@@ -1,0 +1,75 @@
+
+// Author: Jonas Byström
+// Copyright (c) 2002-2008, Righteous Games
+
+
+
+#include "../../Cure/Include/Cure.h"
+#include "../../Cure/Include/RuntimeVariable.h"
+#include "../Include/UiCure.h"
+#include "../Include/UiGameUiManager.h"
+#include "../Include/UiRuntimeVariableName.h"
+
+
+
+namespace UiCure
+{
+
+
+
+Cure::RuntimeVariableScope* mUiCureScope;
+
+
+
+void Init()
+{
+	Cure::Init();
+	mUiCureScope = new Cure::RuntimeVariableScope(Cure::GetSettings());
+	UiCure::SetDefault(mUiCureScope);
+}
+
+void Shutdown()
+{
+	delete (mUiCureScope);
+	mUiCureScope = 0;
+	Cure::Shutdown();
+}
+
+void SetDefault(Cure::RuntimeVariableScope* pSettings)
+{
+	Cure::SetDefault(pSettings);
+
+	CURE_RTVAR_SET(pSettings, RTVAR_UI_DISPLAY_WIDTH, 640);
+	CURE_RTVAR_SET(pSettings, RTVAR_UI_DISPLAY_HEIGHT, 480);
+	CURE_RTVAR_SET(pSettings, RTVAR_UI_DISPLAY_BITSPERPIXEL, 0);
+	CURE_RTVAR_SET(pSettings, RTVAR_UI_DISPLAY_FREQUENCY, 0);
+	CURE_RTVAR_SET(pSettings, RTVAR_UI_DISPLAY_FULLSCREEN, false);
+	CURE_RTVAR_SET(pSettings, RTVAR_UI_DISPLAY_ENABLEVSYNC, true);
+	CURE_RTVAR_SET(pSettings, RTVAR_UI_3D_RENDERENGINE, _T("OpenGL"));
+	CURE_RTVAR_SET(pSettings, RTVAR_UI_3D_ENABLELIGHTS, true);
+	CURE_RTVAR_SET(pSettings, RTVAR_UI_3D_ENABLECLEAR, true);
+	CURE_RTVAR_SET(pSettings, RTVAR_UI_3D_CLEARRED, 0.75);
+	CURE_RTVAR_SET(pSettings, RTVAR_UI_3D_CLEARGREEN, 0.80);
+	CURE_RTVAR_SET(pSettings, RTVAR_UI_3D_CLEARBLUE, 0.85);
+	CURE_RTVAR_SET(pSettings, RTVAR_UI_3D_AMBIENTRED, 0.1);
+	CURE_RTVAR_SET(pSettings, RTVAR_UI_3D_AMBIENTGREEN, 0.1);
+	CURE_RTVAR_SET(pSettings, RTVAR_UI_3D_AMBIENTBLUE, 0.1);
+	CURE_RTVAR_SET(pSettings, RTVAR_UI_3D_ENABLETRILINEARFILTERING, false);
+	CURE_RTVAR_SET(pSettings, RTVAR_UI_3D_ENABLEBILINEARFILTERING, false);
+	CURE_RTVAR_SET(pSettings, RTVAR_UI_3D_ENABLEMIPMAPPING, true);
+	CURE_RTVAR_SET(pSettings, RTVAR_UI_3D_FOV, 90.0);
+	CURE_RTVAR_SET(pSettings, RTVAR_UI_3D_CLIPNEAR, 0.1);
+	CURE_RTVAR_SET(pSettings, RTVAR_UI_3D_CLIPFAR, 1000.0);
+	CURE_RTVAR_SET(pSettings, RTVAR_UI_3D_SHADOWS, _T("VolumesOnly"));
+	CURE_RTVAR_SET(pSettings, RTVAR_UI_2D_PAINTMODE, _T("AlphaBlend"));
+	CURE_RTVAR_SET(pSettings, RTVAR_UI_2D_UPDATEMODE, _T("OptimizeStatic"));
+}
+
+Cure::RuntimeVariableScope* GetSettings()
+{
+	return (mUiCureScope);
+}
+
+
+
+}

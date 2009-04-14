@@ -1,0 +1,58 @@
+
+// Author: Jonas Byström
+// Copyright (c) 2002-2008, Righteous Games
+
+
+
+#pragma once
+
+#include "../Lepra/Include/Application.h"
+#include "../Lepra/Include/LogListener.h"
+#include "../Lepra/Include/String.h"
+
+
+
+namespace Cure
+{
+class GameTicker;
+class ResourceManager;
+}
+
+
+
+namespace Life
+{
+
+
+
+class Application: public Lepra::Application
+{
+public:
+	Application(const Lepra::StringUtility::StringVector& pArgumentList);
+	virtual ~Application();
+	void Init();
+	int Run();
+	void Destroy();
+
+	virtual Lepra::String GetName() const = 0;
+	virtual Cure::GameTicker* CreateGameTicker() const = 0;
+
+protected:
+	virtual Lepra::LogListener* CreateConsoleLogListener() const;
+
+	Cure::ResourceManager* mResourceManager;
+	Cure::GameTicker* mGameTicker;
+	Lepra::LogListener* mConsoleLogger;
+
+private:
+	Lepra::LogListener* mDebugLogger;
+	Lepra::FileLogListener* mFileLogger;
+	Lepra::LogListener* mPerformanceLogger;
+	Lepra::MemFileLogListener* mMemLogger;
+
+	LOG_CLASS_DECLARE();
+};
+
+
+
+}

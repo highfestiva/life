@@ -1,0 +1,480 @@
+
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2008, Righteous Games
+
+
+
+#include "../../Include/GUI/UiWindow.h"
+#include "../../Include/GUI/UiCaption.h"
+#include "../../Include/GUI/UiFloatingLayout.h"
+#include "../../Include/GUI/UiDesktopWindow.h"
+#include "../../../Lepra/Include/Log.h"
+
+
+
+namespace UiTbc
+{
+
+
+
+Window::Window(const Lepra::String& pName,
+			   Layout* pLayout) :
+	Component(pName, new GridLayout(1, 1)),
+	mTLBorder(0),
+	mTRBorder(0),
+	mBRBorder(0),
+	mBLBorder(0),
+	mTBorder(0),
+	mBBorder(0),
+	mLBorder(0),
+	mRBorder(0),
+	mCenterComponent(0),
+	mClientRect(0),
+	mCaption(0),
+	mBorder(true),
+	mBorderWidth(0),
+	mBodyColor(0, 0, 0),
+	mBorderStyle(0)
+{
+	mClientRect = new RectComponent(_T("ClientRect"), pLayout);
+	mCenterComponent = new RectComponent(_T("CenterComponent"), new GridLayout(2, 1));
+	mCenterComponent->AddChild(mClientRect, 1, 0);
+	Component::AddChild(mCenterComponent);
+}
+
+Window::Window(unsigned pBorderStyle,
+			   int pBorderWidth,
+			   const Lepra::Color& pColor,
+			   const Lepra::String& pName,
+			   Layout* pLayout) :
+	Component(pName, new GridLayout(3, 3)),
+	mTLBorder(0),
+	mTRBorder(0),
+	mBRBorder(0),
+	mBLBorder(0),
+	mTBorder(0),
+	mBBorder(0),
+	mLBorder(0),
+	mRBorder(0),
+	mCenterComponent(0),
+	mClientRect(0),
+	mCaption(0),
+	mBorder(true),
+	mBorderWidth(pBorderWidth),
+	mBodyColor(pColor),
+	mBorderStyle(pBorderStyle)
+{
+	mClientRect = new RectComponent(pColor, _T("ClientRect"), pLayout);
+	//mClientRect->SetPreferredSize(0, 0, true);
+	mCenterComponent = new RectComponent(_T("CenterComponent"), new GridLayout(2, 1));
+	mCenterComponent->AddChild(mClientRect, 1, 0);
+	Init();
+}
+
+Window::Window(unsigned pBorderStyle,
+			 int pBorderWidth,
+			 Painter::ImageID pImageID,
+			 const Lepra::String& pName,
+			 Layout* pLayout) :
+	Component(pName, new GridLayout(3, 3)),
+	mTLBorder(0),
+	mTRBorder(0),
+	mBRBorder(0),
+	mBLBorder(0),
+	mTBorder(0),
+	mBBorder(0),
+	mLBorder(0),
+	mRBorder(0),
+	mCenterComponent(0),
+	mClientRect(0),
+	mCaption(0),
+	mBorder(true),
+	mBorderWidth(pBorderWidth),
+	mBodyColor(192, 192, 192),
+	mBorderStyle(pBorderStyle)
+{
+	mClientRect = new RectComponent(pImageID, _T("ClientRect"), pLayout);
+	//mClientRect->SetPreferredSize(0, 0, true);
+	mCenterComponent = new RectComponent(_T("CenterComponent"), new GridLayout(2, 1));
+	mCenterComponent->AddChild(mClientRect, 1, 0);
+	Init();
+}
+
+Window::Window(const Lepra::Color& pColor,
+			 const Lepra::String& pName,
+			 Layout* pLayout) :
+	Component(pName, new GridLayout(1, 1)),
+	mTLBorder(0),
+	mTRBorder(0),
+	mBRBorder(0),
+	mBLBorder(0),
+	mTBorder(0),
+	mBBorder(0),
+	mLBorder(0),
+	mRBorder(0),
+	mCenterComponent(0),
+	mClientRect(0),
+	mCaption(0),
+	mBorder(false),
+	mBorderWidth(0),
+	mBodyColor(192, 192, 192),
+	mBorderStyle(0)
+{
+	mClientRect = new RectComponent(pColor, _T("ClientRect"), pLayout);
+	//mClientRect->SetPreferredSize(0, 0, true);
+	mCenterComponent = new RectComponent(_T("CenterComponent"), new GridLayout(2, 1));
+	mCenterComponent->AddChild(mClientRect, 1, 0);
+	Component::AddChild(mCenterComponent);
+}
+
+Window::Window(Painter::ImageID pImageID,
+			 const Lepra::String& pName,
+			 Layout* pLayout) :
+	Component(pName, new GridLayout(1, 1)),
+	mTLBorder(0),
+	mTRBorder(0),
+	mBRBorder(0),
+	mBLBorder(0),
+	mTBorder(0),
+	mBBorder(0),
+	mLBorder(0),
+	mRBorder(0),
+	mCenterComponent(0),
+	mClientRect(0),
+	mCaption(0),
+	mBorder(false),
+	mBorderWidth(0),
+	mBodyColor(192, 192, 192),
+	mBorderStyle(0)
+{
+	mClientRect = new RectComponent(pImageID, _T("ClientRect"), pLayout);
+	//mClientRect->SetPreferredSize(0, 0, true);
+	mCenterComponent = new RectComponent(_T("CenterComponent"), new GridLayout(2, 1));
+	mCenterComponent->AddChild(mClientRect, 1, 0);
+	Component::AddChild(mCenterComponent);
+}
+
+Window::~Window()
+{
+}
+
+void Window::Init()
+{
+	BorderComponent::BorderShadeFunc lFunc = BorderComponent::ZIGZAG;
+	if (Check(mBorderStyle, BORDER_LINEARSHADING) == true)
+	{
+		lFunc = BorderComponent::LINEAR;
+	}
+
+	if (Check(mBorderStyle, BORDER_HALF) == false)
+	{
+		mTRBorder = new BorderComponent(BorderComponent::TOPRIGHT_CORNER,    mBodyColor, lFunc, GetName() + _T(":TRBorder"));
+		mBRBorder = new BorderComponent(BorderComponent::BOTTOMRIGHT_CORNER, mBodyColor, lFunc, GetName() + _T(":BRBorder"));
+		mBLBorder = new BorderComponent(BorderComponent::BOTTOMLEFT_CORNER,  mBodyColor, lFunc, GetName() + _T(":BLBorder"));
+		mBBorder  = new BorderComponent(BorderComponent::BOTTOM_BORDER,      mBodyColor, lFunc, GetName() + _T(":BBorder"));
+		mRBorder  = new BorderComponent(BorderComponent::RIGHT_BORDER,       mBodyColor, lFunc, GetName() + _T(":RBorder"));
+	}
+	mTLBorder = new BorderComponent(BorderComponent::TOPLEFT_CORNER,     mBodyColor, lFunc, GetName() + _T(":TLBorder"));
+	mTBorder  = new BorderComponent(BorderComponent::TOP_BORDER,         mBodyColor, lFunc, GetName() + _T(":TBorder"));
+	mLBorder  = new BorderComponent(BorderComponent::LEFT_BORDER,        mBodyColor, lFunc, GetName() + _T(":LBorder"));
+
+	if (Check(mBorderStyle, BORDER_SUNKEN) == true)
+	{
+		if (Check(mBorderStyle, BORDER_HALF) == false)
+		{
+			mTRBorder->SetSunken(true);
+			mBRBorder->SetSunken(true);
+			mBLBorder->SetSunken(true);
+			mBBorder->SetSunken(true);
+			mRBorder->SetSunken(true);
+		}
+		mTLBorder->SetSunken(true);
+		mTBorder->SetSunken(true);
+		mLBorder->SetSunken(true);
+	}
+
+	if (Check(mBorderStyle, BORDER_HALF) == false)
+	{
+		mTRBorder->SetMinSize(mBorderWidth, mBorderWidth);
+		mBRBorder->SetMinSize(mBorderWidth, mBorderWidth);
+		mBLBorder->SetMinSize(mBorderWidth, mBorderWidth);
+		mBBorder->SetMinSize(0, mBorderWidth);
+		mRBorder->SetMinSize(mBorderWidth, 0);
+	}
+	mTLBorder->SetMinSize(mBorderWidth, mBorderWidth);
+	mTBorder->SetMinSize(0, mBorderWidth);
+	mLBorder->SetMinSize(mBorderWidth, 0);
+
+	if (Check(mBorderStyle, BORDER_HALF) == false)
+	{
+		mTRBorder->SetPreferredSize(mBorderWidth, mBorderWidth);
+		mBRBorder->SetPreferredSize(mBorderWidth, mBorderWidth);
+		mBLBorder->SetPreferredSize(mBorderWidth, mBorderWidth);
+		mBBorder->SetPreferredSize(0, mBorderWidth);
+		mRBorder->SetPreferredSize(mBorderWidth, 0);
+	}
+	mTLBorder->SetPreferredSize(mBorderWidth, mBorderWidth);
+	mTBorder->SetPreferredSize(0, mBorderWidth);
+	mLBorder->SetPreferredSize(mBorderWidth, 0);
+
+	if (Check(mBorderStyle, BORDER_RESIZABLE) == true)
+	{
+		if (Check(mBorderStyle, BORDER_HALF) == false)
+		{
+			mTRBorder->SetResizable(true);
+			mBRBorder->SetResizable(true);
+			mBLBorder->SetResizable(true);
+			mBBorder->SetResizable(true);
+			mRBorder->SetResizable(true);
+		}
+		mTLBorder->SetResizable(true);
+		mTBorder->SetResizable(true);
+		mLBorder->SetResizable(true);
+	}
+
+//	mCenterComponent->SetPreferredSize(0, 0);
+	if (Check(mBorderStyle, BORDER_HALF) == false)
+	{
+		Component::AddChild(mTRBorder, 0, 2);
+		Component::AddChild(mBRBorder, 2, 2);
+		Component::AddChild(mBLBorder, 2, 0);
+		Component::AddChild(mBBorder, 2, 1);
+		Component::AddChild(mRBorder, 1, 2);
+	}
+
+	Component::AddChild(mTLBorder, 0, 0);
+	Component::AddChild(mTBorder, 0, 1);
+	Component::AddChild(mLBorder, 1, 0);
+
+	Component::AddChild(mCenterComponent, 1, 1);
+}
+
+void Window::SetBorder(unsigned pBorderStyle, int pWidth)
+{
+	if (mBorder == false)
+	{
+		return;
+	}
+
+	SetNeedsRepaint(mBorderStyle != pBorderStyle ||
+			pWidth != mBorderWidth);
+
+	mBorderStyle = pBorderStyle;
+
+	BorderComponent::BorderShadeFunc lFunc = BorderComponent::ZIGZAG;
+	if (Check(mBorderStyle, BORDER_LINEARSHADING) == true)
+	{
+		lFunc = BorderComponent::LINEAR;
+	}
+
+	mBorderWidth = pWidth;
+
+	mTLBorder->SetPreferredSize(pWidth, pWidth);
+	mTRBorder->SetPreferredSize(pWidth, pWidth);
+	mBRBorder->SetPreferredSize(pWidth, pWidth);
+	mBLBorder->SetPreferredSize(pWidth, pWidth);
+	mTBorder->SetPreferredSize(0, pWidth);
+	mBBorder->SetPreferredSize(0, pWidth);
+	mLBorder->SetPreferredSize(pWidth, 0);
+	mRBorder->SetPreferredSize(pWidth, 0);
+
+	mTLBorder->Set(mBodyColor, lFunc);
+	mTRBorder->Set(mBodyColor, lFunc);
+	mBRBorder->Set(mBodyColor, lFunc);
+	mBLBorder->Set(mBodyColor, lFunc);
+	mTBorder->Set(mBodyColor, lFunc);
+	mBBorder->Set(mBodyColor, lFunc);
+	mLBorder->Set(mBodyColor, lFunc);
+	mRBorder->Set(mBodyColor, lFunc);
+
+	if (Check(mBorderStyle, BORDER_SUNKEN) == true)
+	{
+		mTLBorder->SetSunken(true);
+		mTRBorder->SetSunken(true);
+		mBRBorder->SetSunken(true);
+		mBLBorder->SetSunken(true);
+		mTBorder->SetSunken(true);
+		mBBorder->SetSunken(true);
+		mLBorder->SetSunken(true);
+		mRBorder->SetSunken(true);
+	}
+}
+
+void Window::SetBorder(unsigned pBorderStyle,
+		       Painter::ImageID pTopLeftID,
+		       Painter::ImageID pTopRightID,
+		       Painter::ImageID pBottomLeftID,
+		       Painter::ImageID pBottomRightID,
+		       Painter::ImageID pTopID,
+		       Painter::ImageID pBottomID,
+		       Painter::ImageID pLeftID,
+		       Painter::ImageID pRightID)
+{
+	if (mBorder == false)
+	{
+		return;
+	}
+
+	mBorderStyle = pBorderStyle;
+
+	GUIImageManager* lIMan = GetImageManager();
+
+	mTLBorder->SetPreferredSize(lIMan->GetImageSize(pTopLeftID));
+	mTRBorder->SetPreferredSize(lIMan->GetImageSize(pTopRightID));
+	mBLBorder->SetPreferredSize(lIMan->GetImageSize(pBottomLeftID));
+	mBRBorder->SetPreferredSize(lIMan->GetImageSize(pBottomRightID));
+	mTBorder->SetPreferredSize(0, lIMan->GetImageSize(pTopID).y);
+	mBBorder->SetPreferredSize(0, lIMan->GetImageSize(pBottomID).y);
+	mLBorder->SetPreferredSize(lIMan->GetImageSize(pLeftID).x, 0);
+	mRBorder->SetPreferredSize(lIMan->GetImageSize(pRightID).x, 0);
+
+	mTLBorder->Set(pTopLeftID);
+	mTRBorder->Set(pTopRightID);
+	mBRBorder->Set(pBottomRightID);
+	mBLBorder->Set(pBottomLeftID);
+	mTBorder->Set(pTopID);
+	mBBorder->Set(pBottomID);
+	mLBorder->Set(pLeftID);
+	mRBorder->Set(pRightID);
+}
+
+bool Window::IsOver(int pScreenX, int pScreenY)
+{
+	if (GetScreenRect().IsInside(pScreenX, pScreenY) == true)
+	{
+		Layout* lLayout = Component::GetLayout();
+
+		if (lLayout != 0)
+		{
+			Component* lChild = lLayout->GetFirst();
+			while (lChild != 0)
+			{
+				if (lChild->GetScreenRect().IsInside(pScreenX, pScreenY) == true)
+				{
+					return lChild->IsOver(pScreenX, pScreenY);
+				}
+
+				lChild = lLayout->GetNext();
+			}
+		}
+	}
+
+	return false;
+}
+
+void Window::SetCaption(Caption* pCaption)
+{
+	if (mCaption != 0)
+	{
+		mCenterComponent->RemoveChild(mCaption, 0);
+	}
+
+	mCaption = pCaption;
+
+	if (mCaption != 0)
+	{
+		mCenterComponent->AddChild(mCaption, 0, 0);
+	}
+}
+
+Lepra::PixelRect Window::GetClientRect()
+{
+	return mCenterComponent->GetScreenRect();
+}
+
+RectComponent* Window::GetClientRectComponent()
+{
+	return mClientRect;
+}
+
+void Window::AddChild(Component* pChild, int pParam1, int pParam2)
+{
+	mClientRect->AddChild(pChild, pParam1, pParam2);
+}
+
+void Window::RemoveChild(Component* pChild, int pLayer)
+{
+	mClientRect->RemoveChild(pChild, pLayer);
+}
+
+Component* Window::GetChild(const Lepra::String& pName, int pLayer)
+{
+	return mClientRect->GetChild(pName, pLayer);
+}
+
+int Window::GetNumChildren() const
+{
+	return mClientRect->GetNumChildren();
+}
+
+void Window::SetActive(bool pActive)
+{
+	if (IsVisible())
+	{
+		if (pActive)
+		{
+			if (mCaption != 0)
+			{
+				mCaption->SetActive(true);
+			}
+
+			Component* lParent = Component::GetParent();
+
+			if (lParent != 0)
+			{
+				Layout* lParentLayout = lParent->GetLayout();
+
+				if (lParentLayout->GetType() == Layout::FLOATINGLAYOUT)
+				{
+					((FloatingLayout*)lParentLayout)->MoveToTop(this);
+				}
+			}
+		}
+		else
+		{
+			if (mCaption != 0)
+			{
+				if (HasKeyboardFocus() ==  true)
+				{
+					GetTopParent()->ReleaseKeyboardFocus(RECURSE_DOWN);
+				}
+
+				mCaption->SetActive(false);
+			}
+		}
+	}
+}
+
+bool Window::OnLButtonDown(int pMouseX, int pMouseY)
+{
+	bool lReturn = Component::OnLButtonDown(pMouseX, pMouseY);
+	SetActive(true);
+	return lReturn;
+}
+
+bool Window::OnRButtonDown(int pMouseX, int pMouseY)
+{
+	bool lReturn = Component::OnRButtonDown(pMouseX, pMouseY);
+	SetActive(true);
+	return lReturn;
+}
+
+bool Window::OnMButtonDown(int pMouseX, int pMouseY)
+{
+	bool lReturn = Component::OnMButtonDown(pMouseX, pMouseY);
+	SetActive(true);
+	return lReturn;
+}
+
+
+
+void Window::DoSetSize(int pWidth, int pHeight)
+{
+	Parent::DoSetSize(pWidth, pHeight);
+	mCenterComponent->SetSize(pWidth, pHeight);
+	mCenterComponent->UpdateLayout();
+}
+
+
+
+}

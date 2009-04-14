@@ -1,0 +1,397 @@
+
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2009, Righteous Games
+
+
+
+#pragma once
+
+#include <math.h>
+#include <list>
+#include "../../Lepra/Include/String.h"
+#include "../../Lepra/Include/Vector3D.h"
+#include "../../Lepra/Include/Transformation.h"
+#include "TBC.h"
+#include "PortalManager.h"
+
+
+
+
+namespace TBC
+{
+
+
+
+class BoneAnimator;
+
+
+
+class GeometryBase
+{
+public:
+	// UiTbc::Renderer implements this interface and removes the geometry
+	// if it is deleted.
+	class Listener
+	{
+	public:
+		virtual void DeletingGeometry(GeometryBase* pGeometry) = 0;
+	};
+
+	friend class BasicMeshCreator;
+	friend class PortalManager;
+
+	class Edge
+	{
+	public:
+		enum
+		{
+			INVALID_INDEX = -1,
+		};
+
+		Edge();
+		Edge(const Edge& pEdge);
+		Edge(const Edge* pEdge);
+		virtual ~Edge();
+
+		void ClearAll();
+
+		void Copy(const Edge* pEdge);
+
+		void AddTriangle(int pTriangleIndex);
+		void RemoveTriangle(int pTriangleIndex);
+
+		bool HaveTriangle(int pTriangleIndex);
+		bool HaveTriangle(int pTriangleIndex, int& pTrianglePos);
+
+		bool IsSameEdge(int pVertexIndex1, int pVertexIndex2);
+		bool IsSameEdge(int pVertexIndex1, 
+				int pVertexIndex2,
+				int* pTriangles, 
+				int pNumTriangles);
+
+		int* mTriangle;
+		int mVertex[2];
+		int mTriangleCount;
+		int mTriangleElementCount;
+
+		Edge* mReserved;
+	};
+
+	// Buffer object usage hints. These will only have effect
+	// when rendering the geometry using hardware acceleration
+	// APIs. If using a software renderer these won't make any
+	// difference.
+	enum GeometryVolatility
+	{
+		GEOM_STATIC = 0,	// Geometry that will never change.
+		GEOM_DYNAMIC,		// Geometry that will change occasionally (like terrain).
+		GEOM_VOLATILE,		// Geometry that will change between every frame.
+	};
+
+	// Vertex color format.
+	enum ColorFormat
+	{
+		COLOR_RGB = 0,
+		COLOR_RGBA,
+	};
+
+	enum PrimitiveType
+	{
+		TRIANGLES = 0,
+		TRIANGLE_STRIP,
+	};
+
+	class BasicMaterialSettings
+	{
+	public:
+		BasicMaterialSettings() :
+			mRed(1.0f),
+			mGreen(1.0f),
+			mBlue(1.0f),
+			mSpecular(0.0f),
+			mAlpha(1.0f),
+			mSmooth(true),
+			mSelfIllumination(0)
+		{
+		}
+
+		BasicMaterialSettings(float pRed, float pGreen, float pBlue,
+				      float pSpecular, float pAlpha,
+				      bool pSmooth = true,
+				      float pSelfIllumination = 0) :
+			mRed(pRed),
+			mGreen(pGreen),
+			mBlue(pBlue),
+			mSpecular(pSpecular),
+			mAlpha(pAlpha),
+			mSmooth(pSmooth),
+			mSelfIllumination(pSelfIllumination)
+		{
+		}
+
+		void Set(float pRed, float pGreen, float pBlue,
+			 float pSpecular, float pAlpha, 
+			 bool pSmooth, 
+			 float pSelfIllumination)
+		{
+			mRed      		= pRed;
+			mGreen    		= pGreen;
+			mBlue     		= pBlue;
+			mSpecular 		= pSpecular;
+			mAlpha    		= pAlpha;
+			mSmooth   		= pSmooth;
+			mSelfIllumination	= pSelfIllumination;
+		}
+
+		// Surface color.
+		float mRed, mGreen, mBlue;
+
+		// Discussion about the missing diffuse parameter:
+		//
+		// "Diffuse" when speaking in terms of hardware accelerated 3D graphics,
+		// doesn't make any sense to me.
+		//
+		// A surface can reflect light at different wavelengths, which defines its
+		// "color". The only other parameter there is, is the specularity, which
+		// means how "mirrorlike" the surface is. 100% mirror, and you can't see the
+		// surface at all (try to see the actual surface of a mirror). In the case of
+		// a mirror, there is no "diffuse" at all, and vice versa. The correct amount 
+		// of diffuse can be easily calculated as 1 - specular, assuming specularity 
+		// being in the range [0, 1].
+		//
+		// In OpenGL you can set both diffuse and specular to 100% (value 1.0).
+		// But what kind of surface is that in reality? Such a surface doesn't
+		// even exist.
+		float mSpecular;
+
+		// Used on blended materials.
+		float mAlpha;
+
+		// Smooth shaded or flat shaded?
+		bool mSmooth;
+
+		float mSelfIllumination;
+	};
+
+	GeometryBase();
+	virtual ~GeometryBase();
+	
+	void AddListener(Listener* pListener);
+	void RemoveListener(Listener* pListener);
+
+	virtual bool IsGeometryReference();
+
+	virtual GeometryVolatility GetGeometryVolatility() const = 0;
+	virtual void SetGeometryVolatility(GeometryVolatility pVolatility) = 0;
+
+	virtual PrimitiveType GetPrimitiveType() const = 0;
+
+	virtual unsigned int GetMaxVertexCount()   const = 0;
+	        unsigned int GetMaxTriangleCount() const;
+	virtual unsigned int GetMaxIndexCount()    const = 0;
+
+	virtual unsigned int GetVertexCount()   const = 0;
+	        unsigned int GetTriangleCount() const;
+	virtual unsigned int GetIndexCount()    const = 0;
+	virtual unsigned int GetUVSetCount()    const = 0;
+	unsigned int GetEdgeCount()     const;
+
+	// Sets the UV-set to use when generating tangent- and bitangent vectors.
+	// Default is 0. Tangents and bitangents are used with bump/normal mapping.
+	void SetTangentsUVSet(unsigned int pUVSet);
+
+	virtual float*         GetVertexData() const                   = 0;
+	virtual float*         GetUVData(unsigned int pUVSet) const   = 0;
+	virtual Lepra::uint32* GetIndexData() const                    = 0;
+	virtual Lepra::uint8*  GetColorData() const                    = 0;
+
+	virtual float* GetNormalData() const;
+	float*         GetSurfaceNormalData() const;
+	Edge*          GetEdgeData() const;
+	float*         GetTangentData() const;	// Used with bump/normal mapping.
+	float*         GetBitangentData() const;	// Used with bump/normal mapping.
+
+	// 0 <= pTriangle < GetNumTriangles().
+	// Given the triangle index (pTriangle), the function returns the three
+	// indices by setting the values in pIndices.
+	void GetTriangleIndices(int pTriangle, Lepra::uint32 pIndices[3]);
+
+	// Deletes the corresponding arrays and cleans stuff up.
+	virtual void ClearVertexNormalData();
+	void ClearSurfaceNormalData();
+	void ClearEdgeData();
+	void ClearTangentAndBitangentData();
+
+	// Allocates memory for the corresponding arrays, if needed.
+	void AllocVertexNormalData();
+	void AllocSurfaceNormalData();
+	void AllocTangentAndBitangentData();
+
+	// Allocates memory for the corresponding arrays, if needed,
+	// and generates the data (if needed).
+	void GenerateVertexNormalData();
+	void GenerateSurfaceNormalData();
+	void GenerateEdgeData();
+	void GenerateTangentAndBitangentData();
+
+
+
+	// Vertices and normals are supposed to be updated at the same time.
+	// Surface normals are considered changed if either vertices or
+	// indices are changed.
+	// Tangents are considered changed if either vertices of uv-coordinates
+	// are changed.
+	bool GetVertexDataChanged() { return CheckFlag(VERTEX_DATA_CHANGED); }
+	bool GetUVDataChanged()     { return CheckFlag(UV_DATA_CHANGED); }
+	bool GetColorDataChanged()  { return CheckFlag(COLOR_DATA_CHANGED); }
+	bool GetIndexDataChanged()  { return CheckFlag(INDEX_DATA_CHANGED); }
+
+	void SetVertexDataChanged(bool pChanged);
+	void SetUVDataChanged(bool pChanged);
+	void SetColorDataChanged(bool pChanged);
+	void SetIndexDataChanged(bool pChanged);
+
+	void SetVertexNormalsValid()  { SetFlag(VERTEX_NORMALS_VALID); }
+	void SetSurfaceNormalsValid() { SetFlag(SURFACE_NORMALS_VALID); }
+
+	virtual ColorFormat GetColorFormat() const { return COLOR_RGB; }
+
+	// This has been renamed from SetUserData(). These functions are used
+	// by the renderer to associate some arbitrary data with the geometry.
+	// It would be better design to remove these functions and use a hash
+	// table instead to do the association, but that is not as efficient.
+	void SetRendererData(void* pRendererData);
+	virtual void* GetRendererData() const;
+
+	size_t GetExtraData() const;
+	void SetExtraData(size_t pExtraData);
+
+	void SetTransformation(const Lepra::TransformationF& pTransformation);
+	const Lepra::TransformationF& GetBaseTransformation() const;
+	virtual const Lepra::TransformationF& GetTransformation() const;
+	bool GetTransformationChanged() const { return CheckFlag(TRANSFORMATION_CHANGED); }
+	void SetTransformationChanged(bool pTransformationChanged) { SetFlag(TRANSFORMATION_CHANGED, pTransformationChanged); }
+
+	void SetLastFrameVisible(unsigned int pLastFrameVisible);
+	unsigned int GetLastFrameVisible() const;
+	void SetAlwaysVisible(bool pAlwaysVisible) { SetFlag(ALWAYS_VISIBLE, pAlwaysVisible); }
+	bool GetAlwaysVisible() { return CheckFlag(ALWAYS_VISIBLE); }
+
+	void GetBasicMaterialSettings(BasicMaterialSettings& pMatSettings) const;
+	void SetBasicMaterialSettings(const BasicMaterialSettings& pMatSettings);
+
+	// Calling GetBoundingRadius() will recalculate the bounding radius if necessary.
+	float GetBoundingRadius();
+	float GetBoundingRadius() const;
+
+	// Sets the bounding radius. Once set, GetBoundingRadius() will never try to 
+	// recalculate the radius again.
+	void SetBoundingRadius(float pBoundingRadius);
+
+	// Explicitly recalculate the radius.
+	void CalculateBoundingRadius();
+
+	// The following functions will generate edge data.
+	bool IsSolidVolume();	// Returns true if all edges are shared by two triangles.
+	bool IsSingleObject();	// Returns true if all polygons are connected to each other
+				// as one object.
+	bool IsConvexVolume();	// Returns true if it is a solid volume, and
+				// there is no concave angle between any two triangles.
+				// Will generate surface normals if needed.
+
+	// Debug functions.
+	bool VerifyIndexData();
+
+	// Functions used to handle UV-animations. Couldn't find any
+	// better place to put this code.
+	void SetUVAnimator(BoneAnimator* pUVAnimator);
+	BoneAnimator* GetUVAnimator();
+	const Lepra::TransformationF& GetUVTransform();
+
+protected:
+	void SetSurfaceNormalData(float* pSurfaceNormalData);
+	void SetVertexNormalData(float* pVertexNormalData, unsigned int pNumVertices);
+	void SetTangentAndBitangentData(float* pTangentData, float* pBitangentData, unsigned int pNumVertices);
+
+	void Copy(GeometryBase* pGeometry);
+	void ClearAll();
+
+	void SetSolidVolumeCheckValid(bool pValid)  { SetFlag(SOLID_VOLUME_VALID, pValid); }
+	void SetSingleObjectCheckValid(bool pValid) { SetFlag(SINGLE_OBJECT_VALID, pValid); }
+	void SetConvexVolumeCheckValid(bool pValid) { SetFlag(CONVEX_VOLUME_VALID, pValid); }
+
+	// Used by PortalManager.
+	void SetParentCell(PortalManager::Cell* pCell);
+	PortalManager::Cell* GetParentCell();
+
+private:
+	typedef std::list<Listener*> ListenerList;
+
+	enum //Flags
+	{
+		VERTEX_DATA_CHANGED          = (1 << 0),
+		UV_DATA_CHANGED              = (1 << 1),
+		COLOR_DATA_CHANGED           = (1 << 2),
+		INDEX_DATA_CHANGED           = (1 << 3),
+		BOUNDING_RADIUS_VALID        = (1 << 4),
+		BOUNDING_RADIUS_ALWAYS_VALID = (1 << 5),
+		SURFACE_NORMALS_VALID        = (1 << 6),
+		VERTEX_NORMALS_VALID         = (1 << 7),
+		TANGENTS_VALID               = (1 << 8),
+		IS_SOLID_VOLUME              = (1 << 9),
+		IS_SINGLE_OBJECT             = (1 << 10),
+		IS_CONVEX_VOLUME             = (1 << 11),
+		SOLID_VOLUME_VALID           = (1 << 12),
+		SINGLE_OBJECT_VALID          = (1 << 13),
+		CONVEX_VOLUME_VALID          = (1 << 14),
+		ALWAYS_VISIBLE               = (1 << 15),
+		TRANSFORMATION_CHANGED       = (1 << 16),
+	};
+
+	void SetFlag(Lepra::uint32 pFlag, bool pValue) { if(pValue) SetFlag(pFlag); else ClearFlag(pFlag); }
+	void SetFlag(Lepra::uint32 pFlag) { mFlags |= pFlag; }
+	void ClearFlag(Lepra::uint32 pFlag) { mFlags &= (~pFlag); }
+	bool CheckFlag(Lepra::uint32 pFlag) const { return (mFlags & pFlag) != 0; }
+
+	Lepra::uint32 mFlags;
+
+	BasicMaterialSettings mMaterialSettings;
+
+	float mBoundingRadius;
+
+	// Surface normals are primarily used when generating
+	// the shadow volume (used to perform stencil shadows).
+	float* mSurfaceNormalData;
+	unsigned int mSurfaceNormalCount;
+
+	float* mVertexNormalData;
+
+	Edge* mEdgeData;
+	unsigned int mEdgeCount;
+
+	float* mTangentData;   // Contains (x, y, z) triplets for tangent vectors.
+	float* mBitangentData; // Contains (x, y, z) triplets for bitangent vectors.
+	unsigned int mTangentsUVSet;
+
+	// Contains arbitrary data. This is used by Renderer and
+	// subclasses to store associated data.
+	void* mRendererData;
+
+	// The Cell pointer used by PortalManager. This is declared as void*
+	// to avoid including PortalManager.h. 
+	PortalManager::Cell* mParentCell;
+
+	unsigned int mLastFrameVisible;
+
+	Lepra::TransformationF mTransformation;
+
+	BoneAnimator* mUVAnimator;
+
+	ListenerList mListenerList;
+
+	size_t mExtraData;
+};
+
+
+
+}

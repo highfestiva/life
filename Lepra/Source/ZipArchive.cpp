@@ -1,0 +1,477 @@
+
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2008, Righteous Games
+
+#include "../Include/DiskFile.h"
+#include "../Include/Log.h"
+#include "../Include/Path.h"
+#include "../Include/ZipArchive.h"
+#include <stdio.h>
+
+namespace Lepra
+{
+
+ZipArchive::ZipArchive() :
+	mArchiveName(_T("")),
+	mIOType(READ_ONLY),
+	mUnzipFile(0),
+	mZipFile(0),
+	mFileSize(0)
+{
+}
+
+ZipArchive::~ZipArchive()
+{
+	CloseArchive();
+}
+
+IOError ZipArchive::OpenArchive(const String& pArchiveFileName, IOType pIOType)
+{
+	CloseArchive();
+
+	mArchiveName = pArchiveFileName;
+
+	IOError lIOError = IO_FILE_NOT_FOUND;
+	bool lCheckZipFile = false;
+
+	mIOType = pIOType;
+	switch(mIOType)
+	{
+		case READ_ONLY:
+		{
+			mUnzipFile = ::unzOpen(AnsiStringUtility::ToOwnCode(pArchiveFileName).c_str());
+			if (mUnzipFile != 0)
+			{
+				lIOError = IO_OK;
+			}
+		}
+		break;
+		case WRITE_ONLY:
+		{
+			mZipFile = ::zipOpen(AnsiStringUtility::ToOwnCode(pArchiveFileName).c_str(), APPEND_STATUS_CREATE);
+			lCheckZipFile = true;
+		}
+		break;
+		case WRITE_APPEND:
+		{
+			if (DiskFile::Exists(pArchiveFileName) == true)
+				mZipFile = ::zipOpen(AnsiStringUtility::ToOwnCode(pArchiveFileName).c_str(), APPEND_STATUS_ADDINZIP);
+			lCheckZipFile = true;
+		}
+		break;
+		case INSERT_ONLY:
+		{
+		}
+		break;
+	}
+
+	if (lCheckZipFile == true)
+	{
+		if (mZipFile != 0)
+		{
+			lIOError = IO_OK;
+		}
+		else
+		{
+			lIOError = IO_FILE_CREATION_FAILED;
+		}
+	}
+
+	return lIOError;
+}
+
+void ZipArchive::CloseArchive()
+{
+	switch(mIOType)
+	{
+		case READ_ONLY:
+		{
+			if (mUnzipFile != 0)
+			{
+				::unzClose(mUnzipFile);
+				mUnzipFile = 0;
+			}
+		}
+		break;
+		case WRITE_ONLY:
+		case WRITE_APPEND:
+		{
+			if (mZipFile != 0)
+			{
+				::zipClose(mZipFile, "");
+				mZipFile = 0;
+			}
+		}
+		break;
+		case INSERT_ONLY:
+		{
+		}
+		break;
+	}
+}
+
+void ZipArchive::CloseAndRemoveArchive()
+{
+	CloseArchive();
+#ifdef LEPRA_MSVC
+	::_wremove(UnicodeStringUtility::ToOwnCode(mArchiveName).c_str());
+#else
+#ifdef LEPRA_POSIX
+#warning "No unicode support in ZipArchive::CloseAndRemoveArchive()!"
+	::remove(AnsiStringUtility::ToOwnCode(mArchiveName));
+#else
+#error "ZipArchive::CloseAndRemoveArchive() is not implemented on this platform!"
+#endif
+#endif
+}
+
+int ZipArchive::GetFileCount()
+{
+	int lCount = 0;
+
+	if (mIOType == READ_ONLY && mUnzipFile != 0)
+	{
+		unz_global_info lUnzGlobalInfo;
+		::unzGetGlobalInfo(mUnzipFile, &lUnzGlobalInfo);
+		lCount = (int)lUnzGlobalInfo.number_entry;
+	}
+
+	return lCount;
+}
+
+IOError ZipArchive::InsertArchive(const String& /*pArchiveFileName*/)
+{
+	return IO_OK;
+}
+
+String ZipArchive::FileFindFirst()
+{
+	String lFileName;
+
+	if (mIOType == READ_ONLY && mUnzipFile != 0 && ::unzGoToFirstFile(mUnzipFile) == UNZ_OK)
+	{
+		char lCStrFileName[1024];
+		::unzGetCurrentFileInfo(mUnzipFile, 0, lCStrFileName, 1024, 0, 0, 0, 0);
+		lFileName = AnsiStringUtility::ToCurrentCode(AnsiString(lCStrFileName));
+	}
+
+	return lFileName;
+}
+
+String ZipArchive::FileFindNext()
+{
+	String lFileName;
+
+	if (mIOType == READ_ONLY && mUnzipFile != 0 && ::unzGoToNextFile(mUnzipFile) == UNZ_OK)
+	{
+		char lCStrFileName[1024];
+		::unzGetCurrentFileInfo(mUnzipFile, 0, lCStrFileName, 1024, 0, 0, 0, 0);
+		lFileName = AnsiStringUtility::ToCurrentCode(AnsiString(lCStrFileName));
+	}
+
+	return lFileName;
+}
+
+bool ZipArchive::FileOpen(const String& pFileName)
+{
+	bool lOK = false;
+
+	switch(mIOType)
+	{
+		case READ_ONLY:
+		{
+			if (mUnzipFile != 0)
+			{
+				if (::unzLocateFile(mUnzipFile, AnsiStringUtility::ToOwnCode(pFileName).c_str(), 0) == UNZ_OK)
+				{
+					lOK = (::unzOpenCurrentFile(mUnzipFile) == UNZ_OK);
+					if (lOK)
+					{
+						mFileSize = FileSize();
+					}
+				}
+			}
+		}
+		break;
+		case WRITE_ONLY:
+		case WRITE_APPEND:
+		{
+			if (mZipFile != 0)
+			{
+				lOK = (::zipOpenNewFileInZip(mZipFile, AnsiStringUtility::ToOwnCode(pFileName).c_str(), 0, 0, 0, 0, 0, 0, Z_DEFLATED, Z_DEFAULT_COMPRESSION) == ZIP_OK);
+
+				String lTempName;
+				String lDirectory;
+				lDirectory = Path::GetDirectory(mArchiveName);
+
+				if (lOK)
+				{
+					lTempName = DiskFile::GenerateUniqueFileName(lDirectory);
+					lOK = mOutFile.Open(lTempName, DiskFile::MODE_WRITE_ONLY);
+
+					if (lOK == false)
+					{
+						::zipCloseFileInZip(mZipFile);
+					}
+				}
+			}
+		}
+		break;
+		case INSERT_ONLY:
+		{
+		}
+		break;
+	}
+
+	return lOK;
+}
+
+void ZipArchive::FileClose()
+{
+	switch(mIOType)
+	{
+		case READ_ONLY:
+		{
+			if (mUnzipFile != 0)
+			{
+				::unzCloseCurrentFile(mUnzipFile);
+				mFileSize = 0;
+			}
+		}
+		break;
+		case WRITE_ONLY:
+		case WRITE_APPEND:
+		{
+			if (mZipFile != 0)
+			{
+				if (mOutFile.IsOpen() == true)
+				{
+					String lTempFile = mOutFile.GetFullName();
+					int64 lSize = mOutFile.GetSize();
+					mOutFile.Close();
+					if (mOutFile.Open(lTempFile, DiskFile::MODE_READ_ONLY) == false)
+					{
+						mLog.AError("Failed to add file to archive.");
+					}
+					else
+					{
+						// Copy temp file to the zip archive.
+						uint8 lBuf[1024];
+						int64 lSteps = lSize / 1024;
+						int64 lRest = lSize % 1024;
+						int64 i;
+
+						for (i = 0; i < lSteps; i++)
+						{
+							mOutFile.ReadData(lBuf, 1024);
+							::zipWriteInFileInZip(mZipFile, lBuf, 1024);
+						}
+
+						if (lRest > 0)
+						{
+							mOutFile.ReadData(lBuf, (unsigned long)lRest);
+							::zipWriteInFileInZip(mZipFile, lBuf, (unsigned long)lRest);
+						}
+
+						mOutFile.Close();
+						DiskFile::Delete(lTempFile);
+					}
+
+					::zipCloseFileInZip(mZipFile);
+				}
+			}
+		}
+		break;
+		case INSERT_ONLY:
+		{
+		}
+		break;
+	}
+}
+
+bool ZipArchive::FileExist(const String& pFileName)
+{
+	bool lExist = false;
+
+	if (mIOType == READ_ONLY && mUnzipFile != 0)
+	{
+		lExist = (::unzLocateFile(mUnzipFile, AnsiStringUtility::ToOwnCode(pFileName).c_str(), 0) == UNZ_OK);
+	}
+
+	return lExist;
+}
+
+IOError ZipArchive::FileRead(void* pDest, int pSize)
+{
+	IOError lErr = IO_ERROR_READING_FROM_STREAM;
+
+	if (mIOType == READ_ONLY)
+	{
+		if (mUnzipFile != 0)
+		{
+			int lSize = ::unzReadCurrentFile(mUnzipFile, pDest, pSize);
+			if (lSize > 0)
+			{
+				lErr = IO_OK;
+			}
+			else if(lSize == 0)
+			{
+				lErr = IO_NO_DATA_AVAILABLE;
+			}
+		}
+		else
+		{
+			lErr = IO_STREAM_NOT_OPEN;
+		}
+	}
+
+	return lErr;
+}
+
+IOError ZipArchive::FileWrite(void* pSource, int pSize)
+{
+	IOError lErr = IO_ERROR_WRITING_TO_STREAM;
+
+	if (mIOType == WRITE_ONLY || mIOType == WRITE_APPEND)
+	{
+		mOutFile.WriteData(pSource, pSize);
+/*		if (::zipWriteInFileInZip(mZipFile, pSource, pSize) == ZIP_OK)
+		{
+			lErr = IO_OK;
+		}
+*/
+	}
+
+	return lErr;
+}
+
+int64 ZipArchive::FileSize()
+{
+	int64 lSize = 0;
+
+	if (mIOType == READ_ONLY && mUnzipFile != 0)
+	{
+		unz_file_info lInfo;
+		if (::unzGetCurrentFileInfo(mUnzipFile, &lInfo, 0, 0, 0, 0, 0, 0) == UNZ_OK)
+		{
+			lSize = (int64)lInfo.uncompressed_size;
+		}
+	}
+	else if(mIOType == WRITE_ONLY || mIOType == WRITE_APPEND)
+	{
+		lSize = mOutFile.GetSize();
+	}
+
+	return lSize;
+}
+
+void ZipArchive::FileSeek(int64 pOffset, FileOrigin pOrigin)
+{
+	if (mIOType == READ_ONLY && mUnzipFile != 0 && mFileSize != 0)
+	{
+		int64 lOffset = pOffset;
+		switch(pOrigin)
+		{
+		case FSEEK_SET:
+			lOffset = pOffset;
+			break;
+		case FSEEK_CUR:
+			lOffset = (int64)::unztell(mUnzipFile) + pOffset;
+			break;
+		case FSEEK_END:
+			lOffset = (uLong)(mFileSize + pOffset - 1);
+			break;
+		}
+
+		::unzCloseCurrentFile(mUnzipFile);
+		::unzOpenCurrentFile(mUnzipFile);
+
+		// Now skip lOffset bytes of data.
+		uint8 lBuf[1024];
+		int64 lSteps = lOffset / 1024;
+		int64 lRest  = lOffset % 1024;
+
+		int64 i;
+		for (i = 0; i < lSteps; i++)
+		{
+			::unzReadCurrentFile(mUnzipFile, lBuf, 1024);
+		}
+
+		if (lRest > 0)
+		{
+			::unzReadCurrentFile(mUnzipFile, lBuf, (uLong)lRest);
+		}
+	}
+	else if(mIOType == WRITE_ONLY || mIOType == WRITE_APPEND)
+	{
+		switch(pOrigin)
+		{
+		case SEEK_SET:
+			mOutFile.Seek(pOffset, File::FSEEK_SET);
+			break;
+		case SEEK_CUR:
+			mOutFile.Seek(pOffset, File::FSEEK_CUR);
+			break;
+		case SEEK_END:
+			mOutFile.Seek(pOffset, File::FSEEK_END);
+			break;
+		}
+	}
+}
+
+bool ZipArchive::ExtractFile(const String& pFileName, 
+			     const String& pDestFileName,
+			     int pBufferSize, SizeUnit pUnit)
+{
+	if (mIOType != READ_ONLY)
+	{
+		return false;
+	}
+
+	bool lOK = FileOpen(pFileName);
+
+	if (lOK == true)
+	{
+		DiskFile lFile;
+		if (lFile.Open(pDestFileName, DiskFile::MODE_WRITE_ONLY) == true)
+		{
+			int lBufferSize = (int)pBufferSize * (int)pUnit;
+			int64 lDataSize = FileSize();
+			uint8* lBuffer = new uint8[(unsigned)lBufferSize];
+
+			int64 lNumChunks = lDataSize / lBufferSize;
+			int lRest = (int)(lDataSize % (int64)lBufferSize);
+
+			for (int64 i = 0; i < lNumChunks; i++)
+			{
+				FileRead(lBuffer, lBufferSize);
+				lFile.WriteData(lBuffer, lBufferSize);
+			}
+
+			if (lRest != 0)
+			{
+				FileRead(lBuffer, lRest);
+				lFile.WriteData(lBuffer, lRest);
+			}
+
+			FileClose();
+			lFile.Close();
+
+			delete[] lBuffer;
+
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	else
+	{
+		return false;
+	}
+}
+
+LOG_CLASS_DEFINE(GENERAL_RESOURCES, ZipArchive);
+
+} // End namespace.

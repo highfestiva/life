@@ -1,0 +1,13 @@
+
+// Author: Jonas Byström
+// Copyright (c) 2002-2007, Righteous Games
+
+#define LEPRA_INCLUDE_NO_OS
+#include "../../UiLepra/Include/UiLepra.h"
+#undef LEPRA_INCLUDE_NO_OS
+
+namespace UiTbc
+{
+void Init();
+void Shutdown();
+}

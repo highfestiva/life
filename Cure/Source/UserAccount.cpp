@@ -1,0 +1,165 @@
+
+// Author: Jonas Byström
+// Copyright (c) 2002-2008, Righteous Games
+ 
+
+
+#include "../../Lepra/Include/SHA1.h"
+#include "../Include/UserAccount.h"
+
+
+
+namespace Cure
+{
+
+
+
+MangledPassword::MangledPassword()
+{
+}
+
+MangledPassword::MangledPassword(Lepra::UnicodeString& pMangledPassword)
+{
+	MangleAndSet(pMangledPassword);
+}
+
+MangledPassword::MangledPassword(const MangledPassword& pMangledPassword)
+{
+	*this = pMangledPassword;
+}
+
+MangledPassword::~MangledPassword()
+{
+	Clear();
+}
+
+void MangledPassword::operator=(const MangledPassword& pMangledPassword)
+{
+	mMangledPassword = pMangledPassword.mMangledPassword;
+}
+
+void MangledPassword::Clear()
+{
+	size_t lOriginalLength = mMangledPassword.length();
+	for (size_t x = 0; x < lOriginalLength; ++x)
+	{
+		mMangledPassword[x] = 0;
+	}
+}
+
+const std::string& MangledPassword::Get() const
+{
+	return (mMangledPassword);
+}
+
+void MangledPassword::MangleAndSet(Lepra::UnicodeString& pPassword)
+{
+	Clear();
+	mMangledPassword.resize(20);
+
+	const Lepra::uint8* lOriginalData = (const Lepra::uint8*)pPassword.c_str();
+	const size_t lOriginalLength = pPassword.length();
+	Lepra::uint8 lHashData[20];
+	Lepra::SHA1::Hash(lOriginalData, lOriginalLength*2, lHashData);
+	for (size_t x = 0; x < 20; ++x)
+	{
+		mMangledPassword[x] = lHashData[x];
+	}
+
+	// Clear original password.
+	for (size_t y = 0; y < lOriginalLength; ++y)
+	{
+		pPassword[y] = _T('\0');
+	}
+}
+
+void MangledPassword::SetUnmodified(const std::string& pMangledPassword)
+{
+	Clear();
+	mMangledPassword = pMangledPassword;
+}
+
+bool MangledPassword::operator==(const MangledPassword& pMangledPassword) const
+{
+	return (mMangledPassword == pMangledPassword.mMangledPassword);
+}
+
+
+
+LoginId::LoginId()
+{
+}
+
+LoginId::LoginId(const Lepra::UnicodeString& pUserName, const MangledPassword& pMangledPassword):
+	mUserName(pUserName),
+	mMangledPassword(pMangledPassword)
+{
+}
+
+LoginId::~LoginId()
+{
+}
+
+const Lepra::UnicodeString& LoginId::GetName() const
+{
+	return (mUserName);
+}
+
+const MangledPassword& LoginId::GetMangledPassword() const
+{
+	return (mMangledPassword);
+}
+
+bool LoginId::operator==(const LoginId& pUser) const
+{
+	return (mUserName == pUser.GetName() &&
+		mMangledPassword == pUser.mMangledPassword);
+}
+
+
+
+UserAccount::UserAccount(const LoginId& pLoginId, AccountId pId):
+	LoginId(pLoginId),
+	mId(pId),
+	mStatus(STATUS_OK)
+{
+}
+
+/*UserAccount::UserAccount(const Lepra::UnicodeString& pUserName, const MangledPassword& pMangledPassword):
+	LoginId(pUserName, pMangledPassword),
+	mStatus(STATUS_OK)
+{
+}*/
+
+UserAccount::~UserAccount()
+{
+}
+
+UserAccount::AccountId UserAccount::GetId() const
+{
+	return (mId);
+}
+
+UserAccount::Availability UserAccount::GetStatus() const
+{
+	return (mStatus);
+}
+
+void UserAccount::SetStatus(Availability pStatus)
+{
+	mStatus = pStatus;
+}
+
+bool UserAccount::AddAvatarId(const AvatarId& pAvatarId)
+{
+	return (mAvatarIdSet.insert(pAvatarId).second);
+}
+
+const UserAccount::AvatarIdSet& UserAccount::GetAvatarIdSet() const
+{
+	return (mAvatarIdSet);
+}
+
+
+
+}
