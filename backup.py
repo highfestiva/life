@@ -31,7 +31,7 @@ class GlobDirectoryWalker:
                 skip_match = False
                 if os.path.isdir(fullname):
                     for nomatch in self.nomatch_dirs:
-                        if fnmatch.fnmatch(file, nomatch):
+                        if fnmatch.fnmatchcase(file, nomatch):  # TRICKY: directories are case sensitive!
                             skip_match = True
                             break
                 else:
@@ -68,8 +68,8 @@ def working_makedirs(newdir):
 
 def main():
     fl = GlobDirectoryWalker(".", "*",
-        ("*.o", "*.obj", "*.log", ".cvsignore", "*.vcproj.*.user", "*.suo", "*.lib", "*.exp", "*.pdb", "*.ncb"),
-        ("*.svn", "Unicode Release*", "Unicode Final", "Unicode Debug*", "Release Candidate", "Debug", "Release", "CVS"))
+        ("*.o", "*.obj", "*.log", ".cvsignore", "*.vcproj.*.user", "*.suo", "*.exp", "*.pdb", "*.ncb"),
+        ("*.svn", "*.git", "Unicode Release*", "Unicode Final", "Unicode Debug*", "Release Candidate", "Debug", "Release", "CVS"))
     print "Copying..."
     target_dir = "..\\bak"
     cnt = 0
