@@ -770,6 +770,22 @@ bool TestTransformation(const Lepra::LogDecorator& pAccount)
 	}
 	if (lTestOk)
 	{
+		lContext = _T("quaternion multiply");
+		Lepra::Vector3DD x(1, 0, 0);
+		Lepra::QuaternionD q1(Lepra::PI/2, Lepra::Vector3DD(0, -1, 0));
+		x = q1*x;
+		lTestOk = (x.GetDistance(Lepra::Vector3DD(0, 0, 1)) < 0.0001);
+		assert(lTestOk);
+		if (lTestOk)
+		{
+			Lepra::QuaternionD q2(-Lepra::PI*1.5, Lepra::Vector3DD(1, 0, 0));
+			x = (q1*q2)*x;
+			lTestOk = (x.GetDistance(Lepra::Vector3DD(0, -1, 0)) < 0.0001);
+			assert(lTestOk);
+		}
+	}
+	if (lTestOk)
+	{
 		lContext = _T("anchor rotate 2");
 		const Lepra::Vector3DD lAnchor(0, -1, -1);
 		Lepra::TransformationD lTransformation1;

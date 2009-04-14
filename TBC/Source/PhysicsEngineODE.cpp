@@ -1096,22 +1096,32 @@ bool PhysicsEngineODE::SetHingeDiff(BodyID pBodyId, JointID pJointId, const Join
 
 	Lepra::Vector3DF lAnchor;
 	Lepra::Vector3DF lAxis;
-	float lAngle1;
-	if (!GetAnchorPos(pJointId, lAnchor) || !GetAxis1(pJointId, lAxis) || !GetAngle1(pJointId, lAngle1))
+	if (!GetAnchorPos(pJointId, lAnchor) || !GetAxis1(pJointId, lAxis))
 	{
 		return (false);
 	}
 	assert(lAxis.GetLengthSquared() > 0.99f && lAxis.GetLengthSquared() < 1.01f);
 
 	{
-		// Align anchors before rotating.
+		// Fetch parent orientation.
+		assert(lJointInfo->mJointID->node[1].body == ((Object*)pBodyId)->mBodyID);
+		dxBody* lParentBody = lJointInfo->mJointID->node[0].body;
+		const dReal* lPQ = ::dBodyGetQuaternion(lParentBody);
+		const Lepra::QuaternionF lParentQ(lPQ[0], lPQ[1], lPQ[2], lPQ[3]);
+		// Rotate to original child (us) orientation.
+		dxJointHinge* lHinge = (dxJointHinge*)lJointInfo->mJointID;
+		Lepra::QuaternionF lQ(lHinge->qrel[0], lHinge->qrel[1], lHinge->qrel[2], lHinge->qrel[3]);
+		lQ = lParentQ * lQ;
+		// Rotate to input angle.
+		lQ = Lepra::QuaternionF(-pDiff.mAngle, lAxis) * lQ;
+		// Set orientation.
 		Lepra::TransformationF lTransform;
 		GetBodyTransform(pBodyId, lTransform);
-		dVector3 lRawAnchor;
-		::dJointGetHingeAnchor2(lJointInfo->mJointID, lRawAnchor);
-		Lepra::Vector3DF lAnchor2(lRawAnchor[0], lRawAnchor[1], lRawAnchor[2]);
+		lTransform.SetOrientation(lQ);
+		// Align anchors (happen after rotation) and store.
+		Lepra::Vector3DF lAnchor2(lHinge->anchor2[0], lHinge->anchor2[1], lHinge->anchor2[2]);
+		lAnchor2 = lQ*lAnchor2 + lTransform.GetPosition();
 		lTransform.GetPosition() += lAnchor-lAnchor2;
-		lTransform.RotateAroundAnchor(lAnchor, lAxis, -pDiff.mAngle+lAngle1);
 		SetBodyTransform(pBodyId, lTransform);
 	}
 
@@ -1185,39 +1195,40 @@ bool PhysicsEngineODE::SetUniversalDiff(BodyID pBodyId, JointID pJointId, const 
 
 	Lepra::Vector3DF lAxis1;
 	Lepra::Vector3DF lAxis2;
+	Lepra::Vector3DF lAnchor;
+	if (!GetAnchorPos(pJointId, lAnchor) || !GetAxis1(pJointId, lAxis1))
 	{
-		Lepra::Vector3DF lAnchor;
-		float lAngle1;
-		if (!GetAnchorPos(pJointId, lAnchor) || !GetAxis1(pJointId, lAxis1) || !GetAngle1(pJointId, lAngle1))
-		{
-			return (false);
-		}
-		assert(lAxis1.GetLengthSquared() > 0.99f && lAxis1.GetLengthSquared() < 1.01f);
+		return (false);
+	}
+	assert(lAxis1.GetLengthSquared() > 0.99f && lAxis1.GetLengthSquared() < 1.01f);
 
-		// Align anchors before rotation.
+	{
+		// Fetch parent orientation.
+		assert(lJointInfo->mJointID->node[1].body == ((Object*)pBodyId)->mBodyID);
+		dxBody* lParentBody = lJointInfo->mJointID->node[0].body;
+		const dReal* lPQ = ::dBodyGetQuaternion(lParentBody);
+		const Lepra::QuaternionF lParentQ(lPQ[0], lPQ[1], lPQ[2], lPQ[3]);
+		// Rotate to cross piece orientation.
+		dxJointUniversal* lUniversal = (dxJointUniversal*)lJointInfo->mJointID;
+		Lepra::QuaternionF lRelativeQ(lUniversal->qrel1[0], lUniversal->qrel1[1], lUniversal->qrel1[2], lUniversal->qrel1[3]);
+		Lepra::QuaternionF lQ = lParentQ * lRelativeQ;
+		// Rotate to body 1's input angle.
+		lQ = Lepra::QuaternionF(-pDiff.mValue, lAxis1) * lQ;
+		// Apply rotation from cross piece to original child (us).
+		lRelativeQ.Set(lUniversal->qrel2[0], lUniversal->qrel2[1], lUniversal->qrel2[2], lUniversal->qrel2[3]);
+		//lQ = lQ * lRelativeQ;
+		// Rotating around body 1's axis changes body 2's axis. Fetch and act on it AFTER rotation 'round axis1.
+		lAxis2 = lQ * Lepra::Vector3DF(lUniversal->axis2[0], lUniversal->axis2[1], lUniversal->axis2[2]);
+		lQ = Lepra::QuaternionF(-pDiff.mAngle, lAxis2) * lQ;
+		// Set orientation.
 		Lepra::TransformationF lTransform;
 		GetBodyTransform(pBodyId, lTransform);
-		dVector3 lRawAnchor;
-		::dJointGetUniversalAnchor2(lJointInfo->mJointID, lRawAnchor);
-		Lepra::Vector3DF lAnchor2(lRawAnchor[0], lRawAnchor[1], lRawAnchor[2]);
+		lTransform.SetOrientation(lQ);
+		// Align anchors (happen after rotation) and store.
+		Lepra::Vector3DF lAnchor2(lUniversal->anchor2[0], lUniversal->anchor2[1], lUniversal->anchor2[2]);
+		lAnchor2 = lQ*lAnchor2 + lTransform.GetPosition();
 		lTransform.GetPosition() += lAnchor-lAnchor2;
-		// Rotate around first body's axis.
-		lTransform.RotateAroundAnchor(lAnchor, lAxis1, -pDiff.mValue+lAngle1);
-		// Rotating around body 1's axis changes body 2's axis. Fetch and act on it after rotation 'round axis1.
-		float lAngle2;
-		if (!GetAxis2(pJointId, lAxis2) || !GetAngle2(pJointId, lAngle2))
-		{
-			return (false);
-		}
-		assert(lAxis2.GetLengthSquared() > 0.99f && lAxis2.GetLengthSquared() < 1.01f);
-		lTransform.RotateAroundAnchor(lAnchor, lAxis2, -pDiff.mAngle+lAngle2);
 		SetBodyTransform(pBodyId, lTransform);
-
-		/*// TODO: remove test code.
-		GetAngle1(pJointId, lAngle1);
-		GetAngle2(pJointId, lAngle2);
-		assert(Lepra::Math::IsEpsEqual(lAngle1, pDiff.mValue, 0.01f));
-		assert(Lepra::Math::IsEpsEqual(lAngle2, pDiff.mAngle, 0.01f));*/
 	}
 
 	{

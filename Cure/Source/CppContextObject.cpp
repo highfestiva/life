@@ -626,7 +626,6 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 			lJibAnchorPosition, Lepra::Vector3DF(0, 0, 1));
 		pObject->AddPhysicsObject(PhysicsNode(1, 2, lJibId, PhysicsNode::TYPE_HINGE, lJoint));
 
-/*
 		// Wire.
 		const float lWireWeight = 50;
 		const int lWireSegmentCount = 4;
@@ -666,7 +665,7 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 		//lJoint = lPhysicsManager->CreateBallJoint(lParentId, lPhysicsObjectId, lHookAnchor);
 		lJoint = lPhysicsManager->CreateUniversalJoint(lParentId, lPhysicsObjectId, lHookAnchor, Lepra::Vector3DF(1, 0, 0), Lepra::Vector3DF(0, 1, 0));
 		pObject->AddPhysicsObject(PhysicsNode(lParentIndex, lParentIndex+1, lPhysicsObjectId, PhysicsNode::TYPE_UNIVERSAL, lJoint));
-*/
+
 		// Jib rotational engine.
 		ContextObjectEngine* lEngine = new ContextObjectEngine(pObject, ContextObjectEngine::ENGINE_HINGE, lJibWeight, 2.0f, 1.0f, 1);
 		lEngine->AddControlledNode(2, 1.0f);

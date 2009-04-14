@@ -226,19 +226,19 @@ bool CppContextObject::StartLoadGraphics(Cure::UserResource* pParentResource)
 	{
 		mMeshResourceArray.push_back(new UserGeometryReferenceOffsetResource(mUiManager, GeometryOffset(1)));
 		mMeshResourceArray.push_back(new UserGeometryReferenceOffsetResource(mUiManager, GeometryOffset(2)));
-		/*Lepra::TransformationF lWireTransform(Lepra::QuaternionF(Lepra::PIF/2,  Lepra::Vector3DF(1, 0, 0)), Lepra::Vector3DF());
+		Lepra::TransformationF lWireTransform(Lepra::QuaternionF(Lepra::PIF/2,  Lepra::Vector3DF(1, 0, 0)), Lepra::Vector3DF());
 		mMeshResourceArray.push_back(new UserGeometryReferenceOffsetResource(mUiManager, GeometryOffset(3, lWireTransform)));
 		mMeshResourceArray.push_back(new UserGeometryReferenceOffsetResource(mUiManager, GeometryOffset(4, lWireTransform)));
 		mMeshResourceArray.push_back(new UserGeometryReferenceOffsetResource(mUiManager, GeometryOffset(5, lWireTransform)));
 		mMeshResourceArray.push_back(new UserGeometryReferenceOffsetResource(mUiManager, GeometryOffset(6, lWireTransform)));
-		mMeshResourceArray.push_back(new UserGeometryReferenceOffsetResource(mUiManager, GeometryOffset(7, lWireTransform)));*/
+		mMeshResourceArray.push_back(new UserGeometryReferenceOffsetResource(mUiManager, GeometryOffset(7, lWireTransform)));
 		mMeshResourceArray[0]->SetParentResource(pParentResource);
 		mMeshResourceArray[0]->Load(lResourceManager, lIdClass+_T("_tower_mesh"),
 			UiCure::UserGeometryReferenceOffsetResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh));
 		mMeshResourceArray[1]->SetParentResource(pParentResource);
 		mMeshResourceArray[1]->Load(lResourceManager, lIdClass+_T("_jib_mesh0"),
 			UiCure::UserGeometryReferenceOffsetResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh));
-		/*mMeshResourceArray[2]->SetParentResource(pParentResource);
+		mMeshResourceArray[2]->SetParentResource(pParentResource);
 		mMeshResourceArray[2]->Load(lResourceManager, lIdClass+_T("_wire_mesh1"),
 			UiCure::UserGeometryReferenceOffsetResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh));
 		mMeshResourceArray[3]->SetParentResource(pParentResource);
@@ -252,7 +252,7 @@ bool CppContextObject::StartLoadGraphics(Cure::UserResource* pParentResource)
 			UiCure::UserGeometryReferenceOffsetResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh));
 		mMeshResourceArray[6]->SetParentResource(pParentResource);
 		mMeshResourceArray[6]->Load(lResourceManager, lIdClass+_T("_hook_mesh"),
-			UiCure::UserGeometryReferenceOffsetResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh));*/
+			UiCure::UserGeometryReferenceOffsetResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh));
 	}
 	else if (GetClassId().find(_T("ground_002")) != Lepra::String::npos)
 	{
