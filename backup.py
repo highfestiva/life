@@ -7,9 +7,10 @@ import fnmatch
 class GlobDirectoryWalker:
     # a forward iterator that traverses a directory tree
 
-    def __init__(self, directory, pattern="*", nomatch_files=[], nomatch_dirs=[]):
+    def __init__(self, directory, pattern="*", mustmatch_files=[], nomatch_files=[], nomatch_dirs=[]):
         self.stack = [directory]
         self.pattern = pattern
+        self.mustmatch_files = mustmatch_files
         self.nomatch_files = nomatch_files
         self.nomatch_dirs = nomatch_dirs
         self.files = []
@@ -35,10 +36,16 @@ class GlobDirectoryWalker:
                             skip_match = True
                             break
                 else:
-                    for nomatch in self.nomatch_files:
-                        if fnmatch.fnmatch(file, nomatch):
-                            skip_match = True
+                    is_must = False
+                    for mustmatch in self.mustmatch_files:
+                        if fnmatch.fnmatch(file, mustmatch):
+                            is_must = True
                             break
+                    if not is_must:
+                        for nomatch in self.nomatch_files:
+                            if fnmatch.fnmatch(file, nomatch):
+                                skip_match = True
+                                break
                 if skip_match:
                     continue
                 if os.path.isdir(fullname) and not os.path.islink(fullname):
@@ -68,7 +75,8 @@ def working_makedirs(newdir):
 
 def main():
     fl = GlobDirectoryWalker(".", "*",
-        ("*.o", "*.obj", "*.log", ".cvsignore", "*.vcproj.*.user", "*.suo", "*.exp", "*.pdb", "*.ncb"),
+        ("fmod*.lib", "fmod*.dll", "DspFx.dll"),
+        ("*.o", "*.obj", "*.log", ".cvsignore", "*.vcproj.*.user", "*.suo", "*.lib", "*.exp", "*.dll", "*.pdb", "*.ncb"),
         ("*.svn", "*.git", "Unicode Release*", "Unicode Final", "Unicode Debug*", "Release Candidate", "Debug", "Release", "CVS"))
     print "Copying..."
     target_dir = "..\\bak"
