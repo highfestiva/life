@@ -269,6 +269,17 @@ PhysicsEngine::BodyID PhysicsEngineODE::CreateTriMesh(const GeometryBase* pMesh,
 	return (BodyID)(Lepra::uint64)lObject;
 }
 
+bool PhysicsEngineODE::IsStaticBody(BodyID pBodyId) const
+{
+	Object* lObject = (Object*)pBodyId;
+	if (lObject->mWorldID != mWorldID)
+	{
+		mLog.Errorf(_T("IsStaticBody() - Body %i is not part of this world!"), pBodyId);
+		return (true);
+	}
+	return (lObject->mBodyID == 0);
+}
+
 void PhysicsEngineODE::DeleteBody(BodyID pBodyId)
 {
 	ObjectTable::iterator lIter = mObjectTable.find((Object*)pBodyId);
@@ -2710,26 +2721,30 @@ void PhysicsEngineODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID pG
 
 	PhysicsEngineODE* lThis = (PhysicsEngineODE*)pData;
 	dContact lContact[8];
+	int lContactPointCount = -1;
 
-	if (lObject1->mTriggerListener != 0 && lBody2 != 0)
+	if (lObject1->mTriggerListener != 0)
 	{
-		if (dCollide(pGeom1, pGeom2, 8, &lContact[0].geom, sizeof(dContact)) > 0)
+		lContactPointCount = (lContactPointCount < 0)? ::dCollide(pGeom1, pGeom2, 8, &lContact[0].geom, sizeof(dContact)) : lContactPointCount;
+		if (lContactPointCount > 0)
 		{
 			lObject1->mTriggerListener->OnTrigger((BodyID)(size_t)lObject1, (BodyID)(size_t)lObject2);
 		}
 	}
-	if(lObject2->mTriggerListener != 0 && lBody1 != 0)
+	if(lObject2->mTriggerListener != 0)
 	{
-		if (dCollide(pGeom1, pGeom2, 8, &lContact[0].geom, sizeof(dContact)) > 0)
+		lContactPointCount = (lContactPointCount < 0)? ::dCollide(pGeom1, pGeom2, 8, &lContact[0].geom, sizeof(dContact)) : lContactPointCount;
+		if (lContactPointCount > 0)
 		{
 			lObject2->mTriggerListener->OnTrigger((BodyID)(size_t)lObject2, (BodyID)(size_t)lObject1);
 		}
 	}
 
-	// Bounce if NOT BOTH objects are triggers.
-	if (lObject1->mTriggerListener == 0 || lObject2->mTriggerListener == 0)
+	// Bounce (if we haven't tried colliding OR we ARE colliding) AND NOT BOTH objects are triggers.
+	if ((lContactPointCount < 0 || lContactPointCount > 0) &&
+		(lObject1->mTriggerListener == 0 || lObject2->mTriggerListener == 0))
 	{
-		int lNumContactPoints = dCollide(pGeom1, pGeom2, 8, &lContact[0].geom, sizeof(dContact));
+		lContactPointCount = (lContactPointCount < 0)? ::dCollide(pGeom1, pGeom2, 8, &lContact[0].geom, sizeof(dContact)) : lContactPointCount;
 		dMass lMass1;
 		if (lBody1)
 		{
@@ -2737,7 +2752,7 @@ void PhysicsEngineODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID pG
 		}
 		else
 		{
-			lMass1.mass = 1.0;
+			lMass1.mass = 1e10f;
 		}
 		dMass lMass2;
 		if (lBody2)
@@ -2746,11 +2761,11 @@ void PhysicsEngineODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID pG
 		}
 		else
 		{
-			lMass2.mass = 1.0;
+			lMass2.mass = 1e10f;
 		}
 
 		// Perform normal collision detection.
-		for (int i = 0; i < lNumContactPoints; i++)
+		for (int i = 0; i < lContactPointCount; i++)
 		{
 			lContact[i].surface.mode = dContactSlip1 | dContactSlip2 | dContactBounce | dContactApprox1;
 			lContact[i].surface.mu = dInfinity;

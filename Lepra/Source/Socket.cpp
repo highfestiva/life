@@ -255,7 +255,7 @@ IOError BufferedIo::AppendSendBuffer(const void* pData, unsigned pLength)
 {
 	IOError lError = IO_OK;
 
-	if (mSendBuffer.mDataSize + pLength <= UdpMuxSocket::BUFFER_SIZE)
+	if (mSendBuffer.mDataSize + pLength <= SocketBase::BUFFER_SIZE)
 	{
 		if (!mInSendBuffer)
 		{
@@ -274,7 +274,7 @@ IOError BufferedIo::AppendSendBuffer(const void* pData, unsigned pLength)
 	{
 		// It's all or nothing. If half a network packet arrives, we're fucked.
 		SendBuffer();
-		if (pLength <= UdpMuxSocket::BUFFER_SIZE)
+		if (pLength <= SocketBase::BUFFER_SIZE)
 		{
 			lError = AppendSendBuffer(pData, pLength);
 		}

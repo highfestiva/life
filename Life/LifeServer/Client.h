@@ -39,13 +39,14 @@ public:
 	float GetPhysicsFrameAheadCount() const;
 
 private:
-	void SendStriveTimes();
+	void SendStriveTimes(int pNetworkFrameDiffCount);
 
 	// A positive return value n means that data from the client to the server comes n frames too late on average (client needs to speed up).
 	// A negative return value n means that data from the client to the server comes n frames too early on average (client needs to slow down).
 	int CalculateNetworkLatencyFrameDiffCount() const;
 
-	static const int NETWORK_LATENCY_CALCULATION_ARRAY_SIZE = PHYSICS_FPS;
+	static const int NETWORK_DEVIATION_ERROR_COUNT = 4;
+	static const int NETWORK_LATENCY_CALCULATION_ARRAY_SIZE = 8;
 	typedef std::vector<int> NetworkLatencyArray;
 
 	Cure::NetworkAgent* mNetworkAgent;

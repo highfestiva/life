@@ -126,13 +126,18 @@ bool NetworkAgent::SendObjectFullPosition(Lepra::GameSocket* pSocket, GameObject
 
 bool NetworkAgent::PlaceInSendBuffer(bool pSafe, Lepra::GameSocket* pSocket, Packet* pPacket)
 {
+	bool lOk = (pSocket != 0);
+
 	/*for (size_t x = 0; x < pPacket->GetMessageCount(); ++x)
 	{
 		log_volatile(mLog.Tracef(_T("Sending message of type %i."), pPacket->GetMessageAt(x)->GetType()));
 	}*/
 
 	// Try to append this packet to the existing packet buffer.
-	bool lOk = pPacket->AppendToPacketBuffer(pSocket->GetSendBuffer(pSafe));
+	if (lOk)
+	{
+		lOk = pPacket->AppendToPacketBuffer(pSocket->GetSendBuffer(pSafe));
+	}
 	if (!lOk)
 	{
 		pPacket->StoreHeader();

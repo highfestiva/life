@@ -848,6 +848,11 @@ void GameClientSlaveManager::OnStopped(Cure::ContextObject*)
 {
 }
 
+bool GameClientSlaveManager::IsConnectAuthorized()
+{
+	return (false);
+}
+
 
 
 void GameClientSlaveManager::CancelLogin()

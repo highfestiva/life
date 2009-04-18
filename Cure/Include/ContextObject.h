@@ -41,6 +41,7 @@ public:
 	void SetNetworkObjectType(NetworkObjectType pType);
 
 	void SetAllowMoveSelf(bool pAllow);
+	void ConnectObjects(TBC::PhysicsEngine::BodyID pBody1, ContextObject* pObject2, TBC::PhysicsEngine::BodyID pBody2);
 	bool IsConnectedTo(ContextObject* pObject) const;
 	void AddConnection(ContextObject* pObject, TBC::PhysicsEngine::JointID pJoint);
 	bool RemoveConnection(ContextObject* pObject);

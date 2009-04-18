@@ -96,7 +96,10 @@ Lepra::UnicodeStringUtility::StringVector GameServerManager::ListUsers()
 		for (; x != mAccountClientTable.End(); ++x)
 		{
 			const Client* lClient = x.GetObject();
-			lVector.push_back(lClient->GetUserConnection()->GetLoginName());
+			Lepra::String lUserInfo = lClient->GetUserConnection()->GetLoginName();
+			Lepra::Vector3DF lPosition = GetContext()->GetObject(lClient->GetAvatarId())->GetPosition();
+			lUserInfo += Lepra::StringUtility::Format(_T(" at (%f, %f, %f)"), lPosition.x, lPosition.y, lPosition.z);
+			lVector.push_back(lUserInfo);
 		}
 	}
 	return (lVector);
@@ -499,7 +502,7 @@ void GameServerManager::OnLogout(Cure::UserConnection* pUserConnection)
 
 void GameServerManager::AdjustClientSimulationSpeed(Client* pClient, int pClientFrameIndex)
 {
-	int lCurrentFrameDiff = GetTimeManager()->GetCurrentPhysicsFrame() -  pClientFrameIndex;
+	int lCurrentFrameDiff = GetTimeManager()->GetCurrentPhysicsFrame() - pClientFrameIndex;
 	// Calculate client network latency and jitter.
 	pClient->StoreFrameDiff(lCurrentFrameDiff);
 
@@ -521,7 +524,7 @@ void GameServerManager::StoreMovement(int pClientFrameIndex, Cure::MessageObject
 	else
 	{
 		// This input data is already old or too much ahead! Skip it.
-		//mLog.Warningf(_T("Skipping store of movement (%i frames ahead)."), lFrameOffset);
+		mLog.Warningf(_T("Skipping store of movement (%i frames ahead)."), lFrameOffset);
 	}
 }
 
@@ -535,11 +538,14 @@ void GameServerManager::ApplyStoredMovement()
 		lCurrentPhysicsSteps = NETWORK_POSITIONAL_AHEAD_BUFFER_SIZE-1;
 	}
 	int lCurrentPhysicsFrame = GetTimeManager()->GetCurrentPhysicsFrame() - lCurrentPhysicsSteps;
+	//mLog.Debugf(_T("[frame %i to %i]"), lCurrentPhysicsFrame, GetTimeManager()->GetCurrentPhysicsFrame());
 	for (; lCurrentPhysicsFrame <= GetTimeManager()->GetCurrentPhysicsFrame(); ++lCurrentPhysicsFrame)
 	{
 		const int lFrameCycleIndex = lCurrentPhysicsFrame%NETWORK_POSITIONAL_AHEAD_BUFFER_SIZE;
 		MovementList lMovementList = mMovementArrayList[lFrameCycleIndex];
+		size_t lMovementCount = lMovementList.size();
 		mMovementArrayList[lFrameCycleIndex].clear();
+		assert(lMovementCount == lMovementList.size());
 		MovementList::iterator x = lMovementList.begin();
 		for (; x != lMovementList.end(); ++x)
 		{
@@ -663,6 +669,10 @@ void GameServerManager::OnStopped(Cure::ContextObject* pObject)
 	}
 }
 
+bool GameServerManager::IsConnectAuthorized()
+{
+	return (true);
+}
 
 
 void GameServerManager::BroadcastCreateObject(Cure::ContextObject* pObject)

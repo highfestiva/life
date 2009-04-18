@@ -147,6 +147,8 @@ public:
 		Lepra::float32 pFriction = 1, Lepra::float32 pBounce = 0, TriggerListener* pTriggerListener = 0,
 		ForceFeedbackListener* pForceListener = 0) = 0;
 
+	virtual bool IsStaticBody(BodyID pBodyId) const = 0;
+
 	virtual void DeleteBody(BodyID pBodyId) = 0;
 
 	virtual void GetBodyTransform(BodyID pBodyId, Lepra::Transformation<Lepra::float32>& pTransform) const = 0;

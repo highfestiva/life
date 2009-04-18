@@ -24,7 +24,7 @@ PhysicsNode::PhysicsNode():
 }
 
 PhysicsNode::PhysicsNode(Id pParentId, Id pId, TBC::PhysicsEngine::BodyID pBodyId,
-	JointType pJointType, TBC::PhysicsEngine::JointID pJointId):
+	JointType pJointType, TBC::PhysicsEngine::JointID pJointId, ConnectorType pConnectorType):
 	mParentId(pParentId),
 	mId(pId),
 	mBodyId(pBodyId),
@@ -32,6 +32,8 @@ PhysicsNode::PhysicsNode(Id pParentId, Id pId, TBC::PhysicsEngine::BodyID pBodyI
 	mJointId(pJointId),
 	mExtraData(0)
 {
+	AddConnectorType(pConnectorType);
+
 	assert(mId >= 0);
 	assert(mBodyId != TBC::INVALID_BODY);
 }
@@ -65,6 +67,19 @@ PhysicsNode::JointType PhysicsNode::GetJointType() const
 TBC::PhysicsEngine::JointID PhysicsNode::GetJointId() const
 {
 	return (mJointId);
+}
+
+bool PhysicsNode::IsConnectorType(ConnectorType pType) const
+{
+	return (std::find(mConnectorArray.begin(), mConnectorArray.end(), pType) != mConnectorArray.end());
+}
+
+void PhysicsNode::AddConnectorType(ConnectorType pType)
+{
+	if (pType != CONNECT_NONE)
+	{
+		mConnectorArray.push_back(pType);
+	}
 }
 
 

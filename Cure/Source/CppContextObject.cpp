@@ -52,49 +52,25 @@ void CppContextObject::OnAlarm(int pAlarmId)
 
 void CppContextObject::OnTrigger(TBC::PhysicsEngine::BodyID pBody1, TBC::PhysicsEngine::BodyID pBody2)
 {
-	if (GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED)
+	ContextObject* lObject2 = (ContextObject*)mManager->GetGameManager()->GetPhysicsManager()->GetForceFeedbackListener(pBody2);
+	if (mManager->GetGameManager()->IsConnectAuthorized() && lObject2)
 	{
-		return;
-	}
-
-	TBC::PhysicsEngine* lPhysics = mManager->GetGameManager()->GetPhysicsManager();
-	ContextObject* lObject2 = (ContextObject*)lPhysics->GetForceFeedbackListener(pBody2);
-	if (!lObject2 || IsConnectedTo(lObject2))
-	{
-		return;
-	}
-	PhysicsNode* lNode1 = GetPhysicsNode(pBody1);
-	PhysicsNode* lNode2 = lObject2->GetPhysicsNode(pBody2);
-	if (!lNode1 || !lNode2)
-	{
-		return;
-	}
-	// TODO: if (lNode1->IsConnectorType(CONNECTOR_3) && lNode2->IsConnectorType(CONNECTEE_3))
-	{
-		mLog.AInfo("Attaching two objects.");
-		lObject2->SetAllowMoveSelf(false);
-		// TODO:  broadcast "allow move self" = false!
-		PhysicsNode* lNode2Parent = lObject2->GetPhysicsNode(lNode2->GetParentId());
-		TBC::PhysicsEngine::BodyID lBody2Connectee = pBody2;
-		if (lNode2Parent)
-		{
-			lBody2Connectee = lNode2Parent->GetBodyId();
-		}
-		Lepra::TransformationF lAnchor;
-		lPhysics->GetBodyTransform(pBody2, lAnchor);
-		TBC::PhysicsEngine::JointID lJoint = lPhysics->CreateBallJoint(pBody1, lBody2Connectee, lAnchor.GetPosition());
-		AddConnection(lObject2, lJoint);
-		lObject2->AddConnection(this, lJoint);
+		ConnectObjects(pBody1, lObject2, pBody2);
 	}
 }
+
+
 
 void CppContextObject::OnForceApplied(TBC::PhysicsEngine::ForceFeedbackListener* pOtherObject,
 	const Lepra::Vector3DF& pForce, const Lepra::Vector3DF& pTorque)
 {
-	// TODO: replace by sensible values. Like dividing by mass, for instance.
-	//if (pForce.GetLengthSquared() > 100 || pTorque.GetLengthSquared() > 10)
+	if (!IsConnectedTo((ContextObject*)pOtherObject))
 	{
-		mManager->GetGameManager()->OnCollision(pForce, pTorque, this, (ContextObject*)pOtherObject);
+		// TODO: replace by sensible values. Like dividing by mass, for instance.
+		//if (pForce.GetLengthSquared() > 100 || pTorque.GetLengthSquared() > 10)
+		{
+			mManager->GetGameManager()->OnCollision(pForce, pTorque, this, (ContextObject*)pOtherObject);
+		}
 	}
 }
 
@@ -184,14 +160,16 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 		TBC::PhysicsEngine::BodyID lBodyId = lPhysicsManager->CreateBox(lTransformation, lCarWeight, lBodyDimensions,
 			TBC::PhysicsEngine::DYNAMIC, 0.1f, 1.0f, pTriggerListener, pObject);
 		lPhysicsManager->ActivateGravity(lBodyId);
-		pObject->AddPhysicsObject(PhysicsNode(0, 1, lBodyId));
+		pObject->AddPhysicsObject(PhysicsNode(0, 1, lBodyId, PhysicsNode::TYPE_EXCLUDE, TBC::INVALID_JOINT,
+			PhysicsNode::CONNECTEE_3));
 		Lepra::TransformationF lTopTransform(lTransformation);
 		lTopTransform.MoveUp(lBodyDimensions.z/2+lTopDimensions.z/2);
 		lTopTransform.MoveForward(0.9f);
 		TBC::PhysicsEngine::BodyID lTopId = lPhysicsManager->CreateBox(lTopTransform, 0, lTopDimensions,
 			TBC::PhysicsEngine::STATIC, 0.5f, 0.5f, pTriggerListener, pObject);
 		lPhysicsManager->Attach(lTopId, lBodyId);
-		pObject->AddPhysicsObject(PhysicsNode(1, 2, lTopId, PhysicsNode::TYPE_EXCLUDE));
+		pObject->AddPhysicsObject(PhysicsNode(1, 2, lTopId, PhysicsNode::TYPE_EXCLUDE, TBC::INVALID_JOINT,
+			PhysicsNode::CONNECTEE_3));
 
 		// Wheels and suspension.
 		const float lDamperConstant = lCarWeight/20;
@@ -698,7 +676,8 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 		lPhysicsManager->ActivateGravity(lPhysicsObjectId);
 		//lJoint = lPhysicsManager->CreateBallJoint(lParentId, lPhysicsObjectId, lHookAnchor);
 		lJoint = lPhysicsManager->CreateUniversalJoint(lParentId, lPhysicsObjectId, lHookAnchor, Lepra::Vector3DF(1, 0, 0), Lepra::Vector3DF(0, 1, 0));
-		pObject->AddPhysicsObject(PhysicsNode(lParentIndex, lParentIndex+1, lPhysicsObjectId, PhysicsNode::TYPE_UNIVERSAL, lJoint));
+		pObject->AddPhysicsObject(PhysicsNode(lParentIndex, lParentIndex+1, lPhysicsObjectId,
+			PhysicsNode::TYPE_UNIVERSAL, lJoint, PhysicsNode::CONNECTOR_3));
 
 		// Jib rotational engine.
 		ContextObjectEngine* lEngine = new ContextObjectEngine(pObject, ContextObjectEngine::ENGINE_HINGE, lJibWeight, 2.0f, 1.0f, 1);

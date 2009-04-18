@@ -88,6 +88,7 @@ private:
 	void OnCollision(const Lepra::Vector3DF& pForce, const Lepra::Vector3DF& pTorque,
 		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2);
 	void OnStopped(Cure::ContextObject* pObject);
+	bool IsConnectAuthorized();
 
 	void CancelLogin();
 	Cure::RuntimeVariableScope* GetVariableScope() const;

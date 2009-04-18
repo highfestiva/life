@@ -133,6 +133,47 @@ void ContextObject::SetAllowMoveSelf(bool pAllow)
 	mAllowMoveSelf = pAllow;
 }
 
+void ContextObject::ConnectObjects(TBC::PhysicsEngine::BodyID pBody1, ContextObject* pObject2, TBC::PhysicsEngine::BodyID pBody2)
+{
+	if (IsConnectedTo(pObject2))
+	{
+		return;
+	}
+	PhysicsNode* lNode1 = GetPhysicsNode(pBody1);
+	PhysicsNode* lNode2 = pObject2->GetPhysicsNode(pBody2);
+	if (!lNode1 || !lNode2)
+	{
+		return;
+	}
+
+	TBC::PhysicsEngine* lPhysics = mManager->GetGameManager()->GetPhysicsManager();
+	if (lNode1->IsConnectorType(PhysicsNode::CONNECTOR_3) && lNode2->IsConnectorType(PhysicsNode::CONNECTEE_3))
+	{
+		pObject2->SetAllowMoveSelf(false);
+		// TODO:  broadcast "allow move self" = false!
+
+		// Find first parent that is a dynamic body.
+		TBC::PhysicsEngine::BodyID lBody2Connectee = pBody2;
+		PhysicsNode* lNode2Connectee = lNode2;
+		while (lPhysics->IsStaticBody(lBody2Connectee))
+		{
+			lNode2Connectee = pObject2->GetPhysicsNode(lNode2Connectee->GetParentId());
+			if (!lNode2Connectee)
+			{
+				return;
+			}
+			lBody2Connectee = lNode2Connectee->GetBodyId();
+		}
+
+		mLog.AInfo("Attaching two objects.");
+		Lepra::TransformationF lAnchor;
+		lPhysics->GetBodyTransform(pBody2, lAnchor);
+		TBC::PhysicsEngine::JointID lJoint = lPhysics->CreateBallJoint(pBody1, lBody2Connectee, lAnchor.GetPosition());
+		AddConnection(pObject2, lJoint);
+		pObject2->AddConnection(this, lJoint);
+	}
+}
+
 bool ContextObject::IsConnectedTo(ContextObject* pObject) const
 {
 	return (std::find(mConnectionList.begin(), mConnectionList.end(), pObject) != mConnectionList.end());

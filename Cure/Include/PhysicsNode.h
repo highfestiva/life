@@ -30,9 +30,17 @@ public:
 		TYPE_UNIVERSAL,
 	};
 
+	enum ConnectorType
+	{
+		CONNECT_NONE,
+		CONNECTOR_3,
+		CONNECTEE_3,
+	};
+
 	PhysicsNode();
 	PhysicsNode(Id pParentId, Id pId, TBC::PhysicsEngine::BodyID pBodyId,
-		JointType pJointType = TYPE_EXCLUDE, TBC::PhysicsEngine::JointID pJointId = TBC::INVALID_JOINT);
+		JointType pJointType = TYPE_EXCLUDE, TBC::PhysicsEngine::JointID pJointId = TBC::INVALID_JOINT,
+		ConnectorType pConnectorType = CONNECT_NONE);
 	virtual ~PhysicsNode();
 
 	Id GetParentId() const;
@@ -40,16 +48,21 @@ public:
 	TBC::PhysicsEngine::BodyID GetBodyId() const;
 	JointType GetJointType() const;
 	TBC::PhysicsEngine::JointID GetJointId() const;
+	bool IsConnectorType(ConnectorType pType) const;
+	void AddConnectorType(ConnectorType pType);
 
 	float GetExtraData() const;
 	void SetExtraData(float pExtraData);
 
 private:
+	typedef std::vector<ConnectorType> ConnectorArray;
+
 	Id mParentId;
 	Id mId;
 	TBC::PhysicsEngine::BodyID mBodyId;
 	JointType mJointType;
 	TBC::PhysicsEngine::JointID mJointId;
+	ConnectorArray mConnectorArray;
 	float mExtraData;
 };
 

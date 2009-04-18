@@ -98,10 +98,10 @@ void Client::QuerySendStriveTimes()
 		++mStriveSendErrorTimeCounter;
 		mIgnoreStriveErrorTimeCounter = 0;
 		// Only send once every now and then.
-		if (mStriveSendErrorTimeCounter > (int)PHYSICS_FPS)
+		if (mStriveSendErrorTimeCounter > (int)NETWORK_DEVIATION_ERROR_COUNT)
 		{
 			mStriveSendErrorTimeCounter = 0;
-			SendStriveTimes();
+			SendStriveTimes(lNetworkFrameDiffCount);
 		}
 		else
 		{
@@ -120,7 +120,7 @@ void Client::QuerySendStriveTimes()
 	else
 	{
 		++mIgnoreStriveErrorTimeCounter;
-		if (mIgnoreStriveErrorTimeCounter > (int)PHYSICS_FPS)	// Reset send counter if we're mostly good.
+		if (mIgnoreStriveErrorTimeCounter > (int)NETWORK_DEVIATION_ERROR_COUNT)	// Reset send counter if we're mostly good.
 		{
 			mIgnoreStriveErrorTimeCounter = 0;
 			mStriveSendErrorTimeCounter = 0;
@@ -139,38 +139,39 @@ float Client::GetPhysicsFrameAheadCount() const
 }
 
 
-void Client::SendStriveTimes()
+void Client::SendStriveTimes(int pNetworkFrameDiffCount)
 {
 	int lPhysicsTickAdjustmentFrameCount = PHYSICS_FPS;	// Spread over some time (=frames).
-	int lNetworkFrameDiffCount = CalculateNetworkLatencyFrameDiffCount();
 	// Try to adjust us to be x frames early. Being too early is much better than being late,
 	// since early network data can be buffered and used in upcomming frames, but late network
 	// data is always thrown away.
-	++lNetworkFrameDiffCount;
+	++pNetworkFrameDiffCount;
 	float lPhysicsTickAdjustmentTime = 0;
-	if (lNetworkFrameDiffCount > 0)
+	if (pNetworkFrameDiffCount > 0)
 	{
 		// Speed up client physics by taking longer time steps.
-		lPhysicsTickAdjustmentTime = (float)lNetworkFrameDiffCount/lPhysicsTickAdjustmentFrameCount;
+		lPhysicsTickAdjustmentTime = (float)pNetworkFrameDiffCount/lPhysicsTickAdjustmentFrameCount;
 	}
 	else
 	{
 		// Slow down client physics by taking shorter time steps.
-		lNetworkFrameDiffCount = -lNetworkFrameDiffCount;
-		while (lNetworkFrameDiffCount > lPhysicsTickAdjustmentFrameCount)
+		pNetworkFrameDiffCount = -pNetworkFrameDiffCount;	// We always send a positive frame count.
+		while (pNetworkFrameDiffCount > lPhysicsTickAdjustmentFrameCount)
 		{
-			lPhysicsTickAdjustmentFrameCount *= (lNetworkFrameDiffCount/lPhysicsTickAdjustmentFrameCount + 1);
+			lPhysicsTickAdjustmentFrameCount *= (pNetworkFrameDiffCount/lPhysicsTickAdjustmentFrameCount + 1);
 		}
-		lPhysicsTickAdjustmentTime = (float)-lNetworkFrameDiffCount/lPhysicsTickAdjustmentFrameCount;
+		lPhysicsTickAdjustmentTime = (float)-pNetworkFrameDiffCount/lPhysicsTickAdjustmentFrameCount;
 	}
-	mNetworkAgent->SendNumberMessage(true, mUserConnection->GetSocket(), Cure::MessageNumber::INFO_ADJUST_TIME, lNetworkFrameDiffCount, lPhysicsTickAdjustmentTime);
+	mNetworkAgent->SendNumberMessage(true, mUserConnection->GetSocket(), Cure::MessageNumber::INFO_ADJUST_TIME, pNetworkFrameDiffCount, lPhysicsTickAdjustmentTime);
 }
 
 
 
 int Client::CalculateNetworkLatencyFrameDiffCount() const
 {
-	return ((int)(mMeasuredNetworkLatencyFrameCount + mMeasuredNetworkJitterFrameCount));
+	float lDiff = mMeasuredNetworkLatencyFrameCount;
+	lDiff += (mMeasuredNetworkLatencyFrameCount < 0)? -mMeasuredNetworkJitterFrameCount : mMeasuredNetworkJitterFrameCount;
+	return ((int)::ceil(lDiff));
 }
 
 

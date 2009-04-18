@@ -67,6 +67,7 @@ public:
 	virtual void OnCollision(const Lepra::Vector3DF& pForce, const Lepra::Vector3DF& pTorque,
 		ContextObject* pObject1, ContextObject* pObject2) = 0;
 	virtual void OnStopped(ContextObject* pObject) = 0;
+	virtual bool IsConnectAuthorized() = 0;
 
 	void ReportPerformance(double pReportInterval);
 	void ClearPerformanceData();
