@@ -91,6 +91,8 @@ public:
 
 	virtual void DeleteTrigger(TriggerID pTriggerID);
 
+	virtual ForceFeedbackListener* GetForceFeedbackListener(BodyID pBody);
+
 	virtual void GetTriggerTransform(TriggerID pTriggerID, Lepra::Transformation<Lepra::float32>& pTransform);
 	virtual void SetTriggerTransform(TriggerID pTriggerID, const Lepra::Transformation<Lepra::float32>& pTransform);
 

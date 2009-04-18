@@ -46,7 +46,8 @@ ContextObject::ContextObject(const Lepra::String& pClassId):
 	mInstanceId(0),
 	mClassId(pClassId),
 	mNetworkObjectType(NETWORK_OBJECT_LOCAL_ONLY),
-	mRootPhysicsIndex(-1)
+	mRootPhysicsIndex(-1),
+	mAllowMoveSelf(true)
 {
 }
 
@@ -123,6 +124,38 @@ void ContextObject::SetNetworkObjectType(NetworkObjectType pType)
 		(mNetworkObjectType == NETWORK_OBJECT_REMOTE_CONTROLLED && pType == NETWORK_OBJECT_LOCALLY_CONTROLLED) ||
 		(mNetworkObjectType == NETWORK_OBJECT_LOCAL_ONLY));
 	mNetworkObjectType = pType;
+}
+
+
+
+void ContextObject::SetAllowMoveSelf(bool pAllow)
+{
+	mAllowMoveSelf = pAllow;
+}
+
+bool ContextObject::IsConnectedTo(ContextObject* pObject) const
+{
+	return (std::find(mConnectionList.begin(), mConnectionList.end(), pObject) != mConnectionList.end());
+}
+
+void ContextObject::AddConnection(ContextObject* pObject, TBC::PhysicsEngine::JointID pJoint)
+{
+	assert(!IsConnectedTo(pObject));
+	mConnectionList.push_back(pObject);
+	pJoint;	// TODO!
+}
+
+bool ContextObject::RemoveConnection(ContextObject* pObject)
+{
+	bool lRemoved = false;
+	// TODO: something about that joint!
+	ConnectionList::iterator x = std::find(mConnectionList.begin(), mConnectionList.end(), pObject);
+	if (x != mConnectionList.end())
+	{
+		mConnectionList.erase(x);
+		lRemoved = true;
+	}
+	return (lRemoved);
 }
 
 
@@ -347,12 +380,16 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData)
 	mPosition.CopyData(&pPositionalData);
 
 	TBC::PhysicsEngine* lPhysics = mManager->GetGameManager()->GetPhysicsManager();
-	TBC::PhysicsEngine::BodyID lBody = mPhysicsNodeArray[mRootPhysicsIndex].GetBodyId();
-	lPhysics->SetBodyTransform(lBody, pPositionalData.mPosition.mTransformation);
-	lPhysics->SetBodyVelocity(lBody, pPositionalData.mPosition.mVelocity);
-	lPhysics->SetBodyAcceleration(lBody, pPositionalData.mPosition.mAcceleration);
-	lPhysics->SetBodyAngularVelocity(lBody, pPositionalData.mPosition.mAngularVelocity);
-	lPhysics->SetBodyAngularAcceleration(lBody, pPositionalData.mPosition.mAngularAcceleration);
+	TBC::PhysicsEngine::BodyID lBody;
+	if (mAllowMoveSelf)
+	{
+		lBody = mPhysicsNodeArray[mRootPhysicsIndex].GetBodyId();
+		lPhysics->SetBodyTransform(lBody, pPositionalData.mPosition.mTransformation);
+		lPhysics->SetBodyVelocity(lBody, pPositionalData.mPosition.mVelocity);
+		lPhysics->SetBodyAcceleration(lBody, pPositionalData.mPosition.mAcceleration);
+		lPhysics->SetBodyAngularVelocity(lBody, pPositionalData.mPosition.mAngularVelocity);
+		lPhysics->SetBodyAngularAcceleration(lBody, pPositionalData.mPosition.mAngularAcceleration);
+	}
 
 	if (mPosition.mBodyPositionArray.size() <= 0)
 	{
@@ -635,6 +672,20 @@ PhysicsNode* ContextObject::GetPhysicsNode(PhysicsNode::Id pId) const
 	for (; !lNode && x != mPhysicsNodeArray.end(); ++x)
 	{
 		if (x->GetId() == pId)
+		{
+			lNode = (PhysicsNode*)&(*x);
+		}
+	}
+	return (lNode);
+}
+
+PhysicsNode* ContextObject::GetPhysicsNode(TBC::PhysicsEngine::BodyID pBodyId) const
+{
+	PhysicsNode* lNode = 0;
+	PhysicsNodeArray::const_iterator x = mPhysicsNodeArray.begin();
+	for (; !lNode && x != mPhysicsNodeArray.end(); ++x)
+	{
+		if (x->GetBodyId() == pBodyId)
 		{
 			lNode = (PhysicsNode*)&(*x);
 		}

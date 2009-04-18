@@ -39,7 +39,7 @@ public:
 	class TriggerListener
 	{
 	public:
-		virtual void OnBodyInside(BodyID pBody) = 0;
+		virtual void OnTrigger(BodyID pBody1, BodyID pBody2) = 0;
 	};
 
 	class ForceFeedbackListener
@@ -189,6 +189,8 @@ public:
 						TriggerListener* pListener) = 0;
 
 	virtual void DeleteTrigger(TriggerID pTriggerID) = 0;
+
+	virtual ForceFeedbackListener* GetForceFeedbackListener(BodyID pBody) = 0;
 
 	virtual void GetTriggerTransform(TriggerID pTriggerID, Lepra::Transformation<Lepra::float32>& pTransform) = 0;
 	virtual void SetTriggerTransform(TriggerID pTriggerID, const Lepra::Transformation<Lepra::float32>& pTransform) = 0;

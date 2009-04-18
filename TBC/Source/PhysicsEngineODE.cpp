@@ -578,6 +578,18 @@ void PhysicsEngineODE::DeleteTrigger(TriggerID pTriggerID)
 	}
 }
 
+PhysicsEngine::ForceFeedbackListener* PhysicsEngineODE::GetForceFeedbackListener(BodyID pBody)
+{
+	Object* lObject = (Object*)pBody;
+	if (lObject->mWorldID != mWorldID)
+	{
+		mLog.Errorf(_T("GetForceFeedbackListener() - Body %i is not part of this world!"), pBody);
+		return (0);
+	}
+
+	return (lObject->mForceFeedbackListener);
+}
+
 void PhysicsEngineODE::GetTriggerTransform(TriggerID pTriggerID, Lepra::Transformation<Lepra::float32>& pTransform)
 {
 	Object* lObject = (Object*)pTriggerID;
@@ -2678,11 +2690,11 @@ void PhysicsEngineODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID pG
 		return;
 	}
 
-	dBodyID lBody1 = dGeomGetBody(pGeom1);
-	dBodyID lBody2 = dGeomGetBody(pGeom2);
+	dBodyID lBody1 = ::dGeomGetBody(pGeom1);
+	dBodyID lBody2 = ::dGeomGetBody(pGeom2);
 
 	// Check if all bodies are static or disabled.
-	if ((!lBody1 || !dBodyIsEnabled(lBody1)) && (!lBody2 || !dBodyIsEnabled(lBody2)))
+	if ((!lBody1 || !::dBodyIsEnabled(lBody1)) && (!lBody2 || !::dBodyIsEnabled(lBody2)))
 	{
 		// We don't want to act on static and disabled bodies.
 		return;
@@ -2690,7 +2702,7 @@ void PhysicsEngineODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID pG
 	if (lObject1->mTriggerListener == 0 && lObject2->mTriggerListener == 0)
 	{
 		// Exit without doing anything if the two bodies are connected by a joint.
-		if (lBody1 && lBody2 && dAreConnectedExcluding(lBody1, lBody2, dJointTypeContact) != 0)
+		if (lBody1 && lBody2 && ::dAreConnectedExcluding(lBody1, lBody2, dJointTypeContact) != 0)
 		{
 			return;
 		}
@@ -2703,14 +2715,14 @@ void PhysicsEngineODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID pG
 	{
 		if (dCollide(pGeom1, pGeom2, 8, &lContact[0].geom, sizeof(dContact)) > 0)
 		{
-			lObject1->mTriggerListener->OnBodyInside((BodyID)(Lepra::uint64)lObject2);
+			lObject1->mTriggerListener->OnTrigger((BodyID)(size_t)lObject1, (BodyID)(size_t)lObject2);
 		}
 	}
 	if(lObject2->mTriggerListener != 0 && lBody1 != 0)
 	{
 		if (dCollide(pGeom1, pGeom2, 8, &lContact[0].geom, sizeof(dContact)) > 0)
 		{
-			lObject2->mTriggerListener->OnBodyInside((BodyID)(Lepra::uint64)lObject1);
+			lObject2->mTriggerListener->OnTrigger((BodyID)(size_t)lObject2, (BodyID)(size_t)lObject1);
 		}
 	}
 

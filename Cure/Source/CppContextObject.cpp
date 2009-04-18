@@ -50,8 +50,42 @@ void CppContextObject::OnAlarm(int pAlarmId)
 	pAlarmId;
 }
 
-void CppContextObject::OnBodyInside(TBC::PhysicsEngine::BodyID /*pBody*/)
+void CppContextObject::OnTrigger(TBC::PhysicsEngine::BodyID pBody1, TBC::PhysicsEngine::BodyID pBody2)
 {
+	if (GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED)
+	{
+		return;
+	}
+
+	TBC::PhysicsEngine* lPhysics = mManager->GetGameManager()->GetPhysicsManager();
+	ContextObject* lObject2 = (ContextObject*)lPhysics->GetForceFeedbackListener(pBody2);
+	if (!lObject2 || IsConnectedTo(lObject2))
+	{
+		return;
+	}
+	PhysicsNode* lNode1 = GetPhysicsNode(pBody1);
+	PhysicsNode* lNode2 = lObject2->GetPhysicsNode(pBody2);
+	if (!lNode1 || !lNode2)
+	{
+		return;
+	}
+	// TODO: if (lNode1->IsConnectorType(CONNECTOR_3) && lNode2->IsConnectorType(CONNECTEE_3))
+	{
+		mLog.AInfo("Attaching two objects.");
+		lObject2->SetAllowMoveSelf(false);
+		// TODO:  broadcast "allow move self" = false!
+		PhysicsNode* lNode2Parent = lObject2->GetPhysicsNode(lNode2->GetParentId());
+		TBC::PhysicsEngine::BodyID lBody2Connectee = pBody2;
+		if (lNode2Parent)
+		{
+			lBody2Connectee = lNode2Parent->GetBodyId();
+		}
+		Lepra::TransformationF lAnchor;
+		lPhysics->GetBodyTransform(pBody2, lAnchor);
+		TBC::PhysicsEngine::JointID lJoint = lPhysics->CreateBallJoint(pBody1, lBody2Connectee, lAnchor.GetPosition());
+		AddConnection(lObject2, lJoint);
+		lObject2->AddConnection(this, lJoint);
+	}
 }
 
 void CppContextObject::OnForceApplied(TBC::PhysicsEngine::ForceFeedbackListener* pOtherObject,
@@ -660,7 +694,7 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 		Lepra::TransformationF lHookTransform = lWireTransform;
 		lHookTransform.GetPosition().Add(0, 0, -lHookHeight/2);
 		lPhysicsObjectId = lPhysicsManager->CreateBox(lHookTransform, lHookWeight, Lepra::Vector3DF(lHookWidth, lHookWidth, lHookHeight),
-			TBC::PhysicsEngine::DYNAMIC, 0.5f, 0.5f, pTriggerListener, pObject);
+			TBC::PhysicsEngine::DYNAMIC, 0.5f, 0.5f, pObject, pObject);
 		lPhysicsManager->ActivateGravity(lPhysicsObjectId);
 		//lJoint = lPhysicsManager->CreateBallJoint(lParentId, lPhysicsObjectId, lHookAnchor);
 		lJoint = lPhysicsManager->CreateUniversalJoint(lParentId, lPhysicsObjectId, lHookAnchor, Lepra::Vector3DF(1, 0, 0), Lepra::Vector3DF(0, 1, 0));
@@ -739,6 +773,7 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 
 
 
+LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, CppContextObject);
 LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, CppContextObjectFactory);
 
 

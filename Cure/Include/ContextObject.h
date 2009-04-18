@@ -40,6 +40,11 @@ public:
 	NetworkObjectType GetNetworkObjectType() const;
 	void SetNetworkObjectType(NetworkObjectType pType);
 
+	void SetAllowMoveSelf(bool pAllow);
+	bool IsConnectedTo(ContextObject* pObject) const;
+	void AddConnection(ContextObject* pObject, TBC::PhysicsEngine::JointID pJoint);
+	bool RemoveConnection(ContextObject* pObject);
+
 	void AddAttribute(ContextObjectAttribute* pAttribute);
 
 	bool UpdateFullPosition(const ObjectPositionalData*& pPositionalData);
@@ -48,6 +53,7 @@ public:
 
 	void AddPhysicsObject(const PhysicsNode& pPhysicsNode);
 	PhysicsNode* GetPhysicsNode(PhysicsNode::Id pId) const;
+	PhysicsNode* GetPhysicsNode(TBC::PhysicsEngine::BodyID pBodyId) const;
 	void SetEnginePower(unsigned pAspect, float pPower, float pAngle);
 
 	void StepGhost(ObjectPositionalData& pGhost, float pDeltaTime);
@@ -59,6 +65,7 @@ public:
 protected:
 	typedef std::vector<ContextObjectAttribute*> AttributeArray;
 	typedef std::vector<PhysicsNode> PhysicsNodeArray;
+	typedef std::list<ContextObject*> ConnectionList;
 
 	ContextManager* mManager;
 	GameObjectId mInstanceId;
@@ -68,6 +75,8 @@ protected:
 	PhysicsNodeArray mPhysicsNodeArray;
 	int mRootPhysicsIndex;	// TODO: remove this hack!
 	ObjectPositionalData mPosition;
+	bool mAllowMoveSelf;	// This is set to false when attached to someone/something else.
+	ConnectionList mConnectionList;
 
 	LOG_CLASS_DECLARE();
 };
