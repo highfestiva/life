@@ -110,7 +110,7 @@ void Client::QuerySendStriveTimes()
 		{
 			mLog.AInfo("Want to send strive times, but skipping since last transmission is still in effekt.");
 		}
-		else if (mStriveSendErrorTimeCounter > mStriveSendPauseFrameCount)	// Only send if the error repeats itself a few times.
+		else if (mStriveSendErrorTimeCounter > NETWORK_DEVIATION_ERROR_COUNT)	// Only send if the error repeats itself a few times.
 		{
 			mStriveSendErrorTimeCounter = 0;
 			mStriveSendPauseFrameCount = SendStriveTimes(lNetworkFrameDiffCount);
@@ -134,7 +134,7 @@ void Client::QuerySendStriveTimes()
 		++mIgnoreStriveErrorTimeCounter;
 		if (mIgnoreStriveErrorTimeCounter > (int)NETWORK_DEVIATION_ERROR_COUNT)	// Reset send counter if we're mostly good.
 		{
-			mLog.AInfo("Resetting strive error counter.");
+			log_adebug("Resetting strive error counter.");
 			mIgnoreStriveErrorTimeCounter = 0;
 			mStriveSendErrorTimeCounter = 0;
 		}

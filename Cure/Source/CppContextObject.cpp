@@ -692,7 +692,7 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 	{
 		Lepra::Vector3DF lDimensions(lFloorSize, lFloorSize, lFloorSize);
 		lPhysicsObjectId = lPhysicsManager->CreateBox(lTransformation, 0, lDimensions,
-			TBC::PhysicsEngine::STATIC, 2, 0.5f, 0);
+			TBC::PhysicsEngine::STATIC, 1, 0.5f, 0);
 		pObject->AddPhysicsObject(PhysicsNode(0, 1, lPhysicsObjectId));
 
 		Lepra::RotationMatrixF lRotation;

@@ -2745,42 +2745,37 @@ void PhysicsEngineODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID pG
 		(lObject1->mTriggerListener == 0 || lObject2->mTriggerListener == 0))
 	{
 		lContactPointCount = (lContactPointCount < 0)? ::dCollide(pGeom1, pGeom2, 8, &lContact[0].geom, sizeof(dContact)) : lContactPointCount;
-		dMass lMass1;
-		if (lBody1)
-		{
-			::dBodyGetMass(lBody1, &lMass1);
-		}
-		else
-		{
-			lMass1.mass = 1e10f;
-		}
-		dMass lMass2;
-		if (lBody2)
-		{
-			::dBodyGetMass(lBody2, &lMass2);
-		}
-		else
-		{
-			lMass2.mass = 1e10f;
-		}
+
+		// Fetch force, will be used to scale friction (projected against surface normal).
+		Lepra::Vector3DF lAcceleration1;
+		lThis->GetBodyAcceleration((BodyID)lObject1, lAcceleration1);
+		Lepra::Vector3DF lAcceleration2;
+		lThis->GetBodyAcceleration((BodyID)lObject2, lAcceleration2);
+
 
 		// Perform normal collision detection.
 		for (int i = 0; i < lContactPointCount; i++)
 		{
-			lContact[i].surface.mode = dContactSlip1 | dContactSlip2 | dContactBounce | dContactApprox1;
-			lContact[i].surface.mu = dInfinity;
-			const float lSlip = 0.1f / (lObject1->mFriction * lObject2->mFriction * lMass1.mass * lMass2.mass);
-			lContact[i].surface.slip1 = lSlip;
-			lContact[i].surface.slip2 = lSlip;
-			lContact[i].surface.bounce = (dReal)(lObject1->mBounce * lObject2->mBounce);
-			lContact[i].surface.bounce_vel = (dReal)0.000001;
+			dContact& lC = lContact[i];
+	
+			Lepra::Vector3DF lNormal(lC.geom.normal[0], lC.geom.normal[1], lC.geom.normal[2]);
+			const float lFrictionForce1 = ::fabs(lAcceleration1.Dot(lNormal));
+			const float lFrictionForce2 = ::fabs(lAcceleration2.Dot(lNormal));
+
+			lC.surface.mode = dContactSlip1 | dContactSlip2 | dContactBounce | dContactApprox1;
+			lC.surface.mu = dInfinity;
+			const float lSlip = 1e-4f / ((lFrictionForce1 + lFrictionForce2 + 0.1f) * lObject1->mFriction * lObject2->mFriction);
+			lC.surface.slip1 = lSlip;
+			lC.surface.slip2 = lSlip;
+			lC.surface.bounce = (dReal)(lObject1->mBounce * lObject2->mBounce);
+			lC.surface.bounce_vel = (dReal)0.000001;
 
 			if (lObject1->mForceFeedbackListener != 0 ||
 			   lObject2->mForceFeedbackListener != 0)
 			{
 				// Create a joint whith feedback info.
 				JointInfo* lJointInfo = lThis->mJointInfoAllocator.Alloc();
-				lJointInfo->mJointID = dJointCreateContact(lThis->mWorldID, lThis->mContactJointGroupID, &lContact[i]);
+				lJointInfo->mJointID = dJointCreateContact(lThis->mWorldID, lThis->mContactJointGroupID, &lC);
 				lJointInfo->mType = JOINT_CONTACT;
 				lThis->mFeedbackJointList.push_back(lJointInfo);
 				lJointInfo->mListIter = --lThis->mFeedbackJointList.end();
@@ -2793,7 +2788,7 @@ void PhysicsEngineODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID pG
 			else
 			{
 				// Create a temporary joint without feedback info.
-				dJointID lJointID = dJointCreateContact(lThis->mWorldID, lThis->mContactJointGroupID, &lContact[i]);
+				dJointID lJointID = dJointCreateContact(lThis->mWorldID, lThis->mContactJointGroupID, &lC);
 				dJointAttach(lJointID, lBody1, lBody2);
 			}
 		}
