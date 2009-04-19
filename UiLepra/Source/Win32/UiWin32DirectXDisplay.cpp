@@ -72,7 +72,7 @@ bool Win32DirectXDisplay::UpdateScreen()
 	return (true);
 }
 
-bool Win32DirectXDisplay::IsVSyncEnabled()
+bool Win32DirectXDisplay::IsVSyncEnabled() const
 {
 	return mVSyncEnabled;
 }

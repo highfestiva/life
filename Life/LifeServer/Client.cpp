@@ -4,9 +4,14 @@
  
 
 
-#include "../../../Cure/Include/RuntimeVariable.h"
-#include "../../../Lepra/Include/Math.h"
 #include "Client.h"
+#include "../../Cure/Include/Cure.h"
+#include "../../Cure/Include/NetworkAgent.h"
+#include "../../Cure/Include/RuntimeVariable.h"
+#include "../../Cure/Include/TimeManager.h"
+#include "../../Cure/Include/UserConnection.h"
+#include "../../Lepra/Include/Math.h"
+#include "../LifeDefinitions.h"
 
 
 
@@ -15,7 +20,8 @@ namespace Life
 
 
 
-Client::Client(Cure::NetworkAgent* pNetworkAgent, Cure::UserConnection* pUserConnection):
+Client::Client(Cure::TimeManager* pTimeManager, Cure::NetworkAgent* pNetworkAgent, Cure::UserConnection* pUserConnection):
+	mTimeManager(pTimeManager),
 	mNetworkAgent(pNetworkAgent),
 	mUserConnection(pUserConnection),
 	mAvatarResource(ContextObjectAccountInfo(0, 0, 0, Cure::NETWORK_OBJECT_REMOTE_CONTROLLED,
@@ -26,6 +32,7 @@ Client::Client(Cure::NetworkAgent* pNetworkAgent, Cure::UserConnection* pUserCon
 	mMeasuredNetworkLatencyFrameCount(PHYSICS_FPS*0.3f),
 	mMeasuredNetworkJitterFrameCount(PHYSICS_FPS*0.06f),
 	mStriveSendErrorTimeCounter(0),
+	mStriveSendPauseFrameCount(-100000000),
 	mIgnoreStriveErrorTimeCounter(0)
 {
 	mAvatarResource.GetExtraData().mLoadingResource = &mAvatarResource;
@@ -39,6 +46,7 @@ Client::~Client()
 	mAvatarId = 0;
 	mUserConnection = 0;
 	mNetworkAgent = 0;
+	mTimeManager = 0;
 }
 
 
@@ -93,15 +101,19 @@ void Client::QuerySendStriveTimes()
 	// Latency+jitter is where we're looking to hit.
 	int lNetworkFrameDiffCount = CalculateNetworkLatencyFrameDiffCount();
 	// Check if we should send or not.
-	if (lNetworkFrameDiffCount < -CURE_RTVAR_GET(Cure::GetSettings(), RTVAR_NETPHYS_SLOWFRAMECOUNT, 2) || lNetworkFrameDiffCount > 0)
+	if (lNetworkFrameDiffCount < -CURE_RTVAR_GET(Cure::GetSettings(), RTVAR_NETPHYS_SLOWFRAMECOUNT, 2) ||
+		lNetworkFrameDiffCount > 0)
 	{
 		++mStriveSendErrorTimeCounter;
 		mIgnoreStriveErrorTimeCounter = 0;
-		// Only send once every now and then.
-		if (mStriveSendErrorTimeCounter > (int)NETWORK_DEVIATION_ERROR_COUNT)
+		if (mStriveSendPauseFrameCount-mTimeManager->GetCurrentPhysicsFrame() > 0)
+		{
+			mLog.AInfo("Want to send strive times, but skipping since last transmission is still in effekt.");
+		}
+		else if (mStriveSendErrorTimeCounter > mStriveSendPauseFrameCount)	// Only send if the error repeats itself a few times.
 		{
 			mStriveSendErrorTimeCounter = 0;
-			SendStriveTimes(lNetworkFrameDiffCount);
+			mStriveSendPauseFrameCount = SendStriveTimes(lNetworkFrameDiffCount);
 		}
 		else
 		{
@@ -122,6 +134,7 @@ void Client::QuerySendStriveTimes()
 		++mIgnoreStriveErrorTimeCounter;
 		if (mIgnoreStriveErrorTimeCounter > (int)NETWORK_DEVIATION_ERROR_COUNT)	// Reset send counter if we're mostly good.
 		{
+			mLog.AInfo("Resetting strive error counter.");
 			mIgnoreStriveErrorTimeCounter = 0;
 			mStriveSendErrorTimeCounter = 0;
 		}
@@ -139,8 +152,17 @@ float Client::GetPhysicsFrameAheadCount() const
 }
 
 
-void Client::SendStriveTimes(int pNetworkFrameDiffCount)
+int Client::SendStriveTimes(int pNetworkFrameDiffCount)
 {
+	// TODO: insert half a ping time below!
+	const int lHalfPingFrameCount = PHYSICS_FPS/3+(int)mMeasuredNetworkJitterFrameCount;
+
+	if (::abs(pNetworkFrameDiffCount) >= PHYSICS_FPS)
+	{
+		SendPhysicsFrame(mTimeManager->GetCurrentPhysicsFrame()+lHalfPingFrameCount);
+		return (lHalfPingFrameCount*2);
+	}
+
 	int lPhysicsTickAdjustmentFrameCount = PHYSICS_FPS;	// Spread over some time (=frames).
 	// Try to adjust us to be x frames early. Being too early is much better than being late,
 	// since early network data can be buffered and used in upcomming frames, but late network
@@ -156,21 +178,24 @@ void Client::SendStriveTimes(int pNetworkFrameDiffCount)
 	{
 		// Slow down client physics by taking shorter time steps.
 		pNetworkFrameDiffCount = -pNetworkFrameDiffCount;	// We always send a positive frame count.
-		while (pNetworkFrameDiffCount > lPhysicsTickAdjustmentFrameCount)
+		if (pNetworkFrameDiffCount >= lPhysicsTickAdjustmentFrameCount*0.8f)
 		{
-			lPhysicsTickAdjustmentFrameCount *= (pNetworkFrameDiffCount/lPhysicsTickAdjustmentFrameCount + 1);
+			lPhysicsTickAdjustmentFrameCount = pNetworkFrameDiffCount+PHYSICS_FPS;
 		}
 		lPhysicsTickAdjustmentTime = (float)-pNetworkFrameDiffCount/lPhysicsTickAdjustmentFrameCount;
 	}
-	mNetworkAgent->SendNumberMessage(true, mUserConnection->GetSocket(), Cure::MessageNumber::INFO_ADJUST_TIME, pNetworkFrameDiffCount, lPhysicsTickAdjustmentTime);
+	mLog.Infof(_T("Sending time adjustment %f over %i frames to client."), lPhysicsTickAdjustmentTime, lPhysicsTickAdjustmentFrameCount);
+	mNetworkAgent->SendNumberMessage(true, mUserConnection->GetSocket(), Cure::MessageNumber::INFO_ADJUST_TIME, lPhysicsTickAdjustmentFrameCount, lPhysicsTickAdjustmentTime);
+	return (lHalfPingFrameCount*2+lPhysicsTickAdjustmentFrameCount);
 }
 
 
 
 int Client::CalculateNetworkLatencyFrameDiffCount() const
 {
-	float lDiff = mMeasuredNetworkLatencyFrameCount;
-	lDiff += (mMeasuredNetworkLatencyFrameCount < 0)? -mMeasuredNetworkJitterFrameCount : mMeasuredNetworkJitterFrameCount;
+	// Note that latency might be negative, but jitter is always positive. We always add,
+	// never subtract, the jitter, since we want client to be these frames ahead of the server.
+	float lDiff = mMeasuredNetworkLatencyFrameCount + mMeasuredNetworkJitterFrameCount;
 	return ((int)::ceil(lDiff));
 }
 

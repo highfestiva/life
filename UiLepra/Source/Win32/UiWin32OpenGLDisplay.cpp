@@ -80,7 +80,7 @@ bool Win32OpenGLDisplay::UpdateScreen()
 	return (lOk);
 }
 
-bool Win32OpenGLDisplay::IsVSyncEnabled()
+bool Win32OpenGLDisplay::IsVSyncEnabled() const
 {
 	return OpenGLExtensions::IsVSyncEnabled();
 }

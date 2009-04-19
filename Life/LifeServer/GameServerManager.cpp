@@ -4,6 +4,7 @@
 
 
 
+#include "GameServerManager.h"
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/CppContextObject.h"
 #include "../../Cure/Include/NetworkServer.h"
@@ -14,8 +15,8 @@
 #include "../../Lepra/Include/AntiCrack.h"
 #include "../../Lepra/Include/Network.h"
 #include "../../Lepra/Include/SystemManager.h"
+#include "../LifeDefinitions.h"
 #include "Client.h"
-#include "GameServerManager.h"
 #include "ServerConsoleManager.h"
 
 
@@ -463,7 +464,7 @@ void GameServerManager::OnLogin(Cure::UserConnection* pUserConnection)
 	const Cure::UserAccount::AvatarIdSet* lAvatarIdSet = mUserAccountManager->GetUserAvatarIdSet(pUserConnection->GetLoginName());
 	if (lAvatarIdSet && !lAvatarIdSet->empty())
 	{
-		lClient = new Client(GetNetworkAgent(), pUserConnection);
+		lClient = new Client(GetTimeManager(), GetNetworkAgent(), pUserConnection);
 		mAccountClientTable.Insert(pUserConnection->GetAccountId(), lClient);
 		lClient->SendPhysicsFrame(GetTimeManager()->GetCurrentPhysicsFrame());
 

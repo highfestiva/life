@@ -110,7 +110,7 @@ bool Win32SoftwareDisplay::UpdateScreen()
 	return (true);
 }
 
-bool Win32SoftwareDisplay::IsVSyncEnabled()
+bool Win32SoftwareDisplay::IsVSyncEnabled() const
 {
 	// TODO: Implement!
 	return false;

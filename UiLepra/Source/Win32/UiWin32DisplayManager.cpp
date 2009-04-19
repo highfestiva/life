@@ -357,6 +357,11 @@ void Win32DisplayManager::CloseScreen()
 	}
 }
 
+bool Win32DisplayManager::IsVisible() const
+{
+	return (!IsMinimized());
+}
+
 bool Win32DisplayManager::InitWindow()
 {
 	bool lOk = mInitialized;

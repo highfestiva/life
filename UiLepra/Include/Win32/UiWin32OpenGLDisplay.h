@@ -23,7 +23,7 @@ public:
 	bool Activate();
 	bool UpdateScreen();
 
-	bool IsVSyncEnabled();
+	bool IsVSyncEnabled() const;
 	bool SetVSyncEnabled(bool pEnabled);
 
 	inline ContextType GetContextType();

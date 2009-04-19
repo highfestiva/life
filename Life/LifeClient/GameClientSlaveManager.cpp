@@ -903,6 +903,8 @@ void GameClientSlaveManager::DrawAsyncDebugInfo()
 		const int x = mRenderArea.mLeft+10;
 		const int y = mRenderArea.mTop+10;
 		const int s = 10;
+		mUiManager->GetPainter()->ResetClippingRect();
+		mUiManager->GetPainter()->SetClippingRect(mRenderArea);
 		mUiManager->GetPainter()->FillRect(x, y, x+s, y+s);
 	}
 }

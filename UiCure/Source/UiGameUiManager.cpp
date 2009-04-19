@@ -237,44 +237,58 @@ void GameUiManager::Close()
 
 void GameUiManager::InputTick()
 {
-	mInput->PollEvents();
+	if (mDisplay->IsVisible())
+	{
+		mInput->PollEvents();
+	}
 	UiLepra::Core::ProcessMessages();
 }
 
 void GameUiManager::BeginRender()
 {
-	if (CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_ENABLECLEAR, true))
+	if (mDisplay->IsVisible())
 	{
-		mRenderer->ResetClippingRect();
-		float r = (float)CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_CLEARRED, 0.75);
-		float g = (float)CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_CLEARGREEN, 0.80);
-		float b = (float)CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_CLEARBLUE, 0.85);
-		Clear(r, g, b);
+		if (CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_ENABLECLEAR, true))
+		{
+			mRenderer->ResetClippingRect();
+			float r = (float)CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_CLEARRED, 0.75);
+			float g = (float)CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_CLEARGREEN, 0.80);
+			float b = (float)CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_CLEARBLUE, 0.85);
+			Clear(r, g, b);
+		}
+		mSound->Tick(0.0);
 	}
-	mSound->Tick(0.0);
 }
 
 void GameUiManager::Render(const Lepra::PixelRect& pArea)
 {
-	mRenderer->ResetClippingRect();
-
-	mRenderer->SetClippingRect(pArea);
-	mRenderer->SetViewport(pArea);
-	mRenderer->RenderScene();
+	if (mDisplay->IsVisible())
+	{
+		mRenderer->ResetClippingRect();
+		mRenderer->SetClippingRect(pArea);
+		mRenderer->SetViewport(pArea);
+		mRenderer->RenderScene();
+	}
 }
 
 void GameUiManager::Paint()
 {
-	mCanvas->SetBuffer(mDisplay->GetScreenPtr());
-	mPainter->SetDestCanvas(mCanvas);
-	mPainter->ResetClippingRect();
-	mDesktopWindow->Repaint(mPainter);
+	if (mDisplay->IsVisible())
+	{
+		mCanvas->SetBuffer(mDisplay->GetScreenPtr());
+		mPainter->SetDestCanvas(mCanvas);
+		mPainter->ResetClippingRect();
+		mDesktopWindow->Repaint(mPainter);
+	}
 }
 
 void GameUiManager::EndRender()
 {
-	UpdateSettings();
-	mDisplay->UpdateScreen();
+	if (mDisplay->IsVisible())
+	{
+		UpdateSettings();
+		mDisplay->UpdateScreen();
+	}
 }
 
 

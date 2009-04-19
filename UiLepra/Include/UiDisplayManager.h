@@ -132,8 +132,9 @@ public:
 	// Swaps buffers etc.
 	virtual bool UpdateScreen() = 0;
 
-	virtual bool IsVSyncEnabled() = 0;
+	virtual bool IsVSyncEnabled() const = 0;
 	virtual bool SetVSyncEnabled(bool pEnabled) = 0;
+	virtual bool IsVisible() const = 0;	// Visible means "not visible for user" (such as when minimized).
 
 	/*
 		Display mode enumeration (fullscreen modes).

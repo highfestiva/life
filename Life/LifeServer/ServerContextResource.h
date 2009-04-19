@@ -6,7 +6,15 @@
 
 #pragma once
 
+#include "../../Cure/Include/UserAccount.h"
 #include "../ContextResource.h"
+
+
+
+namespace Cure
+{
+class ContextManager;
+}
 
 
 

@@ -42,6 +42,8 @@ public:
 	virtual bool OpenScreen(const DisplayMode& pDisplayMode, ScreenMode pMode);
 	virtual void CloseScreen();
 
+	virtual bool IsVisible() const;
+
 	/*
 		Display mode enumeration (fullscreen modes).
 		Narrow the search by specifying width and height and/or bitrate.
