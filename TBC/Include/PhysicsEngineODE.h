@@ -29,22 +29,22 @@ public:
 	PhysicsEngineODE();
 	virtual ~PhysicsEngineODE();
 
-	virtual BodyID CreateSphere(const Lepra::Transformation<Lepra::float32>& pTransform, Lepra::float32 pMass,
+	virtual BodyID CreateSphere(const Lepra::TransformationF& pTransform, Lepra::float32 pMass,
 		Lepra::float32 pRadius, BodyType pType, Lepra::float32 pFriction = 1, Lepra::float32 pBounce = 0,
 		TriggerListener* pTriggerListener = 0, ForceFeedbackListener* pListener = 0);
-	virtual BodyID CreateCylinder(const Lepra::Transformation<Lepra::float32>& pTransform, Lepra::float32 pMass,
+	virtual BodyID CreateCylinder(const Lepra::TransformationF& pTransform, Lepra::float32 pMass,
 		Lepra::float32 pRadius, Lepra::float32 pLength, BodyType pType, Lepra::float32 pFriction = 1,
 		Lepra::float32 pBounce = 0, TriggerListener* pTriggerListener = 0, ForceFeedbackListener* pListener = 0);
-	virtual BodyID CreateCapsule(const Lepra::Transformation<Lepra::float32>& pTransform, Lepra::float32 pMass,
+	virtual BodyID CreateCapsule(const Lepra::TransformationF& pTransform, Lepra::float32 pMass,
 		Lepra::float32 pRadius, Lepra::float32 pLength, BodyType pType, Lepra::float32 pFriction = 1,
 		Lepra::float32 pBounce = 0, TriggerListener* pTriggerListener = 0, ForceFeedbackListener* pListener = 0);
-	virtual BodyID CreateBox(const Lepra::Transformation<Lepra::float32>& pTransform, Lepra::float32 pMass,
+	virtual BodyID CreateBox(const Lepra::TransformationF& pTransform, Lepra::float32 pMass,
 		const Lepra::Vector3D<Lepra::float32>& pSize, BodyType pType, Lepra::float32 pFriction = 1,
 		Lepra::float32 pBounce = 0, TriggerListener* pTriggerListener = 0, ForceFeedbackListener* pListener = 0);
 	virtual bool Attach(BodyID pStaticBody, BodyID pMainBody);
 
 	// Tri meshes are always static.
-	virtual BodyID CreateTriMesh(const GeometryBase* pMesh, const Lepra::Transformation<Lepra::float32>& pTransform,
+	virtual BodyID CreateTriMesh(const GeometryBase* pMesh, const Lepra::TransformationF& pTransform,
 		Lepra::float32 pFriction = 1, Lepra::float32 pBounce = 0, TriggerListener* pTriggerListener = 0,
 		ForceFeedbackListener* pListener = 0);
 
@@ -52,8 +52,9 @@ public:
 
 	virtual void DeleteBody(BodyID pBodyId);
 
-	void GetBodyTransform(BodyID pBodyId, Lepra::Transformation<Lepra::float32>& pTransform) const;
-	void SetBodyTransform(BodyID pBodyId, const Lepra::Transformation<Lepra::float32>& pTransform);
+	Lepra::Vector3DF GetBodyPosition(BodyID pBodyId) const;
+	void GetBodyTransform(BodyID pBodyId, Lepra::TransformationF& pTransform) const;
+	void SetBodyTransform(BodyID pBodyId, const Lepra::TransformationF& pTransform);
 	void GetBodyVelocity(BodyID pBodyId, Lepra::Vector3DF& pVelocity) const;
 	void SetBodyVelocity(BodyID pBodyId, const Lepra::Vector3DF& pVelocity);
 	void GetBodyAcceleration(BodyID pBodyId, Lepra::Vector3DF& pAcceleration) const;
@@ -72,21 +73,21 @@ public:
 	// affect the simulation. It's only purpose is to tell the listener
 	// when an object intersects the trigger volume.
 	//
-	virtual TriggerID CreateSphereTrigger(const Lepra::Transformation<Lepra::float32>& pTransform,
+	virtual TriggerID CreateSphereTrigger(const Lepra::TransformationF& pTransform,
 										  Lepra::float32 pRadius,
 										  TriggerListener* pListener);
-	virtual TriggerID CreateCylinderTrigger(const Lepra::Transformation<Lepra::float32>& pTransform,
+	virtual TriggerID CreateCylinderTrigger(const Lepra::TransformationF& pTransform,
 											Lepra::float32 pRadius,
 											Lepra::float32 pLength,
 											TriggerListener* pListener);
-	virtual TriggerID CreateCapsuleTrigger(const Lepra::Transformation<Lepra::float32>& pTransform,
+	virtual TriggerID CreateCapsuleTrigger(const Lepra::TransformationF& pTransform,
 											Lepra::float32 pRadius,
 											Lepra::float32 pLength,
 											TriggerListener* pListener);
-	virtual TriggerID CreateBoxTrigger(const Lepra::Transformation<Lepra::float32>& pTransform,
+	virtual TriggerID CreateBoxTrigger(const Lepra::TransformationF& pTransform,
 										const Lepra::Vector3D<Lepra::float32>& pSize,
 										TriggerListener* pListener);
-	virtual TriggerID CreateRayTrigger(const Lepra::Transformation<Lepra::float32>& pTransform,
+	virtual TriggerID CreateRayTrigger(const Lepra::TransformationF& pTransform,
 										const Lepra::Vector3D<Lepra::float32>& pFromPos,
 										const Lepra::Vector3D<Lepra::float32>& pToPos,
 										TriggerListener* pListener);
@@ -95,8 +96,8 @@ public:
 
 	virtual ForceFeedbackListener* GetForceFeedbackListener(BodyID pBody);
 
-	virtual void GetTriggerTransform(TriggerID pTriggerID, Lepra::Transformation<Lepra::float32>& pTransform);
-	virtual void SetTriggerTransform(TriggerID pTriggerID, const Lepra::Transformation<Lepra::float32>& pTransform);
+	virtual void GetTriggerTransform(TriggerID pTriggerID, Lepra::TransformationF& pTransform);
+	virtual void SetTriggerTransform(TriggerID pTriggerID, const Lepra::TransformationF& pTransform);
 
 	//
 	// Create/delete joints.
@@ -272,7 +273,7 @@ private:
 	bool GetBallDiff(BodyID pBodyId, JointID pJointId, Joint3Diff& pDiff) const;
 	bool SetBallDiff(BodyID pBodyId, JointID pJointId, const Joint3Diff& pDiff);
 
-	void SetGeomTransform(dGeomID pGeomID, const Lepra::Transformation<Lepra::float32>& pTransform);
+	void SetGeomTransform(dGeomID pGeomID, const Lepra::TransformationF& pTransform);
 	bool CheckBodies(BodyID& pBody1, BodyID& pBody2, Object*& pObject1, Object*& pObject2, const Lepra::tchar* pFunction);
 	bool CheckBodies2(BodyID& pBody1, BodyID& pBody2, Object*& pObject1, Object*& pObject2, const Lepra::tchar* pFunction);
 	

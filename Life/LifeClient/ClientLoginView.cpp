@@ -43,14 +43,18 @@ ClientLoginView::ClientLoginView(UiTbc::Painter* pPainter, ClientLoginObserver* 
 
 	Lepra::String lServerName;
 	{
+		lServerName = Lepra::Network::GetHostname();
 		Lepra::IPAddress lLocalIp;
-		if (Lepra::Network::ResolveHostname(_T(""), lLocalIp))
+		if (lServerName.empty())
 		{
-			lServerName = lLocalIp.GetAsString();
-		}
-		else
-		{
-			lServerName = _T("localhost");
+			if (Lepra::Network::ResolveHostname(_T(""), lLocalIp))
+			{
+				lServerName = lLocalIp.GetAsString();
+			}
+			else
+			{
+				lServerName = _T("0.0.0.0");
+			}
 		}
 		lServerName += _T(":16650");
 		CURE_RTVAR_GETSET(mLoginObserver->GetVariableScope(), "Login.DefaultServer", lServerName);

@@ -108,11 +108,11 @@ V3D_TEMPLATE void V3D_QUAL::Cross(const Vector3D<_TVarType>& pV1, const Vector3D
 	z = pV1.x * pV2.y - pV1.y * pV2.x;
 }
 
-V3D_TEMPLATE Vector3D<_TVarType> V3D_QUAL::Cross(const Vector3D<_TVarType>& pV)
+V3D_TEMPLATE Vector3D<_TVarType> V3D_QUAL::Cross(const Vector3D<_TVarType>& pV) const
 {
 	return Vector3D<_TVarType>(y * pV.z - z * pV.y,
-							   z * pV.x - x * pV.z,
-							   x * pV.y - y * pV.x);
+		z * pV.x - x * pV.z,
+		x * pV.y - y * pV.x);
 }
 
 V3D_TEMPLATE void V3D_QUAL::CrossUnit(const Vector3D<_TVarType>& pV1, const Vector3D<_TVarType>& pV2)
@@ -121,7 +121,7 @@ V3D_TEMPLATE void V3D_QUAL::CrossUnit(const Vector3D<_TVarType>& pV1, const Vect
 	Normalize();
 }
 
-V3D_TEMPLATE Vector3D<_TVarType> V3D_QUAL::CrossUnit(const Vector3D<_TVarType>& pV)
+V3D_TEMPLATE Vector3D<_TVarType> V3D_QUAL::CrossUnit(const Vector3D<_TVarType>& pV) const
 {
 	Vector3D<_TVarType> lTemp(*this, pV);	// Cross product constructor.
 	lTemp.Normalize();

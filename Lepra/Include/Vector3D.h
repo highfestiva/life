@@ -76,8 +76,8 @@ class Vector3D
 
 		void Cross(const Vector3D<_TVarType>& pV1, const Vector3D<_TVarType>& pV2);
 		inline void CrossUnit(const Vector3D<_TVarType>& pV1, const Vector3D<_TVarType>& pV2);
-		Vector3D<_TVarType> Cross(const Vector3D<_TVarType>& pV);
-		inline Vector3D<_TVarType> CrossUnit(const Vector3D<_TVarType>& pV);
+		Vector3D<_TVarType> Cross(const Vector3D<_TVarType>& pV) const;
+		inline Vector3D<_TVarType> CrossUnit(const Vector3D<_TVarType>& pV) const;
 
 		void GetSphericalAngles(_TVarType& pTheta, _TVarType& pPhi) const;
 		Vector3D ProjectOntoPlane(const Vector3D<_TVarType>& pPlaneNormal) const;

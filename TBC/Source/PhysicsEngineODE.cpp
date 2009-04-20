@@ -70,7 +70,7 @@ PhysicsEngineODE::~PhysicsEngineODE()
 	//::dCloseODE();
 }
 
-PhysicsEngine::BodyID PhysicsEngineODE::CreateSphere(const Lepra::Transformation<Lepra::float32>& pTransform,
+PhysicsEngine::BodyID PhysicsEngineODE::CreateSphere(const Lepra::TransformationF& pTransform,
 	Lepra::float32 pMass, Lepra::float32 pRadius, BodyType pType, Lepra::float32 pFriction, Lepra::float32 pBounce,
 	TriggerListener* pTriggerListener, ForceFeedbackListener* pForceListener)
 {
@@ -103,7 +103,7 @@ PhysicsEngine::BodyID PhysicsEngineODE::CreateSphere(const Lepra::Transformation
 	return (BodyID)(Lepra::uint64)lObject;
 }
 
-PhysicsEngine::BodyID PhysicsEngineODE::CreateCylinder(const Lepra::Transformation<Lepra::float32>& pTransform,
+PhysicsEngine::BodyID PhysicsEngineODE::CreateCylinder(const Lepra::TransformationF& pTransform,
 	Lepra::float32 pMass, Lepra::float32 pRadius, Lepra::float32 pLength, BodyType pType, Lepra::float32 pFriction,
 	Lepra::float32 pBounce, TriggerListener* pTriggerListener, ForceFeedbackListener* pForceListener)
 {
@@ -140,7 +140,7 @@ PhysicsEngine::BodyID PhysicsEngineODE::CreateCylinder(const Lepra::Transformati
 	return (BodyID)(Lepra::uint64)lObject;
 }
 
-PhysicsEngine::BodyID PhysicsEngineODE::CreateCapsule(const Lepra::Transformation<Lepra::float32>& pTransform,
+PhysicsEngine::BodyID PhysicsEngineODE::CreateCapsule(const Lepra::TransformationF& pTransform,
 	Lepra::float32 pMass, Lepra::float32 pRadius, Lepra::float32 pLength, BodyType pType, Lepra::float32 pFriction,
 	Lepra::float32 pBounce, TriggerListener* pTriggerListener, ForceFeedbackListener* pForceListener)
 {
@@ -174,7 +174,7 @@ PhysicsEngine::BodyID PhysicsEngineODE::CreateCapsule(const Lepra::Transformatio
 	return (BodyID)(Lepra::uint64)lObject;
 }
 
-PhysicsEngine::BodyID PhysicsEngineODE::CreateBox(const Lepra::Transformation<Lepra::float32>& pTransform,
+PhysicsEngine::BodyID PhysicsEngineODE::CreateBox(const Lepra::TransformationF& pTransform,
 	Lepra::float32 pMass, const Lepra::Vector3D<Lepra::float32>& pSize, BodyType pType, Lepra::float32 pFriction,
 	Lepra::float32 pBounce, TriggerListener* pTriggerListener, ForceFeedbackListener* pForceListener)
 {
@@ -238,7 +238,7 @@ bool PhysicsEngineODE::Attach(BodyID pStaticBody, BodyID pMainBody)
 }
 
 PhysicsEngine::BodyID PhysicsEngineODE::CreateTriMesh(const GeometryBase* pMesh,
-	const Lepra::Transformation<Lepra::float32>& pTransform, Lepra::float32 pFriction, Lepra::float32 pBounce,
+	const Lepra::TransformationF& pTransform, Lepra::float32 pFriction, Lepra::float32 pBounce,
 	TriggerListener* pTriggerListener, ForceFeedbackListener* pForceListener)
 {
 	Object* lObject = new Object(mWorldID);
@@ -302,7 +302,20 @@ void PhysicsEngineODE::DeleteBody(BodyID pBodyId)
 	}
 }
 
-void PhysicsEngineODE::GetBodyTransform(BodyID pBodyId, Lepra::Transformation<Lepra::float32>& pTransform) const
+Lepra::Vector3DF PhysicsEngineODE::GetBodyPosition(BodyID pBodyId) const
+{
+	Object* lObject = (Object*)pBodyId;
+	if (lObject->mWorldID != mWorldID)
+	{
+		mLog.Errorf(_T("GetBodyTransform() - Body %i is not part of this world!"), pBodyId);
+		return (Lepra::Vector3DF());
+	}
+
+	const dReal* lPosition = dGeomGetPosition(lObject->mGeomID);
+	return (Lepra::Vector3DF(lPosition[0], lPosition[1], lPosition[2]));
+}
+
+void PhysicsEngineODE::GetBodyTransform(BodyID pBodyId, Lepra::TransformationF& pTransform) const
 {
 	Object* lObject = (Object*)pBodyId;
 
@@ -320,7 +333,7 @@ void PhysicsEngineODE::GetBodyTransform(BodyID pBodyId, Lepra::Transformation<Le
 	pTransform.SetOrientation(Lepra::Quaternion<Lepra::float32>(lQ[0], lQ[1], lQ[2], lQ[3]));
 }
 
-void PhysicsEngineODE::SetBodyTransform(BodyID pBodyId, const Lepra::Transformation<Lepra::float32>& pTransform)
+void PhysicsEngineODE::SetBodyTransform(BodyID pBodyId, const Lepra::TransformationF& pTransform)
 {
 	Object* lObject = (Object*)pBodyId;
 
@@ -474,7 +487,7 @@ void* PhysicsEngineODE::GetBodyData(BodyID pBodyId)
 	return lObject->mUserData;
 }
 
-PhysicsEngine::TriggerID PhysicsEngineODE::CreateSphereTrigger(const Lepra::Transformation<Lepra::float32>& pTransform,
+PhysicsEngine::TriggerID PhysicsEngineODE::CreateSphereTrigger(const Lepra::TransformationF& pTransform,
 	Lepra::float32 pRadius, TriggerListener* pForceListener)
 {
 	Object* lObject = new Object(mWorldID);
@@ -491,7 +504,7 @@ PhysicsEngine::TriggerID PhysicsEngineODE::CreateSphereTrigger(const Lepra::Tran
 	return (TriggerID)lObject->mGeomID;
 }
 
-PhysicsEngine::TriggerID PhysicsEngineODE::CreateCylinderTrigger(const Lepra::Transformation<Lepra::float32>& pTransform,
+PhysicsEngine::TriggerID PhysicsEngineODE::CreateCylinderTrigger(const Lepra::TransformationF& pTransform,
 	Lepra::float32 pRadius, Lepra::float32 pLength, TriggerListener* pForceListener)
 {
 	Object* lObject = new Object(mWorldID);
@@ -511,7 +524,7 @@ PhysicsEngine::TriggerID PhysicsEngineODE::CreateCylinderTrigger(const Lepra::Tr
 	return (TriggerID)lObject->mGeomID;
 }
 
-PhysicsEngine::TriggerID PhysicsEngineODE::CreateCapsuleTrigger(const Lepra::Transformation<Lepra::float32>& pTransform,
+PhysicsEngine::TriggerID PhysicsEngineODE::CreateCapsuleTrigger(const Lepra::TransformationF& pTransform,
 	Lepra::float32 pRadius, Lepra::float32 pLength, TriggerListener* pForceListener)
 {
 	Object* lObject = new Object(mWorldID);
@@ -529,7 +542,7 @@ PhysicsEngine::TriggerID PhysicsEngineODE::CreateCapsuleTrigger(const Lepra::Tra
 	return (TriggerID)lObject->mGeomID;
 }
 
-PhysicsEngine::TriggerID PhysicsEngineODE::CreateBoxTrigger(const Lepra::Transformation<Lepra::float32>& pTransform,
+PhysicsEngine::TriggerID PhysicsEngineODE::CreateBoxTrigger(const Lepra::TransformationF& pTransform,
 	const Lepra::Vector3D<Lepra::float32>& pSize, TriggerListener* pForceListener)
 {
 	Object* lObject = new Object(mWorldID);
@@ -547,7 +560,7 @@ PhysicsEngine::TriggerID PhysicsEngineODE::CreateBoxTrigger(const Lepra::Transfo
 	return (TriggerID)lObject->mGeomID;
 }
 
-PhysicsEngine::TriggerID PhysicsEngineODE::CreateRayTrigger(const Lepra::Transformation<Lepra::float32>& pTransform,
+PhysicsEngine::TriggerID PhysicsEngineODE::CreateRayTrigger(const Lepra::TransformationF& pTransform,
 	const Lepra::Vector3D<Lepra::float32>& pFromPos, const Lepra::Vector3D<Lepra::float32>& pToPos,
 	TriggerListener* pForceListener)
 {
@@ -601,7 +614,7 @@ PhysicsEngine::ForceFeedbackListener* PhysicsEngineODE::GetForceFeedbackListener
 	return (lObject->mForceFeedbackListener);
 }
 
-void PhysicsEngineODE::GetTriggerTransform(TriggerID pTriggerID, Lepra::Transformation<Lepra::float32>& pTransform)
+void PhysicsEngineODE::GetTriggerTransform(TriggerID pTriggerID, Lepra::TransformationF& pTransform)
 {
 	Object* lObject = (Object*)pTriggerID;
 
@@ -619,7 +632,7 @@ void PhysicsEngineODE::GetTriggerTransform(TriggerID pTriggerID, Lepra::Transfor
 	pTransform.SetOrientation(Lepra::Quaternion<Lepra::float32>(lQ[0], lQ[1], lQ[2], lQ[3]));
 }
 
-void PhysicsEngineODE::SetTriggerTransform(TriggerID pTriggerID, const Lepra::Transformation<Lepra::float32>& pTransform)
+void PhysicsEngineODE::SetTriggerTransform(TriggerID pTriggerID, const Lepra::TransformationF& pTransform)
 {
 	Object* lObject = (Object*)pTriggerID;
 
@@ -1535,7 +1548,7 @@ bool PhysicsEngineODE::SetBallDiff(BodyID pBodyId, JointID pJointId, const Joint
 	return (true);
 }
 
-void PhysicsEngineODE::SetGeomTransform(dGeomID pGeomID, const Lepra::Transformation<Lepra::float32>& pTransform)
+void PhysicsEngineODE::SetGeomTransform(dGeomID pGeomID, const Lepra::TransformationF& pTransform)
 {
 	const Lepra::Vector3D<Lepra::float32>& lPos = pTransform.GetPosition();
 	dGeomSetPosition(pGeomID, lPos.x, lPos.y, lPos.z);
@@ -2747,24 +2760,48 @@ void PhysicsEngineODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID pG
 		lContactPointCount = (lContactPointCount < 0)? ::dCollide(pGeom1, pGeom2, 8, &lContact[0].geom, sizeof(dContact)) : lContactPointCount;
 
 		// Fetch force, will be used to scale friction (projected against surface normal).
-		Lepra::Vector3DF lAcceleration1;
-		lThis->GetBodyAcceleration((BodyID)lObject1, lAcceleration1);
-		Lepra::Vector3DF lAcceleration2;
-		lThis->GetBodyAcceleration((BodyID)lObject2, lAcceleration2);
-
+		Lepra::Vector3DF lPosition1 = lThis->GetBodyPosition((BodyID)lObject1);
+		Lepra::Vector3DF lPosition2 = lThis->GetBodyPosition((BodyID)lObject2);
+		Lepra::Vector3DF lLinearVelocity1;
+		lThis->GetBodyVelocity((BodyID)lObject1, lLinearVelocity1);
+		Lepra::Vector3DF lLinearVelocity2;
+		lThis->GetBodyVelocity((BodyID)lObject2, lLinearVelocity2);
+		Lepra::Vector3DF lAngularVelocity1;
+		lThis->GetBodyAngularVelocity((BodyID)lObject1, lAngularVelocity1);
+		Lepra::Vector3DF lAngularVelocity2;
+		lThis->GetBodyAngularVelocity((BodyID)lObject2, lAngularVelocity2);
 
 		// Perform normal collision detection.
 		for (int i = 0; i < lContactPointCount; i++)
 		{
 			dContact& lC = lContact[i];
 	
-			Lepra::Vector3DF lNormal(lC.geom.normal[0], lC.geom.normal[1], lC.geom.normal[2]);
-			const float lFrictionForce1 = ::fabs(lAcceleration1.Dot(lNormal));
-			const float lFrictionForce2 = ::fabs(lAcceleration2.Dot(lNormal));
+			const Lepra::Vector3DF lNormal(lC.geom.normal[0], lC.geom.normal[1], lC.geom.normal[2]);
+			const Lepra::Vector3DF lCollisionPoint(lC.geom.pos[0], lC.geom.pos[1], lC.geom.pos[2]);
+			const Lepra::Vector3DF lDistance1(lCollisionPoint-lPosition1);
+			const Lepra::Vector3DF lDistance2(lCollisionPoint-lPosition2);
+			const Lepra::Vector3DF lAngularSurfaceVelocity1 = lAngularVelocity1.Cross(lDistance1);
+			const Lepra::Vector3DF lAngularSurfaceVelocity2 = lAngularVelocity2.Cross(lDistance2);
+			const Lepra::Vector3DF lSurfaceVelocity1 = lLinearVelocity1.ProjectOntoPlane(lNormal) + lAngularSurfaceVelocity1;
+			const Lepra::Vector3DF lSurfaceVelocity2 = lLinearVelocity2.ProjectOntoPlane(lNormal) + lAngularSurfaceVelocity1;
+			const float lRelativeVelocity = lSurfaceVelocity1.GetDistance(lSurfaceVelocity2);
+			Lepra::Vector3DF lSpinDirection = (lAngularSurfaceVelocity1-lAngularSurfaceVelocity2);
+			if (lSpinDirection.GetLengthSquared() <= 1e-4)
+			{
+				Lepra::Vector3DF lDummy;
+				lNormal.GetOrthogonals(lSpinDirection, lDummy);
+			}
+			else
+			{
+				lSpinDirection.Normalize();
+			}
 
-			lC.surface.mode = dContactSlip1 | dContactSlip2 | dContactBounce | dContactApprox1;
+			lC.fdir1[0] = lSpinDirection.x;
+			lC.fdir1[1] = lSpinDirection.y;
+			lC.fdir1[2] = lSpinDirection.z;
+			lC.surface.mode = dContactSlip1 | dContactSlip2 | dContactBounce | dContactApprox1 | dContactFDir1;
 			lC.surface.mu = dInfinity;
-			const float lSlip = 1e-4f / ((lFrictionForce1 + lFrictionForce2 + 0.1f) * lObject1->mFriction * lObject2->mFriction);
+			const float lSlip = (1e-4f * lRelativeVelocity + 1e-6f) / (lObject1->mFriction * lObject2->mFriction + 0.01f);
 			lC.surface.slip1 = lSlip;
 			lC.surface.slip2 = lSlip;
 			lC.surface.bounce = (dReal)(lObject1->mBounce * lObject2->mBounce);

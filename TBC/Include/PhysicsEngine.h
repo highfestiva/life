@@ -151,6 +151,7 @@ public:
 
 	virtual void DeleteBody(BodyID pBodyId) = 0;
 
+	virtual Lepra::Vector3DF GetBodyPosition(BodyID pBodyId) const = 0;
 	virtual void GetBodyTransform(BodyID pBodyId, Lepra::Transformation<Lepra::float32>& pTransform) const = 0;
 	virtual void SetBodyTransform(BodyID pBodyId, const Lepra::Transformation<Lepra::float32>& pTransform) = 0;
 	virtual void GetBodyVelocity(BodyID pBodyId, Lepra::Vector3DF& pVelocity) const = 0;

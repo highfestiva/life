@@ -49,10 +49,16 @@ bool Network::Stop()
 	return !mStarted;
 }
 
+String Network::GetHostname()
+{
+	char lName[256];
+	const int lNameLength = ::gethostname(lName, sizeof(lName));
+	return (AnsiStringUtility::ToCurrentCode(AnsiString(lName, lNameLength)));
+}
+
 bool Network::ResolveHostname(const String& pHostname, IPAddress& pIPAddress)
 {
 	hostent* lHostent;
-
 	if (pHostname.length() == 0)
 	{
 		char lHostname[256] = "";

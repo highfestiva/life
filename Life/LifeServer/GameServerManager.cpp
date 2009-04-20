@@ -293,7 +293,7 @@ bool GameServerManager::Initialize()
 			UserContextObjectInfoResource::TypeLoadCallback(this, &GameServerManager::ContextObjectLoadCallback));
 	}
 
-	Lepra::String lAcceptAddress = CURE_RTVAR_GETSET(GetVariableScope(), "Login.AcceptAddress", _T(":16650"));
+	Lepra::String lAcceptAddress = CURE_RTVAR_GETSET(GetVariableScope(), "Login.AcceptAddress", _T("0.0.0.0:16650"));
 	if (lOk)
 	{
 		Lepra::SocketAddress lAddress;
