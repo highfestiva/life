@@ -51,7 +51,7 @@ private:
 	int CalculateNetworkLatencyFrameDiffCount() const;
 
 	static const int NETWORK_DEVIATION_ERROR_COUNT = 4;
-	static const int NETWORK_LATENCY_CALCULATION_ARRAY_SIZE = 8;
+	static const int NETWORK_LATENCY_CALCULATION_ARRAY_SIZE = NETWORK_DEVIATION_ERROR_COUNT;
 	typedef std::vector<int> NetworkLatencyArray;
 
 	Cure::TimeManager* mTimeManager;

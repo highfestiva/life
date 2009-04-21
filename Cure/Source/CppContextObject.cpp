@@ -172,8 +172,8 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 			PhysicsNode::CONNECTEE_3));
 
 		// Wheels and suspension.
-		const float lDamperConstant = lCarWeight/20;
-		const float lSpringConstant = lCarWeight*20;
+		const float lDamperConstant = lCarWeight/5;
+		const float lSpringConstant = lCarWeight*50;
 		const float lFrameTime = 1/(float)mPhysicsFps;
 		TBC::PhysicsEngine::JointID lJoint;
 
@@ -346,7 +346,7 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 		pObject->AddPhysicsObject(PhysicsNode(1, 6, lPhysicsObjectId, PhysicsNode::TYPE_HINGE2, lJoint));
 
 		// Rear wheel drive engine.
-		ContextObjectEngine* lEngine = new ContextObjectEngine(pObject, ContextObjectEngine::ENGINE_HINGE2_ROLL, 2*lCarWeight, 300, 20, 0);
+		ContextObjectEngine* lEngine = new ContextObjectEngine(pObject, ContextObjectEngine::ENGINE_HINGE2_ROLL, 5*lCarWeight, 300, 20, 0);
 		lEngine->AddControlledNode(3, -1);
 		lEngine->AddControlledNode(4, 1);
 		pObject->AddAttribute(lEngine);

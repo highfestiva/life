@@ -35,6 +35,7 @@ public:
 	virtual bool Start();
 	virtual void Join();
 
+	void PushYieldCommand(const Lepra::String& pCommand);
 	int ExecuteCommand(const Lepra::String& pCommand);
 
 protected:
@@ -71,6 +72,8 @@ private:
 	Lepra::ConsolePrompt* mConsolePrompt;
 	Lepra::ConsoleCommandManager* mConsoleCommandManager;
 	Lepra::MemberThread<ConsoleManager> mConsoleThread;
+	Lepra::Lock mLock;
+	std::list<Lepra::String> mYieldCommandList;
 
 	LOG_CLASS_DECLARE();
 };

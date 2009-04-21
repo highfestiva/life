@@ -126,8 +126,8 @@ GameClientSlaveManager::~GameClientSlaveManager()
 
 void GameClientSlaveManager::LoadSettings()
 {
-	GetConsoleManager()->ExecuteCommand(_T("execute-file ")+GetSystemCommandFilename());
-	GetConsoleManager()->ExecuteCommand(_T("execute-file ")+GetApplicationCommandFilename());
+	GetConsoleManager()->PushYieldCommand(_T("execute-file ")+GetSystemCommandFilename());
+	GetConsoleManager()->PushYieldCommand(_T("execute-file ")+GetApplicationCommandFilename());
 }
 
 void GameClientSlaveManager::SetRenderArea(const Lepra::PixelRect& pRenderArea)
@@ -234,12 +234,12 @@ void GameClientSlaveManager::RequestLogin(const Lepra::String& pServerAddress, c
 {
 	//mMaster->RemoveSlave(this);
 
-	Lepra::ScopeLock lLock(GetTickLock());
-
-	CloseLoginGui();
-
-	mDisconnectReason = _T("Connect failed.");
-	mIsReset = false;
+	{
+		Lepra::ScopeLock lLock(GetTickLock());
+		CloseLoginGui();
+		mDisconnectReason = _T("Connect failed.");
+		mIsReset = false;
+	}
 	GetNetworkClient()->StartConnectLogin(pServerAddress, CURE_RTVAR_GET(GetVariableScope(), RTVAR_NETWORK_CONNECT_TIMEOUT, 3.0), pLoginToken);
 }
 

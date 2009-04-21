@@ -110,10 +110,15 @@ void Client::QuerySendStriveTimes()
 		{
 			mLog.AInfo("Want to send strive times, but skipping since last transmission is still in effekt.");
 		}
-		else if (mStriveSendErrorTimeCounter > NETWORK_DEVIATION_ERROR_COUNT)	// Only send if the error repeats itself a few times.
+		else if (mStriveSendErrorTimeCounter >= NETWORK_DEVIATION_ERROR_COUNT)	// Only send if the error repeats itself a few times.
 		{
 			mStriveSendErrorTimeCounter = 0;
 			mStriveSendPauseFrameCount = SendStriveTimes(lNetworkFrameDiffCount);
+
+			// Reset the whole latency array to be more like something ideal.
+			size_t lCount = mNetworkFrameLatencyArray.size();
+			mNetworkFrameLatencyArray.resize(0);
+			mNetworkFrameLatencyArray.resize(lCount, 1);
 		}
 		else
 		{
@@ -132,9 +137,9 @@ void Client::QuerySendStriveTimes()
 	else
 	{
 		++mIgnoreStriveErrorTimeCounter;
-		if (mIgnoreStriveErrorTimeCounter > (int)NETWORK_DEVIATION_ERROR_COUNT)	// Reset send counter if we're mostly good.
+		if (mIgnoreStriveErrorTimeCounter >= (int)NETWORK_DEVIATION_ERROR_COUNT)	// Reset send counter if we're mostly good.
 		{
-			log_adebug("Resetting strive error counter.");
+			log_volatile(mLog.Debugf(_T("Resetting strive error counter (time diff is %i frames)."), lNetworkFrameDiffCount));
 			mIgnoreStriveErrorTimeCounter = 0;
 			mStriveSendErrorTimeCounter = 0;
 		}
@@ -177,14 +182,15 @@ int Client::SendStriveTimes(int pNetworkFrameDiffCount)
 	else
 	{
 		// Slow down client physics by taking shorter time steps.
-		pNetworkFrameDiffCount = -pNetworkFrameDiffCount;	// We always send a positive frame count.
+		pNetworkFrameDiffCount = -pNetworkFrameDiffCount;	// Negated again below.
 		if (pNetworkFrameDiffCount >= lPhysicsTickAdjustmentFrameCount*0.8f)
 		{
 			lPhysicsTickAdjustmentFrameCount = pNetworkFrameDiffCount+PHYSICS_FPS;
 		}
 		lPhysicsTickAdjustmentTime = (float)-pNetworkFrameDiffCount/lPhysicsTickAdjustmentFrameCount;
+		pNetworkFrameDiffCount = -pNetworkFrameDiffCount;
 	}
-	mLog.Infof(_T("Sending time adjustment %f over %i frames to client."), lPhysicsTickAdjustmentTime, lPhysicsTickAdjustmentFrameCount);
+	mLog.Infof(_T("Sending time adjustment %i frames, spread over %i frames, to client."), pNetworkFrameDiffCount, lPhysicsTickAdjustmentFrameCount);
 	mNetworkAgent->SendNumberMessage(true, mUserConnection->GetSocket(), Cure::MessageNumber::INFO_ADJUST_TIME, lPhysicsTickAdjustmentFrameCount, lPhysicsTickAdjustmentTime);
 	return (lHalfPingFrameCount*2+lPhysicsTickAdjustmentFrameCount);
 }

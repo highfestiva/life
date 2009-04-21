@@ -61,6 +61,12 @@ void ConsoleManager::Join()
 
 
 
+void ConsoleManager::PushYieldCommand(const Lepra::String& pCommand)
+{
+	Lepra::ScopeLock lLock(&mLock);
+	mYieldCommandList.push_back(pCommand);
+}
+
 int ConsoleManager::ExecuteCommand(const Lepra::String& pCommand)
 {
 	return (mConsoleCommandManager->Execute(pCommand, false));
@@ -194,6 +200,25 @@ void ConsoleManager::ConsoleThreadEntry()
 	size_t lEditIndex = 0;
 	while (!Lepra::SystemManager::GetQuitRequest() && !mConsoleThread.GetStopRequest())
 	{
+		// Execute any pending yield command.
+		if (lInputText.empty())
+		{
+			Lepra::String lYieldCommand;
+			{
+				Lepra::ScopeLock lLock(&mLock);
+				if (!mYieldCommandList.empty())
+				{
+					lYieldCommand = mYieldCommandList.front();
+					mYieldCommandList.pop_front();
+				}
+			}
+			if (!lYieldCommand.empty())
+			{
+				mConsoleCommandManager->Execute(lYieldCommand, false);
+				continue;
+			}
+		}
+
 		mConsolePrompt->PrintPrompt(lPrompt, lInputText, lEditIndex);
 
 		mConsoleLogger->SetAutoPrompt(lPrompt+lInputText);

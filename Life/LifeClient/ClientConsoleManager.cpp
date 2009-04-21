@@ -176,7 +176,7 @@ bool ClientConsoleManager::SaveApplicationConfigFile(Lepra::File* pFile)
 	bool lOk = Parent::SaveApplicationConfigFile(pFile);
 	if (lOk)
 	{
-		pFile->WriteLine(_T("//connect server:port username password\n"));
+		pFile->WriteLine(_T("//start-login server:port username password\n"));
 		lOk = true;	// TODO: check if all writes went well.
 	}
 	return (lOk);

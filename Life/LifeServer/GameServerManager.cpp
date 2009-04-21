@@ -56,9 +56,9 @@ GameServerManager::GameServerManager(Cure::RuntimeVariableScope* pVariableScope,
 	SetNetworkAgent(new Cure::NetworkServer(pVariableScope, this));
 
 	SetConsoleManager(new ServerConsoleManager(this, GetVariableScope(), pConsoleLogger, new Lepra::StdioConsolePrompt()));
+	GetConsoleManager()->PushYieldCommand(_T("execute-file ")+GetSystemCommandFilename());
+	GetConsoleManager()->PushYieldCommand(_T("execute-file ")+GetApplicationCommandFilename());
 	GetConsoleManager()->Start();
-	GetConsoleManager()->ExecuteCommand(_T("execute-file ")+GetSystemCommandFilename());
-	GetConsoleManager()->ExecuteCommand(_T("execute-file ")+GetApplicationCommandFilename());
 }
 
 GameServerManager::~GameServerManager()

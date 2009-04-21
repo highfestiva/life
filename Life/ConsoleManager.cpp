@@ -29,6 +29,7 @@ const ConsoleManager::CommandPair ConsoleManager::mCommandIdList[] =
 	{_T("execute-file"), COMMAND_EXECUTE_FILE},
 	{_T("list-active-resources"), COMMAND_LIST_ACTIVE_RESOURCES},
 	{_T("sleep"), COMMAND_SLEEP},
+	{_T("push"), COMMAND_PUSH},
 	{_T("set-default-config"), COMMAND_SET_DEFAULT_CONFIG},
 	{_T("save-system-config-file"), COMMAND_SAVE_SYSTEM_CONFIG_FILE},
 	{_T("save-application-config-file"), COMMAND_SAVE_APPLICATION_CONFIG_FILE},
@@ -317,6 +318,20 @@ int ConsoleManager::OnCommand(const Lepra::String& pCommand, const Lepra::String
 			{
 				mLog.Warningf(_T("usage: %s <secs>"), pCommand.c_str());
 				mLog.AWarning("Sleeps <secs> where secs is a decimal number, e.g. 0.001.");
+				lResult = 1;
+			}
+		}
+		break;
+		case COMMAND_PUSH:
+		{
+			if (pParameterVector.size() >= 1)
+			{
+				PushYieldCommand(Lepra::StringUtility::Join(pParameterVector, _T(" ")));
+			}
+			else
+			{
+				mLog.Warningf(_T("usage: %s command [arg [arg ...]]"), pCommand.c_str());
+				mLog.AWarning("Pushes a command to be executed next time the shell is idle.");
 				lResult = 1;
 			}
 		}

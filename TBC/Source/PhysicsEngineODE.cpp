@@ -2664,6 +2664,8 @@ void PhysicsEngineODE::StepFast(Lepra::float32 pStepSize)
 
 void PhysicsEngineODE::DoForceFeedback()
 {
+	std::hash_set<ForceFeedbackListener*, std::hash<void*> > lFeedbackDuplicateSet;
+
 	JointList::iterator lIter;
 	for (lIter = mFeedbackJointList.begin(); lIter != mFeedbackJointList.end();)
 	{
@@ -2671,16 +2673,22 @@ void PhysicsEngineODE::DoForceFeedback()
 
 		if (lJointInfo->mListener1 != lJointInfo->mListener2)
 		{
-			if (lJointInfo->mListener1 != 0)
+			if (lJointInfo->mListener1 != 0 &&
+				lFeedbackDuplicateSet.find(lJointInfo->mListener1) == lFeedbackDuplicateSet.end())
 			{
+				lFeedbackDuplicateSet.insert(lJointInfo->mListener1);
+
 				dJointFeedback* lFeedback = &lJointInfo->mFeedback;
 				lJointInfo->mListener1->OnForceApplied(
 					lJointInfo->mListener2,
 					Lepra::Vector3D<Lepra::float32>(lFeedback->f1[0], lFeedback->f1[1], lFeedback->f1[2]),
 					Lepra::Vector3D<Lepra::float32>(lFeedback->t1[0], lFeedback->t1[1], lFeedback->t1[2]));
 			}
-			if (lJointInfo->mListener2 != 0)
+			if (lJointInfo->mListener2 != 0 &&
+				lFeedbackDuplicateSet.find(lJointInfo->mListener2) == lFeedbackDuplicateSet.end())
 			{
+				lFeedbackDuplicateSet.insert(lJointInfo->mListener2);
+
 				dJointFeedback* lFeedback = &lJointInfo->mFeedback;
 				lJointInfo->mListener2->OnForceApplied(
 					lJointInfo->mListener1,
