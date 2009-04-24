@@ -4,10 +4,10 @@
 
 
 
+#include "../Include/Packet.h"
 #include <assert.h>
 #include "../Include/PositionalData.h"
 #include "../Include/Packer.h"
-#include "../Include/Packet.h"
 
 
 
@@ -500,10 +500,11 @@ int MessageObject::Parse(const Lepra::uint8* pData, int pSize)
 
 int MessageObject::Store(Packet* pPacket, Lepra::uint32 pObjectId)
 {
+	pPacket;
+
 	mWritableData[0] = (Lepra::uint8)GetType();
 	unsigned lSize = 1;
 	lSize += PackerInt32::Pack(&mWritableData[lSize], pObjectId);
-	pPacket->AddPacketSize(lSize);
 	return (lSize);
 }
 
@@ -552,9 +553,8 @@ int MessageCreateObject::Store(Packet* pPacket, GameObjectId pObjectId, const Le
 {
 	Lepra::int32 lObjectId = (Lepra::int32)pObjectId;
 	unsigned lSize = Parent::Store(pPacket, lObjectId);
-	unsigned lThisPartSize = PackerUnicodeString::Pack(&mWritableData[lSize], pClassId);
-	lSize += lThisPartSize;
-	pPacket->AddPacketSize(lThisPartSize);
+	lSize += PackerUnicodeString::Pack(&mWritableData[lSize], pClassId);
+	pPacket->AddPacketSize(lSize);
 	return (lSize);
 }
 
@@ -607,9 +607,7 @@ int MessageObjectMovement::Parse(const Lepra::uint8* pData, int pSize)
 int MessageObjectMovement::Store(Packet* pPacket, Lepra::uint32 pObjectId, Lepra::int32 pFrameIndex)
 {
 	int lSize = Parent::Store(pPacket, pObjectId);
-	int lThisSize = PackerInt32::Pack(&mWritableData[lSize], pFrameIndex);
-	lSize += lThisSize;
-	pPacket->AddPacketSize(lThisSize);
+	lSize += PackerInt32::Pack(&mWritableData[lSize], pFrameIndex);
 	return (lSize);
 }
 
@@ -658,9 +656,8 @@ int MessageObjectPosition::Parse(const Lepra::uint8* pData, int pSize)
 int MessageObjectPosition::Store(Packet* pPacket, Lepra::uint32 pObjectId, Lepra::int32 pFrameIndex, const ObjectPositionalData& pData)
 {
 	int lSize = Parent::Store(pPacket, pObjectId, pFrameIndex);
-	const int lThisSize = pData.Pack(&mWritableData[lSize]);
-	lSize += lThisSize;
-	pPacket->AddPacketSize(lThisSize);
+	lSize += pData.Pack(&mWritableData[lSize]);
+	pPacket->AddPacketSize(lSize);
 	return (lSize);
 }
 
@@ -681,6 +678,111 @@ MessageObjectPosition::MessageObjectPosition(const ObjectPositionalData& pPositi
 	mIsDataOwner = true;
 	mWritableData = new Lepra::uint8[pSize];
 	::memcpy(mWritableData, pData, pSize);
+}
+
+
+
+MessageObjectAttach::MessageObjectAttach()
+{
+}
+
+MessageType MessageObjectAttach::GetType() const
+{
+	return (MESSAGE_TYPE_OBJECT_ATTACH);
+}
+
+int MessageObjectAttach::Parse(const Lepra::uint8* pData, int pSize)
+{
+	int lTotalSize = -1;
+	if ((MessageType)pData[0] == MESSAGE_TYPE_OBJECT_ATTACH)
+	{
+		lTotalSize = Parent::Parse(pData, pSize);
+		if (lTotalSize > 0)
+		{
+			lTotalSize += sizeof(Lepra::uint32)+sizeof(Lepra::uint16)*2;
+			if (pSize < lTotalSize)
+			{
+				lTotalSize = -1;
+			}
+		}
+	}
+	return (lTotalSize);
+}
+
+int MessageObjectAttach::Store(Packet* pPacket, Lepra::uint32 pObject1Id,
+	Lepra::uint32 pObject2Id, Lepra::uint16 pBody1Id, Lepra::uint16 pBody2Id)
+{
+	int lSize = Parent::Store(pPacket, pObject1Id);
+	lSize += PackerInt32::Pack(&mWritableData[lSize], pObject2Id);
+	lSize += PackerInt16::Pack(&mWritableData[lSize], pBody1Id);
+	lSize += PackerInt16::Pack(&mWritableData[lSize], pBody2Id);
+	pPacket->AddPacketSize(lSize);
+	return (lSize);
+}
+
+Lepra::uint32 MessageObjectAttach::GetObject2Id() const
+{
+	Lepra::int32 lObject2Id;
+	PackerInt32::Unpack(lObject2Id, &mData[1+sizeof(Lepra::uint32)], sizeof(lObject2Id));
+	return (lObject2Id);
+}
+
+Lepra::uint16 MessageObjectAttach::GetBody1Id() const
+{
+	int lBody1Id;
+	PackerInt16::Unpack(lBody1Id, &mData[1+sizeof(Lepra::uint32)*2], sizeof(lBody1Id));
+	return ((Lepra::uint16)lBody1Id);
+}
+
+Lepra::uint16 MessageObjectAttach::GetBody2Id() const
+{
+	int lBody2Id;
+	PackerInt16::Unpack(lBody2Id, &mData[1+sizeof(Lepra::uint32)*2+sizeof(Lepra::uint16)], sizeof(lBody2Id));
+	return ((Lepra::int16)lBody2Id);
+}
+
+
+
+MessageObjectDetach::MessageObjectDetach()
+{
+}
+
+MessageType MessageObjectDetach::GetType() const
+{
+	return (MESSAGE_TYPE_OBJECT_DETACH);
+}
+
+int MessageObjectDetach::Parse(const Lepra::uint8* pData, int pSize)
+{
+	int lTotalSize = -1;
+	if ((MessageType)pData[0] == MESSAGE_TYPE_OBJECT_DETACH)
+	{
+		lTotalSize = Parent::Parse(pData, pSize);
+		if (lTotalSize > 0)
+		{
+			lTotalSize += sizeof(Lepra::uint32);
+			if (pSize < lTotalSize)
+			{
+				lTotalSize = -1;
+			}
+		}
+	}
+	return (lTotalSize);
+}
+
+int MessageObjectDetach::Store(Packet* pPacket, Lepra::uint32 pObject1Id, Lepra::uint32 pObject2Id)
+{
+	int lSize = Parent::Store(pPacket, pObject1Id);
+	lSize += PackerInt32::Pack(&mWritableData[lSize], pObject2Id);
+	pPacket->AddPacketSize(lSize);
+	return (lSize);
+}
+
+Lepra::uint32 MessageObjectDetach::GetObject2Id() const
+{
+	Lepra::int32 lObject2Id;
+	PackerInt32::Unpack(lObject2Id, &mData[1+sizeof(Lepra::uint32)], sizeof(lObject2Id));
+	return (lObject2Id);
 }
 
 
@@ -735,7 +837,9 @@ Message* MessageFactory::Allocate(MessageType pType)
 		case MESSAGE_TYPE_NUMBER:		lMessage = new MessageNumber();			break;
 		case MESSAGE_TYPE_CREATE_OBJECT:	lMessage = new MessageCreateObject();		break;
 		case MESSAGE_TYPE_DELETE_OBJECT:	lMessage = new MessageDeleteObject();		break;
-		case MESSAGE_TYPE_OBJECT_POSITION:	lMessage = new MessageObjectPosition();	break;
+		case MESSAGE_TYPE_OBJECT_POSITION:	lMessage = new MessageObjectPosition();		break;
+		case MESSAGE_TYPE_OBJECT_ATTACH:	lMessage = new MessageObjectAttach();		break;
+		case MESSAGE_TYPE_OBJECT_DETACH:	lMessage = new MessageObjectDetach();		break;
 	}
 	if (!lMessage)
 	{

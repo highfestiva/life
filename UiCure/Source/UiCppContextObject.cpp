@@ -297,22 +297,25 @@ bool CppContextObject::StartLoadGraphics(Cure::UserResource* pParentResource)
 
 
 
-void CppContextObject::DebugDrawAxis()
+void CppContextObject::DebugDrawAxes()
 {
 	PhysicsNodeArray::iterator x = mPhysicsNodeArray.begin();
 	for (; x != mPhysicsNodeArray.end(); ++x)
 	{
-		Lepra::TransformationF lPhysicsTransform;
-		mManager->GetGameManager()->GetPhysicsManager()->GetBodyTransform(
-			(*x).GetBodyId(), lPhysicsTransform);
-		Lepra::Vector3DF lPos = lPhysicsTransform.GetPosition();
-		const float lLength = 2;
-		Lepra::Vector3DF lAxis = lPhysicsTransform.GetOrientation().GetAxisX();
-		mUiManager->GetRenderer()->DrawLine(lPos, lAxis*lLength, Lepra::RED);
-		lAxis = lPhysicsTransform.GetOrientation().GetAxisY();
-		mUiManager->GetRenderer()->DrawLine(lPos, lAxis*lLength, Lepra::GREEN);
-		lAxis = lPhysicsTransform.GetOrientation().GetAxisZ();
-		mUiManager->GetRenderer()->DrawLine(lPos, lAxis*lLength, Lepra::BLUE);
+		if (x->GetBodyId() != TBC::INVALID_BODY)
+		{
+			Lepra::TransformationF lPhysicsTransform;
+			mManager->GetGameManager()->GetPhysicsManager()->GetBodyTransform(
+				x->GetBodyId(), lPhysicsTransform);
+			Lepra::Vector3DF lPos = lPhysicsTransform.GetPosition();
+			const float lLength = 2;
+			Lepra::Vector3DF lAxis = lPhysicsTransform.GetOrientation().GetAxisX();
+			mUiManager->GetRenderer()->DrawLine(lPos, lAxis*lLength, Lepra::RED);
+			lAxis = lPhysicsTransform.GetOrientation().GetAxisY();
+			mUiManager->GetRenderer()->DrawLine(lPos, lAxis*lLength, Lepra::GREEN);
+			lAxis = lPhysicsTransform.GetOrientation().GetAxisZ();
+			mUiManager->GetRenderer()->DrawLine(lPos, lAxis*lLength, Lepra::BLUE);
+		}
 	}
 }
 

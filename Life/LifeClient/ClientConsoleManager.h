@@ -12,6 +12,13 @@
 
 
 
+namespace UiCure
+{
+class GameUiManager;
+}
+
+
+
 namespace Life
 {
 

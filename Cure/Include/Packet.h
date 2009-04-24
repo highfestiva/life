@@ -83,6 +83,8 @@ enum MessageType
 	MESSAGE_TYPE_CREATE_OBJECT,
 	MESSAGE_TYPE_DELETE_OBJECT,
 	MESSAGE_TYPE_OBJECT_POSITION,
+	MESSAGE_TYPE_OBJECT_ATTACH,
+	MESSAGE_TYPE_OBJECT_DETACH,
 };
 
 
@@ -221,6 +223,30 @@ private:
 	MessageObjectPosition(const ObjectPositionalData& pPosition, Lepra::uint8* pData, int pSize);
 
 	ObjectPositionalData mPosition;
+};
+
+class MessageObjectAttach: public MessageObject
+{
+	typedef MessageObject Parent;
+public:
+	MessageObjectAttach();
+	MessageType GetType() const;
+	int Parse(const Lepra::uint8* pData, int pSize);
+	int Store(Packet* pPacket, Lepra::uint32 pObject1Id, Lepra::uint32 pObject2Id, Lepra::uint16 pBody1Id, Lepra::uint16 pBody2Id);
+	Lepra::uint32 GetObject2Id() const;
+	Lepra::uint16 GetBody1Id() const;
+	Lepra::uint16 GetBody2Id() const;
+};
+
+class MessageObjectDetach: public MessageObject
+{
+	typedef MessageObject Parent;
+public:
+	MessageObjectDetach();
+	MessageType GetType() const;
+	int Parse(const Lepra::uint8* pData, int pSize);
+	int Store(Packet* pPacket, Lepra::uint32 pObject1Id, Lepra::uint32 pObject2Id);
+	Lepra::uint32 GetObject2Id() const;
 };
 
 

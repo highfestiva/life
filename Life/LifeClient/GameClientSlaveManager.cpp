@@ -4,6 +4,7 @@
 
 
 
+#include "GameClientSlaveManager.h"
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/NetworkClient.h"
 #include "../../Cure/Include/ResourceManager.h"
@@ -20,7 +21,6 @@
 #include "../../UiTbc/Include/GUI/UiDesktopWindow.h"
 #include "../../UiTbc/Include/GUI/UiFloatingLayout.h"
 #include "GameClientMasterTicker.h"
-#include "GameClientSlaveManager.h"
 
 
 
@@ -234,12 +234,12 @@ void GameClientSlaveManager::RequestLogin(const Lepra::String& pServerAddress, c
 {
 	//mMaster->RemoveSlave(this);
 
-	{
-		Lepra::ScopeLock lLock(GetTickLock());
-		CloseLoginGui();
-		mDisconnectReason = _T("Connect failed.");
-		mIsReset = false;
-	}
+	Lepra::ScopeLock lLock(GetTickLock());
+
+	CloseLoginGui();
+
+	mDisconnectReason = _T("Connect failed.");
+	mIsReset = false;
 	GetNetworkClient()->StartConnectLogin(pServerAddress, CURE_RTVAR_GET(GetVariableScope(), RTVAR_NETWORK_CONNECT_TIMEOUT, 3.0), pLoginToken);
 }
 
@@ -704,6 +704,24 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 			SetMovement(lObjectId, lFrameIndex, lData);
 		}
 		break;
+		case Cure::MESSAGE_TYPE_OBJECT_ATTACH:
+		{
+			Cure::MessageObjectAttach* lMessageAttach = (Cure::MessageObjectAttach*)pMessage;
+			Cure::GameObjectId lObject1Id = lMessageAttach->GetObjectId();
+			Cure::GameObjectId lObject2Id = lMessageAttach->GetObject2Id();
+			Cure::PhysicsNode::Id lBody1Id = lMessageAttach->GetBody1Id();
+			Cure::PhysicsNode::Id lBody2Id = lMessageAttach->GetBody2Id();
+			AttachObjects(lObject1Id, lBody1Id, lObject2Id, lBody2Id);
+		}
+		break;
+		case Cure::MESSAGE_TYPE_OBJECT_DETACH:
+		{
+			Cure::MessageObjectDetach* lMessageDetach = (Cure::MessageObjectDetach*)pMessage;
+			Cure::GameObjectId lObject1Id = lMessageDetach->GetObjectId();
+			Cure::GameObjectId lObject2Id = lMessageDetach->GetObject2Id();
+			DetachObjects(lObject1Id, lObject2Id);
+		}
+		break;
 		default:
 		{
 			mLog.AError("Got bad message type from server.");
@@ -853,6 +871,50 @@ bool GameClientSlaveManager::IsConnectAuthorized()
 	return (false);
 }
 
+void GameClientSlaveManager::SendAttach(Cure::ContextObject*, Cure::PhysicsNode::Id,
+	Cure::ContextObject*, Cure::PhysicsNode::Id)
+{
+	// Server manages this.
+	assert(false);
+}
+
+void GameClientSlaveManager::SendDetach(Cure::ContextObject*, Cure::ContextObject*)
+{
+	// Server manages this.
+}
+
+void GameClientSlaveManager::AttachObjects(Cure::GameObjectId pObject1Id, Cure::PhysicsNode::Id pBody1Id,
+	Cure::GameObjectId pObject2Id, Cure::PhysicsNode::Id pBody2Id)
+{
+	Cure::ContextObject* lObject1 = GetContext()->GetObject(pObject1Id);
+	Cure::ContextObject* lObject2 = GetContext()->GetObject(pObject2Id);
+	if (lObject1 && lObject2)
+	{
+		lObject1->AttachToObject(pBody1Id, lObject2, pBody2Id);
+	}
+	else
+	{
+		assert(false);
+	}
+}
+
+void GameClientSlaveManager::DetachObjects(Cure::GameObjectId pObject1Id, Cure::GameObjectId pObject2Id)
+{
+	Cure::ContextObject* lObject1 = GetContext()->GetObject(pObject1Id);
+	Cure::ContextObject* lObject2 = GetContext()->GetObject(pObject2Id);
+	if (lObject1 && lObject2)
+	{
+		if (!lObject1->DetachFromObject(lObject2))
+		{
+			assert(false);
+		}
+	}
+	else
+	{
+		assert(false);
+	}
+}
+
 
 
 void GameClientSlaveManager::CancelLogin()
@@ -929,7 +991,7 @@ void GameClientSlaveManager::DrawSyncDebugInfo()
 		for (; x != lObjectTable.end(); ++x)
 		{
 			UiCure::CppContextObject* lObject = (UiCure::CppContextObject*)x->second;	// Not very good to cast to a Cpp...
-			lObject->DebugDrawAxis();
+			lObject->DebugDrawAxes();
 		}
 	}
 }

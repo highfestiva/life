@@ -4,10 +4,10 @@
 
 
 
+#include "../Include/CppContextObject.h"
 #include <assert.h>
 #include "../../Lepra/Include/Math.h"
 #include "../../Lepra/Include/Random.h"
-#include "../Include/CppContextObject.h"
 #include "../Include/ContextManager.h"
 #include "../Include/ContextObjectEngine.h"
 #include "../Include/GameManager.h"
@@ -55,7 +55,7 @@ void CppContextObject::OnTrigger(TBC::PhysicsEngine::BodyID pBody1, TBC::Physics
 	ContextObject* lObject2 = (ContextObject*)mManager->GetGameManager()->GetPhysicsManager()->GetForceFeedbackListener(pBody2);
 	if (mManager->GetGameManager()->IsConnectAuthorized() && lObject2)
 	{
-		ConnectObjects(pBody1, lObject2, pBody2);
+		AttachToObject(pBody1, lObject2, pBody2);
 	}
 }
 
@@ -64,7 +64,7 @@ void CppContextObject::OnTrigger(TBC::PhysicsEngine::BodyID pBody1, TBC::Physics
 void CppContextObject::OnForceApplied(TBC::PhysicsEngine::ForceFeedbackListener* pOtherObject,
 	const Lepra::Vector3DF& pForce, const Lepra::Vector3DF& pTorque)
 {
-	if (!IsConnectedTo((ContextObject*)pOtherObject))
+	if (!IsAttachedTo((ContextObject*)pOtherObject))
 	{
 		// TODO: replace by sensible values. Like dividing by mass, for instance.
 		//if (pForce.GetLengthSquared() > 100 || pTorque.GetLengthSquared() > 10)

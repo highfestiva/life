@@ -71,13 +71,15 @@ private:
 		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2);
 	void OnStopped(Cure::ContextObject* pObject);
 	bool IsConnectAuthorized();
+	void SendAttach(Cure::ContextObject* pObject1, Cure::PhysicsNode::Id pId1, Cure::ContextObject* pObject2, Cure::PhysicsNode::Id pId2);
+	void SendDetach(Cure::ContextObject* pObject1, Cure::ContextObject* pObject2);
 
 	void BroadcastCreateObject(Cure::ContextObject* pObject);
 	void BroadcastDeleteObject(Cure::GameObjectId pInstanceId);
 	void SendCreateAllObjects(Client* pClient);
 	void BroadcastObjectPosition(Cure::GameObjectId pInstanceId, const Cure::ObjectPositionalData& pPosition,
 		Client* pExcludeClient, bool pSafe);
-	bool LoadGroup(Cure::ContextObject* pObject, const Lepra::String& pName) const;
+	void BroadcastPacket(const Client* pExcludeClient, Cure::Packet* pPacket, bool pSafe);
 
 	Cure::NetworkServer* GetNetworkServer() const;
 

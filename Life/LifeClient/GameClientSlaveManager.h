@@ -89,6 +89,10 @@ private:
 		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2);
 	void OnStopped(Cure::ContextObject* pObject);
 	bool IsConnectAuthorized();
+	void SendAttach(Cure::ContextObject*, Cure::PhysicsNode::Id, Cure::ContextObject*, Cure::PhysicsNode::Id);
+	void SendDetach(Cure::ContextObject*, Cure::ContextObject*);
+	void AttachObjects(Cure::GameObjectId pObject1Id, Cure::PhysicsNode::Id pBody1Id, Cure::GameObjectId pObject2Id, Cure::PhysicsNode::Id pBody2Id);
+	void DetachObjects(Cure::GameObjectId pObject1Id, Cure::GameObjectId pObject2Id);
 
 	void CancelLogin();
 	Cure::RuntimeVariableScope* GetVariableScope() const;

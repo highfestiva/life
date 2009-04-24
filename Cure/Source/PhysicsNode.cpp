@@ -35,7 +35,7 @@ PhysicsNode::PhysicsNode(Id pParentId, Id pId, TBC::PhysicsEngine::BodyID pBodyI
 	AddConnectorType(pConnectorType);
 
 	assert(mId >= 0);
-	assert(mBodyId != TBC::INVALID_BODY);
+	//assert(mBodyId != TBC::INVALID_BODY);
 }
 
 PhysicsNode::~PhysicsNode()

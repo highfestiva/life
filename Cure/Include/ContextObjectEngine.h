@@ -30,6 +30,7 @@ public:
 		ENGINE_HINGE2_TURN,
 		ENGINE_HINGE2_BREAK,
 		ENGINE_HINGE,
+		ENGINE_GLUE,
 	};
 	enum EngineMode
 	{

@@ -21,7 +21,7 @@ namespace Cure
 
 class ContextManager;
 class ContextObjectAttribute;
-
+class ContextObjectEngine;
 
 
 class ContextObject: public TBC::PhysicsEngine::TriggerListener, public TBC::PhysicsEngine::ForceFeedbackListener
@@ -41,12 +41,12 @@ public:
 	void SetNetworkObjectType(NetworkObjectType pType);
 
 	void SetAllowMoveSelf(bool pAllow);
-	void ConnectObjects(TBC::PhysicsEngine::BodyID pBody1, ContextObject* pObject2, TBC::PhysicsEngine::BodyID pBody2);
-	bool IsConnectedTo(ContextObject* pObject) const;
-	void AddConnection(ContextObject* pObject, TBC::PhysicsEngine::JointID pJoint);
-	bool RemoveConnection(ContextObject* pObject);
+	void AttachToObject(TBC::PhysicsEngine::BodyID pBody1, ContextObject* pObject2, TBC::PhysicsEngine::BodyID pBody2);
+	void AttachToObject(PhysicsNode::Id pBody1Id, ContextObject* pObject2, PhysicsNode::Id pBody2Id);
+	bool DetachFromObject(ContextObject* pObject);
 
 	void AddAttribute(ContextObjectAttribute* pAttribute);
+	void RemoveAttribute(ContextObjectAttribute* pAttribute);
 
 	bool UpdateFullPosition(const ObjectPositionalData*& pPositionalData);
 	void SetFullPosition(const ObjectPositionalData& pPositionalData);
@@ -64,9 +64,27 @@ public:
 	virtual void OnPhysicsTick();
 
 protected:
+	void AttachToObject(PhysicsNode* pNode1, ContextObject* pObject2, PhysicsNode* pNode2, bool pSend);
+	bool IsAttachedTo(ContextObject* pObject) const;
+	void AddAttachment(ContextObject* pObject, TBC::PhysicsEngine::JointID pJoint, ContextObjectEngine* pEngine);
+
+	PhysicsNode::Id GetNextNodeId();
+
 	typedef std::vector<ContextObjectAttribute*> AttributeArray;
 	typedef std::vector<PhysicsNode> PhysicsNodeArray;
-	typedef std::list<ContextObject*> ConnectionList;
+	struct Connection
+	{
+		Connection(ContextObject* pObject, TBC::PhysicsEngine::JointID pJointId, ContextObjectEngine* pEngine):
+			mObject(pObject),
+			mJointId(pJointId),
+			mEngine(pEngine)
+		{
+		}
+		ContextObject* mObject;
+		TBC::PhysicsEngine::JointID mJointId;
+		ContextObjectEngine* mEngine;
+	};
+	typedef std::list<Connection> ConnectionList;
 
 	ContextManager* mManager;
 	GameObjectId mInstanceId;
@@ -78,6 +96,7 @@ protected:
 	ObjectPositionalData mPosition;
 	bool mAllowMoveSelf;	// This is set to false when attached to someone/something else.
 	ConnectionList mConnectionList;
+	int mUniqeNodeId;
 
 	LOG_CLASS_DECLARE();
 };

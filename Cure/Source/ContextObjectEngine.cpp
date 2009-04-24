@@ -117,6 +117,7 @@ bool ContextObjectEngine::SetValue(unsigned pAspect, float pValue, float pZAngle
 		}
 		break;
 		case ENGINE_ROLL_STRAIGHT:
+		case ENGINE_GLUE:
 		{
 			// Fixed mode "engine".
 		}
@@ -143,7 +144,7 @@ void ContextObjectEngine::OnTick(float pFrameTime)
 		const EngineNode& lEngineNode = *i;
 		PhysicsNode* lNode = GetContextObject()->GetPhysicsNode(lEngineNode.mId);
 		const float lScale = lEngineNode.mScale;
-		if (lNode && lNode->GetBodyId() != TBC::INVALID_BODY)
+		if (lNode)
 		{
 			switch (mEngineType)
 			{
@@ -238,6 +239,15 @@ void ContextObjectEngine::OnTick(float pFrameTime)
 					}
 				}
 				break;
+				case ENGINE_GLUE:
+				{
+					assert(lNode->GetJointId() != TBC::INVALID_JOINT);
+					if (lNode->GetJointId() != TBC::INVALID_JOINT)
+					{
+						lPhysicsManager->StabilizeJoint(lNode->GetJointId());
+					}
+				}
+				break;
 				default:
 				{
 					assert(false);
@@ -247,7 +257,7 @@ void ContextObjectEngine::OnTick(float pFrameTime)
 		}
 		else
 		{
-			mLog.AError("Missing node/body!");
+			mLog.AError("Missing node!");
 		}
 	}
 }

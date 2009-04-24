@@ -917,6 +917,42 @@ void PhysicsEngineODE::DeleteJoint(JointID pJointId)
 	mJointInfoAllocator.Free(lJointInfo);
 }
 
+bool PhysicsEngineODE::StabilizeJoint(JointID pJointId)
+{
+	JointTable::iterator lIter = mJointTable.find((JointInfo*)pJointId);
+	if (lIter == mJointTable.end())
+	{
+		mLog.Errorf(_T("Couldn't find joint %i!"), pJointId);
+		return (false);
+	}
+	bool lOk = false;
+	JointInfo* lJointInfo = *lIter;
+	switch (lJointInfo->mType)
+	{
+		case JOINT_BALL:
+		{
+			dVector3 lAnchor;
+			::dJointGetBallAnchor(lJointInfo->mJointID, lAnchor);
+			dVector3 lAnchor2;
+			::dJointGetBallAnchor2(lJointInfo->mJointID, lAnchor2);
+			dxBody* lChildBody = lJointInfo->mJointID->node[1].body;
+			const dReal* lPos = ::dBodyGetPosition(lChildBody);
+			lAnchor[0] = lPos[0] + lAnchor[0] - lAnchor2[0];
+			lAnchor[1] = lPos[1] + lAnchor[1] - lAnchor2[1];
+			lAnchor[2] = lPos[2] + lAnchor[2] - lAnchor2[2];
+			::dBodySetPosition(lChildBody, lAnchor[0], lAnchor[1], lAnchor[2]);
+		}
+		break;
+		default:
+		{
+			mLog.Errorf(_T("Joint type %i of non-1-type!"), lJointInfo->mType);
+			assert(false);
+		}
+		break;
+	}
+	return (lOk);
+}
+
 bool PhysicsEngineODE::GetJoint1Diff(BodyID pBodyId, JointID pJointId, Joint1Diff& pDiff) const
 {
 	JointTable::const_iterator lIter = mJointTable.find((JointInfo*)pJointId);
@@ -926,7 +962,7 @@ bool PhysicsEngineODE::GetJoint1Diff(BodyID pBodyId, JointID pJointId, Joint1Dif
 		return (false);
 	}
 	bool lOk = false;
-	JointInfo* lJointInfo = (JointInfo*)*lIter;
+	const JointInfo* lJointInfo = *lIter;
 	switch (lJointInfo->mType)
 	{
 		case JOINT_HINGE:
@@ -2111,6 +2147,15 @@ bool PhysicsEngineODE::SetAngularMotorRoll(JointID pJointId, Lepra::float32 pMax
 		::dBodyEnable(::dJointGetBody(lJoint->mJointID, 1));
 		return (true);
 	}
+	else if (lJoint->mType == JOINT_UNIVERSAL)
+	{
+		::dJointSetUniversalParam(lJoint->mJointID, dParamFMax, pMaxForce);
+		::dJointSetUniversalParam(lJoint->mJointID, dParamVel, pTargetVelocity);
+		::dJointSetUniversalParam(lJoint->mJointID, dParamFMax2, pMaxForce);
+		::dJointSetUniversalParam(lJoint->mJointID, dParamVel2, pTargetVelocity);
+		::dBodyEnable(::dJointGetBody(lJoint->mJointID, 1));
+		return (true);
+	}
 	mLog.AError("SetAngularMotorRoll() - Joint is not an angular motor!");
 	return (false);
 }
@@ -2259,6 +2304,13 @@ bool PhysicsEngineODE::SetJointParams(JointID pJointId, Lepra::float32 pLowStop,
 			dJointSetUniversalParam(lJointId, dParamLoStop, pLowStop);
 			dJointSetUniversalParam(lJointId, dParamHiStop, pHighStop);
 			dJointSetUniversalParam(lJointId, dParamBounce, pBounce);
+			dJointSetUniversalParam(lJointId, dParamFudgeFactor, pBounce);
+			dJointSetUniversalParam(lJointId, dParamCFM, 0);
+			dJointSetUniversalParam(lJointId, dParamLoStop2, pLowStop);
+			dJointSetUniversalParam(lJointId, dParamHiStop2, pHighStop);
+			dJointSetUniversalParam(lJointId, dParamBounce2, pBounce);
+			dJointSetUniversalParam(lJointId, dParamFudgeFactor2, pBounce);
+			dJointSetUniversalParam(lJointId, dParamCFM2, 0);
 		}
 		break;
 		case JOINT_ANGULARMOTOR:

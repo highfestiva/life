@@ -675,6 +675,34 @@ bool GameServerManager::IsConnectAuthorized()
 	return (true);
 }
 
+void GameServerManager::SendAttach(Cure::ContextObject* pObject1, Cure::PhysicsNode::Id pId1,
+	Cure::ContextObject* pObject2, Cure::PhysicsNode::Id pId2)
+{
+	Cure::Packet* lPacket = GetNetworkAgent()->GetPacketFactory()->Allocate();
+	Cure::MessageObjectAttach* lAttach = (Cure::MessageObjectAttach*)GetNetworkAgent()->
+		GetPacketFactory()->GetMessageFactory()->Allocate(Cure::MESSAGE_TYPE_OBJECT_ATTACH);
+	lPacket->AddMessage(lAttach);
+	lAttach->Store(lPacket, pObject1->GetInstanceId(), pObject2->GetInstanceId(), (Lepra::uint16)pId1, (Lepra::uint16)pId2);
+
+	BroadcastPacket(0, lPacket, true);
+
+	GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
+}
+
+void GameServerManager::SendDetach(Cure::ContextObject* pObject1, Cure::ContextObject* pObject2)
+{
+	Cure::Packet* lPacket = GetNetworkAgent()->GetPacketFactory()->Allocate();
+	Cure::MessageObjectDetach* lDetach = (Cure::MessageObjectDetach*)GetNetworkAgent()->
+		GetPacketFactory()->GetMessageFactory()->Allocate(Cure::MESSAGE_TYPE_OBJECT_DETACH);
+	lPacket->AddMessage(lDetach);
+	lDetach->Store(lPacket, pObject1->GetInstanceId(), pObject2->GetInstanceId());
+
+	BroadcastPacket(0, lPacket, true);
+
+	GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
+}
+
+
 
 void GameServerManager::BroadcastCreateObject(Cure::ContextObject* pObject)
 {
@@ -686,12 +714,7 @@ void GameServerManager::BroadcastCreateObject(Cure::ContextObject* pObject)
 	assert(lInstanceClass.size() == 2);
 	assert(lInstanceClass[1].find(_T(":")) == Lepra::String::npos);
 	lCreate->Store(lPacket, pObject->GetInstanceId(), Lepra::UnicodeStringUtility::ToOwnCode(lInstanceClass[1]));
-	AccountClientTable::Iterator x = mAccountClientTable.First();
-	for (; x != mAccountClientTable.End(); ++x)
-	{
-		const Client* lClient = x.GetObject();
-		GetNetworkAgent()->PlaceInSendBuffer(true, lClient->GetUserConnection()->GetSocket(), lPacket);
-	}
+	BroadcastPacket(0, lPacket, true);
 	GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
 
 	const Cure::ObjectPositionalData* lPosition = 0;
@@ -774,20 +797,25 @@ void GameServerManager::BroadcastObjectPosition(Cure::GameObjectId pInstanceId,
 	lPosition->Store(lPacket, pInstanceId, GetTimeManager()->GetCurrentPhysicsFrame(), pPosition);
 
 	Lepra::ScopeLock lTickLock(GetTickLock());
+	BroadcastPacket(pExcludeClient, lPacket, pSafe);
+
+	GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
+}
+
+void GameServerManager::BroadcastPacket(const Client* pExcludeClient, Cure::Packet* pPacket, bool pSafe)
+{
 	AccountClientTable::Iterator x = mAccountClientTable.First();
 	for (; x != mAccountClientTable.End(); ++x)
 	{
 		const Client* lClient = x.GetObject();
 		if (lClient != pExcludeClient)
 		{
-			//mLog.Debugf(_T("Sending position (%f; %f; %f)."), pPosition.mTransformation.GetPosition().x,
-			//	pPosition.mTransformation.GetPosition().y, pPosition.mTransformation.GetPosition().z);
-			GetNetworkAgent()->PlaceInSendBuffer(pSafe, lClient->GetUserConnection()->GetSocket(), lPacket);
+			GetNetworkAgent()->PlaceInSendBuffer(pSafe, lClient->GetUserConnection()->GetSocket(), pPacket);
 		}
 	}
-
-	GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
 }
+
+
 
 Cure::NetworkServer* GameServerManager::GetNetworkServer() const
 {

@@ -100,8 +100,11 @@ void ContextManager::AddPhysicsBody(ContextObject* pObject, TBC::PhysicsEngine::
 
 void ContextManager::RemovePhysicsBody(TBC::PhysicsEngine::BodyID pBodyId)
 {
-	mBodyTable.erase(pBodyId);
-	GetGameManager()->GetPhysicsManager()->DeleteBody(pBodyId);
+	if (pBodyId != TBC::INVALID_BODY)
+	{
+		mBodyTable.erase(pBodyId);
+		GetGameManager()->GetPhysicsManager()->DeleteBody(pBodyId);
+	}
 }
 
 void ContextManager::RemovePhysicsJoint(TBC::PhysicsEngine::JointID pJointId)

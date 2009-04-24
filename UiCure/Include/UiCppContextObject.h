@@ -29,7 +29,7 @@ public:
 
 	bool StartLoadGraphics(Cure::UserResource* pParentResource);
 
-	void DebugDrawAxis();
+	void DebugDrawAxes();
 
 private:
 	void OnLoadMesh(UserGeometryReferenceOffsetResource* pMeshResource);

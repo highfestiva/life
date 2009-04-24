@@ -4,6 +4,8 @@
 
 
 
+#include "../Include/ContextObject.h"
+#include <algorithm>
 #include <assert.h>
 #include <math.h>
 #include "../../Lepra/Include/Math.h"
@@ -11,7 +13,6 @@
 #include "../../Lepra/Include/RotationMatrix.h"
 #include "../../TBC/Include/PhysicsEngine.h"
 #include "../Include/ContextManager.h"
-#include "../Include/ContextObject.h"
 #include "../Include/ContextObjectEngine.h"
 #include "../Include/Cure.h"
 #include "../Include/GameManager.h"
@@ -47,7 +48,8 @@ ContextObject::ContextObject(const Lepra::String& pClassId):
 	mClassId(pClassId),
 	mNetworkObjectType(NETWORK_OBJECT_LOCAL_ONLY),
 	mRootPhysicsIndex(-1),
-	mAllowMoveSelf(true)
+	mAllowMoveSelf(true),
+	mUniqeNodeId(256)
 {
 }
 
@@ -58,24 +60,39 @@ ContextObject::~ContextObject()
 	mManager->RemoveObject(this);
 	mRootPhysicsIndex = -1;
 
-	PhysicsNodeArray::iterator x = mPhysicsNodeArray.begin();
-	for (; x != mPhysicsNodeArray.end(); ++x)
+	// Detach from other context objects.
 	{
-		mManager->RemovePhysicsJoint(x->GetJointId());
+		while (!mConnectionList.empty())
+		{
+			ContextObject* lObject2 = mConnectionList.front().mObject;
+			DetachFromObject(lObject2);
+		}
 	}
-	x = mPhysicsNodeArray.begin();
-	for (; x != mPhysicsNodeArray.end(); ++x)
-	{
-		mManager->RemovePhysicsBody(x->GetBodyId());
-	}
-	mPhysicsNodeArray.clear();
 
-	AttributeArray::iterator y = mAttributeArray.begin();
-	for (; y != mAttributeArray.end(); ++y)
+	// Destroy joints, then bodies (needs to go in that order).
 	{
-		delete (*y);
+		PhysicsNodeArray::iterator x = mPhysicsNodeArray.begin();
+		for (; x != mPhysicsNodeArray.end(); ++x)
+		{
+			mManager->RemovePhysicsJoint(x->GetJointId());
+		}
+		x = mPhysicsNodeArray.begin();
+		for (; x != mPhysicsNodeArray.end(); ++x)
+		{
+			mManager->RemovePhysicsBody(x->GetBodyId());
+		}
+		mPhysicsNodeArray.clear();
 	}
-	mAttributeArray.clear();
+
+	// Fuck off, attributes.
+	{
+		AttributeArray::iterator x = mAttributeArray.begin();
+		for (; x != mAttributeArray.end(); ++x)
+		{
+			delete (*x);
+		}
+		mAttributeArray.clear();
+	}
 
 	mManager->FreeGameObjectId(mNetworkObjectType, mInstanceId);
 	mInstanceId = 0;
@@ -133,68 +150,59 @@ void ContextObject::SetAllowMoveSelf(bool pAllow)
 	mAllowMoveSelf = pAllow;
 }
 
-void ContextObject::ConnectObjects(TBC::PhysicsEngine::BodyID pBody1, ContextObject* pObject2, TBC::PhysicsEngine::BodyID pBody2)
+void ContextObject::AttachToObject(TBC::PhysicsEngine::BodyID pBody1, ContextObject* pObject2, TBC::PhysicsEngine::BodyID pBody2)
 {
-	if (IsConnectedTo(pObject2))
+	if (IsAttachedTo(pObject2))
 	{
 		return;
 	}
-	PhysicsNode* lNode1 = GetPhysicsNode(pBody1);
-	PhysicsNode* lNode2 = pObject2->GetPhysicsNode(pBody2);
-	if (!lNode1 || !lNode2)
+	AttachToObject(GetPhysicsNode(pBody1), pObject2, pObject2->GetPhysicsNode(pBody2), true);
+}
+
+void ContextObject::AttachToObject(PhysicsNode::Id pBody1Id, ContextObject* pObject2, PhysicsNode::Id pBody2Id)
+{
+	if (IsAttachedTo(pObject2))
 	{
+		assert(false);
 		return;
 	}
-
-	TBC::PhysicsEngine* lPhysics = mManager->GetGameManager()->GetPhysicsManager();
-	if (lNode1->IsConnectorType(PhysicsNode::CONNECTOR_3) && lNode2->IsConnectorType(PhysicsNode::CONNECTEE_3))
-	{
-		pObject2->SetAllowMoveSelf(false);
-		// TODO:  broadcast "allow move self" = false!
-
-		// Find first parent that is a dynamic body.
-		TBC::PhysicsEngine::BodyID lBody2Connectee = pBody2;
-		PhysicsNode* lNode2Connectee = lNode2;
-		while (lPhysics->IsStaticBody(lBody2Connectee))
-		{
-			lNode2Connectee = pObject2->GetPhysicsNode(lNode2Connectee->GetParentId());
-			if (!lNode2Connectee)
-			{
-				return;
-			}
-			lBody2Connectee = lNode2Connectee->GetBodyId();
-		}
-
-		mLog.AInfo("Attaching two objects.");
-		Lepra::TransformationF lAnchor;
-		lPhysics->GetBodyTransform(pBody2, lAnchor);
-		TBC::PhysicsEngine::JointID lJoint = lPhysics->CreateBallJoint(pBody1, lBody2Connectee, lAnchor.GetPosition());
-		AddConnection(pObject2, lJoint);
-		pObject2->AddConnection(this, lJoint);
-	}
+	AttachToObject(GetPhysicsNode(pBody1Id), pObject2, pObject2->GetPhysicsNode(pBody2Id), false);
 }
 
-bool ContextObject::IsConnectedTo(ContextObject* pObject) const
-{
-	return (std::find(mConnectionList.begin(), mConnectionList.end(), pObject) != mConnectionList.end());
-}
-
-void ContextObject::AddConnection(ContextObject* pObject, TBC::PhysicsEngine::JointID pJoint)
-{
-	assert(!IsConnectedTo(pObject));
-	mConnectionList.push_back(pObject);
-	pJoint;	// TODO!
-}
-
-bool ContextObject::RemoveConnection(ContextObject* pObject)
+bool ContextObject::DetachFromObject(ContextObject* pObject)
 {
 	bool lRemoved = false;
-	// TODO: something about that joint!
-	ConnectionList::iterator x = std::find(mConnectionList.begin(), mConnectionList.end(), pObject);
-	if (x != mConnectionList.end())
+	ConnectionList::iterator x = mConnectionList.begin();
+	for (; x != mConnectionList.end(); ++x)
 	{
-		mConnectionList.erase(x);
-		lRemoved = true;
+		if (pObject == x->mObject)
+		{
+			TBC::PhysicsEngine::JointID lJointId = x->mJointId;
+			ContextObjectEngine* lEngine = x->mEngine;
+			mConnectionList.erase(x);
+			pObject->DetachFromObject(this);
+			if (lJointId != TBC::INVALID_JOINT)
+			{
+				PhysicsNodeArray::iterator x = mPhysicsNodeArray.begin();
+				for (; x != mPhysicsNodeArray.end(); ++x)
+				{
+					if (x->GetJointId() == lJointId)
+					{
+						mPhysicsNodeArray.erase(x);
+						break;
+					}
+				}
+				mManager->GetGameManager()->GetPhysicsManager()->DeleteJoint(lJointId);
+				mManager->GetGameManager()->SendDetach(this, pObject);
+			}
+			if (lEngine)
+			{
+				RemoveAttribute(lEngine);
+				delete (lEngine);
+			}
+			lRemoved = true;
+			break;
+		}
 	}
 	return (lRemoved);
 }
@@ -204,6 +212,11 @@ bool ContextObject::RemoveConnection(ContextObject* pObject)
 void ContextObject::AddAttribute(ContextObjectAttribute* pAttribute)
 {
 	mAttributeArray.push_back(pAttribute);
+}
+
+void ContextObject::RemoveAttribute(ContextObjectAttribute* pAttribute)
+{
+	std::remove(mAttributeArray.begin(), mAttributeArray.end(), pAttribute);
 }
 
 
@@ -384,6 +397,7 @@ bool ContextObject::UpdateFullPosition(const ObjectPositionalData*& pPositionalD
 				}
 				break;
 				case ContextObjectEngine::ENGINE_ROLL_STRAIGHT:
+				case ContextObjectEngine::ENGINE_GLUE:
 				{
 					// Unsynchronized "engine".
 				}
@@ -430,6 +444,10 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData)
 		lPhysics->SetBodyAcceleration(lBody, pPositionalData.mPosition.mAcceleration);
 		lPhysics->SetBodyAngularVelocity(lBody, pPositionalData.mPosition.mAngularVelocity);
 		lPhysics->SetBodyAngularAcceleration(lBody, pPositionalData.mPosition.mAngularAcceleration);
+	}
+	else
+	{
+		mLog.AInfo("Skipping setting of main body; we're owned by someone else.");
 	}
 
 	if (mPosition.mBodyPositionArray.size() <= 0)
@@ -659,6 +677,7 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData)
 				}
 				break;
 				case ContextObjectEngine::ENGINE_ROLL_STRAIGHT:
+				case ContextObjectEngine::ENGINE_GLUE:
 				{
 					// Unsynchronized "engine".
 				}
@@ -762,6 +781,83 @@ void ContextObject::StepGhost(ObjectPositionalData& pGhost, float pDeltaTime)
 
 void ContextObject::OnPhysicsTick()
 {
+}
+
+
+
+void ContextObject::AttachToObject(PhysicsNode* pNode1, ContextObject* pObject2, PhysicsNode* pNode2, bool pSend)
+{
+	assert(pObject2);
+	if (!pObject2 || !pNode1 || !pNode2)
+	{
+		return;
+	}
+
+	TBC::PhysicsEngine* lPhysics = mManager->GetGameManager()->GetPhysicsManager();
+	if (pNode1->IsConnectorType(PhysicsNode::CONNECTOR_3) && pNode2->IsConnectorType(PhysicsNode::CONNECTEE_3))
+	{
+		pObject2->SetAllowMoveSelf(false);
+
+		// Find first parent that is a dynamic body.
+		TBC::PhysicsEngine::BodyID lBody2Connectee = pNode2->GetBodyId();
+		PhysicsNode* lNode2Connectee = pNode2;
+		while (lPhysics->IsStaticBody(lBody2Connectee))
+		{
+			lNode2Connectee = pObject2->GetPhysicsNode(lNode2Connectee->GetParentId());
+			if (!lNode2Connectee)
+			{
+				mLog.AError("Failing to attach to a static object.");
+				return;
+			}
+			lBody2Connectee = lNode2Connectee->GetBodyId();
+		}
+
+		mLog.AInfo("Attaching two objects.");
+		Lepra::TransformationF lAnchor;
+		lPhysics->GetBodyTransform(pNode2->GetBodyId(), lAnchor);
+		TBC::PhysicsEngine::JointID lJoint = lPhysics->CreateBallJoint(pNode1->GetBodyId(), lBody2Connectee, lAnchor.GetPosition());
+		PhysicsNode::Id lAttachNodeId = GetNextNodeId();
+		AddPhysicsObject(PhysicsNode(pNode1->GetId(), lAttachNodeId, TBC::INVALID_BODY, PhysicsNode::TYPE_EXCLUDE, lJoint));
+		ContextObjectEngine* lEngine = new ContextObjectEngine(this, ContextObjectEngine::ENGINE_GLUE, 0, 0, 0, 0);
+		lEngine->AddControlledNode(lAttachNodeId, 1);
+		AddAttachment(pObject2, lJoint, lEngine);
+		pObject2->AddAttachment(this, TBC::INVALID_JOINT, 0);
+
+		if (pSend)
+		{
+			mManager->GetGameManager()->SendAttach(this, pNode1->GetId(), pObject2, pNode2->GetId());
+		}
+	}
+}
+
+bool ContextObject::IsAttachedTo(ContextObject* pObject) const
+{
+	ConnectionList::const_iterator x = mConnectionList.begin();
+	for (; x != mConnectionList.end(); ++x)
+	{
+		if (pObject == x->mObject)
+		{
+			return (true);	// TRICKY: RAII.
+		}
+	}
+	return (false);
+}
+
+void ContextObject::AddAttachment(ContextObject* pObject, TBC::PhysicsEngine::JointID pJoint, ContextObjectEngine* pEngine)
+{
+	assert(!IsAttachedTo(pObject));
+	mConnectionList.push_back(Connection(pObject, pJoint, pEngine));
+	if (pEngine)
+	{
+		AddAttribute(pEngine);
+	}
+}
+
+
+
+PhysicsNode::Id ContextObject::GetNextNodeId()
+{
+	return (++mUniqeNodeId);
 }
 
 

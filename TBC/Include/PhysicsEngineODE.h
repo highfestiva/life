@@ -130,6 +130,8 @@ public:
 
 	virtual void DeleteJoint(JointID pJointId);
 
+	virtual bool StabilizeJoint(JointID pJointId);
+
 	bool GetJoint1Diff(BodyID pBodyId, JointID pJointId, Joint1Diff& pDiff) const;
 	bool SetJoint1Diff(BodyID pBodyId, JointID pJointId, const Joint1Diff& pDiff);
 	bool GetJoint2Diff(BodyID pBodyId, JointID pJointId, Joint2Diff& pDiff) const;
