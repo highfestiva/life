@@ -610,11 +610,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Include\IDManager.h"
+				RelativePath=".\Include\IdManager.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Include\IDManager.inl"
+				RelativePath=".\Include\IdManager.inl"
 				>
 			</File>
 			<File
