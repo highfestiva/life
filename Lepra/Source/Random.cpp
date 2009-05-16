@@ -7,8 +7,8 @@
 #include "../Include/Random.h"
 #pragma warning(push)
 #pragma warning(disable: 4127)	// Conditional expression is constant.
-#include "../../ThirdParty/mtwist-0.6/mtwist.h"
-#include "../../ThirdParty/mtwist-0.6/randistrs.h"
+#include "../../ThirdParty/mtwist-0.8/mtwist.h"
+#include "../../ThirdParty/mtwist-0.8/randistrs.h"
 #pragma warning(pop)
 #include <math.h>
 

@@ -45,7 +45,7 @@
 				Optimization="0"
 				WholeProgramOptimization="false"
 				AdditionalIncludeDirectories="&quot;ode-060223/include&quot;;..\ThirdParty\stlport\stlport"
-				PreprocessorDefinitions="WIN32;_DEBUG;dCYLINDER_ENABLED;_STLP_NO_OWN_NAMESPACE"
+				PreprocessorDefinitions="WIN32;_DEBUG;dCYLINDER_ENABLED"
 				ExceptionHandling="1"
 				RuntimeLibrary="1"
 				BufferSecurityCheck="false"
@@ -113,7 +113,7 @@
 				Name="VCCLCompilerTool"
 				FavorSizeOrSpeed="1"
 				AdditionalIncludeDirectories="&quot;ode-060223/include&quot;;..\ThirdParty\stlport\stlport"
-				PreprocessorDefinitions="WIN32;NDEBUG;dCYLINDER_ENABLED;_STLP_NO_OWN_NAMESPACE"
+				PreprocessorDefinitions="WIN32;NDEBUG;dCYLINDER_ENABLED"
 				ExceptionHandling="1"
 				RuntimeLibrary="0"
 				BufferSecurityCheck="false"
@@ -2116,11 +2116,11 @@
 				Filter="h;hpp;hxx;hm;inl;inc;xsd"
 				>
 				<File
-					RelativePath=".\mtwist-0.6\mtwist.h"
+					RelativePath=".\mtwist-0.8\mtwist.h"
 					>
 				</File>
 				<File
-					RelativePath=".\mtwist-0.6\randistrs.h"
+					RelativePath=".\mtwist-0.8\randistrs.h"
 					>
 				</File>
 			</Filter>
@@ -2129,46 +2129,12 @@
 				Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
 				>
 				<File
-					RelativePath=".\mtwist-0.6\mtwist.c"
+					RelativePath=".\mtwist-0.8\mtwist.c"
 					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							WholeProgramOptimization="false"
-							CompileAs="2"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							CompileAs="2"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
-					RelativePath=".\mtwist-0.6\randistrs.c"
+					RelativePath=".\mtwist-0.8\randistrs.c"
 					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							WholeProgramOptimization="false"
-							CompileAs="2"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							CompileAs="2"
-						/>
-					</FileConfiguration>
 				</File>
 			</Filter>
 		</Filter>

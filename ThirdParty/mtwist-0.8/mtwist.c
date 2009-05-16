@@ -172,7 +172,11 @@ static char Rcs_Id[] =
  * to a function.  We do so with a couple of careful #defines.
  */
 #undef MT_NO_INLINE			/* Ask for code to be compiled */
+#ifdef _MSC_VER	// JB: required for MSVC compliance.
+#define MT_INLINE	__inline
+#else // !MSVC
 #define MT_INLINE			/* Disable the inline keyword */
+#endif // MSVC / !MSVC
 #define MT_EXTERN			/* Generate real code for functions */
 
 #include "mtwist.h"

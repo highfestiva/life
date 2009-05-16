@@ -264,7 +264,9 @@ _ForwardIter1 search(_ForwardIter1 __first1, _ForwardIter1 __last1,
     }
     ++__first1;
   }
+#ifndef _MSC_VER	// JB: MSVC rightfully thinks this is unreachable code.
   return __first1;
+#endif // !MSVC
 }
 
 _STLP_MOVE_TO_PRIV_NAMESPACE

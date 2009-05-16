@@ -41,24 +41,8 @@ ClientLoginView::ClientLoginView(UiTbc::Painter* pPainter, ClientLoginObserver* 
 
 	AddLabel(_T("Server"), Lepra::WHITE);
 
-	Lepra::String lServerName;
-	{
-		lServerName = Lepra::Network::GetHostname();
-		Lepra::IPAddress lLocalIp;
-		if (lServerName.empty())
-		{
-			if (Lepra::Network::ResolveHostname(_T(""), lLocalIp))
-			{
-				lServerName = lLocalIp.GetAsString();
-			}
-			else
-			{
-				lServerName = _T("0.0.0.0");
-			}
-		}
-		lServerName += _T(":16650");
-		CURE_RTVAR_GETSET(mLoginObserver->GetVariableScope(), "Login.DefaultServer", lServerName);
-	}
+	Lepra::String lServerName = _T(":16650");
+	CURE_RTVAR_GETSET(mLoginObserver->GetVariableScope(), "Login.DefaultServer", lServerName);
 	AddTextField(lServerName, _T("Server"));
 
 	AddButton(_T("Login"))->SetOnUnclickedFunc(ClientLoginView, OnLogin);

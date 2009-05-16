@@ -348,12 +348,21 @@ extern double		mt_ldrand(void);
 	}								\
 	while (0)
 
+#if defined(_MSC_VER) && defined(__cplusplus)	// JB: required for MSVC compliance.
+extern "C"
+{
+#endif // MSVC && C++
+
 extern mt_state		mt_default_state;
 					/* State of the default generator */
 extern double		mt_32_to_double;
 					/* Multiplier to convert long to dbl */
 extern double		mt_64_to_double;
 					/* Mult'r to cvt long long to dbl */
+
+#if defined(_MSC_VER) && defined(__cplusplus)	// JB: required for MSVC compliance.
+}	// extern "C"
+#endif // MSVC
 
 /*
  * In gcc, inline functions must be declared extern or they'll produce
@@ -362,7 +371,7 @@ extern double		mt_64_to_double;
  */
 #ifndef MT_EXTERN
 #ifdef __cplusplus
-#define MT_EXTERN			/* C++ doesn't need static */
+#define MT_EXTERN	extern		/* C++ doesn't need static */
 #else /* __cplusplus */
 #define MT_EXTERN	extern		/* C (at least gcc) needs extern */
 #endif /* __cplusplus */
@@ -374,7 +383,11 @@ extern double		mt_64_to_double;
  * C/C++ header files, above.
  */
 #ifndef MT_INLINE
+#ifdef _MSC_VER	// JB: required for MSVC compliance.
+#define MT_INLINE	__inline
+#else // !MSVC
 #define MT_INLINE	inline		/* Compiler has inlining */
+#endif // MSVC / !MSVC
 #endif /* MT_INLINE */
 
 /*
