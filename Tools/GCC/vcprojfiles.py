@@ -61,9 +61,9 @@ def main():
             if options.suffix == relp.split(".")[-1]:
                 doPrint = True               
 	if options.filter:
-		for fe in options.filter.split(';'):
-			if fe in relp:
-				doPrint = False
+            for fe in options.filter.split(';'):
+		if fe in relp:
+                    doPrint = False
         if doPrint:
             if options.qouted: q = "\""
             else: q = ""
