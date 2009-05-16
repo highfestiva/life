@@ -35,8 +35,8 @@
 #endif
 
 // streambuf_iterators predeclarations must appear first
-#ifndef _STLP_IOSFWD
-#  include <iosfwd>
+#ifndef _STLP_INTERNAL_IOSFWD
+#  include <stl/_iosfwd.h>
 #endif
 
 #ifndef _STLP_INTERNAL_ALGOBASE_H
@@ -65,7 +65,7 @@ _STLP_BEGIN_NAMESPACE
 #  define __ISI_TMPL_HEADER_ARGUMENTS class _Tp, class _CharT, class _Traits, class _Dist
 #  define __ISI_TMPL_ARGUMENTS _Tp, _CharT, _Traits, _Dist
 template <class _Tp,
-          class _CharT = _STLP_DEFAULTCHAR, class _Traits = char_traits<_CharT>,
+          class _CharT = char, class _Traits = char_traits<_CharT>,
           class _Dist = ptrdiff_t>
 class istream_iterator : public iterator<input_iterator_tag, _Tp , _Dist,
                                          const _Tp*, const _Tp& > {
@@ -144,18 +144,18 @@ private:
   mutable bool _M_read_done;
 
   void _M_read() const {
-    _M_ok = ((_M_stream != 0) && !_M_stream->fail());
+    _STLP_MUTABLE(_Self, _M_ok) = ((_M_stream != 0) && !_M_stream->fail());
     if (_M_ok) {
-      *_M_stream >> _M_value;
-      _M_ok = !_M_stream->fail();
+      *_M_stream >> _STLP_MUTABLE(_Self, _M_value);
+      _STLP_MUTABLE(_Self, _M_ok) = !_M_stream->fail();
     }
-    _M_read_done = true;
+    _STLP_MUTABLE(_Self, _M_read_done) = true;
   }
 };
 
 #if !defined (_STLP_LIMITED_DEFAULT_TEMPLATES)
 template <class _TpP,
-          class _CharT = _STLP_DEFAULTCHAR, class _Traits = char_traits<_CharT> >
+          class _CharT = char, class _Traits = char_traits<_CharT> >
 #else
 template <class _TpP>
 #endif

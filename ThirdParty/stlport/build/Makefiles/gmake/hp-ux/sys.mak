@@ -1,10 +1,21 @@
-# Time-stamp: <05/09/09 21:12:16 ptr>
-# $Id: sys.mak 1802 2005-11-01 08:25:57Z complement $
+# Time-stamp: <07/05/31 00:47:11 ptr>
+#
+# Copyright (c) 1997-1999, 2002, 2003, 2005-2007
+# Petr Ovtchenkov
+#
+# Copyright (c) 2006, 2007
+# Francois Dumont
+#
+# Portion Copyright (c) 1999-2001
+# Parallel Graphics Ltd.
+#
+# Licensed under the Academic Free License version 3.0
+#
 
-INSTALL := $$HOME/bin/install-sh
+INSTALL := cp
 
-INSTALL_SO := ${INSTALL} -c -m 0755
-INSTALL_A := ${INSTALL} -c -m 0644
-INSTALL_EXE := ${INSTALL} -c -m 0755
+INSTALL_SO := ${INSTALL}
+INSTALL_A := ${INSTALL}
+INSTALL_EXE := ${INSTALL}
 
 EXT_TEST := /usr/bin/test

@@ -1,4 +1,13 @@
-# -*- makefile -*- Time-stamp: <07/12/11 10:17:43 ptr>
+# -*- makefile -*- Time-stamp: <08/06/12 15:48:58 ptr>
+#
+# Copyright (c) 1997-1999, 2002, 2003, 2005-2008
+# Petr Ovtchenkov
+#
+# Portion Copyright (c) 1999-2001
+# Parallel Graphics Ltd.
+#
+# Licensed under the Academic Free License version 3.0
+#
 
 # Oh, the commented below work for gmake 3.78.1 and above,
 # but phrase without tag not work for it. Since gmake 3.79 
@@ -6,9 +15,7 @@
 # (really that more correct).
 
 ifneq ($(OSNAME), cygming)
-ifneq ($(OSNAME), windows)
 OPT += -fPIC
-endif
 endif
 
 ifndef NOT_USE_NOSTDLIB
@@ -61,12 +68,43 @@ endif
 ifeq ($(OSNAME),darwin)
 _USE_NOSTDLIB := 1
 endif
+
+ifeq ($(OSNAME),cygming)
+_USE_NOSTDLIB := 1
+endif
+endif
+
+ifndef WITHOUT_STLPORT
+
+ifeq (${STLPORT_LIB_DIR},)
+ifneq ($(OSNAME),cygming)
+release-shared:	STLPORT_LIB = -lstlport
+dbg-shared:	STLPORT_LIB = -lstlportg
+stldbg-shared:	STLPORT_LIB = -lstlportstlg
+else
+LIB_VERSION = ${LIBMAJOR}.${LIBMINOR}
+release-shared:	STLPORT_LIB = -lstlport.${LIB_VERSION}
+dbg-shared:	STLPORT_LIB = -lstlportg.${LIB_VERSION}
+stldbg-shared:	STLPORT_LIB = -lstlportstlg.${LIB_VERSION}
+endif
+else
+# STLPORT_LIB_DIR not empty
+ifneq ($(OSNAME),cygming)
+release-shared:	STLPORT_LIB = -L${STLPORT_LIB_DIR} -lstlport
+dbg-shared:	STLPORT_LIB = -L${STLPORT_LIB_DIR} -lstlportg
+stldbg-shared:	STLPORT_LIB = -L${STLPORT_LIB_DIR} -lstlportstlg
+else
+LIB_VERSION = ${LIBMAJOR}.${LIBMINOR}
+release-shared:	STLPORT_LIB = -L${STLPORT_LIB_DIR} -lstlport.${LIB_VERSION}
+dbg-shared:	STLPORT_LIB = -L${STLPORT_LIB_DIR} -lstlportg.${LIB_VERSION}
+stldbg-shared:	STLPORT_LIB = -L${STLPORT_LIB_DIR} -lstlportstlg.${LIB_VERSION}
+endif
+endif
+
 endif
 
 ifdef _USE_NOSTDLIB
 NOSTDLIB :=
-
-# ifeq ($(CXX_VERSION_MAJOR),3)
 
 # Check whether gcc builded with --disable-shared
 ifeq ($(shell ${CXX} ${CXXFLAGS} -print-file-name=libgcc_eh.a),libgcc_eh.a)
@@ -80,24 +118,50 @@ ifdef USE_STATIC_LIBGCC
 _LGCC_EH := -lgcc_eh
 _LGCC_S := -lgcc
 else
+#ifneq ($(OSNAME),darwin)
 # otherwise, exceptions support is in libgcc_s.so
 _LGCC_EH :=
+ifneq ($(OSNAME),darwin)
 _LGCC_S := -lgcc_s
+else
+ifeq ($(MACOSX_TEN_FIVE),true)
+_LGCC_S := -lgcc_s.10.5
+else
+_LGCC_S := -lgcc_s.10.4
 endif
+# end of Darwin
+endif
+# end of !USE_STATIC_LIBGCC
+endif
+# end of present libgcc_eh.a
 endif
 
+_LSUPCPP := $(shell ${CXX} ${CXXFLAGS} -print-file-name=libsupc++.a)
+ifeq (${OSNAME},darwin)
+ifdef GCC_APPLE_CC
+_LSUPCPP := $(shell mkdir -p $(PRE_OUTPUT_DIR) && lipo ${_LSUPCPP} -thin ${M_ARCH} -output $(PRE_OUTPUT_DIR)/libsupc++.a && echo $(PRE_OUTPUT_DIR)/libsupc++.a)
+endif
+endif
+ifneq (${_LSUPCPP},libsupc++.a)
+_LSUPCPP_OBJ     := $(shell $(AR) t ${_LSUPCPP})
+_LSUPCPP_AUX_OBJ := $(addprefix $(AUX_DIR)/,${_LSUPCPP_OBJ})
+_LSUPCPP_TSMP    := .supc++
+_LSUPCPP_AUX_TSMP:= $(AUX_DIR)/$(_LSUPCPP_TSMP)
+endif
+
+# ifeq ($(CXX_VERSION_MAJOR),3)
 # Include whole language support archive (libsupc++.a) into libstlport:
 # all C++ issues are in libstlport now.
 ifeq ($(OSNAME),linux)
-START_OBJ := $(shell for o in crt{i,beginS}.o; do ${CXX} ${CXXFLAGS} -print-file-name=$$o; done)
-#START_A_OBJ := $(shell for o in crt{i,beginT}.o; do ${CXX} -print-file-name=$$o; done)
-END_OBJ := $(shell for o in crt{endS,n}.o; do ${CXX} ${CXXFLAGS} -print-file-name=$$o; done)
-STDLIBS := -Wl,--whole-archive -lsupc++ ${_LGCC_EH} -Wl,--no-whole-archive ${_LGCC_S} -lpthread -lc -lm
+START_OBJ := $(shell for o in crti.o crtbeginS.o; do ${CXX} ${CXXFLAGS} -print-file-name=$$o; done)
+#START_A_OBJ := $(shell for o in crti.o crtbeginT.o; do ${CXX} -print-file-name=$$o; done)
+END_OBJ := $(shell for o in crtendS.o crtn.o; do ${CXX} ${CXXFLAGS} -print-file-name=$$o; done)
+STDLIBS = -Wl,--whole-archive -lsupc++ ${_LGCC_EH} -Wl,--no-whole-archive ${_LGCC_S} -lpthread -lc -lm
 endif
 ifeq ($(OSNAME),openbsd)
 START_OBJ := $(shell for o in crtbeginS.o; do ${CXX} ${CXXFLAGS} -print-file-name=$$o; done)
 END_OBJ := $(shell for o in crtendS.o; do ${CXX} ${CXXFLAGS} -print-file-name=$$o; done)
-STDLIBS := -Wl,--whole-archive -lsupc++ ${_LGCC_EH} -Wl,--no-whole-archive ${_LGCC_S} -lpthread -lc -lm
+STDLIBS = -Wl,--whole-archive -lsupc++ ${_LGCC_EH} -Wl,--no-whole-archive ${_LGCC_S} -lpthread -lc -lm
 endif
 ifeq ($(OSNAME),freebsd)
 # FreeBSD < 5.3 should use -lc_r, while FreeBSD >= 5.3 use -lpthread
@@ -107,9 +171,9 @@ END_OBJ := $(shell for o in crtendS.o crtn.o; do ${CXX} ${CXXFLAGS} -print-file-
 STDLIBS := -Wl,--whole-archive -lsupc++ ${_LGCC_EH} -Wl,--no-whole-archive ${_LGCC_S} -l${PTHR} -lc -lm
 endif
 ifeq ($(OSNAME),netbsd)
-START_OBJ := $(shell for o in crt{i,beginS}.o; do ${CXX} ${CXXFLAGS} -print-file-name=$$o; done)
-END_OBJ := $(shell for o in crt{endS,n}.o; do ${CXX} ${CXXFLAGS} -print-file-name=$$o; done)
-STDLIBS := -Wl,--whole-archive -lsupc++ ${_LGCC_EH} -Wl,--no-whole-archive ${_LGCC_S} -lpthread -lc -lm
+START_OBJ := $(shell for o in crti.o crtbeginS.o; do ${CXX} ${CXXFLAGS} -print-file-name=$$o; done)
+END_OBJ := $(shell for o in crtendS.o crtn.o; do ${CXX} ${CXXFLAGS} -print-file-name=$$o; done)
+STDLIBS = -Wl,--whole-archive -lsupc++ ${_LGCC_EH} -Wl,--no-whole-archive ${_LGCC_S} -lpthread -lc -lm
 endif
 ifeq ($(OSNAME),sunos)
 START_OBJ := $(shell for o in crti.o crtbegin.o; do ${CXX} ${CXXFLAGS} -print-file-name=$$o; done)
@@ -117,91 +181,131 @@ END_OBJ := $(shell for o in crtend.o crtn.o; do ${CXX} ${CXXFLAGS} -print-file-n
 STDLIBS := -Wl,-zallextract -lsupc++ ${_LGCC_EH} -Wl,-zdefaultextract ${_LGCC_S} -lpthread -lc -lm
 endif
 ifeq ($(OSNAME),darwin)
+ifndef USE_STATIC_LIBGCC
+# MacOS X, shared-libgcc
+ifeq ($(MACOSX_TEN_FIVE),true)
+# MacOS X >= 10.5
+START_OBJ :=
+else
+# MacOS X < 10.5
+START_OBJ :=
+endif
+else
+# MacOS X, not shared-libgcc
 START_OBJ := 
-END_OBJ := 
+endif
+END_OBJ :=
+# -all_load don't demonstrate any visible effect, looks like
+# this is dummy option; but nevertheless, with _LSUPCPP_AUX_OBJ
+# trick (as in static library) we can resolve problem, in potential
 ifdef GCC_APPLE_CC
-STDLIBS := -lgcc -lc -lm -all_load -lsupc++
+STDLIBS := ${_LGCC_S} -lc -lm -all_load ${_LSUPCPP} ${_LGCC_EH}
 else
 LDFLAGS += -single_module
 STDLIBS := ${_LGCC_S} -lc -lm -all_load -lsupc++ ${_LGCC_EH}
 endif
 endif
 #END_A_OBJ := $(shell for o in crtn.o; do ${CXX} -print-file-name=$$o; done)
-
-NOSTDLIB := -nostdlib
 # endif
 
+ifneq ($(OSNAME),cygming)
+NOSTDLIB := -nostdlib
+else
+NOSTDLIB := -nodefaultlibs
+ifndef USE_STATIC_LIBGCC
+ifeq ($(shell ${CXX} ${CXXFLAGS} -print-file-name=libgcc_s.a),libgcc_s.a)
+_LGCC_S := -lgcc
+else
+_LGCC_S := -lgcc_s
+endif
+else
+_LGCC_S := -lgcc
+endif
+ifeq ($(OSREALNAME),mingw)
+STDLIBS = -lsupc++ ${_LGCC_S} -lm -lmoldname -lmingw32 -lmingwex -lmsvcrt -lkernel32
+else
+LIBSUPC++ := $(shell ${CXX} ${CXXFLAGS} -print-file-name=libsupc++.a)
+LSUPC++DEF := $(PRE_OUTPUT_DIR)/libsupc++.def
+$(LSUPC++DEF) : $(LIBSUPC++)
+	dlltool --export-all-symbols --output-def=$(LSUPC++DEF) $(LIBSUPC++)
+ifneq (,$(findstring no-cygwin,$(EXTRA_CXXFLAGS)))
+STDLIBS = -Wl,-whole-archive -lsupc++ -Wl,-no-whole-archive ${_LGCC_S} -lm -lmoldname -lmingw32 -lmingwex -lmsvcrt -lkernel32
+else
+STDLIBS = -Wl,-whole-archive -lsupc++ -Wl,--no-whole-archive ${_LGCC_S} -lpthread -lm -lc -lkernel32
+endif
+endif
+endif
+else
+ifndef WITHOUT_STLPORT
+ifndef STLP_BUILD
+STDLIBS = ${STLPORT_LIB}
+else
+STDLIBS =
+endif
+else
+STDLIBS = 
+endif
+endif
+
+ifneq ($(OSNAME),darwin)
+dbg-shared:	LDFLAGS += -shared
+stldbg-shared:	LDFLAGS += -shared
+release-shared:	LDFLAGS += -shared
 endif
 
 ifeq ($(OSNAME),hp-ux)
-dbg-shared:	LDFLAGS += -shared -Wl,-C20 -Wl,-dynamic  -Wl,+h$(SO_NAME_DBGxx) ${LDSEARCH}
-stldbg-shared:	LDFLAGS += -shared -Wl,-C20 -Wl,-dynamic  -Wl,+h$(SO_NAME_STLDBGxx) ${LDSEARCH}
-release-shared:	LDFLAGS += -shared -Wl,-C20 -Wl,-dynamic -Wl,+h$(SO_NAMExx) ${LDSEARCH}
+dbg-shared:	LDFLAGS += -Wl,-dynamic -Wl,+h$(SO_NAME_DBGxx)
+stldbg-shared:	LDFLAGS += -Wl,-dynamic -Wl,+h$(SO_NAME_STLDBGxx)
+release-shared:	LDFLAGS += -Wl,-dynamic -Wl,+h$(SO_NAMExx)
 endif
 
 ifeq ($(OSNAME),sunos)
-dbg-shared:	LDFLAGS += -shared -Wl,-h$(SO_NAME_DBGxx) ${NOSTDLIB} ${LDSEARCH}
-stldbg-shared:	LDFLAGS += -shared -Wl,-h$(SO_NAME_STLDBGxx) ${NOSTDLIB} ${LDSEARCH}
-release-shared:	LDFLAGS += -shared -Wl,-h$(SO_NAMExx) ${NOSTDLIB} ${LDSEARCH}
-dbg-static:	LDFLAGS += ${LDSEARCH}
-stldbg-static:	LDFLAGS += ${LDSEARCH}
-release-static:	LDFLAGS += ${LDSEARCH}
+dbg-shared:	LDFLAGS += -Wl,-h$(SO_NAME_DBGxx) ${NOSTDLIB}
+stldbg-shared:	LDFLAGS += -Wl,-h$(SO_NAME_STLDBGxx) ${NOSTDLIB}
+release-shared:	LDFLAGS += -Wl,-h$(SO_NAMExx) ${NOSTDLIB}
 endif
 
 ifeq ($(OSNAME),linux)
-dbg-shared:	LDFLAGS += -shared -Wl,-h$(SO_NAME_DBGxx) ${NOSTDLIB} ${LDSEARCH}
-stldbg-shared:	LDFLAGS += -shared -Wl,-h$(SO_NAME_STLDBGxx) ${NOSTDLIB} ${LDSEARCH}
-release-shared:	LDFLAGS += -shared -Wl,-h$(SO_NAMExx) ${NOSTDLIB} ${LDSEARCH}
-dbg-static:	LDFLAGS += ${LDSEARCH}
-stldbg-static:	LDFLAGS += ${LDSEARCH}
-release-static:	LDFLAGS += ${LDSEARCH}
+dbg-shared:	LDFLAGS += -Wl,-h$(SO_NAME_DBGxx) ${NOSTDLIB}
+stldbg-shared:	LDFLAGS += -Wl,-h$(SO_NAME_STLDBGxx) ${NOSTDLIB}
+release-shared:	LDFLAGS += -Wl,-h$(SO_NAMExx) ${NOSTDLIB}
 endif
 
 ifeq ($(OSNAME),cygming)
-dbg-shared:	LDFLAGS += -shared -Wl,--out-implib=${LIB_NAME_OUT_DBG},--enable-auto-image-base
-stldbg-shared:	LDFLAGS += -shared -Wl,--out-implib=${LIB_NAME_OUT_STLDBG},--enable-auto-image-base
-release-shared:	LDFLAGS += -shared -Wl,--out-implib=${LIB_NAME_OUT},--enable-auto-image-base
-dbg-static:	LDFLAGS += -static ${LDSEARCH}
-stldbg-static:	LDFLAGS += -static ${LDSEARCH}
-release-static:	LDFLAGS += -static ${LDSEARCH}
+ifndef USE_STATIC_LIBGCC
+dbg-shared:	LDFLAGS += -shared-libgcc
+stldbg-shared:	LDFLAGS += -shared-libgcc
+release-shared:	LDFLAGS += -shared-libgcc
 endif
-
-ifeq ($(OSNAME),windows)
-dbg-shared:	LDFLAGS += -shared -Wl,--out-implib=${LIB_NAME_OUT_DBG},--enable-auto-image-base
-stldbg-shared:	LDFLAGS += -shared -Wl,--out-implib=${LIB_NAME_OUT_STLDBG},--enable-auto-image-base
-release-shared:	LDFLAGS += -shared -Wl,--out-implib=${LIB_NAME_OUT},--enable-auto-image-base
-dbg-static:	LDFLAGS += -static ${LDSEARCH}
-stldbg-static:	LDFLAGS += -static ${LDSEARCH}
-release-static:	LDFLAGS += -static ${LDSEARCH}
+dbg-shared:	LDFLAGS += -Wl,--out-implib=${LIB_NAME_OUT_DBG},--enable-auto-image-base ${NOSTDLIB}
+stldbg-shared:	LDFLAGS += -Wl,--out-implib=${LIB_NAME_OUT_STLDBG},--enable-auto-image-base ${NOSTDLIB}
+release-shared:	LDFLAGS += -Wl,--out-implib=${LIB_NAME_OUT},--enable-auto-image-base ${NOSTDLIB}
+dbg-static:	LDFLAGS += -static
+stldbg-static:	LDFLAGS += -static
+release-static:	LDFLAGS += -static
 endif
 
 ifeq ($(OSNAME),freebsd)
-dbg-shared:	LDFLAGS += -shared -Wl,-h$(SO_NAME_DBGxx) ${NOSTDLIB} ${LDSEARCH}
-stldbg-shared:	LDFLAGS += -shared -Wl,-h$(SO_NAME_STLDBGxx) ${NOSTDLIB} ${LDSEARCH}
-release-shared:	LDFLAGS += -shared -Wl,-h$(SO_NAMExx) ${NOSTDLIB} ${LDSEARCH}
-dbg-static:	LDFLAGS += ${LDSEARCH}
-stldbg-static:	LDFLAGS += ${LDSEARCH}
-release-static:	LDFLAGS += ${LDSEARCH}
+dbg-shared:	LDFLAGS += -Wl,-h$(SO_NAME_DBGxx) ${NOSTDLIB}
+stldbg-shared:	LDFLAGS += -Wl,-h$(SO_NAME_STLDBGxx) ${NOSTDLIB}
+release-shared:	LDFLAGS += -Wl,-h$(SO_NAMExx) ${NOSTDLIB}
 endif
 
 ifeq ($(OSNAME),darwin)
 CURRENT_VERSION := ${MAJOR}.${MINOR}.${PATCH}
 COMPATIBILITY_VERSION := $(CURRENT_VERSION)
 
-dbg-shared:	LDFLAGS += -dynamic -dynamiclib -compatibility_version $(COMPATIBILITY_VERSION) -current_version $(CURRENT_VERSION) -install_name $(SO_NAME_DBGxx) ${LDSEARCH} ${NOSTDLIB}
-stldbg-shared:	LDFLAGS += -dynamic -dynamiclib -compatibility_version $(COMPATIBILITY_VERSION) -current_version $(CURRENT_VERSION) -install_name $(SO_NAME_STLDBGxx) ${LDSEARCH} ${NOSTDLIB}
-release-shared:	LDFLAGS += -dynamic -dynamiclib -compatibility_version $(COMPATIBILITY_VERSION) -current_version $(CURRENT_VERSION) -install_name $(SO_NAMExx) ${LDSEARCH} ${NOSTDLIB}
-
-dbg-static:	LDFLAGS += -staticlib ${LDSEARCH}
-stldbg-static:	LDFLAGS += -staticlib ${LDSEARCH}
-release-static:	LDFLAGS += -staticlib ${LDSEARCH}
+dbg-shared:	LDFLAGS += -dynamic -dynamiclib -compatibility_version $(COMPATIBILITY_VERSION) -current_version $(CURRENT_VERSION) -install_name $(SO_NAME_DBGxx) ${NOSTDLIB}
+stldbg-shared:	LDFLAGS += -dynamic -dynamiclib -compatibility_version $(COMPATIBILITY_VERSION) -current_version $(CURRENT_VERSION) -install_name $(SO_NAME_STLDBGxx) ${NOSTDLIB}
+release-shared:	LDFLAGS += -dynamic -dynamiclib -compatibility_version $(COMPATIBILITY_VERSION) -current_version $(CURRENT_VERSION) -install_name $(SO_NAMExx) ${NOSTDLIB}
+dbg-static:	LDFLAGS += -staticlib
+stldbg-static:	LDFLAGS += -staticlib
+release-static:	LDFLAGS += -staticlib
 endif
 
 ifeq ($(OSNAME),openbsd)
-dbg-shared:	LDFLAGS += -shared -Wl,-soname -Wl,$(SO_NAME_DBGxx) ${NOSTDLIB} ${LDSEARCH}
-stldbg-shared:	LDFLAGS += -shared -Wl,-soname -Wl,$(SO_NAME_STLDBGxx) ${NOSTDLIB} ${LDSEARCH}
-release-shared:	LDFLAGS += -shared -Wl,-soname -Wl,$(SO_NAMExx) ${NOSTDLIB} ${LDSEARCH}
-dbg-static:	LDFLAGS += ${LDSEARCH}
-stldbg-static:	LDFLAGS += ${LDSEARCH}
-release-static:	LDFLAGS += ${LDSEARCH}
+dbg-shared:	LDFLAGS += -Wl,-soname -Wl,$(SO_NAME_DBGxx) ${NOSTDLIB}
+stldbg-shared:	LDFLAGS += -Wl,-soname -Wl,$(SO_NAME_STLDBGxx) ${NOSTDLIB}
+release-shared:	LDFLAGS += -Wl,-soname -Wl,$(SO_NAMExx) ${NOSTDLIB}
 endif
+

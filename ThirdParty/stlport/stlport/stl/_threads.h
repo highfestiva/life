@@ -53,20 +53,7 @@
  * assign __val to *__target and returns former *__target value
  * void* _STLP_ATOMIC_EXCHANGE_PTR(void* volatile* __target, void* __ptr) :
  * assign __ptr to *__target and returns former *__target value
- * __stl_atomic_t _STLP_ATOMIC_ADD(volatile __stl_atomic_t* __target, __stl_atomic_t __val) :
- * does *__target = *__target + __val and returns the old *__target value
  */
-
-#if defined (_STLP_WIN32) || defined (__sgi) || defined (_STLP_SPARC_SOLARIS_THREADS)
-typedef long __stl_atomic_t;
-#else
-/* Don't import whole namespace!!!! - ptr */
-// # if defined (_STLP_USE_NAMESPACES) && ! defined (_STLP_VENDOR_GLOBAL_CSTD)
-// // using _STLP_VENDOR_CSTD::size_t;
-// using namespace _STLP_VENDOR_CSTD;
-// # endif
-typedef size_t __stl_atomic_t;
-#endif
 
 #if defined (_STLP_THREADS)
 
@@ -88,6 +75,7 @@ typedef size_t __stl_atomic_t;
 
 #    define _STLP_ATOMIC_INCREMENT(__x) __add_and_fetch(__x, 1)
 #    define _STLP_ATOMIC_DECREMENT(__x) __add_and_fetch(__x, (size_t) -1)
+typedef long __stl_atomic_t;
 
 #  elif defined (_STLP_PTHREADS)
 
@@ -102,14 +90,13 @@ typedef size_t __stl_atomic_t;
 #      else
 #        define _STLP_PTHREAD_ATTR_DEFAULT 0
 #      endif
-#    else // _STLP_USE_PTHREAD_SPINLOCK
+#    else
 #      if defined (__OpenBSD__)
 #        include <spinlock.h>
 #      endif
-#    endif // _STLP_USE_PTHREAD_SPINLOCK
+#    endif
 
 #    if defined (__GNUC__) && defined (__i386__)
-
 #      if !defined (_STLP_ATOMIC_INCREMENT)
 inline long _STLP_atomic_increment_gcc_x86(long volatile* p) {
   long result;
@@ -135,20 +122,9 @@ inline long _STLP_atomic_decrement_gcc_x86(long volatile* p) {
 }
 #        define _STLP_ATOMIC_DECREMENT(__x) (_STLP_atomic_decrement_gcc_x86((long volatile*)__x))
 #      endif
-
-#      if !defined (_STLP_ATOMIC_ADD)
-inline long _STLP_atomic_add_gcc_x86(long volatile* p, long addend) {
-  long result;
-  __asm__ __volatile__
-    ("lock; xaddl %1, %0;"
-    :"=m" (*p), "=r" (result)
-    :"m"  (*p), "1"  (addend)
-    :"cc");
- return result + addend;
-}
-#        define _STLP_ATOMIC_ADD(__dst, __val)  (_STLP_atomic_add_gcc_x86((long volatile*)__dst, (long)__val))
-#      endif
-
+typedef long __stl_atomic_t;
+#    else
+typedef size_t __stl_atomic_t;
 #    endif /* if defined(__GNUC__) && defined(__i386__) */
 
 #  elif defined (_STLP_WIN32THREADS)
@@ -164,15 +140,8 @@ inline long _STLP_atomic_add_gcc_x86(long volatile* p, long addend) {
 #        define _STLP_ATOMIC_EXCHANGE(__x, __y)       InterlockedExchange(__x, __y)
 #      endif
 #      define _STLP_ATOMIC_EXCHANGE_PTR(__x, __y)     STLPInterlockedExchangePointer(__x, __y)
-/*
- * The following functionnality is only available since Windows 98, those that are targeting previous OSes
- * should define _WIN32_WINDOWS to a value lower that the one of Win 98, see Platform SDK documentation for
- * more informations:
- */
-#      if defined (_STLP_NEW_PLATFORM_SDK) && (!defined (_STLP_WIN32_VERSION) || (_STLP_WIN32_VERSION >= 0x0410))
-#        define _STLP_ATOMIC_ADD(__dst, __val) InterlockedExchangeAdd(__dst, __val)
-#      endif
 #    endif
+typedef long __stl_atomic_t;
 
 #  elif defined (__DECC) || defined (__DECCXX)
 
@@ -180,9 +149,11 @@ inline long _STLP_atomic_add_gcc_x86(long volatile* p, long addend) {
 #    define _STLP_ATOMIC_EXCHANGE __ATOMIC_EXCH_LONG
 #    define _STLP_ATOMIC_INCREMENT(__x) __ATOMIC_ADD_LONG(__x, 1)
 #    define _STLP_ATOMIC_DECREMENT(__x) __ATOMIC_ADD_LONG(__x, -1)
+typedef long __stl_atomic_t;
 
-#  elif defined(_STLP_SPARC_SOLARIS_THREADS)
+#  elif defined (_STLP_SPARC_SOLARIS_THREADS)
 
+typedef long __stl_atomic_t;
 #    include <stl/_sparc_atomic.h>
 
 #  elif defined (_STLP_UITHREADS)
@@ -197,8 +168,13 @@ inline long _STLP_atomic_add_gcc_x86(long volatile* p, long addend) {
 using _STLP_VENDOR_CSTD::time_t;
 #    endif
 #    include <synch.h>
-#    include <cstdio>
-#    include <cwchar>
+#    ifndef _STLP_INTERNAL_CSTDIO
+#      include <stl/_cstdio.h>
+#    endif
+#    ifndef _STLP_INTERNAL_CWCHAR
+#      include <stl/_cwchar.h>
+#    endif
+typedef size_t __stl_atomic_t;
 
 #  elif defined (_STLP_BETHREADS)
 
@@ -206,11 +182,13 @@ using _STLP_VENDOR_CSTD::time_t;
 #    include <cassert>
 #    include <stdio.h>
 #    define _STLP_MUTEX_INITIALIZER = { 0 }
+typedef size_t __stl_atomic_t;
 
 #  elif defined (_STLP_NWTHREADS)
 
 #    include <nwthread.h>
 #    include <nwsemaph.h>
+typedef size_t __stl_atomic_t;
 
 #  elif defined(_STLP_OS2THREADS)
 
@@ -236,6 +214,11 @@ using _STLP_VENDOR_CSTD::time_t;
   APIRET _System DosCloseMutexSem(HMTX hmtx);
 #      define _STLP_MUTEX_INITIALIZER = { 0 }
 #    endif /* GNUC */
+typedef size_t __stl_atomic_t;
+
+#  else
+
+typedef size_t __stl_atomic_t;
 
 #  endif
 
@@ -246,6 +229,7 @@ using _STLP_VENDOR_CSTD::time_t;
 /* We do not grant other atomic operations as they are useless if STLport do not have
  * to be thread safe
  */
+typedef size_t __stl_atomic_t;
 #endif
 
 #if !defined (_STLP_MUTEX_INITIALIZER)
@@ -270,7 +254,7 @@ struct _STLP_mutex_spin {
   static unsigned __max;
   static unsigned __last;
   static void _STLP_CALL _M_do_lock(volatile __stl_atomic_t* __lock);
-  static void _STLP_CALL _S_nsec_sleep(int __log_nsec);
+  static void _STLP_CALL _S_nsec_sleep(int __log_nsec, unsigned int& __iteration);
 };
 #endif // !_STLP_USE_PTHREAD_SPINLOCK
 
@@ -463,7 +447,7 @@ public:
 
 #if defined (_STLP_THREADS) && \
    (!defined (_STLP_ATOMIC_INCREMENT) || !defined (_STLP_ATOMIC_DECREMENT) || \
-    (defined (_STLP_WIN32_VERSION) && (_STLP_WIN32_VERSION <= 0x0400)))
+    defined (_STLP_WIN95_LIKE))
 #  define _STLP_USE_MUTEX
   _STLP_mutex _M_mutex;
 #endif
@@ -471,6 +455,9 @@ public:
   public:
   // Constructor
   _Refcount_Base(__stl_atomic_t __n) : _M_ref_count(__n) {}
+#if defined (__BORLANDC__)
+  ~_Refcount_Base(){};
+#endif
 
   // _M_incr and _M_decr
 #if defined (_STLP_THREADS)

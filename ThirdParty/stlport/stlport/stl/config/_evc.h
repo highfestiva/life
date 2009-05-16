@@ -45,19 +45,13 @@
 #  define _DEBUG
 #endif
 
-// in evc3/4, on ARM, check that _STLP_DEBUG is not defined
-// the ARM compiler has a bug that prevents that debug mode from working
-#if _WIN32_WCE < 500 && defined(ARM) && defined(_STLP_DEBUG)
-#  error _STLP_DEBUG mode is not supported in evc3 and evc4 on the ARM platform!
-#endif
-
 // inherit all msvc6 options
 #include <stl/config/_msvc.h>
 
 // CE up to at least version 5 has no C locale support
 #define _STLP_NO_LOCALE_SUPPORT
 
-#if _WIN32_WCE >= 0x500
+#if _WIN32_WCE >= 420
    // SDKs built with PB5 have terminate&co in namespace std...
 #  define _STLP_VENDOR_TERMINATE_STD _STLP_VENDOR_STD
 #  define _STLP_VENDOR_UNCAUGHT_EXCEPTION_STD _STLP_VENDOR_STD
@@ -113,7 +107,7 @@
 #endif
 
 // short string optimization bug under evc3, evc4 using ARM compiler
-#if _MSC_VER<1400 && (defined (ARM) || defined (_ARM_))
+#if _MSC_VER < 1400 && (defined (ARM) || defined (_ARM_))
 #  define _STLP_DONT_USE_SHORT_STRING_OPTIM
 #endif
 
@@ -136,8 +130,8 @@
 #  define _STLP_NO_EXCEPTION_HEADER
 #  define _STLP_NO_EXCEPTIONS
 #  undef _STLP_USE_EXCEPTIONS
-#  ifndef __THROW_BAD_ALLOC
-#    define __THROW_BAD_ALLOC { _STLP_WINCE_TRACE(L"out of memory"); ExitThread(1); }
+#  ifndef _STLP_THROW_BAD_ALLOC
+#    define _STLP_THROW_BAD_ALLOC { _STLP_WINCE_TRACE(L"out of memory"); ExitThread(1); }
 #  endif
 #endif
 
@@ -187,7 +181,12 @@
 #      else
          // VC8 crosscompiling for CE
 #        if defined (ARMV4)
-#          define _STLP_NATIVE_INCLUDE_PATH ../Armv4
+           // VC8 bundled Pocket PC 2003 SDK don't have a target CPU subfolder.
+#          if defined(WIN32_PLATFORM_PSPC)
+#            define _STLP_NATIVE_INCLUDE_PATH ../Include
+#          else
+#            define _STLP_NATIVE_INCLUDE_PATH ../Armv4
+#          endif
 #        elif defined(ARMV4I) || defined(ARMV4T)
 #          define _STLP_NATIVE_INCLUDE_PATH ../Armv4i
 #        else
@@ -231,10 +230,6 @@
 #  endif
 
 #endif /* _STLP_WCE_NET */
-
-/* Workaround in _windows.h needs native headers access macros
- * to be defined */
-#include <stl/config/_native_headers.h>
 
 /*
  * eMbedded Visual C++ 3.0 specific settings
@@ -320,22 +315,6 @@ inline void __cdecl operator delete(void *, void *) { return; }
 #  endif
 
 #endif /* _STLP_WCE_EVC3 */
-
-// Minimize windows.h includes
-#if !defined (WIN32_LEAN_AND_MEAN)
-#  define WIN32_LEAN_AND_MEAN
-#endif
-#if !defined (VC_EXTRALEAN)
-#  define VC_EXTRALEAN
-#endif
-#if !defined (STRICT)
-#  define STRICT
-#endif
-
-// Don't let windows.h define its min and max macros.
-#if !defined (NOMINMAX)
-#  define NOMINMAX
-#endif
 
 /*
  * original call: TerminateProcess(GetCurrentProcess(), 0);

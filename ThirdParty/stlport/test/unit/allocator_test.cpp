@@ -64,13 +64,16 @@ void AllocatorTest::bad_alloc_test()
 
     //Allocation failed but no exception thrown
     CPPUNIT_ASSERT( pbigStruct != 0 );
+
+    // Just it case it succeeds:
+    bigStructAlloc.deallocate(pbigStruct, 1024 * 1024 * 1024);
   }
   catch (bad_alloc const&) {
   }
   catch (...) {
     //We shouldn't be there:
     //Not bad_alloc exception thrown.
-    CPPUNIT_ASSERT( false );
+    CPPUNIT_FAIL;
   }
 }
 #endif

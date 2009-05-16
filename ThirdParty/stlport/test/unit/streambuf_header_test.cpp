@@ -5,4 +5,6 @@
  * used to check that files included by those headers are compatible with
  * pure C compilers.
  */
-#include <streambuf>
+#if !defined (_STLP_NO_IOSTREAMS)
+#  include <streambuf>
+#endif

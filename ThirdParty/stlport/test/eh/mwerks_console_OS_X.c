@@ -1,8 +1,8 @@
 /* Metrowerks Standard Library
  * Copyright © 1995-2002 Metrowerks Corporation.  All rights reserved.
  *
- * $Date: 2005-11-18 23:19:19 +0100 (ven., 18 nov. 2005) $
- * $Revision: 1851 $
+ * $Date$
+ * $Revision$
  */
 
 #include <ansi_parms.h>

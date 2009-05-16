@@ -1,13 +1,21 @@
+# -*- Makefile -*- Time-stamp: <05/03/10 17:51:53 ptr>
 
 SRCROOT := ../..
 COMPILER_NAME := bcc
-OBJ_EXT := obj
 
 STLPORT_DIR := ../../..
 include Makefile.inc
-include ${SRCROOT}/Makefiles/top.mak
+include ${SRCROOT}/Makefiles/gmake/top.mak
 
 INCLUDES += -I${STLPORT_INCLUDE_DIR}
+
+ifneq ($(OSNAME),linux)
+OBJ_EXT := obj
+else
+DEFS += -D_GNU_SOURCE
+GCC_VERSION = $(shell gcc -dumpversion)
+DEFS += -DGCC_VERSION=$(GCC_VERSION)
+endif
 
 dbg-shared:	DEFS += -D_STLP_DEBUG_UNINITIALIZED 
 stldbg-shared:	DEFS += -D_STLP_DEBUG_UNINITIALIZED 

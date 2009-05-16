@@ -1,11 +1,8 @@
 # Time-stamp: <04/02/04 14:15:31 ptr>
-# $Id: vc-common.mak 2427 2006-06-11 19:24:54Z dums $
+# $Id$
 
 #INCLUDES = -I$(SRCROOT)/include
 #INCLUDES =
-
-CFLAGS_COMMON = $(CFLAGS_COMMON) /D "_STLP_NO_OWN_NAMESPACE"
-CXXFLAGS_COMMON = $(CXXFLAGS_COMMON) /D "_STLP_NO_OWN_NAMESPACE"
 
 !ifndef CXX
 CXX = cl
@@ -26,12 +23,14 @@ MSVC_VERSION=1200
 MSVC_VERSION=1300
 !else if "$(COMPILER_NAME)" == "vc71"
 MSVC_VERSION=1310
-!else
+!else if "$(COMPILER_NAME)" == "vc80"
 MSVC_VERSION=1400
+!else
+MSVC_VERSION=1500
 !endif
 
-!ifdef STLP_BUILD_FORCE_STATIC_RUNTIME
-!if defined (STLP_BUILD_NO_THREAD) && ($(MSVC_VERSION) < 1400)
+!ifdef WITH_STATIC_RTL
+!if defined (WITHOUT_THREAD) && ($(MSVC_VERSION) < 1400)
 OPT_DBG = $(OPT_DBG) /MLd
 OPT_STLDBG = $(OPT_STLDBG) /MLd
 OPT_REL = $(OPT_REL) /ML
@@ -49,7 +48,7 @@ OPT_STLDBG = $(OPT_STLDBG) /MDd
 OPT_REL = $(OPT_REL) /MD
 !endif
 
-!ifdef STLP_BUILD_FORCE_DYNAMIC_RUNTIME
+!ifdef WITH_DYNAMIC_RTL
 OPT_STATIC_DBG = $(OPT_STATIC_DBG) /MDd
 OPT_STATIC_STLDBG = $(OPT_STATIC_STLDBG) /MDd
 OPT_STATIC_REL = $(OPT_STATIC_REL) /MD
@@ -57,7 +56,7 @@ DEFS_STATIC_REL = $(DEFS_STATIC_REL) /D_STLP_USE_STATIC_LIB
 DEFS_STATIC_DBG = $(DEFS_STATIC_DBG) /D_STLP_USE_STATIC_LIB
 DEFS_STATIC_STLDBG = $(DEFS_STATIC_STLDBG) /D_STLP_USE_STATIC_LIB
 !else
-!if defined (STLP_BUILD_NO_THREAD) && ($(MSVC_VERSION) < 1400)
+!if defined (WITHOUT_THREAD) && ($(MSVC_VERSION) < 1400)
 OPT_STATIC_DBG = $(OPT_STATIC_DBG) /MLd
 OPT_STATIC_STLDBG = $(OPT_STATIC_STLDBG) /MLd
 OPT_STATIC_REL = $(OPT_STATIC_REL) /ML
@@ -68,11 +67,10 @@ OPT_STATIC_REL = $(OPT_STATIC_REL) /MT
 !endif
 !endif
 
-!ifdef STLP_BUILD_NO_THREAD
-#Sometimes thread support activation is detected by STLport depending on the
-#native runtime version option (/ML /MLd); but as there is no equivalent for
-#dll runtime or there is single threaded runtime after VC.Net2003 we simply
-#always define _STLP_NO_THREADS
+!ifdef WITHOUT_THREAD
+#Normally thread support activation is detected by STLport depending on the
+#compiler runtime version option (/ML /MLd); but as there is no more single
+#threaded runtime after VC.Net2003 we simply always define _STLP_NO_THREADS
 DEFS_REL = $(DEFS_REL) /D_STLP_NO_THREADS
 DEFS_DBG = $(DEFS_DBG) /D_STLP_NO_THREADS
 DEFS_STLDBG = $(DEFS_STLDBG) /D_STLP_NO_THREADS
@@ -81,7 +79,9 @@ DEFS_STATIC_DBG = $(DEFS_STATIC_DBG) /D_STLP_NO_THREADS
 DEFS_STATIC_STLDBG = $(DEFS_STATIC_STLDBG) /D_STLP_NO_THREADS
 !endif
 
-!ifdef STLP_BUILD_NO_RTTI
+DEFS = $(DEFS) /DWINVER=$(WINVER)
+
+!ifdef WITHOUT_RTTI
 !if $(MSVC_VERSION) >= 1400
 CXXFLAGS_COMMON = $(CXXFLAGS_COMMON) /GR-
 CFLAGS_COMMON = $(CFLAGS_COMMON) /GR-

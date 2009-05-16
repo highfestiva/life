@@ -40,6 +40,13 @@ template <class _Arg, class _Result>
 struct unary_function {
   typedef _Arg argument_type;
   typedef _Result result_type;
+#if !defined (__BORLANDC__) || (__BORLANDC__ < 0x580)
+protected:
+  /* This class purpose is to be derived but it is not polymorphic so users should never try
+   * to destroy an instance of it directly. The protected non-virtual destructor make this
+   * fact obvious at compilation time. */
+  ~unary_function() {}
+#endif
 };
 
 template <class _Arg1, class _Arg2, class _Result>
@@ -47,6 +54,11 @@ struct binary_function {
   typedef _Arg1 first_argument_type;
   typedef _Arg2 second_argument_type;
   typedef _Result result_type;
+#if !defined (__BORLANDC__) || (__BORLANDC__ < 0x580)
+protected:
+  /* See unary_function comment. */
+  ~binary_function() {}
+#endif
 };
 
 template <class _Tp>
@@ -66,10 +78,8 @@ struct less : public binary_function<_Tp,_Tp,bool>
 {
   bool operator()(const _Tp& __x, const _Tp& __y) const { return __x < __y; }
 
-#if defined (_STLP_CLASS_PARTIAL_SPECIALIZATION) && defined (_STLP_USE_PARTIAL_SPEC_WORKAROUND)
-  //This is for a very special compiler config: partial template specialization
-  //but no template function partial ordering.
-  void swap(less<_Tp>&) {}
+#if defined (_STLP_USE_PARTIAL_SPEC_WORKAROUND) && !defined (_STLP_FUNCTION_TMPL_PARTIAL_ORDER)
+  void _M_swap_workaround(less<_Tp>& __x) {}
 #endif
 };
 

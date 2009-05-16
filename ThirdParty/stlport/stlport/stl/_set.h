@@ -42,7 +42,7 @@ _STLP_BEGIN_NAMESPACE
 _STLP_CREATE_ITERATOR_TRAITS(SetTraitsT, Const_traits)
 
 template <class _Key, _STLP_DFL_TMPL_PARAM(_Compare, less<_Key>),
-                     _STLP_DEFAULT_ALLOCATOR_SELECT(_Key) >
+                      _STLP_DFL_TMPL_PARAM(_Alloc, allocator<_Key>) >
 class set
 #if defined (_STLP_USE_PARTIAL_SPEC_WORKAROUND)
           : public __stlport_class<set<_Key, _Compare, _Alloc> >
@@ -133,8 +133,10 @@ public:
 
   set(const _Self& __x) : _M_t(__x._M_t) {}
 
+#if !defined (_STLP_NO_MOVE_SEMANTIC)
   set(__move_source<_Self> src)
     : _M_t(__move_source<_Rep_type>(src.get()._M_t)) {}
+#endif
 
   _Self& operator=(const _Self& __x) {
     _M_t = __x._M_t;
@@ -158,6 +160,9 @@ public:
   size_type size() const { return _M_t.size(); }
   size_type max_size() const { return _M_t.max_size(); }
   void swap(_Self& __x) { _M_t.swap(__x._M_t); }
+#if defined (_STLP_USE_PARTIAL_SPEC_WORKAROUND) && !defined (_STLP_FUNCTION_TMPL_PARTIAL_ORDER)
+  void _M_swap_workaround(_Self& __x) { swap(__x); }
+#endif
 
   // insert/erase
   pair<iterator,bool> insert(const value_type& __x)
@@ -207,7 +212,7 @@ public:
 _STLP_CREATE_ITERATOR_TRAITS(MultisetTraitsT, Const_traits)
 
 template <class _Key, _STLP_DFL_TMPL_PARAM(_Compare, less<_Key>),
-          _STLP_DEFAULT_ALLOCATOR_SELECT(_Key) >
+                      _STLP_DFL_TMPL_PARAM(_Alloc, allocator<_Key>) >
 class multiset
 #if defined (_STLP_USE_PARTIAL_SPEC_WORKAROUND)
                : public __stlport_class<multiset<_Key, _Compare, _Alloc> >
@@ -304,8 +309,10 @@ public:
     return *this;
   }
 
+#if !defined (_STLP_NO_MOVE_SEMANTIC)
   multiset(__move_source<_Self> src)
     : _M_t(__move_source<_Rep_type>(src.get()._M_t)) {}
+#endif
 
   // accessors:
   key_compare key_comp() const { return _M_t.key_comp(); }
@@ -324,6 +331,9 @@ public:
   size_type size() const { return _M_t.size(); }
   size_type max_size() const { return _M_t.max_size(); }
   void swap(_Self& __x) { _M_t.swap(__x._M_t); }
+#if defined (_STLP_USE_PARTIAL_SPEC_WORKAROUND) && !defined (_STLP_FUNCTION_TMPL_PARTIAL_ORDER)
+  void _M_swap_workaround(_Self& __x) { swap(__x); }
+#endif
 
   // insert/erase
   iterator insert(const value_type& __x)
@@ -381,7 +391,7 @@ _STLP_BEGIN_NAMESPACE
 #undef  _STLP_TEMPLATE_CONTAINER
 #undef  _STLP_TEMPLATE_HEADER
 
-#if defined (_STLP_CLASS_PARTIAL_SPECIALIZATION)
+#if defined (_STLP_CLASS_PARTIAL_SPECIALIZATION) && !defined (_STLP_NO_MOVE_SEMANTIC)
 template <class _Key, class _Compare, class _Alloc>
 struct __move_traits<set<_Key,_Compare,_Alloc> > :
   _STLP_PRIV __move_traits_aux<typename set<_Key,_Compare,_Alloc>::_Rep_type>
@@ -391,7 +401,7 @@ template <class _Key, class _Compare, class _Alloc>
 struct __move_traits<multiset<_Key,_Compare,_Alloc> > :
   _STLP_PRIV __move_traits_aux<typename multiset<_Key,_Compare,_Alloc>::_Rep_type>
 {};
-#endif /* _STLP_CLASS_PARTIAL_SPECIALIZATION */
+#endif
 
 _STLP_END_NAMESPACE
 

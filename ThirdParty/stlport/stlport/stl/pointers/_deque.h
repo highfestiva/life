@@ -75,6 +75,9 @@ struct _DequeIteCast {
 };
 
 #define DEQUE_IMPL _STLP_PTR_IMPL_NAME(deque)
+#if defined (__BORLANDC__) || defined (__DMC__)
+#  define typename
+#endif
 
 #if defined (_STLP_USE_TEMPLATE_EXPORT) && !defined (_STLP_USE_MSVC6_MEM_T_BUG_WORKAROUND)
 _STLP_EXPORT_TEMPLATE_CLASS _STLP_alloc_proxy<size_t, void*,  allocator<void*> >;
@@ -90,13 +93,13 @@ _STLP_EXPORT_TEMPLATE_CLASS DEQUE_IMPL<void*,allocator<void*> >;
 _STLP_MOVE_TO_STD_NAMESPACE
 #endif
 
-template <class _Tp, _STLP_DEFAULT_ALLOCATOR_SELECT(_Tp) >
+template <class _Tp, _STLP_DFL_TMPL_PARAM(_Alloc, allocator<_Tp>) >
 class deque
 #if defined (_STLP_USE_PARTIAL_SPEC_WORKAROUND) && !defined (deque)
             : public __stlport_class<deque<_Tp, _Alloc> >
 #endif
 {
-  typedef typename _STLP_PRIV _StorageType<_Tp>::_Type _StorageType;
+  typedef _STLP_TYPENAME _STLP_PRIV _StorageType<_Tp>::_Type _StorageType;
   typedef typename _Alloc_traits<_StorageType, _Alloc>::allocator_type _StorageTypeAlloc;
   typedef _STLP_PRIV DEQUE_IMPL<_StorageType, _StorageTypeAlloc> _Base;
   typedef deque<_Tp, _Alloc> _Self;
@@ -209,12 +212,17 @@ public:                         // Basic accessors
               _STLP_CONVERT_ALLOCATOR(__a, _StorageType)) {}
 #endif /* _STLP_MEMBER_TEMPLATES */
 
+#if !defined (_STLP_NO_MOVE_SEMANTIC)
   deque(__move_source<_Self> src)
     : _M_impl(__move_source<_Base>(src.get()._M_impl)) {}
+#endif
 
   _Self& operator= (const _Self& __x) { _M_impl = __x._M_impl; return *this; }
 
   void swap(_Self& __x) { _M_impl.swap(__x._M_impl); }
+#if defined (_STLP_USE_PARTIAL_SPEC_WORKAROUND) && !defined (_STLP_FUNCTION_TMPL_PARTIAL_ORDER)
+  void _M_swap_workaround(_Self& __x) { swap(__x); }
+#endif
 
   void assign(size_type __n, const value_type& __val) {
     _M_impl.assign(__n, cast_traits::to_storage_type_cref(__val));
@@ -231,8 +239,8 @@ private:
   template <class _InputIterator>
   void _M_assign_dispatch(_InputIterator __first, _InputIterator __last,
                           const __false_type&) {
-    _M_impl.assign(typename _STLP_PRIV _IteWrapper<_StorageType, _Tp, _InputIterator>::_Ite(__first),
-                   typename _STLP_PRIV _IteWrapper<_StorageType, _Tp, _InputIterator>::_Ite(__last));
+    _M_impl.assign(_STLP_TYPENAME _STLP_PRIV _IteWrapper<_StorageType, _Tp, _InputIterator>::_Ite(__first),
+                   _STLP_TYPENAME _STLP_PRIV _IteWrapper<_StorageType, _Tp, _InputIterator>::_Ite(__last));
   }
 
 public:
@@ -306,8 +314,8 @@ private:
                           _InputIterator __first, _InputIterator __last,
                           const __false_type&) {
     _M_impl.insert(ite_cast_traits::to_storage_type_ite(__pos),
-                   typename _STLP_PRIV _IteWrapper<_StorageType, _Tp, _InputIterator>::_Ite(__first),
-                   typename _STLP_PRIV _IteWrapper<_StorageType, _Tp, _InputIterator>::_Ite(__last));
+                   _STLP_TYPENAME _STLP_PRIV _IteWrapper<_StorageType, _Tp, _InputIterator>::_Ite(__first),
+                   _STLP_TYPENAME _STLP_PRIV _IteWrapper<_StorageType, _Tp, _InputIterator>::_Ite(__last));
   }
 
 public:
@@ -369,6 +377,9 @@ _STLP_MOVE_TO_STD_NAMESPACE
 #endif
 
 #undef DEQUE_IMPL
+#if defined (__BORLANDC__) || defined (__DMC__)
+#  undef typename
+#endif
 
 _STLP_END_NAMESPACE
 

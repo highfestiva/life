@@ -53,11 +53,10 @@ _STLP_MOVE_TO_STD_NAMESPACE
 
 _STLP_TEMPLATE_NULL
 class _STLP_CLASS_DECLSPEC messages<char> : public locale::facet, public messages_base {
-  friend class _Locale_impl;
 public:
   typedef messages_base::catalog catalog;
   typedef char                   char_type;
-  typedef string    string_type;
+  typedef string                 string_type;
 
   explicit messages(size_t __refs = 0);
 
@@ -69,64 +68,51 @@ public:
   inline void close(catalog __c) const
   { do_close(__c); }
 
-  static _STLP_STATIC_MEMBER_DECLSPEC locale::id id;
-
-private:
-  messages(_STLP_PRIV _Messages*);
+  static _STLP_STATIC_DECLSPEC locale::id id;
 
 protected:
-  messages(size_t, _Locale_messages*);
-  ~messages();
+  ~messages() {}
 
-  virtual catalog     do_open(const string& __fn, const locale& __loc) const;
+  virtual catalog     do_open(const string& __fn, const locale& __loc) const
+  { return -1; }
   virtual string_type do_get(catalog __c, int __set, int __msgid,
-                             const string_type& __dfault) const;
-  virtual void        do_close(catalog __c) const;
-
-  void _M_initialize(const char* __name);
-
-private:
-  _STLP_PRIV _Messages* _M_impl;
+                             const string_type& __dfault) const
+  { return __dfault; }
+  virtual void        do_close(catalog __c) const
+  {}
 };
 
 #if !defined (_STLP_NO_WCHAR_T)
 
 _STLP_TEMPLATE_NULL
 class _STLP_CLASS_DECLSPEC messages<wchar_t> : public locale::facet, public messages_base {
-  friend class _Locale_impl;
 public:
   typedef messages_base::catalog catalog;
   typedef wchar_t                char_type;
-  typedef wstring  string_type;
+  typedef wstring                string_type;
 
   explicit messages(size_t __refs = 0);
 
   inline catalog open(const string& __fn, const locale& __loc) const
-    { return do_open(__fn, __loc); }
+  { return do_open(__fn, __loc); }
   inline string_type get(catalog __c, int __set, int __msgid,
                          const string_type& __dfault) const
-    { return do_get(__c, __set, __msgid, __dfault); }
+  { return do_get(__c, __set, __msgid, __dfault); }
   inline void close(catalog __c) const
-    { do_close(__c); }
+  { do_close(__c); }
 
-  static _STLP_STATIC_MEMBER_DECLSPEC locale::id id;
-
-private:
-  messages(_STLP_PRIV _Messages*);
+  static _STLP_STATIC_DECLSPEC locale::id id;
 
 protected:
-  messages(size_t, _Locale_messages*);
-  ~messages();
+  ~messages() {}
 
-  virtual catalog     do_open(const string& __fn, const locale& __loc) const;
+  virtual catalog     do_open(const string& __fn, const locale& __loc) const
+  { return -1; }
   virtual string_type do_get(catalog __c, int __set, int __msgid,
-                             const string_type& __dfault) const;
-  virtual void        do_close(catalog __c) const;
-
-  void _M_initialize(const char* __name);
-
-private:
-  _STLP_PRIV _Messages* _M_impl;
+                             const string_type& __dfault) const
+  { return __dfault; }
+  virtual void        do_close(catalog __c) const
+  {}
 };
 
 #endif
@@ -135,39 +121,57 @@ template <class _CharT> class messages_byname {};
 
 _STLP_TEMPLATE_NULL
 class _STLP_CLASS_DECLSPEC messages_byname<char> : public messages<char> {
+  friend class _Locale_impl;
 public:
   typedef messages_base::catalog catalog;
   typedef string     string_type;
 
-  explicit messages_byname(const char* __name, size_t __refs = 0, _Locale_name_hint* __hint = 0);
+  explicit messages_byname(const char* __name, size_t __refs = 0);
 
 protected:
   ~messages_byname();
 
+  virtual catalog     do_open(const string& __fn, const locale& __loc) const;
+  virtual string_type do_get(catalog __c, int __set, int __msgid,
+                             const string_type& __dfault) const;
+  virtual void        do_close(catalog __c) const;
+
 private:
+  messages_byname(_Locale_messages*);
   typedef messages_byname<char> _Self;
   //explicitely defined as private to avoid warnings:
   messages_byname(_Self const&);
   _Self& operator = (_Self const&);
+
+  _STLP_PRIV _Messages* _M_impl;
 };
 
 #if !defined (_STLP_NO_WCHAR_T)
 _STLP_TEMPLATE_NULL
 class _STLP_CLASS_DECLSPEC messages_byname<wchar_t> : public messages<wchar_t> {
+  friend class _Locale_impl;
 public:
   typedef messages_base::catalog catalog;
   typedef wstring                string_type;
 
-  explicit messages_byname(const char* __name, size_t __refs = 0, _Locale_name_hint* __hint = 0);
+  explicit messages_byname(const char* __name, size_t __refs = 0);
 
 protected:
   ~messages_byname();
 
+  virtual catalog     do_open(const string& __fn, const locale& __loc) const;
+  virtual string_type do_get(catalog __c, int __set, int __msgid,
+                             const string_type& __dfault) const;
+  virtual void        do_close(catalog __c) const;
+
 private:
+  messages_byname(_Locale_messages*);
   typedef messages_byname<wchar_t> _Self;
   //explicitely defined as private to avoid warnings:
   messages_byname(_Self const&);
   _Self& operator = (_Self const&);
+
+  _STLP_PRIV _Messages* _M_impl;
 };
 #endif /* WCHAR_T */
 

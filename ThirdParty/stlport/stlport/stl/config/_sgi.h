@@ -27,8 +27,6 @@
 #  define _STLP_NO_EXCEPTIONS
 #endif
 
-// #define _STLP_NOTHROW throw()
-
 #define __EDG_SWITCHES
 
 #define _STLP_USE_SGI_STRING         1
@@ -89,4 +87,8 @@
 #endif
 #if !((_COMPILER_VERSION >= 730) && defined(_MIPS_SIM) && _MIPS_SIM != _ABIO32)
 #  define _STLP_NO_FUNCTION_TMPL_PARTIAL_ORDER
+#endif
+
+#if !defined (_NOTHREADS) && !defined (_STLP_THREADS_DEFINED) && !defined (__GNUC__)
+#  define _STLP_SGI_THREADS
 #endif

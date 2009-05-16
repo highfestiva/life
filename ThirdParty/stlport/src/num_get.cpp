@@ -101,7 +101,7 @@ _STLP_MOVE_TO_STD_NAMESPACE
 
 #if !defined(_STLP_NO_FORCE_INSTANTIATE)
 //----------------------------------------------------------------------
-// Force instantiation of of num_get<>
+// Force instantiation of num_get<>
 template class _STLP_CLASS_DECLSPEC istreambuf_iterator<char, char_traits<char> >;
 // template class num_get<char, const char*>;
 template class num_get<char, istreambuf_iterator<char, char_traits<char> > >;

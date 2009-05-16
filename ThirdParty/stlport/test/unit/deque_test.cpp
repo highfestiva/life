@@ -241,8 +241,10 @@ struct PointEx : public Point {
 };
 
 #if defined (STLPORT)
+#  if defined (_STLP_USE_NAMESPACES)
 namespace std {
-  template <>
+#  endif
+  _STLP_TEMPLATE_NULL
   struct __type_traits<PointEx> {
     typedef __false_type has_trivial_default_constructor;
     typedef __true_type has_trivial_copy_constructor;
@@ -250,7 +252,9 @@ namespace std {
     typedef __true_type has_trivial_destructor;
     typedef __true_type is_POD_type;
   };
+#  if defined (_STLP_USE_NAMESPACES)
 }
+#  endif
 #endif
 
 //This test check that deque implementation do not over optimize
@@ -309,3 +313,18 @@ void DequeTest::erase()
   dint.erase(dint.end() - 2, dint.end());
   CPPUNIT_ASSERT( *it == 4 );
 }
+
+#if (!defined (STLPORT) || \
+    (!defined (_STLP_USE_PTR_SPECIALIZATIONS) || defined (_STLP_CLASS_PARTIAL_SPECIALIZATION))) && \
+     (!defined (_MSC_VER) || (_MSC_VER > 1400)) && \
+     (!defined(__GNUC__) || (__GNUC__ < 4) || (__GNUC_MINOR__ < 3))
+/* Simple compilation test: Check that nested types like iterator
+ * can be access even if type used to instanciate container is not
+ * yet completely defined.
+ */
+class IncompleteClass
+{
+  deque<IncompleteClass> instances;
+  typedef deque<IncompleteClass>::size_type size;
+};
+#endif

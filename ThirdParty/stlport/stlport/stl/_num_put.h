@@ -24,19 +24,23 @@
 #define _STLP_INTERNAL_NUM_PUT_H
 
 #ifndef _STLP_INTERNAL_NUMPUNCT_H
-# include <stl/_numpunct.h>
+#  include <stl/_numpunct.h>
 #endif
 
 #ifndef _STLP_INTERNAL_CTYPE_H
-# include <stl/_ctype.h>
+#  include <stl/_ctype.h>
 #endif
 
 #ifndef _STLP_INTERNAL_OSTREAMBUF_ITERATOR_H
-# include <stl/_ostreambuf_iterator.h>
+#  include <stl/_ostreambuf_iterator.h>
 #endif
 
 #ifndef _STLP_INTERNAL_IOSTREAM_STRING_H
-# include <stl/_iostream_string.h>
+#  include <stl/_iostream_string.h>
+#endif
+
+#ifndef _STLP_FACETS_FWD_H
+#  include <stl/_facets_fwd.h>
 #endif
 
 _STLP_BEGIN_NAMESPACE
@@ -44,13 +48,8 @@ _STLP_BEGIN_NAMESPACE
 //----------------------------------------------------------------------
 // num_put facet
 
-#if defined (_STLP_LIMITED_DEFAULT_TEMPLATES)
 template <class _CharT, class _OutputIter>
-#else
-template <class _CharT, class _OutputIter = ostreambuf_iterator<_CharT, char_traits<_CharT> > >
-#endif
 class num_put: public locale::facet {
-  friend class _Locale_impl;
 public:
   typedef _CharT      char_type;
   typedef _OutputIter iter_type;
@@ -102,7 +101,7 @@ public:
     return do_put(__s, __f, __fill, __val);
   }
 
-  static _STLP_STATIC_MEMBER_DECLSPEC locale::id id;
+  static locale::id id;
 
 protected:
   ~num_put() {}
@@ -126,10 +125,8 @@ protected:
 
 #if defined (_STLP_USE_TEMPLATE_EXPORT)
 _STLP_EXPORT_TEMPLATE_CLASS num_put<char, ostreambuf_iterator<char, char_traits<char> > >;
-// _STLP_EXPORT_TEMPLATE_CLASS num_put<char, char*>;
 #  if !defined (_STLP_NO_WCHAR_T)
 _STLP_EXPORT_TEMPLATE_CLASS num_put<wchar_t, ostreambuf_iterator<wchar_t, char_traits<wchar_t> > >;
-// _STLP_EXPORT_TEMPLATE_CLASS num_put<wchar_t, wchar_t*>;
 #  endif
 #endif
 

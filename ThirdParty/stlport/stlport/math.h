@@ -15,7 +15,7 @@
 
 #if !defined (_STLP_OUTERMOST_HEADER_ID)
 #  define _STLP_OUTERMOST_HEADER_ID 0x244
-#  include <stl/_prolog.h>
+#  include <stl/_cprolog.h>
 #elif (_STLP_OUTERMOST_HEADER_ID == 0x244) && !defined (_STLP_DONT_POP_HEADER_ID)
 #  define _STLP_DONT_POP_HEADER_ID
 #endif
@@ -26,7 +26,11 @@
 #  define exception __math_exception
 #endif
 
-#include _STLP_NATIVE_C_HEADER(math.h)
+#if defined (_STLP_HAS_INCLUDE_NEXT)
+#  include_next <math.h>
+#else
+#  include _STLP_NATIVE_C_HEADER(math.h)
+#endif
 
 #if defined (_STLP_EXCEPTION_WAS_REDEFINED)
 #  undef exception
@@ -47,7 +51,3 @@
 #  endif
 #endif
 
-/* Local Variables:
- * mode:C++
- * End:
- */

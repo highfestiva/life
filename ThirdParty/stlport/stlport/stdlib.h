@@ -21,14 +21,14 @@
 
 #  if !defined (_STLP_OUTERMOST_HEADER_ID)
 #    define _STLP_OUTERMOST_HEADER_ID 0x265
-#    include <stl/_prolog.h>
+#    include <stl/_cprolog.h>
 #  elif (_STLP_OUTERMOST_HEADER_ID == 0x265) && !defined (_STLP_DONT_POP_HEADER_ID)
 #    define _STLP_DONT_POP_HEADER_ID
 #  endif
 
-#  if defined (_MSC_VER) || (defined (__GNUC__) && defined (__MINGW32__)) || \
-      defined (__BORLANDC__) || defined (__DMC__) || \
-      (defined (__HP_aCC) && defined (_REENTRANT))
+#  if defined (_STLP_MSVC_LIB) || (defined (__GNUC__) && defined (__MINGW32__)) || \
+       defined (__BORLANDC__) || defined (__DMC__) || \
+       (defined (__HP_aCC) && defined (_REENTRANT))
 /* Native stdlib.h contains errno macro definition making inclusion of native
  * errno.h in STLport errno.h impossible. We are then forced to include errno.h
  * first.
@@ -44,7 +44,11 @@
 struct _exception;
 #  endif
 
-#  include _STLP_NATIVE_C_HEADER(stdlib.h)
+#  if defined (_STLP_HAS_INCLUDE_NEXT)
+#    include_next <stdlib.h>
+#  else
+#    include _STLP_NATIVE_C_HEADER(stdlib.h)
+#  endif
 
 /* on evc3/evc4 including stdlib.h also defines setjmp macro */
 #  if defined (_STLP_WCE)
@@ -61,9 +65,3 @@ struct _exception;
 #  endif
 
 #endif /* RC_INVOKED */
-
-/*
-  Local Variables:
-  mode:C++
-  End:
-*/

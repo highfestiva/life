@@ -93,18 +93,18 @@ class _STLP_CLASS_DECLSPEC _Locale_impl : public _Refcount_Base {
 
     friend class Init;
 
-  public: // _Locale
+  public:
     // void remove(size_t index);
-    locale::facet* insert(locale::facet*, size_t index);
+    locale::facet* insert(locale::facet*, const locale::id& n);
     void insert(_Locale_impl* from, const locale::id& n);
 
     // Helper functions for byname construction of locales.
-    _Locale_name_hint* insert_ctype_facets(const char* name, _Locale_name_hint* hint);
-    _Locale_name_hint* insert_numeric_facets(const char* name, _Locale_name_hint* hint);
-    _Locale_name_hint* insert_time_facets(const char* name, _Locale_name_hint* hint);
-    _Locale_name_hint* insert_collate_facets(const char* name, _Locale_name_hint* hint);
-    _Locale_name_hint* insert_monetary_facets(const char* name, _Locale_name_hint* hint);
-    _Locale_name_hint* insert_messages_facets(const char* name, _Locale_name_hint* hint);
+    _Locale_name_hint* insert_ctype_facets(const char* &name, char *buf, _Locale_name_hint* hint);
+    _Locale_name_hint* insert_numeric_facets(const char* &name, char *buf, _Locale_name_hint* hint);
+    _Locale_name_hint* insert_time_facets(const char* &name, char *buf, _Locale_name_hint* hint);
+    _Locale_name_hint* insert_collate_facets(const char* &name, char *buf, _Locale_name_hint* hint);
+    _Locale_name_hint* insert_monetary_facets(const char* &name, char *buf, _Locale_name_hint* hint);
+    _Locale_name_hint* insert_messages_facets(const char* &name, char *buf, _Locale_name_hint* hint);
 
     bool operator != (const locale& __loc) const { return __loc._M_impl != this; }
 
@@ -112,10 +112,10 @@ class _STLP_CLASS_DECLSPEC _Locale_impl : public _Refcount_Base {
     vector<locale::facet*> facets_vec;
 
   private:
-    friend _Locale_impl * _STLP_CALL _copy_Locale_impl( _Locale_impl * );
     friend _Locale_impl * _STLP_CALL _copy_Nameless_Locale_impl( _Locale_impl * );
     friend void _STLP_CALL _release_Locale_impl( _Locale_impl *& loc );
-#if defined (_STLP_USE_MSVC6_MEM_T_BUG_WORKAROUND)
+#if defined (_STLP_USE_MSVC6_MEM_T_BUG_WORKAROUND) || \
+    defined (_STLP_SIGNAL_RUNTIME_COMPATIBILITY) || defined (_STLP_CHECK_RUNTIME_COMPATIBILITY)
     friend class _STLP_NO_MEM_T_NAME(loc);
 #else
     friend class locale;
@@ -123,7 +123,6 @@ class _STLP_CLASS_DECLSPEC _Locale_impl : public _Refcount_Base {
 };
 
 void _STLP_CALL _release_Locale_impl( _Locale_impl *& loc );
-_Locale_impl * _STLP_CALL _copy_Locale_impl( _Locale_impl *loc );
 
 _STLP_END_NAMESPACE
 

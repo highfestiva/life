@@ -38,24 +38,6 @@
 #  include <stl/_codecvt.h>
 #endif
 
-#if !defined (_STLP_USE_UNIX_IO) && !defined(_STLP_USE_WIN32_IO) && \
-    !defined (_STLP_USE_UNIX_EMULATION_IO) && !defined (_STLP_USE_STDIO_IO)
-
-#  if defined (_STLP_UNIX)  || defined (__CYGWIN__) || defined (__amigaos__) || defined (__EMX__)
-// open/close/read/write
-#    define _STLP_USE_UNIX_IO
-#  elif defined (_STLP_WIN32)
-// CreateFile/ReadFile/WriteFile
-#    define _STLP_USE_WIN32_IO
-#  elif defined (_STLP_WIN16) || defined (_STLP_MAC)
-// _open/_read/_write
-#    define _STLP_USE_UNIX_EMULATION_IO
-#  else
-// fopen/fread/fwrite
-#    define _STLP_USE_STDIO_IO
-#  endif /* _STLP_UNIX */
-#endif /* mode selection */
-
 #if defined (_STLP_USE_WIN32_IO)
 typedef void* _STLP_fd;
 #elif defined (_STLP_USE_UNIX_EMULATION_IO) || defined (_STLP_USE_STDIO_IO) || defined (_STLP_USE_UNIX_IO)
@@ -103,7 +85,7 @@ public:
   streamoff _M_get_offset(char* __first, char* __last) {
 #if defined (_STLP_UNIX) || defined (_STLP_MAC)
     return __last - __first;
-#else // defined (_STLP_WIN32) || defined (_STLP_WIN16) || defined (_STLP_DOS) || defined(N_PLAT_NLM)
+#else // defined (_STLP_WIN32)
     return ( (_M_openmode & ios_base::binary) != 0 )
       ? (__last - __first)
       : count(__first, __last, '\n') + (__last - __first);
@@ -113,9 +95,9 @@ public:
   // Returns true if we're in binary mode or if we're using an OS or file
   // system where there is no distinction between text and binary mode.
   bool _M_in_binary_mode() const {
-#if defined (_STLP_UNIX) || defined (_STLP_MAC)  || defined(__BEOS__) || defined (__amigaos__)
+#if defined (_STLP_UNIX) || defined (_STLP_MAC) || defined(__BEOS__) || defined (__amigaos__)
     return true;
-#elif defined (_STLP_WIN32) || defined (_STLP_WIN16) || defined (_STLP_DOS) || defined (_STLP_VM) || defined (__EMX__) || defined(N_PLAT_NLM)
+#elif defined (_STLP_WIN32) || defined (_STLP_VM)
     return (_M_openmode & ios_base::binary) != 0;
 #else
 #  error "Port!"
@@ -133,14 +115,14 @@ protected:                      // Data members.
   // for stdio, the whole FILE* is being kept here
   FILE* _M_file;
 #endif
-#if defined (_STLP_USE_WIN32_IO)
-  _STLP_fd _M_view_id;
-#endif
-
   ios_base::openmode _M_openmode     ;
   unsigned char      _M_is_open      ;
   unsigned char      _M_should_close ;
   unsigned char      _M_regular_file ;
+
+#if defined (_STLP_USE_WIN32_IO)
+  _STLP_fd _M_view_id;
+#endif
 
 public :
   static size_t  _STLP_CALL __page_size() { return _M_page_size; }
@@ -156,20 +138,12 @@ public :
 
 // Forward declaration of two helper classes.
 template <class _Traits> class _Noconv_input;
-_STLP_TEMPLATE_NULL
-class _Noconv_input<char_traits<char> >;
-
 template <class _Traits> class _Noconv_output;
-_STLP_TEMPLATE_NULL
-class _Noconv_output< char_traits<char> >;
 
 // There is a specialized version of underflow, for basic_filebuf<char>,
-// in fstream.cxx.
-
+// in fstream.cpp.
 template <class _CharT, class _Traits>
 class _Underflow;
-
-_STLP_TEMPLATE_NULL class _Underflow< char, char_traits<char> >;
 
 template <class _CharT, class _Traits>
 class basic_filebuf : public basic_streambuf<_CharT, _Traits> {
@@ -252,8 +226,6 @@ private:                        // Helper functions.
 
   int_type _M_input_error();
   int_type _M_underflow_aux();
-  //  friend class _Noconv_input<_Traits>;
-  //  friend class _Noconv_output<_Traits>;
   friend class _Underflow<_CharT, _Traits>;
 
   int_type _M_output_error();
@@ -365,16 +337,6 @@ _STLP_EXPORT_TEMPLATE_CLASS basic_filebuf<wchar_t, char_traits<wchar_t> >;
 #  endif
 #endif /* _STLP_USE_TEMPLATE_EXPORT */
 
-// public:
-// helper class.
-template <class _CharT>
-struct _Filebuf_Tmp_Buf {
-  _CharT* _M_ptr;
-  _Filebuf_Tmp_Buf(ptrdiff_t __n) : _M_ptr(0) { _M_ptr = new _CharT[__n]; }
-  ~_Filebuf_Tmp_Buf() { delete[] _M_ptr; }
-};
-
-
 //
 // This class had to be designed very carefully to work
 // with Visual C++.
@@ -440,40 +402,35 @@ public:
   typedef typename _Traits::int_type int_type;
   typedef _Traits                    traits_type;
 
-  static int_type _STLP_CALL _M_doit(basic_filebuf<_CharT, _Traits>* __this);
-};
+  // There is a specialized version of underflow, for basic_filebuf<char>,
+  // in fstream.cpp.
+  static int_type _STLP_CALL _M_doit(basic_filebuf<_CharT, _Traits>* __this) {
+    if (!__this->_M_in_input_mode) {
+      if (!__this->_M_switch_to_input_mode())
+        return traits_type::eof();
+    }
+    else if (__this->_M_in_putback_mode) {
+      __this->_M_exit_putback_mode();
+      if (__this->gptr() != __this->egptr()) {
+        int_type __c = traits_type::to_int_type(*__this->gptr());
+        return __c;
+      }
+    }
 
+    return __this->_M_underflow_aux();
+  }
+};
 
 // Specialization of underflow: if the character type is char, maybe
 // we can use mmap instead of read.
 _STLP_TEMPLATE_NULL
-class _STLP_CLASS_DECLSPEC _Underflow< char, char_traits<char> > {
-public:
-  typedef char_traits<char>::int_type int_type;
-  typedef char_traits<char> traits_type;
-  static  int _STLP_CALL _M_doit(basic_filebuf<char, traits_type >* __this);
+class _STLP_CLASS_DECLSPEC _Underflow< char, char_traits<char> >
+{
+  public:
+    typedef char_traits<char>::int_type int_type;
+    typedef char_traits<char> traits_type;
+    static int_type _STLP_CALL _M_doit(basic_filebuf<char, traits_type >* __this);
 };
-
-// There is a specialized version of underflow, for basic_filebuf<char>,
-// in fstream.cxx.
-
-template <class _CharT, class _Traits>
-_STLP_TYPENAME_ON_RETURN_TYPE _Underflow<_CharT, _Traits>::int_type // _STLP_CALL
- _Underflow<_CharT, _Traits>::_M_doit(basic_filebuf<_CharT, _Traits>* __this) {
-  if (!__this->_M_in_input_mode) {
-    if (!__this->_M_switch_to_input_mode())
-      return traits_type::eof();
-  }
-  else if (__this->_M_in_putback_mode) {
-    __this->_M_exit_putback_mode();
-    if (__this->gptr() != __this->egptr()) {
-      int_type __c = traits_type::to_int_type(*__this->gptr());
-      return __c;
-    }
-  }
-
-  return __this->_M_underflow_aux();
-}
 
 #if defined (_STLP_USE_TEMPLATE_EXPORT) && !defined (_STLP_NO_WCHAR_T)
 _STLP_EXPORT_TEMPLATE_CLASS _Underflow<wchar_t, char_traits<wchar_t> >;

@@ -57,15 +57,6 @@
 #endif
 
 /*
- * Signal STLport that we are using the cygwin distrib with the -mno-cygwin option.
- * This is similar to a mingw environment except that relative path to native headers
- * is different, this is why we need this macro.
- */
-/*
-#define _STLP_NO_CYGWIN
- */
-
-/*
  * Edit relative path below (or put full path) to get native
  * compiler vendor's headers included. Default is "../include"
  * for _STLP_NATIVE_INCLUDE_PATH, default for other macros is
@@ -124,6 +115,8 @@
 /*
  * Uncomment _STLP_USE_MALLOC to force allocator<T> to use plain "malloc"
  * instead of STLport optimized node allocator engine.
+ *
+ * This is default allocator for glibc 2.3.x and later, if not mentioned other
  */
 /*
 #define _STLP_USE_MALLOC 1
@@ -137,6 +130,16 @@
  */
 /*
 #define _STLP_USE_PERTHREAD_ALLOC 1
+*/
+
+/*
+ * Uncomment _STLP_USE_NODE_ALLOC if you want to force allocator<T> to use
+ * "node_alloc" allocator (this is default allocator for STLport, if not
+ * used other above, except glibc 2.3.x and later, where default is
+ * "malloc", due to better results)
+ */
+/*
+#define _STLP_USE_NODE_ALLOC 1
 */
 
 /*
@@ -224,16 +227,6 @@
 */
 
 /*
- * _STLP_USE_RAW_SGI_ALLOCATORS is a hook so that users can disable use of
- * allocator<T> as default parameter for containers, and use SGI
- * raw allocators as default ones, without having to edit library headers.
- * Use of this macro is strongly discouraged.
- */
-/*
-#define _STLP_USE_RAW_SGI_ALLOCATORS 1
-*/
-
-/*
  * Use obsolete overloaded template functions iterator_category(), value_type(), distance_type()
  * for querying iterator properties. Please note those names are non-standard and are not guaranteed
  * to be used by every implementation. However, this setting is on by default when partial specialization
@@ -253,7 +246,7 @@
  * _LARGEFILE64_SOURCE defined) we will use 64-bit file offset, even if
  * __USE_FILE_OFFSET64 or _FILE_OFFSET_BITS not defined or _FILE_OFFSET_BITS
  * less than 64. In the last case sizeof(std::streamoff) may not be equal to
- * sizeof(off_t), if you want to force equal size of off_t and streamoff,
+ * sizeof(off_t); if you want to force equal size of off_t and streamoff,
  * uncomment macro below. But pay attention, this has influence on libstlport
  * and in future usage it may cause conflict with defined _FILE_OFFSET_BITS macro.
  */
@@ -261,6 +254,28 @@
 /*
 #define _STLP_USE_DEFAULT_FILE_OFFSET
 */
+
+/*
+ * _STLP_USE_STDIO_IO, _STLP_USE_UNIX_IO: force selection of stdio calls
+ * (fopen/flose/fread/fwrite) under fstream buffers or unistd calls
+ * (open/close/read/write + mmap). On systems that have both (i.e. most Unixes)
+ * _STLP_USE_UNIX_IO is used. 
+ *
+ * There is a third variant for Windows: _STLP_USE_WIN32_IO, that based
+ * on Windows calls (CreateFile/CloseHandle/ReadFile/WriteFile + CreateFileMapping,
+ * MapViewOfFile)
+ *
+ * Uncomment only one define here!
+ */
+/*
+#define _STLP_USE_UNIX_IO
+*/
+/*
+#define _STLP_USE_STDIO_IO
+*/
+/*
+#define _STLP_USE_WIN32_IO
+ */
 
 /*==========================================================================*/
 
@@ -271,6 +286,54 @@
 
 #define _STLP_NO_UNCAUGHT_EXCEPT_SUPPORT
 #define _STLP_NO_UNEXPECTED_EXCEPT_SUPPORT
+
+/*==========================================================================*/
+
+#if defined(__sun) && defined(__GNUC__)
+/* __SunOS_5_x is not defined in headers, and there is no way to derive it from headers only;
+ * nevertheless this macro defined automagically by SunPro compilers family;
+ *
+ * gcc know nothing about it, but defining it with -D on compiler command line
+ * is a bad idea from one side, and this info still useful when we want to use
+ * (or don't use) some Solaris version-specific features from other side.
+ * Of course, the best way is to define it in spec file, but this is beyond our scope.
+ *
+ * Uncomment ONE of the following, depends on what Solaris version you use.
+ */
+
+/*
+#define __SunOS_5_5_1
+ */
+/*
+#define __SunOS_5_6
+ */
+/*
+#define __SunOS_5_7
+ */
+/*
+#define __SunOS_5_8
+ */
+/*
+#define __SunOS_5_9
+ */
+/*
+#define __SunOS_5_10
+ */
+#endif
+
+#if defined(__sun)
+/* With following patches Solaris 8 and 9 will have *l and *f (long double and float)
+ * variants of math functions:
+ *   SunOS 5.8 patch 111721-04 (May/08/2003)
+ *     <http://sunsolve.sun.com/search/document.do?assetkey=1-21-111721-04-1>
+ *   SunOS 5.9 patch 111722-04 (May/08/2003)
+ *     <http://sunsolve.sun.com/search/document.do?assetkey=1-21-111722-04-1>
+ * Solaris 10 has this functions from box.
+ */
+/*
+#define _STLP_SOLARIS_MATH_PATCH
+ */
+#endif
 
 /*
   Local Variables:

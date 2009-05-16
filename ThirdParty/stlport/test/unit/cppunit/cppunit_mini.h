@@ -13,24 +13,29 @@
  *
  */
 
-/* $Id: cppunit_mini.h 2490 2006-06-27 19:49:26Z dums $ */
+/* $Id$ */
 
 #ifndef _CPPUNITMPFR_H_
 #define _CPPUNITMPFR_H_
 
-#define CPPUNIT_NS CppUnitMini
+#if 0
+#  define CPPUNIT_NS CppUnitMini
+#else
+#  define CPPUNIT_NS
+#endif
 
 #include <string.h>
 
+#if 0
 namespace CPPUNIT_NS
 {
+#endif
   class Reporter {
   public:
     virtual ~Reporter() {}
     virtual void error(const char * /*macroName*/, const char * /*in_macro*/, const char * /*in_file*/, int /*in_line*/) {}
-    virtual void failure(const char * /*macroName*/, const char * /*in_macro*/, const char * /*in_file*/, int /*in_line*/) {}
     virtual void message( const char * /*msg*/ ) {}
-    virtual void progress( const char * /*in_className*/, const char * /*in_testName*/, bool /*ignored*/) {}
+    virtual void progress( const char * /*in_className*/, const char * /*in_testName*/, bool /*ignored*/, bool /* explicit */) {}
     virtual void end() {}
     virtual void printSummary() {}
   };
@@ -48,23 +53,17 @@ namespace CPPUNIT_NS
 
   class TestCase : public TestFixture {
   public:
-    TestCase() { m_failed = false; registerTestCase(this); }
+    TestCase() { registerTestCase(this); }
 
+    void setUp() { m_failed = false; }
     static int run(Reporter *in_reporter = 0, const char *in_testName = "", bool invert = false);
     int numErrors() { return m_numErrors; }
     static void registerTestCase(TestCase *in_testCase);
 
     virtual void myRun(const char * /*in_name*/, bool /*invert*/ = false) {}
 
-    virtual void failure(const char *in_macroName, const char *in_macro, const char *in_file, int in_line) {
-      m_failed = true;
-      if (m_reporter) {
-        m_reporter->failure(in_macroName, in_macro, in_file, in_line);
-      }
-    }
-
     virtual void error(const char *in_macroName, const char *in_macro, const char *in_file, int in_line) {
-      ++m_numErrors;
+      m_failed = true;
       if (m_reporter) {
         m_reporter->error(in_macroName, in_macro, in_file, in_line);
       }
@@ -84,25 +83,31 @@ namespace CPPUNIT_NS
       return diff < in_maxErr;
     }
 
-    virtual void progress(const char *in_className, const char *in_functionName, bool ignored) {
+    virtual void progress(const char *in_className, const char *in_functionName, bool ignored, bool explicitTest) {
       ++m_numTests;
       if (m_reporter) {
-        m_reporter->progress(in_className, in_functionName, ignored);
+        m_reporter->progress(in_className, in_functionName, ignored, explicitTest);
       }
     }
 
-    bool shouldRunThis(const char *in_desiredTest, const char *in_className, const char *in_functionName, bool invert = false) {
+    bool shouldRunThis(const char *in_desiredTest, const char *in_className, const char *in_functionName,
+                       bool invert, bool explicit_test, bool &do_progress) {
       if ((in_desiredTest) && (in_desiredTest[0] != '\0')) {
+        do_progress = false;
         const char *ptr = strstr(in_desiredTest, "::");
         if (ptr) {
-          bool decision = (strncmp(in_desiredTest, in_className, strlen(in_className)) == 0) &&
-                          (strncmp(ptr + 2, in_functionName, strlen(in_functionName)) == 0);
-          return invert ? !decision : decision;
+          bool match = (strncmp(in_desiredTest, in_className, strlen(in_className)) == 0) &&
+                       (strncmp(ptr + 2, in_functionName, strlen(in_functionName)) == 0);
+          // Invert shall not make explicit test run:
+          return invert ? (match ? !match : !explicit_test)
+                        : match;
         }
-        bool decision = strcmp(in_desiredTest, in_className) == 0;
-        return invert ? !decision : decision;
+        bool match = (strcmp(in_desiredTest, in_className) == 0);
+        do_progress = match;
+        return !explicit_test && (match == !invert);
       }
-      return true;
+      do_progress = true;
+      return !explicit_test;
     }
 
     void tearDown() {
@@ -122,7 +127,9 @@ namespace CPPUNIT_NS
 
     static Reporter *m_reporter;
   };
+#if 0
 }
+#endif
 
 #if !defined (CPPUNIT_MINI_HIDE_UNUSED_VARIABLE)
 #  if defined (_MSC_VER)
@@ -135,45 +142,51 @@ namespace CPPUNIT_NS
 #define CPPUNIT_TEST_SUITE(X) \
   typedef CPPUNIT_NS::TestCase Base; \
   virtual void myRun(const char *in_name, bool invert = false) { \
-    char *className = #X; CPPUNIT_MINI_HIDE_UNUSED_VARIABLE(className) \
+    const char *className = #X; CPPUNIT_MINI_HIDE_UNUSED_VARIABLE(className) \
     bool ignoring = false; CPPUNIT_MINI_HIDE_UNUSED_VARIABLE(ignoring)
 
 #if defined CPPUNIT_MINI_USE_EXCEPTIONS
-#  define CPPUNIT_TEST(X) \
-  if (shouldRunThis(in_name, className, #X, invert)) { \
-    setUp(); \
-    progress(className, #X, ignoring); \
-    if (!ignoring) { \
-      try { \
-        X(); \
+#  define CPPUNIT_TEST_BASE(X, Y) \
+  { \
+    bool do_progress; \
+    bool shouldRun = shouldRunThis(in_name, className, #X, invert, Y, do_progress); \
+    if (shouldRun || do_progress) { \
+      setUp(); \
+      progress(className, #X, ignoring || !shouldRun, !ignoring && Y); \
+      if (shouldRun && !ignoring) { \
+        try { \
+          X(); \
+        } \
+        catch(...) { \
+          Base::error("Test Failed: An Exception was thrown.", #X, __FILE__, __LINE__); \
+        } \
       } \
-      catch(...) { \
-        Base::error("Test Failed: An Exception was thrown.", #X, __FILE__, __LINE__); \
-      } \
+      tearDown(); \
     } \
-    tearDown(); \
   }
 #else
-#  define CPPUNIT_TEST(X) \
-  if (shouldRunThis(in_name, className, #X, invert)) { \
-    setUp(); \
-    progress(className, #X, ignoring); \
-    if (!ignoring) \
-      X(); \
-    tearDown(); \
+#  define CPPUNIT_TEST_BASE(X, Y) \
+  { \
+    bool do_progress; \
+    bool shouldRun = shouldRunThis(in_name, className, #X, invert, Y, do_progress); \
+    if (shouldRun || do_progress) { \
+      setUp(); \
+      progress(className, #X, ignoring || !shouldRun, !ignoring && Y); \
+      if (shouldRun && !ignoring) \
+        X(); \
+      tearDown(); \
+    } \
   }
 #endif
 
-#  define CPPUNIT_IGNORE \
+#define CPPUNIT_TEST(X) CPPUNIT_TEST_BASE(X, false)
+#define CPPUNIT_EXPLICIT_TEST(X) CPPUNIT_TEST_BASE(X, true)
+
+#define CPPUNIT_IGNORE \
   ignoring = true
 
-#  define CPPUNIT_STOP_IGNORE \
+#define CPPUNIT_STOP_IGNORE \
   ignoring = false
-
-#define CPPUNIT_TEST_EXCEPTION(X, Y) \
-  if (shouldRunThis(in_name, className, #X, invert)) { \
-    progress(className, #X, ignoring); \
-  }
 
 #define CPPUNIT_TEST_SUITE_END() }
 
@@ -181,12 +194,17 @@ namespace CPPUNIT_NS
 
 #define CPPUNIT_CHECK(X) \
   if (!(X)) { \
-    Base::failure("CPPUNIT_CHECK", #X, __FILE__, __LINE__); \
+    Base::error("CPPUNIT_CHECK", #X, __FILE__, __LINE__); \
   }
 
 #define CPPUNIT_ASSERT(X) \
   if (!(X)) { \
     Base::error("CPPUNIT_ASSERT", #X, __FILE__, __LINE__); \
+    return; \
+  }
+
+#define CPPUNIT_FAIL { \
+    Base::error("CPPUNIT_FAIL", "", __FILE__, __LINE__); \
     return; \
   }
 

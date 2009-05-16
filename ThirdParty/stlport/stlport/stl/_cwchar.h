@@ -22,20 +22,36 @@
 #  endif
 #else
 #  if defined (__GNUC__)
-#    include _STLP_NATIVE_CPP_C_HEADER(cstddef)
+#    if defined (_STLP_HAS_INCLUDE_NEXT)
+#      include_next <cstddef>
+#    else
+#      include _STLP_NATIVE_CPP_C_HEADER(cstddef)
+#    endif
 #  endif
 
 #  if !defined (_STLP_NO_CWCHAR) && defined (_STLP_USE_NEW_C_HEADERS)
-#    include _STLP_NATIVE_CPP_C_HEADER(cwchar)
+#    if defined (_STLP_HAS_INCLUDE_NEXT)
+#      include_next <cwchar>
+#    else
+#      include _STLP_NATIVE_CPP_C_HEADER(cwchar)
+#    endif
 #    if defined (__OpenBSD__)
 typedef _BSD_WINT_T_ wint_t;
 #    endif /* __OpenBSD__ */
 
-#  elif defined (_STLP_NO_WCHAR_T) || defined (__MRC__) || (defined (__SC__) && !defined (__DMC__)) || \
-       (defined (__BORLANDC__) && (__BORLANDC__ < 0x580)) || \
+#    if defined (__DMC__)
+#      define __STDC_LIMIT_MACROS
+#      include <stdint.h> // WCHAR_MIN, WCHAR_MAX
+#    endif
+#  elif defined (_STLP_NO_WCHAR_T) || \
+       (defined (__BORLANDC__) && (__BORLANDC__ < 0x570)) || \
         defined (__OpenBSD__) || defined (__FreeBSD__) || \
        (defined (__GNUC__) && (defined (__APPLE__) || defined ( __Lynx__ )))
-#    include _STLP_NATIVE_C_HEADER(stddef.h)
+#    if defined (_STLP_HAS_INCLUDE_NEXT)
+#      include_next <stddef.h>
+#    else
+#      include _STLP_NATIVE_C_HEADER(stddef.h)
+#    endif
 #    if defined (__Lynx__)
 #      ifndef _WINT_T
 typedef long int wint_t;
@@ -45,10 +61,12 @@ typedef long int wint_t;
 #    if defined(__OpenBSD__)
 typedef _BSD_WINT_T_ wint_t;
 #    endif /* __OpenBSD__ */
-#  elif defined (__MWERKS__) && defined (N_PLAT_NLM)
-#    include <wchar.h>
 #  else
-#    include _STLP_NATIVE_C_HEADER(wchar.h)
+#    if defined (_STLP_HAS_INCLUDE_NEXT)
+#      include_next <wchar.h>
+#    else
+#      include _STLP_NATIVE_C_HEADER(wchar.h)
+#    endif
 
 #    if defined (__sun) && (defined (_XOPEN_SOURCE) || (_XOPEN_VERSION - 0 == 4))
 extern wint_t   btowc();
@@ -83,7 +101,7 @@ extern int      wscanf();
 namespace std {
   extern "C" size_t wcsftime(wchar_t * str, size_t max_size, const wchar_t * format_str, const struct tm * timeptr);
 }
-#    define _STLP_NO_MBSTATE_T 1
+#    define _STLP_NO_NATIVE_MBSTATE_T 1
 #  elif defined (__BORLANDC__)
 #    if !defined (_STLP_USE_NO_IOSTREAMS)
 #      define _STLP_NO_NATIVE_MBSTATE_T
@@ -105,17 +123,29 @@ namespace std {
 #        define WCHAR_MAX ((wchar_t)~0)
 #      endif
 #    endif
-#    if defined (__GNUC__) && defined (__alpha__)
-/* Definition of WCHAR_MIN and MAX are wrong for alpha platform
- * as gcc consider wchar_t as an unsigned type. Static assertion are
- * here to check that a future alpha SDK or a future gcc won't change the
- * situation making this workaround useless.
- */
-_STLP_STATIC_ASSERT(((wchar_t)-1 > 0) && (WCHAR_MIN < 0))
+#    if defined (__DMC__) || (defined (_STLP_MSVC_LIB) && (_STLP_MSVC_LIB < 1400)) || defined(_WIN32_WCE)
+/* Compilers that do not define WCHAR_MIN and WCHAR_MAX to be testable at
+ * preprocessing time. */
 #      undef WCHAR_MIN
 #      define WCHAR_MIN 0
 #      undef WCHAR_MAX
-#      define WCHAR_MAX ((wchar_t)~0)
+#      define WCHAR_MAX 0xffff
+#    endif
+#    if defined (__GNUC__) && defined (__alpha__)
+/* Definition of WCHAR_MIN and MAX are wrong for alpha platform
+ * as gcc consider wchar_t as an unsigned type but WCHAR_MIN is defined as
+ * a negative value. Static assertion is here to check that a future alpha
+ * SDK or a future gcc won't change the situation making this workaround
+ * useless.
+ */
+/* Check that gcc still consider wchar_t as unsigned */
+_STLP_STATIC_ASSERT(((wchar_t)-1 > 0))
+/* Check that WCHAR_MIN value hasn't been fixed */
+_STLP_STATIC_ASSERT((WCHAR_MIN < 0))
+#      undef WCHAR_MIN
+#      define WCHAR_MIN 0
+#      undef WCHAR_MAX
+#      define WCHAR_MAX 0xffffffff
 #    endif
 #    if defined(__HP_aCC) && (__HP_aCC >= 60000)
 /* Starting with B.11.31, HP-UX/ia64 provides C99-compliant definitions
@@ -127,7 +157,7 @@ _STLP_STATIC_ASSERT(((wchar_t)-1 > 0) && (WCHAR_MIN < 0))
 #      undef WCHAR_MIN
 #      define WCHAR_MIN 0
 #      undef WCHAR_MAX
-#      define WCHAR_MAX UINT_MAX 
+#      define WCHAR_MAX UINT_MAX
 #    endif
 #  endif
 
@@ -144,7 +174,7 @@ typedef int wint_t;
 // gcc 3.0 has a glitch : wint_t only sucked into the global namespace if _GLIBCPP_USE_WCHAR_T is defined
 // __MWERKS__ has definition in wchar_t.h (MSL C++), but ones differ from definition
 // in stdio.h; I prefer settings from last file.
-#      if (defined (__GNUC__) && ! defined (_GLIBCPP_USE_WCHAR_T)) // || (defined(__MWERKS__) && defined(N_PLAT_NLM))
+#      if (defined (__GNUC__) && ! defined (_GLIBCPP_USE_WCHAR_T))
 using ::wint_t;
 #      else
 using _STLP_VENDOR_CSTD::wint_t;
@@ -159,14 +189,14 @@ using _STLP_VENDOR_MB_NAMESPACE::mbstate_t;
 #      if !defined (_STLP_NO_CSTD_FUNCTION_IMPORTS) && !defined(_STLP_WCHAR_BORLAND_EXCLUDE) && \
          (!defined(__MSL__) || __MSL__ > 0x6001)
 #        if defined (__MINGW32__) && ((__MINGW32_MAJOR_VERSION > 3) || ((__MINGW32_MAJOR_VERSION == 3) && (__MINGW32_MINOR_VERSION >= 8))) || \
-          !(defined (__KCC) || defined (__GNUC__)) && !defined(_STLP_WCE_NET) && !(defined(__MWERKS__) && defined(N_PLAT_NLM))
+          !(defined (__KCC) || defined (__GNUC__)) && !defined(_STLP_WCE_NET)
 using _STLP_VENDOR_MB_NAMESPACE::btowc;
 #          if (!defined(__MSL__) || __MSL__ > 0x7001)
 using _STLP_VENDOR_MB_NAMESPACE::mbsinit;
 #          endif
 #        endif
 #        if defined (__MINGW32__) && ((__MINGW32_MAJOR_VERSION > 3) || ((__MINGW32_MAJOR_VERSION == 3) && (__MINGW32_MINOR_VERSION >= 8))) || \
-           !defined (__GNUC__) && !defined(_STLP_WCE_NET) && !(defined(__MWERKS__) && defined(N_PLAT_NLM))
+           !defined (__GNUC__) && !defined(_STLP_WCE_NET)
 using _STLP_VENDOR_MB_NAMESPACE::mbrlen;
 using _STLP_VENDOR_MB_NAMESPACE::mbrtowc;
 using _STLP_VENDOR_MB_NAMESPACE::mbsrtowcs;
@@ -179,7 +209,7 @@ using _STLP_VENDOR_MB_NAMESPACE::wcsrtombs;
 
 #    if !defined (_STLP_NO_NATIVE_WIDE_FUNCTIONS) && ! defined (_STLP_NO_CSTD_FUNCTION_IMPORTS)
 
-#      if !defined (_STLP_WCHAR_BORLAND_EXCLUDE) && ! defined (_STLP_NO_CSTD_FUNCTION_IMPORTS) && !(defined(__MWERKS__) && defined(N_PLAT_NLM))
+#      if !defined (_STLP_WCHAR_BORLAND_EXCLUDE) && ! defined (_STLP_NO_CSTD_FUNCTION_IMPORTS)
 using _STLP_VENDOR_CSTD::fgetwc;
 using _STLP_VENDOR_CSTD::fgetws;
 using _STLP_VENDOR_CSTD::fputwc;
@@ -187,7 +217,7 @@ using _STLP_VENDOR_CSTD::fputws;
 #      endif
 
 #      if !(defined (_STLP_WCHAR_SUNPRO_EXCLUDE) || defined (_STLP_WCHAR_BORLAND_EXCLUDE) || \
-            defined(_STLP_WCHAR_HPACC_EXCLUDE) || (defined(__MWERKS__) && defined(N_PLAT_NLM)))
+            defined(_STLP_WCHAR_HPACC_EXCLUDE) )
 #        if !defined (__DECCXX)
 using _STLP_VENDOR_CSTD::fwide;
 #        endif
@@ -196,7 +226,7 @@ using _STLP_VENDOR_CSTD::fwscanf;
 using _STLP_VENDOR_CSTD::getwchar;
 #      endif
 
-#      if !defined(_STLP_WCHAR_BORLAND_EXCLUDE) && !(defined(__MWERKS__) && defined(N_PLAT_NLM))
+#      if !defined(_STLP_WCHAR_BORLAND_EXCLUDE)
 #        ifndef _STLP_WCE_NET
 using _STLP_VENDOR_CSTD::getwc;
 #        endif
@@ -208,7 +238,7 @@ using _STLP_VENDOR_CSTD::putwchar;
 #      endif
 
 #      if !(defined (_STLP_WCHAR_SUNPRO_EXCLUDE) || defined (_STLP_WCHAR_BORLAND_EXCLUDE) || \
-            defined (_STLP_WCHAR_HPACC_EXCLUDE) || (defined (__MWERKS__) && defined (N_PLAT_NLM)))
+            defined (_STLP_WCHAR_HPACC_EXCLUDE) )
 #        if defined (_STLP_MSVC_LIB) && (_STLP_MSVC_LIB <= 1300) || \
             defined (__MINGW32__)
 #          undef swprintf
@@ -234,11 +264,10 @@ using _STLP_VENDOR_CSTD::wcstok;
 
 #      endif
 
-#      if !(defined(__MWERKS__) && defined(N_PLAT_NLM))
-#        if !defined (_STLP_WCE_NET)
+#      if !defined (_STLP_WCE_NET)
 using _STLP_VENDOR_CSTD::wcscoll;
 using _STLP_VENDOR_CSTD::wcsxfrm;
-#        endif
+#      endif
 using _STLP_VENDOR_CSTD::wcscat;
 using _STLP_VENDOR_CSTD::wcsrchr;
 using _STLP_VENDOR_CSTD::wcscmp;
@@ -254,15 +283,13 @@ using _STLP_VENDOR_CSTD::wcspbrk;
 using _STLP_VENDOR_CSTD::wcschr;
 
 using _STLP_VENDOR_CSTD::wcsspn;
-#      endif
 
-#      if !defined (_STLP_WCHAR_BORLAND_EXCLUDE) && !(defined(__MWERKS__) && defined(N_PLAT_NLM))
+#      if !defined (_STLP_WCHAR_BORLAND_EXCLUDE)
 using _STLP_VENDOR_CSTD::wcstod;
 using _STLP_VENDOR_CSTD::wcstol;
 #      endif
 
-#      if !(defined (_STLP_WCHAR_SUNPRO_EXCLUDE) || defined (_STLP_WCHAR_HPACC_EXCLUDE) || \
-            (defined (__MWERKS__) && defined (N_PLAT_NLM)))
+#      if !(defined (_STLP_WCHAR_SUNPRO_EXCLUDE) || defined (_STLP_WCHAR_HPACC_EXCLUDE) )
 using _STLP_VENDOR_CSTD::wcsstr;
 using _STLP_VENDOR_CSTD::wmemchr;
 
@@ -278,7 +305,7 @@ using _STLP_VENDOR_CSTD::wprintf;
 using _STLP_VENDOR_CSTD::wscanf;
 #        endif
 
-#        if defined (__BORLANDC__)
+#        if defined (__BORLANDC__) && !defined (__linux__)
 inline wchar_t* _STLP_wmemcpy(wchar_t* __wdst, const wchar_t* __wsrc, size_t __n)
 { return __STATIC_CAST(wchar_t*, _STLP_VENDOR_CSTD::wmemcpy(__wdst, __wsrc, __n)); }
 inline wchar_t* _STLP_wmemset(wchar_t* __wdst, wchar_t __wc, size_t __n)
@@ -302,14 +329,6 @@ using _STLP_VENDOR_CSTD::wmemset;
 #        endif
 #      endif
 
-#    elif defined (__MWERKS__) && defined (N_PLAT_NLM) /* _STLP_NO_NATIVE_WIDE_FUNCTIONS */
-using _STLP_VENDOR_CSTD::wcslen;
-using _STLP_VENDOR_CSTD::wcscmp;
-using _STLP_VENDOR_CSTD::wcscpy;
-using _STLP_VENDOR_CSTD::wcsstr;
-using _STLP_VENDOR_CSTD::wcschr;
-using _STLP_VENDOR_CSTD::wcsrchr;
-using _STLP_VENDOR_CSTD::wcspbrk;
 #    endif /* _STLP_NO_NATIVE_WIDE_FUNCTIONS */
 _STLP_END_NAMESPACE
 

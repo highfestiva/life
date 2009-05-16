@@ -40,7 +40,7 @@ _STLP_BEGIN_NAMESPACE
 _STLP_CREATE_ITERATOR_TRAITS(MapTraitsT, traits)
 
 template <class _Key, class _Tp, _STLP_DFL_TMPL_PARAM(_Compare, less<_Key> ),
-          _STLP_DEFAULT_PAIR_ALLOCATOR_SELECT(const _Key, _Tp) >
+          _STLP_DEFAULT_PAIR_ALLOCATOR_SELECT(_STLP_CONST _Key, _Tp) >
 class map
 #if defined (_STLP_USE_PARTIAL_SPEC_WORKAROUND)
           : public __stlport_class<map<_Key, _Tp, _Compare, _Alloc> >
@@ -54,7 +54,7 @@ public:
   typedef _Key                  key_type;
   typedef _Tp                   data_type;
   typedef _Tp                   mapped_type;
-  typedef pair<const _Key, _Tp> value_type;
+  typedef pair<_STLP_CONST _Key, _Tp> value_type;
   typedef _Compare              key_compare;
 
   class value_compare
@@ -145,8 +145,10 @@ public:
 
   map(const _Self& __x) : _M_t(__x._M_t) {}
 
+#if !defined (_STLP_NO_MOVE_SEMANTIC)
   map(__move_source<_Self> src)
     : _M_t(__move_source<_Rep_type>(src.get()._M_t)) {}
+#endif
 
   _Self& operator=(const _Self& __x) {
     _M_t = __x._M_t;
@@ -178,6 +180,9 @@ public:
     return (*__i).second;
   }
   void swap(_Self& __x) { _M_t.swap(__x._M_t); }
+#if defined (_STLP_USE_PARTIAL_SPEC_WORKAROUND) && !defined (_STLP_FUNCTION_TMPL_PARTIAL_ORDER)
+  void _M_swap_workaround(_Self& __x) { swap(__x); }
+#endif
 
   // insert/erase
   pair<iterator,bool> insert(const value_type& __x)
@@ -228,7 +233,7 @@ public:
 _STLP_CREATE_ITERATOR_TRAITS(MultimapTraitsT, traits)
 
 template <class _Key, class _Tp, _STLP_DFL_TMPL_PARAM(_Compare, less<_Key> ),
-          _STLP_DEFAULT_PAIR_ALLOCATOR_SELECT(const _Key, _Tp) >
+          _STLP_DEFAULT_PAIR_ALLOCATOR_SELECT(_STLP_CONST _Key, _Tp) >
 class multimap
 #if defined (_STLP_USE_PARTIAL_SPEC_WORKAROUND)
                : public __stlport_class<multimap<_Key, _Tp, _Compare, _Alloc> >
@@ -242,7 +247,7 @@ public:
   typedef _Key                  key_type;
   typedef _Tp                   data_type;
   typedef _Tp                   mapped_type;
-  typedef pair<const _Key, _Tp> value_type;
+  typedef pair<_STLP_CONST _Key, _Tp> value_type;
   typedef _Compare              key_compare;
 
   class value_compare : public binary_function<value_type, value_type, bool> {
@@ -325,8 +330,10 @@ public:
 
   multimap(const _Self& __x) : _M_t(__x._M_t) {}
 
+#if !defined (_STLP_NO_MOVE_SEMANTIC)
   multimap(__move_source<_Self> src)
     : _M_t(__move_source<_Rep_type>(src.get()._M_t)) {}
+#endif
 
   _Self& operator=(const _Self& __x) {
     _M_t = __x._M_t;
@@ -351,6 +358,9 @@ public:
   size_type size() const { return _M_t.size(); }
   size_type max_size() const { return _M_t.max_size(); }
   void swap(_Self& __x) { _M_t.swap(__x._M_t); }
+#if defined (_STLP_USE_PARTIAL_SPEC_WORKAROUND) && !defined (_STLP_FUNCTION_TMPL_PARTIAL_ORDER)
+  void _M_swap_workaround(_Self& __x) { swap(__x); }
+#endif
 
   // insert/erase
   iterator insert(const value_type& __x) { return _M_t.insert_equal(__x); }
@@ -403,7 +413,7 @@ public:
 #undef  _STLP_TEMPLATE_CONTAINER
 #undef  _STLP_TEMPLATE_HEADER
 
-#if defined (_STLP_CLASS_PARTIAL_SPECIALIZATION)
+#if defined (_STLP_CLASS_PARTIAL_SPECIALIZATION) && !defined (_STLP_NO_MOVE_SEMANTIC)
 template <class _Key, class _Tp, class _Compare, class _Alloc>
 struct __move_traits<map<_Key,_Tp,_Compare,_Alloc> > :
   _STLP_PRIV __move_traits_aux<typename map<_Key,_Tp,_Compare,_Alloc>::_Rep_type>

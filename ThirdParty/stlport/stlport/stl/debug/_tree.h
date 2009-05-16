@@ -60,7 +60,6 @@ public:
   bool operator () (const _Kp1& __lhs, const _Kp2& __rhs) const {
 #endif
     if (_M_non_dbg_cmp(__lhs, __rhs)) {
-      _STLP_VERBOSE_ASSERT(!_M_non_dbg_cmp(__rhs, __lhs), _StlMsg_INVALID_STRICT_WEAK_PREDICATE)
       return true;
     }
     return false;
@@ -90,7 +89,7 @@ _STLP_MOVE_TO_PRIV_NAMESPACE
 
 template <class _Key, class _Compare,
           class _Value, class _KeyOfValue, class _Traits,
-          _STLP_DBG_ALLOCATOR_SELECT(_Value) >
+          _STLP_DFL_TMPL_PARAM(_Alloc, allocator<_Value>) >
 class _Rb_tree {
   typedef _STLP_NON_DBG_TREE _Base;
   typedef _Rb_tree<_Key, _Compare, _Value, _KeyOfValue, _Traits, _Alloc> _Self;
@@ -128,15 +127,17 @@ public:
   _Rb_tree(const _Self& __x)
     : _M_non_dbg_impl(__x._M_non_dbg_impl), _M_iter_list(&_M_non_dbg_impl) {}
 
+#if !defined (_STLP_NO_MOVE_SEMANTIC)
   _Rb_tree(__move_source<_Self> src):
     _M_non_dbg_impl(__move_source<_Base>(src.get()._M_non_dbg_impl)),
     _M_iter_list(&_M_non_dbg_impl) {
-#if defined (_STLP_NO_EXTENSIONS) || (_STLP_DEBUG_LEVEL == _STLP_STANDARD_DBG_LEVEL)
+#  if defined (_STLP_NO_EXTENSIONS) || (_STLP_DEBUG_LEVEL == _STLP_STANDARD_DBG_LEVEL)
     src.get()._M_iter_list._Invalidate_all();
-#else
+#  else
     src.get()._M_iter_list._Set_owner(_M_iter_list);
-#endif
+#  endif
   }
+#endif
 
   ~_Rb_tree() {}
 
@@ -272,10 +273,10 @@ public:
     _M_non_dbg_impl.erase(__pos._M_iterator);
   }
   size_type erase(const key_type& __x) {
-    pair<_Base_iterator,_Base_iterator> __p = _M_non_dbg_impl.equal_range(__x);
-    size_type __n = distance(__p.first, __p.second);
-    _Invalidate_iterators(iterator(&_M_iter_list, __p.first), iterator(&_M_iter_list, __p.second));
-    _M_non_dbg_impl.erase(__p.first, __p.second);
+    pair<iterator, iterator> __p = equal_range(__x);
+    size_type __n = _STLP_STD::distance(__p.first._M_iterator, __p.second._M_iterator);
+    _Invalidate_iterators(__p.first, __p.second);
+    _M_non_dbg_impl.erase(__p.first._M_iterator, __p.second._M_iterator);
     return __n;
   }
   size_type erase_unique(const key_type& __x) {

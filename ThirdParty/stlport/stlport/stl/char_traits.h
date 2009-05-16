@@ -29,14 +29,15 @@
 #  include <stl/_cstring.h>
 #endif
 
-#if defined (__unix) || defined (N_PLAT_NLM)
+#if defined (__unix)
 #  include <sys/types.h>         // For off_t
 #endif /* __unix */
 
-#ifdef __BORLANDC__
-#  include _STLP_NATIVE_C_HEADER(mem.h)
-#  include _STLP_NATIVE_C_HEADER(string.h)
-#  include _STLP_NATIVE_C_HEADER(_stddef.h)
+#if defined (__BORLANDC__)
+#  include <mem.h>
+#  include <string.h>
+#  include <_stddef.h>
+#  include <sys/types.h>
 #endif
 
 #ifndef _STLP_INTERNAL_CONSTRUCT_H
@@ -53,9 +54,7 @@ template <class _Tp> class allocator;
 
 #define _STLP_NULL_CHAR_INIT(_ChT) _STLP_DEFAULT_CONSTRUCTED(_ChT)
 
-#if defined (__sgi) && defined (_STLP_HAS_NO_NEW_C_HEADERS) /* IRIX */
-typedef off64_t streamoff;
-#elif defined(_STLP_WCE)
+#if defined(_STLP_WCE)
 typedef long streamoff;
 #elif defined (_STLP_WIN32)
 #  if defined (_STLP_LONG_LONG) && !defined (__CYGWIN__)
@@ -74,7 +73,7 @@ typedef off64_t streamoff;
 #  else
 typedef off_t streamoff;
 #  endif
-#endif /* ___unix */
+#endif /* __unix */
 
 #if defined (_STLP_WIN32)
 typedef streamoff streamsize;
@@ -125,10 +124,8 @@ private:
   _StateT _M_st;
 };
 
-#if !defined (_STLP_NO_MBSTATE_T)
 typedef fpos<mbstate_t> streampos;
 typedef fpos<mbstate_t> wstreampos;
-#endif
 
 // Class __char_traits_base.
 template <class _CharT, class _IntT>
@@ -138,11 +135,7 @@ public:
   typedef _IntT int_type;
   typedef streamoff off_type;
   typedef streampos pos_type;
-#if defined (_STLP_NO_MBSTATE_T)
-  typedef char      state_type;
-#else
   typedef mbstate_t state_type;
-#endif
 
   static void _STLP_CALL assign(char_type& __c1, const char_type& __c2) { __c1 = __c2; }
   static bool _STLP_CALL eq(const char_type& __c1, const char_type& __c2)
@@ -214,15 +207,14 @@ class char_traits
 
 _STLP_TEMPLATE_NULL
 class _STLP_CLASS_DECLSPEC char_traits<char>
-  : public __char_traits_base<char, int> {
+  : public __char_traits_base<char, int>,
+    public __stlport_class<char_traits<char> > {
 public:
   typedef char char_type;
   typedef int int_type;
   typedef streamoff off_type;
-#if !defined (_STLP_NO_MBSTATE_T)
   typedef streampos pos_type;
   typedef mbstate_t state_type;
-#endif
 
   static char _STLP_CALL to_char_type(const int& __c)
   { return (char)(unsigned char)__c; }
@@ -252,23 +244,21 @@ class _STLP_CLASS_DECLSPEC char_traits<wchar_t>
   : public __char_traits_base<wchar_t, wint_t> {
 #  if !defined (_STLP_NO_NATIVE_WIDE_FUNCTIONS) && !defined (_STLP_WCHAR_HPACC_EXCLUDE)
 public:
-#    if !defined (N_PLAT_NLM)
-#      if !defined (__BORLANDC__)
+#    if !defined (__BORLANDC__)
   static wchar_t* _STLP_CALL move(wchar_t* __dest, const wchar_t* __src, size_t __n)
   { return wmemmove(__dest, __src, __n); }
-#      endif
+#    endif
 
   static wchar_t* _STLP_CALL copy(wchar_t* __dest, const wchar_t* __src, size_t __n)
   { return wmemcpy(__dest, __src, __n); }
 
-#      if !defined (__DMC__) && !defined (__BORLANDC__)
+#    if !defined (__DMC__) && !defined (__BORLANDC__)
   static int _STLP_CALL compare(const wchar_t* __s1, const wchar_t* __s2, size_t __n)
   { return wmemcmp(__s1, __s2, __n); }
-#      endif
+#    endif
 
   static wchar_t* _STLP_CALL assign(wchar_t* __s, size_t __n, wchar_t __c)
   { return wmemset(__s, __c, __n); }
-#    endif
 
   static size_t _STLP_CALL length(const wchar_t* __s)
   { return wcslen(__s); }

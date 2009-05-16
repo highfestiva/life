@@ -22,15 +22,12 @@
 
 #if !defined (_STLP_WCE_EVC3)
 #  if defined (_STLP_USE_NEW_C_HEADERS)
-#    if !defined (N_PLAT_NLM)
-#      include _STLP_NATIVE_CPP_C_HEADER(cwctype)
+#    if defined (_STLP_HAS_INCLUDE_NEXT)
+#      include_next <cwctype>
 #    else
-       // see comments in stlport/cwchar about wint_t on Novell
-#      include _STLP_NATIVE_CPP_C_HEADER(wchar_t.h)
-#      include _STLP_NATIVE_C_HEADER(stddef.h)
-#      include _STLP_NATIVE_C_HEADER(stdio.h)
+#      include _STLP_NATIVE_CPP_C_HEADER(cwctype)
 #    endif
-#    if defined (__MSL__) && !defined (N_PLAT_NLM)
+#    if defined (__MSL__)
 namespace std {
   typedef wchar_t wctrans_t;
   wint_t towctrans(wint_t c, wctrans_t value);
@@ -41,13 +38,14 @@ using std::towctrans;
 using std::wctrans;
 #    endif
 #  else
-#    include _STLP_NATIVE_C_HEADER(wctype.h)
+#    include <wctype.h>
 #  endif
 
-#  if defined (_STLP_IMPORT_VENDOR_CSTD)
+#  if defined (_STLP_IMPORT_VENDOR_CSTD) && !defined (__hpux)
 
 #    if defined (_STLP_USE_GLIBC) && !(defined (_GLIBCPP_USE_WCHAR_T) || defined (_GLIBCXX_USE_WCHAR_T)) || \
         defined (__sun) || defined (__FreeBSD__) || \
+        defined (__CYGWIN__) || \
         defined (__MINGW32__) && ((__MINGW32_MAJOR_VERSION < 3) || (__MINGW32_MAJOR_VERSION == 3) && (__MINGW32_MINOR_VERSION <= 0))
 //We take wide functions from global namespace:
 #      define _STLP_VENDOR_CSTD_WFUNC
@@ -61,14 +59,13 @@ using _STLP_VENDOR_CSTD_WFUNC::wint_t;
 #    if !defined (_STLP_NO_CSTD_FUNCTION_IMPORTS)
 #      if !defined (__BORLANDC__) && !defined (__MSL__)
 using _STLP_VENDOR_CSTD_WFUNC::wctrans_t;
-#        if !defined (__DMC__) && (!defined(_WIN32_WCE) || _WIN32_WCE<0x500)
+#        if !defined (__DMC__) && (!defined(_WIN32_WCE) || (_WIN32_WCE < 400))
 using _STLP_VENDOR_CSTD_WFUNC::towctrans;
 using _STLP_VENDOR_CSTD_WFUNC::wctrans;
 using _STLP_VENDOR_CSTD_WFUNC::wctype;
 #        endif
 using _STLP_VENDOR_CSTD_WFUNC::iswctype;
 #      endif
-#      if !defined(N_PLAT_NLM)
 using _STLP_VENDOR_CSTD_WFUNC::iswalnum;
 using _STLP_VENDOR_CSTD_WFUNC::iswalpha;
 using _STLP_VENDOR_CSTD_WFUNC::iswcntrl;
@@ -84,7 +81,6 @@ using _STLP_VENDOR_CSTD_WFUNC::iswxdigit;
 
 using _STLP_VENDOR_CSTD_WFUNC::towlower;
 using _STLP_VENDOR_CSTD_WFUNC::towupper;
-#      endif /* !N_PLAT_NLM */
 #    endif /* _STLP_NO_CSTD_FUNCTION_IMPORTS */
 _STLP_END_NAMESPACE
 #  endif /* _STLP_IMPORT_VENDOR_CSTD */

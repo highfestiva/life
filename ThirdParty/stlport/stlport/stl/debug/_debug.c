@@ -44,20 +44,20 @@ _STLP_MOVE_TO_PRIV_NAMESPACE
 #if !defined (__DMC__)
 template <class _Iterator>
 inline bool  _STLP_CALL
-__in_range_aux(const _Iterator& __it, const _Iterator& __first,
-               const _Iterator& __last, const random_access_iterator_tag &) {
+stlp_in_range_aux(const _Iterator& __it, const _Iterator& __first,
+                  const _Iterator& __last, const random_access_iterator_tag &) {
     return ( __it >= __first &&
              __it < __last);
 }
 #endif
 
 template <class _Iterator1, class _Iterator>
-#if defined (_STLP_MSVC) && (_STLP_MSVC >= 1100)
-inline bool _STLP_CALL  __in_range_aux(_Iterator1 __it, const _Iterator& __first,
+#if defined (_STLP_MSVC)
+inline bool _STLP_CALL  stlp_in_range_aux(_Iterator1 __it, const _Iterator& __first,
 #else
-inline bool _STLP_CALL  __in_range_aux(const _Iterator1& __it, const _Iterator& __first,
+inline bool _STLP_CALL  stlp_in_range_aux(const _Iterator1& __it, const _Iterator& __first,
 #endif
-                                       const _Iterator& __last, const forward_iterator_tag &) {
+                                          const _Iterator& __last, const forward_iterator_tag &) {
   _Iterator1 __i(__first);
   for (;  __i != __last && __i != __it; ++__i);
   return (__i != __last);
@@ -66,8 +66,8 @@ inline bool _STLP_CALL  __in_range_aux(const _Iterator1& __it, const _Iterator& 
 #if defined (_STLP_NONTEMPL_BASE_MATCH_BUG)
 template <class _Iterator1, class _Iterator>
 inline bool  _STLP_CALL
-__in_range_aux(const _Iterator1& __it, const _Iterator& __first,
-               const _Iterator& __last, const bidirectional_iterator_tag &) {
+stlp_in_range_aux(const _Iterator1& __it, const _Iterator& __first,
+                  const _Iterator& __last, const bidirectional_iterator_tag &) {
   _Iterator1 __i(__first);
   for (;  __i != __last && __i != __it; ++__i);
   return (__i != __last);
@@ -95,7 +95,7 @@ bool _STLP_CALL  __check_range(const _Iterator& __first, const _Iterator& __last
 template <class _Iterator>
 bool _STLP_CALL  __check_range(const _Iterator& __it,
                                const _Iterator& __start, const _Iterator& __finish) {
-  _STLP_VERBOSE_RETURN(__in_range(__it, __start, __finish),
+  _STLP_VERBOSE_RETURN(stlp_in_range(__it, __start, __finish),
                        _StlMsg_NOT_IN_RANGE_1)
   return true;
 }
@@ -103,7 +103,7 @@ bool _STLP_CALL  __check_range(const _Iterator& __it,
 template <class _Iterator>
 bool _STLP_CALL  __check_range(const _Iterator& __first, const _Iterator& __last,
                                const _Iterator& __start, const _Iterator& __finish) {
-  _STLP_VERBOSE_RETURN(__in_range(__first, __last, __start, __finish),
+  _STLP_VERBOSE_RETURN(stlp_in_range(__first, __last, __start, __finish),
                        _StlMsg_NOT_IN_RANGE_2)
   return true;
 }
@@ -128,9 +128,9 @@ void _STLP_CALL __invalidate_range(const __owned_list* __base,
 
   while (__pos != 0) {
     if (!(&__first == __STATIC_CAST(_Iterator*, __pos) || &__last == __STATIC_CAST(_Iterator*, __pos)) &&
-        __in_range_aux(__STATIC_CAST(_Iterator*, __pos)->_M_iterator,
-                       __first._M_iterator, __last._M_iterator,
-                       _STLP_ITERATOR_CATEGORY(__first, _Iterator))) {
+        stlp_in_range_aux(__STATIC_CAST(_Iterator*, __pos)->_M_iterator,
+                          __first._M_iterator, __last._M_iterator,
+                          _STLP_ITERATOR_CATEGORY(__first, _Iterator))) {
       __pos->_M_owner = 0;
       __prev->_M_next = __pos->_M_next;
     }
@@ -181,9 +181,9 @@ void _STLP_CALL  __change_range_owner(const _Iterator& __first,
 
   while (__pos != 0) {
     if (!(&__first == __STATIC_CAST(_Iterator*, __pos) || &__last == __STATIC_CAST(_Iterator*, __pos)) &&
-        __in_range_aux(__STATIC_CAST(_Iterator*, __pos)->_M_iterator,
-                       __first._M_iterator, __last._M_iterator,
-                       _STLP_ITERATOR_CATEGORY(__first, _Iterator))) {
+        stlp_in_range_aux(__STATIC_CAST(_Iterator*, __pos)->_M_iterator,
+                          __first._M_iterator, __last._M_iterator,
+                          _STLP_ITERATOR_CATEGORY(__first, _Iterator))) {
       __pos->_M_owner = __CONST_CAST(__owned_list*, __dst);
       //remove __pos from __base:
       __src_prev->_M_next = __pos->_M_next;
@@ -196,6 +196,17 @@ void _STLP_CALL  __change_range_owner(const _Iterator& __first,
     }
     __pos = __src_prev->_M_next;
   }
+
+#if defined(_STLP_WCE) && defined(_ARM_)
+  // Note: This part is needed for compiling under Windows CE under ARM and correctly using
+  // _STLP_DEBUG mode. This comes from a bug in the ARM compiler where checked iterators that
+  // are passed by value are not copied over correctly. When __change_range_owner is called,
+  // e.g. in std::list::splice() the wrong _M_owner field gets modified and the __first
+  // iterator has the old _M_owner field, but was moved to the new __owned_list. Setting
+  // the first iterator's _M_owner field fixes this. Ugly but works.
+  __pos = __CONST_CAST(_Iterator*, &__first);
+  __pos->_M_owner = __CONST_CAST(__owned_list*, __dst);
+#endif
   //_STLP_RELEASE_LOCK(__base->_M_lock)
 }
 
@@ -298,36 +309,14 @@ _STLP_STRING_LITERAL("Memory allocation function returned a wrongly align memory
 _STLP_STRING_LITERAL("Unknown problem") \
   }
 
-#    if (_STLP_STATIC_TEMPLATE_DATA > 0)
 template <class _Dummy>
-const char* __stl_debug_engine<_Dummy>::_Message_table[_StlMsg_MAX]  _STLP_MESSAGE_TABLE_BODY;
-
-#      if (defined (__CYGWIN__) || defined (__MINGW32__)) && \
-           defined (_STLP_USE_DYNAMIC_LIB) && !defined (__BUILDING_STLPORT)
-/*
- * Under cygwin, when STLport is used as a shared library, the id needs
- * to be specified as imported otherwise they will be duplicated in the
- * calling executable.
- */
-_STLP_TEMPLATE_NULL
-_STLP_DECLSPEC const char* __stl_debug_engine<bool>::_Message_table[_StlMsg_MAX];
-#      endif
-
-#    else
-__DECLARE_INSTANCE(const char*, __stl_debug_engine<bool>::_Message_table[_StlMsg_MAX],
-                   _STLP_MESSAGE_TABLE_BODY);
-#    endif
+const char* __stl_debug_engine<_Dummy>::_Message_table[_StlMsg_MAX] _STLP_MESSAGE_TABLE_BODY;
 
 #    undef _STLP_STRING_LITERAL
 #    undef _STLP_PERCENT_S
 
 _STLP_MOVE_TO_STD_NAMESPACE
 _STLP_END_NAMESPACE
-
-// abort()
-#  ifndef _STLP_INTERNAL_CSTDLIB
-#    include <stl/_cstdlib.h>
-#  endif
 
 #  if !defined (_STLP_DEBUG_MESSAGE)
 #    ifndef _STLP_INTERNAL_CSTDARG

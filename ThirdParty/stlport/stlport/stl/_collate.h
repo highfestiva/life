@@ -40,10 +40,7 @@ template <class _CharT> class collate {};
 template <class _CharT> class collate_byname {};
 
 _STLP_TEMPLATE_NULL
-class _STLP_CLASS_DECLSPEC collate<char> : public locale::facet
-{
-  friend class _Locale_impl;
-
+class _STLP_CLASS_DECLSPEC collate<char> : public locale::facet {
 public:
   typedef char   char_type;
   typedef string string_type;
@@ -62,7 +59,7 @@ public:
   long hash(const char* __low, const char* __high) const
     { return do_hash(__low, __high); }
 
-  static _STLP_STATIC_MEMBER_DECLSPEC locale::id id;
+  static _STLP_STATIC_DECLSPEC locale::id id;
 
 protected:
   ~collate();
@@ -79,10 +76,7 @@ private:
 # ifndef _STLP_NO_WCHAR_T
 
 _STLP_TEMPLATE_NULL
-class _STLP_CLASS_DECLSPEC collate<wchar_t> : public locale::facet
-{
-  friend class _Locale_impl;
-
+class _STLP_CLASS_DECLSPEC collate<wchar_t> : public locale::facet {
 public:
   typedef wchar_t char_type;
   typedef wstring string_type;
@@ -101,7 +95,7 @@ public:
   long hash(const wchar_t* __low, const wchar_t* __high) const
     { return do_hash(__low, __high); }
 
-  static _STLP_STATIC_MEMBER_DECLSPEC locale::id id;
+  static _STLP_STATIC_DECLSPEC locale::id id;
 
 protected:
   ~collate();
@@ -118,10 +112,10 @@ private:
 # endif /* NO_WCHAR_T */
 
 _STLP_TEMPLATE_NULL
-class _STLP_CLASS_DECLSPEC collate_byname<char>: public collate<char>
-{
+class _STLP_CLASS_DECLSPEC collate_byname<char>: public collate<char> {
+  friend class _Locale_impl;
 public:
-  explicit collate_byname(const char* __name, size_t __refs = 0, _Locale_name_hint* __hint = 0);
+  explicit collate_byname(const char* __name, size_t __refs = 0);
 
 protected:
   ~collate_byname();
@@ -131,19 +125,20 @@ protected:
   virtual string_type do_transform(const char*, const char*) const;
 
 private:
+  collate_byname(_Locale_collate *__coll)
+    : _M_collate(__coll) {}
   _Locale_collate* _M_collate;
   collate_byname(const collate_byname<char>&);
   collate_byname<char>& operator =(const collate_byname<char>&);
-  friend _Locale_name_hint* _Locale_extract_hint(collate_byname<char>*);
 };
 
 # ifndef _STLP_NO_WCHAR_T
 
 _STLP_TEMPLATE_NULL
-class _STLP_CLASS_DECLSPEC collate_byname<wchar_t>: public collate<wchar_t>
-{
+class _STLP_CLASS_DECLSPEC collate_byname<wchar_t>: public collate<wchar_t> {
+  friend class _Locale_impl;
 public:
-  explicit collate_byname(const char * __name, size_t __refs = 0, _Locale_name_hint* __hint = 0);
+  explicit collate_byname(const char * __name, size_t __refs = 0);
 
 protected:
   ~collate_byname();
@@ -153,6 +148,8 @@ protected:
   virtual string_type do_transform(const wchar_t*, const wchar_t*) const;
 
 private:
+  collate_byname(_Locale_collate *__coll)
+    : _M_collate(__coll) {}
   _Locale_collate* _M_collate;
   collate_byname(const collate_byname<wchar_t>&);
   collate_byname<wchar_t>& operator =(const collate_byname<wchar_t>&);

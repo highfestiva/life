@@ -1,5 +1,5 @@
 # -*- makefile -*- Time-stamp: <03/10/26 16:17:03 ptr>
-# $Id: clean.mak 2695 2006-10-26 19:36:35Z dums $
+# $Id$
 
 clobber: clean
 	@if exist $(SO_NAME_OUT) del /F /Q $(SO_NAME_OUT)

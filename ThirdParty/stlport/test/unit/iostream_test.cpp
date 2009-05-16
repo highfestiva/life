@@ -2,6 +2,9 @@
 
 #if !defined (STLPORT) || !defined (_STLP_USE_NO_IOSTREAMS)
 #  include <sstream>
+//#  include <locale>
+#  include <iostream>
+//#  include <stdexcept>
 
 #  include "cppunit/cppunit_proxy.h"
 
@@ -16,10 +19,17 @@ class IOStreamTest : public CPPUNIT_NS::TestCase
 {
   CPPUNIT_TEST_SUITE(IOStreamTest);
   CPPUNIT_TEST(manipulators);
+  CPPUNIT_TEST(in_avail);
+//#if defined (STLPORT) && defined (_STLP_NO_WCHAR_T)
+  //CPPUNIT_IGNORE;
+//#endif
+  //CPPUNIT_TEST(wimbue);
   CPPUNIT_TEST_SUITE_END();
 
 private:
   void manipulators();
+  void in_avail();
+  //void wimbue();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(IOStreamTest);
@@ -67,5 +77,40 @@ void IOStreamTest::manipulators()
     istr.clear();
   }
 }
+
+
+void IOStreamTest::in_avail()
+{
+  CPPUNIT_CHECK( cin.rdbuf()->in_avail() == 0 );
+  CPPUNIT_CHECK( cout.rdbuf()->in_avail() == -1 );
+  CPPUNIT_CHECK( clog.rdbuf()->in_avail() == -1 );
+  CPPUNIT_CHECK( cerr.rdbuf()->in_avail() == -1 );
+
+#if !defined (STLPORT) || !defined (_STLP_NO_WCHAR_T)
+  CPPUNIT_CHECK( wcin.rdbuf()->in_avail() == 0 );
+  CPPUNIT_CHECK( wcout.rdbuf()->in_avail() == 0 );
+  CPPUNIT_CHECK( wclog.rdbuf()->in_avail() == 0 );
+  CPPUNIT_CHECK( wcerr.rdbuf()->in_avail() == 0 );
+#endif
+}
+
+//void IOStreamTest::wimbue()
+//{
+//#if !defined (STLPORT) || !defined (_STLP_NO_WCHAR_T)
+//  locale loc;
+//  try {
+//    locale tmp(".866");
+//    loc = tmp;
+//  }
+//  catch (const runtime_error&) {
+//    return;
+//  }
+//
+//  wcout.imbue(loc);
+//  wcout << L"Hello world" << endl;
+//  wcout.imbue(loc);
+//  wcout << L"Hello world" << endl;
+//#endif
+//}
 
 #endif

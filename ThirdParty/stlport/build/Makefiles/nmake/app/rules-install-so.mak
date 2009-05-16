@@ -1,5 +1,5 @@
 # Time-stamp: <03/10/26 16:42:14 ptr>
-# $Id: rules-install-so.mak 2057 2005-12-29 20:43:09Z dums $
+# $Id$
 
 !ifndef INSTALL_TAGS
 INSTALL_TAGS= install-shared install-static

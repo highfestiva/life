@@ -21,7 +21,7 @@
 
 #  if !defined (_STLP_OUTERMOST_HEADER_ID)
 #    define _STLP_OUTERMOST_HEADER_ID 0x261
-#    include <stl/_prolog.h>
+#    include <stl/_cprolog.h>
 #  elif (_STLP_OUTERMOST_HEADER_ID == 0x261) && !defined (_STLP_DONT_POP_HEADER_ID)
 #    define _STLP_DONT_POP_HEADER_ID
 #  endif
@@ -30,7 +30,11 @@
 struct _exception;
 #  endif
 
-#  include _STLP_NATIVE_C_HEADER(stdarg.h)
+#  if defined (_STLP_HAS_INCLUDE_NEXT)
+#    include_next <stdarg.h>
+#  else
+#    include _STLP_NATIVE_C_HEADER(stdarg.h)
+#  endif
 
 #  if (_STLP_OUTERMOST_HEADER_ID == 0x261)
 #    if !defined (_STLP_DONT_POP_HEADER_ID)

@@ -20,11 +20,9 @@
 
 #include <string>
 #include <locale>
-#include <typeinfo>
 #include <hash_map>
 
 #include "c_locale.h"
-#include "acquire_release.h"
 
 _STLP_BEGIN_NAMESPACE
 _STLP_MOVE_TO_PRIV_NAMESPACE
@@ -42,7 +40,8 @@ struct _Catalog_locale_map {
   locale lookup(nl_catd_type key) const;
   void erase(nl_catd_type key);
 
-  typedef hash_map<nl_catd_type, locale, hash<nl_catd_type>, equal_to<nl_catd_type> > map_type;
+  typedef hash_map<nl_catd_type, locale, hash<nl_catd_type>, equal_to<nl_catd_type>, 
+                   allocator<pair<_STLP_CONST nl_catd_type, locale> > > map_type;
   map_type *M;
 
 private:                        // Invalidate copy constructor and assignment
@@ -60,7 +59,7 @@ private:                        // Invalidate copy constructor and assignment
  *
  */
 
-#if defined (_STLP_REAL_LOCALE_IMPLEMENTED) && (defined (_STLP_USE_GLIBC) && !defined (__CYGWIN__))
+#if defined (_STLP_USE_GLIBC2_LOCALIZATION)
 #  define _STLP_USE_NL_CATD_MAPPING
 #else
 /* If no mapping a message_base::catalog entry, int typedef according C++ Standard 22.2.7.1,
@@ -76,8 +75,10 @@ public:
   ~_Catalog_nl_catd_map()
   {}
 
-  typedef hash_map<messages_base::catalog, nl_catd_type, hash<messages_base::catalog>, equal_to<messages_base::catalog> > map_type;
-  typedef hash_map<nl_catd_type, messages_base::catalog, hash<nl_catd_type>, equal_to<nl_catd_type> > rmap_type;
+  typedef hash_map<messages_base::catalog, nl_catd_type, hash<messages_base::catalog>, equal_to<messages_base::catalog>,
+                   allocator<pair<_STLP_CONST messages_base::catalog, nl_catd_type> > > map_type;
+  typedef hash_map<nl_catd_type, messages_base::catalog, hash<nl_catd_type>, equal_to<nl_catd_type>,
+                   allocator<pair<_STLP_CONST nl_catd_type, messages_base::catalog> > > rmap_type;
   // typedef map<messages_base::catalog,nl_catd_type> map_type;
   // typedef map<nl_catd_type,messages_base::catalog> rmap_type;
 
@@ -95,7 +96,7 @@ public:
   ;
 #endif
 
-  nl_catd_type operator [] ( messages_base::catalog cat ) const
+  nl_catd_type operator [] ( messages_base::catalog cat )
 #if !defined (_STLP_USE_NL_CATD_MAPPING)
   { return cat; }
 #else
@@ -107,34 +108,18 @@ private:
   _Catalog_nl_catd_map& operator =(const _Catalog_nl_catd_map&);
 
 #if defined (_STLP_USE_NL_CATD_MAPPING)
-  mutable map_type M;
-  mutable rmap_type Mr;
+  map_type M;
+  rmap_type Mr;
   static _STLP_VOLATILE __stl_atomic_t _count;
 #endif
 };
 
-class _STLP_CLASS_DECLSPEC _Messages {
+class _Messages {
 public:
   typedef messages_base::catalog catalog;
 
-  _Messages();
-
-  virtual catalog do_open(const string& __fn, const locale& __loc) const;
-  virtual string do_get(catalog __c, int __set, int __msgid,
-                        const string& __dfault) const;
-#if !defined (_STLP_NO_WCHAR_T)
-  virtual wstring do_get(catalog __c, int __set, int __msgid,
-                         const wstring& __dfault) const;
-#endif
-  virtual void do_close(catalog __c) const;
-  virtual ~_Messages();
-  bool _M_delete;
-};
-
-class _STLP_CLASS_DECLSPEC _Messages_impl : public _Messages {
-public:
-  _Messages_impl(bool, _Locale_name_hint* hint = 0);
-  _Messages_impl(bool, _Locale_messages*);
+  _Messages(bool, const char *name);
+  _Messages(bool, _Locale_messages*);
 
   catalog do_open(const string& __fn, const locale& __loc) const;
   string do_get(catalog __c, int __set, int __msgid,
@@ -143,9 +128,8 @@ public:
   wstring do_get(catalog __c, int __set, int __msgid,
                  const wstring& __dfault) const;
 #endif
-  void do_close(catalog __c) const;
-
-  ~_Messages_impl();
+  void do_close(catalog __c) const; 
+  ~_Messages(); 
 
 private:
   _Locale_messages* _M_message_obj;
@@ -153,8 +137,8 @@ private:
   mutable _Catalog_nl_catd_map _M_cat;
 
   //private definition to avoid warning (with ICL)
-  _Messages_impl(const _Messages_impl&);
-  _Messages_impl& operator=(const _Messages_impl&);
+  _Messages(const _Messages&);
+  _Messages& operator=(const _Messages&);
 };
 
 _STLP_MOVE_TO_STD_NAMESPACE

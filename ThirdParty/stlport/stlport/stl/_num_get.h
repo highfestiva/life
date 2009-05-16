@@ -43,18 +43,17 @@
 #  include <stl/_iostream_string.h>
 #endif
 
+#ifndef _STLP_FACETS_FWD_H
+#  include <stl/_facets_fwd.h>
+#endif
+
 _STLP_BEGIN_NAMESPACE
 
 //----------------------------------------------------------------------
 // num_get facets
 
-#if defined (_STLP_LIMITED_DEFAULT_TEMPLATES)
 template <class _CharT, class _InputIter>
-#else
-template <class _CharT, class _InputIter = istreambuf_iterator<_CharT, char_traits<_CharT> > >
-#endif
 class num_get: public locale::facet {
-  friend class _Locale_impl;
 public:
   typedef _CharT     char_type;
   typedef _InputIter iter_type;
@@ -121,7 +120,7 @@ public:
                  ios_base::iostate& __err, void*& __val) const
   { return do_get(__ii, __end, __str, __err, __val); }
 
-  static _STLP_STATIC_MEMBER_DECLSPEC locale::id id;
+  static locale::id id;
 
 protected:
   ~num_get() {}
@@ -222,6 +221,7 @@ void _STLP_DECLSPEC _STLP_CALL __string_to_float(const __iostring&, long double&
 _STLP_MOVE_TO_STD_NAMESPACE
 
 #endif /* _STLP_EXPOSE_STREAM_IMPLEMENTATION */
+
 
 _STLP_END_NAMESPACE
 

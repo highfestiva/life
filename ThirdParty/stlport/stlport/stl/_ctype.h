@@ -70,7 +70,6 @@ class _STLP_CLASS_DECLSPEC ctype<char> : public locale::facet, public ctype_base
     friend class ctype<wchar_t>;
 #  endif
 #endif
-  friend class _Locale_impl;
 public:
 
   typedef char char_type;
@@ -112,12 +111,8 @@ public:
     return do_narrow(__low, __high, __dfault, __to);
   }
 
-  static _STLP_STATIC_MEMBER_DECLSPEC locale::id id;
-# if defined(_STLP_STATIC_CONST_INIT_BUG)
-  enum __TableSize { table_size = 256 };
-# else
-  static const size_t table_size = 256;
-# endif
+  static _STLP_STATIC_DECLSPEC locale::id id;
+  _STLP_STATIC_CONSTANT(size_t, table_size = 256);
 
 protected:
   const mask* table() const _STLP_NOTHROW { return _M_ctype_table; }
@@ -150,8 +145,9 @@ private:
 
 _STLP_TEMPLATE_NULL
 class _STLP_CLASS_DECLSPEC ctype_byname<char>: public ctype<char> {
+  friend class _Locale_impl;
 public:
-  explicit ctype_byname(const char*, size_t = 0, _Locale_name_hint* __hint = 0);
+  explicit ctype_byname(const char*, size_t = 0);
   ~ctype_byname();
 
   virtual char        do_toupper(char __c) const;
@@ -161,21 +157,24 @@ public:
   virtual const char* do_tolower(char*, const char*) const;
 
 private:
-  mask _M_byname_table[table_size];
-  _Locale_ctype* _M_ctype;
+  ctype_byname(_Locale_ctype* __ctype)
+    : _M_ctype(__ctype)
+  { _M_init(); }
+
+  void _M_init();
 
   //explicitely defined as private to avoid warnings:
   typedef ctype_byname<char> _Self;
   ctype_byname(_Self const&);
   _Self& operator = (_Self const&);
-  friend _Locale_name_hint* _Locale_extract_hint(ctype_byname<char>*);
+
+  mask _M_byname_table[table_size];
+  _Locale_ctype* _M_ctype;
 };
 
 #  ifndef _STLP_NO_WCHAR_T
 _STLP_TEMPLATE_NULL
-class _STLP_CLASS_DECLSPEC ctype<wchar_t> : public locale::facet, public ctype_base
-{
-  friend class _Locale_impl;
+class _STLP_CLASS_DECLSPEC ctype<wchar_t> : public locale::facet, public ctype_base {
 public:
   typedef wchar_t char_type;
 
@@ -215,7 +214,7 @@ public:
                         char __dfault, char* __to) const
     { return do_narrow(__low, __high, __dfault, __to); }
 
-  static _STLP_STATIC_MEMBER_DECLSPEC locale::id id;
+  static _STLP_STATIC_DECLSPEC locale::id id;
 
 protected:
   ~ctype();
@@ -239,8 +238,9 @@ protected:
 
 _STLP_TEMPLATE_NULL
 class _STLP_CLASS_DECLSPEC ctype_byname<wchar_t>: public ctype<wchar_t> {
+  friend class _Locale_impl;
 public:
-  explicit ctype_byname(const char* __name, size_t __refs = 0, _Locale_name_hint* __hint = 0);
+  explicit ctype_byname(const char* __name, size_t __refs = 0);
 
 protected:
   ~ctype_byname();
@@ -257,12 +257,15 @@ protected:
   virtual const wchar_t* do_tolower(wchar_t*, const wchar_t*) const;
 
 private:
-  _Locale_ctype* _M_ctype;
+  ctype_byname(_Locale_ctype* __ctype)
+    : _M_ctype(__ctype) {}
 
   //explicitely defined as private to avoid warnings:
   typedef ctype_byname<wchar_t> _Self;
   ctype_byname(_Self const&);
   _Self& operator = (_Self const&);
+
+  _Locale_ctype* _M_ctype;
 };
 
 #  endif /* WCHAR_T */

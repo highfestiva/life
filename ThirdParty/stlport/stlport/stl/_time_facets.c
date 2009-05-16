@@ -34,129 +34,93 @@ _STLP_BEGIN_NAMESPACE
 
 //----------------------------------------------------------------------
 // Declarations of static template members.
-#if (_STLP_STATIC_TEMPLATE_DATA > 0)
 
-#  if !defined (__BORLANDC__)
 template <class _CharT, class _InputIterator>
 locale::id time_get<_CharT, _InputIterator>::id;
 
 template <class _CharT, class _OutputIterator>
 locale::id time_put<_CharT, _OutputIterator>::id;
-#  endif
-
-#  if (defined (__CYGWIN__) || defined (__MINGW32__)) && \
-       defined (_STLP_USE_DYNAMIC_LIB) && !defined (__BUILDING_STLPORT)
-/*
- * Under cygwin, when STLport is used as a shared library, the id needs
- * to be specified as imported otherwise they will be duplicated in the
- * calling executable.
- */
-template <>
-_STLP_DECLSPEC locale::id time_get<char, istreambuf_iterator<char, char_traits<char> > >::id;
-/*
-template <>
-_STLP_DECLSPEC locale::id time_get<char, const char*>::id;
-*/
-
-template <>
-_STLP_DECLSPEC locale::id time_put<char, ostreambuf_iterator<char, char_traits<char> > >::id;
-/*
-template <>
-_STLP_DECLSPEC locale::id time_put<char, char*>::id;
-*/
-
-#    ifndef _STLP_NO_WCHAR_T
-template <>
-_STLP_DECLSPEC locale::id time_get<wchar_t, istreambuf_iterator<wchar_t, char_traits<wchar_t> > >::id;
-/*
-template <>
-_STLP_DECLSPEC locale::id time_get<wchar_t, const wchar_t*>::id;
-*/
-
-template <>
-_STLP_DECLSPEC locale::id time_put<wchar_t, ostreambuf_iterator<wchar_t, char_traits<wchar_t> > >::id;
-/*
-template <>
-_STLP_DECLSPEC locale::id time_put<wchar_t, wchar_t*>::id;
-*/
-#    endif /* _STLP_NO_WCHAR_T */
-#  endif /* __CUGWIN__ && _STLP_USE_DYNAMIC_LIB */
-
-#else /* ( _STLP_STATIC_TEMPLATE_DATA > 0 ) */
-
-//typedef time_get<char, const char*> time_get_char;
-typedef time_get<char, istreambuf_iterator<char, char_traits<char> > > time_get_char_2;
-//typedef time_put<char, char*> time_put_char;
-typedef time_put<char, ostreambuf_iterator<char, char_traits<char> > > time_put_char_2;
-
-//__DECLARE_INSTANCE(locale::id, time_get_char::id, );
-__DECLARE_INSTANCE(locale::id, time_get_char_2::id, );
-//__DECLARE_INSTANCE(locale::id, time_put_char::id, );
-__DECLARE_INSTANCE(locale::id, time_put_char_2::id, );
-
-#  if !defined (_STLP_NO_WCHAR_T)
-
-//typedef time_get<wchar_t, const wchar_t*> time_get_wchar_t;
-typedef time_get<wchar_t, istreambuf_iterator<wchar_t, char_traits<wchar_t> > > time_get_wchar_t_2;
-//typedef time_put<wchar_t, wchar_t*> time_put_wchar_t;
-typedef time_put<wchar_t, ostreambuf_iterator<wchar_t, char_traits<wchar_t> > > time_put_wchar_t_2;
-
-//__DECLARE_INSTANCE(locale::id, time_get_wchar_t::id, );
-__DECLARE_INSTANCE(locale::id, time_get_wchar_t_2::id, );
-//__DECLARE_INSTANCE(locale::id, time_put_wchar_t::id, );
-__DECLARE_INSTANCE(locale::id, time_put_wchar_t_2::id, );
-
-#  endif
-
-#endif /* ( _STLP_STATIC_TEMPLATE_DATA > 0 ) */
 
 _STLP_MOVE_TO_PRIV_NAMESPACE
 
-template <class _InIt, class _CharT>
-const string* _STLP_CALL
-__match(_InIt& __first, _InIt& __last, const string *__name, const string *__name_end,
-        const ctype<_CharT>& __ct) {
+/* Matching input against a list of names
+
+ * Alphabetic input of the names of months and the names
+ * of weekdays requires matching input against a list of names.
+ * We use a simple generic algorithm to accomplish this.  This
+ * algorithm is not very efficient, especially for longer lists
+ * of names, but it probably does not matter for the initial
+ * implementation and it may never matter, since we do not expect
+ * this kind of input to be used very often.  The algorithm
+ * could be improved fairly simply by creating a new list of
+ * names still in the running at each iteration.  A more sophisticated
+ * approach would be to build a tree to do the matching.
+ *
+ * We compare each character of the input to the corresponding
+ * character of each name on the list that has not been eliminated,
+ * either because every character in the name has already been
+ * matched, or because some character has not been matched.  We
+ * continue only as long as there are some names that have not been
+ * eliminated.
+
+ * We do not really need a random access iterator (a forward iterator
+ * would do), but the extra generality makes the notation clumsier,
+ * and we don't really need it.
+
+ * We can recognize a failed match by the fact that the return value
+ * will be __name_end.
+ */
+
+#define _MAXNAMES        24
+
+template <class _InIt, class _NameIt>
+size_t _STLP_CALL
+__match(_InIt& __first, _InIt& __last, _NameIt __name, _NameIt __name_end) {
   typedef ptrdiff_t difference_type;
   difference_type __n = __name_end - __name;
-  difference_type __i;
+  difference_type __i, __start = 0;
   size_t __pos = 0;
   difference_type __check_count = __n;
-  bool __do_check[_MAXNAMES];
-  const string* __matching_name[_MAX_NAME_LENGTH];
+  bool __do_not_check[_MAXNAMES];
+  size_t __matching_name_index = __n;
 
-  for (__i = 0; __i < _MAXNAMES; ++__i)
-    __do_check[__i] = true;
-
-  for (__i = 0; __i < _MAX_NAME_LENGTH; ++__i)
-    __matching_name[__i] = __name_end;
+  memset(__do_not_check, 0, sizeof(__do_not_check));
 
   while (__first != __last) {
-    for (__i = 0; __i < __n; ++__i) {
-      if (__do_check[__i]) {
-        if (*__first == __ct.widen(__name[__i][__pos])) {
+    difference_type __new_n = __n;
+    for (__i = __start; __i < __n; ++__i) {
+      if (!__do_not_check[__i]) {
+        if (*__first == __name[__i][__pos]) {
           if (__pos == (__name[__i].size() - 1)) {
-            __do_check[__i] = 0;
-            __matching_name[__pos + 1] = __name + __i;
+            __matching_name_index = __i;
+            __do_not_check[__i] = true;
+            if (__i == __start) ++__start;
             --__check_count;
             if (__check_count == 0) {
               ++__first;
-              return __name + __i;
+              return __matching_name_index;
             }
           }
+          __new_n = __i + 1;
         }
         else {
-          __do_check[__i] = 0;
+          __do_not_check[__i] = true;
+          if (__i == __start) ++__start;
           --__check_count;
           if (__check_count == 0)
-            return __matching_name[__pos];
+            return __matching_name_index;
         }
+      }
+      else {
+        if (__i == __start) ++ __start;
       }
     }
 
+    __n = __new_n;
     ++__first; ++__pos;
   }
 
-  return __matching_name[__pos];
+  return __matching_name_index;
 }
 
 // __get_formatted_time reads input that is assumed to be formatted
@@ -180,14 +144,18 @@ __match(_InIt& __first, _InIt& __last, const string *__name, const string *__nam
 
 // Note that the antepenultimate parameter is being used only to determine
 // the correct overloading for the calls to __get_integer_nogroup.
-template <class _InIt1, class _Ch>
+template <class _InIt1, class _Ch, class _TimeInfo>
 string::const_iterator _STLP_CALL
 __get_formatted_time _STLP_WEAK (_InIt1 __first,  _InIt1 __last,
                                  string::const_iterator __format, string::const_iterator __format_end,
-                                 _Ch*, const _Time_Info& __table,
+                                 _Ch*, const _TimeInfo& __table,
                                  const ios_base& __s, ios_base::iostate& __err, tm* __t) {
-  const ctype<_Ch>& __ct = *__STATIC_CAST(const ctype<_Ch>*, __s._M_ctype_facet());
+  const ctype<_Ch>& __ct = use_facet<ctype<_Ch> >(__s.getloc());
+  typedef basic_string<_Ch, char_traits<_Ch>, allocator<_Ch> > string_type;
+  size_t offset;
+
   while (__first != __last && __format != __format_end) {
+    offset = 0;
     if (*__format == '%') {
       ++__format;
       char __c = *__format;
@@ -197,43 +165,25 @@ __get_formatted_time _STLP_WEAK (_InIt1 __first,  _InIt1 __last,
       }
 
       switch (__c) {
+        case 'A':
+          offset = 7;
         case 'a': {
-          const string* __pr = __match(__first, __last,
-                                       __table._M_dayname + 0, __table._M_dayname + 7,
-                                       __ct);
-          if (__pr == __table._M_dayname + 7)
+          size_t __index = __match(__first, __last,
+                                   __table._M_dayname + offset, __table._M_dayname + offset + 7);
+          if (__index == 7)
             return __format;
-          __t->tm_wday = __STATIC_CAST(int, __pr - __table._M_dayname);
+          __t->tm_wday = __STATIC_CAST(int, __index);
           break;
         }
 
-        case 'A': {
-          const string* __pr = __match(__first, __last,
-                                       __table._M_dayname + 7, __table._M_dayname + 14,
-                                       __ct);
-          if (__pr == __table._M_dayname + 14)
-            return __format;
-          __t->tm_wday = __STATIC_CAST(int, __pr - __table._M_dayname - 7);
-          break;
-        }
-
+        case 'B':
+          offset = 12;
         case 'b': {
-          const string* __pr = __match(__first, __last,
-                                       __table._M_monthname + 0, __table._M_monthname + 12,
-                                       __ct);
-          if (__pr == __table._M_monthname + 12)
+          size_t __index = __match(__first, __last,
+                                   __table._M_monthname + offset, __table._M_monthname + offset + 12);
+          if (__index == 12)
             return __format;
-          __t->tm_mon = __STATIC_CAST(int, __pr - __table._M_monthname);
-          break;
-        }
-
-        case 'B': {
-          const string* __pr = __match(__first, __last,
-                                       __table._M_monthname + 12, __table._M_monthname + 24,
-                                       __ct);
-          if (__pr == __table._M_monthname + 24)
-            return __format;
-          __t->tm_mon = __STATIC_CAST(int, __pr - __table._M_monthname - 12);
+          __t->tm_mon = __STATIC_CAST(int, __index);
           break;
         }
 
@@ -278,14 +228,14 @@ __get_formatted_time _STLP_WEAK (_InIt1 __first,  _InIt1 __last,
         }
 
         case 'p': {
-          const string* __pr = __match(__first, __last,
-                                       __table._M_am_pm + 0, __table._M_am_pm + 2, __ct);
-          if (__pr == __table._M_am_pm + 2)
+          size_t __index = __match(__first, __last,
+                                   __table._M_am_pm + 0, __table._M_am_pm + 2);
+          if (__index == 2)
             return __format;
           // 12:00 PM <=> 12:00, 12:00 AM <=> 00:00
-          if (__pr == __table._M_am_pm + 1 && __t->tm_hour != 12 )
+          if (__index == 1 && __t->tm_hour != 12 )
             __t->tm_hour += 12;
-          if (__pr == __table._M_am_pm && __t->tm_hour == 12 )
+          if (__index == 0 && __t->tm_hour == 12 )
             __t->tm_hour = 0;
           break;
         }
@@ -326,39 +276,27 @@ __get_formatted_time _STLP_WEAK (_InIt1 __first,  _InIt1 __last,
   return __format;
 }
 
-template <class _InIt, class _CharT>
+template <class _InIt, class _TimeInfo>
 bool _STLP_CALL
-__get_short_or_long_dayname(_InIt& __first, _InIt& __last, const ctype<_CharT>& __ct,
-                            const _Time_Info& __table, tm* __t) {
-  const string* __pr =
-    __match(__first, __last, __table._M_dayname + 0, __table._M_dayname + 14, __ct);
-  __t->tm_wday = __STATIC_CAST(int, (__pr - __table._M_dayname) % 7);
-  return __pr != __table._M_dayname + 14;
+__get_short_or_long_dayname(_InIt& __first, _InIt& __last, const _TimeInfo& __table, tm* __t) {
+  size_t __index = __match(__first, __last, __table._M_dayname + 0, __table._M_dayname + 14);
+  if (__index != 14) {
+    __t->tm_wday = __STATIC_CAST(int, __index % 7);
+    return true;
+  }
+  return false;
 }
 
-template <class _InIt, class _CharT>
+template <class _InIt, class _TimeInfo>
 bool _STLP_CALL
-__get_short_or_long_monthname(_InIt& __first, _InIt& __last, const ctype<_CharT>& __ct,
-                              const _Time_Info& __table, tm* __t) {
-  const string* __pr =
-    __match(__first, __last, __table._M_monthname + 0, __table._M_monthname + 24, __ct);
-  __t->tm_mon = __STATIC_CAST(int, (__pr - __table._M_monthname) % 12);
-  return __pr != __table._M_monthname + 24;
+__get_short_or_long_monthname(_InIt& __first, _InIt& __last, const _TimeInfo& __table, tm* __t) {
+  size_t __index = __match(__first, __last, __table._M_monthname + 0, __table._M_monthname + 24);
+  if (__index != 24) {
+    __t->tm_mon = __STATIC_CAST(int, __index % 12);
+    return true;
+  }
+  return false;
 }
-
-#if !defined (_STLP_NO_WCHAR_T)
-template <class _OuIt>
-_OuIt _STLP_CALL
-__put_time(char * __first, char * __last, _OuIt __out_ite,
-           const ios_base& __s, wchar_t) {
-    const ctype<wchar_t>& __ct = *__STATIC_CAST(const ctype<wchar_t>*, __s._M_ctype_facet());
-    wchar_t __wbuf[64];
-    __ct.widen(__first, __last, __wbuf);
-    ptrdiff_t __len = __last - __first;
-    wchar_t * __eend = __wbuf + __len;
-    return copy((wchar_t*)__wbuf, __eend, __out_ite);
-}
-#endif
 
 _STLP_MOVE_TO_STD_NAMESPACE
 
@@ -369,12 +307,12 @@ time_get<_Ch, _InIt>::do_get_date(_InIt __s, _InIt  __end,
                                   tm* __t) const {
   typedef string::const_iterator string_iterator;
 
-  string_iterator __format = _M_timeinfo._M_date_format.begin();
-  string_iterator __format_end = _M_timeinfo._M_date_format.end();
+  string_iterator __format = this->_M_timeinfo._M_date_format.begin();
+  string_iterator __format_end = this->_M_timeinfo._M_date_format.end();
 
   string_iterator __result
     = _STLP_PRIV __get_formatted_time(__s, __end, __format, __format_end,
-                                      __STATIC_CAST(_Ch*, 0), _M_timeinfo,
+                                      __STATIC_CAST(_Ch*, 0), this->_M_timeinfo,
                                       __str, __err, __t);
   if (__result == __format_end)
     __err = ios_base::goodbit;
@@ -392,12 +330,12 @@ time_get<_Ch, _InIt>::do_get_time(_InIt __s, _InIt  __end,
                                   ios_base& __str, ios_base::iostate&  __err,
                                   tm* __t) const {
   typedef string::const_iterator string_iterator;
-  string_iterator __format = _M_timeinfo._M_time_format.begin();
-  string_iterator __format_end = _M_timeinfo._M_time_format.end();
+  string_iterator __format = this->_M_timeinfo._M_time_format.begin();
+  string_iterator __format_end = this->_M_timeinfo._M_time_format.end();
 
   string_iterator __result
     = _STLP_PRIV __get_formatted_time(__s, __end, __format, __format_end,
-                                      __STATIC_CAST(_Ch*, 0), _M_timeinfo,
+                                      __STATIC_CAST(_Ch*, 0), this->_M_timeinfo,
                                       __str, __err, __t);
   __err = __result == __format_end ? ios_base::goodbit
                                    : ios_base::failbit;
@@ -430,9 +368,8 @@ _InIt
 time_get<_Ch, _InIt>::do_get_weekday(_InIt __s, _InIt  __end,
                                      ios_base &__str, ios_base::iostate &__err,
                                      tm *__t) const {
-  const ctype<_Ch>& __ct = *__STATIC_CAST(const ctype<_Ch>*, __str._M_ctype_facet());
   bool __result =
-    _STLP_PRIV __get_short_or_long_dayname(__s, __end, __ct, _M_timeinfo, __t);
+    _STLP_PRIV __get_short_or_long_dayname(__s, __end, this->_M_timeinfo, __t);
   if (__result)
     __err = ios_base::goodbit;
   else {
@@ -448,9 +385,8 @@ _InIt
 time_get<_Ch, _InIt>::do_get_monthname(_InIt __s, _InIt  __end,
                                        ios_base &__str, ios_base::iostate &__err,
                                        tm *__t) const {
-  const ctype<_Ch>& __ct = *__STATIC_CAST(const ctype<_Ch>*, __str._M_ctype_facet());
   bool __result =
-    _STLP_PRIV __get_short_or_long_monthname(__s, __end, __ct, _M_timeinfo, __t);
+    _STLP_PRIV __get_short_or_long_monthname(__s, __end, this->_M_timeinfo, __t);
   if (__result)
     __err = ios_base::goodbit;
   else {
@@ -466,9 +402,7 @@ _OutputIter
 time_put<_Ch,_OutputIter>::put(_OutputIter __s, ios_base& __f, _Ch __fill,
                                const tm* __tmb, const _Ch* __pat,
                                const _Ch* __pat_end) const {
-  //  locale __loc = __f.getloc();
-  //  const ctype<_Ch>& _Ct = use_facet<ctype<_Ch> >(__loc);
-  const ctype<_Ch>& _Ct = *__STATIC_CAST(const ctype<_Ch>*, __f._M_ctype_facet());
+  const ctype<_Ch>& _Ct = use_facet<ctype<_Ch> >(__f.getloc());
   while (__pat != __pat_end) {
     char __c = _Ct.narrow(*__pat, 0);
     if (__c == '%') {
@@ -492,11 +426,10 @@ _OutputIter
 time_put<_Ch,_OutputIter>::do_put(_OutputIter __s, ios_base& __f, _Ch /* __fill */,
                                   const tm* __tmb, char __format,
                                   char __modifier ) const {
-  char __buf[64];
-  char * __iend = _STLP_PRIV __write_formatted_time(_STLP_ARRAY_AND_SIZE(__buf),
-                                                    __format, __modifier, _M_timeinfo, __tmb);
-  //  locale __loc = __f.getloc();
-  return _STLP_PRIV __put_time(__buf, __iend, __s, __f, _Ch());
+  const ctype<_Ch>& __ct = use_facet<ctype<_Ch> >(__f.getloc());
+  _STLP_BASIC_IOSTRING(_Ch) __buf;
+  _STLP_PRIV __write_formatted_time(__buf, __ct, __format, __modifier, this->_M_timeinfo, __tmb);
+  return copy(__buf.begin(), __buf.end(), __s);
 }
 
 _STLP_END_NAMESPACE

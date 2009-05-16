@@ -28,6 +28,10 @@ _STLP_BEGIN_NAMESPACE
 
 #define SLIST_IMPL _STLP_PTR_IMPL_NAME(slist)
 
+#if defined (__BORLANDC__) || defined (__DMC__)
+#  define typename
+#endif
+
 #if defined (_STLP_USE_TEMPLATE_EXPORT) && !defined (_STLP_USE_MSVC6_MEM_T_BUG_WORKAROUND)
 _STLP_MOVE_TO_PRIV_NAMESPACE
 
@@ -45,13 +49,13 @@ _STLP_MOVE_TO_STD_NAMESPACE
 _STLP_MOVE_TO_PRIV_NAMESPACE
 #endif
 
-template <class _Tp, _STLP_DEFAULT_ALLOCATOR_SELECT(_Tp) >
+template <class _Tp, _STLP_DFL_TMPL_PARAM(_Alloc, allocator<_Tp>) >
 class slist
 #if defined (_STLP_USE_PARTIAL_SPEC_WORKAROUND) && !defined (slist)
              : public __stlport_class<slist<_Tp, _Alloc> >
 #endif
 {
-  typedef typename _STLP_PRIV _StorageType<_Tp>::_Type _StorageType;
+  typedef _STLP_TYPENAME _STLP_PRIV _StorageType<_Tp>::_Type _StorageType;
   typedef typename _Alloc_traits<_StorageType, _Alloc>::allocator_type _StorageTypeAlloc;
   typedef _STLP_PRIV SLIST_IMPL<_StorageType, _StorageTypeAlloc> _Base;
   typedef typename _Base::iterator _BaseIte;
@@ -130,8 +134,11 @@ public:
 #endif /* _STLP_MEMBER_TEMPLATES */
 
   slist(const _Self& __x) : _M_impl(__x._M_impl) {}
+
+#if !defined (_STLP_NO_MOVE_SEMANTIC)
   slist(__move_source<_Self> src)
     : _M_impl(__move_source<_Base>(src.get()._M_impl)) {}
+#endif
 
   _Self& operator= (const _Self& __x) { _M_impl = __x._M_impl; return *this; }
 
@@ -149,8 +156,8 @@ private:
   template <class _InputIterator>
   void _M_assign_dispatch(_InputIterator __first, _InputIterator __last,
                           const __false_type&) {
-    _M_impl.assign(typename _STLP_PRIV _IteWrapper<_StorageType, _Tp, _InputIterator>::_Ite(__first),
-                   typename _STLP_PRIV _IteWrapper<_StorageType, _Tp, _InputIterator>::_Ite(__last));
+    _M_impl.assign(_STLP_TYPENAME _STLP_PRIV _IteWrapper<_StorageType, _Tp, _InputIterator>::_Ite(__first),
+                   _STLP_TYPENAME _STLP_PRIV _IteWrapper<_StorageType, _Tp, _InputIterator>::_Ite(__last));
   }
 
 public:
@@ -190,6 +197,9 @@ public:
   bool empty() const          { return _M_impl.empty(); }
 
   void swap(_Self& __x) { _M_impl.swap(__x._M_impl); }
+#if defined (_STLP_USE_PARTIAL_SPEC_WORKAROUND) && !defined (_STLP_FUNCTION_TMPL_PARTIAL_ORDER)
+  void _M_swap_workaround(_Self& __x) { swap(__x); }
+#endif
 
 public:
   reference front()             { return *begin(); }
@@ -242,8 +252,8 @@ private:
                                 _InputIterator __first, _InputIterator __last,
                                 const __false_type&) {
     _M_impl.insert_after(_BaseIte(__pos._M_node),
-                         typename _STLP_PRIV _IteWrapper<_StorageType, _Tp, _InputIterator>::_Ite(__first),
-                         typename _STLP_PRIV _IteWrapper<_StorageType, _Tp, _InputIterator>::_Ite(__last));
+                         _STLP_TYPENAME _STLP_PRIV _IteWrapper<_StorageType, _Tp, _InputIterator>::_Ite(__first),
+                         _STLP_TYPENAME _STLP_PRIV _IteWrapper<_StorageType, _Tp, _InputIterator>::_Ite(__last));
   }
 
 public:
@@ -302,8 +312,8 @@ private:
   void _M_insert_dispatch(iterator __pos,
                           _InputIterator __first, _InputIterator __last,
                           const __false_type&) {
-    _M_impl.insert(_BaseIte(__pos._M_node), typename _STLP_PRIV _IteWrapper<_StorageType, _Tp, _InputIterator>::_Ite(__first),
-                                            typename _STLP_PRIV _IteWrapper<_StorageType, _Tp, _InputIterator>::_Ite(__last));
+    _M_impl.insert(_BaseIte(__pos._M_node), _STLP_TYPENAME _STLP_PRIV _IteWrapper<_StorageType, _Tp, _InputIterator>::_Ite(__first),
+                                            _STLP_TYPENAME _STLP_PRIV _IteWrapper<_StorageType, _Tp, _InputIterator>::_Ite(__last));
   }
 
 public:
@@ -403,6 +413,10 @@ _STLP_MOVE_TO_STD_NAMESPACE
 #endif
 
 #undef SLIST_IMPL
+
+#if defined (__BORLANDC__) || defined (__DMC__)
+#  undef typename
+#endif
 
 _STLP_END_NAMESPACE
 

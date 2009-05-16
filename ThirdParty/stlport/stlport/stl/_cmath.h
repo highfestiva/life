@@ -21,14 +21,22 @@
  * so cstdlib has to be included first.
  */
 #if defined (__GNUC__) && defined (_STLP_USE_NEW_C_HEADERS)
-#  include _STLP_NATIVE_CPP_C_HEADER(cstdlib)
+#  if defined (_STLP_HAS_INCLUDE_NEXT)
+#    include_next <cstdlib>
+#  else
+#    include _STLP_NATIVE_CPP_C_HEADER(cstdlib)
+#  endif
 #endif
 
 #if defined (_STLP_USE_NEW_C_HEADERS)
 #  if defined (_STLP_HAS_NO_NAMESPACES) && !defined (exception)
 #    define exception __math_exception
 #  endif
-#  include _STLP_NATIVE_CPP_C_HEADER(cmath)
+#  if defined (_STLP_HAS_INCLUDE_NEXT)
+#    include_next <cmath>
+#  else
+#    include _STLP_NATIVE_CPP_C_HEADER(cmath)
+#  endif
 #  if defined (_STLP_HAS_NO_NAMESPACES)
 #    undef exception
 #  endif
@@ -38,11 +46,12 @@
 
 #if (defined (__SUNPRO_CC) && (__SUNPRO_CC > 0x500)) || \
      !(defined (__IBMCPP__) && (__IBMCPP__ >= 500) || !(defined(__HP_aCC) && (__HP_aCC >= 30000) ))
-#  ifndef _STLP_HAS_NO_NAMESPACES
+#  if !defined(_STLP_HAS_NO_NAMESPACES) && !defined(__SUNPRO_CC)
+// All the other hypot stuff is going to be at file scope, so follow along here.
 namespace std {
 #  endif
 extern "C" double hypot(double x, double y);
-#  ifndef _STLP_HAS_NO_NAMESPACES
+#  if !defined(_STLP_HAS_NO_NAMESPACES) && !defined(__SUNPRO_CC)
 }
 #  endif
 
@@ -340,7 +349,7 @@ Meaning of suffixes:
 #  define _STLP_RESTORE_FUNCTION_INTRINSIC
 #endif // _STLP_MSVC && _STLP_MSVC <= 1300 && !_STLP_WCE && _MSC_EXTENSIONS
 
-#if defined (__BORLANDC__) && defined (_STLP_USE_NEW_C_HEADERS)
+#if (defined (__BORLANDC__) || defined (__WATCOMC__)) && defined (_STLP_USE_NEW_C_HEADERS)
 /* In this config Borland native lib only define functions in std namespace.
  * In order to have all overloads in STLport namespace we need to add the
  * double overload in global namespace. We do not use a using statement to avoid
@@ -410,7 +419,8 @@ inline double ldexp(double __x, int __y) { return __stlp_ldexp(__x, __y); }
  * HP-UX native lib has math functions in the global namespace.
  */
 #if (!defined (_STLP_MSVC_LIB) || (_STLP_MSVC_LIB < 1310) || defined(UNDER_CE)) && \
-    (!defined (__HP_aCC) || (__HP_aCC < 30000))
+    (!defined (__HP_aCC) || (__HP_aCC < 30000)) && \
+    !defined (__WATCOMC__)
 inline double abs(double __x)
 { return ::fabs(__x); }
 #  if !defined (__MVS__)
@@ -535,7 +545,16 @@ using ::fabs;
 using ::floor;
 using ::fmod;
 using ::frexp;
+/*
+   Because of some weird interaction between STLport headers
+   and native HP-UX headers, when compiled with _STLP_DEBUG
+   macro defined with aC++, hypot() is not declared.
+   At some point we'll need to get to the bottom line of
+   this problem.
+*/
+#if !(defined(__HP_aCC) && defined(_STLP_DEBUG))
 using ::hypot;
+#endif
 using ::ldexp;
 using ::log;
 using ::log10;
@@ -547,7 +566,7 @@ using ::sqrt;
 using ::tan;
 using ::tanh;
 _STLP_END_NAMESPACE
-#  if defined (__BORLANDC__) && (__BORLANDC__ >= 0x560)
+#  if defined (__BORLANDC__) && (__BORLANDC__ >= 0x560) && !defined (__linux__)
 using _STLP_VENDOR_CSTD::_ecvt;
 using _STLP_VENDOR_CSTD::_fcvt;
 #  endif

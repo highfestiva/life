@@ -25,6 +25,10 @@
 
 _STLP_BEGIN_NAMESPACE
 
+#if defined (__BORLANDC__) || defined (__DMC__)
+#  define typename
+#endif
+
 //Specific iterator traits creation
 _STLP_CREATE_ITERATOR_TRAITS(SetTraitsT, Const_traits)
 
@@ -49,15 +53,20 @@ _STLP_MOVE_TO_STD_NAMESPACE
 #endif
 
 template <class _Key, _STLP_DFL_TMPL_PARAM(_Compare, less<_Key>),
-                      _STLP_DEFAULT_ALLOCATOR_SELECT(_Key) >
+                      _STLP_DFL_TMPL_PARAM(_Alloc, allocator<_Key>) >
 class set
 #if defined (_STLP_USE_PARTIAL_SPEC_WORKAROUND)
           : public __stlport_class<set<_Key, _Compare, _Alloc> >
 #endif
 {
+#if !defined (__BORLANDC__)
   typedef _STLP_PRIV _AssocStorageTypes<_Key, _Compare> _AssocStorageTypes;
   typedef typename _AssocStorageTypes::_KeyStorageType _KeyStorageType;
   typedef typename _AssocStorageTypes::_CompareStorageType _CompareStorageType;
+#else
+  typedef _STLP_PRIV _AssocStorageTypes<_Key, _Compare>::_KeyStorageType _KeyStorageType;
+  typedef _STLP_PRIV _AssocStorageTypes<_Key, _Compare>::_CompareStorageType _CompareStorageType;
+#endif
   typedef typename _Alloc_traits<_KeyStorageType, _Alloc>::allocator_type _StorageTypeAlloc;
   typedef _STLP_PRIV _CastTraits<_KeyStorageType, _Key> cast_traits;
 
@@ -127,8 +136,8 @@ public:
   set(_InputIterator __first, _InputIterator __last)
     : _M_t(_Compare(), _StorageTypeAlloc()) {
 #  if defined (_STLP_USE_ITERATOR_WRAPPER)
-    _M_t.insert_unique(typename _STLP_PRIV _IteWrapper<_KeyStorageType, _Key, _InputIterator>::_Ite(__first),
-                       typename _STLP_PRIV _IteWrapper<_KeyStorageType, _Key, _InputIterator>::_Ite(__last));
+    _M_t.insert_unique(_STLP_TYPENAME _STLP_PRIV _IteWrapper<_KeyStorageType, _Key, _InputIterator>::_Ite(__first),
+                       _STLP_TYPENAME _STLP_PRIV _IteWrapper<_KeyStorageType, _Key, _InputIterator>::_Ite(__last));
 #  else
     _M_t.insert_unique(__first, __last);
 #  endif
@@ -139,8 +148,8 @@ public:
   set(_InputIterator __first, _InputIterator __last, const _Compare& __comp)
     : _M_t(__comp, _StorageTypeAlloc()) {
 #    if defined (_STLP_USE_ITERATOR_WRAPPER)
-    _M_t.insert_unique(typename _STLP_PRIV _IteWrapper<_KeyStorageType, _Key, _InputIterator>::_Ite(__first),
-                       typename _STLP_PRIV _IteWrapper<_KeyStorageType, _Key, _InputIterator>::_Ite(__last));
+    _M_t.insert_unique(_STLP_TYPENAME _STLP_PRIV _IteWrapper<_KeyStorageType, _Key, _InputIterator>::_Ite(__first),
+                       _STLP_TYPENAME _STLP_PRIV _IteWrapper<_KeyStorageType, _Key, _InputIterator>::_Ite(__last));
 #    else
     _M_t.insert_unique(__first, __last);
 #    endif
@@ -151,8 +160,8 @@ public:
       const allocator_type& __a _STLP_ALLOCATOR_TYPE_DFL)
     : _M_t(__comp, _STLP_CONVERT_ALLOCATOR(__a, _KeyStorageType)) {
 #  if defined (_STLP_USE_ITERATOR_WRAPPER)
-    _M_t.insert_unique(typename _STLP_PRIV _IteWrapper<_KeyStorageType, _Key, _InputIterator>::_Ite(__first),
-                       typename _STLP_PRIV _IteWrapper<_KeyStorageType, _Key, _InputIterator>::_Ite(__last));
+    _M_t.insert_unique(_STLP_TYPENAME _STLP_PRIV _IteWrapper<_KeyStorageType, _Key, _InputIterator>::_Ite(__first),
+                       _STLP_TYPENAME _STLP_PRIV _IteWrapper<_KeyStorageType, _Key, _InputIterator>::_Ite(__last));
 #  else
     _M_t.insert_unique(__first, __last);
 #  endif
@@ -183,8 +192,10 @@ public:
 
   set(const _Self& __x) : _M_t(__x._M_t) {}
 
+#if !defined (_STLP_NO_MOVE_SEMANTIC)
   set(__move_source<_Self> src)
     : _M_t(__move_source<_Rep_type>(src.get()._M_t)) {}
+#endif
 
   _Self& operator=(const _Self& __x) {
     _M_t = __x._M_t;
@@ -209,6 +220,9 @@ public:
   size_type size() const { return _M_t.size(); }
   size_type max_size() const { return _M_t.max_size(); }
   void swap(_Self& __x) { _M_t.swap(__x._M_t); }
+#if defined (_STLP_USE_PARTIAL_SPEC_WORKAROUND) && !defined (_STLP_FUNCTION_TMPL_PARTIAL_ORDER)
+  void _M_swap_workaround(_Self& __x) { swap(__x); }
+#endif
 
   // insert/erase
   pair<iterator,bool> insert(const value_type& __x) {
@@ -222,8 +236,8 @@ public:
   template <class _InputIterator>
   void insert(_InputIterator __first, _InputIterator __last) {
 #  if defined (_STLP_USE_ITERATOR_WRAPPER)
-    _M_t.insert_unique(typename _STLP_PRIV _IteWrapper<_KeyStorageType, _Key, _InputIterator>::_Ite(__first),
-                       typename _STLP_PRIV _IteWrapper<_KeyStorageType, _Key, _InputIterator>::_Ite(__last));
+    _M_t.insert_unique(_STLP_TYPENAME _STLP_PRIV _IteWrapper<_KeyStorageType, _Key, _InputIterator>::_Ite(__first),
+                       _STLP_TYPENAME _STLP_PRIV _IteWrapper<_KeyStorageType, _Key, _InputIterator>::_Ite(__last));
 #  else
     _M_t.insert_unique(__first, __last);
 #  endif
@@ -286,15 +300,20 @@ public:
 _STLP_CREATE_ITERATOR_TRAITS(MultisetTraitsT, Const_traits)
 
 template <class _Key, _STLP_DFL_TMPL_PARAM(_Compare, less<_Key>),
-                     _STLP_DEFAULT_ALLOCATOR_SELECT(_Key) >
+                     _STLP_DFL_TMPL_PARAM(_Alloc, allocator<_Key>) >
 class multiset
 #if defined (_STLP_USE_PARTIAL_SPEC_WORKAROUND)
                : public __stlport_class<multiset<_Key, _Compare, _Alloc> >
 #endif
 {
+#if !defined (__BORLANDC__)
   typedef _STLP_PRIV _AssocStorageTypes<_Key, _Compare> _AssocStorageTypes;
   typedef typename _AssocStorageTypes::_KeyStorageType _KeyStorageType;
   typedef typename _AssocStorageTypes::_CompareStorageType _CompareStorageType;
+#else
+  typedef _STLP_PRIV _AssocStorageTypes<_Key, _Compare>::_KeyStorageType _KeyStorageType;
+  typedef _STLP_PRIV _AssocStorageTypes<_Key, _Compare>::_CompareStorageType _CompareStorageType;
+#endif
   typedef typename _Alloc_traits<_KeyStorageType, _Alloc>::allocator_type _StorageTypeAlloc;
   typedef _STLP_PRIV _CastTraits<_KeyStorageType, _Key> cast_traits;
 
@@ -364,8 +383,8 @@ public:
   multiset(_InputIterator __first, _InputIterator __last)
     : _M_t(_Compare(), _StorageTypeAlloc()) {
 #  if defined (_STLP_USE_ITERATOR_WRAPPER)
-    _M_t.insert_equal(typename _STLP_PRIV _IteWrapper<_KeyStorageType, _Key, _InputIterator>::_Ite(__first),
-                      typename _STLP_PRIV _IteWrapper<_KeyStorageType, _Key, _InputIterator>::_Ite(__last));
+    _M_t.insert_equal(_STLP_TYPENAME _STLP_PRIV _IteWrapper<_KeyStorageType, _Key, _InputIterator>::_Ite(__first),
+                      _STLP_TYPENAME _STLP_PRIV _IteWrapper<_KeyStorageType, _Key, _InputIterator>::_Ite(__last));
 #  else
     _M_t.insert_equal(__first, __last);
 #  endif
@@ -377,8 +396,8 @@ public:
            const _Compare& __comp)
     : _M_t(__comp, _StorageTypeAlloc()) {
 #    if defined (_STLP_USE_ITERATOR_WRAPPER)
-    _M_t.insert_equal(typename _STLP_PRIV _IteWrapper<_KeyStorageType, _Key, _InputIterator>::_Ite(__first),
-                      typename _STLP_PRIV _IteWrapper<_KeyStorageType, _Key, _InputIterator>::_Ite(__last));
+    _M_t.insert_equal(_STLP_TYPENAME _STLP_PRIV _IteWrapper<_KeyStorageType, _Key, _InputIterator>::_Ite(__first),
+                      _STLP_TYPENAME _STLP_PRIV _IteWrapper<_KeyStorageType, _Key, _InputIterator>::_Ite(__last));
 #    else
     _M_t.insert_equal(__first, __last);
 #    endif
@@ -390,8 +409,8 @@ public:
            const allocator_type& __a _STLP_ALLOCATOR_TYPE_DFL)
     : _M_t(__comp, _STLP_CONVERT_ALLOCATOR(__a, _KeyStorageType)) {
 #  if defined (_STLP_USE_ITERATOR_WRAPPER)
-    _M_t.insert_equal(typename _STLP_PRIV _IteWrapper<_KeyStorageType, _Key, _InputIterator>::_Ite(__first),
-                      typename _STLP_PRIV _IteWrapper<_KeyStorageType, _Key, _InputIterator>::_Ite(__last));
+    _M_t.insert_equal(_STLP_TYPENAME _STLP_PRIV _IteWrapper<_KeyStorageType, _Key, _InputIterator>::_Ite(__first),
+                      _STLP_TYPENAME _STLP_PRIV _IteWrapper<_KeyStorageType, _Key, _InputIterator>::_Ite(__last));
 #  else
     _M_t.insert_equal(__first, __last);
 #  endif
@@ -431,8 +450,10 @@ public:
     return *this;
   }
 
+#if !defined (_STLP_NO_MOVE_SEMANTIC)
   multiset(__move_source<_Self> src)
     : _M_t(__move_source<_Rep_type>(src.get()._M_t)) {}
+#endif
 
   // accessors:
   key_compare key_comp() const { return _M_t.key_comp(); }
@@ -452,6 +473,9 @@ public:
   size_type size() const { return _M_t.size(); }
   size_type max_size() const { return _M_t.max_size(); }
   void swap(_Self& __x) { _M_t.swap(__x._M_t); }
+#if defined (_STLP_USE_PARTIAL_SPEC_WORKAROUND) && !defined (_STLP_FUNCTION_TMPL_PARTIAL_ORDER)
+  void _M_swap_workaround(_Self& __x) { swap(__x); }
+#endif
 
   // insert/erase
   iterator insert(const value_type& __x)
@@ -465,8 +489,8 @@ public:
   template <class _InputIterator>
   void insert(_InputIterator __first, _InputIterator __last) {
 #  if defined (_STLP_USE_ITERATOR_WRAPPER)
-    _M_t.insert_equal(typename _STLP_PRIV _IteWrapper<_KeyStorageType, _Key, _InputIterator>::_Ite(__first),
-                      typename _STLP_PRIV _IteWrapper<_KeyStorageType, _Key, _InputIterator>::_Ite(__last));
+    _M_t.insert_equal(_STLP_TYPENAME _STLP_PRIV _IteWrapper<_KeyStorageType, _Key, _InputIterator>::_Ite(__first),
+                      _STLP_TYPENAME _STLP_PRIV _IteWrapper<_KeyStorageType, _Key, _InputIterator>::_Ite(__last));
 #  else
     _M_t.insert_equal(__first, __last);
 #  endif
@@ -526,6 +550,10 @@ public:
                                                 _S_to_value_ite(__ret.second));
   }
 };
+
+#if defined (__BORLANDC__) || defined (__DMC__)
+#  undef typename
+#endif
 
 _STLP_END_NAMESPACE
 

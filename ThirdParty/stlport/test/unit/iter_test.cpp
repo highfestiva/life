@@ -56,7 +56,7 @@ void IterTest::iter1()
         CPPUNIT_ASSERT(!strcmp(*i, "motorboy"));
         break;
       default:
-        CPPUNIT_ASSERT(false);
+        CPPUNIT_FAIL;
     }
   }
 }
@@ -77,11 +77,9 @@ void IterTest::iter3()
         CPPUNIT_ASSERT(!strcmp(*it, "motorboy"));
         break;
       default:
-        CPPUNIT_ASSERT(false);
+        CPPUNIT_FAIL;
     }
   }
-
-  CPPUNIT_ASSERT(true);
 }
 void IterTest::iter4()
 {
@@ -154,6 +152,10 @@ void IterTest::iterswp3()
   iter_swap(vvints.begin(), lvints.begin());
   CPPUNIT_CHECK( vvints.front() == lvref );
   CPPUNIT_CHECK( lvints.front() == vvref );
+
+  //const vector<vector<int> > &cvvints = vvints;
+  //iter_swap(cvvints.begin(), lvints.begin());
+  //iter_swap(lvints.begin(), cvvints.begin());
 
 #if defined (STLPORT) && defined (_STLP_CLASS_PARTIAL_SPECIALIZATION)
   int *pvvint = &vvints.front().front();

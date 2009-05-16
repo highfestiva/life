@@ -44,7 +44,7 @@
 // Disables wchar_t functionality
 // #  define _STLP_NO_WCHAR_T  1
 
-// Define if wchar_t is not a unique type, and is actually a typedef to unsigned short.
+// Define if wchar_t is not an intrinsic type, and is actually a typedef to unsigned short.
 // #  define _STLP_WCHAR_T_IS_USHORT 1
 
 // Uncomment if long long is available
@@ -92,11 +92,6 @@
 // trouble with functions getting non-type-parameterized classes as parameters
 // #  define _STLP_NON_TYPE_TMPL_PARAM_BUG 1
 
-// Uncomment this if your compiler lacks static data members.
-// Uncomment next line if your compiler supports __attribute__((weak))
-// #  define _STLP_NO_STATIC_TEMPLATE_DATA 1
-// #  define _STLP_WEAK_ATTRIBUTE 1
-
 // Uncomment this if your compiler does not support namespaces
 // #  define _STLP_HAS_NO_NAMESPACES 1
 
@@ -126,6 +121,12 @@
 // Define this if your compiler do not throw bad_alloc from the new operator
 // #  define _STLP_NEW_DONT_THROW_BAD_ALLOC  1
 
+// Define this if your compiler has no rtti support or if it has been disabled
+// #  define _STLP_NO_RTTI 1
+
+// Define this if there is no native type_info definition
+// #  define _STLP_NO_TYPEINFO 1
+
 // Uncomment if member template methods are not available
 // #  define _STLP_NO_MEMBER_TEMPLATES   1
 
@@ -139,9 +140,6 @@
 
 // Uncomment if no "template" keyword should be used with member template classes
 // #  define _STLP_NO_MEMBER_TEMPLATE_KEYWORD   1
-
-// Uncomment if friend member templates are not available
-// #  define _STLP_NO_FRIEND_TEMPLATES   1
 
 // Compiler does not accept friend declaration qualified with namespace name.
 // #  define _STLP_NO_QUALIFIED_FRIENDS 1
@@ -199,10 +197,15 @@
 // Uncomment if getting errors compiling mem_fun* adaptors
 // #  define _STLP_MEMBER_POINTER_PARAM_BUG 1
 
-// * _STLP_STATIC_CONST_INIT_BUG: defined if the compiler can't handle a
-//   constant-initializer in the declaration of a static const data member
-//   of integer type.  (See section 9.4.2, paragraph 4, of the C++ standard.)
+// Uncomment if the compiler can't handle a constant-initializer in the
+// declaration of a static const data member of integer type.
+// (See section 9.4.2, paragraph 4, of the C++ standard.)
 // # define _STLP_STATIC_CONST_INIT_BUG
+
+// Uncomment to indicate that the compiler do not like static constant
+// definition.
+// Meaningfull only if  _STLP_STATIC_CONST_INIT_BUG is not defined.
+// # define _STLP_NO_STATIC_CONST_DEFINITION
 
 // Define if default constructor for builtin integer type fails to initialize it to 0
 // In expression like new(&char) char():
@@ -256,10 +259,6 @@
 // overloads in ::namespace and not only in std::.
 // #  define _STLP_HAS_GLOBAL_C_MATH_FUNCTIONS 1
 
-// uncomment this if your compiler has problem with the import of a namespace in
-// an other one with the using namespace directive
-// #  define _STLP_USING_NAMESPACE_BUG 1
-
 // Edit relative path below (or put full path) to get native
 // compiler headers included. Default is "../include".
 // C headers may reside in different directory, so separate macro is provided.
@@ -278,13 +277,6 @@
 
 // Same for C headers
 // #define _STLP_NATIVE_C_HEADER(header)
-
-// uncomment this if your compiler/platform do not fully support the IEC 559 floating point
-// numbers specification (also known as IEEE 754 in the US). This specification define the
-// infinity and NaN (Not a Number) representation. Unit tests should tell you if your compiler
-// support it.
-// #  define _STLP_NO_IEC559_SUPPORT 1
-
 
 //==========================================================
 #endif

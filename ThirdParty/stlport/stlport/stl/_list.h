@@ -156,7 +156,7 @@ struct __type_traits<_STLP_PRIV _List_iterator<_Tp, _Traits> > {
   typedef __false_type   is_POD_type;
 };
 _STLP_MOVE_TO_PRIV_NAMESPACE
-#endif /* _STLP_CLASS_PARTIAL_SPECIALIZATION */
+#endif
 
 #if defined (_STLP_USE_OLD_HP_ITERATOR_QUERIES)
 _STLP_MOVE_TO_STD_NAMESPACE
@@ -180,13 +180,15 @@ protected:
   typedef typename _Alloc_traits<_Node, _Alloc>::allocator_type _Node_allocator_type;
 public:
   typedef _STLP_alloc_proxy<_Node_base, _Node, _Node_allocator_type> _AllocProxy;
-  typedef typename _Alloc_traits<_Tp, _Alloc>::allocator_type allocator_type;
+  typedef _Alloc allocator_type;
 
   allocator_type get_allocator() const
   { return _STLP_CONVERT_ALLOCATOR((const _Node_allocator_type&)_M_node, _Tp); }
 
   _List_base(const allocator_type& __a) : _M_node(_STLP_CONVERT_ALLOCATOR(__a, _Node), _Node_base())
   { _M_empty_initialize(); }
+
+#if !defined (_STLP_NO_MOVE_SEMANTIC)
   _List_base(__move_source<_Self> src) :
     _M_node(__move_source<_AllocProxy>(src.get()._M_node)) {
     if (src.get().empty())
@@ -197,6 +199,7 @@ public:
       _M_node._M_data._M_prev->_M_next = _M_node._M_data._M_next->_M_prev = &_M_node._M_data;
     }
   }
+#endif
 
   ~_List_base()
   { clear(); }
@@ -221,7 +224,7 @@ public:
 _STLP_MOVE_TO_STD_NAMESPACE
 #endif
 
-template <class _Tp, _STLP_DEFAULT_ALLOCATOR_SELECT(_Tp) >
+template <class _Tp, _STLP_DFL_TMPL_PARAM(_Alloc, allocator<_Tp>) >
 class list;
 
 #if !defined (list)
@@ -274,11 +277,11 @@ public:
   _STLP_DECLARE_BIDIRECTIONAL_REVERSE_ITERATORS;
 
 protected:
-#if !defined(_STLP_DONT_SUP_DFLT_PARAM)
+#if !defined (_STLP_DONT_SUP_DFLT_PARAM)
   _Node_base* _M_create_node(const_reference __x = value_type()) {
 #else
   _Node_base* _M_create_node(const_reference __x) {
-#endif /*!_STLP_DONT_SUP_DFLT_PARAM*/
+#endif
     _Node* __p = this->_M_node.allocate(1);
     _STLP_TRY {
       _Copy_Construct(&__p->_M_data, __x);
@@ -287,7 +290,7 @@ protected:
     return __p;
   }
 
-#if defined(_STLP_DONT_SUP_DFLT_PARAM)
+#if defined (_STLP_DONT_SUP_DFLT_PARAM)
   _Node_base* _M_create_node() {
     _Node* __p = this->_M_node.allocate(1);
     _STLP_TRY {
@@ -296,7 +299,7 @@ protected:
     _STLP_UNWIND(this->_M_node.deallocate(__p, 1))
     return __p;
   }
-#endif /*_STLP_DONT_SUP_DFLT_PARAM*/
+#endif
 
 public:
 #if !defined (_STLP_DONT_SUP_DFLT_PARAM)
@@ -352,8 +355,10 @@ public:
   list(const _Self& __x) : _STLP_PRIV _List_base<_Tp, _Alloc>(__x.get_allocator())
   { _M_insert(begin(), __x.begin(), __x.end()); }
 
+#if !defined (_STLP_NO_MOVE_SEMANTIC)
   list(__move_source<_Self> src)
     : _STLP_PRIV _List_base<_Tp, _Alloc>(__move_source<_Base>(src.get())) {}
+#endif
 
   ~list() {}
 
@@ -372,7 +377,7 @@ public:
   const_reverse_iterator rend() const   { return const_reverse_iterator(begin()); }
 
   size_type size() const {
-    size_type __result = distance(begin(), end());
+    size_type __result = _STLP_STD::distance(begin(), end());
     return __result;
   }
   size_type max_size() const { return size_type(-1); }
@@ -407,12 +412,16 @@ public:
       _STLP_STD::swap(this->_M_node._M_data._M_next->_M_prev, __x._M_node._M_data._M_next->_M_prev);
     }
   }
+#if defined (_STLP_USE_PARTIAL_SPEC_WORKAROUND) && !defined (_STLP_FUNCTION_TMPL_PARTIAL_ORDER)
+  void _M_swap_workaround(_Self& __x) { swap(__x); }
+#endif
 
 #if !defined(_STLP_DONT_SUP_DFLT_PARAM) && !defined(_STLP_NO_ANACHRONISMS)
-  iterator insert(iterator __pos, const_reference __x = value_type()) {
+  iterator insert(iterator __pos, const_reference __x = value_type())
 #else
-  iterator insert(iterator __pos, const_reference __x) {
+  iterator insert(iterator __pos, const_reference __x)
 #endif /*!_STLP_DONT_SUP_DFLT_PARAM && !_STLP_NO_ANACHRONISMS*/
+  {
     _Node_base* __tmp = _M_create_node(__x);
     _Node_base* __n = __pos._M_node;
     _Node_base* __p = __n->_M_prev;
@@ -475,6 +484,7 @@ private:
 #else /* _STLP_MEMBER_TEMPLATES */
   void insert(iterator __pos, const value_type* __first, const value_type* __last) {
     _Self __tmp(__first, __last, this->get_allocator());
+    _STLP_ASSERT(__tmp.get_allocator() == this->get_allocator())
     splice(__pos, __tmp);
   }
   void insert(iterator __pos, const_iterator __first, const_iterator __last) {
@@ -715,13 +725,13 @@ operator==(const list<_Tp,_Alloc>& __x, const list<_Tp,_Alloc>& __y) {
 #undef _STLP_TEMPLATE_HEADER
 #undef _STLP_EQUAL_OPERATOR_SPECIALIZED
 
-#if defined (_STLP_CLASS_PARTIAL_SPECIALIZATION)
+#if defined (_STLP_CLASS_PARTIAL_SPECIALIZATION) && !defined (_STLP_NO_MOVE_SEMANTIC)
 template <class _Tp, class _Alloc>
 struct __move_traits<list<_Tp, _Alloc> > {
-  typedef __stlp_movable implemented;
+  typedef __true_type implemented;
   typedef typename __move_traits<_Alloc>::complete complete;
 };
-#endif /* _STLP_CLASS_PARTIAL_SPECIALIZATION */
+#endif
 
 _STLP_END_NAMESPACE
 

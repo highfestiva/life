@@ -14,12 +14,12 @@
  * or /Qvc8 option.
  */
 /* #define _STLP_MSVC_LIB 1300 */
-/* You need to undef following macro if your icl install is binded to MSVC .Net 2002
+/* You need to undef following macro if your icl install is binded to MSVC .Net 2003
  * native lib and you are building without any /Qvc* option or with /Qvc6 or /Qvc7
  * or /Qvc8 option.
  */
 /* #define _STLP_MSVC_LIB 1310 */
-/* You need to undef following macro if your icl install is binded to MSVC .Net 2002
+/* You need to undef following macro if your icl install is binded to MSVC 2005
  * native lib and you are building without any /Qvc* option or with /Qvc6 or /Qvc7
  * or /Qvc7.1 option.
  */
@@ -31,11 +31,8 @@
 #  undef _STLP_DONT_RETURN_VOID
 #endif
 
-#if (__ICL >= 900)
-/* #  undef _STLP_NO_UNEXPECTED_EXCEPT_SUPPORT */
-#  if !defined (_STLP_DONT_USE_EXCEPTIONS)
-#    define _STLP_NOTHROW throw()
-#  endif
+#if (__ICL < 900)
+#  define _STLP_NOTHROW
 #endif
 
 #if (__ICL <= 810)
@@ -45,7 +42,7 @@
 #  define _STLP_NO_METHOD_SPECIALIZATION 1
 #endif
 
-#if (__ICL >= 800)
+#if (__ICL >= 800 && __ICL < 900)
 #  define _STLP_STATIC_CONST_INIT_BUG 1
 #endif
 
@@ -71,3 +68,5 @@ namespace std
   void _STLP_CALL unexpected();
 }
 #endif
+
+#include <stl/config/_feedback.h>

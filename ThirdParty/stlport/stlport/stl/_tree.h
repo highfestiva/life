@@ -234,7 +234,7 @@ public:
   typedef _Rb_tree_node_base _Node_base;
   typedef _Rb_tree_node<_Tp> _Node;
   _STLP_FORCE_ALLOCATORS(_Tp, _Alloc)
-  typedef typename _Alloc_traits<_Tp, _Alloc>::allocator_type allocator_type;
+  typedef _Alloc allocator_type;
 private:
   typedef _Rb_tree_base<_Tp, _Alloc> _Self;
   typedef typename _Alloc_traits<_Node, _Alloc>::allocator_type _M_node_allocator_type;
@@ -250,11 +250,15 @@ protected:
     _M_header(_STLP_CONVERT_ALLOCATOR(__a, _Node), _Node_base() ) {
     _M_empty_initialize();
   }
+
+#if !defined (_STLP_NO_MOVE_SEMANTIC)
   _Rb_tree_base(__move_source<_Self> src) :
     _M_header(__move_source<_AllocProxy>(src.get()._M_header)) {
     _M_rebind(&src.get()._M_header._M_data);
     src.get()._M_empty_initialize();
   }
+#endif
+
   void _M_empty_initialize() {
     _M_header._M_data._M_color = _S_rb_tree_red; // used to distinguish header from
                                                  // __root, in iterator.operator++
@@ -284,7 +288,7 @@ protected:
 
 template <class _Key, class _Compare,
           class _Value, class _KeyOfValue, class _Traits,
-          _STLP_DEFAULT_ALLOCATOR_SELECT(_Value) >
+          _STLP_DFL_TMPL_PARAM(_Alloc, allocator<_Value>) >
 class _Rb_tree : public _Rb_tree_base<_Value, _Alloc> {
   typedef _Rb_tree_base<_Value, _Alloc> _Base;
   typedef _Rb_tree<_Key, _Compare, _Value, _KeyOfValue, _Traits, _Alloc> _Self;
@@ -399,12 +403,13 @@ public:
     _M_node_count = __x._M_node_count;
   }
 
+#if !defined (_STLP_NO_MOVE_SEMANTIC)
   _Rb_tree(__move_source<_Self> src)
     : _Rb_tree_base<_Value, _Alloc>(__move_source<_Base>(src.get())),
       _M_node_count(src.get()._M_node_count),
-      _M_key_compare(_AsMoveSource(src.get()._M_key_compare)) {
-    src.get()._M_node_count = 0;
-  }
+      _M_key_compare(_AsMoveSource(src.get()._M_key_compare))
+  { src.get()._M_node_count = 0; }
+#endif
 
   ~_Rb_tree() { clear(); }
   _Self& operator=(const _Self& __x);
@@ -496,7 +501,7 @@ public:
 
   size_type erase(const key_type& __x) {
     pair<iterator,iterator> __p = equal_range(__x);
-    size_type __n = distance(__p.first, __p.second);
+    size_type __n = _STLP_STD::distance(__p.first, __p.second);
     erase(__p.first, __p.second);
     return __n;
   }
@@ -590,7 +595,7 @@ public:
   _STLP_TEMPLATE_FOR_CONT_EXT
   size_type count(const _KT& __x) const {
     pair<const_iterator, const_iterator> __p = equal_range(__x);
-    return distance(__p.first, __p.second);
+    return _STLP_STD::distance(__p.first, __p.second);
   }
   _STLP_TEMPLATE_FOR_CONT_EXT
   iterator lower_bound(const _KT& __x) { return iterator(_M_lower_bound(__x)); }
@@ -664,7 +669,7 @@ _STLP_BEGIN_NAMESPACE
 #undef _STLP_TEMPLATE_CONTAINER
 #undef _STLP_TEMPLATE_HEADER
 
-#if defined (_STLP_CLASS_PARTIAL_SPECIALIZATION)
+#if defined (_STLP_CLASS_PARTIAL_SPECIALIZATION) && !defined (_STLP_NO_MOVE_SEMANTIC)
 template <class _Key, class _Compare, class _Value, class _KeyOfValue, class _Traits, class _Alloc>
 struct __move_traits<_STLP_PRIV _Rb_tree<_Key, _Compare, _Value, _KeyOfValue, _Traits, _Alloc> >
   : _STLP_PRIV __move_traits_help2<_Compare, _Alloc> {};

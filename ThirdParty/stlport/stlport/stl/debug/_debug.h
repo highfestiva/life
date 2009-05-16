@@ -20,16 +20,12 @@
 #ifndef _STLP_DEBUG_H
 #define _STLP_DEBUG_H
 
-#if defined (_STLP_ASSERTIONS) || defined (_STLP_DEBUG)
+#if (defined (_STLP_DEBUG) || defined (_STLP_DEBUG_ALLOC)) && \
+    !defined (_STLP_ASSERTIONS)
+#  define _STLP_ASSERTIONS 1
+#endif
 
-#  ifndef _STLP_TYPE_TRAITS_H
-#    include <stl/type_traits.h>
-#  endif
-
-#  if !defined (_STLP_EXTRA_OPERATORS_FOR_DEBUG) && \
-      (defined (_STLP_BASE_MATCH_BUG) || (defined (_STLP_MSVC) && _STLP_MSVC < 1100))
-#    define _STLP_EXTRA_OPERATORS_FOR_DEBUG
-#  endif
+#if defined (_STLP_ASSERTIONS)
 
 #  if !defined (_STLP_FILE__)
 #    define _STLP_FILE__ __FILE__
@@ -83,24 +79,18 @@ enum {
 /* have to hardcode that ;() */
 #  define _StlMsg_MAX 31
 
-// This class is unique (not inherited from exception),
-// to disallow catch in anything but (...)
-struct __stl_debug_exception {
-  // no members
-};
+class __owned_link;
+class __owned_list;
 
-class _STLP_CLASS_DECLSPEC __owned_link;
-class _STLP_CLASS_DECLSPEC __owned_list;
-
-#if defined (_STLP_DEBUG_MODE_THROWS)
-#  define _STLP_MESSAGE_NORETURN _STLP_FUNCTION_THROWS
-#else
-#  define _STLP_MESSAGE_NORETURN
-#endif
+#  if defined (_STLP_DEBUG_MODE_THROWS)
+#    define _STLP_MESSAGE_NORETURN _STLP_FUNCTION_THROWS
+#  else
+#    define _STLP_MESSAGE_NORETURN
+#  endif
 
 template <class _Dummy>
-struct __stl_debug_engine {
-
+class __stl_debug_engine {
+public:
   // Basic routine to report any debug message
   // Use _STLP_DEBUG_MESSAGE to override
   static void _STLP_MESSAGE_NORETURN _STLP_CALL _Message(const char * format_str, ...);
@@ -151,14 +141,14 @@ struct __stl_debug_engine {
 #  endif
 
   // debug messages and formats
-  static _STLP_STATIC_MEMBER_DECLSPEC const char* _Message_table[_StlMsg_MAX];
+  static const char* _Message_table[_StlMsg_MAX];
 };
 
-#undef _STLP_MESSAGE_NORETURN
+#  undef _STLP_MESSAGE_NORETURN
 
 #  if defined (_STLP_USE_TEMPLATE_EXPORT)
-_STLP_EXPORT_TEMPLATE struct _STLP_CLASS_DECLSPEC __stl_debug_engine<bool>;
-#  endif /* _STLP_USE_TEMPLATE_EXPORT */
+_STLP_EXPORT_TEMPLATE_CLASS __stl_debug_engine<bool>;
+#  endif
 
 typedef __stl_debug_engine<bool> __stl_debugger;
 
@@ -171,7 +161,9 @@ _STLP_END_NAMESPACE
        if (!(expr)) { _STLP_PRIV __stl_debugger::_Assert( # expr, _STLP_FILE__, __LINE__); }
 #  endif
 
-#endif /* _STLP_ASSERTIONS || _STLP_DEBUG */
+#else
+#  define _STLP_ASSERT(expr)
+#endif
 
 // this section is for _STLP_DEBUG only
 #if defined (_STLP_DEBUG)
@@ -185,14 +177,11 @@ _STLP_END_NAMESPACE
 #  endif
 
 #  define _STLP_DEBUG_CHECK(expr) _STLP_ASSERT(expr)
-#  define _STLP_DEBUG_DO(expr)    expr;
 
 #  if (_STLP_DEBUG_LEVEL == _STLP_STANDARD_DBG_LEVEL)
 #    define _STLP_STD_DEBUG_CHECK(expr) _STLP_DEBUG_CHECK(expr)
-#    define _STLP_STD_DEBUG_DO(expr) _STLP_DEBUG_DO(expr)
 #  else
 #    define _STLP_STD_DEBUG_CHECK(expr)
-#    define _STLP_STD_DEBUG_DO(expr)
 #  endif
 
 #  if !defined (_STLP_VERBOSE_RETURN)
@@ -215,13 +204,17 @@ _STLP_END_NAMESPACE
 #    include <stl/_iterator_base.h>
 #  endif
 
+#  ifndef _STLP_TYPE_TRAITS_H
+#    include <stl/type_traits.h>
+#  endif
+
 _STLP_BEGIN_NAMESPACE
 
 _STLP_MOVE_TO_PRIV_NAMESPACE
 
 /*
  * Special debug iterator traits having an additionnal static member
- * method _Check. It is used by the slit debug implementation to check
+ * method _Check. It is used by the slist debug implementation to check
  * the special before_begin iterator.
  */
 template <class _Traits>
@@ -271,23 +264,37 @@ inline bool _STLP_CALL __valid_range(const _Iterator& __i1, const _Iterator& __i
 
 // Note : that means in range [i1, i2].
 template <class _Iterator>
-inline bool  _STLP_CALL __in_range(const _Iterator& _It,
-                                   const _Iterator& __i1, const _Iterator& __i2)
+inline bool  _STLP_CALL stlp_in_range(const _Iterator& _It,
+                                      const _Iterator& __i1, const _Iterator& __i2)
 { return __valid_range(__i1,_It) && __valid_range(_It,__i2); }
 
 template <class _Iterator>
-inline bool  _STLP_CALL __in_range(const _Iterator& __first, const _Iterator& __last,
-                                   const _Iterator& __start, const _Iterator& __finish)
+inline bool  _STLP_CALL stlp_in_range(const _Iterator& __first, const _Iterator& __last,
+                                      const _Iterator& __start, const _Iterator& __finish)
 { return __valid_range(__first,__last) && __valid_range(__start,__first) && __valid_range(__last,__finish); }
 
 //==========================================================
 class _STLP_CLASS_DECLSPEC __owned_link {
 public:
+  // Note: This and the following special defines for compiling under Windows CE under ARM
+  // is needed for correctly using _STLP_DEBUG mode. This comes from a bug in the ARM
+  // compiler where checked iterators that are passed by value call _M_attach with the wrong
+  // this pointer and calling _M_detach can't find the correct pointer to the __owned_link.
+  // This is circumvented by managing a _M_self pointer that points to the correct value.
+  // Ugly but works.
+#if defined(_STLP_WCE) && defined(_ARM_)
+  __owned_link() : _M_self(this), _M_owner(0) {}
+  __owned_link(const __owned_list* __c) : _M_self(this), _M_owner(0), _M_next(0)
+  { __stl_debugger::_M_attach(__CONST_CAST(__owned_list*,__c), this); }
+  __owned_link(const __owned_link& __rhs): _M_self(this), _M_owner(0)
+  { __stl_debugger::_M_attach(__CONST_CAST(__owned_list*,__rhs._M_owner), this); }
+#else
   __owned_link() : _M_owner(0) {}
   __owned_link(const __owned_list* __c) : _M_owner(0), _M_next(0)
   { __stl_debugger::_M_attach(__CONST_CAST(__owned_list*,__c), this); }
   __owned_link(const __owned_link& __rhs): _M_owner(0)
   { __stl_debugger::_M_attach(__CONST_CAST(__owned_list*,__rhs._M_owner), this); }
+#endif
   __owned_link& operator=(const __owned_link& __rhs) {
     __owned_list* __new_owner = __CONST_CAST(__owned_list*,__rhs._M_owner);
     __owned_list* __old_owner = _M_owner;
@@ -297,10 +304,17 @@ public:
     }
     return *this;
   }
+#if defined(_STLP_WCE) && defined(_ARM_)
+  ~__owned_link() {
+    __stl_debugger::_M_detach(_M_owner, _M_self);
+    _Invalidate();
+  }
+#else
   ~__owned_link() {
     __stl_debugger::_M_detach(_M_owner, this);
     _Invalidate();
   }
+#endif
 
   const __owned_list* _Owner() const { return _M_owner; }
   __owned_list* _Owner() { return _M_owner; }
@@ -313,6 +327,10 @@ public:
   const __owned_link* _Next() const { return _M_next; }
 
 public:
+#if defined(_STLP_WCE) && defined(_ARM_)
+  __owned_link* _M_self;
+#endif
+
   __owned_list* _M_owner;
   __owned_link* _M_next;
 };
@@ -357,7 +375,7 @@ private:
   __owned_list& operator = (const __owned_list&) { return *this; }
 
   friend class __owned_link;
-  friend struct __stl_debug_engine<bool>;
+  friend class __stl_debug_engine<bool>;
 };
 
 
@@ -375,7 +393,6 @@ bool _STLP_CALL __check_range(const _Iterator&, const _Iterator& ,
                               const _Iterator&, const _Iterator& );
 template <class _Tp>
 bool _STLP_CALL __check_ptr_range(const _Tp*, const _Tp*);
-
 
 template <class _Iterator>
 void _STLP_CALL __invalidate_range(const __owned_list* __base,
@@ -410,21 +427,17 @@ inline bool _STLP_CALL  __check_if_owner( const __owned_list* __owner,
 { return __stl_debugger::_Check_if_owner(__owner, (const __owned_link&)__it); }
 
 template <class _Iterator>
-inline bool _STLP_CALL __check_if_not_owner( const __owned_list* /*__owner*/,
-                                             const _Iterator& /*__it*/,
-                                             const __false_type&)
-{ return true; }
-
-template <class _Iterator>
 inline bool _STLP_CALL __check_if_not_owner( const __owned_list* __owner,
-                                             const _Iterator& __it,
-                                             const __true_type&)
+                                             const _Iterator& __it)
 { return __stl_debugger::_Check_if_not_owner(__owner, (const __owned_link&)__it); }
 
 _STLP_MOVE_TO_STD_NAMESPACE
 
 _STLP_END_NAMESPACE
 
+#else
+#  define _STLP_VERBOSE_ASSERT(expr, diagnostic)
+#  define _STLP_DEBUG_CHECK(expr)
 #endif /* _STLP_DEBUG */
 
 #if defined (_STLP_ASSERTIONS)
@@ -449,7 +462,7 @@ extern  void __stl_debug_terminate();
 
 #endif
 
-#if !defined (_STLP_LINK_TIME_INSTANTIATION)
+#if defined (_STLP_ASSERTIONS) && !defined (_STLP_LINK_TIME_INSTANTIATION)
 #  include <stl/debug/_debug.c>
 #endif
 

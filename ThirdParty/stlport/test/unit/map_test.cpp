@@ -88,7 +88,10 @@ void MapTest::mmap1()
 
   m.insert(pair<const char, int>('Y', 32)); // jbuck: standard way
   mmap::iterator i = m.find('X'); // Find first match.
-  pair<const char, int> p('X', 10);
+#ifndef _STLP_CONST
+#  define _STLP_CONST const
+#endif
+  pair<_STLP_CONST char, int> p('X', 10);
   CPPUNIT_ASSERT(*i == p);
   CPPUNIT_ASSERT((*i).first == 'X');
   CPPUNIT_ASSERT((*i).second == 10);
@@ -432,3 +435,20 @@ void MapTest::template_methods()
   }
 #endif
 }
+
+#if !defined (STLPORT) || \
+    !defined (_STLP_USE_PTR_SPECIALIZATIONS) || defined (_STLP_CLASS_PARTIAL_SPECIALIZATION)
+#  if !defined (__DMC__)
+/* Simple compilation test: Check that nested types like iterator
+ * can be access even if type used to instanciate container is not
+ * yet completely defined.
+ */
+class IncompleteClass
+{
+  map<IncompleteClass, IncompleteClass> instances;
+  typedef map<IncompleteClass, IncompleteClass>::iterator it;
+  multimap<IncompleteClass, IncompleteClass> minstances;
+  typedef multimap<IncompleteClass, IncompleteClass>::iterator mit;
+};
+#  endif
+#endif

@@ -21,7 +21,7 @@
 
 #  ifndef _STLP_OUTERMOST_HEADER_ID
 #    define _STLP_OUTERMOST_HEADER_ID 0x264
-#    include <stl/_prolog.h>
+#    include <stl/_cprolog.h>
 #  elif (_STLP_OUTERMOST_HEADER_ID == 0x264) && !defined (_STLP_DONT_POP_HEADER_ID)
 #    define _STLP_DONT_POP_HEADER_ID
 #  endif
@@ -29,25 +29,20 @@
 #    if defined(_STLP_WCE_EVC3)
 struct _exception;
 #    endif
-#    include _STLP_NATIVE_C_HEADER(stdio.h)
+#    if defined (_STLP_HAS_INCLUDE_NEXT)
+#      include_next <stdio.h>
+#    else
+#      include _STLP_NATIVE_C_HEADER(stdio.h)
+#    endif
 
 #    if defined (__SUNPRO_CC) && !defined (_STRUCT_FILE)
 #      define _STRUCT_FILE
 #    endif
 
-#    if (defined (__MWERKS__) && !defined (N_PLAT_NLM))  || defined (__BORLANDC__)
-#      undef stdin
-#      undef stdout
-#      undef stderr
-#      if defined (__MWERKS__)
-#      define stdin   (&_STLP_VENDOR_CSTD::__files[0])
-#      define stdout  (&_STLP_VENDOR_CSTD::__files[1])
-#      define stderr  (&_STLP_VENDOR_CSTD::__files[2])
-#      elif defined (__BORLANDC__)
-#        define stdin   (&_STLP_VENDOR_CSTD::_streams[0])
-#        define stdout  (&_STLP_VENDOR_CSTD::_streams[1])
-#        define stderr  (&_STLP_VENDOR_CSTD::_streams[2])
-#      endif
+#    if defined (__BORLANDC__) && defined (__cplusplus) && !defined (__linux__)
+_STLP_BEGIN_NAMESPACE
+using __std_alias::_streams;
+_STLP_END_NAMESPACE
 #    endif
 
 #  if (_STLP_OUTERMOST_HEADER_ID == 0x264)

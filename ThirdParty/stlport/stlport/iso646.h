@@ -15,14 +15,18 @@
 
 #if !defined (_STLP_OUTERMOST_HEADER_ID)
 #  define _STLP_OUTERMOST_HEADER_ID 0x204
-#  include <stl/_prolog.h>
+#  include <stl/_cprolog.h>
 #elif (_STLP_OUTERMOST_HEADER_ID == 0x204) && !defined (_STLP_DONT_POP_HEADER_ID)
 #  define _STLP_DONT_POP_HEADER_ID
 #endif
 
 /* evc3 doesn't have iso646.h */
-#if !defined (_STLP_WCE_EVC3) && !defined (N_PLAT_NLM) && !defined (__BORLANDC__)
-#  include _STLP_NATIVE_C_HEADER(iso646.h)
+#if !defined (_STLP_WCE_EVC3) && !defined (__BORLANDC__)
+#  if defined (_STLP_HAS_INCLUDE_NEXT)
+#    include_next <iso646.h>
+#  else
+#    include _STLP_NATIVE_C_HEADER(iso646.h)
+#  endif
 #endif
 
 #if (_STLP_OUTERMOST_HEADER_ID == 0x204)
@@ -33,7 +37,3 @@
 #  undef  _STLP_DONT_POP_HEADER_ID
 #endif
 
-/* Local Variables:
- * mode:C++
- * End:
- */

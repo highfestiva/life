@@ -1,20 +1,26 @@
 // STLport configuration file for Digital Mars C++
 
-//#define _STLP_VERBOSE
+#define _STLP_COMPILER __DMC_VERSION_STRING__
 
-#define _STLP_COMPILER "DMC"
-
-#if defined (_STLP_VERBOSE)
-#  pragma message __DMC_VERSION_STRING__
+#if (__DMC__ < 0x849)
+#  error "Digital Mars C++ compilers before version 8.49 are not supported!"
 #endif
 
-#if (__DMC__ < 0x846)
-#  error "Digital Mars C++ versions prior to 8.46 are not supported!"
-#endif
+/* DMC goes too far in template instanciation and tries to fully instanciate
+ * slist<pair<const int, string> > for instance. The generation of assignment
+ * operator fails of course so we are force to use mutable key for this compiler.
+ */
+#define _STLP_NO_CONST_IN_PAIR
+#define _STLP_DONT_SUP_DFLT_PARAM
 
 #ifndef _CPPUNWIND
 #  define _STLP_NO_EXCEPTIONS
 #endif
+
+#ifndef _CPPRTTI
+#  define _STLP_NO_RTTI
+#endif
+
 #define _STLP_VENDOR_GLOBAL_CSTD
 
 //DMC prefer enum to real static const variable because it do not consider
@@ -45,10 +51,8 @@
 #define _STLP_NO_OWN_NAMESPACE 1
 
 // select threads strategy
-#if defined (_MT) && !defined (_NOTHREADS)
-#  define _REENTRANT
-#else
-#  define _NOTHREADS
+#if defined (_MT) && !defined (_STLP_NO_THREADS)
+#  define _STLP_THREADS
 #endif
 
 #ifndef _BOOL_DEFINED
@@ -61,26 +65,33 @@
 #  define _STLP_LONG_LONG long long
 #endif
 
+#define _STLP_MARK_PARAMETER_AS_UNUSED(X)
 #define _STLP_DONT_USE_PRIV_NAMESPACE
-#define _STLP_NO_BAD_ALLOC
+#define _STLP_PRIV
 #define _STLP_THROW_RETURN_BUG
 
 #if !defined (_DLL)
 #  undef _STLP_NO_UNEXPECTED_EXCEPT_SUPPORT
 #endif
 
+#if (__DMC__ < 0x849)
+#  define _STLP_NO_BAD_ALLOC
+#endif
+
 #define _STLP_USE_ABBREVS
-#define _STLP_NO_CONTAINERS_EXTENSION
 #define _STLP_NO_FUNCTION_TMPL_PARTIAL_ORDER
 
+#define _STLP_USE_MSVC6_MEM_T_BUG_WORKAROUND
 #define _STLP_EXPORT_DECLSPEC __declspec(dllexport)
 #define _STLP_IMPORT_DECLSPEC __declspec(dllimport)
 
 #define _STLP_CLASS_EXPORT_DECLSPEC __declspec(dllexport)
 #define _STLP_CLASS_IMPORT_DECLSPEC __declspec(dllimport)
 
-#define _STLP_IMPORT_TEMPLATE_KEYWORD __declspec(dllimport)
-#define _STLP_EXPORT_TEMPLATE_KEYWORD __declspec(dllexport)
+#define _STLP_NEED_ADDITIONAL_STATIC_DECLSPEC
+
+//#define _STLP_IMPORT_TEMPLATE_KEYWORD __declspec(dllimport)
+//#define _STLP_EXPORT_TEMPLATE_KEYWORD __declspec(dllexport)
 
 #if defined (_WINDLL)
 #  define _STLP_DLL
@@ -105,5 +116,6 @@
 
 #include <stl/config/_auto_link.h>
 
-#  undef __SC__
+#undef __SC__
 
+#include <stl/config/_feedback.h>

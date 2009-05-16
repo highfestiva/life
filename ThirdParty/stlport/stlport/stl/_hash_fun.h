@@ -89,7 +89,7 @@ _STLP_TEMPLATE_NULL struct hash<int> {
   size_t operator()(int __x) const { return __x; }
 };
 
-#if defined (_WIN64) || !defined (_STLP_MSVC) || (_STLP_MSVC < 1300)
+#if !defined (_STLP_MSVC) || (_STLP_MSVC < 1300) || defined (_WIN64)
 _STLP_TEMPLATE_NULL struct hash<unsigned int> {
   size_t operator()(unsigned int __x) const { return __x; }
 };

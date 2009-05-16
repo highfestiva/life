@@ -37,6 +37,7 @@ class VectorTest : public CPPUNIT_NS::TestCase
   CPPUNIT_IGNORE;
 #endif
   CPPUNIT_TEST(optimizations_check);
+  CPPUNIT_TEST(assign_check);
   CPPUNIT_STOP_IGNORE;
   CPPUNIT_TEST(ebo);
   CPPUNIT_TEST_SUITE_END();
@@ -56,6 +57,7 @@ protected:
   void allocator_with_state();
   void iterators();
   void optimizations_check();
+  void assign_check();
   void ebo();
 };
 
@@ -105,12 +107,17 @@ void VectorTest::vec_test_2()
 
   CPPUNIT_ASSERT( v2.size() == 1 );
   CPPUNIT_ASSERT( v2[0] == 3.56 );
+  size_t v1Cap = v1.capacity();
+  size_t v2Cap = v2.capacity();
+
   v1.swap(v2); // Swap the vector's contents.
 
   CPPUNIT_ASSERT( v1.size() == 1 );
+  CPPUNIT_ASSERT( v1.capacity() == v2Cap );
   CPPUNIT_ASSERT( v1[0] == 3.56 );
 
   CPPUNIT_ASSERT( v2.size() == 2 );
+  CPPUNIT_ASSERT( v2.capacity() == v1Cap );
   CPPUNIT_ASSERT( v2[0] == 32.1 );
   CPPUNIT_ASSERT( v2[1] == 40.5 );
 
@@ -313,17 +320,14 @@ void VectorTest::at() {
   CPPUNIT_ASSERT( cv.at(0) == 20 );
 
 #if !defined (STLPORT) || defined (_STLP_USE_EXCEPTIONS)
-  for (;;) {
-    try {
-      v.at(1) = 20;
-      CPPUNIT_ASSERT(false);
-    }
-    catch (out_of_range const&) {
-      return;
-    }
-    catch (...) {
-      CPPUNIT_ASSERT(false);
-    }
+  try {
+    v.at(1) = 20;
+    CPPUNIT_FAIL;
+  }
+  catch (out_of_range const&) {
+  }
+  catch (...) {
+    CPPUNIT_FAIL;
   }
 #endif
 }
@@ -367,34 +371,34 @@ void VectorTest::auto_ref()
 }
 
 void VectorTest::allocator_with_state()
-{
-  char buf1[1024];
-  StackAllocator<int> stack1(buf1, buf1 + sizeof(buf1));
-
-  char buf2[1024];
-  StackAllocator<int> stack2(buf2, buf2 + sizeof(buf2));
-
   {
-    typedef vector<int, StackAllocator<int> > VectorInt;
-    VectorInt vint1(10, 0, stack1);
-    VectorInt vint1Cpy(vint1);
+    char buf1[1024];
+    StackAllocator<int> stack1(buf1, buf1 + sizeof(buf1));
 
-    VectorInt vint2(10, 1, stack2);
-    VectorInt vint2Cpy(vint2);
+    char buf2[1024];
+    StackAllocator<int> stack2(buf2, buf2 + sizeof(buf2));
 
-    vint1.swap(vint2);
+    {
+      typedef vector<int, StackAllocator<int> > VectorInt;
+      VectorInt vint1(10, 0, stack1);
+      VectorInt vint1Cpy(vint1);
 
-    CPPUNIT_ASSERT( vint1.get_allocator().swaped() );
-    CPPUNIT_ASSERT( vint2.get_allocator().swaped() );
+      VectorInt vint2(10, 1, stack2);
+      VectorInt vint2Cpy(vint2);
 
-    CPPUNIT_ASSERT( vint1 == vint2Cpy );
-    CPPUNIT_ASSERT( vint2 == vint1Cpy );
-    CPPUNIT_ASSERT( vint1.get_allocator() == stack2 );
-    CPPUNIT_ASSERT( vint2.get_allocator() == stack1 );
+      vint1.swap(vint2);
+
+      CPPUNIT_ASSERT( vint1.get_allocator().swaped() );
+      CPPUNIT_ASSERT( vint2.get_allocator().swaped() );
+
+      CPPUNIT_ASSERT( vint1 == vint2Cpy );
+      CPPUNIT_ASSERT( vint2 == vint1Cpy );
+      CPPUNIT_ASSERT( vint1.get_allocator() == stack2 );
+      CPPUNIT_ASSERT( vint2.get_allocator() == stack1 );
+    }
+    CPPUNIT_ASSERT( stack1.ok() );
+    CPPUNIT_ASSERT( stack2.ok() );
   }
-  CPPUNIT_ASSERT( stack1.ok() );
-  CPPUNIT_ASSERT( stack2.ok() );
-}
 
 struct Point {
   int x, y;
@@ -408,8 +412,10 @@ struct PointEx : public Point {
 };
 
 #if defined (STLPORT)
+#  if defined (_STLP_USE_NAMESPACES)
 namespace std {
-  template <>
+#  endif
+  _STLP_TEMPLATE_NULL
   struct __type_traits<PointEx> {
     typedef __false_type has_trivial_default_constructor;
     typedef __true_type has_trivial_copy_constructor;
@@ -417,7 +423,9 @@ namespace std {
     typedef __true_type has_trivial_destructor;
     typedef __true_type is_POD_type;
   };
+#  if defined (_STLP_USE_NAMESPACES)
 }
+#  endif
 #endif
 
 //This test check that vector implementation do not over optimize
@@ -431,6 +439,19 @@ void VectorTest::optimizations_check()
   vector<PointEx> v2(v1.begin(), v1.end());
   CPPUNIT_ASSERT( v2.size() == 1 );
   CPPUNIT_ASSERT( v2[0].builtFromBase == true );
+#endif
+}
+
+void VectorTest::assign_check()
+{
+#if !defined (STLPORT) || !defined (_STLP_NO_MEMBER_TEMPLATES)
+  vector<int> v(3,1);
+  int array[] = { 1, 2, 3, 4, 5 };
+  
+  v.assign( array, array + 5 );
+  CPPUNIT_CHECK( v[4] == 5 );
+  CPPUNIT_CHECK( v[0] == 1 );
+  CPPUNIT_CHECK( v[1] == 2 );
 #endif
 }
 
@@ -462,6 +483,20 @@ void VectorTest::iterators()
   CPPUNIT_ASSERT( crvint.rbegin() != crvint.rend() );
 }
 
+
+#if !defined (STLPORT) || \
+    !defined (_STLP_USE_PTR_SPECIALIZATIONS) || defined (_STLP_CLASS_PARTIAL_SPECIALIZATION)
+/* Simple compilation test: Check that nested types like iterator
+ * can be access even if type used to instanciate container is not
+ * yet completely defined.
+ */
+class IncompleteClass
+{
+  vector<IncompleteClass> instances;
+  typedef vector<IncompleteClass>::iterator it;
+};
+#endif
+
 #if defined (STLPORT)
 #  define NOTHROW _STLP_NOTHROW
 #else
@@ -478,7 +513,7 @@ struct NotSTLportAllocator : public allocator<_Tp> {
     typedef NotSTLportAllocator<_Tp1> other;
   };
 #endif
-  NotSTLportAllocator() _STLP_NOTHROW {}
+  NotSTLportAllocator() NOTHROW {}
 #if !defined (STLPORT) || defined (_STLP_MEMBER_TEMPLATES)
   template <class _Tp1> NotSTLportAllocator(const NotSTLportAllocator<_Tp1>&) NOTHROW {}
 #endif
@@ -515,3 +550,4 @@ void VectorTest::ebo()
   delete pv2;
   delete pv1;
 }
+

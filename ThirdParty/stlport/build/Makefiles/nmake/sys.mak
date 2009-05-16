@@ -1,5 +1,5 @@
 # Time-stamp: <03/09/28 18:59:23 ptr>
-# $Id: sys.mak 1907 2005-12-02 22:07:57Z dums $
+# $Id$
 
 # shared library:
 SO  = dll

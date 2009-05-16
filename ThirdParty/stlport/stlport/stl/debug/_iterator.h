@@ -28,10 +28,7 @@
 #  include <stl/_alloc.h>
 #endif
 
-#define _STLP_DBG_ALLOCATOR_SELECT( _Tp ) _STLP_DEFAULT_ALLOCATOR_SELECT( _Tp )
-
 _STLP_BEGIN_NAMESPACE
-
 _STLP_MOVE_TO_PRIV_NAMESPACE
 
 //============================================================
@@ -368,7 +365,7 @@ inline _Iterator _Non_Dbg_iter(_Iterator __it)
 #if defined (_STLP_FUNCTION_TMPL_PARTIAL_ORDER)
 template <class _Container, class _Traits>
 inline typename _DBG_iter<_Container, _Traits>::_Nonconst_iterator
-_Non_Dbg_iter(_DBG_iter<_Container, _Traits> __it)
+_Non_Dbg_iter(const _DBG_iter<_Container, _Traits>& __it)
 { return __it._M_iterator; }
 #endif
 
@@ -412,12 +409,14 @@ protected:
     _STLP_DEBUG_CHECK(__check_range(__f,__l))
   }
 #endif
+#if defined (__BORLANDC__)
+  ~__construct_checker(){}
+#endif
 };
 
 #if defined (_STLP_USE_OLD_HP_ITERATOR_QUERIES)
 #  if defined (_STLP_NESTED_TYPE_PARAM_BUG) ||\
-     (defined (__SUNPRO_CC) && __SUNPRO_CC < 0x600) ||\
-     (defined (_STLP_MSVC) && (_STLP_MSVC < 1100))
+     (defined (__SUNPRO_CC) && __SUNPRO_CC < 0x600)
 #    define _STLP_DEBUG_USE_DISTINCT_VALUE_TYPE_HELPERS 1
 #  endif
 
@@ -431,14 +430,14 @@ distance_type(const _STLP_PRIV _DBG_iter_base<_Container>&) { return (ptrdiff_t*
 template <class _Container>
 inline _STLP_TYPENAME_ON_RETURN_TYPE _STLP_PRIV _DBG_iter_base<_Container>::value_type*
 value_type(const _STLP_PRIV _DBG_iter_base<_Container>&) {
-  typedef typename _STLP_PRIV _DBG_iter_base<_Container>::value_type _Val;
+  typedef _STLP_TYPENAME _STLP_PRIV _DBG_iter_base<_Container>::value_type _Val;
   return (_Val*)0;
 }
 
 template <class _Container>
 inline _STLP_TYPENAME_ON_RETURN_TYPE _STLP_PRIV _DBG_iter_base<_Container>::_Iterator_category
 iterator_category(const _STLP_PRIV _DBG_iter_base<_Container>&) {
-  typedef typename _STLP_PRIV _DBG_iter_base<_Container>::_Iterator_category _Category;
+  typedef _STLP_TYPENAME _STLP_PRIV _DBG_iter_base<_Container>::_Iterator_category _Category;
   return _Category();
 }
 #  endif

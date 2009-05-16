@@ -26,7 +26,6 @@
 
 #if defined (__GNUC__) && (defined (__CYGWIN__) || defined (__MINGW32__))
 #  include <malloc.h>
-//#  define _STLP_MALLOC_USABLE_SIZE(__buf) malloc_usable_size(__buf)
 #endif
 
 #if defined (_STLP_PTHREADS) && !defined (_STLP_NO_THREADS)
@@ -54,81 +53,115 @@ extern "C" {
 }
 #endif
 
-// Specialised debug form of malloc which does not provide "false"
+// Specialised debug form of new operator which does not provide "false"
 // memory leaks when run with debug CRT libraries.
 #if defined (_STLP_MSVC) && (_STLP_MSVC >= 1020 && defined (_STLP_DEBUG_ALLOC)) && !defined (_STLP_WCE)
 #  include <crtdbg.h>
-inline void* __stlp_chunk_malloc(size_t __bytes) { _STLP_CHECK_NULL_ALLOC(_malloc_dbg(__bytes, _CRT_BLOCK, __FILE__, __LINE__)); }
-inline void __stlp_chunck_free(void* __p) { _free_dbg(__p, _CRT_BLOCK); }
-#else  // !_DEBUG
+inline char* __stlp_new_chunk(size_t __bytes) {
+  void *__chunk = _STLP_CHECK_NULL_ALLOC(::operator new(__bytes, __FILE__, __LINE__));
+  return __STATIC_CAST(char*, __chunk);
+}
+inline void __stlp_delete_chunck(void* __p) { ::operator delete(__p, __FILE__, __LINE__); }
+#else
 #  ifdef _STLP_NODE_ALLOC_USE_MALLOC
 #    include <cstdlib>
-inline void* __stlp_chunk_malloc(size_t __bytes) { _STLP_CHECK_NULL_ALLOC(_STLP_VENDOR_CSTD::malloc(__bytes)); }
-inline void __stlp_chunck_free(void* __p) { _STLP_VENDOR_CSTD::free(__p); }
+inline char* __stlp_new_chunk(size_t __bytes) {
+  // do not use _STLP_CHECK_NULL_ALLOC, this macro is dedicated to new operator.
+  void *__chunk = _STLP_VENDOR_CSTD::malloc(__bytes);
+  if (__chunk == 0) {
+    _STLP_THROW_BAD_ALLOC;
+  }
+  return __STATIC_CAST(char*, __chunk);
+}
+inline void __stlp_delete_chunck(void* __p) { _STLP_VENDOR_CSTD::free(__p); }
 #  else
-inline void* __stlp_chunk_malloc(size_t __bytes) { return _STLP_STD::__stl_new(__bytes); }
-inline void __stlp_chunck_free(void* __p) { _STLP_STD::__stl_delete(__p); }
+inline char* __stlp_new_chunk(size_t __bytes)
+{ return __STATIC_CAST(char*, _STLP_STD::__stl_new(__bytes)); }
+inline void __stlp_delete_chunck(void* __p) { _STLP_STD::__stl_delete(__p); }
 #  endif
-#endif  // !_DEBUG
+#endif
+
+/* This is an additional atomic operations to the ones already defined in
+ * stl/_threads.h, platform should try to support it to improve performance.
+ * __add_atomic_t _STLP_ATOMIC_ADD(volatile __add_atomic_t* __target, __add_atomic_t __val) :
+ * does *__target = *__target + __val and returns the old *__target value */
+typedef long __add_atomic_t;
+typedef unsigned long __uadd_atomic_t;
+
+#if defined (__GNUC__) && defined (__i386__)
+inline long _STLP_atomic_add_gcc_x86(long volatile* p, long addend) {
+  long result;
+  __asm__ __volatile__
+    ("lock; xaddl %1, %0;"
+    :"=m" (*p), "=r" (result)
+    :"m"  (*p), "1"  (addend)
+    :"cc");
+ return result + addend;
+}
+#  define _STLP_ATOMIC_ADD(__dst, __val)  _STLP_atomic_add_gcc_x86(__dst, __val)
+#elif defined (_STLP_WIN32THREADS)
+// The Win32 API function InterlockedExchangeAdd is not available on Windows 95.
+#  if !defined (_STLP_WIN95_LIKE)
+#    if defined (_STLP_NEW_PLATFORM_SDK)
+#      define _STLP_ATOMIC_ADD(__dst, __val) InterlockedExchangeAdd(__dst, __val)
+#    else
+#      define _STLP_ATOMIC_ADD(__dst, __val) InterlockedExchangeAdd(__CONST_CAST(__add_atomic_t*, __dst), __val)
+#    endif
+#  endif
+#endif
+
+#if defined (__OS400__)
+// dums 02/05/2007: is it really necessary ?
+enum { _ALIGN = 16, _ALIGN_SHIFT = 4 };
+#else
+enum { _ALIGN = 2 * sizeof(void*), _ALIGN_SHIFT = 2 + sizeof(void*) / 4 };
+#endif
 
 #define _S_FREELIST_INDEX(__bytes) ((__bytes - size_t(1)) >> (int)_ALIGN_SHIFT)
 
 _STLP_BEGIN_NAMESPACE
 
-class __malloc_alloc_impl {
-private:
-  static void* _S_oom_malloc(size_t __n) {
+// malloc_alloc out-of-memory handling
+static __oom_handler_type __oom_handler = __STATIC_CAST(__oom_handler_type, 0);
+
+#ifdef _STLP_THREADS
+_STLP_mutex __oom_handler_lock;
+#endif
+
+void* _STLP_CALL __malloc_alloc::allocate(size_t __n)
+{
+  void *__result = malloc(__n);
+  if ( 0 == __result ) {
     __oom_handler_type __my_malloc_handler;
-    void * __result;
 
     for (;;) {
-      __my_malloc_handler = __oom_handler;
-      if (0 == __my_malloc_handler) { __THROW_BAD_ALLOC; }
+      {
+#ifdef _STLP_THREADS
+        _STLP_auto_lock _l( __oom_handler_lock );
+#endif
+        __my_malloc_handler = __oom_handler;
+      }
+      if ( 0 == __my_malloc_handler) {
+        _STLP_THROW_BAD_ALLOC;
+      }
       (*__my_malloc_handler)();
       __result = malloc(__n);
-      if (__result) return(__result);
+      if ( __result )
+        return __result;
     }
-#if defined (_STLP_NEED_UNREACHABLE_RETURN)
-    return 0;
-#endif
   }
-  static __oom_handler_type __oom_handler;
-public:
-  // this one is needed for proper simple_alloc wrapping
-  typedef char value_type;
-  static void* allocate(size_t& __n) {
-    void* __result = malloc(__n);
-    if (0 == __result) {
-      __result = _S_oom_malloc(__n);
-    }
-#if defined (_STLP_MALLOC_USABLE_SIZE)
-    else {
-      size_t __new_n = _STLP_MALLOC_USABLE_SIZE(__result);
-      /*
-      if (__n != __new_n) {
-        printf("requested size %d, usable %d\n", __n, __new_n);
-      }
-      */
-      __n = __new_n;
-    }
-#endif
-    return __result;
-  }
-  static void deallocate(void* __p, size_t /* __n */) { free((char*)__p); }
-  static __oom_handler_type set_malloc_handler(__oom_handler_type __f) {
-    __oom_handler_type __old = __oom_handler;
-    __oom_handler = __f;
-    return __old;
-  }
-};
+  return __result;
+}
 
-// malloc_alloc out-of-memory handling
-__oom_handler_type __malloc_alloc_impl::__oom_handler = __STATIC_CAST(__oom_handler_type, 0);
-
-void* _STLP_CALL __malloc_alloc::allocate(size_t& __n)
-{ return __malloc_alloc_impl::allocate(__n); }
 __oom_handler_type _STLP_CALL __malloc_alloc::set_malloc_handler(__oom_handler_type __f)
-{ return __malloc_alloc_impl::set_malloc_handler(__f); }
+{
+#ifdef _STLP_THREADS
+  _STLP_auto_lock _l( __oom_handler_lock );
+#endif
+  __oom_handler_type __old = __oom_handler;
+  __oom_handler = __f;
+  return __old;
+}
 
 // *******************************************************
 // Default node allocator.
@@ -175,25 +208,26 @@ __oom_handler_type _STLP_CALL __malloc_alloc::set_malloc_handler(__oom_handler_t
 #  if defined (_STLP_THREADS)
 
 class _Node_Alloc_Lock {
+  static _STLP_STATIC_MUTEX& _S_Mutex() {
+    static _STLP_STATIC_MUTEX mutex _STLP_MUTEX_INITIALIZER;
+    return mutex;
+  }
 public:
   _Node_Alloc_Lock() {
-#  if defined (_STLP_SGI_THREADS)
+#    if defined (_STLP_SGI_THREADS)
     if (__us_rsthread_malloc)
-#  endif
-      _S_lock._M_acquire_lock();
+#    endif
+      _S_Mutex()._M_acquire_lock();
   }
 
   ~_Node_Alloc_Lock() {
-#  if defined (_STLP_SGI_THREADS)
+#    if defined (_STLP_SGI_THREADS)
     if (__us_rsthread_malloc)
-#  endif
-        _S_lock._M_release_lock();
+#    endif
+      _S_Mutex()._M_release_lock();
   }
-
-  static _STLP_STATIC_MUTEX _S_lock;
 };
 
-_STLP_STATIC_MUTEX _Node_Alloc_Lock::_S_lock _STLP_MUTEX_INITIALIZER;
 #  else
 
 class _Node_Alloc_Lock {
@@ -210,7 +244,6 @@ struct _Node_alloc_obj {
 #endif
 
 class __node_alloc_impl {
-_STLP_PRIVATE:
   static inline size_t _STLP_CALL _S_round_up(size_t __bytes)
   { return (((__bytes) + (size_t)_ALIGN-1) & ~((size_t)_ALIGN - 1)); }
 
@@ -240,7 +273,7 @@ private:
   static _Freelist _S_free_list[_STLP_NFREELISTS];
   // Amount of total allocated memory
 #if defined (_STLP_USE_LOCK_FREE_IMPLEMENTATION)
-  static _STLP_VOLATILE __stl_atomic_t _S_heap_size;
+  static _STLP_VOLATILE __add_atomic_t _S_heap_size;
 #else
   static size_t _S_heap_size;
 #endif
@@ -319,6 +352,12 @@ void __node_alloc_impl::_M_deallocate(void *__p, size_t __n) {
   // lock is released here
 }
 
+#  if defined (_STLP_DO_CLEAN_NODE_ALLOC)
+#    define _STLP_OFFSET sizeof(_Obj)
+#  else
+#    define _STLP_OFFSET 0
+#  endif
+
 /* We allocate memory in large chunks in order to avoid fragmenting     */
 /* the malloc heap too much.                                            */
 /* We assume that size is properly aligned.                             */
@@ -347,17 +386,16 @@ char* __node_alloc_impl::_S_chunk_alloc(size_t _p_size, int& __nobjs) {
     _Obj* _STLP_VOLATILE* __my_free_list = _S_free_list + _S_FREELIST_INDEX(__bytes_left);
     __REINTERPRET_CAST(_Obj*, _S_start_free)->_M_next = *__my_free_list;
     *__my_free_list = __REINTERPRET_CAST(_Obj*, _S_start_free);
+    _S_start_free = _S_end_free = 0;
   }
 
-  size_t __bytes_to_get =
-    2 * __total_bytes + _S_round_up(_S_heap_size >> 4)
-#  if defined (_STLP_DO_CLEAN_NODE_ALLOC)
-    + sizeof(_Obj)
-#  endif
-    ;
+  size_t __bytes_to_get = 2 * __total_bytes + _S_round_up(_S_heap_size) + _STLP_OFFSET;
 
-  _S_start_free = __STATIC_CAST(char*, __stlp_chunk_malloc(__bytes_to_get));
-  if (0 == _S_start_free) {
+  _STLP_TRY {
+    _S_start_free = __stlp_new_chunk(__bytes_to_get);
+  }
+#if defined (_STLP_USE_EXCEPTIONS)
+  catch (const _STLP_STD::bad_alloc&) {
     _Obj* _STLP_VOLATILE* __my_free_list;
     _Obj* __p;
     // Try to do with what we have.  That can't hurt.
@@ -375,26 +413,18 @@ char* __node_alloc_impl::_S_chunk_alloc(size_t _p_size, int& __nobjs) {
         // right free list.
       }
     }
-    _S_end_free = 0;    // In case of exception.
-    _S_start_free = __STATIC_CAST(char*, __stlp_chunk_malloc(__bytes_to_get));
-    /*
-    (char*)malloc_alloc::allocate(__bytes_to_get);
-    */
-
-    // This should either throw an
-    // exception or remedy the situation.  Thus we assume it
-    // succeeded.
+    __bytes_to_get = __total_bytes + _STLP_OFFSET;
+    _S_start_free = __stlp_new_chunk(__bytes_to_get);
   }
+#endif
 
-  _S_heap_size += __bytes_to_get;
+  _S_heap_size += __bytes_to_get >> 4;
 #  if defined (_STLP_DO_CLEAN_NODE_ALLOC)
   __REINTERPRET_CAST(_Obj*, _S_start_free)->_M_next = _S_chunks;
   _S_chunks = __REINTERPRET_CAST(_Obj*, _S_start_free);
 #  endif
   _S_end_free = _S_start_free + __bytes_to_get;
-#  if defined (_STLP_DO_CLEAN_NODE_ALLOC)
-  _S_start_free += sizeof(_Obj);
-#  endif
+  _S_start_free += _STLP_OFFSET;
   return _S_chunk_alloc(_p_size, __nobjs);
 }
 
@@ -439,7 +469,7 @@ void __node_alloc_impl::_S_chunk_dealloc() {
   _Obj *__pcur = _S_chunks, *__pnext;
   while (__pcur != 0) {
     __pnext = __pcur->_M_next;
-    __stlp_chunck_free(__pcur);
+    __stlp_delete_chunck(__pcur);
     __pcur = __pnext;
   }
   _S_chunks = 0;
@@ -447,9 +477,9 @@ void __node_alloc_impl::_S_chunk_dealloc() {
   _S_heap_size = 0;
   memset(__REINTERPRET_CAST(char*, __CONST_CAST(_Obj**, &_S_free_list[0])), 0, _STLP_NFREELISTS * sizeof(_Obj*));
 }
-#  endif /* _STLP_DO_CLEAN_NODE_ALLOC */
+#  endif
 
-#else /* !defined(_STLP_USE_LOCK_FREE_IMPLEMENTATION) */
+#else
 
 void* __node_alloc_impl::_M_allocate(size_t& __n) {
   __n = _S_round_up(__n);
@@ -492,6 +522,12 @@ __node_alloc_impl::_Obj* __node_alloc_impl::_S_refill(size_t __n) {
   return __result;
 }
 
+#  if defined (_STLP_DO_CLEAN_NODE_ALLOC)
+#    define _STLP_OFFSET _ALIGN
+#  else
+#    define _STLP_OFFSET 0
+#  endif
+
 /* We allocate memory in large chunks in order to avoid fragmenting     */
 /* the malloc heap too much.                                            */
 /* We assume that size is properly aligned.                             */
@@ -503,20 +539,20 @@ char* __node_alloc_impl::_S_chunk_alloc(size_t _p_size, int& __nobjs) {
   _STLP_STATIC_ASSERT(sizeof(_Obj) <= _ALIGN)
 #  endif
   char*  __result       = 0;
-  __stl_atomic_t __total_bytes  = __STATIC_CAST(__stl_atomic_t, _p_size) * __nobjs;
+  __add_atomic_t __total_bytes  = __STATIC_CAST(__add_atomic_t, _p_size) * __nobjs;
 
   _FreeBlockHeader* __block = __STATIC_CAST(_FreeBlockHeader*, _S_free_mem_blocks.pop());
   if (__block != 0) {
     // We checked a block out and can now mess with it with impugnity.
     // We'll put the remainder back into the list if we're done with it below.
     char*  __buf_start  = __REINTERPRET_CAST(char*, __block);
-    __stl_atomic_t __bytes_left = __block->_M_end - __buf_start;
+    __add_atomic_t __bytes_left = __block->_M_end - __buf_start;
 
-    if ((__bytes_left < __total_bytes) && (__bytes_left >= __STATIC_CAST(__stl_atomic_t, _p_size))) {
+    if ((__bytes_left < __total_bytes) && (__bytes_left >= __STATIC_CAST(__add_atomic_t, _p_size))) {
       // There's enough left for at least one object, but not as much as we wanted
       __result      = __buf_start;
       __nobjs       = (int)(__bytes_left/_p_size);
-      __total_bytes = __STATIC_CAST(__stl_atomic_t, _p_size) * __nobjs;
+      __total_bytes = __STATIC_CAST(__add_atomic_t, _p_size) * __nobjs;
       __bytes_left -= __total_bytes;
       __buf_start  += __total_bytes;
     }
@@ -529,7 +565,7 @@ char* __node_alloc_impl::_S_chunk_alloc(size_t _p_size, int& __nobjs) {
 
     if (__bytes_left != 0) {
       // There is still some memory left over in block after we satisfied our request.
-      if ((__result != 0) && (__bytes_left >= sizeof(_FreeBlockHeader))) {
+      if ((__result != 0) && (__bytes_left >= (__add_atomic_t)sizeof(_FreeBlockHeader))) {
         // We were able to allocate at least one object and there is still enough
         // left to put remainder back into list.
         _FreeBlockHeader* __newblock = __REINTERPRET_CAST(_FreeBlockHeader*, __buf_start);
@@ -549,17 +585,15 @@ char* __node_alloc_impl::_S_chunk_alloc(size_t _p_size, int& __nobjs) {
   }
 
   // We couldn't satisfy it from the list of free blocks, get new memory.
-  __stl_atomic_t __bytes_to_get = 2 * __total_bytes + __STATIC_CAST(__stl_atomic_t, _S_round_up(_S_heap_size >> 4))
-#  if defined (_STLP_DO_CLEAN_NODE_ALLOC)
-    + _ALIGN
-#  endif
-    ;
-
-  __result = __STATIC_CAST(char*, __stlp_chunk_malloc(__bytes_to_get));
-  // Alignment check
-  _STLP_VERBOSE_ASSERT(((__REINTERPRET_CAST(size_t, __result) & __STATIC_CAST(size_t, _ALIGN - 1)) == 0), _StlMsg_DBA_DELETED_TWICE)
-
-  if (0 == __result) {
+  __add_atomic_t __bytes_to_get = 2 * __total_bytes +
+                                  __STATIC_CAST(__add_atomic_t,
+                                                _S_round_up(__STATIC_CAST(__uadd_atomic_t, _STLP_ATOMIC_ADD(&_S_heap_size, 0)))) +
+                                  _STLP_OFFSET;
+  _STLP_TRY {
+    __result = __stlp_new_chunk(__bytes_to_get);
+  }
+#if defined (_STLP_USE_EXCEPTIONS)
+  catch (const bad_alloc&) {
     // Allocation failed; try to canibalize from freelist of a larger object size.
     for (size_t __i = _p_size; __i <= (size_t)_MAX_BYTES; __i += (size_t)_ALIGN) {
       _Obj* __p  = _S_free_list[_S_FREELIST_INDEX(__i)].pop();
@@ -568,7 +602,7 @@ char* __node_alloc_impl::_S_chunk_alloc(size_t _p_size, int& __nobjs) {
           // Not enough to put into list of free blocks, divvy it up here.
           // Use as much as possible for this request and shove remainder into freelist.
           __nobjs = (int)(__i/_p_size);
-          __total_bytes = __nobjs * __STATIC_CAST(__stl_atomic_t, _p_size);
+          __total_bytes = __nobjs * __STATIC_CAST(__add_atomic_t, _p_size);
           size_t __bytes_left = __i - __total_bytes;
           size_t __rounded_down = _S_round_up(__bytes_left+1) - (size_t)_ALIGN;
           if (__rounded_down > 0) {
@@ -587,20 +621,17 @@ char* __node_alloc_impl::_S_chunk_alloc(size_t _p_size, int& __nobjs) {
     }
 
     // We were not able to find something in a freelist, try to allocate a smaller amount.
-    __bytes_to_get  = __total_bytes
-#  if defined (_STLP_DO_CLEAN_NODE_ALLOC)
-      + _ALIGN
-#  endif
-      ;
-    __result = __STATIC_CAST(char*, __stlp_chunk_malloc(__bytes_to_get));
-    // Alignment check
-    _STLP_VERBOSE_ASSERT(((__REINTERPRET_CAST(size_t, __result) & __STATIC_CAST(size_t, _ALIGN - 1)) == 0), _StlMsg_DBA_DELETED_TWICE)
+    __bytes_to_get  = __total_bytes + _STLP_OFFSET;
+    __result = __stlp_new_chunk(__bytes_to_get);
 
     // This should either throw an exception or remedy the situation.
     // Thus we assume it succeeded.
   }
-
-  _STLP_ATOMIC_ADD(&_S_heap_size, __bytes_to_get);
+#endif
+  // Alignment check
+  _STLP_VERBOSE_ASSERT(((__REINTERPRET_CAST(size_t, __result) & __STATIC_CAST(size_t, _ALIGN - 1)) == 0),
+                       _StlMsg_DBA_DELETED_TWICE)
+  _STLP_ATOMIC_ADD(&_S_heap_size, __bytes_to_get >> 4);
 
 #  if defined (_STLP_DO_CLEAN_NODE_ALLOC)
   // We have to track the allocated memory chunks for release on exit.
@@ -650,13 +681,13 @@ void __node_alloc_impl::_S_chunk_dealloc() {
   _Obj* __chunk = _S_chunks.clear();
   while (__chunk != 0) {
     _Obj* __next = __chunk->_M_next;
-    __stlp_chunck_free(__chunk);
+    __stlp_delete_chunck(__chunk);
     __chunk  = __next;
   }
 }
-#  endif /* _STLP_DO_CLEAN_NODE_ALLOC */
+#  endif
 
-#endif /* !defined(_STLP_USE_LOCK_FREE_IMPLEMENTATION) */
+#endif
 
 #if defined (_STLP_DO_CLEAN_NODE_ALLOC)
 struct __node_alloc_cleaner {
@@ -694,7 +725,7 @@ char *__node_alloc_impl::_S_end_free = 0;
 #endif
 
 #if defined (_STLP_USE_LOCK_FREE_IMPLEMENTATION)
-_STLP_VOLATILE __stl_atomic_t
+_STLP_VOLATILE __add_atomic_t
 #else
 size_t
 #endif
@@ -865,7 +896,7 @@ _Pthread_alloc_per_thread_state* _Pthread_alloc_impl::_S_new_per_thread_state() 
     return __result;
   }
   else {
-    return _STLP_NEW _Pthread_alloc_per_thread_state;
+    return new _Pthread_alloc_per_thread_state;
   }
 }
 
@@ -880,7 +911,7 @@ _Pthread_alloc_per_thread_state* _Pthread_alloc_impl::_S_get_per_thread_state() 
   _M_lock __lock_instance;  // Need to acquire lock here.
   if (!_S_key_initialized) {
     if (pthread_key_create(&_S_key, _S_destructor)) {
-      __THROW_BAD_ALLOC;  // failed
+      _STLP_THROW_BAD_ALLOC;  // failed
     }
     _S_key_initialized = true;
   }
@@ -889,7 +920,7 @@ _Pthread_alloc_per_thread_state* _Pthread_alloc_impl::_S_get_per_thread_state() 
   __ret_code = pthread_setspecific(_S_key, __result);
   if (__ret_code) {
     if (__ret_code == ENOMEM) {
-      __THROW_BAD_ALLOC;
+      _STLP_THROW_BAD_ALLOC;
     } else {
   // EINVAL
       _STLP_ABORT();
@@ -923,7 +954,7 @@ char *_Pthread_alloc_impl::_S_chunk_alloc(size_t __p_size, size_t &__nobjs, _Pth
       _S_start_free += __total_bytes;
       return __result;
     } else {
-      size_t __bytes_to_get = 2 * __total_bytes + _S_round_up(_S_heap_size >> 4);
+      size_t __bytes_to_get = 2 * __total_bytes + _S_round_up(_S_heap_size);
       // Try to make use of the left-over piece.
       if (__bytes_left > 0) {
         __obj * volatile * __my_free_list = __a->__free_list + _S_freelist_index(__bytes_left);
@@ -946,7 +977,7 @@ char *_Pthread_alloc_impl::_S_chunk_alloc(size_t __p_size, size_t &__nobjs, _Pth
 #  else  /* !SGI_SOURCE */
       _S_start_free = (char *)__malloc_alloc::allocate(__bytes_to_get);
 #  endif
-      _S_heap_size += __bytes_to_get;
+      _S_heap_size += __bytes_to_get >> 4;
       _S_end_free = _S_start_free + __bytes_to_get;
     }
   }

@@ -67,27 +67,23 @@ using _STLP_VENDOR_EXCEPT_STD::exception;
 
 class _STLP_CLASS_DECLSPEC __Named_exception : public _STLP_EXCEPTION_BASE {
 public:
-  __Named_exception(const string& __str)
-#    ifndef _STLP_USE_NO_IOSTREAMS
-    ;
+  __Named_exception(const string& __str);
+  __Named_exception(const __Named_exception&);
+  __Named_exception& operator = (const __Named_exception&);
+
   const char* what() const _STLP_NOTHROW_INHERENTLY;
   ~__Named_exception() _STLP_NOTHROW_INHERENTLY;
-#    else
-  {
-#      if !defined (_STLP_USE_SAFE_STRING_FUNCTIONS)
-    strncpy(_M_name, _STLP_PRIV __get_c_string(__str), _S_bufsize);
-    _M_name[_S_bufsize - 1] = '\0';
-#      else
-    strncpy_s(_STLP_ARRAY_AND_SIZE(_M_name), _STLP_PRIV __get_c_string(__str), _TRUNCATE);
-#      endif
-  }
-  const char* what() const _STLP_NOTHROW_INHERENTLY { return _M_name; }
-#    endif
 
 private:
   enum { _S_bufsize = 256 };
-  char _M_name[_S_bufsize];
+  char _M_static_name[_S_bufsize];
+  char *_M_name;
 };
+
+#    if defined (_STLP_USE_NO_IOSTREAMS) && !defined (__BUILDING_STLPORT)
+       // if not linking to the lib, expose implementation of members here
+#      include <stl/_stdexcept_base.c>
+#    endif
 
 #    if defined (_STLP_DO_WARNING_POP)
 #      pragma warning (pop)

@@ -42,7 +42,11 @@
 #  include <stl/_iterator_base.h>
 #endif
 
-#ifndef _STLP_MOVE_CONSTRUCT_FWK_H
+#ifndef _STLP_TYPE_TRAITS_H
+#  include <stl/type_traits.h>
+#endif
+
+#if !defined (_STLP_MOVE_CONSTRUCT_FWK_H) && !defined (_STLP_NO_MOVE_SEMANTIC)
 #  include <stl/_move_construct_fwk.h>
 #endif
 
@@ -57,9 +61,6 @@ inline void __destroy_aux(_Tp*, const __true_type& /*_Trivial_destructor*/) {}
 
 template <class _Tp>
 inline void _Destroy(_Tp* __pointer) {
-#if defined (_STLP_MSVC) && (_STLP_MSVC <= 1010)
-  __pointer;
-#endif
   typedef typename __type_traits<_Tp>::has_trivial_destructor _Trivial_destructor;
   __destroy_aux(__pointer, _Trivial_destructor());
 #if defined (_STLP_DEBUG_UNINITIALIZED)
@@ -69,10 +70,14 @@ inline void _Destroy(_Tp* __pointer) {
 
 template <class _Tp>
 inline void _Destroy_Moved(_Tp* __pointer) {
+#if !defined (_STLP_NO_MOVE_SEMANTIC)
   typedef typename __move_traits<_Tp>::complete _Trivial_destructor;
   __destroy_aux(__pointer, _Trivial_destructor());
-#if defined (_STLP_DEBUG_UNINITIALIZED)
+#  if defined (_STLP_DEBUG_UNINITIALIZED)
   memset((char*)__pointer, _STLP_SHRED_BYTE, sizeof(_Tp));
+#  endif
+#else
+  _Destroy(__pointer);
 #endif
 }
 
@@ -81,17 +86,21 @@ inline void _Destroy_Moved(_Tp* __pointer) {
 #  undef new
 #endif
 
-#if defined (_STLP_DEF_CONST_PLCT_NEW_BUG)
 template <class _T1>
 inline void _Construct_aux (_T1* __p, const __false_type&) {
-  _STLP_PLACEMENT_NEW (__p) _T1();
+  new(__p) _T1();
 }
 
 template <class _T1>
 inline void _Construct_aux (_T1* __p, const __true_type&) {
-  _STLP_PLACEMENT_NEW (__p) _T1(0);
-}
+#if defined (_STLP_DEF_CONST_PLCT_NEW_BUG)
+  *__p = _T1(0);
+#else
+  // We use binary copying for POD types since it results
+  // in a considerably better code at least on MSVC.
+  *__p = _T1();
 #endif /* _STLP_DEF_CONST_PLCT_NEW_BUG */
+}
 
 template <class _T1>
 inline void _Construct(_T1* __p) {
@@ -99,10 +108,22 @@ inline void _Construct(_T1* __p) {
   memset((char*)__p, _STLP_SHRED_BYTE, sizeof(_T1));
 #endif
 #if defined (_STLP_DEF_CONST_PLCT_NEW_BUG)
-  _Construct_aux (__p, _HasDefaultZeroValue(__p)._Answer() );
+  _Construct_aux (__p, _HasDefaultZeroValue(__p)._Answer());
 #else
-  _STLP_PLACEMENT_NEW (__p) _T1();
+  _Construct_aux (__p, _Is_POD(__p)._Answer());
 #endif /* _STLP_DEF_CONST_PLCT_NEW_BUG */
+}
+
+template <class _Tp>
+inline void _Copy_Construct_aux(_Tp* __p, const _Tp& __val, const __false_type&) {
+  new(__p) _Tp(__val);
+}
+
+template <class _Tp>
+inline void _Copy_Construct_aux(_Tp* __p, const _Tp& __val, const __true_type&) {
+  // We use binary copying for POD types since it results
+  // in a considerably better code at least on MSVC.
+  *__p = __val;
 }
 
 template <class _Tp>
@@ -110,7 +131,19 @@ inline void _Copy_Construct(_Tp* __p, const _Tp& __val) {
 #if defined (_STLP_DEBUG_UNINITIALIZED)
   memset((char*)__p, _STLP_SHRED_BYTE, sizeof(_Tp));
 #endif
-  _STLP_PLACEMENT_NEW (__p) _Tp(__val);
+  _Copy_Construct_aux(__p, __val, _Is_POD(__p)._Answer());
+}
+
+template <class _T1, class _T2>
+inline void _Param_Construct_aux(_T1* __p, const _T2& __val, const __false_type&) {
+  new(__p) _T1(__val);
+}
+
+template <class _T1, class _T2>
+inline void _Param_Construct_aux(_T1* __p, const _T2& __val, const __true_type&) {
+  // We use binary copying for POD types since it results
+  // in a considerably better code at least on MSVC.
+  *__p = _T1(__val);
 }
 
 template <class _T1, class _T2>
@@ -118,17 +151,23 @@ inline void _Param_Construct(_T1* __p, const _T2& __val) {
 #if defined (_STLP_DEBUG_UNINITIALIZED)
   memset((char*)__p, _STLP_SHRED_BYTE, sizeof(_T1));
 #endif
-  _STLP_PLACEMENT_NEW (__p) _T1(__val);
+  _Param_Construct_aux(__p, __val, _Is_POD(__p)._Answer());
 }
 
 template <class _T1, class _T2>
 inline void _Move_Construct_Aux(_T1* __p, _T2& __val, const __false_type& /*_IsPOD*/) {
-  _STLP_PLACEMENT_NEW (__p) _T1(_STLP_PRIV _AsMoveSource(__val));
+#if !defined (_STLP_NO_MOVE_SEMANTIC)
+  new(__p) _T1(_STLP_PRIV _AsMoveSource(__val));
+#else
+  _Param_Construct(__p, __val);
+#endif
 }
 
 template <class _T1, class _T2>
 inline void _Move_Construct_Aux(_T1* __p, _T2& __val, const __true_type& /*_IsPOD*/) {
-  _STLP_PLACEMENT_NEW (__p) _T1(__val);
+  // We use binary copying for POD types since it results
+  // in a considerably better code at least on MSVC.
+  *__p = _T1(__val);
 }
 
 template <class _T1, class _T2>
@@ -187,17 +226,22 @@ inline void _Destroy_Range(wchar_t*, wchar_t*) {}
 inline void _Destroy_Range(const wchar_t*, const wchar_t*) {}
 #endif
 
+#if !defined (_STLP_NO_MOVE_SEMANTIC)
 template <class _ForwardIterator, class _Tp>
 inline void
 __destroy_mv_srcs(_ForwardIterator __first, _ForwardIterator __last, _Tp *__ptr) {
   typedef typename __move_traits<_Tp>::complete _CompleteMove;
   __destroy_range_aux(__first, __last, __ptr, _CompleteMove());
 }
+#endif
 
 template <class _ForwardIterator>
-inline void _Destroy_Moved_Range(_ForwardIterator __first, _ForwardIterator __last) {
-  __destroy_mv_srcs(__first, __last, _STLP_VALUE_TYPE(__first, _ForwardIterator));
-}
+inline void _Destroy_Moved_Range(_ForwardIterator __first, _ForwardIterator __last)
+#if !defined (_STLP_NO_MOVE_SEMANTIC)
+{ __destroy_mv_srcs(__first, __last, _STLP_VALUE_TYPE(__first, _ForwardIterator)); }
+#else
+{ _Destroy_Range(__first, __last); }
+#endif
 
 #if defined (_STLP_DEF_CONST_DEF_PARAM_BUG)
 // Those adaptors are here to fix common compiler bug regarding builtins:

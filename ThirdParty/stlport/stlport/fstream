@@ -22,24 +22,41 @@
 // streambufs and streams whose sources or destinations are files.
 
 #ifndef _STLP_FSTREAM
-#define _STLP_FSTREAM
 
-# ifndef _STLP_OUTERMOST_HEADER_ID
+#ifndef _STLP_OUTERMOST_HEADER_ID
 #  define _STLP_OUTERMOST_HEADER_ID 0x1025
 #  include <stl/_prolog.h>
-# endif
-
-#ifdef _STLP_PRAGMA_ONCE
-# pragma once
+#  define _STLP_FSTREAM
+#  if defined (__DMC__) && defined (_DLL)
+#    define _STLP_CLASS_IMPORT_DECLSPEC __declspec(dllimport)
+#  endif
 #endif
 
-# include <stl/_ioserr.h>
-# include <stl/_fstream.h>
+#if (_STLP_OUTERMOST_HEADER_ID == 0x1025) && \
+   !(defined (_STLP_NO_IOSTREAMS) && defined (_STLP_IMPORT_VENDOR_STD))
+#  include <stl/_ioserr.h>
 
-# if (_STLP_OUTERMOST_HEADER_ID == 0x1025)
+#  ifndef _STLP_INTERNAL_FSTREAM_H
+#    include <stl/_fstream.h>
+#  endif
+#endif
+
+#if (_STLP_OUTERMOST_HEADER_ID != 0x1025) || defined (_STLP_IMPORT_VENDOR_STD)
+#  if defined (_STLP_HAS_INCLUDE_NEXT)
+#    include_next <fstream>
+#  else
+#    include _STLP_NATIVE_HEADER(fstream)
+#  endif
+#endif
+
+#if (_STLP_OUTERMOST_HEADER_ID == 0x1025)
 #  include <stl/_epilog.h>
 #  undef _STLP_OUTERMOST_HEADER_ID
-# endif
+#  if defined (__DMC__) && defined (_DLL)
+#    undef _STLP_CLASS_IMPORT_DECLSPEC
+#    define _STLP_CLASS_IMPORT_DECLSPEC
+#  endif
+#endif
 
 #endif /* _STLP_FSTREAM */
 

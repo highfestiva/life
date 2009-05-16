@@ -1,10 +1,14 @@
 # build/Makefiles/nmake/evc8.mak
 
 # Note: _WIN32_WCE is defined as 420 for CE 4.2 but as 0x500 for CE 5.0!
-DEFS_COMMON = $(DEFS_COMMON) /D _WIN32_WCE=0x$(CEVERSION) /D UNDER_CE=1 /D "UNICODE"
+DEFS_COMMON = $(DEFS_COMMON) /D _WIN32_WCE=0x$(CEVERSION) /D UNDER_CE=1 /D "UNICODE" 
 LDFLAGS_COMMON = $(LDFLAGS_COMMON) coredll.lib corelibc.lib /nodefaultlib:LIBC.lib /nodefaultlib:OLDNAMES.lib 
+!if "$(PLATFORM)" == "POCKET PC 2003"
+LDFLAGS_COMMON = $(LDFLAGS_COMMON) /subsystem:windowsce,4.20
+!else
 # TODO: the subsystem settings will have to be adjusted for CE5.01...
 LDFLAGS_COMMON = $(LDFLAGS_COMMON) /subsystem:windowsce,5.00
+!endif
 
 !if "$(TARGET_PROC)" == ""
 !error No target processor configured! Please rerun configure.bat!
@@ -32,6 +36,11 @@ OPT_COMMON = $(OPT_COMMON) /FC
 !if "$(TARGET_PROC)" == "arm"
 DEFS_COMMON = $(DEFS_COMMON) /D "ARM" /D "_ARM_" /D "$(TARGET_PROC_SUBTYPE)"
 OPT_COMMON = $(OPT_COMMON)
+!if "$(PLATFORM)" == "POCKET PC 2003"
+DEFS_COMMON = $(DEFS_COMMON) /DWIN32_PLATFORM_PSPC
+# Pocket PC 2003 doesn't support THUMB.
+LDFLAGS_COMMON = $(LDFLAGS_COMMON) ccrtrtti.lib secchk.lib /machine:ARM
+!endif
 !endif
 
 # x86 specific settings
@@ -52,6 +61,12 @@ OPT_COMMON = $(OPT_COMMON) /QMmips2
 !endif
 !endif
 
+# SH4 specific settings
+!if "$(TARGET_PROC)" == "sh4"
+DEFS_COMMON = $(DEFS_COMMON) /D "SHx" /D "_SHX_" /D "SH4"
+OPT_COMMON = $(OPT_COMMON)
+!endif
+
 
 # Note: /GX for MSC<14 has been replaced with /EHsc
 CFLAGS_COMMON = /nologo /TC /W4 /GF /GR /EHsc
@@ -70,7 +85,7 @@ CXXFLAGS_STLDBG = $(CXXFLAGS_COMMON) $(OPT_STLDBG)
 CXXFLAGS_STATIC_STLDBG = $(CXXFLAGS_COMMON) $(OPT_STATIC_STLDBG)
 
 # setup proper runtime (static/dynamic, debug/release)
-!ifdef STLP_BUILD_FORCE_STATIC_RUNTIME
+!ifdef WITH_STATIC_RTL
 OPT_DBG = $(OPT_DBG) /MTd
 OPT_STLDBG = $(OPT_STLDBG) /MTd
 OPT_REL = $(OPT_REL) /MT

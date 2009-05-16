@@ -155,16 +155,18 @@ public:
   typedef _STLP_alloc_proxy<_Slist_node_base, _Node, _M_node_allocator_type> _AllocProxy;
 
   _STLP_FORCE_ALLOCATORS(_Tp, _Alloc)
-  typedef typename _Alloc_traits<_Tp,_Alloc>::allocator_type allocator_type;
+  typedef _Alloc allocator_type;
 
   _Slist_base(const allocator_type& __a) :
-    _M_head(_STLP_CONVERT_ALLOCATOR(__a, _Node), _Slist_node_base() ) {
-    _M_head._M_data._M_next = 0;
-  }
+    _M_head(_STLP_CONVERT_ALLOCATOR(__a, _Node), _Slist_node_base() )
+  { _M_head._M_data._M_next = 0; }
+
+#if !defined (_STLP_NO_MOVE_SEMANTIC)
   _Slist_base(__move_source<_Self> src) :
-    _M_head(__move_source<_AllocProxy>(src.get()._M_head)) {
-      src.get()._M_head._M_data._M_next = 0;
-  }
+    _M_head(__move_source<_AllocProxy>(src.get()._M_head))
+  { src.get()._M_head._M_data._M_next = 0; }
+#endif
+
   ~_Slist_base() { _M_erase_after(&_M_head._M_data, 0); }
 
 protected:
@@ -192,7 +194,7 @@ public:
 _STLP_MOVE_TO_STD_NAMESPACE
 #endif
 
-template <class _Tp, _STLP_DEFAULT_ALLOCATOR_SELECT(_Tp) >
+template <class _Tp, _STLP_DFL_TMPL_PARAM(_Alloc, allocator<_Tp>) >
 class slist;
 
 #if !defined (slist)
@@ -328,8 +330,10 @@ public:
     : _STLP_PRIV _Slist_base<_Tp,_Alloc>(__x.get_allocator())
     { _M_insert_after_range(&this->_M_head._M_data, __x.begin(), __x.end()); }
 
+#if !defined (_STLP_NO_MOVE_SEMANTIC)
   slist(__move_source<_Self> src)
     : _STLP_PRIV _Slist_base<_Tp, _Alloc>(__move_source<_Base>(src.get())) {}
+#endif
 
   _Self& operator= (const _Self& __x);
 
@@ -423,9 +427,11 @@ public:
 
   bool empty() const { return this->_M_head._M_data._M_next == 0; }
 
-  void swap(_Self& __x) {
-    this->_M_head.swap(__x._M_head);
-  }
+  void swap(_Self& __x)
+  { this->_M_head.swap(__x._M_head); }
+#if defined (_STLP_USE_PARTIAL_SPEC_WORKAROUND) && !defined (_STLP_FUNCTION_TMPL_PARTIAL_ORDER)
+  void _M_swap_workaround(_Self& __x) { swap(__x); }
+#endif
 
 public:
   reference front()             { return *begin(); }
@@ -855,11 +861,13 @@ operator == (const slist<_Tp,_Alloc>& _SL1, const slist<_Tp,_Alloc>& _SL2) {
 #undef _STLP_EQUAL_OPERATOR_SPECIALIZED
 
 #if defined (_STLP_CLASS_PARTIAL_SPECIALIZATION)
+#  if !defined (_STLP_NO_MOVE_SEMANTIC)
 template <class _Tp, class _Alloc>
 struct __move_traits<slist<_Tp, _Alloc> > {
-  typedef __stlp_movable implemented;
+  typedef __true_type implemented;
   typedef typename __move_traits<_Alloc>::complete complete;
 };
+#  endif
 
 // Specialization of insert_iterator so that insertions will be constant
 // time rather than linear time.

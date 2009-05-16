@@ -40,8 +40,8 @@ _STLP_BEGIN_NAMESPACE
 _STLP_CREATE_HASH_ITERATOR_TRAITS(HashSetTraitsT, Const_traits)
 
 template <class _Value, _STLP_DFL_TMPL_PARAM(_HashFcn,hash<_Value>),
-          _STLP_DFL_TMPL_PARAM(_EqualKey,equal_to<_Value>),
-          _STLP_DEFAULT_ALLOCATOR_SELECT(_Value) >
+          _STLP_DFL_TMPL_PARAM(_EqualKey, equal_to<_Value>),
+          _STLP_DFL_TMPL_PARAM(_Alloc, allocator<_Value>) >
 class hash_set
 #if defined (_STLP_USE_PARTIAL_SPEC_WORKAROUND)
                : public __stlport_class<hash_set<_Value, _HashFcn, _EqualKey, _Alloc> >
@@ -81,7 +81,7 @@ private:
 
 public:
   hash_set()
-    : _M_ht(100, hasher(), key_equal(), allocator_type()) {}
+    : _M_ht(0, hasher(), key_equal(), allocator_type()) {}
   explicit hash_set(size_type __n)
     : _M_ht(__n, hasher(), key_equal(), allocator_type()) {}
   hash_set(size_type __n, const hasher& __hf)
@@ -97,13 +97,15 @@ public:
 #endif
     : _M_ht(__n, __hf, __eql, __a) {}
 
+#if !defined (_STLP_NO_MOVE_SEMANTIC)
   hash_set(__move_source<_Self> src)
     : _M_ht(__move_source<_Ht>(src.get()._M_ht)) {}
+#endif
 
 #if defined (_STLP_MEMBER_TEMPLATES)
   template <class _InputIterator>
   hash_set(_InputIterator __f, _InputIterator __l)
-    : _M_ht(100, hasher(), key_equal(), allocator_type())
+    : _M_ht(0, hasher(), key_equal(), allocator_type())
     { _M_ht.insert_unique(__f, __l); }
   template <class _InputIterator>
   hash_set(_InputIterator __f, _InputIterator __l, size_type __n)
@@ -129,7 +131,7 @@ public:
 #  endif
 #else
   hash_set(const value_type* __f, const value_type* __l)
-    : _M_ht(100, hasher(), key_equal(), allocator_type())
+    : _M_ht(0, hasher(), key_equal(), allocator_type())
     { _M_ht.insert_unique(__f, __l); }
   hash_set(const value_type* __f, const value_type* __l, size_type __n)
     : _M_ht(__n, hasher(), key_equal(), allocator_type())
@@ -145,7 +147,7 @@ public:
     { _M_ht.insert_unique(__f, __l); }
 
   hash_set(const_iterator __f, const_iterator __l)
-    : _M_ht(100, hasher(), key_equal(), allocator_type())
+    : _M_ht(0, hasher(), key_equal(), allocator_type())
     { _M_ht.insert_unique(__f, __l); }
   hash_set(const_iterator __f, const_iterator __l, size_type __n)
     : _M_ht(__n, hasher(), key_equal(), allocator_type())
@@ -166,6 +168,9 @@ public:
   size_type max_size() const { return _M_ht.max_size(); }
   bool empty() const { return _M_ht.empty(); }
   void swap(_Self& __hs) { _M_ht.swap(__hs._M_ht); }
+#if defined (_STLP_USE_PARTIAL_SPEC_WORKAROUND) && !defined (_STLP_FUNCTION_TMPL_PARTIAL_ORDER)
+  void _M_swap_workaround(_Self& __x) { swap(__x); }
+#endif
 
   iterator begin() { return _M_ht.begin(); }
   iterator end() { return _M_ht.end(); }
@@ -221,8 +226,8 @@ public:
 _STLP_CREATE_HASH_ITERATOR_TRAITS(HashMultisetTraitsT, Const_traits)
 
 template <class _Value, _STLP_DFL_TMPL_PARAM(_HashFcn,hash<_Value>),
-          _STLP_DFL_TMPL_PARAM(_EqualKey,equal_to<_Value>),
-          _STLP_DEFAULT_ALLOCATOR_SELECT(_Value) >
+          _STLP_DFL_TMPL_PARAM(_EqualKey, equal_to<_Value>),
+          _STLP_DFL_TMPL_PARAM(_Alloc, allocator<_Value>) >
 class hash_multiset
 #if defined (_STLP_USE_PARTIAL_SPEC_WORKAROUND)
                     : public __stlport_class<hash_multiset<_Value, _HashFcn, _EqualKey, _Alloc> >
@@ -262,7 +267,7 @@ private:
 
 public:
   hash_multiset()
-    : _M_ht(100, hasher(), key_equal(), allocator_type()) {}
+    : _M_ht(0, hasher(), key_equal(), allocator_type()) {}
   explicit hash_multiset(size_type __n)
     : _M_ht(__n, hasher(), key_equal(), allocator_type()) {}
   hash_multiset(size_type __n, const hasher& __hf)
@@ -273,13 +278,15 @@ public:
                 const allocator_type& __a)
     : _M_ht(__n, __hf, __eql, __a) {}
 
+#if !defined (_STLP_NO_MOVE_SEMANTIC)
   hash_multiset(__move_source<_Self> src)
     : _M_ht(__move_source<_Ht>(src.get()._M_ht)) {}
+#endif
 
 #if defined (_STLP_MEMBER_TEMPLATES)
   template <class _InputIterator>
   hash_multiset(_InputIterator __f, _InputIterator __l)
-    : _M_ht(100, hasher(), key_equal(), allocator_type())
+    : _M_ht(0, hasher(), key_equal(), allocator_type())
     { _M_ht.insert_equal(__f, __l); }
   template <class _InputIterator>
   hash_multiset(_InputIterator __f, _InputIterator __l, size_type __n)
@@ -306,7 +313,7 @@ public:
 #  endif
 #else
   hash_multiset(const value_type* __f, const value_type* __l)
-    : _M_ht(100, hasher(), key_equal(), allocator_type())
+    : _M_ht(0, hasher(), key_equal(), allocator_type())
     { _M_ht.insert_equal(__f, __l); }
   hash_multiset(const value_type* __f, const value_type* __l, size_type __n)
     : _M_ht(__n, hasher(), key_equal(), allocator_type())
@@ -322,7 +329,7 @@ public:
     { _M_ht.insert_equal(__f, __l); }
 
   hash_multiset(const_iterator __f, const_iterator __l)
-    : _M_ht(100, hasher(), key_equal(), allocator_type())
+    : _M_ht(0, hasher(), key_equal(), allocator_type())
     { _M_ht.insert_equal(__f, __l); }
   hash_multiset(const_iterator __f, const_iterator __l, size_type __n)
     : _M_ht(__n, hasher(), key_equal(), allocator_type())
@@ -343,6 +350,9 @@ public:
   size_type max_size() const { return _M_ht.max_size(); }
   bool empty() const { return _M_ht.empty(); }
   void swap(_Self& hs) { _M_ht.swap(hs._M_ht); }
+#if defined (_STLP_USE_PARTIAL_SPEC_WORKAROUND) && !defined (_STLP_FUNCTION_TMPL_PARTIAL_ORDER)
+  void _M_swap_workaround(_Self& __x) { swap(__x); }
+#endif
 
   iterator begin() { return _M_ht.begin(); }
   iterator end() { return _M_ht.end(); }
@@ -410,6 +420,7 @@ public:
 // and hash_multiset.
 
 #if defined (_STLP_CLASS_PARTIAL_SPECIALIZATION)
+#  if !defined (_STLP_NO_MOVE_SEMANTIC)
 template <class _Value, class _HashFcn, class _EqualKey, class _Alloc>
 struct __move_traits<hash_set<_Value, _HashFcn, _EqualKey, _Alloc> > :
   _STLP_PRIV __move_traits_aux<typename hash_set<_Value, _HashFcn, _EqualKey, _Alloc>::_Ht>
@@ -419,6 +430,7 @@ template <class _Value, class _HashFcn, class _EqualKey, class _Alloc>
 struct __move_traits<hash_multiset<_Value, _HashFcn, _EqualKey, _Alloc> > :
   _STLP_PRIV __move_traits_aux<typename hash_multiset<_Value, _HashFcn, _EqualKey, _Alloc>::_Ht>
 {};
+#  endif
 
 template <class _Value, class _HashFcn, class _EqualKey, class _Alloc>
 class insert_iterator<hash_set<_Value, _HashFcn, _EqualKey, _Alloc> > {

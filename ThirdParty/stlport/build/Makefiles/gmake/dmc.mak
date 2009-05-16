@@ -1,7 +1,21 @@
-# Time-stamp: <03/11/30 11:46:14 ptr>
-# $Id: dmc.mak 2484 2006-06-24 20:30:59Z dums $
+# Time-stamp: <07/05/31 01:03:50 ptr>
+#
+# Copyright (c) 1997-1999, 2002, 2003, 2005-2007
+# Petr Ovtchenkov
+#
+# Copyright (c) 2006, 2007
+# Francois Dumont
+#
+# Portion Copyright (c) 1999-2001
+# Parallel Graphics Ltd.
+#
+# Licensed under the Academic Free License version 3.0
+#
 
-#INCLUDES :=
+# For DMC Cygwin/MSys are only build environment, they do not represent
+# the targetted OS so per default we keep all generated files in STLport
+# folder.
+BASE_INSTALL_DIR ?= ${STLPORT_DIR}
 
 ALL_TAGS = all-static all-shared
 ifdef LIBNAME
@@ -9,10 +23,7 @@ INSTALL_TAGS = install-static install-shared
 endif
 
 CXX := dmc
-# For the C compiler we force cpp build otherwise wchar_t is not
-# supported
 CC := dmc
-RC := rcc
 
 DEFS ?=
 OPT ?=
@@ -22,29 +33,44 @@ CXXFLAGS = -Ae -C -p -3 -w12
 
 DEFS += -DSTRICT
 
-ifdef STLP_BUILD_FORCE_DYNAMIC_RUNTIME
+ifdef WITH_DYNAMIC_RTL
 release-static : OPT += -ND
 dbg-static : OPT += -ND
 stldbg-static : OPT += -ND
 endif
 
-ifndef STLP_BUILD_FORCE_STATIC_RUNTIME
+ifndef WITH_STATIC_RTL
 release-shared : OPT += -ND
 dbg-shared : OPT += -ND
 stldbg-shared : OPT += -ND
 endif
 
-ifndef STLP_BUILD_NO_RTTI
+ifdef WITHOUT_THREAD
+DEFS += -D_STLP_NO_THREADS
+endif
+
+ifndef WITHOUT_RTTI
 OPT += -Ar
 endif
 
+WINVER ?= 0x0501
+DEFS += -DWINVER=$(WINVER)
+
 OUTPUT_OPTION = -o$@
-LINK_OUTPUT_OPTION = $(subst /,\,$@)
+LINK_OUTPUT_OPTION = $@
 CPPFLAGS = $(DEFS) $(OPT) $(INCLUDES) 
+
+ifdef EXTRA_CXXFLAGS
+CXXFLAGS += $(EXTRA_CXXFLAGS)
+endif
+
+ifdef EXTRA_CFLAGS
+CFLAGS += $(EXTRA_CFLAGS)
+endif
 
 CDEPFLAGS = -E -M
 CCDEPFLAGS = -E -M
-RCFLAGS = -32 -I${STLPORT_INCLUDE_DIR} -DCOMP=dmc
+RCFLAGS = --include-dir=${STLPORT_INCLUDE_DIR} -DCOMP=dmc
 
 release-shared : RCFLAGS += -DBUILD=r -DBUILD_INFOS="-o"
 dbg-shared : RCFLAGS += -DBUILD=g -DBUILD_INFOS="-gl -D_DEBUG"
@@ -52,13 +78,15 @@ stldbg-shared : RCFLAGS += -DBUILD=stlg -DBUILD_INFOS="-gl -D_STLP_DEBUG"
 RC_OUTPUT_OPTION = $(OUTPUT_OPTION)
 
 COMPILE.rc = ${RC} ${RCFLAGS}
-LINK.cc = dm_link $(LDFLAGS)
+LINK.cc = link $(LDFLAGS)
 
-LDLIBS += user32.lib kernel32.lib
+LDLIBS += user32.lib kernel32.lib snn.lib
 
 # STLport DEBUG mode specific defines
 dbg-static : DEFS += -D_DEBUG
 dbg-shared : DEFS += -D_DEBUG
+stldbg-static : DEFS += -D_DEBUG
+stldbg-shared : DEFS += -D_DEBUG
 dbg-static-dep : DEFS += -D_DEBUG
 dbg-shared-dep : DEFS +=  -D_DEBUG
 stldbg-static :	    DEFS += -D_STLP_DEBUG
@@ -74,27 +102,42 @@ dbg-shared : OPT += -gl
 stldbg-static : OPT += -gl
 stldbg-shared : OPT += -gl
 
+ifndef WITHOUT_THREAD
 release-static : OPT += -D_MT
 dbg-static : OPT += -D_MT
 stldbg-static : OPT += -D_MT
+endif
 
 release-static : AR += -p128
 dbg-static : AR += -p512
 stldbg-static : AR += -p512
 
+ifndef LIBNAME
+ifdef WITH_DYNAMIC_RTL
+release-static: DEFS += -D_STLP_USE_STATIC_LIB
+dbg-static:  DEFS += -D_STLP_USE_STATIC_LIB
+stldbg-static:  DEFS += -D_STLP_USE_STATIC_LIB
+endif
+ifdef WITH_STATIC_RTL
+release-shared: DEFS += -D_STLP_USE_DYNAMIC_LIB
+dbg-shared:  DEFS += -D_STLP_USE_DYNAMIC_LIB
+stldbg-shared:  DEFS += -D_STLP_USE_DYNAMIC_LIB
+endif
+endif
+
 # map output option (move map files to output dir)
 
 ifdef LIBNAME
-release-shared: MAP_OUTPUT_OPTION = $(subst /,\,$(OUTPUT_DIR))\$(SO_NAME_BASE).map
-dbg-shared: MAP_OUTPUT_OPTION = $(subst /,\,$(OUTPUT_DIR_DBG))\$(SO_NAME_DBG_BASE).map
-stldbg-shared: MAP_OUTPUT_OPTION = $(subst /,\,$(OUTPUT_DIR_STLDBG))\$(SO_NAME_STLDBG_BASE).map
+release-shared: MAP_OUTPUT_OPTION = $(OUTPUT_DIR)/$(SO_NAME_BASE).map
+dbg-shared: MAP_OUTPUT_OPTION = $(OUTPUT_DIR_DBG)/$(SO_NAME_DBG_BASE).map
+stldbg-shared: MAP_OUTPUT_OPTION = $(OUTPUT_DIR_STLDBG)/$(SO_NAME_STLDBG_BASE).map
 else
-release-shared: MAP_OUTPUT_OPTION = $(subst /,\,$(OUTPUT_DIR))\$(PRGNAME).map
-release-static: MAP_OUTPUT_OPTION = $(subst /,\,$(OUTPUT_DIR))\$(PRGNAME).map
-dbg-shared: MAP_OUTPUT_OPTION = $(subst /,\,$(OUTPUT_DIR_DBG))\$(PRGNAME).map
-dbg-static: MAP_OUTPUT_OPTION = $(subst /,\,$(OUTPUT_DIR_DBG))\$(PRGNAME).map
-stldbg-shared: MAP_OUTPUT_OPTION = $(subst /,\,$(OUTPUT_DIR_STLDBG))\$(PRGNAME).map
-stldbg-static: MAP_OUTPUT_OPTION = $(subst /,\,$(OUTPUT_DIR_STLDBG))\$(PRGNAME).map
+release-shared: MAP_OUTPUT_OPTION = $(OUTPUT_DIR)/$(PRGNAME).map
+release-static: MAP_OUTPUT_OPTION = $(OUTPUT_DIR)/$(PRGNAME).map
+dbg-shared: MAP_OUTPUT_OPTION = $(OUTPUT_DIR_DBG)/$(PRGNAME).map
+dbg-static: MAP_OUTPUT_OPTION = $(OUTPUT_DIR_DBG)/$(PRGNAME).map
+stldbg-shared: MAP_OUTPUT_OPTION = $(OUTPUT_DIR_STLDBG)/$(PRGNAME).map
+stldbg-static: MAP_OUTPUT_OPTION = $(OUTPUT_DIR_STLDBG)/$(PRGNAME).map
 endif
 
 # dependency output parser (dependencies collector)

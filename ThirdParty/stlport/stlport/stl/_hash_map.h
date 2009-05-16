@@ -41,7 +41,7 @@ _STLP_CREATE_HASH_ITERATOR_TRAITS(HashMapTraitsT, traits)
 
 template <class _Key, class _Tp, _STLP_DFL_TMPL_PARAM(_HashFcn,hash<_Key>),
           _STLP_DFL_TMPL_PARAM(_EqualKey,equal_to<_Key>),
-          _STLP_DEFAULT_PAIR_ALLOCATOR_SELECT(const _Key, _Tp) >
+          _STLP_DEFAULT_PAIR_ALLOCATOR_SELECT(_STLP_CONST _Key, _Tp) >
 class hash_map
 #if defined (_STLP_USE_PARTIAL_SPEC_WORKAROUND)
                : public __stlport_class<hash_map<_Key, _Tp, _HashFcn, _EqualKey, _Alloc> >
@@ -53,15 +53,7 @@ public:
   typedef _Key key_type;
   typedef _Tp data_type;
   typedef _Tp mapped_type;
-#if !defined (__DMC__)
-  typedef pair<const key_type, data_type> value_type;
-#else
-  /* DMC goes too far in template instanciation and tries to fully instanciate
-   * slist<pair<const int, string> > for instance. The generation of assignment
-   * operator fails of course so we are force to use mutable key for this compiler.
-   */
-  typedef pair<key_type, data_type> value_type;
-#endif
+  typedef pair<_STLP_CONST key_type, data_type> value_type;
 private:
   //Specific iterator traits creation
   typedef _STLP_PRIV _HashMapTraitsT<value_type> _HashMapTraits;
@@ -93,7 +85,7 @@ private:
   _Ht _M_ht;
   _STLP_KEY_TYPE_FOR_CONT_EXT(key_type)
 public:
-  hash_map() : _M_ht(100, hasher(), key_equal(), allocator_type()) {}
+  hash_map() : _M_ht(0, hasher(), key_equal(), allocator_type()) {}
   explicit hash_map(size_type __n)
     : _M_ht(__n, hasher(), key_equal(), allocator_type()) {}
   hash_map(size_type __n, const hasher& __hf)
@@ -102,14 +94,16 @@ public:
            const allocator_type& __a = allocator_type())
     : _M_ht(__n, __hf, __eql, __a) {}
 
+#if !defined (_STLP_NO_MOVE_SEMANTIC)
   hash_map(__move_source<_Self> src)
     : _M_ht(__move_source<_Ht>(src.get()._M_ht)) {
   }
+#endif
 
 #ifdef _STLP_MEMBER_TEMPLATES
   template <class _InputIterator>
   hash_map(_InputIterator __f, _InputIterator __l)
-    : _M_ht(100, hasher(), key_equal(), allocator_type())
+    : _M_ht(0, hasher(), key_equal(), allocator_type())
     { _M_ht.insert_unique(__f, __l); }
   template <class _InputIterator>
   hash_map(_InputIterator __f, _InputIterator __l, size_type __n)
@@ -136,7 +130,7 @@ public:
 
 #else
   hash_map(const value_type* __f, const value_type* __l)
-    : _M_ht(100, hasher(), key_equal(), allocator_type())
+    : _M_ht(0, hasher(), key_equal(), allocator_type())
     { _M_ht.insert_unique(__f, __l); }
   hash_map(const value_type* __f, const value_type* __l, size_type __n)
     : _M_ht(__n, hasher(), key_equal(), allocator_type())
@@ -152,7 +146,7 @@ public:
     { _M_ht.insert_unique(__f, __l); }
 
   hash_map(const_iterator __f, const_iterator __l)
-    : _M_ht(100, hasher(), key_equal(), allocator_type())
+    : _M_ht(0, hasher(), key_equal(), allocator_type())
     { _M_ht.insert_unique(__f, __l); }
   hash_map(const_iterator __f, const_iterator __l, size_type __n)
     : _M_ht(__n, hasher(), key_equal(), allocator_type())
@@ -173,6 +167,9 @@ public:
   size_type max_size() const { return _M_ht.max_size(); }
   bool empty() const { return _M_ht.empty(); }
   void swap(_Self& __hs) { _M_ht.swap(__hs._M_ht); }
+#if defined (_STLP_USE_PARTIAL_SPEC_WORKAROUND) && !defined (_STLP_FUNCTION_TMPL_PARTIAL_ORDER)
+  void _M_swap_workaround(_Self& __x) { swap(__x); }
+#endif
   iterator begin() { return _M_ht.begin(); }
   iterator end() { return _M_ht.end(); }
   const_iterator begin() const { return _M_ht.begin(); }
@@ -235,7 +232,7 @@ _STLP_CREATE_HASH_ITERATOR_TRAITS(HashMultimapTraitsT, traits)
 
 template <class _Key, class _Tp, _STLP_DFL_TMPL_PARAM(_HashFcn,hash<_Key>),
           _STLP_DFL_TMPL_PARAM(_EqualKey,equal_to<_Key>),
-          _STLP_DEFAULT_PAIR_ALLOCATOR_SELECT(const _Key, _Tp) >
+          _STLP_DEFAULT_PAIR_ALLOCATOR_SELECT(_STLP_CONST _Key, _Tp) >
 class hash_multimap
 #if defined (_STLP_USE_PARTIAL_SPEC_WORKAROUND)
                     : public __stlport_class<hash_multimap<_Key, _Tp, _HashFcn, _EqualKey, _Alloc> >
@@ -247,11 +244,7 @@ public:
   typedef _Key key_type;
   typedef _Tp data_type;
   typedef _Tp mapped_type;
-#if !defined (__DMC__)
-  typedef pair<const key_type, data_type> value_type;
-#else
-  typedef pair<key_type, data_type> value_type;
-#endif
+  typedef pair<_STLP_CONST key_type, data_type> value_type;
 private:
   //Specific iterator traits creation
   typedef _STLP_PRIV _HashMultimapTraitsT<value_type> _HashMultimapTraits;
@@ -283,7 +276,7 @@ private:
   _Ht _M_ht;
   _STLP_KEY_TYPE_FOR_CONT_EXT(key_type)
 public:
-  hash_multimap() : _M_ht(100, hasher(), key_equal(), allocator_type()) {}
+  hash_multimap() : _M_ht(0, hasher(), key_equal(), allocator_type()) {}
   explicit hash_multimap(size_type __n)
     : _M_ht(__n, hasher(), key_equal(), allocator_type()) {}
   hash_multimap(size_type __n, const hasher& __hf)
@@ -292,14 +285,16 @@ public:
                 const allocator_type& __a = allocator_type())
     : _M_ht(__n, __hf, __eql, __a) {}
 
+#if !defined (_STLP_NO_MOVE_SEMANTIC)
   hash_multimap(__move_source<_Self> src)
     : _M_ht(__move_source<_Ht>(src.get()._M_ht)) {
   }
+#endif
 
 #ifdef _STLP_MEMBER_TEMPLATES
   template <class _InputIterator>
   hash_multimap(_InputIterator __f, _InputIterator __l)
-    : _M_ht(100, hasher(), key_equal(), allocator_type())
+    : _M_ht(0, hasher(), key_equal(), allocator_type())
     { _M_ht.insert_equal(__f, __l); }
   template <class _InputIterator>
   hash_multimap(_InputIterator __f, _InputIterator __l, size_type __n)
@@ -326,7 +321,7 @@ public:
 
 #else
   hash_multimap(const value_type* __f, const value_type* __l)
-    : _M_ht(100, hasher(), key_equal(), allocator_type())
+    : _M_ht(0, hasher(), key_equal(), allocator_type())
     { _M_ht.insert_equal(__f, __l); }
   hash_multimap(const value_type* __f, const value_type* __l, size_type __n)
     : _M_ht(__n, hasher(), key_equal(), allocator_type())
@@ -342,7 +337,7 @@ public:
     { _M_ht.insert_equal(__f, __l); }
 
   hash_multimap(const_iterator __f, const_iterator __l)
-    : _M_ht(100, hasher(), key_equal(), allocator_type())
+    : _M_ht(0, hasher(), key_equal(), allocator_type())
     { _M_ht.insert_equal(__f, __l); }
   hash_multimap(const_iterator __f, const_iterator __l, size_type __n)
     : _M_ht(__n, hasher(), key_equal(), allocator_type())
@@ -363,6 +358,9 @@ public:
   size_type max_size() const { return _M_ht.max_size(); }
   bool empty() const { return _M_ht.empty(); }
   void swap(_Self& __hs) { _M_ht.swap(__hs._M_ht); }
+#if defined (_STLP_USE_PARTIAL_SPEC_WORKAROUND) && !defined (_STLP_FUNCTION_TMPL_PARTIAL_ORDER)
+  void _M_swap_workaround(_Self& __x) { swap(__x); }
+#endif
 
   iterator begin() { return _M_ht.begin(); }
   iterator end() { return _M_ht.end(); }
@@ -425,6 +423,7 @@ public:
 #undef _STLP_TEMPLATE_HEADER
 
 #if defined (_STLP_CLASS_PARTIAL_SPECIALIZATION)
+#  if !defined (_STLP_NO_MOVE_SEMANTIC)
 template <class _Key, class _Tp, class _HashFn,  class _EqKey, class _Alloc>
 struct __move_traits<hash_map<_Key, _Tp, _HashFn, _EqKey, _Alloc> > :
   _STLP_PRIV __move_traits_help<typename hash_map<_Key, _Tp, _HashFn, _EqKey, _Alloc>::_Ht>
@@ -434,6 +433,7 @@ template <class _Key, class _Tp, class _HashFn,  class _EqKey, class _Alloc>
 struct __move_traits<hash_multimap<_Key, _Tp, _HashFn, _EqKey, _Alloc> > :
   _STLP_PRIV __move_traits_help<typename hash_multimap<_Key, _Tp, _HashFn, _EqKey, _Alloc>::_Ht>
 {};
+#  endif
 
 // Specialization of insert_iterator so that it will work for hash_map
 // and hash_multimap.

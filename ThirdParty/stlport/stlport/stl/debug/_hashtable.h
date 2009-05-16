@@ -150,15 +150,17 @@ public:
     : _M_non_dbg_impl(__ht._M_non_dbg_impl),
       _M_iter_list(&_M_non_dbg_impl) {}
 
+#if !defined (_STLP_NO_MOVE_SEMANTIC)
   hashtable(__move_source<_Self> src)
     : _M_non_dbg_impl(__move_source<_Base>(src.get()._M_non_dbg_impl)),
       _M_iter_list(&_M_non_dbg_impl) {
-#if defined (_STLP_NO_EXTENSIONS) || (_STLP_DEBUG_LEVEL == _STLP_STANDARD_DBG_LEVEL)
+#  if defined (_STLP_NO_EXTENSIONS) || (_STLP_DEBUG_LEVEL == _STLP_STANDARD_DBG_LEVEL)
     src.get()._M_iter_list._Invalidate_all();
-#else
+#  else
     src.get()._M_iter_list._Set_owner(_M_iter_list);
-#endif
+#  endif
   }
+#endif
 
   size_type size() const { return _M_non_dbg_impl.size(); }
   size_type max_size() const { return _M_non_dbg_impl.max_size(); }
@@ -280,10 +282,10 @@ public:
   }
 
   size_type erase(const key_type& __key) {
-    pair<_Base_iterator, _Base_iterator> __p = _M_non_dbg_impl.equal_range(__key);
+    pair<iterator, iterator> __p = equal_range(__key);
     size_type __n = _STLP_STD::distance(__p.first, __p.second);
-    _Invalidate_iterators(const_iterator(&_M_iter_list, __p.first), const_iterator(&_M_iter_list, __p.second));
-    _M_non_dbg_impl.erase(__p.first, __p.second);
+    _Invalidate_iterators(__p.first, __p.second);
+    _M_non_dbg_impl.erase(__p.first._M_iterator, __p.second._M_iterator);
     return __n;
   }
 

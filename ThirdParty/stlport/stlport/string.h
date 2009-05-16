@@ -23,7 +23,7 @@
 
 #  ifndef _STLP_OUTERMOST_HEADER_ID
 #    define _STLP_OUTERMOST_HEADER_ID 0x269
-#    include <stl/_prolog.h>
+#    include <stl/_cprolog.h>
 #  elif (_STLP_OUTERMOST_HEADER_ID == 0x269) && !defined (_STLP_DONT_POP_HEADER_ID)
 #    define _STLP_DONT_POP_HEADER_ID
 #    define _STLP_STRING_H
@@ -33,18 +33,24 @@
 struct _exception;
 #  endif
 #  if (_STLP_OUTERMOST_HEADER_ID != 0x269) || defined (_STLP_DONT_POP_HEADER_ID)
-#    include _STLP_NATIVE_C_HEADER(string.h)
-#  else
-#    if defined (__BORLANDC__)
-#      include _STLP_NATIVE_CPP_C_HEADER(_str.h)
+#    if defined (_STLP_HAS_INCLUDE_NEXT)
+#      include_next <string.h>
 #    else
 #      include _STLP_NATIVE_C_HEADER(string.h)
 #    endif
-
-#    if (_STLP_OUTERMOST_HEADER_ID == 0x269)
-#      if defined (__BORLANDC__) && defined (_STLP_IMPORT_VENDOR_CSTD)
-#        include <using/cstring>
-#      endif /* BORLAND */
+#  else
+#    if defined (__BORLANDC__) && !defined (__linux__)
+#      if defined (_STLP_HAS_INCLUDE_NEXT)
+#        include_next <_str.h>
+#      else
+#        include _STLP_NATIVE_CPP_C_HEADER(_str.h)
+#      endif
+#    else
+#      if defined (_STLP_HAS_INCLUDE_NEXT)
+#        include_next <string.h>
+#      else
+#        include _STLP_NATIVE_C_HEADER(string.h)
+#      endif
 #    endif
 #  endif
 

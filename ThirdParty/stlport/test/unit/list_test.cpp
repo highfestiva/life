@@ -28,6 +28,7 @@ class ListTest : public CPPUNIT_NS::TestCase
   CPPUNIT_TEST(push_front);
   CPPUNIT_TEST(allocator_with_state);
   CPPUNIT_TEST(swap);
+  CPPUNIT_TEST(adl);
   //CPPUNIT_TEST(const_list);
   CPPUNIT_TEST_SUITE_END();
 
@@ -42,6 +43,7 @@ protected:
   void push_front();
   void allocator_with_state();
   void swap();
+  void adl();
   //void const_list();
 };
 
@@ -396,7 +398,8 @@ void ListTest::allocator_with_state()
   CPPUNIT_CHECK( stack1.ok() );
   CPPUNIT_CHECK( stack2.ok() );
 
-#if defined (STLPORT) && !defined (_STLP_NO_MEMBER_TEMPLATES)
+#if defined (STLPORT) && !defined (_STLP_NO_MEMBER_TEMPLATES) && \
+    (!defined (_MSC_VER) || (_MSC_VER >= 1300))
   {
     //This is a compile time test.
     //We check that sort implementation is correct when list is instanciated
@@ -437,3 +440,29 @@ void ListTest::swap()
   CPPUNIT_CHECK( lst1.empty() );
   CPPUNIT_CHECK( lst2.empty() );
 }
+
+namespace foo {
+  class bar {};
+
+  template <class _It>
+  size_t distance(_It, _It);
+}
+
+void ListTest::adl()
+{
+  list<foo::bar> lbar;
+  CPPUNIT_ASSERT( lbar.size() == 0);
+}
+
+#if !defined (STLPORT) || \
+    !defined (_STLP_USE_PTR_SPECIALIZATIONS) || defined (_STLP_CLASS_PARTIAL_SPECIALIZATION)
+/* Simple compilation test: Check that nested types like iterator
+ * can be access even if type used to instanciate container is not
+ * yet completely defined.
+ */
+class IncompleteClass
+{
+  list<IncompleteClass> instances;
+  typedef list<IncompleteClass>::iterator it;
+};
+#endif

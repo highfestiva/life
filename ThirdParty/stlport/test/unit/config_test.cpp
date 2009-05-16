@@ -19,12 +19,17 @@ class ConfigTest : public CPPUNIT_NS::TestCase
   CPPUNIT_TEST(placement_new_bug);
   CPPUNIT_TEST(endianess);
   CPPUNIT_TEST(template_function_partial_ordering);
+#if !defined (_STLP_USE_EXCEPTIONS)
+  CPPUNIT_IGNORE;
+#endif
+  CPPUNIT_TEST(new_throw_bad_alloc);
   CPPUNIT_TEST_SUITE_END();
 
   protected:
     void placement_new_bug();
     void endianess();
     void template_function_partial_ordering();
+    void new_throw_bad_alloc();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(ConfigTest);
@@ -77,5 +82,40 @@ void ConfigTest::template_function_partial_ordering()
   CPPUNIT_ASSERT( pvect1Front != &vect2.front() );
   CPPUNIT_ASSERT( pvect2Front != &vect1.front() );
 #  endif
+#endif
+}
+
+void ConfigTest::new_throw_bad_alloc()
+{
+#if defined (STLPORT) && defined (_STLP_USE_EXCEPTIONS)
+  try
+  {
+  /* We try to exhaust heap memory. However, we don't actually use the
+    largest possible size_t value bus slightly less in order to avoid
+    triggering any overflows due to the allocator adding some more for
+    its internal data structures. */
+    size_t const huge_amount = size_t(-1) - 1024;
+    void* pvoid = operator new (huge_amount);
+#if !defined (_STLP_NEW_DONT_THROW_BAD_ALLOC)
+    // Allocation should have fail
+    CPPUNIT_ASSERT( pvoid != 0 );
+#endif
+    // Just in case it succeeds:
+    operator delete(pvoid);
+  }
+  catch (const bad_alloc&)
+  {
+#if defined (_STLP_NEW_DONT_THROW_BAD_ALLOC)
+    // Looks like your compiler new operator finally throw bad_alloc, you can fix
+    // configuration.
+    CPPUNIT_FAIL;
+#endif
+  }
+  catch (...)
+  {
+    //We shouldn't be there:
+    //Not bad_alloc exception thrown.
+    CPPUNIT_FAIL;
+  }
 #endif
 }

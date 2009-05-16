@@ -45,19 +45,13 @@ template <class _CharT> class numpunct_byname {};
 template <class _Ch, class _InIt> class num_get;
 
 _STLP_TEMPLATE_NULL
-class _STLP_CLASS_DECLSPEC numpunct<char> : public locale::facet
-{
-  friend class _Locale_impl;
-
-#ifndef _STLP_NO_FRIEND_TEMPLATES
-  template <class _Ch, class _InIt> friend class num_get;
-#endif
+class _STLP_CLASS_DECLSPEC numpunct<char> : public locale::facet {
 public:
   typedef char               char_type;
   typedef string             string_type;
 
   explicit numpunct(size_t __refs = 0)
-    : locale::facet(__refs), _M_truename("true"), _M_falsename("false") {}
+    : locale::facet(__refs) {}
 
   char decimal_point() const { return do_decimal_point(); }
   char thousands_sep() const { return do_thousands_sep(); }
@@ -65,16 +59,10 @@ public:
   string truename() const { return do_truename(); }
   string falsename() const { return do_falsename(); }
 
-  static _STLP_STATIC_MEMBER_DECLSPEC locale::id id;
+  static _STLP_STATIC_DECLSPEC locale::id id;
 
-#ifndef _STLP_NO_FRIEND_TEMPLATES
 protected:
-#endif
   ~numpunct();
-
-  string  _M_truename;
-  string  _M_falsename;
-  string  _M_grouping;
 
   virtual char do_decimal_point() const;
   virtual char do_thousands_sep() const;
@@ -86,15 +74,13 @@ protected:
 # if ! defined (_STLP_NO_WCHAR_T)
 
 _STLP_TEMPLATE_NULL
-class _STLP_CLASS_DECLSPEC numpunct<wchar_t> : public locale::facet
-{
-  friend class _Locale_impl;
+class _STLP_CLASS_DECLSPEC numpunct<wchar_t> : public locale::facet {
 public:
   typedef wchar_t               char_type;
   typedef wstring               string_type;
 
   explicit numpunct(size_t __refs = 0)
-    : locale::facet(__refs), _M_truename(L"true"), _M_falsename(L"false") {}
+    : locale::facet(__refs) {}
 
   wchar_t decimal_point() const { return do_decimal_point(); }
   wchar_t thousands_sep() const { return do_thousands_sep(); }
@@ -102,13 +88,9 @@ public:
   wstring truename() const { return do_truename(); }
   wstring falsename() const { return do_falsename(); }
 
-  static _STLP_STATIC_MEMBER_DECLSPEC locale::id id;
+  static _STLP_STATIC_DECLSPEC locale::id id;
 
 protected:
-  wstring _M_truename;
-  wstring _M_falsename;
-  string _M_grouping;
-
   ~numpunct();
 
   virtual wchar_t do_decimal_point() const;
@@ -122,11 +104,12 @@ protected:
 
 _STLP_TEMPLATE_NULL
 class _STLP_CLASS_DECLSPEC numpunct_byname<char> : public numpunct<char> {
+  friend class _Locale_impl;
 public:
   typedef char                char_type;
   typedef string              string_type;
 
-  explicit numpunct_byname(const char* __name, size_t __refs = 0, _Locale_name_hint* __hint = 0);
+  explicit numpunct_byname(const char* __name, size_t __refs = 0);
 
 protected:
 
@@ -135,41 +118,50 @@ protected:
   virtual char   do_decimal_point() const;
   virtual char   do_thousands_sep() const;
   virtual string do_grouping()      const;
+  virtual string do_truename()      const;
+  virtual string do_falsename()     const;
 
 private:
-  _Locale_numeric* _M_numeric;
+  numpunct_byname(_Locale_numeric *__numeric)
+    : _M_numeric(__numeric) {}
 
   //explicitely defined as private to avoid warnings:
   typedef numpunct_byname<char> _Self;
   numpunct_byname(_Self const&);
   _Self& operator = (_Self const&);
-  friend _Locale_name_hint* _Locale_extract_hint(numpunct_byname<char>*);
+
+  _Locale_numeric* _M_numeric;
 };
 
 # ifndef _STLP_NO_WCHAR_T
 _STLP_TEMPLATE_NULL
 class _STLP_CLASS_DECLSPEC numpunct_byname<wchar_t>: public numpunct<wchar_t> {
+  friend class _Locale_impl;
 public:
   typedef wchar_t               char_type;
   typedef wstring               string_type;
 
-  explicit numpunct_byname(const char* __name, size_t __refs = 0, _Locale_name_hint* __hint = 0);
+  explicit numpunct_byname(const char* __name, size_t __refs = 0);
 
 protected:
-
   ~numpunct_byname();
 
   virtual wchar_t   do_decimal_point() const;
   virtual wchar_t   do_thousands_sep() const;
   virtual string do_grouping() const;
+  virtual wstring do_truename() const;
+  virtual wstring do_falsename() const;
 
 private:
-  _Locale_numeric* _M_numeric;
+  numpunct_byname(_Locale_numeric *__numeric)
+    : _M_numeric(__numeric) {}
 
   //explicitely defined as private to avoid warnings:
   typedef numpunct_byname<wchar_t> _Self;
   numpunct_byname(_Self const&);
   _Self& operator = (_Self const&);
+
+  _Locale_numeric* _M_numeric;
 };
 
 # endif /* WCHAR_T */

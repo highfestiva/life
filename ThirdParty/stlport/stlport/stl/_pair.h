@@ -32,11 +32,13 @@
 #define _STLP_INTERNAL_PAIR_H
 
 #if defined (_STLP_CLASS_PARTIAL_SPECIALIZATION)
-#  include <stl/type_traits.h>
-#endif
+#  ifndef _STLP_TYPE_TRAITS_H
+#    include <stl/type_traits.h>
+#  endif
 
-#ifndef _STLP_MOVE_CONSTRUCT_FWK_H
-#  include <stl/_move_construct_fwk.h>
+#  if !defined (_STLP_MOVE_CONSTRUCT_FWK_H) && !defined (_STLP_NO_MOVE_SEMANTIC)
+#    include <stl/_move_construct_fwk.h>
+#  endif
 #endif
 
 _STLP_BEGIN_NAMESPACE
@@ -55,16 +57,18 @@ struct pair {
 #endif
   pair(const _T1& __a, const _T2& __b) : first(__a), second(__b) {}
 
-#if defined (_STLP_MEMBER_TEMPLATES) && !(defined (_STLP_MSVC) && (_STLP_MSVC < 1200))
+#if defined (_STLP_MEMBER_TEMPLATES)
   template <class _U1, class _U2>
   pair(const pair<_U1, _U2>& __p) : first(__p.first), second(__p.second) {}
 
   pair(const pair<_T1,_T2>& __o) : first(__o.first), second(__o.second) {}
 #endif
 
+#if defined (_STLP_CLASS_PARTIAL_SPECIALIZATION) && !defined (_STLP_NO_MOVE_SEMANTIC)
   pair(__move_source<pair<_T1, _T2> > src) : first(_STLP_PRIV _AsMoveSource(src.get().first)),
                                              second(_STLP_PRIV _AsMoveSource(src.get().second))
   {}
+#endif
 
   __TRIVIAL_DESTRUCTOR(pair)
 };
@@ -160,19 +164,16 @@ struct __type_traits<pair<_T1, _T2> > {
   typedef typename _Land2<typename _T1Traits::has_trivial_destructor,
                           typename _T2Traits::has_trivial_destructor>::_Ret has_trivial_destructor;
   typedef __false_type is_POD_type;
-
-#if defined (__BORLANDC__) && (__BORLANDC__ < 0x560)
-  // disable incorrect "dependent type qualifier" error
-  typedef __false_type implemented;
-#endif
 };
 
+#  if !defined (_STLP_NO_MOVE_SEMANTIC)
 template <class _T1, class _T2>
 struct __move_traits<pair<_T1, _T2> >
   : _STLP_PRIV __move_traits_help1<_T1, _T2> {};
+#  endif
 
 _STLP_END_NAMESPACE
-#endif /* _STLP_CLASS_PARTIAL_SPECIALIZATION */
+#endif
 
 #endif /* _STLP_INTERNAL_PAIR_H */
 

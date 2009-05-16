@@ -34,7 +34,7 @@
 #  include <stl/_vector.h>
 #endif
 
-#define _STLP_WORD_BIT (int(CHAR_BIT*sizeof(unsigned int)))
+#define _STLP_WORD_BIT (int(CHAR_BIT * sizeof(unsigned int)))
 
 _STLP_BEGIN_NAMESPACE
 _STLP_MOVE_TO_PRIV_NAMESPACE
@@ -269,25 +269,24 @@ class _Bvector_base {
   typedef _Bvector_base<_Alloc> _Self;
 public:
   _STLP_FORCE_ALLOCATORS(bool, _Alloc)
-  typedef typename _Alloc_traits<bool, _Alloc>::allocator_type allocator_type;
+  typedef _Alloc allocator_type;
   typedef unsigned int __chunk_type;
-  typedef typename _Alloc_traits<__chunk_type,
-          _Alloc>::allocator_type __chunk_allocator_type;
-  allocator_type get_allocator() const {
-    return _STLP_CONVERT_ALLOCATOR((const __chunk_allocator_type&)_M_end_of_storage, bool);
-  }
-  static allocator_type __get_dfl_allocator() { return allocator_type(); }
+  typedef typename _Alloc_traits<__chunk_type, _Alloc>::allocator_type __chunk_allocator_type;
+  allocator_type get_allocator() const
+  { return _STLP_CONVERT_ALLOCATOR(__STATIC_CAST(const __chunk_allocator_type&, _M_end_of_storage), bool); }
 
   _Bvector_base(const allocator_type& __a)
     : _M_start(), _M_finish(), _M_end_of_storage(_STLP_CONVERT_ALLOCATOR(__a, __chunk_type),
                                                  (__chunk_type*)0)
   {}
+#if !defined (_STLP_NO_MOVE_SEMANTIC)
   _Bvector_base(__move_source<_Self> src)
     : _M_start(src.get()._M_start), _M_finish(src.get()._M_finish),
       _M_end_of_storage(src.get()._M_end_of_storage) {
     //Make the source destroyable
     src.get()._M_start._M_p = 0;
   }
+#endif
 
   ~_Bvector_base() {
     _M_deallocate();
@@ -295,9 +294,12 @@ public:
 
 protected:
 
-  unsigned int* _M_bit_alloc(size_t __n) {
-    return _M_end_of_storage.allocate((__n + _STLP_WORD_BIT - 1)/_STLP_WORD_BIT);
-  }
+  static size_t _M_bits_to_chunks(size_t __n_bits)
+  { return (__n_bits + _STLP_WORD_BIT - 1) / _STLP_WORD_BIT; }
+
+  __chunk_type* _M_bit_alloc(size_t __n)
+  { return _M_end_of_storage.allocate(_M_bits_to_chunks(__n)); }
+
   void _M_deallocate() {
     if (_M_start._M_p)
       _M_end_of_storage.deallocate(_M_start._M_p,
@@ -325,11 +327,7 @@ protected:
 #  else
 #    define __BVEC_TMPL_HEADER _STLP_TEMPLATE_NULL
 #  endif
-#  if !(defined(__MRC__)||(defined(__SC__)&&!defined(__DMC__)))      //*TY 12/17/2000 -
-#    define _Alloc _STLP_DEFAULT_ALLOCATOR(bool)
-#  else
-#    define _Alloc allocator<bool>
-#  endif
+#  define _Alloc allocator<bool>
 #endif
 
 #if defined (_STLP_DEBUG)
@@ -380,8 +378,8 @@ public:
   _STLP_DECLARE_RANDOM_ACCESS_REVERSE_ITERATORS;
 
 #ifdef _STLP_VECBOOL_TEMPLATE
-  typedef typename _STLP_PRIV _Bvector_base<_Alloc >::allocator_type allocator_type;
-  typedef typename _STLP_PRIV _Bvector_base<_Alloc >::__chunk_type __chunk_type;
+  typedef _STLP_TYPENAME _STLP_PRIV _Bvector_base<_Alloc >::allocator_type allocator_type;
+  typedef _STLP_TYPENAME _STLP_PRIV _Bvector_base<_Alloc >::__chunk_type __chunk_type;
 #else
   typedef _STLP_PRIV _Bvector_base<_Alloc >::allocator_type allocator_type;
   typedef _STLP_PRIV _Bvector_base<_Alloc >::__chunk_type __chunk_type;
@@ -390,8 +388,8 @@ public:
 protected:
 
   void _M_initialize(size_type __n) {
-    unsigned int* __q = this->_M_bit_alloc(__n);
-    this->_M_end_of_storage._M_data = __q + (__n + _STLP_WORD_BIT - 1)/_STLP_WORD_BIT;
+    __chunk_type* __q = this->_M_bit_alloc(__n);
+    this->_M_end_of_storage._M_data = __q + _Base::_M_bits_to_chunks(__n);
     this->_M_start = iterator(__q, 0);
     this->_M_finish = this->_M_start + difference_type(__n);
   }
@@ -404,12 +402,12 @@ protected:
     }
     else {
       size_type __len = size() ? 2 * size() : _STLP_WORD_BIT;
-      unsigned int* __q = this->_M_bit_alloc(__len);
-      iterator __i = copy(begin(), __position, iterator(__q, 0));
+      __chunk_type* __q = this->_M_bit_alloc(__len);
+      iterator __i = _STLP_STD::copy(begin(), __position, iterator(__q, 0));
       *__i++ = __x;
-      this->_M_finish = copy(__position, end(), __i);
+      this->_M_finish = _STLP_STD::copy(__position, end(), __i);
       this->_M_deallocate();
-      this->_M_end_of_storage._M_data = __q + (__len + _STLP_WORD_BIT - 1)/_STLP_WORD_BIT;
+      this->_M_end_of_storage._M_data = __q + _Base::_M_bits_to_chunks(__len);
       this->_M_start = iterator(__q, 0);
     }
   }
@@ -428,9 +426,9 @@ protected:
   template <class _ForwardIterator>
   void _M_initialize_range(_ForwardIterator __first, _ForwardIterator __last,
                            const forward_iterator_tag &) {
-    size_type __n = distance(__first, __last);
+    size_type __n = _STLP_STD::distance(__first, __last);
     _M_initialize(__n);
-    copy(__first, __last, this->_M_start);
+    _STLP_STD::copy(__first, __last, this->_M_start);
   }
 
   template <class _InputIterator>
@@ -448,21 +446,21 @@ protected:
                        _ForwardIterator __first, _ForwardIterator __last,
                        const forward_iterator_tag &) {
     if (__first != __last) {
-      size_type __n = distance(__first, __last);
+      size_type __n = _STLP_STD::distance(__first, __last);
       if (capacity() - size() >= __n) {
         _STLP_PRIV __copy_backward(__position, end(), this->_M_finish + difference_type(__n),
                                    random_access_iterator_tag(), (difference_type*)0 );
-        copy(__first, __last, __position);
+        _STLP_STD::copy(__first, __last, __position);
         this->_M_finish += difference_type(__n);
       }
       else {
         size_type __len = size() + (max)(size(), __n);
-        unsigned int* __q = this->_M_bit_alloc(__len);
-        iterator __i = copy(begin(), __position, iterator(__q, 0));
-        __i = copy(__first, __last, __i);
-        this->_M_finish = copy(__position, end(), __i);
+        __chunk_type* __q = this->_M_bit_alloc(__len);
+        iterator __i = _STLP_STD::copy(begin(), __position, iterator(__q, 0));
+        __i = _STLP_STD::copy(__first, __last, __i);
+        this->_M_finish = _STLP_STD::copy(__position, end(), __i);
         this->_M_deallocate();
-        this->_M_end_of_storage._M_data = __q + (__len + _STLP_WORD_BIT - 1)/_STLP_WORD_BIT;
+        this->_M_end_of_storage._M_data = __q + _Base::_M_bits_to_chunks(__len);
         this->_M_start = iterator(__q, 0);
       }
     }
@@ -525,7 +523,7 @@ public:
   __BVECTOR(const _Self& __x)
     : _STLP_PRIV _Bvector_base<_Alloc >(__x.get_allocator()) {
     _M_initialize(__x.size());
-    copy(__x.begin(), __x.end(), this->_M_start);
+    _STLP_STD::copy(__x.begin(), __x.end(), this->_M_start);
   }
 
 #if defined (_STLP_MEMBER_TEMPLATES)
@@ -560,21 +558,23 @@ public:
   __BVECTOR(const_iterator __first, const_iterator __last,
             const allocator_type& __a = allocator_type())
     : _STLP_PRIV _Bvector_base<_Alloc >(__a) {
-    size_type __n = distance(__first, __last);
+    size_type __n = _STLP_STD::distance(__first, __last);
     _M_initialize(__n);
-    copy(__first, __last, this->_M_start);
+    _STLP_STD::copy(__first, __last, this->_M_start);
   }
   __BVECTOR(const bool* __first, const bool* __last,
             const allocator_type& __a = allocator_type())
     : _STLP_PRIV _Bvector_base<_Alloc >(__a) {
-    size_type __n = distance(__first, __last);
+    size_type __n = _STLP_STD::distance(__first, __last);
     _M_initialize(__n);
-    copy(__first, __last, this->_M_start);
+    _STLP_STD::copy(__first, __last, this->_M_start);
   }
 #endif /* _STLP_MEMBER_TEMPLATES */
 
+#if !defined (_STLP_NO_MOVE_SEMANTIC)
   __BVECTOR(__move_source<_Self> src)
     : _STLP_PRIV _Bvector_base<_Alloc >(__move_source<_Base>(src.get())) {}
+#endif
 
   ~__BVECTOR() {}
 
@@ -584,7 +584,7 @@ public:
       this->_M_deallocate();
       _M_initialize(__x.size());
     }
-    copy(__x.begin(), __x.end(), begin());
+    _STLP_STD::copy(__x.begin(), __x.end(), begin());
     this->_M_finish = begin() + difference_type(__x.size());
     return *this;
   }
@@ -636,13 +636,13 @@ public:
   template <class _ForwardIterator>
   void _M_assign_aux(_ForwardIterator __first, _ForwardIterator __last,
                      const forward_iterator_tag &) {
-    size_type __len = distance(__first, __last);
+    size_type __len = _STLP_STD::distance(__first, __last);
     if (__len < size())
-      erase(copy(__first, __last, begin()), end());
+      erase(_STLP_STD::copy(__first, __last, begin()), end());
     else {
       _ForwardIterator __mid = __first;
-      advance(__mid, size());
-      copy(__first, __mid, begin());
+      _STLP_STD::advance(__mid, size());
+      _STLP_STD::copy(__first, __mid, begin());
       insert(end(), __mid, __last);
     }
   }
@@ -652,12 +652,12 @@ public:
     if (capacity() < __n) {
       if (max_size() < __n)
         __stl_throw_length_error("vector<bool>");
-      unsigned int* __q = this->_M_bit_alloc(__n);
+      __chunk_type* __q = this->_M_bit_alloc(__n);
       _STLP_PRIV _Bit_iterator __z(__q, 0);
-      this->_M_finish = copy(begin(), end(), __z);
+      this->_M_finish = _STLP_STD::copy(begin(), end(), __z);
       this->_M_deallocate();
       this->_M_start = iterator(__q, 0);
-      this->_M_end_of_storage._M_data = __q + (__n + _STLP_WORD_BIT - 1)/_STLP_WORD_BIT;
+      this->_M_end_of_storage._M_data = __q + _Base::_M_bits_to_chunks(__n);
     }
   }
 
@@ -678,6 +678,10 @@ public:
     _STLP_STD::swap(this->_M_finish, __x._M_finish);
     this->_M_end_of_storage.swap(__x._M_end_of_storage);
   }
+#if defined (_STLP_USE_PARTIAL_SPEC_WORKAROUND) && !defined (_STLP_FUNCTION_TMPL_PARTIAL_ORDER)
+  void _M_swap_workaround(__BVECTOR_QUALIFIED& __x) { swap(__x); }
+#endif
+
   iterator insert(iterator __position, bool __x = bool()) {
     difference_type __n = __position - begin();
     if (this->_M_finish._M_p != this->_M_end_of_storage._M_data && __position == end()) {
@@ -715,42 +719,42 @@ public:
   void insert(iterator __position,
               const_iterator __first, const_iterator __last) {
     if (__first == __last) return;
-    size_type __n = distance(__first, __last);
+    size_type __n = _STLP_STD::distance(__first, __last);
     if (capacity() - size() >= __n) {
       _STLP_PRIV __copy_backward(__position, end(), this->_M_finish + __n,
                                  random_access_iterator_tag(), (difference_type*)0 );
-      copy(__first, __last, __position);
+      _STLP_STD::copy(__first, __last, __position);
       this->_M_finish += __n;
     }
     else {
       size_type __len = size() + (max)(size(), __n);
-      unsigned int* __q = this->_M_bit_alloc(__len);
-      iterator __i = copy(begin(), __position, iterator(__q, 0));
-      __i = copy(__first, __last, __i);
-      this->_M_finish = copy(__position, end(), __i);
+      __chunk_type* __q = this->_M_bit_alloc(__len);
+      iterator __i = _STLP_STD::copy(begin(), __position, iterator(__q, 0));
+      __i = _STLP_STD::copy(__first, __last, __i);
+      this->_M_finish = _STLP_STD::copy(__position, end(), __i);
       this->_M_deallocate();
-      this->_M_end_of_storage._M_data = __q + (__len + _STLP_WORD_BIT - 1)/_STLP_WORD_BIT;
+      this->_M_end_of_storage._M_data = __q + _Base::_M_bits_to_chunks(__len);
       this->_M_start = iterator(__q, 0);
     }
   }
 
   void insert(iterator __position, const bool* __first, const bool* __last) {
     if (__first == __last) return;
-    size_type __n = distance(__first, __last);
+    size_type __n = _STLP_STD::distance(__first, __last);
     if (capacity() - size() >= __n) {
       _STLP_PRIV __copy_backward(__position, end(), this->_M_finish + __n,
                                  random_access_iterator_tag(), (difference_type*)0 );
-      copy(__first, __last, __position);
+      _STLP_STD::copy(__first, __last, __position);
       this->_M_finish += __n;
     }
     else {
       size_type __len = size() + (max)(size(), __n);
-      unsigned int* __q = this->_M_bit_alloc(__len);
-      iterator __i = copy(begin(), __position, iterator(__q, 0));
-      __i = copy(__first, __last, __i);
-      this->_M_finish = copy(__position, end(), __i);
+      __chunk_type* __q = this->_M_bit_alloc(__len);
+      iterator __i = _STLP_STD::copy(begin(), __position, iterator(__q, 0));
+      __i = _STLP_STD::copy(__first, __last, __i);
+      this->_M_finish = _STLP_STD::copy(__position, end(), __i);
       this->_M_deallocate();
-      this->_M_end_of_storage._M_data = __q + (__len + _STLP_WORD_BIT - 1)/_STLP_WORD_BIT;
+      this->_M_end_of_storage._M_data = __q + _Base::_M_bits_to_chunks(__len);
       this->_M_start = iterator(__q, 0);
     }
   }
@@ -766,12 +770,12 @@ public:
     }
     else {
       size_type __len = size() + (max)(size(), __n);
-      unsigned int* __q = this->_M_bit_alloc(__len);
-      iterator __i = copy(begin(), __position, iterator(__q, 0));
+      __chunk_type* __q = this->_M_bit_alloc(__len);
+      iterator __i = _STLP_STD::copy(begin(), __position, iterator(__q, 0));
       fill_n(__i, __n, __x);
-      this->_M_finish = copy(__position, end(), __i + difference_type(__n));
+      this->_M_finish = _STLP_STD::copy(__position, end(), __i + difference_type(__n));
       this->_M_deallocate();
-      this->_M_end_of_storage._M_data = __q + (__len + _STLP_WORD_BIT - 1)/_STLP_WORD_BIT;
+      this->_M_end_of_storage._M_data = __q + _Base::_M_bits_to_chunks(__len);
       this->_M_start = iterator(__q, 0);
     }
   }
@@ -785,12 +789,12 @@ public:
   }
   iterator erase(iterator __position) {
     if (__position + 1 != end())
-      copy(__position + 1, end(), __position);
+      _STLP_STD::copy(__position + 1, end(), __position);
       --this->_M_finish;
     return __position;
   }
   iterator erase(iterator __first, iterator __last) {
-    this->_M_finish = copy(__last, end(), __first);
+    this->_M_finish = _STLP_STD::copy(__last, end(), __first);
     return __first;
   }
   void resize(size_type __new_size, bool __x = bool()) {
@@ -800,7 +804,7 @@ public:
       insert(end(), __new_size - size(), __x);
   }
   void flip() {
-    for (unsigned int* __p = this->_M_start._M_p; __p != this->_M_end_of_storage._M_data; ++__p)
+    for (__chunk_type* __p = this->_M_start._M_p; __p != this->_M_end_of_storage._M_data; ++__p)
       *__p = ~*__p;
   }
 

@@ -1,5 +1,5 @@
 # -*- makefile -*- Time-stamp: <03/09/28 17:34:35 ptr>
-# $Id: vc-common.mak 1459 2005-04-18 21:25:32Z ptr $
+# $Id$
 
 !ifndef LDLIBS
 LDLIBS =

@@ -45,24 +45,24 @@ __copy_float_and_fill(const _CharT* __first, const _CharT* __last,
                       streamsize __width, _CharT __fill,
                       _CharT __xplus, _CharT __xminus) {
   if (__width <= __last - __first)
-    return copy(__first, __last, __oi);
+    return _STLP_STD::copy(__first, __last, __oi);
   else {
     streamsize __pad = __width - (__last - __first);
     ios_base::fmtflags __dir = __flags & ios_base::adjustfield;
 
     if (__dir == ios_base::left) {
-      __oi = copy(__first, __last, __oi);
-      return __fill_n(__oi, __pad, __fill);
+      __oi = _STLP_STD::copy(__first, __last, __oi);
+      return _STLP_PRIV __fill_n(__oi, __pad, __fill);
     }
     else if (__dir == ios_base::internal && __first != __last &&
              (*__first == __xplus || *__first == __xminus)) {
       *__oi++ = *__first++;
-      __oi = __fill_n(__oi, __pad, __fill);
-      return copy(__first, __last, __oi);
+      __oi = _STLP_PRIV __fill_n(__oi, __pad, __fill);
+      return _STLP_STD::copy(__first, __last, __oi);
     }
     else {
-      __oi = __fill_n(__oi, __pad, __fill);
-      return copy(__first, __last, __oi);
+      __oi = _STLP_PRIV __fill_n(__oi, __pad, __fill);
+      return _STLP_STD::copy(__first, __last, __oi);
     }
   }
 }
@@ -75,7 +75,7 @@ __put_float(__iostring &__str, _OutputIter __oi,
             ios_base& __f, wchar_t __fill,
             wchar_t __decimal_point, wchar_t __sep,
             size_t __group_pos, const string& __grouping) {
-  const ctype<wchar_t>& __ct = *__STATIC_CAST(const ctype<wchar_t>*, __f._M_ctype_facet());
+  const ctype<wchar_t>& __ct = use_facet<ctype<wchar_t> >(__f.getloc());
 
   __iowstring __wbuf;
   __convert_float_buffer(__str, __wbuf, __ct, __decimal_point);
@@ -85,8 +85,7 @@ __put_float(__iostring &__str, _OutputIter __oi,
                       __sep, __ct.widen('+'), __ct.widen('-'), 0);
   }
 
-  return __copy_float_and_fill(__CONST_CAST(wchar_t*, __wbuf.data()),
-                               __CONST_CAST(wchar_t*, __wbuf.data()) + __wbuf.size(), __oi,
+  return __copy_float_and_fill(__wbuf.data(), __wbuf.data() + __wbuf.size(), __oi,
                                __f.flags(), __f.width(0), __fill, __ct.widen('+'), __ct.widen('-'));
 }
 #endif /* WCHAR_T */
@@ -107,8 +106,7 @@ __put_float(__iostring &__str, _OutputIter __oi,
                       __grouping, __sep, '+', '-', 0);
   }
 
-  return __copy_float_and_fill(__CONST_CAST(char*, __str.data()),
-                               __CONST_CAST(char*, __str.data()) + __str.size(), __oi,
+  return __copy_float_and_fill(__str.data(), __str.data() + __str.size(), __oi,
                                __f.flags(), __f.width(0), __fill, '+', '-');
 }
 
@@ -120,11 +118,10 @@ __do_put_float(_OutputIter __s, ios_base& __f,
 
   size_t __group_pos = __write_float(__buf, __f.flags(), (int)__f.precision(), __x);
 
-  const numpunct<_CharT>& __np = *__STATIC_CAST(const numpunct<_CharT>*, __f._M_numpunct_facet());
-
+  const numpunct<_CharT>& __np = use_facet<numpunct<_CharT> >(__f.getloc());
   return __put_float(__buf, __s, __f, __fill,
                      __np.decimal_point(), __np.thousands_sep(),
-                     __group_pos, __f._M_grouping());
+                     __group_pos, __np.grouping());
 }
 
 inline void __get_money_digits_aux (__iostring &__buf, ios_base &, _STLP_LONGEST_FLOAT_TYPE __x)
@@ -135,7 +132,7 @@ inline void __get_money_digits_aux (__iowstring &__wbuf, ios_base &__f, _STLP_LO
   __iostring __buf;
   __get_floor_digits(__buf, __x);
 
-  const ctype<wchar_t>& __ct = *__STATIC_CAST(const ctype<wchar_t>*, __f._M_ctype_facet());
+  const ctype<wchar_t>& __ct = use_facet<ctype<wchar_t> >(__f.getloc());
   __convert_float_buffer(__buf, __wbuf, __ct, wchar_t(0), false);
 }
 #endif
@@ -153,37 +150,37 @@ __copy_integer_and_fill(const _CharT* __buf, ptrdiff_t __len,
                         ios_base::fmtflags __flg, streamsize __wid, _CharT __fill,
                         _CharT __xplus, _CharT __xminus) {
   if (__len >= __wid)
-    return copy(__buf, __buf + __len, __oi);
+    return _STLP_STD::copy(__buf, __buf + __len, __oi);
   else {
     //casting numeric_limits<ptrdiff_t>::max to streamsize only works is ptrdiff_t is signed or streamsize representation
     //is larger than ptrdiff_t one.
     _STLP_STATIC_ASSERT((sizeof(streamsize) > sizeof(ptrdiff_t)) ||
-                        (sizeof(streamsize) == sizeof(ptrdiff_t)) && numeric_limits<ptrdiff_t>::is_signed)
+                        ((sizeof(streamsize) == sizeof(ptrdiff_t)) && numeric_limits<ptrdiff_t>::is_signed))
     ptrdiff_t __pad = __STATIC_CAST(ptrdiff_t, (min) (__STATIC_CAST(streamsize, (numeric_limits<ptrdiff_t>::max)()),
                                                       __STATIC_CAST(streamsize, __wid - __len)));
     ios_base::fmtflags __dir = __flg & ios_base::adjustfield;
 
     if (__dir == ios_base::left) {
-      __oi = copy(__buf, __buf + __len, __oi);
-      return __fill_n(__oi, __pad, __fill);
+      __oi = _STLP_STD::copy(__buf, __buf + __len, __oi);
+      return _STLP_PRIV __fill_n(__oi, __pad, __fill);
     }
     else if (__dir == ios_base::internal && __len != 0 &&
              (__buf[0] == __xplus || __buf[0] == __xminus)) {
       *__oi++ = __buf[0];
       __oi = __fill_n(__oi, __pad, __fill);
-      return copy(__buf + 1, __buf + __len, __oi);
+      return _STLP_STD::copy(__buf + 1, __buf + __len, __oi);
     }
-    else if (__dir == ios_base::internal && __len >= 2  &&
+    else if (__dir == ios_base::internal && __len >= 2 &&
              (__flg & ios_base::showbase) &&
              (__flg & ios_base::basefield) == ios_base::hex) {
       *__oi++ = __buf[0];
       *__oi++ = __buf[1];
       __oi = __fill_n(__oi, __pad, __fill);
-      return copy(__buf + 2, __buf + __len, __oi);
+      return _STLP_STD::copy(__buf + 2, __buf + __len, __oi);
     }
     else {
       __oi = __fill_n(__oi, __pad, __fill);
-      return copy(__buf, __buf + __len, __oi);
+      return _STLP_STD::copy(__buf, __buf + __len, __oi);
     }
   }
 }
@@ -196,8 +193,7 @@ __put_integer(char* __buf, char* __iend, _OutputIter __s,
               ios_base& __f,
               ios_base::fmtflags __flags, wchar_t __fill) {
   locale __loc = __f.getloc();
-  //  const ctype<wchar_t>& __ct = use_facet<ctype<wchar_t> >(__loc);
-  const ctype<wchar_t>& __ct = *__STATIC_CAST(const ctype<wchar_t>*, __f._M_ctype_facet());
+  const ctype<wchar_t>& __ct = use_facet<ctype<wchar_t> >(__loc);
 
   wchar_t __xplus  = __ct.widen('+');
   wchar_t __xminus = __ct.widen('-');
@@ -207,11 +203,8 @@ __put_integer(char* __buf, char* __iend, _OutputIter __s,
   ptrdiff_t __len = __iend - __buf;
   wchar_t* __eend = __wbuf + __len;
 
-  //  const numpunct<wchar_t>& __np = use_facet<numpunct<wchar_t> >(__loc);
-  //  const string& __grouping = __np.grouping();
-
-  const numpunct<wchar_t>& __np = *__STATIC_CAST(const numpunct<wchar_t>*, __f._M_numpunct_facet());
-  const string& __grouping = __f._M_grouping();
+  const numpunct<wchar_t>& __np = use_facet<numpunct<wchar_t> >(__loc);
+  const string& __grouping = __np.grouping();
 
   if (!__grouping.empty()) {
     int __basechars;
@@ -241,11 +234,8 @@ __put_integer(char* __buf, char* __iend, _OutputIter __s,
   char __grpbuf[64];
   ptrdiff_t __len = __iend - __buf;
 
-  //  const numpunct<char>& __np = use_facet<numpunct<char> >(__f.getloc());
-  //  const string& __grouping = __np.grouping();
-
-  const numpunct<char>& __np = *__STATIC_CAST(const numpunct<char>*, __f._M_numpunct_facet());
-  const string& __grouping = __f._M_grouping();
+  const numpunct<char>& __np = use_facet<numpunct<char> >(__f.getloc());
+  const string& __grouping = __np.grouping();
 
   if (!__grouping.empty()) {
     int __basechars;
@@ -260,7 +250,7 @@ __put_integer(char* __buf, char* __iend, _OutputIter __s,
 
      // make sure there is room at the end of the buffer
      // we pass to __insert_grouping
-    copy(__buf, __iend, (char *) __grpbuf);
+    _STLP_STD::copy(__buf, __iend, (char *) __grpbuf);
     __buf = __grpbuf;
     __iend = __grpbuf + __len;
     __len = __insert_grouping(__buf, __iend, __grouping, __np.thousands_sep(),
@@ -387,98 +377,54 @@ __do_put_integer(_OutputIter __s, ios_base& __f, _CharT __fill, _Integer __x) {
   char __buf[sizeof(_Integer) * 3 + 2];
   const ptrdiff_t __buf_size = sizeof(__buf) / sizeof(char);
   ios_base::fmtflags __flags = __f.flags();
-  char* __ibeg = __write_integer_backward((char*)__buf+__buf_size, __flags, __x);
-  return __put_integer(__ibeg, (char*)__buf+__buf_size, __s, __f, __flags, __fill);
+  char* __ibeg = __write_integer_backward((char*)__buf + __buf_size, __flags, __x);
+  return __put_integer(__ibeg, (char*)__buf + __buf_size, __s, __f, __flags, __fill);
 }
 
+template <class _CharT, class _OutputIter>
+_OutputIter _STLP_CALL
+__do_put_bool(_OutputIter __s, ios_base& __f, _CharT __fill, bool __x) {
+  const numpunct<_CharT>& __np = use_facet<numpunct<_CharT> >(__f.getloc());
+
+  basic_string<_CharT, char_traits<_CharT>, allocator<_CharT> > __str = __x ? __np.truename() : __np.falsename();
+
+  streamsize __wid = __f.width(0);
+  if (__str.size() >= __STATIC_CAST(size_t, __wid))
+    return _STLP_STD::copy(__str.begin(), __str.end(), __s);
+  else {
+    streamsize __pad = __wid - __str.size();
+    ios_base::fmtflags __dir = __f.flags() & ios_base::adjustfield;
+
+    if (__dir == ios_base::left) {
+      __s = _STLP_STD::copy(__str.begin(), __str.end(), __s);
+      return __fill_n(__s, __pad, __fill);
+    }
+    else /* covers right and internal padding */ {
+      __s = __fill_n(__s, __pad, __fill);
+      return _STLP_STD::copy(__str.begin(), __str.end(), __s);
+    }
+  }
+}
 _STLP_MOVE_TO_STD_NAMESPACE
 
 //
 // num_put<>
 //
 
-#if (_STLP_STATIC_TEMPLATE_DATA > 0)
-
-#  if !defined (__BORLANDC__)
 template <class _CharT, class _OutputIterator>
 locale::id num_put<_CharT, _OutputIterator>::id;
-#  endif
-
-#  if (defined (__CYGWIN__) || defined (__MINGW32__)) && \
-       defined (_STLP_USE_DYNAMIC_LIB) && !defined (__BUILDING_STLPORT)
-/*
- * Under cygwin, when STLport is used as a shared library, the id needs
- * to be specified as imported otherwise they will be duplicated in the
- * calling executable.
- */
-template <>
-_STLP_DECLSPEC locale::id num_put<char, ostreambuf_iterator<char, char_traits<char> > >::id;
-/*
-template <>
-_STLP_DECLSPEC locale::id num_put<char, char*>::id;
-*/
-
-#    if !defined (_STLP_NO_WCHAR_T)
-template <>
-_STLP_DECLSPEC locale::id num_put<wchar_t, ostreambuf_iterator<wchar_t, char_traits<wchar_t> > >::id;
-/*
-template <>
-_STLP_DECLSPEC locale::id num_put<wchar_t, wchar_t*>::id;
-*/
-#    endif
-
-#  endif /* __CYGWIN__ && _STLP_USE_DYNAMIC_LIB */
-
-#else /* ( _STLP_STATIC_TEMPLATE_DATA > 0 ) */
-
-//typedef num_put<char, char*> num_put_char;
-typedef num_put<char, ostreambuf_iterator<char, char_traits<char> > > num_put_char_2;
-
-//__DECLARE_INSTANCE(locale::id, num_put_char::id, );
-__DECLARE_INSTANCE(locale::id, num_put_char_2::id, );
-
-#  if !defined (_STLP_NO_WCHAR_T)
-
-//typedef num_put<wchar_t, wchar_t*> num_put_wchar_t;
-typedef num_put<wchar_t, ostreambuf_iterator<wchar_t, char_traits<wchar_t> > > num_put_wchar_t_2;
-
-//__DECLARE_INSTANCE(locale::id, num_put_wchar_t::id, );
-__DECLARE_INSTANCE(locale::id, num_put_wchar_t_2::id, );
-
-#  endif
-
-#endif /* ( _STLP_STATIC_TEMPLATE_DATA > 0 ) */
-
-// issue 118
 
 #if !defined (_STLP_NO_BOOL)
 template <class _CharT, class _OutputIter>
 _OutputIter
-num_put<_CharT, _OutputIter>::do_put(_OutputIter __s, ios_base& __f,
-                                     char_type __fill,  bool __val) const {
+num_put<_CharT, _OutputIter>::do_put(_OutputIter __s, ios_base& __f, _CharT __fill,
+                                     bool __val) const {
   if (!(__f.flags() & ios_base::boolalpha))
-    return this->do_put(__s, __f, __fill, __STATIC_CAST(long,__val));
+    // 22.2.2.2.2.23: shall return do_put for int and not directly __do_put_integer.
+    return do_put(__s, __f, __fill, __STATIC_CAST(long, __val));
 
-  locale __loc = __f.getloc();
-  //  typedef numpunct<_CharT> _Punct;
-  //  const _Punct& __np = use_facet<_Punct>(__loc);
-
-  const numpunct<_CharT>& __np = *__STATIC_CAST(const numpunct<_CharT>*, __f._M_numpunct_facet());
-
-  basic_string<_CharT> __str = __val ? __np.truename() : __np.falsename();
-
-  // Reuse __copy_integer_and_fill.  Since internal padding makes no
-  // sense for bool, though, make sure we use something else instead.
-  // The last two argument to __copy_integer_and_fill are dummies.
-  ios_base::fmtflags __flags = __f.flags();
-  if ((__flags & ios_base::adjustfield) == ios_base::internal)
-    __flags = (__flags & ~ios_base::adjustfield) | ios_base::right;
-
-  return _STLP_PRIV __copy_integer_and_fill(__str.c_str(), __str.size(), __s,
-                                            __flags, __f.width(0), __fill,
-                                            (_CharT) 0, (_CharT) 0);
+  return _STLP_PRIV __do_put_bool(__s, __f, __fill, __val);
 }
-
 #endif
 
 template <class _CharT, class _OutputIter>
@@ -522,23 +468,47 @@ num_put<_CharT, _OutputIter>::do_put(_OutputIter __s, ios_base& __f, _CharT __fi
 #endif /* _STLP_LONG_LONG */
 
 
-// lib.facet.num.put.virtuals "12 For conversion from void* the specifier is %p."
+// 22.2.2.2.2 Stage 1: "For conversion from void* the specifier is %p."
+// This is not clear and I'm really don't follow this (below).
 template <class _CharT, class _OutputIter>
 _OutputIter
 num_put<_CharT, _OutputIter>::do_put(_OutputIter __s, ios_base& __f, _CharT /*__fill*/,
                                      const void* __val) const {
-  const ctype<_CharT>& __c_type = *__STATIC_CAST(const ctype<_CharT>*, __f._M_ctype_facet());
+  const ctype<_CharT>& __c_type = use_facet<ctype<_CharT> >(__f.getloc());
   ios_base::fmtflags __save_flags = __f.flags();
 
   __f.setf(ios_base::hex, ios_base::basefield);
   __f.setf(ios_base::showbase);
   __f.setf(ios_base::internal, ios_base::adjustfield);
   __f.width((sizeof(void*) * 2) + 2); // digits in pointer type plus '0x' prefix
-# if defined(_STLP_LONG_LONG) && !defined(__MRC__) //*ty 11/24/2001 - MrCpp can not cast from void* to long long
-  _OutputIter result = this->do_put(__s, __f, __c_type.widen('0'), __REINTERPRET_CAST(unsigned _STLP_LONG_LONG,__val));
-# else
-  _OutputIter result = this->do_put(__s, __f, __c_type.widen('0'), __REINTERPRET_CAST(unsigned long,__val));
-# endif
+  if ( __val == 0 ) {
+    // base ('0x') not shown for null, but I really want to type it
+    // for pointer. Print it first in this case.
+    const char* __table_ptr = (__save_flags & ios_base::uppercase) ?
+            _STLP_PRIV __hex_char_table_hi() : _STLP_PRIV __hex_char_table_lo();
+    __s++ = __c_type.widen( '0' );
+    __s++ = __c_type.widen( __table_ptr[16] );
+    __f.width((sizeof(void*) * 2)); // digits in pointer type
+  } else {
+    __f.width((sizeof(void*) * 2) + 2); // digits in pointer type plus '0x' prefix
+  }
+#if defined (_STLP_MSVC)
+#  pragma warning (push)
+#  pragma warning (disable : 4311) //pointer truncation from 'const void*' to 'unsigned long'
+#endif
+  _OutputIter result =
+#ifdef _STLP_LONG_LONG
+    ( sizeof(void*) == sizeof(unsigned long) ) ?
+#endif
+    _STLP_PRIV __do_put_integer(__s, __f, __c_type.widen('0'), __REINTERPRET_CAST(unsigned long,__val))
+#ifdef _STLP_LONG_LONG
+      : /* ( sizeof(void*) == sizeof(unsigned _STLP_LONG_LONG) ) ? */
+    _STLP_PRIV __do_put_integer(__s, __f, __c_type.widen('0'), __REINTERPRET_CAST(unsigned _STLP_LONG_LONG,__val))
+#endif
+        ;
+#if defined (_STLP_MSVC)
+#  pragma warning (pop)
+#endif
   __f.flags(__save_flags);
   return result;
 }

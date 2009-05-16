@@ -1,9 +1,9 @@
-# -*- Makefile -*- Time-stamp: <06/01/11 09:53:41 ptr>
+# -*- Makefile -*- Time-stamp: <06/09/08 11:50:49 ptr>
 
 LIBNAME = stlport
 MAJOR = 5
-MINOR = 1
-PATCH = 5
+MINOR = 2
+PATCH = 1
 SRC_CPP = ../../src/dll_main.cpp \
           ../../src/fstream.cpp \
           ../../src/strstream.cpp \
@@ -24,6 +24,7 @@ SRC_CPP = ../../src/dll_main.cpp \
           ../../src/numpunct.cpp \
           ../../src/time_facets.cpp \
           ../../src/messages.cpp \
+          ../../src/locale.cpp \
           ../../src/locale_impl.cpp \
           ../../src/locale_catalog.cpp \
           ../../src/facets_byname.cpp \

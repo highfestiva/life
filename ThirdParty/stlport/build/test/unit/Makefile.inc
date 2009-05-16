@@ -1,8 +1,8 @@
-# -*- makefile -*- Time-stamp: <06/10/13 23:47:44 ptr>
+# -*- makefile -*- Time-stamp: <07/06/27 20:39:05 ptr>
 
 # this is the version number of needed STLport library for linking
 LIBMAJOR = 5
-LIBMINOR = 1
+LIBMINOR = 2
 
 PRGNAME = stl_unit_test
 SRC_CPP = ../../../test/unit/cppunit/test_main.cpp \
@@ -18,6 +18,7 @@ SRC_CPP = ../../../test/unit/cppunit/test_main.cpp \
 	../../../test/unit/bitset_test.cpp \
 	../../../test/unit/bitset_header_test.cpp \
 	../../../test/unit/bnegate_test.cpp \
+	../../../test/unit/boost_check.cpp \
 	../../../test/unit/bound_test.cpp \
 	../../../test/unit/bsearch_test.cpp \
 	../../../test/unit/bvector_test.cpp \
@@ -31,20 +32,22 @@ SRC_CPP = ../../../test/unit/cppunit/test_main.cpp \
 	../../../test/unit/cmath_test.cpp \
 	../../../test/unit/cmath_header_test.cpp \
 	../../../test/unit/codecvt_test.cpp \
+	../../../test/unit/collate_facets_test.cpp \
 	../../../test/unit/complex_header_test.cpp \
 	../../../test/unit/config_test.cpp \
 	../../../test/unit/copy_test.cpp \
 	../../../test/unit/count_test.cpp \
 	../../../test/unit/csetjmp_header_test.cpp \
-	../../../test/unit/cwchar.cpp \
 	../../../test/unit/setjmp_header_test2.cpp \
 	../../../test/unit/csignal_header_test.cpp \
 	../../../test/unit/cstdarg_header_test.cpp \
 	../../../test/unit/cstddef_header_test.cpp \
 	../../../test/unit/cstdio_header_test.cpp \
 	../../../test/unit/cstdlib_header_test.cpp \
+	../../../test/unit/cstring_test.cpp \
 	../../../test/unit/cstring_header_test.cpp \
 	../../../test/unit/ctime_header_test.cpp \
+	../../../test/unit/ctype_facets_test.cpp \
 	../../../test/unit/cwchar_header_test.cpp \
 	../../../test/unit/cwctype_header_test.cpp \
 	../../../test/unit/deque_test.cpp \
@@ -90,20 +93,27 @@ SRC_CPP = ../../../test/unit/cppunit/test_main.cpp \
 	../../../test/unit/locale_test.cpp \
 	../../../test/unit/locale_header_test.cpp \
 	../../../test/unit/logic_test.cpp \
+	../../../test/unit/macro_checks.cpp \
 	../../../test/unit/map_test.cpp \
 	../../../test/unit/map_header_test.cpp \
 	../../../test/unit/max_test.cpp \
-	../../../test/unit/merge_test.cpp \
 	../../../test/unit/memory_header_test.cpp \
+	../../../test/unit/memory_test.cpp \
+	../../../test/unit/merge_test.cpp \
+	../../../test/unit/messages_facets_test.cpp \
 	../../../test/unit/mfunptr_test.cpp \
 	../../../test/unit/min_test.cpp \
 	../../../test/unit/mismatch_test.cpp \
 	../../../test/unit/modulus_test.cpp \
+	../../../test/unit/money_facets_test.cpp \
 	../../../test/unit/multiset_test.cpp \
 	../../../test/unit/mvctor_test.cpp \
+	../../../test/unit/mvctor_declaration_test.cpp \
+	../../../test/unit/mvctor_traits_test.cpp \
 	../../../test/unit/neq_test.cpp \
 	../../../test/unit/new_header_test.cpp \
 	../../../test/unit/nthelm_test.cpp \
+	../../../test/unit/num_facets_test.cpp \
 	../../../test/unit/num_put_get_test.cpp \
 	../../../test/unit/numeric_header_test.cpp \
 	../../../test/unit/ostmit_test.cpp \
@@ -118,6 +128,7 @@ SRC_CPP = ../../../test/unit/cppunit/test_main.cpp \
 	../../../test/unit/queue_test.cpp \
 	../../../test/unit/queue_header_test.cpp \
 	../../../test/unit/rawriter_test.cpp \
+	../../../test/unit/reference_wrapper_test.cpp \
 	../../../test/unit/resolve_name.cpp \
 	../../../test/unit/reviter_test.cpp \
 	../../../test/unit/rm_cp_test.cpp \
@@ -130,6 +141,7 @@ SRC_CPP = ../../../test/unit/cppunit/test_main.cpp \
 	../../../test/unit/setdiff_test.cpp \
 	../../../test/unit/setinter_test.cpp \
 	../../../test/unit/setunion_test.cpp \
+	../../../test/unit/shared_ptr_test.cpp \
 	../../../test/unit/slist_test.cpp \
 	../../../test/unit/sort_test.cpp \
 	../../../test/unit/sstream_test.cpp \
@@ -137,9 +149,10 @@ SRC_CPP = ../../../test/unit/cppunit/test_main.cpp \
 	../../../test/unit/stack_test.cpp \
 	../../../test/unit/stack_header_test.cpp \
 	../../../test/unit/stdexcept_header_test.cpp \
-	../../../test/unit/strstream_header_test.cpp \
+	../../../test/unit/stldbg_include.cpp \
 	../../../test/unit/string_test.cpp \
-        ../../../test/unit/strstream_buffer_read_test.cpp \
+	../../../test/unit/strstream_buffer_read_test.cpp \
+	../../../test/unit/strstream_header_test.cpp \
 	../../../test/unit/swap_test.cpp \
 	../../../test/unit/times_test.cpp \
 	../../../test/unit/transform_test.cpp \
@@ -154,7 +167,8 @@ SRC_CPP = ../../../test/unit/cppunit/test_main.cpp \
 	../../../test/unit/valarray_header_test.cpp \
 	../../../test/unit/vector_test.cpp \
 	../../../test/unit/vector_header_test.cpp \
-	../../../test/unit/test_errno.cpp
+	../../../test/unit/test_errno.cpp \
+	../../../test/unit/time_facets_test.cpp
 
 SRC_C = ../../../test/unit/assert_header_test.c \
 	../../../test/unit/ctype_header_test.c \

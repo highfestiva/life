@@ -93,7 +93,7 @@
 
 /*
  * _STLP_NO_RELOPS_NAMESPACE: if defined, don't put the relational
- * operator templates (>, <=. >=, !=) in namespace std::rel_ops, even
+ * operator templates (>, <=, >=, !=) in namespace std::rel_ops, even
  * if the compiler supports namespaces.
  * Note : if the compiler do not support namespaces, those operators are not be provided by default,
  * to simulate hiding them into rel_ops. This was proved to resolve many compiler bugs with ambiguity.
@@ -103,8 +103,8 @@
 */
 
 /*
- * If _STLP_USE_OWN_NAMESPACE is in effect, STLport by default will try
- * to rename std:: for the user to stlport::. If you do not want this feature,
+ * If STLport use its own namespace, see _STLP_NO_OWN_NAMESPACE in host.h, it will try
+ * by default to rename std:: for the user to stlport::. If you do not want this feature,
  * please define the following switch and then use stlport::
  */
 /*
@@ -112,15 +112,19 @@
 */
 
 /*
- * _STLP_WHOLE_NATIVE_STD : only meaningful in _STLP_USE_OWN_NAMESPACE mode.
- * Normally, STLport only imports necessary components from native std:: namespace -
- * those not yet provided by STLport (<iostream>, <complex>, etc.)
- * and their dependencies (<string>, <stdexcept>).
+ * _STLP_WHOLE_NATIVE_STD : only meaningful if STLport uses its own namespace.
+ * Normally, STLport only imports necessary components from native std:: namespace.
  * You might want everything from std:: being available in std:: namespace when you
  * include corresponding STLport header (like STLport <map> provides std::map as well, etc.),
  * if you are going to use both stlport:: and std:: components in your code.
  * Otherwise this option is not recommended as it increases the size of your object files
  * and slows down compilation.
+ * Beware, if you do not use STLport iostream (_STLP_NO_IOSTREAMS above), ask STLport to
+ * not rename std:: in stlport:: and try to have access to whole native Standard stuff then
+ * STLport will only throw exceptions from the std namespace and not from stlport.
+ * For instance a problem in stlport::vector::at will throw a std::out_of_range exception
+ * and not a stlport::out_of_range.
+ * Notice that STLport exceptions inherits from std::exception.
  */
 /*
 #define _STLP_WHOLE_NATIVE_STD
@@ -225,12 +229,11 @@
  */
 
 /*
- * When using automatic linking (see above), output a message that tells the
- * user which lib is getting linked via 'pragma message(..)'.
- * This setting has no effect if automatic linking is not active.
+ * Uncomment to get feedback at compilation time about result of build environment
+ * introspection.
  */
 /*
-#define _STLP_VERBOSE_AUTO_LINK 1
+#define _STLP_VERBOSE 1
 */
 
 /*
@@ -259,11 +262,14 @@
  * a single call to the allocator. This technique also works for the addition of
  * N elements where elements are basic_string, C string or a single character.
  * The drawback can be longer compilation time and bigger executable size.
+ * Another problem is that some compilers (gcc) fail to use string proxy object
+ * if do with class derived from string (see unit tests for details).
  * STLport rebuild: Yes
  */
 /*
 #define _STLP_USE_TEMPLATE_EXPRESSION 1
 */
+
 
 /*
  * By default the STLport basic_string implementation use a little static buffer
@@ -281,9 +287,16 @@
  * To reduce the famous code bloat trouble due to the use of templates STLport grant
  * a specialization of some containers for pointer types. So all instanciations
  * of those containers with a pointer type will use the same implementation based on
- * a container of void*. This feature has show very good result on object files size
+ * a container of void*. This feature has shown very good result on object files size
  * but after link phase and optimization you will only experiment benefit if you use
  * many container with pointer types.
+ * There are however a number of limitation to use this option:
+ *   - with compilers not supporting partial template specialization feature, you won't
+ *     be able to access some nested container types like iterator as long as the
+ *     definition of the type used to instanciate the container will be incomplete
+ *     (see IncompleteClass definition in test/unit/vector_test.cpp).
+ *   - you won't be able to use complex Standard allocator implementations which are
+ *     allocators having pointer nested type not being a real C pointer.
  */
 /*
 #define _STLP_USE_PTR_SPECIALIZATIONS 1
@@ -298,9 +311,11 @@
  * to use this feature at STLport built time you will have to define the
  * STLP_BUILD_BOOST_PATH enrironment variable with the value of the boost library path.
  */
+
 /*
 #define _STLP_USE_BOOST_SUPPORT 1
 */
+
 
 /*==========================================================*/
 
@@ -309,11 +324,3 @@
   mode: C++
   End:
 */
-
-// Jonas Byström:
-// This is required for MSVC9 - contains a known bug. Older versions
-// get this definition from "_msvc.h", but MSVC9 is not oficially
-// supported yet.
-#ifdef _MSC_VER
-#define _STLP_STATIC_CONST_INIT_BUG 1
-#endif // VS

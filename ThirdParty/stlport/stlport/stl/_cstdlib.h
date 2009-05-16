@@ -17,12 +17,16 @@
 #define _STLP_INTERNAL_CSTDLIB
 
 #if defined (_STLP_USE_NEW_C_HEADERS)
-#  include _STLP_NATIVE_CPP_C_HEADER(cstdlib)
+#  if defined (_STLP_HAS_INCLUDE_NEXT)
+#    include_next <cstdlib>
+#  else
+#    include _STLP_NATIVE_CPP_C_HEADER(cstdlib)
+#  endif
 #else
 #  include <stdlib.h>
 #endif
 
-#if defined (__BORLANDC__)
+#if defined (__BORLANDC__) && !defined (__linux__)
 /* Borland process.h header do not bring anything here and is just included
  * in order to avoid inclusion later. This header cannot be included later
  * because Borland compiler consider that for instance the abort function
@@ -58,12 +62,8 @@ using _STLP_VENDOR_CSTD::size_t;
 // these functions just don't exist on Windows CE
 using _STLP_VENDOR_CSTD::abort;
 using _STLP_VENDOR_CSTD::getenv;
-
-#ifndef __hpux
 using _STLP_VENDOR_CSTD::mblen;
 using _STLP_VENDOR_CSTD::mbtowc;
-#endif
-
 using _STLP_VENDOR_CSTD::system;
 using _STLP_VENDOR_CSTD::bsearch;
 #    endif
@@ -76,16 +76,12 @@ using _STLP_VENDOR_CSTD::realloc;
 using _STLP_VENDOR_CSTD::atof;
 using _STLP_VENDOR_CSTD::atoi;
 using _STLP_VENDOR_CSTD::atol;
-
-#ifndef __hpux
 using _STLP_VENDOR_CSTD::mbstowcs;
-#endif
-
 using _STLP_VENDOR_CSTD::strtod;
 using _STLP_VENDOR_CSTD::strtol;
 using _STLP_VENDOR_CSTD::strtoul;
 
-#    if !(defined (_STLP_NO_NATIVE_WIDE_STREAMS) || defined (_STLP_NO_MBSTATE_T))
+#    if !(defined (_STLP_NO_NATIVE_WIDE_STREAMS) || defined (_STLP_NO_NATIVE_MBSTATE_T))
 using _STLP_VENDOR_CSTD::wcstombs;
 #      ifndef _STLP_WCE
 using _STLP_VENDOR_CSTD::wctomb;
@@ -111,7 +107,7 @@ using _STLP_VENDOR_CSTD::srand;
 _STLP_END_NAMESPACE
 #endif /* _STLP_IMPORT_VENDOR_CSTD */
 
-#if defined (__BORLANDC__) && defined (_STLP_USE_NEW_C_HEADERS)
+#if (defined (__BORLANDC__) || defined (__WATCOMC__)) && defined (_STLP_USE_NEW_C_HEADERS)
 //In this config bcc define everything in std namespace and not in
 //the global one.
 inline int abs(int __x) { return _STLP_VENDOR_CSTD::abs(__x); }
@@ -126,15 +122,18 @@ inline _STLP_VENDOR_CSTD::div_t div(int __x, int __y) { return _STLP_VENDOR_CSTD
 #endif
 
 //HP-UX native lib has abs() and div() functions in global namespace
-#if !defined (__HP_aCC) || (__HP_aCC < 30000)
+#if !defined (__SUNPRO_CC) && \
+    (!defined (__HP_aCC) || (__HP_aCC < 30000))
 
 //MSVC starting with .Net 2003 already define all math functions in global namespace:
-#  if !defined (_STLP_MSVC_LIB) || (_STLP_MSVC_LIB < 1310) || defined(UNDER_CE)
+#  if !defined (__WATCOMC__) && \
+     (!defined (_STLP_MSVC_LIB) || (_STLP_MSVC_LIB < 1310) || defined (UNDER_CE))
 inline long abs(long __x) { return _STLP_VENDOR_CSTD::labs(__x); }
 #  endif
 
 /** VC since version 8 has this, the platform SDK and CE SDKs hanging behind. */
-#  if !defined (_STLP_MSVC_LIB) || (_STLP_MSVC_LIB < 1400) || defined (_STLP_USING_PLATFORM_SDK_COMPILER) || defined(UNDER_CE)
+#  if !defined (__WATCOMC__) && \
+     (!defined (_STLP_MSVC_LIB) || (_STLP_MSVC_LIB < 1400) || defined (_STLP_USING_PLATFORM_SDK_COMPILER) || defined (UNDER_CE))
 inline _STLP_VENDOR_CSTD::ldiv_t div(long __x, long __y) { return _STLP_VENDOR_CSTD::ldiv(__x, __y); }
 #  endif
 
@@ -174,13 +173,7 @@ inline _STLP_LONG_LONG  abs(_STLP_LONG_LONG __x) { return __x < 0 ? -__x : __x; 
 // ad hoc, don't replace with _STLP_VENDOR_CSTD::abs here! - ptr 2005-03-05
 _STLP_BEGIN_NAMESPACE
 using ::abs;
-#  if !defined (N_PLAT_NLM)
 using ::div;
-#  else
-// Don't use div from clib or libc on NetWare---buggy! - ptr 2005-06-06
-inline div_t div(int __x, int __y) { div_t d; d.quot = __x / __y; d.rem = __x % __y; return d; }
-inline ldiv_t div(long __x, long __y) { ldiv_t d; d.quot = __x / __y; d.rem = __x % __y; return d; }
-#  endif
 _STLP_END_NAMESPACE
 #endif
 

@@ -32,6 +32,9 @@ class SstreamTest : public CPPUNIT_NS::TestCase
   CPPUNIT_TEST(rdbuf);
   CPPUNIT_TEST(streambuf_output);
   CPPUNIT_TEST(seek);
+  CPPUNIT_TEST(seekp);
+  CPPUNIT_TEST(seek_gp);
+  CPPUNIT_TEST(tellp);
   CPPUNIT_TEST(negative);
   CPPUNIT_TEST_SUITE_END();
 
@@ -49,6 +52,9 @@ class SstreamTest : public CPPUNIT_NS::TestCase
     void rdbuf();
     void streambuf_output();
     void seek();
+    void seekp();
+    void seek_gp();
+    void tellp();
     void negative();
 };
 
@@ -251,15 +257,31 @@ void SstreamTest::init_out()
   CPPUNIT_ASSERT( os.good() );
 
   // This satisfy to the Standard:
-  CPPUNIT_ASSERT( os.str() == "67345" );
+  // CPPUNIT_ASSERT( os.str() == "67345" );
   // But we don't know the reason, why standard state that.
+
+  /*
+   * 27.7.1.1: ... then copies the content of str into the basic_sringbuf
+   * underlying character sequence and initializes the input and output
+   * sequences according to which. If which & ios_base::out is true, initializes
+   * the output sequence with underlying sequence. ...
+   *
+   * I can treat this as 'like output was performed', and then I should bump
+   * put pointer... Looks like more useful then my previous treatment.
+   *
+   *          - ptr
+   */
+
+  CPPUNIT_ASSERT( os.str() == "1234567" );
+  
 
   os.str( "89ab" );
   CPPUNIT_ASSERT( os.str() == "89ab" );
 
   os << 10;
   CPPUNIT_ASSERT( os.good() );
-  CPPUNIT_ASSERT( os.str() == "10ab" );
+  // CPPUNIT_ASSERT( os.str() == "10ab" );
+  CPPUNIT_ASSERT( os.str() == "89ab10" );
 }
 
 void SstreamTest::buf()
@@ -310,15 +332,15 @@ void SstreamTest::streambuf_output()
     istringstream in("01234567890123456789");
     CPPUNIT_ASSERT( in );
 
-    auto_ptr<full_streambuf> pfull_buf(new full_streambuf(10));
-    ostream out(pfull_buf.get());
+    full_streambuf full_buf(10);
+    ostream out(&full_buf);
     CPPUNIT_ASSERT( out );
 
     out << in.rdbuf();
     CPPUNIT_ASSERT( out );
     CPPUNIT_ASSERT( in );
     //out is good we can check what has been extracted:
-    CPPUNIT_ASSERT( pfull_buf->str() == "0123456789" );
+    CPPUNIT_ASSERT( full_buf.str() == "0123456789" );
 
     out << in.rdbuf();
     CPPUNIT_ASSERT( out.fail() );
@@ -337,15 +359,15 @@ void SstreamTest::streambuf_output()
     istringstream in("01234567890123456789");
     CPPUNIT_ASSERT( in );
 
-    auto_ptr<full_streambuf> pfull_buf(new full_streambuf(10, true));
-    ostream out(pfull_buf.get());
+    full_streambuf full_buf(10, true);
+    ostream out(&full_buf);
     CPPUNIT_ASSERT( out );
 
     out << in.rdbuf();
     CPPUNIT_ASSERT( out.bad() );
     CPPUNIT_ASSERT( in );
     //out is bad we have no guaranty on what has been extracted:
-    //CPPUNIT_ASSERT( pfull_buf->str() == "0123456789" );
+    //CPPUNIT_ASSERT( full_buf.str() == "0123456789" );
 
     out.clear();
     out << in.rdbuf();
@@ -377,6 +399,74 @@ void SstreamTest::seek()
   CPPUNIT_ASSERT( is.tellg() == stringstream::pos_type(6) );
   is.seekg( -3, ios::cur );
   CPPUNIT_ASSERT( is.tellg() == stringstream::pos_type(3) );
+}
+
+void SstreamTest::seekp()
+{
+  ostringstream s;
+
+  s << "1234567";
+  CPPUNIT_CHECK( s.tellp() == stringstream::pos_type(7) );
+  CPPUNIT_CHECK( s.str() == "1234567" );
+  s.seekp( 0 );
+  s << "X";
+  CPPUNIT_CHECK( s.str() == "X234567" );
+  s.seekp( 0, ios::beg );
+  s << "Y";
+  CPPUNIT_CHECK( s.str() == "Y234567" );
+}
+
+void SstreamTest::seek_gp()
+{
+  stringstream ss( "1" );
+
+  /* ISO/IEC 14882 2003 (and 1998 too) assume change as get as put positions
+     with seekg and seekp (27.6.1.3, par 38; 27.6.2.4 par 2),
+     but this contradict to common practice and proposed draft N2588
+     (27.6.1.3, par 41; 27.6.2.5, par 4)
+
+     Now STLport implement (i.e. change behaviour ) the draft's point of view.
+   */
+
+  ss.seekg( 0, ios::beg );
+  ss.seekp( 0, ios::end );
+  
+  ss << "2";
+
+  string str;
+
+  ss >> str;
+
+  /*  CPPUNIT_CHECK( str == "2" ); --- according ISO/IEC 14882 2003 */
+  CPPUNIT_CHECK( str == "12" );
+}
+
+void SstreamTest::tellp()
+{
+  {
+    ostringstream o( "1" );
+
+    o << "23456";
+
+    CPPUNIT_CHECK( o.rdbuf()->pubseekoff( 0, ios_base::cur, ios_base::out ) == stringstream::pos_type(6) );
+    CPPUNIT_CHECK( o.tellp() == stringstream::pos_type(6) );
+  }
+  {
+    ostringstream o;
+
+    o << "123456";
+
+    CPPUNIT_CHECK( o.rdbuf()->pubseekoff( 0, ios_base::cur, ios_base::out ) == stringstream::pos_type(6) );
+    CPPUNIT_CHECK( o.tellp() == stringstream::pos_type(6) );
+  }
+  {
+    ostringstream o( "1" );
+
+    o << "23456789";
+
+    CPPUNIT_CHECK( o.rdbuf()->pubseekoff( 0, ios_base::cur, ios_base::out ) == stringstream::pos_type(9) );
+    CPPUNIT_CHECK( o.tellp() == stringstream::pos_type(9) );
+  }
 }
 
 

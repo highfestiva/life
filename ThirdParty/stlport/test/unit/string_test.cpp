@@ -48,6 +48,7 @@ class StringTest : public CPPUNIT_NS::TestCase
 {
   CPPUNIT_TEST_SUITE(StringTest);
   CPPUNIT_TEST(constructor);
+  CPPUNIT_TEST(trivial_char_compare);
   CPPUNIT_TEST(reserve);
   CPPUNIT_TEST(assign);
   CPPUNIT_TEST(erase);
@@ -59,6 +60,7 @@ class StringTest : public CPPUNIT_NS::TestCase
   CPPUNIT_TEST(resize);
   CPPUNIT_TEST(short_string);
   CPPUNIT_TEST(find);
+  CPPUNIT_TEST(bogus_edge_find);
   CPPUNIT_TEST(rfind);
   CPPUNIT_TEST(find_last_of);
   CPPUNIT_TEST(find_last_not_of);
@@ -70,11 +72,10 @@ class StringTest : public CPPUNIT_NS::TestCase
   CPPUNIT_STOP_IGNORE;
   CPPUNIT_TEST(short_string_optim_bug);
   CPPUNIT_TEST(compare);
-#if defined (__DMC__)
-  CPPUNIT_IGNORE;
-#endif
   CPPUNIT_TEST(template_expression);
-#if defined (STLPORT) && defined (_STLP_MSVC) && (_STLP_MSVC < 1300)
+#if defined (STLPORT) && ((defined (_STLP_MSVC) && (_STLP_MSVC < 1300)) || \
+   (defined(__GNUC__) && defined(_STLP_USE_TEMPLATE_EXPRESSION) && \
+    ((__GNUC__ < 4) || (__GNUC__ == 4 && __GNUC_MINOR__ < 1)) ) )
 #  define TE_TMP_TEST_IGNORED
   CPPUNIT_IGNORE;
 #endif
@@ -82,6 +83,7 @@ class StringTest : public CPPUNIT_NS::TestCase
 #if defined (TE_TMP_TEST_IGNORED)
   CPPUNIT_STOP_IGNORE;
 #endif
+  CPPUNIT_TEST(oper_tmp);
 #if defined (STLPORT) && defined (_STLP_NO_WCHAR_T)
   CPPUNIT_IGNORE;
 #endif
@@ -95,16 +97,18 @@ class StringTest : public CPPUNIT_NS::TestCase
 #endif
   CPPUNIT_TEST(io);
   CPPUNIT_STOP_IGNORE;
-#if defined (STLPORT) && defined (_STLP_NO_CUSTOM_IO) 
+#if defined (STLPORT) && defined (_STLP_NO_CUSTOM_IO)
   CPPUNIT_IGNORE;
 #endif
   CPPUNIT_TEST(allocator_with_state);
   CPPUNIT_STOP_IGNORE;
   CPPUNIT_TEST(capacity);
+  CPPUNIT_TEST(concat24);
   CPPUNIT_TEST_SUITE_END();
 
 protected:
   void constructor();
+  void trivial_char_compare();
   void reserve();
   void erase();
   void data();
@@ -115,6 +119,7 @@ protected:
   void resize();
   void short_string();
   void find();
+  void bogus_edge_find();
   void rfind();
   void find_last_of();
   void find_last_not_of();
@@ -125,10 +130,12 @@ protected:
   void compare();
   void template_expression();
   void te_tmp();
+  void oper_tmp();
   void template_wexpression();
   void io();
   void allocator_with_state();
   void capacity();
+  void concat24();
 
   static string func(const string& par) {
     string tmp( par );
@@ -164,15 +171,23 @@ void StringTest::constructor()
 #if !defined (STLPORT) || defined (_STLP_USE_EXCEPTIONS)
   try {
     string s((size_t)-1, 'a');
-    CPPUNIT_ASSERT( false );
+    CPPUNIT_FAIL;
   }
   catch (length_error const&) {
   }
   catch (...) {
     //Expected exception is length_error:
-    CPPUNIT_ASSERT( false );
+    CPPUNIT_FAIL;
   }
 #endif
+}
+
+void StringTest::trivial_char_compare()
+{
+  string s( "message" );
+
+  CPPUNIT_CHECK( s == "message" );
+  CPPUNIT_CHECK( "message" == s );
 }
 
 void StringTest::reserve()
@@ -181,13 +196,13 @@ void StringTest::reserve()
 #if !defined (STLPORT) || defined (_STLP_USE_EXCEPTIONS)
   try {
     s.reserve(s.max_size() + 1);
-    CPPUNIT_ASSERT( false );
+    CPPUNIT_FAIL;
   }
   catch (length_error const&) {
   }
   catch (...) {
     //Expected exception is length_error:
-    CPPUNIT_ASSERT( false );
+    CPPUNIT_FAIL;
   }
 #endif
 }
@@ -284,6 +299,16 @@ void StringTest::short_string()
   }
 
   {
+    string a(256, 'a');
+    string b(256, 'b');
+    const char* as = a.c_str();
+    const char* bs = b.c_str();
+    swap(a, b);
+    CPPUNIT_ASSERT( a.c_str() == bs );
+    CPPUNIT_ASSERT( b.c_str() == as );
+  }
+
+  {
     //This is to test move constructor
     vector<string> str_vect;
     str_vect.push_back(short_str1);
@@ -315,7 +340,7 @@ void StringTest::erase()
         CPPUNIT_ASSERT( str[i] == '!' );
         break;
       default:
-        CPPUNIT_ASSERT( false );
+        CPPUNIT_FAIL;
     }
   }
 
@@ -339,7 +364,7 @@ void StringTest::erase()
         CPPUNIT_ASSERT( str[i] == '!' );
         break;
       default:
-        CPPUNIT_ASSERT( false );
+        CPPUNIT_FAIL;
     }
   }
 
@@ -415,13 +440,13 @@ void StringTest::null_char()
   try {
     //Check is only here to avoid warning about value of expression not used
     CPPUNIT_CHECK( s.at(s.size()) == '\0' );
-    CPPUNIT_ASSERT( false );
+    CPPUNIT_FAIL;
   }
   catch (out_of_range const&) {
     CPPUNIT_ASSERT( true );
   }
   catch ( ... ) {
-    CPPUNIT_ASSERT( false );
+    CPPUNIT_FAIL;
   }
 #endif
 }
@@ -541,6 +566,12 @@ void StringTest::replace()
   CPPUNIT_ASSERT( s == "1345656" );
 
   s = "123456";
+  i = s.begin();
+  ci = s.begin() + 1;
+  s.replace(i, i, ci, ci + 1);
+  CPPUNIT_CHECK( s == "2123456" );
+
+  s = "123456";
   s.replace(s.begin() + 4, s.end(), cs.begin(), cs.end());
   CPPUNIT_ASSERT( s == "1234123456" );
 
@@ -568,7 +599,7 @@ void StringTest::replace()
   str.replace(5, 5, str.c_str(), 10);
   CPPUNIT_ASSERT( str == "This This is test string for string calls" );
 
-#if !defined (STLPORT) || defined (_STLP_MEMBER_TEMPLATES)
+#if (defined (STLPORT) && defined(_STLP_MEMBER_TEMPLATES)) || ( !defined (STLPORT) && !defined(__GNUC__) )
   deque<char> cdeque;
   cdeque.push_back('I');
   str.replace(str.begin(), str.begin() + 11, cdeque.begin(), cdeque.end());
@@ -611,9 +642,9 @@ void StringTest::find()
   CPPUNIT_ASSERT( s.find('t') == 4 );
   CPPUNIT_ASSERT( s.find('t', 5) == 8 );
   //We are trying to get a const reference to the npos string static member to
-  //force the compiler to allocate memory for this variable. It used to reveal
+  //force the compiler to allocate memory for this variable. It is used to reveal
   //a bug of STLport which was simply declaring npos without instanciating it.
-#if !defined (STLPORT) || !defined (_STLP_STATIC_CONST_INIT_BUG)
+#if defined (STLPORT) && defined (_STLP_STATIC_CONST_INIT_BUG)
   string::size_type const& npos_local = string::npos;
 #else
 #  define npos_local string::npos
@@ -624,6 +655,106 @@ void StringTest::find()
   CPPUNIT_ASSERT( s.find_first_of("abcde") == 2 );
 
   CPPUNIT_ASSERT( s.find_first_not_of("enotw ") == 9 );
+
+  string empty;
+  CPPUNIT_ASSERT( s.substr(s.find(empty), empty.size()) == empty );
+}
+
+void StringTest::bogus_edge_find()
+{
+  /* ISO/IEC 14882 2003, 21.3.6.1 basic_string::find [lib.string::find]
+   *
+   * size_type find(const basic_string<charT,traits,Allocator>& str,
+   *                size_type pos = 0) const;
+   * Effects: Determines the lowest position xpos, if possible, such that
+   * both of the following conditions obtain:
+   *    pos <= xpos and xpos + str.size() <= size();
+   *    at(xpos+I) == str.at(I) for all elements I of the string controlled by str.
+   * Returns: xpos if the function can determine such a value for xpos. Otherwise,
+   * returns npos.
+   * Notes: Uses traits::eq().
+   *
+   * ===
+   * So, from formal point of view 
+   *   string s; string::size_type p = s.find( "", 0, 0 );
+   * should return 0 in p, i.e. position out-of-bound of string, so 
+   * code like following is bad:
+   * string s; 
+   *  
+   * string::size_type p = s.find( "", 0, 0 ); 
+   *
+   * ... 
+   *
+   * if ( p != string::npos ) { // normal 
+   *   char ch = s[p]; // Arghhhhhhhhhh 
+   * }
+   *
+   * People near Standard commete has opinion opposite to my. Even if it looks
+   * like bogus behaviour for me, it should be fixed.
+   */
+
+  {
+    string s;
+    string::size_type p = s.find( "", 0, 0 );
+
+    /* CPPUNIT_CHECK( p == string::npos ); */
+    CPPUNIT_CHECK( p == 0 ); // bogus result, isn't it?
+  }
+  {
+    string s( "123" );
+    string::size_type p = s.find( "", 0, 0 );
+
+    CPPUNIT_CHECK( p == 0 );
+  }
+  {
+    string s( "123" );
+    string::size_type p = s.find( "", 1, 0 );
+
+    CPPUNIT_CHECK( p == 1 );
+  }
+  {
+    string s( "" );
+    string::size_type p = s.find( "", 1, 0 );
+
+    CPPUNIT_CHECK( p == string::npos );
+  }
+  {
+    string s( "123" );
+    string::size_type p = s.find( "", 3, 0 );
+
+    CPPUNIT_CHECK( p == 3 ); // bogus result, isn't it?
+  }
+  {
+    string s;
+    string::size_type p = s.rfind( "", 0, 0 );
+
+    /* CPPUNIT_CHECK( p == string::npos ); */
+    CPPUNIT_CHECK( p == 0 ); // bogus result, isn't it?
+  }
+  {
+    string s( "123" );
+    string::size_type p = s.rfind( "", 0, 0 );
+
+    CPPUNIT_CHECK( p == 0 );
+  }
+  {
+    string s( "123" );
+    string::size_type p = s.rfind( "", 1, 0 );
+
+    CPPUNIT_CHECK( p == 1 );
+  }
+  {
+    string s( "" );
+    string::size_type p = s.rfind( "", 1, 0 );
+
+    CPPUNIT_CHECK( p == 0 ); // bogus result, isn't it?
+  }
+  {
+    string s( "123" );
+    string::size_type p = s.rfind( "", 3, 0 );
+
+    CPPUNIT_CHECK( p == 3 ); // bogus result, isn't it?
+  }
 }
 
 void StringTest::rfind()
@@ -710,13 +841,12 @@ void StringTest::copy()
 #if !defined (STLPORT) || defined (_STLP_USE_EXCEPTIONS)
   try {
     s.copy(dest, 4, 5);
-    CPPUNIT_ASSERT( false );
+    CPPUNIT_FAIL;
   }
   catch (out_of_range const&) {
-    CPPUNIT_ASSERT( true );
   }
   catch ( ... ) {
-    CPPUNIT_ASSERT( false );
+    CPPUNIT_FAIL;
   }
 #endif
 }
@@ -745,7 +875,7 @@ void StringTest::assign()
   CPPUNIT_ASSERT(str2[29] == '0');
 }
 
-/* This test is to check if std::string properly supports the short string
+/* This test is to check if string properly supports the short string
  * optimization. It has been found out that eMbedded Visual C++ 3.0 and .NET
  * compilers for the ARM platform fail to pass structs and classes of certain
  * size per value. This seems to be a known compiler bug. For other processors
@@ -941,13 +1071,13 @@ void StringTest::template_expression()
 #if !defined (STLPORT) || defined (_STLP_USE_EXCEPTIONS)
     try {
       result = (one + ' ' + two).at(10);
-      CPPUNIT_ASSERT(false);
+      CPPUNIT_FAIL;
     }
     catch (out_of_range const&) {
       CPPUNIT_ASSERT( result == ' ' );
     }
     catch (...) {
-      CPPUNIT_ASSERT(false);
+      CPPUNIT_FAIL;
     }
 #endif
   }
@@ -994,12 +1124,45 @@ void StringTest::te_tmp()
 #endif
 }
 
+class mypath
+{
+  public:
+    mypath( const string& s ) :
+        p( s )
+      { }
+
+    const mypath& operator / ( const string& );
+    const string& str() const
+      { return p; }
+ 
+  private:
+    string p;
+};
+
+const mypath& mypath::operator /( const string& s )
+{
+  p += '/';
+  p += s;
+  return *this;
+}
+
+void StringTest::oper_tmp()
+{
+  string s1( "path1" );
+  string s2( ".ext" );
+
+  string& rs1 = s1;
+  string& rs2 = s2;
+
+  CPPUNIT_CHECK( (mypath( string( "/root" ) ) / (rs1 + rs2)).str() == "/root/path1.ext" );
+}
+
 void StringTest::template_wexpression()
 {
 #if !defined (STLPORT) || !defined (_STLP_NO_WCHAR_T)
 #  if !defined (__CYGWIN__) || defined (STLPORT)
   wstring one(L"one"), two(L"two"), three(L"three");
-  wstring space(1, L' ');
+  wstring space(L" ");
 
   {
     wstring result(one + L' ' + two + L' ' + three);
@@ -1092,13 +1255,13 @@ void StringTest::template_wexpression()
 #    if !defined (STLPORT) || defined (_STLP_USE_EXCEPTIONS)
     try {
       result = (one + L' ' + two).at(10);
-      CPPUNIT_ASSERT(false);
+      CPPUNIT_FAIL;
     }
     catch (out_of_range const&) {
       CPPUNIT_ASSERT( result == L' ' );
     }
     catch (...) {
-      CPPUNIT_ASSERT(false);
+      CPPUNIT_FAIL;
     }
 #    endif
   }
@@ -1253,3 +1416,12 @@ void StringTest::capacity()
   }
 }
 
+void StringTest::concat24()
+{
+  string s = string( "123456789012345678901234" ) + string( "123456789012345678901234" );
+
+  CPPUNIT_CHECK( s.length() == 48 );
+  CPPUNIT_CHECK( s[23] == '4' );
+  CPPUNIT_CHECK( s[24] == '1' );
+  CPPUNIT_CHECK( s[47] == '4' );
+}

@@ -4,6 +4,7 @@
 
 #include "cppunit/cppunit_proxy.h"
 
+#if defined (STLPORT) && defined (_STLP_USE_NAMESPACES)
 /*
  * This test case purpose is to check that the exception handling
  * functions are correctly imported to the STLport namespace only
@@ -21,6 +22,7 @@ class ExceptionTest : public CPPUNIT_NS::TestCase
 #if defined (STLPORT) && !defined (_STLP_USE_EXCEPTIONS)
   CPPUNIT_IGNORE;
 #endif
+  CPPUNIT_TEST(what);
 #if defined (STLPORT) && defined (_STLP_NO_UNEXPECTED_EXCEPT_SUPPORT)
   CPPUNIT_IGNORE;
 #endif
@@ -39,6 +41,7 @@ class ExceptionTest : public CPPUNIT_NS::TestCase
   CPPUNIT_TEST_SUITE_END();
 
 protected:
+  void what();
   void unexpected_except();
   void uncaught_except();
   void exception_emission();
@@ -62,6 +65,16 @@ void throw_except_func() throw(std::exception) {
   throw_func();
 }
 #endif
+
+void ExceptionTest::what()
+{
+  try {
+    throw std::runtime_error( std::string( "message" ) );
+  }
+  catch ( std::runtime_error& err ) {
+    CPPUNIT_CHECK( strcmp( err.what(), "message" ) == 0 );
+  }
+}
 
 void ExceptionTest::unexpected_except()
 {
@@ -128,23 +141,53 @@ void ExceptionTest::exception_emission()
   }
   catch (std::runtime_error const& e) {
     CPPUNIT_ASSERT( foo == e.what() );
+    std::runtime_error clone("");
+    clone = e;
+    CPPUNIT_ASSERT(foo == clone.what() );
   }
   catch (...) {
     CPPUNIT_ASSERT( false );
   }
 
   try {
-    std::string msg(512, 'a');
+    throw std::runtime_error(foo);
+  }
+  catch (std::runtime_error e) {
+    CPPUNIT_ASSERT( foo == e.what() );
+    std::runtime_error clone("");
+    clone = e;
+    CPPUNIT_ASSERT(foo == clone.what() );
+  }
+  catch (...) {
+    CPPUNIT_ASSERT( false );
+  }
+
+  std::string msg(512, 'a');
+  try {
     throw std::runtime_error(msg);
   }
   catch (std::runtime_error const& e) {
-    const char* c = e.what();
-    while (*c != 0) {
-      CPPUNIT_ASSERT( *c++ == 'a' );
-    }
+    CPPUNIT_ASSERT(msg == e.what() );
+    std::runtime_error clone("");
+    clone = e;
+    CPPUNIT_ASSERT(msg == clone.what() );
+  }
+  catch (...) {
+    CPPUNIT_ASSERT( false );
+  }
+
+  try {
+    throw std::runtime_error(msg);
+  }
+  catch (std::runtime_error e) {
+    CPPUNIT_ASSERT(msg == e.what() );
+    std::runtime_error clone("");
+    clone = e;
+    CPPUNIT_ASSERT(msg == clone.what() );
   }
   catch (...) {
     CPPUNIT_ASSERT( false );
   }
 #endif
 }
+#endif

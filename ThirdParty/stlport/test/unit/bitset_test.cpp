@@ -1,6 +1,8 @@
 #include <bitset>
 #include <algorithm>
-#include <sstream>
+#if !defined (STLPORT) || !defined (_STLP_USE_NO_IOSTREAMS)
+#  include <sstream>
+#endif
 
 #include "cppunit/cppunit_proxy.h"
 
@@ -15,6 +17,9 @@ class BitsetTest : public CPPUNIT_NS::TestCase
 {
   CPPUNIT_TEST_SUITE(BitsetTest);
   CPPUNIT_TEST(bitset1);
+#if defined (STLPORT) && defined (_STLP_USE_NO_IOSTREAMS)
+  CPPUNIT_IGNORE;
+#endif
   CPPUNIT_TEST(iostream);
   CPPUNIT_TEST_SUITE_END();
 
@@ -32,18 +37,19 @@ void BitsetTest::bitset1()
 {
   bitset<13U> b1(0xFFFF);
   bitset<13U> b2(0x1111);
-  CPPUNIT_ASSERT(b1.size()==13);
-  CPPUNIT_ASSERT(b1==0x1FFF);
-  CPPUNIT_ASSERT(b2.size()==13);
-  CPPUNIT_ASSERT(b2==0x1111);
+  CPPUNIT_ASSERT(b1.size() == 13);
+  CPPUNIT_ASSERT(b1 == 0x1FFF);
+  CPPUNIT_ASSERT(b2.size() == 13);
+  CPPUNIT_ASSERT(b2 == 0x1111);
 
-  b1 = b1^(b2<<2);
-  CPPUNIT_ASSERT(b1==0x1BBB);
+#if !defined (STLPORT) || !defined (_STLP_NON_TYPE_TMPL_PARAM_BUG)
+  b1 = b1 ^ (b2 << 2);
+  CPPUNIT_ASSERT(b1 == 0x1BBB);
 
-  CPPUNIT_ASSERT(b1.count()==10);
-  CPPUNIT_ASSERT(b2.count()==4);
+  CPPUNIT_ASSERT(b1.count() == 10);
+  CPPUNIT_ASSERT(b2.count() == 4);
 
-#if defined (STLPORT) && !defined (_STLP_NO_EXTENSIONS)
+#  if defined (STLPORT) && !defined (_STLP_NO_EXTENSIONS)
   size_t __pos = b2._Find_first();
   CPPUNIT_ASSERT( __pos == 0 );
   __pos = b2._Find_next(__pos);
@@ -54,6 +60,7 @@ void BitsetTest::bitset1()
   CPPUNIT_ASSERT( __pos == 12 );
   __pos = b2._Find_next(__pos);
   CPPUNIT_ASSERT( __pos == 13 );
+#  endif
 #endif
 
 #if !defined (STLPORT) || !defined (_STLP_NO_MEMBER_TEMPLATES) && !defined (_STLP_NO_EXPLICIT_FUNCTION_TMPL_ARGS)
@@ -70,6 +77,7 @@ void BitsetTest::bitset1()
 
 void BitsetTest::iostream()
 {
+#if !defined (STLPORT) || !defined (_STLP_USE_NO_IOSTREAMS)
   {
     stringstream sstr;
     bitset<13U> b(0x1111);
@@ -83,7 +91,7 @@ void BitsetTest::iostream()
     CPPUNIT_ASSERT( b1.test(8) );
     CPPUNIT_ASSERT( b1.test(12) );
   }
-#if !defined (STLPORT) || !defined (_STLP_NO_WCHAR_T)
+#  if !defined (STLPORT) || !defined (_STLP_NO_WCHAR_T)
   {
     wstringstream sstr;
     bitset<13U> b(0x1111);
@@ -97,5 +105,6 @@ void BitsetTest::iostream()
     CPPUNIT_ASSERT( b1.test(8) );
     CPPUNIT_ASSERT( b1.test(12) );
   }
+#  endif
 #endif
 }

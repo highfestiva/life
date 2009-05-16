@@ -17,8 +17,6 @@
  */
 #include "stlport_prefix.h"
 
-#ifndef _STLP_NO_MBSTATE_T
-
 #include <locale>
 #include <algorithm>
 
@@ -29,7 +27,7 @@ _STLP_BEGIN_NAMESPACE
 
 codecvt<char, char, mbstate_t>::~codecvt() {}
 
-int codecvt<char, char, mbstate_t>::do_length(const mbstate_t&,
+int codecvt<char, char, mbstate_t>::do_length(state_type&,
                                               const  char* from,
                                               const  char* end,
                                               size_t mx) const
@@ -47,14 +45,14 @@ codecvt<char, char, mbstate_t>::do_encoding() const _STLP_NOTHROW
 { return 1; }
 
 codecvt_base::result
-codecvt<char, char, mbstate_t>::do_unshift(mbstate_t& /* __state */,
-                                           char*      __to,
-                                           char*      /* __to_limit */,
-                                           char*&     __to_next) const
+codecvt<char, char, mbstate_t>::do_unshift(state_type& /* __state */,
+                                           char*       __to,
+                                           char*       /* __to_limit */,
+                                           char*&      __to_next) const
 { __to_next = __to; return noconv; }
 
 codecvt_base::result
-codecvt<char, char, mbstate_t>::do_in (mbstate_t&   /* __state */ ,
+codecvt<char, char, mbstate_t>::do_in (state_type&  /* __state */ ,
                                        const char*  __from,
                                        const char*  /* __from_end */,
                                        const char*& __from_next,
@@ -64,7 +62,7 @@ codecvt<char, char, mbstate_t>::do_in (mbstate_t&   /* __state */ ,
 { __from_next = __from; __to_next   = __to; return noconv; }
 
 codecvt_base::result
-codecvt<char, char, mbstate_t>::do_out(mbstate_t&   /* __state */,
+codecvt<char, char, mbstate_t>::do_out(state_type&  /* __state */,
                                        const char*  __from,
                                        const char*  /* __from_end */,
                                        const char*& __from_next,
@@ -127,7 +125,7 @@ int codecvt<wchar_t, char, mbstate_t>::do_encoding() const _STLP_NOTHROW
 bool codecvt<wchar_t, char, mbstate_t>::do_always_noconv() const _STLP_NOTHROW
 { return true; }
 
-int codecvt<wchar_t, char, mbstate_t>::do_length(const  state_type&,
+int codecvt<wchar_t, char, mbstate_t>::do_length(state_type&,
                                                  const  extern_type* from,
                                                  const  extern_type* end,
                                                  size_t mx) const
@@ -138,8 +136,6 @@ int codecvt<wchar_t, char, mbstate_t>::do_max_length() const _STLP_NOTHROW
 #endif /* wchar_t */
 
 _STLP_END_NAMESPACE
-
-#endif /* _STLP_NO_MBSTATE_T */
 
 // Local Variables:
 // mode:C++

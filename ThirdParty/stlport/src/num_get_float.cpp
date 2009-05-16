@@ -22,13 +22,18 @@
 #include <locale>
 #include <istream>
 
-#if defined (__GNUC__) && !defined (__sun) || \
+#if (defined (__GNUC__) && !defined (__sun) && !defined (__hpux)) || \
     defined (__DMC__)
 #  include <stdint.h>
 #endif
 
-#if defined (__linux__)
-#  include <ieee754.h>
+#if defined (__linux__) || defined (__MINGW32__) || defined (__CYGWIN__) || \
+    defined (__BORLANDC__) || defined (__DMC__) || defined (__HP_aCC)
+
+#  if defined (__BORLANDC__)
+typedef unsigned int uint32_t;
+typedef unsigned __int64 uint64_t;
+#  endif
 
 union _ll {
   uint64_t i64;
@@ -44,34 +49,25 @@ union _ll {
 #  endif
   } i32;
 };
-#endif
 
-#if defined (N_PLAT_NLM)
-#  include <nlm/nwintxx.h>
-
-#  if defined (INT64)
-typedef unsigned INT64 uint64_t;
+#  if defined (__linux__)
+#    include <ieee754.h>
 #  else
-// #error "Can't find INT64"
-// 64-bit int really not defined in headers
-// (_INTEGRAL_MAX_BITS < 64 in any case?), but compiler indeed know __int64
-//        - ptr, 2005-05-06
-typedef unsigned __int64 uint64_t;
-#  endif
+union ieee854_long_double {
+  long double d;
 
-#  if defined (INT32)
-typedef unsigned INT32 uint32_t;
-#  else
-#    error Can not find INT32
-#  endif
-
-union _ll {
-  uint64_t i64;
+  /* This is the IEEE 854 double-extended-precision format.  */
   struct {
-    uint32_t lo;
-    uint32_t hi;
-  } i32;
+    unsigned int mantissa1:32;
+    unsigned int mantissa0:32;
+    unsigned int exponent:15;
+    unsigned int negative:1;
+    unsigned int empty:16;
+  } ieee;
 };
+
+#    define IEEE854_LONG_DOUBLE_BIAS 0x3fff
+#  endif
 #endif
 
 _STLP_BEGIN_NAMESPACE
@@ -107,11 +103,8 @@ _Initialize_get_float( const ctype<wchar_t>& ct,
 typedef unsigned long uint32;
 typedef unsigned __int64 uint64;
 #  define ULL(x) x##Ui64
-#elif defined (__MRC__) || defined (__SC__)
-typedef unsigned long uint32;
-#  include "uint64.h"    //*TY 03/25/2000 - added 64bit math type definition
-#elif defined (__unix) || defined (__MINGW32__) || defined (N_PLAT_NLM) || \
-      (defined (__DMC__) && (__LONGLONG))
+#elif defined (__unix) || defined (__MINGW32__) || \
+      (defined (__DMC__) && (__LONGLONG)) || defined (__WATCOMC__)
 typedef uint32_t uint32;
 typedef uint64_t uint64;
 #  define ULL(x) x##ULL
@@ -142,16 +135,20 @@ static void _Stl_mult64(const uint64 u, const uint64 v,
   high = u1 * v1 + w2 + (x >> 32);
 }
 
-#define bit11 ULL(0x7ff)
-#define exponent_mask (bit11 << 52)
+#ifndef __linux__
 
-#if !defined (__GNUC__) || (__GNUC__ != 3) || (__GNUC_MINOR__ != 4) || \
-    (!defined (__CYGWIN__) && !defined (__MINGW32__))
+#  define bit11 ULL(0x7ff)
+#  define exponent_mask (bit11 << 52)
+
+#  if !defined (__GNUC__) || (__GNUC__ != 3) || (__GNUC_MINOR__ != 4) || \
+      (!defined (__CYGWIN__) && !defined (__MINGW32__))
 //Generate bad code when compiled with -O2 option.
 inline
-#endif
+#  endif
 void _Stl_set_exponent(uint64 &val, uint64 exp)
 { val = (val & ~exponent_mask) | ((exp & bit11) << 52); }
+
+#endif // __linux__
 
 /* Power of ten fractions for tenscale*/
 /* The constants are factored so that at most two constants
@@ -159,7 +156,6 @@ void _Stl_set_exponent(uint64 &val, uint64 exp)
  * is represented exactly - 10**n where 1<= n <= 27.
  */
 
-#if !defined (__SC__)    //*TY 03/25/2000 - no native 64bit integer under SCpp
 static const uint64 _Stl_tenpow[80] = {
 ULL(0xa000000000000000), /* _Stl_tenpow[0]=(10**1)/(2**4) */
 ULL(0xc800000000000000), /* _Stl_tenpow[1]=(10**2)/(2**7) */
@@ -200,6 +196,9 @@ ULL(0xdf78e4b2bd342cf7), /* _Stl_tenpow[34]=(10**251)/(2**834) */
 ULL(0xe1a63853bbd26451), /* _Stl_tenpow[35]=(10**279)/(2**927) */
 ULL(0xe3d8f9e563a198e5), /* _Stl_tenpow[36]=(10**307)/(2**1020) */
 
+// /* _Stl_tenpow[36]=(10**335)/(2**) */
+// /* _Stl_tenpow[36]=(10**335)/(2**) */
+
 ULL(0xfd87b5f28300ca0e), /* _Stl_tenpow[37]=(10**-28)/(2**-93) */
 ULL(0xfb158592be068d2f), /* _Stl_tenpow[38]=(10**-56)/(2**-186) */
 ULL(0xf8a95fcf88747d94), /* _Stl_tenpow[39]=(10**-84)/(2**-279) */
@@ -213,62 +212,6 @@ ULL(0xe858ad248f5c22ca), /* _Stl_tenpow[46]=(10**-280)/(2**-930) */
 ULL(0xe61acf033d1a45df), /* _Stl_tenpow[47]=(10**-308)/(2**-1023)    */
 ULL(0xe3e27a444d8d98b8), /* _Stl_tenpow[48]=(10**-336)/(2**-1116) */
 ULL(0xe1afa13afbd14d6e)  /* _Stl_tenpow[49]=(10**-364)/(2**-1209) */
-
-#else    //*TY 03/20/2000 - added support for SCpp which lacks native 64bit integer type
-static const UnsignedWide _Stl_tenpow[80] = {
-ULL2(0xa0000000,0x00000000), /* _Stl_tenpow[0]=(10**1)/(2**4) */
-ULL2(0xc8000000,0x00000000), /* _Stl_tenpow[1]=(10**2)/(2**7) */
-ULL2(0xfa000000,0x00000000), /* _Stl_tenpow[2]=(10**3)/(2**10) */
-ULL2(0x9c400000,0x00000000), /* _Stl_tenpow[3]=(10**4)/(2**14) */
-ULL2(0xc3500000,0x00000000), /* _Stl_tenpow[4]=(10**5)/(2**17) */
-ULL2(0xf4240000,0x00000000), /* _Stl_tenpow[5]=(10**6)/(2**20) */
-ULL2(0x98968000,0x00000000), /* _Stl_tenpow[6]=(10**7)/(2**24) */
-ULL2(0xbebc2000,0x00000000), /* _Stl_tenpow[7]=(10**8)/(2**27) */
-ULL2(0xee6b2800,0x00000000), /* _Stl_tenpow[8]=(10**9)/(2**30) */
-ULL2(0x9502f900,0x00000000), /* _Stl_tenpow[9]=(10**10)/(2**34) */
-ULL2(0xba43b740,0x00000000), /* _Stl_tenpow[10]=(10**11)/(2**37) */
-ULL2(0xe8d4a510,0x00000000), /* _Stl_tenpow[11]=(10**12)/(2**40) */
-ULL2(0x9184e72a,0x00000000), /* _Stl_tenpow[12]=(10**13)/(2**44) */
-ULL2(0xb5e620f4,0x80000000), /* _Stl_tenpow[13]=(10**14)/(2**47) */
-ULL2(0xe35fa931,0xa0000000), /* _Stl_tenpow[14]=(10**15)/(2**50) */
-ULL2(0x8e1bc9bf,0x04000000), /* _Stl_tenpow[15]=(10**16)/(2**54) */
-ULL2(0xb1a2bc2e,0xc5000000), /* _Stl_tenpow[16]=(10**17)/(2**57) */
-ULL2(0xde0b6b3a,0x76400000), /* _Stl_tenpow[17]=(10**18)/(2**60) */
-ULL2(0x8ac72304,0x89e80000), /* _Stl_tenpow[18]=(10**19)/(2**64) */
-ULL2(0xad78ebc5,0xac620000), /* _Stl_tenpow[19]=(10**20)/(2**67) */
-ULL2(0xd8d726b7,0x177a8000), /* _Stl_tenpow[20]=(10**21)/(2**70) */
-ULL2(0x87867832,0x6eac9000), /* _Stl_tenpow[21]=(10**22)/(2**74) */
-ULL2(0xa968163f,0x0a57b400), /* _Stl_tenpow[22]=(10**23)/(2**77) */
-ULL2(0xd3c21bce,0xcceda100), /* _Stl_tenpow[23]=(10**24)/(2**80) */
-ULL2(0x84595161,0x401484a0), /* _Stl_tenpow[24]=(10**25)/(2**84) */
-ULL2(0xa56fa5b9,0x9019a5c8), /* _Stl_tenpow[25]=(10**26)/(2**87) */
-ULL2(0xcecb8f27,0xf4200f3a), /* _Stl_tenpow[26]=(10**27)/(2**90) */
-
-ULL2(0xd0cf4b50,0xcfe20766), /* _Stl_tenpow[27]=(10**55)/(2**183) */
-ULL2(0xd2d80db0,0x2aabd62c), /* _Stl_tenpow[28]=(10**83)/(2**276) */
-ULL2(0xd4e5e2cd,0xc1d1ea96), /* _Stl_tenpow[29]=(10**111)/(2**369) */
-ULL2(0xd6f8d750,0x9292d603), /* _Stl_tenpow[30]=(10**139)/(2**462) */
-ULL2(0xd910f7ff,0x28069da4), /* _Stl_tenpow[31]=(10**167)/(2**555) */
-ULL2(0xdb2e51bf,0xe9d0696a), /* _Stl_tenpow[32]=(10**195)/(2**648) */
-ULL2(0xdd50f199,0x6b947519), /* _Stl_tenpow[33]=(10**223)/(2**741) */
-ULL2(0xdf78e4b2,0xbd342cf7), /* _Stl_tenpow[34]=(10**251)/(2**834) */
-ULL2(0xe1a63853,0xbbd26451), /* _Stl_tenpow[35]=(10**279)/(2**927) */
-ULL2(0xe3d8f9e5,0x63a198e5), /* _Stl_tenpow[36]=(10**307)/(2**1020) */
-
-ULL2(0xfd87b5f2,0x8300ca0e), /* _Stl_tenpow[37]=(10**-28)/(2**-93) */
-ULL2(0xfb158592,0xbe068d2f), /* _Stl_tenpow[38]=(10**-56)/(2**-186) */
-ULL2(0xf8a95fcf,0x88747d94), /* _Stl_tenpow[39]=(10**-84)/(2**-279) */
-ULL2(0xf64335bc,0xf065d37d), /* _Stl_tenpow[40]=(10**-112)/(2**-372) */
-ULL2(0xf3e2f893,0xdec3f126), /* _Stl_tenpow[41]=(10**-140)/(2**-465) */
-ULL2(0xf18899b1,0xbc3f8ca2), /* _Stl_tenpow[42]=(10**-168)/(2**-558) */
-ULL2(0xef340a98,0x172aace5), /* _Stl_tenpow[43]=(10**-196)/(2**-651) */
-ULL2(0xece53cec,0x4a314ebe), /* _Stl_tenpow[44]=(10**-224)/(2**-744) */
-ULL2(0xea9c2277,0x23ee8bcb), /* _Stl_tenpow[45]=(10**-252)/(2**-837)     */
-ULL2(0xe858ad24,0x8f5c22ca), /* _Stl_tenpow[46]=(10**-280)/(2**-930) */
-ULL2(0xe61acf03,0x3d1a45df), /* _Stl_tenpow[47]=(10**-308)/(2**-1023)    */
-ULL2(0xe3e27a44,0x4d8d98b8), /* _Stl_tenpow[48]=(10**-336)/(2**-1116) */
-ULL2(0xe1afa13a,0xfbd14d6e)  /* _Stl_tenpow[49]=(10**-364)/(2**-1209) */
-#endif
 };
 
 static const short _Stl_twoexp[80] = {
@@ -307,22 +250,15 @@ static void _Stl_norm_and_round(uint64& p, int& norm, uint64 prodhi, uint64 prod
     p = prodhi;
   }
 
-  if ((prodlo & _Stl_HIBITULL) != 0) {     /* first guard bit a one */    //*TY 03/25/2000 - added explicit comparison to zero to avoid reliance to the implicit conversion from uint64 to bool
-#if !defined (__SC__)                  //*TY 03/25/2000 -
+  if ((prodlo & _Stl_HIBITULL) != 0) {     /* first guard bit a one */
     if (((p & 0x1) != 0) ||
         prodlo != _Stl_HIBITULL ) {    /* not borderline for round to even */
-#else                                 //*TY 03/25/2000 - added workaround for SCpp compiler
-    bool b1 = ((p & 0x1) != 0);
-    if (b1 || prodlo != _Stl_HIBITULL) { //*TY 03/25/2000 - SCpp confuses on this particular original boolean expression
-#endif                                    //*TY 03/25/2000 -
       /* round */
       ++p;
       if (p == 0)
         ++p;
     }
   }
-
-  return;
 }
 
 // Convert a 64-bitb fraction * 10^exp to a 64-bit fraction * 2^bexp.
@@ -330,16 +266,17 @@ static void _Stl_norm_and_round(uint64& p, int& norm, uint64 prodhi, uint64 prod
 // exp:  base-10 exponent
 // bexp: base-2 exponent (output parameter)
 static void _Stl_tenscale(uint64& p, int exp, int& bexp) {
-  uint64 prodhi, prodlo;        /* 128b product */
-  int exp_hi, exp_lo;           /* exp = exp_hi*32 + exp_lo */
-  int hi, lo, tlo, thi;         /* offsets in power of ten table */
-  int norm;                     /* number of bits of normalization */
+  bexp = 0;
+
+  if ( exp == 0 ) {              /* no scaling needed */
+    return;
+  }
+
+  int exp_hi = 0, exp_lo = exp; /* exp = exp_hi*32 + exp_lo */
+  int tlo = TEN_1, thi;         /* offsets in power of ten table */
   int num_hi;                   /* number of high exponent powers */
 
-  bexp = 0;
-  if (exp > 0) {                 /* split exponent */
-    exp_lo = exp;
-    exp_hi = 0;
+  if (exp > 0) {                /* split exponent */
     if (exp_lo > 27) {
       exp_lo++;
       while (exp_lo > 27) {
@@ -347,25 +284,22 @@ static void _Stl_tenscale(uint64& p, int exp, int& bexp) {
         exp_lo -= 28;
       }
     }
-    tlo = TEN_1;
     thi = TEN_27;
     num_hi = NUM_HI_P;
-  }
-  else if (exp < 0) {
-    exp_lo = exp;
-    exp_hi = 0;
+  } else { // exp < 0
     while (exp_lo < 0) {
       exp_hi++;
       exp_lo += 28;
     }
-    tlo = TEN_1;
     thi = TEN_M28;
     num_hi = NUM_HI_N;
   }
-  else {                        /* no scaling needed */
-    return;
-  }
-  while (exp_hi) {               /* scale */
+
+  uint64 prodhi, prodlo;        /* 128b product */
+  int norm;                     /* number of bits of normalization */
+
+  int hi, lo;                   /* offsets in power of ten table */
+  while (exp_hi) {              /* scale */
     hi = (min) (exp_hi, num_hi);    /* only a few large powers of 10 */
     exp_hi -= hi;               /* could iterate in extreme case */
     hi += thi-1;
@@ -373,6 +307,7 @@ static void _Stl_tenscale(uint64& p, int exp, int& bexp) {
     _Stl_norm_and_round(p, norm, prodhi, prodlo);
     bexp += _Stl_twoexp[hi] - norm;
   }
+
   if (exp_lo) {
     lo = tlo + exp_lo -1;
     _Stl_mult64(p, _Stl_tenpow[lo], prodhi, prodlo);
@@ -387,34 +322,18 @@ static void _Stl_tenscale(uint64& p, int exp, int& bexp) {
 // Second argument is number of digits in buffer, 1 <= digits <= 17.
 // Third argument is base-10 exponent.
 
-#if defined (__SC__) || defined (__MRC__)
+/* IEEE representation */
+#if !defined (__linux__)
 
-//*TY 04/06/2000 - powermac's 68K emulator utilizes apple's SANE floating point, which is not compatible with IEEE format.
-_STLP_MOVE_TO_STD_NAMESPACE
-_STLP_END_NAMESPACE
+union _Double_rep {
+  uint64 ival;
+  double val;
+};
 
-#  include <fp.h>
-
-_STLP_BEGIN_NAMESPACE
-_STLP_MOVE_TO_PRIV_NAMESPACE
-
-static inline double _Stl_atod(char *buffer, int ndigit, int dexp) {
-  decimal d;  // ref. inside macintosh powerpc numerics p.9-13
-
-  d.sgn = 0;
-  d.exp = dexp;
-  d.sig.length = ndigit;
-  for (int i = 0; i < ndigit; ++i) {
-    d.sig.text[i] = buffer[i] + '0';
-  }
-  return dec2num(&d);
-}
-
-#else  /* IEEE representation */
-
-#  if !defined (__linux__)
-static double _Stl_atod(char *buffer, int ndigit, int dexp) {
-  uint64 value;         /* Value develops as follows:
+static double _Stl_atod(char *buffer, ptrdiff_t ndigit, int dexp) {
+  typedef numeric_limits<double> limits;
+  _Double_rep drep;
+  uint64 &value = drep.ival;  /* Value develops as follows:
                                  * 1) decimal digits as an integer
                                  * 2) left adjusted fraction
                                  * 3) right adjusted fraction
@@ -430,13 +349,7 @@ static double _Stl_atod(char *buffer, int ndigit, int dexp) {
 
   char *bufferend;              /* pointer to char after last digit */
 
-  /* Check for zero and treat it as a special case */
-  if (buffer == 0){
-    return 0.0;
-  }
-
   /* Convert the decimal digits to a binary integer. */
-
   bufferend = buffer + ndigit;
   value = 0;
 
@@ -491,27 +404,19 @@ static double _Stl_atod(char *buffer, int ndigit, int dexp) {
       }
       else if (lead0 == 64) {
         rest = value & ((ULL(1)<< 63)-1);
-#if !defined(__SC__)
         guard = (uint32) ((value>> 63) & 1 );
-#else
-        guard = to_ulong((value>> 63) & 1 );   //*TY 03/25/2000 - use member function instead of problematic conversion operator utilization
-#endif
         value = 0;
       }
       else {
         rest = value & (((ULL(1) << lead0)-1)-1);
-#if !defined(__SC__)
         guard = (uint32) (((value>> lead0)-1) & 1);
-#else     //*TY 03/25/2000 -
-        guard = to_ulong(((value>> lead0)-1) & 1);
-#endif    //*TY 03/25/2000 -
         value >>= /*(uint64)*/ lead0; /* exponent is zero */
       }
 
       /* Round */
       if (guard && ((value & 1) || rest) ) {
         ++value;
-        if (value == (ULL(1) << 52)) { /* carry created normal number */
+        if (value == (ULL(1) << (limits::digits - 1))) { /* carry created normal number */
           value = 0;
           _Stl_set_exponent(value, 1);
         }
@@ -520,13 +425,9 @@ static double _Stl_atod(char *buffer, int ndigit, int dexp) {
   }
   else {                        /* not zero or denorm */
     /* Round to 53 bits */
-    rest = value & (1<<10)-1;
+    rest = value & ((1 << 10) - 1);
     value >>= 10;
-#if !defined(__SC__)
     guard = (uint32) value & 1;
-#else    //*TY 03/25/2000 -
-    guard = to_ulong(value & 1);
-#endif
     value >>= 1;
 
     /*  value&1 guard   rest    Action
@@ -559,54 +460,50 @@ static double _Stl_atod(char *buffer, int ndigit, int dexp) {
      * Total width in bits         64
      */
 
-    if (bexp > 1024) {          /* overflow */
-      return numeric_limits<double>::infinity();
+    if (bexp > limits::max_exponent) {          /* overflow */
+      return limits::infinity();
     }
     else {                      /* value is normal */
-      value &= ~(ULL(1) << 52);   /* hide hidden bit */
+      value &= ~(ULL(1) << (limits::digits - 1));   /* hide hidden bit */
       _Stl_set_exponent(value, bexp + 1022); /* add bias */
     }
   }
 
-  _STLP_STATIC_ASSERT(sizeof(value) == sizeof(double))
-  return *((double *) &value);
+  _STLP_STATIC_ASSERT(sizeof(uint64) >= sizeof(double))
+  return drep.val;
 }
 
-#  else // __linux__
+#endif
 
-static double _Stl_atod(char *buffer, int ndigit, int dexp) {
-  ieee754_double v;
+#if defined (__linux__) || defined (__MINGW32__) || defined (__CYGWIN__) || \
+    defined (__BORLANDC__) || defined (__DMC__) || defined (__HP_aCC)
 
-  char *bufferend;              /* pointer to char after last digit */
-
-  /* Check for zero and treat it as a special case */
-
-  if (buffer == 0) {
-    return 0.0;
-  }
+template <class D, class IEEE, int M, int BIAS>
+D _Stl_atodT(char *buffer, ptrdiff_t ndigit, int dexp)
+{
+  typedef numeric_limits<D> limits;
 
   /* Convert the decimal digits to a binary integer. */
-
-  bufferend = buffer + ndigit;
+  char *bufferend = buffer + ndigit; /* pointer to char after last digit */
   _ll vv;
   vv.i64 = 0L;
 
-  while (buffer < bufferend) {
+  while ( buffer < bufferend ) {
     vv.i64 *= 10;
     vv.i64 += *buffer++;
   }
 
-  /* Check for zero and treat it as a special case */
-  if (vv.i64 == 0){
-    return 0.0;
+  if ( vv.i64 == ULL(0) ) { /* Check for zero and treat it as a special case */
+    return D(0.0);
   }
 
   /* Normalize value */
-  int bexp = 64;                    /* convert from 64b int to fraction */
+
+  int bexp = 64; /* convert from 64b int to fraction */
 
   /* Count number of non-zeroes in value */
   int nzero = 0;
-  if ((vv.i64 >> 32) !=0 ) { nzero  = 32; }    //*TY 03/25/2000 - added explicit comparison to zero to avoid uint64 to bool conversion operator
+  if ((vv.i64 >> 32) != 0) { nzero = 32; }
   if ((vv.i64 >> (16 + nzero)) != 0) { nzero += 16; }
   if ((vv.i64 >> ( 8 + nzero)) != 0) { nzero +=  8; }
   if ((vv.i64 >> ( 4 + nzero)) != 0) { nzero +=  4; }
@@ -616,7 +513,7 @@ static double _Stl_atod(char *buffer, int ndigit, int dexp) {
 
   /* Normalize */
   nzero = 64 - nzero;
-  vv.i64 <<= nzero;    //*TY 03/25/2000 - removed extraneous cast to uint64
+  vv.i64 <<= nzero;    // * TY 03/25/2000 - removed extraneous cast to uint64
   bexp -= nzero;
 
   /* At this point we have a 64b fraction and a binary exponent
@@ -628,82 +525,33 @@ static double _Stl_atod(char *buffer, int ndigit, int dexp) {
   _Stl_tenscale(vv.i64, dexp, sexp);
   bexp += sexp;
 
-  if (bexp <= -1022) {          /* HI denorm or underflow */
-    bexp += 1022;
-    if (bexp < -53) {           /* guaranteed underflow */
-      vv.i64 = 0;
-    }
-    else {                      /* denorm or possible underflow */
-      int lead0;
-      uint64_t rest;
-      uint32_t guard;
+  if ( bexp >= limits::min_exponent ) { /* not zero or denorm */
+    if ( limits::digits < 64 ) {
+      /* Round to (64 - M + 1) bits */
+      uint64_t rest = vv.i64 & ((~ULL(0) / ULL(2)) >> (limits::digits - 1));
+      vv.i64 >>= M - 2;
+      uint32_t guard = (uint32) vv.i64 & 1;
+      vv.i64 >>= 1;
 
-      lead0 = 12-bexp;          /* 12 sign and exponent bits */
+      /*  value&1 guard   rest    Action
+       *
+       *  dc      0       dc      none
+       *  1       1       dc      round
+       *  0       1       0       none
+       *  0       1       !=0     round
+       */
 
-      /* we must special case right shifts of more than 63 */
-      if (lead0 > 64) {
-        rest = vv.i64;
-        guard = 0;
-        vv.i64 = 0;
-      }
-      else if (lead0 == 64) {
-        rest = vv.i64 & ((ULL(1) << 63)-1);
-#if !defined(__SC__)
-        guard = (uint32) ((vv.i64 >> 63) & 1 );
-#else
-        guard = to_ulong((vv.i64 >> 63) & 1 );   //*TY 03/25/2000 - use member function instead of problematic conversion operator utilization
-#endif
-        vv.i64 = 0;
-      }
-      else {
-        rest = vv.i64 & (((ULL(1) << lead0)-1)-1);
-#if !defined(__SC__)
-        guard = (uint32) (((vv.i64 >> lead0)-1) & 1);
-#else     //*TY 03/25/2000 -
-        guard = to_ulong(((vv.i64 >> lead0)-1) & 1);
-#endif    //*TY 03/25/2000 -
-        vv.i64 >>= /*(uint64)*/ lead0; /* exponent is zero */
-      }
-
-      /* Round */
-      if (guard && ( (vv.i64 & 1) || rest)) {
-        vv.i64++;
-        if (vv.i64 == (ULL(1) << 52)) { /* carry created normal number */
-          v.ieee.mantissa0 = 0;
-          v.ieee.mantissa1 = 0;
-          v.ieee.negative = 0;
-          v.ieee.exponent = 1;
-          return v.d;
+      if (guard) {
+        if ( ((vv.i64 & 1) != 0) || (rest != 0) ) {
+          vv.i64++;       /* round */
+          if ( (vv.i64 >> (limits::digits < 64 ? limits::digits : 0)) != 0 ) { /* carry all the way across */
+            vv.i64 >>= 1; /* renormalize */
+            ++bexp;
+          }
         }
       }
-    }
-  }
-  else {                        /* not zero or denorm */
-    /* Round to 53 bits */
-    uint64_t rest = vv.i64 & (1<<10)-1;
-    vv.i64 >>= 10;
-#if !defined(__SC__)
-    uint32_t guard = (uint32) vv.i64 & 1;
-#else    //*TY 03/25/2000 -
-    uint32_t guard = to_ulong(vv.i64 & 1);
-#endif
-    vv.i64 >>= 1;
 
-    /*  value&1 guard   rest    Action
-     *
-     *  dc      0       dc      none
-     *  1       1       dc      round
-     *  0       1       0       none
-     *  0       1       !=0     round
-     */
-    if (guard) {
-      if (((vv.i64&1)!=0) || (rest!=0)) {
-        vv.i64++;                        /* round */
-        if ((vv.i64>>53)!=0) {         /* carry all the way across */
-          vv.i64 >>= 1;          /* renormalize */
-          ++bexp;
-        }
-      }
+      vv.i64 &= ~(ULL(1) << (limits::digits - 1)); /* hide hidden bit */
     }
     /*
      * Check for overflow
@@ -719,18 +567,69 @@ static double _Stl_atod(char *buffer, int ndigit, int dexp) {
      * Total width in bits         64
      */
 
-    if (bexp > 1024) {          /* overflow */
-      return numeric_limits<double>::infinity();
+    if (bexp > limits::max_exponent) { /* overflow */
+      return limits::infinity();
     }
-    else {                      /* value is normal */
-      vv.i64 &= ~(ULL(1) << 52);   /* hide hidden bit */
-      v.ieee.mantissa0 = vv.i32.hi;
-      v.ieee.mantissa1 = vv.i32.lo;
-      v.ieee.negative = 0;
-      v.ieee.exponent = bexp + 1022;
-      return v.d;
+
+    /* value is normal */
+
+    IEEE v;
+
+    v.ieee.mantissa0 = vv.i32.hi;
+    v.ieee.mantissa1 = vv.i32.lo;
+    v.ieee.negative = 0;
+    v.ieee.exponent = bexp + BIAS - 1;
+
+    return v.d;
+  }
+
+  /* HI denorm or underflow */
+  bexp += BIAS - 1;
+  if (bexp < -limits::digits) { /* guaranteed underflow */
+    vv.i64 = 0;
+  } else {  /* denorm or possible underflow */
+
+    /*
+     * Problem point for long double: looks like this code reflect shareing of mantissa
+     * and exponent in 64b int; not so for long double
+     */
+
+    int lead0 = M - bexp; /* M = 12 sign and exponent bits */
+    uint64_t rest;
+    uint32_t guard;
+
+    /* we must special case right shifts of more than 63 */
+
+    if (lead0 > 64) {
+      rest = vv.i64;
+      guard = 0;
+      vv.i64 = 0;
+    } else if (lead0 == 64) {
+      rest = vv.i64 & ((ULL(1) << 63)-1);
+      guard = (uint32) ((vv.i64 >> 63) & 1 );
+      vv.i64 = 0;
+    } else {
+      rest = vv.i64 & (((ULL(1) << lead0)-1)-1);
+      guard = (uint32) (((vv.i64 >> lead0)-1) & 1);
+      vv.i64 >>= /*(uint64)*/ lead0; /* exponent is zero */
+    }
+
+    /* Round */
+    if (guard && ( (vv.i64 & 1) || rest)) {
+      vv.i64++;
+      if (vv.i64 == (ULL(1) << (limits::digits - 1))) { /* carry created normal number */
+        IEEE v;
+
+        v.ieee.mantissa0 = 0;
+        v.ieee.mantissa1 = 0;
+        v.ieee.negative = 0;
+        v.ieee.exponent = 1;
+        return v.d;
+      }
     }
   }
+
+  IEEE v;
 
   v.ieee.mantissa0 = vv.i32.hi;
   v.ieee.mantissa1 = vv.i32.lo;
@@ -739,252 +638,241 @@ static double _Stl_atod(char *buffer, int ndigit, int dexp) {
 
   return v.d;
 }
-#  endif // __linux__
+#endif // __linux__
 
-#endif
-
+#ifndef __linux__
 static double _Stl_string_to_double(const char *s) {
-  const int max_digits = 17;
+  typedef numeric_limits<double> limits;
+  const int max_digits = limits::digits10 + 2;
   unsigned c;
   unsigned Negate, decimal_point;
   char *d;
   int exp;
-  double x;
   int dpchar;
   char digits[max_digits];
 
-  // Skip leading whitespace, if any.
-  const ctype<char>& ct = use_facet<ctype<char> >(locale::classic());
-  while (c = *s++, ct.is(ctype_base::space, char(c))) {}
+  c = *s++;
 
   /* process sign */
   Negate = 0;
   if (c == '+') {
     c = *s++;
-  }
-  else if (c == '-') {
+  } else if (c == '-') {
     Negate = 1;
     c = *s++;
   }
+
   d = digits;
   dpchar = '.' - '0';
   decimal_point = 0;
   exp = 0;
+
   for (;;) {
     c -= '0';
     if (c < 10) {
       if (d == digits + max_digits) {
-        /* ignore more than 17 digits, but adjust exponent */
+        /* ignore more than max_digits digits, but adjust exponent */
         exp += (decimal_point ^ 1);
-      }
-      else {
+      } else {
         if (c == 0 && d == digits) {
           /* ignore leading zeros */
-        }
-        else {
+        } else {
           *d++ = (char) c;
         }
         exp -= decimal_point;
       }
-    }
-    else if (c == (unsigned int) dpchar && !decimal_point) {    /* INTERNATIONAL */
+    } else if (c == (unsigned int) dpchar && !decimal_point) { /* INTERNATIONAL */
       decimal_point = 1;
+    } else {
+      break;
     }
-    else {
+    c = *s++;
+  }
+
+  /* strtod cant return until it finds the end of the exponent */
+  if (d == digits) {
+    return 0.0;
+  }
+
+  if (c == 'e' - '0' || c == 'E' - '0') {
+    register unsigned negate_exp = 0;
+    register int e = 0;
+    c = *s++;
+    if (c == '+' || c == ' ') {
+      c = *s++;
+    } else if (c == '-') {
+      negate_exp = 1;
+      c = *s++;
+    }
+    if (c -= '0', c < 10) {
+      do {
+        e = e * 10 + (int)c;
+        c = *s++;
+      } while (c -= '0', c < 10);
+
+      if (negate_exp) {
+        e = -e;
+      }
+      exp += e;
+    }
+  }
+
+  double x;
+  ptrdiff_t n = d - digits;
+  if ((exp + n - 1) < limits::min_exponent10) {
+    x = 0;
+  }
+  else if ((exp + n - 1) > limits::max_exponent10) {
+    x = limits::infinity();
+  }
+  else {
+    /* Let _Stl_atod diagnose under- and over-flows.
+     * If the input was == 0.0, we have already returned,
+     * so retval of +-Inf signals OVERFLOW, 0.0 UNDERFLOW */
+    x = _Stl_atod(digits, n, exp);
+  }
+
+  if (Negate) {
+    x = -x;
+  }
+
+  return x;
+}
+
+#endif
+
+#if defined (__linux__) || defined (__MINGW32__) || defined (__CYGWIN__) || \
+    defined (__BORLANDC__) || defined (__DMC__) || defined (__HP_aCC)
+
+template <class D, class IEEE, int M, int BIAS>
+D _Stl_string_to_doubleT(const char *s)
+{
+  typedef numeric_limits<D> limits;
+  const int max_digits = limits::digits10; /* + 2 17 */;
+  unsigned c;
+  unsigned decimal_point;
+  char *d;
+  int exp;
+  D x;
+  int dpchar;
+  char digits[max_digits];
+
+  c = *s++;
+
+  /* process sign */
+  bool Negate = false;
+  if (c == '+') {
+    c = *s++;
+  } else if (c == '-') {
+    Negate = true;
+    c = *s++;
+  }
+
+  d = digits;
+  dpchar = '.' - '0';
+  decimal_point = 0;
+  exp = 0;
+
+  for (;;) {
+    c -= '0';
+    if (c < 10) {
+      if (d == digits + max_digits) {
+        /* ignore more than max_digits digits, but adjust exponent */
+        exp += (decimal_point ^ 1);
+      } else {
+        if (c == 0 && d == digits) {
+          /* ignore leading zeros */
+        } else {
+          *d++ = (char) c;
+        }
+        exp -= decimal_point;
+      }
+    } else if (c == (unsigned int) dpchar && !decimal_point) {    /* INTERNATIONAL */
+      decimal_point = 1;
+    } else {
       break;
     }
     c = *s++;
   }
   /* strtod cant return until it finds the end of the exponent */
   if (d == digits) {
-    return 0.0;
+    return D(0.0);
   }
 
   if (c == 'e'-'0' || c == 'E'-'0') {
-    register unsigned negate_exp = 0;
+    bool negate_exp = false;
     register int e = 0;
     c = *s++;
     if (c == '+' || c == ' ') {
       c = *s++;
-    }
-    else if (c == '-') {
-      negate_exp = 1;
+    } else if (c == '-') {
+      negate_exp = true;
       c = *s++;
     }
     if (c -= '0', c < 10) {
       do {
-        if (e <= 340)
-          e = e * 10 + (int)c;
-        else break;
+        e = e * 10 + (int)c;
         c = *s++;
-      }
-      while (c -= '0', c < 10);
+      } while (c -= '0', c < 10);
+
       if (negate_exp) {
         e = -e;
       }
-      if (e < -340 || e > 340)
-        exp = e;
-      else
-        exp += e;
+      exp += e;
     }
   }
 
-  if (exp < -340) {
-    x = 0;
-  }
-  else if (exp > 308) {
-    x = numeric_limits<double>::infinity();
-  }
-  else {
+  ptrdiff_t n = d - digits;
+  if ((exp + n - 1) < limits::min_exponent10) {
+    return D(0.0); // +0.0 is the same as -0.0
+  } else if ((exp + n - 1) > limits::max_exponent10 ) {
+    // not good, because of x = -x below; this may lead to portability problems
+    x = limits::infinity();
+  } else {
     /* let _Stl_atod diagnose under- and over-flows */
     /* if the input was == 0.0, we have already returned,
        so retval of +-Inf signals OVERFLOW, 0.0 UNDERFLOW
     */
-    x = _Stl_atod(digits, (int)(d - digits), exp);
+    x = _Stl_atodT<D,IEEE,M,BIAS>(digits, n, exp);
   }
-  if (Negate) {
-    x = -x;
-  }
-  return x;
+
+  return Negate ? -x : x;
 }
 
-
-#if !defined (_STLP_NO_LONG_DOUBLE)
-/*
- * __string_to_long_double is just lifted from atold, the difference being
- * that we just use '.' for the decimal point, rather than let it
- * be taken from the current C locale, which of course is not accessible
- * to us.
- */
-
-static long double
-_Stl_string_to_long_double(const char * s) {
-  const int max_digits = 34;
-  register unsigned c;
-  register unsigned Negate, decimal_point;
-  register char *d;
-  register int exp;
-  long double x;
-  register int dpchar;
-  char digits[max_digits];
-
-  const ctype<char>& ct = use_facet<ctype<char> >(locale::classic());
-  while (c = *s++, ct.is(ctype_base::space, char(c)))
-    ;
-
-  /* process sign */
-  Negate = 0;
-  if (c == '+') {
-    c = *s++;
-  }
-  else if (c == '-') {
-    Negate = 1;
-    c = *s++;
-  }
-
-  d = digits;
-  dpchar = '.' - '0';
-  decimal_point = 0;
-  exp = 0;
-
-  for (;;) {
-    c -= '0';
-    if (c < 10) {
-      if (d == digits+max_digits) {
-        /* ignore more than 34 digits, but adjust exponent */
-        exp += (decimal_point ^ 1);
-      }
-      else {
-        if (c == 0 && d == digits) {
-          /* ignore leading zeros */
-          ;
-        }
-        else {
-          *d++ = (char)c;
-        }
-        exp -= decimal_point;
-      }
-    }
-    else if ((char)c == dpchar && !decimal_point) {    /* INTERNATIONAL */
-      decimal_point = 1;
-    }
-    else {
-      break;
-    }
-    c = *s++;
-  } /* for */
-
-  if (d == digits) {
-    return 0.0L;
-  }
-  if (c == 'e'-'0' || c == 'E'-'0') {
-    register unsigned negate_exp = 0;
-    register int e = 0;
-    c = *s++;
-    if (c == '+' || c == ' ') {
-      c = *s++;
-    }
-    else if (c == '-') {
-      negate_exp = 1;
-      c = *s++;
-    }
-    if (c -= '0', c < 10) {
-      do {
-        if (e <= 340)
-          e = e * 10 + c;
-        else break;
-        c = *s++;
-      }
-      while (c -= '0', c < 10);
-      if (negate_exp) {
-        e = -e;
-      }
-      if (e < -(323+max_digits) || e > 308)
-        exp = e;
-      else
-        exp += e;
-    }
-  }
-
-  if (exp < -(324+max_digits)) {
-    x = 0;
-  }
-  else if (exp > 308) {
-    x =  numeric_limits<long double>::infinity();
-  }
-  else {
-    /* let _Stl_atod diagnose under- and over-flows */
-    /* if the input was == 0.0, we have already returned,
-           so retval of +-Inf signals OVERFLOW, 0.0 UNDERFLOW
-        */
-
-    //    x = _Stl_atod (digits, (int)(d - digits), exp); // TEMPORARY!!:1
-    double tmp = _Stl_atod (digits, (int)(d - digits), exp); // TEMPORARY!!:1
-    x = tmp == numeric_limits<double>::infinity()
-      ? numeric_limits<long double>::infinity()
-      : tmp;
-  }
-
-  if (Negate) {
-    x = -x;
-  }
-
-  return x;
-}
-#endif
+#endif // __linux__
 
 void _STLP_CALL
 __string_to_float(const __iostring& v, float& val)
-{ val = (float)_Stl_string_to_double(v.c_str()); }
+{
+#if !defined (__linux__)
+  val = (float)_Stl_string_to_double(v.c_str());
+#else
+  val = (float)_Stl_string_to_doubleT<double,ieee754_double,12,IEEE754_DOUBLE_BIAS>(v.c_str());
+#endif
+}
 
 void _STLP_CALL
 __string_to_float(const __iostring& v, double& val)
-{ val = _Stl_string_to_double(v.c_str()); }
+{
+#if !defined (__linux__)
+  val = _Stl_string_to_double(v.c_str());
+#else
+  val = _Stl_string_to_doubleT<double,ieee754_double,12,IEEE754_DOUBLE_BIAS>(v.c_str());
+#endif
+}
 
 #if !defined (_STLP_NO_LONG_DOUBLE)
 void _STLP_CALL
-__string_to_float(const __iostring& v, long double& val)
-{ val = _Stl_string_to_long_double(v.c_str()); }
+__string_to_float(const __iostring& v, long double& val) {
+#if !defined (__linux__) && !defined (__MINGW32__) && !defined (__CYGWIN__) && \
+    !defined (__BORLANDC__) && !defined (__DMC__) && !defined (__HP_aCC)
+  //The following function is valid only if long double is an alias for double.
+  _STLP_STATIC_ASSERT( sizeof(long double) <= sizeof(double) )
+  val = _Stl_string_to_double(v.c_str());
+#else
+  val = _Stl_string_to_doubleT<long double,ieee854_long_double,16,IEEE854_LONG_DOUBLE_BIAS>(v.c_str());
+#endif
+}
 #endif
 
 _STLP_MOVE_TO_STD_NAMESPACE

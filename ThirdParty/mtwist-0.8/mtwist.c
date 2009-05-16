@@ -1,6 +1,6 @@
 #ifndef lint
 static char Rcs_Id[] =
-    "$Id: mtwist.c,v 1.1 2007/02/25 21:50:16 alex Exp $";
+    "$Id: mtwist.c,v 1.20 2007/10/26 07:21:06 geoff Exp $";
 #endif
 
 /*
@@ -56,8 +56,8 @@ static char Rcs_Id[] =
  * Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  * $Log: mtwist.c,v $
- * Revision 1.1  2007/02/25 21:50:16  alex
- * no message
+ * Revision 1.20  2007/10/26 07:21:06  geoff
+ * Use the new mt_u32bit_t type.
  *
  * Revision 1.19  2003/09/11 05:55:19  geoff
  * Get rid of some minor compiler warnings.
@@ -187,7 +187,7 @@ void			mts_seed32(mt_state* state, unsigned long seed);
 void			mts_seed32new(mt_state* state, unsigned long seed);
 					/* Set random seed for any generator */
 void			mts_seedfull(mt_state* state,
-			  unsigned long seeds[MT_STATE_SIZE]);
+			  mt_u32bit_t seeds[MT_STATE_SIZE]);
 					/* Set complicated seed for any gen. */
 void			mts_seed(mt_state* state);
 					/* Choose seed from random input */
@@ -210,7 +210,7 @@ void			mt_seed32(unsigned long seed);
 					/* Set random seed for default gen. */
 void			mt_seed32new(unsigned long seed);
 					/* Set random seed for default gen. */
-void			mt_seedfull(unsigned long seeds[MT_STATE_SIZE]);
+void			mt_seedfull(mt_u32bit_t seeds[MT_STATE_SIZE]);
 					/* Set complicated seed for default */
 void			mt_seed(void);	/* Choose seed from random input */
 void			mt_goodseed(void);
@@ -335,7 +335,7 @@ double			mt_64_to_double;
  * array.  The chosen bit is used as an index into the following vector,
  * which produces either zero or MATRIX_A and thus the desired effect.
  */
-static unsigned long	matrix_decider[2] =
+static mt_u32bit_t	matrix_decider[2] =
 			  {0x0, MATRIX_A};
 
 /*
@@ -426,7 +426,7 @@ void mts_seed32new(
     unsigned long	seed)		/* 32-bit seed to start from */
     {
     int			i;		/* Loop index */
-    unsigned long	nextval;	/* Next value being calculated */
+    mt_u32bit_t		nextval;	/* Next value being calculated */
 
     /*
      * Fill the state vector using Knuth's PRNG.  Be sure to mask down
@@ -474,7 +474,7 @@ void mts_seed32new(
  */
 void mts_seedfull(
     mt_state*		state,		/* State vector to initialize */
-    unsigned long	seeds[MT_STATE_SIZE])
+    mt_u32bit_t		seeds[MT_STATE_SIZE])
 					/* Seed array to start from */
     {
     int			had_nz = 0;	/* NZ if at least one NZ seen */
@@ -648,11 +648,11 @@ void mts_refresh(
     register mt_state*	state)		/* State for the PRNG */
     {
     register int	i;		/* Index into the state */
-    register unsigned long*
+    register mt_u32bit_t*
 			state_ptr;	/* Next place to get from state */
-    register unsigned long
+    register mt_u32bit_t
 			value1;		/* Scratch val picked up from state */
-    register unsigned long
+    register mt_u32bit_t
 			value2;		/* Scratch val picked up from state */
 
     /*
@@ -895,7 +895,7 @@ void mt_seed32new(
  * See mts_seedfull for full commentary.
  */
 void mt_seedfull(
-    unsigned long	seeds[MT_STATE_SIZE])
+    mt_u32bit_t		seeds[MT_STATE_SIZE])
     {
     mts_seedfull(&mt_default_state, seeds);
     }

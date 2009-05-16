@@ -47,7 +47,6 @@
  * #  endif
  */
 /* boris : hstash reported it can be treated like UNIX */
-#  define _STLP_UNIX 1
 #  define _STLP_NO_TYPEINFO 1
 #  undef _STLP_NATIVE_INCLUDE_PATH
 #  define _STLP_NATIVE_INCLUDE_PATH /usr/lpp/ioclib/include
@@ -86,7 +85,6 @@
 #  define _STLP_NO_MEMBER_TEMPLATES 1
 #  define _STLP_NO_MEMBER_TEMPLATE_CLASSES 1
 #  define _STLP_NO_MEMBER_TEMPLATE_KEYWORD 1
-#  define _STLP_NO_FRIEND_TEMPLATES 1
 #  define _STLP_NO_QUALIFIED_FRIENDS 1
 #  define _STLP_NO_CLASS_PARTIAL_SPECIALIZATION 1
 #  define _STLP_NO_FUNCTION_TMPL_PARTIAL_ORDER 1

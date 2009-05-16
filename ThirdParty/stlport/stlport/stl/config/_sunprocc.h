@@ -57,7 +57,6 @@
 #  define _STLP_NON_TYPE_TMPL_PARAM_BUG 1
 
 #  define _STLP_NO_MEMBER_TEMPLATES 1
-#  define _STLP_NO_FRIEND_TEMPLATES 1
 
 #  define _STLP_NO_FUNCTION_TMPL_PARTIAL_ORDER 1
 #  define _STLP_NO_EXPLICIT_FUNCTION_TMPL_ARGS
@@ -159,3 +158,9 @@ using std::mbstate_t;
 typedef __mbstate_t mbstate_t;
 #  endif
 #endif  /* __MBSTATET_H */
+
+#if !defined(_STLP_HAS_NO_NEW_C_HEADERS) && !defined(_STLP_NO_NEW_C_HEADERS)
+/* Since Sun Studio uses <iso/stdlib_iso.h>, we are at its
+ * mercy.  GCC is built on top of <stdlib.h>. */
+#define _STLP_NO_VENDOR_STDLIB_L
+#endif

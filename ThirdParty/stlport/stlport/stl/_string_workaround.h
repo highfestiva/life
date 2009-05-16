@@ -26,16 +26,14 @@ _STLP_MOVE_TO_PRIV_NAMESPACE
 
 template <class _CharT, class _Traits, class _Alloc>
 class basic_string : public _STLP_NO_MEM_T_STRING_BASE
-#if defined (_STLP_USE_PARTIAL_SPEC_WORKAROUND) && \
-    !defined (basic_string)
+#if defined (_STLP_USE_PARTIAL_SPEC_WORKAROUND) && !defined (basic_string)
                    , public __stlport_class<basic_string<_CharT, _Traits, _Alloc> >
 #endif
 {
-protected:                        // Protected members inherited from base.
+private:                        // Protected members inherited from base.
   typedef basic_string<_CharT, _Traits, _Alloc> _Self;
   typedef _STLP_NO_MEM_T_STRING_BASE _Base;
-  typedef typename _Base::_Char_Is_POD _Char_Is_POD;
-
+  typedef typename _Base::_CalledFromWorkaround_t _CalledFromWorkaround_t;
 public:
 
   __IMPORT_WITH_REVERSE_ITERATORS(_Base)
@@ -43,6 +41,8 @@ public:
   typedef typename _Base::_Iterator_category _Iterator_category;
   typedef typename _Base::traits_type traits_type;
   typedef typename _Base::_Reserve_t _Reserve_t;
+
+#include <stl/_string_npos.h>
 
 public:                         // Constructor, destructor, assignment.
   explicit basic_string(const allocator_type& __a = allocator_type())
@@ -71,28 +71,28 @@ public:                         // Constructor, destructor, assignment.
                const allocator_type& __a = allocator_type())
     : _STLP_NO_MEM_T_STRING_BASE(__n, __c, __a) {}
 
+#if !defined (_STLP_NO_MOVE_SEMANTIC)
   basic_string(__move_source<_Self> src)
     : _STLP_NO_MEM_T_STRING_BASE(__move_source<_Base>(src.get())) {}
+#endif
 
   // Check to see if _InputIterator is an integer type.  If so, then
   // it can't be an iterator.
-#if !(defined(__MRC__) || (defined(__SC__) && !defined(__DMC__))) //*ty 04/30/2001 - mpw compilers choke on this ctor
   template <class _InputIterator>
   basic_string(_InputIterator __f, _InputIterator __l,
                const allocator_type & __a _STLP_ALLOCATOR_TYPE_DFL)
-    : _STLP_NO_MEM_T_STRING_BASE(_Base::_CalledFromWorkaround_t(), __a) {
+    : _STLP_NO_MEM_T_STRING_BASE(_CalledFromWorkaround_t(), __a) {
     typedef typename _IsIntegral<_InputIterator>::_Ret _Integral;
     _M_initialize_dispatch(__f, __l, _Integral());
   }
 #  if defined (_STLP_NEEDS_EXTRA_TEMPLATE_CONSTRUCTORS)
   template <class _InputIterator>
   basic_string(_InputIterator __f, _InputIterator __l)
-    : _STLP_NO_MEM_T_STRING_BASE(_Base::_CalledFromWorkaround_t(), allocator_type()) {
+    : _STLP_NO_MEM_T_STRING_BASE(_CalledFromWorkaround_t(), allocator_type()) {
     typedef typename _IsIntegral<_InputIterator>::_Ret _Integral;
     _M_initialize_dispatch(__f, __l, _Integral());
   }
 #  endif
-#endif /* !__MRC__ || (__SC__ && !__DMC__) */
 
   _Self& operator=(const _Self& __s) {
     _Base::operator=(__s);
@@ -115,24 +115,14 @@ private:
                            const input_iterator_tag &__tag) {
     this->_M_allocate_block();
     this->_M_construct_null(this->_M_Finish());
-    _STLP_TRY {
-      _M_appendT(__f, __l, __tag);
-    }
-    _STLP_UNWIND(this->_M_destroy_range())
+    _M_appendT(__f, __l, __tag);
   }
 
   template <class _ForwardIter>
   void _M_range_initialize(_ForwardIter __f, _ForwardIter __l,
                            const forward_iterator_tag &) {
-    difference_type __n = distance(__f, __l);
+    difference_type __n = _STLP_STD::distance(__f, __l);
     this->_M_allocate_block(__n + 1);
-#if defined (_STLP_USE_SHORT_STRING_OPTIM)
-    if (this->_M_using_static_buf()) {
-      _M_copyT(__f, __l, this->_M_Start());
-      this->_M_finish = this->_M_Start() + __n;
-    }
-    else
-#endif /* _STLP_USE_SHORT_STRING_OPTIM */
     this->_M_finish = uninitialized_copy(__f, __l, this->_M_Start());
     this->_M_terminate_string();
   }
@@ -145,13 +135,6 @@ private:
   template <class _Integer>
   void _M_initialize_dispatch(_Integer __n, _Integer __x, const __true_type& /*_Integral*/) {
     this->_M_allocate_block(__n + 1);
-#if defined (_STLP_USE_SHORT_STRING_OPTIM)
-    if (this->_M_using_static_buf()) {
-      _Traits::assign(this->_M_Start(), __n, __x);
-      this->_M_finish = this->_M_Start() + __n;
-    }
-    else
-#endif /* _STLP_USE_SHORT_STRING_OPTIM */
     this->_M_finish = uninitialized_fill_n(this->_M_Start(), __n, __x);
     this->_M_terminate_string();
   }
@@ -233,40 +216,20 @@ private:                        // Helper functions for append.
   _Self& _M_appendT(_ForwardIter __first, _ForwardIter __last,
                     const forward_iterator_tag &)  {
     if (__first != __last) {
-      const size_type __old_size = this->size();
-      difference_type __n = distance(__first, __last);
-      if (__STATIC_CAST(size_type,__n) > max_size() || __old_size > max_size() - __STATIC_CAST(size_type,__n))
-        this->_M_throw_length_error();
-      if (__old_size + __n > capacity()) {
-        const size_type __len = __old_size +
-          (max)(__old_size, __STATIC_CAST(size_type,__n)) + 1;
-        pointer __new_start = this->_M_end_of_storage.allocate(__len);
-        pointer __new_finish = __new_start;
-        _STLP_TRY {
-          __new_finish = uninitialized_copy(this->_M_Start(), this->_M_Finish(), __new_start);
-          __new_finish = uninitialized_copy(__first, __last, __new_finish);
-          _M_construct_null(__new_finish);
-        }
-        _STLP_UNWIND((_STLP_STD::_Destroy_Range(__new_start,__new_finish),
-          this->_M_end_of_storage.deallocate(__new_start,__len)))
-          this->_M_destroy_range();
+      const size_type __n = __STATIC_CAST(size_type, _STLP_STD::distance(__first, __last));
+      if (__n >= this->_M_rest()) {
+        size_type __len = this->_M_compute_next_size(__n);
+        pointer __new_start = this->_M_start_of_storage.allocate(__len, __len);
+        pointer __new_finish = uninitialized_copy(this->_M_Start(), this->_M_Finish(), __new_start);
+        __new_finish = uninitialized_copy(__first, __last, __new_finish);
+        this->_M_construct_null(__new_finish);
         this->_M_deallocate_block();
         this->_M_reset(__new_start, __new_finish, __new_start + __len);
       }
       else {
-        _ForwardIter __f1 = __first;
-        ++__f1;
-#if defined (_STLP_USE_SHORT_STRING_OPTIM)
-        if (this->_M_using_static_buf())
-          _M_copyT(__f1, __last, this->_M_Finish() + 1);
-        else
-#endif /* _STLP_USE_SHORT_STRING_OPTIM */
-          uninitialized_copy(__f1, __last, this->_M_Finish() + 1);
-        _STLP_TRY {
-          this->_M_construct_null(this->_M_Finish() + __n);
-        }
-        _STLP_UNWIND(this->_M_destroy_ptr_range(this->_M_Finish() + 1, this->_M_Finish() + __n))
-        _Traits::assign(*this->_M_finish, *__first);
+        _Traits::assign(*this->_M_finish, *__first++);
+        uninitialized_copy(__first, __last, this->_M_Finish() + 1);
+        this->_M_construct_null(this->_M_Finish() + __n);
         this->_M_finish += __n;
       }
     }
@@ -274,17 +237,14 @@ private:                        // Helper functions for append.
   }
 
   template <class _Integer>
-  _Self& _M_append_dispatch(_Integer __n, _Integer __x, const __true_type& /*Integral*/) {
-    return append((size_type) __n, (_CharT) __x);
-  }
+  _Self& _M_append_dispatch(_Integer __n, _Integer __x, const __true_type& /*Integral*/)
+  { return append((size_type) __n, (_CharT) __x); }
 
   template <class _InputIter>
-  _Self& _M_append_dispatch(_InputIter __f, _InputIter __l, const __false_type& /*Integral*/) {
-    return _M_appendT(__f, __l, _STLP_ITERATOR_CATEGORY(__f, _InputIter));
-  }
+  _Self& _M_append_dispatch(_InputIter __f, _InputIter __l, const __false_type& /*Integral*/)
+  { return _M_appendT(__f, __l, _STLP_ITERATOR_CATEGORY(__f, _InputIter)); }
 
 public:                         // Assign
-
   _Self& assign(const _Self& __s) {
     _Base::assign(__s);
     return *this;
@@ -316,9 +276,8 @@ public:                         // Assign
 private:                        // Helper functions for assign.
 
   template <class _Integer>
-  _Self& _M_assign_dispatch(_Integer __n, _Integer __x, const __true_type& /*_Integral*/) {
-    return assign((size_type) __n, (_CharT) __x);
-  }
+  _Self& _M_assign_dispatch(_Integer __n, _Integer __x, const __true_type& /*_Integral*/)
+  { return assign((size_type) __n, (_CharT) __x); }
 
   template <class _InputIter>
   _Self& _M_assign_dispatch(_InputIter __f, _InputIter __l, const __false_type& /*_Integral*/)  {
@@ -357,7 +316,6 @@ public:
 #endif
 
 public:                         // Insert
-
   _Self& insert(size_type __pos, const _Self& __s) {
     _Base::insert(__pos, __s);
     return *this;
@@ -385,13 +343,11 @@ public:                         // Insert
     return *this;
   }
 
-  iterator insert(iterator __p, _CharT __c) {
-    return _Base::insert(__p, __c);
-  }
+  iterator insert(iterator __p, _CharT __c)
+  { return _Base::insert(__p, __c); }
 
-  void insert(iterator __p, size_t __n, _CharT __c) {
-    _Base::insert(__p, __n, __c);
-  }
+  void insert(iterator __p, size_t __n, _CharT __c)
+  { _Base::insert(__p, __n, __c); }
 
   // Check to see if _InputIterator is an integer type.  If so, then
   // it can't be an iterator.
@@ -401,29 +357,29 @@ public:                         // Insert
     _M_insert_dispatch(__p, __first, __last, _Integral());
   }
 
-private:  // Helper functions for insert.
+#if !defined (_STLP_NO_METHOD_SPECIALIZATION)
+public:
+  void insert(iterator __p, const _CharT* __f, const _CharT* __l) {
+    _STLP_FIX_LITERAL_BUG(__f) _STLP_FIX_LITERAL_BUG(__l)
+    _M_insert(__p, __f, __l, this->_M_inside(__f));
+  }
+#endif
 
+private:  // Helper functions for insert.
   void _M_insert(iterator __p, const _CharT* __f, const _CharT* __l, bool __self_ref) {
     _STLP_FIX_LITERAL_BUG(__f)_STLP_FIX_LITERAL_BUG(__l)
     _Base::_M_insert(__p, __f, __l, __self_ref);
   }
 
   template <class _ForwardIter>
-  void _M_insert_overflow(iterator __position, _ForwardIter __first, _ForwardIter __last,
-                          difference_type __n) {
-    const size_type __old_size = this->size();
-    const size_type __len = __old_size + (max)(__old_size, __STATIC_CAST(size_type,__n)) + 1;
-    pointer __new_start = this->_M_end_of_storage.allocate(__len);
-    pointer __new_finish = __new_start;
-    _STLP_TRY {
-      __new_finish = uninitialized_copy(this->_M_Start(), __position, __new_start);
-      __new_finish = uninitialized_copy(__first, __last, __new_finish);
-      __new_finish = uninitialized_copy(__position, this->_M_Finish(), __new_finish);
-      this->_M_construct_null(__new_finish);
-    }
-    _STLP_UNWIND((_STLP_STD::_Destroy_Range(__new_start,__new_finish),
-                  this->_M_end_of_storage.deallocate(__new_start,__len)))
-    this->_M_destroy_range();
+  void _M_insert_overflow(iterator __pos, _ForwardIter __first, _ForwardIter __last,
+                          size_type __n) {
+    size_type __len = this->_M_compute_next_size(__n);
+    pointer __new_start = this->_M_start_of_storage.allocate(__len, __len);
+    pointer __new_finish = uninitialized_copy(this->_M_Start(), __pos, __new_start);
+    __new_finish = uninitialized_copy(__first, __last, __new_finish);
+    __new_finish = uninitialized_copy(__pos, this->_M_Finish(), __new_finish);
+    this->_M_construct_null(__new_finish);
     this->_M_deallocate_block();
     this->_M_reset(__new_start, __new_finish, __new_start + __len);
   }
@@ -438,88 +394,47 @@ private:  // Helper functions for insert.
   }
 
   template <class _ForwardIter>
-  void _M_insertT(iterator __position, _ForwardIter __first, _ForwardIter __last,
+  void _M_insertT(iterator __pos, _ForwardIter __first, _ForwardIter __last,
                   const forward_iterator_tag &) {
     if (__first != __last) {
-      difference_type __n = distance(__first, __last);
-      if (this->_M_end_of_storage._M_data - this->_M_finish >= __n + 1) {
-        const difference_type __elems_after = this->_M_finish - __position;
+      size_type __n = __STATIC_CAST(size_type, _STLP_STD::distance(__first, __last));
+      if (__n < this->_M_rest()) {
+        const size_type __elems_after = this->_M_finish - __pos;
         if (__elems_after >= __n) {
-#if defined (_STLP_USE_SHORT_STRING_OPTIM)
-          if (this->_M_using_static_buf())
-            _Base::_M_copy((this->_M_Finish() - __n) + 1, this->_M_Finish() + 1, this->_M_Finish() + 1);
-          else
-#endif /* _STLP_USE_SHORT_STRING_OPTIM */
           uninitialized_copy((this->_M_Finish() - __n) + 1, this->_M_Finish() + 1, this->_M_Finish() + 1);
           this->_M_finish += __n;
-          _Traits::move(__position + __n, __position, (__elems_after - __n) + 1);
-          _M_copyT(__first, __last, __position);
+          _Traits::move(__pos + __n, __pos, (__elems_after - __n) + 1);
+          _M_copyT(__first, __last, __pos);
         }
         else {
           pointer __old_finish = this->_M_Finish();
           _ForwardIter __mid = __first;
-          advance(__mid, __elems_after + 1);
-#if defined (_STLP_USE_SHORT_STRING_OPTIM)
-          if (this->_M_using_static_buf())
-            _M_copyT(__mid, __last, this->_M_Finish() + 1);
-          else
-#endif /* _STLP_USE_SHORT_STRING_OPTIM */
-          uninitialized_copy(__mid, __last, this->_M_Finish() + 1);
+          _STLP_STD::advance(__mid, __elems_after + 1);
+          _STLP_STD::uninitialized_copy(__mid, __last, this->_M_Finish() + 1);
           this->_M_finish += __n - __elems_after;
-          _STLP_TRY {
-#if defined (_STLP_USE_SHORT_STRING_OPTIM)
-            if (this->_M_using_static_buf())
-              _Base::_M_copy(__position, __old_finish + 1, this->_M_Finish());
-            else
-#endif /* _STLP_USE_SHORT_STRING_OPTIM */
-            uninitialized_copy(__position, __old_finish + 1, this->_M_Finish());
-            this->_M_finish += __elems_after;
-          }
-          _STLP_UNWIND((this->_M_destroy_ptr_range(__old_finish + 1, this->_M_Finish()),
-                        this->_M_finish = __old_finish))
-          _M_copyT(__first, __mid, __position);
+          uninitialized_copy(__pos, __old_finish + 1, this->_M_Finish());
+          this->_M_finish += __elems_after;
+          _M_copyT(__first, __mid, __pos);
         }
       }
       else {
-        _M_insert_overflow(__position, __first, __last, __n);
+        _M_insert_overflow(__pos, __first, __last, __n);
       }
     }
   }
 
   template <class _Integer>
   void _M_insert_dispatch(iterator __p, _Integer __n, _Integer __x,
-                          const __true_type& /*Integral*/) {
-    insert(__p, (size_type) __n, (_CharT) __x);
-  }
+                          const __true_type& /*Integral*/)
+  { insert(__p, (size_type) __n, (_CharT) __x); }
 
   template <class _InputIter>
   void _M_insert_dispatch(iterator __p, _InputIter __first, _InputIter __last,
                           const __false_type& /*Integral*/) {
     _STLP_FIX_LITERAL_BUG(__p)
-    /*
-     * Within the basic_string implementation we are only going to check for
-     * self referencing if iterators are string iterators or _CharT pointers.
-     * A user could encapsulate those iterator within their own iterator interface
-     * and in this case lead to a bad behavior, this is a known limitation.
-     */
-    typedef typename _AreSameUnCVTypes<_InputIter, iterator>::_Ret _IsIterator;
-    typedef typename _AreSameUnCVTypes<_InputIter, const_iterator>::_Ret _IsConstIterator;
-    typedef typename _Lor2<_IsIterator, _IsConstIterator>::_Ret _CheckInside;
-    _M_insert_aux(__p, __first, __last, _CheckInside());
-  }
-
-  template <class _RandomIter>
-  void _M_insert_aux (iterator __p, _RandomIter __first, _RandomIter __last,
-                      const __true_type& /*_CheckInside*/) {
-    _STLP_FIX_LITERAL_BUG(__p)
-    _M_insert(__p, &(*__first), &(*__last), _Base::_M_inside(&(*__first)));
-  }
-
-  template<class _InputIter>
-  void _M_insert_aux (iterator __p, _InputIter __first, _InputIter __last,
-                      const __false_type& /*_CheckInside*/) {
-    _STLP_FIX_LITERAL_BUG(__p)
-    _M_insertT(__p, __first, __last, _STLP_ITERATOR_CATEGORY(__first, _InputIter));
+    /* We are forced to do a temporary string to avoid the self referencing issue. */
+    const _Self __self(__first, __last, this->get_allocator());
+    _M_insertT(__p, __self.begin(), __self.end(), _STLP_ITERATOR_CATEGORY(__first, _InputIter));
   }
 
   template <class _InputIterator>
@@ -537,7 +452,6 @@ private:  // Helper functions for insert.
 #endif
 
 public:                         // Erase.
-
   _Self& erase(size_type __pos = 0, size_type __n = npos) {
     _Base::erase(__pos, __n);
     return *this;
@@ -621,20 +535,19 @@ public:                         // Replace.  (Conceptually equivalent
                  _InputIter __f, _InputIter __l) {
     _STLP_FIX_LITERAL_BUG(__first)_STLP_FIX_LITERAL_BUG(__last)
     typedef typename _IsIntegral<_InputIter>::_Ret _Integral;
-    return _M_replace_dispatch(__first, __last, __f, __l,  _Integral());
+    return _M_replace_dispatch(__first, __last, __f, __l, _Integral());
   }
 
-#if !defined (_STLP_NO_METHOD_SPECIALIZATION) && !defined (_STLP_NO_EXTENSIONS)
+#if !defined (_STLP_NO_METHOD_SPECIALIZATION)
   _Self& replace(iterator __first, iterator __last,
                  const _CharT* __f, const _CharT* __l) {
     _STLP_FIX_LITERAL_BUG(__first) _STLP_FIX_LITERAL_BUG(__last)
     _STLP_FIX_LITERAL_BUG(__f) _STLP_FIX_LITERAL_BUG(__l)
-    _Base::replace(__first, __last, __f, __l);
-    return *this;
+    return _M_replace(__first, __last, __f, __l, this->_M_inside(__f));
   }
 #endif
 
-protected:                        // Helper functions for replace.
+private:                        // Helper functions for replace.
   _Self& _M_replace(iterator __first, iterator __last,
                     const _CharT* __f, const _CharT* __l, bool __self_ref) {
     _STLP_FIX_LITERAL_BUG(__first) _STLP_FIX_LITERAL_BUG(__last)
@@ -654,67 +567,20 @@ protected:                        // Helper functions for replace.
   _Self& _M_replace_dispatch(iterator __first, iterator __last,
                              _InputIter __f, _InputIter __l, const __false_type& /*IsIntegral*/) {
     _STLP_FIX_LITERAL_BUG(__first) _STLP_FIX_LITERAL_BUG(__last)
-    typedef typename _AreSameUnCVTypes<_InputIter, iterator>::_Ret _IsIterator;
-    typedef typename _AreSameUnCVTypes<_InputIter, const_iterator>::_Ret _IsConstIterator;
-    typedef typename _Lor2<_IsIterator, _IsConstIterator>::_Ret _CheckInside;
-    return _M_replace_aux(__first, __last, __f, __l, _CheckInside());
-  }
-
-  template <class _RandomIter>
-  _Self& _M_replace_aux(iterator __first, iterator __last,
-                        _RandomIter __f, _RandomIter __l, __true_type const& /*_CheckInside*/) {
-    _STLP_FIX_LITERAL_BUG(__first) _STLP_FIX_LITERAL_BUG(__last)
-    return _M_replace(__first, __last, &(*__f), &(*__l), _Base::_M_inside(&(*__f)));
-  }
-
-  template <class _InputIter>
-  _Self& _M_replace_aux(iterator __first, iterator __last,
-                     _InputIter __f, _InputIter __l, __false_type const& /*_CheckInside*/) {
-    _STLP_FIX_LITERAL_BUG(__first) _STLP_FIX_LITERAL_BUG(__last)
-    return _M_replaceT(__first, __last, __f, __l, _STLP_ITERATOR_CATEGORY(__f, _InputIter));
-  }
-
-  template <class _InputIter>
-  _Self& _M_replaceT(iterator __first, iterator __last,
-                     _InputIter __f, _InputIter __l, const input_iterator_tag&__ite_tag) {
-    _STLP_FIX_LITERAL_BUG(__first) _STLP_FIX_LITERAL_BUG(__last)
-    for ( ; __first != __last && __f != __l; ++__first, ++__f)
-      _Traits::assign(*__first, *__f);
-    if (__f == __l)
-      _Base::erase(__first, __last);
-    else
-      _M_insertT(__last, __f, __l, __ite_tag);
-    return *this;
-  }
-
-  template <class _ForwardIter>
-  _Self& _M_replaceT(iterator __first, iterator __last,
-                     _ForwardIter __f, _ForwardIter __l, const forward_iterator_tag &__ite_tag) {
-    _STLP_FIX_LITERAL_BUG(__first) _STLP_FIX_LITERAL_BUG(__last)
-    difference_type __n = distance(__f, __l);
-    const difference_type __len = __last - __first;
-    if (__len >= __n) {
-      _M_copyT(__f, __l, __first);
-      _Base::erase(__first + __n, __last);
-    }
-    else {
-      _ForwardIter __m = __f;
-      advance(__m, __len);
-      _M_copyT(__f, __m, __first);
-      _M_insertT(__last, __m, __l, __ite_tag);
-    }
-    return *this;
+    /* We are forced to do a temporary string to avoid the self referencing issue. */
+    const _Self __self(__f, __l, this->get_allocator());
+    return _M_replace(__first, __last, __self._M_Start(), __self._M_Finish(), false);
   }
 
 public:                         // Other modifier member functions.
-
-  void swap(_Self& __s)
-  { _Base::swap(__s); }
+  void swap(_Self& __s) { _Base::swap(__s); }
+#if defined (_STLP_USE_PARTIAL_SPEC_WORKAROUND) && !defined (_STLP_FUNCTION_TMPL_PARTIAL_ORDER)
+  void _M_swap_workaround(_Self& __x) { swap(__x); }
+#endif
 
 public:                         // Substring.
-
   _Self substr(size_type __pos = 0, size_type __n = npos) const
-  { return _Self(*this, __pos, __n, get_allocator()); }
+  { return _Self(*this, __pos, __n, this->get_allocator()); }
 
 #if defined (_STLP_USE_TEMPLATE_EXPRESSION) && !defined (_STLP_DEBUG)
 #  define _STLP_STRING_SUM_BASE _STLP_NO_MEM_T_STRING_BASE

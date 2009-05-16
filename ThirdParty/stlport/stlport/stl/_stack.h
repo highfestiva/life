@@ -74,8 +74,10 @@ public:
   stack() : c() {}
   explicit stack(const _Sequence& __s) : c(__s) {}
 
+#if !defined (_STLP_NO_MOVE_SEMANTIC)
   stack(__move_source<_Self> src)
     : c(_STLP_PRIV _AsMoveSource(src.get().c)) {}
+#endif
 
   bool empty() const { return c.empty(); }
   size_type size() const { return c.size(); }
@@ -84,6 +86,13 @@ public:
   void push(const value_type& __x) { c.push_back(__x); }
   void pop() { c.pop_back(); }
   const _Sequence& _Get_s() const { return c; }
+#if defined (_STLP_USE_PARTIAL_SPEC_WORKAROUND) && !defined (_STLP_FUNCTION_TMPL_PARTIAL_ORDER)
+  void _M_swap_workaround(_Self& __x) {
+    _Sequence __tmp = c;
+    c = __x.c;
+    __x.c = __tmp;
+  }
+#endif
 };
 
 #ifndef _STLP_STACK_ARGS
@@ -108,7 +117,7 @@ _STLP_RELOPS_OPERATORS(template < _STLP_STACK_HEADER_ARGS >, stack< _STLP_STACK_
 #undef _STLP_STACK_ARGS
 #undef _STLP_STACK_HEADER_ARGS
 
-#if defined (_STLP_CLASS_PARTIAL_SPECIALIZATION)
+#if defined (_STLP_CLASS_PARTIAL_SPECIALIZATION) && !defined (_STLP_NO_MOVE_SEMANTIC)
 template <class _Tp, class _Sequence>
 struct __move_traits<stack<_Tp, _Sequence> > :
   _STLP_PRIV __move_traits_aux<_Sequence>

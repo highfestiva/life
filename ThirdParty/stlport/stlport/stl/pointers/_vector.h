@@ -38,7 +38,7 @@ _STLP_EXPORT_TEMPLATE_CLASS _STLP_PRIV VECTOR_IMPL<void*, allocator<void*> >;
 _STLP_MOVE_TO_PRIV_NAMESPACE
 #endif
 
-template <class _Tp, _STLP_DEFAULT_ALLOCATOR_SELECT(_Tp) >
+template <class _Tp, _STLP_DFL_TMPL_PARAM(_Alloc, allocator<_Tp>) >
 class vector
 #if defined (_STLP_USE_PARTIAL_SPEC_WORKAROUND) && !defined (vector)
              : public __stlport_class<vector<_Tp, _Alloc> >
@@ -50,7 +50,7 @@ class vector
    * So vector implementation will always use a qualified void pointer type and
    * won't use iterator wrapping.
    */
-  typedef typename _STLP_PRIV _StorageType<_Tp>::_QualifiedType _StorageType;
+  typedef _STLP_TYPENAME _STLP_PRIV _StorageType<_Tp>::_QualifiedType _StorageType;
   typedef typename _Alloc_traits<_StorageType, _Alloc>::allocator_type _StorageTypeAlloc;
   typedef _STLP_PRIV VECTOR_IMPL<_StorageType, _StorageTypeAlloc> _Base;
   typedef vector<_Tp, _Alloc> _Self;
@@ -118,13 +118,15 @@ public:
 #if defined(_STLP_DONT_SUP_DFLT_PARAM)
   explicit vector(size_type __n)
     : _M_impl(__n, allocator_type() ) {}
-#endif /*_STLP_DONT_SUP_DFLT_PARAM*/
+#endif
 
   vector(const _Self& __x)
     : _M_impl(__x._M_impl) {}
 
+#if !defined (_STLP_NO_MOVE_SEMANTIC)
   explicit vector(__move_source<_Self> src)
     : _M_impl(__move_source<_Base>(src.get()._M_impl)) {}
+#endif
 
 #if defined (_STLP_MEMBER_TEMPLATES)
   template <class _InputIterator>
@@ -185,6 +187,9 @@ public:
 #endif /*_STLP_DONT_SUP_DFLT_PARAM && !_STLP_NO_ANACHRONISMS*/
 
   void swap(_Self& __x) { _M_impl.swap(__x._M_impl); }
+#if defined (_STLP_USE_PARTIAL_SPEC_WORKAROUND) && !defined (_STLP_FUNCTION_TMPL_PARTIAL_ORDER)
+  void _M_swap_workaround(_Self& __x) { swap(__x); }
+#endif
 
 #if defined (_STLP_MEMBER_TEMPLATES)
   template <class _InputIterator>

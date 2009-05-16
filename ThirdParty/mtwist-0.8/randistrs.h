@@ -2,7 +2,7 @@
 #define RANDISTRS_H
 
 /*
- * $Id: randistrs.h,v 1.1 2007/02/25 21:50:16 alex Exp $
+ * $Id: randistrs.h,v 1.5 2008/07/25 23:34:01 geoff Exp $
  *
  * Header file for C/C++ use of a generalized package that generates
  * random numbers in various distributions, using the Mersenne-Twist
@@ -36,14 +36,14 @@
  * Random-distribution functions:
  *
  * rds_iuniform(mt_state* state, long lower, long upper)
- *		(Integer) uniform on the open interval (lower, upper].
+ *		(Integer) uniform on the half-open interval [lower, upper).
  * rds_liuniform(mt_state* state, long long lower, long long upper)
- *		(Integer) uniform on the open interval (lower, upper].
+ *		(Integer) uniform on the half-open interval [lower, upper).
  *		Don't use unless you need numbers bigger than a long!
  * rds_uniform(mt_state* state, double lower, double upper)
- *		(Floating) uniform on the open interval (lower, upper].
+ *		(Floating) uniform on the half-open interval [lower, upper).
  * rds_luniform(mt_state* state, double lower, double upper)
- *		(Floating) uniform on the open interval (lower, upper].
+ *		(Floating) uniform on the half-open interval [lower, upper).
  *		Higher precision but slower than rds_uniform.
  * rds_exponential(mt_state* state, double mean)
  *		Exponential with the given mean.
@@ -119,8 +119,8 @@
  *		As above, using the default MT-PRNG.
  *
  * $Log: randistrs.h,v $
- * Revision 1.1  2007/02/25 21:50:16  alex
- * no message
+ * Revision 1.5  2008/07/25 23:34:01  geoff
+ * Fix notation for intervals in commentary.
  *
  * Revision 1.4  2001/06/20 09:07:58  geoff
  * Fix a place where long long wasn't conditionalized.

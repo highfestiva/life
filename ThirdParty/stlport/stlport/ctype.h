@@ -33,7 +33,11 @@
 struct _exception;
 #  endif
 
-#  include _STLP_NATIVE_C_HEADER(ctype.h)
+#  if defined (_STLP_HAS_INCLUDE_NEXT)
+#    include_next <ctype.h>
+#  else
+#    include _STLP_NATIVE_C_HEADER(ctype.h)
+#  endif
 
 /* on evc4 including ctype.h also defines setjmp macro */
 #  if defined (_STLP_WCE)
@@ -79,17 +83,17 @@ __inline int (isascii)(int c) { return ((unsigned)(c) < 0x80); }
 
 #      undef _isctype
 
-__inline int (iswalpha)(int c) { return iswctype(c, _ALPHA); }
-__inline int (iswupper)(int c) { return iswctype(c, _UPPER); }
-__inline int (iswlower)(int c) { return iswctype(c, _LOWER); }
-__inline int (iswdigit)(int c) { return iswctype(c, _DIGIT); }
-__inline int (iswxdigit)(int c) { return iswctype(c, _HEX); }
-__inline int (iswspace)(int c) { return iswctype(c, _SPACE); }
-__inline int (iswpunct)(int c) { return iswctype(c, _PUNCT); }
-__inline int (iswalnum)(int c) { return iswctype(c, _ALPHA|_DIGIT); }
-__inline int (iswprint)(int c) { return iswctype(c, _BLANK|_PUNCT|_ALPHA|_DIGIT); }
-__inline int (iswgraph)(int c) { return iswctype(c, _PUNCT|_ALPHA|_DIGIT); }
-__inline int (iswcntrl)(int c) { return iswctype(c, _CONTROL); }
+__inline int (iswalpha)(int c) { return iswctype((unsigned short)(c), _ALPHA); }
+__inline int (iswupper)(int c) { return iswctype((unsigned short)(c), _UPPER); }
+__inline int (iswlower)(int c) { return iswctype((unsigned short)(c), _LOWER); }
+__inline int (iswdigit)(int c) { return iswctype((unsigned short)(c), _DIGIT); }
+__inline int (iswxdigit)(int c) { return iswctype((unsigned short)(c), _HEX); }
+__inline int (iswspace)(int c) { return iswctype((unsigned short)(c), _SPACE); }
+__inline int (iswpunct)(int c) { return iswctype((unsigned short)(c), _PUNCT); }
+__inline int (iswalnum)(int c) { return iswctype((unsigned short)(c), _ALPHA|_DIGIT); }
+__inline int (iswprint)(int c) { return iswctype((unsigned short)(c), _BLANK|_PUNCT|_ALPHA|_DIGIT); }
+__inline int (iswgraph)(int c) { return iswctype((unsigned short)(c), _PUNCT|_ALPHA|_DIGIT); }
+__inline int (iswcntrl)(int c) { return iswctype((unsigned short)(c), _CONTROL); }
 __inline int (iswascii)(int c) { return ((unsigned)(c) < 0x80); }
 
 #    endif /* UNDER_CE */

@@ -128,15 +128,13 @@ public:
   // the return value is when __n == 0.
   _Tp* allocate(size_type __n, const void* = 0) {
     if (__n > max_size()) {
-      __THROW_BAD_ALLOC;
+      _STLP_THROW_BAD_ALLOC;
     }
     if (__n != 0) {
       size_type __buf_size = __n * sizeof(value_type);
       _Tp* __ret = __REINTERPRET_CAST(value_type*, _S_Alloc::allocate(__buf_size));
 #if defined (_STLP_DEBUG_UNINITIALIZED) && !defined (_STLP_DEBUG_ALLOC)
-      if (__ret != 0) {
-        memset((char*)__ret, _STLP_SHRED_BYTE, __buf_size);
-      }
+      memset((char*)__ret, _STLP_SHRED_BYTE, __buf_size);
 #endif
       return __ret;
     }
@@ -157,7 +155,7 @@ public:
   size_type max_size() const _STLP_NOTHROW
   { return size_t(-1) / sizeof(_Tp); }
 
-  void construct(pointer __p, const _Tp& __val) { _STLP_PLACEMENT_NEW (__p) _Tp(__val); }
+  void construct(pointer __p, const _Tp& __val) { new(__p) _Tp(__val); }
   void destroy(pointer _p) { _p->~_Tp(); }
 
 #if defined (_STLP_NO_EXTENSIONS)
@@ -169,15 +167,13 @@ protected:
 #endif
   _Tp* allocate(size_type __n, size_type& __allocated_n) {
     if (__n > max_size()) {
-      __THROW_BAD_ALLOC;
+      _STLP_THROW_BAD_ALLOC;
     }
     if (__n != 0) {
       size_type __buf_size = __n * sizeof(value_type);
       _Tp* __ret = __REINTERPRET_CAST(value_type*, _S_Alloc::allocate(__buf_size));
 #if defined (_STLP_DEBUG_UNINITIALIZED) && !defined (_STLP_DEBUG_ALLOC)
-      if (__ret != 0) {
-        memset((char*)__ret, _STLP_SHRED_BYTE, __buf_size);
-      }
+      memset((char*)__ret, _STLP_SHRED_BYTE, __buf_size);
 #endif
       __allocated_n = __buf_size / sizeof(value_type);
       return __ret;
@@ -185,6 +181,9 @@ protected:
     else
       return 0;
   }
+#if defined (_STLP_USE_PARTIAL_SPEC_WORKAROUND) && !defined (_STLP_FUNCTION_TMPL_PARTIAL_ORDER)
+  void _M_swap_workaround(pthread_allocator<_Tp>& __x) {}
+#endif
 };
 
 _STLP_TEMPLATE_NULL
@@ -216,12 +215,6 @@ inline bool operator!=(const pthread_allocator<_T1>&,
 
 
 #if defined (_STLP_CLASS_PARTIAL_SPECIALIZATION)
-
-#  if defined (_STLP_USE_RAW_SGI_ALLOCATORS)
-template <class _Tp>
-struct _Alloc_traits<_Tp, _Pthread_alloc>
-{ typedef __allocator<_Tp, _Pthread_alloc> allocator_type; };
-#  endif
 
 template <class _Tp, class _Atype>
 struct _Alloc_traits<_Tp, pthread_allocator<_Atype> >
@@ -318,15 +311,13 @@ public:
   // the return value is when __n == 0.
   _Tp* allocate(size_type __n, const void* = 0) {
     if (__n > max_size()) {
-      __THROW_BAD_ALLOC;
+      _STLP_THROW_BAD_ALLOC;
     }
     if (__n != 0) {
       size_type __buf_size = __n * sizeof(value_type);
       _Tp* __ret = __REINTERPRET_CAST(_Tp*, _S_Alloc::allocate(__buf_size, _M_state));
 #if defined (_STLP_DEBUG_UNINITIALIZED) && !defined (_STLP_DEBUG_ALLOC)
-      if (__ret != 0) {
-        memset((char*)__ret, _STLP_SHRED_BYTE, __buf_size);
-      }
+      memset((char*)__ret, _STLP_SHRED_BYTE, __buf_size);
 #endif
       return __ret;
     }
@@ -347,7 +338,7 @@ public:
   size_type max_size() const _STLP_NOTHROW
   { return size_t(-1) / sizeof(_Tp); }
 
-  void construct(pointer __p, const _Tp& __val) { _STLP_PLACEMENT_NEW (__p) _Tp(__val); }
+  void construct(pointer __p, const _Tp& __val) { new(__p) _Tp(__val); }
   void destroy(pointer _p) { _p->~_Tp(); }
 
   // state is being kept here
@@ -362,15 +353,13 @@ protected:
 #endif
   _Tp* allocate(size_type __n, size_type& __allocated_n) {
     if (__n > max_size()) {
-      __THROW_BAD_ALLOC;
+      _STLP_THROW_BAD_ALLOC;
     }
     if (__n != 0) {
       size_type __buf_size = __n * sizeof(value_type);
       _Tp* __ret = __REINTERPRET_CAST(value_type*, _S_Alloc::allocate(__buf_size, _M_state));
 #if defined (_STLP_DEBUG_UNINITIALIZED) && !defined (_STLP_DEBUG_ALLOC)
-      if (__ret != 0) {
-        memset((char*)__ret, _STLP_SHRED_BYTE, __buf_size);
-      }
+      memset((char*)__ret, _STLP_SHRED_BYTE, __buf_size);
 #endif
       __allocated_n = __buf_size / sizeof(value_type);
       return __ret;

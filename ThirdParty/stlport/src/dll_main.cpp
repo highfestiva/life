@@ -23,7 +23,6 @@
  *
  */
 
-#define __PUT_STATIC_DATA_MEMBERS_HERE
 #define _STLP_EXPOSE_GLOBALS_IMPLEMENTATION
 
 #include "stlport_prefix.h"
@@ -52,54 +51,14 @@
 #include <bitset>
 #include <locale>
 
-#if (_STLP_STATIC_TEMPLATE_DATA < 1) || defined (__DMC__)
+#if defined (__DMC__)
 // for rope static members
 #  include <rope>
 #endif
 
-// boris : this piece of code duplicated from _range_errors.h
-#undef _STLP_THROW_MSG
-#if defined(_STLP_THROW_RANGE_ERRORS)
-#  ifndef _STLP_STDEXCEPT
-#    include <stdexcept>
-#  endif
-#  ifndef _STLP_STRING
-#    include <string>
-#  endif
-#  define _STLP_THROW_MSG(ex,msg)  throw ex(string(msg))
-#else
-#  if defined (_STLP_RTTI_BUG)
-#    define _STLP_THROW_MSG(ex,msg)  TerminateProcess(GetCurrentProcess(), 0)
-#  else
-#    include <cstdlib>
-#    include <cstdio>
-#    define _STLP_THROW_MSG(ex,msg)  puts(msg),_STLP_ABORT()
-#  endif
-#endif
-
-#if defined (_STLP_MSVC) && (_STLP_MSVC < 1310)
-#  pragma optimize("g", off)
-#endif
+#include <stl/_range_errors.c>
 
 _STLP_BEGIN_NAMESPACE
-
-void _STLP_DECLSPEC _STLP_CALL __stl_throw_runtime_error(const char* __msg)
-{ _STLP_THROW_MSG(runtime_error, __msg); }
-
-void _STLP_DECLSPEC _STLP_CALL __stl_throw_range_error(const char* __msg)
-{ _STLP_THROW_MSG(range_error, __msg); }
-
-void _STLP_DECLSPEC _STLP_CALL __stl_throw_out_of_range(const char* __msg)
-{ _STLP_THROW_MSG(out_of_range, __msg); }
-
-void _STLP_DECLSPEC _STLP_CALL __stl_throw_length_error(const char* __msg)
-{ _STLP_THROW_MSG(length_error, __msg); }
-
-void _STLP_DECLSPEC _STLP_CALL __stl_throw_invalid_argument(const char* __msg)
-{ _STLP_THROW_MSG(invalid_argument, __msg); }
-
-void _STLP_DECLSPEC _STLP_CALL __stl_throw_overflow_error(const char* __msg)
-{ _STLP_THROW_MSG(overflow_error, __msg); }
 
 #if defined (_STLP_NO_EXCEPTION_HEADER) || defined (_STLP_BROKEN_EXCEPTION_CLASS)
 exception::exception() _STLP_NOTHROW {}
@@ -111,20 +70,9 @@ const char* bad_exception::what() const _STLP_NOTHROW { return "class bad_except
 #endif
 
 #if defined (_STLP_OWN_STDEXCEPT)
-__Named_exception::__Named_exception(const string& __str) {
-#if !defined (_STLP_USE_SAFE_STRING_FUNCTIONS)
-  strncpy(_M_name, __str.c_str(), _S_bufsize);
-  _M_name[_S_bufsize - 1] = '\0';
-#else
-  strncpy_s(_STLP_ARRAY_AND_SIZE(_M_name), __str.c_str(), _TRUNCATE);
-#endif
-}
-
-const char* __Named_exception::what() const _STLP_NOTHROW_INHERENTLY { return _M_name; }
+#  include <stl/_stdexcept_base.c>
 
 // boris : those are needed to force typeinfo nodes to be created in here only
-__Named_exception::~__Named_exception() _STLP_NOTHROW_INHERENTLY {}
-
 logic_error::~logic_error() _STLP_NOTHROW_INHERENTLY {}
 runtime_error::~runtime_error() _STLP_NOTHROW_INHERENTLY {}
 domain_error::~domain_error() _STLP_NOTHROW_INHERENTLY {}
@@ -135,7 +83,7 @@ range_error::~range_error() _STLP_NOTHROW_INHERENTLY {}
 overflow_error::~overflow_error() _STLP_NOTHROW_INHERENTLY {}
 underflow_error::~underflow_error() _STLP_NOTHROW_INHERENTLY {}
 
-#endif /* _STLP_OWN_STDEXCEPT */
+#endif
 
 #if !defined(_STLP_WCE_EVC3)
 #  if defined (_STLP_NO_BAD_ALLOC)
@@ -147,7 +95,7 @@ const nothrow_t nothrow /* = {} */;
 
 #  if defined (_STLP_DEBUG) || defined (_STLP_ASSERTIONS)
 _STLP_MOVE_TO_PRIV_NAMESPACE
-template struct _STLP_CLASS_DECLSPEC __stl_debug_engine<bool>;
+template class _STLP_CLASS_DECLSPEC __stl_debug_engine<bool>;
 _STLP_MOVE_TO_STD_NAMESPACE
 #  endif
 
@@ -254,14 +202,15 @@ _STLP_MOVE_TO_STD_NAMESPACE
 
 _STLP_END_NAMESPACE
 
+#if defined (_STLP_SIGNAL_RUNTIME_COMPATIBILITY)
+extern "C" void _STLP_DECLSPEC _STLP_CALL _STLP_SIGNAL_RUNTIME_COMPATIBILITY() {}
+#endif
+
 #define FORCE_SYMBOL extern
 
 #if defined (_WIN32) && defined (_STLP_USE_DECLSPEC) && !defined (_STLP_USE_STATIC_LIB)
 // stlportmt.cpp : Defines the entry point for the DLL application.
 //
-#  define WIN32_LEAN_AND_MEAN
-#  include <windows.h>
-
 #  undef FORCE_SYMBOL
 #  define FORCE_SYMBOL APIENTRY
 

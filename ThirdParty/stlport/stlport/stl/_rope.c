@@ -36,8 +36,12 @@
 #endif
 
 #if !defined (_STLP_USE_NO_IOSTREAMS)
-#  ifndef _STLP_IOSTREAM
-#    include <iostream>
+#  ifndef _STLP_INTERNAL_OSTREAM_H
+#    include <stl/_ostream.h>
+#  endif
+
+#  ifndef _STLP_INTERNAL_ISTREAM
+#    include <stl/_istream.h>
 #  endif
 #endif
 
@@ -45,11 +49,11 @@
 
 _STLP_BEGIN_NAMESPACE
 
-# if defined ( _STLP_NESTED_TYPE_PARAM_BUG )
-# define __allocator__ _Alloc
-# else
-# define __allocator__ allocator_type
-# endif
+#if defined ( _STLP_NESTED_TYPE_PARAM_BUG )
+#  define __allocator__ _Alloc
+#else
+#  define __allocator__ allocator_type
+#endif
 
 template<class _CharT, class _Alloc>
 _Rope_iterator<_CharT, _Alloc>::_Rope_iterator(rope<_CharT,_Alloc>* __r, size_t __pos)
@@ -761,20 +765,11 @@ private:
 public:
   _Rope_insert_char_consumer(_Insert_ostream& __writer)
     : _M_o(__writer) {}
-#  if defined(__MRC__) || (defined(__SC__) && !defined(__DMC__))  //*TY 05/23/2000 - added support for mpw compiler's trigger function approach to generate vtable
-  ~_Rope_insert_char_consumer();    //*TY 05/23/2000 -
-#  else    //*TY 05/23/2000 -
   ~_Rope_insert_char_consumer() {}
-#  endif    //*TY 05/23/2000 -
   // Caller is presumed to own the ostream
   bool operator() (const _CharT* __leaf, size_t __n);
   // Returns true to continue traversal.
 };
-
-#  if defined (__MRC__) || (defined (__SC__) && !defined (__DMC__))    //*TY 05/23/2000 - added support for mpw compiler's trigger function approach to generate vtable
-template<class _CharT, class _Traits>
-_Rope_insert_char_consumer<_CharT, _Traits>::  ~_Rope_insert_char_consumer() {}
-#  endif    //*TY 05/23/2000 -
 
 template<class _CharT, class _Traits>
 bool _Rope_insert_char_consumer<_CharT, _Traits>::operator()
@@ -1018,20 +1013,9 @@ void rope<_CharT,_Alloc>::_S_dump(_RopeRep* __r, int __indent) {
 /* 42 */701408733ul, /* 43 */1134903170ul, /* 44 */1836311903ul,                      \
 /* 45 */2971215073ul }
 
-# if ( _STLP_STATIC_TEMPLATE_DATA > 0 )
 template <class _CharT, class _Alloc>
 const unsigned long
 rope<_CharT,_Alloc>::_S_min_len[__ROPE_DEPTH_SIZE] __ROPE_TABLE_BODY;
-# else
-__DECLARE_INSTANCE(const unsigned long,
-                   crope::_S_min_len[__ROPE_DEPTH_SIZE],
-                   __ROPE_TABLE_BODY);
-#  ifndef _STLP_NO_WCHAR_T
-__DECLARE_INSTANCE(const unsigned long,
-                   wrope::_S_min_len[__ROPE_DEPTH_SIZE],
-                   __ROPE_TABLE_BODY);
-#  endif
-# endif
 # undef __ROPE_DEPTH_SIZE
 # undef __ROPE_MAX_DEPTH
 # undef __ROPE_TABLE_BODY
@@ -1313,22 +1297,13 @@ _Rope_char_ref_proxy<_CharT, _Alloc>::operator& () const {
     return _Rope_char_ptr_proxy<_CharT, _Alloc>(*this);
 }
 
-# if ( _STLP_STATIC_TEMPLATE_DATA > 0 )
 template<class _CharT, class _Alloc>
 _CharT rope<_CharT,_Alloc>::_S_empty_c_str[1] = { _CharT() };
-# else
-__DECLARE_INSTANCE(char, crope::_S_empty_c_str[1], ={0});
-# ifdef _STLP_HAS_WCHAR_T
-__DECLARE_INSTANCE(wchar_t, wrope::_S_empty_c_str[1], ={0});
-# endif /* _STLP_HAS_WCHAR_T */
-# endif /* _STLP_STATIC_TEMPLATE_DATA */
 // # endif
 
-#if !defined (_STLP_STATIC_CONST_INIT_BUG)
-#  if !defined (__GNUC__) || (__GNUC__ != 2) || (__GNUC_MINOR__ != 96)
+#if !defined (_STLP_STATIC_CONST_INIT_BUG) && !defined (_STLP_NO_STATIC_CONST_DEFINITION)
 template <class _CharT, class _Alloc>
 const size_t rope<_CharT, _Alloc>::npos;
-#  endif
 #endif
 
 template<class _CharT, class _Alloc>
@@ -1377,8 +1352,7 @@ const _CharT* rope<_CharT,_Alloc>::replace_with_c_str() {
 
 // Algorithm specializations.  More should be added.
 
-#if (!defined (_STLP_MSVC) || (_STLP_MSVC >= 1310)) && \
-    (!defined (__DMC__) || defined (__PUT_STATIC_DATA_MEMBERS_HERE))
+#if (!defined (_STLP_MSVC) || (_STLP_MSVC >= 1310)) && !defined (__DMC__)
 // I couldn't get this to work with VC++
 template<class _CharT,class _Alloc>
 void _Rope_rotate(_Rope_iterator<_CharT,_Alloc> __first,
@@ -1410,9 +1384,9 @@ void _Rope_rotate(_Rope_iterator<_CharT,_Alloc> __first,
 //   for unicode strings.  Unsigned short may be a better character
 //   type.
 inline void rotate(
-    _Rope_iterator<wchar_t,_STLP_DEFAULT_ALLOCATOR(char) > __first,
-                _Rope_iterator<wchar_t,_STLP_DEFAULT_ALLOCATOR(char) > __middle,
-                _Rope_iterator<wchar_t,_STLP_DEFAULT_ALLOCATOR(char) > __last) {
+    _Rope_iterator<wchar_t, allocator<char> > __first,
+                _Rope_iterator<wchar_t, allocator<char> > __middle,
+                _Rope_iterator<wchar_t, allocator<char> > __last) {
     _Rope_rotate(__first, __middle, __last);
 }
 # endif

@@ -2,7 +2,7 @@
 #define MTWIST_H
 
 /*
- * $Id: mtwist.h,v 1.1 2007/02/25 21:50:16 alex Exp $
+ * $Id: mtwist.h,v 1.17 2007/10/26 07:21:06 geoff Exp $
  *
  * Header file for C/C++ use of the Mersenne-Twist pseudo-RNG.  See
  * http://www.math.keio.ac.jp/~matumoto/emt.html for full information.
@@ -25,10 +25,10 @@
  * long-long.  By inverting the sense, this common case will require
  * no special compiler flags.
  *
- * IMPORTANT NOTE: this software assumes that the inherent width of a
- * "long" is 32 bits.  If you are running on a machine that uses
- * 64-bit longs, some of the declarations and code will have to be
- * modified.
+ * IMPORTANT NOTE: this software requires access to a 32-bit type.  Be
+ * sure that "mt_u32bit_t" is set to an unsigned 32-bit integer type.
+ * The Mersenne Twist algorithms are not guaranteed to produce correct
+ * results with a 64-bit type.
  *
  * The executable part of this software is based on LGPL-ed code by
  * Takuji Nishimura.  The header file is therefore also distributed
@@ -48,8 +48,13 @@
  * Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  * $Log: mtwist.h,v $
- * Revision 1.1  2007/02/25 21:50:16  alex
- * no message
+ * Revision 1.17  2007/10/26 07:21:06  geoff
+ * Introduce, document, and use the new mt_u32bit_t type so that the code
+ * will compile and run on 64-bit platforms (although it does not
+ * currently use the 64-bit Mersenne Twist algorithm).
+ *
+ * Revision 1.16  2005/11/11 08:21:39  geoff
+ * If possible, try to infer MT_MACHINE_BITS from limits.h.
  *
  * Revision 1.15  2003/09/11 23:56:20  geoff
  * Allow stdio references in C++ files; it turns out that ANSI has
@@ -130,6 +135,16 @@
 #endif /* MT_MACHINE_BITS */
 
 /*
+ * Define an unsigned type that is guaranteed to be 32 bits wide.
+ */
+#if MT_MACHINE_BITS == 32
+typedef unsigned long	mt_u32bit_t;
+#else /* MT_MACHINE_BITS */
+typedef unsigned int	mt_u32bit_t;
+#endif /* MT_MACHINE_BITS */
+
+
+/*
  * The following value is a fundamental parameter of the algorithm.
  * It was found experimentally using methods described in Matsumoto
  * and Nishimura's paper.  It is exceedingly magic; don't change it.
@@ -154,7 +169,7 @@
  */
 typedef struct
     {
-    unsigned long	statevec[MT_STATE_SIZE];
+    mt_u32bit_t		statevec[MT_STATE_SIZE];
 					/* Vector holding current state */
     int			stateptr;	/* Next state entry to be used */
     int			initialized;	/* NZ if state was initialized */
@@ -176,7 +191,7 @@ extern void		mts_seed32(mt_state* state, unsigned long seed);
 extern void		mts_seed32new(mt_state* state, unsigned long seed);
 					/* Set random seed for any generator */
 extern void		mts_seedfull(mt_state* state,
-			  unsigned long seeds[MT_STATE_SIZE]);
+			  mt_u32bit_t seeds[MT_STATE_SIZE]);
 					/* Set complicated seed for any gen. */
 extern void		mts_seed(mt_state* state);
 					/* Choose seed from random input. */
@@ -213,7 +228,7 @@ extern void		mt_seed32(unsigned long seed);
 					/* Set random seed for default gen. */
 extern void		mt_seed32new(unsigned long seed);
 					/* Set random seed for default gen. */
-extern void		mt_seedfull(unsigned long seeds[MT_STATE_SIZE]);
+extern void		mt_seedfull(mt_u32bit_t seeds[MT_STATE_SIZE]);
 					/* Set complicated seed for default */
 extern void		mt_seed(void);	/* Choose seed from random input. */
 					/* ..Prefers /dev/urandom; uses time */
@@ -257,8 +272,6 @@ extern int		mt_loadstate(FILE* statefile);
  */
 #ifdef __cplusplus
 #undef MT_NO_INLINE			/* C++ definitely has inlining */
-#undef MT_INLINE
-#define MT_INLINE inline
 #endif /* __cplusplus */
 
 extern unsigned long	mts_lrand(mt_state* state);
@@ -335,20 +348,12 @@ extern double		mt_ldrand(void);
 	}								\
 	while (0)
 
-#ifdef __cplusplus
-extern "C"
-    {
-#endif
-
 extern mt_state		mt_default_state;
 					/* State of the default generator */
 extern double		mt_32_to_double;
 					/* Multiplier to convert long to dbl */
 extern double		mt_64_to_double;
 					/* Mult'r to cvt long long to dbl */
-#ifdef __cplusplus
-    }
-#endif
 
 /*
  * In gcc, inline functions must be declared extern or they'll produce
@@ -593,7 +598,6 @@ MT_EXTERN MT_INLINE unsigned long long mt_llrand()
  * (exclusive).  This function is optimized for speed, but it only generates
  * 32 bits of precision.  Use mt_ldrand to get 64 bits of precision.
  */
-
 MT_EXTERN MT_INLINE double mt_drand()
     {
     register unsigned long
@@ -698,7 +702,7 @@ class mt_prng
 			    state.initialized = 0;
 			    mts_seed32(&state, seed);
 			    }
-			mt_prng(unsigned long seeds[MT_STATE_SIZE])
+			mt_prng(mt_u32bit_t seeds[MT_STATE_SIZE])
 					// Construct with full seeding
 			    {
 			    state.stateptr = 0;
@@ -724,7 +728,7 @@ class mt_prng
 			    {
 			    mts_seed32new(&state, seed);
 			    }
-	void		seedfull(unsigned long seeds[MT_STATE_SIZE])
+	void		seedfull(mt_u32bit_t seeds[MT_STATE_SIZE])
 					// Set complicated random seed
 			    {
 			    mts_seedfull(&state, seeds);
@@ -771,7 +775,7 @@ class mt_prng
 
 	/*
 	 * Following Richard J. Wagner's example, we overload the
-	 * function-call operator to return a 32-bit floating value.
+	 * function-call operator to return a 64-bit floating value.
 	 * That allows the common use of the PRNG to be simplified as
 	 * in the following example:
 	 *

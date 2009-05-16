@@ -12,6 +12,9 @@
 
 #if !defined (STLPORT) || defined(_STLP_USE_NAMESPACES)
 using namespace std;
+#  if defined (STLPORT)
+using namespace std::tr1;
+#  endif
 #endif
 
 //
@@ -25,23 +28,14 @@ class UnorderedTest : public CPPUNIT_NS::TestCase
 #endif
   CPPUNIT_TEST(uset);
   CPPUNIT_TEST(umultiset);
-#if defined (__DMC__)
-  CPPUNIT_IGNORE;
-#endif
   CPPUNIT_TEST(umap);
-  CPPUNIT_STOP_IGNORE;
   CPPUNIT_TEST(umultimap);
-#if defined (__DMC__)
-  CPPUNIT_IGNORE;
-#endif
   CPPUNIT_TEST(user_case);
-  CPPUNIT_STOP_IGNORE;
   CPPUNIT_TEST(hash_policy);
   CPPUNIT_TEST(buckets);
-#if defined (__DMC__)
-  CPPUNIT_IGNORE;
-#endif
   CPPUNIT_TEST(equal_range);
+  CPPUNIT_EXPLICIT_TEST(benchmark1);
+  CPPUNIT_EXPLICIT_TEST(benchmark2);
 #if !defined (_STLP_USE_CONTAINERS_EXTENSION)
   CPPUNIT_IGNORE;
 #endif
@@ -57,6 +51,8 @@ protected:
   void hash_policy();
   void buckets();
   void equal_range();
+  void benchmark1();
+  void benchmark2();
   void template_methods();
 };
 
@@ -158,7 +154,7 @@ void UnorderedTest::umultiset()
 
 void UnorderedTest::umap()
 {
-#if defined (STLPORT) && !defined (__DMC__)
+#if defined (STLPORT)
   typedef unordered_map<int, int, hash<int>, equal_to<int> > umaptype;
   umaptype us;
 
@@ -269,7 +265,7 @@ void UnorderedTest::umultimap()
 
 void UnorderedTest::user_case()
 {
-#if defined (STLPORT) && !defined (__DMC__)
+#if defined (STLPORT)
   typedef unordered_map<int, string> UnorderedMap1;
   typedef unordered_map<int, UnorderedMap1> UnorderedMap2;
 
@@ -347,7 +343,7 @@ void UnorderedTest::buckets()
 
 void UnorderedTest::equal_range()
 {
-#if defined (STLPORT) && !defined (__DMC__)
+#if defined (STLPORT)
   typedef unordered_multiset<size_t> umset;
   {
     //General test
@@ -390,7 +386,11 @@ void UnorderedTest::equal_range()
     umset iumset;
 
     size_t i;
-    const size_t nbBuckets = iumset.bucket_count();
+    //We are going to add at least 20 values, to get a stable hash container while doing that
+    //we force a large number of buckets:
+    iumset.rehash(193);
+
+    size_t nbBuckets = iumset.bucket_count();
     const size_t targetedBucket = nbBuckets / 2;
 
     //Lets put 10 values in the targeted bucket:
@@ -414,6 +414,19 @@ void UnorderedTest::equal_range()
     pair<umset::iterator, umset::iterator> p = iumset.equal_range(targetedBucket);
     CPPUNIT_ASSERT( p.first != p.second );
     CPPUNIT_ASSERT( distance(p.first, p.second) == 3 );
+
+    // Now we remove some elements until hash container is resized:
+    nbBuckets = iumset.bucket_count();
+    while (iumset.bucket_count() == nbBuckets &&
+           !iumset.empty()) {
+      iumset.erase(iumset.begin());
+    }
+    CPPUNIT_ASSERT( iumset.load_factor() <= iumset.max_load_factor() );
+
+    // Adding an element back shouldn't change number of buckets:
+    nbBuckets = iumset.bucket_count();
+    iumset.insert(0);
+    CPPUNIT_ASSERT( iumset.bucket_count() == nbBuckets );
   }
 
   {
@@ -429,7 +442,8 @@ void UnorderedTest::equal_range()
         }
         else {
           size_t r;
-          while ((r = rand()) == magic);
+          while ((r = rand()) == magic)
+            ;
           hum.insert(r);
         }
 
@@ -459,12 +473,54 @@ void UnorderedTest::equal_range()
 #endif
 }
 
+void UnorderedTest::benchmark1()
+{
+#if defined (STLPORT)
+  typedef unordered_multiset<size_t> umset;
+
+  const size_t target = 500000;
+  umset iumset;
+  iumset.max_load_factor(10);
+  size_t i;
+  for (i = 0; i < target; ++i) {
+    iumset.insert(i);
+  }
+
+  for (i = 0; i < target; ++i) {
+    iumset.erase(i);
+  }
+#endif
+}
+
+void UnorderedTest::benchmark2()
+{
+#if defined (STLPORT)
+  typedef unordered_multiset<size_t> umset;
+
+  const size_t target = 500000;
+  umset iumset;
+  iumset.max_load_factor(10);
+  size_t i;
+  for (i = 0; i < target; ++i) {
+    iumset.insert(target - i);
+  }
+
+  for (i = 0; i < target; ++i) {
+    iumset.erase(target - i);
+  }
+#endif
+}
+
 struct Key
 {
   Key() : m_data(0) {}
   explicit Key(int data) : m_data(data) {}
 
   int m_data;
+
+#if defined (__DMC__) // slist<_Tp,_Alloc>::remove error
+  bool operator==(const Key&) const;
+#endif
 };
 
 struct KeyHash
@@ -596,3 +652,25 @@ void UnorderedTest::template_methods()
   }
 #endif
 }
+
+#if defined (STLPORT) && \
+    (!defined (_STLP_USE_PTR_SPECIALIZATIONS) || defined (_STLP_CLASS_PARTIAL_SPECIALIZATION))
+#  if !defined (__DMC__)
+/* Simple compilation test: Check that nested types like iterator
+ * can be access even if type used to instanciate container is not
+ * yet completely defined.
+ */
+class IncompleteClass
+{
+  unordered_set<IncompleteClass> usinstances;
+  typedef unordered_set<IncompleteClass>::iterator usit;
+  unordered_multiset<IncompleteClass> usminstances;
+  typedef unordered_multiset<IncompleteClass>::iterator usmit;
+
+  unordered_map<IncompleteClass, IncompleteClass> uminstances;
+  typedef unordered_map<IncompleteClass, IncompleteClass>::iterator umit;
+  unordered_multimap<IncompleteClass, IncompleteClass> umminstances;
+  typedef unordered_multimap<IncompleteClass, IncompleteClass>::iterator ummit;
+};
+#  endif
+#endif

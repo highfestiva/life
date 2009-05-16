@@ -15,14 +15,26 @@
 
 #if !defined (_STLP_OUTERMOST_HEADER_ID)
 #  define _STLP_OUTERMOST_HEADER_ID 0x279
-#  include <stl/_prolog.h>
+#  include <stl/_cprolog.h>
 #elif (_STLP_OUTERMOST_HEADER_ID == 0x279) && !defined (_STLP_DONT_POP_HEADER_ID)
 #  define _STLP_DONT_POP_HEADER_ID
 #endif
 
 /* evc3 doesn't have wctype.h */
-#if !defined(_STLP_WCE_EVC3) && !defined(N_PLAT_NLM)
-#  include _STLP_NATIVE_C_HEADER(wctype.h)
+#if !defined(_STLP_WCE_EVC3)
+#  if defined (_STLP_HAS_INCLUDE_NEXT)
+#    if defined (__hpux)
+#      include_next <stdarg.h>
+#      include_next <wchar.h>
+#    endif
+#    include_next <wctype.h>
+#  else
+#    if defined (__hpux)
+#      include _STLP_NATIVE_C_HEADER(stdarg.h)
+#      include _STLP_NATIVE_C_HEADER(wchar.h)
+#    endif
+#    include _STLP_NATIVE_C_HEADER(wctype.h)
+#  endif
 #endif
 
 #if (_STLP_OUTERMOST_HEADER_ID == 0x279)
@@ -33,8 +45,3 @@
 #    undef  _STLP_DONT_POP_HEADER_ID
 #  endif
 #endif
-
-/* Local Variables:
- * mode:C++
- * End:
- */

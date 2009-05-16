@@ -239,19 +239,19 @@ struct __type_traits {
           - Members you add will be treated like regular members unless
 
             you add the appropriate support in the compiler. */
-#  if !defined (_STLP_HAS_TYPE_TRAITS_INTRINSICS)
+#    if !defined (_STLP_HAS_TYPE_TRAITS_INTRINSICS)
    typedef __false_type    has_trivial_default_constructor;
    typedef __false_type    has_trivial_copy_constructor;
    typedef __false_type    has_trivial_assignment_operator;
    typedef __false_type    has_trivial_destructor;
    typedef __false_type    is_POD_type;
-#  else
+#    else
    typedef typename __bool2type<_STLP_HAS_TRIVIAL_CONSTRUCTOR(_Tp)>::_Ret has_trivial_default_constructor;
    typedef typename __bool2type<_STLP_HAS_TRIVIAL_COPY(_Tp)>::_Ret has_trivial_copy_constructor;
    typedef typename __bool2type<_STLP_HAS_TRIVIAL_ASSIGN(_Tp)>::_Ret has_trivial_assignment_operator;
    typedef typename __bool2type<_STLP_HAS_TRIVIAL_DESTRUCTOR(_Tp)>::_Ret has_trivial_destructor;
    typedef typename __bool2type<_STLP_IS_POD(_Tp)>::_Ret is_POD_type;
-#  endif
+#    endif
 };
 
 #    if defined (_STLP_CLASS_PARTIAL_SPECIALIZATION)
@@ -311,7 +311,7 @@ _STLP_DEFINE_TYPE_TRAITS_FOR(double);
 _STLP_DEFINE_TYPE_TRAITS_FOR(long double);
 #  endif
 
-#if defined (_STLP_CLASS_PARTIAL_SPECIALIZATION)
+#  if defined (_STLP_CLASS_PARTIAL_SPECIALIZATION)
 template <class _ArePtrs, class _Src, class _Dst>
 struct _IsCVConvertibleIf
 { typedef typename _IsCVConvertible<_Src, _Dst>::_Ret _Ret; };
@@ -319,8 +319,8 @@ struct _IsCVConvertibleIf
 template <class _Src, class _Dst>
 struct _IsCVConvertibleIf<__false_type, _Src, _Dst>
 { typedef __false_type _Ret; };
-#else
-#  if defined (_STLP_MEMBER_TEMPLATE_CLASSES)
+#  else
+#    if defined (_STLP_MEMBER_TEMPLATE_CLASSES)
 template <class _ArePtrs>
 struct _IsCVConvertibleIfAux {
   template <class _Src, class _Dst>
@@ -339,15 +339,15 @@ template <class _ArePtrs, class _Src, class _Dst>
 struct _IsCVConvertibleIf {
   typedef typename _IsCVConvertibleIfAux<_ArePtrs>::_STLP_TEMPLATE _In<_Src, _Dst>::_Ret _Ret;
 };
-#  else
+#    else
 /* default behavior: we prefer to miss an optimization rather than taking the risk of
  * a compilation error if playing with types with exotic memory alignment.
  */
 template <class _ArePtrs, class _Src, class _Dst>
 struct _IsCVConvertibleIf
 { typedef __false_type _Ret; };
+#    endif
 #  endif
-#endif
 
 template <class _Src, class _Dst>
 struct _TrivialNativeTypeCopy {
@@ -359,7 +359,12 @@ struct _TrivialNativeTypeCopy {
 
   typedef typename __bool2type<(sizeof(_Src) == sizeof(_Dst))>::_Ret _SameSize;
 
+#if !defined (__BORLANDC__) || (__BORLANDC__ < 0x564)
   typedef typename _IsIntegral<_Src>::_Ret _Int1;
+#else
+  typedef typename _UnQual<_Src>::_Type _UnQuSrc;
+  typedef typename _IsIntegral<_UnQuSrc>::_Ret _Int1;
+#endif
   typedef typename _IsIntegral<_Dst>::_Ret _Int2;
   typedef typename _Land2<_Int1, _Int2>::_Ret _BothInts;
 
@@ -368,24 +373,26 @@ struct _TrivialNativeTypeCopy {
   typedef typename _Land2<_Rat1, _Rat2>::_Ret _BothRats;
 
   typedef typename _Lor2<_BothInts, _BothRats>::_Ret _BothNatives;
+#if !defined (__BORLANDC__) || (__BORLANDC__ >= 0x564)
   typedef typename _Land2<_BothNatives, _SameSize>::_Ret _Trivial2;
-
+#else
+  typedef typename _IsUnQual<_Dst>::_Ret _UnQualDst;
+  typedef typename _Land3<_BothNatives, _SameSize, _UnQualDst>::_Ret _Trivial2;
+#endif
   typedef typename _Lor2<_Trivial1, _Trivial2>::_Ret _Ret;
 };
 
 template <class _Src, class _Dst>
 struct _TrivialCopy {
   typedef typename _TrivialNativeTypeCopy<_Src, _Dst>::_Ret _NativeRet;
-
-#if !defined (__BORLANDC__) || (__BORLANDC__ != 0x560)
+#  if !defined (__BORLANDC__) || (__BORLANDC__ != 0x560)
   typedef typename __type_traits<_Src>::has_trivial_assignment_operator _Tr1;
-#else
-  typedef typename _UnConstPtr<_Src*>::_Type _Tp3;
-  typedef typename __type_traits<_Tp3>::has_trivial_assignment_operator _Tr1;
-#endif
-  typedef typename _AreSameUnCVTypes<_Src, _Dst>::_Ret _Tr2;
+#  else
+  typedef typename _UnConstPtr<_Src*>::_Type _UnConstSrc;
+  typedef typename __type_traits<_UnConstSrc>::has_trivial_assignment_operator _Tr1;
+#  endif
+  typedef typename _AreCopyable<_Src, _Dst>::_Ret _Tr2;
   typedef typename _Land2<_Tr1, _Tr2>::_Ret _UserRet;
-
   typedef typename _Lor2<_NativeRet, _UserRet>::_Ret _Ret;
   static _Ret _Answer() { return _Ret(); }
 };
@@ -393,16 +400,14 @@ struct _TrivialCopy {
 template <class _Src, class _Dst>
 struct _TrivialUCopy {
   typedef typename _TrivialNativeTypeCopy<_Src, _Dst>::_Ret _NativeRet;
-
-#if !defined (__BORLANDC__) || (__BORLANDC__ != 0x560)
+#  if !defined (__BORLANDC__) || (__BORLANDC__ != 0x560)
   typedef typename __type_traits<_Src>::has_trivial_copy_constructor _Tr1;
-#else
-  typedef typename _UnConstPtr<_Src*>::_Type _Tp3;
-  typedef typename __type_traits<_Tp3>::has_trivial_copy_constructor _Tr1;
-#endif
-  typedef typename _AreSameUnCVTypes<_Src, _Dst>::_Ret _Tr2;
+#  else
+  typedef typename _UnConstPtr<_Src*>::_Type _UnConstSrc;
+  typedef typename __type_traits<_UnConstSrc>::has_trivial_copy_constructor _Tr1;
+#  endif
+  typedef typename _AreCopyable<_Src, _Dst>::_Ret _Tr2;
   typedef typename _Land2<_Tr1, _Tr2>::_Ret _UserRet;
-
   typedef typename _Lor2<_NativeRet, _UserRet>::_Ret _Ret;
   static _Ret _Answer() { return _Ret(); }
 };
@@ -417,12 +422,12 @@ struct _DefaultZeroValue {
 
 template <class _Tp>
 struct _TrivialInit {
-#if !defined (__BORLANDC__) || (__BORLANDC__ != 0x560)
+#  if !defined (__BORLANDC__) || (__BORLANDC__ != 0x560)
   typedef typename __type_traits<_Tp>::has_trivial_default_constructor _Tr1;
-#else
+#  else
   typedef typename _UnConstPtr<_Tp*>::_Type _Tp1;
   typedef typename __type_traits<_Tp1>::has_trivial_copy_constructor _Tr1;
-#endif
+#  endif
   typedef typename _DefaultZeroValue<_Tp>::_Ret _Tr2;
   typedef typename _Not<_Tr2>::_Ret _Tr3;
   typedef typename _Land2<_Tr1, _Tr3>::_Ret _Ret;
@@ -447,16 +452,28 @@ template <class _Tp>
 struct __call_traits {
 #if defined (_STLP_USE_BOOST_SUPPORT) && !defined (_STLP_NO_EXTENSIONS)
   typedef typename __select< ::boost::is_reference<_Tp>::value,
-                             _Tp, typename ::boost::add_reference< typename ::boost::add_const<_Tp>::type >::type>::_Ret param_type;
+                             typename ::boost::add_const<_Tp>::type,
+                             typename ::boost::add_reference< typename ::boost::add_const<_Tp>::type >::type>::_Ret const_param_type;
+  typedef typename __select< ::boost::is_reference<_Tp>::value,
+                             typename ::boost::remove_const<_Tp>::type,
+                             typename ::boost::add_reference<_Tp>::type>::_Ret param_type;
 #else
-  typedef const _Tp& param_type;
-#endif /* _STLP_USE_BOOST_SUPPORT */
+  typedef const _Tp& const_param_type;
+  typedef _Tp& param_type;
+#endif
 };
 
 #if !defined (_STLP_USE_BOOST_SUPPORT) && !defined (_STLP_NO_EXTENSIONS) && defined (_STLP_CLASS_PARTIAL_SPECIALIZATION)
 template <class _Tp>
-struct __call_traits<_Tp&>
-{ typedef _Tp& param_type; };
+struct __call_traits<_Tp&> {
+  typedef _Tp& param_type;
+  typedef const _Tp& const_param_type;
+};
+template <class _Tp>
+struct __call_traits<const _Tp&> {
+  typedef _Tp& param_type;
+  typedef const _Tp& const_param_type;
+};
 #endif
 
 template <class _Tp1, class _Tp2>
@@ -470,7 +487,7 @@ struct _BothPtrType {
 
 template <class _Tp1, class _Tp2, class _IsRef1, class _IsRef2>
 struct _OKToSwap {
-  typedef typename _AreSameUnCVTypes<_Tp1, _Tp2>::_Ret _Same;
+  typedef typename _AreSameTypes<_Tp1, _Tp2>::_Ret _Same;
   typedef typename _Land3<_Same, _IsRef1, _IsRef2>::_Ret _Type;
   static _Type _Answer() { return _Type(); }
 };
@@ -487,6 +504,38 @@ inline _TrivialCopy<_Src, _Dst> _UseTrivialCopy(_Src*, _Dst*)
 template <class _Src, class _Dst>
 inline _TrivialUCopy<_Src, _Dst> _UseTrivialUCopy(_Src*, _Dst*)
 { return _TrivialUCopy<_Src, _Dst>(); }
+
+#if defined (_STLP_FUNCTION_TMPL_PARTIAL_ORDER) || defined (__BORLANDC__) || \
+    defined (__DMC__)
+struct _NegativeAnswer {
+  typedef __false_type _Ret;
+  static _Ret _Answer() { return _Ret(); }
+};
+
+template <class _Src, class _Dst>
+inline _NegativeAnswer _UseTrivialCopy(_Src*, const _Dst*)
+{ return _NegativeAnswer(); }
+
+template <class _Src, class _Dst>
+inline _NegativeAnswer _UseTrivialCopy(_Src*, volatile _Dst*)
+{ return _NegativeAnswer(); }
+
+template <class _Src, class _Dst>
+inline _NegativeAnswer _UseTrivialCopy(_Src*, const volatile _Dst*)
+{ return _NegativeAnswer(); }
+
+template <class _Src, class _Dst>
+inline _NegativeAnswer _UseTrivialUCopy(_Src*, const _Dst*)
+{ return _NegativeAnswer(); }
+
+template <class _Src, class _Dst>
+inline _NegativeAnswer _UseTrivialUCopy(_Src*, volatile _Dst*)
+{ return _NegativeAnswer(); }
+
+template <class _Src, class _Dst>
+inline _NegativeAnswer _UseTrivialUCopy(_Src*, const volatile _Dst*)
+{ return _NegativeAnswer(); }
+#endif
 
 template <class _Tp>
 inline _TrivialInit<_Tp> _UseTrivialInit(_Tp*)

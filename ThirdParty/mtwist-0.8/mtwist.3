@@ -1,9 +1,9 @@
 .\"
-.\" $Id: mtwist.3,v 1.1 2007/02/25 21:50:16 alex Exp $
+.\" $Id: mtwist.3,v 1.6 2007/10/26 07:21:06 geoff Exp $
 .\"
 .\" $Log: mtwist.3,v $
-.\" Revision 1.1  2007/02/25 21:50:16  alex
-.\" no message
+.\" Revision 1.6  2007/10/26 07:21:06  geoff
+.\" Document the new mt_u32bit_t type (barely).
 .\"
 .\" Revision 1.5  2002/10/30 07:39:53  geoff
 .\" Document the new seeding routines.
@@ -43,7 +43,7 @@ C interface:
 .BI "void mts_seed32new(mt_state* " state ", unsigned long " seed ");"
 .sp
 .BI "void mts_seedfull(mt_state* " state ","
-.BI "                  unsigned long " seeds "[MT_STATE_SIZE]);"
+.BI "                  mt_u32bit_t " seeds "[MT_STATE_SIZE]);"
 .sp
 .BI "void mts_seed(mt_state* " state ");"
 .sp
@@ -59,7 +59,7 @@ C interface:
 .sp
 .BI "void mt_seed32new(unsigned long " seed ");"
 .sp
-.BI "void mt_seedfull(unsigned long " seeds "[MT_STATE_SIZE]);"
+.BI "void mt_seedfull(mt_u32bit_t " seeds "[MT_STATE_SIZE]);"
 .sp
 .B void mt_seed(void);
 .sp
@@ -97,11 +97,11 @@ C interface:
 .sp
 .BI "mt_prng " rng "(unsigned long " seed );
 .sp
-.BI "mt_prng " rng "(unsigned long " seeds [MT_STATE_SIZE]);
+.BI "mt_prng " rng "(mt_u32bit_t " seeds [MT_STATE_SIZE]);
 .sp
 .BI "void " rng ".seed32(unsigned long " seed ");"
 .sp
-.BI "void " rng ".seedfull(unsigned long seeds[MT_STATE_SIZE]);"
+.BI "void " rng ".seedfull(mt_u32bit_t seeds[MT_STATE_SIZE]);"
 .sp
 .BI "void " rng ".seed();"
 .sp
@@ -190,7 +190,7 @@ In C, a user-provided state vector has the following structure:
 
 typedef struct {
 .in +8
-unsigned long statevec[MT_STATE_SIZE];
+mt_u32bit_t statevec[MT_STATE_SIZE];
 .in +16
 /* Vector holding current state */
 .in -16

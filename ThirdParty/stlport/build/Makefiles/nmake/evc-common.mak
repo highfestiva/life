@@ -1,5 +1,5 @@
 # Time-stamp: <04/04/30 23:36:48 ptr>
-# $Id: evc-common.mak 2394 2006-05-31 13:08:53Z dums $
+# $Id$
 
 # stuff not defined here: CXX, CC, DEFS_COMMON, CFLAGS_*, CXXFLAGS_*, OPT_COMMON
 

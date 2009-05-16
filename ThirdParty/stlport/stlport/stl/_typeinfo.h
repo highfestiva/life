@@ -21,13 +21,10 @@
 #  if defined (_STLP_NO_NEW_NEW_HEADER)
 #    include <typeinfo.h>
 #  else
-#    ifdef _STLP_BROKEN_BAD_CAST_CLASS
-#      define bad_cast _STLP_NULLIFIED_BROKEN_BAD_CAST_CLASS
-#    endif
-#    include _STLP_NATIVE_CPP_RUNTIME_HEADER(typeinfo)
-#    ifdef _STLP_BROKEN_BAD_CAST_CLASS
-#      undef bad_cast
-#      undef _STLP_NULLIFIED_BROKEN_BAD_CAST_CLASS
+#    if defined (_STLP_HAS_INCLUDE_NEXT)
+#      include_next <typeinfo>
+#    else
+#      include _STLP_NATIVE_CPP_RUNTIME_HEADER(typeinfo)
 #    endif
 #  endif
 
@@ -52,14 +49,10 @@ using ::type_info;
 using _STLP_VENDOR_EXCEPT_STD::type_info;
 #    endif
 
-#    if !(defined (__MRC__) || defined (__SC__) || defined (__DMC__))
+#    if !defined (__DMC__)
 using _STLP_VENDOR_EXCEPT_STD::bad_typeid;
 #    endif
 
-//#if defined( __xlC__ ) && (__xlC__ < 0x500)
-//# include <exception>
-//struct bad_cast : exception {};
-//#endif
 #    if defined (_STLP_MSVC) && (_STLP_MSVC < 1300) && !defined (_STLP_WCE_NET)
 using ::bad_cast;
 #    else

@@ -21,33 +21,35 @@
  */
 
 #ifndef _STLP_VECTOR
-#define _STLP_VECTOR
 
-# ifndef _STLP_OUTERMOST_HEADER_ID
+#ifndef _STLP_OUTERMOST_HEADER_ID
 #  define _STLP_OUTERMOST_HEADER_ID 0x77
 #  include <stl/_prolog.h>
-# endif
-
-# ifdef _STLP_PRAGMA_ONCE
-#  pragma once
-# endif
-
-# ifndef _STLP_INTERNAL_ALGOBASE_H
-#  include <stl/_algobase.h>
-# endif
-
-#ifndef _STLP_INTERNAL_VECTOR_H
-# include <stl/_vector.h>
+#  define _STLP_VECTOR
 #endif
 
-#if defined (_STLP_IMPORT_VENDOR_STD) && ! defined (_STLP_MINIMUM_IMPORT_STD)
-#  include _STLP_NATIVE_HEADER(vector)
+#if (_STLP_OUTERMOST_HEADER_ID == 0x77)
+#  ifndef _STLP_INTERNAL_ALGOBASE_H
+#    include <stl/_algobase.h>
+#  endif
+
+#  ifndef _STLP_INTERNAL_VECTOR_H
+#    include <stl/_vector.h>
+#  endif
 #endif
 
-# if (_STLP_OUTERMOST_HEADER_ID == 0x77)
+#if (_STLP_OUTERMOST_HEADER_ID != 0x77) || defined (_STLP_IMPORT_VENDOR_STD)
+#  if defined (_STLP_HAS_INCLUDE_NEXT)
+#    include_next <vector>
+#  else
+#    include _STLP_NATIVE_HEADER(vector)
+#  endif
+#endif
+
+#if (_STLP_OUTERMOST_HEADER_ID == 0x77)
 #  include <stl/_epilog.h>
 #  undef _STLP_OUTERMOST_HEADER_ID
-# endif
+#endif
 
 #endif /* _STLP_VECTOR */
 

@@ -25,20 +25,6 @@
 #  define _STLP_PLATFORM "Windows"
 #endif
 
-/* _STLP_WIN32_VERSION is used to detect targetted Windows platforms as
- * old ones are not supporting some Win32 functions that STLport use.
- * Limited OSs are going up to and including Windows 98 so they can be
- * detected using WINVER or _WIN32_WINDOWS macros, we do not have to use
- * _WINNT_WINDOWS macro for the moment.
- */
-#if !defined (_STLP_WIN32_VERSION)
-#  if defined (WINVER)
-#    define _STLP_WIN32_VERSION WINVER
-#  elif defined (_WIN32_WINDOWS)
-#    define _STLP_WIN32_VERSION _WIN32_WINDOWS
-#  endif
-#endif
-
 #if !defined (_STLP_BIG_ENDIAN) && !defined (_STLP_LITTLE_ENDIAN)
 #  if defined (_MIPSEB)
 #    define _STLP_BIG_ENDIAN 1
@@ -60,15 +46,37 @@
 
 #if !defined (_STLP_WINDOWS_H_INCLUDED)
 #  define _STLP_WINDOWS_H_INCLUDED
-#  if !(defined ( _STLP_MSVC ) || defined (__BORLANDC__) || defined (__ICL) || defined (__WATCOMC__) || \
-        defined (__MINGW32__) || defined (__DMC__))
+#  if defined (__BUILDING_STLPORT)
+#    include <stl/config/_native_headers.h>
+/* Here we define _STLP_OUTERMOST_HEADER_ID to avoid indirect inclusion
+ * of STLport stuffs from C/C++ Standard headers exposed by STLport
+ * as configuration is not yet completed. */
+#    if !defined (_STLP_OUTERMOST_HEADER_ID)
+#      define _STLP_OUTERMOST_HEADER_ID 0x100
+#    endif
+#    if !defined (WIN32_LEAN_AND_MEAN)
+#      define WIN32_LEAN_AND_MEAN
+#    endif
+#    if !defined (VC_EXTRALEAN)
+#      define VC_EXTRALEAN
+#    endif
+/* Don't let windows.h define its min and max macros. */
+#    if !defined (NOMINMAX)
+#      define NOMINMAX
+#    endif
+#    if !defined (STRICT)
+#      define STRICT
+#    endif
 #    if defined (_STLP_USE_MFC)
 #      include <afx.h>
 #    else
 #      include <windows.h>
 #    endif
+#    if (_STLP_OUTERMOST_HEADER_ID == 0x100)
+#      undef _STLP_OUTERMOST_HEADER_ID
+#    endif
 #  else
-/* This section serves as a replacement for windows.h header for Visual C++ */
+/* This section serves as a replacement for windows.h header. */
 #    if defined (__cplusplus)
 extern "C" {
 #    endif
@@ -77,11 +85,6 @@ extern "C" {
 #      define InterlockedIncrement       _InterlockedIncrement
 #      define InterlockedDecrement       _InterlockedDecrement
 #      define InterlockedExchange        _InterlockedExchange
-/* Here we use a different macro name than the InterlockedExchangePointer SDK function
- * to avoid macro definition conflict as the SDK might already define InterlockedExchangePointer
- * as a macro.
- */
-#      define STLPInterlockedExchangePointer _InterlockedExchangePointer
 #      define _STLP_STDCALL
 #    else
 #      if defined (_MAC)
@@ -95,13 +98,24 @@ extern "C" {
 _STLP_IMPORT_DECLSPEC long _STLP_STDCALL InterlockedIncrement(long volatile *);
 _STLP_IMPORT_DECLSPEC long _STLP_STDCALL InterlockedDecrement(long volatile *);
 _STLP_IMPORT_DECLSPEC long _STLP_STDCALL InterlockedExchange(long volatile *, long);
-#      if defined (STLPInterlockedExchangePointer)
-_STLP_IMPORT_DECLSPEC void* _STLP_STDCALL STLPInterlockedExchangePointer(void* volatile *, void*);
+#      if defined (_WIN64)
+_STLP_IMPORT_DECLSPEC void* _STLP_STDCALL _InterlockedExchangePointer(void* volatile *, void*);
 #      endif
-_STLP_IMPORT_DECLSPEC long _STLP_STDCALL InterlockedExchangeAdd(long volatile *, long);
-#    elif defined (_STLP_WCE)
-
+#    elif !defined (_STLP_WCE)
+/* boris : for the latest SDK, you may actually need the other version of the declaration (above)
+ * even for earlier VC++ versions. There is no way to tell SDK versions apart, sorry ...
+ */
+_STLP_IMPORT_DECLSPEC long _STLP_STDCALL InterlockedIncrement(long*);
+_STLP_IMPORT_DECLSPEC long _STLP_STDCALL InterlockedDecrement(long*);
+_STLP_IMPORT_DECLSPEC long _STLP_STDCALL InterlockedExchange(long*, long);
+#    else
 /* start of eMbedded Visual C++ specific section */
+#      include <stl/config/_native_headers.h>
+
+/* Don't let windef.h define its min and max macros. */
+#      if !defined (NOMINMAX)
+#        define NOMINMAX
+#      endif
 #      include <windef.h> /* needed for basic windows types */
 
        /** in SDKs generated with PB5, windef.h somehow includes headers which then
@@ -158,47 +172,6 @@ _STLP_WCE_WINBASEAPI void WINAPI Sleep(DWORD);
 #      endif /* !__WINDOWS__ */
 
 /* end of eMbedded Visual C++ specific section */
-
-#    else
-/* boris : for the latest SDK, you may actually need the other version of the declaration (above)
- * even for earlier VC++ versions. There is no way to tell SDK versions apart, sorry ...
- */
-_STLP_IMPORT_DECLSPEC long _STLP_STDCALL InterlockedIncrement(long*);
-_STLP_IMPORT_DECLSPEC long _STLP_STDCALL InterlockedDecrement(long*);
-_STLP_IMPORT_DECLSPEC long _STLP_STDCALL InterlockedExchange(long*, long);
-#    endif
-
-#    if !defined (STLPInterlockedExchangePointer)
-/* This API function do not exist in the old platform SDK and is equivalent to
- * InterlockedExchange on 32 bits platform:
- */
-#      if defined (__cplusplus)
-/* We do not define this function if we are not in a C++ translation unit just
- * because of the inline portability issue it would introduce. We will have to
- * fix it the day we need this function for a C translation unit.
- */
-inline
-void* _STLP_CALL STLPInterlockedExchangePointer(void* volatile* __a, void* __b) {
-#        if defined (_STLP_MSVC)
-/* Here MSVC produces warning if 64 bits portability issue is activated.
- * MSVC do not see that _STLP_ATOMIC_EXCHANGE_PTR is a macro which content
- * is based on the platform, Win32 or Win64
- */
-#          pragma warning (push)
-#          pragma warning (disable : 4311) // pointer truncation from void* to long
-#          pragma warning (disable : 4312) // conversion from long to void* of greater size
-#        endif
-#        if !defined (_STLP_NO_NEW_STYLE_CASTS)
-  return reinterpret_cast<void*>(InterlockedExchange(reinterpret_cast<long*>(const_cast<void**>(__a)),
-                                                     reinterpret_cast<long>(__b)));
-#        else
-  return (void*)InterlockedExchange((long*)__a, (long)__b);
-#        endif
-#        if defined (_STLP_MSVC)
-#          pragma warning (pop)
-#        endif
-}
-#      endif
 #    endif
 
 #    if !defined (_STLP_WCE)
@@ -210,14 +183,109 @@ _STLP_IMPORT_DECLSPEC void _STLP_STDCALL OutputDebugStringA(const char* lpOutput
 #      pragma intrinsic(_InterlockedIncrement)
 #      pragma intrinsic(_InterlockedDecrement)
 #      pragma intrinsic(_InterlockedExchange)
-#      pragma intrinsic(_InterlockedExchangePointer)
+#      if defined (_WIN64)
+#        pragma intrinsic(_InterlockedExchangePointer)
+#      endif
 #    endif
 #    if defined (__cplusplus)
 } /* extern "C" */
 #    endif
 
-#  endif /* STL_MSVC __BORLANDC__ __ICL __WATCOMC__ __MINGW32__ __DMC__*/
+#  endif
+
+/* Here we use a macro different than the InterlockedExchangePointer SDK one
+ * to avoid macro definition conflict. */
+#  if !defined (_WIN64)
+/* Under 32 bits platform we rely on a simple InterlockedExchange call. */
+#    if defined (__cplusplus)
+/* We do not define this function if we are not in a C++ translation unit just
+ * because of the 'inline' keyword portability issue it would introduce. We will
+ * have to fix it the day we need this function for a C translation unit.
+ */
+inline
+void* _STLP_CALL STLPInterlockedExchangePointer(void* volatile* __a, void* __b) {
+#      if defined (_STLP_MSVC)
+/* Here MSVC produces warning if 64 bits portability issue is activated.
+ * MSVC do not see that _STLP_ATOMIC_EXCHANGE_PTR is a macro which content
+ * is based on the platform, Win32 or Win64
+ */
+#        pragma warning (push)
+#        pragma warning (disable : 4311) // pointer truncation from void* to long
+#        pragma warning (disable : 4312) // conversion from long to void* of greater size
+#      endif
+#      if !defined (_STLP_NO_NEW_STYLE_CASTS)
+  return reinterpret_cast<void*>(InterlockedExchange(reinterpret_cast<long*>(const_cast<void**>(__a)),
+                                                     reinterpret_cast<long>(__b)));
+#      else
+  return (void*)InterlockedExchange((long*)__a, (long)__b);
+#      endif
+#      if defined (_STLP_MSVC)
+#        pragma warning (pop)
+#      endif
+}
+#    endif
+#  else
+#    define STLPInterlockedExchangePointer _InterlockedExchangePointer
+#  endif
 
 #endif /* _STLP_WINDOWS_H_INCLUDED */
+
+/* _STLP_WIN95_LIKE signal the Windows 95 OS or assimilated Windows OS version that
+ * has Interlockeded[Increment, Decrement] Win32 API functions not returning modified
+ * value.
+ */
+#if (defined (WINVER) && (WINVER < 0x0410) && (!defined (_WIN32_WINNT) || (_WIN32_WINNT < 0x400))) || \
+    (!defined (WINVER) && (defined (_WIN32_WINDOWS) && (_WIN32_WINDOWS < 0x0410) || \
+                          (defined (_WIN32_WINNT) && (_WIN32_WINNT < 0x400))))
+#  define _STLP_WIN95_LIKE
+#endif
+
+/* Between Windows 95 (0x400) and later Windows OSes an API enhancement forces us
+ * to change _Refcount_Base internal struct. As _Refcount_base member methods might
+ * be partially inlined we need to check that STLport build/use are coherent. To do
+ * so we try to generate a link time error thanks to the following macro.
+ * This additional check is limited to old compilers that might still be used with
+ * Windows 95. */
+#if (defined (_DEBUG) || defined (_STLP_DEBUG)) && \
+    (defined (_STLP_MSVC) && (_STLP_MSVC < 1310) || \
+     defined (__GNUC__) && (__GNUC__ < 3))
+/* We invert symbol names based on macro detection, when building for Windows
+ * 95 we expose a
+ * building_for_windows95_or_previous_but_library_built_for_windows98_or_later
+ * function in order to have a more obvious link error message signaling how
+ * the lib has been built and how it is used. */
+#  if defined (__BUILDING_STLPORT)
+#    if defined (_STLP_WIN95_LIKE)
+#      define _STLP_SIGNAL_RUNTIME_COMPATIBILITY building_for_windows95_but_library_built_for_at_least_windows98
+#    else
+#      define _STLP_SIGNAL_RUNTIME_COMPATIBILITY building_for_at_least_windows98_but_library_built_for_windows95
+#    endif
+#  else
+#    if defined (_STLP_WIN95_LIKE)
+#      define _STLP_CHECK_RUNTIME_COMPATIBILITY building_for_windows95_but_library_built_for_at_least_windows98
+#    else
+#      define _STLP_CHECK_RUNTIME_COMPATIBILITY building_for_at_least_windows98_but_library_built_for_windows95
+#    endif
+#  endif
+#endif
+
+#if defined (__WIN16) || defined (WIN16) || defined (_WIN16)
+#  define _STLP_WIN16
+#else
+#  define _STLP_WIN32
+#endif
+
+#if defined(_STLP_WIN32)
+#  define _STLP_USE_WIN32_IO /* CreateFile/ReadFile/WriteFile */
+#endif
+
+#if defined(__MINGW32__) && !defined(_STLP_USE_STDIO_IO)
+#  define _STLP_USE_WIN32_IO /* CreateFile/ReadFile/WriteFile */
+#endif /* __MINGW32__ */
+
+#ifdef _STLP_WIN16
+#  define _STLP_USE_UNIX_EMULATION_IO /* _open/_read/_write */
+#  define _STLP_LDOUBLE_80
+#endif
 
 #endif /* _STLP_INTERNAL_WINDOWS_H */

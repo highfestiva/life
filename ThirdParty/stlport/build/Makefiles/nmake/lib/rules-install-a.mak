@@ -1,5 +1,5 @@
 # Time-stamp: <03/10/17 19:29:26 ptr>
-# $Id: rules-install-a.mak 2548 2006-07-31 19:34:29Z dums $
+# $Id$
 
 install-static: install-release-static install-dbg-static install-stldbg-static
 

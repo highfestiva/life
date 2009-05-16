@@ -39,8 +39,7 @@ ios_base::failure::failure(const string& s)
 
 ios_base::failure::~failure() _STLP_NOTHROW_INHERENTLY {}
 
-#if !defined (_STLP_STATIC_CONST_INIT_BUG)
-
+#if !defined (_STLP_STATIC_CONST_INIT_BUG) && !defined (_STLP_NO_STATIC_CONST_DEFINITION)
 // Definitions of ios_base's formatting flags.
 const ios_base::fmtflags ios_base::left;
 const ios_base::fmtflags ios_base::right;
@@ -80,7 +79,7 @@ const ios_base::seekdir ios_base::beg;
 const ios_base::seekdir ios_base::cur;
 const ios_base::seekdir ios_base::end;
 
-#endif /*  _STLP_STATIC_CONST_INIT_BUG */
+#endif
 
 // Internal functions used for managing exponentially-growing arrays of
 // POD types.
@@ -121,7 +120,7 @@ static PODType* _Stl_copy_array(const PODType* __array, size_t N) {
 }
 
 locale ios_base::imbue(const locale& loc) {
-  if (loc._M_impl != _M_locale._M_impl) {
+  if (loc != _M_locale) {
     locale previous = _M_locale;
     _M_locale = loc;
     _M_invoke_callbacks(imbue_event);
@@ -236,12 +235,7 @@ void ios_base::_M_copy_state(const ios_base& x) {
   _M_seekdir   = x._M_seekdir;
   _M_precision = x._M_precision;
   _M_width     = x._M_width;
-
-  if (_M_locale != x._M_locale) {
-    _M_locale = x._M_locale;
-    _M_cached_ctype = x._M_cached_ctype;
-    _M_cached_numpunct = x._M_cached_numpunct;
-  }
+  _M_locale    = x._M_locale;
 
   if (x._M_callbacks) {
     pair<event_callback, int>* tmp = _Stl_copy_array(x._M_callbacks, x._M_callback_index);
@@ -296,7 +290,7 @@ ios_base::ios_base()
     _M_callbacks(0), _M_num_callbacks(0), _M_callback_index(0),
     _M_iwords(0), _M_num_iwords(0),
     _M_pwords(0),
-    _M_num_pwords(0) , _M_cached_ctype(0), _M_cached_numpunct(0)
+    _M_num_pwords(0)
 {}
 
 // ios's destructor.

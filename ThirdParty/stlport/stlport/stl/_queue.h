@@ -46,10 +46,6 @@
 #  include <stl/_function_base.h>
 #endif
 
-#if defined(__SC__) && !defined(__DMC__)    //*ty 12/07/2001 - since "comp" is a built-in type and reserved under SCpp
-#  define comp _Comp
-#endif
-
 _STLP_BEGIN_NAMESPACE
 
 # if ! defined ( _STLP_LIMITED_DEFAULT_TEMPLATES )
@@ -90,8 +86,10 @@ public:
   queue() : c() {}
   explicit queue(const _Sequence& __c) : c(__c) {}
 
+#if !defined (_STLP_NO_MOVE_SEMANTIC)
   queue(__move_source<_Self> src)
     : c(_STLP_PRIV _AsMoveSource(src.get().c)) {}
+#endif
 
   bool empty() const { return c.empty(); }
   size_type size() const { return c.size(); }
@@ -102,6 +100,14 @@ public:
   void push(const value_type& __x) { c.push_back(__x); }
   void pop() { c.pop_front(); }
   const _Sequence& _Get_s() const { return c; }
+
+#if defined (_STLP_USE_PARTIAL_SPEC_WORKAROUND) && !defined (_STLP_FUNCTION_TMPL_PARTIAL_ORDER)
+  void _M_swap_workaround(_Self& __x) {
+    _Sequence __tmp = c;
+    c = __x.c;
+    __x.c = __tmp;
+  }
+#endif
 };
 
 #ifndef _STLP_QUEUE_ARGS
@@ -167,9 +173,11 @@ public:
     : c(__s), comp(__x)
     { make_heap(c.begin(), c.end(), comp); }
 
+#if !defined (_STLP_NO_MOVE_SEMANTIC)
   priority_queue(__move_source<_Self> src)
     : c(_STLP_PRIV _AsMoveSource(src.get().c)),
       comp(_STLP_PRIV _AsMoveSource(src.get().comp)) {}
+#endif
 
 #ifdef _STLP_MEMBER_TEMPLATES
   template <class _InputIterator>
@@ -226,9 +234,16 @@ public:
     }
     _STLP_UNWIND(c.clear())
   }
+#if defined (_STLP_USE_PARTIAL_SPEC_WORKAROUND) && !defined (_STLP_FUNCTION_TMPL_PARTIAL_ORDER)
+  void _M_swap_workaround(_Self& __x) {
+    _Sequence __tmp = c;
+    c = __x.c;
+    __x.c = __tmp;
+  }
+#endif
 };
 
-#if defined (_STLP_CLASS_PARTIAL_SPECIALIZATION)
+#if defined (_STLP_CLASS_PARTIAL_SPECIALIZATION) && !defined (_STLP_NO_MOVE_SEMANTIC)
 template <class _Tp, class _Sequence>
 struct __move_traits<queue<_Tp, _Sequence> > :
   _STLP_PRIV __move_traits_aux<_Sequence>
@@ -238,7 +253,7 @@ template <class _Tp, class _Sequence, class _Compare>
 struct __move_traits<priority_queue<_Tp, _Sequence, _Compare> > :
   _STLP_PRIV __move_traits_aux2<_Sequence, _Compare>
 {};
-#endif /* _STLP_CLASS_PARTIAL_SPECIALIZATION */
+#endif
 
 _STLP_END_NAMESPACE
 

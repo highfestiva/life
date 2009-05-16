@@ -36,75 +36,11 @@
 
 _STLP_BEGIN_NAMESPACE
 
-#if (_STLP_STATIC_TEMPLATE_DATA > 0)
-
-#  if !defined (__BORLANDC__)
 template <class _CharT, class _InputIterator>
 locale::id money_get<_CharT, _InputIterator>::id;
 
 template <class _CharT, class _OutputIterator>
 locale::id money_put<_CharT, _OutputIterator>::id;
-#  endif
-
-#  if (defined (__CYGWIN__) || defined (__MINGW32__)) && \
-       defined (_STLP_USE_DYNAMIC_LIB) && !defined (__BUILDING_STLPORT)
-/*
- * Under cygwin, when STLport is used as a shared library, the id needs
- * to be specified as imported otherwise they will be duplicated in the
- * calling executable.
- */
-template <>
-_STLP_DECLSPEC locale::id money_get<char, istreambuf_iterator<char, char_traits<char> > >::id;
-/*
-template <>
-_STLP_DECLSPEC locale::id money_get<char, const char*>::id;
-*/
-
-template <>
-_STLP_DECLSPEC locale::id money_put<char, ostreambuf_iterator<char, char_traits<char> > >::id;
-template <>
-_STLP_DECLSPEC locale::id money_put<char, char*>::id;
-
-#    if !defined (_STLP_NO_WCHAR_T)
-template <>
-_STLP_DECLSPEC locale::id money_get<wchar_t, istreambuf_iterator<wchar_t, char_traits<wchar_t> > >::id;
-template <>
-_STLP_DECLSPEC locale::id money_get<wchar_t, const wchar_t*>::id;
-
-template <>
-_STLP_DECLSPEC locale::id money_put<wchar_t, ostreambuf_iterator<wchar_t, char_traits<wchar_t> > >::id;
-template <>
-_STLP_DECLSPEC locale::id money_put<wchar_t, wchar_t*>::id;
-#    endif
-
-#  endif
-
-#else /* ( _STLP_STATIC_TEMPLATE_DATA > 0 ) */
-
-//typedef money_get<char, const char*> money_get_char;
-//typedef money_put<char, char*> money_put_char;
-typedef money_get<char, istreambuf_iterator<char, char_traits<char> > > money_get_char_2;
-typedef money_put<char, ostreambuf_iterator<char, char_traits<char> > > money_put_char_2;
-
-//__DECLARE_INSTANCE(locale::id, money_get_char::id, );
-//__DECLARE_INSTANCE(locale::id, money_put_char::id, );
-__DECLARE_INSTANCE(locale::id, money_get_char_2::id, );
-__DECLARE_INSTANCE(locale::id, money_put_char_2::id, );
-
-#  ifndef _STLP_NO_WCHAR_T
-
-//typedef money_get<wchar_t, const wchar_t*> money_get_wchar_t;
-//typedef money_get<wchar_t, istreambuf_iterator<wchar_t, char_traits<wchar_t> > > money_get_wchar_t_2;
-typedef money_put<wchar_t, wchar_t*> money_put_wchar_t;
-typedef money_put<wchar_t, ostreambuf_iterator<wchar_t, char_traits<wchar_t> > > money_put_wchar_t_2;
-
-//__DECLARE_INSTANCE(locale::id, money_get_wchar_t::id, );
-//__DECLARE_INSTANCE(locale::id, money_put_wchar_t::id, );
-__DECLARE_INSTANCE(locale::id, money_get_wchar_t_2::id, );
-__DECLARE_INSTANCE(locale::id, money_put_wchar_t_2::id, );
-
-#  endif
-#endif /* ( _STLP_STATIC_TEMPLATE_DATA > 0 ) */
 
 // money_get facets
 
@@ -216,23 +152,13 @@ _InputIter __money_do_get(_InputIter __s, _InputIter __end, bool  __intl,
 
   for (__i = 0; __i < 4; ++__i) {
     switch (__format.field[__i]) {
-    case money_base::none:
-      if (__i == 3) {
-        if (__c_type.is(ctype_base::space, *__s)) {
-          __err = ios_base::failbit;
-          return __s;
-        }
-        break;
-      }
-      while (__s != __end && __c_type.is(ctype_base::space, *__s))
-        ++__s;
-      break;
     case money_base::space:
       if (!__c_type.is(ctype_base::space, *__s)) {
         __err = ios_base::failbit;
         return __s;
       }
       ++__s;
+    case money_base::none:
       while (__s != __end && __c_type.is(ctype_base::space, *__s))
         ++__s;
       break;
@@ -521,23 +447,20 @@ _OutputIter __money_do_put(_OutputIter __s, bool  __intl, ios_base&  __str,
 
   if (__fill_amt != 0 &&
       !(__fill_pos & (ios_base::left | ios_base::internal)))
-    __s = __fill_n(__s, __fill_amt, __fill);
+    __s = _STLP_PRIV __fill_n(__s, __fill_amt, __fill);
 
   for (int __i = 0; __i < 4; ++__i) {
     char __ffield = __format.field[__i];
     switch (__ffield) {
-      case money_base::none:
-        if (__fill_amt != 0 && __fill_pos == ios_base::internal)
-          __s = __fill_n(__s, __fill_amt, __fill);
-        break;
       case money_base::space:
         *__s++ = __space;
+      case money_base::none:
         if (__fill_amt != 0 && __fill_pos == ios_base::internal)
-          __s = __fill_n(__s, __fill_amt, __fill);
+          __s = _STLP_PRIV __fill_n(__s, __fill_amt, __fill);
         break;
       case money_base::symbol:
         if (__generate_curr)
-          __s = copy(__curr_sym.begin(), __curr_sym.end(), __s);
+          __s = _STLP_STD::copy(__curr_sym.begin(), __curr_sym.end(), __s);
         break;
       case money_base::sign:
         if (!__sign.empty())
@@ -545,19 +468,19 @@ _OutputIter __money_do_put(_OutputIter __s, bool  __intl, ios_base&  __str,
         break;
       case money_base::value:
         if (__frac_digits == 0) {
-          __s = copy(__digits_first, __digits_last, __s);
+          __s = _STLP_STD::copy(__digits_first, __digits_last, __s);
         } else {
           if ((int)__value_length <= __frac_digits) {
             // if we see '9' here, we should out 0.09
             *__s++ = __zero;  // integer part is zero
             *__s++ = __point; // decimal point
-            __s =  __fill_n(__s, __frac_digits - __value_length, __zero); // zeros
-            __s = copy(__digits_first, __digits_last, __s); // digits
+            __s =  _STLP_PRIV __fill_n(__s, __frac_digits - __value_length, __zero); // zeros
+            __s = _STLP_STD::copy(__digits_first, __digits_last, __s); // digits
           } else {
-            __s = copy(__digits_first, __digits_last - __frac_digits, __s);
+            __s = _STLP_STD::copy(__digits_first, __digits_last - __frac_digits, __s);
             if (__frac_digits != 0) {
               *__s++ = __point;
-              __s = copy(__digits_last - __frac_digits, __digits_last, __s);
+              __s = _STLP_STD::copy(__digits_last - __frac_digits, __digits_last, __s);
             }
           }
         }
@@ -567,10 +490,10 @@ _OutputIter __money_do_put(_OutputIter __s, bool  __intl, ios_base&  __str,
 
   // Ouput rest of sign if necessary.
   if (__sign.size() > 1)
-    __s = copy(__sign.begin() + 1, __sign.end(), __s);
+    __s = _STLP_STD::copy(__sign.begin() + 1, __sign.end(), __s);
   if (__fill_amt != 0 &&
       !(__fill_pos & (ios_base::right | ios_base::internal)))
-    __s = __fill_n(__s, __fill_amt, __fill);
+    __s = _STLP_PRIV __fill_n(__s, __fill_amt, __fill);
 
   return __s;
 }

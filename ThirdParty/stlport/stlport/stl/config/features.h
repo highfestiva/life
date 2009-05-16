@@ -75,7 +75,7 @@
 #  if defined (_STLP_NO_EXTENSIONS)
 #    undef _STLP_NO_EXTENSIONS
 #  endif
-/* Moreover there are things that has no sens:
+/* Moreover there are things that have no sens:
  */
 #  if defined (_STLP_NO_IOSTREAMS)
 #    error If you do not use iostreams you do not need to build the STLport library.
@@ -102,33 +102,8 @@
  */
 #include <stl/config/stl_confix.h>
 
-#ifdef _STLP_USE_BOOST_SUPPORT
-/* We are going to use the boost library support. To limit the problem
- * of self referencing headers we have to specify clearly to the boost
- * library that the Standard lib is STLport:
- */
-#  ifndef BOOST_STDLIB_CONFIG
-#    define BOOST_STDLIB_CONFIG <boost/config/stdlib/stlport.hpp>
-#  endif
-#endif
-
-
-/*
- * Performs integrity check on user-specified parameters
- * and site-specific settings.
- */
-/*
-# include <stl/_check_config.h>
-*/
-
-/* SGI terms */
-
 #if !defined (_STLP_NO_MEMBER_TEMPLATES) && !defined (_STLP_MEMBER_TEMPLATES)
 #  define _STLP_MEMBER_TEMPLATES 1
-#endif
-
-#if !defined (_STLP_NO_FRIEND_TEMPLATES) && !defined (_STLP_FRIEND_TEMPLATES)
-#  define _STLP_FRIEND_TEMPLATES 1
 #endif
 
 #if !defined (_STLP_NO_MEMBER_TEMPLATE_CLASSES) && !defined (_STLP_MEMBER_TEMPLATE_CLASSES)
@@ -164,7 +139,16 @@
 
 #if defined (_STLP_USE_PTR_SPECIALIZATIONS) && \
     (defined (_STLP_NO_CLASS_PARTIAL_SPECIALIZATION) && defined (_STLP_DONT_SIMULATE_PARTIAL_SPEC_FOR_TYPE_TRAITS))
-#  error "Sorry but according the STLport settings your compiler can not support the pointer specialization feature."
+#  error Sorry but according the STLport settings your compiler can not support the pointer specialization feature.
+#endif
+
+#if defined (_STLP_WHOLE_NATIVE_STD) && defined (_STLP_NO_OWN_NAMESPACE)
+#  error Sorry but asking for both STLport to be in the real std namespace and also having STLport import all native std stuff \
+  is invalid, chose one or none.
+#endif
+
+#if defined (_STLP_VERBOSE) && !defined (_STLP_VERBOSE_MODE_SUPPORTED)
+#  error Sorry but the verbose mode is not implemented for your compiler.
 #endif
 
 #if defined (_STLP_NO_IOSTREAMS) && \
@@ -218,33 +202,10 @@
 #endif
 
 /* Operating system recognition (basic) */
-#if defined (__unix) || defined (__linux__) || defined (__QNX__) || defined (_AIX)  || defined (__NetBSD__) || defined(__OpenBSD__) || defined (__Lynx__)
+#if (defined(__unix) || defined(__linux__) || defined(__QNX__) || defined(_AIX)  || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__FreeBSD__) || defined(__Lynx__) || defined(__hpux) || defined(__sgi)) && \
+     !defined (_STLP_UNIX)
 #  define _STLP_UNIX 1
-#elif defined(macintosh) || defined (_MAC)
-#  define _STLP_MAC  1
-#elif defined (_WIN32) || defined (__WIN32) || defined (WIN32) || defined (__WIN32__)
-#  define _STLP_WIN32 1
-#elif defined (__WIN16) || defined (WIN16) || defined (_WIN16)
-#  define _STLP_WIN16
 #endif /* __unix */
-
-#if defined (_STLP_WIN16)
-#  define _STLP_LDOUBLE_80
-#elif defined(_STLP_WIN32)
-#  if defined (_STLP_MSVC) || defined (__ICL) || defined (__BORLANDC__) || defined (__CYGWIN__)
-#    define _STLP_LDOUBLE_64
-#  else
-#    define _STLP_LDOUBLE_96
-#  endif
-#elif defined (_STLP_UNIX)
-#  if defined (__CYGWIN__)
-#    define _STLP_LDOUBLE_96
-#  endif
-#endif
-
-#if !defined (_STLP_LDOUBLE_64) && !defined (_STLP_LDOUBLE_80) && !defined (_STLP_LDOUBLE_96) && !defined (_STLP_LDOUBLE_128)
-#  define _STLP_LDOUBLE_128
-#endif
 
 #if !defined (_STLP_NO_LONG_DOUBLE)
 #  define _STLP_LONGEST_FLOAT_TYPE long double
@@ -253,7 +214,9 @@
 #endif
 
 /* Native headers access macros */
-#include <stl/config/_native_headers.h>
+#if !defined (_STLP_HAS_INCLUDE_NEXT)
+#  include <stl/config/_native_headers.h>
+#endif
 
 /*  shared library tune-up */
 
@@ -283,45 +246,19 @@
 #    define _STLP_THREADS
 #  endif
 
-#  if defined (__sgi) && !defined (__KCC) && !defined (__GNUC__)
-#    define _STLP_SGI_THREADS
-#  elif defined (__DECC) || defined (__DECCXX)
-#    define _STLP_DEC_THREADS
-#  elif defined (_STLP_WIN32) && !defined (_STLP_PTHREADS)
+#  if defined (_STLP_WIN32) && !defined (_STLP_PTHREADS)
 #    define _STLP_WIN32THREADS 1
 #  elif ((defined (__sun) && !defined (__linux__)) || defined (_UITHREADS) ) && \
         !defined(_STLP_PTHREADS)
 #    define _STLP_UITHREADS
-#  elif defined (__OS2__)
-#    define _STLP_OS2THREADS
-#  elif defined (__BEOS__)
-#    define _STLP_BETHREADS
-#  elif defined (__MWERKS__) && defined (N_PLAT_NLM) /* (__dest_os == __netware_os) */
-#    define _STLP_NWTHREADS
 #  else
 #    define _STLP_PTHREADS
 #  endif /* __sgi */
 #  define _STLP_THREADS_DEFINED
 #endif
 
-#if (defined (_REENTRANT) || defined (_THREAD_SAFE) || \
-    (defined (_POSIX_THREADS) && defined (__OpenBSD__))) && \
-    !defined (_STLP_THREADS)
+#if (defined (_REENTRANT) || defined (_THREAD_SAFE)) && !defined (_STLP_THREADS)
 #  define _STLP_THREADS
-#endif /* _REENTRANT */
-
-#if defined (__linux__) && defined (_STLP_PTHREADS)
-/* #  include <features.h> */
-
-#  if defined (__USE_XOPEN2K) && !defined (_STLP_DONT_USE_PTHREAD_SPINLOCK)
-#    define _STLP_USE_PTHREAD_SPINLOCK
-#    define _STLP_STATIC_MUTEX _STLP_mutex
-#  endif /* __USE_XOPEN2K */
-#endif /* __linux__ && _STLP_PTHREADS */
-
-#if defined (__OpenBSD__) && defined (_POSIX_THREADS) && !defined (_STLP_DONT_USE_PTHREAD_SPINLOCK)
-#  define _STLP_USE_PTHREAD_SPINLOCK
-#  define _STLP_STATIC_MUTEX _STLP_mutex
 #endif
 
 #ifndef _STLP_STATIC_MUTEX
@@ -334,17 +271,6 @@
 
 #if defined (_STLP_THREADS)
 #  define _STLP_VOLATILE volatile
-/* windows.h _MUST be included before bool definition ;( */
-#  if defined (_STLP_WIN32THREADS) && defined (_STLP_NO_BOOL)
-#    undef  NOMINMAX
-#    define NOMINMAX
-#    ifdef _STLP_USE_MFC
-#      include <afx.h>
-#    else
-#      include <windows.h>
-#    endif
-#    define _STLP_WINDOWS_H_INCLUDED
-#  endif
 #else
 #  define _STLP_VOLATILE
 #endif
@@ -357,16 +283,12 @@
 #  undef _STLP_USE_NEW_C_HEADERS
 #endif
 
-#if !defined (_STLP_STATIC_TEMPLATE_DATA)
-#  define _STLP_STATIC_TEMPLATE_DATA 1
-#endif
-
 #if defined (_STLP_BASE_TYPEDEF_BUG)
 #  undef  _STLP_BASE_TYPEDEF_OUTSIDE_BUG
 #  define _STLP_BASE_TYPEDEF_OUTSIDE_BUG 1
 #endif
 
-#if defined (_STLP_NESTED_TYPE_PARAM_BUG) || (defined (_STLP_MSVC) && (_STLP_MSVC < 1100))
+#if defined (_STLP_NESTED_TYPE_PARAM_BUG)
 #  define _STLP_GLOBAL_NESTED_RETURN_TYPE_PARAM_BUG
 #endif
 
@@ -380,13 +302,6 @@
 #if defined (_STLP_NON_TYPE_TMPL_PARAM_BUG)
 #  undef  _STLP_NO_DEFAULT_NON_TYPE_PARAM
 #  define _STLP_NO_DEFAULT_NON_TYPE_PARAM 1
-#endif
-
-#define _STLP_NEW new
-#define _STLP_PLACEMENT_NEW new
-
-#ifdef _STLP_DEBUG
-#  define _STLP_ASSERTIONS 1
 #endif
 
 #if !defined (_STLP_STATIC_ASSERT)
@@ -407,18 +322,6 @@
 #  define _STLP_MPWFIX_CATCH_ACTION(action)
 #endif
 
-/* if _STLP_DEBUG or _STLP_ASSERTIONS are set, stl/debug/_debug.h defines those */
-
-#if !defined (_STLP_ASSERTIONS) && !defined (_STLP_DEBUG) && !defined (_STLP_DEBUG_ALLOC)
-#  define _STLP_ASSERT(expr)
-#endif
-
-#if !defined (_STLP_DEBUG)
-#  define _STLP_VERBOSE_ASSERT(expr,diagnostic)
-#  define _STLP_DEBUG_CHECK(expr)
-#  define _STLP_DEBUG_DO(expr)
-#endif
-
 #if !defined (_STLP_WEAK)
 #  define _STLP_WEAK
 #endif
@@ -431,6 +334,13 @@
 #    define _STLP_DEFAULT_TYPE_PARAM 1
 #  endif
 #  define _STLP_DFL_TMPL_PARAM( classname, defval ) class classname = defval
+#endif
+
+#if defined (_STLP_LIMITED_DEFAULT_TEMPLATES)
+#  define _STLP_DEFAULT_PAIR_ALLOCATOR_SELECT(_Key, _Tp ) class _Alloc
+#else
+#  define _STLP_DEFAULT_PAIR_ALLOCATOR_SELECT(_Key, _Tp ) \
+            class _Alloc = allocator< pair < _Key, _Tp > >
 #endif
 
 /* default parameters as complete types */
@@ -456,27 +366,6 @@
 #  define _STLP_CAN_THROW_RANGE_ERRORS 1
 #endif
 
-#if !defined (_STLP_USE_RAW_SGI_ALLOCATORS)
-#  define _STLP_DEFAULT_ALLOCATOR(_Tp) allocator< _Tp >
-#  define _STLP_DEFAULT_ALLOCATOR_SELECT( _Tp ) _STLP_DFL_TMPL_PARAM(_Alloc, allocator< _Tp >)
-#  define _STLP_DEFAULT_PAIR_ALLOCATOR(_Key, _Tp) allocator< pair < _Key, _Tp > >
-#  if defined (_STLP_LIMITED_DEFAULT_TEMPLATES)
-#    define _STLP_DEFAULT_PAIR_ALLOCATOR_SELECT(_Key, _Tp ) class _Alloc
-#    define _STLP_USE_WRAPPER_FOR_ALLOC_PARAM 1
-#  else
-#    define _STLP_DEFAULT_PAIR_ALLOCATOR_SELECT(_Key, _Tp ) \
-            class _Alloc = allocator< pair < _Key, _Tp > >
-#  endif
-#else
-#  define _STLP_DEFAULT_ALLOCATOR( _Tp ) __sgi_alloc
-#  define _STLP_DEFAULT_ALLOCATOR_SELECT( _Tp ) _STLP_DFL_TYPE_PARAM(_Alloc,__sgi_alloc)
-#  define _STLP_DEFAULT_PAIR_ALLOCATOR( _Key, _Tp ) __sgi_alloc
-#  define _STLP_DEFAULT_PAIR_ALLOCATOR_SELECT(_Key, _Tp ) _STLP_DFL_TYPE_PARAM(_Alloc,__sgi_alloc)
-#  if defined (_STLP_LIMITED_DEFAULT_TEMPLATES) && !defined (_STLP_DEFAULT_TYPE_PARAM)
-#    define _STLP_USE_WRAPPER_FOR_ALLOC_PARAM 1
-#  endif
-#endif
-
 /* debug mode tool */
 #if defined (_STLP_DEBUG)
 #  define _STLP_NON_DBG_NAME(X) _NonDbg_##X
@@ -487,11 +376,9 @@
 #  define _STLP_PTR_IMPL_NAME(X) _Impl_##X
 #endif
 
-#if defined (_STLP_USE_MSVC6_MEM_T_BUG_WORKAROUND)
+#if defined (_STLP_USE_MSVC6_MEM_T_BUG_WORKAROUND) || \
+    defined (_STLP_SIGNAL_RUNTIME_COMPATIBILITY) || defined (_STLP_CHECK_RUNTIME_COMPATIBILITY)
 #  define _STLP_NO_MEM_T_NAME(X) _NoMemT_##X
-#  if defined (_STLP_DEBUG)
-#    define _STLP_NON_DBG_NO_MEM_T_NAME(X) _NonDbg_NoMemT_##X
-#  endif
 #endif
 
 /* this always mean the C library is in global namespace */
@@ -510,7 +397,6 @@
  * (if we wrap native iostreams and use namepace other than std::) */
 #  if defined (_STLP_WHOLE_NATIVE_STD)
 #    define  _STLP_IMPORT_VENDOR_STD 1
-#    undef   _STLP_MINIMUM_IMPORT_STD
 #  endif
 
 /* if using stlport:: namespace or if C library stuff is not in vendor's std::,
@@ -533,7 +419,7 @@ namespace __std_alias = std;
 #  if defined (_STLP_VENDOR_GLOBAL_STD)
 #    define _STLP_VENDOR_STD
 #  else
-#    define _STLP_VENDOR_STD __std_alias
+#    define _STLP_VENDOR_STD std
 #  endif
 
 /* tune things that come from C library */
@@ -588,7 +474,7 @@ namespace __std_alias = std;
 /*
  * The STLport debug mode is binary incompatible with the other modes,
  * lets make it clear on the STLport namespace to generate link errors rather
- * than runtime.
+ * than runtime ones.
  */
 #        if !defined (_STLP_USING_CROSS_NATIVE_RUNTIME_LIB)
 #          ifndef _STLP_THREADS
@@ -607,43 +493,12 @@ namespace __std_alias = std;
 #    endif
 namespace _STLP_STD_NAME { }
 #  else
-#    if defined (_STLP_DEBUG)
-namespace stdD = std;
-#    endif
 #    define _STLP_STD_NAME std
 #  endif /* _STLP_USE_OWN_NAMESPACE */
 
-#  if !defined (_STLP_USING_NAMESPACE_BUG)
-#    define _STLP_PRIV_NAME stlp_priv
-namespace _STLP_PRIV_NAME {
-  using namespace _STLP_STD_NAME;
-}
-#  else
-#    define _STLP_PRIV_NAME priv
-#  endif
-
 #  define _STLP_BEGIN_NAMESPACE namespace _STLP_STD_NAME {
+#  define _STLP_BEGIN_TR1_NAMESPACE namespace tr1 {
 #  define _STLP_END_NAMESPACE }
-
-#  if !defined (_STLP_DONT_USE_PRIV_NAMESPACE)
-#    if !defined (_STLP_USING_NAMESPACE_BUG)
-/* We prefer to make private namespace a totaly seperated namespace...
- */
-#      define _STLP_PRIV ::_STLP_PRIV_NAME::
-#      define _STLP_MOVE_TO_PRIV_NAMESPACE } namespace _STLP_PRIV_NAME {
-#      define _STLP_MOVE_TO_STD_NAMESPACE } namespace _STLP_STD_NAME {
-#    else
-/* but sometimes we can't:
- */
-#      define _STLP_PRIV _STLP_PRIV_NAME::
-#      define _STLP_MOVE_TO_PRIV_NAMESPACE namespace _STLP_PRIV_NAME {
-#      define _STLP_MOVE_TO_STD_NAMESPACE }
-#    endif
-#  else
-#    define _STLP_PRIV
-#    define _STLP_MOVE_TO_PRIV_NAMESPACE
-#    define _STLP_MOVE_TO_STD_NAMESPACE
-#  endif
 
 /* decide whether or not we use separate namespace for rel ops */
 #  if defined (_STLP_NO_RELOPS_NAMESPACE)
@@ -657,10 +512,26 @@ namespace _STLP_PRIV_NAME {
 #  endif /* Use std::rel_ops namespace */
 
 #  define _STLP_STD ::_STLP_STD_NAME
+#  if !defined (_STLP_TR1)
+#    define _STLP_TR1 _STLP_STD::tr1::
+#  endif
+
+#  if !defined (_STLP_DONT_USE_PRIV_NAMESPACE)
+#    define _STLP_PRIV_NAME priv
+#    define _STLP_PRIV _STLP_STD::_STLP_PRIV_NAME::
+#    define _STLP_MOVE_TO_PRIV_NAMESPACE namespace _STLP_PRIV_NAME {
+#    define _STLP_MOVE_TO_STD_NAMESPACE }
+#  else
+#      if !defined (_STLP_PRIV)
+#        define _STLP_PRIV _STLP_STD::
+#      endif
+#    define _STLP_MOVE_TO_PRIV_NAMESPACE
+#    define _STLP_MOVE_TO_STD_NAMESPACE
+#  endif
 
 /* Official STLport namespace when std is not redefined.
- * Here we don't use a macro as stlport is used as file name by boost
- * and folder name under beos:
+ * Here we don't use a macro because we do not need it and because
+ * stlport is used as file name by boost and folder name under beos:
  */
 namespace stlport = _STLP_STD_NAME;
 
@@ -674,7 +545,9 @@ namespace _STL = _STLP_STD_NAME;
 /* STLport is being put into global namespace */
 #  define _STLP_STD
 #  define _STLP_PRIV
+#  define _STLP_TR1
 #  define _STLP_BEGIN_NAMESPACE
+#  define _STLP_BEGIN_TR1_NAMESPACE
 #  define _STLP_END_NAMESPACE
 #  define _STLP_MOVE_TO_PRIV_NAMESPACE
 #  define _STLP_MOVE_TO_STD_NAMESPACE
@@ -709,12 +582,10 @@ namespace _STL = _STLP_STD_NAME;
 #  define __CONST_CAST(__x,__y) const_cast<__x>(__y)
 #  define __STATIC_CAST(__x,__y) static_cast<__x>(__y)
 #  define __REINTERPRET_CAST(__x,__y) reinterpret_cast<__x>(__y)
-#  define __DYNAMIC_CAST(__x,__y) dynamic_cast<__x>(__y)
 #else
 #  define __STATIC_CAST(__x,__y) __C_CAST(__x, __y)
 #  define __CONST_CAST(__x,__y) __C_CAST(__x, __y)
 #  define __REINTERPRET_CAST(__x,__y) __C_CAST(__x, __y)
-#  define __DYNAMIC_CAST(__x,__y) __C_CAST(__x, __y)
 #endif
 
 #if defined (_STLP_NEED_TYPENAME) && ! defined (typename)
@@ -731,6 +602,12 @@ namespace _STL = _STLP_STD_NAME;
 #  define _STLP_HEADER_TYPENAME
 #else
 #  define _STLP_HEADER_TYPENAME typename
+#endif
+
+#ifdef _STLP_NO_TYPENAME_BEFORE_NAMESPACE
+#  define _STLP_TYPENAME
+#else
+#  define _STLP_TYPENAME typename
 #endif
 
 #ifndef _STLP_NO_MEMBER_TEMPLATE_KEYWORD
@@ -752,9 +629,9 @@ namespace _STL = _STLP_STD_NAME;
 #endif
 
 #if !defined (_STLP_NEED_MUTABLE)
-#  define _STLP_ASSIGN_MUTABLE(type,x,y) x = y
+#  define _STLP_MUTABLE(type, x) x
 #else
-#  define _STLP_ASSIGN_MUTABLE(type,x,y) __CONST_CAST(type,x)=y
+#  define _STLP_MUTABLE(type, x) __CONST_CAST(type*, this)->x
 #  define mutable
 #endif
 
@@ -768,8 +645,6 @@ namespace _STL = _STLP_STD_NAME;
 #else
 #  define _STLP_INLINE_LOOP inline
 #endif
-
-#define _STLP_PRIVATE public
 
 #ifndef _STLP_NO_PARTIAL_SPECIALIZATION_SYNTAX
 #  define _STLP_TEMPLATE_NULL template<>
@@ -922,6 +797,12 @@ namespace _STL = _STLP_STD_NAME;
 #define __TRIVIAL_STUFF(__type)  \
   __TRIVIAL_CONSTRUCTOR(__type) __TRIVIAL_DESTRUCTOR(__type)
 
+#if defined (_STLP_STATIC_CONST_INIT_BUG)
+#  define _STLP_STATIC_CONSTANT(__type, __assignment) enum { __assignment }
+#else
+#  define _STLP_STATIC_CONSTANT(__type, __assignment) static const __type __assignment
+#endif
+
 #if defined (_STLP_HAS_NO_EXCEPTIONS)
 #  define _STLP_NO_EXCEPTIONS
 #endif
@@ -946,12 +827,11 @@ namespace _STL = _STLP_STD_NAME;
 #    define _STLP_RET_AFTER_THROW(data)
 #  endif
 
-/* We do not use exception throw specifications unless we are forced to */
 #  if !defined (_STLP_THROWS)
-#    define _STLP_THROWS(x)
+#    define _STLP_THROWS(x) throw(x)
 #  endif
 #  if !defined (_STLP_NOTHROW)
-#    define _STLP_NOTHROW
+#    define _STLP_NOTHROW throw()
 #  endif
 #else
 #  define _STLP_TRY
@@ -1015,18 +895,6 @@ typedef int bool;
 #  define _STLP_BOOL_KEYWORD 1
 #endif /* _STLP_NO_BOOL */
 
-#ifndef _STLP_MPW_EXTRA_CONST
-#  define _STLP_MPW_EXTRA_CONST
-#endif
-
-#ifndef _STLP_DEFAULTCHAR
-#  define _STLP_DEFAULTCHAR char
-#endif
-
-#if defined (_STLP_DEBUG_ALLOC) && !defined (_STLP_ASSERTIONS)
-#  define _STLP_ASSERTIONS 1
-#endif
-
 /* uninitialized value filler */
 #ifndef _STLP_SHRED_BYTE
 /* This value is designed to cause problems if an error occurs */
@@ -1046,6 +914,12 @@ typedef int bool;
 #  define _STLP_IMPORT_TEMPLATE_KEYWORD
 #endif
 
+#if !defined (_STLP_NO_CONST_IN_PAIR)
+#  define _STLP_CONST const
+#else
+#  define _STLP_CONST
+#endif
+
 #ifdef _STLP_USE_NO_IOSTREAMS
 /*
  * If we do not use iostreams we do not use the export/import
@@ -1054,7 +928,7 @@ typedef int bool;
 #  undef _STLP_USE_DECLSPEC
 /* We also undef USE_DYNAMIC_LIB macro as this macro add some code
  * to use the dynamic (shared) STLport library for some platform/compiler
- * configuration leading to problem when do not link to the STLport lib.
+ * configuration leading to problem when not linking to the STLport lib.
  */
 #  undef _STLP_USE_DYNAMIC_LIB
 #endif
@@ -1110,10 +984,10 @@ typedef int bool;
 
 #define _STLP_EXPORT_TEMPLATE_CLASS _STLP_EXPORT template class _STLP_CLASS_DECLSPEC
 
-#if defined (_STLP_MSVC) || defined (__ICL)
-#  define _STLP_STATIC_MEMBER_DECLSPEC
+#if defined (_STLP_NEED_ADDITIONAL_STATIC_DECLSPEC)
+#  define _STLP_STATIC_DECLSPEC _STLP_DECLSPEC
 #else
-#  define _STLP_STATIC_MEMBER_DECLSPEC _STLP_DECLSPEC
+#  define _STLP_STATIC_DECLSPEC
 #endif
 
 #if !defined (_STLP_CALL)
@@ -1159,11 +1033,6 @@ typedef int bool;
 #  define _STLP_USE_PARTIAL_SPEC_WORKAROUND
 #endif
 
-#ifndef _STLP_USE_NO_IOSTREAMS
-#  define _STLP_NEW_IO_NAMESPACE _STLP_STD
-#  define _STLP_NO_WIDE_STREAMS  _STLP_NO_WCHAR_T
-#endif
-
 #ifdef _STLP_USE_SEPARATE_RELOPS_NAMESPACE
 #  define _STLP_RELOPS_OPERATORS(_TMPL, _TP) \
 _TMPL inline bool _STLP_CALL operator!=(const _TP& __x, const _TP& __y) {return !(__x == __y);}\
@@ -1178,9 +1047,25 @@ _TMPL inline bool _STLP_CALL operator>=(const _TP& __x, const _TP& __y) { return
 #  include <stl/_abbrevs.h>
 #endif
 
-/* A really useful macro */
+/* Some really useful macro */
 #define _STLP_ARRAY_SIZE(A) sizeof(A) / sizeof(A[0])
 #define _STLP_ARRAY_AND_SIZE(A) A, sizeof(A) / sizeof(A[0])
+
+#if !defined (_STLP_MARK_PARAMETER_AS_UNUSED)
+#  define _STLP_MARK_PARAMETER_AS_UNUSED(X) (void*)X;
+#endif
+
+#if defined (_STLP_CHECK_RUNTIME_COMPATIBILITY)
+#  if defined (_STLP_USE_NO_IOSTREAMS)
+#    undef _STLP_CHECK_RUNTIME_COMPATIBILITY
+#  else
+/* The extern "C" simply makes the symbol simpler. */
+#if defined (__cplusplus)
+extern "C"
+#endif
+void _STLP_DECLSPEC _STLP_CALL _STLP_CHECK_RUNTIME_COMPATIBILITY();
+#  endif
+#endif
 
 /* some cleanup */
 #undef _STLP_DONT_USE_BOOL_TYPEDEF

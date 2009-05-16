@@ -190,8 +190,10 @@ __get_num(basic_istream<_CharT, _Traits>& __that, _Number& __val) {
   if (__sentry) {
     typedef num_get<_CharT, istreambuf_iterator<_CharT, _Traits> > _Num_get;
     _STLP_TRY {
-      ((const _Num_get&)use_facet<_Num_get>(__that.getloc())).get(istreambuf_iterator<_CharT, _Traits>(__that.rdbuf()),
-                                                                  0, __that, __err, __val);
+      // Do not remove additional parenthesis around use_facet instanciation, some compilers (VC6)
+      // require it when building the library.
+      (use_facet<_Num_get>(__that.getloc())).get(istreambuf_iterator<_CharT, _Traits>(__that.rdbuf()),
+                                               0, __that, __err, __val);
     }
     _STLP_CATCH_ALL {
       __that._M_handle_exception(ios_base::badbit);
@@ -504,7 +506,7 @@ basic_istream<_CharT, _Traits>::seekg(pos_type __pos) {
 
   basic_streambuf<_CharT, _Traits>* __buf = this->rdbuf();
   if (!this->fail() && __buf) {
-    if (__buf->pubseekpos(__pos) == pos_type(-1)) {
+    if (__buf->pubseekpos(__pos, ios_base::in) == pos_type(-1)) {
       this->setstate(ios_base::failbit);
     }
   }
@@ -518,7 +520,7 @@ basic_istream<_CharT, _Traits>::seekg(off_type __off, ios_base::seekdir __dir) {
 
   basic_streambuf<_CharT, _Traits>* __buf = this->rdbuf();
   if (!this->fail() && __buf)
-    __buf->pubseekoff(__off, __dir);
+    __buf->pubseekoff(__off, __dir, ios_base::in);
   return *this;
 }
 
@@ -592,7 +594,6 @@ __read_unbuffered(basic_istream<_CharT, _Traits>* __that, basic_streambuf<_CharT
           __status |= ios_base::failbit;
         break;
       }
-
       int_type __c = __buf->sbumpc(); // sschwarz
 
       if (__that->_S_eof(__c)) {
@@ -647,7 +648,7 @@ __read_buffered(basic_istream<_CharT, _Traits>* __that, basic_streambuf<_CharT, 
       //casting numeric_limits<ptrdiff_t>::max to streamsize only works is ptrdiff_t is signed or streamsize representation
       //is larger than ptrdiff_t one.
       _STLP_STATIC_ASSERT((sizeof(streamsize) > sizeof(ptrdiff_t)) ||
-                          (sizeof(streamsize) == sizeof(ptrdiff_t)) && numeric_limits<ptrdiff_t>::is_signed)
+                          ((sizeof(streamsize) == sizeof(ptrdiff_t)) && numeric_limits<ptrdiff_t>::is_signed))
       ptrdiff_t __request = __STATIC_CAST(ptrdiff_t, (min) (__STATIC_CAST(streamsize, (numeric_limits<ptrdiff_t>::max)()), _Num - __n));
 
       const _CharT* __p  = __scan_delim(__first, __last);
@@ -865,11 +866,11 @@ void basic_istream<_CharT, _Traits>::_M_formatted_get(_CharT* __s) {
 
     streamsize __n = __buf->gptr() != __buf->egptr()
       ? _STLP_PRIV __read_buffered(this,  __buf, __nmax, __s,
-                                   _STLP_PRIV _Is_wspace_null<_Traits>(__STATIC_CAST(const ctype<_CharT>*, this->_M_ctype_facet())),
-                                   _STLP_PRIV _Scan_wspace_null<_Traits>(__STATIC_CAST(const ctype<_CharT>*, this->_M_ctype_facet())),
+                                   _STLP_PRIV _Is_wspace_null<_Traits>(this->_M_ctype_facet()),
+                                   _STLP_PRIV _Scan_wspace_null<_Traits>(this->_M_ctype_facet()),
                                    false, true, false)
       : _STLP_PRIV __read_unbuffered(this,  __buf, __nmax, __s,
-                                     _STLP_PRIV _Is_wspace_null<_Traits>(__STATIC_CAST(const ctype<_CharT>*, this->_M_ctype_facet())),
+                                     _STLP_PRIV _Is_wspace_null<_Traits>(this->_M_ctype_facet()),
                                      false, true, false);
     if (__n == 0)
       this->setstate(ios_base::failbit);
@@ -1188,12 +1189,12 @@ void basic_istream<_CharT, _Traits>::_M_skip_whitespace(bool __set_failbit) {
     this->setstate(ios_base::badbit);
   else if (__buf->gptr() != __buf->egptr())
     _M_ignore_buffered(this,  __buf,
-                       _STLP_PRIV _Is_not_wspace<_Traits>(__STATIC_CAST(const ctype<_CharT>*, this->_M_ctype_facet())),
-                       _STLP_PRIV _Scan_for_not_wspace<_Traits>(__STATIC_CAST(const ctype<_CharT>*, this->_M_ctype_facet())),
+                       _STLP_PRIV _Is_not_wspace<_Traits>(this->_M_ctype_facet()),
+                       _STLP_PRIV _Scan_for_not_wspace<_Traits>(this->_M_ctype_facet()),
                        false, __set_failbit);
   else
     _M_ignore_unbuffered(this,  __buf,
-                         _STLP_PRIV _Is_not_wspace<_Traits>(__STATIC_CAST(const ctype<_CharT>*, this->_M_ctype_facet())),
+                         _STLP_PRIV _Is_not_wspace<_Traits>(this->_M_ctype_facet()),
                          false, __set_failbit);
 }
 

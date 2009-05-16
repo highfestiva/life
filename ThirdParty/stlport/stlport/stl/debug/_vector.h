@@ -94,7 +94,7 @@ struct _Vector_const_traits<bool, _Bit_iterator> {
 
 _STLP_MOVE_TO_STD_NAMESPACE
 
-template <class _Tp, _STLP_DBG_ALLOCATOR_SELECT(_Tp) >
+template <class _Tp, _STLP_DFL_TMPL_PARAM(_Alloc, allocator<_Tp>) >
 class vector :
 #if !defined (__DMC__)
              private
@@ -178,27 +178,29 @@ public:
   explicit vector(size_type __n, const _Tp& __x = _Tp(),
 #else
   vector(size_type __n, const _Tp& __x,
-#endif /*_STLP_DONT_SUP_DFLT_PARAM*/
+#endif
          const allocator_type& __a = allocator_type())
     : _M_non_dbg_impl(__n, __x, __a), _M_iter_list(&_M_non_dbg_impl) {}
 
 #if defined(_STLP_DONT_SUP_DFLT_PARAM)
   explicit vector(size_type __n)
     : _M_non_dbg_impl(__n), _M_iter_list(&_M_non_dbg_impl) {}
-#endif /*_STLP_DONT_SUP_DFLT_PARAM*/
+#endif
 
   vector(const _Self& __x)
     : _ConstructCheck(__x), _M_non_dbg_impl(__x._M_non_dbg_impl), _M_iter_list(&_M_non_dbg_impl) {}
 
+#if !defined (_STLP_NO_MOVE_SEMANTIC)
   vector(__move_source<_Self> src)
     : _M_non_dbg_impl(__move_source<_Base>(src.get()._M_non_dbg_impl)),
       _M_iter_list(&_M_non_dbg_impl) {
-#if defined (_STLP_NO_EXTENSIONS) || (_STLP_DEBUG_LEVEL == _STLP_STANDARD_DBG_LEVEL)
+#  if defined (_STLP_NO_EXTENSIONS) || (_STLP_DEBUG_LEVEL == _STLP_STANDARD_DBG_LEVEL)
     src.get()._M_iter_list._Invalidate_all();
-#else
+#  else
     src.get()._M_iter_list._Set_owner(_M_iter_list);
-#endif
+#  endif
   }
+#endif
 
 #if defined (_STLP_MEMBER_TEMPLATES)
   template <class _InputIterator>
@@ -264,6 +266,9 @@ public:
     _M_iter_list._Swap_owners(__x._M_iter_list);
     _M_non_dbg_impl.swap(__x._M_non_dbg_impl);
   }
+#if defined (_STLP_USE_PARTIAL_SPEC_WORKAROUND) && !defined (_STLP_FUNCTION_TMPL_PARTIAL_ORDER)
+  void _M_swap_workaround(_Self& __x) { swap(__x); }
+#endif
 
 #if !defined(_STLP_DONT_SUP_DFLT_PARAM)
   iterator insert(iterator __pos, const _Tp& __x = _Tp()) {
@@ -285,19 +290,15 @@ public:
   template <class _InputIterator>
   void insert(iterator __pos,
               _InputIterator __first, _InputIterator __last) {
-    typedef typename _AreSameUnCVTypes<_InputIterator, iterator>::_Ret _IsNonConstIterator;
-    typedef typename _AreSameUnCVTypes<_InputIterator, const_iterator>::_Ret _IsConstIterator;
-    typedef typename _Lor2<_IsNonConstIterator, _IsConstIterator>::_Ret _DoCheck;
     _STLP_DEBUG_CHECK(_STLP_PRIV __check_range(__first, __last))
     _STLP_DEBUG_CHECK(_STLP_PRIV __check_if_owner(&_M_iter_list, __pos))
-    //Sequence requirements 23.1.1 Table 67:
-    _STLP_DEBUG_CHECK(_STLP_PRIV __check_if_not_owner(&_M_iter_list, __first, _DoCheck()));
     size_type __old_capacity = capacity();
     _M_non_dbg_impl.insert(__pos._M_iterator,
                            _STLP_PRIV _Non_Dbg_iter(__first), _STLP_PRIV _Non_Dbg_iter(__last));
     _Compare_Capacity(__old_capacity);
   }
-#else
+#endif
+#if !defined (_STLP_MEMBER_TEMPLATES)
   void insert (iterator __pos,
                const value_type *__first, const value_type *__last) {
     _STLP_DEBUG_CHECK(_STLP_PRIV __check_ptr_range(__first,__last))
@@ -306,17 +307,29 @@ public:
     _M_non_dbg_impl.insert(__pos._M_iterator, __first, __last);
     _Compare_Capacity(__old_capacity);
   }
+#endif
 
+#if !defined (_STLP_MEMBER_TEMPLATES) || !defined (_STLP_NO_METHOD_SPECIALIZATION)
   void insert(iterator __pos,
               const_iterator __first, const_iterator __last) {
     _STLP_DEBUG_CHECK(_STLP_PRIV __check_range(__first,__last))
     _STLP_DEBUG_CHECK(_STLP_PRIV __check_if_owner(&_M_iter_list, __pos))
     //Sequence requirements 23.1.1 Table 67:
-    _STLP_DEBUG_CHECK(_STLP_PRIV __check_if_not_owner(&_M_iter_list, __first, __true_type()));
+    _STLP_DEBUG_CHECK(_STLP_PRIV __check_if_not_owner(&_M_iter_list, __first));
     size_type __old_capacity = capacity();
     _M_non_dbg_impl.insert(__pos._M_iterator, __first._M_iterator, __last._M_iterator);
     _Compare_Capacity(__old_capacity);
-}
+  }
+  void insert(iterator __pos,
+              iterator __first, iterator __last) {
+    _STLP_DEBUG_CHECK(_STLP_PRIV __check_range(__first,__last))
+    _STLP_DEBUG_CHECK(_STLP_PRIV __check_if_owner(&_M_iter_list, __pos))
+    //Sequence requirements 23.1.1 Table 67:
+    _STLP_DEBUG_CHECK(_STLP_PRIV __check_if_not_owner(&_M_iter_list, __first));
+    size_type __old_capacity = capacity();
+    _M_non_dbg_impl.insert(__pos._M_iterator, __first._M_iterator, __last._M_iterator);
+    _Compare_Capacity(__old_capacity);
+  }
 #endif
 
   void insert (iterator __pos, size_type __n, const _Tp& __x){
@@ -358,46 +371,19 @@ public:
 
 #if defined (_STLP_DONT_SUP_DFLT_PARAM)
   void resize(size_type __new_size) { resize(__new_size, _STLP_DEFAULT_CONSTRUCTED(_Tp)); }
-#endif /*_STLP_DONT_SUP_DFLT_PARAM*/
+#endif
 
 #if defined (_STLP_MEMBER_TEMPLATES)
-private:
-  template <class _Integer>
-  void _M_assign_dispatch(_Integer __n, _Integer __val,
-                          const __true_type& /*_IsIntegral*/) {
-    _M_check_assign(__n);
-    _M_non_dbg_impl.assign(__n, __val);
-  }
-
-  template <class _InputIter>
-  void _M_assign_dispatch(_InputIter __first, _InputIter __last,
-                          const __false_type& /*_IsIntegral*/) {
-    _STLP_DEBUG_CHECK(_STLP_PRIV __check_range(__first,__last))
-    size_type __old_size = size();
-    size_type __old_capacity = capacity();
-    iterator __old_end = end();
-    _M_non_dbg_impl.assign(_STLP_PRIV _Non_Dbg_iter(__first), _STLP_PRIV _Non_Dbg_iter(__last));
-    if (__old_capacity != 0) {
-      if (empty() || (capacity() > __old_capacity)) {
-        _Invalidate_all();
-      }
-      else if (size() < __old_size) {
-        _Invalidate_iterators(begin() + size(), __old_end);
-      }
-    }
-  }
-
-public:
   template <class _InputIterator>
   void assign(_InputIterator __first, _InputIterator __last) {
-    typedef typename _IsIntegral<_InputIterator>::_Ret _Integral;
-    _M_assign_dispatch(__first, __last, _Integral());
+    _STLP_DEBUG_CHECK(_STLP_PRIV __check_range(__first,__last))
+    _Invalidate_all();
+    _M_non_dbg_impl.assign(_STLP_PRIV _Non_Dbg_iter(__first), _STLP_PRIV _Non_Dbg_iter(__last));
   }
 #else
 private:
   void _M_assign(const value_type *__first, const value_type *__last) {
-    size_type __len = distance(__first, __last);
-    _M_check_assign(__len);
+    _Invalidate_all();
     _M_non_dbg_impl.assign(__first, __last);
   }
 public:
@@ -412,19 +398,9 @@ public:
   }
 #endif
 
-private:
-  void _M_check_assign(size_type __n) {
-    if (__n > capacity()) {
-      _Invalidate_all();
-    }
-    else if (__n < size()) {
-      _Invalidate_iterators(begin() + __n, end());
-    }
-  }
-
 public:
   void assign(size_type __n, const _Tp& __val) {
-    _M_check_assign(__n);
+    _Invalidate_all();
     _M_non_dbg_impl.assign(__n, __val);
   }
 

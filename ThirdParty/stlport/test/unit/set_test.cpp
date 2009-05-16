@@ -203,14 +203,22 @@ private:
   int _data;
 };
 
+#if !defined (STLPORT) || defined (_STLP_USE_NAMESPACES)
 namespace std {
+#endif
+#if defined (STLPORT)
+  _STLP_TEMPLATE_NULL
+#else
   template <>
+#endif
   struct less<SetTestClass> {
     bool operator () (SetTestClass const& lhs, SetTestClass const& rhs) const {
       return lhs.data() < rhs.data();
     }
   };
+#if !defined (STLPORT) || defined (_STLP_USE_NAMESPACES)
 }
+#endif
 
 void SetTest::specialized_less()
 {
@@ -480,3 +488,20 @@ void SetTest::template_methods()
   }
 #endif
 }
+
+#if !defined (STLPORT) || \
+    !defined (_STLP_USE_PTR_SPECIALIZATIONS) || defined (_STLP_CLASS_PARTIAL_SPECIALIZATION)
+#  if !defined (__DMC__)
+/* Simple compilation test: Check that nested types like iterator
+ * can be access even if type used to instanciate container is not
+ * yet completely defined.
+ */
+class IncompleteClass
+{
+  set<IncompleteClass> instances;
+  typedef set<IncompleteClass>::iterator it;
+  multiset<IncompleteClass> minstances;
+  typedef multiset<IncompleteClass>::iterator mit;
+};
+#  endif
+#endif
