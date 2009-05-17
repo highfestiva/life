@@ -1,20 +1,13 @@
-/*
-	File:	PosixTarget.h
-	Author:	Jonas Bystr�
-	Copyright (c) 2002-2006, Righteous Games
 
-	This file now only includes the system-specific header
-	files and fiddles with the inherent #defines.
-*/
+// Author: Jonas Byström
+// Copyright (c) 2002-2006, Righteous Games
+
+// TRICKY: do NOT add "#pragma once" to this file.
 
 
 
-#ifndef POSIXTARGET_H
-#define POSIXTARGET_H
-
-
-
-#ifndef LEPRA_INCLUDE_NO_OS
+#if !defined(LEPRA_INCLUDE_NO_OS) && !defined(LEPRA_OS_INCLUDED)
+#define LEPRA_OS_INCLUDED
 
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -37,10 +30,4 @@ namespace Lepra
 	typedef	int sys_socket;
 }
 
-#else // LEPRA_INCLUDE_NO_OS
-
-#endif // !LEPRA_INCLUDE_NO_OS/LEPRA_INCLUDE_NO_OS
-
-typedef int SOCKET;
-
-#endif // !POSIXTARGET_H
+#endif // !LEPRA_INCLUDE_NO_OS

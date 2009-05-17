@@ -23,7 +23,7 @@ public:
 	static String GetRootDirectory();
 	static String GetCurrentDirectory();
 	// Get preferred documents location.
-	static String GetDocumentsDirectory();
+	static String GetUserDirectory();
 	static String GetLoginName();
 	static String QueryFullUserName();
 	static std::string GetRandomId();

@@ -46,6 +46,26 @@ String SystemManager::GetUniqueHardwareString()
 	return (s);
 }
 
+uint64 SystemManager::SingleCpuTest()
+{
+	HiResTimer lTimer;
+	uint64 lDeltaTime = lTimer.GetFrequency() / 100;
+	uint64 lStartTick;
+	uint64 lEndTick;
+	// Reset the timer and start counting.
+	lTimer.UpdateTimer();
+	lTimer.ClearTimeDiff();
+	lStartTick = GetCpuTick();
+	// Take 1000 samples.
+	while (lTimer.GetCounterDiff() < lDeltaTime)
+	{
+		lTimer.UpdateTimer();
+	}
+	lEndTick = GetCpuTick();
+	// Return the estimated frequency.
+	return (lEndTick - lStartTick) * lTimer.GetFrequency() / lTimer.GetCounterDiff();
+}
+
 uint64 SystemManager::QueryCpuFrequency()
 {
 	uint64 lPreviousTest = 0xFFFFFFFF;

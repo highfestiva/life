@@ -12,21 +12,15 @@
 
 AntiCrack::AntiCrack()
 {
-#ifdef LEPRA_WINDOWS
 	BOOL lPresent = FALSE;
 	if (CheckRemoteDebuggerPresent(GetCurrentProcess(), &lPresent) && lPresent)
 	{
 		// TODO: enable when ready for release.
 		//SetBsodOnProcessExit();
 	}
-#else // !Windows
-#error "Target does not have anti-debugging code."
-#endif // Windows
 }
 
 
-
-#ifdef LEPRA_WINDOWS
 
 void AntiCrack::SetBsodOnProcessExit()
 {
@@ -74,5 +68,3 @@ bool AntiCrack::EnableCriticalPrivileges(LPCTSTR pPrivilegeName) // by Napalm
 	::CloseHandle(lTokenHandle);
 	return (!!lAdjustedPrivileges);
 }
-
-#endif // Windows

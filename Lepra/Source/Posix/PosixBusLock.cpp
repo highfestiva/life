@@ -1,13 +1,11 @@
-/*
-	File:	PosixCompareAndSwap.cpp
-	Author:	Alexander Hugestrand
-	Copyright (c) 2002-2006, Righteous Games
-*/
+
+// Author: Alexander Hugestrand, Jonas Byström
+// Copyright (c) 2002-2006, Righteous Games
 
 
 
 #include <pthread.h>
-#include "../../Include/Lepra.h"
+#include "../../Include/BusLock.h"
 
 
 
@@ -46,6 +44,22 @@ bool CompareAndSwap(long* pDest, long pSrc, long pComperand)
 	pthread_mutex_unlock(&g_CASMutex);
 #endif // LEPRA_GCC_X86/!LEPRA_GCC_X86
 	return (lResult);
+}
+
+
+
+void BusLock::Add(int32* pDestination, int32 pAddend)
+{
+	// TODO: implement correctly!
+	// On Win32 we do ::InterlockedExchangeAdd((volatile long*)pDestination, pAddend);
+	pDestination += pAddend;
+}
+
+void BusLock::Add(int64* pDestination, int64 pAddend)
+{
+	// TODO: implement correctly!
+	//::InterlockedExchangeAdd64(pDestination, pAddend); <- check how this would be implemented in kernel32.dll (my machine does probably not support an IPF-compliant CPU).
+	pDestination += pAddend;
 }
 
 

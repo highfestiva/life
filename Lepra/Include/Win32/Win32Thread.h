@@ -1,21 +1,14 @@
-/*
-	Class:  Win32Thread
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Righteous Games
-*/
+
+// Author: Alexander Hugestrand, Jonas Byström
+// Copyright (c) 2002-2006, Righteous Games
 
 
 
-#ifndef LEPRA_WIN32THREAD_H
-#define LEPRA_WIN32THREAD_H
-
-
+#pragma once
 
 #ifndef _WIN32_WINNT
 #define _WIN32_WINNT	0x0400
 #endif // _WIN32_WINNT
-
-
 
 #include <Windows.h>
 #undef INT32
@@ -204,7 +197,3 @@ private:
 
 
 }
-
-
-
-#endif // !LEPRA_WIN32THREAD_H

@@ -1,15 +1,10 @@
-/*
-	File:	PosixThread.h
-	Author:	Jonas Bystr�
-	Copyright (c) 2002-2006, Righteous Games
-*/
+
+// Author:	Jonas Byström
+// Copyright (c) 2002-2006, Righteous Games
 
 
 
-#ifndef LEPRA_POSIXTHREAD_H
-#define LEPRA_POSIXTHREAD_H
-
-
+#pragma once
 
 #include <pthread.h>
 #include <semaphore.h>
@@ -77,6 +72,7 @@ class PosixSemaphore: public SemaphoreBC
 {
 public:
 	PosixSemaphore();
+	PosixSemaphore(unsigned pMaxCount);
 	virtual ~PosixSemaphore();
 
 	void Wait();
@@ -84,8 +80,8 @@ public:
 	void Signal();
 
 protected:
-	//pthread_condition_t mCondition;
-	sem mSemaphore;
+	unsigned mMaxPermitCount;
+	sem_t mSemaphore;
 };
 
 
@@ -107,7 +103,3 @@ private:
 
 
 }
-
-
-
-#endif // !LEPRA_POSIXTHREAD_H

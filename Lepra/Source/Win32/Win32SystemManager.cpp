@@ -12,7 +12,6 @@
 #include "../../Include/String.h"
 #include "../../Include/SystemManager.h"
 #include "../../Include/Log.h"
-#include "../../Include/HiResTimer.h"
 #include "../../Include/Thread.h"
 
 
@@ -126,7 +125,7 @@ String SystemManager::GetCurrentDirectory()
 	lBuffer[0] = 0;
 	if (::_getcwd(lBuffer, sizeof(lBuffer)) == NULL)
 	{
-		mLog.AWarning("Failed in GetCurrentDirectory()");
+		mLog.AError("Failed in GetCurrentDirectory()");
 	}
 
 	String lString(AnsiStringUtility::ToCurrentCode(AnsiString(lBuffer)));
@@ -135,14 +134,14 @@ String SystemManager::GetCurrentDirectory()
 	return (lString);
 }
 
-String SystemManager::GetDocumentsDirectory()
+String SystemManager::GetUserDirectory()
 {
-	tchar lMyDocsDir[2048];
-	if (FAILED(::SHGetFolderPath(0, CSIDL_PERSONAL, NULL, 0, lMyDocsDir)))
+	tchar lHomeDir[2048];
+	if (FAILED(::SHGetFolderPath(0, CSIDL_PROFILE, NULL, 0, lHomeDir)))
 	{
-		mLog.AWarning("Failed in GetCurrentDirectory()");
+		mLog.AWarning("Failed in GetUserDirectory()");
 	}
-	String lString(lMyDocsDir);
+	String lString(lHomeDir);
 	lString = StringUtility::ReplaceAll(lString, _T('\\'), _T('/'));
 	return (lString);
 }
@@ -179,31 +178,6 @@ String SystemManager::QueryFullUserName()
 		::NetApiBufferFree(lDomainControllerName);
 	}
 	return (lFullName);
-}
-
-uint64 SystemManager::SingleCpuTest()
-{
-	if (IsRdtscAvailable() == false)
-	{
-		return 0;
-	}
-
-	HiResTimer lTimer;
-	uint64 lDeltaTime = lTimer.GetFrequency() / 100;
-	uint64 lStartTick;
-	uint64 lEndTick;
-	// Reset the timer and start counting.
-	lTimer.UpdateTimer();
-	lTimer.ClearTimeDiff();
-	lStartTick = GetCpuTick();
-	// Take 1000 samples.
-	while (lTimer.GetCounterDiff() < lDeltaTime)
-	{
-		lTimer.UpdateTimer();
-	}
-	lEndTick = GetCpuTick();
-	// Return the estimated frequency.
-	return (lEndTick - lStartTick) * lTimer.GetFrequency() / lTimer.GetCounterDiff();
 }
 
 unsigned SystemManager::GetLogicalCpuCount()

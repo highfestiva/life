@@ -985,7 +985,7 @@ bool TestSystemManager(const Lepra::LogDecorator& pAccount)
 	{
 		lContext = _T("current/documents directory");
 		lTestOk = (Lepra::SystemManager::GetCurrentDirectory().length() >= 4 &&
-			Lepra::SystemManager::GetDocumentsDirectory().length() >= 4);
+			Lepra::SystemManager::GetUserDirectory().length() >= 4);
 		assert(lTestOk);
 	}
 

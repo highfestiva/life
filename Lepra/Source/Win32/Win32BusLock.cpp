@@ -1,5 +1,5 @@
 
-// Author: Alexander Hugestrand
+// Author: Alexander Hugestrand, Jonas Byström
 // Copyright (c) 2002-2006, Righteous Games
 
 
