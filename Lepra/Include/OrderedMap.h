@@ -1,15 +1,10 @@
-/*
-	Class:  OrderedMap
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Righteous Games
 
-	NOTES:
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2006, Righteous Games
 
-	The ordered map is a combination of a hashtable and a linked list.
-*/
 
-#ifndef ORDEREDMAP_H
-#define ORDEREDMAP_H
+
+#pragma once
 
 #include <list>
 #include "HashTable.h"
@@ -18,10 +13,13 @@
 #define QUAL OrderedMap<KeyType, ObjectType, HashFunc>
 
 
+
 namespace Lepra
 {
 
-template<class KeyType, class ObjectType, class HashFunc = std::hash<KeyType>>
+
+
+template<class KeyType, class ObjectType, class HashFunc = std::hash<KeyType> >
 class OrderedMap
 {
 private:
@@ -437,9 +435,11 @@ TEMPLATE const OrderedMap<KeyType, ObjectType, HashFunc>& QUAL::operator=(const 
 	return (*this);
 }
 
-} // End namespace.
+
+
+}
+
+
 
 #undef TEMPLATE
 #undef QUAL
-
-#endif

@@ -46,18 +46,6 @@ TEMPLATE QUAL::~Quaternion()
 {
 }
 
-TEMPLATE _TVarType QUAL::GetEpsilon() const
-{
-#pragma warning(push)
-#pragma warning(disable: 4127)	// Warning: conditional expression is constant.
-	// Determine wether _TVarType is float or double.
-	if (sizeof(_TVarType) == sizeof(float32))
-#pragma warning(pop)
-		return 1e-6f;
-	else
-		return (_TVarType)1e-15;
-}
-
 TEMPLATE void QUAL::Set(_TVarType pA, _TVarType pB, _TVarType pC, _TVarType pD)
 {
 	mA = pA;
@@ -623,7 +611,7 @@ TEMPLATE void QUAL::Normalize(_TVarType pLength)
 {
 	_TVarType lLength = GetMagnitude();
 
-	if (lLength >= GetEpsilon())
+	if (lLength >= MathTraits<_TVarType>::FullEps())
 	{
 		Div(lLength);
 		Mul(pLength);
@@ -666,7 +654,7 @@ TEMPLATE void QUAL::Slerp(const Quaternion<_TVarType>& pFrom,
 	_TVarType lScale0;
 	_TVarType lScale1;
 
-	if (lCosOmega < ((_TVarType)1.0 - GetEpsilon()))
+	if (lCosOmega < ((_TVarType)1.0 - MathTraits<_TVarType>::FullEps()))
 	{
 		// Standard case (slerp).
 		_TVarType lOmega = acos(lCosOmega);
@@ -783,13 +771,13 @@ TEMPLATE void QUAL::GetEulerAngles(_TVarType& pYaw, _TVarType& pPitch, _TVarType
 	_TVarType lYaw;
 	_TVarType lPitch;
 	_TVarType lRoll;
-	if (abcd > ((_TVarType)0.5-Lepra::Math::Traits<_TVarType>::FullEps())*lUnitLength)
+	if (abcd > ((_TVarType)0.5-Lepra::MathTraits<_TVarType>::FullEps())*lUnitLength)
 	{
 		lYaw = 2 * atan2(GetC(), GetA());
 		lPitch = (_TVarType)Lepra::PI/2;
 		lRoll = 0;
 	}
-	else if (abcd < (-(_TVarType)0.5+Lepra::Math::Traits<_TVarType>::FullEps())*lUnitLength)
+	else if (abcd < (-(_TVarType)0.5+Lepra::MathTraits<_TVarType>::FullEps())*lUnitLength)
 	{
 		lYaw = -2 * ::atan2(GetC(), GetA());
 		lPitch = -(_TVarType)Lepra::PI/2;
@@ -1024,21 +1012,22 @@ TEMPLATE Quaternion<_TVarType> QUAL::operator*= (const Quaternion<_TVarType>& pQ
 	return *this;
 }
 
-TEMPLATE Vector3D<_TVarType> QUAL::operator* (const Vector3D<_TVarType>& pV) const
+TEMPLATE Vector3D<_TVarType> QUAL::operator * (const Vector3D<_TVarType>& pV) const
 {
 	return GetRotatedVector(pV);
 }
 
 #if !defined(LEPRA_MSVC)
 
-inline TEMPLATE Vector3D<_TVarType> operator * (const Vector3D<_TVarType>& pVector, const Quaternion<_TVarType>& pQ)
+TEMPLATE Vector3D<_TVarType> operator * (const Vector3D<_TVarType>& pVector, const Quaternion<_TVarType>& pQ)
 {
 	return pQ.GetInverseRotatedVector(pVector);
 }
 
-inline TEMPLATE Vector3D<_TVarType>& operator *= (Vector3D<_TVarType>& pVector, const Quaternion<_TVarType>& pQ)
+TEMPLATE Vector3D<_TVarType>& operator *= (Vector3D<_TVarType>& pVector, const Quaternion<_TVarType>& pQ)
 {
-	return (pQ*pVector);
+	pVector = pQ*pVector;
+	return (pVector);
 }
 
 #else // LEPRA_MSVC

@@ -1,17 +1,20 @@
-/*
-	Class:  Vector2D
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Righteous Games
-*/
 
-#ifndef LEPRA_VECTOR2D_H
-#define LEPRA_VECTOR2D_H
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2006, Righteous Games
 
-#include <math.h>
+
+
+#pragma once
+
 #include "LepraTypes.h"
+#include "Math.h"
+
+
 
 namespace Lepra
 {
+
+
 
 template<class _TVarType>
 class Vector2D
@@ -96,26 +99,29 @@ public:
 	Vector2D<float> ToFloat() const;
 	Vector2D<double> ToDouble() const;
 
-	// PoL: Point on line 
-	// Dir: Direction of line
-	// Point: Any point
-	// ClosestPoint: The point on the line which is closest to Point.
-	// DirDistance: The distance to move from PoL along Dir to get to Point.
-	// Returns the shortest distance between the Point and the line.
-	friend _TVarType LineDistance(const Vector2D<_TVarType>& pPoL, const Vector2D<_TVarType>& pDir, const Vector2D<_TVarType>& pPoint);
-	friend _TVarType LineDistance(const Vector2D<_TVarType>& pPoL, const Vector2D<_TVarType>& pDir, const Vector2D<_TVarType>& pPoint, Vector2D<_TVarType>& pClosestPoint, _TVarType& pDirDistance);
-	friend _TVarType LineSegmentDistance(const Vector2D<_TVarType>& pStart, const Vector2D<_TVarType>& pEnd, const Vector2D<_TVarType>& pPoint, Vector2D<_TVarType>& pClosestPoint, _TVarType& pDirDistance);
-
 protected:
 private:
-	inline _TVarType GetEpsilon() const;
 };
+
+
+
+// PoL: Point on line 
+// Dir: Direction of line
+// Point: Any point
+// ClosestPoint: The point on the line which is closest to Point.
+// DirDistance: The distance to move from PoL along Dir to get to Point.
+// Returns the shortest distance between the Point and the line.
+template<class _TVarType> inline _TVarType LineDistance(const Vector2D<_TVarType>& pPoL, const Vector2D<_TVarType>& pDir, const Vector2D<_TVarType>& pPoint);
+template<class _TVarType> inline _TVarType LineDistance(const Vector2D<_TVarType>& pPoL, const Vector2D<_TVarType>& pDir, const Vector2D<_TVarType>& pPoint, Vector2D<_TVarType>& pClosestPoint, _TVarType& pDirDistance);
+template<class _TVarType> inline _TVarType LineSegmentDistance(const Vector2D<_TVarType>& pStart, const Vector2D<_TVarType>& pEnd, const Vector2D<_TVarType>& pPoint, Vector2D<_TVarType>& pClosestPoint, _TVarType& pDirDistance);
+
+
 
 #include "Vector2D.inl"
 
 typedef Vector2D<float> Vector2DF;
 typedef Vector2D<double> Vector2DD;
 
-} // End namespace.
 
-#endif // !LEPRA_VECTOR2D_H
+
+}

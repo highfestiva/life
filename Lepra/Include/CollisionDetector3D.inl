@@ -634,7 +634,7 @@ template<class _TVarType>
 bool CollisionDetector3D<_TVarType>::IsOBBOverlappingOBBOptimized(const OBB<_TVarType>& pOBB1,
 								  const OBB<_TVarType>& pOBB2)
 {
-	_TVarType lEpsilon = Lepra::Math::Traits<_TVarType>::Eps();
+	_TVarType lEpsilon = Lepra::MathTraits<_TVarType>::Eps();
 	Vector3D<_TVarType> lDistance(pOBB2.GetPosition() - pOBB1.GetPosition());
 
 	Vector3D<_TVarType> lXAxis1(pOBB1.GetRotation().GetAxisX());
@@ -951,7 +951,7 @@ bool CollisionDetector3D<_TVarType>::IsOBBOverlappingOBB(const OBB<_TVarType>& p
 	// Almost the same as the IsOBBOverlappingOBB() function...
 	pCollisionInfo.mTimeToCollision = 1;
 
-	_TVarType lEps = Lepra::Math::Traits<_TVarType>::Eps();
+	_TVarType lEps = Lepra::MathTraits<_TVarType>::Eps();
 
 	Vector3D<_TVarType> lDistance(pOBB2.GetPosition() - pOBB1.GetPosition());
 
@@ -1237,7 +1237,7 @@ bool CollisionDetector3D<_TVarType>::AreMovingOBBsColliding(_TVarType pTimeDelta
 	// TSPMACRO_TEST_MOVING_OBB_COLLISION_0 and TSPMACRO_TEST_MOVING_OBB_COLLISION_1.
 	// 
 
-	const _TVarType lEpsilon = Lepra::Math::Traits<_TVarType>::Eps();
+	const _TVarType lEpsilon = Lepra::MathTraits<_TVarType>::Eps();
 
 	mOBBCollisionData->Reset();
 	mCollisionInfo.mTimeToCollision = 0.0f;	// Reset to minimum.
@@ -1733,7 +1733,7 @@ bool CollisionDetector3D<_TVarType>::AreMovingOBBsColliding(_TVarType pTimeDelta
 template<class _TVarType>
 typename CollisionDetector3D<_TVarType>::CollisionType CollisionDetector3D<_TVarType>::GetOBBCollisionType()
 {
-	const _TVarType lEpsilon = Lepra::Math::Traits<_TVarType>::Eps();
+	const _TVarType lEpsilon = Lepra::MathTraits<_TVarType>::Eps();
 	const _TVarType lOneCmp = 1.0f - lEpsilon;
 
 	// We have to figure out what kind of collision we have here... 
@@ -1962,7 +1962,7 @@ void CollisionDetector3D<_TVarType>::GetOBBToOBBIntersection(Vector3D<_TVarType>
 		return;
 	}
 
-	const _TVarType lEpsilon = Lepra::Math::Traits<_TVarType>::Eps();
+	const _TVarType lEpsilon = Lepra::MathTraits<_TVarType>::Eps();
 	CollisionType lCollisionType = GetOBBCollisionType();
 
 	switch(lCollisionType)
@@ -1981,7 +1981,7 @@ template<class _TVarType>
 void CollisionDetector3D<_TVarType>::GetOBBPointIntersection(Vector3D<_TVarType> pPoint[8], int &pNumPoints)
 {
     // Determine the point of intersection
-	const _TVarType lEpsilon = Lepra::Math::Traits<_TVarType>::Eps();
+	const _TVarType lEpsilon = Lepra::MathTraits<_TVarType>::Eps();
 
 	pNumPoints = 1;
 
@@ -2584,7 +2584,7 @@ void CollisionDetector3D<_TVarType>::GetOBBEdgeSurfaceIntersection(Vector3D<_TVa
 
 	pNumPoints = 0;
 
-	const _TVarType lEpsilon = Lepra::Math::Traits<_TVarType>::Eps();
+	const _TVarType lEpsilon = Lepra::MathTraits<_TVarType>::Eps();
 	const _TVarType lOneCmp = 1.0f - lEpsilon;
 
 	//

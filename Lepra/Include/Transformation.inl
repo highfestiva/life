@@ -1,8 +1,8 @@
-/*
-	Class:  Transformation
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Righteous Games
-*/
+
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2006, Righteous Games
+
+
 
 TEMPLATE QUAL::Transformation()
 {
@@ -278,12 +278,12 @@ TEMPLATE Vector3D<_TVarType> QUAL::operator * (const Vector3D<_TVarType>& pVecto
 	return mOrientation.GetInverseRotatedVector(pVector - mPosition);
 }
 
-TEMPLATE Vector3D<_TVarType> operator * (const Vector3D<_TVarType>& pVector, const Transformation<_TVarType>& pTransformation)
+TEMPLATE inline Vector3D<_TVarType> operator * (const Vector3D<_TVarType>& pVector, const Transformation<_TVarType>& pTransformation)
 {
 	return pTransformation.mOrientation.GetRotatedVector(pVector) + pTransformation.mPosition;
 }
 
-TEMPLATE const Vector3D<_TVarType>& operator *= (Vector3D<_TVarType>& pVector, const Transformation<_TVarType>& pTransformation)
+TEMPLATE inline const Vector3D<_TVarType>& operator *= (Vector3D<_TVarType>& pVector, const Transformation<_TVarType>& pTransformation)
 {
 	pVector = pTransformation.mOrientation.GetRotatedVector(pVector) + pTransformation.mPosition;
 	return pVector;

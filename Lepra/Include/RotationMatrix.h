@@ -28,25 +28,28 @@
 	û' = û * A   ->   û' is û inverse transformed (rotated backwards).
 */
 
-#ifndef ROTATIONMATRIX_H
-#define ROTATIONMATRIX_H
 
-#include <math.h>
+
+#pragma once
+
 #include "LepraTypes.h"
+#include "Math.h"
 #include "Vector3D.h"
 
 #define TEMPLATE template<class _TVarType>
 #define QUAL RotationMatrix<_TVarType>
 
+
+
 namespace Lepra
 {
+
+
 
 TEMPLATE
 class RotationMatrix
 {
 public:
-	// friend class Transformation;
-
 	inline RotationMatrix();
 	inline RotationMatrix(_TVarType p11, _TVarType p12, _TVarType p13,
 			      _TVarType p21, _TVarType p22, _TVarType p23,
@@ -182,9 +185,6 @@ public:
 	inline RotationMatrix operator *  (const _TVarType pScalar) const;
 	inline RotationMatrix operator /  (const _TVarType pScalar) const;
 
-	friend Vector3D<_TVarType>  operator *  (const Vector3D<_TVarType>& pVec, const RotationMatrix<_TVarType>& pMtx);
-	friend Vector3D<_TVarType>& operator *= (Vector3D<_TVarType>& pVec, const RotationMatrix<_TVarType>& pMtx);
-
 	inline operator const _TVarType* () const;
 	inline operator _TVarType* ();
 
@@ -195,6 +195,13 @@ private:
 	_TVarType mMatrix[9];
 };
 
+
+
+TEMPLATE inline Vector3D<_TVarType>  operator *  (const Vector3D<_TVarType>& pVec, const RotationMatrix<_TVarType>& pMtx);
+TEMPLATE inline Vector3D<_TVarType>& operator *= (Vector3D<_TVarType>& pVec, const RotationMatrix<_TVarType>& pMtx);
+
+
+
 #include "RotationMatrix.inl"
 
 typedef RotationMatrix<float> RotationMatrixF;
@@ -203,9 +210,9 @@ typedef RotationMatrix<double> RotationMatrixD;
 const RotationMatrixF g3x3IdentityMatrixF(Vector3DF(1, 0, 0), Vector3DF(0, 1, 0), Vector3DF(0, 0, 1));
 const RotationMatrixD g3x3IdentityMatrixD(Vector3DD(1, 0, 0), Vector3DD(0, 1, 0), Vector3DD(0, 0, 1));
 
-} // End namespace.
+
+
+}
 
 #undef TEMPLATE
 #undef QUAL
-
-#endif

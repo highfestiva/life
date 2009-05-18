@@ -11,16 +11,9 @@
 
 
 
-#ifndef LEPRA_TIMER_H
-#define LEPRA_TIMER_H
-
-
+#pragma once
 
 #include "Lepra.h"
-#include <math.h>
-#ifdef LEPRA_POSIX
-#include <sys/time.h>
-#endif
 
 
 
@@ -226,8 +219,4 @@ void Timer::SetTime(uint64 pMilliSecs)
 
 
 
-} // End namespace.
-
-
-
-#endif // !LEPRA_TIMER_H
+}

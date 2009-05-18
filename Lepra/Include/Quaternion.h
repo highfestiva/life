@@ -42,15 +42,20 @@
 	won't help much I'm afraid.
 */
 
-#ifndef LEPRA_QUATERNION_H
-#define LEPRA_QUATERNION_H
 
-#include <math.h>
+
+#pragma once
+
 #include "LepraTypes.h"
+#include "Math.h"
 #include "RotationMatrix.h"
+
+
 
 namespace Lepra
 {
+
+
 
 template<class _TVarType>
 class Quaternion
@@ -188,9 +193,6 @@ public:
 	inline Quaternion operator*= (_TVarType pScalar);
 
 	inline Vector3D<_TVarType> operator* (const Vector3D<_TVarType>& pV) const;
-	friend Vector3D<_TVarType>  operator *  (const Vector3D<_TVarType>& pVec, const RotationMatrix<_TVarType>& pMtx);
-	friend Vector3D<_TVarType>& operator *= (Vector3D<_TVarType>& pVec, const RotationMatrix<_TVarType>& pMtx);
-
 	// Division
 	inline Quaternion operator/ (const Quaternion<_TVarType>& pQ) const;
 	inline Quaternion operator/= (const Quaternion<_TVarType>& pQ);
@@ -205,19 +207,17 @@ public:
 
 protected:
 
-	inline _TVarType GetEpsilon() const;
-
 	_TVarType mA; // Real part.
 	_TVarType mB; // Imaginary i
 	_TVarType mC; // Imaginary j
 	_TVarType mD; // Imaginary k
 };
 
+
+
 #include "Quaternion.inl"
 
 typedef Quaternion<float32> QuaternionF;
 typedef Quaternion<float64> QuaternionD;
 
-} // End namespace.
-
-#endif // !LEPRA_QUATERNION_H
+}

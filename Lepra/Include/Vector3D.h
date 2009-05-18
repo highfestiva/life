@@ -97,24 +97,6 @@ class Vector3D
 		inline Vector3D operator/= (_TVarType pScalar);
 		inline Vector3D operator/ (_TVarType pScalar) const;
 
-		friend Vector3D<_TVarType> operator * (_TVarType pScalar, const Vector3D<_TVarType>& pVec);
-		friend Vector3D<_TVarType> operator / (_TVarType pScalar, const Vector3D<_TVarType>& pVec);
-
-		// Calculates the shortest distance between two lines defined by (P0, PDir) and (Q0, QDir)
-		// and returns the two points P and Q on these lines where the distance is minimal.
-		friend void LineDistance(const Vector3D<_TVarType>& pP0, const Vector3D<_TVarType>& pPDir,
-				  const Vector3D<_TVarType>& pQ0, const Vector3D<_TVarType>& pQDir,
-				  Vector3D<_TVarType>& pP, Vector3D<_TVarType>& pQ);
-		
-		// PoL: Point on line 
-		// Dir: Direction of line
-		// Point: Any point
-		// ClosestPoint: The point on the line which is closest to Point.
-		// DirDistance: The distance to move from PoL along Dir to get to Point.
-		// Returns the shortest distance between the Point and the line.
-		friend _TVarType LineDistance(const Vector3D<_TVarType>& pPoL, const Vector3D<_TVarType>& pDir, const Vector3D<_TVarType>& pPoint);
-		friend _TVarType LineDistance(const Vector3D<_TVarType>& pPoL, const Vector3D<_TVarType>& pDir, const Vector3D<_TVarType>& pPoint, Vector3D<_TVarType>& pClosestPoint, _TVarType& pDirDistance);
-
 		// Dot product
 		inline _TVarType operator* (const Vector3D<_TVarType>& pV) const;
 
@@ -133,6 +115,26 @@ class Vector3D
 		Vector3D<float> ToFloat() const;
 		Vector3D<double> ToDouble() const;
 };
+
+
+
+template<class _TVarType> inline Vector3D<_TVarType> operator * (_TVarType pScalar, const Vector3D<_TVarType>& pVec);
+template<class _TVarType> inline Vector3D<_TVarType> operator / (_TVarType pScalar, const Vector3D<_TVarType>& pVec);
+
+// Calculates the shortest distance between two lines defined by (P0, PDir) and (Q0, QDir)
+// and returns the two points P and Q on these lines where the distance is minimal.
+template<class _TVarType> inline void LineDistance(const Vector3D<_TVarType>& pP0, const Vector3D<_TVarType>& pPDir,
+		  const Vector3D<_TVarType>& pQ0, const Vector3D<_TVarType>& pQDir,
+		  Vector3D<_TVarType>& pP, Vector3D<_TVarType>& pQ);
+
+// PoL: Point on line 
+// Dir: Direction of line
+// Point: Any point
+// ClosestPoint: The point on the line which is closest to Point.
+// DirDistance: The distance to move from PoL along Dir to get to Point.
+// Returns the shortest distance between the Point and the line.
+template<class _TVarType> inline _TVarType LineDistance(const Vector3D<_TVarType>& pPoL, const Vector3D<_TVarType>& pDir, const Vector3D<_TVarType>& pPoint);
+template<class _TVarType> inline _TVarType LineDistance(const Vector3D<_TVarType>& pPoL, const Vector3D<_TVarType>& pDir, const Vector3D<_TVarType>& pPoint, Vector3D<_TVarType>& pClosestPoint, _TVarType& pDirDistance);
 
 
 

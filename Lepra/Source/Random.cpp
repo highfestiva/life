@@ -10,11 +10,13 @@
 #include "../../ThirdParty/mtwist-0.8/mtwist.h"
 #include "../../ThirdParty/mtwist-0.8/randistrs.h"
 #pragma warning(pop)
-#include <math.h>
+
 
 
 namespace Lepra
 {
+
+
 
 void Random::SetSeed(uint32 pSeed)
 {
@@ -66,4 +68,6 @@ float64 Random::Triangular(float64 pLower, float64 pUpper, float64 pMode)
 	return ::rd_ltriangular(pLower, pUpper, pMode);
 }
 
-} // End namespace.
+
+
+}

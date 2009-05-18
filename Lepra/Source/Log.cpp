@@ -192,7 +192,7 @@ void Log::DoRawPrint(const String& pMessage, LogLevel pLevel)
 
 
 
-LogDecorator::LogDecorator(Log* pLog, const type_info& pTypeId):
+LogDecorator::LogDecorator(Log* pLog, const std::type_info& pTypeId):
 	mLog(pLog),
 #ifdef LEPRA_MSVC
 	// Skip "class " in beginning of name.

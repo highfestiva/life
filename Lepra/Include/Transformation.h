@@ -1,11 +1,10 @@
-/*
-	Class:  Transformation
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Righteous Games
-*/
 
-#ifndef LEPRA_TRANSFORMATION_H
-#define LEPRA_TRANSFORMATION_H
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2006, Righteous Games
+
+
+
+#pragma once
 
 #include "LepraTypes.h"
 #include "Vector3D.h"
@@ -15,8 +14,12 @@
 #define TEMPLATE template<class _TVarType>
 #define QUAL Transformation<_TVarType>
 
+
+
 namespace Lepra
 {
+
+
 
 TEMPLATE
 class Transformation
@@ -111,10 +114,6 @@ public:
 	// T * V
 	Vector3D<_TVarType> operator * (const Vector3D<_TVarType>& pVector) const;
 
-	// V * T
-	friend Vector3D<_TVarType> operator * (const Vector3D<_TVarType>& pVector, const Transformation& pTransformation);
-	friend const Vector3D<_TVarType>& operator *= (Vector3D<_TVarType>& pVector, const Transformation& pTransformation);
-
 	Transformation<float> ToFloat() const;
 	Transformation<double> ToDouble() const;
 
@@ -124,7 +123,16 @@ private:
 	Vector3D<_TVarType> mPosition;
 };
 
+
+
+TEMPLATE inline Vector3D<_TVarType> operator * (const Vector3D<_TVarType>& pVector, const Transformation& pTransformation);
+TEMPLATE inline const Vector3D<_TVarType>& operator *= (Vector3D<_TVarType>& pVector, const Transformation& pTransformation);
+
+
+
 #include "Transformation.inl"
+
+
 
 typedef Transformation<float> TransformationF;
 typedef Transformation<double> TransformationD;
@@ -135,6 +143,6 @@ const Transformation<double> gIdentityTransformationD;
 #undef TEMPLATE
 #undef QUAL
 
-} // End namespace.
 
-#endif // !LEPRA_TRANSFORMATION_H
+
+}

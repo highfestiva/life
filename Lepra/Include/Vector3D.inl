@@ -58,7 +58,7 @@ V3D_TEMPLATE V3D_QUAL::Vector3D(_TVarType pX1, _TVarType pY1, _TVarType pZ1,
 V3D_TEMPLATE void V3D_QUAL::Normalize(_TVarType pLength)
 {
 	_TVarType lLength = GetLength();
-	if (lLength >= Math::Traits<_TVarType>::FullEps())
+	if (lLength >= MathTraits<_TVarType>::FullEps())
 	{
 		Div(lLength);
 		Mul(pLength);
@@ -135,7 +135,7 @@ V3D_TEMPLATE void V3D_QUAL::GetSphericalAngles(_TVarType& pTheta, _TVarType& pPh
 
 	Vector3D<_TVarType> lXY = ProjectOntoPlane(lZAxis);
 	_TVarType lLength = lXY.GetLength();
-	if (lLength <= Math::Traits<_TVarType>::FullEps())
+	if (lLength <= MathTraits<_TVarType>::FullEps())
 	{
 		pPhi = 0;
 	}
@@ -322,7 +322,7 @@ V3D_TEMPLATE _TVarType V3D_QUAL::GetPolarCoordAngleZ() const
 	_TVarType lX = (_TVarType)sqrt(x * x + z * z);
 	_TVarType lY = y;
 
-	if (lX > Math::Traits<_TVarType>::FullEps())
+	if (lX > MathTraits<_TVarType>::FullEps())
 		return atan(lY / lX);
 	else
 		return (_TVarType)(PI / 2.0);
@@ -333,7 +333,7 @@ V3D_TEMPLATE _TVarType V3D_QUAL::GetPolarCoordAngleY() const
 	_TVarType lX = x;
 	_TVarType lY = z;
 
-	if (fabs(lX) <= Math::Traits<_TVarType>::FullEps())
+	if (fabs(lX) <= MathTraits<_TVarType>::FullEps())
 	{
 		if (lY >= 0)
 			return (_TVarType)(PI / 2.0);
@@ -470,17 +470,17 @@ V3D_TEMPLATE Vector3D<_TVarType> V3D_QUAL::operator/ (_TVarType pScalar) const
 
 #if !defined(LEPRA_MSVC)
 
-inline V3D_TEMPLATE Vector3D<_TVarType> operator * (_TVarType pScalar, const Vector3D<_TVarType>& pVector)
+V3D_TEMPLATE inline Vector3D<_TVarType> operator * (_TVarType pScalar, const Vector3D<_TVarType>& pVector)
 {
 	return pVector * pScalar;
 }
 
-inline V3D_TEMPLATE Vector3D<_TVarType> operator / (_TVarType pScalar, const Vector3D<_TVarType>& pVector)
+V3D_TEMPLATE inline Vector3D<_TVarType> operator / (_TVarType pScalar, const Vector3D<_TVarType>& pVector)
 {
 	return pVector / pScalar;
 }
 
-inline V3D_TEMPLATE void LineDistance(const Vector3D<_TVarType>& pP0, const Vector3D<_TVarType>& pPDir,
+V3D_TEMPLATE inline void LineDistance(const Vector3D<_TVarType>& pP0, const Vector3D<_TVarType>& pPDir,
 		  const Vector3D<_TVarType>& pQ0, const Vector3D<_TVarType>& pQDir,
 		  Vector3D<_TVarType>& pP, Vector3D<_TVarType>& pQ)
 {
@@ -502,7 +502,7 @@ inline V3D_TEMPLATE void LineDistance(const Vector3D<_TVarType>& pP0, const Vect
 	pQ = (pQ0 + v * tc);
 }
 
-inline _TVarType LineDistance(const Vector3D<_TVarType>& pPoL, const Vector3D<_TVarType>& pDir, const Vector3D<_TVarType>& pPoint)
+V3D_TEMPLATE inline _TVarType LineDistance(const Vector3D<_TVarType>& pPoL, const Vector3D<_TVarType>& pDir, const Vector3D<_TVarType>& pPoint)
 {
 	Vector3D<_TVarType> lNormDir(pDir);
 	lNormDir.Normalize();
@@ -510,7 +510,7 @@ inline _TVarType LineDistance(const Vector3D<_TVarType>& pPoL, const Vector3D<_T
 	return (lV - lNormDir * lNormDir.Dot(lV)).GetLength();
 }
 
-_TVarType LineDistance(const Vector3D<_TVarType>& pPoL, const Vector3D<_TVarType>& pDir, const Vector3D<_TVarType>& pPoint, Vector3D<_TVarType>& pClosestPoint, _TVarType& pDirDistance)
+V3D_TEMPLATE inline _TVarType LineDistance(const Vector3D<_TVarType>& pPoL, const Vector3D<_TVarType>& pDir, const Vector3D<_TVarType>& pPoint, Vector3D<_TVarType>& pClosestPoint, _TVarType& pDirDistance)
 {
 	Vector3D<_TVarType> lNormDir(pDir);
 	lNormDir.Normalize();
@@ -628,7 +628,6 @@ inline double LineDistance(const Vector3D<double>& pPoL, const Vector3D<double>&
 	return (lV - lD).GetLength();
 }
 
-
 #endif // !LEPRA_MSVC/LEPRA_MSVC
 
 V3D_TEMPLATE _TVarType V3D_QUAL::operator* (const Vector3D<_TVarType>& pV) const
@@ -663,9 +662,9 @@ V3D_TEMPLATE int V3D_QUAL::SetRawData(uint8* pData)
 
 V3D_TEMPLATE bool V3D_QUAL::IsNullVector() const
 {
-	return (fabs(x) <= Math::Traits<_TVarType>::FullEps() &&
-			fabs(y) <= Math::Traits<_TVarType>::FullEps() &&
-			fabs(z) <= Math::Traits<_TVarType>::FullEps());
+	return (fabs(x) <= MathTraits<_TVarType>::FullEps() &&
+			fabs(y) <= MathTraits<_TVarType>::FullEps() &&
+			fabs(z) <= MathTraits<_TVarType>::FullEps());
 }
 
 V3D_TEMPLATE Vector3D<float> V3D_QUAL::ToFloat() const

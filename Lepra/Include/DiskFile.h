@@ -160,16 +160,16 @@ public:
 	String GetName() const;		// Returns filename only.
 	String GetPath() const;		// Returns path.
 
-	int64 GetSize() const;
+	virtual int64 GetSize() const;
 
 	// Overrided from Reader/Writer.
 	IOError ReadData(void* pBuffer, size_t pSize);
 	IOError WriteData(const void* pBuffer, size_t pSize);
 
-	void Flush();
+	virtual void Flush();
 
-	int64 Tell() const;
-	int64 Seek(int64 pOffset, FileOrigin pFrom);
+	virtual int64 Tell() const;
+	virtual int64 Seek(int64 pOffset, FileOrigin pFrom);
 
 	// Static functions.
 
@@ -189,11 +189,11 @@ public:
 
 	// Overrided from InputStream.
 	int64 GetAvailable() const;
-	IOError ReadRaw(void* pBuffer, size_t pSize);
+	virtual IOError ReadRaw(void* pBuffer, size_t pSize);
 	IOError Skip(size_t pSize);
 
 	// Overrided from OutputStream.
-	IOError WriteRaw(const void* pBuffer, size_t pSize);
+	virtual IOError WriteRaw(const void* pBuffer, size_t pSize);
 private:
 	void ExtractPathAndFileName(const String& pFileName);
 

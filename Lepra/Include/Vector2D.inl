@@ -168,7 +168,7 @@ V2D_TEMPLATE _TVarType V2D_QUAL::GetDistanceSquared(const Vector2D<_TVarType>& p
 
 V2D_TEMPLATE _TVarType V2D_QUAL::GetAngle() const
 {
-	if (fabs(x) <= GetEpsilon())
+	if (fabs(x) <= MathTraits<_TVarType>::FullEps())
 	{
 		if (y >= 0)
 			return (_TVarType)(PI/2);
@@ -325,7 +325,7 @@ V2D_TEMPLATE void V2D_QUAL::Normalize(_TVarType pLength)
 {
 	_TVarType lLength = GetLength();
 
-	if (lLength >= GetEpsilon())
+	if (lLength >= MathTraits<_TVarType>::FullEps())
 	{
 		Div(lLength);
 		Mul(pLength);
@@ -357,18 +357,8 @@ V2D_TEMPLATE int V2D_QUAL::SetRawData(uint8* pData)
 
 V2D_TEMPLATE bool V2D_QUAL::IsNullVector() const
 {
-	return (fabs(x) <= GetEpsilon() &&
-			fabs(y) <= GetEpsilon());
-}
-
-V2D_TEMPLATE _TVarType V2D_QUAL::GetEpsilon() const
-{
-#pragma warning(disable: 4127) // "Conditional expression is constant."
-	// Determine wether _TVarType is float or double.
-	if (sizeof(_TVarType) == sizeof(float32))
-		return (_TVarType)1e-6f;
-	else
-		return (_TVarType)1e-15;
+	return (fabs(x) <= MathTraits<_TVarType>::FullEps() &&
+		fabs(y) <= MathTraits<_TVarType>::FullEps());
 }
 
 V2D_TEMPLATE Vector2D<float> V2D_QUAL::ToFloat() const

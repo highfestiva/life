@@ -69,7 +69,7 @@ private:
 class LogDecorator
 {
 public:
-	LogDecorator(Log* pLog, const type_info& pTypeId);
+	LogDecorator(Log* pLog, const std::type_info& pTypeId);
 
 	void Print(Log::LogLevel pLogLevel, const String& pText) const;
 	void RawPrint(Log::LogLevel pLogLevel, const String& pText) const;

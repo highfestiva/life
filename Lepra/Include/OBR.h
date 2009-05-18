@@ -12,7 +12,6 @@
 #define LEPRA_OBR_H
 
 #include "Vector2D.h"
-#include <math.h>
 
 namespace Lepra
 {

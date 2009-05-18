@@ -143,7 +143,7 @@ TEMPLATE bool QUAL::Insert(const _TSetObject& pObject)
 
 TEMPLATE bool QUAL::Remove(const _TSetObject& pObject)
 {
-	_HashSet::iterator lIter(mHashSet.find(pObject));
+	typename _HashSet::iterator lIter(mHashSet.find(pObject));
 	bool lRemoved = (lIter != mHashSet.end());
 	if (lRemoved == true)
 	{

@@ -57,7 +57,7 @@ typename ResourceType::UserData UserTypeResourceBase<ResourceType, SubtypeLoadCa
 }
 
 template<class ResourceType, class SubtypeLoadCallback, class SubtypeExtraData>
-typename SubtypeExtraData& UserTypeResourceBase<ResourceType, SubtypeLoadCallback, SubtypeExtraData>::GetExtraData() const
+SubtypeExtraData& UserTypeResourceBase<ResourceType, SubtypeLoadCallback, SubtypeExtraData>::GetExtraData() const
 {
 	return (mExtraData);
 }
@@ -65,8 +65,7 @@ typename SubtypeExtraData& UserTypeResourceBase<ResourceType, SubtypeLoadCallbac
 
 
 template<class ResourceType>
-UserTypeResource<ResourceType>::UserTypeResource():
-	UserTypeResourceBase()
+UserTypeResource<ResourceType>::UserTypeResource()
 {
 }
 
@@ -84,7 +83,7 @@ Resource* UserTypeResource<ResourceType>::CreateResource(ResourceManager* pManag
 
 
 template<class ResourceType, class SubtypeExtraType>
-UserExtraCreateTypeResource<ResourceType, SubtypeExtraType>::UserExtraCreateTypeResource(typename ExtraType pExtraData):
+UserExtraCreateTypeResource<ResourceType, SubtypeExtraType>::UserExtraCreateTypeResource(SubtypeExtraType pExtraData):
 	UserTypeResourceBase(pExtraData)
 {
 }
@@ -92,7 +91,7 @@ UserExtraCreateTypeResource<ResourceType, SubtypeExtraType>::UserExtraCreateType
 template<class ResourceType, class SubtypeExtraType>
 Resource* UserExtraCreateTypeResource<ResourceType, SubtypeExtraType>::CreateResource(ResourceManager* pManager, const Lepra::String& pName) const
 {
-	return (new ResourceType(pManager, pName, GetExtraData()));
+	return (new ResourceType(pManager, pName, Parent::GetExtraData()));
 }
 
 
@@ -158,7 +157,7 @@ template<class RamData, class DiversifiedData> DiversifiedResource<RamData, Dive
 template<class RamData, class DiversifiedData> DiversifiedData DiversifiedResource<RamData, DiversifiedData>::GetUserData(const UserResource* pUserResource)
 {
 	DiversifiedData lInstanceId = (DiversifiedData)0;
-	UserDataTable::Iterator x = mUserDiversifiedTable.Find(pUserResource);
+	typename UserDataTable::Iterator x = mUserDiversifiedTable.Find(pUserResource);
 	if (x != mUserDiversifiedTable.End())
 	{
 		lInstanceId = *x;
@@ -174,7 +173,7 @@ template<class RamData, class DiversifiedData> DiversifiedData DiversifiedResour
 
 template<class RamData, class DiversifiedData> void DiversifiedResource<RamData, DiversifiedData>::FreeDiversified(UserResource* pUserResource)
 {
-	UserDataTable::Iterator x = mUserDiversifiedTable.Find(pUserResource);
+	typename UserDataTable::Iterator x = mUserDiversifiedTable.Find(pUserResource);
 	if (x != mUserDiversifiedTable.End())
 	{
 		DiversifiedData lInstanceId = *x;

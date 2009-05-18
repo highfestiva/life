@@ -416,12 +416,12 @@ TEMPLATE QUAL::operator _TVarType* ()
 
 #if !defined(LEPRA_MSVC)
 
-inline TEMPLATE Vector3D<_TVarType> operator * (const Vector3D<_TVarType>& pVector, const RotationMatrix<_TVarType>& pMtx)
+TEMPLATE inline Vector3D<_TVarType> operator * (const Vector3D<_TVarType>& pVector, const RotationMatrix<_TVarType>& pMtx)
 {
 	return pMtx.GetInverseRotatedVector(pVector);
 }
 
-inline TEMPLATE Vector3D<_TVarType>& operator *= (Vector3D<_TVarType>& pVector, const RotationMatrix<_TVarType>& pMtx)
+TEMPLATE inline Vector3D<_TVarType>& operator *= (Vector3D<_TVarType>& pVector, const RotationMatrix<_TVarType>& pMtx)
 {
 	pVector = pMtx.GetInverseRotatedVector(pVector);
 	return pVector;

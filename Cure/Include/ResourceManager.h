@@ -123,9 +123,11 @@ protected:
 template<class ResourceType, class SubtypeExtraType> class UserExtraCreateTypeResource: public UserTypeResourceBase<ResourceType,
 	fastdelegate::FastDelegate1<UserExtraCreateTypeResource<ResourceType, SubtypeExtraType>*, void>, SubtypeExtraType>
 {
-	typedef UserTypeResourceBase Parent;
+	typedef UserTypeResourceBase<ResourceType,
+		fastdelegate::FastDelegate1<UserExtraCreateTypeResource<ResourceType, SubtypeExtraType>*, void>,
+		SubtypeExtraType> Parent;
 public:
-	UserExtraCreateTypeResource(typename Parent::ExtraType pExtraData);
+	UserExtraCreateTypeResource(SubtypeExtraType pExtraData);
 
 protected:
 	Resource* CreateResource(ResourceManager* pManager, const Lepra::String& pName) const;

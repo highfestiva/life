@@ -6,8 +6,6 @@
 
 #pragma once
 
-
-
 #include <math.h>
 #include <vector>
 
@@ -30,39 +28,35 @@ const double eps = 1e-300;	// 1e-324 is smallest, but denormalized. This cuts us
 const float eps_f = 1e-34f;	// 1e-45 is smallest, but denormalized. This cuts us some slack.
 
 
+template<class _TVarType>
+class MathTraits
+{
+};
+
+// Specialization...
+template<>
+class MathTraits<float>
+{
+public:
+	inline static float Eps() { return 1e-34f; }
+	inline static float FullEps() { return 1e-7f; }
+	inline static float Pi() { return 3.1415926535897932384626433832795028841971693993751f; }
+};
+
+template<>
+class MathTraits<double>
+{
+public:
+	inline static double Eps() { return 1e-300; }
+	inline static double FullEps() { return 1e-16f; }
+	inline static double Pi() { return 3.1415926535897932384626433832795028841971693993751; }
+};
+
+
+
 class Math
 {
 public:
-	// Alex: Implemented this Traits class in order to be able to use constants
-	//       like pi and eps easily in other template classes. Just write
-	//       Lepra::Math::Traits<float>::Eps() to get the float eps.
-	//
-	//       TODO: Remove Traits and make Math a template instead(?), and specialize
-	//       it in the same way.
-	template<class _TVarType>
-	class Traits
-	{
-	};
-
-	// Specialization...
-	template<>
-	class Traits<float>
-	{
-	public:
-		inline static float Eps() { return 1e-34f; }
-		inline static float FullEps() { return 1e-7f; }
-		inline static float Pi() { return 3.1415926535897932384626433832795028841971693993751f; }
-	};
-
-	template<>
-	class Traits<double>
-	{
-	public:
-		inline static double Eps() { return 1e-300; }
-		inline static double FullEps() { return 1e-16f; }
-		inline static double Pi() { return 3.1415926535897932384626433832795028841971693993751; }
-	};
-
 	static inline float Deg2Rad(float pDeg)
 	{
 		return pDeg * PIF / 180.0f;
@@ -104,7 +98,7 @@ public:
 	{
 		return (value >= min && value <= max);
 	}
-	template<class _Type> static bool IsEpsEqual(_Type value1, _Type value2, _Type eps = Traits<_Type>::FullEps())
+	template<class _Type> static bool IsEpsEqual(_Type value1, _Type value2, _Type eps = MathTraits<_Type>::FullEps())
 	{
 		return (IsInRange(value1, value2-eps, value2+eps));
 	}

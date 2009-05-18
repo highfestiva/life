@@ -45,11 +45,11 @@ public:
 
 	// Overrided from InputStream.
 	int64 GetAvailable() const;
-	IOError ReadRaw(void* pBuffer, unsigned pSize);
+	virtual IOError ReadRaw(void* pBuffer, unsigned pSize);
 	IOError Skip(size_t pSize);
 
 	// Overrided from OutputStream.
-	IOError WriteRaw(const void* pBuffer, unsigned pSize);
+	virtual IOError WriteRaw(const void* pBuffer, unsigned pSize);
 	void Flush();
 
 	void Close();

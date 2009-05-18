@@ -123,10 +123,14 @@ int ConsoleManager::OnCommand(const Lepra::String& pCommand, const Lepra::String
 		{
 #ifdef LEPRA_DEBUG
 			mLog.Warningf(_T("Debug break."));
+#ifdef LEPRA_MSVC
 			::DebugBreak();
-#else
+#else // Other compilers
+			assert(false);
+#endif // MSVC / others
+#else // Release
 			log_atrace("debug break is not available in non-debug builds.");
-#endif // LEPRA_DEBUG
+#endif // Debug / Release
 		}
 		break;
 		case COMMAND_HELP:

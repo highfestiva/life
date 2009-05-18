@@ -90,11 +90,11 @@ public:
 //protected:
 	// Overrided from InputStream.
 	int64 GetAvailable() const;
-	IOError ReadRaw(void* pBuffer, size_t pSize);
+	virtual IOError ReadRaw(void* pBuffer, size_t pSize);
 	IOError Skip(size_t pSize);
 
 	// Overrided from OutputStream.
-	IOError WriteRaw(const void* pBuffer, size_t pSize);
+	virtual IOError WriteRaw(const void* pBuffer, size_t pSize);
 	void Flush();
 
 private:

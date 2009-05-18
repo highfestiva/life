@@ -1,19 +1,14 @@
-/*
-	Class:  HashTable
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Righteous Games
 
-	NOTES:
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2006, Righteous Games
 
-	A hash table.
 
-	To be able to index the table, the key must be converted to a size_t.
+// To be able to index the table, the key must be converted to a size_t.
+// The keys must be comparable using the equal-operator ==.
 
-	The keys must be comparable using the equal-operator ==.
-*/
 
-#ifndef LEPRA_HASHTABLE_H
-#define LEPRA_HASHTABLE_H
+
+#pragma once
 
 #include "FastAllocator.h"
 #include "Hasher.h"
@@ -23,8 +18,12 @@
 #define HASHTABLE_TEMPLATE template<class _TTableKey, class _TTableObject, class _THash, unsigned SIZE>
 #define HASHTABLE_QUAL HashTable<_TTableKey, _TTableObject, _THash, SIZE>
 
+
+
 namespace Lepra
 {
+
+
 
 template<class _TTableKey, class _TTableObject, class _THash = std::hash<_TTableKey>, unsigned SIZE = 64>
 class HashTable
@@ -207,7 +206,7 @@ HASHTABLE_TEMPLATE void HASHTABLE_QUAL::Remove(const Iterator& pIter)
 
 HASHTABLE_TEMPLATE _TTableObject HASHTABLE_QUAL::FindObject(const _TTableKey& pKey) const
 {
-	HashMap::const_iterator lIter(mHashMap.find(pKey));
+	typename HashMap::const_iterator lIter(mHashMap.find(pKey));
 	if (lIter != mHashMap.end())
 	{
 		return (*lIter).second;
@@ -260,7 +259,7 @@ HASHTABLE_TEMPLATE const HASHTABLE_QUAL& HASHTABLE_QUAL::operator=(const HashTab
 
 }
 
+
+
 #undef HASHTABLE_TEMPLATE
 #undef HASHTABLE_QUAL
-
-#endif // !LEPRA_HASHTABLE_H

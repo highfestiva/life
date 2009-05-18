@@ -55,7 +55,7 @@ bool CollisionDetector2D<_TVarType>::StaticLineSegmentToLineSegmentTest(const Ve
 	Vector2D<_TVarType> lDir2(pEnd2 - pStart2);
 	_TVarType lDenominator = lDir2.y * lDir1.x - lDir2.x * lDir1.y;
 
-	if(abs(lDenominator) < Lepra::Math::Traits<_TVarType>::Eps())
+	if(abs(lDenominator) < Lepra::MathTraits<_TVarType>::Eps())
 		return false;
 
 	Vector2D<_TVarType> lDiff(pStart1 - pStart2);

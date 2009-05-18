@@ -73,7 +73,7 @@ template<class _Base> bool MemberThread<_Base>::Start(_Base* pObject, void (_Bas
 	return (Thread::Start());	// Will call Run() when the new thread starts.
 }
 
-template<class _Base> typename void MemberThread<_Base>::Run()
+template<class _Base> void MemberThread<_Base>::Run()
 {
 	assert(mObject);
 	assert(mThreadEntry);
