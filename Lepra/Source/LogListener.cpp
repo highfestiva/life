@@ -5,6 +5,7 @@
 
 
 #include <assert.h>
+#include <ncurses.h>
 #include "../Include/LogListener.h"
 #include "../Include/Time.h"
 
@@ -18,9 +19,9 @@ namespace Lepra
 LogListener::LogListener(Lepra::String pName, OutputFormat pFormat):
 	mLog(0),
 	mName(pName),
+	mLevel(Log::LEVEL_LOWEST_TYPE),
 	mFormat(pFormat),
-	mLogCount(1),
-	mLevel(Log::LEVEL_LOWEST_TYPE)
+	mLogCount(1)
 {
 }
 
@@ -208,9 +209,14 @@ void InteractiveStdioConsoleLogListener::WriteLog(const String& pFullMessage, Lo
 #ifdef LEPRA_WINDOWS
 	CONSOLE_SCREEN_BUFFER_INFO lConsoleInfo;
 	::GetConsoleScreenBufferInfo(::GetStdHandle(STD_OUTPUT_HANDLE), &lConsoleInfo);
-#else // !Windows
-#error "Cursor stuff not implemented for non-Windows platform."
-#endif // Windows/!Windows
+#elif defined(LEPRA_POSIX)
+	int x;
+	int y;
+	getsyx(y, x);
+#else // !known
+#error "Cursor stuff not implemented for platform."
+#endif // Windows / POSIX / ?
+
 	::printf("\r");
 	mStdioLogListener.WriteLog(pFullMessage, pLevel);
 
@@ -221,9 +227,11 @@ void InteractiveStdioConsoleLogListener::WriteLog(const String& pFullMessage, Lo
 	::GetConsoleScreenBufferInfo(::GetStdHandle(STD_OUTPUT_HANDLE), &lConsoleInfo);
 	lConsoleInfo.dwCursorPosition.X = x;
 	::SetConsoleCursorPosition(::GetStdHandle(STD_OUTPUT_HANDLE), lConsoleInfo.dwCursorPosition);
-#else // !Windows
-#error "Cursor stuff not implemented for non-Windows platform."
-#endif // Windows/!Windows
+#elif defined(LEPRA_POSIX)
+	setsyx(y, x);
+#else // !known
+#error "Cursor stuff not implemented for platform."
+#endif // Windows / Posix / ?
 }
 
 void InteractiveStdioConsoleLogListener::OnLogRawMessage(const String& pText)

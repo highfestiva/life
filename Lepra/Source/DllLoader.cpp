@@ -16,9 +16,7 @@ namespace Lepra
 {
 
 #ifdef LEPRA_WINDOWS
-void* DllLoader::LoadDLL(const tchar* pFileName,
-			 int pNumFuncs,
-			 ...)
+void* DllLoader::LoadDLL(const tchar* pFileName, int pNumFuncs, ...)
 {
 	HINSTANCE lLibrary = NULL;
 
@@ -56,12 +54,9 @@ void* DllLoader::LoadDLL(const tchar* pFileName,
 
 // TODO: Verify that this function works.
 
-void* DllLoader::LoadDLL(const tchar* pFileName,
-			 int pNumFuncs,
-			 ...)
+void* DllLoader::LoadDLL(const tchar* pFileName, int pNumFuncs, ...)
 {
 	void* lLibrary = NULL;
-	bool lSuccess = true;
 
 	va_list lArg;			// Pointer to the current argument.
 	va_start(lArg, pNumFuncs);	// Set lArg to point at the first argument.

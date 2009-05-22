@@ -1,34 +1,27 @@
-/*
-	Class:  IOBuffer
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Righteous Games
 
-	NOTES:
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2006, Righteous Games
 
-	This class contains a buffer which can be accessed both as an InputStream
-	as well as an OutputStream. There is intentionally no thread safety (mutex)
-	implemented here.
 
-	The buffer is treated as a cyclic array, and will grow exponentially if
-	no max limit is given, and if there is more data written than read.
-*/
 
-#ifndef IOBUFFER_H
-#define IOBUFFER_H
+#pragma once
 
 #include "LepraTypes.h"
 #include "InputStream.h"
 #include "OutputStream.h"
 
+
+
 namespace Lepra
 {
 
+
+
 class IOBuffer : public InputStream, public OutputStream
 {
-public:
-	
-	IOBuffer(unsigned pMaxSize = 0);
-	IOBuffer(uint8* pBuffer, unsigned pSize, unsigned pDataSize = 0);
+public:	
+	IOBuffer(size_t pMaxSize = 0);
+	IOBuffer(uint8* pBuffer, size_t pSize, size_t pDataSize = 0);
 	virtual ~IOBuffer();
 	
 	virtual void Close();
@@ -42,17 +35,17 @@ public:
 
 protected:
 private:
-	void ExtendDataBuffer(unsigned pMinSize);
+	void ExtendDataBuffer(size_t pMinSize);
 
-	unsigned mMaxSize;
+	size_t mMaxSize;
 	uint8* mBuffer;
-	unsigned mBufferSize;
-	unsigned mBufferStart;
-	unsigned mDataSize;
+	size_t mBufferSize;
+	size_t mBufferStart;
+	size_t mDataSize;
 
 	bool mBufferOwner;
 };
 
-} // End namespace.
 
-#endif
+
+}

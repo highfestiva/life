@@ -8,7 +8,7 @@
 	Visual C++ fix + memory leak detection in debug mode.
 */
 
-#include "../Include/Memory.h"
+#include "../Include/MemoryLeakTracker.h"
 
 #if defined(_DEBUG) && defined(LEPRA_WINDOWS) && defined(MEMLEAK_DETECT)
 

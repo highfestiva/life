@@ -129,7 +129,7 @@ PosixSemaphore::PosixSemaphore():
 	::sem_init(&mSemaphore, 0, 0);
 }
 
-PosixSemaphore(unsigned pMaxCount):
+PosixSemaphore::PosixSemaphore(unsigned pMaxCount):
 	mMaxPermitCount(pMaxCount)
 {
 	::sem_init(&mSemaphore, 0, 0);

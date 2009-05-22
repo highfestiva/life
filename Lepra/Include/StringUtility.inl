@@ -399,8 +399,8 @@ STR_UTIL_TEMPLATE int STR_UTIL_QUAL::StrCmpI(const typename _String::value_type*
 			continue;
 		}
 
-		ToLower(lC1);
-		ToLower(lC2);
+		lC1 = std::tolower(lC1, mLocale);
+		lC2 = std::tolower(lC2, mLocale);
 
 		if (lC1 != lC2)
 		{
@@ -420,7 +420,7 @@ STR_UTIL_TEMPLATE bool STR_UTIL_QUAL::StringToInt(const _String& pString, int& p
 	{
 		return (false);
 	}
-	_String::value_type* lEndPtr;
+	typename _String::value_type* lEndPtr;
 	pValue = StrToL(pString.c_str(), &lEndPtr, pRadix);
 	return (pString.c_str()+pString.length() == lEndPtr);
 }
@@ -433,7 +433,7 @@ STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::IntToString(int64 pValue, int pRadix)
 		pValue = -pValue;
 	}
 
-	_String::value_type lString[64];
+	typename _String::value_type lString[64];
 	int i = 0;
 
 	while (pValue > 0)
@@ -443,11 +443,11 @@ STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::IntToString(int64 pValue, int pRadix)
 
 		if (lDigit >= 0 && lDigit <= 9)
 		{
-			lString[i] = (_String::value_type)('0' + lDigit);
+			lString[i] = (typename _String::value_type)('0' + lDigit);
 		}
 		else if(lDigit > 9)
 		{
-			lString[i] = (_String::value_type)('a' + (lDigit - 10));
+			lString[i] = (typename _String::value_type)('a' + (lDigit - 10));
 		}
 		i++;
 	}
@@ -468,7 +468,7 @@ STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::IntToString(int64 pValue, int pRadix)
 	// Reverse string.
 	for (int j = 0; j < i; j++, i--)
 	{
-		_String::value_type lTemp = lString[i - 1];
+		typename _String::value_type lTemp = lString[i - 1];
 		lString[i - 1] = lString[j];
 		lString[j] = lTemp;
 	}

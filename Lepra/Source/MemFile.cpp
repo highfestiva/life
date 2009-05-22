@@ -138,7 +138,7 @@ int64 MemFile::Seek(int64 pOffset, FileOrigin pFrom)
 	}
 	else
 	{
-		mCurrentPos = (unsigned)lPos;
+		mCurrentPos = (size_t)lPos;
 	}
 	return (int64)mCurrentPos;
 }
@@ -165,7 +165,7 @@ int64 MemFile::GetSize() const
 	return ((int64)mSize);
 }
 
-void MemFile::CropHead(unsigned pFinalSize)
+void MemFile::CropHead(size_t pFinalSize)
 {
 	ScopeLock lLock(&mLock);
 	int lCropByteCount = mSize-pFinalSize;
@@ -173,7 +173,7 @@ void MemFile::CropHead(unsigned pFinalSize)
 	{
 		::memcpy(mBuffer, mBuffer+lCropByteCount, pFinalSize);
 		mSize = pFinalSize;
-		if (mCurrentPos > (unsigned)lCropByteCount)
+		if (mCurrentPos > (size_t)lCropByteCount)
 		{
 			mCurrentPos -= lCropByteCount;
 		}
@@ -189,7 +189,7 @@ int64 MemFile::GetAvailable() const
 	return ((int64)mSize - (int64)mCurrentPos);
 }
 
-IOError MemFile::ReadRaw(void* pBuffer, unsigned pSize)
+IOError MemFile::ReadRaw(void* pBuffer, size_t pSize)
 {
 	ScopeLock lLock(&mLock);
 
@@ -198,7 +198,7 @@ IOError MemFile::ReadRaw(void* pBuffer, unsigned pSize)
 		return IO_BUFFER_UNDERFLOW;
 	}
 
-	unsigned lEndPos = mCurrentPos + pSize;
+	size_t lEndPos = mCurrentPos + pSize;
 	if (lEndPos > mSize)
 	{
 		::memcpy(pBuffer, &mBuffer[mCurrentPos], mSize - mCurrentPos);
@@ -212,21 +212,21 @@ IOError MemFile::ReadRaw(void* pBuffer, unsigned pSize)
 	return IO_OK;
 }
 
-IOError MemFile::Skip(unsigned pSize)
+IOError MemFile::Skip(size_t pSize)
 {
 	return (File::Skip(pSize));
 }
 
-IOError MemFile::WriteRaw(const void* pBuffer, unsigned pSize)
+IOError MemFile::WriteRaw(const void* pBuffer, size_t pSize)
 {
 	ScopeLock lLock(&mLock);
 
-	unsigned lEndPos = mCurrentPos + pSize;
+	size_t lEndPos = mCurrentPos + pSize;
 
 	// Check if we need to allocate more memory.
 	if (lEndPos > mBufferSize)
 	{
-		unsigned lNewBufferSize = (lEndPos * 3) / 2;
+		size_t lNewBufferSize = (lEndPos * 3) / 2;
 		uint8* lBuffer = new uint8[lNewBufferSize];
 
 		if (mBuffer != 0)
@@ -262,7 +262,7 @@ void MemFile::Close()
 	mBuffer = 0;
 }
 
-IOError MemFile::ReadData(void* pBuffer, unsigned pSize)
+IOError MemFile::ReadData(void* pBuffer, size_t pSize)
 {
 	ScopeLock lLock(&mLock);
 	if (mReader != 0)
@@ -275,7 +275,7 @@ IOError MemFile::ReadData(void* pBuffer, unsigned pSize)
 	}
 }
 
-IOError MemFile::WriteData(const void* pBuffer, unsigned pSize)
+IOError MemFile::WriteData(const void* pBuffer, size_t pSize)
 {
 	ScopeLock lLock(&mLock);
 	if (mWriter != 0)

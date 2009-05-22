@@ -105,8 +105,8 @@ template<> void UnicodeStringUtility::DoubleToString(double pValue, int pNumDeci
 	::swprintf(lResult, lFormat, pValue);
 #endif // MSVC 2005+/MSVC 2003-
 #else // !LEPRA_WINDOWS
-	::swprintf(lFormat, sizeof(lFormat) / sizeof(wchar_t), L"\%%.%if", pNumDecimals);
-	::swprintf(lResult, pString.miSize, lFormat, pValue);
+	::swprintf(lFormat, sizeof(lFormat) / sizeof(wchar_t), L"%%.%if", pNumDecimals);
+	::swprintf(lResult, sizeof(lResult) / sizeof(wchar_t), lFormat, pValue);
 #endif // LEPRA_WINDOWS/!LEPRA_WINDOWS
 
 	pString = lResult;
@@ -233,8 +233,8 @@ template<> const UnicodeString UnicodeStringUtility::ToOwnCode(const UnicodeStri
 
 
 
-std::locale AnsiStringUtility::mLocale;
-std::locale UnicodeStringUtility::mLocale;
+template<> std::locale AnsiStringUtility::mLocale;
+template<> std::locale UnicodeStringUtility::mLocale;
 
 
 

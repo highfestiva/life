@@ -14,35 +14,35 @@ namespace Lepra
 
 
 
-#ifndef LEPRA_GCC_X86
+#ifndef LEPRA_GCC_X86_32
 pthread_mutex_t g_CASMutex = PTHREAD_MUTEX_INITIALIZER;
-#endif // !LEPRA_GCC_X86
+#endif // !i386
 
 
 
 bool CompareAndSwap(long* pDest, long pSrc, long pComperand)
 {
 	bool lResult = false;
-#ifdef LEPRA_GCC_X86
-	// Optimized with X86 assembler.
+#ifdef LEPRA_GCC_X86_32
+	// Optimized with i386 assembler.
 	__asm __volatile__
 	(
 		// TODO: This code is not compiled nor tested yet, so expect bugs.
-		"movl		pDest,%ebx		\n\t"	// Load address of destination into scratch ebx.
-		"movl		pSrc,%ecx		\n\t"	// Load source into scratch register ecx.
+		"movl		pDest,%ebx	\n\t"	// Load address of destination into scratch ebx.
+		"movl		pSrc,%ecx	\n\t"	// Load source into scratch register ecx.
 		"movl		pComperand,%eax	\n\t"	// Load comperand into scratch eax.			
-		"lock cmpxchg	%ecx,(%ebx)		\n\t"	// Exchange %%ecx with [%%ebx] if %%eax == [%%ebx].
+		"lock cmpxchg	%ecx,(%ebx)	\n\t"	// Exchange %%ecx with [%%ebx] if %%eax == [%%ebx].
 		"sete		lResult		\n\t"	// Store result.
 	);
-#else // !LEPRA_GCC_X86
+#else // Not i386.
 	pthread_mutex_lock(&g_CASMutex);
-	if (pDest == pComperand)
+	if (*pDest == pComperand)
 	{
-		pDest = pSrc;
+		*pDest = pSrc;
 		lResult = true;
 	}
 	pthread_mutex_unlock(&g_CASMutex);
-#endif // LEPRA_GCC_X86/!LEPRA_GCC_X86
+#endif // i386 / other.
 	return (lResult);
 }
 

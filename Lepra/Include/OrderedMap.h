@@ -258,7 +258,7 @@ TEMPLATE typename QUAL::Iterator QUAL::PushFront(KeyType pKey, ObjectType pObjec
 {
 	assert(mTable.Find(pKey) == mTable.End());
 	mList.push_front(Node(pKey, pObject));
-	NodeList::iterator lIter = mList.begin();
+	typename NodeList::iterator lIter = mList.begin();
 	mTable.Insert(pKey, lIter);
 	assert(mTable.GetCount() == (int)mList.size());
 	return Iterator(lIter);
@@ -268,7 +268,7 @@ TEMPLATE typename QUAL::Iterator QUAL::PushBack(KeyType pKey, ObjectType pObject
 {
 	assert(mTable.Find(pKey) == mTable.End());
 	mList.push_back(Node(pKey, pObject));
-	NodeList::iterator lIter = mList.end();
+	typename NodeList::iterator lIter = mList.end();
 	--lIter;
 	mTable.Insert(pKey, lIter);
 	assert(mTable.GetCount() == (int)mList.size());
@@ -303,14 +303,14 @@ TEMPLATE void QUAL::PopBack(KeyType& pKey, ObjectType& pObject)
 
 TEMPLATE typename QUAL::Iterator QUAL::InsertBefore(const Iterator& pBeforeHere, KeyType pKey, ObjectType pObject)
 {
-	NodeList::Iterator lIter(mList.InsertBefore(pBeforeHere.mIter, Node(pKey, pObject)));
+	typename NodeList::Iterator lIter(mList.InsertBefore(pBeforeHere.mIter, Node(pKey, pObject)));
 	mTable.Insert(pKey, lIter);
 	return lIter;
 }
 
 TEMPLATE typename QUAL::Iterator QUAL::InsertAfter(const Iterator& pAfterHere, KeyType pKey, ObjectType pObject)
 {
-	NodeList::Iterator lIter(mList.InsertAfter(pAfterHere.mIter, Node(pKey, pObject)));
+	typename NodeList::Iterator lIter(mList.InsertAfter(pAfterHere.mIter, Node(pKey, pObject)));
 	mTable.Insert(pKey, lIter);
 	return lIter;
 }
@@ -326,7 +326,7 @@ TEMPLATE void QUAL::Remove(const Iterator& pIter)
 TEMPLATE bool QUAL::Remove(KeyType pKey)
 {
 	assert(mTable.GetCount() == (int)mList.size());
-	TTable::Iterator lIter(mTable.Find(pKey));
+	typename TTable::Iterator lIter(mTable.Find(pKey));
 	const bool lErased = (lIter != mTable.End());
 	if (lErased)
 	{
@@ -347,7 +347,7 @@ TEMPLATE void QUAL::RemoveAll()
 
 TEMPLATE typename QUAL::Iterator QUAL::Find(KeyType pKey)
 {
-	TTable::Iterator lIter(mTable.Find(pKey));
+	typename TTable::Iterator lIter(mTable.Find(pKey));
 	if (lIter == mTable.End())
 	{
 		return End();
@@ -368,7 +368,7 @@ TEMPLATE int QUAL::GetIndex(KeyType pKey)
 	int i = 0;
 	int lIndex = -1;
 
-	NodeList::Iterator lIter;
+	typename NodeList::Iterator lIter;
 	for(lIter = mList.First(); lIter != mList.End(); ++lIter, ++i)
 	{
 		if((*lIter).mKey == pKey)

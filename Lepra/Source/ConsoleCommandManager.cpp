@@ -8,7 +8,9 @@
 #include "../Include/SystemManager.h"
 #ifdef LEPRA_WINDOWS
 #include <conio.h>
-#endif // LEPRA_WINDOWS
+#elif defined(LEPRA_POSIX)
+#include <curses.h>
+#endif // Windows / POSIX
 
 
 
@@ -293,8 +295,10 @@ int StdioConsolePrompt::WaitChar()
 			case 68:	c = KEY_F10;		break;
 		}
 	}
+#elif defined(LEPRA_POSIX)
+	int c = getch();
 #else
-#error "ncurses support not implemented..."
+#error "other curses support not implemented..."
 #endif // LEPRA_WINDOWS
 	return (c);
 }
@@ -303,8 +307,10 @@ void StdioConsolePrompt::ReleaseWaitCharThread()
 {
 #ifdef LEPRA_WINDOWS
 	_ungetch_nolock(-100);
+#elif defined(LEPRA_POSIX)
+	ungetch(-100);
 #else
-#error "ncurses support not implemented..."
+#error "other curses support not implemented..."
 #endif // LEPRA_WINDOWS
 }
 

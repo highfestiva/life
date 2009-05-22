@@ -1,14 +1,18 @@
-/*
-	Class:  File
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Righteous Games
-*/
+
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2006, Righteous Games
+
+
 
 #include "../Include/File.h"
 #include "../Include/Random.h"
 
+
+
 namespace Lepra
 {
+
+
 
 void File::SetEndian(Endian::EndianType pEndian)
 {
@@ -16,7 +20,7 @@ void File::SetEndian(Endian::EndianType pEndian)
 	Writer::SetWriterEndian(pEndian);
 }
 
-IOError File::Skip(unsigned pSize)
+IOError File::Skip(size_t pSize)
 {
 	IOError lStatus = IO_OK;
 	int64 lTargetPos = Tell() + (int64)GetSize();
@@ -96,61 +100,6 @@ bool File::WriteString(const String& pString)
 	return (WriteData(pString.c_str(), pString.length()*sizeof(Lepra::tchar) + 1) == (int)pString.length() + 1);
 }
 
-/*
-JB: doesn't work: (currently only used under Posix).
-If ever put back: place it in Lepra::Path instead!
 
-bool File::CompareFileName(const String& pFileName, const String& pCompareString)
-{
-	static bool slInitialized = false;
-	static String slSpecialTokens;
 
-	if (slInitialized == false)
-	{
-		slSpecialTokens.AddToken(_T("?"));
-		slSpecialTokens.AddToken(_T("*"));
-		slInitialized = true;
-	}
-
-	int lCSIndex = 0;
-	int lFNIndex = 0;
-	bool lAsterisk = false;
-	bool lReturn = false;
-	String lToken;
-
-	while (lCSIndex >= 0)
-	{
-		lCSIndex = pCompareString.GetToken(lToken, lCSIndex, _T(""), slSpecialTokens, true);
-
-		if (lCSIndex >= 0)
-		{
-			if (lToken == _T("?"))
-			{
-				if (lAsterisk == false)
-				{
-					lFNIndex++;
-				}
-			}
-			else if(lToken == _T("*"))
-			{
-				lAsterisk = true;
-			}
-			else
-			{
-				lFNIndex = pFileName.Find(lToken.c_str(), lFNIndex);
-				if (lAsterisk == false && lFNIndex != 0)
-				{
-					lReturn = false;
-					break;
-				}
-
-				lAsterisk = false;
-			}
-		}
-	}
-
-	return lReturn;
 }
-*/
-
-} // End namespace.

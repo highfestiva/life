@@ -55,8 +55,12 @@
 #elif defined(__GNUG__)	// GCC (C++).
 
 #define LEPRA_GCC
-#if defined(__i386__)
+#if defined(__x86_64__)
 #define LEPRA_GCC_X86
+#define LEPRA_GCC_X86_64
+#elif defined(__i386__)
+#define LEPRA_GCC_X86
+#define LEPRA_GCC_X86_32
 #else	// Unknown hardware.
 #error "Hardware platform not supported!"
 #endif // _X86_/ARM

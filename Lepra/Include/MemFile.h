@@ -41,15 +41,15 @@ public:
 
 	void Clear();
 	int64 GetSize() const;
-	void CropHead(unsigned pFinalSize);
+	void CropHead(size_t pFinalSize);
 
 	// Overrided from InputStream.
 	int64 GetAvailable() const;
-	virtual IOError ReadRaw(void* pBuffer, unsigned pSize);
+	virtual IOError ReadRaw(void* pBuffer, size_t pSize);
 	IOError Skip(size_t pSize);
 
 	// Overrided from OutputStream.
-	virtual IOError WriteRaw(const void* pBuffer, unsigned pSize);
+	virtual IOError WriteRaw(const void* pBuffer, size_t pSize);
 	void Flush();
 
 	void Close();
@@ -69,9 +69,9 @@ private:
 
 	Lock mLock;
 	uint8* mBuffer;
-	unsigned mSize;
-	unsigned mBufferSize;
-	unsigned mCurrentPos;
+	size_t mSize;
+	size_t mBufferSize;
+	size_t mCurrentPos;
 
 	// Usually just NULL. Can be set by the user to redirect the IO
 	// through another reader/writer.

@@ -36,7 +36,7 @@ int64 Endian::SwapBytes(int64 pValue)
 	uint8* lOldData = (uint8*)&pValue;
 	uint8 lData[sizeof(int64)];
 
-	for (int64 i = 0; i < sizeof(int64); i++)
+	for (int64 i = 0; i < (int64)sizeof(int64); i++)
 	{
 		lData[i] = lOldData[sizeof(int64) - (i + 1)];
 	}
@@ -87,7 +87,7 @@ uint64 Endian::SwapBytes(uint64 pValue)
 	uint8* lOldData = (uint8*)&pValue;
 	uint8 lData[sizeof(uint64)];
 
-	for (int64 i = 0; i < sizeof(int64); i++)
+	for (int64 i = 0; i < (int64)sizeof(int64); i++)
 	{
 		lData[i] = lOldData[sizeof(uint64) - (i + 1)];
 	}

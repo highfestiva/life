@@ -144,7 +144,7 @@ protected:
 	static const uint8 mAcceptionString[15];
 
 private:
-	typedef std::hash_set<BufferedIo*, std::hash<void*>> IoSet;
+	typedef std::hash_set<BufferedIo*, std::hash<void*> > IoSet;
 
 	IoSet mSenderSet;
 	IoSet mReceiverSet;
@@ -324,14 +324,14 @@ private:
 		TcpListenerSocket* pServerSocket, DatagramReceiver* pReceiver);
 	void AddConnectedSocket(TcpVSocket* pSocket);
 	bool RemoveConnectedSocketNoLock(TcpVSocket* pSocket);
-	size_t BuildConnectedSocketSet(fd_set& pSocketSet);
-	void PushReceiverSockets(const fd_set& pSocketSet);
+	size_t BuildConnectedSocketSet(FdSet& pSocketSet);
+	void PushReceiverSockets(const FdSet& pSocketSet);
 	AcceptStatus QueryReceiveConnectString(TcpVSocket* pSocket);
 	void ReleaseSocketThreads();
 	void AcceptThreadEntry();
 	void SelectThreadEntry();
 
-	typedef Lepra::OrderedMap<TcpVSocket*, Timer, std::hash<void*>> SocketTimeMap;
+	typedef Lepra::OrderedMap<TcpVSocket*, Timer, std::hash<void*> > SocketTimeMap;
 	typedef std::hash_map<sys_socket, TcpVSocket*> SocketVMap;
 
 	MemberThread<TcpMuxSocket> mAcceptThread;
@@ -341,7 +341,7 @@ private:
 	SocketTimeMap mPendingConnectIdMap;
 	SocketVMap mConnectedSocketMap;
 	bool mActiveReceiverMapChanged;
-	fd_set mBackupFdSet;
+	FdSet mBackupFdSet;
 	Semaphore mConnectedSocketSemaphore;
 	int64 mVSentByteCount;
 	int64 mVReceivedByteCount;
@@ -548,10 +548,10 @@ private:
 
 	void OnCloseTcpSocket(TcpVSocket* pTcpSocket);
 
-	typedef std::hash_map<TcpVSocket*, GameSocket*, std::hash<void*>> TcpSocketMap;
-	typedef std::hash_map<UdpVSocket*, GameSocket*, std::hash<void*>> UdpSocketMap;
+	typedef std::hash_map<TcpVSocket*, GameSocket*, std::hash<void*> > TcpSocketMap;
+	typedef std::hash_map<UdpVSocket*, GameSocket*, std::hash<void*> > UdpSocketMap;
 	typedef std::hash_map<std::string, GameSocket*> IdSocketMap;
-	typedef Lepra::OrderedMap<GameSocket*, Timer, std::hash<void*>> SocketTimeMap;
+	typedef Lepra::OrderedMap<GameSocket*, Timer, std::hash<void*> > SocketTimeMap;
 
 	mutable Lock mLock;
 	TcpMuxSocket* mTcpMuxSocket;

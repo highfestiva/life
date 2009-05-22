@@ -43,12 +43,12 @@ int64 SubFile::GetAvailable() const
 	return (mFileSize-lOffset);
 }
 
-IOError SubFile::Skip(unsigned pLength)
+IOError SubFile::Skip(size_t pLength)
 {
 	return (File::Skip(pLength));
 }
 
-IOError SubFile::ReadRaw(void* pData, unsigned pLength)
+IOError SubFile::ReadRaw(void* pData, size_t pLength)
 {
 	IOError lStatus = IO_BUFFER_OVERFLOW;
 	int64 lEndOffset = Tell()+pLength;
@@ -59,7 +59,7 @@ IOError SubFile::ReadRaw(void* pData, unsigned pLength)
 	return (lStatus);
 }
 
-IOError SubFile::WriteRaw(const void* pData, unsigned pLength)
+IOError SubFile::WriteRaw(const void* pData, size_t pLength)
 {
 	IOError lStatus = IO_BUFFER_OVERFLOW;
 	int64 lEndOffset = Tell()+pLength;

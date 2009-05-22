@@ -30,7 +30,7 @@ int64 SocketInputStream::GetAvailable() const
 	return -1; // Unknown size...
 }
 
-IOError SocketInputStream::ReadRaw(void* pData, unsigned pLength)
+IOError SocketInputStream::ReadRaw(void* pData, size_t pLength)
 {
 	unsigned lSum = 0;
 	unsigned lRead = 0;
@@ -52,7 +52,7 @@ IOError SocketInputStream::ReadRaw(void* pData, unsigned pLength)
 	return IO_OK;
 }
 
-IOError SocketInputStream::Skip(unsigned pLength)
+IOError SocketInputStream::Skip(size_t pLength)
 {
 	uint8 lBuffer[SocketBase::BUFFER_SIZE];
 	unsigned lCount = pLength / SocketBase::BUFFER_SIZE;
@@ -88,7 +88,7 @@ void SocketOutputStream::Flush()
 	// Do nothing.
 }
 
-IOError SocketOutputStream::WriteRaw(void* pData, unsigned pLength)
+IOError SocketOutputStream::WriteRaw(void* pData, size_t pLength)
 {
 	if (mSocket->IsConnected() == true)
 	{

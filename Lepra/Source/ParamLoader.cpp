@@ -879,15 +879,15 @@ void ParamLoader::ReadType(Reader& pReader, String& pType, tchar& pCurrentChar, 
 {
 	SkipSpaces(pReader, pCurrentChar, pLine);
 
-	if ((pCurrentChar >= _T('a') && pCurrentChar <= _T('z') ||
-		pCurrentChar >= _T('A') && pCurrentChar <= _T('Z')))
+	if ((pCurrentChar >= _T('a') && pCurrentChar <= _T('z')) ||
+		(pCurrentChar >= _T('A') && pCurrentChar <= _T('Z')))
 	{
 		pType += pCurrentChar;
 		while (pReader.GetAvailable() > 0)
 		{
 			pReader.Read(pCurrentChar);
-			if ((pCurrentChar >= _T('a') && pCurrentChar <= _T('z') ||
-				pCurrentChar >= _T('A') && pCurrentChar <= _T('Z')))
+			if ((pCurrentChar >= _T('a') && pCurrentChar <= _T('z')) ||
+				(pCurrentChar >= _T('A') && pCurrentChar <= _T('Z')))
 			{
 				pType += pCurrentChar;
 			}
@@ -1133,8 +1133,8 @@ void ParamLoader::ReadVariableName(Reader& pReader, String& pName, tchar& pCurre
 {
 	SkipSpaces(pReader, pCurrentChar, pLine);
 
-	if ((pCurrentChar >= _T('a') && pCurrentChar <= _T('z') ||
-		pCurrentChar >= _T('A') && pCurrentChar <= _T('Z')) ||
+	if ((pCurrentChar >= _T('a') && pCurrentChar <= _T('z')) ||
+		(pCurrentChar >= _T('A') && pCurrentChar <= _T('Z')) ||
 		pCurrentChar == _T('_'))
 	{
 		pName += pCurrentChar;

@@ -24,7 +24,7 @@ namespace Lepra
 
 
 
-IOError Writer::WriteData(const void* pBuffer, unsigned pSize)
+IOError Writer::WriteData(const void* pBuffer, size_t pSize)
 {
 	return mOutStream->WriteRaw(pBuffer, pSize);
 }

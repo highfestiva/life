@@ -87,11 +87,11 @@ private:
 
 inline PerformanceScope::Node::Node(const AnsiString& pName, size_t pNameHash, Node* pParent, Node* pNext):
 	mName(pName),
+	mNameHash(pNameHash),
 	mHits(1),
 	mTime(0),
 	mParent(pParent),
-	mNext(pNext),
-	mNameHash(pNameHash)
+	mNext(pNext)
 {
 	mChildren[0] = 0;
 	mChildren[1] = 0;

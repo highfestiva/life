@@ -31,7 +31,7 @@ String Number::ConvertToPostfixNumber(double pNumber, unsigned decimals)
 		};
 		double lResult = 0;
 		int x;
-		for (x = 0; x < (sizeof(lPrefixList)-1)/sizeof(lPrefixList[0]); ++x)
+		for (x = 0; x < (int)((sizeof(lPrefixList)-1)/sizeof(lPrefixList[0])); ++x)
 		{
 			lResult = pNumber/::pow(10.0, lPrefixList[x].mExponent);
 			if (::fabs(lResult) >= 1)

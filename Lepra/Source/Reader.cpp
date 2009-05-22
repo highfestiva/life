@@ -178,7 +178,7 @@ IOError Reader::ReadLine(String& pString)
 	return IO_OK;
 }
 
-IOError Reader::Skip(unsigned pSize)
+IOError Reader::Skip(size_t pSize)
 {
 	return mInStream->Skip(pSize);
 }

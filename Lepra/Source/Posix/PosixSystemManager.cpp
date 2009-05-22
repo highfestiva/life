@@ -1,13 +1,9 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) 2002-2008, Righteous Games
 
 
 
-#include <direct.h>
-#include <shlobj.h>
-#include <Lm.h>
-#include <Windows.h>	// Must reside here to avoid lean and mean (for timeXxxPeriod()).
 #include "../../Include/Lepra.h"
 #include "../../Include/String.h"
 #include "../../Include/SystemManager.h"
@@ -83,7 +79,7 @@ unsigned SystemManager::GetCoreCount()
 String SystemManager::GetCpuName()
 {
 	// TODO: search /proc/cpuinfo by brute force.
-	return (1);
+	return (_T("Unknown CPU"));
 }
 
 String SystemManager::GetOsName()

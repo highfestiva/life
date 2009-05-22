@@ -212,7 +212,7 @@ FA_TEMPLATE void FA_QUAL::AllocateMoreChunks()
 		lChunk[i] = mChunk[i];
 	}
 
-	for (i; i < mNumChunks + mNumChunksPerAlloc; i++)
+	for (; i < mNumChunks + mNumChunksPerAlloc; i++)
 	{
 		lChunk[i] = 0;
 	}

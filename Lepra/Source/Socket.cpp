@@ -6,6 +6,7 @@
 
 //#define FD_SETSIZE	256	// Used for desciding how many sockets that can be listened to using ::select().
 #include <assert.h>
+#include <algorithm>
 #include <fcntl.h>
 #include "../Include/Lepra.h"
 #include "../Include/HashUtil.h"
@@ -251,7 +252,7 @@ Datagram& BufferedIo::GetSendBuffer() const
 	return ((Datagram&)mSendBuffer);
 }
 
-IOError BufferedIo::AppendSendBuffer(const void* pData, unsigned pLength)
+IOError BufferedIo::AppendSendBuffer(const void* pData, size_t pLength)
 {
 	IOError lError = IO_OK;
 
@@ -473,7 +474,7 @@ bool TcpSocket::IsConnected()
 	return (mSocket != INVALID_SOCKET);
 }
 
-int TcpSocket::Send(const void* pData, unsigned pSize)
+int TcpSocket::Send(const void* pData, size_t pSize)
 {
 	int lSentByteCount = 0;
 	if (mSocket != INVALID_SOCKET && pData != 0 && pSize > 0)
@@ -490,7 +491,7 @@ int TcpSocket::Send(const void* pData, unsigned pSize)
 		{
 			log_volatile(String lLocalAddress);
 			log_volatile(if (mServerSocket) lLocalAddress = mServerSocket->GetLocalAddress().GetAsString());
-			log_volatile(String lData = StringUtility::DumpData((uint8*)pData, min(pSize, 20)));
+			log_volatile(String lData = StringUtility::DumpData((uint8*)pData, std::min((int)pSize, 20)));
 			log_volatile(mLog.Tracef(_T("TCP -> %u bytes (%s -> %s): %s."), pSize,
 				lLocalAddress.c_str(), mTargetAddress.GetAsString().c_str(), lData.c_str()));
 
@@ -535,7 +536,7 @@ int TcpSocket::Receive(void* pData, size_t pMaxSize)
 		{
 			log_volatile(String lLocalAddress);
 			log_volatile(if (mServerSocket) lLocalAddress = mServerSocket->GetLocalAddress().GetAsString());
-			log_volatile(String lData = StringUtility::DumpData((uint8*)pData, min(lSize, 20)));
+			log_volatile(String lData = StringUtility::DumpData((uint8*)pData, std::min(lSize, 20)));
 			log_volatile(mLog.Tracef(_T("TCP <- %u bytes (%s <- %s): %s."), lSize,
 				lLocalAddress.c_str(), mTargetAddress.GetAsString().c_str(), lData.c_str()));
 
@@ -844,7 +845,7 @@ size_t TcpMuxSocket::BuildConnectedSocketSet(FdSet& pSocketSet)
 	{
 		lSocketCount = FdSetHelper::Copy(pSocketSet, mBackupFdSet);
 	}
-	assert(lSocketCount == LEPRA_FD_GET_COUNT(pSocketSet));
+	assert(lSocketCount == LEPRA_FD_GET_COUNT(&pSocketSet));
 	return (lSocketCount);
 }
 
@@ -855,7 +856,7 @@ void TcpMuxSocket::PushReceiverSockets(const FdSet& pSocketSet)
 	for (SocketVMap::iterator y = mConnectedSocketMap.begin(); y != mConnectedSocketMap.end(); ++y)
 	{
 		sys_socket lSysSocket = y->first;
-		if (FD_ISSET(lSysSocket, &pSocketSet))
+		if (FD_ISSET(lSysSocket, LEPRA_FDS(&pSocketSet)))
 		{
 			TcpVSocket* lSocket = y->second;
 			log_adebug("Adding receiver socket. Does this mean disconnected client?");
@@ -886,7 +887,7 @@ TcpMuxSocket::AcceptStatus TcpMuxSocket::QueryReceiveConnectString(TcpVSocket* p
 		log_atrace("Received a connect string.");
 
 		// Look for "VSocket connect magic".
-		if (lBuffer.mDataSize >= sizeof(mConnectionString) &&
+		if (lBuffer.mDataSize >= (int)sizeof(mConnectionString) &&
 			::memcmp(lBuffer.mDataBuffer, mConnectionString, sizeof(mConnectionString)) == 0)
 		{
 			std::string lConnectionId((const char*)&lBuffer.mDataBuffer[sizeof(mConnectionString)], lBuffer.mDataSize-sizeof(mConnectionString));
@@ -953,7 +954,7 @@ void TcpMuxSocket::SelectThreadEntry()
 	log_atrace("Select thread running");
 
 	FdSet lReadSet;
-	FD_ZERO(&mBackupFdSet);
+	LEPRA_FD_ZERO(&mBackupFdSet);
 	mActiveReceiverMapChanged = true;
 	while (IsOpen() && !mSelectThread.GetStopRequest())
 	{
@@ -963,7 +964,7 @@ void TcpMuxSocket::SelectThreadEntry()
 			timeval lTimeout;
 			lTimeout.tv_sec = 0;
 			lTimeout.tv_usec = 200000;
-			assert(lSocketCount == LEPRA_FD_GET_COUNT(lReadSet));
+			assert(lSocketCount == LEPRA_FD_GET_COUNT(&lReadSet));
 			FdSet lExceptionSet;
 			FdSetHelper::Copy(lExceptionSet, lReadSet);
 			int lSelectCount = ::select(LEPRA_FD_GET_MAX_HANDLE(lReadSet)+1, LEPRA_FDS(&lReadSet), 0, LEPRA_FDS(&lExceptionSet), &lTimeout);
@@ -975,13 +976,13 @@ void TcpMuxSocket::SelectThreadEntry()
 			else if (lSelectCount < 0)
 			{
 				int e = SOCKET_LAST_ERROR();
-				mLog.Warningf(_T("Could not ::select() properly. Error=%i, sockets=%u, exception set=%u."), e, lSocketCount, LEPRA_FD_GET_COUNT(lExceptionSet));
+				mLog.Warningf(_T("Could not ::select() properly. Error=%i, sockets=%u, exception set=%u."), e, lSocketCount, LEPRA_FD_GET_COUNT(&lExceptionSet));
 
-				for (u_int x = 0; x < LEPRA_FD_GET_COUNT(lExceptionSet); ++x)
+				for (u_int x = 0; x < LEPRA_FD_GET_COUNT(&lExceptionSet); ++x)
 				{
-					const sys_socket lSysSocket = LEPRA_FD_GET(lExceptionSet, x);
+					const sys_socket lSysSocket = LEPRA_FD_GET(&lExceptionSet, x);
 					int lErrorCode = 0;
-					int lErrorSize = sizeof(lErrorCode);
+					socklen_t lErrorSize = sizeof(lErrorCode);
 					if (::getsockopt(lSysSocket, SOL_SOCKET, SO_ERROR, (char*)&lErrorCode, &lErrorSize) == 0 &&
 						lErrorCode == 0)
 					{
@@ -1152,7 +1153,7 @@ int UdpSocket::SendTo(const uint8* pData, unsigned pSize, const SocketAddress& p
 		}
 		else
 		{
-			log_volatile(String lData = StringUtility::DumpData((uint8*)pData, min(pSize, 20)));
+			log_volatile(String lData = StringUtility::DumpData((uint8*)pData, std::min(pSize, (unsigned)20)));
 			log_volatile(mLog.Tracef(_T("UDP -> %u bytes (%s -> %s): %s."), pSize,
 				mLocalAddress.GetAsString().c_str(), pTargetAddress.GetAsString().c_str(),
 				lData.c_str()));
@@ -1177,7 +1178,7 @@ int UdpSocket::ReceiveFrom(uint8* pData, unsigned pMaxSize, SocketAddress& pSour
 		}
 		else
 		{
-			log_volatile(String lData = StringUtility::DumpData((uint8*)pData, min(lSize, 20)));
+			log_volatile(String lData = StringUtility::DumpData((uint8*)pData, std::min(lSize, 20)));
 			log_volatile(mLog.Tracef(_T("UDP <- %u bytes (%s <- %s): %s."), lSize,
 				mLocalAddress.GetAsString().c_str(), pSourceAddress.GetAsString().c_str(),
 				lData.c_str()));
@@ -1389,7 +1390,7 @@ void UdpMuxSocket::Run()
 			else if(mAcceptTable.Find(lSourceAddress) == mAcceptTable.End())
 			{
 				// Look for "VSocket connect magic".
-				if (lBuffer->mDataSize >= sizeof(mConnectionString) &&
+				if (lBuffer->mDataSize >= (int)sizeof(mConnectionString) &&
 					::memcmp(lBuffer->mDataBuffer, mConnectionString, sizeof(mConnectionString)) == 0)
 				{
 					std::string lConnectionId((const char*)&lBuffer->mDataBuffer[sizeof(mConnectionString)], lBuffer->mDataSize-sizeof(mConnectionString));
@@ -1488,7 +1489,7 @@ void UdpVSocket::Init(UdpMuxSocket& pSocket, const SocketAddress& pTargetAddress
 	SetConnectionId(pConnectionId);
 }
 
-int UdpVSocket::Receive(void* pData, unsigned pLength)
+int UdpVSocket::Receive(void* pData, size_t pLength)
 {
 	int lReadSize = 0;
 	if (mReceiveBufferList.GetCount() > 0)
@@ -1509,7 +1510,7 @@ int UdpVSocket::Receive(void* pData, unsigned pLength)
 			lReadSize = lReceiveBuffer->mDataSize;
 			if (lReceiveBuffer->mDataSize > 0)
 			{
-				lReadSize = min(lReceiveBuffer->mDataSize, (int)pLength);
+				lReadSize = std::min(lReceiveBuffer->mDataSize, (int)pLength);
 				::memcpy(pData, lReceiveBuffer->mDataBuffer, lReadSize);
 			}
 			((UdpMuxSocket*)mMuxIo)->RecycleBuffer(lReceiveBuffer);
@@ -1529,7 +1530,7 @@ int UdpVSocket::SendBuffer()
 	return (lSendResult);
 }
 
-int UdpVSocket::DirectSend(const void* pData, unsigned pLength)
+int UdpVSocket::DirectSend(const void* pData, size_t pLength)
 {
 	return (((UdpMuxSocket*)mMuxIo)->SendTo((const uint8*)pData, pLength, mTargetAddress));
 }
@@ -1612,7 +1613,7 @@ int64 UdpVSocket::GetAvailable() const
 	return (lReadSize);
 }
 
-IOError UdpVSocket::ReadRaw(void* pData, unsigned pLength)
+IOError UdpVSocket::ReadRaw(void* pData, size_t pLength)
 {
 	IOError lResult = IO_NO_DATA_AVAILABLE;
 	ScopeLock lLock(&mLock);
@@ -1638,7 +1639,7 @@ IOError UdpVSocket::ReadRaw(void* pData, unsigned pLength)
 	return (lResult);
 }
 
-IOError UdpVSocket::Skip(unsigned /*pLength*/)
+IOError UdpVSocket::Skip(size_t /*pLength*/)
 {
 	IOError lResult = IO_NO_DATA_AVAILABLE;
 	ScopeLock lLock(&mLock);
@@ -1650,7 +1651,7 @@ IOError UdpVSocket::Skip(unsigned /*pLength*/)
 	return (lResult);
 }
 
-IOError UdpVSocket::WriteRaw(const void* pData, unsigned pLength)
+IOError UdpVSocket::WriteRaw(const void* pData, size_t pLength)
 {
 	return (AppendSendBuffer(pData, pLength));
 }

@@ -117,8 +117,7 @@ void ZipArchive::CloseAndRemoveArchive()
 	::_wremove(UnicodeStringUtility::ToOwnCode(mArchiveName).c_str());
 #else
 #ifdef LEPRA_POSIX
-#warning "No unicode support in ZipArchive::CloseAndRemoveArchive()!"
-	::remove(AnsiStringUtility::ToOwnCode(mArchiveName));
+	::remove(AnsiStringUtility::ToOwnCode(mArchiveName).c_str());
 #else
 #error "ZipArchive::CloseAndRemoveArchive() is not implemented on this platform!"
 #endif

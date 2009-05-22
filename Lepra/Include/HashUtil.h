@@ -24,7 +24,7 @@ public:
 		{
 			return (*x);	// TRICKY: RAII simplifies here.
 		}
-		return (_HashSetType::key_type(0));
+		return (typename _HashSetType::key_type(0));
 	}
 
 	template<class _HashMapType> static typename _HashMapType::data_type
@@ -35,7 +35,7 @@ public:
 		{
 			return (x->second);	// TRICKY: RAII simplifies here.
 		}
-		return (_HashMapType::data_type(0));
+		return (typename _HashMapType::data_type(0));
 	}
 };
 

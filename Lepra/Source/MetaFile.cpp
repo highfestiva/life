@@ -237,7 +237,7 @@ String MetaFile::GetPath() const
 	return _T("");
 }
 
-IOError MetaFile::ReadData(void* pBuffer, unsigned pSize)
+IOError MetaFile::ReadData(void* pBuffer, size_t pSize)
 {
 	IOError lError = IO_FILE_NOT_OPEN;
 
@@ -253,7 +253,7 @@ IOError MetaFile::ReadData(void* pBuffer, unsigned pSize)
 	return lError;
 }
 
-IOError MetaFile::WriteData(const void* pBuffer, unsigned pSize)
+IOError MetaFile::WriteData(const void* pBuffer, size_t pSize)
 {
 	IOError lError = IO_FILE_NOT_OPEN;
 
@@ -286,7 +286,7 @@ int64 MetaFile::GetAvailable() const
 	return lAvailable;
 }
 
-IOError MetaFile::ReadRaw(void* pBuffer, unsigned pSize)
+IOError MetaFile::ReadRaw(void* pBuffer, size_t pSize)
 {
 	IOError lError = IO_FILE_NOT_OPEN;
 
@@ -302,12 +302,12 @@ IOError MetaFile::ReadRaw(void* pBuffer, unsigned pSize)
 	return lError;
 }
 
-IOError MetaFile::Skip(unsigned pSize)
+IOError MetaFile::Skip(size_t pSize)
 {
 	return (File::Skip(pSize));
 }
 
-IOError MetaFile::WriteRaw(const void* pBuffer, unsigned pSize)
+IOError MetaFile::WriteRaw(const void* pBuffer, size_t pSize)
 {
 	IOError lError = IO_FILE_NOT_OPEN;
 

@@ -36,7 +36,7 @@ public:
 
 	// Writes pLength bytes from the specified byte array to this output 
 	// stream.
-	virtual IOError WriteRaw(const void* pData, unsigned pLength) = 0;
+	virtual IOError WriteRaw(const void* pData, size_t pLength) = 0;
 
 	inline void SetName(const String& pName);
 	inline const String& GetName();

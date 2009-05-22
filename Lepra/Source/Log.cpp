@@ -5,6 +5,9 @@
 
 
 #include <assert.h>
+#include <iomanip>
+#include <iostream>
+#include <strstream>
 #include "../Include/Log.h"
 #include "../Include/LogListener.h"
 
@@ -193,14 +196,30 @@ void Log::DoRawPrint(const String& pMessage, LogLevel pLevel)
 
 
 LogDecorator::LogDecorator(Log* pLog, const std::type_info& pTypeId):
-	mLog(pLog),
+	mLog(pLog)
 #ifdef LEPRA_MSVC
 	// Skip "class " in beginning of name.
-	mClassName(AnsiStringUtility::ToCurrentCode(Lepra::AnsiString(pTypeId.name()+6)))
-#elif // !MSVC
+	, mClassName(AnsiStringUtility::ToCurrentCode(Lepra::AnsiString(pTypeId.name()+6)))
+{
+#elif defined(LEPRA_POSIX)
+{
+	// Parse up to class name.
+	const char* s = pTypeId.name();
+	const size_t lLength = ::strlen(s);
+	size_t x = 0;
+	size_t lStepLength = 1;
+	for (; x < lLength && lStepLength > 0; x += lStepLength)
+	{
+		for (; s[x] && ::isalpha(s[x]); ++x)
+			;
+		char* lEndPtr;
+		AnsiStringUtility::StrToL(&s[x], &lEndPtr, 10);
+		lStepLength = lEndPtr-&s[x];
+	}
+	mClassName = AnsiStringUtility::ToCurrentCode(&s[x]);
+#else // !MSVC
 #error typeid parsing not implemented.
 #endif // MSVC/!MSVC
-{
 }
 
 void LogDecorator::Print(Log::LogLevel pLogLevel, const String& pText) const

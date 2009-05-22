@@ -1,15 +1,19 @@
-/*
-	Class:  IOBuffer
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Righteous Games
-*/
+
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2006, Righteous Games
+
+
 
 #include "../Include/IOBuffer.h"
+
+
 
 namespace Lepra
 {
 
-IOBuffer::IOBuffer(unsigned pMaxSize) :
+
+
+IOBuffer::IOBuffer(size_t pMaxSize) :
 	mMaxSize(pMaxSize),
 	mBuffer(0),
 	mBufferSize(0),
@@ -19,7 +23,7 @@ IOBuffer::IOBuffer(unsigned pMaxSize) :
 {
 }
 
-IOBuffer::IOBuffer(uint8* pBuffer, unsigned pSize, unsigned pDataSize) :
+IOBuffer::IOBuffer(uint8* pBuffer, size_t pSize, size_t pDataSize) :
 	mMaxSize(pSize),
 	mBuffer(pBuffer),
 	mBufferSize(pSize),
@@ -47,7 +51,7 @@ void IOBuffer::Flush()
 	mDataSize = 0;
 }
 
-IOError IOBuffer::WriteRaw(const void* pData, unsigned pLength)
+IOError IOBuffer::WriteRaw(const void* pData, size_t pLength)
 {
 	if (mBufferOwner == true && (mDataSize + pLength) > mBufferSize)
 	{
@@ -63,11 +67,11 @@ IOError IOBuffer::WriteRaw(const void* pData, unsigned pLength)
 	}
 
 	// Calculate the starting position for writing (mBufferStart is for reading).
-	unsigned lBufferStart = (mBufferStart + mDataSize) % mBufferSize;
+	size_t lBufferStart = (mBufferStart + mDataSize) % mBufferSize;
 
 	if (lBufferStart + pLength > mBufferSize)
 	{
-		unsigned lSize = mBufferSize - lBufferStart;
+		size_t lSize = mBufferSize - lBufferStart;
 		memcpy(&mBuffer[lBufferStart],
 			   pData,
 			   (size_t)lSize);
@@ -85,7 +89,7 @@ IOError IOBuffer::WriteRaw(const void* pData, unsigned pLength)
 	return lErr;
 }
 
-IOError IOBuffer::ReadRaw(void* pData, unsigned pLength)
+IOError IOBuffer::ReadRaw(void* pData, size_t pLength)
 {
 	IOError lErr = IO_OK;
 
@@ -97,7 +101,7 @@ IOError IOBuffer::ReadRaw(void* pData, unsigned pLength)
 
 	if (mBufferStart + pLength > mBufferSize)
 	{
-		unsigned lSize = mBufferSize - mBufferStart;
+		size_t lSize = mBufferSize - mBufferStart;
 		memcpy(pData,
 			   &mBuffer[mBufferStart],
 			   (size_t)lSize);
@@ -121,7 +125,7 @@ int64 IOBuffer::GetAvailable() const
 	return (int64)mDataSize;
 }
 
-IOError IOBuffer::Skip(unsigned pLength)
+IOError IOBuffer::Skip(size_t pLength)
 {
 	if (pLength > mDataSize)
 	{
@@ -134,14 +138,14 @@ IOError IOBuffer::Skip(unsigned pLength)
 	return IO_OK;
 }
 
-void IOBuffer::ExtendDataBuffer(unsigned pMinSize)
+void IOBuffer::ExtendDataBuffer(size_t pMinSize)
 {
 	if (mMaxSize != 0 && mBufferSize >= mMaxSize)
 	{
 		return;
 	}
 
-	unsigned lNewSize;
+	size_t lNewSize;
 
 	if (mBufferSize <= 1)
 	{
@@ -170,17 +174,13 @@ void IOBuffer::ExtendDataBuffer(unsigned pMinSize)
 	{
 		if (mBufferStart + mDataSize > mBufferSize)
 		{
-			unsigned lSize = mBufferSize - mBufferStart;
-			memcpy(lBuffer, 
-				   &mBuffer[mBufferStart], 
-				   (size_t)lSize);
-			memcpy(&lBuffer[lSize], 
-				   mBuffer, 
-				   (size_t)(mDataSize - lSize));
+			size_t lSize = mBufferSize - mBufferStart;
+			memcpy(lBuffer, &mBuffer[mBufferStart], lSize);
+			memcpy(&lBuffer[lSize], mBuffer, mDataSize - lSize);
 		}
 		else
 		{
-			memcpy(lBuffer, &mBuffer[mBufferStart], (size_t)mDataSize);
+			memcpy(lBuffer, &mBuffer[mBufferStart], mDataSize);
 		}
 		delete[] mBuffer;
 	}

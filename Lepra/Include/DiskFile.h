@@ -67,10 +67,9 @@ public:
 #if defined LEPRA_WINDOWS
 			mFindHandle(-1),
 #elif defined LEPRA_POSIX
-			mDIR(0),
-			mFileSpec(_T("")),
+			mFileSpec(),
 #endif
-			mName(_T("")),
+			mName(),
 			mSubDir(false),
 			mSize(0),
 			mTime(-1)

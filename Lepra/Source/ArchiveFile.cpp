@@ -342,7 +342,7 @@ bool ArchiveFile::OpenForWriting(const String& pFileName, OpenMode pMode)
 
 				if (lRest > 0)
 				{
-					lFile.ReadData(lBuf, (unsigned int)lRest);
+					lFile.ReadData(lBuf, (size_t)lRest);
 					mArchive.FileWrite(lBuf, (int)lRest);
 				}
 
@@ -455,7 +455,7 @@ bool ArchiveFile::OpenZipForWriting(const String& pFileName, OpenMode pMode)
 
 				if (lRest > 0)
 				{
-					lFile.ReadData(lBuf, (unsigned int)lRest);
+					lFile.ReadData(lBuf, (size_t)lRest);
 					mZipArchive.FileWrite(lBuf, (int)lRest);
 				}
 
@@ -703,7 +703,7 @@ bool ArchiveFile::RefillDataBuffer()
 	return lOK;
 }
 
-IOError ArchiveFile::ReadRaw(void* pBuffer, unsigned pSize)
+IOError ArchiveFile::ReadRaw(void* pBuffer, size_t pSize)
 {
 	IOError lError = IO_OK;
 
@@ -750,12 +750,12 @@ IOError ArchiveFile::ReadRaw(void* pBuffer, unsigned pSize)
 	return lError;
 }
 
-IOError ArchiveFile::Skip(unsigned pSize)
+IOError ArchiveFile::Skip(size_t pSize)
 {
 	return (File::Skip(pSize));
 }
 
-IOError ArchiveFile::WriteRaw(const void* pBuffer, unsigned pSize)
+IOError ArchiveFile::WriteRaw(const void* pBuffer, size_t pSize)
 {
 	IOError lError = IO_OK;
 
@@ -807,7 +807,7 @@ IOError ArchiveFile::WriteRaw(const void* pBuffer, unsigned pSize)
 	return lError;
 }
 
-IOError ArchiveFile::ReadData(void* pBuffer, unsigned pSize)
+IOError ArchiveFile::ReadData(void* pBuffer, size_t pSize)
 {
 	IOError lError;
 	if (mReader != 0)
@@ -822,7 +822,7 @@ IOError ArchiveFile::ReadData(void* pBuffer, unsigned pSize)
 	return lError;
 }
 
-IOError ArchiveFile::WriteData(const void* pBuffer, unsigned pSize)
+IOError ArchiveFile::WriteData(const void* pBuffer, size_t pSize)
 {
 	IOError lError;
 	if (mWriter != 0)

@@ -9,13 +9,17 @@
 #if !defined(LEPRA_INCLUDE_NO_OS) && !defined(LEPRA_OS_INCLUDED)
 #define LEPRA_OS_INCLUDED
 
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <sys/socket.h>
 #include <sys/time.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
+#include <errno.h>
 #include <netdb.h>
+#include <stdarg.h>
 #include <stdint.h>
 #include <time.h>
+#include <unistd.h>
 
 #define INVALID_SOCKET (-1)
 #define SOCKET_ERROR (-1)

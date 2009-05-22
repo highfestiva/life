@@ -1,8 +1,8 @@
-/*
-	Class:  DiskFile
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Righteous Games
-*/
+
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2006, Righteous Games
+
+
 
 #include "../Include/DiskFile.h"
 #include "../Include/FileArchive.h"
@@ -14,19 +14,20 @@
 #include <errno.h>
 
 #if defined LEPRA_WINDOWS
-
 #include <direct.h>
 #include <io.h>
-
 #elif defined LEPRA_POSIX
-
-#include <unistd.h>
 #include <sys/stat.h>
+#include <glob.h>
+#include <unistd.h>
+#endif // Windows / Posix
 
-#endif
+
 
 namespace Lepra
 {
+
+
 
 DiskFile::DiskFile() :
 	File(Endian::TYPE_LITTLE_ENDIAN, Endian::TYPE_LITTLE_ENDIAN, 0, 0),
@@ -283,7 +284,7 @@ String DiskFile::GetPath() const
 	return mPath;
 }
 
-IOError DiskFile::ReadRaw(void* pBuffer, unsigned pSize)
+IOError DiskFile::ReadRaw(void* pBuffer, size_t pSize)
 {
 	IOError lError = IO_OK;
 
@@ -308,12 +309,12 @@ IOError DiskFile::ReadRaw(void* pBuffer, unsigned pSize)
 	return lError;
 }
 
-IOError DiskFile::Skip(unsigned pSize)
+IOError DiskFile::Skip(size_t pSize)
 {
 	return (File::Skip(pSize));
 }
 
-IOError DiskFile::WriteRaw(const void* pBuffer, unsigned pSize)
+IOError DiskFile::WriteRaw(const void* pBuffer, size_t pSize)
 {
 	IOError lError = IO_OK;
 
@@ -338,7 +339,7 @@ IOError DiskFile::WriteRaw(const void* pBuffer, unsigned pSize)
 	return lError;
 }
 
-IOError DiskFile::ReadData(void* pBuffer, unsigned pSize)
+IOError DiskFile::ReadData(void* pBuffer, size_t pSize)
 {
 	IOError lError;
 	if (mReader != 0)
@@ -353,7 +354,7 @@ IOError DiskFile::ReadData(void* pBuffer, unsigned pSize)
 	return lError;
 }
 
-IOError DiskFile::WriteData(const void* pBuffer, unsigned pSize)
+IOError DiskFile::WriteData(const void* pBuffer, size_t pSize)
 {
 	IOError lError;
 	if (mWriter != 0)
@@ -444,7 +445,7 @@ bool DiskFile::PathExists(const String& pPathName)
 	::_chdir(lCurrentDir);
 #else
 	::getcwd(lCurrentDir, 299);
-	bool lSuccess = ::chdir(AnsiStringUtility::ToOwnCode(pPathName)) == 0;
+	bool lSuccess = ::chdir(AnsiStringUtility::ToOwnCode(pPathName).c_str()) == 0;
 	::chdir(lCurrentDir);
 #endif
 
@@ -531,48 +532,24 @@ bool DiskFile::FindFirst(const String& pFileSpec, FindData& pFindData)
 		pFindData.mTime  = lData.time_write;
 	}
 #elif defined LEPRA_POSIX
-
-	String lPath;
-	File::ExtractPathAndFileName(pFileSpec, pFindData.mFileSpec, lPath);
-
-	if (pFindData.mDIR != 0)
+	glob_t lGlobList;
+	lGlobList.gl_offs = 1;
+	::glob(AnsiStringUtility::ToOwnCode(pFileSpec).c_str(), GLOB_DOOFFS|GLOB_MARK, 0, &lGlobList);
+	if (lGlobList.gl_pathc >= 1)
 	{
-		::closedir(pFindData.mDIR);
-		pFindData.mDIR = 0;
+		pFindData.mFileSpec = pFileSpec;
+		pFindData.mName = AnsiStringUtility::ToCurrentCode(lGlobList.gl_pathv[0]);
+		struct stat lFileInfo;
+		::stat(lGlobList.gl_pathv[0], &lFileInfo);	// TODO: error check.
+		pFindData.mSize = lFileInfo.st_size;
+		pFindData.mSubDir = (S_ISDIR(lFileInfo.st_mode) != 0);
+		pFindData.mTime = lFileInfo.st_mtime;
 	}
-
-	pFindData.mDIR = ::opendir(AnsiStringUtility::ToOwnCode(lPath));
-
-	if (pFindData.mDIR == 0)
+	else
 	{
 		lOk = false;
 	}
-
-	dirent* lDirEntry = 0;
-
-	if (lOk == true)
-	{
-		lDirEntry = readdir(pFindData.mDIR);
-		lOk = (lDirEntry != 0);
-	}
-
-	if (lOk == true)
-	{
-		pFindData.mName = AnsiStringUtility::ToCurrentCode(AnsiString(lDirEntry->d_name));	// TODO: needs real Unicode findxxx().
-
-		DIR* lDIR = ::opendir(lDirEntry->d_name);
-		if (lDIR != 0)
-		{
-			::closedir(lDIR);
-			pFindData.mSubDir = true;
-		}
-	}
-
-	// Check if this file matches the file specification.
-	if (File::CompareFileName(pFindData.mName, pFindData.mFileSpec) == false)
-	{
-		lOk = FindNext(pFindData);
-	}
+	::globfree(&lGlobList);
 #else
 #error DiskFile::FindFirst() not implemented on this platform!
 #endif
@@ -587,12 +564,10 @@ bool DiskFile::FindNext(FindData& pFindData)
 
 #ifdef LEPRA_WINDOWS
 	_finddata_t lData;
-
 	if (_findnext(pFindData.mFindHandle, &lData) != 0)
 	{
 		lOk = false;
 	}
-
 	if (lOk == true)
 	{
 		pFindData.mName = AnsiStringUtility::ToCurrentCode(AnsiString(lData.name));	// TODO: needs real Unicode findxxx()!
@@ -606,37 +581,35 @@ bool DiskFile::FindNext(FindData& pFindData)
 		pFindData.mTime  = lData.time_write;
 	}
 #elif defined LEPRA_POSIX
-	if (pFindData.mDIR == 0)
+	lOk = false;
+	glob_t lGlobList;
+	lGlobList.gl_offs = 1000;
+	::glob(AnsiStringUtility::ToOwnCode(pFindData.mFileSpec).c_str(), GLOB_DOOFFS|GLOB_MARK, 0, &lGlobList);
+	if (lGlobList.gl_pathc >= 1)
 	{
-		lOk = false;
-	}
-
-	dirent* lDirEntry = 0;
-
-	do
-	{
-		if (lOk == true)
+		for (size_t x = 0; x < lGlobList.gl_pathc; ++x)
 		{
-			lDirEntry = readdir(pFindData.mDIR);
-			lOk = (lDirEntry != 0);
-		}
-	
-		if (lOk == true)
-		{
-			pFindData.mName = AnsiStringUtility::ToCurrentCode(AnsiString(lDirEntry->d_name));	// TODO: needs real Unicode findxxx().
-	
-			DIR* lDIR = ::opendir(lDirEntry->d_name);
-			if (lDIR != 0)
+			if (AnsiStringUtility::ToCurrentCode(lGlobList.gl_pathv[x]) == pFindData.mName)
 			{
-				::closedir(lDIR);
-				pFindData.mSubDir = true;
+				++x;
+			  	if (x < lGlobList.gl_pathc)
+				{
+					lOk = true;
+					pFindData.mName = AnsiStringUtility::ToCurrentCode(lGlobList.gl_pathv[0]);
+					struct stat lFileInfo;
+					::stat(lGlobList.gl_pathv[0], &lFileInfo);	// TODO: error check.
+					pFindData.mSize = lFileInfo.st_size;
+					pFindData.mSubDir = (S_ISDIR(lFileInfo.st_mode) != 0);
+					pFindData.mTime = lFileInfo.st_mtime;
+					break;
+				}
 			}
 		}
-	}while(lOk == true && File::CompareFileName(pFindData.mName, pFindData.mFileSpec) == false);
+	}
+	::globfree(&lGlobList);
 #else
 #error DiskFile::FindFirst() not implemented on this platform!
 #endif
-
 
 	return lOk;
 }
@@ -694,4 +667,6 @@ Endian::EndianType DiskFile::GetEndian()
 	return mFileEndian;
 }
 
-} // End namespace.
+
+
+}

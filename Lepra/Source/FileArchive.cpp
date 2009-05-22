@@ -18,15 +18,17 @@ namespace Lepra
 
 
 FileArchive::FileArchive() :
-	mCallback(0),
-	mArchiveFileName(_T("")),
-	mTempFileName(_T("")),
+	mArchiveFileName(),
+	mTempFileName(),
 	mIOType(READ_ONLY),
 	mCurrentFindIndex(0),
-	mFileHandleCounter(0),
 	mCurrentWriteFile(0),
+	mFileHandleCounter(0),
 	mWriteBuffer(0),
-	mWriteBufferSize(2 * 1024 * 1024)	// 2Mb
+	mWriteBufferSize(2 * 1024 * 1024),
+	mWriteBufferPos(0),
+	mCurrentWritePos(0),
+	mCallback(0)
 {
 }
 

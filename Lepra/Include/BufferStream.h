@@ -36,7 +36,7 @@ private:
 class BufferOutputStream : public OutputStream
 {
 public:
-	BufferOutputStream(uint8* pBuffer, unsigned pBufferSize);
+	BufferOutputStream(uint8* pBuffer, size_t pBufferSize);
 	virtual ~BufferOutputStream();
 
 	virtual void Close();
