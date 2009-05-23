@@ -1,67 +1,71 @@
-# 'Twas generated from ../../Cure/Cure.vcproj, 2009-05-15, type='lib'.
+# 'Twas generated from ../../Cure/Cure.vcproj, 2009-05-23, type='lib'.
 # Don't edit manually. See 'generate_makefile.py' for info.
 
-.SUFFIXES: .cpp
-CFLAGS = -O0 -ggdb -c -D_POSIX_PTHREAD_SEMANTICS -IInclude -DPOSIX -D_DEBUG -D_CONSOLE -Wall
+CFLAGS = -O0 -ggdb -fPIC -D_POSIX_PTHREAD_SEMANTICS -I../ThirdParty/stlport/stlport -I../ThirdParty/ode-060223/include -DPOSIX -D_DEBUG -D_CONSOLE -DPNG_NO_ASSEMBLER_CODE -DdCYLINDER_ENABLED -Wall -Wno-unknown-pragmas
 
 SRCS=	\
-../../Cure/Source/ConsoleManager.cpp	\
-../../Cure/Source/ContextManager.cpp	\
-../../Cure/Source/ContextObject.cpp	\
-../../Cure/Source/ContextObjectAttribute.cpp	\
-../../Cure/Source/ContextObjectEngine.cpp	\
-../../Cure/Source/CppContextObject.cpp	\
-../../Cure/Source/Cure.cpp	\
-../../Cure/Source/GameManager.cpp	\
-../../Cure/Source/NetworkAgent.cpp	\
-../../Cure/Source/Packer.cpp	\
-../../Cure/Source/Packet.cpp	\
-../../Cure/Source/PhysicsNode.cpp	\
-../../Cure/Source/PositionalData.cpp	\
-../../Cure/Source/ResourceManager.cpp	\
-../../Cure/Source/RuntimeVariable.cpp	\
-../../Cure/Source/TerrainFunctionManager.cpp	\
-../../Cure/Source/TerrainManager.cpp	\
-../../Cure/Source/TerrainPatchLoader.cpp	\
-../../Cure/Source/TerrainPatchManager.cpp	\
-../../Cure/Source/TimeManager.cpp	\
-../../Cure/Source/NetworkClient.cpp	\
-../../Cure/Source/NetworkServer.cpp	\
-../../Cure/Source/UserAccount.cpp	\
-../../Cure/Source/UserAccountManager.cpp	\
-../../Cure/Source/UserConnection.cpp
+Source/ConsoleManager.cpp	\
+Source/ContextManager.cpp	\
+Source/ContextObject.cpp	\
+Source/ContextObjectAttribute.cpp	\
+Source/ContextObjectEngine.cpp	\
+Source/CppContextObject.cpp	\
+Source/Cure.cpp	\
+Source/GameManager.cpp	\
+Source/NetworkAgent.cpp	\
+Source/Packer.cpp	\
+Source/Packet.cpp	\
+Source/PhysicsNode.cpp	\
+Source/PositionalData.cpp	\
+Source/ResourceManager.cpp	\
+Source/RuntimeVariable.cpp	\
+Source/TerrainFunctionManager.cpp	\
+Source/TerrainManager.cpp	\
+Source/TerrainPatchLoader.cpp	\
+Source/TerrainPatchManager.cpp	\
+Source/TimeManager.cpp	\
+Source/NetworkClient.cpp	\
+Source/NetworkServer.cpp	\
+Source/UserAccount.cpp	\
+Source/UserAccountManager.cpp	\
+Source/UserConnection.cpp
 
 OBJS=	\
-../../Cure/Source/ConsoleManager.o	\
-../../Cure/Source/ContextManager.o	\
-../../Cure/Source/ContextObject.o	\
-../../Cure/Source/ContextObjectAttribute.o	\
-../../Cure/Source/ContextObjectEngine.o	\
-../../Cure/Source/CppContextObject.o	\
-../../Cure/Source/Cure.o	\
-../../Cure/Source/GameManager.o	\
-../../Cure/Source/NetworkAgent.o	\
-../../Cure/Source/Packer.o	\
-../../Cure/Source/Packet.o	\
-../../Cure/Source/PhysicsNode.o	\
-../../Cure/Source/PositionalData.o	\
-../../Cure/Source/ResourceManager.o	\
-../../Cure/Source/RuntimeVariable.o	\
-../../Cure/Source/TerrainFunctionManager.o	\
-../../Cure/Source/TerrainManager.o	\
-../../Cure/Source/TerrainPatchLoader.o	\
-../../Cure/Source/TerrainPatchManager.o	\
-../../Cure/Source/TimeManager.o	\
-../../Cure/Source/NetworkClient.o	\
-../../Cure/Source/NetworkServer.o	\
-../../Cure/Source/UserAccount.o	\
-../../Cure/Source/UserAccountManager.o	\
-../../Cure/Source/UserConnection.o
+Source/ConsoleManager.o	\
+Source/ContextManager.o	\
+Source/ContextObject.o	\
+Source/ContextObjectAttribute.o	\
+Source/ContextObjectEngine.o	\
+Source/CppContextObject.o	\
+Source/Cure.o	\
+Source/GameManager.o	\
+Source/NetworkAgent.o	\
+Source/Packer.o	\
+Source/Packet.o	\
+Source/PhysicsNode.o	\
+Source/PositionalData.o	\
+Source/ResourceManager.o	\
+Source/RuntimeVariable.o	\
+Source/TerrainFunctionManager.o	\
+Source/TerrainManager.o	\
+Source/TerrainPatchLoader.o	\
+Source/TerrainPatchManager.o	\
+Source/TimeManager.o	\
+Source/NetworkClient.o	\
+Source/NetworkServer.o	\
+Source/UserAccount.o	\
+Source/UserAccountManager.o	\
+Source/UserConnection.o
 
-all:	$(OBJS)
+all:	libCure.so
 clean:
-	@rm -f $(OBJS)
+	@rm -f libCure.so $(OBJS)
+libCure.so:	$(OBJS)
+	g++ -shared -o $@ $(OBJS)
+
 depend:
-	makedepend --$(CFLAGS) --$(SRCS)
+	makedepend -- $(CFLAGS) -- $(SRCS)
+.c.o:
+	gcc $(CFLAGS) -o $@ -c $<
 .cpp.o:
-	g++ $(CFLAGS) -c -o $@ $<
+	g++ $(CFLAGS) -o $@ -c $<

@@ -1,23 +1,27 @@
-# 'Twas generated from ../../Life/Life.vcproj, 2009-05-15, type='lib'.
+# 'Twas generated from ../../Life/Life.vcproj, 2009-05-23, type='lib'.
 # Don't edit manually. See 'generate_makefile.py' for info.
 
-.SUFFIXES: .cpp
-CFLAGS = -O0 -ggdb -c -D_POSIX_PTHREAD_SEMANTICS -IInclude -DPOSIX -D_DEBUG -D_CONSOLE -Wall
+CFLAGS = -O0 -ggdb -fPIC -D_POSIX_PTHREAD_SEMANTICS -I../ThirdParty/stlport/stlport -I../ThirdParty/ode-060223/include -DPOSIX -D_DEBUG -D_CONSOLE -DPNG_NO_ASSEMBLER_CODE -DdCYLINDER_ENABLED -Wall -Wno-unknown-pragmas
 
 SRCS=	\
-../../Life/ConsoleManager.cpp	\
-../../Life/ContextResource.cpp	\
-../../Life/LifeApplication.cpp
+ConsoleManager.cpp	\
+ContextResource.cpp	\
+LifeApplication.cpp
 
 OBJS=	\
-../../Life/ConsoleManager.o	\
-../../Life/ContextResource.o	\
-../../Life/LifeApplication.o
+ConsoleManager.o	\
+ContextResource.o	\
+LifeApplication.o
 
-all:	$(OBJS)
+all:	libLife.so
 clean:
-	@rm -f $(OBJS)
+	@rm -f libLife.so $(OBJS)
+libLife.so:	$(OBJS)
+	g++ -shared -o $@ $(OBJS)
+
 depend:
-	makedepend --$(CFLAGS) --$(SRCS)
+	makedepend -- $(CFLAGS) -- $(SRCS)
+.c.o:
+	gcc $(CFLAGS) -o $@ -c $<
 .cpp.o:
-	g++ $(CFLAGS) -c -o $@ $<
+	g++ $(CFLAGS) -o $@ -c $<

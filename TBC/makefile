@@ -1,43 +1,47 @@
-# 'Twas generated from ../../TBC/TBC.vcproj, 2009-05-15, type='lib'.
+# 'Twas generated from ../../TBC/TBC.vcproj, 2009-05-23, type='lib'.
 # Don't edit manually. See 'generate_makefile.py' for info.
 
-.SUFFIXES: .cpp
-CFLAGS = -O0 -ggdb -c -D_POSIX_PTHREAD_SEMANTICS -IInclude -DPOSIX -D_DEBUG -D_CONSOLE -Wall
+CFLAGS = -O0 -ggdb -fPIC -D_POSIX_PTHREAD_SEMANTICS -I../ThirdParty/stlport/stlport -I../ThirdParty/ode-060223/include -DPOSIX -D_DEBUG -D_CONSOLE -DPNG_NO_ASSEMBLER_CODE -DdCYLINDER_ENABLED -Wall -Wno-unknown-pragmas
 
 SRCS=	\
-../../TBC/Source/Bones.cpp	\
-../../TBC/Source/ChunkyBoneGeometry.cpp	\
-../../TBC/Source/ChunkyLoader.cpp	\
-../../TBC/Source/ChunkyStructure.cpp	\
-../../TBC/Source/GeometryBase.cpp	\
-../../TBC/Source/GeometryReference.cpp	\
-../../TBC/Source/Model.cpp	\
-../../TBC/Source/PhysicsEngineFactory.cpp	\
-../../TBC/Source/PhysicsEngineODE.cpp	\
-../../TBC/Source/PortalManager.cpp	\
-../../TBC/Source/TBC.cpp	\
-../../TBC/Source/TerrainFunction.cpp	\
-../../TBC/Source/TerrainPatch.cpp
+Source/Bones.cpp	\
+Source/ChunkyBoneGeometry.cpp	\
+Source/ChunkyLoader.cpp	\
+Source/ChunkyStructure.cpp	\
+Source/GeometryBase.cpp	\
+Source/GeometryReference.cpp	\
+Source/Model.cpp	\
+Source/PhysicsEngineFactory.cpp	\
+Source/PhysicsEngineODE.cpp	\
+Source/PortalManager.cpp	\
+Source/TBC.cpp	\
+Source/TerrainFunction.cpp	\
+Source/TerrainPatch.cpp
 
 OBJS=	\
-../../TBC/Source/Bones.o	\
-../../TBC/Source/ChunkyBoneGeometry.o	\
-../../TBC/Source/ChunkyLoader.o	\
-../../TBC/Source/ChunkyStructure.o	\
-../../TBC/Source/GeometryBase.o	\
-../../TBC/Source/GeometryReference.o	\
-../../TBC/Source/Model.o	\
-../../TBC/Source/PhysicsEngineFactory.o	\
-../../TBC/Source/PhysicsEngineODE.o	\
-../../TBC/Source/PortalManager.o	\
-../../TBC/Source/TBC.o	\
-../../TBC/Source/TerrainFunction.o	\
-../../TBC/Source/TerrainPatch.o
+Source/Bones.o	\
+Source/ChunkyBoneGeometry.o	\
+Source/ChunkyLoader.o	\
+Source/ChunkyStructure.o	\
+Source/GeometryBase.o	\
+Source/GeometryReference.o	\
+Source/Model.o	\
+Source/PhysicsEngineFactory.o	\
+Source/PhysicsEngineODE.o	\
+Source/PortalManager.o	\
+Source/TBC.o	\
+Source/TerrainFunction.o	\
+Source/TerrainPatch.o
 
-all:	$(OBJS)
+all:	libTBC.so
 clean:
-	@rm -f $(OBJS)
+	@rm -f libTBC.so $(OBJS)
+libTBC.so:	$(OBJS)
+	g++ -shared -o $@ $(OBJS)
+
 depend:
-	makedepend --$(CFLAGS) --$(SRCS)
+	makedepend -- $(CFLAGS) -- $(SRCS)
+.c.o:
+	gcc $(CFLAGS) -o $@ -c $<
 .cpp.o:
-	g++ $(CFLAGS) -c -o $@ $<
+	g++ $(CFLAGS) -o $@ -c $<
