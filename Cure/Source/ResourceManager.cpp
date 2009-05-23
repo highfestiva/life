@@ -282,7 +282,7 @@ LOG_CLASS_DEFINE(GENERAL_RESOURCES, Resource);
 
 
 ContextObjectResource::ContextObjectResource(ResourceManager* pManager, const Lepra::String& pName):
-	RamResource(pManager, pName)
+	Parent(pManager, pName)
 {
 }
 
@@ -336,7 +336,7 @@ LOG_CLASS_DEFINE(GAME_CONTEXT, ContextObjectResource);
 
 
 PhysicalTerrainResource::PhysicalTerrainResource(ResourceManager* pManager, const Lepra::String& pName):
-	RamResource(pManager, pName)
+	Parent(pManager, pName)
 {
 }
 

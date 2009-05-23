@@ -45,9 +45,8 @@ void CppContextObject::OnTick(float pFrameTime)
 	}
 }
 
-void CppContextObject::OnAlarm(int pAlarmId)
+void CppContextObject::OnAlarm(int)// pAlarmId)
 {
-	pAlarmId;
 }
 
 void CppContextObject::OnTrigger(TBC::PhysicsEngine::BodyID pBody1, TBC::PhysicsEngine::BodyID pBody2)

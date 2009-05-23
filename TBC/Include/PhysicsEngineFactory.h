@@ -8,8 +8,9 @@
 
 
 
-#ifndef PHYSICSENGINEFACTORY_H
-#define PHYSICSENGINEFACTORY_H
+#pragma once
+
+#include "../../Lepra/Include/Log.h"
 
 
 
@@ -29,15 +30,14 @@ public:
 	{
 		ENGINE_ODE = 1,
 		ENGINE_PHYSX = 2,
+		ENGINE_BULLET = 3,
 	};
 
 	static PhysicsEngine* Create(Engine pEngine);
+
+	LOG_CLASS_DECLARE();
 };
 
 
 
 }
-
-
-
-#endif // !PHYSICSENGINEFACTORY_H

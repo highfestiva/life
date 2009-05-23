@@ -36,7 +36,7 @@ int PackerTransformation::Unpack(Lepra::TransformationF& pDestination, const Lep
 {
 	typedef Lepra::TransformationF::BaseType _T;
 	int lOffset = 0;
-	if (pSize >= sizeof(_T)*7)
+	if (pSize >= (int)sizeof(_T)*7)
 	{
 		pDestination.GetOrientation().Set(*(_T*)&pSource[lOffset+0*sizeof(_T)], *(_T*)&pSource[lOffset+1*sizeof(_T)],
 			*(_T*)&pSource[lOffset+2*sizeof(_T)], *(_T*)&pSource[lOffset+3*sizeof(_T)]);
@@ -69,7 +69,7 @@ int PackerVector::Unpack(Lepra::Vector3DF& pDestination, const Lepra::uint8* pSo
 {
 	typedef Lepra::Vector3DF::BaseType _T;
 	int lOffset = 0;
-	if (pSize >= sizeof(_T)*3)
+	if (pSize >= (int)sizeof(_T)*3)
 	{
 		pDestination.x = Lepra::Endian::BigToHost(*(_T*)&pSource[lOffset]);	lOffset += sizeof(_T);
 		pDestination.y = Lepra::Endian::BigToHost(*(_T*)&pSource[lOffset]);	lOffset += sizeof(_T);
@@ -95,7 +95,7 @@ int PackerInt32::Unpack(Lepra::int32& pDestination, const Lepra::uint8* pSource,
 {
 	// TODO: fix byte order.
 	int lSize = -1;
-	if (pSize >= sizeof(pDestination))
+	if (pSize >= (int)sizeof(pDestination))
 	{
 		lSize = sizeof(pDestination);
 		pDestination = Lepra::Endian::BigToHost(*(Lepra::uint32*)pSource);
@@ -119,7 +119,7 @@ int PackerInt16::Unpack(int& pDestination, const Lepra::uint8* pSource, int pSiz
 {
 	// TODO: fix byte order.
 	int lSize = -1;
-	if (pSize >= sizeof(Lepra::int16))
+	if (pSize >= (int)sizeof(Lepra::int16))
 	{
 		lSize = sizeof(Lepra::int16);
 		pDestination = Lepra::Endian::BigToHost(*(Lepra::int16*)pSource);
@@ -142,7 +142,7 @@ int PackerReal::Pack(Lepra::uint8* pDestination, float pSource)
 int PackerReal::Unpack(float& pDestination, const Lepra::uint8* pSource, int pSize)
 {
 	int lSize;
-	if (pSize >= sizeof(pDestination))
+	if (pSize >= (int)sizeof(pDestination))
 	{
 		lSize = sizeof(pDestination);
 		pDestination = Lepra::Endian::BigToHost(*(float*)pSource);

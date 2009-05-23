@@ -27,7 +27,7 @@ ChunkyLoader::ChunkyFileElement::ChunkyFileElement():
 {
 }
 
-ChunkyLoader::ChunkyFileElement::ChunkyFileElement(ChunkyType pType, void** pPointer, unsigned* pFieldSize, unsigned pElementCount):
+ChunkyLoader::ChunkyFileElement::ChunkyFileElement(ChunkyType pType, void** pPointer, Lepra::uint32* pFieldSize, unsigned pElementCount):
 	mType(pType),
 	mLoadCallback(false),
 	mIntPointer(0),
@@ -39,7 +39,7 @@ ChunkyLoader::ChunkyFileElement::ChunkyFileElement(ChunkyType pType, void** pPoi
 {
 }
 
-ChunkyLoader::ChunkyFileElement::ChunkyFileElement(ChunkyType pType, Lepra::int32* pInt, unsigned* pFieldSize, unsigned pElementCount):
+ChunkyLoader::ChunkyFileElement::ChunkyFileElement(ChunkyType pType, Lepra::int32* pInt, Lepra::uint32* pFieldSize, unsigned pElementCount):
 	mType(pType),
 	mLoadCallback(false),
 	mIntPointer(pInt),
@@ -118,7 +118,7 @@ bool ChunkyLoader::AllocLoadChunkyList(FileElementList& pLoadList)
 	while (!lLoadedAllElements && lOk && mFile->Tell() < mFile->GetSize())
 	{
 		ChunkyType lType = (ChunkyType)0;
-		size_t lSize = 0;
+		Lepra::uint32 lSize = 0;
 		Lepra::int64 lChunkEndPosition = 0;
 
 		// Load element head.
@@ -219,7 +219,7 @@ bool ChunkyLoader::AllocLoadChunkyList(FileElementList& pLoadList)
 bool ChunkyLoader::SaveSingleString(ChunkyType pType, const Lepra::String& pString)
 {
 	// Write padding at once. No CPU safety border (a.k.a. page boundary) crosses the 4-byte alignment boundary.
-	const size_t lSize = ((pString.length()+1+3)&(~3));
+	const Lepra::uint32 lSize = (Lepra::uint32)((pString.length()+1+3)&(~3));
 	Lepra::int64 lChunkEndPosition = 0;
 	bool lOk = true;
 	if (lOk)
@@ -320,7 +320,7 @@ bool ChunkyLoader::SaveChunkyList(const FileElementList& pSaveList)
 
 
 
-bool ChunkyLoader::LoadElementCallback(ChunkyType, size_t, Lepra::int64 pChunkEndPosition, void*)
+bool ChunkyLoader::LoadElementCallback(ChunkyType, Lepra::uint32, Lepra::int64 pChunkEndPosition, void*)
 {
 	// Default behavior is to simply skip the chunk.
 	bool lOk = (mFile->SeekSet(pChunkEndPosition) == pChunkEndPosition);
@@ -331,7 +331,7 @@ bool ChunkyLoader::LoadElementCallback(ChunkyType, size_t, Lepra::int64 pChunkEn
 
 bool ChunkyLoader::VerifyFileType(ChunkyType pType)
 {
-	size_t lSize = 0;
+	Lepra::uint32 lSize = 0;
 	Lepra::int64 lChunkEndPosition = 0;
 	bool lOk = LoadRequiredHead(pType, lSize, lChunkEndPosition);
 	if (lOk && lChunkEndPosition != mFile->GetSize())
@@ -343,7 +343,7 @@ bool ChunkyLoader::VerifyFileType(ChunkyType pType)
 
 bool ChunkyLoader::WriteFileType(ChunkyType pType)
 {
-	size_t lSize = 0;
+	Lepra::uint32 lSize = 0;
 	Lepra::int64 lChunkEndPosition;
 	bool lOk = SaveHead(pType, lSize, lChunkEndPosition);
 	return (lOk);
@@ -351,7 +351,7 @@ bool ChunkyLoader::WriteFileType(ChunkyType pType)
 
 
 
-bool ChunkyLoader::LoadHead(ChunkyType& pType, size_t& pSize, Lepra::int64& pChunkEndPosition)
+bool ChunkyLoader::LoadHead(ChunkyType& pType, Lepra::uint32& pSize, Lepra::int64& pChunkEndPosition)
 {
 	bool lOk = true;
 	Lepra::int32 lTempType = 0;
@@ -362,7 +362,9 @@ bool ChunkyLoader::LoadHead(ChunkyType& pType, size_t& pSize, Lepra::int64& pChu
 	}
 	if (lOk)
 	{
-		lOk = (mFile->Read(pSize) == Lepra::IO_OK);
+		Lepra::uint32 lSize;
+		lOk = (mFile->Read(lSize) == Lepra::IO_OK);
+		pSize = lSize;
 	}
 	if (lOk)
 	{
@@ -371,7 +373,7 @@ bool ChunkyLoader::LoadHead(ChunkyType& pType, size_t& pSize, Lepra::int64& pChu
 	return (lOk);
 }
 
-bool ChunkyLoader::LoadRequiredHead(ChunkyType pType, size_t& pSize, Lepra::int64& pChunkEndPosition)
+bool ChunkyLoader::LoadRequiredHead(ChunkyType pType, Lepra::uint32& pSize, Lepra::int64& pChunkEndPosition)
 {
 	bool lOk = true;
 	ChunkyType lFileType = (ChunkyType)0;
@@ -386,7 +388,7 @@ bool ChunkyLoader::LoadRequiredHead(ChunkyType pType, size_t& pSize, Lepra::int6
 	return (lOk);
 }
 
-bool ChunkyLoader::SaveHead(ChunkyType pType, size_t pSize, Lepra::int64& pChunkEndPosition)
+bool ChunkyLoader::SaveHead(ChunkyType pType, Lepra::uint32 pSize, Lepra::int64& pChunkEndPosition)
 {
 	bool lOk = true;
 	if (lOk)
@@ -396,7 +398,8 @@ bool ChunkyLoader::SaveHead(ChunkyType pType, size_t pSize, Lepra::int64& pChunk
 	}
 	if (lOk)
 	{
-		lOk = (mFile->Write(pSize) == Lepra::IO_OK);
+		Lepra::uint32 lSize = (Lepra::uint32)pSize;
+		lOk = (mFile->Write(lSize) == Lepra::IO_OK);
 	}
 	if (lOk)
 	{
@@ -532,7 +535,7 @@ bool ChunkyAnimationLoader::Save(const BoneAnimation* pAnimation)
 	// Re-write file header size.
 	if (lOk)
 	{
-		size_t lSize = (size_t)(mFile->Tell()-lFileDataStart);
+		Lepra::uint32 lSize = (Lepra::uint32)(mFile->Tell()-lFileDataStart);
 		mFile->SeekSet(lFileDataStart-4);
 		lOk = (mFile->Write(lSize) == Lepra::IO_OK);
 	}
@@ -542,7 +545,7 @@ bool ChunkyAnimationLoader::Save(const BoneAnimation* pAnimation)
 
 
 
-bool ChunkyAnimationLoader::LoadElementCallback(ChunkyType pType, size_t pSize, Lepra::int64 pChunkEndPosition, void* pStorage)
+bool ChunkyAnimationLoader::LoadElementCallback(ChunkyType pType, Lepra::uint32 pSize, Lepra::int64 pChunkEndPosition, void* pStorage)
 {
 	bool lOk = false;
 	if (pType == CHUNK_ANIMATION_KEYFRAME)
@@ -550,10 +553,10 @@ bool ChunkyAnimationLoader::LoadElementCallback(ChunkyType pType, size_t pSize, 
 		// Setup pointers and counters for list loading.
 		float lKeyframeTime = 0;
 		float* lTransformArray = 0;
-		unsigned lFloatByteSize = 0;
+		Lepra::uint32 lFloatByteSize = 0;
 		FileElementList lLoadList;
 		lLoadList.push_back(ChunkyFileElement(CHUNK_ANIMATION_KEYFRAME_TIME, (Lepra::int32*)&lKeyframeTime));
-		lLoadList.push_back(ChunkyFileElement(CHUNK_ANIMATION_KEYFRAME_TRANSFORM, (void**)&lTransformArray, (unsigned*)&lFloatByteSize));
+		lLoadList.push_back(ChunkyFileElement(CHUNK_ANIMATION_KEYFRAME_TRANSFORM, (void**)&lTransformArray, &lFloatByteSize));
 		lOk = AllocLoadChunkyList(lLoadList);
 
 		const unsigned lTransformFloatCount = 3+4;
@@ -719,7 +722,7 @@ bool ChunkyStructureLoader::Save(const ChunkyStructure* pStructure)
 	if (lOk)
 	{
 		Lepra::int64 lFileEnd = mFile->Tell();
-		size_t lSize = (size_t)(lFileEnd-lBoneChunkStart);
+		Lepra::uint32 lSize = (Lepra::uint32)(lFileEnd-lBoneChunkStart);
 		mFile->SeekSet(lBoneChunkStart-4);
 		lOk = (mFile->Write(lSize) == Lepra::IO_OK);
 		mFile->SeekSet(lFileEnd);
@@ -728,7 +731,7 @@ bool ChunkyStructureLoader::Save(const ChunkyStructure* pStructure)
 	// Re-write file header size.
 	if (lOk)
 	{
-		size_t lSize = (size_t)(mFile->Tell()-lFileDataStart);
+		Lepra::uint32 lSize = (Lepra::uint32)(mFile->Tell()-lFileDataStart);
 		mFile->SeekSet(lFileDataStart-4);
 		lOk = (mFile->Write(lSize) == Lepra::IO_OK);
 	}
@@ -736,7 +739,7 @@ bool ChunkyStructureLoader::Save(const ChunkyStructure* pStructure)
 	return (lOk);
 }
 
-bool ChunkyStructureLoader::LoadElementCallback(ChunkyType pType, size_t pSize, Lepra::int64 pChunkEndPosition, void* pStorage)
+bool ChunkyStructureLoader::LoadElementCallback(ChunkyType pType, Lepra::uint32 pSize, Lepra::int64 pChunkEndPosition, void* pStorage)
 {
 	bool lOk = false;
 	if (pType == CHUNK_STRUCTURE_BONE)

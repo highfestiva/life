@@ -62,14 +62,14 @@ V2D_TEMPLATE void V2D_QUAL::SetBezier(const Vector2D<_TVarType>& pVA,
 						_TVarType pT)
 {
 	// Calculate lots of temporary variables to minimize number of operations.
-	_TVarType lT1_05 = (_TVarType)(0.5 * lT);
+	_TVarType lT1_05 = (_TVarType)(0.5 * pT);
 
-	_TVarType lT2_10 = lT * lT;
+	_TVarType lT2_10 = pT * pT;
 	_TVarType lT2_05 = (_TVarType)(0.5 * lT2_10);
 	_TVarType lT2_20 = (_TVarType)(2.0 * lT2_10);
 	_TVarType lT2_25 = (_TVarType)(2.5 * lT2_10);
 
-	_TVarType lT3 = lT2_10 * lT;
+	_TVarType lT3 = lT2_10 * pT;
 	_TVarType lT3_05 = (_TVarType)(0.5 * lT3);
 	_TVarType lT3_15 = (_TVarType)(1.5 * lT3);
 
@@ -346,6 +346,7 @@ V2D_TEMPLATE int V2D_QUAL::GetRawData(uint8* pData)
 	_TVarType* lData = (_TVarType*)pData;
 	lData[0] = x;
 	lData[1] = y;
+	return (sizeof(lData[0])*2);
 }
 
 V2D_TEMPLATE int V2D_QUAL::SetRawData(uint8* pData)
@@ -353,6 +354,7 @@ V2D_TEMPLATE int V2D_QUAL::SetRawData(uint8* pData)
 	_TVarType* lData = (_TVarType*)pData;
 	x = lData[0];
 	y = lData[1];
+	return (sizeof(lData[0])*2);
 }
 
 V2D_TEMPLATE bool V2D_QUAL::IsNullVector() const

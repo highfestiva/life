@@ -327,6 +327,7 @@ RemoteStatus NetworkServer::ManageLogin(Lepra::GameSocket* pSocket, Packet* pPac
 			DropSocket(pSocket);
 		}
 		break;
+		case REMOTE_NO_CONNECTION:	// TODO: check me out!
 		case REMOTE_UNKNOWN:
 		{
 			mLog.Error(_T("An unknown error occurred when user ")+Lepra::UnicodeStringUtility::ToCurrentCode(lLoginName)+_T(" tried logging in."));

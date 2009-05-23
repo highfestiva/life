@@ -26,16 +26,21 @@
 	Check wether it works with uneven time gaps.
 */
 
-#ifndef CUBICDECASTELJAUSPLINE_H
-#define CUBICDECASTELJAUSPLINE_H
+
+
+#pragma once
 
 #include "Lepra.h"
 #include "Math.h"
 
+
+
 namespace Lepra
 {
 
-template <class T, class TimeType, class TBase = T::BaseType>
+
+
+template<class T, class TimeType, class TBase = typename T::BaseType>
 class CubicDeCasteljauSpline
 {
 public:
@@ -92,8 +97,10 @@ private:
 	int mCurrentFrame[4];
 };
 
+
+
 #include "CubicDeCasteljauSpline.inl"
 
-}
 
-#endif
+
+}

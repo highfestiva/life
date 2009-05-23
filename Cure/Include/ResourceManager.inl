@@ -84,7 +84,7 @@ Resource* UserTypeResource<ResourceType>::CreateResource(ResourceManager* pManag
 
 template<class ResourceType, class SubtypeExtraType>
 UserExtraCreateTypeResource<ResourceType, SubtypeExtraType>::UserExtraCreateTypeResource(SubtypeExtraType pExtraData):
-	UserTypeResourceBase(pExtraData)
+	Parent(pExtraData)
 {
 }
 

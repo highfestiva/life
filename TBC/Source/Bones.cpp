@@ -651,7 +651,7 @@ void BoneAnimator::Step(float pStepTime)
 	AnimList::iterator lIter(--mCurrentlyPlayingAnims.end());
 
 	// Increase time counters and check wether the animations are currently playing.
-	for (lIter; lIter != mCurrentlyPlayingAnims.end(); --lIter)
+	for (; lIter != mCurrentlyPlayingAnims.end(); --lIter)
 	{
 		(*lIter).mCurrentTime += pStepTime;
 

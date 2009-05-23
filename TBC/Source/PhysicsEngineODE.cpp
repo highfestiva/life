@@ -5,7 +5,7 @@
 
 
 #include <assert.h>
-#include "../../Thirdparty/ode-060223/ode/src/joint.h"
+#include <../ode/src/joint.h>
 #include "../../Lepra/Include/Log.h"
 #include "../../Lepra/Include/Math.h"
 #include "../Include/PhysicsEngineODE.h"
@@ -1430,7 +1430,7 @@ bool PhysicsEngineODE::SetHinge2Diff(BodyID pBodyId, JointID pJointId, const Joi
 		}
 		if (pDiff.mAngle2 < Lepra::PIF*10)
 		{
-			pDiff.mAngle2;	// JB-TODO: use this angle as well.
+			//pDiff.mAngle2;	// JB-TODO: use this angle as well.
 		}
 		SetBodyTransform(pBodyId, lTransform);
 	}

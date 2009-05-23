@@ -151,9 +151,9 @@ public:
 		ChunkyFileElement();
 		// Used for any non-32 bit, statically formed data. Allocates a byte array for each element loaded.
 		// Field sizes are stored in pFieldSize[e], where e is the element index.
-		ChunkyFileElement(ChunkyType pType, void** pPointer, unsigned* pFieldSize, unsigned pElementCount = 1);
+		ChunkyFileElement(ChunkyType pType, void** pPointer, Lepra::uint32* pFieldSize, unsigned pElementCount = 1);
 		// Used for 32-bits (floats may use them too). Does not allocate. Stores total field size in *pFieldSize.
-		ChunkyFileElement(ChunkyType pType, Lepra::int32* pInt, unsigned* pFieldSize = 0, unsigned pElementCount = 1);
+		ChunkyFileElement(ChunkyType pType, Lepra::int32* pInt, Lepra::uint32* pFieldSize = 0, unsigned pElementCount = 1);
 		// Used for strings.
 		ChunkyFileElement(ChunkyType pType, Lepra::String* pString, unsigned pElementCount = 1);
 		// Used for receiving callbacks. Will call LoadElementCallback if this chunk type is found.
@@ -166,7 +166,7 @@ public:
 		Lepra::int32* mIntPointer;
 		void** mPointer;
 		Lepra::String* mString;
-		size_t* mFieldSize;
+		Lepra::uint32* mFieldSize;
 		unsigned mElementCount;
 
 		bool mIsElementLoaded;
@@ -188,14 +188,14 @@ public:
 	bool SaveChunkyList(const FileElementList& pSaveList);
 
 protected:
-	virtual bool LoadElementCallback(ChunkyType pType, size_t pSize, Lepra::int64 pChunkEndPosition, void* pStorage);
+	virtual bool LoadElementCallback(ChunkyType pType, Lepra::uint32 pSize, Lepra::int64 pChunkEndPosition, void* pStorage);
 
 	bool VerifyFileType(ChunkyType pType);
 	bool WriteFileType(ChunkyType pType);
 
-	bool LoadHead(ChunkyType& pType, size_t& pSize, Lepra::int64& pChunkEndPosition);
-	bool LoadRequiredHead(ChunkyType pRequiredType, size_t& pSize, Lepra::int64& pChunkEndPosition);
-	bool SaveHead(ChunkyType pType, size_t pSize, Lepra::int64& pChunkEndPosition);
+	bool LoadHead(ChunkyType& pType, Lepra::uint32& pSize, Lepra::int64& pChunkEndPosition);
+	bool LoadRequiredHead(ChunkyType pRequiredType, Lepra::uint32& pSize, Lepra::int64& pChunkEndPosition);
+	bool SaveHead(ChunkyType pType, Lepra::uint32 pSize, Lepra::int64& pChunkEndPosition);
 
 	Lepra::File* mFile;
 	bool mIsFileOwner;
@@ -212,7 +212,7 @@ public:
 	virtual bool Save(const BoneAnimation* pAnimation);
 
 private:
-	bool LoadElementCallback(TBC::ChunkyType pType, size_t pSize, Lepra::int64 pChunkEndPosition, void* pStorage);
+	bool LoadElementCallback(TBC::ChunkyType pType, Lepra::uint32 pSize, Lepra::int64 pChunkEndPosition, void* pStorage);
 
 	Lepra::int32 mKeyframeCount;
 	Lepra::int32 mBoneCount;
@@ -228,7 +228,7 @@ public:
 	virtual bool Save(const ChunkyStructure* pData);
 
 private:
-	bool LoadElementCallback(TBC::ChunkyType pType, size_t pSize, Lepra::int64 pChunkEndPosition, void* pStorage);
+	bool LoadElementCallback(TBC::ChunkyType pType, Lepra::uint32 pSize, Lepra::int64 pChunkEndPosition, void* pStorage);
 	void SetBoneChildren(int pBoneIndex);
 
 	Lepra::int32 mCurrentBoneIndex;

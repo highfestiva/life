@@ -13,7 +13,7 @@
 #include "../../Lepra/Include/Log.h"
 #pragma warning(push)
 #pragma warning(disable: 4100)	// Warning: unreferenced formal parameter (in ODE).
-#include "../../Thirdparty/ode-060223/include/ode/ode.h"
+#include <ode/ode.h>
 #pragma warning(pop)
 #include <list>
 

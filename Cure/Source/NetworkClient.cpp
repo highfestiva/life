@@ -23,6 +23,7 @@ namespace Cure
 NetworkClient::NetworkClient(RuntimeVariableScope* pVariableScope):
 	NetworkAgent(pVariableScope),
 	mSocket(0),
+	mLoginAccountId(0),
 	mIsConnecting(false),
 	mIsLoggingIn(false),
 	mPollSafeSource(true),
@@ -30,8 +31,7 @@ NetworkClient::NetworkClient(RuntimeVariableScope* pVariableScope):
 	mConnectTimeout(0),
 	mLoginToken(),
 	mLoginTimeout(0),
-	mLoginThread(_T("LoginThread")),
-	mLoginAccountId(0)
+	mLoginThread(_T("LoginThread"))
 {
 }
 
@@ -176,6 +176,7 @@ RemoteStatus NetworkClient::WaitLogin()
 					SetLoginAccountId(0);
 				}
 				break;
+				case Cure::NetworkAgent::RECEIVE_NO_DATA:
 				case Cure::NetworkAgent::RECEIVE_CONNECTION_BROKEN:
 				{
 					mLog.AError("Disconnected from server while waiting for login!");

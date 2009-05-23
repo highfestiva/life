@@ -194,12 +194,12 @@ TerrainConeFunction::TerrainConeFunction(float pAmplitude, const Lepra::Vector2D
 }
 
 void TerrainConeFunction::AddPoint(float pRelativeNormalizedX, float pRelativeNormalizedY,
-	float pScale, float pAbsoluteXyDistance, Lepra::Vector3DF& pPoint) const
+	float /*pScale*/, float pAbsoluteXyDistance, Lepra::Vector3DF& pPoint) const
 {
 	// Does not simply crunch the terrain grid vertically, but has a smarter
 	// function that distributes the grid vertices evenly around the cone profile.
 
-	pScale;
+	//pScale;
 
 	// Calculate a new distance, where the slope is weighed in correctly.
 	const float lNormalizedXyDistance = pAbsoluteXyDistance/mOuterRadius;

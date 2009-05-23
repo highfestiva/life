@@ -15,18 +15,18 @@ namespace Cure
 
 
 
-#define CHECK_SIZE(size)	\
-	if (pSize < size)	\
-	{	\
-		assert(false);	\
-		return (-1);	\
+#define CHECK_SIZE(size)		\
+	if (pSize < (int)(size))	\
+	{				\
+		assert(false);		\
+		return (-1);		\
 	}
 
-#define CHECK_TYPE(type)	\
+#define CHECK_TYPE(type)			\
 	if (type != (Type)pData[lSize++])	\
-	{	\
-		assert(false);	\
-		return (-1);	\
+	{					\
+		assert(false);			\
+		return (-1);			\
 	}
 
 

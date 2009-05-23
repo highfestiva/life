@@ -42,7 +42,7 @@ public:
 	float GetNormalFrameTime() const;
 	// Setting the current physics frame is only done on the client during login, all other times
 	// are set using adjustment rather than direct setting.
-	void TimeManager::SetCurrentPhysicsFrame(int pPhysicsFrame);
+	void SetCurrentPhysicsFrame(int pPhysicsFrame);
 	// Returns how many "fixed normal" physics steps s we must take this frame. s >= 0.
 	int GetCurrentPhysicsStepCount() const;
 	// Returns how many "actual" physics steps a we can take this frame without ending up lagged behind. a >= 1.

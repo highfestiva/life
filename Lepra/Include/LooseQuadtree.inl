@@ -1,15 +1,10 @@
-/*
-	Class:  LQCircleArea,
-		LQRectArea,
-		LooseQuadtree
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Righteous Games
-*/
 
-LQ_TEMPLATE LQ_QUAL::LooseQuadtree(_TObject pErrorObject, 
-			     _TVarType pTotalTreeSize, 
-			     _TVarType pMinimumCellSize, 
-			     _TVarType pK) :
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2006, Righteous Games
+
+
+
+LQ_TEMPLATE LQ_QUAL::LooseQuadtree(_TObject pErrorObject, _TVarType pTotalTreeSize,_TVarType pMinimumCellSize, _TVarType pK):
 	mErrorObject(pErrorObject)
 {
 	// Find required root node size.
@@ -29,7 +24,7 @@ LQ_TEMPLATE LQ_QUAL::LooseQuadtree(_TObject pErrorObject,
 
 	// Tree center at 0,0,0.
 	Vector2D<_TVarType> lSizeHalfVec(lSizeHalf, lSizeHalf);
-	mRootNode->mNodeBox = AABR(Vector2D<_TVarType>(0, 0), lSizeHalfVec);
+	mRootNode->mNodeBox = AABR_(Vector2D<_TVarType>(0, 0), lSizeHalfVec);
 
 	mNumObjects = 0;
 	mNumNodes = 1;
@@ -41,7 +36,7 @@ LQ_TEMPLATE LQ_QUAL::LooseQuadtree(_TObject pErrorObject,
 LQ_TEMPLATE LQ_QUAL::~LooseQuadtree()
 {
 	delete mRootNode;
-	NodeList::iterator lIter;
+	typename NodeList::iterator lIter;
 	for (lIter = mRecycledNodeList.begin(); lIter != mRecycledNodeList.end(); ++lIter)
 	{
 		delete (*lIter);
@@ -107,7 +102,7 @@ LQ_TEMPLATE void LQ_QUAL::InsertObject(_TKey pKey, typename Node::Entry pEntry, 
 
 LQ_TEMPLATE _TObject LQ_QUAL::RemoveObject(_TKey pKey)
 {
-	NodeTable::Iterator lNodeIter = mNodeTable.Find(pKey);
+	typename NodeTable::Iterator lNodeIter = mNodeTable.Find(pKey);
 	if (lNodeIter == mNodeTable.End())
 	{
 		return mErrorObject;
@@ -124,8 +119,8 @@ LQ_TEMPLATE typename LQ_QUAL::Node::Entry LQ_QUAL::RemoveObject(_TKey pKey, type
 	// Removes object from the octree and deletes the node if empty.
 	Node* lCurrentNode = *pNodeIter;
 
-	Node::EntryTable::Iterator lIter = FindObject(pKey, lCurrentNode);
-	Node::Entry lEntry = *lIter;
+	typename Node::EntryTable::Iterator lIter = FindObject(pKey, lCurrentNode);
+	typename Node::Entry lEntry = *lIter;
 
 	lCurrentNode->mEntryTable.Remove(lIter);
 	mNodeTable.Remove(pNodeIter);
@@ -155,7 +150,7 @@ LQ_TEMPLATE typename LQ_QUAL::Node::Entry LQ_QUAL::RemoveObject(_TKey pKey, type
 
 LQ_TEMPLATE _TObject LQ_QUAL::FindObject(_TKey pKey) const
 {
-	NodeTable::ConstIterator lNodeIter = mNodeTable.Find(pKey);
+	typename NodeTable::ConstIterator lNodeIter = mNodeTable.Find(pKey);
 	if (lNodeIter == mNodeTable.End())
 	{
 		return mErrorObject;
@@ -180,7 +175,7 @@ LQ_TEMPLATE inline typename LQ_QUAL::Node::EntryTable::Iterator LQ_QUAL::FindObj
 
 LQ_TEMPLATE bool LQ_QUAL::MoveObject(_TKey pKey, LQArea<_TVarType>* pNewArea)
 {
-	NodeTable::Iterator lNodeIter = mNodeTable.Find(pKey);
+	typename NodeTable::Iterator lNodeIter = mNodeTable.Find(pKey);
 	if (lNodeIter == mNodeTable.End())
 	{
 		//LOG(PHYSIC, DEBUG, "LooseQuadtree::MoveObject, trying to move non existing object!");
@@ -188,7 +183,7 @@ LQ_TEMPLATE bool LQ_QUAL::MoveObject(_TKey pKey, LQArea<_TVarType>* pNewArea)
 	}
 	Node* lNode = *lNodeIter;
 
-	Node::EntryTable::Iterator lEntryIter = FindObject(pKey, lNode);
+	typename Node::EntryTable::Iterator lEntryIter = FindObject(pKey, lNode);
 	(*lEntryIter).mArea = pNewArea;
 	
 	MoveObject(pKey, lNodeIter, lEntryIter);
@@ -201,7 +196,7 @@ LQ_TEMPLATE bool LQ_QUAL::MoveObject(_TKey pKey, LQArea<_TVarType>* pNewArea)
 
 LQ_TEMPLATE _TObject LQ_QUAL::MoveObject(_TKey pKey, const Vector2D<_TVarType>& pToPos)
 {
-	NodeTable::Iterator lNodeIter = mNodeTable.Find(pKey);
+	typename NodeTable::Iterator lNodeIter = mNodeTable.Find(pKey);
 	if (lNodeIter == mNodeTable.End())
 	{
 		//LOG(PHYSIC, DEBUG, "LooseQuadtree::MoveObject, trying to move non existing object!");
@@ -209,7 +204,7 @@ LQ_TEMPLATE _TObject LQ_QUAL::MoveObject(_TKey pKey, const Vector2D<_TVarType>& 
 	}
 	Node* lNode = *lNodeIter;
 
-	Node::EntryTable::Iterator lEntryIter = FindObject(pKey, lNode);
+	typename Node::EntryTable::Iterator lEntryIter = FindObject(pKey, lNode);
 	(*lEntryIter).mArea->SetPosition(pToPos);
 
 	return MoveObject(pKey, lNodeIter);
@@ -217,7 +212,7 @@ LQ_TEMPLATE _TObject LQ_QUAL::MoveObject(_TKey pKey, const Vector2D<_TVarType>& 
 
 LQ_TEMPLATE _TObject LQ_QUAL::MoveObject(_TKey pKey, typename NodeTable::Iterator& pNodeIter)
 {
-	Node::Entry lEntry = RemoveObject(pKey, pNodeIter);
+	typename Node::Entry lEntry = RemoveObject(pKey, pNodeIter);
 	InsertObject(pKey, lEntry, mRootNode, 0);
 	return lEntry.mObject;
 }
@@ -350,7 +345,7 @@ LQ_TEMPLATE void LQ_QUAL::GetObjects(ObjectList& pObjects, const BC& pBC)
 	GetObjectsInBC(mRootNode, pObjects, pBC);
 }
 
-LQ_TEMPLATE void LQ_QUAL::GetObjects(ObjectList& pObjects, const AABR& pAABR)
+LQ_TEMPLATE void LQ_QUAL::GetObjects(ObjectList& pObjects, const AABR_& pAABR)
 {
 	GetObjectsInAABR(mRootNode, pObjects, pAABR);
 }
@@ -358,12 +353,12 @@ LQ_TEMPLATE void LQ_QUAL::GetObjects(ObjectList& pObjects, const AABR& pAABR)
 LQ_TEMPLATE void LQ_QUAL::GetObjectsInBC(Node* pCurrentNode, ObjectList& pObjects, const BC& pBC)
 {
 	// Insert objects at this node into list.
-	Node::EntryTable::Iterator lIter;
+	typename Node::EntryTable::Iterator lIter;
 	for (lIter  = pCurrentNode->mEntryTable.First(); 
 		lIter != pCurrentNode->mEntryTable.End(); 
 		++lIter)
 	{
-		const Node::Entry& lEntry = *lIter;
+		const typename Node::Entry& lEntry = *lIter;
 
 		if (lEntry.mArea->IsBCOverlappingArea(pBC))
 		{
@@ -402,14 +397,14 @@ LQ_TEMPLATE void LQ_QUAL::GetObjectsInBC(Node* pCurrentNode, ObjectList& pObject
 
 
 
-LQ_TEMPLATE void LQ_QUAL::GetObjectsInAABR(Node* pCurrentNode, ObjectList& pObjects, const AABR& pAABR)
+LQ_TEMPLATE void LQ_QUAL::GetObjectsInAABR(Node* pCurrentNode, ObjectList& pObjects, const AABR_& pAABR)
 {
-	Node::EntryTable::Iterator lIter;
+	typename Node::EntryTable::Iterator lIter;
 	for (lIter = pCurrentNode->mEntryTable.First(); 
 		lIter != pCurrentNode->mEntryTable.End(); 
 		++lIter)
 	{
-		const Node::Entry& lEntry = *lIter;
+		const typename Node::Entry& lEntry = *lIter;
 
 		if (lEntry.mArea->IsAABROverlappingArea(pAABR))
 		{
@@ -455,7 +450,7 @@ LQ_TEMPLATE unsigned LQ_QUAL::GetFullTreeMemSize() const
 
 	for (i = 1; i <= mMaxTreeDepth; i++)
 	{
-		lNumNodes += (unsigned)pow(8, i);
+		lNumNodes += (unsigned)pow(8.0f, i);
 	}
 
 	return lNumNodes * sizeof(Node);

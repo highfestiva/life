@@ -342,8 +342,8 @@ bool PortalManager::Portal::TestCollision(const Lepra::Vector3DF& pFromPos,
 	float lTest2 = mNormal.Dot(pToPos)   + mD;
 
 	// If both points are on the same side of the plane...
-	if (lTest1 >= 0 && lTest2 >= 0 ||
-	   lTest1 <= 0 && lTest2 <= 0)
+	if ((lTest1 >= 0 && lTest2 >= 0) ||
+	   (lTest1 <= 0 && lTest2 <= 0))
 	{
 		return false;
 	}

@@ -19,10 +19,15 @@ PhysicsEngine* PhysicsEngineFactory::Create(Engine pEngine)
 	PhysicsEngine* lEngine = 0;
 	switch (pEngine)
 	{
-		case ENGINE_ODE:	lEngine = new PhysicsEngineODE();	break;
+		case ENGINE_ODE:	lEngine = new PhysicsEngineODE();		break;
+		default:		mLog.Error(_T("Physics type not supported."));	break;
 	}
 	return (lEngine);
 }
+
+
+
+LOG_CLASS_DEFINE(PHYSICS, PhysicsEngineFactory);
 
 
 

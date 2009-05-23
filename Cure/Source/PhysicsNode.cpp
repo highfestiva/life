@@ -15,8 +15,8 @@ namespace Cure
 
 
 PhysicsNode::PhysicsNode():
-	mId((unsigned)-1),
 	mParentId((unsigned)-1),
+	mId((unsigned)-1),
 	mBodyId(TBC::INVALID_BODY),
 	mJointType(TYPE_EXCLUDE),
 	mJointId(TBC::INVALID_JOINT)

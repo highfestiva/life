@@ -6,38 +6,42 @@ import os
 import sys
 
 
-cflags = """
-CFLAGS = -O0 -ggdb -fPIC -D_POSIX_PTHREAD_SEMANTICS %(includes)s -DPOSIX -D_DEBUG -D_CONSOLE -DPNG_NO_ASSEMBLER_CODE -DdCYLINDER_ENABLED -D_STLP_NO_OWN_NAMESPACE"""
+cflags_1 = """
+CFLAGS = -O0 -ggdb -fPIC -D_POSIX_PTHREAD_SEMANTICS %(includes)s -DPOSIX -D_DEBUG -D_CONSOLE -DPNG_NO_ASSEMBLER_CODE -DdCYLINDER_ENABLED"""
+cflags_2 = "-Wno-unknown-pragmas"
 
-head_lib = cflags+""" -Wall
-"""
+head_lib = cflags_1+" -Wall "+cflags_2+"\n"
 
-head_lib_nowarn = cflags+"""
+head_lib_nowarn = cflags_1+" "+cflags_2+"\n"
+
+foot_rules = """
+depend:
+\tmakedepend -- $(CFLAGS) -- $(SRCS)
+.c.o:
+\tgcc $(CFLAGS) -o $@ -c $<
+.cpp.o:
+\tg++ $(CFLAGS) -o $@ -c $<
 """
 
 foot_lib = """
 all:\tlib%(lib)s.so
 clean:
-\t@rm -f $(OBJS)
-depend:
-\tmakedepend --$(CFLAGS) --$(SRCS)
+\t@rm -f lib%(lib)s.so $(OBJS)
 lib%(lib)s.so:\t$(OBJS)
-\tg++ -o $(OBJS) $@
-.cpp.o:
-\tg++ $(CFLAGS) -o $@ -c $<
-"""
+\tg++ -shared -o $@ $(OBJS)
+"""+foot_rules
 
 head_bin = head_lib+"""
-LIBS = -lm -lpthread -lsocket -lnsl
-CLDFLAGS = $(LIBS) -o $(CLIENT)
-SLDFLAGS = $(LIBS) -o $(SERVER)
-CLIENT= coma3d
-SERVER= comaserver
+LIBS = -lLife -lCure -lTBC -lLepra -lThirdParty -lm -lpthread -lnsl -lncurses %(libs)s
 """
 
-foot_bin = foot_lib+"""
-Dunno!
-"""
+foot_bin = """
+all:\t%(lib)s
+clean:
+\t@rm -f %(lib)s $(OBJS)
+%(lib)s:\t$(OBJS)
+\tg++ $(LIBS) -o $@ $(OBJS)
+"""+foot_rules
 
 maketext = \
 {
@@ -53,7 +57,7 @@ def isSrc(fname):
     ext = os.path.splitext(fname)[1]
     return (ext == ".cpp" or ext == ".c")
 
-def generate_makefile(vcfile, makename, includedirs, header, footer, type):
+def generate_makefile(vcfile, makename, includedirs, libdirs, header, footer, type):
     libname = os.path.splitext(os.path.basename(vcfile))[0]
     libname = libname.split("_")[0]
     if libname.endswith("Lib"):
@@ -68,7 +72,8 @@ def generate_makefile(vcfile, makename, includedirs, header, footer, type):
     f.write("# 'Twas generated from %s, %s, type='%s'.\n" % (vcfile, datetime.now().isoformat()[:10], type))
     f.write("# Don't edit manually. See 'generate_makefile.py' for info.\n")
     includes = " ".join(["-I%s" % i for i in includedirs])
-    f.write(header % {"includes":includes})
+    libs = " ".join(["-L%s" % i for i in libdirs])
+    f.write(header % {"includes":includes, "libs":libs})
     f.write("\nSRCS=\t\\\n")
     f.write("\t\\\n".join(cpps))
     f.write("\n\nOBJS=\t\\\n")
@@ -83,11 +88,16 @@ def generate_makefiles(basedir, vcfileinfolist):
         vcfile = os.path.join(basedir, vcfile)
         projdir = os.path.dirname(vcfile)
         #bindir = os.path.relpath(os.path.join(projdir, "bin/"), projdir)
-        includedir1 = os.path.relpath(basedir+"ThirdParty/stlport/stlport/", projdir)
-        includedir2 = os.path.relpath(basedir+"ThirdParty/ode-060223/include/", projdir)
+        includedirs = [os.path.relpath(basedir+"ThirdParty/stlport/stlport/", projdir),
+        	os.path.relpath(basedir+"ThirdParty/ode-060223/include/", projdir)]
+	libdirs = [os.path.relpath(basedir+"ThirdParty", projdir),
+		os.path.relpath(basedir+"Lepra", projdir),
+		os.path.relpath(basedir+"TBC", projdir),
+		os.path.relpath(basedir+"Cure", projdir),
+		os.path.relpath(basedir+"Life", projdir)]
         makename = os.path.join(os.path.dirname(vcfile), "makefile")
         sys.stdout.write(os.path.abspath(makename)+":\t")
-        generate_makefile(vcfile, makename, (includedir1, includedir2), maketext["head_"+type], maketext["foot_"+type], type)
+        generate_makefile(vcfile, makename, includedirs, libdirs, maketext["head_"+type], maketext["foot_"+type], type)
         sys.stdout.write("done (type="+type+").\n")
 
 def main():

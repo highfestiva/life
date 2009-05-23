@@ -292,6 +292,8 @@ private:
 
 class PhysicalTerrainResource: public RamResource<TBC::TerrainPatch*>
 {
+protected:
+	typedef RamResource<TBC::TerrainPatch*> Parent;
 public:
 	typedef TBC::TerrainPatch* UserData;
 

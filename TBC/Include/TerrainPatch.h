@@ -193,10 +193,10 @@ private:
 	unsigned int mHiResEdgeFlags;
 
 	// Indices to the extra vertices of the edges.
-	unsigned int mSouthEdgeIndex;
 	unsigned int mNorthEdgeIndex;
-	unsigned int mWestEdgeIndex;
+	unsigned int mSouthEdgeIndex;
 	unsigned int mEastEdgeIndex;
+	unsigned int mWestEdgeIndex;
 
 	float* mVertexData;
 	float* mUVData[2];

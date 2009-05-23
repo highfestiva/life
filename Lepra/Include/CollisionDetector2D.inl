@@ -1,12 +1,13 @@
-/*
-	Class:  CollisionDetector2D
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2005, Alexander Hugestrand
-*/
+
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2005, Alexander Hugestrand
+
+
 
 #include "../Include/CollisionDetector2D.h"
 #include "../Include/Math.h"
-#include <Math.h>
+
+
 
 template<class _TVarType>
 bool CollisionDetector2D<_TVarType>::IsAABR1EnclosingAABR2(const AABR<_TVarType>& pBox1, const AABR<_TVarType>& pBox2)
@@ -24,8 +25,8 @@ bool CollisionDetector2D<_TVarType>::IsAABREnclosingCircle(const AABR<_TVarType>
 	Vector2D<_TVarType> lDim(pCircle.GetRadius(), pCircle.GetRadius());
 	Vector2D<_TVarType> lCMin(pCircle.GetPosition() - lDim);
 	Vector2D<_TVarType> lCMax(pCircle.GetPosition() + lDim);
-	Vector2D<_TVarType> lMin(pAABR.GetPosition() - pAABR.GetSize());
-	Vector2D<_TVarType> lMax(pAABR.GetPosition() + pAABR.GetSize());
+	Vector2D<_TVarType> lMin(pBox.GetPosition() - pBox.GetSize());
+	Vector2D<_TVarType> lMax(pBox.GetPosition() + pBox.GetSize());
 	return (lMin.x <= lCMin.x && lMin.y <= lCMin.y && lMax.x >= lCMax.x && lMax.y >= lCMax.y);
 }
 
@@ -39,7 +40,7 @@ bool CollisionDetector2D<_TVarType>::IsCircle1EnclosingCircle2(const Circle<_TVa
 template<class _TVarType>
 bool CollisionDetector2D<_TVarType>::IsCircleEnclosingAABR(const Circle<_TVarType>& pCircle, const AABR<_TVarType>& pBox)
 {
-	return IsCircle1EnclosingCircle2(pCircle, Circle(pBox.GetPosition(), pBox.GetSize().GetLength()));
+	return IsCircle1EnclosingCircle2(pCircle, Circle<_TVarType>(pBox.GetPosition(), pBox.GetSize().GetLength()));
 }
 
 
@@ -242,7 +243,7 @@ bool CollisionDetector2D<_TVarType>::VelocityAABRToAABRTest(const AABR<_TVarType
 		if(lMaxAllowedMove.x >= 0)
 		{
 			pCollisionInfo->mSeparationDistance = 0;
-			pCollisionInfo->mTimeToCollision = (_TVarType)lMaxAllowedMove.x / (_TVarType)abs(lRelVel.x);
+			pCollisionInfo->mTimeToCollision = (_TVarType)lMaxAllowedMove.x / (_TVarType)abs(lRelativeVelocity.x);
 		}
 		else
 		{
@@ -253,7 +254,7 @@ bool CollisionDetector2D<_TVarType>::VelocityAABRToAABRTest(const AABR<_TVarType
 
 	// Test y-axis. Even if the boxes are colliding from start,
 	// don't count it as a collision if they are moving apart.
-	if(lMaxAllowedMove.y > abs(lRelVel.y) ||
+	if(lMaxAllowedMove.y > abs(lRelativeVelocity.y) ||
 	   (lRelativeVelocity.y >= 0 && lDist.y >= 0) ||
 	   (lRelativeVelocity.y < 0 && lDist.y < 0))
 	{
@@ -263,7 +264,7 @@ bool CollisionDetector2D<_TVarType>::VelocityAABRToAABRTest(const AABR<_TVarType
 	}
 	else if(pCollisionInfo != 0)
 	{
-		_TVarType lTimeToCollision = (_TVarType)lMaxAllowedMove.y / (_TVarType)abs(lRelVel.y);
+		_TVarType lTimeToCollision = (_TVarType)lMaxAllowedMove.y / (_TVarType)abs(lRelativeVelocity.y);
 		if(lTimeToCollision > pCollisionInfo->mTimeToCollision)
 		{
 			if(lDist.y >= 0)
@@ -285,7 +286,7 @@ bool CollisionDetector2D<_TVarType>::VelocityAABRToAABRTest(const AABR<_TVarType
 	}
 
 	// Check for collision by looking along he velocity vector.
-	Vector2D<_TVarType> lNormal(lRelVel.y, -lRelVel.x);
+	Vector2D<_TVarType> lNormal(lRelativeVelocity.y, -lRelativeVelocity.x);
 	lNormal.Normalize();
 
 	_TVarType lBox1Projection = abs(lNormal.Dot(pBox1.GetSize()));
@@ -300,15 +301,15 @@ bool CollisionDetector2D<_TVarType>::VelocityAABRToAABRTest(const AABR<_TVarType
 	if(pCollisionInfo != 0)
 	{
 		// Calculate the point of collision.
-		Vector2D lBox1ExtentMin(pBox1.GetPosition() - pBox1.GetSize());
-		Vector2D lBox1ExtentMax(pBox1.GetPosition() + pBox1.GetSize());
-		Vector2D lBox2ExtentMin(pBox2.GetPosition() - pBox2.GetSize());
-		Vector2D lBox2ExtentMax(pBox2.GetPosition() + pBox2.GetSize());
+		Vector2D<_TVarType> lBox1ExtentMin(pBox1.GetPosition() - pBox1.GetSize());
+		Vector2D<_TVarType> lBox1ExtentMax(pBox1.GetPosition() + pBox1.GetSize());
+		Vector2D<_TVarType> lBox2ExtentMin(pBox2.GetPosition() - pBox2.GetSize());
+		Vector2D<_TVarType> lBox2ExtentMax(pBox2.GetPosition() + pBox2.GetSize());
 
-		Vector2D lOverlapMin(max(lBox1ExtentMin.x, lBox2ExtentMin.x), max(lBox1ExtentMin.y, lBox2ExtentMin.y));
-		Vector2D lOverlapMax(min(lBox1ExtentMax.x, lBox2ExtentMax.x), min(lBox1ExtentMax.y, lBox2ExtentMax.y));
+		Vector2D<_TVarType> lOverlapMin(max(lBox1ExtentMin.x, lBox2ExtentMin.x), max(lBox1ExtentMin.y, lBox2ExtentMin.y));
+		Vector2D<_TVarType> lOverlapMax(min(lBox1ExtentMax.x, lBox2ExtentMax.x), min(lBox1ExtentMax.y, lBox2ExtentMax.y));
 
-		Vector2D lDiff(lOverlapMax - lOverlapMin);
+		Vector2D<_TVarType> lDiff(lOverlapMax - lOverlapMin);
 
 		pCollisionInfo->mPointOfCollision = lOverlapMin + lDiff * (_TVarType)0.5;
 	}
@@ -533,7 +534,7 @@ bool CollisionDetector2D<_TVarType>::StaticCircleToCircleTest(const Circle<_TVar
 template<class _TVarType>
 bool CollisionDetector2D<_TVarType>::StaticTriangleToTriangleTest(const Vector2D<_TVarType> pTri1[3], 
 								  const Vector2D<_TVarType> pTri2[3],
-								  CollisionInfo* pCollisionInfo = 0)
+								  CollisionInfo* pCollisionInfo)
 {
 	if(pCollisionInfo != 0)
 		pCollisionInfo->mTimeToCollision = 1;
@@ -918,7 +919,7 @@ bool CollisionDetector2D<_TVarType>::StaticAABRToOBRTest(const AABR<_TVarType>& 
 {
 	// TODO: Implement a case specific optimized version if you think it's worth
 	// all the trouble. =)
-	OBR<_TVarType lBox1(pBox1.GetPosition(), pBox1.GetSize());
+	OBR<_TVarType> lBox1(pBox1.GetPosition(), pBox1.GetSize());
 	return StaticOBRToOBRTest(lBox1, pBox2, pCollisionInfo);
 }
 

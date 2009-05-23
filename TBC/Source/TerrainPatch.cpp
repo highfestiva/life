@@ -40,7 +40,7 @@ TerrainPatch::TerrainPatch(const Lepra::Vector2D<int>& pPosition,
 			   unsigned int pSizeExponent,
 			   unsigned int pHiResEdgeFlags,
 			   float pWestU1, float pEastU1, float pSouthV1, float pNorthV1,
-			   float pWestU2, float pEastU2, float pSouthV2, float pNorthV2) :
+			   float pWestU2, float pEastU2, float pSouthV2, float pNorthV2):
 	mVertexCount(0),
 	mTriangleCount(0),
 	mSizeMultiplier(Lepra::Math::Pow(smPatchSizeMultiplier, pSizeExponent)),

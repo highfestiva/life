@@ -58,16 +58,16 @@ public:
 
 // Default area types.
 template<class _TVarType>
-class LQCircleArea : public Circle<_TVarType>, public LQArea<_TVarType>
+class LQCircleArea: public Circle<_TVarType>, public LQArea<_TVarType>
 {
 public:
-	LQCircleArea() : 
-		Circle() 
+	LQCircleArea():
+		Circle<_TVarType>() 
 	{
 		mCD.SetPointOfCollisionEnabled(false);
 	}
-	LQCircleArea(const Vector2D<_TVarType>& pPosition, _TVarType pRadius) : 
-		Circle(pPosition, pRadius) 
+	LQCircleArea(const Vector2D<_TVarType>& pPosition, _TVarType pRadius):
+		Circle<_TVarType>(pPosition, pRadius) 
 	{
 		mCD.SetPointOfCollisionEnabled(false);
 	}
@@ -88,12 +88,12 @@ class LQRectArea : public AABR<_TVarType>, public LQArea<_TVarType>
 {
 public:
 	LQRectArea() : 
-		AABR() 
+		AABR<_TVarType>() 
 	{
 		mCD.SetPointOfCollisionEnabled(false);
 	}
 	LQRectArea(const Vector2D<_TVarType>& pPosition, const Vector2D<_TVarType>& pSize) : 
-		AABR(pPosition, pSize) 
+		AABR<_TVarType>(pPosition, pSize) 
 	{
 		mCD.SetPointOfCollisionEnabled(false);
 	}
@@ -109,14 +109,14 @@ private:
 	CollisionDetector2D<_TVarType> mCD;
 };
 
-template<class _TKey, class _TObject, class _TVarType, class _THashFunc = std::hash<_TKey>>
+template<class _TKey, class _TObject, class _TVarType, class _THashFunc = std::hash<_TKey> >
 class LooseQuadtree
 {
 public:
-	typedef AABR<_TVarType>     AABR; // Axis Aligned Bounding Rect.
+	typedef AABR<_TVarType>     AABR_; // Axis Aligned Bounding Rect.
 	typedef Circle<_TVarType>   BC;   // Bounding Circle
 	typedef std::list<_TObject> ObjectList;
-	typedef std::list<AABR>     AABRList;
+	typedef std::list<AABR_>     AABRList;
 
 	LooseQuadtree(_TObject pErrorObject,		// An object to return when an error occurs.
 		      _TVarType pTotalTreeSize = 65536,	// Length of one dimension of the entire 2D-space.
@@ -134,7 +134,7 @@ public:
 	// Get list with objects within the specified area. The list is not cleared, 
 	// objects are appended.
 	void GetObjects(ObjectList& pObjects, const BC& pBC);
-	void GetObjects(ObjectList& pObjects, const AABR& pAABR);
+	void GetObjects(ObjectList& pObjects, const AABR_& pAABR);
 
 	//
 	// Debug utilities.
@@ -292,7 +292,7 @@ private:
 			}
 
 			_TVarType mFixedSizeHalf;
-			AABR mNodeBox;
+			AABR_ mNodeBox;
 
 			Node* mParent;
 			Node* mChildren[4];
@@ -337,7 +337,7 @@ private:
 				     _TVarType pParentNodeSize) const;
 
 	void GetObjectsInBC(Node* pNode, ObjectList& pObjects, const BC& pBC);
-	void GetObjectsInAABR(Node* pNode, ObjectList& pObjects, const AABR& pAABR);
+	void GetObjectsInAABR(Node* pNode, ObjectList& pObjects, const AABR_& pAABR);
 
 	uint8 GetChild(const Vector2D<_TVarType>& pPos, const Node* pNode);
 	uint8 GetChild(const Vector2D<_TVarType>& pPos, const Node* pNode, Vector2D<_TVarType>& pChildPos);

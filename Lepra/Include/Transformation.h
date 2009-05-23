@@ -125,8 +125,8 @@ private:
 
 
 
-TEMPLATE inline Vector3D<_TVarType> operator * (const Vector3D<_TVarType>& pVector, const Transformation& pTransformation);
-TEMPLATE inline const Vector3D<_TVarType>& operator *= (Vector3D<_TVarType>& pVector, const Transformation& pTransformation);
+TEMPLATE inline Vector3D<_TVarType> operator * (const Vector3D<_TVarType>& pVector, const Transformation<_TVarType>& pTransformation);
+TEMPLATE inline const Vector3D<_TVarType>& operator *= (Vector3D<_TVarType>& pVector, const Transformation<_TVarType>& pTransformation);
 
 
 

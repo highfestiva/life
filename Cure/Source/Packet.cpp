@@ -157,14 +157,14 @@ void Packet::SetPacketSize(int pSize)
 {
 	assert(pSize > 0);
 	mPacketSize = pSize;
-	assert(mPacketSize <= PACKET_LENGTH);
+	assert((int)mPacketSize <= PACKET_LENGTH);
 }
 
 void Packet::AddPacketSize(int pSize)
 {
 	assert(pSize > 0);
 	mPacketSize += pSize;
-	assert(mPacketSize <= PACKET_LENGTH);
+	assert((int)mPacketSize <= PACKET_LENGTH);
 }
 
 size_t Packet::GetMessageCount() const
@@ -375,7 +375,7 @@ int MessageStatus::Parse(const Lepra::uint8* pData, int pSize)
 
 		lTotalSize = 1+sizeof(Lepra::uint32)*2;
 		int lSize = -1;
-		if (pSize >= 1+sizeof(Lepra::uint32)*2+4)
+		if (pSize >= (int)(1+sizeof(Lepra::uint32)*2+4))
 		{
 			lSize = PackerUnicodeString::Unpack(0, &mData[lTotalSize], pSize-lTotalSize);
 			lTotalSize += lSize;
@@ -498,10 +498,8 @@ int MessageObject::Parse(const Lepra::uint8* pData, int pSize)
 	return (lTotalSize);
 }
 
-int MessageObject::Store(Packet* pPacket, Lepra::uint32 pObjectId)
+int MessageObject::Store(Packet*, Lepra::uint32 pObjectId)
 {
-	pPacket;
-
 	mWritableData[0] = (Lepra::uint8)GetType();
 	unsigned lSize = 1;
 	lSize += PackerInt32::Pack(&mWritableData[lSize], pObjectId);

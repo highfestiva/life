@@ -117,7 +117,7 @@ TimeType CubicDeCasteljauSpline<T, TimeType, TBase>::FindNearestTime(TimeType pS
 	// And so forth. This could probably be optimized using Newton-Raphson, or (worst-case) Runge-Cutta.
 	TimeType lNearestTime = mCurrentTime;
 	T lNearestDistance = GetValue()-pWhere;
-	T::BaseType lDistance2 = lNearestDistance.GetLengthSquared();
+	typename T::BaseType lDistance2 = lNearestDistance.GetLengthSquared();
 	T lNewNearestDistance;
 	for (int y = 0; y < 20; ++y)
 	{
@@ -127,7 +127,7 @@ TimeType CubicDeCasteljauSpline<T, TimeType, TBase>::FindNearestTime(TimeType pS
 		{
 			StepInterpolation(pStepLength);
 			lNewNearestDistance = GetValue()-pWhere;
-			T::BaseType lNewDistance2 = lNewNearestDistance.GetLengthSquared();
+			typename T::BaseType lNewDistance2 = lNewNearestDistance.GetLengthSquared();
 			if (lNewDistance2 >= lDistance2)
 			{
 				StepInterpolation(-pStepLength);	// Go back to previous point.

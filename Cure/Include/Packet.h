@@ -171,7 +171,6 @@ public:
 
 class MessageCreateObject: public MessageObject
 {
-	typedef MessageObject Parent;
 public:
 	typedef MessageObject Parent;
 

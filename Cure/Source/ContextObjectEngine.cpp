@@ -135,8 +135,6 @@ bool ContextObjectEngine::SetValue(unsigned pAspect, float pValue, float pZAngle
 
 void ContextObjectEngine::OnTick(float pFrameTime)
 {
-	pFrameTime;
-
 	TBC::PhysicsEngine* lPhysicsManager = GetContextObject()->GetManager()->GetGameManager()->GetPhysicsManager();
 	EngineNodeArray::const_iterator i = mEngineNodeArray.begin();
 	for (; i != mEngineNodeArray.end(); ++i)

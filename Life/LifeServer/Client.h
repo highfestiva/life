@@ -36,7 +36,7 @@ public:
 
 	Cure::GameObjectId GetAvatarId() const;
 	void SetAvatarId(Cure::GameObjectId pAvatarId);
-	UserContextObjectAccountInfoResource* Client::GetAvatarResource();
+	UserContextObjectAccountInfoResource* GetAvatarResource();
 
 	void StoreFrameDiff(int pFrameDiff);
 	void QuerySendStriveTimes();

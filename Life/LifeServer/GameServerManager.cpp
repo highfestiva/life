@@ -97,9 +97,9 @@ Lepra::UnicodeStringUtility::StringVector GameServerManager::ListUsers()
 		for (; x != mAccountClientTable.End(); ++x)
 		{
 			const Client* lClient = x.GetObject();
-			Lepra::String lUserInfo = lClient->GetUserConnection()->GetLoginName();
+			Lepra::UnicodeString lUserInfo = lClient->GetUserConnection()->GetLoginName();
 			Lepra::Vector3DF lPosition = GetContext()->GetObject(lClient->GetAvatarId())->GetPosition();
-			lUserInfo += Lepra::StringUtility::Format(_T(" at (%f, %f, %f)"), lPosition.x, lPosition.y, lPosition.z);
+			lUserInfo += Lepra::UnicodeStringUtility::Format(L" at (%f, %f, %f)", lPosition.x, lPosition.y, lPosition.z);
 			lVector.push_back(lUserInfo);
 		}
 	}
@@ -368,6 +368,7 @@ void GameServerManager::TickInput()
 				mLog.AError("Problem with receiving crap data!");
 			}
 			break;
+			case Cure::NetworkAgent::RECEIVE_NO_DATA:
 			case Cure::NetworkAgent::RECEIVE_CONNECTION_BROKEN:
 			{
 				mLog.AError("Disconnected from client!");
