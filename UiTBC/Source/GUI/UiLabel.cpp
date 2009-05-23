@@ -276,7 +276,7 @@ Lepra::PixelCoords Label::GetPreferredSize(bool pForceAdaptive)
 	if (pForceAdaptive == true || IsAdaptive() == true)
 	{
 		int lContentSizeX = lIconSize.x + mTextWidth;
-		int lContentSizeY = max(lIconSize.y, mTextHeight);
+		int lContentSizeY = std::max(lIconSize.y, mTextHeight);
 		if (lContentSizeX > lSize.x)
 		{
 			lSize.x = lContentSizeX;

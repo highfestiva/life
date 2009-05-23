@@ -441,8 +441,8 @@ bool CollisionDetector3D<_TVarType>::IsAABBOverlappingAABB(const AABB<_TVarType>
 		Vector3D<_TVarType> lBox2Min(pAABB2.GetPosition() - pAABB2.GetSize());
 		Vector3D<_TVarType> lBox2Max(pAABB2.GetPosition() + pAABB2.GetSize());
 
-		Vector3D<_TVarType> lOverlapMin(max(lBox1Min.x, lBox2Min.x), max(lBox1Min.y, lBox2Min.y), max(lBox1Min.z, lBox2Min.z));
-		Vector3D<_TVarType> lOverlapMax(min(lBox1Max.x, lBox2Max.x), min(lBox1Max.y, lBox2Max.y), min(lBox1Max.z, lBox2Max.z));
+		Vector3D<_TVarType> lOverlapMin(std::max(lBox1Min.x, lBox2Min.x), std::max(lBox1Min.y, lBox2Min.y), std::max(lBox1Min.z, lBox2Min.z));
+		Vector3D<_TVarType> lOverlapMax(std::min(lBox1Max.x, lBox2Max.x), std::min(lBox1Max.y, lBox2Max.y), std::min(lBox1Max.z, lBox2Max.z));
 
 		pCollisionInfo->mTimeToCollision = 0;
 		pCollisionInfo->mPointOfCollision = (lOverlapMin + lOverlapMax) * (_TVarType)0.5;

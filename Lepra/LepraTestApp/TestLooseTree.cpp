@@ -136,7 +136,7 @@ bool TestLooseQuadtree(const Lepra::LogDecorator& pAccount)
 	{
 		// Retreive all objects.
 		lContext = _T("Get objects, count");
-		lLQT.GetObjects(lList, QuadTree::AABR((lMax + lMin) * 0.5, (lMax + lMin) * 0.5, 
+		lLQT.GetObjects(lList, QuadTree::AABR_((lMax + lMin) * 0.5, (lMax + lMin) * 0.5, 
 						      (lMax - lMin) * 0.5, (lMax - lMin) * 0.5));
 		lTestOk = (lList.size() == 3);
 	}

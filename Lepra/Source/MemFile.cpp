@@ -168,7 +168,7 @@ int64 MemFile::GetSize() const
 void MemFile::CropHead(size_t pFinalSize)
 {
 	ScopeLock lLock(&mLock);
-	int lCropByteCount = mSize-pFinalSize;
+	size_t lCropByteCount = mSize-pFinalSize;
 	if (lCropByteCount > 0)
 	{
 		::memcpy(mBuffer, mBuffer+lCropByteCount, pFinalSize);

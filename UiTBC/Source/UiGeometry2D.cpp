@@ -57,7 +57,7 @@ Geometry2D::~Geometry2D()
 void Geometry2D::Realloc(void** pData, size_t pNewSize, size_t pBytesToCopy)
 {
 	Lepra::uint8* lNewData = new Lepra::uint8[pNewSize];
-	::memcpy(lNewData, *pData, min(pNewSize, pBytesToCopy));
+	::memcpy(lNewData, *pData, std::min(pNewSize, pBytesToCopy));
 	delete[] *pData;
 	*pData = lNewData;
 }
@@ -94,7 +94,7 @@ void Geometry2D::ReallocVertexBuffers(int pVertexCapacity)
 void Geometry2D::ReallocTriangleBuffer(int pTriangleCapacity)
 {
 	Lepra::uint32* lTriangleData = new Lepra::uint32[pTriangleCapacity * 3];
-	::memcpy(lTriangleData, mTriangleData, min(pTriangleCapacity, mTriangleCount) * 3 * sizeof(Lepra::uint32));
+	::memcpy(lTriangleData, mTriangleData, std::min(pTriangleCapacity, mTriangleCount) * 3 * sizeof(Lepra::uint32));
 	delete[] mTriangleData;
 	mTriangleData = lTriangleData;
 	mTriangleCapacity = mTriangleCapacity;

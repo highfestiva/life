@@ -10,8 +10,10 @@
 #include <string.h>
 #include <stdarg.h>
 #include <malloc.h>
+#if defined(__GNUG__)	// Jonas B.
 #include <alloca.h>
 #include <values.h>
+#endif // g++
 #include <float.h>
 
 #ifdef __cplusplus
@@ -48,6 +50,12 @@ typedef unsigned long int intP;
 #define dCYLINDER_ENABLED 1
 
 /* available functions */
+#if defined(_MSC_VER)	// Jonas B.
+#define copysignf _copysign
+#define copysign _copysign
+#define snprintf _snprintf
+#define vsnprintf _vsnprintf
+#endif // MSVC
 
 #ifdef __cplusplus
 }

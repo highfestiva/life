@@ -252,7 +252,7 @@ Datagram& BufferedIo::GetSendBuffer() const
 	return ((Datagram&)mSendBuffer);
 }
 
-IOError BufferedIo::AppendSendBuffer(const void* pData, size_t pLength)
+IOError BufferedIo::AppendSendBuffer(const void* pData, int pLength)
 {
 	IOError lError = IO_OK;
 
@@ -269,7 +269,7 @@ IOError BufferedIo::AppendSendBuffer(const void* pData, size_t pLength)
 			assert(mMuxIo->IsSender(this));
 		}
 		::memcpy(&mSendBuffer.mDataBuffer[mSendBuffer.mDataSize], pData, pLength);
-		mSendBuffer.mDataSize += pLength;
+		mSendBuffer.mDataSize += (int)pLength;
 	}
 	else
 	{
@@ -474,7 +474,7 @@ bool TcpSocket::IsConnected()
 	return (mSocket != INVALID_SOCKET);
 }
 
-int TcpSocket::Send(const void* pData, size_t pSize)
+int TcpSocket::Send(const void* pData, int pSize)
 {
 	int lSentByteCount = 0;
 	if (mSocket != INVALID_SOCKET && pData != 0 && pSize > 0)
@@ -501,7 +501,7 @@ int TcpSocket::Send(const void* pData, size_t pSize)
 	return (lSentByteCount);
 }
 
-int TcpSocket::Receive(void* pData, size_t pMaxSize)
+int TcpSocket::Receive(void* pData, int pMaxSize)
 {
 	int lSize = -1;
 	if (mSocket != INVALID_SOCKET)
@@ -546,7 +546,7 @@ int TcpSocket::Receive(void* pData, size_t pMaxSize)
 	return (lSize);
 }
 
-bool TcpSocket::Unreceive(void* pData, size_t pByteCount)
+bool TcpSocket::Unreceive(void* pData, int pByteCount)
 {
 	assert(mUnreceivedByteCount == 0);
 	assert(pByteCount <= sizeof(mUnreceivedArray));
@@ -568,7 +568,7 @@ void TcpSocket::SetDatagramReceiver(DatagramReceiver* pReceiver)
 	mReceiver = pReceiver;
 }
 
-int TcpSocket::ReceiveDatagram(void* pData, size_t pMaxSize)
+int TcpSocket::ReceiveDatagram(void* pData, int pMaxSize)
 {
 	int lReceivedByteCount;
 	if (mReceiver)
@@ -633,7 +633,7 @@ TcpVSocket* TcpMuxSocket::Connect(const SocketAddress& pTargetAddress, const std
 	{
 		std::string lConnectString(mConnectionString, sizeof(mConnectionString));
 		lConnectString += pConnectionId;
-		lOk = (lSocket->Send(lConnectString.c_str(), lConnectString.length()) == (int)lConnectString.length());
+		lOk = (lSocket->Send(lConnectString.c_str(), (int)lConnectString.length()) == (int)lConnectString.length());
 		if (!lOk)
 		{
 			mLog.AError("Could not send connect data to server!");
@@ -817,9 +817,9 @@ bool TcpMuxSocket::RemoveConnectedSocketNoLock(TcpVSocket* pSocket)
 	return (lEraseCount > 0);
 }
 
-size_t TcpMuxSocket::BuildConnectedSocketSet(FdSet& pSocketSet)
+int TcpMuxSocket::BuildConnectedSocketSet(FdSet& pSocketSet)
 {
-	size_t lSocketCount;
+	int lSocketCount;
 	if (mActiveReceiverMapChanged)
 	{
 		ScopeLock lLock(&mIoLock);
@@ -845,7 +845,7 @@ size_t TcpMuxSocket::BuildConnectedSocketSet(FdSet& pSocketSet)
 	{
 		lSocketCount = FdSetHelper::Copy(pSocketSet, mBackupFdSet);
 	}
-	assert(lSocketCount == LEPRA_FD_GET_COUNT(&pSocketSet));
+	assert(lSocketCount == (int)LEPRA_FD_GET_COUNT(&pSocketSet));
 	return (lSocketCount);
 }
 
@@ -958,13 +958,13 @@ void TcpMuxSocket::SelectThreadEntry()
 	mActiveReceiverMapChanged = true;
 	while (IsOpen() && !mSelectThread.GetStopRequest())
 	{
-		size_t lSocketCount = BuildConnectedSocketSet(lReadSet);
+		int lSocketCount = BuildConnectedSocketSet(lReadSet);
 		if (lSocketCount > 0)
 		{
 			timeval lTimeout;
 			lTimeout.tv_sec = 0;
 			lTimeout.tv_usec = 200000;
-			assert(lSocketCount == LEPRA_FD_GET_COUNT(&lReadSet));
+			assert(lSocketCount == (int)LEPRA_FD_GET_COUNT(&lReadSet));
 			FdSet lExceptionSet;
 			FdSetHelper::Copy(lExceptionSet, lReadSet);
 			int lSelectCount = ::select(LEPRA_FD_GET_MAX_HANDLE(lReadSet)+1, LEPRA_FDS(&lReadSet), 0, LEPRA_FDS(&lExceptionSet), &lTimeout);
@@ -1070,7 +1070,7 @@ int TcpVSocket::SendBuffer()
 	return (lSendResult);
 }
 
-int TcpVSocket::Receive(void* pData, size_t pMaxSize, bool pDatagram)
+int TcpVSocket::Receive(void* pData, int pMaxSize, bool pDatagram)
 {
 	int lReceiveResult = pDatagram? TcpSocket::ReceiveDatagram(pData, pMaxSize) : TcpSocket::Receive(pData, pMaxSize);
 	if (lReceiveResult > 0)
@@ -1080,7 +1080,7 @@ int TcpVSocket::Receive(void* pData, size_t pMaxSize, bool pDatagram)
 	return (lReceiveResult);
 }
 
-int TcpVSocket::Receive(void* pData, size_t pMaxSize, double pTimeout, bool pDatagram)
+int TcpVSocket::Receive(void* pData, int pMaxSize, double pTimeout, bool pDatagram)
 {
 	HiResTimer lTimer;
 	int lReceiveCount;
@@ -1239,7 +1239,7 @@ UdpVSocket* UdpMuxSocket::Connect(const SocketAddress& pTargetAddress, const std
 			mSocketTable.Insert(pTargetAddress, lSocket);
 			std::string lConnectString(mConnectionString, sizeof(mConnectionString));
 			lConnectString += pConnectionId;
-			if (lSocket->DirectSend(lConnectString.c_str(), lConnectString.length()) != (int)lConnectString.length())
+			if (lSocket->DirectSend(lConnectString.c_str(), (int)lConnectString.length()) != (int)lConnectString.length())
 			{
 				mLog.AError("Send to server (as connect) failed.");
 				CloseSocket(lSocket);
@@ -1489,7 +1489,7 @@ void UdpVSocket::Init(UdpMuxSocket& pSocket, const SocketAddress& pTargetAddress
 	SetConnectionId(pConnectionId);
 }
 
-int UdpVSocket::Receive(void* pData, size_t pLength)
+int UdpVSocket::Receive(void* pData, int pLength)
 {
 	int lReadSize = 0;
 	if (mReceiveBufferList.GetCount() > 0)
@@ -1510,7 +1510,7 @@ int UdpVSocket::Receive(void* pData, size_t pLength)
 			lReadSize = lReceiveBuffer->mDataSize;
 			if (lReceiveBuffer->mDataSize > 0)
 			{
-				lReadSize = std::min(lReceiveBuffer->mDataSize, (int)pLength);
+				lReadSize = (int)std::min(lReceiveBuffer->mDataSize, (int)pLength);
 				::memcpy(pData, lReceiveBuffer->mDataBuffer, lReadSize);
 			}
 			((UdpMuxSocket*)mMuxIo)->RecycleBuffer(lReceiveBuffer);
@@ -1530,7 +1530,7 @@ int UdpVSocket::SendBuffer()
 	return (lSendResult);
 }
 
-int UdpVSocket::DirectSend(const void* pData, size_t pLength)
+int UdpVSocket::DirectSend(const void* pData, int pLength)
 {
 	return (((UdpMuxSocket*)mMuxIo)->SendTo((const uint8*)pData, pLength, mTargetAddress));
 }
@@ -1630,7 +1630,7 @@ IOError UdpVSocket::ReadRaw(void* pData, size_t pLength)
 			}
 			else
 			{
-				mRawReadBufferIndex += pLength;
+				mRawReadBufferIndex += (int)pLength;
 			}
 			lResult = IO_OK;
 			break;
@@ -1653,7 +1653,7 @@ IOError UdpVSocket::Skip(size_t /*pLength*/)
 
 IOError UdpVSocket::WriteRaw(const void* pData, size_t pLength)
 {
-	return (AppendSendBuffer(pData, pLength));
+	return (AppendSendBuffer(pData, (int)pLength));
 }
 
 void UdpVSocket::Flush()
@@ -2147,7 +2147,7 @@ Datagram& GameSocket::GetSendBuffer(bool pSafe) const
 	}
 }
 
-IOError GameSocket::AppendSendBuffer(bool pSafe, const void* pData, size_t pLength)
+IOError GameSocket::AppendSendBuffer(bool pSafe, const void* pData, int pLength)
 {
 	IOError lSendResult = IO_OK;
 	if (pSafe)
@@ -2188,7 +2188,7 @@ bool GameSocket::HasSendData() const
 	return (mTcpSocket->HasSendData() || mUdpSocket->HasSendData());
 }
 
-int GameSocket::Receive(bool pSafe, void* pData, size_t pLength)
+int GameSocket::Receive(bool pSafe, void* pData, int pLength)
 {
 	int lReceiveCount;
 	if (pSafe)

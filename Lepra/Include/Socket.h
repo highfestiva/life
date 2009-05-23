@@ -164,7 +164,7 @@ public:
 
 	void ClearOutputData();
 	Datagram& GetSendBuffer() const;
-	IOError AppendSendBuffer(const void* pData, size_t pLength);
+	IOError AppendSendBuffer(const void* pData, int pLength);
 	bool HasSendData() const;
 
 	// Sets/Gets mInSendBuffer. Used to keep track on whether this is added
@@ -185,7 +185,7 @@ protected:
 class DatagramReceiver
 {
 public:
-	virtual int Receive(TcpSocket* pSocket, void* pBuffer, size_t pMaxSize) = 0;
+	virtual int Receive(TcpSocket* pSocket, void* pBuffer, int pMaxSize) = 0;
 };
 
 
@@ -250,12 +250,12 @@ public:
 
 	const SocketAddress& GetTargetAddress() const;
 
-	int Send(const void* pData, size_t pSize);
-	int Receive(void* pData, size_t pMaxSize);
-	bool Unreceive(void* pData, size_t pByteCount);
+	int Send(const void* pData, int pSize);
+	int Receive(void* pData, int pMaxSize);
+	bool Unreceive(void* pData, int pByteCount);
 
 	void SetDatagramReceiver(DatagramReceiver* pReceiver);
-	int ReceiveDatagram(void* pData, size_t pMaxSize);
+	int ReceiveDatagram(void* pData, int pMaxSize);
 
 protected:
 	friend class TcpListenerSocket;
@@ -265,7 +265,7 @@ protected:
 private:
 	DatagramReceiver* mReceiver;
 	uint8 mUnreceivedArray[16];
-	size_t mUnreceivedByteCount;
+	int mUnreceivedByteCount;
 	SocketAddress mTargetAddress;
 	TcpListenerSocket* mServerSocket;
 
@@ -324,7 +324,7 @@ private:
 		TcpListenerSocket* pServerSocket, DatagramReceiver* pReceiver);
 	void AddConnectedSocket(TcpVSocket* pSocket);
 	bool RemoveConnectedSocketNoLock(TcpVSocket* pSocket);
-	size_t BuildConnectedSocketSet(FdSet& pSocketSet);
+	int BuildConnectedSocketSet(FdSet& pSocketSet);
 	void PushReceiverSockets(const FdSet& pSocketSet);
 	AcceptStatus QueryReceiveConnectString(TcpVSocket* pSocket);
 	void ReleaseSocketThreads();
@@ -361,8 +361,8 @@ public:
 	bool Connect(const SocketAddress& pTargetAddress, const std::string& pConnectionId, double pTimeout);
 
 	int SendBuffer();	// ::send() return value.
-	int Receive(void* pData, size_t pMaxSize, bool pDatagram = true);
-	int Receive(void* pData, size_t pMaxSize, double pTimeout, bool pDatagram);
+	int Receive(void* pData, int pMaxSize, bool pDatagram = true);
+	int Receive(void* pData, int pMaxSize, double pTimeout, bool pDatagram);
 
 private:
 	LOG_CLASS_DECLARE();
@@ -459,9 +459,9 @@ public:
 
 	void ClearAll();
 
-	int Receive(void* pData, size_t pLength);	// ::recv() return value.
+	int Receive(void* pData, int pLength);	// ::recv() return value.
 	int SendBuffer();	// ::send() return value.
-	int DirectSend(const void* pData, size_t pLength);	// Writes buffer, flushes.
+	int DirectSend(const void* pData, int pLength);	// Writes buffer, flushes.
 
 	const SocketAddress& GetTargetAddress() const;
 
@@ -617,11 +617,11 @@ public:
 
 	void ClearOutputData();
 	Datagram& GetSendBuffer(bool pSafe) const;
-	IOError AppendSendBuffer(bool pSafe, const void* pData, size_t pLength);
+	IOError AppendSendBuffer(bool pSafe, const void* pData, int pLength);
 	int SendBuffer();	// ::send() and ::sendto() return values.
 	bool HasSendData() const;
 
-	int Receive(bool pSafe, void* pData, size_t pLength);
+	int Receive(bool pSafe, void* pData, int pLength);
 
 	void TryAddReceiverSocket();
 

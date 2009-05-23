@@ -619,7 +619,7 @@ void ClientReceive(int pAgentIndex)
 		Cure::Packet::ParseResult lParseResult;
 		do
 		{
-			for (size_t i = 0; i < lPacket->GetMessageCount(); ++i)
+			for (int i = 0; i < lPacket->GetMessageCount(); ++i)
 			{
 				Cure::MessageObjectPosition* lMessage = (Cure::MessageObjectPosition*)lPacket->GetMessageAt(0);
 				int lClientFrameIndex = -1;
@@ -748,7 +748,7 @@ void ServerReceive()
 			Cure::Packet::ParseResult lParseResult;
 			do
 			{
-				for (size_t i = 0; i < lPacket->GetMessageCount(); ++i)
+				for (int i = 0; i < lPacket->GetMessageCount(); ++i)
 				{
 					Cure::MessageObjectPosition* lMessage = (Cure::MessageObjectPosition*)lPacket->GetMessageAt(i);
 					int lClientIndex = -1;

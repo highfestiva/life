@@ -167,14 +167,14 @@ void Packet::AddPacketSize(int pSize)
 	assert((int)mPacketSize <= PACKET_LENGTH);
 }
 
-size_t Packet::GetMessageCount() const
+int Packet::GetMessageCount() const
 {
-	return (mMessageVector.size());
+	return ((int)mMessageVector.size());
 }
 
-Message* Packet::GetMessageAt(size_t pIndex) const
+Message* Packet::GetMessageAt(int pIndex) const
 {
-	assert(mMessageVector.size() > pIndex);
+	assert((int)mMessageVector.size() > pIndex);
 	return (mMessageVector[pIndex]);
 }
 
@@ -188,12 +188,12 @@ Lepra::uint8* Packet::GetWriteBuffer() const
 	return ((Lepra::uint8*)c_str());
 }
 
-size_t Packet::GetBufferSize() const
+int Packet::GetBufferSize() const
 {
-	return (length());
+	return ((int)length());
 }
 
-int Packet::Receive(Lepra::TcpSocket* pSocket, void* pBuffer, size_t pMaxSize)
+int Packet::Receive(Lepra::TcpSocket* pSocket, void* pBuffer, int pMaxSize)
 {
 	// Split up the TCP stream into packets that all fit into the buffer.
 
@@ -202,7 +202,7 @@ int Packet::Receive(Lepra::TcpSocket* pSocket, void* pBuffer, size_t pMaxSize)
 	const int lReadQuickLength = 4;
 	assert(lReadQuickLength >= PACKET_SIZE_MARKER_LENGTH);
 	int lReceiveCount = 0;
-	bool lOk = (pMaxSize > (size_t)(lCurrentOffset+lReadQuickLength));
+	bool lOk = (pMaxSize > lCurrentOffset+lReadQuickLength);
 	if (lOk)
 	{
 		int lHeaderReceiveCount = pSocket->Receive(lBuffer+lCurrentOffset, lReadQuickLength);
@@ -232,7 +232,7 @@ int Packet::Receive(Lepra::TcpSocket* pSocket, void* pBuffer, size_t pMaxSize)
 		{
 			const int lContentSize = lPacketSize-lReadQuickLength+PACKET_SIZE_MARKER_LENGTH;
 			int lExtraHeaderSize = lContentSize;
-			if ((size_t)(lCurrentOffset+PACKET_SIZE_MARKER_LENGTH+lPacketSize+lReadQuickLength) < pMaxSize)
+			if (lCurrentOffset+PACKET_SIZE_MARKER_LENGTH+lPacketSize+lReadQuickLength < pMaxSize)
 			{
 				// Try and read the NEXT header, if available.
 				lExtraHeaderSize += lReadQuickLength;
@@ -818,7 +818,7 @@ MessageFactory* PacketFactory::GetMessageFactory() const
 	return (mMessageFactory);
 }
 
-int PacketFactory::Receive(Lepra::TcpSocket* pSocket, void* pBuffer, size_t pMaxSize)
+int PacketFactory::Receive(Lepra::TcpSocket* pSocket, void* pBuffer, int pMaxSize)
 {
 	return (Packet::Receive(pSocket, pBuffer, pMaxSize));
 }

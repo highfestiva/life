@@ -177,8 +177,8 @@ bool CollisionDetector2D<_TVarType>::StaticAABRToAABRTest(const AABR<_TVarType>&
 		Vector2D<_TVarType> lBox2ExtentMin(pBox2.GetPosition() - pBox2.GetSize());
 		Vector2D<_TVarType> lBox2ExtentMax(pBox2.GetPosition() + pBox2.GetSize());
 
-		Vector2D<_TVarType> lOverlapMin(max(lBox1ExtentMin.x, lBox2ExtentMin.x), max(lBox1ExtentMin.y, lBox2ExtentMin.y));
-		Vector2D<_TVarType> lOverlapMax(min(lBox1ExtentMax.x, lBox2ExtentMax.x), min(lBox1ExtentMax.y, lBox2ExtentMax.y));
+		Vector2D<_TVarType> lOverlapMin(std::max(lBox1ExtentMin.x, lBox2ExtentMin.x), std::max(lBox1ExtentMin.y, lBox2ExtentMin.y));
+		Vector2D<_TVarType> lOverlapMax(std::min(lBox1ExtentMax.x, lBox2ExtentMax.x), std::min(lBox1ExtentMax.y, lBox2ExtentMax.y));
 
 		pCollisionInfo->mTimeToCollision = 0;
 		pCollisionInfo->mPointOfCollision = (lOverlapMin + lOverlapMax) * (_TVarType)0.5;

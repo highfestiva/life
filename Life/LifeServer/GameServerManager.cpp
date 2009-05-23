@@ -348,8 +348,8 @@ void GameServerManager::TickInput()
 				do
 				{
 					// Walk messages.
-					const size_t lMessageCount = lPacket->GetMessageCount();
-					for (size_t x = 0; x < lMessageCount; ++x)
+					const int lMessageCount = lPacket->GetMessageCount();
+					for (int x = 0; x < lMessageCount; ++x)
 					{
 						Cure::Message* lMessage = lPacket->GetMessageAt(x);
 						ProcessNetworkInputMessage(lClient, lMessage);
@@ -368,10 +368,14 @@ void GameServerManager::TickInput()
 				mLog.AError("Problem with receiving crap data!");
 			}
 			break;
-			case Cure::NetworkAgent::RECEIVE_NO_DATA:
 			case Cure::NetworkAgent::RECEIVE_CONNECTION_BROKEN:
 			{
 				mLog.AError("Disconnected from client!");
+			}
+			break;
+			case Cure::NetworkAgent::RECEIVE_NO_DATA:
+			{
+				// Nothing, really.
 			}
 			break;
 		}

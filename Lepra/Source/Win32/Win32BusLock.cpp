@@ -4,13 +4,7 @@
 
 
 
-#ifndef _WIN32_WINNT
-#define _WIN32_WINNT	0x0502
-#endif // _WIN32_WINNT
-
-
-
-#include <Windows.h>
+#include "../../Include/Win32/Win32Target.h"
 #include "../../Include/BusLock.h"
 
 

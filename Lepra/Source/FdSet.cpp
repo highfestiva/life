@@ -13,13 +13,13 @@ namespace Lepra
 
 
 
-size_t FdSetHelper::Copy(FdSet& pDestination, const FdSet& pSource)
+int FdSetHelper::Copy(FdSet& pDestination, const FdSet& pSource)
 {
 #ifdef LEPRA_WINDOWS
 	::memcpy(&pDestination, &pSource, sizeof(pSource.fd_count)+pSource.fd_count*sizeof(pSource.fd_array[0]));
 	return (pSource.fd_count);
 #else // Posix
-	size_t lSocketCount = pSource.mSocketArray.size();
+	int lSocketCount = (int)pSource.mSocketArray.size();
 	if (lSocketCount)
 	{
 		int lMaxSocket = pSource.mSocketArray[lSocketCount-1];

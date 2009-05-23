@@ -1,18 +1,24 @@
-/*
-	Class:  Win32Thread
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Righteous Games
-*/
+
+// Author: Jonas Byström
+// Copyright (c) 2002-2006, Righteous Games
+
+
 
 #include <assert.h>
 #include "../../Include/Win32/Win32Thread.h"
 #include "../../Include/Lepra.h"
 #include "../../Include/Log.h"
 
+
+
 namespace Lepra
 {
 
+
+
 ThreadPointerStorage ThreadPointerStorage::smTPS;
+
+
 
 ThreadPointerStorage::ThreadPointerStorage()
 {
@@ -848,4 +854,6 @@ void Win32RWLock::Release()
 	}
 }
 
-} // End namespace.
+
+
+}

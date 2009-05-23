@@ -114,7 +114,7 @@ PopupList* FileNameField::CreatePopupList()
 			}
 		}
 
-		lPopupList->SetPreferredHeight(lLabelHeight * min(lPopupList->GetNumChildren(), 10));
+		lPopupList->SetPreferredHeight(lLabelHeight * (int)std::min(lPopupList->GetNumChildren(), 10));
 	}
 
 	return lPopupList;

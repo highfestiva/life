@@ -146,7 +146,7 @@ DefaultStaticGeometryHandler::DefaultStaticGeometryHandler(TriangleBasedGeometry
 
 void DefaultStaticGeometryHandler::UpdateGeometry(float pLODLevel)
 {
-	int lNewLODIndex = min(mNumLODLevels - 1, (int)floor(pLODLevel * (mNumLODLevels - 1) + 0.5));
+	int lNewLODIndex = (int)std::min(mNumLODLevels - 1, (int)floor(pLODLevel * (mNumLODLevels - 1) + 0.5));
 
 	if (lNewLODIndex != mCurrentLODLevel)
 	{
@@ -231,7 +231,7 @@ DefaultAnimatedStaticGeometryHandler::DefaultAnimatedStaticGeometryHandler(Anima
 
 void DefaultAnimatedStaticGeometryHandler::UpdateGeometry(float pLODLevel)
 {
-	int lNewLODIndex = min(mNumLODLevels - 1, (int)floor(pLODLevel * (mNumLODLevels - 1) + 0.5));
+	int lNewLODIndex = (int)std::min(mNumLODLevels - 1, (int)floor(pLODLevel * (mNumLODLevels - 1) + 0.5));
 
 	if (lNewLODIndex != mCurrentLODLevel)
 	{

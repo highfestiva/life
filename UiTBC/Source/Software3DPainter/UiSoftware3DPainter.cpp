@@ -1951,9 +1951,9 @@ void Software3DPainter::ProcessLights()
 		for (i = 0; i < 3; i++)
 		{
 			DataRGB* lRGB = mPoint[i].mRGB;
-			lRGB->mLightProcessedR = min(lRGB->mLightProcessedR, 1.0f);
-			lRGB->mLightProcessedG = min(lRGB->mLightProcessedG, 1.0f);
-			lRGB->mLightProcessedB = min(lRGB->mLightProcessedB, 1.0f);
+			lRGB->mLightProcessedR = std::min(lRGB->mLightProcessedR, 1.0f);
+			lRGB->mLightProcessedG = std::min(lRGB->mLightProcessedG, 1.0f);
+			lRGB->mLightProcessedB = std::min(lRGB->mLightProcessedB, 1.0f);
 		}
 	} // End if(LIGHTS_ACTIVE)
 	else

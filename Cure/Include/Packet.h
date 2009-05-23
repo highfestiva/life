@@ -50,13 +50,13 @@ public:
 	unsigned GetPacketSize() const;
 	void SetPacketSize(int pSize);
 	void AddPacketSize(int pSize);
-	size_t GetMessageCount() const;
-	Message* GetMessageAt(size_t pIndex) const;
+	int GetMessageCount() const;
+	Message* GetMessageAt(int pIndex) const;
 	const Lepra::uint8* GetReadBuffer() const;
 	Lepra::uint8* GetWriteBuffer() const;
-	size_t GetBufferSize() const;
+	int GetBufferSize() const;
 
-	static int Receive(Lepra::TcpSocket* pSocket, void* pBuffer, size_t pMaxSize);
+	static int Receive(Lepra::TcpSocket* pSocket, void* pBuffer, int pMaxSize);
 
 protected:
 	static bool ReadHeader(int& pThisPacketSize, const Lepra::uint8* pBuffer, int pByteCount);
@@ -260,7 +260,7 @@ public:
 	void SetMessageFactory(MessageFactory* pMessageFactory);
 	MessageFactory* GetMessageFactory() const;
 
-	int Receive(Lepra::TcpSocket* pSocket, void* pBuffer, size_t pMaxSize);
+	int Receive(Lepra::TcpSocket* pSocket, void* pBuffer, int pMaxSize);
 
 private:
 	MessageFactory* mMessageFactory;

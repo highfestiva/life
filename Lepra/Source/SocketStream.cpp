@@ -41,7 +41,7 @@ IOError SocketInputStream::ReadRaw(void* pData, size_t pLength)
 		// but suddenly stops in the middle of something? The connection will 
 		// never shut down, and no data will ever arrive. Several such connections
 		// will occupy a whole server and make it useless.
-		lRead = mSocket->Receive(&((uint8*)pData)[lSum], pLength - lSum);
+		lRead = mSocket->Receive(&((uint8*)pData)[lSum], (int)(pLength-lSum));
 
 		if (lRead <= 0)
 			return IO_STREAM_NOT_OPEN;
@@ -55,7 +55,7 @@ IOError SocketInputStream::ReadRaw(void* pData, size_t pLength)
 IOError SocketInputStream::Skip(size_t pLength)
 {
 	uint8 lBuffer[SocketBase::BUFFER_SIZE];
-	unsigned lCount = pLength / SocketBase::BUFFER_SIZE;
+	size_t lCount = pLength / SocketBase::BUFFER_SIZE;
 	IOError lIOError;
 
 	for (unsigned i = 0; i < lCount; i++)
@@ -92,7 +92,7 @@ IOError SocketOutputStream::WriteRaw(void* pData, size_t pLength)
 {
 	if (mSocket->IsConnected() == true)
 	{
-		mSocket->Send((uint8*)pData, pLength);
+		mSocket->Send((uint8*)pData, (int)pLength);
 		return IO_OK;
 	}
 	return IO_STREAM_NOT_OPEN;

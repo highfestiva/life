@@ -6,12 +6,7 @@
 
 #pragma once
 
-#ifndef _WIN32_WINNT
-#define _WIN32_WINNT	0x0400
-#endif // _WIN32_WINNT
-
-#include <Windows.h>
-#undef INT32
+#include "Win32Target.h"
 #include "../Thread.h"
 
 

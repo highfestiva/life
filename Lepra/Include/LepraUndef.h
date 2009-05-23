@@ -6,46 +6,52 @@
 
 #ifdef ASYNC
 #undef ASYNCH
-#endif // ASYNCH
+#endif
 #ifdef CreateDirectory
 #undef CreateDirectory
-#endif // CreateDirectory
+#endif
 #ifdef CreateFile
 #undef CreateFile
-#endif // CreateFile
+#endif
 #ifdef CreateWindow
 #undef CreateWindow
-#endif // CreateWindow
+#endif
 #ifdef GetCurrentDirectory
 #undef GetCurrentDirectory
-#endif // GetCurrentDirectory
+#endif
 #ifdef GetObject
 #undef GetObject
-#endif // GetObject
+#endif
 #ifdef GetObjectA
 #undef GetObjectA
-#endif // GetObjectA
+#endif
 #ifdef GetObjectW
 #undef GetObjectW
-#endif // GetObjectW
+#endif
 #ifdef GetUserName
 #undef GetUserName
-#endif // GetUserName
+#endif
 #ifdef IsMaximized
 #undef IsMaximized
-#endif // IsMaximized
+#endif
 #ifdef IsMinimized
 #undef IsMinimized
-#endif // IsMinimized
+#endif
 #ifdef Rect
 #undef Rect
-#endif // Rect
+#endif
 #ifdef RemoveDirectory
 #undef RemoveDirectory
-#endif // RemoveDirectory
+#endif
 #ifdef SYNCH
 #undef SYNCH
-#endif // SYNCH
+#endif
 #ifdef ToUnicode
 #undef ToUnicode
-#endif // ToUnicode
+#endif
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif

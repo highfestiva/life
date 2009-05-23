@@ -18,6 +18,10 @@
 #pragma warning(push)	// Disable warnings for M$ header files.
 #pragma warning(disable: 4201)	// Nonstandard extention: unnamed struct.
 
+#ifndef _WIN32_WINNT
+#define _WIN32_WINNT	0x0400
+#endif // _WIN32_WINNT
+
 #include <Windows.h>
 #include <WindowsX.h>
 #ifdef LEPRA_NETWORK_IPV6

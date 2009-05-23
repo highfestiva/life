@@ -163,7 +163,7 @@ void TextField::SpawnPopupList()
 			Lepra::PixelRect lRect(mTopParent->ScreenToWindow(GetScreenRect()));
 
 			mListControl->UpdateLayout();
-			int lHeight = min(mListControl->GetPreferredHeight(), min(mListControl->GetContentSize().y, lClientScreenRect.mBottom - lScreenRect.mBottom));
+			int lHeight = (int)std::min(mListControl->GetPreferredHeight(), std::min(mListControl->GetContentSize().y, lClientScreenRect.mBottom - lScreenRect.mBottom));
 
 			mListControl->SetPreferredSize(GetSize().x, lHeight);
 

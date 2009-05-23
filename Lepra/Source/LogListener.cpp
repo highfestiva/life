@@ -4,8 +4,11 @@
 
 
 
+#include "../Include/LepraTarget.h"
 #include <assert.h>
+#if defined(LEPRA_POSIX)
 #include <ncurses.h>
+#endif // POSIX
 #include "../Include/LogListener.h"
 #include "../Include/Time.h"
 

@@ -501,8 +501,8 @@ void GameClientSlaveManager::TickNetworkInput()
 			do
 			{
 				// Walk messages.
-				const size_t lMessageCount = lPacket->GetMessageCount();
-				for (size_t x = 0; x < lMessageCount; ++x)
+				const int lMessageCount = lPacket->GetMessageCount();
+				for (int x = 0; x < lMessageCount; ++x)
 				{
 					Cure::Message* lMessage = lPacket->GetMessageAt(x);
 					//log_volatile(mLog.Tracef(_T("Received message of type %i."), lMessage->GetType()));

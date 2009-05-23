@@ -1252,7 +1252,7 @@ bool TestNetwork(const Lepra::LogDecorator& pAccount)
 			lSender.Send("A1B2C3", 6);
 			class TestReceiver: public Lepra::DatagramReceiver
 			{
-				int Receive(Lepra::TcpSocket* pSocket, void* pBuffer, size_t)
+				int Receive(Lepra::TcpSocket* pSocket, void* pBuffer, int)
 				{
 					static int x = 6;
 					x -= 2;
