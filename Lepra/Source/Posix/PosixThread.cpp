@@ -51,6 +51,129 @@ Thread* ThreadPointerStorage::GetPointer()
 
 
 
+StaticThread gMainThread(_T("MainThread"));
+
+// This is where the thread starts. A global standard C-function.
+DWORD __stdcall ThreadEntry(void* pThread)
+{
+	Thread* lThread = (Thread*)pThread;
+	ThreadPointerStorage::SetPointer(lThread);
+	assert(ThreadPointerStorage::GetPointer() == lThread);
+	assert(Thread::GetCurrentThread() == lThread);
+	RunThread(lThread);
+	return 0;
+}
+
+void Thread::InitializeMainThread(const String& pThreadName)
+{
+	ThreadPointerStorage::SetPointer(&gMainThread);
+	assert(ThreadPointerStorage::GetPointer() == &gMainThread);
+	assert(Thread::GetCurrentThread() == &gMainThread);
+}
+
+size_t Thread::GetCurrentThreadId()
+{
+	return (::gettid());
+}
+
+Thread* Thread::GetCurrentThread()
+{
+	return ThreadPointerStorage::GetPointer();
+}
+
+void Thread::SetCpuAffinityMask(uint64 /*pAffinityMask*/)
+{
+	// This is not yet implemented on a per-thread basis in GNU/Linux.
+	// I'm also guessing that we won't need it.
+}
+
+void Thread::Sleep(unsigned int pMilliSeconds)
+{
+	::usleep(pMilliSeconds*1000);
+}
+
+bool Thread::Start()
+{
+	bool lOk = true;
+
+	if (!IsRunning())
+	{
+		SetStopRequest(false);
+
+		if(::pthread_create(&mThreadHandle, 0, ThreadEntry, this) == 0)
+		{
+			// Try to wait for newly created thread.
+			for (int x = 0; !IsRunning() && x < 1000; ++x)
+			{
+				Thread::YieldCpu();
+			}
+		}
+		else
+		{
+			SetRunning(false);
+			mLog.Errorf((_T("Failed to start thread ")+GetThreadName()+_T("!")).c_str());
+			lOk = false;
+		}
+	}
+	return (lOk);
+}
+
+bool Thread::Join()
+{
+	SetStopRequest(true);
+	if (GetThreadHandle() != 0)
+	{
+		assert(GetThreadId() != GetCurrentThreadId());
+		Thread::YieldCpu();	// Try to let thread self destruct.
+		::pthread_join(mThreadHandle, 0);
+		assert(!IsRunning());
+		mThreadHandle = 0;
+		mThreadId = 0;
+	}
+	SetStopRequest(false);
+	return (true);
+}
+
+bool Thread::Join(float64 pTimeOut)
+{
+	SetStopRequest(true);
+	if (GetThreadHandle() != 0)
+	{
+		assert(GetThreadId() != GetCurrentThreadId());
+		timespec lTimeSpec;
+		GetAbsTime(pTimeOut, lTimeSpec);
+		if (::sem_timedwait(&mSemaphore, &lTimeSpec) != 0)
+		{
+			// Possible dead lock...
+			mLog.Warningf((_T("Failed to timed join thread \"") + GetThreadName() + _T("\"! Deadlock?")).c_str());
+			return (false);	// RAII simplifies here.
+		}
+		Join();
+	}
+	SetStopRequest(false);
+	return (true);
+}
+
+void Thread::Kill()
+{
+	if (GetThreadHandle() != 0)
+	{
+		assert(GetThreadId() != GetCurrentThreadId());
+		mLog.Warningf(_T("Forcing kill of thread %s."), GetThreadName().c_str());
+		::pthread_kill(mThreadHandle, SIGKILL);
+		Join();
+		SetRunning(false);
+	}
+	SetStopRequest(false);
+}
+
+void Thread::YieldCpu()
+{
+	::sched_yield();
+}
+
+
+
 PosixLock::PosixLock()
 {
 	::pthread_mutex_init(&mMutex, 0);
