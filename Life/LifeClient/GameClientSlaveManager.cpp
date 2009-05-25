@@ -56,50 +56,50 @@ GameClientSlaveManager::GameClientSlaveManager(GameClientMasterTicker* pMaster, 
 	{
 		case 0:
 		{
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.ConsoleToggle", UiLepra::InputManager::KEY_PARAGRAPH);
+			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.ConsoleToggle", UiLepra::InputManager::IN_KBD_PARAGRAPH);
 
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Forward",	UiLepra::InputManager::KEY_W);
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Backward", UiLepra::InputManager::KEY_S);
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Left", UiLepra::InputManager::KEY_A);
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Right", UiLepra::InputManager::KEY_D);
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Up", UiLepra::InputManager::KEY_E);
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Down", UiLepra::InputManager::KEY_Q);
+			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Forward",	UiLepra::InputManager::IN_KBD_W);
+			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Backward", UiLepra::InputManager::IN_KBD_S);
+			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Left", UiLepra::InputManager::IN_KBD_A);
+			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Right", UiLepra::InputManager::IN_KBD_D);
+			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Up", UiLepra::InputManager::IN_KBD_E);
+			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Down", UiLepra::InputManager::IN_KBD_Q);
 		}
 		break;
 		case 1:
 		{
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.ConsoleToggle", UiLepra::InputManager::KEY_SCROLL_LOCK);
+			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.ConsoleToggle", UiLepra::InputManager::IN_KBD_SCROLL_LOCK);
 
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Forward", UiLepra::InputManager::KEY_UP);
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Backward", UiLepra::InputManager::KEY_DOWN);
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Left", UiLepra::InputManager::KEY_LEFT);
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Right", UiLepra::InputManager::KEY_RIGHT);
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Up", UiLepra::InputManager::KEY_NUMPAD_1);
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Down", UiLepra::InputManager::KEY_NUMPAD_0);
+			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Forward", UiLepra::InputManager::IN_KBD_UP);
+			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Backward", UiLepra::InputManager::IN_KBD_DOWN);
+			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Left", UiLepra::InputManager::IN_KBD_LEFT);
+			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Right", UiLepra::InputManager::IN_KBD_RIGHT);
+			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Up", UiLepra::InputManager::IN_KBD_NUMPAD_1);
+			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Down", UiLepra::InputManager::IN_KBD_NUMPAD_0);
 		}
 		break;
 		case 2:
 		{
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.ConsoleToggle", UiLepra::InputManager::KEY_F12);
+			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.ConsoleToggle", UiLepra::InputManager::IN_KBD_F12);
 
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Forward", UiLepra::InputManager::KEY_K);
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Backward", UiLepra::InputManager::KEY_COMMA);
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Left", UiLepra::InputManager::KEY_M);
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Right", UiLepra::InputManager::KEY_DOT);
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Up", UiLepra::InputManager::KEY_L);
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Down", UiLepra::InputManager::KEY_J);
+			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Forward", UiLepra::InputManager::IN_KBD_K);
+			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Backward", UiLepra::InputManager::IN_KBD_COMMA);
+			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Left", UiLepra::InputManager::IN_KBD_M);
+			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Right", UiLepra::InputManager::IN_KBD_DOT);
+			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Up", UiLepra::InputManager::IN_KBD_L);
+			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Down", UiLepra::InputManager::IN_KBD_J);
 		}
 		break;
 		case 3:
 		{
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.ConsoleToggle", UiLepra::InputManager::KEY_PAUSE);
+			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.ConsoleToggle", UiLepra::InputManager::IN_KBD_PAUSE);
 
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Forward", UiLepra::InputManager::KEY_NUMPAD_8);
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Backward", UiLepra::InputManager::KEY_NUMPAD_5);
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Left", UiLepra::InputManager::KEY_NUMPAD_4);
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Right", UiLepra::InputManager::KEY_NUMPAD_6);
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Up", UiLepra::InputManager::KEY_NUMPAD_9);
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Down", UiLepra::InputManager::KEY_NUMPAD_7);
+			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Forward", UiLepra::InputManager::IN_KBD_NUMPAD_8);
+			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Backward", UiLepra::InputManager::IN_KBD_NUMPAD_5);
+			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Left", UiLepra::InputManager::IN_KBD_NUMPAD_4);
+			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Right", UiLepra::InputManager::IN_KBD_NUMPAD_6);
+			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Up", UiLepra::InputManager::IN_KBD_NUMPAD_9);
+			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Down", UiLepra::InputManager::IN_KBD_NUMPAD_7);
 		}
 		break;
 	}

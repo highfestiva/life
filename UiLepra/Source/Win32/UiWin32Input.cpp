@@ -598,13 +598,13 @@ void Win32InputManager::SetKey(KeyCode pWParam, long pLParam, bool pIsDown)
 	{
 		switch (pWParam)
 		{
-			case KEY_LCTRL:		pWParam = KEY_RCTRL;	break;
-			case KEY_LALT:		pWParam = KEY_RALT;	break;
+			case IN_KBD_LCTRL:		pWParam = IN_KBD_RCTRL;	break;
+			case IN_KBD_LALT:		pWParam = IN_KBD_RALT;	break;
 		}
 	}
-	else if (pWParam == KEY_LSHIFT && (pLParam&0xFF0000) == 0x360000)
+	else if (pWParam == IN_KBD_LSHIFT && (pLParam&0xFF0000) == 0x360000)
 	{
-		pWParam = KEY_RSHIFT;
+		pWParam = IN_KBD_RSHIFT;
 	}
 	InputManager::SetKey(pWParam, pIsDown);
 }

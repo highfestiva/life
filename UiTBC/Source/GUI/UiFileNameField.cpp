@@ -125,7 +125,7 @@ bool FileNameField::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 	Parent::OnKeyDown(pKeyCode);
 	switch (pKeyCode)
 	{
-		case UiLepra::InputManager::KEY_ENTER:
+		case UiLepra::InputManager::IN_KBD_ENTER:
 		{
 			FinalizeSelection();
 		}

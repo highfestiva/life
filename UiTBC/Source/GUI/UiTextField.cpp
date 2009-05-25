@@ -307,12 +307,12 @@ bool TextField::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 	const DesktopWindow* lDesktopWindow = (DesktopWindow*)GetParentOfType(Component::DESKTOPWINDOW);
 	UiLepra::InputManager* lInputManager = lDesktopWindow->GetInputManager();
 
-	bool lCtrlDown = lInputManager->ReadKey(UiLepra::InputManager::KEY_LCTRL) ||
-			  lInputManager->ReadKey(UiLepra::InputManager::KEY_RCTRL);
+	bool lCtrlDown = lInputManager->ReadKey(UiLepra::InputManager::IN_KBD_LCTRL) ||
+			  lInputManager->ReadKey(UiLepra::InputManager::IN_KBD_RCTRL);
 
 	switch(pKeyCode)
 	{
-		case UiLepra::InputManager::KEY_LEFT:
+		case UiLepra::InputManager::IN_KBD_LEFT:
 		{
 			if (mMarkerPos > 0)
 			{
@@ -329,7 +329,7 @@ bool TextField::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 				lResetMarker = true;
 			}
 		} break;
-		case UiLepra::InputManager::KEY_RIGHT:
+		case UiLepra::InputManager::IN_KBD_RIGHT:
 		{
 			if (mMarkerPos < mText.length())
 			{
@@ -350,17 +350,17 @@ bool TextField::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 				lResetMarker = true;
 			}
 		} break;
-		case UiLepra::InputManager::KEY_HOME:
+		case UiLepra::InputManager::IN_KBD_HOME:
 		{
 			mMarkerPos = 0;
 			lResetMarker = true;
 		} break;
-		case UiLepra::InputManager::KEY_END:
+		case UiLepra::InputManager::IN_KBD_END:
 		{
 			mMarkerPos = mText.length();
 			lResetMarker = true;
 		} break;
-		case UiLepra::InputManager::KEY_DOWN:
+		case UiLepra::InputManager::IN_KBD_DOWN:
 		{
 			if (mListControl == 0)
 			{
@@ -372,7 +372,7 @@ bool TextField::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 				Parent::SetKeyboardFocus();
 			}
 		} break;
-		case UiLepra::InputManager::KEY_UP:
+		case UiLepra::InputManager::IN_KBD_UP:
 		{
 			if (mListControl != 0)
 			{
@@ -380,14 +380,14 @@ bool TextField::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 				Parent::SetKeyboardFocus();
 			}
 		} break;
-		case UiLepra::InputManager::KEY_DEL:
+		case UiLepra::InputManager::IN_KBD_DEL:
 		{
 			if (mMarkerPos < mText.length())
 			{
 				mText.erase(mMarkerPos, 1);
 			}
 		} break;
-		case UiLepra::InputManager::KEY_ESC:
+		case UiLepra::InputManager::IN_KBD_ESC:
 		{
 			if (mListControl != 0)
 			{

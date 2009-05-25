@@ -262,22 +262,22 @@ bool ListControl::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 
 	if (lLayout->GetListType() == ListLayout::COLUMN)
 	{
-		if (pKeyCode == UiLepra::InputManager::KEY_DOWN)
+		if (pKeyCode == UiLepra::InputManager::IN_KBD_DOWN)
 		{
 			lChildToSelect = lLayout->GetNext(mLastSelected);
 		}
-		if (pKeyCode == UiLepra::InputManager::KEY_UP)
+		if (pKeyCode == UiLepra::InputManager::IN_KBD_UP)
 		{
 			lChildToSelect = lLayout->GetPrev(mLastSelected);
 		}
 	}
 	else //if (lLayout->GetListType() == ListLayout::ROW)
 	{
-		if (pKeyCode == UiLepra::InputManager::KEY_RIGHT)
+		if (pKeyCode == UiLepra::InputManager::IN_KBD_RIGHT)
 		{
 			lChildToSelect = lLayout->GetNext(mLastSelected);
 		}
-		if (pKeyCode == UiLepra::InputManager::KEY_LEFT)
+		if (pKeyCode == UiLepra::InputManager::IN_KBD_LEFT)
 		{
 			lChildToSelect = lLayout->GetPrev(mLastSelected);
 		}
@@ -311,8 +311,8 @@ void ListControl::Select(Component* pChild, int pSelectedX, int pSelectedY)
 		{
 			const DesktopWindow* lDesktopWindow = (DesktopWindow*)GetParentOfType(DESKTOPWINDOW);
 			UiLepra::InputManager* lInputManager = lDesktopWindow->GetInputManager();
-			bool lCTRL  = lInputManager->ReadKey(UiLepra::InputManager::KEY_LCTRL) || lInputManager->ReadKey(UiLepra::InputManager::KEY_RCTRL);
-			bool lShift = lInputManager->ReadKey(UiLepra::InputManager::KEY_LSHIFT) || lInputManager->ReadKey(UiLepra::InputManager::KEY_RSHIFT);
+			bool lCTRL  = lInputManager->ReadKey(UiLepra::InputManager::IN_KBD_LCTRL) || lInputManager->ReadKey(UiLepra::InputManager::IN_KBD_RCTRL);
+			bool lShift = lInputManager->ReadKey(UiLepra::InputManager::IN_KBD_LSHIFT) || lInputManager->ReadKey(UiLepra::InputManager::IN_KBD_RSHIFT);
 
 			if (lCTRL == false && lShift == false)
 			{

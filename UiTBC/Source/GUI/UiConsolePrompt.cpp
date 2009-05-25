@@ -56,7 +56,7 @@ bool ConsolePrompt::OnChar(Lepra::tchar pChar)
 		int lChar = pChar;
 		if (lChar == 27)
 		{
-			lChar = KEY_ESCAPE;
+			lChar = CON_KEY_ESCAPE;
 		}
 		mBufferedChars.push_back(lChar);
 	}
@@ -66,15 +66,15 @@ bool ConsolePrompt::OnChar(Lepra::tchar pChar)
 
 bool ConsolePrompt::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 {
-	if (pKeyCode == UiLepra::InputManager::KEY_LCTRL || pKeyCode == UiLepra::InputManager::KEY_RCTRL)
+	if (pKeyCode == UiLepra::InputManager::IN_KBD_LCTRL || pKeyCode == UiLepra::InputManager::IN_KBD_RCTRL)
 	{
 		mIsCtrlPressed = true;
 	}
-	else if (pKeyCode == UiLepra::InputManager::KEY_LALT || pKeyCode == UiLepra::InputManager::KEY_RALT)
+	else if (pKeyCode == UiLepra::InputManager::IN_KBD_LALT || pKeyCode == UiLepra::InputManager::IN_KBD_RALT)
 	{
 		mIsAltPressed = true;
 	}
-	else if (pKeyCode == UiLepra::InputManager::KEY_LSHIFT || pKeyCode == UiLepra::InputManager::KEY_RSHIFT)
+	else if (pKeyCode == UiLepra::InputManager::IN_KBD_LSHIFT || pKeyCode == UiLepra::InputManager::IN_KBD_RSHIFT)
 	{
 		mIsShiftPressed = true;
 	}
@@ -83,38 +83,38 @@ bool ConsolePrompt::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 		Lepra::ScopeLock lLock(&mLock);
 		switch(pKeyCode)
 		{
-			case UiLepra::InputManager::KEY_LEFT:
+			case UiLepra::InputManager::IN_KBD_LEFT:
 			{
 				if (mIsCtrlPressed)
 				{
-					mBufferedChars.push_back(KEY_CTRL_LEFT);
+					mBufferedChars.push_back(CON_KEY_CTRL_LEFT);
 				}
 				else
 				{
-					mBufferedChars.push_back(KEY_LEFT);
+					mBufferedChars.push_back(CON_KEY_LEFT);
 				}
 			}
 			break;
-			case UiLepra::InputManager::KEY_RIGHT:
+			case UiLepra::InputManager::IN_KBD_RIGHT:
 			{
 				if (mIsCtrlPressed)
 				{
-					mBufferedChars.push_back(KEY_CTRL_RIGHT);
+					mBufferedChars.push_back(CON_KEY_CTRL_RIGHT);
 				}
 				else
 				{
-					mBufferedChars.push_back(KEY_RIGHT);
+					mBufferedChars.push_back(CON_KEY_RIGHT);
 				}
 			}
 			break;
-			case UiLepra::InputManager::KEY_HOME:	mBufferedChars.push_back(KEY_HOME);		break;
-			case UiLepra::InputManager::KEY_END:	mBufferedChars.push_back(KEY_END);		break;
-			case UiLepra::InputManager::KEY_DOWN:	mBufferedChars.push_back(KEY_DOWN);		break;
-			case UiLepra::InputManager::KEY_UP:	mBufferedChars.push_back(KEY_UP);		break;
-			case UiLepra::InputManager::KEY_DEL:	mBufferedChars.push_back(KEY_DELETE);		break;
-			case UiLepra::InputManager::KEY_PGUP:	mBufferedChars.push_back(KEY_PAGE_UP);		break;
-			case UiLepra::InputManager::KEY_PGDOWN:	mBufferedChars.push_back(KEY_PAGE_DOWN);	break;
-			default:				return (false);	// TRICKY: RAII!
+			case UiLepra::InputManager::IN_KBD_HOME:	mBufferedChars.push_back(CON_KEY_HOME);		break;
+			case UiLepra::InputManager::IN_KBD_END:		mBufferedChars.push_back(CON_KEY_END);		break;
+			case UiLepra::InputManager::IN_KBD_DOWN:	mBufferedChars.push_back(CON_KEY_DOWN);		break;
+			case UiLepra::InputManager::IN_KBD_UP:		mBufferedChars.push_back(CON_KEY_UP);		break;
+			case UiLepra::InputManager::IN_KBD_DEL:		mBufferedChars.push_back(CON_KEY_DELETE);	break;
+			case UiLepra::InputManager::IN_KBD_PGUP:	mBufferedChars.push_back(CON_KEY_PAGE_UP);	break;
+			case UiLepra::InputManager::IN_KBD_PGDOWN:	mBufferedChars.push_back(CON_KEY_PAGE_DOWN);	break;
+			default:					return (false);	// TRICKY: RAII!
 		}
 	}
 	mSemaphore.Signal();
@@ -123,15 +123,15 @@ bool ConsolePrompt::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 
 bool ConsolePrompt::OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode)
 {
-	if (pKeyCode == UiLepra::InputManager::KEY_LCTRL || pKeyCode == UiLepra::InputManager::KEY_RCTRL)
+	if (pKeyCode == UiLepra::InputManager::IN_KBD_LCTRL || pKeyCode == UiLepra::InputManager::IN_KBD_RCTRL)
 	{
 		mIsCtrlPressed = false;
 	}
-	else if (pKeyCode == UiLepra::InputManager::KEY_LALT || pKeyCode == UiLepra::InputManager::KEY_RALT)
+	else if (pKeyCode == UiLepra::InputManager::IN_KBD_LALT || pKeyCode == UiLepra::InputManager::IN_KBD_RALT)
 	{
 		mIsAltPressed = false;
 	}
-	else if (pKeyCode == UiLepra::InputManager::KEY_LSHIFT || pKeyCode == UiLepra::InputManager::KEY_RSHIFT)
+	else if (pKeyCode == UiLepra::InputManager::IN_KBD_LSHIFT || pKeyCode == UiLepra::InputManager::IN_KBD_RSHIFT)
 	{
 		mIsShiftPressed = false;
 	}

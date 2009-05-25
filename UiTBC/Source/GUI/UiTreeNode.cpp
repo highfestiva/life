@@ -397,7 +397,7 @@ bool TreeNode::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 
 	switch(pKeyCode)
 	{
-		case UiLepra::InputManager::KEY_LEFT:
+		case UiLepra::InputManager::IN_KBD_LEFT:
 		{
 			if (IsExpandable() && IsExpanded())
 			{
@@ -406,7 +406,7 @@ bool TreeNode::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 			}
 			break;
 		}
-		case UiLepra::InputManager::KEY_RIGHT:
+		case UiLepra::InputManager::IN_KBD_RIGHT:
 		{
 			if (IsExpandable() && IsExpanded() == false)
 			{

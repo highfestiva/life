@@ -171,10 +171,10 @@ struct AgentData: public UiLepra::KeyCodeInputObserver
 	{
 		switch (pKeyCode)
 		{
-			case UiLepra::InputManager::KEY_UP:	mMoveKeys |= 1;	break;
-			case UiLepra::InputManager::KEY_DOWN:	mMoveKeys |= 2;	break;
-			case UiLepra::InputManager::KEY_LEFT:	mMoveKeys |= 4;	break;
-			case UiLepra::InputManager::KEY_RIGHT:	mMoveKeys |= 8;	break;
+			case UiLepra::InputManager::IN_KBD_UP:	mMoveKeys |= 1;	break;
+			case UiLepra::InputManager::IN_KBD_DOWN:	mMoveKeys |= 2;	break;
+			case UiLepra::InputManager::IN_KBD_LEFT:	mMoveKeys |= 4;	break;
+			case UiLepra::InputManager::IN_KBD_RIGHT:	mMoveKeys |= 8;	break;
 		}
 		return (false);
 	}
@@ -182,10 +182,10 @@ struct AgentData: public UiLepra::KeyCodeInputObserver
 	{
 		switch (pKeyCode)
 		{
-			case UiLepra::InputManager::KEY_UP:	mMoveKeys &= ~1;	break;
-			case UiLepra::InputManager::KEY_DOWN:	mMoveKeys &= ~2;	break;
-			case UiLepra::InputManager::KEY_LEFT:	mMoveKeys &= ~4;	break;
-			case UiLepra::InputManager::KEY_RIGHT:	mMoveKeys &= ~8;	break;
+			case UiLepra::InputManager::IN_KBD_UP:	mMoveKeys &= ~1;	break;
+			case UiLepra::InputManager::IN_KBD_DOWN:	mMoveKeys &= ~2;	break;
+			case UiLepra::InputManager::IN_KBD_LEFT:	mMoveKeys &= ~4;	break;
+			case UiLepra::InputManager::IN_KBD_RIGHT:	mMoveKeys &= ~8;	break;
 		}
 		mNetworkForceSend = true;
 		return (false);

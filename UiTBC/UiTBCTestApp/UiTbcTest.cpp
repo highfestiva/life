@@ -276,7 +276,7 @@ bool SceneTest::Run(double pTime)
 			mContext = _T("running");
 		}
 
-		while (mTestOk && lTotalTimer.GetTimeDiffF() < pTime && gInput->ReadKey(UiLepra::InputManager::KEY_ESC) == false)
+		while (mTestOk && lTotalTimer.GetTimeDiffF() < pTime && gInput->ReadKey(UiLepra::InputManager::IN_KBD_ESC) == false)
 		{
 			double lDeltaTime = lDeltaTimer.GetTimeDiff();
 			lDeltaTimer.ClearTimeDiff();
@@ -292,30 +292,30 @@ bool SceneTest::Run(double pTime)
 			gScreen->SetBuffer(gDisplay->GetScreenPtr());
 
 			Lepra::TransformationF lCam = gRenderer->GetCameraTransformation();
-			if (gInput->ReadKey(UiLepra::InputManager::KEY_UP))
+			if (gInput->ReadKey(UiLepra::InputManager::IN_KBD_UP))
 				lCam.RotatePitch(mCamRotSpeed * (float)lDeltaTime);
-			if (gInput->ReadKey(UiLepra::InputManager::KEY_DOWN))
+			if (gInput->ReadKey(UiLepra::InputManager::IN_KBD_DOWN))
 				lCam.RotatePitch(-mCamRotSpeed * (float)lDeltaTime);
-			if (gInput->ReadKey(UiLepra::InputManager::KEY_LEFT))
+			if (gInput->ReadKey(UiLepra::InputManager::IN_KBD_LEFT))
 				lCam.RotateYaw(mCamRotSpeed * (float)lDeltaTime);
-			if (gInput->ReadKey(UiLepra::InputManager::KEY_RIGHT))
+			if (gInput->ReadKey(UiLepra::InputManager::IN_KBD_RIGHT))
 				lCam.RotateYaw(-mCamRotSpeed * (float)lDeltaTime);
-			if (gInput->ReadKey(UiLepra::InputManager::KEY_Q))
+			if (gInput->ReadKey(UiLepra::InputManager::IN_KBD_Q))
 				lCam.RotateRoll(-mCamRotSpeed * (float)lDeltaTime);
-			if (gInput->ReadKey(UiLepra::InputManager::KEY_E))
+			if (gInput->ReadKey(UiLepra::InputManager::IN_KBD_E))
 				lCam.RotateRoll(mCamRotSpeed * (float)lDeltaTime);
 
-			if (gInput->ReadKey(UiLepra::InputManager::KEY_W))
+			if (gInput->ReadKey(UiLepra::InputManager::IN_KBD_W))
 				lCam.MoveForward(mCamMoveSpeed * (float)lDeltaTime);
-			if (gInput->ReadKey(UiLepra::InputManager::KEY_S))
+			if (gInput->ReadKey(UiLepra::InputManager::IN_KBD_S))
 				lCam.MoveBackward(mCamMoveSpeed * (float)lDeltaTime);
-			if (gInput->ReadKey(UiLepra::InputManager::KEY_A))
+			if (gInput->ReadKey(UiLepra::InputManager::IN_KBD_A))
 				lCam.MoveLeft(mCamMoveSpeed * (float)lDeltaTime);
-			if (gInput->ReadKey(UiLepra::InputManager::KEY_D))
+			if (gInput->ReadKey(UiLepra::InputManager::IN_KBD_D))
 				lCam.MoveRight(mCamMoveSpeed * (float)lDeltaTime);
-			if (gInput->ReadKey(UiLepra::InputManager::KEY_R))
+			if (gInput->ReadKey(UiLepra::InputManager::IN_KBD_R))
 				lCam.MoveUp(mCamMoveSpeed * (float)lDeltaTime);
-			if (gInput->ReadKey(UiLepra::InputManager::KEY_F))
+			if (gInput->ReadKey(UiLepra::InputManager::IN_KBD_F))
 				lCam.MoveDown(mCamMoveSpeed * (float)lDeltaTime);
 
 			gRenderer->SetCameraTransformation(lCam);
@@ -2316,7 +2316,7 @@ bool TestCubicSpline(const Lepra::LogDecorator&, double pShowTime)
 	}
 
 	Lepra::Timer lTimer;
-	while (lTimer.GetTimeDiffF() < pShowTime && gInput->ReadKey(UiLepra::InputManager::KEY_ESC) == false)
+	while (lTimer.GetTimeDiffF() < pShowTime && gInput->ReadKey(UiLepra::InputManager::IN_KBD_ESC) == false)
 	{
 		lTimer.UpdateTimer();
 		if (Lepra::SystemManager::GetQuitRequest())

@@ -251,31 +251,31 @@ int StdioConsolePrompt::WaitChar()
 	int c = _getch_nolock();
 	if (c == 27)
 	{
-		c = KEY_ESCAPE;
+		c = CON_KEY_ESCAPE;
 	}
 	else if (c == 224)
 	{
 		c = ::_getch_nolock();
 		switch (c)
 		{
-			case 72:	c = KEY_UP;		break;
-			case 80:	c = KEY_DOWN;		break;
-			case 75:	c = KEY_LEFT;		break;
-			case 77:	c = KEY_RIGHT;		break;
-			case 73:	c = KEY_PAGE_DOWN;	break;
-			case 81:	c = KEY_PAGE_UP;	break;
-			case 71:	c = KEY_HOME;		break;
-			case 79:	c = KEY_END;		break;
-			case 82:	c = KEY_INSERT;		break;
-			case 83:	c = KEY_DELETE;		break;
-			case 133:	c = KEY_F11;		break;
-			case 134:	c = KEY_F12;		break;
-			case 115:	c = KEY_CTRL_LEFT;	break;
-			case 116:	c = KEY_CTRL_RIGHT;	break;
-			case 141:	c = KEY_CTRL_UP;	break;
-			case 145:	c = KEY_CTRL_DOWN;	break;
-			case 119:	c = KEY_CTRL_HOME;	break;
-			case 117:	c = KEY_CTRL_END;	break;
+			case 72:	c = CON_KEY_UP;		break;
+			case 80:	c = CON_KEY_DOWN;	break;
+			case 75:	c = CON_KEY_LEFT;	break;
+			case 77:	c = CON_KEY_RIGHT;	break;
+			case 73:	c = CON_KEY_PAGE_DOWN;	break;
+			case 81:	c = CON_KEY_PAGE_UP;	break;
+			case 71:	c = CON_KEY_HOME;	break;
+			case 79:	c = CON_KEY_END;	break;
+			case 82:	c = CON_KEY_INSERT;	break;
+			case 83:	c = CON_KEY_DELETE;	break;
+			case 133:	c = CON_KEY_F11;	break;
+			case 134:	c = CON_KEY_F12;	break;
+			case 115:	c = CON_KEY_CTRL_LEFT;	break;
+			case 116:	c = CON_KEY_CTRL_RIGHT;	break;
+			case 141:	c = CON_KEY_CTRL_UP;	break;
+			case 145:	c = CON_KEY_CTRL_DOWN;	break;
+			case 119:	c = CON_KEY_CTRL_HOME;	break;
+			case 117:	c = CON_KEY_CTRL_END;	break;
 		}
 	}
 	else if (c == 0)
@@ -283,20 +283,26 @@ int StdioConsolePrompt::WaitChar()
 		c = ::_getch_nolock();
 		switch (c)
 		{
-			case 59:	c = KEY_F1;		break;
-			case 60:	c = KEY_F2;		break;
-			case 61:	c = KEY_F3;		break;
-			case 62:	c = KEY_F4;		break;
-			case 63:	c = KEY_F5;		break;
-			case 64:	c = KEY_F6;		break;
-			case 65:	c = KEY_F7;		break;
-			case 66:	c = KEY_F8;		break;
-			case 67:	c = KEY_F9;		break;
-			case 68:	c = KEY_F10;		break;
+			case 59:	c = CON_KEY_F1;		break;
+			case 60:	c = CON_KEY_F2;		break;
+			case 61:	c = CON_KEY_F3;		break;
+			case 62:	c = CON_KEY_F4;		break;
+			case 63:	c = CON_KEY_F5;		break;
+			case 64:	c = CON_KEY_F6;		break;
+			case 65:	c = CON_KEY_F7;		break;
+			case 66:	c = CON_KEY_F8;		break;
+			case 67:	c = CON_KEY_F9;		break;
+			case 68:	c = CON_KEY_F10;	break;
 		}
 	}
 #elif defined(LEPRA_POSIX)
 	int c = getch();
+        switch (c)
+        {
+		case 27:	c = CON_KEY_ESCAPE;	break;
+		case '\n':	c = '\r';		break;
+        }
+	::printf("\nChar ordinal = %i.\n", c);
 #else
 #error "other curses support not implemented..."
 #endif // LEPRA_WINDOWS

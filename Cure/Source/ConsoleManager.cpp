@@ -267,7 +267,7 @@ void ConsoleManager::ConsoleThreadEntry()
 				lInputText = lNewInputText;
 			}
 		}
-		else if (c == CURE_RTVAR_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_DELETE, Lepra::ConsolePrompt::KEY_DELETE))
+		else if (c == CURE_RTVAR_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_DELETE, Lepra::ConsolePrompt::CON_KEY_DELETE))
 		{
 			if (lEditIndex < lInputText.length())
 			{
@@ -279,35 +279,35 @@ void ConsoleManager::ConsoleThreadEntry()
 				lInputText = lNewInputText;
 			}
 		}
-		else if (c == CURE_RTVAR_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_CTRLLEFT, Lepra::ConsolePrompt::KEY_CTRL_LEFT))
+		else if (c == CURE_RTVAR_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_CTRLLEFT, Lepra::ConsolePrompt::CON_KEY_CTRL_LEFT))
 		{
 			lEditIndex = Lepra::StringUtility::FindPreviousWord(lInputText, lWordDelimitors, lEditIndex);
 		}
-		else if (c == CURE_RTVAR_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_CTRLRIGHT, Lepra::ConsolePrompt::KEY_CTRL_RIGHT))
+		else if (c == CURE_RTVAR_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_CTRLRIGHT, Lepra::ConsolePrompt::CON_KEY_CTRL_RIGHT))
 		{
 			lEditIndex = Lepra::StringUtility::FindNextWord(lInputText, lWordDelimitors, lEditIndex);
 		}
-		else if (c == CURE_RTVAR_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_HOME, Lepra::ConsolePrompt::KEY_HOME))
+		else if (c == CURE_RTVAR_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_HOME, Lepra::ConsolePrompt::CON_KEY_HOME))
 		{
 			lEditIndex = 0;
 		}
-		else if (c == CURE_RTVAR_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_END, Lepra::ConsolePrompt::KEY_END))
+		else if (c == CURE_RTVAR_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_END, Lepra::ConsolePrompt::CON_KEY_END))
 		{
 			lEditIndex = lInputText.length();
 		}
-		else if (c == CURE_RTVAR_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_UP, Lepra::ConsolePrompt::KEY_UP) ||
-			c == CURE_RTVAR_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_DOWN, Lepra::ConsolePrompt::KEY_DOWN))
+		else if (c == CURE_RTVAR_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_UP, Lepra::ConsolePrompt::CON_KEY_UP) ||
+			c == CURE_RTVAR_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_DOWN, Lepra::ConsolePrompt::CON_KEY_DOWN))
 		{
 			// Erase current text.
 			mConsolePrompt->Backspace(lEditIndex);
 			mConsolePrompt->EraseText(lInputText.length());
 			int lDesiredHistoryIndex = mConsoleCommandManager->GetCurrentHistoryIndex();
-			if (c == Lepra::ConsolePrompt::KEY_UP)
+			if (c == Lepra::ConsolePrompt::CON_KEY_UP)
 			{
 				// History->previous.
 				--lDesiredHistoryIndex;
 			}
-			else if (c == Lepra::ConsolePrompt::KEY_DOWN)
+			else if (c == Lepra::ConsolePrompt::CON_KEY_DOWN)
 			{
 				// History->next.
 				++lDesiredHistoryIndex;
@@ -317,32 +317,32 @@ void ConsoleManager::ConsoleThreadEntry()
 			lInputText = mConsoleCommandManager->GetHistory(lDesiredHistoryIndex);
 			lEditIndex = lInputText.length();
 		}
-		else if (c == CURE_RTVAR_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_LEFT, Lepra::ConsolePrompt::KEY_LEFT))
+		else if (c == CURE_RTVAR_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_LEFT, Lepra::ConsolePrompt::CON_KEY_LEFT))
 		{
 			if (lEditIndex > 0)
 			{
 				--lEditIndex;
 			}
 		}
-		else if (c == CURE_RTVAR_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_RIGHT, Lepra::ConsolePrompt::KEY_RIGHT))
+		else if (c == CURE_RTVAR_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_RIGHT, Lepra::ConsolePrompt::CON_KEY_RIGHT))
 		{
 			if (lEditIndex < lInputText.length())
 			{
 				++lEditIndex;
 			}
 		}
-		else if (c == CURE_RTVAR_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_ESC, Lepra::ConsolePrompt::KEY_ESCAPE))
+		else if (c == CURE_RTVAR_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_ESC, Lepra::ConsolePrompt::CON_KEY_ESCAPE))
 		{
 			mConsolePrompt->Backspace(lEditIndex);
 			mConsolePrompt->EraseText(lInputText.length());
 			lInputText = _T("");
 			lEditIndex = 0;
 		}
-		else if (c == CURE_RTVAR_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_PAGEUP, Lepra::ConsolePrompt::KEY_PAGE_UP))
+		else if (c == CURE_RTVAR_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_PAGEUP, Lepra::ConsolePrompt::CON_KEY_PAGE_UP))
 		{
 			mConsoleLogger->StepPage(-1);
 		}
-		else if (c == CURE_RTVAR_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_PAGEDOWN, Lepra::ConsolePrompt::KEY_PAGE_DOWN))
+		else if (c == CURE_RTVAR_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_PAGEDOWN, Lepra::ConsolePrompt::CON_KEY_PAGE_DOWN))
 		{
 			mConsoleLogger->StepPage(+1);
 		}
