@@ -7,7 +7,6 @@
 #pragma once
 
 #include <pthread.h>
-#include <semaphore.h>
 #include "../Thread.h"
 
 

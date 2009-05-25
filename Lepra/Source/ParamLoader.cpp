@@ -1267,4 +1267,9 @@ void ParamLoader::ReadBinary(Reader& pReader, Params& pParams, const String pVar
 }
 
 
-} // End namespace.
+
+LOG_CLASS_DEFINE(GENERAL, ParamLoader);
+
+
+
+}

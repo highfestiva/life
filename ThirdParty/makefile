@@ -1,4 +1,4 @@
-# 'Twas generated from ../../ThirdParty/ThirdPartyLib_800.vcproj, 2009-05-23, type='lib_nowarn'.
+# 'Twas generated from ../../ThirdParty/ThirdPartyLib_800.vcproj, 2009-05-25, type='lib_nowarn'.
 # Don't edit manually. See 'generate_makefile.py' for info.
 
 CFLAGS = -O0 -ggdb -fPIC -D_POSIX_PTHREAD_SEMANTICS -Istlport/stlport -Iode-060223/include -DPOSIX -D_DEBUG -D_CONSOLE -DPNG_NO_ASSEMBLER_CODE -DdCYLINDER_ENABLED -Wno-unknown-pragmas
@@ -321,7 +321,7 @@ ode-060223/ode/src/util.o	\
 mtwist-0.8/mtwist.o	\
 mtwist-0.8/randistrs.o
 
-all:	libThirdParty.so
+all:	libThirdParty.so $(OBJS)
 clean:
 	@rm -f libThirdParty.so $(OBJS)
 libThirdParty.so:	$(OBJS)
@@ -330,6 +330,6 @@ libThirdParty.so:	$(OBJS)
 depend:
 	makedepend -- $(CFLAGS) -- $(SRCS)
 .c.o:
-	gcc $(CFLAGS) -o $@ -c $<
+	g++ $(CFLAGS) -o $@ -c $<
 .cpp.o:
 	g++ $(CFLAGS) -o $@ -c $<

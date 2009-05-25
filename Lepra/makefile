@@ -1,4 +1,4 @@
-# 'Twas generated from ../../Lepra/Lepra.vcproj, 2009-05-23, type='lib'.
+# 'Twas generated from ../../Lepra/Lepra.vcproj, 2009-05-25, type='lib'.
 # Don't edit manually. See 'generate_makefile.py' for info.
 
 CFLAGS = -O0 -ggdb -fPIC -D_POSIX_PTHREAD_SEMANTICS -I../ThirdParty/stlport/stlport -I../ThirdParty/ode-060223/include -DPOSIX -D_DEBUG -D_CONSOLE -DPNG_NO_ASSEMBLER_CODE -DdCYLINDER_ENABLED -Wall -Wno-unknown-pragmas
@@ -123,7 +123,7 @@ Source/Posix/PosixBusLock.o	\
 Source/Posix/PosixSystemManager.o	\
 Source/Posix/PosixThread.o
 
-all:	libLepra.so
+all:	libLepra.so $(OBJS)
 clean:
 	@rm -f libLepra.so $(OBJS)
 libLepra.so:	$(OBJS)
@@ -132,6 +132,6 @@ libLepra.so:	$(OBJS)
 depend:
 	makedepend -- $(CFLAGS) -- $(SRCS)
 .c.o:
-	gcc $(CFLAGS) -o $@ -c $<
+	g++ $(CFLAGS) -o $@ -c $<
 .cpp.o:
 	g++ $(CFLAGS) -o $@ -c $<

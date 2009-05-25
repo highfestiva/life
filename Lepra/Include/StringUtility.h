@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶
 // Copyright (c) 2002-2008, Righteous Games
 
 

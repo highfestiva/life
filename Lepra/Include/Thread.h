@@ -17,8 +17,7 @@
 
 #pragma once
 
-
-
+#include "LepraTarget.h"
 #include "LepraTypes.h"
 #define EXCLUDE_LOG_CLASS
 #include "Log.h"
@@ -96,6 +95,9 @@ private:
 
 	size_t mThreadHandle;
 	size_t mThreadId;
+#ifdef LEPRA_POSIX
+	sem_t mJoinSemaphore;
+#endif // Posix.
 
 	LOG_CLASS_DECLARE();
 };

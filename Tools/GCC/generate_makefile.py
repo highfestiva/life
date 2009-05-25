@@ -18,13 +18,13 @@ foot_rules = """
 depend:
 \tmakedepend -- $(CFLAGS) -- $(SRCS)
 .c.o:
-\tgcc $(CFLAGS) -o $@ -c $<
+\tg++ $(CFLAGS) -o $@ -c $<
 .cpp.o:
 \tg++ $(CFLAGS) -o $@ -c $<
 """
 
 foot_lib = """
-all:\tlib%(lib)s.so
+all:\tlib%(lib)s.so $(OBJS)
 clean:
 \t@rm -f lib%(lib)s.so $(OBJS)
 lib%(lib)s.so:\t$(OBJS)
@@ -32,16 +32,23 @@ lib%(lib)s.so:\t$(OBJS)
 """+foot_rules
 
 head_bin = head_lib+"""
-LIBS = -lLife -lCure -lTBC -lLepra -lThirdParty -lm -lpthread -lnsl -lncurses %(libs)s
+LIBS = -lLife -lCure -lTBC -lLepra -lThirdParty -lstlport -lm -lpthread -lnsl -lncurses %(libs)s
 """
 
 foot_bin = """
-all:\t%(lib)s
+all:\t%(lib)s $(OBJS)
 clean:
 \t@rm -f %(lib)s $(OBJS)
 %(lib)s:\t$(OBJS)
 \tg++ $(LIBS) -o $@ $(OBJS)
 """+foot_rules
+
+foot_bin_base ="""
+%(bin)s:\t$(SRCS)
+\tmake --directory %(bindir)s
+\t@cp ThirdParty/stlport/build/lib/obj/gcc/so/libstlport.so.5.2 bin/
+\t@cp %(bin)s bin/
+"""
 
 makedict = \
 {
@@ -51,12 +58,20 @@ makedict = \
 "foot_lib_nowarn": foot_lib,
 "head_bin": head_bin,
 "foot_bin": foot_bin,
-"foot_all_base": "\nall:\t%(bins)s\n",
-"foot_bin_base": "%(bin)s:\t$(SRCS)\n\tmake --directory %(bindir)s\n",
-"foot_lib_base": "%(lib)s:\n\tmake --directory %(libdir)s\n",
+"foot_all_base": "\nall:\t$(OBJS) $(SRCS)\n",
+"foot_clean_base": "\nclean:\n\t@rm bin/*\n",
+"foot_clean_dir_base": "\tmake clean --directory %(directory)s\n",
+"foot_bin_base": foot_bin_base,
+"foot_lib_base": "%(lib)s:\n\tmake --directory %(libdir)s\n\t@cp %(lib)s bin/\n",
 }
 
-def isSrc(fname):
+def printstart(makename):
+    sys.stdout.write(os.path.abspath(makename)+":\t")
+
+def printend(type):
+    sys.stdout.write("done (type="+type+").\n")
+
+def issrc(fname):
     ext = os.path.splitext(fname)[1]
     return (ext == ".cpp" or ext == ".c")
 
@@ -95,7 +110,7 @@ def generate_makefile(vcfile, makename, includedirs, libdirs, header, footer, ty
     projbasedir = os.path.dirname(vcfile)
     cpps = os.popen("./vcprojfiles.py -i "+vcfile+" -f Win32\\;win32 --rel-path --base-path="+projbasedir).read()
     cpps = cpps.split()
-    cpps = filter(lambda x: isSrc(x), cpps)
+    cpps = filter(lambda x: issrc(x), cpps)
     objs = map(lambda x: os.path.splitext(x)[0]+".o", cpps)
     f = create_makefile(makename, vcfile, type)
     includes = " ".join(["-I%s" % i for i in includedirs])
@@ -110,9 +125,13 @@ def generate_base_make(makename, binlist, liblist):
     f = create_makefile(makename, "", "base")
     write_contents(f, liblist, binlist)
     bins = " ".join(binlist)
-    f.write(makedict["foot_all_base"] % {"bins":bins})
+    f.write(makedict["foot_all_base"])
+    f.write(makedict["foot_clean_base"])
+    for d in [os.path.dirname(e) for e in binlist+liblist]:
+    	f.write(makedict["foot_clean_dir_base"] % {"directory":d})
     for bin in binlist:
-    	f.write(makedict["foot_bin_base"] % {"bin":bin, "bindir":os.path.dirname(bin)})
+	stllib = "ThirdParty/stlport/build/lib/obj/gcc/so/libstlport.so.5.2"
+    	f.write(makedict["foot_bin_base"] % {"bin":bin, "bindir":os.path.dirname(bin), "stllib":stllib})
     f.write("\n")
     for lib in liblist:
     	f.write(makedict["foot_lib_base"] % {"lib":lib, "libdir":os.path.dirname(lib)})
@@ -132,18 +151,21 @@ def generate_makefiles(basedir, vcfileinfolist):
         projdir = os.path.dirname(vcfile)
         includedirs = [os.path.relpath(basedir+"ThirdParty/stlport/stlport/", projdir),
         	os.path.relpath(basedir+"ThirdParty/ode-060223/include/", projdir)]
-	libdirs = [os.path.relpath(basedir+"ThirdParty", projdir),
+	libdirs = [os.path.relpath(basedir+"ThirdParty/stlport/build/lib/obj/gcc/so", projdir),
+		os.path.relpath(basedir+"ThirdParty", projdir),
 		os.path.relpath(basedir+"Lepra", projdir),
 		os.path.relpath(basedir+"TBC", projdir),
 		os.path.relpath(basedir+"Cure", projdir),
 		os.path.relpath(basedir+"Life", projdir)]
         makename = os.path.join(os.path.dirname(vcfile), "makefile")
-        sys.stdout.write(os.path.abspath(makename)+":\t")
+	printstart(makename)
         generate_makefile(vcfile, makename, includedirs, libdirs, makedict["head_"+type], makedict["foot_"+type], type)
-        sys.stdout.write("done (type="+type+").\n")
+	printend(type)
 
-    print files
-    generate_base_make(os.path.join(basedir, "makefile"), files["bin"], files["lib"])
+    makename = os.path.join(basedir, "makefile")
+    printstart(makename)
+    generate_base_make(makename, files["bin"], files["lib"])
+    printend("base")
 
 
 def main():

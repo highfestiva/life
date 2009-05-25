@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrrÃ¶m
 // Copyright (c) 2002-2008, Righteous Games
 
 
@@ -233,10 +233,8 @@ template<> const UnicodeString UnicodeStringUtility::ToOwnCode(const UnicodeStri
 
 
 
-template<> std::locale AnsiStringUtility::mLocale;
-template<> std::locale UnicodeStringUtility::mLocale;
-
-
+template<> std::locale AnsiStringUtility::mLocale("");
+template<> std::locale UnicodeStringUtility::mLocale("");
 
 const AnsiString gEmptyAnsiString;
 const UnicodeString gEmptyUnicodeString;

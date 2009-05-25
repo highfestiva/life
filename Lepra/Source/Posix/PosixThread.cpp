@@ -4,10 +4,14 @@
 
 
 
-#include <pthread.h>
-#include <time.h>
-#include <math.h>
 #include <sys/time.h>
+#include <sys/types.h>
+#include <sys/syscall.h>
+#include <assert.h>
+#include <math.h>
+#include <pthread.h>
+#include <signal.h>
+#include <time.h>
 #include "../../Include/Posix/PosixThread.h"
 
 
@@ -26,6 +30,8 @@ void GetAbsTime(float64 pDeltaTime, timespec& pTimeSpec)
 	pTimeSpec.tv_sec = (time_t)lTimeVal.tv_sec + (time_t)lSeconds;
 	pTimeSpec.tv_nsec = (long int)lNanoSeconds + (long int)(lTimeVal.tv_usec * 1000);
 }
+
+
 	
 ThreadPointerStorage ThreadPointerStorage::smTPS;
 
@@ -53,15 +59,17 @@ Thread* ThreadPointerStorage::GetPointer()
 
 StaticThread gMainThread(_T("MainThread"));
 
+
+
 // This is where the thread starts. A global standard C-function.
-DWORD __stdcall ThreadEntry(void* pThread)
+void* ThreadEntry(void* pThread)
 {
 	Thread* lThread = (Thread*)pThread;
 	ThreadPointerStorage::SetPointer(lThread);
 	assert(ThreadPointerStorage::GetPointer() == lThread);
 	assert(Thread::GetCurrentThread() == lThread);
 	RunThread(lThread);
-	return 0;
+	return (0);
 }
 
 void Thread::InitializeMainThread(const String& pThreadName)
@@ -73,12 +81,15 @@ void Thread::InitializeMainThread(const String& pThreadName)
 
 size_t Thread::GetCurrentThreadId()
 {
-	return (::gettid());
+#ifndef gettid
+#define gettid()	::syscall(SYS_gettid)
+#endif
+	return (gettid());
 }
 
 Thread* Thread::GetCurrentThread()
 {
-	return ThreadPointerStorage::GetPointer();
+	return (ThreadPointerStorage::GetPointer());
 }
 
 void Thread::SetCpuAffinityMask(uint64 /*pAffinityMask*/)
@@ -142,7 +153,7 @@ bool Thread::Join(float64 pTimeOut)
 		assert(GetThreadId() != GetCurrentThreadId());
 		timespec lTimeSpec;
 		GetAbsTime(pTimeOut, lTimeSpec);
-		if (::sem_timedwait(&mSemaphore, &lTimeSpec) != 0)
+		if (::sem_timedwait(&mJoinSemaphore, &lTimeSpec) != 0)
 		{
 			// Possible dead lock...
 			mLog.Warningf((_T("Failed to timed join thread \"") + GetThreadName() + _T("\"! Deadlock?")).c_str());
@@ -160,7 +171,7 @@ void Thread::Kill()
 	{
 		assert(GetThreadId() != GetCurrentThreadId());
 		mLog.Warningf(_T("Forcing kill of thread %s."), GetThreadName().c_str());
-		::pthread_kill(mThreadHandle, SIGKILL);
+		::pthread_kill(mThreadHandle, 9);	// 9 = SIGKILL.
 		Join();
 		SetRunning(false);
 	}
@@ -176,7 +187,11 @@ void Thread::YieldCpu()
 
 PosixLock::PosixLock()
 {
-	::pthread_mutex_init(&mMutex, 0);
+	::pthread_mutexattr_t lMutexAttr;
+	::pthread_mutexattr_init(&lMutexAttr);
+	::pthread_mutexattr_settype(&lMutexAttr, PTHREAD_MUTEX_RECURSIVE);
+	::pthread_mutex_init(&mMutex, &lMutexAttr);
+	::pthread_mutexattr_destroy(&lMutexAttr);
 }
 
 PosixLock::~PosixLock()

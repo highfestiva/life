@@ -1,4 +1,4 @@
-# 'Twas generated from ../../Cure/Cure.vcproj, 2009-05-23, type='lib'.
+# 'Twas generated from ../../Cure/Cure.vcproj, 2009-05-25, type='lib'.
 # Don't edit manually. See 'generate_makefile.py' for info.
 
 CFLAGS = -O0 -ggdb -fPIC -D_POSIX_PTHREAD_SEMANTICS -I../ThirdParty/stlport/stlport -I../ThirdParty/ode-060223/include -DPOSIX -D_DEBUG -D_CONSOLE -DPNG_NO_ASSEMBLER_CODE -DdCYLINDER_ENABLED -Wall -Wno-unknown-pragmas
@@ -57,7 +57,7 @@ Source/UserAccount.o	\
 Source/UserAccountManager.o	\
 Source/UserConnection.o
 
-all:	libCure.so
+all:	libCure.so $(OBJS)
 clean:
 	@rm -f libCure.so $(OBJS)
 libCure.so:	$(OBJS)
@@ -66,6 +66,6 @@ libCure.so:	$(OBJS)
 depend:
 	makedepend -- $(CFLAGS) -- $(SRCS)
 .c.o:
-	gcc $(CFLAGS) -o $@ -c $<
+	g++ $(CFLAGS) -o $@ -c $<
 .cpp.o:
 	g++ $(CFLAGS) -o $@ -c $<

@@ -185,7 +185,7 @@ TBC::PhysicsEngine* GameManager::GetPhysicsManager() const
 	// Check if we are
 	//   a) in thread-safe part of code (=physics thread not running), or
 	//   b) we don't have a physics thread (we run physics using the main thread).
-	if (!mIsThreadSafe)
+	if (!mIsThreadSafe && mPhysicsWorkerThread)
 	{
 		// We have a physics thread. Are we it?
 		size_t lPhysicsThreadId = mPhysicsWorkerThread->GetThreadId();

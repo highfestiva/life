@@ -27,7 +27,9 @@ bool Network::Start()
 #ifdef LEPRA_WINDOWS
 		WSADATA lSocketData;
 		mStarted = (::WSAStartup(MAKEWORD(2, 2), &lSocketData) == 0);
-#endif // LEPRA_WINDOWS
+#else
+		mStarted = true;
+#endif // Windows / other.
 	}
 	if (!mStarted)
 	{

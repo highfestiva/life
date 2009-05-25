@@ -1,6 +1,8 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) 2002-2008, Righteous Games
+
+
 
 #pragma once
 
@@ -12,14 +14,16 @@
 #include "Hasher.h"
 #include "LepraTypes.h"
 
+
+
 namespace Lepra
 {
 typedef std::string AnsiString;
 typedef std::wstring UnicodeString;
 #ifdef LEPRA_UNICODE
-typedef UnicodeString		String;
+typedef UnicodeString	String;
 #else // !LEPRA_UNICODE
-typedef AnsiString		String;
+typedef AnsiString	String;
 #endif // LEPRA_UNICODE/!LEPRA_UNICODE
 }
 
@@ -66,5 +70,7 @@ public:
 	}
 };
 }
+
+
 
 #include "StringUtility.h"

@@ -23,6 +23,9 @@ Thread::Thread(const String& pThreadName) :
 	mThreadHandle(0),
 	mThreadId(0)
 {
+#ifdef LEPRA_POSIX
+	::sem_init(&mJoinSemaphore, 0, 0);
+#endif // Posix.
 }
 
 Thread::~Thread()
@@ -31,6 +34,9 @@ Thread::~Thread()
 	{
 		Join();
 	}
+#ifdef LEPRA_POSIX
+	::sem_destroy(&mJoinSemaphore);
+#endif // Posix.
 }
 
 bool Thread::IsRunning() const
@@ -106,6 +112,7 @@ void RunThread(Thread* pThread)
 }
 
 LOG_CLASS_DEFINE(GENERAL, Thread);
+
 
 
 StaticThread::StaticThread(const String& pThreadName):

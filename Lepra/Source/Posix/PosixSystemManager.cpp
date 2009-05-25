@@ -4,6 +4,7 @@
 
 
 
+#include <ncurses.h>
 #include "../../Include/Lepra.h"
 #include "../../Include/String.h"
 #include "../../Include/SystemManager.h"
@@ -20,6 +21,8 @@ namespace Lepra
 
 void SystemManager::Init()
 {
+	timeout(3000000);
+
 	Thread::InitializeMainThread(_T("MainThread"));
 }
 

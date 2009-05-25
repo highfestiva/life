@@ -16,6 +16,7 @@
 #include <sys/time.h>
 #include <errno.h>
 #include <netdb.h>
+#include <semaphore.h>
 #include <stdarg.h>
 #include <stdint.h>
 #include <time.h>
