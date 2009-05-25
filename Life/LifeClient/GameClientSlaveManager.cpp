@@ -682,7 +682,7 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 			Cure::MessageCreateObject* lMessageCreateObject = (Cure::MessageCreateObject*)pMessage;
 			Lepra::UnicodeString lClassId;
 			lMessageCreateObject->GetClassId(lClassId);
-			assert(lClassId.find(_T(":")) == Lepra::String::npos);
+			assert(lClassId.find(L":") == Lepra::UnicodeString::npos);
 			Lepra::String lObjectClass = Lepra::StringUtility::IntToString(GetSlaveIndex(), 10) +
 				_T("/") + Lepra::StringUtility::IntToString(lMessageCreateObject->GetObjectId(), 10) +
 				_T(":") + Lepra::UnicodeStringUtility::ToCurrentCode(lClassId);
