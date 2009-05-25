@@ -19,7 +19,7 @@
 #pragma warning(disable: 4201)	// Nonstandard extention: unnamed struct.
 
 #ifndef _WIN32_WINNT
-#define _WIN32_WINNT	0x0400
+#define _WIN32_WINNT	0x0500
 #endif // _WIN32_WINNT
 
 #include <Windows.h>
