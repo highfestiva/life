@@ -46,6 +46,7 @@ bool Thread::IsRunning() const
 
 void Thread::SetRunning(bool pRunning)
 {
+	mLog.Infof(_T("Thread %s is %s."), mThreadName.c_str(), pRunning? _T("starting") : _T("stopping"));
 	mRunning = pRunning;
 }
 
