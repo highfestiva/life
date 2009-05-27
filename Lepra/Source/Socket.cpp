@@ -371,11 +371,14 @@ TcpSocket* TcpListenerSocket::Accept(SocketFactory pSocketFactory)
 		{
 			fd_set lAcceptSet;
 			FD_ZERO(&lAcceptSet);
-			FD_SET(mSocket, &lAcceptSet);
+#pragma warning(push)
+#pragma warning(disable: 4127)	// MSVC warning: conditional expression is constant.
+			LEPRA_FD_SET(mSocket, &lAcceptSet);
+#pragma warning(pop)
 			timeval lTime;
 			lTime.tv_sec = 1;
 			lTime.tv_usec = 0;
-			lAcceptCount = ::select(mSocket+1, &lAcceptSet, NULL, NULL, &lTime);
+			lAcceptCount = ::select((int)mSocket+1, &lAcceptSet, NULL, NULL, &lTime);
 		}
 		if (lAcceptCount >= 1)
 		{
