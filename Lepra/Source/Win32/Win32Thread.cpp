@@ -191,6 +191,11 @@ bool Thread::Join(float64 pTimeOut)
 	return lReturnValue;
 }
 
+void Thread::Signal(int)
+{
+	// We don't need this on Windows, since nothing really blocks hard.
+}
+
 void Thread::Kill()
 {
 	if (GetThreadHandle() != 0)

@@ -50,10 +50,8 @@ public:
 	bool GetSelfDestruct() const;
 	void RequestSelfDestruct();	// Deletes thead object when thread terminates.
 
-
 	// All public functions below are NOT implemented in Thread.cpp, but somewhere
-	// else instead. Exactly where depends on the implementation. Win32Thread.cpp 
-	// on a Win32 application, for instance.
+	// else instead. Win32Thread.cpp on a Win32 application, for instance.
 
 	static size_t GetCurrentThreadId();
 	static Thread* GetCurrentThread();
@@ -64,11 +62,9 @@ public:
 	static void Sleep(unsigned int pMilliSeconds);
 	static void YieldCpu();
 
-	// Join() will block the calling thread until this thread has exited.
 	bool Join();
 	bool Join(float64 pTimeOut);
-
-	// Kills/exits the thread. 
+	void Signal(int pSignal);
 	void Kill();
 
 protected:

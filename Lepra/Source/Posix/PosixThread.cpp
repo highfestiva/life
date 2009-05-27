@@ -61,6 +61,14 @@ StaticThread gMainThread(_T("MainThread"));
 
 
 
+static void InitializeSignalMask()
+{
+	sigset_t lMask;
+	::sigemptyset(&lMask);
+	::sigaddset(&lMask, SIGHUP);
+	::pthread_sigmask(SIG_BLOCK, &lMask, 0);
+}
+
 // This is where the thread starts. A global standard C-function.
 void* ThreadEntry(void* pThread)
 {
@@ -68,6 +76,7 @@ void* ThreadEntry(void* pThread)
 	ThreadPointerStorage::SetPointer(lThread);
 	assert(ThreadPointerStorage::GetPointer() == lThread);
 	assert(Thread::GetCurrentThread() == lThread);
+	//InitializeSignalMask();
 	RunThread(lThread);
 	return (0);
 }
@@ -77,6 +86,7 @@ void Thread::InitializeMainThread(const String& pThreadName)
 	ThreadPointerStorage::SetPointer(&gMainThread);
 	assert(ThreadPointerStorage::GetPointer() == &gMainThread);
 	assert(Thread::GetCurrentThread() == &gMainThread);
+	InitializeSignalMask();
 }
 
 size_t Thread::GetCurrentThreadId()
@@ -165,13 +175,18 @@ bool Thread::Join(float64 pTimeOut)
 	return (true);
 }
 
+void Thread::Signal(int) // Ignore signal for now.
+{
+	::pthread_kill(mThreadHandle, SIGHUP);
+}
+
 void Thread::Kill()
 {
 	if (GetThreadHandle() != 0)
 	{
 		assert(GetThreadId() != GetCurrentThreadId());
 		mLog.Warningf(_T("Forcing kill of thread %s."), GetThreadName().c_str());
-		::pthread_kill(mThreadHandle, 9);	// 9 = SIGKILL.
+		::pthread_kill(mThreadHandle, SIGKILL);
 		Join();
 		SetRunning(false);
 	}

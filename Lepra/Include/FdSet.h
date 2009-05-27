@@ -29,12 +29,13 @@ struct FdSet
 {
 	fd_set mFdSet;
 	std::vector<int> mSocketArray;
+	int mMaxHandle;
 };
-#define LEPRA_FD_ZERO(fds)		FD_ZERO(&(fds)->mFdSet); (fds)->mSocketArray.clear()
+#define LEPRA_FD_ZERO(fds)		FD_ZERO(&(fds)->mFdSet); (fds)->mSocketArray.clear(); (fds)->mMaxHandle = -1
 #define LEPRA_FD_GET(fds, idx)		((fds)->mSocketArray[idx])
 #define LEPRA_FD_GET_COUNT(fds)		((fds)->mSocketArray.size())
-#define LEPRA_FD_GET_MAX_HANDLE(fds)	FD_SETSIZE
-#define LEPRA_FD_SET(s, fds)		FD_SET(s, &(fds)->mFdSet); (fds)->mSocketArray.push_back(s)
+#define LEPRA_FD_GET_MAX_HANDLE(fds)	((fds)->mMaxHandle)
+#define LEPRA_FD_SET(s, fds)		FD_SET(s, &(fds)->mFdSet); (fds)->mSocketArray.push_back(s); if ((s) > (fds)->mMaxHandle) (fds)->mMaxHandle = (s)
 #define LEPRA_FDS(fds)			(&(fds)->mFdSet)
 #else // ???
 #error fd_set and friends not defined for this platform.

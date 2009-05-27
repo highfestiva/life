@@ -979,7 +979,7 @@ void TcpMuxSocket::SelectThreadEntry()
 			assert(lSocketCount == (int)LEPRA_FD_GET_COUNT(&lReadSet));
 			FdSet lExceptionSet;
 			FdSetHelper::Copy(lExceptionSet, lReadSet);
-			int lSelectCount = ::select(LEPRA_FD_GET_MAX_HANDLE(lReadSet)+1, LEPRA_FDS(&lReadSet), 0, LEPRA_FDS(&lExceptionSet), &lTimeout);
+			int lSelectCount = ::select(LEPRA_FD_GET_MAX_HANDLE(&lReadSet)+1, LEPRA_FDS(&lReadSet), 0, LEPRA_FDS(&lExceptionSet), &lTimeout);
 			if (lSelectCount > 0)
 			{
 				log_atrace("Picked up a receive socket.");
@@ -1223,11 +1223,15 @@ UdpMuxSocket::~UdpMuxSocket()
 	log_atrace("~UdpMuxSocket()");
 
 	RequestStop();
+
 	SocketAddress lAddress = GetLocalAddress();
 	lAddress.ResolveHost(_T(""));
-	SendTo((const uint8*)"?", 1, lAddress);	// Release recvfrom().
+	SendTo((const uint8*)"Release!", 8, lAddress); // Release recvfrom().
+	Thread::Sleep(1.01);
+
 	Close();
 	ReleaseSocketThreads();
+	Signal(0);
 	Join(5.0f);
 }
 
