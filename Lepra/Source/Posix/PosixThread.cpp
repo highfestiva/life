@@ -183,6 +183,13 @@ void Thread::YieldCpu()
 	::sched_yield();
 }
 
+void Thread::PostRun()
+{
+	::sem_post(&mJoinSemaphore);
+}
+
+
+
 
 
 PosixLock::PosixLock()

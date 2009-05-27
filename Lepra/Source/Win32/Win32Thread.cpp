@@ -210,20 +210,9 @@ void Thread::YieldCpu()
 	::SwitchToThread();
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+void Thread::PostRun()
+{
+}
 
 
 

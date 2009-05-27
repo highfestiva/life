@@ -79,6 +79,7 @@ protected:
 	//     ...
 	// }
 	virtual void Run() = 0;
+	void PostRun();
 
 	friend void RunThread(Thread* pThread);
 

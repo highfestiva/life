@@ -105,6 +105,7 @@ void RunThread(Thread* pThread)
 	pThread->SetRunning(true);
 	pThread->Run();
 	pThread->SetRunning(false);
+	pThread->PostRun();
 	if (pThread->GetSelfDestruct())
 	{
 		delete (pThread);
