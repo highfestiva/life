@@ -64,6 +64,7 @@ bool Network::ResolveHostname(const String& pHostname, IPAddress& pIPAddress)
 	if (pHostname.length() == 0)
 	{
 		char lHostname[256] = "";
+		::gethostname(lHostname, sizeof(lHostname));
 		lHostent = ::gethostbyname(lHostname);
 	}
 	else

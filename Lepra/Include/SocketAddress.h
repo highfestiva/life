@@ -52,9 +52,7 @@ public:
 
 	bool Resolve(const String& pAddress);
 	bool ResolveRange(const String& pAddress, uint16& pEndPort);
-
-protected:
-	bool ResolveIp(const String& pIp);
+	bool ResolveHost(const String& pHostname);	// Only changes address, not port.
 
 private:
 	#ifdef LEPRA_NETWORK_IPV6

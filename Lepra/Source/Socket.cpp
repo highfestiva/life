@@ -366,16 +366,28 @@ TcpSocket* TcpListenerSocket::Accept(SocketFactory pSocketFactory)
 	TcpSocket* lTcpSocket = 0;
 	if (mSocket != INVALID_SOCKET)
 	{
-		// Initialize socket address struct.
-		SocketAddress lSockAddress;
-		socklen_t lSize = (socklen_t)sizeof(lSockAddress.GetAddr());
-
-		sys_socket lSocket = ::accept(mSocket, (sockaddr*)&lSockAddress.GetAddr(), &lSize);
-		if (lSocket != INVALID_SOCKET)
+		int lAcceptCount = 0;
+		while (IsOpen() && lAcceptCount == 0)
 		{
-			log_atrace("::accept() received a ::connect()");
-			lTcpSocket = pSocketFactory(lSocket, lSockAddress, this, mReceiver);
-			BusLock::Add(&mConnectionCount, 1);
+			fd_set lAcceptSet;
+			FD_ZERO(&lAcceptSet);
+			FD_SET(mSocket, &lAcceptSet);
+			timeval lTime;
+			lTime.tv_sec = 1;
+			lTime.tv_usec = 0;
+			lAcceptCount = ::select(mSocket+1, &lAcceptSet, NULL, NULL, &lTime);
+		}
+		if (lAcceptCount >= 1)
+		{
+			SocketAddress lSockAddress;
+			socklen_t lSize = (socklen_t)sizeof(lSockAddress.GetAddr());
+			sys_socket lSocket = ::accept(mSocket, (sockaddr*)&lSockAddress.GetAddr(), &lSize);
+			if (lSocket != INVALID_SOCKET)
+			{
+				log_atrace("::accept() received a ::connect()");
+				lTcpSocket = pSocketFactory(lSocket, lSockAddress, this, mReceiver);
+				BusLock::Add(&mConnectionCount, 1);
+			}
 		}
 	}
 	return (lTcpSocket);
@@ -549,8 +561,8 @@ int TcpSocket::Receive(void* pData, int pMaxSize)
 bool TcpSocket::Unreceive(void* pData, int pByteCount)
 {
 	assert(mUnreceivedByteCount == 0);
-	assert(pByteCount <= sizeof(mUnreceivedArray));
-	bool lOk = (mUnreceivedByteCount == 0 && pByteCount <= sizeof(mUnreceivedArray));
+	assert(pByteCount <= (int)sizeof(mUnreceivedArray));
+	bool lOk = (mUnreceivedByteCount == 0 && pByteCount <= (int)sizeof(mUnreceivedArray));
 	if (lOk)
 	{
 		mUnreceivedByteCount = pByteCount;
@@ -1211,6 +1223,9 @@ UdpMuxSocket::~UdpMuxSocket()
 	log_atrace("~UdpMuxSocket()");
 
 	RequestStop();
+	SocketAddress lAddress = GetLocalAddress();
+	lAddress.ResolveHost(_T(""));
+	SendTo((const uint8*)"?", 1, lAddress);	// Release recvfrom().
 	Close();
 	ReleaseSocketThreads();
 	Join(5.0f);

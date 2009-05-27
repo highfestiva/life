@@ -171,7 +171,7 @@ bool SocketAddress::Resolve(const String& pAddress)
 	}
 	if (lOk)
 	{
-		lOk = ResolveIp(lVector[0]);
+		lOk = ResolveHost(lVector[0]);
 	}
 	if (lOk)
 	{
@@ -205,7 +205,7 @@ bool SocketAddress::ResolveRange(const String& pAddress, uint16& pEndPort)
 	return (lOk);
 }
 
-bool SocketAddress::ResolveIp(const String& pAddress)
+bool SocketAddress::ResolveHost(const String& pHostname)
 {
 #ifdef LEPRA_NETWORK_IPV6
 	// TODO: fixme!
@@ -215,16 +215,16 @@ bool SocketAddress::ResolveIp(const String& pAddress)
 #endif // IPv6/IPV4
 	IPAddress lIpAddress;
 	bool lOk = false;
-	if (Network::ResolveHostname(pAddress, lIpAddress))
+	if (Network::ResolveHostname(pHostname, lIpAddress))
 	{
 		lOk = true;
 		lIpAddress.Get((uint8*)&mSockAddr.sin_addr);
 	}
 #ifdef LEPRA_NETWORK_IPV6
 	// TODO: fixme!
-	else if ((lIp = inet_addr(AnsiStringUtility::ToOwnCode(pAddress).c_str())) != 0xFFFFFFFF)
+	else if ((lIp = inet_addr(AnsiStringUtility::ToOwnCode(pHostname).c_str())) != 0xFFFFFFFF)
 #else // IPV4
-	else if ((lIp = inet_addr(AnsiStringUtility::ToOwnCode(pAddress).c_str())) != 0xFFFFFFFF)
+	else if ((lIp = inet_addr(AnsiStringUtility::ToOwnCode(pHostname).c_str())) != 0xFFFFFFFF)
 #endif // IPv6/IPV4
 	{
 		lOk = true;
