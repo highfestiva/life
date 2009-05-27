@@ -4,7 +4,7 @@
 
 
 
-#include <ncurses.h>
+#include <termios.h>
 #include "../../Include/Lepra.h"
 #include "../../Include/String.h"
 #include "../../Include/SystemManager.h"
@@ -19,15 +19,25 @@ namespace Lepra
 
 
 
+static termios gInitialTermios;
+
+
+
 void SystemManager::Init()
 {
-	timeout(3000000);
+	::tcgetattr(STDIN_FILENO, &gInitialTermios);
+	termios lTermios = gInitialTermios;
+	lTermios.c_lflag &= ~(ICANON|ECHO);
+	lTermios.c_cc[VMIN] = 1;
+	lTermios.c_cc[VTIME] = 5;
+	::tcsetattr(STDIN_FILENO, TCSANOW, &lTermios);
 
 	Thread::InitializeMainThread(_T("MainThread"));
 }
 
 void SystemManager::Shutdown()
 {
+	::tcsetattr(STDIN_FILENO, TCSANOW, &gInitialTermios);
 }
 
 String SystemManager::GetRootDirectory()

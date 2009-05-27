@@ -149,7 +149,7 @@ public:
 	virtual void PrintPrompt(const Lepra::String& pPrompt, const Lepra::String& pInputText, size_t pEditIndex) = 0;
 };
 
-// Uses ::printf() and ncurses (or corresponding).
+// Uses ::printf() and termios (or corresponding).
 class StdioConsolePrompt: public ConsolePrompt
 {
 public:

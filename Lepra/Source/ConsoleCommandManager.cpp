@@ -9,13 +9,44 @@
 #ifdef LEPRA_WINDOWS
 #include <conio.h>
 #elif defined(LEPRA_POSIX)
-#include <curses.h>
+#include <termios.h>
 #endif // Windows / POSIX
 
 
 
 namespace Lepra
 {
+
+
+
+#if defined(LEPRA_POSIX)
+int Getc(float pTimeout)
+{
+	const int fn = fileno(stdin);
+	fd_set lCharSet;
+	FD_ZERO(&lCharSet);
+	FD_SET(fn, &lCharSet);
+	timeval* lTime = 0;
+	timeval lCharTimeout;
+	if (pTimeout >= 0)
+	{
+		lTime = &lCharTimeout;
+		lCharTimeout.tv_sec = (int)pTimeout;
+		pTimeout -= lCharTimeout.tv_sec;
+		lCharTimeout.tv_usec = (int)(pTimeout*1000*1000);
+	}
+	int lResult = -1;
+	if (::select(fn+1, &lCharSet, 0, 0, lTime) > 0)
+	{
+		unsigned char c;
+		if (::read(fn, &c, 1) == 1)
+		{
+			lResult = c;
+		}
+	}
+	return (lResult);
+}
+#endif // Posix.
 
 
 
@@ -296,15 +327,55 @@ int StdioConsolePrompt::WaitChar()
 		}
 	}
 #elif defined(LEPRA_POSIX)
-	int c = getch();
-        switch (c)
-        {
-		case 27:	c = CON_KEY_ESCAPE;	break;
-		case '\n':	c = '\r';		break;
-        }
-	::printf("\nChar ordinal = %i.\n", c);
+	::fflush(stdout);
+	int c = Getc(-1.0f);
+	if (c == 27)
+	{
+		c = CON_KEY_ESCAPE;
+		int c2 = Getc(0.5f);
+		if (c2 == '[')
+		{
+			c = '?';
+			UnicodeString lSequence;
+			for (int x = 0; x < 30 && c2 > 0 && c2 != '~'; ++x)
+			{
+				c2 = Getc(0.5f);
+				lSequence.push_back(c2);
+				if (lSequence == L"A")		{ c = CON_KEY_UP;	break; }
+				else if (lSequence == L"B")	{ c = CON_KEY_DOWN;	break; }
+				else if (lSequence == L"C")	{ c = CON_KEY_RIGHT;	break; }
+				else if (lSequence == L"D")	{ c = CON_KEY_LEFT;	break; }
+				else if (lSequence == L"1~")	c = CON_KEY_HOME;
+				else if (lSequence == L"2~")	c = CON_KEY_INSERT;
+				else if (lSequence == L"3~")	c = CON_KEY_DELETE;
+				else if (lSequence == L"4~")	c = CON_KEY_END;
+				else if (lSequence == L"5~")	c = CON_KEY_PAGE_UP;
+				else if (lSequence == L"6~")	c = CON_KEY_PAGE_DOWN;
+				else if (lSequence == L"11~")	c = CON_KEY_F1;
+				else if (lSequence == L"12~")	c = CON_KEY_F2;
+				else if (lSequence == L"13~")	c = CON_KEY_F3;
+				else if (lSequence == L"14~")	c = CON_KEY_F4;
+				else if (lSequence == L"15~")	c = CON_KEY_F5;
+				else if (lSequence == L"17~")	c = CON_KEY_F6;
+				else if (lSequence == L"18~")	c = CON_KEY_F7;
+				else if (lSequence == L"19~")	c = CON_KEY_F8;
+				else if (lSequence == L"20~")	c = CON_KEY_F9;
+				else if (lSequence == L"21~")	c = CON_KEY_F10;
+				else if (lSequence == L"23~")	c = CON_KEY_F11;
+				else if (lSequence == L"24~")	c = CON_KEY_F12;
+			}
+		}
+	}
+	else if (c == '\n')
+	{
+		c = '\r';
+	}
+	else if (c == 127)
+	{
+		c = '\b';
+	}
 #else
-#error "other curses support not implemented..."
+#error "Other console support not implemented..."
 #endif // LEPRA_WINDOWS
 	return (c);
 }
@@ -312,9 +383,9 @@ int StdioConsolePrompt::WaitChar()
 void StdioConsolePrompt::ReleaseWaitCharThread()
 {
 #ifdef LEPRA_WINDOWS
-	_ungetch_nolock(-100);
+	::_ungetch_nolock(-100);
 #elif defined(LEPRA_POSIX)
-	ungetch(-100);
+	::write(fileno(stdin), "Q", 1);
 #else
 #error "other curses support not implemented..."
 #endif // LEPRA_WINDOWS
@@ -345,6 +416,7 @@ void StdioConsolePrompt::PrintPrompt(const Lepra::String& pPrompt, const Lepra::
 	{
 		::printf("\b");
 	}
+	::fflush(stdout);
 }
 
 

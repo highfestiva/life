@@ -1,4 +1,4 @@
-# 'Twas generated from ../../ThirdParty/ThirdPartyLib_800.vcproj, 2009-05-25, type='lib_nowarn'.
+# 'Twas generated from ../../ThirdParty/ThirdPartyLib_800.vcproj, 2009-05-26, type='lib_nowarn'.
 # Don't edit manually. See 'generate_makefile.py' for info.
 
 CFLAGS = -O0 -ggdb -fPIC -D_POSIX_PTHREAD_SEMANTICS -Istlport/stlport -Iode-060223/include -DPOSIX -D_DEBUG -D_CONSOLE -DPNG_NO_ASSEMBLER_CODE -DdCYLINDER_ENABLED -Wno-unknown-pragmas

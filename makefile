@@ -1,12 +1,12 @@
-# 'Twas generated 2009-05-25, type='base'.
+# 'Twas generated 2009-05-26, type='base'.
 # Don't edit manually. See 'generate_makefile.py' for info.
 
 SRCS=	\
-ThirdParty/libThirdParty.so	\
-Lepra/libLepra.so	\
-TBC/libTBC.so	\
-Cure/libCure.so	\
-Life/libLife.so
+ThirdParty	\
+Lepra	\
+TBC	\
+Cure	\
+Life
 
 OBJS=	\
 Life/LifeServer/LifeServer
@@ -15,30 +15,22 @@ all:	$(OBJS) $(SRCS)
 
 clean:
 	@rm bin/*
-	make clean --directory Life/LifeServer
-	make clean --directory ThirdParty
-	make clean --directory Lepra
-	make clean --directory TBC
-	make clean --directory Cure
-	make clean --directory Life
+	$(MAKE) clean -C Life/LifeServer
+	$(MAKE) clean -C ThirdParty
+	$(MAKE) clean -C Lepra
+	$(MAKE) clean -C TBC
+	$(MAKE) clean -C Cure
+	$(MAKE) clean -C Life
 
 Life/LifeServer/LifeServer:	$(SRCS)
-	make --directory Life/LifeServer
+	$(MAKE) -C Life/LifeServer
 	@cp ThirdParty/stlport/build/lib/obj/gcc/so/libstlport.so.5.2 bin/
-	@cp Life/LifeServer/LifeServer bin/
+	@cp $@ bin/
 
-ThirdParty/libThirdParty.so:
-	make --directory ThirdParty
-	@cp ThirdParty/libThirdParty.so bin/
-Lepra/libLepra.so:
-	make --directory Lepra
-	@cp Lepra/libLepra.so bin/
-TBC/libTBC.so:
-	make --directory TBC
-	@cp TBC/libTBC.so bin/
-Cure/libCure.so:
-	make --directory Cure
-	@cp Cure/libCure.so bin/
-Life/libLife.so:
-	make --directory Life
-	@cp Life/libLife.so bin/
+
+.PHONY:	$(OBJS) $(SRCS)
+
+$(SRCS):
+	$(MAKE) -C $@
+	@rm -f $(OBJS)
+	@cp $@/*.so bin/
