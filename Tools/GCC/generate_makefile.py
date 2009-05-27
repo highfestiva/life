@@ -32,7 +32,7 @@ lib%(lib)s.so:\t$(OBJS)
 """+foot_rules
 
 head_bin = head_lib+"""
-LIBS = -lLife -lCure -lTBC -lLepra -lThirdParty -lstlport -lm -lpthread -lnsl -lncurses %(libs)s
+LIBS = -lLife -lCure -lTBC -lLepra -lThirdParty -lstlport -lpthread -ldl %(libs)s
 """
 
 foot_bin = """
@@ -43,11 +43,20 @@ clean:
 \tg++ $(LIBS) -o $@ $(OBJS)
 """+foot_rules
 
-foot_bin_base ="""
+foot_bin_base = """
 %(bin)s:\t$(SRCS)
-\tmake --directory %(bindir)s
+\t$(MAKE) -C %(bindir)s
 \t@cp ThirdParty/stlport/build/lib/obj/gcc/so/libstlport.so.5.2 bin/
-\t@cp %(bin)s bin/
+\t@cp $@ bin/
+"""
+
+foot_lib_base = """
+.PHONY:\t$(OBJS) $(SRCS)
+
+$(SRCS):
+\t$(MAKE) -C $@
+\t@rm -f $(OBJS)
+\t@cp $@/*.so bin/
 """
 
 makedict = \
@@ -60,9 +69,9 @@ makedict = \
 "foot_bin": foot_bin,
 "foot_all_base": "\nall:\t$(OBJS) $(SRCS)\n",
 "foot_clean_base": "\nclean:\n\t@rm bin/*\n",
-"foot_clean_dir_base": "\tmake clean --directory %(directory)s\n",
+"foot_clean_dir_base": "\t$(MAKE) clean -C %(directory)s\n",
 "foot_bin_base": foot_bin_base,
-"foot_lib_base": "%(lib)s:\n\tmake --directory %(libdir)s\n\t@cp %(lib)s bin/\n",
+"foot_lib_base": foot_lib_base,
 }
 
 def printstart(makename):
@@ -123,7 +132,8 @@ def generate_makefile(vcfile, makename, includedirs, libdirs, header, footer, ty
 def generate_base_make(makename, binlist, liblist):
     global makedict
     f = create_makefile(makename, "", "base")
-    write_contents(f, liblist, binlist)
+    libdirlist = [os.path.dirname(lib) for lib in liblist]
+    write_contents(f, libdirlist, binlist)
     bins = " ".join(binlist)
     f.write(makedict["foot_all_base"])
     f.write(makedict["foot_clean_base"])
@@ -133,8 +143,7 @@ def generate_base_make(makename, binlist, liblist):
 	stllib = "ThirdParty/stlport/build/lib/obj/gcc/so/libstlport.so.5.2"
     	f.write(makedict["foot_bin_base"] % {"bin":bin, "bindir":os.path.dirname(bin), "stllib":stllib})
     f.write("\n")
-    for lib in liblist:
-    	f.write(makedict["foot_lib_base"] % {"lib":lib, "libdir":os.path.dirname(lib)})
+    f.write(makedict["foot_lib_base"])
     f.close()
 	
 

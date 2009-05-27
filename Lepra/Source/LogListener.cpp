@@ -4,11 +4,8 @@
 
 
 
-#include "../Include/LepraTarget.h"
 #include <assert.h>
-#if defined(LEPRA_POSIX)
-#include <ncurses.h>
-#endif // POSIX
+#include "../Include/LepraTarget.h"
 #include "../Include/LogListener.h"
 #include "../Include/Time.h"
 
@@ -178,7 +175,7 @@ void StdioConsoleLogListener::WriteLog(const String& pFullMessage, Log::LogLevel
 	lAttributes = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE;
 	::SetConsoleTextAttribute(lStdOut, lAttributes);
 #else // !LEPRA_WINDOWS
-	::puts(AnsiStringUtility::ToOwnCode(pFullMessage).c_str());
+	::printf("%s", AnsiStringUtility::ToOwnCode(pFullMessage).c_str());
 #endif // LEPRA_WINDOWS/!LEPRA_WINDOWS
 }
 
@@ -213,9 +210,7 @@ void InteractiveStdioConsoleLogListener::WriteLog(const String& pFullMessage, Lo
 	CONSOLE_SCREEN_BUFFER_INFO lConsoleInfo;
 	::GetConsoleScreenBufferInfo(::GetStdHandle(STD_OUTPUT_HANDLE), &lConsoleInfo);
 #elif defined(LEPRA_POSIX)
-	int x;
-	int y;
-	getsyx(y, x);
+	::printf("\033[s");	// Store position.
 #else // !known
 #error "Cursor stuff not implemented for platform."
 #endif // Windows / POSIX / ?
@@ -231,7 +226,15 @@ void InteractiveStdioConsoleLogListener::WriteLog(const String& pFullMessage, Lo
 	lConsoleInfo.dwCursorPosition.X = x;
 	::SetConsoleCursorPosition(::GetStdHandle(STD_OUTPUT_HANDLE), lConsoleInfo.dwCursorPosition);
 #elif defined(LEPRA_POSIX)
-	setsyx(y, x);
+	::printf("\033[u");	// Pop position.
+	for (size_t x = 0; x < pFullMessage.length(); ++x)
+	{
+		if (pFullMessage[x] == _T('\n'))
+		{
+			::printf("\033[B");	// Move down.
+		}
+	}
+	::fflush(stdout);
 #else // !known
 #error "Cursor stuff not implemented for platform."
 #endif // Windows / Posix / ?
