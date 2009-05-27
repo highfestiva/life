@@ -80,6 +80,11 @@ bool ConsoleCommandManager::AddCommand(const String& pCommand)
 	return mCommandSet.insert(pCommand).second;
 }
 
+bool ConsoleCommandManager::RemoveCommand(const String& pCommand)
+{
+	return (mCommandSet.erase(pCommand) != 0);
+}
+
 int ConsoleCommandManager::Execute(const String& pCommand, bool pAppendToHistory)
 {
 	int lExecutionResult = 0;

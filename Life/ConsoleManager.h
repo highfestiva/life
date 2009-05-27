@@ -37,18 +37,20 @@ protected:
 	{
 		COMMAND_NOT_IMPLEMENTED = -1,
 
+		COMMAND_ALIAS,
+		COMMAND_ALIAS_VALUE,
 		COMMAND_ECHO,
-		COMMAND_SET_SUBSYSTEM_LOG_LEVEL,
-		COMMAND_SET_STDOUT_LOG_LEVEL,
-		COMMAND_FORK,
-		COMMAND_EXECUTE_VARIABLE,
 		COMMAND_EXECUTE_FILE,
+		COMMAND_EXECUTE_VARIABLE,
+		COMMAND_FORK,
 		COMMAND_LIST_ACTIVE_RESOURCES,
-		COMMAND_SLEEP,
 		COMMAND_PUSH,
-		COMMAND_SET_DEFAULT_CONFIG,
 		COMMAND_SAVE_SYSTEM_CONFIG_FILE,
 		COMMAND_SAVE_APPLICATION_CONFIG_FILE,
+		COMMAND_SET_DEFAULT_CONFIG,
+		COMMAND_SET_STDOUT_LOG_LEVEL,
+		COMMAND_SET_SUBSYSTEM_LOG_LEVEL,
+		COMMAND_SLEEP,
 
 		COMMAND_DUMP_PERFORMANCE_INFO,
 		COMMAND_CLEAR_PERFORMANCE_INFO,
@@ -62,6 +64,7 @@ protected:
 	void Init();
 	unsigned GetCommandCount() const;
 	const CommandPair& GetCommand(unsigned pIndex) const;
+	int TranslateCommand(const Lepra::String& pCommand) const;
 	int OnCommand(const Lepra::String& pCommand, const Lepra::StringUtility::StringVector& pParameterVector);
 
 	virtual bool SaveApplicationConfigFile(Lepra::File* pFile);
@@ -73,6 +76,8 @@ private:
 	bool SaveConfigFile(Lepra::File* pFile, std::list<Lepra::String>& pVariableList);
 
 	static const CommandPair mCommandIdList[];
+	typedef std::hash_map<Lepra::String, Lepra::String> AliasMap;
+	AliasMap mAliasMap;
 	Lepra::LogListener* mLogger;
 	LOG_CLASS_DECLARE();
 };

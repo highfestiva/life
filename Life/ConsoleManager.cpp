@@ -21,25 +21,26 @@ namespace Life
 const ConsoleManager::CommandPair ConsoleManager::mCommandIdList[] =
 {
 	// IO.
+	{_T("alias"), COMMAND_ALIAS},
 	{_T("echo"), COMMAND_ECHO},
-	{_T("set-subsystem-log-level"), COMMAND_SET_SUBSYSTEM_LOG_LEVEL},
-	{_T("set-stdout-log-level"), COMMAND_SET_STDOUT_LOG_LEVEL},
-	{_T("fork"), COMMAND_FORK},
-	{_T("execute-variable"), COMMAND_EXECUTE_VARIABLE},
 	{_T("execute-file"), COMMAND_EXECUTE_FILE},
+	{_T("execute-variable"), COMMAND_EXECUTE_VARIABLE},
+	{_T("fork"), COMMAND_FORK},
 	{_T("list-active-resources"), COMMAND_LIST_ACTIVE_RESOURCES},
-	{_T("sleep"), COMMAND_SLEEP},
 	{_T("push"), COMMAND_PUSH},
-	{_T("set-default-config"), COMMAND_SET_DEFAULT_CONFIG},
 	{_T("save-system-config-file"), COMMAND_SAVE_SYSTEM_CONFIG_FILE},
 	{_T("save-application-config-file"), COMMAND_SAVE_APPLICATION_CONFIG_FILE},
+	{_T("set-default-config"), COMMAND_SET_DEFAULT_CONFIG},
+	{_T("set-stdout-log-level"), COMMAND_SET_STDOUT_LOG_LEVEL},
+	{_T("set-subsystem-log-level"), COMMAND_SET_SUBSYSTEM_LOG_LEVEL},
+	{_T("sleep"), COMMAND_SLEEP},
 
 	// Info/debug stuff.
-	{_T("dump-performance-info"), COMMAND_DUMP_PERFORMANCE_INFO},
 	{_T("clear-performance-info"), COMMAND_CLEAR_PERFORMANCE_INFO},
-	{_T("system-info"), COMMAND_SHOW_SYSTEM_INFO},
 	{_T("debug-break"), COMMAND_DEBUG_BREAK},
+	{_T("dump-performance-info"), COMMAND_DUMP_PERFORMANCE_INFO},
 	{_T("help"), COMMAND_HELP},
+	{_T("system-info"), COMMAND_SHOW_SYSTEM_INFO},
 };
 
 
@@ -65,6 +66,14 @@ void ConsoleManager::Init()
 	Parent::Init();
 	GetConsoleCommandManager()->SetComment(_T("//"));
 	GetConsoleCommandManager()->AddCompleter(new Cure::RuntimeVariableCompleter(GetVariableScope(), _T("#")));
+
+	ExecuteCommand(_T("alias trace-log-level \"set-stdout-log-level 0; set-subsystem-log-level Root 0\""));
+	ExecuteCommand(_T("alias debug-log-level \"set-stdout-log-level 1; set-subsystem-log-level Root 1\""));
+	ExecuteCommand(_T("alias performance-log-level \"set-stdout-log-level 2; set-subsystem-log-level Root 2\""));
+	ExecuteCommand(_T("alias info-log-level \"set-stdout-log-level 3; set-subsystem-log-level Root 3\""));
+	ExecuteCommand(_T("alias headline-log-level \"set-stdout-log-level 4; set-subsystem-log-level Root 4\""));
+	ExecuteCommand(_T("alias warning-log-level \"set-stdout-log-level 5; set-subsystem-log-level Root 5\""));
+	ExecuteCommand(_T("alias error-log-level \"set-stdout-log-level 6; set-subsystem-log-level Root 6\""));
 }
 
 unsigned ConsoleManager::GetCommandCount() const
@@ -77,12 +86,68 @@ const ConsoleManager::CommandPair& ConsoleManager::GetCommand(unsigned pIndex) c
 	return (mCommandIdList[pIndex]);
 }
 
+int ConsoleManager::TranslateCommand(const Lepra::String& pCommand) const
+{
+	int lTranslation = Parent::TranslateCommand(pCommand);
+	if (lTranslation == -1)
+	{
+		if (mAliasMap.find(pCommand) != mAliasMap.end())
+		{
+			lTranslation = COMMAND_ALIAS_VALUE;
+		}
+	}
+	return (lTranslation);
+}
+
 int ConsoleManager::OnCommand(const Lepra::String& pCommand, const Lepra::StringUtility::StringVector& pParameterVector)
 {
 	int lResult = 0;
 	CommandCommon lCommand = (CommandCommon)TranslateCommand(pCommand);
 	switch (lCommand)
 	{
+		case COMMAND_ALIAS:
+		{
+			//bool lUsage = false;
+			if (pParameterVector.size() == 2)
+			{
+				mAliasMap.insert(AliasMap::value_type(pParameterVector[0], pParameterVector[1]));
+				GetConsoleCommandManager()->AddCommand(pParameterVector[0]);
+			}
+			else if (pParameterVector.size() == 1)
+			{
+				mAliasMap.erase(pParameterVector[0]);
+				GetConsoleCommandManager()->RemoveCommand(pParameterVector[0]);
+			}
+			else
+			{
+				mLog.AInfo("List of aliases:");
+				for (AliasMap::iterator x = mAliasMap.begin(); x != mAliasMap.end(); ++x)
+				{
+					mLog.Infof(_T("  %s -> %s"), x->first.c_str(), x->second.c_str());
+				}
+			}
+			/*if (lUsage)
+			{
+				mLog.Warningf(_T("usage: %s <alias_name> [<command>]"), pCommand.c_str());
+				mLog.AWarning("Adds a new alias, or removes one if <command is left out.");
+				lResult = 1;
+			}*/
+		}
+		break;
+		case COMMAND_ALIAS_VALUE:
+		{
+			AliasMap::iterator x = mAliasMap.find(pCommand);
+			if (x != mAliasMap.end())
+			{
+				lResult = ExecuteCommand(x->second);
+			}
+			else
+			{
+				mLog.Warningf(_T("Alias %s is removed."), pCommand.c_str());
+				lResult = 1;
+			}
+		}
+		break;
 		case COMMAND_ECHO:
 		{
 			bool lUsage = false;

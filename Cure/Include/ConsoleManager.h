@@ -49,7 +49,7 @@ protected:
 
 	virtual void Init();
 	std::list<Lepra::String> GetCommandList() const;
-	int TranslateCommand(const Lepra::String& pCommand) const;
+	virtual int TranslateCommand(const Lepra::String& pCommand) const;
 	void PrintCommandList(const std::list<Lepra::String>& pCommandList);
 	Lepra::InteractiveConsoleLogListener* GetConsoleLogger() const;
 	Lepra::ConsolePrompt* GetConsolePrompt() const;

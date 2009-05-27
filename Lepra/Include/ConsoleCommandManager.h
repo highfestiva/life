@@ -21,7 +21,6 @@
 
 
 
-#include <hash_map>
 #include <list>
 #include <set>
 #include <vector>
@@ -53,6 +52,7 @@ public:
 
 	void SetComment(const String& pComment);
 	bool AddCommand(const String& pCommand);
+	bool RemoveCommand(const String& pCommand);
 	int Execute(const String& pCommand, bool pAppendToHistory);
 	void AddCompleter(CommandCompleter* pCompleter);
 	void RemoveCompleter(CommandCompleter* pCompleter);
