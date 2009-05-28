@@ -16,7 +16,7 @@ namespace Lepra
 int FdSetHelper::Copy(FdSet& pDestination, const FdSet& pSource)
 {
 #if defined(LEPRA_WINDOWS)
-	const size_t lCountAndPad = pSource.fd_array-(&pSource.fd_count);
+	const size_t lCountAndPad = ((const char*)pSource.fd_array)-((const char*)(&pSource.fd_count));
 	::memcpy(&pDestination, &pSource, lCountAndPad + pSource.fd_count*sizeof(pSource.fd_array[0]));
 	return (pSource.fd_count);
 #elif defined(LEPRA_POSIX)

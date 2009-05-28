@@ -771,7 +771,7 @@ void ServerReceive()
 		}
 		else if (lReceived != Cure::NetworkAgent::RECEIVE_NO_DATA)
 		{
-			gNptLog.AError("Server networking error Problem receiving data!");
+			gNptLog.AError("Server networking error: problem receiving data!");
 		}
 	}
 	gServer.mNetworkAgent->GetPacketFactory()->Release(lPacket);

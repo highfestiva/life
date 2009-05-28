@@ -66,6 +66,7 @@ bool TestThreading(const LogDecorator& pAccount)
 			if (lTestOk)
 			{
 				lContext = _T("thread run and self termination");
+				Thread::Sleep(0.001);	// Make sure we sleep at least once.
 				for (unsigned y = 0; y < 200 && lThread.IsRunning(); ++y)
 				{
 					Thread::Sleep(0.001);

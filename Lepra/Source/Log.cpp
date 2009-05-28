@@ -96,7 +96,7 @@ void Log::RemoveListener(LogListener* pLogger)
 	assert(pLogger);
 	for (int x = LEVEL_LOWEST_TYPE; x < LEVEL_TYPE_COUNT; ++x)
 	{
-		std::list<LogListener*>::iterator y = mLoggerList[x].begin();
+		std::vector<LogListener*>::iterator y = mLoggerList[x].begin();
 		for (; y != mLoggerList[x].end(); ++y)
 		{
 			if (*y == pLogger)
@@ -114,7 +114,7 @@ LogListener* Log::GetListener(const Lepra::String& pName) const
 	LogListener* lListener = 0;
 	for (int x = LEVEL_LOWEST_TYPE; !lListener && x < LEVEL_TYPE_COUNT; ++x)
 	{
-		std::list<LogListener*>::const_iterator y = mLoggerList[x].begin();
+		std::vector<LogListener*>::const_iterator y = mLoggerList[x].begin();
 		for (; !lListener && y != mLoggerList[x].end(); ++y)
 		{
 			if ((*y)->GetName() == pName)
@@ -168,7 +168,7 @@ void Log::DoPrint(const Log* pOriginator, const String& pAccount, const String& 
 			mParent->DoPrint(this, pAccount, pMessage, pLevel);
 		}
 
-		std::list<LogListener*>::iterator x = mLoggerList[pLevel].begin();
+		std::vector<LogListener*>::iterator x = mLoggerList[pLevel].begin();
 		for (; x != mLoggerList[pLevel].end(); ++x)
 		{
 			(*x)->OnLog(pOriginator, pAccount, pMessage, pLevel);
@@ -185,7 +185,7 @@ void Log::DoRawPrint(const String& pMessage, LogLevel pLevel)
 			mParent->DoRawPrint(pMessage, pLevel);
 		}
 
-		std::list<LogListener*>::iterator x = mLoggerList[pLevel].begin();
+		std::vector<LogListener*>::iterator x = mLoggerList[pLevel].begin();
 		for (; x != mLoggerList[pLevel].end(); ++x)
 		{
 			(*x)->WriteLog(pMessage, pLevel);

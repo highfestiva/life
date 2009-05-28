@@ -8,8 +8,8 @@
 
 #pragma once
 
-#include <list>
 #include <typeinfo>
+#include <vector>
 #include "LepraTypes.h"
 #include "LogType.h"
 #include "String.h"
@@ -60,7 +60,7 @@ private:
 
 	String mName;
 	Log* mParent;
-	std::list<LogListener*> mLoggerList[LEVEL_TYPE_COUNT];
+	std::vector<LogListener*> mLoggerList[LEVEL_TYPE_COUNT];
 	LogLevel mLevel;
 };
 

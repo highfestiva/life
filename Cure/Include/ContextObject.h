@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include <list>
 #include "../../Lepra/Include/String.h"
 #include "../../TBC/Include/PhysicsEngine.h"
 #include "Cure.h"

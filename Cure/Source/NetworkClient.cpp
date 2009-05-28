@@ -176,12 +176,16 @@ RemoteStatus NetworkClient::WaitLogin()
 					SetLoginAccountId(0);
 				}
 				break;
-				case Cure::NetworkAgent::RECEIVE_NO_DATA:
 				case Cure::NetworkAgent::RECEIVE_CONNECTION_BROKEN:
 				{
 					mLog.AError("Disconnected from server while waiting for login!");
 					lStatus = REMOTE_UNKNOWN;
 					SetLoginAccountId(0);
+				}
+				break;
+				case Cure::NetworkAgent::RECEIVE_NO_DATA:
+				{
+					// Nothing, really.
 				}
 				break;
 			}
