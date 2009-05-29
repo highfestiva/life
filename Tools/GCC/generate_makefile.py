@@ -7,7 +7,7 @@ import sys
 
 
 cflags_1 = """
-CFLAGS = -O0 -ggdb -fPIC -D_POSIX_PTHREAD_SEMANTICS %(includes)s -DPOSIX -D_DEBUG -D_CONSOLE -DPNG_NO_ASSEMBLER_CODE -DdCYLINDER_ENABLED"""
+CFLAGS = -O0 -ggdb -fPIC -D_POSIX_PTHREAD_SEMANTICS %(includes)s -DPOSIX -D_DEBUG -D_CONSOLE -DPNG_NO_ASSEMBLER_CODE -DdCYLINDER_ENABLED -DCURE_TEST_WITHOUT_UI"""
 cflags_2 = "-Wno-unknown-pragmas"
 
 head_lib = cflags_1+" -Wall "+cflags_2+"\n"
@@ -205,7 +205,8 @@ def main():
                 ["lib", "TBC/TBC.vcproj"],
                 ["lib", "Cure/Cure.vcproj"],
                 ["lib", "Life/Life.vcproj"],
-                ["bin", "Life/LifeServer/LifeServer.vcproj"]]
+                ["bin", "Life/LifeServer/LifeServer.vcproj"],
+                ["bin", "UiCure/CureTestApp/CureTestApp.vcproj"]]
     generate_makefiles(basedir, projects)
 
 if __name__ == '__main__':

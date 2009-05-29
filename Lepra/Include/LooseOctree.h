@@ -57,8 +57,8 @@ template<class _TVarType>
 class LOSphereVolume : public Sphere<_TVarType>, public LOVolume<_TVarType>
 {
 public:
-	LOSphereVolume() : Sphere() {}
-	LOSphereVolume(const Vector3D<_TVarType>& pPosition, _TVarType pRadius) : Sphere(pPosition, pRadius) {}
+	LOSphereVolume() {}
+	LOSphereVolume(const Vector3D<_TVarType>& pPosition, _TVarType pRadius) : Sphere<_TVarType>(pPosition, pRadius) {}
 
 	bool IsAABBEnclosingVolume(const AABB<_TVarType>& pAABB) { return mCD.IsAABBEnclosingSphere(pAABB, *this); }
 	bool IsAABCEnclosingVolume(const Vector3D<_TVarType>& pAABCCenter, _TVarType pHalfAABCSize) { return mCD.IsAABBEnclosingSphere(AABB<_TVarType>(pAABCCenter, Vector3D<_TVarType>(pHalfAABCSize, pHalfAABCSize, pHalfAABCSize)), *this); }
@@ -74,8 +74,8 @@ template<class _TVarType>
 class LOAABBVolume : public AABB<_TVarType>, public LOVolume<_TVarType>
 {
 public:
-	LOAABBVolume() : Sphere() {}
-	LOAABBVolume(const Vector3D<_TVarType>& pPosition, const Vector3D<_TVarType>& pSize) : AABB(pPosition, pSize) {}
+	LOAABBVolume() {}
+	LOAABBVolume(const Vector3D<_TVarType>& pPosition, const Vector3D<_TVarType>& pSize) : AABB<_TVarType>(pPosition, pSize) {}
 
 	bool IsAABBEnclosingVolume(const AABB<_TVarType>& pAABB) { return mCD.IsAABB1EnclosingAABB2(pAABB, *this); }
 	bool IsAABCEnclosingVolume(const Vector3D<_TVarType>& pAABCCenter, _TVarType pHalfAABCSize) { return mCD.IsAABB1EnclosingAABB2(AABB<_TVarType>(pAABCCenter, Vector3D<_TVarType>(pHalfAABCSize, pHalfAABCSize, pHalfAABCSize)), *this); }
@@ -88,7 +88,7 @@ private:
 };
 
 
-template<class _TKey, class _TObject, class _TVarType, class _THashFunc = std::hash<_TKey>>
+template<class _TKey, class _TObject, class _TVarType, class _THashFunc = std::hash<_TKey> >
 class LooseOctree
 {
 public:

@@ -68,7 +68,7 @@ public:
 	inline Alignment GetAlignment() const;
 private:
 	Vector3D<_TVarType> mPosition;
-	RotationMatrix<_TVarType> pRotMtx;
+	RotationMatrix<_TVarType> mRotMtx;
 	_TVarType mLength;
 	_TVarType mRadius;
 	Alignment mAlignment;
@@ -98,7 +98,7 @@ template<class _TVarType> Cylinder<_TVarType>::Cylinder(const Vector3D<_TVarType
                                                   _TVarType pRadius, 
 						  Alignment pAlignment) :
 	mPosition(pPosition),
-	pRotMtx(pRotMtx),
+	mRotMtx(pRotMtx),
 	mLength(pLength),
 	mRadius(pRadius),
 	mAlignment(pAlignment)

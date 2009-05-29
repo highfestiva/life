@@ -1,7 +1,7 @@
 # 'Twas generated from ../../ThirdParty/ThirdPartyLib_800.vcproj, 2009-05-29, type='lib_nowarn'.
 # Don't edit manually. See 'generate_makefile.py' for info.
 
-CFLAGS = -O0 -ggdb -fPIC -D_POSIX_PTHREAD_SEMANTICS -Istlport/stlport -Iode-060223/include -DPOSIX -D_DEBUG -D_CONSOLE -DPNG_NO_ASSEMBLER_CODE -DdCYLINDER_ENABLED -Wno-unknown-pragmas
+CFLAGS = -O0 -ggdb -fPIC -D_POSIX_PTHREAD_SEMANTICS -Istlport/stlport -Iode-060223/include -DPOSIX -D_DEBUG -D_CONSOLE -DPNG_NO_ASSEMBLER_CODE -DdCYLINDER_ENABLED -DCURE_TEST_WITHOUT_UI -Wno-unknown-pragmas
 
 SRCS=	\
 jpeg-6b/jcapimin.cpp	\

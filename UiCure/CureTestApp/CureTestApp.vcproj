@@ -592,10 +592,6 @@
 				>
 			</File>
 		</Filter>
-		<File
-			RelativePath=".\Texture0.tga"
-			>
-		</File>
 	</Files>
 	<Globals>
 	</Globals>

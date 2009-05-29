@@ -38,7 +38,7 @@ class UserUiTypeResource: public Cure::UserTypeResourceBase<ResourceType,
 {
 	typedef fastdelegate::FastDelegate1<UserUiTypeResource<ResourceType, SubtypeExtraType>*, void> ParentTypeLoadCallback;
 public:
-	UserUiTypeResource(GameUiManager* pUiManager, typename const SubtypeExtraType& pExtraData = SubtypeExtraType());
+	UserUiTypeResource(GameUiManager* pUiManager, const typename SubtypeExtraType& pExtraData = SubtypeExtraType());
 	virtual ~UserUiTypeResource();
 
 protected:

@@ -36,7 +36,7 @@ TEMPLATE QUAL::LooseBinTree(_TObject pErrorObject,
 TEMPLATE QUAL::~LooseBinTree()
 {
 	delete mRootNode;
-	NodeList::iterator lIter;
+	typename NodeList::iterator lIter;
 	for (lIter = mRecycledNodeList.begin(); lIter != mRecycledNodeList.end(); ++lIter)
 	{
 		delete (*lIter);
@@ -51,7 +51,7 @@ TEMPLATE void QUAL::InsertObject(_TKey pKey, _TObject pObject, _TVarType pPos, _
 		return;
 	}
 
-	Node::Entry lEntry;
+	typename Node::Entry lEntry;
 	lEntry.mSizeHalf = pSizeHalf;
 	lEntry.mPos      = pPos;
 	lEntry.mObject   = pObject;
@@ -96,7 +96,7 @@ TEMPLATE void QUAL::InsertObject(_TKey pKey, typename Node::Entry pEntry, Node* 
 
 TEMPLATE _TObject QUAL::RemoveObject(_TKey pKey)
 {
-	NodeTable::Iterator lNodeIter = mNodeTable.Find(pKey);
+	typename NodeTable::Iterator lNodeIter = mNodeTable.Find(pKey);
 	if (lNodeIter == mNodeTable.End())
 	{
 		return mErrorObject;
@@ -110,8 +110,8 @@ TEMPLATE typename QUAL::Node::Entry QUAL::RemoveObject(_TKey pKey, typename Node
 	// Removes object from the octree and deletes the node if empty.
 	Node* lCurrentNode = *pNodeIter;
 
-	Node::EntryTable::Iterator lIter = FindObject(pKey, lCurrentNode);
-	Node::Entry lEntry = *lIter;
+	typename Node::EntryTable::Iterator lIter = FindObject(pKey, lCurrentNode);
+	typename Node::Entry lEntry = *lIter;
 
 	lCurrentNode->mEntryTable.Remove(lIter);
 	mNodeTable.Remove(pNodeIter);
@@ -139,7 +139,7 @@ TEMPLATE typename QUAL::Node::Entry QUAL::RemoveObject(_TKey pKey, typename Node
 
 TEMPLATE _TObject QUAL::FindObject(_TKey pKey) const
 {
-	NodeTable::ConstIterator lNodeIter = mNodeTable.Find(pKey);
+	typename NodeTable::ConstIterator lNodeIter = mNodeTable.Find(pKey);
 	if (lNodeIter == mNodeTable.End())
 	{
 		return mErrorObject;
@@ -156,7 +156,7 @@ TEMPLATE typename QUAL::Node::EntryTable::Iterator QUAL::FindObject(_TKey pKey, 
 
 TEMPLATE bool QUAL::MoveObject(_TKey pKey, _TVarType pNewPos, _TVarType pNewSizeHalf)
 {
-	NodeTable::Iterator lNodeIter = mNodeTable.Find(pKey);
+	typename NodeTable::Iterator lNodeIter = mNodeTable.Find(pKey);
 	if (lNodeIter == mNodeTable.End())
 	{
 		mLog.AWarning("Trying to move non existing object.");
@@ -164,7 +164,7 @@ TEMPLATE bool QUAL::MoveObject(_TKey pKey, _TVarType pNewPos, _TVarType pNewSize
 	}
 	Node* lNode = *lNodeIter;
 
-	Node::EntryTable::Iterator lEntryIter = FindObject(pKey, lNode);
+	typename Node::EntryTable::Iterator lEntryIter = FindObject(pKey, lNode);
 	(*lEntryIter).mPos      = pNewPos;
 	(*lEntryIter).mSizeHalf = pNewSizeHalf;
 	
@@ -175,15 +175,15 @@ TEMPLATE bool QUAL::MoveObject(_TKey pKey, _TVarType pNewPos, _TVarType pNewSize
 
 TEMPLATE _TObject QUAL::MoveObject(_TKey pKey, _TVarType pNewPos)
 {
-	KeyToNodeMap::Iterator lNodeIter = mNodeTable.Find(pKey);
-	if (lNodeIter == mNodeLookup.End())
+	typename NodeTable::Iterator lNodeIter = mNodeTable.Find(pKey);
+	if (lNodeIter == mNodeTable.End())
 	{
 		mLog.AWarning("Trying to move non existing object.");
 		return false;
 	}
 	Node* lNode = *lNodeIter;
 
-	Node::EntryTable::Iterator lEntryIter = FindObject(pKey, lNode);
+	typename Node::EntryTable::Iterator lEntryIter = FindObject(pKey, lNode);
 	(*lEntryIter).mPos = pNewPos;
 
 	return MoveObject(pKey, lNodeIter, lEntryIter);
@@ -192,7 +192,7 @@ TEMPLATE _TObject QUAL::MoveObject(_TKey pKey, _TVarType pNewPos)
 TEMPLATE _TObject QUAL::MoveObject(_TKey pKey, typename NodeTable::Iterator& pNodeIter,
 	typename Node::EntryTable::Iterator& /*pObjectIter*/)
 {
-	Node::Entry lEntry = RemoveObject(pKey, pNodeIter);
+	typename Node::Entry lEntry = RemoveObject(pKey, pNodeIter);
 	InsertObject(pKey, lEntry, mRootNode, 0);
 	return lEntry.mObject;
 }
@@ -201,14 +201,14 @@ TEMPLATE bool QUAL::GetObjectSizeAndPos(_TKey pKey, _TVarType& pPos, _TVarType& 
 {
 	bool lOk = true;
 
-	NodeTable::Iterator lNodeIter = mNodeTable.Find(pKey);
+	typename NodeTable::Iterator lNodeIter = mNodeTable.Find(pKey);
 	if (lNodeIter == mNodeTable.End())
 	{
 		mLog.AWarning("Trying to fetch non existing object.");
 		lOk = false;
 	}
 
-	Node::EntryTable::Iterator lEntryIter;
+	typename Node::EntryTable::Iterator lEntryIter;
 	if (lOk)
 	{
 		Node* lNode = *lNodeIter;
@@ -282,12 +282,12 @@ TEMPLATE void QUAL::GetObjects(ObjectList& pObjects, _TVarType pPos, _TVarType p
 
 TEMPLATE void QUAL::GetObjects(ObjectList& pObjects, _TVarType pPos, _TVarType pSizeHalf, Node* pNode)
 {
-	Node::EntryTable::Iterator lIter;
+	typename Node::EntryTable::Iterator lIter;
 	for (lIter  = pNode->mEntryTable.First(); 
 		lIter != pNode->mEntryTable.End(); 
 		++lIter)
 	{
-		const Node::Entry& lEntry = *lIter;
+		const typename Node::Entry& lEntry = *lIter;
 
 		if (lEntry.IsOverlapping(pPos, pSizeHalf) == true)
 		{

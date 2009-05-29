@@ -70,7 +70,7 @@ String SystemManager::GetLoginName()
 String SystemManager::QueryFullUserName()
 {
 	// TODO: use ::getlogin() to search /usr/passwd or something similarly gory.
-	return (String(_T("?")));
+	return (GetLoginName());
 }
 
 unsigned SystemManager::GetLogicalCpuCount()
@@ -92,13 +92,13 @@ unsigned SystemManager::GetCoreCount()
 String SystemManager::GetCpuName()
 {
 	// TODO: search /proc/cpuinfo by brute force.
-	return (_T("Unknown CPU"));
+	return (_T("GenuineIntel"));
 }
 
 String SystemManager::GetOsName()
 {
 	// TODO: probably something like popen("uname -o").read()...
-	return (_T("POSIX"));
+	return (_T("Posix"));
 }
 
 uint64 SystemManager::GetAmountRam()

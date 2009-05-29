@@ -1,33 +1,34 @@
-/*
-	Class:  BinTree
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Righteous Games
 
-	NOTES:
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2006, Righteous Games
 
-	A binary tree.
-*/
 
-#ifndef BINTREE_H
-#define BINTREE_H
+
+#pragma once
 
 #include "LepraTypes.h"
 #include "FastAllocator.h"
 
+
+
 #define TEMPLATE template<class _TKey, class _TObject>
 #define QUAL BinTree<_TKey, _TObject>
 
+
+
 namespace Lepra
 {
+
+
 
 template<class _TKey, class _TObject>
 class BinTree
 {
 public:
 	class Node;
-
 private:
 	typedef FastAllocator<Node> NodeAllocator;
+public:
 	class Node
 	{
 	public:
@@ -586,7 +587,7 @@ TEMPLATE typename QUAL::Iterator QUAL::FindN(int pNum)
 
 TEMPLATE bool QUAL::Exists(_TKey pKey)
 {
-	Find(pKey) != End();
+	return (Find(pKey) != End());
 }
 
 TEMPLATE void QUAL::Balance()
@@ -790,7 +791,7 @@ TEMPLATE typename QUAL::Node* QUAL::Node::Find(_TKey pKey)
 	}
 }
 
-TEMPLATE typename const QUAL::Node* QUAL::Node::GetLeftMostNode() const
+TEMPLATE const typename QUAL::Node* QUAL::Node::GetLeftMostNode() const
 {
 	if (mLeft == 0)
 	{
@@ -814,7 +815,7 @@ TEMPLATE typename QUAL::Node* QUAL::Node::GetLeftMostNode()
 	}
 }
 
-TEMPLATE typename const QUAL::Node* QUAL::Node::GetRightMostNode() const
+TEMPLATE const typename QUAL::Node* QUAL::Node::GetRightMostNode() const
 {
 	if (mRight == 0)
 	{
@@ -939,11 +940,9 @@ TEMPLATE typename QUAL::Node* QUAL::Node::Unlink()
 
 
 
+}
 
 
-} // End namespace.
 
 #undef TEMPLATE
 #undef QUAL
-
-#endif

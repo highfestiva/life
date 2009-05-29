@@ -15,12 +15,12 @@ namespace Lepra
 
 
 #ifndef LEPRA_GCC_X86_32
-pthread_mutex_t g_CASMutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t g_CASMutex = PTHREAD_MUTEX_INITIALIZER;
 #endif // !i386
 
 
 
-bool CompareAndSwap(long* pDest, long pSrc, long pComperand)
+bool BusLock::CompareAndSwap(long* pDest, long pSrc, long pComperand)
 {
 	bool lResult = false;
 #ifdef LEPRA_GCC_X86_32

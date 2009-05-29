@@ -86,7 +86,7 @@ TEMPLATE const Vector3D<_TVarType>& QUAL::GetSize() const
 
 TEMPLATE int QUAL::GetRawDataSize()
 {
-	return sizeof(Vector<_TVarType>) * 2;
+	return sizeof(Vector3D<_TVarType>) * 2;
 }
 
 TEMPLATE int QUAL::GetRawData(uint8* pData)

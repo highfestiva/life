@@ -54,7 +54,7 @@ LQ_TEMPLATE void LQ_QUAL::InsertObject(_TKey pKey, LQArea<_TVarType>* pArea, _TO
 		return;
 	}
 
-	InsertObject(pKey, Node::Entry(pArea, pObject), mRootNode, 0);
+	InsertObject(pKey, typename Node::Entry(pArea, pObject), mRootNode, 0);
 }
 
 

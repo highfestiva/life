@@ -16,13 +16,16 @@
 	anything else.
 */
 
-#ifndef SPINLOCK_H
-#define SPINLOCK_H
+#pragma once
 
 #include "BusLock.h"
 
+
+
 namespace Lepra
 {
+
+
 
 class SpinLock
 {
@@ -45,30 +48,31 @@ private:
 	long mLocked;
 };
 
-SpinLock::SpinLock() :
+inline SpinLock::SpinLock() :
 	mLocked(UNLOCKED)
 {
 }
 
-SpinLock::~SpinLock()
+inline SpinLock::~SpinLock()
 {
 }
 
-void SpinLock::Acquire()
+inline void SpinLock::Acquire()
 {
 	while (BusLock::CompareAndSwap(&mLocked, LOCKED, UNLOCKED) == false){}
 }
 
-bool SpinLock::TryAcquire()
+inline bool SpinLock::TryAcquire()
 {
 	return BusLock::CompareAndSwap(&mLocked, LOCKED, UNLOCKED);
 }
 
-void SpinLock::Release()
+inline void SpinLock::Release()
 {
 	BusLock::CompareAndSwap(&mLocked, UNLOCKED, LOCKED);
 }
 
-} // End namespace.
 
-#endif
+
+}
+

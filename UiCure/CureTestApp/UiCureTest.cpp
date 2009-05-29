@@ -4,6 +4,8 @@
 
 
 
+#ifndef CURE_TEST_WITHOUT_UI
+
 #include <assert.h>
 #include "../../Lepra/Include/Log.h"
 #include "../Include/UiGameUiManager.h"
@@ -30,23 +32,23 @@ public:
 	bool Test();
 
 private:
-	void ResourceTest::RendererImageLoadCallback(UiCure::UserRendererImageResource* pResource)
+	void RendererImageLoadCallback(UiCure::UserRendererImageResource* pResource)
 	{
 		LoadCallback(pResource);
 	}
-	void ResourceTest::PainterImageLoadCallback(UiCure::UserPainterImageResource* pResource)
+	void PainterImageLoadCallback(UiCure::UserPainterImageResource* pResource)
 	{
 		LoadCallback(pResource);
 	}
-	void ResourceTest::TextureImageLoadCallback(UiCure::UserTextureResource* pResource)
+	void TextureImageLoadCallback(UiCure::UserTextureResource* pResource)
 	{
 		LoadCallback(pResource);
 	}
-	void ResourceTest::Sound2dImageLoadCallback(UiCure::UserSound2dResource* pResource)
+	void Sound2dImageLoadCallback(UiCure::UserSound2dResource* pResource)
 	{
 		LoadCallback(pResource);
 	}
-	void ResourceTest::LoadCallback(Cure::UserResource* pResource)
+	void LoadCallback(Cure::UserResource* pResource)
 	{
 		if (pResource->GetConstResource()->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 		{
@@ -182,3 +184,7 @@ bool TestUiCure()
 	}
 	return (lTestOk);
 }
+
+
+
+#endif // !CURE_TEST_WITHOUT_UI

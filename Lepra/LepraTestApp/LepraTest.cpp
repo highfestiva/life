@@ -974,11 +974,11 @@ bool TestSystemManager(const Lepra::LogDecorator& pAccount)
 		lTestOk = lDriveLetter >= _T("A") && 
 				   lDriveLetter <= _T("Z") &&
 				   lRest == _T(":/");
-#elif defined(LEPRA_POsIX)
+#elif defined(LEPRA_POSIX)
 		lTestOk = (lRootDir == _T("/"));
 #else // <Unknown target>
 #error "Unknown target!"
-#endif // LEPRA_WINDOWS/LEPRA_POsIX/<Unknown target>
+#endif // LEPRA_WINDOWS/LEPRA_POSIX/<Unknown target>
 		assert(lTestOk);
 	}
 	if (lTestOk)
@@ -996,13 +996,13 @@ bool TestSystemManager(const Lepra::LogDecorator& pAccount)
 		lTestOk = (Lepra::SystemManager::GetOsName() ==
 #if defined(LEPRA_WINDOWS)
 			_T("Windows NT"));
-#elif defined(LEPRA_LINUX)
-			_T("Linux"));
-#elif defined(LEPRA_MACOsX)
-			_T("MacOs X"));
+#elif defined(LEPRA_POSIX)
+			_T("Posix"));
+#elif defined(LEPRA_MACOSX)
+			_T("MacOS X"));
 #else // <Unknown target>
 #error "Not implemented for this platform!"
-#endif // LEPRA_WINDOWS/LEPRA_LINUX/LEPRA_MACOsX/<Unknown target>
+#endif // LEPRA_WINDOWS/LEPRA_LINUX/LEPRA_MACOSX/<Unknown target>
 		assert(lTestOk);
 	}
 	if (lTestOk)
@@ -1602,7 +1602,7 @@ template<class _Server> bool GameSocketClientTest::TestClientServerTransmit(Lepr
 	if (lTestOk)
 	{
 		pContext = _T("server pop sender");
-		_Server::VSocket* lSocket = pServer.mServerMuxSocket.PopSenderSocket();
+		typename _Server::VSocket* lSocket = pServer.mServerMuxSocket.PopSenderSocket();
 		lTestOk = (lSocket == pServer.mServerSocket);
 		assert(lTestOk);
 	}
@@ -1657,7 +1657,7 @@ template<class _Server> bool GameSocketClientTest::TestClientServerTransmit(Lepr
 	if (lTestOk)
 	{
 		pContext = _T("server pop receiver");
-		_Server::VSocket* lSocket = 0;
+		typename _Server::VSocket* lSocket = 0;
 		for (int x = 0; lSocket == 0 && x < 500; ++x)
 		{
 			lSocket = pServer.mServerMuxSocket.PopReceiverSocket();
@@ -2195,7 +2195,7 @@ bool TestPerformance(const Lepra::LogDecorator& pAccount)
 				{
 					LEPRA_PERFORMANCE_SCOPE("recvfrom");
 					char buf[12] = "";
-					int fromlen = sizeof(sa);
+					socklen_t fromlen = sizeof(sa);
 					::recvfrom(fd, buf, 12, 0, (sockaddr*)&sa, &fromlen);
 					assert(::strcmp(buf, "Hello World") == 0);
 				}

@@ -1,3 +1,5 @@
+#ifndef CURE_TEST_WITHOUT_UI
+
 #include "../../UiLepra/Include/UiLepra.h"
 #include "../../UiLepra/Include/UiCore.h"
 #include "../../UiTbc/Include/UiTbc.h"
@@ -340,3 +342,5 @@ void RunRotationalAgreementTest()
 		delete lDynamicObj[i];
 	}
 }
+
+#endif // !CURE_TEST_WITHOUT_UI

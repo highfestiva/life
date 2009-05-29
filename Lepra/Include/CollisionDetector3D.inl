@@ -167,7 +167,7 @@ bool CollisionDetector3D<_TVarType>::IsSphere1EnclosingSphere2(const Sphere<_TVa
 	// ...which still requires that we know the actual distance.
 
 	_TVarType lDistance = pSphere1.GetPosition().GetDistance(pSphere2.GetPosition());
-	return ((lDist + pSphere2.GetRadius()) <= pSphere1.GetRadius());
+	return ((lDistance + pSphere2.GetRadius()) <= pSphere1.GetRadius());
 }
 
 template<class _TVarType>
@@ -537,7 +537,7 @@ bool CollisionDetector3D<_TVarType>::IsAABBOverlappingOBB(const AABB<_TVarType>&
 							  const OBB<_TVarType>& pOBB,
 							  CollisionInfo* pCollisionInfo)
 {
-	OBB lOBB(pAABB.GetPosition(), pAABB.GetSize(), RotationMatrix<_TVarType>());
+	OBB<_TVarType> lOBB(pAABB.GetPosition(), pAABB.GetSize(), RotationMatrix<_TVarType>());
 	if(pCollisionInfo)
 		return IsOBBOverlappingOBB(lOBB, pOBB, *pCollisionInfo);
 	else
@@ -605,8 +605,8 @@ bool CollisionDetector3D<_TVarType>::IsOBBOverlappingSphere(const OBB<_TVarType>
 	Vector3D<_TVarType> lPosDiff(pSphere.GetPosition() - pOBB.GetPosition());
 	Vector3D<_TVarType> lRotPos(pOBB.GetRotation().GetInverseRotatedVector(lPosDiff) + pOBB.GetPosition());
 
-	AABB lAABB(pOBB.GetPosition(), pOBB.GetSize());
-	Sphere lSphere(lRotPos, pSphere.GetRadius());
+	AABB<_TVarType> lAABB(pOBB.GetPosition(), pOBB.GetSize());
+	Sphere<_TVarType> lSphere(lRotPos, pSphere.GetRadius());
 
 	if(pCollisionInfo)
 	{
@@ -1240,7 +1240,7 @@ bool CollisionDetector3D<_TVarType>::AreMovingOBBsColliding(_TVarType pTimeDelta
 	const _TVarType lEpsilon = Lepra::MathTraits<_TVarType>::Eps();
 
 	mOBBCollisionData->Reset();
-	mCollisionInfo.mTimeToCollision = 0.0f;	// Reset to minimum.
+	//JB: not a clue...	mCollisionInfo.mTimeToCollision = 0.0f;	// Reset to minimum.
 
 	mOBBCollisionData->mOBB1RotAxis[0] = pOBB1.GetRotation().GetAxisX();
 	mOBBCollisionData->mOBB1RotAxis[1] = pOBB1.GetRotation().GetAxisY();
@@ -1263,9 +1263,9 @@ bool CollisionDetector3D<_TVarType>::AreMovingOBBsColliding(_TVarType pTimeDelta
 
 	Vector3D<_TVarType> lRelativeVelocity(pOBB2Velocity - pOBB1Velocity);
 
-	// Compute difference of box centers at time 0 and time 'pTime'.
+	// Compute difference of box centers at time 0 and given time.
 	Vector3D<_TVarType> lDistance0(pOBB2.GetPosition() - pOBB1.GetPosition());
-	Vector3D<_TVarType> lDistance1(lDistance0 + lRelativeVelocity * pTime);
+	Vector3D<_TVarType> lDistance1(lDistance0 + lRelativeVelocity * pTimeDelta);
 
 	_TVarType lOBB1D0[3];	// Projected lDistance0 on OBB1's axes.
 	_TVarType lOBB1D1[3];	// Projected lDistance1 on OBB1's axes.

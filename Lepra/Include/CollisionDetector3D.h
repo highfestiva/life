@@ -418,11 +418,11 @@ public:
 	/* when combined. */ \
 	if(c > 0.0f) \
 	{ \
-		signedExtent = sign0##side*extent; \
+		signedExtent = sign0(side*extent); \
 	} \
 	else if(c < 0.0f) \
 	{ \
-		signedExtent = sign1##side*extent; \
+		signedExtent = sign1(side*extent); \
 	} \
 	else \
 	{ \

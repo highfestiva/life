@@ -9,10 +9,12 @@ Cure	\
 Life
 
 OBJS=	\
-Life/LifeServer
+Life/LifeServer	\
+UiCure/CureTestApp
 
 BINS=	\
-Life/LifeServer/LifeServer
+Life/LifeServer/LifeServer	\
+UiCure/CureTestApp/CureTestApp
 
 
 .PHONY:	$(BINS) $(OBJS) $(SRCS) all clean depend

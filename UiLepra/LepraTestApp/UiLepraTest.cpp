@@ -4,6 +4,8 @@
 
 
 
+#ifndef CURE_TEST_WITHOUT_UI
+
 #include "stdafx.h"
 #include <assert.h>
 #include <math.h>
@@ -182,3 +184,5 @@ bool TestUiLepra()
 
 	return (lTestOk);
 }
+
+#endif //!CURE_TEST_WITHOUT_UI

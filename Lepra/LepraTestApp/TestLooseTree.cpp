@@ -6,7 +6,7 @@
 
 #include "../Include/Log.h"
 #include "../Include/String.h"
-#include "../Include/LooseBintree.h"
+#include "../Include/LooseBinTree.h"
 #include "../Include/LooseQuadtree.h"
 #include "../Include/LooseOctree.h"
 #include "../Include/Vector3D.h"

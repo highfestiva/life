@@ -4,6 +4,8 @@
 
 
 
+#ifndef CURE_TEST_WITHOUT_UI
+
 #include <assert.h>
 #include <list>
 #include "../../Lepra/Include/DynamicArray.h"
@@ -1177,3 +1179,5 @@ bool TestPrototypeNetworkPhysics()
 
 	return (lTestOk);
 }
+
+#endif // !CURE_TEST_WITHOUT_UI

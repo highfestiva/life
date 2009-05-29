@@ -39,7 +39,7 @@ TEMPLATE QUAL::LooseOctree(	_TObject pErrorObject,
 TEMPLATE QUAL::~LooseOctree()
 {
 	delete mRootNode;
-	NodeList::iterator lIter;
+	typename NodeList::iterator lIter;
 	for (lIter = mRecycledNodeList.begin(); lIter != mRecycledNodeList.end(); ++lIter)
 	{
 		delete (*lIter);
@@ -107,7 +107,7 @@ TEMPLATE void QUAL::InsertObject(_TKey pKey, typename Node::Entry pEntry, Node* 
 
 TEMPLATE _TObject QUAL::RemoveObject(_TKey pKey)
 {
-	NodeTable::Iterator lNodeIter = mNodeTable.Find(pKey);
+	typename NodeTable::Iterator lNodeIter = mNodeTable.Find(pKey);
 	if (lNodeIter == mNodeTable.End())
 	{
 		return mErrorObject;
@@ -124,8 +124,8 @@ TEMPLATE typename QUAL::Node::Entry QUAL::RemoveObject(_TKey pKey, typename Node
 	// Removes object from the octree and deletes the node if empty.
 	Node* lCurrentNode = *pNodeIter;
 
-	Node::EntryTable::Iterator lIter = FindObject(pKey, lCurrentNode);
-	Node::Entry lEntry = *lIter;
+	typename Node::EntryTable::Iterator lIter = FindObject(pKey, lCurrentNode);
+	typename Node::Entry lEntry = *lIter;
 
 	lCurrentNode->mEntryTable.Remove(lIter);
 	mNodeTable.Remove(pNodeIter);
@@ -155,7 +155,7 @@ TEMPLATE typename QUAL::Node::Entry QUAL::RemoveObject(_TKey pKey, typename Node
 
 TEMPLATE _TObject QUAL::FindObject(_TKey pKey) const
 {
-	NodeTable::ConstIterator lNodeIter = mNodeTable.Find(pKey);
+	typename NodeTable::ConstIterator lNodeIter = mNodeTable.Find(pKey);
 	if (lNodeIter == mNodeTable.End())
 	{
 		return mErrorObject;
@@ -180,7 +180,7 @@ TEMPLATE inline typename QUAL::Node::EntryTable::Iterator QUAL::FindObject(_TKey
 
 TEMPLATE bool QUAL::MoveObject(_TKey pKey, LOVolume<_TVarType>* pNewVolume)
 {
-	NodeTable::Iterator lNodeIter = mNodeTable.Find(pKey);
+	typename NodeTable::Iterator lNodeIter = mNodeTable.Find(pKey);
 	if (lNodeIter == mNodeTable.End())
 	{
 		//LOG(PHYSIC, DEBUG, "LooseOctree::MoveObject, trying to move non existing object!");
@@ -201,7 +201,7 @@ TEMPLATE bool QUAL::MoveObject(_TKey pKey, LOVolume<_TVarType>* pNewVolume)
 
 TEMPLATE _TObject QUAL::MoveObject(_TKey pKey, const Vector3D<_TVarType>& pToPos)
 {
-	NodeTable::Iterator lNodeIter = mNodeTable.Find(pKey);
+	typename NodeTable::Iterator lNodeIter = mNodeTable.Find(pKey);
 	if (lNodeIter == mNodeTable.End())
 	{
 		//LOG(PHYSIC, DEBUG, "LooseOctree::MoveObject, trying to move non existing object!");
@@ -375,12 +375,12 @@ TEMPLATE void QUAL::GetObjects(ObjectList& pObjects, const AABB<_TVarType>& pAAB
 TEMPLATE void QUAL::GetObjectsInBS(ObjectList& pObjects, const Sphere<_TVarType>& pBS, Node* pCurrentNode)
 {
 	// Insert objects at this node into list.
-	Node::EntryTable::Iterator lIter;
+	typename Node::EntryTable::Iterator lIter;
 	for (lIter  = pCurrentNode->mEntryTable.First(); 
 		lIter != pCurrentNode->mEntryTable.End(); 
 		++lIter)
 	{
-		const Node::Entry& lEntry = *lIter;
+		const typename Node::Entry& lEntry = *lIter;
 
 		if (lEntry.mVolume->IsBSOverlappingVolume(pBS))
 		{
@@ -437,12 +437,12 @@ TEMPLATE void QUAL::GetObjectsInBS(ObjectList& pObjects, const Sphere<_TVarType>
 
 TEMPLATE void QUAL::GetObjectsInAABB(ObjectList& pObjects, const AABB<_TVarType>& pAABB, Node* pCurrentNode)
 {
-	Node::EntryTable::Iterator lIter;
+	typename Node::EntryTable::Iterator lIter;
 	for (lIter  = pCurrentNode->mEntryTable.First(); 
 		lIter != pCurrentNode->mEntryTable.End(); 
 		++lIter)
 	{
-		const Node::Entry& lEntry = *lIter;
+		const typename Node::Entry& lEntry = *lIter;
 
 		if (lEntry.mVolume->IsAABBOverlappingVolume(pAABB))
 		{
@@ -505,7 +505,7 @@ TEMPLATE unsigned QUAL::GetFullTreeMemSize() const
 
 	for (i = 1; i <= mMaxTreeDepth; i++)
 	{
-		lNumNodes += (unsigned)pow(8, i);
+		lNumNodes += (unsigned)pow(8.0f, i);
 	}
 
 	return lNumNodes * sizeof(Node);
