@@ -50,10 +50,9 @@
 
 namespace Lepra
 {
-	// OS types.
 	typedef	SOCKET sys_socket;
-	typedef int socklen_t;
 }
+typedef int socklen_t;
 
 #endif // !LEPRA_OS_INCLUDED
 
