@@ -1,55 +1,55 @@
-# 'Twas generated from ../../ThirdParty/ThirdPartyLib_800.vcproj, 2009-05-26, type='lib_nowarn'.
+# 'Twas generated from ../../ThirdParty/ThirdPartyLib_800.vcproj, 2009-05-29, type='lib_nowarn'.
 # Don't edit manually. See 'generate_makefile.py' for info.
 
 CFLAGS = -O0 -ggdb -fPIC -D_POSIX_PTHREAD_SEMANTICS -Istlport/stlport -Iode-060223/include -DPOSIX -D_DEBUG -D_CONSOLE -DPNG_NO_ASSEMBLER_CODE -DdCYLINDER_ENABLED -Wno-unknown-pragmas
 
 SRCS=	\
-jpeg-6b/jcapimin.c	\
-jpeg-6b/jcapistd.c	\
-jpeg-6b/jccoefct.c	\
-jpeg-6b/jccolor.c	\
-jpeg-6b/jcdctmgr.c	\
-jpeg-6b/jchuff.c	\
-jpeg-6b/jcinit.c	\
-jpeg-6b/jcmainct.c	\
-jpeg-6b/jcmarker.c	\
-jpeg-6b/jcmaster.c	\
-jpeg-6b/jcomapi.c	\
-jpeg-6b/jcparam.c	\
-jpeg-6b/jcphuff.c	\
-jpeg-6b/jcprepct.c	\
-jpeg-6b/jcsample.c	\
-jpeg-6b/jctrans.c	\
-jpeg-6b/jdapimin.c	\
-jpeg-6b/jdapistd.c	\
-jpeg-6b/jdatadst.c	\
-jpeg-6b/jdatasrc.c	\
-jpeg-6b/jdcoefct.c	\
-jpeg-6b/jdcolor.c	\
-jpeg-6b/jddctmgr.c	\
-jpeg-6b/jdhuff.c	\
-jpeg-6b/jdinput.c	\
-jpeg-6b/jdmainct.c	\
-jpeg-6b/jdmarker.c	\
-jpeg-6b/jdmaster.c	\
-jpeg-6b/jdmerge.c	\
-jpeg-6b/jdphuff.c	\
-jpeg-6b/jdpostct.c	\
-jpeg-6b/jdsample.c	\
-jpeg-6b/jdtrans.c	\
-jpeg-6b/jerror.c	\
-jpeg-6b/jfdctflt.c	\
-jpeg-6b/jfdctfst.c	\
-jpeg-6b/jfdctint.c	\
-jpeg-6b/jidctflt.c	\
-jpeg-6b/jidctfst.c	\
-jpeg-6b/jidctint.c	\
-jpeg-6b/jidctred.c	\
-jpeg-6b/jmemansi.c	\
-jpeg-6b/jmemmgr.c	\
-jpeg-6b/jquant1.c	\
-jpeg-6b/jquant2.c	\
-jpeg-6b/jutils.c	\
+jpeg-6b/jcapimin.cpp	\
+jpeg-6b/jcapistd.cpp	\
+jpeg-6b/jccoefct.cpp	\
+jpeg-6b/jccolor.cpp	\
+jpeg-6b/jcdctmgr.cpp	\
+jpeg-6b/jchuff.cpp	\
+jpeg-6b/jcinit.cpp	\
+jpeg-6b/jcmainct.cpp	\
+jpeg-6b/jcmarker.cpp	\
+jpeg-6b/jcmaster.cpp	\
+jpeg-6b/jcomapi.cpp	\
+jpeg-6b/jcparam.cpp	\
+jpeg-6b/jcphuff.cpp	\
+jpeg-6b/jcprepct.cpp	\
+jpeg-6b/jcsample.cpp	\
+jpeg-6b/jctrans.cpp	\
+jpeg-6b/jdapimin.cpp	\
+jpeg-6b/jdapistd.cpp	\
+jpeg-6b/jdatadst.cpp	\
+jpeg-6b/jdatasrc.cpp	\
+jpeg-6b/jdcoefct.cpp	\
+jpeg-6b/jdcolor.cpp	\
+jpeg-6b/jddctmgr.cpp	\
+jpeg-6b/jdhuff.cpp	\
+jpeg-6b/jdinput.cpp	\
+jpeg-6b/jdmainct.cpp	\
+jpeg-6b/jdmarker.cpp	\
+jpeg-6b/jdmaster.cpp	\
+jpeg-6b/jdmerge.cpp	\
+jpeg-6b/jdphuff.cpp	\
+jpeg-6b/jdpostct.cpp	\
+jpeg-6b/jdsample.cpp	\
+jpeg-6b/jdtrans.cpp	\
+jpeg-6b/jerror.cpp	\
+jpeg-6b/jfdctflt.cpp	\
+jpeg-6b/jfdctfst.cpp	\
+jpeg-6b/jfdctint.cpp	\
+jpeg-6b/jidctflt.cpp	\
+jpeg-6b/jidctfst.cpp	\
+jpeg-6b/jidctint.cpp	\
+jpeg-6b/jidctred.cpp	\
+jpeg-6b/jmemansi.cpp	\
+jpeg-6b/jmemmgr.cpp	\
+jpeg-6b/jquant1.cpp	\
+jpeg-6b/jquant2.cpp	\
+jpeg-6b/jutils.cpp	\
 lpng1212/png.c	\
 lpng1212/pngerror.c	\
 lpng1212/pnggccrd.c	\
@@ -329,7 +329,10 @@ libThirdParty.so:	$(OBJS)
 
 depend:
 	makedepend -- $(CFLAGS) -- $(SRCS)
+	#@grep -Ev "\.o: .*([T]hirdParty|/[u]sr)/" makefile >.tmpmake
+	#@mv .tmpmake makefile
 .c.o:
-	g++ $(CFLAGS) -o $@ -c $<
+	gcc $(CFLAGS) -o $@ -c $<
 .cpp.o:
 	g++ $(CFLAGS) -o $@ -c $<
+

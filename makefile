@@ -1,4 +1,4 @@
-# 'Twas generated 2009-05-26, type='base'.
+# 'Twas generated 2009-05-29, type='base'.
 # Don't edit manually. See 'generate_makefile.py' for info.
 
 SRCS=	\
@@ -9,28 +9,41 @@ Cure	\
 Life
 
 OBJS=	\
+Life/LifeServer
+
+BINS=	\
 Life/LifeServer/LifeServer
 
-all:	$(OBJS) $(SRCS)
+
+.PHONY:	$(BINS) $(OBJS) $(SRCS) all clean depend
+
+all:	$(OBJS) $(SRCS) $(BINS)
 
 clean:
-	@rm bin/*
-	$(MAKE) clean -C Life/LifeServer
-	$(MAKE) clean -C ThirdParty
-	$(MAKE) clean -C Lepra
-	$(MAKE) clean -C TBC
-	$(MAKE) clean -C Cure
-	$(MAKE) clean -C Life
+	@rm -f bin/*
+	@for SUBDIR in $(SRCS); do \
+		$(MAKE) -C $$SUBDIR clean; \
+	done
+	@for SUBDIR in $(OBJS); do \
+		$(MAKE) -C $$SUBDIR clean; \
+	done
 
-Life/LifeServer/LifeServer:	$(SRCS)
-	$(MAKE) -C Life/LifeServer
+depend:
+	@for SUBDIR in $(SRCS); do \
+		$(MAKE) -C $$SUBDIR depend; \
+	done
+	@for SUBDIR in $(OBJS); do \
+		$(MAKE) -C $$SUBDIR depend; \
+	done
+
+$(BINS):	$(OBJS)
 	@cp ThirdParty/stlport/build/lib/obj/gcc/so/libstlport.so.5.2 bin/
 	@cp $@ bin/
 
-
-.PHONY:	$(OBJS) $(SRCS)
+$(OBJS):	$(SRCS)
+	$(MAKE) -C $@
 
 $(SRCS):
 	$(MAKE) -C $@
-	@rm -f $(OBJS)
+	@rm -f $(BINS)
 	@cp $@/*.so bin/

@@ -1,4 +1,4 @@
-# 'Twas generated from ../../TBC/TBC.vcproj, 2009-05-26, type='lib'.
+# 'Twas generated from ../../TBC/TBC.vcproj, 2009-05-29, type='lib'.
 # Don't edit manually. See 'generate_makefile.py' for info.
 
 CFLAGS = -O0 -ggdb -fPIC -D_POSIX_PTHREAD_SEMANTICS -I../ThirdParty/stlport/stlport -I../ThirdParty/ode-060223/include -DPOSIX -D_DEBUG -D_CONSOLE -DPNG_NO_ASSEMBLER_CODE -DdCYLINDER_ENABLED -Wall -Wno-unknown-pragmas
@@ -41,7 +41,10 @@ libTBC.so:	$(OBJS)
 
 depend:
 	makedepend -- $(CFLAGS) -- $(SRCS)
+	#@grep -Ev "\.o: .*([T]hirdParty|/[u]sr)/" makefile >.tmpmake
+	#@mv .tmpmake makefile
 .c.o:
-	g++ $(CFLAGS) -o $@ -c $<
+	gcc $(CFLAGS) -o $@ -c $<
 .cpp.o:
 	g++ $(CFLAGS) -o $@ -c $<
+

@@ -373,7 +373,7 @@ TcpSocket* TcpListenerSocket::Accept(SocketFactory pSocketFactory)
 			FD_ZERO(&lAcceptSet);
 #pragma warning(push)
 #pragma warning(disable: 4127)	// MSVC warning: conditional expression is constant.
-			LEPRA_FD_SET(mSocket, &lAcceptSet);
+			FD_SET(mSocket, &lAcceptSet);
 #pragma warning(pop)
 			timeval lTime;
 			lTime.tv_sec = 1;

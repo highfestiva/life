@@ -17,10 +17,13 @@ head_lib_nowarn = cflags_1+" "+cflags_2+"\n"
 foot_rules = """
 depend:
 \tmakedepend -- $(CFLAGS) -- $(SRCS)
+\t#@grep -Ev "\\.o: .*([T]hirdParty|/[u]sr)/" makefile >.tmpmake
+\t#@mv .tmpmake makefile
 .c.o:
-\tg++ $(CFLAGS) -o $@ -c $<
+\tgcc $(CFLAGS) -o $@ -c $<
 .cpp.o:
 \tg++ $(CFLAGS) -o $@ -c $<
+
 """
 
 foot_lib = """
@@ -43,19 +46,39 @@ clean:
 \tg++ $(LIBS) -o $@ $(OBJS)
 """+foot_rules
 
-foot_bin_base = """
-%(bin)s:\t$(SRCS)
-\t$(MAKE) -C %(bindir)s
+foot_base = """
+
+.PHONY:\t$(BINS) $(OBJS) $(SRCS) all clean depend
+
+all:\t$(OBJS) $(SRCS) $(BINS)
+
+clean:
+\t@rm -f bin/*
+\t@for SUBDIR in $(SRCS); do \\
+\t\t$(MAKE) -C $$SUBDIR clean; \\
+\tdone
+\t@for SUBDIR in $(OBJS); do \\
+\t\t$(MAKE) -C $$SUBDIR clean; \\
+\tdone
+
+depend:
+\t@for SUBDIR in $(SRCS); do \\
+\t\t$(MAKE) -C $$SUBDIR depend; \\
+\tdone
+\t@for SUBDIR in $(OBJS); do \\
+\t\t$(MAKE) -C $$SUBDIR depend; \\
+\tdone
+
+$(BINS):\t$(OBJS)
 \t@cp ThirdParty/stlport/build/lib/obj/gcc/so/libstlport.so.5.2 bin/
 \t@cp $@ bin/
-"""
 
-foot_lib_base = """
-.PHONY:\t$(OBJS) $(SRCS)
+$(OBJS):\t$(SRCS)
+\t$(MAKE) -C $@
 
 $(SRCS):
 \t$(MAKE) -C $@
-\t@rm -f $(OBJS)
+\t@rm -f $(BINS)
 \t@cp $@/*.so bin/
 """
 
@@ -67,11 +90,7 @@ makedict = \
 "foot_lib_nowarn": foot_lib,
 "head_bin": head_bin,
 "foot_bin": foot_bin,
-"foot_all_base": "\nall:\t$(OBJS) $(SRCS)\n",
-"foot_clean_base": "\nclean:\n\t@rm bin/*\n",
-"foot_clean_dir_base": "\t$(MAKE) clean -C %(directory)s\n",
-"foot_bin_base": foot_bin_base,
-"foot_lib_base": foot_lib_base,
+"foot_base": foot_base,
 }
 
 def printstart(makename):
@@ -92,11 +111,14 @@ def create_makefile(makename, srcname, type):
     f.write("# Don't edit manually. See 'generate_makefile.py' for info.\n")
     return f
 
-def write_contents(f, srcs, objs):
+def write_contents(f, srcs, objs, bins=None):
     f.write("\nSRCS=\t\\\n")
     f.write("\t\\\n".join(srcs))
     f.write("\n\nOBJS=\t\\\n")
     f.write("\t\\\n".join(objs))
+    if bins:
+	f.write("\n\nBINS=\t\\\n")
+	f.write("\t\\\n".join(bins))
     f.write("\n")
 
 def convert_out_name(vcfile):
@@ -132,18 +154,17 @@ def generate_makefile(vcfile, makename, includedirs, libdirs, header, footer, ty
 def generate_base_make(makename, binlist, liblist):
     global makedict
     f = create_makefile(makename, "", "base")
+    bindirlist = [os.path.dirname(bin) for bin in binlist]
     libdirlist = [os.path.dirname(lib) for lib in liblist]
-    write_contents(f, libdirlist, binlist)
-    bins = " ".join(binlist)
-    f.write(makedict["foot_all_base"])
-    f.write(makedict["foot_clean_base"])
-    for d in [os.path.dirname(e) for e in binlist+liblist]:
-    	f.write(makedict["foot_clean_dir_base"] % {"directory":d})
-    for bin in binlist:
-	stllib = "ThirdParty/stlport/build/lib/obj/gcc/so/libstlport.so.5.2"
-    	f.write(makedict["foot_bin_base"] % {"bin":bin, "bindir":os.path.dirname(bin), "stllib":stllib})
-    f.write("\n")
-    f.write(makedict["foot_lib_base"])
+    write_contents(f, libdirlist, bindirlist, binlist)
+    f.write(makedict["foot_base"])
+#    for bin in binlist:
+#    	f.write(makedict["foot_clean_bin_base"] % {"bindir":os.path.dirname(bin)})
+#    for bin in binlist:
+#	stllib = "ThirdParty/stlport/build/lib/obj/gcc/so/libstlport.so.5.2"
+#    	f.write(makedict["foot_bin_base"] % {"bin":bin, "bindir":os.path.dirname(bin), "stllib":stllib})
+#    f.write("\n")
+#    f.write(makedict["foot_lib_base"])
     f.close()
 	
 
