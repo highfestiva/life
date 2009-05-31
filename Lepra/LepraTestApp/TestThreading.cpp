@@ -71,8 +71,13 @@ bool TestThreading(const LogDecorator& pAccount)
 				{
 					Thread::Sleep(0.001);
 				}
-				lTestOk = (gThreadTestCounter == 8 && !lThread.IsRunning());
+				lTestOk = (gThreadTestCounter == 8);
 				assert(lTestOk);
+				if (lTestOk)
+				{
+					lTestOk = !lThread.IsRunning();
+					assert(lTestOk);
+				}
 			}
 		}
 	}

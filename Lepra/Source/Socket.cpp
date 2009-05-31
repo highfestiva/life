@@ -24,15 +24,28 @@ namespace Lepra
 {
 
 
+sys_socket InitSocket(sys_socket pSocket, int pSize)
+{
+	// Set the underlying socket buffer sizes.
+	int lBufferSize = pSize;
+	::setsockopt(pSocket, SOL_SOCKET, SO_RCVBUF, (char*)&lBufferSize, sizeof(lBufferSize));
+	lBufferSize = pSize;
+	::setsockopt(pSocket, SOL_SOCKET, SO_SNDBUF, (char*)&lBufferSize, sizeof(lBufferSize));
+	int lFlag = 1;
+	::setsockopt(pSocket, SOL_SOCKET, SO_REUSEADDR, &lFlag, sizeof(lFlag));
+	return (pSocket);
+}
 
 sys_socket NewTcpSocket()
 {
-	return ::socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+	sys_socket s = ::socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+	return (InitSocket(s, 32*SocketBase::BUFFER_SIZE));
 }
 
 sys_socket NewUdpSocket()
 {
-	return ::socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
+	sys_socket s = ::socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
+	return (InitSocket(s, 8*SocketBase::BUFFER_SIZE));
 }
 
 
@@ -428,10 +441,13 @@ TcpSocket::TcpSocket(const SocketAddress& pLocalAddress):
 {
 	mSocket = NewTcpSocket();
 
-	if (::bind(mSocket, (const sockaddr*)&pLocalAddress.GetAddr(), sizeof(pLocalAddress.GetAddr())) != 0)
+	if (mSocket != INVALID_SOCKET)
 	{
-		mLog.AWarning("TCP socket binding failed!");
-		Close();
+		if (::bind(mSocket, (const sockaddr*)&pLocalAddress.GetAddr(), sizeof(pLocalAddress.GetAddr())) != 0)
+		{
+			mLog.Warningf(_T("TCP socket binding failed! Error=%i"), SOCKET_LAST_ERROR());
+			Close();
+		}
 	}
 }
 
@@ -1124,15 +1140,7 @@ UdpSocket::UdpSocket(const SocketAddress& pLocalAddress) :
 
 	if (mSocket != INVALID_SOCKET)
 	{
-		if (::bind(mSocket, (const sockaddr*)&mLocalAddress.GetAddr(), sizeof(mLocalAddress.GetAddr())) == 0)
-		{
-			// Set the underlying socket buffer sizes.
-			int lBufferSize = 8*BUFFER_SIZE;
-			::setsockopt(mSocket, SOL_SOCKET, SO_RCVBUF, (char*)&lBufferSize, sizeof(lBufferSize));
-			lBufferSize = 8*BUFFER_SIZE;
-			::setsockopt(mSocket, SOL_SOCKET, SO_SNDBUF, (char*)&lBufferSize, sizeof(lBufferSize));
-		}
-		else
+		if (::bind(mSocket, (const sockaddr*)&mLocalAddress.GetAddr(), sizeof(mLocalAddress.GetAddr())) != 0)
 		{
 			mLog.Warning(_T("Failed to bind UDP socket to ")+pLocalAddress.GetAsString()+_T("."));
 			Close();

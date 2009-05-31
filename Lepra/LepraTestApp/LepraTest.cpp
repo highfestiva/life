@@ -1231,7 +1231,8 @@ bool TestNetwork(const Lepra::LogDecorator& pAccount)
 			{
 				const int lReadSize = lPacketByteCount*10;
 				Lepra::uint8 lValue[lReadSize];
-				lTestOk = (lReceiver->Receive(lValue, lReadSize) == lReadSize);
+				int lActualReadSize = lReceiver->Receive(lValue, lReadSize);
+				lTestOk = (lActualReadSize == lReadSize);
 				assert(lTestOk);
 				if (lTestOk)
 				{
@@ -1304,6 +1305,7 @@ bool TestTcpMuxSocket(const Lepra::LogDecorator& pAccount)
 	{
 		lContext = _T("opening TCP MUX");
 		lAcceptSocket = new Lepra::TcpMuxSocket(_T("T1"), lAcceptAddress, true);
+		lAcceptSocket->SetConnectIdTimeout(5.0);
 		lTestOk = lAcceptSocket->IsOpen();
 		assert(lTestOk);
 	}

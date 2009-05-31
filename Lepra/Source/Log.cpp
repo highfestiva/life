@@ -206,11 +206,12 @@ LogDecorator::LogDecorator(Log* pLog, const std::type_info& pTypeId):
 	// Parse up to class name.
 	const char* s = pTypeId.name();
 	const size_t lLength = ::strlen(s);
+	int c = 0;
 	size_t x = 0;
 	size_t lStepLength = 1;
-	for (; x < lLength && lStepLength > 0; x += lStepLength)
+	for (; c < 1 && x < lLength && lStepLength > 0; ++c, x += lStepLength)
 	{
-		for (; s[x] && ::isalpha(s[x]); ++x)
+		for (; x < lLength && ::isalpha(s[x]); ++x)
 			;
 		char* lEndPtr;
 		AnsiStringUtility::StrToL(&s[x], &lEndPtr, 10);
