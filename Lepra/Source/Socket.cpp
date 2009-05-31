@@ -28,11 +28,11 @@ sys_socket InitSocket(sys_socket pSocket, int pSize)
 {
 	// Set the underlying socket buffer sizes.
 	int lBufferSize = pSize;
-	::setsockopt(pSocket, SOL_SOCKET, SO_RCVBUF, (char*)&lBufferSize, sizeof(lBufferSize));
+	::setsockopt(pSocket, SOL_SOCKET, SO_RCVBUF, (const char*)&lBufferSize, sizeof(lBufferSize));
 	lBufferSize = pSize;
-	::setsockopt(pSocket, SOL_SOCKET, SO_SNDBUF, (char*)&lBufferSize, sizeof(lBufferSize));
+	::setsockopt(pSocket, SOL_SOCKET, SO_SNDBUF, (const char*)&lBufferSize, sizeof(lBufferSize));
 	int lFlag = 1;
-	::setsockopt(pSocket, SOL_SOCKET, SO_REUSEADDR, &lFlag, sizeof(lFlag));
+	::setsockopt(pSocket, SOL_SOCKET, SO_REUSEADDR, (const char*)&lFlag, sizeof(lFlag));
 	return (pSocket);
 }
 
