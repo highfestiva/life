@@ -147,6 +147,55 @@ bool TestThreading(const LogDecorator& pAccount)
 			assert(lTestOk);
 		}
 	}
+	if (lTestOk)
+	{
+		lContext = _T("semaphore wait timeout");
+		Lepra::Timer lTimer;
+		Lepra::Semaphore lSemaphore;
+		lTestOk = !lSemaphore.Wait(1.0);
+		assert(lTestOk);
+		if (lTestOk)
+		{
+			double lTime = lTimer.PopTimeDiffF();
+			lTestOk = (lTime >= 0.9 && lTime < 1.1);
+			assert(lTestOk);
+		}
+	}
+	Lepra::Semaphore lSemaphore;
+	if (lTestOk)
+	{
+		lContext = _T("semaphore satisfied timed wait 1");
+		Lepra::Timer lTimer;
+		lSemaphore.Signal();
+		lSemaphore.Signal();
+		lTestOk = lSemaphore.Wait(1.0);
+		assert(lTestOk);
+		if (lTestOk)
+		{
+			double lTime = lTimer.PopTimeDiffF();
+			lTestOk = (lTime >= 0.0 && lTime < 0.1);
+			assert(lTestOk);
+		}
+	}
+	if (lTestOk)
+	{
+		lContext = _T("semaphore satisfied timed wait 2");
+		Lepra::Timer lTimer;
+		lTestOk = lSemaphore.Wait(1.0);
+		assert(lTestOk);
+		if (lTestOk)
+		{
+			double lTime = lTimer.PopTimeDiffF();
+			lTestOk = (lTime >= 0.0 && lTime < 0.1);
+			assert(lTestOk);
+		}
+	}
+	if (lTestOk)
+	{
+		lContext = _T("semaphore permit reset");
+		lTestOk = !lSemaphore.Wait(0.0001);
+		assert(lTestOk);
+	}
 
 	ReportTestResult(pAccount, _T("Threading"), lContext, lTestOk);
 	return (lTestOk);

@@ -1,17 +1,6 @@
-/*
-	Class:  Thread, 
-			Lock, 
-			ScopeLock, 
-			Condition,
-			ThreadRWLock
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Righteous Games
 
-	NOTES:
-
-	Tools needed for concurrent programming.
-	BC = Base Class.
-*/
+// Author: Alexander Hugestrand, Jonas Byström
+// Copyright (c) 2002-2009, Righteous Games
 
 
 
@@ -29,94 +18,6 @@
 
 namespace Lepra
 {
-
-
-
-class Thread
-{
-public:
-	Thread(const String& pThreadName);
-	virtual ~Thread();
-
-	static void InitializeMainThread(const String& pThreadName);
-
-	const String& GetThreadName();
-	size_t GetThreadId();
-	size_t GetThreadHandle();
-
-	bool IsRunning() const;
-	bool GetStopRequest() const;
-	void RequestStop();	// Tells thread to gracefully terminate by setting the stop request flag.
-	bool GetSelfDestruct() const;
-	void RequestSelfDestruct();	// Deletes thead object when thread terminates.
-
-	// All public functions below are NOT implemented in Thread.cpp, but somewhere
-	// else instead. Win32Thread.cpp on a Win32 application, for instance.
-
-	static size_t GetCurrentThreadId();
-	static Thread* GetCurrentThread();
-	void SetCpuAffinityMask(uint64 pAffinityMask);
-
-	bool Start();
-	static void Sleep(float64 pTime);
-	static void Sleep(unsigned int pMilliSeconds);
-	static void YieldCpu();
-
-	bool Join();
-	bool Join(float64 pTimeOut);
-	void Signal(int pSignal);
-	void Kill();
-
-protected:
-	// Implemented by user. If containing an eternal while-loop, it should be
-	// written like this:
-	// while(GetStopRequest() == false) 
-	// {
-	//     ...
-	// }
-	virtual void Run() = 0;
-	void PostRun();
-
-	friend void RunThread(Thread* pThread);
-
-	void SetStopRequest(bool pStopRequest);
-	void SetRunning(bool pRunning);
-
-private:
-
-	String mThreadName;
-
-	volatile bool mRunning;
-	volatile bool mStopRequested;
-	bool mSelfDestruct;
-
-	size_t mThreadHandle;
-	size_t mThreadId;
-#ifdef LEPRA_POSIX
-	sem_t mJoinSemaphore;
-#endif // Posix.
-
-	LOG_CLASS_DECLARE();
-};
-
-
-
-class StaticThread: public Thread
-{
-public:
-	StaticThread(const String& pThreadName);
-	virtual ~StaticThread();
-
-	bool Start(void (*pThreadEntry)(void*), void* pData);
-
-protected:
-	bool Start();
-	void Run();
-
-private:
-	void (*mThreadEntry)(void*);
-	void* mData;
-};
 
 
 
@@ -370,7 +271,11 @@ private:
 	String mName;
 };
 
+
+
 }
+
+
 
 #if defined(LEPRA_WINDOWS)
 
@@ -399,3 +304,93 @@ private:
 #error "Not implemented for target system!"
 
 #endif // LEPRA_WINDOWS/LEPRA_POSIX
+
+
+
+namespace Lepra
+{
+
+
+
+class Thread
+{
+public:
+	Thread(const String& pThreadName);
+	virtual ~Thread();
+
+	static void InitializeMainThread(const String& pThreadName);
+
+	const String& GetThreadName();
+	size_t GetThreadId();
+	size_t GetThreadHandle();
+
+	bool IsRunning() const;
+	bool GetStopRequest() const;
+	void RequestStop();	// Tells thread to gracefully terminate by setting the stop request flag.
+	bool GetSelfDestruct() const;
+	void RequestSelfDestruct();	// Deletes thead object when thread terminates.
+
+	// All public functions below are NOT implemented in Thread.cpp, but somewhere
+	// else instead. Win32Thread.cpp on a Win32 application, for instance.
+
+	static size_t GetCurrentThreadId();
+	static Thread* GetCurrentThread();
+	void SetCpuAffinityMask(uint64 pAffinityMask);
+
+	bool Start();
+	static void Sleep(float64 pTime);
+	static void Sleep(unsigned int pMilliSeconds);
+	static void YieldCpu();
+
+	bool Join();
+	bool Join(float64 pTimeOut);
+	void Signal(int pSignal);
+	void Kill();
+
+protected:
+	virtual void Run() = 0;
+	void PostRun();
+
+	void RunThread();
+	friend void RunThread(Thread* pThread);
+
+	void SetStopRequest(bool pStopRequest);
+	void SetRunning(bool pRunning);
+
+private:
+	String mThreadName;
+
+	volatile bool mRunning;
+	volatile bool mStopRequested;
+	bool mSelfDestruct;
+
+	size_t mThreadHandle;
+	size_t mThreadId;
+
+	Semaphore mSemaphore;
+
+	LOG_CLASS_DECLARE();
+};
+
+
+
+class StaticThread: public Thread
+{
+public:
+	StaticThread(const String& pThreadName);
+	virtual ~StaticThread();
+
+	bool Start(void (*pThreadEntry)(void*), void* pData);
+
+protected:
+	bool Start();
+	void Run();
+
+private:
+	void (*mThreadEntry)(void*);
+	void* mData;
+};
+
+
+
+}

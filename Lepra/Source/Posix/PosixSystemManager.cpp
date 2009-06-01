@@ -64,7 +64,12 @@ String SystemManager::GetUserDirectory()
 
 String SystemManager::GetLoginName()
 {
-	return (AnsiStringUtility::ToCurrentCode(AnsiString(::getlogin())));
+	const char* lLoginName = ::getlogin();
+	if (!lLoginName)
+	{
+		lLoginName = "<Unknown>";
+	}
+	return (AnsiStringUtility::ToCurrentCode(AnsiString(lLoginName)));
 }
 
 String SystemManager::QueryFullUserName()

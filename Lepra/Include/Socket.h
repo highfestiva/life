@@ -54,6 +54,11 @@ public:
 		SHUT_BOTH  = 2
 	};
 
+	static sys_socket InitSocket(sys_socket pSocket, int pSize);
+	static sys_socket CreateTcpSocket();
+	static sys_socket CreateUdpSocket();
+	static void CloseSysSocket(sys_socket pSocket);
+
 	SocketBase(sys_socket pSocket = INVALID_SOCKET);
 	virtual ~SocketBase();
 	void Close();
