@@ -202,7 +202,7 @@ int PackerUnicodeString::Pack(Lepra::uint8* pDestination, const Lepra::UnicodeSt
 	{
 		for (size_t x = 0; x < lCharCount-1; ++x)
 		{
-			*(Lepra::uint16*)pDestination[2+x*2] = (Lepra::uint16)pSource[x];
+			*(Lepra::uint16*)&pDestination[2+x*2] = (Lepra::uint16)pSource[x];
 		}
 	}
 	else
@@ -241,12 +241,12 @@ int PackerUnicodeString::Unpack(Lepra::UnicodeString* pDestination, const Lepra:
 					}
 					else if (sizeof(wchar_t) == 4)	// UTF-32 (Posix)
 					{
-						wchar_t lBuffer[1024];	// TODO: fix buffer overrun exploit.
+						pDestination->clear();
+						pDestination->reserve(pCharCount);
 						for (size_t x = 0; x < pCharCount-1; ++x)
 						{
-							lBuffer[x] = pSource[x];
+							pDestination->push_back(pSource[x]);
 						}
-						pDestination->assign(lBuffer, pCharCount-1);
 					}
 					else
 					{

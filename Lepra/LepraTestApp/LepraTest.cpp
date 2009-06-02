@@ -40,10 +40,8 @@
 #include "../Include/Transformation.h"
 
 
-class LepraTest
-{
-};
-Lepra::LogDecorator gLLog(Lepra::LogType::GetLog(Lepra::LogType::SUB_TEST), typeid(LepraTest));
+class LepraTest{};
+static Lepra::LogDecorator gLLog(Lepra::LogType::GetLog(Lepra::LogType::SUB_TEST), typeid(LepraTest));
 
 
 
@@ -1877,7 +1875,7 @@ bool TestFFT(const Lepra::LogDecorator& pAccount)
 			Lepra::float32 lPhase1 = (Lepra::float32)lFFT.GetPhase(1);
 			Lepra::float32 lPhase2 = (Lepra::float32)lFFT.GetPhase(-1);
 			lTestOk = (abs(lPhase1 - 0.4f) < 1e-5f) &&
-				        (abs(lPhase2 + 0.4f) < 1e-5f);
+					(abs(lPhase2 + 0.4f) < 1e-5f);
 		}
 
 		if (lTestOk)
@@ -1920,7 +1918,7 @@ bool TestCrypto(const Lepra::LogDecorator& pAccount)
 		{
 			lContext = _T("DES decrypt failed.");
 			lDES.Decrypt(lData, 16);
-                        lTestOk = (::memcmp(lData, lString, sizeof(lData)) == 0);
+			lTestOk = (::memcmp(lData, lString, sizeof(lData)) == 0);
 			assert(lTestOk);
 		}
 	}
@@ -1941,7 +1939,7 @@ bool TestCrypto(const Lepra::LogDecorator& pAccount)
 //		{
 //			lContext = _T("RSA decrypt failed.");
 //			lDES.Decrypt(lData, 17);
-//                        lTestOk = (::memcmp(lData, lString, sizeof(lData)) == 0);
+//			lTestOk = (::memcmp(lData, lString, sizeof(lData)) == 0);
 //			assert(lTestOk);
 //		}
 	}
@@ -2650,6 +2648,7 @@ void ShowTestResult(const Lepra::LogDecorator& pAccount, bool pTestOk)
 	for (int y = 0; y < lProgressBarSteps; ++y)
 	{
 		::printf("*");
+		::fflush(stdout);
 		Lepra::Thread::Sleep(lTerminationTime/lProgressBarSteps);
 	}
 	printf("]\n");

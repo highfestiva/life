@@ -7,6 +7,7 @@
 #include <assert.h>
 #include "../../Cure/Include/NetworkClient.h"
 #include "../../Cure/Include/NetworkServer.h"
+#include "../../Cure/Include/Packer.h"
 #include "../../Cure/Include/Packet.h"
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../../Cure/Include/TerrainManager.h"
@@ -16,6 +17,8 @@
 
 
 
+class CureTest{};
+static Lepra::LogDecorator gCLog(Lepra::LogType::GetLog(Lepra::LogType::SUB_TEST), typeid(CureTest));
 void ReportTestResult(const Lepra::LogDecorator& pLog, const Lepra::String& pTestName, const Lepra::String& pContext, bool pbResult);
 
 
@@ -80,6 +83,43 @@ bool TestPython(const Lepra::LogDecorator& pLog)
 	ReportTestResult(pLog, _T("Python"), lContext, lTestOk);
 	return (lTestOk);
 }*/
+
+bool TestPacker(const Lepra::LogDecorator& pAccount)
+{
+	Lepra::String lContext;
+	bool lTestOk = true;
+
+	Lepra::uint8 lRawData[1024];
+	if (lTestOk)
+	{
+		lContext = _T("pack unicode");
+		lTestOk = (Cure::PackerUnicodeString::Pack(lRawData, L"ABC") == 10);
+		assert(lTestOk);
+		if (lTestOk)
+		{
+			lTestOk = (lRawData[0] == 4 && lRawData[1] == 0 && lRawData[2] == 'A' &&
+				lRawData[3] == 0 && lRawData[4] == 'B' && lRawData[5] == 0 &&
+				lRawData[6] == 'C' && lRawData[7] == 0 && lRawData[8] == 0 &&
+				lRawData[9] == 0);
+			assert(lTestOk);
+		}
+	}
+	if (lTestOk)
+	{
+		lContext = _T("unpack unicode");
+		Lepra::UnicodeString lUnpacked;
+		lTestOk = (Cure::PackerUnicodeString::Unpack(&lUnpacked, lRawData, 10) == 10);
+		assert(lTestOk);
+		if (lTestOk)
+		{
+			lTestOk = (lUnpacked == L"ABC");
+			assert(lTestOk);
+		}
+	}
+
+	ReportTestResult(pAccount, _T("Packer"), lContext, lTestOk);
+	return (lTestOk);
+}
 
 class TerrainTest
 {
@@ -566,8 +606,12 @@ bool TestCure()
 	bool lTestOk = true;
 	/*if (lTestOk)
 	{
-		lTestOk = TestPython(pLogAccount);
+		lTestOk = TestPython(gCLog);
 	}*/
+	if (lTestOk)
+	{
+		TestPacker(gCLog);
+	}
 	if (lTestOk)
 	{
 		TerrainTest lTerrainTest;
