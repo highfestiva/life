@@ -16,6 +16,10 @@ namespace Lepra
 
 
 
+class Thread;
+
+
+
 class ThreadPointerStorage
 {
 public:

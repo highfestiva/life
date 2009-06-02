@@ -29,12 +29,12 @@ sys_socket SocketBase::InitSocket(sys_socket pSocket, int pSize)
 {
 	// Set the underlying socket buffer sizes.
 	int lBufferSize = pSize;
-	::setsockopt(pSocket, SOL_SOCKET, SO_RCVBUF, (char*)&lBufferSize, sizeof(lBufferSize));
+	::setsockopt(pSocket, SOL_SOCKET, SO_RCVBUF, (const char*)&lBufferSize, sizeof(lBufferSize));
 	lBufferSize = pSize;
-	::setsockopt(pSocket, SOL_SOCKET, SO_SNDBUF, (char*)&lBufferSize, sizeof(lBufferSize));
+	::setsockopt(pSocket, SOL_SOCKET, SO_SNDBUF, (const char*)&lBufferSize, sizeof(lBufferSize));
 #ifndef LEPRA_WINDOWS
 	int lFlag = 1;
-	::setsockopt(pSocket, SOL_SOCKET, SO_REUSEADDR, &lFlag, sizeof(lFlag));
+	::setsockopt(pSocket, SOL_SOCKET, SO_REUSEADDR, (const char*)&lFlag, sizeof(lFlag));
 #endif // !Windows
 	return (pSocket);
 }
@@ -726,7 +726,7 @@ TcpVSocket* TcpMuxSocket::PollAccept()
 {
 	Timer lTime;
 	TcpVSocket* lTcpSocket = 0;
-	size_t lPendingSocketCount = mPendingConnectIdMap.GetCount();
+	size_t lPendingSocketCount = mPendingConnectIdMap.GetCountSafe();
 	for (size_t x = 0; !lTcpSocket && x < lPendingSocketCount; ++x)
 	{
 		{
@@ -1372,7 +1372,6 @@ void UdpMuxSocket::CloseSocket(UdpVSocket* pSocket)
 
 unsigned UdpMuxSocket::GetConnectionCount() const
 {
-	ScopeLock lLock(&mIoLock);
 	return (mSocketTable.GetCount());
 }
 
@@ -1617,7 +1616,6 @@ void UdpVSocket::AddInputBuffer(Datagram* pBuffer)
 
 bool UdpVSocket::NeedInputPeek() const
 {
-	ScopeLock lLock(&mLock);
 	return (mReceiveBufferList.GetCount() != 0);
 }
 

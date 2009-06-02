@@ -229,6 +229,7 @@ public:
 	inline ConstIterator Last() const;
 	inline ConstIterator End() const;
 
+	inline size_t GetCountSafe() const;
 	inline size_t GetCount() const;
 	inline bool IsEmpty() const;
 
@@ -416,16 +417,21 @@ TEMPLATE typename QUAL::ConstIterator QUAL::End() const
 	return ConstIterator(mList.End());
 }
 
+TEMPLATE size_t QUAL::GetCountSafe() const
+{
+	return (mTable.GetCount());	// This is safe as long as STLport is using member integer for size() for hash_map type.
+}
+
 TEMPLATE size_t QUAL::GetCount() const
 {
 	assert(mTable.GetCount() == (int)mList.size());
-	return mList.size();
+	return (GetCountSafe());
 }
 
 TEMPLATE bool QUAL::IsEmpty() const
 {
 	assert(mTable.GetCount() == (int)mList.size());
-	return mList.empty();
+	return (mTable.IsEmpty());
 }
 
 TEMPLATE const OrderedMap<KeyType, ObjectType, HashFunc>& QUAL::operator=(const OrderedMap& pOther)
