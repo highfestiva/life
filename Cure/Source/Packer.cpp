@@ -7,8 +7,11 @@
 
 
 
+#include <assert.h>
 #include "../../Lepra/Include/Endian.h"
 #include "../Include/Packer.h"
+
+#pragma warning(disable: 4127)	// Conditional expression is constant - for sizeof(wchar_t).
 
 
 
@@ -186,12 +189,27 @@ int PackerOctetString::Unpack(Lepra::uint8* pDestination, const Lepra::uint8* pS
 
 int PackerUnicodeString::Pack(Lepra::uint8* pDestination, const Lepra::UnicodeString& pSource)
 {
-	// TODO: improve UTF-16 packer.
+	// TODO: improve Unicode packer. Could be optimized, and implemented to support
+	// horrid UTF-16 characters (which are 24 and 32 bits in length).
 	size_t lCharCount = pSource.length()+1;
 	pDestination[0] = (Lepra::uint8)lCharCount;
 	pDestination[1] = (Lepra::uint8)(lCharCount>>8);
-	::memcpy(pDestination+2, pSource.c_str(), (lCharCount-1)*2);
-	*(wchar_t*)&pDestination[2+(lCharCount-1)*2] = 0;
+	if (sizeof(wchar_t) == 2)	// UTF-16 (Windows)
+	{
+		::memcpy(pDestination+2, pSource.c_str(), (lCharCount-1)*2);
+	}
+	else if (sizeof(wchar_t) == 4)	// UTF-32 (Posix)
+	{
+		for (size_t x = 0; x < lCharCount-1; ++x)
+		{
+			*(Lepra::uint16*)pDestination[2+x*2] = (Lepra::uint16)pSource[x];
+		}
+	}
+	else
+	{
+		assert(false);
+	}
+	*(Lepra::uint16*)&pDestination[2+(lCharCount-1)*2] = 0;
 	return (2+(int)lCharCount*2);
 }
 
@@ -203,7 +221,7 @@ int PackerUnicodeString::Unpack(Lepra::UnicodeString* pDestination, const Lepra:
 		const unsigned pCharCount = pSource[0]|(((unsigned)pSource[1])<<8);
 		if (pCharCount >= 1 && (int)pCharCount*2+2 <= pSize)
 		{
-			const wchar_t* lSource = (const wchar_t*)&pSource[2];
+			const Lepra::uint16* lSource = (const Lepra::uint16*)&pSource[2];
 			// Check that the string is non-null everywhere but on the terminating zero.
 			for (unsigned x = 0; x < pCharCount-1; ++x)
 			{
@@ -217,7 +235,23 @@ int PackerUnicodeString::Unpack(Lepra::UnicodeString* pDestination, const Lepra:
 				lSize = 2+pCharCount*2;
 				if (pDestination)
 				{
-					pDestination->assign(lSource, pCharCount-1);
+					if (sizeof(wchar_t) == 2)	// UTF-16 (Windows)
+					{
+						pDestination->assign((wchar_t*)lSource, pCharCount-1);
+					}
+					else if (sizeof(wchar_t) == 4)	// UTF-32 (Posix)
+					{
+						wchar_t lBuffer[1024];	// TODO: fix buffer overrun exploit.
+						for (size_t x = 0; x < pCharCount-1; ++x)
+						{
+							lBuffer[x] = pSource[x];
+						}
+						pDestination->assign(lBuffer, pCharCount-1);
+					}
+					else
+					{
+						assert(false);
+					}
 				}
 			}
 		}
