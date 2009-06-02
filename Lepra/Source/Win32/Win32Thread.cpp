@@ -5,7 +5,7 @@
 
 
 #include <assert.h>
-#include "../../Include/Win32/Win32Thread.h"
+#include "../../Include/Thread.h"
 #include "../../Include/Lepra.h"
 #include "../../Include/Log.h"
 

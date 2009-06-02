@@ -726,7 +726,7 @@ TcpVSocket* TcpMuxSocket::PollAccept()
 {
 	Timer lTime;
 	TcpVSocket* lTcpSocket = 0;
-	size_t lPendingSocketCount = mPendingConnectIdMap.GetCount();
+	size_t lPendingSocketCount = mPendingConnectIdMap.GetCountSafe();
 	for (size_t x = 0; !lTcpSocket && x < lPendingSocketCount; ++x)
 	{
 		{
@@ -1371,7 +1371,6 @@ void UdpMuxSocket::CloseSocket(UdpVSocket* pSocket)
 
 unsigned UdpMuxSocket::GetConnectionCount() const
 {
-	ScopeLock lLock(&mIoLock);
 	return (mSocketTable.GetCount());
 }
 
@@ -1616,7 +1615,6 @@ void UdpVSocket::AddInputBuffer(Datagram* pBuffer)
 
 bool UdpVSocket::NeedInputPeek() const
 {
-	ScopeLock lLock(&mLock);
 	return (mReceiveBufferList.GetCount() != 0);
 }
 

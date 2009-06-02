@@ -349,7 +349,7 @@ void MemFileLogListener::WriteLog(const String& pFullMessage, Log::LogLevel)
 #ifndef NO_ASSERT_ON_LOG_FLOOD
 	static size_t lSessionLogSize = 0;
 	lSessionLogSize += pFullMessage.length();
-	assert(lSessionLogSize < 2*1024*1024);	// TODO: something smarter using time as well (checking rate, opposed to size).
+	assert(lSessionLogSize < 4*1024*1024);	// TODO: something smarter using time as well (checking rate, opposed to size).
 #endif // NO_ASSERT_ON_LOG_FLOOD
 
 	if ((uint64)mFile.GetSize() > mMaxSize)
