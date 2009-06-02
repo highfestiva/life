@@ -159,6 +159,11 @@ void Thread::SetRunning(bool pRunning)
 	mRunning = pRunning;
 }
 
+void Thread::SetThreadId(size_t pThreadId)
+{
+	mThreadId = pThreadId;
+}
+
 bool Thread::GetStopRequest() const
 {
 	return (mStopRequested);
@@ -212,6 +217,7 @@ void Thread::Sleep(float64 pTime)
 
 void Thread::RunThread()
 {
+	SetThreadId(GetCurrentThreadId());
 	SetRunning(true);
 	mSemaphore.Signal();
 	Run();

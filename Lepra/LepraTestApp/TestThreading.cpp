@@ -49,6 +49,16 @@ public:
 	}
 };
 
+class ThreadIdTestClass
+{
+public:
+	size_t mThreadId;
+	void StoreId()
+	{
+		mThreadId = Thread::GetCurrentThreadId();
+	}
+};
+
 bool TestThreading(const LogDecorator& pAccount)
 {
 	String lContext;
@@ -144,6 +154,35 @@ bool TestThreading(const LogDecorator& pAccount)
 		if (lTestOk)
 		{
 			lTestOk = (gThreadTestCounter == -4);
+			assert(lTestOk);
+		}
+	}
+	if (lTestOk)
+	{
+		lContext = _T("main thread ID");
+		lTestOk = (Lepra::Thread::GetCurrentThreadId() != 0);
+		assert(lTestOk);
+	}
+	if (lTestOk)
+	{
+		lContext = _T("sub thread ID");
+		ThreadIdTestClass lTestInstance;
+		lTestInstance.mThreadId = 0;
+		MemberThread<ThreadIdTestClass> lThread(_T("TestThreadId"));
+		if (lTestOk)
+		{
+			lTestOk = lThread.Start(&lTestInstance, &ThreadIdTestClass::StoreId);
+			assert(lTestOk);
+		}
+		size_t lActualThreadId = lThread.GetThreadId();
+		if (lTestOk)
+		{
+			lTestOk = lThread.Join();
+			assert(lTestOk);
+		}
+		if (lTestOk)
+		{
+			lTestOk = (lTestInstance.mThreadId != 0 && lTestInstance.mThreadId == lActualThreadId);
 			assert(lTestOk);
 		}
 	}

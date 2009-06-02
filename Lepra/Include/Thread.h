@@ -356,6 +356,7 @@ protected:
 
 	void SetStopRequest(bool pStopRequest);
 	void SetRunning(bool pRunning);
+	void SetThreadId(size_t pThreadId);
 
 private:
 	String mThreadName;

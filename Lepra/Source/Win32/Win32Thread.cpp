@@ -714,6 +714,7 @@ void Win32RWLock::Release()
 void Thread::InitializeMainThread(const String& pThreadName)
 {
 	ThreadPointerStorage::SetPointer(&gMainThread);
+	gMainThread.SetThreadId(GetCurrentThreadId());
 	assert(ThreadPointerStorage::GetPointer() == &gMainThread);
 	assert(Thread::GetCurrentThread() == &gMainThread);
 	SetVisualStudioThreadName(AnsiStringUtility::ToOwnCode(pThreadName).c_str(), (DWORD)-1);
@@ -754,7 +755,6 @@ bool Thread::Start()
 		mThreadHandle = (size_t)::CreateThread(0, 0, ThreadEntry, this, 0, &lThreadId);
 		if (mThreadHandle)
 		{
-			mThreadId = lThreadId;
 			// Try to wait for newly created thread.
 			mSemaphore.Wait(5.0);
 		}

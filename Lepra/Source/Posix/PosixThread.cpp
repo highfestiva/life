@@ -225,6 +225,7 @@ void* ThreadEntry(void* pThread)
 void Thread::InitializeMainThread(const String& pThreadName)
 {
 	ThreadPointerStorage::SetPointer(&gMainThread);
+	gMainThread.SetThreadId(GetCurrentThreadId());
 	assert(ThreadPointerStorage::GetPointer() == &gMainThread);
 	assert(Thread::GetCurrentThread() == &gMainThread);
 	InitializeSignalMask();
