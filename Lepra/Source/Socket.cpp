@@ -1,5 +1,5 @@
 
-// Author: Alexander Hugestrand, Jonas Byström
+// Author: Jonas Byström
 // Copyright (c) 2002-2009, Righteous Games
 
 
@@ -24,28 +24,40 @@ namespace Lepra
 {
 
 
-sys_socket InitSocket(sys_socket pSocket, int pSize)
+
+sys_socket SocketBase::InitSocket(sys_socket pSocket, int pSize)
 {
 	// Set the underlying socket buffer sizes.
 	int lBufferSize = pSize;
 	::setsockopt(pSocket, SOL_SOCKET, SO_RCVBUF, (const char*)&lBufferSize, sizeof(lBufferSize));
 	lBufferSize = pSize;
 	::setsockopt(pSocket, SOL_SOCKET, SO_SNDBUF, (const char*)&lBufferSize, sizeof(lBufferSize));
+#ifndef LEPRA_WINDOWS
 	int lFlag = 1;
 	::setsockopt(pSocket, SOL_SOCKET, SO_REUSEADDR, (const char*)&lFlag, sizeof(lFlag));
+#endif // !Windows
 	return (pSocket);
 }
 
-sys_socket NewTcpSocket()
+sys_socket SocketBase::CreateTcpSocket()
 {
 	sys_socket s = ::socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 	return (InitSocket(s, 32*SocketBase::BUFFER_SIZE));
 }
 
-sys_socket NewUdpSocket()
+sys_socket SocketBase::CreateUdpSocket()
 {
 	sys_socket s = ::socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	return (InitSocket(s, 8*SocketBase::BUFFER_SIZE));
+}
+
+void SocketBase::CloseSysSocket(sys_socket pSocket)
+{
+#ifdef LEPRA_WINDOWS
+	::closesocket(pSocket);
+#else // !LEPRA_WINDOWS
+	::close(pSocket);
+#endif // LEPRA_WINDOWS/!LEPRA_WINDOWS
 }
 
 
@@ -73,11 +85,7 @@ void SocketBase::CloseKeepHandle()
 	if (mSocket != INVALID_SOCKET)
 	{
 		Shutdown(SHUT_WRITE);
-#ifdef LEPRA_WINDOWS
-		::closesocket(mSocket);
-#else // !LEPRA_WINDOWS
-		::close(mSocket);
-#endif // LEPRA_WINDOWS/!LEPRA_WINDOWS
+		CloseSysSocket(mSocket);
 	}
 }
 
@@ -326,7 +334,7 @@ TcpListenerSocket::TcpListenerSocket(const SocketAddress& pLocalAddress):
 	log_atrace("TcpListenerSocket()");
 
 	// Initialize the socket.
-	mSocket = NewTcpSocket();
+	mSocket = CreateTcpSocket();
 
 	if (mSocket != INVALID_SOCKET)
 	{
@@ -430,7 +438,7 @@ TcpSocket::TcpSocket(DatagramReceiver* pReceiver):
 	mTargetAddress(),
 	mServerSocket(0)
 {
-	mSocket = NewTcpSocket();
+	mSocket = CreateTcpSocket();
 }
 
 TcpSocket::TcpSocket(const SocketAddress& pLocalAddress):
@@ -439,7 +447,7 @@ TcpSocket::TcpSocket(const SocketAddress& pLocalAddress):
 	mTargetAddress(),
 	mServerSocket(0)
 {
-	mSocket = NewTcpSocket();
+	mSocket = CreateTcpSocket();
 
 	if (mSocket != INVALID_SOCKET)
 	{
@@ -1136,7 +1144,7 @@ UdpSocket::UdpSocket(const SocketAddress& pLocalAddress) :
 	mLocalAddress(pLocalAddress)
 {
 	// Initialize UDP socket.
-	mSocket = NewUdpSocket();
+	mSocket = CreateUdpSocket();
 
 	if (mSocket != INVALID_SOCKET)
 	{
@@ -1235,10 +1243,12 @@ UdpMuxSocket::~UdpMuxSocket()
 
 	RequestStop();
 
+	sys_socket lKiller = CreateUdpSocket();
 	SocketAddress lAddress = GetLocalAddress();
 	lAddress.ResolveHost(_T(""));
-	SendTo((const uint8*)"Release!", 8, lAddress); // Release recvfrom().
+	::sendto(lKiller, "Release!", 8, 0, (const sockaddr*)&lAddress.GetAddr(), sizeof(lAddress.GetAddr()));
 	Thread::Sleep(1.01);
+	CloseSysSocket(lKiller);
 
 	Close();
 	ReleaseSocketThreads();

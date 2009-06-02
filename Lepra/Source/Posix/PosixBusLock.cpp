@@ -52,14 +52,14 @@ void BusLock::Add(int32* pDestination, int32 pAddend)
 {
 	// TODO: implement correctly!
 	// On Win32 we do ::InterlockedExchangeAdd((volatile long*)pDestination, pAddend);
-	pDestination += pAddend;
+	*pDestination += pAddend;
 }
 
 void BusLock::Add(int64* pDestination, int64 pAddend)
 {
 	// TODO: implement correctly!
 	//::InterlockedExchangeAdd64(pDestination, pAddend); <- check how this would be implemented in kernel32.dll (my machine does probably not support an IPF-compliant CPU).
-	pDestination += pAddend;
+	*pDestination += pAddend;
 }
 
 

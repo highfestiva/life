@@ -1,9 +1,9 @@
-# 'Twas generated from ../../Life/LifeServer/LifeServer.vcproj, 2009-05-29, type='bin'.
+# 'Twas generated from ../../Life/LifeServer/LifeServer.vcproj, 2009-06-01, type='bin'.
 # Don't edit manually. See 'generate_makefile.py' for info.
 
 CFLAGS = -O0 -ggdb -fPIC -D_POSIX_PTHREAD_SEMANTICS -I../../ThirdParty/stlport/stlport -I../../ThirdParty/ode-060223/include -DPOSIX -D_DEBUG -D_CONSOLE -DPNG_NO_ASSEMBLER_CODE -DdCYLINDER_ENABLED -DCURE_TEST_WITHOUT_UI -Wall -Wno-unknown-pragmas
 
-LIBS = -lLife -lCure -lTBC -lLepra -lThirdParty -lstlport -lpthread -ldl -L../../ThirdParty/stlport/build/lib/obj/gcc/so -L../../ThirdParty -L../../Lepra -L../../TBC -L../../Cure -L..
+LIBS = -lLife -lCure -lTBC -lLepra -lThirdParty -lstlport -lpthread -ldl -lrt -L../../ThirdParty/stlport/build/lib/obj/gcc/so -L../../ThirdParty -L../../Lepra -L../../TBC -L../../Cure -L..
 
 SRCS=	\
 Client.cpp	\

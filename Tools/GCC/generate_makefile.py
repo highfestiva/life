@@ -35,7 +35,7 @@ lib%(lib)s.so:\t$(OBJS)
 """+foot_rules
 
 head_bin = head_lib+"""
-LIBS = -lLife -lCure -lTBC -lLepra -lThirdParty -lstlport -lpthread -ldl %(libs)s
+LIBS = -lLife -lCure -lTBC -lLepra -lThirdParty -lstlport -lpthread -ldl -lrt %(libs)s
 """
 
 foot_bin = """

@@ -126,7 +126,7 @@ int CureTestApplication::Run()
 	Lepra::MemFileLogListener lMemLogger(100*1024);
 	Lepra::LogType::GetLog(Lepra::LogType::SUB_ROOT)->SetupBasicListeners(lConsoleLogPointer, &lDebugLogger,
 		&lFileLogger, &lPerformanceLogger, &lMemLogger);
-	Lepra::LogType::GetLog(Lepra::LogType::SUB_ROOT)->SetLevelThreashold(Lepra::Log::LEVEL_DEBUG);
+	Lepra::LogType::GetLog(Lepra::LogType::SUB_ROOT)->SetLevelThreashold(Lepra::Log::LEVEL_TRACE);
 
 	mLog.Headline(_T("\n\n--- Build type: ") _T(LEPRA_STRING_TYPE_TEXT) _T(" ") _T(LEPRA_BUILD_TYPE_TEXT) _T(" ---\n"));
 

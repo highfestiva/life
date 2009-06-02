@@ -111,7 +111,7 @@ void HiResTimer::InitFrequency()
 	::QueryPerformanceFrequency(&lFrequency);
 	mFrequency = (int64)lFrequency.QuadPart;
 #elif defined(LEPRA_POSIX)
-	mFrequency = 1000000;
+	mFrequency = 1000000000;
 #else // <Unknown target>
 #error HiResTimer::InitFrequency() not implemented on this platform!
 #endif // LEPRA_WINDOWS/LEPRA_POSIX/<Unknown target>
@@ -229,9 +229,9 @@ inline uint64 HiResTimer::GetSystemCounter()
 	::QueryPerformanceCounter(&lTimeCounter);
 	return ((uint64)lTimeCounter.QuadPart);
 #elif defined(LEPRA_POSIX)
-	timeval lTimeValue;
-	::gettimeofday(&lTimeValue, 0);
-	return ((uint64)lTimeValue.tv_sec*1000000+lTimeValue.tv_usec);
+	timespec lTimeValue;
+	::clock_gettime(CLOCK_REALTIME, &lTimeValue);
+	return ((uint64)lTimeValue.tv_sec*1000000000+lTimeValue.tv_nsec);
 #else // <Unknown target>
 #error HiResTimer::UpdateCounter() not implemented on this platform!
 #endif // LEPRA_WINDOWS/LEPRA_POSIX/<Unknown target>

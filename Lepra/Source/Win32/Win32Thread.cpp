@@ -82,145 +82,6 @@ DWORD __stdcall ThreadEntry(void* pThread)
 	return 0;
 }
 
-void Thread::InitializeMainThread(const String& pThreadName)
-{
-	ThreadPointerStorage::SetPointer(&gMainThread);
-	assert(ThreadPointerStorage::GetPointer() == &gMainThread);
-	assert(Thread::GetCurrentThread() == &gMainThread);
-	SetVisualStudioThreadName(AnsiStringUtility::ToOwnCode(pThreadName).c_str(), (DWORD)-1);
-}
-
-size_t Thread::GetCurrentThreadId()
-{
-	return (::GetCurrentThreadId());
-}
-
-Thread* Thread::GetCurrentThread()
-{
-	return ThreadPointerStorage::GetPointer();
-}
-
-void Thread::SetCpuAffinityMask(uint64 pAffinityMask)
-{
-	DWORD_PTR lMask = (DWORD_PTR)pAffinityMask;
-	::SetThreadAffinityMask((HANDLE)GetThreadHandle(), lMask);
-	// Cut timeslice short and allow OS to reschedule us to the given CPU immediately.
-	::Sleep(1);
-}
-
-void Thread::Sleep(unsigned int pMilliSeconds)
-{
-	::Sleep(pMilliSeconds);
-}
-
-bool Thread::Start()
-{
-	bool lOk = true;
-
-	if (!IsRunning())
-	{
-		SetStopRequest(false);
-
-		DWORD lThreadId;
-		mThreadHandle = (size_t)::CreateThread(0, 0, ThreadEntry, this, 0, &lThreadId);
-		if (mThreadHandle)
-		{
-			mThreadId = lThreadId;
-			// Try to wait for newly created thread.
-			for (int x = 0; !IsRunning() && x < 1000; ++x)
-			{
-				Thread::YieldCpu();
-			}
-		}
-		else
-		{
-			SetRunning(false);
-			mLog.Errorf((_T("Failed to start thread ")+GetThreadName()+_T("!")).c_str());
-			lOk = false;
-		}
-	}
-	return (lOk);
-}
-
-bool Thread::Join()
-{
-	bool lReturnValue = true;
-
-	SetStopRequest(true);
-	if (GetThreadHandle() != 0)
-	{
-		assert(GetThreadId() != GetCurrentThreadId());
-		Thread::YieldCpu();	// Try to let thread self destruct.
-		::WaitForSingleObject((HANDLE)GetThreadHandle(), INFINITE);
-		assert(!IsRunning());
-		if (GetThreadHandle())
-		{
-			::CloseHandle((HANDLE)GetThreadHandle());
-		}
-		mThreadHandle = 0;
-		mThreadId = 0;
-	}
-	SetStopRequest(false);
-
-	return (lReturnValue);
-}
-
-bool Thread::Join(float64 pTimeOut)
-{
-	bool lReturnValue = true;
-
-	SetStopRequest(true);
-	if (GetThreadHandle() != 0)
-	{
-		assert(GetThreadId() != GetCurrentThreadId());
-		if (::WaitForSingleObject((HANDLE)GetThreadHandle(), (DWORD)(pTimeOut * 1000.0)) == WAIT_TIMEOUT)
-		{
-			// Possible dead lock...
-			mLog.Warningf((_T("Failed to join thread \"") + GetThreadName() + _T("\"! Deadlock?")).c_str());
-			return (false);	// RAII simplifies here.
-		}
-		if (GetThreadHandle())
-		{
-			::CloseHandle((HANDLE)GetThreadHandle());
-		}
-		mThreadHandle = 0;
-		mThreadId = 0;
-	}
-	SetStopRequest(false);
-
-	return lReturnValue;
-}
-
-void Thread::Signal(int)
-{
-	// We don't need this on Windows, since nothing really blocks hard.
-}
-
-void Thread::Kill()
-{
-	if (GetThreadHandle() != 0)
-	{
-		assert(GetThreadId() != GetCurrentThreadId());
-		mLog.Warningf(_T("Forcing kill of thread %s."), GetThreadName().c_str());
-		::TerminateThread((HANDLE)GetThreadHandle(), 0);
-		SetRunning(false);
-		::CloseHandle((HANDLE)GetThreadHandle());
-		mThreadHandle = 0;
-	}
-	SetStopRequest(false);
-}
-
-void Thread::YieldCpu()
-{
-	::SwitchToThread();
-}
-
-void Thread::PostRun()
-{
-}
-
-
-
 
 
 Win32Lock::Win32Lock()
@@ -846,6 +707,142 @@ void Win32RWLock::Release()
 
 		mWriteLock.Release();
 	}
+}
+
+
+
+void Thread::InitializeMainThread(const String& pThreadName)
+{
+	ThreadPointerStorage::SetPointer(&gMainThread);
+	assert(ThreadPointerStorage::GetPointer() == &gMainThread);
+	assert(Thread::GetCurrentThread() == &gMainThread);
+	SetVisualStudioThreadName(AnsiStringUtility::ToOwnCode(pThreadName).c_str(), (DWORD)-1);
+}
+
+size_t Thread::GetCurrentThreadId()
+{
+	return (::GetCurrentThreadId());
+}
+
+Thread* Thread::GetCurrentThread()
+{
+	return ThreadPointerStorage::GetPointer();
+}
+
+void Thread::SetCpuAffinityMask(uint64 pAffinityMask)
+{
+	DWORD_PTR lMask = (DWORD_PTR)pAffinityMask;
+	::SetThreadAffinityMask((HANDLE)GetThreadHandle(), lMask);
+	// Cut timeslice short and allow OS to reschedule us to the given CPU immediately.
+	::Sleep(1);
+}
+
+void Thread::Sleep(unsigned int pMilliSeconds)
+{
+	::Sleep(pMilliSeconds);
+}
+
+bool Thread::Start()
+{
+	bool lOk = true;
+
+	if (!IsRunning())
+	{
+		SetStopRequest(false);
+
+		DWORD lThreadId;
+		mThreadHandle = (size_t)::CreateThread(0, 0, ThreadEntry, this, 0, &lThreadId);
+		if (mThreadHandle)
+		{
+			mThreadId = lThreadId;
+			// Try to wait for newly created thread.
+			mSemaphore.Wait(5.0);
+		}
+		else
+		{
+			SetRunning(false);
+			mLog.Errorf((_T("Failed to start thread ")+GetThreadName()+_T("!")).c_str());
+			lOk = false;
+		}
+	}
+	return (lOk);
+}
+
+bool Thread::Join()
+{
+	bool lReturnValue = true;
+
+	SetStopRequest(true);
+	if (GetThreadHandle() != 0)
+	{
+		assert(GetThreadId() != GetCurrentThreadId());
+		Thread::YieldCpu();	// Try to let thread self destruct.
+		::WaitForSingleObject((HANDLE)GetThreadHandle(), INFINITE);
+		assert(!IsRunning());
+		if (GetThreadHandle())
+		{
+			::CloseHandle((HANDLE)GetThreadHandle());
+		}
+		mThreadHandle = 0;
+		mThreadId = 0;
+	}
+	SetStopRequest(false);
+
+	return (lReturnValue);
+}
+
+bool Thread::Join(float64 pTimeOut)
+{
+	bool lReturnValue = true;
+
+	SetStopRequest(true);
+	if (GetThreadHandle() != 0)
+	{
+		assert(GetThreadId() != GetCurrentThreadId());
+		if (::WaitForSingleObject((HANDLE)GetThreadHandle(), (DWORD)(pTimeOut * 1000.0)) == WAIT_TIMEOUT)
+		{
+			// Possible dead lock...
+			mLog.Warningf((_T("Failed to join thread \"") + GetThreadName() + _T("\"! Deadlock?")).c_str());
+			return (false);	// RAII simplifies here.
+		}
+		if (GetThreadHandle())
+		{
+			::CloseHandle((HANDLE)GetThreadHandle());
+		}
+		mThreadHandle = 0;
+		mThreadId = 0;
+	}
+	SetStopRequest(false);
+
+	return lReturnValue;
+}
+
+void Thread::Signal(int)
+{
+	// We don't need this on Windows, since nothing really blocks hard.
+}
+
+void Thread::Kill()
+{
+	if (GetThreadHandle() != 0)
+	{
+		assert(GetThreadId() != GetCurrentThreadId());
+		mLog.Warningf(_T("Forcing kill of thread %s."), GetThreadName().c_str());
+		::TerminateThread((HANDLE)GetThreadHandle(), 0);
+		SetRunning(false);
+		::CloseHandle((HANDLE)GetThreadHandle());
+		mThreadHandle = 0;
+	}
+	SetStopRequest(false);
+}
+
+void Thread::YieldCpu()
+{
+	::SwitchToThread();
+}
+
+void Thread::PostRun()
+{
 }
 
 
