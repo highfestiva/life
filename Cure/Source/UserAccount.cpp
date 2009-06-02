@@ -5,6 +5,7 @@
 
 
 #include "../../Lepra/Include/SHA1.h"
+#include "../Include/Packer.h"
 #include "../Include/UserAccount.h"
 
 
@@ -57,20 +58,23 @@ void MangledPassword::MangleAndSet(Lepra::UnicodeString& pPassword)
 	Clear();
 	mMangledPassword.resize(20);
 
-	const Lepra::uint8* lOriginalData = (const Lepra::uint8*)pPassword.c_str();
-	const size_t lOriginalLength = pPassword.length();
+	const size_t lStringLength = pPassword.length();
+	std::vector<Lepra::uint8> lData(lStringLength*2 + 32);
+	Lepra::uint8* lRawData = &lData[0];
+	const int lRawDataSize = PackerUnicodeString::Pack(lRawData, pPassword);
 	Lepra::uint8 lHashData[20];
-	Lepra::SHA1::Hash(lOriginalData, lOriginalLength*2, lHashData);
+	Lepra::SHA1::Hash(lRawData, lRawDataSize, lHashData);
 	for (size_t x = 0; x < 20; ++x)
 	{
 		mMangledPassword[x] = lHashData[x];
 	}
 
 	// Clear original password.
-	for (size_t y = 0; y < lOriginalLength; ++y)
+	for (size_t y = 0; y < lStringLength; ++y)
 	{
 		pPassword[y] = _T('\0');
 	}
+	::memset(lRawData, 0, lRawDataSize);
 }
 
 void MangledPassword::SetUnmodified(const std::string& pMangledPassword)
