@@ -1246,8 +1246,7 @@ UdpMuxSocket::~UdpMuxSocket()
 	sys_socket lKiller = CreateUdpSocket();
 	const SocketAddress& lAddress = GetLocalAddress();
 	const int lReleaseByteCount = 8;
-	int lSentCount = ::sendto(lKiller, "Release!", lReleaseByteCount, 0, (const sockaddr*)&lAddress.GetAddr(), sizeof(lAddress.GetAddr()));
-	assert(lSentCount == lReleaseByteCount);
+	::sendto(lKiller, "Release!", lReleaseByteCount, 0, (const sockaddr*)&lAddress.GetAddr(), sizeof(lAddress.GetAddr()));
 	Thread::Sleep(0.01);
 	CloseSysSocket(lKiller);
 

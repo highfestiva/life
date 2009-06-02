@@ -2376,7 +2376,7 @@ bool TestPath(const Lepra::LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = _T("directory 4");
-		Lepra::StringUtility::StringVector lDirectoryArray = Lepra::Path::SplitNodes(_T("\\WINDOWS.0\\");
+		Lepra::StringUtility::StringVector lDirectoryArray = Lepra::Path::SplitNodes(_T("\\WINDOWS.0\\"));
 		lTestOk = (lDirectoryArray.size() == 1 && lDirectoryArray[0] == _T("WINDOWS.0"));
 		assert(lTestOk);
 	}

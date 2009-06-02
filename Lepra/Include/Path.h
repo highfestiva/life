@@ -29,7 +29,7 @@ public:
 	static StringUtility::StringVector SplitPath(const String& pPath);
 	static void SplitPath(const String& pPath, String& pDirectory, String& pFilename);
 	// Splits directory path into subdirectories: "C:\\a\\b" -> ["C:","a","b"].
-	static StringUtility::StringVector SplitNodes(const String& pDirectory, bool pExcludeTrailingDirectory = true);
+	static StringUtility::StringVector SplitNodes(const String& pDirectory, bool pExcludeLeadingDirectory = true, bool pExcludeTrailingDirectory = true);
 	// Joins a directory, filename and extension to full/filename.ext (if ext != "").
 	static String JoinPath(const String& pDirectory, const String& pFileBase, const String& pExtension);
 	static bool NormalizePath(const String& pInputPath, String& pOutputPath);

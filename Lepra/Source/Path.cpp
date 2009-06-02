@@ -97,7 +97,7 @@ void Path::SplitPath(const String& pPath, String& pDirectory, String& pFilename)
 	pFilename = JoinPath(_T(""), lPathParts[1], lPathParts[2]);
 }
 
-StringUtility::StringVector Path::SplitNodes(const String& pDirectory, bool pExcludeTrailingDirectory)
+StringUtility::StringVector Path::SplitNodes(const String& pDirectory, bool pExcludeLeadingDirectory, bool pExcludeTrailingDirectory)
 {
 #ifdef LEPRA_WINDOWS
 	String lDirectory;
@@ -117,13 +117,13 @@ StringUtility::StringVector Path::SplitNodes(const String& pDirectory, bool pExc
 #else // !LEPRA_WINDOWS
 	String lDirectory = pDirectory;
 #endif // LEPRA_WINDOWS / !LEPRA_WINDOWS
+	if (pExcludeLeadingDirectory && !lDirectory.empty() && IsPathSeparator(lDirectory[0]))
+	{
+		lDirectory = lDirectory.substr(1);
+	}
 	if (pExcludeTrailingDirectory && !lDirectory.empty() && IsPathSeparator(lDirectory[lDirectory.length()-1]))
 	{
 		lDirectory.resize(lDirectory.length()-1);
-	}
-	if (IsPathSeparator(lDirectory[0]))
-	{
-		lDirectory = lDirectory.substr(1);
 	}
 	return (StringUtility::Split(lDirectory, _T("/")));
 }
@@ -149,7 +149,7 @@ String Path::JoinPath(const String& pDirectory, const String& pFileBase, const S
 
 bool Path::NormalizePath(const String& pInputPath, String& pOutputPath)
 {
-	Lepra::StringUtility::StringVector lDirectoryArray = Lepra::Path::SplitNodes(pInputPath, false);
+	Lepra::StringUtility::StringVector lDirectoryArray = Lepra::Path::SplitNodes(pInputPath, false, false);
 	// Drop irrelevant path info such as "./" and "../" (not leading of course).
 	Lepra::StringUtility::StringVector::iterator y = lDirectoryArray.begin();
 	for (int x = 0; y != lDirectoryArray.end(); ++x)
