@@ -121,6 +121,10 @@ StringUtility::StringVector Path::SplitNodes(const String& pDirectory, bool pExc
 	{
 		lDirectory.resize(lDirectory.length()-1);
 	}
+	if (IsPathSeparator(lDirectory[0]))
+	{
+		lDirectory = lDirectory.substr(1);
+	}
 	return (StringUtility::Split(lDirectory, _T("/")));
 }
 

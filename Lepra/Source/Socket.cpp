@@ -42,13 +42,13 @@ sys_socket SocketBase::InitSocket(sys_socket pSocket, int pSize)
 sys_socket SocketBase::CreateTcpSocket()
 {
 	sys_socket s = ::socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
-	return (InitSocket(s, 32*SocketBase::BUFFER_SIZE));
+	return (InitSocket(s, 32*1024));
 }
 
 sys_socket SocketBase::CreateUdpSocket()
 {
 	sys_socket s = ::socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
-	return (InitSocket(s, 8*SocketBase::BUFFER_SIZE));
+	return (InitSocket(s, 8*1024));
 }
 
 void SocketBase::CloseSysSocket(sys_socket pSocket)
@@ -1244,10 +1244,11 @@ UdpMuxSocket::~UdpMuxSocket()
 	RequestStop();
 
 	sys_socket lKiller = CreateUdpSocket();
-	SocketAddress lAddress = GetLocalAddress();
-	lAddress.ResolveHost(_T(""));
-	::sendto(lKiller, "Release!", 8, 0, (const sockaddr*)&lAddress.GetAddr(), sizeof(lAddress.GetAddr()));
-	Thread::Sleep(1.01);
+	const SocketAddress& lAddress = GetLocalAddress();
+	const int lReleaseByteCount = 8;
+	int lSentCount = ::sendto(lKiller, "Release!", lReleaseByteCount, 0, (const sockaddr*)&lAddress.GetAddr(), sizeof(lAddress.GetAddr()));
+	assert(lSentCount == lReleaseByteCount);
+	Thread::Sleep(0.01);
 	CloseSysSocket(lKiller);
 
 	Close();

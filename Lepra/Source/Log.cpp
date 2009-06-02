@@ -204,20 +204,39 @@ LogDecorator::LogDecorator(Log* pLog, const std::type_info& pTypeId):
 #elif defined(LEPRA_POSIX)
 {
 	// Parse up to class name.
+	// The format looks something like "1w5Lepra14TestBajjaMajjaE", thus (((BCD length)(data))...).
+	// If in global namespace, the namespace (len)(data) pair is left out.
 	const char* s = pTypeId.name();
 	const size_t lLength = ::strlen(s);
-	int c = 0;
+	int lWordCount = 0;
+	int lTargetWordCount = 1;
 	size_t x = 0;
+	size_t lStartOfWord = 0;
 	size_t lStepLength = 1;
-	for (; c < 1 && x < lLength && lStepLength > 0; ++c, x += lStepLength)
+	for (; lWordCount < lTargetWordCount && x < lLength && lStepLength > 0; ++lWordCount, x += lStepLength)
 	{
 		for (; x < lLength && ::isalpha(s[x]); ++x)
 			;
 		char* lEndPtr;
-		AnsiStringUtility::StrToL(&s[x], &lEndPtr, 10);
+		long lWordLength = AnsiStringUtility::StrToL(&s[x], &lEndPtr, 10);
 		lStepLength = lEndPtr-&s[x];
+		lStartOfWord = x+lStepLength;
+		lStepLength = (lStepLength < 1)? 1 : lStepLength;
+		lStepLength += lWordLength;
+		if (lWordCount == 0 && x+lStepLength < lLength && ::isdigit(s[x+lStepLength]))
+		{
+			++lTargetWordCount;
+		}
 	}
-	mClassName = AnsiStringUtility::ToCurrentCode(&s[x]);
+	if (x <= lLength)
+	{
+		Lepra::AnsiString lCrop(&s[lStartOfWord], x-lStartOfWord);
+		mClassName = AnsiStringUtility::ToCurrentCode(lCrop);
+	}
+	else
+	{
+		mClassName = AnsiStringUtility::ToCurrentCode(s);
+	}
 #else // !MSVC
 #error typeid parsing not implemented.
 #endif // MSVC/!MSVC

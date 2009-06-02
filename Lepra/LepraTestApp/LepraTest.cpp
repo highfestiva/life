@@ -1227,6 +1227,7 @@ bool TestNetwork(const Lepra::LogDecorator& pAccount)
 		if (lTestOk)
 		{
 			lContext = _T("TCP underflow receive");
+			Lepra::Thread::Sleep(0.2f);	// On POSIX, it actually takes some time to pass through firewall and stuff.
 			for (int x = 0; lTestOk && x < lPacketCount/10; ++x)
 			{
 				const int lReadSize = lPacketByteCount*10;
@@ -1563,8 +1564,8 @@ bool GameSocketClientTest::Test()
 	if (lTestOk)
 	{
 		lContext = _T("client TCP+UDP connect");
-		Lepra::Thread::Sleep(0.02);
-		lClientSocket = lClientMuxSocket.Connect(lServerAddress, 0.5);
+		Lepra::Thread::Sleep(0.2);
+		lClientSocket = lClientMuxSocket.Connect(lServerAddress, 1.0);
 		lTestOk = (lClientSocket != 0);
 		assert(lTestOk);
 	}
@@ -2186,7 +2187,9 @@ bool TestPerformance(const Lepra::LogDecorator& pAccount)
 				sockaddr_in sa;
 				::memset(&sa, 0, sizeof(sa));
 				sa.sin_family = AF_INET;
-				sa.sin_addr.s_addr = *(u_long*)gethostbyname("")->h_addr;
+				char lHostname[256] = "";
+				::gethostname(lHostname, sizeof(lHostname));
+				sa.sin_addr.s_addr = *(u_long*)(gethostbyname(lHostname)->h_addr);
 				sa.sin_port = Lepra::Endian::HostToBig((Lepra::uint16)46666);
 				lTestOk = (::bind(fd, (sockaddr*)&sa, sizeof(sa)) >= 0);
 				assert(lTestOk);
@@ -2345,6 +2348,7 @@ bool TestPath(const Lepra::LogDecorator& pAccount)
 		lTestOk = (lExtension == _T("apansson"));
 		assert(lTestOk);
 	}
+#ifdef LEPRA_WINDOWS
 	if (lTestOk)
 	{
 		lContext = _T("file 2");
@@ -2367,6 +2371,22 @@ bool TestPath(const Lepra::LogDecorator& pAccount)
 		lTestOk = (lDirectoryArray.size() == 4 && lDirectoryArray[0] == _T("C:") &&
 			lDirectoryArray[1] == _T("Documents and settings") && lDirectoryArray[2] == _T("Sverker") &&
 			lDirectoryArray[3] == _T("Mina dokument"));
+		assert(lTestOk);
+	}
+	if (lTestOk)
+	{
+		lContext = _T("directory 4");
+		Lepra::StringUtility::StringVector lDirectoryArray = Lepra::Path::SplitNodes(_T("\\WINDOWS.0\\");
+		lTestOk = (lDirectoryArray.size() == 1 && lDirectoryArray[0] == _T("WINDOWS.0"));
+		assert(lTestOk);
+	}
+#endif // Windows
+	if (lTestOk)
+	{
+		lContext = _T("directory 5");
+		Lepra::StringUtility::StringVector lDirectoryArray = Lepra::Path::SplitNodes(lTestPath1);
+		lTestOk = (lDirectoryArray.size() == 3 && lDirectoryArray[0] == _T("usr") &&
+			lDirectoryArray[1] == _T("bin") && lDirectoryArray[2] == _T(".hid"));
 		assert(lTestOk);
 	}
 	if (lTestOk)
@@ -2487,6 +2507,7 @@ bool TestPath(const Lepra::LogDecorator& pAccount)
 		}
 		assert(lTestOk);
 	}
+#ifdef LEPRA_WINDOWS
 	if (lTestOk)
 	{
 		lContext = _T("normalize 11");
@@ -2531,6 +2552,7 @@ bool TestPath(const Lepra::LogDecorator& pAccount)
 		}
 		assert(lTestOk);
 	}
+#endif // Windows
 	if (lTestOk)
 	{
 		lContext = _T("normalize error 1");
