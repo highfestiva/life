@@ -645,10 +645,7 @@ TcpMuxSocket::TcpMuxSocket(const String& pName, const SocketAddress& pLocalAddre
 	log_atrace("TcpMuxSocket()");
 	if (pIsServer)
 	{
-		if (mAcceptThread.Start(this, &TcpMuxSocket::AcceptThreadEntry))
-		{
-			mAcceptSemaphore.Wait();
-		}
+		mAcceptThread.Start(this, &TcpMuxSocket::AcceptThreadEntry);
 	}
 	mSelectThread.Start(this, &TcpMuxSocket::SelectThreadEntry);
 }
@@ -972,7 +969,6 @@ void TcpMuxSocket::ReleaseSocketThreads()
 void TcpMuxSocket::AcceptThreadEntry()
 {
 	log_atrace("Accept thread running");
-	mAcceptSemaphore.Signal();
 
 	while (IsOpen() && !mAcceptThread.GetStopRequest())
 	{
@@ -1047,7 +1043,7 @@ void TcpMuxSocket::SelectThreadEntry()
 		}
 		else
 		{
-			mConnectedSocketSemaphore.Wait(0.2f);
+			mConnectedSocketSemaphore.Wait(2.0f);
 		}
 	}
 }
