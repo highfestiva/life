@@ -245,7 +245,7 @@ int PackerUnicodeString::Unpack(Lepra::UnicodeString* pDestination, const Lepra:
 						pDestination->reserve(pCharCount);
 						for (size_t x = 0; x < pCharCount-1; ++x)
 						{
-							pDestination->push_back(pSource[x]);
+							pDestination->push_back(lSource[x]);
 						}
 					}
 					else

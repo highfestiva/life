@@ -252,7 +252,12 @@ void Thread::SetCpuAffinityMask(uint64 /*pAffinityMask*/)
 
 void Thread::Sleep(unsigned int pMilliSeconds)
 {
-	::usleep(pMilliSeconds*1000);
+	time_t lSeconds = pMilliSeconds/1000;
+	long lNanoSeconds = (pMilliSeconds - lSeconds*1000) * 1000000.0;
+	timespec lTimeSpec;
+	lTimeSpec.tv_sec = lSeconds;
+	lTimeSpec.tv_nsec = lNanoSeconds;
+	::nanosleep(&lTimeSpec, 0);
 }
 
 bool Thread::Start()
@@ -322,7 +327,7 @@ void Thread::Kill()
 	{
 		assert(GetThreadId() != GetCurrentThreadId());
 		mLog.Warningf(_T("Forcing kill of thread %s."), GetThreadName().c_str());
-		::pthread_kill(mThreadHandle, SIGKILL);
+		::pthread_kill(mThreadHandle, SIGHUP);
 		Join();
 		SetRunning(false);
 	}
