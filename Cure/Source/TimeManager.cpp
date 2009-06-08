@@ -32,6 +32,7 @@ void TimeManager::Clear(int pPhysicsFrameCounter)
 	mTickTimeModulo = 0;
 	mPhysicsSpeedAdjustmentTime = 0;
 	mPhysicsSpeedAdjustmentFrameCount = 0;
+	mAbsoluteTime = 0;
 	mCurrentFrameTime = 0;
 	mPhysicsFrameCounter = pPhysicsFrameCounter;
 	mAverageFrameTime = 1.0f;
@@ -44,6 +45,7 @@ void TimeManager::TickTime()
 	{
 		mCurrentFrameTime = 1.0;
 	}
+	mAbsoluteTime += mCurrentFrameTime;
 
 	mTickTimeModulo += mCurrentFrameTime;
 
@@ -71,6 +73,11 @@ void TimeManager::TickPhysics()
 			mPhysicsSpeedAdjustmentTime = 0;
 		}
 	}
+}
+
+float TimeManager::GetAbsoluteTime() const
+{
+	return (mAbsoluteTime);
 }
 
 float TimeManager::GetCurrentFrameTime() const

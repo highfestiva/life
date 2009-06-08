@@ -16,6 +16,7 @@
 #include "../Include/ContextObjectEngine.h"
 #include "../Include/Cure.h"
 #include "../Include/GameManager.h"
+#include "../Include/TimeManager.h"
 
 
 
@@ -47,6 +48,7 @@ ContextObject::ContextObject(const Lepra::String& pClassId):
 	mInstanceId(0),
 	mClassId(pClassId),
 	mNetworkObjectType(NETWORK_OBJECT_LOCAL_ONLY),
+	mLastSendTime(0),
 	mRootPhysicsIndex(-1),
 	mAllowMoveSelf(true),
 	mUniqeNodeId(256)
@@ -775,6 +777,20 @@ void ContextObject::StepGhost(ObjectPositionalData& pGhost, float pDeltaTime)
 	// here might save us a few bytes of network data.
 	pGhost.mPosition.mVelocity.Add(pGhost.mPosition.mAcceleration*pDeltaTime);
 	pGhost.mPosition.mTransformation.GetPosition().Add(pGhost.mPosition.mVelocity*pDeltaTime);
+}
+
+
+
+bool ContextObject::QueryResendTime(float pDeltaTime)
+{
+	bool lOkToSend = false;
+	const float lAbsoluteTime = GetManager()->GetGameManager()->GetConstTimeManager()->GetAbsoluteTime();
+	if (mLastSendTime+pDeltaTime < lAbsoluteTime)
+	{
+		lOkToSend = true;
+		mLastSendTime = lAbsoluteTime;
+	}
+	return (lOkToSend);
 }
 
 

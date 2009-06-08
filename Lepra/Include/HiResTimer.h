@@ -34,7 +34,6 @@ public:
 
 	// Returns the actual counter value.
 	inline int64 GetCounter() const;
-	inline int64 GetFrequency() const;
 
 	// Updates to the current time. 
 	// Does not update the previous time.
@@ -64,57 +63,40 @@ public:
 	inline HiResTimer& operator += (const HiResTimer& pTimer);
 	inline HiResTimer& operator -= (const HiResTimer& pTimer);
 
+	static inline void InitFrequency();
+	static inline int64 GetFrequency();
 	static inline uint64 GetSystemCounter();
 
-protected:
 private:
-	inline void InitFrequency();
-
 	uint64 mPrevCounter;
 	uint64 mCounter;
-	uint64 mFrequency;
+
+	static uint64 mFrequency;
+	static double mPeriod;
 };
 
 HiResTimer::HiResTimer() :
 	mPrevCounter(0),
-	mCounter(0),
-	mFrequency(0)
+	mCounter(0)
 {
-	InitFrequency();
 	UpdateTimer();
 	mPrevCounter = mCounter;
 }
 
 HiResTimer::HiResTimer(uint64 pCount) :
 	mPrevCounter(pCount),
-	mCounter(pCount),
-	mFrequency(0)
+	mCounter(pCount)
 {
-	InitFrequency();
 }
 
 HiResTimer::HiResTimer(const HiResTimer& pTimer) :
 	mPrevCounter(pTimer.mPrevCounter),
-	mCounter(pTimer.mCounter),
-	mFrequency(pTimer.mFrequency)
+	mCounter(pTimer.mCounter)
 {
 }
 
 HiResTimer::~HiResTimer()
 {
-}
-
-void HiResTimer::InitFrequency()
-{
-#if defined(LEPRA_WINDOWS)
-	LARGE_INTEGER lFrequency;
-	::QueryPerformanceFrequency(&lFrequency);
-	mFrequency = (int64)lFrequency.QuadPart;
-#elif defined(LEPRA_POSIX)
-	mFrequency = 1000000000;
-#else // <Unknown target>
-#error HiResTimer::InitFrequency() not implemented on this platform!
-#endif // LEPRA_WINDOWS/LEPRA_POSIX/<Unknown target>
 }
 
 double HiResTimer::PopTimeDiff()
@@ -127,17 +109,12 @@ double HiResTimer::PopTimeDiff()
 
 double HiResTimer::GetTime() const
 {
-	return (double)mCounter / (double)mFrequency;
+	return (mCounter*mPeriod);
 }
 
 int64 HiResTimer::GetCounter() const
 {
-	return mCounter;
-}
-
-int64 HiResTimer::GetFrequency() const
-{
-	return mFrequency;
+	return (mCounter);
 }
 
 void HiResTimer::UpdateTimer()
@@ -164,7 +141,7 @@ void HiResTimer::ReduceTimeDiff(double pSeconds)
 
 double HiResTimer::GetTimeDiff() const
 {
-	return (double)(mCounter - mPrevCounter) / (double)mFrequency;
+	return ((mCounter - mPrevCounter) * mPeriod);
 }
 
 uint64 HiResTimer::GetCounterDiff() const
@@ -177,52 +154,74 @@ const HiResTimer& HiResTimer::operator= (const HiResTimer& pTimer)
 	mPrevCounter = pTimer.mPrevCounter;
 	mCounter = pTimer.mCounter;
 	mFrequency = pTimer.mFrequency;
+	mPeriod = pTimer.mPeriod;
 	return (pTimer);
 }
 
 bool HiResTimer::operator <  (const HiResTimer& pTimer) const
 {
-	return mCounter < pTimer.mCounter;
+	return (mCounter < pTimer.mCounter);
 }
 
 bool HiResTimer::operator >  (const HiResTimer& pTimer) const
 {
-	return mCounter > pTimer.mCounter;
+	return (mCounter > pTimer.mCounter);
 }
 
 bool HiResTimer::operator == (const HiResTimer& pTimer) const
 {
-	return mCounter == pTimer.mCounter;
+	return (mCounter == pTimer.mCounter);
 }
 
 bool HiResTimer::operator != (const HiResTimer& pTimer) const
 {
-	return mCounter != pTimer.mCounter;
+	return (mCounter != pTimer.mCounter);
 }
 
 bool HiResTimer::operator <= (const HiResTimer& pTimer) const
 {
-	return mCounter <= pTimer.mCounter;
+	return (mCounter <= pTimer.mCounter);
 }
 
 bool HiResTimer::operator >= (const HiResTimer& pTimer) const
 {
-	return mCounter >= pTimer.mCounter;
+	return (mCounter >= pTimer.mCounter);
 }
 
 HiResTimer& HiResTimer::operator += (const HiResTimer& pTimer)
 {
 	mCounter += pTimer.mCounter;
-	return *this;
+	return (*this);
 }
 
 HiResTimer& HiResTimer::operator -= (const HiResTimer& pTimer)
 {
 	mCounter -= pTimer.mCounter;
-	return *this;
+	return (*this);
 }
 
-inline uint64 HiResTimer::GetSystemCounter()
+
+
+void HiResTimer::InitFrequency()
+{
+#if defined(LEPRA_WINDOWS)
+	LARGE_INTEGER lFrequency;
+	::QueryPerformanceFrequency(&lFrequency);
+	mFrequency = (int64)lFrequency.QuadPart;
+#elif defined(LEPRA_POSIX)
+	mFrequency = 1000000000;
+#else // <Unknown target>
+#error HiResTimer::InitFrequency() not implemented on this platform!
+#endif // LEPRA_WINDOWS/LEPRA_POSIX/<Unknown target>
+	mPeriod = 1.0/mFrequency;
+}
+
+int64 HiResTimer::GetFrequency()
+{
+	return (mFrequency);
+}
+
+uint64 HiResTimer::GetSystemCounter()
 {
 #if defined(LEPRA_WINDOWS)
 	LARGE_INTEGER lTimeCounter;

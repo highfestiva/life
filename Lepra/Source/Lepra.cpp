@@ -4,9 +4,10 @@
 
 
 
+#include "../Include/Lepra.h"
 #include "../Include/Canvas.h"
 #include "../Include/GammaLookup.h"
-#include "../Include/Lepra.h"
+#include "../Include/HiResTimer.h"
 #include "../Include/MetaFile.h"
 #include "../Include/SystemManager.h"
 
@@ -20,6 +21,8 @@ namespace Lepra
 void Init()
 {
 	LogType::Init();
+
+	HiResTimer::InitFrequency();
 
 	SystemManager::Init();
 

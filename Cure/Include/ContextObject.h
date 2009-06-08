@@ -60,6 +60,8 @@ public:
 
 	void StepGhost(ObjectPositionalData& pGhost, float pDeltaTime);
 
+	bool QueryResendTime(float pDeltaTime);
+
 	virtual void OnTick(float pFrameTime) = 0;
 	virtual void OnAlarm(int pAlarmId) = 0;
 	virtual void OnPhysicsTick();
@@ -93,6 +95,7 @@ protected:
 	NetworkObjectType mNetworkObjectType;
 	AttributeArray mAttributeArray;
 	PhysicsNodeArray mPhysicsNodeArray;
+	float mLastSendTime;
 	int mRootPhysicsIndex;	// TODO: remove this hack!
 	ObjectPositionalData mPosition;
 	bool mAllowMoveSelf;	// This is set to false when attached to someone/something else.

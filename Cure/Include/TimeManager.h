@@ -33,6 +33,8 @@ public:
 	// reducing m so that only the remainder is left (m -= s*fps). Also adjusts m for the
 	// increase or decrease in physics simulation speed.
 	void TickPhysics();
+	// Returns the actual (calendar) current time since this instance was created.
+	float GetAbsoluteTime() const;
 	// Returns the actual (calendar) current time difference between this and the previous
 	// time tick.
 	float GetCurrentFrameTime() const;
@@ -62,6 +64,7 @@ public:
 private:
 	int mFixedFrameRate;	// Physics frame rate (at which the physics system is updated).
 	Lepra::HiResTimer mTime;	// Absolute time.
+	float mAbsoluteTime;	// Cache of absolute time.
 	float mTickTimeModulo;	// Contains the time that was "left over" since last physics step.
 	float mPhysicsSpeedAdjustmentTime;	// Total number of seconds that our our physics time needs adjusting.
 	int mPhysicsSpeedAdjustmentFrameCount;	// The number of physics steps to adjust our physics time over.

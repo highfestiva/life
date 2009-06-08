@@ -651,6 +651,10 @@ void GameServerManager::OnCollision(const Lepra::Vector3DF& pForce, const Lepra:
 		}
 		if (lSendCollision)
 		{
+			lSendCollision = pObject1->QueryResendTime(1.0);
+		}
+		if (lSendCollision)
+		{
 			// We have found a collision. Inform all viewers, including the colliding client.
 			log_adebug("Sending collision.");
 			const Cure::ObjectPositionalData* lPosition = 0;
@@ -670,7 +674,7 @@ void GameServerManager::OnStopped(Cure::ContextObject* pObject)
 		const Cure::ObjectPositionalData* lPosition = 0;
 		if (pObject->UpdateFullPosition(lPosition))
 		{
-			BroadcastObjectPosition(pObject->GetInstanceId(), *lPosition, 0, true);
+			BroadcastObjectPosition(pObject->GetInstanceId(), *lPosition, 0, false);
 		}
 	}
 }

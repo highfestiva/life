@@ -565,17 +565,22 @@ bool GameClientSlaveManager::TickNetworkOutput()
 			lObject->SetNetworkObjectType(Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
 			const Cure::ObjectPositionalData* lPositionalData = 0;
 			lObject->UpdateFullPosition(lPositionalData);
-			if (lPositionalData && !lPositionalData->IsSameStructure(mNetworkOutputGhost))
+			if (lPositionalData)
 			{
-				mNetworkOutputGhost.CopyData(lPositionalData);
-			}
-			if (lPositionalData && (lForceSendUnsafeClientKeepalive ||
-				lPositionalData->GetScaledDifference(&mNetworkOutputGhost) > CURE_RTVAR_GET(GetVariableScope(), RTVAR_NETPHYS_RESYNCONDIFFGT, 100.0)))
-			{
-				CURE_RTVAR_SET(GetVariableScope(), "Debug.Net.SentPosition", true);
-				mNetworkOutputGhost.CopyData(lPositionalData);
-				lSendOk = GetNetworkAgent()->SendObjectFullPosition(GetNetworkClient()->GetSocket(),
-					lObject->GetInstanceId(), GetTimeManager()->GetCurrentPhysicsFrame(), mNetworkOutputGhost);
+				if (!lPositionalData->IsSameStructure(mNetworkOutputGhost))
+				{
+					mNetworkOutputGhost.CopyData(lPositionalData);
+				}
+
+				if (lForceSendUnsafeClientKeepalive ||
+					(lObject->QueryResendTime(1.0f) &&
+					lPositionalData->GetScaledDifference(&mNetworkOutputGhost) > CURE_RTVAR_GET(GetVariableScope(), RTVAR_NETPHYS_RESYNCONDIFFGT, 100.0)))
+				{
+					CURE_RTVAR_SET(GetVariableScope(), "Debug.Net.SentPosition", true);
+					mNetworkOutputGhost.CopyData(lPositionalData);
+					lSendOk = GetNetworkAgent()->SendObjectFullPosition(GetNetworkClient()->GetSocket(),
+						lObject->GetInstanceId(), GetTimeManager()->GetCurrentPhysicsFrame(), mNetworkOutputGhost);
+				}
 			}
 		}
 
