@@ -666,9 +666,13 @@ void GameServerManager::OnCollision(const Lepra::Vector3DF& pForce, const Lepra:
 	}
 }
 
-void GameServerManager::OnStopped(Cure::ContextObject* pObject)
+void GameServerManager::OnStopped(Cure::ContextObject* pObject, TBC::PhysicsEngine::BodyID pBodyId)
 {
-	if (pObject->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY)
+	assert(pObject->GetPhysicsNode((Cure::PhysicsNode::Id)1));
+	pObject;
+	pBodyId;
+	/*if (pObject->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY &&
+		pObject->GetPhysicsNode((Cure::PhysicsNode::Id)1)->GetBodyId() == pBodyId)
 	{
 		log_volatile(mLog.Debugf(_T("Object %u stopped, sending position."), pObject->GetInstanceId()));
 		const Cure::ObjectPositionalData* lPosition = 0;
@@ -676,7 +680,7 @@ void GameServerManager::OnStopped(Cure::ContextObject* pObject)
 		{
 			BroadcastObjectPosition(pObject->GetInstanceId(), *lPosition, 0, false);
 		}
-	}
+	}*/
 }
 
 bool GameServerManager::IsConnectAuthorized()

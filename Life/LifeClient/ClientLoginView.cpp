@@ -42,7 +42,7 @@ ClientLoginView::ClientLoginView(UiTbc::Painter* pPainter, ClientLoginObserver* 
 	AddLabel(_T("Server"), Lepra::WHITE);
 
 	Lepra::String lServerName = _T("rg.servegame.org:16650");
-	CURE_RTVAR_GETSET(mLoginObserver->GetVariableScope(), "Login.DefaultServer", lServerName);
+	lServerName = CURE_RTVAR_GETSET(mLoginObserver->GetVariableScope(), "Login.DefaultServer", lServerName);
 	AddTextField(lServerName, _T("Server"));
 
 	AddButton(_T("Login"))->SetOnUnclickedFunc(ClientLoginView, OnLogin);

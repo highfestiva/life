@@ -211,7 +211,7 @@ void ContextManager::HandleIdledBodies()
 		BodyTable::iterator y = mBodyTable.find(*x);
 		if (y != mBodyTable.end())
 		{
-			mGameManager->OnStopped(y->second);
+			mGameManager->OnStopped(y->second, y->first);
 		}
 		else
 		{

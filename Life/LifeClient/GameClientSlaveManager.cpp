@@ -126,8 +126,8 @@ GameClientSlaveManager::~GameClientSlaveManager()
 
 void GameClientSlaveManager::LoadSettings()
 {
-	GetConsoleManager()->PushYieldCommand(_T("execute-file ")+GetSystemCommandFilename());
-	GetConsoleManager()->PushYieldCommand(_T("execute-file ")+GetApplicationCommandFilename());
+	GetConsoleManager()->ExecuteCommand(_T("execute-file ")+GetSystemCommandFilename());
+	GetConsoleManager()->ExecuteCommand(_T("execute-file ")+GetApplicationCommandFilename());
 }
 
 void GameClientSlaveManager::SetRenderArea(const Lepra::PixelRect& pRenderArea)
@@ -866,7 +866,7 @@ void GameClientSlaveManager::OnCollision(const Lepra::Vector3DF& pForce, const L
 	}*/
 }
 
-void GameClientSlaveManager::OnStopped(Cure::ContextObject*)
+void GameClientSlaveManager::OnStopped(Cure::ContextObject*, TBC::PhysicsEngine::BodyID)
 {
 }
 

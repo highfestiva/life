@@ -87,7 +87,7 @@ private:
 	void SetMovement(Cure::GameObjectId pObjectId, Lepra::int32 pFrameIndex, const Cure::ObjectPositionalData& pData);
 	void OnCollision(const Lepra::Vector3DF& pForce, const Lepra::Vector3DF& pTorque,
 		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2);
-	void OnStopped(Cure::ContextObject* pObject);
+	void OnStopped(Cure::ContextObject* pObject, TBC::PhysicsEngine::BodyID pBodyId);
 	bool IsConnectAuthorized();
 	void SendAttach(Cure::ContextObject*, Cure::PhysicsNode::Id, Cure::ContextObject*, Cure::PhysicsNode::Id);
 	void SendDetach(Cure::ContextObject*, Cure::ContextObject*);

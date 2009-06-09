@@ -284,7 +284,7 @@ double RuntimeVariableScope::GetDefaultValue(const Lepra::String& pName, GetMode
 	double lValue = pDefaultValue;
 	if (!Lepra::StringUtility::StringToDouble(lValueString, lValue))
 	{
-		mLog.Errorf(_T("RT variable %s is not int (value is %s)."), pName.c_str(), lValueString.c_str());
+		mLog.Errorf(_T("RT variable %s is not of type double (value is %s)."), pName.c_str(), lValueString.c_str());
 		assert(false);
 	}
 	return (lValue);
@@ -297,7 +297,7 @@ int RuntimeVariableScope::GetDefaultValue(const Lepra::String& pName, GetMode pM
 	int lValue = pDefaultValue;
 	if (!Lepra::StringUtility::StringToInt(lValueString, lValue))
 	{
-		mLog.Errorf(_T("RT variable %s is not int (value is %s)."), pName.c_str(), lValueString.c_str());
+		mLog.Errorf(_T("RT variable %s is not of type int (value is %s)."), pName.c_str(), lValueString.c_str());
 		assert(false);
 	}
 	return (lValue);
@@ -310,7 +310,7 @@ bool RuntimeVariableScope::GetDefaultValue(const Lepra::String& pName, GetMode p
 	bool lValue = pDefaultValue;
 	if (!Lepra::StringUtility::StringToBool(lValueString, lValue))
 	{
-		mLog.Errorf(_T("RT variable %s is not bool (value is %s)."), pName.c_str(), lValueString.c_str());
+		mLog.Errorf(_T("RT variable %s is not of type bool (value is %s)."), pName.c_str(), lValueString.c_str());
 		assert(false);
 	}
 	return (lValue);

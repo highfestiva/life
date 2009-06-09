@@ -10,15 +10,9 @@
 #include "../../Lepra/Include/Performance.h"
 #include "../../Lepra/Include/String.h"
 #include "../../Lepra/Include/Timer.h"
+#include "../../TBC/Include/PhysicsEngine.h"
 #include "../Include/PhysicsNode.h"
 #include "../Include/ResourceManager.h"
-
-
-
-namespace TBC
-{
-class PhysicsEngine;
-}
 
 
 
@@ -67,7 +61,7 @@ public:
 
 	virtual void OnCollision(const Lepra::Vector3DF& pForce, const Lepra::Vector3DF& pTorque,
 		ContextObject* pObject1, ContextObject* pObject2) = 0;
-	virtual void OnStopped(ContextObject* pObject) = 0;
+	virtual void OnStopped(ContextObject* pObject, TBC::PhysicsEngine::BodyID pBodyId) = 0;
 	virtual bool IsConnectAuthorized() = 0;
 	virtual void SendAttach(ContextObject* pObject1, PhysicsNode::Id pId1, ContextObject* pObject2, PhysicsNode::Id pId2) = 0;
 	virtual void SendDetach(ContextObject* pObject1, ContextObject* pObject2) = 0;
