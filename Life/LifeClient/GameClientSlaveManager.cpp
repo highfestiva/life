@@ -573,8 +573,7 @@ bool GameClientSlaveManager::TickNetworkOutput()
 				}
 
 				if (lForceSendUnsafeClientKeepalive ||
-					(lObject->QueryResendTime(1.0f) &&
-					lPositionalData->GetScaledDifference(&mNetworkOutputGhost) > CURE_RTVAR_GET(GetVariableScope(), RTVAR_NETPHYS_RESYNCONDIFFGT, 100.0)))
+					lPositionalData->GetScaledDifference(&mNetworkOutputGhost) > CURE_RTVAR_GET(GetVariableScope(), RTVAR_NETPHYS_RESYNCONDIFFGT, 100.0))
 				{
 					CURE_RTVAR_SET(GetVariableScope(), "Debug.Net.SentPosition", true);
 					mNetworkOutputGhost.CopyData(lPositionalData);

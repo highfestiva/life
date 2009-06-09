@@ -91,13 +91,16 @@
 #if defined(LEPRA_DEBUG)
 #define LEPRA_BUILD_TYPE_TEXT	"Debug"
 #define LEPRA_INFO_PERFORMANCE
+#define LEPRA_DEBUG_CODE(x)		x
 #elif !defined(NO_LOG_DEBUG_INFO)
 #define LEPRA_RELEASE_CANDIDATE
 #define LEPRA_BUILD_TYPE_TEXT	"Release Candidate"
 #define LEPRA_INFO_PERFORMANCE
+#define LEPRA_DEBUG_CODE(x)
 #else // FINAL
 #define LEPRA_FINAL
 #define LEPRA_BUILD_TYPE_TEXT	"Final"
+#define LEPRA_DEBUG_CODE(x)
 #endif // _DEBUG/!NO_LOG_DEBUG_INFO/FINAL
 
 #if defined(LEPRA_UNICODE)

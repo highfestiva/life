@@ -549,7 +549,7 @@ void GameServerManager::ApplyStoredMovement()
 	{
 		const int lFrameCycleIndex = lCurrentPhysicsFrame%NETWORK_POSITIONAL_AHEAD_BUFFER_SIZE;
 		MovementList lMovementList = mMovementArrayList[lFrameCycleIndex];
-		size_t lMovementCount = lMovementList.size();
+		LEPRA_DEBUG_CODE(size_t lMovementCount = lMovementList.size();)
 		mMovementArrayList[lFrameCycleIndex].clear();
 		assert(lMovementCount == lMovementList.size());
 		MovementList::iterator x = lMovementList.begin();

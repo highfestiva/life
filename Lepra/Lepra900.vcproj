@@ -1117,6 +1117,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Source\HiResTimer.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Source\ImageLoader.cpp"
 				>
 			</File>

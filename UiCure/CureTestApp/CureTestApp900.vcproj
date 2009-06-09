@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="UiCureTestApp"
+	Name="CureTestApp"
 	ProjectGUID="{3C46C2E1-41EF-49C2-9D3C-1C69B8CFCD8C}"
 	RootNamespace="PlagueTestApp"
 	Keyword="ManagedCProj"
@@ -528,6 +528,14 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\CureTest.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\CureTestApp.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\Lepra\LepraTestApp\LepraTest.cpp"
 				>
 			</File>
@@ -564,10 +572,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\UiCureTestApp.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\UiLepra\LepraTestApp\UiLepraTest.cpp"
 				>
 			</File>
@@ -586,10 +590,6 @@
 				>
 			</File>
 		</Filter>
-		<File
-			RelativePath=".\Texture0.tga"
-			>
-		</File>
 	</Files>
 	<Globals>
 	</Globals>
