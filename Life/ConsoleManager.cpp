@@ -237,6 +237,11 @@ int ConsoleManager::OnCommand(const Lepra::String& pCommand, const Lepra::String
 		break;
 		case COMMAND_SET_STDOUT_LOG_LEVEL:
 		{
+			if (!GetConsoleLogger())
+			{
+				break;
+			}
+
 			int lLogLevel = 0;
 			if (pParameterVector.size() == 1 && Lepra::StringUtility::StringToInt(pParameterVector[0], lLogLevel))
 			{
@@ -426,7 +431,7 @@ int ConsoleManager::OnCommand(const Lepra::String& pCommand, const Lepra::String
 		case COMMAND_SAVE_APPLICATION_CONFIG_FILE:
 		{
 			bool lUsage = false;
-			if (pParameterVector.size() == 1 || pParameterVector.size() == 2)
+			if (pParameterVector.size() >= 1 && pParameterVector.size() <= 3)
 			{
 				size_t lFilenameIndex = 0;
 				bool lIgnoreIfExists = false;
@@ -435,7 +440,17 @@ int ConsoleManager::OnCommand(const Lepra::String& pCommand, const Lepra::String
 					lIgnoreIfExists = true;
 					++lFilenameIndex;
 				}
-				if (lFilenameIndex < pParameterVector.size())
+				if (lCommand == COMMAND_SAVE_SYSTEM_CONFIG_FILE)
+				{
+					++lFilenameIndex;
+				}
+				int lScopeSkipCount = 0;
+				if (lFilenameIndex < pParameterVector.size() &&
+					(lCommand == COMMAND_SAVE_SYSTEM_CONFIG_FILE &&
+					Lepra::StringUtility::StringToInt(pParameterVector[lFilenameIndex-1], lScopeSkipCount))
+					||
+					(lCommand == COMMAND_SAVE_APPLICATION_CONFIG_FILE &&
+					lFilenameIndex < pParameterVector.size()))
 				{
 					Lepra::String lFilename = pParameterVector[lFilenameIndex];
 					if (!lIgnoreIfExists || !Lepra::DiskFile::Exists(lFilename))
@@ -451,7 +466,7 @@ int ConsoleManager::OnCommand(const Lepra::String& pCommand, const Lepra::String
 							bool lSaveResult;
 							if (lCommand == COMMAND_SAVE_SYSTEM_CONFIG_FILE)
 							{
-								lSaveResult = SaveSystemConfigFile(&lFile, lUserConfig);
+								lSaveResult = SaveSystemConfigFile(lScopeSkipCount, &lFile, lUserConfig);
 							}
 							else
 							{
@@ -489,9 +504,10 @@ int ConsoleManager::OnCommand(const Lepra::String& pCommand, const Lepra::String
 			}
 			if (lUsage)
 			{
-				mLog.Warningf(_T("usage: %s [<-i>] <file_name>"), pCommand.c_str());
+				mLog.Warningf(_T("usage: %s [<-i>] {skip_scope_count} <file_name>"), pCommand.c_str());
 				mLog.AWarning("Saves settings to <file_name>.");
-				mLog.AWarning("  -i   Skips overwriting in case of already existing file.");
+				mLog.AWarning("  {skip_scope_count}  How many variable scopes to skip before writing. Not valid for all cmds.");
+				mLog.AWarning("  -i                  Skips overwriting in case of already existing file.");
 				lResult = 1;
 			}
 		}
@@ -579,10 +595,10 @@ Lepra::String ConsoleManager::LoadUserConfig(Lepra::File* pFile)
 	return (lUserConfig);
 }
 
-bool ConsoleManager::SaveSystemConfigFile(Lepra::File* pFile, const Lepra::String& pUserConfig)
+bool ConsoleManager::SaveSystemConfigFile(int pScopeSkipCount, Lepra::File* pFile, const Lepra::String& pUserConfig)
 {
 	pFile->WriteString(_T("// Generated system shell script section.\n"));
-	std::list<Lepra::String> lVariableList = GetVariableScope()->GetVariableNameList(1);
+	std::list<Lepra::String> lVariableList = GetVariableScope()->GetVariableNameList(pScopeSkipCount);
 	return (SaveConfigFile(pFile, lVariableList, pUserConfig));
 }
 

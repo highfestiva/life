@@ -63,7 +63,6 @@ public:
 
 private:
 	Lepra::String GetName() const;
-	Lepra::String GetSystemCommandFilename() const;
 	Lepra::String GetApplicationCommandFilename() const;
 
 	bool Reset();

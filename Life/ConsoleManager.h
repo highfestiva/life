@@ -32,6 +32,8 @@ public:
 		Lepra::ConsolePrompt* pConsolePrompt);
 	virtual ~ConsoleManager();
 
+	void Init();
+
 protected:
 	enum CommandCommon
 	{
@@ -61,7 +63,6 @@ protected:
 		COMMAND_COUNT_COMMON
 	};
 
-	void Init();
 	unsigned GetCommandCount() const;
 	const CommandPair& GetCommand(unsigned pIndex) const;
 	int TranslateCommand(const Lepra::String& pCommand) const;
@@ -73,7 +74,7 @@ protected:
 
 private:
 	Lepra::String LoadUserConfig(Lepra::File* pFile);
-	bool SaveSystemConfigFile(Lepra::File* pFile, const Lepra::String& pUserConfig);
+	bool SaveSystemConfigFile(int pScopeSkipCount, Lepra::File* pFile, const Lepra::String& pUserConfig);
 	bool SaveConfigFile(Lepra::File* pFile, std::list<Lepra::String>& pVariableList, const Lepra::String& pUserConfig);
 
 	static const CommandPair mCommandIdList[];

@@ -42,7 +42,6 @@ public:
 
 private:
 	Lepra::String GetName() const;
-	Lepra::String GetSystemCommandFilename() const;
 	Lepra::String GetApplicationCommandFilename() const;
 
 	void Logout(Cure::UserAccount::AccountId pAccountId, const Lepra::String& pReason);

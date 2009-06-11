@@ -123,14 +123,12 @@ GameClientSlaveManager::~GameClientSlaveManager()
 	mMaster = 0;
 
 	GetConsoleManager()->ExecuteCommand(_T("save-application-config-file ")+GetApplicationCommandFilename());
-	GetConsoleManager()->ExecuteCommand(_T("save-system-config-file ")+GetSystemCommandFilename());
 
 	GetConsoleManager()->Join();
 }
 
 void GameClientSlaveManager::LoadSettings()
 {
-	GetConsoleManager()->ExecuteCommand(_T("execute-file -i ")+GetSystemCommandFilename());
 	GetConsoleManager()->ExecuteCommand(_T("execute-file -i ")+GetApplicationCommandFilename());
 }
 
@@ -326,14 +324,9 @@ Lepra::String GameClientSlaveManager::GetName() const
 	return (_T("Client")+Lepra::StringUtility::IntToString(mSlaveIndex, 10));
 }
 
-Lepra::String GameClientSlaveManager::GetSystemCommandFilename() const
-{
-	return (Lepra::SystemManager::GetLoginName()+_T("ClientSystem") _TEXT_ALTERNATIVE("", L"U") _T(".LifeBatch"));
-}
-
 Lepra::String GameClientSlaveManager::GetApplicationCommandFilename() const
 {
-	return (Lepra::SystemManager::GetLoginName()+GetName()+_T("Application") _TEXT_ALTERNATIVE("", L"U") _T(".LifeBatch"));
+	return (GetName()+_T("Application") _TEXT_ALTERNATIVE("", L"U") _T(".lsh"));
 }
 
 

@@ -38,10 +38,19 @@ GameClientMasterTicker::GameClientMasterTicker(UiCure::GameUiManager* pUiManager
 	mActiveWidth(0),
 	mActiveHeight(0)
 {
+	ConsoleManager lConsole(0, UiCure::GetSettings(), 0, 0);
+	lConsole.Init();
+	lConsole.ExecuteCommand(_T("execute-file -i ClientBase.lsh"));
 }
 
 GameClientMasterTicker::~GameClientMasterTicker()
 {
+	{
+		ConsoleManager lConsole(0, UiCure::GetSettings(), 0, 0);
+		lConsole.Init();
+		lConsole.ExecuteCommand(_T("save-system-config-file 0 ClientBase.lsh"));
+	}
+
 	mUiManager->GetInputManager()->ReleaseAll();
 	mUiManager->GetInputManager()->RemoveKeyCodeInputObserver(this);
 

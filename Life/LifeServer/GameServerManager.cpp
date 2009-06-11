@@ -43,6 +43,10 @@ GameServerManager::GameServerManager(Cure::RuntimeVariableScope* pVariableScope,
 	mBoxResource(ContextObjectInfo(GetContext(), 0, 0, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED)),
 	mMovementArrayList(NETWORK_POSITIONAL_AHEAD_BUFFER_SIZE)
 {
+	ConsoleManager lConsole(0, Cure::GetSettings(), 0, 0);
+	lConsole.Init();
+	lConsole.ExecuteCommand(_T("execute-file -i ServerBase.lsh"));
+
 	unsigned lPhysicsFps = CURE_RTVAR_GET(pVariableScope, RTVAR_PHYSICS_FPS, 60);
 	GetResourceManager()->InitDefault(new Cure::CppContextObjectFactory(lPhysicsFps));
 
@@ -56,20 +60,24 @@ GameServerManager::GameServerManager(Cure::RuntimeVariableScope* pVariableScope,
 	SetNetworkAgent(new Cure::NetworkServer(pVariableScope, this));
 
 	SetConsoleManager(new ServerConsoleManager(this, GetVariableScope(), pConsoleLogger, new Lepra::StdioConsolePrompt()));
-	GetConsoleManager()->PushYieldCommand(_T("execute-file ")+GetSystemCommandFilename());
 	GetConsoleManager()->PushYieldCommand(_T("execute-file ")+GetApplicationCommandFilename());
 	GetConsoleManager()->Start();
 }
 
 GameServerManager::~GameServerManager()
 {
+	{
+		ConsoleManager lConsole(0, Cure::GetSettings(), 0, 0);
+		lConsole.Init();
+		lConsole.ExecuteCommand(_T("save-system-config-file 0 ServerBase.lsh"));
+	}
+
 	DeleteAllClients();
 
 	delete (mUserAccountManager);
 	mUserAccountManager = 0;
 
-	GetConsoleManager()->ExecuteCommand(_T("save-application-config-file -no ")+GetApplicationCommandFilename());
-	GetConsoleManager()->ExecuteCommand(_T("save-system-config-file -no ")+GetSystemCommandFilename());
+	GetConsoleManager()->ExecuteCommand(_T("save-application-config-file ")+GetApplicationCommandFilename());
 }
 
 
@@ -161,11 +169,6 @@ int GameServerManager::GetLoggedInClientCount() const
 Lepra::String GameServerManager::GetName() const
 {
 	return (_T("Server"));
-}
-
-Lepra::String GameServerManager::GetSystemCommandFilename() const
-{
-	return (Lepra::SystemManager::GetLoginName()+GetName()+(_T("System") _TEXT_ALTERNATIVE("", L"U") _T(".LifeBatch")));
 }
 
 Lepra::String GameServerManager::GetApplicationCommandFilename() const
