@@ -1,3 +1,3 @@
 #!/bin/bash
 
-git push ssh://rg@localhost/~rg/TSP/
+git push ssh://rg@localhost:2202/~rg/TSP/
