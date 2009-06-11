@@ -636,7 +636,7 @@ bool ConsoleManager::SaveConfigFile(Lepra::File* pFile, std::list<Lepra::String>
 		pFile->WriteString(_T("#")+lVariable+_T(" ")+lValue+lDefaultValue);
 	}
 	pFile->WriteString(_T("\nset-stdout-log-level 1\n"));
-	pFile->WriteString(_T("\n" USER_SECTION_MARK " -- User config. Everything but variable values will be overwritten above this section!\n"));
+	pFile->WriteString(_T("\n") _T(USER_SECTION_MARK) _T(" -- User config. Everything but variable values will be overwritten above this section!\n"));
 	pFile->WriteString(pUserConfig);
 	return (true);	// TODO: check if all writes went well.
 }
