@@ -389,7 +389,7 @@ TEXLoader::Status TEXLoader::Save(const Lepra::String& pFileName, const Texture&
 	Lepra::DiskFile lFile;
 	mSaveFile = &lFile;
 
-	if (lFile.Open(pFileName, Lepra::DiskFile::MODE_WRITE_ONLY) == false)
+	if (lFile.Open(pFileName, Lepra::DiskFile::MODE_WRITE) == false)
 	{
 		lStatus = STATUS_OPEN_ERROR;
 	}

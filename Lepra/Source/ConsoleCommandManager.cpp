@@ -97,7 +97,7 @@ int ConsoleCommandManager::Execute(const String& pCommand, bool pAppendToHistory
 		lInCommand = lInCommand.substr(0, lInCommand.find(mComment, 0));
 	}
 
-	StringUtility::StringVector lCommandList = StringUtility::BlockSplit(lInCommand, _T(";"), true);
+	StringUtility::StringVector lCommandList = StringUtility::BlockSplit(lInCommand, _T(";"), true, true);
 
 	if (lCommandList.size() == 0)
 	{
@@ -112,7 +112,7 @@ int ConsoleCommandManager::Execute(const String& pCommand, bool pAppendToHistory
 	{
 		const String& lTempCommand = lCommandList[lCommandIndex];
 		String lCommand = StringUtility::StripLeft(lTempCommand, lCommandDelimitors);
-		StringUtility::StringVector lCommandTokenList = StringUtility::BlockSplit(lCommand, lCommandDelimitors, 1, false);
+		StringUtility::StringVector lCommandTokenList = StringUtility::BlockSplit(lCommand, lCommandDelimitors, 1, false, true);
 		if (lCommandTokenList.size() > 0)
 		{
 			lCommand = lCommandTokenList[0];
@@ -121,7 +121,7 @@ int ConsoleCommandManager::Execute(const String& pCommand, bool pAppendToHistory
 			{
 				String lParameters = lCommandTokenList[1];
 				lParameters = StringUtility::StripLeft(lParameters, lCommandDelimitors);
-				lParameterTokenList = StringUtility::BlockSplit(lParameters, lCommandDelimitors, false);
+				lParameterTokenList = StringUtility::BlockSplit(lParameters, lCommandDelimitors, false, true);
 			}
 
 			lExecutionResult = OnExecute(lCommand, lParameterTokenList);

@@ -134,6 +134,8 @@ private:
 	bool mAllowMovementInput;
 	int mMoveKeys;	// TODO: remove hack!
 	UiTbc::Window* mLoginWindow;
+	Lepra::String mConnectUserName;
+	Lepra::String mConnectServerAddress;
 	Lepra::String mDisconnectReason;
 	std::set<UserGfxContextObjectInfoResource*> mLoadingContextSet;
 

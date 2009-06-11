@@ -1131,7 +1131,7 @@ bool TestSkinningLoadSave(const Lepra::LogDecorator& pLog, double pShowTime)
 			float lDisplacement = (lMeshIndex*2-1)*lCuboidLength/4.0f;
 			lGeometry->Translate(Lepra::Vector3DF(0, lDisplacement, 0));
 			Lepra::DiskFile lFile;
-			lTestOk = lFile.Open(lThisMeshName, Lepra::DiskFile::MODE_WRITE_ONLY);
+			lTestOk = lFile.Open(lThisMeshName, Lepra::DiskFile::MODE_WRITE);
 			if (lTestOk)
 			{
 				lTestOk = InitializeGeometry(lGeometry);
@@ -1151,7 +1151,7 @@ bool TestSkinningLoadSave(const Lepra::LogDecorator& pLog, double pShowTime)
 		{
 			lContext = _T("load cuboid mesh");
 			Lepra::DiskFile lFile;
-			lTestOk = lFile.Open(lThisMeshName, Lepra::DiskFile::MODE_READ_ONLY);
+			lTestOk = lFile.Open(lThisMeshName, Lepra::DiskFile::MODE_READ);
 			if (lTestOk)
 			{
 				UiTbc::ChunkyMeshLoader lMeshLoader(&lFile, false);
@@ -1170,7 +1170,7 @@ bool TestSkinningLoadSave(const Lepra::LogDecorator& pLog, double pShowTime)
 			lContext = _T("save cuboid skin");
 			UiTbc::BasicMeshCreator::CreateYBonedSkin(-lCuboidLength/2.0f, +lCuboidLength/2.0f, &lGeometry[lSkinIndex], &lSkin[lSkinIndex], 2);
 			Lepra::DiskFile lFile;
-			lTestOk = lFile.Open(lThisSkinName, Lepra::DiskFile::MODE_WRITE_ONLY);
+			lTestOk = lFile.Open(lThisSkinName, Lepra::DiskFile::MODE_WRITE);
 			if (lTestOk)
 			{
 				UiTbc::ChunkySkinLoader lSkinLoader(&lFile, false);
@@ -1181,7 +1181,7 @@ bool TestSkinningLoadSave(const Lepra::LogDecorator& pLog, double pShowTime)
 		{
 			lContext = _T("load cuboid skin");
 			Lepra::DiskFile lFile;
-			lTestOk = lFile.Open(lThisSkinName, Lepra::DiskFile::MODE_READ_ONLY);
+			lTestOk = lFile.Open(lThisSkinName, Lepra::DiskFile::MODE_READ);
 			if (lTestOk)
 			{
 				UiTbc::ChunkySkinLoader lSkinLoader(&lFile, false);
@@ -1213,7 +1213,7 @@ bool TestSkinningLoadSave(const Lepra::LogDecorator& pLog, double pShowTime)
 		lTransform1.RotatePitch(+0.8f);
 		lAnimation.SetBoneTransformation(1, 1, lTransform1);
 		Lepra::DiskFile lFile;
-		lTestOk = lFile.Open(lAnimationName, Lepra::DiskFile::MODE_WRITE_ONLY);
+		lTestOk = lFile.Open(lAnimationName, Lepra::DiskFile::MODE_WRITE);
 		if (lTestOk)
 		{
 			TBC::ChunkyAnimationLoader lAnimationLoader(&lFile, false);
@@ -1225,7 +1225,7 @@ bool TestSkinningLoadSave(const Lepra::LogDecorator& pLog, double pShowTime)
 	{
 		lContext = _T("load cuboid animation");
 		Lepra::DiskFile lFile;
-		lTestOk = lFile.Open(lAnimationName, Lepra::DiskFile::MODE_READ_ONLY);
+		lTestOk = lFile.Open(lAnimationName, Lepra::DiskFile::MODE_READ);
 		if (lTestOk)
 		{
 			TBC::ChunkyAnimationLoader lAnimationLoader(&lFile, false);
@@ -1249,7 +1249,7 @@ bool TestSkinningLoadSave(const Lepra::LogDecorator& pLog, double pShowTime)
 		lStructure.SetPhysicsType(TBC::ChunkyStructure::DYNAMIC);
 		lStructure.FinalizeInit();
 		Lepra::DiskFile lFile;
-		lTestOk = lFile.Open(lStructureName, Lepra::DiskFile::MODE_WRITE_ONLY);
+		lTestOk = lFile.Open(lStructureName, Lepra::DiskFile::MODE_WRITE);
 		if (lTestOk)
 		{
 			TBC::ChunkyStructureLoader lStructureLoader(&lFile, false);
@@ -1261,7 +1261,7 @@ bool TestSkinningLoadSave(const Lepra::LogDecorator& pLog, double pShowTime)
 	{
 		lContext = _T("load cuboid structure");
 		Lepra::DiskFile lFile;
-		lTestOk = lFile.Open(lStructureName, Lepra::DiskFile::MODE_READ_ONLY);
+		lTestOk = lFile.Open(lStructureName, Lepra::DiskFile::MODE_READ);
 		if (lTestOk)
 		{
 			TBC::ChunkyStructureLoader lStructureLoader(&lFile, false);

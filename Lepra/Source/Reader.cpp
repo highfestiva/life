@@ -158,7 +158,7 @@ IOError Reader::ReadLine(String& pString)
 	
 	if (lErr != IO_OK)
 	{
-		return lErr;
+		return (lErr);
 	}
 
 	while (lChar != 0 && lChar != _T('\n'))
@@ -171,11 +171,15 @@ IOError Reader::ReadLine(String& pString)
 		lErr = Read(lChar);
 		if (lErr != IO_OK)
 		{
-			return lErr;
+			if (lErr == IO_ERROR_READING_FROM_STREAM)
+			{
+				break;	// We'll take the error on the next (=empty) line.
+			}
+			return (lErr);
 		}
 	}
 
-	return IO_OK;
+	return (IO_OK);
 }
 
 IOError Reader::Skip(size_t pSize)

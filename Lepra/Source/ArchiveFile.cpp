@@ -327,7 +327,7 @@ bool ArchiveFile::OpenForWriting(const String& pFileName, OpenMode pMode)
 			// We have to take care about the temp file...
 			// Insert it into the archive.
 			DiskFile lFile;
-			if (lFile.Open(lTempFile, DiskFile::MODE_READ_ONLY) == true)
+			if (lFile.Open(lTempFile, DiskFile::MODE_READ) == true)
 			{
 				uint8 lBuf[1024];
 				uint64 lSteps = lFile.GetSize() / 1024;
@@ -438,7 +438,7 @@ bool ArchiveFile::OpenZipForWriting(const String& pFileName, OpenMode pMode)
 			// We have to take care about the temp file...
 			// Insert it into the archive.
 			DiskFile lFile;
-			if (lFile.Open(lTempFile, DiskFile::MODE_READ_ONLY) == true)
+			if (lFile.Open(lTempFile, DiskFile::MODE_READ) == true)
 			{
 				mCurrentPos = lFile.GetSize();
 
@@ -945,12 +945,12 @@ bool ArchiveFile::ExtractFileFromArchive(const String& pArchiveName, const Strin
 
 		if (pLocal == false)
 		{
-			lOpened = lDiskFile.Open(pExtractedFileName, DiskFile::MODE_WRITE_ONLY, true);
+			lOpened = lDiskFile.Open(pExtractedFileName, DiskFile::MODE_WRITE, true);
 		}
 		else
 		{
 			String lFileName = Path::GetCompositeFilename(pExtractedFileName);
-			lOpened = lDiskFile.Open(lFileName, DiskFile::MODE_WRITE_ONLY, false);
+			lOpened = lDiskFile.Open(lFileName, DiskFile::MODE_WRITE, false);
 		}
 
 		if (lOpened == true)
@@ -995,7 +995,7 @@ bool ArchiveFile::InsertFileIntoArchive(const String& pArchiveName, const String
 
 	DiskFile lDiskFile;
 
-	if (lDiskFile.Open(pFileName, DiskFile::MODE_READ_ONLY) == true)
+	if (lDiskFile.Open(pFileName, DiskFile::MODE_READ) == true)
 	{
 		ArchiveFile lArchiveFile(pArchiveName);
 		bool lOpened = false;

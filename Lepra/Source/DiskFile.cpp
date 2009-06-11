@@ -38,7 +38,7 @@ DiskFile::DiskFile() :
 	mFileSize(0),
 	mWriter(0),
 	mReader(0),
-	mMode(MODE_READ_ONLY)
+	mMode(MODE_READ)
 {
 	Reader::SetInputStream(this);
 	Writer::SetOutputStream(this);
@@ -53,7 +53,7 @@ DiskFile::DiskFile(Reader* pReader) :
 	mFileSize(0),
 	mWriter(0),
 	mReader(pReader),
-	mMode(MODE_READ_ONLY)
+	mMode(MODE_READ)
 {
 	Reader::SetInputStream(this);
 	Writer::SetOutputStream(this);
@@ -73,7 +73,7 @@ DiskFile::DiskFile(Writer* pWriter) :
 	mFileSize(0),
 	mWriter(pWriter),
 	mReader(0),
-	mMode(MODE_READ_ONLY)
+	mMode(MODE_READ)
 {
 	Reader::SetInputStream(this);
 	Writer::SetOutputStream(this);
@@ -93,7 +93,7 @@ DiskFile::DiskFile(Reader* pReader, Writer* pWriter) :
 	mFileSize(0),
 	mWriter(pWriter),
 	mReader(pReader),
-	mMode(MODE_READ_ONLY)
+	mMode(MODE_READ)
 {
 	Reader::SetInputStream(this);
 	Writer::SetOutputStream(this);
@@ -149,17 +149,17 @@ bool DiskFile::Open(const String& pFileName, OpenMode pMode, bool pCreatePath, E
 
 	bool lOk = true;
 
-	if (pMode&MODE_READ_ONLY)
+	File::ClearMode(File::READ_MODE);
+	File::ClearMode(File::WRITE_MODE);
+	if (pMode&MODE_READ)
 	{
 		File::SetMode(File::READ_MODE);
-		File::ClearMode(File::WRITE_MODE);
 	}
-	else if(pMode&(MODE_WRITE_ONLY|MODE_WRITE_APPEND))
+	if (pMode&(MODE_WRITE|MODE_WRITE_APPEND))
 	{
 		File::SetMode(File::WRITE_MODE);
-		File::ClearMode(File::READ_MODE);
 	}
-	else
+	if (!(pMode&(MODE_WRITE|MODE_WRITE_APPEND|MODE_READ)))
 	{
 		lOk = false;
 	}
@@ -167,57 +167,58 @@ bool DiskFile::Open(const String& pFileName, OpenMode pMode, bool pCreatePath, E
 	if (lOk)
 	{
 		ExtractPathAndFileName(pFileName);
-
-		if (pMode&MODE_READ_ONLY)
-		{
-			if (pMode&MODE_TEXT)
-			{
-				mFile = FileOpen(pFileName, _T("rt"));
-			}
-			else
-			{
-				mFile = FileOpen(pFileName, _T("rb"));
-			}
-		}
-		else if (pMode&MODE_WRITE_ONLY)
+		if(pMode&(MODE_WRITE|MODE_WRITE_APPEND))
 		{
 			if (pCreatePath == true && CreateSubDirs() == false)
 			{
 				lOk = false;
-			}
-			else
-			{
-				if (pMode&MODE_TEXT)
-				{
-					mFile = FileOpen(pFileName, _T("wt"));
-				}
-				else
-				{
-					mFile = FileOpen(pFileName, _T("wb"));
-				}
-			}
-		}
-		else if (pMode&MODE_WRITE_APPEND)
-		{
-			if (pCreatePath == true && CreateSubDirs() == false)
-			{
-				lOk = false;
-			}
-			else
-			{
-				if (pMode&MODE_TEXT)
-				{
-					mFile = FileOpen(pFileName, _T("a+t"));
-				}
-				else
-				{
-					mFile = FileOpen(pFileName, _T("a+b"));
-				}
 			}
 		}
 	}
 
-	if (lOk == true)
+	Lepra::String lModeString;
+	if (lOk)
+	{
+		if ((pMode&(MODE_READ|MODE_WRITE|MODE_WRITE_APPEND)) == MODE_READ)
+		{
+			lModeString = _T("r");
+		}
+		else if ((pMode&(MODE_READ|MODE_WRITE|MODE_WRITE_APPEND)) == MODE_WRITE)
+		{
+			lModeString = _T("w");
+		}
+		else if ((pMode&(MODE_READ|MODE_WRITE_APPEND)) == MODE_WRITE_APPEND)
+		{
+			lModeString = _T("a");
+		}
+		else if ((pMode&(MODE_READ|MODE_WRITE|MODE_WRITE_APPEND)) == (MODE_READ|MODE_WRITE))
+		{
+			lModeString = _T("r+");
+		}
+		else if ((pMode&(MODE_READ|MODE_WRITE_APPEND)) == (MODE_READ|MODE_WRITE_APPEND))
+		{
+			lModeString = _T("a+");
+		}
+		else
+		{
+			lOk = false;
+		}
+	}
+	if (lOk)
+	{
+
+		if (pMode&MODE_TEXT)
+		{
+			lModeString += _T("t");
+		}
+		else
+		{
+			lModeString += _T("b");
+		}
+		mFile = FileOpen(pFileName, lModeString);
+	}
+
+	if (lOk)
 	{
 		mMode = pMode;
 
@@ -293,7 +294,7 @@ IOError DiskFile::ReadRaw(void* pBuffer, size_t pSize)
 		lError = IO_STREAM_NOT_OPEN;
 	}
 
-	if (lError == IO_OK && !(mMode&MODE_READ_ONLY))
+	if (lError == IO_OK && !(mMode&MODE_READ))
 	{
 		lError = IO_INVALID_OPERATION;
 	}
@@ -323,7 +324,7 @@ IOError DiskFile::WriteRaw(const void* pBuffer, size_t pSize)
 		lError = IO_STREAM_NOT_OPEN;
 	}
 
-	if (lError == IO_OK && !(mMode&(MODE_WRITE_ONLY|MODE_WRITE_APPEND)))
+	if (lError == IO_OK && !(mMode&(MODE_WRITE|MODE_WRITE_APPEND)))
 	{
 		lError = IO_INVALID_OPERATION;
 	}

@@ -29,6 +29,10 @@ namespace Life
 
 
 
+#define K(v)	GetVariableScope()->GetDefaultValue(Cure::RuntimeVariableScope::READ_ONLY, _T("Control.Key.") _T(v), -1)
+
+
+
 GameClientSlaveManager::GameClientSlaveManager(GameClientMasterTicker* pMaster, Cure::RuntimeVariableScope* pVariableScope,
 	Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager, int pSlaveIndex,
 	const Lepra::PixelRect& pRenderArea):
@@ -56,50 +60,50 @@ GameClientSlaveManager::GameClientSlaveManager(GameClientMasterTicker* pMaster, 
 	{
 		case 0:
 		{
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.ConsoleToggle", UiLepra::InputManager::IN_KBD_PARAGRAPH);
+			CURE_RTVAR_OVERRIDE(GetVariableScope(), "Control.Key.ConsoleToggle", UiLepra::InputManager::IN_KBD_PARAGRAPH);
 
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Forward",	UiLepra::InputManager::IN_KBD_W);
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Backward", UiLepra::InputManager::IN_KBD_S);
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Left", UiLepra::InputManager::IN_KBD_A);
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Right", UiLepra::InputManager::IN_KBD_D);
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Up", UiLepra::InputManager::IN_KBD_E);
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Down", UiLepra::InputManager::IN_KBD_Q);
+			CURE_RTVAR_OVERRIDE(GetVariableScope(), "Control.Key.Forward",	UiLepra::InputManager::IN_KBD_W);
+			CURE_RTVAR_OVERRIDE(GetVariableScope(), "Control.Key.Backward", UiLepra::InputManager::IN_KBD_S);
+			CURE_RTVAR_OVERRIDE(GetVariableScope(), "Control.Key.Left", UiLepra::InputManager::IN_KBD_A);
+			CURE_RTVAR_OVERRIDE(GetVariableScope(), "Control.Key.Right", UiLepra::InputManager::IN_KBD_D);
+			CURE_RTVAR_OVERRIDE(GetVariableScope(), "Control.Key.Up", UiLepra::InputManager::IN_KBD_E);
+			CURE_RTVAR_OVERRIDE(GetVariableScope(), "Control.Key.Down", UiLepra::InputManager::IN_KBD_Q);
 		}
 		break;
 		case 1:
 		{
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.ConsoleToggle", UiLepra::InputManager::IN_KBD_SCROLL_LOCK);
+			CURE_RTVAR_OVERRIDE(GetVariableScope(), "Control.Key.ConsoleToggle", UiLepra::InputManager::IN_KBD_SCROLL_LOCK);
 
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Forward", UiLepra::InputManager::IN_KBD_UP);
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Backward", UiLepra::InputManager::IN_KBD_DOWN);
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Left", UiLepra::InputManager::IN_KBD_LEFT);
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Right", UiLepra::InputManager::IN_KBD_RIGHT);
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Up", UiLepra::InputManager::IN_KBD_NUMPAD_1);
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Down", UiLepra::InputManager::IN_KBD_NUMPAD_0);
+			CURE_RTVAR_OVERRIDE(GetVariableScope(), "Control.Key.Forward", UiLepra::InputManager::IN_KBD_UP);
+			CURE_RTVAR_OVERRIDE(GetVariableScope(), "Control.Key.Backward", UiLepra::InputManager::IN_KBD_DOWN);
+			CURE_RTVAR_OVERRIDE(GetVariableScope(), "Control.Key.Left", UiLepra::InputManager::IN_KBD_LEFT);
+			CURE_RTVAR_OVERRIDE(GetVariableScope(), "Control.Key.Right", UiLepra::InputManager::IN_KBD_RIGHT);
+			CURE_RTVAR_OVERRIDE(GetVariableScope(), "Control.Key.Up", UiLepra::InputManager::IN_KBD_NUMPAD_1);
+			CURE_RTVAR_OVERRIDE(GetVariableScope(), "Control.Key.Down", UiLepra::InputManager::IN_KBD_NUMPAD_0);
 		}
 		break;
 		case 2:
 		{
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.ConsoleToggle", UiLepra::InputManager::IN_KBD_F12);
+			CURE_RTVAR_OVERRIDE(GetVariableScope(), "Control.Key.ConsoleToggle", UiLepra::InputManager::IN_KBD_F12);
 
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Forward", UiLepra::InputManager::IN_KBD_K);
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Backward", UiLepra::InputManager::IN_KBD_COMMA);
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Left", UiLepra::InputManager::IN_KBD_M);
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Right", UiLepra::InputManager::IN_KBD_DOT);
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Up", UiLepra::InputManager::IN_KBD_L);
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Down", UiLepra::InputManager::IN_KBD_J);
+			CURE_RTVAR_OVERRIDE(GetVariableScope(), "Control.Key.Forward", UiLepra::InputManager::IN_KBD_K);
+			CURE_RTVAR_OVERRIDE(GetVariableScope(), "Control.Key.Backward", UiLepra::InputManager::IN_KBD_COMMA);
+			CURE_RTVAR_OVERRIDE(GetVariableScope(), "Control.Key.Left", UiLepra::InputManager::IN_KBD_M);
+			CURE_RTVAR_OVERRIDE(GetVariableScope(), "Control.Key.Right", UiLepra::InputManager::IN_KBD_DOT);
+			CURE_RTVAR_OVERRIDE(GetVariableScope(), "Control.Key.Up", UiLepra::InputManager::IN_KBD_L);
+			CURE_RTVAR_OVERRIDE(GetVariableScope(), "Control.Key.Down", UiLepra::InputManager::IN_KBD_J);
 		}
 		break;
 		case 3:
 		{
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.ConsoleToggle", UiLepra::InputManager::IN_KBD_PAUSE);
+			CURE_RTVAR_OVERRIDE(GetVariableScope(), "Control.Key.ConsoleToggle", UiLepra::InputManager::IN_KBD_PAUSE);
 
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Forward", UiLepra::InputManager::IN_KBD_NUMPAD_8);
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Backward", UiLepra::InputManager::IN_KBD_NUMPAD_5);
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Left", UiLepra::InputManager::IN_KBD_NUMPAD_4);
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Right", UiLepra::InputManager::IN_KBD_NUMPAD_6);
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Up", UiLepra::InputManager::IN_KBD_NUMPAD_9);
-			CURE_RTVAR_SET(GetVariableScope(), "Control.Key.Down", UiLepra::InputManager::IN_KBD_NUMPAD_7);
+			CURE_RTVAR_OVERRIDE(GetVariableScope(), "Control.Key.Forward", UiLepra::InputManager::IN_KBD_NUMPAD_8);
+			CURE_RTVAR_OVERRIDE(GetVariableScope(), "Control.Key.Backward", UiLepra::InputManager::IN_KBD_NUMPAD_5);
+			CURE_RTVAR_OVERRIDE(GetVariableScope(), "Control.Key.Left", UiLepra::InputManager::IN_KBD_NUMPAD_4);
+			CURE_RTVAR_OVERRIDE(GetVariableScope(), "Control.Key.Right", UiLepra::InputManager::IN_KBD_NUMPAD_6);
+			CURE_RTVAR_OVERRIDE(GetVariableScope(), "Control.Key.Up", UiLepra::InputManager::IN_KBD_NUMPAD_9);
+			CURE_RTVAR_OVERRIDE(GetVariableScope(), "Control.Key.Down", UiLepra::InputManager::IN_KBD_NUMPAD_7);
 		}
 		break;
 	}
@@ -118,16 +122,16 @@ GameClientSlaveManager::~GameClientSlaveManager()
 
 	mMaster = 0;
 
-	GetConsoleManager()->ExecuteCommand(_T("save-application-config-file -no ")+GetApplicationCommandFilename());
-	GetConsoleManager()->ExecuteCommand(_T("save-system-config-file -no ")+GetSystemCommandFilename());
+	GetConsoleManager()->ExecuteCommand(_T("save-application-config-file ")+GetApplicationCommandFilename());
+	GetConsoleManager()->ExecuteCommand(_T("save-system-config-file ")+GetSystemCommandFilename());
 
 	GetConsoleManager()->Join();
 }
 
 void GameClientSlaveManager::LoadSettings()
 {
-	GetConsoleManager()->ExecuteCommand(_T("execute-file ")+GetSystemCommandFilename());
-	GetConsoleManager()->ExecuteCommand(_T("execute-file ")+GetApplicationCommandFilename());
+	GetConsoleManager()->ExecuteCommand(_T("execute-file -i ")+GetSystemCommandFilename());
+	GetConsoleManager()->ExecuteCommand(_T("execute-file -i ")+GetApplicationCommandFilename());
 }
 
 void GameClientSlaveManager::SetRenderArea(const Lepra::PixelRect& pRenderArea)
@@ -143,7 +147,7 @@ void GameClientSlaveManager::SetRenderArea(const Lepra::PixelRect& pRenderArea)
 	// Register a local FOV variable.
 	Cure::RuntimeVariableScope* lParent = GetVariableScope()->LockParentScope(0);
 	double lFov = 30+15*pRenderArea.GetWidth()/pRenderArea.GetHeight();
-	CURE_RTVAR_SET(GetVariableScope(), RTVAR_UI_3D_FOV, lFov);
+	CURE_RTVAR_OVERRIDE_INTERNAL(GetVariableScope(), RTVAR_UI_3D_FOV, lFov);
 	GetVariableScope()->LockParentScope(lParent);
 }
 
@@ -238,6 +242,8 @@ void GameClientSlaveManager::RequestLogin(const Lepra::String& pServerAddress, c
 
 	CloseLoginGui();
 
+	mConnectUserName = Lepra::UnicodeStringUtility::ToCurrentCode(pLoginToken.GetName());
+	mConnectServerAddress = pServerAddress;
 	mDisconnectReason = _T("Connect failed.");
 	mIsReset = false;
 	GetNetworkClient()->StartConnectLogin(pServerAddress, CURE_RTVAR_GET(GetVariableScope(), RTVAR_NETWORK_CONNECT_TIMEOUT, 3.0), pLoginToken);
@@ -268,8 +274,6 @@ bool GameClientSlaveManager::IsLoggingIn() const
 
 bool GameClientSlaveManager::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 {
-#define K(v)	GetVariableScope()->GetDefaultValue(_T("Control.Key.") _T(v), Cure::RuntimeVariableScope::READ_ONLY, -1)
-
 	if (pKeyCode == K("ConsoleToggle"))
 	{
 		ToggleConsole();
@@ -286,16 +290,11 @@ bool GameClientSlaveManager::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 		if (pKeyCode == K("Up"))		mMoveKeys |= 0x10;
 		if (pKeyCode == K("Down"))		mMoveKeys |= 0x20;
 	}
-
-#undef K
-
 	return (false);
 }
 
 bool GameClientSlaveManager::OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode)
 {
-#define K(v)	GetVariableScope()->GetDefaultValue(_T("Control.Key.") _T(v), Cure::RuntimeVariableScope::READ_ONLY, -1)
-
 	if (mAllowMovementInput)
 	{
 		// TODO: remove movement hack (movement should be ContextObject controlled)!
@@ -306,9 +305,6 @@ bool GameClientSlaveManager::OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode)
 		if (pKeyCode == K("Up"))		mMoveKeys &= ~0x10;
 		if (pKeyCode == K("Down"))		mMoveKeys &= ~0x20;
 	}
-
-#undef K
-
 	return (false);
 }
 
@@ -540,7 +536,7 @@ void GameClientSlaveManager::TickNetworkInput()
 
 bool GameClientSlaveManager::TickNetworkOutput()
 {
-	CURE_RTVAR_SET(GetVariableScope(), "Debug.Net.SentPosition", false);
+	CURE_RTVAR_OVERRIDE_INTERNAL(GetVariableScope(), "Debug.Net.SentPosition", false);
 
 	bool lSendOk = true;
 	if (GetNetworkClient()->GetSocket())
@@ -575,7 +571,7 @@ bool GameClientSlaveManager::TickNetworkOutput()
 				if (lForceSendUnsafeClientKeepalive ||
 					lPositionalData->GetScaledDifference(&mNetworkOutputGhost) > CURE_RTVAR_GET(GetVariableScope(), RTVAR_NETPHYS_RESYNCONDIFFGT, 100.0))
 				{
-					CURE_RTVAR_SET(GetVariableScope(), "Debug.Net.SentPosition", true);
+					CURE_RTVAR_OVERRIDE_INTERNAL(GetVariableScope(), "Debug.Net.SentPosition", true);
 					mNetworkOutputGhost.CopyData(lPositionalData);
 					lSendOk = GetNetworkAgent()->SendObjectFullPosition(GetNetworkClient()->GetSocket(),
 						lObject->GetInstanceId(), GetTimeManager()->GetCurrentPhysicsFrame(), mNetworkOutputGhost);
@@ -658,6 +654,9 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 			{
 				GetNetworkClient()->SetLoginAccountId(lMessageStatus->GetInteger());
 				mDisconnectReason.clear();
+				// A successful login: lets store these parameters for next time!
+				CURE_RTVAR_OVERRIDE(GetVariableScope(), "Login.UserName", mConnectUserName);
+				CURE_RTVAR_OVERRIDE(GetVariableScope(), "Login.DefaultServer", mConnectServerAddress);
 			}
 			else
 			{

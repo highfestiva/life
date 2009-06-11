@@ -55,7 +55,7 @@ protected:
 	Lepra::ConsolePrompt* GetConsolePrompt() const;
 	Lepra::ConsoleCommandManager* GetConsoleCommandManager() const;
 
-	RuntimeVariableScope* GetVariableScope();
+	RuntimeVariableScope* GetVariableScope() const;
 
 private:
 	void AddCommands();

@@ -40,7 +40,7 @@ TgaLoader::Status TgaLoader::Save(const String& pFileName, const Canvas& pCanvas
 {
 	Status lStatus = STATUS_SUCCESS;
 	DiskFile lFile;
-	if (lFile.Open(pFileName, DiskFile::MODE_WRITE_ONLY) == false)
+	if (lFile.Open(pFileName, DiskFile::MODE_WRITE) == false)
 	{
 		lStatus = STATUS_OPEN_ERROR;
 	}

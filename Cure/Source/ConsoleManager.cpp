@@ -177,7 +177,7 @@ Lepra::ConsoleCommandManager* ConsoleManager::GetConsoleCommandManager() const
 
 
 
-RuntimeVariableScope* ConsoleManager::GetVariableScope()
+RuntimeVariableScope* ConsoleManager::GetVariableScope() const
 {
 	return (mVariableScope);
 }

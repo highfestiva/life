@@ -29,7 +29,7 @@ public:
 	typedef std::vector<_String> StringVector;
 	static StringVector Split(const _String& pString, const _String& pCharDelimitors, int pSplitMaxCount = 10000);
 	// Splits strings, but also keeps track of quotes. Strings within quotes are left untouched from the delimitors.
-	static StringVector BlockSplit(const _String& pString, const _String& pCharDelimitors, bool pKeepQuotes, int pSplitMaxCount = 10000);
+	static StringVector BlockSplit(const _String& pString, const _String& pCharDelimitors, bool pKeepQuotes, bool pIsCString, int pSplitMaxCount = 10000);
 	static _String Join(const StringVector& pStringVector, const _String& pJoinString, size_t pStartIndex = 0, size_t pEndIndex = _String::npos);
 
 	static _String StringToCString(const _String& pString);

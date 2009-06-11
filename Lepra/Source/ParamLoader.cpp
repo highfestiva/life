@@ -51,7 +51,7 @@ void ParamLoader::LoadOneExpression(Reader& pReader, Params& pParams)
 void ParamLoader::Load(const String& pFileName, Params& pParams)
 {
 	DiskFile lFile;
-	if (lFile.Open(pFileName, DiskFile::MODE_READ_ONLY) == true)
+	if (lFile.Open(pFileName, DiskFile::MODE_READ) == true)
 	{
 		Load(lFile, pParams);
 		lFile.Close();
@@ -61,7 +61,7 @@ void ParamLoader::Load(const String& pFileName, Params& pParams)
 void ParamLoader::Save(const String& pFileName, Params& pParams)
 {
 	DiskFile lFile;
-	if (lFile.Open(pFileName, DiskFile::MODE_WRITE_ONLY) == true)
+	if (lFile.Open(pFileName, DiskFile::MODE_WRITE) == true)
 	{
 		Save(lFile, pParams);
 		lFile.Close();
@@ -117,27 +117,27 @@ void ParamLoader::Save(Writer& pWriter, Params& pParams, int pTabs, bool pSkipFi
 			switch(lSubType)
 			{
 			case Params::ST_INT8:
-				pWriter.WriteLine(_T("int8 "));
-				pWriter.WriteLine(lVarName);
-				pWriter.WriteLine(StringUtility::Format(_T("[%i] =\r\n"), lCount));
+				pWriter.WriteString(_T("int8 "));
+				pWriter.WriteString(lVarName);
+				pWriter.WriteString(StringUtility::Format(_T("[%i] =\r\n"), lCount));
 				lBinary = true;
 				break;
 			case Params::ST_INT16:
-				pWriter.WriteLine(_T("int16 "));
-				pWriter.WriteLine(lVarName);
-				pWriter.WriteLine(StringUtility::Format(_T("[%i] =\r\n"), lCount));
+				pWriter.WriteString(_T("int16 "));
+				pWriter.WriteString(lVarName);
+				pWriter.WriteString(StringUtility::Format(_T("[%i] =\r\n"), lCount));
 				lBinary = true;
 				break;
 			case Params::ST_INT32:
-				pWriter.WriteLine(_T("int "));
-				pWriter.WriteLine(lVarName);
-				pWriter.WriteLine(StringUtility::Format(_T("[%i] =\r\n"), lCount));
+				pWriter.WriteString(_T("int "));
+				pWriter.WriteString(lVarName);
+				pWriter.WriteString(StringUtility::Format(_T("[%i] =\r\n"), lCount));
 				lBinary = true;
 				break;
 			case Params::ST_INT:
 			default:
-				pWriter.WriteLine(_T("int "));
-				pWriter.WriteLine(lVarName);
+				pWriter.WriteString(_T("int "));
+				pWriter.WriteString(lVarName);
 				break;
 			}
 			break;
@@ -145,31 +145,31 @@ void ParamLoader::Save(Writer& pWriter, Params& pParams, int pTabs, bool pSkipFi
 			switch(lSubType)
 			{
 			case Params::ST_FLOAT32:
-				pWriter.WriteLine(_T("float32 "));
-				pWriter.WriteLine(lVarName);
-				pWriter.WriteLine(StringUtility::Format(_T("[%i] =\r\n"), lCount));
+				pWriter.WriteString(_T("float32 "));
+				pWriter.WriteString(lVarName);
+				pWriter.WriteString(StringUtility::Format(_T("[%i] =\r\n"), lCount));
 				lBinary = true;
 				break;
 			case Params::ST_FLOAT64:
-				pWriter.WriteLine(_T("float64 "));
-				pWriter.WriteLine(lVarName);
-				pWriter.WriteLine(StringUtility::Format(_T("[%i] =\r\n"), lCount));
+				pWriter.WriteString(_T("float64 "));
+				pWriter.WriteString(lVarName);
+				pWriter.WriteString(StringUtility::Format(_T("[%i] =\r\n"), lCount));
 				lBinary = true;
 				break;
 			case Params::ST_FLOAT:
 			default:
-				pWriter.WriteLine(_T("float "));
-				pWriter.WriteLine(lVarName);
+				pWriter.WriteString(_T("float "));
+				pWriter.WriteString(lVarName);
 				break;
 			}
 			break;
 		case Params::VT_STRING:
-			pWriter.WriteLine(_T("string "));
-			pWriter.WriteLine(lVarName);
+			pWriter.WriteString(_T("string "));
+			pWriter.WriteString(lVarName);
 			break;
 		case Params::VT_STRUCT:
-			pWriter.WriteLine(_T("struct "));
-			pWriter.WriteLine(lVarName);
+			pWriter.WriteString(_T("struct "));
+			pWriter.WriteString(lVarName);
 			break;
 		}
 
@@ -234,35 +234,35 @@ void ParamLoader::Save(Writer& pWriter, Params& pParams, int pTabs, bool pSkipFi
 				case Params::VT_INT:
 					{
 						String lString = StringUtility::Format(_T(" = %i"), pParams.GetIntValue(lVarName, 0));
-						pWriter.WriteLine(lString);
+						pWriter.WriteString(lString);
 					}
 					break;
 				case Params::VT_FLOAT:
 					{
 						String lString = StringUtility::Format(_T(" = %f"), pParams.GetFloatValue(lVarName, 0));
-						pWriter.WriteLine(lString);
+						pWriter.WriteString(lString);
 					}
 					break;
 				case Params::VT_STRING:
-					pWriter.WriteLine(_T(" = \""));
-					pWriter.WriteLine(pParams.GetStringValue(lVarName, 0));
-					pWriter.WriteLine(_T("\""));
+					pWriter.WriteString(_T(" = \""));
+					pWriter.WriteString(pParams.GetStringValue(lVarName, 0));
+					pWriter.WriteString(_T("\""));
 					break;
 				case Params::VT_STRUCT:
-					pWriter.WriteLine(_T("\r\n"));
+					pWriter.WriteString(_T("\r\n"));
 					for (i = 0; i < pTabs; i++)
 					{
-						pWriter.WriteLine(_T("\t"));
+						pWriter.WriteString(_T("\t"));
 					}
-					pWriter.WriteLine(_T("{\r\n"));
+					pWriter.WriteString(_T("{\r\n"));
 
 					Save(pWriter, *pParams.GetStruct(lVarName, 0), pTabs + 1);
 
 					for (i = 0; i < pTabs; i++)
 					{
-						pWriter.WriteLine(_T("\t"));
+						pWriter.WriteString(_T("\t"));
 					}
-					pWriter.WriteLine(_T("}\r\n"));
+					pWriter.WriteString(_T("}\r\n"));
 					break;
 				};
 			}
@@ -272,11 +272,11 @@ void ParamLoader::Save(Writer& pWriter, Params& pParams, int pTabs, bool pSkipFi
 				{
 				case Params::VT_INT:
 				case Params::VT_FLOAT:
-					pWriter.WriteLine(_T(" = ["));
+					pWriter.WriteString(_T(" = ["));
 					break;
 				case Params::VT_STRING:
 				case Params::VT_STRUCT:
-					pWriter.WriteLine(_T(" = [\r\n"));
+					pWriter.WriteString(_T(" = [\r\n"));
 					break;
 				}
 
@@ -288,71 +288,71 @@ void ParamLoader::Save(Writer& pWriter, Params& pParams, int pTabs, bool pSkipFi
 					case Params::VT_INT:
 						{
 							String lString = StringUtility::Format(_T("%i"), pParams.GetIntValue(lVarName, i));
-							pWriter.WriteLine(lString);
+							pWriter.WriteString(lString);
 							if (i != (lCount - 1))
 							{
-								pWriter.WriteLine(_T(", "));
+								pWriter.WriteString(_T(", "));
 							}
 							else
 							{
-								pWriter.WriteLine(_T("]\r\n"));
+								pWriter.WriteString(_T("]\r\n"));
 							}
 						}
 						break;
 					case Params::VT_FLOAT:
 						{
 							String lString = StringUtility::Format(_T("%f"), pParams.GetFloatValue(lVarName, i));
-							pWriter.WriteLine(lString);
+							pWriter.WriteString(lString);
 							if (i != (lCount - 1))
 							{
-								pWriter.WriteLine(_T(", "));
+								pWriter.WriteString(_T(", "));
 							}
 							else
 							{
-								pWriter.WriteLine(_T("]\r\n"));
+								pWriter.WriteString(_T("]\r\n"));
 							}
 						}
 						break;
 					case Params::VT_STRING:
 						for (j = 0; j < pTabs; j++)
 						{
-							pWriter.WriteLine(_T("\t"));
+							pWriter.WriteString(_T("\t"));
 						}
-						pWriter.WriteLine(_T("\""));
-						pWriter.WriteLine(pParams.GetStringValue(lVarName, i));
-						pWriter.WriteLine(_T("\""));
+						pWriter.WriteString(_T("\""));
+						pWriter.WriteString(pParams.GetStringValue(lVarName, i));
+						pWriter.WriteString(_T("\""));
 						if (i != (lCount - 1))
 						{
-							pWriter.WriteLine(_T(",\r\n"));
+							pWriter.WriteString(_T(",\r\n"));
 						}
 						else
 						{
-							pWriter.WriteLine(_T("\r\n"));
+							pWriter.WriteString(_T("\r\n"));
 							for (j = 0; j < pTabs; j++)
 							{
-								pWriter.WriteLine(_T("\t"));
+								pWriter.WriteString(_T("\t"));
 							}
-							pWriter.WriteLine(_T("]\r\n"));
+							pWriter.WriteString(_T("]\r\n"));
 						}
 						break;
 					case Params::VT_STRUCT:
 						for (j = 0; j < pTabs; j++)
 						{
-							pWriter.WriteLine(_T("\t"));
+							pWriter.WriteString(_T("\t"));
 						}
-						pWriter.WriteLine(_T("{\t"));
+						pWriter.WriteString(_T("{\t"));
 						Save(pWriter, *pParams.GetStruct(lVarName, i), pTabs + 1, true);
 						for (j = 0; j < pTabs; j++)
 						{
-							pWriter.WriteLine(_T("\t"));
+							pWriter.WriteString(_T("\t"));
 						}
 						if (i != (lCount - 1))
 						{
-							pWriter.WriteLine(_T("},\r\n"));
+							pWriter.WriteString(_T("},\r\n"));
 						}
 						else
 						{
-							pWriter.WriteLine(_T("}]\r\n\r\n"));
+							pWriter.WriteString(_T("}]\r\n\r\n"));
 						}
 						break;
 					};
@@ -360,7 +360,7 @@ void ParamLoader::Save(Writer& pWriter, Params& pParams, int pTabs, bool pSkipFi
 			}
 		}
 
-		pWriter.WriteLine(_T("\r\n"));
+		pWriter.WriteString(_T("\r\n"));
 		lContinue = pParams.GetNextVariable(lVarName, lType, lCount, &lSubType);
 	}
 }

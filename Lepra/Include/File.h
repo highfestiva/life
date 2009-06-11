@@ -56,7 +56,7 @@ public:
 	int64 ReadString(String& pString);
 
 	// Writes the entire string, including the terminating null-character.
-	bool WriteString(const String& pString);
+	bool WriteStringZero(const String& pString);
 
 	virtual void Flush() = 0;
 

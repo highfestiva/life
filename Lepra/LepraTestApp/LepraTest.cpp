@@ -149,6 +149,26 @@ bool TestString(const Lepra::LogDecorator& pAccount)
 		assert(lTestOk);
 	}
 
+	if (lTestOk)
+	{
+		lContext = _T("string -> C string");
+		lTestOk = (Lepra::StringUtility::StringToCString(_T("Hej\"\\\n'!#\r\t")) == _T("Hej\\\"\\\\\\n'!#\\r\\t"));
+		assert(lTestOk);
+	}
+
+	if (lTestOk)
+	{
+		lContext = _T("C string -> string");
+		Lepra::String lValue;
+		lTestOk = Lepra::StringUtility::CStringToString(_T("Hej\\\"\\\\\\n'!#\\r\\t"), lValue);
+		assert(lTestOk);
+		if (lTestOk)
+		{
+			lTestOk = (lValue == _T("Hej\"\\\n'!#\r\t"));
+			assert(lTestOk);
+		}
+	}
+
 	Lepra::StringUtility::StringVector lTestWords;
 	if (lTestOk)
 	{
@@ -179,7 +199,7 @@ bool TestString(const Lepra::LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = _T("block string splitting 1");
-		Lepra::StringUtility::StringVector lWords = Lepra::StringUtility::BlockSplit(_T("\"Hej du glade\" sade jag  \ttill\n\n\r\vhonom igen."), _T(" \t\v\r\n"), false, 4);
+		Lepra::StringUtility::StringVector lWords = Lepra::StringUtility::BlockSplit(_T("\"Hej du glade\" sade jag  \ttill\n\n\r\vhonom igen."), _T(" \t\v\r\n"), false, false, 4);
 		size_t lPhraseCount = lWords.size();
 		const Lepra::String& lWord0 = lWords[0];
 		const Lepra::String& lWord1 = lWords[1];
@@ -194,9 +214,17 @@ bool TestString(const Lepra::LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = _T("block string splitting 2");
-		Lepra::StringUtility::StringVector lWords = Lepra::StringUtility::BlockSplit(_T("\"Hej du glade \" sade jag  \t\"till\n\"\n\r\vhan..\nhonom igen."), _T(" \t\v\r\n"), true, 4);
+		Lepra::StringUtility::StringVector lWords = Lepra::StringUtility::BlockSplit(_T("\"Hej du glade \" sade jag  \t\"till\n\"\n\r\vhan..\nhonom igen."), _T(" \t\v\r\n"), true, false, 4);
 		lTestOk = (lWords.size() == 5 && lWords[0] == _T("\"Hej du glade \"") && lWords[1] == _T("sade") &&
 			lWords[2] == _T("jag") && lWords[3] == _T("\"till\n\"") && lWords[4] == _T("\n\r\vhan..\nhonom igen."));
+		assert(lTestOk);
+	}
+
+	if (lTestOk)
+	{
+		lContext = _T("block string splitting 3");
+		Lepra::StringUtility::StringVector lWords = Lepra::StringUtility::BlockSplit(_T("\"a\\\"b\""), _T(" \t\v\r\n\""), false, true, 4);
+		lTestOk = (lWords.size() == 1 && lWords[0] == _T("a\\\"b"));
 		assert(lTestOk);
 	}
 

@@ -60,9 +60,7 @@ void ClientLoginView::OnExit()
 void ClientLoginView::OnLogin(UiTbc::Button*)
 {
 	// Save user's login info.
-	CURE_RTVAR_SET(mLoginObserver->GetVariableScope(), "Login.UserName", ((UiTbc::TextField*)GetChild(_T("User"), 0))->GetText());
 	Lepra::String lServer = ((UiTbc::TextField*)GetChild(_T("Server"), 0))->GetText();
-	CURE_RTVAR_SET(mLoginObserver->GetVariableScope(), "Login.DefaultServer", lServer);
 
 	// Pick strings from UI.
 	Lepra::UnicodeString lUsername = Lepra::UnicodeStringUtility::ToOwnCode(((UiTbc::TextField*)GetChild(_T("User"), 0))->GetText());

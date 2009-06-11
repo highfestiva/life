@@ -330,7 +330,7 @@ bool MemFileLogListener::Dump(File& pFile)
 		lStatus = mFile.ReadLine(lLine);
 		if (lStatus == IO_OK || lStatus == IO_BUFFER_UNDERFLOW)
 		{
-			IOError lWriteStatus = pFile.WriteLine(_T("  >>  ")+lLine+_T("\n"));
+			IOError lWriteStatus = pFile.WriteString(_T("  >>  ")+lLine+_T("\n"));
 			if (lWriteStatus != IO_OK)
 			{
 				lStatus = (lWriteStatus == IO_BUFFER_UNDERFLOW)? IO_ERROR_WRITING_TO_STREAM : lWriteStatus;

@@ -67,13 +67,14 @@ protected:
 	int TranslateCommand(const Lepra::String& pCommand) const;
 	int OnCommand(const Lepra::String& pCommand, const Lepra::StringUtility::StringVector& pParameterVector);
 
-	virtual bool SaveApplicationConfigFile(Lepra::File* pFile);
+	virtual bool SaveApplicationConfigFile(Lepra::File* pFile, const Lepra::String& pUserConfig);
 
 	Cure::GameManager* mGameManager;
 
 private:
-	bool SaveSystemConfigFile(Lepra::File* pFile);
-	bool SaveConfigFile(Lepra::File* pFile, std::list<Lepra::String>& pVariableList);
+	Lepra::String LoadUserConfig(Lepra::File* pFile);
+	bool SaveSystemConfigFile(Lepra::File* pFile, const Lepra::String& pUserConfig);
+	bool SaveConfigFile(Lepra::File* pFile, std::list<Lepra::String>& pVariableList, const Lepra::String& pUserConfig);
 
 	static const CommandPair mCommandIdList[];
 	typedef std::hash_map<Lepra::String, Lepra::String> AliasMap;

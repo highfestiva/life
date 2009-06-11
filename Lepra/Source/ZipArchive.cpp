@@ -206,7 +206,7 @@ bool ZipArchive::FileOpen(const String& pFileName)
 				if (lOK)
 				{
 					lTempName = DiskFile::GenerateUniqueFileName(lDirectory);
-					lOK = mOutFile.Open(lTempName, DiskFile::MODE_WRITE_ONLY);
+					lOK = mOutFile.Open(lTempName, DiskFile::MODE_WRITE);
 
 					if (lOK == false)
 					{
@@ -248,7 +248,7 @@ void ZipArchive::FileClose()
 					String lTempFile = mOutFile.GetFullName();
 					int64 lSize = mOutFile.GetSize();
 					mOutFile.Close();
-					if (mOutFile.Open(lTempFile, DiskFile::MODE_READ_ONLY) == false)
+					if (mOutFile.Open(lTempFile, DiskFile::MODE_READ) == false)
 					{
 						mLog.AError("Failed to add file to archive.");
 					}
@@ -432,7 +432,7 @@ bool ZipArchive::ExtractFile(const String& pFileName,
 	if (lOK == true)
 	{
 		DiskFile lFile;
-		if (lFile.Open(pDestFileName, DiskFile::MODE_WRITE_ONLY) == true)
+		if (lFile.Open(pDestFileName, DiskFile::MODE_WRITE) == true)
 		{
 			int lBufferSize = (int)pBufferSize * (int)pUnit;
 			int64 lDataSize = FileSize();

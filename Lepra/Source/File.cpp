@@ -92,7 +92,7 @@ int64 File::ReadString(String& pString)
 	return pString.length();
 }
 
-bool File::WriteString(const String& pString)
+bool File::WriteStringZero(const String& pString)
 {
 	if (GetMode(WRITE_MODE) == false)
 		return false;

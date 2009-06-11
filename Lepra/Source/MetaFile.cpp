@@ -391,17 +391,17 @@ void MetaFile::AllocArchiveFile(const String& pArchiveName)
 
 DiskFile::OpenMode MetaFile::ToDiskFileMode(OpenMode pMode)
 {
-	DiskFile::OpenMode lMode = DiskFile::MODE_READ_ONLY;
+	DiskFile::OpenMode lMode = DiskFile::MODE_READ;
 	switch (pMode)
 	{
 		case READ_ONLY:
 		{
-			lMode = DiskFile::MODE_READ_ONLY;
+			lMode = DiskFile::MODE_READ;
 			break;
 		}
 		case WRITE_ONLY:
 		{
-			lMode = DiskFile::MODE_WRITE_ONLY;
+			lMode = DiskFile::MODE_WRITE;
 			break;
 		}
 		case WRITE_APPEND:

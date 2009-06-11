@@ -171,12 +171,12 @@ void ClientConsoleManager::Tick()
 
 
 
-bool ClientConsoleManager::SaveApplicationConfigFile(Lepra::File* pFile)
+bool ClientConsoleManager::SaveApplicationConfigFile(Lepra::File* pFile, const Lepra::String& pUserConfig)
 {
-	bool lOk = Parent::SaveApplicationConfigFile(pFile);
-	if (lOk)
+	bool lOk = Parent::SaveApplicationConfigFile(pFile, pUserConfig);
+	if (lOk && pUserConfig.empty())
 	{
-		pFile->WriteLine(_T("//push \"start-login server:port username password\"\n"));
+		pFile->WriteString(_T("//push \"start-login server:port username password\"\n"));
 		lOk = true;	// TODO: check if all writes went well.
 	}
 	return (lOk);

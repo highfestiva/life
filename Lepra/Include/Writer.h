@@ -57,8 +57,8 @@ public:
 
 	virtual IOError WriteData(const void* pBuffer, size_t pSize);
 
-	// Writes the string, but not the null-character. Doesn't append '\n'.
-	inline IOError WriteLine(const String& pString);
+	// Writes the length of the string (excluding the implicit null-character).
+	inline IOError WriteString(const String& pString);
 
 	inline void SetWriterEndian(Endian::EndianType pWriterEndian);
 	inline Endian::EndianType GetWriterEndian() const;
@@ -142,7 +142,7 @@ IOError Writer::Write(const float64& pData)
 	return WriteData(&lData, sizeof(float64));
 }
 
-IOError Writer::WriteLine(const String& pString)
+IOError Writer::WriteString(const String& pString)
 {
 	return (WriteData(pString.c_str(), (unsigned)pString.length()*sizeof(tchar)));
 }

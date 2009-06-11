@@ -12,6 +12,10 @@
 
 
 
+#define USER_SECTION_MARK "//!MARK!//"
+
+
+
 namespace Life
 {
 
@@ -308,7 +312,7 @@ int ConsoleManager::OnCommand(const Lepra::String& pCommand, const Lepra::String
 		{
 			if (pParameterVector.size() == 1)
 			{
-				Lepra::String lValue = GetVariableScope()->GetDefaultValue(pParameterVector[0], Cure::RuntimeVariableScope::READ_ONLY);
+				Lepra::String lValue = GetVariableScope()->GetDefaultValue(Cure::RuntimeVariableScope::READ_ONLY, pParameterVector[0]);
 				if (ExecuteCommand(lValue) == 0)
 				{
 					mLog.Infof(_T("Variable %s executed OK."), pParameterVector[0].c_str());
@@ -329,10 +333,17 @@ int ConsoleManager::OnCommand(const Lepra::String& pCommand, const Lepra::String
 		break;
 		case COMMAND_EXECUTE_FILE:
 		{
-			if (pParameterVector.size() == 1)
+			size_t lFilenameIndex = 0;
+			bool lIgnoreIfMissing = false;
+			if (pParameterVector[0] == _T("-i"))
+			{
+				lIgnoreIfMissing = true;
+				++lFilenameIndex;
+			}
+			if (lFilenameIndex < pParameterVector.size())
 			{
 				Lepra::DiskFile lFile;
-				if (lFile.Open(pParameterVector[0], Lepra::DiskFile::MODE_TEXT_READ_ONLY))
+				if (lFile.Open(pParameterVector[lFilenameIndex], Lepra::DiskFile::MODE_TEXT_READ))
 				{
 					Lepra::String lLine;
 					int lLineNumber = 1;
@@ -350,7 +361,7 @@ int ConsoleManager::OnCommand(const Lepra::String& pCommand, const Lepra::String
 						lResult += 100;
 					}
 				}
-				else
+				else if (!lIgnoreIfMissing)
 				{
 					mLog.Errorf(_T("File %s did not open for reading."), pParameterVector[0].c_str());
 					lResult = 2;
@@ -358,8 +369,9 @@ int ConsoleManager::OnCommand(const Lepra::String& pCommand, const Lepra::String
 			}
 			else
 			{
-				mLog.Warningf(_T("usage: %s <file_name>"), pCommand.c_str());
+				mLog.Warningf(_T("usage: %s [-i] <file_name>"), pCommand.c_str());
 				mLog.AWarning("Executes contents of <file_name>.");
+				mLog.AWarning("  -i   Ignores non-existing shell file.");
 				lResult = 1;
 			}
 		}
@@ -416,29 +428,34 @@ int ConsoleManager::OnCommand(const Lepra::String& pCommand, const Lepra::String
 			bool lUsage = false;
 			if (pParameterVector.size() == 1 || pParameterVector.size() == 2)
 			{
-				bool lNoOverwrite = false;
 				size_t lFilenameIndex = 0;
-				if (pParameterVector[0] == _T("-no"))
+				bool lIgnoreIfExists = false;
+				if (pParameterVector[0] == _T("-i"))
 				{
-					lNoOverwrite = true;
+					lIgnoreIfExists = true;
 					++lFilenameIndex;
 				}
-				if (lFilenameIndex <  pParameterVector.size())
+				if (lFilenameIndex < pParameterVector.size())
 				{
 					Lepra::String lFilename = pParameterVector[lFilenameIndex];
-					if (!lNoOverwrite || !Lepra::DiskFile::Exists(lFilename))
+					if (!lIgnoreIfExists || !Lepra::DiskFile::Exists(lFilename))
 					{
+						Lepra::String lUserConfig;
 						Lepra::DiskFile lFile;
-						if (lFile.Open(lFilename, Lepra::DiskFile::MODE_TEXT_WRITE_ONLY))
+						if (lFile.Open(lFilename, Lepra::DiskFile::MODE_TEXT_READ))
+						{
+							lUserConfig = LoadUserConfig(&lFile);
+						}
+						if (lFile.Open(lFilename, Lepra::DiskFile::MODE_TEXT_WRITE))
 						{
 							bool lSaveResult;
 							if (lCommand == COMMAND_SAVE_SYSTEM_CONFIG_FILE)
 							{
-								lSaveResult = SaveSystemConfigFile(&lFile);
+								lSaveResult = SaveSystemConfigFile(&lFile, lUserConfig);
 							}
 							else
 							{
-								lSaveResult = SaveApplicationConfigFile(&lFile);
+								lSaveResult = SaveApplicationConfigFile(&lFile, lUserConfig);
 							}
 							if (lSaveResult)
 							{
@@ -472,9 +489,9 @@ int ConsoleManager::OnCommand(const Lepra::String& pCommand, const Lepra::String
 			}
 			if (lUsage)
 			{
-				mLog.Warningf(_T("usage: %s [<-no>] <file_name>"), pCommand.c_str());
+				mLog.Warningf(_T("usage: %s [<-i>] <file_name>"), pCommand.c_str());
 				mLog.AWarning("Saves settings to <file_name>.");
-				mLog.AWarning("  -no   No Overwrite in case of already existing file.");
+				mLog.AWarning("  -i   Skips overwriting in case of already existing file.");
 				lResult = 1;
 			}
 		}
@@ -488,7 +505,7 @@ int ConsoleManager::OnCommand(const Lepra::String& pCommand, const Lepra::String
 				{
 					if (GetVariableScope()->IsDefined(lVariable))
 					{
-						Lepra::String lValue = GetVariableScope()->GetDefaultValue(lVariable, Cure::RuntimeVariableScope::READ_ONLY);
+						Lepra::String lValue = GetVariableScope()->GetDefaultValue(Cure::RuntimeVariableScope::READ_ONLY, lVariable);
 						lValue = Lepra::StringUtility::StringToCString(lValue);
 						mLog.Infof(_T("%s"), lValue.c_str());
 					}
@@ -502,9 +519,9 @@ int ConsoleManager::OnCommand(const Lepra::String& pCommand, const Lepra::String
 				{
 					Lepra::String lValue;
 					Lepra::StringUtility::CStringToString(pParameterVector[0], lValue);
-					if (GetVariableScope()->SetValue(lVariable, lValue))
+					if (GetVariableScope()->SetValue(Cure::RuntimeVariableScope::SET_OVERWRITE, lVariable, lValue))
 					{
-						Lepra::String lValue = GetVariableScope()->GetDefaultValue(lVariable, Cure::RuntimeVariableScope::READ_ONLY);
+						Lepra::String lValue = GetVariableScope()->GetDefaultValue(Cure::RuntimeVariableScope::READ_ONLY, lVariable);
 						lValue = Lepra::StringUtility::StringToCString(lValue);
 						mLog.Infof(_T("%s <- %s"), lVariable.c_str(), lValue.c_str());
 					}
@@ -532,25 +549,47 @@ int ConsoleManager::OnCommand(const Lepra::String& pCommand, const Lepra::String
 
 
 
-bool ConsoleManager::SaveApplicationConfigFile(Lepra::File* pFile)
+bool ConsoleManager::SaveApplicationConfigFile(Lepra::File* pFile, const Lepra::String& pUserConfig)
 {
-	pFile->WriteLine(_T("// Autogenerated application command batch/configuration file.\n"));
-	std::list<Lepra::String> lVariableList = GetVariableScope()->GetVariableNameList(1);
-	bool lSaved = SaveConfigFile(pFile, lVariableList);
-	pFile->WriteLine(_T("push \"echo 4 Welcome ")+Lepra::SystemManager::QueryFullUserName()+_T("!\"\n"));
+	pFile->WriteString(_T("// Generated application shell script section.\n"));
+	std::list<Lepra::String> lVariableList = GetVariableScope()->GetVariableNameList(0, 0);
+	bool lSaved = SaveConfigFile(pFile, lVariableList, pUserConfig);
+	if (pUserConfig.empty())
+	{
+		pFile->WriteString(_T("\npush \"echo 4 Welcome ")+Lepra::SystemManager::QueryFullUserName()+_T("!\"\n"));
+	}
 	return (lSaved);
 }
 
-bool ConsoleManager::SaveSystemConfigFile(Lepra::File* pFile)
+Lepra::String ConsoleManager::LoadUserConfig(Lepra::File* pFile)
 {
-	pFile->WriteLine(_T("// Autogenerated system command batch/configuration file.\n"));
-	std::list<Lepra::String> lVariableList = GetVariableScope()->GetVariableNameList();
-	return (SaveConfigFile(pFile, lVariableList));
+	Lepra::String lUserConfig;
+	Lepra::String lLine;
+	for (bool lInUserConfig = false; pFile->ReadLine(lLine) == Lepra::IO_OK; )
+	{
+		if (lInUserConfig)
+		{
+			lUserConfig += lLine+_T("\n");
+		}
+		else if (lLine.find(_T(USER_SECTION_MARK)) != Lepra::String::npos)
+		{
+			lInUserConfig = true;
+		}
+	}
+	return (lUserConfig);
 }
 
-bool ConsoleManager::SaveConfigFile(Lepra::File* pFile, std::list<Lepra::String>& pVariableList)
+bool ConsoleManager::SaveSystemConfigFile(Lepra::File* pFile, const Lepra::String& pUserConfig)
 {
-	pFile->WriteLine(_T("set-stdout-log-level 4\t// 4\n"));
+	pFile->WriteString(_T("// Generated system shell script section.\n"));
+	std::list<Lepra::String> lVariableList = GetVariableScope()->GetVariableNameList(1);
+	return (SaveConfigFile(pFile, lVariableList, pUserConfig));
+}
+
+bool ConsoleManager::SaveConfigFile(Lepra::File* pFile, std::list<Lepra::String>& pVariableList, const Lepra::String& pUserConfig)
+{
+	pFile->WriteString(_T("// Only change variable values below - use user section for all else.\n"));
+	pFile->WriteString(_T("set-stdout-log-level 4\n"));
 
 	pVariableList.sort();
 	Lepra::String lLastGroup;
@@ -562,24 +601,27 @@ bool ConsoleManager::SaveConfigFile(Lepra::File* pFile, std::list<Lepra::String>
 		const Lepra::String lGroup = Lepra::StringUtility::Split(lVariable, lGroupDelimitors, 1)[0];
 		if (lLastGroup != lGroup)
 		{
-			pFile->WriteLine(_T("\n"));
+			pFile->WriteString(_T("\n"));
 			lLastGroup = lGroup;
 		}
-		Lepra::String lValue = GetVariableScope()->GetDefaultValue(lVariable, Cure::RuntimeVariableScope::READ_ONLY);
+		Lepra::String lValue = GetVariableScope()->GetDefaultValue(Cure::RuntimeVariableScope::READ_ONLY, lVariable);
 		lValue = Lepra::StringUtility::StringToCString(lValue);
 		if (GetVariableScope()->GetType(lValue) == _T("string"))
 		{
 			lValue = _T('"')+lValue+_T('"');
 		}
-		Lepra::String lDefaultValue = GetVariableScope()->GetDefaultValue(lVariable, Cure::RuntimeVariableScope::READ_DEFAULT);
+		Lepra::String lDefaultValue = GetVariableScope()->GetDefaultValue(Cure::RuntimeVariableScope::READ_DEFAULT, lVariable);
 		lDefaultValue = Lepra::StringUtility::StringToCString(lDefaultValue);
 		if (GetVariableScope()->GetType(lDefaultValue) == _T("string"))
 		{
 			lDefaultValue = _T('"')+lDefaultValue+_T('"');
 		}
-		pFile->WriteLine(_T("#")+lVariable+_T(" ")+lValue+_T("\t// Default is ")+lDefaultValue+_T(".\n"));
+		lDefaultValue = (lValue != lDefaultValue)? _T("\t// Default is ")+lDefaultValue+_T(".\n") : _T("\n");
+		pFile->WriteString(_T("#")+lVariable+_T(" ")+lValue+lDefaultValue);
 	}
-	pFile->WriteLine(_T("\nset-stdout-log-level 1\t// 1\n"));
+	pFile->WriteString(_T("\nset-stdout-log-level 1\n"));
+	pFile->WriteString(_T("\n" USER_SECTION_MARK " -- User config. Everything but variable values will be overwritten above this section!\n"));
+	pFile->WriteString(pUserConfig);
 	return (true);	// TODO: check if all writes went well.
 }
 

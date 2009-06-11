@@ -42,7 +42,7 @@ STR_UTIL_TEMPLATE typename STR_UTIL_QUAL::StringVector STR_UTIL_QUAL::Split(cons
 	return (lTokenVector);
 }
 
-STR_UTIL_TEMPLATE typename STR_UTIL_QUAL::StringVector STR_UTIL_QUAL::BlockSplit(const _String& pString, const _String& pCharDelimitors, bool pKeepQuotes, int pSplitMaxCount)
+STR_UTIL_TEMPLATE typename STR_UTIL_QUAL::StringVector STR_UTIL_QUAL::BlockSplit(const _String& pString, const _String& pCharDelimitors, bool pKeepQuotes, bool pIsCString, int pSplitMaxCount)
 {
 	StringVector lTokenVector;
 	_String lCurrentToken;
@@ -51,7 +51,12 @@ STR_UTIL_TEMPLATE typename STR_UTIL_QUAL::StringVector STR_UTIL_QUAL::BlockSplit
 	size_t x = 0;
 	for (int lSplitCount = 0; x < pString.length(); ++x)
 	{
-		if (pString[x] == _T('"'))
+		if (pIsCString && pString[x] == _T('\\') && x+1 < pString.length())
+		{
+			lCurrentToken.push_back(pString[x]);
+			lCurrentToken.push_back(pString[++x]);
+		}
+		else if (pString[x] == _T('"'))
 		{
 			lInsideString = !lInsideString;
 			if (pKeepQuotes)
@@ -119,7 +124,7 @@ STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::StringToCString(const _String& pString)
 			case _T('\v'):	lCString += _T("\\v");	break;
 			case _T('\r'):	lCString += _T("\\r");	break;
 			case _T('\n'):	lCString += _T("\\n");	break;
-			case _T('\"'):	lCString += _T("\\\"");	break;
+			case _T('"'):	lCString += _T("\\\"");	break;
 			default:	lCString += pString[x];	break;
 		}
 	}
@@ -172,9 +177,9 @@ STR_UTIL_TEMPLATE bool STR_UTIL_QUAL::CStringToString(const _String& pCString, _
 					++x;
 				}
 				break;
-				case _T('\"'):
+				case _T('"'):
 				{
-					pString += _T('\"');
+					pString += _T('"');
 					++x;
 				}
 				break;

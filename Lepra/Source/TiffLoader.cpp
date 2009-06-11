@@ -42,7 +42,7 @@ TiffLoader::Status TiffLoader::Save(const String& pFileName, const Canvas& pCanv
 	DiskFile lFile;
 	Status lStatus = STATUS_SUCCESS;
 
-	if (lFile.Open(pFileName, DiskFile::MODE_WRITE_ONLY) == false)
+	if (lFile.Open(pFileName, DiskFile::MODE_WRITE) == false)
 	{
 		lStatus = STATUS_OPEN_ERROR;
 	}
@@ -428,7 +428,7 @@ TiffLoader::Status TiffLoader::StartLoad(const String& pFileName, Header& pHeade
 	DiskFile* lFile = new DiskFile;
 	mLoadFile = lFile;
 
-	if (lFile->Open(pFileName, DiskFile::MODE_READ_ONLY) == false)
+	if (lFile->Open(pFileName, DiskFile::MODE_READ) == false)
 	{
 		return STATUS_OPEN_ERROR;
 	}
