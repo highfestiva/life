@@ -1,4 +1,4 @@
-# 'Twas generated from ../../Life/Life.vcproj, 2009-06-01, type='lib'.
+# 'Twas generated from ../../Life/Life.vcproj, 2009-06-11, type='lib'.
 # Don't edit manually. See 'generate_makefile.py' for info.
 
 CFLAGS = -O0 -ggdb -fPIC -D_POSIX_PTHREAD_SEMANTICS -I../ThirdParty/stlport/stlport -I../ThirdParty/ode-060223/include -DPOSIX -D_DEBUG -D_CONSOLE -DPNG_NO_ASSEMBLER_CODE -DdCYLINDER_ENABLED -DCURE_TEST_WITHOUT_UI -Wall -Wno-unknown-pragmas

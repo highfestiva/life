@@ -1,4 +1,4 @@
-# 'Twas generated from ../../Lepra/Lepra.vcproj, 2009-06-01, type='lib'.
+# 'Twas generated from ../../Lepra/Lepra.vcproj, 2009-06-11, type='lib'.
 # Don't edit manually. See 'generate_makefile.py' for info.
 
 CFLAGS = -O0 -ggdb -fPIC -D_POSIX_PTHREAD_SEMANTICS -I../ThirdParty/stlport/stlport -I../ThirdParty/ode-060223/include -DPOSIX -D_DEBUG -D_CONSOLE -DPNG_NO_ASSEMBLER_CODE -DdCYLINDER_ENABLED -DCURE_TEST_WITHOUT_UI -Wall -Wno-unknown-pragmas
@@ -6,7 +6,6 @@ CFLAGS = -O0 -ggdb -fPIC -D_POSIX_PTHREAD_SEMANTICS -I../ThirdParty/stlport/stlp
 SRCS=	\
 Source/Application.cpp	\
 Source/ArchiveFile.cpp	\
-Source/ArgumentList.cpp	\
 Source/BmpLoader.cpp	\
 Source/BufferStream.cpp	\
 Source/Canvas.cpp	\
@@ -21,6 +20,7 @@ Source/FdSet.cpp	\
 Source/File.cpp	\
 Source/FileArchive.cpp	\
 Source/GammaLookup.cpp	\
+Source/HiResTimer.cpp	\
 Source/ImageLoader.cpp	\
 Source/IOBuffer.cpp	\
 Source/IOError.cpp	\
@@ -66,7 +66,6 @@ Source/Posix/PosixThread.cpp
 OBJS=	\
 Source/Application.o	\
 Source/ArchiveFile.o	\
-Source/ArgumentList.o	\
 Source/BmpLoader.o	\
 Source/BufferStream.o	\
 Source/Canvas.o	\
@@ -81,6 +80,7 @@ Source/FdSet.o	\
 Source/File.o	\
 Source/FileArchive.o	\
 Source/GammaLookup.o	\
+Source/HiResTimer.o	\
 Source/ImageLoader.o	\
 Source/IOBuffer.o	\
 Source/IOError.o	\

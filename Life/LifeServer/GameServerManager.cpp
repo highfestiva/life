@@ -173,7 +173,7 @@ Lepra::String GameServerManager::GetName() const
 
 Lepra::String GameServerManager::GetApplicationCommandFilename() const
 {
-	return (Lepra::SystemManager::GetLoginName()+GetName()+(_T("Application") _TEXT_ALTERNATIVE("", L"U") _T(".LifeBatch")));
+	return (Lepra::SystemManager::GetLoginName()+GetName()+(_T("Application") _TEXT_ALTERNATIVE("", L"U") _T(".lsh")));
 }
 
 
