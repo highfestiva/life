@@ -77,20 +77,20 @@ bool ClientOptionsManager::SetDefault(int pPriority)
 		{
 			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_CONTOGGLE, _T("Key.PARAGRAPH, Key.ACUTE, Key.APOSTROPHE"));
 			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_FWD, _T("Device0.Button1"));
-			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_BACK, _T("Device0.Button3"));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_BACK, _T(""));
 			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_BRKBACK, _T("Device0.Button0"));
-			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_LEFT, _T("Device0.AbsoluteAxis3+"));
-			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_RIGHT, _T("Device0.AbsoluteAxis3-"));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_LEFT, _T("Device0.AbsoluteAxis3-"));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_RIGHT, _T("Device0.AbsoluteAxis3+"));
 			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_UP, _T("Device0.AbsoluteAxis0-"));
 			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_DOWN, _T("Device0.AbsoluteAxis0+"));
-			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_HANDBRK, _T("Device0.Button5"));
-			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_BRK, _T("Device0.Button2"));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_HANDBRK, _T(""));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_BRK, _T(""));
 			lOk = true;
 		}
 		break;
 		case 1:
 		{
-			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_CONTOGGLE, _T("Key.ScrollLock"));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_CONTOGGLE, _T("Key.SCROLL_LOCK"));
 			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_FWD, _T("Key.UP"));
 			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_BACK, _T("Key.DOWN"));
 			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_BRKBACK, _T(""));
@@ -175,7 +175,7 @@ void ClientOptionsManager::SetValue(const Lepra::String& pKey, float pValue)
 float* ClientOptionsManager::GetValuePointer(const Lepra::String& pKey)
 {
 	typedef std::pair<const Lepra::String, float*> KeyValue;
-	static const KeyValue lEntries[] =
+	const KeyValue lEntries[] =
 	{
 		KeyValue(_T(RTVAR_CTRL_UI_CONTOGGLE), &mOptions.mControl.mUi.mConsoleToggle),
 		KeyValue(_T(RTVAR_CTRL_VEHICLE_FWD), &mOptions.mControl.mVehicle.mForward),

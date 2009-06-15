@@ -1,26 +1,24 @@
-/*
-	Class:  Win32DisplayManager
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Righteous Games
-*/
 
-#include "../../Include/UiLepra.h"
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2009, Righteous Games
 
-#define LEPRA_INCLUDE_NO_OS
+
+
+#include "../../Include/Win32/UiWin32DisplayManager.h"
 #include "../../../Lepra/Include/Log.h"
 #include "../../../Lepra/Include/String.h"
 #include "../../../Lepra/Include/SystemManager.h"
-#include "../../Include/Win32/UiWin32DisplayManager.h"
+#include "../../Include/UiLepra.h"
 //#include "../../Include/Win32/UiWin32DirectXDisplay.h"
 #include "../../Include/Win32/UiWin32OpenGLDisplay.h"
 #include "../../Include/Win32/UiWin32SoftwareDisplay.h"
-#undef LEPRA_INCLUDE_NO_OS
 
-// Undefine the Microsoft macro IsMinimized.
-#undef IsMinimized
+
 
 namespace UiLepra
 {
+
+
 
 DisplayManager* DisplayManager::CreateDisplayManager(ContextType pCT)
 {
@@ -34,6 +32,15 @@ DisplayManager* DisplayManager::CreateDisplayManager(ContextType pCT)
 	}
 	return (lDisplayManager);
 }
+
+void DisplayManager::EnableScreensaver(bool pEnable)
+{
+	// TODO: get this code working!
+	BOOL lOldValue;
+	::SystemParametersInfo(SPI_SETSCREENSAVERRUNNING, !pEnable, &lOldValue, 0);
+}
+
+
 
 Win32DisplayManager::Win32DisplayManager() :
 	mScreenMode(DisplayManager::WINDOWED),
@@ -1006,10 +1013,14 @@ bool Win32DisplayManager::OnMessage(int pMsg, int pwParam, long plParam)
 	return (false);
 }
 
+
+
 int Win32DisplayManager::msWindowCount = 0;
 int Win32DisplayManager::msRegisterCount = 0;
 HANDLE Win32DisplayManager::mshThisInstance = 0;
 WNDCLASSEX Win32DisplayManager::msWindowClass;
 LOG_CLASS_DEFINE(UI_GFX, Win32DisplayManager);
 
-} // End namespace.
+
+
+}

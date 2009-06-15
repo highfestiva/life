@@ -1,12 +1,11 @@
-/*
-	Author: Jonas Byström
-	Copyright (c) 2002-2007, Righteous Games
-*/
+
+// Author: Jonas Byström
+// Copyright (c) 2002-2009, Righteous Games
 
 
 
-#ifndef UILEPRA_H
-#define UILEPRA_H
+
+#pragma once
 
 #include "../../Lepra/Include/Lepra.h"
 
@@ -17,5 +16,3 @@ void Init();
 void Shutdown();
 
 }
-
-#endif // !UILEPRA_H

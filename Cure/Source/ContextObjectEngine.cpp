@@ -26,8 +26,7 @@ ContextObjectEngine::ContextObjectEngine(ContextObject* pContextObject, EngineTy
 	mStrength(pStrength),
 	mMaxSpeed(pMaxSpeed),
 	mMaxSpeed2(pMaxSpeed2),
-	mControllerIndex(pControllerIndex),
-	mIsAnalogue(false)
+	mControllerIndex(pControllerIndex)
 {
 	::memset(mValue, 0, sizeof(mValue));
 }
@@ -59,9 +58,6 @@ bool ContextObjectEngine::SetValue(unsigned pAspect, float pValue, float pZAngle
 {
 	pValue = (pValue > 1)? 1 : pValue;
 	pValue = (pValue < -1)? -1 : pValue;
-
-	mIsAnalogue = ((pAspect&0x80) != 0);
-	pAspect &= 0x7F;
 
 	switch (mEngineType)
 	{
@@ -275,11 +271,6 @@ float ContextObjectEngine::GetValue() const
 const float* ContextObjectEngine::GetValues() const
 {
 	return (mValue);
-}
-
-bool ContextObjectEngine::IsAnalogue() const
-{
-	return (mIsAnalogue);
 }
 
 

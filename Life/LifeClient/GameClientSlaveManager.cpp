@@ -322,7 +322,6 @@ void GameClientSlaveManager::TickInput()
 
 void GameClientSlaveManager::TickUiInput()
 {
-	// TODO: remove movement hack!
 	int lPhysicsStepCount = GetTimeManager()->GetCurrentPhysicsStepCount();
 	if (lPhysicsStepCount > 0 && mAllowMovementInput)
 	{
@@ -331,13 +330,15 @@ void GameClientSlaveManager::TickUiInput()
 		{
 			const Options::ClientOptions::Control::Vehicle& v = mOptions.GetOptions().mControl.mVehicle;
 			float lPower;
-			const bool IS_MOVING_FORWARD = true;
-			lPower = v.mForward - v.mBackward - (IS_MOVING_FORWARD? 0.0f : v.mBreakAndBack);
+			const bool IS_MOVING_FORWARD = lObject->GetForwardSpeed() > 0.5f;
+			lPower = v.mForward - std::max(v.mBackward, IS_MOVING_FORWARD? 0.0f : v.mBreakAndBack);
 			lObject->SetEnginePower(0, lPower, mCameraOrientation.x);
 			lPower = v.mRight-v.mLeft;
 			lObject->SetEnginePower(1, lPower, mCameraOrientation.x);
-			lPower = std::max(v.mUp, v.mHandBreak)-std::max(v.mDown, v.mBreak);	// TODO: separate!
+			lPower = v.mHandBreak - std::max(v.mBreak, IS_MOVING_FORWARD? v.mBreakAndBack : 0.0f);
 			lObject->SetEnginePower(2, lPower, mCameraOrientation.x);
+			lPower = v.mUp-v.mDown;
+			lObject->SetEnginePower(3, lPower, mCameraOrientation.x);
 		}
 	}
 }

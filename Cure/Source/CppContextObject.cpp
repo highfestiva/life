@@ -564,7 +564,7 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 		pObject->AddPhysicsObject(PhysicsNode(23, 24, lPhysicsObjectId, PhysicsNode::TYPE_EXCLUDE));
 
 		// All wheel drive engine.
-		ContextObjectEngine* lEngine = new ContextObjectEngine(pObject, ContextObjectEngine::ENGINE_HINGE2_ROLL, 0.5f*lCarWeight, 20, 20, 0);
+		ContextObjectEngine* lEngine = new ContextObjectEngine(pObject, ContextObjectEngine::ENGINE_HINGE2_ROLL, 0.5f*lCarWeight, 25, 25, 0);
 		lEngine->AddControlledNode(3, -1);
 		lEngine->AddControlledNode(4, 1);
 		lEngine->AddControlledNode(5, -1);
@@ -573,7 +573,7 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 		lEngine->AddControlledNode(8, 1);
 		pObject->AddAttribute(lEngine);
 		// Turning with tracks are controlled by rolling of the wheels.
-		lEngine = new ContextObjectEngine(pObject, ContextObjectEngine::ENGINE_HINGE2_ROLL, 0.5f*lCarWeight, 10, 10, 1);
+		lEngine = new ContextObjectEngine(pObject, ContextObjectEngine::ENGINE_HINGE2_ROLL, lCarWeight, 20, 20, 1);
 		lEngine->AddControlledNode(3, 1);
 		lEngine->AddControlledNode(4, 1);
 		lEngine->AddControlledNode(5, 1);
@@ -582,10 +582,10 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 		lEngine->AddControlledNode(8, 1);
 		pObject->AddAttribute(lEngine);
 		// The boom, arm and bucket are hinge-controlled.
-		lEngine = new ContextObjectEngine(pObject, ContextObjectEngine::ENGINE_HINGE, 20*lCarWeight, 2.0f, 1.0f, 2);
+		lEngine = new ContextObjectEngine(pObject, ContextObjectEngine::ENGINE_HINGE, 20*lCarWeight, 2.0f, 1.0f, 3);
 		lEngine->AddControlledNode(20, 5);
-		lEngine->AddControlledNode(22, 2, ContextObjectEngine::MODE_HALF_LOCK);
-		lEngine->AddControlledNode(23, 1, ContextObjectEngine::MODE_HALF_LOCK);
+		lEngine->AddControlledNode(22, 2, ContextObjectEngine::MODE_HALF_LOCK);	// MODE_HALF_LOCK = has neutral/freeze position outside mid value.
+		lEngine->AddControlledNode(23, 1, ContextObjectEngine::MODE_HALF_LOCK);	// MODE_HALF_LOCK = has neutral/freeze position outside mid value.
 		pObject->AddAttribute(lEngine);
 		// Just a "dummy engine" to keep wheels straight at all times.
 		lEngine = new ContextObjectEngine(pObject, ContextObjectEngine::ENGINE_ROLL_STRAIGHT, 0, 0, 0, 0);

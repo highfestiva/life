@@ -113,6 +113,8 @@ public:
 	DisplayManager();
 	virtual ~DisplayManager();
 
+	static void EnableScreensaver(bool pEnable);
+
 	virtual ContextType GetContextType() = 0;
 
 	// Sets the caption of the window.

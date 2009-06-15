@@ -15,16 +15,21 @@
 	that are interested in "Window Messages".
 */
 
-#ifndef UIWIN32CORE_H
-#define UIWIN32CORE_H
+
+
+#pragma once
 
 #include "../../../Lepra/Include/HashTable.h"
 #include "../../../Lepra/Include/Thread.h"
 #include "../UiCore.h"
 #include "../UiLepra.h"
 
+
+
 namespace UiLepra
 {
+
+
 
 class Win32DisplayManager;
 
@@ -50,6 +55,6 @@ private:
 	static WindowTable mWindowTable;
 };
 
-}
 
-#endif
+
+}

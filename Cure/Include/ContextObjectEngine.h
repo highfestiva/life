@@ -53,7 +53,6 @@ public:
 	unsigned GetControllerIndex() const;
 	float GetValue() const;
 	const float* GetValues() const;
-	bool IsAnalogue() const;
 
 private:
 	struct EngineNode
@@ -80,7 +79,6 @@ private:
 	unsigned mControllerIndex;
 	EngineNodeArray mEngineNodeArray;
 	float mValue[4];
-	bool mIsAnalogue;
 
 	LOG_CLASS_DECLARE();
 };

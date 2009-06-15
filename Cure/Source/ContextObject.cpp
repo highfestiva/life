@@ -370,27 +370,8 @@ bool ContextObject::UpdateFullPosition(const ObjectPositionalData*& pPositionalD
 				}
 				break;
 				case ContextObjectEngine::ENGINE_HINGE2_ROLL:
-				{
-					GETSET_OBJECT_POSITIONAL_AT(mPosition, y, RealData1, lData, PositionalData::TYPE_REAL_1, 1);
-					++y;
-					lData->mValue = lEngine->GetValue();
-				}
-				break;
 				case ContextObjectEngine::ENGINE_HINGE2_TURN:
-				{
-					GETSET_OBJECT_POSITIONAL_AT(mPosition, y, RealData1Bool, lData, PositionalData::TYPE_REAL_1_BOOL, 1);
-					++y;
-					lData->mValue = lEngine->GetValue();
-					lData->mBool = lEngine->IsAnalogue();
-				}
-				break;
 				case ContextObjectEngine::ENGINE_HINGE2_BREAK:
-				{
-					GETSET_OBJECT_POSITIONAL_AT(mPosition, y, RealData1, lData, PositionalData::TYPE_REAL_1, 1);
-					++y;
-					lData->mValue = lEngine->GetValue();
-				}
-				break;
 				case ContextObjectEngine::ENGINE_HINGE:
 				{
 					GETSET_OBJECT_POSITIONAL_AT(mPosition, y, RealData1, lData, PositionalData::TYPE_REAL_1, 1);
@@ -613,55 +594,8 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData)
 				}
 				break;
 				case ContextObjectEngine::ENGINE_HINGE2_ROLL:
-				{
-					assert(mPosition.mBodyPositionArray.size() > y);
-					assert(mPosition.mBodyPositionArray[y]->GetType() == PositionalData::TYPE_REAL_1);
-					GET_OBJECT_POSITIONAL_AT(mPosition, y, const RealData1, lData, PositionalData::TYPE_REAL_1);
-					++y;
-					assert(lData);
-					if (!lData)
-					{
-						mLog.AError("Could not fetch the right type of network positional!");
-						return;
-					}
-					assert(lData->mValue >= -1 && lData->mValue <= 1);
-					SetEnginePower(lEngine->GetControllerIndex(), lData->mValue, 0);
-				}
-				break;
 				case ContextObjectEngine::ENGINE_HINGE2_TURN:
-				{
-					assert(mPosition.mBodyPositionArray.size() > y);
-					assert(mPosition.mBodyPositionArray[y]->GetType() == PositionalData::TYPE_REAL_1_BOOL);
-					GET_OBJECT_POSITIONAL_AT(mPosition, y, const RealData1Bool, lData, PositionalData::TYPE_REAL_1_BOOL);
-					++y;
-					assert(lData);
-					if (!lData)
-					{
-						mLog.AError("Could not fetch the right type of network positional!");
-						return;
-					}
-					assert(lData->mValue >= -1 && lData->mValue <= 1);
-					assert(!lData->mBool);
-					unsigned lAnalogueFlag = (lData->mBool)? 0x80 : 0;
-					SetEnginePower(lEngine->GetControllerIndex()|lAnalogueFlag, lData->mValue, 0);
-				}
-				break;
 				case ContextObjectEngine::ENGINE_HINGE2_BREAK:
-				{
-					assert(mPosition.mBodyPositionArray.size() > y);
-					assert(mPosition.mBodyPositionArray[y]->GetType() == PositionalData::TYPE_REAL_1);
-					GET_OBJECT_POSITIONAL_AT(mPosition, y, const RealData1, lData, PositionalData::TYPE_REAL_1);
-					++y;
-					assert(lData);
-					if (!lData)
-					{
-						mLog.AError("Could not fetch the right type of network positional!");
-						return;
-					}
-					assert(lData->mValue >= -1 && lData->mValue <= 1);
-					SetEnginePower(lEngine->GetControllerIndex(), lData->mValue, 0);
-				}
-				break;
 				case ContextObjectEngine::ENGINE_HINGE:
 				{
 					assert(mPosition.mBodyPositionArray.size() > y);
@@ -711,6 +645,26 @@ Lepra::Vector3DF ContextObject::GetPosition() const
 		// TODO: throw something here...
 	}
 	return (lPosition);
+}
+
+float ContextObject::GetForwardSpeed() const
+{
+	float lSpeed = 0;
+	if (mRootPhysicsIndex >= 0)
+	{
+		Lepra::TransformationF lTransform;
+		mManager->GetGameManager()->GetPhysicsManager()->GetBodyTransform(mPhysicsNodeArray[mRootPhysicsIndex].GetBodyId(), lTransform);
+		Lepra::Vector3DF lVelocity;
+		mManager->GetGameManager()->GetPhysicsManager()->GetBodyVelocity(mPhysicsNodeArray[mRootPhysicsIndex].GetBodyId(), lVelocity);
+		Lepra::Vector3DF lAxis = lTransform.GetOrientation().GetAxisY();
+		lAxis.Normalize();
+		lSpeed = -(lVelocity*lAxis);	// TODO: negate when objects created in the right direction.
+	}
+	else
+	{
+		assert(false);
+	}
+	return (lSpeed);
 }
 
 

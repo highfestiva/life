@@ -52,6 +52,7 @@ public:
 	bool UpdateFullPosition(const ObjectPositionalData*& pPositionalData);
 	void SetFullPosition(const ObjectPositionalData& pPositionalData);
 	Lepra::Vector3DF GetPosition() const;
+	float GetForwardSpeed() const;
 
 	void AddPhysicsObject(const PhysicsNode& pPhysicsNode);
 	PhysicsNode* GetPhysicsNode(PhysicsNode::Id pId) const;

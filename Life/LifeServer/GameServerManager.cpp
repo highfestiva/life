@@ -752,7 +752,11 @@ void GameServerManager::BroadcastDeleteObject(Cure::GameObjectId pInstanceId)
 	for (; x != mAccountClientTable.End(); ++x)
 	{
 		const Client* lClient = x.GetObject();
-		GetNetworkAgent()->PlaceInSendBuffer(true, lClient->GetUserConnection()->GetSocket(), lPacket);
+		Lepra::GameSocket* lSocket = lClient->GetUserConnection()->GetSocket();
+		if (lSocket)
+		{
+			GetNetworkAgent()->PlaceInSendBuffer(true, lSocket, lPacket);
+		}
 	}
 	GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
 }

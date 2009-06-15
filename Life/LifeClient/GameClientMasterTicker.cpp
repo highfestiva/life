@@ -38,6 +38,8 @@ GameClientMasterTicker::GameClientMasterTicker(UiCure::GameUiManager* pUiManager
 	mActiveWidth(0),
 	mActiveHeight(0)
 {
+	UiLepra::DisplayManager::EnableScreensaver(false);
+
 	ConsoleManager lConsole(0, UiCure::GetSettings(), 0, 0);
 	lConsole.Init();
 	lConsole.ExecuteCommand(_T("execute-file -i ClientBase.lsh"));
@@ -45,6 +47,8 @@ GameClientMasterTicker::GameClientMasterTicker(UiCure::GameUiManager* pUiManager
 
 GameClientMasterTicker::~GameClientMasterTicker()
 {
+	UiLepra::DisplayManager::EnableScreensaver(true);
+
 	{
 		ConsoleManager lConsole(0, UiCure::GetSettings(), 0, 0);
 		lConsole.Init();

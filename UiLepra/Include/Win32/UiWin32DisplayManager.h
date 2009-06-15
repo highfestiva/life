@@ -1,21 +1,21 @@
-/*
-	Class:  Win32DisplayManager
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Righteous Games
-*/
 
-#ifndef UIWIN32DISPLAYMANAGER_H
-#define UIWIN32DISPLAYMANAGER_H
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2009, Righteous Games
+
+
+
+#pragma once
 
 #include <hash_set>
 #include "../UiDisplayManager.h"
 #include "UiWin32Core.h"
 
-#undef IsMinimized
-#undef IsMaximized
+
 
 namespace UiLepra
 {
+
+
 
 class Win32Observer
 {
@@ -179,6 +179,6 @@ private:
 	LOG_CLASS_DECLARE();
 };
 
-} // End namespace.
 
-#endif
+
+}
