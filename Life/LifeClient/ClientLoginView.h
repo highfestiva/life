@@ -13,6 +13,7 @@
 namespace Cure
 {
 class LoginId;
+class RuntimeVariableScope;
 }
 
 

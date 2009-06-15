@@ -58,10 +58,10 @@ private:
 	void OnExit(View* pPlayerCountView);
 	void OnSetPlayerCount(View* pPlayerCountView, int pPlayerCount);
 
-	class ConsoleInputFunctor: public UiLepra::InputFunctor
+	class MasterInputFunctor: public UiLepra::InputFunctor
 	{
 	public:
-		ConsoleInputFunctor(GameClientMasterTicker* pManager);
+		MasterInputFunctor(GameClientMasterTicker* pManager);
 	private:
 		void Call(UiLepra::InputElement* pElement);
 		UiLepra::InputFunctor* CreateCopy() const;

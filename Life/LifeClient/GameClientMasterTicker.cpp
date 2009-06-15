@@ -292,8 +292,38 @@ bool GameClientMasterTicker::Reinitialize()
 	}
 	if (lOk)
 	{
-		mUiManager->GetInputManager()->ActivateAll();
-		mUiManager->GetInputManager()->GetKeyboard()->SetFunctor(new ConsoleInputFunctor(this));
+		/*mUiManager->GetInputManager()->ActivateAll();
+		mUiManager->GetInputManager()->PollEvents();
+		const UiLepra::InputManager::DeviceList& lDeviceList = mUiManager->GetInputManager()->GetDeviceList();
+		UiLepra::InputManager::DeviceList::const_iterator y = lDeviceList.begin();
+		for (; y != lDeviceList.end(); ++y)
+		{
+			UiLepra::InputDevice* lDevice = (*y);
+			mLog.Infof(_T("Found input device %s with %u digital and %u analogue input elements."),
+				lDevice->GetIdentifier().c_str(), lDevice->GetNumDigitalElements(),
+				lDevice->GetNumAnalogueElements());
+			if (lDevice->GetNumElements() < 30)
+			{
+				mLog.AInfo(_T("Elements are:"));
+				for (unsigned e = 0; e < lDevice->GetNumElements(); ++e)
+				{
+					UiLepra::InputElement* lElement = lDevice->GetElement(e);
+					Lepra::String lInterpretation;
+					switch (lElement->GetInterpretation())
+					{
+						case UiLepra::InputElement::ABSOLUTE_AXIS:	lInterpretation += _T("AbsoluteAxis");	break;
+						case UiLepra::InputElement::RELATIVE_AXIS:	lInterpretation += _T("RelativeAxis");	break;
+						default:					lInterpretation += _T("Button");	break;
+					}
+					mLog.Infof(_T("  - '%s' of type '%s' with value '%f'"),
+						lElement->GetIdentifier().c_str(),
+						lInterpretation.c_str(),
+						lElement->GetValue());
+				}
+			}
+			lDevice->AddFunctor(new MasterInputFunctor(this));
+		}*/
+		mUiManager->GetInputManager()->AddFunctor(new MasterInputFunctor(this));
 
 		SlaveMap::Iterator x;
 		for (x = mSlaveSet.First(); lOk && x != mSlaveSet.End(); ++x)
@@ -428,19 +458,19 @@ void GameClientMasterTicker::OnSetPlayerCount(View* pPlayerCountView, int pPlaye
 }
 
 
-GameClientMasterTicker::ConsoleInputFunctor::ConsoleInputFunctor(GameClientMasterTicker* pManager):
+GameClientMasterTicker::MasterInputFunctor::MasterInputFunctor(GameClientMasterTicker* pManager):
 	mManager(pManager)
 {
 }
 
-void GameClientMasterTicker::ConsoleInputFunctor::Call(UiLepra::InputElement* pElement)
+void GameClientMasterTicker::MasterInputFunctor::Call(UiLepra::InputElement* pElement)
 {
 	mManager->OnInput(pElement);
 }
 
-UiLepra::InputFunctor* GameClientMasterTicker::ConsoleInputFunctor::CreateCopy() const
+UiLepra::InputFunctor* GameClientMasterTicker::MasterInputFunctor::CreateCopy() const
 {
-	return (new ConsoleInputFunctor(mManager));
+	return (new MasterInputFunctor(mManager));
 }
 
 

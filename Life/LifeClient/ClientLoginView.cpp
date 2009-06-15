@@ -4,12 +4,13 @@
 
 
 
+#include "ClientLoginView.h"
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../../Cure/Include/UserAccount.h"
 #include "../../Lepra/Include/Network.h"
 #include "../../UiTbc/Include/GUI/UiCaption.h"
 #include "../../UiTbc/Include/GUI/UiTextField.h"
-#include "ClientLoginView.h"
+#include "../RtVar.h"
 
 
 
@@ -32,7 +33,7 @@ ClientLoginView::ClientLoginView(UiTbc::Painter* pPainter, ClientLoginObserver* 
 
 	AddLabel(_T("Username"), Lepra::WHITE);
 
-	Lepra::String lUserName = CURE_RTVAR_GETSET(mLoginObserver->GetVariableScope(), "Login.UserName", _T("Car0"));
+	Lepra::String lUserName = CURE_RTVAR_GETSET(mLoginObserver->GetVariableScope(), RTVAR_LOGIN_USERNAME, _T("Car0"));
 	AddTextField(lUserName, _T("User"));
 
 	AddLabel(_T("Password"), Lepra::WHITE);
@@ -42,7 +43,7 @@ ClientLoginView::ClientLoginView(UiTbc::Painter* pPainter, ClientLoginObserver* 
 	AddLabel(_T("Server"), Lepra::WHITE);
 
 	Lepra::String lServerName = _T("rg.servegame.org:16650");
-	lServerName = CURE_RTVAR_GETSET(mLoginObserver->GetVariableScope(), "Login.DefaultServer", lServerName);
+	lServerName = CURE_RTVAR_GETSET(mLoginObserver->GetVariableScope(), RTVAR_LOGIN_SERVER, lServerName);
 	AddTextField(lServerName, _T("Server"));
 
 	AddButton(_T("Login"))->SetOnUnclickedFunc(ClientLoginView, OnLogin);

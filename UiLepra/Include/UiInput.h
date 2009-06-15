@@ -114,12 +114,12 @@ public:
 	BIND_INPUT(e2, OnShoot, Player);
 
 	...where BIND_INPUT(_e, _func, _class) is a macro defined as:
-	(e)->SetFunctor(new TInputFunctor<_class>(this, (_func)));
+	(e)->AddFunctor(new TInputFunctor<_class>(this, (_func)));
 
 	When the state of e1 and e2 changes, the functions OnJump() and OnShoot()
 	will be called.
 
-	To unbind an element, just make the call "element->SetFunctor(0)" on that 
+	To unbind elements, just make the call "element->ClearFunctorArray()" on that 
 	element.
 
 	In order to store keybindings in a file, you need to identify the exact
@@ -205,33 +205,24 @@ public:
 	enum Type
 	{
 		UNKNOWN = 0,
-		DIGITAL,
 		ANALOGUE,
+		DIGITAL,
 	};
 
 	enum Interpretation
 	{
-		NO_INTERPRETATION = 0,
-
-		// Analogue interpretations.
-		X_AXIS,       // X-axis on mouse or joystick.
-		Y_AXIS,       // Y-axis on mouse or joystick.
-		Z_AXIS,       // ??
-		MOUSE_WHEEL,
-		ACCELERATION, // Gas pedal, thrust or something.
-
-		// Digital interpretations.
+		ABSOLUTE_AXIS,
+		RELATIVE_AXIS,
 		BUTTON1,	// BUTTON1 + offset gives the button index.
 	};
 
-	InputElement(Type pType, InputDevice* pParentDevice);
+	InputElement(Type pType, Interpretation pInterpretation, int pTypeIndex, InputDevice* pParentDevice);
 	virtual ~InputElement();
 
 	Type GetType() const;
 
-	// Gets and sets the preferred interpretation of this element.
 	Interpretation GetInterpretation() const;
-	void SetInterpretation(Interpretation pInterpretation);
+	int GetTypeIndex() const;
 
 	InputDevice* GetParentDevice() const;
 
@@ -255,8 +246,8 @@ public:
 
 	// Sets the input listener functor. The InputElement will be responsible
 	// of deleting it.
-	void SetFunctor(InputFunctor* pFunctor);
-	const InputFunctor* GetFunctor();
+	void AddFunctor(InputFunctor* pFunctor);
+	void ClearFunctorArray();
 
 	// Returns the required size in bytes of the calibration data.
 	// This value is always valid.
@@ -275,16 +266,17 @@ private:
 
 	Type mType;
 	Interpretation mInterpretation;
+	int mTypeIndex;
 	InputDevice* mParentDevice;
 
 	Lepra::String mIdentifier;
 
-	// The one and only "action listener", or "input listener".
-	InputFunctor* mFunctor;
+	typedef std::vector<InputFunctor*> FunctorArray;
+	FunctorArray mFunctorArray;
 };
 
 #define BIND_INPUT(_e, _func, _class) \
-	(_e)->SetFunctor(new UiLepra::TInputFunctor<_class>(this, &_class::_func));
+	(_e)->AddFunctor(new UiLepra::TInputFunctor<_class>(this, &_class::_func));
 
 
 
@@ -305,8 +297,19 @@ class InputDevice
 public:
 	typedef std::vector<InputElement*> ElementArray;
 
+	enum Interpretation
+	{
+		TYPE_MOUSE = 0,
+		TYPE_KEYBOARD,
+		TYPE_OTHER,
+	};
+
 	InputDevice(InputManager* pManager);
 	virtual ~InputDevice();
+
+	Interpretation GetInterpretation() const;
+	int GetTypeIndex() const;
+	void SetInterpretation(Interpretation pInterpretation, int pTypeIndex);
 
 	InputManager* GetManager() const;
 
@@ -340,13 +343,9 @@ public:
 	void SetIdentifier(const Lepra::String& pIdentifier);
 	const Lepra::String& GetIdentifier() const;
 
-	// Sets the observer on a specific element.
-	void SetFunctor(const Lepra::String& pElementIdentifier,
-					InputFunctor* pFunctor);
-
 	// Sets an observer on the entire device. (All elements).
 	// The device takes care of deleting the functor.
-	void SetFunctor(InputFunctor* pFunctor);
+	void AddFunctor(InputFunctor* pFunctor);
 
 	unsigned GetCalibrationDataSize();
 	void GetCalibrationData(Lepra::uint8* pData);
@@ -365,6 +364,8 @@ private:
 	void CountElements();
 
 	InputManager* mManager;
+	Interpretation mInterpretation;
+	int mTypeIndex;
 	int mNumDigitalElements;
 	int mNumAnalogueElements;
 
@@ -456,8 +457,8 @@ public:
 		IN_KBD_X		= 88,
 		IN_KBD_Y		= 89,
 		IN_KBD_Z		= 90,
-		IN_KBD_LWIN_START	= 91,
-		IN_KBD_RWIN_START	= 92,
+		IN_KBD_LWIN	= 91,
+		IN_KBD_RWIN	= 92,
 
 		IN_KBD_CONTEXT_MENU	= 93,	// The "windows menu" button on Microsoft-compatible keyboards.
 
@@ -581,11 +582,11 @@ public:
 	void RemoveMouseInputObserver(MouseInputObserver* pListener);
 
 	// Call this every frame, or at least at a regular basis.
-	virtual void PollEvents();
+	void PollEvents();
 
 	// Sets one observer on all input devices, and all elements.
 	// The input manager takes care of deleting the functor.
-	void SetFunctor(InputFunctor* pFunctor);
+	void AddFunctor(InputFunctor* pFunctor);
 	
 	// Activase/release all devices.
 	void ActivateAll();
@@ -602,30 +603,10 @@ public:
 	// Range: [-1, 1] (Left and right, up and down)
 	virtual Lepra::float64 GetCursorX() = 0;
 	virtual Lepra::float64 GetCursorY() = 0;
-	virtual void SetCursorX(Lepra::float64 x) = 0;
-	virtual void SetCursorY(Lepra::float64 y) = 0;
-
-	// Returns the state of the mouse button with index pButtonIndex.
-	// The first mouse button has index 0. For any given system, the only
-	// thing that can be promised is that there is ONE button, so don't
-	// rely on multiple button mice.
-	virtual bool GetMouseButtonState(unsigned pButtonIndex) = 0;
-
-	// Returns change in mouse movement since last PollEvents call. 
-	virtual Lepra::float64 GetMouseDeltaX() = 0;
-	virtual Lepra::float64 GetMouseDeltaY() = 0;
-
-	// Returns the change in mouse cursor position since last PollEvents call.
-	virtual Lepra::float64 GetCursorDeltaX() = 0;
-	virtual Lepra::float64 GetCursorDeltaY() = 0;
-
-	virtual Lepra::float64 GetMouseDeltaUnit() = 0;
-
-	// Get change in wheel position since last PollEvents call. 
-	// (Size of one click = 0.1f).
-	virtual Lepra::float64 GetMouseDeltaWheel() = 0;
 
 	bool ReadKey(KeyCode pKeyCode);
+
+	static Lepra::String GetKeyName(KeyCode pKeyCode);
 
 protected:
 

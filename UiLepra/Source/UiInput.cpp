@@ -14,39 +14,39 @@ namespace UiLepra
 
 
 
-InputElement::InputElement(Type pType, InputDevice* pParentDevice):
+InputElement::InputElement(Type pType, Interpretation pInterpretation, int pTypeIndex, InputDevice* pParentDevice):
 	mPrevValue(0),
 	mValue(0),
 	mType(pType),
-	mInterpretation(NO_INTERPRETATION),
-	mParentDevice(pParentDevice),
-	mFunctor(0)
+	mInterpretation(pInterpretation),
+	mTypeIndex(pTypeIndex),
+	mParentDevice(pParentDevice)
 {
 }
 
 InputElement::~InputElement()
 {
-	SetFunctor(0);
+	ClearFunctorArray();
 }
 
 InputElement::Type InputElement::GetType() const
 {
-	return mType;
+	return (mType);
 }
 
 InputElement::Interpretation InputElement::GetInterpretation() const
 {
-	return mInterpretation;
+	return (mInterpretation);
 }
 
-void InputElement::SetInterpretation(Interpretation pInterpretation)
+int InputElement::GetTypeIndex() const
 {
-	mInterpretation = pInterpretation;
+	return (mTypeIndex);
 }
 
 InputDevice* InputElement::GetParentDevice() const
 {
-	return mParentDevice;
+	return (mParentDevice);
 }
 
 bool InputElement::GetBooleanValue(Lepra::float64 pThreshold) const
@@ -74,34 +74,34 @@ void InputElement::SetIdentifier(const Lepra::String& pIdentifier)
 	mIdentifier = pIdentifier;
 }
 
-void InputElement::SetFunctor(InputFunctor* pFunctor)
+void InputElement::AddFunctor(InputFunctor* pFunctor)
 {
-	if (mFunctor != 0)
-	{
-		delete mFunctor;
-	}
-
-	mFunctor = pFunctor;
+	mFunctorArray.push_back(pFunctor);
 }
 
-const InputFunctor* InputElement::GetFunctor()
+void InputElement::ClearFunctorArray()
 {
-	return mFunctor;
+	for (FunctorArray::iterator x = mFunctorArray.begin(); x != mFunctorArray.end(); ++x)
+	{
+		delete (*x);
+	}
+	mFunctorArray.clear();
 }
 
 void InputElement::SetValue(Lepra::float64 pNewValue)
 {
-	static const Lepra::float64 lEpsilon = 1e-15;
-
-	if (fabs(pNewValue - mValue) > lEpsilon)
+	static const Lepra::float64 lInputEpsilon = 1e-8;
+	if (fabs(pNewValue - mValue) > lInputEpsilon)
 	{
+		//::printf("%s(%i) = %f", GetIdentifier().c_str(), GetTypeIndex(), pNewValue);
+
 		mPrevValue = mValue;
 		mValue = pNewValue;
 
-		// Notify our observer.
-		if (mFunctor != 0)
+		// Notify our observers.
+		for (FunctorArray::iterator x = mFunctorArray.begin(); x != mFunctorArray.end(); ++x)
 		{
-			mFunctor->Call(this);
+			(*x)->Call(this);
 		}
 	}
 }
@@ -110,6 +110,8 @@ void InputElement::SetValue(Lepra::float64 pNewValue)
 
 InputDevice::InputDevice(InputManager* pManager):
 	mManager(pManager),
+	mInterpretation(TYPE_OTHER),
+	mTypeIndex(-1),
 	mNumDigitalElements(-1),
 	mNumAnalogueElements(-1),
 	mActive(false)
@@ -118,6 +120,22 @@ InputDevice::InputDevice(InputManager* pManager):
 
 InputDevice::~InputDevice()
 {
+}
+
+InputDevice::Interpretation InputDevice::GetInterpretation() const
+{
+	return (mInterpretation);
+}
+
+int InputDevice::GetTypeIndex() const
+{
+	return (mTypeIndex);
+}
+
+void InputDevice::SetInterpretation(Interpretation pInterpretation, int pTypeIndex)
+{
+	mInterpretation = pInterpretation;
+	mTypeIndex = pTypeIndex;
 }
 
 InputManager* InputDevice::GetManager() const
@@ -293,9 +311,7 @@ void InputDevice::CountElements()
 	mNumAnalogueElements = 0;
 
 	ElementArray::iterator x;
-	for (x = mElementArray.begin();
-		x != mElementArray.end();
-		++x)
+	for (x = mElementArray.begin(); x != mElementArray.end(); ++x)
 	{
 		InputElement* lElement = *x;
 
@@ -310,34 +326,15 @@ void InputDevice::CountElements()
 	}
 }
 
-void InputDevice::SetFunctor(const Lepra::String& pElementIdentifier,
-							 InputFunctor* pFunctor)
+void InputDevice::AddFunctor(InputFunctor* pFunctor)
 {
 	ElementArray::iterator x;
-	for (x = mElementArray.begin();
-		x != mElementArray.end();
-		++x)
+	for (x = mElementArray.begin(); x != mElementArray.end(); ++x)
 	{
 		InputElement* lElement = *x;
-		if (lElement->GetIdentifier() == pElementIdentifier)
-		{
-			lElement->SetFunctor(pFunctor);
-		}
+		lElement->AddFunctor(pFunctor->CreateCopy());
 	}
-}
-
-void InputDevice::SetFunctor(InputFunctor* pFunctor)
-{
-	ElementArray::iterator x;
-	for (x = mElementArray.begin();
-		x != mElementArray.end();
-		++x)
-	{
-		InputElement* lElement = *x;
-		lElement->SetFunctor(pFunctor->CreateCopy());
-	}
-
-	delete pFunctor;
+	delete (pFunctor);
 }
 
 unsigned InputDevice::GetCalibrationDataSize()
@@ -392,10 +389,7 @@ void InputDevice::SetCalibrationData(Lepra::uint8* pData)
 
 InputManager::InputManager()
 {
-	for (int i = 0; i < 256; i++)
-	{
-		mKeyDown[i] = false;
-	}
+	::memset(mKeyDown, 0, sizeof(mKeyDown));
 }
 
 InputManager::~InputManager()
@@ -440,6 +434,104 @@ void InputManager::RemoveMouseInputObserver(MouseInputObserver* pListener)
 bool InputManager::ReadKey(KeyCode pKeyCode)
 {
 	return (mKeyDown[(int)pKeyCode]);
+}
+
+Lepra::String InputManager::GetKeyName(KeyCode pKeyCode)
+{
+	const Lepra::tchar* lKeyName = 0;
+#define X(name)	case IN_KBD_##name:	lKeyName = _T(#name);	break
+	switch (pKeyCode)
+	{
+		X(BACKSPACE);
+		X(TAB);
+		X(ENTER);
+		X(LSHIFT);
+		X(LCTRL);
+		X(LALT);
+		X(PAUSE);
+		X(CAPS_LOCK);
+		X(ESC);
+		X(SPACE);
+		X(PGUP);
+		X(PGDOWN);
+		X(END);
+		X(HOME);
+		X(LEFT);
+		X(UP);
+		X(RIGHT);
+		X(DOWN);
+		X(PRINT_SCREEN);
+		X(INSERT);
+		X(DEL);
+		X(LWIN);
+		X(RWIN);
+		X(CONTEXT_MENU);
+		X(NUMPAD_0);
+		X(NUMPAD_1);
+		X(NUMPAD_2);
+		X(NUMPAD_3);
+		X(NUMPAD_4);
+		X(NUMPAD_5);
+		X(NUMPAD_6);
+		X(NUMPAD_7);
+		X(NUMPAD_8);
+		X(NUMPAD_9);
+		X(NUMPAD_MUL);
+		X(NUMPAD_PLUS);
+		X(NUMPAD_MINUS);
+		X(NUMPAD_DOT);
+		X(NUMPAD_DIV);
+		X(F1);
+		X(F2);
+		X(F3);
+		X(F4);
+		X(F5);
+		X(F6);
+		X(F7);
+		X(F8);
+		X(F9);
+		X(F10);
+		X(F11);
+		X(F12);
+		X(NUM_LOCK);
+		X(SCROLL_LOCK);
+		X(QUICK_BACK);
+		X(QUICK_FORWARD);
+		X(QUICK_REFRESH);
+		X(QUICK_STOP);
+		X(QUICK_SEARCH);
+		X(QUICK_FAVORITES);
+		X(QUICK_WEB_HOME);
+		X(QUICK_SOUND_MUTE);
+		X(QUICK_DECR_VOLUME);
+		X(QUICK_INCR_VOLUME);
+		X(QUICK_NAV_RIGHT);
+		X(QUICK_NAV_LEFT);
+		X(QUICK_NAV_STOP);
+		X(QUICK_NAV_PLAYPAUSE);
+		X(QUICK_MAIL);
+		X(QUICK_MEDIA);
+		X(QUICK_MY_COMPUTER);
+		X(QUICK_CALCULATOR);
+		X(DIAERESIS);
+		X(PLUS);
+		X(COMMA);
+		X(MINUS);
+;		X(DOT);
+		X(APOSTROPHE);
+		X(ACUTE);
+		X(PARAGRAPH);
+		X(COMPARE);
+		X(RSHIFT);
+		X(RCTRL);
+		X(RALT);
+	}
+#undef X
+	if (lKeyName)
+	{
+		return (lKeyName);
+	}
+	return (Lepra::String((Lepra::tchar)pKeyCode, 1));
 }
 
 void InputManager::SetKey(KeyCode pKeyCode, bool pValue)
@@ -503,18 +595,15 @@ void InputManager::PollEvents()
 	}
 }
 
-void InputManager::SetFunctor(InputFunctor* pFunctor)
+void InputManager::AddFunctor(InputFunctor* pFunctor)
 {
 	DeviceList::iterator x;
-	for (x = mDeviceList.begin(); 
-		x != mDeviceList.end(); 
-		++x)
+	for (x = mDeviceList.begin(); x != mDeviceList.end(); ++x)
 	{
 		InputDevice* lDevice = *x;
-		lDevice->SetFunctor(pFunctor->CreateCopy());
+		lDevice->AddFunctor(pFunctor->CreateCopy());
 	}
-
-	delete pFunctor;
+	delete (pFunctor);
 }
 
 void InputManager::ActivateAll()

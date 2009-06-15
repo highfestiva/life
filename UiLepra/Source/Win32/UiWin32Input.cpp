@@ -20,9 +20,9 @@ InputManager* InputManager::CreateInputManager(DisplayManager* pDisplayManager)
 	return (new Win32InputManager((Win32DisplayManager*)pDisplayManager));
 }
 
-Win32InputElement::Win32InputElement(InputElement::Type pType, Win32InputDevice* pParentDevice,
-	LPCDIDEVICEOBJECTINSTANCE pElement, unsigned pFieldOffset):
-	InputElement(pType, pParentDevice),
+Win32InputElement::Win32InputElement(Type pType, Interpretation pInterpretation, int pTypeIndex,
+	Win32InputDevice* pParentDevice, LPCDIDEVICEOBJECTINSTANCE pElement, unsigned pFieldOffset):
+	InputElement(pType, pInterpretation, pTypeIndex, pParentDevice),
 	mElement(pElement),
 	mMin(MAX_INT),
 	mMax(MIN_INT)
@@ -54,8 +54,7 @@ void Win32InputElement::SetValue(int pValue)
 	Win32InputDevice* lDevice = (Win32InputDevice*)GetParentDevice();
 	Win32InputManager* lManager = (Win32InputManager*)lDevice->GetManager();
 
-//	if ((mElement->dwType & DIDFT_RELAXIS) != 0)
-	if (lDevice->HaveRelativeAxes() == true)
+	if (GetInterpretation() == RELATIVE_AXIS)
 	{
 		// Treat this as a relative axis. Since we don't know the maximum value
 		// of this axis (can probably be infinitly large), we need to scale it down
@@ -66,62 +65,19 @@ void Win32InputElement::SetValue(int pValue)
 		// To give the relative mouse coordinates the same unit as for absolute ones,
 		// we will divide the value by half the screen width and height.
 
-		if (GetInterpretation() == MOUSE_WHEEL)
-		{
-			InputElement::SetValue((double)pValue / 1000.0);
-		}
-		else
+		if (GetTypeIndex() <= 1)	// Mouse of sorts.
 		{
 			InputElement::SetValue(2.0 * (double)pValue / (double)lManager->mScreenWidth);
 		}
-
-		if (GetParentDevice() == lManager->GetMouse())
+		else
 		{
-			// Update the mouse delta coordinates in the input manager.
-			if (GetInterpretation() == Y_AXIS)
-			{
-				lManager->mMouseDY = GetValue();
-			}
-			else if(GetInterpretation() == MOUSE_WHEEL)
-			{
-				lManager->mMouseDWheel = GetValue();
-			}
-			else
-			{
-				lManager->mMouseDX = GetValue();
-			}
+			InputElement::SetValue((double)pValue / 1000.0);
 		}
 	}
-	else
+	else if (mMin < mMax)
 	{
-		double lPrevValue = GetValue();
-
-		// Treat this as an absolute axis, centered about 0.
-		if (pValue > 0)
-		{
-			InputElement::SetValue((double)pValue / (double)mMax);
-		}
-		else if(pValue < 0)
-		{
-			InputElement::SetValue(-(double)pValue / (double)mMin);
-		}
-
-		if (GetParentDevice() == lManager->GetMouse())
-		{
-			// Update the mouse delta coordinates in the input manager.
-			if (GetInterpretation() == Y_AXIS)
-			{
-				lManager->mMouseDY = GetValue() - lPrevValue;
-			}
-			else if(GetInterpretation() == MOUSE_WHEEL)
-			{
-				lManager->mMouseDWheel = GetValue() - lPrevValue;
-			}
-			else
-			{
-				lManager->mMouseDX = GetValue() - lPrevValue;
-			}
-		}
+		// Scale to +-1.
+		InputElement::SetValue((pValue*2.0-(mMax+mMin)) / (double)(mMax-mMin));
 	}
 }
 
@@ -142,6 +98,12 @@ void Win32InputElement::SetCalibrationData(const Lepra::uint8* pData)
 	mMax = ((unsigned*)pData)[1];
 }
 
+
+
+LOG_CLASS_DEFINE(UI_INPUT, Win32InputElement);
+
+
+
 /*
 	class Win32InputDevice
 */
@@ -149,9 +111,10 @@ void Win32InputElement::SetCalibrationData(const Lepra::uint8* pData)
 Win32InputDevice::Win32InputDevice(LPDIRECTINPUTDEVICE8 pDIDevice, LPCDIDEVICEINSTANCE pInfo, InputManager* pManager):
 	InputDevice(pManager),
 	mDIDevice(pDIDevice),
-	mButtonCount(0),
 	mRelAxisCount(0),
-	mAbsAxisCount(0)
+	mAbsAxisCount(0),
+	mAnalogueCount(0),
+	mButtonCount(0)
 {
 	SetIdentifier(pInfo->tszInstanceName);
 
@@ -171,13 +134,14 @@ Win32InputDevice::Win32InputDevice(LPDIRECTINPUTDEVICE8 pDIDevice, LPCDIDEVICEIN
 	mDataFormat.dwNumObjs  = lNumElements;
 	mDataFormat.rgodf      = new DIOBJECTDATAFORMAT[lNumElements];
 
-	if (mAbsAxisCount > mRelAxisCount)
+	mDataFormat.dwFlags = 0;
+	if (mAbsAxisCount > 0)
 	{
-		mDataFormat.dwFlags    = DIDF_ABSAXIS;
+		mDataFormat.dwFlags |= DIDF_ABSAXIS;
 	}
-	else
+	if (mRelAxisCount > 0)
 	{
-		mDataFormat.dwFlags    = DIDF_RELAXIS;
+		mDataFormat.dwFlags |= DIDF_RELAXIS;
 	}
 
 	memset(mDataFormat.rgodf, 0, mDataFormat.dwObjSize * lNumElements);
@@ -220,80 +184,52 @@ BOOL CALLBACK Win32InputDevice::EnumElementsCallback(LPCDIDEVICEOBJECTINSTANCE l
 {
 	Win32InputDevice* lDevice = (Win32InputDevice*)pvRef;
 
+	Win32InputElement* lElement = 0;
 	// Is this an analogue or digital element?
 	if ((lpddoi->dwType & DIDFT_ABSAXIS) != 0 ||
 		(lpddoi->dwType & DIDFT_AXIS)    != 0 ||
 		(lpddoi->dwType & DIDFT_POV)     != 0 ||
 		(lpddoi->dwType & DIDFT_RELAXIS) != 0)
 	{
+		InputElement::Interpretation lInterpretation = InputElement::ABSOLUTE_AXIS;
 		// Count number of relative and absolute axes.
-		// These values are used later on in the constructor to determine 
+		// These values are used later on in the constructor to determine
 		// the data format.
 		if ((lpddoi->dwType & DIDFT_RELAXIS) != 0)
 		{
-			lDevice->mRelAxisCount++;
+			++lDevice->mRelAxisCount;
+			lInterpretation = InputElement::RELATIVE_AXIS;
 		}
-		if ((lpddoi->dwType & DIDFT_ABSAXIS) != 0)
+		else if ((lpddoi->dwType & DIDFT_ABSAXIS) != 0)
 		{
 			lDevice->mAbsAxisCount++;
 		}
 
-		Win32InputElement* lElement = 
-			new Win32InputElement(InputElement::ANALOGUE,
-								  lDevice,
-								  lpddoi,
-								  (unsigned)lDevice->mElementArray.size() * sizeof(unsigned));
-
-		lElement->SetIdentifier(lpddoi->tszName);
-		lDevice->mElementArray.push_back(lElement);
-
-		// Set the preferred interpretation of this element.
-		if (lpddoi->guidType == GUID_XAxis ||
-			lpddoi->guidType == GUID_RxAxis ||
-			lpddoi->guidType == GUID_Slider)
-		{
-			lElement->SetInterpretation(InputElement::X_AXIS);
-		}
-		else if(lpddoi->guidType == GUID_YAxis ||
-				lpddoi->guidType == GUID_RyAxis)
-		{
-			lElement->SetInterpretation(InputElement::Y_AXIS);
-		}
-		else if(lpddoi->guidType == GUID_ZAxis ||
-				lpddoi->guidType == GUID_RzAxis)
-		{
-			if (lDevice->GetIdentifier() == _T("Mouse"))
-			{
-				// This is for sure a mouse wheel.
-				lElement->SetInterpretation(InputElement::MOUSE_WHEEL);
-			}
-			else
-			{
-				lElement->SetInterpretation(InputElement::Z_AXIS);
-			}
-		}
+		lElement = new Win32InputElement(InputElement::ANALOGUE, lInterpretation, lDevice->mAnalogueCount,
+			lDevice, lpddoi, (unsigned)lDevice->mElementArray.size() * sizeof(unsigned));
+		++lDevice->mAnalogueCount;
 	}
 	else if((lpddoi->dwType&DIDFT_BUTTON)    != 0 ||
 			(lpddoi->dwType&DIDFT_PSHBUTTON) != 0 ||
 			(lpddoi->dwType&DIDFT_TGLBUTTON) != 0)
 	{
-		Win32InputElement* lElement = new Win32InputElement(InputElement::DIGITAL,
-			lDevice, lpddoi, (unsigned)lDevice->mElementArray.size() * sizeof(unsigned));
-
-		lElement->SetIdentifier(lpddoi->tszName);
-		lDevice->mElementArray.push_back(lElement);
-
-		// Set the preferred interpretation of this element.
-		lElement->SetInterpretation(
-			(InputElement::Interpretation)((int)InputElement::BUTTON1 + lDevice->mButtonCount));
-		lDevice->mButtonCount++;
+		InputElement::Interpretation lInterpretation = (InputElement::Interpretation)((int)InputElement::BUTTON1 + lDevice->mButtonCount);
+		lElement = new Win32InputElement(InputElement::DIGITAL, lInterpretation,
+			lDevice->mButtonCount, lDevice, lpddoi, (unsigned)lDevice->mElementArray.size() * sizeof(unsigned));
+		++lDevice->mButtonCount;
 	}
 	else if(lpddoi->dwType&DIDFT_FFACTUATOR)
 	{
 		// TODO: handle force feedback elements!
 	}
 
-	return DIENUM_CONTINUE;
+	if (lElement)
+	{
+		lElement->SetIdentifier(lpddoi->tszName);
+		lDevice->mElementArray.push_back(lElement);
+	}
+
+	return (DIENUM_CONTINUE);
 }
 
 void Win32InputDevice::Activate()
@@ -359,12 +295,13 @@ void Win32InputDevice::PollEvents()
 		}
 
 		bool lMore = true;
-		while (lMore == true)
+		while (lMore)
 		{
 			DWORD lInOut = (DWORD)mElementArray.size();
-			mDIDevice->GetDeviceData(sizeof(mDeviceObjectData[0]), mDeviceObjectData, &lInOut, 0);
+			lHR = mDIDevice->GetDeviceData(sizeof(mDeviceObjectData[0]), mDeviceObjectData, &lInOut, 0);
+			lMore = (lHR == DI_OK);
 
-			for (unsigned i = 0; i < lInOut; i++)
+			for (unsigned i = 0; lMore && i < lInOut; i++)
 			{
 				// The following is a hack. I don't know if it works as 
 				// intended on non-Swedish keyboards. The issue is 
@@ -390,7 +327,7 @@ void Win32InputDevice::PollEvents()
 				else
 				{
 					int lValue = mDeviceObjectData[i].dwData;
-					SetElementValue(lElement, lValue == 0 ? 0.0 : 1.0);
+					SetElementValue(lElement, (lValue&0x80)? 1.0 : 0.0);
 				}
 			}
 
@@ -420,17 +357,13 @@ Win32InputManager::Win32InputManager(Win32DisplayManager* pDisplayManager):
 	mInitialized(false),
 	mScreenWidth(0),
 	mScreenHeight(0),
-	mMouseDX(0),
-	mMouseDY(0),
-	mCursorDX(0),
-	mCursorDY(0),
 	mCursorX(0),
 	mCursorY(0),
-	mPrevCursorX(0),
-	mPrevCursorY(0),
 	mMouse(0),
 	mKeyboard(0)
 {
+	::memset(&mTypeCount, 0, sizeof(mTypeCount));
+
 	HRESULT lHR;
 	
 	// Create the DirectInput object.
@@ -454,10 +387,6 @@ Win32InputManager::Win32InputManager(Win32DisplayManager* pDisplayManager):
 	}
 
 	Refresh();
-
-	mMouseButton[0] = false;
-	mMouseButton[1] = false;
-	mMouseButton[2] = false;
 
 	AddObserver();
 
@@ -521,57 +450,31 @@ bool Win32InputManager::OnMessage(int pMsg, int pwParam, long plParam)
 		case WM_CHAR:
 		{
 			lConsumed = InputManager::NotifyOnChar((Lepra::tchar)pwParam);
-		} break;
+		}
+		break;
 		case WM_LBUTTONDBLCLK:
 		{
 			lConsumed = NotifyMouseDoubleClick();
-		} break;
-		case WM_LBUTTONDOWN:
-		{
-			mMouseButton[0] = true;
-		} break;
-		case WM_RBUTTONDOWN:
-		{
-			mMouseButton[1] = true;
-		} break;
-		case WM_MBUTTONDOWN:
-		{
-			mMouseButton[2] = true;
-		} break;
-		case WM_LBUTTONUP:
-		{
-			mMouseButton[0] = false;
-		} break;
-		case WM_RBUTTONUP:
-		{
-			mMouseButton[1] = false;
-		} break;
-		case WM_MBUTTONUP:
-		{
-			mMouseButton[2] = false;
-		} break;
+		}
+		break;
 		case WM_MOUSEMOVE:
 		{
 			int lX = LOWORD(plParam);
 			int lY = HIWORD(plParam);
-
-			mPrevCursorX = mCursorX;
-			mPrevCursorY = mCursorY;
 
 			mCursorX = 2.0 * (double)lX / (double)mScreenWidth  - 1.0;
 			mCursorY = 2.0 * (double)lY / (double)mScreenHeight - 1.0;
 
 			mCursorX = mCursorX < -1.0 ? -1.0 : (mCursorX > 1.0 ? 1.0 : mCursorX);
 			mCursorY = mCursorY < -1.0 ? -1.0 : (mCursorY > 1.0 ? 1.0 : mCursorY);
-
-			mCursorDX = mCursorX - mPrevCursorX;
-			mCursorDY = mCursorY - mPrevCursorY;
-		} break;
+		}
+		break;
 		case WM_KEYUP:
 		{
 			SetKey((KeyCode)pwParam, plParam, false);
 			lConsumed = NotifyOnKeyUp((KeyCode)pwParam);
-		}break;
+		}
+		break;
 		case WM_KEYDOWN:
 		{
 			SetKey((KeyCode)pwParam, plParam, true);
@@ -582,12 +485,14 @@ bool Win32InputManager::OnMessage(int pMsg, int pwParam, long plParam)
 		{
 			SetKey((KeyCode)pwParam, plParam, false);
 			lConsumed = NotifyOnKeyUp((KeyCode)pwParam);
-		} break;
+		}
+		break;
 		case WM_SYSKEYDOWN:
 		{
 			SetKey((KeyCode)pwParam, plParam, true);
 			lConsumed = NotifyOnKeyDown((KeyCode)pwParam);
-		} break;
+		}
+		break;
 	}
 	return (lConsumed);
 }
@@ -624,37 +529,37 @@ BOOL CALLBACK Win32InputManager::EnumDeviceCallback(LPCDIDEVICEINSTANCE lpddi, L
 		return DIENUM_STOP;
 	}
 
-	// Create a device and add it to the list of devices.
 	Win32InputDevice* lDevice = new Win32InputDevice(lDIDevice, lpddi, lInputManager);
-	lInputManager->mDeviceList.push_back(lDevice);
-
 	// Since we can't detect the mouse and keyboard by string comparisons 
 	// due to the language of the OS, we have to make a qualified guess.
-	if (lInputManager->mMouse == 0 &&
-	   lDevice->GetNumAnalogueElements() >= 2 &&
+	if (lDevice->GetNumAnalogueElements() >= 2 &&
 	   lDevice->HaveRelativeAxes() == true &&
 	   lDevice->GetNumDigitalElements() >= 1)
 	{
-		lInputManager->mMouse = lDevice;
+		lDevice->SetInterpretation(InputDevice::TYPE_MOUSE, lInputManager->mTypeCount[InputDevice::TYPE_MOUSE]);
+		++lInputManager->mTypeCount[InputDevice::TYPE_MOUSE];
+		if (lInputManager->mMouse == 0)
+		{
+			lInputManager->mMouse = lDevice;
+		}
 	}
-
-	if (lInputManager->mKeyboard == 0 &&
-	   lDevice->GetNumDigitalElements() >= 70)
+	else if (lDevice->GetNumDigitalElements() >= 64)
 	{
-		lInputManager->mKeyboard = lDevice;
+		lDevice->SetInterpretation(InputDevice::TYPE_KEYBOARD, lInputManager->mTypeCount[InputDevice::TYPE_KEYBOARD]);
+		++lInputManager->mTypeCount[InputDevice::TYPE_KEYBOARD];
+		if (lInputManager->mKeyboard == 0)
+		{
+			lInputManager->mKeyboard = lDevice;
+		}
 	}
+	else
+	{
+		lDevice->SetInterpretation(InputDevice::TYPE_OTHER, lInputManager->mTypeCount[InputDevice::TYPE_OTHER]);
+		++lInputManager->mTypeCount[InputDevice::TYPE_OTHER];
+	}
+	lInputManager->mDeviceList.push_back(lDevice);
 
-	return DIENUM_CONTINUE;
-}
-
-void Win32InputManager::PollEvents()
-{
-	// Reset mouse delta coordinates every frame.
-	mMouseDX = 0;
-	mMouseDY = 0;
-	mMouseDWheel = 0;
-
-	InputManager::PollEvents();
+	return (DIENUM_CONTINUE);
 }
 
 void Win32InputManager::ShowCursor()
@@ -667,48 +572,6 @@ void Win32InputManager::HideCursor()
 	::ShowCursor(FALSE);
 }
 
-bool Win32InputManager::GetMouseButtonState(unsigned pButtonIndex)
-{
-	if (pButtonIndex < 3)
-	{
-		return mMouseButton[pButtonIndex];
-	}
-	else
-	{
-		return false;
-	}
-}
-
-double Win32InputManager::GetMouseDeltaX()
-{
-	return mMouseDX;
-}
-
-double Win32InputManager::GetMouseDeltaY()
-{
-	return mMouseDY;
-}
-
-double Win32InputManager::GetCursorDeltaX()
-{
-	return mCursorDX;
-}
-
-double Win32InputManager::GetCursorDeltaY()
-{
-	return mCursorDY;
-}
-
-double Win32InputManager::GetMouseDeltaUnit()
-{
-	return 2.0 / (double)mScreenWidth;
-}
-
-double Win32InputManager::GetMouseDeltaWheel()
-{
-	return mMouseDWheel;
-}
-
 double Win32InputManager::GetCursorX()
 {
 	return mCursorX;
@@ -717,30 +580,6 @@ double Win32InputManager::GetCursorX()
 double Win32InputManager::GetCursorY()
 {
 	return mCursorY;
-}
-
-void Win32InputManager::SetCursorX(double x)
-{
-	mCursorX = x < -1.0 ? -1.0 : (x > 1.0 ? 1.0 : x);
-
-	int lX = (int)((mCursorX + 1.0) * 0.5 * (double)mScreenWidth);
-	int lY = (int)((mCursorY + 1.0) * 0.5 * (double)mScreenHeight);
-
-	RECT lWinRect;
-	::GetWindowRect(mDisplayManager->GetHWND(), &lWinRect);
-	::SetCursorPos(lWinRect.left + lX, lWinRect.top + lY);
-}
-
-void Win32InputManager::SetCursorY(double y)
-{
-	mCursorY = y < -1.0 ? -1.0 : (y > 1.0 ? 1.0 : y);
-
-	int lX = (int)((mCursorX + 1.0) * 0.5 * (double)mScreenWidth);
-	int lY = (int)((mCursorY + 1.0) * 0.5 * (double)mScreenHeight);
-
-	RECT lWinRect;
-	::GetWindowRect(mDisplayManager->GetHWND(), &lWinRect);
-	::SetCursorPos(lWinRect.left + lX, lWinRect.top + lY);
 }
 
 const InputDevice* Win32InputManager::GetKeyboard() const

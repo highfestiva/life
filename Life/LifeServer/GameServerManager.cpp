@@ -16,6 +16,7 @@
 #include "../../Lepra/Include/Network.h"
 #include "../../Lepra/Include/SystemManager.h"
 #include "../LifeDefinitions.h"
+#include "../RtVar.h"
 #include "Client.h"
 #include "ServerConsoleManager.h"
 
@@ -60,7 +61,7 @@ GameServerManager::GameServerManager(Cure::RuntimeVariableScope* pVariableScope,
 	SetNetworkAgent(new Cure::NetworkServer(pVariableScope, this));
 
 	SetConsoleManager(new ServerConsoleManager(this, GetVariableScope(), pConsoleLogger, new Lepra::StdioConsolePrompt()));
-	GetConsoleManager()->PushYieldCommand(_T("execute-file ")+GetApplicationCommandFilename());
+	GetConsoleManager()->PushYieldCommand(_T("execute-file -i ")+GetApplicationCommandFilename());
 	GetConsoleManager()->Start();
 }
 
@@ -296,7 +297,7 @@ bool GameServerManager::Initialize()
 			UserContextObjectInfoResource::TypeLoadCallback(this, &GameServerManager::ContextObjectLoadCallback));
 	}
 
-	Lepra::String lAcceptAddress = CURE_RTVAR_GETSET(GetVariableScope(), "Login.AcceptAddress", _T("0.0.0.0:16650"));
+	Lepra::String lAcceptAddress = CURE_RTVAR_GETSET(GetVariableScope(), RTVAR_NETWORK_LISTEN_ADDRESS, _T("0.0.0.0:16650"));
 	if (lOk)
 	{
 		Lepra::SocketAddress lAddress;

@@ -552,6 +552,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ClientOptionsManager.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\GameClientMasterTicker.cpp"
 				>
 			</File>
@@ -583,6 +587,14 @@
 			</File>
 			<File
 				RelativePath=".\ClientLoginView.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ClientOptions.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ClientOptionsManager.h"
 				>
 			</File>
 			<File

@@ -624,7 +624,7 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData)
 						mLog.AError("Could not fetch the right type of network positional!");
 						return;
 					}
-					assert(lData->mValue == 0 || lData->mValue == 1 || lData->mValue == -1);
+					assert(lData->mValue >= -1 && lData->mValue <= 1);
 					SetEnginePower(lEngine->GetControllerIndex(), lData->mValue, 0);
 				}
 				break;
@@ -640,7 +640,7 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData)
 						mLog.AError("Could not fetch the right type of network positional!");
 						return;
 					}
-					assert(lData->mValue == 0 || lData->mValue == 1 || lData->mValue == -1);
+					assert(lData->mValue >= -1 && lData->mValue <= 1);
 					assert(!lData->mBool);
 					unsigned lAnalogueFlag = (lData->mBool)? 0x80 : 0;
 					SetEnginePower(lEngine->GetControllerIndex()|lAnalogueFlag, lData->mValue, 0);
@@ -658,7 +658,7 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData)
 						mLog.AError("Could not fetch the right type of network positional!");
 						return;
 					}
-					assert(lData->mValue == 0 || lData->mValue == 1 || lData->mValue == -1);
+					assert(lData->mValue >= -1 && lData->mValue <= 1);
 					SetEnginePower(lEngine->GetControllerIndex(), lData->mValue, 0);
 				}
 				break;
@@ -674,7 +674,7 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData)
 						mLog.AError("Could not fetch the right type of network positional!");
 						return;
 					}
-					assert(lData->mValue == 0 || lData->mValue == 1 || lData->mValue == -1);
+					assert(lData->mValue >= -1 && lData->mValue <= 1);
 					SetEnginePower(lEngine->GetControllerIndex(), lData->mValue, 0);
 				}
 				break;

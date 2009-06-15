@@ -25,10 +25,8 @@ class Win32InputDevice;
 class Win32InputElement: public UiLepra::InputElement
 {
 public:
-	Win32InputElement(UiLepra::InputElement::Type pType,
-					  Win32InputDevice* pParentDevice,
-					  LPCDIDEVICEOBJECTINSTANCE pElement,
-					  unsigned pFieldOffset);
+	Win32InputElement(UiLepra::InputElement::Type pType, Interpretation pInterpretation, int pTypeIndex,
+		Win32InputDevice* pParentDevice, LPCDIDEVICEOBJECTINSTANCE pElement, unsigned pFieldOffset);
 	virtual ~Win32InputElement();
 
 	const LPCDIDEVICEOBJECTINSTANCE GetDirectInputElement() const;
@@ -56,6 +54,8 @@ private:
 
 	int mMin;
 	int mMax;
+
+	LOG_CLASS_DECLARE();
 };
 
 const LPCDIDEVICEOBJECTINSTANCE Win32InputElement::GetDirectInputElement() const
@@ -91,10 +91,10 @@ private:
 	LPDIRECTINPUTDEVICE8 mDIDevice;
 	bool mReacquire;
 
-	// Only used in element enumeration.
-	int mButtonCount;
 	int mRelAxisCount;
 	int mAbsAxisCount;
+	int mAnalogueCount;
+	int mButtonCount;
 
 	// The DirectInput data format description of mInputData.
 	DIDATAFORMAT mDataFormat;
@@ -125,22 +125,11 @@ public:
 	virtual const UiLepra::InputDevice* GetMouse() const;
 	virtual UiLepra::InputDevice* GetMouse();
 
-	virtual void PollEvents();
-
 	virtual void ShowCursor();
 	virtual void HideCursor();
-	virtual bool GetMouseButtonState(unsigned pButtonIndex);
-	virtual double GetMouseDeltaX();
-	virtual double GetMouseDeltaY();
-	virtual double GetCursorDeltaX();
-	virtual double GetCursorDeltaY();
-	virtual double GetMouseDeltaUnit();
-	virtual double GetMouseDeltaWheel();
 
 	virtual double GetCursorX();
 	virtual double GetCursorY();
-	virtual void SetCursorX(double x);
-	virtual void SetCursorY(double y);
 
 	bool IsInitialized();
 
@@ -169,20 +158,13 @@ private:
 	int mScreenHeight;
 
 	// Mouse related stuff.
-	double mMouseDX;
-	double mMouseDY;
-	double mMouseDWheel;
-	double mCursorDX;
-	double mCursorDY;
 	double mCursorX;
 	double mCursorY;
-	double mPrevCursorX;
-	double mPrevCursorY;
-	bool mMouseButton[3];
 
 	// Default devices.
 	UiLepra::InputDevice* mKeyboard;
 	UiLepra::InputDevice* mMouse;
+	int mTypeCount[3];
 };
 
 bool Win32InputManager::IsInitialized()

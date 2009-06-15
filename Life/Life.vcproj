@@ -473,6 +473,10 @@
 				RelativePath="LifeDefinitions.h"
 				>
 			</File>
+			<File
+				RelativePath=".\RtVar.h"
+				>
+			</File>
 		</Filter>
 	</Files>
 	<Globals>

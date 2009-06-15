@@ -13,8 +13,9 @@
 #include "../../Lepra/Include/Timer.h"
 #include "../../UiTbc/Include/GUI/UiTextArea.h"
 #include "../../UiTbc/Include/GUI/UiConsoleLogListener.h"
-#include "ClientLoginView.h"
 #include "ClientConsoleManager.h"
+#include "ClientLoginView.h"
+#include "ClientOptionsManager.h"
 #include "GfxContextResource.h"
 #include "InputObserver.h"
 
@@ -131,7 +132,7 @@ private:
 	Lepra::Vector3DF mCameraOrientation;		// TODO: remove hack (should context object controlled)!
 	Cure::ObjectPositionalData mNetworkOutputGhost;	// TODO: remove hack (should be one per controllable object)!
 	bool mAllowMovementInput;
-	int mMoveKeys;	// TODO: remove hack!
+	Options::ClientOptionsManager mOptions;
 	UiTbc::Window* mLoginWindow;
 	Lepra::String mConnectUserName;
 	Lepra::String mConnectServerAddress;
