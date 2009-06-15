@@ -334,7 +334,7 @@ void GameClientSlaveManager::TickUiInput()
 			const bool IS_MOVING_FORWARD = true;
 			lPower = v.mForward - v.mBackward - (IS_MOVING_FORWARD? 0.0f : v.mBreakAndBack);
 			lObject->SetEnginePower(0, lPower, mCameraOrientation.x);
-			lPower = v.mLeft-v.mRight;
+			lPower = v.mRight-v.mLeft;
 			lObject->SetEnginePower(1, lPower, mCameraOrientation.x);
 			lPower = std::max(v.mUp, v.mHandBreak)-std::max(v.mDown, v.mBreak);	// TODO: separate!
 			lObject->SetEnginePower(2, lPower, mCameraOrientation.x);
