@@ -714,7 +714,7 @@ TcpVSocket* TcpMuxSocket::Accept()
 	TcpVSocket* lSocket = 0;
 	while (IsOpen() && (lSocket = PollAccept()) == 0)
 	{
-		mAcceptSemaphore.Wait(0.5);
+		mAcceptSemaphore.Wait(10.0);
 	}
 	return (lSocket);
 }
@@ -1043,7 +1043,7 @@ void TcpMuxSocket::SelectThreadEntry()
 		}
 		else
 		{
-			mConnectedSocketSemaphore.Wait(2.0f);
+			mConnectedSocketSemaphore.Wait(10.0f);
 		}
 	}
 }

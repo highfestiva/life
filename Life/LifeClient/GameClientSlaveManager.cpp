@@ -487,7 +487,7 @@ bool GameClientSlaveManager::TickNetworkOutput()
 			lObject->SetNetworkObjectType(Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
 			const Cure::ObjectPositionalData* lPositionalData = 0;
 			lObject->UpdateFullPosition(lPositionalData);
-			if (lPositionalData)
+			if (lPositionalData || lObject->QueryResendTime(0.1f, true))
 			{
 				if (!lPositionalData->IsSameStructure(mNetworkOutputGhost))
 				{
@@ -781,14 +781,14 @@ void GameClientSlaveManager::SetMovement(Cure::GameObjectId pInstanceId, Lepra::
 void GameClientSlaveManager::OnCollision(const Lepra::Vector3DF& pForce, const Lepra::Vector3DF& pTorque,
 	Cure::ContextObject* pObject1, Cure::ContextObject* pObject2)
 {
-	pForce;
-	pTorque;
-	pObject1;
-	pObject2;
-	/*if (pObject->GetNetworkObjectType() == Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED)
+	const float lForceSquare = pForce.GetLengthSquared();
+	const float lTorqueSquare = pTorque.GetLengthSquared();
+	if (pObject2 && pObject1 != pObject2 && pObject1->GetInstanceId() == mAvatarId &&
+		(lForceSquare > 400.0f || lTorqueSquare > 800.0f) && pObject2->GetMass() > 0)
 	{
-		log_adebug("Collision.");
-	}*/
+		log_adebug("Collided hard with something dynamic, preventing positional transmission for some time.");
+		pObject1->QueryResendTime(0, false);
+	}
 }
 
 void GameClientSlaveManager::OnStopped(Cure::ContextObject*, TBC::PhysicsEngine::BodyID)

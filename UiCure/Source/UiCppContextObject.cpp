@@ -71,7 +71,7 @@ void CppContextObject::OnPhysicsTick()
 			const float lClose = 1.5f;
 			if (lPosition.GetDistanceSquared(lPhysicsTransform.GetPosition()) < lClose*lClose)
 			{
-				//lPhysicsTransform.SetPosition(Lepra::Math::Lerp(lPosition, lPhysicsTransform.GetPosition(), 0.5f));
+				lPhysicsTransform.SetPosition(Lepra::Math::Lerp(lPosition, lPhysicsTransform.GetPosition(), 0.5f));
 			}
 		}
 		lGeometry->SetTransformation(lPhysicsTransform);

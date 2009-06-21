@@ -52,12 +52,12 @@ void Application::Init()
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_PHYSICS_FPS, PHYSICS_FPS);
 
 	mConsoleLogger = CreateConsoleLogListener();
-	mConsoleLogger->SetLevelThreashold(Lepra::Log::LEVEL_INFO);
+	//mConsoleLogger->SetLevelThreashold(Lepra::Log::LEVEL_INFO);
 #ifndef NO_LOG_DEBUG_INFO
 	mDebugLogger = new Lepra::DebuggerLogListener();
 #endif // Showing debug information.
 	mFileLogger = new Lepra::FileLogListener(_TEXT_ALTERNATIVE(GetName()+".log", GetName()+L"U.log"));
-	mFileLogger->SetLevelThreashold(Lepra::Log::LEVEL_INFO);
+	//mFileLogger->SetLevelThreashold(Lepra::Log::LEVEL_INFO);
 	mFileLogger->WriteLog(_T("\n\n"), Lepra::Log::LEVEL_INFO);
 	mPerformanceLogger = new Lepra::FileLogListener(_TEXT_ALTERNATIVE(GetName()+"Performance.log", GetName()+L"PerformanceU.log"));
 	mMemLogger = new Lepra::MemFileLogListener(100*1024);

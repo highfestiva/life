@@ -78,6 +78,7 @@ PhysicsEngine::BodyID PhysicsEngineODE::CreateSphere(const Lepra::Transformation
 	lObject->mGeomID = dCreateSphere(mSpaceID, (dReal)pRadius);
 	lObject->mTriggerListener = pTriggerListener;
 	lObject->mForceFeedbackListener = pForceListener;
+	assert(pType == STATIC || lObject->mForceFeedbackListener);
 
 	if (pType == PhysicsEngine::DYNAMIC)
 	{
@@ -115,6 +116,7 @@ PhysicsEngine::BodyID PhysicsEngineODE::CreateCylinder(const Lepra::Transformati
 
 	lObject->mTriggerListener = pTriggerListener;
 	lObject->mForceFeedbackListener = pForceListener;
+	assert(pType == STATIC || lObject->mForceFeedbackListener);
 
 	if (pType == PhysicsEngine::DYNAMIC)
 	{
@@ -149,6 +151,7 @@ PhysicsEngine::BodyID PhysicsEngineODE::CreateCapsule(const Lepra::Transformatio
 	lObject->mGeomID = dCreateCCylinder(mSpaceID, (dReal)pRadius, (dReal)pLength);
 	lObject->mTriggerListener = pTriggerListener;
 	lObject->mForceFeedbackListener = pForceListener;
+	assert(pType == STATIC || lObject->mForceFeedbackListener);
 
 	if (pType == PhysicsEngine::DYNAMIC)
 	{
@@ -183,6 +186,7 @@ PhysicsEngine::BodyID PhysicsEngineODE::CreateBox(const Lepra::TransformationF& 
 	lObject->mGeomID = ::dCreateBox(mSpaceID, (dReal)pSize.x, (dReal)pSize.y, (dReal)pSize.z);
 	lObject->mTriggerListener = pTriggerListener;
 	lObject->mForceFeedbackListener = pForceListener;
+	assert(pType == STATIC || lObject->mForceFeedbackListener);
 
 	if (pType == PhysicsEngine::DYNAMIC)
 	{
@@ -257,6 +261,7 @@ PhysicsEngine::BodyID PhysicsEngineODE::CreateTriMesh(const GeometryBase* pMesh,
 	dGeomSetData(lObject->mGeomID, lObject);
 	lObject->mTriggerListener = pTriggerListener;
 	lObject->mForceFeedbackListener = pForceListener;
+	assert(lObject->mForceFeedbackListener);
 
 //	dGeomTriMeshEnableTC(lObject->mGeomID, dBoxClass, 1);
 
@@ -459,6 +464,23 @@ void PhysicsEngineODE::SetBodyAngularAcceleration(BodyID pBodyId, const Lepra::V
 	{
 		::dBodySetTorque(lObject->mBodyID, pAngularAcceleration.x, pAngularAcceleration.y, pAngularAcceleration.z);
 	}
+}
+
+float PhysicsEngineODE::GetBodyMass(BodyID pBodyId)
+{
+	Object* lObject = (Object*)pBodyId;
+	if (lObject->mWorldID != mWorldID)
+	{
+		mLog.Errorf(_T("SetBodyData() - Body %i is not part of this world!"), pBodyId);
+		return (0);
+	}
+	if (!lObject->mBodyID)
+	{
+		return (0);	
+	}
+	dMass lMass;
+	::dBodyGetMass(lObject->mBodyID, &lMass);
+	return (lMass.mass);
 }
 
 void PhysicsEngineODE::SetBodyData(BodyID pBodyId, void* pUserData)
@@ -2684,6 +2706,13 @@ void PhysicsEngineODE::SetGravity(const Lepra::Vector3D<Lepra::float32>& pGravit
 	dWorldSetGravity(mWorldID, pGravity.x, pGravity.y, pGravity.z);
 }
 
+Lepra::Vector3DF PhysicsEngineODE::GetGravity() const
+{
+	dVector3 lGravity;
+	::dWorldGetGravity(mWorldID, lGravity);
+	return (Lepra::Vector3DF(lGravity[0], lGravity[1], lGravity[2]));
+}
+
 void PhysicsEngineODE::StepAccurate(Lepra::float32 pStepSize)
 {
 	if (pStepSize > 0)
@@ -2716,8 +2745,6 @@ void PhysicsEngineODE::StepFast(Lepra::float32 pStepSize)
 
 void PhysicsEngineODE::DoForceFeedback()
 {
-	std::hash_set<ForceFeedbackListener*, std::hash<void*> > lFeedbackDuplicateSet;
-
 	JointList::iterator lIter;
 	for (lIter = mFeedbackJointList.begin(); lIter != mFeedbackJointList.end();)
 	{
@@ -2725,22 +2752,16 @@ void PhysicsEngineODE::DoForceFeedback()
 
 		if (lJointInfo->mListener1 != lJointInfo->mListener2)
 		{
-			if (lJointInfo->mListener1 != 0 &&
-				lFeedbackDuplicateSet.find(lJointInfo->mListener1) == lFeedbackDuplicateSet.end())
+			if (lJointInfo->mListener1 != 0)
 			{
-				lFeedbackDuplicateSet.insert(lJointInfo->mListener1);
-
 				dJointFeedback* lFeedback = &lJointInfo->mFeedback;
 				lJointInfo->mListener1->OnForceApplied(
 					lJointInfo->mListener2,
 					Lepra::Vector3D<Lepra::float32>(lFeedback->f1[0], lFeedback->f1[1], lFeedback->f1[2]),
 					Lepra::Vector3D<Lepra::float32>(lFeedback->t1[0], lFeedback->t1[1], lFeedback->t1[2]));
 			}
-			if (lJointInfo->mListener2 != 0 &&
-				lFeedbackDuplicateSet.find(lJointInfo->mListener2) == lFeedbackDuplicateSet.end())
+			if (lJointInfo->mListener2 != 0)
 			{
-				lFeedbackDuplicateSet.insert(lJointInfo->mListener2);
-
 				dJointFeedback* lFeedback = &lJointInfo->mFeedback;
 				lJointInfo->mListener2->OnForceApplied(
 					lJointInfo->mListener1,

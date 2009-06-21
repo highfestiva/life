@@ -667,6 +667,18 @@ float ContextObject::GetForwardSpeed() const
 	return (lSpeed);
 }
 
+float ContextObject::GetMass() const
+{
+	float lTotalMass = 0;
+	TBC::PhysicsEngine* lPhysics = mManager->GetGameManager()->GetPhysicsManager();
+	PhysicsNodeArray::const_iterator x = mPhysicsNodeArray.begin();
+	for (; x != mPhysicsNodeArray.end(); ++x)
+	{
+		lTotalMass += lPhysics->GetBodyMass((*x).GetBodyId());
+	}
+	return (lTotalMass);
+}
+
 
 
 void ContextObject::AddPhysicsObject(const PhysicsNode& pPhysicsNode)
@@ -735,14 +747,14 @@ void ContextObject::StepGhost(ObjectPositionalData& pGhost, float pDeltaTime)
 
 
 
-bool ContextObject::QueryResendTime(float pDeltaTime)
+bool ContextObject::QueryResendTime(float pDeltaTime, bool pUnblockDelta)
 {
 	bool lOkToSend = false;
 	const float lAbsoluteTime = GetManager()->GetGameManager()->GetConstTimeManager()->GetAbsoluteTime();
-	if (mLastSendTime+pDeltaTime < lAbsoluteTime)
+	if (mLastSendTime+pDeltaTime <= lAbsoluteTime)
 	{
 		lOkToSend = true;
-		mLastSendTime = lAbsoluteTime;
+		mLastSendTime = lAbsoluteTime - (pUnblockDelta? pDeltaTime+Lepra::MathTraits<float>::FullEps() : 0);
 	}
 	return (lOkToSend);
 }

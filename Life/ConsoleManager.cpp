@@ -474,23 +474,23 @@ int ConsoleManager::OnCommand(const Lepra::String& pCommand, const Lepra::String
 							}
 							if (lSaveResult)
 							{
-								mLog.Infof(_T("Successfully wrote LifeBatch file %s to disk."), lFilename.c_str());
+								mLog.Infof(_T("Successfully wrote script %s to disk."), lFilename.c_str());
 							}
 							else
 							{
-								mLog.Errorf(_T("LifeBatch file %s was NOT sucessfully saved; error writing to disk."), lFilename.c_str());
+								mLog.Errorf(_T("Script %s was NOT sucessfully saved; error writing to disk."), lFilename.c_str());
 								lResult = 2;
 							}
 						}
 						else
 						{
-							mLog.Errorf(_T("LifeBatch file %s was NOT sucessfully saved; error opening for writing."), lFilename.c_str());
+							mLog.Errorf(_T("Script %s was NOT sucessfully saved; error opening for writing."), lFilename.c_str());
 							lResult = 2;
 						}
 					}
 					else
 					{
-						mLog.Infof(_T("LifeBatch file %s not written; already exists."), lFilename.c_str());
+						mLog.Infof(_T("Script %s not written; already exists."), lFilename.c_str());
 					}
 				}
 				else

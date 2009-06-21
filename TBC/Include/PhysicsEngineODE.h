@@ -64,6 +64,8 @@ public:
 	void GetBodyAngularAcceleration(BodyID pBodyId, Lepra::Vector3DF& pAngularAcceleration) const;
 	void SetBodyAngularAcceleration(BodyID pBodyId, const Lepra::Vector3DF& pAngularAcceleration);
 
+	virtual float GetBodyMass(BodyID pBodyId);
+
 	// Set and get user data.
 	virtual void SetBodyData(BodyID pBodyId, void* pUserData);
 	virtual void* GetBodyData(BodyID pBodyId);
@@ -189,6 +191,7 @@ public:
 	virtual void ActivateGravity(BodyID pBodyId);
 	virtual void DeactivateGravity(BodyID pBodyId);
 	virtual void SetGravity(const Lepra::Vector3D<Lepra::float32>& pGravity);
+	virtual Lepra::Vector3DF GetGravity() const;
 
 	virtual void StepAccurate(Lepra::float32 pStepSize);
 	virtual void StepFast(Lepra::float32 pStepSize);

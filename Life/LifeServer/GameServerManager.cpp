@@ -630,10 +630,10 @@ void GameServerManager::OnCollision(const Lepra::Vector3DF& pForce, const Lepra:
 		pObject1->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY)	// We only handle network object collisions.
 	{
 		// Are two dynamic objects colliding?
-		float lForceSquare = pForce.GetLengthSquared();
-		float lTorqueSquare = pTorque.GetLengthSquared();
+		const float lForceSquare = pForce.GetLengthSquared();
+		const float lTorqueSquare = pTorque.GetLengthSquared();
 		bool lSendCollision;
-		bool lAreBothDynamic = (pObject2 != 0 && pObject2->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY);
+		const bool lAreBothDynamic = (pObject2 != 0 && pObject2->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY);
 		if (lAreBothDynamic)
 		{
 			// Are two dynamic object colliding with high enough force (threshold keeps trafic low).
@@ -655,7 +655,7 @@ void GameServerManager::OnCollision(const Lepra::Vector3DF& pForce, const Lepra:
 		}
 		if (lSendCollision)
 		{
-			lSendCollision = pObject1->QueryResendTime(1.0);
+			lSendCollision = pObject1->QueryResendTime(1, false);
 		}
 		if (lSendCollision)
 		{

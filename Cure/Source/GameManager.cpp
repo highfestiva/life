@@ -104,7 +104,7 @@ bool GameManager::BeginTick()
 		// On UI-based managers we handle user input here as well.
 		TickInput();
 
-		// Sends network packets. Among other things movement of locally-controlled objects are sent.
+		// Sends network packets. Among other things, movement of locally-controlled objects are sent.
 		TickNetworkOutput();
 	}
 

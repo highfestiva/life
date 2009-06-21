@@ -53,6 +53,7 @@ public:
 	void SetFullPosition(const ObjectPositionalData& pPositionalData);
 	Lepra::Vector3DF GetPosition() const;
 	float GetForwardSpeed() const;
+	float GetMass() const;
 
 	void AddPhysicsObject(const PhysicsNode& pPhysicsNode);
 	PhysicsNode* GetPhysicsNode(PhysicsNode::Id pId) const;
@@ -61,7 +62,7 @@ public:
 
 	void StepGhost(ObjectPositionalData& pGhost, float pDeltaTime);
 
-	bool QueryResendTime(float pDeltaTime);
+	bool QueryResendTime(float pDeltaTime, bool pUnblockDelta);
 
 	virtual void OnTick(float pFrameTime) = 0;
 	virtual void OnAlarm(int pAlarmId) = 0;

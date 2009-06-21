@@ -146,12 +146,12 @@ bool GameClientMasterTicker::Tick()
 	for (x = mSlaveSet.First(); lOk && x != mSlaveSet.End(); ++x)
 	{
 		lOk = x.GetObject()->BeginTick();
+		if (lOk)
+		{
+			lOk = x.GetObject()->Render();
+		}
 	}
 
-	for (x = mSlaveSet.First(); lOk && x != mSlaveSet.End(); ++x)
-	{
-		lOk = x.GetObject()->Render();
-	}
 	mUiManager->Paint();
 
 	int lSlaveIndex = 0;
