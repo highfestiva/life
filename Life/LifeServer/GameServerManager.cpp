@@ -334,6 +334,7 @@ bool GameServerManager::InitializeTerrain()
 
 bool GameServerManager::IsPowerSaving() const
 {
+	// TODO: if there are logged-in clients, check if all have been idle lately.
 	return (GetLoggedInClientCount() == 0);
 }
 

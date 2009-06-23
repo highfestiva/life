@@ -262,6 +262,10 @@ int Packet::Receive(Lepra::TcpSocket* pSocket, void* pBuffer, int pMaxSize)
 bool Packet::ReadHeader(int& pPacketSize, const Lepra::uint8* pBuffer, int pByteCount)
 {
 	bool lOk = (PackerInt16::Unpack(pPacketSize, pBuffer, pByteCount) == PACKET_SIZE_MARKER_LENGTH);
+	if (lOk)
+	{
+		lOk = (pPacketSize > 0);
+	}
 	return (lOk);
 }
 
@@ -582,6 +586,12 @@ int MessageDeleteObject::Parse(const Lepra::uint8* pData, int pSize)
 	return (lTotalSize);
 }
 
+int MessageDeleteObject::Store(Packet* pPacket, GameObjectId pObjectId)
+{
+	unsigned lSize = Parent::Store(pPacket, pObjectId);
+	pPacket->AddPacketSize(lSize);
+	return (lSize);
+}
 
 
 MessageObjectMovement::MessageObjectMovement()

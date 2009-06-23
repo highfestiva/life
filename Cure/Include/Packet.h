@@ -190,6 +190,7 @@ public:
 	MessageDeleteObject();
 	MessageType GetType() const;
 	int Parse(const Lepra::uint8* pData, int pSize);
+	int Store(Packet* pPacket, GameObjectId pObjectId);
 };
 
 class MessageObjectMovement: public MessageObject
