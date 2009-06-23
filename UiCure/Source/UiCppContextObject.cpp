@@ -64,6 +64,7 @@ void CppContextObject::OnPhysicsTick()
 			lNode->GetBodyId(), lPhysicsTransform);
 
 		TBC::GeometryBase* lGeometry = lResource->GetRamData();
+		/* Doesn't work on splitscreen: both players uses same graphics object?
 		//if (GetNetworkObjectType() == Cure::NETWORK_OBJECT_REMOTE_CONTROLLED)
 		{
 			// Smooth (sliding average) to the physics position if we're close enough. Otherwise warp.
@@ -71,9 +72,9 @@ void CppContextObject::OnPhysicsTick()
 			const float lClose = 1.5f;
 			if (lPosition.GetDistanceSquared(lPhysicsTransform.GetPosition()) < lClose*lClose)
 			{
-				lPhysicsTransform.SetPosition(Lepra::Math::Lerp(lPosition, lPhysicsTransform.GetPosition(), 0.5f));
+				lPhysicsTransform.SetPosition(Lepra::Math::Lerp(lPosition, lPhysicsTransform.GetPosition(), 0.3f));
 			}
-		}
+		}*/
 		lGeometry->SetTransformation(lPhysicsTransform);
 	}
 }

@@ -487,14 +487,20 @@ bool GameClientSlaveManager::TickNetworkOutput()
 			lObject->SetNetworkObjectType(Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
 			const Cure::ObjectPositionalData* lPositionalData = 0;
 			lObject->UpdateFullPosition(lPositionalData);
-			if (lPositionalData || lObject->QueryResendTime(0.1f, true))
+			const bool lIsCollisionExpired = mCollisionEndAlarm.PopExpired(0.6);
+			if (lPositionalData && (lObject->QueryResendTime(0.1f, true) || lIsCollisionExpired))
 			{
 				if (!lPositionalData->IsSameStructure(mNetworkOutputGhost))
 				{
 					mNetworkOutputGhost.CopyData(lPositionalData);
 				}
+				if (lIsCollisionExpired)
+				{
+					mLog.AInfo("Collision expires.");
+				}
 
 				if (lForceSendUnsafeClientKeepalive ||
+					lIsCollisionExpired ||
 					lPositionalData->GetScaledDifference(&mNetworkOutputGhost) > CURE_RTVAR_GET(GetVariableScope(), RTVAR_NETPHYS_RESYNCONDIFFGT, 100.0))
 				{
 					CURE_RTVAR_OVERRIDE_INTERNAL(GetVariableScope(), RTVAR_DEBUG_NET_SENTPOSITION, true);
@@ -786,8 +792,18 @@ void GameClientSlaveManager::OnCollision(const Lepra::Vector3DF& pForce, const L
 	if (pObject2 && pObject1 != pObject2 && pObject1->GetInstanceId() == mAvatarId &&
 		(lForceSquare > 400.0f || lTorqueSquare > 800.0f) && pObject2->GetMass() > 0)
 	{
-		log_adebug("Collided hard with something dynamic, preventing positional transmission for some time.");
-		pObject1->QueryResendTime(0, false);
+		const float lMassFactor = 1/pObject1->GetMass();
+		Lepra::Vector3DF lGravityDirection = GetPhysicsManager()->GetGravity();
+		lGravityDirection.Normalize();
+		const float lForceFactor = ((pForce * lGravityDirection) - pForce.Cross(lGravityDirection).GetLength()) * lMassFactor;
+		const float lTorqueFactor = pTorque.GetLength() * lMassFactor;
+		if (lForceFactor < -200.0f || lForceFactor >= 24.0f || lTorqueFactor > 36.0f)
+		{
+			log_volatile(mLog.Debugf(_T("Collided hard with something dynamic, preventing positional transmission for some time. F=%f, T=%f"),
+				lForceFactor, lTorqueFactor));
+			pObject1->QueryResendTime(0, false);
+		}
+		mCollisionEndAlarm.Set();
 	}
 }
 

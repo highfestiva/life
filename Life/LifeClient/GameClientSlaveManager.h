@@ -10,6 +10,7 @@
 #include "../../Cure/Include/NetworkClient.h"
 #include "../../Cure/Include/Packet.h"
 #include "../../Cure/Include/PositionalData.h"
+#include "../../Lepra/Include/Alarm.h"
 #include "../../Lepra/Include/Timer.h"
 #include "../../UiTbc/Include/GUI/UiTextArea.h"
 #include "../../UiTbc/Include/GUI/UiConsoleLogListener.h"
@@ -125,6 +126,7 @@ private:
 	Lepra::Timer mLastUnsafeSendTime;
 	int mPingAttemptCount;
 	Lepra::Timer mLastUnsafeReceiveTime;
+	Lepra::Alarm mCollisionEndAlarm;
 
 	Lepra::PerformanceData mUiOutputTime;
 
