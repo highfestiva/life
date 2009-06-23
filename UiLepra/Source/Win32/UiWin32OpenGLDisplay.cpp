@@ -87,7 +87,7 @@ bool Win32OpenGLDisplay::IsVSyncEnabled() const
 
 bool Win32OpenGLDisplay::SetVSyncEnabled(bool pEnabled)
 {
-	return (OpenGLExtensions::SetVSyncEnabled(pEnabled));
+	return (mDC? OpenGLExtensions::SetVSyncEnabled(pEnabled) : false);
 }
 
 unsigned Win32OpenGLDisplay::GetPitch()

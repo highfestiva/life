@@ -91,9 +91,10 @@ int Application::Run()
 	while (lOk && !lQuit)
 	{
 		lOk = mGameTicker->Tick();
-		if (mGameTicker->IsPowerSaving())
+		const float lPowerSaveAmount = mGameTicker->GetPowerSaveAmount();
+		if (lPowerSaveAmount > 0)
 		{
-			Lepra::Thread::Sleep(0.4);
+			Lepra::Thread::Sleep(1.0*lPowerSaveAmount);
 		}
 		else
 		{

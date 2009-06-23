@@ -409,10 +409,10 @@ void GameClientMasterTicker::UpdateSlaveLayout()
 
 
 
-bool GameClientMasterTicker::IsPowerSaving() const
+float GameClientMasterTicker::GetPowerSaveAmount() const
 {
 	bool lIsMinimized = !mUiManager->GetDisplayManager()->IsVisible();
-	return (lIsMinimized);
+	return (lIsMinimized? 0.4f : 0);
 }
 
 

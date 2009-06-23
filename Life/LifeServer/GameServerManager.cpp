@@ -332,10 +332,10 @@ bool GameServerManager::InitializeTerrain()
 
 
 
-bool GameServerManager::IsPowerSaving() const
+float GameServerManager::GetPowerSaveAmount() const
 {
 	// TODO: if there are logged-in clients, check if all have been idle lately.
-	return (GetLoggedInClientCount() == 0);
+	return ((GetLoggedInClientCount() == 0)? 1.0f : 0);
 }
 
 
@@ -552,7 +552,10 @@ void GameServerManager::ApplyStoredMovement()
 	int lCurrentPhysicsSteps = GetTimeManager()->GetCurrentPhysicsStepCount();
 	if (lCurrentPhysicsSteps >= NETWORK_POSITIONAL_AHEAD_BUFFER_SIZE)
 	{
-		mLog.Errorf(_T("Too small network positional buffer: had to skip %i steps!"), lCurrentPhysicsSteps-NETWORK_POSITIONAL_AHEAD_BUFFER_SIZE+1);
+		if (GetLoggedInClientCount() > 0)
+		{
+			mLog.Errorf(_T("Too small network positional buffer: had to skip %i steps!"), lCurrentPhysicsSteps-NETWORK_POSITIONAL_AHEAD_BUFFER_SIZE+1);
+		}
 		lCurrentPhysicsSteps = NETWORK_POSITIONAL_AHEAD_BUFFER_SIZE-1;
 	}
 	int lCurrentPhysicsFrame = GetTimeManager()->GetCurrentPhysicsFrame() - lCurrentPhysicsSteps;

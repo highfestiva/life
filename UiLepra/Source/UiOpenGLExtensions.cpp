@@ -943,7 +943,9 @@ bool OpenGLExtensions::SetVSyncEnabled(bool pEnabled)
 {
 #ifdef LEPRA_WINDOWS
 	if (wglSwapIntervalEXT != 0)
+	{
 		return (wglSwapIntervalEXT(pEnabled ? 1 : 0) != FALSE);
+	}
 #else
 #pragma message("Warning: OpenGLExtensions::SetVSyncEnabled() is not implemented.")
 #endif
