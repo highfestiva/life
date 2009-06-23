@@ -54,6 +54,8 @@ private:
 	bool Initialize();
 	bool InitializeTerrain();
 
+	bool IsPowerSaving() const;
+
 	void TickInput();
 	void ProcessNetworkInputMessage(Client* pClient, Cure::Message* pMessage);
 

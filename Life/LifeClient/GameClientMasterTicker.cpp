@@ -409,6 +409,14 @@ void GameClientMasterTicker::UpdateSlaveLayout()
 
 
 
+bool GameClientMasterTicker::IsPowerSaving() const
+{
+	bool lIsMinimized = !mUiManager->GetDisplayManager()->IsVisible();
+	return (lIsMinimized);
+}
+
+
+
 bool GameClientMasterTicker::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 {
 	bool lConsumed = false;

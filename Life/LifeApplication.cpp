@@ -91,14 +91,21 @@ int Application::Run()
 	while (lOk && !lQuit)
 	{
 		lOk = mGameTicker->Tick();
-		double lTickInterval = CURE_RTVAR_GET(Cure::GetSettings(), RTVAR_TICK_INTERVAL, 0.001);
-		if (lTickInterval > 0)
+		if (mGameTicker->IsPowerSaving())
 		{
-			Lepra::Thread::Sleep(lTickInterval);
+			Lepra::Thread::Sleep(0.4);
 		}
 		else
 		{
-			Lepra::Thread::YieldCpu();
+			double lTickInterval = CURE_RTVAR_GET(Cure::GetSettings(), RTVAR_TICK_INTERVAL, 0.001);
+			if (lTickInterval > 0)
+			{
+				Lepra::Thread::Sleep(lTickInterval);
+			}
+			else
+			{
+				Lepra::Thread::YieldCpu();
+			}
 		}
 		lQuit = Lepra::SystemManager::GetQuitRequest();
 	}

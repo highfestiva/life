@@ -36,6 +36,7 @@ public:
 	virtual ~GameTicker();
 	virtual bool Initialize() = 0;
 	virtual bool Tick() = 0;
+	virtual bool IsPowerSaving() const = 0;
 };
 
 

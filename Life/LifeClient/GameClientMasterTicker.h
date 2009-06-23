@@ -51,6 +51,8 @@ private:
 	bool Reinitialize();
 	void UpdateSlaveLayout();
 
+	bool IsPowerSaving() const;
+
 	bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
 	bool OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode);
 	void OnInput(UiLepra::InputElement* pElement);

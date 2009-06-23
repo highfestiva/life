@@ -332,6 +332,13 @@ bool GameServerManager::InitializeTerrain()
 
 
 
+bool GameServerManager::IsPowerSaving() const
+{
+	return (GetLoggedInClientCount() == 0);
+}
+
+
+
 void GameServerManager::TickInput()
 {
 	Cure::Packet* lPacket = GetNetworkAgent()->GetPacketFactory()->Allocate();
