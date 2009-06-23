@@ -590,7 +590,7 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData)
 					}
 					SetEnginePower(0, lData->mValue[0], lData->mValue[3]);
 					SetEnginePower(1, lData->mValue[1], lData->mValue[3]);
-					SetEnginePower(2, lData->mValue[2], lData->mValue[3]);
+					SetEnginePower(3, lData->mValue[2], lData->mValue[3]);	// TRICKY: specialcasing.
 				}
 				break;
 				case ContextObjectEngine::ENGINE_HINGE2_ROLL:

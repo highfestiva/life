@@ -602,10 +602,10 @@ float RealData4::GetBiasedDifference(const PositionalData* pReference) const
 {
 	const RealData4& lReference = (const RealData4&)*pReference;
 	float lWeightedDifferenceSum =
-		::fabs(mValue[0]-lReference.mValue[0])*1000 +
-		::fabs(mValue[1]-lReference.mValue[1])*1000 +
-		::fabs(mValue[2]-lReference.mValue[2])*1000 +
-		::fabs(mValue[3]-lReference.mValue[3])*1000;
+		::fabs(mValue[0]-lReference.mValue[0])*100.0f +
+		::fabs(mValue[1]-lReference.mValue[1])*100.0f +
+		::fabs(mValue[2]-lReference.mValue[2])*100.0f +
+		::fabs(mValue[3]-lReference.mValue[3])*100.0f;
 	return (lWeightedDifferenceSum);
 }
 

@@ -48,7 +48,7 @@ public:
 	// and the previous time.
 	inline double GetTimeDiff() const;
 
-	inline uint64 GetCounterDiff() const;
+	inline int64 GetCounterDiff() const;
 
 	// Operators.
 	inline const HiResTimer& operator = (const HiResTimer& pTimer);
@@ -129,24 +129,17 @@ void HiResTimer::ClearTimeDiff()
 
 void HiResTimer::ReduceTimeDiff(double pSeconds)
 {
-	if (pSeconds > 0)
-	{
-		mPrevCounter += (uint64)(pSeconds * (double)mFrequency);
-		if (mPrevCounter > mCounter)
-		{
-			mPrevCounter = mCounter;
-		}
-	}
+	mPrevCounter += (int64)(pSeconds * (double)mFrequency);
 }
 
 double HiResTimer::GetTimeDiff() const
 {
-	return ((mCounter - mPrevCounter) * mPeriod);
+	return (((int64)(mCounter - mPrevCounter)) * mPeriod);
 }
 
-uint64 HiResTimer::GetCounterDiff() const
+int64 HiResTimer::GetCounterDiff() const
 {
-	return mCounter - mPrevCounter;
+	return (mCounter - mPrevCounter);
 }
 
 const HiResTimer& HiResTimer::operator= (const HiResTimer& pTimer)

@@ -7,6 +7,7 @@
 #include "ClientOptionsManager.h"
 #include <assert.h>
 #include "../../Cure/Include/RuntimeVariable.h"
+#include "../../Lepra/Include/Math.h"
 #include "../RtVar.h"
 #include "ClientOptions.h"
 
@@ -28,14 +29,15 @@ ClientOptionsManager::ClientOptionsManager(Cure::RuntimeVariableScope* pVariable
 
 
 	
-void ClientOptionsManager::UpdateInput(UiLepra::InputManager::KeyCode pKeyCode, bool pActive)
+bool ClientOptionsManager::UpdateInput(UiLepra::InputManager::KeyCode pKeyCode, bool pActive)
 {
 	const Lepra::String lInputElementName = ConvertToString(pKeyCode);
-	SetValue(lInputElementName, pActive? 1.0f : 0.0f);
+	return (SetValue(lInputElementName, pActive? 1.0f : 0.0f));
 }
 
-void ClientOptionsManager::UpdateInput(UiLepra::InputElement* pElement)
+bool ClientOptionsManager::UpdateInput(UiLepra::InputElement* pElement)
 {
+	bool lValueSet;
 	const float lValue = (float)pElement->GetValue();
 	const Lepra::String lInputElementName = ConvertToString(pElement);
 	if (pElement->GetType() == UiLepra::InputElement::ANALOGUE)
@@ -43,19 +45,20 @@ void ClientOptionsManager::UpdateInput(UiLepra::InputElement* pElement)
 		// Update both sides for analogue input.
 		if (lValue >= 0)
 		{
-			SetValue(lInputElementName+_T("+"), lValue);
+			lValueSet = SetValue(lInputElementName+_T("+"), lValue);
 			SetValue(lInputElementName+_T("-"), 0);
 		}
 		else
 		{
-			SetValue(lInputElementName+_T("-"), -lValue);
+			lValueSet = SetValue(lInputElementName+_T("-"), -lValue);
 			SetValue(lInputElementName+_T("+"), 0);
 		}
 	}
 	else
 	{
-		SetValue(lInputElementName, lValue);
+		lValueSet = SetValue(lInputElementName, lValue);
 	}
+	return (lValueSet);
 }
 
 
@@ -163,13 +166,18 @@ const Lepra::String ClientOptionsManager::ConvertToString(UiLepra::InputElement*
 	return (lName);
 }
 
-void ClientOptionsManager::SetValue(const Lepra::String& pKey, float pValue)
+bool ClientOptionsManager::SetValue(const Lepra::String& pKey, float pValue)
 {
 	float* lValuePointer = GetValuePointer(pKey);
 	if (lValuePointer)
 	{
-		*lValuePointer = pValue;
+		if (!Lepra::Math::IsEpsEqual(*lValuePointer, pValue))
+		{
+			*lValuePointer = pValue;
+			return (true);	// RAII.
+		}
 	}
+	return (false);
 }
 
 float* ClientOptionsManager::GetValuePointer(const Lepra::String& pKey)

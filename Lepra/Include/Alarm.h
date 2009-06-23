@@ -21,10 +21,11 @@ public:
 	Alarm();
 
 	void Reset();
+	void Push(double pInitialWaitTime);
 	void Set();
 	// Alarm is expired if a) started AND b) time overdue.
-	bool IsExpired(double pTime);
-	bool PopExpired(double pTime);
+	bool IsExpired(double pOptionalWaitTime);
+	bool PopExpired(double pOptionalWaitTime);
 
 private:
 	HiResTimer mTimer;

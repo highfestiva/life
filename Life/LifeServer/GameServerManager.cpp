@@ -232,7 +232,7 @@ bool GameServerManager::Initialize()
 		for (x = 0; lOk && x < 100; ++x)
 		{
 			const Lepra::UnicodeString lUserName = Lepra::UnicodeStringUtility::Format(L"Ball%i", x);
-			Lepra::UnicodeString lReadablePassword(L"BallPassword");
+			Lepra::UnicodeString lReadablePassword(L"CarPassword");
 			Cure::MangledPassword lPassword(lReadablePassword);
 			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
 			if (lOk)

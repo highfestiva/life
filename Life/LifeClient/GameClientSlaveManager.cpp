@@ -217,7 +217,10 @@ bool GameClientSlaveManager::IsLoggingIn() const
 
 bool GameClientSlaveManager::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 {
-	mOptions.UpdateInput(pKeyCode, true);
+	if (mOptions.UpdateInput(pKeyCode, true))
+	{
+		mInputExpireAlarm.Set();
+	}
 	if (mOptions.GetOptions().mControl.mUi.mConsoleToggle >= 0.5f)
 	{
 		ToggleConsole();
@@ -228,13 +231,19 @@ bool GameClientSlaveManager::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 
 bool GameClientSlaveManager::OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode)
 {
-	mOptions.UpdateInput(pKeyCode, false);
+	if (mOptions.UpdateInput(pKeyCode, false))
+	{
+		mInputExpireAlarm.Set();
+	}
 	return (false);
 }
 
 void GameClientSlaveManager::OnInput(UiLepra::InputElement* pElement)
 {
-	mOptions.UpdateInput(pElement);
+	if (mOptions.UpdateInput(pElement))
+	{
+		mInputExpireAlarm.Push(0.1);
+	}
 }
 
 
@@ -487,20 +496,22 @@ bool GameClientSlaveManager::TickNetworkOutput()
 			lObject->SetNetworkObjectType(Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
 			const Cure::ObjectPositionalData* lPositionalData = 0;
 			lObject->UpdateFullPosition(lPositionalData);
-			const bool lIsCollisionExpired = mCollisionEndAlarm.PopExpired(0.6);
-			if (lPositionalData && (lObject->QueryResendTime(0.1f, true) || lIsCollisionExpired))
+			if (lPositionalData && lObject->QueryResendTime(0.1f, true))
 			{
 				if (!lPositionalData->IsSameStructure(mNetworkOutputGhost))
 				{
 					mNetworkOutputGhost.CopyData(lPositionalData);
 				}
-				if (lIsCollisionExpired)
+				const bool lIsCollisionExpired = mCollisionExpireAlarm.PopExpired(0.6);
+				const bool lIsInputExpired = mInputExpireAlarm.PopExpired(0.0);
+				bool lIsPositionExpired = (lIsCollisionExpired || lIsInputExpired);
+				if (lIsPositionExpired)
 				{
-					mLog.AInfo("Collision expires.");
+					log_adebug("Position expires.");
 				}
 
 				if (lForceSendUnsafeClientKeepalive ||
-					lIsCollisionExpired ||
+					lIsPositionExpired ||
 					lPositionalData->GetScaledDifference(&mNetworkOutputGhost) > CURE_RTVAR_GET(GetVariableScope(), RTVAR_NETPHYS_RESYNCONDIFFGT, 100.0))
 				{
 					CURE_RTVAR_OVERRIDE_INTERNAL(GetVariableScope(), RTVAR_DEBUG_NET_SENTPOSITION, true);
@@ -803,7 +814,7 @@ void GameClientSlaveManager::OnCollision(const Lepra::Vector3DF& pForce, const L
 				lForceFactor, lTorqueFactor));
 			pObject1->QueryResendTime(0, false);
 		}
-		mCollisionEndAlarm.Set();
+		mCollisionExpireAlarm.Set();
 	}
 }
 

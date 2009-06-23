@@ -61,15 +61,22 @@ bool ContextObjectEngine::SetValue(unsigned pAspect, float pValue, float pZAngle
 
 	switch (mEngineType)
 	{
+		case ENGINE_WALK:
+		{
+			assert(false);
+			mLog.AError("Walk not implemented!");
+		}
+		break;
 		case ENGINE_CAMERA_FLAT_PUSH:
 		{
-			if (pAspect >= 0 && pAspect <= 2)
+			if (pAspect >= 0 && pAspect <= 3)
 			{
 				switch (pAspect)
 				{
-					case 0:		mValue[0] = pValue;	break;
-					case 1:		mValue[1] = -pValue;	break;
-					case 2:		mValue[2] = pValue;	break;
+					case 0:		mValue[0] = pValue;		break;
+					case 1:		mValue[1] = pValue;		break;
+					case 2:		mValue[0] -= ::fabs(pValue);	break;	// Breaking and handbreaking always reverse.
+					case 3:		mValue[2] = pValue;		break;
 				}
 				mValue[3] = pZAngle;
 				return (true);
@@ -150,16 +157,16 @@ void ContextObjectEngine::OnTick(float pFrameTime)
 				break;
 				case ENGINE_CAMERA_FLAT_PUSH:
 				{
-					Lepra::Vector3DF lAxis[3] = {Lepra::Vector3DF(1, 0, 0),
-						Lepra::Vector3DF(0, 1, 0), Lepra::Vector3DF(0, 0, 1)};
+					Lepra::Vector3DF lAxis[3] = {Lepra::Vector3DF(0, 1, 0),
+						Lepra::Vector3DF(1, 0, 0), Lepra::Vector3DF(0, 0, 1)};
 					Lepra::QuaternionF lRotation;
-					lRotation.RotateAroundWorldZ(mValue[3]);
+					lRotation.RotateAroundWorldZ(mValue[3] - Lepra::MathTraits<float>::Pi() / 2);
 					lAxis[0] = lRotation*lAxis[0];
 					lAxis[1] = lRotation*lAxis[1];
 					Lepra::Vector3DF lVelocityVector;
 					lPhysicsManager->GetBodyVelocity(lNode->GetBodyId(), lVelocityVector);
-					float lVelocity[3];
-					lVelocityVector.GetRawData((Lepra::uint8*)lVelocity);
+					lVelocityVector = lRotation*lVelocityVector;
+					float lVelocity[3] = { lVelocityVector.y, lVelocityVector.x, lVelocityVector.z };
 					bool lIsSpeeding = (lVelocityVector.GetLength() >= mMaxSpeed);
 					for (int i = 0; i < 3; ++i)
 					{

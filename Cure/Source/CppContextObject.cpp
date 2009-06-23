@@ -133,7 +133,7 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 		lPhysicsManager->ActivateGravity(lPhysicsObjectId);
 		pObject->AddPhysicsObject(PhysicsNode(0, 1, lPhysicsObjectId));
 
-		ContextObjectEngine* lEngine = new ContextObjectEngine(pObject, ContextObjectEngine::ENGINE_CAMERA_FLAT_PUSH, 50, 0, 50, 0);
+		ContextObjectEngine* lEngine = new ContextObjectEngine(pObject, ContextObjectEngine::ENGINE_CAMERA_FLAT_PUSH, 55, 50, 0, 0);
 		lEngine->AddControlledNode(1, 1);
 		pObject->AddAttribute(lEngine);
 

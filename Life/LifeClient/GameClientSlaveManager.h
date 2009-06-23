@@ -126,7 +126,8 @@ private:
 	Lepra::Timer mLastUnsafeSendTime;
 	int mPingAttemptCount;
 	Lepra::Timer mLastUnsafeReceiveTime;
-	Lepra::Alarm mCollisionEndAlarm;
+	Lepra::Alarm mCollisionExpireAlarm;
+	Lepra::Alarm mInputExpireAlarm;
 
 	Lepra::PerformanceData mUiOutputTime;
 

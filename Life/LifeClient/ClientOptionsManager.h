@@ -30,8 +30,8 @@ struct ClientOptionsManager
 {
 	ClientOptionsManager(Cure::RuntimeVariableScope* pVariableScope, int pPriority);
 
-	void UpdateInput(UiLepra::InputManager::KeyCode pKeyCode, bool pActive);
-	void UpdateInput(UiLepra::InputElement* pElement);
+	bool UpdateInput(UiLepra::InputManager::KeyCode pKeyCode, bool pActive);
+	bool UpdateInput(UiLepra::InputElement* pElement);
 
 	const ClientOptions& GetOptions() const;
 
@@ -40,7 +40,7 @@ private:
 
 	const Lepra::String ConvertToString(UiLepra::InputManager::KeyCode pKeyCode) const;
 	const Lepra::String ConvertToString(UiLepra::InputElement* pElement) const;
-	void SetValue(const Lepra::String& pKey, float pValue);
+	bool SetValue(const Lepra::String& pKey, float pValue);
 	float* GetValuePointer(const Lepra::String& pKey);
 
 	Cure::RuntimeVariableScope* mVariableScope;

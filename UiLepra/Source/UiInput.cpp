@@ -531,7 +531,7 @@ Lepra::String InputManager::GetKeyName(KeyCode pKeyCode)
 	{
 		return (lKeyName);
 	}
-	return (Lepra::String((Lepra::tchar)pKeyCode, 1));
+	return (Lepra::String(1, (Lepra::tchar)pKeyCode));
 }
 
 void InputManager::SetKey(KeyCode pKeyCode, bool pValue)

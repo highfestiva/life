@@ -49,7 +49,7 @@ String SystemManager::GetUniqueHardwareString()
 uint64 SystemManager::SingleCpuTest()
 {
 	HiResTimer lTimer;
-	uint64 lDeltaTime = HiResTimer::GetFrequency() / 100;
+	int64 lDeltaTime = HiResTimer::GetFrequency() / 100;
 	uint64 lStartTick;
 	uint64 lEndTick;
 	// Reset the timer and start counting.
