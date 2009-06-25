@@ -646,9 +646,13 @@ void GameServerManager::OnCollision(const Lepra::Vector3DF& pForce, const Lepra:
 		// - Is a server controlled object colliding with a static object with high enough force?
 		const bool lAreBothDynamic = (pObject2 != 0 && pObject2->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY);
 		const bool lIsServerControlled = (pObject1->GetNetworkObjectType() == Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
-		if (lAreBothDynamic || lIsServerControlled)
+		if (lAreBothDynamic)
 		{
-			lSendCollision = IsHighImpact(pObject1, pForce, pTorque);
+			lSendCollision = IsHighImpact(12.0f, pObject1, pForce, pTorque);
+		}
+		else if (lIsServerControlled)
+		{
+			lSendCollision = IsHighImpact(7.0f, pObject1, pForce, pTorque);
 		}
 		if (lSendCollision)
 		{
@@ -665,9 +669,7 @@ void GameServerManager::OnCollision(const Lepra::Vector3DF& pForce, const Lepra:
 void GameServerManager::OnStopped(Cure::ContextObject* pObject, TBC::PhysicsEngine::BodyID pBodyId)
 {
 	assert(pObject->GetPhysicsNode((Cure::PhysicsNode::Id)1));
-	pObject;
-	pBodyId;
-	/*if (pObject->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY &&
+	if (pObject->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY &&
 		pObject->GetPhysicsNode((Cure::PhysicsNode::Id)1)->GetBodyId() == pBodyId)
 	{
 		log_volatile(mLog.Debugf(_T("Object %u stopped, sending position."), pObject->GetInstanceId()));
@@ -676,7 +678,7 @@ void GameServerManager::OnStopped(Cure::ContextObject* pObject, TBC::PhysicsEngi
 		{
 			BroadcastObjectPosition(pObject->GetInstanceId(), *lPosition, 0, false);
 		}
-	}*/
+	}
 }
 
 void GameServerManager::OnPhysicsSend(Cure::ContextObject* pObject)

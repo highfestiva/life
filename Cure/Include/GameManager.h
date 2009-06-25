@@ -87,7 +87,7 @@ protected:
 	void WaitPhysicsTick();
 
 	virtual void PhysicsTick();
-	bool IsHighImpact(const ContextObject* pObject, const Lepra::Vector3DF& pForce,
+	bool IsHighImpact(float pScaleFactor, const ContextObject* pObject, const Lepra::Vector3DF& pForce,
 		const Lepra::Vector3DF& pTorque) const;
 
 	bool IsThreadSafe() const;

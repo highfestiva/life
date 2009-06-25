@@ -807,7 +807,7 @@ void GameClientSlaveManager::OnCollision(const Lepra::Vector3DF& pForce, const L
 		pObject1->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY &&
 		pObject2->GetMass() > 0)
 	{
-		if (IsHighImpact(pObject1, pForce, pTorque))
+		if (IsHighImpact(12.0f, pObject1, pForce, pTorque))
 		{
 			pObject1->QueryResendTime(0, false);
 		}

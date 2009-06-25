@@ -340,7 +340,7 @@ void GameManager::PhysicsTick()
 	mPhysicsTime.Update(lTime.PopTimeDiff());
 }
 
-bool GameManager::IsHighImpact(const ContextObject* pObject, const Lepra::Vector3DF& pForce,
+bool GameManager::IsHighImpact(float pScaleFactor, const ContextObject* pObject, const Lepra::Vector3DF& pForce,
 	const Lepra::Vector3DF& pTorque) const
 {
 	const float lMassFactor = 1/pObject->GetMass();
@@ -350,7 +350,7 @@ bool GameManager::IsHighImpact(const ContextObject* pObject, const Lepra::Vector
 	const float lForceWithoutGravityFactor = (pForce * lGravityDirection) - pForce.Cross(lGravityDirection).GetLength();
 	const float lNormalizedForceFactor = lForceWithoutGravityFactor * lMassFactor;
 	const float lNormalizedTorqueFactor = pTorque.GetLength() * lMassFactor;
-	bool lIsHighImpact = (lNormalizedForceFactor < -200.0f || lNormalizedForceFactor >= 24.0f || lNormalizedTorqueFactor > 36.0f);
+	bool lIsHighImpact = (lNormalizedForceFactor < -16*pScaleFactor || lNormalizedForceFactor >= 2*pScaleFactor || lNormalizedTorqueFactor > 3*pScaleFactor);
 	if (lIsHighImpact)
 	{
 		log_volatile(mLog.Debugf(_T("Collided hard with something dynamic. F=%f, T=%f"),
