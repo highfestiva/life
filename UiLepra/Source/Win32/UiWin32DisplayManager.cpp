@@ -35,9 +35,8 @@ DisplayManager* DisplayManager::CreateDisplayManager(ContextType pCT)
 
 void DisplayManager::EnableScreensaver(bool pEnable)
 {
-	// TODO: get this code working!
 	BOOL lOldValue;
-	::SystemParametersInfo(SPI_SETSCREENSAVERRUNNING, !pEnable, &lOldValue, 0);
+	::SystemParametersInfo(SPI_SETSCREENSAVEACTIVE, pEnable, &lOldValue, 0);
 }
 
 

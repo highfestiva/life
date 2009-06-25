@@ -93,6 +93,14 @@ void ContextManager::ClearObjects()
 	}
 }
 
+void ContextManager::AddPhysicsSenderObject(ContextObject* pObject)
+{
+	assert(pObject->GetInstanceId() != 0);
+	assert(mObjectTable.find(pObject->GetInstanceId()) != mObjectTable.end());
+	assert(pObject->GetManager() == this);
+	mPhysicsSenderObjectTable.insert(ContextObjectPair(pObject->GetInstanceId(), pObject));
+}
+
 void ContextManager::AddPhysicsBody(ContextObject* pObject, TBC::PhysicsEngine::BodyID pBodyId)
 {
 	mBodyTable.insert(BodyPair(pBodyId, pObject));
@@ -218,6 +226,16 @@ void ContextManager::HandleIdledBodies()
 			mLog.AError("Body not present in body table!");
 		}
 	}
+}
+
+void ContextManager::HandlePhysicsSend()
+{
+	ContextObjectTable::iterator x = mPhysicsSenderObjectTable.begin();
+	for (; x != mPhysicsSenderObjectTable.end(); ++x)
+	{
+		mGameManager->OnPhysicsSend(x->second);
+	}
+	mPhysicsSenderObjectTable.clear();
 }
 
 

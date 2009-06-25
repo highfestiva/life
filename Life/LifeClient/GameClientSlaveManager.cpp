@@ -90,7 +90,7 @@ void GameClientSlaveManager::SetRenderArea(const Lepra::PixelRect& pRenderArea)
 	// Register a local FOV variable.
 	Cure::RuntimeVariableScope* lParent = GetVariableScope()->LockParentScope(0);
 	double lFov = 30+15*pRenderArea.GetWidth()/pRenderArea.GetHeight();
-	CURE_RTVAR_OVERRIDE_INTERNAL(GetVariableScope(), RTVAR_UI_3D_FOV, lFov);
+	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_UI_3D_FOV, lFov);
 	GetVariableScope()->LockParentScope(lParent);
 }
 
@@ -411,6 +411,8 @@ void GameClientSlaveManager::TickUiUpdate()
 
 void GameClientSlaveManager::TickNetworkInput()
 {
+	CURE_RTVAR_INTERNAL_ARITHMETIC(GetVariableScope(), RTVAR_DEBUG_NET_RECVPOSCNT, int, -, 1, 0);
+
 	if (GetNetworkClient()->GetSocket() == 0)
 	{
 		if (!GetNetworkClient()->IsConnecting() && !mIsReset)
@@ -471,13 +473,14 @@ void GameClientSlaveManager::TickNetworkInput()
 
 bool GameClientSlaveManager::TickNetworkOutput()
 {
-	CURE_RTVAR_OVERRIDE_INTERNAL(GetVariableScope(), RTVAR_DEBUG_NET_SENTPOSITION, false);
+	CURE_RTVAR_INTERNAL_ARITHMETIC(GetVariableScope(), RTVAR_DEBUG_NET_SENDPOSCNT, int, -, 1, 0);
 
 	bool lSendOk = true;
 	if (GetNetworkClient()->GetSocket())
 	{
 		// Check if we should send client keepalive (keepalive is simply a position update).
 		bool lForceSendUnsafeClientKeepalive = false;
+		mLastUnsafeSendTime.UpdateTimer();
 		if (mLastUnsafeSentByteCount != GetNetworkAgent()->GetSentByteCount(false))
 		{
 			mLastUnsafeSentByteCount = GetNetworkAgent()->GetSentByteCount(false);
@@ -487,7 +490,6 @@ bool GameClientSlaveManager::TickNetworkOutput()
 		{
 			lForceSendUnsafeClientKeepalive = true;
 		}
-		mLastUnsafeSendTime.UpdateTimer();
 
 		// Check if we should send updates.
 		Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
@@ -514,10 +516,11 @@ bool GameClientSlaveManager::TickNetworkOutput()
 					lIsPositionExpired ||
 					lPositionalData->GetScaledDifference(&mNetworkOutputGhost) > CURE_RTVAR_GET(GetVariableScope(), RTVAR_NETPHYS_RESYNCONDIFFGT, 100.0))
 				{
-					CURE_RTVAR_OVERRIDE_INTERNAL(GetVariableScope(), RTVAR_DEBUG_NET_SENTPOSITION, true);
 					mNetworkOutputGhost.CopyData(lPositionalData);
 					lSendOk = GetNetworkAgent()->SendObjectFullPosition(GetNetworkClient()->GetSocket(),
 						lObject->GetInstanceId(), GetTimeManager()->GetCurrentPhysicsFrame(), mNetworkOutputGhost);
+
+					CURE_RTVAR_INTERNAL_ARITHMETIC(GetVariableScope(), RTVAR_DEBUG_NET_SENDPOSCNT, int, +, 1, 0);
 				}
 			}
 		}
@@ -648,6 +651,8 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 			Lepra::int32 lFrameIndex = lMessageMovement->GetFrameIndex();
 			const Cure::ObjectPositionalData& lData = lMessageMovement->GetPositionalData();
 			SetMovement(lObjectId, lFrameIndex, lData);
+
+			CURE_RTVAR_INTERNAL_ARITHMETIC(GetVariableScope(), RTVAR_DEBUG_NET_RECVPOSCNT, int, +, 1, 0);
 		}
 		break;
 		case Cure::MESSAGE_TYPE_OBJECT_ATTACH:
@@ -798,20 +803,12 @@ void GameClientSlaveManager::SetMovement(Cure::GameObjectId pInstanceId, Lepra::
 void GameClientSlaveManager::OnCollision(const Lepra::Vector3DF& pForce, const Lepra::Vector3DF& pTorque,
 	Cure::ContextObject* pObject1, Cure::ContextObject* pObject2)
 {
-	const float lForceSquare = pForce.GetLengthSquared();
-	const float lTorqueSquare = pTorque.GetLengthSquared();
 	if (pObject2 && pObject1 != pObject2 && pObject1->GetInstanceId() == mAvatarId &&
-		(lForceSquare > 400.0f || lTorqueSquare > 800.0f) && pObject2->GetMass() > 0)
+		pObject1->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY &&
+		pObject2->GetMass() > 0)
 	{
-		const float lMassFactor = 1/pObject1->GetMass();
-		Lepra::Vector3DF lGravityDirection = GetPhysicsManager()->GetGravity();
-		lGravityDirection.Normalize();
-		const float lForceFactor = ((pForce * lGravityDirection) - pForce.Cross(lGravityDirection).GetLength()) * lMassFactor;
-		const float lTorqueFactor = pTorque.GetLength() * lMassFactor;
-		if (lForceFactor < -200.0f || lForceFactor >= 24.0f || lTorqueFactor > 36.0f)
+		if (IsHighImpact(pObject1, pForce, pTorque))
 		{
-			log_volatile(mLog.Debugf(_T("Collided hard with something dynamic, preventing positional transmission for some time. F=%f, T=%f"),
-				lForceFactor, lTorqueFactor));
 			pObject1->QueryResendTime(0, false);
 		}
 		mCollisionExpireAlarm.Set();
@@ -819,6 +816,10 @@ void GameClientSlaveManager::OnCollision(const Lepra::Vector3DF& pForce, const L
 }
 
 void GameClientSlaveManager::OnStopped(Cure::ContextObject*, TBC::PhysicsEngine::BodyID)
+{
+}
+
+void GameClientSlaveManager::OnPhysicsSend(Cure::ContextObject*)
 {
 }
 
@@ -915,15 +916,24 @@ void GameClientSlaveManager::ContextLoadCallback(UserGfxContextObjectInfoResourc
 
 void GameClientSlaveManager::DrawAsyncDebugInfo()
 {
-	if (CURE_RTVAR_GET(GetVariableScope(), RTVAR_DEBUG_NET_SENTPOSITION, false))
+	mUiManager->GetPainter()->ResetClippingRect();
+	mUiManager->GetPainter()->SetClippingRect(mRenderArea);
+
+	int lCount = CURE_RTVAR_GET(GetVariableScope(), RTVAR_DEBUG_NET_SENDPOSCNT, 0);
+	DrawDebugStaple(0, lCount*10, Lepra::Color(255, 0, 0));
+	lCount = CURE_RTVAR_GET(GetVariableScope(), RTVAR_DEBUG_NET_RECVPOSCNT, 0);
+	DrawDebugStaple(1, lCount*10, Lepra::Color(0, 255, 0));
+}
+
+void GameClientSlaveManager::DrawDebugStaple(int pIndex, int pHeight, const Lepra::Color& pColor)
+{
+	if (pHeight > 0)
 	{
-		mUiManager->GetPainter()->SetColor(Lepra::Color(255, 0, 0), 0);
-		const int x = mRenderArea.mLeft+10;
-		const int y = mRenderArea.mTop+10;
-		const int s = 10;
-		mUiManager->GetPainter()->ResetClippingRect();
-		mUiManager->GetPainter()->SetClippingRect(mRenderArea);
-		mUiManager->GetPainter()->FillRect(x, y, x+s, y+s);
+		mUiManager->GetPainter()->SetColor(pColor, 0);
+		const int lUnit = 10;
+		const int x = mRenderArea.mLeft + lUnit + pIndex*lUnit*2;
+		const int y = mRenderArea.mBottom - lUnit - pHeight;
+		mUiManager->GetPainter()->FillRect(x, y, x+lUnit, y+pHeight);
 	}
 }
 

@@ -57,7 +57,7 @@ public:
 	{
 		SET_OVERWRITE	= 1,
 		SET_OVERRIDE,
-		SET_OVERRIDE_INTERNAL,
+		SET_INTERNAL,
 	};
 
 	RuntimeVariableScope(RuntimeVariableScope* pParentScope);
@@ -117,12 +117,18 @@ private:
 
 
 
-#define CURE_RTVAR_GETSET(scope, name, def)			(scope)->GetDefaultValue(Cure::RuntimeVariableScope::READ_WRITE, _T(name), def)
-#define CURE_RTVAR_GET(scope, name, def)			(scope)->GetDefaultValue(Cure::RuntimeVariableScope::READ_ONLY, _T(name), def)
-#define CURE_RTVAR_GET_DEFAULT(scope, name, def)		(scope)->GetDefaultValue(Cure::RuntimeVariableScope::READ_DEFAULT, _T(name), def)
-#define CURE_RTVAR_SET(scope, name, value)			(scope)->SetValue(Cure::RuntimeVariableScope::SET_OVERWRITE, _T(name), value)
-#define CURE_RTVAR_OVERRIDE(scope, name, value)			(scope)->SetValue(Cure::RuntimeVariableScope::SET_OVERRIDE, _T(name), value)
-#define CURE_RTVAR_OVERRIDE_INTERNAL(scope, name, value)	(scope)->SetValue(Cure::RuntimeVariableScope::SET_OVERRIDE_INTERNAL, _T(name), value)
+#define CURE_RTVAR_GETSET(scope, name, def)		(scope)->GetDefaultValue(Cure::RuntimeVariableScope::READ_WRITE, _T(name), def)
+#define CURE_RTVAR_GET(scope, name, def)		(scope)->GetDefaultValue(Cure::RuntimeVariableScope::READ_ONLY, _T(name), def)
+#define CURE_RTVAR_GET_DEFAULT(scope, name, def)	(scope)->GetDefaultValue(Cure::RuntimeVariableScope::READ_DEFAULT, _T(name), def)
+#define CURE_RTVAR_SET(scope, name, value)		(scope)->SetValue(Cure::RuntimeVariableScope::SET_OVERWRITE, _T(name), value)
+#define CURE_RTVAR_OVERRIDE(scope, name, value)		(scope)->SetValue(Cure::RuntimeVariableScope::SET_OVERRIDE, _T(name), value)
+#define CURE_RTVAR_INTERNAL(scope, name, value)		(scope)->SetValue(Cure::RuntimeVariableScope::SET_INTERNAL, _T(name), value)
+#define CURE_RTVAR_INTERNAL_ARITHMETIC(scope, name, type, arith, value, min)	\
+{										\
+	type _new_val = CURE_RTVAR_GET(scope, name, min) arith value;		\
+	_new_val = (_new_val >= min)? _new_val : min;				\
+	CURE_RTVAR_INTERNAL(scope, name, _new_val);				\
+}
 
 
 

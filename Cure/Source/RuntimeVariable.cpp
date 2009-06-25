@@ -226,7 +226,7 @@ bool RuntimeVariableScope::SetValue(SetMode pSetMode, const Lepra::String& pName
 	{
 		if (GetType(lValue) == GetType(lVariable->GetValue()))
 		{
-			lVariable->SetValue(lValue, pSetMode != SET_OVERWRITE, pSetMode != SET_OVERRIDE_INTERNAL);
+			lVariable->SetValue(lValue, pSetMode != SET_OVERWRITE, pSetMode != SET_INTERNAL);
 		}
 		else
 		{
@@ -237,7 +237,7 @@ bool RuntimeVariableScope::SetValue(SetMode pSetMode, const Lepra::String& pName
 	}
 	else
 	{
-		CreateLocalVariable(pName, lValue, pSetMode != SET_OVERRIDE_INTERNAL);
+		CreateLocalVariable(pName, lValue, pSetMode != SET_INTERNAL);
 	}
 	return (lTypeOk);
 }

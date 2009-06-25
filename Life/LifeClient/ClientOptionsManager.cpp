@@ -38,10 +38,15 @@ bool ClientOptionsManager::UpdateInput(UiLepra::InputManager::KeyCode pKeyCode, 
 bool ClientOptionsManager::UpdateInput(UiLepra::InputElement* pElement)
 {
 	bool lValueSet;
-	const float lValue = (float)pElement->GetValue();
+	float lValue = (float)pElement->GetValue();
 	const Lepra::String lInputElementName = ConvertToString(pElement);
 	if (pElement->GetType() == UiLepra::InputElement::ANALOGUE)
 	{
+		// Clamp analogue to neutral when close enough.
+		if (Lepra::Math::IsEpsEqual(lValue, 0.0f, 0.1f))
+		{
+			lValue = 0;
+		}
 		// Update both sides for analogue input.
 		if (lValue >= 0)
 		{
@@ -79,60 +84,60 @@ bool ClientOptionsManager::SetDefault(int pPriority)
 		case 0:
 		{
 			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_CONTOGGLE, _T("Key.PARAGRAPH, Key.ACUTE, Key.APOSTROPHE"));
-			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_FWD, _T("Device0.Button1"));
-			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_BACK, _T(""));
-			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_BRKBACK, _T("Device0.Button0"));
-			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_LEFT, _T("Device0.AbsoluteAxis3-"));
-			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_RIGHT, _T("Device0.AbsoluteAxis3+"));
-			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_UP, _T("Device0.AbsoluteAxis0-"));
-			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_DOWN, _T("Device0.AbsoluteAxis0+"));
-			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_HANDBRK, _T(""));
-			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_BRK, _T(""));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_FWD, _T("Device0.Button1"));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_BACK, _T(""));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_BRKBACK, _T("Device0.Button0"));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_LEFT, _T("Device0.AbsoluteAxis3-"));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_RIGHT, _T("Device0.AbsoluteAxis3+"));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_UP, _T("Device0.AbsoluteAxis0-"));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_DOWN, _T("Device0.AbsoluteAxis0+"));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_HANDBRK, _T(""));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_BRK, _T(""));
 			lOk = true;
 		}
 		break;
 		case 1:
 		{
 			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_CONTOGGLE, _T("Key.SCROLL_LOCK"));
-			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_FWD, _T("Key.UP"));
-			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_BACK, _T(""));
-			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_BRKBACK, _T("Key.DOWN"));
-			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_LEFT, _T("Key.LEFT"));
-			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_RIGHT, _T("Key.RIGHT"));
-			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_UP, _T("Key.NUMPAD_4"));
-			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_DOWN, _T("Key.NUMPAD_1"));
-			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_HANDBRK, _T("Key.NUMPAD_0"));
-			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_BRK, _T(""));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_FWD, _T("Key.UP"));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_BACK, _T(""));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_BRKBACK, _T("Key.DOWN"));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_LEFT, _T("Key.LEFT"));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_RIGHT, _T("Key.RIGHT"));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_UP, _T("Key.NUMPAD_4"));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_DOWN, _T("Key.NUMPAD_1"));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_HANDBRK, _T("Key.NUMPAD_0"));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_BRK, _T(""));
 			lOk = true;
 		}
 		break;
 		case 2:
 		{
 			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_CONTOGGLE, _T("Key.F12"));
-			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_FWD, _T("Key.W"));
-			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_BACK, _T(""));
-			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_BRKBACK, _T("Key.S"));
-			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_LEFT, _T("Key.A"));
-			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_RIGHT, _T("Key.D"));
-			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_UP, _T("Key.E"));
-			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_DOWN, _T("Key.Q"));
-			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_HANDBRK, _T("Key.E"));
-			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_BRK, _T(""));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_FWD, _T("Key.W"));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_BACK, _T(""));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_BRKBACK, _T("Key.S"));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_LEFT, _T("Key.A"));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_RIGHT, _T("Key.D"));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_UP, _T("Key.E"));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_DOWN, _T("Key.Q"));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_HANDBRK, _T("Key.E"));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_BRK, _T(""));
 			lOk = true;
 		}
 		break;
 		case 3:
 		{
 			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_CONTOGGLE, _T("Key.PAUSE"));
-			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_FWD, _T("Key.NUMPAD_8"));
-			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_BACK, _T("Key.NUMPAD_5"));
-			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_BRKBACK, _T(""));
-			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_LEFT, _T("Key.NUMPAD_4"));
-			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_RIGHT, _T("Key.NUMPAD_6"));
-			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_UP, _T("Key.NUMPAD_9"));
-			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_DOWN, _T("Key.NUMPAD_7"));
-			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_HANDBRK, _T("Key.NUMPAD_9"));
-			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_VEHICLE_BRK, _T("Key.NUMPAD_7"));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_FWD, _T("Key.NUMPAD_8"));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_BACK, _T("Key.NUMPAD_5"));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_BRKBACK, _T(""));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_LEFT, _T("Key.NUMPAD_4"));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_RIGHT, _T("Key.NUMPAD_6"));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_UP, _T("Key.NUMPAD_9"));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_DOWN, _T("Key.NUMPAD_7"));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_HANDBRK, _T("Key.NUMPAD_9"));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_BRK, _T("Key.NUMPAD_7"));
 			lOk = true;
 		}
 		break;
@@ -168,43 +173,48 @@ const Lepra::String ClientOptionsManager::ConvertToString(UiLepra::InputElement*
 
 bool ClientOptionsManager::SetValue(const Lepra::String& pKey, float pValue)
 {
-	float* lValuePointer = GetValuePointer(pKey);
+	bool lIsSteeringValue;
+	float* lValuePointer = GetValuePointer(pKey, lIsSteeringValue);
 	if (lValuePointer)
 	{
 		if (!Lepra::Math::IsEpsEqual(*lValuePointer, pValue))
 		{
 			*lValuePointer = pValue;
-			return (true);	// RAII.
+			return (lIsSteeringValue);	// RAII.
 		}
 	}
 	return (false);
 }
 
-float* ClientOptionsManager::GetValuePointer(const Lepra::String& pKey)
+float* ClientOptionsManager::GetValuePointer(const Lepra::String& pKey, bool& pIsSteeringValue)
 {
+	pIsSteeringValue = false;
+
 	typedef std::pair<const Lepra::String, float*> KeyValue;
 	const KeyValue lEntries[] =
 	{
 		KeyValue(_T(RTVAR_CTRL_UI_CONTOGGLE), &mOptions.mControl.mUi.mConsoleToggle),
-		KeyValue(_T(RTVAR_CTRL_VEHICLE_FWD), &mOptions.mControl.mVehicle.mForward),
-		KeyValue(_T(RTVAR_CTRL_VEHICLE_BACK), &mOptions.mControl.mVehicle.mBackward),
-		KeyValue(_T(RTVAR_CTRL_VEHICLE_BRKBACK), &mOptions.mControl.mVehicle.mBreakAndBack),
-		KeyValue(_T(RTVAR_CTRL_VEHICLE_LEFT), &mOptions.mControl.mVehicle.mLeft),
-		KeyValue(_T(RTVAR_CTRL_VEHICLE_RIGHT), &mOptions.mControl.mVehicle.mRight),
-		KeyValue(_T(RTVAR_CTRL_VEHICLE_UP), &mOptions.mControl.mVehicle.mUp),
-		KeyValue(_T(RTVAR_CTRL_VEHICLE_DOWN), &mOptions.mControl.mVehicle.mDown),
-		KeyValue(_T(RTVAR_CTRL_VEHICLE_HANDBRK), &mOptions.mControl.mVehicle.mHandBreak),
-		KeyValue(_T(RTVAR_CTRL_VEHICLE_BRK), &mOptions.mControl.mVehicle.mBreak),
+		KeyValue(_T(RTVAR_CTRL_STEER_FWD), &mOptions.mControl.mVehicle.mForward),
+		KeyValue(_T(RTVAR_CTRL_STEER_BACK), &mOptions.mControl.mVehicle.mBackward),
+		KeyValue(_T(RTVAR_CTRL_STEER_BRKBACK), &mOptions.mControl.mVehicle.mBreakAndBack),
+		KeyValue(_T(RTVAR_CTRL_STEER_LEFT), &mOptions.mControl.mVehicle.mLeft),
+		KeyValue(_T(RTVAR_CTRL_STEER_RIGHT), &mOptions.mControl.mVehicle.mRight),
+		KeyValue(_T(RTVAR_CTRL_STEER_UP), &mOptions.mControl.mVehicle.mUp),
+		KeyValue(_T(RTVAR_CTRL_STEER_DOWN), &mOptions.mControl.mVehicle.mDown),
+		KeyValue(_T(RTVAR_CTRL_STEER_HANDBRK), &mOptions.mControl.mVehicle.mHandBreak),
+		KeyValue(_T(RTVAR_CTRL_STEER_BRK), &mOptions.mControl.mVehicle.mBreak),
 	};
 	for (int x = 0; x < sizeof(lEntries)/sizeof(lEntries[0]); ++x)
 	{
-		const Lepra::String lKeys = mVariableScope->GetDefaultValue(Cure::RuntimeVariableScope::READ_ONLY, lEntries[x].first);
+		const Lepra::String lKeys = mVariableScope->GetDefaultValue(Cure::RuntimeVariableScope::READ_ONLY,
+			lEntries[x].first);
 		typedef Lepra::StringUtility::StringVector SV;
 		SV lKeyArray = Lepra::StringUtility::Split(lKeys, _T(", \t"));
 		for (SV::iterator y = lKeyArray.begin(); y != lKeyArray.end(); ++y)
 		{
 			if ((*y) == pKey)
 			{
+				pIsSteeringValue = (lEntries[x].first.find(_T("Steer")) != Lepra::String::npos);
 				return (lEntries[x].second);
 			}
 		}

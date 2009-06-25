@@ -89,6 +89,7 @@ private:
 	void OnCollision(const Lepra::Vector3DF& pForce, const Lepra::Vector3DF& pTorque,
 		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2);
 	void OnStopped(Cure::ContextObject* pObject, TBC::PhysicsEngine::BodyID pBodyId);
+	void OnPhysicsSend(Cure::ContextObject* pObject);
 	bool IsConnectAuthorized();
 	void SendAttach(Cure::ContextObject*, Cure::PhysicsNode::Id, Cure::ContextObject*, Cure::PhysicsNode::Id);
 	void SendDetach(Cure::ContextObject*, Cure::ContextObject*);
@@ -103,6 +104,7 @@ private:
 	void ContextLoadCallback(UserGfxContextObjectInfoResource* pResource);
 
 	void DrawAsyncDebugInfo();
+	void DrawDebugStaple(int pIndex, int pHeight, const Lepra::Color& pColor);
 	void DrawSyncDebugInfo();
 
 	typedef std::hash_map<Cure::GameObjectId, int> ObjectFrameIndexMap;

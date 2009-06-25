@@ -640,29 +640,15 @@ void GameServerManager::OnCollision(const Lepra::Vector3DF& pForce, const Lepra:
 	if (pObject1 != pObject2 &&	// I.e. car where a wheel collides with the body.
 		pObject1->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY)	// We only handle network object collisions.
 	{
-		// Are two dynamic objects colliding?
-		const float lForceSquare = pForce.GetLengthSquared();
-		const float lTorqueSquare = pTorque.GetLengthSquared();
-		bool lSendCollision;
+		bool lSendCollision = false;
+		// - Are two dynamic object colliding with high enough force (threshold keeps trafic low)?
+		// OR
+		// - Is a server controlled object colliding with a static object with high enough force?
 		const bool lAreBothDynamic = (pObject2 != 0 && pObject2->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY);
-		if (lAreBothDynamic)
+		const bool lIsServerControlled = (pObject1->GetNetworkObjectType() == Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
+		if (lAreBothDynamic || lIsServerControlled)
 		{
-			// Are two dynamic object colliding with high enough force (threshold keeps trafic low).
-			lSendCollision = (lForceSquare > 400.0f || lTorqueSquare > 800.0f);
-			if (lSendCollision)
-			{
-				log_volatile(mLog.Tracef(_T("Collision between dynamic objects. f^2=%f, t^2=%f."), lForceSquare, lTorqueSquare));
-			}
-		}
-		else
-		{
-			// Is a server controlled object colliding with a static object with high enough force?
-			lSendCollision = (pObject1->GetNetworkObjectType() == Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED &&
-				(lForceSquare > 400.0f || lTorqueSquare > 800.0f));
-			if (lSendCollision)
-			{
-				log_volatile(mLog.Tracef(_T("Collision with static object. f^2=%f, t^2=%f."), lForceSquare, lTorqueSquare));
-			}
+			lSendCollision = IsHighImpact(pObject1, pForce, pTorque);
 		}
 		if (lSendCollision)
 		{
@@ -670,13 +656,8 @@ void GameServerManager::OnCollision(const Lepra::Vector3DF& pForce, const Lepra:
 		}
 		if (lSendCollision)
 		{
-			// We have found a collision. Inform all viewers, including the colliding client.
-			log_adebug("Sending collision.");
-			const Cure::ObjectPositionalData* lPosition = 0;
-			if (pObject1->UpdateFullPosition(lPosition))
-			{
-				BroadcastObjectPosition(pObject1->GetInstanceId(), *lPosition, 0, true);
-			}
+			// We have found a collision. Asynchronously inform all viewers, including the colliding client.
+			GetContext()->AddPhysicsSenderObject(pObject1);
 		}
 	}
 }
@@ -696,6 +677,16 @@ void GameServerManager::OnStopped(Cure::ContextObject* pObject, TBC::PhysicsEngi
 			BroadcastObjectPosition(pObject->GetInstanceId(), *lPosition, 0, false);
 		}
 	}*/
+}
+
+void GameServerManager::OnPhysicsSend(Cure::ContextObject* pObject)
+{
+	log_adebug("Sending collision.");
+	const Cure::ObjectPositionalData* lPosition = 0;
+	if (pObject->UpdateFullPosition(lPosition))
+	{
+		BroadcastObjectPosition(pObject->GetInstanceId(), *lPosition, 0, true);
+	}
 }
 
 bool GameServerManager::IsConnectAuthorized()

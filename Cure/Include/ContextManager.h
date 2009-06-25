@@ -41,6 +41,7 @@ public:
 	ContextObject* GetObject(GameObjectId pInstanceId) const;
 	const ContextObjectTable& GetObjectTable() const;
 	void ClearObjects();
+	void AddPhysicsSenderObject(ContextObject* pObject);
 	void AddPhysicsBody(ContextObject* pObject, TBC::PhysicsEngine::BodyID pBodyId);
 	void RemovePhysicsBody(TBC::PhysicsEngine::BodyID pBodyId);
 	void RemovePhysicsJoint(TBC::PhysicsEngine::JointID pJointId);
@@ -58,6 +59,7 @@ public:
 	void Tick();
 	void TickPhysics();
 	void HandleIdledBodies();
+	void HandlePhysicsSend();
 
 private:
 	void DispatchPhysicsUpdateCallbacks();
@@ -84,6 +86,7 @@ private:
 	ObjectIdManager mLocalObjectIdManager;
 	ObjectIdManager mRemoteObjectIdManager;
 	ContextObjectTable mObjectTable;
+	ContextObjectTable mPhysicsSenderObjectTable;
 	BodyTable mBodyTable;
 	ContextObjectTable mPhysicsUpdateCallbackObjectTable;
 	ContextObjectTable mTickCallbackObjectTable;
