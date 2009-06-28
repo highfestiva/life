@@ -446,11 +446,11 @@ int ConsoleManager::OnCommand(const Lepra::String& pCommand, const Lepra::String
 				}
 				int lScopeSkipCount = 0;
 				if (lFilenameIndex < pParameterVector.size() &&
-					(lCommand == COMMAND_SAVE_SYSTEM_CONFIG_FILE &&
+					((lCommand == COMMAND_SAVE_SYSTEM_CONFIG_FILE &&
 					Lepra::StringUtility::StringToInt(pParameterVector[lFilenameIndex-1], lScopeSkipCount))
 					||
 					(lCommand == COMMAND_SAVE_APPLICATION_CONFIG_FILE &&
-					lFilenameIndex < pParameterVector.size()))
+					lFilenameIndex < pParameterVector.size())))
 				{
 					Lepra::String lFilename = pParameterVector[lFilenameIndex];
 					if (!lIgnoreIfExists || !Lepra::DiskFile::Exists(lFilename))

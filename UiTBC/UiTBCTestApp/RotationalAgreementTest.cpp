@@ -74,7 +74,7 @@ public:
 		float lVolume = lSize.x * lSize.y * lSize.z;
 		// Need to be careful about what is "width", "height" and "depth".
 		mGfxGeom = UiTbc::BasicMeshCreator::CreateFlatBox(lSize.x, lSize.z, lSize.y);
-		mBodyID = mPhysics->CreateBox(mTransform, lVolume, lSize, mBodyType);
+		mBodyID = mPhysics->CreateBox(true, mTransform, lVolume, lSize, mBodyType);
 		mGeomID = mRenderer->AddGeometry(mGfxGeom, UiTbc::Renderer::MAT_SINGLE_COLOR_SOLID_PXS, UiTbc::Renderer::CAST_SHADOWS);
 
 		TBC::GeometryBase::BasicMaterialSettings lMat((float)Lepra::Random::Uniform(0.5f, 1.0f), 
@@ -94,7 +94,7 @@ public:
 
 		float lVolume = pRadius * pRadius * pRadius * Lepra::PIF * 4.0f / 3.0f;
 		mGfxGeom = UiTbc::BasicMeshCreator::CreateEllipsoid(pRadius, pRadius, pRadius, 16, 16);
-		mBodyID = mPhysics->CreateSphere(mTransform, lVolume, pRadius, mBodyType);
+		mBodyID = mPhysics->CreateSphere(true, mTransform, lVolume, pRadius, mBodyType);
 		mGeomID = mRenderer->AddGeometry(mGfxGeom, UiTbc::Renderer::MAT_SINGLE_COLOR_SOLID_PXS, UiTbc::Renderer::CAST_SHADOWS);
 
 		TBC::GeometryBase::BasicMaterialSettings lMat((float)Lepra::Random::Uniform(0.5f, 1.0f), 
@@ -234,7 +234,7 @@ void RunRotationalAgreementTest()
 			lRotation.RotateAroundOwnX(Lepra::PIF/4);
 			//lTransformation.SetOrientation(lRotation);
 			lTransformation.RotatePitch(Lepra::PIF/8);
-			lStaticObj[i]->mBodyID = lPhysics.CreateBox(lTransformation, 0, lDimensions, TBC::PhysicsEngine::STATIC, 0.5f, 1.0f, 0);
+			lStaticObj[i]->mBodyID = lPhysics.CreateBox(true, lTransformation, 0, lDimensions, TBC::PhysicsEngine::STATIC, 0.5f, 1.0f, 0);
 
 			// Then graphics.
 			TBC::GeometryBase::BasicMaterialSettings lMaterial;

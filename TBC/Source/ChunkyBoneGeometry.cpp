@@ -41,7 +41,7 @@ void ChunkyBoneGeometry::Remove()
 
 
 
-ChunkyBoneCapsule::ChunkyBoneCapsule(PhysicsEngine* pPhysics, Lepra::float32 pMass, Lepra::float32 pRadius,
+/*ChunkyBoneCapsule::ChunkyBoneCapsule(PhysicsEngine* pPhysics, Lepra::float32 pMass, Lepra::float32 pRadius,
 	Lepra::float32 pLength, Lepra::float32 pFriction, Lepra::float32 pBounce):
 	ChunkyBoneGeometry(pPhysics),
 	mMass(pMass),
@@ -152,7 +152,7 @@ void ChunkyBoneBox::LoadChunkyData(const void* pData)
 	mSize.x = lData[3];
 	mFriction = lData[4];
 	mBounce = lData[5];
-}
+}*/
 
 
 

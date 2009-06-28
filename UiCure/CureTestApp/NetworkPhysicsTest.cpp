@@ -359,7 +359,7 @@ bool CreateWorld(AgentData& pAgentData)
 	TBC::PhysicsEngine::BodyID lPhysicsId;
 	UiTbc::TriangleBasedGeometry* lGeometry;
 	UiTbc::Renderer::GeometryID lGraphicsId;
-	lPhysicsId = pAgentData.mPhysics->CreateBox(lFloorPlacement, 3, Lepra::Vector3DF(lFloorSize, lFloorSize, lFloorSize), TBC::PhysicsEngine::STATIC, 1, 1.0f);
+	lPhysicsId = pAgentData.mPhysics->CreateBox(true, lFloorPlacement, 3, Lepra::Vector3DF(lFloorSize, lFloorSize, lFloorSize), TBC::PhysicsEngine::STATIC, 1, 1.0f);
 	lGeometry = UiTbc::BasicMeshCreator::CreateFlatBox(lFloorSize, lFloorSize, lFloorSize);
 	lGeometry->SetAlwaysVisible(true);
 	lGraphicsId = pAgentData.mRenderer->AddGeometry(lGeometry, UiTbc::Renderer::MAT_SINGLE_COLOR_SOLID, UiTbc::Renderer::NO_SHADOWS);
@@ -370,7 +370,7 @@ bool CreateWorld(AgentData& pAgentData)
 		Lepra::TransformationF lClientPlacement;
 		Lepra::Vector3DF lClientPosition(-lFloorSize/2+y*lClientSize*4, 0, lClientSize*10);
 		lClientPlacement.SetPosition(lClientPosition);
-		lPhysicsId = pAgentData.mPhysics->CreateSphere(lClientPlacement, lClientSize, lClientSize, TBC::PhysicsEngine::DYNAMIC, 1, 1.0f);
+		lPhysicsId = pAgentData.mPhysics->CreateSphere(true, lClientPlacement, lClientSize, lClientSize, TBC::PhysicsEngine::DYNAMIC, 1, 1.0f);
 		pAgentData.mPhysics->ActivateGravity(lPhysicsId);
 		lGeometry = UiTbc::BasicMeshCreator::CreateEllipsoid(lClientSize, lClientSize, lClientSize, 10, 10);
 		lGeometry->SetAlwaysVisible(true);

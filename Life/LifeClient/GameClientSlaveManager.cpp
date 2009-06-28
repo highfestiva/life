@@ -818,8 +818,10 @@ void GameClientSlaveManager::OnCollision(const Lepra::Vector3DF& pForce, const L
 	}
 }
 
-void GameClientSlaveManager::OnStopped(Cure::ContextObject*, TBC::PhysicsEngine::BodyID)
+void GameClientSlaveManager::OnStopped(Cure::ContextObject* pObject, TBC::PhysicsEngine::BodyID)
 {
+	pObject;
+	log_volatile(mLog.Debugf(_T("Object %u/%s stopped."), pObject->GetInstanceId(), pObject->GetClassId().c_str()));
 }
 
 bool GameClientSlaveManager::OnPhysicsSend(Cure::ContextObject*)

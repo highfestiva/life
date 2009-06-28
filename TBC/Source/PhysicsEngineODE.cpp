@@ -70,11 +70,11 @@ PhysicsEngineODE::~PhysicsEngineODE()
 	//::dCloseODE();
 }
 
-PhysicsEngine::BodyID PhysicsEngineODE::CreateSphere(const Lepra::TransformationF& pTransform,
+PhysicsEngine::BodyID PhysicsEngineODE::CreateSphere(bool pIsRoot, const Lepra::TransformationF& pTransform,
 	Lepra::float32 pMass, Lepra::float32 pRadius, BodyType pType, Lepra::float32 pFriction, Lepra::float32 pBounce,
 	TriggerListener* pTriggerListener, ForceFeedbackListener* pForceListener)
 {
-	Object* lObject = new Object(mWorldID);
+	Object* lObject = new Object(mWorldID, pIsRoot);
 	lObject->mGeomID = dCreateSphere(mSpaceID, (dReal)pRadius);
 	lObject->mTriggerListener = pTriggerListener;
 	lObject->mForceFeedbackListener = pForceListener;
@@ -104,11 +104,11 @@ PhysicsEngine::BodyID PhysicsEngineODE::CreateSphere(const Lepra::Transformation
 	return (BodyID)(Lepra::uint64)lObject;
 }
 
-PhysicsEngine::BodyID PhysicsEngineODE::CreateCylinder(const Lepra::TransformationF& pTransform,
+PhysicsEngine::BodyID PhysicsEngineODE::CreateCylinder(bool pIsRoot, const Lepra::TransformationF& pTransform,
 	Lepra::float32 pMass, Lepra::float32 pRadius, Lepra::float32 pLength, BodyType pType, Lepra::float32 pFriction,
 	Lepra::float32 pBounce, TriggerListener* pTriggerListener, ForceFeedbackListener* pForceListener)
 {
-	Object* lObject = new Object(mWorldID);
+	Object* lObject = new Object(mWorldID, pIsRoot);
 
 	// TODO: Create a real cylinder when ODE supports it.
 	lObject->mGeomID = ::dCreateCCylinder(mSpaceID, (dReal)pRadius, (dReal)pLength);
@@ -142,11 +142,11 @@ PhysicsEngine::BodyID PhysicsEngineODE::CreateCylinder(const Lepra::Transformati
 	return (BodyID)(Lepra::uint64)lObject;
 }
 
-PhysicsEngine::BodyID PhysicsEngineODE::CreateCapsule(const Lepra::TransformationF& pTransform,
+PhysicsEngine::BodyID PhysicsEngineODE::CreateCapsule(bool pIsRoot, const Lepra::TransformationF& pTransform,
 	Lepra::float32 pMass, Lepra::float32 pRadius, Lepra::float32 pLength, BodyType pType, Lepra::float32 pFriction,
 	Lepra::float32 pBounce, TriggerListener* pTriggerListener, ForceFeedbackListener* pForceListener)
 {
-	Object* lObject = new Object(mWorldID);
+	Object* lObject = new Object(mWorldID, pIsRoot);
 
 	lObject->mGeomID = dCreateCCylinder(mSpaceID, (dReal)pRadius, (dReal)pLength);
 	lObject->mTriggerListener = pTriggerListener;
@@ -177,11 +177,11 @@ PhysicsEngine::BodyID PhysicsEngineODE::CreateCapsule(const Lepra::Transformatio
 	return (BodyID)(Lepra::uint64)lObject;
 }
 
-PhysicsEngine::BodyID PhysicsEngineODE::CreateBox(const Lepra::TransformationF& pTransform,
+PhysicsEngine::BodyID PhysicsEngineODE::CreateBox(bool pIsRoot, const Lepra::TransformationF& pTransform,
 	Lepra::float32 pMass, const Lepra::Vector3D<Lepra::float32>& pSize, BodyType pType, Lepra::float32 pFriction,
 	Lepra::float32 pBounce, TriggerListener* pTriggerListener, ForceFeedbackListener* pForceListener)
 {
-	Object* lObject = new Object(mWorldID);
+	Object* lObject = new Object(mWorldID, pIsRoot);
 
 	lObject->mGeomID = ::dCreateBox(mSpaceID, (dReal)pSize.x, (dReal)pSize.y, (dReal)pSize.z);
 	lObject->mTriggerListener = pTriggerListener;
@@ -241,11 +241,11 @@ bool PhysicsEngineODE::Attach(BodyID pStaticBody, BodyID pMainBody)
 	return (true);
 }
 
-PhysicsEngine::BodyID PhysicsEngineODE::CreateTriMesh(const GeometryBase* pMesh,
+PhysicsEngine::BodyID PhysicsEngineODE::CreateTriMesh(bool pIsRoot, const GeometryBase* pMesh,
 	const Lepra::TransformationF& pTransform, Lepra::float32 pFriction, Lepra::float32 pBounce,
 	TriggerListener* pTriggerListener, ForceFeedbackListener* pForceListener)
 {
-	Object* lObject = new Object(mWorldID);
+	Object* lObject = new Object(mWorldID, pIsRoot);
 	lObject->mTriMeshID = dGeomTriMeshDataCreate();
 
 	dGeomTriMeshDataBuildSingle(lObject->mTriMeshID,
@@ -512,7 +512,7 @@ void* PhysicsEngineODE::GetBodyData(BodyID pBodyId)
 PhysicsEngine::TriggerID PhysicsEngineODE::CreateSphereTrigger(const Lepra::TransformationF& pTransform,
 	Lepra::float32 pRadius, TriggerListener* pForceListener)
 {
-	Object* lObject = new Object(mWorldID);
+	Object* lObject = new Object(mWorldID, false);
 	lObject->mGeomID = dCreateSphere(mSpaceID, (dReal)pRadius);
 
 	dGeomSetBody(lObject->mGeomID, 0);
@@ -529,7 +529,7 @@ PhysicsEngine::TriggerID PhysicsEngineODE::CreateSphereTrigger(const Lepra::Tran
 PhysicsEngine::TriggerID PhysicsEngineODE::CreateCylinderTrigger(const Lepra::TransformationF& pTransform,
 	Lepra::float32 pRadius, Lepra::float32 pLength, TriggerListener* pForceListener)
 {
-	Object* lObject = new Object(mWorldID);
+	Object* lObject = new Object(mWorldID, false);
 
 	// TODO: Create a real cylinder when ODE supports it.
 	lObject->mGeomID = dCreateCCylinder(mSpaceID, (dReal)pRadius, (dReal)(pLength - pRadius * 2));
@@ -549,7 +549,7 @@ PhysicsEngine::TriggerID PhysicsEngineODE::CreateCylinderTrigger(const Lepra::Tr
 PhysicsEngine::TriggerID PhysicsEngineODE::CreateCapsuleTrigger(const Lepra::TransformationF& pTransform,
 	Lepra::float32 pRadius, Lepra::float32 pLength, TriggerListener* pForceListener)
 {
-	Object* lObject = new Object(mWorldID);
+	Object* lObject = new Object(mWorldID, false);
 
 	lObject->mGeomID = dCreateCCylinder(mSpaceID, (dReal)pRadius, (dReal)pLength);
 
@@ -567,7 +567,7 @@ PhysicsEngine::TriggerID PhysicsEngineODE::CreateCapsuleTrigger(const Lepra::Tra
 PhysicsEngine::TriggerID PhysicsEngineODE::CreateBoxTrigger(const Lepra::TransformationF& pTransform,
 	const Lepra::Vector3D<Lepra::float32>& pSize, TriggerListener* pForceListener)
 {
-	Object* lObject = new Object(mWorldID);
+	Object* lObject = new Object(mWorldID, false);
 
 	lObject->mGeomID = dCreateBox(mSpaceID, (dReal)pSize.x, (dReal)pSize.y, (dReal)pSize.z);
 
@@ -586,7 +586,7 @@ PhysicsEngine::TriggerID PhysicsEngineODE::CreateRayTrigger(const Lepra::Transfo
 	const Lepra::Vector3D<Lepra::float32>& pFromPos, const Lepra::Vector3D<Lepra::float32>& pToPos,
 	TriggerListener* pForceListener)
 {
-	Object* lObject = new Object(mWorldID);
+	Object* lObject = new Object(mWorldID, false);
 
 	// Calculate the direction vector.
 	Lepra::Vector3D<Lepra::float32> lDir(pToPos - pFromPos);
@@ -2956,7 +2956,7 @@ void PhysicsEngineODE::ListEnabledObjects()
 	for (; x != mObjectTable.end(); ++x)
 	{
 		Object* lObject = *x;
-		if (lObject->mBodyID && dBodyIsEnabled(lObject->mBodyID))
+		if (lObject->mBodyID && lObject->mIsRoot && dBodyIsEnabled(lObject->mBodyID))
 		{
 			mAutoDisabledObjectSet.insert((BodyID)lObject);
 		}

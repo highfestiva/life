@@ -125,26 +125,28 @@ public:
 	// This is indeed a "hack", but it's there to make life easier writing games.
 	//
 	// The cylinder and capsule are both created along the local Z-axis.
-	virtual BodyID CreateSphere(const Lepra::Transformation<Lepra::float32>& pTransform, Lepra::float32 pMass,
-		Lepra::float32 pRadius, BodyType pType, Lepra::float32 pFriction = 1, Lepra::float32 pBounce = 0,
-		TriggerListener* pTriggerListener = 0, ForceFeedbackListener* pForceListener = 0) = 0;
-	virtual BodyID CreateCylinder(const Lepra::Transformation<Lepra::float32>& pTransform, Lepra::float32 pMass,
-		Lepra::float32 pRadius, Lepra::float32 pLength, BodyType pType, Lepra::float32 pFriction = 1,
+	virtual BodyID CreateSphere(bool pIsRoot, const Lepra::Transformation<Lepra::float32>& pTransform,
+		Lepra::float32 pMass, Lepra::float32 pRadius, BodyType pType, Lepra::float32 pFriction = 1,
 		Lepra::float32 pBounce = 0, TriggerListener* pTriggerListener = 0,
 		ForceFeedbackListener* pForceListener = 0) = 0;
-	virtual BodyID CreateCapsule(const Lepra::Transformation<Lepra::float32>& pTransform, Lepra::float32 pMass,
-		Lepra::float32 pRadius, Lepra::float32 pLength, BodyType pType, Lepra::float32 pFriction = 1,
-		Lepra::float32 pBounce = 0, TriggerListener* pTriggerListener = 0,
+	virtual BodyID CreateCylinder(bool pIsRoot, const Lepra::Transformation<Lepra::float32>& pTransform,
+		Lepra::float32 pMass, Lepra::float32 pRadius, Lepra::float32 pLength, BodyType pType,
+		Lepra::float32 pFriction = 1, Lepra::float32 pBounce = 0, TriggerListener* pTriggerListener = 0,
 		ForceFeedbackListener* pForceListener = 0) = 0;
-	virtual BodyID CreateBox(const Lepra::Transformation<Lepra::float32>& pTransform, Lepra::float32 pMass,
-		const Lepra::Vector3D<Lepra::float32>& pSize, BodyType pType, Lepra::float32 pFriction = 1,
-		Lepra::float32 pBounce = 0, TriggerListener* pTriggerListener = 0,
+	virtual BodyID CreateCapsule(bool pIsRoot, const Lepra::Transformation<Lepra::float32>& pTransform,
+		Lepra::float32 pMass, Lepra::float32 pRadius, Lepra::float32 pLength, BodyType pType,
+		Lepra::float32 pFriction = 1, Lepra::float32 pBounce = 0, TriggerListener* pTriggerListener = 0,
+		ForceFeedbackListener* pForceListener = 0) = 0;
+	virtual BodyID CreateBox(bool pIsRoot, const Lepra::Transformation<Lepra::float32>& pTransform,
+		Lepra::float32 pMass, const Lepra::Vector3D<Lepra::float32>& pSize, BodyType pType,
+		Lepra::float32 pFriction = 1, Lepra::float32 pBounce = 0, TriggerListener* pTriggerListener = 0,
 		ForceFeedbackListener* pForceListener = 0) = 0;
 	virtual bool Attach(BodyID pStaticBody, BodyID pMainBody) = 0;
 
 	// Tri meshes are always static.
-	virtual BodyID CreateTriMesh(const GeometryBase* pMesh, const Lepra::Transformation<Lepra::float32>& pTransform,
-		Lepra::float32 pFriction = 1, Lepra::float32 pBounce = 0, TriggerListener* pTriggerListener = 0,
+	virtual BodyID CreateTriMesh(bool pIsRoot, const GeometryBase* pMesh,
+		const Lepra::Transformation<Lepra::float32>& pTransform, Lepra::float32 pFriction = 1,
+		Lepra::float32 pBounce = 0, TriggerListener* pTriggerListener = 0,
 		ForceFeedbackListener* pForceListener = 0) = 0;
 
 	virtual bool IsStaticBody(BodyID pBodyId) const = 0;

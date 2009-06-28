@@ -44,7 +44,7 @@ protected:
 
 
 
-class ChunkyBoneCapsule: public ChunkyBoneGeometry
+/*class ChunkyBoneCapsule: public ChunkyBoneGeometry
 {
 public:
 	ChunkyBoneCapsule(PhysicsEngine* pPhyics, Lepra::float32 pMass, Lepra::float32 pRadius,
@@ -85,7 +85,7 @@ private:
 	Lepra::Vector3DF mSize;
 	Lepra::float32 mFriction;
 	Lepra::float32 mBounce;
-};
+};*/
 
 
 

@@ -29,22 +29,22 @@ public:
 	PhysicsEngineODE();
 	virtual ~PhysicsEngineODE();
 
-	virtual BodyID CreateSphere(const Lepra::TransformationF& pTransform, Lepra::float32 pMass,
+	virtual BodyID CreateSphere(bool pIsRoot, const Lepra::TransformationF& pTransform, Lepra::float32 pMass,
 		Lepra::float32 pRadius, BodyType pType, Lepra::float32 pFriction = 1, Lepra::float32 pBounce = 0,
 		TriggerListener* pTriggerListener = 0, ForceFeedbackListener* pListener = 0);
-	virtual BodyID CreateCylinder(const Lepra::TransformationF& pTransform, Lepra::float32 pMass,
+	virtual BodyID CreateCylinder(bool pIsRoot, const Lepra::TransformationF& pTransform, Lepra::float32 pMass,
 		Lepra::float32 pRadius, Lepra::float32 pLength, BodyType pType, Lepra::float32 pFriction = 1,
 		Lepra::float32 pBounce = 0, TriggerListener* pTriggerListener = 0, ForceFeedbackListener* pListener = 0);
-	virtual BodyID CreateCapsule(const Lepra::TransformationF& pTransform, Lepra::float32 pMass,
+	virtual BodyID CreateCapsule(bool pIsRoot, const Lepra::TransformationF& pTransform, Lepra::float32 pMass,
 		Lepra::float32 pRadius, Lepra::float32 pLength, BodyType pType, Lepra::float32 pFriction = 1,
 		Lepra::float32 pBounce = 0, TriggerListener* pTriggerListener = 0, ForceFeedbackListener* pListener = 0);
-	virtual BodyID CreateBox(const Lepra::TransformationF& pTransform, Lepra::float32 pMass,
+	virtual BodyID CreateBox(bool pIsRoot, const Lepra::TransformationF& pTransform, Lepra::float32 pMass,
 		const Lepra::Vector3D<Lepra::float32>& pSize, BodyType pType, Lepra::float32 pFriction = 1,
 		Lepra::float32 pBounce = 0, TriggerListener* pTriggerListener = 0, ForceFeedbackListener* pListener = 0);
 	virtual bool Attach(BodyID pStaticBody, BodyID pMainBody);
 
 	// Tri meshes are always static.
-	virtual BodyID CreateTriMesh(const GeometryBase* pMesh, const Lepra::TransformationF& pTransform,
+	virtual BodyID CreateTriMesh(bool pIsRoot, const GeometryBase* pMesh, const Lepra::TransformationF& pTransform,
 		Lepra::float32 pFriction = 1, Lepra::float32 pBounce = 0, TriggerListener* pTriggerListener = 0,
 		ForceFeedbackListener* pListener = 0);
 
@@ -215,11 +215,11 @@ private:
 		JOINT_CONTACT,
 	};
 
-	class Object
+	struct Object
 	{
-	public:
-		Object(dWorldID pWorldID) :
+		Object(dWorldID pWorldID, bool pIsRoot) :
 			mWorldID(pWorldID),
+			mIsRoot(pIsRoot),
 			mBodyID(0),
 			mGeomID(0),
 			mTriMeshID(0),
@@ -232,6 +232,7 @@ private:
 		}
 
 		dWorldID mWorldID;
+		bool mIsRoot;
 		dBodyID mBodyID;
 		dGeomID mGeomID;
 		dTriMeshDataID mTriMeshID;
