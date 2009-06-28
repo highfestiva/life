@@ -199,8 +199,10 @@ public:
 	virtual const BodySet& GetIdledBodies() const;
 
 private:
-	void ListEnabledObjects();
-	void HandleAutoDisabledObjects();
+	void FlagMovingObjects();
+	void HandleMovableObjects();
+
+	void NormalizeRotation(BodyID pObject);
 
 	enum JointType
 	{

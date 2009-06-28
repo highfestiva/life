@@ -114,7 +114,7 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 		lTransformation.GetOrientation().RotateAroundOwnX(0.1f);
 		lTransformation.GetOrientation().RotateAroundWorldZ(0.7f);
 		lPhysicsObjectId = lPhysicsManager->CreateBox(true, lTransformation, 1, lDimensions,
-			TBC::PhysicsEngine::DYNAMIC, 0.2f, 0.2f, pTriggerListener, pObject);
+			TBC::PhysicsEngine::DYNAMIC, 0.2f, 1.0f, pTriggerListener, pObject);
 		lPhysicsManager->ActivateGravity(lPhysicsObjectId);
 		pObject->AddPhysicsObject(PhysicsNode(0, 1, lPhysicsObjectId));
 
@@ -165,7 +165,7 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 		lTopTransform.MoveUp(lBodyDimensions.z/2+lTopDimensions.z/2);
 		lTopTransform.MoveForward(0.9f);
 		TBC::PhysicsEngine::BodyID lTopId = lPhysicsManager->CreateBox(false, lTopTransform, 0, lTopDimensions,
-			TBC::PhysicsEngine::STATIC, 0.5f, 0.5f, pTriggerListener, pObject);
+			TBC::PhysicsEngine::STATIC, 0.5f, 1.0f, pTriggerListener, pObject);
 		lPhysicsManager->Attach(lTopId, lBodyId);
 		pObject->AddPhysicsObject(PhysicsNode(1, 2, lTopId, PhysicsNode::TYPE_EXCLUDE, TBC::INVALID_JOINT,
 			PhysicsNode::CONNECTEE_3));

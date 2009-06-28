@@ -5,6 +5,7 @@
 
 
 #include <assert.h>
+#include <../ode/src/collision_kernel.h>
 #include <../ode/src/joint.h>
 #include "../../Lepra/Include/Log.h"
 #include "../../Lepra/Include/Math.h"
@@ -101,7 +102,7 @@ PhysicsEngine::BodyID PhysicsEngineODE::CreateSphere(bool pIsRoot, const Lepra::
 	SetGeomTransform(lObject->mGeomID, pTransform);
 
 	mObjectTable.insert(lObject);
-	return (BodyID)(Lepra::uint64)lObject;
+	return ((BodyID)lObject);
 }
 
 PhysicsEngine::BodyID PhysicsEngineODE::CreateCylinder(bool pIsRoot, const Lepra::TransformationF& pTransform,
@@ -421,7 +422,7 @@ void PhysicsEngineODE::GetBodyAngularVelocity(BodyID pBodyId, Lepra::Vector3DF& 
 	Object* lObject = (Object*)pBodyId;
 	if(lObject->mBodyID)
 	{
-		const dReal* lAngularVelocity = dBodyGetAngularVel(lObject->mBodyID);
+		const dReal* lAngularVelocity = ::dBodyGetAngularVel(lObject->mBodyID);
 		pAngularVelocity.x = lAngularVelocity[0];
 		pAngularVelocity.y = lAngularVelocity[1];
 		pAngularVelocity.z = lAngularVelocity[2];
@@ -2717,12 +2718,12 @@ void PhysicsEngineODE::StepAccurate(Lepra::float32 pStepSize)
 {
 	if (pStepSize > 0)
 	{
-		ListEnabledObjects();
+		FlagMovingObjects();
 
 		dSpaceCollide(mSpaceID, this, CollisionCallback);
 		dWorldStep(mWorldID, pStepSize);
 
-		HandleAutoDisabledObjects();
+		HandleMovableObjects();
 		DoForceFeedback();
 		dJointGroupEmpty(mContactJointGroupID);
 	}
@@ -2732,12 +2733,12 @@ void PhysicsEngineODE::StepFast(Lepra::float32 pStepSize)
 {
 	if (pStepSize > 0)
 	{
-		ListEnabledObjects();
+		FlagMovingObjects();
 
 		dSpaceCollide(mSpaceID, this, CollisionCallback);
 		dWorldQuickStep(mWorldID, pStepSize);
 		
-		HandleAutoDisabledObjects();
+		HandleMovableObjects();
 		DoForceFeedback();
 		dJointGroupEmpty(mContactJointGroupID);
 	}
@@ -2949,35 +2950,54 @@ const PhysicsEngine::BodySet& PhysicsEngineODE::GetIdledBodies() const
 
 
 
-void PhysicsEngineODE::ListEnabledObjects()
+void PhysicsEngineODE::FlagMovingObjects()
 {
 	mAutoDisabledObjectSet.clear();
 	ObjectTable::iterator x = mObjectTable.begin();
 	for (; x != mObjectTable.end(); ++x)
 	{
 		Object* lObject = *x;
-		if (lObject->mBodyID && lObject->mIsRoot && dBodyIsEnabled(lObject->mBodyID))
+		if (lObject->mBodyID && lObject->mIsRoot && ::dBodyIsEnabled(lObject->mBodyID))
 		{
 			mAutoDisabledObjectSet.insert((BodyID)lObject);
 		}
 	}
 }
 
-void PhysicsEngineODE::HandleAutoDisabledObjects()
+void PhysicsEngineODE::HandleMovableObjects()
 {
 	BodySet::iterator x = mAutoDisabledObjectSet.begin();
 	while(x != mAutoDisabledObjectSet.end())
 	{
 		Object* lObject = (Object*)(*x);
-		if (lObject->mBodyID && dBodyIsEnabled(lObject->mBodyID))
+		if (lObject->mBodyID && ::dBodyIsEnabled(lObject->mBodyID))
 		{
 			BodySet::iterator y = x;
 			++x;
 			mAutoDisabledObjectSet.erase(y);
+
+			NormalizeRotation(lObject);
 		}
 		else
 		{
 			++x;
+		}
+	}
+}
+
+void PhysicsEngineODE::NormalizeRotation(BodyID pObject)
+{
+	Object* lObject = (Object*)pObject;
+	if (lObject->mBodyID->geom->type == dBoxClass)
+	{
+		Lepra::Vector3DF lVelocity;
+		GetBodyAngularVelocity(lObject, lVelocity);
+		const float lMaxAngularVelocity = 12.0f;
+		if (lVelocity.GetLength() > lMaxAngularVelocity)
+		{
+			lVelocity.Normalize(lMaxAngularVelocity);
+			SetBodyAngularVelocity(lObject, lVelocity);
+			SetBodyAngularAcceleration(lObject, Lepra::Vector3DF());
 		}
 	}
 }
