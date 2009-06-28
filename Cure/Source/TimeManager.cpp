@@ -121,8 +121,8 @@ int TimeManager::GetAffordedPhysicsStepCount() const
 
 float TimeManager::GetAffordedStepPeriod() const
 {
-	// TODO: return ((GetCurrentPhysicsStepCount()/(float)GetAffordedPhysicsStepCount())/(float)mFixedFrameRate);
-	return (1/(float)mFixedFrameRate);
+	return ((GetCurrentPhysicsStepCount()/(float)GetAffordedPhysicsStepCount())/(float)mFixedFrameRate);
+	//return (1/(float)mFixedFrameRate);
 }
 
 

@@ -85,11 +85,11 @@ private:
 	void ProcessNumber(Cure::MessageNumber::InfoType pType, Lepra::int32 pInteger, Lepra::float32 pFloat);
 	bool CreateObject(Cure::GameObjectId pObjectId, const Lepra::String& pClassId, Cure::NetworkObjectType pNetworkType);
 	bool DeleteObject(Cure::GameObjectId pObjectId);
-	void SetMovement(Cure::GameObjectId pObjectId, Lepra::int32 pFrameIndex, const Cure::ObjectPositionalData& pData);
+	void SetMovement(Cure::GameObjectId pObjectId, Lepra::int32 pFrameIndex, Cure::ObjectPositionalData& pData);
 	void OnCollision(const Lepra::Vector3DF& pForce, const Lepra::Vector3DF& pTorque,
 		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2);
 	void OnStopped(Cure::ContextObject* pObject, TBC::PhysicsEngine::BodyID pBodyId);
-	void OnPhysicsSend(Cure::ContextObject* pObject);
+	bool OnPhysicsSend(Cure::ContextObject* pObject);
 	bool IsConnectAuthorized();
 	void SendAttach(Cure::ContextObject*, Cure::PhysicsNode::Id, Cure::ContextObject*, Cure::PhysicsNode::Id);
 	void SendDetach(Cure::ContextObject*, Cure::ContextObject*);

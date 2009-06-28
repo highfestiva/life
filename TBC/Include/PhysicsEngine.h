@@ -297,7 +297,7 @@ public:
 	virtual void StepFast(Lepra::float32 pStepSize)     = 0;
 
 	// Returns the bodies that were "idled" last step.
-	virtual BodySet GetIdledBodies() const = 0;
+	virtual const BodySet& GetIdledBodies() const = 0;
 
 protected:
 };

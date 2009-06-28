@@ -60,20 +60,24 @@ void CppContextObject::OnPhysicsTick()
 			continue;
 		}
 
-		mManager->GetGameManager()->GetPhysicsManager()->GetBodyTransform(
-			lNode->GetBodyId(), lPhysicsTransform);
+		mManager->GetGameManager()->GetPhysicsManager()->GetBodyTransform(lNode->GetBodyId(), lPhysicsTransform);
 
 		TBC::GeometryBase* lGeometry = lResource->GetRamData();
 		//if (GetNetworkObjectType() == Cure::NETWORK_OBJECT_REMOTE_CONTROLLED)
-		{
+		/*{
 			// Smooth (sliding average) to the physics position if we're close enough. Otherwise warp.
+			Lepra::Vector3DF lPhysicsVelocity;
+			mManager->GetGameManager()->GetPhysicsManager()->GetBodyVelocity(lNode->GetBodyId(), lPhysicsVelocity);
 			const Lepra::Vector3DF& lPosition = lGeometry->GetBaseTransformation().GetPosition();
-			const float lClose = 1.5f;
+			const float lCloseTime = 0.5f;
+			const float lCloseStandStillDistance = 1.5f;
+			float lClose = lPhysicsVelocity.GetLength()*lCloseTime;
+			lClose = std::max(lCloseStandStillDistance, lClose);
 			if (lPosition.GetDistanceSquared(lPhysicsTransform.GetPosition()) < lClose*lClose)
 			{
-				lPhysicsTransform.SetPosition(Lepra::Math::Lerp(lPosition, lPhysicsTransform.GetPosition(), 0.3f));
+				lPhysicsTransform.SetPosition(Lepra::Math::Lerp(lPosition, lPhysicsTransform.GetPosition(), 0.1f));
 			}
-		}
+		}*/
 		lGeometry->SetTransformation(lPhysicsTransform);
 	}
 }

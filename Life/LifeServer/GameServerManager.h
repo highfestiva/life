@@ -71,7 +71,7 @@ private:
 	void OnCollision(const Lepra::Vector3DF& pForce, const Lepra::Vector3DF& pTorque,
 		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2);
 	void OnStopped(Cure::ContextObject* pObject, TBC::PhysicsEngine::BodyID pBodyId);
-	void OnPhysicsSend(Cure::ContextObject* pObject);
+	bool OnPhysicsSend(Cure::ContextObject* pObject);
 	bool IsConnectAuthorized();
 	void SendAttach(Cure::ContextObject* pObject1, Cure::PhysicsNode::Id pId1, Cure::ContextObject* pObject2, Cure::PhysicsNode::Id pId2);
 	void SendDetach(Cure::ContextObject* pObject1, Cure::ContextObject* pObject2);
@@ -95,6 +95,7 @@ private:
 	UserContextObjectInfoResource mTerrainResource;	// TODO: remove when applicable.
 	UserContextObjectInfoResource mBoxResource;	// TODO: remove when applicable.
 	MovementArrayList mMovementArrayList;
+	mutable Lepra::Timer mPowerSaveTimer;
 
 	LOG_CLASS_DECLARE();
 };

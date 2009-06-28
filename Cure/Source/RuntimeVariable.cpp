@@ -288,7 +288,10 @@ const Lepra::String& RuntimeVariableScope::GetDefaultValue(GetMode pMode, const 
 	{
 		SetValue(SET_OVERRIDE, pName, pDefaultValue);
 	}
-	mLog.Warningf(_T("Variable %s not found."), pName.c_str());
+	else if (pMode != READ_IGNORE)
+	{
+		mLog.Warningf(_T("Variable %s not found."), pName.c_str());
+	}
 	return (pDefaultValue);
 }
 

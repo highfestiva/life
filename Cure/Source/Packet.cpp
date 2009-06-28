@@ -674,7 +674,7 @@ MessageObjectMovement* MessageObjectPosition::CloneToStandalone()
 	return (new MessageObjectPosition(mPosition, mWritableData, Parent::Parse(mData, 1024)));
 }
 
-const ObjectPositionalData& MessageObjectPosition::GetPositionalData() const
+ObjectPositionalData& MessageObjectPosition::GetPositionalData()
 {
 	return (mPosition);
 }

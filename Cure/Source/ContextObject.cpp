@@ -737,16 +737,6 @@ void ContextObject::SetEnginePower(unsigned pAspect, float pPower, float pAngle)
 
 
 
-void ContextObject::StepGhost(ObjectPositionalData& pGhost, float pDeltaTime)
-{
-	// We just add acceleration to velocity, and velocity to position. An improvement
-	// here might save us a few bytes of network data.
-	pGhost.mPosition.mVelocity.Add(pGhost.mPosition.mAcceleration*pDeltaTime);
-	pGhost.mPosition.mTransformation.GetPosition().Add(pGhost.mPosition.mVelocity*pDeltaTime);
-}
-
-
-
 bool ContextObject::QueryResendTime(float pDeltaTime, bool pUnblockDelta)
 {
 	bool lOkToSend = false;

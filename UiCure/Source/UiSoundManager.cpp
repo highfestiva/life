@@ -52,7 +52,9 @@ void SoundManager::Tick(double pFrameTimeDelta)
 		{
 			mSound->DeleteSoundInstance((*x).mInstanceId);
 			mSound->Release((*x).mId);
-			mPlayList.erase(x++);
+			std::list<ContextSound>::iterator y = x;
+			++x;
+			mPlayList.erase(y);
 		}
 	}
 }
@@ -151,7 +153,9 @@ void SoundManager::Stop3dSounds(Cure::ContextObject* pSource)
 	{
 		if ((*x).mSource == pSource)
 		{
-			mPlayList.erase(x++);
+			std::list<ContextSound>::iterator y = x;
+			++x;
+			mPlayList.erase(y);
 		}
 		else
 		{

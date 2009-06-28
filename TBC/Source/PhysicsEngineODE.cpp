@@ -201,7 +201,7 @@ PhysicsEngine::BodyID PhysicsEngineODE::CreateBox(const Lepra::TransformationF& 
 
 	::dGeomSetData(lObject->mGeomID, lObject);
 
-	lObject->mFriction = pFriction;
+	lObject->mFriction = -pFriction;
 	lObject->mBounce   = pBounce;
 
 	SetGeomTransform(lObject->mGeomID, pTransform);
@@ -265,7 +265,7 @@ PhysicsEngine::BodyID PhysicsEngineODE::CreateTriMesh(const GeometryBase* pMesh,
 
 //	dGeomTriMeshEnableTC(lObject->mGeomID, dBoxClass, 1);
 
-	lObject->mFriction = pFriction;
+	lObject->mFriction = -pFriction;
 	lObject->mBounce   = pBounce;
 
 	SetGeomTransform(lObject->mGeomID, pTransform);
@@ -287,17 +287,17 @@ bool PhysicsEngineODE::IsStaticBody(BodyID pBodyId) const
 
 void PhysicsEngineODE::DeleteBody(BodyID pBodyId)
 {
-	ObjectTable::iterator lIter = mObjectTable.find((Object*)pBodyId);
-	if (lIter != mObjectTable.end())
+	ObjectTable::iterator x = mObjectTable.find((Object*)pBodyId);
+	if (x != mObjectTable.end())
 	{
-		Object* lObject = *lIter;
+		Object* lObject = *x;
 		if (lObject->mBodyID != 0)
 		{
 			dBodyDestroy(lObject->mBodyID);
 		}
 		dGeomDestroy(lObject->mGeomID);
 		delete lObject;
-		mObjectTable.erase(lIter);
+		mObjectTable.erase(x);
 		mAutoDisabledObjectSet.erase(lObject);
 	}
 	else
@@ -610,13 +610,13 @@ PhysicsEngine::TriggerID PhysicsEngineODE::CreateRayTrigger(const Lepra::Transfo
 
 void PhysicsEngineODE::DeleteTrigger(TriggerID pTriggerID)
 {
-	ObjectTable::iterator lIter = mObjectTable.find((Object*)pTriggerID);
+	ObjectTable::iterator x = mObjectTable.find((Object*)pTriggerID);
 
-	if (lIter != mObjectTable.end())
+	if (x != mObjectTable.end())
 	{
-		dGeomDestroy((*lIter)->mGeomID);
-		delete *lIter;
-		mObjectTable.erase(lIter);
+		dGeomDestroy((*x)->mGeomID);
+		delete *x;
+		mObjectTable.erase(x);
 	}
 	else
 	{
@@ -941,14 +941,14 @@ void PhysicsEngineODE::DeleteJoint(JointID pJointId)
 
 bool PhysicsEngineODE::StabilizeJoint(JointID pJointId)
 {
-	JointTable::iterator lIter = mJointTable.find((JointInfo*)pJointId);
-	if (lIter == mJointTable.end())
+	JointTable::iterator x = mJointTable.find((JointInfo*)pJointId);
+	if (x == mJointTable.end())
 	{
 		mLog.Errorf(_T("Couldn't find joint %i!"), pJointId);
 		return (false);
 	}
 	bool lOk = false;
-	JointInfo* lJointInfo = *lIter;
+	JointInfo* lJointInfo = *x;
 	switch (lJointInfo->mType)
 	{
 		case JOINT_BALL:
@@ -977,14 +977,14 @@ bool PhysicsEngineODE::StabilizeJoint(JointID pJointId)
 
 bool PhysicsEngineODE::GetJoint1Diff(BodyID pBodyId, JointID pJointId, Joint1Diff& pDiff) const
 {
-	JointTable::const_iterator lIter = mJointTable.find((JointInfo*)pJointId);
-	if (lIter == mJointTable.end())
+	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
+	if (x == mJointTable.end())
 	{
 		mLog.Errorf(_T("Couldn't find joint %i!"), pJointId);
 		return (false);
 	}
 	bool lOk = false;
-	const JointInfo* lJointInfo = *lIter;
+	const JointInfo* lJointInfo = *x;
 	switch (lJointInfo->mType)
 	{
 		case JOINT_HINGE:
@@ -1004,14 +1004,14 @@ bool PhysicsEngineODE::GetJoint1Diff(BodyID pBodyId, JointID pJointId, Joint1Dif
 
 bool PhysicsEngineODE::SetJoint1Diff(BodyID pBodyId, JointID pJointId, const Joint1Diff& pDiff)
 {
-	JointTable::const_iterator lIter = mJointTable.find((JointInfo*)pJointId);
-	if (lIter == mJointTable.end())
+	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
+	if (x == mJointTable.end())
 	{
 		mLog.Errorf(_T("Couldn't find joint %i!"), pJointId);
 		return (false);
 	}
 	bool lOk = false;
-	JointInfo* lJointInfo = (JointInfo*)*lIter;
+	JointInfo* lJointInfo = (JointInfo*)*x;
 	switch (lJointInfo->mType)
 	{
 		case JOINT_HINGE:
@@ -1031,14 +1031,14 @@ bool PhysicsEngineODE::SetJoint1Diff(BodyID pBodyId, JointID pJointId, const Joi
 
 bool PhysicsEngineODE::GetJoint2Diff(BodyID pBodyId, JointID pJointId, Joint2Diff& pDiff) const
 {
-	JointTable::const_iterator lIter = mJointTable.find((JointInfo*)pJointId);
-	if (lIter == mJointTable.end())
+	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
+	if (x == mJointTable.end())
 	{
 		mLog.Errorf(_T("Couldn't find joint %i!"), pJointId);
 		return (false);
 	}
 	bool lOk = false;
-	JointInfo* lJointInfo = (JointInfo*)*lIter;
+	JointInfo* lJointInfo = (JointInfo*)*x;
 	switch (lJointInfo->mType)
 	{
 		case JOINT_UNIVERSAL:
@@ -1058,14 +1058,14 @@ bool PhysicsEngineODE::GetJoint2Diff(BodyID pBodyId, JointID pJointId, Joint2Dif
 
 bool PhysicsEngineODE::SetJoint2Diff(BodyID pBodyId, JointID pJointId, const Joint2Diff& pDiff)
 {
-	JointTable::const_iterator lIter = mJointTable.find((JointInfo*)pJointId);
-	if (lIter == mJointTable.end())
+	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
+	if (x == mJointTable.end())
 	{
 		mLog.Errorf(_T("Couldn't find joint %i!"), pJointId);
 		return (false);
 	}
 	bool lOk = false;
-	JointInfo* lJointInfo = (JointInfo*)*lIter;
+	JointInfo* lJointInfo = (JointInfo*)*x;
 	switch (lJointInfo->mType)
 	{
 		case JOINT_UNIVERSAL:
@@ -1085,14 +1085,14 @@ bool PhysicsEngineODE::SetJoint2Diff(BodyID pBodyId, JointID pJointId, const Joi
 
 bool PhysicsEngineODE::GetJoint3Diff(BodyID pBodyId, JointID pJointId, Joint3Diff& pDiff) const
 {
-	JointTable::const_iterator lIter = mJointTable.find((JointInfo*)pJointId);
-	if (lIter == mJointTable.end())
+	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
+	if (x == mJointTable.end())
 	{
 		mLog.Errorf(_T("Couldn't find joint %i!"), pJointId);
 		return (false);
 	}
 	bool lOk = false;
-	JointInfo* lJointInfo = (JointInfo*)*lIter;
+	JointInfo* lJointInfo = (JointInfo*)*x;
 	switch (lJointInfo->mType)
 	{
 		case JOINT_HINGE2:
@@ -1117,14 +1117,14 @@ bool PhysicsEngineODE::GetJoint3Diff(BodyID pBodyId, JointID pJointId, Joint3Dif
 
 bool PhysicsEngineODE::SetJoint3Diff(BodyID pBodyId, JointID pJointId, const Joint3Diff& pDiff)
 {
-	JointTable::const_iterator lIter = mJointTable.find((JointInfo*)pJointId);
-	if (lIter == mJointTable.end())
+	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
+	if (x == mJointTable.end())
 	{
 		mLog.Errorf(_T("Couldn't find joint %i!"), pJointId);
 		return (false);
 	}
 	bool lOk = false;
-	JointInfo* lJointInfo = (JointInfo*)*lIter;
+	JointInfo* lJointInfo = (JointInfo*)*x;
 	switch (lJointInfo->mType)
 	{
 		case JOINT_HINGE2:
@@ -1749,8 +1749,8 @@ bool PhysicsEngineODE::CheckBodies2(BodyID& pBody1, BodyID& pBody2, Object*& pOb
 
 bool PhysicsEngineODE::GetAnchorPos(JointID pJointId, Lepra::Vector3D<Lepra::float32>& pAnchorPos) const
 {
-	JointTable::const_iterator lIter = mJointTable.find((JointInfo*)pJointId);
-	if (lIter == mJointTable.end())
+	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
+	if (x == mJointTable.end())
 	{
 		mLog.Errorf(_T("GetAnchorPos() - Couldn't find joint %i!"), pJointId);
 		return (false);
@@ -1758,19 +1758,19 @@ bool PhysicsEngineODE::GetAnchorPos(JointID pJointId, Lepra::Vector3D<Lepra::flo
 
 	dVector3 lPos;
 
-	switch ((*lIter)->mType)
+	switch ((*x)->mType)
 	{
 	case JOINT_BALL:
-		dJointGetBallAnchor((*lIter)->mJointID, lPos);
+		dJointGetBallAnchor((*x)->mJointID, lPos);
 		break;
 	case JOINT_HINGE:
-		dJointGetHingeAnchor((*lIter)->mJointID, lPos);
+		dJointGetHingeAnchor((*x)->mJointID, lPos);
 		break;
 	case JOINT_HINGE2:
-		dJointGetHinge2Anchor((*lIter)->mJointID, lPos);
+		dJointGetHinge2Anchor((*x)->mJointID, lPos);
 		break;
 	case JOINT_UNIVERSAL:
-		dJointGetUniversalAnchor((*lIter)->mJointID, lPos);
+		dJointGetUniversalAnchor((*x)->mJointID, lPos);
 		break;
 	case JOINT_FIXED:
 	case JOINT_ANGULARMOTOR:
@@ -1791,8 +1791,8 @@ bool PhysicsEngineODE::GetAnchorPos(JointID pJointId, Lepra::Vector3D<Lepra::flo
 
 bool PhysicsEngineODE::GetAxis1(JointID pJointId, Lepra::Vector3D<Lepra::float32>& pAxis1) const
 {
-	JointTable::const_iterator lIter = mJointTable.find((JointInfo*)pJointId);
-	if (lIter == mJointTable.end())
+	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
+	if (x == mJointTable.end())
 	{
 		mLog.Errorf(_T("GetAxis1() - Couldn't find joint %i!"), pJointId);
 		return (false);
@@ -1800,22 +1800,22 @@ bool PhysicsEngineODE::GetAxis1(JointID pJointId, Lepra::Vector3D<Lepra::float32
 
 	dVector3 lAxis;
 
-	switch ((*lIter)->mType)
+	switch ((*x)->mType)
 	{
 	case JOINT_HINGE:
-		dJointGetHingeAxis((*lIter)->mJointID, lAxis);
+		dJointGetHingeAxis((*x)->mJointID, lAxis);
 		break;
 	case JOINT_HINGE2:
-		dJointGetHinge2Axis1((*lIter)->mJointID, lAxis);
+		dJointGetHinge2Axis1((*x)->mJointID, lAxis);
 		break;
 	case JOINT_UNIVERSAL:
-		dJointGetUniversalAxis1((*lIter)->mJointID, lAxis);
+		dJointGetUniversalAxis1((*x)->mJointID, lAxis);
 		break;
 	case JOINT_ANGULARMOTOR:
-		dJointGetAMotorAxis((*lIter)->mJointID, 0, lAxis);
+		dJointGetAMotorAxis((*x)->mJointID, 0, lAxis);
 		break;
 	case JOINT_SLIDER:
-		dJointGetSliderAxis((*lIter)->mJointID, lAxis);
+		dJointGetSliderAxis((*x)->mJointID, lAxis);
 		break;
 	case JOINT_BALL:
 	case JOINT_FIXED:
@@ -1835,8 +1835,8 @@ bool PhysicsEngineODE::GetAxis1(JointID pJointId, Lepra::Vector3D<Lepra::float32
 
 bool PhysicsEngineODE::GetAxis2(JointID pJointId, Lepra::Vector3D<Lepra::float32>& pAxis2) const
 {
-	JointTable::const_iterator lIter = mJointTable.find((JointInfo*)pJointId);
-	if (lIter == mJointTable.end())
+	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
+	if (x == mJointTable.end())
 	{
 		mLog.Errorf(_T("GetAxis2() - Couldn't find joint %i!"), pJointId);
 		return (false);
@@ -1844,13 +1844,13 @@ bool PhysicsEngineODE::GetAxis2(JointID pJointId, Lepra::Vector3D<Lepra::float32
 
 	dVector3 lAxis;
 
-	switch ((*lIter)->mType)
+	switch ((*x)->mType)
 	{
 	case JOINT_HINGE2:
-		dJointGetHinge2Axis2((*lIter)->mJointID, lAxis);
+		dJointGetHinge2Axis2((*x)->mJointID, lAxis);
 		break;
 	case JOINT_UNIVERSAL:
-		dJointGetUniversalAxis2((*lIter)->mJointID, lAxis);
+		dJointGetUniversalAxis2((*x)->mJointID, lAxis);
 		break;
 	case JOINT_BALL:
 	case JOINT_HINGE:
@@ -1873,26 +1873,26 @@ bool PhysicsEngineODE::GetAxis2(JointID pJointId, Lepra::Vector3D<Lepra::float32
 
 bool PhysicsEngineODE::GetAngle1(JointID pJointId, Lepra::float32& pAngle) const
 {
-	JointTable::const_iterator lIter = mJointTable.find((JointInfo*)pJointId);
-	if (lIter == mJointTable.end())
+	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
+	if (x == mJointTable.end())
 	{
 		mLog.Errorf(_T("GetAngle1() - Couldn't find joint %i!"), pJointId);
 		return (false);
 	}
 
-	switch ((*lIter)->mType)
+	switch ((*x)->mType)
 	{
 	case JOINT_HINGE2:
-		pAngle = dJointGetHinge2Angle1((*lIter)->mJointID);
+		pAngle = dJointGetHinge2Angle1((*x)->mJointID);
 		break;
 	case JOINT_UNIVERSAL:
-		pAngle = dJointGetUniversalAngle1((*lIter)->mJointID);
+		pAngle = dJointGetUniversalAngle1((*x)->mJointID);
 		break;
 	case JOINT_HINGE:
-		pAngle = dJointGetHingeAngle((*lIter)->mJointID);
+		pAngle = dJointGetHingeAngle((*x)->mJointID);
 		break;
 	case JOINT_ANGULARMOTOR:
-		pAngle = dJointGetAMotorAngle((*lIter)->mJointID, 0);
+		pAngle = dJointGetAMotorAngle((*x)->mJointID, 0);
 		break;
 	case JOINT_BALL:
 	case JOINT_SLIDER:
@@ -1909,17 +1909,17 @@ bool PhysicsEngineODE::GetAngle1(JointID pJointId, Lepra::float32& pAngle) const
 
 bool PhysicsEngineODE::GetAngle2(JointID pJointId, Lepra::float32& pAngle) const
 {
-	JointTable::const_iterator lIter = mJointTable.find((JointInfo*)pJointId);
-	if (lIter == mJointTable.end())
+	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
+	if (x == mJointTable.end())
 	{
 		mLog.Errorf(_T("GetAngle2() - Couldn't find joint %i!"), pJointId);
 		return (false);
 	}
 
-	switch ((*lIter)->mType)
+	switch ((*x)->mType)
 	{
 	case JOINT_UNIVERSAL:
-		pAngle = dJointGetUniversalAngle2((*lIter)->mJointID);
+		pAngle = dJointGetUniversalAngle2((*x)->mJointID);
 		break;
 	case JOINT_HINGE2:
 		// TODO: implement this!
@@ -1942,26 +1942,26 @@ bool PhysicsEngineODE::GetAngle2(JointID pJointId, Lepra::float32& pAngle) const
 
 bool PhysicsEngineODE::GetAngleRate1(JointID pJointId, Lepra::float32& pAngleRate) const
 {
-	JointTable::const_iterator lIter = mJointTable.find((JointInfo*)pJointId);
-	if (lIter == mJointTable.end())
+	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
+	if (x == mJointTable.end())
 	{
 		mLog.Errorf(_T("GetAngleRate1() - Couldn't find joint %i!"), pJointId);
 		return (false);
 	}
 
-	switch ((*lIter)->mType)
+	switch ((*x)->mType)
 	{
 	case JOINT_HINGE2:
-		pAngleRate = dJointGetHinge2Angle1Rate((*lIter)->mJointID);
+		pAngleRate = dJointGetHinge2Angle1Rate((*x)->mJointID);
 		break;
 	case JOINT_UNIVERSAL:
-		pAngleRate = dJointGetUniversalAngle1Rate((*lIter)->mJointID);
+		pAngleRate = dJointGetUniversalAngle1Rate((*x)->mJointID);
 		break;
 	case JOINT_HINGE:
-		pAngleRate = dJointGetHingeAngleRate((*lIter)->mJointID);
+		pAngleRate = dJointGetHingeAngleRate((*x)->mJointID);
 		break;
 	case JOINT_ANGULARMOTOR:
-		pAngleRate = dJointGetAMotorAngleRate((*lIter)->mJointID, 0);
+		pAngleRate = dJointGetAMotorAngleRate((*x)->mJointID, 0);
 		break;
 	case JOINT_BALL:
 	case JOINT_SLIDER:
@@ -1978,20 +1978,20 @@ bool PhysicsEngineODE::GetAngleRate1(JointID pJointId, Lepra::float32& pAngleRat
 
 bool PhysicsEngineODE::GetAngleRate2(JointID pJointId, Lepra::float32& pAngleRate) const
 {	
-	JointTable::const_iterator lIter = mJointTable.find((JointInfo*)pJointId);
-	if (lIter == mJointTable.end())
+	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
+	if (x == mJointTable.end())
 	{
 		mLog.Errorf(_T("GetAngleRate2() - Couldn't find joint %i!"), pJointId);
 		return (false);
 	}
 
-	switch ((*lIter)->mType)
+	switch ((*x)->mType)
 	{
 	case JOINT_HINGE2:
-		pAngleRate = dJointGetHinge2Angle2Rate((*lIter)->mJointID);
+		pAngleRate = dJointGetHinge2Angle2Rate((*x)->mJointID);
 		break;
 	case JOINT_UNIVERSAL:
-		pAngleRate = dJointGetUniversalAngle2Rate((*lIter)->mJointID);
+		pAngleRate = dJointGetUniversalAngle2Rate((*x)->mJointID);
 		break;
 	case JOINT_BALL:
 	case JOINT_HINGE:
@@ -2010,8 +2010,8 @@ bool PhysicsEngineODE::GetAngleRate2(JointID pJointId, Lepra::float32& pAngleRat
 
 bool PhysicsEngineODE::SetAngle1(BodyID pBodyId, JointID pJointId, Lepra::float32 pAngle)
 {
-	JointTable::const_iterator lIter = mJointTable.find((JointInfo*)pJointId);
-	if (lIter == mJointTable.end())
+	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
+	if (x == mJointTable.end())
 	{
 		mLog.Errorf(_T("SetAngle1() - Couldn't find joint %i!"), pJointId);
 		return (false);
@@ -2041,9 +2041,9 @@ bool PhysicsEngineODE::SetAngle1(BodyID pBodyId, JointID pJointId, Lepra::float3
 			if (GetAxis1(pJointId, lAxis))
 			{
 				dVector3 lRawAnchor;
-				::dJointGetHingeAnchor((*lIter)->mJointID, lRawAnchor);
+				::dJointGetHingeAnchor((*x)->mJointID, lRawAnchor);
 				Lepra::Vector3DF lAnchor(lRawAnchor[0], lRawAnchor[1], lRawAnchor[2]);
-				::dJointGetHingeAnchor2((*lIter)->mJointID, lRawAnchor);
+				::dJointGetHingeAnchor2((*x)->mJointID, lRawAnchor);
 				Lepra::Vector3DF lAnchor2(lRawAnchor[0], lRawAnchor[1], lRawAnchor[2]);
 				lTransform.GetPosition() += lAnchor-lAnchor2;
 				lTransform.RotateAroundAnchor(lAnchor, lAxis, -pAngle+lCurrentAngle);
@@ -2090,53 +2090,53 @@ bool PhysicsEngineODE::SetAngle1(BodyID pBodyId, JointID pJointId, Lepra::float3
 
 bool PhysicsEngineODE::SetAngularMotorAngle(JointID pJointId, Lepra::float32 pAngle)
 {
-	JointTable::iterator lIter = mJointTable.find((JointInfo*)pJointId);
-	if (lIter == mJointTable.end())
+	JointTable::iterator x = mJointTable.find((JointInfo*)pJointId);
+	if (x == mJointTable.end())
 	{
 		mLog.Errorf(_T("SetAngularMotorAngle() - Couldn't find joint %i!"), pJointId);
 		return (false);
 	}
 
-	if ((*lIter)->mType != JOINT_ANGULARMOTOR)
+	if ((*x)->mType != JOINT_ANGULARMOTOR)
 	{
 		mLog.AError("SetAngularMotorAngle() - Joint is not an angular motor!");
 		return (false);
 	}
 
-	dJointSetAMotorAngle((*lIter)->mJointID, 0, pAngle);
+	dJointSetAMotorAngle((*x)->mJointID, 0, pAngle);
 	return (true);
 }
 
 bool PhysicsEngineODE::SetAngularMotorSpeed(JointID pJointId, Lepra::float32 pSpeed)
 {
-	JointTable::iterator lIter = mJointTable.find((JointInfo*)pJointId);
-	if (lIter == mJointTable.end())
+	JointTable::iterator x = mJointTable.find((JointInfo*)pJointId);
+	if (x == mJointTable.end())
 	{
 		mLog.Errorf(_T("SetAngularMotorSpeed() - Couldn't find joint %i!"), pJointId);
 		return (false);
 	}
 
-	if ((*lIter)->mType != JOINT_ANGULARMOTOR)
+	if ((*x)->mType != JOINT_ANGULARMOTOR)
 	{
 		mLog.AError("SetAngularMotorSpeed() - Joint is not an angular motor!");
 		return (false);
 	}
 
-	dJointSetAMotorParam((*lIter)->mJointID, dParamVel, pSpeed);
+	dJointSetAMotorParam((*x)->mJointID, dParamVel, pSpeed);
 	return (true);
 }
 
 bool PhysicsEngineODE::SetAngularMotorMaxForce(JointID pJointId, Lepra::float32 pMaxForce)
 {
-	JointTable::iterator lIter = mJointTable.find((JointInfo*)pJointId);
-	if (lIter == mJointTable.end())
+	JointTable::iterator x = mJointTable.find((JointInfo*)pJointId);
+	if (x == mJointTable.end())
 	{
 		mLog.Errorf(_T("SetAngularMotorMaxForce() - Couldn't find joint %i!"), pJointId);
 		return (false);
 	}
 
 
-	JointInfo* lJoint = *lIter;
+	JointInfo* lJoint = *x;
 	if (lJoint->mType == JOINT_ANGULARMOTOR)
 	{
 		dJointSetAMotorParam(lJoint->mJointID, dParamFMax, pMaxForce);
@@ -2154,14 +2154,14 @@ bool PhysicsEngineODE::SetAngularMotorMaxForce(JointID pJointId, Lepra::float32 
 
 bool PhysicsEngineODE::SetAngularMotorRoll(JointID pJointId, Lepra::float32 pMaxForce, Lepra::float32 pTargetVelocity)
 {
-	JointTable::iterator lIter = mJointTable.find((JointInfo*)pJointId);
-	if (lIter == mJointTable.end())
+	JointTable::iterator x = mJointTable.find((JointInfo*)pJointId);
+	if (x == mJointTable.end())
 	{
 		mLog.Errorf(_T("SetAngularMotorRoll() - Couldn't find joint %i!"), pJointId);
 		return (false);
 	}
 
-	JointInfo* lJoint = *lIter;
+	JointInfo* lJoint = *x;
 	if (lJoint->mType == JOINT_HINGE2)
 	{
 		::dJointSetHinge2Param(lJoint->mJointID, dParamFMax2, pMaxForce);
@@ -2184,14 +2184,14 @@ bool PhysicsEngineODE::SetAngularMotorRoll(JointID pJointId, Lepra::float32 pMax
 
 bool PhysicsEngineODE::GetAngularMotorRoll(JointID pJointId, Lepra::float32& pMaxForce, Lepra::float32& pTargetVelocity)
 {
-	JointTable::iterator lIter = mJointTable.find((JointInfo*)pJointId);
-	if (lIter == mJointTable.end())
+	JointTable::iterator x = mJointTable.find((JointInfo*)pJointId);
+	if (x == mJointTable.end())
 	{
 		mLog.Errorf(_T("GetAngularMotorRoll() - Couldn't find joint %i!"), pJointId);
 		return (false);
 	}
 
-	JointInfo* lJoint = *lIter;
+	JointInfo* lJoint = *x;
 	if (lJoint->mType == JOINT_HINGE2)
 	{
 		pMaxForce = ::dJointGetHinge2Param(lJoint->mJointID, dParamFMax2);
@@ -2204,14 +2204,14 @@ bool PhysicsEngineODE::GetAngularMotorRoll(JointID pJointId, Lepra::float32& pMa
 
 bool PhysicsEngineODE::SetAngularMotorTurn(JointID pJointId, Lepra::float32 pMaxForce, Lepra::float32 pTargetVelocity)
 {
-	JointTable::iterator lIter = mJointTable.find((JointInfo*)pJointId);
-	if (lIter == mJointTable.end())
+	JointTable::iterator x = mJointTable.find((JointInfo*)pJointId);
+	if (x == mJointTable.end())
 	{
 		mLog.Errorf(_T("SetAngularMotorTurn() - Couldn't find joint %i!"), pJointId);
 		return (false);
 	}
 
-	JointInfo* lJoint = *lIter;
+	JointInfo* lJoint = *x;
 	if (lJoint->mType == JOINT_HINGE2)
 	{
 		dJointSetHinge2Param(lJoint->mJointID, dParamFMax, pMaxForce);
@@ -2232,72 +2232,72 @@ bool PhysicsEngineODE::SetAngularMotorTurn(JointID pJointId, Lepra::float32 pMax
 
 bool PhysicsEngineODE::GetAngularMotorAngle(JointID pJointId, Lepra::float32& pAngle) const
 {
-	JointTable::const_iterator lIter = mJointTable.find((JointInfo*)pJointId);
-	if (lIter == mJointTable.end())
+	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
+	if (x == mJointTable.end())
 	{
 		mLog.Errorf(_T("GetAngularMotorAngle() - Couldn't find joint %i!"), pJointId);
 		return (false);
 	}
 
-	if ((*lIter)->mType != JOINT_ANGULARMOTOR)
+	if ((*x)->mType != JOINT_ANGULARMOTOR)
 	{
 		mLog.AError("GetAngularMotorAngle() - Joint is not an angular motor!");
 		return (false);
 	}
 
-	pAngle = dJointGetAMotorAngle((*lIter)->mJointID, 0);
+	pAngle = dJointGetAMotorAngle((*x)->mJointID, 0);
 	return (true);
 }
 
 bool PhysicsEngineODE::GetAngularMotorSpeed(JointID pJointId, Lepra::float32& pSpeed) const
 {
-	JointTable::const_iterator lIter = mJointTable.find((JointInfo*)pJointId);
-	if (lIter == mJointTable.end())
+	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
+	if (x == mJointTable.end())
 	{
 		mLog.Errorf(_T("GetAngularMotorSpeed() - Couldn't find joint %i!"), pJointId);
 		return (false);
 	}
 
-	if ((*lIter)->mType != JOINT_ANGULARMOTOR)
+	if ((*x)->mType != JOINT_ANGULARMOTOR)
 	{
 		mLog.AError("GetAngularMotorSpeed() - Joint is not an angular motor!");
 		return (false);
 	}
 
-	pSpeed = dJointGetAMotorParam((*lIter)->mJointID, dParamVel);
+	pSpeed = dJointGetAMotorParam((*x)->mJointID, dParamVel);
 	return (true);
 }
 
 bool PhysicsEngineODE::GetAngularMotorMaxForce(JointID pJointId, Lepra::float32& pMaxForce) const
 {
-	JointTable::const_iterator lIter = mJointTable.find((JointInfo*)pJointId);
-	if (lIter == mJointTable.end())
+	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
+	if (x == mJointTable.end())
 	{
 		mLog.Errorf(_T("GetAngularMotorMaxForce() - Couldn't find joint %i!"), pJointId);
 		return (false);
 	}
 
-	if ((*lIter)->mType != JOINT_ANGULARMOTOR)
+	if ((*x)->mType != JOINT_ANGULARMOTOR)
 	{
 		mLog.AError("GetAngularMotorMaxForce() - Joint is not an angular motor!");
 		return (false);
 	}
 
-	pMaxForce = dJointGetAMotorParam((*lIter)->mJointID, dParamFMax);
+	pMaxForce = dJointGetAMotorParam((*x)->mJointID, dParamFMax);
 	return (true);
 }
 
 bool PhysicsEngineODE::SetJointParams(JointID pJointId, Lepra::float32 pLowStop, Lepra::float32 pHighStop, Lepra::float32 pBounce)
 {
-	JointTable::iterator lIter = mJointTable.find((JointInfo*)pJointId);
-	if (lIter == mJointTable.end())
+	JointTable::iterator x = mJointTable.find((JointInfo*)pJointId);
+	if (x == mJointTable.end())
 	{
 		mLog.Errorf(_T("SetJointParams() - Couldn't find joint!"), pJointId);
 		return (false);
 	}
 
-	dJointID lJointId = (*lIter)->mJointID;
-	switch ((*lIter)->mType)
+	dJointID lJointId = (*x)->mJointID;
+	switch ((*x)->mType)
 	{
 		case JOINT_SLIDER:
 		{
@@ -2360,39 +2360,39 @@ bool PhysicsEngineODE::SetJointParams(JointID pJointId, Lepra::float32 pLowStop,
 
 bool PhysicsEngineODE::GetJointParams(JointID pJointId, Lepra::float32& pLowStop, Lepra::float32& pHighStop, Lepra::float32& pBounce) const
 {
-	JointTable::const_iterator lIter = mJointTable.find((JointInfo*)pJointId);
-	if (lIter == mJointTable.end())
+	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
+	if (x == mJointTable.end())
 	{
 		mLog.Errorf(_T("GetJointParams() - Couldn't find joint %i!"), pJointId);
 		return (false);
 	}
 
-	switch ((*lIter)->mType)
+	switch ((*x)->mType)
 	{
 	case JOINT_SLIDER:
-		pLowStop  = dJointGetSliderParam((*lIter)->mJointID, dParamLoStop);
-		pHighStop = dJointGetSliderParam((*lIter)->mJointID, dParamHiStop);
-		pBounce   = dJointGetSliderParam((*lIter)->mJointID, dParamBounce);
+		pLowStop  = dJointGetSliderParam((*x)->mJointID, dParamLoStop);
+		pHighStop = dJointGetSliderParam((*x)->mJointID, dParamHiStop);
+		pBounce   = dJointGetSliderParam((*x)->mJointID, dParamBounce);
 		break;
 	case JOINT_HINGE:
-		pLowStop  = dJointGetHingeParam((*lIter)->mJointID, dParamLoStop);
-		pHighStop = dJointGetHingeParam((*lIter)->mJointID, dParamHiStop);
-		pBounce   = dJointGetHingeParam((*lIter)->mJointID, dParamBounce);
+		pLowStop  = dJointGetHingeParam((*x)->mJointID, dParamLoStop);
+		pHighStop = dJointGetHingeParam((*x)->mJointID, dParamHiStop);
+		pBounce   = dJointGetHingeParam((*x)->mJointID, dParamBounce);
 		break;
 	case JOINT_HINGE2:
-		pLowStop  = dJointGetHinge2Param((*lIter)->mJointID, dParamLoStop);
-		pHighStop = dJointGetHinge2Param((*lIter)->mJointID, dParamHiStop);
-		pBounce   = dJointGetHinge2Param((*lIter)->mJointID, dParamBounce);
+		pLowStop  = dJointGetHinge2Param((*x)->mJointID, dParamLoStop);
+		pHighStop = dJointGetHinge2Param((*x)->mJointID, dParamHiStop);
+		pBounce   = dJointGetHinge2Param((*x)->mJointID, dParamBounce);
 		break;
 	case JOINT_UNIVERSAL:
-		pLowStop  = dJointGetUniversalParam((*lIter)->mJointID, dParamLoStop);
-		pHighStop = dJointGetUniversalParam((*lIter)->mJointID, dParamHiStop);
-		pBounce   = dJointGetUniversalParam((*lIter)->mJointID, dParamBounce);
+		pLowStop  = dJointGetUniversalParam((*x)->mJointID, dParamLoStop);
+		pHighStop = dJointGetUniversalParam((*x)->mJointID, dParamHiStop);
+		pBounce   = dJointGetUniversalParam((*x)->mJointID, dParamBounce);
 		break;
 	case JOINT_ANGULARMOTOR:
-		pLowStop  = dJointGetAMotorParam((*lIter)->mJointID, dParamLoStop);
-		pHighStop = dJointGetAMotorParam((*lIter)->mJointID, dParamHiStop);
-		pBounce   = dJointGetAMotorParam((*lIter)->mJointID, dParamBounce);
+		pLowStop  = dJointGetAMotorParam((*x)->mJointID, dParamLoStop);
+		pHighStop = dJointGetAMotorParam((*x)->mJointID, dParamHiStop);
+		pBounce   = dJointGetAMotorParam((*x)->mJointID, dParamBounce);
 		break;
 	case JOINT_BALL:
 	case JOINT_FIXED:
@@ -2407,14 +2407,14 @@ bool PhysicsEngineODE::GetJointParams(JointID pJointId, Lepra::float32& pLowStop
 
 bool PhysicsEngineODE::SetSuspension(JointID pJointId, Lepra::float32 pFrameTime, Lepra::float32 pSpringConstant, Lepra::float32 pDampingConstant)
 {
-	JointTable::const_iterator lIter = mJointTable.find((JointInfo*)pJointId);
-	if (lIter == mJointTable.end())
+	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
+	if (x == mJointTable.end())
 	{
 		mLog.Errorf(_T("GetJointParams() - Couldn't find joint %i!"), pJointId);
 		return (false);
 	}
 
-	JointInfo* lJoint = *lIter;
+	JointInfo* lJoint = *x;
 	if (lJoint->mType == JOINT_HINGE2)
 	{
 		::dJointSetHinge2Param(lJoint->mJointID, dParamSuspensionERP,
@@ -2429,85 +2429,85 @@ bool PhysicsEngineODE::SetSuspension(JointID pJointId, Lepra::float32 pFrameTime
 
 bool PhysicsEngineODE::GetSliderPos(JointID pJointId, Lepra::float32& pPos) const
 {
-	JointTable::const_iterator lIter = mJointTable.find((JointInfo*)pJointId);
-	if (lIter == mJointTable.end())
+	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
+	if (x == mJointTable.end())
 	{
 		mLog.Errorf(_T("GetSliderPos() - Couldn't find joint %i!"), pJointId);
 		return (false);
 	}
 
-	if ((*lIter)->mType != JOINT_SLIDER)
+	if ((*x)->mType != JOINT_SLIDER)
 	{
 		mLog.AError("GetSliderPos() - Joint is not a slider!");
 		return (false);
 	}
 
-	pPos = dJointGetSliderPosition((*lIter)->mJointID);
+	pPos = dJointGetSliderPosition((*x)->mJointID);
 	return (true);
 }
 
 bool PhysicsEngineODE::GetSliderSpeed(JointID pJointId, Lepra::float32& pSpeed) const
 {
-	JointTable::const_iterator lIter = mJointTable.find((JointInfo*)pJointId);
-	if (lIter == mJointTable.end())
+	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
+	if (x == mJointTable.end())
 	{
 		mLog.Errorf(_T("GetSliderSleep() - Couldn't find joint %i!"), pJointId);
 		return (false);
 	}
 
-	if ((*lIter)->mType != JOINT_SLIDER)
+	if ((*x)->mType != JOINT_SLIDER)
 	{
 		mLog.AError("GetSliderSleep() - Joint is not a slider!");
 		return (false);
 	}
 
-	pSpeed = dJointGetSliderPositionRate((*lIter)->mJointID);
+	pSpeed = dJointGetSliderPositionRate((*x)->mJointID);
 
 	return (true);
 }
 
 bool PhysicsEngineODE::AddJointForce(JointID pJointId, Lepra::float32 pForce)
 {
-	JointTable::iterator lIter = mJointTable.find((JointInfo*)pJointId);
-	if (lIter == mJointTable.end())
+	JointTable::iterator x = mJointTable.find((JointInfo*)pJointId);
+	if (x == mJointTable.end())
 	{
 		mLog.Errorf(_T("AddJointForce() - Couldn't find joint %i!"), pJointId);
 		return (false);
 	}
 
-	if ((*lIter)->mType != JOINT_SLIDER)
+	if ((*x)->mType != JOINT_SLIDER)
 	{
 		mLog.AError("AddJointForce() - Joint is not a slider!");
 		return (false);
 	}
 
-	dJointAddSliderForce((*lIter)->mJointID, pForce);
+	dJointAddSliderForce((*x)->mJointID, pForce);
 
 	return (true);
 }
 
 bool PhysicsEngineODE::AddJointTorque(JointID pJointId, Lepra::float32 pTorque)
 {
-	JointTable::iterator lIter = mJointTable.find((JointInfo*)pJointId);
-	if (lIter == mJointTable.end())
+	JointTable::iterator x = mJointTable.find((JointInfo*)pJointId);
+	if (x == mJointTable.end())
 	{
 		mLog.Errorf(_T("AddJointTorque() - Couldn't find joint %i!"), pJointId);
 		return (false);
 	}
 
-	switch ((*lIter)->mType)
+	switch ((*x)->mType)
 	{
 	case JOINT_HINGE:
-		dJointAddHingeTorque((*lIter)->mJointID, pTorque);
+		dJointAddHingeTorque((*x)->mJointID, pTorque);
 		break;
 	case JOINT_HINGE2:
-		dJointAddHinge2Torques((*lIter)->mJointID, pTorque, 0);
+		dJointAddHinge2Torques((*x)->mJointID, pTorque, 0);
 		break;
 	case JOINT_UNIVERSAL:
-		dJointAddUniversalTorques((*lIter)->mJointID, pTorque, 0);
+		dJointAddUniversalTorques((*x)->mJointID, pTorque, 0);
 		break;
 	case JOINT_ANGULARMOTOR:
-		dJointAddAMotorTorques((*lIter)->mJointID, pTorque, 0, 0);
+		dJointAddAMotorTorques((*x)->mJointID, pTorque, 0, 0);
 		break;
 	case JOINT_BALL:
 	case JOINT_FIXED:
@@ -2523,20 +2523,20 @@ bool PhysicsEngineODE::AddJointTorque(JointID pJointId, Lepra::float32 pTorque)
 
 bool PhysicsEngineODE::AddJointTorque(JointID pJointId, Lepra::float32 pTorque1, Lepra::float32 pTorque2)
 {
-	JointTable::iterator lIter = mJointTable.find((JointInfo*)pJointId);
-	if (lIter == mJointTable.end())
+	JointTable::iterator x = mJointTable.find((JointInfo*)pJointId);
+	if (x == mJointTable.end())
 	{
 		mLog.Errorf(_T("AddJointTorque() - Couldn't find joint %i!"), pJointId);
 		return (false);
 	}
 
-	switch ((*lIter)->mType)
+	switch ((*x)->mType)
 	{
 	case JOINT_HINGE2:
-		dJointAddHinge2Torques((*lIter)->mJointID, pTorque1, pTorque2);
+		dJointAddHinge2Torques((*x)->mJointID, pTorque1, pTorque2);
 		break;
 	case JOINT_UNIVERSAL:
-		dJointAddUniversalTorques((*lIter)->mJointID, pTorque1, pTorque2);
+		dJointAddUniversalTorques((*x)->mJointID, pTorque1, pTorque2);
 		break;
 	case JOINT_BALL:
 	case JOINT_HINGE:
@@ -2745,10 +2745,10 @@ void PhysicsEngineODE::StepFast(Lepra::float32 pStepSize)
 
 void PhysicsEngineODE::DoForceFeedback()
 {
-	JointList::iterator lIter;
-	for (lIter = mFeedbackJointList.begin(); lIter != mFeedbackJointList.end();)
+	JointList::iterator x;
+	for (x = mFeedbackJointList.begin(); x != mFeedbackJointList.end();)
 	{
-		JointInfo* lJointInfo = *lIter;
+		JointInfo* lJointInfo = *x;
 
 		if (lJointInfo->mListener1 != lJointInfo->mListener2)
 		{
@@ -2774,12 +2774,14 @@ void PhysicsEngineODE::DoForceFeedback()
 
 		if (lJointInfo->mType == JOINT_CONTACT)
 		{
-			mFeedbackJointList.erase(lIter++);
+			JointList::iterator y = x;
+			++x;
+			mFeedbackJointList.erase(y);
 			mJointInfoAllocator.Free(lJointInfo);
 		}
 		else
 		{
-			++lIter;
+			++x;
 		}
 	}
 }
@@ -2834,7 +2836,7 @@ void PhysicsEngineODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID pG
 		}
 	}
 
-	// Bounce (if we haven't tried colliding OR we ARE colliding) AND NOT BOTH objects are triggers.
+	// Bounce/slide (if we haven't tried colliding OR we ARE colliding) AND NOT BOTH objects are triggers.
 	if ((lContactPointCount < 0 || lContactPointCount > 0) &&
 		(lObject1->mTriggerListener == 0 || lObject2->mTriggerListener == 0))
 	{
@@ -2852,39 +2854,64 @@ void PhysicsEngineODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID pG
 		Lepra::Vector3DF lAngularVelocity2;
 		lThis->GetBodyAngularVelocity((BodyID)lObject2, lAngularVelocity2);
 
+		dMass lMass;
+		float lMass1 = 1;
+		if (lBody1)
+		{
+			::dBodyGetMass(lBody1, &lMass);
+			lMass1 = lMass.mass;
+		}
+		float lMass2 = 1;
+		if (lBody2)
+		{
+			::dBodyGetMass(lBody2, &lMass);
+			lMass2 = lMass.mass;
+		}
+
 		// Perform normal collision detection.
 		for (int i = 0; i < lContactPointCount; i++)
 		{
 			dContact& lC = lContact[i];
-	
-			const Lepra::Vector3DF lNormal(lC.geom.normal[0], lC.geom.normal[1], lC.geom.normal[2]);
-			const Lepra::Vector3DF lCollisionPoint(lC.geom.pos[0], lC.geom.pos[1], lC.geom.pos[2]);
-			const Lepra::Vector3DF lDistance1(lCollisionPoint-lPosition1);
-			const Lepra::Vector3DF lDistance2(lCollisionPoint-lPosition2);
-			const Lepra::Vector3DF lAngularSurfaceVelocity1 = lAngularVelocity1.Cross(lDistance1);
-			const Lepra::Vector3DF lAngularSurfaceVelocity2 = lAngularVelocity2.Cross(lDistance2);
-			const Lepra::Vector3DF lSurfaceVelocity1 = lLinearVelocity1.ProjectOntoPlane(lNormal) + lAngularSurfaceVelocity1;
-			const Lepra::Vector3DF lSurfaceVelocity2 = lLinearVelocity2.ProjectOntoPlane(lNormal) + lAngularSurfaceVelocity1;
-			const float lRelativeVelocity = lSurfaceVelocity1.GetDistance(lSurfaceVelocity2);
-			Lepra::Vector3DF lSpinDirection = (lAngularSurfaceVelocity1-lAngularSurfaceVelocity2);
-			if (lSpinDirection.GetLengthSquared() <= 1e-4)
+
+			const float lTotalFriction = ::fabs(lObject1->mFriction*lObject2->mFriction)+0.01f;
+			// Negative friction factor means simple friction model.
+			if (lObject1->mFriction > 0 || lObject2->mFriction > 0)
 			{
-				Lepra::Vector3DF lDummy;
-				lNormal.GetOrthogonals(lSpinDirection, lDummy);
+				lC.surface.mode = dContactSlip1 | dContactSlip2 | dContactApprox1 | dContactFDir1 | dContactBounce;
+
+				const Lepra::Vector3DF lNormal(lC.geom.normal[0], lC.geom.normal[1], lC.geom.normal[2]);
+				const Lepra::Vector3DF lCollisionPoint(lC.geom.pos[0], lC.geom.pos[1], lC.geom.pos[2]);
+				const Lepra::Vector3DF lDistance1(lCollisionPoint-lPosition1);
+				const Lepra::Vector3DF lDistance2(lCollisionPoint-lPosition2);
+				const Lepra::Vector3DF lAngularSurfaceVelocity1 = lAngularVelocity1.Cross(lDistance1);
+				const Lepra::Vector3DF lAngularSurfaceVelocity2 = lAngularVelocity2.Cross(lDistance2);
+				const Lepra::Vector3DF lSurfaceVelocity1 = lLinearVelocity1.ProjectOntoPlane(lNormal) + lAngularSurfaceVelocity1;
+				const Lepra::Vector3DF lSurfaceVelocity2 = lLinearVelocity2.ProjectOntoPlane(lNormal) + lAngularSurfaceVelocity1;
+				const float lRelativeVelocity = lSurfaceVelocity1.GetDistance(lSurfaceVelocity2);
+				Lepra::Vector3DF lSpinDirection = (lAngularSurfaceVelocity1-lAngularSurfaceVelocity2);
+				if (lSpinDirection.GetLengthSquared() <= 1e-4)
+				{
+					Lepra::Vector3DF lDummy;
+					lNormal.GetOrthogonals(lSpinDirection, lDummy);
+				}
+				else
+				{
+					lSpinDirection.Normalize();
+				}
+				lC.fdir1[0] = lSpinDirection.x;
+				lC.fdir1[1] = lSpinDirection.y;
+				lC.fdir1[2] = lSpinDirection.z;
+
+				lC.surface.mu = dInfinity;
+				const float lSlip = (1e-4f * lRelativeVelocity + 1e-6f) / lTotalFriction;
+				lC.surface.slip1 = lSlip;
+				lC.surface.slip2 = lSlip;
 			}
 			else
 			{
-				lSpinDirection.Normalize();
+				lC.surface.mode = dContactBounce;
+				lC.surface.mu = lTotalFriction * 3 * lMass1 * lMass2;
 			}
-
-			lC.fdir1[0] = lSpinDirection.x;
-			lC.fdir1[1] = lSpinDirection.y;
-			lC.fdir1[2] = lSpinDirection.z;
-			lC.surface.mode = dContactSlip1 | dContactSlip2 | dContactBounce | dContactApprox1 | dContactFDir1;
-			lC.surface.mu = dInfinity;
-			const float lSlip = (1e-4f * lRelativeVelocity + 1e-6f) / (lObject1->mFriction * lObject2->mFriction + 0.01f);
-			lC.surface.slip1 = lSlip;
-			lC.surface.slip2 = lSlip;
 			lC.surface.bounce = (dReal)(lObject1->mBounce * lObject2->mBounce);
 			lC.surface.bounce_vel = (dReal)0.000001;
 
@@ -2915,7 +2942,7 @@ void PhysicsEngineODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID pG
 
 
 
-PhysicsEngine::BodySet PhysicsEngineODE::GetIdledBodies() const
+const PhysicsEngine::BodySet& PhysicsEngineODE::GetIdledBodies() const
 {
 	return (mAutoDisabledObjectSet);
 }
@@ -2944,7 +2971,9 @@ void PhysicsEngineODE::HandleAutoDisabledObjects()
 		Object* lObject = (Object*)(*x);
 		if (lObject->mBodyID && dBodyIsEnabled(lObject->mBodyID))
 		{
-			mAutoDisabledObjectSet.erase(x++);
+			BodySet::iterator y = x;
+			++x;
+			mAutoDisabledObjectSet.erase(y);
 		}
 		else
 		{

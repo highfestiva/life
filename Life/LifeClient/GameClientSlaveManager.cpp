@@ -339,15 +339,17 @@ void GameClientSlaveManager::TickUiInput()
 		{
 			const Options::ClientOptions::Control::Vehicle& v = mOptions.GetOptions().mControl.mVehicle;
 			float lPower;
-			const bool IS_MOVING_FORWARD = lObject->GetForwardSpeed() > 0.5f;
-			lPower = v.mForward - std::max(v.mBackward, IS_MOVING_FORWARD? 0.0f : v.mBreakAndBack);
+			const bool lIsMovingForward = lObject->GetForwardSpeed() > 0.5f;
+			lPower = v.mForward - std::max(v.mBackward, lIsMovingForward? 0.0f : v.mBreakAndBack);
 			lObject->SetEnginePower(0, lPower, mCameraOrientation.x);
 			lPower = v.mRight-v.mLeft;
 			lObject->SetEnginePower(1, lPower, mCameraOrientation.x);
-			lPower = v.mHandBreak - std::max(v.mBreak, IS_MOVING_FORWARD? v.mBreakAndBack : 0.0f);
+			lPower = v.mHandBreak - std::max(v.mBreak, lIsMovingForward? v.mBreakAndBack : 0.0f);
 			lObject->SetEnginePower(2, lPower, mCameraOrientation.x);
 			lPower = v.mUp-v.mDown;
 			lObject->SetEnginePower(3, lPower, mCameraOrientation.x);
+			lPower = v.mForward3d - v.mBackward3d;
+			lObject->SetEnginePower(4, lPower, mCameraOrientation.x);
 		}
 	}
 }
@@ -569,8 +571,8 @@ void GameClientSlaveManager::PhysicsTick()
 	if (lObject)
 	{
 		int lStepCount = GetTimeManager()->GetCurrentPhysicsStepCount();
-		float lPhysicsStepTime = (float)GetTimeManager()->ConvertPhysicsFramesToSeconds(lStepCount);
-		lObject->StepGhost(mNetworkOutputGhost, lPhysicsStepTime);
+		float lPhysicsFrameTime = (float)GetTimeManager()->ConvertPhysicsFramesToSeconds(1);
+		mNetworkOutputGhost.GhostStep(lStepCount, lPhysicsFrameTime);
 	}
 
 	Parent::PhysicsTick();
@@ -649,7 +651,7 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 			Cure::MessageObjectPosition* lMessageMovement = (Cure::MessageObjectPosition*)pMessage;
 			Cure::GameObjectId lObjectId = lMessageMovement->GetObjectId();
 			Lepra::int32 lFrameIndex = lMessageMovement->GetFrameIndex();
-			const Cure::ObjectPositionalData& lData = lMessageMovement->GetPositionalData();
+			Cure::ObjectPositionalData& lData = lMessageMovement->GetPositionalData();
 			SetMovement(lObjectId, lFrameIndex, lData);
 
 			CURE_RTVAR_INTERNAL_ARITHMETIC(GetVariableScope(), RTVAR_DEBUG_NET_RECVPOSCNT, int, +, 1, 0);
@@ -769,7 +771,7 @@ bool GameClientSlaveManager::DeleteObject(Cure::GameObjectId pInstanceId)
 	return (lOk);
 }
 
-void GameClientSlaveManager::SetMovement(Cure::GameObjectId pInstanceId, Lepra::int32 pFrameIndex, const Cure::ObjectPositionalData& pData)
+void GameClientSlaveManager::SetMovement(Cure::GameObjectId pInstanceId, Lepra::int32 pFrameIndex, Cure::ObjectPositionalData& pData)
 {
 	ObjectFrameIndexMap::iterator x = mObjectFrameIndexMap.find(pInstanceId);
 	if (x == mObjectFrameIndexMap.end())
@@ -777,10 +779,11 @@ void GameClientSlaveManager::SetMovement(Cure::GameObjectId pInstanceId, Lepra::
 		mObjectFrameIndexMap.insert(ObjectFrameIndexPair(pInstanceId, pFrameIndex-1));
 		x = mObjectFrameIndexMap.find(pInstanceId);
 	}
-	int lLastSetFrameIndex = x->second;	// Last set frame index.
+	const int lLastSetFrameIndex = x->second;	// Last set frame index.
 	if (pFrameIndex-lLastSetFrameIndex >= 0)
 	{
 		x->second = pFrameIndex;
+
 		//Lepra::String s = Lepra::StringUtility::Format(_T("client %i at frame %i"), pClientIndex, pFrameIndex);
 		//log_debug(_T("Client set pos of other client"), s);
 		Cure::ContextObject* lObject = GetContext()->GetObject(pInstanceId);
@@ -819,8 +822,9 @@ void GameClientSlaveManager::OnStopped(Cure::ContextObject*, TBC::PhysicsEngine:
 {
 }
 
-void GameClientSlaveManager::OnPhysicsSend(Cure::ContextObject*)
+bool GameClientSlaveManager::OnPhysicsSend(Cure::ContextObject*)
 {
+	return (false);
 }
 
 bool GameClientSlaveManager::IsConnectAuthorized()

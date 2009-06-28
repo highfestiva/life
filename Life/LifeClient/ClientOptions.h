@@ -27,6 +27,8 @@ struct ClientOptions
 		{
 			float mForward;
 			float mBackward;
+			float mForward3d;
+			float mBackward3d;
 			float mBreakAndBack;
 			float mLeft;
 			float mRight;

@@ -661,7 +661,9 @@ void BoneAnimator::Step(float pStepTime)
 			// Delete all animations previous to this.
 			while (lIter != mCurrentlyPlayingAnims.end())
 			{
-				mCurrentlyPlayingAnims.erase(lIter--);
+				AnimList::iterator y = lIter;
+				--lIter;
+				mCurrentlyPlayingAnims.erase(y);
 			}
 		}
 

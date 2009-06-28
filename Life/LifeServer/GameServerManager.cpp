@@ -334,8 +334,27 @@ bool GameServerManager::InitializeTerrain()
 
 float GameServerManager::GetPowerSaveAmount() const
 {
+	mPowerSaveTimer.UpdateTimer();
+	float lPowerSave;
 	// TODO: if there are logged-in clients, check if all have been idle lately.
-	return ((GetLoggedInClientCount() == 0)? 1.0f : 0);
+	if (GetLoggedInClientCount() > 0)
+	{
+		lPowerSave = 0;	// Users are currently playing = no power save.
+		mPowerSaveTimer.ClearTimeDiff();
+	}
+	else if (mPowerSaveTimer.GetTimeDiffF() < 10.0)
+	{
+		lPowerSave = 0;	// Users played until very recently = no power save yet.
+	}
+	else if (GetNetworkAgent()->GetConnectionCount() > 0)
+	{
+		lPowerSave = 0.1f;	// Someone is currently logging in, but not logged in yet.
+	}
+	else
+	{
+		lPowerSave = 1.0f;	// None logged in, none connected.
+	}
+	return (lPowerSave);
 }
 
 
@@ -641,22 +660,21 @@ void GameServerManager::OnCollision(const Lepra::Vector3DF& pForce, const Lepra:
 		pObject1->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY)	// We only handle network object collisions.
 	{
 		bool lSendCollision = false;
-		// - Are two dynamic object colliding with high enough force (threshold keeps trafic low)?
-		// OR
-		// - Is a server controlled object colliding with a static object with high enough force?
 		const bool lAreBothDynamic = (pObject2 != 0 && pObject2->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY);
 		const bool lIsServerControlled = (pObject1->GetNetworkObjectType() == Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
-		if (lAreBothDynamic)
+		if (lIsServerControlled)
 		{
 			lSendCollision = IsHighImpact(12.0f, pObject1, pForce, pTorque);
+			if (!lSendCollision && lAreBothDynamic)
+			{
+				// If the other object thinks it's a high impact, we go. This is to not
+				// replicate when another - heavier - object is standing on top of us.
+				lSendCollision = IsHighImpact(7.0f, pObject2, pForce, pTorque);
+			}
 		}
-		else if (lIsServerControlled)
+		else if (lAreBothDynamic)
 		{
-			lSendCollision = IsHighImpact(7.0f, pObject1, pForce, pTorque);
-		}
-		if (lSendCollision)
-		{
-			lSendCollision = pObject1->QueryResendTime(1, false);
+			lSendCollision = IsHighImpact(12.0f, pObject1, pForce, pTorque);
 		}
 		if (lSendCollision)
 		{
@@ -672,7 +690,7 @@ void GameServerManager::OnStopped(Cure::ContextObject* pObject, TBC::PhysicsEngi
 	if (pObject->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY &&
 		pObject->GetPhysicsNode((Cure::PhysicsNode::Id)1)->GetBodyId() == pBodyId)
 	{
-		log_volatile(mLog.Debugf(_T("Object %u stopped, sending position."), pObject->GetInstanceId()));
+		log_volatile(mLog.Debugf(_T("Object %u/%s stopped, sending position."), pObject->GetInstanceId(), pObject->GetClassId().c_str()));
 		const Cure::ObjectPositionalData* lPosition = 0;
 		if (pObject->UpdateFullPosition(lPosition))
 		{
@@ -681,14 +699,20 @@ void GameServerManager::OnStopped(Cure::ContextObject* pObject, TBC::PhysicsEngi
 	}
 }
 
-void GameServerManager::OnPhysicsSend(Cure::ContextObject* pObject)
+bool GameServerManager::OnPhysicsSend(Cure::ContextObject* pObject)
 {
-	log_adebug("Sending collision.");
-	const Cure::ObjectPositionalData* lPosition = 0;
-	if (pObject->UpdateFullPosition(lPosition))
+	bool lSent = false;
+	if (pObject->QueryResendTime(0.3f, false))
 	{
-		BroadcastObjectPosition(pObject->GetInstanceId(), *lPosition, 0, true);
+		log_adebug("Sending collision.");
+		const Cure::ObjectPositionalData* lPosition = 0;
+		lSent = pObject->UpdateFullPosition(lPosition);
+		if (lSent)
+		{
+			BroadcastObjectPosition(pObject->GetInstanceId(), *lPosition, 0, true);
+		}
 	}
+	return (lSent);
 }
 
 bool GameServerManager::IsConnectAuthorized()

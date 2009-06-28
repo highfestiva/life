@@ -10,6 +10,8 @@
 
 #define RTVAR_CTRL_STEER_FWD		"Control.Steer.Forward"
 #define RTVAR_CTRL_STEER_BACK		"Control.Steer.Backward"
+#define RTVAR_CTRL_STEER_FWD3D		"Control.Steer.Forward3d"
+#define RTVAR_CTRL_STEER_BACK3D		"Control.Steer.Backward3d"
 #define RTVAR_CTRL_STEER_BRKBACK	"Control.Steer.BreakAndBack"
 #define RTVAR_CTRL_STEER_LEFT		"Control.Steer.Left"
 #define RTVAR_CTRL_STEER_RIGHT		"Control.Steer.Right"

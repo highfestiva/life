@@ -69,11 +69,12 @@ bool ContextObjectEngine::SetValue(unsigned pAspect, float pValue, float pZAngle
 		break;
 		case ENGINE_CAMERA_FLAT_PUSH:
 		{
-			if (pAspect >= 0 && pAspect <= 3)
+			if (pAspect >= 0 && pAspect <= 4)
 			{
 				switch (pAspect)
 				{
 					case 0:		mValue[0] = pValue;		break;
+					case 4:		mValue[0] += pValue;		break;
 					case 1:		mValue[1] = pValue;		break;
 					case 2:		mValue[0] -= ::fabs(pValue);	break;	// Breaking and handbreaking always reverse.
 					case 3:		mValue[2] = pValue;		break;

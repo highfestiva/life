@@ -196,7 +196,7 @@ public:
 	virtual void StepAccurate(Lepra::float32 pStepSize);
 	virtual void StepFast(Lepra::float32 pStepSize);
 
-	virtual BodySet GetIdledBodies() const;
+	virtual const BodySet& GetIdledBodies() const;
 
 private:
 	void ListEnabledObjects();

@@ -58,6 +58,7 @@ void ContextManager::RemoveObject(ContextObject* pObject)
 	CancelPendingAlarmCallbacks(pObject);
 	DisableTickCallback(pObject);
 	DisablePhysicsUpdateCallback(pObject);
+	mPhysicsSenderObjectTable.erase(pObject->GetInstanceId());
 	mObjectTable.erase(pObject->GetInstanceId());
 }
 
@@ -79,6 +80,7 @@ const ContextManager::ContextObjectTable& ContextManager::GetObjectTable() const
 
 void ContextManager::ClearObjects()
 {
+	mPhysicsSenderObjectTable.clear();
 	if (mIsObjectOwner)
 	{
 		while (mObjectTable.size() > 0)
@@ -187,7 +189,9 @@ void ContextManager::CancelPendingAlarmCallbacks(ContextObject* pObject)
 	{
 		if ((*x).second.mObject == pObject)
 		{
-			mAlarmCallbackObjectMap.erase(x++);
+			AlarmMap::iterator y = x;
+			++x;
+			mAlarmCallbackObjectMap.erase(y);
 		}
 		else
 		{
@@ -212,8 +216,8 @@ void ContextManager::TickPhysics()
 void ContextManager::HandleIdledBodies()
 {
 	typedef TBC::PhysicsEngine::BodySet BodySet;
-	BodySet lBodySet = mGameManager->GetPhysicsManager()->GetIdledBodies();
-	BodySet::iterator x = lBodySet.begin();
+	const BodySet& lBodySet = mGameManager->GetPhysicsManager()->GetIdledBodies();
+	BodySet::const_iterator x = lBodySet.begin();
 	for (; x != lBodySet.end(); ++x)
 	{
 		BodyTable::iterator y = mBodyTable.find(*x);
@@ -231,11 +235,19 @@ void ContextManager::HandleIdledBodies()
 void ContextManager::HandlePhysicsSend()
 {
 	ContextObjectTable::iterator x = mPhysicsSenderObjectTable.begin();
-	for (; x != mPhysicsSenderObjectTable.end(); ++x)
+	while (x != mPhysicsSenderObjectTable.end())
 	{
-		mGameManager->OnPhysicsSend(x->second);
+		if (mGameManager->OnPhysicsSend(x->second))
+		{
+			ContextObjectTable::iterator y = x;
+			++x;
+			mPhysicsSenderObjectTable.erase(y);
+		}
+		else
+		{
+			++x;
+		}
 	}
-	mPhysicsSenderObjectTable.clear();
 }
 
 
@@ -275,7 +287,9 @@ void ContextManager::DispatchAlarmCallbacks()
 		if (lCurrentPhysicsFrame-(*x).first <= 0)
 		{
 			lCallbackList.push_back((*x).second);
-			mAlarmCallbackObjectMap.erase(x++);
+			AlarmMap::iterator y = x;
+			++x;
+			mAlarmCallbackObjectMap.erase(y);
 		}
 		else
 		{

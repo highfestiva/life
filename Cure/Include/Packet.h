@@ -217,7 +217,7 @@ public:
 	int Store(Packet* pPacket, Lepra::uint32 pObjectId, Lepra::int32 pFrameIndex, const ObjectPositionalData& pData);
 	MessageObjectMovement* CloneToStandalone();
 
-	const ObjectPositionalData& GetPositionalData() const;
+	ObjectPositionalData& GetPositionalData();
 
 private:
 	MessageObjectPosition(const ObjectPositionalData& pPosition, Lepra::uint8* pData, int pSize);

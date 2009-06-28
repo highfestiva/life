@@ -103,9 +103,6 @@ bool GameManager::BeginTick()
 		// Sorts up incoming network data; adds/removes objects (for instance via remote create/delete).
 		// On UI-based managers we handle user input here as well.
 		TickInput();
-
-		// Sends network packets. Among other things, movement of locally-controlled objects are sent.
-		TickNetworkOutput();
 	}
 
 	{
@@ -143,6 +140,13 @@ bool GameManager::EndTick()
 		GetTickLock()->Release();
 	}
 
+
+	{
+		// Sends network packets. Among other things, movement of locally-controlled objects are sent.
+		// This must be run after input processing, otherwise input-physics-output loop won't have
+		// the desired effect.
+		TickNetworkOutput();
+	}
 
 	return (true);
 }
@@ -328,6 +332,11 @@ void GameManager::PhysicsTick()
 
 	const int lAffordedStepCount = mTime->GetAffordedPhysicsStepCount();
 	const float lStepIncrement = mTime->GetAffordedStepPeriod();
+	if (lAffordedStepCount != 1 && !Lepra::Math::IsEpsEqual(lStepIncrement, 1/60.0f))
+	{
+		mLog.Warningf(_T("Game time allows for %i physics steps in increments of %f."),
+			lAffordedStepCount, lStepIncrement);
+	}
 	for (int x = 0; x < lAffordedStepCount; ++x)
 	{
 		ScriptTick();

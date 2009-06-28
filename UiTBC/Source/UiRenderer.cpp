@@ -1014,7 +1014,9 @@ void Renderer::RemoveAllGeometry()
 	int i;
 	for (i = 0, x = mGeometryTable.First(); x != mGeometryTable.End(); ++i)
 	{
-		RemoveGeometry((GeometryID)(x++).GetKey());
+		GeometryTable::Iterator y = x;
+		++x;
+		RemoveGeometry((GeometryID)y.GetKey());
 	}
 }
 
@@ -1523,7 +1525,9 @@ void Renderer::ReleaseTextureMaps()
 	{
 		TextureData* lTexture = *x;
 		ReleaseMap(lTexture);
-		mTextureTable.Remove(x++);
+		TextureTable::Iterator y = x;
+		++x;
+		mTextureTable.Remove(y);
 		delete lTexture;
 	}
 }

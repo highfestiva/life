@@ -27,6 +27,12 @@ Win32InputElement::Win32InputElement(Type pType, Interpretation pInterpretation,
 	mMin(MAX_INT),
 	mMax(MIN_INT)
 {
+	if (pInterpretation == ABSOLUTE_AXIS)
+	{
+		mMin = 0;	// TODO: verify that absolute axis range always is this!
+		mMax = 65535;	// TODO: verify that absolute axis range always is this!
+	}
+
 	SetIdentifier(mElement->tszName);
 
 	mDataFormat.dwType  = mElement->dwType;
@@ -445,11 +451,11 @@ Win32DisplayManager* Win32InputManager::GetDisplayManager() const
 bool Win32InputManager::OnMessage(int pMsg, int pwParam, long plParam)
 {
 	bool lConsumed = false;
-	switch(pMsg)
+	switch (pMsg)
 	{
 		case WM_CHAR:
 		{
-			lConsumed = InputManager::NotifyOnChar((Lepra::tchar)pwParam);
+			lConsumed = NotifyOnChar((Lepra::tchar)pwParam);
 		}
 		break;
 		case WM_LBUTTONDBLCLK:
@@ -458,15 +464,20 @@ bool Win32InputManager::OnMessage(int pMsg, int pwParam, long plParam)
 		}
 		break;
 		case WM_MOUSEMOVE:
+		case WM_NCMOUSEMOVE:
 		{
-			int lX = LOWORD(plParam);
-			int lY = HIWORD(plParam);
+			int lX = GET_X_LPARAM(plParam);
+			int lY = GET_Y_LPARAM(plParam);
+			if (pMsg == WM_NCMOUSEMOVE)
+			{
+				POINT lPoint;
+				lPoint.x = lX;
+				lPoint.y = lY;
+				::ScreenToClient(mDisplayManager->GetHWND(), &lPoint);
+			}
 
 			mCursorX = 2.0 * (double)lX / (double)mScreenWidth  - 1.0;
 			mCursorY = 2.0 * (double)lY / (double)mScreenHeight - 1.0;
-
-			mCursorX = mCursorX < -1.0 ? -1.0 : (mCursorX > 1.0 ? 1.0 : mCursorX);
-			mCursorY = mCursorY < -1.0 ? -1.0 : (mCursorY > 1.0 ? 1.0 : mCursorY);
 		}
 		break;
 		case WM_KEYUP:
@@ -613,6 +624,7 @@ void Win32InputManager::AddObserver()
 		mDisplayManager->AddObserver(WM_KEYDOWN, this);
 		mDisplayManager->AddObserver(WM_KEYUP, this);
 		mDisplayManager->AddObserver(WM_MOUSEMOVE, this);
+		mDisplayManager->AddObserver(WM_NCMOUSEMOVE, this);
 		mDisplayManager->AddObserver(WM_LBUTTONDBLCLK, this);
 		mDisplayManager->AddObserver(WM_LBUTTONDOWN, this);
 		mDisplayManager->AddObserver(WM_RBUTTONDOWN, this);

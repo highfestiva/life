@@ -60,8 +60,6 @@ public:
 	PhysicsNode* GetPhysicsNode(TBC::PhysicsEngine::BodyID pBodyId) const;
 	void SetEnginePower(unsigned pAspect, float pPower, float pAngle);
 
-	void StepGhost(ObjectPositionalData& pGhost, float pDeltaTime);
-
 	bool QueryResendTime(float pDeltaTime, bool pUnblockDelta);
 
 	virtual void OnTick(float pFrameTime) = 0;

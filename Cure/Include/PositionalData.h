@@ -145,6 +145,10 @@ public:
 
 	ObjectPositionalData();
 	virtual ~ObjectPositionalData();
+
+	/// Step forward to compensate for lag. Used for network ghosts.
+	void GhostStep(int pStepCount, float pFrameTime);
+
 	void Clear();
 	int GetPackSize() const;
 	int Pack(Lepra::uint8* pData) const;

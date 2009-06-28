@@ -341,6 +341,23 @@ ObjectPositionalData::~ObjectPositionalData()
 	Clear();
 }
 
+void ObjectPositionalData::GhostStep(int pFrameCount, float pDeltaTime)
+{
+	if (pFrameCount < 0)
+	{
+		// Simply reverse delta time factor if going backwards.
+		pDeltaTime = -pDeltaTime;
+		pFrameCount = -pFrameCount;
+	}
+	for (int x = 0; x < pFrameCount; ++x)
+	{
+		// We just add acceleration to velocity, and velocity to position. An improvement
+		// here might save us a few bytes of network data.
+		mPosition.mTransformation.GetPosition().Add(mPosition.mVelocity*pDeltaTime);
+		mPosition.mVelocity.Add(mPosition.mAcceleration*pDeltaTime);
+	}
+}
+
 void ObjectPositionalData::Clear()
 {
 	BodyPositionArray::iterator x = mBodyPositionArray.begin();

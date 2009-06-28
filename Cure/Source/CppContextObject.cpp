@@ -114,7 +114,7 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 		lTransformation.GetOrientation().RotateAroundOwnX(0.1f);
 		lTransformation.GetOrientation().RotateAroundWorldZ(0.7f);
 		lPhysicsObjectId = lPhysicsManager->CreateBox(lTransformation, 1, lDimensions,
-			TBC::PhysicsEngine::DYNAMIC, 0.5f, 0.2f, pTriggerListener, pObject);
+			TBC::PhysicsEngine::DYNAMIC, 0.2f, 0.2f, pTriggerListener, pObject);
 		lPhysicsManager->ActivateGravity(lPhysicsObjectId);
 		pObject->AddPhysicsObject(PhysicsNode(0, 1, lPhysicsObjectId));
 
@@ -274,13 +274,13 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 
 		// Body.
 		TBC::PhysicsEngine::BodyID lBodyId = lPhysicsManager->CreateBox(lTransformation, lCarWeight, lBodyDimensions,
-			TBC::PhysicsEngine::DYNAMIC, 0.5f, 0.5f, pTriggerListener, pObject);
+			TBC::PhysicsEngine::DYNAMIC, 0.1f, 0.5f, pTriggerListener, pObject);
 		lPhysicsManager->ActivateGravity(lBodyId);
 		pObject->AddPhysicsObject(PhysicsNode(0, 1, lBodyId));
 		Lepra::TransformationF lTopTransform(lTransformation);
 		lTopTransform.MoveUp(lBodyDimensions.z/2+lTopDimensions.z/2);
 		TBC::PhysicsEngine::BodyID lTopId = lPhysicsManager->CreateBox(lTopTransform, 0, lTopDimensions,
-			TBC::PhysicsEngine::STATIC, 0.5f, 0.5f, pTriggerListener, pObject);
+			TBC::PhysicsEngine::STATIC, 0.8f, 0.5f, pTriggerListener, pObject);
 		lPhysicsManager->Attach(lTopId, lBodyId);
 		pObject->AddPhysicsObject(PhysicsNode(1, 2, lTopId, PhysicsNode::TYPE_EXCLUDE));
 
@@ -613,7 +613,7 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 
 		// Body.
 		TBC::PhysicsEngine::BodyID lTowerId = lPhysicsManager->CreateBox(lTransformation, lTowerWeight, lTowerDimensions,
-			TBC::PhysicsEngine::DYNAMIC, 0.5f, 0.5f, pTriggerListener, pObject);
+			TBC::PhysicsEngine::DYNAMIC, 1.0f, 0.5f, pTriggerListener, pObject);
 		lPhysicsManager->ActivateGravity(lTowerId);
 		pObject->AddPhysicsObject(PhysicsNode(0, 1, lTowerId));
 
@@ -691,7 +691,7 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 	{
 		Lepra::Vector3DF lDimensions(lFloorSize, lFloorSize, lFloorSize);
 		lPhysicsObjectId = lPhysicsManager->CreateBox(lTransformation, 0, lDimensions,
-			TBC::PhysicsEngine::STATIC, 1, 0.5f, 0);
+			TBC::PhysicsEngine::STATIC, 1, 0.6f, 0);
 		pObject->AddPhysicsObject(PhysicsNode(0, 1, lPhysicsObjectId));
 
 		Lepra::RotationMatrixF lRotation;
@@ -703,7 +703,7 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 			lUphillOrthogonalLength/2+lFloorSize/2-lRoadHeight/2/1.5f));
 		lRotation.RotateAroundOwnX(Lepra::PIF/4);
 		lTransformation.SetOrientation(lRotation);
-		lPhysicsObjectId = lPhysicsManager->CreateBox(lTransformation, 0, lDimensions, TBC::PhysicsEngine::STATIC, 0.5f, 1.0f, 0);
+		lPhysicsObjectId = lPhysicsManager->CreateBox(lTransformation, 0, lDimensions, TBC::PhysicsEngine::STATIC, 0.8f, 0.8f, 0);
 		pObject->AddPhysicsObject(PhysicsNode(1, 2, lPhysicsObjectId));
 		// Upper climb.
 		lDimensions.Set(lUphillLength, lRoadWidth, lRoadHeight);
@@ -713,7 +713,7 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 		lRotation = Lepra::RotationMatrixF();
 		lRotation.RotateAroundOwnY(Lepra::PIF/4);
 		lTransformation.SetOrientation(lRotation);
-		lPhysicsObjectId = lPhysicsManager->CreateBox(lTransformation, 0, lDimensions, TBC::PhysicsEngine::STATIC, 0.5f, 1.0f, 0);
+		lPhysicsObjectId = lPhysicsManager->CreateBox(lTransformation, 0, lDimensions, TBC::PhysicsEngine::STATIC, 0.8f, 0.8f, 0);
 		pObject->AddPhysicsObject(PhysicsNode(1, 3, lPhysicsObjectId));
 		// First plateau.
 		lDimensions.Set(lRoadWidth, lPlateauLength+lPlateauLengthCompensation, lRoadHeight);
@@ -722,7 +722,7 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 			lUphillOrthogonalLength/2+lPlateauLength/2,
 			lUphillOrthogonalLength+lFloorSize/2-lRoadHeight/2));
 		lTransformation.SetOrientation(Lepra::RotationMatrixF());
-		lPhysicsObjectId = lPhysicsManager->CreateBox(lTransformation, 0, lDimensions, TBC::PhysicsEngine::STATIC, 0.5f, 1.0f, 0);
+		lPhysicsObjectId = lPhysicsManager->CreateBox(lTransformation, 0, lDimensions, TBC::PhysicsEngine::STATIC, 0.8f, 0.8f, 0);
 		pObject->AddPhysicsObject(PhysicsNode(1, 4, lPhysicsObjectId));
 		// Second plateau.
 		lDimensions.Set(lPlateauLength, lRoadWidth, lRoadHeight);
@@ -730,14 +730,14 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 			lPlateauLength+lUphillOrthogonalLength+lPlateauLength/2,
 			lUphillOrthogonalLength/2+lPlateauLength-lRoadWidth/2,
 			lUphillOrthogonalLength+lFloorSize/2-lRoadHeight/2));
-		lPhysicsObjectId = lPhysicsManager->CreateBox(lTransformation, 0, lDimensions, TBC::PhysicsEngine::STATIC, 0.5f, 1.0f, 0);
+		lPhysicsObjectId = lPhysicsManager->CreateBox(lTransformation, 0, lDimensions, TBC::PhysicsEngine::STATIC, 0.8f, 0.8f, 0);
 		pObject->AddPhysicsObject(PhysicsNode(1, 5, lPhysicsObjectId));
 		// Top plateau.
 		lDimensions.Set(lPlateauLength+lPlateauLengthCompensation, lRoadWidth, lRoadHeight);
 		lTransformation.SetPosition(Lepra::Vector3DF(lPlateauLength/2,
 			lUphillOrthogonalLength/2+lPlateauLength-lRoadWidth/2,
 			lUphillOrthogonalLength*2+lFloorSize/2-lRoadHeight/2));
-		lPhysicsObjectId = lPhysicsManager->CreateBox(lTransformation, 0, lDimensions, TBC::PhysicsEngine::STATIC, 0.5f, 1.0f, 0);
+		lPhysicsObjectId = lPhysicsManager->CreateBox(lTransformation, 0, lDimensions, TBC::PhysicsEngine::STATIC, 0.8f, 0.8f, 0);
 		pObject->AddPhysicsObject(PhysicsNode(1, 6, lPhysicsObjectId));
 
 		lOk = true;
