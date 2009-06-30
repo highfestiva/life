@@ -650,7 +650,16 @@ Component::StateComponentList TextField::GetStateList(ComponentState pState) con
 	StateComponentList lList;
 	if (pState == STATE_FOCUSABLE)
 	{
-		lList.push_back(std::pair<bool, Component*>(HasKeyboardFocus(), (Component*)this));
+		int lState = 0;
+		if (IsDispatcher())
+		{
+			lState = 2;
+		}
+		else if (HasKeyboardFocus())
+		{
+			lState = 1;
+		}
+		lList.push_back(StateComponent(lState, (Component*)this));
 	}
 	return (lList);
 }

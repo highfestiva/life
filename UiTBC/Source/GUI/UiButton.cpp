@@ -217,7 +217,7 @@ Component::StateComponentList Button::GetStateList(ComponentState pState) const
 	StateComponentList lList;
 	if (pState == STATE_CLICKABLE)
 	{
-		lList.push_back(std::pair<bool, Component*>(false, (Component*)this));
+		lList.push_back(StateComponent(0, (Component*)this));
 	}
 	return (lList);
 }

@@ -810,6 +810,11 @@ void Component::DispatchChar(Lepra::tchar pChar)
 	}
 }
 
+bool Component::IsDispatcher() const
+{
+	return (!mTextListenerSet.empty());
+}
+
 void Component::ReleaseMouseFocus(RecurseDir pDir, Component* pFocusedComponent)
 {
 	if (pDir == RECURSE_UP)

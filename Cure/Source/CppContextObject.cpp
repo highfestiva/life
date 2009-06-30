@@ -542,7 +542,7 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 		Lepra::TransformationF lBucketBackTransform(lTransformation);
 		lBucketBackTransform.RotatePitch(-lBucketBackAngle);
 		TBC::PhysicsEngine::BodyID lBucketBackId = lPhysicsManager->CreateBox(false, lBucketBackTransform, lCarWeight/50, lBucketBackDimensions,
-			TBC::PhysicsEngine::DYNAMIC, 0.1f, 0.2f, pTriggerListener, pObject);
+			TBC::PhysicsEngine::DYNAMIC, 1.0f, 0.2f, pTriggerListener, pObject);
 		lPhysicsManager->ActivateGravity(lBucketBackId);
 		lJoint = lPhysicsManager->CreateHingeJoint(lArmId, lBucketBackId,
 			lBucketAnchorTransform.GetPosition(), Lepra::Vector3DF(1, 0, 0));
@@ -559,7 +559,7 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 		Lepra::TransformationF lBucketFloorTransform(lTransformation);
 		lBucketFloorTransform.RotatePitch(lBucketFloorAngle);
 		lPhysicsObjectId = lPhysicsManager->CreateBox(false, lBucketFloorTransform, 0, lBucketFloorDimensions,
-			TBC::PhysicsEngine::STATIC, 0.1f, 0.2f, pTriggerListener, pObject);
+			TBC::PhysicsEngine::STATIC, 1.0f, 0.2f, pTriggerListener, pObject);
 		lPhysicsManager->Attach(lPhysicsObjectId, lBucketBackId);
 		pObject->AddPhysicsObject(PhysicsNode(23, 24, lPhysicsObjectId, PhysicsNode::TYPE_EXCLUDE));
 

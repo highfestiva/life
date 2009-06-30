@@ -225,6 +225,7 @@ protected:
 	virtual void SetKeyboardFocus(Component* pChild);
 	virtual void SetMouseFocus(Component* pChild);
 	void DispatchChar(Lepra::tchar pChar);
+	bool IsDispatcher() const;
 
 	void DeleteLayout(int pLayer);
 
@@ -233,7 +234,8 @@ protected:
 		STATE_FOCUSABLE	= 1,
 		STATE_CLICKABLE,
 	};
-	typedef std::list<std::pair<bool, Component*> > StateComponentList;
+	typedef std::pair<int, Component*> StateComponent;
+	typedef std::list<StateComponent> StateComponentList;
 	virtual StateComponentList GetStateList(ComponentState pState) const;
 
 private:

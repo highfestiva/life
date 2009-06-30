@@ -463,7 +463,11 @@ bool Window::OnChar(Lepra::tchar pChar)
 			{
 				break;
 			}
-			if (x->first)
+			if (x->first == 2)
+			{
+				return (Parent::OnChar(pChar));	// RAII simplifies.
+			}
+			else if (x->first)
 			{
 				if (lInputManager->ReadKey(UiLepra::InputManager::IN_KBD_LSHIFT) ||
 					lInputManager->ReadKey(UiLepra::InputManager::IN_KBD_RSHIFT))
@@ -498,8 +502,11 @@ bool Window::OnChar(Lepra::tchar pChar)
 		StateComponentList::iterator x = lComponentList.begin();
 		if (x != lComponentList.end())
 		{
-			++x;
 			((Button*)x->second)->Click(true);
+		}
+		else
+		{
+			return (Parent::OnChar(pChar));	// RAII simplifies.
 		}
 		lOk = true;
 	}
