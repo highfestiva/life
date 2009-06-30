@@ -231,8 +231,8 @@ public:
 
 	virtual bool OnLButtonDown(int pMouseX, int pMouseY);
 	virtual bool OnLButtonUp(int pMouseX, int pMouseY);
-
 	virtual bool OnMouseMove(int pMouseX, int pMouseY, int pDeltaX, int pDeltaY);
+	virtual bool Click(bool pDepress);
 
 protected:
 
@@ -252,6 +252,8 @@ protected:
 	virtual void OnTextChanged();
 	State GetState();
 	void SetState(State pState);
+
+	virtual StateComponentList GetStateList(ComponentState pState) const;
 
 	ButtonFunctor* GetOnPressedFunctor();
 	ButtonFunctor* GetOnReleasedFunctor();

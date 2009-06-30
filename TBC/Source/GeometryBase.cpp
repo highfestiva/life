@@ -400,9 +400,9 @@ void GeometryBase::SetTangentsUVSet(unsigned int pUVSet)
 	}
 }
 
-void GeometryBase::GetBasicMaterialSettings(BasicMaterialSettings& pMatSettings) const
+const GeometryBase::BasicMaterialSettings& GeometryBase::GetBasicMaterialSettings() const
 {
-	pMatSettings = mMaterialSettings;
+	return (mMaterialSettings);
 }
 
 void GeometryBase::SetBasicMaterialSettings(const BasicMaterialSettings& pMatSettings)
@@ -664,7 +664,7 @@ void GeometryBase::Copy(GeometryBase* pGeometry)
 {
 	ClearAll();
 
-	pGeometry->GetBasicMaterialSettings(mMaterialSettings);
+	mMaterialSettings = pGeometry->GetBasicMaterialSettings();
 
 	mFlags = pGeometry->mFlags;
 

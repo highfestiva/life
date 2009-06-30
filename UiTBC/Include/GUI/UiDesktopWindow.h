@@ -130,7 +130,6 @@ public:
 
 protected:
 private:
-
 	typedef std::list<Component*> ComponentList;
 
 	void OnButton1(UiLepra::InputElement* pElement);

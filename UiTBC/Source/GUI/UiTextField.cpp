@@ -1,8 +1,8 @@
-/*
-	Class:  TextField
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Alexander Hugestrand
-*/
+
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2009, Righteous Games
+
+
 
 #include "../../Include/GUI/UiTextField.h"
 #include "../../Include/GUI/UiDesktopWindow.h"
@@ -11,8 +11,12 @@
 #include "../../Include/UiMouseTheme.h"
 #include "../../../UiLepra/Include/UiInput.h"
 
+
+
 namespace UiTbc
 {
+
+
 
 TextField::TextField(Component* pTopParent, const Lepra::String& pName) :
 	Window(pName),
@@ -308,7 +312,9 @@ bool TextField::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 	UiLepra::InputManager* lInputManager = lDesktopWindow->GetInputManager();
 
 	bool lCtrlDown = lInputManager->ReadKey(UiLepra::InputManager::IN_KBD_LCTRL) ||
-			  lInputManager->ReadKey(UiLepra::InputManager::IN_KBD_RCTRL);
+		lInputManager->ReadKey(UiLepra::InputManager::IN_KBD_RCTRL);
+	const Lepra::String lDelimitors = _T(" \t");
+
 
 	switch(pKeyCode)
 	{
@@ -318,8 +324,7 @@ bool TextField::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 			{
 				if (lCtrlDown == true)
 				{
-					mMarkerPos = Lepra::StringUtility::FindFirstWhiteSpace(GetVisibleText(), mMarkerPos, -1);
-					mMarkerPos++;
+					mMarkerPos = Lepra::StringUtility::FindPreviousWord(GetVisibleText(), lDelimitors, mMarkerPos);
 				}
 				else
 				{
@@ -335,12 +340,16 @@ bool TextField::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 			{
 				if (lCtrlDown == true)
 				{
-					Lepra::String lToken;
-					mMarkerPos = Lepra::StringUtility::FindFirstWhiteSpace(GetVisibleText(), mMarkerPos, 1);
-					if (mMarkerPos == -1)
+					size_t lIndex = GetVisibleText().find_first_not_of(lDelimitors, mMarkerPos);
+					lIndex = GetVisibleText().find_first_of(lDelimitors, lIndex);
+					if (lIndex == Lepra::String::npos)
 					{
 						// We have reached the end.
 						mMarkerPos = mText.length();
+					}
+					else
+					{
+						mMarkerPos = lIndex;
 					}
 				}
 				else
@@ -385,6 +394,7 @@ bool TextField::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 			if (mMarkerPos < mText.length())
 			{
 				mText.erase(mMarkerPos, 1);
+				lResetMarker = true;
 			}
 		} break;
 		case UiLepra::InputManager::IN_KBD_ESC:
@@ -633,6 +643,16 @@ void TextField::Repaint(Painter* pPainter)
 	}
 
 	pPainter->PopAttrib();
+}
+
+Component::StateComponentList TextField::GetStateList(ComponentState pState) const
+{
+	StateComponentList lList;
+	if (pState == STATE_FOCUSABLE)
+	{
+		lList.push_back(std::pair<bool, Component*>(HasKeyboardFocus(), (Component*)this));
+	}
+	return (lList);
 }
 
 void TextField::UpdateMarkerPos(Painter* pPainter)

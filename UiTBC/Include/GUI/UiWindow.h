@@ -78,6 +78,7 @@ public:
 
 	inline virtual Component::Type GetType();
 
+	virtual bool OnChar(Lepra::tchar pChar);
 	virtual bool OnLButtonDown(int pMouseX, int pMouseY);
 	virtual bool OnRButtonDown(int pMouseX, int pMouseY);
 	virtual bool OnMButtonDown(int pMouseX, int pMouseY);

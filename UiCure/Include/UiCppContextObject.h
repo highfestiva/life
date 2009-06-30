@@ -32,13 +32,13 @@ public:
 	void DebugDrawAxes();
 
 private:
-	void OnLoadMesh(UserGeometryReferenceOffsetResource* pMeshResource);
+	void OnLoadMesh(UserGeometryReferenceResource* pMeshResource);
 	void OnLoadTexture(UserRendererImageResource* pTextureResource);
 
 	void TryAddTexture();
 
 	GameUiManager* mUiManager;
-	typedef std::vector<UserGeometryReferenceOffsetResource*> MeshArray;
+	typedef std::vector<UserGeometryReferenceResource*> MeshArray;
 	MeshArray mMeshResourceArray;
 	UserRendererImageResource mTextureResource;
 

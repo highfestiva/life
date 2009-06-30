@@ -247,52 +247,62 @@ GeometryResource::UserData GeometryResource::GetUserData(const Cure::UserResourc
 
 bool GeometryResource::Load()
 {
+	float lCubeMappingScale = -1;
+	TBC::GeometryBase::BasicMaterialSettings lMaterial;
+	lMaterial.SetColor(0.5f, 0.5f, 0.5f);
+
 	UiTbc::TriangleBasedGeometry* lGeometry = 0;
 	// TODO: load from file!
 	if (GetName().find(_T("box_002_mesh")) != Lepra::String::npos)
 	{
 		Lepra::Vector3DF lDimensions(2.0f, 1.0f, 3.5f);
 		lGeometry = UiTbc::BasicMeshCreator::CreateFlatBox(lDimensions.x, lDimensions.y, lDimensions.z);
-		TBC::GeometryBase::BasicMaterialSettings lMaterial;
-		lMaterial.mRed = 0.8f;
-		lMaterial.mGreen = 0.3f;
-		lMaterial.mBlue = 0;
-		lGeometry->SetBasicMaterialSettings(lMaterial);
+		lMaterial.SetColor(0, 1, 0);
+		lCubeMappingScale = lGeometry->GetBoundingRadius();
 	}
 	else if (GetName().find(_T("sphere_002_mesh")) != Lepra::String::npos)
 	{
 		float lRadius = 1.0f;
 		lGeometry = UiTbc::BasicMeshCreator::CreateEllipsoid(lRadius, lRadius, lRadius, 10, 10);
+		lMaterial.SetColor(1, 0, 1);
 	}
 	else if (GetName().find(_T("car_001_body_mesh")) != Lepra::String::npos)
 	{
 		Lepra::Vector3DF lBodyDimensions(1.9f, 4.9f, 0.6f);
 		lGeometry = UiTbc::BasicMeshCreator::CreateFlatBox(lBodyDimensions.x, lBodyDimensions.y, lBodyDimensions.z);
+		lMaterial.SetColor(0.9f, 0.8f, 0.3f);
+		lCubeMappingScale = lGeometry->GetBoundingRadius();
 	}
 	else if (GetName().find(_T("car_001_top_mesh")) != Lepra::String::npos)
 	{
 		Lepra::Vector3DF lBodyDimensions(1.6f, 2.9f, 0.6f);
 		lGeometry = UiTbc::BasicMeshCreator::CreateFlatBox(lBodyDimensions.x, lBodyDimensions.y, lBodyDimensions.z);
+		lMaterial.SetColor(0.8f, 0.6f, 0.2f);
 	}
 	else if (GetName().find(_T("monster_001_body_mesh")) != Lepra::String::npos)
 	{
 		Lepra::Vector3DF lBodyDimensions(3.0f, 5.0f, 0.7f);
 		lGeometry = UiTbc::BasicMeshCreator::CreateFlatBox(lBodyDimensions.x, lBodyDimensions.y, lBodyDimensions.z);
+		lMaterial.SetColor(0.0f, 0.0f, 0.5f);
 	}
 	else if (GetName().find(_T("monster_001_top_mesh")) != Lepra::String::npos)
 	{
 		Lepra::Vector3DF lBodyDimensions(3.0f, 3.0f, 0.7f);
 		lGeometry = UiTbc::BasicMeshCreator::CreateFlatBox(lBodyDimensions.x, lBodyDimensions.y, lBodyDimensions.z);
+		lMaterial.SetColor(1, 1, 1);
+		lCubeMappingScale = lGeometry->GetBoundingRadius();
 	}
 	else if (GetName().find(_T("excavator_703_body_mesh")) != Lepra::String::npos)
 	{
 		Lepra::Vector3DF lBodyDimensions(2.9f, 3.0f, 1.5f);
 		lGeometry = UiTbc::BasicMeshCreator::CreateFlatBox(lBodyDimensions.x, lBodyDimensions.y, lBodyDimensions.z);
+		lMaterial.SetColor(0.7f, 0.2f, 0.2f);
 	}
 	else if (GetName().find(_T("excavator_703_top_mesh")) != Lepra::String::npos)
 	{
 		Lepra::Vector3DF lBodyDimensions(1.0f, 1.5f, 0.6f);
 		lGeometry = UiTbc::BasicMeshCreator::CreateFlatBox(lBodyDimensions.x, lBodyDimensions.y, lBodyDimensions.z);
+		lMaterial.SetColor(0.2f, 0.8f, 0.9f, 0.6f);
 	}
 	else if (GetName().find(_T("car_antenna_mesh")) != Lepra::String::npos)
 	{
@@ -303,47 +313,44 @@ bool GeometryResource::Load()
 		const float lWheelRadius = 0.3f;
 		const float lWheelWidth = lWheelRadius*1;
 		lGeometry = UiTbc::BasicMeshCreator::CreateCylinder(lWheelRadius, lWheelRadius, lWheelWidth, 10);
-		TBC::GeometryBase::BasicMaterialSettings lMaterial;
-		lMaterial.mRed = 0.9f;
-		lMaterial.mGreen = 0.6f;
-		lMaterial.mBlue = 0.6f;
-		lGeometry->SetBasicMaterialSettings(lMaterial);
+		lMaterial.SetColor(0.1f, 0.1f, 0.1f);
 	}
 	else if (GetName().find(_T("monster_001_wheel_mesh")) != Lepra::String::npos)
 	{
 		const float lWheelRadius = 1.0f;
 		const float lWheelWidth = lWheelRadius*0.8f;
 		lGeometry = UiTbc::BasicMeshCreator::CreateCylinder(lWheelRadius, lWheelRadius, lWheelWidth, 10);
-		TBC::GeometryBase::BasicMaterialSettings lMaterial;
-		lMaterial.mRed = 0.9f;
-		lMaterial.mGreen = 0.6f;
-		lMaterial.mBlue = 0.6f;
-		lGeometry->SetBasicMaterialSettings(lMaterial);
+		lMaterial.SetColor(0.1f, 0.1f, 0.1f);
 	}
 	else if (GetName().find(_T("excavator_703_boom1_mesh")) != Lepra::String::npos)
 	{
 		Lepra::Vector3DF lBodyDimensions(0.6f, 0.6f, 2.5f);
 		lGeometry = UiTbc::BasicMeshCreator::CreateFlatBox(lBodyDimensions.x, lBodyDimensions.y, lBodyDimensions.z);
+		lMaterial.SetColor(0.7f, 0.2f, 0.2f);
 	}
 	else if (GetName().find(_T("excavator_703_boom2_mesh")) != Lepra::String::npos)
 	{
 		Lepra::Vector3DF lBodyDimensions(0.6f, 0.6f, 3.2f);
 		lGeometry = UiTbc::BasicMeshCreator::CreateFlatBox(lBodyDimensions.x, lBodyDimensions.y, lBodyDimensions.z);
+		lMaterial.SetColor(0.7f, 0.2f, 0.2f);
 	}
 	else if (GetName().find(_T("excavator_703_arm_mesh")) != Lepra::String::npos)
 	{
 		Lepra::Vector3DF lBodyDimensions(0.4f, 3.0f, 0.4f);
 		lGeometry = UiTbc::BasicMeshCreator::CreateFlatBox(lBodyDimensions.x, lBodyDimensions.y, lBodyDimensions.z);
+		lMaterial.SetColor(0.7f, 0.2f, 0.2f);
 	}
 	else if (GetName().find(_T("excavator_703_bucket_back_mesh")) != Lepra::String::npos)
 	{
 		Lepra::Vector3DF lBodyDimensions(1.5f, 0.8f, 0.1f);
 		lGeometry = UiTbc::BasicMeshCreator::CreateFlatBox(lBodyDimensions.x, lBodyDimensions.y, lBodyDimensions.z);
+		lMaterial.SetColor(0.3f, 0.2f, 0.1f);
 	}
 	else if (GetName().find(_T("excavator_703_bucket_floor_mesh")) != Lepra::String::npos)
 	{
 		Lepra::Vector3DF lBodyDimensions(1.5f, 1.0f, 0.1f);
 		lGeometry = UiTbc::BasicMeshCreator::CreateFlatBox(lBodyDimensions.x, lBodyDimensions.y, lBodyDimensions.z);
+		lMaterial.SetColor(0.3f, 0.2f, 0.1f);
 	}
 	else if (GetName().find(_T("crane_whatever_tower_mesh")) != Lepra::String::npos)
 	{
@@ -403,15 +410,8 @@ bool GeometryResource::Load()
 			assert(false);
 		}
 		lGeometry = UiTbc::BasicMeshCreator::CreateFlatBox(lDimensions.x, lDimensions.y, lDimensions.z);
-		TBC::GeometryBase::BasicMaterialSettings lMaterial;
-		lMaterial.mRed = 0.85f;
-		lMaterial.mGreen = 0.85f;
-		lMaterial.mBlue = 0.85f;
-		lGeometry->SetBasicMaterialSettings(lMaterial);
-		lGeometry->AddEmptyUVSet();
-		Lepra::Vector2DD lUVOffset(0.5, 0.5);
-		UiTbc::UVMapper::ApplyCubeMapping(lGeometry, 0, lGeometry->GetBoundingRadius()/20, lUVOffset);
-		lGeometry->DupUVSet(0);
+		lMaterial.SetColor(0.9f, 0.9f, 0.9f);
+		lCubeMappingScale = lGeometry->GetBoundingRadius()/20;
 	}
 	else
 	{
@@ -420,6 +420,15 @@ bool GeometryResource::Load()
 	}
 	if (lGeometry)
 	{
+		lGeometry->SetBasicMaterialSettings(lMaterial);
+		if (lCubeMappingScale > 0)
+		{
+			lGeometry->AddEmptyUVSet();
+			Lepra::Vector2DD lUVOffset(0.5, 0.5);
+			UiTbc::UVMapper::ApplyCubeMapping(lGeometry, 0, lCubeMappingScale, lUVOffset);
+			//lGeometry->DupUVSet(0);
+		}
+
 		SetRamData(lGeometry);
 	}
 	return (lGeometry != 0);
@@ -489,6 +498,7 @@ Cure::ResourceLoadState GeometryReferenceResource::PostProcess()
 	{
 		SetRamData(new TBC::GeometryReference(mClassResource->GetRamData()));
 		GetRamData()->SetAlwaysVisible(true);
+		GetRamData()->SetBasicMaterialSettings(mClassResource->GetRamData()->GetBasicMaterialSettings());
 		lLoadState = Parent::PostProcess();
 	}
 	return (lLoadState);

@@ -369,20 +369,20 @@ RuntimeVariableScope* RuntimeVariableScope::LockParentScope(RuntimeVariableScope
 
 
 
-std::list<Lepra::String> RuntimeVariableScope::GetVariableNameList(int pStartScopeIndex, int pEndScopeIndex)
+std::list<Lepra::String> RuntimeVariableScope::GetVariableNameList(bool pSkipInternal, int pStartScopeIndex, int pEndScopeIndex)
 {
 	std::list<Lepra::String> lVariableNameList;
 	Lepra::ScopeLock lLock(&mLock);
 	if (pEndScopeIndex > 0 && pStartScopeIndex < pEndScopeIndex && mParentScope)
 	{
-		lVariableNameList = mParentScope->GetVariableNameList(pStartScopeIndex-1, pEndScopeIndex-1);
+		lVariableNameList = mParentScope->GetVariableNameList(pSkipInternal, pStartScopeIndex-1, pEndScopeIndex-1);
 	}
 	if (pStartScopeIndex <= 0)
 	{
 		VariableTable::iterator x = mVariableTable.begin();
 		for (; x != mVariableTable.end(); ++x)
 		{
-			if (x->second->IsExportable())
+			if (!pSkipInternal || x->second->IsExportable())
 			{
 				lVariableNameList.push_back(x->first);
 			}
@@ -449,7 +449,7 @@ std::list<Lepra::String> RuntimeVariableCompleter::CompleteCommand(const Lepra::
 	if (pPartialCommand.compare(0, mPrefix.length(), mPrefix) == 0)
 	{
 		const Lepra::String lPartialVariableName = pPartialCommand.substr(mPrefix.length());
-		std::list<Lepra::String> lVariableList = mVariableScope->GetVariableNameList();
+		std::list<Lepra::String> lVariableList = mVariableScope->GetVariableNameList(false);
 		std::list<Lepra::String>::const_iterator x = lVariableList.begin();
 		for (; x != lVariableList.end(); ++x)
 		{

@@ -107,6 +107,8 @@ protected:
 
 	PopupList* GetPopupList() const;
 
+	virtual StateComponentList GetStateList(ComponentState pState) const;
+
 	void UpdateMarkerPos(Painter* pPainter);
 	void SetMarkerPos(size_t pPos);
 

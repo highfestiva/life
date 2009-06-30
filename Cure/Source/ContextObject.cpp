@@ -50,6 +50,7 @@ ContextObject::ContextObject(const Lepra::String& pClassId):
 	mNetworkObjectType(NETWORK_OBJECT_LOCAL_ONLY),
 	mLastSendTime(0),
 	mRootPhysicsIndex(-1),
+	mSendCount(0),
 	mAllowMoveSelf(true),
 	mUniqeNodeId(256)
 {
@@ -227,6 +228,8 @@ bool ContextObject::UpdateFullPosition(const ObjectPositionalData*& pPositionalD
 {
 	if (mRootPhysicsIndex < 0 || mPhysicsNodeArray[mRootPhysicsIndex].GetBodyId() == TBC::INVALID_BODY)
 	{
+		mLog.Errorf(_T("Could not get positional update (for streaming), since %i/%s not loaded yet!"),
+			GetInstanceId(), GetClassId().c_str());
 		return (false);
 	}
 
@@ -396,6 +399,8 @@ bool ContextObject::UpdateFullPosition(const ObjectPositionalData*& pPositionalD
 
 	mPosition.Trunkate(y);
 	pPositionalData = &mPosition;
+
+	++mSendCount;
 
 	return (true);
 }
@@ -747,6 +752,20 @@ bool ContextObject::QueryResendTime(float pDeltaTime, bool pUnblockDelta)
 		mLastSendTime = lAbsoluteTime - (pUnblockDelta? pDeltaTime+Lepra::MathTraits<float>::FullEps() : 0);
 	}
 	return (lOkToSend);
+}
+
+int ContextObject::PopSendCount()
+{
+	if (mSendCount > 0)
+	{
+		--mSendCount;
+	}
+	return (mSendCount);
+}
+
+void ContextObject::SetSendCount(int pCount)
+{
+	mSendCount = pCount;
 }
 
 

@@ -129,6 +129,19 @@ public:
 		{
 		}
 
+		void SetColor(float pRed, float pGreen, float pBlue)
+		{
+			mRed      = pRed;
+			mGreen    = pGreen;
+			mBlue     = pBlue;
+		}
+		void SetColor(float pRed, float pGreen, float pBlue, float pAlpha)
+		{
+			mRed	= pRed;
+			mGreen	= pGreen;
+			mBlue	= pBlue;
+			mAlpha	= pAlpha;
+		}
 		void Set(float pRed, float pGreen, float pBlue,
 			 float pSpecular, float pAlpha, 
 			 bool pSmooth, 
@@ -277,7 +290,7 @@ public:
 	void SetAlwaysVisible(bool pAlwaysVisible) { SetFlag(ALWAYS_VISIBLE, pAlwaysVisible); }
 	bool GetAlwaysVisible() { return CheckFlag(ALWAYS_VISIBLE); }
 
-	void GetBasicMaterialSettings(BasicMaterialSettings& pMatSettings) const;
+	const BasicMaterialSettings& GetBasicMaterialSettings() const;
 	void SetBasicMaterialSettings(const BasicMaterialSettings& pMatSettings);
 
 	// Calling GetBoundingRadius() will recalculate the bounding radius if necessary.

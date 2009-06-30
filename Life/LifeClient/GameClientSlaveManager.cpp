@@ -156,13 +156,20 @@ bool GameClientSlaveManager::Render()
 
 bool GameClientSlaveManager::EndTick()
 {
-	DrawAsyncDebugInfo();
+	bool lIsDebugging = CURE_RTVAR_TRYGET(GetVariableScope(), RTVAR_DEBUG_ENABLED, false);
+	if (lIsDebugging)
+	{
+		DrawAsyncDebugInfo();
+	}
 
 	Lepra::ScopeLock lLock(GetTickLock());
 	bool lOk = Parent::EndTick();
 	if (lOk)
 	{
-		DrawSyncDebugInfo();
+		if (lIsDebugging)
+		{
+			DrawSyncDebugInfo();
+		}
 		TickUiUpdate();
 	}
 	return (lOk);
@@ -925,9 +932,9 @@ void GameClientSlaveManager::DrawAsyncDebugInfo()
 	mUiManager->GetPainter()->ResetClippingRect();
 	mUiManager->GetPainter()->SetClippingRect(mRenderArea);
 
-	int lCount = CURE_RTVAR_GET(GetVariableScope(), RTVAR_DEBUG_NET_SENDPOSCNT, 0);
+	int lCount = CURE_RTVAR_TRYGET(GetVariableScope(), RTVAR_DEBUG_NET_SENDPOSCNT, 0);
 	DrawDebugStaple(0, lCount*10, Lepra::Color(255, 0, 0));
-	lCount = CURE_RTVAR_GET(GetVariableScope(), RTVAR_DEBUG_NET_RECVPOSCNT, 0);
+	lCount = CURE_RTVAR_TRYGET(GetVariableScope(), RTVAR_DEBUG_NET_RECVPOSCNT, 0);
 	DrawDebugStaple(1, lCount*10, Lepra::Color(0, 255, 0));
 }
 
@@ -945,7 +952,7 @@ void GameClientSlaveManager::DrawDebugStaple(int pIndex, int pHeight, const Lepr
 
 void GameClientSlaveManager::DrawSyncDebugInfo()
 {
-	if (CURE_RTVAR_GETSET(GetVariableScope(), "Ui.3D.EnableAxis", false))
+	if (CURE_RTVAR_TRYGET(GetVariableScope(), RTVAR_DEBUG_3D_ENABLEAXES, false))
 	{
 		Lepra::ScopeLock lLock(GetTickLock());
 		mUiManager->GetRenderer()->ResetClippingRect();

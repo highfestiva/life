@@ -679,6 +679,7 @@ void GameServerManager::OnCollision(const Lepra::Vector3DF& pForce, const Lepra:
 		if (lSendCollision)
 		{
 			// We have found a collision. Asynchronously inform all viewers, including the colliding client.
+			pObject1->SetSendCount(2);
 			GetContext()->AddPhysicsSenderObject(pObject1);
 		}
 	}
@@ -701,18 +702,20 @@ void GameServerManager::OnStopped(Cure::ContextObject* pObject, TBC::PhysicsEngi
 
 bool GameServerManager::OnPhysicsSend(Cure::ContextObject* pObject)
 {
-	bool lSent = false;
+	bool lResend = false;
 	if (pObject->QueryResendTime(0.3f, false))
 	{
 		log_adebug("Sending collision.");
 		const Cure::ObjectPositionalData* lPosition = 0;
-		lSent = pObject->UpdateFullPosition(lPosition);
-		if (lSent)
+		lResend = pObject->UpdateFullPosition(lPosition);
+		if (lResend)
 		{
-			BroadcastObjectPosition(pObject->GetInstanceId(), *lPosition, 0, true);
+			BroadcastObjectPosition(pObject->GetInstanceId(), *lPosition, 0, false);
+			lResend = (pObject->PopSendCount() > 0);
 		}
+
 	}
-	return (lSent);
+	return (lResend);
 }
 
 bool GameServerManager::IsConnectAuthorized()

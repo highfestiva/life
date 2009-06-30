@@ -20,9 +20,7 @@ GeometryBatch::GeometryBatch(TBC::GeometryBase* pGeometry) :
 	mUVSetCount(0),
 	mGeometryInstance(pGeometry)
 {
-	BasicMaterialSettings lMatSet;
-	mGeometryInstance->GetBasicMaterialSettings(lMatSet);
-	SetBasicMaterialSettings(lMatSet);
+	SetBasicMaterialSettings(mGeometryInstance->GetBasicMaterialSettings());
 }
 
 GeometryBatch::~GeometryBatch()

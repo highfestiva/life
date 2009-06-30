@@ -267,8 +267,7 @@ struct GeometryOffset
 typedef UserUiTypeResource<PainterImageResource>			UserPainterImageResource;
 typedef UserUiTypeResource<RendererImageResource>			UserRendererImageResource;
 typedef UserUiTypeResource<TextureResource>				UserTextureResource;
-typedef UserUiTypeResource<GeometryReferenceResource, unsigned>		UserGeometryReferenceResource;
-typedef UserUiTypeResource<GeometryReferenceResource, GeometryOffset>	UserGeometryReferenceOffsetResource;
+typedef UserUiTypeResource<GeometryReferenceResource, GeometryOffset>	UserGeometryReferenceResource;
 typedef UserUiTypeResource<SoundResource2d>				UserSound2dResource;
 typedef UserUiTypeResource<SoundResource3d>				UserSound3dResource;
 //typedef Cure::UserTypeResource<TBC::...>				UserPhysicsResource;

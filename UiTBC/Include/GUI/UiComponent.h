@@ -199,11 +199,11 @@ public:
 
 	virtual void SetMouseFocus();
 	virtual void ReleaseMouseFocus(RecurseDir pDir = RECURSE_UP, Component* pFocusedComponent = 0);
-	bool HasMouseFocus();
+	bool HasMouseFocus() const;
 
 	virtual void SetKeyboardFocus();
 	virtual void ReleaseKeyboardFocus(RecurseDir pDir = RECURSE_UP, Component* pFocusedComponent = 0);
-	bool HasKeyboardFocus();
+	bool HasKeyboardFocus() const;
 
 	void RequestRepaint();
 
@@ -224,8 +224,17 @@ protected:
 
 	virtual void SetKeyboardFocus(Component* pChild);
 	virtual void SetMouseFocus(Component* pChild);
+	void DispatchChar(Lepra::tchar pChar);
 
 	void DeleteLayout(int pLayer);
+
+	enum ComponentState
+	{
+		STATE_FOCUSABLE	= 1,
+		STATE_CLICKABLE,
+	};
+	typedef std::list<std::pair<bool, Component*> > StateComponentList;
+	virtual StateComponentList GetStateList(ComponentState pState) const;
 
 private:
 	typedef std::set<UiLepra::TextInputObserver*> TextListenerSet;

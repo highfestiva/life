@@ -39,7 +39,7 @@ Window::Window(const Lepra::String& pName,
 	mClientRect = new RectComponent(_T("ClientRect"), pLayout);
 	mCenterComponent = new RectComponent(_T("CenterComponent"), new GridLayout(2, 1));
 	mCenterComponent->AddChild(mClientRect, 1, 0);
-	Component::AddChild(mCenterComponent);
+	Parent::AddChild(mCenterComponent);
 }
 
 Window::Window(unsigned pBorderStyle,
@@ -124,7 +124,7 @@ Window::Window(const Lepra::Color& pColor,
 	//mClientRect->SetPreferredSize(0, 0, true);
 	mCenterComponent = new RectComponent(_T("CenterComponent"), new GridLayout(2, 1));
 	mCenterComponent->AddChild(mClientRect, 1, 0);
-	Component::AddChild(mCenterComponent);
+	Parent::AddChild(mCenterComponent);
 }
 
 Window::Window(Painter::ImageID pImageID,
@@ -151,7 +151,7 @@ Window::Window(Painter::ImageID pImageID,
 	//mClientRect->SetPreferredSize(0, 0, true);
 	mCenterComponent = new RectComponent(_T("CenterComponent"), new GridLayout(2, 1));
 	mCenterComponent->AddChild(mClientRect, 1, 0);
-	Component::AddChild(mCenterComponent);
+	Parent::AddChild(mCenterComponent);
 }
 
 Window::~Window()
@@ -235,18 +235,18 @@ void Window::Init()
 //	mCenterComponent->SetPreferredSize(0, 0);
 	if (Check(mBorderStyle, BORDER_HALF) == false)
 	{
-		Component::AddChild(mTRBorder, 0, 2);
-		Component::AddChild(mBRBorder, 2, 2);
-		Component::AddChild(mBLBorder, 2, 0);
-		Component::AddChild(mBBorder, 2, 1);
-		Component::AddChild(mRBorder, 1, 2);
+		Parent::AddChild(mTRBorder, 0, 2);
+		Parent::AddChild(mBRBorder, 2, 2);
+		Parent::AddChild(mBLBorder, 2, 0);
+		Parent::AddChild(mBBorder, 2, 1);
+		Parent::AddChild(mRBorder, 1, 2);
 	}
 
-	Component::AddChild(mTLBorder, 0, 0);
-	Component::AddChild(mTBorder, 0, 1);
-	Component::AddChild(mLBorder, 1, 0);
+	Parent::AddChild(mTLBorder, 0, 0);
+	Parent::AddChild(mTBorder, 0, 1);
+	Parent::AddChild(mLBorder, 1, 0);
 
-	Component::AddChild(mCenterComponent, 1, 1);
+	Parent::AddChild(mCenterComponent, 1, 1);
 }
 
 void Window::SetBorder(unsigned pBorderStyle, int pWidth)
@@ -342,7 +342,7 @@ bool Window::IsOver(int pScreenX, int pScreenY)
 {
 	if (GetScreenRect().IsInside(pScreenX, pScreenY) == true)
 	{
-		Layout* lLayout = Component::GetLayout();
+		Layout* lLayout = Parent::GetLayout();
 
 		if (lLayout != 0)
 		{
@@ -418,7 +418,7 @@ void Window::SetActive(bool pActive)
 				mCaption->SetActive(true);
 			}
 
-			Component* lParent = Component::GetParent();
+			Component* lParent = Parent::GetParent();
 
 			if (lParent != 0)
 			{
@@ -445,23 +445,88 @@ void Window::SetActive(bool pActive)
 	}
 }
 
+bool Window::OnChar(Lepra::tchar pChar)
+{
+	bool lOk;
+	if (pChar == _T('\t'))
+	{
+		// Focus next component. May wrap.
+		const DesktopWindow* lDesktopWindow = (DesktopWindow*)GetParentOfType(Component::DESKTOPWINDOW);
+		UiLepra::InputManager* lInputManager = lDesktopWindow->GetInputManager();
+		bool lFocusPrevious = false;
+		bool lFocusNext = false;
+		StateComponentList lComponentList = GetStateList(STATE_FOCUSABLE);
+		StateComponentList::iterator x = lComponentList.begin();
+		for (; x != lComponentList.end(); ++x)
+		{
+			if (lFocusNext)
+			{
+				break;
+			}
+			if (x->first)
+			{
+				if (lInputManager->ReadKey(UiLepra::InputManager::IN_KBD_LSHIFT) ||
+					lInputManager->ReadKey(UiLepra::InputManager::IN_KBD_RSHIFT))
+				{
+					lFocusPrevious = true;
+					break;
+				}
+				lFocusNext = true;
+			}
+		}
+		if (lFocusPrevious)
+		{
+			if (x == lComponentList.begin())
+			{
+				x = lComponentList.end();
+			}
+			--x;
+		}
+		else if (!lFocusNext || x == lComponentList.end())
+		{
+			x = lComponentList.begin();
+		}
+		if (x != lComponentList.end())	// Any available focusable children?
+		{
+			x->second->SetKeyboardFocus();
+		}
+		lOk = true;
+	}
+	else if (pChar == _T('\r'))
+	{
+		StateComponentList lComponentList = GetStateList(STATE_CLICKABLE);
+		StateComponentList::iterator x = lComponentList.begin();
+		if (x != lComponentList.end())
+		{
+			++x;
+			((Button*)x->second)->Click(true);
+		}
+		lOk = true;
+	}
+	else
+	{
+		lOk = Parent::OnChar(pChar);
+	}
+	return (lOk);
+}
+
 bool Window::OnLButtonDown(int pMouseX, int pMouseY)
 {
-	bool lReturn = Component::OnLButtonDown(pMouseX, pMouseY);
+	bool lReturn = Parent::OnLButtonDown(pMouseX, pMouseY);
 	SetActive(true);
 	return lReturn;
 }
 
 bool Window::OnRButtonDown(int pMouseX, int pMouseY)
 {
-	bool lReturn = Component::OnRButtonDown(pMouseX, pMouseY);
+	bool lReturn = Parent::OnRButtonDown(pMouseX, pMouseY);
 	SetActive(true);
 	return lReturn;
 }
 
 bool Window::OnMButtonDown(int pMouseX, int pMouseY)
 {
-	bool lReturn = Component::OnMButtonDown(pMouseX, pMouseY);
+	bool lReturn = Parent::OnMButtonDown(pMouseX, pMouseY);
 	SetActive(true);
 	return lReturn;
 }
