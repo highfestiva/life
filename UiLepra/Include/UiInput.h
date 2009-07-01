@@ -243,6 +243,7 @@ public:
 
 	void SetIdentifier(const Lepra::String& pIdentifier);
 	const Lepra::String& GetIdentifier() const;
+	Lepra::String GetFullName() const;
 
 	// Sets the input listener functor. The InputElement will be responsible
 	// of deleting it.

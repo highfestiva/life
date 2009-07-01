@@ -441,6 +441,11 @@ bool GameClientMasterTicker::OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode)
 
 void GameClientMasterTicker::OnInput(UiLepra::InputElement* pElement)
 {
+	log_volatile(mLog.Tracef(_T("Got input from element '%s' / '%s' = %f.\n"),
+		Lepra::AnsiStringUtility::ToCurrentCode(pElement->GetFullName()).c_str(),
+		Lepra::AnsiStringUtility::ToCurrentCode(pElement->GetIdentifier()).c_str(),
+		pElement->GetValue()));
+
 	SlaveMap::Iterator x = mSlaveSet.First();
 	for (; x != mSlaveSet.End(); ++x)
 	{

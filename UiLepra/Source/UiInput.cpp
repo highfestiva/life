@@ -69,6 +69,27 @@ const Lepra::String& InputElement::GetIdentifier() const
 	return mIdentifier;
 }
 
+Lepra::String InputElement::GetFullName() const
+{
+	Lepra::String lName;
+	switch (GetParentDevice()->GetInterpretation())
+	{
+		case UiLepra::InputDevice::TYPE_MOUSE:		lName = _T("Mouse");	break;
+		case UiLepra::InputDevice::TYPE_KEYBOARD:	lName = _T("Keyboard");	break;
+		default:					lName = _T("Device");	break;
+	}
+	lName += Lepra::StringUtility::IntToString(GetParentDevice()->GetTypeIndex(), 10)+_T(".");
+
+	switch (GetInterpretation())
+	{
+		case UiLepra::InputElement::ABSOLUTE_AXIS:	lName += _T("AbsoluteAxis");	break;
+		case UiLepra::InputElement::RELATIVE_AXIS:	lName += _T("RelativeAxis");	break;
+		default:					lName += _T("Button");		break;
+	}
+	lName += Lepra::StringUtility::IntToString(GetTypeIndex(), 10);
+	return (lName);
+}
+
 void InputElement::SetIdentifier(const Lepra::String& pIdentifier)
 {
 	mIdentifier = pIdentifier;

@@ -27,12 +27,6 @@ Win32InputElement::Win32InputElement(Type pType, Interpretation pInterpretation,
 	mMin(MAX_INT),
 	mMax(MIN_INT)
 {
-	if (pInterpretation == ABSOLUTE_AXIS)
-	{
-		mMin = 0;	// TODO: verify that absolute axis range always is this!
-		mMax = 65535;	// TODO: verify that absolute axis range always is this!
-	}
-
 	SetIdentifier(mElement->tszName);
 
 	mDataFormat.dwType  = mElement->dwType;
@@ -214,6 +208,26 @@ BOOL CALLBACK Win32InputDevice::EnumElementsCallback(LPCDIDEVICEOBJECTINSTANCE l
 		lElement = new Win32InputElement(InputElement::ANALOGUE, lInterpretation, lDevice->mAnalogueCount,
 			lDevice, lpddoi, (unsigned)lDevice->mElementArray.size() * sizeof(unsigned));
 		++lDevice->mAnalogueCount;
+
+		// Set absolute axis range.
+		if ((lpddoi->dwType & DIDFT_ABSAXIS) != 0)
+		{
+			log_volatile(mLog.Infof(_T("Found absolute axis element '%s' = '%s'.\n"),
+				Lepra::AnsiStringUtility::ToCurrentCode(lElement->GetFullName()).c_str(),
+				Lepra::AnsiStringUtility::ToCurrentCode(lElement->GetIdentifier()).c_str()));
+
+			DIPROPRANGE lRange;
+			lRange.diph.dwSize = sizeof(DIPROPRANGE);
+			lRange.diph.dwHeaderSize = sizeof(DIPROPHEADER);
+			lRange.diph.dwHow = DIPH_BYID;
+			lRange.diph.dwObj = lpddoi->dwType;
+			if (lDevice->mDIDevice->GetProperty(DIPROP_RANGE, &lRange.diph) == DI_OK)
+			{
+				lElement->SetValue(lRange.lMin);
+				lElement->SetValue(lRange.lMax);
+				lElement->SetValue((lRange.lMin+lRange.lMax) / 2);
+			}
+		}
 	}
 	else if((lpddoi->dwType&DIDFT_BUTTON)    != 0 ||
 			(lpddoi->dwType&DIDFT_PSHBUTTON) != 0 ||

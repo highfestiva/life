@@ -69,24 +69,6 @@ void Component::DeleteLayout(int pLayer)
 	}
 }
 
-Component::StateComponentList Component::GetStateList(ComponentState pState) const
-{
-	StateComponentList lList;
-	for (int i = 0; i < mLayerCount; i++)
-	{
-		if (mLayout[i] != 0)
-		{
-			Component* c = mLayout[i]->GetFirst();
-			for (; c; c = mLayout[i]->GetNext())
-			{
-				StateComponentList lChildList = c->GetStateList(pState);
-				lList.splice(lList.end(), lChildList);
-			}
-		}
-	}
-	return (lList);
-}
-
 int Component::CreateLayer(Layout* pLayout)
 {
 	Layout** lLayout = new Layout*[mLayerCount + 1];
@@ -667,6 +649,24 @@ bool Component::IsOver(int pScreenX, int pScreenY)
 	Lepra::PixelCoords lPos(GetScreenPos());
 	Lepra::PixelRect lRect(lPos, lPos + GetSize());
 	return lRect.IsInside(pScreenX, pScreenY);
+}
+
+Component::StateComponentList Component::GetStateList(ComponentState pState) const
+{
+	StateComponentList lList;
+	for (int i = 0; i < mLayerCount; i++)
+	{
+		if (mLayout[i] != 0)
+		{
+			Component* c = mLayout[i]->GetFirst();
+			for (; c; c = mLayout[i]->GetNext())
+			{
+				StateComponentList lChildList = c->GetStateList(pState);
+				lList.splice(lList.end(), lChildList);
+			}
+		}
+	}
+	return (lList);
 }
 
 void Component::RepaintChild(Component* pChild, Painter* pPainter)

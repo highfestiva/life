@@ -498,7 +498,7 @@ bool Window::OnChar(Lepra::tchar pChar)
 	}
 	else if (pChar == _T('\r'))
 	{
-		StateComponentList lComponentList = GetStateList(STATE_CLICKABLE);
+		StateComponentList lComponentList = mClientRect->GetStateList(STATE_CLICKABLE);
 		StateComponentList::iterator x = lComponentList.begin();
 		if (x != lComponentList.end())
 		{

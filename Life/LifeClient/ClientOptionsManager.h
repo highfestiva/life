@@ -39,7 +39,6 @@ private:
 	bool SetDefault(int pPriority);
 
 	const Lepra::String ConvertToString(UiLepra::InputManager::KeyCode pKeyCode) const;
-	const Lepra::String ConvertToString(UiLepra::InputElement* pElement) const;
 	bool SetValue(const Lepra::String& pKey, float pValue);
 	float* GetValuePointer(const Lepra::String& pKey, bool& pIsSteeringValue);
 
