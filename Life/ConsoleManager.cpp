@@ -568,7 +568,7 @@ int ConsoleManager::OnCommand(const Lepra::String& pCommand, const Lepra::String
 bool ConsoleManager::SaveApplicationConfigFile(Lepra::File* pFile, const Lepra::String& pUserConfig)
 {
 	pFile->WriteString(_T("// Generated application shell script section.\n"));
-	std::list<Lepra::String> lVariableList = GetVariableScope()->GetVariableNameList(0, 0);
+	std::list<Lepra::String> lVariableList = GetVariableScope()->GetVariableNameList(true, 0, 0);
 	bool lSaved = SaveConfigFile(pFile, lVariableList, pUserConfig);
 	if (pUserConfig.empty())
 	{
@@ -598,7 +598,7 @@ Lepra::String ConsoleManager::LoadUserConfig(Lepra::File* pFile)
 bool ConsoleManager::SaveSystemConfigFile(int pScopeSkipCount, Lepra::File* pFile, const Lepra::String& pUserConfig)
 {
 	pFile->WriteString(_T("// Generated system shell script section.\n"));
-	std::list<Lepra::String> lVariableList = GetVariableScope()->GetVariableNameList(pScopeSkipCount);
+	std::list<Lepra::String> lVariableList = GetVariableScope()->GetVariableNameList(true, pScopeSkipCount);
 	return (SaveConfigFile(pFile, lVariableList, pUserConfig));
 }
 

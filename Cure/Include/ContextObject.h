@@ -61,6 +61,8 @@ public:
 	void SetEnginePower(unsigned pAspect, float pPower, float pAngle);
 
 	bool QueryResendTime(float pDeltaTime, bool pUnblockDelta);
+	int PopSendCount();
+	void SetSendCount(int pCount);
 
 	virtual void OnTick(float pFrameTime) = 0;
 	virtual void OnAlarm(int pAlarmId) = 0;
@@ -98,6 +100,7 @@ protected:
 	float mLastSendTime;
 	int mRootPhysicsIndex;	// TODO: remove this hack!
 	ObjectPositionalData mPosition;
+	int mSendCount;
 	bool mAllowMoveSelf;	// This is set to false when attached to someone/something else.
 	ConnectionList mConnectionList;
 	int mUniqeNodeId;

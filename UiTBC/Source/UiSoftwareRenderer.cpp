@@ -252,9 +252,7 @@ bool SoftwareRenderer::PreRender(TBC::GeometryBase* pGeometry)
 
 	TextureTable::Iterator lIter = lGeometryData->mTA? mTextureTable.Find(lGeometryData->mTA->mTextureID[0]) : mTextureTable.End();
 
-	TBC::GeometryBase::BasicMaterialSettings lMatSettings;
-	pGeometry->GetBasicMaterialSettings(lMatSettings);
-
+	const TBC::GeometryBase::BasicMaterialSettings& lMatSettings = pGeometry->GetBasicMaterialSettings();
 	float lRed   = lMatSettings.mRed;
 	float lGreen = lMatSettings.mGreen;
 	float lBlue  = lMatSettings.mBlue;

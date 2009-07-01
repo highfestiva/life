@@ -298,9 +298,7 @@ void TriangleBasedGeometry::Copy(const TriangleBasedGeometry& pGeometry)
 
 		mGeometryVolatility = pGeometry.GetGeometryVolatility();
 
-		TBC::GeometryBase::BasicMaterialSettings lMatSettings;
-		pGeometry.GetBasicMaterialSettings(lMatSettings);
-		TBC::GeometryBase::SetBasicMaterialSettings(lMatSettings);
+		TBC::GeometryBase::SetBasicMaterialSettings(pGeometry.GetBasicMaterialSettings());
 
 		TBC::GeometryBase::SetBoundingRadius(pGeometry.GetBoundingRadius());
 
@@ -712,8 +710,7 @@ void TriangleBasedGeometry::SplitVertices()
 {
 	if (mIndexData != 0)
 	{
-		TBC::GeometryBase::BasicMaterialSettings lMaterial;
-		TBC::GeometryBase::GetBasicMaterialSettings(lMaterial);
+		const TBC::GeometryBase::BasicMaterialSettings& lMaterial = GetBasicMaterialSettings();
 		bool lSmooth = lMaterial.mSmooth;
 		float* lOriginalNormalData = 0;
 		if (lSmooth == true)

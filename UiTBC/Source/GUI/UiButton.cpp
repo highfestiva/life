@@ -212,6 +212,16 @@ void Button::SetState(State pState)
 	}
 }
 
+Component::StateComponentList Button::GetStateList(ComponentState pState) const
+{
+	StateComponentList lList;
+	if (pState == STATE_CLICKABLE)
+	{
+		lList.push_back(std::pair<bool, Component*>(false, (Component*)this));
+	}
+	return (lList);
+}
+
 void Button::Repaint(Painter* pPainter)
 {
 	Window::Repaint(pPainter);
@@ -310,10 +320,7 @@ bool Button::OnLButtonDown(int pMouseX, int pMouseY)
 
 		SetMouseFocus();
 
-		if (mOnClickedFunctor != 0)
-		{
-			mOnClickedFunctor->Call(this);
-		}
+		Click(false);
 	}
 
 	return true;
@@ -395,7 +402,20 @@ bool Button::OnMouseMove(int pMouseX, int pMouseY, int pDeltaX, int pDeltaY)
 	return Component::OnMouseMove(pMouseX, pMouseY, pDeltaX, pDeltaY);
 }
 
-
+bool Button::Click(bool pDepress)
+{
+	bool lClicked = false;
+	if (mOnClickedFunctor)
+	{
+		mOnClickedFunctor->Call(this);
+		lClicked = true;
+	}
+	if (pDepress && mOnUnclickedFunctor)
+	{
+		mOnUnclickedFunctor->Call(this);
+	}
+	return (lClicked);
+}
 
 bool Button::GetPressed()
 {

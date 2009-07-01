@@ -69,6 +69,24 @@ void Component::DeleteLayout(int pLayer)
 	}
 }
 
+Component::StateComponentList Component::GetStateList(ComponentState pState) const
+{
+	StateComponentList lList;
+	for (int i = 0; i < mLayerCount; i++)
+	{
+		if (mLayout[i] != 0)
+		{
+			Component* c = mLayout[i]->GetFirst();
+			for (; c; c = mLayout[i]->GetNext())
+			{
+				StateComponentList lChildList = c->GetStateList(pState);
+				lList.splice(lList.end(), lChildList);
+			}
+		}
+	}
+	return (lList);
+}
+
 int Component::CreateLayer(Layout* pLayout)
 {
 	Layout** lLayout = new Layout*[mLayerCount + 1];
@@ -539,11 +557,7 @@ bool Component::OnMouseMove(int pMouseX, int pMouseY, int pDeltaX, int pDeltaY)
 
 bool Component::OnChar(Lepra::tchar pChar)
 {
-	TextListenerSet::iterator x = mTextListenerSet.begin();
-	for (; x != mTextListenerSet.end(); ++x)
-	{
-		(*x)->OnChar(pChar);
-	}
+	DispatchChar(pChar);
 
 	if (mKeyboardFocusChild != 0)
 	{
@@ -784,6 +798,15 @@ void Component::SetMouseFocus(Component* pChild)
 	if (mParent != 0)
 	{
 		mParent->SetMouseFocus(this);
+	}
+}
+
+void Component::DispatchChar(Lepra::tchar pChar)
+{
+	TextListenerSet::iterator x = mTextListenerSet.begin();
+	for (; x != mTextListenerSet.end(); ++x)
+	{
+		(*x)->OnChar(pChar);
 	}
 }
 
@@ -1065,12 +1088,12 @@ bool Component::GetSelected() const
 	return mSelected;
 }
 
-bool Component::HasMouseFocus()
+bool Component::HasMouseFocus() const
 {
 	return (mParent->mMouseFocusChild == this);
 }
 
-bool Component::HasKeyboardFocus()
+bool Component::HasKeyboardFocus() const
 {
 	bool lFocused = (mParent == 0 || mParent->mKeyboardFocusChild == this);
 	if (lFocused && mParent)

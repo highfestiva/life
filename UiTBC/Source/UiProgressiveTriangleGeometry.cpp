@@ -181,8 +181,7 @@ void ProgressiveTriangleGeometry::Copy(const ProgressiveTriangleGeometry& pProgr
 
 	SetTransformation(pProgressiveGeometry.GetTransformation());
 
-	TBC::GeometryBase::BasicMaterialSettings lMatSettings;
-	pProgressiveGeometry.GetBasicMaterialSettings(lMatSettings);
+	const TBC::GeometryBase::BasicMaterialSettings& lMatSettings = pProgressiveGeometry.GetBasicMaterialSettings();
 	TBC::GeometryBase::SetBasicMaterialSettings(lMatSettings);
 
 	SetLastFrameVisible(pProgressiveGeometry.GetLastFrameVisible());
@@ -459,9 +458,7 @@ void ProgressiveTriangleGeometry::Set(TriangleBasedGeometry& pGeometry)
 
 	TBC::GeometryBase::SetBoundingRadius(pGeometry.GetBoundingRadius());
 
-	TBC::GeometryBase::BasicMaterialSettings lMatSettings;
-	pGeometry.GetBasicMaterialSettings(lMatSettings);
-	TBC::GeometryBase::SetBasicMaterialSettings(lMatSettings);
+	TBC::GeometryBase::SetBasicMaterialSettings(pGeometry.GetBasicMaterialSettings());
 
 	SetLastFrameVisible(pGeometry.GetLastFrameVisible());
 	SetTransformation(pGeometry.GetTransformation());

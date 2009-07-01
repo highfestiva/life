@@ -131,7 +131,7 @@ void PositionalData6::CopyData(const PositionalData* pData)
 	*this = lCopy;
 }
 
-PositionalData* PositionalData6::Clone()
+PositionalData* PositionalData6::Clone() const
 {
 	return (new PositionalData6(*this));
 }
@@ -206,7 +206,7 @@ void PositionalData3::CopyData(const PositionalData* pData)
 	*this = lCopy;
 }
 
-PositionalData* PositionalData3::Clone()
+PositionalData* PositionalData3::Clone() const
 {
 	return (new PositionalData3(*this));
 }
@@ -270,7 +270,7 @@ void PositionalData2::CopyData(const PositionalData* pData)
 	*this = lCopy;
 }
 
-PositionalData* PositionalData2::Clone()
+PositionalData* PositionalData2::Clone() const
 {
 	return (new PositionalData2(*this));
 }
@@ -325,7 +325,7 @@ void PositionalData1::CopyData(const PositionalData* pData)
 	*this = lCopy;
 }
 
-PositionalData* PositionalData1::Clone()
+PositionalData* PositionalData1::Clone() const
 {
 	return (new PositionalData1(*this));
 }
@@ -544,7 +544,7 @@ void ObjectPositionalData::CopyData(const PositionalData* pData)
 	}
 }
 
-PositionalData* ObjectPositionalData::Clone()
+PositionalData* ObjectPositionalData::Clone() const
 {
 	ObjectPositionalData* lData = new ObjectPositionalData;
 	BodyPositionArray::const_iterator x = mBodyPositionArray.begin();
@@ -638,7 +638,7 @@ void RealData4::CopyData(const PositionalData* pData)
 	*this = lCopy;
 }
 
-PositionalData* RealData4::Clone()
+PositionalData* RealData4::Clone() const
 {
 	return (new RealData4(*this));
 }
@@ -690,7 +690,7 @@ void RealData1Bool::CopyData(const PositionalData* pData)
 	*this = lCopy;
 }
 
-PositionalData* RealData1Bool::Clone()
+PositionalData* RealData1Bool::Clone() const
 {
 	return (new RealData1Bool(*this));
 }
@@ -739,7 +739,7 @@ void RealData1::CopyData(const PositionalData* pData)
 	*this = lCopy;
 }
 
-PositionalData* RealData1::Clone()
+PositionalData* RealData1::Clone() const
 {
 	return (new RealData1(*this));
 }

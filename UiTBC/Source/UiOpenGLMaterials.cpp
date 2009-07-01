@@ -123,8 +123,8 @@ void OpenGLMatSingleColorSolid::RenderGeometry(TBC::GeometryBase* pGeometry)
 
 void OpenGLMatSingleColorSolid::PrepareBasicMaterialSettings(TBC::GeometryBase* pGeometry)
 {
-	TBC::GeometryBase::BasicMaterialSettings lMatSettings;
-	pGeometry->GetBasicMaterialSettings(lMatSettings);
+	const TBC::GeometryBase::BasicMaterialSettings& lMatSettings =
+		pGeometry->GetBasicMaterialSettings();
 
 	glColor4f(lMatSettings.mRed,
 		  lMatSettings.mGreen,
@@ -422,8 +422,8 @@ void OpenGLMatSingleTextureAlphaTested::RenderAllGeometry(unsigned int pCurrentF
 
 void OpenGLMatSingleTextureAlphaTested::RenderGeometry(TBC::GeometryBase* pGeometry)
 {
-	TBC::GeometryBase::BasicMaterialSettings lMatSettings;
-	pGeometry->GetBasicMaterialSettings(lMatSettings);
+	const TBC::GeometryBase::BasicMaterialSettings& lMatSettings =
+		pGeometry->GetBasicMaterialSettings();
 	glAlphaFunc(GL_GEQUAL, lMatSettings.mAlpha);
 
 	OpenGLMatSingleTextureSolid::RenderGeometry(pGeometry);
@@ -581,8 +581,8 @@ void OpenGLMatSingleColorEnvMapSolid::PrepareBasicMaterialSettings(TBC::Geometry
 	else
 	{
 		// Prepare basic material settings using 100% specularity.
-		TBC::GeometryBase::BasicMaterialSettings lMatSettings;
-		pGeometry->GetBasicMaterialSettings(lMatSettings);
+		const TBC::GeometryBase::BasicMaterialSettings& lMatSettings =
+			pGeometry->GetBasicMaterialSettings();
 
 		glColor4f(lMatSettings.mRed,
 			  lMatSettings.mGreen,
@@ -633,8 +633,8 @@ void OpenGLMatSingleColorEnvMapBlended::PrepareBasicMaterialSettings(TBC::Geomet
 	else
 	{
 		// Prepare basic material settings using 100% specularity.
-		TBC::GeometryBase::BasicMaterialSettings lMatSettings;
-		pGeometry->GetBasicMaterialSettings(lMatSettings);
+		const TBC::GeometryBase::BasicMaterialSettings& lMatSettings =
+			pGeometry->GetBasicMaterialSettings();
 
 		glColor4f(lMatSettings.mRed,
 			  lMatSettings.mGreen,
@@ -877,8 +877,8 @@ void OpenGLMatSingleTextureEnvMapSolid::PrepareBasicMaterialSettings(TBC::Geomet
 	else
 	{
 		// Prepare basic material settings using 100% specularity.
-		TBC::GeometryBase::BasicMaterialSettings lMatSettings;
-		pGeometry->GetBasicMaterialSettings(lMatSettings);
+		const TBC::GeometryBase::BasicMaterialSettings& lMatSettings =
+			pGeometry->GetBasicMaterialSettings();
 
 		glColor4f(lMatSettings.mRed,
 			  lMatSettings.mGreen,
@@ -928,8 +928,8 @@ void OpenGLMatSingleTextureEnvMapBlended::PrepareBasicMaterialSettings(TBC::Geom
 	else
 	{
 		// Prepare basic material settings using 100% specularity.
-		TBC::GeometryBase::BasicMaterialSettings lMatSettings;
-		pGeometry->GetBasicMaterialSettings(lMatSettings);
+		const TBC::GeometryBase::BasicMaterialSettings& lMatSettings =
+			pGeometry->GetBasicMaterialSettings();
 
 		glColor4f(lMatSettings.mRed,
 			  lMatSettings.mGreen,
@@ -1545,8 +1545,8 @@ void OpenGLMatPXS::SetAmbientLight(OpenGLRenderer* pRenderer, TBC::GeometryBase*
 	float r, g, b;
 	pRenderer->GetAmbientLight(r, g, b);
 
-	TBC::GeometryBase::BasicMaterialSettings lMat;
-	pGeometry->GetBasicMaterialSettings(lMat);
+	const TBC::GeometryBase::BasicMaterialSettings& lMat =
+		pGeometry->GetBasicMaterialSettings();
 
 	r += lMat.mSelfIllumination;
 	g += lMat.mSelfIllumination;
@@ -1629,8 +1629,7 @@ void OpenGLMatSingleColorSolidPXS::RenderGeometry(TBC::GeometryBase* pGeometry)
 	OpenGLMatPXS::SetAmbientLight((OpenGLRenderer*)GetRenderer(), pGeometry);
 
 	float lSpecular[4];
-	TBC::GeometryBase::BasicMaterialSettings lMatSettings;
-	pGeometry->GetBasicMaterialSettings(lMatSettings);
+	const TBC::GeometryBase::BasicMaterialSettings& lMatSettings = pGeometry->GetBasicMaterialSettings();
 	lSpecular[0] = lMatSettings.mSpecular;
 	lSpecular[1] = lMatSettings.mSpecular;
 	lSpecular[2] = lMatSettings.mSpecular;
@@ -1736,8 +1735,7 @@ void OpenGLMatSingleTextureSolidPXS::RenderGeometry(TBC::GeometryBase* pGeometry
 	OpenGLMaterial::UpdateTextureMatrix(lGeometry->mGeometry);
 	
 	float lSpecular[4];
-	TBC::GeometryBase::BasicMaterialSettings lMatSettings;
-	pGeometry->GetBasicMaterialSettings(lMatSettings);
+	const TBC::GeometryBase::BasicMaterialSettings& lMatSettings = pGeometry->GetBasicMaterialSettings();
 	lSpecular[0] = lMatSettings.mSpecular;
 	lSpecular[1] = lMatSettings.mSpecular;
 	lSpecular[2] = lMatSettings.mSpecular;
@@ -1886,8 +1884,7 @@ void OpenGLMatTextureAndLightmapPXS::RenderGeometry(TBC::GeometryBase* pGeometry
 	}
 
 	float lSpecular[4];
-	TBC::GeometryBase::BasicMaterialSettings lMatSettings;
-	pGeometry->GetBasicMaterialSettings(lMatSettings);
+	const TBC::GeometryBase::BasicMaterialSettings& lMatSettings = pGeometry->GetBasicMaterialSettings();
 	lSpecular[0] = lMatSettings.mSpecular;
 	lSpecular[1] = lMatSettings.mSpecular;
 	lSpecular[2] = lMatSettings.mSpecular;
@@ -2072,8 +2069,7 @@ void OpenGLMatTextureSBMapPXS::RenderGeometry(TBC::GeometryBase* pGeometry)
 	}
 
 	float lSpecular[4];
-	TBC::GeometryBase::BasicMaterialSettings lMatSettings;
-	pGeometry->GetBasicMaterialSettings(lMatSettings);
+	const TBC::GeometryBase::BasicMaterialSettings& lMatSettings = pGeometry->GetBasicMaterialSettings();
 	lSpecular[0] = lMatSettings.mSpecular;
 	lSpecular[1] = lMatSettings.mSpecular;
 	lSpecular[2] = lMatSettings.mSpecular;

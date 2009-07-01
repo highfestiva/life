@@ -44,7 +44,7 @@ public:
 	void SetScale(float pScale);
 	virtual Type GetType() const = 0;
 	virtual void CopyData(const PositionalData* pData) = 0;
-	virtual PositionalData* Clone() = 0;
+	virtual PositionalData* Clone() const = 0;
 
 protected:
 	virtual float GetBiasedDifference(const PositionalData* pReference) const = 0;
@@ -75,7 +75,7 @@ private:
 
 	Type GetType() const;
 	void CopyData(const PositionalData* pData);
-	PositionalData* Clone();
+	PositionalData* Clone() const;
 
 	LOG_CLASS_DECLARE();
 };
@@ -95,7 +95,7 @@ public:
 
 	Type GetType() const;
 	void CopyData(const PositionalData* pData);
-	PositionalData* Clone();
+	PositionalData* Clone() const;
 };
 
 // Two degrees of freedom in position, velocity and acceleration.
@@ -113,7 +113,7 @@ public:
 
 	Type GetType() const;
 	void CopyData(const PositionalData* pData);
-	PositionalData* Clone();
+	PositionalData* Clone() const;
 };
 
 // One degree of freedom in position, velocity and acceleration.
@@ -131,7 +131,7 @@ public:
 
 	Type GetType() const;
 	void CopyData(const PositionalData* pData);
-	PositionalData* Clone();
+	PositionalData* Clone() const;
 };
 
 // A container with it's own positional info.
@@ -161,7 +161,7 @@ public:
 
 	Type GetType() const;
 	void CopyData(const PositionalData* pData);
-	PositionalData* Clone();
+	PositionalData* Clone() const;
 
 	bool IsSameStructure(const ObjectPositionalData& pCopy) const;
 
@@ -184,7 +184,7 @@ public:
 
 	Type GetType() const;
 	void CopyData(const PositionalData* pData);
-	PositionalData* Clone();
+	PositionalData* Clone() const;
 };
 
 class RealData1Bool: public PositionalData
@@ -200,7 +200,7 @@ public:
 
 	Type GetType() const;
 	void CopyData(const PositionalData* pData);
-	PositionalData* Clone();
+	PositionalData* Clone() const;
 };
 
 class RealData1: public PositionalData
@@ -215,7 +215,7 @@ public:
 
 	Type GetType() const;
 	void CopyData(const PositionalData* pData);
-	PositionalData* Clone();
+	PositionalData* Clone() const;
 };
 
 

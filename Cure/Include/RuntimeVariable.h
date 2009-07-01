@@ -83,7 +83,7 @@ public:
 
 	RuntimeVariableScope* LockParentScope(RuntimeVariableScope* pParentScope);
 
-	std::list<Lepra::String> GetVariableNameList(int pStartScopeIndex = 0, int pEndScopeIndex = 1000);
+	std::list<Lepra::String> GetVariableNameList(bool pSkipInternal = true, int pStartScopeIndex = 0, int pEndScopeIndex = 1000);
 
 private:
 	void CreateLocalVariable(const Lepra::String& pName, const Lepra::String& pValue, bool pExport);
