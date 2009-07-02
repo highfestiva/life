@@ -251,13 +251,10 @@ void Window::Init()
 
 void Window::SetBorder(unsigned pBorderStyle, int pWidth)
 {
-	if (mBorder == false)
+	if (mBorder == false || (pBorderStyle == mBorderStyle && pWidth == mBorderWidth))
 	{
 		return;
 	}
-
-	SetNeedsRepaint(mBorderStyle != pBorderStyle ||
-			pWidth != mBorderWidth);
 
 	mBorderStyle = pBorderStyle;
 
@@ -298,6 +295,8 @@ void Window::SetBorder(unsigned pBorderStyle, int pWidth)
 		mLBorder->SetSunken(true);
 		mRBorder->SetSunken(true);
 	}
+
+	SetNeedsRepaint(true);
 }
 
 void Window::SetBorder(unsigned pBorderStyle,

@@ -173,6 +173,7 @@ private:
 
 class Button : public Window
 {
+	typedef Window Parent;
 public:
 
 	enum IconAlignment
@@ -198,6 +199,8 @@ public:
 		   const Lepra::String& pName);
 
 	virtual ~Button();
+
+	void InitializeHoover();
 
 	virtual void SetPressed(bool pPressed);
 	bool GetPressed();
@@ -280,6 +283,9 @@ private:
 	Lepra::Color mTextBackgColor;
 	BlendFunc mTextBlendFunc;
 	Lepra::uint8 mTextAlpha;
+
+	Lepra::Color mHooverColor;
+	Lepra::Color mPressColor;
 	
 	bool mPressed;
 	bool mImageButton;

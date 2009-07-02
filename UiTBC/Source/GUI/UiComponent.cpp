@@ -503,38 +503,18 @@ bool Component::OnMouseWheel(int pMouseX, int pMouseY, int pChange, bool pDown)
 
 bool Component::OnMouseMove(int pMouseX, int pMouseY, int pDeltaX, int pDeltaY)
 {
-	if (mMouseFocusChild != 0)
+	for (int i = 0; i < mLayerCount; i++)
 	{
-		mMouseFocusChild->OnMouseMove(pMouseX, pMouseY, pDeltaX, pDeltaY);
-		return true;
-	}
-	else
-	{
-		Component* lChild = GetChild(pMouseX, pMouseY);
-
-		if (lChild != 0)
+		if (mLayout[i] != 0)
 		{
-			lChild->OnMouseMove(pMouseX, pMouseY, pDeltaX, pDeltaY);
-			return true;
-		}
-		else
-		{
-			DesktopWindow* lDWin = (DesktopWindow*)Component::GetParentOfType(DESKTOPWINDOW);
-			MouseTheme* lMTheme = 0;
-
-			if (lDWin != 0)
+			Component* lChild = mLayout[i]->GetFirst();
+			for (; lChild; lChild = mLayout[i]->GetNext())
 			{
-				lMTheme = lDWin->GetMouseTheme();
-			}
-
-			if (lMTheme != 0)
-			{
-				lMTheme->LoadArrowCursor();
+				lChild->OnMouseMove(pMouseX, pMouseY, pDeltaX, pDeltaY);
 			}
 		}
-
-		return false;
 	}
+	return (true);
 }
 
 bool Component::OnChar(Lepra::tchar pChar)

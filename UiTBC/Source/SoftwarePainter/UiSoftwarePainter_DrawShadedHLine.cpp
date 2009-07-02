@@ -22,13 +22,13 @@ namespace UiTbc
 	type* lDest = (type*)lCanvas->GetBuffer(); \
 	lDest += (pY * lCanvas->GetPitch() + pX1) * unitsize; \
 \
-	int lLeftRed   = (int)(lr * 1073741824.0); \
-	int lLeftGreen = (int)(lg * 1073741824.0); \
-	int lLeftBlue  = (int)(lb * 1073741824.0); \
+	int lLeftRed   = (int)(lr * 1073741823.0); \
+	int lLeftGreen = (int)(lg * 1073741823.0); \
+	int lLeftBlue  = (int)(lb * 1073741823.0); \
  \
-	int lRightRed   = (int)(rr * 1073741824.0); \
-	int lRightGreen = (int)(rg * 1073741824.0); \
-	int lRightBlue  = (int)(rb * 1073741824.0); \
+	int lRightRed   = (int)(rr * 1073741823.0); \
+	int lRightGreen = (int)(rg * 1073741823.0); \
+	int lRightBlue  = (int)(rb * 1073741823.0); \
  \
 	int lRedAdd   = (lRightRed   - lLeftRed  ) / lLength; \
 	int lGreenAdd = (lRightGreen - lLeftGreen) / lLength; \
@@ -62,15 +62,15 @@ namespace UiTbc
 	Lepra::uint8* lDest = (Lepra::uint8*)lCanvas->GetBuffer(); \
 	lDest += (pY * lCanvas->GetPitch() + pX1) * 4; \
 \
-	int lLeftRed   = (int)(lr * 1073741824.0); \
-	int lLeftGreen = (int)(lg * 1073741824.0); \
-	int lLeftBlue  = (int)(lb * 1073741824.0); \
-	int lLeftAlpha = (int)(la * 1073741824.0); \
+	int lLeftRed   = (int)(lr * 1073741823.0); \
+	int lLeftGreen = (int)(lg * 1073741823.0); \
+	int lLeftBlue  = (int)(lb * 1073741823.0); \
+	int lLeftAlpha = (int)(la * 1073741823.0); \
  \
-	int lRightRed   = (int)(rr * 1073741824.0); \
-	int lRightGreen = (int)(rg * 1073741824.0); \
-	int lRightBlue  = (int)(rb * 1073741824.0); \
-	int lRightAlpha = (int)(ra * 1073741824.0); \
+	int lRightRed   = (int)(rr * 1073741823.0); \
+	int lRightGreen = (int)(rg * 1073741823.0); \
+	int lRightBlue  = (int)(rb * 1073741823.0); \
+	int lRightAlpha = (int)(ra * 1073741823.0); \
  \
 	int lRedAdd   = (lRightRed   - lLeftRed  ) / lLength; \
 	int lGreenAdd = (lRightGreen - lLeftGreen) / lLength; \

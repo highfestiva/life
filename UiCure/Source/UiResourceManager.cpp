@@ -484,11 +484,15 @@ const Lepra::String GeometryReferenceResource::GetType() const
 
 bool GeometryReferenceResource::Load()
 {
-	Lepra::StringUtility::StringVector lIdClass = Lepra::StringUtility::Split(GetName(), _T(":"), 1);
-	assert(lIdClass.size() == 2);
-	mClassResource->Load(GetManager(), lIdClass[1], ClassResource::TypeLoadCallback(this,
-		&GeometryReferenceResource::OnLoadClass));
-	return (true);
+	bool lOk = (mClassResource != 0);
+	if (lOk)
+	{
+		Lepra::StringUtility::StringVector lIdClass = Lepra::StringUtility::Split(GetName(), _T(":"), 1);
+		assert(lIdClass.size() == 2);
+		mClassResource->Load(GetManager(), lIdClass[1], ClassResource::TypeLoadCallback(this,
+			&GeometryReferenceResource::OnLoadClass));
+	}
+	return (lOk);
 }
 
 Cure::ResourceLoadState GeometryReferenceResource::PostProcess()
