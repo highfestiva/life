@@ -67,8 +67,6 @@ void SetDefault(RuntimeVariableScope* pSettings)
 
 	CURE_RTVAR_SET(pSettings, RTVAR_PERFORMANCE_TEXT_INTERVAL, 10.0);
 	CURE_RTVAR_SET(pSettings, RTVAR_PERFORMANCE_TEXT_ENABLE, false);
-
-	CURE_RTVAR_SET(pSettings, RTVAR_TICK_INTERVAL, 0.009);
 }
 
 RuntimeVariableScope* GetSettings()
