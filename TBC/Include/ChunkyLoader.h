@@ -112,13 +112,13 @@ enum ChunkyType
 	// File type: structure. Used by both graphics and text applications.
 	CHUNK_STRUCTURE                    = 'STRU',	// Structure file type.
 	CHUNK_STRUCTURE_PART_COUNT         = 'STPC',	// Number of bones. Mandatory.
-	CHUNK_STRUCTURE_ROOT_BONE_INDEX    = 'STRI',	// Index of root bone. Mandatory.
 	CHUNK_STRUCTURE_PHYSICS_TYPE       = 'STPT',	// Physics type: dynamic, static, etc. Mandatory.
 	// Structure sub element: bone.
 	CHUNK_STRUCTURE_BONE               = 'STBO',	// A bone and its transformation, type. Mandatory.
 	CHUNK_STRUCTURE_BONE_CHILD_LIST    = 'STBC',	// The indices of this bone's children. Optional for bones without children, mandatory otherwise.
 	CHUNK_STRUCTURE_BONE_TRANSFORM     = 'STBT',	// The transform of this bone. Mandatory.
 	CHUNK_STRUCTURE_BONE_SHAPE_CAPSULE = 'STSC',	// A capsule; mandatory with one and one shape only per bone.
+	CHUNK_STRUCTURE_BONE_SHAPE_SPHERE  = 'STSS',	// A sphere; mandatory with one and one shape only per bone.
 	CHUNK_STRUCTURE_BONE_SHAPE_BOX     = 'STSB',	// A box; mandatory with one and one shape only per bone.
 	CHUNK_STRUCTURE_BONE_SHAPE_PORTAL  = 'STSP',	// A portal; mandatory with one and one shape only per bone.
 

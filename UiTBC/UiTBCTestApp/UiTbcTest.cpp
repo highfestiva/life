@@ -1059,7 +1059,7 @@ bool AddUVAnimation(TBC::GeometryBase* pGeometry)
 	TBC::BoneHierarchy* lBones = new TBC::BoneHierarchy;
 	lBones->SetBoneCount(1);
 	lBones->SetRootBone(0);
-	lBones->FinalizeInit();
+	lBones->FinalizeInit(0);
 
 	TBC::BoneAnimation* lAnimation = new TBC::BoneAnimation;
 	lAnimation->SetKeyframeCount(4, true);
@@ -1247,7 +1247,7 @@ bool TestSkinningLoadSave(const Lepra::LogDecorator& pLog, double pShowTime)
 		lStructure.SetOriginalBoneTransformation(0, lTransform);
 		lStructure.SetOriginalBoneTransformation(1, lTransform);
 		lStructure.SetPhysicsType(TBC::ChunkyStructure::DYNAMIC);
-		lStructure.FinalizeInit();
+		lStructure.FinalizeInit(0);
 		Lepra::DiskFile lFile;
 		lTestOk = lFile.Open(lStructureName, Lepra::DiskFile::MODE_WRITE);
 		if (lTestOk)
@@ -1986,7 +1986,7 @@ BumpMapSceneTest::BumpMapSceneTest(const Lepra::LogDecorator& pLog) :
 	mTransformBones = new TBC::BoneHierarchy;
 	mTransformBones->SetBoneCount(1);
 	mTransformBones->SetRootBone(0);
-	mTransformBones->FinalizeInit();
+	mTransformBones->FinalizeInit(0);
 
 	mAnimation = new TBC::BoneAnimation;
 	mAnimation->SetKeyframeCount(8, true);

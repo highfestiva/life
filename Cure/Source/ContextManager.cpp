@@ -113,15 +113,6 @@ void ContextManager::RemovePhysicsBody(TBC::PhysicsEngine::BodyID pBodyId)
 	if (pBodyId != TBC::INVALID_BODY)
 	{
 		mBodyTable.erase(pBodyId);
-		GetGameManager()->GetPhysicsManager()->DeleteBody(pBodyId);
-	}
-}
-
-void ContextManager::RemovePhysicsJoint(TBC::PhysicsEngine::JointID pJointId)
-{
-	if (pJointId != TBC::INVALID_JOINT)
-	{
-		GetGameManager()->GetPhysicsManager()->DeleteJoint(pJointId);
 	}
 }
 

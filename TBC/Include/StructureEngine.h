@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2007, Righteous Games
+// Copyright (c) 2002-2009, Righteous Games
 
 
 
@@ -8,17 +8,20 @@
 
 #include <vector>
 #include "../../Lepra/Include/Log.h"
-#include "ContextObjectAttribute.h"
-#include "PhysicsNode.h"
 
 
 
-namespace Cure
+namespace TBC
 {
 
 
 
-class ContextObjectEngine: public ContextObjectAttribute
+class ChunkyBoneGeometry;
+class PhysicsEngine;
+
+
+
+class StructureEngine
 {
 public:
 	enum EngineType
@@ -38,17 +41,16 @@ public:
 		MODE_HALF_LOCK,
 	};
 
-	ContextObjectEngine(ContextObject* pContextObject, EngineType pEngineType, float pStrength,
+	StructureEngine(EngineType pEngineType, float pStrength,
 		float pMaxSpeed, float pMaxSpeed2, unsigned pControllerIndex);
-	virtual ~ContextObjectEngine();
+	virtual ~StructureEngine();
 
-	Type GetType() const;
 	EngineType GetEngineType() const;
 
-	void AddControlledNode(unsigned pPhysicsNodeId, float pScale, EngineMode pMode = MODE_NORMAL);
+	void AddControlledGeometry(ChunkyBoneGeometry* pGeometry, float pScale, EngineMode pMode = MODE_NORMAL);
 	bool SetValue(unsigned pAspect, float pValue, float pZAngle);
 
-	void OnTick(float pFrameTime);
+	void OnTick(PhysicsEngine* pPhysicsManager, float pFrameTime);
 
 	unsigned GetControllerIndex() const;
 	float GetValue() const;
@@ -57,18 +59,18 @@ public:
 private:
 	struct EngineNode
 	{
-		EngineNode(PhysicsNode::Id pId, float pScale, EngineMode pMode):
-			mId(pId),
+		EngineNode(ChunkyBoneGeometry* pGeometry, float pScale, EngineMode pMode):
+			mGeometry(pGeometry),
 			mScale(pScale),
 			mMode(pMode)
 		{
 		}
-		PhysicsNode::Id mId;
+		ChunkyBoneGeometry* mGeometry;
 		float mScale;
 		EngineMode mMode;
 	};
 
-	void ApplyTorque(float pFrameTime, TBC::PhysicsEngine* pPhysicsManager, const PhysicsNode& pNode, const EngineNode& pEngineNode);
+	void ApplyTorque(TBC::PhysicsEngine* pPhysicsManager, float pFrameTime, ChunkyBoneGeometry* pGeometry, const EngineNode& pEngineNode);
 
 	typedef std::vector<EngineNode> EngineNodeArray;
 

@@ -66,7 +66,7 @@ int Bone::GetChild(int pChildIndex)
 
 BoneHierarchy::BoneHierarchy() :
 	mBoneCount(0),
-	mRootBoneIndex(0),
+	mRootBoneIndex(-1),
 	mBone(0),
 	mParent(0),
 	mParentBoneIndex(0),
@@ -79,40 +79,21 @@ BoneHierarchy::BoneHierarchy() :
 
 BoneHierarchy::~BoneHierarchy()
 {
-	ClearAll();
+	assert(!mBone);	// Ensure all resources has been released prior to delete.
 }
 
-void BoneHierarchy::ClearAll()
+void BoneHierarchy::ClearAll(PhysicsEngine*)
 {
-	if (mBone != 0)
-	{
-		delete[] mBone;
-		mBone = 0;
-	}
-
-	if (mOriginalBoneTransformation != 0)
-	{
-		delete[] mOriginalBoneTransformation;
-		mOriginalBoneTransformation = 0;
-	}
-
-	if (mRelativeBoneTransformation != 0)
-	{
-		delete[] mRelativeBoneTransformation;
-		mRelativeBoneTransformation = 0;
-	}
-
-	if (mCurrentBoneTransformation != 0)
-	{
-		delete[] mCurrentBoneTransformation;
-		mCurrentBoneTransformation = 0;
-	}
-
-	if (mCurrentBoneObjectTransformation != 0)
-	{
-		delete[] mCurrentBoneObjectTransformation;
-		mCurrentBoneObjectTransformation = 0;
-	}
+	delete[] (mBone);
+	mBone = 0;
+	delete[] (mOriginalBoneTransformation);
+	mOriginalBoneTransformation = 0;
+	delete[] (mRelativeBoneTransformation);
+	mRelativeBoneTransformation = 0;
+	delete[] (mCurrentBoneTransformation);
+	mCurrentBoneTransformation = 0;
+	delete[] (mCurrentBoneObjectTransformation);
+	mCurrentBoneObjectTransformation = 0;
 
 	mParent = 0;
 	mParentBoneIndex = 0;
@@ -120,7 +101,7 @@ void BoneHierarchy::ClearAll()
 
 void BoneHierarchy::SetBoneCount(int pBoneCount)
 {
-	ClearAll();
+	assert(mBoneCount == 0);
 
 	mBoneCount = pBoneCount;
 
@@ -184,12 +165,13 @@ const Lepra::TransformationF& BoneHierarchy::GetOriginalBoneTransformation(int p
 	return (mOriginalBoneTransformation[pBoneIndex]);
 }
 
-void BoneHierarchy::FinalizeInit()
+bool BoneHierarchy::FinalizeInit(PhysicsEngine*)
 {
 	for (int i = 0; i < mBoneCount; i++)
 	{
 		mCurrentBoneTransformation[i] = mOriginalBoneTransformation[i];
 	}
+	return (true);
 }
 
 

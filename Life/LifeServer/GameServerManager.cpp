@@ -687,9 +687,10 @@ void GameServerManager::OnCollision(const Lepra::Vector3DF& pForce, const Lepra:
 
 void GameServerManager::OnStopped(Cure::ContextObject* pObject, TBC::PhysicsEngine::BodyID pBodyId)
 {
-	assert(pObject->GetPhysicsNode((Cure::PhysicsNode::Id)1));
+	const unsigned lRootIndex = 0;
+	assert(pObject->GetStructureGeometry(lRootIndex));
 	if (pObject->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY &&
-		pObject->GetPhysicsNode((Cure::PhysicsNode::Id)1)->GetBodyId() == pBodyId)
+		pObject->GetStructureGeometry(lRootIndex)->GetBodyId() == pBodyId)
 	{
 		log_volatile(mLog.Debugf(_T("Object %u/%s stopped, sending position."), pObject->GetInstanceId(), pObject->GetClassId().c_str()));
 		const Cure::ObjectPositionalData* lPosition = 0;
@@ -723,8 +724,8 @@ bool GameServerManager::IsConnectAuthorized()
 	return (true);
 }
 
-void GameServerManager::SendAttach(Cure::ContextObject* pObject1, Cure::PhysicsNode::Id pId1,
-	Cure::ContextObject* pObject2, Cure::PhysicsNode::Id pId2)
+void GameServerManager::SendAttach(Cure::ContextObject* pObject1, unsigned pId1,
+	Cure::ContextObject* pObject2, unsigned pId2)
 {
 	Cure::Packet* lPacket = GetNetworkAgent()->GetPacketFactory()->Allocate();
 	Cure::MessageObjectAttach* lAttach = (Cure::MessageObjectAttach*)GetNetworkAgent()->

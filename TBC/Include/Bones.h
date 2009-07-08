@@ -1,19 +1,17 @@
 
 // Author: Alexander Hugestrand, Jonas Byström
-// Copyright (c) 2002-2007, Righteous Games
+// Copyright (c) 2002-2009, Righteous Games
 
 
 
-#ifndef BONES_H
-#define BONES_H
-
-
+#pragma once
 
 #include "../../Lepra/Include/HashTable.h"
 #include "../../Lepra/Include/String.h"
 #include "../../Lepra/Include/Transformation.h"
 #include "TBC.h"
 #include <list>
+
 
 
 namespace Lepra
@@ -25,6 +23,10 @@ class CubicSpline;
 
 namespace TBC
 {
+
+
+
+class PhysicsEngine;
 
 
 
@@ -59,7 +61,7 @@ public:
 	BoneHierarchy();
 	virtual ~BoneHierarchy();
 
-	virtual void ClearAll();
+	virtual void ClearAll(PhysicsEngine* pPhysics);
 
 	// Use these functions to setup the skeleton. Preferably in the given order.
 	virtual void SetBoneCount(int pBoneCount);
@@ -73,7 +75,7 @@ public:
 	void SetOriginalBoneTransformation(int pBoneIndex, const Lepra::TransformationF& pTransformation);
 	const Lepra::TransformationF& GetOriginalBoneTransformation(int pBoneIndex) const;
 	// Call this when the whole skeleton is complete.
-	virtual void FinalizeInit();
+	virtual bool FinalizeInit(PhysicsEngine* pPhysics);
 
 	void Connect(BoneHierarchy* pParentBones, int pParentBoneIndex);
 
@@ -191,8 +193,4 @@ private:
 
 
 
-} // End namespace.
-
-
-
-#endif // !BONES_H
+}

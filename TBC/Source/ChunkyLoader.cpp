@@ -607,21 +607,18 @@ bool ChunkyStructureLoader::Load(ChunkyStructure* pStructure)
 	}
 
 	Lepra::int32 lBoneCount = -1;
-	Lepra::int32 lRootBoneIndex = -1;
 	Lepra::int32 lPhysicsType = -1;
 	if (lOk)
 	{
 		FileElementList lLoadList;
 		lLoadList.push_back(ChunkyFileElement(CHUNK_STRUCTURE_PART_COUNT, &lBoneCount));
-		lLoadList.push_back(ChunkyFileElement(CHUNK_STRUCTURE_ROOT_BONE_INDEX, &lRootBoneIndex));
 		lLoadList.push_back(ChunkyFileElement(CHUNK_STRUCTURE_PHYSICS_TYPE, &lPhysicsType));
 		lOk = AllocLoadChunkyList(lLoadList);
 	}
 	if (lOk)
 	{
 		// Check that all mandatories have been found.
-		lOk = (lRootBoneIndex >= 0 && lRootBoneIndex < lBoneCount &&
-			lBoneCount >= 1 && lBoneCount < 10000 &&
+		lOk = (lBoneCount >= 1 && lBoneCount < 10000 &&
 			(lPhysicsType == ChunkyStructure::STATIC ||
 			lPhysicsType == ChunkyStructure::DYNAMIC ||
 			lPhysicsType == ChunkyStructure::COLLISION_DETECT_ONLY));
@@ -629,7 +626,6 @@ bool ChunkyStructureLoader::Load(ChunkyStructure* pStructure)
 	if (lOk)
 	{
 		pStructure->SetBoneCount(lBoneCount);
-		pStructure->SetRootBone(lRootBoneIndex);
 		pStructure->SetPhysicsType((ChunkyStructure::PhysicsType)lPhysicsType);
 
 		FileElementList lLoadList;
@@ -637,10 +633,10 @@ bool ChunkyStructureLoader::Load(ChunkyStructure* pStructure)
 		lLoadList.push_back(ChunkyFileElement(CHUNK_STRUCTURE_BONE, (void*)pStructure, lBoneCount));
 		lOk = AllocLoadChunkyList(lLoadList);
 	}
-	if (lOk)
+	/*if (lOk)
 	{
 		pStructure->FinalizeInit();
-	}
+	}*/
 
 	return (lOk);
 }
@@ -670,7 +666,6 @@ bool ChunkyStructureLoader::Save(const ChunkyStructure* pStructure)
 	{
 		FileElementList lSaveList;
 		lSaveList.push_back(ChunkyFileElement(CHUNK_STRUCTURE_PART_COUNT, &lBoneCount));
-		lSaveList.push_back(ChunkyFileElement(CHUNK_STRUCTURE_ROOT_BONE_INDEX, &lRootBoneIndex));
 		lSaveList.push_back(ChunkyFileElement(CHUNK_STRUCTURE_PHYSICS_TYPE, &lPhysicsType));
 		lOk = SaveChunkyList(lSaveList);
 	}

@@ -10,8 +10,8 @@
 #include "../../Lepra/Include/Performance.h"
 #include "../../Lepra/Include/String.h"
 #include "../../Lepra/Include/Timer.h"
+#include "../../TBC/Include/ChunkyBoneGeometry.h"
 #include "../../TBC/Include/PhysicsEngine.h"
-#include "../Include/PhysicsNode.h"
 #include "../Include/ResourceManager.h"
 
 
@@ -65,7 +65,7 @@ public:
 	virtual void OnStopped(ContextObject* pObject, TBC::PhysicsEngine::BodyID pBodyId) = 0;
 	virtual bool OnPhysicsSend(ContextObject* pObject) = 0;
 	virtual bool IsConnectAuthorized() = 0;
-	virtual void SendAttach(ContextObject* pObject1, PhysicsNode::Id pId1, ContextObject* pObject2, PhysicsNode::Id pId2) = 0;
+	virtual void SendAttach(ContextObject* pObject1, unsigned pId1, ContextObject* pObject2, unsigned pId2) = 0;
 	virtual void SendDetach(ContextObject* pObject1, ContextObject* pObject2) = 0;
 
 	void ReportPerformance(double pReportInterval);

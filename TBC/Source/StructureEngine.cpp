@@ -1,27 +1,23 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2007, Righteous Games
+// Copyright (c) 2002-2009, Righteous Games
 
 
 
-#include "../Include/ContextObjectEngine.h"
+#include "../Include/StructureEngine.h"
 #include <assert.h>
 #include "../../Lepra/Include/Math.h"
-#include "../Include/ContextManager.h"
-#include "../Include/ContextObject.h"
-#include "../Include/GameManager.h"
-#include "../Include/TimeManager.h"
+#include "../Include/ChunkyBoneGeometry.h"
 
 
 
-namespace Cure
+namespace TBC
 {
 
 
 
-ContextObjectEngine::ContextObjectEngine(ContextObject* pContextObject, EngineType pEngineType,
-	float pStrength, float pMaxSpeed, float pMaxSpeed2, unsigned pControllerIndex):
-	ContextObjectAttribute(pContextObject),
+StructureEngine::StructureEngine(EngineType pEngineType, float pStrength, float pMaxSpeed,
+	float pMaxSpeed2, unsigned pControllerIndex):
 	mEngineType(pEngineType),
 	mStrength(pStrength),
 	mMaxSpeed(pMaxSpeed),
@@ -31,30 +27,25 @@ ContextObjectEngine::ContextObjectEngine(ContextObject* pContextObject, EngineTy
 	::memset(mValue, 0, sizeof(mValue));
 }
 
-ContextObjectEngine::~ContextObjectEngine()
+StructureEngine::~StructureEngine()
 {
 }
 
 
 
-ContextObjectEngine::Type ContextObjectEngine::GetType() const
-{
-	return (TYPE_ENGINE);
-}
-
-ContextObjectEngine::EngineType ContextObjectEngine::GetEngineType() const
+StructureEngine::EngineType StructureEngine::GetEngineType() const
 {
 	return (mEngineType);
 }
 
 
 
-void ContextObjectEngine::AddControlledNode(unsigned pPhysicsNodeId, float pScale, EngineMode pMode)
+void StructureEngine::AddControlledGeometry(ChunkyBoneGeometry* pGeometry, float pScale, EngineMode pMode)
 {
-	mEngineNodeArray.push_back(EngineNode(pPhysicsNodeId, pScale, pMode));
+	mEngineNodeArray.push_back(EngineNode(pGeometry, pScale, pMode));
 }
 
-bool ContextObjectEngine::SetValue(unsigned pAspect, float pValue, float pZAngle)
+bool StructureEngine::SetValue(unsigned pAspect, float pValue, float pZAngle)
 {
 	pValue = (pValue > 1)? 1 : pValue;
 	pValue = (pValue < -1)? -1 : pValue;
@@ -137,16 +128,15 @@ bool ContextObjectEngine::SetValue(unsigned pAspect, float pValue, float pZAngle
 
 
 
-void ContextObjectEngine::OnTick(float pFrameTime)
+void StructureEngine::OnTick(PhysicsEngine* pPhysicsManager, float pFrameTime)
 {
-	TBC::PhysicsEngine* lPhysicsManager = GetContextObject()->GetManager()->GetGameManager()->GetPhysicsManager();
 	EngineNodeArray::const_iterator i = mEngineNodeArray.begin();
 	for (; i != mEngineNodeArray.end(); ++i)
 	{
 		const EngineNode& lEngineNode = *i;
-		PhysicsNode* lNode = GetContextObject()->GetPhysicsNode(lEngineNode.mId);
+		ChunkyBoneGeometry* lGeometry = lEngineNode.mGeometry;
 		const float lScale = lEngineNode.mScale;
-		if (lNode)
+		if (lGeometry)
 		{
 			switch (mEngineType)
 			{
@@ -165,7 +155,7 @@ void ContextObjectEngine::OnTick(float pFrameTime)
 					lAxis[0] = lRotation*lAxis[0];
 					lAxis[1] = lRotation*lAxis[1];
 					Lepra::Vector3DF lVelocityVector;
-					lPhysicsManager->GetBodyVelocity(lNode->GetBodyId(), lVelocityVector);
+					pPhysicsManager->GetBodyVelocity(lGeometry->GetBodyId(), lVelocityVector);
 					lVelocityVector = lRotation*lVelocityVector;
 					float lVelocity[3] = { lVelocityVector.y, lVelocityVector.x, lVelocityVector.z };
 					bool lIsSpeeding = (lVelocityVector.GetLength() >= mMaxSpeed);
@@ -173,25 +163,25 @@ void ContextObjectEngine::OnTick(float pFrameTime)
 					{
 						if (!lIsSpeeding || (lVelocity[i]>0) != (mValue[i]>0))
 						{
-							lPhysicsManager->AddForce(lNode->GetBodyId(), mValue[i]*lAxis[i]*mStrength*lScale);
+							pPhysicsManager->AddForce(lGeometry->GetBodyId(), mValue[i]*lAxis[i]*mStrength*lScale);
 						}
 					}
 				}
 				break;
 				case ENGINE_HINGE2_ROLL:
 				{
-					assert(lNode->GetJointId() != TBC::INVALID_JOINT);
-					if (lNode->GetJointId() != TBC::INVALID_JOINT)
+					assert(lGeometry->GetJointId() != INVALID_JOINT);
+					if (lGeometry->GetJointId() != INVALID_JOINT)
 					{
 						// TODO: implement torque "curve" instead of constant angular force.
 						const float lUsedStrength = mStrength*(::fabs(mValue[0])+0.01f);
 						const float lDirectionalMaxSpeed = (mValue[0] >= 0)? mMaxSpeed : mMaxSpeed2;
 						float lCurrentUsedStrength = 0;
 						float lCurrentTargetSpeed = 0;
-						lPhysicsManager->GetAngularMotorRoll(lNode->GetJointId(), lCurrentUsedStrength, lCurrentTargetSpeed);
+						pPhysicsManager->GetAngularMotorRoll(lGeometry->GetJointId(), lCurrentUsedStrength, lCurrentTargetSpeed);
 						const float lTargetSpeed = Lepra::Math::Lerp(lCurrentTargetSpeed, lDirectionalMaxSpeed*mValue[0]*lScale, 0.5f);
 						const float lTargetStrength = Lepra::Math::Lerp(lCurrentUsedStrength, lUsedStrength, 0.5f);
-						lPhysicsManager->SetAngularMotorRoll(lNode->GetJointId(), lTargetStrength, lTargetSpeed);
+						pPhysicsManager->SetAngularMotorRoll(lGeometry->GetJointId(), lTargetStrength, lTargetSpeed);
 					}
 					else
 					{
@@ -201,23 +191,23 @@ void ContextObjectEngine::OnTick(float pFrameTime)
 				break;
 				case ENGINE_ROLL_STRAIGHT:
 				{
-					assert(lNode->GetJointId() != TBC::INVALID_JOINT);
-					if (lNode->GetJointId() != TBC::INVALID_JOINT)
+					assert(lGeometry->GetJointId() != INVALID_JOINT);
+					if (lGeometry->GetJointId() != INVALID_JOINT)
 					{
-						lPhysicsManager->SetAngle1(lNode->GetBodyId(), lNode->GetJointId(), 0);
+						pPhysicsManager->SetAngle1(lGeometry->GetBodyId(), lGeometry->GetJointId(), 0);
 					}
 				}
 				break;
 				case ENGINE_HINGE2_TURN:
 				case ENGINE_HINGE:
 				{
-					ApplyTorque(pFrameTime, lPhysicsManager, *lNode, lEngineNode);
+					ApplyTorque(pPhysicsManager, pFrameTime, lGeometry, lEngineNode);
 				}
 				break;
 				case ENGINE_HINGE2_BREAK:
 				{
-					assert(lNode->GetJointId() != TBC::INVALID_JOINT);
-					if (lNode->GetJointId() != TBC::INVALID_JOINT)
+					assert(lGeometry->GetJointId() != INVALID_JOINT);
+					if (lGeometry->GetJointId() != INVALID_JOINT)
 					{
 						// "Max speed" used as a type of "break threashold", so that a joystick or similar
 						// won't start breaking on the tiniest movement. "Scaling" here determines part of
@@ -226,13 +216,13 @@ void ContextObjectEngine::OnTick(float pFrameTime)
 						if (lAbsValue > mMaxSpeed && mValue[0] < lScale)
 						{
 							const float lBreakForceUsed = mStrength*lAbsValue;
-							lNode->SetExtraData(1);
-							lPhysicsManager->SetAngularMotorRoll(lNode->GetJointId(), lBreakForceUsed, 0);
+							lGeometry->SetExtraData(1);
+							pPhysicsManager->SetAngularMotorRoll(lGeometry->GetJointId(), lBreakForceUsed, 0);
 						}
-						else if (lNode->GetExtraData())
+						else if (lGeometry->GetExtraData())
 						{
-							lNode->SetExtraData(0);
-							lPhysicsManager->SetAngularMotorRoll(lNode->GetJointId(), 0, 0);
+							lGeometry->SetExtraData(0);
+							pPhysicsManager->SetAngularMotorRoll(lGeometry->GetJointId(), 0, 0);
 						}
 					}
 					else
@@ -243,10 +233,10 @@ void ContextObjectEngine::OnTick(float pFrameTime)
 				break;
 				case ENGINE_GLUE:
 				{
-					assert(lNode->GetJointId() != TBC::INVALID_JOINT);
-					if (lNode->GetJointId() != TBC::INVALID_JOINT)
+					assert(lGeometry->GetJointId() != INVALID_JOINT);
+					if (lGeometry->GetJointId() != INVALID_JOINT)
 					{
-						lPhysicsManager->StabilizeJoint(lNode->GetJointId());
+						pPhysicsManager->StabilizeJoint(lGeometry->GetJointId());
 					}
 				}
 				break;
@@ -266,27 +256,27 @@ void ContextObjectEngine::OnTick(float pFrameTime)
 
 
 
-unsigned ContextObjectEngine::GetControllerIndex() const
+unsigned StructureEngine::GetControllerIndex() const
 {
 	return (mControllerIndex);
 }
 
-float ContextObjectEngine::GetValue() const
+float StructureEngine::GetValue() const
 {
 	return (mValue[0]);
 }
 
-const float* ContextObjectEngine::GetValues() const
+const float* StructureEngine::GetValues() const
 {
 	return (mValue);
 }
 
 
 
-void ContextObjectEngine::ApplyTorque(float pFrameTime, TBC::PhysicsEngine* pPhysicsManager, const PhysicsNode& pNode, const EngineNode& pEngineNode)
+void StructureEngine::ApplyTorque(PhysicsEngine* pPhysicsManager, float pFrameTime, ChunkyBoneGeometry* pGeometry, const EngineNode& pEngineNode)
 {
-	assert(pNode.GetJointId() != TBC::INVALID_JOINT);
-	if (pNode.GetJointId() != TBC::INVALID_JOINT)
+	assert(pGeometry->GetJointId() != INVALID_JOINT);
+	if (pGeometry->GetJointId() != INVALID_JOINT)
 	{
 		float lForce = mValue[0];
 
@@ -294,17 +284,17 @@ void ContextObjectEngine::ApplyTorque(float pFrameTime, TBC::PhysicsEngine* pPhy
 		float lLoStop;
 		float lHiStop;
 		float lBounce;
-		pPhysicsManager->GetJointParams(pNode.GetJointId(), lLoStop, lHiStop, lBounce);
+		pPhysicsManager->GetJointParams(pGeometry->GetJointId(), lLoStop, lHiStop, lBounce);
 		const float lMiddle = (lLoStop+lHiStop)*0.5f;
 		if (lLoStop < -1000 || lHiStop > 1000)
 		{
 			// Open interval -> relative torque.
-			pPhysicsManager->SetAngularMotorTurn(pNode.GetJointId(), mStrength, lForce*lScale*mMaxSpeed);
+			pPhysicsManager->SetAngularMotorTurn(pGeometry->GetJointId(), mStrength, lForce*lScale*mMaxSpeed);
 			return;
 		}
 
 		float lIrlAngle;
-		if (!pPhysicsManager->GetAngle1(pNode.GetJointId(), lIrlAngle))
+		if (!pPhysicsManager->GetAngle1(pGeometry->GetJointId(), lIrlAngle))
 		{
 			mLog.AError("Bad joint angle!");
 			return;
@@ -349,17 +339,17 @@ void ContextObjectEngine::ApplyTorque(float pFrameTime, TBC::PhysicsEngine* pPhy
 			if (mEngineType == ENGINE_HINGE2_TURN)
 			{
 				float lAngleRate = 0;
-				pPhysicsManager->GetAngleRate2(pNode.GetJointId(), lAngleRate);
+				pPhysicsManager->GetAngleRate2(pGeometry->GetJointId(), lAngleRate);
 				lAngleSpeed *= 1+::fabs(lAngleRate)/30;
 			}
 			else
 			{
 				float lAngleRate = 0;
-				pPhysicsManager->GetAngleRate1(pNode.GetJointId(), lAngleRate);
+				pPhysicsManager->GetAngleRate1(pGeometry->GetJointId(), lAngleRate);
 				lAngleSpeed += (lAngleSpeed-lAngleRate)*pFrameTime*mMaxSpeed2*50.0f*lScale*lScale/mMaxSpeed;
 
 			}
-			pPhysicsManager->SetAngularMotorTurn(pNode.GetJointId(), mStrength, lAngleSpeed);
+			pPhysicsManager->SetAngularMotorTurn(pGeometry->GetJointId(), mStrength, lAngleSpeed);
 		}
 	}
 	else
@@ -370,7 +360,7 @@ void ContextObjectEngine::ApplyTorque(float pFrameTime, TBC::PhysicsEngine* pPhy
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT, ContextObjectEngine);
+LOG_CLASS_DEFINE(GAME_CONTEXT, StructureEngine);
 
 
 
