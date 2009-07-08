@@ -79,7 +79,7 @@ BoneHierarchy::BoneHierarchy() :
 
 BoneHierarchy::~BoneHierarchy()
 {
-	assert(!mBone);	// Ensure all resources has been released prior to delete.
+	ClearAll(0);
 }
 
 void BoneHierarchy::ClearAll(PhysicsEngine*)
@@ -117,11 +117,11 @@ int BoneHierarchy::GetBoneCount() const
 	return (mBoneCount);
 }
 
-void BoneHierarchy::SetRootBone(int pRootBoneIndex)
+/*void BoneHierarchy::SetRootBone(int pRootBoneIndex)
 {
 	assert(pRootBoneIndex < mBoneCount);
 	mRootBoneIndex = pRootBoneIndex;
-}
+}*/
 
 int BoneHierarchy::GetRootBone() const
 {
@@ -167,6 +167,7 @@ const Lepra::TransformationF& BoneHierarchy::GetOriginalBoneTransformation(int p
 
 bool BoneHierarchy::FinalizeInit(PhysicsEngine*)
 {
+	mRootBoneIndex = 0;
 	for (int i = 0; i < mBoneCount; i++)
 	{
 		mCurrentBoneTransformation[i] = mOriginalBoneTransformation[i];

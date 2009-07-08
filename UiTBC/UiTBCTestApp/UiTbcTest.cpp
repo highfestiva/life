@@ -1058,7 +1058,6 @@ bool AddUVAnimation(TBC::GeometryBase* pGeometry)
 
 	TBC::BoneHierarchy* lBones = new TBC::BoneHierarchy;
 	lBones->SetBoneCount(1);
-	lBones->SetRootBone(0);
 	lBones->FinalizeInit(0);
 
 	TBC::BoneAnimation* lAnimation = new TBC::BoneAnimation;
@@ -1238,16 +1237,15 @@ bool TestSkinningLoadSave(const Lepra::LogDecorator& pLog, double pShowTime)
 	if (lTestOk)
 	{
 		lContext = _T("save cuboid structure");
-		TBC::ChunkyStructure lStructure;
+		TBC::ChunkyStructure lStructure(TBC::ChunkyStructure::DYNAMIC);
 		lStructure.SetBoneCount(2);
-		lStructure.SetRootBone(0);
 		lStructure.SetBoneChildCount(0, 1);
 		lStructure.SetChildIndex(0, 0, 1);
 		Lepra::TransformationF lTransform = Lepra::gIdentityTransformationF;
 		lStructure.SetOriginalBoneTransformation(0, lTransform);
 		lStructure.SetOriginalBoneTransformation(1, lTransform);
 		lStructure.SetPhysicsType(TBC::ChunkyStructure::DYNAMIC);
-		lStructure.FinalizeInit(0);
+		lStructure.BoneHierarchy::FinalizeInit(0);
 		Lepra::DiskFile lFile;
 		lTestOk = lFile.Open(lStructureName, Lepra::DiskFile::MODE_WRITE);
 		if (lTestOk)
@@ -1256,7 +1254,7 @@ bool TestSkinningLoadSave(const Lepra::LogDecorator& pLog, double pShowTime)
 			lTestOk = lStructureLoader.Save(&lStructure);
 		}
 	}
-	TBC::ChunkyStructure lStructure;
+	TBC::ChunkyStructure lStructure(TBC::ChunkyStructure::DYNAMIC);
 	if (lTestOk)
 	{
 		lContext = _T("load cuboid structure");
@@ -1266,6 +1264,10 @@ bool TestSkinningLoadSave(const Lepra::LogDecorator& pLog, double pShowTime)
 		{
 			TBC::ChunkyStructureLoader lStructureLoader(&lFile, false);
 			lTestOk = lStructureLoader.Load(&lStructure);
+		}
+		if (lTestOk)
+		{
+			lTestOk = lStructure.BoneHierarchy::FinalizeInit(0);
 		}
 	}
 	Lepra::DiskFile::Delete(lStructureName);
@@ -1985,7 +1987,6 @@ BumpMapSceneTest::BumpMapSceneTest(const Lepra::LogDecorator& pLog) :
 	// Setup a transform animation bone.
 	mTransformBones = new TBC::BoneHierarchy;
 	mTransformBones->SetBoneCount(1);
-	mTransformBones->SetRootBone(0);
 	mTransformBones->FinalizeInit(0);
 
 	mAnimation = new TBC::BoneAnimation;

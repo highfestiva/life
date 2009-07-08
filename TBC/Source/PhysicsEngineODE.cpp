@@ -79,7 +79,7 @@ PhysicsEngine::BodyID PhysicsEngineODE::CreateSphere(bool pIsRoot, const Lepra::
 	lObject->mGeomID = dCreateSphere(mSpaceID, (dReal)pRadius);
 	lObject->mTriggerListener = pTriggerListener;
 	lObject->mForceFeedbackListener = pForceListener;
-	assert(pType == STATIC || lObject->mForceFeedbackListener);
+	//assert(pType == STATIC || lObject->mForceFeedbackListener);
 
 	if (pType == PhysicsEngine::DYNAMIC)
 	{
@@ -117,7 +117,7 @@ PhysicsEngine::BodyID PhysicsEngineODE::CreateCylinder(bool pIsRoot, const Lepra
 
 	lObject->mTriggerListener = pTriggerListener;
 	lObject->mForceFeedbackListener = pForceListener;
-	assert(pType == STATIC || lObject->mForceFeedbackListener);
+	//assert(pType == STATIC || lObject->mForceFeedbackListener);
 
 	if (pType == PhysicsEngine::DYNAMIC)
 	{
@@ -152,7 +152,7 @@ PhysicsEngine::BodyID PhysicsEngineODE::CreateCapsule(bool pIsRoot, const Lepra:
 	lObject->mGeomID = dCreateCCylinder(mSpaceID, (dReal)pRadius, (dReal)pLength);
 	lObject->mTriggerListener = pTriggerListener;
 	lObject->mForceFeedbackListener = pForceListener;
-	assert(pType == STATIC || lObject->mForceFeedbackListener);
+	//assert(pType == STATIC || lObject->mForceFeedbackListener);
 
 	if (pType == PhysicsEngine::DYNAMIC)
 	{
@@ -187,7 +187,7 @@ PhysicsEngine::BodyID PhysicsEngineODE::CreateBox(bool pIsRoot, const Lepra::Tra
 	lObject->mGeomID = ::dCreateBox(mSpaceID, (dReal)pSize.x, (dReal)pSize.y, (dReal)pSize.z);
 	lObject->mTriggerListener = pTriggerListener;
 	lObject->mForceFeedbackListener = pForceListener;
-	assert(pType == STATIC || lObject->mForceFeedbackListener);
+	//assert(pType == STATIC || lObject->mForceFeedbackListener);
 
 	if (pType == PhysicsEngine::DYNAMIC)
 	{

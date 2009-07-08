@@ -66,7 +66,7 @@ public:
 	// Use these functions to setup the skeleton. Preferably in the given order.
 	virtual void SetBoneCount(int pBoneCount);
 	int GetBoneCount() const;
-	void SetRootBone(int pRootBoneIndex);
+	//void SetRootBone(int pRootBoneIndex);
 	int GetRootBone() const;
 	void SetBoneChildCount(int pBoneIndex, int pChildCount);
 	int GetBoneChildCount(int pBoneIndex) const;

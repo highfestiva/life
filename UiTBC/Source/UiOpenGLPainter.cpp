@@ -209,14 +209,21 @@ void OpenGLPainter::DoFillTriangle(float pX1, float pY1,
 
 	UpdateRenderMode();
 
+	pX1 = pX1 - 0.5f;
+	pX2 = pX2 - 0.5f;
+	pX3 = pX3 - 0.5f;
+	pY1 = pY1 - 0.5f;
+	pY2 = pY2 - 0.5f;
+	pY3 = pY3 - 0.5f;
+
 	Lepra::Color& lColor = GetColorInternal(0);
 	glColor4ub(lColor.mRed, lColor.mGreen, lColor.mBlue, GetAlphaValue());
 
 	glBegin(GL_TRIANGLES);
 
-	glVertex2f((GLfloat)pX1, (GLfloat)pY1);
-	glVertex2f((GLfloat)pX2, (GLfloat)pY2);
-	glVertex2f((GLfloat)pX3, (GLfloat)pY3);
+	glVertex2f(pX1, pY1);
+	glVertex2f(pX2, pY2);
+	glVertex2f(pX3, pY3);
 
 	glEnd();
 }
@@ -231,15 +238,22 @@ void OpenGLPainter::DoFillShadedTriangle(float pX1, float pY1,
 
 	UpdateRenderMode();
 
+	pX1 = pX1 - 0.5f;
+	pX2 = pX2 - 0.5f;
+	pX3 = pX3 - 0.5f;
+	pY1 = pY1 - 0.5f;
+	pY2 = pY2 - 0.5f;
+	pY3 = pY3 - 0.5f;
+
 	glBegin(GL_TRIANGLES);
 
 	Lepra::Color* lColor = &GetColorInternal(0);
 	glColor4ub(lColor[0].mRed, lColor[0].mGreen, lColor[0].mBlue, GetAlphaValue());
-	glVertex2f((GLfloat)pX1, (GLfloat)pY1);
+	glVertex2f(pX1, pY1);
 	glColor4ub(lColor[1].mRed, lColor[1].mGreen, lColor[1].mBlue, GetAlphaValue());
-	glVertex2f((GLfloat)pX2, (GLfloat)pY2);
+	glVertex2f(pX2, pY2);
 	glColor4ub(lColor[2].mRed, lColor[2].mGreen, lColor[2].mBlue, GetAlphaValue());
-	glVertex2f((GLfloat)pX3, (GLfloat)pY3);
+	glVertex2f(pX3, pY3);
 
 	glEnd();
 }
@@ -261,6 +275,13 @@ void OpenGLPainter::DoFillTriangle(float pX1, float pY1, float pU1, float pV1,
 	{
 		return;
 	}
+
+	pX1	= pX1 - 0.5f;
+	pX2	= pX2 - 0.5f;
+	pX3	= pX3 - 0.5f;
+	pY1	= pY1 - 0.5f;
+	pY2	= pY2 - 0.5f;
+	pY3	= pY3 - 0.5f;
 
 	glPushAttrib(GL_TEXTURE_BIT);
 	glEnable(GL_TEXTURE_2D);
@@ -288,12 +309,12 @@ void OpenGLPainter::DoFillTriangle(float pX1, float pY1, float pU1, float pV1,
 
 	glBegin(GL_TRIANGLES);
 
-	glTexCoord2f((GLfloat)pU1, (GLfloat)pV1);
-	glVertex2f((GLfloat)pX1, (GLfloat)pY1);
-	glTexCoord2f((GLfloat)pU2, (GLfloat)pV2);
-	glVertex2f((GLfloat)pX2, (GLfloat)pY2);
-	glTexCoord2f((GLfloat)pU3, (GLfloat)pV3);
-	glVertex2f((GLfloat)pX3, (GLfloat)pY3);
+	glTexCoord2f(pU1, pV1);
+	glVertex2f(pX1, pY1);
+	glTexCoord2f(pU2, pV2);
+	glVertex2f(pX2, pY2);
+	glTexCoord2f(pU3, pV3);
+	glVertex2f(pX3, pY3);
 
 	glEnd();
 	glDisable(GL_TEXTURE_2D);

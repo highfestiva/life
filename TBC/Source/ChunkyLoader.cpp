@@ -654,12 +654,10 @@ bool ChunkyStructureLoader::Save(const ChunkyStructure* pStructure)
 
 	// Write structure modes and similar stuff.
 	Lepra::int32 lBoneCount = pStructure->GetBoneCount();
-	Lepra::int32 lRootBoneIndex = pStructure->GetRootBone();
 	Lepra::int32 lPhysicsType = pStructure->GetPhysicsType();
 	if (lOk)
 	{
 		lOk = (lBoneCount > 0 && lBoneCount < 10000 &&
-			lRootBoneIndex >= 0 && lRootBoneIndex < lBoneCount &&
 			lPhysicsType >= ChunkyStructure::STATIC);
 	}
 	if (lOk)

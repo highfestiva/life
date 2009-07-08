@@ -77,10 +77,6 @@ void ChunkyStructure::AddBoneGeometry(ChunkyBoneGeometry* pGeometry)
 {
 	assert((int)mGeometryArray.size() < GetBoneCount());
 	mGeometryArray.push_back(pGeometry);
-	if (GetRootBone() < 0 && !pGeometry->GetParent())
-	{
-		SetRootBone((int)mGeometryArray.size()-1);
-	}
 }
 
 void ChunkyStructure::AddBoneGeometry(const Lepra::TransformationF& pTransformation, ChunkyBoneGeometry* pGeometry)
