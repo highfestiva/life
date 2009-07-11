@@ -550,6 +550,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\UiTBC\UiTBCTestApp\TbcTest.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\Lepra\LepraTestApp\TestBinTree.cpp"
 				>
 			</File>

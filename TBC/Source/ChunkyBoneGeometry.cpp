@@ -187,29 +187,81 @@ void ChunkyBoneGeometry::SetExtraData(float pExtraData)
 
 
 
-ChunkyBoneCapsule::ChunkyBoneCapsule(const BodyData& pBodyData, Lepra::float32 pMass, Lepra::float32 pRadius,
-	Lepra::float32 pLength, Lepra::float32 pFriction, Lepra::float32 pBounce):
-	ChunkyBoneGeometry(pBodyData),
-	mMass(pMass),
+unsigned ChunkyBoneGeometry::GetChunkySize() const
+{
+	return ((unsigned)(sizeof(Lepra::int32)*6 + sizeof(mBodyData.mParameter) +
+		sizeof(Lepra::int32) + sizeof(Lepra::int32)*mConnectorArray.size()));
+}
+
+void ChunkyBoneGeometry::SaveChunkyData(const ChunkyStructure* pStructure, void* pData) const
+{
+	Lepra::uint32* lData = (Lepra::uint32*)pData;
+	lData[0] = Lepra::Endian::HostToBigF(mBodyData.mMass);
+	lData[1] = Lepra::Endian::HostToBigF(mBodyData.mFriction);
+	lData[2] = Lepra::Endian::HostToBigF(mBodyData.mBounce);
+	lData[3] = Lepra::Endian::HostToBig(pStructure->GetIndex(mBodyData.mParent));
+	lData[4] = Lepra::Endian::HostToBig(mBodyData.mJointType);
+	lData[5] = Lepra::Endian::HostToBig(mBodyData.mIsAffectedByGravity? 1 : 0);
+	int x;
+	for (x = 0; x < sizeof(mBodyData.mParameter)/sizeof(mBodyData.mParameter[0]); ++x)
+	{
+		lData[6+x] = Lepra::Endian::HostToBigF(mBodyData.mParameter[x]);
+	}
+	const int lConnectorTypes = (int)mConnectorArray.size();
+	lData[6+x] = Lepra::Endian::HostToBig(lConnectorTypes);
+	for (int y = 0; y < lConnectorTypes; ++y)
+	{
+		lData[7+x+y] = Lepra::Endian::HostToBig(mConnectorArray[y]);
+	}
+}
+
+void ChunkyBoneGeometry::LoadChunkyData(ChunkyStructure* pStructure, const void* pData)
+{
+	const Lepra::uint32* lData = (const Lepra::uint32*)pData;
+
+	mBodyData.mMass = Lepra::Endian::BigToHostF(lData[0]);
+	mBodyData.mFriction = Lepra::Endian::BigToHostF(lData[1]);
+	mBodyData.mBounce = Lepra::Endian::BigToHostF(lData[2]);
+	int lParentIndex = Lepra::Endian::BigToHost(lData[3]);
+	mBodyData.mParent = pStructure->GetBoneGeometry(lParentIndex);
+	mBodyData.mJointType = (JointType)Lepra::Endian::BigToHost(lData[4]);
+	mBodyData.mIsAffectedByGravity = Lepra::Endian::BigToHost(lData[5])? true : false;
+	int x;
+	for (x = 0; x < sizeof(mBodyData.mParameter)/sizeof(mBodyData.mParameter[0]); ++x)
+	{
+		mBodyData.mParameter[x] = Lepra::Endian::BigToHostF(lData[6+x]);
+	}
+	const int lConnectorTypes = Lepra::Endian::BigToHost(lData[6+x]);
+	for (int y = 0; y < lConnectorTypes; ++y)
+	{
+		 mConnectorArray.push_back((ConnectorType)Lepra::Endian::BigToHost(lData[7+x+y]));
+	}
+}
+
+
+
+ChunkyBoneCapsule::ChunkyBoneCapsule(const BodyData& pBodyData, Lepra::float32 pRadius, Lepra::float32 pLength):
+	Parent(pBodyData),
 	mRadius(pRadius),
-	mLength(pLength),
-	mFriction(pFriction),
-	mBounce(pBounce)
+	mLength(pLength)
 {
 }
 
-bool ChunkyBoneCapsule::CreateBody(PhysicsEngine* pPhysics, bool pIsRoot, PhysicsEngine::BodyType pType, const Lepra::TransformationF& pTransform)
+bool ChunkyBoneCapsule::CreateBody(PhysicsEngine* pPhysics, bool pIsRoot, PhysicsEngine::TriggerListener* pTrigListener,
+	PhysicsEngine::ForceFeedbackListener* pForceListener, PhysicsEngine::BodyType pType,
+	const Lepra::TransformationF& pTransform)
 {
 	RemovePhysics(pPhysics);
-	mBodyId = pPhysics->CreateCapsule(pIsRoot, pTransform, mMass, mRadius, mLength, pType, mFriction, mBounce,
-		mBodyData.mTriggerListener, mBodyData.mForceFeedbackListener);
+	mBodyId = pPhysics->CreateCapsule(pIsRoot, pTransform, mBodyData.mMass, mRadius, mLength, pType,
+		mBodyData.mFriction, mBodyData.mBounce, pTrigListener, pForceListener);
 	return (mBodyId != INVALID_BODY);
 }
 
-bool ChunkyBoneCapsule::CreateTrigger(PhysicsEngine* pPhysics, const Lepra::TransformationF& pTransform)
+bool ChunkyBoneCapsule::CreateTrigger(PhysicsEngine* pPhysics, PhysicsEngine::TriggerListener* pTrigListener,
+	const Lepra::TransformationF& pTransform)
 {
 	RemovePhysics(pPhysics);
-	mTriggerId = pPhysics->CreateCapsuleTrigger(pTransform, mRadius, mLength, mBodyData.mTriggerListener);
+	mTriggerId = pPhysics->CreateCapsuleTrigger(pTransform, mRadius, mLength, pTrigListener);
 	return (mTriggerId != INVALID_TRIGGER);
 }
 
@@ -220,53 +272,50 @@ ChunkyType ChunkyBoneCapsule::GetChunkyType() const
 
 unsigned ChunkyBoneCapsule::GetChunkySize() const
 {
-	return (sizeof(Lepra::float32)*5);
+	return (Parent::GetChunkySize() + sizeof(Lepra::float32)*2);
 }
 
-void ChunkyBoneCapsule::SaveChunkyData(void* pData) const
+void ChunkyBoneCapsule::SaveChunkyData(const ChunkyStructure* pStructure, void* pData) const
 {
-	float* lData = (float*)pData;
-	lData[0] = mMass;
-	lData[1] = mRadius;
-	lData[2] = mLength;
-	lData[3] = mFriction;
-	lData[4] = mBounce;
+	Parent::SaveChunkyData(pStructure, pData);
+
+	Lepra::uint32* lData = (Lepra::uint32*)&((const char*)pData)[Parent::GetChunkySize()];
+	lData[0] = Lepra::Endian::HostToBigF(mRadius);
+	lData[1] = Lepra::Endian::HostToBigF(mLength);
 }
 
-void ChunkyBoneCapsule::LoadChunkyData(const void* pData)
+void ChunkyBoneCapsule::LoadChunkyData(ChunkyStructure* pStructure, const void* pData)
 {
-	const float* lData = (const float*)pData;
-	mMass = lData[0];
-	mRadius = lData[1];
-	mLength = lData[2];
-	mFriction = lData[3];
-	mBounce = lData[4];
+	Parent::LoadChunkyData(pStructure, pData);
+
+	const Lepra::uint32* lData = (const Lepra::uint32*)&((const char*)pData)[Parent::GetChunkySize()];
+	mRadius = Lepra::Endian::BigToHostF(lData[0]);
+	mLength = Lepra::Endian::BigToHostF(lData[1]);
 }
 
 
 
-ChunkyBoneSphere::ChunkyBoneSphere(const BodyData& pBodyData, Lepra::float32 pMass, Lepra::float32 pRadius,
-	Lepra::float32 pFriction, Lepra::float32 pBounce):
-	ChunkyBoneGeometry(pBodyData),
-	mMass(pMass),
-	mRadius(pRadius),
-	mFriction(pFriction),
-	mBounce(pBounce)
+ChunkyBoneSphere::ChunkyBoneSphere(const BodyData& pBodyData, Lepra::float32 pRadius):
+	Parent(pBodyData),
+	mRadius(pRadius)
 {
 }
 
-bool ChunkyBoneSphere::CreateBody(PhysicsEngine* pPhysics, bool pIsRoot, PhysicsEngine::BodyType pType, const Lepra::TransformationF& pTransform)
+bool ChunkyBoneSphere::CreateBody(PhysicsEngine* pPhysics, bool pIsRoot, PhysicsEngine::TriggerListener* pTrigListener,
+	PhysicsEngine::ForceFeedbackListener* pForceListener, PhysicsEngine::BodyType pType,
+	const Lepra::TransformationF& pTransform)
 {
 	RemovePhysics(pPhysics);
-	mBodyId = pPhysics->CreateSphere(pIsRoot, pTransform, mMass, mRadius, pType, mFriction, mBounce,
-		mBodyData.mTriggerListener, mBodyData.mForceFeedbackListener);
+	mBodyId = pPhysics->CreateSphere(pIsRoot, pTransform, mBodyData.mMass, mRadius, pType, mBodyData.mFriction,
+		mBodyData.mBounce, pTrigListener, pForceListener);
 	return (mBodyId != INVALID_BODY);
 }
 
-bool ChunkyBoneSphere::CreateTrigger(PhysicsEngine* pPhysics, const Lepra::TransformationF& pTransform)
+bool ChunkyBoneSphere::CreateTrigger(PhysicsEngine* pPhysics, PhysicsEngine::TriggerListener* pTrigListener,
+	const Lepra::TransformationF& pTransform)
 {
 	RemovePhysics(pPhysics);
-	mTriggerId = pPhysics->CreateSphereTrigger(pTransform, mRadius, mBodyData.mTriggerListener);
+	mTriggerId = pPhysics->CreateSphereTrigger(pTransform, mRadius, pTrigListener);
 	return (mTriggerId != INVALID_TRIGGER);
 }
 
@@ -277,51 +326,48 @@ ChunkyType ChunkyBoneSphere::GetChunkyType() const
 
 unsigned ChunkyBoneSphere::GetChunkySize() const
 {
-	return (sizeof(Lepra::float32)*4);
+	return (Parent::GetChunkySize() + sizeof(Lepra::float32));
 }
 
-void ChunkyBoneSphere::SaveChunkyData(void* pData) const
+void ChunkyBoneSphere::SaveChunkyData(const ChunkyStructure* pStructure, void* pData) const
 {
-	float* lData = (float*)pData;
-	lData[0] = mMass;
-	lData[1] = mRadius;
-	lData[2] = mFriction;
-	lData[3] = mBounce;
+	Parent::SaveChunkyData(pStructure, pData);
+
+	Lepra::uint32* lData = (Lepra::uint32*)&((const char*)pData)[Parent::GetChunkySize()];
+	lData[0] = Lepra::Endian::HostToBigF(mRadius);
 }
 
-void ChunkyBoneSphere::LoadChunkyData(const void* pData)
+void ChunkyBoneSphere::LoadChunkyData(ChunkyStructure* pStructure, const void* pData)
 {
-	const float* lData = (const float*)pData;
-	mMass = lData[0];
-	mRadius = lData[1];
-	mFriction = lData[2];
-	mBounce = lData[3];
+	Parent::LoadChunkyData(pStructure, pData);
+
+	const Lepra::uint32* lData = (const Lepra::uint32*)&((const char*)pData)[Parent::GetChunkySize()];
+	mRadius = Lepra::Endian::BigToHostF(lData[0]);
 }
 
 
 
-ChunkyBoneBox::ChunkyBoneBox(const BodyData& pBodyData, Lepra::float32 pMass, const Lepra::Vector3DF& pSize,
-	Lepra::float32 pFriction, Lepra::float32 pBounce):
-	ChunkyBoneGeometry(pBodyData),
-	mMass(pMass),
-	mSize(pSize),
-	mFriction(pFriction),
-	mBounce(pBounce)
+ChunkyBoneBox::ChunkyBoneBox(const BodyData& pBodyData, const Lepra::Vector3DF& pSize):
+	Parent(pBodyData),
+	mSize(pSize)
 {
 }
 
-bool ChunkyBoneBox::CreateBody(PhysicsEngine* pPhysics, bool pIsRoot, PhysicsEngine::BodyType pType, const Lepra::TransformationF& pTransform)
+bool ChunkyBoneBox::CreateBody(PhysicsEngine* pPhysics, bool pIsRoot, PhysicsEngine::TriggerListener* pTrigListener,
+	PhysicsEngine::ForceFeedbackListener* pForceListener, PhysicsEngine::BodyType pType,
+	const Lepra::TransformationF& pTransform)
 {
 	RemovePhysics(pPhysics);
-	mBodyId = pPhysics->CreateBox(pIsRoot, pTransform, mMass, mSize, pType, mFriction, mBounce,
-		mBodyData.mTriggerListener, mBodyData.mForceFeedbackListener);
+	mBodyId = pPhysics->CreateBox(pIsRoot, pTransform, mBodyData.mMass, mSize, pType, mBodyData.mFriction,
+		mBodyData.mBounce, pTrigListener, pForceListener);
 	return (mBodyId != INVALID_BODY);
 }
 
-bool ChunkyBoneBox::CreateTrigger(PhysicsEngine* pPhysics, const Lepra::TransformationF& pTransform)
+bool ChunkyBoneBox::CreateTrigger(PhysicsEngine* pPhysics, PhysicsEngine::TriggerListener* pTrigListener,
+	const Lepra::TransformationF& pTransform)
 {
 	RemovePhysics(pPhysics);
-	mTriggerId = pPhysics->CreateBoxTrigger(pTransform, mSize, mBodyData.mTriggerListener);
+	mTriggerId = pPhysics->CreateBoxTrigger(pTransform, mSize, pTrigListener);
 	return (mTriggerId != INVALID_TRIGGER);
 }
 
@@ -332,29 +378,27 @@ ChunkyType ChunkyBoneBox::GetChunkyType() const
 
 unsigned ChunkyBoneBox::GetChunkySize() const
 {
-	return (sizeof(Lepra::float32)*6);
+	return (Parent::GetChunkySize() + sizeof(Lepra::float32)*3);
 }
 
-void ChunkyBoneBox::SaveChunkyData(void* pData) const
+void ChunkyBoneBox::SaveChunkyData(const ChunkyStructure* pStructure, void* pData) const
 {
-	float* lData = (float*)pData;
-	lData[0] = mMass;
-	lData[1] = mSize.x;
-	lData[2] = mSize.y;
-	lData[3] = mSize.z;
-	lData[4] = mFriction;
-	lData[5] = mBounce;
+	Parent::SaveChunkyData(pStructure, pData);
+
+	Lepra::uint32* lData = (Lepra::uint32*)&((const char*)pData)[Parent::GetChunkySize()];
+	lData[0] = Lepra::Endian::HostToBigF(mSize.x);
+	lData[1] = Lepra::Endian::HostToBigF(mSize.y);
+	lData[2] = Lepra::Endian::HostToBigF(mSize.z);
 }
 
-void ChunkyBoneBox::LoadChunkyData(const void* pData)
+void ChunkyBoneBox::LoadChunkyData(ChunkyStructure* pStructure, const void* pData)
 {
-	const float* lData = (const float*)pData;
-	mMass = lData[0];
-	mSize.x = lData[1];
-	mSize.x = lData[2];
-	mSize.x = lData[3];
-	mFriction = lData[4];
-	mBounce = lData[5];
+	Parent::LoadChunkyData(pStructure, pData);
+
+	const Lepra::uint32* lData = (const Lepra::uint32*)&((const char*)pData)[Parent::GetChunkySize()];
+	mSize.x = Lepra::Endian::BigToHostF(lData[0]);
+	mSize.x = Lepra::Endian::BigToHostF(lData[1]);
+	mSize.x = Lepra::Endian::BigToHostF(lData[2]);
 }
 
 

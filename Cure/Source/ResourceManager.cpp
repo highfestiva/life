@@ -317,7 +317,7 @@ bool ContextObjectResource::Load()
 ResourceLoadState ContextObjectResource::PostProcess()
 {
 	log_atrace("Loading context object (group).");
-	ResourceLoadState lLoadState = GetManager()->GetContextObjectFactory()->CreatePhysics(GetRamData(), 0) ?
+	ResourceLoadState lLoadState = GetManager()->GetContextObjectFactory()->CreatePhysics(GetRamData()) ?
 		RESOURCE_LOAD_COMPLETE : RESOURCE_LOAD_ERROR;
 	if (lLoadState == RESOURCE_LOAD_COMPLETE)
 	{

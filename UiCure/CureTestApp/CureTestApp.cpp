@@ -24,6 +24,7 @@
 #define TEST_RUN_TBC		TestUiTbc
 #define TEST_RUN_CURE		TestUiCure
 #define TEST_RUN_NETPHYS	TestPrototypeNetworkPhysics
+#define EXPORT_MESH		ExportMesh
 #define LEPRA_NS		UiLepra
 #define TBC_NS			UiTbc
 #define CURE_NS			UiCure
@@ -32,6 +33,7 @@
 #define TEST_RUN_TBC		TestRunDummy
 #define TEST_RUN_CURE		TestCure
 #define TEST_RUN_NETPHYS	TestRunDummy
+#define EXPORT_MESH		TestRunDummy
 static bool TestRunDummy() { return (true); }
 #define LEPRA_NS		Lepra
 #define TBC_NS			TBC
@@ -42,7 +44,21 @@ bool TEST_RUN_LEPRA();
 bool TEST_RUN_TBC();
 bool TEST_RUN_CURE();
 bool TEST_RUN_NETPHYS();
+bool ExportStructure();
+bool EXPORT_MESH();
 void ShowTestResult(const Lepra::LogDecorator& pAccount, bool pbTestOk);
+
+
+
+static bool ExportData()
+{
+	bool lTestOk = ExportStructure();
+	if (lTestOk)
+	{
+		//lTestOk = EXPORT_MESH();
+	}
+	return (lTestOk);
+}
 
 
 
@@ -59,8 +75,9 @@ private:
 		TBC_BIT = (1<<1),
 		CURE_BIT = (1<<2),
 		NETWORK_PHYSICS_BIT = (1<<3),
+		EXPORT_BIT = (1<<31),
 	};
-	int mTestBits;
+	unsigned mTestBits;
 	LOG_CLASS_DECLARE();
 };
 
@@ -68,7 +85,7 @@ LEPRA_RUN_APPLICATION(CureTestApplication);
 
 CureTestApplication::CureTestApplication(const Lepra::StringUtility::StringVector& pArgumentList):
 	Lepra::Application(pArgumentList),
-	mTestBits(0xFFFFFFFF)
+	mTestBits(~EXPORT_BIT)
 {
 	for (size_t x = 1; x < pArgumentList.size(); ++x)
 	{
@@ -90,6 +107,10 @@ CureTestApplication::CureTestApplication(const Lepra::StringUtility::StringVecto
 		else if (lArgument == _T("NETPHYS"))
 		{
 			lMask |= NETWORK_PHYSICS_BIT;
+		}
+		else if (lArgument == _T("EXPORT"))
+		{
+			lMask |= EXPORT_BIT;
 		}
 		else
 		{
@@ -146,6 +167,10 @@ int CureTestApplication::Run()
 	if (lTestOk && mTestBits&NETWORK_PHYSICS_BIT)
 	{
 		lTestOk = TEST_RUN_NETPHYS();
+	}
+	if (lTestOk && mTestBits&EXPORT_BIT)
+	{
+		lTestOk = ExportData();
 	}
 	ShowTestResult(mLog, lTestOk);
 

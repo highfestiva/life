@@ -5,6 +5,7 @@
 
 
 #include "../Include/Bones.h"
+#include "../Include/ChunkyBoneGeometry.h"
 #include "../Include/ChunkyLoader.h"
 #include "../Include/ChunkyStructure.h"
 
@@ -705,9 +706,21 @@ bool ChunkyStructureLoader::Save(const ChunkyStructure* pStructure)
 				lOk = (mFile->WriteData(lTransform, sizeof(lTransform)) == Lepra::IO_OK);
 			}
 
-			// TODO: save structure's geometry lists.
-			if (lOk)
+			// Save geometry lists.
+			for (int c = 0; lOk && c < cc; ++c)
 			{
+				ChunkyBoneGeometry* lGeometry = pStructure->GetBoneGeometry(c);
+				assert(lGeometry);
+				Lepra::int64 lChunkEndPosition = 0;
+				unsigned lSize = lGeometry->GetChunkySize();
+				lOk = SaveHead(lGeometry->GetChunkyType(), lSize, lChunkEndPosition);
+				if (lOk)
+				{
+					char* lData = new char[lSize];
+					lGeometry->SaveChunkyData(pStructure, lData);
+					delete (lData);
+					lOk = (mFile->WriteData(lData, lSize) == Lepra::IO_OK);
+				}
 			}
 		}
 	}

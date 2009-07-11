@@ -84,7 +84,7 @@ ContextObject* CppContextObjectFactory::Create(const Lepra::String& pClassId) co
 	return (new CppContextObject(pClassId));
 }
 
-bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObject* pTriggerListener) const
+bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject) const
 {
 	// This hack will all go away as soon as disk physics loading is avail.
 
@@ -111,8 +111,7 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 		lTransformation.GetOrientation().RotateAroundWorldZ(0.7f);
 
 		TBC::ChunkyBoneGeometry* lGeometry = new TBC::ChunkyBoneBox(
-			TBC::ChunkyBoneGeometry::BodyData(pTriggerListener, pObject),
-			1.0f, lDimensions, 0.2f, 1.0f);
+			TBC::ChunkyBoneGeometry::BodyData(1.0f,  0.2f, 1.0f), lDimensions);
 		lStructure->AddBoneGeometry(lTransformation, lGeometry);
 	}
 	else if (pObject->GetClassId().find(_T("sphere_002")) != Lepra::String::npos)
@@ -125,8 +124,7 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 		const float lY = (float)Lepra::Random::Uniform(-240, 240);
 		lTransformation.SetPosition(Lepra::Vector3DF(lX, lY, 250+15));
 		TBC::ChunkyBoneGeometry* lGeometry = new TBC::ChunkyBoneSphere(
-			TBC::ChunkyBoneGeometry::BodyData(pTriggerListener, pObject),
-			1.0f, lRadius, 0.2f, 1.0f);
+			TBC::ChunkyBoneGeometry::BodyData(1.0f, 0.2f, 1.0f), lRadius);
 		lStructure->AddBoneGeometry(lTransformation, lGeometry);
 
 		TBC::StructureEngine* lEngine = new TBC::StructureEngine(TBC::StructureEngine::ENGINE_CAMERA_FLAT_PUSH,
@@ -152,18 +150,18 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 		lTransformation.SetPosition(Lepra::Vector3DF(lX, lY, 250+5));
 
 		// Body.
-		TBC::ChunkyBoneGeometry::BodyData lBodyData(pTriggerListener, pObject, 0,
+		TBC::ChunkyBoneGeometry::BodyData lBodyData(lCarWeight, 0.1f, 1.0f, 0,
 			TBC::ChunkyBoneGeometry::TYPE_EXCLUDE, TBC::ChunkyBoneGeometry::CONNECTEE_3DOF);
-		TBC::ChunkyBoneGeometry* lBodyGeometry = new TBC::ChunkyBoneBox(lBodyData, lCarWeight, lBodyDimensions,
-			0.1f, 1.0f);
+		TBC::ChunkyBoneGeometry* lBodyGeometry = new TBC::ChunkyBoneBox(lBodyData, lBodyDimensions);
 		lStructure->AddBoneGeometry(lTransformation, lBodyGeometry);
 		// Top of body.
 		Lepra::TransformationF lTopTransform(lTransformation);
 		lTopTransform.MoveUp(lBodyDimensions.z/2+lTopDimensions.z/2);
 		lTopTransform.MoveForward(0.9f);
+		lBodyData.mMass = 0.0f;
+		lBodyData.mFriction = 0.5f;
 		lBodyData.mParent = lBodyGeometry;
-		TBC::ChunkyBoneGeometry* lGeometry = new TBC::ChunkyBoneBox(lBodyData, 0.0f, lTopDimensions,
-			0.5f, 1.0f);
+		TBC::ChunkyBoneGeometry* lGeometry = new TBC::ChunkyBoneBox(lBodyData, lTopDimensions);
 		lStructure->AddBoneGeometry(lTopTransform, lGeometry);
 
 		// Wheels and suspension.
@@ -176,20 +174,21 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 		lTransformation.GetOrientation().RotateAroundOwnZ(Lepra::PIF/2);
 		lBodyData.mJointType = TBC::ChunkyBoneGeometry::TYPE_SUSPEND_HINGE;
 		lBodyData.mConnectorType = TBC::ChunkyBoneGeometry::CONNECT_NONE;
+		lBodyData.mMass = lCarWeight/50;
+		lBodyData.mFriction = 1.0f;
+		lBodyData.mBounce = 0.5f;
 		lBodyData.mParameter[0] = lFrameTime;
 		lBodyData.mParameter[1] = lSpringConstant;
 		lBodyData.mParameter[2] = lDamperConstant;
 		lBodyData.mParameter[3] = 0;
 		lBodyData.mParameter[4] = Lepra::PIF * 0.5f;
-		lGeometry = new TBC::ChunkyBoneSphere(lBodyData, lCarWeight/50, lWheelRadius,
-			1.0f, 0.5f);
+		lGeometry = new TBC::ChunkyBoneSphere(lBodyData, lWheelRadius);
 		lStructure->AddBoneGeometry(lTransformation, lGeometry);
 
 		lTransformation.GetPosition().x += lBodyDimensions.x+lWheelXOffset*2;
 		lTransformation.GetOrientation().RotateAroundOwnZ(-Lepra::PIF);
 		lBodyData.mParameter[3] = Lepra::PIF;
-		lGeometry = new TBC::ChunkyBoneSphere(lBodyData, lCarWeight/50, lWheelRadius,
-			1.0f, 0.5f);
+		lGeometry = new TBC::ChunkyBoneSphere(lBodyData, lWheelRadius);
 		lStructure->AddBoneGeometry(lTransformation, lGeometry);
 
 		lTransformation.GetPosition().x -= lBodyDimensions.x+lWheelXOffset*2;
@@ -199,15 +198,13 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 		lBodyData.mParameter[3] = 0;
 		lBodyData.mParameter[5] = -0.5f;
 		lBodyData.mParameter[6] = 0.5f;
-		lGeometry = new TBC::ChunkyBoneSphere(lBodyData, lCarWeight/50, lWheelRadius,
-			1.0f, 0.5f);
+		lGeometry = new TBC::ChunkyBoneSphere(lBodyData, lWheelRadius);
 		lStructure->AddBoneGeometry(lTransformation, lGeometry);
 
 		lTransformation.GetPosition().x += lBodyDimensions.x+lWheelXOffset*2;
 		lTransformation.GetOrientation().RotateAroundOwnZ(-Lepra::PIF);
 		lBodyData.mParameter[3] = Lepra::PIF;
-		lGeometry = new TBC::ChunkyBoneSphere(lBodyData, lCarWeight/50, lWheelRadius,
-			1.0f, 0.5f);
+		lGeometry = new TBC::ChunkyBoneSphere(lBodyData, lWheelRadius);
 		lStructure->AddBoneGeometry(lTransformation, lGeometry);
 
 		// Front wheel drive engine.
@@ -252,16 +249,16 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 		lTransformation.SetPosition(Lepra::Vector3DF(lX, lY, 250+15));
 
 		// Body.
-		TBC::ChunkyBoneGeometry::BodyData lBodyData(pTriggerListener, pObject);
-		TBC::ChunkyBoneGeometry* lBodyGeometry = new TBC::ChunkyBoneBox(lBodyData, lCarWeight, lBodyDimensions,
-			0.1f, 0.5f);
+		TBC::ChunkyBoneGeometry::BodyData lBodyData(lCarWeight, 0.1f, 0.5f);
+		TBC::ChunkyBoneGeometry* lBodyGeometry = new TBC::ChunkyBoneBox(lBodyData, lBodyDimensions);
 		lStructure->AddBoneGeometry(lTransformation, lBodyGeometry);
 		// Top of body.
 		Lepra::TransformationF lTopTransform(lTransformation);
 		lTopTransform.MoveUp(lBodyDimensions.z/2+lTopDimensions.z/2);
+		lBodyData.mMass = 0.0f;
+		lBodyData.mFriction = 0.8f;
 		lBodyData.mParent = lBodyGeometry;
-		TBC::ChunkyBoneGeometry* lGeometry = new TBC::ChunkyBoneBox(lBodyData, 0.0f, lTopDimensions,
-			0.8f, 0.5f);
+		TBC::ChunkyBoneGeometry* lGeometry = new TBC::ChunkyBoneBox(lBodyData, lTopDimensions);
 		lStructure->AddBoneGeometry(lTopTransform, lGeometry);
 
 		// Wheels and suspension.
@@ -272,6 +269,9 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 		lTransformation.GetPosition().Add(-lBodyDimensions.x/2-lWheelXOffset,
 			lBodyDimensions.y/2+lBackWheelYOffset, -lWheelZOffset);
 		lTransformation.GetOrientation().RotateAroundOwnZ(Lepra::PIF/2);
+		lBodyData.mMass = lCarWeight/50;
+		lBodyData.mFriction = 1.0f;
+		lBodyData.mBounce = 0.5f;
 		lBodyData.mJointType = TBC::ChunkyBoneGeometry::TYPE_SUSPEND_HINGE;
 		lBodyData.mConnectorType = TBC::ChunkyBoneGeometry::CONNECT_NONE;
 		lBodyData.mParameter[0] = lFrameTime;
@@ -279,15 +279,13 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 		lBodyData.mParameter[2] = lDamperConstant;
 		lBodyData.mParameter[3] = 0;
 		lBodyData.mParameter[4] = Lepra::PIF * 0.5f;
-		lGeometry = new TBC::ChunkyBoneSphere(lBodyData, lCarWeight/50, lWheelRadius,
-			1.0f, 0.5f);
+		lGeometry = new TBC::ChunkyBoneSphere(lBodyData, lWheelRadius);
 		lStructure->AddBoneGeometry(lTransformation, lGeometry);
 
 		lTransformation.GetPosition().x += lBodyDimensions.x+lWheelXOffset*2;
 		lTransformation.GetOrientation().RotateAroundOwnZ(-Lepra::PIF);
 		lBodyData.mParameter[3] = Lepra::PIF;
-		lGeometry = new TBC::ChunkyBoneSphere(lBodyData, lCarWeight/50, lWheelRadius,
-			1.0f, 0.5f);
+		lGeometry = new TBC::ChunkyBoneSphere(lBodyData, lWheelRadius);
 		lStructure->AddBoneGeometry(lTransformation, lGeometry);
 
 		lTransformation.GetPosition().x -= lBodyDimensions.x+lWheelXOffset*2;
@@ -296,15 +294,13 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 		lBodyData.mParameter[3] = 0;
 		lBodyData.mParameter[5] = -0.5f;
 		lBodyData.mParameter[6] = 0.5f;
-		lGeometry = new TBC::ChunkyBoneSphere(lBodyData, lCarWeight/50, lWheelRadius,
-			1.0f, 0.5f);
+		lGeometry = new TBC::ChunkyBoneSphere(lBodyData, lWheelRadius);
 		lStructure->AddBoneGeometry(lTransformation, lGeometry);
 
 		lTransformation.GetPosition().x += lBodyDimensions.x+lWheelXOffset*2;
 		lTransformation.GetOrientation().RotateAroundOwnZ(-Lepra::PIF);
 		lBodyData.mParameter[3] = Lepra::PIF;
-		lGeometry = new TBC::ChunkyBoneSphere(lBodyData, lCarWeight/50, lWheelRadius,
-			1.0f, 0.5f);
+		lGeometry = new TBC::ChunkyBoneSphere(lBodyData, lWheelRadius);
 		lStructure->AddBoneGeometry(lTransformation, lGeometry);
 
 		// Rear wheel drive engine.
@@ -350,18 +346,18 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 
 		// Body.
 		const Lepra::TransformationF lBodyTransformation(lTransformation);
-		TBC::ChunkyBoneGeometry::BodyData lBodyData(pTriggerListener, pObject);
-		TBC::ChunkyBoneGeometry* lBodyGeometry = new TBC::ChunkyBoneBox(lBodyData, lCarWeight, lBodyDimensions,
-			0.5f, 0.5f);
+		TBC::ChunkyBoneGeometry::BodyData lBodyData(lCarWeight, 0.5f, 0.5f);
+		TBC::ChunkyBoneGeometry* lBodyGeometry = new TBC::ChunkyBoneBox(lBodyData, lBodyDimensions);
 		lStructure->AddBoneGeometry(lTransformation, lBodyGeometry);
 		// Top of body.
 		Lepra::TransformationF lTopTransform(lTransformation);
 		lTopTransform.MoveUp(lBodyDimensions.z/2+lTopDimensions.z/2);
 		lTopTransform.MoveRight(1.0f);
 		lTopTransform.MoveBackward(0.75f);
+		lBodyData.mMass = 0.0f;
+		lBodyData.mBounce = 1.0f;
 		lBodyData.mParent = lBodyGeometry;
-		TBC::ChunkyBoneGeometry* lGeometry = new TBC::ChunkyBoneBox(lBodyData, 0.0f, lTopDimensions,
-			0.5f, 1.0f);
+		TBC::ChunkyBoneGeometry* lGeometry = new TBC::ChunkyBoneBox(lBodyData, lTopDimensions);
 		lStructure->AddBoneGeometry(lTopTransform, lGeometry);
 
 		// Wheels and suspension.
@@ -372,6 +368,9 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 		lTransformation.GetPosition().Add(-lBodyDimensions.x/2-lWheelXOffset,
 			lBodyDimensions.y/2+lBackWheelYOffset, -lWheelZOffset);
 		lTransformation.GetOrientation().RotateAroundOwnZ(Lepra::PIF/2);
+		lBodyData.mMass = lCarWeight/50;
+		lBodyData.mFriction = 4.0f;
+		lBodyData.mBounce = 0.2f;
 		lBodyData.mJointType = TBC::ChunkyBoneGeometry::TYPE_SUSPEND_HINGE;
 		lBodyData.mConnectorType = TBC::ChunkyBoneGeometry::CONNECT_NONE;
 		lBodyData.mParameter[0] = lFrameTime;
@@ -379,45 +378,39 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 		lBodyData.mParameter[2] = lDamperConstant;
 		lBodyData.mParameter[3] = 0;
 		lBodyData.mParameter[4] = Lepra::PIF * 0.5f;
-		lGeometry = new TBC::ChunkyBoneSphere(lBodyData, lCarWeight/50, lWheelRadius,
-			4.0f, 0.2f);
+		lGeometry = new TBC::ChunkyBoneSphere(lBodyData, lWheelRadius);
 		lStructure->AddBoneGeometry(lTransformation, lGeometry);
 
 		lTransformation.GetPosition().x += lBodyDimensions.x+lWheelXOffset*2;
 		lTransformation.GetOrientation().RotateAroundOwnZ(-Lepra::PIF);
 		lBodyData.mParameter[3] = Lepra::PIF;
-		lGeometry = new TBC::ChunkyBoneSphere(lBodyData, lCarWeight/50, lWheelRadius,
-			4.0f, 0.2f);
+		lGeometry = new TBC::ChunkyBoneSphere(lBodyData, lWheelRadius);
 		lStructure->AddBoneGeometry(lTransformation, lGeometry);
 
 		lTransformation.GetPosition().x -= lBodyDimensions.x+lWheelXOffset*2;
 		lTransformation.GetPosition().y -= lWheelYDistance;
 		lTransformation.GetOrientation().RotateAroundOwnZ(Lepra::PIF);
 		lBodyData.mParameter[3] = 0;
-		lGeometry = new TBC::ChunkyBoneSphere(lBodyData, lCarWeight/50, lWheelRadius,
-			4.0f, 0.2f);
+		lGeometry = new TBC::ChunkyBoneSphere(lBodyData, lWheelRadius);
 		lStructure->AddBoneGeometry(lTransformation, lGeometry);
 
 		lTransformation.GetPosition().x += lBodyDimensions.x+lWheelXOffset*2;
 		lTransformation.GetOrientation().RotateAroundOwnZ(-Lepra::PIF);
 		lBodyData.mParameter[3] = Lepra::PIF;
-		lGeometry = new TBC::ChunkyBoneSphere(lBodyData, lCarWeight/50, lWheelRadius,
-			4.0f, 0.2f);
+		lGeometry = new TBC::ChunkyBoneSphere(lBodyData, lWheelRadius);
 		lStructure->AddBoneGeometry(lTransformation, lGeometry);
 
 		lTransformation.GetPosition().x -= lBodyDimensions.x+lWheelXOffset*2;
 		lTransformation.GetPosition().y -= lWheelYDistance;
 		lTransformation.GetOrientation().RotateAroundOwnZ(Lepra::PIF);
 		lBodyData.mParameter[3] = 0;
-		lGeometry = new TBC::ChunkyBoneSphere(lBodyData, lCarWeight/50, lWheelRadius,
-			4.0f, 0.2f);
+		lGeometry = new TBC::ChunkyBoneSphere(lBodyData, lWheelRadius);
 		lStructure->AddBoneGeometry(lTransformation, lGeometry);
 
 		lTransformation.GetPosition().x += lBodyDimensions.x+lWheelXOffset*2;
 		lTransformation.GetOrientation().RotateAroundOwnZ(-Lepra::PIF);
 		lBodyData.mParameter[3] = Lepra::PIF;
-		lGeometry = new TBC::ChunkyBoneSphere(lBodyData, lCarWeight/50, lWheelRadius,
-			4.0f, 0.2f);
+		lGeometry = new TBC::ChunkyBoneSphere(lBodyData, lWheelRadius);
 		lStructure->AddBoneGeometry(lTransformation, lGeometry);
 
 		// Boom.
@@ -429,6 +422,9 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 		lTransformation.MoveBackward(0.75f);
 		const Lepra::TransformationF lBoom1AnchorTransform(lTransformation);
 		lTransformation.MoveUp(lBoom1Dimensions.z/2);
+		lBodyData.mMass = lCarWeight/12;
+		lBodyData.mFriction = 1.0f;
+		lBodyData.mBounce = 0.2f;
 		lBodyData.mJointType = TBC::ChunkyBoneGeometry::TYPE_HINGE;
 		lBodyData.mParameter[3] = 0;
 		lBodyData.mParameter[4] = Lepra::PIF * 0.5f;
@@ -437,8 +433,7 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 		lBodyData.mParameter[7] = lBoom1AnchorTransform.GetPosition().x;
 		lBodyData.mParameter[8] = lBoom1AnchorTransform.GetPosition().y;
 		lBodyData.mParameter[9] = lBoom1AnchorTransform.GetPosition().z;
-		lGeometry = new TBC::ChunkyBoneBox(lBodyData, lCarWeight/12, lBoom1Dimensions,
-			1.0f, 0.2f);
+		lGeometry = new TBC::ChunkyBoneBox(lBodyData, lBoom1Dimensions);
 		lStructure->AddBoneGeometry(lTransformation, lGeometry);
 		// Boom, part 2.
 		lTransformation.MoveUp(lBoom1Dimensions.z/2);
@@ -447,10 +442,10 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 		lTransformation.MoveUp(::cos(lBoom2Angle)*lBoom2Dimensions.z/2);
 		Lepra::TransformationF lBoom2Transform(lTransformation);
 		lBoom2Transform.RotatePitch(lBoom2Angle);
+		lBodyData.mMass = 0.0f;
 		lBodyData.mParent = lGeometry;
 		lBodyData.mJointType = TBC::ChunkyBoneGeometry::TYPE_EXCLUDE;
-		lGeometry = new TBC::ChunkyBoneBox(lBodyData, 0.0f, lBoom2Dimensions,
-			1.0f, 0.2f);
+		lGeometry = new TBC::ChunkyBoneBox(lBodyData, lBoom2Dimensions);
 		lStructure->AddBoneGeometry(lTransformation, lGeometry);
 
 		// Arm.
@@ -459,14 +454,15 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 		const Lepra::TransformationF lArmAnchorTransform(lTransformation);
 		const Lepra::Vector3DF lArmDimensions(0.4f, 3.0f, 0.4f);
 		lTransformation.MoveBackward(lArmDimensions.y/2);
+		lBodyData.mMass = lCarWeight/25;
+		lBodyData.mParent = lGeometry;
 		lBodyData.mJointType = TBC::ChunkyBoneGeometry::TYPE_HINGE;
 		lBodyData.mParameter[5] = -1.0f;
 		lBodyData.mParameter[6] = 0.5f;
 		lBodyData.mParameter[7] = lArmAnchorTransform.GetPosition().x;
 		lBodyData.mParameter[8] = lArmAnchorTransform.GetPosition().y;
 		lBodyData.mParameter[9] = lArmAnchorTransform.GetPosition().z;
-		lGeometry = new TBC::ChunkyBoneBox(lBodyData, lCarWeight/25, lArmDimensions,
-			1.0f, 0.2f);
+		lGeometry = new TBC::ChunkyBoneBox(lBodyData, lArmDimensions);
 		lStructure->AddBoneGeometry(lTransformation, lGeometry);
 
 		// Bucket.
@@ -478,6 +474,8 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 		lTransformation.MoveUp(::sin(lBucketBackAngle)*lBucketBackDimensions.y/2);
 		Lepra::TransformationF lBucketBackTransform(lTransformation);
 		lBucketBackTransform.RotatePitch(-lBucketBackAngle);
+		lBodyData.mMass = lCarWeight/50;
+		lBodyData.mFriction = 10.0f;
 		lBodyData.mParent = lGeometry;
 		lBodyData.mJointType = TBC::ChunkyBoneGeometry::TYPE_HINGE;
 		lBodyData.mParameter[5] = -1.0f;
@@ -485,8 +483,7 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 		lBodyData.mParameter[7] = lBucketAnchorTransform.GetPosition().x;
 		lBodyData.mParameter[8] = lBucketAnchorTransform.GetPosition().y;
 		lBodyData.mParameter[9] = lBucketAnchorTransform.GetPosition().z;
-		lGeometry = new TBC::ChunkyBoneBox(lBodyData, lCarWeight/50, lBucketBackDimensions,
-			10.0f, 0.2f);
+		lGeometry = new TBC::ChunkyBoneBox(lBodyData, lBucketBackDimensions);
 		lStructure->AddBoneGeometry(lBucketBackTransform, lGeometry);
 		// Bucket, floor part.
 		lTransformation.MoveBackward(::cos(lBucketBackAngle)*lBucketBackDimensions.y/2);
@@ -497,10 +494,10 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 		lTransformation.MoveDown(::sin(lBucketFloorAngle)*lBucketFloorDimensions.y/2);
 		Lepra::TransformationF lBucketFloorTransform(lTransformation);
 		lBucketFloorTransform.RotatePitch(lBucketFloorAngle);
+		lBodyData.mMass = 0.0f;
 		lBodyData.mParent = lGeometry;
 		lBodyData.mJointType = TBC::ChunkyBoneGeometry::TYPE_EXCLUDE;
-		lGeometry = new TBC::ChunkyBoneBox(lBodyData, 0.0f, lBucketBackDimensions,
-			10.0f, 0.2f);
+		lGeometry = new TBC::ChunkyBoneBox(lBodyData, lBucketBackDimensions);
 		lStructure->AddBoneGeometry(lBucketFloorTransform, lGeometry);
 
 		// All wheel drive engine.
@@ -551,9 +548,8 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 		lTransformation.SetPosition(Lepra::Vector3DF(lX, lY, 250+lTowerHeight/2));
 
 		// Body.
-		TBC::ChunkyBoneGeometry::BodyData lBodyData(pTriggerListener, pObject);
-		TBC::ChunkyBoneGeometry* lGeometry = new TBC::ChunkyBoneBox(lBodyData, lTowerWeight, lTowerDimensions,
-			1.0f, 0.5f);
+		TBC::ChunkyBoneGeometry::BodyData lBodyData(lTowerWeight, 1.0f, 0.5f);
+		TBC::ChunkyBoneGeometry* lGeometry = new TBC::ChunkyBoneBox(lBodyData, lTowerDimensions);
 		lStructure->AddBoneGeometry(lTransformation, lGeometry);
 
 		// Jib.
@@ -568,6 +564,7 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 		const Lepra::Vector3DF lJibAnchorPosition(lJibTransform.GetPosition());
 		lJibTransform.GetPosition().Add(0, lTotalJibLength/2-lCounterJibLength, 0);
 		const Lepra::Vector3DF lJibDimensions(lThickness, lTotalJibLength, lThickness);
+		lBodyData.mMass = lJibWeight;
 		lBodyData.mParent = lGeometry;
 		lBodyData.mJointType = TBC::ChunkyBoneGeometry::TYPE_HINGE;
 		lBodyData.mParameter[5] = -1e10f;
@@ -575,8 +572,7 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 		lBodyData.mParameter[7] = lJibAnchorPosition.x;
 		lBodyData.mParameter[8] = lJibAnchorPosition.y;
 		lBodyData.mParameter[9] = lJibAnchorPosition.z;
-		lGeometry = new TBC::ChunkyBoneBox(lBodyData, lJibWeight, lJibDimensions,
-			0.5f, 0.5f);
+		lGeometry = new TBC::ChunkyBoneBox(lBodyData, lJibDimensions);
 		lStructure->AddBoneGeometry(lJibTransform, lGeometry);
 
 		// Wire.
@@ -592,14 +588,14 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 			Lepra::Vector3DF lWireAnchor(lWireTransform.GetPosition());
 			lWireTransform.GetPosition().Add(0, 0, -lWireLength/2);
 
+			lBodyData.mMass = lWireSegmentWeight;
 			lBodyData.mParent = lGeometry;
 			lBodyData.mJointType = TBC::ChunkyBoneGeometry::TYPE_UNIVERSAL;
 			lBodyData.mParameter[4] = Lepra::PIF * 0.5f;
 			lBodyData.mParameter[7] = lWireAnchor.x;
 			lBodyData.mParameter[8] = lWireAnchor.y;
 			lBodyData.mParameter[9] = lWireAnchor.z;
-			lGeometry = new TBC::ChunkyBoneCapsule(lBodyData, lWireSegmentWeight, lWireThickness/2,
-				lWireLength, 0.5f, 0.5f);
+			lGeometry = new TBC::ChunkyBoneCapsule(lBodyData, lWireThickness/2, lWireLength);
 			lStructure->AddBoneGeometry(lWireTransform, lGeometry);
 
 			lWireTransform.GetPosition().Add(0, 0, -lWireLength/2);
@@ -613,6 +609,7 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 		Lepra::TransformationF lHookTransform = lWireTransform;
 		lHookTransform.GetPosition().Add(0, 0, -lHookHeight/2);
 
+		lBodyData.mMass = lHookWeight;
 		lBodyData.mParent = lGeometry;
 		lBodyData.mJointType = TBC::ChunkyBoneGeometry::TYPE_UNIVERSAL;
 		lBodyData.mParameter[4] = Lepra::PIF * 0.5f;
@@ -620,8 +617,7 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 		lBodyData.mParameter[8] = lHookAnchor.y;
 		lBodyData.mParameter[9] = lHookAnchor.z;
 		lBodyData.mConnectorType = TBC::ChunkyBoneGeometry::CONNECTOR_3DOF;
-		lGeometry = new TBC::ChunkyBoneBox(lBodyData, lHookWeight,
-			Lepra::Vector3DF(lHookWidth, lHookWidth, lHookHeight), 0.5f, 0.5f);
+		lGeometry = new TBC::ChunkyBoneBox(lBodyData, Lepra::Vector3DF(lHookWidth, lHookWidth, lHookHeight));
 		lStructure->AddBoneGeometry(lHookTransform, lGeometry);
 
 		// Jib rotational engine.
@@ -633,11 +629,10 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 	{
 		lStructure = new TBC::ChunkyStructure(TBC::ChunkyStructure::STATIC);
 		lStructure->SetBoneCount(6);
+		TBC::ChunkyBoneGeometry::BodyData lBodyData(0.0f, 1.0f, 0.6f);
 
 		Lepra::Vector3DF lDimensions(lFloorSize, lFloorSize, lFloorSize);
-		TBC::ChunkyBoneGeometry* lGeometry = new TBC::ChunkyBoneBox(
-			TBC::ChunkyBoneGeometry::BodyData(pTriggerListener, pObject),
-			0.0f, lDimensions, 1.0f, 0.6f);
+		TBC::ChunkyBoneGeometry* lGeometry = new TBC::ChunkyBoneBox(lBodyData, lDimensions);
 		lStructure->AddBoneGeometry(lTransformation, lGeometry);
 
 		Lepra::RotationMatrixF lRotation;
@@ -649,9 +644,7 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 			lUphillOrthogonalLength/2+lFloorSize/2-lRoadHeight/2/1.5f));
 		lRotation.RotateAroundOwnX(Lepra::PIF/4);
 		lTransformation.SetOrientation(lRotation);
-		lGeometry = new TBC::ChunkyBoneBox(
-			TBC::ChunkyBoneGeometry::BodyData(pTriggerListener, pObject),
-			0.0f, lDimensions, 1.0f, 0.6f);
+		lGeometry = new TBC::ChunkyBoneBox(lBodyData, lDimensions);
 		lStructure->AddBoneGeometry(lTransformation, lGeometry);
 		// Upper climb.
 		lDimensions.Set(lUphillLength, lRoadWidth, lRoadHeight);
@@ -661,9 +654,7 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 		lRotation = Lepra::RotationMatrixF();
 		lRotation.RotateAroundOwnY(Lepra::PIF/4);
 		lTransformation.SetOrientation(lRotation);
-		lGeometry = new TBC::ChunkyBoneBox(
-			TBC::ChunkyBoneGeometry::BodyData(pTriggerListener, pObject),
-			0.0f, lDimensions, 1.0f, 0.6f);
+		lGeometry = new TBC::ChunkyBoneBox(lBodyData, lDimensions);
 		lStructure->AddBoneGeometry(lTransformation, lGeometry);
 		// First plateau.
 		lDimensions.Set(lRoadWidth, lPlateauLength+lPlateauLengthCompensation, lRoadHeight);
@@ -672,9 +663,7 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 			lUphillOrthogonalLength/2+lPlateauLength/2,
 			lUphillOrthogonalLength+lFloorSize/2-lRoadHeight/2));
 		lTransformation.SetOrientation(Lepra::RotationMatrixF());
-		lGeometry = new TBC::ChunkyBoneBox(
-			TBC::ChunkyBoneGeometry::BodyData(pTriggerListener, pObject),
-			0.0f, lDimensions, 1.0f, 0.6f);
+		lGeometry = new TBC::ChunkyBoneBox(lBodyData, lDimensions);
 		lStructure->AddBoneGeometry(lTransformation, lGeometry);
 		// Second plateau.
 		lDimensions.Set(lPlateauLength, lRoadWidth, lRoadHeight);
@@ -682,18 +671,14 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject, ContextObjec
 			lPlateauLength+lUphillOrthogonalLength+lPlateauLength/2,
 			lUphillOrthogonalLength/2+lPlateauLength-lRoadWidth/2,
 			lUphillOrthogonalLength+lFloorSize/2-lRoadHeight/2));
-		lGeometry = new TBC::ChunkyBoneBox(
-			TBC::ChunkyBoneGeometry::BodyData(pTriggerListener, pObject),
-			0.0f, lDimensions, 1.0f, 0.6f);
+		lGeometry = new TBC::ChunkyBoneBox(lBodyData, lDimensions);
 		lStructure->AddBoneGeometry(lTransformation, lGeometry);
 		// Top plateau.
 		lDimensions.Set(lPlateauLength+lPlateauLengthCompensation, lRoadWidth, lRoadHeight);
 		lTransformation.SetPosition(Lepra::Vector3DF(lPlateauLength/2,
 			lUphillOrthogonalLength/2+lPlateauLength-lRoadWidth/2,
 			lUphillOrthogonalLength*2+lFloorSize/2-lRoadHeight/2));
-		lGeometry = new TBC::ChunkyBoneBox(
-			TBC::ChunkyBoneGeometry::BodyData(pTriggerListener, pObject),
-			0.0f, lDimensions, 1.0f, 0.6f);
+		lGeometry = new TBC::ChunkyBoneBox(lBodyData, lDimensions);
 		lStructure->AddBoneGeometry(lTransformation, lGeometry);
 	}
 	else

@@ -85,18 +85,23 @@ void ChunkyStructure::AddBoneGeometry(const Lepra::TransformationF& pTransformat
 	AddBoneGeometry(pGeometry);
 }
 
-const Lepra::TransformationF& ChunkyStructure::GetTransformation(const ChunkyBoneGeometry* pGeometry) const
+int ChunkyStructure::GetIndex(const ChunkyBoneGeometry* pGeometry) const
 {
 	const int lBoneCount = GetBoneCount();
 	for (int x = 0; x < lBoneCount; ++x)
 	{
 		if (pGeometry == GetBoneGeometry(x))
 		{
-			return (GetOriginalBoneTransformation(x));
+			return (x);
 		}
 	}
 	assert(false);
-	return (GetOriginalBoneTransformation(0));
+	return (0);
+}
+
+const Lepra::TransformationF& ChunkyStructure::GetTransformation(const ChunkyBoneGeometry* pGeometry) const
+{
+	return (GetOriginalBoneTransformation(GetIndex(pGeometry)));
 }
 
 void ChunkyStructure::ClearBoneGeometries(PhysicsEngine* pPhysics)
@@ -165,14 +170,15 @@ void ChunkyStructure::SetBoneCount(int pBoneCount)
 	mUniqeGeometryIndex = GetBoneCount();
 }
 
-bool ChunkyStructure::FinalizeInit(PhysicsEngine* pPhysics)
+bool ChunkyStructure::FinalizeInit(PhysicsEngine* pPhysics, PhysicsEngine::TriggerListener* pTrigListener,
+	PhysicsEngine::ForceFeedbackListener* pForceListener)
 {
 	// TODO: add to physics engine depending on mPhysicsType.
 	bool lOk = ((int)mGeometryArray.size() == GetBoneCount());
 	assert(lOk);
 	if (lOk)
 	{
-		lOk = BoneHierarchy::FinalizeInit(pPhysics);
+		lOk = BoneHierarchy::FinalizeInit();
 	}
 	if (lOk)
 	{
@@ -187,11 +193,12 @@ bool ChunkyStructure::FinalizeInit(PhysicsEngine* pPhysics)
 				{
 					lBodyType = PhysicsEngine::STATIC;
 				}
-				lOk = lGeometry->CreateBody(pPhysics, x == 0, lBodyType, GetOriginalBoneTransformation(x));
+				lOk = lGeometry->CreateBody(pPhysics, x == 0, pTrigListener, pForceListener,
+					lBodyType, GetOriginalBoneTransformation(x));
 			}
 			else if (mPhysicsType == COLLISION_DETECT_ONLY)
 			{
-				lOk = lGeometry->CreateTrigger(pPhysics, GetOriginalBoneTransformation(x));
+				lOk = lGeometry->CreateTrigger(pPhysics, pTrigListener, GetOriginalBoneTransformation(x));
 			}
 			else
 			{

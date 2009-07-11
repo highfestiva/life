@@ -75,7 +75,7 @@ public:
 	void SetOriginalBoneTransformation(int pBoneIndex, const Lepra::TransformationF& pTransformation);
 	const Lepra::TransformationF& GetOriginalBoneTransformation(int pBoneIndex) const;
 	// Call this when the whole skeleton is complete.
-	virtual bool FinalizeInit(PhysicsEngine* pPhysics);
+	bool FinalizeInit();
 
 	void Connect(BoneHierarchy* pParentBones, int pParentBoneIndex);
 

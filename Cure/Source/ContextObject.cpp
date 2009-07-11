@@ -695,7 +695,8 @@ float ContextObject::GetMass() const
 
 bool ContextObject::SetStructure(TBC::ChunkyStructure* pStructure)
 {
-	bool lOk = (!mStructure && pStructure->FinalizeInit(mManager->GetGameManager()->GetPhysicsManager()));
+	TBC::PhysicsEngine* lPhysics = mManager->GetGameManager()->GetPhysicsManager();
+	bool lOk = (mStructure == 0 && pStructure->FinalizeInit(lPhysics, 0, this));
 	assert(lOk);
 	if (lOk)
 	{

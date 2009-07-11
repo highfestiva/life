@@ -165,7 +165,7 @@ const Lepra::TransformationF& BoneHierarchy::GetOriginalBoneTransformation(int p
 	return (mOriginalBoneTransformation[pBoneIndex]);
 }
 
-bool BoneHierarchy::FinalizeInit(PhysicsEngine*)
+bool BoneHierarchy::FinalizeInit()
 {
 	mRootBoneIndex = 0;
 	for (int i = 0; i < mBoneCount; i++)

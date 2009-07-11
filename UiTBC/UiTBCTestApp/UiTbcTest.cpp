@@ -106,10 +106,10 @@ int gY = 0;
 double gTotalFps = 0;
 UiTbc::Painter::FontID gSystemFontID;
 
-class TbcTest
+class UiTbcTest
 {
 };
-Lepra::LogDecorator gUiTbcLog(Lepra::LogType::GetLog(Lepra::LogType::SUB_TEST), typeid(TbcTest));
+Lepra::LogDecorator gUiTbcLog(Lepra::LogType::GetLog(Lepra::LogType::SUB_TEST), typeid(UiTbcTest));
 
 class GUITestWindow: public UiTbc::Window
 {
@@ -1058,7 +1058,7 @@ bool AddUVAnimation(TBC::GeometryBase* pGeometry)
 
 	TBC::BoneHierarchy* lBones = new TBC::BoneHierarchy;
 	lBones->SetBoneCount(1);
-	lBones->FinalizeInit(0);
+	lBones->FinalizeInit();
 
 	TBC::BoneAnimation* lAnimation = new TBC::BoneAnimation;
 	lAnimation->SetKeyframeCount(4, true);
@@ -1245,7 +1245,7 @@ bool TestSkinningLoadSave(const Lepra::LogDecorator& pLog, double pShowTime)
 		lStructure.SetOriginalBoneTransformation(0, lTransform);
 		lStructure.SetOriginalBoneTransformation(1, lTransform);
 		lStructure.SetPhysicsType(TBC::ChunkyStructure::DYNAMIC);
-		lStructure.BoneHierarchy::FinalizeInit(0);
+		lStructure.BoneHierarchy::FinalizeInit();
 		Lepra::DiskFile lFile;
 		lTestOk = lFile.Open(lStructureName, Lepra::DiskFile::MODE_WRITE);
 		if (lTestOk)
@@ -1267,7 +1267,7 @@ bool TestSkinningLoadSave(const Lepra::LogDecorator& pLog, double pShowTime)
 		}
 		if (lTestOk)
 		{
-			lTestOk = lStructure.BoneHierarchy::FinalizeInit(0);
+			lTestOk = lStructure.BoneHierarchy::FinalizeInit();
 		}
 	}
 	Lepra::DiskFile::Delete(lStructureName);
@@ -1987,7 +1987,7 @@ BumpMapSceneTest::BumpMapSceneTest(const Lepra::LogDecorator& pLog) :
 	// Setup a transform animation bone.
 	mTransformBones = new TBC::BoneHierarchy;
 	mTransformBones->SetBoneCount(1);
-	mTransformBones->FinalizeInit(0);
+	mTransformBones->FinalizeInit();
 
 	mAnimation = new TBC::BoneAnimation;
 	mAnimation->SetKeyframeCount(8, true);

@@ -32,7 +32,7 @@ public:
 		COLLISION_DETECT_ONLY,	// Only collision detection. (Used when ray-testing NPCs/avatars.) Change type to dynamic for ragdoll (when falling or dead).
 	};
 
-	ChunkyStructure(PhysicsType pPhysicsType);
+	ChunkyStructure(PhysicsType pPhysicsType = STATIC);
 	virtual ~ChunkyStructure();
 
 	void OnTick(PhysicsEngine* pPhysicsManager, float pFrameTime);
@@ -44,6 +44,7 @@ public:
 	ChunkyBoneGeometry* GetBoneGeometry(TBC::PhysicsEngine::BodyID pBodyId) const;
 	void AddBoneGeometry(ChunkyBoneGeometry* pGeometry);	// Takes ownership of the given geometry.
 	void AddBoneGeometry(const Lepra::TransformationF& pTransformation, ChunkyBoneGeometry* pGeometry);	// Takes ownership of the given geometry.
+	int GetIndex(const ChunkyBoneGeometry* pGeometry) const;
 	const Lepra::TransformationF& GetTransformation(const ChunkyBoneGeometry* pGeometry) const;
 	void ClearBoneGeometries(PhysicsEngine* pPhysics);
 
@@ -56,7 +57,8 @@ public:
 	// Overrides.
 	void ClearAll(PhysicsEngine* pPhysics);
 	void SetBoneCount(int pBoneCount);
-	bool FinalizeInit(PhysicsEngine* pPhysics);
+	bool FinalizeInit(PhysicsEngine* pPhysics, PhysicsEngine::TriggerListener* pTrigListener,
+		PhysicsEngine::ForceFeedbackListener* pForceListener);
 
 	unsigned GetNextGeometryIndex();
 

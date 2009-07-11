@@ -42,7 +42,7 @@ public:
 
 protected:
 	ContextObject* Create(const Lepra::String& pClassId) const;
-	bool CreatePhysics(ContextObject* pObject, ContextObject* pTriggerListener) const;
+	bool CreatePhysics(ContextObject* pObject) const;
 
 private:
 	unsigned mPhysicsFps;

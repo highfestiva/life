@@ -116,7 +116,7 @@ class ContextObjectFactory
 {
 public:
 	virtual ContextObject* Create(const Lepra::String& pClassId) const = 0;
-	virtual bool CreatePhysics(ContextObject* pObject, ContextObject* pTriggerListener) const = 0;
+	virtual bool CreatePhysics(ContextObject* pObject) const = 0;
 };
 
 
