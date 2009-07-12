@@ -399,8 +399,7 @@ void CppContextObject::TryAddTexture()
 
 
 
-CppContextObjectFactory::CppContextObjectFactory(GameUiManager* pUiManager, unsigned pPhysicsFps):
-	Cure::CppContextObjectFactory(pPhysicsFps),
+CppContextObjectFactory::CppContextObjectFactory(GameUiManager* pUiManager):
 	mUiManager(pUiManager)
 {
 }

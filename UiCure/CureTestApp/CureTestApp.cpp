@@ -75,7 +75,7 @@ private:
 		TBC_BIT = (1<<1),
 		CURE_BIT = (1<<2),
 		NETWORK_PHYSICS_BIT = (1<<3),
-		EXPORT_BIT = (1<<31),
+		EXPORT_BIT = (1<<4),
 	};
 	unsigned mTestBits;
 	LOG_CLASS_DECLARE();
@@ -85,7 +85,7 @@ LEPRA_RUN_APPLICATION(CureTestApplication);
 
 CureTestApplication::CureTestApplication(const Lepra::StringUtility::StringVector& pArgumentList):
 	Lepra::Application(pArgumentList),
-	mTestBits(~EXPORT_BIT)
+	mTestBits((unsigned)~0)
 {
 	for (size_t x = 1; x < pArgumentList.size(); ++x)
 	{
@@ -100,6 +100,10 @@ CureTestApplication::CureTestApplication(const Lepra::StringUtility::StringVecto
 		{
 			lMask |= TBC_BIT;
 		}
+		else if (lArgument == _T("EXPORT"))
+		{
+			lMask |= EXPORT_BIT;
+		}
 		else if (lArgument == _T("CURE"))
 		{
 			lMask |= CURE_BIT;
@@ -107,10 +111,6 @@ CureTestApplication::CureTestApplication(const Lepra::StringUtility::StringVecto
 		else if (lArgument == _T("NETPHYS"))
 		{
 			lMask |= NETWORK_PHYSICS_BIT;
-		}
-		else if (lArgument == _T("EXPORT"))
-		{
-			lMask |= EXPORT_BIT;
 		}
 		else
 		{
@@ -160,6 +160,10 @@ int CureTestApplication::Run()
 	{
 		lTestOk = TEST_RUN_TBC();
 	}
+	if (lTestOk && mTestBits&EXPORT_BIT)
+	{
+		lTestOk = ExportData();
+	}
 	if (lTestOk && mTestBits&CURE_BIT)
 	{
 		lTestOk = TEST_RUN_CURE();
@@ -167,10 +171,6 @@ int CureTestApplication::Run()
 	if (lTestOk && mTestBits&NETWORK_PHYSICS_BIT)
 	{
 		lTestOk = TEST_RUN_NETPHYS();
-	}
-	if (lTestOk && mTestBits&EXPORT_BIT)
-	{
-		lTestOk = ExportData();
 	}
 	ShowTestResult(mLog, lTestOk);
 

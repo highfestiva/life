@@ -37,7 +37,7 @@ private:
 class CppContextObjectFactory: public ContextObjectFactory
 {
 public:
-	CppContextObjectFactory(unsigned pPhysicsFps);
+	CppContextObjectFactory();
 	virtual ~CppContextObjectFactory();
 
 protected:
@@ -45,8 +45,6 @@ protected:
 	bool CreatePhysics(ContextObject* pObject) const;
 
 private:
-	unsigned mPhysicsFps;
-
 	LOG_CLASS_DECLARE();
 };
 

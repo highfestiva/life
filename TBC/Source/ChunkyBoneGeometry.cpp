@@ -30,72 +30,108 @@ ChunkyBoneGeometry::~ChunkyBoneGeometry()
 	assert(mJointId == INVALID_JOINT && mBodyId == INVALID_BODY && mTriggerId == INVALID_TRIGGER);
 }
 
-bool ChunkyBoneGeometry::CreateJoint(ChunkyStructure* pStructure, PhysicsEngine* pPhysics)
+ChunkyBoneGeometry* ChunkyBoneGeometry::Load(ChunkyStructure* pStructure, const void* pData, unsigned pByteCount)
+{
+	if (pByteCount < sizeof(Lepra::uint32))
+	{
+		mLog.AError("Could not load; very small data size.");
+		assert(false);
+		return (0);
+	}
+
+	ChunkyBoneGeometry* lGeometry = 0;
+	const Lepra::uint32* lData = (const Lepra::uint32*)pData;
+	BodyData lBodyData(0, 0, 0);
+	switch (Lepra::Endian::BigToHost(lData[0]))
+	{
+		case GEOMETRY_CAPSULE:	lGeometry = new ChunkyBoneCapsule(lBodyData, 0, 0);			break;
+		case GEOMETRY_SPHERE:	lGeometry = new ChunkyBoneSphere(lBodyData, 0);				break;
+		case GEOMETRY_BOX:	lGeometry = new ChunkyBoneBox(lBodyData, Lepra::Vector3DF(0, 0, 0));	break;
+	}
+	if (lGeometry)
+	{
+		if (pByteCount == lGeometry->GetChunkySize(lData))
+		{
+			lGeometry->LoadChunkyData(pStructure, lData);
+			assert(lGeometry->GetChunkySize() == pByteCount);
+		}
+		else
+		{
+			mLog.AError("Could not load; wrong data size.");
+			assert(false);
+			delete (lGeometry);
+			lGeometry = 0;
+		}
+	}
+	return (lGeometry);
+}
+
+bool ChunkyBoneGeometry::CreateJoint(ChunkyStructure* pStructure, PhysicsEngine* pPhysics, unsigned pPhysicsFps)
 {
 	bool lOk = false;
 	if (mBodyData.mParent)
 	{
-		if (mBodyData.mJointType == TYPE_EXCLUDE)
+		if (mBodyData.mJointType == JOINT_EXCLUDE)
 		{
 			lOk = pPhysics->Attach(GetBodyId(), mBodyData.mParent->GetBodyId());
 		}
-		else if (mBodyData.mJointType == TYPE_SUSPEND_HINGE || mBodyData.mJointType == TYPE_HINGE2)
+		else if (mBodyData.mJointType == JOINT_SUSPEND_HINGE || mBodyData.mJointType == JOINT_HINGE2)
 		{
 			// Calculate axis from given euler angles.
 			Lepra::Vector3DF lSuspensionAxis(-1, 0, 0);
 			Lepra::Vector3DF lHingeAxis(0, 0, 1);
 			Lepra::QuaternionF lRotator;
-			lRotator.SetEulerAngles(mBodyData.mParameter[3], 0, mBodyData.mParameter[4]);
+			lRotator.SetEulerAngles(mBodyData.mParameter[2], 0, mBodyData.mParameter[3]);
 			lSuspensionAxis = lRotator*lSuspensionAxis;
 			lHingeAxis = lRotator*lHingeAxis;
 
 			mJointId = pPhysics->CreateHinge2Joint(mBodyData.mParent->GetBodyId(),
 				GetBodyId(), pStructure->GetTransformation(this).GetPosition(),
 				lSuspensionAxis, lHingeAxis);
-			pPhysics->SetJointParams(mJointId, mBodyData.mParameter[5], mBodyData.mParameter[6], 0);
-			pPhysics->SetSuspension(mJointId, mBodyData.mParameter[0], mBodyData.mParameter[1],
-				mBodyData.mParameter[2]);
+			pPhysics->SetJointParams(mJointId, mBodyData.mParameter[4], mBodyData.mParameter[5], 0);
+			pPhysics->SetSuspension(mJointId, 1/(float)pPhysicsFps, mBodyData.mParameter[0],
+				mBodyData.mParameter[1]);
 			pPhysics->SetAngularMotorRoll(mJointId, 0, 0);
 			pPhysics->SetAngularMotorTurn(mJointId, 0, 0);
 			lOk = true;
 		}
-		else if (mBodyData.mJointType == TYPE_HINGE)
+		else if (mBodyData.mJointType == JOINT_HINGE)
 		{
 			// Calculate axis from given euler angles.
 			Lepra::Vector3DF lHingeAxis(0, 0, 1);
 			Lepra::QuaternionF lHingeRotator;
-			lHingeRotator.SetEulerAngles(mBodyData.mParameter[3], 0, mBodyData.mParameter[4]);
+			lHingeRotator.SetEulerAngles(mBodyData.mParameter[2], 0, mBodyData.mParameter[3]);
 			lHingeAxis = lHingeRotator*lHingeAxis;
 
-			Lepra::Vector3DF lAnchor;
-			lAnchor.x = mBodyData.mParameter[7];
-			lAnchor.y = mBodyData.mParameter[8];
-			lAnchor.z = mBodyData.mParameter[9];
+			Lepra::Vector3DF lAnchor = pStructure->GetBoneTransformation(0).GetPosition();
+			lAnchor.x += mBodyData.mParameter[6];
+			lAnchor.y += mBodyData.mParameter[7];
+			lAnchor.z += mBodyData.mParameter[8];
 			mJointId = pPhysics->CreateHingeJoint(mBodyData.mParent->GetBodyId(),
 				GetBodyId(), lAnchor, lHingeAxis);
-			pPhysics->SetJointParams(mJointId, mBodyData.mParameter[5], mBodyData.mParameter[6], 0);
+			pPhysics->SetJointParams(mJointId, mBodyData.mParameter[4], mBodyData.mParameter[5], 0);
 			pPhysics->SetAngularMotorTurn(mJointId, 0, 0);
 			lOk = true;
 		}
-		else if (mBodyData.mJointType == TYPE_UNIVERSAL)
+		else if (mBodyData.mJointType == JOINT_UNIVERSAL)
 		{
 			// Calculate axis from given euler angles.
 			Lepra::Vector3DF lAxis1(0, 0, 1);
 			Lepra::Vector3DF lAxis2(0, 1, 0);
 			Lepra::QuaternionF lRotator;
-			lRotator.SetEulerAngles(mBodyData.mParameter[3], 0, mBodyData.mParameter[4]);
+			lRotator.SetEulerAngles(mBodyData.mParameter[2], 0, mBodyData.mParameter[3]);
 			lAxis1 = lRotator*lAxis1;
 			lAxis2 = lRotator*lAxis2;
 
-			Lepra::Vector3DF lAnchor;
-			lAnchor.x = mBodyData.mParameter[7];
-			lAnchor.y = mBodyData.mParameter[8];
-			lAnchor.z = mBodyData.mParameter[9];
+			Lepra::Vector3DF lAnchor = pStructure->GetBoneTransformation(0).GetPosition();
+			lAnchor.x += mBodyData.mParameter[6];
+			lAnchor.y += mBodyData.mParameter[7];
+			lAnchor.z += mBodyData.mParameter[8];
 			mJointId = pPhysics->CreateUniversalJoint(mBodyData.mParent->GetBodyId(),
 				GetBodyId(), lAnchor, lAxis1, lAxis2);
-			/*pPhysics->SetJointParams(mJointId, mBodyData.mParameter[5], mBodyData.mParameter[6], 0);
-			pPhysics->SetSuspension(mJointId, mBodyData.mParameter[0], mBodyData.mParameter[1],
-				mBodyData.mParameter[2]);
+			/*pPhysics->SetJointParams(mJointId, mBodyData.mParameter[4], mBodyData.mParameter[5], 0);
+			pPhysics->SetSuspension(mJointId, 1/(float)pPhysicsFps, mBodyData.mParameter[0],
+				mBodyData.mParameter[1]);
 			pPhysics->SetAngularMotorRoll(mJointId, 0, 0);
 			pPhysics->SetAngularMotorTurn(mJointId, 0, 0);*/
 			lOk = true;
@@ -107,7 +143,7 @@ bool ChunkyBoneGeometry::CreateJoint(ChunkyStructure* pStructure, PhysicsEngine*
 	}
 	else
 	{
-		assert(mBodyData.mJointType == TYPE_EXCLUDE);
+		assert(mBodyData.mJointType == JOINT_EXCLUDE);
 		lOk = true;
 	}
 	assert(lOk);
@@ -187,31 +223,40 @@ void ChunkyBoneGeometry::SetExtraData(float pExtraData)
 
 
 
-unsigned ChunkyBoneGeometry::GetChunkySize() const
+unsigned ChunkyBoneGeometry::GetChunkySize(const void* pData) const
 {
-	return ((unsigned)(sizeof(Lepra::int32)*6 + sizeof(mBodyData.mParameter) +
-		sizeof(Lepra::int32) + sizeof(Lepra::int32)*mConnectorArray.size()));
+	unsigned lSize = (unsigned)(sizeof(Lepra::int32)*7 + sizeof(mBodyData.mParameter) +
+		sizeof(Lepra::int32) + sizeof(Lepra::int32)*mConnectorArray.size());
+
+	if (pData && mConnectorArray.empty())	// Shouldn't go here if we have something in RAM already.
+	{
+		const Lepra::uint32* lData = (const Lepra::uint32*)pData;
+		const int x = sizeof(mBodyData.mParameter)/sizeof(mBodyData.mParameter[0]);
+		lSize += Lepra::Endian::BigToHost(lData[7+x]) * sizeof(ConnectorType);
+	}
+	return (lSize);
 }
 
 void ChunkyBoneGeometry::SaveChunkyData(const ChunkyStructure* pStructure, void* pData) const
 {
 	Lepra::uint32* lData = (Lepra::uint32*)pData;
-	lData[0] = Lepra::Endian::HostToBigF(mBodyData.mMass);
-	lData[1] = Lepra::Endian::HostToBigF(mBodyData.mFriction);
-	lData[2] = Lepra::Endian::HostToBigF(mBodyData.mBounce);
-	lData[3] = Lepra::Endian::HostToBig(pStructure->GetIndex(mBodyData.mParent));
-	lData[4] = Lepra::Endian::HostToBig(mBodyData.mJointType);
-	lData[5] = Lepra::Endian::HostToBig(mBodyData.mIsAffectedByGravity? 1 : 0);
+	lData[0] = Lepra::Endian::HostToBig(GetGeometryType());
+	lData[1] = Lepra::Endian::HostToBigF(mBodyData.mMass);
+	lData[2] = Lepra::Endian::HostToBigF(mBodyData.mFriction);
+	lData[3] = Lepra::Endian::HostToBigF(mBodyData.mBounce);
+	lData[4] = mBodyData.mParent? Lepra::Endian::HostToBig(pStructure->GetIndex(mBodyData.mParent)) : (unsigned)-1;
+	lData[5] = Lepra::Endian::HostToBig(mBodyData.mJointType);
+	lData[6] = Lepra::Endian::HostToBig(mBodyData.mIsAffectedByGravity? 1 : 0);
 	int x;
 	for (x = 0; x < sizeof(mBodyData.mParameter)/sizeof(mBodyData.mParameter[0]); ++x)
 	{
-		lData[6+x] = Lepra::Endian::HostToBigF(mBodyData.mParameter[x]);
+		lData[7+x] = Lepra::Endian::HostToBigF(mBodyData.mParameter[x]);
 	}
 	const int lConnectorTypes = (int)mConnectorArray.size();
-	lData[6+x] = Lepra::Endian::HostToBig(lConnectorTypes);
+	lData[7+x] = Lepra::Endian::HostToBig(lConnectorTypes);
 	for (int y = 0; y < lConnectorTypes; ++y)
 	{
-		lData[7+x+y] = Lepra::Endian::HostToBig(mConnectorArray[y]);
+		lData[8+x+y] = Lepra::Endian::HostToBig(mConnectorArray[y]);
 	}
 }
 
@@ -219,22 +264,23 @@ void ChunkyBoneGeometry::LoadChunkyData(ChunkyStructure* pStructure, const void*
 {
 	const Lepra::uint32* lData = (const Lepra::uint32*)pData;
 
-	mBodyData.mMass = Lepra::Endian::BigToHostF(lData[0]);
-	mBodyData.mFriction = Lepra::Endian::BigToHostF(lData[1]);
-	mBodyData.mBounce = Lepra::Endian::BigToHostF(lData[2]);
-	int lParentIndex = Lepra::Endian::BigToHost(lData[3]);
-	mBodyData.mParent = pStructure->GetBoneGeometry(lParentIndex);
-	mBodyData.mJointType = (JointType)Lepra::Endian::BigToHost(lData[4]);
-	mBodyData.mIsAffectedByGravity = Lepra::Endian::BigToHost(lData[5])? true : false;
+	assert((GeometryType)Lepra::Endian::BigToHost(lData[0]) == GetGeometryType());
+	mBodyData.mMass = Lepra::Endian::BigToHostF(lData[1]);
+	mBodyData.mFriction = Lepra::Endian::BigToHostF(lData[2]);
+	mBodyData.mBounce = Lepra::Endian::BigToHostF(lData[3]);
+	int lParentIndex = Lepra::Endian::BigToHost(lData[4]);
+	mBodyData.mParent = (lParentIndex < 0)? 0 : pStructure->GetBoneGeometry(lParentIndex);
+	mBodyData.mJointType = (JointType)Lepra::Endian::BigToHost(lData[5]);
+	mBodyData.mIsAffectedByGravity = Lepra::Endian::BigToHost(lData[6])? true : false;
 	int x;
 	for (x = 0; x < sizeof(mBodyData.mParameter)/sizeof(mBodyData.mParameter[0]); ++x)
 	{
-		mBodyData.mParameter[x] = Lepra::Endian::BigToHostF(lData[6+x]);
+		mBodyData.mParameter[x] = Lepra::Endian::BigToHostF(lData[7+x]);
 	}
-	const int lConnectorTypes = Lepra::Endian::BigToHost(lData[6+x]);
+	const int lConnectorTypes = Lepra::Endian::BigToHost(lData[7+x]);
 	for (int y = 0; y < lConnectorTypes; ++y)
 	{
-		 mConnectorArray.push_back((ConnectorType)Lepra::Endian::BigToHost(lData[7+x+y]));
+		mConnectorArray.push_back((ConnectorType)Lepra::Endian::BigToHost(lData[8+x+y]));
 	}
 }
 
@@ -265,14 +311,9 @@ bool ChunkyBoneCapsule::CreateTrigger(PhysicsEngine* pPhysics, PhysicsEngine::Tr
 	return (mTriggerId != INVALID_TRIGGER);
 }
 
-ChunkyType ChunkyBoneCapsule::GetChunkyType() const
+unsigned ChunkyBoneCapsule::GetChunkySize(const void* pData) const
 {
-	return (CHUNK_STRUCTURE_BONE_SHAPE_CAPSULE);
-}
-
-unsigned ChunkyBoneCapsule::GetChunkySize() const
-{
-	return (Parent::GetChunkySize() + sizeof(Lepra::float32)*2);
+	return (Parent::GetChunkySize(pData) + sizeof(Lepra::float32)*2);
 }
 
 void ChunkyBoneCapsule::SaveChunkyData(const ChunkyStructure* pStructure, void* pData) const
@@ -291,6 +332,11 @@ void ChunkyBoneCapsule::LoadChunkyData(ChunkyStructure* pStructure, const void* 
 	const Lepra::uint32* lData = (const Lepra::uint32*)&((const char*)pData)[Parent::GetChunkySize()];
 	mRadius = Lepra::Endian::BigToHostF(lData[0]);
 	mLength = Lepra::Endian::BigToHostF(lData[1]);
+}
+
+ChunkyBoneCapsule::GeometryType ChunkyBoneCapsule::GetGeometryType() const
+{
+	return (GEOMETRY_CAPSULE);
 }
 
 
@@ -319,14 +365,9 @@ bool ChunkyBoneSphere::CreateTrigger(PhysicsEngine* pPhysics, PhysicsEngine::Tri
 	return (mTriggerId != INVALID_TRIGGER);
 }
 
-ChunkyType ChunkyBoneSphere::GetChunkyType() const
+unsigned ChunkyBoneSphere::GetChunkySize(const void* pData) const
 {
-	return (CHUNK_STRUCTURE_BONE_SHAPE_SPHERE);
-}
-
-unsigned ChunkyBoneSphere::GetChunkySize() const
-{
-	return (Parent::GetChunkySize() + sizeof(Lepra::float32));
+	return (Parent::GetChunkySize(pData) + sizeof(Lepra::float32));
 }
 
 void ChunkyBoneSphere::SaveChunkyData(const ChunkyStructure* pStructure, void* pData) const
@@ -343,6 +384,11 @@ void ChunkyBoneSphere::LoadChunkyData(ChunkyStructure* pStructure, const void* p
 
 	const Lepra::uint32* lData = (const Lepra::uint32*)&((const char*)pData)[Parent::GetChunkySize()];
 	mRadius = Lepra::Endian::BigToHostF(lData[0]);
+}
+
+ChunkyBoneCapsule::GeometryType ChunkyBoneSphere::GetGeometryType() const
+{
+	return (GEOMETRY_SPHERE);
 }
 
 
@@ -371,14 +417,9 @@ bool ChunkyBoneBox::CreateTrigger(PhysicsEngine* pPhysics, PhysicsEngine::Trigge
 	return (mTriggerId != INVALID_TRIGGER);
 }
 
-ChunkyType ChunkyBoneBox::GetChunkyType() const
+unsigned ChunkyBoneBox::GetChunkySize(const void* pData) const
 {
-	return (CHUNK_STRUCTURE_BONE_SHAPE_BOX);
-}
-
-unsigned ChunkyBoneBox::GetChunkySize() const
-{
-	return (Parent::GetChunkySize() + sizeof(Lepra::float32)*3);
+	return (Parent::GetChunkySize(pData) + sizeof(Lepra::float32)*3);
 }
 
 void ChunkyBoneBox::SaveChunkyData(const ChunkyStructure* pStructure, void* pData) const
@@ -397,9 +438,18 @@ void ChunkyBoneBox::LoadChunkyData(ChunkyStructure* pStructure, const void* pDat
 
 	const Lepra::uint32* lData = (const Lepra::uint32*)&((const char*)pData)[Parent::GetChunkySize()];
 	mSize.x = Lepra::Endian::BigToHostF(lData[0]);
-	mSize.x = Lepra::Endian::BigToHostF(lData[1]);
-	mSize.x = Lepra::Endian::BigToHostF(lData[2]);
+	mSize.y = Lepra::Endian::BigToHostF(lData[1]);
+	mSize.z = Lepra::Endian::BigToHostF(lData[2]);
 }
+
+ChunkyBoneCapsule::GeometryType ChunkyBoneBox::GetGeometryType() const
+{
+	return (GEOMETRY_BOX);
+}
+
+
+
+LOG_CLASS_DEFINE(PHYSICS, ChunkyBoneGeometry);
 
 
 

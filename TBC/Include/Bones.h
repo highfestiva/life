@@ -81,6 +81,7 @@ public:
 
 	// Returns the current local transform.
 	const Lepra::TransformationF& GetBoneTransformation(int pBoneIndex) const;
+	void SetBoneTransformation(int pBoneIndex, const Lepra::TransformationF& pTransformation);
 	// Returns the current transform relative to the root bone's origo,
 	// which is in object space.
 	const Lepra::TransformationF& GetBoneObjectTransformation(int pBoneIndex) const;

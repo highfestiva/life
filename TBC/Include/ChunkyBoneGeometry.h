@@ -20,14 +20,21 @@ namespace TBC
 class ChunkyBoneGeometry
 {
 public:
+	enum GeometryType
+	{
+		GEOMETRY_CAPSULE = 1,
+		GEOMETRY_SPHERE,
+		GEOMETRY_BOX,
+	};
+
 	enum JointType
 	{
-		TYPE_EXCLUDE = 1,
-		TYPE_SUSPEND_HINGE,
-		TYPE_HINGE2,
-		TYPE_HINGE,
-		TYPE_BALL,
-		TYPE_UNIVERSAL,
+		JOINT_EXCLUDE = 1,
+		JOINT_SUSPEND_HINGE,
+		JOINT_HINGE2,
+		JOINT_HINGE,
+		JOINT_BALL,
+		JOINT_UNIVERSAL,
 	};
 
 	enum ConnectorType
@@ -61,7 +68,7 @@ public:
 	struct BodyData: public BodyDataBase
 	{
 		BodyData(float pMass, float pFriction, float pBounce, ChunkyBoneGeometry* pParent = 0,
-			JointType pJointType = TYPE_EXCLUDE, ConnectorType pConnectorType = CONNECT_NONE,
+			JointType pJointType = JOINT_EXCLUDE, ConnectorType pConnectorType = CONNECT_NONE,
 			bool pIsAffectedByGravity = true):
 			BodyDataBase(pMass, pFriction, pBounce, pParent, pJointType, pIsAffectedByGravity),
 			mConnectorType(pConnectorType)
@@ -73,7 +80,9 @@ public:
 	ChunkyBoneGeometry(const BodyData& pBodyData);
 	virtual ~ChunkyBoneGeometry();
 
-	bool CreateJoint(ChunkyStructure* pStructure, PhysicsEngine* pPhysics);
+	static ChunkyBoneGeometry* Load(ChunkyStructure* pStructure, const void* pData, unsigned pByteCount);
+
+	bool CreateJoint(ChunkyStructure* pStructure, PhysicsEngine* pPhysics, unsigned pPhysicsFps);
 	virtual bool CreateBody(PhysicsEngine* pPhysics, bool pIsRoot, PhysicsEngine::TriggerListener* pTrigListener,
 		PhysicsEngine::ForceFeedbackListener* pForceListener, PhysicsEngine::BodyType pType,
 		const Lepra::TransformationF& pTransform) = 0;
@@ -92,12 +101,13 @@ public:
 	float GetExtraData() const;
 	void SetExtraData(float pExtraData);
 
-	virtual ChunkyType GetChunkyType() const = 0;
-	virtual unsigned GetChunkySize() const;
+	virtual unsigned GetChunkySize(const void* pData = 0) const;
 	virtual void SaveChunkyData(const ChunkyStructure* pStructure, void* pData) const;
-	virtual void LoadChunkyData(ChunkyStructure* pStructure, const void* pData);
 
 protected:
+	virtual void LoadChunkyData(ChunkyStructure* pStructure, const void* pData);
+	virtual GeometryType GetGeometryType() const = 0;
+
 	typedef std::vector<ConnectorType> ConnectorArray;
 
 	BodyDataBase mBodyData;
@@ -106,6 +116,8 @@ protected:
 	PhysicsEngine::TriggerID mTriggerId;
 	ConnectorArray mConnectorArray;
 	float mExtraData;
+
+	LOG_CLASS_DECLARE();
 };
 
 
@@ -121,12 +133,13 @@ public:
 	bool CreateTrigger(PhysicsEngine* pPhysics, PhysicsEngine::TriggerListener* pTrigListener,
 		const Lepra::TransformationF& pTransform);
 
-	ChunkyType GetChunkyType() const;
-	unsigned GetChunkySize() const;
+	unsigned GetChunkySize(const void* pData = 0) const;
 	void SaveChunkyData(const ChunkyStructure* pStructure, void* pData) const;
-	void LoadChunkyData(ChunkyStructure* pStructure, const void* pData);
 
 private:
+	void LoadChunkyData(ChunkyStructure* pStructure, const void* pData);
+	GeometryType GetGeometryType() const;
+
 	Lepra::float32 mRadius;
 	Lepra::float32 mLength;
 };
@@ -144,12 +157,13 @@ public:
 	bool CreateTrigger(PhysicsEngine* pPhysics, PhysicsEngine::TriggerListener* pTrigListener,
 		const Lepra::TransformationF& pTransform);
 
-	ChunkyType GetChunkyType() const;
-	unsigned GetChunkySize() const;
+	unsigned GetChunkySize(const void* pData = 0) const;
 	void SaveChunkyData(const ChunkyStructure* pStructure, void* pData) const;
-	void LoadChunkyData(ChunkyStructure* pStructure, const void* pData);
 
 private:
+	void LoadChunkyData(ChunkyStructure* pStructure, const void* pData);
+	GeometryType GetGeometryType() const;
+
 	Lepra::float32 mRadius;
 };
 
@@ -166,12 +180,13 @@ public:
 	bool CreateTrigger(PhysicsEngine* pPhysics, PhysicsEngine::TriggerListener* pTrigListener,
 		const Lepra::TransformationF& pTransform);
 
-	ChunkyType GetChunkyType() const;
-	unsigned GetChunkySize() const;
+	unsigned GetChunkySize(const void* pData = 0) const;
 	void SaveChunkyData(const ChunkyStructure* pStructure, void* pData) const;
-	void LoadChunkyData(ChunkyStructure* pStructure, const void* pData);
 
 private:
+	void LoadChunkyData(ChunkyStructure* pStructure, const void* pData);
+	GeometryType GetGeometryType() const;
+
 	Lepra::Vector3DF mSize;
 };
 

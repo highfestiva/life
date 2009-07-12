@@ -48,17 +48,17 @@ public:
 	const Lepra::TransformationF& GetTransformation(const ChunkyBoneGeometry* pGeometry) const;
 	void ClearBoneGeometries(PhysicsEngine* pPhysics);
 
-	int GetStructureEngineCount() const;
-	StructureEngine* GetStructureEngine(int pBoneIndex) const;
-	void AddStructureEngine(StructureEngine* pEngine);	// Takes ownership of the given engine.
+	int GetEngineCount() const;
+	StructureEngine* GetEngine(int pBoneIndex) const;
+	void AddEngine(StructureEngine* pEngine);	// Takes ownership of the given engine.
 	void SetEnginePower(unsigned pAspect, float pPower, float pAngle);
-	void ClearStructureEngines();
+	void ClearEngines();
 
 	// Overrides.
 	void ClearAll(PhysicsEngine* pPhysics);
 	void SetBoneCount(int pBoneCount);
-	bool FinalizeInit(PhysicsEngine* pPhysics, PhysicsEngine::TriggerListener* pTrigListener,
-		PhysicsEngine::ForceFeedbackListener* pForceListener);
+	bool FinalizeInit(PhysicsEngine* pPhysics, unsigned pPhysicsFps, Lepra::TransformationF pTransform,
+		PhysicsEngine::TriggerListener* pTrigListener, PhysicsEngine::ForceFeedbackListener* pForceListener);
 
 	unsigned GetNextGeometryIndex();
 
@@ -70,6 +70,8 @@ private:
 	EngineArray mEngineArray;
 	PhysicsType mPhysicsType;
 	unsigned mUniqeGeometryIndex;
+
+	LOG_CLASS_DECLARE();
 };
 
 

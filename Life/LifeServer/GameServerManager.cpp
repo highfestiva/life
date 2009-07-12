@@ -48,8 +48,7 @@ GameServerManager::GameServerManager(Cure::RuntimeVariableScope* pVariableScope,
 	lConsole.Init();
 	lConsole.ExecuteCommand(_T("execute-file -i ServerBase.lsh"));
 
-	unsigned lPhysicsFps = CURE_RTVAR_GET(pVariableScope, RTVAR_PHYSICS_FPS, 60);
-	GetResourceManager()->InitDefault(new Cure::CppContextObjectFactory(lPhysicsFps));
+	GetResourceManager()->InitDefault(new Cure::CppContextObjectFactory());
 
 	GetContext()->SetIsObjectOwner(false);
 

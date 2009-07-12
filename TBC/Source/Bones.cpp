@@ -191,6 +191,12 @@ const Lepra::TransformationF& BoneHierarchy::GetBoneTransformation(int pBoneInde
 	return mCurrentBoneTransformation[pBoneIndex];
 }
 
+void BoneHierarchy::SetBoneTransformation(int pBoneIndex, const Lepra::TransformationF& pTransformation)
+{
+	assert(pBoneIndex < mBoneCount);
+	mCurrentBoneTransformation[pBoneIndex] = pTransformation;
+}
+
 const Lepra::TransformationF& BoneHierarchy::GetBoneObjectTransformation(int pBoneIndex) const
 {
 	assert(pBoneIndex < mBoneCount);

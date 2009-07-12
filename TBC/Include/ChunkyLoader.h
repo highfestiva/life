@@ -111,16 +111,17 @@ enum ChunkyType
 
 	// File type: structure. Used by both graphics and text applications.
 	CHUNK_STRUCTURE                    = 'STRU',	// Structure file type.
-	CHUNK_STRUCTURE_PART_COUNT         = 'STPC',	// Number of bones. Mandatory.
+	CHUNK_STRUCTURE_BONE_COUNT         = 'STBC',	// Number of bones. Mandatory.
 	CHUNK_STRUCTURE_PHYSICS_TYPE       = 'STPT',	// Physics type: dynamic, static, etc. Mandatory.
+	CHUNK_STRUCTURE_ENGINE_COUNT       = 'STEC',	// Number of bones. Mandatory.
 	// Structure sub element: bone.
-	CHUNK_STRUCTURE_BONE               = 'STBO',	// A bone and its transformation, type. Mandatory.
-	CHUNK_STRUCTURE_BONE_CHILD_LIST    = 'STBC',	// The indices of this bone's children. Optional for bones without children, mandatory otherwise.
+	CHUNK_STRUCTURE_BONE_CONTAINER     = 'STBO',	// A bone and its transformation, type. Mandatory.
+	CHUNK_STRUCTURE_BONE_CHILD_LIST    = 'SBCL',	// The indices of this bone's children. Optional for bones without children, mandatory otherwise.
 	CHUNK_STRUCTURE_BONE_TRANSFORM     = 'STBT',	// The transform of this bone. Mandatory.
-	CHUNK_STRUCTURE_BONE_SHAPE_CAPSULE = 'STSC',	// A capsule; mandatory with one and one shape only per bone.
-	CHUNK_STRUCTURE_BONE_SHAPE_SPHERE  = 'STSS',	// A sphere; mandatory with one and one shape only per bone.
-	CHUNK_STRUCTURE_BONE_SHAPE_BOX     = 'STSB',	// A box; mandatory with one and one shape only per bone.
-	CHUNK_STRUCTURE_BONE_SHAPE_PORTAL  = 'STSP',	// A portal; mandatory with one and one shape only per bone.
+	CHUNK_STRUCTURE_BONE_SHAPE         = 'STSH',	// Bone shape (i.e. capsule, box, sphere, portal...), mandatory with one and one shape only per bone.
+	// Structure sub element: engine.
+	CHUNK_STRUCTURE_ENGINE_CONTAINER   = 'STEC',	// Engine array. Mandatory.
+	CHUNK_STRUCTURE_ENGINE             = 'STEN',	// An engine and its parameters, type. Mandatory.
 
 	// File type: class. Used by both graphics and text applications.
 	CHUNK_CLASS_INHERITANCE_LIST       = 'CLIL',	// Parent class information. List arranged after parent priority. Optional.
@@ -180,7 +181,7 @@ public:
 	//bool LoadSingleString(ChunkyType pType, Lepra::String& pString);
 	//bool LoadStringList(std::list<Lepra::String>& pStringList);
 	//bool LoadInt(ChunkyType pType, Lepra::int32& pInt);
-	bool AllocLoadChunkyList(FileElementList& pLoadList);
+	bool AllocLoadChunkyList(FileElementList& pLoadList, Lepra::int64 pChunkEnd);
 
 	bool SaveSingleString(ChunkyType pType, const Lepra::String& pString);
 	//bool SaveStringList(const std::list<Lepra::String>& pStringList, ChunkyType pType);
@@ -196,9 +197,12 @@ protected:
 	bool LoadHead(ChunkyType& pType, Lepra::uint32& pSize, Lepra::int64& pChunkEndPosition);
 	bool LoadRequiredHead(ChunkyType pRequiredType, Lepra::uint32& pSize, Lepra::int64& pChunkEndPosition);
 	bool SaveHead(ChunkyType pType, Lepra::uint32 pSize, Lepra::int64& pChunkEndPosition);
+	bool RewriteChunkSize(Lepra::int64 pChunkStartPosition);
 
 	Lepra::File* mFile;
 	bool mIsFileOwner;
+
+	LOG_CLASS_DECLARE();
 };
 
 

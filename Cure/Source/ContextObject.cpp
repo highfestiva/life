@@ -260,7 +260,7 @@ bool ContextObject::UpdateFullPosition(const ObjectPositionalData*& pPositionalD
 		TBC::PhysicsEngine::JointID lJoint = lStructureGeometry->GetJointId();
 		switch (lStructureGeometry->GetJointType())
 		{
-			case TBC::ChunkyBoneGeometry::TYPE_SUSPEND_HINGE:
+			case TBC::ChunkyBoneGeometry::JOINT_SUSPEND_HINGE:
 			{
 				GETSET_OBJECT_POSITIONAL_AT(mPosition, y, PositionalData2, lData, PositionalData::TYPE_POSITION_2, 1);
 				++y;
@@ -278,7 +278,7 @@ bool ContextObject::UpdateFullPosition(const ObjectPositionalData*& pPositionalD
 				lData->mAcceleration[1] = lDiff.mAngle2Acceleration;
 			}
 			break;
-			case TBC::ChunkyBoneGeometry::TYPE_HINGE2:
+			case TBC::ChunkyBoneGeometry::JOINT_HINGE2:
 			{
 				GETSET_OBJECT_POSITIONAL_AT(mPosition, y, PositionalData3, lData, PositionalData::TYPE_POSITION_3, 1);
 				++y;
@@ -299,7 +299,7 @@ bool ContextObject::UpdateFullPosition(const ObjectPositionalData*& pPositionalD
 				lData->mAcceleration[2] = lDiff.mAngle2Acceleration;
 			}
 			break;
-			case TBC::ChunkyBoneGeometry::TYPE_HINGE:
+			case TBC::ChunkyBoneGeometry::JOINT_HINGE:
 			{
 				GETSET_OBJECT_POSITIONAL_AT(mPosition, y, PositionalData1, lData, PositionalData::TYPE_POSITION_1, 1);
 				++y;
@@ -314,7 +314,7 @@ bool ContextObject::UpdateFullPosition(const ObjectPositionalData*& pPositionalD
 				lData->mAcceleration = lDiff.mAngleAcceleration;
 			}
 			break;
-			case TBC::ChunkyBoneGeometry::TYPE_BALL:
+			case TBC::ChunkyBoneGeometry::JOINT_BALL:
 			{
 				GETSET_OBJECT_POSITIONAL_AT(mPosition, y, PositionalData3, lData, PositionalData::TYPE_POSITION_3, 0.00001f);
 				++y;
@@ -335,7 +335,7 @@ bool ContextObject::UpdateFullPosition(const ObjectPositionalData*& pPositionalD
 				lData->mAcceleration[2] = lDiff.mAngle2Acceleration;
 			}
 			break;
-			case TBC::ChunkyBoneGeometry::TYPE_UNIVERSAL:
+			case TBC::ChunkyBoneGeometry::JOINT_UNIVERSAL:
 			{
 				GETSET_OBJECT_POSITIONAL_AT(mPosition, y, PositionalData2, lData, PositionalData::TYPE_POSITION_2, 1);
 				++y;
@@ -353,7 +353,7 @@ bool ContextObject::UpdateFullPosition(const ObjectPositionalData*& pPositionalD
 				lData->mAcceleration[1] = lDiff.mAngleAcceleration;
 			}
 			break;
-			case TBC::ChunkyBoneGeometry::TYPE_EXCLUDE:
+			case TBC::ChunkyBoneGeometry::JOINT_EXCLUDE:
 			{
 			}
 			break;
@@ -365,11 +365,11 @@ bool ContextObject::UpdateFullPosition(const ObjectPositionalData*& pPositionalD
 		}
 	}
 
-	const int lEngineCount = mStructure->GetStructureEngineCount();
+	const int lEngineCount = mStructure->GetEngineCount();
 	for (int z = 0; z != lEngineCount; ++z)
 	{
 		// TODO: add support for parent ID??????????? JB 2009-07-08: don't know what this is anymore.
-		const TBC::StructureEngine* lEngine = mStructure->GetStructureEngine(z);
+		const TBC::StructureEngine* lEngine = mStructure->GetEngine(z);
 		switch (lEngine->GetEngineType())
 		{
 			case TBC::StructureEngine::ENGINE_CAMERA_FLAT_PUSH:
@@ -463,7 +463,7 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData)
 		TBC::PhysicsEngine::JointID lJoint = lStructureGeometry->GetJointId();
 		switch (lStructureGeometry->GetJointType())
 		{
-			case TBC::ChunkyBoneGeometry::TYPE_SUSPEND_HINGE:
+			case TBC::ChunkyBoneGeometry::JOINT_SUSPEND_HINGE:
 			{
 				assert(mPosition.mBodyPositionArray[y]->GetType() == PositionalData::TYPE_POSITION_2);
 				GET_OBJECT_POSITIONAL_AT(mPosition, y, const PositionalData2, lData, PositionalData::TYPE_POSITION_2);
@@ -484,7 +484,7 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData)
 				}
 			}
 			break;
-			case TBC::ChunkyBoneGeometry::TYPE_HINGE2:
+			case TBC::ChunkyBoneGeometry::JOINT_HINGE2:
 			{
 				assert(mPosition.mBodyPositionArray[y]->GetType() == PositionalData::TYPE_POSITION_3);
 				GET_OBJECT_POSITIONAL_AT(mPosition, y, const PositionalData3, lData, PositionalData::TYPE_POSITION_3);
@@ -505,7 +505,7 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData)
 				}
 			}
 			break;
-			case TBC::ChunkyBoneGeometry::TYPE_HINGE:
+			case TBC::ChunkyBoneGeometry::JOINT_HINGE:
 			{
 				assert(mPosition.mBodyPositionArray[y]->GetType() == PositionalData::TYPE_POSITION_1);
 				GET_OBJECT_POSITIONAL_AT(mPosition, y, const PositionalData1, lData, PositionalData::TYPE_POSITION_1);
@@ -525,7 +525,7 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData)
 				}
 			}
 			break;
-			case TBC::ChunkyBoneGeometry::TYPE_BALL:
+			case TBC::ChunkyBoneGeometry::JOINT_BALL:
 			{
 				assert(mPosition.mBodyPositionArray[y]->GetType() == PositionalData::TYPE_POSITION_3);
 				GET_OBJECT_POSITIONAL_AT(mPosition, y, const PositionalData3, lData, PositionalData::TYPE_POSITION_3);
@@ -546,7 +546,7 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData)
 				}
 			}
 			break;
-			case TBC::ChunkyBoneGeometry::TYPE_UNIVERSAL:
+			case TBC::ChunkyBoneGeometry::JOINT_UNIVERSAL:
 			{
 				assert(mPosition.mBodyPositionArray[y]->GetType() == PositionalData::TYPE_POSITION_2);
 				GET_OBJECT_POSITIONAL_AT(mPosition, y, const PositionalData2, lData, PositionalData::TYPE_POSITION_2);
@@ -567,7 +567,7 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData)
 				}
 			}
 			break;
-			case TBC::ChunkyBoneGeometry::TYPE_EXCLUDE:
+			case TBC::ChunkyBoneGeometry::JOINT_EXCLUDE:
 			{
 			}
 			break;
@@ -579,11 +579,11 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData)
 		}
 	}
 
-	const int lEngineCount = mStructure->GetStructureEngineCount();
+	const int lEngineCount = mStructure->GetEngineCount();
 	for (int z = 0; z != lEngineCount; ++z)
 	{
 		// TODO: add support for parent ID??????????? JB 2009-07-08: don't know what this is anymore.
-		const TBC::StructureEngine* lEngine = mStructure->GetStructureEngine(z);
+		const TBC::StructureEngine* lEngine = mStructure->GetEngine(z);
 		switch (lEngine->GetEngineType())
 		{
 			case TBC::StructureEngine::ENGINE_CAMERA_FLAT_PUSH:
@@ -696,7 +696,18 @@ float ContextObject::GetMass() const
 bool ContextObject::SetStructure(TBC::ChunkyStructure* pStructure)
 {
 	TBC::PhysicsEngine* lPhysics = mManager->GetGameManager()->GetPhysicsManager();
-	bool lOk = (mStructure == 0 && pStructure->FinalizeInit(lPhysics, 0, this));
+	const int lPhysicsFps = mManager->GetGameManager()->GetConstTimeManager()->GetDesiredPhysicsFps();
+
+	// TODO: drop hard-coding, this should come from world loader or spawn engine?
+	Lepra::TransformationF lTransformation;
+	if (GetNetworkObjectType() == NETWORK_OBJECT_REMOTE_CONTROLLED)
+	{
+		const float lX = (float)Lepra::Random::Uniform(-200, 200);
+		const float lY = (float)Lepra::Random::Uniform(-200, 200);
+		lTransformation.SetPosition(Lepra::Vector3DF(lX, lY, 250+3));
+	}
+
+	bool lOk = (mStructure == 0 && pStructure->FinalizeInit(lPhysics, lPhysicsFps, lTransformation, 0, this));
 	assert(lOk);
 	if (lOk)
 	{
@@ -831,7 +842,7 @@ void ContextObject::AddAttachment(ContextObject* pObject, TBC::PhysicsEngine::Jo
 	mConnectionList.push_back(Connection(pObject, pJoint, pEngine));
 	if (pEngine)
 	{
-		mStructure->AddStructureEngine(pEngine);
+		mStructure->AddEngine(pEngine);
 	}
 }
 

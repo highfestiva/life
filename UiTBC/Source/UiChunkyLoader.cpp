@@ -81,7 +81,7 @@ bool ChunkyMeshLoader::Load(TriangleBasedGeometry* pMeshData)
 		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_COLOR, (void**)&lColors, &lColorsSize));
 		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_COLOR_FORMAT, &lColorFormat));
 		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_VOLATILITY, &lGeometryVolatility));
-		lOk = AllocLoadChunkyList(lLoadList);
+		lOk = AllocLoadChunkyList(lLoadList, mFile->GetSize());
 	}
 	if (lOk)
 	{
@@ -244,7 +244,7 @@ bool ChunkySkinLoader::Load(AnimatedGeometry* pSkinData)
 	{
 		TBC::ChunkyLoader::FileElementList lLoadList;
 		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_SKIN_BONE_WEIGHT_GROUP, (void*)pSkinData, 10000));
-		lOk = AllocLoadChunkyList(lLoadList);
+		lOk = AllocLoadChunkyList(lLoadList, mFile->GetSize());
 	}
 	return (lOk);
 }
@@ -291,7 +291,7 @@ bool ChunkySkinLoader::LoadElementCallback(TBC::ChunkyType pType, Lepra::uint32 
 		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_SKIN_BWG_BONES, (void**)&lBoneIndices, (unsigned*)&lWeights.mBoneCount));
 		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_SKIN_BWG_VERTICES, (void**)&lWeights.mVectorIndexArray, (unsigned*)&lWeights.mVectorIndexCount));
 		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_SKIN_BWG_WEIGHTS, (void**)&lWeights.mVectorWeightArray, &lWeightCount));
-		lOk = AllocLoadChunkyList(lLoadList);
+		lOk = AllocLoadChunkyList(lLoadList, pChunkEndPosition);
 
 		if (lOk)
 		{

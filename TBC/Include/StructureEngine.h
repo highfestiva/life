@@ -17,6 +17,7 @@ namespace TBC
 
 
 class ChunkyBoneGeometry;
+class ChunkyStructure;
 class PhysicsEngine;
 
 
@@ -45,6 +46,8 @@ public:
 		float pMaxSpeed, float pMaxSpeed2, unsigned pControllerIndex);
 	virtual ~StructureEngine();
 
+	static StructureEngine* Load(ChunkyStructure* pStructure, const void* pData, unsigned pByteCount);
+
 	EngineType GetEngineType() const;
 
 	void AddControlledGeometry(ChunkyBoneGeometry* pGeometry, float pScale, EngineMode pMode = MODE_NORMAL);
@@ -56,7 +59,12 @@ public:
 	float GetValue() const;
 	const float* GetValues() const;
 
+	unsigned GetChunkySize() const;
+	void SaveChunkyData(const ChunkyStructure* pStructure, void* pData) const;
+
 private:
+	void LoadChunkyData(ChunkyStructure* pStructure, const void* pData);
+
 	struct EngineNode
 	{
 		EngineNode(ChunkyBoneGeometry* pGeometry, float pScale, EngineMode pMode):

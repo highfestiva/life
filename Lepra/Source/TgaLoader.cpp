@@ -162,7 +162,7 @@ TgaLoader::Status TgaLoader::Load(File& pFile, Canvas& pCanvas)
 	if (lFileHeader.mIDLength != 0)
 	{
 		// Skip image ID. This is just identification info about the image.
-		pFile.SeekSet(pFile.Tell() + (int64)lFileHeader.mIDLength);
+		pFile.SeekCur((int64)lFileHeader.mIDLength);
 	}
 
 	// Read the palette, if any.

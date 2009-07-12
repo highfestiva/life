@@ -678,6 +678,7 @@ PhysicsEngine::JointID PhysicsEngineODE::CreateBallJoint(BodyID pBody1, BodyID p
 	JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
 	lJointInfo->mJointID = dJointCreateBall(mWorldID, 0);
 	lJointInfo->mType = JOINT_BALL;
+	lJointInfo->mListIter = mFeedbackJointList.end();
 	lJointInfo->mListener1 = lObject1->mForceFeedbackListener;
 	lJointInfo->mListener2 = lObject2->mForceFeedbackListener;
 
@@ -715,6 +716,7 @@ PhysicsEngine::JointID PhysicsEngineODE::CreateHingeJoint(BodyID pBody1, BodyID 
 	JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
 	lJointInfo->mJointID = dJointCreateHinge(mWorldID, 0);
 	lJointInfo->mType = JOINT_HINGE;
+	lJointInfo->mListIter = mFeedbackJointList.end();
 	lJointInfo->mListener1 = lObject1->mForceFeedbackListener;
 	lJointInfo->mListener2 = lObject2->mForceFeedbackListener;
 
@@ -754,6 +756,7 @@ PhysicsEngine::JointID PhysicsEngineODE::CreateHinge2Joint(BodyID pBody1, BodyID
 	JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
 	lJointInfo->mJointID = dJointCreateHinge2(mWorldID, 0);
 	lJointInfo->mType = JOINT_HINGE2;
+	lJointInfo->mListIter = mFeedbackJointList.end();
 	lJointInfo->mListener1 = lObject1->mForceFeedbackListener;
 	lJointInfo->mListener2 = lObject2->mForceFeedbackListener;
 
@@ -787,6 +790,7 @@ PhysicsEngine::JointID PhysicsEngineODE::CreateUniversalJoint(BodyID pBody1, Bod
 	JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
 	lJointInfo->mJointID = dJointCreateUniversal(mWorldID, 0);
 	lJointInfo->mType = JOINT_UNIVERSAL;
+	lJointInfo->mListIter = mFeedbackJointList.end();
 	lJointInfo->mListener1 = lObject1->mForceFeedbackListener;
 	lJointInfo->mListener2 = lObject2->mForceFeedbackListener;
 
@@ -826,6 +830,7 @@ PhysicsEngine::JointID PhysicsEngineODE::CreateSliderJoint(BodyID pBody1, BodyID
 	JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
 	lJointInfo->mJointID = dJointCreateSlider(mWorldID, 0);
 	lJointInfo->mType = JOINT_SLIDER;
+	lJointInfo->mListIter = mFeedbackJointList.end();
 	lJointInfo->mListener1 = lObject1->mForceFeedbackListener;
 	lJointInfo->mListener2 = lObject2->mForceFeedbackListener;
 
@@ -862,6 +867,7 @@ PhysicsEngine::JointID PhysicsEngineODE::CreateFixedJoint(BodyID pBody1, BodyID 
 	JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
 	lJointInfo->mJointID = dJointCreateFixed(mWorldID, 0);
 	lJointInfo->mType = JOINT_FIXED;
+	lJointInfo->mListIter = mFeedbackJointList.end();
 	lJointInfo->mListener1 = lObject1->mForceFeedbackListener;
 	lJointInfo->mListener2 = lObject2->mForceFeedbackListener;
 
@@ -897,6 +903,7 @@ PhysicsEngine::JointID PhysicsEngineODE::CreateAngularMotorJoint(BodyID pBody1, 
 	JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
 	lJointInfo->mJointID = dJointCreateAMotor(mWorldID, 0);
 	lJointInfo->mType = JOINT_ANGULARMOTOR;
+	lJointInfo->mListIter = mFeedbackJointList.end();
 	lJointInfo->mListener1 = lObject1->mForceFeedbackListener;
 	lJointInfo->mListener2 = lObject2->mForceFeedbackListener;
 
@@ -2422,6 +2429,26 @@ bool PhysicsEngineODE::SetSuspension(JointID pJointId, Lepra::float32 pFrameTime
 			pFrameTime * pSpringConstant / (pFrameTime * pSpringConstant + pDampingConstant));
 		::dJointSetHinge2Param(lJoint->mJointID, dParamSuspensionCFM,
 			1 / (pFrameTime * pSpringConstant + pDampingConstant));
+		return (true);
+	}
+	mLog.AError("SetSuspension() - Joint is not a hinge-2!");
+	return (false);
+}
+
+bool PhysicsEngineODE::GetSuspension(JointID pJointId, Lepra::float32& pErp, Lepra::float32& pCfm) const
+{
+	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
+	if (x == mJointTable.end())
+	{
+		mLog.Errorf(_T("GetJointParams() - Couldn't find joint %i!"), pJointId);
+		return (false);
+	}
+
+	JointInfo* lJoint = *x;
+	if (lJoint->mType == JOINT_HINGE2)
+	{
+		pErp = ::dJointGetHinge2Param(lJoint->mJointID, dParamSuspensionERP);
+		pCfm = ::dJointGetHinge2Param(lJoint->mJointID, dParamSuspensionCFM);
 		return (true);
 	}
 	mLog.AError("SetSuspension() - Joint is not a hinge-2!");

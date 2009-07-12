@@ -276,8 +276,7 @@ bool GameClientMasterTicker::Reinitialize()
 	Lepra::SystemManager::SetQuitRequest(lQuit);
 
 	// Reopen.
-	unsigned lPhysicsFps = CURE_RTVAR_GET(UiCure::GetSettings(), RTVAR_PHYSICS_FPS, 60);
-	bool lOk = mResourceManager->InitDefault(new UiCure::CppContextObjectFactory(mUiManager, lPhysicsFps));
+	bool lOk = mResourceManager->InitDefault(new UiCure::CppContextObjectFactory(mUiManager));
 	if (lOk)
 	{
 		lOk = mUiManager->Open();

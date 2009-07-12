@@ -8,6 +8,7 @@
 #include <assert.h>
 #include "../../Lepra/Include/Math.h"
 #include "../Include/ChunkyBoneGeometry.h"
+#include "../Include/ChunkyStructure.h"
 
 
 
@@ -29,6 +30,30 @@ StructureEngine::StructureEngine(EngineType pEngineType, float pStrength, float 
 
 StructureEngine::~StructureEngine()
 {
+}
+
+
+
+StructureEngine* StructureEngine::Load(ChunkyStructure* pStructure, const void* pData, unsigned pByteCount)
+{
+	const Lepra::uint32* lData = (const Lepra::uint32*)pData;
+	if (pByteCount != sizeof(Lepra::uint32)*6 + Lepra::Endian::BigToHost(lData[5])*sizeof(Lepra::uint32)*3)
+	{
+		mLog.AError("Could not load; wrong data size.");
+		assert(false);
+		return (0);
+	}
+
+	StructureEngine* lEngine = new StructureEngine(ENGINE_WALK, 0, 0, 0, 0);
+	lEngine->LoadChunkyData(pStructure, pData);
+	if (lEngine->GetChunkySize() != pByteCount)
+	{
+		assert(false);
+		mLog.AError("Corrupt data or error in loading algo.");
+		delete (lEngine);
+		lEngine = 0;
+	}
+	return (lEngine);
 }
 
 
@@ -273,6 +298,54 @@ const float* StructureEngine::GetValues() const
 
 
 
+unsigned StructureEngine::GetChunkySize() const
+{
+	return ((unsigned)(sizeof(Lepra::uint32)*5 +
+		sizeof(Lepra::uint32) + sizeof(Lepra::uint32)*3*mEngineNodeArray.size()));
+}
+
+void StructureEngine::SaveChunkyData(const ChunkyStructure* pStructure, void* pData) const
+{
+	Lepra::uint32* lData = (Lepra::uint32*)pData;
+	lData[0] = Lepra::Endian::HostToBig(GetEngineType());
+	lData[1] = Lepra::Endian::HostToBigF(mStrength);
+	lData[2] = Lepra::Endian::HostToBigF(mMaxSpeed);
+	lData[3] = Lepra::Endian::HostToBigF(mMaxSpeed2);
+	lData[4] = Lepra::Endian::HostToBig(mControllerIndex);
+	lData[5] = Lepra::Endian::HostToBig((Lepra::uint32)mEngineNodeArray.size());
+	int x;
+	for (x = 0; x < (int)mEngineNodeArray.size(); ++x)
+	{
+		const EngineNode& lControlledNode = mEngineNodeArray[x];
+		lData[6+x*3] = Lepra::Endian::HostToBig(pStructure->GetIndex(lControlledNode.mGeometry));
+		lData[7+x*3] = Lepra::Endian::HostToBigF(lControlledNode.mScale);
+		lData[8+x*3] = Lepra::Endian::HostToBig(lControlledNode.mMode);
+	}
+}
+
+void StructureEngine::LoadChunkyData(ChunkyStructure* pStructure, const void* pData)
+{
+	const Lepra::uint32* lData = (const Lepra::uint32*)pData;
+
+	mEngineType = (EngineType)Lepra::Endian::BigToHost(lData[0]);
+	mStrength = Lepra::Endian::BigToHostF(lData[1]);
+	mMaxSpeed = Lepra::Endian::BigToHostF(lData[2]);
+	mMaxSpeed2 = Lepra::Endian::BigToHostF(lData[3]);
+	mControllerIndex = Lepra::Endian::BigToHost(lData[4]);
+	const int lControlledNodeCount = Lepra::Endian::BigToHost(lData[5]);
+	int x;
+	for (x = 0; x < lControlledNodeCount; ++x)
+	{
+		ChunkyBoneGeometry* lGeometry = pStructure->GetBoneGeometry(Lepra::Endian::BigToHost(lData[6+x*3]));
+		assert(lGeometry);
+		float lScale = Lepra::Endian::BigToHostF(lData[7+x*3]);
+		EngineMode lMode = (EngineMode)Lepra::Endian::BigToHost(lData[8+x*3]);
+		AddControlledGeometry(lGeometry, lScale, lMode);
+	}
+}
+
+
+
 void StructureEngine::ApplyTorque(PhysicsEngine* pPhysicsManager, float pFrameTime, ChunkyBoneGeometry* pGeometry, const EngineNode& pEngineNode)
 {
 	assert(pGeometry->GetJointId() != INVALID_JOINT);
@@ -360,7 +433,7 @@ void StructureEngine::ApplyTorque(PhysicsEngine* pPhysicsManager, float pFrameTi
 
 
 
-LOG_CLASS_DEFINE(GAME_CONTEXT, StructureEngine);
+LOG_CLASS_DEFINE(PHYSICS, StructureEngine);
 
 
 
