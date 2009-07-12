@@ -51,7 +51,7 @@ IOError FileArchive::OpenArchive(const String& pArchiveFileName, IOType pIOType)
 	{
 	case READ_ONLY:
 
-		if (mArchiveFile.Open(mArchiveFileName, DiskFile::MODE_READ) == false)
+		if (mArchiveFile.Open(mArchiveFileName, DiskFile::MODE_READ, false, Endian::TYPE_LITTLE_ENDIAN) == false)
 		{
 			return IO_FILE_NOT_FOUND;
 		}
@@ -61,7 +61,7 @@ IOError FileArchive::OpenArchive(const String& pArchiveFileName, IOType pIOType)
 		break;
 	case WRITE_ONLY:
 
-		if (mArchiveFile.Open(lTempFileName, DiskFile::MODE_WRITE) == false)
+		if (mArchiveFile.Open(lTempFileName, DiskFile::MODE_WRITE, false, Endian::TYPE_LITTLE_ENDIAN) == false)
 		{
 			return IO_ERROR_WRITING_TO_STREAM;
 		}
@@ -72,7 +72,7 @@ IOError FileArchive::OpenArchive(const String& pArchiveFileName, IOType pIOType)
 
 		break;
 	case WRITE_APPEND:
-		if (mArchiveFile.Open(mArchiveFileName, DiskFile::MODE_READ) == false)
+		if (mArchiveFile.Open(mArchiveFileName, DiskFile::MODE_READ, false, Endian::TYPE_LITTLE_ENDIAN) == false)
 		{
 			return IO_FILE_NOT_FOUND;
 		}
@@ -87,7 +87,7 @@ IOError FileArchive::OpenArchive(const String& pArchiveFileName, IOType pIOType)
 			return lError;
 		}
 
-		if (mArchiveFile.Open(mArchiveFileName, DiskFile::MODE_WRITE_APPEND) == false)
+		if (mArchiveFile.Open(mArchiveFileName, DiskFile::MODE_WRITE_APPEND, false, Endian::TYPE_LITTLE_ENDIAN) == false)
 		{
 			return IO_ERROR_WRITING_TO_STREAM;
 		}
@@ -765,7 +765,7 @@ bool FileArchive::AddFile(const String& pFileName, const String& pDestFileName,
 	}
 
 	DiskFile lFile;
-	if (lFile.Open(pFileName, DiskFile::MODE_READ) == true)
+	if (lFile.Open(pFileName, DiskFile::MODE_READ, false, Endian::TYPE_LITTLE_ENDIAN) == true)
 	{
 		int lBufferSize = (int)pBufferSize * (int)pUnit;
 		int64 lDataSize   = lFile.GetSize();
@@ -814,7 +814,7 @@ bool FileArchive::ExtractFile(const String& pFileName, const String& pDestFileNa
 	if (lHandle != 0)
 	{
 		DiskFile lFile;
-		if (lFile.Open(pDestFileName, DiskFile::MODE_WRITE) == true)
+		if (lFile.Open(pDestFileName, DiskFile::MODE_WRITE, true, Endian::TYPE_LITTLE_ENDIAN) == true)
 		{
 			int lBufferSize = (int)pBufferSize * (int)pUnit;
 			int64 lDataSize   = FileSize(lHandle);

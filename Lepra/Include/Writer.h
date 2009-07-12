@@ -25,14 +25,14 @@ public:
 	friend class ArchiveFile;
 	friend class MemFile;
 
-	inline Writer(Endian::EndianType pEndian = Endian::TYPE_LITTLE_ENDIAN) :
+	inline Writer(Endian::EndianType pEndian = Endian::TYPE_BIG_ENDIAN) :
 		mOutStream(0),
 		mWriterEndian(pEndian)
 	{
 	}
 
 	inline Writer(OutputStream* pOut,
-				  Endian::EndianType pEndian = Endian::TYPE_LITTLE_ENDIAN) :
+				  Endian::EndianType pEndian = Endian::TYPE_BIG_ENDIAN) :
 		mOutStream(pOut),
 		mWriterEndian(pEndian)
 	{

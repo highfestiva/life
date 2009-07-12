@@ -382,6 +382,10 @@ Win32InputManager::Win32InputManager(Win32DisplayManager* pDisplayManager):
 	mMouse(0),
 	mKeyboard(0)
 {
+	POINT lPoint;
+	::GetCursorPos(&lPoint);
+	SetMousePosition(WM_NCMOUSEMOVE, lPoint.x, lPoint.y);
+
 	::memset(&mTypeCount, 0, sizeof(mTypeCount));
 
 	HRESULT lHR;
@@ -480,18 +484,9 @@ bool Win32InputManager::OnMessage(int pMsg, int pwParam, long plParam)
 		case WM_MOUSEMOVE:
 		case WM_NCMOUSEMOVE:
 		{
-			int lX = GET_X_LPARAM(plParam);
-			int lY = GET_Y_LPARAM(plParam);
-			if (pMsg == WM_NCMOUSEMOVE)
-			{
-				POINT lPoint;
-				lPoint.x = lX;
-				lPoint.y = lY;
-				::ScreenToClient(mDisplayManager->GetHWND(), &lPoint);
-			}
-
-			mCursorX = 2.0 * (double)lX / (double)mScreenWidth  - 1.0;
-			mCursorY = 2.0 * (double)lY / (double)mScreenHeight - 1.0;
+			int x = GET_X_LPARAM(plParam);
+			int y = GET_Y_LPARAM(plParam);
+			SetMousePosition(pMsg, x, y);
 		}
 		break;
 		case WM_KEYUP:
@@ -655,6 +650,24 @@ void Win32InputManager::RemoveObserver()
 	{
 		mDisplayManager->RemoveObserver(this);
 	}
+}
+
+
+
+void Win32InputManager::SetMousePosition(int pMsg, int x, int y)
+{
+	if (pMsg == WM_NCMOUSEMOVE && mDisplayManager)
+	{
+		POINT lPoint;
+		lPoint.x = x;
+		lPoint.y = y;
+		::ScreenToClient(mDisplayManager->GetHWND(), &lPoint);
+		x = lPoint.x;
+		y = lPoint.y;
+	}
+
+	mCursorX = 2.0 * (double)x / (double)mScreenWidth  - 1.0;
+	mCursorY = 2.0 * (double)y / (double)mScreenHeight - 1.0;
 }
 
 

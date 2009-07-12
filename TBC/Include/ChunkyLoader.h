@@ -74,69 +74,71 @@ class ChunkyStructure;
 class ChunkyWorld;
 
 
+#define ENUMROT(c, bits)	(((int)c)<<bits)
+#define ENUMIFY(a, b, c, d)	ENUMROT(a, 24) + ENUMROT(b, 16) + ENUMROT(c, 8) +  ENUMROT(d, 0)
 
 enum ChunkyType
 {
 	// File type: mesh. Unly used by graphics applications.
-	CHUNK_MESH                         = 'MESH',	// Mesh file type.
-	CHUNK_MESH_VERTICES                = 'MEVX',	// Mandatory.
-	CHUNK_MESH_NORMALS                 = 'MENO',	// Mandatory.
-	CHUNK_MESH_UV                      = 'MEUV',	// Optional.
-	CHUNK_MESH_COLOR                   = 'MECO',	// Optional.
-	CHUNK_MESH_COLOR_FORMAT            = 'MECF',	// Optional.
-	CHUNK_MESH_TRIANGLES               = 'METR',	// A mesh can contain EITHER this type OR the strips type.
-	CHUNK_MESH_STRIPS                  = 'MEST',	// A mesh can contain EITHER this type OR the triangles type.
-	CHUNK_MESH_VOLATILITY              = 'MEVO',	// Optional.
+	CHUNK_MESH                         = ENUMIFY('M','E','S','H'),	// Mesh file type.
+	CHUNK_MESH_VERTICES                = ENUMIFY('M','E','V','X'),	// Mandatory.
+	CHUNK_MESH_NORMALS                 = ENUMIFY('M','E','N','O'),	// Mandatory.
+	CHUNK_MESH_UV                      = ENUMIFY('M','E','U','V'),	// Optional.
+	CHUNK_MESH_COLOR                   = ENUMIFY('M','E','C','O'),	// Optional.
+	CHUNK_MESH_COLOR_FORMAT            = ENUMIFY('M','E','C','F'),	// Optional.
+	CHUNK_MESH_TRIANGLES               = ENUMIFY('M','E','T','R'),	// A mesh can contain EITHER this type OR the strips type.
+	CHUNK_MESH_STRIPS                  = ENUMIFY('M','E','S','T'),	// A mesh can contain EITHER this type OR the triangles type.
+	CHUNK_MESH_VOLATILITY              = ENUMIFY('M','E','V','O'),	// Optional.
 
 	// File type: skin. Unly used by graphics applications.
-	CHUNK_SKIN                         = 'SKIN',	// Skin file type.
+	CHUNK_SKIN                         = ENUMIFY('S','K','I','N'),	// Skin file type.
 	// Skin sub element: bone weight group. Used by skinning to determine bone-weight-per-vertex.
-	CHUNK_SKIN_BONE_WEIGHT_GROUP       = 'SKWG',	// Optional.
-	CHUNK_SKIN_BWG_BONES               = 'SKWB',	// Sub-object is mandatory if weight group present.
-	CHUNK_SKIN_BWG_VERTICES            = 'SKWV',	// Sub-object is mandatory if weight group present.
-	CHUNK_SKIN_BWG_WEIGHTS             = 'SKWW',	// Sub-object is mandatory if weight group present.
+	CHUNK_SKIN_BONE_WEIGHT_GROUP       = ENUMIFY('S','K','W','G'),	// Optional.
+	CHUNK_SKIN_BWG_BONES               = ENUMIFY('S','K','W','B'),	// Sub-object is mandatory if weight group present.
+	CHUNK_SKIN_BWG_VERTICES            = ENUMIFY('S','K','W','V'),	// Sub-object is mandatory if weight group present.
+	CHUNK_SKIN_BWG_WEIGHTS             = ENUMIFY('S','K','W','W'),	// Sub-object is mandatory if weight group present.
 
 	// File type: animation. Used by both graphics and text applications.
-	CHUNK_ANIMATION                    = 'ANIM',	// Animation file type.
-	CHUNK_ANIMATION_MODE               = 'ANMO',	// "Looped" or "play once". Mandatory.
-	CHUNK_ANIMATION_FRAME_COUNT        = 'ANFC',	// Number of keyframes. Mandatory.
-	CHUNK_ANIMATION_BONE_COUNT         = 'ANBC',	// Number of bones. Mandatory.
-	CHUNK_ANIMATION_USE_SPLINES        = 'ANUS',	// Hehe, love the abbreviation... Mandatory.
-	CHUNK_ANIMATION_TIME               = 'ANTI',	// Animation length in seconds. Mandatory.
-	CHUNK_ANIMATION_ROOT_NODE          = 'ANRN',	// A single NAME that corresponds to the start node in the structure hierarchy. Mandatory.
+	CHUNK_ANIMATION                    = ENUMIFY('A','N','I','M'),	// Animation file type.
+	CHUNK_ANIMATION_MODE               = ENUMIFY('A','N','M','O'),	// "Looped" or "play once". Mandatory.
+	CHUNK_ANIMATION_FRAME_COUNT        = ENUMIFY('A','N','F','C'),	// Number of keyframes. Mandatory.
+	CHUNK_ANIMATION_BONE_COUNT         = ENUMIFY('A','N','B','C'),	// Number of bones. Mandatory.
+	CHUNK_ANIMATION_USE_SPLINES        = ENUMIFY('A','N','U','S'),	// Hehe, love the abbreviation... Mandatory.
+	CHUNK_ANIMATION_TIME               = ENUMIFY('A','N','T','I'),	// Animation length in seconds. Mandatory.
+	CHUNK_ANIMATION_ROOT_NODE          = ENUMIFY('A','N','R','N'),	// A single NAME that corresponds to the start node in the structure hierarchy. Mandatory.
 	// Animation sub element: keyframe.
-	CHUNK_ANIMATION_KEYFRAME           = 'ANKA',	// A keyframe and its transformations. Means "duck" in swedish. Mandatory.
-	CHUNK_ANIMATION_KEYFRAME_TIME      = 'ANTM',	// Time for this keyframe. Mandatory.
-	CHUNK_ANIMATION_KEYFRAME_TRANSFORM = 'ANKT',	// Transformations for this keyframe for all bones in one BLOB. Mandatory.
+	CHUNK_ANIMATION_KEYFRAME           = ENUMIFY('A','N','K','A'),	// A keyframe and its transformations. Means "duck" in swedish. Mandatory.
+	CHUNK_ANIMATION_KEYFRAME_TIME      = ENUMIFY('A','N','T','M'),	// Time for this keyframe. Mandatory.
+	CHUNK_ANIMATION_KEYFRAME_TRANSFORM = ENUMIFY('A','N','K','T'),	// Transformations for this keyframe for all bones in one BLOB. Mandatory.
 
 	// File type: structure. Used by both graphics and text applications.
-	CHUNK_STRUCTURE                    = 'STRU',	// Structure file type.
-	CHUNK_STRUCTURE_BONE_COUNT         = 'STBC',	// Number of bones. Mandatory.
-	CHUNK_STRUCTURE_PHYSICS_TYPE       = 'STPT',	// Physics type: dynamic, static, etc. Mandatory.
-	CHUNK_STRUCTURE_ENGINE_COUNT       = 'STEC',	// Number of bones. Mandatory.
+	CHUNK_STRUCTURE                    = ENUMIFY('S','T','R','U'),	// Structure file type.
+	CHUNK_STRUCTURE_BONE_COUNT         = ENUMIFY('S','T','B','C'),	// Number of bones. Mandatory.
+	CHUNK_STRUCTURE_PHYSICS_TYPE       = ENUMIFY('S','T','P','T'),	// Physics type: dynamic, static, etc. Mandatory.
+	CHUNK_STRUCTURE_ENGINE_COUNT       = ENUMIFY('S','T','E','C'),	// Number of bones. Mandatory.
 	// Structure sub element: bone.
-	CHUNK_STRUCTURE_BONE_CONTAINER     = 'STBO',	// A bone and its transformation, type. Mandatory.
-	CHUNK_STRUCTURE_BONE_CHILD_LIST    = 'SBCL',	// The indices of this bone's children. Optional for bones without children, mandatory otherwise.
-	CHUNK_STRUCTURE_BONE_TRANSFORM     = 'STBT',	// The transform of this bone. Mandatory.
-	CHUNK_STRUCTURE_BONE_SHAPE         = 'STSH',	// Bone shape (i.e. capsule, box, sphere, portal...), mandatory with one and one shape only per bone.
+	CHUNK_STRUCTURE_BONE_CONTAINER     = ENUMIFY('S','T','B','O'),	// A bone and its transformation, type. Mandatory.
+	CHUNK_STRUCTURE_BONE_CHILD_LIST    = ENUMIFY('S','B','C','L'),	// The indices of this bone's children. Optional for bones without children, mandatory otherwise.
+	CHUNK_STRUCTURE_BONE_TRANSFORM     = ENUMIFY('S','T','B','T'),	// The transform of this bone. Mandatory.
+	CHUNK_STRUCTURE_BONE_SHAPE         = ENUMIFY('S','T','S','H'),	// Bone shape (i.e. capsule, box, sphere, portal...), mandatory with one and one shape only per bone.
 	// Structure sub element: engine.
-	CHUNK_STRUCTURE_ENGINE_CONTAINER   = 'STEC',	// Engine array. Mandatory.
-	CHUNK_STRUCTURE_ENGINE             = 'STEN',	// An engine and its parameters, type. Mandatory.
+	CHUNK_STRUCTURE_ENGINE_CONTAINER   = ENUMIFY('S','T','E','C'),	// Engine array. Mandatory.
+	CHUNK_STRUCTURE_ENGINE             = ENUMIFY('S','T','E','N'),	// An engine and its parameters, type. Mandatory.
 
 	// File type: class. Used by both graphics and text applications.
-	CHUNK_CLASS_INHERITANCE_LIST       = 'CLIL',	// Parent class information. List arranged after parent priority. Optional.
-	CHUNK_CLASS_STRUCTURE              = 'CLST',	// An structure filename of the structure that forms the shapes of this class. Optional - absent when structure inherited or for abstract nouns ("clan" and "weather").
-	CHUNK_CLASS_SETTINGS               = 'CLSE',	// String keys and their corresponding default string values. Example "stand_nimation":"heavy_walk". Optional.
-	CHUNK_CLASS_MESH_LIST              = 'CLML',	// A list of mesh filenames that forms the looks of this class. Only used by graphics applications, and completly ignored by text applications. Optional - absent when using inherited or for abstract nouns.
+	CHUNK_CLASS_INHERITANCE_LIST       = ENUMIFY('C','L','I','L'),	// Parent class information. List arranged after parent priority. Optional.
+	CHUNK_CLASS_STRUCTURE              = ENUMIFY('C','L','S','T'),	// An structure filename of the structure that forms the shapes of this class. Optional - absent when structure inherited or for abstract nouns ("clan" and "weather").
+	CHUNK_CLASS_SETTINGS               = ENUMIFY('C','L','S','E'),	// String keys and their corresponding default string values. Example "stand_nimation":"heavy_walk". Optional.
+	CHUNK_CLASS_MESH_LIST              = ENUMIFY('C','L','M','L'),	// A list of mesh filenames that forms the looks of this class. Only used by graphics applications, and completly ignored by text applications. Optional - absent when using inherited or for abstract nouns.
 
 	// File type: Group. Used by both graphics and text applications.
-	CHUNK_GROUP_CLASS_LIST             = 'GCLI',	// A list of class filenames (each with a group-unique NAME) that forms the nouns of this group. Mandatory.
-	CHUNK_GROUP_SETTINGS               = 'GRSE',	// A list of settings and attachments. A setting/an attachment contains two strings. Example: (groupNAME1.structure_NAME1) and (groupNAME2.structure_NAME2). May override class settings. Optional.
+	CHUNK_GROUP_CLASS_LIST             = ENUMIFY('G','C','L','I'),	// A list of class filenames (each with a group-unique NAME) that forms the nouns of this group. Mandatory.
+	CHUNK_GROUP_SETTINGS               = ENUMIFY('G','R','S','E'),	// A list of settings and attachments. A setting/an attachment contains two strings. Example: (groupNAME1.structure_NAME1) and (groupNAME2.structure_NAME2). May override class settings. Optional.
 
 	// File type: world. Used by both graphics and text applications.
-	CHUNK_WORLD_INFO                   = 'WINF',	// Global world data, such as pos+size. Mandatory.
-	CHUNK_WORLD_QUAD_LIST              = 'WQUL',	// Just a recursive container for a world group list. Container for CHUNK_WORLD_GROUP_LIST. Mandatory.
-	CHUNK_WORLD_GROUP_LIST             = 'WGRL',	// A list where each element is a group filename and a transformation. Each instance hangs on branches and leafs in the CHUNK_WORLD_QUAD_LIST. Mandatory.
+	CHUNK_WORLD_INFO                   = ENUMIFY('W','I','N','F'),	// Global world data, such as pos+size. Mandatory.
+	CHUNK_WORLD_QUAD_LIST              = ENUMIFY('W','Q','U','L'),	// Just a recursive container for a world group list. Container for CHUNK_WORLD_GROUP_LIST. Mandatory.
+	CHUNK_WORLD_GROUP_LIST             = ENUMIFY('W','G','R','L'),	// A list where each element is a group filename and a transformation. Each instance hangs on branches and leafs in the CHUNK_WORLD_QUAD_LIST. Mandatory.
 };
 
 
@@ -152,13 +154,13 @@ public:
 		ChunkyFileElement();
 		// Used for any non-32 bit, statically formed data. Allocates a byte array for each element loaded.
 		// Field sizes are stored in pFieldSize[e], where e is the element index.
-		ChunkyFileElement(ChunkyType pType, void** pPointer, Lepra::uint32* pFieldSize, unsigned pElementCount = 1);
+		ChunkyFileElement(ChunkyType pType, void** pPointer, Lepra::uint32* pFieldSize, int pElementCount = 1);
 		// Used for 32-bits (floats may use them too). Does not allocate. Stores total field size in *pFieldSize.
-		ChunkyFileElement(ChunkyType pType, Lepra::int32* pInt, Lepra::uint32* pFieldSize = 0, unsigned pElementCount = 1);
+		ChunkyFileElement(ChunkyType pType, Lepra::int32* pInt, Lepra::uint32* pFieldSize = 0, int pElementCount = 1);
 		// Used for strings.
-		ChunkyFileElement(ChunkyType pType, Lepra::String* pString, unsigned pElementCount = 1);
+		ChunkyFileElement(ChunkyType pType, Lepra::String* pString, int pElementCount = 1);
 		// Used for receiving callbacks. Will call LoadElementCallback if this chunk type is found.
-		ChunkyFileElement(ChunkyType pType, void* pPointer, unsigned pElementCount = 1);
+		ChunkyFileElement(ChunkyType pType, void* pPointer, int pElementCount = 1);
 		ChunkyFileElement(const ChunkyFileElement& pOriginal);
 		void operator=(const ChunkyFileElement& pOriginal);
 
@@ -168,7 +170,7 @@ public:
 		void** mPointer;
 		Lepra::String* mString;
 		Lepra::uint32* mFieldSize;
-		unsigned mElementCount;
+		int mElementCount;
 
 		bool mIsElementLoaded;
 	};

@@ -343,6 +343,7 @@ void CppContextObject::OnLoadMesh(UserGeometryReferenceResource* pMeshResource)
 	else
 	{
 		mLog.AError("Could not load mesh! Shit.");
+		assert(false);
 	}
 }
 
@@ -355,6 +356,7 @@ void CppContextObject::OnLoadTexture(UserRendererImageResource* pTextureResource
 	else
 	{
 		mLog.AError("Could not load texture. Gah!");
+		assert(false);
 	}
 }
 

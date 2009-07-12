@@ -30,8 +30,8 @@ public:
 		FSEEK_END,
 	};
 
-	inline File(Endian::EndianType pReaderEndian = Endian::TYPE_LITTLE_ENDIAN,
-		    Endian::EndianType pWriterEndian = Endian::TYPE_LITTLE_ENDIAN,
+	inline File(Endian::EndianType pReaderEndian = Endian::TYPE_BIG_ENDIAN,
+		    Endian::EndianType pWriterEndian = Endian::TYPE_BIG_ENDIAN,
 		    InputStream* pIn = 0,
 		    OutputStream* pOut = 0);
 

@@ -243,7 +243,7 @@ bool ChunkySkinLoader::Load(AnimatedGeometry* pSkinData)
 	if (lOk)
 	{
 		TBC::ChunkyLoader::FileElementList lLoadList;
-		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_SKIN_BONE_WEIGHT_GROUP, (void*)pSkinData, 10000));
+		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_SKIN_BONE_WEIGHT_GROUP, (void*)pSkinData, -1000000));
 		lOk = AllocLoadChunkyList(lLoadList, mFile->GetSize());
 	}
 	return (lOk);

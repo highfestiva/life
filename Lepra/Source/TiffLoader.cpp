@@ -142,9 +142,10 @@ TiffLoader::Status TiffLoader::Save(Writer& pWriter, const Canvas& pCanvas)
 		Write Image File Header (8 bytes)
 	*/
 
+	const bool lIsLittleEndian = (pWriter.GetWriterEndian() == Endian::TYPE_LITTLE_ENDIAN);
 	uint16 lVersion = 42;
-	unsigned lIFDOffset = 8; // IFD = Image File Directory
-	pWriter.WriteData("II", 2);
+	unsigned lIFDOffset = 8; // IFD = Image File Directory.
+	pWriter.WriteData(lIsLittleEndian? "II" : "MM", 2);
 	pWriter.Write(lVersion);
 	pWriter.Write(lIFDOffset);
 

@@ -139,6 +139,7 @@ int CureTestApplication::Run()
 	Lepra::StdioConsoleLogListener* lConsoleLogPointer = 0;
 #ifdef LEPRA_CONSOLE
 	Lepra::StdioConsoleLogListener lConsoleLogger;
+	lConsoleLogger.SetLevelThreashold(Lepra::Log::LEVEL_HEADLINE);
 	lConsoleLogPointer = &lConsoleLogger;
 #endif // LEPRA_CONSOLE
 	Lepra::DebuggerLogListener lDebugLogger;
@@ -172,9 +173,13 @@ int CureTestApplication::Run()
 	{
 		lTestOk = TEST_RUN_NETPHYS();
 	}
+#ifdef LEPRA_CONSOLE
+	if (!lTestOk)
+	{
+		lMemLogger.Dump(lConsoleLogger, Lepra::Log::LEVEL_ERROR);
+	}
+#endif // LEPRA_CONSOLE
 	ShowTestResult(mLog, lTestOk);
-
-	//lMemLogger.DumpToFile(_TEXT_ALTERNATIVE("Temp.log", L"TempUnicode.log"));
 
 	CURE_NS::Shutdown();
 	TBC_NS::Shutdown();

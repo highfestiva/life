@@ -28,6 +28,7 @@ namespace Lepra
 
 class MemFile: public File, public InputStream, public OutputStream
 {
+	typedef File Parent;
 public:
 	MemFile();
 	MemFile(Reader* pReader);

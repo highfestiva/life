@@ -20,7 +20,7 @@ class Endian
 public:
 	enum EndianType
 	{
-		TYPE_BIG_ENDIAN = 0,
+		TYPE_BIG_ENDIAN = 2,
 		TYPE_LITTLE_ENDIAN
 	};
 

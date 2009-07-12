@@ -13,7 +13,7 @@ namespace Lepra
 Reader::Reader() :
 	mReadCount(0),
 	mInStream(0),
-	mReaderEndian(Endian::TYPE_LITTLE_ENDIAN)
+	mReaderEndian(Endian::TYPE_BIG_ENDIAN)
 {
 }
 
@@ -27,7 +27,7 @@ Reader::Reader(Lepra::Endian::EndianType pEndian) :
 Reader::Reader(InputStream* pIn) :
 	mReadCount(0),
 	mInStream(pIn),
-	mReaderEndian(Endian::TYPE_LITTLE_ENDIAN)
+	mReaderEndian(Endian::TYPE_BIG_ENDIAN)
 {
 }
 

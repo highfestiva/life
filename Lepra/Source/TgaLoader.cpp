@@ -23,7 +23,7 @@ TgaLoader::Status TgaLoader::Load(const String& pFileName, Canvas& pCanvas)
 {
 	Status lStatus = STATUS_SUCCESS;
 	MetaFile lFile;
-	if (lFile.Open(pFileName, MetaFile::READ_ONLY) == false)
+	if (lFile.Open(pFileName, MetaFile::READ_ONLY, false, Endian::TYPE_LITTLE_ENDIAN) == false)
 	{
 		lStatus = STATUS_OPEN_ERROR;
 	}
@@ -40,7 +40,7 @@ TgaLoader::Status TgaLoader::Save(const String& pFileName, const Canvas& pCanvas
 {
 	Status lStatus = STATUS_SUCCESS;
 	DiskFile lFile;
-	if (lFile.Open(pFileName, DiskFile::MODE_WRITE) == false)
+	if (lFile.Open(pFileName, DiskFile::MODE_WRITE, false, Endian::TYPE_LITTLE_ENDIAN) == false)
 	{
 		lStatus = STATUS_OPEN_ERROR;
 	}
@@ -57,7 +57,7 @@ TgaLoader::Status TgaLoader::Load(const String& pArchiveName, const String& pFil
 {
 	Status lStatus = STATUS_SUCCESS;
 	ArchiveFile lFile(pArchiveName);
-	if (lFile.Open(pFileName, ArchiveFile::READ_ONLY) == false)
+	if (lFile.Open(pFileName, ArchiveFile::READ_ONLY, Endian::TYPE_LITTLE_ENDIAN) == false)
 	{
 		lStatus = STATUS_OPEN_ERROR;
 	}
@@ -74,7 +74,7 @@ TgaLoader::Status TgaLoader::Save(const String& pArchiveName, const String& pFil
 {
 	Status lStatus = STATUS_SUCCESS;
 	ArchiveFile lFile(pArchiveName);
-	if (lFile.Open(pFileName, ArchiveFile::WRITE_ONLY) == false)
+	if (lFile.Open(pFileName, ArchiveFile::WRITE_ONLY, Endian::TYPE_LITTLE_ENDIAN) == false)
 	{
 		lStatus = STATUS_OPEN_ERROR;
 	}
@@ -901,7 +901,10 @@ TgaLoader::Status TgaLoader::LoadRLETrueColorImage(Canvas& pCanvas, TGAFileHeade
 						// Raw packet.
 						for (int lCount = 0; lCount < (int)lRepetitionCount; lCount++)
 						{
-							pFile.Read(lData[lYOffset + x]);
+							if (pFile.Read(lData[lYOffset + x]) != IO_OK)
+							{
+								return (STATUS_READSTREAM_ERROR);	// TRICKY: RAII!
+							}
 							x += lXAdd;
 						}
 					}
@@ -955,7 +958,10 @@ TgaLoader::Status TgaLoader::LoadRLETrueColorImage(Canvas& pCanvas, TGAFileHeade
 						// Raw packet.
 						for (int lCount = 0; lCount < (int)lRepetitionCount; lCount++)
 						{
-							pFile.Read(lData[lYOffset + x]);
+							if (pFile.Read(lData[lYOffset + x]) != IO_OK)
+							{
+								return (STATUS_READSTREAM_ERROR);	// TRICKY: RAII!
+							}
 							x += lXAdd;
 						}
 					}
@@ -1011,7 +1017,10 @@ TgaLoader::Status TgaLoader::LoadRLETrueColorImage(Canvas& pCanvas, TGAFileHeade
 						// Raw packet.
 						for (int lCount = 0; lCount < (int)lRepetitionCount; lCount++)
 						{
-							pFile.ReadData(&lData[lYOffset + x * 3], 3);
+							if (pFile.ReadData(&lData[lYOffset + x * 3], 3) != IO_OK)
+							{
+								return (STATUS_READSTREAM_ERROR);	// TRICKY: RAII!
+							}
 							x += lXAdd;
 						}
 					}
@@ -1068,7 +1077,10 @@ TgaLoader::Status TgaLoader::LoadRLETrueColorImage(Canvas& pCanvas, TGAFileHeade
 						// Raw packet.
 						for (int lCount = 0; lCount < (int)lRepetitionCount; lCount++)
 						{
-							pFile.ReadData(&lData[lYOffset + x * 4], 4);
+							if (pFile.ReadData(&lData[lYOffset + x * 4], 4) != IO_OK)
+							{
+								return (STATUS_READSTREAM_ERROR);	// TRICKY: RAII!
+							}
 							x += lXAdd;
 						}
 					}

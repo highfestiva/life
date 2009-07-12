@@ -134,8 +134,11 @@ public:
 	void Clear();
 	bool Dump(const String& pFilename);
 	bool Dump(File& pFile);
+	bool Dump(LogListener& pLogListener, Log::LogLevel pLevel);
 
 protected:
+	bool Dump(File* pFile, LogListener* pLogListener, Log::LogLevel pLevel);
+
 	void WriteLog(const String& pFullMessage, Log::LogLevel pLevel);
 
 	MemFile mFile;

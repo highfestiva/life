@@ -29,7 +29,7 @@ ChunkyLoader::ChunkyFileElement::ChunkyFileElement():
 {
 }
 
-ChunkyLoader::ChunkyFileElement::ChunkyFileElement(ChunkyType pType, void** pPointer, Lepra::uint32* pFieldSize, unsigned pElementCount):
+ChunkyLoader::ChunkyFileElement::ChunkyFileElement(ChunkyType pType, void** pPointer, Lepra::uint32* pFieldSize, int pElementCount):
 	mType(pType),
 	mLoadCallback(false),
 	mIntPointer(0),
@@ -41,7 +41,7 @@ ChunkyLoader::ChunkyFileElement::ChunkyFileElement(ChunkyType pType, void** pPoi
 {
 }
 
-ChunkyLoader::ChunkyFileElement::ChunkyFileElement(ChunkyType pType, Lepra::int32* pInt, Lepra::uint32* pFieldSize, unsigned pElementCount):
+ChunkyLoader::ChunkyFileElement::ChunkyFileElement(ChunkyType pType, Lepra::int32* pInt, Lepra::uint32* pFieldSize, int pElementCount):
 	mType(pType),
 	mLoadCallback(false),
 	mIntPointer(pInt),
@@ -53,7 +53,7 @@ ChunkyLoader::ChunkyFileElement::ChunkyFileElement(ChunkyType pType, Lepra::int3
 {
 }
 
-ChunkyLoader::ChunkyFileElement::ChunkyFileElement(ChunkyType pType, Lepra::String* pString, unsigned pElementCount):
+ChunkyLoader::ChunkyFileElement::ChunkyFileElement(ChunkyType pType, Lepra::String* pString, int pElementCount):
 	mType(pType),
 	mLoadCallback(false),
 	mIntPointer(0),
@@ -65,7 +65,7 @@ ChunkyLoader::ChunkyFileElement::ChunkyFileElement(ChunkyType pType, Lepra::Stri
 {
 }
 
-ChunkyLoader::ChunkyFileElement::ChunkyFileElement(ChunkyType pType, void* pPointer, unsigned pElementCount):
+ChunkyLoader::ChunkyFileElement::ChunkyFileElement(ChunkyType pType, void* pPointer, int pElementCount):
 	mType(pType),
 	mLoadCallback(true),
 	mIntPointer(0),
@@ -146,7 +146,8 @@ bool ChunkyLoader::AllocLoadChunkyList(FileElementList& pLoadList, Lepra::int64 
 					lAlreadyLoaded = lElement.mIsElementLoaded;
 					lOk = !lAlreadyLoaded;
 					lElement.mIsElementLoaded = true;
-					for (unsigned y = 0; lOk && y < lElement.mElementCount; ++y)
+					const int lMaxElementCount = ::abs(lElement.mElementCount);
+					for (int y = 0; lOk && y < lMaxElementCount; ++y)
 					{
 						if (lElement.mLoadCallback)
 						{
@@ -183,7 +184,7 @@ bool ChunkyLoader::AllocLoadChunkyList(FileElementList& pLoadList, Lepra::int64 
 
 						if (mFile->Tell() >= lChunkEndPosition)
 						{
-							lOk = (y == lElement.mElementCount-1);
+							lOk = (y == lElement.mElementCount-1 || lElement.mElementCount <= 0);
 							if (!lOk)
 							{
 								mLog.Errorf(_T("Trying to load %i elements,")
@@ -316,7 +317,7 @@ bool ChunkyLoader::SaveChunkyList(const FileElementList& pSaveList)
 	for (; lOk && x != pSaveList.end(); ++x)
 	{
 		const ChunkyFileElement& lElement = *x;
-		for (unsigned y = 0; lOk && y < lElement.mElementCount; ++y)
+		for (int y = 0; lOk && y < lElement.mElementCount; ++y)
 		{
 			Lepra::int64 lChunkEndPosition = 0;
 			if (lElement.mIntPointer)
@@ -819,7 +820,7 @@ bool ChunkyStructureLoader::LoadElementCallback(ChunkyType pType, Lepra::uint32 
 		Lepra::uint32* lGeometryArray = 0;
 		unsigned lGeometryByteSize = 0;
 		FileElementList lLoadList;
-		lLoadList.push_back(ChunkyFileElement(CHUNK_STRUCTURE_BONE_CHILD_LIST, lChildArray, &lChildByteSize, MAXIMUM_CHILD_BONES));
+		lLoadList.push_back(ChunkyFileElement(CHUNK_STRUCTURE_BONE_CHILD_LIST, lChildArray, &lChildByteSize, -MAXIMUM_CHILD_BONES));
 		lLoadList.push_back(ChunkyFileElement(CHUNK_STRUCTURE_BONE_TRANSFORM, (void**)&lTransformArray, (unsigned*)&lFloatByteSize));
 		lLoadList.push_back(ChunkyFileElement(CHUNK_STRUCTURE_BONE_SHAPE, (void**)&lGeometryArray, (unsigned*)&lGeometryByteSize));
 		lOk = AllocLoadChunkyList(lLoadList, pChunkEndPosition);
