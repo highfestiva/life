@@ -1,4 +1,4 @@
-# 'Twas generated from ../../Cure/Cure.vcproj, 2009-06-11, type='lib'.
+# 'Twas generated from ../../Cure/Cure.vcproj, 2009-07-13, type='lib'.
 # Don't edit manually. See 'generate_makefile.py' for info.
 
 CFLAGS = -O0 -ggdb -fPIC -D_POSIX_PTHREAD_SEMANTICS -I../ThirdParty/stlport/stlport -I../ThirdParty/ode-060223/include -DPOSIX -D_DEBUG -D_CONSOLE -DPNG_NO_ASSEMBLER_CODE -DdCYLINDER_ENABLED -DCURE_TEST_WITHOUT_UI -Wall -Wno-unknown-pragmas
@@ -8,14 +8,12 @@ Source/ConsoleManager.cpp	\
 Source/ContextManager.cpp	\
 Source/ContextObject.cpp	\
 Source/ContextObjectAttribute.cpp	\
-Source/ContextObjectEngine.cpp	\
 Source/CppContextObject.cpp	\
 Source/Cure.cpp	\
 Source/GameManager.cpp	\
 Source/NetworkAgent.cpp	\
 Source/Packer.cpp	\
 Source/Packet.cpp	\
-Source/PhysicsNode.cpp	\
 Source/PositionalData.cpp	\
 Source/ResourceManager.cpp	\
 Source/RuntimeVariable.cpp	\
@@ -35,14 +33,12 @@ Source/ConsoleManager.o	\
 Source/ContextManager.o	\
 Source/ContextObject.o	\
 Source/ContextObjectAttribute.o	\
-Source/ContextObjectEngine.o	\
 Source/CppContextObject.o	\
 Source/Cure.o	\
 Source/GameManager.o	\
 Source/NetworkAgent.o	\
 Source/Packer.o	\
 Source/Packet.o	\
-Source/PhysicsNode.o	\
 Source/PositionalData.o	\
 Source/ResourceManager.o	\
 Source/RuntimeVariable.o	\

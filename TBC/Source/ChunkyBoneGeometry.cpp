@@ -248,7 +248,7 @@ void ChunkyBoneGeometry::SaveChunkyData(const ChunkyStructure* pStructure, void*
 	lData[5] = Lepra::Endian::HostToBig(mBodyData.mJointType);
 	lData[6] = Lepra::Endian::HostToBig(mBodyData.mIsAffectedByGravity? 1 : 0);
 	int x;
-	for (x = 0; x < sizeof(mBodyData.mParameter)/sizeof(mBodyData.mParameter[0]); ++x)
+	for (x = 0; (size_t)x < sizeof(mBodyData.mParameter)/sizeof(mBodyData.mParameter[0]); ++x)
 	{
 		lData[7+x] = Lepra::Endian::HostToBigF(mBodyData.mParameter[x]);
 	}
@@ -273,7 +273,7 @@ void ChunkyBoneGeometry::LoadChunkyData(ChunkyStructure* pStructure, const void*
 	mBodyData.mJointType = (JointType)Lepra::Endian::BigToHost(lData[5]);
 	mBodyData.mIsAffectedByGravity = Lepra::Endian::BigToHost(lData[6])? true : false;
 	int x;
-	for (x = 0; x < sizeof(mBodyData.mParameter)/sizeof(mBodyData.mParameter[0]); ++x)
+	for (x = 0; (size_t)x < sizeof(mBodyData.mParameter)/sizeof(mBodyData.mParameter[0]); ++x)
 	{
 		mBodyData.mParameter[x] = Lepra::Endian::BigToHostF(lData[7+x]);
 	}

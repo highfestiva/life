@@ -1,9 +1,10 @@
-# 'Twas generated from ../../Lepra/Lepra.vcproj, 2009-06-11, type='lib'.
+# 'Twas generated from ../../Lepra/Lepra.vcproj, 2009-07-13, type='lib'.
 # Don't edit manually. See 'generate_makefile.py' for info.
 
 CFLAGS = -O0 -ggdb -fPIC -D_POSIX_PTHREAD_SEMANTICS -I../ThirdParty/stlport/stlport -I../ThirdParty/ode-060223/include -DPOSIX -D_DEBUG -D_CONSOLE -DPNG_NO_ASSEMBLER_CODE -DdCYLINDER_ENABLED -DCURE_TEST_WITHOUT_UI -Wall -Wno-unknown-pragmas
 
 SRCS=	\
+Source/Alarm.cpp	\
 Source/Application.cpp	\
 Source/ArchiveFile.cpp	\
 Source/BmpLoader.cpp	\
@@ -64,6 +65,7 @@ Source/Posix/PosixSystemManager.cpp	\
 Source/Posix/PosixThread.cpp
 
 OBJS=	\
+Source/Alarm.o	\
 Source/Application.o	\
 Source/ArchiveFile.o	\
 Source/BmpLoader.o	\

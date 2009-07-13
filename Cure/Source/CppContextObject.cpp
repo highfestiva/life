@@ -124,7 +124,7 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject) const
 	if (lOk)
 	{
 		// TODO: remove path hard-coding.
-		lOk = lFile.Open(_T("../../data/")+lAssetName, Lepra::DiskFile::MODE_READ);
+		lOk = lFile.Open(_T("../../Data/")+lAssetName, Lepra::DiskFile::MODE_READ);
 		assert(lOk);
 	}
 	TBC::ChunkyStructure* lStructure = 0;
