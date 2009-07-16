@@ -213,8 +213,8 @@ BOOL CALLBACK Win32InputDevice::EnumElementsCallback(LPCDIDEVICEOBJECTINSTANCE l
 		if ((lpddoi->dwType & DIDFT_ABSAXIS) != 0)
 		{
 			log_volatile(mLog.Infof(_T("Found absolute axis element '%s' = '%s'.\n"),
-				Lepra::AnsiStringUtility::ToCurrentCode(lElement->GetFullName()).c_str(),
-				Lepra::AnsiStringUtility::ToCurrentCode(lElement->GetIdentifier()).c_str()));
+				lElement->GetFullName().c_str(),
+				lElement->GetIdentifier().c_str()));
 
 			DIPROPRANGE lRange;
 			lRange.diph.dwSize = sizeof(DIPROPRANGE);
