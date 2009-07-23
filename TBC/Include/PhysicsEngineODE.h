@@ -238,7 +238,9 @@ private:
 		bool mIsRoot;
 		dBodyID mBodyID;
 		dGeomID mGeomID;
+		float mGeometryData[3];
 		dTriMeshDataID mTriMeshID;
+		float mMass;
 		Lepra::float32 mFriction;
 		Lepra::float32 mBounce;
 		void* mUserData;

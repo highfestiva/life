@@ -256,8 +256,7 @@ TEMPLATE Transformation<_TVarType>& QUAL::operator *= (const Transformation& pTr
 
 TEMPLATE Transformation<_TVarType> QUAL::operator * (const Transformation& pTransformation) const
 {
-	return Transformation(mOrientation * pTransformation.mOrientation,
-			      mPosition + mOrientation.GetRotatedVector(pTransformation.mPosition));
+	return (Transform(pTransformation));
 }
 
 TEMPLATE Transformation<_TVarType>& QUAL::operator /= (const Transformation& pTransformation)

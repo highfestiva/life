@@ -361,6 +361,8 @@ bool SceneTest::Run(double pTime)
 		}
 	}
 
+	gInput->ClearFunctors();
+
 	ReportTestResult(mLog, mSceneName, mContext, mTestOk);
 	return (mTestOk);
 }
@@ -1058,7 +1060,7 @@ bool AddUVAnimation(TBC::GeometryBase* pGeometry)
 
 	TBC::BoneHierarchy* lBones = new TBC::BoneHierarchy;
 	lBones->SetBoneCount(1);
-	lBones->FinalizeInit();
+	lBones->FinalizeInit(TBC::BoneHierarchy::TRANSFORM_NONE);
 
 	TBC::BoneAnimation* lAnimation = new TBC::BoneAnimation;
 	lAnimation->SetKeyframeCount(4, true);
@@ -1237,7 +1239,7 @@ bool TestSkinningLoadSave(const Lepra::LogDecorator& pLog, double pShowTime)
 	if (lTestOk)
 	{
 		lContext = _T("save cuboid structure");
-		TBC::ChunkyStructure lStructure(TBC::ChunkyStructure::DYNAMIC);
+		TBC::ChunkyStructure lStructure(TBC::BoneHierarchy::TRANSFORM_NONE, TBC::ChunkyStructure::DYNAMIC);
 		lStructure.SetBoneCount(2);
 		lStructure.SetBoneChildCount(0, 1);
 		lStructure.SetChildIndex(0, 0, 1);
@@ -1245,7 +1247,7 @@ bool TestSkinningLoadSave(const Lepra::LogDecorator& pLog, double pShowTime)
 		lStructure.SetOriginalBoneTransformation(0, lTransform);
 		lStructure.SetOriginalBoneTransformation(1, lTransform);
 		lStructure.SetPhysicsType(TBC::ChunkyStructure::DYNAMIC);
-		lStructure.BoneHierarchy::FinalizeInit();
+		lStructure.BoneHierarchy::FinalizeInit(TBC::BoneHierarchy::TRANSFORM_NONE);
 		Lepra::DiskFile lFile;
 		lTestOk = lFile.Open(lStructureName, Lepra::DiskFile::MODE_WRITE);
 		if (lTestOk)
@@ -1254,7 +1256,7 @@ bool TestSkinningLoadSave(const Lepra::LogDecorator& pLog, double pShowTime)
 			lTestOk = lStructureLoader.Save(&lStructure);
 		}
 	}
-	TBC::ChunkyStructure lStructure(TBC::ChunkyStructure::DYNAMIC);
+	TBC::ChunkyStructure lStructure(TBC::BoneHierarchy::TRANSFORM_NONE, TBC::ChunkyStructure::DYNAMIC);
 	if (lTestOk)
 	{
 		lContext = _T("load cuboid structure");
@@ -1267,7 +1269,7 @@ bool TestSkinningLoadSave(const Lepra::LogDecorator& pLog, double pShowTime)
 		}
 		if (lTestOk)
 		{
-			lTestOk = lStructure.BoneHierarchy::FinalizeInit();
+			lTestOk = lStructure.BoneHierarchy::FinalizeInit(TBC::BoneHierarchy::TRANSFORM_NONE);
 		}
 	}
 	Lepra::DiskFile::Delete(lStructureName);
@@ -1987,7 +1989,7 @@ BumpMapSceneTest::BumpMapSceneTest(const Lepra::LogDecorator& pLog) :
 	// Setup a transform animation bone.
 	mTransformBones = new TBC::BoneHierarchy;
 	mTransformBones->SetBoneCount(1);
-	mTransformBones->FinalizeInit();
+	mTransformBones->FinalizeInit(TBC::BoneHierarchy::TRANSFORM_NONE);
 
 	mAnimation = new TBC::BoneAnimation;
 	mAnimation->SetKeyframeCount(8, true);

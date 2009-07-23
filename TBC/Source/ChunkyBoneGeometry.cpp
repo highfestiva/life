@@ -103,10 +103,10 @@ bool ChunkyBoneGeometry::CreateJoint(ChunkyStructure* pStructure, PhysicsEngine*
 			lHingeRotator.SetEulerAngles(mBodyData.mParameter[2], 0, mBodyData.mParameter[3]);
 			lHingeAxis = lHingeRotator*lHingeAxis;
 
-			Lepra::Vector3DF lAnchor = pStructure->GetBoneTransformation(0).GetPosition();
-			lAnchor.x += mBodyData.mParameter[6];
-			lAnchor.y += mBodyData.mParameter[7];
-			lAnchor.z += mBodyData.mParameter[8];
+			const Lepra::TransformationF& lBodyTransform = pStructure->GetTransformation(this);
+			const Lepra::Vector3DF lAnchor = lBodyTransform.GetPosition() +
+				(lBodyTransform.GetOrientation() *
+				Lepra::Vector3DF(mBodyData.mParameter[6], mBodyData.mParameter[7], mBodyData.mParameter[8]));
 			mJointId = pPhysics->CreateHingeJoint(mBodyData.mParent->GetBodyId(),
 				GetBodyId(), lAnchor, lHingeAxis);
 			pPhysics->SetJointParams(mJointId, mBodyData.mParameter[4], mBodyData.mParameter[5], 0);
@@ -123,10 +123,10 @@ bool ChunkyBoneGeometry::CreateJoint(ChunkyStructure* pStructure, PhysicsEngine*
 			lAxis1 = lRotator*lAxis1;
 			lAxis2 = lRotator*lAxis2;
 
-			Lepra::Vector3DF lAnchor = pStructure->GetBoneTransformation(0).GetPosition();
-			lAnchor.x += mBodyData.mParameter[6];
-			lAnchor.y += mBodyData.mParameter[7];
-			lAnchor.z += mBodyData.mParameter[8];
+			const Lepra::TransformationF& lBodyTransform = pStructure->GetTransformation(this);
+			const Lepra::Vector3DF lAnchor = lBodyTransform.GetPosition() +
+				(lBodyTransform.GetOrientation() * 
+				Lepra::Vector3DF(mBodyData.mParameter[6], mBodyData.mParameter[7], mBodyData.mParameter[8]));
 			mJointId = pPhysics->CreateUniversalJoint(mBodyData.mParent->GetBodyId(),
 				GetBodyId(), lAnchor, lAxis1, lAxis2);
 			/*pPhysics->SetJointParams(mJointId, mBodyData.mParameter[4], mBodyData.mParameter[5], 0);

@@ -115,14 +115,14 @@ enum ChunkyType
 	CHUNK_STRUCTURE                    = ENUMIFY('S','T','R','U'),	// Structure file type.
 	CHUNK_STRUCTURE_BONE_COUNT         = ENUMIFY('S','T','B','C'),	// Number of bones. Mandatory.
 	CHUNK_STRUCTURE_PHYSICS_TYPE       = ENUMIFY('S','T','P','T'),	// Physics type: dynamic, static, etc. Mandatory.
-	CHUNK_STRUCTURE_ENGINE_COUNT       = ENUMIFY('S','T','E','C'),	// Number of bones. Mandatory.
+	CHUNK_STRUCTURE_ENGINE_COUNT       = ENUMIFY('S','T','E','C'),	// Number of engines. Mandatory.
 	// Structure sub element: bone.
 	CHUNK_STRUCTURE_BONE_CONTAINER     = ENUMIFY('S','T','B','O'),	// A bone and its transformation, type. Mandatory.
 	CHUNK_STRUCTURE_BONE_CHILD_LIST    = ENUMIFY('S','B','C','L'),	// The indices of this bone's children. Optional for bones without children, mandatory otherwise.
 	CHUNK_STRUCTURE_BONE_TRANSFORM     = ENUMIFY('S','T','B','T'),	// The transform of this bone. Mandatory.
 	CHUNK_STRUCTURE_BONE_SHAPE         = ENUMIFY('S','T','S','H'),	// Bone shape (i.e. capsule, box, sphere, portal...), mandatory with one and one shape only per bone.
 	// Structure sub element: engine.
-	CHUNK_STRUCTURE_ENGINE_CONTAINER   = ENUMIFY('S','T','E','C'),	// Engine array. Mandatory.
+	CHUNK_STRUCTURE_ENGINE_CONTAINER   = ENUMIFY('S','T','E','O'),	// Engine array. Mandatory.
 	CHUNK_STRUCTURE_ENGINE             = ENUMIFY('S','T','E','N'),	// An engine and its parameters, type. Mandatory.
 
 	// File type: class. Used by both graphics and text applications.
@@ -223,6 +223,8 @@ private:
 	Lepra::int32 mKeyframeCount;
 	Lepra::int32 mBoneCount;
 	Lepra::int32 mCurrentKeyframe;
+
+	LOG_CLASS_DECLARE();
 };
 
 class ChunkyStructureLoader: public ChunkyLoader	// For physics and skinning. Loads the bone hierachy.
@@ -238,6 +240,8 @@ private:
 	void SetBoneChildren(int pBoneIndex);
 
 	Lepra::int32 mCurrentBoneIndex;
+
+	LOG_CLASS_DECLARE();
 };
 
 /*// Contans information on structure and animation names. Derived class handles UI: mesh, materials, sounds, etc.

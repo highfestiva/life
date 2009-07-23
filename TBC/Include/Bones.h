@@ -6,11 +6,12 @@
 
 #pragma once
 
+#include <list>
+#include <vector>
 #include "../../Lepra/Include/HashTable.h"
 #include "../../Lepra/Include/String.h"
 #include "../../Lepra/Include/Transformation.h"
 #include "TBC.h"
-#include <list>
 
 
 
@@ -44,10 +45,10 @@ private:
 	void SetChildCount(int pChildCount);
 	int GetChildCount();
 	void SetChild(int pChildIndex, int pIndexValue);
+	void AddChild(int pIndexValue);
 	int GetChild(int pChildIndex);
 
-	int mChildCount;
-	int* mChildIndex;
+	std::vector<int> mChildIndex;
 };
 
 
@@ -56,7 +57,12 @@ private:
 class BoneHierarchy
 {
 public:
-	friend class BoneAnimator;
+	enum TransformOperation
+	{
+		TRANSFORM_NONE = 1,
+		TRANSFORM_LOCAL2WORLD,
+		TRANSFORM_WORLD2LOCAL,
+	};
 
 	BoneHierarchy();
 	virtual ~BoneHierarchy();
@@ -71,11 +77,12 @@ public:
 	void SetBoneChildCount(int pBoneIndex, int pChildCount);
 	int GetBoneChildCount(int pBoneIndex) const;
 	void SetChildIndex(int pParentBoneIndex, int pParentChildIndex, int pChildBoneIndex);
+	void AddChild(int pParentBoneIndex, int pChildBoneIndex);
 	int GetChildIndex(int pParentBoneIndex, int pParentChildIndex) const;
-	void SetOriginalBoneTransformation(int pBoneIndex, const Lepra::TransformationF& pTransformation);
+	void SetOriginalBoneTransformation(int pBoneIndex, const Lepra::TransformationF& pTransformation, int pParentBoneIndex = -1);
 	const Lepra::TransformationF& GetOriginalBoneTransformation(int pBoneIndex) const;
 	// Call this when the whole skeleton is complete.
-	bool FinalizeInit();
+	bool FinalizeInit(TransformOperation pTransformOperation);
 
 	void Connect(BoneHierarchy* pParentBones, int pParentBoneIndex);
 
@@ -89,6 +96,9 @@ public:
 	const Lepra::TransformationF& GetRelativeBoneTransformation(int pBoneIndex) const;
 
 private:
+	friend class BoneAnimator;
+
+	void Transform(int pBoneIndex, TransformOperation pTransformOperation);
 	void UpdateBonesObjectTransformation(int pBoneIndex, const Lepra::TransformationF& pParentTransformation);
 
 	int mBoneCount;

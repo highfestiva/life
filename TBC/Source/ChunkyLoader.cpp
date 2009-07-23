@@ -140,11 +140,33 @@ bool ChunkyLoader::AllocLoadChunkyList(FileElementList& pLoadList, Lepra::int64 
 			for (; lOk && !lElementFound && x != pLoadList.end(); ++x)
 			{
 				ChunkyFileElement& lElement = *x;
-				if (lElement.mType == lType)
+				if (lOk && lElement.mType == lType)
 				{
 					lElementFound = true;
 					lAlreadyLoaded = lElement.mIsElementLoaded;
 					lOk = !lAlreadyLoaded;
+					if (lOk)
+					{
+						FileElementList::iterator y = x;
+						// Check that elements appear in the same order as given in the load list, otherwise
+						// we're looking at a new (optional) element in a chunk array.
+						for (++y; lOk && y != pLoadList.end(); ++y)
+						{
+							const ChunkyFileElement& lElement = *y;
+							lAlreadyLoaded = lElement.mIsElementLoaded;
+							lOk = !lAlreadyLoaded;
+						}
+					}
+					if (lOk)
+					{
+						Lepra::tchar c[4];
+						c[0] = (Lepra::tchar)((lType>>24)&0x7F);
+						c[1] = (Lepra::tchar)((lType>>16)&0x7F);
+						c[2] = (Lepra::tchar)((lType>>8)&0x7F);
+						c[3] = (Lepra::tchar)((lType>>0)&0x7F);
+						log_volatile(mLog.Debugf(_T("Loading chunk '%c%c%c%c'."),
+							c[0], c[1], c[2], c[3]));
+					}
 					lElement.mIsElementLoaded = true;
 					const int lMaxElementCount = ::abs(lElement.mElementCount);
 					for (int y = 0; lOk && y < lMaxElementCount; ++y)
@@ -737,7 +759,7 @@ bool ChunkyStructureLoader::Save(const ChunkyStructure* pStructure)
 			Lepra::int64 lChunkEndPosition = 0;
 			lOk = SaveHead(CHUNK_STRUCTURE_BONE_TRANSFORM, lTransformSize, lChunkEndPosition);
 			float lTransform[lTransformFloatCount];
-			pStructure->GetOriginalBoneTransformation(b).Get(lTransform);
+			pStructure->GetBoneTransformation(b).Get(lTransform);
 			lOk = (mFile->WriteData(lTransform, sizeof(lTransform)) == Lepra::IO_OK);
 		}
 
@@ -842,6 +864,8 @@ bool ChunkyStructureLoader::LoadElementCallback(ChunkyType pType, Lepra::uint32 
 
 		if (lOk)
 		{
+			log_volatile(mLog.Debugf(_T("Current bone index is %i."),
+				mCurrentBoneIndex));
 			lStructure->SetBoneChildCount(mCurrentBoneIndex, lChildCount);
 			for (int x = 0; lOk && x < lChildCount; ++x)
 			{
@@ -853,8 +877,6 @@ bool ChunkyStructureLoader::LoadElementCallback(ChunkyType pType, Lepra::uint32 
 			}
 			Lepra::TransformationF lTransform(lTransformArray);
 			lStructure->SetOriginalBoneTransformation(mCurrentBoneIndex, lTransform);
-
-			++mCurrentBoneIndex;
 		}
 
 		if (lOk && lGeometryArray)
@@ -868,8 +890,11 @@ bool ChunkyStructureLoader::LoadElementCallback(ChunkyType pType, Lepra::uint32 
 			}
 		}
 
+		assert(lOk);
+
 		delete[] (lGeometryArray);
 		delete[] (lTransformArray);
+		++mCurrentBoneIndex;
 	}
 	else if (pType == CHUNK_STRUCTURE_ENGINE_CONTAINER)
 	{
@@ -902,6 +927,8 @@ bool ChunkyStructureLoader::LoadElementCallback(ChunkyType pType, Lepra::uint32 
 
 
 LOG_CLASS_DEFINE(GENERAL_RESOURCES, ChunkyLoader);
+LOG_CLASS_DEFINE(GENERAL_RESOURCES, ChunkyAnimationLoader);
+LOG_CLASS_DEFINE(GENERAL_RESOURCES, ChunkyStructureLoader);
 
 
 

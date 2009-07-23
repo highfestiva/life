@@ -130,7 +130,7 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject) const
 	TBC::ChunkyStructure* lStructure = 0;
 	if (lOk)
 	{
-		lStructure = new TBC::ChunkyStructure;
+		lStructure = new TBC::ChunkyStructure(TBC::BoneHierarchy::TRANSFORM_LOCAL2WORLD);
 		TBC::ChunkyStructureLoader lLoader(&lFile, false);
 		lOk = lLoader.Load(lStructure);
 		assert(lOk);

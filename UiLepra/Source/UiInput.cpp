@@ -26,7 +26,7 @@ InputElement::InputElement(Type pType, Interpretation pInterpretation, int pType
 
 InputElement::~InputElement()
 {
-	ClearFunctorArray();
+	ClearFunctors();
 }
 
 InputElement::Type InputElement::GetType() const
@@ -100,7 +100,7 @@ void InputElement::AddFunctor(InputFunctor* pFunctor)
 	mFunctorArray.push_back(pFunctor);
 }
 
-void InputElement::ClearFunctorArray()
+void InputElement::ClearFunctors()
 {
 	for (FunctorArray::iterator x = mFunctorArray.begin(); x != mFunctorArray.end(); ++x)
 	{
@@ -356,6 +356,16 @@ void InputDevice::AddFunctor(InputFunctor* pFunctor)
 		lElement->AddFunctor(pFunctor->CreateCopy());
 	}
 	delete (pFunctor);
+}
+
+void InputDevice::ClearFunctors()
+{
+	ElementArray::iterator x;
+	for (x = mElementArray.begin(); x != mElementArray.end(); ++x)
+	{
+		InputElement* lElement = *x;
+		lElement->ClearFunctors();
+	}
 }
 
 unsigned InputDevice::GetCalibrationDataSize()
@@ -625,6 +635,16 @@ void InputManager::AddFunctor(InputFunctor* pFunctor)
 		lDevice->AddFunctor(pFunctor->CreateCopy());
 	}
 	delete (pFunctor);
+}
+
+void InputManager::ClearFunctors()
+{
+	DeviceList::iterator x;
+	for (x = mDeviceList.begin(); x != mDeviceList.end(); ++x)
+	{
+		InputDevice* lDevice = *x;
+		lDevice->ClearFunctors();
+	}
 }
 
 void InputManager::ActivateAll()

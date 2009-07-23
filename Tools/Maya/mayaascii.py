@@ -1541,6 +1541,7 @@ class DefaultMAReader(MAReader):
 			
 		node = self.createNode(nodetype, opts)
 		self.currentnode = node
+		return node
 
 	# onSelect
 	def onSelect(self, objects, opts):

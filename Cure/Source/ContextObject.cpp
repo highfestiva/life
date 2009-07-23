@@ -707,7 +707,7 @@ bool ContextObject::SetStructure(TBC::ChunkyStructure* pStructure)
 		lTransformation.SetPosition(Lepra::Vector3DF(lX, lY, 250+3));
 	}
 
-	bool lOk = (mStructure == 0 && pStructure->FinalizeInit(lPhysics, lPhysicsFps, lTransformation, 0, this));
+	bool lOk = (mStructure == 0 && pStructure->FinalizeInit(lPhysics, lPhysicsFps, &lTransformation, 0, this));
 	assert(lOk);
 	if (lOk)
 	{

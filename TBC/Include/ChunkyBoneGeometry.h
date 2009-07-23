@@ -39,7 +39,7 @@ public:
 
 	enum ConnectorType
 	{
-		CONNECT_NONE,
+		CONNECT_NONE = 0,
 		CONNECTOR_3DOF,	// Three degrees of freedom.
 		CONNECTEE_3DOF,
 	};

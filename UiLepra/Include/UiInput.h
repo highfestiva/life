@@ -248,7 +248,7 @@ public:
 	// Sets the input listener functor. The InputElement will be responsible
 	// of deleting it.
 	void AddFunctor(InputFunctor* pFunctor);
-	void ClearFunctorArray();
+	void ClearFunctors();
 
 	// Returns the required size in bytes of the calibration data.
 	// This value is always valid.
@@ -347,6 +347,7 @@ public:
 	// Sets an observer on the entire device. (All elements).
 	// The device takes care of deleting the functor.
 	void AddFunctor(InputFunctor* pFunctor);
+	void ClearFunctors();
 
 	unsigned GetCalibrationDataSize();
 	void GetCalibrationData(Lepra::uint8* pData);
@@ -588,6 +589,7 @@ public:
 	// Sets one observer on all input devices, and all elements.
 	// The input manager takes care of deleting the functor.
 	void AddFunctor(InputFunctor* pFunctor);
+	void ClearFunctors();
 	
 	// Activase/release all devices.
 	void ActivateAll();

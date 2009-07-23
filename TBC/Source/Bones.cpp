@@ -14,51 +14,45 @@ namespace TBC
 
 
 
-Bone::Bone() :
-	mChildCount(0),
-	mChildIndex(0)
+Bone::Bone()
 {
 }
 
-Bone::Bone(int pChildCount) :
-	mChildCount(pChildCount),
-	mChildIndex(0)
+Bone::Bone(int pChildCount)
 {
+	SetChildCount(pChildCount);
 }
 
 Bone::~Bone()
 {
-	delete[] (mChildIndex);
-	mChildIndex = 0;
-	mChildCount = 0;
+	mChildIndex.clear();
 }
 
 
 void Bone::SetChildCount(int pChildCount)
 {
-	mChildCount = pChildCount;
-	if (mChildIndex != 0)
-	{
-		delete[] mChildIndex;
-	}
-
-	mChildIndex = new int[mChildCount];
+	mChildIndex.resize(pChildCount);
 }
 
 int Bone::GetChildCount()
 {
-	return (mChildCount);
+	return ((int)mChildIndex.size());
 }
 
 void Bone::SetChild(int pChildIndex, int pIndexValue)
 {
-	assert(pChildIndex < mChildCount);
+	assert(pChildIndex >= 0 && pChildIndex < GetChildCount());
 	mChildIndex[pChildIndex] = pIndexValue;
+}
+
+void Bone::AddChild(int pIndexValue)
+{
+	mChildIndex.push_back(pIndexValue);
 }
 
 int Bone::GetChild(int pChildIndex)
 {
-	assert(pChildIndex < mChildCount);
+	assert(pChildIndex >= 0 && pChildIndex < GetChildCount());
 	return (mChildIndex[pChildIndex]);
 }
 
@@ -125,26 +119,34 @@ int BoneHierarchy::GetBoneCount() const
 
 int BoneHierarchy::GetRootBone() const
 {
+	assert(mRootBoneIndex == 0);
 	return (mRootBoneIndex);
 }
 
 void BoneHierarchy::SetBoneChildCount(int pBoneIndex, int pChildCount)
 {
-	assert(pBoneIndex < mBoneCount);
+	assert(pBoneIndex >= 0 && pBoneIndex < mBoneCount);
 	mBone[pBoneIndex].SetChildCount(pChildCount);
 }
 
 int BoneHierarchy::GetBoneChildCount(int pBoneIndex) const
 {
-	assert(pBoneIndex < mBoneCount);
+	assert(pBoneIndex >= 0 && pBoneIndex < mBoneCount);
 	return (mBone[pBoneIndex].GetChildCount());
 }
 
 void BoneHierarchy::SetChildIndex(int pParentBoneIndex, int pParentChildIndex, int pChildBoneIndex)
 {
-	assert(pParentBoneIndex < mBoneCount);
-	assert(pChildBoneIndex < mBoneCount);
+	assert(pParentBoneIndex >= 0 && pParentBoneIndex < mBoneCount);
+	assert(pChildBoneIndex >= 0 && pChildBoneIndex < mBoneCount);
 	mBone[pParentBoneIndex].SetChild(pParentChildIndex, pChildBoneIndex);
+}
+
+void BoneHierarchy::AddChild(int pParentBoneIndex, int pChildBoneIndex)
+{
+	assert(pParentBoneIndex >= 0 && pParentBoneIndex < mBoneCount);
+	assert(pChildBoneIndex >= 0 && pChildBoneIndex < mBoneCount);
+	mBone[pParentBoneIndex].AddChild(pChildBoneIndex);
 }
 
 int BoneHierarchy::GetChildIndex(int pParentBoneIndex, int pParentChildIndex) const
@@ -153,25 +155,31 @@ int BoneHierarchy::GetChildIndex(int pParentBoneIndex, int pParentChildIndex) co
 	return (mBone[pParentBoneIndex].GetChild(pParentChildIndex));
 }
 
-void BoneHierarchy::SetOriginalBoneTransformation(int pBoneIndex, const Lepra::TransformationF& pTransformation)
+void BoneHierarchy::SetOriginalBoneTransformation(int pBoneIndex, const Lepra::TransformationF& pTransformation, int pParentBoneIndex)
 {
-	assert(pBoneIndex < mBoneCount);
+	assert(pBoneIndex >= 0 && pBoneIndex < mBoneCount);
 	mOriginalBoneTransformation[pBoneIndex] = pTransformation;
+	if (pParentBoneIndex >= 0)
+	{
+		AddChild(pParentBoneIndex, pBoneIndex);
+	}
 }
 
 const Lepra::TransformationF& BoneHierarchy::GetOriginalBoneTransformation(int pBoneIndex) const
 {
-	assert(pBoneIndex < mBoneCount);
+	assert(pBoneIndex >= 0 && pBoneIndex < mBoneCount);
 	return (mOriginalBoneTransformation[pBoneIndex]);
 }
 
-bool BoneHierarchy::FinalizeInit()
+bool BoneHierarchy::FinalizeInit(TransformOperation pTransformOperation)
 {
+	assert(mBoneCount > 0);
 	mRootBoneIndex = 0;
 	for (int i = 0; i < mBoneCount; i++)
 	{
 		mCurrentBoneTransformation[i] = mOriginalBoneTransformation[i];
 	}
+	Transform(mRootBoneIndex, pTransformOperation);
 	return (true);
 }
 
@@ -187,32 +195,61 @@ void BoneHierarchy::Connect(BoneHierarchy* pParentBones, int pParentBoneIndex)
 
 const Lepra::TransformationF& BoneHierarchy::GetBoneTransformation(int pBoneIndex) const
 {
-	assert(pBoneIndex < mBoneCount);
+	assert(pBoneIndex >= 0 && pBoneIndex < mBoneCount);
 	return mCurrentBoneTransformation[pBoneIndex];
 }
 
 void BoneHierarchy::SetBoneTransformation(int pBoneIndex, const Lepra::TransformationF& pTransformation)
 {
-	assert(pBoneIndex < mBoneCount);
+	assert(pBoneIndex >= 0 && pBoneIndex < mBoneCount);
 	mCurrentBoneTransformation[pBoneIndex] = pTransformation;
 }
 
 const Lepra::TransformationF& BoneHierarchy::GetBoneObjectTransformation(int pBoneIndex) const
 {
-	assert(pBoneIndex < mBoneCount);
+	assert(pBoneIndex >= 0 && pBoneIndex < mBoneCount);
 	return mCurrentBoneObjectTransformation[pBoneIndex];
 }
 
 const Lepra::TransformationF& BoneHierarchy::GetRelativeBoneTransformation(int pBoneIndex) const
 {
-	assert(pBoneIndex < mBoneCount);
+	assert(pBoneIndex >= 0 && pBoneIndex < mBoneCount);
 	return mRelativeBoneTransformation[pBoneIndex];
 }
 
 
 
+void BoneHierarchy::Transform(int pBoneIndex, TransformOperation pTransformOperation)
+{
+	assert(pBoneIndex >= 0 && pBoneIndex < mBoneCount);
+	for (int i = 0; i < mBone[pBoneIndex].GetChildCount(); i++)
+	{
+		const int lChildIndex = mBone[pBoneIndex].GetChild(i);
+		assert(lChildIndex >= 0 && lChildIndex < mBoneCount);
+		assert(lChildIndex != pBoneIndex);
+
+		if (pTransformOperation == TRANSFORM_LOCAL2WORLD)
+		{
+			const Lepra::TransformationF& lThisTransform = mCurrentBoneTransformation[pBoneIndex];
+			Lepra::TransformationF& lChildTransform = mCurrentBoneTransformation[lChildIndex];
+			lChildTransform = lThisTransform*lChildTransform;
+		}
+
+		Transform(lChildIndex, pTransformOperation);
+
+		if (pTransformOperation == TRANSFORM_WORLD2LOCAL)
+		{
+			const Lepra::TransformationF& lThisTransform = mCurrentBoneTransformation[pBoneIndex];
+			Lepra::TransformationF& lChildTransform = mCurrentBoneTransformation[lChildIndex];
+			lChildTransform = lThisTransform.InverseTransform(lChildTransform);
+		}
+	}
+}
+
 void BoneHierarchy::UpdateBonesObjectTransformation(int pBoneIndex, const Lepra::TransformationF& pParentTransformation)
 {
+	assert(pBoneIndex >= 0 && pBoneIndex < mBoneCount);
+
 	mCurrentBoneObjectTransformation[pBoneIndex] = pParentTransformation * mCurrentBoneTransformation[pBoneIndex];
 	Lepra::TransformationF lOrgObjTransf(pParentTransformation * mOriginalBoneTransformation[pBoneIndex]);
 

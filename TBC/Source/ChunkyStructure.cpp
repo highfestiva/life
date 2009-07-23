@@ -15,8 +15,9 @@ namespace TBC
 
 
 
-ChunkyStructure::ChunkyStructure(PhysicsType pPhysicsType):
+ChunkyStructure::ChunkyStructure(TransformOperation pTransformOperation, PhysicsType pPhysicsType):
 	BoneHierarchy(),
+	mTransformOperation(pTransformOperation),
 	mPhysicsType(pPhysicsType),
 	mUniqeGeometryIndex(0)
 {
@@ -79,10 +80,17 @@ void ChunkyStructure::AddBoneGeometry(ChunkyBoneGeometry* pGeometry)
 	mGeometryArray.push_back(pGeometry);
 }
 
-void ChunkyStructure::AddBoneGeometry(const Lepra::TransformationF& pTransformation, ChunkyBoneGeometry* pGeometry)
+void ChunkyStructure::AddBoneGeometry(const Lepra::TransformationF& pTransformation,
+	ChunkyBoneGeometry* pGeometry, const ChunkyBoneGeometry* pParent)
 {
-	SetOriginalBoneTransformation((int)mGeometryArray.size(), pTransformation);
+	const int lChildIndex = (int)mGeometryArray.size();
+	SetOriginalBoneTransformation(lChildIndex, pTransformation);
 	AddBoneGeometry(pGeometry);
+	if (pParent)
+	{
+		int lParentIndex = GetIndex(pParent);
+		AddChild(lParentIndex, lChildIndex);
+	}
 }
 
 int ChunkyStructure::GetIndex(const ChunkyBoneGeometry* pGeometry) const
@@ -175,23 +183,25 @@ void ChunkyStructure::SetBoneCount(int pBoneCount)
 	mUniqeGeometryIndex = GetBoneCount();
 }
 
-bool ChunkyStructure::FinalizeInit(PhysicsEngine* pPhysics, unsigned pPhysicsFps, Lepra::TransformationF pTransform,
+bool ChunkyStructure::FinalizeInit(PhysicsEngine* pPhysics, unsigned pPhysicsFps, Lepra::TransformationF* pTransform,
 	PhysicsEngine::TriggerListener* pTrigListener, PhysicsEngine::ForceFeedbackListener* pForceListener)
 {
-	// TODO: add to physics engine depending on mPhysicsType.
 	bool lOk = ((int)mGeometryArray.size() == GetBoneCount());
 	assert(lOk);
 	if (lOk)
 	{
-		lOk = BoneHierarchy::FinalizeInit();
+		if (pTransform)
+		{
+			const int lRoot = 0;
+			SetOriginalBoneTransformation(lRoot, (*pTransform)*GetOriginalBoneTransformation(lRoot));
+		}
+		lOk = Parent::FinalizeInit(mTransformOperation);
 	}
 	if (lOk)
 	{
 		const int lBoneCount = GetBoneCount();
 		for (int x = 0; lOk && x < lBoneCount; ++x)
 		{
-			SetBoneTransformation(x, pTransform*GetOriginalBoneTransformation(x));
-
 			ChunkyBoneGeometry* lGeometry = GetBoneGeometry(x);
 			if (mPhysicsType == DYNAMIC || mPhysicsType == STATIC)
 			{
