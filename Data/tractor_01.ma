@@ -1,6 +1,6 @@
 //Maya ASCII 2009 scene
 //Name: tractor_01.ma
-//Last modified: Thu, Jul 23, 2009 03:01:45 AM
+//Last modified: Thu, Jul 23, 2009 04:00:47 AM
 //Codeset: 1252
 requires maya "2009";
 currentUnit -l centimeter -a degree -t film;
@@ -11,15 +11,15 @@ fileInfo "cutIdentifier" "200811130729-738540";
 fileInfo "osv" "Microsoft Windows XP Service Pack 3 (Build 2600)\n";
 createNode transform -s -n "persp";
 	setAttr ".v" no;
-	setAttr ".t" -type "double3" -7.7566877913924639 6.2002954443352252 5.7275156450063118 ;
-	setAttr ".r" -type "double3" -34.561489187758511 -63.373449488012788 -7.0967058410926142e-015 ;
+	setAttr ".t" -type "double3" 9.5766545343312117 12.232707110824638 7.2182554870313655 ;
+	setAttr ".r" -type "double3" -48.961489187760009 58.626550511987084 -6.1092371740444271e-015 ;
 	setAttr ".rp" -type "double3" 3.2612801348363973e-016 6.6613381477509392e-016 1.7763568394002505e-015 ;
 	setAttr ".rpt" -type "double3" -3.1999111411044307e-015 1.0837479376026062e-015 
 		-5.4363157409169434e-015 ;
 createNode camera -s -n "perspShape" -p "persp";
 	setAttr -k off ".v" no;
 	setAttr ".fl" 34.999999999999979;
-	setAttr ".coi" 11.098784359466045;
+	setAttr ".coi" 16.345168667752439;
 	setAttr ".imn" -type "string" "persp";
 	setAttr ".den" -type "string" "persp_depth";
 	setAttr ".man" -type "string" "persp_mask";
@@ -181,11 +181,11 @@ createNode mesh -n "hoe_armShape1" -p "hoe_arm1";
 	setAttr ".dcc" -type "string" "Ambient+Diffuse";
 	setAttr ".covm[0]"  0 1 1;
 	setAttr ".cdvm[0]"  0 1 1;
-createNode transform -n "hoe_back" -p "hoe_arm1";
-	setAttr ".t" -type "double3" 0.0023624814001030649 0.62329782800419564 0.15311021938383984 ;
-	setAttr ".r" -type "double3" -43.556351614393314 0 1.3608231655482164e-029 ;
-	setAttr ".s" -type "double3" 0.10379379563303039 0.77697422889131074 0.8580293166453592 ;
-	setAttr ".sh" -type "double3" 0 0 -0.37682662454669752 ;
+createNode transform -n "hoe_back" -p "hoe_arm0";
+	setAttr ".t" -type "double3" 0.0020638239672236842 0.38733013950645256 1.5990507559593938 ;
+	setAttr ".r" -type "double3" 63.077331982390064 0 1.3502527539148834e-029 ;
+	setAttr ".s" -type "double3" 0.10460634212971123 0.89219214176406747 0.74722319942037896 ;
+	setAttr ".sh" -type "double3" 0 0 0.40169856407178073 ;
 createNode mesh -n "hoe_backShape" -p "hoe_back";
 	setAttr -k off ".v";
 	setAttr ".vir" yes;
@@ -195,11 +195,10 @@ createNode mesh -n "hoe_backShape" -p "hoe_back";
 	setAttr ".dcc" -type "string" "Ambient+Diffuse";
 	setAttr ".covm[0]"  0 1 1;
 	setAttr ".cdvm[0]"  0 1 1;
-createNode transform -n "hoe_floor" -p "hoe_arm1";
-	setAttr ".t" -type "double3" 0.00222825499311764 1.1134217209275155 0.3090074508444367 ;
-	setAttr ".r" -type "double3" -119.24043393082138 -2.7216463310964335e-029 0 ;
-	setAttr ".s" -type "double3" 0.10379379563303037 0.87764540456115414 0.75960822355130631 ;
-	setAttr ".sh" -type "double3" 0 0 0.41038839301308733 ;
+createNode transform -n "hoe_floor" -p "hoe_back";
+	setAttr ".t" -type "double3" -0.0012932026058666488 0.5374771496871058 0.52528133297643409 ;
+	setAttr ".r" -type "double3" -97.650347327656576 0 -2.8249000307521022e-030 ;
+	setAttr ".s" -type "double3" 0.99999999999999989 0.999999999999999 0.99999999999999967 ;
 createNode mesh -n "hoe_floorShape" -p "hoe_floor";
 	setAttr -k off ".v";
 	setAttr ".vir" yes;
@@ -209,11 +208,10 @@ createNode mesh -n "hoe_floorShape" -p "hoe_floor";
 	setAttr ".dcc" -type "string" "Ambient+Diffuse";
 	setAttr ".covm[0]"  0 1 1;
 	setAttr ".cdvm[0]"  0 1 1;
-createNode transform -n "hoe_side0" -p "hoe_arm1";
-	setAttr ".t" -type "double3" 0.092561326897664983 0.91136154964378191 -0.073717516364240065 ;
-	setAttr ".r" -type "double3" 2.5444437451708134e-014 119.24043393082135 90.000000000000014 ;
-	setAttr ".s" -type "double3" 0.87764540456115436 0.10379379563303037 0.75960822355130642 ;
-	setAttr ".sh" -type "double3" 0 0.41038839301308661 0 ;
+createNode transform -n "hoe_side0" -p "hoe_back";
+	setAttr ".t" -type "double3" 0.86901962634130581 0.48639147877519529 0.03975856461681393 ;
+	setAttr ".r" -type "double3" 0 97.650347327656547 90 ;
+	setAttr ".s" -type "double3" 0.99999999999999922 0.99999999999999989 0.99999999999999989 ;
 createNode mesh -n "hoe_sideShape0" -p "hoe_side0";
 	setAttr -k off ".v";
 	setAttr ".vir" yes;
@@ -223,11 +221,10 @@ createNode mesh -n "hoe_sideShape0" -p "hoe_side0";
 	setAttr ".dcc" -type "string" "Ambient+Diffuse";
 	setAttr ".covm[0]"  0 1 1;
 	setAttr ".cdvm[0]"  0 1 1;
-createNode transform -n "hoe_side1" -p "hoe_arm1";
-	setAttr ".t" -type "double3" -0.088279271853798053 0.91136154964378213 -0.073717516364240065 ;
-	setAttr ".r" -type "double3" 2.5444437451708134e-014 119.24043393082135 90.000000000000014 ;
-	setAttr ".s" -type "double3" 0.87764540456115436 0.10379379563303037 0.75960822355130642 ;
-	setAttr ".sh" -type "double3" 0 0.41038839301308661 0 ;
+createNode transform -n "hoe_side1" -p "hoe_back";
+	setAttr ".t" -type "double3" -0.87328681546988451 0.48639147877519617 0.039758564616814152 ;
+	setAttr ".r" -type "double3" 0 97.650347327656547 90 ;
+	setAttr ".s" -type "double3" 0.99999999999999922 0.99999999999999989 0.99999999999999989 ;
 createNode mesh -n "hoe_sideShape1" -p "hoe_side1";
 	setAttr -k off ".v";
 	setAttr ".vir" yes;
@@ -301,8 +298,8 @@ createNode script -n "uiConfigurationScriptNode";
 		+ "                -transmitFilters 0\n                -setFilter \"0\" \n                -showSetMembers 0\n                -allowMultiSelection 1\n                -alwaysToggleSelect 0\n                -directSelect 0\n                -displayMode \"DAG\" \n                -expandObjects 0\n                -setsIgnoreFilters 1\n                -containersIgnoreFilters 0\n                -editAttrName 0\n                -showAttrValues 0\n                -highlightSecondary 0\n                -showUVAttrsOnly 0\n                -showTextureNodesOnly 0\n                -attrAlphaOrder \"default\" \n                -animLayerFilterOptions \"allAffecting\" \n                -sortOrder \"none\" \n                -longNames 0\n                -niceNames 1\n                -showNamespace 1\n                $editorName;\n\n\t\t\t$editorName = ($panelName+\"DopeSheetEd\");\n            dopeSheetEditor -e \n                -displayKeys 1\n                -displayTangents 0\n                -displayActiveKeys 0\n                -displayActiveKeyTangents 0\n                -displayInfinities 0\n"
 		+ "                -autoFit 0\n                -snapTime \"integer\" \n                -snapValue \"none\" \n                -outliner \"dopeSheetPanel1OutlineEd\" \n                -showSummary 1\n                -showScene 0\n                -hierarchyBelow 0\n                -showTicks 1\n                -selectionWindow 0 0 0 0 \n                $editorName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"clipEditorPanel\" (localizedPanelLabel(\"Trax Editor\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"clipEditorPanel\" -l (localizedPanelLabel(\"Trax Editor\")) -mbv $menusOkayInPanels `;\n\n\t\t\t$editorName = clipEditorNameFromPanel($panelName);\n            clipEditor -e \n                -displayKeys 0\n                -displayTangents 0\n                -displayActiveKeys 0\n                -displayActiveKeyTangents 0\n                -displayInfinities 0\n                -autoFit 0\n                -snapTime \"none\" \n"
 		+ "                -snapValue \"none\" \n                $editorName;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Trax Editor\")) -mbv $menusOkayInPanels  $panelName;\n\n\t\t\t$editorName = clipEditorNameFromPanel($panelName);\n            clipEditor -e \n                -displayKeys 0\n                -displayTangents 0\n                -displayActiveKeys 0\n                -displayActiveKeyTangents 0\n                -displayInfinities 0\n                -autoFit 0\n                -snapTime \"none\" \n                -snapValue \"none\" \n                $editorName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"hyperGraphPanel\" (localizedPanelLabel(\"Hypergraph Hierarchy1\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"hyperGraphPanel\" -l (localizedPanelLabel(\"Hypergraph Hierarchy1\")) -mbv $menusOkayInPanels `;\n\n\t\t\t$editorName = ($panelName+\"HyperGraphEd\");\n"
-		+ "            hyperGraph -e \n                -graphLayoutStyle \"hierarchicalLayout\" \n                -orientation \"horiz\" \n                -mergeConnections 1\n                -zoom 0.645808\n                -animateTransition 0\n                -showRelationships 1\n                -showShapes 0\n                -showDeformers 0\n                -showExpressions 0\n                -showConstraints 0\n                -showUnderworld 0\n                -showInvisible 0\n                -transitionFrames 5\n                -currentNode \"hoe_side1\" \n                -opaqueContainers 0\n                -dropTargetNode \"hoe_arm1\" \n                -dropNode \"hoe_side1\" \n                -freeform 0\n                -imagePosition 0 0 \n                -imageScale 1\n                -imageEnabled 0\n                -graphType \"DAG\" \n                -heatMapDisplay 0\n                -updateSelection 1\n                -updateNodeAdded 1\n                -useDrawOverrideColor 0\n                -limitGraphTraversal -1\n                -range -1 -1 \n"
-		+ "                -iconSize \"largeIcons\" \n                -showCachedConnections 0\n                $editorName;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Hypergraph Hierarchy1\")) -mbv $menusOkayInPanels  $panelName;\n\n\t\t\t$editorName = ($panelName+\"HyperGraphEd\");\n            hyperGraph -e \n                -graphLayoutStyle \"hierarchicalLayout\" \n                -orientation \"horiz\" \n                -mergeConnections 1\n                -zoom 0.645808\n                -animateTransition 0\n                -showRelationships 1\n                -showShapes 0\n                -showDeformers 0\n                -showExpressions 0\n                -showConstraints 0\n                -showUnderworld 0\n                -showInvisible 0\n                -transitionFrames 5\n                -currentNode \"hoe_side1\" \n                -opaqueContainers 0\n                -dropTargetNode \"hoe_arm1\" \n                -dropNode \"hoe_side1\" \n                -freeform 0\n                -imagePosition 0 0 \n"
+		+ "            hyperGraph -e \n                -graphLayoutStyle \"hierarchicalLayout\" \n                -orientation \"horiz\" \n                -mergeConnections 1\n                -zoom 0.645808\n                -animateTransition 0\n                -showRelationships 1\n                -showShapes 0\n                -showDeformers 0\n                -showExpressions 0\n                -showConstraints 0\n                -showUnderworld 0\n                -showInvisible 0\n                -transitionFrames 5\n                -currentNode \"hoe_back\" \n                -opaqueContainers 0\n                -dropTargetNode \"hoe_back\" \n                -dropNode \"hoe_side1\" \n                -freeform 0\n                -imagePosition 0 0 \n                -imageScale 1\n                -imageEnabled 0\n                -graphType \"DAG\" \n                -heatMapDisplay 0\n                -updateSelection 1\n                -updateNodeAdded 1\n                -useDrawOverrideColor 0\n                -limitGraphTraversal -1\n                -range -1 -1 \n"
+		+ "                -iconSize \"largeIcons\" \n                -showCachedConnections 0\n                $editorName;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Hypergraph Hierarchy1\")) -mbv $menusOkayInPanels  $panelName;\n\n\t\t\t$editorName = ($panelName+\"HyperGraphEd\");\n            hyperGraph -e \n                -graphLayoutStyle \"hierarchicalLayout\" \n                -orientation \"horiz\" \n                -mergeConnections 1\n                -zoom 0.645808\n                -animateTransition 0\n                -showRelationships 1\n                -showShapes 0\n                -showDeformers 0\n                -showExpressions 0\n                -showConstraints 0\n                -showUnderworld 0\n                -showInvisible 0\n                -transitionFrames 5\n                -currentNode \"hoe_back\" \n                -opaqueContainers 0\n                -dropTargetNode \"hoe_back\" \n                -dropNode \"hoe_side1\" \n                -freeform 0\n                -imagePosition 0 0 \n"
 		+ "                -imageScale 1\n                -imageEnabled 0\n                -graphType \"DAG\" \n                -heatMapDisplay 0\n                -updateSelection 1\n                -updateNodeAdded 1\n                -useDrawOverrideColor 0\n                -limitGraphTraversal -1\n                -range -1 -1 \n                -iconSize \"largeIcons\" \n                -showCachedConnections 0\n                $editorName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"hyperShadePanel\" (localizedPanelLabel(\"Hypershade\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"hyperShadePanel\" -l (localizedPanelLabel(\"Hypershade\")) -mbv $menusOkayInPanels `;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Hypershade\")) -mbv $menusOkayInPanels  $panelName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"visorPanel\" (localizedPanelLabel(\"Visor\")) `;\n"
 		+ "\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"visorPanel\" -l (localizedPanelLabel(\"Visor\")) -mbv $menusOkayInPanels `;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Visor\")) -mbv $menusOkayInPanels  $panelName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"polyTexturePlacementPanel\" (localizedPanelLabel(\"UV Texture Editor\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"polyTexturePlacementPanel\" -l (localizedPanelLabel(\"UV Texture Editor\")) -mbv $menusOkayInPanels `;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"UV Texture Editor\")) -mbv $menusOkayInPanels  $panelName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"multiListerPanel\" (localizedPanelLabel(\"Multilister\")) `;\n"
 		+ "\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"multiListerPanel\" -l (localizedPanelLabel(\"Multilister\")) -mbv $menusOkayInPanels `;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Multilister\")) -mbv $menusOkayInPanels  $panelName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"renderWindowPanel\" (localizedPanelLabel(\"Render View\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"renderWindowPanel\" -l (localizedPanelLabel(\"Render View\")) -mbv $menusOkayInPanels `;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Render View\")) -mbv $menusOkayInPanels  $panelName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextPanel \"blendShapePanel\" (localizedPanelLabel(\"Blend Shape\")) `;\n"

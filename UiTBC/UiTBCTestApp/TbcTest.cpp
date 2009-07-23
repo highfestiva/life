@@ -1013,6 +1013,31 @@ bool ExportStructure()
 		}
 		lStructure.ClearAll(lPhysics);
 	}
+	if (lOk)
+	{
+		lContext = _T("tracktor load");
+		Lepra::String lFilename(_T("tractor_01.phys"));
+
+		TBC::ChunkyStructure lStructure(TBC::BoneHierarchy::TRANSFORM_LOCAL2WORLD);
+		lOk = ReadStructure(lFilename, lStructure);
+		assert(lOk);
+		if (lOk)
+		{
+			Lepra::TransformationF lTransformation;
+			lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, &lTransformation, 0, 0);
+			assert(lOk);
+		}
+		if (lOk)
+		{
+			lOk = (lStructure.GetBoneCount() == 12 &&
+				lStructure.GetPhysicsType() == TBC::ChunkyStructure::DYNAMIC &&
+				lStructure.GetBoneGeometry(0) != 0 &&
+				lStructure.GetBoneGeometry(0)->GetBodyId() != TBC::INVALID_BODY &&
+				lStructure.GetEngineCount() == 3);
+			assert(lOk);
+		}
+		lStructure.ClearAll(lPhysics);
+	}
 
 	delete (lPhysics);
 

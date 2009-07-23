@@ -27,18 +27,19 @@ class StructureEngine
 public:
 	enum EngineType
 	{
-		ENGINE_WALK,
+		ENGINE_WALK = 1,
 		ENGINE_CAMERA_FLAT_PUSH,
 		ENGINE_HINGE2_ROLL,
-		ENGINE_ROLL_STRAIGHT,
 		ENGINE_HINGE2_TURN,
 		ENGINE_HINGE2_BREAK,
 		ENGINE_HINGE,
 		ENGINE_GLUE,
+
+		ENGINE_ROLL_STRAIGHT = 100,	// TODO: remove!
 	};
 	enum EngineMode
 	{
-		MODE_NORMAL,
+		MODE_NORMAL = 1,
 		MODE_HALF_LOCK,
 	};
 

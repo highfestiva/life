@@ -758,8 +758,13 @@ bool ChunkyStructureLoader::Save(const ChunkyStructure* pStructure)
 			const Lepra::uint32 lTransformSize = lTransformFloatCount*sizeof(float);
 			Lepra::int64 lChunkEndPosition = 0;
 			lOk = SaveHead(CHUNK_STRUCTURE_BONE_TRANSFORM, lTransformSize, lChunkEndPosition);
-			float lTransform[lTransformFloatCount];
-			pStructure->GetBoneTransformation(b).Get(lTransform);
+			Lepra::uint32 lTransform[lTransformFloatCount];
+			pStructure->GetBoneTransformation(b).Get((float*)lTransform);
+			// Convert to network byte order.
+			for (int x = 0; x < lTransformFloatCount; ++x)
+			{
+				lTransform[x] = Lepra::Endian::HostToBig(lTransform[x]);
+			}
 			lOk = (mFile->WriteData(lTransform, sizeof(lTransform)) == Lepra::IO_OK);
 		}
 
@@ -837,7 +842,7 @@ bool ChunkyStructureLoader::LoadElementCallback(ChunkyType pType, Lepra::uint32 
 		Lepra::int32 lChildArray[MAXIMUM_CHILD_BONES];
 		::memset(lChildArray, -1, sizeof(lChildArray));
 		unsigned lChildByteSize = 0;
-		float* lTransformArray = 0;
+		Lepra::uint32* lTransformArray = 0;
 		unsigned lFloatByteSize = 0;
 		Lepra::uint32* lGeometryArray = 0;
 		unsigned lGeometryByteSize = 0;
@@ -875,7 +880,12 @@ bool ChunkyStructureLoader::LoadElementCallback(ChunkyType pType, Lepra::uint32 
 					lStructure->SetChildIndex(mCurrentBoneIndex, x, lChildArray[x]);
 				}
 			}
-			Lepra::TransformationF lTransform(lTransformArray);
+			// Convert to host endian.
+			for (int x = 0; x < lTransformFloatCount; ++x)
+			{
+				lTransformArray[x] = Lepra::Endian::BigToHost(lTransformArray[x]);
+			}
+			Lepra::TransformationF lTransform((const float*)lTransformArray);
 			lStructure->SetOriginalBoneTransformation(mCurrentBoneIndex, lTransform);
 		}
 

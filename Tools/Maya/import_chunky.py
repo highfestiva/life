@@ -410,6 +410,7 @@ class GroupWriter:
                         pprint.pprint(data)
                         self._writechunk(data)
 
+
         def _writechunk(self, chunks, name=None):
                 t = type(chunks)
                 if t == tuple or t == list:
@@ -448,6 +449,7 @@ class GroupWriter:
                         print("Error: trying to write unknown chunk data, type='%s', value='%s'." % str(t), str(chunks))
                         sys.exit(17)
 
+
         def _writebone(self, node):
                 q = node.getrot()
                 if not q:
@@ -455,8 +457,10 @@ class GroupWriter:
                         sys.exit(18)
                 pos = node.gettrans()
                 data = q.totuple()+pos
+                print("Writing bone with data", data)
                 for f in data:
                         self._writefloat(f)
+
 
         def _writeshape(self, shape):
                 # Write all general parameters first.
@@ -503,10 +507,31 @@ class GroupWriter:
                 # Write shape data (dimensions of shape).
                 for x in shape.data:
                         self._writefloat(x)
-                print("Wrote shape with axes", self._getaxes(node))
+                #print("Wrote shape with axes", self._getaxes(node))
+
 
         def _writeengine(self, node):
-                print("Would have written motor.")
+                # Write all general parameters first.
+                types = {"walk":1, "cam_flat_push":2, "hinge_roll":3, "hinge2_roll":3, "hinge2_turn":4, "hinge2_break":5, "hinge":6, "glue":7}
+                self._writeint(types[node.get_fixed_attribute("type")])
+                self._writefloat(node.get_fixed_attribute("strength"))
+                self._writefloat(node.get_fixed_attribute("max_velocity")[0])
+                self._writefloat(node.get_fixed_attribute("max_velocity")[1])
+                self._writefloat(node.get_fixed_attribute("controller_index"))
+                connected_to = node.get_fixed_attribute("connected_to")
+                connected_to = self._expand_connected_list(connected_to)
+                if len(connected_to) < 1:
+                        print("Error: could not find any matching nodes to connected engine '%s' to." % node.getFullName())
+                        sys.exit(19)
+                self._writeint(len(connected_to))
+                for connection in connected_to:
+                        body, scale, connectiontype = connection
+                        self._writeint(self.bodies.index(body))
+                        self._writefloat(scale)
+                        connectiontypes = {"normal":1, "half_lock":2}
+                        self._writeint(connectiontypes[connectiontype])
+                print("Wrote engine '%s' for %i nodes." % (node.getName()[6:], len(connected_to)))
+
 
         def _writeheader(self, signature, size=0):
                 self._writesignature(signature)
@@ -539,6 +564,17 @@ class GroupWriter:
                         sys.exit(10)
                 self.f.write(data)
 
+
+        def _expand_connected_list(self, unexpanded):
+                expanded = []
+                for e in unexpanded:
+                        noderegexp, scale, ctype = e
+                        for body in self.bodies:
+                                if re.search("^"+noderegexp+"$", body.getFullName()[1:]):
+                                        expanded += [(body, scale, ctype)]
+                return expanded
+
+
         def _geteuler(self, node):
                 q = node.getrot()
                 w2 = q[0]*q[0]
@@ -563,9 +599,11 @@ class GroupWriter:
                         roll = math.atan2(2*acbd, 1 - 2*(y2+x2))
                 return yaw, pitch, roll
 
+
         def _getaxes(self, node):
                 q = node.getrot()
                 return q.rotateVec((1,0,0)), q.rotateVec((0,1,0)), q.rotateVec((0,0,1))
+
 
         def _getshape(self, node):
                 shapenode = self._findchildnode(parent=node, nodetype="mesh")
@@ -585,6 +623,7 @@ class GroupWriter:
                         sys.exit(14)
                 return shape.Shape(node, in_node)
 
+
         def _findchildnode(self, parent, nodetype):
                 for node in self.group:
                         if node.getParent() == parent and node.nodetype == nodetype:
@@ -598,6 +637,7 @@ class GroupWriter:
                                 return node
                 print("Warning: node '%s' not found!" % name)
                 return None
+
 
         def _count_transforms(self):
                 count = 0
