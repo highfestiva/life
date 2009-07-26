@@ -1157,7 +1157,7 @@ class MAReader:
 		# The line number where the current MEL command ended
 		self.cmd_end_linenr = None
 		
-		cpp = MAPreProcessor(self.lineHandler)
+		cpp = self.create_pre_processor()
 		self.cpp = cpp
 		# Read the file and invoke the lineHandler for each line...
 		cpp(f)
@@ -1165,6 +1165,9 @@ class MAReader:
 		# Execute the last command
 		self.processCommands(";")
 		self.end()
+
+	def create_pre_processor(self):
+		return MAPreProcessor(self.lineHandler)
 
 	def lineHandler(self, s):
 #		self.linenr += 1

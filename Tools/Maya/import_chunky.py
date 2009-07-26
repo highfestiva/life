@@ -8,6 +8,7 @@ import shape
 
 from functools import reduce
 import configparser
+import datetime
 import pprint
 import re
 import struct
@@ -16,6 +17,7 @@ import types
 
 
 physics_type = {"static":1, "dynamic":2, "collision_detect_only":3}
+modified_time = None
 
 CHUNK_STRUCTURE                    = "STRU"
 CHUNK_STRUCTURE_BONE_COUNT         = "STBC"
@@ -29,45 +31,71 @@ CHUNK_STRUCTURE_ENGINE_CONTAINER   = "STEO"
 CHUNK_STRUCTURE_ENGINE             = "STEN"
 
 
+class TimePreProcessor(MAPreProcessor):
+        "Overrides the default pre processor to try to fetch .ma modification time."
+        def iterStringIntervals(self, _s):
+                if _s.startswith("//Last modified: "):
+                        M, D, Y, h, m, s, ToD = _s[22:].replace(",", "").replace(":", " ").split()
+                        getmonth = lambda M: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].index(M)+1
+                        gettodoff = lambda ToD: ["AM", "PM"].index(ToD)*12
+                        M, D, Y, h, m, s = getmonth(M), int(D), int(Y), int(h)+gettodoff(ToD), int(m), int(s)
+                        global modified_time
+                        modified_time = "%i-%2.2i-%2.2iT%2.2i:%2.2i:%2.2i" % (Y, M, D, h, m, s);
+                return super(MAPreProcessor, self).iterStringIntervals(_s)
+
 
 class GroupReader(DefaultMAReader):
         """Reads two files: a .ma and a .ini, sort outs islands. The islands that contain "bad" types
         are sorted out, the others are kept for writing to Chunky file in the future.
-        Only ONE group is allowed to exist per .ma file."""
+        Exactly TWO groups must to exist per .ma file: phys and visual."""
 
         def __init__(self, basename):
                 DefaultMAReader.__init__(self)
                 self.bad_types = ["camera", "lightLinker", "displayLayerManager", "displayLayer", \
-                                  "renderLayerManager", "renderLayer", "script", "<unknown>"]
+                                  "renderLayerManager", "renderLayer", "script", "<unknown>", "phong", \
+                                  "shadingEngine", "materialInfo", "groupId", "groupParts" ]
                 self.basename = basename
                 self.read(basename+".ma")
 
 
+        # Override.
+        def create_pre_processor(self):
+                return TimePreProcessor(self.lineHandler)
+
+
+        # Override.
         def end(self):
                 islands = self.gatherIslands(self.nodelist)
                 if not islands:
                         print("Bad file! Terminating due to error.")
                         sys.exit(1)
+                self.check_mesh_export(islands)
                 islands = self.filterIslands(islands)
-                if len(islands) != 1:
+                if len(islands) != 2:
                         # TODO: print objects from each island.
-                        print("More than a single island (total %i) exists in the .ma file! Terminating due to error." % len(islands))
+                        print("The number of standalone groups is not two (is totally %i) in the .ma file! These are the groups:" % len(islands))
+                        for i in islands:
+                                print("  "+str(list(map(lambda x: x.getFullName(), i))))
+                                print("")
+                        print("Terminating due to error.")
                         sys.exit(2)
-                group = islands[0]
+                phys_group, visual_group = islands
                 config = configparser.SafeConfigParser()
                 ininame = self.basename+".ini"
                 if not config.read(ininame):
                         print("Error: could not open tweak file '%s'!" % ininame)
                         sys.exit(3)
-                self.flipaxis(group)
-                if not self.applyConfig(config, group):
+                self.flipaxis(phys_group)
+                self.flipaxis(visual_group)
+                if not self.applyPhysConfig(config, phys_group):
                         print("Error: could not apply configuration.")
                         sys.exit(4)
-                if not self.validateGroup(group):
-                        #self.printnodes(group)
-                        print("Invalid group/island! Terminating due to error.")
+                if not self.validatePhysGroup(phys_group):
+                        #self.printnodes(phys_group)
+                        print("Invalid physics group! Terminating due to error.")
                         sys.exit(3)
-                self.group = group
+                self.phys_group = phys_group
+                self.visual_group = visual_group
 
 
         # Override
@@ -104,36 +132,27 @@ class GroupReader(DefaultMAReader):
                         tab = self._fixattr.copy()
                         tab.update(self._setattr)
                         return tab
-##                def get_world_translation(self):
-##                        if self.getParent():
-##                                pt = self.get_world_translation(self.getParent())
-##                                pq = self.getParent().get_world_orientation()
-##                        else:
-##                                pt = (0, 0, 0)
-##                                pq = quat(1,0,0,0)
-##                        p = self.get_fixed_attribute("t", optional=True, default=(0,0,0))
-##                        p = pq.rotateVec(p)
-##                        p = tuple(map(lambda x,y: x+y, pt, p))
-##                        return p
-##                def get_world_orientation(self):
-##                        if self.getParent():
-##                                pq = self.get_world_orientation(self.getParent())
-##                        else:
-##                                pq = quat(1, 0, 0, 0)
-##                        rot = self.get_fixed_attribute("r", optional=True, default=(0,0,0))
-##                        qx = quat().fromAngleAxis(rot[0], (1, 0, 0))
-##                        qy = quat().fromAngleAxis(rot[1], (0, 1, 0))
-##                        qz = quat().fromAngleAxis(rot[2], (0, 0, 1))
-##                        q = pq*qx*qz*qy
-##                        return q
-                def gettrans(self):
-                        return self.get_fixed_attribute("t", default=(0,0,0))
-                def getrot(self):
-                        rot = self.get_fixed_attribute("r", default=(0,0,0))
+                def get_world_translation(self):
+                        if self.getParent():
+                                pt = self.get_world_translation(self.getParent())
+                                pq = self.getParent().get_world_orientation()
+                        else:
+                                pt = (0, 0, 0)
+                                pq = quat(1,0,0,0)
+                        p = self.get_fixed_attribute("t", optional=True, default=(0,0,0))
+                        p = pq.rotateVec(p)
+                        p = tuple(map(lambda x,y: x+y, pt, p))
+                        return p
+                def get_world_orientation(self):
+                        if self.getParent():
+                                pq = self.get_world_orientation(self.getParent())
+                        else:
+                                pq = quat(1, 0, 0, 0)
+                        rot = self.get_fixed_attribute("r", optional=True, default=(0,0,0))
                         qx = quat().fromAngleAxis(rot[0], (1, 0, 0))
                         qy = quat().fromAngleAxis(rot[1], (0, 1, 0))
                         qz = quat().fromAngleAxis(rot[2], (0, 0, 1))
-                        q = qy*qz*qx
+                        q = pq*qx*qz*qy
                         return q
                 def get_world_scale(self):
                         node = self
@@ -146,37 +165,82 @@ class GroupReader(DefaultMAReader):
                                 s = tuple(map(lambda x, y: x*y, s, scale))
                                 node = node.getParent()
                         return s
+                def gettrans(self):
+                        return self.get_fixed_attribute("t", default=(0,0,0))
+                def getrot(self):
+                        rot = self.get_fixed_attribute("r", default=(0,0,0))
+                        qx = quat().fromAngleAxis(rot[0], (1, 0, 0))
+                        qy = quat().fromAngleAxis(rot[1], (0, 1, 0))
+                        qz = quat().fromAngleAxis(rot[2], (0, 0, 1))
+                        q = qy*qz*qx
+                        return q
                 node.fix_attribute = types.MethodType(fix_attribute, node)
                 node.get_fixed_attribute = types.MethodType(get_fixed_attribute, node)
                 node.get_inherited_attr = types.MethodType(get_inherited_attr, node)
                 node.get_fixed_tab = types.MethodType(get_fixed_tab, node)
+                node.get_world_translation = types.MethodType(get_world_translation, node)
+                node.get_world_orientation = types.MethodType(get_world_orientation, node)
+                node.get_world_scale = types.MethodType(get_world_scale, node)
                 node.gettrans = types.MethodType(gettrans, node)
                 node.getrot = types.MethodType(getrot, node)
-                node.get_world_scale = types.MethodType(get_world_scale, node)
                 return node
 
 
         def gatherIslands(self, nodes):
                 islands = []
-                for node in nodes:
-                        parentName = node.getParentName()
-                        if parentName:
-                                parentNode = self.findNode(parentName)
-                                if not parentNode:
-                                        print("Error: parent %s does not exist!" % parentName)
+                allow_no_association = True
+                prevnodecnt = len(nodes)
+                while len(nodes) > 0:
+                        curr_nodes = list(nodes)
+                        for node in curr_nodes:
+                                #print(node.getFullName())
+                                parentName = node.getParentName()
+                                if parentName:
+                                        parentNode = self.findNode(parentName)
+                                        if not parentNode:
+                                                print("Error: parent %s does not exist!" % parentName)
+                                                return None
+                                        if not self._insertInSameIslandAs(islands, parentNode, node, False):
+                                                return None
+                                        nodes.remove(node)
+                                outnodes = node.getOutNodes("out", "out")
+                                if len(outnodes) == 1:
+                                        if self._insertInSameIslandAs(islands, outnodes[0][0], node, allow_no_association):
+                                                nodes.remove(node)
+                                elif len(outnodes) > 1:
+                                        print("Error: more than one output node not yet supported!")
                                         return None
-                                if not self._insertInSameIslandAs(islands, parentNode, node):
+                                elif not parentName:
+                                        islands.append([node])
+                                        nodes.remove(node)
+                        #print("Inserted %i nodes in loop." % (prevnodecnt-len(nodes)))
+                        if prevnodecnt == len(nodes):
+                                if not allow_no_association:
+                                        print("Error: could not insert all nodes in islands. Currently pending are:")
+                                        for node in nodes:
+                                                print("  "+node.getFullName())
                                         return None
-                        outnodes = node.getOutNodes("out", "out")
-                        if len(outnodes) == 1:
-                                if not self._insertInSameIslandAs(islands, outnodes[0][0], node):
-                                        return None
-                        elif len(outnodes) > 1:
-                                print("Error: more than one output node not yet supported!")
-                                return None
-                        elif not parentName:
-                                islands.append([node])
+                                allow_no_association = False
+                        prevnodecnt = len(nodes)
                 return islands
+
+
+        def check_mesh_export(self, islands):
+                for island in islands:
+                        for n in island:
+                                if n.getName() == "rg_export":
+                                        t = n.get_fixed_attribute("time").strip("\"")
+                                        t0 = datetime.datetime.strptime(t.split(".")[0], "%Y-%m-%dT%H:%M:%S")
+                                        t1 = datetime.datetime.strptime(modified_time.split(".")[0], "%Y-%m-%dT%H:%M:%S")
+                                        diff = t1-t0
+                                        secondlimit = 3
+                                        ok = (diff.days == 0 and diff.seconds <= secondlimit)
+                                        if not ok:
+                                                print("Error: .ma file was not saved within %i seconds from internal export. Time diff is %s." % (secondlimit, str(diff)))
+                                                sys.exit(19)
+                                        return True
+                print("Error: you need to manually do an internal export of meshes.")
+                sys.exit(19)
 
 
         def filterIslands(self, islands):
@@ -200,7 +264,7 @@ class GroupReader(DefaultMAReader):
                                 scale = node.getAttrValue("s", "s", None, default=(1,1,1))
                                 node.fix_attribute("s", (scale[0], scale[2], scale[1]))
 
-        def applyConfig(self, config, group):
+        def applyPhysConfig(self, config, group):
                 allApplied = True
 
                 used_sections = {}
@@ -264,7 +328,7 @@ class GroupReader(DefaultMAReader):
                 return allApplied
 
 
-        def validateGroup(self, group):
+        def validatePhysGroup(self, group):
                 isGroupValid = True
                 transformIsRoot = True
                 for node in group:
@@ -305,22 +369,6 @@ class GroupReader(DefaultMAReader):
                 return isHierarchyValid
 
 
-        def _listchildnodes(self, path, basenode, group):
-                childlist = []
-                for node in group:
-                        if node.getParent() == basenode:
-                              childlist += [node]
-                if childlist:
-                        print("Children for %s:" % path)
-                        for child in childlist:
-                                print("  - %s" % child.getName())
-                grandchildlist = []
-                for child in childlist:
-                        childpath = path+"->"+child.getName()
-                        grandchildlist += self._listchildnodes(childpath, child, group)
-                return childlist+grandchildlist
-
-
         def printnodes(self, nodes, attrs=True):
                 for node in nodes:
                         print('%-30s %-20s parent:%s' % ('"'+node.getFullName()+'"', node.nodetype, node.getParentName()))
@@ -340,6 +388,22 @@ class GroupReader(DefaultMAReader):
                                 print("  input node = %s" % in_node[0])
 
 
+        def _listchildnodes(self, path, basenode, group):
+                childlist = []
+                for node in group:
+                        if node.getParent() == basenode:
+                              childlist += [node]
+                if childlist:
+                        print("Children for %s:" % path)
+                        for child in childlist:
+                                print("  - %s" % child.getName())
+                grandchildlist = []
+                for child in childlist:
+                        childpath = path+"->"+child.getName()
+                        grandchildlist += self._listchildnodes(childpath, child, group)
+                return childlist+grandchildlist
+
+
         def _queryAttribute(self, node, attrname, check, err_missing=True):
                 try:
                         value = node.get_fixed_attribute(attrname)
@@ -353,16 +417,17 @@ class GroupReader(DefaultMAReader):
                 return isValid, value
 
 
-        def _insertInSameIslandAs(self, islands, same, node):
+        def _insertInSameIslandAs(self, islands, same, node, allow_disconnected):
                 if self._isInIslands(islands, node):
-                        print("Error: trying to re-insert already inserted node!")
+                        print("Error: trying to re-insert already inserted node '%s'!" % node.getFullName())
                         return False
                 for island in islands:
                         for n in island:
                                 if n == same:
                                         island.append(node)
                                         return True
-                print("Error: parent/associated node '%s' (related to '%s') does not exist in islands!" % (same.getFullName(), node.getFullName()))
+                if not allow_disconnected:
+                        print("Error: parent/associated node '%s' (related to '%s') does not exist in islands!" % (same.getFullName(), node.getFullName()))
                 return False
 
 
@@ -377,8 +442,9 @@ class GroupReader(DefaultMAReader):
 class GroupWriter:
         """Translates a node/attribute group and writes it to disk as chunky files."""
 
-        def __init__(self, basename, group, config):
-                self.group = group
+        def __init__(self, basename, phys_group, visual_group, config):
+                self.phys_group = phys_group
+                self.visual_group = visual_group
                 self.config = config
                 self.writephysics(basename+".phys")
 
@@ -398,13 +464,13 @@ class GroupWriter:
                                                 (CHUNK_STRUCTURE_ENGINE_CONTAINER, engines)
                                         )
                                 )
-                        for node in self.group:
+                        for node in self.phys_group:
                                 if node.nodetype == "transform":
                                         self.bodies.append(node)
                                         # TODO: add optional saves of child bones.
                                         bones.append((CHUNK_STRUCTURE_BONE_TRANSFORM, node))
                                         bones.append((CHUNK_STRUCTURE_BONE_SHAPE, self._getshape(node)))
-                        for node in self.group:
+                        for node in self.phys_group:
                                 if node.nodetype.startswith("motor:"):
                                         engines.append((CHUNK_STRUCTURE_ENGINE, node))
                         pprint.pprint(data)
@@ -625,14 +691,14 @@ class GroupWriter:
 
 
         def _findchildnode(self, parent, nodetype):
-                for node in self.group:
+                for node in self.phys_group:
                         if node.getParent() == parent and node.nodetype == nodetype:
                                 return node
                 print("Warning: certain node not found!")
                 return None
 
         def _findglobalnode(self, simplename):
-                for node in self.group:
+                for node in self.phys_group:
                         if node.getName() == simplename:
                                 return node
                 print("Warning: node '%s' not found!" % name)
@@ -641,14 +707,14 @@ class GroupWriter:
 
         def _count_transforms(self):
                 count = 0
-                for node in self.group:
+                for node in self.phys_group:
                         if node.nodetype == "transform":
                                  count += 1
                 return count
 
         def _count_engines(self):
                 count = 0
-                for node in self.group:
+                for node in self.phys_group:
                         if node.nodetype.startswith("motor:"):
                                  count += 1
                 return count
@@ -660,8 +726,9 @@ def main():
                 print("Reads basename.ma and basename.ini and writes some output chunky files.")
                 sys.exit(20)
         rd = GroupReader(sys.argv[1])
-        wr = GroupWriter(sys.argv[1], rd.group, rd.config)
-        rd.printnodes(rd.group, False)
+        wr = GroupWriter(sys.argv[1], rd.phys_group, rd.visual_group, rd.config)
+        rd.printnodes(rd.phys_group, False)
+        rd.printnodes(rd.visual_group, False)
 
 
 if __name__=="__main__":
