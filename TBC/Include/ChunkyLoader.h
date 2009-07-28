@@ -201,6 +201,9 @@ protected:
 	bool SaveHead(ChunkyType pType, Lepra::uint32 pSize, Lepra::int64& pChunkEndPosition);
 	bool RewriteChunkSize(Lepra::int64 pChunkStartPosition);
 
+	Lepra::uint32* AllocInitBigEndian(const float* pData, unsigned pCount);
+	Lepra::uint32* AllocInitBigEndian(const Lepra::uint32* pData, unsigned pCount);
+
 	Lepra::File* mFile;
 	bool mIsFileOwner;
 

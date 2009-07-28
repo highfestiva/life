@@ -462,6 +462,34 @@ bool ChunkyLoader::RewriteChunkSize(Lepra::int64 pChunkStartPosition)
 	return (lOk);
 }
 
+Lepra::uint32* ChunkyLoader::AllocInitBigEndian(const float* pData, unsigned pCount)
+{
+	if (!pData || !pCount)
+	{
+		return (0);
+	}
+	Lepra::uint32* lData = new Lepra::uint32[pCount];
+	for (unsigned x = 0; x < pCount; ++x)
+	{
+		lData[x] = Lepra::Endian::HostToBigF(pData[x]);
+	}
+	return (lData);
+}
+
+Lepra::uint32* ChunkyLoader::AllocInitBigEndian(const Lepra::uint32* pData, unsigned pCount)
+{
+	if (!pData || !pCount)
+	{
+		return (0);
+	}
+	Lepra::uint32* lData = new Lepra::uint32[pCount];
+	for (unsigned x = 0; x < pCount; ++x)
+	{
+		lData[x] = Lepra::Endian::HostToBig(pData[x]);
+	}
+	return (lData);
+}
+
 
 
 ChunkyAnimationLoader::ChunkyAnimationLoader(Lepra::File* pFile, bool pIsFileOwner):

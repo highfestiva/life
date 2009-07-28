@@ -2,33 +2,21 @@
 # Created by Jonas Byström, 2009-07-17 for Righteous Engine tool chain.
 
 
+from mat4 import *
 from mayaascii import *
 from quat import *
-import shape
+from vec4 import *
+import chunkywriter
 
 from functools import reduce
 import configparser
 import datetime
-import pprint
 import re
-import struct
 import sys
 import types
 
 
-physics_type = {"static":1, "dynamic":2, "collision_detect_only":3}
 modified_time = None
-
-CHUNK_STRUCTURE                    = "STRU"
-CHUNK_STRUCTURE_BONE_COUNT         = "STBC"
-CHUNK_STRUCTURE_PHYSICS_TYPE       = "STPT"
-CHUNK_STRUCTURE_ENGINE_COUNT       = "STEC"
-CHUNK_STRUCTURE_BONE_CONTAINER     = "STBO"
-CHUNK_STRUCTURE_BONE_CHILD_LIST    = "SBCL"
-CHUNK_STRUCTURE_BONE_TRANSFORM     = "STBT"
-CHUNK_STRUCTURE_BONE_SHAPE         = "STSH"
-CHUNK_STRUCTURE_ENGINE_CONTAINER   = "STEO"
-CHUNK_STRUCTURE_ENGINE             = "STEN"
 
 
 class TimePreProcessor(MAPreProcessor):
@@ -37,8 +25,13 @@ class TimePreProcessor(MAPreProcessor):
                 if _s.startswith("//Last modified: "):
                         M, D, Y, h, m, s, ToD = _s[22:].replace(",", "").replace(":", " ").split()
                         getmonth = lambda M: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].index(M)+1
-                        gettodoff = lambda ToD: ["AM", "PM"].index(ToD)*12
-                        M, D, Y, h, m, s = getmonth(M), int(D), int(Y), int(h)+gettodoff(ToD), int(m), int(s)
+                        def gettodoff(h, ToD):
+                                h = int(h)
+                                h += ["AM", "PM"].index(ToD)*12
+                                if h >= 24:
+                                        h -= 12
+                                return h
+                        M, D, Y, h, m, s = getmonth(M), int(D), int(Y), gettodoff(h, ToD), int(m), int(s)
                         global modified_time
                         modified_time = "%i-%2.2i-%2.2iT%2.2i:%2.2i:%2.2i" % (Y, M, D, h, m, s);
                 return super(MAPreProcessor, self).iterStringIntervals(_s)
@@ -47,7 +40,7 @@ class TimePreProcessor(MAPreProcessor):
 class GroupReader(DefaultMAReader):
         """Reads two files: a .ma and a .ini, sort outs islands. The islands that contain "bad" types
         are sorted out, the others are kept for writing to Chunky file in the future.
-        Exactly TWO groups must to exist per .ma file: phys and visual."""
+        Exactly TWO groups must to exist per .ma file: phys and mesh."""
 
         def __init__(self, basename):
                 DefaultMAReader.__init__(self)
@@ -55,7 +48,10 @@ class GroupReader(DefaultMAReader):
                                   "renderLayerManager", "renderLayer", "script", "<unknown>", "phong", \
                                   "shadingEngine", "materialInfo", "groupId", "groupParts" ]
                 self.basename = basename
-                self.read(basename+".ma")
+
+
+        def doread(self):
+                self.read(self.basename+".ma")
 
 
         # Override.
@@ -72,21 +68,30 @@ class GroupReader(DefaultMAReader):
                 self.check_mesh_export(islands)
                 islands = self.filterIslands(islands)
                 if len(islands) != 2:
-                        # TODO: print objects from each island.
                         print("The number of standalone groups is not two (is totally %i) in the .ma file! These are the groups:" % len(islands))
                         for i in islands:
                                 print("  "+str(list(map(lambda x: x.getFullName(), i))))
                                 print("")
                         print("Terminating due to error.")
                         sys.exit(2)
-                phys_group, visual_group = islands
+                phys_group, mesh_group = islands
+                if not phys_group[0].getName().startswith("phys"):
+                        phys_group, mesh_group = mesh_group, phys_group
+                if not phys_group[0].getName().startswith("phys_"):
+                        print("Error: physics root must be named 'phys_...' something, not '%s'." % phys_group[0].getName())
+                        sys.exit(2)
+                if not mesh_group[0].getName().startswith("m_"):
+                        print("Error: gfx mesh root must be named 'm_...' something, not '%s'." % mesh_group[0].getName())
+                        sys.exit(2)
                 config = configparser.SafeConfigParser()
                 ininame = self.basename+".ini"
                 if not config.read(ininame):
                         print("Error: could not open tweak file '%s'!" % ininame)
                         sys.exit(3)
-                self.flipaxis(phys_group)
-                self.flipaxis(visual_group)
+                self.rotatexaxis(phys_group)
+                self.rotatexaxis(mesh_group)
+                self.faces2triangles(mesh_group)
+                self.makevertsrelative(mesh_group)
                 if not self.applyPhysConfig(config, phys_group):
                         print("Error: could not apply configuration.")
                         sys.exit(4)
@@ -94,8 +99,14 @@ class GroupReader(DefaultMAReader):
                         #self.printnodes(phys_group)
                         print("Invalid physics group! Terminating due to error.")
                         sys.exit(3)
+                if not self.validateMeshGroup(mesh_group):
+                        print("Invalid mesh group! Terminating due to error.")
+                        sys.exit(3)
                 self.phys_group = phys_group
-                self.visual_group = visual_group
+                self.mesh_group = mesh_group
+                if not self.validategroup():
+                        print("Invalid group! Terminating due to error.")
+                        sys.exit(3)
 
 
         # Override
@@ -114,7 +125,7 @@ class GroupReader(DefaultMAReader):
                         try:
                                 return self._fixattr[name]
                         except KeyError:
-                                value = self.getAttrValue(name, name, None, default=default)
+                                value = self.getAttrValue(name, name, None, n=None, default=default)
                                 if value == None:
                                         if not optional:
                                                 raise KeyError("Error fetching required attribute '%s'." % name)
@@ -132,20 +143,35 @@ class GroupReader(DefaultMAReader):
                         tab = self._fixattr.copy()
                         tab.update(self._setattr)
                         return tab
-                def get_world_translation(self):
+                def get_world_translation(self, checkparent=False):
                         if self.getParent():
-                                pt = self.get_world_translation(self.getParent())
-                                pq = self.getParent().get_world_orientation()
+                                pt = self.getParent().get_world_translation(True)
+                                pm = self.getParent().get_world_orientation().toMat4()
+                                s  = self.getParent().get_world_scale()
+                                sh = self.getParent().get_world_shear()
                         else:
                                 pt = (0, 0, 0)
-                                pq = quat(1,0,0,0)
+                                pm = mat4((1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1))
+                                s  = (1, 1, 1)
+                                sh = mat4((1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1))
+                        pm *= sh
+                        if sh.getColumn(3)[1]:
+                                print("Scale is %s in node '%s'." % (str(s), self.getFullName()))
                         p = self.get_fixed_attribute("t", optional=True, default=(0,0,0))
-                        p = pq.rotateVec(p)
-                        p = tuple(map(lambda x,y: x+y, pt, p))
+                        if not checkparent:
+                                rp = self.get_fixed_attribute("rp", optional=True, default=(0,0,0))
+                                rpt = self.get_fixed_attribute("rpt", optional=True, default=(0,0,0))
+                        else:
+                                rp = (0, 0, 0)
+                                rpt = (0, 0, 0)
+                        p = vec4(tuple(map(lambda x,y,z,u: (x+y+z)*u, p, rp, rpt, s)))
+                        p.w = 1.0
+                        p = pm * p
+                        p = tuple(map(lambda x,y: x+y, pt, (p.x, p.y, p.z)))
                         return p
                 def get_world_orientation(self):
                         if self.getParent():
-                                pq = self.get_world_orientation(self.getParent())
+                                pq = self.getParent().get_world_orientation()
                         else:
                                 pq = quat(1, 0, 0, 0)
                         rot = self.get_fixed_attribute("r", optional=True, default=(0,0,0))
@@ -156,7 +182,7 @@ class GroupReader(DefaultMAReader):
                         return q
                 def get_world_scale(self):
                         node = self
-                        s = (1.0, 1.0, 1.0)
+                        s = (1,1,1)
                         while node:
                                 scale = node.get_fixed_attribute("s", default=(1,1,1))
                                 if len(scale) != 3 or reduce(lambda x,y: x*y, scale) == 0:
@@ -165,6 +191,22 @@ class GroupReader(DefaultMAReader):
                                 s = tuple(map(lambda x, y: x*y, s, scale))
                                 node = node.getParent()
                         return s
+                def get_world_shear(self):
+                        node = self
+                        sh = mat4((1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1))
+                        shear = (0,0)
+                        while node:
+                                shear = node.get_fixed_attribute("sh", default=(0,0,0))
+                                if len(shear) != 3:
+                                        print("Error: wrong number of shear scalars for node '%s'." % node.getFullName())
+                                        sys.exit(19)
+                                psh = mat4((1,0,0,0), (0,1,0,0), (0,0,1,0), (shear[0],shear[1],shear[2],1))
+                                sh *= psh
+                                node = node.getParent()
+                        if reduce(lambda x,y: x+y, sh.getColumn(3)) != 1:
+                                print("Node '%s' has shear matrix:\n%s." % (self.getFullName(), str(sh)))
+                        #print("Node '%s' has shear matrix %s." % (self.getFullName(), str(sh)))
+                        return sh
                 def gettrans(self):
                         return self.get_fixed_attribute("t", default=(0,0,0))
                 def getrot(self):
@@ -181,6 +223,7 @@ class GroupReader(DefaultMAReader):
                 node.get_world_translation = types.MethodType(get_world_translation, node)
                 node.get_world_orientation = types.MethodType(get_world_orientation, node)
                 node.get_world_scale = types.MethodType(get_world_scale, node)
+                node.get_world_shear = types.MethodType(get_world_shear, node)
                 node.gettrans = types.MethodType(gettrans, node)
                 node.getrot = types.MethodType(getrot, node)
                 return node
@@ -254,15 +297,62 @@ class GroupReader(DefaultMAReader):
                 return islands
 
 
-        def flipaxis(self, group):
+        def rotatexaxis(self, group):
                 for node in group:
                         if node.nodetype == "transform":
                                 pos = node.getAttrValue("t", "t", None, default=(0,0,0))
                                 node.fix_attribute("t", (pos[0], -pos[2], pos[1]))
+                                pos = node.getAttrValue("rp", "rp", None, default=(0,0,0))
+                                node.fix_attribute("rp", (pos[0], -pos[2], pos[1]))
+                                pos = node.getAttrValue("rpt", "rpt", None, default=(0,0,0))
+                                node.fix_attribute("rpt", (pos[0], -pos[2], pos[1]))
                                 rot = node.getAttrValue("r", "r", None, default=(0,0,0))
                                 node.fix_attribute("r", (math.radians(rot[0]), -math.radians(rot[2]), math.radians(rot[1])))
                                 scale = node.getAttrValue("s", "s", None, default=(1,1,1))
                                 node.fix_attribute("s", (scale[0], scale[2], scale[1]))
+                                shear = node.getAttrValue("sh", "sh", None, default=(0,0,0))
+                                node.fix_attribute("sh", (shear[0], shear[2], shear[1]))
+                        vtx = node.getAttrValue("rgvtx", "rgvtx", None, n=None)
+                        if vtx:
+                                for x in range(0, len(vtx), 3):
+                                        tmp = vtx[x+1]
+                                        vtx[x+1] = -vtx[x+2]
+                                        vtx[x+2] = tmp
+                                node.fix_attribute("rgvtx", vtx)
+
+
+        def faces2triangles(self, group):
+                for node in group:
+                        faces = node.get_fixed_attribute("rgf", optional=True)
+                        if faces:
+                                triangles = []
+                                if not type(faces) == str:
+                                        faces = faces[1]        # From ("(", "...", ")") to "..."
+                                faces = eval(faces[1:-1])
+                                for face in faces:
+                                        if len(face) == 4:
+                                                l = [face[0], face[1], face[2], face[0], face[2], face[3]]
+                                                #print(l)
+                                                triangles += l
+                                        elif len(face) == 3:
+                                                #print(face)
+                                                triangles += face
+                                                pass
+                                        else:
+                                                print("Error: cannot yet handle faces with less than three or more than four vertices!")
+                                                sys.exit(19)
+                                node.fix_attribute("rgtri", triangles)
+
+
+        def makevertsrelative(self, group):
+                for node in group:
+                        vtx = node.get_fixed_attribute("rgvtx", optional=True)
+                        if vtx:
+                                pos = node.get_world_translation()
+                                idx = 0
+                                for idx in range(len(vtx)):
+                                        vtx[idx] -= pos[idx%3]
+
 
         def applyPhysConfig(self, config, group):
                 allApplied = True
@@ -317,7 +407,7 @@ class GroupReader(DefaultMAReader):
                                 for name, value in params:
                                         self.config[name] = stripQuotes(value)
                                 used_sections[section] = True
-                required = [("type", lambda x: physics_type.get(x) != None)]
+                required = [("type", lambda x: chunkywriter.physics_type.get(x) != None)]
                 for name, config_check in required:
                         allApplied &= config_check(self.config.get(name))
 
@@ -346,16 +436,117 @@ class GroupReader(DefaultMAReader):
                                 isGroupValid &= self._queryAttribute(node, "friction", lambda x: (x >= 0 and x <= 100))[0]
                                 isGroupValid &= self._queryAttribute(node, "affected_by_gravity", lambda x: x==True or x==False)[0]
                                 if transformIsRoot:
-                                        isGroupValid &= self.validateHierarchy(node, group)
+                                        isGroupValid &= self.validate_non_recursive(node, group)
                                 transformIsRoot = False
                 return isGroupValid
 
 
+        def validateMeshGroup(self, group):
+                isGroupValid = True
+                for node in group:
+                        vtx = node.get_fixed_attribute("rgvtx", optional=True)
+                        polys = node.get_fixed_attribute("rgtri", optional=True)
+                        if vtx and not polys:
+                                isGroupValid = False
+                                print("Error: mesh '%s' contains vertices, but no triangle definition." % node.getFullName())
+                        elif not vtx and polys:
+                                isGroupValid = False
+                                print("Error: mesh '%s' contains triangle definitions but no vertices." % node.getFullName())
+                        elif vtx and polys:
+                                if len(vtx) % 3 != 0:
+                                        print("Error: vertex count in '%s' is not a multiple of three!" % node.getFullName())
+                                        isGroupValid = False
+                                usedlastvertex = False
+                                for p in polys:
+                                        if p == len(vtx)/3-1:
+                                                usedlastvertex = True
+                                        if p >= len(vtx)/3:
+                                                print("Error: polygon %i in '%s' is out of vertex range." % (polys.index(p), node.getFullName()))
+                                                isGroupValid = False
+                                if not usedlastvertex:
+                                        print("Error: not all vertices in '%s' is used." % node.getFullName())
+                                        isGroupValid = False
+                return isGroupValid
 
-        def validateHierarchy(self, basenode, group):
+
+        def validategroup(self):
+                ok = True
+                for mesh in self.mesh_group:
+                        mesh.phys_ref = []
+                for phys in self.phys_group:
+                        if phys.nodetype != "transform":
+                                continue
+                        phys.mesh_ref = []
+                        phys.loose_mesh_ref = []
+                        phys_mesh_ref = phys.mesh_ref
+                        if phys.getParent() and not phys.get_fixed_attribute("joint", optional=True):
+                                phys_mesh_ref = phys.loose_mesh_ref
+                        phys_name = phys.getName()
+                        if phys_name.startswith("phys_"):
+                                phys_name = phys_name[5:]
+                        for mesh in self.mesh_group:
+                                mesh_name = mesh.getName()
+                                if mesh_name.startswith("m_"):
+                                        mesh_name = mesh_name[2:]
+                                samesamebutdifferent = False
+                                if mesh_name == phys_name:
+                                        samesamebutdifferent = True
+                                elif mesh_name.startswith(phys_name):
+                                        s = mesh_name[len(phys_name):]
+                                        if s.startswith("_"):
+                                                try:
+                                                        int(s[1:])
+                                                        samesamebutdifferent = True
+                                                except ValueError:
+                                                        pass
+                                if samesamebutdifferent:
+                                        mesh.phys_ref += [phys]
+                                        phys_mesh_ref += [mesh]
+                # Check for erroneous references.
+                for phys in self.phys_group:
+                        if phys.nodetype != "transform":
+                                continue
+                        for mesh in phys.mesh_ref:
+                                if not self._is_valid_phys_ref(phys, mesh, False):
+                                        ok = False
+                                        print("Error: mesh node '%s' referenced by jointed phys node '%s' is not a valid reference." % \
+                                              (mesh.getFullName(), phys.getFullName()))
+                        if phys.getParent() == None or phys.get_fixed_attribute("joint", optional=True):
+                                if not phys.mesh_ref:
+                                        ok = False
+                                        print("Error: jointed phys node '%s' does not seem to have corresponding mesh node(s)." % phys.getFullName())
+                        for mesh in phys.loose_mesh_ref:
+                                if not self._is_valid_phys_ref(phys, mesh, True):
+                                        ok = False
+                                        print("Error: mesh node '%s' referenced by non-jointed phys node '%s' is not a valid reference." % \
+                                              (mesh.getFullName(), phys.getFullName()))
+                        if phys.getParent() and not phys.get_fixed_attribute("joint", optional=True):
+                                if not phys.loose_mesh_ref:
+                                        ok = False
+                                        print("Error: non-jointed phys node '%s' does not seem to have corresponding mesh node8s)." % phys.getFullName())
+                for mesh in self.mesh_group:
+                        for phys in mesh.phys_ref:
+                                if not self._is_valid_mesh_ref(mesh, phys):
+                                        ok = False
+                                        print("Error: phys node '%s' is illegally referencing mesh node '%s'." % \
+                                              (phys.getFullName(), mesh.getFullName()))
+                        if len(mesh.phys_ref) > 1:
+                                ok = False
+                                print("Error: mesh node '%s' is illegaly referenced by several physics nodes:" % mesh.getFullName())
+                                for phys in mesh.phys_ref:
+                                        print("Error:   - '%s'" % phys.getFullName())
+                        elif not mesh.phys_ref:
+                                if self._is_valid_phys_ref(None, mesh, False):
+                                        ok = False
+                                        print("Error: mesh node '%s' must be referenced by a phys node, but is not!" % mesh.getFullName())
+                return ok
+                        
+
+
+        def validate_non_recursive(self, basenode, group):
                 isHierarchyValid = True
                 childcount = {}
-                childlist = self._listchildnodes(basenode.getName(), basenode, group)
+                childlist = self._listchildnodes(basenode.getFullName(), basenode, group, True)
                 for node in childlist:
                         count = childcount.get(node)
                         if not count:
@@ -388,19 +579,92 @@ class GroupReader(DefaultMAReader):
                                 print("  input node = %s" % in_node[0])
 
 
-        def _listchildnodes(self, path, basenode, group):
+        def _is_valid_phys_ref(self, phys, mesh, loose):
+                if mesh.nodetype != "transform":
+                        return False
+                invalid_child_list = ["polyCube", "polySphere", "polyCylinder", "polyTorus", "polySmoothFace", "polyTweak", \
+                                      "polyMergeVert", "groupId", "groupParts", "polyUnite", "script", "camera"]
+                meshcnt = 0
+                invcnt = 0
+                children = self._listchildnodes(mesh.getFullName(), mesh, self.mesh_group, False)
+                for child in children:
+                        if child.get_fixed_attribute("rgvtx", optional=True):
+                                meshcnt += 1
+                        if child in invalid_child_list:
+                                invcnt += 1
+                hangaround_child = False
+                if mesh.getParent() and phys in mesh.getParent().phys_ref:
+                        hangaround_child = True
+                if phys:
+                        valid_ref = True
+                        if meshcnt > 1:
+                                valid_ref = False
+                                print("Error: mesh '%s' (referenced by '%s') contains %i mesh shapes (only one allowed)." %
+                                      (mesh.getFullName(), phys.getFullName(), meshcnt))
+                        elif not loose and meshcnt == 0 and not hangaround_child:
+                                valid_ref = False
+                                print("Error: mesh '%s' (referenced by '%s') contains no child mesh shapes." %
+                                      (mesh.getFullName(), phys.getFullName()))
+                        if invcnt:
+                                valid_ref = False
+                                print("Error: mesh '%s' (referenced by '%s') contains %i invalid child nodes." %
+                                      (mesh.getFullName(), phys.getFullName(), invcnt))
+                        if not phys.getParent() and mesh.getParent():
+                                valid_ref = False
+                                print("Error: root mesh node '%s' (referenced by '%s') erroneously has parent." %
+                                      (mesh.getFullName(), phys.getFullName()))
+                        if not loose and phys.getParent() and not phys.get_fixed_attribute("joint", optional=True):
+                                valid_ref = False
+                                print("Error: mesh '%s' referenced by non-jointed phys node '%s'." %
+                                      (mesh.getFullName(), phys.getFullName()))
+                        if loose and (not phys.getParent() or phys.get_fixed_attribute("joint", optional=True)):
+                                valid_ref = False
+                                print("Error: attached mesh '%s' referenced by jointed phys node '%s'." %
+                                      (mesh.getFullName(), phys.getFullName()))
+                        jointed_phys = phys
+                        while jointed_phys.getParent() and not jointed_phys.get_fixed_attribute("joint", optional=True):
+                                jointed_phys = jointed_phys.getParent()
+                        mt = mesh.get_world_translation()
+                        pt = jointed_phys.get_world_translation()
+                        eps = 0.0001
+                        if math.fabs(mt[0]-pt[0]) >= eps or \
+                                math.fabs(mt[1]-pt[1]) >= eps or \
+                                math.fabs(mt[2]-pt[2]) >= eps:
+                                valid_ref = False
+                                print("Error: mesh '%s' and phys node '%s' is not on exactly the same XYZ coordinate (%s and %s). " \
+                                      "Note that Y and Z axes are transformed compared to Maya." %
+                                      (mesh.getFullName(), jointed_phys.getFullName(), str(mt), str(pt)))
+                else:
+                        valid_ref = False
+                        if meshcnt > 0:
+                                valid_ref = True
+                                print("Error: mesh '%s' contains mesh shape, but is not linked to." % mesh.getFullName())
+                return valid_ref
+
+
+        def _is_valid_mesh_ref(self, mesh, phys):
+                valid_ref = True
+                if phys.nodetype != "transform":
+                        valid_ref = False
+                        print("Error: phys node '%s' may not reference any mesh node (accidental to mesh '%s'?)." %
+                                (phys.getFullName(), mesh.getFullName()))
+                return valid_ref
+
+
+        def _listchildnodes(self, path, basenode, group, recursive):
                 childlist = []
                 for node in group:
                         if node.getParent() == basenode:
                               childlist += [node]
-                if childlist:
-                        print("Children for %s:" % path)
-                        for child in childlist:
-                                print("  - %s" % child.getName())
+                #if childlist:
+                #        print("Children for %s:" % path)
+                #        for child in childlist:
+                #                print("  - %s" % child.getName())
                 grandchildlist = []
-                for child in childlist:
-                        childpath = path+"->"+child.getName()
-                        grandchildlist += self._listchildnodes(childpath, child, group)
+                if recursive:
+                        for child in childlist:
+                                childpath = path+"|"+child.getName()
+                                grandchildlist += self._listchildnodes(childpath, child, group, True)
                 return childlist+grandchildlist
 
 
@@ -439,296 +703,19 @@ class GroupReader(DefaultMAReader):
                 return False
 
 
-class GroupWriter:
-        """Translates a node/attribute group and writes it to disk as chunky files."""
-
-        def __init__(self, basename, phys_group, visual_group, config):
-                self.phys_group = phys_group
-                self.visual_group = visual_group
-                self.config = config
-                self.writephysics(basename+".phys")
-
-        def writephysics(self, filename):
-                self.bodies = []
-                with open(filename, "wb") as f:
-                        self.f = f
-                        bones = []
-                        engines = []
-                        data =  (
-                                        CHUNK_STRUCTURE,
-                                        (
-                                                (CHUNK_STRUCTURE_BONE_COUNT, self._count_transforms()),
-                                                (CHUNK_STRUCTURE_PHYSICS_TYPE, physics_type[self.config["type"]]),
-                                                (CHUNK_STRUCTURE_ENGINE_COUNT, self._count_engines()),
-                                                (CHUNK_STRUCTURE_BONE_CONTAINER, bones),
-                                                (CHUNK_STRUCTURE_ENGINE_CONTAINER, engines)
-                                        )
-                                )
-                        for node in self.phys_group:
-                                if node.nodetype == "transform":
-                                        self.bodies.append(node)
-                                        # TODO: add optional saves of child bones.
-                                        bones.append((CHUNK_STRUCTURE_BONE_TRANSFORM, node))
-                                        bones.append((CHUNK_STRUCTURE_BONE_SHAPE, self._getshape(node)))
-                        for node in self.phys_group:
-                                if node.nodetype.startswith("motor:"):
-                                        engines.append((CHUNK_STRUCTURE_ENGINE, node))
-                        pprint.pprint(data)
-                        self._writechunk(data)
-
-
-        def _writechunk(self, chunks, name=None):
-                t = type(chunks)
-                if t == tuple or t == list:
-                        islist = False
-                        for chunk in chunks:
-                                if type(chunk) != list and type(chunk) != tuple:
-                                        if not islist and len(chunks) == 2:
-                                                break
-                                        print("Error: trying to write less/more than one chunk, which is not a subchunk.")
-                                        sys.exit(15)
-                                islist = True
-                                self._writechunk(chunk, "subchunk of "+name)
-                        if len(chunks) == 0 or islist:
-                                return
-
-                        if type(chunks[0]) != str:
-                                print("Error: trying to write chunk without header signature (%s, type=%s, value='%s')." % (name, str(type(chunks[0])), str(chunks[0])))
-                                sys.exit(16)
-                        if type(chunks[1]) == int:
-                                head = self._writeheader(chunks[0], 4)
-                                self._writeint(chunks[1])
-                        else:
-                                head = self._writeheader(chunks[0])
-                                self._writechunk(chunks[1], chunks[0])
-                                self._rewriteheadersize(head)
-                elif t == Node:
-                        node = chunks
-                        if node.nodetype == "transform":
-                                self._writebone(node)
-                        elif node.nodetype.startswith("motor:"):
-                                self._writeengine(node)
-                elif t == shape.Shape:
-                        shapeChunk = chunks
-                        self._writeshape(shapeChunk)
-                else:
-                        print("Error: trying to write unknown chunk data, type='%s', value='%s'." % str(t), str(chunks))
-                        sys.exit(17)
-
-
-        def _writebone(self, node):
-                q = node.getrot()
-                if not q:
-                        print("Error: trying to get rotation from node '%s', but none available." % node.getFullName())
-                        sys.exit(18)
-                pos = node.gettrans()
-                data = q.totuple()+pos
-                print("Writing bone with data", data)
-                for f in data:
-                        self._writefloat(f)
-
-
-        def _writeshape(self, shape):
-                # Write all general parameters first.
-                types = {"capsule":1, "sphere":2, "box":3}
-                self._writeint(types[shape.type])
-                node = shape.getnode()
-                self._writefloat(node.get_fixed_attribute("mass"))
-                self._writefloat(node.get_fixed_attribute("friction"))
-                self._writefloat(node.get_fixed_attribute("bounce"))
-                self._writeint(-1 if not node.getParent() else self.bodies.index(node.getParent()))
-                joints = {None:1, "exclude":1, "suspend_hinge":2, "hinge2":3, "hinge":4, "ball":5, "universal":6}
-                jointvalue = joints[node.get_fixed_attribute("joint", True)]
-                self._writeint(jointvalue)
-                self._writeint(1 if node.get_fixed_attribute("affected_by_gravity") else 0)
-                # Write joint parameters.
-                parameters = [0.0]*16
-                parameters[0] = node.get_fixed_attribute("spring_constant", True, 0.0)
-                parameters[1] = node.get_fixed_attribute("spring_damping", True, 0.0)
-                yaw, pitch, roll = self._geteuler(node)
-                #if jointvalue != 1 and (pitch < -0.1 or pitch > 0.1):
-                #        print("Error: euler rotation pitch of jointed body '%s' must be zero." % node.getFullName())
-                #        sys.exit(19)
-                parameters[2] = yaw
-                parameters[3] = roll
-                parameters[4] = 0.0     # TODO: pick joint end-values from .ma!
-                parameters[5] = 0.0     # TODO: pick joint end-values from .ma!
-                parameters[6] = 0.0     # TODO: pick joint anchor from .ma!
-                parameters[7] = 0.0     # TODO: pick joint anchor from .ma!
-                parameters[8] = 0.0     # TODO: pick joint anchor from .ma!
-                for x in parameters:
-                        self._writefloat(x)
-                # Write connecor type (may hook other stuff, may be hooked by hookers :).
-                connectors = node.get_fixed_attribute("connector_types", True)
-                if connectors:
-                        if not type(connectors) == list and not type(connetors) == tuple:
-                                print("Error: connector_types for '%s' must be a list." % node.getFullName())
-                                sys.exit(19)
-                        self._writeint(len(connectors))
-                        connector_types = {"connector_3dof":1, "connectee_3dof":2}
-                        for c in connectors:
-                                self._writeint(connector_types[c])
-                else:
-                        self._writeint(0)
-                # Write shape data (dimensions of shape).
-                for x in shape.data:
-                        self._writefloat(x)
-                #print("Wrote shape with axes", self._getaxes(node))
-
-
-        def _writeengine(self, node):
-                # Write all general parameters first.
-                types = {"walk":1, "cam_flat_push":2, "hinge_roll":3, "hinge2_roll":3, "hinge2_turn":4, "hinge2_break":5, "hinge":6, "glue":7}
-                self._writeint(types[node.get_fixed_attribute("type")])
-                self._writefloat(node.get_fixed_attribute("strength"))
-                self._writefloat(node.get_fixed_attribute("max_velocity")[0])
-                self._writefloat(node.get_fixed_attribute("max_velocity")[1])
-                self._writefloat(node.get_fixed_attribute("controller_index"))
-                connected_to = node.get_fixed_attribute("connected_to")
-                connected_to = self._expand_connected_list(connected_to)
-                if len(connected_to) < 1:
-                        print("Error: could not find any matching nodes to connected engine '%s' to." % node.getFullName())
-                        sys.exit(19)
-                self._writeint(len(connected_to))
-                for connection in connected_to:
-                        body, scale, connectiontype = connection
-                        self._writeint(self.bodies.index(body))
-                        self._writefloat(scale)
-                        connectiontypes = {"normal":1, "half_lock":2}
-                        self._writeint(connectiontypes[connectiontype])
-                print("Wrote engine '%s' for %i nodes." % (node.getName()[6:], len(connected_to)))
-
-
-        def _writeheader(self, signature, size=0):
-                self._writesignature(signature)
-                sizeoffset = self.f.tell()
-                self._writeint(size)
-                return sizeoffset
-
-        def _rewriteheadersize(self, offset):
-                endoffset = self.f.tell()
-                content_size = endoffset - offset - 4
-                self.f.seek(offset)
-                #print("Writing header size. Header at offset %i, end at offset %i." % (offset, endoffset))
-                self._writeint(content_size, "chunk size")
-                self.f.seek(endoffset)
-
-        def _writesignature(self, sign):
-                self._dowrite(sign.encode('latin-1'), 4, "signature")
-
-        def _writefloat(self, val, name="float"):
-                data = struct.pack(">f", val)
-                self._dowrite(data, 4, name)
-
-        def _writeint(self, val, name="int"):
-                data = struct.pack(">i", val)
-                self._dowrite(data, 4, name)
-
-        def _dowrite(self, data, length, name):
-                if len(data) != length:
-                        print("Error: trying to write bad %s '%s'." % (name, data))
-                        sys.exit(10)
-                self.f.write(data)
-
-
-        def _expand_connected_list(self, unexpanded):
-                expanded = []
-                for e in unexpanded:
-                        noderegexp, scale, ctype = e
-                        for body in self.bodies:
-                                if re.search("^"+noderegexp+"$", body.getFullName()[1:]):
-                                        expanded += [(body, scale, ctype)]
-                return expanded
-
-
-        def _geteuler(self, node):
-                q = node.getrot()
-                w2 = q[0]*q[0]
-                x2 = q[1]*q[1]
-                y2 = q[2]*q[2]
-                z2 = q[3]*q[3]
-                unitlength = w2 + x2 + y2 + z2  # Normalised == 1, otherwise correction divisor.
-                abcd = q[0]*q[1] + q[2]*q[3]
-                if abcd > (0.5-0.0001)*unitlength:
-                        yaw = 2 * atan2(q[2], q[0])
-                        pitch = math.pi
-                        roll = 0
-                elif abcd < (-0.5+0.0001)*unitlength:
-                        yaw = -2 * math.atan2(q[2], q[0])
-                        pitch = -math.pi
-                        roll = 0
-                else:
-                        adbc = q[0]*q[3] - q[1]*q[2]
-                        acbd = q[0]*q[2] - q[1]*q[3]
-                        yaw = math.atan2(2*adbc, 1 - 2*(z2+x2))
-                        pitch = math.asin(2*abcd/unitlength)
-                        roll = math.atan2(2*acbd, 1 - 2*(y2+x2))
-                return yaw, pitch, roll
-
-
-        def _getaxes(self, node):
-                q = node.getrot()
-                return q.rotateVec((1,0,0)), q.rotateVec((0,1,0)), q.rotateVec((0,0,1))
-
-
-        def _getshape(self, node):
-                shapenode = self._findchildnode(parent=node, nodetype="mesh")
-                if not shapenode:
-                        print("Error: shape for node '%s' does not exist." % node.getFullName())
-                        sys.exit(11)
-                in_nodename = shapenode.getInNode("i", "i")[0]
-                if not in_nodename:
-                        print("Error: input shape for node '%s' does not exist." % shapenode.getFullName())
-                        sys.exit(12)
-                in_node = self._findglobalnode(in_nodename)
-                if not in_node:
-                        print("Error: unable to find input shape node '%s'." % in_nodename)
-                        sys.exit(13)
-                if not in_node.nodetype in ["polyCube", "polySphere"]:
-                        print("Error: input shape node '%s' is of unknown type '%s'." % (in_node.getFullName(), in_node.nodetype))
-                        sys.exit(14)
-                return shape.Shape(node, in_node)
-
-
-        def _findchildnode(self, parent, nodetype):
-                for node in self.phys_group:
-                        if node.getParent() == parent and node.nodetype == nodetype:
-                                return node
-                print("Warning: certain node not found!")
-                return None
-
-        def _findglobalnode(self, simplename):
-                for node in self.phys_group:
-                        if node.getName() == simplename:
-                                return node
-                print("Warning: node '%s' not found!" % name)
-                return None
-
-
-        def _count_transforms(self):
-                count = 0
-                for node in self.phys_group:
-                        if node.nodetype == "transform":
-                                 count += 1
-                return count
-
-        def _count_engines(self):
-                count = 0
-                for node in self.phys_group:
-                        if node.nodetype.startswith("motor:"):
-                                 count += 1
-                return count
-
-
 def main():
         if len(sys.argv) != 2:
                 print("Usage: %s <basename>")
                 print("Reads basename.ma and basename.ini and writes some output chunky files.")
                 sys.exit(20)
         rd = GroupReader(sys.argv[1])
-        wr = GroupWriter(sys.argv[1], rd.phys_group, rd.visual_group, rd.config)
-        rd.printnodes(rd.phys_group, False)
-        rd.printnodes(rd.visual_group, False)
+        rd.doread()
+        gwr = chunkywriter.GroupWriter(sys.argv[1], rd.phys_group, rd.mesh_group)
+        gwr.dowrite()
+        pmwr = chunkywriter.PhysMeshWriter(sys.argv[1], rd.phys_group, rd.mesh_group, rd.config)
+        pmwr.dowrite()
+        #rd.printnodes(rd.phys_group, False)
+        #rd.printnodes(rd.mesh_group, False)
 
 
 if __name__=="__main__":

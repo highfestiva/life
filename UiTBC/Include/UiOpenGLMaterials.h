@@ -44,13 +44,17 @@ protected:
 	void UpdateTextureMatrix(TBC::GeometryBase* pGeometry);
 
 	Material* mFallBackMaterial;	// If geometry doesn't contain all data needed.
-
-	static GLenum smPrimitiveLUT[2];
 };
 
 GLenum OpenGLMaterial::GetGLElementType(TBC::GeometryBase* pGeometry)
 {
-	return smPrimitiveLUT[pGeometry->GetPrimitiveType()];
+	switch (pGeometry->GetPrimitiveType())
+	{
+		case TBC::GeometryBase::TRIANGLES:	return (GL_TRIANGLES);
+		case TBC::GeometryBase::TRIANGLE_STRIP:	return (GL_TRIANGLE_STRIP);
+	}
+	assert(false);
+	return (GL_TRIANGLES);
 }
 
 

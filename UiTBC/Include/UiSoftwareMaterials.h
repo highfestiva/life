@@ -42,13 +42,17 @@ public:
 protected:
 	Software3DPainter* m3DPainter;
 	Material* mFallBackMaterial;	// If geometry doesn't contain all data needed.
-
-	static Software3DPainter::RenderingPrimitive smPrimitiveLUT[2];
 };
 
 Software3DPainter::RenderingPrimitive SoftwareMaterial::GetElementType(TBC::GeometryBase* pGeometry)
 {
-	return smPrimitiveLUT[pGeometry->GetPrimitiveType()];
+	switch (pGeometry->GetPrimitiveType())
+	{
+		case TBC::GeometryBase::TRIANGLES:	return (Software3DPainter::RENDER_TRIANGLES);
+		case TBC::GeometryBase::TRIANGLE_STRIP:	return (Software3DPainter::RENDER_TRIANGLE_STRIP);
+	}
+	assert(false);
+	return (Software3DPainter::RENDER_TRIANGLES);
 }
 
 

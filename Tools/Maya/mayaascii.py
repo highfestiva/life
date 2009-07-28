@@ -376,6 +376,10 @@ class Attribute:
 		n = int(self._vals[0])
 		return [int(x) for x in self._vals[1:n+1]]
 
+	def convertVectorArray(self):
+		n = int(self._vals[0])
+		return [float(x) for x in self._vals[1:n*3+1]]
+
 	def convertDoubleArray(self):
 		n = int(self._vals[0])
 		return [float(x) for x in self._vals[1:n+1]]

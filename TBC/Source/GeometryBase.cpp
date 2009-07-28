@@ -5,6 +5,7 @@
 
 
 #include "../Include/GeometryBase.h"
+#include <assert.h>
 #include "../Include/Bones.h"
 #include "../../Lepra/Include/Vector2D.h"
 
@@ -332,7 +333,8 @@ unsigned int GeometryBase::GetMaxTriangleCount() const
 		case TRIANGLE_STRIP:
 			return GetMaxIndexCount() - 2;
 		default:
-			return 0;
+			assert(false);
+			return (0);
 	}
 }
 
@@ -345,7 +347,8 @@ unsigned int GeometryBase::GetTriangleCount() const
 		case TRIANGLE_STRIP:
 			return GetIndexCount() - 2;
 		default:
-			return 0;
+			assert(false);
+			return (0);
 	}
 }
 
@@ -379,10 +382,11 @@ void GeometryBase::GetTriangleIndices(int pTriangle, Lepra::uint32 pIndices[3])
 		} break;
 		default:
 		{
+			assert(false);
 			// These values should hopefully cause a crash.
-			pIndices[0] = (Lepra::uint32)-1;
-			pIndices[1] = (Lepra::uint32)-1;
-			pIndices[2] = (Lepra::uint32)-1;
+			pIndices[0] = (Lepra::uint32)-100000;
+			pIndices[1] = (Lepra::uint32)-100000;
+			pIndices[2] = (Lepra::uint32)-100000;
 		} break;
 	}
 }

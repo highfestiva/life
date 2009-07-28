@@ -83,7 +83,7 @@ public:
 	// difference.
 	enum GeometryVolatility
 	{
-		GEOM_STATIC = 0,	// Geometry that will never change.
+		GEOM_STATIC = 1,	// Geometry that will never change.
 		GEOM_DYNAMIC,		// Geometry that will change occasionally (like terrain).
 		GEOM_VOLATILE,		// Geometry that will change between every frame.
 	};
@@ -91,13 +91,13 @@ public:
 	// Vertex color format.
 	enum ColorFormat
 	{
-		COLOR_RGB = 0,
+		COLOR_RGB = 1,
 		COLOR_RGBA,
 	};
 
 	enum PrimitiveType
 	{
-		TRIANGLES = 0,
+		TRIANGLES = 1,
 		TRIANGLE_STRIP,
 	};
 
