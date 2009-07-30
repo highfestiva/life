@@ -175,11 +175,12 @@ class GroupReader(DefaultMAReader):
                         qz = quat(1,0,0,0).fromAngleAxis(rot[2], (0, 0, 1))
                         m = (qx*qz*qy).toMat4()
                         t = self.get_fixed_attribute("t", optional=True, default=vec3(0,0,0))
+                        s = self.get_fixed_attribute("s", optional=True, default=vec3(1,1,1))
                         rpt = self.get_fixed_attribute("rpt", optional=True, default=vec3(0,0,0))
                         sp = self.get_fixed_attribute("sp", optional=True, default=vec3(0,0,0))
                         spt = self.get_fixed_attribute("spt", optional=True, default=vec3(0,0,0))
                         o = t+rpt+sp+spt
-                        m = mat4.translation(o) * m
+                        m = mat4.translation(o) * mat4.scaling(s) * m
                         mp = pm * m
                         #print(self.getFullName() + " before parent\n", m, "\nafter parent\n", mp, "\n", mp*vec4(0,0,5,1))
                         return mp
