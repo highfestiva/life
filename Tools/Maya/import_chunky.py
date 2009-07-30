@@ -5,6 +5,7 @@
 from mat4 import *
 from mayaascii import *
 from quat import *
+from vec3 import *
 from vec4 import *
 import chunkywriter
 
@@ -90,6 +91,12 @@ class GroupReader(DefaultMAReader):
                         sys.exit(3)
                 self.rotatexaxis(phys_group)
                 self.rotatexaxis(mesh_group)
+
+                for n in phys_group+mesh_group:
+                        if n.getFullName().find("Shape") < 0 and n.getFullName().find("poly") < 0:
+                                print("%-20s  %s  %s." % (n.getFullName(), n.get_world_translation(), n.get_pivot_translation()))
+                print("----------------")
+
                 self.faces2triangles(mesh_group)
                 self.makevertsrelative(mesh_group)
                 if not self.applyPhysConfig(config, phys_group):
@@ -143,43 +150,39 @@ class GroupReader(DefaultMAReader):
                         tab = self._fixattr.copy()
                         tab.update(self._setattr)
                         return tab
-                def get_world_translation(self, checkparent=False):
+                def get_world_translation(self):
+                        t = self.get_fixed_attribute("t", optional=True, default=vec3(0,0,0))
+                        return self.get_pivot_translation(vec4(t[0],t[1],t[2], 1))
+                def get_pivot_translation(self, origin=vec4(0, 0, 0, 1)):
+                        m = self.get_world_transform()
+                        p = self.getParent()
+                        while p:
+                                rpt = p.get_fixed_attribute("rpt", optional=True, default=vec3(0,0,0))
+                                sp = p.get_fixed_attribute("sp", optional=True, default=vec3(0,0,0))
+                                spt = p.get_fixed_attribute("spt", optional=True, default=vec3(0,0,0))
+                                t = -(rpt+sp+spt)
+                                origin = origin + vec4(t[0], t[1], t[2], 0)
+                                p = p.getParent()
+                        return m * origin
+                def get_world_transform(self):
                         if self.getParent():
-                                pt = self.getParent().get_world_translation(True)
-                                pm = self.getParent().get_world_orientation().toMat4()
-                                s  = self.getParent().get_world_scale()
-                                sh = self.getParent().get_world_shear()
+                                pm = self.getParent().get_world_transform()
                         else:
-                                pt = (0, 0, 0)
-                                pm = mat4((1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1))
-                                s  = (1, 1, 1)
-                                sh = mat4((1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1))
-                        pm *= sh
-                        if sh.getColumn(3)[1]:
-                                print("Scale is %s in node '%s'." % (str(s), self.getFullName()))
-                        p = self.get_fixed_attribute("t", optional=True, default=(0,0,0))
-                        if not checkparent:
-                                rp = self.get_fixed_attribute("rp", optional=True, default=(0,0,0))
-                                rpt = self.get_fixed_attribute("rpt", optional=True, default=(0,0,0))
-                        else:
-                                rp = (0, 0, 0)
-                                rpt = (0, 0, 0)
-                        p = vec4(tuple(map(lambda x,y,z,u: (x+y+z)*u, p, rp, rpt, s)))
-                        p.w = 1.0
-                        p = pm * p
-                        p = tuple(map(lambda x,y: x+y, pt, (p.x, p.y, p.z)))
-                        return p
-                def get_world_orientation(self):
-                        if self.getParent():
-                                pq = self.getParent().get_world_orientation()
-                        else:
-                                pq = quat(1, 0, 0, 0)
+                                pm = mat4.identity()
                         rot = self.get_fixed_attribute("r", optional=True, default=(0,0,0))
-                        qx = quat().fromAngleAxis(rot[0], (1, 0, 0))
-                        qy = quat().fromAngleAxis(rot[1], (0, 1, 0))
-                        qz = quat().fromAngleAxis(rot[2], (0, 0, 1))
-                        q = pq*qx*qz*qy
-                        return q
+                        qx = quat(1,0,0,0).fromAngleAxis(rot[0], (1, 0, 0))
+                        qy = quat(1,0,0,0).fromAngleAxis(rot[1], (0, 1, 0))
+                        qz = quat(1,0,0,0).fromAngleAxis(rot[2], (0, 0, 1))
+                        m = (qx*qz*qy).toMat4()
+                        t = self.get_fixed_attribute("t", optional=True, default=vec3(0,0,0))
+                        rpt = self.get_fixed_attribute("rpt", optional=True, default=vec3(0,0,0))
+                        sp = self.get_fixed_attribute("sp", optional=True, default=vec3(0,0,0))
+                        spt = self.get_fixed_attribute("spt", optional=True, default=vec3(0,0,0))
+                        o = t+rpt+sp+spt
+                        m = mat4.translation(o) * m
+                        mp = pm * m
+                        #print(self.getFullName() + " before parent\n", m, "\nafter parent\n", mp, "\n", mp*vec4(0,0,5,1))
+                        return mp
                 def get_world_scale(self):
                         node = self
                         s = (1,1,1)
@@ -194,7 +197,6 @@ class GroupReader(DefaultMAReader):
                 def get_world_shear(self):
                         node = self
                         sh = mat4((1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1))
-                        shear = (0,0)
                         while node:
                                 shear = node.get_fixed_attribute("sh", default=(0,0,0))
                                 if len(shear) != 3:
@@ -203,9 +205,6 @@ class GroupReader(DefaultMAReader):
                                 psh = mat4((1,0,0,0), (0,1,0,0), (0,0,1,0), (shear[0],shear[1],shear[2],1))
                                 sh *= psh
                                 node = node.getParent()
-                        if reduce(lambda x,y: x+y, sh.getColumn(3)) != 1:
-                                print("Node '%s' has shear matrix:\n%s." % (self.getFullName(), str(sh)))
-                        #print("Node '%s' has shear matrix %s." % (self.getFullName(), str(sh)))
                         return sh
                 def gettrans(self):
                         return self.get_fixed_attribute("t", default=(0,0,0))
@@ -216,16 +215,24 @@ class GroupReader(DefaultMAReader):
                         qz = quat().fromAngleAxis(rot[2], (0, 0, 1))
                         q = qy*qz*qx
                         return q
+                def getshear(self):
+                        sh = self.get_fixed_attribute("sh", optional=True)
+                        if sh and len(sh) != 3:
+                                print("Error: wrong number of shear scalars for node '%s'." % node.getFullName())
+                                sys.exit(19)
+                        return sh
                 node.fix_attribute = types.MethodType(fix_attribute, node)
                 node.get_fixed_attribute = types.MethodType(get_fixed_attribute, node)
                 node.get_inherited_attr = types.MethodType(get_inherited_attr, node)
                 node.get_fixed_tab = types.MethodType(get_fixed_tab, node)
                 node.get_world_translation = types.MethodType(get_world_translation, node)
-                node.get_world_orientation = types.MethodType(get_world_orientation, node)
+                node.get_pivot_translation = types.MethodType(get_pivot_translation, node)
+                node.get_world_transform = types.MethodType(get_world_transform, node)
                 node.get_world_scale = types.MethodType(get_world_scale, node)
                 node.get_world_shear = types.MethodType(get_world_shear, node)
                 node.gettrans = types.MethodType(gettrans, node)
                 node.getrot = types.MethodType(getrot, node)
+                node.getshear = types.MethodType(getshear, node)
                 return node
 
 
@@ -289,7 +296,8 @@ class GroupReader(DefaultMAReader):
         def filterIslands(self, islands):
                 for island in islands:
                         for n in island:
-                                if n.nodetype in self.bad_types:
+                                if n.nodetype in self.bad_types or \
+                                        (island.index(n) == 0 and n.getName().startswith("ignore_")):
                                         #print("Removing %s." % n.nodetype)
                                         islands.remove(island)
                                         self.filterIslands(islands)
@@ -300,18 +308,23 @@ class GroupReader(DefaultMAReader):
         def rotatexaxis(self, group):
                 for node in group:
                         if node.nodetype == "transform":
-                                pos = node.getAttrValue("t", "t", None, default=(0,0,0))
-                                node.fix_attribute("t", (pos[0], -pos[2], pos[1]))
-                                pos = node.getAttrValue("rp", "rp", None, default=(0,0,0))
-                                node.fix_attribute("rp", (pos[0], -pos[2], pos[1]))
-                                pos = node.getAttrValue("rpt", "rpt", None, default=(0,0,0))
-                                node.fix_attribute("rpt", (pos[0], -pos[2], pos[1]))
-                                rot = node.getAttrValue("r", "r", None, default=(0,0,0))
-                                node.fix_attribute("r", (math.radians(rot[0]), -math.radians(rot[2]), math.radians(rot[1])))
-                                scale = node.getAttrValue("s", "s", None, default=(1,1,1))
-                                node.fix_attribute("s", (scale[0], scale[2], scale[1]))
-                                shear = node.getAttrValue("sh", "sh", None, default=(0,0,0))
-                                node.fix_attribute("sh", (shear[0], shear[2], shear[1]))
+                                def fix(node, aname, default, conv=None):
+                                        val = node.getAttrValue(aname, aname, None, default=default)
+                                        if val:
+                                                val = (val[0], -val[2], val[1])
+                                                if conv:
+                                                        val = tuple(map(conv, val))
+                                                val = vec3(val)
+                                                node.fix_attribute(aname, val)
+                                                return val
+                                fix(node, "t", (0,0,0))
+                                fix(node, "rp", (0,0,0))
+                                fix(node, "rpt", (0,0,0))
+                                fix(node, "sp", (0,0,0))
+                                fix(node, "spt", (0,0,0))
+                                fix(node, "r", (0,0,0), math.radians)
+                                fix(node, "s", (1,1,1), math.fabs)
+                                fix(node, "sh", None)
                         vtx = node.getAttrValue("rgvtx", "rgvtx", None, n=None)
                         if vtx:
                                 for x in range(0, len(vtx), 3):
@@ -348,7 +361,7 @@ class GroupReader(DefaultMAReader):
                 for node in group:
                         vtx = node.get_fixed_attribute("rgvtx", optional=True)
                         if vtx:
-                                pos = node.get_world_translation()
+                                pos = node.getParent().get_world_translation()
                                 idx = 0
                                 for idx in range(len(vtx)):
                                         vtx[idx] -= pos[idx%3]
@@ -509,7 +522,7 @@ class GroupReader(DefaultMAReader):
                         for mesh in phys.mesh_ref:
                                 if not self._is_valid_phys_ref(phys, mesh, False):
                                         ok = False
-                                        print("Error: mesh node '%s' referenced by jointed phys node '%s' is not a valid reference." % \
+                                        print("Error: mesh node '%s' referenced by jointed phys node '%s' is not a valid reference (due to above error(s))." % \
                                               (mesh.getFullName(), phys.getFullName()))
                         if phys.getParent() == None or phys.get_fixed_attribute("joint", optional=True):
                                 if not phys.mesh_ref:
@@ -518,7 +531,7 @@ class GroupReader(DefaultMAReader):
                         for mesh in phys.loose_mesh_ref:
                                 if not self._is_valid_phys_ref(phys, mesh, True):
                                         ok = False
-                                        print("Error: mesh node '%s' referenced by non-jointed phys node '%s' is not a valid reference." % \
+                                        print("Error: mesh node '%s' referenced by non-jointed phys node '%s' is not a valid reference (due to above error(s))." % \
                                               (mesh.getFullName(), phys.getFullName()))
                         if phys.getParent() and not phys.get_fixed_attribute("joint", optional=True):
                                 if not phys.loose_mesh_ref:
@@ -624,14 +637,14 @@ class GroupReader(DefaultMAReader):
                         jointed_phys = phys
                         while jointed_phys.getParent() and not jointed_phys.get_fixed_attribute("joint", optional=True):
                                 jointed_phys = jointed_phys.getParent()
-                        mt = mesh.get_world_translation()
-                        pt = jointed_phys.get_world_translation()
+                        mt = mesh.get_pivot_translation()
+                        pt = jointed_phys.get_pivot_translation()
                         eps = 0.0001
                         if math.fabs(mt[0]-pt[0]) >= eps or \
                                 math.fabs(mt[1]-pt[1]) >= eps or \
                                 math.fabs(mt[2]-pt[2]) >= eps:
                                 valid_ref = False
-                                print("Error: mesh '%s' and phys node '%s' is not on exactly the same XYZ coordinate (%s and %s). " \
+                                print("Error: mesh '%s' and phys node '%s' do not share the exact same World Space Pivot (%s and %s). " \
                                       "Note that Y and Z axes are transformed compared to Maya." %
                                       (mesh.getFullName(), jointed_phys.getFullName(), str(mt), str(pt)))
                 else:
@@ -710,7 +723,7 @@ def main():
                 sys.exit(20)
         rd = GroupReader(sys.argv[1])
         rd.doread()
-        gwr = chunkywriter.GroupWriter(sys.argv[1], rd.phys_group, rd.mesh_group)
+        gwr = chunkywriter.GroupWriter(sys.argv[1], rd.phys_group, rd.mesh_group, rd.config)
         gwr.dowrite()
         pmwr = chunkywriter.PhysMeshWriter(sys.argv[1], rd.phys_group, rd.mesh_group, rd.config)
         pmwr.dowrite()

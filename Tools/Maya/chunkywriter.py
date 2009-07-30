@@ -104,7 +104,7 @@ class ChunkyWriter:
                         print("Error: trying to get rotation from node '%s', but none available." % node.getFullName())
                         sys.exit(18)
                 pos = node.gettrans()
-                data = q.totuple()+pos
+                data = q.totuple()+(pos[0], pos[1], pos[2])
                 print("Writing bone with data", data)
                 for f in data:
                         self._writefloat(f)
@@ -316,7 +316,7 @@ class GroupWriter(ChunkyWriter):
         """Translates a node/attribute group and writes it to disk as a group chunky file."""
 
         def __init__(self, basename, phys_group, mesh_group, config):
-                ChunkyWriter.__init__(basename)
+                ChunkyWriter.__init__(self, basename)
                 self.phys_group = phys_group
                 self.mesh_group = mesh_group
                 self.config = config
@@ -335,7 +335,7 @@ class PhysMeshWriter(ChunkyWriter):
         """Translates a node/attribute group and writes it to disk as physics+mesh chunky files."""
 
         def __init__(self, basename, phys_group, mesh_group, config):
-                ChunkyWriter.__init__(basename)
+                ChunkyWriter.__init__(self, basename)
                 self.phys_group = phys_group
                 self.mesh_group = mesh_group
                 self.config = config

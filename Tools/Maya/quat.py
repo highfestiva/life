@@ -215,6 +215,9 @@ class quat:
                         w1*x2+x1*w2+y1*z2-z1*y2,
                         w1*y2+y1*w2-x1*z2+z1*x2,
                         w1*z2+z1*w2+x1*y2-y1*x2)
+        # quat*vec3
+        if isinstance(other, _vec3):
+            return self.rotateVec(other)
         # unsupported
         else:
             # Try to delegate the operation to the other operand
