@@ -150,19 +150,11 @@ class GroupReader(DefaultMAReader):
                         tab = self._fixattr.copy()
                         tab.update(self._setattr)
                         return tab
-                def get_world_translation(self):
-                        t = self.get_fixed_attribute("t", optional=True, default=vec3(0,0,0))
-                        return self.get_pivot_translation(vec4(t[0],t[1],t[2], 1))
-                def get_pivot_translation(self, origin=vec4(0, 0, 0, 1)):
+                def get_pivot_translation(self):
+                        o = self.get_fixed_attribute("rp", optional=True, default=vec3(0,0,0))
+                        return self.get_world_translation(vec4(o[0],o[1],o[2], 1))
+                def get_world_translation(self, origin=vec4(0, 0, 0, 1)):
                         m = self.get_world_transform()
-                        p = self.getParent()
-                        while p:
-                                rpt = p.get_fixed_attribute("rpt", optional=True, default=vec3(0,0,0))
-                                sp = p.get_fixed_attribute("sp", optional=True, default=vec3(0,0,0))
-                                spt = p.get_fixed_attribute("spt", optional=True, default=vec3(0,0,0))
-                                t = -(rpt+sp+spt)
-                                origin = origin + vec4(t[0], t[1], t[2], 0)
-                                p = p.getParent()
                         return m * origin
                 def get_world_transform(self):
                         if self.getParent():
@@ -173,17 +165,39 @@ class GroupReader(DefaultMAReader):
                         qx = quat(1,0,0,0).fromAngleAxis(rot[0], (1, 0, 0))
                         qy = quat(1,0,0,0).fromAngleAxis(rot[1], (0, 1, 0))
                         qz = quat(1,0,0,0).fromAngleAxis(rot[2], (0, 0, 1))
-                        m = (qx*qz*qy).toMat4()
+                        mr = (qx*qz*qy).toMat4()
                         t = self.get_fixed_attribute("t", optional=True, default=vec3(0,0,0))
                         s = self.get_fixed_attribute("s", optional=True, default=vec3(1,1,1))
+                        sh = self.get_fixed_attribute("sh", optional=True, default=vec3(0,0,0))
+                        rp = self.get_fixed_attribute("rp", optional=True, default=vec3(0,0,0))
                         rpt = self.get_fixed_attribute("rpt", optional=True, default=vec3(0,0,0))
                         sp = self.get_fixed_attribute("sp", optional=True, default=vec3(0,0,0))
                         spt = self.get_fixed_attribute("spt", optional=True, default=vec3(0,0,0))
-                        o = t+rpt+sp+spt
-                        m = mat4.translation(o) * mat4.scaling(s) * m
-                        mp = pm * m
+                        #o = t+rpt+sp+spt
+                        #msh = mat4.identity()
+                        #msh.mlist[4] = sh[0]    # X: x(y)
+                        #msh.mlist[8] = sh[1]    # Y: x(z)
+                        #msh.mlist[9] = sh[2]    # Z: z(y)
+                        #m = mat4.translation(o) * mat4.scaling(s) * mr * msh
+                        msp = mat4.translation(-sp)
+                        ms = mat4.scaling(s)
+                        msh = mat4.identity()
+                        msh.mlist[2] = +sh[0]	# X: x(+z), originally x(y) in Maya.
+                        msh.mlist[1] = -sh[1]	# Y: x(-y), originally x(z) in Maya.
+                        msh.mlist[9] = -sh[2]	# Z: z(-y), originally y(z) in Maya.
+                        mspi = mat4.translation(sp)
+                        mst = mat4.translation(spt)
+                        mrp = mat4.translation(-rp)
+                        mar = mat4.identity()	# TODO: add composite axis rotation.
+                        mrpi = mat4.translation(rp)
+                        mrt = mat4.translation(rpt)
+                        mt = mat4.translation(t)
+                        #m = pm * msp * ms * msh * mspi * mst * mrp * mar * mr * mrpi * mrt * mt
+                        m = pm * mt * mrt * mrpi * mr * mar * mrp * mst * mspi * msh * ms * msp
+                        #m = pm * mt * mrt * mspi * mst * ms * mr
+                        #m = pm * mt * mrt * mrpi * mr * mar * mrp * mst * ms
                         #print(self.getFullName() + " before parent\n", m, "\nafter parent\n", mp, "\n", mp*vec4(0,0,5,1))
-                        return mp
+                        return m
                 def get_world_scale(self):
                         node = self
                         s = (1,1,1)
