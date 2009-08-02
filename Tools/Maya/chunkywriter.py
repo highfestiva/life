@@ -99,11 +99,11 @@ class ChunkyWriter:
 
 
         def _writebone(self, node):
-                q = node.getrot()
+                q = node.get_local_quat()
                 if not q:
                         print("Error: trying to get rotation from node '%s', but none available." % node.getFullName())
                         sys.exit(18)
-                pos = node.gettrans()
+                pos = node.get_local_translation()
                 data = q.totuple()+(pos[0], pos[1], pos[2])
                 print("Writing bone with data", data)
                 for f in data:
@@ -135,9 +135,12 @@ class ChunkyWriter:
                 parameters[3] = roll
                 parameters[4] = 0.0     # TODO: pick joint end-values from .ma!
                 parameters[5] = 0.0     # TODO: pick joint end-values from .ma!
-                parameters[6] = 0.0     # TODO: pick joint anchor from .ma!
-                parameters[7] = 0.0     # TODO: pick joint anchor from .ma!
-                parameters[8] = 0.0     # TODO: pick joint anchor from .ma!
+                lq = node.get_local_quat()
+                lp = node.get_local_pivot()
+                j = lq*lp
+                parameters[6] = j.x
+                parameters[7] = j.y
+                parameters[8] = j.z
                 for x in parameters:
                         self._writefloat(x)
                 # Write connecor type (may hook other stuff, may be hooked by hookers :).
@@ -233,7 +236,7 @@ class ChunkyWriter:
 
 
         def _geteuler(self, node):
-                q = node.getrot()
+                q = node.get_local_quat()
                 w2 = q[0]*q[0]
                 x2 = q[1]*q[1]
                 y2 = q[2]*q[2]
@@ -258,7 +261,7 @@ class ChunkyWriter:
 
 
         def _getaxes(self, node):
-                q = node.getrot()
+                q = node.get_local_quat()
                 return q.rotateVec((1,0,0)), q.rotateVec((0,1,0)), q.rotateVec((0,0,1))
 
 

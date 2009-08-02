@@ -28,9 +28,9 @@ class TimePreProcessor(MAPreProcessor):
                         getmonth = lambda M: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].index(M)+1
                         def gettodoff(h, ToD):
                                 h = int(h)
-                                h += ["AM", "PM"].index(ToD)*12
-                                if h >= 24:
+                                if h >= 12:
                                         h -= 12
+                                h += ["AM", "PM"].index(ToD)*12
                                 return h
                         M, D, Y, h, m, s = getmonth(M), int(D), int(Y), gettodoff(h, ToD), int(m), int(s)
                         global modified_time
@@ -94,7 +94,7 @@ class GroupReader(DefaultMAReader):
 
                 for n in phys_group+mesh_group:
                         if n.getFullName().find("Shape") < 0 and n.getFullName().find("poly") < 0:
-                                print("%-20s  %s  %s." % (n.getFullName(), n.get_world_translation(), n.get_pivot_translation()))
+                                print("%-20s  %s  %s." % (n.getFullName(), n.get_world_translation(), n.get_world_pivot()))
                 print("----------------")
 
                 self.faces2triangles(mesh_group)
@@ -150,8 +150,8 @@ class GroupReader(DefaultMAReader):
                         tab = self._fixattr.copy()
                         tab.update(self._setattr)
                         return tab
-                def get_pivot_translation(self):
-                        o = self.get_fixed_attribute("rp", optional=True, default=vec3(0,0,0))
+                def get_world_pivot(self):
+                        o = self.get_local_pivot() - self.get_fixed_attribute("spt", optional=True, default=vec3(0,0,0))
                         return self.get_world_translation(vec4(o[0],o[1],o[2], 1))
                 def get_world_translation(self, origin=vec4(0, 0, 0, 1)):
                         m = self.get_world_transform()
@@ -161,93 +161,72 @@ class GroupReader(DefaultMAReader):
                                 pm = self.getParent().get_world_transform()
                         else:
                                 pm = mat4.identity()
-                        rot = self.get_fixed_attribute("r", optional=True, default=(0,0,0))
-                        qx = quat(1,0,0,0).fromAngleAxis(rot[0], (1, 0, 0))
-                        qy = quat(1,0,0,0).fromAngleAxis(rot[1], (0, 1, 0))
-                        qz = quat(1,0,0,0).fromAngleAxis(rot[2], (0, 0, 1))
-                        mr = (qx*qz*qy).toMat4()
-                        t = self.get_fixed_attribute("t", optional=True, default=vec3(0,0,0))
+                        mr = self.get_local_quat().toMat4()
+                        t = self.get_local_translation()
                         s = self.get_fixed_attribute("s", optional=True, default=vec3(1,1,1))
                         sh = self.get_fixed_attribute("sh", optional=True, default=vec3(0,0,0))
-                        rp = self.get_fixed_attribute("rp", optional=True, default=vec3(0,0,0))
-                        rpt = self.get_fixed_attribute("rpt", optional=True, default=vec3(0,0,0))
+                        rp = self.get_local_pivot()
+                        rt = self.get_fixed_attribute("rpt", optional=True, default=vec3(0,0,0))
                         sp = self.get_fixed_attribute("sp", optional=True, default=vec3(0,0,0))
-                        spt = self.get_fixed_attribute("spt", optional=True, default=vec3(0,0,0))
-                        #o = t+rpt+sp+spt
-                        #msh = mat4.identity()
-                        #msh.mlist[4] = sh[0]    # X: x(y)
-                        #msh.mlist[8] = sh[1]    # Y: x(z)
-                        #msh.mlist[9] = sh[2]    # Z: z(y)
-                        #m = mat4.translation(o) * mat4.scaling(s) * mr * msh
+                        st = self.get_fixed_attribute("spt", optional=True, default=vec3(0,0,0))
                         msp = mat4.translation(-sp)
                         ms = mat4.scaling(s)
                         msh = mat4.identity()
-                        msh.mlist[2] = +sh[0]	# X: x(+z), originally x(y) in Maya.
+                        msh.mlist[2] = +sh[0]	# X: x(+z), originally x(+y) in Maya.
                         msh.mlist[1] = -sh[1]	# Y: x(-y), originally x(z) in Maya.
                         msh.mlist[9] = -sh[2]	# Z: z(-y), originally y(z) in Maya.
                         mspi = mat4.translation(sp)
-                        mst = mat4.translation(spt)
+                        mst = mat4.translation(st)
                         mrp = mat4.translation(-rp)
-                        mar = mat4.identity()	# TODO: add composite axis rotation.
+                        mar = self.get_local_arq().toMat4()
                         mrpi = mat4.translation(rp)
-                        mrt = mat4.translation(rpt)
+                        mrt = mat4.translation(rt)
                         mt = mat4.translation(t)
-                        #m = pm * msp * ms * msh * mspi * mst * mrp * mar * mr * mrpi * mrt * mt
+                        # According to Maya doc (as I understood it): [sp][s][sh][sp^-1][st][rp][ar][r][rp^-1][rt][t].
+                        # My multiplications are reversed order, since matrices already transposed.
                         m = pm * mt * mrt * mrpi * mr * mar * mrp * mst * mspi * msh * ms * msp
-                        #m = pm * mt * mrt * mspi * mst * ms * mr
-                        #m = pm * mt * mrt * mrpi * mr * mar * mrp * mst * ms
-                        #print(self.getFullName() + " before parent\n", m, "\nafter parent\n", mp, "\n", mp*vec4(0,0,5,1))
                         return m
                 def get_world_scale(self):
                         node = self
                         s = (1,1,1)
                         while node:
-                                scale = node.get_fixed_attribute("s", default=(1,1,1))
+                                scale = node.get_fixed_attribute("s", default=vec3(1,1,1))
                                 if len(scale) != 3 or reduce(lambda x,y: x*y, scale) == 0:
                                         print("Error: wrong number of scale scalars, or some scale is zero for node '%s'." % node.getFullName())
                                         sys.exit(19)
                                 s = tuple(map(lambda x, y: x*y, s, scale))
                                 node = node.getParent()
                         return s
-                def get_world_shear(self):
-                        node = self
-                        sh = mat4((1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1))
-                        while node:
-                                shear = node.get_fixed_attribute("sh", default=(0,0,0))
-                                if len(shear) != 3:
-                                        print("Error: wrong number of shear scalars for node '%s'." % node.getFullName())
-                                        sys.exit(19)
-                                psh = mat4((1,0,0,0), (0,1,0,0), (0,0,1,0), (shear[0],shear[1],shear[2],1))
-                                sh *= psh
-                                node = node.getParent()
-                        return sh
-                def gettrans(self):
-                        return self.get_fixed_attribute("t", default=(0,0,0))
-                def getrot(self):
-                        rot = self.get_fixed_attribute("r", default=(0,0,0))
+                def get_local_translation(self):
+                        return self.get_fixed_attribute("t", default=vec3(0,0,0))
+                def get_local_pivot(self):
+                        return self.get_fixed_attribute("rp", default=vec3(0,0,0))
+                def get_local_quat(self):
+                        rot = self.get_fixed_attribute("r", default=vec3(0,0,0))
                         qx = quat().fromAngleAxis(rot[0], (1, 0, 0))
                         qy = quat().fromAngleAxis(rot[1], (0, 1, 0))
                         qz = quat().fromAngleAxis(rot[2], (0, 0, 1))
                         q = qy*qz*qx
                         return q
-                def getshear(self):
-                        sh = self.get_fixed_attribute("sh", optional=True)
-                        if sh and len(sh) != 3:
-                                print("Error: wrong number of shear scalars for node '%s'." % node.getFullName())
-                                sys.exit(19)
-                        return sh
+                def get_local_arq(self):
+                        ra = self.get_fixed_attribute("ra", default=vec3(0,0,0))
+                        qx = quat().fromAngleAxis(ra[0], (1, 0, 0))
+                        qy = quat().fromAngleAxis(ra[1], (0, 1, 0))
+                        qz = quat().fromAngleAxis(ra[2], (0, 0, 1))
+                        q = qy*qz*qx
+                        return q
                 node.fix_attribute = types.MethodType(fix_attribute, node)
                 node.get_fixed_attribute = types.MethodType(get_fixed_attribute, node)
                 node.get_inherited_attr = types.MethodType(get_inherited_attr, node)
                 node.get_fixed_tab = types.MethodType(get_fixed_tab, node)
                 node.get_world_translation = types.MethodType(get_world_translation, node)
-                node.get_pivot_translation = types.MethodType(get_pivot_translation, node)
+                node.get_world_pivot = types.MethodType(get_world_pivot, node)
                 node.get_world_transform = types.MethodType(get_world_transform, node)
                 node.get_world_scale = types.MethodType(get_world_scale, node)
-                node.get_world_shear = types.MethodType(get_world_shear, node)
-                node.gettrans = types.MethodType(gettrans, node)
-                node.getrot = types.MethodType(getrot, node)
-                node.getshear = types.MethodType(getshear, node)
+                node.get_local_translation = types.MethodType(get_local_translation, node)
+                node.get_local_pivot = types.MethodType(get_local_pivot, node)
+                node.get_local_quat = types.MethodType(get_local_quat, node)
+                node.get_local_arq = types.MethodType(get_local_arq, node)
                 return node
 
 
@@ -323,10 +302,11 @@ class GroupReader(DefaultMAReader):
         def rotatexaxis(self, group):
                 for node in group:
                         if node.nodetype == "transform":
-                                def fix(node, aname, default, conv=None):
+                                def fix(node, aname, default, conv=None, flip=lambda x,y,z: (x,-z,y)):
                                         val = node.getAttrValue(aname, aname, None, default=default)
                                         if val:
-                                                val = (val[0], -val[2], val[1])
+                                                if flip:
+                                                        val = flip(*val)
                                                 if conv:
                                                         val = tuple(map(conv, val))
                                                 val = vec3(val)
@@ -339,7 +319,8 @@ class GroupReader(DefaultMAReader):
                                 fix(node, "spt", (0,0,0))
                                 fix(node, "r", (0,0,0), math.radians)
                                 fix(node, "s", (1,1,1), math.fabs)
-                                fix(node, "sh", None)
+                                fix(node, "sh", (0,0,0), None, None)
+                                fix(node, "ra", (0,0,0), math.radians)
                         vtx = node.getAttrValue("rgvtx", "rgvtx", None, n=None)
                         if vtx:
                                 for x in range(0, len(vtx), 3):
@@ -652,8 +633,8 @@ class GroupReader(DefaultMAReader):
                         jointed_phys = phys
                         while jointed_phys.getParent() and not jointed_phys.get_fixed_attribute("joint", optional=True):
                                 jointed_phys = jointed_phys.getParent()
-                        mt = mesh.get_pivot_translation()
-                        pt = jointed_phys.get_pivot_translation()
+                        mt = mesh.get_world_pivot()
+                        pt = jointed_phys.get_world_pivot()
                         eps = 0.0001
                         if math.fabs(mt[0]-pt[0]) >= eps or \
                                 math.fabs(mt[1]-pt[1]) >= eps or \
