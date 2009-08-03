@@ -11,9 +11,12 @@
 #include "../../Lepra/Include/Math.h"
 #include "../../Lepra/Include/Random.h"
 #include "../../Lepra/Include/RotationMatrix.h"
+#include "../../TBC/Include/ChunkyBoneGeometry.h"
+#include "../../TBC/Include/ChunkyStructure.h"
 #include "../../TBC/Include/PhysicsEngine.h"
+#include "../../TBC/Include/StructureEngine.h"
 #include "../Include/ContextManager.h"
-#include "../Include/ContextObjectEngine.h"
+#include "../Include/ContextObjectAttribute.h"
 #include "../Include/Cure.h"
 #include "../Include/GameManager.h"
 #include "../Include/TimeManager.h"
@@ -48,11 +51,10 @@ ContextObject::ContextObject(const Lepra::String& pClassId):
 	mInstanceId(0),
 	mClassId(pClassId),
 	mNetworkObjectType(NETWORK_OBJECT_LOCAL_ONLY),
+	mStructure(0),
 	mLastSendTime(0),
-	mRootPhysicsIndex(-1),
 	mSendCount(0),
-	mAllowMoveSelf(true),
-	mUniqeNodeId(256)
+	mAllowMoveSelf(true)
 {
 }
 
@@ -61,7 +63,6 @@ ContextObject::~ContextObject()
 	log_volatile(mLog.Debugf(_T("Destructing context object %s."), mClassId.c_str()));
 
 	mManager->RemoveObject(this);
-	mRootPhysicsIndex = -1;
 
 	// Detach from other context objects.
 	{
@@ -72,19 +73,16 @@ ContextObject::~ContextObject()
 		}
 	}
 
-	// Destroy joints, then bodies (needs to go in that order).
+	// Removes bodies from manager, then destroys all physical stuff.
+	if (mStructure)
 	{
-		PhysicsNodeArray::iterator x = mPhysicsNodeArray.begin();
-		for (; x != mPhysicsNodeArray.end(); ++x)
+		const int lBoneCount = mStructure->GetBoneCount();
+		for (int x = 0; x < lBoneCount; ++x)
 		{
-			mManager->RemovePhysicsJoint(x->GetJointId());
+			TBC::ChunkyBoneGeometry* lStructureGeometry = mStructure->GetBoneGeometry(x);
+			mManager->RemovePhysicsBody(lStructureGeometry->GetBodyId());
 		}
-		x = mPhysicsNodeArray.begin();
-		for (; x != mPhysicsNodeArray.end(); ++x)
-		{
-			mManager->RemovePhysicsBody(x->GetBodyId());
-		}
-		mPhysicsNodeArray.clear();
+		mStructure->ClearAll(mManager->GetGameManager()->GetPhysicsManager());
 	}
 
 	// Fuck off, attributes.
@@ -159,37 +157,41 @@ void ContextObject::AttachToObject(TBC::PhysicsEngine::BodyID pBody1, ContextObj
 	{
 		return;
 	}
-	AttachToObject(GetPhysicsNode(pBody1), pObject2, pObject2->GetPhysicsNode(pBody2), true);
+	AttachToObject(GetStructureGeometry(pBody1), pObject2, pObject2->GetStructureGeometry(pBody2), true);
 }
 
-void ContextObject::AttachToObject(PhysicsNode::Id pBody1Id, ContextObject* pObject2, PhysicsNode::Id pBody2Id)
+void ContextObject::AttachToObject(unsigned pBody1Index, ContextObject* pObject2, unsigned pBody2Index)
 {
 	if (IsAttachedTo(pObject2))
 	{
 		assert(false);
 		return;
 	}
-	AttachToObject(GetPhysicsNode(pBody1Id), pObject2, pObject2->GetPhysicsNode(pBody2Id), false);
+	AttachToObject(mStructure->GetBoneGeometry(pBody1Index), pObject2, pObject2->GetStructureGeometry(pBody2Index), false);
 }
 
-bool ContextObject::DetachFromObject(ContextObject* pObject)
+bool ContextObject::DetachFromObject(ContextObject* /*pObject*/)
 {
 	bool lRemoved = false;
-	ConnectionList::iterator x = mConnectionList.begin();
+
+	// TODO: implement when new design is in place.
+
+	/*ConnectionList::iterator x = mConnectionList.begin();
 	for (; x != mConnectionList.end(); ++x)
 	{
 		if (pObject == x->mObject)
 		{
 			TBC::PhysicsEngine::JointID lJointId = x->mJointId;
-			ContextObjectEngine* lEngine = x->mEngine;
+			TBC::StructureEngine* lEngine = x->mEngine;
 			mConnectionList.erase(x);
 			pObject->DetachFromObject(this);
 			if (lJointId != TBC::INVALID_JOINT)
 			{
-				PhysicsNodeArray::iterator x = mPhysicsNodeArray.begin();
-				for (; x != mPhysicsNodeArray.end(); ++x)
+				const int lBoneCount = mStructure->GetBoneCount();
+				for (int x = 0; x < lBoneCount; ++x)
 				{
-					if (x->GetJointId() == lJointId)
+					TBC::ChunkyBoneGeometry* lStructureGeometry = mStructure->GetBoneGeometry(x);
+					if (lStructureGeometry->GetJointId() == lJointId)
 					{
 						mPhysicsNodeArray.erase(x);
 						break;
@@ -206,7 +208,7 @@ bool ContextObject::DetachFromObject(ContextObject* pObject)
 			lRemoved = true;
 			break;
 		}
-	}
+	}*/
 	return (lRemoved);
 }
 
@@ -226,36 +228,44 @@ void ContextObject::RemoveAttribute(ContextObjectAttribute* pAttribute)
 
 bool ContextObject::UpdateFullPosition(const ObjectPositionalData*& pPositionalData)
 {
-	if (mRootPhysicsIndex < 0 || mPhysicsNodeArray[mRootPhysicsIndex].GetBodyId() == TBC::INVALID_BODY)
+	TBC::ChunkyBoneGeometry* lStructureGeometry = mStructure->GetBoneGeometry(mStructure->GetRootBone());
+	if (!lStructureGeometry || lStructureGeometry->GetBodyId() == TBC::INVALID_BODY)
 	{
 		mLog.Errorf(_T("Could not get positional update (for streaming), since %i/%s not loaded yet!"),
 			GetInstanceId(), GetClassId().c_str());
 		return (false);
 	}
 
-	TBC::PhysicsEngine* lPhysics = mManager->GetGameManager()->GetPhysicsManager();
-	TBC::PhysicsEngine::BodyID lBody = mPhysicsNodeArray[mRootPhysicsIndex].GetBodyId();
-	lPhysics->GetBodyTransform(lBody, mPosition.mPosition.mTransformation);
-	lPhysics->GetBodyVelocity(lBody, mPosition.mPosition.mVelocity);
-	lPhysics->GetBodyAcceleration(lBody, mPosition.mPosition.mAcceleration);
-	lPhysics->GetBodyAngularVelocity(lBody, mPosition.mPosition.mAngularVelocity);
-	lPhysics->GetBodyAngularAcceleration(lBody, mPosition.mPosition.mAngularAcceleration);
+	TBC::PhysicsEngine* lPhysicsManager = mManager->GetGameManager()->GetPhysicsManager();
+	TBC::PhysicsEngine::BodyID lBody = lStructureGeometry->GetBodyId();
+	lPhysicsManager->GetBodyTransform(lBody, mPosition.mPosition.mTransformation);
+	lPhysicsManager->GetBodyVelocity(lBody, mPosition.mPosition.mVelocity);
+	lPhysicsManager->GetBodyAcceleration(lBody, mPosition.mPosition.mAcceleration);
+	lPhysicsManager->GetBodyAngularVelocity(lBody, mPosition.mPosition.mAngularVelocity);
+	lPhysicsManager->GetBodyAngularAcceleration(lBody, mPosition.mPosition.mAngularAcceleration);
 
+	const int lGeometryCount = mStructure->GetBoneCount();
 	size_t y = 0;
-	for (size_t x = 0; x < mPhysicsNodeArray.size(); ++x)
+	for (int x = 0; x < lGeometryCount; ++x)
 	{
-		// TODO: add support for parent ID.
-		const PhysicsNode& lNode = mPhysicsNodeArray[x];
-		lBody = lNode.GetBodyId();
-		TBC::PhysicsEngine::JointID lJoint = lNode.GetJointId();
-		switch (lNode.GetJointType())
+		// TODO: add support for parent ID??? JB 2009-07-07: Don't know anymore what this might mean.
+		const TBC::ChunkyBoneGeometry* lStructureGeometry = mStructure->GetBoneGeometry(x);
+		if (!lStructureGeometry)
 		{
-			case PhysicsNode::TYPE_SUSPEND_HINGE:
+			mLog.Errorf(_T("Could not get positional update (for streaming), since *WHOLE* %i/%s not loaded yet!"),
+				GetInstanceId(), GetClassId().c_str());
+			return (false);
+		}
+		lBody = lStructureGeometry->GetBodyId();
+		TBC::PhysicsEngine::JointID lJoint = lStructureGeometry->GetJointId();
+		switch (lStructureGeometry->GetJointType())
+		{
+			case TBC::ChunkyBoneGeometry::JOINT_SUSPEND_HINGE:
 			{
 				GETSET_OBJECT_POSITIONAL_AT(mPosition, y, PositionalData2, lData, PositionalData::TYPE_POSITION_2, 1);
 				++y;
 				TBC::PhysicsEngine::Joint3Diff lDiff;
-				if (!lPhysics->GetJoint3Diff(lBody, lJoint, lDiff))
+				if (!lPhysicsManager->GetJoint3Diff(lBody, lJoint, lDiff))
 				{
 					mLog.AError("Could not get hinge-2!");
 					return (false);
@@ -268,12 +278,12 @@ bool ContextObject::UpdateFullPosition(const ObjectPositionalData*& pPositionalD
 				lData->mAcceleration[1] = lDiff.mAngle2Acceleration;
 			}
 			break;
-			case PhysicsNode::TYPE_HINGE2:
+			case TBC::ChunkyBoneGeometry::JOINT_HINGE2:
 			{
 				GETSET_OBJECT_POSITIONAL_AT(mPosition, y, PositionalData3, lData, PositionalData::TYPE_POSITION_3, 1);
 				++y;
 				TBC::PhysicsEngine::Joint3Diff lDiff;
-				if (!lPhysics->GetJoint3Diff(lBody, lJoint, lDiff))
+				if (!lPhysicsManager->GetJoint3Diff(lBody, lJoint, lDiff))
 				{
 					mLog.AError("Could not get hinge-2!");
 					return (false);
@@ -289,12 +299,12 @@ bool ContextObject::UpdateFullPosition(const ObjectPositionalData*& pPositionalD
 				lData->mAcceleration[2] = lDiff.mAngle2Acceleration;
 			}
 			break;
-			case PhysicsNode::TYPE_HINGE:
+			case TBC::ChunkyBoneGeometry::JOINT_HINGE:
 			{
 				GETSET_OBJECT_POSITIONAL_AT(mPosition, y, PositionalData1, lData, PositionalData::TYPE_POSITION_1, 1);
 				++y;
 				TBC::PhysicsEngine::Joint1Diff lDiff;
-				if (!lPhysics->GetJoint1Diff(lBody, lJoint, lDiff))
+				if (!lPhysicsManager->GetJoint1Diff(lBody, lJoint, lDiff))
 				{
 					mLog.AError("Could not get hinge!");
 					return (false);
@@ -304,12 +314,12 @@ bool ContextObject::UpdateFullPosition(const ObjectPositionalData*& pPositionalD
 				lData->mAcceleration = lDiff.mAngleAcceleration;
 			}
 			break;
-			case PhysicsNode::TYPE_BALL:
+			case TBC::ChunkyBoneGeometry::JOINT_BALL:
 			{
 				GETSET_OBJECT_POSITIONAL_AT(mPosition, y, PositionalData3, lData, PositionalData::TYPE_POSITION_3, 0.00001f);
 				++y;
 				TBC::PhysicsEngine::Joint3Diff lDiff;
-				if (!lPhysics->GetJoint3Diff(lBody, lJoint, lDiff))
+				if (!lPhysicsManager->GetJoint3Diff(lBody, lJoint, lDiff))
 				{
 					mLog.AError("Could not get ball!");
 					return (false);
@@ -325,12 +335,12 @@ bool ContextObject::UpdateFullPosition(const ObjectPositionalData*& pPositionalD
 				lData->mAcceleration[2] = lDiff.mAngle2Acceleration;
 			}
 			break;
-			case PhysicsNode::TYPE_UNIVERSAL:
+			case TBC::ChunkyBoneGeometry::JOINT_UNIVERSAL:
 			{
 				GETSET_OBJECT_POSITIONAL_AT(mPosition, y, PositionalData2, lData, PositionalData::TYPE_POSITION_2, 1);
 				++y;
 				TBC::PhysicsEngine::Joint2Diff lDiff;
-				if (!lPhysics->GetJoint2Diff(lBody, lJoint, lDiff))
+				if (!lPhysicsManager->GetJoint2Diff(lBody, lJoint, lDiff))
 				{
 					mLog.AError("Could not get universal!");
 					return (false);
@@ -343,7 +353,7 @@ bool ContextObject::UpdateFullPosition(const ObjectPositionalData*& pPositionalD
 				lData->mAcceleration[1] = lDiff.mAngleAcceleration;
 			}
 			break;
-			case PhysicsNode::TYPE_EXCLUDE:
+			case TBC::ChunkyBoneGeometry::JOINT_EXCLUDE:
 			{
 			}
 			break;
@@ -355,45 +365,41 @@ bool ContextObject::UpdateFullPosition(const ObjectPositionalData*& pPositionalD
 		}
 	}
 
-	AttributeArray::const_iterator z = mAttributeArray.begin();
-	for (; z != mAttributeArray.end(); ++z)
+	const int lEngineCount = mStructure->GetEngineCount();
+	for (int z = 0; z != lEngineCount; ++z)
 	{
-		// TODO: add support for parent ID.
-		ContextObjectAttribute* lAttribute = *z;
-		if (lAttribute->GetType() == ContextObjectAttribute::TYPE_ENGINE)
+		// TODO: add support for parent ID??????????? JB 2009-07-08: don't know what this is anymore.
+		const TBC::StructureEngine* lEngine = mStructure->GetEngine(z);
+		switch (lEngine->GetEngineType())
 		{
-			ContextObjectEngine* lEngine = (ContextObjectEngine*)lAttribute;
-			switch (lEngine->GetEngineType())
+			case TBC::StructureEngine::ENGINE_CAMERA_FLAT_PUSH:
 			{
-				case ContextObjectEngine::ENGINE_CAMERA_FLAT_PUSH:
-				{
-					GETSET_OBJECT_POSITIONAL_AT(mPosition, y, RealData4, lData, PositionalData::TYPE_REAL_4, 1);
-					++y;
-					::memcpy(lData->mValue, lEngine->GetValues(), sizeof(float)*4);
-				}
-				break;
-				case ContextObjectEngine::ENGINE_HINGE2_ROLL:
-				case ContextObjectEngine::ENGINE_HINGE2_TURN:
-				case ContextObjectEngine::ENGINE_HINGE2_BREAK:
-				case ContextObjectEngine::ENGINE_HINGE:
-				{
-					GETSET_OBJECT_POSITIONAL_AT(mPosition, y, RealData1, lData, PositionalData::TYPE_REAL_1, 1);
-					++y;
-					lData->mValue = lEngine->GetValue();
-				}
-				break;
-				case ContextObjectEngine::ENGINE_ROLL_STRAIGHT:
-				case ContextObjectEngine::ENGINE_GLUE:
-				{
-					// Unsynchronized "engine".
-				}
-				break;
-				default:
-				{
-					assert(false);
-				}
-				break;
+				GETSET_OBJECT_POSITIONAL_AT(mPosition, y, RealData4, lData, PositionalData::TYPE_REAL_4, 1);
+				++y;
+				::memcpy(lData->mValue, lEngine->GetValues(), sizeof(float)*4);
 			}
+			break;
+			case TBC::StructureEngine::ENGINE_HINGE2_ROLL:
+			case TBC::StructureEngine::ENGINE_HINGE2_TURN:
+			case TBC::StructureEngine::ENGINE_HINGE2_BREAK:
+			case TBC::StructureEngine::ENGINE_HINGE:
+			{
+				GETSET_OBJECT_POSITIONAL_AT(mPosition, y, RealData1, lData, PositionalData::TYPE_REAL_1, 1);
+				++y;
+				lData->mValue = lEngine->GetValue();
+			}
+			break;
+			case TBC::StructureEngine::ENGINE_ROLL_STRAIGHT:
+			case TBC::StructureEngine::ENGINE_GLUE:
+			{
+				// Unsynchronized "engine".
+			}
+			break;
+			default:
+			{
+				assert(false);
+			}
+			break;
 		}
 	}
 
@@ -407,7 +413,8 @@ bool ContextObject::UpdateFullPosition(const ObjectPositionalData*& pPositionalD
 
 void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData)
 {
-	if (mRootPhysicsIndex < 0 || mPhysicsNodeArray[mRootPhysicsIndex].GetBodyId() == TBC::INVALID_BODY)
+	const TBC::ChunkyBoneGeometry* lGeometry = mStructure->GetBoneGeometry(mStructure->GetRootBone());
+	if (!lGeometry || lGeometry->GetBodyId() == TBC::INVALID_BODY)
 	{
 		return;
 	}
@@ -422,16 +429,16 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData)
 
 	mPosition.CopyData(&pPositionalData);
 
-	TBC::PhysicsEngine* lPhysics = mManager->GetGameManager()->GetPhysicsManager();
+	TBC::PhysicsEngine* lPhysicsManager = mManager->GetGameManager()->GetPhysicsManager();
 	TBC::PhysicsEngine::BodyID lBody;
 	if (mAllowMoveSelf)
 	{
-		lBody = mPhysicsNodeArray[mRootPhysicsIndex].GetBodyId();
-		lPhysics->SetBodyTransform(lBody, pPositionalData.mPosition.mTransformation);
-		lPhysics->SetBodyVelocity(lBody, pPositionalData.mPosition.mVelocity);
-		lPhysics->SetBodyAcceleration(lBody, pPositionalData.mPosition.mAcceleration);
-		lPhysics->SetBodyAngularVelocity(lBody, pPositionalData.mPosition.mAngularVelocity);
-		lPhysics->SetBodyAngularAcceleration(lBody, pPositionalData.mPosition.mAngularAcceleration);
+		lBody = lGeometry->GetBodyId();
+		lPhysicsManager->SetBodyTransform(lBody, pPositionalData.mPosition.mTransformation);
+		lPhysicsManager->SetBodyVelocity(lBody, pPositionalData.mPosition.mVelocity);
+		lPhysicsManager->SetBodyAcceleration(lBody, pPositionalData.mPosition.mAcceleration);
+		lPhysicsManager->SetBodyAngularVelocity(lBody, pPositionalData.mPosition.mAngularVelocity);
+		lPhysicsManager->SetBodyAngularAcceleration(lBody, pPositionalData.mPosition.mAngularAcceleration);
 	}
 	else
 	{
@@ -445,17 +452,18 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData)
 
 	//mLog.AInfo("Setting full position.");
 
+	const int lBoneCount = mStructure->GetBoneCount();
 	size_t y = 0;
-	for (size_t x = 0; x < mPhysicsNodeArray.size(); ++x)
+	for (int x = 0; x < lBoneCount; ++x)
 	{
 		assert(mPosition.mBodyPositionArray.size() > y);
 		// TODO: add support for parent ID.
-		const PhysicsNode& lNode = mPhysicsNodeArray[x];
-		lBody = lNode.GetBodyId();
-		TBC::PhysicsEngine::JointID lJoint = lNode.GetJointId();
-		switch (lNode.GetJointType())
+		const TBC::ChunkyBoneGeometry* lStructureGeometry = mStructure->GetBoneGeometry(x);
+		lBody = lStructureGeometry->GetBodyId();
+		TBC::PhysicsEngine::JointID lJoint = lStructureGeometry->GetJointId();
+		switch (lStructureGeometry->GetJointType())
 		{
-			case PhysicsNode::TYPE_SUSPEND_HINGE:
+			case TBC::ChunkyBoneGeometry::JOINT_SUSPEND_HINGE:
 			{
 				assert(mPosition.mBodyPositionArray[y]->GetType() == PositionalData::TYPE_POSITION_2);
 				GET_OBJECT_POSITIONAL_AT(mPosition, y, const PositionalData2, lData, PositionalData::TYPE_POSITION_2);
@@ -469,14 +477,14 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData)
 				const TBC::PhysicsEngine::Joint3Diff lDiff(lData->mTransformation[0], lData->mTransformation[1], 100000,
 					lData->mVelocity[0], lData->mVelocity[1], 100000,
 					lData->mAcceleration[0], lData->mAcceleration[1], 100000);
-				if (!lPhysics->SetJoint3Diff(lBody, lJoint, lDiff))
+				if (!lPhysicsManager->SetJoint3Diff(lBody, lJoint, lDiff))
 				{
 					mLog.AError("Could not set hinge-2!");
 					return;
 				}
 			}
 			break;
-			case PhysicsNode::TYPE_HINGE2:
+			case TBC::ChunkyBoneGeometry::JOINT_HINGE2:
 			{
 				assert(mPosition.mBodyPositionArray[y]->GetType() == PositionalData::TYPE_POSITION_3);
 				GET_OBJECT_POSITIONAL_AT(mPosition, y, const PositionalData3, lData, PositionalData::TYPE_POSITION_3);
@@ -490,14 +498,14 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData)
 				const TBC::PhysicsEngine::Joint3Diff lDiff(lData->mTransformation[0], lData->mTransformation[1], lData->mTransformation[2],
 					lData->mVelocity[0], lData->mVelocity[1], lData->mVelocity[2],
 					lData->mAcceleration[0], lData->mAcceleration[1], lData->mAcceleration[2]);
-				if (!lPhysics->SetJoint3Diff(lBody, lJoint, lDiff))
+				if (!lPhysicsManager->SetJoint3Diff(lBody, lJoint, lDiff))
 				{
 					mLog.AError("Could not set hinge-2!");
 					return;
 				}
 			}
 			break;
-			case PhysicsNode::TYPE_HINGE:
+			case TBC::ChunkyBoneGeometry::JOINT_HINGE:
 			{
 				assert(mPosition.mBodyPositionArray[y]->GetType() == PositionalData::TYPE_POSITION_1);
 				GET_OBJECT_POSITIONAL_AT(mPosition, y, const PositionalData1, lData, PositionalData::TYPE_POSITION_1);
@@ -510,14 +518,14 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData)
 				}
 				const TBC::PhysicsEngine::Joint1Diff lDiff(lData->mTransformation,
 					lData->mVelocity, lData->mAcceleration);
-				if (!lPhysics->SetJoint1Diff(lBody, lJoint, lDiff))
+				if (!lPhysicsManager->SetJoint1Diff(lBody, lJoint, lDiff))
 				{
 					mLog.AError("Could not set hinge!");
 					return;
 				}
 			}
 			break;
-			case PhysicsNode::TYPE_BALL:
+			case TBC::ChunkyBoneGeometry::JOINT_BALL:
 			{
 				assert(mPosition.mBodyPositionArray[y]->GetType() == PositionalData::TYPE_POSITION_3);
 				GET_OBJECT_POSITIONAL_AT(mPosition, y, const PositionalData3, lData, PositionalData::TYPE_POSITION_3);
@@ -531,14 +539,14 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData)
 				const TBC::PhysicsEngine::Joint3Diff lDiff(lData->mTransformation[0], lData->mTransformation[1], lData->mTransformation[2],
 					lData->mVelocity[0], lData->mVelocity[1], lData->mVelocity[2],
 					lData->mAcceleration[0], lData->mAcceleration[1], lData->mAcceleration[2]);
-				if (!lPhysics->SetJoint3Diff(lBody, lJoint, lDiff))
+				if (!lPhysicsManager->SetJoint3Diff(lBody, lJoint, lDiff))
 				{
 					mLog.AError("Could not set ball!");
 					return;
 				}
 			}
 			break;
-			case PhysicsNode::TYPE_UNIVERSAL:
+			case TBC::ChunkyBoneGeometry::JOINT_UNIVERSAL:
 			{
 				assert(mPosition.mBodyPositionArray[y]->GetType() == PositionalData::TYPE_POSITION_2);
 				GET_OBJECT_POSITIONAL_AT(mPosition, y, const PositionalData2, lData, PositionalData::TYPE_POSITION_2);
@@ -552,14 +560,14 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData)
 				const TBC::PhysicsEngine::Joint2Diff lDiff(lData->mTransformation[0], lData->mTransformation[1],
 					lData->mVelocity[0], lData->mVelocity[1],
 					lData->mAcceleration[0], lData->mAcceleration[1]);
-				if (!lPhysics->SetJoint2Diff(lBody, lJoint, lDiff))
+				if (!lPhysicsManager->SetJoint2Diff(lBody, lJoint, lDiff))
 				{
 					mLog.AError("Could not set universal!");
 					return;
 				}
 			}
 			break;
-			case PhysicsNode::TYPE_EXCLUDE:
+			case TBC::ChunkyBoneGeometry::JOINT_EXCLUDE:
 			{
 			}
 			break;
@@ -571,64 +579,60 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData)
 		}
 	}
 
-	AttributeArray::iterator z = mAttributeArray.begin();
-	for (; z != mAttributeArray.end(); ++z)
+	const int lEngineCount = mStructure->GetEngineCount();
+	for (int z = 0; z != lEngineCount; ++z)
 	{
-		// TODO: add support for parent ID.
-		ContextObjectAttribute* lAttribute = *z;
-		if (lAttribute->GetType() == ContextObjectAttribute::TYPE_ENGINE)
+		// TODO: add support for parent ID??????????? JB 2009-07-08: don't know what this is anymore.
+		const TBC::StructureEngine* lEngine = mStructure->GetEngine(z);
+		switch (lEngine->GetEngineType())
 		{
-			ContextObjectEngine* lEngine = (ContextObjectEngine*)lAttribute;
-			switch (lEngine->GetEngineType())
+			case TBC::StructureEngine::ENGINE_CAMERA_FLAT_PUSH:
 			{
-				case ContextObjectEngine::ENGINE_CAMERA_FLAT_PUSH:
+				assert(mPosition.mBodyPositionArray.size() > y);
+				assert(mPosition.mBodyPositionArray[y]->GetType() == PositionalData::TYPE_REAL_4);
+				GET_OBJECT_POSITIONAL_AT(mPosition, y, const RealData4, lData, PositionalData::TYPE_REAL_4);
+				++y;
+				assert(lData);
+				if (!lData)
 				{
-					assert(mPosition.mBodyPositionArray.size() > y);
-					assert(mPosition.mBodyPositionArray[y]->GetType() == PositionalData::TYPE_REAL_4);
-					GET_OBJECT_POSITIONAL_AT(mPosition, y, const RealData4, lData, PositionalData::TYPE_REAL_4);
-					++y;
-					assert(lData);
-					if (!lData)
-					{
-						mLog.AError("Could not fetch the right type of network positional!");
-						return;
-					}
-					SetEnginePower(0, lData->mValue[0], lData->mValue[3]);
-					SetEnginePower(1, lData->mValue[1], lData->mValue[3]);
-					SetEnginePower(3, lData->mValue[2], lData->mValue[3]);	// TRICKY: specialcasing.
+					mLog.AError("Could not fetch the right type of network positional!");
+					return;
 				}
-				break;
-				case ContextObjectEngine::ENGINE_HINGE2_ROLL:
-				case ContextObjectEngine::ENGINE_HINGE2_TURN:
-				case ContextObjectEngine::ENGINE_HINGE2_BREAK:
-				case ContextObjectEngine::ENGINE_HINGE:
-				{
-					assert(mPosition.mBodyPositionArray.size() > y);
-					assert(mPosition.mBodyPositionArray[y]->GetType() == PositionalData::TYPE_REAL_1);
-					GET_OBJECT_POSITIONAL_AT(mPosition, y, const RealData1, lData, PositionalData::TYPE_REAL_1);
-					++y;
-					assert(lData);
-					if (!lData)
-					{
-						mLog.AError("Could not fetch the right type of network positional!");
-						return;
-					}
-					assert(lData->mValue >= -1 && lData->mValue <= 1);
-					SetEnginePower(lEngine->GetControllerIndex(), lData->mValue, 0);
-				}
-				break;
-				case ContextObjectEngine::ENGINE_ROLL_STRAIGHT:
-				case ContextObjectEngine::ENGINE_GLUE:
-				{
-					// Unsynchronized "engine".
-				}
-				break;
-				default:
-				{
-					assert(false);
-				}
-				break;
+				SetEnginePower(0, lData->mValue[0], lData->mValue[3]);
+				SetEnginePower(1, lData->mValue[1], lData->mValue[3]);
+				SetEnginePower(3, lData->mValue[2], lData->mValue[3]);	// TRICKY: specialcasing.
 			}
+			break;
+			case TBC::StructureEngine::ENGINE_HINGE2_ROLL:
+			case TBC::StructureEngine::ENGINE_HINGE2_TURN:
+			case TBC::StructureEngine::ENGINE_HINGE2_BREAK:
+			case TBC::StructureEngine::ENGINE_HINGE:
+			{
+				assert(mPosition.mBodyPositionArray.size() > y);
+				assert(mPosition.mBodyPositionArray[y]->GetType() == PositionalData::TYPE_REAL_1);
+				GET_OBJECT_POSITIONAL_AT(mPosition, y, const RealData1, lData, PositionalData::TYPE_REAL_1);
+				++y;
+				assert(lData);
+				if (!lData)
+				{
+					mLog.AError("Could not fetch the right type of network positional!");
+					return;
+				}
+				assert(lData->mValue >= -1 && lData->mValue <= 1);
+				SetEnginePower(lEngine->GetControllerIndex(), lData->mValue, 0);
+			}
+			break;
+			case TBC::StructureEngine::ENGINE_ROLL_STRAIGHT:
+			case TBC::StructureEngine::ENGINE_GLUE:
+			{
+				// Unsynchronized "engine".
+			}
+			break;
+			default:
+			{
+				assert(false);
+			}
+			break;
 		}
 	}
 }
@@ -636,10 +640,11 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData)
 Lepra::Vector3DF ContextObject::GetPosition() const
 {
 	Lepra::Vector3DF lPosition;
-	if (mRootPhysicsIndex >= 0)
+	const TBC::ChunkyBoneGeometry* lGeometry = mStructure->GetBoneGeometry(mStructure->GetRootBone());
+	if (lGeometry && lGeometry->GetBodyId() != TBC::INVALID_BODY)
 	{
 		Lepra::TransformationF lTransform;
-		mManager->GetGameManager()->GetPhysicsManager()->GetBodyTransform(mPhysicsNodeArray[mRootPhysicsIndex].GetBodyId(), lTransform);
+		mManager->GetGameManager()->GetPhysicsManager()->GetBodyTransform(lGeometry->GetBodyId(), lTransform);
 		lPosition.x = lTransform.GetPosition().x;
 		lPosition.y = lTransform.GetPosition().y;
 		lPosition.z = lTransform.GetPosition().z;
@@ -655,12 +660,13 @@ Lepra::Vector3DF ContextObject::GetPosition() const
 float ContextObject::GetForwardSpeed() const
 {
 	float lSpeed = 0;
-	if (mRootPhysicsIndex >= 0)
+	const TBC::ChunkyBoneGeometry* lGeometry = mStructure->GetBoneGeometry(mStructure->GetRootBone());
+	if (lGeometry && lGeometry->GetBodyId() != TBC::INVALID_BODY)
 	{
 		Lepra::TransformationF lTransform;
-		mManager->GetGameManager()->GetPhysicsManager()->GetBodyTransform(mPhysicsNodeArray[mRootPhysicsIndex].GetBodyId(), lTransform);
+		mManager->GetGameManager()->GetPhysicsManager()->GetBodyTransform(lGeometry->GetBodyId(), lTransform);
 		Lepra::Vector3DF lVelocity;
-		mManager->GetGameManager()->GetPhysicsManager()->GetBodyVelocity(mPhysicsNodeArray[mRootPhysicsIndex].GetBodyId(), lVelocity);
+		mManager->GetGameManager()->GetPhysicsManager()->GetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
 		Lepra::Vector3DF lAxis = lTransform.GetOrientation().GetAxisY();
 		lAxis.Normalize();
 		lSpeed = -(lVelocity*lAxis);	// TODO: negate when objects created in the right direction.
@@ -675,69 +681,60 @@ float ContextObject::GetForwardSpeed() const
 float ContextObject::GetMass() const
 {
 	float lTotalMass = 0;
-	TBC::PhysicsEngine* lPhysics = mManager->GetGameManager()->GetPhysicsManager();
-	PhysicsNodeArray::const_iterator x = mPhysicsNodeArray.begin();
-	for (; x != mPhysicsNodeArray.end(); ++x)
+	TBC::PhysicsEngine* lPhysicsManager = mManager->GetGameManager()->GetPhysicsManager();
+	const int lBoneCount = mStructure->GetBoneCount();
+	for (int x = 0; x < lBoneCount; ++x)
 	{
-		lTotalMass += lPhysics->GetBodyMass((*x).GetBodyId());
+		const TBC::ChunkyBoneGeometry* lGeometry = mStructure->GetBoneGeometry(x);
+		lTotalMass += lPhysicsManager->GetBodyMass(lGeometry->GetBodyId());
 	}
 	return (lTotalMass);
 }
 
 
 
-void ContextObject::AddPhysicsObject(const PhysicsNode& pPhysicsNode)
+bool ContextObject::SetStructure(TBC::ChunkyStructure* pStructure)
 {
-	mPhysicsNodeArray.push_back(pPhysicsNode);
-	if (pPhysicsNode.GetParentId() == 0)
-	{
-		assert(mRootPhysicsIndex == -1);
-		mRootPhysicsIndex = (int)mPhysicsNodeArray.size()-1;
-		//assert(mRootPhysicsIndex == 0);
-	}
-	mManager->AddPhysicsBody(this, pPhysicsNode.GetBodyId());
-}
+	TBC::PhysicsEngine* lPhysics = mManager->GetGameManager()->GetPhysicsManager();
+	const int lPhysicsFps = mManager->GetGameManager()->GetConstTimeManager()->GetDesiredPhysicsFps();
 
-PhysicsNode* ContextObject::GetPhysicsNode(PhysicsNode::Id pId) const
-{
-	PhysicsNode* lNode = 0;
-	PhysicsNodeArray::const_iterator x = mPhysicsNodeArray.begin();
-	for (; !lNode && x != mPhysicsNodeArray.end(); ++x)
+	// TODO: drop hard-coding, this should come from world loader or spawn engine?
+	Lepra::TransformationF lTransformation;
+	if (GetNetworkObjectType() == NETWORK_OBJECT_REMOTE_CONTROLLED)
 	{
-		if (x->GetId() == pId)
+		const float lX = (float)Lepra::Random::Uniform(-200, 200);
+		const float lY = (float)Lepra::Random::Uniform(-200, 200);
+		lTransformation.SetPosition(Lepra::Vector3DF(lX, lY, 250+3));
+	}
+
+	bool lOk = (mStructure == 0 && pStructure->FinalizeInit(lPhysics, lPhysicsFps, &lTransformation, 0, this));
+	assert(lOk);
+	if (lOk)
+	{
+		mStructure = pStructure;
+		const int lBoneCount = mStructure->GetBoneCount();
+		for (int x = 0; x < lBoneCount; ++x)
 		{
-			lNode = (PhysicsNode*)&(*x);
+			const TBC::ChunkyBoneGeometry* lGeometry = mStructure->GetBoneGeometry(x);
+			mManager->AddPhysicsBody(this, lGeometry->GetBodyId());
 		}
 	}
-	return (lNode);
+	return (lOk);
 }
 
-PhysicsNode* ContextObject::GetPhysicsNode(TBC::PhysicsEngine::BodyID pBodyId) const
+TBC::ChunkyBoneGeometry* ContextObject::GetStructureGeometry(unsigned pIndex) const
 {
-	PhysicsNode* lNode = 0;
-	PhysicsNodeArray::const_iterator x = mPhysicsNodeArray.begin();
-	for (; !lNode && x != mPhysicsNodeArray.end(); ++x)
-	{
-		if (x->GetBodyId() == pBodyId)
-		{
-			lNode = (PhysicsNode*)&(*x);
-		}
-	}
-	return (lNode);
+	return (mStructure->GetBoneGeometry(pIndex));
+}
+
+TBC::ChunkyBoneGeometry* ContextObject::GetStructureGeometry(TBC::PhysicsEngine::BodyID pBodyId) const
+{
+	return (mStructure->GetBoneGeometry(pBodyId));
 }
 
 void ContextObject::SetEnginePower(unsigned pAspect, float pPower, float pAngle)
 {
-	AttributeArray::iterator x = mAttributeArray.begin();
-	for (; x != mAttributeArray.end(); ++x)
-	{
-		ContextObjectAttribute* lAttribute = *x;
-		if (lAttribute->GetType() == ContextObjectAttribute::TYPE_ENGINE)
-		{
-			ContextObjectEngine* lEngine = (ContextObjectEngine*)lAttribute;
-			lEngine->SetValue(pAspect, pPower, pAngle);
-		}
-	}
+	mStructure->SetEnginePower(pAspect, pPower, pAngle);
 }
 
 
@@ -776,25 +773,29 @@ void ContextObject::OnPhysicsTick()
 
 
 
-void ContextObject::AttachToObject(PhysicsNode* pNode1, ContextObject* pObject2, PhysicsNode* pNode2, bool pSend)
+void ContextObject::AttachToObject(TBC::ChunkyBoneGeometry* pBoneGeometry1, ContextObject* pObject2, TBC::ChunkyBoneGeometry* pBoneGeometry2, bool pSend)
 {
 	assert(pObject2);
-	if (!pObject2 || !pNode1 || !pNode2)
+	assert(!IsAttachedTo(pObject2));
+	if (!pObject2 || !pBoneGeometry1 || !pBoneGeometry2)
 	{
 		return;
 	}
 
-	TBC::PhysicsEngine* lPhysics = mManager->GetGameManager()->GetPhysicsManager();
-	if (pNode1->IsConnectorType(PhysicsNode::CONNECTOR_3) && pNode2->IsConnectorType(PhysicsNode::CONNECTEE_3))
+	pSend;	// TODO: remove when new structure in place!
+
+	TBC::PhysicsEngine* lPhysicsManager = mManager->GetGameManager()->GetPhysicsManager();
+	if (pBoneGeometry1->IsConnectorType(TBC::ChunkyBoneGeometry::CONNECTOR_3DOF) &&
+		pBoneGeometry2->IsConnectorType(TBC::ChunkyBoneGeometry::CONNECTEE_3DOF))
 	{
 		pObject2->SetAllowMoveSelf(false);
 
 		// Find first parent that is a dynamic body.
-		TBC::PhysicsEngine::BodyID lBody2Connectee = pNode2->GetBodyId();
-		PhysicsNode* lNode2Connectee = pNode2;
-		while (lPhysics->IsStaticBody(lBody2Connectee))
+		TBC::PhysicsEngine::BodyID lBody2Connectee = pBoneGeometry2->GetBodyId();
+		TBC::ChunkyBoneGeometry* lNode2Connectee = pBoneGeometry2;
+		while (lPhysicsManager->IsStaticBody(lBody2Connectee))
 		{
-			lNode2Connectee = pObject2->GetPhysicsNode(lNode2Connectee->GetParentId());
+			lNode2Connectee = lNode2Connectee->GetParent();
 			if (!lNode2Connectee)
 			{
 				mLog.AError("Failing to attach to a static object.");
@@ -804,20 +805,21 @@ void ContextObject::AttachToObject(PhysicsNode* pNode1, ContextObject* pObject2,
 		}
 
 		mLog.AInfo("Attaching two objects.");
-		Lepra::TransformationF lAnchor;
-		lPhysics->GetBodyTransform(pNode2->GetBodyId(), lAnchor);
-		TBC::PhysicsEngine::JointID lJoint = lPhysics->CreateBallJoint(pNode1->GetBodyId(), lBody2Connectee, lAnchor.GetPosition());
-		PhysicsNode::Id lAttachNodeId = GetNextNodeId();
-		AddPhysicsObject(PhysicsNode(pNode1->GetId(), lAttachNodeId, TBC::INVALID_BODY, PhysicsNode::TYPE_EXCLUDE, lJoint));
-		ContextObjectEngine* lEngine = new ContextObjectEngine(this, ContextObjectEngine::ENGINE_GLUE, 0, 0, 0, 0);
+		// TODO: fix algo when new chunky structure in place.
+		/*Lepra::TransformationF lAnchor;
+		lPhysicsManager->GetBodyTransform(pBoneGeometry2->GetBodyId(), lAnchor);
+		TBC::PhysicsEngine::JointID lJoint = lPhysicsManager->CreateBallJoint(pBoneGeometry1->GetBodyId(), lBody2Connectee, lAnchor.GetPosition());
+		unsigned lAttachNodeId = mStructure->GetNextGeometryIndex();
+		AddPhysicsObject(PhysicsNode(pBoneGeometry1->GetId(), lAttachNodeId, TBC::INVALID_BODY, PhysicsNode::TYPE_EXCLUDE, lJoint));
+		TBC::StructureEngine* lEngine = new TBC::StructureEngine(this, TBC::StructureEngine::ENGINE_GLUE, 0, 0, 0, 0);
 		lEngine->AddControlledNode(lAttachNodeId, 1);
 		AddAttachment(pObject2, lJoint, lEngine);
 		pObject2->AddAttachment(this, TBC::INVALID_JOINT, 0);
 
 		if (pSend)
 		{
-			mManager->GetGameManager()->SendAttach(this, pNode1->GetId(), pObject2, pNode2->GetId());
-		}
+			mManager->GetGameManager()->SendAttach(this, pBoneGeometry1->GetId(), pObject2, pBoneGeometry2->GetId());
+		}*/
 	}
 }
 
@@ -834,21 +836,14 @@ bool ContextObject::IsAttachedTo(ContextObject* pObject) const
 	return (false);
 }
 
-void ContextObject::AddAttachment(ContextObject* pObject, TBC::PhysicsEngine::JointID pJoint, ContextObjectEngine* pEngine)
+void ContextObject::AddAttachment(ContextObject* pObject, TBC::PhysicsEngine::JointID pJoint, TBC::StructureEngine* pEngine)
 {
 	assert(!IsAttachedTo(pObject));
 	mConnectionList.push_back(Connection(pObject, pJoint, pEngine));
 	if (pEngine)
 	{
-		AddAttribute(pEngine);
+		mStructure->AddEngine(pEngine);
 	}
-}
-
-
-
-PhysicsNode::Id ContextObject::GetNextNodeId()
-{
-	return (++mUniqeNodeId);
 }
 
 

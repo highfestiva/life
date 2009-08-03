@@ -197,6 +197,15 @@ public:
 	virtual void SetParent(Component* pParent);
 	bool IsChildOf(Component* pParent);
 
+	enum ComponentState
+	{
+		STATE_FOCUSABLE	= 1,
+		STATE_CLICKABLE,
+	};
+	typedef std::pair<int, Component*> StateComponent;
+	typedef std::list<StateComponent> StateComponentList;
+	virtual StateComponentList GetStateList(ComponentState pState) const;
+
 	virtual void SetMouseFocus();
 	virtual void ReleaseMouseFocus(RecurseDir pDir = RECURSE_UP, Component* pFocusedComponent = 0);
 	bool HasMouseFocus() const;
@@ -225,16 +234,9 @@ protected:
 	virtual void SetKeyboardFocus(Component* pChild);
 	virtual void SetMouseFocus(Component* pChild);
 	void DispatchChar(Lepra::tchar pChar);
+	bool IsDispatcher() const;
 
 	void DeleteLayout(int pLayer);
-
-	enum ComponentState
-	{
-		STATE_FOCUSABLE	= 1,
-		STATE_CLICKABLE,
-	};
-	typedef std::list<std::pair<bool, Component*> > StateComponentList;
-	virtual StateComponentList GetStateList(ComponentState pState) const;
 
 private:
 	typedef std::set<UiLepra::TextInputObserver*> TextListenerSet;

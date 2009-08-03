@@ -317,7 +317,7 @@ bool ContextObjectResource::Load()
 ResourceLoadState ContextObjectResource::PostProcess()
 {
 	log_atrace("Loading context object (group).");
-	ResourceLoadState lLoadState = GetManager()->GetContextObjectFactory()->CreatePhysics(GetRamData(), 0) ?
+	ResourceLoadState lLoadState = GetManager()->GetContextObjectFactory()->CreatePhysics(GetRamData()) ?
 		RESOURCE_LOAD_COMPLETE : RESOURCE_LOAD_ERROR;
 	if (lLoadState == RESOURCE_LOAD_COMPLETE)
 	{
@@ -608,6 +608,21 @@ ResourceManager::NameTypeList ResourceManager::QueryActiveResourceNames()
 		lNames.push_back(lPair);
 	}
 	return (lNames);
+}
+
+
+
+bool ResourceManager::ExportAll(const Lepra::String& pDirectory)
+{
+	Lepra::ScopeLock lLock(&mThreadLock);
+	ResourceTable::Iterator x = mActiveResourceTable.First();
+	for (; x != mActiveResourceTable.End(); ++x)
+	{
+		Resource* lResource = *x;
+		StringPair lPair(lResource->GetName(), lResource->GetType());
+		mLog.Infof(_T("  - Resource: '%s' -> '%s'"), lPair.first.c_str(), pDirectory.c_str());
+	}
+	return (true);
 }
 
 

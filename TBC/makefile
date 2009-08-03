@@ -1,4 +1,4 @@
-# 'Twas generated from ../../TBC/TBC.vcproj, 2009-06-11, type='lib'.
+# 'Twas generated from ../../TBC/TBC.vcproj, 2009-07-13, type='lib'.
 # Don't edit manually. See 'generate_makefile.py' for info.
 
 CFLAGS = -O0 -ggdb -fPIC -D_POSIX_PTHREAD_SEMANTICS -I../ThirdParty/stlport/stlport -I../ThirdParty/ode-060223/include -DPOSIX -D_DEBUG -D_CONSOLE -DPNG_NO_ASSEMBLER_CODE -DdCYLINDER_ENABLED -DCURE_TEST_WITHOUT_UI -Wall -Wno-unknown-pragmas
@@ -14,6 +14,7 @@ Source/Model.cpp	\
 Source/PhysicsEngineFactory.cpp	\
 Source/PhysicsEngineODE.cpp	\
 Source/PortalManager.cpp	\
+Source/StructureEngine.cpp	\
 Source/TBC.cpp	\
 Source/TerrainFunction.cpp	\
 Source/TerrainPatch.cpp
@@ -29,6 +30,7 @@ Source/Model.o	\
 Source/PhysicsEngineFactory.o	\
 Source/PhysicsEngineODE.o	\
 Source/PortalManager.o	\
+Source/StructureEngine.o	\
 Source/TBC.o	\
 Source/TerrainFunction.o	\
 Source/TerrainPatch.o

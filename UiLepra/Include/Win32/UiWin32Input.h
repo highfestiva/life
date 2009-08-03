@@ -145,6 +145,8 @@ private:
 	void AddObserver();
 	void RemoveObserver();
 
+	void SetMousePosition(int pMsg, int x, int y);
+
 	Win32DisplayManager* mDisplayManager;
 
 	// The DirectInput object.

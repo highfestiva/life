@@ -19,7 +19,7 @@ BmpLoader::Status BmpLoader::Load(const String& pFileName, Canvas& pCanvas)
 	Status lStatus = STATUS_SUCCESS;
 	MetaFile lFile;
 	
-	if (lFile.Open(pFileName, MetaFile::READ_ONLY) == false)
+	if (lFile.Open(pFileName, MetaFile::READ_ONLY, false, Endian::TYPE_LITTLE_ENDIAN) == false)
 	{
 		lStatus = STATUS_OPEN_ERROR;
 	}
@@ -38,7 +38,7 @@ BmpLoader::Status BmpLoader::Save(const String& pFileName, const Canvas& pCanvas
 	Status lStatus = STATUS_SUCCESS;
 	DiskFile lFile;
 	
-	if (lFile.Open(pFileName, DiskFile::MODE_WRITE) == false)
+	if (lFile.Open(pFileName, DiskFile::MODE_WRITE, false, Endian::TYPE_LITTLE_ENDIAN) == false)
 	{
 		lStatus = STATUS_OPEN_ERROR;
 	}
@@ -57,7 +57,7 @@ BmpLoader::Status BmpLoader::Load(const String& pArchiveName, const String& pFil
 	Status lStatus = STATUS_SUCCESS;
 	ArchiveFile lFile(pArchiveName);
 	
-	if (lFile.Open(pFileName, ArchiveFile::READ_ONLY) == false)
+	if (lFile.Open(pFileName, ArchiveFile::READ_ONLY, Endian::TYPE_LITTLE_ENDIAN) == false)
 	{
 		lStatus = STATUS_OPEN_ERROR;
 	}
@@ -76,7 +76,7 @@ BmpLoader::Status BmpLoader::Save(const String& pArchiveName, const String& pFil
 	Status lStatus = STATUS_SUCCESS;
 	ArchiveFile lFile(pArchiveName);
 	
-	if (lFile.Open(pFileName, ArchiveFile::WRITE_ONLY) == false)
+	if (lFile.Open(pFileName, ArchiveFile::WRITE_ONLY, Endian::TYPE_LITTLE_ENDIAN) == false)
 	{
 		lStatus = STATUS_OPEN_ERROR;
 	}

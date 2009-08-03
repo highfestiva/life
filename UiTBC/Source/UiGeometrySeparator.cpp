@@ -1,14 +1,19 @@
-/*
-	Class:  GeometrySeparator
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Righteous Games
-*/
+
+// Author: Alexander Hugestrand
+//Copyright (c) 2002-2006, Righteous Games
+
+
 
 #include "../Include/UiGeometrySeparator.h"
+#include <assert.h>
 #include "../Include/UiTriangleBasedGeometry.h"
+
+
 
 namespace UiTbc
 {
+
+
 
 TriangleBasedGeometry* UiGeometrySeparator::GetSeparateObjects(TBC::GeometryBase& pGeom, int& pNumObjects)
 {
@@ -16,6 +21,7 @@ TriangleBasedGeometry* UiGeometrySeparator::GetSeparateObjects(TBC::GeometryBase
 
 	if (pGeom.GetPrimitiveType() != TBC::GeometryBase::TRIANGLES)
 	{
+		assert(false);
 		return 0;
 	}
 
@@ -402,4 +408,6 @@ TriangleBasedGeometry* UiGeometrySeparator::GetSeparateObjects(TBC::GeometryBase
 	return lGeom;
 }
 
-} // End namespace.
+
+
+}

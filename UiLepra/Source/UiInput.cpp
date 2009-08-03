@@ -26,7 +26,7 @@ InputElement::InputElement(Type pType, Interpretation pInterpretation, int pType
 
 InputElement::~InputElement()
 {
-	ClearFunctorArray();
+	ClearFunctors();
 }
 
 InputElement::Type InputElement::GetType() const
@@ -69,6 +69,27 @@ const Lepra::String& InputElement::GetIdentifier() const
 	return mIdentifier;
 }
 
+Lepra::String InputElement::GetFullName() const
+{
+	Lepra::String lName;
+	switch (GetParentDevice()->GetInterpretation())
+	{
+		case UiLepra::InputDevice::TYPE_MOUSE:		lName = _T("Mouse");	break;
+		case UiLepra::InputDevice::TYPE_KEYBOARD:	lName = _T("Keyboard");	break;
+		default:					lName = _T("Device");	break;
+	}
+	lName += Lepra::StringUtility::IntToString(GetParentDevice()->GetTypeIndex(), 10)+_T(".");
+
+	switch (GetInterpretation())
+	{
+		case UiLepra::InputElement::ABSOLUTE_AXIS:	lName += _T("AbsoluteAxis");	break;
+		case UiLepra::InputElement::RELATIVE_AXIS:	lName += _T("RelativeAxis");	break;
+		default:					lName += _T("Button");		break;
+	}
+	lName += Lepra::StringUtility::IntToString(GetTypeIndex(), 10);
+	return (lName);
+}
+
 void InputElement::SetIdentifier(const Lepra::String& pIdentifier)
 {
 	mIdentifier = pIdentifier;
@@ -79,7 +100,7 @@ void InputElement::AddFunctor(InputFunctor* pFunctor)
 	mFunctorArray.push_back(pFunctor);
 }
 
-void InputElement::ClearFunctorArray()
+void InputElement::ClearFunctors()
 {
 	for (FunctorArray::iterator x = mFunctorArray.begin(); x != mFunctorArray.end(); ++x)
 	{
@@ -335,6 +356,16 @@ void InputDevice::AddFunctor(InputFunctor* pFunctor)
 		lElement->AddFunctor(pFunctor->CreateCopy());
 	}
 	delete (pFunctor);
+}
+
+void InputDevice::ClearFunctors()
+{
+	ElementArray::iterator x;
+	for (x = mElementArray.begin(); x != mElementArray.end(); ++x)
+	{
+		InputElement* lElement = *x;
+		lElement->ClearFunctors();
+	}
 }
 
 unsigned InputDevice::GetCalibrationDataSize()
@@ -604,6 +635,16 @@ void InputManager::AddFunctor(InputFunctor* pFunctor)
 		lDevice->AddFunctor(pFunctor->CreateCopy());
 	}
 	delete (pFunctor);
+}
+
+void InputManager::ClearFunctors()
+{
+	DeviceList::iterator x;
+	for (x = mDeviceList.begin(); x != mDeviceList.end(); ++x)
+	{
+		InputDevice* lDevice = *x;
+		lDevice->ClearFunctors();
+	}
 }
 
 void InputManager::ActivateAll()

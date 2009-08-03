@@ -157,7 +157,6 @@ public:
 	void RemoveCaller(UserResource* pUserResource);
 
 	virtual bool Load() = 0;
-	// Return true if postprocessing is done, false to go again next frame.
 	virtual ResourceLoadState PostProcess();
 	void UserPostProcess();
 	void Callback();
@@ -345,6 +344,8 @@ public:
 	void ForceFreeCache();	// Called to force immediate freeing of all resources.
 
 	NameTypeList QueryActiveResourceNames();
+
+	bool ExportAll(const Lepra::String& pDirectory);
 
 protected:
 	Resource* QueryCachedResource(const Lepra::String& pName, UserResource* pUserResource, bool& pMustLoad);

@@ -1,0 +1,5 @@
+Tools:
+ - mayaascii.py + simplecpp.py = LGPL 2.1 from "Python Computer Graphics Kit", I upgraded to Python 3.1. Requires more work.
+
+Engine:
+ - TODO! Fill me in!

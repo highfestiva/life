@@ -262,6 +262,25 @@ int GameClientSlaveManager::GetSlaveIndex() const
 
 
 
+bool GameClientSlaveManager::ExportAll(const Lepra::String& pDirectory)
+{
+	bool lOk = GetResourceManager()->ExportAll(pDirectory);
+	if (lOk)
+	{
+		Lepra::ScopeLock lLock(GetTickLock());
+		const Cure::ContextManager::ContextObjectTable& lObjectList = GetContext()->GetObjectTable();
+		Cure::ContextManager::ContextObjectTable::const_iterator x = lObjectList.begin();
+		for (; x != lObjectList.end(); ++x)
+		{
+			const Cure::ContextObject* lObject = x->second;
+			mLog.Infof(_T("  - Context object: '%s' -> '%s'"), lObject->GetClassId().c_str(), pDirectory.c_str());
+		}
+	}
+	return (true);
+}
+
+
+
 Lepra::String GameClientSlaveManager::GetName() const
 {
 	return (_T("Client")+Lepra::StringUtility::IntToString(mSlaveIndex, 10));
@@ -669,8 +688,8 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 			Cure::MessageObjectAttach* lMessageAttach = (Cure::MessageObjectAttach*)pMessage;
 			Cure::GameObjectId lObject1Id = lMessageAttach->GetObjectId();
 			Cure::GameObjectId lObject2Id = lMessageAttach->GetObject2Id();
-			Cure::PhysicsNode::Id lBody1Id = lMessageAttach->GetBody1Id();
-			Cure::PhysicsNode::Id lBody2Id = lMessageAttach->GetBody2Id();
+			unsigned lBody1Id = lMessageAttach->GetBody1Id();
+			unsigned lBody2Id = lMessageAttach->GetBody2Id();
 			AttachObjects(lObject1Id, lBody1Id, lObject2Id, lBody2Id);
 		}
 		break;
@@ -841,8 +860,7 @@ bool GameClientSlaveManager::IsConnectAuthorized()
 	return (false);
 }
 
-void GameClientSlaveManager::SendAttach(Cure::ContextObject*, Cure::PhysicsNode::Id,
-	Cure::ContextObject*, Cure::PhysicsNode::Id)
+void GameClientSlaveManager::SendAttach(Cure::ContextObject*, unsigned, Cure::ContextObject*, unsigned)
 {
 	// Server manages this.
 	assert(false);
@@ -853,8 +871,8 @@ void GameClientSlaveManager::SendDetach(Cure::ContextObject*, Cure::ContextObjec
 	// Server manages this.
 }
 
-void GameClientSlaveManager::AttachObjects(Cure::GameObjectId pObject1Id, Cure::PhysicsNode::Id pBody1Id,
-	Cure::GameObjectId pObject2Id, Cure::PhysicsNode::Id pBody2Id)
+void GameClientSlaveManager::AttachObjects(Cure::GameObjectId pObject1Id, unsigned pBody1Id,
+	Cure::GameObjectId pObject2Id, unsigned pBody2Id)
 {
 	Cure::ContextObject* lObject1 = GetContext()->GetObject(pObject1Id);
 	Cure::ContextObject* lObject2 = GetContext()->GetObject(pObject2Id);

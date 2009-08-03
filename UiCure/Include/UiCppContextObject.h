@@ -50,7 +50,7 @@ private:
 class CppContextObjectFactory: public Cure::CppContextObjectFactory
 {
 public:
-	CppContextObjectFactory(GameUiManager* pUiManager, unsigned pPhysicsFps);
+	CppContextObjectFactory(GameUiManager* pUiManager);
 	virtual ~CppContextObjectFactory();
 
 	CppContextObject* Create(const Lepra::String& pClassId) const;

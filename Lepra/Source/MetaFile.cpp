@@ -13,7 +13,7 @@ MetaFile::MetaFile() :
 	mArchiveFile(0),
 	mReader(0),
 	mWriter(0),
-	mEndian(Endian::TYPE_LITTLE_ENDIAN)
+	mEndian(Endian::TYPE_BIG_ENDIAN)
 {
 }
 
@@ -22,7 +22,7 @@ MetaFile::MetaFile(Reader* pReader) :
 	mArchiveFile(0),
 	mReader(pReader),
 	mWriter(0),
-	mEndian(Endian::TYPE_LITTLE_ENDIAN)
+	mEndian(Endian::TYPE_BIG_ENDIAN)
 {
 }
 
@@ -31,7 +31,7 @@ MetaFile::MetaFile(Writer* pWriter) :
 	mArchiveFile(0),
 	mReader(0),
 	mWriter(pWriter),
-	mEndian(Endian::TYPE_LITTLE_ENDIAN)
+	mEndian(Endian::TYPE_BIG_ENDIAN)
 {
 }
 
@@ -40,7 +40,7 @@ MetaFile::MetaFile(Reader* pReader, Writer* pWriter) :
 	mArchiveFile(0),
 	mReader(pReader),
 	mWriter(pWriter),
-	mEndian(Endian::TYPE_LITTLE_ENDIAN)
+	mEndian(Endian::TYPE_BIG_ENDIAN)
 {
 }
 
@@ -131,7 +131,7 @@ void MetaFile::Close()
 void MetaFile::SetEndian(Endian::EndianType pEndian)
 {
 	mEndian = pEndian;
-
+	Parent::SetEndian(pEndian);
 	if (mDiskFile != 0)
 	{
 		mDiskFile->SetEndian(mEndian);
@@ -304,7 +304,7 @@ IOError MetaFile::ReadRaw(void* pBuffer, size_t pSize)
 
 IOError MetaFile::Skip(size_t pSize)
 {
-	return (File::Skip(pSize));
+	return (Parent::Skip(pSize));
 }
 
 IOError MetaFile::WriteRaw(const void* pBuffer, size_t pSize)

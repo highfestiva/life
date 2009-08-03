@@ -73,7 +73,7 @@ private:
 	void OnStopped(Cure::ContextObject* pObject, TBC::PhysicsEngine::BodyID pBodyId);
 	bool OnPhysicsSend(Cure::ContextObject* pObject);
 	bool IsConnectAuthorized();
-	void SendAttach(Cure::ContextObject* pObject1, Cure::PhysicsNode::Id pId1, Cure::ContextObject* pObject2, Cure::PhysicsNode::Id pId2);
+	void SendAttach(Cure::ContextObject* pObject1, unsigned pId1, Cure::ContextObject* pObject2, unsigned pId2);
 	void SendDetach(Cure::ContextObject* pObject1, Cure::ContextObject* pObject2);
 
 	void BroadcastCreateObject(Cure::ContextObject* pObject);

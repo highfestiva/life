@@ -69,24 +69,6 @@ void Component::DeleteLayout(int pLayer)
 	}
 }
 
-Component::StateComponentList Component::GetStateList(ComponentState pState) const
-{
-	StateComponentList lList;
-	for (int i = 0; i < mLayerCount; i++)
-	{
-		if (mLayout[i] != 0)
-		{
-			Component* c = mLayout[i]->GetFirst();
-			for (; c; c = mLayout[i]->GetNext())
-			{
-				StateComponentList lChildList = c->GetStateList(pState);
-				lList.splice(lList.end(), lChildList);
-			}
-		}
-	}
-	return (lList);
-}
-
 int Component::CreateLayer(Layout* pLayout)
 {
 	Layout** lLayout = new Layout*[mLayerCount + 1];
@@ -521,38 +503,18 @@ bool Component::OnMouseWheel(int pMouseX, int pMouseY, int pChange, bool pDown)
 
 bool Component::OnMouseMove(int pMouseX, int pMouseY, int pDeltaX, int pDeltaY)
 {
-	if (mMouseFocusChild != 0)
+	for (int i = 0; i < mLayerCount; i++)
 	{
-		mMouseFocusChild->OnMouseMove(pMouseX, pMouseY, pDeltaX, pDeltaY);
-		return true;
-	}
-	else
-	{
-		Component* lChild = GetChild(pMouseX, pMouseY);
-
-		if (lChild != 0)
+		if (mLayout[i] != 0)
 		{
-			lChild->OnMouseMove(pMouseX, pMouseY, pDeltaX, pDeltaY);
-			return true;
-		}
-		else
-		{
-			DesktopWindow* lDWin = (DesktopWindow*)Component::GetParentOfType(DESKTOPWINDOW);
-			MouseTheme* lMTheme = 0;
-
-			if (lDWin != 0)
+			Component* lChild = mLayout[i]->GetFirst();
+			for (; lChild; lChild = mLayout[i]->GetNext())
 			{
-				lMTheme = lDWin->GetMouseTheme();
-			}
-
-			if (lMTheme != 0)
-			{
-				lMTheme->LoadArrowCursor();
+				lChild->OnMouseMove(pMouseX, pMouseY, pDeltaX, pDeltaY);
 			}
 		}
-
-		return false;
 	}
+	return (true);
 }
 
 bool Component::OnChar(Lepra::tchar pChar)
@@ -667,6 +629,24 @@ bool Component::IsOver(int pScreenX, int pScreenY)
 	Lepra::PixelCoords lPos(GetScreenPos());
 	Lepra::PixelRect lRect(lPos, lPos + GetSize());
 	return lRect.IsInside(pScreenX, pScreenY);
+}
+
+Component::StateComponentList Component::GetStateList(ComponentState pState) const
+{
+	StateComponentList lList;
+	for (int i = 0; i < mLayerCount; i++)
+	{
+		if (mLayout[i] != 0)
+		{
+			Component* c = mLayout[i]->GetFirst();
+			for (; c; c = mLayout[i]->GetNext())
+			{
+				StateComponentList lChildList = c->GetStateList(pState);
+				lList.splice(lList.end(), lChildList);
+			}
+		}
+	}
+	return (lList);
 }
 
 void Component::RepaintChild(Component* pChild, Painter* pPainter)
@@ -808,6 +788,11 @@ void Component::DispatchChar(Lepra::tchar pChar)
 	{
 		(*x)->OnChar(pChar);
 	}
+}
+
+bool Component::IsDispatcher() const
+{
+	return (!mTextListenerSet.empty());
 }
 
 void Component::ReleaseMouseFocus(RecurseDir pDir, Component* pFocusedComponent)

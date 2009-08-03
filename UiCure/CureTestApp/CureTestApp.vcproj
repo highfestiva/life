@@ -534,10 +534,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\CureTestApp.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\Lepra\LepraTestApp\LepraTest.cpp"
 				>
 			</File>
@@ -547,6 +543,10 @@
 			</File>
 			<File
 				RelativePath="..\..\UiTBC\UiTBCTestApp\RotationalAgreementTest.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\UiTBC\UiTBCTestApp\TbcTest.cpp"
 				>
 			</File>
 			<File
@@ -589,6 +589,14 @@
 			>
 			<File
 				RelativePath="..\..\UiTBC\UiTBCTestApp\RotationalAgreementTest.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="App"
+			>
+			<File
+				RelativePath=".\CureTestApp.cpp"
 				>
 			</File>
 		</Filter>

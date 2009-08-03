@@ -15,8 +15,7 @@ namespace Lepra
 
 
 MemFile::MemFile():
-	File(Endian::TYPE_LITTLE_ENDIAN, Endian::TYPE_LITTLE_ENDIAN, 0, 0),
-	mFileEndian(Endian::TYPE_LITTLE_ENDIAN),
+	File(Endian::TYPE_BIG_ENDIAN, Endian::TYPE_BIG_ENDIAN, 0, 0),
 	mBuffer(0),
 	mSize(0),
 	mBufferSize(0),
@@ -29,8 +28,7 @@ MemFile::MemFile():
 }
 
 MemFile::MemFile(Reader* pReader):
-	File(Endian::TYPE_LITTLE_ENDIAN, Endian::TYPE_LITTLE_ENDIAN, 0, 0),
-	mFileEndian(Endian::TYPE_LITTLE_ENDIAN),
+	File(Endian::TYPE_BIG_ENDIAN, Endian::TYPE_BIG_ENDIAN, 0, 0),
 	mBuffer(0),
 	mSize(0),
 	mBufferSize(0),
@@ -47,8 +45,7 @@ MemFile::MemFile(Reader* pReader):
 }
 
 MemFile::MemFile(Writer* pWriter):
-	File(Endian::TYPE_LITTLE_ENDIAN, Endian::TYPE_LITTLE_ENDIAN, 0, 0),
-	mFileEndian(Endian::TYPE_LITTLE_ENDIAN),
+	File(Endian::TYPE_BIG_ENDIAN, Endian::TYPE_BIG_ENDIAN, 0, 0),
 	mBuffer(0),
 	mSize(0),
 	mBufferSize(0),
@@ -65,8 +62,7 @@ MemFile::MemFile(Writer* pWriter):
 }
 
 MemFile::MemFile(Reader* pReader, Writer* pWriter):
-	File(Endian::TYPE_LITTLE_ENDIAN, Endian::TYPE_LITTLE_ENDIAN, 0, 0),
-	mFileEndian(Endian::TYPE_LITTLE_ENDIAN),
+	File(Endian::TYPE_BIG_ENDIAN, Endian::TYPE_BIG_ENDIAN, 0, 0),
 	mBuffer(0),
 	mSize(0),
 	mBufferSize(0),
@@ -93,24 +89,15 @@ MemFile::~MemFile()
 
 void MemFile::SetEndian(Endian::EndianType pEndian)
 {
-	mFileEndian = pEndian;
-	Reader::SetReaderEndian(mFileEndian);
-	Writer::SetWriterEndian(mFileEndian);
-
+	Parent::SetEndian(pEndian);
 	if (mReader != 0)
 	{
-		mReader->SetReaderEndian(mFileEndian);
+		mReader->SetReaderEndian(pEndian);
 	}
-
 	if (mWriter != 0)
 	{
-		mWriter->SetWriterEndian(mFileEndian);
+		mWriter->SetWriterEndian(pEndian);
 	}
-}
-
-Endian::EndianType MemFile::GetEndian()
-{
-	return (mFileEndian);
 }
 
 int64 MemFile::Tell() const
@@ -214,7 +201,7 @@ IOError MemFile::ReadRaw(void* pBuffer, size_t pSize)
 
 IOError MemFile::Skip(size_t pSize)
 {
-	return (File::Skip(pSize));
+	return (Parent::Skip(pSize));
 }
 
 IOError MemFile::WriteRaw(const void* pBuffer, size_t pSize)

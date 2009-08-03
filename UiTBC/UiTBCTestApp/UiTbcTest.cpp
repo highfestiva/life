@@ -106,10 +106,10 @@ int gY = 0;
 double gTotalFps = 0;
 UiTbc::Painter::FontID gSystemFontID;
 
-class TbcTest
+class UiTbcTest
 {
 };
-Lepra::LogDecorator gUiTbcLog(Lepra::LogType::GetLog(Lepra::LogType::SUB_TEST), typeid(TbcTest));
+Lepra::LogDecorator gUiTbcLog(Lepra::LogType::GetLog(Lepra::LogType::SUB_TEST), typeid(UiTbcTest));
 
 class GUITestWindow: public UiTbc::Window
 {
@@ -361,6 +361,8 @@ bool SceneTest::Run(double pTime)
 		}
 	}
 
+	gInput->ClearFunctors();
+
 	ReportTestResult(mLog, mSceneName, mContext, mTestOk);
 	return (mTestOk);
 }
@@ -437,7 +439,6 @@ private:
 class TerrainFunctionTest: public SceneTest
 {
 public:
-	// All funtions are defined where TestTerrainFunction() used to be.
 	TerrainFunctionTest(const Lepra::LogDecorator& pLog);
 	virtual ~TerrainFunctionTest();
 
@@ -454,7 +455,6 @@ LOG_CLASS_DEFINE(TEST, TerrainFunctionTest);
 class GeometryReferenceTest: public SceneTest
 {
 public:
-	// All funtions are defined where TestTerrainFunction() used to be.
 	GeometryReferenceTest(const Lepra::LogDecorator& pLog);
 	virtual ~GeometryReferenceTest();
 
@@ -1058,8 +1058,7 @@ bool AddUVAnimation(TBC::GeometryBase* pGeometry)
 
 	TBC::BoneHierarchy* lBones = new TBC::BoneHierarchy;
 	lBones->SetBoneCount(1);
-	lBones->SetRootBone(0);
-	lBones->FinalizeInit();
+	lBones->FinalizeInit(TBC::BoneHierarchy::TRANSFORM_NONE);
 
 	TBC::BoneAnimation* lAnimation = new TBC::BoneAnimation;
 	lAnimation->SetKeyframeCount(4, true);
@@ -1092,7 +1091,7 @@ bool AddUVAnimation(TBC::GeometryBase* pGeometry)
 	return true;
 }
 
-bool TestSkinningLoadSave(const Lepra::LogDecorator& pLog, double pShowTime)
+bool TestSkinningSaveLoad(const Lepra::LogDecorator& pLog, double pShowTime)
 {
 	// Performs the following steps:
 	//  1. Create+save mesh 1.
@@ -1112,7 +1111,7 @@ bool TestSkinningLoadSave(const Lepra::LogDecorator& pLog, double pShowTime)
 
 	Lepra::String lContext;
 	bool lTestOk = true;
-	const Lepra::String lFileName(_T("cuboid"));
+	const Lepra::String lFileName(_T("chain"));
 
 	const float lCuboidLength = 40.0f;
 	UiTbc::TriangleBasedGeometry lGeometry[2];
@@ -1121,7 +1120,7 @@ bool TestSkinningLoadSave(const Lepra::LogDecorator& pLog, double pShowTime)
 		const Lepra::String lThisMeshName = lFileName+Lepra::StringUtility::Format(_T("%i.mesh"), lMeshIndex);
 		if (lTestOk)
 		{
-			lContext = _T("save cuboid mesh");
+			lContext = _T("save chain mesh");
 			//UiTbc::TriangleBasedGeometry* lGeometry = UiTbc::BasicMeshCreator::CreateFlatBox(lCuboidLength/4.0f, lCuboidLength/2.0f, lCuboidLength/4.0f, 1, 2, 1);
 			UiTbc::TriangleBasedGeometry* lGeometry = UiTbc::BasicMeshCreator::CreateTorus(lCuboidLength/4.0f, lCuboidLength/10.0f, lCuboidLength/10.0f, 32, 24);
 			//UiTbc::TriangleBasedGeometry* lGeometry = UiTbc::BasicMeshCreator::CreateCylinder(lCuboidLength/10.0f, lCuboidLength/10.0f, lCuboidLength/2.0f, 32);
@@ -1149,7 +1148,7 @@ bool TestSkinningLoadSave(const Lepra::LogDecorator& pLog, double pShowTime)
 		}
 		if (lTestOk)
 		{
-			lContext = _T("load cuboid mesh");
+			lContext = _T("load chain mesh");
 			Lepra::DiskFile lFile;
 			lTestOk = lFile.Open(lThisMeshName, Lepra::DiskFile::MODE_READ);
 			if (lTestOk)
@@ -1167,7 +1166,7 @@ bool TestSkinningLoadSave(const Lepra::LogDecorator& pLog, double pShowTime)
 		const Lepra::String lThisSkinName = lFileName+Lepra::StringUtility::Format(_T("%i.skin"), lSkinIndex);
 		if (lTestOk)
 		{
-			lContext = _T("save cuboid skin");
+			lContext = _T("save chain skin");
 			UiTbc::BasicMeshCreator::CreateYBonedSkin(-lCuboidLength/2.0f, +lCuboidLength/2.0f, &lGeometry[lSkinIndex], &lSkin[lSkinIndex], 2);
 			Lepra::DiskFile lFile;
 			lTestOk = lFile.Open(lThisSkinName, Lepra::DiskFile::MODE_WRITE);
@@ -1179,7 +1178,7 @@ bool TestSkinningLoadSave(const Lepra::LogDecorator& pLog, double pShowTime)
 		}
 		if (lTestOk)
 		{
-			lContext = _T("load cuboid skin");
+			lContext = _T("load chain skin");
 			Lepra::DiskFile lFile;
 			lTestOk = lFile.Open(lThisSkinName, Lepra::DiskFile::MODE_READ);
 			if (lTestOk)
@@ -1194,7 +1193,7 @@ bool TestSkinningLoadSave(const Lepra::LogDecorator& pLog, double pShowTime)
 	const Lepra::String lAnimationName(lFileName+_T(".animation"));
 	if (lTestOk)
 	{
-		lContext = _T("save cuboid animation");
+		lContext = _T("save chain animation");
 		TBC::BoneAnimation lAnimation;
 		lAnimation.SetDefaultMode(TBC::BoneAnimation::MODE_PLAY_LOOP);
 		lAnimation.SetRootNodeName(_T("any_friggen_node"));
@@ -1223,7 +1222,7 @@ bool TestSkinningLoadSave(const Lepra::LogDecorator& pLog, double pShowTime)
 	TBC::BoneAnimation lAnimation;
 	if (lTestOk)
 	{
-		lContext = _T("load cuboid animation");
+		lContext = _T("load chain animation");
 		Lepra::DiskFile lFile;
 		lTestOk = lFile.Open(lAnimationName, Lepra::DiskFile::MODE_READ);
 		if (lTestOk)
@@ -1237,17 +1236,16 @@ bool TestSkinningLoadSave(const Lepra::LogDecorator& pLog, double pShowTime)
 	const Lepra::String lStructureName(lFileName+_T(".structure"));
 	if (lTestOk)
 	{
-		lContext = _T("save cuboid structure");
-		TBC::ChunkyStructure lStructure;
+		lContext = _T("save chain structure");
+		TBC::ChunkyStructure lStructure(TBC::BoneHierarchy::TRANSFORM_NONE, TBC::ChunkyStructure::DYNAMIC);
 		lStructure.SetBoneCount(2);
-		lStructure.SetRootBone(0);
 		lStructure.SetBoneChildCount(0, 1);
 		lStructure.SetChildIndex(0, 0, 1);
 		Lepra::TransformationF lTransform = Lepra::gIdentityTransformationF;
 		lStructure.SetOriginalBoneTransformation(0, lTransform);
 		lStructure.SetOriginalBoneTransformation(1, lTransform);
 		lStructure.SetPhysicsType(TBC::ChunkyStructure::DYNAMIC);
-		lStructure.FinalizeInit();
+		lStructure.BoneHierarchy::FinalizeInit(TBC::BoneHierarchy::TRANSFORM_NONE);
 		Lepra::DiskFile lFile;
 		lTestOk = lFile.Open(lStructureName, Lepra::DiskFile::MODE_WRITE);
 		if (lTestOk)
@@ -1256,16 +1254,20 @@ bool TestSkinningLoadSave(const Lepra::LogDecorator& pLog, double pShowTime)
 			lTestOk = lStructureLoader.Save(&lStructure);
 		}
 	}
-	TBC::ChunkyStructure lStructure;
+	TBC::ChunkyStructure lStructure(TBC::BoneHierarchy::TRANSFORM_NONE, TBC::ChunkyStructure::DYNAMIC);
 	if (lTestOk)
 	{
-		lContext = _T("load cuboid structure");
+		lContext = _T("load chain structure");
 		Lepra::DiskFile lFile;
 		lTestOk = lFile.Open(lStructureName, Lepra::DiskFile::MODE_READ);
 		if (lTestOk)
 		{
 			TBC::ChunkyStructureLoader lStructureLoader(&lFile, false);
 			lTestOk = lStructureLoader.Load(&lStructure);
+		}
+		if (lTestOk)
+		{
+			lTestOk = lStructure.BoneHierarchy::FinalizeInit(TBC::BoneHierarchy::TRANSFORM_NONE);
 		}
 	}
 	Lepra::DiskFile::Delete(lStructureName);
@@ -1313,6 +1315,69 @@ bool TestSkinningLoadSave(const Lepra::LogDecorator& pLog, double pShowTime)
 	}
 
 	ReportTestResult(pLog, _T("SkinningLoadSave"), lContext, lTestOk);
+	return (lTestOk);
+}
+
+bool TestMeshImport(const Lepra::LogDecorator& pLog, double pShowTime)
+{
+	Lepra::String lContext;
+	bool lTestOk = true;
+
+	UiTbc::TriangleBasedGeometry lGeometry;
+	if (lTestOk)
+	{
+		lContext = _T("load imported mesh");
+		const Lepra::String lMeshName = _T("tractor_01_rear_wheel0.mesh");
+		Lepra::DiskFile lFile;
+		lTestOk = lFile.Open(lMeshName, Lepra::DiskFile::MODE_READ);
+		assert(lTestOk);
+		if (lTestOk)
+		{
+			UiTbc::ChunkyMeshLoader lMeshLoader(&lFile, false);
+			lTestOk = lMeshLoader.Load(&lGeometry);
+			assert(lTestOk);
+		}
+		if (lTestOk)
+		{
+			lTestOk = (lGeometry.GetVertexCount() == 442 && lGeometry.GetIndexCount() == 2640);
+			assert(lTestOk);
+		}
+		if (lTestOk)
+		{
+			float* lVertices = lGeometry.GetVertexData();
+			unsigned vc = lGeometry.GetVertexCount()*3;
+			for (unsigned x = 0; x < vc; ++x)
+			{
+				lVertices[x] *= 7;
+			}
+			AddRandomVertexColor(&lGeometry);
+		}
+	}
+
+	if (lTestOk)
+	{
+		lContext = _T("clear screen");
+		lTestOk = ResetAndClearFrame();
+	}
+	Lepra::Timer lTotalTimer;
+	Lepra::TransformationF lObjectTransform;
+	while (lTestOk && lTotalTimer.GetTimeDiffF() < pShowTime)
+	{
+		lContext = _T("render");
+		if (lTestOk)
+		{
+			lTestOk = QuickRender(&lGeometry, UiTbc::Renderer::MAT_VERTEX_COLOR_SOLID, true, &lObjectTransform, -1.0, 0, true);
+		}
+		if (lTestOk)
+		{
+			Lepra::QuaternionF lRotation;
+			lRotation.RotateAroundVector(Lepra::Vector3DF(0.1f, -0.1f, 1), (float)lTotalTimer.GetTimeDiffF()*Lepra::PIF*2/6.7f);
+			lObjectTransform.SetOrientation(lRotation);
+			lTotalTimer.UpdateTimer();
+		}
+	}
+
+	ReportTestResult(pLog, _T("MeshImport"), lContext, lTestOk);
 	return (lTestOk);
 }
 
@@ -1434,107 +1499,6 @@ void TerrainFunctionTest::UpdateScene(double pTotalTime, double pDeltaTime)
 	mExtraInfo = mTriangleCountInfo;
 }
 
-/*bool TestTerrainFunction(const Lepra::LogDecorator& pLog)
-{
-	const float lPatchLeft = 5;
-	const float lPatchSize = 20;
-	const Lepra::Vector2DF lVolcanoPosition(lPatchSize-lPatchLeft, -2*lPatchLeft);
-	const Lepra::Vector2DF lNorthWest(-lPatchLeft, -lPatchSize);
-	const Lepra::Vector2DF lSouthEast(lPatchSize, lPatchSize);
-	const int lVertexCountX = 55;
-	const int lVertexCountY = 43;
-	const unsigned lVertexCount = 2*lVertexCountX*lVertexCountY;
-	Lepra::Vector3DF* lGrid = new Lepra::Vector3DF[lVertexCount];
-	if (lTestOk)
-	{
-		lContext = _T("grid flattening");
-		lTestOk = TBC::TerrainFunction::SetFlatTerrainPatchVertexData(lNorthWest, lSouthEast, lVertexCountX, lVertexCountY, lGrid, lVertexCount);
-		assert(lTestOk);
-	}
-	const float lConeAmplitude = 4.0f;
-	if (lTestOk)
-	{
-		lContext = _T("cone function");
-		TBC::TerrainConeFunction lConeFunction(lConeAmplitude, lVolcanoPosition, lPatchLeft+1, lPatchLeft*1.5f);
-		lConeFunction.AddFunction(lNorthWest, lSouthEast, lVertexCountX, lVertexCountY, lGrid);
-		lTestOk = (lGrid[2*lVertexCountX*((lVertexCountY+1)/4)+(lVertexCountX-1)*2].z >= lConeAmplitude*0.9);
-		assert(lTestOk);
-	}
-	if (lTestOk)
-	{
-		lContext = _T("hemisphere functions");
-		const float lHemisphereAmplitude = 4.0f;
-		TBC::TerrainHemisphereFunction lHemisphereFunction(-lHemisphereAmplitude, lVolcanoPosition, lPatchLeft-1, lPatchLeft-1);
-		lHemisphereFunction.AddFunction(lNorthWest, lSouthEast, lVertexCountX, lVertexCountY, lGrid);
-		TBC::TerrainHemisphereFunction lHemisphereFunction2(lHemisphereAmplitude, lVolcanoPosition, lPatchLeft/2, lPatchLeft/2);
-		lHemisphereFunction2.AddFunction(lNorthWest, lSouthEast, lVertexCountX, lVertexCountY, lGrid);
-		lTestOk = (lGrid[2*lVertexCountX*((lVertexCountY+1)/4)+(lVertexCountX-1)*2].z >= lConeAmplitude*0.9);
-		assert(lTestOk);
-	}
-	if (lTestOk)
-	{
-		lContext = _T("dune function");
-		const float lDuneAmplitude = 1.0f;
-		const Lepra::Vector2DF lDunePosition(5, 5);
-
-		TBC::TerrainDuneFunction lDuneFunction(1.0f, 1.0f, lDuneAmplitude, lDunePosition, lPatchLeft, lPatchLeft*2);
-		const float lDuneAmplitudeVector[] = {1.0f, 3.0f, 2.0f, 4.0f};
-		TBC::TerrainAmplitudeFunction lAmplitudeFunction(lDuneAmplitudeVector, 4, &lDuneFunction);
-		const float lDuneDrawVector[][2] = {{-1, -1}, {-0.4f, 0.0f}, {0.4f, -0.0f}, {1, 1}};
-		TBC::TerrainDrawFunction lDrawFunction(lDuneDrawVector, 4, &lAmplitudeFunction);
-		lDrawFunction.AddFunction(lNorthWest, lSouthEast, lVertexCountX, lVertexCountY, lGrid);
-		//lAmplitudeFunction.AddFunction(lNorthWest, lSouthEast, lVertexCountX, lVertexCountY, lGrid);
-
-		//lTestOk = (lGrid[2*lVertexCountX*((lVertexCountY+1)/4)+(lVertexCountX-1)*2].z >= lConeAmplitude*0.9);
-		assert(lTestOk);
-	}
-	if (lTestOk)
-	{
-		lContext = _T("zero effect validation");
-		lTestOk = (lGrid[0].z == 0 && lGrid[1].z == 0);
-		assert(lTestOk);
-	}
-	UiTbc::TriangleBasedGeometry lPatchGeometry;
-	if (lTestOk)
-	{
-		lContext = _T("creating patch mesh");
-		const unsigned lIndexCount = 3*4*(lVertexCountX-1)*(lVertexCountY-1);
-		Lepra::uint32* lIndexData = new Lepra::uint32[lIndexCount];
-		TBC::TerrainFunction::GenerateTerrainPatchIndexData(lVertexCountX, lVertexCountY, lIndexData, lIndexCount);
-		lPatchGeometry.Set(lGrid, 0, 0, 0, TBC::GeometryBase::COLOR_RGBA, lIndexData,
-			lVertexCount, lIndexCount, TBC::GeometryBase::TRIANGLES, TBC::GeometryBase::GEOM_STATIC);
-		delete[] (lIndexData);
-	}
-	delete[] (lGrid);
-	if (lTestOk)
-	{
-		lContext = _T("initializing patch geometry");
-		lTestOk = InitializeGeometry(&lPatchGeometry);
-		assert(lTestOk);
-	}
-	if (lTestOk)
-	{
-		lContext = _T("setting patch colors");
-		lTestOk = AddRandomVertexColor(&lPatchGeometry);
-		assert(lTestOk);
-	}
-	if (lTestOk)
-	{
-		lContext = _T("rendering patch");
-		Lepra::TransformationF lTransform;
-		lTransform.RotateRoll(Lepra::PIF);
-		lTransform.RotatePitch(0.4f);
-		lTransform.MoveDown(3.0f);
-		lTransform.MoveBackward(20.0f);
-		ResetAndClearFrame();
-		lTestOk = QuickRender(&lPatchGeometry, UiTbc::Renderer::MAT_VERTEX_COLOR_SOLID, true, &lTransform, 20.0, _T("Terrain patch"), true, 0.3f, Lepra::Vector3DF(0, 0, 1));
-		assert(lTestOk);
-	}
-
-	ReportTestResult(pLog, _T("TerrainFunction"), lContext, lTestOk);
-	return (lTestOk);
-}
-*/
 bool TestMaterials(const Lepra::LogDecorator& pLog, double pShowTime)
 {
 	gTotalFps = 0;
@@ -1569,7 +1533,8 @@ bool TestMaterials(const Lepra::LogDecorator& pLog, double pShowTime)
 	}*/
 
 	int lFrameCount = 0;
-	Lepra::Timer lTotalTimer;
+	Lepra::HiResTimer lTotalTimer;
+	bool lFirstTime = true;
 	Lepra::HiResTimer lFrameTimer;
 	Lepra::TransformationF lObjectTransform;
 	do
@@ -1734,10 +1699,18 @@ bool TestMaterials(const Lepra::LogDecorator& pLog, double pShowTime)
 			lObjectTransform.SetOrientation(lRotation);
 		}
 
-		lTotalTimer.UpdateTimer();
-		++lFrameCount;
+		if (lFirstTime)
+		{
+			lFirstTime = false;
+			lTotalTimer.PopTimeDiff();
+		}
+		else
+		{
+			lTotalTimer.UpdateTimer();
+			++lFrameCount;
+		}
 	}
-	while (lTestOk && lTotalTimer.GetTimeDiffF() < pShowTime);
+	while (lTestOk && lTotalTimer.GetTimeDiff() < pShowTime);
 
 	//gRenderer->RemoveGeometry(lGeometryId);
 
@@ -1748,7 +1721,7 @@ bool TestMaterials(const Lepra::LogDecorator& pLog, double pShowTime)
 	gRenderer->SetAmbientLight(0.5, 0.5, 0.5);
 
 	// Assign FPS meter for next test.
-	gTotalFps = lFrameCount/lTotalTimer.GetTimeDiffF();
+	gTotalFps = lFrameCount/lTotalTimer.GetTimeDiff();
 
 	ReportTestResult(pLog, _T("RenderModes"), lContext, lTestOk);
 	return (lTestOk);
@@ -1757,11 +1730,11 @@ bool TestMaterials(const Lepra::LogDecorator& pLog, double pShowTime)
 bool TestFps(const Lepra::LogDecorator& pLog, double pAverageFps)
 {
 	Lepra::String lContext = _T("too low");
-	bool lTestOk = (gTotalFps > pAverageFps/2.0);
+	bool lTestOk = (gTotalFps > pAverageFps/8.0);
 	if (lTestOk)
 	{
 		lContext = _T("too high");
-		lTestOk = (gTotalFps < pAverageFps*2.0);
+		lTestOk = (gTotalFps < pAverageFps*8.0);
 	}
 	ReportTestResult(pLog, Lepra::StringUtility::Format(_T("FPS (%.1f)"), gTotalFps), lContext, lTestOk);
 	return (lTestOk);
@@ -1985,8 +1958,7 @@ BumpMapSceneTest::BumpMapSceneTest(const Lepra::LogDecorator& pLog) :
 	// Setup a transform animation bone.
 	mTransformBones = new TBC::BoneHierarchy;
 	mTransformBones->SetBoneCount(1);
-	mTransformBones->SetRootBone(0);
-	mTransformBones->FinalizeInit();
+	mTransformBones->FinalizeInit(TBC::BoneHierarchy::TRANSFORM_NONE);
 
 	mAnimation = new TBC::BoneAnimation;
 	mAnimation->SetKeyframeCount(8, true);
@@ -2383,7 +2355,6 @@ bool TestUiTbc()
 	// > Men cp-störd!!! Bara för att din dator är så jävla snabb då eller?
 	// Du själv, ap-balle!!! Bara för att din grafikmotor skalar så fantastiskt då elle? Det är väl bara att ta bort lite pixelshaders och trianglar så går väl allt skitfort?
 	const double lAverageFps[2] = { 200.0, 2.0 };
-	lAverageFps;
 #ifdef TEST_SOFTWARE_RENDERER
 	for (unsigned y = 0; y < 2; ++y)
 #else // TEST_SOFTWARE_RENDERER
@@ -2417,13 +2388,17 @@ bool TestUiTbc()
 			LEPRA_PERFORMANCE_SCOPE("Material test");
 			lTestOk = TestMaterials(gUiTbcLog, 2.0);
 		}
-/*		if (lTestOk)
+		if (lTestOk)
 		{
 			lTestOk = TestFps(gUiTbcLog, lAverageFps[y]);
 		}
-*/		if (lTestOk)
+		if (lTestOk)
 		{
-			lTestOk = TestSkinningLoadSave(gUiTbcLog, 2.0);
+			lTestOk = TestSkinningSaveLoad(gUiTbcLog, 2.0);
+		}
+		if (lTestOk)
+		{
+			lTestOk = TestMeshImport(gUiTbcLog, 4.0);
 		}
 		if (lTestOk)
 		{

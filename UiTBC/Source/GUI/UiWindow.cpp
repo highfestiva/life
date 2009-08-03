@@ -251,13 +251,10 @@ void Window::Init()
 
 void Window::SetBorder(unsigned pBorderStyle, int pWidth)
 {
-	if (mBorder == false)
+	if (mBorder == false || (pBorderStyle == mBorderStyle && pWidth == mBorderWidth))
 	{
 		return;
 	}
-
-	SetNeedsRepaint(mBorderStyle != pBorderStyle ||
-			pWidth != mBorderWidth);
 
 	mBorderStyle = pBorderStyle;
 
@@ -298,6 +295,8 @@ void Window::SetBorder(unsigned pBorderStyle, int pWidth)
 		mLBorder->SetSunken(true);
 		mRBorder->SetSunken(true);
 	}
+
+	SetNeedsRepaint(true);
 }
 
 void Window::SetBorder(unsigned pBorderStyle,
@@ -463,7 +462,11 @@ bool Window::OnChar(Lepra::tchar pChar)
 			{
 				break;
 			}
-			if (x->first)
+			if (x->first == 2)
+			{
+				return (Parent::OnChar(pChar));	// RAII simplifies.
+			}
+			else if (x->first)
 			{
 				if (lInputManager->ReadKey(UiLepra::InputManager::IN_KBD_LSHIFT) ||
 					lInputManager->ReadKey(UiLepra::InputManager::IN_KBD_RSHIFT))
@@ -494,12 +497,15 @@ bool Window::OnChar(Lepra::tchar pChar)
 	}
 	else if (pChar == _T('\r'))
 	{
-		StateComponentList lComponentList = GetStateList(STATE_CLICKABLE);
+		StateComponentList lComponentList = mClientRect->GetStateList(STATE_CLICKABLE);
 		StateComponentList::iterator x = lComponentList.begin();
 		if (x != lComponentList.end())
 		{
-			++x;
 			((Button*)x->second)->Click(true);
+		}
+		else
+		{
+			return (Parent::OnChar(pChar));	// RAII simplifies.
 		}
 		lOk = true;
 	}

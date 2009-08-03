@@ -1,13 +1,18 @@
-/*
-	Class:  TriangleBasedGeometry
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Righteous Games
-*/
+
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2009, Righteous Games
+
+
 
 #include "../Include/UiTriangleBasedGeometry.h"
+#include <assert.h>
+
+
 
 namespace UiTbc
 {
+
+
 
 TriangleBasedGeometry::TriangleBasedGeometry() :
 	mVertexCount(0),
@@ -684,6 +689,10 @@ void TriangleBasedGeometry::FlipTriangles()
 			mIndexData[1] = mIndexData[2];
 			mIndexData[2] = lTemp;
 		}
+		else
+		{
+			assert(false);
+		}
 	}
 
 	TBC::GeometryBase::SetConvexVolumeCheckValid(false);
@@ -703,6 +712,10 @@ void TriangleBasedGeometry::FlipTriangle(int pTriangleIndex)
 		mIndexData[i + 1] = lTemp;
 
 		TBC::GeometryBase::SetConvexVolumeCheckValid(false);
+	}
+	else
+	{
+		assert(false);
 	}
 }
 
@@ -993,6 +1006,7 @@ void TriangleBasedGeometry::AddGeometry(TriangleBasedGeometry* pGeometry)
 {
 	if (mPrimitiveType != TRIANGLES)
 	{
+		assert(false);
 		return;
 	}
 
@@ -1194,22 +1208,28 @@ Lepra::uint32* TriangleBasedGeometry::GetIndexData() const
 
 TBC::GeometryBase::PrimitiveType TriangleBasedGeometry::GetPrimitiveType() const
 {
+	assert(mPrimitiveType == TRIANGLES);
 	return mPrimitiveType;
 }
 
 TBC::GeometryBase::GeometryVolatility TriangleBasedGeometry::GetGeometryVolatility() const
 {
+	assert(mGeometryVolatility == GEOM_STATIC);
 	return (mGeometryVolatility);
 }
 
 void TriangleBasedGeometry::SetGeometryVolatility(TBC::GeometryBase::GeometryVolatility pVolatility)
 {
 	mGeometryVolatility = pVolatility;
+	assert(mGeometryVolatility == GEOM_STATIC);
 }
 
 TriangleBasedGeometry::ColorFormat TriangleBasedGeometry::GetColorFormat() const
 {
+	assert(mColorFormat == COLOR_RGB || mColorFormat == COLOR_RGBA);
 	return mColorFormat;
 }
 
-} // End namespace.
+
+
+}

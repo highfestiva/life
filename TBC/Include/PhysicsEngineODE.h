@@ -164,6 +164,7 @@ public:
 	virtual bool SetJointParams(JointID pJointId, Lepra::float32 pLowStop, Lepra::float32 pHighStop, Lepra::float32 pBounce);
 	virtual bool GetJointParams(JointID pJointId, Lepra::float32& pLowStop, Lepra::float32& pHighStop, Lepra::float32& pBounce) const;
 	virtual bool SetSuspension(JointID pJointId, Lepra::float32 pFrameTime, Lepra::float32 pSpringConstant, Lepra::float32 pDampingConstant);
+	virtual bool GetSuspension(JointID pJointId, Lepra::float32& pErp, Lepra::float32& pCfm) const;
 
 	virtual bool GetSliderPos(JointID pJointId, Lepra::float32& pPos) const;
 	virtual bool GetSliderSpeed(JointID pJointId, Lepra::float32& pSpeed) const;
@@ -237,7 +238,9 @@ private:
 		bool mIsRoot;
 		dBodyID mBodyID;
 		dGeomID mGeomID;
+		float mGeometryData[3];
 		dTriMeshDataID mTriMeshID;
+		float mMass;
 		Lepra::float32 mFriction;
 		Lepra::float32 mBounce;
 		void* mUserData;

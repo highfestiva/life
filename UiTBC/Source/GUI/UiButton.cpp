@@ -31,6 +31,7 @@ Button::Button(const Lepra::String& pName) :
 	mOnUnclickedFunctor(0),
 	mOnButtonDraggedFunctor(0)
 {
+	InitializeHoover();
 }
 
 Button::Button(const Lepra::Color& pColor, const Lepra::String& pName):
@@ -51,11 +52,12 @@ Button::Button(const Lepra::Color& pColor, const Lepra::String& pName):
 	mOnUnclickedFunctor(0),
 	mOnButtonDraggedFunctor(0)
 {
+	InitializeHoover();
 }
 
 Button::Button(BorderComponent::BorderShadeFunc pShadeFunc, int pBorderWidth, const Lepra::Color& pColor,
 	const Lepra::String& pName):
-	Window((pShadeFunc == BorderComponent::LINEAR ? Window::BORDER_LINEARSHADING : 0), pBorderWidth, pColor, pName),
+	Window((pShadeFunc == BorderComponent::LINEAR ? Parent::BORDER_LINEARSHADING : 0), pBorderWidth, pColor, pName),
 	mIconID(Painter::INVALID_IMAGEID),
 	mIconAlignment(ICON_CENTER),
 	mFontID(Painter::INVALID_FONTID),
@@ -72,6 +74,7 @@ Button::Button(BorderComponent::BorderShadeFunc pShadeFunc, int pBorderWidth, co
 	mOnUnclickedFunctor(0),
 	mOnButtonDraggedFunctor(0)
 {
+	InitializeHoover();
 }
 
 Button::Button(Painter::ImageID pReleasedImageID, Painter::ImageID pPressedImageID,
@@ -101,6 +104,7 @@ Button::Button(Painter::ImageID pReleasedImageID, Painter::ImageID pPressedImage
 	mOnUnclickedFunctor(0),
 	mOnButtonDraggedFunctor(0)
 {
+	InitializeHoover();
 }
 
 Button::~Button()
@@ -131,10 +135,16 @@ Button::~Button()
 	}
 }
 
+void Button::InitializeHoover()
+{
+	mHooverColor = GetColor() * 1.2f;
+	mPressColor = GetColor() * 0.95f;
+}
+
 void Button::SetPressed(bool pPressed)
 {
 	mPressed = pPressed;
-	SetState(mPressed ? PRESSED : RELEASED);
+	SetState(mPressed? PRESSED : HasMouseFocus()? RELEASED : RELEASED_HOOVER);
 }
 
 void Button::SetState(State pState)
@@ -153,36 +163,42 @@ void Button::SetState(State pState)
 		switch(mState)
 		{
 		case RELEASED:
-			Window::SetBackgroundImage(mReleasedImageID);
+			Parent::SetBackgroundImage(mReleasedImageID);
 			break;
 		case RELEASED_HOOVER:
-			Window::SetBackgroundImage(mReleasedActiveImageID);
+			Parent::SetBackgroundImage(mReleasedActiveImageID);
 			break;
 		case RELEASING:
-			Window::SetBackgroundImage(mReleasingImageID);
+			Parent::SetBackgroundImage(mReleasingImageID);
 			break;
 		case PRESSED:
-			Window::SetBackgroundImage(mPressedImageID);
+			Parent::SetBackgroundImage(mPressedImageID);
 			break;
 		case PRESSED_HOOVER:
-			Window::SetBackgroundImage(mPressedActiveImageID);
+			Parent::SetBackgroundImage(mPressedActiveImageID);
 			break;
 		case PRESSING:
-			Window::SetBackgroundImage(mPressingImageID);
+			Parent::SetBackgroundImage(mPressingImageID);
 			break;
 		}
 	}
-	else if(Window::GetBorderWidth() != 0)
+	else
 	{
 		if (mState == PRESSED || mState == PRESSING || mState == PRESSED_HOOVER)
 		{
-			unsigned lStyle = Window::GetBorderStyle() | Window::BORDER_SUNKEN;
-			Window::SetBorder(lStyle, Window::GetBorderWidth());
+			unsigned lStyle = Parent::GetBorderStyle() | Parent::BORDER_SUNKEN;
+			Parent::SetBorder(lStyle, Parent::GetBorderWidth());
+			Parent::SetColor(mPressColor);
+		}
+		else if (mState == RELEASED_HOOVER)
+		{
+			Parent::SetColor(mHooverColor);
 		}
 		else
 		{
-			unsigned lStyle = (Window::GetBorderStyle() & (~Window::BORDER_SUNKEN));
-			Window::SetBorder(lStyle, Window::GetBorderWidth());
+			unsigned lStyle = (Parent::GetBorderStyle() & (~Parent::BORDER_SUNKEN));
+			Parent::SetBorder(lStyle, Parent::GetBorderWidth());
+			Parent::SetColor(GetColor());
 		}
 	}
 
@@ -217,19 +233,19 @@ Component::StateComponentList Button::GetStateList(ComponentState pState) const
 	StateComponentList lList;
 	if (pState == STATE_CLICKABLE)
 	{
-		lList.push_back(std::pair<bool, Component*>(false, (Component*)this));
+		lList.push_back(StateComponent(0, (Component*)this));
 	}
 	return (lList);
 }
 
 void Button::Repaint(Painter* pPainter)
 {
-	Window::Repaint(pPainter);
+	Parent::Repaint(pPainter);
 
 	GUIImageManager* lIMan = GetImageManager();
 
 	pPainter->PushAttrib(Painter::ATTR_ALL);
-	Lepra::PixelRect lRect(Window::GetClientRect());
+	Lepra::PixelRect lRect(Parent::GetClientRect());
 	pPainter->ReduceClippingRect(lRect);
 
 	int lOffset = GetPressed() ? 1 : 0;

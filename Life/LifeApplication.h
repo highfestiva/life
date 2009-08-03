@@ -45,6 +45,8 @@ protected:
 	Lepra::LogListener* mConsoleLogger;
 
 private:
+	void TickSleep(double pMeasuredFrameTime) const;
+
 	Lepra::LogListener* mDebugLogger;
 	Lepra::FileLogListener* mFileLogger;
 	Lepra::LogListener* mPerformanceLogger;

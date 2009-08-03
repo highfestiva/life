@@ -45,6 +45,7 @@ class FileArchive;
 
 class DiskFile: public File, protected InputStream, protected OutputStream
 {
+	typedef File Parent;
 public:
 	// Not really an enum, but a bit field.
 	enum OpenMode
@@ -146,7 +147,7 @@ public:
 	// If pCreatePath is set to true, the directory structure given by
 	// pFileName will be created if it doesn't already exist, and if
 	// pMode is set to WRITE_ONLY or WRITE_APPEND.
-	bool Open(const String& pFileName, OpenMode pMode, bool pCreatePath = false, Endian::EndianType pEndian = Endian::TYPE_LITTLE_ENDIAN);
+	bool Open(const String& pFileName, OpenMode pMode, bool pCreatePath = false, Endian::EndianType pEndian = Endian::TYPE_BIG_ENDIAN);
 
 	void Close();
 
@@ -154,7 +155,6 @@ public:
 
 	// Use this to change the endian in the middle of a file read/write.
 	void SetEndian(Endian::EndianType pEndian);
-	Endian::EndianType GetEndian();
 
 	String GetFullName() const;	// Returns path+filename.
 	String GetName() const;		// Returns filename only.
@@ -205,8 +205,6 @@ private:
 	//bool CopyFileBetweenArchives(FileArchive& pSource, FileArchive& pDest, const String& pFileName);
 
 	void operator=(const DiskFile&);
-
-	Endian::EndianType mFileEndian;
 
 	FILE* mFile;
 	String mFileName;

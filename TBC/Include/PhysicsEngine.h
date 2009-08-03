@@ -266,6 +266,7 @@ public:
 	virtual bool SetJointParams(JointID pJointId, Lepra::float32 pLowStop, Lepra::float32 pHighStop, Lepra::float32 pBounce) = 0;
 	virtual bool GetJointParams(JointID pJointId, Lepra::float32& pLowStop, Lepra::float32& pHighStop, Lepra::float32& pBounce) const = 0;
 	virtual bool SetSuspension(JointID pJointId, Lepra::float32 pFrameTime, Lepra::float32 pSpringConstant, Lepra::float32 pDampingConstant) = 0;
+	virtual bool GetSuspension(JointID pJointId, Lepra::float32& pErp, Lepra::float32& pCfm) const = 0;
 
 	virtual bool GetSliderPos(JointID pJointId, Lepra::float32& pPos) const = 0;
 	virtual bool GetSliderSpeed(JointID pJointId, Lepra::float32& pSleep) const = 0;

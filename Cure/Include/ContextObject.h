@@ -11,7 +11,15 @@
 #include "../../TBC/Include/PhysicsEngine.h"
 #include "Cure.h"
 #include "PositionalData.h"
-#include "PhysicsNode.h"
+
+
+
+namespace TBC
+{
+class ChunkyStructure;
+class ChunkyBoneGeometry;
+class StructureEngine;
+}
 
 
 
@@ -22,7 +30,6 @@ namespace Cure
 
 class ContextManager;
 class ContextObjectAttribute;
-class ContextObjectEngine;
 
 
 class ContextObject: public TBC::PhysicsEngine::TriggerListener, public TBC::PhysicsEngine::ForceFeedbackListener
@@ -43,7 +50,7 @@ public:
 
 	void SetAllowMoveSelf(bool pAllow);
 	void AttachToObject(TBC::PhysicsEngine::BodyID pBody1, ContextObject* pObject2, TBC::PhysicsEngine::BodyID pBody2);
-	void AttachToObject(PhysicsNode::Id pBody1Id, ContextObject* pObject2, PhysicsNode::Id pBody2Id);
+	void AttachToObject(unsigned pBody1Index, ContextObject* pObject2, unsigned pBody2Index);
 	bool DetachFromObject(ContextObject* pObject);
 
 	void AddAttribute(ContextObjectAttribute* pAttribute);
@@ -55,9 +62,9 @@ public:
 	float GetForwardSpeed() const;
 	float GetMass() const;
 
-	void AddPhysicsObject(const PhysicsNode& pPhysicsNode);
-	PhysicsNode* GetPhysicsNode(PhysicsNode::Id pId) const;
-	PhysicsNode* GetPhysicsNode(TBC::PhysicsEngine::BodyID pBodyId) const;
+	bool SetStructure(TBC::ChunkyStructure* pStructure);
+	TBC::ChunkyBoneGeometry* GetStructureGeometry(unsigned pIndex) const;
+	TBC::ChunkyBoneGeometry* GetStructureGeometry(TBC::PhysicsEngine::BodyID pBodyId) const;
 	void SetEnginePower(unsigned pAspect, float pPower, float pAngle);
 
 	bool QueryResendTime(float pDeltaTime, bool pUnblockDelta);
@@ -69,17 +76,14 @@ public:
 	virtual void OnPhysicsTick();
 
 protected:
-	void AttachToObject(PhysicsNode* pNode1, ContextObject* pObject2, PhysicsNode* pNode2, bool pSend);
+	void AttachToObject(TBC::ChunkyBoneGeometry* pBoneGeometry1, ContextObject* pObject2, TBC::ChunkyBoneGeometry* pBoneGeometry2, bool pSend);
 	bool IsAttachedTo(ContextObject* pObject) const;
-	void AddAttachment(ContextObject* pObject, TBC::PhysicsEngine::JointID pJoint, ContextObjectEngine* pEngine);
-
-	PhysicsNode::Id GetNextNodeId();
+	void AddAttachment(ContextObject* pObject, TBC::PhysicsEngine::JointID pJoint, TBC::StructureEngine* pEngine);
 
 	typedef std::vector<ContextObjectAttribute*> AttributeArray;
-	typedef std::vector<PhysicsNode> PhysicsNodeArray;
 	struct Connection
 	{
-		Connection(ContextObject* pObject, TBC::PhysicsEngine::JointID pJointId, ContextObjectEngine* pEngine):
+		Connection(ContextObject* pObject, TBC::PhysicsEngine::JointID pJointId, TBC::StructureEngine* pEngine):
 			mObject(pObject),
 			mJointId(pJointId),
 			mEngine(pEngine)
@@ -87,7 +91,7 @@ protected:
 		}
 		ContextObject* mObject;
 		TBC::PhysicsEngine::JointID mJointId;
-		ContextObjectEngine* mEngine;
+		TBC::StructureEngine* mEngine;
 	};
 	typedef std::list<Connection> ConnectionList;
 
@@ -96,14 +100,12 @@ protected:
 	Lepra::String mClassId;
 	NetworkObjectType mNetworkObjectType;
 	AttributeArray mAttributeArray;
-	PhysicsNodeArray mPhysicsNodeArray;
+	TBC::ChunkyStructure* mStructure;
 	float mLastSendTime;
-	int mRootPhysicsIndex;	// TODO: remove this hack!
 	ObjectPositionalData mPosition;
 	int mSendCount;
 	bool mAllowMoveSelf;	// This is set to false when attached to someone/something else.
 	ConnectionList mConnectionList;
-	int mUniqeNodeId;
 
 	LOG_CLASS_DECLARE();
 };
@@ -114,7 +116,7 @@ class ContextObjectFactory
 {
 public:
 	virtual ContextObject* Create(const Lepra::String& pClassId) const = 0;
-	virtual bool CreatePhysics(ContextObject* pObject, ContextObject* pTriggerListener) const = 0;
+	virtual bool CreatePhysics(ContextObject* pObject) const = 0;
 };
 
 

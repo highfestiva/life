@@ -63,6 +63,8 @@ public:
 
 	int GetSlaveIndex() const;
 
+	bool ExportAll(const Lepra::String& pDirectory);
+
 private:
 	Lepra::String GetName() const;
 	Lepra::String GetApplicationCommandFilename() const;
@@ -91,9 +93,9 @@ private:
 	void OnStopped(Cure::ContextObject* pObject, TBC::PhysicsEngine::BodyID pBodyId);
 	bool OnPhysicsSend(Cure::ContextObject* pObject);
 	bool IsConnectAuthorized();
-	void SendAttach(Cure::ContextObject*, Cure::PhysicsNode::Id, Cure::ContextObject*, Cure::PhysicsNode::Id);
+	void SendAttach(Cure::ContextObject*, unsigned, Cure::ContextObject*, unsigned);
 	void SendDetach(Cure::ContextObject*, Cure::ContextObject*);
-	void AttachObjects(Cure::GameObjectId pObject1Id, Cure::PhysicsNode::Id pBody1Id, Cure::GameObjectId pObject2Id, Cure::PhysicsNode::Id pBody2Id);
+	void AttachObjects(Cure::GameObjectId pObject1Id, unsigned pBody1Id, Cure::GameObjectId pObject2Id, unsigned pBody2Id);
 	void DetachObjects(Cure::GameObjectId pObject1Id, Cure::GameObjectId pObject2Id);
 
 	void CancelLogin();

@@ -50,6 +50,7 @@ namespace Lepra
 
 class MetaFile: public File, protected InputStream, protected OutputStream
 {
+	typedef File Parent;
 public:
 	enum OpenMode
 	{
@@ -64,7 +65,7 @@ public:
 	MetaFile(Reader* pReader, Writer* pWriter);
 	virtual ~MetaFile();
 
-	bool Open(const String& pFileName, OpenMode pMode, bool pCreatePath = false, Endian::EndianType pEndian = Endian::TYPE_LITTLE_ENDIAN);
+	bool Open(const String& pFileName, OpenMode pMode, bool pCreatePath = false, Endian::EndianType pEndian = Endian::TYPE_BIG_ENDIAN);
 	void Close();
 
 	void SetEndian(Endian::EndianType pEndian);

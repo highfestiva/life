@@ -473,10 +473,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Source\ContextObjectEngine.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\Source\CppContextObject.cpp"
 				>
 			</File>
@@ -498,10 +494,6 @@
 			</File>
 			<File
 				RelativePath=".\Source\Packet.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Source\PhysicsNode.cpp"
 				>
 			</File>
 			<File
@@ -587,10 +579,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Include\ContextObjectEngine.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Include\CppContextObject.h"
 				>
 			</File>
@@ -612,10 +600,6 @@
 			</File>
 			<File
 				RelativePath=".\Include\Packet.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\PhysicsNode.h"
 				>
 			</File>
 			<File

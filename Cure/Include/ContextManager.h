@@ -44,7 +44,6 @@ public:
 	void AddPhysicsSenderObject(ContextObject* pObject);
 	void AddPhysicsBody(ContextObject* pObject, TBC::PhysicsEngine::BodyID pBodyId);
 	void RemovePhysicsBody(TBC::PhysicsEngine::BodyID pBodyId);
-	void RemovePhysicsJoint(TBC::PhysicsEngine::JointID pJointId);
 
 	GameObjectId AllocateGameObjectId(NetworkObjectType pNetworkType);
 	void FreeGameObjectId(NetworkObjectType pNetworkType, GameObjectId pObjectId);

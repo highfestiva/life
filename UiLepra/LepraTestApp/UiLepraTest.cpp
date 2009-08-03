@@ -21,10 +21,8 @@
 
 
 
-class LepraTest
-{
-};
-Lepra::LogDecorator gUiLLog(Lepra::LogType::GetLog(Lepra::LogType::SUB_TEST), typeid(LepraTest));
+class UiLepraTest{};
+static Lepra::LogDecorator gUiLLog(Lepra::LogType::GetLog(Lepra::LogType::SUB_TEST), typeid(UiLepraTest));
 
 
 

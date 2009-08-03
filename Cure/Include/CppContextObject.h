@@ -37,16 +37,14 @@ private:
 class CppContextObjectFactory: public ContextObjectFactory
 {
 public:
-	CppContextObjectFactory(unsigned pPhysicsFps);
+	CppContextObjectFactory();
 	virtual ~CppContextObjectFactory();
 
 protected:
 	ContextObject* Create(const Lepra::String& pClassId) const;
-	bool CreatePhysics(ContextObject* pObject, ContextObject* pTriggerListener) const;
+	bool CreatePhysics(ContextObject* pObject) const;
 
 private:
-	unsigned mPhysicsFps;
-
 	LOG_CLASS_DECLARE();
 };
 

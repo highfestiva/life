@@ -14,8 +14,6 @@
 namespace UiTbc
 {
 
-Software3DPainter::RenderingPrimitive SoftwareMaterial::smPrimitiveLUT[2] = {Software3DPainter::RENDER_TRIANGLES, Software3DPainter::RENDER_TRIANGLE_STRIP};
-
 Material::RemoveStatus SoftwareMaterial::RemoveGeometry(TBC::GeometryBase* pGeometry)
 {
 	Material::RemoveStatus lRemoved = Material::RemoveGeometry(pGeometry);

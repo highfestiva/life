@@ -18,8 +18,7 @@ namespace Lepra
 
 
 ArchiveFile::ArchiveFile(const String& pArchiveName):
-	File(Endian::TYPE_LITTLE_ENDIAN, Endian::TYPE_LITTLE_ENDIAN, 0, 0),
-	mFileEndian(Endian::TYPE_LITTLE_ENDIAN),
+	File(Endian::TYPE_BIG_ENDIAN, Endian::TYPE_BIG_ENDIAN, 0, 0),
 	mArchiveFileName(pArchiveName),
 	mIsZipArchive(false),
 	mFileHandle(0),
@@ -44,8 +43,7 @@ ArchiveFile::ArchiveFile(const String& pArchiveName):
 }
 
 ArchiveFile::ArchiveFile(const String& pArchiveName, Reader* pReader):
-	File(Endian::TYPE_LITTLE_ENDIAN, Endian::TYPE_LITTLE_ENDIAN, 0, 0),
-	mFileEndian(Endian::TYPE_LITTLE_ENDIAN),
+	File(Endian::TYPE_BIG_ENDIAN, Endian::TYPE_BIG_ENDIAN, 0, 0),
 	mArchiveFileName(pArchiveName),
 	mIsZipArchive(false),
 	mFileHandle(0),
@@ -75,8 +73,7 @@ ArchiveFile::ArchiveFile(const String& pArchiveName, Reader* pReader):
 }
 
 ArchiveFile::ArchiveFile(const String& pArchiveName, Writer* pWriter):
-	File(Endian::TYPE_LITTLE_ENDIAN, Endian::TYPE_LITTLE_ENDIAN, 0, 0),
-	mFileEndian(Endian::TYPE_LITTLE_ENDIAN),
+	File(Endian::TYPE_BIG_ENDIAN, Endian::TYPE_BIG_ENDIAN, 0, 0),
 	mArchiveFileName(pArchiveName),
 	mIsZipArchive(false),
 	mFileHandle(0),
@@ -106,8 +103,7 @@ ArchiveFile::ArchiveFile(const String& pArchiveName, Writer* pWriter):
 }
 
 ArchiveFile::ArchiveFile(const String& pArchiveName, Reader* pReader, Writer* pWriter):
-	File(Endian::TYPE_LITTLE_ENDIAN, Endian::TYPE_LITTLE_ENDIAN, 0, 0),
-	mFileEndian(Endian::TYPE_LITTLE_ENDIAN),
+	File(Endian::TYPE_BIG_ENDIAN, Endian::TYPE_BIG_ENDIAN, 0, 0),
 	mArchiveFileName(pArchiveName),
 	mIsZipArchive(false),
 	mFileHandle(0),
@@ -159,7 +155,7 @@ bool ArchiveFile::Open(const String& pFileName, OpenMode pMode, Endian::EndianTy
 {
 	Close();
 
-	mFileEndian = pEndian;
+	SetEndian(pEndian);
 
 	bool lOK = true;
 
@@ -168,13 +164,13 @@ bool ArchiveFile::Open(const String& pFileName, OpenMode pMode, Endian::EndianTy
 		switch(pMode)
 		{
 		case READ_ONLY:
-			File::SetMode(File::READ_MODE);
-			File::ClearMode(File::WRITE_MODE);
+			Parent::SetMode(Parent::READ_MODE);
+			Parent::ClearMode(Parent::WRITE_MODE);
 			break;
 		case WRITE_ONLY:
 		case WRITE_APPEND:
-			File::SetMode(File::WRITE_MODE);
-			File::ClearMode(File::READ_MODE);
+			Parent::SetMode(Parent::WRITE_MODE);
+			Parent::ClearMode(Parent::READ_MODE);
 			break;
 		default:
 			lOK = false;
@@ -327,7 +323,7 @@ bool ArchiveFile::OpenForWriting(const String& pFileName, OpenMode pMode)
 			// We have to take care about the temp file...
 			// Insert it into the archive.
 			DiskFile lFile;
-			if (lFile.Open(lTempFile, DiskFile::MODE_READ) == true)
+			if (lFile.Open(lTempFile, DiskFile::MODE_READ, false, Endian::TYPE_LITTLE_ENDIAN) == true)
 			{
 				uint8 lBuf[1024];
 				uint64 lSteps = lFile.GetSize() / 1024;
@@ -399,7 +395,7 @@ bool ArchiveFile::OpenZipForWriting(const String& pFileName, OpenMode pMode)
 		
 				lOriginal.CloseAndRemoveArchive();
 				mZipArchive.CloseArchive();
-				//File::ExtractPathAndFileName(lTempName, 
+				//Parent::ExtractPathAndFileName(lTempName, 
 				DiskFile::Rename(lTempName, mArchiveFileName);
 			}
 			else
@@ -438,7 +434,7 @@ bool ArchiveFile::OpenZipForWriting(const String& pFileName, OpenMode pMode)
 			// We have to take care about the temp file...
 			// Insert it into the archive.
 			DiskFile lFile;
-			if (lFile.Open(lTempFile, DiskFile::MODE_READ) == true)
+			if (lFile.Open(lTempFile, DiskFile::MODE_READ, false, Endian::TYPE_LITTLE_ENDIAN) == true)
 			{
 				mCurrentPos = lFile.GetSize();
 
@@ -617,18 +613,14 @@ bool ArchiveFile::CopyFileBetweenZipArchives(ZipArchive& pSource, ZipArchive& pD
 
 void ArchiveFile::SetEndian(Endian::EndianType pEndian)
 {
-	mFileEndian = pEndian;
-	Reader::SetReaderEndian(mFileEndian);
-	Writer::SetWriterEndian(mFileEndian);
-
+	Parent::SetEndian(pEndian);
 	if (mReader != 0)
 	{
-		mReader->SetReaderEndian(mFileEndian);
+		mReader->SetReaderEndian(pEndian);
 	}
-
 	if (mWriter != 0)
 	{
-		mWriter->SetWriterEndian(mFileEndian);
+		mWriter->SetWriterEndian(pEndian);
 	}
 }
 
@@ -752,7 +744,7 @@ IOError ArchiveFile::ReadRaw(void* pBuffer, size_t pSize)
 
 IOError ArchiveFile::Skip(size_t pSize)
 {
-	return (File::Skip(pSize));
+	return (Parent::Skip(pSize));
 }
 
 IOError ArchiveFile::WriteRaw(const void* pBuffer, size_t pSize)
@@ -938,19 +930,19 @@ bool ArchiveFile::ExtractFileFromArchive(const String& pArchiveName, const Strin
 	bool lRet = false;
 
 	ArchiveFile lArchivedFile(pArchiveName);
-	if (lArchivedFile.Open(pFileName, ArchiveFile::READ_ONLY) == true)
+	if (lArchivedFile.Open(pFileName, ArchiveFile::READ_ONLY, Endian::TYPE_LITTLE_ENDIAN) == true)
 	{
 		DiskFile lDiskFile;
 		bool lOpened = false;
 
 		if (pLocal == false)
 		{
-			lOpened = lDiskFile.Open(pExtractedFileName, DiskFile::MODE_WRITE, true);
+			lOpened = lDiskFile.Open(pExtractedFileName, DiskFile::MODE_WRITE, true, Endian::TYPE_LITTLE_ENDIAN);
 		}
 		else
 		{
 			String lFileName = Path::GetCompositeFilename(pExtractedFileName);
-			lOpened = lDiskFile.Open(lFileName, DiskFile::MODE_WRITE, false);
+			lOpened = lDiskFile.Open(lFileName, DiskFile::MODE_WRITE, false, Endian::TYPE_LITTLE_ENDIAN);
 		}
 
 		if (lOpened == true)
@@ -995,19 +987,19 @@ bool ArchiveFile::InsertFileIntoArchive(const String& pArchiveName, const String
 
 	DiskFile lDiskFile;
 
-	if (lDiskFile.Open(pFileName, DiskFile::MODE_READ) == true)
+	if (lDiskFile.Open(pFileName, DiskFile::MODE_READ, false, Endian::TYPE_LITTLE_ENDIAN) == true)
 	{
 		ArchiveFile lArchiveFile(pArchiveName);
 		bool lOpened = false;
 
 		if (pLocal == false)
 		{
-			lOpened = lArchiveFile.Open(pInsertedFileName, ArchiveFile::WRITE_ONLY);
+			lOpened = lArchiveFile.Open(pInsertedFileName, ArchiveFile::WRITE_ONLY, Endian::TYPE_LITTLE_ENDIAN);
 		}
 		else
 		{
 			String lFileName = Path::GetCompositeFilename(pInsertedFileName);
-			lOpened = lArchiveFile.Open(lFileName, ArchiveFile::WRITE_ONLY);
+			lOpened = lArchiveFile.Open(lFileName, ArchiveFile::WRITE_ONLY, Endian::TYPE_LITTLE_ENDIAN);
 		}
 
 		if (lOpened == true)
@@ -1071,11 +1063,6 @@ int64 ArchiveFile::GetAvailable() const
 void ArchiveFile::Flush()
 {
 	FlushDataBuffer();
-}
-
-Endian::EndianType ArchiveFile::GetEndian()
-{
-	return mFileEndian;
 }
 
 

@@ -242,7 +242,6 @@ TEXLoader::Status TEXLoader::ReadJpeg(Lepra::Canvas& pCanvas)
 {
 	unsigned lSize;
 	mLoadFile->Read(lSize);
-	int lEndOffset = (int)mLoadFile->Tell() + (int)lSize;
 
 	jpeg_decompress_struct lCInfo;
 	jpeg_error_mgr lJErr;
@@ -291,7 +290,7 @@ TEXLoader::Status TEXLoader::ReadJpeg(Lepra::Canvas& pCanvas)
 	jpeg_finish_decompress(&lCInfo);
 	jpeg_destroy_decompress(&lCInfo);
 
-	mLoadFile->SeekSet(lEndOffset);
+	mLoadFile->SeekCur(lSize);
 
 	return STATUS_SUCCESS;
 }
@@ -353,13 +352,13 @@ TEXLoader::Status TEXLoader::WriteJpeg(const Lepra::Canvas& pCanvas)
 	jpeg_destroy_compress(&lCInfo);
 
 	// Calculate and write the size of this jpeg image.
-	int lEndOffset = (int)mSaveFile->Tell();
+	const int lEndOffset = (int)mSaveFile->Tell();
 	lSize = (unsigned)(lEndOffset - lStartOffset);
 	mSaveFile->SeekSet(lSizeOffset);
 	mSaveFile->Write(lSize);
 
 	// Go back to where we were...
-	mSaveFile->SeekSet(lEndOffset);
+	mSaveFile->SeekEnd(0);
 
 	return STATUS_SUCCESS;
 }

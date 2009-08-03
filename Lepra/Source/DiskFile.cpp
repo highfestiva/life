@@ -30,8 +30,7 @@ namespace Lepra
 
 
 DiskFile::DiskFile() :
-	File(Endian::TYPE_LITTLE_ENDIAN, Endian::TYPE_LITTLE_ENDIAN, 0, 0),
-	mFileEndian(Endian::TYPE_LITTLE_ENDIAN),
+	File(Endian::TYPE_BIG_ENDIAN, Endian::TYPE_BIG_ENDIAN, 0, 0),
 	mFile(0),
 	mFileName(_T("")),
 	mPath(_T("")),
@@ -45,8 +44,7 @@ DiskFile::DiskFile() :
 }
 
 DiskFile::DiskFile(Reader* pReader) :
-	File(Endian::TYPE_LITTLE_ENDIAN, Endian::TYPE_LITTLE_ENDIAN, 0, 0),
-	mFileEndian(Endian::TYPE_LITTLE_ENDIAN),
+	File(Endian::TYPE_BIG_ENDIAN, Endian::TYPE_BIG_ENDIAN, 0, 0),
 	mFile(0),
 	mFileName(_T("")),
 	mPath(_T("")),
@@ -65,8 +63,7 @@ DiskFile::DiskFile(Reader* pReader) :
 }
 
 DiskFile::DiskFile(Writer* pWriter) :
-	File(Endian::TYPE_LITTLE_ENDIAN, Endian::TYPE_LITTLE_ENDIAN, 0, 0),
-	mFileEndian(Endian::TYPE_LITTLE_ENDIAN),
+	File(Endian::TYPE_BIG_ENDIAN, Endian::TYPE_BIG_ENDIAN, 0, 0),
 	mFile(0),
 	mFileName(_T("")),
 	mPath(_T("")),
@@ -85,8 +82,7 @@ DiskFile::DiskFile(Writer* pWriter) :
 }
 
 DiskFile::DiskFile(Reader* pReader, Writer* pWriter) :
-	File(Endian::TYPE_LITTLE_ENDIAN, Endian::TYPE_LITTLE_ENDIAN, 0, 0),
-	mFileEndian(Endian::TYPE_LITTLE_ENDIAN),
+	File(Endian::TYPE_BIG_ENDIAN, Endian::TYPE_BIG_ENDIAN, 0, 0),
 	mFile(0),
 	mFileName(_T("")),
 	mPath(_T("")),
@@ -145,19 +141,19 @@ bool DiskFile::Open(const String& pFileName, OpenMode pMode, bool pCreatePath, E
 {
 	Close();
 
-	mFileEndian = pEndian;
+	SetEndian(pEndian);
 
 	bool lOk = true;
 
-	File::ClearMode(File::READ_MODE);
-	File::ClearMode(File::WRITE_MODE);
+	Parent::ClearMode(Parent::READ_MODE);
+	Parent::ClearMode(Parent::WRITE_MODE);
 	if (pMode&MODE_READ)
 	{
-		File::SetMode(File::READ_MODE);
+		Parent::SetMode(Parent::READ_MODE);
 	}
 	if (pMode&(MODE_WRITE|MODE_WRITE_APPEND))
 	{
-		File::SetMode(File::WRITE_MODE);
+		Parent::SetMode(Parent::WRITE_MODE);
 	}
 	if (!(pMode&(MODE_WRITE|MODE_WRITE_APPEND|MODE_READ)))
 	{
@@ -256,17 +252,14 @@ void DiskFile::Close()
 
 void DiskFile::SetEndian(Endian::EndianType pEndian)
 {
-	File::SetEndian(pEndian);
-	mFileEndian = pEndian;
-
-	if (mReader != 0)
+	Parent::SetEndian(pEndian);
+	if (mReader)
 	{
-		mReader->SetReaderEndian(mFileEndian);
+		mReader->SetReaderEndian(pEndian);
 	}
-
-	if (mWriter != 0)
+	if (mWriter)
 	{
-		mWriter->SetWriterEndian(mFileEndian);
+		mWriter->SetWriterEndian(pEndian);
 	}
 }
 
@@ -312,7 +305,7 @@ IOError DiskFile::ReadRaw(void* pBuffer, size_t pSize)
 
 IOError DiskFile::Skip(size_t pSize)
 {
-	return (File::Skip(pSize));
+	return (Parent::Skip(pSize));
 }
 
 IOError DiskFile::WriteRaw(const void* pBuffer, size_t pSize)
@@ -661,11 +654,6 @@ int64 DiskFile::GetAvailable() const
 void DiskFile::Flush()
 {
 	::fflush(mFile);
-}
-
-Endian::EndianType DiskFile::GetEndian()
-{
-	return mFileEndian;
 }
 
 

@@ -28,6 +28,7 @@ class FileArchive;
 
 class ArchiveFile : public File, protected InputStream, protected OutputStream
 {
+	typedef File Parent;
 public:
 	enum OpenMode
 	{
@@ -50,7 +51,7 @@ public:
 
 	void SetArchiveType(ArchiveType pType);
 
-	bool Open(const String& pFileName, OpenMode pMode, Endian::EndianType pEndian = Endian::TYPE_LITTLE_ENDIAN);
+	bool Open(const String& pFileName, OpenMode pMode, Endian::EndianType pEndian = Endian::TYPE_BIG_ENDIAN);
 
 	void Close();
 
@@ -58,7 +59,6 @@ public:
 
 	// Use this to change the endian in the middle of a file read/write.
 	void SetEndian(Endian::EndianType pEndian);
-	Endian::EndianType GetEndian();
 
 	String GetFullName() const;	// Returns path+filename.
 	String GetName() const;		// Returns filename only.

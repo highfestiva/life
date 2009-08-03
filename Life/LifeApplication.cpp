@@ -88,25 +88,15 @@ int Application::Run()
 		lOk = mGameTicker->Initialize();
 	}
 	bool lQuit = false;
+	Lepra::PerformanceData lTimeInfo;
+	lTimeInfo.Set(1/60.0, 1/60.0, 1/60.0);
 	while (lOk && !lQuit)
 	{
+		Lepra::ScopeTimer lTimer(&lTimeInfo);
 		lOk = mGameTicker->Tick();
-		const float lPowerSaveAmount = mGameTicker->GetPowerSaveAmount();
-		if (lPowerSaveAmount > 0)
+		if (lOk)
 		{
-			Lepra::Thread::Sleep(1.0*lPowerSaveAmount);
-		}
-		else
-		{
-			double lTickInterval = CURE_RTVAR_GET(Cure::GetSettings(), RTVAR_TICK_INTERVAL, 0.001);
-			if (lTickInterval > 0)
-			{
-				Lepra::Thread::Sleep(lTickInterval);
-			}
-			else
-			{
-				Lepra::Thread::YieldCpu();
-			}
+			TickSleep(lTimeInfo.GetSlidingAverage());
 		}
 		lQuit = Lepra::SystemManager::GetQuitRequest();
 	}
@@ -153,6 +143,29 @@ Lepra::LogListener* Application::CreateConsoleLogListener() const
 	return (new Lepra::StdioConsoleLogListener());
 }
 
+
+
+void Application::TickSleep(double pMeasuredFrameTime) const
+{
+	const float lPowerSaveAmount = mGameTicker->GetPowerSaveAmount();
+	if (lPowerSaveAmount > 0)
+	{
+		Lepra::Thread::Sleep(1.0*lPowerSaveAmount);
+	}
+	else
+	{
+		const int lFps = CURE_RTVAR_GET(Cure::GetSettings(), RTVAR_PHYSICS_FPS, 2);
+		double lWantedFrameTime = lFps? 1.0/lFps : 1;
+		if (lWantedFrameTime > pMeasuredFrameTime)
+		{
+			Lepra::Thread::Sleep(lWantedFrameTime-pMeasuredFrameTime);
+		}
+		else
+		{
+			Lepra::Thread::YieldCpu();
+		}
+	}
+}
 
 
 LOG_CLASS_DEFINE(GAME, Application);

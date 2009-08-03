@@ -24,6 +24,7 @@
 #define TEST_RUN_TBC		TestUiTbc
 #define TEST_RUN_CURE		TestUiCure
 #define TEST_RUN_NETPHYS	TestPrototypeNetworkPhysics
+#define EXPORT_MESH		ExportMesh
 #define LEPRA_NS		UiLepra
 #define TBC_NS			UiTbc
 #define CURE_NS			UiCure
@@ -32,6 +33,7 @@
 #define TEST_RUN_TBC		TestRunDummy
 #define TEST_RUN_CURE		TestCure
 #define TEST_RUN_NETPHYS	TestRunDummy
+#define EXPORT_MESH		TestRunDummy
 static bool TestRunDummy() { return (true); }
 #define LEPRA_NS		Lepra
 #define TBC_NS			TBC
@@ -42,7 +44,21 @@ bool TEST_RUN_LEPRA();
 bool TEST_RUN_TBC();
 bool TEST_RUN_CURE();
 bool TEST_RUN_NETPHYS();
+bool ExportStructure();
+bool EXPORT_MESH();
 void ShowTestResult(const Lepra::LogDecorator& pAccount, bool pbTestOk);
+
+
+
+static bool ExportData()
+{
+	bool lTestOk = ExportStructure();
+	if (lTestOk)
+	{
+		//lTestOk = EXPORT_MESH();
+	}
+	return (lTestOk);
+}
 
 
 
@@ -59,8 +75,9 @@ private:
 		TBC_BIT = (1<<1),
 		CURE_BIT = (1<<2),
 		NETWORK_PHYSICS_BIT = (1<<3),
+		EXPORT_BIT = (1<<4),
 	};
-	int mTestBits;
+	unsigned mTestBits;
 	LOG_CLASS_DECLARE();
 };
 
@@ -68,7 +85,7 @@ LEPRA_RUN_APPLICATION(CureTestApplication);
 
 CureTestApplication::CureTestApplication(const Lepra::StringUtility::StringVector& pArgumentList):
 	Lepra::Application(pArgumentList),
-	mTestBits(0xFFFFFFFF)
+	mTestBits((unsigned)~0)
 {
 	for (size_t x = 1; x < pArgumentList.size(); ++x)
 	{
@@ -82,6 +99,10 @@ CureTestApplication::CureTestApplication(const Lepra::StringUtility::StringVecto
 		else if (lArgument == _T("TBC"))
 		{
 			lMask |= TBC_BIT;
+		}
+		else if (lArgument == _T("EXPORT"))
+		{
+			lMask |= EXPORT_BIT;
 		}
 		else if (lArgument == _T("CURE"))
 		{
@@ -118,6 +139,7 @@ int CureTestApplication::Run()
 	Lepra::StdioConsoleLogListener* lConsoleLogPointer = 0;
 #ifdef LEPRA_CONSOLE
 	Lepra::StdioConsoleLogListener lConsoleLogger;
+	lConsoleLogger.SetLevelThreashold(Lepra::Log::LEVEL_HEADLINE);
 	lConsoleLogPointer = &lConsoleLogger;
 #endif // LEPRA_CONSOLE
 	Lepra::DebuggerLogListener lDebugLogger;
@@ -139,6 +161,10 @@ int CureTestApplication::Run()
 	{
 		lTestOk = TEST_RUN_TBC();
 	}
+	if (lTestOk && mTestBits&EXPORT_BIT)
+	{
+		lTestOk = ExportData();
+	}
 	if (lTestOk && mTestBits&CURE_BIT)
 	{
 		lTestOk = TEST_RUN_CURE();
@@ -147,9 +173,13 @@ int CureTestApplication::Run()
 	{
 		lTestOk = TEST_RUN_NETPHYS();
 	}
+#ifdef LEPRA_CONSOLE
+	if (!lTestOk)
+	{
+		lMemLogger.Dump(lConsoleLogger, Lepra::Log::LEVEL_ERROR);
+	}
+#endif // LEPRA_CONSOLE
 	ShowTestResult(mLog, lTestOk);
-
-	//lMemLogger.DumpToFile(_TEXT_ALTERNATIVE("Temp.log", L"TempUnicode.log"));
 
 	CURE_NS::Shutdown();
 	TBC_NS::Shutdown();

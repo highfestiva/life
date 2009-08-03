@@ -321,6 +321,16 @@ bool MemFileLogListener::Dump(const String& pFilename)
 
 bool MemFileLogListener::Dump(File& pFile)
 {
+	return (Dump(&pFile, 0, Log::LEVEL_LOWEST_TYPE));
+}
+
+bool MemFileLogListener::Dump(LogListener& pLogListener, Log::LogLevel pLevel)
+{
+	return (Dump(0, &pLogListener, pLevel));
+}
+
+bool MemFileLogListener::Dump(File* pFile, LogListener* pLogListener, Log::LogLevel pLevel)
+{
 	IOError lStatus = IO_OK;
 	Lepra::String lLine;
 	int64 lPosition = mFile.Tell();
@@ -330,15 +340,25 @@ bool MemFileLogListener::Dump(File& pFile)
 		lStatus = mFile.ReadLine(lLine);
 		if (lStatus == IO_OK || lStatus == IO_BUFFER_UNDERFLOW)
 		{
-			IOError lWriteStatus = pFile.WriteString(_T("  >>  ")+lLine+_T("\n"));
-			if (lWriteStatus != IO_OK)
+			if (pFile)
 			{
-				lStatus = (lWriteStatus == IO_BUFFER_UNDERFLOW)? IO_ERROR_WRITING_TO_STREAM : lWriteStatus;
+				IOError lWriteStatus = pFile->WriteString(_T("  >>  ")+lLine+_T("\n"));
+				if (lWriteStatus != IO_OK)
+				{
+					lStatus = (lWriteStatus == IO_BUFFER_UNDERFLOW)? IO_ERROR_WRITING_TO_STREAM : lWriteStatus;
+				}
+			}
+			if (pLogListener)
+			{
+				pLogListener->WriteLog(_T("  >>  ")+lLine+_T("\n"), pLevel);
 			}
 		}
 	}
 	mFile.SeekSet(lPosition);
-	pFile.Flush();
+	if (pFile)
+	{
+		pFile->Flush();
+	}
 	return (lStatus == IO_OK || lStatus == IO_BUFFER_UNDERFLOW);
 }
 

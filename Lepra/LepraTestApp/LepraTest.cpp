@@ -2660,8 +2660,8 @@ bool TestMemFileConcurrency(const Lepra::LogDecorator& pAccount)
 
 void ShowTestResult(const Lepra::LogDecorator& pAccount, bool pTestOk)
 {
-	gLLog.AInfo("");
-	ReportTestResult(pAccount, _T("Total test result"), _T(""), pTestOk);
+	::printf("\n");
+	ReportTestResult(pAccount, _T("Total test result"), _T("?"), pTestOk);
 
 	// Print termination "progress bar".
 	const char* lEndMessage = "Termination progress: [";

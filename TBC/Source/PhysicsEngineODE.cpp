@@ -79,12 +79,11 @@ PhysicsEngine::BodyID PhysicsEngineODE::CreateSphere(bool pIsRoot, const Lepra::
 	lObject->mGeomID = dCreateSphere(mSpaceID, (dReal)pRadius);
 	lObject->mTriggerListener = pTriggerListener;
 	lObject->mForceFeedbackListener = pForceListener;
-	assert(pType == STATIC || lObject->mForceFeedbackListener);
+	//assert(pType == STATIC || lObject->mForceFeedbackListener);
 
 	if (pType == PhysicsEngine::DYNAMIC)
 	{
 		dMass lMass;
-		::dMassSetZero(&lMass);
 		::dMassSetSphereTotal(&lMass, (dReal)pMass, (dReal)pRadius);
 	
 		lObject->mBodyID = dBodyCreate(mWorldID);
@@ -96,6 +95,8 @@ PhysicsEngine::BodyID PhysicsEngineODE::CreateSphere(bool pIsRoot, const Lepra::
 	::dGeomSetBody(lObject->mGeomID, lObject->mBodyID);
 	::dGeomSetData(lObject->mGeomID, lObject);
 
+	lObject->mGeometryData[0] = pRadius;
+	lObject->mMass = pMass;
 	lObject->mFriction = pFriction;
 	lObject->mBounce   = pBounce;
 
@@ -117,12 +118,11 @@ PhysicsEngine::BodyID PhysicsEngineODE::CreateCylinder(bool pIsRoot, const Lepra
 
 	lObject->mTriggerListener = pTriggerListener;
 	lObject->mForceFeedbackListener = pForceListener;
-	assert(pType == STATIC || lObject->mForceFeedbackListener);
+	//assert(pType == STATIC || lObject->mForceFeedbackListener);
 
 	if (pType == PhysicsEngine::DYNAMIC)
 	{
 		dMass lMass;
-		::dMassSetZero(&lMass);
 		::dMassSetCylinderTotal(&lMass, (dReal)pMass, 3, (dReal)pRadius, (dReal)pLength);
 	
 		lObject->mBodyID = dBodyCreate(mWorldID);
@@ -134,6 +134,9 @@ PhysicsEngine::BodyID PhysicsEngineODE::CreateCylinder(bool pIsRoot, const Lepra
 	::dGeomSetBody(lObject->mGeomID, lObject->mBodyID);
 	::dGeomSetData(lObject->mGeomID, lObject);
 
+	lObject->mGeometryData[0] = pRadius;
+	lObject->mGeometryData[1] = pLength;
+	lObject->mMass = pMass;
 	lObject->mFriction = pFriction;
 	lObject->mBounce   = pBounce;
 
@@ -152,13 +155,12 @@ PhysicsEngine::BodyID PhysicsEngineODE::CreateCapsule(bool pIsRoot, const Lepra:
 	lObject->mGeomID = dCreateCCylinder(mSpaceID, (dReal)pRadius, (dReal)pLength);
 	lObject->mTriggerListener = pTriggerListener;
 	lObject->mForceFeedbackListener = pForceListener;
-	assert(pType == STATIC || lObject->mForceFeedbackListener);
+	//assert(pType == STATIC || lObject->mForceFeedbackListener);
 
 	if (pType == PhysicsEngine::DYNAMIC)
 	{
 		dMass lMass;
-		dMassSetZero(&lMass);
-		dMassSetCappedCylinderTotal(&lMass, (dReal)pMass, 3, (dReal)pRadius, (dReal)pLength);
+		::dMassSetCappedCylinderTotal(&lMass, (dReal)pMass, 3, (dReal)pRadius, (dReal)pLength);
 	
 		lObject->mBodyID = dBodyCreate(mWorldID);
 		dBodySetMass(lObject->mBodyID, &lMass);
@@ -166,11 +168,14 @@ PhysicsEngine::BodyID PhysicsEngineODE::CreateCapsule(bool pIsRoot, const Lepra:
 		dBodySetAutoDisableDefaults(lObject->mBodyID);
 	}
 
+	lObject->mGeometryData[0] = pRadius;
+	lObject->mGeometryData[1] = pLength;
 	dGeomSetBody(lObject->mGeomID, lObject->mBodyID);
 	dGeomSetData(lObject->mGeomID, lObject);
 
+	lObject->mMass = pMass;
 	lObject->mFriction = pFriction;
-	lObject->mBounce   = pBounce;
+	lObject->mBounce = pBounce;
 
 	SetGeomTransform(lObject->mGeomID, pTransform);
 
@@ -187,12 +192,11 @@ PhysicsEngine::BodyID PhysicsEngineODE::CreateBox(bool pIsRoot, const Lepra::Tra
 	lObject->mGeomID = ::dCreateBox(mSpaceID, (dReal)pSize.x, (dReal)pSize.y, (dReal)pSize.z);
 	lObject->mTriggerListener = pTriggerListener;
 	lObject->mForceFeedbackListener = pForceListener;
-	assert(pType == STATIC || lObject->mForceFeedbackListener);
+	//assert(pType == STATIC || lObject->mForceFeedbackListener);
 
 	if (pType == PhysicsEngine::DYNAMIC)
 	{
 		dMass lMass;
-		::dMassSetZero(&lMass);
 		::dMassSetBoxTotal(&lMass, (dReal)pMass, (dReal)pSize.x, (dReal)pSize.y, (dReal)pSize.z);
 		lObject->mBodyID = ::dBodyCreate(mWorldID);
 		::dBodySetMass(lObject->mBodyID, &lMass);
@@ -202,8 +206,12 @@ PhysicsEngine::BodyID PhysicsEngineODE::CreateBox(bool pIsRoot, const Lepra::Tra
 
 	::dGeomSetData(lObject->mGeomID, lObject);
 
+	lObject->mGeometryData[0] = pSize.x;
+	lObject->mGeometryData[1] = pSize.y;
+	lObject->mGeometryData[2] = pSize.z;
+	lObject->mMass = pMass;
 	lObject->mFriction = -pFriction;
-	lObject->mBounce   = pBounce;
+	lObject->mBounce = pBounce;
 
 	SetGeomTransform(lObject->mGeomID, pTransform);
 
@@ -233,12 +241,43 @@ bool PhysicsEngineODE::Attach(BodyID pStaticBody, BodyID pMainBody)
 		assert(false);
 		return (false);
 	}
-	const dReal* lPos = dGeomGetPosition(lStaticObject->mGeomID);
+	const dReal* lPos = ::dGeomGetPosition(lStaticObject->mGeomID);
 	dQuaternion o;
 	::dGeomGetQuaternion(lStaticObject->mGeomID, o);
 	::dGeomSetBody(lStaticObject->mGeomID, lMainObject->mBodyID);
 	::dGeomSetOffsetWorldPosition(lStaticObject->mGeomID, lPos[0], lPos[1], lPos[2]);
 	::dGeomSetOffsetWorldQuaternion(lStaticObject->mGeomID, o);
+
+	{
+		dMass lMass;
+		const dReal lMassScalar = (dReal)lStaticObject->mMass;
+		assert(lMassScalar > 0);
+		float* lSize = lStaticObject->mGeometryData;
+		// Adding mass to the dynamic object.
+		switch (lStaticObject->mGeomID->type)
+		{
+			case dTriMeshClass:	// TRICKY: fall through (act as sphere).
+			case dSphereClass:	::dMassSetSphereTotal(&lMass, lMassScalar, (dReal)lSize[0]);					break;
+			case dBoxClass:		::dMassSetBoxTotal(&lMass, lMassScalar, (dReal)lSize[0], (dReal)lSize[1], (dReal)lSize[2]);	break;
+			case dCCylinderClass:	::dMassSetCylinderTotal(&lMass, lMassScalar, 3, (dReal)lSize[0], (dReal)lSize[1]);		break;
+			case dCylinderClass:	::dMassSetCappedCylinderTotal(&lMass, lMassScalar, 3, (dReal)lSize[0], (dReal)lSize[1]);	break;
+			default:
+			{
+				mLog.AError("Trying to attach object of unknown type!");
+				assert(false);
+				return (false);
+			}
+		}
+		const dReal* lRelPos = ::dGeomGetOffsetPosition(lStaticObject->mGeomID);
+		const dReal* lRelRot = ::dGeomGetOffsetRotation(lStaticObject->mGeomID);
+		::dMassTranslate(&lMass, lRelPos[0], lRelPos[1], lRelPos[2]);
+		::dMassRotate(&lMass, lRelRot);
+		dMass lDynamicMass;
+		::dBodyGetMass(lMainObject->mBodyID, &lDynamicMass);
+		::dMassAdd(&lDynamicMass, &lMass);
+		::dBodySetMass(lMainObject->mBodyID, &lDynamicMass);
+	}
+
 	return (true);
 }
 
@@ -266,8 +305,12 @@ PhysicsEngine::BodyID PhysicsEngineODE::CreateTriMesh(bool pIsRoot, const Geomet
 
 //	dGeomTriMeshEnableTC(lObject->mGeomID, dBoxClass, 1);
 
+	// TODO: add body approximation (sphere).
+
+	lObject->mGeometryData[0] = 1.0f;	// TODO: approximate sphere radius by calculating average vertex distance.
+	lObject->mMass = 1.0f;	// TODO: add mass to interface when suitable.
 	lObject->mFriction = -pFriction;
-	lObject->mBounce   = pBounce;
+	lObject->mBounce = pBounce;
 
 	SetGeomTransform(lObject->mGeomID, pTransform);
 
@@ -475,13 +518,7 @@ float PhysicsEngineODE::GetBodyMass(BodyID pBodyId)
 		mLog.Errorf(_T("SetBodyData() - Body %i is not part of this world!"), pBodyId);
 		return (0);
 	}
-	if (!lObject->mBodyID)
-	{
-		return (0);	
-	}
-	dMass lMass;
-	::dBodyGetMass(lObject->mBodyID, &lMass);
-	return (lMass.mass);
+	return (lObject->mMass);
 }
 
 void PhysicsEngineODE::SetBodyData(BodyID pBodyId, void* pUserData)
@@ -678,6 +715,7 @@ PhysicsEngine::JointID PhysicsEngineODE::CreateBallJoint(BodyID pBody1, BodyID p
 	JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
 	lJointInfo->mJointID = dJointCreateBall(mWorldID, 0);
 	lJointInfo->mType = JOINT_BALL;
+	lJointInfo->mListIter = mFeedbackJointList.end();
 	lJointInfo->mListener1 = lObject1->mForceFeedbackListener;
 	lJointInfo->mListener2 = lObject2->mForceFeedbackListener;
 
@@ -715,16 +753,17 @@ PhysicsEngine::JointID PhysicsEngineODE::CreateHingeJoint(BodyID pBody1, BodyID 
 	JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
 	lJointInfo->mJointID = dJointCreateHinge(mWorldID, 0);
 	lJointInfo->mType = JOINT_HINGE;
+	lJointInfo->mListIter = mFeedbackJointList.end();
 	lJointInfo->mListener1 = lObject1->mForceFeedbackListener;
 	lJointInfo->mListener2 = lObject2->mForceFeedbackListener;
 
 	if (lObject2 != 0)
 	{
-		dJointAttach(lJointInfo->mJointID, lObject1->mBodyID, lObject2->mBodyID);
+		dJointAttach(lJointInfo->mJointID, lObject1->mGeomID->body, lObject2->mGeomID->body);
 	}
 	else
 	{
-		dJointAttach(lJointInfo->mJointID, lObject1->mBodyID, 0);
+		dJointAttach(lJointInfo->mJointID, lObject1->mGeomID->body, 0);
 	}
 
 	if ((lObject1 != 0 && lObject1->mForceFeedbackListener != 0) || 
@@ -754,6 +793,7 @@ PhysicsEngine::JointID PhysicsEngineODE::CreateHinge2Joint(BodyID pBody1, BodyID
 	JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
 	lJointInfo->mJointID = dJointCreateHinge2(mWorldID, 0);
 	lJointInfo->mType = JOINT_HINGE2;
+	lJointInfo->mListIter = mFeedbackJointList.end();
 	lJointInfo->mListener1 = lObject1->mForceFeedbackListener;
 	lJointInfo->mListener2 = lObject2->mForceFeedbackListener;
 
@@ -787,6 +827,7 @@ PhysicsEngine::JointID PhysicsEngineODE::CreateUniversalJoint(BodyID pBody1, Bod
 	JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
 	lJointInfo->mJointID = dJointCreateUniversal(mWorldID, 0);
 	lJointInfo->mType = JOINT_UNIVERSAL;
+	lJointInfo->mListIter = mFeedbackJointList.end();
 	lJointInfo->mListener1 = lObject1->mForceFeedbackListener;
 	lJointInfo->mListener2 = lObject2->mForceFeedbackListener;
 
@@ -826,6 +867,7 @@ PhysicsEngine::JointID PhysicsEngineODE::CreateSliderJoint(BodyID pBody1, BodyID
 	JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
 	lJointInfo->mJointID = dJointCreateSlider(mWorldID, 0);
 	lJointInfo->mType = JOINT_SLIDER;
+	lJointInfo->mListIter = mFeedbackJointList.end();
 	lJointInfo->mListener1 = lObject1->mForceFeedbackListener;
 	lJointInfo->mListener2 = lObject2->mForceFeedbackListener;
 
@@ -862,6 +904,7 @@ PhysicsEngine::JointID PhysicsEngineODE::CreateFixedJoint(BodyID pBody1, BodyID 
 	JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
 	lJointInfo->mJointID = dJointCreateFixed(mWorldID, 0);
 	lJointInfo->mType = JOINT_FIXED;
+	lJointInfo->mListIter = mFeedbackJointList.end();
 	lJointInfo->mListener1 = lObject1->mForceFeedbackListener;
 	lJointInfo->mListener2 = lObject2->mForceFeedbackListener;
 
@@ -897,6 +940,7 @@ PhysicsEngine::JointID PhysicsEngineODE::CreateAngularMotorJoint(BodyID pBody1, 
 	JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
 	lJointInfo->mJointID = dJointCreateAMotor(mWorldID, 0);
 	lJointInfo->mType = JOINT_ANGULARMOTOR;
+	lJointInfo->mListIter = mFeedbackJointList.end();
 	lJointInfo->mListener1 = lObject1->mForceFeedbackListener;
 	lJointInfo->mListener2 = lObject2->mForceFeedbackListener;
 
@@ -2422,6 +2466,26 @@ bool PhysicsEngineODE::SetSuspension(JointID pJointId, Lepra::float32 pFrameTime
 			pFrameTime * pSpringConstant / (pFrameTime * pSpringConstant + pDampingConstant));
 		::dJointSetHinge2Param(lJoint->mJointID, dParamSuspensionCFM,
 			1 / (pFrameTime * pSpringConstant + pDampingConstant));
+		return (true);
+	}
+	mLog.AError("SetSuspension() - Joint is not a hinge-2!");
+	return (false);
+}
+
+bool PhysicsEngineODE::GetSuspension(JointID pJointId, Lepra::float32& pErp, Lepra::float32& pCfm) const
+{
+	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
+	if (x == mJointTable.end())
+	{
+		mLog.Errorf(_T("GetJointParams() - Couldn't find joint %i!"), pJointId);
+		return (false);
+	}
+
+	JointInfo* lJoint = *x;
+	if (lJoint->mType == JOINT_HINGE2)
+	{
+		pErp = ::dJointGetHinge2Param(lJoint->mJointID, dParamSuspensionERP);
+		pCfm = ::dJointGetHinge2Param(lJoint->mJointID, dParamSuspensionCFM);
 		return (true);
 	}
 	mLog.AError("SetSuspension() - Joint is not a hinge-2!");

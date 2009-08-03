@@ -20,7 +20,7 @@ class ContextObjectAttribute
 public:
 	enum Type
 	{
-		TYPE_ENGINE,
+		TYPE_UNDEFINED,
 	};
 
 	ContextObjectAttribute(ContextObject* pContextObject);

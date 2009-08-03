@@ -246,21 +246,21 @@ public:
 struct GeometryOffset
 {
 	GeometryOffset(unsigned pPhysicsNodeId):
-		mPhysicsNodeId(pPhysicsNodeId)
+		mGeometryIndex(pPhysicsNodeId)
 	{
 	}
 	GeometryOffset(unsigned pPhysicsNodeId, Lepra::Vector3DF pOffset):
-		mPhysicsNodeId(pPhysicsNodeId)
+		mGeometryIndex(pPhysicsNodeId)
 	{
 		mOffset.SetPosition(pOffset);
 	}
 	GeometryOffset(unsigned pPhysicsNodeId, Lepra::TransformationF pOffset):
-		mPhysicsNodeId(pPhysicsNodeId),
+		mGeometryIndex(pPhysicsNodeId),
 		mOffset(pOffset)
 	{
 	}
 
-	unsigned mPhysicsNodeId;
+	unsigned mGeometryIndex;
 	Lepra::TransformationF mOffset;
 };
 

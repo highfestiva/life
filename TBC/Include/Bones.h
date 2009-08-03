@@ -1,19 +1,18 @@
 
 // Author: Alexander Hugestrand, Jonas Byström
-// Copyright (c) 2002-2007, Righteous Games
+// Copyright (c) 2002-2009, Righteous Games
 
 
 
-#ifndef BONES_H
-#define BONES_H
+#pragma once
 
-
-
+#include <list>
+#include <vector>
 #include "../../Lepra/Include/HashTable.h"
 #include "../../Lepra/Include/String.h"
 #include "../../Lepra/Include/Transformation.h"
 #include "TBC.h"
-#include <list>
+
 
 
 namespace Lepra
@@ -25,6 +24,10 @@ class CubicSpline;
 
 namespace TBC
 {
+
+
+
+class PhysicsEngine;
 
 
 
@@ -42,10 +45,10 @@ private:
 	void SetChildCount(int pChildCount);
 	int GetChildCount();
 	void SetChild(int pChildIndex, int pIndexValue);
+	void AddChild(int pIndexValue);
 	int GetChild(int pChildIndex);
 
-	int mChildCount;
-	int* mChildIndex;
+	std::vector<int> mChildIndex;
 };
 
 
@@ -54,31 +57,38 @@ private:
 class BoneHierarchy
 {
 public:
-	friend class BoneAnimator;
+	enum TransformOperation
+	{
+		TRANSFORM_NONE = 1,
+		TRANSFORM_LOCAL2WORLD,
+		TRANSFORM_WORLD2LOCAL,
+	};
 
 	BoneHierarchy();
 	virtual ~BoneHierarchy();
 
-	virtual void ClearAll();
+	virtual void ClearAll(PhysicsEngine* pPhysics);
 
 	// Use these functions to setup the skeleton. Preferably in the given order.
 	virtual void SetBoneCount(int pBoneCount);
 	int GetBoneCount() const;
-	void SetRootBone(int pRootBoneIndex);
+	//void SetRootBone(int pRootBoneIndex);
 	int GetRootBone() const;
 	void SetBoneChildCount(int pBoneIndex, int pChildCount);
 	int GetBoneChildCount(int pBoneIndex) const;
 	void SetChildIndex(int pParentBoneIndex, int pParentChildIndex, int pChildBoneIndex);
+	void AddChild(int pParentBoneIndex, int pChildBoneIndex);
 	int GetChildIndex(int pParentBoneIndex, int pParentChildIndex) const;
-	void SetOriginalBoneTransformation(int pBoneIndex, const Lepra::TransformationF& pTransformation);
+	void SetOriginalBoneTransformation(int pBoneIndex, const Lepra::TransformationF& pTransformation, int pParentBoneIndex = -1);
 	const Lepra::TransformationF& GetOriginalBoneTransformation(int pBoneIndex) const;
 	// Call this when the whole skeleton is complete.
-	virtual void FinalizeInit();
+	bool FinalizeInit(TransformOperation pTransformOperation);
 
 	void Connect(BoneHierarchy* pParentBones, int pParentBoneIndex);
 
 	// Returns the current local transform.
 	const Lepra::TransformationF& GetBoneTransformation(int pBoneIndex) const;
+	void SetBoneTransformation(int pBoneIndex, const Lepra::TransformationF& pTransformation);
 	// Returns the current transform relative to the root bone's origo,
 	// which is in object space.
 	const Lepra::TransformationF& GetBoneObjectTransformation(int pBoneIndex) const;
@@ -86,6 +96,9 @@ public:
 	const Lepra::TransformationF& GetRelativeBoneTransformation(int pBoneIndex) const;
 
 private:
+	friend class BoneAnimator;
+
+	void Transform(int pBoneIndex, TransformOperation pTransformOperation);
 	void UpdateBonesObjectTransformation(int pBoneIndex, const Lepra::TransformationF& pParentTransformation);
 
 	int mBoneCount;
@@ -191,8 +204,4 @@ private:
 
 
 
-} // End namespace.
-
-
-
-#endif // !BONES_H
+}

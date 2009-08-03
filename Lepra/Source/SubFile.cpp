@@ -14,7 +14,7 @@ namespace Lepra
 
 
 SubFile::SubFile(File* pMasterFile, int64 pFileSize) :
-	File(Endian::TYPE_LITTLE_ENDIAN, Endian::TYPE_LITTLE_ENDIAN),
+	File(Endian::TYPE_BIG_ENDIAN, Endian::TYPE_BIG_ENDIAN),
 	mMasterFile(pMasterFile),
 	mFileSize(pFileSize)
 {

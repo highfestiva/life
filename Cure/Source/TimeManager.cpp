@@ -35,7 +35,7 @@ void TimeManager::Clear(int pPhysicsFrameCounter)
 	mAbsoluteTime = 0;
 	mCurrentFrameTime = 0;
 	mPhysicsFrameCounter = pPhysicsFrameCounter;
-	mAverageFrameTime = 1.0f;
+	mAverageFrameTime = 1/60.0f;
 }
 
 void TimeManager::TickTime()
@@ -123,6 +123,11 @@ float TimeManager::GetAffordedStepPeriod() const
 {
 	return ((GetCurrentPhysicsStepCount()/(float)GetAffordedPhysicsStepCount())/(float)mFixedFrameRate);
 	//return (1/(float)mFixedFrameRate);
+}
+
+int TimeManager::GetDesiredPhysicsFps() const
+{
+	return (mFixedFrameRate);
 }
 
 

@@ -39,7 +39,7 @@ bool ClientOptionsManager::UpdateInput(UiLepra::InputElement* pElement)
 {
 	bool lValueSet;
 	float lValue = (float)pElement->GetValue();
-	const Lepra::String lInputElementName = ConvertToString(pElement);
+	const Lepra::String lInputElementName = pElement->GetFullName();
 	if (pElement->GetType() == UiLepra::InputElement::ANALOGUE)
 	{
 		// Clamp analogue to neutral when close enough.
@@ -156,27 +156,6 @@ bool ClientOptionsManager::SetDefault(int pPriority)
 const Lepra::String ClientOptionsManager::ConvertToString(UiLepra::InputManager::KeyCode pKeyCode) const
 {
 	return (_T("Key.")+UiLepra::InputManager::GetKeyName(pKeyCode));
-}
-
-const Lepra::String ClientOptionsManager::ConvertToString(UiLepra::InputElement* pElement) const
-{
-	Lepra::String lName;
-	switch (pElement->GetParentDevice()->GetInterpretation())
-	{
-		case UiLepra::InputDevice::TYPE_MOUSE:		lName = _T("Mouse");	break;
-		case UiLepra::InputDevice::TYPE_KEYBOARD:	lName = _T("Keyboard");	break;
-		default:					lName = _T("Device");	break;
-	}
-	lName += Lepra::StringUtility::IntToString(pElement->GetParentDevice()->GetTypeIndex(), 10)+_T(".");
-
-	switch (pElement->GetInterpretation())
-	{
-		case UiLepra::InputElement::ABSOLUTE_AXIS:	lName += _T("AbsoluteAxis");	break;
-		case UiLepra::InputElement::RELATIVE_AXIS:	lName += _T("RelativeAxis");	break;
-		default:					lName += _T("Button");		break;
-	}
-	lName += Lepra::StringUtility::IntToString(pElement->GetTypeIndex(), 10);
-	return (lName);
 }
 
 bool ClientOptionsManager::SetValue(const Lepra::String& pKey, float pValue)

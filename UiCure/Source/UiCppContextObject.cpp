@@ -11,6 +11,7 @@
 #include "../../Lepra/Include/Math.h"
 #include "../../Lepra/Include/Random.h"
 #include "../../TBC/Include/PhysicsEngine.h"
+#include "../../TBC/Include/ChunkyStructure.h"
 #include "../Include/UiCppContextObject.h"
 #include "../Include/UiCure.h"
 #include "../Include/UiGameUiManager.h"
@@ -45,6 +46,12 @@ CppContextObject::~CppContextObject()
 
 void CppContextObject::OnPhysicsTick()
 {
+	if (!mStructure)
+	{
+		mLog.Warningf(_T("Physical body for %s not loaded!"), GetClassId().c_str());
+		return;
+	}
+
 	Lepra::TransformationF lPhysicsTransform;
 	for (size_t x = 0; x < mMeshResourceArray.size(); ++x)
 	{
@@ -53,22 +60,22 @@ void CppContextObject::OnPhysicsTick()
 		{
 			continue;
 		}
-		Cure::PhysicsNode* lNode = GetPhysicsNode(lResource->GetExtraData().mPhysicsNodeId);
-		if (lNode == 0 || lNode->GetBodyId() == TBC::INVALID_BODY)
+		TBC::ChunkyBoneGeometry* lGeometry = mStructure->GetBoneGeometry(lResource->GetExtraData().mGeometryIndex);
+		if (lGeometry == 0 || lGeometry->GetBodyId() == TBC::INVALID_BODY)
 		{
 			mLog.Warningf(_T("Physical body for %s not loaded!"), lResource->GetName().c_str());
 			continue;
 		}
 
-		mManager->GetGameManager()->GetPhysicsManager()->GetBodyTransform(lNode->GetBodyId(), lPhysicsTransform);
+		mManager->GetGameManager()->GetPhysicsManager()->GetBodyTransform(lGeometry->GetBodyId(), lPhysicsTransform);
 
-		TBC::GeometryBase* lGeometry = lResource->GetRamData();
+		TBC::GeometryBase* lGfxGeometry = lResource->GetRamData();
 		//if (GetNetworkObjectType() == Cure::NETWORK_OBJECT_REMOTE_CONTROLLED)
 		/*{
 			// Smooth (sliding average) to the physics position if we're close enough. Otherwise warp.
 			Lepra::Vector3DF lPhysicsVelocity;
 			mManager->GetGameManager()->GetPhysicsManager()->GetBodyVelocity(lNode->GetBodyId(), lPhysicsVelocity);
-			const Lepra::Vector3DF& lPosition = lGeometry->GetBaseTransformation().GetPosition();
+			const Lepra::Vector3DF& lPosition = lGfxGeometry->GetBaseTransformation().GetPosition();
 			const float lCloseTime = 0.5f;
 			const float lCloseStandStillDistance = 1.5f;
 			float lClose = lPhysicsVelocity.GetLength()*lCloseTime;
@@ -78,7 +85,7 @@ void CppContextObject::OnPhysicsTick()
 				lPhysicsTransform.SetPosition(Lepra::Math::Lerp(lPosition, lPhysicsTransform.GetPosition(), 0.1f));
 			}
 		}*/
-		lGeometry->SetTransformation(lPhysicsTransform);
+		lGfxGeometry->SetTransformation(lPhysicsTransform);
 	}
 }
 
@@ -93,15 +100,15 @@ bool CppContextObject::StartLoadGraphics(Cure::UserResource* pParentResource)
 
 	if (GetClassId().find(_T("car_001")) != Lepra::String::npos)
 	{
-		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(1)));
-		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(1, Lepra::Vector3DF(0, 1, 0.6f))));
+		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(0)));
+		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(0, Lepra::Vector3DF(0, 1, 0.6f))));
 		const Lepra::QuaternionF lOrientation(Lepra::PIF/2, Lepra::Vector3DF(1, 0, 0));
 		const Lepra::TransformationF lTransform(lOrientation, Lepra::Vector3DF(0.9f, 0.9f, 1.2f));
-		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(1, lTransform)));
+		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(0, lTransform)));
+		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(2)));
 		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(3)));
 		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(4)));
 		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(5)));
-		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(6)));
 		mMeshResourceArray[0]->SetParentResource(pParentResource);
 		mMeshResourceArray[0]->Load(lResourceManager, lIdClass+_T("_body_mesh"),
 			UiCure::UserGeometryReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh));
@@ -127,15 +134,15 @@ bool CppContextObject::StartLoadGraphics(Cure::UserResource* pParentResource)
 	}
 	else if (GetClassId().find(_T("monster_001")) != Lepra::String::npos)
 	{
-		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(1)));
-		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(1, Lepra::Vector3DF(0, 0, 0.7f))));
+		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(0)));
+		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(0, Lepra::Vector3DF(0, 0, 0.7f))));
 		const Lepra::QuaternionF lOrientation(Lepra::PIF/2, Lepra::Vector3DF(1, 0, 0));
 		const Lepra::TransformationF lTransform(lOrientation, Lepra::Vector3DF(1.4f, 1, 2.4f));
-		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(1, lTransform)));
+		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(0, lTransform)));
+		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(2)));
 		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(3)));
 		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(4)));
 		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(5)));
-		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(6)));
 		mMeshResourceArray[0]->SetParentResource(pParentResource);
 		mMeshResourceArray[0]->Load(lResourceManager, lIdClass+_T("_body_mesh"),
 			UiCure::UserGeometryReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh));
@@ -161,28 +168,28 @@ bool CppContextObject::StartLoadGraphics(Cure::UserResource* pParentResource)
 	}
 	else if (GetClassId().find(_T("excavator_703")) != Lepra::String::npos)
 	{
-		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(1)));
-		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(1, Lepra::Vector3DF(1.0f, -0.75f, 1.00f))));
+		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(0)));
+		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(0, Lepra::Vector3DF(1.0f, -0.75f, 1.00f))));
+		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(2)));
 		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(3)));
 		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(4)));
 		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(5)));
 		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(6)));
 		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(7)));
 		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(8)));
-		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(20)));
 		const float lBoom2Angle = Lepra::PIF/4;
 		Lepra::TransformationF lBoom2Offset;
 		lBoom2Offset.RotatePitch(lBoom2Angle);
 		lBoom2Offset.GetPosition().Set(0, -3.2f/2*::sin(lBoom2Angle), (2.5f+3.2f*::cos(lBoom2Angle))/2);
-		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(20, lBoom2Offset)));
-		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(22)));
-		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(23)));
+		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(8, lBoom2Offset)));
+		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(10)));
+		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(11)));
 		const float lBucketBackAngle = Lepra::PIF/4;
 		const float lBucketFloorAngle = Lepra::PIF/4;
 		Lepra::TransformationF lBucketFloorOffset;
 		lBucketFloorOffset.RotatePitch(lBucketBackAngle+lBucketFloorAngle);
 		lBucketFloorOffset.GetPosition().Set(0, -0.4f, -0.5f);
-		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(23, lBucketFloorOffset)));
+		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(11, lBucketFloorOffset)));
 
 		mMeshResourceArray[0]->SetParentResource(pParentResource);
 		mMeshResourceArray[0]->Load(lResourceManager, lIdClass+_T("_body_mesh"),
@@ -228,14 +235,14 @@ bool CppContextObject::StartLoadGraphics(Cure::UserResource* pParentResource)
 	}
 	else if (GetClassId().find(_T("crane_whatever")) != Lepra::String::npos)
 	{
+		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(0)));
 		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(1)));
-		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(2)));
 		Lepra::TransformationF lWireTransform(Lepra::QuaternionF(Lepra::PIF/2,  Lepra::Vector3DF(1, 0, 0)), Lepra::Vector3DF());
+		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(2, lWireTransform)));
 		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(3, lWireTransform)));
 		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(4, lWireTransform)));
 		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(5, lWireTransform)));
 		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(6, lWireTransform)));
-		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(7, lWireTransform)));
 		mMeshResourceArray[0]->SetParentResource(pParentResource);
 		mMeshResourceArray[0]->Load(lResourceManager, lIdClass+_T("_tower_mesh"),
 			UiCure::UserGeometryReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh));
@@ -260,12 +267,12 @@ bool CppContextObject::StartLoadGraphics(Cure::UserResource* pParentResource)
 	}
 	else if (GetClassId().find(_T("ground_002")) != Lepra::String::npos)
 	{
+		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(0)));
 		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(1)));
 		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(2)));
 		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(3)));
 		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(4)));
 		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(5)));
-		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(6)));
 		mMeshResourceArray[0]->SetParentResource(pParentResource);
 		mMeshResourceArray[0]->Load(lResourceManager, lIdClass+_T("_0_mesh"),
 			UiCure::UserGeometryReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh));
@@ -287,7 +294,7 @@ bool CppContextObject::StartLoadGraphics(Cure::UserResource* pParentResource)
 	}
 	else
 	{
-		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(1)));
+		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(0)));
 		mMeshResourceArray.back()->SetParentResource(pParentResource);
 		mMeshResourceArray.back()->Load(lResourceManager, lIdClass+_T("_mesh"),
 			UiCure::UserGeometryReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh));
@@ -303,14 +310,15 @@ bool CppContextObject::StartLoadGraphics(Cure::UserResource* pParentResource)
 
 void CppContextObject::DebugDrawAxes()
 {
-	PhysicsNodeArray::iterator x = mPhysicsNodeArray.begin();
-	for (; x != mPhysicsNodeArray.end(); ++x)
+	const int lBoneCount = mStructure->GetBoneCount();
+	for (int x = 0; x < lBoneCount; ++x)
 	{
-		if (x->GetBodyId() != TBC::INVALID_BODY)
+		const TBC::ChunkyBoneGeometry* lGeometry = mStructure->GetBoneGeometry(x);
+		if (lGeometry->GetBodyId() != TBC::INVALID_BODY)
 		{
 			Lepra::TransformationF lPhysicsTransform;
 			mManager->GetGameManager()->GetPhysicsManager()->GetBodyTransform(
-				x->GetBodyId(), lPhysicsTransform);
+				lGeometry->GetBodyId(), lPhysicsTransform);
 			Lepra::Vector3DF lPos = lPhysicsTransform.GetPosition();
 			const float lLength = 2;
 			Lepra::Vector3DF lAxis = lPhysicsTransform.GetOrientation().GetAxisX();
@@ -335,6 +343,7 @@ void CppContextObject::OnLoadMesh(UserGeometryReferenceResource* pMeshResource)
 	else
 	{
 		mLog.AError("Could not load mesh! Shit.");
+		assert(false);
 	}
 }
 
@@ -347,6 +356,7 @@ void CppContextObject::OnLoadTexture(UserRendererImageResource* pTextureResource
 	else
 	{
 		mLog.AError("Could not load texture. Gah!");
+		assert(false);
 	}
 }
 
@@ -391,8 +401,7 @@ void CppContextObject::TryAddTexture()
 
 
 
-CppContextObjectFactory::CppContextObjectFactory(GameUiManager* pUiManager, unsigned pPhysicsFps):
-	Cure::CppContextObjectFactory(pPhysicsFps),
+CppContextObjectFactory::CppContextObjectFactory(GameUiManager* pUiManager):
 	mUiManager(pUiManager)
 {
 }

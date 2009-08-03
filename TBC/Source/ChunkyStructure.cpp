@@ -6,6 +6,7 @@
 
 #include "../Include/ChunkyBoneGeometry.h"
 #include "../Include/ChunkyStructure.h"
+#include "../Include/StructureEngine.h"
 
 
 
@@ -14,16 +15,29 @@ namespace TBC
 
 
 
-ChunkyStructure::ChunkyStructure():
+ChunkyStructure::ChunkyStructure(TransformOperation pTransformOperation, PhysicsType pPhysicsType):
 	BoneHierarchy(),
-	mGeometryArray(0),
-	mPhysicsType(UNINITIALIZED)
+	mTransformOperation(pTransformOperation),
+	mPhysicsType(pPhysicsType),
+	mUniqeGeometryIndex(0)
 {
 }
 
 ChunkyStructure::~ChunkyStructure()
 {
-	ClearBoneGeometries();
+	assert(mGeometryArray.empty());	// Ensure all resources has been released prior to delete.
+	ClearEngines();
+}
+
+
+
+void ChunkyStructure::OnTick(PhysicsEngine* pPhysicsManager, float pFrameTime)
+{
+	EngineArray::iterator x = mEngineArray.begin();
+	for (; x != mEngineArray.end(); ++x)
+	{
+		(*x)->OnTick(pPhysicsManager, pFrameTime);
+	}
 }
 
 
@@ -39,50 +53,195 @@ ChunkyStructure::PhysicsType ChunkyStructure::GetPhysicsType() const
 	return (mPhysicsType);
 }
 
-void ChunkyStructure::SetBoneGeometry(int pBoneIndex, ChunkyBoneGeometry* pGeometry)
+ChunkyBoneGeometry* ChunkyStructure::GetBoneGeometry(int pBoneIndex) const
 {
-	if (mGeometryArray[pBoneIndex])
-	{
-		delete (mGeometryArray[pBoneIndex]);
-	}
-	mGeometryArray[pBoneIndex] = pGeometry;
+	assert(pBoneIndex < GetBoneCount());
+	return ((pBoneIndex < (int)mGeometryArray.size())? mGeometryArray[pBoneIndex] : 0);
 }
 
-void ChunkyStructure::ClearBoneGeometries()
+ChunkyBoneGeometry* ChunkyStructure::GetBoneGeometry(PhysicsEngine::BodyID pBodyId) const
 {
-	if (mGeometryArray)
+	const int lBoneCount = GetBoneCount();
+	for (int x = 0; x < lBoneCount; ++x)
 	{
-		for (int x = 0; x < GetBoneCount(); ++x)
+		ChunkyBoneGeometry* lGeometry = GetBoneGeometry(x);
+		if (lGeometry->GetBodyId() == pBodyId)
 		{
-			delete (mGeometryArray[x]);
+			return (lGeometry);	// TRICKY: RAII.
+		}
+	}
+	assert(false);
+	return (0);
+}
+
+void ChunkyStructure::AddBoneGeometry(ChunkyBoneGeometry* pGeometry)
+{
+	assert((int)mGeometryArray.size() < GetBoneCount());
+	mGeometryArray.push_back(pGeometry);
+}
+
+void ChunkyStructure::AddBoneGeometry(const Lepra::TransformationF& pTransformation,
+	ChunkyBoneGeometry* pGeometry, const ChunkyBoneGeometry* pParent)
+{
+	const int lChildIndex = (int)mGeometryArray.size();
+	SetOriginalBoneTransformation(lChildIndex, pTransformation);
+	AddBoneGeometry(pGeometry);
+	if (pParent)
+	{
+		int lParentIndex = GetIndex(pParent);
+		AddChild(lParentIndex, lChildIndex);
+	}
+}
+
+int ChunkyStructure::GetIndex(const ChunkyBoneGeometry* pGeometry) const
+{
+	const int lBoneCount = GetBoneCount();
+	for (int x = 0; x < lBoneCount; ++x)
+	{
+		if (pGeometry == GetBoneGeometry(x))
+		{
+			return (x);
+		}
+	}
+	assert(false);
+	mLog.AError("Trying to get uncontained geometry!");
+	return (-1);
+}
+
+const Lepra::TransformationF& ChunkyStructure::GetTransformation(const ChunkyBoneGeometry* pGeometry) const
+{
+	return (GetBoneTransformation(GetIndex(pGeometry)));
+}
+
+void ChunkyStructure::ClearBoneGeometries(PhysicsEngine* pPhysics)
+{
+	for (size_t x = 0; x < mGeometryArray.size(); ++x)
+	{
+		ChunkyBoneGeometry* lGeometry = mGeometryArray[x];
+		if (lGeometry)
+		{
+			lGeometry->RemovePhysics(pPhysics);
+			delete (lGeometry);
 			mGeometryArray[x] = 0;
 		}
-		delete[] (mGeometryArray);
-		mGeometryArray = 0;
 	}
+	mGeometryArray.clear();
+	mUniqeGeometryIndex = 0;
 }
 
 
 
-void ChunkyStructure::ClearAll()
+int ChunkyStructure::GetEngineCount() const
 {
-	ClearBoneGeometries();
-	BoneHierarchy::ClearAll();
+	return ((int)mEngineArray.size());
+}
+
+StructureEngine* ChunkyStructure::GetEngine(int pBoneIndex) const
+{
+	assert((size_t)pBoneIndex < mEngineArray.size());
+	return (mEngineArray[pBoneIndex]);
+}
+
+void ChunkyStructure::AddEngine(StructureEngine* pEngine)
+{
+	mEngineArray.push_back(pEngine);
+}
+
+void ChunkyStructure::SetEnginePower(unsigned pAspect, float pPower, float pAngle)
+{
+	EngineArray::iterator x = mEngineArray.begin();
+	for (; x != mEngineArray.end(); ++x)
+	{
+		(*x)->SetValue(pAspect, pPower, pAngle);
+	}
+}
+
+void ChunkyStructure::ClearEngines()
+{
+	EngineArray::iterator x = mEngineArray.begin();
+	for (; x != mEngineArray.end(); ++x)
+	{
+		delete (*x);
+	}
+	mEngineArray.clear();
+}
+
+void ChunkyStructure::ClearAll(PhysicsEngine* pPhysics)
+{
+	ClearBoneGeometries(pPhysics);
+	BoneHierarchy::ClearAll(pPhysics);
+	ClearEngines();
 }
 
 void ChunkyStructure::SetBoneCount(int pBoneCount)
 {
 	BoneHierarchy::SetBoneCount(pBoneCount);
 
-	mGeometryArray = new ChunkyBoneGeometry*[GetBoneCount()];
-	::memset(mGeometryArray, 0, sizeof(ChunkyBoneGeometry*)*GetBoneCount());
+	assert(mGeometryArray.empty());
+	mGeometryArray.clear();
+
+	mUniqeGeometryIndex = GetBoneCount();
 }
 
-void ChunkyStructure::FinalizeInit()
+bool ChunkyStructure::FinalizeInit(PhysicsEngine* pPhysics, unsigned pPhysicsFps, Lepra::TransformationF* pTransform,
+	PhysicsEngine::TriggerListener* pTrigListener, PhysicsEngine::ForceFeedbackListener* pForceListener)
 {
-	// TODO: add to physics engine depending on mPhysicsType.
-	BoneHierarchy::FinalizeInit();
+	bool lOk = ((int)mGeometryArray.size() == GetBoneCount());
+	assert(lOk);
+	if (lOk)
+	{
+		if (pTransform)
+		{
+			const int lRoot = 0;
+			SetOriginalBoneTransformation(lRoot, (*pTransform)*GetOriginalBoneTransformation(lRoot));
+		}
+		lOk = Parent::FinalizeInit(mTransformOperation);
+	}
+	if (lOk)
+	{
+		const int lBoneCount = GetBoneCount();
+		for (int x = 0; lOk && x < lBoneCount; ++x)
+		{
+			ChunkyBoneGeometry* lGeometry = GetBoneGeometry(x);
+			if (mPhysicsType == DYNAMIC || mPhysicsType == STATIC)
+			{
+				PhysicsEngine::BodyType lBodyType = (mPhysicsType == DYNAMIC)? PhysicsEngine::DYNAMIC : PhysicsEngine::STATIC;
+				if (lGeometry->GetParent() && lGeometry->GetJointType() == ChunkyBoneGeometry::JOINT_EXCLUDE)
+				{
+					lBodyType = PhysicsEngine::STATIC;
+				}
+				lOk = lGeometry->CreateBody(pPhysics, x == 0, pTrigListener, pForceListener,
+					lBodyType, GetBoneTransformation(x));
+			}
+			else if (mPhysicsType == COLLISION_DETECT_ONLY)
+			{
+				lOk = lGeometry->CreateTrigger(pPhysics, pTrigListener, GetBoneTransformation(x));
+			}
+			else
+			{
+				assert(false);
+			}
+		}
+		for (int z = 0; lOk && z < lBoneCount; ++z)
+		{
+			ChunkyBoneGeometry* lGeometry = GetBoneGeometry(z);
+			lOk = lGeometry->CreateJoint(this, pPhysics, pPhysicsFps);
+		}
+	}
+	assert(lOk);
+	return (lOk);
 }
+
+
+
+unsigned ChunkyStructure::GetNextGeometryIndex()
+{
+	return (++mUniqeGeometryIndex);
+}
+
+
+
+LOG_CLASS_DEFINE(PHYSICS, ChunkyStructure);
 
 
 

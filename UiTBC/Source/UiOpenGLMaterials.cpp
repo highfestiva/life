@@ -20,8 +20,6 @@ namespace UiTbc
 	OpenGLMaterial
 */
 
-GLenum OpenGLMaterial::smPrimitiveLUT[2] = {GL_TRIANGLES, GL_TRIANGLE_STRIP};
-
 Material::RemoveStatus OpenGLMaterial::RemoveGeometry(TBC::GeometryBase* pGeometry)
 {
 	Material::RemoveStatus lStatus = Material::RemoveGeometry(pGeometry);
