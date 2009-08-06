@@ -110,6 +110,145 @@ class ChunkyWriter:
                         self._writefloat(f)
 
 
+        def _writeheader(self, signature, size=0):
+                self._writesignature(signature)
+                sizeoffset = self.f.tell()
+                self._writeint(size)
+                return sizeoffset
+
+        def _rewriteheadersize(self, offset):
+                endoffset = self.f.tell()
+                content_size = endoffset - offset - 4
+                self.f.seek(offset)
+                #print("Writing header size. Header at offset %i, end at offset %i." % (offset, endoffset))
+                self._writeint(content_size, "chunk size")
+                self.f.seek(endoffset)
+
+        def _writesignature(self, sign):
+                self._dowrite(sign.encode('latin-1'), 4, "signature")
+
+        def _writenumber(self, val):
+                if type(val) == int:
+                        self._writeint(val)
+                elif type(val) == float:
+                        self._writefloat(val)
+                else:
+                        print("Error: could not write number type %s." % str(type(val)))
+                        sys.exit(15)
+
+        def _writefloat(self, val, name="float"):
+                data = struct.pack(">f", val)
+                self._dowrite(data, 4, name)
+
+        def _writeint(self, val, name="int"):
+                data = struct.pack(">i", val)
+                self._dowrite(data, 4, name)
+
+        def _dowrite(self, data, length, name):
+                if len(data) != length:
+                        print("Error: trying to write bad %s '%s'." % (name, data))
+                        sys.exit(10)
+                self.f.write(data)
+
+
+        @staticmethod
+        def _geteuler(node):
+                q = node.get_local_quat()
+                w2 = q[0]*q[0]
+                x2 = q[1]*q[1]
+                y2 = q[2]*q[2]
+                z2 = q[3]*q[3]
+                unitlength = w2 + x2 + y2 + z2  # Normalised == 1, otherwise correction divisor.
+                abcd = q[0]*q[1] + q[2]*q[3]
+                if abcd > (0.5-0.0001)*unitlength:
+                        yaw = 2 * atan2(q[2], q[0])
+                        pitch = math.pi
+                        roll = 0
+                elif abcd < (-0.5+0.0001)*unitlength:
+                        yaw = -2 * math.atan2(q[2], q[0])
+                        pitch = -math.pi
+                        roll = 0
+                else:
+                        adbc = q[0]*q[3] - q[1]*q[2]
+                        acbd = q[0]*q[2] - q[1]*q[3]
+                        yaw = math.atan2(2*adbc, 1 - 2*(z2+x2))
+                        pitch = math.asin(2*abcd/unitlength)
+                        roll = math.atan2(2*acbd, 1 - 2*(y2+x2))
+                return yaw, pitch, roll
+
+
+        def _getaxes(self, node):
+                q = node.get_local_quat()
+                return q.rotateVec((1,0,0)), q.rotateVec((0,1,0)), q.rotateVec((0,0,1))
+
+
+        def _findglobalnode(self, simplename):
+                for node in self.group:
+                        if node.getName() == simplename:
+                                return node
+                print("Warning: node '%s' not found!" % name)
+                return None
+
+
+
+class GroupWriter(ChunkyWriter):
+        """Translates a node/attribute group and writes it to disk as a group chunky file."""
+
+        def __init__(self, basename, phys_group, mesh_group, config):
+                ChunkyWriter.__init__(self, basename)
+                self.phys_group = phys_group
+                self.mesh_group = mesh_group
+                self.config = config
+
+
+        def dowrite(self):
+                self.writegroup(self.basename+".group")
+
+
+        def writegroup(self, filename):
+                pass
+
+
+
+class PhysWriter(ChunkyWriter):
+        """Translates a node/attribute group and writes it to disk as physics+mesh chunky files."""
+
+        def __init__(self, basename, group, config):
+                ChunkyWriter.__init__(self, basename)
+                self.group = group
+                self.config = config
+
+
+        def dowrite(self):
+                filename = self.basename+".phys"
+                self.bodies = []
+                with open(filename, "wb") as f:
+                        self.f = f
+                        bones = []
+                        engines = []
+                        data =  (
+                                        CHUNK_STRUCTURE,
+                                        (
+                                                (CHUNK_STRUCTURE_BONE_COUNT, self._count_transforms()),
+                                                (CHUNK_STRUCTURE_PHYSICS_TYPE, physics_type[self.config["type"]]),
+                                                (CHUNK_STRUCTURE_ENGINE_COUNT, self._count_engines()),
+                                                (CHUNK_STRUCTURE_BONE_CONTAINER, bones),
+                                                (CHUNK_STRUCTURE_ENGINE_CONTAINER, engines)
+                                        )
+                                )
+                        for node in self.group:
+                                if node.nodetype == "transform":
+                                        self.bodies.append(node)
+                                        # TODO: add optional saves of child bones.
+                                        bones.append((CHUNK_STRUCTURE_BONE_TRANSFORM, node))
+                                        bones.append((CHUNK_STRUCTURE_BONE_SHAPE, self._getshape(node)))
+                        for node in self.group:
+                                if node.nodetype.startswith("motor:"):
+                                        engines.append((CHUNK_STRUCTURE_ENGINE, node))
+                        #pprint.pprint(data)
+                        self._writechunk(data)
+
+
         def _writeshape(self, shape):
                 # Write all general parameters first.
                 types = {"capsule":1, "sphere":2, "box":3}
@@ -127,7 +266,7 @@ class ChunkyWriter:
                 parameters = [0.0]*16
                 parameters[0] = node.get_fixed_attribute("spring_constant", True, 0.0)
                 parameters[1] = node.get_fixed_attribute("spring_damping", True, 0.0)
-                yaw, pitch, roll = self._geteuler(node)
+                yaw, pitch, roll = ChunkyWriter._geteuler(node)
                 #if jointvalue != 1 and (pitch < -0.1 or pitch > 0.1):
                 #        print("Error: euler rotation pitch of jointed body '%s' must be zero." % node.getFullName())
                 #        sys.exit(19)
@@ -184,47 +323,6 @@ class ChunkyWriter:
                 print("Wrote engine '%s' for %i nodes." % (node.getName()[6:], len(connected_to)))
 
 
-        def _writeheader(self, signature, size=0):
-                self._writesignature(signature)
-                sizeoffset = self.f.tell()
-                self._writeint(size)
-                return sizeoffset
-
-        def _rewriteheadersize(self, offset):
-                endoffset = self.f.tell()
-                content_size = endoffset - offset - 4
-                self.f.seek(offset)
-                #print("Writing header size. Header at offset %i, end at offset %i." % (offset, endoffset))
-                self._writeint(content_size, "chunk size")
-                self.f.seek(endoffset)
-
-        def _writesignature(self, sign):
-                self._dowrite(sign.encode('latin-1'), 4, "signature")
-
-        def _writenumber(self, val):
-                if type(val) == int:
-                        self._writeint(val)
-                elif type(val) == float:
-                        self._writefloat(val)
-                else:
-                        print("Error: could not write number type %s." % str(type(val)))
-                        sys.exit(15)
-
-        def _writefloat(self, val, name="float"):
-                data = struct.pack(">f", val)
-                self._dowrite(data, 4, name)
-
-        def _writeint(self, val, name="int"):
-                data = struct.pack(">i", val)
-                self._dowrite(data, 4, name)
-
-        def _dowrite(self, data, length, name):
-                if len(data) != length:
-                        print("Error: trying to write bad %s '%s'." % (name, data))
-                        sys.exit(10)
-                self.f.write(data)
-
-
         def _expand_connected_list(self, unexpanded):
                 expanded = []
                 for e in unexpanded:
@@ -233,36 +331,6 @@ class ChunkyWriter:
                                 if re.search("^"+noderegexp+"$", body.getFullName()[1:]):
                                         expanded += [(body, scale, ctype)]
                 return expanded
-
-
-        def _geteuler(self, node):
-                q = node.get_local_quat()
-                w2 = q[0]*q[0]
-                x2 = q[1]*q[1]
-                y2 = q[2]*q[2]
-                z2 = q[3]*q[3]
-                unitlength = w2 + x2 + y2 + z2  # Normalised == 1, otherwise correction divisor.
-                abcd = q[0]*q[1] + q[2]*q[3]
-                if abcd > (0.5-0.0001)*unitlength:
-                        yaw = 2 * atan2(q[2], q[0])
-                        pitch = math.pi
-                        roll = 0
-                elif abcd < (-0.5+0.0001)*unitlength:
-                        yaw = -2 * math.atan2(q[2], q[0])
-                        pitch = -math.pi
-                        roll = 0
-                else:
-                        adbc = q[0]*q[3] - q[1]*q[2]
-                        acbd = q[0]*q[2] - q[1]*q[3]
-                        yaw = math.atan2(2*adbc, 1 - 2*(z2+x2))
-                        pitch = math.asin(2*abcd/unitlength)
-                        roll = math.atan2(2*acbd, 1 - 2*(y2+x2))
-                return yaw, pitch, roll
-
-
-        def _getaxes(self, node):
-                q = node.get_local_quat()
-                return q.rotateVec((1,0,0)), q.rotateVec((0,1,0)), q.rotateVec((0,0,1))
 
 
         def _getshape(self, node):
@@ -285,106 +353,44 @@ class ChunkyWriter:
 
 
         def _findchildnode(self, parent, nodetype):
-                for node in self.phys_group:
+                for node in self.group:
                         if node.getParent() == parent and node.nodetype == nodetype:
                                 return node
                 print("Warning: certain node not found!")
                 return None
 
-        def _findglobalnode(self, simplename):
-                for node in self.phys_group:
-                        if node.getName() == simplename:
-                                return node
-                print("Warning: node '%s' not found!" % name)
-                return None
-
 
         def _count_transforms(self):
                 count = 0
-                for node in self.phys_group:
+                for node in self.group:
                         if node.nodetype == "transform":
                                  count += 1
                 return count
 
         def _count_engines(self):
                 count = 0
-                for node in self.phys_group:
+                for node in self.group:
                         if node.nodetype.startswith("motor:"):
                                  count += 1
                 return count
 
 
 
-class GroupWriter(ChunkyWriter):
-        """Translates a node/attribute group and writes it to disk as a group chunky file."""
+class MeshWriter(ChunkyWriter):
+        """Translates a node/attribute group and writes it to disk as mesh chunky files."""
 
-        def __init__(self, basename, phys_group, mesh_group, config):
+        def __init__(self, basename, group, config):
                 ChunkyWriter.__init__(self, basename)
-                self.phys_group = phys_group
-                self.mesh_group = mesh_group
+                self.group = group
                 self.config = config
 
-
         def dowrite(self):
-                self.writegroup(self.basename+".group")
-
-
-        def writegroup(self, filename):
-                pass
-
-
-
-class PhysMeshWriter(ChunkyWriter):
-        """Translates a node/attribute group and writes it to disk as physics+mesh chunky files."""
-
-        def __init__(self, basename, phys_group, mesh_group, config):
-                ChunkyWriter.__init__(self, basename)
-                self.phys_group = phys_group
-                self.mesh_group = mesh_group
-                self.config = config
-
-
-        def dowrite(self):
-                self.writephysics(self.basename+".phys")
-                self.writemeshes(self.basename)
-
-
-        def writephysics(self, filename):
-                self.bodies = []
-                with open(filename, "wb") as f:
-                        self.f = f
-                        bones = []
-                        engines = []
-                        data =  (
-                                        CHUNK_STRUCTURE,
-                                        (
-                                                (CHUNK_STRUCTURE_BONE_COUNT, self._count_transforms()),
-                                                (CHUNK_STRUCTURE_PHYSICS_TYPE, physics_type[self.config["type"]]),
-                                                (CHUNK_STRUCTURE_ENGINE_COUNT, self._count_engines()),
-                                                (CHUNK_STRUCTURE_BONE_CONTAINER, bones),
-                                                (CHUNK_STRUCTURE_ENGINE_CONTAINER, engines)
-                                        )
-                                )
-                        for node in self.phys_group:
-                                if node.nodetype == "transform":
-                                        self.bodies.append(node)
-                                        # TODO: add optional saves of child bones.
-                                        bones.append((CHUNK_STRUCTURE_BONE_TRANSFORM, node))
-                                        bones.append((CHUNK_STRUCTURE_BONE_SHAPE, self._getshape(node)))
-                        for node in self.phys_group:
-                                if node.nodetype.startswith("motor:"):
-                                        engines.append((CHUNK_STRUCTURE_ENGINE, node))
-                        #pprint.pprint(data)
-                        self._writechunk(data)
-
-
-        def writemeshes(self, basename):
-                for node in self.mesh_group:
+                for node in self.group:
                         if node.get_fixed_attribute("rgvtx", optional=True):
                                 nodemeshname = node.getName().replace("Shape", "")
                                 if nodemeshname.startswith("m_"):
                                         nodemeshname = nodemeshname[2:]
-                                self.writemesh(basename+"_"+nodemeshname+".mesh", node)
+                                self.writemesh(self.basename+"_"+nodemeshname+".mesh", node)
 
         def writemesh(self, filename, node):
                 print("Writing mesh %s..." % filename)

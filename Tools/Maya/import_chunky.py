@@ -357,10 +357,17 @@ class GroupReader(DefaultMAReader):
                 for node in group:
                         vtx = node.get_fixed_attribute("rgvtx", optional=True)
                         if vtx:
-                                pos = node.getParent().get_world_translation()
+                                transform = node.getParent().get_world_transform().inverse()
+                                vp = vec4(0,0,0,1);
                                 idx = 0
                                 for idx in range(len(vtx)):
-                                        vtx[idx] -= pos[idx%3]
+                                        cidx = idx%3
+                                        vp[cidx] = vtx[idx]
+                                        if cidx == 2:
+                                                vp = transform*vp
+                                                vtx[idx-2] = vp.x
+                                                vtx[idx-1] = vp.y
+                                                vtx[idx-0] = vp.z
 
 
         def applyPhysConfig(self, config, group):
@@ -720,9 +727,11 @@ def main():
         rd = GroupReader(sys.argv[1])
         rd.doread()
         gwr = chunkywriter.GroupWriter(sys.argv[1], rd.phys_group, rd.mesh_group, rd.config)
+        pwr = chunkywriter.PhysWriter(sys.argv[1], rd.phys_group, rd.config)
+        mwr = chunkywriter.MeshWriter(sys.argv[1], rd.mesh_group, rd.config)
         gwr.dowrite()
-        pmwr = chunkywriter.PhysMeshWriter(sys.argv[1], rd.phys_group, rd.mesh_group, rd.config)
-        pmwr.dowrite()
+        pwr.dowrite()
+        mwr.dowrite()
         #rd.printnodes(rd.phys_group, False)
         #rd.printnodes(rd.mesh_group, False)
 
