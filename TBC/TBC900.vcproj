@@ -501,6 +501,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Source\StructureEngine.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Source\TBC.cpp"
 				>
 			</File>
@@ -560,6 +564,10 @@
 			</File>
 			<File
 				RelativePath=".\Include\PortalManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Include\StructureEngine.h"
 				>
 			</File>
 			<File
