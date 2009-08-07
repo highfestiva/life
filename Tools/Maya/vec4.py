@@ -461,8 +461,10 @@ class vec4(object):
         0.2
         """
         T=type(key)
+        if T==slice:
+            return tuple(map(lambda x: self.__getitem__(x), range(*key.indices(key.stop))))
         if T!=int and T!=int:
-            raise TypeError("index must be integer")
+            raise TypeError("index must be integer or slice")
 
         if   key==0: return self.x
         elif key==1: return self.y

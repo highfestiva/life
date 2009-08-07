@@ -3,6 +3,7 @@
 
 
 import sys
+from vec3 import vec3
 
 
 class Shape:
@@ -17,11 +18,15 @@ class Shape:
                                         return False
                 return firstval != None
 
+
         def __init__(self, scalenode, shapenode):
                 d = []
                 self.data = d
                 self._attrnode = scalenode
-                scale = scalenode.get_world_scale()
+                if not scalenode.isortho():
+                        print("Error: node '%s' is not orthogonal.")
+                        sys.exit(21)
+                scale = scalenode.get_local_scale()
                 if shapenode.nodetype == "polyCube":
                         self.type = "box"
                         d.append(shapenode.getAttrValue("w", "w", None, default=1.0)*scale[0])
@@ -30,12 +35,14 @@ class Shape:
                 elif shapenode.nodetype == "polySphere":
                         self.type = "sphere"
                         if not Shape.inrange(scale, 0.05):
-                                print("Error: scale for sphere node '%s' must be orthogonal." % scalenode.getFullName())
+                                print("Error: scale for sphere node '%s' must be symmetric (is %s)." % (scalenode.getFullName(), str(scale)))
                                 sys.exit(21)
                         d.append(shapenode.getAttrValue("r", "r", None, default=1.0)*scale[0])
                 else:
                         print("Error: shape type '%s' on node '%s' is unknown." % (shapenode.nodetype, shapenode.getFullName()))
                         sys.exit(22)
+                
+                # TODO: check orthogonality of shape by simply checking that (1,0,0), (0,1,0), (0,0,1) and (1,1,1) are all.
 
         def __str__(self):
                 return "<Shape %s %s>" % (self.type, " ".join(map(lambda x: str(x), self.data)))

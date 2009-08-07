@@ -634,6 +634,9 @@ class Node:
 	def __str__(self):
 		return '<Node "%s" %s>'%(self.getFullName(), self.nodetype)
 
+	def __repr__(self):
+		return self.getName()
+
 	def __getattr__(self, name):
 		if self._create_attributes:
 			ma = MultiAttrStorage()

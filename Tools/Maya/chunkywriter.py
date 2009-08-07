@@ -38,8 +38,28 @@ CHUNK_MESH_VOLATILITY              = "MEVO"
 
 
 class ChunkyWriter:
-        def __init__(self, basename):
+        def __init__(self, basename, group, config):
                 self.basename = basename
+                self.group = group
+                self.config = config
+                self.feats = {}
+
+
+        def printfeats(self):
+                for k,v in self.feats.items():
+                        singular, plural = k.split(":")
+                        if v == 1:
+                                name = singular
+                        else:
+                                name = plural
+                        print("Wrote %6i %s." % (v, name))
+
+
+        def _addfeat(self, k, v):
+                oldv = self.feats.get(k)
+                if oldv != None:
+                        v += oldv
+                self.feats[k] = v
 
 
         def _writechunk(self, chunks, name=None):
@@ -105,7 +125,8 @@ class ChunkyWriter:
                         sys.exit(18)
                 pos = node.get_local_translation()
                 data = q.totuple()+(pos[0], pos[1], pos[2])
-                print("Writing bone with data", data)
+                #print("Writing bone with data", data)
+                self._addfeat("bone:bones", 1)
                 for f in data:
                         self._writefloat(f)
 
@@ -194,11 +215,8 @@ class ChunkyWriter:
 class GroupWriter(ChunkyWriter):
         """Translates a node/attribute group and writes it to disk as a group chunky file."""
 
-        def __init__(self, basename, phys_group, mesh_group, config):
-                ChunkyWriter.__init__(self, basename)
-                self.phys_group = phys_group
-                self.mesh_group = mesh_group
-                self.config = config
+        def __init__(self, basename, group, config):
+                ChunkyWriter.__init__(self, basename, group, config)
 
 
         def dowrite(self):
@@ -206,7 +224,7 @@ class GroupWriter(ChunkyWriter):
 
 
         def writegroup(self, filename):
-                pass
+                self._addfeat("group:groups", 1)
 
 
 
@@ -214,9 +232,7 @@ class PhysWriter(ChunkyWriter):
         """Translates a node/attribute group and writes it to disk as physics+mesh chunky files."""
 
         def __init__(self, basename, group, config):
-                ChunkyWriter.__init__(self, basename)
-                self.group = group
-                self.config = config
+                ChunkyWriter.__init__(self, basename, group, config)
 
 
         def dowrite(self):
@@ -237,7 +253,7 @@ class PhysWriter(ChunkyWriter):
                                         )
                                 )
                         for node in self.group:
-                                if node.nodetype == "transform":
+                                if node.getName().startswith("phys_") and node.nodetype == "transform":
                                         self.bodies.append(node)
                                         # TODO: add optional saves of child bones.
                                         bones.append((CHUNK_STRUCTURE_BONE_TRANSFORM, node))
@@ -257,9 +273,12 @@ class PhysWriter(ChunkyWriter):
                 self._writefloat(node.get_fixed_attribute("mass"))
                 self._writefloat(node.get_fixed_attribute("friction"))
                 self._writefloat(node.get_fixed_attribute("bounce"))
-                self._writeint(-1 if not node.getParent() else self.bodies.index(node.getParent()))
+                self._writeint(-1 if not node.phys_parent else self.bodies.index(node.phys_parent))
                 joints = {None:1, "exclude":1, "suspend_hinge":2, "hinge2":3, "hinge":4, "ball":5, "universal":6}
-                jointvalue = joints[node.get_fixed_attribute("joint", True)]
+                jointtype = node.get_fixed_attribute("joint", True)
+                jointvalue = joints[jointtype]
+                if jointtype:
+                        self._addfeat("joint:joints", 1)
                 self._writeint(jointvalue)
                 self._writeint(1 if node.get_fixed_attribute("affected_by_gravity") else 0)
                 # Write joint parameters.
@@ -282,7 +301,7 @@ class PhysWriter(ChunkyWriter):
                 parameters[8] = j.z
                 for x in parameters:
                         self._writefloat(x)
-                # Write connecor type (may hook other stuff, may be hooked by hookers :).
+                # Write connecor type (may hook other stuff, may get hooked by hookers :).
                 connectors = node.get_fixed_attribute("connector_types", True)
                 if connectors:
                         if not type(connectors) == list and not type(connetors) == tuple:
@@ -298,6 +317,7 @@ class PhysWriter(ChunkyWriter):
                 for x in shape.data:
                         self._writefloat(x)
                 #print("Wrote shape with axes", self._getaxes(node))
+                self._addfeat("physical geometry:physical geometries", 1)
 
 
         def _writeengine(self, node):
@@ -320,7 +340,8 @@ class PhysWriter(ChunkyWriter):
                         self._writefloat(scale)
                         connectiontypes = {"normal":1, "half_lock":2}
                         self._writeint(connectiontypes[connectiontype])
-                print("Wrote engine '%s' for %i nodes." % (node.getName()[6:], len(connected_to)))
+                #print("Wrote engine '%s' for %i nodes." % (node.getName()[6:], len(connected_to)))
+                self._addfeat("physical engine:physical engines", 1)
 
 
         def _expand_connected_list(self, unexpanded):
@@ -334,7 +355,7 @@ class PhysWriter(ChunkyWriter):
 
 
         def _getshape(self, node):
-                shapenode = self._findchildnode(parent=node, nodetype="mesh")
+                shapenode = self._findphyschildnode(parent=node, nodetype="mesh")
                 if not shapenode:
                         print("Error: shape for node '%s' does not exist." % node.getFullName())
                         sys.exit(11)
@@ -352,9 +373,9 @@ class PhysWriter(ChunkyWriter):
                 return shape.Shape(node, in_node)
 
 
-        def _findchildnode(self, parent, nodetype):
+        def _findphyschildnode(self, parent, nodetype):
                 for node in self.group:
-                        if node.getParent() == parent and node.nodetype == nodetype:
+                        if node.getName().startswith("phys_") and node.nodetype == nodetype and node.getParent() == parent:
                                 return node
                 print("Warning: certain node not found!")
                 return None
@@ -363,7 +384,7 @@ class PhysWriter(ChunkyWriter):
         def _count_transforms(self):
                 count = 0
                 for node in self.group:
-                        if node.nodetype == "transform":
+                        if node.getName().startswith("phys_") and node.nodetype == "transform":
                                  count += 1
                 return count
 
@@ -380,9 +401,7 @@ class MeshWriter(ChunkyWriter):
         """Translates a node/attribute group and writes it to disk as mesh chunky files."""
 
         def __init__(self, basename, group, config):
-                ChunkyWriter.__init__(self, basename)
-                self.group = group
-                self.config = config
+                ChunkyWriter.__init__(self, basename, group, config)
 
         def dowrite(self):
                 for node in self.group:
@@ -393,7 +412,9 @@ class MeshWriter(ChunkyWriter):
                                 self.writemesh(self.basename+"_"+nodemeshname+".mesh", node)
 
         def writemesh(self, filename, node):
-                print("Writing mesh %s..." % filename)
+                #print("Writing mesh %s with %i triangles..." % (filename, len(node.get_fixed_attribute("rgtri"))/3))
+                self._addfeat("mesh:meshes", 1)
+                self._addfeat("gfx triangle:gfx triangles", len(node.get_fixed_attribute("rgtri"))/3)
                 with open(filename, "wb") as f:
                         self.f = f
                         default_mesh_type = {"static":1, "dynamic":2, "volatile":3}
