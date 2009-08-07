@@ -455,6 +455,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Include\Alarm.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Include\AntiCrack.h"
 				>
 			</File>
@@ -1044,6 +1048,10 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
+			<File
+				RelativePath=".\Source\Alarm.cpp"
+				>
+			</File>
 			<File
 				RelativePath=".\Source\Application.cpp"
 				>
