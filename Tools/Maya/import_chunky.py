@@ -106,6 +106,9 @@ class GroupReader(DefaultMAReader):
                 if not self.validategroup(group):
                         print("Invalid group! Terminating due to error.")
                         sys.exit(3)
+                if not self.makephysrelative(group):
+                        print("Internal vector math failed! Terminating due to error.")
+                        sys.exit(3)
                 self.group = group
 
 
@@ -115,6 +118,7 @@ class GroupReader(DefaultMAReader):
                    configuration settings separate to the Maya ASCII .ma file."""
                 node = super(GroupReader, self).createNode(nodetype, opts)
                 node._fixattr = {}
+                node.xformparent = node.getParent()
                 def fix_attribute(self, name, value):
                         try:
                                 value = eval(value)
@@ -150,10 +154,22 @@ class GroupReader(DefaultMAReader):
                         m = self.get_world_transform()
                         return m * origin
                 def get_world_transform(self):
-                        if self.getParent():
-                                pm = self.getParent().get_world_transform()
+                        return self.gettransformto(None)
+                def get_local_transform(self):
+                        return self.gettransformto(self.xformparent)
+                def gettransformto(self, toparent):
+                        parent = self.xformparent
+                        if parent and (toparent == None or parent != toparent):
+                                pm = parent.gettransformto(toparent)
+                                if not pm:
+                                        return None
                         else:
                                 pm = mat4.identity()
+                                if toparent and parent == None:
+                                        print("Warning: could not transform to parent '%s'" % toparent.getFullName())
+                                        return None
+                        if hasattr(self, "localmat4"):
+                                return pm * self.localmat4
                         mr = self.get_local_quat().toMat4()
                         t = self.get_local_translation()
                         s = self.get_local_scale()
@@ -177,8 +193,8 @@ class GroupReader(DefaultMAReader):
                         mt = mat4.translation(t)
                         # According to Maya doc (as I understood it): [sp][s][sh][sp^-1][st][rp][ar][r][rp^-1][rt][t].
                         # My multiplications are reversed order, since matrices already transposed.
-                        m = pm * mt * mrt * mrpi * mr * mar * mrp * mst * mspi * msh * ms * msp
-                        return m
+                        self.localmat4 = mt * mrt * mrpi * mr * mar * mrp * mst * mspi * msh * ms * msp
+                        return pm * self.localmat4
                 def get_local_scale(self):
                         return self.get_fixed_attribute("s", default=vec3(1,1,1))
                 def get_local_translation(self):
@@ -199,6 +215,12 @@ class GroupReader(DefaultMAReader):
                         qz = quat().fromAngleAxis(ra[2], (0, 0, 1))
                         q = qy*qz*qx
                         return q
+                def get_world_quat(self):
+                        if self.xformparent:
+                                pq = self.xformparent.get_world_quat()
+                        else:
+                                pq = quat()
+                        return pq * self.get_local_quat() * self.get_local_arq()
                 def isortho(self):
                         l = [vec4(1,0,0,1), vec4(0,1,0,1), vec4(0,0,1,1)]
                         p = vec3(self.get_world_translation()[0:3])
@@ -214,7 +236,7 @@ class GroupReader(DefaultMAReader):
                                                 w = vec3(l[k][0:3])-p
                                                 s = u.cross(v)
                                                 a = abs((s * w) / (s.length()*w.length()))
-                                                if a <= 0.99 or a >= 1.01:
+                                                if a <= 0.99:
                                                         print(i,j,k,u,v,w,s)
                                                         print("cos(a) of %s is %f." % (self.getFullName(), a))
                                                         return False
@@ -226,11 +248,14 @@ class GroupReader(DefaultMAReader):
                 node.get_world_translation = types.MethodType(get_world_translation, node)
                 node.get_world_pivot = types.MethodType(get_world_pivot, node)
                 node.get_world_transform = types.MethodType(get_world_transform, node)
+                node.get_local_transform = types.MethodType(get_local_transform, node)
+                node.gettransformto = types.MethodType(gettransformto, node)
                 node.get_local_scale = types.MethodType(get_local_scale, node)
                 node.get_local_translation = types.MethodType(get_local_translation, node)
                 node.get_local_pivot = types.MethodType(get_local_pivot, node)
                 node.get_local_quat = types.MethodType(get_local_quat, node)
                 node.get_local_arq = types.MethodType(get_local_arq, node)
+                node.get_world_quat = types.MethodType(get_world_quat, node)
                 node.isortho = types.MethodType(isortho, node)
                 return node
 
@@ -373,7 +398,8 @@ class GroupReader(DefaultMAReader):
                         vtx = node.get_fixed_attribute("rgvtx", optional=True)
                         if vtx:
                                 # Get transformation to origo without rescaling.
-                                transform = mat4.translation(-vec3(node.get_world_translation()[0:3])).inverse()
+                                transform = mat4.translation(-vec3(node.get_world_translation()[0:3]))
+                                transform = (transform * node.get_world_quat().toMat4()).inverse()
                                 vp = vec4(0,0,0,1);
                                 idx = 0
                                 for idx in range(len(vtx)):
@@ -583,6 +609,29 @@ class GroupReader(DefaultMAReader):
                                 if self._is_valid_phys_ref(group, None, mesh, False):
                                         ok = False
                                         print("Error: mesh node '%s' must be referenced by a phys node, but is not!" % mesh.getFullName())
+                return ok
+
+
+        def makephysrelative(self, group):
+                ok = True
+                for node in group:
+                        if node.getName().startswith("phys_") and node.nodetype == "transform":
+                                ok &= self._physrelativemat4(node)
+                return ok
+
+
+        def _physrelativemat4(self, node):
+                ok = True
+                phpar = node.phys_parent
+                if phpar:
+                        if not hasattr(phpar, "localmat4"):
+                               ok = self._physrelativemat4(phpar)
+                        own_branch_xform = node.gettransformto(phpar.xformparent)
+                        parent_branch_invxform = phpar.gettransformto(phpar.xformparent).inverse()
+                        node.localmat4 = parent_branch_invxform * own_branch_xform
+                        node.xformparent = phpar
+                else:
+                        node.get_world_transform()
                 return ok
 
 

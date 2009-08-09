@@ -24,7 +24,7 @@ class Shape:
                 self.data = d
                 self._attrnode = scalenode
                 if not scalenode.isortho():
-                        print("Error: node '%s' is not orthogonal.")
+                        print("Error: node '%s' is not orthogonal." % scalenode.getFullName())
                         sys.exit(21)
                 scale = scalenode.get_local_scale()
                 if shapenode.nodetype == "polyCube":
