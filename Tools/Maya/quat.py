@@ -278,6 +278,16 @@ class quat:
                          self.y*self.y + self.z*self.z)
 
     def __getitem__(self, key):
+        T=type(key)
+        if T==slice:
+            start, stop, step = key.start, key.stop, key.step
+            start = 0 if start==None else start
+            stop  = 4 if stop ==None else stop
+            step  = 1 if step ==None else step
+            return list(map(lambda x: self.__getitem__(x), range(start, stop, step)))
+        if T!=int and T!=int:
+            raise TypeError("index must be integer or slice")
+
         if   key==0: return self.w
         elif key==1: return self.x
         elif key==2: return self.y

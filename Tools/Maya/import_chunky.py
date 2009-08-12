@@ -856,17 +856,15 @@ def main():
                 sys.exit(20)
         rd = GroupReader(sys.argv[1])
         rd.doread()
-        gwr = chunkywriter.GroupWriter(sys.argv[1], rd.group, rd.config)
         pwr = chunkywriter.PhysWriter(sys.argv[1], rd.group, rd.config)
         mwr = chunkywriter.MeshWriter(sys.argv[1], rd.group, rd.config)
-        gwr.dowrite()
+        cwr = chunkywriter.ClassWriter(sys.argv[1], rd.group, rd.config)
         pwr.dowrite()
         mwr.dowrite()
-        #print("Wrote hierarchy:");
-        #rd.printnode(rd.group[0], rd.group)
-        gwr.printfeats()
+        cwr.dowrite()
         pwr.printfeats()
         mwr.printfeats()
+        cwr.printfeats()
         print("Import successful.")
 
 
