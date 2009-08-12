@@ -148,7 +148,7 @@ class GroupReader(DefaultMAReader):
                         tab.update(self._setattr)
                         return tab
                 def get_world_pivot(self):
-                        o = self.get_local_pivot() - self.get_fixed_attribute("spt", optional=True, default=vec3(0,0,0))
+                        o = self.get_local_pivot()
                         return self.get_world_translation(vec4(o[0],o[1],o[2], 1))
                 def get_world_translation(self, origin=vec4(0, 0, 0, 1)):
                         m = self.get_world_transform()
@@ -157,10 +157,12 @@ class GroupReader(DefaultMAReader):
                         return self.gettransformto(None)
                 def get_local_transform(self):
                         return self.gettransformto(self.xformparent)
-                def gettransformto(self, toparent):
-                        parent = self.xformparent
+                def gettransformto(self, toparent, matname="localmat4", getparent=lambda n: n.xformparent):
+                        if self == toparent:
+                                return mat4.identity()
+                        parent = getparent(self)
                         if parent and (toparent == None or parent != toparent):
-                                pm = parent.gettransformto(toparent)
+                                pm = parent.gettransformto(toparent, matname, getparent)
                                 if not pm:
                                         return None
                         else:
@@ -168,13 +170,13 @@ class GroupReader(DefaultMAReader):
                                 if toparent and parent == None:
                                         print("Warning: could not transform to parent '%s'" % toparent.getFullName())
                                         return None
-                        if hasattr(self, "localmat4"):
-                                return pm * self.localmat4
+                        if hasattr(self, matname):
+                                return pm * getattr(self, matname)
                         mr = self.get_local_quat().toMat4()
                         t = self.get_local_translation()
                         s = self.get_local_scale()
                         sh = self.get_fixed_attribute("sh", optional=True, default=vec3(0,0,0))
-                        rp = self.get_local_pivot()
+                        rp = self.get_local_rpivot()
                         rt = self.get_fixed_attribute("rpt", optional=True, default=vec3(0,0,0))
                         sp = self.get_fixed_attribute("sp", optional=True, default=vec3(0,0,0))
                         st = self.get_fixed_attribute("spt", optional=True, default=vec3(0,0,0))
@@ -193,14 +195,17 @@ class GroupReader(DefaultMAReader):
                         mt = mat4.translation(t)
                         # According to Maya doc (as I understood it): [sp][s][sh][sp^-1][st][rp][ar][r][rp^-1][rt][t].
                         # My multiplications are reversed order, since matrices already transposed.
-                        self.localmat4 = mt * mrt * mrpi * mr * mar * mrp * mst * mspi * msh * ms * msp
-                        return pm * self.localmat4
+                        m = mt * mrt * mrpi * mr * mar * mrp * mst * mspi * msh * ms * msp
+                        setattr(self, matname, m)
+                        return pm * getattr(self, matname)
                 def get_local_scale(self):
                         return self.get_fixed_attribute("s", default=vec3(1,1,1))
                 def get_local_translation(self):
                         return self.get_fixed_attribute("t", default=vec3(0,0,0))
-                def get_local_pivot(self):
+                def get_local_rpivot(self):
                         return self.get_fixed_attribute("rp", default=vec3(0,0,0))
+                def get_local_pivot(self):
+                        return self.get_local_rpivot() - self.get_fixed_attribute("spt", optional=True, default=vec3(0,0,0))
                 def get_local_quat(self):
                         rot = self.get_fixed_attribute("r", default=vec3(0,0,0))
                         qx = quat().fromAngleAxis(rot[0], (1, 0, 0))
@@ -252,6 +257,7 @@ class GroupReader(DefaultMAReader):
                 node.gettransformto = types.MethodType(gettransformto, node)
                 node.get_local_scale = types.MethodType(get_local_scale, node)
                 node.get_local_translation = types.MethodType(get_local_translation, node)
+                node.get_local_rpivot = types.MethodType(get_local_rpivot, node)
                 node.get_local_pivot = types.MethodType(get_local_pivot, node)
                 node.get_local_quat = types.MethodType(get_local_quat, node)
                 node.get_local_arq = types.MethodType(get_local_arq, node)
@@ -459,6 +465,9 @@ class GroupReader(DefaultMAReader):
                                 if not usedlastvertex:
                                         isGroupValid = False
                                         print("Error: not all vertices in '%s' is used." % node.getFullName())
+                        if node.getName().startswith("m_") and node.nodetype == "transform":
+                                node.mesh_children = list(filter(lambda x: x.nodetype == "transform", self._listchildnodes(node.getFullName(), node, "m_", group, False)))
+                                node.phys_children = self._listchildnodes(node.getFullName(), node, "phys_", group, False)
                 return isGroupValid
 
                                 
@@ -495,11 +504,14 @@ class GroupReader(DefaultMAReader):
                                 def check_connected_to(l):
                                         ok = (len(l) >= 1)
                                         for e in l:
-                                                ok = ok and (len(e) == 3)
-                                                ok = ok and (type(e[0]) == str)
-                                                ok = ok and (e[1] >= -100 and e[1] <= 100)
-                                                ok = ok and (e[2] in ["normal", "half_lock"])
-                                                # TODO: verify that this actually gets connected to a body.
+                                                ok &= (len(e) == 3)
+                                                ok &= (type(e[0]) == str)
+                                                ok &= (e[1] >= -100 and e[1] <= 100)
+                                                ok &= (e[2] in ["normal", "half_lock"])
+                                                connected_to = self._regexpnodes(e[0], group)
+                                                ok &= (len(connected_to) > 0)
+                                                for cn in connected_to:
+                                                        ok &= cn.getName().startswith("phys_")
                                         return ok
                                 required = [("type", lambda x: type(x) == str),
                                             ("strength", lambda x: x > 0 and x < 30000),
@@ -534,7 +546,7 @@ class GroupReader(DefaultMAReader):
                 isGroupValid = True
                 for node in group:
                         if node.getName().startswith("phys_") and node.nodetype == "transform":
-                                isGroupValid &= self._resolve_phys_parent(node, group)
+                                isGroupValid &= self._resolve_phys(node, group)
                                 # Check attributes.
                                 def jointCheck(t):
                                         return (t == "suspend_hinge") or (t == "hinge2") or (t == "hinge")
@@ -620,6 +632,14 @@ class GroupReader(DefaultMAReader):
                 return ok
 
 
+        def _regexpnodes(self, regexp, group):
+                found = []
+                for node in group:
+                        if re.search("^"+regexp+"$", node.getFullName()[1:]):
+                                found += [node]
+                return found
+
+
         def _physrelativemat4(self, node):
                 ok = True
                 phpar = node.phys_parent
@@ -678,13 +698,18 @@ class GroupReader(DefaultMAReader):
                         self.printnode(child, nodes, lvl+1)
 
 
-        def _resolve_phys_parent(self, phys, group):
+        def _resolve_phys(self, phys, group):
                 phys.phys_parent = None
+                phys.phys_children = []
                 if phys.getParent() == group[0]:
                         return True
                 parent = phys.getParent()
                 if parent != None and parent.getName().startswith("phys_") and parent.nodetype == "transform":
                         phys.phys_parent = parent
+                        if not hasattr(parent, "phys_children"):
+                                parent.phys_children = [phys]
+                        else:
+                                parent.phys_children += [phys]
                         return True
                 # Check children of grandparents.
                 parent = parent.getParent()
@@ -700,6 +725,10 @@ class GroupReader(DefaultMAReader):
                         print("Error: phys node '%s' has no related parent phys node higher up in the hierarchy." % phys.getFullName())
                         return False
                 phys.phys_parent = parent
+                if not hasattr(parent, "phys_children"):
+                        parent.phys_children = [phys]
+                else:
+                        parent.phys_children += [phys]
                 return True
 
 

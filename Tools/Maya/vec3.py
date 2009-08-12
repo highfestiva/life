@@ -431,8 +431,14 @@ class vec3:
         -1.8
         """
         T=type(key)
+        if T==slice:
+            start, stop, step = key.start, key.stop, key.step
+            start = 0 if start==None else start
+            stop  = 3 if step ==None else step
+            step  = 1 if step ==None else step
+            return list(map(lambda x: self.__getitem__(x), range(start, stop, step)))
         if T!=int and T!=int:
-            raise TypeError("index must be integer")
+            raise TypeError("index must be integer or slice")
 
         if   key==0: return self.x
         elif key==1: return self.y

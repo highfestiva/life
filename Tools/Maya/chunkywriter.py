@@ -2,8 +2,11 @@
 # Created by Jonas Byström, 2009-07-17 for Righteous Engine tool chain.
 
 
+from mat4 import mat4
 from mayaascii import *
+from quat import quat
 import shape
+from vec4 import vec4
 
 import math
 import pprint
@@ -108,7 +111,7 @@ class ChunkyWriter:
                         node = chunks
                         if node.nodetype == "transform":
                                 self._writebone(node)
-                        elif node.nodetype.startswith("motor:"):
+                        elif node.nodetype.startswith("engine:"):
                                 self._writeengine(node)
                 elif t == shape.Shape:
                         shapeChunk = chunks
@@ -225,7 +228,41 @@ class GroupWriter(ChunkyWriter):
 
         def writegroup(self, filename):
                 self._addfeat("group:groups", 1)
+                self._listchildmeshes()
+                for node in self.group:
+                        if node.getName().startswith("phys_") and node.nodetype == "transform" and node.childmeshes:
+                                print("%s:" % node.getFullName())
+                                for m in node.childmeshes:
+                                        tm = m.get_world_transform()
+                                        tp = node.get_world_transform()
+                                        lpm = tm * vec4(m.get_local_pivot()[:]+[1])
+                                        lpp = tp * vec4(node.get_local_pivot()[:]+[1])
+                                        t = tp.inverse() * tm
+                                        q = quat().fromMat(t).normalize()
+                                        p = (lpm-lpp)[0:3]
+                                        print(" - %s (%s), (%s)" % (m.getName(), repr(q), repr(p)))
+                                        #t2 = node.gettransformto(cm[0], "omat4", lambda n: n.getParent())       # Remove me: debugging only!
+                                        #print(tm, "\n\n"+str(tp)+"\n\n"+str(t2)+"\n\n"+str(t2.inverse()))
 
+
+        def _listchildmeshes(self):
+                for node in self.group:
+                        if node.getName().startswith("phys_") and node.nodetype == "transform":
+                                node.childmeshes = []
+                                if not node.getParent().getName().startswith("m_"):
+                                        continue
+                                parent = node.getParent()
+                                node.childmeshes += [parent]
+                                def recurselistmeshes(n, to):
+                                        mc = []
+                                        if not n.phys_children:
+                                                for m in n.mesh_children:
+                                                        mc += [n]
+                                        print(n.getName(), str(n.mesh_children))
+                                        for cn in n.mesh_children:
+                                                mc += recurselistmeshes(cn, to)
+                                        return mc
+                                node.childmeshes += recurselistmeshes(parent, parent.getParent())
 
 
 class PhysWriter(ChunkyWriter):
@@ -259,7 +296,7 @@ class PhysWriter(ChunkyWriter):
                                         bones.append((CHUNK_STRUCTURE_BONE_TRANSFORM, node))
                                         bones.append((CHUNK_STRUCTURE_BONE_SHAPE, self._getshape(node)))
                         for node in self.group:
-                                if node.nodetype.startswith("motor:"):
+                                if node.nodetype.startswith("engine:"):
                                         engines.append((CHUNK_STRUCTURE_ENGINE, node))
                         #pprint.pprint(data)
                         self._writechunk(data)
@@ -291,8 +328,10 @@ class PhysWriter(ChunkyWriter):
                 #        sys.exit(19)
                 parameters[2] = yaw
                 parameters[3] = roll
-                parameters[4] = 0.0     # TODO: pick joint end-values from .ma!
-                parameters[5] = 0.0     # TODO: pick joint end-values from .ma!
+                joint_min, joint_max = node.get_fixed_attribute("joint_angles", True, [0.0,0.0])
+                joint_min, joint_max = math.radians(joint_min), math.radians(joint_max)
+                parameters[4] = joint_min
+                parameters[5] = joint_max
                 lq = node.get_local_quat()
                 lp = node.get_local_pivot()
                 j = lq*lp
@@ -391,7 +430,7 @@ class PhysWriter(ChunkyWriter):
         def _count_engines(self):
                 count = 0
                 for node in self.group:
-                        if node.nodetype.startswith("motor:"):
+                        if node.nodetype.startswith("engine:"):
                                  count += 1
                 return count
 
