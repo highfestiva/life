@@ -22,7 +22,7 @@ class PhysicsManager;
 
 
 
-class StructureEngine
+class PhysicsEngine
 {
 public:
 	enum EngineType
@@ -43,11 +43,11 @@ public:
 		MODE_HALF_LOCK,
 	};
 
-	StructureEngine(EngineType pEngineType, float pStrength,
+	PhysicsEngine(EngineType pEngineType, float pStrength,
 		float pMaxSpeed, float pMaxSpeed2, unsigned pControllerIndex);
-	virtual ~StructureEngine();
+	virtual ~PhysicsEngine();
 
-	static StructureEngine* Load(ChunkyPhysics* pStructure, const void* pData, unsigned pByteCount);
+	static PhysicsEngine* Load(ChunkyPhysics* pStructure, const void* pData, unsigned pByteCount);
 
 	EngineType GetEngineType() const;
 

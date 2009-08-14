@@ -4,9 +4,9 @@
  
 
 
-#include "../../Lepra/Include/SHA1.h"
-#include "../Include/Packer.h"
 #include "../Include/UserAccount.h"
+#include "../../Lepra/Include/Packer.h"
+#include "../../Lepra/Include/SHA1.h"
 
 
 
@@ -61,7 +61,7 @@ void MangledPassword::MangleAndSet(Lepra::UnicodeString& pPassword)
 	const size_t lStringLength = pPassword.length();
 	std::vector<Lepra::uint8> lData(lStringLength*2 + 32);
 	Lepra::uint8* lRawData = &lData[0];
-	const int lRawDataSize = PackerUnicodeString::Pack(lRawData, pPassword);
+	const int lRawDataSize = Lepra::PackerUnicodeString::Pack(lRawData, pPassword);
 	Lepra::uint8 lHashData[20];
 	Lepra::SHA1::Hash(lRawData, lRawDataSize, lHashData);
 	for (size_t x = 0; x < 20; ++x)

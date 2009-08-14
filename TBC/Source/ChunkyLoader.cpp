@@ -4,11 +4,13 @@
 
 
 
+#include "../Include/ChunkyLoader.h"
+#include "../../Lepra/Include/Packer.h"
 #include "../Include/Bones.h"
 #include "../Include/ChunkyBoneGeometry.h"
-#include "../Include/ChunkyLoader.h"
+#include "../Include/ChunkyClass.h"
 #include "../Include/ChunkyPhysics.h"
-#include "../Include/StructureEngine.h"
+#include "../Include/PhysicsEngine.h"
 
 
 
@@ -193,13 +195,20 @@ bool ChunkyLoader::AllocLoadChunkyList(FileElementList& pLoadList, Lepra::int64 
 						}
 						else if (lElement.mString)
 						{
-							char* lString = 0;
-							lOk = (mFile->AllocReadData((void**)&lString, lSize) == Lepra::IO_OK);
+							Lepra::uint8* lString = 0;
+							lOk = (lSize >= 4 && (lSize&1) == 0);
 							if (lOk)
 							{
-								Lepra::AnsiString lAnsiString;
-								lAnsiString.assign(lString, lSize);
-								lElement.mString[y] = Lepra::AnsiStringUtility::ToCurrentCode(lAnsiString);
+								lOk = (mFile->AllocReadData((void**)&lString, lSize) == Lepra::IO_OK);
+							}
+							if (lOk)
+							{
+								Lepra::UnicodeString lUnicodeString;
+								lOk = (Lepra::PackerUnicodeString::Unpack(&lUnicodeString, lString, lSize) == (int)lSize);
+								if (lOk)
+								{
+									lElement.mString[y] = Lepra::UnicodeStringUtility::ToCurrentCode(lUnicodeString);
+								}
 							}
 							delete[] (lString);
 						}
@@ -264,7 +273,7 @@ bool ChunkyLoader::AllocLoadChunkyList(FileElementList& pLoadList, Lepra::int64 
 bool ChunkyLoader::SaveSingleString(ChunkyType pType, const Lepra::String& pString)
 {
 	// Write padding at once. No CPU safety border (a.k.a. page boundary) crosses the 4-byte alignment boundary.
-	const Lepra::uint32 lSize = (Lepra::uint32)((pString.length()+1+3)&(~3));
+	const Lepra::uint32 lSize = (Lepra::uint32)((2 + pString.length()*2+2 + 3)&(~3));
 	Lepra::int64 lChunkEndPosition = 0;
 	bool lOk = true;
 	if (lOk)
@@ -273,7 +282,11 @@ bool ChunkyLoader::SaveSingleString(ChunkyType pType, const Lepra::String& pStri
 	}
 	if (lOk)
 	{
-		lOk = (mFile->WriteData(Lepra::AnsiStringUtility::ToOwnCode(pString).c_str(), lSize) == Lepra::IO_OK);
+		Lepra::uint8* lData = new Lepra::uint8[lSize];
+		::memset(lData, 0, lSize);
+		Lepra::PackerUnicodeString::Pack(lData, Lepra::UnicodeStringUtility::ToOwnCode(pString));
+		lOk = (mFile->WriteData(lData, lSize) == Lepra::IO_OK);
+		delete[] (lData);
 	}
 	if (lOk)
 	{
@@ -832,7 +845,7 @@ bool ChunkyPhysicsLoader::Save(const ChunkyPhysics* pPhysics)
 	// Write engines.
 	for (int e = 0; lOk && e < lEngineCount; ++e)
 	{
-		StructureEngine* lEngine = pPhysics->GetEngine(e);
+		PhysicsEngine* lEngine = pPhysics->GetEngine(e);
 		assert(lEngine);
 		Lepra::int64 lChunkEndPosition = 0;
 		unsigned lSize = lEngine->GetChunkySize();
@@ -942,10 +955,10 @@ bool ChunkyPhysicsLoader::LoadElementCallback(ChunkyType pType, Lepra::uint32 pS
 		lLoadList.push_back(ChunkyFileElement(CHUNK_PHYSICS_ENGINE, (void**)&lEngineArray, (unsigned*)&lEngineByteSize));
 		lOk = AllocLoadChunkyList(lLoadList, pChunkEndPosition);
 
-		StructureEngine* lEngine = 0;
+		PhysicsEngine* lEngine = 0;
 		if (lOk)
 		{
-			lEngine = StructureEngine::Load(lPhysics, lEngineArray, lEngineByteSize);
+			lEngine = PhysicsEngine::Load(lPhysics, lEngineArray, lEngineByteSize);
 			lOk = (lEngine != 0);
 		}
 		if (lOk)
@@ -964,9 +977,56 @@ bool ChunkyPhysicsLoader::LoadElementCallback(ChunkyType pType, Lepra::uint32 pS
 
 
 
+ChunkyClassLoader::ChunkyClassLoader(Lepra::File* pFile, bool pIsFileOwner):
+	ChunkyLoader(pFile, pIsFileOwner)
+{
+}
+
+ChunkyClassLoader::~ChunkyClassLoader()
+{
+}
+
+bool ChunkyClassLoader::Load(ChunkyClass* pData)
+{
+	bool lOk = true;
+	if (lOk)
+	{
+		lOk = VerifyFileType(CHUNK_CLASS);
+	}
+
+	Lepra::String lPhysicsBaseName;
+	if (lOk)
+	{
+		FileElementList lLoadList;
+		lLoadList.push_back(ChunkyFileElement(CHUNK_CLASS_PHYSICS, &lPhysicsBaseName));
+		ööö
+		lOk = AllocLoadChunkyList(lLoadList, mFile->GetSize());
+	}
+	if (lOk)
+	{
+		lOk = (!lPhysicsBaseName.empty() &&
+			true);	// TODO: check other tags.
+	}
+	if (lOk)
+	{
+		pData->SetPhysicsBaseName(lPhysicsBaseName);
+	}
+
+	return (lOk);
+}
+
+bool ChunkyClassLoader::Save(const ChunkyClass*)
+{
+	// TODO: implement...
+	return (false);
+}
+
+
+
 LOG_CLASS_DEFINE(GENERAL_RESOURCES, ChunkyLoader);
 LOG_CLASS_DEFINE(GENERAL_RESOURCES, ChunkyAnimationLoader);
 LOG_CLASS_DEFINE(GENERAL_RESOURCES, ChunkyPhysicsLoader);
+LOG_CLASS_DEFINE(GENERAL_RESOURCES, ChunkyClassLoader);
 
 
 

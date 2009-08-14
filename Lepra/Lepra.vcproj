@@ -742,6 +742,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Include\Packer.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Include\ParamLoader.h"
 				>
 			</File>
@@ -1170,6 +1174,10 @@
 			</File>
 			<File
 				RelativePath=".\Source\Number.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\Packer.cpp"
 				>
 			</File>
 			<File

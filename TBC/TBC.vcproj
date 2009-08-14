@@ -465,6 +465,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Source\ChunkyClass.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Source\ChunkyLoader.cpp"
 				>
 			</File>
@@ -485,6 +489,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Source\PhysicsEngine.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Source\PhysicsManagerFactory.cpp"
 				>
 			</File>
@@ -494,10 +502,6 @@
 			</File>
 			<File
 				RelativePath=".\Source\PortalManager.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Source\StructureEngine.cpp"
 				>
 			</File>
 			<File
@@ -527,6 +531,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Include\ChunkyClass.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Include\ChunkyLoader.h"
 				>
 			</File>
@@ -547,6 +555,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Include\PhysicsEngine.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Include\PhysicsManager.h"
 				>
 			</File>
@@ -560,10 +572,6 @@
 			</File>
 			<File
 				RelativePath=".\Include\PortalManager.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\StructureEngine.h"
 				>
 			</File>
 			<File

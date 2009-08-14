@@ -7,12 +7,12 @@
 #include <assert.h>
 #include "../../Cure/Include/NetworkClient.h"
 #include "../../Cure/Include/NetworkServer.h"
-#include "../../Cure/Include/Packer.h"
 #include "../../Cure/Include/Packet.h"
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../../Cure/Include/TerrainManager.h"
 #include "../../Lepra/Include/Log.h"
 #include "../../Lepra/Include/Network.h"
+#include "../../Lepra/Include/Packer.h"
 #include "../../Lepra/Include/PerformanceScope.h"
 
 
@@ -93,7 +93,7 @@ bool TestPacker(const Lepra::LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = _T("pack unicode");
-		lTestOk = (Cure::PackerUnicodeString::Pack(lRawData, L"ABC") == 10);
+		lTestOk = (Lepra::PackerUnicodeString::Pack(lRawData, L"ABC") == 10);
 		assert(lTestOk);
 		if (lTestOk)
 		{
@@ -108,7 +108,7 @@ bool TestPacker(const Lepra::LogDecorator& pAccount)
 	{
 		lContext = _T("unpack unicode");
 		Lepra::UnicodeString lUnpacked;
-		lTestOk = (Cure::PackerUnicodeString::Unpack(&lUnpacked, lRawData, 10) == 10);
+		lTestOk = (Lepra::PackerUnicodeString::Unpack(&lUnpacked, lRawData, 10) == 10);
 		assert(lTestOk);
 		if (lTestOk)
 		{

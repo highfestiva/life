@@ -4,7 +4,7 @@
 
 
 
-#include "../Include/StructureEngine.h"
+#include "../Include/PhysicsEngine.h"
 #include <assert.h>
 #include "../../Lepra/Include/Math.h"
 #include "../Include/ChunkyBoneGeometry.h"
@@ -17,7 +17,7 @@ namespace TBC
 
 
 
-StructureEngine::StructureEngine(EngineType pEngineType, float pStrength, float pMaxSpeed,
+PhysicsEngine::PhysicsEngine(EngineType pEngineType, float pStrength, float pMaxSpeed,
 	float pMaxSpeed2, unsigned pControllerIndex):
 	mEngineType(pEngineType),
 	mStrength(pStrength),
@@ -28,13 +28,13 @@ StructureEngine::StructureEngine(EngineType pEngineType, float pStrength, float 
 	::memset(mValue, 0, sizeof(mValue));
 }
 
-StructureEngine::~StructureEngine()
+PhysicsEngine::~PhysicsEngine()
 {
 }
 
 
 
-StructureEngine* StructureEngine::Load(ChunkyPhysics* pStructure, const void* pData, unsigned pByteCount)
+PhysicsEngine* PhysicsEngine::Load(ChunkyPhysics* pStructure, const void* pData, unsigned pByteCount)
 {
 	const Lepra::uint32* lData = (const Lepra::uint32*)pData;
 	if (pByteCount != sizeof(Lepra::uint32)*6 + Lepra::Endian::BigToHost(lData[5])*sizeof(Lepra::uint32)*3)
@@ -44,7 +44,7 @@ StructureEngine* StructureEngine::Load(ChunkyPhysics* pStructure, const void* pD
 		return (0);
 	}
 
-	StructureEngine* lEngine = new StructureEngine(ENGINE_WALK, 0, 0, 0, 0);
+	PhysicsEngine* lEngine = new PhysicsEngine(ENGINE_WALK, 0, 0, 0, 0);
 	lEngine->LoadChunkyData(pStructure, pData);
 	if (lEngine->GetChunkySize() != pByteCount)
 	{
@@ -58,19 +58,19 @@ StructureEngine* StructureEngine::Load(ChunkyPhysics* pStructure, const void* pD
 
 
 
-StructureEngine::EngineType StructureEngine::GetEngineType() const
+PhysicsEngine::EngineType PhysicsEngine::GetEngineType() const
 {
 	return (mEngineType);
 }
 
 
 
-void StructureEngine::AddControlledGeometry(ChunkyBoneGeometry* pGeometry, float pScale, EngineMode pMode)
+void PhysicsEngine::AddControlledGeometry(ChunkyBoneGeometry* pGeometry, float pScale, EngineMode pMode)
 {
 	mEngineNodeArray.push_back(EngineNode(pGeometry, pScale, pMode));
 }
 
-bool StructureEngine::SetValue(unsigned pAspect, float pValue, float pZAngle)
+bool PhysicsEngine::SetValue(unsigned pAspect, float pValue, float pZAngle)
 {
 	pValue = (pValue > 1)? 1 : pValue;
 	pValue = (pValue < -1)? -1 : pValue;
@@ -153,7 +153,7 @@ bool StructureEngine::SetValue(unsigned pAspect, float pValue, float pZAngle)
 
 
 
-void StructureEngine::OnTick(PhysicsManager* pPhysicsManager, float pFrameTime)
+void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, float pFrameTime)
 {
 	EngineNodeArray::const_iterator i = mEngineNodeArray.begin();
 	for (; i != mEngineNodeArray.end(); ++i)
@@ -281,30 +281,30 @@ void StructureEngine::OnTick(PhysicsManager* pPhysicsManager, float pFrameTime)
 
 
 
-unsigned StructureEngine::GetControllerIndex() const
+unsigned PhysicsEngine::GetControllerIndex() const
 {
 	return (mControllerIndex);
 }
 
-float StructureEngine::GetValue() const
+float PhysicsEngine::GetValue() const
 {
 	return (mValue[0]);
 }
 
-const float* StructureEngine::GetValues() const
+const float* PhysicsEngine::GetValues() const
 {
 	return (mValue);
 }
 
 
 
-unsigned StructureEngine::GetChunkySize() const
+unsigned PhysicsEngine::GetChunkySize() const
 {
 	return ((unsigned)(sizeof(Lepra::uint32)*5 +
 		sizeof(Lepra::uint32) + sizeof(Lepra::uint32)*3*mEngineNodeArray.size()));
 }
 
-void StructureEngine::SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const
+void PhysicsEngine::SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const
 {
 	Lepra::uint32* lData = (Lepra::uint32*)pData;
 	lData[0] = Lepra::Endian::HostToBig(GetEngineType());
@@ -323,7 +323,7 @@ void StructureEngine::SaveChunkyData(const ChunkyPhysics* pStructure, void* pDat
 	}
 }
 
-void StructureEngine::LoadChunkyData(ChunkyPhysics* pStructure, const void* pData)
+void PhysicsEngine::LoadChunkyData(ChunkyPhysics* pStructure, const void* pData)
 {
 	const Lepra::uint32* lData = (const Lepra::uint32*)pData;
 
@@ -346,7 +346,7 @@ void StructureEngine::LoadChunkyData(ChunkyPhysics* pStructure, const void* pDat
 
 
 
-void StructureEngine::ApplyTorque(PhysicsManager* pPhysicsManager, float pFrameTime, ChunkyBoneGeometry* pGeometry, const EngineNode& pEngineNode)
+void PhysicsEngine::ApplyTorque(PhysicsManager* pPhysicsManager, float pFrameTime, ChunkyBoneGeometry* pGeometry, const EngineNode& pEngineNode)
 {
 	assert(pGeometry->GetJointId() != INVALID_JOINT);
 	if (pGeometry->GetJointId() != INVALID_JOINT)
@@ -433,7 +433,7 @@ void StructureEngine::ApplyTorque(PhysicsManager* pPhysicsManager, float pFrameT
 
 
 
-LOG_CLASS_DEFINE(PHYSICS, StructureEngine);
+LOG_CLASS_DEFINE(PHYSICS, PhysicsEngine);
 
 
 

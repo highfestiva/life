@@ -489,10 +489,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Source\Packer.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\Source\Packet.cpp"
 				>
 			</File>
@@ -592,10 +588,6 @@
 			</File>
 			<File
 				RelativePath=".\Include\NetworkAgent.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\Packer.h"
 				>
 			</File>
 			<File

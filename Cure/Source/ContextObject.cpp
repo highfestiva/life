@@ -14,7 +14,7 @@
 #include "../../TBC/Include/ChunkyBoneGeometry.h"
 #include "../../TBC/Include/ChunkyPhysics.h"
 #include "../../TBC/Include/PhysicsManager.h"
-#include "../../TBC/Include/StructureEngine.h"
+#include "../../TBC/Include/PhysicsEngine.h"
 #include "../Include/ContextManager.h"
 #include "../Include/ContextObjectAttribute.h"
 #include "../Include/Cure.h"
@@ -182,7 +182,7 @@ bool ContextObject::DetachFromObject(ContextObject* /*pObject*/)
 		if (pObject == x->mObject)
 		{
 			TBC::PhysicsManager::JointID lJointId = x->mJointId;
-			TBC::StructureEngine* lEngine = x->mEngine;
+			TBC::PhysicsEngine* lEngine = x->mEngine;
 			mConnectionList.erase(x);
 			pObject->DetachFromObject(this);
 			if (lJointId != TBC::INVALID_JOINT)
@@ -369,28 +369,28 @@ bool ContextObject::UpdateFullPosition(const ObjectPositionalData*& pPositionalD
 	for (int z = 0; z != lEngineCount; ++z)
 	{
 		// TODO: add support for parent ID??????????? JB 2009-07-08: don't know what this is anymore.
-		const TBC::StructureEngine* lEngine = mStructure->GetEngine(z);
+		const TBC::PhysicsEngine* lEngine = mStructure->GetEngine(z);
 		switch (lEngine->GetEngineType())
 		{
-			case TBC::StructureEngine::ENGINE_CAMERA_FLAT_PUSH:
+			case TBC::PhysicsEngine::ENGINE_CAMERA_FLAT_PUSH:
 			{
 				GETSET_OBJECT_POSITIONAL_AT(mPosition, y, RealData4, lData, PositionalData::TYPE_REAL_4, 1);
 				++y;
 				::memcpy(lData->mValue, lEngine->GetValues(), sizeof(float)*4);
 			}
 			break;
-			case TBC::StructureEngine::ENGINE_HINGE2_ROLL:
-			case TBC::StructureEngine::ENGINE_HINGE2_TURN:
-			case TBC::StructureEngine::ENGINE_HINGE2_BREAK:
-			case TBC::StructureEngine::ENGINE_HINGE:
+			case TBC::PhysicsEngine::ENGINE_HINGE2_ROLL:
+			case TBC::PhysicsEngine::ENGINE_HINGE2_TURN:
+			case TBC::PhysicsEngine::ENGINE_HINGE2_BREAK:
+			case TBC::PhysicsEngine::ENGINE_HINGE:
 			{
 				GETSET_OBJECT_POSITIONAL_AT(mPosition, y, RealData1, lData, PositionalData::TYPE_REAL_1, 1);
 				++y;
 				lData->mValue = lEngine->GetValue();
 			}
 			break;
-			case TBC::StructureEngine::ENGINE_ROLL_STRAIGHT:
-			case TBC::StructureEngine::ENGINE_GLUE:
+			case TBC::PhysicsEngine::ENGINE_ROLL_STRAIGHT:
+			case TBC::PhysicsEngine::ENGINE_GLUE:
 			{
 				// Unsynchronized "engine".
 			}
@@ -583,10 +583,10 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData)
 	for (int z = 0; z != lEngineCount; ++z)
 	{
 		// TODO: add support for parent ID??????????? JB 2009-07-08: don't know what this is anymore.
-		const TBC::StructureEngine* lEngine = mStructure->GetEngine(z);
+		const TBC::PhysicsEngine* lEngine = mStructure->GetEngine(z);
 		switch (lEngine->GetEngineType())
 		{
-			case TBC::StructureEngine::ENGINE_CAMERA_FLAT_PUSH:
+			case TBC::PhysicsEngine::ENGINE_CAMERA_FLAT_PUSH:
 			{
 				assert(mPosition.mBodyPositionArray.size() > y);
 				assert(mPosition.mBodyPositionArray[y]->GetType() == PositionalData::TYPE_REAL_4);
@@ -603,10 +603,10 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData)
 				SetEnginePower(3, lData->mValue[2], lData->mValue[3]);	// TRICKY: specialcasing.
 			}
 			break;
-			case TBC::StructureEngine::ENGINE_HINGE2_ROLL:
-			case TBC::StructureEngine::ENGINE_HINGE2_TURN:
-			case TBC::StructureEngine::ENGINE_HINGE2_BREAK:
-			case TBC::StructureEngine::ENGINE_HINGE:
+			case TBC::PhysicsEngine::ENGINE_HINGE2_ROLL:
+			case TBC::PhysicsEngine::ENGINE_HINGE2_TURN:
+			case TBC::PhysicsEngine::ENGINE_HINGE2_BREAK:
+			case TBC::PhysicsEngine::ENGINE_HINGE:
 			{
 				assert(mPosition.mBodyPositionArray.size() > y);
 				assert(mPosition.mBodyPositionArray[y]->GetType() == PositionalData::TYPE_REAL_1);
@@ -622,8 +622,8 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData)
 				SetEnginePower(lEngine->GetControllerIndex(), lData->mValue, 0);
 			}
 			break;
-			case TBC::StructureEngine::ENGINE_ROLL_STRAIGHT:
-			case TBC::StructureEngine::ENGINE_GLUE:
+			case TBC::PhysicsEngine::ENGINE_ROLL_STRAIGHT:
+			case TBC::PhysicsEngine::ENGINE_GLUE:
 			{
 				// Unsynchronized "engine".
 			}
@@ -811,7 +811,7 @@ void ContextObject::AttachToObject(TBC::ChunkyBoneGeometry* pBoneGeometry1, Cont
 		TBC::PhysicsManager::JointID lJoint = lPhysicsManager->CreateBallJoint(pBoneGeometry1->GetBodyId(), lBody2Connectee, lAnchor.GetPosition());
 		unsigned lAttachNodeId = mStructure->GetNextGeometryIndex();
 		AddPhysicsObject(PhysicsNode(pBoneGeometry1->GetId(), lAttachNodeId, TBC::INVALID_BODY, PhysicsNode::TYPE_EXCLUDE, lJoint));
-		TBC::StructureEngine* lEngine = new TBC::StructureEngine(this, TBC::StructureEngine::ENGINE_GLUE, 0, 0, 0, 0);
+		TBC::PhysicsEngine* lEngine = new TBC::PhysicsEngine(this, TBC::PhysicsEngine::ENGINE_GLUE, 0, 0, 0, 0);
 		lEngine->AddControlledNode(lAttachNodeId, 1);
 		AddAttachment(pObject2, lJoint, lEngine);
 		pObject2->AddAttachment(this, TBC::INVALID_JOINT, 0);
@@ -836,7 +836,7 @@ bool ContextObject::IsAttachedTo(ContextObject* pObject) const
 	return (false);
 }
 
-void ContextObject::AddAttachment(ContextObject* pObject, TBC::PhysicsManager::JointID pJoint, TBC::StructureEngine* pEngine)
+void ContextObject::AddAttachment(ContextObject* pObject, TBC::PhysicsManager::JointID pJoint, TBC::PhysicsEngine* pEngine)
 {
 	assert(!IsAttachedTo(pObject));
 	mConnectionList.push_back(Connection(pObject, pJoint, pEngine));

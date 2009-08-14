@@ -6,7 +6,7 @@
 
 #include "../Include/ChunkyBoneGeometry.h"
 #include "../Include/ChunkyPhysics.h"
-#include "../Include/StructureEngine.h"
+#include "../Include/PhysicsEngine.h"
 
 
 
@@ -136,13 +136,13 @@ int ChunkyPhysics::GetEngineCount() const
 	return ((int)mEngineArray.size());
 }
 
-StructureEngine* ChunkyPhysics::GetEngine(int pBoneIndex) const
+PhysicsEngine* ChunkyPhysics::GetEngine(int pBoneIndex) const
 {
 	assert((size_t)pBoneIndex < mEngineArray.size());
 	return (mEngineArray[pBoneIndex]);
 }
 
-void ChunkyPhysics::AddEngine(StructureEngine* pEngine)
+void ChunkyPhysics::AddEngine(PhysicsEngine* pEngine)
 {
 	mEngineArray.push_back(pEngine);
 }

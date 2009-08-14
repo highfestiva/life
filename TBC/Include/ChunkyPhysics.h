@@ -18,7 +18,7 @@ namespace TBC
 
 
 class ChunkyBoneGeometry;
-class StructureEngine;
+class PhysicsEngine;
 
 
 
@@ -51,8 +51,8 @@ public:
 	void ClearBoneGeometries(PhysicsManager* pPhysics);
 
 	int GetEngineCount() const;
-	StructureEngine* GetEngine(int pBoneIndex) const;
-	void AddEngine(StructureEngine* pEngine);	// Takes ownership of the given engine.
+	PhysicsEngine* GetEngine(int pBoneIndex) const;
+	void AddEngine(PhysicsEngine* pEngine);	// Takes ownership of the given engine.
 	void SetEnginePower(unsigned pAspect, float pPower, float pAngle);
 	void ClearEngines();
 
@@ -67,7 +67,7 @@ public:
 protected:
 private:
 	typedef std::vector<ChunkyBoneGeometry*> GeometryArray;
-	typedef std::vector<StructureEngine*> EngineArray;
+	typedef std::vector<PhysicsEngine*> EngineArray;
 	GeometryArray mGeometryArray;
 	EngineArray mEngineArray;
 	TransformOperation mTransformOperation;

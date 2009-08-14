@@ -18,7 +18,7 @@ namespace TBC
 {
 class ChunkyPhysics;
 class ChunkyBoneGeometry;
-class StructureEngine;
+class PhysicsEngine;
 }
 
 
@@ -78,12 +78,12 @@ public:
 protected:
 	void AttachToObject(TBC::ChunkyBoneGeometry* pBoneGeometry1, ContextObject* pObject2, TBC::ChunkyBoneGeometry* pBoneGeometry2, bool pSend);
 	bool IsAttachedTo(ContextObject* pObject) const;
-	void AddAttachment(ContextObject* pObject, TBC::PhysicsManager::JointID pJoint, TBC::StructureEngine* pEngine);
+	void AddAttachment(ContextObject* pObject, TBC::PhysicsManager::JointID pJoint, TBC::PhysicsEngine* pEngine);
 
 	typedef std::vector<ContextObjectAttribute*> AttributeArray;
 	struct Connection
 	{
-		Connection(ContextObject* pObject, TBC::PhysicsManager::JointID pJointId, TBC::StructureEngine* pEngine):
+		Connection(ContextObject* pObject, TBC::PhysicsManager::JointID pJointId, TBC::PhysicsEngine* pEngine):
 			mObject(pObject),
 			mJointId(pJointId),
 			mEngine(pEngine)
@@ -91,7 +91,7 @@ protected:
 		}
 		ContextObject* mObject;
 		TBC::PhysicsManager::JointID mJointId;
-		TBC::StructureEngine* mEngine;
+		TBC::PhysicsEngine* mEngine;
 	};
 	typedef std::list<Connection> ConnectionList;
 

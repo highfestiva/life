@@ -4,8 +4,8 @@
 
 
 
-#include "../Include/PhysicsEngineFactory.h"
-#include "../Include/PhysicsEngineODE.h"
+#include "../Include/PhysicsManagerFactory.h"
+#include "../Include/PhysicsManagerODE.h"
 
 
 
@@ -14,12 +14,12 @@ namespace TBC
 
 
 
-PhysicsEngine* PhysicsEngineFactory::Create(Engine pEngine)
+PhysicsManager* PhysicsManagerFactory::Create(Engine pEngine)
 {
-	PhysicsEngine* lEngine = 0;
+	PhysicsManager* lEngine = 0;
 	switch (pEngine)
 	{
-		case ENGINE_ODE:	lEngine = new PhysicsEngineODE();		break;
+		case ENGINE_ODE:	lEngine = new PhysicsManagerODE();		break;
 		default:		mLog.Error(_T("Physics type not supported."));	break;
 	}
 	return (lEngine);
@@ -27,7 +27,7 @@ PhysicsEngine* PhysicsEngineFactory::Create(Engine pEngine)
 
 
 
-LOG_CLASS_DEFINE(PHYSICS, PhysicsEngineFactory);
+LOG_CLASS_DEFINE(PHYSICS, PhysicsManagerFactory);
 
 
 

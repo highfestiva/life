@@ -6,8 +6,8 @@
 
 #include "../Include/Packet.h"
 #include <assert.h>
+#include "../../Lepra/Include/Packer.h"
 #include "../Include/PositionalData.h"
-#include "../Include/Packer.h"
 
 
 
@@ -118,7 +118,7 @@ Packet::ParseResult Packet::Parse(unsigned pOffset)
 void Packet::StoreHeader(unsigned pOffset)
 {
 	const int lPacketDataSize = mPacketSize-PACKET_SIZE_MARKER_LENGTH;
-	PackerInt16::Pack(&GetWriteBuffer()[pOffset], lPacketDataSize);
+	Lepra::PackerInt16::Pack(&GetWriteBuffer()[pOffset], lPacketDataSize);
 }
 
 void Packet::AddMessage(Message* pMessage)
@@ -142,7 +142,7 @@ bool Packet::AppendToPacketBuffer(Lepra::Datagram& pWriteBuffer) const
 		{
 			::memcpy(&pWriteBuffer.mDataBuffer[pWriteBuffer.mDataSize], GetReadBuffer()+PACKET_SIZE_MARKER_LENGTH, lThisDataLength);
 			pWriteBuffer.mDataSize = lTotalNewLength;
-			PackerInt16::Pack(pWriteBuffer.mDataBuffer, lTotalNewLength-PACKET_SIZE_MARKER_LENGTH);
+			Lepra::PackerInt16::Pack(pWriteBuffer.mDataBuffer, lTotalNewLength-PACKET_SIZE_MARKER_LENGTH);
 		}
 	}
 	return (lOk);
@@ -261,7 +261,7 @@ int Packet::Receive(Lepra::TcpSocket* pSocket, void* pBuffer, int pMaxSize)
 
 bool Packet::ReadHeader(int& pPacketSize, const Lepra::uint8* pBuffer, int pByteCount)
 {
-	bool lOk = (PackerInt16::Unpack(pPacketSize, pBuffer, pByteCount) == PACKET_SIZE_MARKER_LENGTH);
+	bool lOk = (Lepra::PackerInt16::Unpack(pPacketSize, pBuffer, pByteCount) == PACKET_SIZE_MARKER_LENGTH);
 	if (lOk)
 	{
 		lOk = (pPacketSize > 0);
@@ -316,12 +316,12 @@ int MessageLoginRequest::Parse(const Lepra::uint8* pData, int pSize)
 		int lSize = -1;
 		if (pSize >= 1+4+22)
 		{
-			lSize = PackerUnicodeString::Unpack(0, &mData[lTotalSize], pSize-1-22);
+			lSize = Lepra::PackerUnicodeString::Unpack(0, &mData[lTotalSize], pSize-1-22);
 			lTotalSize += lSize;
 		}
 		if (lSize > 0)
 		{
-			lSize = PackerOctetString::Unpack(0, &mData[lTotalSize], 22);
+			lSize = Lepra::PackerOctetString::Unpack(0, &mData[lTotalSize], 22);
 			if (lSize > 0)
 			{
 				mPasswordData = &mData[lTotalSize+2];
@@ -340,15 +340,15 @@ int MessageLoginRequest::Store(Packet* pPacket, const Lepra::UnicodeString& pLog
 {
 	mWritableData[0] = (Lepra::uint8)GetType();
 	unsigned lSize = 1;
-	lSize += PackerUnicodeString::Pack(&mWritableData[lSize], pLoginName);
-	lSize += PackerOctetString::Pack(&mWritableData[lSize], (const Lepra::uint8*)pPassword.Get().c_str(), 20);
+	lSize += Lepra::PackerUnicodeString::Pack(&mWritableData[lSize], pLoginName);
+	lSize += Lepra::PackerOctetString::Pack(&mWritableData[lSize], (const Lepra::uint8*)pPassword.Get().c_str(), 20);
 	pPacket->AddPacketSize(lSize);
 	return (lSize);
 }
 
 void MessageLoginRequest::GetLoginName(Lepra::UnicodeString& pLoginName)
 {
-	PackerUnicodeString::Unpack(&pLoginName, &mData[1], 1024);
+	Lepra::PackerUnicodeString::Unpack(&pLoginName, &mData[1], 1024);
 }
 
 MangledPassword MessageLoginRequest::GetPassword()
@@ -381,7 +381,7 @@ int MessageStatus::Parse(const Lepra::uint8* pData, int pSize)
 		int lSize = -1;
 		if (pSize >= (int)(1+sizeof(Lepra::uint32)*2+4))
 		{
-			lSize = PackerUnicodeString::Unpack(0, &mData[lTotalSize], pSize-lTotalSize);
+			lSize = Lepra::PackerUnicodeString::Unpack(0, &mData[lTotalSize], pSize-lTotalSize);
 			lTotalSize += lSize;
 		}
 		if (lSize <= 0)
@@ -397,9 +397,9 @@ int MessageStatus::Store(Packet* pPacket, RemoteStatus pStatus, Lepra::int32 pIn
 	Lepra::int32 lStatus = (Lepra::int32)pStatus;
 	mWritableData[0] = (Lepra::uint8)GetType();
 	unsigned lSize = 1;
-	lSize += PackerInt32::Pack(&mWritableData[lSize], lStatus);
-	lSize += PackerInt32::Pack(&mWritableData[lSize], pInteger);
-	lSize += PackerUnicodeString::Pack(&mWritableData[lSize], pMessage);
+	lSize += Lepra::PackerInt32::Pack(&mWritableData[lSize], lStatus);
+	lSize += Lepra::PackerInt32::Pack(&mWritableData[lSize], pInteger);
+	lSize += Lepra::PackerUnicodeString::Pack(&mWritableData[lSize], pMessage);
 	pPacket->AddPacketSize(lSize);
 	return (lSize);
 }
@@ -407,20 +407,20 @@ int MessageStatus::Store(Packet* pPacket, RemoteStatus pStatus, Lepra::int32 pIn
 RemoteStatus MessageStatus::GetRemoteStatus() const
 {
 	Lepra::int32 lStatus = -1;
-	PackerInt32::Unpack(lStatus, mData+1, 4);
+	Lepra::PackerInt32::Unpack(lStatus, mData+1, 4);
 	return ((RemoteStatus)lStatus);
 }
 
 Lepra::int32 MessageStatus::GetInteger() const
 {
 	Lepra::int32 lInteger = -1;
-	PackerInt32::Unpack(lInteger, mData+1+sizeof(Lepra::uint32), 4);
+	Lepra::PackerInt32::Unpack(lInteger, mData+1+sizeof(Lepra::uint32), 4);
 	return (lInteger);
 }
 
 void MessageStatus::GetMessageString(Lepra::UnicodeString& pMessage) const
 {
-	PackerUnicodeString::Unpack(&pMessage, &mData[1+sizeof(Lepra::uint32)*2], 1024);
+	Lepra::PackerUnicodeString::Unpack(&pMessage, &mData[1+sizeof(Lepra::uint32)*2], 1024);
 }
 
 
@@ -456,9 +456,9 @@ int MessageNumber::Store(Packet* pPacket, InfoType pInfo, Lepra::int32 pInteger,
 
 	mWritableData[0] = (Lepra::uint8)GetType();
 	unsigned lSize = 1;
-	lSize += PackerInt32::Pack(&mWritableData[lSize], lInfo);
-	lSize += PackerInt32::Pack(&mWritableData[lSize], pInteger);
-	lSize += PackerReal::Pack(&mWritableData[lSize], pFloat);
+	lSize += Lepra::PackerInt32::Pack(&mWritableData[lSize], lInfo);
+	lSize += Lepra::PackerInt32::Pack(&mWritableData[lSize], pInteger);
+	lSize += Lepra::PackerReal::Pack(&mWritableData[lSize], pFloat);
 	pPacket->AddPacketSize(lSize);
 	return (lSize);
 }
@@ -466,21 +466,21 @@ int MessageNumber::Store(Packet* pPacket, InfoType pInfo, Lepra::int32 pInteger,
 MessageNumber::InfoType MessageNumber::GetInfo() const
 {
 	Lepra::int32 lInfo = -1;
-	PackerInt32::Unpack(lInfo, mData+1, 4);
+	Lepra::PackerInt32::Unpack(lInfo, mData+1, 4);
 	return ((InfoType)lInfo);
 }
 
 Lepra::int32 MessageNumber::GetInteger() const
 {
 	Lepra::int32 lInteger = -1;
-	PackerInt32::Unpack(lInteger, mData+1+sizeof(Lepra::int32), 4);
+	Lepra::PackerInt32::Unpack(lInteger, mData+1+sizeof(Lepra::int32), 4);
 	return (lInteger);
 }
 
 Lepra::float32 MessageNumber::GetFloat() const
 {
 	Lepra::float32 lFloat = -1;
-	PackerReal::Unpack(lFloat, mData+1+sizeof(Lepra::int32)*2, 4);
+	Lepra::PackerReal::Unpack(lFloat, mData+1+sizeof(Lepra::int32)*2, 4);
 	return (lFloat);
 }
 
@@ -506,14 +506,14 @@ int MessageObject::Store(Packet*, Lepra::uint32 pObjectId)
 {
 	mWritableData[0] = (Lepra::uint8)GetType();
 	unsigned lSize = 1;
-	lSize += PackerInt32::Pack(&mWritableData[lSize], pObjectId);
+	lSize += Lepra::PackerInt32::Pack(&mWritableData[lSize], pObjectId);
 	return (lSize);
 }
 
 Lepra::uint32 MessageObject::GetObjectId() const
 {
 	Lepra::int32 lObjectId;
-	PackerInt32::Unpack(lObjectId, &mData[1], sizeof(lObjectId));
+	Lepra::PackerInt32::Unpack(lObjectId, &mData[1], sizeof(lObjectId));
 	return (lObjectId);
 }
 
@@ -539,7 +539,7 @@ int MessageCreateObject::Parse(const Lepra::uint8* pData, int pSize)
 			int lSize = -1;
 			if (pSize >= lTotalSize+4)
 			{
-				lSize = PackerUnicodeString::Unpack(0, &mData[lTotalSize], pSize-lTotalSize);
+				lSize = Lepra::PackerUnicodeString::Unpack(0, &mData[lTotalSize], pSize-lTotalSize);
 				lTotalSize += lSize;
 			}
 			if (lSize <= 0)
@@ -555,14 +555,14 @@ int MessageCreateObject::Store(Packet* pPacket, GameObjectId pObjectId, const Le
 {
 	Lepra::int32 lObjectId = (Lepra::int32)pObjectId;
 	unsigned lSize = Parent::Store(pPacket, lObjectId);
-	lSize += PackerUnicodeString::Pack(&mWritableData[lSize], pClassId);
+	lSize += Lepra::PackerUnicodeString::Pack(&mWritableData[lSize], pClassId);
 	pPacket->AddPacketSize(lSize);
 	return (lSize);
 }
 
 void MessageCreateObject::GetClassId(Lepra::UnicodeString& pClassId) const
 {
-	PackerUnicodeString::Unpack(&pClassId, &mData[1+sizeof(Lepra::int32)], 1024);
+	Lepra::PackerUnicodeString::Unpack(&pClassId, &mData[1+sizeof(Lepra::int32)], 1024);
 }
 
 
@@ -615,14 +615,14 @@ int MessageObjectMovement::Parse(const Lepra::uint8* pData, int pSize)
 int MessageObjectMovement::Store(Packet* pPacket, Lepra::uint32 pObjectId, Lepra::int32 pFrameIndex)
 {
 	int lSize = Parent::Store(pPacket, pObjectId);
-	lSize += PackerInt32::Pack(&mWritableData[lSize], pFrameIndex);
+	lSize += Lepra::PackerInt32::Pack(&mWritableData[lSize], pFrameIndex);
 	return (lSize);
 }
 
 Lepra::int32 MessageObjectMovement::GetFrameIndex() const
 {
 	Lepra::int32 lFrameIndex;
-	PackerInt32::Unpack(lFrameIndex, &mData[1+sizeof(Lepra::uint32)], sizeof(lFrameIndex));
+	Lepra::PackerInt32::Unpack(lFrameIndex, &mData[1+sizeof(Lepra::uint32)], sizeof(lFrameIndex));
 	return (lFrameIndex);
 }
 
@@ -721,9 +721,9 @@ int MessageObjectAttach::Store(Packet* pPacket, Lepra::uint32 pObject1Id,
 	Lepra::uint32 pObject2Id, Lepra::uint16 pBody1Id, Lepra::uint16 pBody2Id)
 {
 	int lSize = Parent::Store(pPacket, pObject1Id);
-	lSize += PackerInt32::Pack(&mWritableData[lSize], pObject2Id);
-	lSize += PackerInt16::Pack(&mWritableData[lSize], pBody1Id);
-	lSize += PackerInt16::Pack(&mWritableData[lSize], pBody2Id);
+	lSize += Lepra::PackerInt32::Pack(&mWritableData[lSize], pObject2Id);
+	lSize += Lepra::PackerInt16::Pack(&mWritableData[lSize], pBody1Id);
+	lSize += Lepra::PackerInt16::Pack(&mWritableData[lSize], pBody2Id);
 	pPacket->AddPacketSize(lSize);
 	return (lSize);
 }
@@ -731,21 +731,21 @@ int MessageObjectAttach::Store(Packet* pPacket, Lepra::uint32 pObject1Id,
 Lepra::uint32 MessageObjectAttach::GetObject2Id() const
 {
 	Lepra::int32 lObject2Id;
-	PackerInt32::Unpack(lObject2Id, &mData[1+sizeof(Lepra::uint32)], sizeof(lObject2Id));
+	Lepra::PackerInt32::Unpack(lObject2Id, &mData[1+sizeof(Lepra::uint32)], sizeof(lObject2Id));
 	return (lObject2Id);
 }
 
 Lepra::uint16 MessageObjectAttach::GetBody1Id() const
 {
 	int lBody1Id;
-	PackerInt16::Unpack(lBody1Id, &mData[1+sizeof(Lepra::uint32)*2], sizeof(lBody1Id));
+	Lepra::PackerInt16::Unpack(lBody1Id, &mData[1+sizeof(Lepra::uint32)*2], sizeof(lBody1Id));
 	return ((Lepra::uint16)lBody1Id);
 }
 
 Lepra::uint16 MessageObjectAttach::GetBody2Id() const
 {
 	int lBody2Id;
-	PackerInt16::Unpack(lBody2Id, &mData[1+sizeof(Lepra::uint32)*2+sizeof(Lepra::uint16)], sizeof(lBody2Id));
+	Lepra::PackerInt16::Unpack(lBody2Id, &mData[1+sizeof(Lepra::uint32)*2+sizeof(Lepra::uint16)], sizeof(lBody2Id));
 	return ((Lepra::int16)lBody2Id);
 }
 
@@ -781,7 +781,7 @@ int MessageObjectDetach::Parse(const Lepra::uint8* pData, int pSize)
 int MessageObjectDetach::Store(Packet* pPacket, Lepra::uint32 pObject1Id, Lepra::uint32 pObject2Id)
 {
 	int lSize = Parent::Store(pPacket, pObject1Id);
-	lSize += PackerInt32::Pack(&mWritableData[lSize], pObject2Id);
+	lSize += Lepra::PackerInt32::Pack(&mWritableData[lSize], pObject2Id);
 	pPacket->AddPacketSize(lSize);
 	return (lSize);
 }
@@ -789,7 +789,7 @@ int MessageObjectDetach::Store(Packet* pPacket, Lepra::uint32 pObject1Id, Lepra:
 Lepra::uint32 MessageObjectDetach::GetObject2Id() const
 {
 	Lepra::int32 lObject2Id;
-	PackerInt32::Unpack(lObject2Id, &mData[1+sizeof(Lepra::uint32)], sizeof(lObject2Id));
+	Lepra::PackerInt32::Unpack(lObject2Id, &mData[1+sizeof(Lepra::uint32)], sizeof(lObject2Id));
 	return (lObject2Id);
 }
 

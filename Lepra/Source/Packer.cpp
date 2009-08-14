@@ -7,23 +7,21 @@
 
 
 
-#include <assert.h>
-#include "../../Lepra/Include/Endian.h"
 #include "../Include/Packer.h"
+#include <assert.h>
+#include "../Include/Endian.h"
 
-#pragma warning(disable: 4127)	// Conditional expression is constant - for sizeof(wchar_t).
 
 
-
-namespace Cure
+namespace Lepra
 {
 
 
 
-int PackerTransformation::Pack(Lepra::uint8* pDestination, const Lepra::TransformationF& pSource)
+int PackerTransformation::Pack(uint8* pDestination, const TransformationF& pSource)
 {
 	// TODO: improve packer.
-	typedef Lepra::TransformationF::BaseType _T;
+	typedef TransformationF::BaseType _T;
 	int lOffset = 0;
 	*(_T*)&pDestination[lOffset] = pSource.GetOrientation().GetA();	lOffset += sizeof(_T);
 	*(_T*)&pDestination[lOffset] = pSource.GetOrientation().GetB();	lOffset += sizeof(_T);
@@ -35,9 +33,9 @@ int PackerTransformation::Pack(Lepra::uint8* pDestination, const Lepra::Transfor
 	return (lOffset);
 }
 
-int PackerTransformation::Unpack(Lepra::TransformationF& pDestination, const Lepra::uint8* pSource, int pSize)
+int PackerTransformation::Unpack(TransformationF& pDestination, const uint8* pSource, int pSize)
 {
-	typedef Lepra::TransformationF::BaseType _T;
+	typedef TransformationF::BaseType _T;
 	int lOffset = 0;
 	if (pSize >= (int)sizeof(_T)*7)
 	{
@@ -57,26 +55,26 @@ int PackerTransformation::Unpack(Lepra::TransformationF& pDestination, const Lep
 
 
 
-int PackerVector::Pack(Lepra::uint8* pDestination, const Lepra::Vector3DF& pSource)
+int PackerVector::Pack(uint8* pDestination, const Vector3DF& pSource)
 {
 	// TODO: improve packer.
-	typedef Lepra::Vector3DF::BaseType _T;
+	typedef Vector3DF::BaseType _T;
 	int lOffset = 0;
-	*(_T*)&pDestination[lOffset] = Lepra::Endian::HostToBig(pSource.x);	lOffset += sizeof(_T);
-	*(_T*)&pDestination[lOffset] = Lepra::Endian::HostToBig(pSource.y);	lOffset += sizeof(_T);
-	*(_T*)&pDestination[lOffset] = Lepra::Endian::HostToBig(pSource.z);	lOffset += sizeof(_T);
+	*(_T*)&pDestination[lOffset] = Endian::HostToBig(pSource.x);	lOffset += sizeof(_T);
+	*(_T*)&pDestination[lOffset] = Endian::HostToBig(pSource.y);	lOffset += sizeof(_T);
+	*(_T*)&pDestination[lOffset] = Endian::HostToBig(pSource.z);	lOffset += sizeof(_T);
 	return (lOffset);
 }
 
-int PackerVector::Unpack(Lepra::Vector3DF& pDestination, const Lepra::uint8* pSource, int pSize)
+int PackerVector::Unpack(Vector3DF& pDestination, const uint8* pSource, int pSize)
 {
-	typedef Lepra::Vector3DF::BaseType _T;
+	typedef Vector3DF::BaseType _T;
 	int lOffset = 0;
 	if (pSize >= (int)sizeof(_T)*3)
 	{
-		pDestination.x = Lepra::Endian::BigToHost(*(_T*)&pSource[lOffset]);	lOffset += sizeof(_T);
-		pDestination.y = Lepra::Endian::BigToHost(*(_T*)&pSource[lOffset]);	lOffset += sizeof(_T);
-		pDestination.z = Lepra::Endian::BigToHost(*(_T*)&pSource[lOffset]);	lOffset += sizeof(_T);
+		pDestination.x = Endian::BigToHost(*(_T*)&pSource[lOffset]);	lOffset += sizeof(_T);
+		pDestination.y = Endian::BigToHost(*(_T*)&pSource[lOffset]);	lOffset += sizeof(_T);
+		pDestination.z = Endian::BigToHost(*(_T*)&pSource[lOffset]);	lOffset += sizeof(_T);
 	}
 	else
 	{
@@ -87,21 +85,21 @@ int PackerVector::Unpack(Lepra::Vector3DF& pDestination, const Lepra::uint8* pSo
 
 
 
-int PackerInt32::Pack(Lepra::uint8* pDestination, Lepra::int32 pSource)
+int PackerInt32::Pack(uint8* pDestination, int32 pSource)
 {
 	// TODO: fix byte order.
-	*(Lepra::uint32*)pDestination = Lepra::Endian::HostToBig(pSource);
+	*(uint32*)pDestination = Endian::HostToBig(pSource);
 	return (sizeof(pSource));
 }
 
-int PackerInt32::Unpack(Lepra::int32& pDestination, const Lepra::uint8* pSource, int pSize)
+int PackerInt32::Unpack(int32& pDestination, const uint8* pSource, int pSize)
 {
 	// TODO: fix byte order.
 	int lSize = -1;
 	if (pSize >= (int)sizeof(pDestination))
 	{
 		lSize = sizeof(pDestination);
-		pDestination = Lepra::Endian::BigToHost(*(Lepra::uint32*)pSource);
+		pDestination = Endian::BigToHost(*(uint32*)pSource);
 	}
 	else
 	{
@@ -112,20 +110,20 @@ int PackerInt32::Unpack(Lepra::int32& pDestination, const Lepra::uint8* pSource,
 
 
 
-int PackerInt16::Pack(Lepra::uint8* pDestination, int pSource)
+int PackerInt16::Pack(uint8* pDestination, int pSource)
 {
-	*(Lepra::int16*)pDestination = Lepra::Endian::HostToBig((Lepra::int16)pSource);
-	return (sizeof(Lepra::int16));
+	*(int16*)pDestination = Endian::HostToBig((int16)pSource);
+	return (sizeof(int16));
 }
 
-int PackerInt16::Unpack(int& pDestination, const Lepra::uint8* pSource, int pSize)
+int PackerInt16::Unpack(int& pDestination, const uint8* pSource, int pSize)
 {
 	// TODO: fix byte order.
 	int lSize = -1;
-	if (pSize >= (int)sizeof(Lepra::int16))
+	if (pSize >= (int)sizeof(int16))
 	{
-		lSize = sizeof(Lepra::int16);
-		pDestination = Lepra::Endian::BigToHost(*(Lepra::int16*)pSource);
+		lSize = sizeof(int16);
+		pDestination = Endian::BigToHost(*(int16*)pSource);
 	}
 	else
 	{
@@ -136,19 +134,19 @@ int PackerInt16::Unpack(int& pDestination, const Lepra::uint8* pSource, int pSiz
 
 
 
-int PackerReal::Pack(Lepra::uint8* pDestination, float pSource)
+int PackerReal::Pack(uint8* pDestination, float pSource)
 {
-	*(float*)pDestination = Lepra::Endian::HostToBig(pSource);
+	*(float*)pDestination = Endian::HostToBig(pSource);
 	return (sizeof(pSource));
 }
 
-int PackerReal::Unpack(float& pDestination, const Lepra::uint8* pSource, int pSize)
+int PackerReal::Unpack(float& pDestination, const uint8* pSource, int pSize)
 {
 	int lSize;
 	if (pSize >= (int)sizeof(pDestination))
 	{
 		lSize = sizeof(pDestination);
-		pDestination = Lepra::Endian::BigToHost(*(float*)pSource);
+		pDestination = Endian::BigToHost(*(float*)pSource);
 	}
 	else
 	{
@@ -159,15 +157,15 @@ int PackerReal::Unpack(float& pDestination, const Lepra::uint8* pSource, int pSi
 
 
 
-int PackerOctetString::Pack(Lepra::uint8* pDestination, const Lepra::uint8* pSource, unsigned pLength)
+int PackerOctetString::Pack(uint8* pDestination, const uint8* pSource, unsigned pLength)
 {
-	pDestination[0] = (Lepra::uint8)pLength;
-	pDestination[1] = (Lepra::uint8)(pLength>>8);
+	pDestination[0] = (uint8)pLength;
+	pDestination[1] = (uint8)(pLength>>8);
 	::memcpy(pDestination+2, pSource, pLength);
 	return (2+pLength);
 }
 
-int PackerOctetString::Unpack(Lepra::uint8* pDestination, const Lepra::uint8* pSource, int pSize)
+int PackerOctetString::Unpack(uint8* pDestination, const uint8* pSource, int pSize)
 {
 	int lSize = -1;
 	if (pSize >= 3)
@@ -187,13 +185,15 @@ int PackerOctetString::Unpack(Lepra::uint8* pDestination, const Lepra::uint8* pS
 
 
 
-int PackerUnicodeString::Pack(Lepra::uint8* pDestination, const Lepra::UnicodeString& pSource)
+#pragma warning(disable: 4127)	// Conditional expression is constant - for sizeof(wchar_t).
+
+int PackerUnicodeString::Pack(uint8* pDestination, const UnicodeString& pSource)
 {
 	// TODO: improve Unicode packer. Could be optimized, and implemented to support
 	// horrid UTF-16 characters (which are 24 and 32 bits in length).
 	size_t lCharCount = pSource.length()+1;
-	pDestination[0] = (Lepra::uint8)lCharCount;
-	pDestination[1] = (Lepra::uint8)(lCharCount>>8);
+	pDestination[0] = (uint8)lCharCount;
+	pDestination[1] = (uint8)(lCharCount>>8);
 	if (sizeof(wchar_t) == 2)	// UTF-16 (Windows)
 	{
 		::memcpy(pDestination+2, pSource.c_str(), (lCharCount-1)*2);
@@ -202,28 +202,28 @@ int PackerUnicodeString::Pack(Lepra::uint8* pDestination, const Lepra::UnicodeSt
 	{
 		for (size_t x = 0; x < lCharCount-1; ++x)
 		{
-			*(Lepra::uint16*)&pDestination[2+x*2] = (Lepra::uint16)pSource[x];
+			*(uint16*)&pDestination[2+x*2] = (uint16)pSource[x];
 		}
 	}
 	else
 	{
 		assert(false);
 	}
-	*(Lepra::uint16*)&pDestination[2+(lCharCount-1)*2] = 0;
+	*(uint16*)&pDestination[2+(lCharCount-1)*2] = 0;
 	return (2+(int)lCharCount*2);
 }
 
-int PackerUnicodeString::Unpack(Lepra::UnicodeString* pDestination, const Lepra::uint8* pSource, int pSize)
+int PackerUnicodeString::Unpack(UnicodeString* pDestination, const uint8* pSource, int pSize)
 {
 	int lSize = -1;
-	if (pSize >= 3)
+	if (pSize >= 4)
 	{
-		const unsigned pCharCount = pSource[0]|(((unsigned)pSource[1])<<8);
-		if (pCharCount >= 1 && (int)pCharCount*2+2 <= pSize)
+		const int pCharCount = pSource[0]|(((unsigned)pSource[1])<<8);
+		if (pCharCount >= 1 && pCharCount*2+2 <= pSize)
 		{
-			const Lepra::uint16* lSource = (const Lepra::uint16*)&pSource[2];
+			const uint16* lSource = (const uint16*)&pSource[2];
 			// Check that the string is non-null everywhere but on the terminating zero.
-			for (unsigned x = 0; x < pCharCount-1; ++x)
+			for (int x = 0; x < pCharCount-1; ++x)
 			{
 				if (lSource[x] == _T('\0'))
 				{
@@ -243,7 +243,7 @@ int PackerUnicodeString::Unpack(Lepra::UnicodeString* pDestination, const Lepra:
 					{
 						pDestination->clear();
 						pDestination->reserve(pCharCount);
-						for (size_t x = 0; x < pCharCount-1; ++x)
+						for (int x = 0; x < pCharCount-1; ++x)
 						{
 							pDestination->push_back(lSource[x]);
 						}
@@ -258,6 +258,8 @@ int PackerUnicodeString::Unpack(Lepra::UnicodeString* pDestination, const Lepra:
 	}
 	return (lSize);
 }
+
+#pragma warning(default: 4127)
 
 
 

@@ -248,7 +248,7 @@ private:
 	LOG_CLASS_DECLARE();
 };
 
-/*// Contans information on physics and animation names. Derived class handles UI: mesh, materials, sounds, etc.
+// Contans information on physics and animation names. Derived class handles UI: mesh, materials, sounds, etc.
 class ChunkyClassLoader: public ChunkyLoader
 {
 public:
@@ -256,9 +256,12 @@ public:
 	virtual ~ChunkyClassLoader();
 	virtual bool Load(ChunkyClass* pData);
 	virtual bool Save(const ChunkyClass* pData);
+
+private:
+	LOG_CLASS_DECLARE();
 };
 
-// Contains class/group objects and links between them.
+/*// Contains class/group objects and links between them.
 class ChunkyGroupLoader: public ChunkyLoader
 {
 public:

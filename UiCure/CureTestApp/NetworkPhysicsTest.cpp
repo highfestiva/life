@@ -8,17 +8,16 @@
 
 #include <assert.h>
 #include <list>
+#include "../../Cure/Include/NetworkClient.h"
+#include "../../Cure/Include/NetworkServer.h"
+#include "../../Cure/Include/Packet.h"
+#include "../../Cure/Include/PositionalData.h"
 #include "../../Lepra/Include/DynamicArray.h"
 #include "../../Lepra/Include/HiResTimer.h"
 #include "../../Lepra/Include/Math.h"
 #include "../../Lepra/Include/Network.h"
 #include "../../Lepra/Include/Random.h"
 #include "../../Lepra/Include/SystemManager.h"
-#include "../../Cure/Include/NetworkClient.h"
-#include "../../Cure/Include/NetworkServer.h"
-#include "../../Cure/Include/Packer.h"
-#include "../../Cure/Include/Packet.h"
-#include "../../Cure/Include/PositionalData.h"
 #include "../../TBC/Include/PhysicsManager.h"
 #include "../../TBC/Include/PhysicsManagerFactory.h"
 #include "../../UiLepra/Include/UiCore.h"

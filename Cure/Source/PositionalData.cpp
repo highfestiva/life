@@ -4,9 +4,9 @@
 
 
 
-#include <assert.h>
-#include "../Include/Packer.h"
 #include "../Include/PositionalData.h"
+#include <assert.h>
+#include "../../Lepra/Include/Packer.h"
 
 
 
@@ -66,11 +66,11 @@ int PositionalData6::Pack(Lepra::uint8* pData) const
 {
 	int lSize = 0;
 	pData[lSize++] = (Lepra::uint8)TYPE_POSITION_6;
-	lSize += Cure::PackerTransformation::Pack(&pData[lSize], mTransformation);
-	lSize += Cure::PackerVector::Pack(&pData[lSize], mVelocity);
-	lSize += Cure::PackerVector::Pack(&pData[lSize], mAcceleration);
-	lSize += Cure::PackerVector::Pack(&pData[lSize], mAngularVelocity);
-	lSize += Cure::PackerVector::Pack(&pData[lSize], mAngularAcceleration);
+	lSize += Lepra::PackerTransformation::Pack(&pData[lSize], mTransformation);
+	lSize += Lepra::PackerVector::Pack(&pData[lSize], mVelocity);
+	lSize += Lepra::PackerVector::Pack(&pData[lSize], mAcceleration);
+	lSize += Lepra::PackerVector::Pack(&pData[lSize], mAngularVelocity);
+	lSize += Lepra::PackerVector::Pack(&pData[lSize], mAngularAcceleration);
 	return (lSize);
 }
 
@@ -79,11 +79,11 @@ int PositionalData6::Unpack(const Lepra::uint8* pData, int pSize)
 	CHECK_SIZE(1+sizeof(float)*7+sizeof(float)*3*4);
 	int lSize = 0;
 	CHECK_TYPE(TYPE_POSITION_6);
-	lSize += Cure::PackerTransformation::Unpack(mTransformation, &pData[lSize], sizeof(float)*7);
-	lSize += Cure::PackerVector::Unpack(mVelocity, &pData[lSize], sizeof(float)*3);
-	lSize += Cure::PackerVector::Unpack(mAcceleration, &pData[lSize], sizeof(float)*3);
-	lSize += Cure::PackerVector::Unpack(mAngularVelocity, &pData[lSize], sizeof(float)*3);
-	lSize += Cure::PackerVector::Unpack(mAngularAcceleration, &pData[lSize], sizeof(float)*3);
+	lSize += Lepra::PackerTransformation::Unpack(mTransformation, &pData[lSize], sizeof(float)*7);
+	lSize += Lepra::PackerVector::Unpack(mVelocity, &pData[lSize], sizeof(float)*3);
+	lSize += Lepra::PackerVector::Unpack(mAcceleration, &pData[lSize], sizeof(float)*3);
+	lSize += Lepra::PackerVector::Unpack(mAngularVelocity, &pData[lSize], sizeof(float)*3);
+	lSize += Lepra::PackerVector::Unpack(mAngularAcceleration, &pData[lSize], sizeof(float)*3);
 	return (lSize);
 }
 
@@ -149,15 +149,15 @@ int PositionalData3::Pack(Lepra::uint8* pData) const
 {
 	int lSize = 0;
 	pData[lSize++] = (Lepra::uint8)TYPE_POSITION_3;
-	lSize += Cure::PackerReal::Pack(&pData[lSize], mTransformation[0]);
-	lSize += Cure::PackerReal::Pack(&pData[lSize], mTransformation[1]);
-	lSize += Cure::PackerReal::Pack(&pData[lSize], mTransformation[2]);
-	lSize += Cure::PackerReal::Pack(&pData[lSize], mVelocity[0]);
-	lSize += Cure::PackerReal::Pack(&pData[lSize], mVelocity[1]);
-	lSize += Cure::PackerReal::Pack(&pData[lSize], mVelocity[2]);
-	lSize += Cure::PackerReal::Pack(&pData[lSize], mAcceleration[0]);
-	lSize += Cure::PackerReal::Pack(&pData[lSize], mAcceleration[1]);
-	lSize += Cure::PackerReal::Pack(&pData[lSize], mAcceleration[2]);
+	lSize += Lepra::PackerReal::Pack(&pData[lSize], mTransformation[0]);
+	lSize += Lepra::PackerReal::Pack(&pData[lSize], mTransformation[1]);
+	lSize += Lepra::PackerReal::Pack(&pData[lSize], mTransformation[2]);
+	lSize += Lepra::PackerReal::Pack(&pData[lSize], mVelocity[0]);
+	lSize += Lepra::PackerReal::Pack(&pData[lSize], mVelocity[1]);
+	lSize += Lepra::PackerReal::Pack(&pData[lSize], mVelocity[2]);
+	lSize += Lepra::PackerReal::Pack(&pData[lSize], mAcceleration[0]);
+	lSize += Lepra::PackerReal::Pack(&pData[lSize], mAcceleration[1]);
+	lSize += Lepra::PackerReal::Pack(&pData[lSize], mAcceleration[2]);
 	return (lSize);
 }
 
@@ -166,15 +166,15 @@ int PositionalData3::Unpack(const Lepra::uint8* pData, int pSize)
 	CHECK_SIZE(1+sizeof(mTransformation[0])*3*3);
 	int lSize = 0;
 	CHECK_TYPE(TYPE_POSITION_3);
-	lSize += Cure::PackerReal::Unpack(mTransformation[0], &pData[lSize], sizeof(float));
-	lSize += Cure::PackerReal::Unpack(mTransformation[1], &pData[lSize], sizeof(float));
-	lSize += Cure::PackerReal::Unpack(mTransformation[2], &pData[lSize], sizeof(float));
-	lSize += Cure::PackerReal::Unpack(mVelocity[0], &pData[lSize], sizeof(float));
-	lSize += Cure::PackerReal::Unpack(mVelocity[1], &pData[lSize], sizeof(float));
-	lSize += Cure::PackerReal::Unpack(mVelocity[2], &pData[lSize], sizeof(float));
-	lSize += Cure::PackerReal::Unpack(mAcceleration[0], &pData[lSize], sizeof(float));
-	lSize += Cure::PackerReal::Unpack(mAcceleration[1], &pData[lSize], sizeof(float));
-	lSize += Cure::PackerReal::Unpack(mAcceleration[2], &pData[lSize], sizeof(float));
+	lSize += Lepra::PackerReal::Unpack(mTransformation[0], &pData[lSize], sizeof(float));
+	lSize += Lepra::PackerReal::Unpack(mTransformation[1], &pData[lSize], sizeof(float));
+	lSize += Lepra::PackerReal::Unpack(mTransformation[2], &pData[lSize], sizeof(float));
+	lSize += Lepra::PackerReal::Unpack(mVelocity[0], &pData[lSize], sizeof(float));
+	lSize += Lepra::PackerReal::Unpack(mVelocity[1], &pData[lSize], sizeof(float));
+	lSize += Lepra::PackerReal::Unpack(mVelocity[2], &pData[lSize], sizeof(float));
+	lSize += Lepra::PackerReal::Unpack(mAcceleration[0], &pData[lSize], sizeof(float));
+	lSize += Lepra::PackerReal::Unpack(mAcceleration[1], &pData[lSize], sizeof(float));
+	lSize += Lepra::PackerReal::Unpack(mAcceleration[2], &pData[lSize], sizeof(float));
 	return (lSize);
 }
 
@@ -222,12 +222,12 @@ int PositionalData2::Pack(Lepra::uint8* pData) const
 {
 	int lSize = 0;
 	pData[lSize++] = (Lepra::uint8)TYPE_POSITION_2;
-	lSize += Cure::PackerReal::Pack(&pData[lSize], mTransformation[0]);
-	lSize += Cure::PackerReal::Pack(&pData[lSize], mTransformation[1]);
-	lSize += Cure::PackerReal::Pack(&pData[lSize], mVelocity[0]);
-	lSize += Cure::PackerReal::Pack(&pData[lSize], mVelocity[1]);
-	lSize += Cure::PackerReal::Pack(&pData[lSize], mAcceleration[0]);
-	lSize += Cure::PackerReal::Pack(&pData[lSize], mAcceleration[1]);
+	lSize += Lepra::PackerReal::Pack(&pData[lSize], mTransformation[0]);
+	lSize += Lepra::PackerReal::Pack(&pData[lSize], mTransformation[1]);
+	lSize += Lepra::PackerReal::Pack(&pData[lSize], mVelocity[0]);
+	lSize += Lepra::PackerReal::Pack(&pData[lSize], mVelocity[1]);
+	lSize += Lepra::PackerReal::Pack(&pData[lSize], mAcceleration[0]);
+	lSize += Lepra::PackerReal::Pack(&pData[lSize], mAcceleration[1]);
 	return (lSize);
 }
 
@@ -236,12 +236,12 @@ int PositionalData2::Unpack(const Lepra::uint8* pData, int pSize)
 	CHECK_SIZE(1+sizeof(mTransformation[0])*2*3);
 	int lSize = 0;
 	CHECK_TYPE(TYPE_POSITION_2);
-	lSize += Cure::PackerReal::Unpack(mTransformation[0], &pData[lSize], sizeof(float));
-	lSize += Cure::PackerReal::Unpack(mTransformation[1], &pData[lSize], sizeof(float));
-	lSize += Cure::PackerReal::Unpack(mVelocity[0], &pData[lSize], sizeof(float));
-	lSize += Cure::PackerReal::Unpack(mVelocity[1], &pData[lSize], sizeof(float));
-	lSize += Cure::PackerReal::Unpack(mAcceleration[0], &pData[lSize], sizeof(float));
-	lSize += Cure::PackerReal::Unpack(mAcceleration[1], &pData[lSize], sizeof(float));
+	lSize += Lepra::PackerReal::Unpack(mTransformation[0], &pData[lSize], sizeof(float));
+	lSize += Lepra::PackerReal::Unpack(mTransformation[1], &pData[lSize], sizeof(float));
+	lSize += Lepra::PackerReal::Unpack(mVelocity[0], &pData[lSize], sizeof(float));
+	lSize += Lepra::PackerReal::Unpack(mVelocity[1], &pData[lSize], sizeof(float));
+	lSize += Lepra::PackerReal::Unpack(mAcceleration[0], &pData[lSize], sizeof(float));
+	lSize += Lepra::PackerReal::Unpack(mAcceleration[1], &pData[lSize], sizeof(float));
 	return (lSize);
 }
 
@@ -286,9 +286,9 @@ int PositionalData1::Pack(Lepra::uint8* pData) const
 {
 	int lSize = 0;
 	pData[lSize++] = (Lepra::uint8)TYPE_POSITION_1;
-	lSize += Cure::PackerReal::Pack(&pData[lSize], mTransformation);
-	lSize += Cure::PackerReal::Pack(&pData[lSize], mVelocity);
-	lSize += Cure::PackerReal::Pack(&pData[lSize], mAcceleration);
+	lSize += Lepra::PackerReal::Pack(&pData[lSize], mTransformation);
+	lSize += Lepra::PackerReal::Pack(&pData[lSize], mVelocity);
+	lSize += Lepra::PackerReal::Pack(&pData[lSize], mAcceleration);
 	return (lSize);
 }
 
@@ -297,9 +297,9 @@ int PositionalData1::Unpack(const Lepra::uint8* pData, int pSize)
 	CHECK_SIZE(1+sizeof(mTransformation)*1*3);
 	int lSize = 0;
 	CHECK_TYPE(TYPE_POSITION_1);
-	lSize += Cure::PackerReal::Unpack(mTransformation, &pData[lSize], sizeof(float));
-	lSize += Cure::PackerReal::Unpack(mVelocity, &pData[lSize], sizeof(float));
-	lSize += Cure::PackerReal::Unpack(mAcceleration, &pData[lSize], sizeof(float));
+	lSize += Lepra::PackerReal::Unpack(mTransformation, &pData[lSize], sizeof(float));
+	lSize += Lepra::PackerReal::Unpack(mVelocity, &pData[lSize], sizeof(float));
+	lSize += Lepra::PackerReal::Unpack(mAcceleration, &pData[lSize], sizeof(float));
 	return (lSize);
 }
 
@@ -384,7 +384,7 @@ int ObjectPositionalData::Pack(Lepra::uint8* pData) const
 {
 	int lSize = 0;
 	pData[lSize++] = (Lepra::uint8)TYPE_OBJECT;
-	lSize += PackerInt16::Pack(&pData[lSize], GetPackSize()-1-sizeof(Lepra::int16));
+	lSize += Lepra::PackerInt16::Pack(&pData[lSize], GetPackSize()-1-sizeof(Lepra::int16));
 	lSize += mPosition.Pack(&pData[lSize]);
 	BodyPositionArray::const_iterator x = mBodyPositionArray.begin();
 	for (; x != mBodyPositionArray.end(); ++x)
@@ -401,7 +401,7 @@ int ObjectPositionalData::Unpack(const Lepra::uint8* pData, int pSize)
 	CHECK_TYPE(TYPE_OBJECT);
 	assert(mBodyPositionArray.size() == 0);
 	int lDataSize;
-	int lSubSize = PackerInt16::Unpack(lDataSize, &pData[lSize], pSize-lSize);
+	int lSubSize = Lepra::PackerInt16::Unpack(lDataSize, &pData[lSize], pSize-lSize);
 	if (lSubSize <= 0)
 	{
 		assert(false);
@@ -596,10 +596,10 @@ int RealData4::Pack(Lepra::uint8* pData) const
 {
 	int lSize = 0;
 	pData[lSize++] = (Lepra::uint8)TYPE_REAL_4;
-	lSize += Cure::PackerReal::Pack(&pData[lSize], mValue[0]);
-	lSize += Cure::PackerReal::Pack(&pData[lSize], mValue[1]);
-	lSize += Cure::PackerReal::Pack(&pData[lSize], mValue[2]);
-	lSize += Cure::PackerReal::Pack(&pData[lSize], mValue[3]);
+	lSize += Lepra::PackerReal::Pack(&pData[lSize], mValue[0]);
+	lSize += Lepra::PackerReal::Pack(&pData[lSize], mValue[1]);
+	lSize += Lepra::PackerReal::Pack(&pData[lSize], mValue[2]);
+	lSize += Lepra::PackerReal::Pack(&pData[lSize], mValue[3]);
 	return (lSize);
 }
 
@@ -608,10 +608,10 @@ int RealData4::Unpack(const Lepra::uint8* pData, int pSize)
 	CHECK_SIZE(1+sizeof(mValue[0])*4);
 	int lSize = 0;
 	CHECK_TYPE(TYPE_REAL_4);
-	lSize += Cure::PackerReal::Unpack(mValue[0], &pData[lSize], sizeof(float));
-	lSize += Cure::PackerReal::Unpack(mValue[1], &pData[lSize], sizeof(float));
-	lSize += Cure::PackerReal::Unpack(mValue[2], &pData[lSize], sizeof(float));
-	lSize += Cure::PackerReal::Unpack(mValue[3], &pData[lSize], sizeof(float));
+	lSize += Lepra::PackerReal::Unpack(mValue[0], &pData[lSize], sizeof(float));
+	lSize += Lepra::PackerReal::Unpack(mValue[1], &pData[lSize], sizeof(float));
+	lSize += Lepra::PackerReal::Unpack(mValue[2], &pData[lSize], sizeof(float));
+	lSize += Lepra::PackerReal::Unpack(mValue[3], &pData[lSize], sizeof(float));
 	return (lSize);
 }
 
@@ -654,7 +654,7 @@ int RealData1Bool::Pack(Lepra::uint8* pData) const
 {
 	int lSize = 0;
 	pData[lSize++] = (Lepra::uint8)TYPE_REAL_1_BOOL;
-	lSize += Cure::PackerReal::Pack(&pData[lSize], mValue);
+	lSize += Lepra::PackerReal::Pack(&pData[lSize], mValue);
 	pData[lSize++] = (Lepra::uint8)mBool;
 	return (lSize);
 }
@@ -664,7 +664,7 @@ int RealData1Bool::Unpack(const Lepra::uint8* pData, int pSize)
 	CHECK_SIZE(1+sizeof(mValue)+1);
 	int lSize = 0;
 	CHECK_TYPE(TYPE_REAL_1_BOOL);
-	lSize += Cure::PackerReal::Unpack(mValue, &pData[lSize], sizeof(float));
+	lSize += Lepra::PackerReal::Unpack(mValue, &pData[lSize], sizeof(float));
 	mBool = (pData[lSize++] != 0);
 	return (lSize);
 }
@@ -706,7 +706,7 @@ int RealData1::Pack(Lepra::uint8* pData) const
 {
 	int lSize = 0;
 	pData[lSize++] = (Lepra::uint8)TYPE_REAL_1;
-	lSize += Cure::PackerReal::Pack(&pData[lSize], mValue);
+	lSize += Lepra::PackerReal::Pack(&pData[lSize], mValue);
 	return (lSize);
 }
 
@@ -715,7 +715,7 @@ int RealData1::Unpack(const Lepra::uint8* pData, int pSize)
 	CHECK_SIZE(1+sizeof(mValue));
 	int lSize = 0;
 	CHECK_TYPE(TYPE_REAL_1);
-	lSize += Cure::PackerReal::Unpack(mValue, &pData[lSize], sizeof(float));
+	lSize += Lepra::PackerReal::Unpack(mValue, &pData[lSize], sizeof(float));
 	return (lSize);
 }
 
