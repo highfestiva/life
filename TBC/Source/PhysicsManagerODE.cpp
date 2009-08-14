@@ -9,7 +9,7 @@
 #include <../ode/src/joint.h>
 #include "../../Lepra/Include/Log.h"
 #include "../../Lepra/Include/Math.h"
-#include "../Include/PhysicsEngineODE.h"
+#include "../Include/PhysicsManagerODE.h"
 #include "../Include/GeometryBase.h"
 
 
@@ -19,7 +19,7 @@ namespace TBC
 
 
 
-PhysicsEngineODE::PhysicsEngineODE()
+PhysicsManagerODE::PhysicsManagerODE()
 {
 	mWorldID = dWorldCreate();
 	
@@ -45,7 +45,7 @@ PhysicsEngineODE::PhysicsEngineODE()
 	mContactJointGroupID = ::dJointGroupCreate(0);
 }
 
-PhysicsEngineODE::~PhysicsEngineODE()
+PhysicsManagerODE::~PhysicsManagerODE()
 {
 	ObjectTable::iterator x = mObjectTable.begin();
 	for (; x != mObjectTable.end(); ++x)
@@ -71,7 +71,7 @@ PhysicsEngineODE::~PhysicsEngineODE()
 	//::dCloseODE();
 }
 
-PhysicsEngine::BodyID PhysicsEngineODE::CreateSphere(bool pIsRoot, const Lepra::TransformationF& pTransform,
+PhysicsManager::BodyID PhysicsManagerODE::CreateSphere(bool pIsRoot, const Lepra::TransformationF& pTransform,
 	Lepra::float32 pMass, Lepra::float32 pRadius, BodyType pType, Lepra::float32 pFriction, Lepra::float32 pBounce,
 	TriggerListener* pTriggerListener, ForceFeedbackListener* pForceListener)
 {
@@ -81,7 +81,7 @@ PhysicsEngine::BodyID PhysicsEngineODE::CreateSphere(bool pIsRoot, const Lepra::
 	lObject->mForceFeedbackListener = pForceListener;
 	//assert(pType == STATIC || lObject->mForceFeedbackListener);
 
-	if (pType == PhysicsEngine::DYNAMIC)
+	if (pType == PhysicsManager::DYNAMIC)
 	{
 		dMass lMass;
 		::dMassSetSphereTotal(&lMass, (dReal)pMass, (dReal)pRadius);
@@ -106,7 +106,7 @@ PhysicsEngine::BodyID PhysicsEngineODE::CreateSphere(bool pIsRoot, const Lepra::
 	return ((BodyID)lObject);
 }
 
-PhysicsEngine::BodyID PhysicsEngineODE::CreateCylinder(bool pIsRoot, const Lepra::TransformationF& pTransform,
+PhysicsManager::BodyID PhysicsManagerODE::CreateCylinder(bool pIsRoot, const Lepra::TransformationF& pTransform,
 	Lepra::float32 pMass, Lepra::float32 pRadius, Lepra::float32 pLength, BodyType pType, Lepra::float32 pFriction,
 	Lepra::float32 pBounce, TriggerListener* pTriggerListener, ForceFeedbackListener* pForceListener)
 {
@@ -120,7 +120,7 @@ PhysicsEngine::BodyID PhysicsEngineODE::CreateCylinder(bool pIsRoot, const Lepra
 	lObject->mForceFeedbackListener = pForceListener;
 	//assert(pType == STATIC || lObject->mForceFeedbackListener);
 
-	if (pType == PhysicsEngine::DYNAMIC)
+	if (pType == PhysicsManager::DYNAMIC)
 	{
 		dMass lMass;
 		::dMassSetCylinderTotal(&lMass, (dReal)pMass, 3, (dReal)pRadius, (dReal)pLength);
@@ -146,7 +146,7 @@ PhysicsEngine::BodyID PhysicsEngineODE::CreateCylinder(bool pIsRoot, const Lepra
 	return (BodyID)(Lepra::uint64)lObject;
 }
 
-PhysicsEngine::BodyID PhysicsEngineODE::CreateCapsule(bool pIsRoot, const Lepra::TransformationF& pTransform,
+PhysicsManager::BodyID PhysicsManagerODE::CreateCapsule(bool pIsRoot, const Lepra::TransformationF& pTransform,
 	Lepra::float32 pMass, Lepra::float32 pRadius, Lepra::float32 pLength, BodyType pType, Lepra::float32 pFriction,
 	Lepra::float32 pBounce, TriggerListener* pTriggerListener, ForceFeedbackListener* pForceListener)
 {
@@ -157,7 +157,7 @@ PhysicsEngine::BodyID PhysicsEngineODE::CreateCapsule(bool pIsRoot, const Lepra:
 	lObject->mForceFeedbackListener = pForceListener;
 	//assert(pType == STATIC || lObject->mForceFeedbackListener);
 
-	if (pType == PhysicsEngine::DYNAMIC)
+	if (pType == PhysicsManager::DYNAMIC)
 	{
 		dMass lMass;
 		::dMassSetCappedCylinderTotal(&lMass, (dReal)pMass, 3, (dReal)pRadius, (dReal)pLength);
@@ -183,7 +183,7 @@ PhysicsEngine::BodyID PhysicsEngineODE::CreateCapsule(bool pIsRoot, const Lepra:
 	return (BodyID)(Lepra::uint64)lObject;
 }
 
-PhysicsEngine::BodyID PhysicsEngineODE::CreateBox(bool pIsRoot, const Lepra::TransformationF& pTransform,
+PhysicsManager::BodyID PhysicsManagerODE::CreateBox(bool pIsRoot, const Lepra::TransformationF& pTransform,
 	Lepra::float32 pMass, const Lepra::Vector3D<Lepra::float32>& pSize, BodyType pType, Lepra::float32 pFriction,
 	Lepra::float32 pBounce, TriggerListener* pTriggerListener, ForceFeedbackListener* pForceListener)
 {
@@ -194,7 +194,7 @@ PhysicsEngine::BodyID PhysicsEngineODE::CreateBox(bool pIsRoot, const Lepra::Tra
 	lObject->mForceFeedbackListener = pForceListener;
 	//assert(pType == STATIC || lObject->mForceFeedbackListener);
 
-	if (pType == PhysicsEngine::DYNAMIC)
+	if (pType == PhysicsManager::DYNAMIC)
 	{
 		dMass lMass;
 		::dMassSetBoxTotal(&lMass, (dReal)pMass, (dReal)pSize.x, (dReal)pSize.y, (dReal)pSize.z);
@@ -219,7 +219,7 @@ PhysicsEngine::BodyID PhysicsEngineODE::CreateBox(bool pIsRoot, const Lepra::Tra
 	return (BodyID)(Lepra::uint64)lObject;
 }
 
-bool PhysicsEngineODE::Attach(BodyID pStaticBody, BodyID pMainBody)
+bool PhysicsManagerODE::Attach(BodyID pStaticBody, BodyID pMainBody)
 {
 	ObjectTable::iterator x = mObjectTable.find((Object*)pStaticBody);
 	if (x == mObjectTable.end())
@@ -281,7 +281,7 @@ bool PhysicsEngineODE::Attach(BodyID pStaticBody, BodyID pMainBody)
 	return (true);
 }
 
-PhysicsEngine::BodyID PhysicsEngineODE::CreateTriMesh(bool pIsRoot, const GeometryBase* pMesh,
+PhysicsManager::BodyID PhysicsManagerODE::CreateTriMesh(bool pIsRoot, const GeometryBase* pMesh,
 	const Lepra::TransformationF& pTransform, Lepra::float32 pFriction, Lepra::float32 pBounce,
 	TriggerListener* pTriggerListener, ForceFeedbackListener* pForceListener)
 {
@@ -318,7 +318,7 @@ PhysicsEngine::BodyID PhysicsEngineODE::CreateTriMesh(bool pIsRoot, const Geomet
 	return (BodyID)(Lepra::uint64)lObject;
 }
 
-bool PhysicsEngineODE::IsStaticBody(BodyID pBodyId) const
+bool PhysicsManagerODE::IsStaticBody(BodyID pBodyId) const
 {
 	Object* lObject = (Object*)pBodyId;
 	if (lObject->mWorldID != mWorldID)
@@ -329,7 +329,7 @@ bool PhysicsEngineODE::IsStaticBody(BodyID pBodyId) const
 	return (lObject->mBodyID == 0);
 }
 
-void PhysicsEngineODE::DeleteBody(BodyID pBodyId)
+void PhysicsManagerODE::DeleteBody(BodyID pBodyId)
 {
 	ObjectTable::iterator x = mObjectTable.find((Object*)pBodyId);
 	if (x != mObjectTable.end())
@@ -351,7 +351,7 @@ void PhysicsEngineODE::DeleteBody(BodyID pBodyId)
 	}
 }
 
-Lepra::Vector3DF PhysicsEngineODE::GetBodyPosition(BodyID pBodyId) const
+Lepra::Vector3DF PhysicsManagerODE::GetBodyPosition(BodyID pBodyId) const
 {
 	Object* lObject = (Object*)pBodyId;
 	if (lObject->mWorldID != mWorldID)
@@ -364,7 +364,7 @@ Lepra::Vector3DF PhysicsEngineODE::GetBodyPosition(BodyID pBodyId) const
 	return (Lepra::Vector3DF(lPosition[0], lPosition[1], lPosition[2]));
 }
 
-void PhysicsEngineODE::GetBodyTransform(BodyID pBodyId, Lepra::TransformationF& pTransform) const
+void PhysicsManagerODE::GetBodyTransform(BodyID pBodyId, Lepra::TransformationF& pTransform) const
 {
 	Object* lObject = (Object*)pBodyId;
 
@@ -382,7 +382,7 @@ void PhysicsEngineODE::GetBodyTransform(BodyID pBodyId, Lepra::TransformationF& 
 	pTransform.SetOrientation(Lepra::Quaternion<Lepra::float32>(lQ[0], lQ[1], lQ[2], lQ[3]));
 }
 
-void PhysicsEngineODE::SetBodyTransform(BodyID pBodyId, const Lepra::TransformationF& pTransform)
+void PhysicsManagerODE::SetBodyTransform(BodyID pBodyId, const Lepra::TransformationF& pTransform)
 {
 	Object* lObject = (Object*)pBodyId;
 
@@ -412,7 +412,7 @@ void PhysicsEngineODE::SetBodyTransform(BodyID pBodyId, const Lepra::Transformat
 	}
 }
 
-void PhysicsEngineODE::GetBodyVelocity(BodyID pBodyId, Lepra::Vector3DF& pVelocity) const
+void PhysicsManagerODE::GetBodyVelocity(BodyID pBodyId, Lepra::Vector3DF& pVelocity) const
 {
 	Object* lObject = (Object*)pBodyId;
 	if (lObject->mBodyID)
@@ -428,7 +428,7 @@ void PhysicsEngineODE::GetBodyVelocity(BodyID pBodyId, Lepra::Vector3DF& pVeloci
 	}
 }
 
-void PhysicsEngineODE::SetBodyVelocity(BodyID pBodyId, const Lepra::Vector3DF& pVelocity)
+void PhysicsManagerODE::SetBodyVelocity(BodyID pBodyId, const Lepra::Vector3DF& pVelocity)
 {
 	Object* lObject = (Object*)pBodyId;
 	if(lObject->mBodyID)
@@ -437,7 +437,7 @@ void PhysicsEngineODE::SetBodyVelocity(BodyID pBodyId, const Lepra::Vector3DF& p
 	}
 }
 
-void PhysicsEngineODE::GetBodyAcceleration(BodyID pBodyId, Lepra::Vector3DF& pAcceleration) const
+void PhysicsManagerODE::GetBodyAcceleration(BodyID pBodyId, Lepra::Vector3DF& pAcceleration) const
 {
 	Object* lObject = (Object*)pBodyId;
 	if(lObject->mBodyID)
@@ -453,14 +453,14 @@ void PhysicsEngineODE::GetBodyAcceleration(BodyID pBodyId, Lepra::Vector3DF& pAc
 	}
 }
 
-void PhysicsEngineODE::SetBodyAcceleration(BodyID pBodyId, const Lepra::Vector3DF& pAcceleration)
+void PhysicsManagerODE::SetBodyAcceleration(BodyID pBodyId, const Lepra::Vector3DF& pAcceleration)
 {
 	Object* lObject = (Object*)pBodyId;
 	if(lObject->mBodyID)
 		dBodySetForce(lObject->mBodyID, pAcceleration.x, pAcceleration.y, pAcceleration.z);
 }
 
-void PhysicsEngineODE::GetBodyAngularVelocity(BodyID pBodyId, Lepra::Vector3DF& pAngularVelocity) const
+void PhysicsManagerODE::GetBodyAngularVelocity(BodyID pBodyId, Lepra::Vector3DF& pAngularVelocity) const
 {
 	Object* lObject = (Object*)pBodyId;
 	if(lObject->mBodyID)
@@ -476,7 +476,7 @@ void PhysicsEngineODE::GetBodyAngularVelocity(BodyID pBodyId, Lepra::Vector3DF& 
 	}
 }
 
-void PhysicsEngineODE::SetBodyAngularVelocity(BodyID pBodyId, const Lepra::Vector3DF& pAngularVelocity)
+void PhysicsManagerODE::SetBodyAngularVelocity(BodyID pBodyId, const Lepra::Vector3DF& pAngularVelocity)
 {
 	Object* lObject = (Object*)pBodyId;
 	if(lObject->mBodyID)
@@ -485,7 +485,7 @@ void PhysicsEngineODE::SetBodyAngularVelocity(BodyID pBodyId, const Lepra::Vecto
 	}
 }
 
-void PhysicsEngineODE::GetBodyAngularAcceleration(BodyID pBodyId, Lepra::Vector3DF& pAngularAcceleration) const
+void PhysicsManagerODE::GetBodyAngularAcceleration(BodyID pBodyId, Lepra::Vector3DF& pAngularAcceleration) const
 {
 	Object* lObject = (Object*)pBodyId;
 	if(lObject->mBodyID)
@@ -501,7 +501,7 @@ void PhysicsEngineODE::GetBodyAngularAcceleration(BodyID pBodyId, Lepra::Vector3
 	}
 }
 
-void PhysicsEngineODE::SetBodyAngularAcceleration(BodyID pBodyId, const Lepra::Vector3DF& pAngularAcceleration)
+void PhysicsManagerODE::SetBodyAngularAcceleration(BodyID pBodyId, const Lepra::Vector3DF& pAngularAcceleration)
 {
 	Object* lObject = (Object*)pBodyId;
 	if(lObject->mBodyID)
@@ -510,7 +510,7 @@ void PhysicsEngineODE::SetBodyAngularAcceleration(BodyID pBodyId, const Lepra::V
 	}
 }
 
-float PhysicsEngineODE::GetBodyMass(BodyID pBodyId)
+float PhysicsManagerODE::GetBodyMass(BodyID pBodyId)
 {
 	Object* lObject = (Object*)pBodyId;
 	if (lObject->mWorldID != mWorldID)
@@ -521,7 +521,7 @@ float PhysicsEngineODE::GetBodyMass(BodyID pBodyId)
 	return (lObject->mMass);
 }
 
-void PhysicsEngineODE::SetBodyData(BodyID pBodyId, void* pUserData)
+void PhysicsManagerODE::SetBodyData(BodyID pBodyId, void* pUserData)
 {
 	Object* lObject = (Object*)pBodyId;
 
@@ -534,7 +534,7 @@ void PhysicsEngineODE::SetBodyData(BodyID pBodyId, void* pUserData)
 	lObject->mUserData = pUserData;
 }
 
-void* PhysicsEngineODE::GetBodyData(BodyID pBodyId)
+void* PhysicsManagerODE::GetBodyData(BodyID pBodyId)
 {
 	Object* lObject = (Object*)pBodyId;
 
@@ -547,7 +547,7 @@ void* PhysicsEngineODE::GetBodyData(BodyID pBodyId)
 	return lObject->mUserData;
 }
 
-PhysicsEngine::TriggerID PhysicsEngineODE::CreateSphereTrigger(const Lepra::TransformationF& pTransform,
+PhysicsManager::TriggerID PhysicsManagerODE::CreateSphereTrigger(const Lepra::TransformationF& pTransform,
 	Lepra::float32 pRadius, TriggerListener* pForceListener)
 {
 	Object* lObject = new Object(mWorldID, false);
@@ -564,7 +564,7 @@ PhysicsEngine::TriggerID PhysicsEngineODE::CreateSphereTrigger(const Lepra::Tran
 	return (TriggerID)lObject->mGeomID;
 }
 
-PhysicsEngine::TriggerID PhysicsEngineODE::CreateCylinderTrigger(const Lepra::TransformationF& pTransform,
+PhysicsManager::TriggerID PhysicsManagerODE::CreateCylinderTrigger(const Lepra::TransformationF& pTransform,
 	Lepra::float32 pRadius, Lepra::float32 pLength, TriggerListener* pForceListener)
 {
 	Object* lObject = new Object(mWorldID, false);
@@ -584,7 +584,7 @@ PhysicsEngine::TriggerID PhysicsEngineODE::CreateCylinderTrigger(const Lepra::Tr
 	return (TriggerID)lObject->mGeomID;
 }
 
-PhysicsEngine::TriggerID PhysicsEngineODE::CreateCapsuleTrigger(const Lepra::TransformationF& pTransform,
+PhysicsManager::TriggerID PhysicsManagerODE::CreateCapsuleTrigger(const Lepra::TransformationF& pTransform,
 	Lepra::float32 pRadius, Lepra::float32 pLength, TriggerListener* pForceListener)
 {
 	Object* lObject = new Object(mWorldID, false);
@@ -602,7 +602,7 @@ PhysicsEngine::TriggerID PhysicsEngineODE::CreateCapsuleTrigger(const Lepra::Tra
 	return (TriggerID)lObject->mGeomID;
 }
 
-PhysicsEngine::TriggerID PhysicsEngineODE::CreateBoxTrigger(const Lepra::TransformationF& pTransform,
+PhysicsManager::TriggerID PhysicsManagerODE::CreateBoxTrigger(const Lepra::TransformationF& pTransform,
 	const Lepra::Vector3D<Lepra::float32>& pSize, TriggerListener* pForceListener)
 {
 	Object* lObject = new Object(mWorldID, false);
@@ -620,7 +620,7 @@ PhysicsEngine::TriggerID PhysicsEngineODE::CreateBoxTrigger(const Lepra::Transfo
 	return (TriggerID)lObject->mGeomID;
 }
 
-PhysicsEngine::TriggerID PhysicsEngineODE::CreateRayTrigger(const Lepra::TransformationF& pTransform,
+PhysicsManager::TriggerID PhysicsManagerODE::CreateRayTrigger(const Lepra::TransformationF& pTransform,
 	const Lepra::Vector3D<Lepra::float32>& pFromPos, const Lepra::Vector3D<Lepra::float32>& pToPos,
 	TriggerListener* pForceListener)
 {
@@ -646,7 +646,7 @@ PhysicsEngine::TriggerID PhysicsEngineODE::CreateRayTrigger(const Lepra::Transfo
 	return (TriggerID)lObject->mGeomID;
 }
 
-void PhysicsEngineODE::DeleteTrigger(TriggerID pTriggerID)
+void PhysicsManagerODE::DeleteTrigger(TriggerID pTriggerID)
 {
 	ObjectTable::iterator x = mObjectTable.find((Object*)pTriggerID);
 
@@ -662,7 +662,7 @@ void PhysicsEngineODE::DeleteTrigger(TriggerID pTriggerID)
 	}
 }
 
-PhysicsEngine::ForceFeedbackListener* PhysicsEngineODE::GetForceFeedbackListener(BodyID pBody)
+PhysicsManager::ForceFeedbackListener* PhysicsManagerODE::GetForceFeedbackListener(BodyID pBody)
 {
 	Object* lObject = (Object*)pBody;
 	if (lObject->mWorldID != mWorldID)
@@ -674,7 +674,7 @@ PhysicsEngine::ForceFeedbackListener* PhysicsEngineODE::GetForceFeedbackListener
 	return (lObject->mForceFeedbackListener);
 }
 
-void PhysicsEngineODE::GetTriggerTransform(TriggerID pTriggerID, Lepra::TransformationF& pTransform)
+void PhysicsManagerODE::GetTriggerTransform(TriggerID pTriggerID, Lepra::TransformationF& pTransform)
 {
 	Object* lObject = (Object*)pTriggerID;
 
@@ -692,7 +692,7 @@ void PhysicsEngineODE::GetTriggerTransform(TriggerID pTriggerID, Lepra::Transfor
 	pTransform.SetOrientation(Lepra::Quaternion<Lepra::float32>(lQ[0], lQ[1], lQ[2], lQ[3]));
 }
 
-void PhysicsEngineODE::SetTriggerTransform(TriggerID pTriggerID, const Lepra::TransformationF& pTransform)
+void PhysicsManagerODE::SetTriggerTransform(TriggerID pTriggerID, const Lepra::TransformationF& pTransform)
 {
 	Object* lObject = (Object*)pTriggerID;
 
@@ -705,7 +705,7 @@ void PhysicsEngineODE::SetTriggerTransform(TriggerID pTriggerID, const Lepra::Tr
 	SetGeomTransform(lObject->mGeomID, pTransform);
 }
 
-PhysicsEngine::JointID PhysicsEngineODE::CreateBallJoint(BodyID pBody1, BodyID pBody2, const Lepra::Vector3D<Lepra::float32>& pAnchorPos)
+PhysicsManager::JointID PhysicsManagerODE::CreateBallJoint(BodyID pBody1, BodyID pBody2, const Lepra::Vector3D<Lepra::float32>& pAnchorPos)
 {
 	Object* lObject1;
 	Object* lObject2;
@@ -742,7 +742,7 @@ PhysicsEngine::JointID PhysicsEngineODE::CreateBallJoint(BodyID pBody1, BodyID p
 	return (JointID)lJointInfo;
 }
 
-PhysicsEngine::JointID PhysicsEngineODE::CreateHingeJoint(BodyID pBody1, BodyID pBody2, 
+PhysicsManager::JointID PhysicsManagerODE::CreateHingeJoint(BodyID pBody1, BodyID pBody2, 
 	const Lepra::Vector3D<Lepra::float32>& pAnchorPos, const Lepra::Vector3D<Lepra::float32>& pAxis)
 {
 	Object* lObject1;
@@ -781,7 +781,7 @@ PhysicsEngine::JointID PhysicsEngineODE::CreateHingeJoint(BodyID pBody1, BodyID 
 	return (JointID)lJointInfo;
 }
 
-PhysicsEngine::JointID PhysicsEngineODE::CreateHinge2Joint(BodyID pBody1, BodyID pBody2,
+PhysicsManager::JointID PhysicsManagerODE::CreateHinge2Joint(BodyID pBody1, BodyID pBody2,
 	const Lepra::Vector3D<Lepra::float32>& pAnchorPos, const Lepra::Vector3D<Lepra::float32>& pAxis1,
 	const Lepra::Vector3D<Lepra::float32>& pAxis2)
 {
@@ -815,7 +815,7 @@ PhysicsEngine::JointID PhysicsEngineODE::CreateHinge2Joint(BodyID pBody1, BodyID
 	return (JointID)lJointInfo;
 }
 
-PhysicsEngine::JointID PhysicsEngineODE::CreateUniversalJoint(BodyID pBody1, BodyID pBody2,
+PhysicsManager::JointID PhysicsManagerODE::CreateUniversalJoint(BodyID pBody1, BodyID pBody2,
 	const Lepra::Vector3D<Lepra::float32>& pAnchorPos, const Lepra::Vector3D<Lepra::float32>& pAxis1,
 	const Lepra::Vector3D<Lepra::float32>& pAxis2)
 {
@@ -856,7 +856,7 @@ PhysicsEngine::JointID PhysicsEngineODE::CreateUniversalJoint(BodyID pBody1, Bod
 	return (JointID)lJointInfo;
 }
 
-PhysicsEngine::JointID PhysicsEngineODE::CreateSliderJoint(BodyID pBody1, BodyID pBody2,
+PhysicsManager::JointID PhysicsManagerODE::CreateSliderJoint(BodyID pBody1, BodyID pBody2,
 	const Lepra::Vector3D<Lepra::float32>& pAxis)
 {
 	Object* lObject1;
@@ -894,7 +894,7 @@ PhysicsEngine::JointID PhysicsEngineODE::CreateSliderJoint(BodyID pBody1, BodyID
 	return (JointID)lJointInfo;
 }
 
-PhysicsEngine::JointID PhysicsEngineODE::CreateFixedJoint(BodyID pBody1, BodyID pBody2)
+PhysicsManager::JointID PhysicsManagerODE::CreateFixedJoint(BodyID pBody1, BodyID pBody2)
 {
 	Object* lObject1;
 	Object* lObject2;
@@ -929,7 +929,7 @@ PhysicsEngine::JointID PhysicsEngineODE::CreateFixedJoint(BodyID pBody1, BodyID 
 	return (JointID)lJointInfo;
 }
 
-PhysicsEngine::JointID PhysicsEngineODE::CreateAngularMotorJoint(BodyID pBody1, BodyID pBody2,
+PhysicsManager::JointID PhysicsManagerODE::CreateAngularMotorJoint(BodyID pBody1, BodyID pBody2,
 	const Lepra::Vector3D<Lepra::float32>& pAxis)
 {
 	Object* lObject1;
@@ -971,7 +971,7 @@ PhysicsEngine::JointID PhysicsEngineODE::CreateAngularMotorJoint(BodyID pBody1, 
 	return (JointID)lJointInfo;
 }
 
-void PhysicsEngineODE::DeleteJoint(JointID pJointId)
+void PhysicsManagerODE::DeleteJoint(JointID pJointId)
 {
 	JointInfo* lJointInfo = (JointInfo*)pJointId;
 	dJointDestroy(lJointInfo->mJointID);
@@ -984,7 +984,7 @@ void PhysicsEngineODE::DeleteJoint(JointID pJointId)
 	mJointInfoAllocator.Free(lJointInfo);
 }
 
-bool PhysicsEngineODE::StabilizeJoint(JointID pJointId)
+bool PhysicsManagerODE::StabilizeJoint(JointID pJointId)
 {
 	JointTable::iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
@@ -1020,7 +1020,7 @@ bool PhysicsEngineODE::StabilizeJoint(JointID pJointId)
 	return (lOk);
 }
 
-bool PhysicsEngineODE::GetJoint1Diff(BodyID pBodyId, JointID pJointId, Joint1Diff& pDiff) const
+bool PhysicsManagerODE::GetJoint1Diff(BodyID pBodyId, JointID pJointId, Joint1Diff& pDiff) const
 {
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
@@ -1047,7 +1047,7 @@ bool PhysicsEngineODE::GetJoint1Diff(BodyID pBodyId, JointID pJointId, Joint1Dif
 	return (lOk);
 }
 
-bool PhysicsEngineODE::SetJoint1Diff(BodyID pBodyId, JointID pJointId, const Joint1Diff& pDiff)
+bool PhysicsManagerODE::SetJoint1Diff(BodyID pBodyId, JointID pJointId, const Joint1Diff& pDiff)
 {
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
@@ -1074,7 +1074,7 @@ bool PhysicsEngineODE::SetJoint1Diff(BodyID pBodyId, JointID pJointId, const Joi
 	return (lOk);
 }
 
-bool PhysicsEngineODE::GetJoint2Diff(BodyID pBodyId, JointID pJointId, Joint2Diff& pDiff) const
+bool PhysicsManagerODE::GetJoint2Diff(BodyID pBodyId, JointID pJointId, Joint2Diff& pDiff) const
 {
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
@@ -1101,7 +1101,7 @@ bool PhysicsEngineODE::GetJoint2Diff(BodyID pBodyId, JointID pJointId, Joint2Dif
 	return (lOk);
 }
 
-bool PhysicsEngineODE::SetJoint2Diff(BodyID pBodyId, JointID pJointId, const Joint2Diff& pDiff)
+bool PhysicsManagerODE::SetJoint2Diff(BodyID pBodyId, JointID pJointId, const Joint2Diff& pDiff)
 {
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
@@ -1128,7 +1128,7 @@ bool PhysicsEngineODE::SetJoint2Diff(BodyID pBodyId, JointID pJointId, const Joi
 	return (lOk);
 }
 
-bool PhysicsEngineODE::GetJoint3Diff(BodyID pBodyId, JointID pJointId, Joint3Diff& pDiff) const
+bool PhysicsManagerODE::GetJoint3Diff(BodyID pBodyId, JointID pJointId, Joint3Diff& pDiff) const
 {
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
@@ -1160,7 +1160,7 @@ bool PhysicsEngineODE::GetJoint3Diff(BodyID pBodyId, JointID pJointId, Joint3Dif
 	return (lOk);
 }
 
-bool PhysicsEngineODE::SetJoint3Diff(BodyID pBodyId, JointID pJointId, const Joint3Diff& pDiff)
+bool PhysicsManagerODE::SetJoint3Diff(BodyID pBodyId, JointID pJointId, const Joint3Diff& pDiff)
 {
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
@@ -1192,7 +1192,7 @@ bool PhysicsEngineODE::SetJoint3Diff(BodyID pBodyId, JointID pJointId, const Joi
 	return (lOk);
 }
 
-bool PhysicsEngineODE::GetHingeDiff(BodyID pBodyId, JointID pJointId, Joint1Diff& pDiff) const
+bool PhysicsManagerODE::GetHingeDiff(BodyID pBodyId, JointID pJointId, Joint1Diff& pDiff) const
 {
 	JointInfo* lJointInfo = (JointInfo*)pJointId;
 	assert(lJointInfo->mType == JOINT_HINGE);
@@ -1223,7 +1223,7 @@ bool PhysicsEngineODE::GetHingeDiff(BodyID pBodyId, JointID pJointId, Joint1Diff
 	return (true);
 }
 
-bool PhysicsEngineODE::SetHingeDiff(BodyID pBodyId, JointID pJointId, const Joint1Diff& pDiff)
+bool PhysicsManagerODE::SetHingeDiff(BodyID pBodyId, JointID pJointId, const Joint1Diff& pDiff)
 {
 	JointInfo* lJointInfo = (JointInfo*)pJointId;
 	assert(lJointInfo->mType == JOINT_HINGE);
@@ -1293,7 +1293,7 @@ bool PhysicsEngineODE::SetHingeDiff(BodyID pBodyId, JointID pJointId, const Join
 	return (true);
 }
 
-bool PhysicsEngineODE::GetUniversalDiff(BodyID pBodyId, JointID pJointId, Joint2Diff& pDiff) const
+bool PhysicsManagerODE::GetUniversalDiff(BodyID pBodyId, JointID pJointId, Joint2Diff& pDiff) const
 {
 	LEPRA_DEBUG_CODE(JointInfo* lJointInfo = (JointInfo*)pJointId;)
 	assert(lJointInfo->mType == JOINT_UNIVERSAL);
@@ -1327,7 +1327,7 @@ bool PhysicsEngineODE::GetUniversalDiff(BodyID pBodyId, JointID pJointId, Joint2
 	return (true);
 }
 
-bool PhysicsEngineODE::SetUniversalDiff(BodyID pBodyId, JointID pJointId, const Joint2Diff& pDiff)
+bool PhysicsManagerODE::SetUniversalDiff(BodyID pBodyId, JointID pJointId, const Joint2Diff& pDiff)
 {
 	JointInfo* lJointInfo = (JointInfo*)pJointId;
 	assert(lJointInfo->mType == JOINT_UNIVERSAL);
@@ -1417,7 +1417,7 @@ bool PhysicsEngineODE::SetUniversalDiff(BodyID pBodyId, JointID pJointId, const 
 	return (true);
 }
 
-bool PhysicsEngineODE::GetHinge2Diff(BodyID pBodyId, JointID pJointId, Joint3Diff& pDiff) const
+bool PhysicsManagerODE::GetHinge2Diff(BodyID pBodyId, JointID pJointId, Joint3Diff& pDiff) const
 {
 	LEPRA_DEBUG_CODE(JointInfo* lJointInfo = (JointInfo*)pJointId;)
 	assert(lJointInfo->mType == JOINT_HINGE2);
@@ -1467,7 +1467,7 @@ bool PhysicsEngineODE::GetHinge2Diff(BodyID pBodyId, JointID pJointId, Joint3Dif
 	return (true);
 }
 
-bool PhysicsEngineODE::SetHinge2Diff(BodyID pBodyId, JointID pJointId, const Joint3Diff& pDiff)
+bool PhysicsManagerODE::SetHinge2Diff(BodyID pBodyId, JointID pJointId, const Joint3Diff& pDiff)
 {
 	LEPRA_DEBUG_CODE(JointInfo* lJointInfo = (JointInfo*)pJointId;)
 	assert(lJointInfo->mType == JOINT_HINGE2);
@@ -1563,7 +1563,7 @@ bool PhysicsEngineODE::SetHinge2Diff(BodyID pBodyId, JointID pJointId, const Joi
 	return (true);
 }
 
-bool PhysicsEngineODE::GetBallDiff(BodyID pBodyId, JointID pJointId, Joint3Diff& pDiff) const
+bool PhysicsManagerODE::GetBallDiff(BodyID pBodyId, JointID pJointId, Joint3Diff& pDiff) const
 {
 	JointInfo* lJointInfo = (JointInfo*)pJointId;
 	assert(lJointInfo->mType == JOINT_BALL);
@@ -1599,7 +1599,7 @@ bool PhysicsEngineODE::GetBallDiff(BodyID pBodyId, JointID pJointId, Joint3Diff&
 	return (true);
 }
 
-bool PhysicsEngineODE::SetBallDiff(BodyID pBodyId, JointID pJointId, const Joint3Diff& pDiff)
+bool PhysicsManagerODE::SetBallDiff(BodyID pBodyId, JointID pJointId, const Joint3Diff& pDiff)
 {
 	JointInfo* lJointInfo = (JointInfo*)pJointId;
 	assert(lJointInfo->mType == JOINT_BALL);
@@ -1651,7 +1651,7 @@ bool PhysicsEngineODE::SetBallDiff(BodyID pBodyId, JointID pJointId, const Joint
 	return (true);
 }
 
-void PhysicsEngineODE::SetGeomTransform(dGeomID pGeomID, const Lepra::TransformationF& pTransform)
+void PhysicsManagerODE::SetGeomTransform(dGeomID pGeomID, const Lepra::TransformationF& pTransform)
 {
 	const Lepra::Vector3D<Lepra::float32>& lPos = pTransform.GetPosition();
 	dGeomSetPosition(pGeomID, lPos.x, lPos.y, lPos.z);
@@ -1667,7 +1667,7 @@ void PhysicsEngineODE::SetGeomTransform(dGeomID pGeomID, const Lepra::Transforma
 	dGeomSetQuaternion(pGeomID, lQ);
 }
 
-bool PhysicsEngineODE::CheckBodies(BodyID& pBody1, BodyID& pBody2, Object*& pObject1, Object*& pObject2, const Lepra::tchar* pFunction)
+bool PhysicsManagerODE::CheckBodies(BodyID& pBody1, BodyID& pBody2, Object*& pObject1, Object*& pObject2, const Lepra::tchar* pFunction)
 {
 	if (pBody1 == 0 && pBody2 == 0)
 	{
@@ -1736,7 +1736,7 @@ bool PhysicsEngineODE::CheckBodies(BodyID& pBody1, BodyID& pBody2, Object*& pObj
 	}
 }
 
-bool PhysicsEngineODE::CheckBodies2(BodyID& pBody1, BodyID& pBody2, Object*& pObject1, Object*& pObject2, const Lepra::tchar* pFunction)
+bool PhysicsManagerODE::CheckBodies2(BodyID& pBody1, BodyID& pBody2, Object*& pObject1, Object*& pObject2, const Lepra::tchar* pFunction)
 {
 	if (pBody1 == 0)
 	{
@@ -1792,7 +1792,7 @@ bool PhysicsEngineODE::CheckBodies2(BodyID& pBody1, BodyID& pBody2, Object*& pOb
 	return (true);
 }
 
-bool PhysicsEngineODE::GetAnchorPos(JointID pJointId, Lepra::Vector3D<Lepra::float32>& pAnchorPos) const
+bool PhysicsManagerODE::GetAnchorPos(JointID pJointId, Lepra::Vector3D<Lepra::float32>& pAnchorPos) const
 {
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
@@ -1834,7 +1834,7 @@ bool PhysicsEngineODE::GetAnchorPos(JointID pJointId, Lepra::Vector3D<Lepra::flo
 	return (true);
 }
 
-bool PhysicsEngineODE::GetAxis1(JointID pJointId, Lepra::Vector3D<Lepra::float32>& pAxis1) const
+bool PhysicsManagerODE::GetAxis1(JointID pJointId, Lepra::Vector3D<Lepra::float32>& pAxis1) const
 {
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
@@ -1878,7 +1878,7 @@ bool PhysicsEngineODE::GetAxis1(JointID pJointId, Lepra::Vector3D<Lepra::float32
 	return (true);
 }
 
-bool PhysicsEngineODE::GetAxis2(JointID pJointId, Lepra::Vector3D<Lepra::float32>& pAxis2) const
+bool PhysicsManagerODE::GetAxis2(JointID pJointId, Lepra::Vector3D<Lepra::float32>& pAxis2) const
 {
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
@@ -1916,7 +1916,7 @@ bool PhysicsEngineODE::GetAxis2(JointID pJointId, Lepra::Vector3D<Lepra::float32
 	return (true);
 }
 
-bool PhysicsEngineODE::GetAngle1(JointID pJointId, Lepra::float32& pAngle) const
+bool PhysicsManagerODE::GetAngle1(JointID pJointId, Lepra::float32& pAngle) const
 {
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
@@ -1952,7 +1952,7 @@ bool PhysicsEngineODE::GetAngle1(JointID pJointId, Lepra::float32& pAngle) const
 	return (true);
 }
 
-bool PhysicsEngineODE::GetAngle2(JointID pJointId, Lepra::float32& pAngle) const
+bool PhysicsManagerODE::GetAngle2(JointID pJointId, Lepra::float32& pAngle) const
 {
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
@@ -1985,7 +1985,7 @@ bool PhysicsEngineODE::GetAngle2(JointID pJointId, Lepra::float32& pAngle) const
 	return (true);
 }
 
-bool PhysicsEngineODE::GetAngleRate1(JointID pJointId, Lepra::float32& pAngleRate) const
+bool PhysicsManagerODE::GetAngleRate1(JointID pJointId, Lepra::float32& pAngleRate) const
 {
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
@@ -2021,7 +2021,7 @@ bool PhysicsEngineODE::GetAngleRate1(JointID pJointId, Lepra::float32& pAngleRat
 	return (true);
 }
 
-bool PhysicsEngineODE::GetAngleRate2(JointID pJointId, Lepra::float32& pAngleRate) const
+bool PhysicsManagerODE::GetAngleRate2(JointID pJointId, Lepra::float32& pAngleRate) const
 {	
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
@@ -2053,7 +2053,7 @@ bool PhysicsEngineODE::GetAngleRate2(JointID pJointId, Lepra::float32& pAngleRat
 	return (true);
 }
 
-bool PhysicsEngineODE::SetAngle1(BodyID pBodyId, JointID pJointId, Lepra::float32 pAngle)
+bool PhysicsManagerODE::SetAngle1(BodyID pBodyId, JointID pJointId, Lepra::float32 pAngle)
 {
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
@@ -2133,7 +2133,7 @@ bool PhysicsEngineODE::SetAngle1(BodyID pBodyId, JointID pJointId, Lepra::float3
 	return (false);
 }
 
-bool PhysicsEngineODE::SetAngularMotorAngle(JointID pJointId, Lepra::float32 pAngle)
+bool PhysicsManagerODE::SetAngularMotorAngle(JointID pJointId, Lepra::float32 pAngle)
 {
 	JointTable::iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
@@ -2152,7 +2152,7 @@ bool PhysicsEngineODE::SetAngularMotorAngle(JointID pJointId, Lepra::float32 pAn
 	return (true);
 }
 
-bool PhysicsEngineODE::SetAngularMotorSpeed(JointID pJointId, Lepra::float32 pSpeed)
+bool PhysicsManagerODE::SetAngularMotorSpeed(JointID pJointId, Lepra::float32 pSpeed)
 {
 	JointTable::iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
@@ -2171,7 +2171,7 @@ bool PhysicsEngineODE::SetAngularMotorSpeed(JointID pJointId, Lepra::float32 pSp
 	return (true);
 }
 
-bool PhysicsEngineODE::SetAngularMotorMaxForce(JointID pJointId, Lepra::float32 pMaxForce)
+bool PhysicsManagerODE::SetAngularMotorMaxForce(JointID pJointId, Lepra::float32 pMaxForce)
 {
 	JointTable::iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
@@ -2197,7 +2197,7 @@ bool PhysicsEngineODE::SetAngularMotorMaxForce(JointID pJointId, Lepra::float32 
 	return (false);
 }
 
-bool PhysicsEngineODE::SetAngularMotorRoll(JointID pJointId, Lepra::float32 pMaxForce, Lepra::float32 pTargetVelocity)
+bool PhysicsManagerODE::SetAngularMotorRoll(JointID pJointId, Lepra::float32 pMaxForce, Lepra::float32 pTargetVelocity)
 {
 	JointTable::iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
@@ -2227,7 +2227,7 @@ bool PhysicsEngineODE::SetAngularMotorRoll(JointID pJointId, Lepra::float32 pMax
 	return (false);
 }
 
-bool PhysicsEngineODE::GetAngularMotorRoll(JointID pJointId, Lepra::float32& pMaxForce, Lepra::float32& pTargetVelocity)
+bool PhysicsManagerODE::GetAngularMotorRoll(JointID pJointId, Lepra::float32& pMaxForce, Lepra::float32& pTargetVelocity)
 {
 	JointTable::iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
@@ -2247,7 +2247,7 @@ bool PhysicsEngineODE::GetAngularMotorRoll(JointID pJointId, Lepra::float32& pMa
 	return (false);
 }
 
-bool PhysicsEngineODE::SetAngularMotorTurn(JointID pJointId, Lepra::float32 pMaxForce, Lepra::float32 pTargetVelocity)
+bool PhysicsManagerODE::SetAngularMotorTurn(JointID pJointId, Lepra::float32 pMaxForce, Lepra::float32 pTargetVelocity)
 {
 	JointTable::iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
@@ -2275,7 +2275,7 @@ bool PhysicsEngineODE::SetAngularMotorTurn(JointID pJointId, Lepra::float32 pMax
 	return (false);
 }
 
-bool PhysicsEngineODE::GetAngularMotorAngle(JointID pJointId, Lepra::float32& pAngle) const
+bool PhysicsManagerODE::GetAngularMotorAngle(JointID pJointId, Lepra::float32& pAngle) const
 {
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
@@ -2294,7 +2294,7 @@ bool PhysicsEngineODE::GetAngularMotorAngle(JointID pJointId, Lepra::float32& pA
 	return (true);
 }
 
-bool PhysicsEngineODE::GetAngularMotorSpeed(JointID pJointId, Lepra::float32& pSpeed) const
+bool PhysicsManagerODE::GetAngularMotorSpeed(JointID pJointId, Lepra::float32& pSpeed) const
 {
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
@@ -2313,7 +2313,7 @@ bool PhysicsEngineODE::GetAngularMotorSpeed(JointID pJointId, Lepra::float32& pS
 	return (true);
 }
 
-bool PhysicsEngineODE::GetAngularMotorMaxForce(JointID pJointId, Lepra::float32& pMaxForce) const
+bool PhysicsManagerODE::GetAngularMotorMaxForce(JointID pJointId, Lepra::float32& pMaxForce) const
 {
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
@@ -2332,7 +2332,7 @@ bool PhysicsEngineODE::GetAngularMotorMaxForce(JointID pJointId, Lepra::float32&
 	return (true);
 }
 
-bool PhysicsEngineODE::SetJointParams(JointID pJointId, Lepra::float32 pLowStop, Lepra::float32 pHighStop, Lepra::float32 pBounce)
+bool PhysicsManagerODE::SetJointParams(JointID pJointId, Lepra::float32 pLowStop, Lepra::float32 pHighStop, Lepra::float32 pBounce)
 {
 	JointTable::iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
@@ -2403,7 +2403,7 @@ bool PhysicsEngineODE::SetJointParams(JointID pJointId, Lepra::float32 pLowStop,
 	return (true);
 }
 
-bool PhysicsEngineODE::GetJointParams(JointID pJointId, Lepra::float32& pLowStop, Lepra::float32& pHighStop, Lepra::float32& pBounce) const
+bool PhysicsManagerODE::GetJointParams(JointID pJointId, Lepra::float32& pLowStop, Lepra::float32& pHighStop, Lepra::float32& pBounce) const
 {
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
@@ -2450,7 +2450,7 @@ bool PhysicsEngineODE::GetJointParams(JointID pJointId, Lepra::float32& pLowStop
 	return (true);
 }
 
-bool PhysicsEngineODE::SetSuspension(JointID pJointId, Lepra::float32 pFrameTime, Lepra::float32 pSpringConstant, Lepra::float32 pDampingConstant)
+bool PhysicsManagerODE::SetSuspension(JointID pJointId, Lepra::float32 pFrameTime, Lepra::float32 pSpringConstant, Lepra::float32 pDampingConstant)
 {
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
@@ -2472,7 +2472,7 @@ bool PhysicsEngineODE::SetSuspension(JointID pJointId, Lepra::float32 pFrameTime
 	return (false);
 }
 
-bool PhysicsEngineODE::GetSuspension(JointID pJointId, Lepra::float32& pErp, Lepra::float32& pCfm) const
+bool PhysicsManagerODE::GetSuspension(JointID pJointId, Lepra::float32& pErp, Lepra::float32& pCfm) const
 {
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
@@ -2492,7 +2492,7 @@ bool PhysicsEngineODE::GetSuspension(JointID pJointId, Lepra::float32& pErp, Lep
 	return (false);
 }
 
-bool PhysicsEngineODE::GetSliderPos(JointID pJointId, Lepra::float32& pPos) const
+bool PhysicsManagerODE::GetSliderPos(JointID pJointId, Lepra::float32& pPos) const
 {
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
@@ -2511,7 +2511,7 @@ bool PhysicsEngineODE::GetSliderPos(JointID pJointId, Lepra::float32& pPos) cons
 	return (true);
 }
 
-bool PhysicsEngineODE::GetSliderSpeed(JointID pJointId, Lepra::float32& pSpeed) const
+bool PhysicsManagerODE::GetSliderSpeed(JointID pJointId, Lepra::float32& pSpeed) const
 {
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
@@ -2531,7 +2531,7 @@ bool PhysicsEngineODE::GetSliderSpeed(JointID pJointId, Lepra::float32& pSpeed) 
 	return (true);
 }
 
-bool PhysicsEngineODE::AddJointForce(JointID pJointId, Lepra::float32 pForce)
+bool PhysicsManagerODE::AddJointForce(JointID pJointId, Lepra::float32 pForce)
 {
 	JointTable::iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
@@ -2551,7 +2551,7 @@ bool PhysicsEngineODE::AddJointForce(JointID pJointId, Lepra::float32 pForce)
 	return (true);
 }
 
-bool PhysicsEngineODE::AddJointTorque(JointID pJointId, Lepra::float32 pTorque)
+bool PhysicsManagerODE::AddJointTorque(JointID pJointId, Lepra::float32 pTorque)
 {
 	JointTable::iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
@@ -2586,7 +2586,7 @@ bool PhysicsEngineODE::AddJointTorque(JointID pJointId, Lepra::float32 pTorque)
 	return (true);
 }
 
-bool PhysicsEngineODE::AddJointTorque(JointID pJointId, Lepra::float32 pTorque1, Lepra::float32 pTorque2)
+bool PhysicsManagerODE::AddJointTorque(JointID pJointId, Lepra::float32 pTorque1, Lepra::float32 pTorque2)
 {
 	JointTable::iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
@@ -2617,7 +2617,7 @@ bool PhysicsEngineODE::AddJointTorque(JointID pJointId, Lepra::float32 pTorque1,
 	return (true);
 }
 
-void PhysicsEngineODE::AddForce(BodyID pBodyId, const Lepra::Vector3D<Lepra::float32>& pForce)
+void PhysicsManagerODE::AddForce(BodyID pBodyId, const Lepra::Vector3D<Lepra::float32>& pForce)
 {
 	if (((Object*)pBodyId)->mWorldID != mWorldID)
 	{
@@ -2629,7 +2629,7 @@ void PhysicsEngineODE::AddForce(BodyID pBodyId, const Lepra::Vector3D<Lepra::flo
 	dBodyAddForce(((Object*)pBodyId)->mBodyID, pForce.x, pForce.y, pForce.z);
 }
 
-void PhysicsEngineODE::AddTorque(BodyID pBodyId, const Lepra::Vector3D<Lepra::float32>& pTorque)
+void PhysicsManagerODE::AddTorque(BodyID pBodyId, const Lepra::Vector3D<Lepra::float32>& pTorque)
 {
 	if (((Object*)pBodyId)->mWorldID != mWorldID)
 	{
@@ -2641,7 +2641,7 @@ void PhysicsEngineODE::AddTorque(BodyID pBodyId, const Lepra::Vector3D<Lepra::fl
 	dBodyAddTorque(((Object*)pBodyId)->mBodyID, pTorque.x, pTorque.y, pTorque.z);
 }
 
-void PhysicsEngineODE::AddRelForce(BodyID pBodyId, const Lepra::Vector3D<Lepra::float32>& pForce)
+void PhysicsManagerODE::AddRelForce(BodyID pBodyId, const Lepra::Vector3D<Lepra::float32>& pForce)
 {
 	if (((Object*)pBodyId)->mWorldID != mWorldID)
 	{
@@ -2653,7 +2653,7 @@ void PhysicsEngineODE::AddRelForce(BodyID pBodyId, const Lepra::Vector3D<Lepra::
 	dBodyAddRelForce(((Object*)pBodyId)->mBodyID, pForce.x, pForce.y, pForce.z);
 }
 
-void PhysicsEngineODE::AddRelTorque(BodyID pBodyId, const Lepra::Vector3D<Lepra::float32>& pTorque)
+void PhysicsManagerODE::AddRelTorque(BodyID pBodyId, const Lepra::Vector3D<Lepra::float32>& pTorque)
 {
 	if (((Object*)pBodyId)->mWorldID != mWorldID)
 	{
@@ -2665,7 +2665,7 @@ void PhysicsEngineODE::AddRelTorque(BodyID pBodyId, const Lepra::Vector3D<Lepra:
 	dBodyAddRelTorque(((Object*)pBodyId)->mBodyID, pTorque.x, pTorque.y, pTorque.z);
 }
 
-void PhysicsEngineODE::AddForceAtPos(BodyID pBodyId, const Lepra::Vector3D<Lepra::float32>& pForce,
+void PhysicsManagerODE::AddForceAtPos(BodyID pBodyId, const Lepra::Vector3D<Lepra::float32>& pForce,
 									 const Lepra::Vector3D<Lepra::float32>& pPos)
 {
 	if (((Object*)pBodyId)->mWorldID != mWorldID)
@@ -2678,7 +2678,7 @@ void PhysicsEngineODE::AddForceAtPos(BodyID pBodyId, const Lepra::Vector3D<Lepra
 	dBodyAddForceAtPos(((Object*)pBodyId)->mBodyID, pForce.x, pForce.y, pForce.z, pPos.x, pPos.y, pPos.z);
 }
 
-void PhysicsEngineODE::AddForceAtRelPos(BodyID pBodyId, const Lepra::Vector3D<Lepra::float32>& pForce,
+void PhysicsManagerODE::AddForceAtRelPos(BodyID pBodyId, const Lepra::Vector3D<Lepra::float32>& pForce,
 										const Lepra::Vector3D<Lepra::float32>& pPos)
 {
 	if (((Object*)pBodyId)->mWorldID != mWorldID)
@@ -2691,7 +2691,7 @@ void PhysicsEngineODE::AddForceAtRelPos(BodyID pBodyId, const Lepra::Vector3D<Le
 	dBodyAddForceAtRelPos(((Object*)pBodyId)->mBodyID, pForce.x, pForce.y, pForce.z, pPos.x, pPos.y, pPos.z);
 }
 
-void PhysicsEngineODE::AddRelForceAtPos(BodyID pBodyId, const Lepra::Vector3D<Lepra::float32>& pForce,
+void PhysicsManagerODE::AddRelForceAtPos(BodyID pBodyId, const Lepra::Vector3D<Lepra::float32>& pForce,
 										const Lepra::Vector3D<Lepra::float32>& pPos)
 {
 	if (((Object*)pBodyId)->mWorldID != mWorldID)
@@ -2704,7 +2704,7 @@ void PhysicsEngineODE::AddRelForceAtPos(BodyID pBodyId, const Lepra::Vector3D<Le
 	dBodyAddRelForceAtPos(((Object*)pBodyId)->mBodyID, pForce.x, pForce.y, pForce.z, pPos.x, pPos.y, pPos.z);
 }
 
-void PhysicsEngineODE::AddRelForceAtRelPos(BodyID pBodyId, const Lepra::Vector3D<Lepra::float32>& pForce,
+void PhysicsManagerODE::AddRelForceAtRelPos(BodyID pBodyId, const Lepra::Vector3D<Lepra::float32>& pForce,
 										   const Lepra::Vector3D<Lepra::float32>& pPos)
 {
 	if (((Object*)pBodyId)->mWorldID != mWorldID)
@@ -2717,7 +2717,7 @@ void PhysicsEngineODE::AddRelForceAtRelPos(BodyID pBodyId, const Lepra::Vector3D
 	dBodyAddRelForceAtRelPos(((Object*)pBodyId)->mBodyID, pForce.x, pForce.y, pForce.z, pPos.x, pPos.y, pPos.z);
 }
 
-void PhysicsEngineODE::RestrictBody(BodyID pBodyId, Lepra::float32 pMaxSpeed, Lepra::float32 pMaxAngularSpeed)
+void PhysicsManagerODE::RestrictBody(BodyID pBodyId, Lepra::float32 pMaxSpeed, Lepra::float32 pMaxAngularSpeed)
 {
 	if (((Object*)pBodyId)->mWorldID != mWorldID)
 	{
@@ -2744,7 +2744,7 @@ void PhysicsEngineODE::RestrictBody(BodyID pBodyId, Lepra::float32 pMaxSpeed, Le
 	}
 }
 
-void PhysicsEngineODE::ActivateGravity(BodyID pBodyId)
+void PhysicsManagerODE::ActivateGravity(BodyID pBodyId)
 {
 	if (((Object*)pBodyId)->mWorldID != mWorldID)
 	{
@@ -2755,7 +2755,7 @@ void PhysicsEngineODE::ActivateGravity(BodyID pBodyId)
 	dBodySetGravityMode(((Object*)pBodyId)->mBodyID, 1);
 }
 
-void PhysicsEngineODE::DeactivateGravity(BodyID pBodyId)
+void PhysicsManagerODE::DeactivateGravity(BodyID pBodyId)
 {
 	if (((Object*)pBodyId)->mWorldID != mWorldID)
 	{
@@ -2766,19 +2766,19 @@ void PhysicsEngineODE::DeactivateGravity(BodyID pBodyId)
 	dBodySetGravityMode(((Object*)pBodyId)->mBodyID, 0);
 }
 
-void PhysicsEngineODE::SetGravity(const Lepra::Vector3D<Lepra::float32>& pGravity)
+void PhysicsManagerODE::SetGravity(const Lepra::Vector3D<Lepra::float32>& pGravity)
 {
 	dWorldSetGravity(mWorldID, pGravity.x, pGravity.y, pGravity.z);
 }
 
-Lepra::Vector3DF PhysicsEngineODE::GetGravity() const
+Lepra::Vector3DF PhysicsManagerODE::GetGravity() const
 {
 	dVector3 lGravity;
 	::dWorldGetGravity(mWorldID, lGravity);
 	return (Lepra::Vector3DF(lGravity[0], lGravity[1], lGravity[2]));
 }
 
-void PhysicsEngineODE::StepAccurate(Lepra::float32 pStepSize)
+void PhysicsManagerODE::StepAccurate(Lepra::float32 pStepSize)
 {
 	if (pStepSize > 0)
 	{
@@ -2793,7 +2793,7 @@ void PhysicsEngineODE::StepAccurate(Lepra::float32 pStepSize)
 	}
 }
 
-void PhysicsEngineODE::StepFast(Lepra::float32 pStepSize)
+void PhysicsManagerODE::StepFast(Lepra::float32 pStepSize)
 {
 	if (pStepSize > 0)
 	{
@@ -2808,7 +2808,7 @@ void PhysicsEngineODE::StepFast(Lepra::float32 pStepSize)
 	}
 }
 
-void PhysicsEngineODE::DoForceFeedback()
+void PhysicsManagerODE::DoForceFeedback()
 {
 	JointList::iterator x;
 	for (x = mFeedbackJointList.begin(); x != mFeedbackJointList.end();)
@@ -2851,7 +2851,7 @@ void PhysicsEngineODE::DoForceFeedback()
 	}
 }
 
-void PhysicsEngineODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID pGeom2)
+void PhysicsManagerODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID pGeom2)
 {
 	Object* lObject1 = (Object*)dGeomGetData(pGeom1);
 	Object* lObject2 = (Object*)dGeomGetData(pGeom2);
@@ -2880,7 +2880,7 @@ void PhysicsEngineODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID pG
 		}
 	}
 
-	PhysicsEngineODE* lThis = (PhysicsEngineODE*)pData;
+	PhysicsManagerODE* lThis = (PhysicsManagerODE*)pData;
 	dContact lContact[8];
 	int lContactPointCount = -1;
 
@@ -3007,14 +3007,14 @@ void PhysicsEngineODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID pG
 
 
 
-const PhysicsEngine::BodySet& PhysicsEngineODE::GetIdledBodies() const
+const PhysicsManager::BodySet& PhysicsManagerODE::GetIdledBodies() const
 {
 	return (mAutoDisabledObjectSet);
 }
 
 
 
-void PhysicsEngineODE::FlagMovingObjects()
+void PhysicsManagerODE::FlagMovingObjects()
 {
 	mAutoDisabledObjectSet.clear();
 	ObjectTable::iterator x = mObjectTable.begin();
@@ -3028,7 +3028,7 @@ void PhysicsEngineODE::FlagMovingObjects()
 	}
 }
 
-void PhysicsEngineODE::HandleMovableObjects()
+void PhysicsManagerODE::HandleMovableObjects()
 {
 	BodySet::iterator x = mAutoDisabledObjectSet.begin();
 	while(x != mAutoDisabledObjectSet.end())
@@ -3049,7 +3049,7 @@ void PhysicsEngineODE::HandleMovableObjects()
 	}
 }
 
-void PhysicsEngineODE::NormalizeRotation(BodyID pObject)
+void PhysicsManagerODE::NormalizeRotation(BodyID pObject)
 {
 	Object* lObject = (Object*)pObject;
 	if (lObject->mBodyID->geom->type == dBoxClass)
@@ -3068,7 +3068,7 @@ void PhysicsEngineODE::NormalizeRotation(BodyID pObject)
 
 
 
-LOG_CLASS_DEFINE(PHYSICS, PhysicsEngineODE);
+LOG_CLASS_DEFINE(PHYSICS, PhysicsManagerODE);
 
 
 

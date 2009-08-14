@@ -22,7 +22,7 @@
 #include "../../Lepra/Include/Thread.h"
 #include "../../Lepra/Include/Timer.h"
 #include "../../Lepra/Include/ZipArchive.h"
-#include "../../TBC/Include/ChunkyStructure.h"
+#include "../../TBC/Include/ChunkyPhysics.h"
 #include "../../TBC/Include/GeometryReference.h"
 #include "../../TBC/Include/TerrainFunction.h"
 #include "../../TBC/Include/TerrainPatch.h"
@@ -1237,24 +1237,24 @@ bool TestSkinningSaveLoad(const Lepra::LogDecorator& pLog, double pShowTime)
 	if (lTestOk)
 	{
 		lContext = _T("save chain structure");
-		TBC::ChunkyStructure lStructure(TBC::BoneHierarchy::TRANSFORM_NONE, TBC::ChunkyStructure::DYNAMIC);
+		TBC::ChunkyPhysics lStructure(TBC::BoneHierarchy::TRANSFORM_NONE, TBC::ChunkyPhysics::DYNAMIC);
 		lStructure.SetBoneCount(2);
 		lStructure.SetBoneChildCount(0, 1);
 		lStructure.SetChildIndex(0, 0, 1);
 		Lepra::TransformationF lTransform = Lepra::gIdentityTransformationF;
 		lStructure.SetOriginalBoneTransformation(0, lTransform);
 		lStructure.SetOriginalBoneTransformation(1, lTransform);
-		lStructure.SetPhysicsType(TBC::ChunkyStructure::DYNAMIC);
+		lStructure.SetPhysicsType(TBC::ChunkyPhysics::DYNAMIC);
 		lStructure.BoneHierarchy::FinalizeInit(TBC::BoneHierarchy::TRANSFORM_NONE);
 		Lepra::DiskFile lFile;
 		lTestOk = lFile.Open(lStructureName, Lepra::DiskFile::MODE_WRITE);
 		if (lTestOk)
 		{
-			TBC::ChunkyStructureLoader lStructureLoader(&lFile, false);
+			TBC::ChunkyPhysicsLoader lStructureLoader(&lFile, false);
 			lTestOk = lStructureLoader.Save(&lStructure);
 		}
 	}
-	TBC::ChunkyStructure lStructure(TBC::BoneHierarchy::TRANSFORM_NONE, TBC::ChunkyStructure::DYNAMIC);
+	TBC::ChunkyPhysics lStructure(TBC::BoneHierarchy::TRANSFORM_NONE, TBC::ChunkyPhysics::DYNAMIC);
 	if (lTestOk)
 	{
 		lContext = _T("load chain structure");
@@ -1262,7 +1262,7 @@ bool TestSkinningSaveLoad(const Lepra::LogDecorator& pLog, double pShowTime)
 		lTestOk = lFile.Open(lStructureName, Lepra::DiskFile::MODE_READ);
 		if (lTestOk)
 		{
-			TBC::ChunkyStructureLoader lStructureLoader(&lFile, false);
+			TBC::ChunkyPhysicsLoader lStructureLoader(&lFile, false);
 			lTestOk = lStructureLoader.Load(&lStructure);
 		}
 		if (lTestOk)

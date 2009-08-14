@@ -8,7 +8,7 @@
 
 #include "TBC.h"
 #include "../Include/Bones.h"
-#include "../Include/PhysicsEngine.h"
+#include "../Include/PhysicsManager.h"
 
 
 
@@ -22,7 +22,7 @@ class StructureEngine;
 
 
 
-class ChunkyStructure: public BoneHierarchy
+class ChunkyPhysics: public BoneHierarchy
 {
 	typedef BoneHierarchy Parent;
 public:
@@ -33,22 +33,22 @@ public:
 		COLLISION_DETECT_ONLY,	// Only collision detection. (Used when ray-testing NPCs/avatars.) Change type to dynamic for ragdoll (when falling or dead).
 	};
 
-	ChunkyStructure(TransformOperation pTransformOperation, PhysicsType pPhysicsType = STATIC);
-	virtual ~ChunkyStructure();
+	ChunkyPhysics(TransformOperation pTransformOperation, PhysicsType pPhysicsType = STATIC);
+	virtual ~ChunkyPhysics();
 
-	void OnTick(PhysicsEngine* pPhysicsManager, float pFrameTime);
+	void OnTick(PhysicsManager* pPhysicsManager, float pFrameTime);
 
 	void SetPhysicsType(PhysicsType pPhysicsType);	// You may use this to change into a ragdoll (COLLISION_DETECT_ONLY -> DYNAMIC), or back.
 	PhysicsType GetPhysicsType() const;
 
 	ChunkyBoneGeometry* GetBoneGeometry(int pBoneIndex) const;
-	ChunkyBoneGeometry* GetBoneGeometry(TBC::PhysicsEngine::BodyID pBodyId) const;
+	ChunkyBoneGeometry* GetBoneGeometry(TBC::PhysicsManager::BodyID pBodyId) const;
 	void AddBoneGeometry(ChunkyBoneGeometry* pGeometry);	// Takes ownership of the added geometry.
 	void AddBoneGeometry(const Lepra::TransformationF& pTransformation, ChunkyBoneGeometry* pGeometry,
 		const ChunkyBoneGeometry* pParent = 0);	// Takes ownership of the added geometry.
 	int GetIndex(const ChunkyBoneGeometry* pGeometry) const;
 	const Lepra::TransformationF& GetTransformation(const ChunkyBoneGeometry* pGeometry) const;
-	void ClearBoneGeometries(PhysicsEngine* pPhysics);
+	void ClearBoneGeometries(PhysicsManager* pPhysics);
 
 	int GetEngineCount() const;
 	StructureEngine* GetEngine(int pBoneIndex) const;
@@ -57,10 +57,10 @@ public:
 	void ClearEngines();
 
 	// Overrides.
-	void ClearAll(PhysicsEngine* pPhysics);
+	void ClearAll(PhysicsManager* pPhysics);
 	void SetBoneCount(int pBoneCount);
-	bool FinalizeInit(PhysicsEngine* pPhysics, unsigned pPhysicsFps, Lepra::TransformationF* pTransform,
-		PhysicsEngine::TriggerListener* pTrigListener, PhysicsEngine::ForceFeedbackListener* pForceListener);
+	bool FinalizeInit(PhysicsManager* pPhysics, unsigned pPhysicsFps, Lepra::TransformationF* pTransform,
+		PhysicsManager::TriggerListener* pTrigListener, PhysicsManager::ForceFeedbackListener* pForceListener);
 
 	unsigned GetNextGeometryIndex();
 

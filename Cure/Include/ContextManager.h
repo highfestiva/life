@@ -9,7 +9,7 @@
 #include <map>
 #include "../../Lepra/Include/HashTable.h"
 #include "../../Lepra/Include/IdManager.h"
-#include "../../TBC/Include/PhysicsEngine.h"
+#include "../../TBC/Include/PhysicsManager.h"
 #include "Cure.h"
 
 
@@ -42,8 +42,8 @@ public:
 	const ContextObjectTable& GetObjectTable() const;
 	void ClearObjects();
 	void AddPhysicsSenderObject(ContextObject* pObject);
-	void AddPhysicsBody(ContextObject* pObject, TBC::PhysicsEngine::BodyID pBodyId);
-	void RemovePhysicsBody(TBC::PhysicsEngine::BodyID pBodyId);
+	void AddPhysicsBody(ContextObject* pObject, TBC::PhysicsManager::BodyID pBodyId);
+	void RemovePhysicsBody(TBC::PhysicsManager::BodyID pBodyId);
 
 	GameObjectId AllocateGameObjectId(NetworkObjectType pNetworkType);
 	void FreeGameObjectId(NetworkObjectType pNetworkType, GameObjectId pObjectId);
@@ -76,8 +76,8 @@ private:
 	};
 	typedef std::map<int, AlarmInfo> AlarmMap;
 	typedef std::pair<int, AlarmInfo> AlarmPair;
-	typedef std::hash_map<TBC::PhysicsEngine::BodyID, ContextObject*> BodyTable;
-	typedef std::pair<TBC::PhysicsEngine::BodyID, ContextObject*> BodyPair;
+	typedef std::hash_map<TBC::PhysicsManager::BodyID, ContextObject*> BodyTable;
+	typedef std::pair<TBC::PhysicsManager::BodyID, ContextObject*> BodyPair;
 
 	GameManager* mGameManager;
 

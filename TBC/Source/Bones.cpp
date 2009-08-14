@@ -76,7 +76,7 @@ BoneHierarchy::~BoneHierarchy()
 	ClearAll(0);
 }
 
-void BoneHierarchy::ClearAll(PhysicsEngine*)
+void BoneHierarchy::ClearAll(PhysicsManager*)
 {
 	delete[] (mBone);
 	mBone = 0;

@@ -469,7 +469,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Source\ChunkyStructure.cpp"
+				RelativePath=".\Source\ChunkyPhysics.cpp"
 				>
 			</File>
 			<File
@@ -485,11 +485,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Source\PhysicsEngineFactory.cpp"
+				RelativePath=".\Source\PhysicsManagerFactory.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\Source\PhysicsEngineODE.cpp"
+				RelativePath=".\Source\PhysicsManagerODE.cpp"
 				>
 			</File>
 			<File
@@ -531,7 +531,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Include\ChunkyStructure.h"
+				RelativePath=".\Include\ChunkyPhysics.h"
 				>
 			</File>
 			<File
@@ -547,15 +547,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Include\PhysicsEngine.h"
+				RelativePath=".\Include\PhysicsManager.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Include\PhysicsEngineFactory.h"
+				RelativePath=".\Include\PhysicsManagerFactory.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Include\PhysicsEngineODE.h"
+				RelativePath=".\Include\PhysicsManagerODE.h"
 				>
 			</File>
 			<File

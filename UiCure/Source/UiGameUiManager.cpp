@@ -8,7 +8,7 @@
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../../Lepra/Include/Math.h"
 #include "../../Lepra/Include/Thread.h"
-#include "../../TBC/Include/PhysicsEngine.h"
+#include "../../TBC/Include/PhysicsManager.h"
 #include "../../UiLepra/Include/UiCore.h"
 #include "../../UiLepra/Include/UiInput.h"
 #include "../../UiTbc/Include/GUI/UiDesktopWindow.h"

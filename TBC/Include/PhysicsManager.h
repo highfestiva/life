@@ -20,7 +20,7 @@ class GeometryBase;
 
 
 
-class PhysicsEngine
+class PhysicsManager
 {
 public:
 	typedef void* BodyID;
@@ -118,7 +118,7 @@ public:
 		float mAngle2Acceleration;
 	};
 
-	virtual ~PhysicsEngine(){};
+	virtual ~PhysicsManager(){};
 
 	// The "friction" parameter is a factor such that the friction coefficient
 	// between two bodies is calculated as mu = body1.friction * body2.friction.
@@ -307,10 +307,10 @@ protected:
 
 
 
-const PhysicsEngine::BodyID INVALID_BODY = 0;
-const PhysicsEngine::JointID INVALID_JOINT = 0;
-const PhysicsEngine::GeomID INVALID_GEOM = 0;
-const PhysicsEngine::TriggerID INVALID_TRIGGER = 0;
+const PhysicsManager::BodyID INVALID_BODY = 0;
+const PhysicsManager::JointID INVALID_JOINT = 0;
+const PhysicsManager::GeomID INVALID_GEOM = 0;
+const PhysicsManager::TriggerID INVALID_TRIGGER = 0;
 
 
 

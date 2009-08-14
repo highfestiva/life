@@ -8,7 +8,7 @@
 
 #include <hash_set>
 #include "TBC.h"
-#include "PhysicsEngine.h"
+#include "PhysicsManager.h"
 #include "../../Lepra/Include/FastAllocator.h"
 #include "../../Lepra/Include/Log.h"
 #pragma warning(push)
@@ -23,11 +23,11 @@ namespace TBC
 
 
 
-class PhysicsEngineODE: public PhysicsEngine
+class PhysicsManagerODE: public PhysicsManager
 {
 public:
-	PhysicsEngineODE();
-	virtual ~PhysicsEngineODE();
+	PhysicsManagerODE();
+	virtual ~PhysicsManagerODE();
 
 	virtual BodyID CreateSphere(bool pIsRoot, const Lepra::TransformationF& pTransform, Lepra::float32 pMass,
 		Lepra::float32 pRadius, BodyType pType, Lepra::float32 pFriction = 1, Lepra::float32 pBounce = 0,

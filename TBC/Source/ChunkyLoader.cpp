@@ -7,7 +7,7 @@
 #include "../Include/Bones.h"
 #include "../Include/ChunkyBoneGeometry.h"
 #include "../Include/ChunkyLoader.h"
-#include "../Include/ChunkyStructure.h"
+#include "../Include/ChunkyPhysics.h"
 #include "../Include/StructureEngine.h"
 
 
@@ -669,21 +669,21 @@ bool ChunkyAnimationLoader::LoadElementCallback(ChunkyType pType, Lepra::uint32 
 
 
 
-ChunkyStructureLoader::ChunkyStructureLoader(Lepra::File* pFile, bool pIsFileOwner):
+ChunkyPhysicsLoader::ChunkyPhysicsLoader(Lepra::File* pFile, bool pIsFileOwner):
 	ChunkyLoader(pFile, pIsFileOwner)
 {
 }
 
-ChunkyStructureLoader::~ChunkyStructureLoader()
+ChunkyPhysicsLoader::~ChunkyPhysicsLoader()
 {
 }
 
-bool ChunkyStructureLoader::Load(ChunkyStructure* pStructure)
+bool ChunkyPhysicsLoader::Load(ChunkyPhysics* pPhysics)
 {
 	bool lOk = true;
 	if (lOk)
 	{
-		lOk = VerifyFileType(CHUNK_STRUCTURE);
+		lOk = VerifyFileType(CHUNK_PHYSICS);
 	}
 
 	Lepra::int32 lBoneCount = -1;
@@ -692,67 +692,67 @@ bool ChunkyStructureLoader::Load(ChunkyStructure* pStructure)
 	if (lOk)
 	{
 		FileElementList lLoadList;
-		lLoadList.push_back(ChunkyFileElement(CHUNK_STRUCTURE_BONE_COUNT, &lBoneCount));
-		lLoadList.push_back(ChunkyFileElement(CHUNK_STRUCTURE_PHYSICS_TYPE, &lPhysicsType));
-		lLoadList.push_back(ChunkyFileElement(CHUNK_STRUCTURE_ENGINE_COUNT, &lEngineCount));
+		lLoadList.push_back(ChunkyFileElement(CHUNK_PHYSICS_BONE_COUNT, &lBoneCount));
+		lLoadList.push_back(ChunkyFileElement(CHUNK_PHYSICS_PHYSICS_TYPE, &lPhysicsType));
+		lLoadList.push_back(ChunkyFileElement(CHUNK_PHYSICS_ENGINE_COUNT, &lEngineCount));
 		lOk = AllocLoadChunkyList(lLoadList, mFile->GetSize());
 	}
 	if (lOk)
 	{
 		// Check that all mandatories have been found.
 		lOk = (lBoneCount >= 1 && lBoneCount < 10000 &&
-			(lPhysicsType == ChunkyStructure::STATIC ||
-			lPhysicsType == ChunkyStructure::DYNAMIC ||
-			lPhysicsType == ChunkyStructure::COLLISION_DETECT_ONLY) &&
+			(lPhysicsType == ChunkyPhysics::STATIC ||
+			lPhysicsType == ChunkyPhysics::DYNAMIC ||
+			lPhysicsType == ChunkyPhysics::COLLISION_DETECT_ONLY) &&
 			lEngineCount >= 0 && lEngineCount < 1000);
 	}
 	if (lOk)
 	{
-		pStructure->SetBoneCount(lBoneCount);
-		pStructure->SetPhysicsType((ChunkyStructure::PhysicsType)lPhysicsType);
+		pPhysics->SetBoneCount(lBoneCount);
+		pPhysics->SetPhysicsType((ChunkyPhysics::PhysicsType)lPhysicsType);
 
 		FileElementList lLoadList;
 		mCurrentBoneIndex = 0;
-		lLoadList.push_back(ChunkyFileElement(CHUNK_STRUCTURE_BONE_CONTAINER, (void*)pStructure, lBoneCount));
-		lLoadList.push_back(ChunkyFileElement(CHUNK_STRUCTURE_ENGINE_CONTAINER, (void*)pStructure, lEngineCount));
+		lLoadList.push_back(ChunkyFileElement(CHUNK_PHYSICS_BONE_CONTAINER, (void*)pPhysics, lBoneCount));
+		lLoadList.push_back(ChunkyFileElement(CHUNK_PHYSICS_ENGINE_CONTAINER, (void*)pPhysics, lEngineCount));
 		lOk = AllocLoadChunkyList(lLoadList, mFile->GetSize());
 	}
 	if (lOk)
 	{
-		lOk = (lEngineCount == pStructure->GetEngineCount());
+		lOk = (lEngineCount == pPhysics->GetEngineCount());
 		assert(lOk);
 	}
 
 	return (lOk);
 }
 
-bool ChunkyStructureLoader::Save(const ChunkyStructure* pStructure)
+bool ChunkyPhysicsLoader::Save(const ChunkyPhysics* pPhysics)
 {
-	bool lOk = (pStructure->GetBoneCount() > 0);
+	bool lOk = (pPhysics->GetBoneCount() > 0);
 
 	// Write file header. We will come back to it later to re-write the actual size.
 	if (lOk)
 	{
-		lOk = WriteFileType(CHUNK_STRUCTURE);
+		lOk = WriteFileType(CHUNK_PHYSICS);
 	}
 	const Lepra::int64 lFileDataStart = mFile->Tell();
 
-	// Write structure modes and similar stuff.
-	Lepra::int32 lBoneCount = pStructure->GetBoneCount();
-	Lepra::int32 lPhysicsType = pStructure->GetPhysicsType();
-	Lepra::int32 lEngineCount = pStructure->GetEngineCount();
+	// Write physics modes and similar stuff.
+	Lepra::int32 lBoneCount = pPhysics->GetBoneCount();
+	Lepra::int32 lPhysicsType = pPhysics->GetPhysicsType();
+	Lepra::int32 lEngineCount = pPhysics->GetEngineCount();
 	if (lOk)
 	{
 		lOk = (lBoneCount > 0 && lBoneCount < 10000 &&
-			lPhysicsType >= ChunkyStructure::STATIC &&
+			lPhysicsType >= ChunkyPhysics::STATIC &&
 			lEngineCount >= 0 && lEngineCount < 1000);
 	}
 	if (lOk)
 	{
 		FileElementList lSaveList;
-		lSaveList.push_back(ChunkyFileElement(CHUNK_STRUCTURE_BONE_COUNT, &lBoneCount));
-		lSaveList.push_back(ChunkyFileElement(CHUNK_STRUCTURE_PHYSICS_TYPE, &lPhysicsType));
-		lSaveList.push_back(ChunkyFileElement(CHUNK_STRUCTURE_ENGINE_COUNT, &lEngineCount));
+		lSaveList.push_back(ChunkyFileElement(CHUNK_PHYSICS_BONE_COUNT, &lBoneCount));
+		lSaveList.push_back(ChunkyFileElement(CHUNK_PHYSICS_PHYSICS_TYPE, &lPhysicsType));
+		lSaveList.push_back(ChunkyFileElement(CHUNK_PHYSICS_ENGINE_COUNT, &lEngineCount));
 		lOk = SaveChunkyList(lSaveList);
 	}
 
@@ -761,20 +761,20 @@ bool ChunkyStructureLoader::Save(const ChunkyStructure* pStructure)
 	{
 		// Write all bone stuff into a single chunk (multiple element chunk).
 		Lepra::int64 lChunkEndPosition = 0;
-		lOk = SaveHead(CHUNK_STRUCTURE_BONE_CONTAINER, 0, lChunkEndPosition);
+		lOk = SaveHead(CHUNK_PHYSICS_BONE_CONTAINER, 0, lChunkEndPosition);
 	}
 	const Lepra::int64 lBoneChunkStart = mFile->Tell();
 	for (int b = 0; lOk && b < lBoneCount; ++b)
 	{
 		// Save children.
-		const int cc = pStructure->GetBoneChildCount(b);
+		const int cc = pPhysics->GetBoneChildCount(b);
 		if (cc > 0)
 		{
 			Lepra::int64 lChunkEndPosition = 0;
-			lOk = SaveHead(CHUNK_STRUCTURE_BONE_CHILD_LIST, cc*sizeof(Lepra::int32), lChunkEndPosition);
+			lOk = SaveHead(CHUNK_PHYSICS_BONE_CHILD_LIST, cc*sizeof(Lepra::int32), lChunkEndPosition);
 			for (int c = 0; lOk && c < cc; ++c)
 			{
-				Lepra::int32 lChildIndex = pStructure->GetChildIndex(b, c);
+				Lepra::int32 lChildIndex = pPhysics->GetChildIndex(b, c);
 				mFile->Write(lChildIndex);
 			}
 		}
@@ -785,9 +785,9 @@ bool ChunkyStructureLoader::Save(const ChunkyStructure* pStructure)
 			const unsigned lTransformFloatCount = 3+4;
 			const Lepra::uint32 lTransformSize = lTransformFloatCount*sizeof(float);
 			Lepra::int64 lChunkEndPosition = 0;
-			lOk = SaveHead(CHUNK_STRUCTURE_BONE_TRANSFORM, lTransformSize, lChunkEndPosition);
+			lOk = SaveHead(CHUNK_PHYSICS_BONE_TRANSFORM, lTransformSize, lChunkEndPosition);
 			Lepra::uint32 lTransform[lTransformFloatCount];
-			pStructure->GetBoneTransformation(b).Get((float*)lTransform);
+			pPhysics->GetBoneTransformation(b).Get((float*)lTransform);
 			// Convert to network byte order.
 			for (int x = 0; x < lTransformFloatCount; ++x)
 			{
@@ -799,16 +799,16 @@ bool ChunkyStructureLoader::Save(const ChunkyStructure* pStructure)
 		// Save geometries.
 		if (lOk)
 		{
-			ChunkyBoneGeometry* lGeometry = pStructure->GetBoneGeometry(b);
+			ChunkyBoneGeometry* lGeometry = pPhysics->GetBoneGeometry(b);
 			if (lGeometry)
 			{
 				Lepra::int64 lChunkEndPosition = 0;
 				unsigned lSize = lGeometry->GetChunkySize();
-				lOk = SaveHead(CHUNK_STRUCTURE_BONE_SHAPE, lSize, lChunkEndPosition);
+				lOk = SaveHead(CHUNK_PHYSICS_BONE_SHAPE, lSize, lChunkEndPosition);
 				if (lOk)
 				{
 					char* lData = new char[lSize];
-					lGeometry->SaveChunkyData(pStructure, lData);
+					lGeometry->SaveChunkyData(pPhysics, lData);
 					assert(lGeometry->GetChunkySize(lData) == lSize);
 					lOk = (mFile->WriteData(lData, lSize) == Lepra::IO_OK);
 					delete (lData);
@@ -826,21 +826,21 @@ bool ChunkyStructureLoader::Save(const ChunkyStructure* pStructure)
 	{
 		// Write all bone stuff into a single chunk (multiple element chunk).
 		Lepra::int64 lChunkEndPosition = 0;
-		lOk = SaveHead(CHUNK_STRUCTURE_ENGINE_CONTAINER, 0, lChunkEndPosition);
+		lOk = SaveHead(CHUNK_PHYSICS_ENGINE_CONTAINER, 0, lChunkEndPosition);
 	}
 	const Lepra::int64 lEngineChunkStart = mFile->Tell();
 	// Write engines.
 	for (int e = 0; lOk && e < lEngineCount; ++e)
 	{
-		StructureEngine* lEngine = pStructure->GetEngine(e);
+		StructureEngine* lEngine = pPhysics->GetEngine(e);
 		assert(lEngine);
 		Lepra::int64 lChunkEndPosition = 0;
 		unsigned lSize = lEngine->GetChunkySize();
-		lOk = SaveHead(CHUNK_STRUCTURE_ENGINE, lSize, lChunkEndPosition);
+		lOk = SaveHead(CHUNK_PHYSICS_ENGINE, lSize, lChunkEndPosition);
 		if (lOk)
 		{
 			char* lData = new char[lSize];
-			lEngine->SaveChunkyData(pStructure, lData);
+			lEngine->SaveChunkyData(pPhysics, lData);
 			lOk = (mFile->WriteData(lData, lSize) == Lepra::IO_OK);
 			delete (lData);
 		}
@@ -859,11 +859,11 @@ bool ChunkyStructureLoader::Save(const ChunkyStructure* pStructure)
 	return (lOk);
 }
 
-bool ChunkyStructureLoader::LoadElementCallback(ChunkyType pType, Lepra::uint32 pSize, Lepra::int64 pChunkEndPosition, void* pStorage)
+bool ChunkyPhysicsLoader::LoadElementCallback(ChunkyType pType, Lepra::uint32 pSize, Lepra::int64 pChunkEndPosition, void* pStorage)
 {
-	ChunkyStructure* lStructure = (ChunkyStructure*)pStorage;
+	ChunkyPhysics* lPhysics = (ChunkyPhysics*)pStorage;
 	bool lOk = false;
-	if (pType == CHUNK_STRUCTURE_BONE_CONTAINER)
+	if (pType == CHUNK_PHYSICS_BONE_CONTAINER)
 	{
 		// Setup pointers and counters for list loading.
 		const int MAXIMUM_CHILD_BONES = 64;
@@ -875,9 +875,9 @@ bool ChunkyStructureLoader::LoadElementCallback(ChunkyType pType, Lepra::uint32 
 		Lepra::uint32* lGeometryArray = 0;
 		unsigned lGeometryByteSize = 0;
 		FileElementList lLoadList;
-		lLoadList.push_back(ChunkyFileElement(CHUNK_STRUCTURE_BONE_CHILD_LIST, lChildArray, &lChildByteSize, -MAXIMUM_CHILD_BONES));
-		lLoadList.push_back(ChunkyFileElement(CHUNK_STRUCTURE_BONE_TRANSFORM, (void**)&lTransformArray, (unsigned*)&lFloatByteSize));
-		lLoadList.push_back(ChunkyFileElement(CHUNK_STRUCTURE_BONE_SHAPE, (void**)&lGeometryArray, (unsigned*)&lGeometryByteSize));
+		lLoadList.push_back(ChunkyFileElement(CHUNK_PHYSICS_BONE_CHILD_LIST, lChildArray, &lChildByteSize, -MAXIMUM_CHILD_BONES));
+		lLoadList.push_back(ChunkyFileElement(CHUNK_PHYSICS_BONE_TRANSFORM, (void**)&lTransformArray, (unsigned*)&lFloatByteSize));
+		lLoadList.push_back(ChunkyFileElement(CHUNK_PHYSICS_BONE_SHAPE, (void**)&lGeometryArray, (unsigned*)&lGeometryByteSize));
 		lOk = AllocLoadChunkyList(lLoadList, pChunkEndPosition);
 
 		// Check child array byte size.
@@ -899,13 +899,13 @@ bool ChunkyStructureLoader::LoadElementCallback(ChunkyType pType, Lepra::uint32 
 		{
 			log_volatile(mLog.Debugf(_T("Current bone index is %i."),
 				mCurrentBoneIndex));
-			lStructure->SetBoneChildCount(mCurrentBoneIndex, lChildCount);
+			lPhysics->SetBoneChildCount(mCurrentBoneIndex, lChildCount);
 			for (int x = 0; lOk && x < lChildCount; ++x)
 			{
-				lOk = (lChildArray[x] >= 0 && lChildArray[x] < lStructure->GetBoneCount());
+				lOk = (lChildArray[x] >= 0 && lChildArray[x] < lPhysics->GetBoneCount());
 				if (lOk)
 				{
-					lStructure->SetChildIndex(mCurrentBoneIndex, x, lChildArray[x]);
+					lPhysics->SetChildIndex(mCurrentBoneIndex, x, lChildArray[x]);
 				}
 			}
 			// Convert to host endian.
@@ -914,17 +914,17 @@ bool ChunkyStructureLoader::LoadElementCallback(ChunkyType pType, Lepra::uint32 
 				lTransformArray[x] = Lepra::Endian::BigToHost(lTransformArray[x]);
 			}
 			Lepra::TransformationF lTransform((const float*)lTransformArray);
-			lStructure->SetOriginalBoneTransformation(mCurrentBoneIndex, lTransform);
+			lPhysics->SetOriginalBoneTransformation(mCurrentBoneIndex, lTransform);
 		}
 
 		if (lOk && lGeometryArray)
 		{
-			ChunkyBoneGeometry* lGeometry = ChunkyBoneGeometry::Load(lStructure,
+			ChunkyBoneGeometry* lGeometry = ChunkyBoneGeometry::Load(lPhysics,
 				lGeometryArray, lGeometryByteSize);
 			lOk = (lGeometry != 0);
 			if (lOk)
 			{
-				lStructure->AddBoneGeometry(lGeometry);
+				lPhysics->AddBoneGeometry(lGeometry);
 			}
 		}
 
@@ -934,23 +934,23 @@ bool ChunkyStructureLoader::LoadElementCallback(ChunkyType pType, Lepra::uint32 
 		delete[] (lTransformArray);
 		++mCurrentBoneIndex;
 	}
-	else if (pType == CHUNK_STRUCTURE_ENGINE_CONTAINER)
+	else if (pType == CHUNK_PHYSICS_ENGINE_CONTAINER)
 	{
 		Lepra::uint32* lEngineArray = 0;
 		unsigned lEngineByteSize = 0;
 		FileElementList lLoadList;
-		lLoadList.push_back(ChunkyFileElement(CHUNK_STRUCTURE_ENGINE, (void**)&lEngineArray, (unsigned*)&lEngineByteSize));
+		lLoadList.push_back(ChunkyFileElement(CHUNK_PHYSICS_ENGINE, (void**)&lEngineArray, (unsigned*)&lEngineByteSize));
 		lOk = AllocLoadChunkyList(lLoadList, pChunkEndPosition);
 
 		StructureEngine* lEngine = 0;
 		if (lOk)
 		{
-			lEngine = StructureEngine::Load(lStructure, lEngineArray, lEngineByteSize);
+			lEngine = StructureEngine::Load(lPhysics, lEngineArray, lEngineByteSize);
 			lOk = (lEngine != 0);
 		}
 		if (lOk)
 		{
-			lStructure->AddEngine(lEngine);
+			lPhysics->AddEngine(lEngine);
 		}
 
 		delete[] (lEngineArray);
@@ -966,7 +966,7 @@ bool ChunkyStructureLoader::LoadElementCallback(ChunkyType pType, Lepra::uint32 
 
 LOG_CLASS_DEFINE(GENERAL_RESOURCES, ChunkyLoader);
 LOG_CLASS_DEFINE(GENERAL_RESOURCES, ChunkyAnimationLoader);
-LOG_CLASS_DEFINE(GENERAL_RESOURCES, ChunkyStructureLoader);
+LOG_CLASS_DEFINE(GENERAL_RESOURCES, ChunkyPhysicsLoader);
 
 
 

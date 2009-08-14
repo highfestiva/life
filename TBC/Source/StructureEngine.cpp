@@ -8,7 +8,7 @@
 #include <assert.h>
 #include "../../Lepra/Include/Math.h"
 #include "../Include/ChunkyBoneGeometry.h"
-#include "../Include/ChunkyStructure.h"
+#include "../Include/ChunkyPhysics.h"
 
 
 
@@ -34,7 +34,7 @@ StructureEngine::~StructureEngine()
 
 
 
-StructureEngine* StructureEngine::Load(ChunkyStructure* pStructure, const void* pData, unsigned pByteCount)
+StructureEngine* StructureEngine::Load(ChunkyPhysics* pStructure, const void* pData, unsigned pByteCount)
 {
 	const Lepra::uint32* lData = (const Lepra::uint32*)pData;
 	if (pByteCount != sizeof(Lepra::uint32)*6 + Lepra::Endian::BigToHost(lData[5])*sizeof(Lepra::uint32)*3)
@@ -153,7 +153,7 @@ bool StructureEngine::SetValue(unsigned pAspect, float pValue, float pZAngle)
 
 
 
-void StructureEngine::OnTick(PhysicsEngine* pPhysicsManager, float pFrameTime)
+void StructureEngine::OnTick(PhysicsManager* pPhysicsManager, float pFrameTime)
 {
 	EngineNodeArray::const_iterator i = mEngineNodeArray.begin();
 	for (; i != mEngineNodeArray.end(); ++i)
@@ -304,7 +304,7 @@ unsigned StructureEngine::GetChunkySize() const
 		sizeof(Lepra::uint32) + sizeof(Lepra::uint32)*3*mEngineNodeArray.size()));
 }
 
-void StructureEngine::SaveChunkyData(const ChunkyStructure* pStructure, void* pData) const
+void StructureEngine::SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const
 {
 	Lepra::uint32* lData = (Lepra::uint32*)pData;
 	lData[0] = Lepra::Endian::HostToBig(GetEngineType());
@@ -323,7 +323,7 @@ void StructureEngine::SaveChunkyData(const ChunkyStructure* pStructure, void* pD
 	}
 }
 
-void StructureEngine::LoadChunkyData(ChunkyStructure* pStructure, const void* pData)
+void StructureEngine::LoadChunkyData(ChunkyPhysics* pStructure, const void* pData)
 {
 	const Lepra::uint32* lData = (const Lepra::uint32*)pData;
 
@@ -346,7 +346,7 @@ void StructureEngine::LoadChunkyData(ChunkyStructure* pStructure, const void* pD
 
 
 
-void StructureEngine::ApplyTorque(PhysicsEngine* pPhysicsManager, float pFrameTime, ChunkyBoneGeometry* pGeometry, const EngineNode& pEngineNode)
+void StructureEngine::ApplyTorque(PhysicsManager* pPhysicsManager, float pFrameTime, ChunkyBoneGeometry* pGeometry, const EngineNode& pEngineNode)
 {
 	assert(pGeometry->GetJointId() != INVALID_JOINT);
 	if (pGeometry->GetJointId() != INVALID_JOINT)

@@ -7,8 +7,8 @@
 #include "../../Cure/Include/RuntimeVariableName.h"
 #include "../../Lepra/Include/Number.h"
 #include "../../Lepra/Include/SystemManager.h"
-#include "../../TBC/Include/PhysicsEngine.h"
-#include "../../TBC/Include/PhysicsEngineFactory.h"
+#include "../../TBC/Include/PhysicsManager.h"
+#include "../../TBC/Include/PhysicsManagerFactory.h"
 #include "../Include/ConsoleManager.h"
 #include "../Include/ContextManager.h"
 #include "../Include/ContextObject.h"
@@ -37,7 +37,7 @@ GameManager::GameManager(RuntimeVariableScope* pVariableScope, ResourceManager* 
 	mResource(pResourceManager),
 	mNetwork(0),
 	mTime(new TimeManager(CURE_RTVAR_GET(pVariableScope, RTVAR_PHYSICS_FPS, 60))),
-	mPhysics(TBC::PhysicsEngineFactory::Create(TBC::PhysicsEngineFactory::ENGINE_ODE)),
+	mPhysics(TBC::PhysicsManagerFactory::Create(TBC::PhysicsManagerFactory::ENGINE_ODE)),
 	mContext(0),
 	mTerrain(new TerrainManager(pResourceManager)),
 	mConsole(0),
@@ -178,7 +178,7 @@ const TimeManager* GameManager::GetConstTimeManager() const
 	return (mTime);
 }
 
-TBC::PhysicsEngine* GameManager::GetPhysicsManager() const
+TBC::PhysicsManager* GameManager::GetPhysicsManager() const
 {
 #ifdef LEPRA_DEBUG
 	// This is a check to see if the code that fetches the physics manager

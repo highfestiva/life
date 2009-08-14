@@ -7,7 +7,7 @@
 #include "../Include/CppContextObject.h"
 #include <assert.h>
 #include "../../Lepra/Include/DiskFile.h"
-#include "../../TBC/Include/ChunkyStructure.h"
+#include "../../TBC/Include/ChunkyPhysics.h"
 #include "../Include/ContextManager.h"
 #include "../Include/GameManager.h"
 
@@ -41,7 +41,7 @@ void CppContextObject::OnAlarm(int)// pAlarmId)
 {
 }
 
-void CppContextObject::OnTrigger(TBC::PhysicsEngine::BodyID pBody1, TBC::PhysicsEngine::BodyID pBody2)
+void CppContextObject::OnTrigger(TBC::PhysicsManager::BodyID pBody1, TBC::PhysicsManager::BodyID pBody2)
 {
 	ContextObject* lObject2 = (ContextObject*)mManager->GetGameManager()->GetPhysicsManager()->GetForceFeedbackListener(pBody2);
 	if (mManager->GetGameManager()->IsConnectAuthorized() && lObject2)
@@ -52,7 +52,7 @@ void CppContextObject::OnTrigger(TBC::PhysicsEngine::BodyID pBody1, TBC::Physics
 
 
 
-void CppContextObject::OnForceApplied(TBC::PhysicsEngine::ForceFeedbackListener* pOtherObject,
+void CppContextObject::OnForceApplied(TBC::PhysicsManager::ForceFeedbackListener* pOtherObject,
 	const Lepra::Vector3DF& pForce, const Lepra::Vector3DF& pTorque)
 {
 	if (!IsAttachedTo((ContextObject*)pOtherObject))
@@ -127,11 +127,11 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject) const
 		lOk = lFile.Open(_T("../../Data/")+lAssetName, Lepra::DiskFile::MODE_READ);
 		assert(lOk);
 	}
-	TBC::ChunkyStructure* lStructure = 0;
+	TBC::ChunkyPhysics* lStructure = 0;
 	if (lOk)
 	{
-		lStructure = new TBC::ChunkyStructure(TBC::BoneHierarchy::TRANSFORM_LOCAL2WORLD);
-		TBC::ChunkyStructureLoader lLoader(&lFile, false);
+		lStructure = new TBC::ChunkyPhysics(TBC::BoneHierarchy::TRANSFORM_LOCAL2WORLD);
+		TBC::ChunkyPhysicsLoader lLoader(&lFile, false);
 		lOk = lLoader.Load(lStructure);
 		assert(lOk);
 	}
@@ -140,7 +140,7 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject) const
 		lOk = pObject->SetStructure(lStructure);
 		assert(lOk);
 	}
-	if (lOk && lStructure->GetPhysicsType() != TBC::ChunkyStructure::STATIC)
+	if (lOk && lStructure->GetPhysicsType() != TBC::ChunkyPhysics::STATIC)
 	{
 		pObject->GetManager()->EnablePhysicsUpdateCallback(pObject);
 	}

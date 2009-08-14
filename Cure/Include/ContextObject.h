@@ -8,7 +8,7 @@
 
 #include <list>
 #include "../../Lepra/Include/String.h"
-#include "../../TBC/Include/PhysicsEngine.h"
+#include "../../TBC/Include/PhysicsManager.h"
 #include "Cure.h"
 #include "PositionalData.h"
 
@@ -16,7 +16,7 @@
 
 namespace TBC
 {
-class ChunkyStructure;
+class ChunkyPhysics;
 class ChunkyBoneGeometry;
 class StructureEngine;
 }
@@ -32,7 +32,7 @@ class ContextManager;
 class ContextObjectAttribute;
 
 
-class ContextObject: public TBC::PhysicsEngine::TriggerListener, public TBC::PhysicsEngine::ForceFeedbackListener
+class ContextObject: public TBC::PhysicsManager::TriggerListener, public TBC::PhysicsManager::ForceFeedbackListener
 {
 public:
 	ContextObject(const Lepra::String& pClassId);
@@ -49,7 +49,7 @@ public:
 	void SetNetworkObjectType(NetworkObjectType pType);
 
 	void SetAllowMoveSelf(bool pAllow);
-	void AttachToObject(TBC::PhysicsEngine::BodyID pBody1, ContextObject* pObject2, TBC::PhysicsEngine::BodyID pBody2);
+	void AttachToObject(TBC::PhysicsManager::BodyID pBody1, ContextObject* pObject2, TBC::PhysicsManager::BodyID pBody2);
 	void AttachToObject(unsigned pBody1Index, ContextObject* pObject2, unsigned pBody2Index);
 	bool DetachFromObject(ContextObject* pObject);
 
@@ -62,9 +62,9 @@ public:
 	float GetForwardSpeed() const;
 	float GetMass() const;
 
-	bool SetStructure(TBC::ChunkyStructure* pStructure);
+	bool SetStructure(TBC::ChunkyPhysics* pStructure);
 	TBC::ChunkyBoneGeometry* GetStructureGeometry(unsigned pIndex) const;
-	TBC::ChunkyBoneGeometry* GetStructureGeometry(TBC::PhysicsEngine::BodyID pBodyId) const;
+	TBC::ChunkyBoneGeometry* GetStructureGeometry(TBC::PhysicsManager::BodyID pBodyId) const;
 	void SetEnginePower(unsigned pAspect, float pPower, float pAngle);
 
 	bool QueryResendTime(float pDeltaTime, bool pUnblockDelta);
@@ -78,19 +78,19 @@ public:
 protected:
 	void AttachToObject(TBC::ChunkyBoneGeometry* pBoneGeometry1, ContextObject* pObject2, TBC::ChunkyBoneGeometry* pBoneGeometry2, bool pSend);
 	bool IsAttachedTo(ContextObject* pObject) const;
-	void AddAttachment(ContextObject* pObject, TBC::PhysicsEngine::JointID pJoint, TBC::StructureEngine* pEngine);
+	void AddAttachment(ContextObject* pObject, TBC::PhysicsManager::JointID pJoint, TBC::StructureEngine* pEngine);
 
 	typedef std::vector<ContextObjectAttribute*> AttributeArray;
 	struct Connection
 	{
-		Connection(ContextObject* pObject, TBC::PhysicsEngine::JointID pJointId, TBC::StructureEngine* pEngine):
+		Connection(ContextObject* pObject, TBC::PhysicsManager::JointID pJointId, TBC::StructureEngine* pEngine):
 			mObject(pObject),
 			mJointId(pJointId),
 			mEngine(pEngine)
 		{
 		}
 		ContextObject* mObject;
-		TBC::PhysicsEngine::JointID mJointId;
+		TBC::PhysicsManager::JointID mJointId;
 		TBC::StructureEngine* mEngine;
 	};
 	typedef std::list<Connection> ConnectionList;
@@ -100,7 +100,7 @@ protected:
 	Lepra::String mClassId;
 	NetworkObjectType mNetworkObjectType;
 	AttributeArray mAttributeArray;
-	TBC::ChunkyStructure* mStructure;
+	TBC::ChunkyPhysics* mStructure;
 	float mLastSendTime;
 	ObjectPositionalData mPosition;
 	int mSendCount;

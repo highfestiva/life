@@ -9,7 +9,7 @@
 #include "../../Lepra/Include/Thread.h"
 #include "../../Lepra/Include/Random.h"
 #include "../../Lepra/Include/Transformation.h"
-#include "../../TBC/Include/PhysicsEngineODE.h"
+#include "../../TBC/Include/PhysicsManagerODE.h"
 #include "../../UiLepra/Include/UiDisplayManager.h"
 #include "../../UiLepra/Include/UiInput.h"
 #include "../../UiTbc/Include/UiBasicMeshCreator.h"
@@ -29,9 +29,9 @@ public:
 	};
 
 	Object(UiTbc::Renderer* pRenderer, 
-	       TBC::PhysicsEngine* pPhysics) :
+	       TBC::PhysicsManager* pPhysics) :
 		mType(BOX),
-		mBodyType(TBC::PhysicsEngine::STATIC),
+		mBodyType(TBC::PhysicsManager::STATIC),
 		mGfxGeom(0),
 		mGeomID(UiTbc::Renderer::INVALID_GEOMETRY),
 		mBodyID(TBC::INVALID_BODY),
@@ -41,8 +41,8 @@ public:
 	}
 
 	Object(UiTbc::Renderer* pRenderer, 
-	       TBC::PhysicsEngine* pPhysics, 
-	       TBC::PhysicsEngine::BodyType pBodyType) :
+	       TBC::PhysicsManager* pPhysics, 
+	       TBC::PhysicsManager::BodyType pBodyType) :
 		mType(BOX),
 		mBodyType(pBodyType),
 		mGfxGeom(0),
@@ -149,13 +149,13 @@ public:
 	}
 
 	Type mType;
-	TBC::PhysicsEngine::BodyType mBodyType;
+	TBC::PhysicsManager::BodyType mBodyType;
 	TBC::GeometryBase* mGfxGeom;
 	UiTbc::Renderer::GeometryID mGeomID;
-	TBC::PhysicsEngine::BodyID mBodyID;
+	TBC::PhysicsManager::BodyID mBodyID;
 
 	UiTbc::Renderer* mRenderer;
-	TBC::PhysicsEngine* mPhysics;
+	TBC::PhysicsManager* mPhysics;
 
 	Lepra::TransformationF mTransform;
 
@@ -173,7 +173,7 @@ void RunRotationalAgreementTest()
 	Lepra::Canvas lScreen;
 	lDisp->GetScreenCanvas(lScreen);
 	UiTbc::OpenGLRenderer lRenderer(&lScreen);
-	TBC::PhysicsEngineODE lPhysics;
+	TBC::PhysicsManagerODE lPhysics;
 
 	lRenderer.SetShadowsEnabled(true, UiTbc::Renderer::SH_VOLUMES_AND_MAPS);
 	lPhysics.SetGravity(Lepra::Vector3DF(0, 0, -9.82f));
@@ -200,7 +200,7 @@ void RunRotationalAgreementTest()
 		for(x = 0; x < DIM; x++)
 		{
 			i = y * DIM + x + 1;
-			lStaticObj[i] = new Object(&lRenderer, &lPhysics, TBC::PhysicsEngine::STATIC);
+			lStaticObj[i] = new Object(&lRenderer, &lPhysics, TBC::PhysicsManager::STATIC);
 			//lStaticObj[i]->MakeBox(Lepra::Vector3DF(3.0f / DIM, 10.0f / DIM, 0.1f));
 			//lStaticObj[i]->SetPos(Lepra::Vector3DF((x+0.5f - 0.5f * DIM) * 10.0f / DIM, (y+0.5f - 0.5f * DIM) * 10.0f / DIM, 5.0f));
 
@@ -234,7 +234,7 @@ void RunRotationalAgreementTest()
 			lRotation.RotateAroundOwnX(Lepra::PIF/4);
 			//lTransformation.SetOrientation(lRotation);
 			lTransformation.RotatePitch(Lepra::PIF/8);
-			lStaticObj[i]->mBodyID = lPhysics.CreateBox(true, lTransformation, 0, lDimensions, TBC::PhysicsEngine::STATIC, 0.5f, 1.0f, 0);
+			lStaticObj[i]->mBodyID = lPhysics.CreateBox(true, lTransformation, 0, lDimensions, TBC::PhysicsManager::STATIC, 0.5f, 1.0f, 0);
 
 			// Then graphics.
 			TBC::GeometryBase::BasicMaterialSettings lMaterial;
@@ -265,7 +265,7 @@ void RunRotationalAgreementTest()
 
 	for(i = 0; i < DYNAMIC_COUNT; i++)
 	{
-		lDynamicObj[i] = new Object(&lRenderer, &lPhysics, TBC::PhysicsEngine::DYNAMIC);
+		lDynamicObj[i] = new Object(&lRenderer, &lPhysics, TBC::PhysicsManager::DYNAMIC);
 		//switch((Object::Type)(Lepra::Random::GetRandomNumber() % Object::TYPE_COUNT))
 		//{
 		//case Object::BOX: lDynamicObj[i]->MakeBox(Lepra::Vector3DF((float)Lepra::Random::Uniform(0.1f, 0.9f), (float)Lepra::Random::Uniform(0.1f, 0.9f), (float)Lepra::Random::Uniform(0.1f, 0.9f))); break;

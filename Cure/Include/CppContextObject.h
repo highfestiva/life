@@ -25,8 +25,8 @@ public:
 private:
 	void OnTick(float pFrameTime);
 	void OnAlarm(int pAlarmId);
-	void OnTrigger(TBC::PhysicsEngine::BodyID pBody1, TBC::PhysicsEngine::BodyID pBody2);
-	void OnForceApplied(TBC::PhysicsEngine::ForceFeedbackListener* pOtherObject,
+	void OnTrigger(TBC::PhysicsManager::BodyID pBody1, TBC::PhysicsManager::BodyID pBody2);
+	void OnForceApplied(TBC::PhysicsManager::ForceFeedbackListener* pOtherObject,
 		const Lepra::Vector3DF& pForce, const Lepra::Vector3DF& pTorque);
 
 	LOG_CLASS_DECLARE();

@@ -5,7 +5,7 @@
 
 
 #include "../Include/ChunkyBoneGeometry.h"
-#include "../Include/ChunkyStructure.h"
+#include "../Include/ChunkyPhysics.h"
 #include "../Include/StructureEngine.h"
 
 
@@ -15,7 +15,7 @@ namespace TBC
 
 
 
-ChunkyStructure::ChunkyStructure(TransformOperation pTransformOperation, PhysicsType pPhysicsType):
+ChunkyPhysics::ChunkyPhysics(TransformOperation pTransformOperation, PhysicsType pPhysicsType):
 	BoneHierarchy(),
 	mTransformOperation(pTransformOperation),
 	mPhysicsType(pPhysicsType),
@@ -23,7 +23,7 @@ ChunkyStructure::ChunkyStructure(TransformOperation pTransformOperation, Physics
 {
 }
 
-ChunkyStructure::~ChunkyStructure()
+ChunkyPhysics::~ChunkyPhysics()
 {
 	assert(mGeometryArray.empty());	// Ensure all resources has been released prior to delete.
 	ClearEngines();
@@ -31,7 +31,7 @@ ChunkyStructure::~ChunkyStructure()
 
 
 
-void ChunkyStructure::OnTick(PhysicsEngine* pPhysicsManager, float pFrameTime)
+void ChunkyPhysics::OnTick(PhysicsManager* pPhysicsManager, float pFrameTime)
 {
 	EngineArray::iterator x = mEngineArray.begin();
 	for (; x != mEngineArray.end(); ++x)
@@ -42,24 +42,24 @@ void ChunkyStructure::OnTick(PhysicsEngine* pPhysicsManager, float pFrameTime)
 
 
 
-void ChunkyStructure::SetPhysicsType(PhysicsType pPhysicsType)
+void ChunkyPhysics::SetPhysicsType(PhysicsType pPhysicsType)
 {
 	// TODO: implement change in physics engine.
 	mPhysicsType = pPhysicsType;
 }
 
-ChunkyStructure::PhysicsType ChunkyStructure::GetPhysicsType() const
+ChunkyPhysics::PhysicsType ChunkyPhysics::GetPhysicsType() const
 {
 	return (mPhysicsType);
 }
 
-ChunkyBoneGeometry* ChunkyStructure::GetBoneGeometry(int pBoneIndex) const
+ChunkyBoneGeometry* ChunkyPhysics::GetBoneGeometry(int pBoneIndex) const
 {
 	assert(pBoneIndex < GetBoneCount());
 	return ((pBoneIndex < (int)mGeometryArray.size())? mGeometryArray[pBoneIndex] : 0);
 }
 
-ChunkyBoneGeometry* ChunkyStructure::GetBoneGeometry(PhysicsEngine::BodyID pBodyId) const
+ChunkyBoneGeometry* ChunkyPhysics::GetBoneGeometry(PhysicsManager::BodyID pBodyId) const
 {
 	const int lBoneCount = GetBoneCount();
 	for (int x = 0; x < lBoneCount; ++x)
@@ -74,13 +74,13 @@ ChunkyBoneGeometry* ChunkyStructure::GetBoneGeometry(PhysicsEngine::BodyID pBody
 	return (0);
 }
 
-void ChunkyStructure::AddBoneGeometry(ChunkyBoneGeometry* pGeometry)
+void ChunkyPhysics::AddBoneGeometry(ChunkyBoneGeometry* pGeometry)
 {
 	assert((int)mGeometryArray.size() < GetBoneCount());
 	mGeometryArray.push_back(pGeometry);
 }
 
-void ChunkyStructure::AddBoneGeometry(const Lepra::TransformationF& pTransformation,
+void ChunkyPhysics::AddBoneGeometry(const Lepra::TransformationF& pTransformation,
 	ChunkyBoneGeometry* pGeometry, const ChunkyBoneGeometry* pParent)
 {
 	const int lChildIndex = (int)mGeometryArray.size();
@@ -93,7 +93,7 @@ void ChunkyStructure::AddBoneGeometry(const Lepra::TransformationF& pTransformat
 	}
 }
 
-int ChunkyStructure::GetIndex(const ChunkyBoneGeometry* pGeometry) const
+int ChunkyPhysics::GetIndex(const ChunkyBoneGeometry* pGeometry) const
 {
 	const int lBoneCount = GetBoneCount();
 	for (int x = 0; x < lBoneCount; ++x)
@@ -108,12 +108,12 @@ int ChunkyStructure::GetIndex(const ChunkyBoneGeometry* pGeometry) const
 	return (-1);
 }
 
-const Lepra::TransformationF& ChunkyStructure::GetTransformation(const ChunkyBoneGeometry* pGeometry) const
+const Lepra::TransformationF& ChunkyPhysics::GetTransformation(const ChunkyBoneGeometry* pGeometry) const
 {
 	return (GetBoneTransformation(GetIndex(pGeometry)));
 }
 
-void ChunkyStructure::ClearBoneGeometries(PhysicsEngine* pPhysics)
+void ChunkyPhysics::ClearBoneGeometries(PhysicsManager* pPhysics)
 {
 	for (size_t x = 0; x < mGeometryArray.size(); ++x)
 	{
@@ -131,23 +131,23 @@ void ChunkyStructure::ClearBoneGeometries(PhysicsEngine* pPhysics)
 
 
 
-int ChunkyStructure::GetEngineCount() const
+int ChunkyPhysics::GetEngineCount() const
 {
 	return ((int)mEngineArray.size());
 }
 
-StructureEngine* ChunkyStructure::GetEngine(int pBoneIndex) const
+StructureEngine* ChunkyPhysics::GetEngine(int pBoneIndex) const
 {
 	assert((size_t)pBoneIndex < mEngineArray.size());
 	return (mEngineArray[pBoneIndex]);
 }
 
-void ChunkyStructure::AddEngine(StructureEngine* pEngine)
+void ChunkyPhysics::AddEngine(StructureEngine* pEngine)
 {
 	mEngineArray.push_back(pEngine);
 }
 
-void ChunkyStructure::SetEnginePower(unsigned pAspect, float pPower, float pAngle)
+void ChunkyPhysics::SetEnginePower(unsigned pAspect, float pPower, float pAngle)
 {
 	EngineArray::iterator x = mEngineArray.begin();
 	for (; x != mEngineArray.end(); ++x)
@@ -156,7 +156,7 @@ void ChunkyStructure::SetEnginePower(unsigned pAspect, float pPower, float pAngl
 	}
 }
 
-void ChunkyStructure::ClearEngines()
+void ChunkyPhysics::ClearEngines()
 {
 	EngineArray::iterator x = mEngineArray.begin();
 	for (; x != mEngineArray.end(); ++x)
@@ -166,14 +166,14 @@ void ChunkyStructure::ClearEngines()
 	mEngineArray.clear();
 }
 
-void ChunkyStructure::ClearAll(PhysicsEngine* pPhysics)
+void ChunkyPhysics::ClearAll(PhysicsManager* pPhysics)
 {
 	ClearBoneGeometries(pPhysics);
 	BoneHierarchy::ClearAll(pPhysics);
 	ClearEngines();
 }
 
-void ChunkyStructure::SetBoneCount(int pBoneCount)
+void ChunkyPhysics::SetBoneCount(int pBoneCount)
 {
 	BoneHierarchy::SetBoneCount(pBoneCount);
 
@@ -183,8 +183,8 @@ void ChunkyStructure::SetBoneCount(int pBoneCount)
 	mUniqeGeometryIndex = GetBoneCount();
 }
 
-bool ChunkyStructure::FinalizeInit(PhysicsEngine* pPhysics, unsigned pPhysicsFps, Lepra::TransformationF* pTransform,
-	PhysicsEngine::TriggerListener* pTrigListener, PhysicsEngine::ForceFeedbackListener* pForceListener)
+bool ChunkyPhysics::FinalizeInit(PhysicsManager* pPhysics, unsigned pPhysicsFps, Lepra::TransformationF* pTransform,
+	PhysicsManager::TriggerListener* pTrigListener, PhysicsManager::ForceFeedbackListener* pForceListener)
 {
 	bool lOk = ((int)mGeometryArray.size() == GetBoneCount());
 	assert(lOk);
@@ -205,10 +205,10 @@ bool ChunkyStructure::FinalizeInit(PhysicsEngine* pPhysics, unsigned pPhysicsFps
 			ChunkyBoneGeometry* lGeometry = GetBoneGeometry(x);
 			if (mPhysicsType == DYNAMIC || mPhysicsType == STATIC)
 			{
-				PhysicsEngine::BodyType lBodyType = (mPhysicsType == DYNAMIC)? PhysicsEngine::DYNAMIC : PhysicsEngine::STATIC;
+				PhysicsManager::BodyType lBodyType = (mPhysicsType == DYNAMIC)? PhysicsManager::DYNAMIC : PhysicsManager::STATIC;
 				if (lGeometry->GetParent() && lGeometry->GetJointType() == ChunkyBoneGeometry::JOINT_EXCLUDE)
 				{
-					lBodyType = PhysicsEngine::STATIC;
+					lBodyType = PhysicsManager::STATIC;
 				}
 				lOk = lGeometry->CreateBody(pPhysics, x == 0, pTrigListener, pForceListener,
 					lBodyType, GetBoneTransformation(x));
@@ -234,14 +234,14 @@ bool ChunkyStructure::FinalizeInit(PhysicsEngine* pPhysics, unsigned pPhysicsFps
 
 
 
-unsigned ChunkyStructure::GetNextGeometryIndex()
+unsigned ChunkyPhysics::GetNextGeometryIndex()
 {
 	return (++mUniqeGeometryIndex);
 }
 
 
 
-LOG_CLASS_DEFINE(PHYSICS, ChunkyStructure);
+LOG_CLASS_DEFINE(PHYSICS, ChunkyPhysics);
 
 
 

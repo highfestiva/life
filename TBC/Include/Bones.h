@@ -27,7 +27,7 @@ namespace TBC
 
 
 
-class PhysicsEngine;
+class PhysicsManager;
 
 
 
@@ -67,7 +67,7 @@ public:
 	BoneHierarchy();
 	virtual ~BoneHierarchy();
 
-	virtual void ClearAll(PhysicsEngine* pPhysics);
+	virtual void ClearAll(PhysicsManager* pPhysics);
 
 	// Use these functions to setup the skeleton. Preferably in the given order.
 	virtual void SetBoneCount(int pBoneCount);

@@ -11,7 +11,7 @@
 #include "../../Lepra/Include/String.h"
 #include "../../Lepra/Include/Timer.h"
 #include "../../TBC/Include/ChunkyBoneGeometry.h"
-#include "../../TBC/Include/PhysicsEngine.h"
+#include "../../TBC/Include/PhysicsManager.h"
 #include "../Include/ResourceManager.h"
 
 
@@ -57,12 +57,12 @@ public:
 	ResourceManager* GetResourceManager() const;
 	ContextManager* GetContext() const;
 	const TimeManager* GetConstTimeManager() const;
-	TBC::PhysicsEngine* GetPhysicsManager() const;
+	TBC::PhysicsManager* GetPhysicsManager() const;
 	ConsoleManager* GetConsoleManager() const;
 
 	virtual void OnCollision(const Lepra::Vector3DF& pForce, const Lepra::Vector3DF& pTorque,
 		ContextObject* pObject1, ContextObject* pObject2) = 0;
-	virtual void OnStopped(ContextObject* pObject, TBC::PhysicsEngine::BodyID pBodyId) = 0;
+	virtual void OnStopped(ContextObject* pObject, TBC::PhysicsManager::BodyID pBodyId) = 0;
 	virtual bool OnPhysicsSend(ContextObject* pObject) = 0;
 	virtual bool IsConnectAuthorized() = 0;
 	virtual void SendAttach(ContextObject* pObject1, unsigned pId1, ContextObject* pObject2, unsigned pId2) = 0;
@@ -109,7 +109,7 @@ private:
 	ResourceManager* mResource;
 	NetworkAgent* mNetwork;
 	TimeManager* mTime;
-	TBC::PhysicsEngine* mPhysics;
+	TBC::PhysicsManager* mPhysics;
 	ContextManager* mContext;
 	TerrainManager* mTerrain;
 	ConsoleManager* mConsole;

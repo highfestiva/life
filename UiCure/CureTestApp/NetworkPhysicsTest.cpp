@@ -19,8 +19,8 @@
 #include "../../Cure/Include/Packer.h"
 #include "../../Cure/Include/Packet.h"
 #include "../../Cure/Include/PositionalData.h"
-#include "../../TBC/Include/PhysicsEngine.h"
-#include "../../TBC/Include/PhysicsEngineFactory.h"
+#include "../../TBC/Include/PhysicsManager.h"
+#include "../../TBC/Include/PhysicsManagerFactory.h"
 #include "../../UiLepra/Include/UiCore.h"
 #include "../../UiLepra/Include/UiDisplayManager.h"
 #include "../../UiLepra/Include/UiInput.h"
@@ -52,7 +52,7 @@ struct AgentData: public UiLepra::KeyCodeInputObserver
 	struct BodyInfo
 	{
 		Lepra::String mType;
-		TBC::PhysicsEngine::BodyID mPhysicsId;
+		TBC::PhysicsManager::BodyID mPhysicsId;
 		TBC::GeometryBase* mGraphicsGeometry;
 		UiTbc::Renderer::GeometryID mGraphicsId;
 		int mLastSetFrameIndex;	// TODO: this is a hack, read up on what algo to use for clients that want to set other clients positions.
@@ -65,7 +65,7 @@ struct AgentData: public UiLepra::KeyCodeInputObserver
 			mLastSetFrameIndex(0)
 		{
 		}
-		BodyInfo(Lepra::String pType, TBC::PhysicsEngine::BodyID pBodyId, TBC::GeometryBase* pGeometry, UiTbc::Renderer::GeometryID pGeometryId):
+		BodyInfo(Lepra::String pType, TBC::PhysicsManager::BodyID pBodyId, TBC::GeometryBase* pGeometry, UiTbc::Renderer::GeometryID pGeometryId):
 			mType(pType),
 			mPhysicsId(pBodyId),
 			mGraphicsGeometry(pGeometry),
@@ -75,7 +75,7 @@ struct AgentData: public UiLepra::KeyCodeInputObserver
 		}
 	};
 	Cure::NetworkAgent* mNetworkAgent;
-	TBC::PhysicsEngine* mPhysics;
+	TBC::PhysicsManager* mPhysics;
 	std::vector<BodyInfo> mBodyArray;
 	UiLepra::DisplayManager* mDisplay;
 	Lepra::Canvas* mScreen;
@@ -158,7 +158,7 @@ struct AgentData: public UiLepra::KeyCodeInputObserver
 		mNetworkAgent = 0;
 	}
 
-	void AddBody(Lepra::String pType, TBC::PhysicsEngine::BodyID pBodyId, TBC::GeometryBase* pGeometry, UiTbc::Renderer::GeometryID pGeometryId)
+	void AddBody(Lepra::String pType, TBC::PhysicsManager::BodyID pBodyId, TBC::GeometryBase* pGeometry, UiTbc::Renderer::GeometryID pGeometryId)
 	{
 		mBodyArray.push_back(BodyInfo(pType, pBodyId, pGeometry, pGeometryId));
 	}
@@ -348,7 +348,7 @@ bool CreateWorld(AgentData& pAgentData)
 {
 	bool lTestOk = true;
 	pAgentData.mTickTimeModulo = 0;
-	pAgentData.mPhysics = TBC::PhysicsEngineFactory::Create(TBC::PhysicsEngineFactory::ENGINE_ODE);
+	pAgentData.mPhysics = TBC::PhysicsManagerFactory::Create(TBC::PhysicsManagerFactory::ENGINE_ODE);
 	pAgentData.mPhysics->SetGravity(Lepra::Vector3DF(0, 0, -10));
 	// Create floor on server.
 	const float lFloorSize = 100;
@@ -356,10 +356,10 @@ bool CreateWorld(AgentData& pAgentData)
 	Lepra::TransformationF lFloorPlacement;
 	Lepra::Vector3DF lFloorPosition(0, 0, -lFloorSize/2);
 	lFloorPlacement.SetPosition(lFloorPosition);
-	TBC::PhysicsEngine::BodyID lPhysicsId;
+	TBC::PhysicsManager::BodyID lPhysicsId;
 	UiTbc::TriangleBasedGeometry* lGeometry;
 	UiTbc::Renderer::GeometryID lGraphicsId;
-	lPhysicsId = pAgentData.mPhysics->CreateBox(true, lFloorPlacement, 3, Lepra::Vector3DF(lFloorSize, lFloorSize, lFloorSize), TBC::PhysicsEngine::STATIC, 1, 1.0f);
+	lPhysicsId = pAgentData.mPhysics->CreateBox(true, lFloorPlacement, 3, Lepra::Vector3DF(lFloorSize, lFloorSize, lFloorSize), TBC::PhysicsManager::STATIC, 1, 1.0f);
 	lGeometry = UiTbc::BasicMeshCreator::CreateFlatBox(lFloorSize, lFloorSize, lFloorSize);
 	lGeometry->SetAlwaysVisible(true);
 	lGraphicsId = pAgentData.mRenderer->AddGeometry(lGeometry, UiTbc::Renderer::MAT_SINGLE_COLOR_SOLID, UiTbc::Renderer::NO_SHADOWS);
@@ -370,7 +370,7 @@ bool CreateWorld(AgentData& pAgentData)
 		Lepra::TransformationF lClientPlacement;
 		Lepra::Vector3DF lClientPosition(-lFloorSize/2+y*lClientSize*4, 0, lClientSize*10);
 		lClientPlacement.SetPosition(lClientPosition);
-		lPhysicsId = pAgentData.mPhysics->CreateSphere(true, lClientPlacement, lClientSize, lClientSize, TBC::PhysicsEngine::DYNAMIC, 1, 1.0f);
+		lPhysicsId = pAgentData.mPhysics->CreateSphere(true, lClientPlacement, lClientSize, lClientSize, TBC::PhysicsManager::DYNAMIC, 1, 1.0f);
 		pAgentData.mPhysics->ActivateGravity(lPhysicsId);
 		lGeometry = UiTbc::BasicMeshCreator::CreateEllipsoid(lClientSize, lClientSize, lClientSize, 10, 10);
 		lGeometry->SetAlwaysVisible(true);
@@ -602,7 +602,7 @@ void ClientSetMovement(AgentData& pClientData, int pClientIndex, int pClientFram
 		lLastFrame = pClientFrameIndex;
 		//Lepra::String s = Lepra::StringUtility::Format(_T("client %i at frame %i"), pClientIndex, pClientFrameIndex);
 		//logdebug(_T("Client set pos of other client"), s);
-		TBC::PhysicsEngine::BodyID lPhysicsId = pClientData.mBodyArray[pClientIndex+1].mPhysicsId;
+		TBC::PhysicsManager::BodyID lPhysicsId = pClientData.mBodyArray[pClientIndex+1].mPhysicsId;
 		pClientData.mPhysics->SetBodyTransform(lPhysicsId, pData.mPosition.mTransformation);
 		pClientData.mPhysics->SetBodyVelocity(lPhysicsId, pData.mPosition.mVelocity);
 		pClientData.mPhysics->SetBodyAcceleration(lPhysicsId, pData.mPosition.mAcceleration);
@@ -691,7 +691,7 @@ Cure::ObjectPositionalData* ServerPopClientMovement(int pClientIndex, int pServe
 
 void ServerAdjustClientMovement(int pClientIndex, const Cure::ObjectPositionalData& pData)
 {
-	TBC::PhysicsEngine::BodyID lPhysicsId = gServer.mBodyArray[pClientIndex+1].mPhysicsId;
+	TBC::PhysicsManager::BodyID lPhysicsId = gServer.mBodyArray[pClientIndex+1].mPhysicsId;
 	gServer.mPhysics->SetBodyTransform(lPhysicsId, pData.mPosition.mTransformation);
 	gServer.mPhysics->SetBodyVelocity(lPhysicsId, pData.mPosition.mVelocity);
 	gServer.mPhysics->SetBodyAcceleration(lPhysicsId, pData.mPosition.mAcceleration);
@@ -977,7 +977,7 @@ void ClientHandleUserInput(int pClientIndex)
 	AgentData& lAgentData = gClient[pClientIndex];
 	const float lForce = 800;
 	Lepra::Vector3DF lForceVector[] = { Lepra::Vector3DF(0, lForce, 0), Lepra::Vector3DF(0, -lForce, 0), Lepra::Vector3DF(-lForce, 0, 0), Lepra::Vector3DF(lForce, 0, 0), };
-	TBC::PhysicsEngine::BodyID lPhysicsId = lAgentData.mBodyArray[pClientIndex+1].mPhysicsId;
+	TBC::PhysicsManager::BodyID lPhysicsId = lAgentData.mBodyArray[pClientIndex+1].mPhysicsId;
 	for (int lKey = 0; lKey < 4; ++lKey)
 	{
 		if (lAgentData.mMoveKeys&(1<<lKey))

@@ -17,8 +17,8 @@ namespace TBC
 
 
 class ChunkyBoneGeometry;
-class ChunkyStructure;
-class PhysicsEngine;
+class ChunkyPhysics;
+class PhysicsManager;
 
 
 
@@ -47,24 +47,24 @@ public:
 		float pMaxSpeed, float pMaxSpeed2, unsigned pControllerIndex);
 	virtual ~StructureEngine();
 
-	static StructureEngine* Load(ChunkyStructure* pStructure, const void* pData, unsigned pByteCount);
+	static StructureEngine* Load(ChunkyPhysics* pStructure, const void* pData, unsigned pByteCount);
 
 	EngineType GetEngineType() const;
 
 	void AddControlledGeometry(ChunkyBoneGeometry* pGeometry, float pScale, EngineMode pMode = MODE_NORMAL);
 	bool SetValue(unsigned pAspect, float pValue, float pZAngle);
 
-	void OnTick(PhysicsEngine* pPhysicsManager, float pFrameTime);
+	void OnTick(PhysicsManager* pPhysicsManager, float pFrameTime);
 
 	unsigned GetControllerIndex() const;
 	float GetValue() const;
 	const float* GetValues() const;
 
 	unsigned GetChunkySize() const;
-	void SaveChunkyData(const ChunkyStructure* pStructure, void* pData) const;
+	void SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const;
 
 private:
-	void LoadChunkyData(ChunkyStructure* pStructure, const void* pData);
+	void LoadChunkyData(ChunkyPhysics* pStructure, const void* pData);
 
 	struct EngineNode
 	{
@@ -79,7 +79,7 @@ private:
 		EngineMode mMode;
 	};
 
-	void ApplyTorque(TBC::PhysicsEngine* pPhysicsManager, float pFrameTime, ChunkyBoneGeometry* pGeometry, const EngineNode& pEngineNode);
+	void ApplyTorque(TBC::PhysicsManager* pPhysicsManager, float pFrameTime, ChunkyBoneGeometry* pGeometry, const EngineNode& pEngineNode);
 
 	typedef std::vector<EngineNode> EngineNodeArray;
 

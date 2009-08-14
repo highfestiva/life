@@ -684,7 +684,7 @@ void GameServerManager::OnCollision(const Lepra::Vector3DF& pForce, const Lepra:
 	}
 }
 
-void GameServerManager::OnStopped(Cure::ContextObject* pObject, TBC::PhysicsEngine::BodyID pBodyId)
+void GameServerManager::OnStopped(Cure::ContextObject* pObject, TBC::PhysicsManager::BodyID pBodyId)
 {
 	const unsigned lRootIndex = 0;
 	assert(pObject->GetStructureGeometry(lRootIndex));

@@ -34,7 +34,7 @@
 //      |- Keyframe time for keyframe #n.
 //      |- Keyframe transformations for all bones for keyframe #n.
 
-// Structure format:
+// Physics format:
 // - File tag.
 //   |- Number of parts (=bones).
 //   |- ...
@@ -70,7 +70,7 @@ namespace TBC
 class BoneAnimation;
 class ChunkyClass;
 class ChunkyGroup;
-class ChunkyStructure;
+class ChunkyPhysics;
 class ChunkyWorld;
 
 
@@ -105,35 +105,36 @@ enum ChunkyType
 	CHUNK_ANIMATION_BONE_COUNT         = ENUMIFY('A','N','B','C'),	// Number of bones. Mandatory.
 	CHUNK_ANIMATION_USE_SPLINES        = ENUMIFY('A','N','U','S'),	// Hehe, love the abbreviation... Mandatory.
 	CHUNK_ANIMATION_TIME               = ENUMIFY('A','N','T','I'),	// Animation length in seconds. Mandatory.
-	CHUNK_ANIMATION_ROOT_NODE          = ENUMIFY('A','N','R','N'),	// A single NAME that corresponds to the start node in the structure hierarchy. Mandatory.
+	CHUNK_ANIMATION_ROOT_NODE          = ENUMIFY('A','N','R','N'),	// A single NAME that corresponds to the start node in the physics hierarchy. Mandatory.
 	// Animation sub element: keyframe.
 	CHUNK_ANIMATION_KEYFRAME           = ENUMIFY('A','N','K','A'),	// A keyframe and its transformations. Means "duck" in swedish. Mandatory.
 	CHUNK_ANIMATION_KEYFRAME_TIME      = ENUMIFY('A','N','T','M'),	// Time for this keyframe. Mandatory.
 	CHUNK_ANIMATION_KEYFRAME_TRANSFORM = ENUMIFY('A','N','K','T'),	// Transformations for this keyframe for all bones in one BLOB. Mandatory.
 
-	// File type: structure. Used by both graphics and text applications.
-	CHUNK_STRUCTURE                    = ENUMIFY('S','T','R','U'),	// Structure file type.
-	CHUNK_STRUCTURE_BONE_COUNT         = ENUMIFY('S','T','B','C'),	// Number of bones. Mandatory.
-	CHUNK_STRUCTURE_PHYSICS_TYPE       = ENUMIFY('S','T','P','T'),	// Physics type: dynamic, static, etc. Mandatory.
-	CHUNK_STRUCTURE_ENGINE_COUNT       = ENUMIFY('S','T','E','C'),	// Number of engines. Mandatory.
-	// Structure sub element: bone.
-	CHUNK_STRUCTURE_BONE_CONTAINER     = ENUMIFY('S','T','B','O'),	// A bone and its transformation, type. Mandatory.
-	CHUNK_STRUCTURE_BONE_CHILD_LIST    = ENUMIFY('S','B','C','L'),	// The indices of this bone's children. Optional for bones without children, mandatory otherwise.
-	CHUNK_STRUCTURE_BONE_TRANSFORM     = ENUMIFY('S','T','B','T'),	// The transform of this bone. Mandatory.
-	CHUNK_STRUCTURE_BONE_SHAPE         = ENUMIFY('S','T','S','H'),	// Bone shape (i.e. capsule, box, sphere, portal...), mandatory with one and one shape only per bone.
-	// Structure sub element: engine.
-	CHUNK_STRUCTURE_ENGINE_CONTAINER   = ENUMIFY('S','T','E','O'),	// Engine array. Mandatory.
-	CHUNK_STRUCTURE_ENGINE             = ENUMIFY('S','T','E','N'),	// An engine and its parameters, type. Mandatory.
+	// File type: physics. Used by both graphics and text applications.
+	CHUNK_PHYSICS                      = ENUMIFY('P','H','Y','S'),	// Physics file type.
+	CHUNK_PHYSICS_BONE_COUNT           = ENUMIFY('P','H','B','C'),	// Number of bones. Mandatory.
+	CHUNK_PHYSICS_PHYSICS_TYPE         = ENUMIFY('P','H','P','T'),	// Physics type: dynamic, static, etc. Mandatory.
+	CHUNK_PHYSICS_ENGINE_COUNT         = ENUMIFY('P','H','E','C'),	// Number of engines. Mandatory.
+	// Physics sub element: bone.
+	CHUNK_PHYSICS_BONE_CONTAINER       = ENUMIFY('P','H','B','O'),	// A bone and its transformation, type. Mandatory.
+	CHUNK_PHYSICS_BONE_CHILD_LIST      = ENUMIFY('S','B','C','L'),	// The indices of this bone's children. Optional for bones without children, mandatory otherwise.
+	CHUNK_PHYSICS_BONE_TRANSFORM       = ENUMIFY('P','H','B','T'),	// The transform of this bone. Mandatory.
+	CHUNK_PHYSICS_BONE_SHAPE           = ENUMIFY('P','H','S','H'),	// Bone shape (i.e. capsule, box, sphere, portal...), mandatory with one and one shape only per bone.
+	// Physics sub element: engine.
+	CHUNK_PHYSICS_ENGINE_CONTAINER     = ENUMIFY('P','H','E','O'),	// Engine array. Mandatory.
+	CHUNK_PHYSICS_ENGINE               = ENUMIFY('P','H','E','N'),	// An engine and its parameters, type. Mandatory.
 
 	// File type: class. Used by both graphics and text applications.
+	CHUNK_CLASS                        = ENUMIFY('C','L','A','S'),	// Class file type.
 	CHUNK_CLASS_INHERITANCE_LIST       = ENUMIFY('C','L','I','L'),	// Parent class information. List arranged after parent priority. Optional.
-	CHUNK_CLASS_STRUCTURE              = ENUMIFY('C','L','S','T'),	// An structure filename of the structure that forms the shapes of this class. Optional - absent when structure inherited or for abstract nouns ("clan" and "weather").
-	CHUNK_CLASS_SETTINGS               = ENUMIFY('C','L','S','E'),	// String keys and their corresponding default string values. Example "stand_nimation":"heavy_walk". Optional.
+	CHUNK_CLASS_PHYSICS                = ENUMIFY('C','L','P','H'),	// An physics filename of the physics that forms the shapes of this class. Optional - absent when physics inherited or for abstract nouns ("clan" and "weather").
+	CHUNK_CLASS_SETTINGS               = ENUMIFY('C','L','S','E'),	// String keys and their corresponding default string values. Example "stand_animation":"heavy_walk". Optional.
 	CHUNK_CLASS_MESH_LIST              = ENUMIFY('C','L','M','L'),	// A list of mesh filenames that forms the looks of this class. Only used by graphics applications, and completly ignored by text applications. Optional - absent when using inherited or for abstract nouns.
 
 	// File type: Group. Used by both graphics and text applications.
 	CHUNK_GROUP_CLASS_LIST             = ENUMIFY('G','C','L','I'),	// A list of class filenames (each with a group-unique NAME) that forms the nouns of this group. Mandatory.
-	CHUNK_GROUP_SETTINGS               = ENUMIFY('G','R','S','E'),	// A list of settings and attachments. A setting/an attachment contains two strings. Example: (groupNAME1.structure_NAME1) and (groupNAME2.structure_NAME2). May override class settings. Optional.
+	CHUNK_GROUP_SETTINGS               = ENUMIFY('G','R','S','E'),	// A list of settings and attachments. A setting/an attachment contains two strings. Example: (groupNAME1.physics_NAME1) and (groupNAME2.physics_NAME2). May override class settings. Optional.
 
 	// File type: world. Used by both graphics and text applications.
 	CHUNK_WORLD_INFO                   = ENUMIFY('W','I','N','F'),	// Global world data, such as pos+size. Mandatory.
@@ -230,13 +231,13 @@ private:
 	LOG_CLASS_DECLARE();
 };
 
-class ChunkyStructureLoader: public ChunkyLoader	// For physics and skinning. Loads the bone hierachy.
+class ChunkyPhysicsLoader: public ChunkyLoader	// For physics and skinning. Loads the bone hierachy.
 {
 public:
-	ChunkyStructureLoader(Lepra::File* pFile, bool pIsFileOwner);
-	virtual ~ChunkyStructureLoader();
-	virtual bool Load(ChunkyStructure* pData);
-	virtual bool Save(const ChunkyStructure* pData);
+	ChunkyPhysicsLoader(Lepra::File* pFile, bool pIsFileOwner);
+	virtual ~ChunkyPhysicsLoader();
+	virtual bool Load(ChunkyPhysics* pData);
+	virtual bool Save(const ChunkyPhysics* pData);
 
 private:
 	bool LoadElementCallback(TBC::ChunkyType pType, Lepra::uint32 pSize, Lepra::int64 pChunkEndPosition, void* pStorage);
@@ -247,7 +248,7 @@ private:
 	LOG_CLASS_DECLARE();
 };
 
-/*// Contans information on structure and animation names. Derived class handles UI: mesh, materials, sounds, etc.
+/*// Contans information on physics and animation names. Derived class handles UI: mesh, materials, sounds, etc.
 class ChunkyClassLoader: public ChunkyLoader
 {
 public:

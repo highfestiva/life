@@ -103,12 +103,12 @@ void ContextManager::AddPhysicsSenderObject(ContextObject* pObject)
 	mPhysicsSenderObjectTable.insert(ContextObjectPair(pObject->GetInstanceId(), pObject));
 }
 
-void ContextManager::AddPhysicsBody(ContextObject* pObject, TBC::PhysicsEngine::BodyID pBodyId)
+void ContextManager::AddPhysicsBody(ContextObject* pObject, TBC::PhysicsManager::BodyID pBodyId)
 {
 	mBodyTable.insert(BodyPair(pBodyId, pObject));
 }
 
-void ContextManager::RemovePhysicsBody(TBC::PhysicsEngine::BodyID pBodyId)
+void ContextManager::RemovePhysicsBody(TBC::PhysicsManager::BodyID pBodyId)
 {
 	if (pBodyId != TBC::INVALID_BODY)
 	{
@@ -206,7 +206,7 @@ void ContextManager::TickPhysics()
 
 void ContextManager::HandleIdledBodies()
 {
-	typedef TBC::PhysicsEngine::BodySet BodySet;
+	typedef TBC::PhysicsManager::BodySet BodySet;
 	const BodySet& lBodySet = mGameManager->GetPhysicsManager()->GetIdledBodies();
 	BodySet::const_iterator x = lBodySet.begin();
 	for (; x != lBodySet.end(); ++x)
