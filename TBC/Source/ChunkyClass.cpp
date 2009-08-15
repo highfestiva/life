@@ -23,9 +23,14 @@ ChunkyClass::~ChunkyClass()
 
 
 
-void ChunkyClass::SetPhysicsBaseName(const Lepra::String& pBaseName)
+const Lepra::String& ChunkyClass::GetPhysicsBaseName() const
 {
-	mPhysicsBaseName = pBaseName;
+	return (mPhysicsBaseName);
+}
+
+Lepra::String& ChunkyClass::GetPhysicsBaseName()
+{
+	return (mPhysicsBaseName);
 }
 
 

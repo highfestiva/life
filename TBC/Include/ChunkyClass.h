@@ -21,7 +21,8 @@ public:
 	ChunkyClass();
 	virtual ~ChunkyClass();
 
-	void SetPhysicsBaseName(const Lepra::String& pBaseName);
+	const Lepra::String& GetPhysicsBaseName() const;
+	Lepra::String& GetPhysicsBaseName();
 
 protected:
 private:

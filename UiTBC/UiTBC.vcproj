@@ -465,6 +465,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Source\UiChunkyClass.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Source\UiChunkyLoader.cpp"
 				>
 			</File>
@@ -884,6 +888,10 @@
 			</File>
 			<File
 				RelativePath=".\Include\UiBasicMeshCreator.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Include\UiChunkyClass.h"
 				>
 			</File>
 			<File

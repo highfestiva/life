@@ -18,6 +18,7 @@ import sys
 physics_type = {"static":1, "dynamic":2, "collision_detect_only":3}
 
 CHUNK_CLASS                        = "CLAS"
+CHUNK_CLASS_MESH_COUNT             = "CLMC"
 CHUNK_CLASS_PHYSICS                = "CLPH"
 CHUNK_CLASS_MESH_LIST              = "CLML"
 CHUNK_CLASS_PHYS_MESH              = "CLPM"
@@ -196,14 +197,15 @@ class ChunkyWriter:
                 self._dowrite(sign.encode('latin-1'), 4, "signature")
 
         def _writestr(self, string):
-                res = string.encode('utf-16')
+                res = list(string.encode('utf-16'))
                 # Overwrite 2-byte Unicode BOM with string length.
-                chrcnt = (len(res)-2)/2
-                res[0] = chrcnt)
+                chrcnt = (len(res)-2)//2
+                res[0] = (chrcnt&0xFF)
                 res[1] = (chrcnt>>8)
                 reslen = ((len(res)+1+3) & (~3))
                 resremainder = reslen - len(res)
-                res += b"\0" * resremainder
+                res += [0] * resremainder
+                res = bytes(res)
                 self._dowrite(res, reslen, "str data")
 
         def _writenumber(self, val):
@@ -486,27 +488,27 @@ class ClassWriter(ChunkyWriter):
                 with open(filename, "wb") as f:
                         self.f = f
                         meshes = []
+                        physidx = 0
+                        for phys in self.bodies:
+                                #print("%s:" % phys.getFullName())
+                                for m in phys.childmeshes:
+                                        tm = m.get_world_transform()
+                                        tp = phys.get_world_transform()
+                                        lpm = tm * vec4(m.get_local_pivot()[:]+[1])
+                                        lpp = tp * vec4(phys.get_local_pivot()[:]+[1])
+                                        t = tp.inverse() * tm
+                                        q = quat().fromMat(t).normalize()
+                                        p = (lpm-lpp)[0:3]
+                                        meshes += [(CHUNK_CLASS_PHYS_MESH, PhysMeshPtr(physidx, m.meshbasename, q, p))]
+                                physidx += 1
                         data =  (
                                         CHUNK_CLASS,
                                         (
+                                                (CHUNK_CLASS_MESH_COUNT, len(meshes)),
                                                 (CHUNK_CLASS_PHYSICS, self.basename),
                                                 (CHUNK_CLASS_MESH_LIST, meshes),
                                         )
                                 )
-                        physidx = 0
-                        for phys in self.bodies:
-                                if phys.childmeshes:
-                                        #print("%s:" % phys.getFullName())
-                                        for m in phys.childmeshes:
-                                                tm = m.get_world_transform()
-                                                tp = phys.get_world_transform()
-                                                lpm = tm * vec4(m.get_local_pivot()[:]+[1])
-                                                lpp = tp * vec4(phys.get_local_pivot()[:]+[1])
-                                                t = tp.inverse() * tm
-                                                q = quat().fromMat(t).normalize()
-                                                p = (lpm-lpp)[0:3]
-                                                meshes += [(CHUNK_CLASS_PHYS_MESH, PhysMeshPtr(physidx, m.meshbasename, q, p))]
-                                        physidx += 1
                         #pprint.pprint(data)
                         self._writechunk(data)
                         self._addfeat("class:classes", 1)

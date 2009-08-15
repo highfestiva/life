@@ -75,6 +75,21 @@ private:
 	bool SaveBoneWeightChunkArray(const AnimatedGeometry* pSkinData);
 };
 
+class ChunkyClassLoader: public TBC::ChunkyClassLoader
+{
+	typedef TBC::ChunkyClassLoader Parent;
+public:
+	ChunkyClassLoader(Lepra::File* pFile, bool pIsFileOwner);
+	virtual ~ChunkyClassLoader();
+
+protected:
+	bool LoadElementCallback(TBC::ChunkyType pType, Lepra::uint32 pSize, Lepra::int64 pChunkEndPosition, void* pStorage);
+	virtual void AddLoadElements(FileElementList& pElementList, ChunkyClass* pData);
+
+private:
+	LOG_CLASS_DECLARE();
+};
+
 
 
 }

@@ -4,37 +4,16 @@
 
 
 
-#include "../Include/UiAnimatedGeometry.h"
 #include "../Include/UiChunkyLoader.h"
+#include "../../Lepra/Include/Packer.h"
+#include "../Include/UiAnimatedGeometry.h"
+#include "../Include/UiChunkyClass.h"
 #include "../Include/UiTriangleBasedGeometry.h"
 
 
 
 namespace UiTbc
 {
-
-
-
-/*ChunkyClassLoader::ChunkyClassLoader(Lepra::File* pFile):
-      TBC::ChunkyClassLoader(pFile)
-{
-}
-
-ChunkyClassLoader::~ChunkyClassLoader()
-{
-}
-
-bool ChunkyClassLoader::Load(ChunkyClass* pMeshData)
-{
-	pData;
-	return (true);
-}
-
-bool ChunkyClassLoader::Save(const ChunkyClass* pData)
-{
-	pData;
-	return (true);
-}*/
 
 
 
@@ -423,6 +402,67 @@ bool ChunkySkinLoader::SaveBoneWeightChunkArray(const AnimatedGeometry* pSkinDat
 	return (lOk);
 }
 
+
+
+ChunkyClassLoader::ChunkyClassLoader(Lepra::File* pFile, bool pIsFileOwner):
+	Parent(pFile, pIsFileOwner)
+{
+}
+
+ChunkyClassLoader::~ChunkyClassLoader()
+{
+}
+
+void ChunkyClassLoader::AddLoadElements(FileElementList& pElementList, ChunkyClass* pData)
+{
+	pElementList.push_back(ChunkyFileElement(TBC::CHUNK_CLASS_MESH_LIST, (void*)pData));
+}
+
+bool ChunkyClassLoader::LoadElementCallback(TBC::ChunkyType pType, Lepra::uint32 pSize, Lepra::int64 pChunkEndPosition, void* pStorage)
+{
+	ChunkyClass* lClass = (ChunkyClass*)pStorage;
+	bool lOk = false;
+	if (pType == TBC::CHUNK_CLASS_MESH_LIST)
+	{
+		FileElementList lLoadList;
+		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_CLASS_PHYS_MESH, (void*)lClass, mMeshCount));
+		lOk = AllocLoadChunkyList(lLoadList, pChunkEndPosition);
+	}
+	else if (pType == TBC::CHUNK_CLASS_PHYS_MESH)
+	{
+		Lepra::uint8* lBuffer = 0;
+		lOk = (mFile->AllocReadData((void**)&lBuffer, pSize) == Lepra::IO_OK);
+		Lepra::int32 lPhysicsIndex = -1;
+		Lepra::String lMeshBaseName;
+		int lIndex = 0;
+		if (lOk)
+		{
+			lPhysicsIndex = Lepra::Endian::BigToHost(*(Lepra::int32*)&lBuffer[lIndex]);
+			lIndex += sizeof(lPhysicsIndex);
+			Lepra::UnicodeString lUnicodeMeshName;
+			const size_t lExcludeByteCount = (1+7)*4;	// Index+transform.
+			int lStrSize = Lepra::PackerUnicodeString::Unpack(&lUnicodeMeshName, &lBuffer[lIndex], pSize-lExcludeByteCount);
+			lOk = (lStrSize == (int)(pSize-lExcludeByteCount));
+			lIndex += lStrSize;
+			lMeshBaseName = Lepra::UnicodeStringUtility::ToCurrentCode(lUnicodeMeshName);
+		}
+		if (lOk)
+		{
+			const int lTransformFloatCount = 7;
+			float lTransformArray[lTransformFloatCount];
+			for (int x = 0; x < lTransformFloatCount; ++x)
+			{
+				lTransformArray[x] = Lepra::Endian::BigToHostF(*(Lepra::uint32*)&lBuffer[lIndex+x*sizeof(float)]);
+			}
+			lClass->AddMesh(lPhysicsIndex, lMeshBaseName, Lepra::TransformationF(lTransformArray));
+		}
+	}
+	else
+	{
+		lOk = Parent::LoadElementCallback(pType, pSize, pChunkEndPosition, pStorage);
+	}
+	return (lOk);
+}
 
 
 }

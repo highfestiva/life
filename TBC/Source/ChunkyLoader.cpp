@@ -506,7 +506,7 @@ Lepra::uint32* ChunkyLoader::AllocInitBigEndian(const Lepra::uint32* pData, unsi
 
 
 ChunkyAnimationLoader::ChunkyAnimationLoader(Lepra::File* pFile, bool pIsFileOwner):
-	ChunkyLoader(pFile, pIsFileOwner)
+	Parent(pFile, pIsFileOwner)
 {
 }
 
@@ -675,7 +675,7 @@ bool ChunkyAnimationLoader::LoadElementCallback(ChunkyType pType, Lepra::uint32 
 	}
 	else
 	{
-		lOk = ChunkyLoader::LoadElementCallback(pType, pSize, pChunkEndPosition, pStorage);
+		lOk = Parent::LoadElementCallback(pType, pSize, pChunkEndPosition, pStorage);
 	}
 	return (lOk);
 }
@@ -683,7 +683,7 @@ bool ChunkyAnimationLoader::LoadElementCallback(ChunkyType pType, Lepra::uint32 
 
 
 ChunkyPhysicsLoader::ChunkyPhysicsLoader(Lepra::File* pFile, bool pIsFileOwner):
-	ChunkyLoader(pFile, pIsFileOwner)
+	Parent(pFile, pIsFileOwner)
 {
 }
 
@@ -970,7 +970,7 @@ bool ChunkyPhysicsLoader::LoadElementCallback(ChunkyType pType, Lepra::uint32 pS
 	}
 	else
 	{
-		lOk = ChunkyLoader::LoadElementCallback(pType, pSize, pChunkEndPosition, pStorage);
+		lOk = Parent::LoadElementCallback(pType, pSize, pChunkEndPosition, pStorage);
 	}
 	return (lOk);
 }
@@ -978,7 +978,8 @@ bool ChunkyPhysicsLoader::LoadElementCallback(ChunkyType pType, Lepra::uint32 pS
 
 
 ChunkyClassLoader::ChunkyClassLoader(Lepra::File* pFile, bool pIsFileOwner):
-	ChunkyLoader(pFile, pIsFileOwner)
+	Parent(pFile, pIsFileOwner),
+	mMeshCount(-1)
 {
 }
 
@@ -994,31 +995,35 @@ bool ChunkyClassLoader::Load(ChunkyClass* pData)
 		lOk = VerifyFileType(CHUNK_CLASS);
 	}
 
-	Lepra::String lPhysicsBaseName;
+	mMeshCount = -1;
 	if (lOk)
 	{
 		FileElementList lLoadList;
-		lLoadList.push_back(ChunkyFileElement(CHUNK_CLASS_PHYSICS, &lPhysicsBaseName));
-		ööö
+		lLoadList.push_back(ChunkyFileElement(CHUNK_CLASS_MESH_COUNT, &mMeshCount));
 		lOk = AllocLoadChunkyList(lLoadList, mFile->GetSize());
 	}
 	if (lOk)
 	{
-		lOk = (!lPhysicsBaseName.empty() &&
-			true);	// TODO: check other tags.
+		lOk = (mMeshCount >= 0);
 	}
 	if (lOk)
 	{
-		pData->SetPhysicsBaseName(lPhysicsBaseName);
+		FileElementList lLoadList;
+		AddLoadElements(lLoadList, pData);
+		lOk = AllocLoadChunkyList(lLoadList, mFile->GetSize());
+	}
+	if (lOk)
+	{
+		lOk = (!pData->GetPhysicsBaseName().empty() &&
+			true);	// TODO: check other tags (e.g. settings).
 	}
 
 	return (lOk);
 }
 
-bool ChunkyClassLoader::Save(const ChunkyClass*)
+void ChunkyClassLoader::AddLoadElements(FileElementList& pElementList, ChunkyClass* pData)
 {
-	// TODO: implement...
-	return (false);
+	pElementList.push_back(ChunkyFileElement(CHUNK_CLASS_PHYSICS, &pData->GetPhysicsBaseName()));
 }
 
 

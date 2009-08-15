@@ -128,9 +128,11 @@ enum ChunkyType
 	// File type: class. Used by both graphics and text applications.
 	CHUNK_CLASS                        = ENUMIFY('C','L','A','S'),	// Class file type.
 	CHUNK_CLASS_INHERITANCE_LIST       = ENUMIFY('C','L','I','L'),	// Parent class information. List arranged after parent priority. Optional.
+	CHUNK_CLASS_MESH_COUNT             = ENUMIFY('C','L','M','C'),	// Number of meshes attached to our physics.
 	CHUNK_CLASS_PHYSICS                = ENUMIFY('C','L','P','H'),	// An physics filename of the physics that forms the shapes of this class. Optional - absent when physics inherited or for abstract nouns ("clan" and "weather").
 	CHUNK_CLASS_SETTINGS               = ENUMIFY('C','L','S','E'),	// String keys and their corresponding default string values. Example "stand_animation":"heavy_walk". Optional.
 	CHUNK_CLASS_MESH_LIST              = ENUMIFY('C','L','M','L'),	// A list of mesh filenames that forms the looks of this class. Only used by graphics applications, and completly ignored by text applications. Optional - absent when using inherited or for abstract nouns.
+	CHUNK_CLASS_PHYS_MESH              = ENUMIFY('C','L','P','M'),	// Connection between a bone and a mesh. Mandatory in sub-chunk array.
 
 	// File type: Group. Used by both graphics and text applications.
 	CHUNK_GROUP_CLASS_LIST             = ENUMIFY('G','C','L','I'),	// A list of class filenames (each with a group-unique NAME) that forms the nouns of this group. Mandatory.
@@ -215,6 +217,7 @@ protected:
 
 class ChunkyAnimationLoader: public ChunkyLoader	// For bone animations.
 {
+	typedef ChunkyLoader Parent;
 public:
 	ChunkyAnimationLoader(Lepra::File* pFile, bool pIsFileOwner);
 	virtual ~ChunkyAnimationLoader();
@@ -233,6 +236,7 @@ private:
 
 class ChunkyPhysicsLoader: public ChunkyLoader	// For physics and skinning. Loads the bone hierachy.
 {
+	typedef ChunkyLoader Parent;
 public:
 	ChunkyPhysicsLoader(Lepra::File* pFile, bool pIsFileOwner);
 	virtual ~ChunkyPhysicsLoader();
@@ -251,11 +255,16 @@ private:
 // Contans information on physics and animation names. Derived class handles UI: mesh, materials, sounds, etc.
 class ChunkyClassLoader: public ChunkyLoader
 {
+	typedef ChunkyLoader Parent;
 public:
 	ChunkyClassLoader(Lepra::File* pFile, bool pIsFileOwner);
 	virtual ~ChunkyClassLoader();
 	virtual bool Load(ChunkyClass* pData);
-	virtual bool Save(const ChunkyClass* pData);
+
+protected:
+	virtual void AddLoadElements(FileElementList& pElementList, ChunkyClass* pData);
+
+	Lepra::int32 mMeshCount;
 
 private:
 	LOG_CLASS_DECLARE();
