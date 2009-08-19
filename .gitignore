@@ -15,3 +15,10 @@
 *.manifest.res
 *.exe
 mt.dep
+*.mesh
+*.phys
+*.class
+*.lsh
+*.dll
+*.pyc
+ThirdParty/stlport/build/*

@@ -9,10 +9,13 @@
 
 #include <list>
 #include <set>
+#include "../../Lepra/Include/DiskFile.h"
 #include "../../Lepra/Include/HashTable.h"
 #include "../../Lepra/Include/MemberThread.h"
 #include "../../Lepra/Include/OrderedMap.h"
 #include "../../Lepra/Include/String.h"
+#include "../../TBC/Include/ChunkyClass.h"
+#include "../../TBC/Include/ChunkyLoader.h"
 #include "../../ThirdParty/FastDelegate/FastDelegate.h"
 #include "Cure.h"
 
@@ -94,6 +97,7 @@ public:
 	virtual ~UserTypeResourceBase();
 
 	void Load(ResourceManager* pResourceManager, const Lepra::String& pName, TypeLoadCallback pCallback);
+	void LoadUnique(ResourceManager* pResourceManager, const Lepra::String& pName, TypeLoadCallback pCallback);
 
 	void ReleaseRamResource();
 
@@ -148,7 +152,8 @@ public:
 	virtual int Reference();
 	virtual int Dereference();
 	int GetReferenceCount();
-	virtual bool IsUnique() const;
+	bool IsUnique() const;
+	void SetIsUnique(bool pIsUnique);
 
 	ResourceLoadState GetLoadState() const;
 	void SetLoadState(ResourceLoadState pState);
@@ -161,6 +166,7 @@ public:
 	void UserPostProcess();
 	void Callback();
 	virtual void FreeDiversified(UserResource*);
+	UserResource* GetFirstUserResource() const;
 
 private:
 	struct UserResourceCallbackInfo
@@ -183,6 +189,8 @@ private:
 	ResourceLoadState mState;
 	typedef std::list<UserResourceCallbackInfo> CallbackList;
 	CallbackList mLoadCallbackList;
+	bool mIsUnique;
+
 	LOG_CLASS_DECLARE();
 
 	void operator=(const Resource&);
@@ -244,19 +252,25 @@ protected:
 
 
 
-/*class PhysicsResource: public OptimizedResource<void*, int>	// Perhaps a physics ID may be used on physics accelerated hardware (i.e. PhysX or PS3)?
+class PhysicsResource: public RamResource<TBC::ChunkyPhysics*>
 {
+	typedef RamResource<TBC::ChunkyPhysics*> Parent;
 public:
-	typedef void* UserData;
+	typedef TBC::ChunkyPhysics* UserData;
 
-	PhysicsResource(const Lepra::String& pName);
-
+	PhysicsResource(ResourceManager* pManager, const Lepra::String& pName);
+	virtual ~PhysicsResource();
+	const Lepra::String GetType() const;
+	UserData GetUserData(const UserResource*) const;
 	bool Load();
+
+private:
+	LOG_CLASS_DECLARE();
 };
 
 
 
-class AnimationResource: public OptimizedResource<void*, int>	// Perhaps a animation ID may be used on graphics accelerated hardware (i.e. PhysX or PS3)?
+/*class AnimationResource: public OptimizedResource<void*, int>	// Perhaps a animation ID may be used on graphics accelerated hardware (i.e. PhysX or PS3)?
 {
 public:
 	typedef void* UserData;
@@ -268,9 +282,34 @@ public:
 
 
 
+template<class _Class, class _ClassLoader> class ClassResourceBase: public RamResource<_Class*>
+{
+	typedef RamResource<_Class*> Parent;
+public:
+	typedef _Class* UserData;
+
+	ClassResourceBase(ResourceManager* pManager, const Lepra::String& pName);
+	virtual ~ClassResourceBase();
+	const Lepra::String GetType() const;
+	UserData GetUserData(const UserResource*) const;
+	bool Load();
+
+private:
+	LOG_CLASS_DECLARE();
+};
+
+class ClassResource: public ClassResourceBase<TBC::ChunkyClass, TBC::ChunkyClassLoader>
+{
+	typedef ClassResourceBase<TBC::ChunkyClass, TBC::ChunkyClassLoader> Parent;
+public:
+	ClassResource(ResourceManager* pManager, const Lepra::String& pName);
+	virtual ~ClassResource();
+};
+
+
+
 class ContextObjectResource: public RamResource<ContextObject*>
 {
-protected:
 	typedef RamResource<ContextObject*> Parent;
 public:
 	typedef ContextObject* UserData;
@@ -278,10 +317,9 @@ public:
 	ContextObjectResource(ResourceManager* pManager, const Lepra::String& pName);
 	virtual ~ContextObjectResource();
 	const Lepra::String GetType() const;
-	UserData GetUserData(const Cure::UserResource*) const;
+	UserData GetUserData(const UserResource*) const;
 	bool Load();
 	ResourceLoadState PostProcess();	// TODO: remove this method when ContextObject::LoadGroup has been implemented correctly (thread safe).
-	bool IsUnique() const;
 
 private:
 	LOG_CLASS_DECLARE();
@@ -291,7 +329,6 @@ private:
 
 class PhysicalTerrainResource: public RamResource<TBC::TerrainPatch*>
 {
-protected:
 	typedef RamResource<TBC::TerrainPatch*> Parent;
 public:
 	typedef TBC::TerrainPatch* UserData;
@@ -299,7 +336,7 @@ public:
 	PhysicalTerrainResource(ResourceManager* pManager, const Lepra::String& pName);
 	virtual ~PhysicalTerrainResource();
 	const Lepra::String GetType() const;
-	UserData GetUserData(const Cure::UserResource*) const;
+	UserData GetUserData(const UserResource*) const;
 	bool Load();
 
 private:
@@ -308,7 +345,7 @@ private:
 
 
 
-//typedef UserTypeResource<TBC::...>			UserPhysicsResource;
+typedef UserTypeResource<PhysicsResource>		UserPhysicsResource;
 //typedef UserTypeResource<TBC::...>			UserAnimationResource;
 typedef UserTypeResource<ContextObjectResource>		UserContextObjectResource;
 typedef UserTypeResource<PhysicalTerrainResource>	UserPhysicalTerrainResource;
@@ -336,6 +373,7 @@ public:
 	// image as a painter resource and at the same time loading the same image
 	// name as a renderer resource is an error with undefined behaviour.
 	void Load(const Lepra::String& pName, UserResource* pUserResource, UserResource::LoadCallback pCallback);
+	void LoadUnique(const Lepra::String& pName, UserResource* pUserResource, UserResource::LoadCallback pCallback);
 	bool IsCreated(const Lepra::String& pName) const;
 	void SafeRelease(UserResource* pUserResource);
 	void Release(Resource* pResource);
@@ -343,12 +381,19 @@ public:
 	void Tick();	// Call often, preferably every frame.
 	void ForceFreeCache();	// Called to force immediate freeing of all resources.
 
-	NameTypeList QueryActiveResourceNames();
+	size_t QueryResourceCount() const;
+	NameTypeList QueryResourceNames();
 
 	bool ExportAll(const Lepra::String& pDirectory);
 
+	inline void AssertIsLocked()
+	{
+		assert(mThreadLock.IsOwner());
+	}
+
 protected:
 	Resource* QueryCachedResource(const Lepra::String& pName, UserResource* pUserResource, bool& pMustLoad);
+	void DoLoad(Resource* pResource);
 
 	// Called by Tick (main thread) to push objects into the active table, optimize them and callback waiters.
 	void InjectResourceLoop();
@@ -367,6 +412,7 @@ private:
 
 	typedef Lepra::HashTable<Lepra::String, Resource*> ResourceTable;
 	typedef Lepra::OrderedMap<Lepra::String, Resource*> ResourceMap;
+	typedef Lepra::OrderedMap<Resource*, Resource*, std::hash<void*> > ResourceMapList;
 	typedef std::set<Resource*> ResourceSet;
 
 	ContextObjectFactory* mContextObjectFactory;
@@ -376,11 +422,11 @@ private:
 	Lepra::MemberThread<ResourceManager> mLoaderThread;	// TODO: increase max loader thread count (put in list).
 	Lepra::Semaphore mLoadSemaphore;
 	Lepra::Lock mThreadLock;
-	ResourceTable mActiveResourceTable;	// In use. Data owner for Resource*.
-	ResourceTable mCachedResourceTable;	// On the way out. Data owner for Resource*.
-	ResourceMap mRequestLoadList;	// Under way to be loaded by worker thread. TODO: priority map thingie!
-	ResourceMap mLoadedList;	// Loaded by worker thread, worker thread will injected into the system at end of tick.
-	ResourceSet mResourceSafeLookup;
+	ResourceTable mActiveResourceTable;	// In use. Holds non-unique resources.
+	ResourceTable mCachedResourceTable;	// On the way out. Holds non-unique resources.
+	ResourceMapList mRequestLoadList;	// Under way to be loaded by worker thread. TODO: priority map thingie!
+	ResourceMapList mLoadedList;		// Loaded by worker thread, worker thread will injected into the system at end of tick.
+	ResourceSet mResourceSafeLookup;	// Data owner for Resource*.
 
 	LOG_CLASS_DECLARE();
 };

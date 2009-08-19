@@ -24,6 +24,8 @@ public:
 	virtual ~ChunkyClass();
 
 	void AddMesh(int pPhysIndex, const Lepra::String& pMeshBaseName, const Lepra::TransformationF& pTransform);
+	size_t GetMeshCount() const;
+	void GetMesh(size_t pIndex, int& pPhysIndex, Lepra::String& pMeshBaseName, Lepra::TransformationF& pTransform);
 
 private:
 	struct PhysMeshEntry

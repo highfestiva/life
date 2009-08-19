@@ -21,6 +21,10 @@ namespace Lepra
 
 
 
+class Thread;
+
+
+
 /*
 //
 // A state lock is a spin lock that will loop through a number of states,
@@ -92,8 +96,24 @@ void StateLock::WaitForState(long pDesiredState)
 
 
 
+class OwnedLock
+{
+public:
+	bool IsOwner() const;
+
+protected:
+	OwnedLock();
+	virtual	~OwnedLock();
+	void Reference();
+	void Dereference();
+
+private:
+	Thread* mOwner;
+	int mAcquireCount;
+};
+
 // Try using this instead of CompatibleLock wherever possible.
-class LockBC
+class LockBC: public OwnedLock
 {
 public:
 	LockBC();
@@ -120,7 +140,7 @@ protected:
 
 
 
-class CompatibleLockBC
+class CompatibleLockBC: public OwnedLock
 {
 public:
 	CompatibleLockBC();

@@ -8,6 +8,7 @@
 
 #include <assert.h>
 #include "../../Lepra/Include/Log.h"
+#include "../../Lepra/Include/Random.h"
 #include "../Include/UiGameUiManager.h"
 #include "../Include/UiResourceManager.h"
 #include "../Include/UiSoundManager.h"
@@ -29,7 +30,12 @@ void ReportTestResult(const Lepra::LogDecorator& pLog, const Lepra::String& pTes
 class ResourceTest
 {
 public:
-	bool Test();
+	ResourceTest();
+	virtual ~ResourceTest();
+
+	bool TestAtom();
+	bool TestClass();
+	bool TestStress();
 
 private:
 	void RendererImageLoadCallback(UiCure::UserRendererImageResource* pResource)
@@ -40,13 +46,51 @@ private:
 	{
 		LoadCallback(pResource);
 	}
-	void TextureImageLoadCallback(UiCure::UserTextureResource* pResource)
+	void TextureLoadCallback(UiCure::UserTextureResource* pResource)
 	{
 		LoadCallback(pResource);
 	}
-	void Sound2dImageLoadCallback(UiCure::UserSound2dResource* pResource)
+	void Sound2dLoadCallback(UiCure::UserSound2dResource* pResource)
 	{
 		LoadCallback(pResource);
+	}
+	void ClassLoadCallback(UiCure::UserClassResource* pResource)
+	{
+		LoadCallback(pResource);
+
+		UiTbc::ChunkyClass* lClass = pResource->GetData();
+		mPhysicsResource->LoadUnique(pResource->GetConstResource()->GetManager(),
+			lClass->GetPhysicsBaseName()+_T(".phys"),
+			Cure::UserPhysicsResource::TypeLoadCallback(this,
+				&ResourceTest::PhysicsLoadCallback));
+		const size_t lMeshCount = lClass->GetMeshCount();
+		for (size_t x = 0; x < lMeshCount; ++x)
+		{
+			int lPhysIndex = -1;
+			Lepra::String lName;
+			Lepra::TransformationF lTransform;
+			lClass->GetMesh(x, lPhysIndex, lName, lTransform);
+			mMeshResourceArray.push_back(new UiCure::UserGeometryReferenceResource(
+				mUiManager, UiCure::GeometryOffset(lPhysIndex, lTransform)));
+			mMeshResourceArray[x]->LoadUnique(pResource->GetConstResource()->GetManager(),
+				lName+_T(".mesh"),
+				UiCure::UserGeometryReferenceResource::TypeLoadCallback(this,
+					&ResourceTest::MeshLoadCallback));
+		}
+	}
+	void PhysicsLoadCallback(Cure::UserPhysicsResource* pResource)
+	{
+		LoadCallback(pResource);
+	}
+	void MeshLoadCallback(UiCure::UserGeometryReferenceResource* pResource)
+	{
+		LoadCallback(pResource);
+	}
+	void DumbClassLoadCallback(UiCure::UserClassResource*)
+	{
+	}
+	void DumbMeshLoadCallback(UiCure::UserGeometryReferenceResource*)
+	{
 	}
 	void LoadCallback(Cure::UserResource* pResource)
 	{
@@ -60,29 +104,46 @@ private:
 		}
 	}
 
+	Cure::ResourceManager* mResourceManager;
+	UiCure::GameUiManager* mUiManager;
+	Cure::UserPhysicsResource* mPhysicsResource;
+	typedef std::vector<UiCure::UserGeometryReferenceResource*> MeshArray;
+	MeshArray mMeshResourceArray;
+
 	LOG_CLASS_DECLARE();
 };
 
-bool ResourceTest::Test()
+ResourceTest::ResourceTest()
+{
+	mUiManager = new UiCure::GameUiManager(UiCure::GetSettings());
+	mUiManager->Open();
+	mUiManager->GetSoundManager()->SetMicrophonePosition(Lepra::Vector3DF(0, 0, 0));
+	mResourceManager = new Cure::ResourceManager(1);
+	mResourceManager->InitDefault(0);
+
+	mPhysicsResource = new Cure::UserPhysicsResource();
+}
+
+ResourceTest::~ResourceTest()
+{
+	delete (mResourceManager);	// Must be first to allow resources suicide.
+	delete (mUiManager);
+}
+
+bool ResourceTest::TestAtom()
 {
 	Lepra::String lContext;
 	bool lTestOk = true;
-
-	Cure::ResourceManager* lResourceManager = new Cure::ResourceManager(1);
-	lResourceManager->InitDefault(0);
-	UiCure::GameUiManager lUiManager(Cure::GetSettings());
-	lUiManager.Open();
-	lUiManager.GetSoundManager()->SetMicrophonePosition(Lepra::Vector3DF(0, 0, 0));
 
 	// Test loading a 2D image.
 	if (lTestOk)
 	{
 		lContext = _T("load 2D image");
-		UiCure::UserRendererImageResource lImage(&lUiManager);
-		lImage.Load(lResourceManager, _T("normalmap.tga"), UiCure::UserRendererImageResource::TypeLoadCallback(this, &ResourceTest::RendererImageLoadCallback));
+		UiCure::UserRendererImageResource lImage(mUiManager);
+		lImage.Load(mResourceManager, _T("normalmap.tga"), UiCure::UserRendererImageResource::TypeLoadCallback(this, &ResourceTest::RendererImageLoadCallback));
 		Lepra::Thread::Sleep(0.4);
-		lResourceManager->Tick();
-		lResourceManager->SafeRelease(&lImage);
+		mResourceManager->Tick();
+		mResourceManager->SafeRelease(&lImage);
 		lTestOk = (gResourceLoadCount == 1 && gResourceLoadErrorCount == 0);
 		assert(lTestOk);
 	}
@@ -93,12 +154,12 @@ bool ResourceTest::Test()
 		lContext = _T("load 2D image into texture");
 		// Free previous resource; it's a requirement since the name must be
 		// unique throughout all resource types.
-		lResourceManager->ForceFreeCache();
-		UiCure::UserPainterImageResource lImage(&lUiManager);
-		lImage.Load(lResourceManager, _T("normalmap.tga"), UiCure::UserPainterImageResource::TypeLoadCallback(this, &ResourceTest::PainterImageLoadCallback));
+		mResourceManager->ForceFreeCache();
+		UiCure::UserPainterImageResource lImage(mUiManager);
+		lImage.Load(mResourceManager, _T("normalmap.tga"), UiCure::UserPainterImageResource::TypeLoadCallback(this, &ResourceTest::PainterImageLoadCallback));
 		Lepra::Thread::Sleep(0.4);
-		lResourceManager->Tick();
-		lResourceManager->SafeRelease(&lImage);
+		mResourceManager->Tick();
+		mResourceManager->SafeRelease(&lImage);
 		lTestOk = (gResourceLoadCount == 2 && gResourceLoadErrorCount == 0);
 		assert(lTestOk);
 	}
@@ -108,11 +169,11 @@ bool ResourceTest::Test()
 	if (lTestOk)
 	{
 		lContext = _T("load 3D texture");
-		UiCure::UserTextureResource lTexture(&lUiManager);
-		lTexture.Load(lResourceManager, _T("NoSuchFile.tex"), UiCure::UserTextureResource::TypeLoadCallback(this, &ResourceTest::TextureImageLoadCallback));
+		UiCure::UserTextureResource lTexture(mUiManager);
+		lTexture.Load(mResourceManager, _T("NoSuchFile.tex"), UiCure::UserTextureResource::TypeLoadCallback(this, &ResourceTest::TextureLoadCallback));
 		Lepra::Thread::Sleep(0.4);
-		lResourceManager->Tick();
-		lResourceManager->SafeRelease(&lTexture);
+		mResourceManager->Tick();
+		mResourceManager->SafeRelease(&lTexture);
 		lTestOk = (gResourceLoadCount == 2 && gResourceLoadErrorCount == 1);
 		assert(lTestOk);
 	}
@@ -121,11 +182,11 @@ bool ResourceTest::Test()
 	if (lTestOk)
 	{
 		lContext = _T("load 3D texture");
-		UiCure::UserTextureResource lTexture(&lUiManager);
-		lTexture.Load(lResourceManager, _T("Normalmap.tex"), UiCure::UserTextureResource::TypeLoadCallback(this, &ResourceTest::TextureImageLoadCallback));
+		UiCure::UserTextureResource lTexture(mUiManager);
+		lTexture.Load(mResourceManager, _T("Normalmap.tex"), UiCure::UserTextureResource::TypeLoadCallback(this, &ResourceTest::TextureLoadCallback));
 		Lepra::Thread::Sleep(0.4);
-		lResourceManager->Tick();
-		lResourceManager->SafeRelease(&lTexture);
+		mResourceManager->Tick();
+		mResourceManager->SafeRelease(&lTexture);
 		lTestOk = (gResourceLoadCount == 3 && gResourceLoadErrorCount == 1);
 		if (!lTestOk)
 		{
@@ -138,33 +199,224 @@ bool ResourceTest::Test()
 	if (lTestOk)
 	{
 		lContext = _T("load sound");
-		UiCure::UserSound2dResource lSound(&lUiManager);
-		lSound.Load(lResourceManager, _T("Bark.wav"), UiCure::UserSound2dResource::TypeLoadCallback(this, &ResourceTest::Sound2dImageLoadCallback));
+		UiCure::UserSound2dResource lSound(mUiManager);
+		lSound.Load(mResourceManager, _T("Bark.wav"), UiCure::UserSound2dResource::TypeLoadCallback(this, &ResourceTest::Sound2dLoadCallback));
 		Lepra::Thread::Sleep(0.4);
-		lResourceManager->Tick();
+		mResourceManager->Tick();
 		lTestOk = (gResourceLoadCount == 4 && gResourceLoadErrorCount == 1);
 		if (lTestOk)
 		{
-			lUiManager.GetSoundManager()->GetSoundManager()->Play(lSound.GetData(), 1.0, 1.0);
+			mUiManager->GetSoundManager()->GetSoundManager()->Play(lSound.GetData(), 1.0, 1.0);
 			for (int x = 0; x < 5; ++x)
 			{
-				lUiManager.GetSoundManager()->GetSoundManager()->Update();
+				mUiManager->GetSoundManager()->GetSoundManager()->Update();
 				Lepra::Thread::Sleep(0.1);
 			}
 		}
-		lResourceManager->SafeRelease(&lSound);
+		mResourceManager->SafeRelease(&lSound);
 		assert(lTestOk);
 	}
 
-	// RM should be deleted prior to its managers, so that it has a chance to free it's optimized resources.
-	delete (lResourceManager);
-	lUiManager.Close();
-
-	ReportTestResult(mLog, _T("Resource"), lContext, lTestOk);
+	ReportTestResult(mLog, _T("ResourceAtom"), lContext, lTestOk);
 	return (lTestOk);
 }
 
+bool ResourceTest::TestClass()
+{
+	Lepra::String lContext;
+	bool lTestOk = true;
 
+	if (lTestOk)
+	{
+		lContext = _T("load class");
+		UiCure::UserClassResource lClass(mUiManager);
+		lClass.LoadUnique(mResourceManager, _T("tractor_01.class"), UiCure::UserClassResource::TypeLoadCallback(this, &ResourceTest::ClassLoadCallback));
+		for (int x = 0; gResourceLoadCount != 13 && x < 100; ++x)
+		{
+			Lepra::Thread::Sleep(0.01);
+			mResourceManager->Tick();	// Continue loading of physics and meshes.
+		}
+		// Make sure nothing more makes it through.
+		Lepra::Thread::Sleep(0.1);
+		mResourceManager->Tick();
+		lTestOk = (gResourceLoadCount == 13 && gResourceLoadErrorCount == 1);
+		mResourceManager->SafeRelease(&lClass);
+		assert(lTestOk);
+	}
+
+	delete (mPhysicsResource);
+	mPhysicsResource = 0;
+	for (size_t x = 0; x < mMeshResourceArray.size(); ++x)
+	{
+		delete (mMeshResourceArray[x]);
+	}
+	mMeshResourceArray.clear();
+	mResourceManager->StopClear();
+	mResourceManager->InitDefault(0);
+
+	ReportTestResult(mLog, _T("ResourceClass"), lContext, lTestOk);
+	return (lTestOk);
+}
+
+bool ResourceTest::TestStress()
+{
+	Lepra::String lContext;
+	bool lTestOk = true;
+
+	if (lTestOk)
+	{
+		lContext = _T("no loaded resources");
+		lTestOk = (mResourceManager->QueryResourceCount() == 0);
+		assert(lTestOk);
+	}
+
+	if (lTestOk)
+	{
+		lContext = _T("stressing unique load");
+		typedef std::list<UiCure::UserClassResource*> ClassList;
+		ClassList lResources;
+		const int lLoopCount = 100;
+		const int lAddCount = 10;
+		for (int x = 0; x < lLoopCount; ++x)
+		{
+			for (int y = 0; y < lAddCount; ++y)
+			{
+				UiCure::UserClassResource* lClass = new UiCure::UserClassResource(mUiManager);
+				lClass->LoadUnique(mResourceManager, _T("tractor_01.class"),
+					UiCure::UserClassResource::TypeLoadCallback(this, &ResourceTest::DumbClassLoadCallback));
+				lResources.push_back(lClass);
+			}
+			size_t c = mResourceManager->QueryResourceCount();
+			assert(c <= lLoopCount*lAddCount);
+			assert(c < 710);
+			for (int z = 0; z < lAddCount/3; ++z)
+			{
+				int lDropIndex = Lepra::Random::GetRandomNumber()%lAddCount;
+				ClassList::reverse_iterator u = lResources.rbegin();
+				for (int v = 0; v < lDropIndex; ++u, ++v)
+					;
+				delete (*u);
+				lResources.erase(--u.base());
+			}
+			mResourceManager->Tick();
+		}
+		lTestOk = (mResourceManager->QueryResourceCount() == lLoopCount*(lAddCount-lAddCount/3));
+		assert(lTestOk);
+		if (lTestOk)
+		{
+			lTestOk = false;
+			for (int z = 0; !lTestOk && z < 100; ++z)
+			{
+				Lepra::Thread::Sleep(0.1);
+				mResourceManager->Tick();
+
+				lTestOk = true;
+				ClassList::iterator y = lResources.begin();
+				int u = 0;
+				for (; lTestOk && y != lResources.end(); ++y, ++u)
+				{
+					lTestOk = ((*y)->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE);
+					//if (!lTestOk)
+					//{
+					//	mLog.Warningf(_T("Failed on the %ith element; load state = %i."),
+					//		u, (*y)->GetLoadState());
+					//}
+				}
+			}
+			assert(lTestOk);
+		}
+		if (lTestOk)
+		{
+			ClassList::iterator y = lResources.begin();
+			for (; y != lResources.end(); ++y)
+			{
+				delete (*y);
+			}
+			lResources.clear();
+			lTestOk = (mResourceManager->QueryResourceCount() == 0);
+			assert(lTestOk);
+		}
+	}
+
+	if (lTestOk)
+	{
+		lContext = _T("stressing mass load");
+		typedef std::list<UiCure::UserGeometryReferenceResource*> MeshList;
+		MeshList lResources;
+		const int lLoopCount = 100;
+		const int lAddCount = 10;
+		for (int x = 0; x < lLoopCount; ++x)
+		{
+			for (int y = 0; y < lAddCount; ++y)
+			{
+				UiCure::UserGeometryReferenceResource* lMesh =
+					new UiCure::UserGeometryReferenceResource(mUiManager, UiCure::GeometryOffset(0));
+				lMesh->LoadUnique(mResourceManager, _T("tractor_01_front_wheel0.mesh"),
+					UiCure::UserGeometryReferenceResource::TypeLoadCallback(this,
+						&ResourceTest::DumbMeshLoadCallback));
+				lResources.push_back(lMesh);
+			}
+			size_t c = mResourceManager->QueryResourceCount();
+			assert(c <= lLoopCount*lAddCount);
+			assert(c < 710);
+			for (int z = 0; z < lAddCount/3; ++z)
+			{
+				int lDropIndex = Lepra::Random::GetRandomNumber()%lAddCount;
+				MeshList::reverse_iterator u = lResources.rbegin();
+				for (int v = 0; v < lDropIndex; ++u, ++v)
+					;
+				delete (*u);
+				lResources.erase(--u.base());
+			}
+			mResourceManager->Tick();
+		}
+		lTestOk = (mResourceManager->QueryResourceCount() == lLoopCount*(lAddCount-lAddCount/3)+1);
+		assert(lTestOk);
+		if (lTestOk)
+		{
+			lTestOk = false;
+			for (int z = 0; !lTestOk && z < 100; ++z)
+			{
+				Lepra::Thread::Sleep(0.1);
+				mResourceManager->Tick();
+
+				lTestOk = true;
+				MeshList::iterator y = lResources.begin();
+				int u = 0;
+				for (; lTestOk && y != lResources.end(); ++y, ++u)
+				{
+					lTestOk = ((*y)->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE);
+					//if (!lTestOk)
+					//{
+					//	mLog.Warningf(_T("Failed on the %ith element; load state = %i."),
+					//		u, (*y)->GetLoadState());
+					//}
+				}
+			}
+			assert(lTestOk);
+		}
+		if (lTestOk)
+		{
+			MeshList::iterator y = lResources.begin();
+			for (; y != lResources.end(); ++y)
+			{
+				delete (*y);
+			}
+			lResources.clear();
+			lTestOk = (mResourceManager->QueryResourceCount() == 1);
+			assert(lTestOk);
+		}
+		if (lTestOk)
+		{
+			mResourceManager->ForceFreeCache();
+			lTestOk = (mResourceManager->QueryResourceCount() == 0);
+			assert(lTestOk);
+		}
+	}
+
+	ReportTestResult(mLog, _T("ResourceStress"), lContext, lTestOk);
+	return (lTestOk);
+}
 
 LOG_CLASS_DEFINE(TEST, ResourceTest);
 
@@ -175,12 +427,20 @@ bool TestUiCure()
 	bool lTestOk = true;
 	if (lTestOk)
 	{
-		lTestOk = TestCure();
+		//lTestOk = TestCure();
+	}
+	ResourceTest lResourceTest;
+	if (lTestOk)
+	{
+		lTestOk = lResourceTest.TestAtom();
 	}
 	if (lTestOk)
 	{
-		ResourceTest lResourceTest;
-		lTestOk = lResourceTest.Test();
+		lTestOk = lResourceTest.TestClass();
+	}
+	if (lTestOk)
+	{
+		lTestOk = lResourceTest.TestStress();
 	}
 	return (lTestOk);
 }

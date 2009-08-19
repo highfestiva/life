@@ -4,9 +4,10 @@
 
 
 
+#include "../Include/Thread.h"
+#include <assert.h>
 #include <stdio.h>
 #include "../Include/LepraTypes.h"
-#include "../Include/Thread.h"
 #include "../Include/BusLock.h"
 #include "../Include/Timer.h"
 #include "../Include/Log.h"
@@ -18,6 +19,44 @@ namespace Lepra
 
 
 
+bool OwnedLock::IsOwner() const
+{
+	return (mOwner == Thread::GetCurrentThread());
+}
+
+OwnedLock::OwnedLock():
+	mOwner(0),
+	mAcquireCount(0)
+{
+}
+
+OwnedLock::~OwnedLock()
+{
+	assert(mAcquireCount == 0);
+}
+
+void OwnedLock::Reference()
+{
+	if (mAcquireCount == 0)
+	{
+		assert(!mOwner);
+		mOwner = Thread::GetCurrentThread();
+	}
+	++mAcquireCount;
+}
+
+void OwnedLock::Dereference()
+{
+	assert(mOwner == Thread::GetCurrentThread());
+	--mAcquireCount;
+	if (mAcquireCount == 0)
+	{
+		mOwner = 0;
+	}
+}
+
+
+
 LockBC::LockBC()
 {
 }
@@ -25,6 +64,7 @@ LockBC::LockBC()
 LockBC::~LockBC()
 {
 }
+
 
 
 ScopeLock::ScopeLock(LockBC* pLock) :

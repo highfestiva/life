@@ -92,6 +92,23 @@ bool TestThreading(const LogDecorator& pAccount)
 		}
 	}
 
+	if (lTestOk)
+	{
+		lContext = _T("mutex ownership");
+		lTestOk = (gThreadTestLock.IsOwner() == false);
+		if (lTestOk)
+		{
+			gThreadTestLock.Acquire();
+			lTestOk = (gThreadTestLock.IsOwner() == true);
+		}
+		if (lTestOk)
+		{
+			gThreadTestLock.Release();
+			lTestOk = (gThreadTestLock.IsOwner() == false);
+		}
+		assert(lTestOk);
+	}
+
 	StaticThread lThread(_T("LockTest"));
 	if (lTestOk)
 	{

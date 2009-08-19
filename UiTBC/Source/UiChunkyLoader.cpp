@@ -413,9 +413,10 @@ ChunkyClassLoader::~ChunkyClassLoader()
 {
 }
 
-void ChunkyClassLoader::AddLoadElements(FileElementList& pElementList, ChunkyClass* pData)
+void ChunkyClassLoader::AddLoadElements(Parent::FileElementList& pElementList, TBC::ChunkyClass* pData)
 {
-	pElementList.push_back(ChunkyFileElement(TBC::CHUNK_CLASS_MESH_LIST, (void*)pData));
+	Parent::AddLoadElements(pElementList, pData);
+	pElementList.push_back(ChunkyFileElement(TBC::CHUNK_CLASS_MESH_LIST, (void*)pData, -1000));
 }
 
 bool ChunkyClassLoader::LoadElementCallback(TBC::ChunkyType pType, Lepra::uint32 pSize, Lepra::int64 pChunkEndPosition, void* pStorage)
@@ -425,7 +426,7 @@ bool ChunkyClassLoader::LoadElementCallback(TBC::ChunkyType pType, Lepra::uint32
 	if (pType == TBC::CHUNK_CLASS_MESH_LIST)
 	{
 		FileElementList lLoadList;
-		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_CLASS_PHYS_MESH, (void*)lClass, mMeshCount));
+		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_CLASS_PHYS_MESH, (void*)lClass));
 		lOk = AllocLoadChunkyList(lLoadList, pChunkEndPosition);
 	}
 	else if (pType == TBC::CHUNK_CLASS_PHYS_MESH)
@@ -442,6 +443,7 @@ bool ChunkyClassLoader::LoadElementCallback(TBC::ChunkyType pType, Lepra::uint32
 			Lepra::UnicodeString lUnicodeMeshName;
 			const size_t lExcludeByteCount = (1+7)*4;	// Index+transform.
 			int lStrSize = Lepra::PackerUnicodeString::Unpack(&lUnicodeMeshName, &lBuffer[lIndex], pSize-lExcludeByteCount);
+			lStrSize = (lStrSize+3)&(~3);
 			lOk = (lStrSize == (int)(pSize-lExcludeByteCount));
 			lIndex += lStrSize;
 			lMeshBaseName = Lepra::UnicodeStringUtility::ToCurrentCode(lUnicodeMeshName);
@@ -463,6 +465,7 @@ bool ChunkyClassLoader::LoadElementCallback(TBC::ChunkyType pType, Lepra::uint32
 	}
 	return (lOk);
 }
+
 
 
 }

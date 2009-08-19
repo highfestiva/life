@@ -15,6 +15,8 @@
 #include "../../TBC/Include/GeometryReference.h"
 #include "../../ThirdParty/FastDelegate/FastDelegate.h"
 #include "../../UiLepra/Include/UiSoundManager.h"
+#include "../../UiTBC/Include/UiChunkyClass.h"
+#include "../../UiTBC/Include/UiChunkyLoader.h"
 #include "../../UiTBC/Include/UiPainter.h"
 #include "../../UiTBC/Include/UiRenderer.h"
 #include "UiCure.h"
@@ -209,19 +211,17 @@ public:
 
 
 
-/*class PhysicsResource: public OptimizedResource<void*, int>	// Perhaps a physics ID may be used on physics accelerated hardware (i.e. PhysX or PS3)?
+class ClassResource: public Cure::ClassResourceBase<UiTbc::ChunkyClass, UiTbc::ChunkyClassLoader>, public UiResource
 {
+	typedef Cure::ClassResourceBase<UiTbc::ChunkyClass, UiTbc::ChunkyClassLoader> Parent;
 public:
-	typedef void* UserData;
-
-	PhysicsResource(const Lepra::String& pName);
-
-	bool Load();
+	ClassResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const Lepra::String& pName);
+	virtual ~ClassResource();
 };
 
 
 
-class AnimationResource: public OptimizedResource<void*, int>	// Perhaps a animation ID may be used on graphics accelerated hardware (i.e. PhysX or PS3)?
+/*class AnimationResource: public OptimizedResource<void*, int>	// Perhaps a animation ID may be used on graphics accelerated hardware (i.e. PhysX or PS3)?
 {
 public:
 	typedef void* UserData;
@@ -270,6 +270,7 @@ typedef UserUiTypeResource<TextureResource>				UserTextureResource;
 typedef UserUiTypeResource<GeometryReferenceResource, GeometryOffset>	UserGeometryReferenceResource;
 typedef UserUiTypeResource<SoundResource2d>				UserSound2dResource;
 typedef UserUiTypeResource<SoundResource3d>				UserSound3dResource;
+typedef UserUiTypeResource<ClassResource>				UserClassResource;
 //typedef Cure::UserTypeResource<TBC::...>				UserPhysicsResource;
 //typedef UserUiTypeResource<TBC::...>					UserAnimationResource;
 //typedef Cure::UserTypeResource<...>					UserTerrainResource;

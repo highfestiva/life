@@ -84,7 +84,7 @@ public:
 
 protected:
 	bool LoadElementCallback(TBC::ChunkyType pType, Lepra::uint32 pSize, Lepra::int64 pChunkEndPosition, void* pStorage);
-	virtual void AddLoadElements(FileElementList& pElementList, ChunkyClass* pData);
+	virtual void AddLoadElements(Parent::FileElementList& pElementList, TBC::ChunkyClass* pData);
 
 private:
 	LOG_CLASS_DECLARE();

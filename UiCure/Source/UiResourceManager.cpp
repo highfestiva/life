@@ -6,8 +6,10 @@
 
 #include <assert.h>
 #include "../../Cure/Include/TerrainFunctionManager.h"
+#include "../../TBC/Include/ChunkyPhysics.h"
 #include "../../UiLepra/Include/UiInput.h"
 #include "../../UiTBC/Include/UiBasicMeshCreator.h"
+#include "../../UiTBC/Include/UiChunkyLoader.h"
 #include "../../UiTBC/Include/UiTEXLoader.h"
 #include "../../UiTBC/Include/UiTriangleBasedGeometry.h"
 #include "../../UiTBC/Include/UiUvMapper.h"
@@ -252,8 +254,21 @@ bool GeometryResource::Load()
 	lMaterial.SetColor(0.5f, 0.5f, 0.5f);
 
 	UiTbc::TriangleBasedGeometry* lGeometry = 0;
-	// TODO: load from file!
-	if (GetName().find(_T("box_002_mesh")) != Lepra::String::npos)
+
+	Lepra::DiskFile lFile;
+	if (lFile.Open(GetName(), Lepra::DiskFile::MODE_READ))
+	{
+		UiTbc::ChunkyMeshLoader lLoader(&lFile, false);
+		lGeometry = new UiTbc::TriangleBasedGeometry();
+		bool lOk = lLoader.Load(lGeometry);
+		if (!lOk)
+		{
+			assert(false);
+			delete (lGeometry);
+			lGeometry = 0;
+		}
+	}
+	else if (GetName().find(_T("box_002_mesh")) != Lepra::String::npos)
 	{
 		Lepra::Vector3DF lDimensions(2.0f, 1.0f, 3.5f);
 		lGeometry = UiTbc::BasicMeshCreator::CreateFlatBox(lDimensions.x, lDimensions.y, lDimensions.z);
@@ -484,12 +499,13 @@ const Lepra::String GeometryReferenceResource::GetType() const
 
 bool GeometryReferenceResource::Load()
 {
+	assert(IsUnique());
 	bool lOk = (mClassResource != 0);
 	if (lOk)
 	{
 		Lepra::StringUtility::StringVector lIdClass = Lepra::StringUtility::Split(GetName(), _T(":"), 1);
-		assert(lIdClass.size() == 2);
-		mClassResource->Load(GetManager(), lIdClass[1], ClassResource::TypeLoadCallback(this,
+		assert(lIdClass.size() == 1);
+		mClassResource->Load(GetManager(), GetName(), ClassResource::TypeLoadCallback(this,
 			&GeometryReferenceResource::OnLoadClass));
 	}
 	return (lOk);
@@ -604,6 +620,18 @@ const Lepra::String SoundResource3d::GetType() const
 {
 	return (_T("Sound3D"));
 }
+
+
+ClassResource::ClassResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const Lepra::String& pName):
+	Parent(pManager, pName),
+	UiResource(pUiManager)
+{
+}
+
+ClassResource::~ClassResource()
+{
+}
+
 
 
 /*AnimationResource::AnimationResource(const Lepra::String& pName):

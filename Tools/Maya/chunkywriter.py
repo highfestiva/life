@@ -18,7 +18,6 @@ import sys
 physics_type = {"static":1, "dynamic":2, "collision_detect_only":3}
 
 CHUNK_CLASS                        = "CLAS"
-CHUNK_CLASS_MESH_COUNT             = "CLMC"
 CHUNK_CLASS_PHYSICS                = "CLPH"
 CHUNK_CLASS_MESH_LIST              = "CLML"
 CHUNK_CLASS_PHYS_MESH              = "CLPM"
@@ -198,11 +197,12 @@ class ChunkyWriter:
 
         def _writestr(self, string):
                 res = list(string.encode('utf-16'))
+                res += [0, 0]
                 # Overwrite 2-byte Unicode BOM with string length.
                 chrcnt = (len(res)-2)//2
                 res[0] = (chrcnt&0xFF)
                 res[1] = (chrcnt>>8)
-                reslen = ((len(res)+1+3) & (~3))
+                reslen = ((len(res)+3) & (~3))
                 resremainder = reslen - len(res)
                 res += [0] * resremainder
                 res = bytes(res)
@@ -504,7 +504,6 @@ class ClassWriter(ChunkyWriter):
                         data =  (
                                         CHUNK_CLASS,
                                         (
-                                                (CHUNK_CLASS_MESH_COUNT, len(meshes)),
                                                 (CHUNK_CLASS_PHYSICS, self.basename),
                                                 (CHUNK_CLASS_MESH_LIST, meshes),
                                         )

@@ -362,14 +362,17 @@ bool MemFileLogListener::Dump(File* pFile, LogListener* pLogListener, Log::LogLe
 	return (lStatus == IO_OK || lStatus == IO_BUFFER_UNDERFLOW);
 }
 
-void MemFileLogListener::WriteLog(const String& pFullMessage, Log::LogLevel)
+void MemFileLogListener::WriteLog(const String& pFullMessage, Log::LogLevel pLogLevel)
 {
 	mFile.WriteData(pFullMessage.c_str(), pFullMessage.length()*sizeof(tchar));
 
 #ifndef NO_ASSERT_ON_LOG_FLOOD
-	static size_t lSessionLogSize = 0;
-	lSessionLogSize += pFullMessage.length();
-	assert(lSessionLogSize < 4*1024*1024);	// TODO: something smarter using time as well (checking rate, opposed to size).
+	if (pLogLevel >= Log::LEVEL_INFO)
+	{
+		static size_t lSessionLogSize = 0;
+		lSessionLogSize += pFullMessage.length();
+		assert(lSessionLogSize < 4*1024*1024);	// TODO: something smarter using time as well (checking rate, opposed to size).
+	}
 #endif // NO_ASSERT_ON_LOG_FLOOD
 
 	if ((uint64)mFile.GetSize() > mMaxSize)

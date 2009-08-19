@@ -28,14 +28,25 @@ UserTypeResourceBase<ResourceType, SubtypeLoadCallback, SubtypeExtraData>::~User
 }
 
 template<class ResourceType, class SubtypeLoadCallback, class SubtypeExtraData>
-void UserTypeResourceBase<ResourceType, SubtypeLoadCallback, SubtypeExtraData>::Load(ResourceManager* pResourceManager,
-	const Lepra::String& pName, TypeLoadCallback pCallback)
+void UserTypeResourceBase<ResourceType, SubtypeLoadCallback, SubtypeExtraData>::Load(
+	ResourceManager* pResourceManager, const Lepra::String& pName, TypeLoadCallback pCallback)
 {
 	// JB-TRICKY: this is what I gather that it takes to cast a callback parameter.
 	//            The memento contains the "this" and "method" pointers...
 	LoadCallback lCallbackCast;
 	lCallbackCast.SetMemento(pCallback.GetMemento());
 	pResourceManager->Load(pName, this, lCallbackCast);
+}
+
+template<class ResourceType, class SubtypeLoadCallback, class SubtypeExtraData>
+void UserTypeResourceBase<ResourceType, SubtypeLoadCallback, SubtypeExtraData>::LoadUnique(
+	ResourceManager* pResourceManager, const Lepra::String& pName, TypeLoadCallback pCallback)
+{
+	// JB-TRICKY: this is what I gather that it takes to cast a callback parameter.
+	//            The memento contains the "this" and "method" pointers...
+	LoadCallback lCallbackCast;
+	lCallbackCast.SetMemento(pCallback.GetMemento());
+	pResourceManager->LoadUnique(pName, this, lCallbackCast);
 }
 
 template<class ResourceType, class SubtypeLoadCallback, class SubtypeExtraData>
@@ -180,6 +191,46 @@ template<class RamData, class DiversifiedData> void DiversifiedResource<RamData,
 		mUserDiversifiedTable.Remove(x);
 		ReleaseDiversifiedData(lInstanceId);
 	}
+}
+
+
+
+template<class _Class, class _ClassLoader>
+ClassResourceBase<_Class, _ClassLoader>::ClassResourceBase(Cure::ResourceManager* pManager, const Lepra::String& pName):
+	Parent(pManager, pName)
+{
+}
+
+template<class _Class, class _ClassLoader>
+ClassResourceBase<_Class, _ClassLoader>::~ClassResourceBase()
+{
+}
+
+template<class _Class, class _ClassLoader>
+const Lepra::String ClassResourceBase<_Class, _ClassLoader>::GetType() const
+{
+	return (_T("Class"));
+}
+
+template<class _Class, class _ClassLoader>
+typename ClassResourceBase<_Class, _ClassLoader>::UserData ClassResourceBase<_Class, _ClassLoader>::GetUserData(const Cure::UserResource*) const
+{
+	return (GetRamData());
+}
+
+template<class _Class, class _ClassLoader>
+bool ClassResourceBase<_Class, _ClassLoader>::Load()
+{
+	assert(GetRamData() == 0);
+	SetRamData(new _Class());
+	Lepra::DiskFile lFile;
+	bool lOk = lFile.Open(GetName(), Lepra::DiskFile::MODE_READ);
+	if (lOk)
+	{
+		_ClassLoader lLoader(&lFile, false);
+		lOk = lLoader.Load(GetRamData());
+	}
+	return (lOk);
 }
 
 

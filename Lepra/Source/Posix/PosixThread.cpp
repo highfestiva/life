@@ -87,15 +87,22 @@ PosixLock::~PosixLock()
 void PosixLock::Acquire()
 {
 	::pthread_mutex_lock(&mMutex);
+	Reference();
 }
 
 bool PosixLock::TryAcquire()
 {
-	return (::pthread_mutex_trylock(&mMutex) == 0);
+	bool lAcquired = (::pthread_mutex_trylock(&mMutex) == 0);
+	if (lAcquired)
+	{
+		Reference();
+	}
+	return (lAcquired);
 }
 
 void PosixLock::Release()
 {
+	Dereference();
 	::pthread_mutex_unlock(&mMutex);
 }
 

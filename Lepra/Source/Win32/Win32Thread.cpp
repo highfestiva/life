@@ -97,22 +97,28 @@ Win32Lock::~Win32Lock()
 void Win32Lock::Acquire()
 {
 	::EnterCriticalSection(&mMutex);
+	Reference();
 }
 
 bool Win32Lock::TryAcquire()
 {
-	return (::TryEnterCriticalSection(&mMutex) == TRUE);
+	bool lAcquired = (::TryEnterCriticalSection(&mMutex) == TRUE);
+	if (lAcquired)
+	{
+		Reference();
+	}
+	return (lAcquired);
 }
 
 void Win32Lock::Release()
 {
+	Dereference();
 	::LeaveCriticalSection(&mMutex);
 }
 
 
 Win32CompatibleLock::Win32CompatibleLock() :
-	mMutex(::CreateMutex(NULL, FALSE, NULL)),
-	mLockCount(0)
+	mMutex(::CreateMutex(NULL, FALSE, NULL))
 {
 }
 
@@ -124,48 +130,33 @@ Win32CompatibleLock::~Win32CompatibleLock()
 void Win32CompatibleLock::Acquire()
 {
 	::WaitForSingleObject(mMutex, INFINITE);
-	mLockCount++;
+	Reference();
 }
 
 bool Win32CompatibleLock::Acquire(float64 pMaxWaitTime)
 {
-	bool lSuccess = (::WaitForSingleObject(mMutex, (DWORD)(pMaxWaitTime * 1000.0)) == WAIT_OBJECT_0);
-
-	if (lSuccess == true)
+	bool lAcquired = (::WaitForSingleObject(mMutex, (DWORD)(pMaxWaitTime * 1000.0)) == WAIT_OBJECT_0);
+	if (lAcquired)
 	{
-		mLockCount++;
+		Reference();
 	}
-
-	return lSuccess;
+	return (lAcquired);
 }
 
 bool Win32CompatibleLock::TryAcquire()
 {
-	bool lReturnValue = false;
-
-	if (::WaitForSingleObject(mMutex, 0) == WAIT_OBJECT_0)
+	bool lAcquired = (::WaitForSingleObject(mMutex, 0) == WAIT_OBJECT_0);
+	if (lAcquired)
 	{
-		mLockCount++;
-		lReturnValue = true;
+		Reference();
 	}
-
-	return lReturnValue;
+	return (lAcquired);
 }
 
 void Win32CompatibleLock::Release()
 {
-	mLockCount--;
-
-	if (mLockCount < 0)
-	{
-		// One release too much. This is harmless at the moment, but means that the 
-		// number of calls to Release() don't match the number of calls to Lock().
-		mLockCount = 0;
-	}
-	else
-	{
-		::ReleaseMutex(mMutex);
-	}
+	Dereference();
+	::ReleaseMutex(mMutex);
 }
 
 

@@ -978,8 +978,7 @@ bool ChunkyPhysicsLoader::LoadElementCallback(ChunkyType pType, Lepra::uint32 pS
 
 
 ChunkyClassLoader::ChunkyClassLoader(Lepra::File* pFile, bool pIsFileOwner):
-	Parent(pFile, pIsFileOwner),
-	mMeshCount(-1)
+	Parent(pFile, pIsFileOwner)
 {
 }
 
@@ -995,17 +994,6 @@ bool ChunkyClassLoader::Load(ChunkyClass* pData)
 		lOk = VerifyFileType(CHUNK_CLASS);
 	}
 
-	mMeshCount = -1;
-	if (lOk)
-	{
-		FileElementList lLoadList;
-		lLoadList.push_back(ChunkyFileElement(CHUNK_CLASS_MESH_COUNT, &mMeshCount));
-		lOk = AllocLoadChunkyList(lLoadList, mFile->GetSize());
-	}
-	if (lOk)
-	{
-		lOk = (mMeshCount >= 0);
-	}
 	if (lOk)
 	{
 		FileElementList lLoadList;

@@ -384,7 +384,7 @@ int ConsoleManager::OnCommand(const Lepra::String& pCommand, const Lepra::String
 		case COMMAND_LIST_ACTIVE_RESOURCES:
 		{
 			typedef Cure::ResourceManager::NameTypeList NameTypeList;
-			NameTypeList lNameTypeList = mGameManager->GetResourceManager()->QueryActiveResourceNames();
+			NameTypeList lNameTypeList = mGameManager->GetResourceManager()->QueryResourceNames();
 			mLog.Infof(_T("Currently %u active resources:"), lNameTypeList.size());
 			lNameTypeList.sort();
 			for (NameTypeList::iterator x = lNameTypeList.begin(); x != lNameTypeList.end(); ++x)

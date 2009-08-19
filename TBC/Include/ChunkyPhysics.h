@@ -33,7 +33,7 @@ public:
 		COLLISION_DETECT_ONLY,	// Only collision detection. (Used when ray-testing NPCs/avatars.) Change type to dynamic for ragdoll (when falling or dead).
 	};
 
-	ChunkyPhysics(TransformOperation pTransformOperation, PhysicsType pPhysicsType = STATIC);
+	ChunkyPhysics(TransformOperation pTransformOperation = TRANSFORM_NONE, PhysicsType pPhysicsType = STATIC);
 	virtual ~ChunkyPhysics();
 
 	void OnTick(PhysicsManager* pPhysicsManager, float pFrameTime);

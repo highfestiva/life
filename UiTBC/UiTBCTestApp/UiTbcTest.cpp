@@ -9,12 +9,12 @@
 #include "stdafx.h"
 #include <assert.h>
 #include "../../Lepra/Include/ArchiveFile.h"
+#include "../../Lepra/Include/CubicDeCasteljauSpline.h"
 #include "../../Lepra/Include/HiResTimer.h"
 #include "../../Lepra/Include/IOError.h"
 #include "../../Lepra/Include/Log.h"
 #include "../../Lepra/Include/Math.h"
 #include "../../Lepra/Include/Number.h"
-#include "../../Lepra/Include/CubicDeCasteljauSpline.h"
 #include "../../Lepra/Include/PerformanceScope.h"
 #include "../../Lepra/Include/Random.h"
 #include "../../Lepra/Include/String.h"
@@ -44,6 +44,7 @@
 #include "../Include/GUI/UiGridLayout.h"
 #include "../Include/GUI/UiTreeNode.h"
 #include "../Include/UiBasicMeshCreator.h"
+#include "../Include/UiChunkyClass.h"
 #include "../Include/UiChunkyLoader.h"
 #include "../Include/UiGraphicalModel.h"
 #include "../Include/UiOpenGLPainter.h"
@@ -55,10 +56,6 @@
 #include "../Include/UiUVMapper.h"
 #include "RotationalAgreementTest.h"
 
-#include "../../Lepra/Include/Sphere.h"
-#include "../../Lepra/Include/Cylinder.h"
-#include "../../Lepra/Include/AABB.h"
-#include "../../Lepra/Include/OBB.h"
 
 
 #ifdef LEPRA_WINDOWS
@@ -1381,6 +1378,32 @@ bool TestMeshImport(const Lepra::LogDecorator& pLog, double pShowTime)
 	return (lTestOk);
 }
 
+bool TestLoadClass(const Lepra::LogDecorator& pLog)
+{
+	Lepra::String lContext;
+	bool lTestOk = true;
+
+	Lepra::DiskFile lFile;
+	if (lTestOk)
+	{
+		lContext = _T("open file");
+		const Lepra::String lClassName = _T("tractor_01.class");
+		lTestOk = lFile.Open(lClassName, Lepra::DiskFile::MODE_READ);
+		assert(lTestOk);
+	}
+	UiTbc::ChunkyClass lClass;
+	if (lTestOk)
+	{
+		lContext = _T("load class");
+		UiTbc::ChunkyClassLoader lLoader(&lFile, false);
+		lTestOk = lLoader.Load(&lClass);
+		assert(lTestOk);
+	}
+
+	ReportTestResult(pLog, _T("LoadClass"), lContext, lTestOk);
+	return (lTestOk);
+}
+
 TerrainFunctionTest::TerrainFunctionTest(const Lepra::LogDecorator& pLog) :
 	SceneTest(pLog, _T("TerrainFunctionTest"))
 {
@@ -2362,7 +2385,6 @@ bool TestUiTbc()
 #endif // TEST_SOFTWARE_RENDERER/!TEST_SOFTWARE_RENDERER
 	{
 		LEPRA_PERFORMANCE_SCOPE("Graphics");
-
 		bool lRendererOpenedOk = false;
 		if (lTestOk)
 		{
@@ -2399,6 +2421,10 @@ bool TestUiTbc()
 		if (lTestOk)
 		{
 			lTestOk = TestMeshImport(gUiTbcLog, 4.0);
+		}
+		if (lTestOk)
+		{
+			lTestOk = TestLoadClass(gUiTbcLog);
 		}
 		if (lTestOk)
 		{
