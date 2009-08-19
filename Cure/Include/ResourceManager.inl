@@ -215,20 +215,20 @@ const Lepra::String ClassResourceBase<_Class, _ClassLoader>::GetType() const
 template<class _Class, class _ClassLoader>
 typename ClassResourceBase<_Class, _ClassLoader>::UserData ClassResourceBase<_Class, _ClassLoader>::GetUserData(const Cure::UserResource*) const
 {
-	return (GetRamData());
+	return (Parent::GetRamData());
 }
 
 template<class _Class, class _ClassLoader>
 bool ClassResourceBase<_Class, _ClassLoader>::Load()
 {
-	assert(GetRamData() == 0);
+	assert(Parent::GetRamData() == 0);
 	SetRamData(new _Class());
 	Lepra::DiskFile lFile;
-	bool lOk = lFile.Open(GetName(), Lepra::DiskFile::MODE_READ);
+	bool lOk = lFile.Open(Parent::GetName(), Lepra::DiskFile::MODE_READ);
 	if (lOk)
 	{
 		_ClassLoader lLoader(&lFile, false);
-		lOk = lLoader.Load(GetRamData());
+		lOk = lLoader.Load(Parent::GetRamData());
 	}
 	return (lOk);
 }

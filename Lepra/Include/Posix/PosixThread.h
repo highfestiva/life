@@ -36,7 +36,7 @@ private:
 
 
 
-class PosixLock: public LockBC, public CompatibleLockBC
+class PosixLock: public LockBC
 {
 public:
 	PosixLock();

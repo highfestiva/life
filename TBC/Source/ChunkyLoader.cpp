@@ -802,7 +802,7 @@ bool ChunkyPhysicsLoader::Save(const ChunkyPhysics* pPhysics)
 			Lepra::uint32 lTransform[lTransformFloatCount];
 			pPhysics->GetBoneTransformation(b).Get((float*)lTransform);
 			// Convert to network byte order.
-			for (int x = 0; x < lTransformFloatCount; ++x)
+			for (unsigned x = 0; x < lTransformFloatCount; ++x)
 			{
 				lTransform[x] = Lepra::Endian::HostToBig(lTransform[x]);
 			}
@@ -922,7 +922,7 @@ bool ChunkyPhysicsLoader::LoadElementCallback(ChunkyType pType, Lepra::uint32 pS
 				}
 			}
 			// Convert to host endian.
-			for (int x = 0; x < lTransformFloatCount; ++x)
+			for (unsigned x = 0; x < lTransformFloatCount; ++x)
 			{
 				lTransformArray[x] = Lepra::Endian::BigToHost(lTransformArray[x]);
 			}
