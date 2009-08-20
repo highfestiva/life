@@ -387,6 +387,7 @@ public:
 	void ForceFreeCache();	// Called to force immediate freeing of all resources.
 
 	size_t QueryResourceCount() const;
+	size_t QueryCachedResourceCount() const;
 	NameTypeList QueryResourceNames();
 
 	bool ExportAll(const Lepra::String& pDirectory);
@@ -426,7 +427,7 @@ private:
 	unsigned mLoaderThreadCount;
 	Lepra::MemberThread<ResourceManager> mLoaderThread;	// TODO: increase max loader thread count (put in list).
 	Lepra::Semaphore mLoadSemaphore;
-	Lepra::Lock mThreadLock;
+	mutable Lepra::Lock mThreadLock;
 	ResourceTable mActiveResourceTable;	// In use. Holds non-unique resources.
 	ResourceTable mCachedResourceTable;	// On the way out. Holds non-unique resources.
 	ResourceMapList mRequestLoadList;	// Under way to be loaded by worker thread. TODO: priority map thingie!

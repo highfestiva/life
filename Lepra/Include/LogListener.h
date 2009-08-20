@@ -101,7 +101,7 @@ protected:
 class DebuggerLogListener: public LogListener
 {
 public:
-	DebuggerLogListener(OutputFormat pFormat = FORMAT_CLASS_TIME);
+	DebuggerLogListener(OutputFormat pFormat = FORMAT_THREAD_CLASS);
 
 protected:
 	void WriteLog(const String& pFullMessage, Log::LogLevel pLevel);

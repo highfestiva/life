@@ -75,14 +75,18 @@ private:
 			mMeshResourceArray[x]->LoadUnique(pResource->GetConstResource()->GetManager(),
 				lName+_T(".mesh"),
 				UiCure::UserGeometryReferenceResource::TypeLoadCallback(this,
-					&ResourceTest::MeshLoadCallback));
+					&ResourceTest::MeshRefLoadCallback));
 		}
 	}
 	void PhysicsLoadCallback(Cure::UserPhysicsResource* pResource)
 	{
 		LoadCallback(pResource);
 	}
-	void MeshLoadCallback(UiCure::UserGeometryReferenceResource* pResource)
+	void MeshRefLoadCallback(UiCure::UserGeometryReferenceResource* pResource)
+	{
+		LoadCallback(pResource);
+	}
+	void MeshLoadCallback(UiCure::UserUiTypeResource<UiCure::GeometryResource>* pResource)
 	{
 		LoadCallback(pResource);
 	}
@@ -260,6 +264,24 @@ bool ResourceTest::TestStress()
 	Lepra::String lContext;
 	bool lTestOk = true;
 
+	class TickRM
+	{
+	public:
+		inline TickRM(Cure::ResourceManager* pRM, double pSleepTime = 0.001)
+		{
+			const int lTickCount = 2;
+			for (int x = 0; x < lTickCount; ++x)
+			{
+				pRM->Tick();
+			}
+			Lepra::Thread::Sleep(pSleepTime);
+			for (int x = 0; x < lTickCount; ++x)
+			{
+				pRM->Tick();
+			}
+		}
+	};
+
 	if (lTestOk)
 	{
 		lContext = _T("no loaded resources");
@@ -269,12 +291,92 @@ bool ResourceTest::TestStress()
 
 	if (lTestOk)
 	{
+		lContext = _T("stress load/free unique");
+		for (int x = 0; x <= 0x100; ++x)
+		{
+			UiCure::UserGeometryReferenceResource* lMesh0 =
+				new UiCure::UserGeometryReferenceResource(mUiManager, UiCure::GeometryOffset(0));
+			UiCure::UserGeometryReferenceResource* lMesh1 =
+				new UiCure::UserGeometryReferenceResource(mUiManager, UiCure::GeometryOffset(0));
+			lMesh0->LoadUnique(mResourceManager, _T(":tractor_01_rear_wheel0.mesh"),
+				UiCure::UserGeometryReferenceResource::TypeLoadCallback(this,
+					&ResourceTest::MeshRefLoadCallback));
+			lMesh1->LoadUnique(mResourceManager, _T(":tractor_01_rear_wheel0.mesh"),
+				UiCure::UserGeometryReferenceResource::TypeLoadCallback(this,
+					&ResourceTest::MeshRefLoadCallback));
+			delete (lMesh1);
+			delete (lMesh0);
+			if ((x&7) == 0)
+			{
+				TickRM lTick(mResourceManager);
+				const size_t lCount = mResourceManager->QueryResourceCount();
+				lTestOk = (lCount <= 2);
+				assert(lTestOk);
+			}
+		}
+	}
+
+	if (lTestOk)
+	{
+		lContext = _T("caching 1");
+		lTestOk = (mResourceManager->QueryCachedResourceCount() == 1);
+		assert(lTestOk);
+	}
+	if (lTestOk)
+	{
+		lContext = _T("clearing cache 1");
+		mResourceManager->ForceFreeCache();
+		lTestOk = (mResourceManager->QueryResourceCount() == 0);
+		assert(lTestOk);
+	}
+
+	if (lTestOk)
+	{
+		lContext = _T("stress load/free mass");
+		for (int x = 0; x <= 0x100; ++x)
+		{
+			typedef UiCure::UserUiTypeResource<UiCure::GeometryResource> UserMesh;
+			UserMesh* lMesh0 = new UserMesh(mUiManager);
+			UserMesh* lMesh1 = new UserMesh(mUiManager);
+			lMesh0->Load(mResourceManager, _T("tractor_01_rear_wheel0.mesh"),
+				UserMesh::TypeLoadCallback(this, &ResourceTest::MeshLoadCallback));
+			lMesh1->Load(mResourceManager, _T("tractor_01_rear_wheel0.mesh"),
+				UserMesh::TypeLoadCallback(this, &ResourceTest::MeshLoadCallback));
+			delete (lMesh1);
+			delete (lMesh0);
+			if ((x&7) == 0)
+			{
+				TickRM lTick(mResourceManager);
+				const size_t lCount = mResourceManager->QueryResourceCount();
+				lTestOk = (lCount <= 1);
+				assert(lTestOk);
+			}
+		}
+	}
+
+	if (lTestOk)
+	{
+		lContext = _T("caching 2");
+		lTestOk = (mResourceManager->QueryCachedResourceCount() == 1);
+		assert(lTestOk);
+	}
+	if (lTestOk)
+	{
+		lContext = _T("clearing cache 2");
+		mResourceManager->ForceFreeCache();
+		lTestOk = (mResourceManager->QueryResourceCount() == 0);
+		assert(lTestOk);
+	}
+
+	const int lLoopCount = 100;
+	const int lAddCount = 10;
+	const int lDecCount = lAddCount/3;
+
+	if (lTestOk)
+	{
 		lContext = _T("stressing unique load");
 		typedef std::list<UiCure::UserClassResource*> ClassList;
 		ClassList lResources;
-		const int lLoopCount = 100;
-		const int lAddCount = 10;
-		const int lDecCount = lAddCount/3;
 		for (int x = 0; x < lLoopCount; ++x)
 		{
 			for (int y = 0; y < lAddCount; ++y)
@@ -295,25 +397,20 @@ bool ResourceTest::TestStress()
 				delete (*u);
 				lResources.erase(--u.base());
 			}
-			lTestOk = false;
-			for (int z = 0; !lTestOk && z < 1000; ++z)
-			{
-				Lepra::Thread::Sleep(0.01);
-				mResourceManager->Tick();
-				c = mResourceManager->QueryResourceCount();
-				lTestOk = (c == (size_t)((x+1)*(lAddCount-lDecCount)));
-			}
+			TickRM lTick(mResourceManager);
+			c = mResourceManager->QueryResourceCount();
+			lTestOk = (c == (size_t)((x+1)*(lAddCount-lDecCount)));
 			assert(lTestOk);
 		}
 		lTestOk = (mResourceManager->QueryResourceCount() == lLoopCount*(lAddCount-lAddCount/3));
 		assert(lTestOk);
 		if (lTestOk)
 		{
+			lContext = _T("unique load completeness");
 			lTestOk = false;
 			for (int z = 0; !lTestOk && z < 100; ++z)
 			{
-				Lepra::Thread::Sleep(0.1);
-				mResourceManager->Tick();
+				TickRM lTick(mResourceManager, 0.1);
 
 				lTestOk = true;
 				ClassList::iterator y = lResources.begin();
@@ -321,17 +418,18 @@ bool ResourceTest::TestStress()
 				for (; lTestOk && y != lResources.end(); ++y, ++u)
 				{
 					lTestOk = ((*y)->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE);
-					//if (!lTestOk)
-					//{
-					//	mLog.Warningf(_T("Failed on the %ith element; load state = %i."),
-					//		u, (*y)->GetLoadState());
-					//}
+					/*if (!lTestOk)
+					{
+						mLog.Warningf(_T("Failed on the %ith element; load state = %i."),
+							u, (*y)->GetLoadState());
+					}*/
 				}
 			}
 			assert(lTestOk);
 		}
 		if (lTestOk)
 		{
+			lContext = _T("unique load clear");
 			ClassList::iterator y = lResources.begin();
 			for (; y != lResources.end(); ++y)
 			{
@@ -360,11 +458,11 @@ bool ResourceTest::TestStress()
 					new UiCure::UserGeometryReferenceResource(mUiManager, UiCure::GeometryOffset(0));
 				lMesh->LoadUnique(mResourceManager, _T("tractor_01_front_wheel0.mesh"),
 					UiCure::UserGeometryReferenceResource::TypeLoadCallback(this,
-						&ResourceTest::MeshLoadCallback));
+						&ResourceTest::MeshRefLoadCallback));
 				lResources.push_back(lMesh);
 			}
-			//size_t c = mResourceManager->QueryResourceCount();
-			//assert(c == (size_t)(x*(lAddCount-lDecCount)+lAddCount+1));
+			size_t c = mResourceManager->QueryResourceCount();
+			assert(c == (size_t)(x*(lAddCount-lDecCount)+lAddCount+1));
 			for (int z = 0; z < lDecCount; ++z)
 			{
 				int lDropIndex = Lepra::Random::GetRandomNumber()%lAddCount;
@@ -374,51 +472,31 @@ bool ResourceTest::TestStress()
 				delete (*u);
 				lResources.erase(--u.base());
 			}
-			mResourceManager->Tick();
-			//c = mResourceManager->QueryResourceCount();
-			//assert(c == (size_t)((x+1)*(lAddCount-lDecCount)+1));
-		}
-		if (lTestOk)
-		{
-			lTestOk = false;
-			for (int z = 0; !lTestOk && z < 500; ++z)
-			{
-				Lepra::Thread::Sleep(0.1);
-				mResourceManager->Tick();
-				lTestOk = (mResourceManager->QueryResourceCount() == lLoopCount*(lAddCount-lDecCount)+1);
-			}
-		}
-		assert(lTestOk);
-		if (lTestOk)
-		{
-			lTestOk = (gResourceLoadCount == lLoopCount*lAddCount+1);
+			TickRM lTick(mResourceManager);
+			c = mResourceManager->QueryResourceCount();
+			lTestOk = (c == (size_t)((x+1)*(lAddCount-lDecCount)+1));
 			assert(lTestOk);
 		}
 		if (lTestOk)
 		{
-			lTestOk = false;
-			for (int z = 0; !lTestOk && z < 100; ++z)
+			lContext = _T("mass load completeness");
+			TickRM lTick(mResourceManager, 0.1);
+			MeshList::iterator y = lResources.begin();
+			int u = 0;
+			for (; lTestOk && y != lResources.end(); ++y, ++u)
 			{
-				Lepra::Thread::Sleep(0.1);
-				mResourceManager->Tick();
-
-				lTestOk = true;
-				MeshList::iterator y = lResources.begin();
-				int u = 0;
-				for (; lTestOk && y != lResources.end(); ++y, ++u)
+				lTestOk = ((*y)->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE);
+				if (!lTestOk)
 				{
-					lTestOk = ((*y)->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE);
-					//if (!lTestOk)
-					//{
-					//	mLog.Warningf(_T("Failed on the %ith element; load state = %i."),
-					//		u, (*y)->GetLoadState());
-					//}
+					mLog.Warningf(_T("Failed on the %ith element; load state = %i."),
+						u, (*y)->GetLoadState());
 				}
 			}
 			assert(lTestOk);
 		}
 		if (lTestOk)
 		{
+			lContext = _T("mass ref clear");
 			MeshList::iterator y = lResources.begin();
 			for (; y != lResources.end(); ++y)
 			{
@@ -430,6 +508,7 @@ bool ResourceTest::TestStress()
 		}
 		if (lTestOk)
 		{
+			lContext = _T("mass cache clear");
 			mResourceManager->ForceFreeCache();
 			lTestOk = (mResourceManager->QueryResourceCount() == 0);
 			assert(lTestOk);
