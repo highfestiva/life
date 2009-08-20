@@ -62,7 +62,10 @@ ContextObject::~ContextObject()
 {
 	log_volatile(mLog.Debugf(_T("Destructing context object %s."), mClassId.c_str()));
 
-	mManager->RemoveObject(this);
+	if (mManager)
+	{
+		mManager->RemoveObject(this);
+	}
 
 	// Detach from other context objects.
 	{
@@ -74,7 +77,7 @@ ContextObject::~ContextObject()
 	}
 
 	// Removes bodies from manager, then destroys all physical stuff.
-	if (mStructure)
+	if (mManager && mStructure)
 	{
 		const int lBoneCount = mStructure->GetBoneCount();
 		for (int x = 0; x < lBoneCount; ++x)
@@ -95,7 +98,10 @@ ContextObject::~ContextObject()
 		mAttributeArray.clear();
 	}
 
-	mManager->FreeGameObjectId(mNetworkObjectType, mInstanceId);
+	if (mManager)
+	{
+		mManager->FreeGameObjectId(mNetworkObjectType, mInstanceId);
+	}
 	mInstanceId = 0;
 }
 
@@ -108,7 +114,7 @@ ContextManager* ContextObject::GetManager() const
 
 void ContextObject::SetManager(ContextManager* pManager)
 {
-	assert(mManager == 0);
+	assert(mManager == 0 || pManager == 0);
 	mManager = pManager;
 }
 

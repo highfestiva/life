@@ -110,13 +110,13 @@ bool CppContextObject::StartLoadGraphics(Cure::UserResource* pParentResource)
 		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(4)));
 		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(5)));
 		mMeshResourceArray[0]->SetParentResource(pParentResource);
-		mMeshResourceArray[0]->Load(lResourceManager, lIdClass+_T("_body_mesh"),
+		mMeshResourceArray[0]->LoadUnique(lResourceManager, lIdClass+_T("_body_mesh"),
 			UiCure::UserGeometryReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh));
 		mMeshResourceArray[1]->SetParentResource(pParentResource);
-		mMeshResourceArray[1]->Load(lResourceManager, lIdClass+_T("_top_mesh"),
+		mMeshResourceArray[1]->LoadUnique(lResourceManager, lIdClass+_T("_top_mesh"),
 			UiCure::UserGeometryReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh));
 		mMeshResourceArray[2]->SetParentResource(pParentResource);
-		mMeshResourceArray[2]->Load(lResourceManager, lIdClass+_T("car_antenna_mesh"),
+		mMeshResourceArray[2]->LoadUnique(lResourceManager, lIdClass+_T("car_antenna_mesh"),
 			UiCure::UserGeometryReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh));
 
 		Lepra::StringUtility::StringVector lIdClassArray = Lepra::StringUtility::Split(lIdClass, _T(":"), 1);
@@ -128,7 +128,7 @@ bool CppContextObject::StartLoadGraphics(Cure::UserResource* pParentResource)
 			Lepra::String lWheelClass = lIdClassArray[0]+_T("_")+
 				Lepra::StringUtility::IntToString(x, 10)+_T(":")+lIdClassArray[1]+_T("_wheel_mesh");
 			mMeshResourceArray[x+lWheelBase]->SetParentResource(pParentResource);
-			mMeshResourceArray[x+lWheelBase]->Load(lResourceManager, lWheelClass,
+			mMeshResourceArray[x+lWheelBase]->LoadUnique(lResourceManager, lWheelClass,
 				UiCure::UserGeometryReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh));
 		}
 	}
@@ -144,13 +144,13 @@ bool CppContextObject::StartLoadGraphics(Cure::UserResource* pParentResource)
 		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(4)));
 		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(5)));
 		mMeshResourceArray[0]->SetParentResource(pParentResource);
-		mMeshResourceArray[0]->Load(lResourceManager, lIdClass+_T("_body_mesh"),
+		mMeshResourceArray[0]->LoadUnique(lResourceManager, lIdClass+_T("_body_mesh"),
 			UiCure::UserGeometryReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh));
 		mMeshResourceArray[1]->SetParentResource(pParentResource);
-		mMeshResourceArray[1]->Load(lResourceManager, lIdClass+_T("_top_mesh"),
+		mMeshResourceArray[1]->LoadUnique(lResourceManager, lIdClass+_T("_top_mesh"),
 			UiCure::UserGeometryReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh));
 		mMeshResourceArray[2]->SetParentResource(pParentResource);
-		mMeshResourceArray[2]->Load(lResourceManager, lIdClass+_T("car_antenna_mesh"),
+		mMeshResourceArray[2]->LoadUnique(lResourceManager, lIdClass+_T("car_antenna_mesh"),
 			UiCure::UserGeometryReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh));
 
 		Lepra::StringUtility::StringVector lIdClassArray = Lepra::StringUtility::Split(lIdClass, _T(":"), 1);
@@ -162,7 +162,7 @@ bool CppContextObject::StartLoadGraphics(Cure::UserResource* pParentResource)
 			Lepra::String lWheelClass = lIdClassArray[0]+_T("_")+
 				Lepra::StringUtility::IntToString(x, 10)+_T(":")+lIdClassArray[1]+_T("_wheel_mesh");
 			mMeshResourceArray[x+lWheelBase]->SetParentResource(pParentResource);
-			mMeshResourceArray[x+lWheelBase]->Load(lResourceManager, lWheelClass,
+			mMeshResourceArray[x+lWheelBase]->LoadUnique(lResourceManager, lWheelClass,
 				UiCure::UserGeometryReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh));
 		}
 	}
@@ -192,10 +192,10 @@ bool CppContextObject::StartLoadGraphics(Cure::UserResource* pParentResource)
 		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(11, lBucketFloorOffset)));
 
 		mMeshResourceArray[0]->SetParentResource(pParentResource);
-		mMeshResourceArray[0]->Load(lResourceManager, lIdClass+_T("_body_mesh"),
+		mMeshResourceArray[0]->LoadUnique(lResourceManager, lIdClass+_T("_body_mesh"),
 			UiCure::UserGeometryReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh));
 		mMeshResourceArray[1]->SetParentResource(pParentResource);
-		mMeshResourceArray[1]->Load(lResourceManager, lIdClass+_T("_top_mesh"),
+		mMeshResourceArray[1]->LoadUnique(lResourceManager, lIdClass+_T("_top_mesh"),
 			UiCure::UserGeometryReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh));
 
 		Lepra::StringUtility::StringVector lIdClassArray = Lepra::StringUtility::Split(lIdClass, _T(":"), 1);
@@ -208,28 +208,28 @@ bool CppContextObject::StartLoadGraphics(Cure::UserResource* pParentResource)
 			Lepra::String lWheelClass = lIdClassArray[0]+_T("_")+
 				Lepra::StringUtility::IntToString(x-lWheelBase, 10)+_T(":")+_T("monster_001_wheel_mesh");
 			mMeshResourceArray[x]->SetParentResource(pParentResource);
-			mMeshResourceArray[x]->Load(lResourceManager, lWheelClass,
+			mMeshResourceArray[x]->LoadUnique(lResourceManager, lWheelClass,
 				UiCure::UserGeometryReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh));
 		}
 
 		mMeshResourceArray[x]->SetParentResource(pParentResource);
-		mMeshResourceArray[x]->Load(lResourceManager, lIdClass+_T("_boom1_mesh"),
+		mMeshResourceArray[x]->LoadUnique(lResourceManager, lIdClass+_T("_boom1_mesh"),
 			UiCure::UserGeometryReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh));
 		++x;
 		mMeshResourceArray[x]->SetParentResource(pParentResource);
-		mMeshResourceArray[x]->Load(lResourceManager, lIdClass+_T("_boom2_mesh"),
+		mMeshResourceArray[x]->LoadUnique(lResourceManager, lIdClass+_T("_boom2_mesh"),
 			UiCure::UserGeometryReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh));
 		++x;
 		mMeshResourceArray[x]->SetParentResource(pParentResource);
-		mMeshResourceArray[x]->Load(lResourceManager, lIdClass+_T("_arm_mesh"),
+		mMeshResourceArray[x]->LoadUnique(lResourceManager, lIdClass+_T("_arm_mesh"),
 			UiCure::UserGeometryReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh));
 		++x;
 		mMeshResourceArray[x]->SetParentResource(pParentResource);
-		mMeshResourceArray[x]->Load(lResourceManager, lIdClass+_T("_bucket_back_mesh"),
+		mMeshResourceArray[x]->LoadUnique(lResourceManager, lIdClass+_T("_bucket_back_mesh"),
 			UiCure::UserGeometryReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh));
 		++x;
 		mMeshResourceArray[x]->SetParentResource(pParentResource);
-		mMeshResourceArray[x]->Load(lResourceManager, lIdClass+_T("_bucket_floor_mesh"),
+		mMeshResourceArray[x]->LoadUnique(lResourceManager, lIdClass+_T("_bucket_floor_mesh"),
 			UiCure::UserGeometryReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh));
 		++x;
 	}
@@ -244,25 +244,25 @@ bool CppContextObject::StartLoadGraphics(Cure::UserResource* pParentResource)
 		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(5, lWireTransform)));
 		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(6, lWireTransform)));
 		mMeshResourceArray[0]->SetParentResource(pParentResource);
-		mMeshResourceArray[0]->Load(lResourceManager, lIdClass+_T("_tower_mesh"),
+		mMeshResourceArray[0]->LoadUnique(lResourceManager, lIdClass+_T("_tower_mesh"),
 			UiCure::UserGeometryReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh));
 		mMeshResourceArray[1]->SetParentResource(pParentResource);
-		mMeshResourceArray[1]->Load(lResourceManager, lIdClass+_T("_jib_mesh0"),
+		mMeshResourceArray[1]->LoadUnique(lResourceManager, lIdClass+_T("_jib_mesh0"),
 			UiCure::UserGeometryReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh));
 		mMeshResourceArray[2]->SetParentResource(pParentResource);
-		mMeshResourceArray[2]->Load(lResourceManager, lIdClass+_T("_wire_mesh1"),
+		mMeshResourceArray[2]->LoadUnique(lResourceManager, lIdClass+_T("_wire_mesh1"),
 			UiCure::UserGeometryReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh));
 		mMeshResourceArray[3]->SetParentResource(pParentResource);
-		mMeshResourceArray[3]->Load(lResourceManager, lIdClass+_T("_wire_mesh2"),
+		mMeshResourceArray[3]->LoadUnique(lResourceManager, lIdClass+_T("_wire_mesh2"),
 			UiCure::UserGeometryReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh));
 		mMeshResourceArray[4]->SetParentResource(pParentResource);
-		mMeshResourceArray[4]->Load(lResourceManager, lIdClass+_T("_wire_mesh3"),
+		mMeshResourceArray[4]->LoadUnique(lResourceManager, lIdClass+_T("_wire_mesh3"),
 			UiCure::UserGeometryReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh));
 		mMeshResourceArray[5]->SetParentResource(pParentResource);
-		mMeshResourceArray[5]->Load(lResourceManager, lIdClass+_T("_wire_mesh4"),
+		mMeshResourceArray[5]->LoadUnique(lResourceManager, lIdClass+_T("_wire_mesh4"),
 			UiCure::UserGeometryReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh));
 		mMeshResourceArray[6]->SetParentResource(pParentResource);
-		mMeshResourceArray[6]->Load(lResourceManager, lIdClass+_T("_hook_mesh"),
+		mMeshResourceArray[6]->LoadUnique(lResourceManager, lIdClass+_T("_hook_mesh"),
 			UiCure::UserGeometryReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh));
 	}
 	else if (GetClassId().find(_T("ground_002")) != Lepra::String::npos)
@@ -274,29 +274,29 @@ bool CppContextObject::StartLoadGraphics(Cure::UserResource* pParentResource)
 		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(4)));
 		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(5)));
 		mMeshResourceArray[0]->SetParentResource(pParentResource);
-		mMeshResourceArray[0]->Load(lResourceManager, lIdClass+_T("_0_mesh"),
+		mMeshResourceArray[0]->LoadUnique(lResourceManager, lIdClass+_T("_0_mesh"),
 			UiCure::UserGeometryReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh));
 		mMeshResourceArray[1]->SetParentResource(pParentResource);
-		mMeshResourceArray[1]->Load(lResourceManager, lIdClass+_T("_1_mesh"),
+		mMeshResourceArray[1]->LoadUnique(lResourceManager, lIdClass+_T("_1_mesh"),
 			UiCure::UserGeometryReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh));
 		mMeshResourceArray[2]->SetParentResource(pParentResource);
-		mMeshResourceArray[2]->Load(lResourceManager, lIdClass+_T("_2_mesh"),
+		mMeshResourceArray[2]->LoadUnique(lResourceManager, lIdClass+_T("_2_mesh"),
 			UiCure::UserGeometryReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh));
 		mMeshResourceArray[3]->SetParentResource(pParentResource);
-		mMeshResourceArray[3]->Load(lResourceManager, lIdClass+_T("_3_mesh"),
+		mMeshResourceArray[3]->LoadUnique(lResourceManager, lIdClass+_T("_3_mesh"),
 			UiCure::UserGeometryReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh));
 		mMeshResourceArray[4]->SetParentResource(pParentResource);
-		mMeshResourceArray[4]->Load(lResourceManager, lIdClass+_T("_4_mesh"),
+		mMeshResourceArray[4]->LoadUnique(lResourceManager, lIdClass+_T("_4_mesh"),
 			UiCure::UserGeometryReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh));
 		mMeshResourceArray[5]->SetParentResource(pParentResource);
-		mMeshResourceArray[5]->Load(lResourceManager, lIdClass+_T("_5_mesh"),
+		mMeshResourceArray[5]->LoadUnique(lResourceManager, lIdClass+_T("_5_mesh"),
 			UiCure::UserGeometryReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh));
 	}
 	else
 	{
 		mMeshResourceArray.push_back(new UserGeometryReferenceResource(mUiManager, GeometryOffset(0)));
 		mMeshResourceArray.back()->SetParentResource(pParentResource);
-		mMeshResourceArray.back()->Load(lResourceManager, lIdClass+_T("_mesh"),
+		mMeshResourceArray.back()->LoadUnique(lResourceManager, lIdClass+_T("_mesh"),
 			UiCure::UserGeometryReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh));
 	}
 	// TODO: not everybody should load the texture, not everybody should load *A* texture. Load from group file definition.

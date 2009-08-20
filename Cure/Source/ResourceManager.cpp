@@ -44,11 +44,6 @@ void UserResource::SafeRelease(ResourceManager* pManager)
 
 void UserResource::SetParentResource(UserResource* pParentResource)
 {
-	if (mResource)
-	{
-		mResource->GetManager()->AssertIsLocked();
-	}
-
 	if (pParentResource)
 	{
 		assert(!mParentResource);
@@ -68,8 +63,6 @@ void UserResource::SetParentResource(UserResource* pParentResource)
 
 void UserResource::CallbackParent(ResourceLoadState pChildLoadState)
 {
-	mResource->GetManager()->AssertIsLocked();
-
 	UserResource* lParent = mParentResource;
 	mParentResource = 0;
 	if (lParent)
@@ -144,8 +137,6 @@ Resource::Resource(ResourceManager* pManager, const Lepra::String& pName):
 
 Resource::~Resource()
 {
-	mManager->AssertIsLocked();
-
 	mState = RESOURCE_LOAD_ERROR;
 	log_volatile(mLog.Debugf((_T("Deleting resource ")+mName).c_str(), Lepra::Log::LEVEL_TRACE));
 	mManager = 0;
@@ -178,23 +169,28 @@ const Lepra::String& Resource::GetName() const
 
 int Resource::Reference()
 {
-	mManager->AssertIsLocked();
-
 	++mReferenceCount;
 	return (mReferenceCount);
 }
 
 int Resource::Dereference()
 {
-	mManager->AssertIsLocked();
-
 	--mReferenceCount;
+	assert(mReferenceCount >= 0);
 	return (mReferenceCount);
 }
 
 int Resource::GetReferenceCount()
 {
 	return (mReferenceCount);
+}
+
+void Resource::Resume()
+{
+}
+
+void Resource::Suspend()
+{
 }
 
 bool Resource::IsUnique() const
@@ -219,14 +215,13 @@ void Resource::SetLoadState(ResourceLoadState pState)
 
 void Resource::AddCaller(UserResource* pUserResource, const UserResource::LoadCallback& pCallback)
 {
-	mManager->AssertIsLocked();
-
+	Lepra::ScopeLock lMutex(&mMutex);
 	mLoadCallbackList.push_back(UserResourceCallbackInfo(pUserResource, pCallback));
 }
 
 void Resource::RemoveCaller(UserResource* pUserResource)
 {
-	mManager->AssertIsLocked();
+	Lepra::ScopeLock lMutex(&mMutex);
 
 	CallbackList::iterator x = mLoadCallbackList.begin();
 	while (x != mLoadCallbackList.end())
@@ -252,7 +247,7 @@ ResourceLoadState Resource::PostProcess()
 
 void Resource::UserPostProcess()
 {
-	mManager->AssertIsLocked();
+	Lepra::ScopeLock lMutex(&mMutex);
 
 	CallbackList::iterator x = mLoadCallbackList.begin();
 	for (; x != mLoadCallbackList.end(); ++x)
@@ -264,7 +259,7 @@ void Resource::UserPostProcess()
 
 void Resource::Callback()
 {
-	mManager->AssertIsLocked();
+	Lepra::ScopeLock lMutex(&mMutex);
 
 	Reference();	// Is here to stop a callback from dereferencing+deleting this resource.
 
@@ -298,7 +293,6 @@ void Resource::Callback()
 
 void Resource::FreeDiversified(UserResource*)
 {
-	mManager->AssertIsLocked();
 }
 
 UserResource* Resource::GetFirstUserResource() const
@@ -315,6 +309,8 @@ void Resource::operator=(const Resource&)
 {
 	assert(false);
 }
+
+Lepra::Lock Resource::mMutex;
 
 LOG_CLASS_DEFINE(GENERAL_RESOURCES, Resource);
 
@@ -341,6 +337,7 @@ PhysicsResource::UserData PhysicsResource::GetUserData(const Cure::UserResource*
 
 bool PhysicsResource::Load()
 {
+	assert(IsUnique());
 	assert(GetRamData() == 0);
 	SetRamData(new TBC::ChunkyPhysics());
 	Lepra::DiskFile lFile;
@@ -394,6 +391,7 @@ bool ContextObjectResource::Load()
 {
 	log_atrace("Loading context object (self).");
 
+	assert(!IsUnique());
 	assert(GetRamData() == 0);
 	ContextObject* lObject = GetManager()->GetContextObjectFactory()->Create(GetName());
 	SetRamData(lObject);
@@ -444,6 +442,7 @@ bool PhysicalTerrainResource::Load()
 {
 	log_atrace("Loading actual TBC::TerrainPatch.");
 
+	assert(!IsUnique());
 	// TODO: parse constants out of resource name string.
 	const TerrainPatchLoader::PatchArea lArea(0, 0, 0, 0);
 	const float lLod = 0;
@@ -523,8 +522,7 @@ void ResourceManager::StopClear()
 	}
 	mResourceSafeLookup.clear();
 
-	// These just contain pointers, they are not data owners.
-	// Therefore no delete is done.
+	// These just contain pointers, they are not data owners. Thus no delete required.
 	mRequestLoadList.RemoveAll();
 	mLoadedList.RemoveAll();
 }
@@ -563,32 +561,35 @@ void ResourceManager::SetTerrainFunctionManager(TerrainFunctionManager* pTerrain
 
 void ResourceManager::Load(const Lepra::String& pName, UserResource* pUserResource, UserResource::LoadCallback pCallback)
 {
-	bool lMustLoad = true;
-	Lepra::ScopeLock lLock(&mThreadLock);
-	Resource* lResource = QueryCachedResource(pName, pUserResource, lMustLoad);
-	pUserResource->SetResource(lResource);
-	lResource->AddCaller(pUserResource, pCallback);
-	if (lMustLoad)
+	Resource* lResource;
 	{
-		DoLoad(lResource);
+		bool lMustLoad = true;
+		Lepra::ScopeLock lLock(&mThreadLock);
+		lResource = GetAddCachedResource(pName, pUserResource, lMustLoad);
+		pUserResource->SetResource(lResource);
+		lResource->AddCaller(pUserResource, pCallback);
+		if (lMustLoad)
+		{
+			StartLoad(lResource);
+			return;	// TRICKY: RAII simplifies.
+		}
+	}
+
+	// Resource is already loaded.
+	if (lResource->GetLoadState() == RESOURCE_LOAD_IN_PROGRESS)
+	{
+		// Loader thread is going to put this object in the request load list when it's done.
+		// We have already placed the caller in the list, so we don't need to do anything else.
 	}
 	else
 	{
-		if (lResource->GetLoadState() == RESOURCE_LOAD_IN_PROGRESS)
+		// The object is already loaded by some previous call. All we need to to is to inform the
+		// current caller of resource load result.
+		if (lResource->GetLoadState() == RESOURCE_LOAD_COMPLETE)
 		{
-			// Loader thread is going to put this object in the request load list when it's done.
-			// We have already placed the caller in the list, so we don't need to do anything else.
+			lResource->UserPostProcess();
 		}
-		else
-		{
-			// The object is already loaded by some previous call. All we need to to is to inform the
-			// current caller of resource load result.
-			if (lResource->GetLoadState() == RESOURCE_LOAD_COMPLETE)
-			{
-				lResource->UserPostProcess();
-			}
-			lResource->Callback();
-		}
+		lResource->Callback();
 	}
 }
 
@@ -597,10 +598,10 @@ void ResourceManager::LoadUnique(const Lepra::String& pName, UserResource* pUser
 	Lepra::ScopeLock lLock(&mThreadLock);
 	Resource* lResource = CreateResource(pUserResource, pName);
 	lResource->SetIsUnique(true);
-	lResource->Reference();
 	pUserResource->SetResource(lResource);
 	lResource->AddCaller(pUserResource, pCallback);
-	DoLoad(lResource);
+	lResource->Reference();
+	StartLoad(lResource);
 }
 
 bool ResourceManager::IsCreated(const Lepra::String& pName) const
@@ -629,17 +630,36 @@ void ResourceManager::Release(Resource* pResource)
 {
 	if (pResource->Dereference() <= 0)
 	{
+		Lepra::ScopeLock lMutex(&mThreadLock);
+
 		if (!pResource->IsUnique())
 		{
 			mActiveResourceTable.Remove(pResource->GetName());
-			// Resource dropped, place it "on the way out" of the system.
-			log_volatile(mLog.Debug(_T("Resource ")+pResource->GetName()+_T(" dereferenced. Placed in cache.")));
-			mCachedResourceTable.Insert(pResource->GetName(), pResource);
+			if (pResource->GetLoadState() == RESOURCE_LOAD_COMPLETE)
+			{
+				// A completely loaded resource dropped, place it "on the way out" of the system.
+				mCachedResourceTable.Insert(pResource->GetName(), pResource);
+				log_volatile(mLog.Debug(_T("Loaded resource ")+pResource->GetName()+_T(" dereferenced. Placed in cache.")));
+				pResource->Suspend();
+			}
+			else
+			{
+				if (PrepareRemoveInLoadProgress(pResource))
+				{
+					log_volatile(mLog.Debug(_T("Incomplete resource ")+pResource->GetName()+_T(" dereferenced. Not cached - deleted immediately.")));
+					assert(mRequestLoadList.Find(pResource) == mRequestLoadList.End());
+					DeleteResource(pResource);
+				}
+				else
+				{
+					log_volatile(mLog.Debug(_T("Currently loading resource ")+pResource->GetName()+_T(" dereferenced. Not cached - will be deleted immediately after loader thread is done.")));
+					assert(mRequestLoadList.Find(pResource) == mRequestLoadList.End());
+				}
+			}
 		}
 		else
 		{
-			Lepra::ScopeLock lLock(&mThreadLock);
-			if (PrepareDeleteInLoadProgress(pResource))
+			if (PrepareRemoveInLoadProgress(pResource))
 			{
 				log_volatile(mLog.Debug(_T("Resource ")+pResource->GetName()+_T(" (unique) dereferenced. Deleted immediately.")));
 				assert(mRequestLoadList.Find(pResource) == mRequestLoadList.End());
@@ -648,7 +668,7 @@ void ResourceManager::Release(Resource* pResource)
 			else
 			{
 				log_volatile(mLog.Debug(_T("Resource ")+pResource->GetName()+_T(" (unique) dereferenced. Will be deleted immediately after loader thread is done.")));
-				assert(mRequestLoadList.Find(pResource) != mRequestLoadList.End());
+				assert(mRequestLoadList.Find(pResource) == mRequestLoadList.End());
 			}
 		}
 	}
@@ -674,9 +694,19 @@ void ResourceManager::ForceFreeCache()
 {
 	Lepra::ScopeLock lLock(&mThreadLock);
 	// TODO: optimize by keeping objects in cache for a while!
+
+	mLog.AHeadline("ForceFreeCache...");
+	ResourceTable::Iterator x = mCachedResourceTable.First();
+	for (; x != mCachedResourceTable.End(); ++x)
+	{
+		mLog.Headlinef(_T("  - %s @ %p."), (*x)->GetName().c_str(), *x);
+	}
+	mLog.AHeadline("---------------");
 	while (!mCachedResourceTable.IsEmpty())
 	{
 		ResourceTable::Iterator x = mCachedResourceTable.First();
+		mLog.Headlinef(_T("  %p:"), *x);
+		mLog.Headlinef(_T("  - %s."), (*x)->GetName().c_str());
 		Resource* lResource = *x;
 		assert(mRequestLoadList.Find(lResource) == mRequestLoadList.End());
 		mCachedResourceTable.Remove(x);
@@ -722,7 +752,7 @@ bool ResourceManager::ExportAll(const Lepra::String& pDirectory)
 
 
 
-Resource* ResourceManager::QueryCachedResource(const Lepra::String& pName, UserResource* pUserResource, bool& pMustLoad)
+Resource* ResourceManager::GetAddCachedResource(const Lepra::String& pName, UserResource* pUserResource, bool& pMustLoad)
 {
 	pMustLoad = false;
 	Resource* lResource = mActiveResourceTable.FindObject(pName);
@@ -735,6 +765,7 @@ Resource* ResourceManager::QueryCachedResource(const Lepra::String& pName, UserR
 			mCachedResourceTable.Remove(lResource->GetName());
 			assert(mActiveResourceTable.Find(lResource->GetName()) == mActiveResourceTable.End());
 			mActiveResourceTable.Insert(lResource->GetName(), lResource);
+			lResource->Resume();
 		}
 	}
 	if (!lResource)
@@ -767,11 +798,12 @@ Resource* ResourceManager::QueryCachedResource(const Lepra::String& pName, UserR
 	return (lResource);
 }
 
-void ResourceManager::DoLoad(Resource* pResource)
+void ResourceManager::StartLoad(Resource* pResource)
 {
-	AssertIsLocked();
+	AssertIsMutexOwner();
 
 	// Pass on to loader thread.
+	assert(pResource->GetReferenceCount() > 0);
 	pResource->SetLoadState(RESOURCE_LOAD_IN_PROGRESS);
 	assert(mRequestLoadList.GetCount() < 10000);	// Just run GetCount() to validate internal integrity.
 	const Lepra::String& lName = pResource->GetName();
@@ -785,13 +817,12 @@ void ResourceManager::DoLoad(Resource* pResource)
 
 void ResourceManager::InjectResourceLoop()
 {
-	Lepra::ScopeLock lLock(&mThreadLock);
 	// Perhaps-TODO: measure time. This method should exit when time is up.
 	// Such a functionality would give a more stable frame rate, without horrible
 	// dips from the resource system.
 	ResourceMapList lInjectList;
 	{
-		//Lepra::ScopeLock lLock(&mThreadLock);
+		Lepra::ScopeLock lLock(&mThreadLock);
 		if (mLoadedList.GetCount() > 0)
 		{
 			lInjectList = mLoadedList;
@@ -864,11 +895,8 @@ void ResourceManager::ThreadLoaderLoop()
 {
 	while (!mLoaderThread.GetStopRequest())
 	{
+		LoadSingleResource();
 		mLoadSemaphore.Wait();
-		if (!mLoaderThread.GetStopRequest())
-		{
-			LoadSingleResource();
-		}
 	}
 }
 
@@ -880,25 +908,34 @@ void ResourceManager::SynchronousLoadLoop()
 	}
 }
 
-bool ResourceManager::PrepareDeleteInLoadProgress(Resource* pResource)
+bool ResourceManager::PrepareRemoveInLoadProgress(Resource* pResource)
 {
-	AssertIsLocked();
+	AssertIsMutexOwner();
 
+	// We assume that only the main thread is at work. If more threads are working
+	// the system, the following race condition can and will happen:
+	//
+	//   1.          Thread A:  starts loading resource R.
+	//   2. Resource thread T:  loads resource R and places in LOADED list.
+	//   3.          Thread A:  ticks the resource, picking it out of the LOADED list, RM now unlocked.
+	//   4.          Thread B:  tries to destroy resource R in loading state, but cannot find it in LOADED
+	//                          nor REQUEST_LOADED lists.
 	bool lAllowDelete = true;
-	if (mRequestLoadList.GetCount() > 0)
+	if (pResource->GetLoadState() == RESOURCE_LOAD_IN_PROGRESS)
 	{
+		assert(mRequestLoadList.GetCount() > 0);
+
 		// Only the first object in the 'request load' list may be currently loading.
 		if (pResource == mRequestLoadList.First().GetObject())
 		{
 			lAllowDelete = false;
 		}
-		else
-		{
-			// If it's in the 'request load' list, but not first, simply remove it
-			// and it's safe to delete.
-			mRequestLoadList.Remove(pResource);
-			assert(mRequestLoadList.GetCount() < 10000);
-		}
+		// If it's in the 'request load' list, but not first, simply remove it
+		// and it's safe to delete.
+		assert(mRequestLoadList.Find(pResource) != mRequestLoadList.End() ||
+			mLoadedList.Find(pResource) != mLoadedList.End());
+		mRequestLoadList.Remove(pResource);
+		assert(mRequestLoadList.GetCount() < 10000);
 	}
 	mLoadedList.Remove(pResource);
 	return (lAllowDelete);
@@ -921,27 +958,31 @@ void ResourceManager::LoadSingleResource()
 
 	if (lResource)
 	{
+		assert(lResource->GetLoadState() == RESOURCE_LOAD_IN_PROGRESS);
 		log_volatile(mLog.Debugf(_T("Loading '%s'."), lResource->GetName().c_str()));
-		if (!lResource->Load())
+		const bool lIsLoaded = lResource->Load();
+		assert(lResource->GetLoadState() == RESOURCE_LOAD_IN_PROGRESS);
+		if (!lIsLoaded)
 		{
 			lResource->SetLoadState(RESOURCE_LOAD_ERROR);
 		}
 		{
 			Lepra::ScopeLock lLock(&mThreadLock);
-			ResourceMapList::Iterator x = mRequestLoadList.Find(lResource);
-			if (x == mRequestLoadList.First())
+			if (lResource == mRequestLoadList.First().GetObject())
 			{
 				assert(mRequestLoadList.GetCount() < 10000);
-				mRequestLoadList.Remove(x);
+				mRequestLoadList.Remove(lResource);
 				assert(mRequestLoadList.GetCount() < 10000);
 				mLoadedList.PushBack(lResource, lResource);
 			}
 			else
 			{
 				// Resource was released while loading, but could not be deleted since this
-				// thread was loading it. Therefore we simply delete it here.
+				// thread was loading it. Therefore we delete it here. No use trying to cache
+				// this resource, since it needs both Suspend() and PostProcess(); in addition
+				// the last call must also come from the main thread.
 				assert(mRequestLoadList.Find(lResource) == mRequestLoadList.End());
-				log_debug(_T("Deleting just loaded resource '")+lResource->GetName()+_T("'."));
+				log_debug(_T("Deleting just loaded resource '")+lResource->GetName()+_T("' (unique)."));
 				DeleteResource(lResource);
 			}
 		}
@@ -952,7 +993,7 @@ void ResourceManager::LoadSingleResource()
 
 Resource* ResourceManager::CreateResource(UserResource* pUserResource, const Lepra::String& pName)
 {
-	AssertIsLocked();
+	AssertIsMutexOwner();
 
 	Resource* pResource = pUserResource->CreateResource(this, pName);
 	mResourceSafeLookup.insert(pResource);
@@ -961,7 +1002,7 @@ Resource* ResourceManager::CreateResource(UserResource* pUserResource, const Lep
 
 void ResourceManager::DeleteResource(Resource* pResource)
 {
-	AssertIsLocked();
+	AssertIsMutexOwner();
 
 	assert(mResourceSafeLookup.find(pResource) != mResourceSafeLookup.end());
 	assert(mRequestLoadList.Find(pResource) == mRequestLoadList.End());

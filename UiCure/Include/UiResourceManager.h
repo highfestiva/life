@@ -162,8 +162,8 @@ public:
 	Cure::ResourceLoadState PostProcess();
 
 private:
-	int Reference();
-	int Dereference();
+	void Resume();
+	void Suspend();
 
 	void OnLoadClass(ClassResource*);
 	ClassResource* mClassResource;

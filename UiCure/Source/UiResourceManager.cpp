@@ -72,6 +72,7 @@ PainterImageResource::UserData PainterImageResource::GetUserData(const Cure::Use
 
 bool PainterImageResource::Load()
 {
+	assert(!IsUnique());
 	assert(GetRamData() == 0);
 	SetRamData(new Lepra::Canvas());
 	Lepra::ImageLoader lLoader;
@@ -163,6 +164,7 @@ const Lepra::String RendererImageResource::GetType() const
 
 bool RendererImageResource::Load()
 {
+	assert(!IsUnique());
 	assert(GetRamData() == 0);
 	Lepra::Canvas lImage;
 	Lepra::ImageLoader lLoader;
@@ -191,6 +193,7 @@ const Lepra::String TextureResource::GetType() const
 
 bool TextureResource::Load()
 {
+	assert(!IsUnique());
 	assert(GetRamData() == 0);
 	SetRamData(new UiTbc::Texture());
 	UiTbc::TEXLoader lLoader;
@@ -249,6 +252,8 @@ GeometryResource::UserData GeometryResource::GetUserData(const Cure::UserResourc
 
 bool GeometryResource::Load()
 {
+	assert(!IsUnique());
+
 	float lCubeMappingScale = -1;
 	TBC::GeometryBase::BasicMaterialSettings lMaterial;
 	lMaterial.SetColor(0.5f, 0.5f, 0.5f);
@@ -501,12 +506,21 @@ bool GeometryReferenceResource::Load()
 {
 	assert(IsUnique());
 	bool lOk = (mClassResource != 0);
+	assert(lOk);
 	if (lOk)
 	{
 		Lepra::StringUtility::StringVector lIdClass = Lepra::StringUtility::Split(GetName(), _T(":"), 1);
-		assert(lIdClass.size() == 1);
-		mClassResource->Load(GetManager(), GetName(), ClassResource::TypeLoadCallback(this,
-			&GeometryReferenceResource::OnLoadClass));
+		// TODO: remove ID splitting!
+		if (lIdClass.size() == 1)
+		{
+			mClassResource->Load(GetManager(), GetName(), ClassResource::TypeLoadCallback(this,
+				&GeometryReferenceResource::OnLoadClass));
+		}
+		else
+		{
+			mClassResource->Load(GetManager(), lIdClass[1], ClassResource::TypeLoadCallback(this,
+				&GeometryReferenceResource::OnLoadClass));
+		}
 	}
 	return (lOk);
 }
@@ -524,24 +538,15 @@ Cure::ResourceLoadState GeometryReferenceResource::PostProcess()
 	return (lLoadState);
 }
 
-int GeometryReferenceResource::Reference()
+void GeometryReferenceResource::Resume()
 {
-	if (!mClassResource)
-	{
-		mClassResource = new ClassResource(GetUiManager());
-		Load();
-	}
-	return (Parent::Reference());
+	assert(!mClassResource);
+	mClassResource = new ClassResource(GetUiManager());
 }
 
-int GeometryReferenceResource::Dereference()
+void GeometryReferenceResource::Suspend()
 {
-	int lReferenceCount = Parent::Dereference();
-	if (lReferenceCount == 0)
-	{
-		ReleaseGeometry();
-	}
-	return (lReferenceCount);
+	ReleaseGeometry();
 }
 
 void GeometryReferenceResource::OnLoadClass(ClassResource*)
@@ -578,6 +583,7 @@ SoundResource::~SoundResource()
 
 bool SoundResource::Load()
 {
+	assert(!IsUnique());
 	assert(GetRamData() == UiLepra::SoundManager::INVALID_SOUNDID);
 	if (mDimension == DIMENSION_2D)
 	{

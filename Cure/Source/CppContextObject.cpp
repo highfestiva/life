@@ -87,31 +87,31 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject) const
 	Lepra::String lAssetName;
 	if (pObject->GetClassId().find(_T("box_002")) != Lepra::String::npos)
 	{
-		lAssetName = _T("box_01.str");
+		lAssetName = _T("box_01.phys");
 	}
 	else if (pObject->GetClassId().find(_T("sphere_002")) != Lepra::String::npos)
 	{
-		lAssetName = _T("sphere_01.str");
+		lAssetName = _T("sphere_01.phys");
 	}
 	else if (pObject->GetClassId().find(_T("car_001")) != Lepra::String::npos)
 	{
-		lAssetName = _T("car_01.str");
+		lAssetName = _T("car_01.phys");
 	}
 	else if (pObject->GetClassId().find(_T("monster_001")) != Lepra::String::npos)
 	{
-		lAssetName = _T("monster_01.str");
+		lAssetName = _T("monster_01.phys");
 	}
 	else if (pObject->GetClassId().find(_T("excavator_703")) != Lepra::String::npos)
 	{
-		lAssetName = _T("excavator_01.str");
+		lAssetName = _T("excavator_01.phys");
 	}
 	else if (pObject->GetClassId().find(_T("crane_whatever")) != Lepra::String::npos)
 	{
-		lAssetName = _T("crane_01.str");
+		lAssetName = _T("crane_01.phys");
 	}
 	else if (pObject->GetClassId().find(_T("ground_002")) != Lepra::String::npos)
 	{
-		lAssetName = _T("world_01.str");
+		lAssetName = _T("world_01.phys");
 	}
 	else
 	{
@@ -130,7 +130,7 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject) const
 	TBC::ChunkyPhysics* lStructure = 0;
 	if (lOk)
 	{
-		lStructure = new TBC::ChunkyPhysics();
+		lStructure = new TBC::ChunkyPhysics(TBC::ChunkyPhysics::TRANSFORM_LOCAL2WORLD);
 		TBC::ChunkyPhysicsLoader lLoader(&lFile, false);
 		lOk = lLoader.Load(lStructure);
 		assert(lOk);

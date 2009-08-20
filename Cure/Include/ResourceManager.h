@@ -149,9 +149,11 @@ public:
 	virtual const Lepra::String GetType() const = 0;
 
 	// Increases/decreases the reference counter. Returns the new value.
-	virtual int Reference();
-	virtual int Dereference();
+	int Reference();
+	int Dereference();
 	int GetReferenceCount();
+	virtual void Resume();	// Resource goes from cache -> live.
+	virtual void Suspend();	// Resource enters cache.
 	bool IsUnique() const;
 	void SetIsUnique(bool pIsUnique);
 
@@ -190,6 +192,7 @@ private:
 	typedef std::list<UserResourceCallbackInfo> CallbackList;
 	CallbackList mLoadCallbackList;
 	bool mIsUnique;
+	static Lepra::Lock mMutex;
 
 	LOG_CLASS_DECLARE();
 
@@ -197,7 +200,6 @@ private:
 };
 
 
-// Alex/NOTE: A regular resource which is stored in some data structure in RAM.
 template<class RamData> class RamResource: public Resource
 {
 public:
@@ -217,7 +219,8 @@ private:
 };
 
 
-// Alex/NOTE: An optimized resource is usually a resource which is stored in other memory
+
+// NOTE: An optimized resource is usually a resource which is stored in other memory
 // other than the internal RAM. E.g. textures and images uploaded to the graphics memory.
 template<class RamData, class OptimizedData> class OptimizedResource: public RamResource<RamData>
 {
@@ -233,6 +236,8 @@ protected:
 
 
 
+// A type of resource that needs it's own clone data, but has much in common with
+// the related clones. Used for sounds.
 template<class RamData, class DiversifiedData> class DiversifiedResource: public RamResource<RamData>
 {
 public:
@@ -386,14 +391,9 @@ public:
 
 	bool ExportAll(const Lepra::String& pDirectory);
 
-	inline void AssertIsLocked()
-	{
-		assert(mThreadLock.IsOwner());
-	}
-
 protected:
-	Resource* QueryCachedResource(const Lepra::String& pName, UserResource* pUserResource, bool& pMustLoad);
-	void DoLoad(Resource* pResource);
+	Resource* GetAddCachedResource(const Lepra::String& pName, UserResource* pUserResource, bool& pMustLoad);
+	void StartLoad(Resource* pResource);
 
 	// Called by Tick (main thread) to push objects into the active table, optimize them and callback waiters.
 	void InjectResourceLoop();
@@ -403,8 +403,13 @@ protected:
 
 	void ThreadLoaderLoop();	// Called by worker thread to load objects asynchronously.
 	void SynchronousLoadLoop();	// Called by main thread to load all requested resources.
-	bool PrepareDeleteInLoadProgress(Resource* pResource);	// Drops the resource from the load list.
+	bool PrepareRemoveInLoadProgress(Resource* pResource);	// Drops the resource from the load list.
 	void LoadSingleResource();
+
+	inline void AssertIsMutexOwner()
+	{
+		assert(mThreadLock.IsOwner());
+	}
 
 private:
 	Resource* CreateResource(UserResource* pUserResource, const Lepra::String& pName);

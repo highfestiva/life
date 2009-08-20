@@ -23,6 +23,7 @@ ContextObjectInfoResource::ContextObjectInfoResource(Cure::ResourceManager* pMan
 
 bool ContextObjectInfoResource::Load()
 {
+	assert(!IsUnique());
 	bool lOk = Parent::Load();
 	if (lOk)
 	{

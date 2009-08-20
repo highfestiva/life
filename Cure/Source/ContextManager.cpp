@@ -81,17 +81,18 @@ const ContextManager::ContextObjectTable& ContextManager::GetObjectTable() const
 void ContextManager::ClearObjects()
 {
 	mPhysicsSenderObjectTable.clear();
-	if (mIsObjectOwner)
+	while (mObjectTable.size() > 0)
 	{
-		while (mObjectTable.size() > 0)
+		ContextObject* lObject = mObjectTable.begin()->second;
+		if (mIsObjectOwner)
 		{
-			ContextObject* lObject = mObjectTable.begin()->second;
 			delete (lObject);
 		}
-	}
-	else
-	{
-		mObjectTable.clear();
+		else
+		{
+			lObject->SetManager(0);
+			mObjectTable.erase(mObjectTable.begin());
+		}
 	}
 }
 

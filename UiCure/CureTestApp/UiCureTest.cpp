@@ -89,9 +89,6 @@ private:
 	void DumbClassLoadCallback(UiCure::UserClassResource*)
 	{
 	}
-	void DumbMeshLoadCallback(UiCure::UserGeometryReferenceResource*)
-	{
-	}
 	void LoadCallback(Cure::UserResource* pResource)
 	{
 		if (pResource->GetConstResource()->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
@@ -277,6 +274,7 @@ bool ResourceTest::TestStress()
 		ClassList lResources;
 		const int lLoopCount = 100;
 		const int lAddCount = 10;
+		const int lDecCount = lAddCount/3;
 		for (int x = 0; x < lLoopCount; ++x)
 		{
 			for (int y = 0; y < lAddCount; ++y)
@@ -287,9 +285,8 @@ bool ResourceTest::TestStress()
 				lResources.push_back(lClass);
 			}
 			size_t c = mResourceManager->QueryResourceCount();
-			assert(c <= lLoopCount*lAddCount);
-			assert(c < 710);
-			for (int z = 0; z < lAddCount/3; ++z)
+			assert(c == (size_t)(x*(lAddCount-lDecCount)+lAddCount));
+			for (int z = 0; z < lDecCount; ++z)
 			{
 				int lDropIndex = Lepra::Random::GetRandomNumber()%lAddCount;
 				ClassList::reverse_iterator u = lResources.rbegin();
@@ -298,7 +295,15 @@ bool ResourceTest::TestStress()
 				delete (*u);
 				lResources.erase(--u.base());
 			}
-			mResourceManager->Tick();
+			lTestOk = false;
+			for (int z = 0; !lTestOk && z < 1000; ++z)
+			{
+				Lepra::Thread::Sleep(0.01);
+				mResourceManager->Tick();
+				c = mResourceManager->QueryResourceCount();
+				lTestOk = (c == (size_t)((x+1)*(lAddCount-lDecCount)));
+			}
+			assert(lTestOk);
 		}
 		lTestOk = (mResourceManager->QueryResourceCount() == lLoopCount*(lAddCount-lAddCount/3));
 		assert(lTestOk);
@@ -341,10 +346,12 @@ bool ResourceTest::TestStress()
 	if (lTestOk)
 	{
 		lContext = _T("stressing mass load");
+		gResourceLoadCount = 0;
 		typedef std::list<UiCure::UserGeometryReferenceResource*> MeshList;
 		MeshList lResources;
 		const int lLoopCount = 100;
 		const int lAddCount = 10;
+		const int lDecCount = lAddCount/3;
 		for (int x = 0; x < lLoopCount; ++x)
 		{
 			for (int y = 0; y < lAddCount; ++y)
@@ -353,13 +360,12 @@ bool ResourceTest::TestStress()
 					new UiCure::UserGeometryReferenceResource(mUiManager, UiCure::GeometryOffset(0));
 				lMesh->LoadUnique(mResourceManager, _T("tractor_01_front_wheel0.mesh"),
 					UiCure::UserGeometryReferenceResource::TypeLoadCallback(this,
-						&ResourceTest::DumbMeshLoadCallback));
+						&ResourceTest::MeshLoadCallback));
 				lResources.push_back(lMesh);
 			}
-			size_t c = mResourceManager->QueryResourceCount();
-			assert(c <= lLoopCount*lAddCount);
-			assert(c < 710);
-			for (int z = 0; z < lAddCount/3; ++z)
+			//size_t c = mResourceManager->QueryResourceCount();
+			//assert(c == (size_t)(x*(lAddCount-lDecCount)+lAddCount+1));
+			for (int z = 0; z < lDecCount; ++z)
 			{
 				int lDropIndex = Lepra::Random::GetRandomNumber()%lAddCount;
 				MeshList::reverse_iterator u = lResources.rbegin();
@@ -369,9 +375,25 @@ bool ResourceTest::TestStress()
 				lResources.erase(--u.base());
 			}
 			mResourceManager->Tick();
+			//c = mResourceManager->QueryResourceCount();
+			//assert(c == (size_t)((x+1)*(lAddCount-lDecCount)+1));
 		}
-		lTestOk = (mResourceManager->QueryResourceCount() == lLoopCount*(lAddCount-lAddCount/3)+1);
+		if (lTestOk)
+		{
+			lTestOk = false;
+			for (int z = 0; !lTestOk && z < 500; ++z)
+			{
+				Lepra::Thread::Sleep(0.1);
+				mResourceManager->Tick();
+				lTestOk = (mResourceManager->QueryResourceCount() == lLoopCount*(lAddCount-lDecCount)+1);
+			}
+		}
 		assert(lTestOk);
+		if (lTestOk)
+		{
+			lTestOk = (gResourceLoadCount == lLoopCount*lAddCount+1);
+			assert(lTestOk);
+		}
 		if (lTestOk)
 		{
 			lTestOk = false;
