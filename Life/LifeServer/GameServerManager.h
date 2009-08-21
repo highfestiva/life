@@ -13,7 +13,6 @@
 #include "../../Cure/Include/Packet.h"
 #include "../../Cure/Include/UserAccountManager.h"
 #include "../../Lepra/Include/LogListener.h"
-#include "ServerContextResource.h"
 #include "Client.h"
 
 
@@ -47,8 +46,6 @@ private:
 	void Logout(Cure::UserAccount::AccountId pAccountId, const Lepra::String& pReason);
 	void DeleteAllClients();
 
-	void ContextObjectLoadCallback(UserContextObjectInfoResource* pResource);
-
 	Client* GetClientByAccount(Cure::UserAccount::AccountId pAccountId) const;
 
 	bool Initialize();
@@ -67,7 +64,8 @@ private:
 	void StoreMovement(int pClientFrameIndex, Cure::MessageObjectMovement* pMovement);
 	void ApplyStoredMovement();
 
-	void AvatarLoadCallback(UserContextObjectAccountInfoResource* pResource);
+	void BroadcastAvatar(Client* pClient);
+
 	void OnCollision(const Lepra::Vector3DF& pForce, const Lepra::Vector3DF& pTorque,
 		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2);
 	void OnStopped(Cure::ContextObject* pObject, TBC::PhysicsManager::BodyID pBodyId);
@@ -92,8 +90,8 @@ private:
 
 	Cure::UserAccountManager* mUserAccountManager;
 	AccountClientTable mAccountClientTable;
-	UserContextObjectInfoResource mTerrainResource;	// TODO: remove when applicable.
-	UserContextObjectInfoResource mBoxResource;	// TODO: remove when applicable.
+	Cure::ContextObject* mTerrainResource;	// TODO: remove when applicable.
+	Cure::ContextObject* mBoxResource;	// TODO: remove when applicable.
 	MovementArrayList mMovementArrayList;
 	mutable Lepra::Timer mPowerSaveTimer;
 

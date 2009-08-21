@@ -40,8 +40,8 @@ GameServerManager::GameServerManager(Cure::RuntimeVariableScope* pVariableScope,
 	Lepra::InteractiveConsoleLogListener* pConsoleLogger):
 	Cure::GameManager(pVariableScope, pResourceManager, false),
 	mUserAccountManager(new Cure::MemoryUserAccountManager()),
-	mTerrainResource(ContextObjectInfo(GetContext(), 0, 0, Cure::NETWORK_OBJECT_LOCAL_ONLY)),
-	mBoxResource(ContextObjectInfo(GetContext(), 0, 0, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED)),
+	mTerrainResource(0),
+	mBoxResource(0),
 	mMovementArrayList(NETWORK_POSITIONAL_AHEAD_BUFFER_SIZE)
 {
 	ConsoleManager lConsole(0, Cure::GetSettings(), 0, 0);
@@ -51,11 +51,6 @@ GameServerManager::GameServerManager(Cure::RuntimeVariableScope* pVariableScope,
 	GetResourceManager()->InitDefault(new Cure::CppContextObjectFactory());
 
 	GetContext()->SetIsObjectOwner(false);
-
-	mTerrainResource.GetExtraData().mInstanceId = GetContext()->AllocateGameObjectId(mTerrainResource.GetExtraData().mNetworkType);
-	mTerrainResource.GetExtraData().mLoadingResource = &mTerrainResource;
-	mBoxResource.GetExtraData().mInstanceId = GetContext()->AllocateGameObjectId(mBoxResource.GetExtraData().mNetworkType);
-	mBoxResource.GetExtraData().mLoadingResource = &mBoxResource;
 
 	SetNetworkAgent(new Cure::NetworkServer(pVariableScope, this));
 
@@ -194,22 +189,6 @@ void GameServerManager::DeleteAllClients()
 
 
 
-void GameServerManager::ContextObjectLoadCallback(UserContextObjectInfoResource* pResource)
-{
-	if (pResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
-	{
-		Cure::ContextObject* lObject = pResource->GetData();
-		GetContext()->AddObject(lObject);
-		GetContext()->EnableTickCallback(lObject);
-	}
-	else
-	{
-		mLog.Errorf(_T("Problem loading context object %s."), pResource->GetName().c_str());
-	}
-}
-
-
-
 Client* GameServerManager::GetClientByAccount(Cure::UserAccount::AccountId pAccountId) const
 {
 	Client* lClient = mAccountClientTable.FindObject(pAccountId);
@@ -292,8 +271,16 @@ bool GameServerManager::Initialize()
 
 	if (lOk)
 	{
-		mBoxResource.Load(GetResourceManager(), _T("x:box_002"),
-			UserContextObjectInfoResource::TypeLoadCallback(this, &GameServerManager::ContextObjectLoadCallback));
+		assert(mBoxResource == 0);
+		TODO make common function for all of these.
+		mBoxResource = YaddaYaddaCreate();
+		mBoxResource->SetManager(GetContext());
+		mBoxResource->SetInstanceId(pInstanceId);
+		mBoxResource->SetNetworkObjectType(pNetworkType);
+		GetContext()->AddObject(mBoxResource);
+		GetContext()->EnableTickCallback(mBoxResource);
+		mBoxResource->StartLoading();
+		...
 	}
 
 	Lepra::String lAcceptAddress = CURE_RTVAR_GETSET(GetVariableScope(), RTVAR_NETWORK_LISTEN_ADDRESS, _T("0.0.0.0:16650"));
@@ -324,8 +311,15 @@ bool GameServerManager::Initialize()
 
 bool GameServerManager::InitializeTerrain()
 {
-	mTerrainResource.Load(GetResourceManager(), _T("ground_002"),
-		UserContextObjectInfoResource::TypeLoadCallback(this, &GameServerManager::ContextObjectLoadCallback));
+	assert(mTerrainResource == 0);
+	mTerrainResource = YaddaYaddaCreate();
+	mTerrainResource->SetManager(GetContext());
+	mTerrainResource->SetInstanceId(pInstanceId);
+	mTerrainResource->SetNetworkObjectType(pNetworkType);
+	GetContext()->AddObject(mBoxResource);
+	GetContext()->EnableTickCallback(mBoxResource);
+	mTerrainResource->StartLoading();
+	...
 	return (true);
 }
 
@@ -505,10 +499,16 @@ void GameServerManager::OnLogin(Cure::UserConnection* pUserConnection)
 
 		const Cure::UserAccount::AvatarId& lAvatarId = *lAvatarIdSet->begin();
 		mLog.Info(_T("Loading avatar '")+lAvatarId+_T("' for user ")+Lepra::UnicodeStringUtility::ToCurrentCode(lClient->GetUserConnection()->GetLoginName())+_T("."));
-		lClient->GetAvatarResource()->GetExtraData().mContextManager = GetContext();
-		lClient->GetAvatarResource()->GetExtraData().mInstanceId = GetContext()->AllocateGameObjectId(lClient->GetAvatarResource()->GetExtraData().mNetworkType);
-		lClient->GetAvatarResource()->Load(GetResourceManager(), lAvatarId,
-			UserContextObjectAccountInfoResource::TypeLoadCallback(this, &GameServerManager::AvatarLoadCallback));
+		lClient->mAvatar
+		lClient->mAvatar = YaddaYaddaCreate();
+		lClient->mAvatar->SetManager(GetContext());
+		lClient->mAvatar->SetInstanceId(pInstanceId);
+		lClient->mAvatar->SetNetworkObjectType(pNetworkType);
+		GetContext()->AddObject(mBoxResource);
+		GetContext()->EnableTickCallback(mBoxResource);
+		lClient->mAvatar->StartLoading();
+		...
+		BroadcastAvatar(lClient);	Must be async, once loaded.
 	}
 	else
 	{
@@ -615,41 +615,20 @@ void GameServerManager::ApplyStoredMovement()
 
 
 
-void GameServerManager::AvatarLoadCallback(UserContextObjectAccountInfoResource* pResource)
+void GameServerManager::BroadcastAvatar(Client* pClient)
 {
-	Cure::UserAccount::AccountId lAccountId = pResource->GetExtraData().mAccountId;
-	if (pResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
-	{
-		Client* lClient = GetClientByAccount(lAccountId);
-		if (lClient)
-		{
-			Cure::ContextObject* lObject = pResource->GetData();
-			Cure::GameObjectId lInstanceId = lObject->GetInstanceId();
-			lClient->SetAvatarId(lInstanceId);
-			GetContext()->AddObject(lObject);
-			GetContext()->EnableTickCallback(lObject);
-			mLog.Info(_T("User ")+Lepra::UnicodeStringUtility::ToCurrentCode(lClient->GetUserConnection()->GetLoginName())+_T(" login complete (avatar loaded)."));
+	Cure::ContextObject* lObject = pClient->mAvatar;
+	Cure::GameObjectId lInstanceId = lObject->GetInstanceId();
+	mLog.Info(_T("User ")+Lepra::UnicodeStringUtility::ToCurrentCode(pClient->GetUserConnection()->GetLoginName())+_T(" login complete (avatar loaded)."));
 
-			// TODO: this is hard-coded. Use a general replication-mechanism instead (where visible and added/updated objects gets replicated automatically).
-			Cure::Packet* lPacket = GetNetworkAgent()->GetPacketFactory()->Allocate();
-			GetNetworkAgent()->SendNumberMessage(true, lClient->GetUserConnection()->GetSocket(),
-				Cure::MessageNumber::INFO_AVATAR, lInstanceId, 0);
-			GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
+	// TODO: this is hard-coded. Use a general replication-mechanism instead (where visible and added/updated objects gets replicated automatically).
+	Cure::Packet* lPacket = GetNetworkAgent()->GetPacketFactory()->Allocate();
+	GetNetworkAgent()->SendNumberMessage(true, pClient->GetUserConnection()->GetSocket(),
+		Cure::MessageNumber::INFO_AVATAR, lInstanceId, 0);
+	GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
 
-			BroadcastCreateObject(lObject);
-			SendCreateAllObjects(lClient);
-		}
-		else
-		{
-			// The client has logged out during load, we need to dispose of context object.
-			mLog.Errorf(_T("User logged out while loading avatar resource? AccountId=%u. TODO: implement!"), lAccountId);
-			// TODO: what? Why hasn't this resource been dropped before we end up here?
-		}
-	}
-	else
-	{
-		Logout(lAccountId, _T("Error when loading avatar."));
-	}
+	BroadcastCreateObject(lObject);
+	SendCreateAllObjects(pClient);
 }
 
 void GameServerManager::OnCollision(const Lepra::Vector3DF& pForce, const Lepra::Vector3DF& pTorque,

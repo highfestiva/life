@@ -375,7 +375,7 @@ ClassResource::~ClassResource()
 
 
 
-ContextObjectResource::ContextObjectResource(ResourceManager* pManager, const Lepra::String& pName):
+/*ContextObjectResource::ContextObjectResource(ResourceManager* pManager, const Lepra::String& pName):
 	Parent(pManager, pName)
 {
 }
@@ -422,7 +422,7 @@ ResourceLoadState ContextObjectResource::PostProcess()
 	return (lLoadState);
 }
 
-LOG_CLASS_DEFINE(GAME_CONTEXT, ContextObjectResource);
+LOG_CLASS_DEFINE(GAME_CONTEXT, ContextObjectResource);*/
 
 
 

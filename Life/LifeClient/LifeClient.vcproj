@@ -564,10 +564,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\GfxContextResource.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\PlayerCountView.cpp"
 				>
 			</File>
@@ -603,10 +599,6 @@
 			</File>
 			<File
 				RelativePath=".\GameClientSlaveManager.h"
-				>
-			</File>
-			<File
-				RelativePath=".\GfxContextResource.h"
 				>
 			</File>
 			<File

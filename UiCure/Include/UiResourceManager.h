@@ -34,23 +34,6 @@ class SoundManager;
 
 
 
-template<class ResourceType, class SubtypeExtraType = int>
-class UserUiTypeResource: public Cure::UserTypeResourceBase<ResourceType,
-	fastdelegate::FastDelegate1<UserUiTypeResource<ResourceType, SubtypeExtraType>*, void>, SubtypeExtraType>
-{
-	typedef fastdelegate::FastDelegate1<UserUiTypeResource<ResourceType, SubtypeExtraType>*, void> ParentTypeLoadCallback;
-public:
-	UserUiTypeResource(GameUiManager* pUiManager, const typename SubtypeExtraType& pExtraData = SubtypeExtraType());
-	virtual ~UserUiTypeResource();
-
-protected:
-	Cure::Resource* CreateResource(Cure::ResourceManager* pManager, const Lepra::String& pName) const;
-
-	GameUiManager* mUiManager;
-};
-
-
-
 class UiResource
 {
 protected:
@@ -62,6 +45,22 @@ protected:
 private:
 	GameUiManager* mUiManager;
 };
+
+
+
+template<class ResourceType>
+class UserUiTypeResource: public Cure::UserTypeResourceBase<UserUiTypeResource<ResourceType>, ResourceType>,
+	public UiResource
+{
+public:
+	UserUiTypeResource(GameUiManager* pUiManager);
+	virtual ~UserUiTypeResource();
+
+protected:
+	Cure::Resource* CreateResource(Cure::ResourceManager* pManager, const Lepra::String& pName) const;
+};
+
+
 
 class PainterImageResource: public Cure::OptimizedResource<Lepra::Canvas*, UiTbc::Painter::ImageID>, public UiResource
 {
@@ -113,19 +112,6 @@ public:
 
 
 
-/*class StaticGeometryResource: public Cure::OptimizedResource<TBC::GeometryBase*, UiTbc::Renderer::GeometryID>
-{
-public:
-	typedef UiTbc::Renderer::GeometryID UserData;
-
-	StaticGeometryResource(const Lepra::String& pName);
-
-	bool Load();
-	void Optimize();
-};*/
-
-
-
 class GeometryResource: public Cure::OptimizedResource<TBC::GeometryBase*, UiTbc::Renderer::GeometryID>, public UiResource
 {
 	typedef Cure::OptimizedResource<TBC::GeometryBase*, UiTbc::Renderer::GeometryID> Parent;
@@ -147,7 +133,7 @@ private:
 
 
 
-class GeometryReferenceResource: public GeometryResource
+/*class GeometryReferenceResource: public GeometryResource
 {
 	typedef GeometryResource Parent;
 public:
@@ -167,6 +153,52 @@ private:
 
 	void OnLoadClass(ClassResource*);
 	ClassResource* mClassResource;
+
+	LOG_CLASS_DECLARE();
+};*/
+
+struct GeometryOffset
+{
+	GeometryOffset(unsigned pPhysicsNodeId):
+		mGeometryIndex(pPhysicsNodeId)
+	{
+	}
+	GeometryOffset(unsigned pPhysicsNodeId, Lepra::Vector3DF pOffset):
+		mGeometryIndex(pPhysicsNodeId)
+	{
+		mOffset.SetPosition(pOffset);
+	}
+	GeometryOffset(unsigned pPhysicsNodeId, Lepra::TransformationF pOffset):
+		mGeometryIndex(pPhysicsNodeId),
+		mOffset(pOffset)
+	{
+	}
+
+	unsigned mGeometryIndex;
+	Lepra::TransformationF mOffset;
+};
+
+
+
+class UserGeometryReferenceResource: public Cure::UserTypeResourceBase<
+	UserGeometryReferenceResource, GeometryResource>, public UiResource
+{
+	typedef Cure::UserTypeResourceBase<UserGeometryReferenceResource, GeometryResource> Parent;
+public:
+	UserGeometryReferenceResource(GameUiManager* pUiManager, const GeometryOffset& pOffset);
+	virtual ~UserGeometryReferenceResource();
+
+	virtual void PostProcess();
+
+	const GeometryOffset& GetOffset() const;
+
+protected:
+	Cure::Resource* CreateResource(Cure::ResourceManager* pManager, const Lepra::String& pName) const;
+
+private:
+	GeometryOffset mOffset;
+	TBC::GeometryBase* mGeometryReference;
+	UiTbc::Renderer::GeometryID mGeometryReferenceId;
 
 	LOG_CLASS_DECLARE();
 };
@@ -243,31 +275,9 @@ public:
 
 
 
-struct GeometryOffset
-{
-	GeometryOffset(unsigned pPhysicsNodeId):
-		mGeometryIndex(pPhysicsNodeId)
-	{
-	}
-	GeometryOffset(unsigned pPhysicsNodeId, Lepra::Vector3DF pOffset):
-		mGeometryIndex(pPhysicsNodeId)
-	{
-		mOffset.SetPosition(pOffset);
-	}
-	GeometryOffset(unsigned pPhysicsNodeId, Lepra::TransformationF pOffset):
-		mGeometryIndex(pPhysicsNodeId),
-		mOffset(pOffset)
-	{
-	}
-
-	unsigned mGeometryIndex;
-	Lepra::TransformationF mOffset;
-};
-
 typedef UserUiTypeResource<PainterImageResource>			UserPainterImageResource;
 typedef UserUiTypeResource<RendererImageResource>			UserRendererImageResource;
 typedef UserUiTypeResource<TextureResource>				UserTextureResource;
-typedef UserUiTypeResource<GeometryReferenceResource, GeometryOffset>	UserGeometryReferenceResource;
 typedef UserUiTypeResource<SoundResource2d>				UserSound2dResource;
 typedef UserUiTypeResource<SoundResource3d>				UserSound3dResource;
 typedef UserUiTypeResource<ClassResource>				UserClassResource;

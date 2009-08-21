@@ -60,7 +60,7 @@ void CppContextObject::OnPhysicsTick()
 		{
 			continue;
 		}
-		TBC::ChunkyBoneGeometry* lGeometry = mStructure->GetBoneGeometry(lResource->GetExtraData().mGeometryIndex);
+		TBC::ChunkyBoneGeometry* lGeometry = mStructure->GetBoneGeometry(lResource->GetOffset().mGeometryIndex);
 		if (lGeometry == 0 || lGeometry->GetBodyId() == TBC::INVALID_BODY)
 		{
 			mLog.Warningf(_T("Physical body for %s not loaded!"), lResource->GetName().c_str());
@@ -337,7 +337,7 @@ void CppContextObject::OnLoadMesh(UserGeometryReferenceResource* pMeshResource)
 {
 	if (pMeshResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
-		((TBC::GeometryReference*)pMeshResource->GetRamData())->SetOffsetTransformation(pMeshResource->GetExtraData().mOffset);
+		((TBC::GeometryReference*)pMeshResource->GetRamData())->SetOffsetTransformation(pMeshResource->GetOffset().mOffset);
 		TryAddTexture();
 	}
 	else

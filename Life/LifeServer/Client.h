@@ -7,7 +7,6 @@
 #pragma once
 
 #include "../../Cure/Include/Cure.h"
-#include "ServerContextResource.h"
 
 
 
@@ -36,7 +35,7 @@ public:
 
 	Cure::GameObjectId GetAvatarId() const;
 	void SetAvatarId(Cure::GameObjectId pAvatarId);
-	UserContextObjectAccountInfoResource* GetAvatarResource();
+	Cure::ContextObject* GetAvatarResource();
 
 	void StoreFrameDiff(int pFrameDiff);
 	void QuerySendStriveTimes();
@@ -57,7 +56,7 @@ private:
 	Cure::TimeManager* mTimeManager;
 	Cure::NetworkAgent* mNetworkAgent;
 	Cure::UserConnection* mUserConnection;
-	UserContextObjectAccountInfoResource mAvatarResource;
+	Cure::ContextObject* mAvatar;
 	Cure::GameObjectId mAvatarId;
 	NetworkLatencyArray mNetworkFrameLatencyArray;
 	size_t mNetworkFrameLatencyArrayIndex;

@@ -444,10 +444,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ContextResource.cpp"
-				>
-			</File>
-			<File
 				RelativePath="LifeApplication.cpp"
 				>
 			</File>
@@ -459,10 +455,6 @@
 			>
 			<File
 				RelativePath=".\ConsoleManager.h"
-				>
-			</File>
-			<File
-				RelativePath=".\ContextResource.h"
 				>
 			</File>
 			<File

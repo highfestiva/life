@@ -86,33 +86,26 @@ private:
 
 
 
-template<class ResourceType, class SubtypeLoadCallback, class SubtypeExtraData = int>
+template<class UserResourceType, class ResourceType>
 class UserTypeResourceBase: public UserResource
 {
 public:
-	typedef SubtypeLoadCallback TypeLoadCallback;
-	typedef SubtypeExtraData ExtraType;
+	typedef fastdelegate::FastDelegate1<UserResourceType*, void> TypeLoadCallback;
 
-	UserTypeResourceBase(const ExtraType& pExtraData = ExtraType());
+	UserTypeResourceBase();
 	virtual ~UserTypeResourceBase();
 
 	void Load(ResourceManager* pResourceManager, const Lepra::String& pName, TypeLoadCallback pCallback);
 	void LoadUnique(ResourceManager* pResourceManager, const Lepra::String& pName, TypeLoadCallback pCallback);
 
-	void ReleaseRamResource();
-
 	typename ResourceType::UserRamData GetRamData() const;
 	typename ResourceType::UserData GetData() const;
-	ExtraType& GetExtraData() const;
-
-private:
-	mutable ExtraType mExtraData;
 };
 
 
 
-template<class ResourceType> class UserTypeResource: public UserTypeResourceBase<ResourceType,
-	fastdelegate::FastDelegate1<UserTypeResource<ResourceType>*, void> >
+template<class ResourceType>
+class UserTypeResource: public UserTypeResourceBase<UserTypeResource<ResourceType>, ResourceType>
 {
 public:
 	UserTypeResource();
@@ -124,18 +117,25 @@ protected:
 
 
 
-template<class ResourceType, class SubtypeExtraType> class UserExtraCreateTypeResource: public UserTypeResourceBase<ResourceType,
-	fastdelegate::FastDelegate1<UserExtraCreateTypeResource<ResourceType, SubtypeExtraType>*, void>, SubtypeExtraType>
+template<class ResourceType, class SubtypeExtraType>
+class UserExtraTypeResource: public UserTypeResourceBase<
+	UserExtraTypeResource<ResourceType, SubtypeExtraType>, ResourceType>
 {
-	typedef UserTypeResourceBase<ResourceType,
-		fastdelegate::FastDelegate1<UserExtraCreateTypeResource<ResourceType, SubtypeExtraType>*, void>,
-		SubtypeExtraType> Parent;
 public:
-	UserExtraCreateTypeResource(SubtypeExtraType pExtraData);
+	typedef SubtypeExtraType ExtraType;
+
+	UserExtraTypeResource(const ExtraType& pExtraData);
+	virtual ~UserExtraTypeResource();
+
+	ExtraType& GetExtraData() const;
 
 protected:
-	Resource* CreateResource(ResourceManager* pManager, const Lepra::String& pName) const;
+	virtual Resource* CreateResource(ResourceManager* pManager, const Lepra::String& pName) const;
+
+private:
+	mutable ExtraType mExtraData;
 };
+
 
 
 class Resource
@@ -313,7 +313,7 @@ public:
 
 
 
-class ContextObjectResource: public RamResource<ContextObject*>
+/*class ContextObjectResource: public RamResource<ContextObject*>
 {
 	typedef RamResource<ContextObject*> Parent;
 public:
@@ -328,7 +328,7 @@ public:
 
 private:
 	LOG_CLASS_DECLARE();
-};
+};*/
 
 
 
@@ -352,7 +352,7 @@ private:
 
 typedef UserTypeResource<PhysicsResource>		UserPhysicsResource;
 //typedef UserTypeResource<TBC::...>			UserAnimationResource;
-typedef UserTypeResource<ContextObjectResource>		UserContextObjectResource;
+//typedef UserTypeResource<ContextObjectResource>		UserContextObjectResource;
 typedef UserTypeResource<PhysicalTerrainResource>	UserPhysicalTerrainResource;
 
 

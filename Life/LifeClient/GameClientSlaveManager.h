@@ -17,7 +17,6 @@
 #include "ClientConsoleManager.h"
 #include "ClientLoginView.h"
 #include "ClientOptionsManager.h"
-#include "GfxContextResource.h"
 #include "InputObserver.h"
 
 
@@ -103,8 +102,6 @@ private:
 
 	Cure::NetworkClient* GetNetworkClient() const;
 
-	void ContextLoadCallback(UserGfxContextObjectInfoResource* pResource);
-
 	void DrawAsyncDebugInfo();
 	void DrawDebugStaple(int pIndex, int pHeight, const Lepra::Color& pColor);
 	void DrawSyncDebugInfo();
@@ -144,7 +141,6 @@ private:
 	Lepra::String mConnectUserName;
 	Lepra::String mConnectServerAddress;
 	Lepra::String mDisconnectReason;
-	std::set<UserGfxContextObjectInfoResource*> mLoadingContextSet;
 
 	LOG_CLASS_DECLARE();
 };

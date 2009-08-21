@@ -9,24 +9,22 @@ namespace UiCure
 
 
 
-template<class ResourceType, class SubtypeExtraType>
-UserUiTypeResource<ResourceType, SubtypeExtraType>::UserUiTypeResource(GameUiManager* pUiManager, const SubtypeExtraType& pExtraData):
-	Cure::UserTypeResourceBase<ResourceType, ParentTypeLoadCallback, SubtypeExtraType>(pExtraData),
-	mUiManager(pUiManager)
+template<class ResourceType>
+UserUiTypeResource<ResourceType>::UserUiTypeResource(GameUiManager* pUiManager):
+	UiResource(pUiManager)
 {
 }
 
-template<class ResourceType, class SubtypeExtraType>
-UserUiTypeResource<ResourceType, SubtypeExtraType>::~UserUiTypeResource()
+template<class ResourceType>
+UserUiTypeResource<ResourceType>::~UserUiTypeResource()
 {
-	mUiManager = 0;
 }
 
-template<class ResourceType, class SubtypeExtraType>
-Cure::Resource* UserUiTypeResource<ResourceType, SubtypeExtraType>::CreateResource(
+template<class ResourceType>
+Cure::Resource* UserUiTypeResource<ResourceType>::CreateResource(
 	Cure::ResourceManager* pManager, const Lepra::String& pName) const
 {
-	return (new ResourceType(mUiManager, pManager, pName));
+	return (new ResourceType(GetUiManager(), pManager, pName));
 }
 
 

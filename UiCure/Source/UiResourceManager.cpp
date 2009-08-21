@@ -41,6 +41,10 @@ GameUiManager* UiResource::GetUiManager() const
 
 
 
+// ----------------------------------------------------------------------------
+
+
+
 PainterImageResource::PainterImageResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const Lepra::String& pName):
 	OptimizedResource<Lepra::Canvas*, UiTbc::Painter::ImageID>(pManager, pName),
 	UiResource(pUiManager)
@@ -99,6 +103,10 @@ Cure::ResourceLoadState PainterImageResource::PostProcess()
 
 	return (lLoadState);
 }
+
+
+
+// ----------------------------------------------------------------------------
 
 
 
@@ -176,6 +184,12 @@ bool RendererImageResource::Load()
 	return (lOk);
 }
 
+
+
+// ----------------------------------------------------------------------------
+
+
+
 TextureResource::TextureResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const Lepra::String& pName):
 	RendererImageBaseResource(pUiManager, pManager, pName)
 {
@@ -202,19 +216,7 @@ bool TextureResource::Load()
 
 
 
-/*StaticGeometryResource::StaticGeometryResource(const Lepra::String& pName):
-	OptimizedResource(pName)
-{
-}
-
-bool StaticGeometryResource::Load()
-{
-}
-
-bool StaticGeometryResource::PostProcess()
-{
-	Parent::PostProcess();
-}*/
+// ----------------------------------------------------------------------------
 
 
 
@@ -479,7 +481,11 @@ LOG_CLASS_DEFINE(UI_GFX_3D, GeometryResource);
 
 
 
-GeometryReferenceResource::GeometryReferenceResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const Lepra::String& pName):
+// ----------------------------------------------------------------------------
+
+
+
+/*GeometryReferenceResource::GeometryReferenceResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const Lepra::String& pName):
 	GeometryResource(pUiManager, pManager, pName),
 	mClassResource(new ClassResource(pUiManager))
 {
@@ -553,7 +559,65 @@ void GeometryReferenceResource::OnLoadClass(ClassResource*)
 {
 }
 
-LOG_CLASS_DEFINE(UI_GFX_3D, GeometryReferenceResource);
+LOG_CLASS_DEFINE(UI_GFX_3D, GeometryReferenceResource);*/
+
+
+
+// ----------------------------------------------------------------------------
+
+
+
+UserGeometryReferenceResource::UserGeometryReferenceResource(GameUiManager* pUiManager, const GeometryOffset& pOffset):
+	UiResource(pUiManager),
+	mOffset(pOffset),
+	mGeometryReference(0),
+	mGeometryReferenceId(UiTbc::Renderer::INVALID_GEOMETRY)
+{
+}
+
+UserGeometryReferenceResource::~UserGeometryReferenceResource()
+{
+	if (mGeometryReferenceId)
+	{
+		GetUiManager()->GetRenderer()->RemoveGeometry(mGeometryReferenceId);
+		mGeometryReferenceId = UiTbc::Renderer::INVALID_GEOMETRY;
+	}
+	delete (mGeometryReference);
+	mGeometryReference = 0;
+}
+
+void UserGeometryReferenceResource::PostProcess()
+{
+	if (GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
+	{
+		assert(mGeometryReferenceId == UiTbc::Renderer::INVALID_GEOMETRY);
+		assert(mGeometryReference == 0);
+
+		TBC::GeometryBase* lOriginal = GetRamData();
+		mGeometryReference = new TBC::GeometryReference(lOriginal);
+		mGeometryReference->SetAlwaysVisible(true);
+		mGeometryReference->SetBasicMaterialSettings(lOriginal->GetBasicMaterialSettings());
+		mGeometryReferenceId = GetUiManager()->GetRenderer()->AddGeometry(
+			mGeometryReference, UiTbc::Renderer::MAT_NULL, UiTbc::Renderer::NO_SHADOWS);
+		assert(mGeometryReferenceId != UiTbc::Renderer::INVALID_GEOMETRY);
+	}
+}
+
+const GeometryOffset& UserGeometryReferenceResource::GetOffset() const
+{
+	return (mOffset);
+}
+
+Cure::Resource* UserGeometryReferenceResource::CreateResource(Cure::ResourceManager* pManager, const Lepra::String& pName) const
+{
+	return (new GeometryResource(GetUiManager(), pManager, pName));
+}
+
+LOG_CLASS_DEFINE(UI_GFX_3D, UserGeometryReferenceResource);
+
+
+
+// ----------------------------------------------------------------------------
 
 
 
@@ -626,6 +690,11 @@ const Lepra::String SoundResource3d::GetType() const
 {
 	return (_T("Sound3D"));
 }
+
+
+
+// ----------------------------------------------------------------------------
+
 
 
 ClassResource::ClassResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const Lepra::String& pName):

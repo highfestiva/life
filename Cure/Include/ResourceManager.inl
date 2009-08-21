@@ -14,21 +14,19 @@ namespace Cure
 
 
 
-template<class ResourceType, class SubtypeLoadCallback, class SubtypeExtraData>
-UserTypeResourceBase<ResourceType, SubtypeLoadCallback, SubtypeExtraData>::UserTypeResourceBase(const SubtypeExtraData& pExtraData):
-	UserResource(),
-	mExtraData(pExtraData)
+template<class UserResourceType, class ResourceType>
+UserTypeResourceBase<UserResourceType, ResourceType>::UserTypeResourceBase()
 {
 }
 
-template<class ResourceType, class SubtypeLoadCallback, class SubtypeExtraData>
-UserTypeResourceBase<ResourceType, SubtypeLoadCallback, SubtypeExtraData>::~UserTypeResourceBase()
+template<class UserResourceType, class ResourceType>
+UserTypeResourceBase<UserResourceType, ResourceType>::~UserTypeResourceBase()
 {
 	// Parent class dereferences Resource*.
 }
 
-template<class ResourceType, class SubtypeLoadCallback, class SubtypeExtraData>
-void UserTypeResourceBase<ResourceType, SubtypeLoadCallback, SubtypeExtraData>::Load(
+template<class UserResourceType, class ResourceType>
+void UserTypeResourceBase<UserResourceType, ResourceType>::Load(
 	ResourceManager* pResourceManager, const Lepra::String& pName, TypeLoadCallback pCallback)
 {
 	// JB-TRICKY: this is what I gather that it takes to cast a callback parameter.
@@ -38,8 +36,8 @@ void UserTypeResourceBase<ResourceType, SubtypeLoadCallback, SubtypeExtraData>::
 	pResourceManager->Load(pName, this, lCallbackCast);
 }
 
-template<class ResourceType, class SubtypeLoadCallback, class SubtypeExtraData>
-void UserTypeResourceBase<ResourceType, SubtypeLoadCallback, SubtypeExtraData>::LoadUnique(
+template<class UserResourceType, class ResourceType>
+void UserTypeResourceBase<UserResourceType, ResourceType>::LoadUnique(
 	ResourceManager* pResourceManager, const Lepra::String& pName, TypeLoadCallback pCallback)
 {
 	// JB-TRICKY: this is what I gather that it takes to cast a callback parameter.
@@ -49,29 +47,21 @@ void UserTypeResourceBase<ResourceType, SubtypeLoadCallback, SubtypeExtraData>::
 	pResourceManager->LoadUnique(pName, this, lCallbackCast);
 }
 
-template<class ResourceType, class SubtypeLoadCallback, class SubtypeExtraData>
-void UserTypeResourceBase<ResourceType, SubtypeLoadCallback, SubtypeExtraData>::ReleaseRamResource()
-{
-	((ResourceType*)GetResource())->SetRamDataType(0);
-}
-
-template<class ResourceType, class SubtypeLoadCallback, class SubtypeExtraData>
-typename ResourceType::UserRamData UserTypeResourceBase<ResourceType, SubtypeLoadCallback, SubtypeExtraData>::GetRamData() const
+template<class UserResourceType, class ResourceType>
+typename ResourceType::UserRamData UserTypeResourceBase<UserResourceType, ResourceType>::GetRamData() const
 {
 	return (((ResourceType*)GetConstResource())->GetRamData());
 }
 
-template<class ResourceType, class SubtypeLoadCallback, class SubtypeExtraData>
-typename ResourceType::UserData UserTypeResourceBase<ResourceType, SubtypeLoadCallback, SubtypeExtraData>::GetData() const
+template<class UserResourceType, class ResourceType>
+typename ResourceType::UserData UserTypeResourceBase<UserResourceType, ResourceType>::GetData() const
 {
 	return (((ResourceType*)GetConstResource())->GetUserData(this));
 }
 
-template<class ResourceType, class SubtypeLoadCallback, class SubtypeExtraData>
-SubtypeExtraData& UserTypeResourceBase<ResourceType, SubtypeLoadCallback, SubtypeExtraData>::GetExtraData() const
-{
-	return (mExtraData);
-}
+
+
+// ----------------------------------------------------------------------------
 
 
 
@@ -93,41 +83,65 @@ Resource* UserTypeResource<ResourceType>::CreateResource(ResourceManager* pManag
 
 
 
+// ----------------------------------------------------------------------------
+
+
+
 template<class ResourceType, class SubtypeExtraType>
-UserExtraCreateTypeResource<ResourceType, SubtypeExtraType>::UserExtraCreateTypeResource(SubtypeExtraType pExtraData):
-	Parent(pExtraData)
+UserExtraTypeResource<ResourceType, SubtypeExtraType>::UserExtraTypeResource(const SubtypeExtraType& pExtraData):
+	mExtraData(pExtraData)
 {
 }
 
 template<class ResourceType, class SubtypeExtraType>
-Resource* UserExtraCreateTypeResource<ResourceType, SubtypeExtraType>::CreateResource(ResourceManager* pManager, const Lepra::String& pName) const
+UserExtraTypeResource<ResourceType, SubtypeExtraType>::~UserExtraTypeResource()
+{
+}
+
+template<class ResourceType, class SubtypeExtraType>
+Resource* UserExtraTypeResource<ResourceType, SubtypeExtraType>::CreateResource(ResourceManager* pManager, const Lepra::String& pName) const
 {
 	return (new ResourceType(pManager, pName, Parent::GetExtraData()));
 }
 
+template<class ResourceType, class SubtypeExtraType>
+typename SubtypeExtraType& UserExtraTypeResource<ResourceType, SubtypeExtraType>::GetExtraData() const
+{
+	return (mExtraData);
+}
 
 
-template<class RamData> RamData RamResource<RamData>::GetRamData() const
+
+// ----------------------------------------------------------------------------
+
+
+
+template<class RamData>
+RamData RamResource<RamData>::GetRamData() const
 {
 	return (mRamData);
 }
 
-template<class RamData> void RamResource<RamData>::SetRamDataType(RamData pData)
+template<class RamData>
+void RamResource<RamData>::SetRamDataType(RamData pData)
 {
 	mRamData = pData;
 }
 
-template<class RamData> RamResource<RamData>::RamResource(ResourceManager* pManager, const Lepra::String& pName):
+template<class RamData>
+RamResource<RamData>::RamResource(ResourceManager* pManager, const Lepra::String& pName):
 	Resource(pManager, pName),
 	mRamData((RamData)0)
 {
 }
 
-template<class RamData> RamResource<RamData>::~RamResource()
+template<class RamData>
+RamResource<RamData>::~RamResource()
 {
 }
 
-template<class RamData> void RamResource<RamData>::SetRamData(RamData pData)
+template<class RamData>
+void RamResource<RamData>::SetRamData(RamData pData)
 {
 	delete (mRamData);
 	SetRamDataType(pData);
@@ -135,37 +149,51 @@ template<class RamData> void RamResource<RamData>::SetRamData(RamData pData)
 
 
 
-template<class RamData, class OptimizedData> OptimizedResource<RamData, OptimizedData>::OptimizedResource(
+// ----------------------------------------------------------------------------
+
+
+
+template<class RamData, class OptimizedData>
+OptimizedResource<RamData, OptimizedData>::OptimizedResource(
 	ResourceManager* pManager, const Lepra::String& pName):
 	RamResource<RamData>(pManager, pName),
 	mOptimizedData((OptimizedData)0)
 {
 }
 
-template<class RamData, class OptimizedData> OptimizedResource<RamData, OptimizedData>::~OptimizedResource()
+template<class RamData, class OptimizedData>
+OptimizedResource<RamData, OptimizedData>::~OptimizedResource()
 {
 	mOptimizedData = (OptimizedData)0;
 }
 
-template<class RamData, class OptimizedData> void OptimizedResource<RamData, OptimizedData>::SetOptimizedData(OptimizedData pData)
+template<class RamData, class OptimizedData>
+void OptimizedResource<RamData, OptimizedData>::SetOptimizedData(OptimizedData pData)
 {
 	mOptimizedData = pData;
 }
 
 
 
-template<class RamData, class DiversifiedData> DiversifiedResource<RamData, DiversifiedData>::DiversifiedResource(ResourceManager* pManager, const Lepra::String& pName):
+// ----------------------------------------------------------------------------
+
+
+
+template<class RamData, class DiversifiedData>
+DiversifiedResource<RamData, DiversifiedData>::DiversifiedResource(ResourceManager* pManager, const Lepra::String& pName):
 	RamResource<RamData>(pManager, pName)
 {
 }
 
-template<class RamData, class DiversifiedData> DiversifiedResource<RamData, DiversifiedData>::~DiversifiedResource()
+template<class RamData, class DiversifiedData>
+DiversifiedResource<RamData, DiversifiedData>::~DiversifiedResource()
 {
 	// Diviersified table must be entirely free'd and cleared out by child class.
 	assert(mUserDiversifiedTable.IsEmpty());
 }
 
-template<class RamData, class DiversifiedData> DiversifiedData DiversifiedResource<RamData, DiversifiedData>::GetUserData(const UserResource* pUserResource)
+template<class RamData, class DiversifiedData>
+DiversifiedData DiversifiedResource<RamData, DiversifiedData>::GetUserData(const UserResource* pUserResource)
 {
 	DiversifiedData lInstanceId = (DiversifiedData)0;
 	typename UserDataTable::Iterator x = mUserDiversifiedTable.Find(pUserResource);
@@ -182,7 +210,8 @@ template<class RamData, class DiversifiedData> DiversifiedData DiversifiedResour
 	return (lInstanceId);
 }
 
-template<class RamData, class DiversifiedData> void DiversifiedResource<RamData, DiversifiedData>::FreeDiversified(UserResource* pUserResource)
+template<class RamData, class DiversifiedData>
+void DiversifiedResource<RamData, DiversifiedData>::FreeDiversified(UserResource* pUserResource)
 {
 	typename UserDataTable::Iterator x = mUserDiversifiedTable.Find(pUserResource);
 	if (x != mUserDiversifiedTable.End())
@@ -192,6 +221,10 @@ template<class RamData, class DiversifiedData> void DiversifiedResource<RamData,
 		ReleaseDiversifiedData(lInstanceId);
 	}
 }
+
+
+
+// ----------------------------------------------------------------------------
 
 
 

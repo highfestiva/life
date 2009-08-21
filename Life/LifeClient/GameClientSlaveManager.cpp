@@ -56,13 +56,6 @@ GameClientSlaveManager::GameClientSlaveManager(GameClientMasterTicker* pMaster, 
 
 GameClientSlaveManager::~GameClientSlaveManager()
 {
-	while (!mLoadingContextSet.empty())
-	{
-		UserGfxContextObjectInfoResource* lResource = *mLoadingContextSet.begin();
-		mLoadingContextSet.erase(mLoadingContextSet.begin());
-		delete (lResource);
-	}
-
 	Close();
 
 	mMaster = 0;
@@ -762,12 +755,14 @@ bool GameClientSlaveManager::CreateObject(Cure::GameObjectId pInstanceId, const 
 		if (!GetResourceManager()->IsCreated(pClassId))
 		{
 			mLog.Infof(_T("%s creating context object %s."), GetName().c_str(), pClassId.c_str());
-			ContextObjectInfo lObjectInfo(GetContext(), 0, pInstanceId, pNetworkType);
-			UserGfxContextObjectInfoResource* lResource = new UserGfxContextObjectInfoResource(lObjectInfo);
-			mLoadingContextSet.insert(lResource);
-			lResource->GetExtraData().mLoadingResource = lResource;
-			lResource->Load(GetResourceManager(), pClassId, UserGfxContextObjectInfoResource::TypeLoadCallback(
-				this, &GameClientSlaveManager::ContextLoadCallback));
+			Cure::ContextObject* lObject = YaddaYaddaCreate();
+			lObject->SetManager(GetContext());
+			lObject->SetInstanceId(pInstanceId);
+			lObject->SetNetworkObjectType(pNetworkType);
+			GetContext()->AddObject(mBoxResource);
+			GetContext()->EnableTickCallback(mBoxResource);
+			lObject->StartLoading();
+			...
 		}
 		else
 		{
@@ -921,26 +916,6 @@ Cure::RuntimeVariableScope* GameClientSlaveManager::GetVariableScope() const
 Cure::NetworkClient* GameClientSlaveManager::GetNetworkClient() const
 {
 	return ((Cure::NetworkClient*)GetNetworkAgent());
-}
-
-
-
-void GameClientSlaveManager::ContextLoadCallback(UserGfxContextObjectInfoResource* pResource)
-{
-	assert(mLoadingContextSet.find(pResource) != mLoadingContextSet.end());
-	mLoadingContextSet.erase(pResource);
-	if (pResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
-	{
-		Cure::ContextObject* lObject = pResource->GetRamData();
-		pResource->ReleaseRamResource();
-		GetContext()->AddObject(lObject);
-		GetContext()->EnableTickCallback(lObject);
-	}
-	else
-	{
-		mLog.AError("An error arised when loading data for a context object.");
-	}
-	GetResourceManager()->SafeRelease(pResource);
 }
 
 
