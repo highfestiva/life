@@ -25,6 +25,8 @@ public:
 	CppContextObject(const Lepra::String& pClassId, GameUiManager* pUiManager);
 	virtual ~CppContextObject();
 
+	void StartLoading();
+
 	void OnPhysicsTick();
 
 	bool StartLoadGraphics(Cure::UserResource* pParentResource);
@@ -32,31 +34,19 @@ public:
 	void DebugDrawAxes();
 
 private:
+	void OnLoadClass(UserClassResource* pClassResource);
 	void OnLoadMesh(UserGeometryReferenceResource* pMeshResource);
 	void OnLoadTexture(UserRendererImageResource* pTextureResource);
-
 	void TryAddTexture();
+	virtual void TryComplete();
 
 	GameUiManager* mUiManager;
+	UserClassResource* mUiClassResource;
 	typedef std::vector<UserGeometryReferenceResource*> MeshArray;
 	MeshArray mMeshResourceArray;
 	UserRendererImageResource mTextureResource;
 
 	LOG_CLASS_DECLARE();
-};
-
-
-
-class CppContextObjectFactory: public Cure::CppContextObjectFactory
-{
-public:
-	CppContextObjectFactory(GameUiManager* pUiManager);
-	virtual ~CppContextObjectFactory();
-
-	CppContextObject* Create(const Lepra::String& pClassId) const;
-
-private:
-	GameUiManager* mUiManager;
 };
 
 

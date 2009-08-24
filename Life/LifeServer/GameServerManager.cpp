@@ -40,15 +40,15 @@ GameServerManager::GameServerManager(Cure::RuntimeVariableScope* pVariableScope,
 	Lepra::InteractiveConsoleLogListener* pConsoleLogger):
 	Cure::GameManager(pVariableScope, pResourceManager, false),
 	mUserAccountManager(new Cure::MemoryUserAccountManager()),
-	mTerrainResource(0),
-	mBoxResource(0),
+	mTerrainObject(0),
+	mBoxObject(0),
 	mMovementArrayList(NETWORK_POSITIONAL_AHEAD_BUFFER_SIZE)
 {
 	ConsoleManager lConsole(0, Cure::GetSettings(), 0, 0);
 	lConsole.Init();
 	lConsole.ExecuteCommand(_T("execute-file -i ServerBase.lsh"));
 
-	GetResourceManager()->InitDefault(new Cure::CppContextObjectFactory());
+	GetResourceManager()->InitDefault();
 
 	GetContext()->SetIsObjectOwner(false);
 
@@ -271,16 +271,9 @@ bool GameServerManager::Initialize()
 
 	if (lOk)
 	{
-		assert(mBoxResource == 0);
-		TODO make common function for all of these.
-		mBoxResource = YaddaYaddaCreate();
-		mBoxResource->SetManager(GetContext());
-		mBoxResource->SetInstanceId(pInstanceId);
-		mBoxResource->SetNetworkObjectType(pNetworkType);
-		GetContext()->AddObject(mBoxResource);
-		GetContext()->EnableTickCallback(mBoxResource);
-		mBoxResource->StartLoading();
-		...
+		assert(mBoxObject == 0);
+		mBoxObject = Parent::CreateContextObject(_T("box_01"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, false);
+		((Cure::CppContextObject*)mBoxObject)->StartLoading();
 	}
 
 	Lepra::String lAcceptAddress = CURE_RTVAR_GETSET(GetVariableScope(), RTVAR_NETWORK_LISTEN_ADDRESS, _T("0.0.0.0:16650"));
@@ -311,15 +304,9 @@ bool GameServerManager::Initialize()
 
 bool GameServerManager::InitializeTerrain()
 {
-	assert(mTerrainResource == 0);
-	mTerrainResource = YaddaYaddaCreate();
-	mTerrainResource->SetManager(GetContext());
-	mTerrainResource->SetInstanceId(pInstanceId);
-	mTerrainResource->SetNetworkObjectType(pNetworkType);
-	GetContext()->AddObject(mBoxResource);
-	GetContext()->EnableTickCallback(mBoxResource);
-	mTerrainResource->StartLoading();
-	...
+	assert(mTerrainObject == 0);
+	mTerrainObject = Parent::CreateContextObject(_T("ground_01"), Cure::NETWORK_OBJECT_LOCAL_ONLY, false);
+	((Cure::CppContextObject*)mTerrainObject)->StartLoading();
 	return (true);
 }
 
@@ -499,16 +486,11 @@ void GameServerManager::OnLogin(Cure::UserConnection* pUserConnection)
 
 		const Cure::UserAccount::AvatarId& lAvatarId = *lAvatarIdSet->begin();
 		mLog.Info(_T("Loading avatar '")+lAvatarId+_T("' for user ")+Lepra::UnicodeStringUtility::ToCurrentCode(lClient->GetUserConnection()->GetLoginName())+_T("."));
-		lClient->mAvatar
-		lClient->mAvatar = YaddaYaddaCreate();
-		lClient->mAvatar->SetManager(GetContext());
-		lClient->mAvatar->SetInstanceId(pInstanceId);
-		lClient->mAvatar->SetNetworkObjectType(pNetworkType);
-		GetContext()->AddObject(mBoxResource);
-		GetContext()->EnableTickCallback(mBoxResource);
-		lClient->mAvatar->StartLoading();
-		...
-		BroadcastAvatar(lClient);	Must be async, once loaded.
+		Cure::ContextObject* lObject = Parent::CreateContextObject(lAvatarId,
+			Cure::NETWORK_OBJECT_REMOTE_CONTROLLED, false);
+		lClient->SetAvatarId(lObject->GetInstanceId());
+		lObject->SetExtraData((void*)(size_t)lClient->GetUserConnection()->GetAccountId());
+		((Cure::CppContextObject*)lObject)->StartLoading();
 	}
 	else
 	{
@@ -617,7 +599,7 @@ void GameServerManager::ApplyStoredMovement()
 
 void GameServerManager::BroadcastAvatar(Client* pClient)
 {
-	Cure::ContextObject* lObject = pClient->mAvatar;
+	Cure::ContextObject* lObject = GetContext()->GetObject(pClient->GetAvatarId());
 	Cure::GameObjectId lInstanceId = lObject->GetInstanceId();
 	mLog.Info(_T("User ")+Lepra::UnicodeStringUtility::ToCurrentCode(pClient->GetUserConnection()->GetLoginName())+_T(" login complete (avatar loaded)."));
 
@@ -629,6 +611,60 @@ void GameServerManager::BroadcastAvatar(Client* pClient)
 
 	BroadcastCreateObject(lObject);
 	SendCreateAllObjects(pClient);
+}
+
+
+
+Cure::ContextObject* GameServerManager::CreateContextObject(const Lepra::String& pClassId) const
+{
+	return (new Cure::CppContextObject(pClassId));
+}
+
+void GameServerManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
+{
+	Client* lClient = 0;
+	{
+		Cure::UserAccount::AccountId lAccountId = (Cure::UserAccount::AccountId)(size_t)pObject->GetExtraData();
+		if (lAccountId)
+		{
+			lClient = GetClientByAccount(lAccountId);
+			if (!lClient)
+			{
+				mLog.Errorf(_T("Error: client seems to have logged off before avatar %s got loaded."),
+					pObject->GetClassId().c_str());
+				delete (pObject);
+				return;
+			}
+		}
+	}
+	if (pOk)
+	{
+		if (lClient)
+		{
+			mLog.Infof(_T("Yeeha! Loaded avatar for %s."),
+				lClient->GetUserConnection()->GetLoginName().c_str());
+			BroadcastAvatar(lClient);
+		}
+		else
+		{
+			mLog.Infof(_T("Loaded object %s."), pObject->GetClassId().c_str());
+			OnPhysicsSend(pObject);
+		}
+	}
+	else
+	{
+		if (lClient)
+		{
+			mLog.Errorf(_T("Could not load avatar of type %s for user %s."),
+				pObject->GetClassId().c_str(), lClient->GetUserConnection()->GetLoginName().c_str());
+		}
+		else
+		{
+			mLog.Errorf(_T("Could not load object of type %s."), pObject->GetClassId().c_str());
+		}
+		assert(false);
+		delete (pObject);
+	}
 }
 
 void GameServerManager::OnCollision(const Lepra::Vector3DF& pForce, const Lepra::Vector3DF& pTorque,

@@ -48,7 +48,8 @@ size_t ChunkyClass::GetMeshCount() const
 	return (mMeshArray.size());
 }
 
-void ChunkyClass::GetMesh(size_t pIndex, int& pPhysIndex, Lepra::String& pMeshBaseName, Lepra::TransformationF& pTransform)
+void ChunkyClass::GetMesh(size_t pIndex, int& pPhysIndex, Lepra::String& pMeshBaseName,
+	Lepra::TransformationF& pTransform) const
 {
 	assert(pIndex < mMeshArray.size());
 	pPhysIndex = mMeshArray[pIndex].mPhysIndex;

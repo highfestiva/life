@@ -26,6 +26,7 @@ namespace UiCure
 CppContextObject::CppContextObject(const Lepra::String& pClassId, GameUiManager* pUiManager):
 	Cure::CppContextObject(pClassId),
 	mUiManager(pUiManager),
+	mUiClassResource(0),
 	mTextureResource(pUiManager)
 {
 	log_volatile(mLog.Tracef(_T("Construct CppCO %s."), pClassId.c_str()));
@@ -39,14 +40,28 @@ CppContextObject::~CppContextObject()
 		delete (*x);
 	}
 	mMeshResourceArray.clear();
+
+	delete (mUiClassResource);
+	mUiClassResource = 0;
+
 	mUiManager = 0;
+}
+
+
+
+void CppContextObject::StartLoading()
+{
+	assert(mUiClassResource == 0);
+	mUiClassResource = new UserClassResource(mUiManager);
+	mUiClassResource->LoadUnique(GetManager()->GetGameManager()->GetResourceManager(), GetClassId(),
+		UserClassResource::TypeLoadCallback(this, &CppContextObject::OnLoadClass));
 }
 
 
 
 void CppContextObject::OnPhysicsTick()
 {
-	if (!mStructure)
+	if (!mPhysics)
 	{
 		mLog.Warningf(_T("Physical body for %s not loaded!"), GetClassId().c_str());
 		return;
@@ -60,7 +75,7 @@ void CppContextObject::OnPhysicsTick()
 		{
 			continue;
 		}
-		TBC::ChunkyBoneGeometry* lGeometry = mStructure->GetBoneGeometry(lResource->GetOffset().mGeometryIndex);
+		TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(lResource->GetOffset().mGeometryIndex);
 		if (lGeometry == 0 || lGeometry->GetBodyId() == TBC::INVALID_BODY)
 		{
 			mLog.Warningf(_T("Physical body for %s not loaded!"), lResource->GetName().c_str());
@@ -310,10 +325,10 @@ bool CppContextObject::StartLoadGraphics(Cure::UserResource* pParentResource)
 
 void CppContextObject::DebugDrawAxes()
 {
-	const int lBoneCount = mStructure->GetBoneCount();
+	const int lBoneCount = mPhysics->GetBoneCount();
 	for (int x = 0; x < lBoneCount; ++x)
 	{
-		const TBC::ChunkyBoneGeometry* lGeometry = mStructure->GetBoneGeometry(x);
+		const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(x);
 		if (lGeometry->GetBodyId() != TBC::INVALID_BODY)
 		{
 			Lepra::TransformationF lPhysicsTransform;
@@ -332,6 +347,31 @@ void CppContextObject::DebugDrawAxes()
 }
 
 
+
+void CppContextObject::OnLoadClass(UserClassResource* pClassResource)
+{
+	const UiTbc::ChunkyClass* lClass = pClassResource->GetData();
+	StartLoadingPhysics(lClass->GetPhysicsBaseName());
+
+	Cure::ResourceManager* lResourceManager = GetManager()->GetGameManager()->GetResourceManager();
+	const size_t lMeshCount = lClass->GetMeshCount();
+	for (size_t x = 0; x < lMeshCount; ++x)
+	{
+		int lPhysIndex = -1;
+		Lepra::String lMeshName;
+		Lepra::TransformationF lTransform;
+		lClass->GetMesh(x, lPhysIndex, lMeshName, lTransform);
+		UiCure::UserGeometryReferenceResource* lMesh = new UiCure::UserGeometryReferenceResource(
+			mUiManager, UiCure::GeometryOffset(lPhysIndex, lTransform));
+		mMeshResourceArray.push_back(lMesh);
+		lMesh->LoadUnique(lResourceManager,
+			lMeshName+_T(".mesh"), UiCure::UserGeometryReferenceResource::TypeLoadCallback(this,
+				&CppContextObject::OnLoadMesh));
+	}
+	// TODO: not everybody should load the texture, not everybody should load *A* texture. Load from group file definition.
+	mTextureResource.Load(lResourceManager, _T("Checker.tga"),
+		UiCure::UserRendererImageResource::TypeLoadCallback(this, &CppContextObject::OnLoadTexture));
+}
 
 void CppContextObject::OnLoadMesh(UserGeometryReferenceResource* pMeshResource)
 {
@@ -359,8 +399,6 @@ void CppContextObject::OnLoadTexture(UserRendererImageResource* pTextureResource
 		assert(false);
 	}
 }
-
-
 
 void CppContextObject::TryAddTexture()
 {
@@ -396,24 +434,25 @@ void CppContextObject::TryAddTexture()
 	if (lLoadCount == mMeshResourceArray.size())
 	{
 		OnPhysicsTick();
+		TryComplete();
 	}
 }
 
-
-
-CppContextObjectFactory::CppContextObjectFactory(GameUiManager* pUiManager):
-	mUiManager(pUiManager)
+void CppContextObject::TryComplete()
 {
-}
-
-CppContextObjectFactory::~CppContextObjectFactory()
-{
-	mUiManager = 0;
-}
-
-CppContextObject* CppContextObjectFactory::Create(const Lepra::String& pClassId) const
-{
-	return (new CppContextObject(pClassId, mUiManager));
+	if (mTextureResource.GetLoadState() != Cure::RESOURCE_LOAD_COMPLETE)
+	{
+		return;
+	}
+	for (size_t x = 0;  x < mMeshResourceArray.size(); ++x)
+	{
+		UserGeometryReferenceResource* lMesh = mMeshResourceArray[x];
+		if (lMesh->GetLoadState() != Cure::RESOURCE_LOAD_COMPLETE)
+		{
+			return;
+		}
+	}
+	Parent::TryComplete();
 }
 
 

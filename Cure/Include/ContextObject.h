@@ -48,6 +48,9 @@ public:
 	NetworkObjectType GetNetworkObjectType() const;
 	void SetNetworkObjectType(NetworkObjectType pType);
 
+	void* GetExtraData() const;
+	void SetExtraData(void* pData);
+
 	void SetAllowMoveSelf(bool pAllow);
 	void AttachToObject(TBC::PhysicsManager::BodyID pBody1, ContextObject* pObject2, TBC::PhysicsManager::BodyID pBody2);
 	void AttachToObject(unsigned pBody1Index, ContextObject* pObject2, unsigned pBody2Index);
@@ -62,7 +65,7 @@ public:
 	float GetForwardSpeed() const;
 	float GetMass() const;
 
-	bool SetStructure(TBC::ChunkyPhysics* pStructure);
+	bool SetPhysics(TBC::ChunkyPhysics* pStructure);
 	TBC::ChunkyBoneGeometry* GetStructureGeometry(unsigned pIndex) const;
 	TBC::ChunkyBoneGeometry* GetStructureGeometry(TBC::PhysicsManager::BodyID pBodyId) const;
 	void SetEnginePower(unsigned pAspect, float pPower, float pAngle);
@@ -99,8 +102,9 @@ protected:
 	GameObjectId mInstanceId;
 	Lepra::String mClassId;
 	NetworkObjectType mNetworkObjectType;
+	void* mExtraData;
 	AttributeArray mAttributeArray;
-	TBC::ChunkyPhysics* mStructure;
+	TBC::ChunkyPhysics* mPhysics;
 	float mLastSendTime;
 	ObjectPositionalData mPosition;
 	int mSendCount;
@@ -108,15 +112,6 @@ protected:
 	ConnectionList mConnectionList;
 
 	LOG_CLASS_DECLARE();
-};
-
-
-
-class ContextObjectFactory
-{
-public:
-	virtual ContextObject* Create(const Lepra::String& pClassId) const = 0;
-	virtual bool CreatePhysics(ContextObject* pObject) const = 0;
 };
 
 

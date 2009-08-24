@@ -72,7 +72,7 @@ private:
 			lClass->GetMesh(x, lPhysIndex, lName, lTransform);
 			mMeshResourceArray.push_back(new UiCure::UserGeometryReferenceResource(
 				mUiManager, UiCure::GeometryOffset(lPhysIndex, lTransform)));
-			mMeshResourceArray[x]->LoadUnique(pResource->GetConstResource()->GetManager(),
+			mMeshResourceArray[x]->Load(pResource->GetConstResource()->GetManager(),
 				lName+_T(".mesh"),
 				UiCure::UserGeometryReferenceResource::TypeLoadCallback(this,
 					&ResourceTest::MeshRefLoadCallback));
@@ -120,7 +120,7 @@ ResourceTest::ResourceTest()
 	mUiManager->Open();
 	mUiManager->GetSoundManager()->SetMicrophonePosition(Lepra::Vector3DF(0, 0, 0));
 	mResourceManager = new Cure::ResourceManager(1);
-	mResourceManager->InitDefault(0);
+	mResourceManager->InitDefault();
 
 	mPhysicsResource = new Cure::UserPhysicsResource();
 }
@@ -253,7 +253,7 @@ bool ResourceTest::TestClass()
 	}
 	mMeshResourceArray.clear();
 	mResourceManager->StopClear();
-	mResourceManager->InitDefault(0);
+	mResourceManager->InitDefault();
 
 	ReportTestResult(mLog, _T("ResourceClass"), lContext, lTestOk);
 	return (lTestOk);
@@ -298,10 +298,10 @@ bool ResourceTest::TestStress()
 				new UiCure::UserGeometryReferenceResource(mUiManager, UiCure::GeometryOffset(0));
 			UiCure::UserGeometryReferenceResource* lMesh1 =
 				new UiCure::UserGeometryReferenceResource(mUiManager, UiCure::GeometryOffset(0));
-			lMesh0->LoadUnique(mResourceManager, _T(":tractor_01_rear_wheel0.mesh"),
+			lMesh0->Load(mResourceManager, _T("tractor_01_rear_wheel0.mesh"),
 				UiCure::UserGeometryReferenceResource::TypeLoadCallback(this,
 					&ResourceTest::MeshRefLoadCallback));
-			lMesh1->LoadUnique(mResourceManager, _T(":tractor_01_rear_wheel0.mesh"),
+			lMesh1->Load(mResourceManager, _T("tractor_01_rear_wheel0.mesh"),
 				UiCure::UserGeometryReferenceResource::TypeLoadCallback(this,
 					&ResourceTest::MeshRefLoadCallback));
 			delete (lMesh1);
@@ -456,13 +456,13 @@ bool ResourceTest::TestStress()
 			{
 				UiCure::UserGeometryReferenceResource* lMesh =
 					new UiCure::UserGeometryReferenceResource(mUiManager, UiCure::GeometryOffset(0));
-				lMesh->LoadUnique(mResourceManager, _T("tractor_01_front_wheel0.mesh"),
+				lMesh->Load(mResourceManager, _T("tractor_01_front_wheel0.mesh"),
 					UiCure::UserGeometryReferenceResource::TypeLoadCallback(this,
 						&ResourceTest::MeshRefLoadCallback));
 				lResources.push_back(lMesh);
 			}
 			size_t c = mResourceManager->QueryResourceCount();
-			assert(c == (size_t)(x*(lAddCount-lDecCount)+lAddCount+1));
+			assert(c == 1);
 			for (int z = 0; z < lDecCount; ++z)
 			{
 				int lDropIndex = Lepra::Random::GetRandomNumber()%lAddCount;
@@ -474,7 +474,7 @@ bool ResourceTest::TestStress()
 			}
 			TickRM lTick(mResourceManager);
 			c = mResourceManager->QueryResourceCount();
-			lTestOk = (c == (size_t)((x+1)*(lAddCount-lDecCount)+1));
+			lTestOk = (c == 1);
 			assert(lTestOk);
 		}
 		if (lTestOk)
@@ -528,7 +528,7 @@ bool TestUiCure()
 	bool lTestOk = true;
 	if (lTestOk)
 	{
-		//lTestOk = TestCure();
+		lTestOk = TestCure();
 	}
 	ResourceTest lResourceTest;
 	if (lTestOk)

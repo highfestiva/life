@@ -60,6 +60,9 @@ public:
 	TBC::PhysicsManager* GetPhysicsManager() const;
 	ConsoleManager* GetConsoleManager() const;
 
+	ContextObject* CreateContextObject(const Lepra::String& pClassId, NetworkObjectType pNetworkType,
+		bool pTick, GameObjectId pInstanceId = 0);
+	virtual void OnLoadCompleted(ContextObject* pObject, bool pOk) = 0;
 	virtual void OnCollision(const Lepra::Vector3DF& pForce, const Lepra::Vector3DF& pTorque,
 		ContextObject* pObject1, ContextObject* pObject2) = 0;
 	virtual void OnStopped(ContextObject* pObject, TBC::PhysicsManager::BodyID pBodyId) = 0;
@@ -80,6 +83,8 @@ protected:
 
 	virtual void TickInput() = 0;
 	virtual bool TickNetworkOutput();
+
+	virtual ContextObject* CreateContextObject(const Lepra::String& pClassId) const = 0;
 
 	void ReportPerformance(const Lepra::String& pHead, const Lepra::PerformanceData& pPerformance);
 

@@ -752,26 +752,15 @@ bool GameClientSlaveManager::CreateObject(Cure::GameObjectId pInstanceId, const 
 	//assert(!lPreviousObject);
 	if (!lPreviousObject)
 	{
-		if (!GetResourceManager()->IsCreated(pClassId))
-		{
-			mLog.Infof(_T("%s creating context object %s."), GetName().c_str(), pClassId.c_str());
-			Cure::ContextObject* lObject = YaddaYaddaCreate();
-			lObject->SetManager(GetContext());
-			lObject->SetInstanceId(pInstanceId);
-			lObject->SetNetworkObjectType(pNetworkType);
-			GetContext()->AddObject(mBoxResource);
-			GetContext()->EnableTickCallback(mBoxResource);
-			lObject->StartLoading();
-			...
-		}
-		else
-		{
-			log_volatile(mLog.Debugf(_T("Context object %s currently loading, skipping doubles."), pClassId.c_str()));
-		}
+		mLog.Infof(_T("%s creating context object %s."), GetName().c_str(), pClassId.c_str());
+		Cure::CppContextObject* lObject = (Cure::CppContextObject*)Parent::CreateContextObject(pClassId,
+			pNetworkType, false, pInstanceId);
+		lObject->StartLoading();
 	}
 	else
 	{
 		assert(lPreviousObject->GetClassId() == pClassId);
+		assert(false);
 	}
 	return (true);
 }
@@ -790,6 +779,32 @@ bool GameClientSlaveManager::DeleteObject(Cure::GameObjectId pInstanceId)
 		log_volatile(mLog.Debugf(_T("Could not delete context object %i, since not found."), pInstanceId));
 	}
 	return (lOk);
+}
+
+Cure::ContextObject* GameClientSlaveManager::CreateContextObject(const Lepra::String& pClassId) const
+{
+	return (new Cure::CppContextObject(pClassId));
+}
+
+void GameClientSlaveManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
+{
+	if (pOk)
+	{
+		if (pObject->GetInstanceId() == mAvatarId)
+		{
+			mLog.AInfo("Yeeha! Loaded avatar!");
+		}
+		else
+		{
+			mLog.Infof(_T("Loaded object %s."), pObject->GetClassId().c_str());
+		}
+	}
+	else
+	{
+		mLog.Errorf(_T("Could not load object of type %s."), pObject->GetClassId().c_str());
+		assert(false);
+		delete (pObject);
+	}
 }
 
 void GameClientSlaveManager::SetMovement(Cure::GameObjectId pInstanceId, Lepra::int32 pFrameIndex, Cure::ObjectPositionalData& pData)

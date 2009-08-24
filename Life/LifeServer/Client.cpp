@@ -5,6 +5,7 @@
 
 
 #include "Client.h"
+#include "../../Cure/Include/ContextObject.h"
 #include "../../Cure/Include/Cure.h"
 #include "../../Cure/Include/NetworkAgent.h"
 #include "../../Cure/Include/RuntimeVariable.h"
@@ -24,8 +25,6 @@ Client::Client(Cure::TimeManager* pTimeManager, Cure::NetworkAgent* pNetworkAgen
 	mTimeManager(pTimeManager),
 	mNetworkAgent(pNetworkAgent),
 	mUserConnection(pUserConnection),
-	mAvatarResource(ContextObjectAccountInfo(0, 0, 0, Cure::NETWORK_OBJECT_REMOTE_CONTROLLED,
-	pUserConnection->GetAccountId())),
 	mAvatarId(0),
 	mNetworkFrameLatencyArray(NETWORK_LATENCY_CALCULATION_ARRAY_SIZE, 0),
 	mNetworkFrameLatencyArrayIndex(0),
@@ -35,7 +34,6 @@ Client::Client(Cure::TimeManager* pTimeManager, Cure::NetworkAgent* pNetworkAgen
 	mStriveSendPauseFrameCount(-100000000),
 	mIgnoreStriveErrorTimeCounter(0)
 {
-	mAvatarResource.GetExtraData().mLoadingResource = &mAvatarResource;
 }
 
 Client::~Client()
@@ -71,11 +69,6 @@ Cure::GameObjectId Client::GetAvatarId() const
 void Client::SetAvatarId(Cure::GameObjectId pAvatarId)
 {
 	mAvatarId = pAvatarId;
-}
-
-UserContextObjectAccountInfoResource* Client::GetAvatarResource()
-{
-	return (&mAvatarResource);
 }
 
 

@@ -19,21 +19,60 @@ namespace Cure
 
 
 CppContextObject::CppContextObject(const Lepra::String& pClassId):
-	ContextObject(pClassId)
+	ContextObject(pClassId),
+	mClassResource(0),
+	mPhysicsResource(0)
 {
 }
 
 CppContextObject::~CppContextObject()
 {
+	delete (mPhysicsResource);
+	mPhysicsResource = 0;
+	delete (mClassResource);
+	mClassResource = 0;
+}
+
+
+
+void CppContextObject::StartLoading()
+{
+	assert(mClassResource == 0);
+	mClassResource = new UserClassResource();
+	mClassResource->LoadUnique(GetManager()->GetGameManager()->GetResourceManager(), GetClassId(),
+		UserClassResource::TypeLoadCallback(this, &CppContextObject::OnLoadClass));
+}
+
+
+
+void CppContextObject::StartLoadingPhysics(const Lepra::String& pPhysicsName)
+{
+	assert(mPhysicsResource == 0);
+	mPhysicsResource = new UserPhysicsResource();
+	mPhysicsResource->LoadUnique(GetManager()->GetGameManager()->GetResourceManager(), pPhysicsName,
+		UserPhysicsResource::TypeLoadCallback(this, &CppContextObject::OnLoadPhysics));
+}
+
+void CppContextObject::TryComplete()
+{
+	if (mClassResource->GetLoadState() == RESOURCE_LOAD_COMPLETE &&
+		mPhysicsResource->GetLoadState() == RESOURCE_LOAD_COMPLETE)
+	{
+		GetManager()->GetGameManager()->OnLoadCompleted(this, true);
+	}
+	else
+	{
+		GetManager()->GetGameManager()->OnLoadCompleted(this, false);
+	}
 }
 
 
 
 void CppContextObject::OnTick(float pFrameTime)
 {
-	if (mStructure)
+	if (mPhysics)
 	{
-		mStructure->OnTick(GetManager()->GetGameManager()->GetPhysicsManager(), pFrameTime);
+		mPhysics->OnTick(GetManager()->GetGameManager()->GetPhysicsManager(), pFrameTime);
 	}
 }
 
@@ -67,20 +106,34 @@ void CppContextObject::OnForceApplied(TBC::PhysicsManager::ForceFeedbackListener
 
 
 
-CppContextObjectFactory::CppContextObjectFactory()
+void CppContextObject::OnLoadClass(UserClassResource* pClassResource)
 {
+	if (pClassResource->GetLoadState() != RESOURCE_LOAD_COMPLETE)
+	{
+		mLog.Errorf(_T("Could not load class '%s'."), pClassResource->GetName().c_str());
+		assert(false);
+		return;
+	}
+
+	StartLoadingPhysics(pClassResource->GetData()->GetPhysicsBaseName());
 }
 
-CppContextObjectFactory::~CppContextObjectFactory()
+void CppContextObject::OnLoadPhysics(UserPhysicsResource* pPhysicsResource)
 {
+	if (pPhysicsResource->GetLoadState() != RESOURCE_LOAD_COMPLETE)
+	{
+		mLog.Errorf(_T("Could not physics class '%s'."), pPhysicsResource->GetName().c_str());
+		assert(false);
+		return;
+	}
+
+	SetPhysics(pPhysicsResource->GetData());
+	TryComplete();
 }
 
-ContextObject* CppContextObjectFactory::Create(const Lepra::String& pClassId) const
-{
-	return (new CppContextObject(pClassId));
-}
 
-bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject) const
+
+/*bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject) const
 {
 	// TODO: go away! Use world loader/spawn engine instead.
 
@@ -137,7 +190,7 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject) const
 	}
 	if (lOk)
 	{
-		lOk = pObject->SetStructure(lStructure);
+		lOk = pObject->SetPhysics(lStructure);
 		assert(lOk);
 	}
 	if (lOk && lStructure->GetPhysicsType() != TBC::ChunkyPhysics::STATIC)
@@ -150,12 +203,11 @@ bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject) const
 	}
 
 	return (lOk);
-}
+}*/
 
 
 
 LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, CppContextObject);
-LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, CppContextObjectFactory);
 
 
 

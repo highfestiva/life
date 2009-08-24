@@ -86,6 +86,8 @@ private:
 	void ProcessNumber(Cure::MessageNumber::InfoType pType, Lepra::int32 pInteger, Lepra::float32 pFloat);
 	bool CreateObject(Cure::GameObjectId pObjectId, const Lepra::String& pClassId, Cure::NetworkObjectType pNetworkType);
 	bool DeleteObject(Cure::GameObjectId pObjectId);
+	Cure::ContextObject* CreateContextObject(const Lepra::String& pClassId) const;
+	void OnLoadCompleted(Cure::ContextObject* pObject, bool pOk);
 	void SetMovement(Cure::GameObjectId pObjectId, Lepra::int32 pFrameIndex, Cure::ObjectPositionalData& pData);
 	void OnCollision(const Lepra::Vector3DF& pForce, const Lepra::Vector3DF& pTorque,
 		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2);

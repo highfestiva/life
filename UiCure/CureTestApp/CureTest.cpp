@@ -136,7 +136,7 @@ bool TerrainTest::Test()
 	bool lTestOk = true;
 
 	Cure::ResourceManager* lResourceManager = new Cure::ResourceManager(1);
-	lResourceManager->InitDefault(0);
+	lResourceManager->InitDefault();
 	Cure::TerrainManager lTerrainManager(lResourceManager);	// Creates the TerrainFunctionManager and throws it at the resource manager.
 
 	// Test loading terrain by simply placing a camera.

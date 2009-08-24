@@ -276,7 +276,7 @@ bool GameClientMasterTicker::Reinitialize()
 	Lepra::SystemManager::SetQuitRequest(lQuit);
 
 	// Reopen.
-	bool lOk = mResourceManager->InitDefault(new UiCure::CppContextObjectFactory(mUiManager));
+	bool lOk = mResourceManager->InitDefault();
 	if (lOk)
 	{
 		lOk = mUiManager->Open();

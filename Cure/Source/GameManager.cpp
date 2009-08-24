@@ -209,6 +209,30 @@ ConsoleManager* GameManager::GetConsoleManager() const
 
 
 
+ContextObject* GameManager::CreateContextObject(const Lepra::String& pClassId, NetworkObjectType pNetworkType,
+	bool pTick, GameObjectId pInstanceId)
+{
+	ContextObject* lObject = CreateContextObject(pClassId);
+	lObject->SetManager(GetContext());
+	lObject->SetNetworkObjectType(pNetworkType);
+	if (pInstanceId)
+	{
+		lObject->SetInstanceId(pInstanceId);
+	}
+	else
+	{
+		lObject->SetInstanceId(GetContext()->AllocateGameObjectId(pNetworkType));
+	}
+	GetContext()->AddObject(lObject);
+	if (pTick)
+	{
+		GetContext()->EnableTickCallback(lObject);
+	}
+	return (lObject);
+}
+
+
+
 void GameManager::ReportPerformance(double pReportInterval)
 {
 	mPerformanceReportTimer.UpdateTimer();

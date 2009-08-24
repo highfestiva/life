@@ -12,6 +12,7 @@
 
 namespace Cure
 {
+class ContextObject;
 class NetworkAgent;
 class TimeManager;
 class UserConnection;
@@ -35,7 +36,6 @@ public:
 
 	Cure::GameObjectId GetAvatarId() const;
 	void SetAvatarId(Cure::GameObjectId pAvatarId);
-	Cure::ContextObject* GetAvatarResource();
 
 	void StoreFrameDiff(int pFrameDiff);
 	void QuerySendStriveTimes();

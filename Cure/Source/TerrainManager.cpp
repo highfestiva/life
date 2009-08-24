@@ -137,7 +137,8 @@ void TerrainManager::UpdatePatchTree()
 		// TODO: remove dummy code.
 		log_atrace("Loading terrain patch.");
 		UserPhysicalTerrainResource* pDummyTerrainResource = new UserPhysicalTerrainResource();
-		pDummyTerrainResource->Load(mResourceManager, _T("DummyTerainPatch"), UserPhysicalTerrainResource::TypeLoadCallback(this, &TerrainManager::TerrainPatchLoadCallback));
+		pDummyTerrainResource->Load(mResourceManager, _T("DummyTerainPatch"),
+			UserPhysicalTerrainResource::TypeLoadCallback(this, &TerrainManager::TerrainPatchLoadCallback));
 	}
 
 	// Walk through all patches+functions and delete those marked as "not used".

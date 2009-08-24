@@ -473,7 +473,6 @@ LOG_CLASS_DEFINE(PHYSICS, PhysicalTerrainResource);
 
 
 ResourceManager::ResourceManager(unsigned pLoaderThreadCount):
-	mContextObjectFactory(0),
 	mTerrainFunctionManager(0),
 	mLoaderThreadCount(pLoaderThreadCount),
 	mLoaderThread(_T("ResourceLoader"))
@@ -483,14 +482,12 @@ ResourceManager::ResourceManager(unsigned pLoaderThreadCount):
 ResourceManager::~ResourceManager()
 {
 	StopClear();
-	SetContextObjectFactory(0);
 	SetTerrainFunctionManager(0);
 }
 
-bool ResourceManager::InitDefault(ContextObjectFactory* pContextObjectFactory)
+bool ResourceManager::InitDefault()
 {
 	// Resources below deleted in the resource manager destructor.
-	SetContextObjectFactory(pContextObjectFactory);
 	SetTerrainFunctionManager(new TerrainFunctionManager());
 	return (mLoaderThread.Start(this, &ResourceManager::ThreadLoaderLoop));
 }
@@ -540,20 +537,6 @@ void ResourceManager::StopClear()
 }
 
 
-
-ContextObjectFactory* ResourceManager::GetContextObjectFactory() const
-{
-	return (mContextObjectFactory);
-}
-
-void ResourceManager::SetContextObjectFactory(ContextObjectFactory* pContextObjectFactory)
-{
-	if (mContextObjectFactory)
-	{
-		delete (mContextObjectFactory);
-	}
-	mContextObjectFactory = pContextObjectFactory;
-}
 
 TerrainFunctionManager* ResourceManager::GetTerrainFunctionManager() const
 {

@@ -5,14 +5,12 @@
 #pragma once
 
 #include "ContextObject.h"
+#include "ResourceManager.h"
 
 
 
 namespace Cure
 {
-
-
-class GameManager;
 
 
 
@@ -22,6 +20,13 @@ public:
 	CppContextObject(const Lepra::String& pClassId);
 	virtual ~CppContextObject();
 
+	void StartLoading();
+
+protected:
+	void StartLoadingPhysics(const Lepra::String& pPhysicsName);
+
+	virtual void TryComplete();
+
 private:
 	void OnTick(float pFrameTime);
 	void OnAlarm(int pAlarmId);
@@ -29,22 +34,11 @@ private:
 	void OnForceApplied(TBC::PhysicsManager::ForceFeedbackListener* pOtherObject,
 		const Lepra::Vector3DF& pForce, const Lepra::Vector3DF& pTorque);
 
-	LOG_CLASS_DECLARE();
-};
+	void OnLoadClass(UserClassResource* pClassResource);
+	void OnLoadPhysics(UserPhysicsResource* pPhysicsResource);
 
-
-
-class CppContextObjectFactory: public ContextObjectFactory
-{
-public:
-	CppContextObjectFactory();
-	virtual ~CppContextObjectFactory();
-
-protected:
-	ContextObject* Create(const Lepra::String& pClassId) const;
-	bool CreatePhysics(ContextObject* pObject) const;
-
-private:
+	UserClassResource* mClassResource;
+	UserPhysicsResource* mPhysicsResource;
 	LOG_CLASS_DECLARE();
 };
 

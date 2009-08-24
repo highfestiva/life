@@ -33,8 +33,6 @@ namespace Cure
 
 
 
-class ContextObject;
-class ContextObjectFactory;
 class Resource;
 class ResourceManager;
 class TerrainFunctionManager;
@@ -200,7 +198,8 @@ private:
 };
 
 
-template<class RamData> class RamResource: public Resource
+template<class RamData>
+class RamResource: public Resource
 {
 public:
 	typedef RamData UserRamData;
@@ -222,7 +221,8 @@ private:
 
 // NOTE: An optimized resource is usually a resource which is stored in other memory
 // other than the internal RAM. E.g. textures and images uploaded to the graphics memory.
-template<class RamData, class OptimizedData> class OptimizedResource: public RamResource<RamData>
+template<class RamData, class OptimizedData>
+class OptimizedResource: public RamResource<RamData>
 {
 public:
 	OptimizedResource(ResourceManager* pManager, const Lepra::String& pName);
@@ -238,7 +238,8 @@ protected:
 
 // A type of resource that needs it's own clone data, but has much in common with
 // the related clones. Used for sounds.
-template<class RamData, class DiversifiedData> class DiversifiedResource: public RamResource<RamData>
+template<class RamData, class DiversifiedData>
+class DiversifiedResource: public RamResource<RamData>
 {
 public:
 	DiversifiedResource(ResourceManager* pManager, const Lepra::String& pName);
@@ -287,7 +288,8 @@ public:
 
 
 
-template<class _Class, class _ClassLoader> class ClassResourceBase: public RamResource<_Class*>
+template<class _Class, class _ClassLoader>
+class ClassResourceBase: public RamResource<_Class*>
 {
 	typedef RamResource<_Class*> Parent;
 public:
@@ -351,8 +353,9 @@ private:
 
 
 typedef UserTypeResource<PhysicsResource>		UserPhysicsResource;
+typedef UserTypeResource<ClassResource>			UserClassResource;
 //typedef UserTypeResource<TBC::...>			UserAnimationResource;
-//typedef UserTypeResource<ContextObjectResource>		UserContextObjectResource;
+//typedef UserTypeResource<ContextObjectResource>	UserContextObjectResource;
 typedef UserTypeResource<PhysicalTerrainResource>	UserPhysicalTerrainResource;
 
 
@@ -365,11 +368,9 @@ public:
 
 	ResourceManager(unsigned pLoaderThreadCount);
 	virtual ~ResourceManager();
-	bool InitDefault(ContextObjectFactory* pContextObjectFactory);
+	bool InitDefault();
 	void StopClear();
 
-	ContextObjectFactory* GetContextObjectFactory() const;
-	void SetContextObjectFactory(ContextObjectFactory* pContextObjectFactory);
 	TerrainFunctionManager* GetTerrainFunctionManager() const;
 	void SetTerrainFunctionManager(TerrainFunctionManager* pTerrainFunctionManager);	// May not be changed while its resources are loaded.
 
@@ -421,7 +422,6 @@ private:
 	typedef Lepra::OrderedMap<Resource*, Resource*, std::hash<void*> > ResourceMapList;
 	typedef std::set<Resource*> ResourceSet;
 
-	ContextObjectFactory* mContextObjectFactory;
 	TerrainFunctionManager* mTerrainFunctionManager;
 
 	unsigned mLoaderThreadCount;

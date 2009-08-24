@@ -66,6 +66,8 @@ private:
 
 	void BroadcastAvatar(Client* pClient);
 
+	Cure::ContextObject* CreateContextObject(const Lepra::String& pClassId) const;
+	void OnLoadCompleted(Cure::ContextObject* pObject, bool pOk);
 	void OnCollision(const Lepra::Vector3DF& pForce, const Lepra::Vector3DF& pTorque,
 		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2);
 	void OnStopped(Cure::ContextObject* pObject, TBC::PhysicsManager::BodyID pBodyId);
@@ -90,8 +92,8 @@ private:
 
 	Cure::UserAccountManager* mUserAccountManager;
 	AccountClientTable mAccountClientTable;
-	Cure::ContextObject* mTerrainResource;	// TODO: remove when applicable.
-	Cure::ContextObject* mBoxResource;	// TODO: remove when applicable.
+	Cure::ContextObject* mTerrainObject;	// TODO: remove when applicable.
+	Cure::ContextObject* mBoxObject;	// TODO: remove when applicable.
 	MovementArrayList mMovementArrayList;
 	mutable Lepra::Timer mPowerSaveTimer;
 
