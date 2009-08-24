@@ -23,6 +23,7 @@ public:
 	void StartLoading();
 
 protected:
+	void __StartLoadingFuckedUpPhysicsRemoveMe(Cure::UserResource* pClassResource, const TBC::ChunkyClass* pClass);
 	void StartLoadingPhysics(const Lepra::String& pPhysicsName);
 
 	virtual void TryComplete();

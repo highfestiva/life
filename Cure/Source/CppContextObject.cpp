@@ -18,6 +18,41 @@ namespace Cure
 
 
 
+static Lepra::String RemoveMeTranslateToHardcodedShit(CppContextObject* pObject)
+{
+	if (pObject->GetClassId().find(_T("box_002")) != Lepra::String::npos)
+	{
+		return (_T("box_01"));
+	}
+	else if (pObject->GetClassId().find(_T("sphere_002")) != Lepra::String::npos)
+	{
+		return (_T("sphere_01"));
+	}
+	else if (pObject->GetClassId().find(_T("car_001")) != Lepra::String::npos)
+	{
+		return (_T("car_01"));
+	}
+	else if (pObject->GetClassId().find(_T("monster_001")) != Lepra::String::npos)
+	{
+		return (_T("monster_01"));
+	}
+	else if (pObject->GetClassId().find(_T("excavator_703")) != Lepra::String::npos)
+	{
+		return (_T("excavator_01"));
+	}
+	else if (pObject->GetClassId().find(_T("crane_whatever")) != Lepra::String::npos)
+	{
+		return (_T("crane_01"));
+	}
+	else if (pObject->GetClassId().find(_T("ground_002")) != Lepra::String::npos)
+	{
+		return (_T("world_01"));
+	}
+	return (Lepra::EmptyString);
+}
+
+
+
 CppContextObject::CppContextObject(const Lepra::String& pClassId):
 	ContextObject(pClassId),
 	mClassResource(0),
@@ -45,18 +80,40 @@ void CppContextObject::StartLoading()
 
 
 
+void CppContextObject::__StartLoadingFuckedUpPhysicsRemoveMe(Cure::UserResource* pClassResource, const TBC::ChunkyClass* pClass)
+{
+	Lepra::String lPhysics;
+	if (pClassResource->GetLoadState() != RESOURCE_LOAD_COMPLETE)
+	{
+		lPhysics = RemoveMeTranslateToHardcodedShit(this);
+		if (lPhysics.empty())
+		{
+			mLog.Errorf(_T("Could not load class '%s'."), pClassResource->GetName().c_str());
+			assert(false);
+			return;
+		}
+	}
+	else
+	{
+		lPhysics = pClass->GetPhysicsBaseName();
+	}
+
+	StartLoadingPhysics(lPhysics);
+}
+
 void CppContextObject::StartLoadingPhysics(const Lepra::String& pPhysicsName)
 {
 	assert(mPhysicsResource == 0);
 	mPhysicsResource = new UserPhysicsResource();
-	mPhysicsResource->LoadUnique(GetManager()->GetGameManager()->GetResourceManager(), pPhysicsName,
+	const Lepra::String lAssetName = _T("../../Data/")+pPhysicsName+_T(".phys");	// TODO: move to central source file.
+	mPhysicsResource->LoadUnique(GetManager()->GetGameManager()->GetResourceManager(), lAssetName,
 		UserPhysicsResource::TypeLoadCallback(this, &CppContextObject::OnLoadPhysics));
 }
 
 void CppContextObject::TryComplete()
 {
-	if (mClassResource->GetLoadState() == RESOURCE_LOAD_COMPLETE &&
-		mPhysicsResource->GetLoadState() == RESOURCE_LOAD_COMPLETE)
+	//if (mClassResource->GetLoadState() == RESOURCE_LOAD_COMPLETE &&	TODO: check this!!!
+	if (	mPhysicsResource->GetLoadState() == RESOURCE_LOAD_COMPLETE)
 	{
 		GetManager()->GetGameManager()->OnLoadCompleted(this, true);
 	}
@@ -108,14 +165,7 @@ void CppContextObject::OnForceApplied(TBC::PhysicsManager::ForceFeedbackListener
 
 void CppContextObject::OnLoadClass(UserClassResource* pClassResource)
 {
-	if (pClassResource->GetLoadState() != RESOURCE_LOAD_COMPLETE)
-	{
-		mLog.Errorf(_T("Could not load class '%s'."), pClassResource->GetName().c_str());
-		assert(false);
-		return;
-	}
-
-	StartLoadingPhysics(pClassResource->GetData()->GetPhysicsBaseName());
+	__StartLoadingFuckedUpPhysicsRemoveMe(pClassResource, pClassResource->GetData());
 }
 
 void CppContextObject::OnLoadPhysics(UserPhysicsResource* pPhysicsResource)
@@ -140,31 +190,31 @@ void CppContextObject::OnLoadPhysics(UserPhysicsResource* pPhysicsResource)
 	Lepra::String lAssetName;
 	if (pObject->GetClassId().find(_T("box_002")) != Lepra::String::npos)
 	{
-		lAssetName = _T("box_01.phys");
+		return (_T("box_01");
 	}
 	else if (pObject->GetClassId().find(_T("sphere_002")) != Lepra::String::npos)
 	{
-		lAssetName = _T("sphere_01.phys");
+		return (_T("sphere_01");
 	}
 	else if (pObject->GetClassId().find(_T("car_001")) != Lepra::String::npos)
 	{
-		lAssetName = _T("car_01.phys");
+		return (_T("car_01");
 	}
 	else if (pObject->GetClassId().find(_T("monster_001")) != Lepra::String::npos)
 	{
-		lAssetName = _T("monster_01.phys");
+		return (_T("monster_01");
 	}
 	else if (pObject->GetClassId().find(_T("excavator_703")) != Lepra::String::npos)
 	{
-		lAssetName = _T("excavator_01.phys");
+		return (_T("excavator_01");
 	}
 	else if (pObject->GetClassId().find(_T("crane_whatever")) != Lepra::String::npos)
 	{
-		lAssetName = _T("crane_01.phys");
+		return (_T("crane_01");
 	}
 	else if (pObject->GetClassId().find(_T("ground_002")) != Lepra::String::npos)
 	{
-		lAssetName = _T("world_01.phys");
+		return (_T("world_01");
 	}
 	else
 	{

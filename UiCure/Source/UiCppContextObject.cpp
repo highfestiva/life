@@ -325,6 +325,11 @@ bool CppContextObject::StartLoadGraphics(Cure::UserResource* pParentResource)
 
 void CppContextObject::DebugDrawAxes()
 {
+	if (!mPhysics)
+	{
+		return;
+	}
+
 	const int lBoneCount = mPhysics->GetBoneCount();
 	for (int x = 0; x < lBoneCount; ++x)
 	{
@@ -350,8 +355,16 @@ void CppContextObject::DebugDrawAxes()
 
 void CppContextObject::OnLoadClass(UserClassResource* pClassResource)
 {
+	/* TODO: put me back!
+	if (lResource->GetLoadState() != RESOURCE_LOAD_COMPLETE)
+	{
+		mLog.Errorf(_T("Could not load class '%s'."), pClassResource->GetName().c_str());
+		assert(false);
+		return;
+	}*/
+
 	const UiTbc::ChunkyClass* lClass = pClassResource->GetData();
-	StartLoadingPhysics(lClass->GetPhysicsBaseName());
+	__StartLoadingFuckedUpPhysicsRemoveMe(pClassResource, lClass);
 
 	Cure::ResourceManager* lResourceManager = GetManager()->GetGameManager()->GetResourceManager();
 	const size_t lMeshCount = lClass->GetMeshCount();

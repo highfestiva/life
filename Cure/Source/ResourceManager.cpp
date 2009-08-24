@@ -506,6 +506,8 @@ void ResourceManager::StopClear()
 	}
 	mLoaderThread.Kill();
 
+	Lepra::ScopeLock lLock(&mThreadLock);	// Just here for mutex lock verification.
+
 	// Free memory.
 	ForceFreeCache();	// Must be before and after active resources' are deleted (caused by hierarchical resource structures).
 	while (!mActiveResourceTable.IsEmpty())

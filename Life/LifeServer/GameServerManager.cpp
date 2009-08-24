@@ -50,7 +50,7 @@ GameServerManager::GameServerManager(Cure::RuntimeVariableScope* pVariableScope,
 
 	GetResourceManager()->InitDefault();
 
-	GetContext()->SetIsObjectOwner(false);
+	//GetContext()->SetIsObjectOwner(false);
 
 	SetNetworkAgent(new Cure::NetworkServer(pVariableScope, this));
 
@@ -272,7 +272,7 @@ bool GameServerManager::Initialize()
 	if (lOk)
 	{
 		assert(mBoxObject == 0);
-		mBoxObject = Parent::CreateContextObject(_T("box_01"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, false);
+		mBoxObject = Parent::CreateContextObject(_T("box_002"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, false);
 		((Cure::CppContextObject*)mBoxObject)->StartLoading();
 	}
 
@@ -305,7 +305,7 @@ bool GameServerManager::Initialize()
 bool GameServerManager::InitializeTerrain()
 {
 	assert(mTerrainObject == 0);
-	mTerrainObject = Parent::CreateContextObject(_T("ground_01"), Cure::NETWORK_OBJECT_LOCAL_ONLY, false);
+	mTerrainObject = Parent::CreateContextObject(_T("ground_002"), Cure::NETWORK_OBJECT_LOCAL_ONLY, false);
 	((Cure::CppContextObject*)mTerrainObject)->StartLoading();
 	return (true);
 }

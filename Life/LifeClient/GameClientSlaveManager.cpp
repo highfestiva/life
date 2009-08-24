@@ -783,7 +783,7 @@ bool GameClientSlaveManager::DeleteObject(Cure::GameObjectId pInstanceId)
 
 Cure::ContextObject* GameClientSlaveManager::CreateContextObject(const Lepra::String& pClassId) const
 {
-	return (new Cure::CppContextObject(pClassId));
+	return (new UiCure::CppContextObject(pClassId, mUiManager));
 }
 
 void GameClientSlaveManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
