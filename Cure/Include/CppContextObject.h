@@ -25,7 +25,7 @@ protected:
 
 	virtual void StartLoading();
 	void StartLoadingPhysics(const Lepra::String& pPhysicsName);
-	virtual void TryComplete();
+	virtual bool TryComplete();
 
 	TBC::ChunkyPhysics* GetPhysics() const;
 

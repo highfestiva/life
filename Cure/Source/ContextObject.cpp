@@ -741,7 +741,7 @@ bool ContextObject::SetPhysics(TBC::ChunkyPhysics* pStructure)
 
 	// TODO: drop hard-coding, this should come from world loader or spawn engine?
 	Lepra::TransformationF lTransformation;
-	if (GetNetworkObjectType() == NETWORK_OBJECT_REMOTE_CONTROLLED)
+	if (GetNetworkObjectType() != NETWORK_OBJECT_LOCAL_ONLY)
 	{
 		const float lX = (float)Lepra::Random::Uniform(-200, 200);
 		const float lY = (float)Lepra::Random::Uniform(-200, 200);

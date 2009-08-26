@@ -54,7 +54,8 @@ void CppContextObject::StartLoading()
 {
 	assert(mUiClassResource == 0);
 	mUiClassResource = new UserClassResource(mUiManager);
-	mUiClassResource->LoadUnique(GetManager()->GetGameManager()->GetResourceManager(), GetClassId(),
+	const Lepra::String lAssetName = _T("../../Data/")+GetClassId()+_T(".class");	// TODO: move to central source file.
+	mUiClassResource->LoadUnique(GetManager()->GetGameManager()->GetResourceManager(), lAssetName,
 		UserClassResource::TypeLoadCallback(this, &CppContextObject::OnLoadClass));
 }
 
@@ -237,6 +238,10 @@ void CppContextObject::OnLoadClass(UserClassResource* pClassResource)
 		assert(false);
 		return;*/
 	}
+	else
+	{
+		StartLoadingPhysics(lClass->GetPhysicsBaseName());
+	}
 
 	assert(mMeshLoadCount == 0);
 	Cure::ResourceManager* lResourceManager = GetManager()->GetGameManager()->GetResourceManager();
@@ -252,7 +257,7 @@ void CppContextObject::OnLoadClass(UserClassResource* pClassResource)
 			mUiManager, UiCure::GeometryOffset(lPhysIndex, lTransform));
 		mMeshResourceArray.push_back(lMesh);
 		lMesh->Load(lResourceManager,
-			lMeshName+_T(".mesh"), UiCure::UserGeometryReferenceResource::TypeLoadCallback(this,
+			_T("../../Data/")+lMeshName+_T(".mesh"), UiCure::UserGeometryReferenceResource::TypeLoadCallback(this,
 				&CppContextObject::OnLoadMesh));
 	}
 	// TODO: not everybody should load the texture, not everybody should load *A* texture. Load from group file definition.
@@ -325,24 +330,33 @@ void CppContextObject::TryAddTexture()
 	}
 }
 
-void CppContextObject::TryComplete()
+bool CppContextObject::TryComplete()
 {
+	if (!mUiClassResource)
+	{
+		return (false);
+	}
 	if (mTextureResource.GetLoadState() != Cure::RESOURCE_LOAD_COMPLETE)
 	{
-		return;
+		return (false);
 	}
 	// Meshes must be both 1) all attempted, and 2) all loaded OK.
 	if (mMeshLoadCount != mMeshResourceArray.size())
 	{
-		return;
+		return (false);
 	}
 	for (size_t x = 0;  x < mMeshResourceArray.size(); ++x)
 	{
 		UserGeometryReferenceResource* lMesh = mMeshResourceArray[x];
 		if (lMesh->GetLoadState() != Cure::RESOURCE_LOAD_COMPLETE)
 		{
-			return;
+			return (false);
 		}
+	}
+
+	if (!Parent::TryComplete())
+	{
+		return (false);
 	}
 
 	OnPhysicsTick();
@@ -350,9 +364,7 @@ void CppContextObject::TryComplete()
 	{
 		GetManager()->EnablePhysicsUpdateCallback(this);	// TODO: clear out this mess. How to use these two callback types?
 	}
-
-	Parent::TryComplete();
-
+	return (true);
 }
 
 
