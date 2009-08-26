@@ -700,7 +700,9 @@ class GroupReader(DefaultMAReader):
 
         def _resolve_phys(self, phys, group):
                 phys.phys_parent = None
-                phys.phys_children = []
+                if not hasattr(phys, "phys_children"):
+                        phys.phys_children = []
+                        print("Reset self=", phys)
                 if phys.getParent() == group[0]:
                         return True
                 parent = phys.getParent()
@@ -721,14 +723,18 @@ class GroupReader(DefaultMAReader):
                         elif len(phys_nodes) == 1:
                                 parent = phys_nodes[0]
                                 break
+                print("Phys %s has parent:" % phys.getFullName(), parent)
                 if parent == None:
                         print("Error: phys node '%s' has no related parent phys node higher up in the hierarchy." % phys.getFullName())
                         return False
                 phys.phys_parent = parent
                 if not hasattr(parent, "phys_children"):
+                        print("Init parent", parent, "with self=", phys)
                         parent.phys_children = [phys]
                 else:
+                        print("Adding self=", phys, "to parent.")
                         parent.phys_children += [phys]
+                        print(parent.phys_children)
                 return True
 
 

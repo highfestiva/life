@@ -46,7 +46,7 @@ private:
 	void OnLoadMesh(UserGeometryReferenceResource* pMeshResource);
 	void OnLoadTexture(UserRendererImageResource* pTextureResource);
 	void TryAddTexture();
-	virtual void TryComplete();
+	virtual bool TryComplete();
 
 	GameUiManager* mUiManager;
 	UserClassResource* mUiClassResource;

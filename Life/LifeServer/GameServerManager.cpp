@@ -262,14 +262,29 @@ bool GameServerManager::Initialize()
 				lOk = mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("crane_whatever")));
 			}
 		}
+		for (x = 0; lOk && x < 100; ++x)
+		{
+			const Lepra::UnicodeString lUserName = Lepra::UnicodeStringUtility::Format(L"Tractor%i", x);
+			Lepra::UnicodeString lReadablePassword(L"CarPassword");
+			Cure::MangledPassword lPassword(lReadablePassword);
+			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
+			if (lOk)
+			{
+				lOk = mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("tractor_01")));
+			}
+		}
 	}
 
 	if (lOk)
 	{
 		assert(mBoxObject == 0);
-		mBoxObject = Parent::CreateContextObject(_T("box_002"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, false);
+		mBoxObject = Parent::CreateContextObject(_T("box_002"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
 		mBoxObject->StartLoading();
 	}
+
+	// TODO: remove!!!
+	Cure::ContextObject* lTractor = Parent::CreateContextObject(_T("tractor_01"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
+	lTractor->StartLoading();
 
 	Lepra::String lAcceptAddress = CURE_RTVAR_GETSET(GetVariableScope(), RTVAR_NETWORK_LISTEN_ADDRESS, _T("0.0.0.0:16650"));
 	if (lOk)
@@ -300,7 +315,7 @@ bool GameServerManager::Initialize()
 bool GameServerManager::InitializeTerrain()
 {
 	assert(mTerrainObject == 0);
-	mTerrainObject = Parent::CreateContextObject(_T("ground_002"), Cure::NETWORK_OBJECT_LOCAL_ONLY, false);
+	mTerrainObject = Parent::CreateContextObject(_T("ground_002"), Cure::NETWORK_OBJECT_LOCAL_ONLY);
 	mTerrainObject->StartLoading();
 	return (true);
 }
@@ -482,7 +497,7 @@ void GameServerManager::OnLogin(Cure::UserConnection* pUserConnection)
 		const Cure::UserAccount::AvatarId& lAvatarId = *lAvatarIdSet->begin();
 		mLog.Info(_T("Loading avatar '")+lAvatarId+_T("' for user ")+Lepra::UnicodeStringUtility::ToCurrentCode(lClient->GetUserConnection()->GetLoginName())+_T("."));
 		Cure::ContextObject* lObject = Parent::CreateContextObject(lAvatarId,
-			Cure::NETWORK_OBJECT_REMOTE_CONTROLLED, false);
+			Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
 		lClient->SetAvatarId(lObject->GetInstanceId());
 		lObject->SetExtraData((void*)(size_t)lClient->GetUserConnection()->GetAccountId());
 		lObject->StartLoading();

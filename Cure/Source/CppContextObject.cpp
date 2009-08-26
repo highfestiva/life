@@ -97,7 +97,8 @@ void CppContextObject::StartLoading()
 {
 	assert(mClassResource == 0);
 	mClassResource = new UserClassResource();
-	mClassResource->LoadUnique(GetManager()->GetGameManager()->GetResourceManager(), GetClassId(),
+	const Lepra::String lAssetName = _T("../../Data/")+GetClassId()+_T(".class");	// TODO: move to central source file.
+	mClassResource->LoadUnique(GetManager()->GetGameManager()->GetResourceManager(), lAssetName,
 		UserClassResource::TypeLoadCallback(this, &CppContextObject::OnLoadClass));
 }
 
@@ -110,21 +111,23 @@ void CppContextObject::StartLoadingPhysics(const Lepra::String& pPhysicsName)
 		UserPhysicsResource::TypeLoadCallback(this, &CppContextObject::OnLoadPhysics));
 }
 
-void CppContextObject::TryComplete()
+bool CppContextObject::TryComplete()
 {
-	//if (mClassResource->GetLoadState() == RESOURCE_LOAD_COMPLETE &&	TODO: check this!!!
-	if (	mPhysicsResource->GetLoadState() == RESOURCE_LOAD_COMPLETE)
+	if (mPhysicsResource->GetLoadState() == RESOURCE_LOAD_COMPLETE)
 	{
 		if (GetPhysics() && GetPhysics()->GetPhysicsType() != TBC::ChunkyPhysics::STATIC)
 		{
 			GetManager()->EnableTickCallback(this);	// TODO: clear out this mess. How to use these two callback types?
 		}
 		SetLoadResult(true);
+		return (true);
 	}
 	else if (mPhysicsResource->GetLoadState() != RESOURCE_LOAD_IN_PROGRESS)
 	{
 		SetLoadResult(false);
+		return (true);
 	}
+	return (false);
 }
 
 
@@ -191,80 +194,6 @@ void CppContextObject::OnLoadPhysics(UserPhysicsResource* pPhysicsResource)
 	SetPhysics(pPhysicsResource->GetData());
 	TryComplete();
 }
-
-
-
-/*bool CppContextObjectFactory::CreatePhysics(ContextObject* pObject) const
-{
-	// TODO: go away! Use world loader/spawn engine instead.
-
-	Lepra::String lAssetName;
-	if (pObject->GetClassId().find(_T("box_002")) != Lepra::String::npos)
-	{
-		return (_T("box_01");
-	}
-	else if (pObject->GetClassId().find(_T("sphere_002")) != Lepra::String::npos)
-	{
-		return (_T("sphere_01");
-	}
-	else if (pObject->GetClassId().find(_T("car_001")) != Lepra::String::npos)
-	{
-		return (_T("car_01");
-	}
-	else if (pObject->GetClassId().find(_T("monster_001")) != Lepra::String::npos)
-	{
-		return (_T("monster_01");
-	}
-	else if (pObject->GetClassId().find(_T("excavator_703")) != Lepra::String::npos)
-	{
-		return (_T("excavator_01");
-	}
-	else if (pObject->GetClassId().find(_T("crane_whatever")) != Lepra::String::npos)
-	{
-		return (_T("crane_01");
-	}
-	else if (pObject->GetClassId().find(_T("ground_002")) != Lepra::String::npos)
-	{
-		return (_T("world_01");
-	}
-	else
-	{
-		mLog.Error(_T("Unknown context object type."));
-		assert(false);
-	}
-
-	bool lOk = !lAssetName.empty();
-	Lepra::DiskFile lFile;
-	if (lOk)
-	{
-		// TODO: remove path hard-coding.
-		lOk = lFile.Open(_T("../../Data/")+lAssetName, Lepra::DiskFile::MODE_READ);
-		assert(lOk);
-	}
-	TBC::ChunkyPhysics* lStructure = 0;
-	if (lOk)
-	{
-		lStructure = new TBC::ChunkyPhysics(TBC::ChunkyPhysics::TRANSFORM_LOCAL2WORLD);
-		TBC::ChunkyPhysicsLoader lLoader(&lFile, false);
-		lOk = lLoader.Load(lStructure);
-		assert(lOk);
-	}
-	if (lOk)
-	{
-		lOk = pObject->SetPhysics(lStructure);
-		assert(lOk);
-	}
-	if (lOk && lStructure->GetPhysicsType() != TBC::ChunkyPhysics::STATIC)
-	{
-		pObject->GetManager()->EnablePhysicsUpdateCallback(pObject);
-	}
-	if (!lOk && lStructure)
-	{
-		delete (lStructure);
-	}
-
-	return (lOk);
-}*/
 
 
 

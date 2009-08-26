@@ -210,8 +210,10 @@ bool ChunkyPhysics::FinalizeInit(PhysicsManager* pPhysics, unsigned pPhysicsFps,
 				{
 					lBodyType = PhysicsManager::STATIC;
 				}
+				const Lepra::TransformationF& lBone = GetBoneTransformation(x);
+				mLog.Infof(_T("Creating bone %i at (%f; %f; %f)."), x, lBone.GetPosition().x, lBone.GetPosition().y, lBone.GetPosition().z);
 				lOk = lGeometry->CreateBody(pPhysics, x == 0, pTrigListener, pForceListener,
-					lBodyType, GetBoneTransformation(x));
+					lBodyType, lBone);
 			}
 			else if (mPhysicsType == COLLISION_DETECT_ONLY)
 			{

@@ -27,7 +27,7 @@ CHUNK_PHYSICS_BONE_COUNT           = "PHBC"
 CHUNK_PHYSICS_PHYSICS_TYPE         = "PHPT"
 CHUNK_PHYSICS_ENGINE_COUNT         = "PHEC"
 CHUNK_PHYSICS_BONE_CONTAINER       = "PHBO"
-CHUNK_PHYSICS_BONE_CHILD_LIST      = "SBCL"
+CHUNK_PHYSICS_BONE_CHILD_LIST      = "PHCL"
 CHUNK_PHYSICS_BONE_TRANSFORM       = "PHBT"
 CHUNK_PHYSICS_BONE_SHAPE           = "PHSH"
 CHUNK_PHYSICS_ENGINE_CONTAINER     = "PHEO"
@@ -137,7 +137,8 @@ class ChunkyWriter:
                                 head = self._writeheader(chunks[0])
                                 self._writestr(chunks[1])
                                 self._rewriteheadersize(head)
-                        else:
+                        elif len(chunks) == 2 and type(chunks[0]) == str and \
+                                ((type(chunks[1]) != list and type(chunks[1]) != tuple) or len(chunks[1]) > 0):
                                 #print("Writing %s with data of type %s." % (chunks[0], type(chunks[1])))
                                 head = self._writeheader(chunks[0])
                                 self._writechunk(chunks[1], chunks[0])
@@ -296,7 +297,10 @@ class PhysWriter(ChunkyWriter):
                                         )
                                 )
                         for node in self.bodies:
-                                # TODO: add optional saves of child bones.
+                                print("Children of %s: %s." % (node.getFullName(), repr(node.phys_children)))
+                                map(lambda n: print("  - "+n.getName()), node.phys_children)
+                                childlist = list(map(lambda n: self.bodies.index(n), node.phys_children))
+                                bones.append((CHUNK_PHYSICS_BONE_CHILD_LIST, childlist))
                                 bones.append((CHUNK_PHYSICS_BONE_TRANSFORM, node))
                                 bones.append((CHUNK_PHYSICS_BONE_SHAPE, self._getshape(node)))
                         for node in self.group:

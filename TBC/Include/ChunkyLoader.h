@@ -118,7 +118,7 @@ enum ChunkyType
 	CHUNK_PHYSICS_ENGINE_COUNT         = ENUMIFY('P','H','E','C'),	// Number of engines. Mandatory.
 	// Physics sub element: bone.
 	CHUNK_PHYSICS_BONE_CONTAINER       = ENUMIFY('P','H','B','O'),	// A bone and its transformation, type. Mandatory.
-	CHUNK_PHYSICS_BONE_CHILD_LIST      = ENUMIFY('S','B','C','L'),	// The indices of this bone's children. Optional for bones without children, mandatory otherwise.
+	CHUNK_PHYSICS_BONE_CHILD_LIST      = ENUMIFY('P','H','C','L'),	// The indices of this bone's children. Optional for bones without children, mandatory otherwise.
 	CHUNK_PHYSICS_BONE_TRANSFORM       = ENUMIFY('P','H','B','T'),	// The transform of this bone. Mandatory.
 	CHUNK_PHYSICS_BONE_SHAPE           = ENUMIFY('P','H','S','H'),	// Bone shape (i.e. capsule, box, sphere, portal...), mandatory with one and one shape only per bone.
 	// Physics sub element: engine.
