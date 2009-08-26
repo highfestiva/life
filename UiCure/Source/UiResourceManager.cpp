@@ -588,24 +588,31 @@ UserGeometryReferenceResource::~UserGeometryReferenceResource()
 
 void UserGeometryReferenceResource::PostProcess()
 {
-	if (GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
-	{
-		assert(mGeometryReferenceId == UiTbc::Renderer::INVALID_GEOMETRY);
-		assert(mGeometryReference == 0);
+	assert(mGeometryReferenceId == UiTbc::Renderer::INVALID_GEOMETRY);
+	assert(mGeometryReference == 0);
 
-		TBC::GeometryBase* lOriginal = GetRamData();
-		mGeometryReference = new TBC::GeometryReference(lOriginal);
-		mGeometryReference->SetAlwaysVisible(true);
-		mGeometryReference->SetBasicMaterialSettings(lOriginal->GetBasicMaterialSettings());
-		mGeometryReferenceId = GetUiManager()->GetRenderer()->AddGeometry(
-			mGeometryReference, UiTbc::Renderer::MAT_NULL, UiTbc::Renderer::NO_SHADOWS);
-		assert(mGeometryReferenceId != UiTbc::Renderer::INVALID_GEOMETRY);
-	}
+	TBC::GeometryBase* lOriginal = Parent::GetRamData();
+	mGeometryReference = new TBC::GeometryReference(lOriginal);
+	mGeometryReference->SetAlwaysVisible(true);
+	mGeometryReference->SetBasicMaterialSettings(lOriginal->GetBasicMaterialSettings());
+	mGeometryReferenceId = GetUiManager()->GetRenderer()->AddGeometry(
+		mGeometryReference, UiTbc::Renderer::MAT_NULL, UiTbc::Renderer::NO_SHADOWS);
+	assert(mGeometryReferenceId != UiTbc::Renderer::INVALID_GEOMETRY);
 }
 
 const GeometryOffset& UserGeometryReferenceResource::GetOffset() const
 {
 	return (mOffset);
+}
+
+TBC::GeometryBase* UserGeometryReferenceResource::GetRamData() const
+{
+	return (mGeometryReference);
+}
+
+UiTbc::Renderer::GeometryID UserGeometryReferenceResource::GetData() const
+{
+	return (mGeometryReferenceId);
 }
 
 Cure::Resource* UserGeometryReferenceResource::CreateResource(Cure::ResourceManager* pManager, const Lepra::String& pName) const

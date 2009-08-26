@@ -48,7 +48,7 @@ public:
 
 	bool SendStatusMessage(Lepra::GameSocket* pSocket, Lepra::int32 pInteger, RemoteStatus pStatus, Lepra::UnicodeString pMessage, Packet* pPacket);
 	bool SendNumberMessage(bool pSafe, Lepra::GameSocket* pSocket, Cure::MessageNumber::InfoType pInfo, Lepra::int32 pInteger, Lepra::float32 pFloat);
-	bool SendObjectFullPosition(Lepra::GameSocket* pSocket, GameObjectId pObjectId, Lepra::int32 pFrameIndex, const ObjectPositionalData& pData);
+	bool SendObjectFullPosition(Lepra::GameSocket* pSocket, GameObjectId pInstanceId, Lepra::int32 pFrameIndex, const ObjectPositionalData& pData);
 	bool PlaceInSendBuffer(bool pSafe, Lepra::GameSocket* pSocket, Packet* pPacket);
 
 protected:

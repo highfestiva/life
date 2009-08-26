@@ -191,6 +191,8 @@ public:
 	virtual void PostProcess();
 
 	const GeometryOffset& GetOffset() const;
+	TBC::GeometryBase* GetRamData() const;
+	UiTbc::Renderer::GeometryID GetData() const;
 
 protected:
 	Cure::Resource* CreateResource(Cure::ResourceManager* pManager, const Lepra::String& pName) const;

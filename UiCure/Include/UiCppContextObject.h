@@ -12,6 +12,14 @@
 
 
 
+// TODO: remove!
+namespace UiTbc
+{
+class ChunkyClass;
+}
+
+
+
 namespace UiCure
 {
 
@@ -25,15 +33,15 @@ public:
 	CppContextObject(const Lepra::String& pClassId, GameUiManager* pUiManager);
 	virtual ~CppContextObject();
 
-	void StartLoading();
+	virtual void StartLoading();
 
 	void OnPhysicsTick();
-
-	bool StartLoadGraphics(Cure::UserResource* pParentResource);
 
 	void DebugDrawAxes();
 
 private:
+	void __GetFuckedUpMeshesRemoveMe(UiTbc::ChunkyClass* pClass) const;
+
 	void OnLoadClass(UserClassResource* pClassResource);
 	void OnLoadMesh(UserGeometryReferenceResource* pMeshResource);
 	void OnLoadTexture(UserRendererImageResource* pTextureResource);
@@ -44,6 +52,7 @@ private:
 	UserClassResource* mUiClassResource;
 	typedef std::vector<UserGeometryReferenceResource*> MeshArray;
 	MeshArray mMeshResourceArray;
+	size_t mMeshLoadCount;
 	UserRendererImageResource mTextureResource;
 
 	LOG_CLASS_DECLARE();

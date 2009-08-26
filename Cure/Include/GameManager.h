@@ -61,7 +61,7 @@ public:
 	ConsoleManager* GetConsoleManager() const;
 
 	ContextObject* CreateContextObject(const Lepra::String& pClassId, NetworkObjectType pNetworkType,
-		bool pTick, GameObjectId pInstanceId = 0);
+		GameObjectId pInstanceId = 0);
 	virtual void OnLoadCompleted(ContextObject* pObject, bool pOk) = 0;
 	virtual void OnCollision(const Lepra::Vector3DF& pForce, const Lepra::Vector3DF& pTorque,
 		ContextObject* pObject1, ContextObject* pObject2) = 0;

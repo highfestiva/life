@@ -30,8 +30,6 @@ public:
 
 protected:
 private:
-	ChunkyPhysics* mPhysics;
-
 	Lepra::String mPhysicsBaseName;
 
 	LOG_CLASS_DECLARE();

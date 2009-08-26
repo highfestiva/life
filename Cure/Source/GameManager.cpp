@@ -210,7 +210,7 @@ ConsoleManager* GameManager::GetConsoleManager() const
 
 
 ContextObject* GameManager::CreateContextObject(const Lepra::String& pClassId, NetworkObjectType pNetworkType,
-	bool pTick, GameObjectId pInstanceId)
+	GameObjectId pInstanceId)
 {
 	ContextObject* lObject = CreateContextObject(pClassId);
 	lObject->SetManager(GetContext());
@@ -224,10 +224,6 @@ ContextObject* GameManager::CreateContextObject(const Lepra::String& pClassId, N
 		lObject->SetInstanceId(GetContext()->AllocateGameObjectId(pNetworkType));
 	}
 	GetContext()->AddObject(lObject);
-	if (pTick)
-	{
-		GetContext()->EnableTickCallback(lObject);
-	}
 	return (lObject);
 }
 

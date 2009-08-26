@@ -62,13 +62,34 @@ void ContextManager::RemoveObject(ContextObject* pObject)
 	mObjectTable.erase(pObject->GetInstanceId());
 }
 
-ContextObject* ContextManager::GetObject(GameObjectId pInstanceId) const
+bool ContextManager::DeleteObject(GameObjectId pInstanceId)
+{
+	bool lOk = false;
+	ContextObject* lObject = GetObject(pInstanceId, true);
+	if (lObject)
+	{
+		log_volatile(mLog.Debugf(_T("Deleting context object %i."), pInstanceId));
+		delete (lObject);
+		lOk = true;
+	}
+	else
+	{
+		log_volatile(mLog.Debugf(_T("Could not delete context object %i, since not found."), pInstanceId));
+	}
+	return (lOk);
+}
+
+ContextObject* ContextManager::GetObject(GameObjectId pInstanceId, bool pForce) const
 {
 	ContextObjectTable::const_iterator x = mObjectTable.find(pInstanceId);
 	ContextObject* lObject = 0;
 	if (x != mObjectTable.end())
 	{
 		lObject = x->second;
+		if (!pForce && !lObject->IsLoaded())
+		{
+			lObject = 0;
+		}
 	}
 	return (lObject);
 }
@@ -121,27 +142,27 @@ void ContextManager::RemovePhysicsBody(TBC::PhysicsManager::BodyID pBodyId)
 
 GameObjectId ContextManager::AllocateGameObjectId(NetworkObjectType pNetworkType)
 {
-	GameObjectId lObjectId;
+	GameObjectId lInstanceId;
 	if (pNetworkType == NETWORK_OBJECT_LOCAL_ONLY)
 	{
-		lObjectId = mLocalObjectIdManager.GetFreeId();
+		lInstanceId = mLocalObjectIdManager.GetFreeId();
 	}
 	else
 	{
-		lObjectId = mRemoteObjectIdManager.GetFreeId();
+		lInstanceId = mRemoteObjectIdManager.GetFreeId();
 	}
-	return (lObjectId);
+	return (lInstanceId);
 }
 
-void ContextManager::FreeGameObjectId(NetworkObjectType pNetworkType, GameObjectId pObjectId)
+void ContextManager::FreeGameObjectId(NetworkObjectType pNetworkType, GameObjectId pInstanceId)
 {
 	if (pNetworkType == NETWORK_OBJECT_LOCAL_ONLY)
 	{
-		mLocalObjectIdManager.RecycleId(pObjectId);
+		mLocalObjectIdManager.RecycleId(pInstanceId);
 	}
 	else
 	{
-		mRemoteObjectIdManager.RecycleId(pObjectId);
+		mRemoteObjectIdManager.RecycleId(pInstanceId);
 	}
 }
 

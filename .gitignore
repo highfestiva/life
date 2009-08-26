@@ -1,4 +1,3 @@
-
 *.obj
 *.htm
 *.idb
@@ -14,11 +13,11 @@
 *.manifest
 *.manifest.res
 *.exe
-mt.dep
 *.mesh
 *.phys
 *.class
 *.lsh
 *.dll
 *.pyc
-ThirdParty/stlport/build/*
+mt.dep
+stlport.res

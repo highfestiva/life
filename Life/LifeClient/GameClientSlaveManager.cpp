@@ -322,7 +322,7 @@ bool GameClientSlaveManager::Reset()	// Run when disconnected. Removes all objec
 bool GameClientSlaveManager::InitializeTerrain()
 {
 	Cure::GameObjectId lGameObjectId = GetContext()->AllocateGameObjectId(Cure::NETWORK_OBJECT_LOCAL_ONLY);
-	bool lOk = CreateObject(lGameObjectId, Lepra::StringUtility::IntToString(GetSlaveIndex(), 10)+_T("/:ground_002"),
+	bool lOk = CreateObject(lGameObjectId, _T("ground_002"),
 		Cure::NETWORK_OBJECT_LOCAL_ONLY);
 	return (lOk);
 }
@@ -652,26 +652,24 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 			Cure::MessageCreateObject* lMessageCreateObject = (Cure::MessageCreateObject*)pMessage;
 			Lepra::UnicodeString lClassId;
 			lMessageCreateObject->GetClassId(lClassId);
-			assert(lClassId.find(L":") == Lepra::UnicodeString::npos);
-			Lepra::String lObjectClass = Lepra::StringUtility::IntToString(GetSlaveIndex(), 10) +
-				_T("/") + Lepra::StringUtility::IntToString(lMessageCreateObject->GetObjectId(), 10) +
-				_T(":") + Lepra::UnicodeStringUtility::ToCurrentCode(lClassId);
-			CreateObject(lMessageCreateObject->GetObjectId(), lObjectClass, Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
+			CreateObject(lMessageCreateObject->GetObjectId(),
+				Lepra::UnicodeStringUtility::ToCurrentCode(lClassId),
+				Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
 		}
 		break;
 		case Cure::MESSAGE_TYPE_DELETE_OBJECT:
 		{
 			Cure::MessageDeleteObject* lMessageDeleteObject = (Cure::MessageDeleteObject*)pMessage;
-			DeleteObject(lMessageDeleteObject->GetObjectId());
+			GetContext()->DeleteObject(lMessageDeleteObject->GetObjectId());
 		}
 		break;
 		case Cure::MESSAGE_TYPE_OBJECT_POSITION:
 		{
 			Cure::MessageObjectPosition* lMessageMovement = (Cure::MessageObjectPosition*)pMessage;
-			Cure::GameObjectId lObjectId = lMessageMovement->GetObjectId();
+			Cure::GameObjectId lInstanceId = lMessageMovement->GetObjectId();
 			Lepra::int32 lFrameIndex = lMessageMovement->GetFrameIndex();
 			Cure::ObjectPositionalData& lData = lMessageMovement->GetPositionalData();
-			SetMovement(lObjectId, lFrameIndex, lData);
+			SetMovement(lInstanceId, lFrameIndex, lData);
 
 			CURE_RTVAR_INTERNAL_ARITHMETIC(GetVariableScope(), RTVAR_DEBUG_NET_RECVPOSCNT, int, +, 1, 0);
 		}
@@ -748,37 +746,19 @@ void GameClientSlaveManager::ProcessNumber(Cure::MessageNumber::InfoType pType, 
 
 bool GameClientSlaveManager::CreateObject(Cure::GameObjectId pInstanceId, const Lepra::String& pClassId, Cure::NetworkObjectType pNetworkType)
 {
-	Cure::ContextObject* lPreviousObject = GetContext()->GetObject(pInstanceId);
+	Cure::ContextObject* lPreviousObject = GetContext()->GetObject(pInstanceId, true);
 	//assert(!lPreviousObject);
 	if (!lPreviousObject)
 	{
 		mLog.Infof(_T("%s creating context object %s."), GetName().c_str(), pClassId.c_str());
-		Cure::CppContextObject* lObject = (Cure::CppContextObject*)Parent::CreateContextObject(pClassId,
-			pNetworkType, false, pInstanceId);
+		Cure::ContextObject* lObject = Parent::CreateContextObject(pClassId, pNetworkType, pInstanceId);
 		lObject->StartLoading();
 	}
 	else
 	{
 		assert(lPreviousObject->GetClassId() == pClassId);
-		assert(false);
 	}
 	return (true);
-}
-
-bool GameClientSlaveManager::DeleteObject(Cure::GameObjectId pInstanceId)
-{
-	bool lOk = false;
-	Cure::ContextObject* lObject = GetContext()->GetObject(pInstanceId);
-	if (lObject)
-	{
-		log_volatile(mLog.Debugf(_T("Deleting context object %i."), pInstanceId));
-		delete (lObject);
-	}
-	else
-	{
-		log_volatile(mLog.Debugf(_T("Could not delete context object %i, since not found."), pInstanceId));
-	}
-	return (lOk);
 }
 
 Cure::ContextObject* GameClientSlaveManager::CreateContextObject(const Lepra::String& pClassId) const
@@ -822,11 +802,10 @@ void GameClientSlaveManager::SetMovement(Cure::GameObjectId pInstanceId, Lepra::
 
 		//Lepra::String s = Lepra::StringUtility::Format(_T("client %i at frame %i"), pClientIndex, pFrameIndex);
 		//log_debug(_T("Client set pos of other client"), s);
-		Cure::ContextObject* lObject = GetContext()->GetObject(pInstanceId);
+		Cure::ContextObject* lObject = GetContext()->GetObject(pInstanceId, true);
 		if (lObject)
 		{
 			lObject->SetFullPosition(pData);
-			//lObject->OnPhysicsTick();	// Reflect physics changes on graphics movement.
 		}
 		else
 		{

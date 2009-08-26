@@ -52,6 +52,7 @@ ContextObject::ContextObject(const Lepra::String& pClassId):
 	mClassId(pClassId),
 	mNetworkObjectType(NETWORK_OBJECT_LOCAL_ONLY),
 	mExtraData(0),
+	mIsLoaded(false),
 	mPhysics(0),
 	mLastSendTime(0),
 	mSendCount(0),
@@ -161,6 +162,20 @@ void* ContextObject::GetExtraData() const
 void ContextObject::SetExtraData(void* pData)
 {
 	mExtraData = pData;
+}
+
+
+
+bool ContextObject::IsLoaded() const
+{
+	return (mIsLoaded);
+}
+
+void ContextObject::SetLoadResult(bool pOk)
+{
+	assert(!mIsLoaded);
+	mIsLoaded = true;
+	GetManager()->GetGameManager()->OnLoadCompleted(this, pOk);
 }
 
 
@@ -432,6 +447,13 @@ bool ContextObject::UpdateFullPosition(const ObjectPositionalData*& pPositionalD
 
 void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData)
 {
+	if (!IsLoaded())
+	{
+		// TODO: store movement until loaded. Movement of this object
+		// was received from server before we were ready.
+		return;
+	}
+
 	const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
 	if (!lGeometry || lGeometry->GetBodyId() == TBC::INVALID_BODY)
 	{

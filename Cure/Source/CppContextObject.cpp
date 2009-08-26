@@ -70,16 +70,6 @@ CppContextObject::~CppContextObject()
 
 
 
-void CppContextObject::StartLoading()
-{
-	assert(mClassResource == 0);
-	mClassResource = new UserClassResource();
-	mClassResource->LoadUnique(GetManager()->GetGameManager()->GetResourceManager(), GetClassId(),
-		UserClassResource::TypeLoadCallback(this, &CppContextObject::OnLoadClass));
-}
-
-
-
 void CppContextObject::__StartLoadingFuckedUpPhysicsRemoveMe(Cure::UserResource* pClassResource, const TBC::ChunkyClass* pClass)
 {
 	Lepra::String lPhysics;
@@ -101,6 +91,16 @@ void CppContextObject::__StartLoadingFuckedUpPhysicsRemoveMe(Cure::UserResource*
 	StartLoadingPhysics(lPhysics);
 }
 
+
+
+void CppContextObject::StartLoading()
+{
+	assert(mClassResource == 0);
+	mClassResource = new UserClassResource();
+	mClassResource->LoadUnique(GetManager()->GetGameManager()->GetResourceManager(), GetClassId(),
+		UserClassResource::TypeLoadCallback(this, &CppContextObject::OnLoadClass));
+}
+
 void CppContextObject::StartLoadingPhysics(const Lepra::String& pPhysicsName)
 {
 	assert(mPhysicsResource == 0);
@@ -115,12 +115,23 @@ void CppContextObject::TryComplete()
 	//if (mClassResource->GetLoadState() == RESOURCE_LOAD_COMPLETE &&	TODO: check this!!!
 	if (	mPhysicsResource->GetLoadState() == RESOURCE_LOAD_COMPLETE)
 	{
-		GetManager()->GetGameManager()->OnLoadCompleted(this, true);
+		if (GetPhysics() && GetPhysics()->GetPhysicsType() != TBC::ChunkyPhysics::STATIC)
+		{
+			GetManager()->EnableTickCallback(this);	// TODO: clear out this mess. How to use these two callback types?
+		}
+		SetLoadResult(true);
 	}
-	else
+	else if (mPhysicsResource->GetLoadState() != RESOURCE_LOAD_IN_PROGRESS)
 	{
-		GetManager()->GetGameManager()->OnLoadCompleted(this, false);
+		SetLoadResult(false);
 	}
+}
+
+
+
+TBC::ChunkyPhysics* CppContextObject::GetPhysics() const
+{
+	return (mPhysicsResource->GetData());
 }
 
 

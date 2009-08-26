@@ -38,7 +38,8 @@ public:
 	void SetIsObjectOwner(bool pIsObjectOwner);
 	void AddObject(ContextObject* pObject);
 	virtual void RemoveObject(ContextObject* pObject);
-	ContextObject* GetObject(GameObjectId pInstanceId) const;
+	bool DeleteObject(GameObjectId pInstanceId);
+	ContextObject* GetObject(GameObjectId pInstanceId, bool pForce = false) const;
 	const ContextObjectTable& GetObjectTable() const;
 	void ClearObjects();
 	void AddPhysicsSenderObject(ContextObject* pObject);
@@ -46,7 +47,7 @@ public:
 	void RemovePhysicsBody(TBC::PhysicsManager::BodyID pBodyId);
 
 	GameObjectId AllocateGameObjectId(NetworkObjectType pNetworkType);
-	void FreeGameObjectId(NetworkObjectType pNetworkType, GameObjectId pObjectId);
+	void FreeGameObjectId(NetworkObjectType pNetworkType, GameObjectId pInstanceId);
 
 	void EnablePhysicsUpdateCallback(ContextObject* pObject);
 	void DisablePhysicsUpdateCallback(ContextObject* pObject);

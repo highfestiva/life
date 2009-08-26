@@ -164,7 +164,7 @@ protected:
 	int Parse(const Lepra::uint8* pData, int pSize);
 
 public:
-	int Store(Packet* pPacket, Lepra::uint32 pObjectId);
+	int Store(Packet* pPacket, Lepra::uint32 pInstanceId);
 
 	Lepra::uint32 GetObjectId() const;
 };
@@ -177,7 +177,7 @@ public:
 	MessageCreateObject();
 	MessageType GetType() const;
 	int Parse(const Lepra::uint8* pData, int pSize);
-	int Store(Packet* pPacket, GameObjectId pObjectId, const Lepra::UnicodeString& pClassId);
+	int Store(Packet* pPacket, GameObjectId pInstanceId, const Lepra::UnicodeString& pClassId);
 
 	void GetClassId(Lepra::UnicodeString& pClassId) const;
 };
@@ -190,7 +190,7 @@ public:
 	MessageDeleteObject();
 	MessageType GetType() const;
 	int Parse(const Lepra::uint8* pData, int pSize);
-	int Store(Packet* pPacket, GameObjectId pObjectId);
+	int Store(Packet* pPacket, GameObjectId pInstanceId);
 };
 
 class MessageObjectMovement: public MessageObject
@@ -199,7 +199,7 @@ class MessageObjectMovement: public MessageObject
 protected:
 	MessageObjectMovement();
 	int Parse(const Lepra::uint8* pData, int pSize);
-	int Store(Packet* pPacket, GameObjectId pObjectId, Lepra::int32 pFrameIndex);
+	int Store(Packet* pPacket, GameObjectId pInstanceId, Lepra::int32 pFrameIndex);
 
 public:
 	virtual MessageObjectMovement* CloneToStandalone() = 0;
@@ -214,7 +214,7 @@ public:
 	MessageObjectPosition();
 	MessageType GetType() const;
 	int Parse(const Lepra::uint8* pData, int pSize);
-	int Store(Packet* pPacket, Lepra::uint32 pObjectId, Lepra::int32 pFrameIndex, const ObjectPositionalData& pData);
+	int Store(Packet* pPacket, Lepra::uint32 pInstanceId, Lepra::int32 pFrameIndex, const ObjectPositionalData& pData);
 	MessageObjectMovement* CloneToStandalone();
 
 	ObjectPositionalData& GetPositionalData();

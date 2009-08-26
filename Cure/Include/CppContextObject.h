@@ -20,13 +20,14 @@ public:
 	CppContextObject(const Lepra::String& pClassId);
 	virtual ~CppContextObject();
 
-	void StartLoading();
-
 protected:
 	void __StartLoadingFuckedUpPhysicsRemoveMe(Cure::UserResource* pClassResource, const TBC::ChunkyClass* pClass);
-	void StartLoadingPhysics(const Lepra::String& pPhysicsName);
 
+	virtual void StartLoading();
+	void StartLoadingPhysics(const Lepra::String& pPhysicsName);
 	virtual void TryComplete();
+
+	TBC::ChunkyPhysics* GetPhysics() const;
 
 private:
 	void OnTick(float pFrameTime);
@@ -40,6 +41,7 @@ private:
 
 	UserClassResource* mClassResource;
 	UserPhysicsResource* mPhysicsResource;
+
 	LOG_CLASS_DECLARE();
 };
 

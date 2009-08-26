@@ -113,12 +113,12 @@ bool NetworkAgent::SendNumberMessage(bool pSafe, Lepra::GameSocket* pSocket, Cur
 	return (lOk);
 }
 
-bool NetworkAgent::SendObjectFullPosition(Lepra::GameSocket* pSocket, GameObjectId pObjectId, Lepra::int32 pFrameIndex, const ObjectPositionalData& pData)
+bool NetworkAgent::SendObjectFullPosition(Lepra::GameSocket* pSocket, GameObjectId pInstanceId, Lepra::int32 pFrameIndex, const ObjectPositionalData& pData)
 {
 	Packet* lPacket = mPacketFactory->Allocate();
 	MessageObjectPosition* lPosition = (MessageObjectPosition*)mPacketFactory->GetMessageFactory()->Allocate(MESSAGE_TYPE_OBJECT_POSITION);
 	lPacket->AddMessage(lPosition);
-	lPosition->Store(lPacket, pObjectId, pFrameIndex, pData);
+	lPosition->Store(lPacket, pInstanceId, pFrameIndex, pData);
 	bool lOk = PlaceInSendBuffer(false, pSocket, lPacket);
 	GetPacketFactory()->Release(lPacket);
 	return (lOk);

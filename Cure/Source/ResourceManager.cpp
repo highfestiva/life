@@ -351,7 +351,7 @@ bool PhysicsResource::Load()
 {
 	assert(IsUnique());
 	assert(GetRamData() == 0);
-	SetRamData(new TBC::ChunkyPhysics());
+	SetRamData(new TBC::ChunkyPhysics(TBC::ChunkyPhysics::TRANSFORM_LOCAL2WORLD));
 	Lepra::DiskFile lFile;
 	bool lOk = lFile.Open(GetName(), Lepra::DiskFile::MODE_READ);
 	if (lOk)
@@ -702,8 +702,8 @@ void ResourceManager::ForceFreeCache()
 	while (!mCachedResourceTable.IsEmpty())
 	{
 		ResourceTable::Iterator x = mCachedResourceTable.First();
-		//mLog.Headlinef(_T("  %p:"), *x);
-		//mLog.Headlinef(_T("  - %s."), (*x)->GetName().c_str());
+		/*mLog.Headlinef(_T("  %p:"), *x);
+		mLog.Headlinef(_T("  - %s."), (*x)->GetName().c_str());*/
 		Resource* lResource = *x;
 		assert(mRequestLoadList.Find(lResource) == mRequestLoadList.End());
 		mCachedResourceTable.Remove(x);

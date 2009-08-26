@@ -51,6 +51,9 @@ public:
 	void* GetExtraData() const;
 	void SetExtraData(void* pData);
 
+	bool IsLoaded() const;
+	void SetLoadResult(bool pOk);
+
 	void SetAllowMoveSelf(bool pAllow);
 	void AttachToObject(TBC::PhysicsManager::BodyID pBody1, ContextObject* pObject2, TBC::PhysicsManager::BodyID pBody2);
 	void AttachToObject(unsigned pBody1Index, ContextObject* pObject2, unsigned pBody2Index);
@@ -74,6 +77,7 @@ public:
 	int PopSendCount();
 	void SetSendCount(int pCount);
 
+	virtual void StartLoading() = 0;
 	virtual void OnTick(float pFrameTime) = 0;
 	virtual void OnAlarm(int pAlarmId) = 0;
 	virtual void OnPhysicsTick();
@@ -103,6 +107,7 @@ protected:
 	Lepra::String mClassId;
 	NetworkObjectType mNetworkObjectType;
 	void* mExtraData;
+	bool mIsLoaded;
 	AttributeArray mAttributeArray;
 	TBC::ChunkyPhysics* mPhysics;
 	float mLastSendTime;

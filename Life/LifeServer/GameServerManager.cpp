@@ -215,8 +215,7 @@ bool GameServerManager::Initialize()
 			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
 			if (lOk)
 			{
-				lOk = mUserAccountManager->AddUserAvatarId(lUserName,
-					Lepra::StringUtility::IntToString(x, 10) + _T(":sphere_002"));
+				lOk = mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("sphere_002")));
 			}
 		}
 		for (x = 0; lOk && x < 100; ++x)
@@ -227,8 +226,7 @@ bool GameServerManager::Initialize()
 			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
 			if (lOk)
 			{
-				lOk = mUserAccountManager->AddUserAvatarId(lUserName,
-					Lepra::StringUtility::IntToString(x, 10) + Cure::UserAccount::AvatarId(_T(":car_001")));
+				lOk = mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("car_001")));
 			}
 		}
 		for (x = 0; lOk && x < 100; ++x)
@@ -239,8 +237,7 @@ bool GameServerManager::Initialize()
 			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
 			if (lOk)
 			{
-				lOk = mUserAccountManager->AddUserAvatarId(lUserName,
-					Lepra::StringUtility::IntToString(x, 10) + Cure::UserAccount::AvatarId(_T(":monster_001")));
+				lOk = mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("monster_001")));
 			}
 		}
 		for (x = 0; lOk && x < 100; ++x)
@@ -251,8 +248,7 @@ bool GameServerManager::Initialize()
 			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
 			if (lOk)
 			{
-				lOk = mUserAccountManager->AddUserAvatarId(lUserName,
-					Lepra::StringUtility::IntToString(x, 10) + Cure::UserAccount::AvatarId(_T(":excavator_703")));
+				lOk = mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("excavator_703")));
 			}
 		}
 		for (x = 0; lOk && x < 100; ++x)
@@ -263,8 +259,7 @@ bool GameServerManager::Initialize()
 			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
 			if (lOk)
 			{
-				lOk = mUserAccountManager->AddUserAvatarId(lUserName,
-					Lepra::StringUtility::IntToString(x, 10) + Cure::UserAccount::AvatarId(_T(":crane_whatever")));
+				lOk = mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("crane_whatever")));
 			}
 		}
 	}
@@ -273,7 +268,7 @@ bool GameServerManager::Initialize()
 	{
 		assert(mBoxObject == 0);
 		mBoxObject = Parent::CreateContextObject(_T("box_002"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, false);
-		((Cure::CppContextObject*)mBoxObject)->StartLoading();
+		mBoxObject->StartLoading();
 	}
 
 	Lepra::String lAcceptAddress = CURE_RTVAR_GETSET(GetVariableScope(), RTVAR_NETWORK_LISTEN_ADDRESS, _T("0.0.0.0:16650"));
@@ -306,7 +301,7 @@ bool GameServerManager::InitializeTerrain()
 {
 	assert(mTerrainObject == 0);
 	mTerrainObject = Parent::CreateContextObject(_T("ground_002"), Cure::NETWORK_OBJECT_LOCAL_ONLY, false);
-	((Cure::CppContextObject*)mTerrainObject)->StartLoading();
+	mTerrainObject->StartLoading();
 	return (true);
 }
 
@@ -490,7 +485,7 @@ void GameServerManager::OnLogin(Cure::UserConnection* pUserConnection)
 			Cure::NETWORK_OBJECT_REMOTE_CONTROLLED, false);
 		lClient->SetAvatarId(lObject->GetInstanceId());
 		lObject->SetExtraData((void*)(size_t)lClient->GetUserConnection()->GetAccountId());
-		((Cure::CppContextObject*)lObject)->StartLoading();
+		lObject->StartLoading();
 	}
 	else
 	{
@@ -511,6 +506,7 @@ void GameServerManager::OnLogout(Cure::UserConnection* pUserConnection)
 	assert(IsThreadSafe());
 	mAccountClientTable.Remove(pUserConnection->GetAccountId());
 	delete (lClient);
+	GetContext()->DeleteObject(lAvatarId);
 	BroadcastDeleteObject(lAvatarId);
 
 	mLog.Info(_T("User ") + Lepra::UnicodeStringUtility::ToCurrentCode(pUserConnection->GetLoginName()) + _T(" logged out."));
@@ -642,7 +638,7 @@ void GameServerManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 		if (lClient)
 		{
 			mLog.Infof(_T("Yeeha! Loaded avatar for %s."),
-				lClient->GetUserConnection()->GetLoginName().c_str());
+				Lepra::UnicodeStringUtility::ToCurrentCode(lClient->GetUserConnection()->GetLoginName()).c_str());
 			BroadcastAvatar(lClient);
 		}
 		else
@@ -773,10 +769,7 @@ void GameServerManager::BroadcastCreateObject(Cure::ContextObject* pObject)
 	Cure::MessageCreateObject* lCreate = (Cure::MessageCreateObject*)GetNetworkAgent()->
 		GetPacketFactory()->GetMessageFactory()->Allocate(Cure::MESSAGE_TYPE_CREATE_OBJECT);
 	lPacket->AddMessage(lCreate);
-	Lepra::StringUtility::StringVector lInstanceClass = Lepra::StringUtility::Split(pObject->GetClassId(), _T(":"), 1);
-	assert(lInstanceClass.size() == 2);
-	assert(lInstanceClass[1].find(_T(":")) == Lepra::String::npos);
-	lCreate->Store(lPacket, pObject->GetInstanceId(), Lepra::UnicodeStringUtility::ToOwnCode(lInstanceClass[1]));
+	lCreate->Store(lPacket, pObject->GetInstanceId(), Lepra::UnicodeStringUtility::ToOwnCode(pObject->GetClassId()));
 	BroadcastPacket(0, lPacket, true);
 	GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
 
@@ -829,11 +822,8 @@ void GameServerManager::SendCreateAllObjects(Client* pClient)
 
 			// Store creation info.
 			lPacket->AddMessage(lCreateMessage);
-			Lepra::StringUtility::StringVector lInstanceClass = Lepra::StringUtility::Split(lObject->GetClassId(), _T(":"), 1);
-			assert(lInstanceClass.size() == 2);
-			assert(lInstanceClass[1].find(_T(":")) == Lepra::String::npos);
 			lCreateMessage->Store(lPacket, lObject->GetInstanceId(),
-				Lepra::UnicodeStringUtility::ToOwnCode(lInstanceClass[1]));
+				Lepra::UnicodeStringUtility::ToOwnCode(lObject->GetClassId()));
 
 			// Store positional info.
 			lPacket->AddMessage(lPositionMessage);
