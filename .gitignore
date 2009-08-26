@@ -21,3 +21,4 @@
 *.pyc
 mt.dep
 stlport.res
+makefile

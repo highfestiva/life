@@ -101,11 +101,11 @@ UserExtraTypeResource<ResourceType, SubtypeExtraType>::~UserExtraTypeResource()
 template<class ResourceType, class SubtypeExtraType>
 Resource* UserExtraTypeResource<ResourceType, SubtypeExtraType>::CreateResource(ResourceManager* pManager, const Lepra::String& pName) const
 {
-	return (new ResourceType(pManager, pName, Parent::GetExtraData()));
+	return (new ResourceType(pManager, pName, GetExtraData()));
 }
 
 template<class ResourceType, class SubtypeExtraType>
-typename SubtypeExtraType& UserExtraTypeResource<ResourceType, SubtypeExtraType>::GetExtraData() const
+SubtypeExtraType& UserExtraTypeResource<ResourceType, SubtypeExtraType>::GetExtraData() const
 {
 	return (mExtraData);
 }
