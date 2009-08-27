@@ -164,9 +164,9 @@ class ChunkyWriter:
                 if not q:
                         print("Error: trying to get rotation from node '%s', but none available." % node.getFullName())
                         sys.exit(18)
-                pos = node.get_local_translation()
+                pos = node.get_relative_translation()
                 data = q[:]+pos[:3]
-                #print("Writing bone with data", data)
+                print("Writing bone %s with data" % node.getName(), data)
                 self._addfeat("bone:bones", 1)
                 self._writexform(data)
 
@@ -297,7 +297,7 @@ class PhysWriter(ChunkyWriter):
                                         )
                                 )
                         for node in self.bodies:
-                                print("Children of %s: %s." % (node.getFullName(), repr(node.phys_children)))
+                                #print("Children of %s: %s." % (node.getFullName(), repr(node.phys_children)))
                                 map(lambda n: print("  - "+n.getName()), node.phys_children)
                                 childlist = list(map(lambda n: self.bodies.index(n), node.phys_children))
                                 bones.append((CHUNK_PHYSICS_BONE_CHILD_LIST, childlist))
@@ -308,6 +308,13 @@ class PhysWriter(ChunkyWriter):
                                         engines.append((CHUNK_PHYSICS_ENGINE, node))
                         #pprint.pprint(data)
                         self._writechunk(data)
+
+
+        def _gettotalmass(self):
+                totalmass = 0.0
+                for body in self.bodies:
+                        totalmass += body.get_fixed_attribute("mass")
+                return totalmass
 
 
         def _writeshape(self, shape):
@@ -328,14 +335,19 @@ class PhysWriter(ChunkyWriter):
                 self._writeint(1 if node.get_fixed_attribute("affected_by_gravity") else 0)
                 # Write joint parameters.
                 parameters = [0.0]*16
-                parameters[0] = node.get_fixed_attribute("spring_constant", True, 0.0)
-                parameters[1] = node.get_fixed_attribute("spring_damping", True, 0.0)
-                yaw, pitch, roll = ChunkyWriter._geteuler(node)
+                totalmass = self._gettotalmass()
+                print("Total mass:", totalmass)
+                parameters[0] = node.get_fixed_attribute("spring_constant", True, 0.0) * totalmass
+                parameters[1] = node.get_fixed_attribute("spring_damping", True, 0.0) * totalmass
+                #yaw, pitch, roll = ChunkyWriter._geteuler(node)
+                yaw = node.get_fixed_attribute("joint_yaw", True, 0.0)
+                pitch = node.get_fixed_attribute("joint_pitch", True, 0.0)
                 #if jointvalue != 1 and (pitch < -0.1 or pitch > 0.1):
                 #        print("Error: euler rotation pitch of jointed body '%s' must be zero." % node.getFullName())
                 #        sys.exit(19)
+                print("Euler angles for", shape.getnode().getName(), ":", yaw, pitch)
                 parameters[2] = yaw
-                parameters[3] = roll
+                parameters[3] = pitch
                 joint_min, joint_max = node.get_fixed_attribute("joint_angles", True, [0.0,0.0])
                 joint_min, joint_max = math.radians(joint_min), math.radians(joint_max)
                 parameters[4] = joint_min

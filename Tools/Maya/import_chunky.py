@@ -87,7 +87,6 @@ class GroupReader(DefaultMAReader):
                 self.rotatexaxis(group)
 
                 self.faces2triangles(group)
-                self.makevertsrelative(group)
                 if not self.validatehierarchy(group):
                         print("Invalid hierarchy! Terminating due to error.")
                         sys.exit(3)
@@ -106,6 +105,7 @@ class GroupReader(DefaultMAReader):
                 if not self.validategroup(group):
                         print("Invalid group! Terminating due to error.")
                         sys.exit(3)
+                self.makevertsrelative(group)
                 if not self.makephysrelative(group):
                         print("Internal vector math failed! Terminating due to error.")
                         sys.exit(3)
@@ -157,6 +157,8 @@ class GroupReader(DefaultMAReader):
                         return self.gettransformto(None)
                 def get_local_transform(self):
                         return self.gettransformto(self.xformparent)
+                def get_relative_translation(self):
+                        return self.gettransformto(self.xformparent) * vec4(0, 0, 0, 1)
                 def gettransformto(self, toparent, matname="localmat4", getparent=lambda n: n.xformparent):
                         if self == toparent:
                                 return mat4.identity()
@@ -254,6 +256,7 @@ class GroupReader(DefaultMAReader):
                 node.get_world_pivot = types.MethodType(get_world_pivot, node)
                 node.get_world_transform = types.MethodType(get_world_transform, node)
                 node.get_local_transform = types.MethodType(get_local_transform, node)
+                node.get_relative_translation = types.MethodType(get_relative_translation, node)
                 node.gettransformto = types.MethodType(gettransformto, node)
                 node.get_local_scale = types.MethodType(get_local_scale, node)
                 node.get_local_translation = types.MethodType(get_local_translation, node)
@@ -403,9 +406,12 @@ class GroupReader(DefaultMAReader):
                 for node in group:
                         vtx = node.get_fixed_attribute("rgvtx", optional=True)
                         if vtx:
+                                phys = node.getParent().phys_ref[0]
                                 # Get transformation to origo without rescaling.
-                                transform = mat4.translation(-vec3(node.get_world_translation()[0:3]))
+                                transform = mat4.translation(vec3(phys.get_world_translation()[0:3]))
                                 transform = (transform * node.get_world_quat().toMat4()).inverse()
+                                print(phys)
+                                print(transform)
                                 vp = vec4(0,0,0,1);
                                 idx = 0
                                 for idx in range(len(vtx)):
@@ -702,7 +708,7 @@ class GroupReader(DefaultMAReader):
                 phys.phys_parent = None
                 if not hasattr(phys, "phys_children"):
                         phys.phys_children = []
-                        print("Reset self=", phys)
+                        #print("Reset self=", phys)
                 if phys.getParent() == group[0]:
                         return True
                 parent = phys.getParent()
@@ -723,18 +729,18 @@ class GroupReader(DefaultMAReader):
                         elif len(phys_nodes) == 1:
                                 parent = phys_nodes[0]
                                 break
-                print("Phys %s has parent:" % phys.getFullName(), parent)
+                #print("Phys %s has parent:" % phys.getFullName(), parent)
                 if parent == None:
                         print("Error: phys node '%s' has no related parent phys node higher up in the hierarchy." % phys.getFullName())
                         return False
                 phys.phys_parent = parent
                 if not hasattr(parent, "phys_children"):
-                        print("Init parent", parent, "with self=", phys)
+                        #print("Init parent", parent, "with self=", phys)
                         parent.phys_children = [phys]
                 else:
-                        print("Adding self=", phys, "to parent.")
+                        #print("Adding self=", phys, "to parent.")
                         parent.phys_children += [phys]
-                        print(parent.phys_children)
+                        #print(parent.phys_children)
                 return True
 
 
