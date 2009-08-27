@@ -503,6 +503,22 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Include\CollisionDetector2D.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Include\CollisionDetector2D.inl"
+				>
+			</File>
+			<File
+				RelativePath=".\Include\CollisionDetector3D.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Include\CollisionDetector3D.inl"
+				>
+			</File>
+			<File
 				RelativePath=".\Include\Comparator.h"
 				>
 			</File>
@@ -536,6 +552,10 @@
 			</File>
 			<File
 				RelativePath=".\Include\CyclicArray.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Include\Cylinder.h"
 				>
 			</File>
 			<File
@@ -667,6 +687,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Include\ListUtil.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Include\Log.h"
 				>
 			</File>
@@ -719,6 +743,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Include\MemoryLeakTracker.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Include\MetaFile.h"
 				>
 			</File>
@@ -731,11 +759,23 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Include\OBB.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Include\OBR.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Include\OrderedMap.h"
 				>
 			</File>
 			<File
 				RelativePath=".\Include\OutputStream.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Include\Packer.h"
 				>
 			</File>
 			<File
@@ -1174,6 +1214,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Source\MemoryLeakTracker.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Source\MetaFile.cpp"
 				>
 			</File>
@@ -1183,6 +1227,10 @@
 			</File>
 			<File
 				RelativePath=".\Source\Number.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\Packer.cpp"
 				>
 			</File>
 			<File
