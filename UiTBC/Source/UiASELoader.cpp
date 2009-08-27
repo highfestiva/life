@@ -28,7 +28,7 @@ bool ASELoader::Load(ASEData& pASEData, const Lepra::String& pFileName)
 {
 	bool lOk = false;
 	Lepra::DiskFile lFile;
-	if (lFile.Open(pFileName, Lepra::DiskFile::READ_ONLY) == true)
+	if (lFile.Open(pFileName, Lepra::DiskFile::MODE_READ) == true)
 	{
 		lOk = Load(pASEData, lFile);
 		lFile.Close();

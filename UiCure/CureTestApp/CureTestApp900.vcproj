@@ -548,6 +548,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\UiTBC\UiTBCTestApp\stdafx.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\UiTBC\UiTBCTestApp\TbcTest.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\Lepra\LepraTestApp\TestBinTree.cpp"
 				>
 			</File>
@@ -590,6 +598,14 @@
 				>
 			</File>
 		</Filter>
+		<File
+			RelativePath="..\..\UiTBC\UiTBCTestApp\UiTBCTestApp.vcproj"
+			>
+		</File>
+		<File
+			RelativePath="..\..\UiTBC\UiTBCTestApp\UiTBCTestApp710.vcproj"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>
