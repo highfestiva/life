@@ -211,7 +211,15 @@ bool ChunkyPhysics::FinalizeInit(PhysicsManager* pPhysics, unsigned pPhysicsFps,
 					lBodyType = PhysicsManager::STATIC;
 				}
 				const Lepra::TransformationF& lBone = GetBoneTransformation(x);
-				mLog.Infof(_T("Creating bone %i at (%f; %f; %f)."), x, lBone.GetPosition().x, lBone.GetPosition().y, lBone.GetPosition().z);
+				const Lepra::Vector3DF lArrow0(0, 1, 0);
+				Lepra::Vector3DF lArrow1 = lBone.GetOrientation()*lArrow0;
+				lArrow1.x = 0;	// Project onto YZ.
+				const float lXAngle = ::asin(lArrow0*lArrow1) * 180/Lepra::PIF;
+				const int lParentIndex = lGeometry->GetParent()? GetIndex(lGeometry->GetParent()) : -1;
+				mLog.Infof(_T("Creating bone %i (with parent %i) at (%f; %f; %f) with x angle %f."),
+					x, lParentIndex,
+					lBone.GetPosition().x, lBone.GetPosition().y, lBone.GetPosition().z,
+					lXAngle);
 				lOk = lGeometry->CreateBody(pPhysics, x == 0, pTrigListener, pForceListener,
 					lBodyType, lBone);
 			}

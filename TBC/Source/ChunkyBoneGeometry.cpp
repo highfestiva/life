@@ -432,6 +432,11 @@ void ChunkyBoneBox::SaveChunkyData(const ChunkyPhysics* pStructure, void* pData)
 	lData[2] = Lepra::Endian::HostToBigF(mSize.z);
 }
 
+const Lepra::Vector3DF& ChunkyBoneBox::GetShapeSize() const
+{
+	return (mSize);
+}
+
 void ChunkyBoneBox::LoadChunkyData(ChunkyPhysics* pStructure, const void* pData)
 {
 	Parent::LoadChunkyData(pStructure, pData);

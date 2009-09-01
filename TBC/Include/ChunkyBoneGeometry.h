@@ -82,6 +82,8 @@ public:
 
 	static ChunkyBoneGeometry* Load(ChunkyPhysics* pStructure, const void* pData, unsigned pByteCount);
 
+	virtual GeometryType GetGeometryType() const = 0;
+
 	bool CreateJoint(ChunkyPhysics* pStructure, PhysicsManager* pPhysics, unsigned pPhysicsFps);
 	virtual bool CreateBody(PhysicsManager* pPhysics, bool pIsRoot, PhysicsManager::TriggerListener* pTrigListener,
 		PhysicsManager::ForceFeedbackListener* pForceListener, PhysicsManager::BodyType pType,
@@ -106,7 +108,6 @@ public:
 
 protected:
 	virtual void LoadChunkyData(ChunkyPhysics* pStructure, const void* pData);
-	virtual GeometryType GetGeometryType() const = 0;
 
 	typedef std::vector<ConnectorType> ConnectorArray;
 
@@ -182,6 +183,7 @@ public:
 
 	unsigned GetChunkySize(const void* pData = 0) const;
 	void SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const;
+	const Lepra::Vector3DF& GetShapeSize() const;
 
 private:
 	void LoadChunkyData(ChunkyPhysics* pStructure, const void* pData);

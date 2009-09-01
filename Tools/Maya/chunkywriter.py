@@ -149,6 +149,9 @@ class ChunkyWriter:
                                 self._writebone(node)
                         elif node.nodetype.startswith("engine:"):
                                 self._writeengine(node)
+                        else:
+                                print("Error: can not write node '%s' of type '%s'" % (node.getFullName(), node.nodetype))
+                                sys.exit(17)
                 elif t == shape.Shape:
                         shapeChunk = chunks
                         self._writeshape(shapeChunk)
@@ -160,13 +163,25 @@ class ChunkyWriter:
 
 
         def _writebone(self, node):
-                q = node.get_local_quat()
+                #q = quat(node.get_local_transform())
+                q = node.get_world_quat()
+                v0 = vec4(0,1,0,0)
+                v1 = q.toMat4()*v0
+                v1[0] = 0
+                #print(v0, v1)
+                xangle = math.asin(v0*v1)*180/math.pi
+                print("%s x angle is %s" % (node.getName(), xangle))
+                #q = [1.0,0.0,0.0,0.0]
                 if not q:
                         print("Error: trying to get rotation from node '%s', but none available." % node.getFullName())
                         sys.exit(18)
-                pos = node.get_relative_translation()
+                pos = node.get_relative_pos()
+                #t = node.get_local_transform()
+                #pos = t * vec4(0,0,0,1)
+                #q = quat(t)
+                #pos = vec4(node.get_local_pivot()[:]+[1])
                 data = q[:]+pos[:3]
-                print("Writing bone %s with data" % node.getName(), data)
+                #print("Writing bone %s with data" % node.getName(), data)
                 self._addfeat("bone:bones", 1)
                 self._writexform(data)
 
@@ -219,10 +234,14 @@ class ChunkyWriter:
                         sys.exit(15)
 
         def _writefloat(self, val, name="float"):
+                if type(val) != float:
+                        raise ValueError("Error: trying to pass '%s' off as 'float'." % str(type(val)))
                 data = struct.pack(">f", val)
                 self._dowrite(data, 4, name)
 
         def _writeint(self, val, name="int"):
+                if type(val) != int:
+                        raise ValueError("Error: trying to pass '%s' off as 'int'." % str(type(val)))
                 data = struct.pack(">i", val)
                 self._dowrite(data, 4, name)
 
@@ -281,6 +300,7 @@ class PhysWriter(ChunkyWriter):
 
 
         def dowrite(self):
+                #print(self.bodies)
                 filename = self.basename+".phys"
                 with open(filename, "wb") as f:
                         self.f = f
@@ -322,9 +342,9 @@ class PhysWriter(ChunkyWriter):
                 types = {"capsule":1, "sphere":2, "box":3}
                 self._writeint(types[shape.type])
                 node = shape.getnode()
-                self._writefloat(node.get_fixed_attribute("mass"))
-                self._writefloat(node.get_fixed_attribute("friction"))
-                self._writefloat(node.get_fixed_attribute("bounce"))
+                self._writefloat(float(node.get_fixed_attribute("mass")))
+                self._writefloat(float(node.get_fixed_attribute("friction")))
+                self._writefloat(float(node.get_fixed_attribute("bounce")))
                 self._writeint(-1 if not node.phys_parent else self.bodies.index(node.phys_parent))
                 joints = {None:1, "exclude":1, "suspend_hinge":2, "hinge2":3, "hinge":4, "ball":5, "universal":6}
                 jointtype = node.get_fixed_attribute("joint", True)
@@ -336,20 +356,21 @@ class PhysWriter(ChunkyWriter):
                 # Write joint parameters.
                 parameters = [0.0]*16
                 totalmass = self._gettotalmass()
-                print("Total mass:", totalmass)
-                parameters[0] = node.get_fixed_attribute("spring_constant", True, 0.0) * totalmass
-                parameters[1] = node.get_fixed_attribute("spring_damping", True, 0.0) * totalmass
+                #print("Total mass:", totalmass)
+                parameters[0] = node.get_fixed_attribute("joint_spring_constant", True, 0.0) * totalmass
+                parameters[1] = node.get_fixed_attribute("joint_spring_damping", True, 0.0) * totalmass
                 #yaw, pitch, roll = ChunkyWriter._geteuler(node)
                 yaw = node.get_fixed_attribute("joint_yaw", True, 0.0)
                 pitch = node.get_fixed_attribute("joint_pitch", True, 0.0)
                 #if jointvalue != 1 and (pitch < -0.1 or pitch > 0.1):
                 #        print("Error: euler rotation pitch of jointed body '%s' must be zero." % node.getFullName())
                 #        sys.exit(19)
-                print("Euler angles for", shape.getnode().getName(), ":", yaw, pitch)
+                #print("Euler angles for", shape.getnode().getName(), ":", yaw, pitch)
                 parameters[2] = yaw
                 parameters[3] = pitch
                 joint_min, joint_max = node.get_fixed_attribute("joint_angles", True, [0.0,0.0])
                 joint_min, joint_max = math.radians(joint_min), math.radians(joint_max)
+                #print("Joint angles for '%s': (%f, %f)." % (node.getName(), joint_min, joint_max))
                 parameters[4] = joint_min
                 parameters[5] = joint_max
                 lq = node.get_local_quat()
@@ -359,7 +380,7 @@ class PhysWriter(ChunkyWriter):
                 parameters[7] = j.y
                 parameters[8] = j.z
                 for x in parameters:
-                        self._writefloat(x)
+                        self._writefloat(float(x))
                 # Write connecor type (may hook other stuff, may get hooked by hookers :).
                 connectors = node.get_fixed_attribute("connector_types", True)
                 if connectors:
@@ -374,19 +395,20 @@ class PhysWriter(ChunkyWriter):
                         self._writeint(0)
                 # Write shape data (dimensions of shape).
                 for x in shape.data:
-                        self._writefloat(x)
+                        self._writefloat(math.fabs(x))
                 #print("Wrote shape with axes", self._getaxes(node))
                 self._addfeat("physical geometry:physical geometries", 1)
 
 
         def _writeengine(self, node):
                 # Write all general parameters first.
-                types = {"walk":1, "cam_flat_push":2, "hinge_roll":3, "hinge2_roll":3, "hinge2_turn":4, "hinge2_break":5, "hinge":6, "glue":7}
+                types = {"walk":1, "cam_flat_push":2, "hinge2_roll":3, "hinge2_turn":4, "hinge2_break":5, "hinge":6, "glue":7}
                 self._writeint(types[node.get_fixed_attribute("type")])
-                self._writefloat(node.get_fixed_attribute("strength"))
-                self._writefloat(node.get_fixed_attribute("max_velocity")[0])
-                self._writefloat(node.get_fixed_attribute("max_velocity")[1])
-                self._writefloat(node.get_fixed_attribute("controller_index"))
+                totalmass = self._gettotalmass()
+                self._writefloat(node.get_fixed_attribute("strength")*totalmass)
+                self._writefloat(float(node.get_fixed_attribute("max_velocity")[0]))
+                self._writefloat(float(node.get_fixed_attribute("max_velocity")[1]))
+                self._writeint(node.get_fixed_attribute("controller_index"))
                 connected_to = node.get_fixed_attribute("connected_to")
                 connected_to = self._expand_connected_list(connected_to)
                 if len(connected_to) < 1:
@@ -395,8 +417,10 @@ class PhysWriter(ChunkyWriter):
                 self._writeint(len(connected_to))
                 for connection in connected_to:
                         body, scale, connectiontype = connection
-                        self._writeint(self.bodies.index(body))
-                        self._writefloat(scale)
+                        idx = self.bodies.index(body)
+                        #print("Engine '%s's body index is %i."% (node.getName(), idx))
+                        self._writeint(idx)
+                        self._writefloat(float(scale))
                         connectiontypes = {"normal":1, "half_lock":2}
                         self._writeint(connectiontypes[connectiontype])
                 #print("Wrote engine '%s' for %i nodes." % (node.getName()[6:], len(connected_to)))

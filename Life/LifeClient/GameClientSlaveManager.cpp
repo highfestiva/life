@@ -939,7 +939,9 @@ void GameClientSlaveManager::DrawDebugStaple(int pIndex, int pHeight, const Lepr
 
 void GameClientSlaveManager::DrawSyncDebugInfo()
 {
-	if (CURE_RTVAR_TRYGET(GetVariableScope(), RTVAR_DEBUG_3D_ENABLEAXES, false))
+	const bool lDebugAxes = CURE_RTVAR_TRYGET(GetVariableScope(), RTVAR_DEBUG_3D_ENABLEAXES, false);
+	const bool lDebugShape = CURE_RTVAR_TRYGET(GetVariableScope(), RTVAR_DEBUG_3D_ENABLESHAPE, false);
+	if (lDebugAxes || lDebugShape)
 	{
 		Lepra::ScopeLock lLock(GetTickLock());
 		mUiManager->GetRenderer()->ResetClippingRect();
@@ -957,7 +959,14 @@ void GameClientSlaveManager::DrawSyncDebugInfo()
 		for (; x != lObjectTable.end(); ++x)
 		{
 			UiCure::CppContextObject* lObject = (UiCure::CppContextObject*)x->second;	// Not very good to cast to a Cpp...
-			lObject->DebugDrawAxes();
+			if (lDebugAxes)
+			{
+				lObject->DebugDrawAxes(UiCure::CppContextObject::DEBUG_AXES);
+			}
+			if (lDebugShape)
+			{
+				lObject->DebugDrawAxes(UiCure::CppContextObject::DEBUG_SHAPE);
+			}
 		}
 	}
 }

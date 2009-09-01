@@ -2,8 +2,11 @@
 # Created by Jonas Byström, 2009-07-21 for Righteous Engine tool chain.
 
 
+import math
 import sys
+from mat4 import mat4
 from vec3 import vec3
+from vec4 import vec4
 
 
 class Shape:
@@ -26,18 +29,28 @@ class Shape:
                 if not scalenode.isortho():
                         print("Error: node '%s' is not orthogonal." % scalenode.getFullName())
                         sys.exit(21)
-                scale = scalenode.get_local_scale()
+                #scale = scalenode.get_local_scale()
+                #m = mat4(scalenode.get_world_transform()).getMat3()
+                scale = (scalenode.get_world_transform()*vec4(1,1,1,0))[:3]
+                #scale = m * scalenode.get_world_scale()
+                #scale = m * vec3(1,1,1)
+                #scale = scalenode.get_world_scale()
                 if shapenode.nodetype == "polyCube":
                         self.type = "box"
                         d.append(shapenode.getAttrValue("w", "w", None, default=1.0)*scale[0])
                         d.append(shapenode.getAttrValue("d", "d", None, default=1.0)*scale[1])
                         d.append(shapenode.getAttrValue("h", "h", None, default=1.0)*scale[2])
+                        #d.append(shapenode.getAttrValue("w", "w", None, default=1.0))
+                        #d.append(shapenode.getAttrValue("d", "d", None, default=1.0))
+                        #d.append(shapenode.getAttrValue("h", "h", None, default=1.0))
                 elif shapenode.nodetype == "polySphere":
                         self.type = "sphere"
-                        if not Shape.inrange(scale, 0.05):
+                        absscale = map(lambda x: math.fabs(x), scale)
+                        if not Shape.inrange(absscale, 0.05):
                                 print("Error: scale for sphere node '%s' must be symmetric (is %s)." % (scalenode.getFullName(), str(scale)))
                                 sys.exit(21)
                         d.append(shapenode.getAttrValue("r", "r", None, default=1.0)*scale[0])
+                        #d.append(shapenode.getAttrValue("r", "r", None, default=1.0))
                 else:
                         print("Error: shape type '%s' on node '%s' is unknown." % (shapenode.nodetype, shapenode.getFullName()))
                         sys.exit(22)

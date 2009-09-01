@@ -105,10 +105,13 @@ class GroupReader(DefaultMAReader):
                 if not self.validategroup(group):
                         print("Invalid group! Terminating due to error.")
                         sys.exit(3)
-                self.makevertsrelative(group)
                 if not self.makephysrelative(group):
                         print("Internal vector math failed! Terminating due to error.")
                         sys.exit(3)
+                self.makevertsrelative(group)
+                #for t in filter(lambda n: n.nodetype=="transform", group):
+                        #print("%s transformation:" % t.getName())
+                        #print(t.get_local_transform())
                 self.group = group
 
 
@@ -157,8 +160,11 @@ class GroupReader(DefaultMAReader):
                         return self.gettransformto(None)
                 def get_local_transform(self):
                         return self.gettransformto(self.xformparent)
-                def get_relative_translation(self):
-                        return self.gettransformto(self.xformparent) * vec4(0, 0, 0, 1)
+                def get_relative_pos(self):
+                        #par = self.xformparent.get_world_translation() if self.xformparent else vec4(0,0,0,1)
+                        #return self.get_world_pivot() - par
+                        p = self.xformparent.get_world_translation() if self.xformparent else vec4(0,0,0,1)
+                        return self.get_world_translation() - p
                 def gettransformto(self, toparent, matname="localmat4", getparent=lambda n: n.xformparent):
                         if self == toparent:
                                 return mat4.identity()
@@ -186,8 +192,8 @@ class GroupReader(DefaultMAReader):
                         ms = mat4.scaling(s)
                         msh = mat4.identity()
                         msh.mlist[2] = +sh[0]	# X: x(+z), originally x(+y) in Maya.
-                        msh.mlist[1] = -sh[1]	# Y: x(-y), originally x(z) in Maya.
-                        msh.mlist[9] = -sh[2]	# Z: z(-y), originally y(z) in Maya.
+                        msh.mlist[1] = -sh[2]	# Y: x(+y), originally y(+z) in Maya.
+                        msh.mlist[9] = +sh[1]	# Z: z(+y), originally x(+z) in Maya.
                         mspi = mat4.translation(sp)
                         mst = mat4.translation(st)
                         mrp = mat4.translation(-rp)
@@ -200,6 +206,13 @@ class GroupReader(DefaultMAReader):
                         m = mt * mrt * mrpi * mr * mar * mrp * mst * mspi * msh * ms * msp
                         setattr(self, matname, m)
                         return pm * getattr(self, matname)
+                def get_world_scale(self):
+                        if self.getParent():
+                                pws = self.getParent().get_world_scale()
+                        else:
+                                pws = (1,1,1)
+                        ls = self.get_local_scale()
+                        return ls[0]*pws[0], ls[1]*pws[1], ls[2]*pws[2]
                 def get_local_scale(self):
                         return self.get_fixed_attribute("s", default=vec3(1,1,1))
                 def get_local_translation(self):
@@ -226,11 +239,11 @@ class GroupReader(DefaultMAReader):
                         if self.xformparent:
                                 pq = self.xformparent.get_world_quat()
                         else:
-                                pq = quat()
-                        return pq * self.get_local_quat() * self.get_local_arq()
+                                pq = quat(1,0,0,0)
+                        return quat(pq.toMat4().inverse()) * self.get_local_quat() * self.get_local_arq()
                 def isortho(self):
                         l = [vec4(1,0,0,1), vec4(0,1,0,1), vec4(0,0,1,1)]
-                        p = vec3(self.get_world_translation()[0:3])
+                        p = vec3(self.get_world_translation(vec4(0,0,0,1))[0:3])
                         t = self.get_world_transform()
                         for i in range(3):
                                 l[i] = t * l[i]
@@ -256,8 +269,9 @@ class GroupReader(DefaultMAReader):
                 node.get_world_pivot = types.MethodType(get_world_pivot, node)
                 node.get_world_transform = types.MethodType(get_world_transform, node)
                 node.get_local_transform = types.MethodType(get_local_transform, node)
-                node.get_relative_translation = types.MethodType(get_relative_translation, node)
+                node.get_relative_pos = types.MethodType(get_relative_pos, node)
                 node.gettransformto = types.MethodType(gettransformto, node)
+                node.get_world_scale = types.MethodType(get_world_scale, node)
                 node.get_local_scale = types.MethodType(get_local_scale, node)
                 node.get_local_translation = types.MethodType(get_local_translation, node)
                 node.get_local_rpivot = types.MethodType(get_local_rpivot, node)
@@ -368,7 +382,7 @@ class GroupReader(DefaultMAReader):
                                 fix(node, "spt", (0,0,0))
                                 fix(node, "r", (0,0,0), math.radians)
                                 fix(node, "s", (1,1,1), math.fabs)
-                                fix(node, "sh", (0,0,0), None, None)
+                                fix(node, "sh", (0,0,0))
                                 fix(node, "ra", (0,0,0), math.radians)
                         vtx = node.getAttrValue("rgvtx", "rgvtx", None, n=None)
                         if vtx:
@@ -408,10 +422,24 @@ class GroupReader(DefaultMAReader):
                         if vtx:
                                 phys = node.getParent().phys_ref[0]
                                 # Get transformation to origo without rescaling.
-                                transform = mat4.translation(vec3(phys.get_world_translation()[0:3]))
-                                transform = (transform * node.get_world_quat().toMat4()).inverse()
-                                print(phys)
-                                print(transform)
+                                transform = mat4.translation(vec3(phys.get_world_translation()[:3]))
+                                #transform = mat4.translation(vec3(node.get_local_pivot()[:3]))
+                                if phys.phys_parent:
+                                        pq = phys.phys_parent.get_world_quat()
+                                        #print("'%s' got phys parent (%s) world quat:" % (node.getName(), phys.phys_parent.getName()), pq)
+                                else:
+                                        #print("Oh-oh!")
+                                        pq = quat(1,0,0,0)
+                                lq = phys.get_world_quat()
+                                print("%s has lq=%s, ilq=%s" % (node.getName(), lq, quat(lq.toMat4().inverse())))
+                                #q = node.get_world_quat()
+                                #print("'%s' has rot %s" % (node.getName(), q))
+                                transform = transform * lq.toMat4()
+                                #transform = node.get_world_transform()
+                                transform = transform.inverse()
+                                #print(phys)
+                                #print(transform)
+                                avg = vec4()
                                 vp = vec4(0,0,0,1);
                                 idx = 0
                                 for idx in range(len(vtx)):
@@ -419,9 +447,19 @@ class GroupReader(DefaultMAReader):
                                         vp[cidx] = vtx[idx]
                                         if cidx == 2:
                                                 vp = transform*vp
+                                                avg += vp
                                                 vtx[idx-2] = vp.x
                                                 vtx[idx-1] = vp.y
                                                 vtx[idx-0] = vp.z
+                                avg = avg*(3/idx)
+                                #avg -= phys.get_world_translation()
+                                #avg -= node.get_world_translation()
+                                #print("Average %s origo: %s" % (node.getName(), str(avg)))
+                                #print("  wt    =", phys.get_world_translation())
+                                #print("  wtlt  =", phys.get_world_translation(vec4(phys.get_local_translation()[:]+[1])))
+                                #print("  wp    =", phys.get_world_pivot())
+                                #print("  wtlp  =", phys.get_world_translation(vec4(phys.get_local_pivot()[:]+[1])))
+                                #print("  wtlrp =", phys.get_world_translation(vec4(phys.get_local_rpivot()[:]+[1])))
 
 
         def validate_orthogonality(self, group):
@@ -653,9 +691,20 @@ class GroupReader(DefaultMAReader):
                         if not hasattr(phpar, "localmat4"):
                                ok = self._physrelativemat4(phpar)
                         own_branch_xform = node.gettransformto(phpar.xformparent)
-                        parent_branch_invxform = phpar.gettransformto(phpar.xformparent).inverse()
-                        node.localmat4 = parent_branch_invxform * own_branch_xform
+                        parent_branch_xform = phpar.gettransformto(phpar.xformparent)
+                        #print("%s had local translation %s." %(node.getName(), node.get_relative_pos()))
+                        #print("Parent xform:")
+                        #print(phpar.localmat4)
+                        #print("To parent xform:")
+                        #print(parent_branch_xform)
+                        #print("Before trasform own xform:")
+                        #print(own_branch_xform)
+                        #print("Parent inverted xform:")
+                        #print(parent_branch_xform.inverse())
+                        node.localmat4 = parent_branch_xform.inverse() * own_branch_xform
                         node.xformparent = phpar
+                        #print("%s got local translation %s." %(node.getName(), node.get_relative_pos()))
+                        #sys.exit(1)
                 else:
                         node.get_world_transform()
                 return ok
