@@ -214,12 +214,23 @@ bool ChunkyPhysics::FinalizeInit(PhysicsManager* pPhysics, unsigned pPhysicsFps,
 				const Lepra::Vector3DF lArrow0(0, 1, 0);
 				Lepra::Vector3DF lArrow1 = lBone.GetOrientation()*lArrow0;
 				lArrow1.x = 0;	// Project onto YZ.
-				const float lXAngle = ::asin(lArrow0*lArrow1) * 180/Lepra::PIF;
+				const float lXAngle = ::acos(lArrow0*lArrow1) * 180/Lepra::PIF;
 				const int lParentIndex = lGeometry->GetParent()? GetIndex(lGeometry->GetParent()) : -1;
-				mLog.Infof(_T("Creating bone %i (with parent %i) at (%f; %f; %f) with x angle %f."),
+				mLog.Infof(_T("Creating bone %i (with parent %i) at (%f; %f; %f) with world x angle %f."),
 					x, lParentIndex,
 					lBone.GetPosition().x, lBone.GetPosition().y, lBone.GetPosition().z,
 					lXAngle);
+				{	// TODO: remove entire scope!
+					const Lepra::TransformationF& lBone = GetOriginalBoneTransformation(x);
+					const Lepra::QuaternionF q = lBone.GetOrientation();
+					const Lepra::Vector3DF lArrow0(0, 1, 0);
+					Lepra::Vector3DF lArrow1 = lBone.GetOrientation()*lArrow0;
+					lArrow1.x = 0;	// Project onto YZ.
+					const float lXAngle = ::acos(lArrow0*lArrow1) * 180/Lepra::PIF;
+					mLog.Infof(_T("Creating bone %i with local x angle %f from q=(%f; %f; %f; %f)."),
+						x, lXAngle,
+						q.GetA(), q.GetB(), q.GetC(), q.GetD());
+				}
 				lOk = lGeometry->CreateBody(pPhysics, x == 0, pTrigListener, pForceListener,
 					lBodyType, lBone);
 			}

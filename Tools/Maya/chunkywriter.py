@@ -5,6 +5,7 @@
 from mat4 import mat4
 from mayaascii import *
 from quat import quat
+from vec3 import vec3
 from vec4 import vec4
 import shape
 
@@ -163,14 +164,33 @@ class ChunkyWriter:
 
 
         def _writebone(self, node):
-                #q = quat(node.get_local_transform())
-                q = node.get_world_quat()
+                #if node.xformparent:
+                #        pm = node.xformparent.get_world_transform()
+                #else:
+                #        pm = mat4.identity()
+                #q = quat(pm.inverse() * node.get_local_transform())
+                #pq = node.xformparent.get_world_quat()
+                #q = pq * node.get_world_quat()
+                #q = quat(pq.toMat4().inverse()) * node.get_world_quat()
+                q = node.get_local_quat()
+                #q = quat(node.get_local_transform().decompose()[1])
+                #q = quat(node.get_world_transform())
                 v0 = vec4(0,1,0,0)
                 v1 = q.toMat4()*v0
+                #print("v1 is now", v1, "dot is", v0*v1)
                 v1[0] = 0
-                #print(v0, v1)
-                xangle = math.asin(v0*v1)*180/math.pi
-                print("%s x angle is %s" % (node.getName(), xangle))
+                #print("v0 and v1 are", v0, v1, q.toMat4())
+                xangle = math.acos(v0*v1)*180/math.pi
+                #print("%s local x angle is %f, local q=%s, world q=%s" % (node.getName(), xangle, node.get_local_quat(), node.get_world_quat()))
+                v0 = vec4(0,1,0,0)
+                v1 = node.get_world_quat().toMat4()*v0
+                v1[0] = 0
+                xangle = math.acos(v0*v1)*180/math.pi
+                #print("%s world x angle is %f" % (node.getName(), xangle))
+                #print("%s parent is %s" % (node.getName(), node.xformparent.getName()))
+                #print("Parent %s has wq=%s" % (node.xformparent.getName(), node.xformparent.get_world_quat()))
+                #rot = node.get_fixed_attribute("r", default=vec3(0,0,0))
+                #print("%s rot is %s" % (node.getName(), rot))
                 #q = [1.0,0.0,0.0,0.0]
                 if not q:
                         print("Error: trying to get rotation from node '%s', but none available." % node.getFullName())
@@ -373,9 +393,10 @@ class PhysWriter(ChunkyWriter):
                 #print("Joint angles for '%s': (%f, %f)." % (node.getName(), joint_min, joint_max))
                 parameters[4] = joint_min
                 parameters[5] = joint_max
-                lq = node.get_local_quat()
-                lp = node.get_local_pivot()
-                j = lq*lp
+                #lq = node.get_local_quat()
+                #lp = node.get_local_pivot()
+                #j = lq.toMat4()*lp
+                j = node.get_local_pivot()
                 parameters[6] = j.x
                 parameters[7] = j.y
                 parameters[8] = j.z
@@ -534,8 +555,8 @@ class ClassWriter(ChunkyWriter):
                                 for m in phys.childmeshes:
                                         tm = m.get_world_transform()
                                         tp = phys.get_world_transform()
-                                        lpm = tm * vec4(m.get_local_pivot()[:]+[1])
-                                        lpp = tp * vec4(phys.get_local_pivot()[:]+[1])
+                                        lpm = tm * m.get_local_pivot()
+                                        lpp = tp * phys.get_local_pivot()
                                         t = tp.inverse() * tm
                                         q = quat().fromMat(t).normalize()
                                         p = (lpm-lpp)[0:3]

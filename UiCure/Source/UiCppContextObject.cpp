@@ -108,7 +108,7 @@ void CppContextObject::OnPhysicsTick()
 
 
 
-void CppContextObject::DebugDrawAxes(DebugPrimitive pPrimitive)
+void CppContextObject::DebugDrawPrimitive(DebugPrimitive pPrimitive)
 {
 	if (!mPhysics)
 	{
@@ -118,6 +118,25 @@ void CppContextObject::DebugDrawAxes(DebugPrimitive pPrimitive)
 	const int lBoneCount = mPhysics->GetBoneCount();
 	for (int x = 0; x < lBoneCount; ++x)
 	{
+		if (x == 5)	// TODO: remove whole scope!
+		{
+			static int lDrawHoeShapeCount = 0;
+			++lDrawHoeShapeCount;
+			if (lDrawHoeShapeCount&0x100)
+			{
+				continue;
+			}
+		}
+		if (x == 8)	// TODO: remove whole scope!
+		{
+			static int lDrawHoeShapeCount = 0;
+			++lDrawHoeShapeCount;
+			if (lDrawHoeShapeCount&0x40)
+			{
+				continue;
+			}
+		}
+
 		const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(x);
 		if (lGeometry->GetBodyId() != TBC::INVALID_BODY)
 		{
@@ -159,8 +178,8 @@ void CppContextObject::DebugDrawAxes(DebugPrimitive pPrimitive)
 					mUiManager->GetRenderer()->DrawLine(lVertex[6], lVertex[4]-lVertex[6], Lepra::MAGENTA);
 					mUiManager->GetRenderer()->DrawLine(lVertex[0], lVertex[4]-lVertex[0], Lepra::CYAN);
 					mUiManager->GetRenderer()->DrawLine(lVertex[1], lVertex[5]-lVertex[1], Lepra::CYAN);
-					mUiManager->GetRenderer()->DrawLine(lVertex[2], lVertex[6]-lVertex[2], Lepra::CYAN);
-					mUiManager->GetRenderer()->DrawLine(lVertex[3], lVertex[7]-lVertex[3], Lepra::CYAN);
+					mUiManager->GetRenderer()->DrawLine(lVertex[2], lVertex[6]-lVertex[2], Lepra::ORANGE);
+					mUiManager->GetRenderer()->DrawLine(lVertex[3], lVertex[7]-lVertex[3], Lepra::ORANGE);
 				}
 			}
 			else

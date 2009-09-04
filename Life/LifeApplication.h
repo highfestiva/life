@@ -47,6 +47,8 @@ protected:
 private:
 	void TickSleep(double pMeasuredFrameTime) const;
 
+	mutable bool mIsPowerSaving;
+
 	Lepra::LogListener* mDebugLogger;
 	Lepra::FileLogListener* mFileLogger;
 	Lepra::LogListener* mPerformanceLogger;

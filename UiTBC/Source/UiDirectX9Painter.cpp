@@ -1,13 +1,12 @@
-/*
-	Class:  DirectX9Painter
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Alexander Hugestrand
 
-*/
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2006, Alexander Hugestrand
 
+
+
+#include "../../Lepra/Include/LepraTarget.h"
 #include <math.h>
 #include <D3dx9math.h>
-
 #include "../../Lepra/Include/Log.h"
 #include "../../UiLepra/Include/Win32/UiWin32DirectXDisplay.h"
 #include "../Include/UiDirectX9Painter.h"
@@ -18,8 +17,12 @@
 #pragma comment(lib, "d3dx9.lib")
 #endif
 
+
+
 namespace UiTbc
 {
+
+
 
 DWORD ToArgb(DWORD pAlpha, const Lepra::Color& pColor)
 {
@@ -1670,4 +1673,6 @@ void DirectX9Painter::DoRenderDisplayList(std::vector<DisplayEntity*>* pDisplayL
 
 LOG_CLASS_DEFINE(UI_GFX_2D, DirectX9Painter);
 
-} // End namespace.
+
+
+}

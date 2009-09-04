@@ -42,7 +42,7 @@ public:
 
 	void OnPhysicsTick();
 
-	void DebugDrawAxes(DebugPrimitive pPrimitive);
+	void DebugDrawPrimitive(DebugPrimitive pPrimitive);
 
 private:
 	void __GetFuckedUpMeshesRemoveMe(UiTbc::ChunkyClass* pClass) const;

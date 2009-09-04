@@ -24,6 +24,7 @@ Application::Application(const Lepra::StringUtility::StringVector& pArgumentList
 	Lepra::Application(pArgumentList),
 	mResourceManager(0),
 	mGameTicker(0),
+	mIsPowerSaving(false),
 	mConsoleLogger(0),
 	mDebugLogger(0),
 	mFileLogger(0),
@@ -150,10 +151,21 @@ void Application::TickSleep(double pMeasuredFrameTime) const
 	const float lPowerSaveAmount = mGameTicker->GetPowerSaveAmount();
 	if (lPowerSaveAmount > 0)
 	{
+		if (!mIsPowerSaving)
+		{
+			mLog.AInfo("Entering power save mode.");
+			mIsPowerSaving = true;
+		}
 		Lepra::Thread::Sleep(1.0*lPowerSaveAmount);
 	}
 	else
 	{
+		if (mIsPowerSaving)
+		{
+			mLog.AInfo("Leaving power save mode.");
+			mIsPowerSaving = false;
+		}
+
 		const int lFps = CURE_RTVAR_GET(Cure::GetSettings(), RTVAR_PHYSICS_FPS, 2);
 		double lWantedFrameTime = lFps? 1.0/lFps : 1;
 		if (lWantedFrameTime > pMeasuredFrameTime)

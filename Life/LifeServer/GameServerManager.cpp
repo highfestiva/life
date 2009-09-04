@@ -84,6 +84,18 @@ bool GameServerManager::Tick()
 	bool lOk = Parent::BeginTick();
 	lOk = (lOk && Parent::EndTick());
 	GetResourceManager()->Tick();
+
+#ifdef LEPRA_DEBUG
+	static size_t lMaxLoginCount = 0;
+	size_t lUserCount = ListUsers().size();
+	lMaxLoginCount = (lUserCount > lMaxLoginCount)? lUserCount : lMaxLoginCount;
+	if (lMaxLoginCount > 0 && lUserCount == 0)
+	{
+		mLog.AWarning("Server automatically shuts down in debug when no more users are on.");
+		Lepra::SystemManager::SetQuitRequest(true);
+	}
+#endif // Debug.
+
 	return (lOk);
 }
 
@@ -101,8 +113,16 @@ Lepra::UnicodeStringUtility::StringVector GameServerManager::ListUsers()
 		{
 			const Client* lClient = x.GetObject();
 			Lepra::UnicodeString lUserInfo = lClient->GetUserConnection()->GetLoginName();
-			Lepra::Vector3DF lPosition = GetContext()->GetObject(lClient->GetAvatarId())->GetPosition();
-			lUserInfo += Lepra::UnicodeStringUtility::Format(L" at (%f, %f, %f)", lPosition.x, lPosition.y, lPosition.z);
+			Cure::ContextObject* lObject = GetContext()->GetObject(lClient->GetAvatarId());
+			if (lObject)
+			{
+				Lepra::Vector3DF lPosition = lObject->GetPosition();
+				lUserInfo += Lepra::UnicodeStringUtility::Format(L" at (%f, %f, %f)", lPosition.x, lPosition.y, lPosition.z);
+			}
+			else
+			{
+				lUserInfo += L" [not loaded]";
+			}
 			lVector.push_back(lUserInfo);
 		}
 	}

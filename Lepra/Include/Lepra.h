@@ -4,11 +4,7 @@
 
 
 
-// Don't replace this one with #pragma once!
-#ifndef LEPRA_H
-#define LEPRA_H
-
-
+#pragma once
 
 #include "LepraTarget.h"
 #include "LepraTypes.h"
@@ -47,7 +43,3 @@ void Shutdown();
 
 
 }
-
-
-
-#endif // !LEPRA_H

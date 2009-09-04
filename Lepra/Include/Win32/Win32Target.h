@@ -22,12 +22,12 @@
 #define _WIN32_WINNT	0x0500
 #endif // _WIN32_WINNT
 
+#include <WinSock2.h>
 #include <Windows.h>
 #include <WindowsX.h>
 #ifdef LEPRA_NETWORK_IPV6
 #include <Ws2tcpip.h>
 #endif // LEPRA_NETWORK_IPV6
-#include <WinSock.h>
 
 #pragma warning(pop)	// Enable all warnings again.
 

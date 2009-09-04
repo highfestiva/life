@@ -961,11 +961,11 @@ void GameClientSlaveManager::DrawSyncDebugInfo()
 			UiCure::CppContextObject* lObject = (UiCure::CppContextObject*)x->second;	// Not very good to cast to a Cpp...
 			if (lDebugAxes)
 			{
-				lObject->DebugDrawAxes(UiCure::CppContextObject::DEBUG_AXES);
+				lObject->DebugDrawPrimitive(UiCure::CppContextObject::DEBUG_AXES);
 			}
 			if (lDebugShape)
 			{
-				lObject->DebugDrawAxes(UiCure::CppContextObject::DEBUG_SHAPE);
+				lObject->DebugDrawPrimitive(UiCure::CppContextObject::DEBUG_SHAPE);
 			}
 		}
 	}

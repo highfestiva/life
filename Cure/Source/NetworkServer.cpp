@@ -493,6 +493,7 @@ void NetworkServer::KillDeadSockets()
 
 void NetworkServer::DropSocket(Lepra::GameSocket* pSocket)
 {
+	pSocket->SendBuffer();
 	mSocketTimeoutTable.erase(pSocket);
 	mPendingLoginTable.erase(pSocket);
 	mMuxSocket->CloseSocket(pSocket);

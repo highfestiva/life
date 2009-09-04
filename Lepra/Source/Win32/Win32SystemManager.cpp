@@ -4,10 +4,14 @@
 
 
 
+#include "../../Include/LepraTarget.h"
 #include <direct.h>
-#include <shlobj.h>
-#include <Lm.h>
-#include <Windows.h>	// Must reside here to avoid lean and mean (for timeXxxPeriod()).
+#include <LM.h>
+#pragma warning(push)
+#pragma warning(disable: 4201)	// Non-standard extension used: unnamed struct.
+#include <MMSystem.h>
+#pragma warning(pop)
+#include <ShlObj.h>
 #include "../../Include/Lepra.h"
 #include "../../Include/String.h"
 #include "../../Include/SystemManager.h"

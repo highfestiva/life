@@ -369,7 +369,10 @@ class vec4(object):
         else:
             raise TypeError("unsupported operand type for *=")
 
-    def __idiv__(self, other):
+    def __floordiv__(self, other):
+        self.__truediv__(other)
+
+    def __truediv__(self, other):
         """Inline division with scalar
 
         >>> a=vec4(1.0, 0.5, -1.8, 0.2)
@@ -379,7 +382,7 @@ class vec4(object):
         """
         T = type(other)
         # vec4/=scalar
-        if T==float or T==int or T==int:
+        if T==float or T==int:
             self.x/=other
             self.y/=other
             self.z/=other

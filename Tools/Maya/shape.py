@@ -40,9 +40,11 @@ class Shape:
                         d.append(shapenode.getAttrValue("w", "w", None, default=1.0)*scale[0])
                         d.append(shapenode.getAttrValue("d", "d", None, default=1.0)*scale[1])
                         d.append(shapenode.getAttrValue("h", "h", None, default=1.0)*scale[2])
-                        #d.append(shapenode.getAttrValue("w", "w", None, default=1.0))
-                        #d.append(shapenode.getAttrValue("d", "d", None, default=1.0))
-                        #d.append(shapenode.getAttrValue("h", "h", None, default=1.0))
+                        #_w = shapenode.getAttrValue("w", "w", None, default=1.0)
+                        #_d = shapenode.getAttrValue("d", "d", None, default=1.0)
+                        #_h = shapenode.getAttrValue("h", "h", None, default=1.0)
+                        #size = (scalenode.get_world_transform()*vec4(_w,_d,_h,0))[:3]
+                        #d += size
                 elif shapenode.nodetype == "polySphere":
                         self.type = "sphere"
                         absscale = map(lambda x: math.fabs(x), scale)
@@ -50,7 +52,6 @@ class Shape:
                                 print("Error: scale for sphere node '%s' must be symmetric (is %s)." % (scalenode.getFullName(), str(scale)))
                                 sys.exit(21)
                         d.append(shapenode.getAttrValue("r", "r", None, default=1.0)*scale[0])
-                        #d.append(shapenode.getAttrValue("r", "r", None, default=1.0))
                 else:
                         print("Error: shape type '%s' on node '%s' is unknown." % (shapenode.nodetype, shapenode.getFullName()))
                         sys.exit(22)

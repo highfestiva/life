@@ -111,6 +111,7 @@ void NetworkClient::Disconnect(bool pSendDisconnect)
 		SendStatusMessage(mSocket, 0, Cure::REMOTE_NO_CONNECTION, L"", lPacket);
 		GetPacketFactory()->Release(lPacket);
 	}
+	SendAll();
 	SetLoginAccountId(0);
 	Stop();
 }
