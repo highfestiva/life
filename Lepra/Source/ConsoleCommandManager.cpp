@@ -50,6 +50,16 @@ int Getc(float pTimeout)
 
 
 
+ConsoleCommandExecutor::ConsoleCommandExecutor()
+{
+}
+
+ConsoleCommandExecutor::~ConsoleCommandExecutor()
+{
+}
+
+
+
 ConsoleCommandManager::ConsoleCommandManager():
 	mCurrentHistoryIndex(0)
 {
@@ -58,6 +68,14 @@ ConsoleCommandManager::ConsoleCommandManager():
 
 ConsoleCommandManager::~ConsoleCommandManager()
 {
+	CommandExecutorSet::iterator e = mCommandExecutorSet.begin();
+	for (; e != mCommandExecutorSet.end(); ++e)
+	{
+		ConsoleCommandExecutor* lExecutor = *e;
+		delete (lExecutor);
+	}
+	mCommandExecutorSet.clear();
+
 	RemoveCompleter(this);
 	CommandCompleterSet::iterator x = mCommandCompleterList.begin();
 	for (; x != mCommandCompleterList.end(); ++x)
@@ -66,6 +84,19 @@ ConsoleCommandManager::~ConsoleCommandManager()
 		delete (lCompleter);
 	}
 	mCommandCompleterList.clear();
+}
+
+
+
+void ConsoleCommandManager::AddExecutor(ConsoleCommandExecutor* lExecutor)
+{
+	mCommandExecutorSet.insert(lExecutor);
+}
+
+void ConsoleCommandManager::DeleteExecutor(ConsoleCommandExecutor* lExecutor)
+{
+	mCommandExecutorSet.erase(lExecutor);
+	delete (lExecutor);
 }
 
 
@@ -124,10 +155,15 @@ int ConsoleCommandManager::Execute(const String& pCommand, bool pAppendToHistory
 				lParameterTokenList = StringUtility::BlockSplit(lParameters, lCommandDelimitors, false, true);
 			}
 
-			lExecutionResult = OnExecute(lCommand, lParameterTokenList);
-			if (lExecutionResult != 0)
+			lExecutionResult = -1;
+			CommandExecutorSet::iterator x = mCommandExecutorSet.begin();
+			for (; x != mCommandExecutorSet.end() && lExecutionResult < 0; ++x)
 			{
-				OnExecutionError(lCommand, lParameterTokenList, lExecutionResult);
+				lExecutionResult = (*x)->Execute(lCommand, lParameterTokenList);
+				if (lExecutionResult > 0)
+				{
+					(*x)->OnExecutionError(lCommand, lParameterTokenList, lExecutionResult);
+				}
 			}
 		}
 	}

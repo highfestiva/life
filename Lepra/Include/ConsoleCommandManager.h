@@ -41,6 +41,37 @@ public:
 
 
 
+class ConsoleCommandExecutor
+{
+public:
+	ConsoleCommandExecutor();
+	virtual ~ConsoleCommandExecutor();
+
+	virtual int Execute(const String& pCommand, const StringUtility::StringVector& pParameterList) = 0;
+	virtual void OnExecutionError(const String& pCommand, const StringUtility::StringVector& pParameterList, int pResult) = 0;
+};
+
+template<class _Base> class ConsoleExecutor: public ConsoleCommandExecutor
+{
+public:
+	typedef int (_Base::*CommandCallback)(const String&, const StringUtility::StringVector&);
+	typedef void (_Base::*CommandErrorCallback)(const String&, const StringUtility::StringVector&, int);
+
+	ConsoleExecutor(_Base* pInstance, CommandCallback pCommandListener, CommandErrorCallback pCommandErrorListener);
+	virtual ~ConsoleExecutor();
+
+protected:
+	int Execute(const String& pCommand, const StringUtility::StringVector& pParameterList);
+	void OnExecutionError(const String& pCommand, const StringUtility::StringVector& pParameterList, int pResult);
+
+private:
+	_Base* mInstance;
+	CommandCallback mCommandListener;
+	CommandErrorCallback mCommandErrorListener;
+};
+
+
+
 // Console manager handles the basics of the console: commands, completion, history, etc.
 class ConsoleCommandManager: public CommandCompleter
 {
@@ -49,6 +80,9 @@ public:
 
 	ConsoleCommandManager();
 	virtual ~ConsoleCommandManager();
+
+	void AddExecutor(ConsoleCommandExecutor* lExecutor);	// Takes ownership!
+	void DeleteExecutor(ConsoleCommandExecutor* lExecutor);
 
 	void SetComment(const String& pComment);
 	bool AddCommand(const String& pCommand);
@@ -64,38 +98,17 @@ public:
 	String GetHistory(int pIndex) const;
 	void AppendHistory(const String& pCommand);
 
-protected:
-	virtual int OnExecute(const String& pCommand, const StringUtility::StringVector& pParameterList) = 0;
-	virtual void OnExecutionError(const String& pCommand, const StringUtility::StringVector& pParameterList, int pResult) = 0;
-
 private:
+	typedef std::set<ConsoleCommandExecutor*> CommandExecutorSet;
 	typedef std::set<String> CommandSet;
 	typedef std::vector<String> CommandVector;
 	typedef std::set<CommandCompleter*> CommandCompleterSet;
+	CommandExecutorSet mCommandExecutorSet;
 	CommandCompleterSet mCommandCompleterList;
 	CommandSet mCommandSet;
 	CommandVector mHistoryVector;
 	String mComment;
 	int mCurrentHistoryIndex;
-};
-
-template<class _Base> class ConsoleExecutor: public ConsoleCommandManager
-{
-public:
-	typedef int (_Base::*CommandCallback)(const String&, const StringUtility::StringVector&);
-	typedef void (_Base::*CommandErrorCallback)(const String&, const StringUtility::StringVector&, int);
-
-	ConsoleExecutor(_Base* pInstance, CommandCallback pCommandListener, CommandErrorCallback pCommandErrorListener);
-	virtual ~ConsoleExecutor();
-
-protected:
-	int OnExecute(const String& pCommand, const StringUtility::StringVector& pParameterList);
-	void OnExecutionError(const String& pCommand, const StringUtility::StringVector& pParameterList, int pResult);
-
-private:
-	_Base* mInstance;
-	CommandCallback mCommandListener;
-	CommandErrorCallback mCommandErrorListener;
 };
 
 

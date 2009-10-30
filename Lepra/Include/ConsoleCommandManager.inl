@@ -25,7 +25,7 @@ template<class _Base> ConsoleExecutor<_Base>::~ConsoleExecutor()
 
 
 
-template<class _Base> int ConsoleExecutor<_Base>::OnExecute(const String& pCommand, const StringUtility::StringVector& pParameterList)
+template<class _Base> int ConsoleExecutor<_Base>::Execute(const String& pCommand, const StringUtility::StringVector& pParameterList)
 {
 	return ((mInstance->*mCommandListener)(pCommand, pParameterList));
 }
