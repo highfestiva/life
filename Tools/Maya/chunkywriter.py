@@ -380,8 +380,8 @@ class PhysWriter(ChunkyWriter):
                 parameters[0] = node.get_fixed_attribute("joint_spring_constant", True, 0.0) * totalmass
                 parameters[1] = node.get_fixed_attribute("joint_spring_damping", True, 0.0) * totalmass
                 #yaw, pitch, roll = ChunkyWriter._geteuler(node)
-                yaw = node.get_fixed_attribute("joint_yaw", True, 0.0)
-                pitch = node.get_fixed_attribute("joint_pitch", True, 0.0)
+                yaw = node.get_fixed_attribute("joint_yaw", True, 0.0)*math.pi/180
+                pitch = node.get_fixed_attribute("joint_pitch", True, 0.0)*math.pi/180
                 #if jointvalue != 1 and (pitch < -0.1 or pitch > 0.1):
                 #        print("Error: euler rotation pitch of jointed body '%s' must be zero." % node.getFullName())
                 #        sys.exit(19)

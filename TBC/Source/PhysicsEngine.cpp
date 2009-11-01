@@ -238,7 +238,7 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, float pFrameTime)
 						// won't start breaking on the tiniest movement. "Scaling" here determines part of
 						// functionality (such as only affecting some wheels), may be positive or negative.
 						const float lAbsValue = ::fabs(mValue[0]);
-						if (lAbsValue > mMaxSpeed && mValue[0] < lScale)
+						if (lAbsValue > mMaxSpeed && mValue[0] < ::fabs(lScale))
 						{
 							const float lBreakForceUsed = mStrength*lAbsValue;
 							lGeometry->SetExtraData(1);

@@ -26,9 +26,9 @@ class Shape:
                 d = []
                 self.data = d
                 self._attrnode = scalenode
-                if not scalenode.isortho():
-                        print("Error: node '%s' is not orthogonal." % scalenode.getFullName())
-                        sys.exit(21)
+                #if not scalenode.isortho():
+                #        print("Error: node '%s' is not orthogonal." % scalenode.getFullName())
+                #        sys.exit(21)
                 #scale = scalenode.get_local_scale()
                 #m = mat4(scalenode.get_world_transform()).getMat3()
                 scale = (scalenode.get_world_transform()*vec4(1,1,1,0))[:3]
@@ -37,9 +37,15 @@ class Shape:
                 #scale = scalenode.get_world_scale()
                 if shapenode.nodetype == "polyCube":
                         self.type = "box"
-                        d.append(shapenode.getAttrValue("w", "w", None, default=1.0)*scale[0])
-                        d.append(shapenode.getAttrValue("d", "d", None, default=1.0)*scale[1])
-                        d.append(shapenode.getAttrValue("h", "h", None, default=1.0)*scale[2])
+                        #d.append(shapenode.getAttrValue("w", "w", None, default=1.0)*scale[0])
+                        #d.append(shapenode.getAttrValue("d", "d", None, default=1.0)*scale[1])
+                        #d.append(shapenode.getAttrValue("h", "h", None, default=1.0)*scale[2])
+                        x = shapenode.getAttrValue("w", "w", None, default=1.0)
+                        y = shapenode.getAttrValue("h", "h", None, default=1.0)
+                        z = shapenode.getAttrValue("d", "d", None, default=1.0)
+                        s = scalenode.get_world_transform() * vec4(x,z,y,0)
+                        #d += map(lambda x, y: x*y, s[:3], scale)
+                        d += s[:3]
                         #_w = shapenode.getAttrValue("w", "w", None, default=1.0)
                         #_d = shapenode.getAttrValue("d", "d", None, default=1.0)
                         #_h = shapenode.getAttrValue("h", "h", None, default=1.0)
@@ -55,8 +61,6 @@ class Shape:
                 else:
                         print("Error: shape type '%s' on node '%s' is unknown." % (shapenode.nodetype, shapenode.getFullName()))
                         sys.exit(22)
-                
-                # TODO: check orthogonality of shape by simply checking that (1,0,0), (0,1,0), (0,0,1) and (1,1,1) are all.
 
         def __str__(self):
                 return "<Shape %s %s>" % (self.type, " ".join(map(lambda x: str(x), self.data)))

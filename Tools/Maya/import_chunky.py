@@ -92,7 +92,7 @@ class GroupReader(DefaultMAReader):
                         sys.exit(3)
                 if not self.validate_orthogonality(group):
                         print("Group not completely orthogonal. Terminating due to error.")
-                        sys.exit(3)
+                        #sys.exit(3)
                 if not self.validateMeshGroup(group):
                         print("Invalid mesh group! Terminating due to error.")
                         sys.exit(3)
@@ -195,8 +195,9 @@ class GroupReader(DefaultMAReader):
                         ms = mat4.scaling(s)
                         msh = mat4.identity()
                         msh.mlist[2] = +sh[0]	# X: x(+z), originally x(+y) in Maya.
-                        msh.mlist[1] = -sh[2]	# Y: x(+y), originally y(+z) in Maya.
-                        msh.mlist[9] = +sh[1]	# Z: z(+y), originally x(+z) in Maya.
+                        msh.mlist[9] = +sh[1]	# Y: z(-y), originally y(+z) in Maya.
+                        msh.mlist[1] = -sh[2]	# Z: x(-y), originally x(+z) in Maya.
+                        #msh = msh * mat4.rotation(math.pi, (1,0,0))
                         mspi = mat4.translation(sp)
                         mst = mat4.translation(st)
                         mrp = mat4.translation(-rp)
@@ -205,6 +206,7 @@ class GroupReader(DefaultMAReader):
                         mrt = mat4.translation(rt)
                         mt = mat4.translation(t)
                         # According to Maya doc (as I understood it): [sp][s][sh][sp^-1][st][rp][ar][r][rp^-1][rt][t].
+                        # See http://download.autodesk.com/us/maya/2010help/CommandsPython/xform.html for more info.
                         # My multiplications are reversed order, since matrices already transposed.
                         m = mt * mrt * mrpi * mr * mar * mrp * mst * mspi * msh * ms * msp
                         setattr(self, matname, m)
@@ -385,7 +387,7 @@ class GroupReader(DefaultMAReader):
                                 fix(node, "sp", (0,0,0))
                                 fix(node, "spt", (0,0,0))
                                 fix(node, "r", (0,0,0), math.radians)
-                                fix(node, "s", (1,1,1), math.fabs)
+                                fix(node, "s", (1,1,1), None, lambda x,y,z: (x,z,y))
                                 fix(node, "sh", (0,0,0))
                                 fix(node, "ra", (0,0,0), math.radians)
                         vtx = node.getAttrValue("rgvtx", "rgvtx", None, n=None)
@@ -406,17 +408,8 @@ class GroupReader(DefaultMAReader):
                                         faces = faces[1]        # From ("(", "...", ")") to "..."
                                 faces = eval(faces[1:-1])
                                 for face in faces:
-                                        if len(face) == 4:
-                                                l = [face[0], face[1], face[2], face[0], face[2], face[3]]
-                                                #print(l)
-                                                triangles += l
-                                        elif len(face) == 3:
-                                                #print(face)
-                                                triangles += face
-                                                pass
-                                        else:
-                                                print("Error: cannot yet handle faces with less than three or more than four vertices!")
-                                                sys.exit(19)
+                                        for x in range(1, len(face)-1):
+                                                triangles += [face[0], face[x], face[x+1]]
                                 node.fix_attribute("rgtri", triangles)
 
 
@@ -426,47 +419,13 @@ class GroupReader(DefaultMAReader):
                         if vtx:
                                 phys = node.getParent().phys_ref[0]
                                 # Get transformation to origo without rescaling.
-                                transform = mat4.translation(vec3(phys.get_world_translation()[:3]))
-                                #transform = mat4.translation(vec3(node._get_local_pivot()[:3]))
-                                if phys.phys_parent:
-                                        pq = phys.phys_parent.get_world_quat()
-                                        #print("'%s' got phys parent (%s) world quat:" % (node.getName(), phys.phys_parent.getName()), pq)
-                                else:
-                                        #print("Oh-oh!")
-                                        pq = quat(1,0,0,0)
-                                lq = phys.get_local_quat()
-                                #print("%s has lq=%s, ilq=%s" % (node.getName(), lq, quat(lq.toMat4().inverse())))
-                                #q = node.get_world_quat()
-                                #print("'%s' has rot %s" % (node.getName(), q))
-                                transform = transform * lq.toMat4().inverse()
-                                pt = phys.get_world_transform()
-                                mtr = phys.gettransformto(None, "localmeshmat4", getparent=lambda n: n.getParent())
-                                iwt = phys.get_world_transform()
-                                #transform = mtr
-                                translation, rotation, scale = mtr.decompose()
-                                #translation = phys.get_world_transform()*vec4(phys._get_local_t()[:]+[1])
-                                #translation = phys.get_world_transform() * vec4((-node._get_local_pivot())[:]+[1])
-                                #print("Node local pivot is", node._get_local_pivot())
-                                #print("Phys local pivot is", phys._get_local_pivot())
-                                ta = tuple(map(math.fabs, (node.get_world_pivot()+node.get_world_translation())[:3]))
-                                translation[0] += ta[0]*scale[0]
-                                translation[1] += ta[1]*scale[1]
-                                translation[2] += ta[2]*scale[2]
-                                transform = mat4.identity().translate(translation)
-                                transform = transform*rotation
-                                transform = transform.inverse()
-                                transform = iwt * mtr.inverse()
-                                #if node.getName() == "m_hoe_armShape":
-                                #        print("m pivot is", node.get_world_pivot())
-                                #        print("p pivot is", phys.get_world_pivot())
-                                transform = mat4.identity().translate((-phys.get_world_translation())[:3])
-                                #translation, rotation, scale = phys.gettransformto(phys.getxformroot("phys_")).decompose()
-                                #translation, rotation, scale = phys.getxformroot("phys_").get_world_transform().decompose()
-                                translation, rotation, scale = mtr.decompose()
-                                transform = rotation.inverse() * transform
-                                #transform = transform.inverse()
-                                #print(phys)
-                                #print(transform)
+                                m_tr = phys.gettransformto(None, "localmeshmat4", getparent=lambda n: n.getParent())
+                                m_t, m_r, m_s = m_tr.decompose()
+                                m_t_tr = mat4.identity().translate(m_t[:3])
+                                p_tr = phys.gettransformto(node.getParent(), "localmeshmat4", getparent=lambda n: n.getParent())
+                                p_t, p_r, p_s = p_tr.decompose()
+                                transform = p_r.inverse() * m_t_tr.inverse()
+                                #transform = mat4.identity()
                                 avg = vec4()
                                 vp = vec4(0,0,0,1);
                                 idx = 0
@@ -878,6 +837,7 @@ class GroupReader(DefaultMAReader):
                         if meshcnt > 0:
                                 valid_ref = True
                                 print("Error: mesh '%s' contains mesh shape, but is not linked to phys node." % mesh.getFullName())
+                                raise Exception("Bad, bad boy!")
                 return valid_ref
 
 

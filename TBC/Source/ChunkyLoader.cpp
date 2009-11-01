@@ -204,10 +204,15 @@ bool ChunkyLoader::AllocLoadChunkyList(FileElementList& pLoadList, Lepra::int64 
 							if (lOk)
 							{
 								Lepra::UnicodeString lUnicodeString;
-								lOk = (Lepra::PackerUnicodeString::Unpack(&lUnicodeString, lString, lSize) == (int)lSize);
+								int lStringLength = Lepra::PackerUnicodeString::Unpack(&lUnicodeString, lString, lSize);
+								lOk = (lStringLength == (int)lSize || lStringLength == (int)lSize-2);
 								if (lOk)
 								{
 									lElement.mString[y] = Lepra::UnicodeStringUtility::ToCurrentCode(lUnicodeString);
+								}
+								else
+								{
+									mLog.AError("Could not unpack string!");
 								}
 							}
 							delete[] (lString);
@@ -1004,6 +1009,10 @@ bool ChunkyClassLoader::Load(ChunkyClass* pData)
 	{
 		lOk = (!pData->GetPhysicsBaseName().empty() &&
 			true);	// TODO: check other tags (e.g. settings).
+		if (!lOk)
+		{
+			mLog.AError("Could not load contents of class file %s!");
+		}
 	}
 
 	return (lOk);
