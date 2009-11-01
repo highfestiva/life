@@ -528,7 +528,7 @@ TEMPLATE void QUAL::Div(const Quaternion& pQuaternion)
 TEMPLATE Vector3D<_TVarType> QUAL::GetRotatedVector(const Vector3D<_TVarType>& pVector) const
 {
 	Quaternion lQ(0, pVector.x, pVector.y, pVector.z);
-	lQ = (*this) * lQ * GetInverse();
+	lQ = (*this) * lQ * GetInverse();	// TODO: assume unit, and use conjugate instead of inverse.
 
 	Vector3D<_TVarType> lV(lQ.mB, lQ.mC, lQ.mD);
 	return lV;
@@ -537,7 +537,7 @@ TEMPLATE Vector3D<_TVarType> QUAL::GetRotatedVector(const Vector3D<_TVarType>& p
 TEMPLATE Vector3D<_TVarType> QUAL::GetInverseRotatedVector(const Vector3D<_TVarType>& pVector) const
 {
 	Quaternion lQ(0, pVector.x, pVector.y, pVector.z);
-	lQ = GetInverse() * lQ * (*this);
+	lQ = GetInverse() * lQ * (*this);	// TODO: assume unit, and use conjugate instead of inverse.
 
 	Vector3D<_TVarType> lV(lQ.mB, lQ.mC, lQ.mD);
 	return lV;
@@ -613,8 +613,7 @@ TEMPLATE void QUAL::Normalize(_TVarType pLength)
 
 	if (lLength >= MathTraits<_TVarType>::FullEps())
 	{
-		Div(lLength);
-		Mul(pLength);
+		Mul(pLength/lLength);
 	}
 	else
 	{

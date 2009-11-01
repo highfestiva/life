@@ -197,7 +197,10 @@ class GroupReader(DefaultMAReader):
                         msh.mlist[2] = +sh[0]	# X: x(+z), originally x(+y) in Maya.
                         msh.mlist[9] = +sh[1]	# Y: z(-y), originally y(+z) in Maya.
                         msh.mlist[1] = -sh[2]	# Z: x(-y), originally x(+z) in Maya.
-                        #msh = msh * mat4.rotation(math.pi, (1,0,0))
+                        msh = mat4.identity()
+                        msh.mlist[1] = +sh[0]   # According to doc?
+                        msh.mlist[2] = +sh[1]   # According to doc?
+                        msh.mlist[6] = +sh[2]   # According to doc?
                         mspi = mat4.translation(sp)
                         mst = mat4.translation(st)
                         mrp = mat4.translation(-rp)
@@ -214,9 +217,9 @@ class GroupReader(DefaultMAReader):
                 def get_world_scale(self):
                         return self.get_world_transform().decompose()[2]
                 def get_world_quat(self):
-                        return quat(self.get_world_transform().decompose()[1])
+                        return quat(self.get_world_transform().decompose()[1].ortho())
                 def get_local_quat(self):
-                        return quat(self.get_local_transform().decompose()[1])
+                        return quat(self.get_local_transform().decompose()[1].ortho())
                 def isortho(self):
                         l = [vec4(1,0,0,1), vec4(0,1,0,1), vec4(0,0,1,1)]
                         p = vec3(self.get_world_translation(vec4(0,0,0,1))[0:3])
@@ -371,7 +374,7 @@ class GroupReader(DefaultMAReader):
         def rotatexaxis(self, group):
                 for node in group:
                         if node.nodetype == "transform":
-                                def fix(node, aname, default, conv=None, flip=lambda x,y,z: (x,-z,y)):
+                                def fix(node, aname, default, conv=None, flip=lambda x,y,z: (x,y,z)):
                                         val = node.getAttrValue(aname, aname, None, default=default)
                                         if val:
                                                 if flip:
@@ -387,15 +390,15 @@ class GroupReader(DefaultMAReader):
                                 fix(node, "sp", (0,0,0))
                                 fix(node, "spt", (0,0,0))
                                 fix(node, "r", (0,0,0), math.radians)
-                                fix(node, "s", (1,1,1), None, lambda x,y,z: (x,z,y))
+                                fix(node, "s", (1,1,1))
                                 fix(node, "sh", (0,0,0))
                                 fix(node, "ra", (0,0,0), math.radians)
                         vtx = node.getAttrValue("rgvtx", "rgvtx", None, n=None)
                         if vtx:
                                 for x in range(0, len(vtx), 3):
                                         tmp = vtx[x+1]
-                                        vtx[x+1] = -vtx[x+2]
-                                        vtx[x+2] = tmp
+                                        #vtx[x+1] = -vtx[x+2]
+                                        #vtx[x+2] = tmp
                                 node.fix_attribute("rgvtx", vtx)
 
 
@@ -422,8 +425,9 @@ class GroupReader(DefaultMAReader):
                                 m_tr = phys.gettransformto(None, "localmeshmat4", getparent=lambda n: n.getParent())
                                 m_t, m_r, m_s = m_tr.decompose()
                                 m_t_tr = mat4.identity().translate(m_t[:3])
-                                p_tr = phys.gettransformto(node.getParent(), "localmeshmat4", getparent=lambda n: n.getParent())
+                                p_tr = phys.gettransformto(phys.getParent(), "localmeshmat4", getparent=lambda n: n.getParent())
                                 p_t, p_r, p_s = p_tr.decompose()
+                                p_t_tr = mat4.identity().translate(p_t[:3])
                                 transform = p_r.inverse() * m_t_tr.inverse()
                                 #transform = mat4.identity()
                                 avg = vec4()

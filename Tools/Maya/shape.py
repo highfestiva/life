@@ -43,7 +43,8 @@ class Shape:
                         x = shapenode.getAttrValue("w", "w", None, default=1.0)
                         y = shapenode.getAttrValue("h", "h", None, default=1.0)
                         z = shapenode.getAttrValue("d", "d", None, default=1.0)
-                        s = scalenode.get_world_transform() * vec4(x,z,y,0)
+                        s = scalenode.get_world_transform() * vec4(x,y,z,0)
+                        #s = map(lambda x,y: x*y, [x,y,z], scale)
                         #d += map(lambda x, y: x*y, s[:3], scale)
                         d += s[:3]
                         #_w = shapenode.getAttrValue("w", "w", None, default=1.0)

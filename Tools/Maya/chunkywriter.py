@@ -173,20 +173,21 @@ class ChunkyWriter:
                 #q = pq * node.get_world_quat()
                 #q = quat(pq.toMat4().inverse()) * node.get_world_quat()
                 q = node.get_local_quat()
+                #print("Writing bone", node.getName(), "with matrix:\n", q.toMat4())
                 #q = quat(node.get_local_transform().decompose()[1])
                 #q = quat(node.get_world_transform())
                 v0 = vec4(0,1,0,0)
-                v1 = q.toMat4()*v0
-                #print("v1 is now", v1, "dot is", v0*v1)
+                v1 = q.toMat4() * v0
+                print(node.getName(), "v1 is now", v1, "dot is", v0*v1)
                 v1[0] = 0
                 #print("v0 and v1 are", v0, v1, q.toMat4())
                 xangle = math.acos(v0*v1)*180/math.pi
-                #print("%s local x angle is %f, local q=%s, world q=%s" % (node.getName(), xangle, node.get_local_quat(), node.get_world_quat()))
+                print("%s local x angle is %f, local q=%s, world q=%s" % (node.getName(), xangle, node.get_local_quat(), node.get_world_quat()))
                 v0 = vec4(0,1,0,0)
                 v1 = node.get_world_quat().toMat4()*v0
                 v1[0] = 0
                 xangle = math.acos(v0*v1)*180/math.pi
-                #print("%s world x angle is %f" % (node.getName(), xangle))
+                print("%s world x angle is %f" % (node.getName(), xangle))
                 #print("%s parent is %s" % (node.getName(), node.xformparent.getName()))
                 #print("Parent %s has wq=%s" % (node.xformparent.getName(), node.xformparent.get_world_quat()))
                 #rot = node.get_fixed_attribute("r", default=vec3(0,0,0))

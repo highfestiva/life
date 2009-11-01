@@ -36,6 +36,7 @@
 
 import types, math
 from vec3 import vec3 as _vec3
+from vec4 import vec4 as _vec4
 from mat3 import mat3 as _mat3
 from mat4 import mat4 as _mat4
 
@@ -216,7 +217,7 @@ class quat:
                         w1*y2+y1*w2-x1*z2+z1*x2,
                         w1*z2+z1*w2+x1*y2-y1*x2)
         # quat*vec3
-        if isinstance(other, _vec3):
+        if isinstance(other, _vec3) or isinstance(other, _vec4):
             return self.rotateVec(other)
         # unsupported
         else:
@@ -242,7 +243,9 @@ class quat:
         # unsupported
         else:
             raise TypeError("unsupported operand type for /")
-        
+
+    __truediv__ = __div__
+
     def __pow__(self, other):
         """Return self**q."""
 #        if modulo!=None:
@@ -508,7 +511,7 @@ class quat:
         self*v*self.conjugate() and turning the result back into a vec3.
         """
 
-        v = _vec3(v)
+        u = _vec3(v[:3])
         ww = self.w*self.w
         xx = self.x*self.x
         yy = self.y*self.y
@@ -520,9 +523,13 @@ class quat:
         xz = self.x*self.z
         yz = self.y*self.z
 
-        return _vec3(ww*v.x + xx*v.x - yy*v.x - zz*v.x + 2*((xy-wz)*v.y + (xz+wy)*v.z),
-                     ww*v.y - xx*v.y + yy*v.y - zz*v.y + 2*((xy+wz)*v.x + (yz-wx)*v.z),
-                     ww*v.z - xx*v.z - yy*v.z + zz*v.z + 2*((xz-wy)*v.x + (yz+wx)*v.y))
+        u = (ww*u.x + xx*u.x - yy*u.x - zz*u.x + 2*((xy-wz)*u.y + (xz+wy)*u.z),
+             ww*u.y - xx*u.y + yy*u.y - zz*u.y + 2*((xy+wz)*u.x + (yz-wx)*u.z),
+             ww*u.z - xx*u.z - yy*u.z + zz*u.z + 2*((xz-wy)*u.x + (yz+wx)*u.y))
+        if isinstance(v, _vec4):
+            return _vec4(u)
+        return _vec3(u)
+        
     
 
 def slerp(t, q0, q1, shortest=True):
