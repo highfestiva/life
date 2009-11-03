@@ -225,7 +225,7 @@ class mat4:
                          m41*n14+m42*n24+m43*n34+m44*n44)
         # unsupported
         else:
-            raise TypeError("unsupported operand type for *")
+            raise TypeError("unsupported operand type '"+str(type(other))+"' for *")
 
     def __rmul__(self, other):
         T = type(other)

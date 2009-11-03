@@ -197,6 +197,8 @@ class ChunkyWriter:
                         print("Error: trying to get rotation from node '%s', but none available." % node.getFullName())
                         sys.exit(18)
                 pos = node.get_relative_pos()
+                #if node.phys_parent != node.phys_root:
+                #        pos[1] -= 1.5
                 #t = node.get_local_transform()
                 #pos = t * vec4(0,0,0,1)
                 #q = quat(t)
@@ -366,10 +368,11 @@ class PhysWriter(ChunkyWriter):
                 self._writefloat(float(node.get_fixed_attribute("mass")))
                 self._writefloat(float(node.get_fixed_attribute("friction")))
                 self._writefloat(float(node.get_fixed_attribute("bounce")))
-                self._writeint(-1 if not node.phys_parent else self.bodies.index(node.phys_parent))
+                self._writeint(-1 if not node.phys_root else self.bodies.index(node.phys_root))
                 joints = {None:1, "exclude":1, "suspend_hinge":2, "hinge2":3, "hinge":4, "ball":5, "universal":6}
                 jointtype = node.get_fixed_attribute("joint", True)
                 jointvalue = joints[jointtype]
+                print(node.getName(), "is jointed by type", jointvalue)
                 if jointtype:
                         self._addfeat("joint:joints", 1)
                 self._writeint(jointvalue)
@@ -515,6 +518,7 @@ class MeshWriter(ChunkyWriter):
                                 if nodemeshname.startswith("m_"):
                                         nodemeshname = nodemeshname[2:]
                                 meshbasename = self.basename+"_"+nodemeshname
+                                print("Setting", node.getParent(), "meshbasename.")
                                 node.getParent().meshbasename = meshbasename
                                 self.writemesh(meshbasename+".mesh", node)
 
@@ -561,6 +565,8 @@ class ClassWriter(ChunkyWriter):
                                         t = tp.inverse() * tm
                                         q = quat().fromMat(t).normalize()
                                         p = (lpm-lpp)[0:3]
+                                        print(m)
+                                        print(m.meshbasename)
                                         meshes += [(CHUNK_CLASS_PHYS_MESH, PhysMeshPtr(physidx, m.meshbasename, q, p))]
                                 physidx += 1
                         data =  (
