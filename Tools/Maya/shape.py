@@ -37,13 +37,16 @@ class Shape:
                 #scale = scalenode.get_world_scale()
                 if shapenode.nodetype == "polyCube":
                         self.type = "box"
+                        scale = scalenode.get_world_scale()
                         #d.append(shapenode.getAttrValue("w", "w", None, default=1.0)*scale[0])
                         #d.append(shapenode.getAttrValue("d", "d", None, default=1.0)*scale[1])
                         #d.append(shapenode.getAttrValue("h", "h", None, default=1.0)*scale[2])
                         x = shapenode.getAttrValue("w", "w", None, default=1.0)
                         y = shapenode.getAttrValue("h", "h", None, default=1.0)
                         z = shapenode.getAttrValue("d", "d", None, default=1.0)
-                        d += map(lambda x,y: x*y, [x,y,z], scale)
+                        s = list(map(lambda x,y: x*y, [x,y,z], scale))
+                        print(scalenode.getName(), "has scale", scale, "and size", [x,y,z])
+                        d += s
                         s = scalenode.get_world_transform() * vec4(x,y,z,0)
                         #d += s[:3]
                         #s = map(lambda x,y: x*y, [x,y,z], scale)

@@ -583,6 +583,10 @@ class GroupReader(DefaultMAReader):
                                                 ok &= (len(connected_to) > 0)
                                                 for cn in connected_to:
                                                         ok &= cn.getName().startswith("phys_")
+                                                        isValid, hasJoint = self._queryAttribute(cn, "joint", lambda x: True, False)
+                                                        if not hasJoint:
+                                                                ok = False
+                                                                print("Error: %s is not jointed, but has an engine connected_to it!" % cn.getFullName())
                                         return ok
                                 required = [("type", lambda x: type(x) == str),
                                             ("strength", lambda x: x > 0 and x < 30000),

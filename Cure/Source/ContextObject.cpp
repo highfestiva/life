@@ -262,6 +262,11 @@ void ContextObject::RemoveAttribute(ContextObjectAttribute* pAttribute)
 
 bool ContextObject::UpdateFullPosition(const ObjectPositionalData*& pPositionalData)
 {
+	if (!mPhysics)
+	{
+		return (false);
+	}
+
 	TBC::ChunkyBoneGeometry* lStructureGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
 	if (!lStructureGeometry || lStructureGeometry->GetBodyId() == TBC::INVALID_BODY)
 	{
