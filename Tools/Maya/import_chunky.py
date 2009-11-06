@@ -84,7 +84,12 @@ class GroupReader(DefaultMAReader):
                 if not config.read(ininame):
                         print("Error: could not open tweak file '%s'!" % ininame)
                         sys.exit(3)
-                self.rotatexaxis(group)
+                self.fixparams(group)
+
+                #for t in filter(lambda n: n.getName()=="phys_body", group):
+                #        print(t.getName(), "has rel pos", t.get_relative_pos())
+                #for t in filter(lambda n: n.getName()=="phys_backbar", group):
+                #        print(t.getName(), "has rel pos", t.get_relative_pos())
 
                 self.faces2triangles(group)
                 if not self.validatehierarchy(group):
@@ -108,12 +113,20 @@ class GroupReader(DefaultMAReader):
                 if not self.makephysrelative(group):
                         print("Internal vector math failed! Terminating due to error.")
                         sys.exit(3)
-                for t in filter(lambda n: n.nodetype=="transform", group):
-                        #print("%s transformation:" % t.getName())
-                        #print(t.get_local_transform())
-                        if t.getName().startswith("phys_"):
-                                print(t.getName(), "has root", t.phys_root)
+                #for t in filter(lambda n: n.nodetype=="transform", group):
+                #        print("%s transformation:" % t.getName())
+                #        print(t.get_local_transform())
+                #        if t.getName().startswith("phys_"):
+                #                print(t.getName(), "has root", t.phys_root)
                 self.makevertsrelative(group)
+
+                self.rotatexaxis(group)
+
+                #for t in filter(lambda n: n.getName()=="phys_body", group):
+                #        print(t.getName(), "has rel pos", t.get_relative_pos())
+                #for t in filter(lambda n: n.getName()=="phys_backbar", group):
+                #        print(t.getName(), "has rel pos", t.get_relative_pos())
+
                 #for t in filter(lambda n: n.nodetype=="transform", group):
                         #print("%s transformation:" % t.getName())
                         #print(t.get_local_transform())
@@ -171,12 +184,7 @@ class GroupReader(DefaultMAReader):
                 def get_local_transform(self):
                         return self.gettransformto(self.xformparent)
                 def get_relative_pos(self):
-                        #par = self.xformparent.get_world_translation() if self.xformparent else vec4(0,0,0,1)
-                        #return self.get_world_pivot() - par
-                        if hasattr(self, "phys_root") and self.phys_root:
-                                p = self.phys_parent.get_world_translation() #- self.phys_parent.xformparent.get_world_translation()
-                        else:
-                                p = self.xformparent.get_world_translation() if self.xformparent else vec4(0,0,0,1)
+                        p = self.xformparent.get_world_translation() if self.xformparent else vec4(0,0,0,1)
                         return self.get_world_translation() - p
                 def gettransformto(self, toparent, matname="localmat4", getparent=lambda n: n.xformparent):
                         if self == toparent:
@@ -227,9 +235,9 @@ class GroupReader(DefaultMAReader):
                 def get_world_scale(self):
                         return self.get_world_transform().decompose()[2]
                 def get_world_quat(self):
-                        return quat(self.get_world_transform().decompose()[1].ortho())
+                        return quat(self.get_world_transform().decompose()[1])
                 def get_local_quat(self):
-                        return quat(self.get_local_transform().decompose()[1].ortho())
+                        return quat(self.get_local_transform().decompose()[1])
                 def isortho(self):
                         l = [vec4(1,0,0,1), vec4(0,1,0,1), vec4(0,0,1,1)]
                         p = vec3(self.get_world_translation(vec4(0,0,0,1))[0:3])
@@ -384,19 +392,16 @@ class GroupReader(DefaultMAReader):
                 return islands
 
 
-        def rotatexaxis(self, group):
+        def fixparams(self, group):
                 for node in group:
                         if node.nodetype == "transform":
-                                def fix(node, aname, default, conv=None, flip=lambda x,y,z: (x,y,z)):
+                                def fix(node, aname, default, conv=None):
                                         val = node.getAttrValue(aname, aname, None, default=default)
                                         if val:
-                                                if flip:
-                                                        val = flip(*val)
                                                 if conv:
                                                         val = tuple(map(conv, val))
                                                 val = vec3(val)
                                                 node.fix_attribute(aname, val)
-                                                return val
                                 fix(node, "t", (0,0,0))
                                 fix(node, "rp", (0,0,0))
                                 fix(node, "rpt", (0,0,0))
@@ -408,11 +413,72 @@ class GroupReader(DefaultMAReader):
                                 fix(node, "ra", (0,0,0), math.radians)
                         vtx = node.getAttrValue("rgvtx", "rgvtx", None, n=None)
                         if vtx:
-                                for x in range(0, len(vtx), 3):
-                                        tmp = vtx[x+1]
-                                        #vtx[x+1] = -vtx[x+2]
-                                        #vtx[x+2] = tmp
                                 node.fix_attribute("rgvtx", vtx)
+
+
+        def rotatexaxis(self, group):
+                return
+                r = mat4.rotation(math.pi/2, (1,0,0))
+                for node in group:
+                        if node.nodetype == "transform":
+                                if node.getName() == "phys_body":
+                                        #node.localrotmat4 = node.localmat4
+                                        #node.localrotmat4 = None
+                                        #del node.localmat4
+                                        #node.localmat4 = node.localmat4 * r
+                                        #del node.localmat4
+                                        #print("YEAH!!!")
+                                        pass
+                                elif node.getName() == "m_body":
+                                        #node.localrotmat4 = node.localmat4
+                                        node.localmat4 = node.localmat4
+                                        #del node.localmat4
+                                        #print("YEAH!!!")
+                                        pass
+                                continue
+                                xfp = mat4.identity()
+                                if node.xformparent:
+                                        xfp = node.xformparent.get_world_transform()
+                                #else:
+                                #        print("Using identity parent for", node.getName())
+                                #        xfp = r * node.get_world_transform()
+                                xfp = r * xfp
+                                #if hasattr(node, "phys_root") and not node.phys_root:
+                                #        xfp = mat4.identity()
+                                xfs = r * node.get_world_transform()
+                                node.localrotmat4 = xfp.inverse() * xfs
+                                node.localrotmat4 = node.localmat4
+                                if hasattr(node, "phys_root") and not node.phys_root:
+                                        node.localrotmat4 = r.inverse() * node.get_world_transform()
+                for node in group:
+                        if node.nodetype == "transform":
+                                #print("Rotating", node.getName(), "mat")
+                                #print(node.localmat4)
+                                #print("with")
+                                #print(node.localrotmat4)
+                                #print()
+                                def rot(node, aname, flip=lambda x,y,z: (x,-z,y)):
+                                        val = node.get_fixed_attribute(aname)
+                                        val = vec3(flip(*val))
+                                        node.fix_attribute(aname, val)
+                                rot(node, "t")
+                                rot(node, "rp")
+                                rot(node, "rpt")
+                                rot(node, "sp")
+                                rot(node, "spt")
+                                rot(node, "r")
+                                rot(node, "s", flip=lambda x,y,z: (x,z,y))
+                                rot(node, "sh")
+                                rot(node, "ra")
+                                #node.localmat4 = node.localrotmat4
+                                #del node.localrotmat4
+##                        vtx = node.get_fixed_attribute("rgvtx", True)
+##                        if vtx:
+##                                for x in range(0, len(vtx), 3):
+##                                        tmp = vtx[x+1]
+##                                        vtx[x+1] = -vtx[x+2]
+##                                        vtx[x+2] = tmp
+##                                node.fix_attribute("rgvtx", vtx)
 
 
         def faces2triangles(self, group):
@@ -436,8 +502,8 @@ class GroupReader(DefaultMAReader):
                                 phys = node.getParent().phys_ref[0]
                                 # Get transformation to origo without rescaling.
                                 meshroot = None if not phys.phys_root else phys.phys_root.getParent()
-                                meshroot = None
-                                m_tr = phys.gettransformto(meshroot, "localmeshmat4", getparent=lambda n: n.getParent())
+                                #meshroot = None
+                                m_tr = phys.gettransformto(meshroot, "original", getparent=lambda n: n.getParent())
                                 if not m_tr:
                                         print("Mesh crash in", phys.getName(), "with root", phys.phys_root)
                                 #if phys.phys_root != phys.phys_parent:
@@ -516,7 +582,7 @@ class GroupReader(DefaultMAReader):
                                 print("Error: mesh '%s' contains triangle definitions but no vertices." % node.getFullName())
                         elif vtx and polys:
                                 node.physcnt = 0
-                                print("Found mesh:", node.getName())
+                                #print("Found mesh:", node.getName())
                                 if not node.getName().startswith("m_"):
                                         isGroupValid = False
                                         print("Error: mesh '%s' must have a name prefixed with 'm_'!" % node.getFullName())
@@ -628,7 +694,7 @@ class GroupReader(DefaultMAReader):
                                         return (t == "suspend_hinge") or (t == "hinge2") or (t == "hinge")
                                 isValid, hasJoint = self._queryAttribute(node, "joint", jointCheck, False)
                                 isGroupValid &= isValid
-                                if not node.phys_parent and isValid and hasJoint:
+                                if not node.phys_root and isValid and hasJoint:
                                         print("Error: root node %s may not be jointed to anything else!" % node.getFullName())
                                         isGroupValid = False
                                 isGroupValid &= self._queryAttribute(node, "mass", lambda x: (x > 0 and x < 1000000))[0]
@@ -638,14 +704,27 @@ class GroupReader(DefaultMAReader):
                 for node in group:
                         if node.getName().startswith("phys_") and node.nodetype == "transform":
                                 root = node
+                                current_parent = node.phys_parent
+                                del node.phys_parent
                                 isValid, hasJoint = self._queryAttribute(root, "joint", jointCheck, False)
                                 while root and isValid and not hasJoint:
                                         if not hasattr(root, "phys_root"):
-                                                print("Breaking in root search for", node.getName(), "skipping root", root.getName())
+                                                isGroupValid = False
+                                                print("Error: phys_root search for", node.getName(), "failed. Skipping root", root.getName())
                                                 break
                                         root = root.phys_root
                                         if root and root.getName().startswith("phys_"):
                                                 node.phys_root = root
+                                                current_parent.phys_children.index(node)
+                                                current_parent.phys_children.remove(node)
+                                                try:
+                                                        current_parent.phys_children.index(node)
+                                                        print("Error: multiple instances of", node.getName(), "was children to", current_parent.getName())
+                                                        isGroupValid = False
+                                                except ValueError:
+                                                        pass
+                                                root.phys_children += [node]
+                                                current_parent = root
                                                 isValid, hasJoint = self._queryAttribute(root, "joint", jointCheck, False)
                 return isGroupValid
 
@@ -662,7 +741,7 @@ class GroupReader(DefaultMAReader):
                         phys.mesh_ref = []
                         phys.loose_mesh_ref = []
                         phys_mesh_ref = phys.mesh_ref
-                        if phys.phys_parent and not phys.get_fixed_attribute("joint", optional=True):
+                        if phys.phys_root and not phys.get_fixed_attribute("joint", optional=True):
                                 phys_mesh_ref = phys.loose_mesh_ref
                         for mesh in group:
                                 if not mesh.getName().startswith("m_"):
@@ -734,8 +813,8 @@ class GroupReader(DefaultMAReader):
                 if phroot:
                         if not hasattr(phroot, "localmat4"):
                                ok = self._physrelativemat4(phroot)
-                        own_branch_xform = node.gettransformto(None)
-                        parent_branch_xform = phroot.gettransformto(None)
+                        own_branch_xform = node.gettransformto(None, "original", lambda n: n.getParent())
+                        parent_branch_xform = phroot.gettransformto(None, "original", lambda n: n.getParent())
                         #print("%s had local translation %s." %(node.getName(), node.get_relative_pos()))
                         #print("Parent xform:")
                         #print(phroot.localmat4)
@@ -884,15 +963,15 @@ class GroupReader(DefaultMAReader):
                                 valid_ref = False
                                 print("Error: mesh '%s' (referenced by '%s') contains %i invalid child nodes." %
                                       (mesh.getFullName(), phys.getFullName(), invcnt))
-                        if not phys.phys_parent and mesh.getParent():
+                        if not phys.phys_root and mesh.getParent():
                                 valid_ref = False
                                 print("Error: root mesh node '%s' (referenced by '%s') erroneously has parent." %
                                       (mesh.getFullName(), phys.getFullName()))
-                        if not loose and phys.phys_parent and not phys.get_fixed_attribute("joint", optional=True):
+                        if not loose and phys.phys_root and not phys.get_fixed_attribute("joint", optional=True):
                                 valid_ref = False
                                 print("Error: mesh '%s' referenced by non-jointed phys node '%s'." %
                                       (mesh.getFullName(), phys.getFullName()))
-                        if loose and (not phys.phys_parent or phys.get_fixed_attribute("joint", optional=True)):
+                        if loose and (not phys.phys_root or phys.get_fixed_attribute("joint", optional=True)):
                                 valid_ref = False
                                 print("Error: attached mesh '%s' referenced by jointed phys node '%s'." %
                                       (mesh.getFullName(), phys.getFullName()))
@@ -978,8 +1057,16 @@ def main():
                 sys.exit(20)
         rd = GroupReader(sys.argv[1])
         rd.doread()
-        print()
-        print(rd.group)
+
+        #print()
+        #print("This is what the physics look like:")
+        def p_p(n, indent=0):
+                print("  "*indent + n.getName())
+                for child in n.phys_children:
+                        p_p(child, indent+1)
+        #[p_p(root) for root in filter(lambda n: n.getName()=="phys_body", rd.group)]
+        #print()
+
         pwr = chunkywriter.PhysWriter(sys.argv[1], rd.group, rd.config)
         mwr = chunkywriter.MeshWriter(sys.argv[1], rd.group, rd.config)
         cwr = chunkywriter.ClassWriter(sys.argv[1], rd.group, rd.config)

@@ -45,7 +45,7 @@ class Shape:
                         y = shapenode.getAttrValue("h", "h", None, default=1.0)
                         z = shapenode.getAttrValue("d", "d", None, default=1.0)
                         s = list(map(lambda x,y: x*y, [x,y,z], scale))
-                        print(scalenode.getName(), "has scale", scale, "and size", [x,y,z])
+                        #print(scalenode.getName(), "has scale", scale, "and size", [x,y,z])
                         d += s
                         s = scalenode.get_world_transform() * vec4(x,y,z,0)
                         #d += s[:3]
