@@ -709,13 +709,16 @@ float ContextObject::GetForwardSpeed() const
 	const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
 	if (lGeometry && lGeometry->GetBodyId() != TBC::INVALID_BODY)
 	{
+		const Lepra::TransformationF lOriginalTransform =
+			mPhysics->GetOriginalBoneTransformation(0);
+		const Lepra::Vector3DF lForwardAxis = lOriginalTransform.GetOrientation().GetInverse() * Lepra::Vector3DF(0, 1, 0);
 		Lepra::TransformationF lTransform;
 		mManager->GetGameManager()->GetPhysicsManager()->GetBodyTransform(lGeometry->GetBodyId(), lTransform);
 		Lepra::Vector3DF lVelocity;
 		mManager->GetGameManager()->GetPhysicsManager()->GetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
-		Lepra::Vector3DF lAxis = lTransform.GetOrientation().GetAxisY();
+		Lepra::Vector3DF lAxis = lTransform.GetOrientation() * lForwardAxis;
 		lAxis.Normalize();
-		lSpeed = -(lVelocity*lAxis);	// TODO: negate when objects created in the right direction.
+		lSpeed = lVelocity*lAxis;
 	}
 	else
 	{

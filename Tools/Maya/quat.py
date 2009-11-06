@@ -449,8 +449,8 @@ class quat:
                 v.z = 1.0
             else:
                 # Jonte: let's try this...
-                self.w = 0
-                self.x = 0
+                self.w = 0.0
+                self.x = 0.0
                 self.y = 1/math.sqrt(2)
                 self.z = 1/math.sqrt(2)
                 return self

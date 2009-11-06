@@ -118,9 +118,11 @@ class GroupReader(DefaultMAReader):
                 #        print(t.get_local_transform())
                 #        if t.getName().startswith("phys_"):
                 #                print(t.getName(), "has root", t.phys_root)
+                #self.rotatexaxis(group)
+
                 self.makevertsrelative(group)
 
-                self.rotatexaxis(group)
+                #self.rotatexaxis(group)
 
                 #for t in filter(lambda n: n.getName()=="phys_body", group):
                 #        print(t.getName(), "has rel pos", t.get_relative_pos())
@@ -417,68 +419,31 @@ class GroupReader(DefaultMAReader):
 
 
         def rotatexaxis(self, group):
-                return
-                r = mat4.rotation(math.pi/2, (1,0,0))
                 for node in group:
                         if node.nodetype == "transform":
-                                if node.getName() == "phys_body":
-                                        #node.localrotmat4 = node.localmat4
-                                        #node.localrotmat4 = None
-                                        #del node.localmat4
-                                        #node.localmat4 = node.localmat4 * r
-                                        #del node.localmat4
-                                        #print("YEAH!!!")
-                                        pass
+                                #if node.getName() == "phys_body":
+                                if node.getName().startswith("phys_"):
+                                        #r = mat4.rotation(math.pi, (0,1,0)) * mat4.rotation(math.pi/2, (1,0,0))
+                                        r = mat4.rotation(-math.pi/2, (0,0,1))
+                                        lt = node.xformparent.get_world_transform().inverse() * r * node.get_world_transform()
+                                        print("Before on ", node.getName(), "was:")
+                                        print(node.localmat4)
+                                        node.localmat4 = lt
+                                        print("After:")
+                                        print(node.localmat4)
                                 elif node.getName() == "m_body":
-                                        #node.localrotmat4 = node.localmat4
-                                        node.localmat4 = node.localmat4
-                                        #del node.localmat4
-                                        #print("YEAH!!!")
                                         pass
                                 continue
-                                xfp = mat4.identity()
-                                if node.xformparent:
-                                        xfp = node.xformparent.get_world_transform()
-                                #else:
-                                #        print("Using identity parent for", node.getName())
-                                #        xfp = r * node.get_world_transform()
-                                xfp = r * xfp
-                                #if hasattr(node, "phys_root") and not node.phys_root:
-                                #        xfp = mat4.identity()
-                                xfs = r * node.get_world_transform()
-                                node.localrotmat4 = xfp.inverse() * xfs
-                                node.localrotmat4 = node.localmat4
-                                if hasattr(node, "phys_root") and not node.phys_root:
-                                        node.localrotmat4 = r.inverse() * node.get_world_transform()
                 for node in group:
                         if node.nodetype == "transform":
-                                #print("Rotating", node.getName(), "mat")
-                                #print(node.localmat4)
-                                #print("with")
-                                #print(node.localrotmat4)
-                                #print()
-                                def rot(node, aname, flip=lambda x,y,z: (x,-z,y)):
-                                        val = node.get_fixed_attribute(aname)
-                                        val = vec3(flip(*val))
-                                        node.fix_attribute(aname, val)
-                                rot(node, "t")
-                                rot(node, "rp")
-                                rot(node, "rpt")
-                                rot(node, "sp")
-                                rot(node, "spt")
-                                rot(node, "r")
-                                rot(node, "s", flip=lambda x,y,z: (x,z,y))
-                                rot(node, "sh")
-                                rot(node, "ra")
-                                #node.localmat4 = node.localrotmat4
-                                #del node.localrotmat4
-##                        vtx = node.get_fixed_attribute("rgvtx", True)
-##                        if vtx:
-##                                for x in range(0, len(vtx), 3):
-##                                        tmp = vtx[x+1]
-##                                        vtx[x+1] = -vtx[x+2]
-##                                        vtx[x+2] = tmp
-##                                node.fix_attribute("rgvtx", vtx)
+                                pass
+                        vtx = node.get_fixed_attribute("rgvtx", True)
+                        if vtx:
+                                for x in range(0, len(vtx), 3):
+                                        tmp = vtx[x+1]
+                                        #vtx[x+1] = -vtx[x+2]
+                                        #vtx[x+2] = tmp
+                                node.fix_attribute("rgvtx", vtx)
 
 
         def faces2triangles(self, group):
@@ -512,21 +477,22 @@ class GroupReader(DefaultMAReader):
                                         #m_tr = p * m_tr
                                 m_t, m_r, m_s = m_tr.decompose()
                                 m_t_tr = mat4.identity().translate(m_t[:3])
-                                p_tr = phys.gettransformto(meshroot)
-                                if not p_tr:
-                                        print("Phys crash in", phys.getName(), "with meshroot", meshroot)
-                                        self.printnode(meshroot, group)
-                                        print()
-                                        p = phys
-                                        while p:
-                                                print(p)
-                                                p = p.xformparent
-                                        print()
-                                p_t, p_r, p_s = p_tr.decompose()
-                                p_t_tr = mat4.identity().translate(p_t[:3])
-                                transform = p_r * p_t_tr * p_r.inverse() * m_t_tr.inverse()
-                                transform = p_r.inverse() * m_t_tr.inverse()
-                                #transform = m_t_tr.inverse()
+##                                p_tr = phys.gettransformto(meshroot)
+##                                if not p_tr:
+##                                        print("Phys crash in", phys.getName(), "with meshroot", meshroot)
+##                                        self.printnode(meshroot, group)
+##                                        print()
+##                                        p = phys
+##                                        while p:
+##                                                print(p)
+##                                                p = p.xformparent
+##                                        print()
+##                                p_t, p_r, p_s = p_tr.decompose()
+##                                p_t_tr = mat4.identity().translate(p_t[:3])
+##                                transform = p_r * p_t_tr * m_r.inverse() * m_t_tr.inverse()
+                                #transform = m_r.inverse() * m_t_tr.inverse()
+                                #transform = m_t_tr
+                                transform = m_r.inverse() * m_t_tr.inverse()
                                 #transform = mat4.identity()
                                 avg = vec4()
                                 vp = vec4(0,0,0,1);

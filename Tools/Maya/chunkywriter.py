@@ -219,22 +219,12 @@ class ChunkyWriter:
                 #q = node.get_world_quat().normalize()
                 #pos = vec4(node.get_local_pivot()[:]+[1])
                 if not node.phys_root:
-                        #m = mat4.rotation(-math.pi/2, (1,0,0)) * (mat4.rotation(math.pi, (0,0,1)) * q.toMat4())
-                        m = node.get_world_transform().decompose()[1] * mat4.rotation(math.pi/2, (1,0,0))
-                        #m = node.get_local_transform()
-                        print("Got m=")
-                        print(m)
-                        #m.ortho()
-                        #m = m * mat4.rotation(math.pi/2, (0,1,0))
-                        m = m * mat4.rotation(math.pi*40/40, (0,1,0))
-                        #m = m * mat4.rotation(math.pi, (0,1,0))
-                        print("but after last rotation:")
-                        print(m)
-                        print()
-                        q = quat(m.decompose()[1]).normalize()
-                        q = quat(m).normalize()
-                        print(q)
-                        pos = m * vec4(0,0,0,1)
+                        wt, wr = node.get_world_transform(), node.get_world_transform().decompose()[1]
+                        r = mat4.rotation(math.pi/2, (1,0,0)) * mat4.rotation(math.pi, (0,1,0))
+                        wt = wt * r
+                        wr = wr * r
+                        q = quat(wr).normalize()
+                        pos = wt * vec4(0,0,0,1)
                 data = q[:]+pos[:3]
                 #print("Writing bone %s with data" % node.getName(), data)
                 self._addfeat("bone:bones", 1)
@@ -245,7 +235,10 @@ class ChunkyWriter:
                 if len(xform) != 7:
                         print("Error: trying to store transform with len != 7!")
                         sys.exit(18)
+                #x = 0
                 for f in xform:
+                        #print("Writing transform", x, ": ", f)
+                        #x += 1
                         self._writefloat(f)
 
 
@@ -290,7 +283,7 @@ class ChunkyWriter:
 
         def _writefloat(self, val, name="float"):
                 if type(val) != float:
-                        raise ValueError("Error: trying to pass '%s' off as 'float'." % str(type(val)))
+                        raise ValueError("Error: trying to pass '" + str(type(val)) + "' (with value " + str(val) + ") off as 'float'.")
                 data = struct.pack(">f", val)
                 self._dowrite(data, 4, name)
 
