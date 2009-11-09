@@ -34,7 +34,7 @@ sys_socket SocketBase::InitSocket(sys_socket pSocket, int pSize)
 	::setsockopt(pSocket, SOL_SOCKET, SO_SNDBUF, (const char*)&lBufferSize, sizeof(lBufferSize));
 	linger lLinger;
 	lLinger.l_onoff = 0;	// Graceful shutdown.
-	lLinger.l_linger = 0;
+	lLinger.l_linger = 1;	// Wait this many seconds.
 	::setsockopt(pSocket, SOL_SOCKET, SO_LINGER, (const char*)&lLinger, sizeof(lLinger));
 #ifndef LEPRA_WINDOWS
 	int lFlag = 1;

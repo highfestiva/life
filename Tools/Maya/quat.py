@@ -416,37 +416,82 @@ class quat:
     def fromMat(self, m):
         """Initialize self from either a mat3 or mat4 and returns self."""
         global _epsilon
-        
-        d1,d2,d3 = m[0,0],m[1,1],m[2,2]
-        t = d1+d2+d3+1.0
-        if t>_epsilon:
-            s = 0.5/math.sqrt(t)
-            self.w = 0.25/s
-            self.x = (m[2,1]-m[1,2])*s
-            self.y = (m[0,2]-m[2,0])*s
-            self.z = (m[1,0]-m[0,1])*s
-        else:
-            ad1 = d1
-            ad2 = d2
-            ad3 = d3
-            if ad1>=ad2 and ad1>=ad3:
-                s = math.sqrt(1.0+d1-d2-d3)*2.0
-                self.x = 0.5/s
-                self.y = (m[0,1]+m[1,0])/s
-                self.z = (m[0,2]+m[2,0])/s
-                self.w = (m[1,2]+m[2,1])/s
-            elif ad2>=ad1 and ad2>=ad3:
-                s = math.sqrt(1.0+d2-d1-d3)*2.0
-                self.x = (m[0,1]+m[1,0])/s
-                self.y = 0.5/s
-                self.z = (m[1,2]+m[2,1])/s
-                self.w = (m[0,2]+m[2,0])/s
+
+        # Jonte: start out by fetching the rotation matrix' rotation vector.
+        angle = 0
+        cosa = (m[0,0] + m[1,1] + m[2,2] - 1.0) * 0.5
+        try:
+            angle = math.acos(cosa)
+        except ValueError as e:
+            print("Got an matrix-to-quaternion error:", e)
+            print(m)
+            raise
+        #print("Angle is", angle)
+
+        v = _vec3(m[2,1] - m[1,2],
+                  m[0,2] - m[2,0],
+                  m[1,0] - m[0,1])
+        #print("Vector is", v)
+
+        if v.length() < _epsilon:
+            lEpsilonOne = 1.0 - _epsilon
+            if m[0,0] >= lEpsilonOne:
+                v.x = 1.0
+                v.y = 0.0
+                v.z = 0.0
+            elif m[1,1] >= lEpsilonOne:
+                v.x = 0.0
+                v.y = 1.0
+                v.z = 0.0
+            elif m[2,2] >= lEpsilonOne:
+                v.x = 0.0
+                v.y = 0.0
+                v.z = 1.0
             else:
-                s = math.sqrt(1.0+d3-d1-d2)*2.0
-                self.x = (m[0,2]+m[2,0])/s
-                self.y = (m[1,2]+m[2,1])/s
-                self.z = 0.5/s
-                self.w = (m[0,1]+m[1,0])/s
+                # Jonte: let's try this...
+                self.w = 0
+                self.x = 0
+                self.y = 1/math.sqrt(2)
+                self.z = 1/math.sqrt(2)
+                return self
+
+        # Now set the vector.
+        self.fromAngleAxis(angle, v)
+        
+##        d1,d2,d3 = m[0,0],m[1,1],m[2,2]
+##        t = d1+d2+d3+1.0
+##        if t>_epsilon:
+##            #print("Probable OK1!")
+##            s = 0.5/math.sqrt(t)
+##            self.w = 0.25/s
+##            self.x = (m[2,1]-m[1,2])*s
+##            self.y = (m[0,2]-m[2,0])*s
+##            self.z = (m[1,0]-m[0,1])*s
+##        else:
+##            ad1 = d1
+##            ad2 = d2
+##            ad3 = d3
+##            if ad1>=ad2 and ad1>=ad3:
+##                print("Probable OK2!")
+##                s = math.sqrt(1.0+d1-d2-d3)*2.0
+##                self.x = 0.5/s
+##                self.y = (m[0,1]+m[1,0])/s
+##                self.z = (m[0,2]+m[2,0])/s
+##                self.w = (m[1,2]+m[2,1])/s
+##            elif ad2>=ad1 and ad2>=ad3:
+##                s = math.sqrt(1.0+d2-d1-d3)*2.0
+##                print("Probable failure!!! s is", s)
+##                self.x = (m[0,1]+m[1,0])/s
+##                self.y = 0.5/s
+##                self.z = (m[1,2]+m[2,1])/s
+##                self.w = (m[0,2]+m[2,0])/s
+##            else:
+##                print("Probable OK3!")
+##                s = math.sqrt(1.0+d3-d1-d2)*2.0
+##                self.x = (m[0,2]+m[2,0])/s
+##                self.y = (m[1,2]+m[2,1])/s
+##                self.z = 0.5/s
+##                self.w = (m[0,1]+m[1,0])/s
 
         return self
 

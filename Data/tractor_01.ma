@@ -1,6 +1,6 @@
 //Maya ASCII 2009 scene
 //Name: tractor_01.ma
-//Last modified: Tue, Nov 03, 2009 03:13:53 AM
+//Last modified: Tue, Nov 03, 2009 11:00:03 PM
 //Codeset: 1252
 requires maya "2009";
 requires "stereoCamera" "10.0";
@@ -313,12 +313,170 @@ createNode mesh -n "phys_hoe_armShape" -p "phys_hoe_arm";
 	setAttr ".dcc" -type "string" "Ambient+Diffuse";
 	setAttr ".covm[0]"  0 1 1;
 	setAttr ".cdvm[0]"  0 1 1;
-createNode transform -n "m_hoe" -p "m_hoe_arm";
-	setAttr ".t" -type "double3" 0 -2.2204460492503141e-016 4.4408920985006281e-016 ;
-	setAttr ".s" -type "double3" 1 0.99999999999999967 0.99999999999999967 ;
-	setAttr ".rp" -type "double3" 0.032699999999999993 1.3555909653453553 4.2093372896036056 ;
+createNode transform -n "m_hoe_arm0" -p "m_hoe_arm";
+	setAttr ".s" -type "double3" 1 0.99999999999999978 0.99999999999999978 ;
+	setAttr ".rp" -type "double3" 0.0331 1.4051999999999998 2.0633999999999997 ;
+	setAttr ".sp" -type "double3" 0.0331 1.4052 2.0634 ;
+	setAttr ".spt" -type "double3" 0 -2.2204460492503126e-016 -4.4408920985006252e-016 ;
+createNode mesh -n "m_hoe_arm0Shape" -p "m_hoe_arm0";
+	addAttr -ci true -sn "mso" -ln "miShadingSamplesOverride" -min 0 -max 1 -at "bool";
+	addAttr -ci true -sn "msh" -ln "miShadingSamples" -min 0 -smx 8 -at "float";
+	addAttr -ci true -sn "mdo" -ln "miMaxDisplaceOverride" -min 0 -max 1 -at "bool";
+	addAttr -ci true -sn "mmd" -ln "miMaxDisplace" -min 0 -smx 1 -at "float";
+	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "vectorArray";
+	addAttr -ci true -sn "rgf" -ln "rgf" -dt "string";
+	setAttr -k off ".v";
+	setAttr -s 2 ".iog[0].og";
+	setAttr ".vir" yes;
+	setAttr ".vif" yes;
+	setAttr ".uvst[0].uvsn" -type "string" "map1";
+	setAttr ".cuvs" -type "string" "map1";
+	setAttr ".dcc" -type "string" "Ambient+Diffuse";
+	setAttr ".covm[0]"  0 1 1;
+	setAttr ".cdvm[0]"  0 1 1;
+	setAttr ".rgvtx" -type "vectorArray" 52 -0.62863469123840332 2.3170588016510001
+		 2.8771076202392556 -0.52298808097839355 2.3170588016510001 2.8771076202392556 -0.62863469123840332
+		 1.222394466400146 4.1738376617431605 -0.52298808097839355 1.222394466400146 4.1738376617431605 -0.62863469123840332
+		 1.5378640890121453 4.0664014816284144 -0.52298808097839355 1.5378640890121453 4.0664014816284144 -0.62863469123840332
+		 2.4566841125488268 3.0094335079193089 -0.52298808097839355 2.4566841125488268 3.0094335079193089 -0.57581138610839844
+		 2.3563501834869371 2.817136764526365 -0.57581138610839844 1.1690217256546016 4.2204632759094203 -0.57581138610839844
+		 1.4985727071762081 4.126372337341305 -0.57581138610839844 2.5100567340850817 2.9628078937530495 -0.63396203517913818
+		 1.8506082296371451 3.3989188671112034 -0.51766073703765869 1.8506082296371451 3.3989188671112034 -0.63396203517913818
+		 1.400168657302856 4.1181182861328089 -0.51766073703765869 1.400168657302856 4.1181182861328089 -0.63396203517913818
+		 2.0043146610260001 3.5445902347564671 -0.51766073703765869 2.0043146610260001 3.5445902347564671 -0.63396203517913818
+		 2.4332034587860094 2.8899722099304177 -0.51766073703765869 2.4332034587860094 2.8899722099304177 -0.57581138610839844
+		 1.841555953025817 3.3903398513793919 -0.57581138610839844 1.3405989408493038 4.18664455413818 -0.57581138610839844
+		 2.0133669376373282 3.5531692504882786 -0.57581138610839844 2.4927730560302721 2.8214461803436257 -0.51081138849258423
+		 1.9274615049362174 3.4717545509338352 -0.64081138372421265 1.9274615049362174 3.4717545509338352 0.55685049295425415
+		 2.3168799877166739 2.8773133754730202 0.66249710321426392 2.3168799877166739 2.8773133754730202 0.55685049295425415
+		 1.2757167816162105 4.1350107192993129 0.66249710321426392 1.2757167816162105 4.1350107192993129 0.55685049295425415
+		 1.5376571416854852 4.066639900207516 0.66249710321426392 1.5376571416854852 4.066639900207516 0.55685049295425415
+		 2.4564771652221666 3.0096716880798313 0.66249710321426392 2.4564771652221666 3.0096716880798313 0.60967379808425903
+		 2.3561728000640856 2.8173408508300759 0.60967379808425903 1.2223454713821407 4.181634902954098 0.60967379808425903
+		 1.4983643293380733 4.1266121864318812 0.60967379808425903 2.5098483562469469 2.9630477428436257 0.55152314901351929
+		 1.8504308462142935 3.3991231918334934 0.66782444715499878 1.8504308462142935 3.3991231918334934 0.55152314901351929
+		 1.4026924371719356 4.1259107589721644 0.66782444715499878 1.4026924371719356 4.1259107589721644 0.55152314901351929
+		 2.0041062831878653 3.5448298454284641 0.66782444715499878 2.0041062831878653 3.5448298454284641 0.55152314901351929
+		 2.4330105781555162 2.8901941776275613 0.66782444715499878 2.4330105781555162 2.8901941776275613 0.60967379808425903
+		 1.8413803577423087 3.39054203033447 0.60967379808425903 1.3431228399276729 4.1944370269775355 0.60967379808425903
+		 2.0131568908691397 3.5534110069274876 0.60967379808425903 2.4925801753997789 2.8216681480407693 0.67467379570007324
+		 1.9272686243057242 3.4719765186309788 0.54467380046844482 1.9272686243057242 3.4719765186309788 ;
+	setAttr ".rgf" -type "string" "[[8,1,13,20],[13,3,9,20],[9,2,12,20],[12,0,8,20],[9,3,15,21],[15,5,10,21],[10,4,14,21],[14,2,9,21],[10,5,17,22],[17,7,11,22],[11,6,16,22],[16,4,10,22],[11,7,19,23],[19,1,8,23],[8,0,18,23],[18,6,11,23],[19,7,17,24],[17,5,15,24],[15,3,13,24],[13,1,19,24],[18,0,12,25],[12,2,14,25],[14,4,16,25],[16,6,18,25],[34,27,39,46],[39,29,35,46],[35,28,38,46],[38,26,34,46],[35,29,41,47],[41,31,36,47],[36,30,40,47],[40,28,35,47],[36,31,43,48],[43,33,37,48],[37,32,42,48],[42,30,36,48],[37,33,45,49],[45,27,34,49],[34,26,44,49],[44,32,37,49],[45,33,43,50],[43,31,41,50],[41,29,39,50],[39,27,45,50],[44,26,38,51],[38,28,40,51],[40,30,42,51],[42,32,44,51]]";
+createNode transform -n "m_hoe_arm0_1" -p "m_hoe_arm0";
+	setAttr ".t" -type "double3" -0.57581136819782874 1.9272686148324523 3.4719764057581126 ;
+	setAttr ".r" -type "double3" 131.00036035786397 0 0 ;
+	setAttr ".s" -type "double3" 0.99999999999999989 1.031121273151421 0.78831060865244784 ;
+	setAttr ".sh" -type "double3" 0 0 -0.043 ;
+	setAttr ".rp" -type "double3" 0.60891136819782865 -0.72054998915211599 1.3181239860439511 ;
+	setAttr ".rpt" -type "double3" 0 0.19848137431966351 -2.7267003918020647 ;
+	setAttr ".sp" -type "double3" 0.60891136819782876 -0.64354852826571951 1.6720870829040027 ;
+	setAttr ".spt" -type "double3" -1.1102230246251564e-016 -0.077001460886395562 -0.35396309686005234 ;
+createNode transform -n "pasted__transform4" -p "m_hoe_arm0_1";
+createNode mesh -n "m_hoe_arm0_Shape1" -p "pasted__transform4";
+	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "vectorArray";
+	addAttr -ci true -sn "rgf" -ln "rgf" -dt "string";
+	setAttr -k off ".v";
+	setAttr ".io" yes;
+	setAttr -s 2 ".iog[0].og";
+	setAttr ".vir" yes;
+	setAttr ".vif" yes;
+	setAttr ".uvst[0].uvsn" -type "string" "map1";
+	setAttr ".cuvs" -type "string" "map1";
+	setAttr ".dcc" -type "string" "Ambient+Diffuse";
+	setAttr ".covm[0]"  0 1 1;
+	setAttr ".cdvm[0]"  0 1 1;
+	setAttr -s 6 ".pt";
+	setAttr ".pt[2:3]" -type "float3" 0 0.28634614 -0.031191103  0 0.28634614 
+		-0.031191103 ;
+	setAttr ".pt[9]" -type "float3" 0 0.28634614 -0.031191103 ;
+	setAttr ".pt[14:15]" -type "float3" 0 0.059892256 -0.033115093  0 0.059892256 
+		-0.033115093 ;
+	setAttr ".pt[21]" -type "float3" 0 0.059892256 -0.033115093 ;
+	setAttr ".rgvtx" -type "vectorArray" 26 -0.62863469567957542 2.3170589282398026
+		 2.8771074940459815 -0.52298804071608207 2.3170589282398026 2.8771074940459815 -0.62863469567957542
+		 1.222394494964258 4.17383736562872 -0.52298804071608207 1.222394494964258 4.17383736562872 -0.62863469567957542
+		 1.5378641718326238 4.0664014299826414 -0.52298804071608207 1.5378641718326238 4.0664014299826414 -0.62863469567957542
+		 2.4566840468518096 3.0094335000234365 -0.52298804071608207 2.4566840468518096 3.0094335000234365 -0.57581136819782874
+		 2.3563503230454637 2.8171366223905507 -0.57581136819782874 1.169021723004793 4.2204630698528485 -0.57581136819782874
+		 1.4985727770269626 4.1263723016380727 -0.57581136819782874 2.510056778489846 2.9628078421832162 -0.6339619911915364
+		 1.8506083223140219 3.3989188521179785 -0.51766074520412109 1.8506083223140219 3.3989188521179785 -0.6339619911915364
+		 1.4001686989808224 4.1181181009013841 -0.51766074520412109 1.4001686989808224 4.1181181009013841 -0.6339619911915364
+		 2.0043147777584043 3.5445900719106445 -0.51766074520412109 2.0043147777584043 3.5445900719106445 -0.6339619911915364
+		 2.4332035507676548 2.8899722322868833 -0.51766074520412109 2.4332035507676548 2.8899722322868833 -0.57581136819782874
+		 1.8415560233781347 3.3903397756952862 -0.57581136819782874 1.3405990301343635 4.1866442955134477 -0.57581136819782874
+		 2.0133670766942915 3.5531691483333367 -0.57581136819782874 2.4927732196141137 2.8214460376748196 -0.51081137058201453
+		 1.9274615500362131 3.4717544620143115 -0.64081136581364295 1.9274615500362131 3.4717544620143115 ;
+	setAttr ".rgf" -type "string" "[[8,1,13,20],[13,3,9,20],[9,2,12,20],[12,0,8,20],[9,3,15,21],[15,5,10,21],[10,4,14,21],[14,2,9,21],[10,5,17,22],[17,7,11,22],[11,6,16,22],[16,4,10,22],[11,7,19,23],[19,1,8,23],[8,0,18,23],[18,6,11,23],[19,7,17,24],[17,5,15,24],[15,3,13,24],[13,1,19,24],[18,0,12,25],[12,2,14,25],[14,4,16,25],[16,6,18,25]]";
+createNode transform -n "m_hoe_arm0_0" -p "m_hoe_arm0";
+	setAttr ".t" -type "double3" 0.60967381584302027 1.9272686148324509 3.4719764057581108 ;
+	setAttr ".r" -type "double3" 131.00036035786397 0 0 ;
+	setAttr ".s" -type "double3" 0.99999999999999989 1.031121273151421 0.78831060865244784 ;
+	setAttr ".sh" -type "double3" 0 0 -0.043223104924321763 ;
+	setAttr ".rp" -type "double3" -0.57657381584302025 -0.72054998915211843 1.3181239860439478 ;
+	setAttr ".rpt" -type "double3" 0 0.1984813743196675 -2.7267003918020589 ;
+	setAttr ".sp" -type "double3" -0.57657381584302037 -0.64354852826572329 1.6720870829039964 ;
+	setAttr ".spt" -type "double3" 1.1102230246251564e-016 -0.077001460886395118 -0.35396309686004868 ;
+createNode transform -n "pasted__transform3" -p "m_hoe_arm0_0";
+createNode mesh -n "m_hoe_arm0_Shape0" -p "pasted__transform3";
+	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "vectorArray";
+	addAttr -ci true -sn "rgf" -ln "rgf" -dt "string";
+	setAttr -k off ".v";
+	setAttr ".io" yes;
+	setAttr -s 2 ".iog[0].og";
+	setAttr -av ".iog[0].og[0].gco";
+	setAttr ".vir" yes;
+	setAttr ".vif" yes;
+	setAttr ".uvst[0].uvsn" -type "string" "map1";
+	setAttr ".cuvs" -type "string" "map1";
+	setAttr ".dcc" -type "string" "Ambient+Diffuse";
+	setAttr ".covm[0]"  0 1 1;
+	setAttr ".cdvm[0]"  0 1 1;
+	setAttr -s 6 ".pt";
+	setAttr ".pt[2:3]" -type "float3" 0 0.22311206 -0.049927223  0 0.22311206 
+		-0.049927223 ;
+	setAttr ".pt[9]" -type "float3" 0 0.22311206 -0.049927223 ;
+	setAttr ".pt[14:15]" -type "float3" 0 0.063405015 -0.042016536  0 0.063405015 
+		-0.042016536 ;
+	setAttr ".pt[21]" -type "float3" 0 0.063405015 -0.042016536 ;
+	setAttr ".rgvtx" -type "vectorArray" 26 0.5568504883612736 2.3168800585730263
+		 2.8773132574459224 0.66249714332476695 2.3168800585730263 2.8773132574459224 0.5568504883612736
+		 1.2757167846705444 4.135010738808699 0.66249714332476695 1.2757167846705444 4.135010738808699 0.5568504883612736
+		 1.5376571710918694 4.0666395540702842 0.66249714332476695 1.5376571710918694 4.0666395540702842 0.5568504883612736
+		 2.456477046111055 3.0096716241110792 0.66249714332476695 2.456477046111055 3.0096716241110792 0.60967381584302027
+		 2.3561728719025608 2.8173407539861706 0.60967381584302027 1.2223454715563813 4.1816347648445982 0.60967381584302027
+		 1.4983643577623349 4.1266120575300365 0.60967381584302027 2.5098483592252183 2.96304759807518 0.55152319284931262
+		 1.8504308711711193 3.3991229837135988 0.66782443883672793 1.8504308711711193 3.3991229837135988 0.55152319284931262
+		 1.4026924599207529 4.125910645246873 0.66782443883672793 1.4026924599207529 4.125910645246873 0.55152319284931262
+		 2.0041063584937766 3.5448298278026078 0.66782443883672793 2.0041063584937766 3.5448298278026078 0.55152319284931262
+		 2.4330106155638895 2.8901941760306751 0.66782443883672793 2.4330106155638895 2.8901941760306751 0.60967381584302027
+		 1.8413803960538511 3.3905418092542363 0.60967381584302027 1.343122791074294 4.1944368398589367 0.60967381584302027
+		 2.0131568336110446 3.5534110022619703 0.60967381584302027 2.4925802844103484 2.821667981418611 0.67467381345883448
+		 1.9272686148324478 3.4719764057581033 0.54467381822720606 1.9272686148324478 3.4719764057581033 ;
+	setAttr ".rgf" -type "string" "[[8,1,13,20],[13,3,9,20],[9,2,12,20],[12,0,8,20],[9,3,15,21],[15,5,10,21],[10,4,14,21],[14,2,9,21],[10,5,17,22],[17,7,11,22],[11,6,16,22],[16,4,10,22],[11,7,19,23],[19,1,8,23],[8,0,18,23],[18,6,11,23],[19,7,17,24],[17,5,15,24],[15,3,13,24],[13,1,19,24],[18,0,12,25],[12,2,14,25],[14,4,16,25],[16,6,18,25]]";
+createNode transform -n "phys_hoe_arm0" -p "m_hoe_arm0";
+	setAttr ".t" -type "double3" 0.030678609270855636 1.880647256853363 3.5228074587309552 ;
+	setAttr ".r" -type "double3" 130.02056333476983 0 0 ;
+	setAttr ".s" -type "double3" 1.0078284688571719 1.4999999999999987 0.99999999999999944 ;
+	setAttr ".sh" -type "double3" 0 0 -0.047741251279671305 ;
+	setAttr ".rp" -type "double3" 0.0024213907291438055 -0.81189192221130591 1.3025942312542953 ;
+	setAttr ".rpt" -type "double3" 0 0.33644466535794582 -2.7620016899852535 ;
+	setAttr ".sp" -type "double3" 0.0024025821892980893 -0.49980296246769684 1.302594231254296 ;
+	setAttr ".spt" -type "double3" 1.8808539845716036e-005 -0.31208895974360934 -8.8817841970012474e-016 ;
+createNode mesh -n "phys_hoe_armShape0" -p "phys_hoe_arm0";
+	setAttr -k off ".v";
+	setAttr ".vir" yes;
+	setAttr ".vif" yes;
+	setAttr ".uvst[0].uvsn" -type "string" "map1";
+	setAttr ".cuvs" -type "string" "map1";
+	setAttr ".dcc" -type "string" "Ambient+Diffuse";
+	setAttr ".covm[0]"  0 1 1;
+	setAttr ".cdvm[0]"  0 1 1;
+createNode transform -n "m_hoe" -p "m_hoe_arm0";
+	setAttr ".t" -type "double3" 0 -4.4408920985006271e-016 8.8817841970012543e-016 ;
+	setAttr ".s" -type "double3" 1 0.99999999999999989 0.99999999999999989 ;
+	setAttr ".rp" -type "double3" 0.032699999999999993 1.3555909653453557 4.2093372896036065 ;
 	setAttr ".sp" -type "double3" 0.032699999999999993 1.3555909653453559 4.2093372896036074 ;
-	setAttr ".spt" -type "double3" 0 -6.6613381477509373e-016 -1.7763568394002499e-015 ;
+	setAttr ".spt" -type "double3" 0 -2.2204460492503128e-016 -8.8817841970012513e-016 ;
 createNode mesh -n "m_hoeShape" -p "m_hoe";
 	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "vectorArray";
 	addAttr -ci true -sn "rgf" -ln "rgf" -dt "string";
@@ -519,165 +677,6 @@ createNode mesh -n "phys_hoeShape" -p "phys_hoe";
 	addAttr -ci true -sn "msh" -ln "miShadingSamples" -min 0 -smx 8 -at "float";
 	addAttr -ci true -sn "mdo" -ln "miMaxDisplaceOverride" -min 0 -max 1 -at "bool";
 	addAttr -ci true -sn "mmd" -ln "miMaxDisplace" -min 0 -smx 1 -at "float";
-	setAttr -k off ".v";
-	setAttr ".vir" yes;
-	setAttr ".vif" yes;
-	setAttr ".uvst[0].uvsn" -type "string" "map1";
-	setAttr ".cuvs" -type "string" "map1";
-	setAttr ".dcc" -type "string" "Ambient+Diffuse";
-	setAttr ".covm[0]"  0 1 1;
-	setAttr ".cdvm[0]"  0 1 1;
-createNode transform -n "m_hoe_arm0" -p "m_body";
-	setAttr ".t" -type "double3" 0 2.2204460492503131e-016 -4.4408920985006262e-016 ;
-	setAttr ".s" -type "double3" 1 0.99999999999999944 0.99999999999999944 ;
-	setAttr ".rp" -type "double3" 0.0331 1.4051999999999991 2.0633999999999988 ;
-	setAttr ".sp" -type "double3" 0.0331 1.4052 2.0634 ;
-	setAttr ".spt" -type "double3" 0 -8.8817841970012474e-016 -1.3322676295501871e-015 ;
-createNode mesh -n "m_hoe_arm0Shape" -p "m_hoe_arm0";
-	addAttr -ci true -sn "mso" -ln "miShadingSamplesOverride" -min 0 -max 1 -at "bool";
-	addAttr -ci true -sn "msh" -ln "miShadingSamples" -min 0 -smx 8 -at "float";
-	addAttr -ci true -sn "mdo" -ln "miMaxDisplaceOverride" -min 0 -max 1 -at "bool";
-	addAttr -ci true -sn "mmd" -ln "miMaxDisplace" -min 0 -smx 1 -at "float";
-	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "vectorArray";
-	addAttr -ci true -sn "rgf" -ln "rgf" -dt "string";
-	setAttr -k off ".v";
-	setAttr -s 2 ".iog[0].og";
-	setAttr ".vir" yes;
-	setAttr ".vif" yes;
-	setAttr ".uvst[0].uvsn" -type "string" "map1";
-	setAttr ".cuvs" -type "string" "map1";
-	setAttr ".dcc" -type "string" "Ambient+Diffuse";
-	setAttr ".covm[0]"  0 1 1;
-	setAttr ".cdvm[0]"  0 1 1;
-	setAttr ".rgvtx" -type "vectorArray" 52 -0.62863469123840332 2.3170588016510001
-		 2.8771076202392556 -0.52298808097839355 2.3170588016510001 2.8771076202392556 -0.62863469123840332
-		 1.222394466400146 4.1738376617431605 -0.52298808097839355 1.222394466400146 4.1738376617431605 -0.62863469123840332
-		 1.5378640890121453 4.0664014816284144 -0.52298808097839355 1.5378640890121453 4.0664014816284144 -0.62863469123840332
-		 2.4566841125488268 3.0094335079193089 -0.52298808097839355 2.4566841125488268 3.0094335079193089 -0.57581138610839844
-		 2.3563501834869371 2.817136764526365 -0.57581138610839844 1.1690217256546016 4.2204632759094203 -0.57581138610839844
-		 1.4985727071762081 4.126372337341305 -0.57581138610839844 2.5100567340850817 2.9628078937530495 -0.63396203517913818
-		 1.8506082296371451 3.3989188671112034 -0.51766073703765869 1.8506082296371451 3.3989188671112034 -0.63396203517913818
-		 1.400168657302856 4.1181182861328089 -0.51766073703765869 1.400168657302856 4.1181182861328089 -0.63396203517913818
-		 2.0043146610260001 3.5445902347564671 -0.51766073703765869 2.0043146610260001 3.5445902347564671 -0.63396203517913818
-		 2.4332034587860094 2.8899722099304177 -0.51766073703765869 2.4332034587860094 2.8899722099304177 -0.57581138610839844
-		 1.841555953025817 3.3903398513793919 -0.57581138610839844 1.3405989408493038 4.18664455413818 -0.57581138610839844
-		 2.0133669376373282 3.5531692504882786 -0.57581138610839844 2.4927730560302721 2.8214461803436257 -0.51081138849258423
-		 1.9274615049362174 3.4717545509338352 -0.64081138372421265 1.9274615049362174 3.4717545509338352 0.55685049295425415
-		 2.3168799877166739 2.8773133754730202 0.66249710321426392 2.3168799877166739 2.8773133754730202 0.55685049295425415
-		 1.2757167816162105 4.1350107192993129 0.66249710321426392 1.2757167816162105 4.1350107192993129 0.55685049295425415
-		 1.5376571416854852 4.066639900207516 0.66249710321426392 1.5376571416854852 4.066639900207516 0.55685049295425415
-		 2.4564771652221666 3.0096716880798313 0.66249710321426392 2.4564771652221666 3.0096716880798313 0.60967379808425903
-		 2.3561728000640856 2.8173408508300759 0.60967379808425903 1.2223454713821407 4.181634902954098 0.60967379808425903
-		 1.4983643293380733 4.1266121864318812 0.60967379808425903 2.5098483562469469 2.9630477428436257 0.55152314901351929
-		 1.8504308462142935 3.3991231918334934 0.66782444715499878 1.8504308462142935 3.3991231918334934 0.55152314901351929
-		 1.4026924371719356 4.1259107589721644 0.66782444715499878 1.4026924371719356 4.1259107589721644 0.55152314901351929
-		 2.0041062831878653 3.5448298454284641 0.66782444715499878 2.0041062831878653 3.5448298454284641 0.55152314901351929
-		 2.4330105781555162 2.8901941776275613 0.66782444715499878 2.4330105781555162 2.8901941776275613 0.60967379808425903
-		 1.8413803577423087 3.39054203033447 0.60967379808425903 1.3431228399276729 4.1944370269775355 0.60967379808425903
-		 2.0131568908691397 3.5534110069274876 0.60967379808425903 2.4925801753997789 2.8216681480407693 0.67467379570007324
-		 1.9272686243057242 3.4719765186309788 0.54467380046844482 1.9272686243057242 3.4719765186309788 ;
-	setAttr ".rgf" -type "string" "[[8,1,13,20],[13,3,9,20],[9,2,12,20],[12,0,8,20],[9,3,15,21],[15,5,10,21],[10,4,14,21],[14,2,9,21],[10,5,17,22],[17,7,11,22],[11,6,16,22],[16,4,10,22],[11,7,19,23],[19,1,8,23],[8,0,18,23],[18,6,11,23],[19,7,17,24],[17,5,15,24],[15,3,13,24],[13,1,19,24],[18,0,12,25],[12,2,14,25],[14,4,16,25],[16,6,18,25],[34,27,39,46],[39,29,35,46],[35,28,38,46],[38,26,34,46],[35,29,41,47],[41,31,36,47],[36,30,40,47],[40,28,35,47],[36,31,43,48],[43,33,37,48],[37,32,42,48],[42,30,36,48],[37,33,45,49],[45,27,34,49],[34,26,44,49],[44,32,37,49],[45,33,43,50],[43,31,41,50],[41,29,39,50],[39,27,45,50],[44,26,38,51],[38,28,40,51],[40,30,42,51],[42,32,44,51]]";
-createNode transform -n "m_hoe_arm0_1" -p "m_hoe_arm0";
-	setAttr ".t" -type "double3" -0.57581136819782874 1.9272686148324523 3.4719764057581126 ;
-	setAttr ".r" -type "double3" 131.00036035786397 0 0 ;
-	setAttr ".s" -type "double3" 0.99999999999999989 1.031121273151421 0.78831060865244784 ;
-	setAttr ".sh" -type "double3" 0 0 -0.043 ;
-	setAttr ".rp" -type "double3" 0.60891136819782865 -0.72054998915211599 1.3181239860439511 ;
-	setAttr ".rpt" -type "double3" 0 0.19848137431966351 -2.7267003918020647 ;
-	setAttr ".sp" -type "double3" 0.60891136819782876 -0.64354852826571951 1.6720870829040027 ;
-	setAttr ".spt" -type "double3" -1.1102230246251564e-016 -0.077001460886395562 -0.35396309686005234 ;
-createNode transform -n "pasted__transform4" -p "m_hoe_arm0_1";
-createNode mesh -n "m_hoe_arm0_Shape1" -p "pasted__transform4";
-	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "vectorArray";
-	addAttr -ci true -sn "rgf" -ln "rgf" -dt "string";
-	setAttr -k off ".v";
-	setAttr ".io" yes;
-	setAttr -s 2 ".iog[0].og";
-	setAttr ".vir" yes;
-	setAttr ".vif" yes;
-	setAttr ".uvst[0].uvsn" -type "string" "map1";
-	setAttr ".cuvs" -type "string" "map1";
-	setAttr ".dcc" -type "string" "Ambient+Diffuse";
-	setAttr ".covm[0]"  0 1 1;
-	setAttr ".cdvm[0]"  0 1 1;
-	setAttr -s 6 ".pt";
-	setAttr ".pt[2:3]" -type "float3" 0 0.28634614 -0.031191103  0 0.28634614 
-		-0.031191103 ;
-	setAttr ".pt[9]" -type "float3" 0 0.28634614 -0.031191103 ;
-	setAttr ".pt[14:15]" -type "float3" 0 0.059892256 -0.033115093  0 0.059892256 
-		-0.033115093 ;
-	setAttr ".pt[21]" -type "float3" 0 0.059892256 -0.033115093 ;
-	setAttr ".rgvtx" -type "vectorArray" 26 -0.62863469567957542 2.3170589282398026
-		 2.8771074940459815 -0.52298804071608207 2.3170589282398026 2.8771074940459815 -0.62863469567957542
-		 1.222394494964258 4.17383736562872 -0.52298804071608207 1.222394494964258 4.17383736562872 -0.62863469567957542
-		 1.5378641718326238 4.0664014299826414 -0.52298804071608207 1.5378641718326238 4.0664014299826414 -0.62863469567957542
-		 2.4566840468518096 3.0094335000234365 -0.52298804071608207 2.4566840468518096 3.0094335000234365 -0.57581136819782874
-		 2.3563503230454637 2.8171366223905507 -0.57581136819782874 1.169021723004793 4.2204630698528485 -0.57581136819782874
-		 1.4985727770269626 4.1263723016380727 -0.57581136819782874 2.510056778489846 2.9628078421832162 -0.6339619911915364
-		 1.8506083223140219 3.3989188521179785 -0.51766074520412109 1.8506083223140219 3.3989188521179785 -0.6339619911915364
-		 1.4001686989808224 4.1181181009013841 -0.51766074520412109 1.4001686989808224 4.1181181009013841 -0.6339619911915364
-		 2.0043147777584043 3.5445900719106445 -0.51766074520412109 2.0043147777584043 3.5445900719106445 -0.6339619911915364
-		 2.4332035507676548 2.8899722322868833 -0.51766074520412109 2.4332035507676548 2.8899722322868833 -0.57581136819782874
-		 1.8415560233781347 3.3903397756952862 -0.57581136819782874 1.3405990301343635 4.1866442955134477 -0.57581136819782874
-		 2.0133670766942915 3.5531691483333367 -0.57581136819782874 2.4927732196141137 2.8214460376748196 -0.51081137058201453
-		 1.9274615500362131 3.4717544620143115 -0.64081136581364295 1.9274615500362131 3.4717544620143115 ;
-	setAttr ".rgf" -type "string" "[[8,1,13,20],[13,3,9,20],[9,2,12,20],[12,0,8,20],[9,3,15,21],[15,5,10,21],[10,4,14,21],[14,2,9,21],[10,5,17,22],[17,7,11,22],[11,6,16,22],[16,4,10,22],[11,7,19,23],[19,1,8,23],[8,0,18,23],[18,6,11,23],[19,7,17,24],[17,5,15,24],[15,3,13,24],[13,1,19,24],[18,0,12,25],[12,2,14,25],[14,4,16,25],[16,6,18,25]]";
-createNode transform -n "m_hoe_arm0_0" -p "m_hoe_arm0";
-	setAttr ".t" -type "double3" 0.60967381584302027 1.9272686148324509 3.4719764057581108 ;
-	setAttr ".r" -type "double3" 131.00036035786397 0 0 ;
-	setAttr ".s" -type "double3" 0.99999999999999989 1.031121273151421 0.78831060865244784 ;
-	setAttr ".sh" -type "double3" 0 0 -0.043223104924321763 ;
-	setAttr ".rp" -type "double3" -0.57657381584302025 -0.72054998915211843 1.3181239860439478 ;
-	setAttr ".rpt" -type "double3" 0 0.1984813743196675 -2.7267003918020589 ;
-	setAttr ".sp" -type "double3" -0.57657381584302037 -0.64354852826572329 1.6720870829039964 ;
-	setAttr ".spt" -type "double3" 1.1102230246251564e-016 -0.077001460886395118 -0.35396309686004868 ;
-createNode transform -n "pasted__transform3" -p "m_hoe_arm0_0";
-createNode mesh -n "m_hoe_arm0_Shape0" -p "pasted__transform3";
-	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "vectorArray";
-	addAttr -ci true -sn "rgf" -ln "rgf" -dt "string";
-	setAttr -k off ".v";
-	setAttr ".io" yes;
-	setAttr -s 2 ".iog[0].og";
-	setAttr -av ".iog[0].og[0].gco";
-	setAttr ".vir" yes;
-	setAttr ".vif" yes;
-	setAttr ".uvst[0].uvsn" -type "string" "map1";
-	setAttr ".cuvs" -type "string" "map1";
-	setAttr ".dcc" -type "string" "Ambient+Diffuse";
-	setAttr ".covm[0]"  0 1 1;
-	setAttr ".cdvm[0]"  0 1 1;
-	setAttr -s 6 ".pt";
-	setAttr ".pt[2:3]" -type "float3" 0 0.22311206 -0.049927223  0 0.22311206 
-		-0.049927223 ;
-	setAttr ".pt[9]" -type "float3" 0 0.22311206 -0.049927223 ;
-	setAttr ".pt[14:15]" -type "float3" 0 0.063405015 -0.042016536  0 0.063405015 
-		-0.042016536 ;
-	setAttr ".pt[21]" -type "float3" 0 0.063405015 -0.042016536 ;
-	setAttr ".rgvtx" -type "vectorArray" 26 0.5568504883612736 2.3168800585730263
-		 2.8773132574459224 0.66249714332476695 2.3168800585730263 2.8773132574459224 0.5568504883612736
-		 1.2757167846705444 4.135010738808699 0.66249714332476695 1.2757167846705444 4.135010738808699 0.5568504883612736
-		 1.5376571710918694 4.0666395540702842 0.66249714332476695 1.5376571710918694 4.0666395540702842 0.5568504883612736
-		 2.456477046111055 3.0096716241110792 0.66249714332476695 2.456477046111055 3.0096716241110792 0.60967381584302027
-		 2.3561728719025608 2.8173407539861706 0.60967381584302027 1.2223454715563813 4.1816347648445982 0.60967381584302027
-		 1.4983643577623349 4.1266120575300365 0.60967381584302027 2.5098483592252183 2.96304759807518 0.55152319284931262
-		 1.8504308711711193 3.3991229837135988 0.66782443883672793 1.8504308711711193 3.3991229837135988 0.55152319284931262
-		 1.4026924599207529 4.125910645246873 0.66782443883672793 1.4026924599207529 4.125910645246873 0.55152319284931262
-		 2.0041063584937766 3.5448298278026078 0.66782443883672793 2.0041063584937766 3.5448298278026078 0.55152319284931262
-		 2.4330106155638895 2.8901941760306751 0.66782443883672793 2.4330106155638895 2.8901941760306751 0.60967381584302027
-		 1.8413803960538511 3.3905418092542363 0.60967381584302027 1.343122791074294 4.1944368398589367 0.60967381584302027
-		 2.0131568336110446 3.5534110022619703 0.60967381584302027 2.4925802844103484 2.821667981418611 0.67467381345883448
-		 1.9272686148324478 3.4719764057581033 0.54467381822720606 1.9272686148324478 3.4719764057581033 ;
-	setAttr ".rgf" -type "string" "[[8,1,13,20],[13,3,9,20],[9,2,12,20],[12,0,8,20],[9,3,15,21],[15,5,10,21],[10,4,14,21],[14,2,9,21],[10,5,17,22],[17,7,11,22],[11,6,16,22],[16,4,10,22],[11,7,19,23],[19,1,8,23],[8,0,18,23],[18,6,11,23],[19,7,17,24],[17,5,15,24],[15,3,13,24],[13,1,19,24],[18,0,12,25],[12,2,14,25],[14,4,16,25],[16,6,18,25]]";
-createNode transform -n "phys_hoe_arm0" -p "m_hoe_arm0";
-	setAttr ".t" -type "double3" 0.030678609270855636 1.880647256853363 3.5228074587309552 ;
-	setAttr ".r" -type "double3" 130.02056333476983 0 0 ;
-	setAttr ".s" -type "double3" 1.0078284688571719 1.4999999999999987 0.99999999999999944 ;
-	setAttr ".sh" -type "double3" 0 0 -0.047741251279671305 ;
-	setAttr ".rp" -type "double3" 0.0024213907291438055 -0.81189192221130591 1.3025942312542953 ;
-	setAttr ".rpt" -type "double3" 0 0.33644466535794582 -2.7620016899852535 ;
-	setAttr ".sp" -type "double3" 0.0024025821892980893 -0.49980296246769684 1.302594231254296 ;
-	setAttr ".spt" -type "double3" 1.8808539845716036e-005 -0.31208895974360934 -8.8817841970012474e-016 ;
-createNode mesh -n "phys_hoe_armShape0" -p "phys_hoe_arm0";
 	setAttr -k off ".v";
 	setAttr ".vir" yes;
 	setAttr ".vif" yes;
@@ -2081,11 +2080,11 @@ createNode script -n "uiConfigurationScriptNode";
 		+ "                -headsUpDisplay 1\n                -selectionHiliteDisplay 1\n                -useDefaultMaterial 0\n                -bufferMode \"double\" \n                -twoSidedLighting 1\n                -backfaceCulling 0\n                -xray 0\n                -jointXray 0\n                -activeComponentsXray 0\n                -displayTextures 0\n                -smoothWireframe 0\n                -lineWidth 1\n                -textureAnisotropic 0\n                -textureHilight 1\n                -textureSampling 2\n                -textureDisplay \"modulate\" \n                -textureMaxSize 8192\n                -fogging 0\n                -fogSource \"fragment\" \n                -fogMode \"linear\" \n                -fogStart 0\n                -fogEnd 100\n                -fogDensity 0.1\n                -fogColor 0.5 0.5 0.5 1 \n                -maxConstantTransparency 1\n                -colorResolution 4 4 \n                -bumpResolution 4 4 \n                -textureCompression 0\n                -transparencyAlgorithm \"frontAndBackCull\" \n"
 		+ "                -transpInShadows 0\n                -cullingOverride \"none\" \n                -lowQualityLighting 0\n                -maximumNumHardwareLights 0\n                -occlusionCulling 0\n                -shadingModel 0\n                -useBaseRenderer 0\n                -useReducedRenderer 0\n                -smallObjectCulling 0\n                -smallObjectThreshold -1 \n                -interactiveDisableShadows 0\n                -interactiveBackFaceCull 0\n                -sortTransparent 1\n                -nurbsCurves 1\n                -nurbsSurfaces 1\n                -polymeshes 1\n                -subdivSurfaces 1\n                -planes 1\n                -lights 1\n                -cameras 1\n                -controlVertices 1\n                -hulls 1\n                -grid 1\n                -joints 1\n                -ikHandles 1\n                -deformers 1\n                -dynamics 1\n                -fluids 1\n                -hairSystems 1\n                -follicles 1\n                -nCloths 1\n                -nParticles 1\n"
 		+ "                -nRigids 1\n                -dynamicConstraints 1\n                -locators 1\n                -manipulators 1\n                -dimensions 1\n                -handles 1\n                -pivots 1\n                -textures 1\n                -strokes 1\n                -shadows 0\n                -displayMode \"centerEye\" \n                -viewColor 0 0 0 1 \n                $editorName;\nstereoCameraView -e -viewSelected 0 $editorName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"hyperGraphPanel\" (localizedPanelLabel(\"Hypergraph Hierarchy1\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"hyperGraphPanel\" -l (localizedPanelLabel(\"Hypergraph Hierarchy1\")) -mbv $menusOkayInPanels `;\n\n\t\t\t$editorName = ($panelName+\"HyperGraphEd\");\n            hyperGraph -e \n                -graphLayoutStyle \"hierarchicalLayout\" \n                -orientation \"horiz\" \n                -mergeConnections 1\n"
-		+ "                -zoom 0.533853\n                -animateTransition 0\n                -showRelationships 1\n                -showShapes 0\n                -showDeformers 0\n                -showExpressions 0\n                -showConstraints 0\n                -showUnderworld 0\n                -showInvisible 0\n                -transitionFrames 5\n                -currentNode \"i_m_hoe\" \n                -opaqueContainers 0\n                -dropTargetNode \"m_hoe_arm\" \n                -dropNode \"m_hoe\" \n                -freeform 1\n                -imagePosition 0 0 \n                -imageScale 1\n                -imageEnabled 0\n                -graphType \"DAG\" \n                -heatMapDisplay 0\n                -updateSelection 1\n                -updateNodeAdded 1\n                -useDrawOverrideColor 0\n                -limitGraphTraversal -1\n                -range -1 -1 \n                -iconSize \"largeIcons\" \n                -showCachedConnections 0\n                $editorName;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n"
-		+ "\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Hypergraph Hierarchy1\")) -mbv $menusOkayInPanels  $panelName;\n\n\t\t\t$editorName = ($panelName+\"HyperGraphEd\");\n            hyperGraph -e \n                -graphLayoutStyle \"hierarchicalLayout\" \n                -orientation \"horiz\" \n                -mergeConnections 1\n                -zoom 0.533853\n                -animateTransition 0\n                -showRelationships 1\n                -showShapes 0\n                -showDeformers 0\n                -showExpressions 0\n                -showConstraints 0\n                -showUnderworld 0\n                -showInvisible 0\n                -transitionFrames 5\n                -currentNode \"i_m_hoe\" \n                -opaqueContainers 0\n                -dropTargetNode \"m_hoe_arm\" \n                -dropNode \"m_hoe\" \n                -freeform 1\n                -imagePosition 0 0 \n                -imageScale 1\n                -imageEnabled 0\n                -graphType \"DAG\" \n                -heatMapDisplay 0\n                -updateSelection 1\n"
+		+ "                -zoom 0.533853\n                -animateTransition 0\n                -showRelationships 1\n                -showShapes 0\n                -showDeformers 0\n                -showExpressions 0\n                -showConstraints 0\n                -showUnderworld 0\n                -showInvisible 0\n                -transitionFrames 5\n                -currentNode \"m_hoe_arm0\" \n                -opaqueContainers 0\n                -dropTargetNode \"m_hoe_arm0\" \n                -dropNode \"m_hoe\" \n                -freeform 1\n                -imagePosition 0 0 \n                -imageScale 1\n                -imageEnabled 0\n                -graphType \"DAG\" \n                -heatMapDisplay 0\n                -updateSelection 1\n                -updateNodeAdded 1\n                -useDrawOverrideColor 0\n                -limitGraphTraversal -1\n                -range -1 -1 \n                -iconSize \"largeIcons\" \n                -showCachedConnections 0\n                $editorName;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n"
+		+ "\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Hypergraph Hierarchy1\")) -mbv $menusOkayInPanels  $panelName;\n\n\t\t\t$editorName = ($panelName+\"HyperGraphEd\");\n            hyperGraph -e \n                -graphLayoutStyle \"hierarchicalLayout\" \n                -orientation \"horiz\" \n                -mergeConnections 1\n                -zoom 0.533853\n                -animateTransition 0\n                -showRelationships 1\n                -showShapes 0\n                -showDeformers 0\n                -showExpressions 0\n                -showConstraints 0\n                -showUnderworld 0\n                -showInvisible 0\n                -transitionFrames 5\n                -currentNode \"m_hoe_arm0\" \n                -opaqueContainers 0\n                -dropTargetNode \"m_hoe_arm0\" \n                -dropNode \"m_hoe\" \n                -freeform 1\n                -imagePosition 0 0 \n                -imageScale 1\n                -imageEnabled 0\n                -graphType \"DAG\" \n                -heatMapDisplay 0\n                -updateSelection 1\n"
 		+ "                -updateNodeAdded 1\n                -useDrawOverrideColor 0\n                -limitGraphTraversal -1\n                -range -1 -1 \n                -iconSize \"largeIcons\" \n                -showCachedConnections 0\n                $editorName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\tif ($useSceneConfig) {\n        string $configName = `getPanel -cwl (localizedPanelLabel(\"Current Layout\"))`;\n        if (\"\" != $configName) {\n\t\t\tpanelConfiguration -edit -label (localizedPanelLabel(\"Current Layout\")) \n\t\t\t\t-defaultImage \"\"\n\t\t\t\t-image \"\"\n\t\t\t\t-sc false\n\t\t\t\t-configString \"global string $gMainPane; paneLayout -e -cn \\\"horizontal2\\\" -ps 1 100 53 -ps 2 100 47 $gMainPane;\"\n\t\t\t\t-removeAllPanels\n\t\t\t\t-ap false\n\t\t\t\t\t(localizedPanelLabel(\"Hypergraph Hierarchy1\")) \n\t\t\t\t\t\"scriptedPanel\"\n"
-		+ "\t\t\t\t\t\"$panelName = `scriptedPanel -unParent  -type \\\"hyperGraphPanel\\\" -l (localizedPanelLabel(\\\"Hypergraph Hierarchy1\\\")) -mbv $menusOkayInPanels `;\\n\\n\\t\\t\\t$editorName = ($panelName+\\\"HyperGraphEd\\\");\\n            hyperGraph -e \\n                -graphLayoutStyle \\\"hierarchicalLayout\\\" \\n                -orientation \\\"horiz\\\" \\n                -mergeConnections 1\\n                -zoom 0.533853\\n                -animateTransition 0\\n                -showRelationships 1\\n                -showShapes 0\\n                -showDeformers 0\\n                -showExpressions 0\\n                -showConstraints 0\\n                -showUnderworld 0\\n                -showInvisible 0\\n                -transitionFrames 5\\n                -currentNode \\\"i_m_hoe\\\" \\n                -opaqueContainers 0\\n                -dropTargetNode \\\"m_hoe_arm\\\" \\n                -dropNode \\\"m_hoe\\\" \\n                -freeform 1\\n                -imagePosition 0 0 \\n                -imageScale 1\\n                -imageEnabled 0\\n                -graphType \\\"DAG\\\" \\n                -heatMapDisplay 0\\n                -updateSelection 1\\n                -updateNodeAdded 1\\n                -useDrawOverrideColor 0\\n                -limitGraphTraversal -1\\n                -range -1 -1 \\n                -iconSize \\\"largeIcons\\\" \\n                -showCachedConnections 0\\n                $editorName\"\n"
-		+ "\t\t\t\t\t\"scriptedPanel -edit -l (localizedPanelLabel(\\\"Hypergraph Hierarchy1\\\")) -mbv $menusOkayInPanels  $panelName;\\n\\n\\t\\t\\t$editorName = ($panelName+\\\"HyperGraphEd\\\");\\n            hyperGraph -e \\n                -graphLayoutStyle \\\"hierarchicalLayout\\\" \\n                -orientation \\\"horiz\\\" \\n                -mergeConnections 1\\n                -zoom 0.533853\\n                -animateTransition 0\\n                -showRelationships 1\\n                -showShapes 0\\n                -showDeformers 0\\n                -showExpressions 0\\n                -showConstraints 0\\n                -showUnderworld 0\\n                -showInvisible 0\\n                -transitionFrames 5\\n                -currentNode \\\"i_m_hoe\\\" \\n                -opaqueContainers 0\\n                -dropTargetNode \\\"m_hoe_arm\\\" \\n                -dropNode \\\"m_hoe\\\" \\n                -freeform 1\\n                -imagePosition 0 0 \\n                -imageScale 1\\n                -imageEnabled 0\\n                -graphType \\\"DAG\\\" \\n                -heatMapDisplay 0\\n                -updateSelection 1\\n                -updateNodeAdded 1\\n                -useDrawOverrideColor 0\\n                -limitGraphTraversal -1\\n                -range -1 -1 \\n                -iconSize \\\"largeIcons\\\" \\n                -showCachedConnections 0\\n                $editorName\"\n"
+		+ "\t\t\t\t\t\"$panelName = `scriptedPanel -unParent  -type \\\"hyperGraphPanel\\\" -l (localizedPanelLabel(\\\"Hypergraph Hierarchy1\\\")) -mbv $menusOkayInPanels `;\\n\\n\\t\\t\\t$editorName = ($panelName+\\\"HyperGraphEd\\\");\\n            hyperGraph -e \\n                -graphLayoutStyle \\\"hierarchicalLayout\\\" \\n                -orientation \\\"horiz\\\" \\n                -mergeConnections 1\\n                -zoom 0.533853\\n                -animateTransition 0\\n                -showRelationships 1\\n                -showShapes 0\\n                -showDeformers 0\\n                -showExpressions 0\\n                -showConstraints 0\\n                -showUnderworld 0\\n                -showInvisible 0\\n                -transitionFrames 5\\n                -currentNode \\\"m_hoe_arm0\\\" \\n                -opaqueContainers 0\\n                -dropTargetNode \\\"m_hoe_arm0\\\" \\n                -dropNode \\\"m_hoe\\\" \\n                -freeform 1\\n                -imagePosition 0 0 \\n                -imageScale 1\\n                -imageEnabled 0\\n                -graphType \\\"DAG\\\" \\n                -heatMapDisplay 0\\n                -updateSelection 1\\n                -updateNodeAdded 1\\n                -useDrawOverrideColor 0\\n                -limitGraphTraversal -1\\n                -range -1 -1 \\n                -iconSize \\\"largeIcons\\\" \\n                -showCachedConnections 0\\n                $editorName\"\n"
+		+ "\t\t\t\t\t\"scriptedPanel -edit -l (localizedPanelLabel(\\\"Hypergraph Hierarchy1\\\")) -mbv $menusOkayInPanels  $panelName;\\n\\n\\t\\t\\t$editorName = ($panelName+\\\"HyperGraphEd\\\");\\n            hyperGraph -e \\n                -graphLayoutStyle \\\"hierarchicalLayout\\\" \\n                -orientation \\\"horiz\\\" \\n                -mergeConnections 1\\n                -zoom 0.533853\\n                -animateTransition 0\\n                -showRelationships 1\\n                -showShapes 0\\n                -showDeformers 0\\n                -showExpressions 0\\n                -showConstraints 0\\n                -showUnderworld 0\\n                -showInvisible 0\\n                -transitionFrames 5\\n                -currentNode \\\"m_hoe_arm0\\\" \\n                -opaqueContainers 0\\n                -dropTargetNode \\\"m_hoe_arm0\\\" \\n                -dropNode \\\"m_hoe\\\" \\n                -freeform 1\\n                -imagePosition 0 0 \\n                -imageScale 1\\n                -imageEnabled 0\\n                -graphType \\\"DAG\\\" \\n                -heatMapDisplay 0\\n                -updateSelection 1\\n                -updateNodeAdded 1\\n                -useDrawOverrideColor 0\\n                -limitGraphTraversal -1\\n                -range -1 -1 \\n                -iconSize \\\"largeIcons\\\" \\n                -showCachedConnections 0\\n                $editorName\"\n"
 		+ "\t\t\t\t-ap false\n\t\t\t\t\t(localizedPanelLabel(\"Persp View\")) \n\t\t\t\t\t\"modelPanel\"\n"
 		+ "\t\t\t\t\t\"$panelName = `modelPanel -unParent -l (localizedPanelLabel(\\\"Persp View\\\")) -mbv $menusOkayInPanels `;\\n$editorName = $panelName;\\nmodelEditor -e \\n    -cam `findStartUpCamera persp` \\n    -useInteractiveMode 0\\n    -displayLights \\\"default\\\" \\n    -displayAppearance \\\"smoothShaded\\\" \\n    -activeOnly 0\\n    -wireframeOnShaded 0\\n    -headsUpDisplay 1\\n    -selectionHiliteDisplay 1\\n    -useDefaultMaterial 0\\n    -bufferMode \\\"double\\\" \\n    -twoSidedLighting 1\\n    -backfaceCulling 0\\n    -xray 0\\n    -jointXray 0\\n    -activeComponentsXray 0\\n    -displayTextures 0\\n    -smoothWireframe 0\\n    -lineWidth 1\\n    -textureAnisotropic 0\\n    -textureHilight 1\\n    -textureSampling 2\\n    -textureDisplay \\\"modulate\\\" \\n    -textureMaxSize 8192\\n    -fogging 0\\n    -fogSource \\\"fragment\\\" \\n    -fogMode \\\"linear\\\" \\n    -fogStart 0\\n    -fogEnd 100\\n    -fogDensity 0.1\\n    -fogColor 0.5 0.5 0.5 1 \\n    -maxConstantTransparency 1\\n    -rendererName \\\"base_OpenGL_Renderer\\\" \\n    -colorResolution 256 256 \\n    -bumpResolution 512 512 \\n    -textureCompression 0\\n    -transparencyAlgorithm \\\"frontAndBackCull\\\" \\n    -transpInShadows 0\\n    -cullingOverride \\\"none\\\" \\n    -lowQualityLighting 0\\n    -maximumNumHardwareLights 1\\n    -occlusionCulling 0\\n    -shadingModel 0\\n    -useBaseRenderer 0\\n    -useReducedRenderer 0\\n    -smallObjectCulling 0\\n    -smallObjectThreshold -1 \\n    -interactiveDisableShadows 0\\n    -interactiveBackFaceCull 0\\n    -sortTransparent 1\\n    -nurbsCurves 1\\n    -nurbsSurfaces 1\\n    -polymeshes 1\\n    -subdivSurfaces 1\\n    -planes 1\\n    -lights 1\\n    -cameras 0\\n    -controlVertices 1\\n    -hulls 1\\n    -grid 1\\n    -joints 1\\n    -ikHandles 1\\n    -deformers 1\\n    -dynamics 1\\n    -fluids 1\\n    -hairSystems 1\\n    -follicles 1\\n    -nCloths 1\\n    -nParticles 1\\n    -nRigids 1\\n    -dynamicConstraints 1\\n    -locators 1\\n    -manipulators 1\\n    -dimensions 1\\n    -handles 1\\n    -pivots 1\\n    -textures 1\\n    -strokes 1\\n    -shadows 0\\n    $editorName;\\nmodelEditor -e -viewSelected 0 $editorName\"\n"
 		+ "\t\t\t\t\t\"modelPanel -edit -l (localizedPanelLabel(\\\"Persp View\\\")) -mbv $menusOkayInPanels  $panelName;\\n$editorName = $panelName;\\nmodelEditor -e \\n    -cam `findStartUpCamera persp` \\n    -useInteractiveMode 0\\n    -displayLights \\\"default\\\" \\n    -displayAppearance \\\"smoothShaded\\\" \\n    -activeOnly 0\\n    -wireframeOnShaded 0\\n    -headsUpDisplay 1\\n    -selectionHiliteDisplay 1\\n    -useDefaultMaterial 0\\n    -bufferMode \\\"double\\\" \\n    -twoSidedLighting 1\\n    -backfaceCulling 0\\n    -xray 0\\n    -jointXray 0\\n    -activeComponentsXray 0\\n    -displayTextures 0\\n    -smoothWireframe 0\\n    -lineWidth 1\\n    -textureAnisotropic 0\\n    -textureHilight 1\\n    -textureSampling 2\\n    -textureDisplay \\\"modulate\\\" \\n    -textureMaxSize 8192\\n    -fogging 0\\n    -fogSource \\\"fragment\\\" \\n    -fogMode \\\"linear\\\" \\n    -fogStart 0\\n    -fogEnd 100\\n    -fogDensity 0.1\\n    -fogColor 0.5 0.5 0.5 1 \\n    -maxConstantTransparency 1\\n    -rendererName \\\"base_OpenGL_Renderer\\\" \\n    -colorResolution 256 256 \\n    -bumpResolution 512 512 \\n    -textureCompression 0\\n    -transparencyAlgorithm \\\"frontAndBackCull\\\" \\n    -transpInShadows 0\\n    -cullingOverride \\\"none\\\" \\n    -lowQualityLighting 0\\n    -maximumNumHardwareLights 1\\n    -occlusionCulling 0\\n    -shadingModel 0\\n    -useBaseRenderer 0\\n    -useReducedRenderer 0\\n    -smallObjectCulling 0\\n    -smallObjectThreshold -1 \\n    -interactiveDisableShadows 0\\n    -interactiveBackFaceCull 0\\n    -sortTransparent 1\\n    -nurbsCurves 1\\n    -nurbsSurfaces 1\\n    -polymeshes 1\\n    -subdivSurfaces 1\\n    -planes 1\\n    -lights 1\\n    -cameras 0\\n    -controlVertices 1\\n    -hulls 1\\n    -grid 1\\n    -joints 1\\n    -ikHandles 1\\n    -deformers 1\\n    -dynamics 1\\n    -fluids 1\\n    -hairSystems 1\\n    -follicles 1\\n    -nCloths 1\\n    -nParticles 1\\n    -nRigids 1\\n    -dynamicConstraints 1\\n    -locators 1\\n    -manipulators 1\\n    -dimensions 1\\n    -handles 1\\n    -pivots 1\\n    -textures 1\\n    -strokes 1\\n    -shadows 0\\n    $editorName;\\nmodelEditor -e -viewSelected 0 $editorName\"\n"
@@ -2725,7 +2724,7 @@ createNode groupId -n "groupId24";
 	setAttr ".ihi" 0;
 createNode script -n "rg_export";
 	addAttr -ci true -sn "time" -ln "time" -dt "string";
-	setAttr ".time" -type "string" "2009-11-03T03:13:53.125000";
+	setAttr ".time" -type "string" "2009-11-03T23:00:03.171000";
 select -ne :time1;
 	setAttr ".o" 1;
 select -ne :renderPartition;
@@ -2750,17 +2749,19 @@ select -ne :hardwareRenderGlobals;
 select -ne :defaultHardwareRenderGlobals;
 	setAttr ".fn" -type "string" "im";
 	setAttr ".res" -type "string" "ntsc_4d 646 485 1.333";
+select -ne :ikSystem;
+	setAttr -s 4 ".sol";
 select -ne :hyperGraphLayout;
 	setAttr -s 45 ".hyp";
-	setAttr ".hyp[19].x" 446.3797607421875;
-	setAttr ".hyp[19].y" -133.02471923828125;
+	setAttr ".hyp[19].x" 416.17062377929687;
+	setAttr ".hyp[19].y" -123.59032440185547;
 	setAttr ".hyp[19].isf" yes;
 	setAttr ".hyp[21].x" 352.24166870117187;
 	setAttr ".hyp[21].y" 230.48019409179687;
 	setAttr ".hyp[21].isc" yes;
 	setAttr ".hyp[21].isf" yes;
-	setAttr ".hyp[22].x" 459.00497436523437;
-	setAttr ".hyp[22].y" -216.46937561035156;
+	setAttr ".hyp[22].x" 429.17062377929687;
+	setAttr ".hyp[22].y" -206.59031677246094;
 	setAttr ".hyp[22].isf" yes;
 	setAttr ".hyp[23].x" 1085.476318359375;
 	setAttr ".hyp[23].y" -222.66740417480469;
@@ -2777,14 +2778,14 @@ select -ne :hyperGraphLayout;
 	setAttr ".hyp[27].x" 871.3408203125;
 	setAttr ".hyp[27].y" -300.33432006835937;
 	setAttr ".hyp[27].isf" yes;
-	setAttr ".hyp[28].x" 459.21640014648437;
-	setAttr ".hyp[28].y" -254.52626037597656;
+	setAttr ".hyp[28].x" 429.17062377929687;
+	setAttr ".hyp[28].y" -244.59031677246094;
 	setAttr ".hyp[28].isf" yes;
-	setAttr ".hyp[29].x" 458.21640014648437;
-	setAttr ".hyp[29].y" -180.52626037597656;
+	setAttr ".hyp[29].x" 428.17062377929687;
+	setAttr ".hyp[29].y" -170.59031677246094;
 	setAttr ".hyp[29].isf" yes;
-	setAttr ".hyp[30].x" 386.24520874023437;
-	setAttr ".hyp[30].y" -21.312213897705078;
+	setAttr ".hyp[30].x" 395.50729370117187;
+	setAttr ".hyp[30].y" -31.32206916809082;
 	setAttr ".hyp[30].isf" yes;
 	setAttr ".hyp[31].x" 347.97824096679687;
 	setAttr ".hyp[31].y" 20.354648590087891;
@@ -2809,17 +2810,17 @@ select -ne :hyperGraphLayout;
 	setAttr ".hyp[36].x" 859.285400390625;
 	setAttr ".hyp[36].y" 155.38203430175781;
 	setAttr ".hyp[36].isf" yes;
-	setAttr ".hyp[40].x" 1539;
-	setAttr ".hyp[40].y" -172.1268310546875;
+	setAttr ".hyp[40].x" 1556.523681640625;
+	setAttr ".hyp[40].y" -127.108154296875;
 	setAttr ".hyp[40].isf" yes;
-	setAttr ".hyp[41].x" 1539.21142578125;
-	setAttr ".hyp[41].y" -209.1837158203125;
+	setAttr ".hyp[41].x" 1556.735107421875;
+	setAttr ".hyp[41].y" -164.1650390625;
 	setAttr ".hyp[41].isf" yes;
-	setAttr ".hyp[42].x" 1539.21142578125;
-	setAttr ".hyp[42].y" -248.1837158203125;
+	setAttr ".hyp[42].x" 1556.735107421875;
+	setAttr ".hyp[42].y" -203.1650390625;
 	setAttr ".hyp[42].isf" yes;
-	setAttr ".hyp[43].x" 1562.04931640625;
-	setAttr ".hyp[43].y" -106.95280456542969;
+	setAttr ".hyp[43].x" 1579.572998046875;
+	setAttr ".hyp[43].y" -61.934127807617188;
 	setAttr ".hyp[43].isf" yes;
 	setAttr ".hyp[47].x" 868.3408203125;
 	setAttr ".hyp[47].y" -258.33432006835937;
@@ -2833,17 +2834,17 @@ select -ne :hyperGraphLayout;
 	setAttr ".hyp[50].x" 1084.476318359375;
 	setAttr ".hyp[50].y" -180.66740417480469;
 	setAttr ".hyp[50].isf" yes;
-	setAttr ".hyp[51].x" 1278.923095703125;
-	setAttr ".hyp[51].y" 22.877151489257813;
+	setAttr ".hyp[51].x" 1296.44677734375;
+	setAttr ".hyp[51].y" 67.895828247070312;
 	setAttr ".hyp[51].isf" yes;
-	setAttr ".hyp[52].x" 1271.5888671875;
-	setAttr ".hyp[52].y" 61.099048614501953;
+	setAttr ".hyp[52].x" 1289.112548828125;
+	setAttr ".hyp[52].y" 106.11772155761719;
 	setAttr ".hyp[52].isf" yes;
-	setAttr ".hyp[53].x" 1253.476318359375;
-	setAttr ".hyp[53].y" 121.33259582519531;
+	setAttr ".hyp[53].x" 1271;
+	setAttr ".hyp[53].y" 166.35127258300781;
 	setAttr ".hyp[53].isf" yes;
-	setAttr ".hyp[54].x" 1486.2431640625;
-	setAttr ".hyp[54].y" -46.523109436035156;
+	setAttr ".hyp[54].x" 1503.766845703125;
+	setAttr ".hyp[54].y" -1.5044326782226563;
 	setAttr ".hyp[54].isf" yes;
 	setAttr ".hyp[55].x" 553.041015625;
 	setAttr ".hyp[55].y" 39.342319488525391;
@@ -2896,11 +2897,11 @@ select -ne :hyperGraphLayout;
 	setAttr ".hyp[69].x" 834.3408203125;
 	setAttr ".hyp[69].y" -215.33432006835937;
 	setAttr ".hyp[69].isf" yes;
-	setAttr ".hyp[70].x" 392.63705444335937;
-	setAttr ".hyp[70].y" -65.436843872070312;
+	setAttr ".hyp[70].x" 396.63412475585938;
+	setAttr ".hyp[70].y" -74.790153503417969;
 	setAttr ".hyp[70].isf" yes;
-	setAttr ".hyp[96].x" 1453.92822265625;
-	setAttr ".hyp[96].y" 182.85618591308594;
+	setAttr ".hyp[96].x" 1467.9853515625;
+	setAttr ".hyp[96].y" 138.91697692871094;
 	setAttr ".hyp[96].isf" yes;
 connectAttr "groupId25.id" "m_bodyShape.iog.og[0].gid";
 connectAttr "phong1SG.mwc" "m_bodyShape.iog.og[0].gco";
@@ -2924,6 +2925,19 @@ connectAttr "groupId5.id" "vhoe_arm0_Shape0.iog.og[0].gid";
 connectAttr "phong1SG.mwc" "vhoe_arm0_Shape0.iog.og[0].gco";
 connectAttr "groupId6.id" "vhoe_arm0_Shape0.ciog.cog[0].cgid";
 connectAttr "pasted__polyCube3.out" "phys_hoe_armShape.i";
+connectAttr "pasted__groupId9.id" "m_hoe_arm0Shape.iog.og[0].gid";
+connectAttr "pasted__phong1SG2.mwc" "m_hoe_arm0Shape.iog.og[0].gco";
+connectAttr "pasted__groupParts5.og" "m_hoe_arm0Shape.i";
+connectAttr "pasted__groupId10.id" "m_hoe_arm0Shape.ciog.cog[0].cgid";
+connectAttr "pasted__groupParts1.og" "m_hoe_arm0_Shape1.i";
+connectAttr "pasted__groupId1.id" "m_hoe_arm0_Shape1.iog.og[0].gid";
+connectAttr "pasted__phong1SG2.mwc" "m_hoe_arm0_Shape1.iog.og[0].gco";
+connectAttr "pasted__groupId2.id" "m_hoe_arm0_Shape1.ciog.cog[0].cgid";
+connectAttr "pasted__phong1SG2.mwc" "m_hoe_arm0_Shape0.iog.og[0].gco";
+connectAttr "pasted__groupId3.id" "m_hoe_arm0_Shape0.iog.og[0].gid";
+connectAttr "pasted__groupParts2.og" "m_hoe_arm0_Shape0.i";
+connectAttr "pasted__groupId4.id" "m_hoe_arm0_Shape0.ciog.cog[0].cgid";
+connectAttr "polyCube3.out" "phys_hoe_armShape0.i";
 connectAttr "groupId19.id" "m_hoeShape.iog.og[0].gid";
 connectAttr "phong1SG.mwc" "m_hoeShape.iog.og[0].gco";
 connectAttr "polyCut2.out" "m_hoeShape.i";
@@ -2948,19 +2962,6 @@ connectAttr "phong1SG.mwc" "m_hoe_sideShape1.iog.og[0].gco";
 connectAttr "groupId18.id" "m_hoe_sideShape1.ciog.cog[0].cgid";
 connectAttr "pasted__polyCube11.out" "phys_hoe_sideShape1.i";
 connectAttr "polyCube4.out" "phys_hoeShape.i";
-connectAttr "pasted__groupId9.id" "m_hoe_arm0Shape.iog.og[0].gid";
-connectAttr "pasted__phong1SG2.mwc" "m_hoe_arm0Shape.iog.og[0].gco";
-connectAttr "pasted__groupParts5.og" "m_hoe_arm0Shape.i";
-connectAttr "pasted__groupId10.id" "m_hoe_arm0Shape.ciog.cog[0].cgid";
-connectAttr "pasted__groupParts1.og" "m_hoe_arm0_Shape1.i";
-connectAttr "pasted__groupId1.id" "m_hoe_arm0_Shape1.iog.og[0].gid";
-connectAttr "pasted__phong1SG2.mwc" "m_hoe_arm0_Shape1.iog.og[0].gco";
-connectAttr "pasted__groupId2.id" "m_hoe_arm0_Shape1.ciog.cog[0].cgid";
-connectAttr "pasted__phong1SG2.mwc" "m_hoe_arm0_Shape0.iog.og[0].gco";
-connectAttr "pasted__groupId3.id" "m_hoe_arm0_Shape0.iog.og[0].gid";
-connectAttr "pasted__groupParts2.og" "m_hoe_arm0_Shape0.i";
-connectAttr "pasted__groupId4.id" "m_hoe_arm0_Shape0.ciog.cog[0].cgid";
-connectAttr "polyCube3.out" "phys_hoe_armShape0.i";
 connectAttr "phong1SG.mwc" "m_rear_wheelShape1.iog.og[0].gco";
 connectAttr "groupId31.id" "m_rear_wheelShape1.iog.og[0].gid";
 connectAttr "groupParts16.og" "m_rear_wheelShape1.i";
