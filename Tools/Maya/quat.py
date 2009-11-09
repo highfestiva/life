@@ -413,7 +413,30 @@ class quat:
                      xz-yw, yz+xw, 1.0-xx-yy, 0.0,
                      0.0, 0.0, 0.0, 1.0)
 
+
     def fromMat(self, m):
+        try:
+            return self._fromMat(m)
+        except:
+            pass
+        qlist = []
+        cnt = 0
+        for axis in [(-1,0,0),(+1,0,0),(0,-1,0),(0,1,0),(0,0,-1),(0,0,1)]:
+            rot = m * _mat4.rotation(0.01, axis)
+            try:
+                qlist += [self._fromMat(rot)]
+            except:
+                pass
+        r = quat(0,0,0,0)
+        for q in qlist:
+            r += q
+        r = r.normalize()
+        #print("Got a matrix-2-quaternion lerp of", r, "using", len(qlist), "checks!")
+        self.w, self.x, self.y, self.z = r[:]
+        return self
+
+
+    def _fromMat(self, m):
         """Initialize self from either a mat3 or mat4 and returns self."""
         global _epsilon
 
@@ -448,12 +471,7 @@ class quat:
                 v.y = 0.0
                 v.z = 1.0
             else:
-                # Jonte: let's try this...
-                self.w = 0.0
-                self.x = 0.0
-                self.y = 1/math.sqrt(2)
-                self.z = 1/math.sqrt(2)
-                return self
+                raise Exception("Uh-uh! Bad matrix!")
 
         # Now set the vector.
         self.fromAngleAxis(angle, v)
