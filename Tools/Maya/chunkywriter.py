@@ -169,14 +169,9 @@ class ChunkyWriter:
                         ipm = mat4.translation(t) * r
                 wt = node.get_world_transform()
                 if not node.phys_root:
-                        # Rotate back the start angle.
-                        root = node.xformparent
-                        ra = root.original_ra
-                        root.fix_attribute("ra", -ra)
-                        print("Restoring %s's 'ra' to: %s" % (root.getName(), ra))
-                        wt = node.gettransformto(None, "no_ra")
-                        #wt = wt * mat4.rotation(math.pi/4, (1,1,1))
-                        #print(wt)
+                        # Use inverse initial rotation (only when writing root physics).
+                        wt = node.gettransformto(None, "inverse_initial_r")
+                        print("Specialcasing", node.getName())
                 m = ipm * wt
                 t, r, s = m.decompose()
                 q = quat(r).normalize()
