@@ -26,17 +26,24 @@ class Shape:
                 d = []
                 self.data = d
                 self._attrnode = scalenode
-                #if not scalenode.isortho():
-                #        print("Error: node '%s' is not orthogonal." % scalenode.getFullName())
-                #        sys.exit(21)
-                #scale = scalenode.get_local_scale()
-                #m = mat4(scalenode.get_world_transform()).getMat3()
-                scale = (scalenode.get_world_transform()*vec4(1,1,1,0))[:3]
+
+                wt = scalenode.get_world_transform()
+                v0 = wt*vec4(1,0,0,0)
+                v1 = wt*vec4(0,1,0,0)
+                v2 = wt*vec4(0,0,1,0)
+                if round(v0*v1, 8) or round(v0*v2, 8) or round(v1*v2, 8):
+                        print("Error: scale for physical shape '%s' is not orthogonal!" % scalenode.getFullName())
+                        print(v0, v1, v2)
+                        print(wt)
+                        #sys.exit(21)
+                check_orthonormal = True
+
                 #scale = m * scalenode.get_world_scale()
                 #scale = m * vec3(1,1,1)
                 #scale = scalenode.get_world_scale()
                 if shapenode.nodetype == "polyCube":
                         self.type = "box"
+                        check_orthonormal = False
                         scale = scalenode.get_world_scale()
                         #d.append(shapenode.getAttrValue("w", "w", None, default=1.0)*scale[0])
                         #d.append(shapenode.getAttrValue("d", "d", None, default=1.0)*scale[1])
@@ -47,25 +54,27 @@ class Shape:
                         s = list(map(lambda x,y: x*y, [x,y,z], scale))
                         #print(scalenode.getName(), "has scale", scale, "and size", [x,y,z])
                         d += s
-                        s = scalenode.get_world_transform() * vec4(x,y,z,0)
+                        s = wt * vec4(x,y,z,0)
                         #d += s[:3]
                         #s = map(lambda x,y: x*y, [x,y,z], scale)
                         #d += map(lambda x, y: x*y, s[:3], scale)
                         #_w = shapenode.getAttrValue("w", "w", None, default=1.0)
                         #_d = shapenode.getAttrValue("d", "d", None, default=1.0)
                         #_h = shapenode.getAttrValue("h", "h", None, default=1.0)
-                        #size = (scalenode.get_world_transform()*vec4(_w,_d,_h,0))[:3]
+                        #size = (wt*vec4(_w,_d,_h,0))[:3]
                         #d += size
                 elif shapenode.nodetype == "polySphere":
                         self.type = "sphere"
-                        absscale = map(lambda x: math.fabs(x), scale)
-                        if not Shape.inrange(absscale, 0.05):
-                                print("Error: scale for sphere node '%s' must be symmetric (is %s)." % (scalenode.getFullName(), str(scale)))
-                                sys.exit(21)
-                        d.append(shapenode.getAttrValue("r", "r", None, default=1.0)*scale[0])
+                        d.append(shapenode.getAttrValue("r", "r", None, default=1.0)*v0.length())
                 else:
                         print("Error: shape type '%s' on node '%s' is unknown." % (shapenode.nodetype, shapenode.getFullName()))
                         sys.exit(22)
+
+                if check_orthonormal:
+                        if round(v0.length()-v1.length(), 8) or round(v0.length()-v2.length(), 8) or round(v1.length()-v2.length(), 8):
+                                print("Error: scale for physical shape '%s' is not orthonormal!" % scalenode.getFullName())
+                                #sys.exit(21)
+
 
         def __str__(self):
                 return "<Shape %s %s>" % (self.type, " ".join(map(lambda x: str(x), self.data)))

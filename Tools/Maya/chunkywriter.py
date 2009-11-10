@@ -64,14 +64,13 @@ class ChunkyWriter:
                 self.bodies = self._sortbodies(group)
 
 
-        def printfeats(self):
+        def addfeats(self, feats):
                 for k,v in self.feats.items():
-                        singular, plural = k.split(":")
-                        if v == 1:
-                                name = singular
+                        oldv = feats.get(k)
+                        if oldv:
+                                feats[k] += v
                         else:
-                                name = plural
-                        print("Wrote %6i %s." % (v, name))
+                                feats[k] = v
 
 
         def _sortbodies(self, group):
@@ -164,79 +163,26 @@ class ChunkyWriter:
 
 
         def _writebone(self, node):
-                #if node.xformparent:
-                #        pm = node.xformparent.get_world_transform()
-                #else:
-                #        pm = mat4.identity()
-                #q = quat(pm.inverse() * node.get_local_transform())
-                #pq = node.xformparent.get_world_quat()
-                #q = pq * node.get_world_quat()
-                #q = quat(pq.toMat4().inverse()) * node.get_world_quat()
-                q = node.get_local_quat()
                 ipm = mat4.identity()
-                if node.phys_root:
-                        ipm = node.phys_root.get_world_transform().inverse()
-                m = ipm * node.get_world_transform()
-                #q = quat(m)
-                #print("Writing bone", node.getName(), "with matrix:\n", q.toMat4())
-                #q = quat(node.get_local_transform().decompose()[1])
-                #q = quat(node.get_world_transform())
-                v0 = vec4(0,1,0,0)
-                v1 = q.toMat4() * v0
-                #v1 = node.get_local_transform().decompose()[1] * v0
-                #print(node.getName(), "v1 is now", v1, "dot is", v0*v1)
-                v1[0] = 0
-                #print("v0 and v1 are", v0, v1, q.toMat4())
-                xangle = math.acos(v0*v1)*180/math.pi
-                #print("%s local x angle is %f, local q=%s, world q=%s" % (node.getName(), xangle, node.get_local_quat(), node.get_world_quat()))
-
-                v0 = vec4(0,1,0,0)
-                v1 = q.toMat4() * v0
-                v1[2] = 0
-                zangle = math.acos(v0*v1)*180/math.pi
-                #print("%s local z angle is %f" % (node.getName(), zangle))
-
-                v0 = vec4(0,1,0,0)
-                v1 = node.get_world_quat().toMat4()*v0
-                #v1 = node.get_world_transform().decompose()[1] * v0
-                v1[0] = 0
-                xangle = math.acos(v0*v1)*180/math.pi
-                #print("%s world x angle is %f" % (node.getName(), xangle))
-                #print("%s parent is %s" % (node.getName(), node.xformparent.getName()))
-                #print("Parent %s has wq=%s" % (node.xformparent.getName(), node.xformparent.get_world_quat()))
-                #rot = node.get_fixed_attribute("r", default=vec3(0,0,0))
-                #print("%s rot is %s" % (node.getName(), rot))
-                #q = [1.0,0.0,0.0,0.0]
-                if not q:
-                        print("Error: trying to get rotation from node '%s', but none available." % node.getFullName())
-                        sys.exit(18)
-                pos = node.get_relative_pos()
-                #if node.phys_parent != node.phys_root:
-                #        pos[1] -= 1.5
-                #t = node.get_local_transform()
-                #pos = t * vec4(0,0,0,1)
-                #q = quat(t)
-                #q = node.get_world_quat().normalize()
-                #pos = vec4(node.get_local_pivot()[:]+[1])
+                if node.xformparent:
+                        t, r, s = node.xformparent.get_world_transform().inverse().decompose()
+                        ipm = mat4.translation(t) * r
+                wt = node.get_world_transform()
                 if not node.phys_root:
-                        #m = mat4.rotation(-math.pi/2, (1,0,0)) * (mat4.rotation(math.pi, (0,0,1)) * q.toMat4())
-                        m = node.get_world_transform().decompose()[1] * mat4.rotation(math.pi/2, (1,0,0))
-                        #m = node.get_local_transform()
-                        print("Got m=")
-                        print(m)
-                        #m.ortho()
-                        #m = m * mat4.rotation(math.pi/2, (0,1,0))
-                        m = m * mat4.rotation(math.pi*40/40, (0,1,0))
-                        #m = m * mat4.rotation(math.pi, (0,1,0))
-                        print("but after last rotation:")
-                        print(m)
-                        print()
-                        q = quat(m.decompose()[1]).normalize()
-                        q = quat(m).normalize()
-                        print(q)
-                        pos = m * vec4(0,0,0,1)
+                        # Rotate back the start angle.
+                        root = node.xformparent
+                        ra = root.original_ra
+                        root.fix_attribute("ra", -ra)
+                        print("Restoring %s's 'ra' to: %s" % (root.getName(), ra))
+                        wt = node.gettransformto(None, "no_ra")
+                        #wt = wt * mat4.rotation(math.pi/4, (1,1,1))
+                        #print(wt)
+                m = ipm * wt
+                t, r, s = m.decompose()
+                q = quat(r).normalize()
+                pos = t
                 data = q[:]+pos[:3]
-                #print("Writing bone %s with data" % node.getName(), data)
+                print("Writing bone %s with pos" % node.getName(), data)
                 self._addfeat("bone:bones", 1)
                 self._writexform(data)
 
@@ -245,7 +191,10 @@ class ChunkyWriter:
                 if len(xform) != 7:
                         print("Error: trying to store transform with len != 7!")
                         sys.exit(18)
+                #x = 0
                 for f in xform:
+                        #print("Writing transform", x, ": ", f)
+                        #x += 1
                         self._writefloat(f)
 
 
@@ -290,7 +239,7 @@ class ChunkyWriter:
 
         def _writefloat(self, val, name="float"):
                 if type(val) != float:
-                        raise ValueError("Error: trying to pass '%s' off as 'float'." % str(type(val)))
+                        raise ValueError("Error: trying to pass '" + str(type(val)) + "' (with value " + str(val) + ") off as 'float'.")
                 data = struct.pack(">f", val)
                 self._dowrite(data, 4, name)
 
@@ -309,7 +258,7 @@ class ChunkyWriter:
 
         @staticmethod
         def _geteuler(node):
-                q = node.get_local_quat()
+                q = quat(node.get_local_transform().decompose()[1])
                 w2 = q[0]*q[0]
                 x2 = q[1]*q[1]
                 y2 = q[2]*q[2]
@@ -334,7 +283,7 @@ class ChunkyWriter:
 
 
         def _getaxes(self, node):
-                q = node.get_local_quat()
+                q = quat(node.get_local_transform().decompose()[1])
                 return q.rotateVec((1,0,0)), q.rotateVec((0,1,0)), q.rotateVec((0,0,1))
 
 
@@ -383,6 +332,7 @@ class PhysWriter(ChunkyWriter):
                                         engines.append((CHUNK_PHYSICS_ENGINE, node))
                         #pprint.pprint(data)
                         self._writechunk(data)
+                self._addfeat("file:files", 1)
 
 
         def _gettotalmass(self):
@@ -570,6 +520,7 @@ class MeshWriter(ChunkyWriter):
                                         )
                                 )
                         self._writechunk(data)
+                self._addfeat("file:files", 1)
 
 
 
@@ -592,9 +543,15 @@ class ClassWriter(ChunkyWriter):
                                 for m in phys.childmeshes:
                                         tm = m.get_world_transform()
                                         tp = phys.get_world_transform()
+                                        tmt, tmr, tms = tm.decompose()
+                                        tpt, tpr, tps = tp.decompose()
+                                        tpt = mat4.translation(tpt)
+                                        tps = mat4.scaling(tps)
+                                        #tmr = quat(tmr).normalize().toMat4()
+                                        #tpr = quat(tpr).normalize().toMat4()
                                         lpm = tm * m.get_local_pivot()
                                         lpp = tp * phys.get_local_pivot()
-                                        t = tp.inverse() * tm
+                                        t = tps.inverse() * tpt.inverse() * tpr.inverse() * tm
                                         q = quat(t.decompose()[1]).normalize()
                                         p = (lpm-lpp)[0:3]
                                         #print(m)
@@ -611,6 +568,7 @@ class ClassWriter(ChunkyWriter):
                         #pprint.pprint(data)
                         self._writechunk(data)
                         self._addfeat("class:classes", 1)
+                self._addfeat("file:files", 1)
 
 
         def _writephysmeshptr(self, physmeshptr):

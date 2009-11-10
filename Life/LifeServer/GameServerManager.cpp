@@ -290,7 +290,7 @@ bool GameServerManager::Initialize()
 			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
 			if (lOk)
 			{
-				lOk = mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("tractor_01")));
+				lOk = mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("tractor_02")));
 			}
 		}
 		for (x = 0; lOk && x < 100; ++x)
