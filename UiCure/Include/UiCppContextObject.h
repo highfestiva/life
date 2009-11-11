@@ -32,7 +32,8 @@ public:
 	enum DebugPrimitive
 	{
 		DEBUG_AXES = 1,
-		DEBUG_SHAPE,
+		DEBUG_JOINTS,
+		DEBUG_SHAPES,
 	};
 
 	CppContextObject(const Lepra::String& pClassId, GameUiManager* pUiManager);

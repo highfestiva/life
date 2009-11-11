@@ -1902,7 +1902,7 @@ bool PhysicsManagerODE::GetAxis2(JointID pJointId, Lepra::Vector3D<Lepra::float3
 	case JOINT_SLIDER:
 	case JOINT_FIXED:
 	case JOINT_ANGULARMOTOR:
-		mLog.AError("GetAxis2() - Joint doesn't have two axes!");
+		//mLog.AError("GetAxis2() - Joint doesn't have two axes!");
 		return (false);
 	default:
 		mLog.AError("GetAxis2() - Unknown joint type!");

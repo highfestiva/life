@@ -173,10 +173,20 @@ class GroupReader(DefaultMAReader):
                         return tab
                 def get_world_pivot(self):
                         o = self._get_local_pivot()
-                        return self.get_world_translation(vec4(o[0],o[1],o[2],1))
+                        v = self.get_world_transform() * vec4(o[0],o[1],o[2],1)
+                        v[3] = 1
+                        return v
                 def get_local_pivot(self):
                         o = self._get_local_pivot()
-                        return self.get_local_transform().decompose()[1] * -vec4(o[0],o[1],o[2],1)
+                        if self.xformparent:
+                                ipm = self.xformparent.get_world_transform().inverse()
+                        else:
+                                ipm = mat4.identity()
+                        m = ipm * self.get_world_transform()
+                        t, r, s = m.decompose()
+                        v = r * vec4(o[0],o[1],o[2],1)
+                        v[3] = 1
+                        return v
                 def get_world_translation(self, origin=vec4(0,0,0,1)):
                         m = self.get_world_transform()
                         return m * origin
@@ -515,15 +525,17 @@ class GroupReader(DefaultMAReader):
                 for node in group:
                         vtx = node.get_fixed_attribute("rgvtx", optional=True)
                         if vtx:
-                                phys = node.getParent().phys_ref[0]
+                                mnode = node.getParent()
+                                #phys = node.getParent().phys_ref[0]
                                 # Get transformation to origo without rescaling.
-                                meshroot = phys.getParent() if phys.is_phys_root else phys.phys_root.getParent()
-                                #meshroot = None
-                                m_tr = phys.getParent().gettransformto(meshroot, "original", getparent=lambda n: n.getParent())
+                                #meshroot = phys.getParent() if phys.is_phys_root else phys.phys_root.getParent()
+                                meshroot = None
+                                #m_tr = phys.getParent().gettransformto(meshroot, "original", getparent=lambda n: n.getParent())
+                                m_tr = mnode.gettransformto(meshroot, "original", getparent=lambda n: n.getParent())
                                 if not m_tr:
-                                        print("Mesh crash in", phys.getName(), "with root", phys.phys_root)
+                                        print("Mesh crash!")
                                 m_t, m_r, m_s = m_tr.decompose()
-                                transform = mat4.scaling(m_s)
+                                transform = m_r * mat4.scaling(m_s)
                                 vp = vec4(0,0,0,1);
                                 idx = 0
                                 for idx in range(len(vtx)):
@@ -671,9 +683,12 @@ class GroupReader(DefaultMAReader):
         def validatePhysGroup(self, group):
                 isGroupValid = True
                 for node in group:
+                        #print("Checking physics for", node)
                         if node.getName().startswith("phys_") and node.nodetype == "transform":
                                 node.is_phys_root = False
+                                #print("Before resolve...")
                                 isGroupValid &= self._resolve_phys(node, group)
+                                #print("After resolve...")
                                 node.phys_root = node.phys_parent
                                 # Check attributes.
                                 def jointCheck(t):
@@ -688,6 +703,7 @@ class GroupReader(DefaultMAReader):
                                 isGroupValid &= self._queryAttribute(node, "friction", lambda x: (x >= 0 and x <= 100))[0]
                                 isGroupValid &= self._queryAttribute(node, "affected_by_gravity", lambda x: x==True or x==False)[0]
                 for node in group:
+                        #print("Checking physics II for", node)
                         if node.getName().startswith("phys_") and node.nodetype == "transform":
                                 root = node
                                 current_parent = node.phys_parent
@@ -902,12 +918,17 @@ class GroupReader(DefaultMAReader):
                 parent = parent.getParent()
                 while parent != None:
                         phys_nodes = self._listchildnodes(parent.getFullName(), parent, "phys_", group, False)
-                        if len(phys_nodes) > 1:
-                                print("Error: mesh node '%s' may only have one phys node child (but has %i children)." % (parent.getName(), len(phys_nodes)))
-                                return False
-                        elif len(phys_nodes) == 1:
+                        if len(phys_nodes) >= 1:
+                                def distance(node):
+                                        dist = phys.get_world_translation()-node.get_world_translation()
+                                        return dist.length()
+                                phys_nodes.sort(key=distance)
                                 parent = phys_nodes[0]
+                                if len(phys_nodes) > 1:
+                                        print("*********** Picked parent node", parent)
                                 break
+                        else:
+                                parent = parent.getParent()
                 #print("Phys %s has parent:" % phys.getFullName(), parent)
                 if parent == None:
                         print("Error: phys node '%s' has no related parent phys node higher up in the hierarchy." % phys.getFullName())
@@ -1073,9 +1094,9 @@ def main():
         pwr = chunkywriter.PhysWriter(sys.argv[1], rd.group, rd.config)
         mwr = chunkywriter.MeshWriter(sys.argv[1], rd.group, rd.config)
         cwr = chunkywriter.ClassWriter(sys.argv[1], rd.group, rd.config)
-        pwr.dowrite()
-        mwr.dowrite()
-        cwr.dowrite()
+        pwr.write()
+        mwr.write()
+        cwr.write()
         feats = {}
         pwr.addfeats(feats)
         mwr.addfeats(feats)
