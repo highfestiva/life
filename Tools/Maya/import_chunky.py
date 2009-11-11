@@ -87,18 +87,7 @@ class GroupReader(DefaultMAReader):
                         sys.exit(3)
                 self.fixparams(group)
 
-                for t in group:
-                        if t == group[0]:
-                                ro = t.get_fixed_attribute("ro", optional=True, default=0)
-                                if ro != 0:
-                                        print("Error: root %s must have xyz rotation order!" % t.getName())
-                                        sys.exit(3)
-                                v = t.get_fixed_attribute("ra")
-                                t.original_ra = v
-                                v = (math.pi/2, 0, math.pi)
-                                t.fix_attribute("ra", v)
-                #for t in filter(lambda n: n.getName()=="phys_backbar", group):
-                #        print(t.getName(), "has rel pos", t.get_relative_pos())
+                self.fixroottrans(group)
 
                 self.faces2triangles(group)
                 if not self.validatehierarchy(group):
@@ -459,6 +448,27 @@ class GroupReader(DefaultMAReader):
                                 node.fix_attribute("rgvtx", vtx)
 
 
+        def fixroottrans(self, group):
+                '''Do some magic with the (mesh) root transformation. When writing the physics root we
+                   will need the inverted initial transform, but 'til then we'll use our own coordinate
+                   system (more natural when playing, less so when editing).'''
+                t = group[0]
+                #o = t.get_fixed_attribute("t")
+                #if o.length() != 0:
+                #        print("Error: root node %s must be placed in origo." % t.getName())
+                #        sys.exit(3)
+                ro = t.get_fixed_attribute("ro", optional=True, default=0)
+                if ro != 0:
+                        print("Error: root %s must have xyz rotation order!" % t.getName())
+                        sys.exit(3)
+                # Store inverse of rotation for later, then  set our preferred rotation angles in the exported vehicle.
+                t.fix_attribute("ra", -t.get_fixed_attribute("ra"))
+                #t.fix_attribute("r", -t.get_fixed_attribute("r"))
+                t.gettransformto(None, "inverse_initial_r")       # Store transformation for writing.
+                t.fix_attribute("ra", vec3(math.pi/2, 0, math.pi))
+                t.fix_attribute("r", vec3(0,0,0))
+
+
         def rotatexaxis(self, group):
                 for node in group:
                         if node.nodetype == "transform":
@@ -507,8 +517,8 @@ class GroupReader(DefaultMAReader):
                         if vtx:
                                 phys = node.getParent().phys_ref[0]
                                 # Get transformation to origo without rescaling.
-                                #meshroot = None if not phys.phys_root else phys.phys_root.getParent()
-                                meshroot = None
+                                meshroot = phys.getParent() if phys.is_phys_root else phys.phys_root.getParent()
+                                #meshroot = None
                                 m_tr = phys.getParent().gettransformto(meshroot, "original", getparent=lambda n: n.getParent())
                                 if not m_tr:
                                         print("Mesh crash in", phys.getName(), "with root", phys.phys_root)
@@ -662,6 +672,7 @@ class GroupReader(DefaultMAReader):
                 isGroupValid = True
                 for node in group:
                         if node.getName().startswith("phys_") and node.nodetype == "transform":
+                                node.is_phys_root = False
                                 isGroupValid &= self._resolve_phys(node, group)
                                 node.phys_root = node.phys_parent
                                 # Check attributes.
@@ -701,6 +712,8 @@ class GroupReader(DefaultMAReader):
                                                 root.phys_children += [node]
                                                 current_parent = root
                                                 isValid, hasJoint = self._queryAttribute(root, "joint", jointCheck, False)
+                                if node.phys_root:
+                                        node.phys_root.is_phys_root = True
                 return isGroupValid
 
 

@@ -314,8 +314,8 @@ bool GameServerManager::Initialize()
 	}
 
 	// TODO: remove!!!
-	Cure::ContextObject* lTractor = Parent::CreateContextObject(_T("tractor_01"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
-	lTractor->StartLoading();
+	//Cure::ContextObject* lTractor = Parent::CreateContextObject(_T("tractor_01"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
+	//lTractor->StartLoading();
 
 	Lepra::String lAcceptAddress = CURE_RTVAR_GETSET(GetVariableScope(), RTVAR_NETWORK_LISTEN_ADDRESS, _T("0.0.0.0:16650"));
 	if (lOk)
