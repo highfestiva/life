@@ -2,6 +2,7 @@
 # Created by Jonas Byström, 2009-07-17 for Righteous Engine tool chain.
 
 
+from mat3 import mat3
 from mat4 import mat4
 from mayaascii import *
 from quat import quat
@@ -403,6 +404,29 @@ class PhysWriter(ChunkyWriter):
                 #        print("Error: euler rotation pitch of jointed body '%s' must be zero." % node.getFullName())
                 #        sys.exit(19)
                 #print("Euler angles for", shape.getnode().getName(), ":", yaw, pitch)
+                m = mat4.identity()
+                yaw = math.pi/2
+                pitch = math.pi/2
+                ööö - do proper Euler from vector rotation, ignoring aligned rotation.
+                m.setMat3(mat3.fromEulerXZY(pitch, 0, yaw))
+                print("This is it:", type(m), type(node.get_local_transform()))
+                print(m)
+                #print(node.get_local_transform())
+                if True:
+                        ipm = mat4.identity()
+                        t, r, s = node.xformparent.get_world_transform().inverse().decompose()
+                        ipm = mat4.translation(t) * r
+                        wt = node.get_world_transform()
+                        mat = ipm * wt
+                        t, r, s = mat.decompose()
+
+                #m = node.get_world_transform().inverse().decompose()[1] * m
+                #m = r.inverse() * m
+                m = m.decompose()[1].getMat3()
+                print(m)
+                pitch, _, yaw = m.toEulerXZY()
+                #pitch = -pitch
+                #yaw = -yaw
                 parameters[2] = yaw
                 parameters[3] = pitch
                 joint_min, joint_max = node.get_fixed_attribute("joint_angles", True, [0.0,0.0])
@@ -411,9 +435,11 @@ class PhysWriter(ChunkyWriter):
                 parameters[4] = joint_min
                 parameters[5] = joint_max
                 #lq = node.get_local_quat()
-                #lp = node.get_local_pivot()
                 #j = lq.toMat4()*lp
-                j = node.get_local_pivot()
+                j = node.get_world_translation() - node.get_world_pivot()
+                #j = node.get_world_transform().decompose()[1] * j
+                j = node._get_local_rpivot()
+                #j = vec3(0.0,0.0,0.0)
                 print("Writing joint point", j)
                 parameters[6] = j.x
                 parameters[7] = j.y
@@ -571,20 +597,31 @@ class ClassWriter(ChunkyWriter):
                 filename = self.basename+".class"
                 with self._fileopenwrite(filename) as f:
                         self.f = f
-                        meshes = []
+                        meshptrs = []
                         physidx = 0
                         #print("These are the bodies:", self.bodies)
                         #print("These are the meshes:", self.meshes)
                         for m in self.meshes:
                                 def _getparentphys(m):
+                                        ph = None
                                         mesh = m
-                                        while mesh:
+                                        while mesh and not ph:
                                                 for phys in self.bodies:
-                                                        if mesh in phys.childmeshes:
-                                                                return phys
+                                                        meshes = list(filter(None, [ch == mesh for ch in phys.childmeshes]))
+                                                        if len(meshes) == 1:
+                                                                if not ph:
+                                                                        ph = phys
+                                                                else:
+                                                                        print("Error: both phys %s and %s has mesh refs to %s." % (ph.getFullName(), phys.getFullName(), mesh.getFullName()))
+                                                                        print(ph.childmeshes, meshes)
+                                                                        sys.exit(3)
+                                                        elif len(meshes) > 1:
+                                                                print("Error: phys %s has multiple mesh children refs to %s." % (phys.getFullName(), mesh.getFullName()))
+                                                                sys.exit(3)
                                                 mesh = mesh.getParent()
-                                        print("Warning: mesh %s is not attached to any physics object!" % m.getFullName())
-                                        return None
+                                        if not ph:
+                                                print("Warning: mesh %s is not attached to any physics object!" % m.getFullName())
+                                        return ph
                                 phys = _getparentphys(m)
                                 if not phys:
                                         continue
@@ -598,10 +635,8 @@ class ClassWriter(ChunkyWriter):
                                 tps = mat4.scaling(tps)
                                 #tmr = quat(tmr).normalize().toMat4()
                                 #tpr = quat(tpr).normalize().toMat4()
-                                lpm = tm * m.get_local_pivot()
-                                lpp = tp * phys.get_local_pivot()
-                                wpm = m.get_world_pivot()
-                                wpp = phys.get_world_pivot()
+                                wpm = m.get_world_translation()
+                                wpp = phys.get_world_translation()
                                 mat = tps.inverse() * tpt.inverse() * tpr.inverse() * mat4.translation(tmt)
                                 mat = tp.inverse() * mat4.translation(tmt)
                                 mat = tpt.inverse() * tpr.inverse() * tps.inverse() * mat4.translation(tmt)
@@ -617,12 +652,12 @@ class ClassWriter(ChunkyWriter):
                                 p = p[0:3]
                                 print("Writing class", m.meshbasename, "relative to", phys.getName(), "with", q[:]+p[:])
                                 physidx = self.bodies.index(phys)
-                                meshes += [(CHUNK_CLASS_PHYS_MESH, PhysMeshPtr(physidx, m.meshbasename, q, p))]
+                                meshptrs += [(CHUNK_CLASS_PHYS_MESH, PhysMeshPtr(physidx, m.meshbasename, q, p))]
                         data =  (
                                         CHUNK_CLASS,
                                         (
                                                 (CHUNK_CLASS_PHYSICS, self.basename),
-                                                (CHUNK_CLASS_MESH_LIST, meshes),
+                                                (CHUNK_CLASS_MESH_LIST, meshptrs),
                                         )
                                 )
                         #pprint.pprint(data)
@@ -645,20 +680,24 @@ class ClassWriter(ChunkyWriter):
                         node.isphyschild = False
                 for node in self.bodies:
                         node.childmeshes = []
-                        if not node.getParent().getName().startswith("m_"):
+                        if not node.getParent() in self.meshes:
                                 continue
                         if node.getParent().isphyschild:
                                 continue
                         node.getParent().isphyschild = True
                         parent = node.getParent()
                         node.childmeshes += [parent]
-                        def recurselistmeshes(n, to):
+                        def recurselistmeshes(n):
                                 mc = []
-                                if not n.phys_children:
+                                if n and not n.phys_children:
+                                        #print("Entering mesh", n)
                                         for m in n.mesh_children:
                                                 mc += [n]
-                                #print(n.getName(), str(n.mesh_children))
-                                for cn in n.mesh_children:
-                                        mc += recurselistmeshes(cn, to)
+                                        for cn in n.mesh_children:
+                                                mc += recurselistmeshes(cn)
                                 return mc
-                        node.childmeshes += recurselistmeshes(parent, parent.getParent())
+                        cm = list(map(lambda x: x[0], filter(None, [recurselistmeshes(c) for c in parent.mesh_children])))
+                        #print("Taking ownership of", cm, "to", node.getName())
+                        node.childmeshes += cm
+                #for node in self.bodies:
+                #        print(node, "has mesh children", node.childmeshes)

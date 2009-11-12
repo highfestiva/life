@@ -35,12 +35,9 @@ class Shape:
                         print("Error: scale for physical shape '%s' is not orthogonal!" % scalenode.getFullName())
                         print(v0, v1, v2)
                         print(wt)
-                        #sys.exit(21)
+                        sys.exit(21)
                 check_orthonormal = True
 
-                #scale = m * scalenode.get_world_scale()
-                #scale = m * vec3(1,1,1)
-                #scale = scalenode.get_world_scale()
                 if shapenode.nodetype == "polyCube":
                         self.type = "box"
                         check_orthonormal = False
@@ -73,7 +70,7 @@ class Shape:
                 if check_orthonormal:
                         if round(v0.length()-v1.length(), 8) or round(v0.length()-v2.length(), 8) or round(v1.length()-v2.length(), 8):
                                 print("Error: scale for physical shape '%s' is not orthonormal!" % scalenode.getFullName())
-                                #sys.exit(21)
+                                sys.exit(21)
 
 
         def __str__(self):

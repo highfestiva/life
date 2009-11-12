@@ -111,27 +111,8 @@ class GroupReader(DefaultMAReader):
                 if not self.makephysrelative(group):
                         print("Internal vector math failed! Terminating due to error.")
                         sys.exit(3)
-                #for t in filter(lambda n: n.nodetype=="transform", group):
-                #        print("%s transformation:" % t.getName())
-                #        print(t.get_local_transform())
-                #        if t.getName().startswith("phys_"):
-                #                print(t.getName(), "has root", t.phys_root)
-                #self.rotatexaxis(group)
-
                 self.makevertsrelative(group)
 
-                #self.rotatexaxis(group)
-
-                #for t in filter(lambda n: n.getName()=="phys_body", group):
-                #        print(t.getName(), "has rel pos", t.get_relative_pos())
-                #for t in filter(lambda n: n.getName()=="phys_backbar", group):
-                #        print(t.getName(), "has rel pos", t.get_relative_pos())
-
-                #for t in filter(lambda n: n.nodetype=="transform", group):
-                        #print("%s transformation:" % t.getName())
-                        #print(t.get_local_transform())
-                        #if t.getName().startswith("phys_"):
-                        #        print(t.getName(), "has root", t.phys_root)
                 self.group = group
 
 
@@ -159,32 +140,9 @@ class GroupReader(DefaultMAReader):
                                                 raise KeyError("Error fetching required attribute '%s'." % name)
                                         value = default
                                 return value
-                def get_inherited_attr(self, name):
-                        try:
-                                return self.get_fixed_attribute(name)
-                        except KeyError:
-                                parent = self.getParent()
-                                if not parent:
-                                        raise AttributeError("Error: could not fetch inherited attr '%s' from node '%s'." % (name, node.getFullName()))
-                                return parent.get_inherited_attr(name)
-                def get_fixed_tab(self):
-                        tab = self._fixattr.copy()
-                        tab.update(self._setattr)
-                        return tab
                 def get_world_pivot(self):
                         o = self._get_local_pivot()
                         v = self.get_world_transform() * vec4(o[0],o[1],o[2],1)
-                        v[3] = 1
-                        return v
-                def get_local_pivot(self):
-                        o = self._get_local_pivot()
-                        if self.xformparent:
-                                ipm = self.xformparent.get_world_transform().inverse()
-                        else:
-                                ipm = mat4.identity()
-                        m = ipm * self.get_world_transform()
-                        t, r, s = m.decompose()
-                        v = r * vec4(o[0],o[1],o[2],1)
                         v[3] = 1
                         return v
                 def get_world_translation(self, origin=vec4(0,0,0,1)):
@@ -194,9 +152,6 @@ class GroupReader(DefaultMAReader):
                         return self.gettransformto(None)
                 def get_local_transform(self):
                         return self.gettransformto(self.xformparent)
-                def get_relative_pos(self):
-                        p = self.xformparent.get_world_translation() if self.xformparent else vec4(0,0,0,1)
-                        return self.get_world_translation() - p
                 def csetprinttransform(cls, enable):
                         cls.enable_print_transform = enable
                 def setprinttransform(self, enable):
@@ -322,21 +277,12 @@ class GroupReader(DefaultMAReader):
                         mra = eval(rotorder[ro])
                         #print("Result of rot:", mra*vec4(0,1,0,0))
                         return mra
-                def getxformroot(self, prefix):
-                        root = self
-                        while root.xformparent and root.xformparent.getName().startswith(prefix):
-                                root = root.xformparent
-                        return root
                 node.fix_attribute = types.MethodType(fix_attribute, node)
                 node.get_fixed_attribute = types.MethodType(get_fixed_attribute, node)
-                node.get_inherited_attr = types.MethodType(get_inherited_attr, node)
-                node.get_fixed_tab = types.MethodType(get_fixed_tab, node)
                 node.get_world_translation = types.MethodType(get_world_translation, node)
                 node.get_world_pivot = types.MethodType(get_world_pivot, node)
-                node.get_local_pivot = types.MethodType(get_local_pivot, node)
                 node.get_world_transform = types.MethodType(get_world_transform, node)
                 node.get_local_transform = types.MethodType(get_local_transform, node)
-                node.get_relative_pos = types.MethodType(get_relative_pos, node)
                 node.gettransformto = types.MethodType(gettransformto, node)
                 node.get_world_scale = types.MethodType(get_world_scale, node)
                 node.isortho = types.MethodType(isortho, node)
@@ -346,7 +292,6 @@ class GroupReader(DefaultMAReader):
                 node._get_local_pivot = types.MethodType(_get_local_pivot, node)
                 node._get_local_quat = types.MethodType(_get_local_quat, node)
                 node._get_local_ar = types.MethodType(_get_local_ar, node)
-                node.getxformroot = types.MethodType(getxformroot, node)
                 node.__class__.csetprinttransform = types.MethodType(csetprinttransform, node.__class__)
                 node.setprinttransform = types.MethodType(setprinttransform, node)
                 return node
@@ -822,7 +767,6 @@ class GroupReader(DefaultMAReader):
                                ok = self._physrelativemat4(phroot)
                         own_branch_xform = node.gettransformto(None, "original", lambda n: n.getParent())
                         parent_branch_xform = phroot.gettransformto(None, "original", lambda n: n.getParent())
-                        #print("%s had local translation %s." %(node.getName(), node.get_relative_pos()))
                         #print("Parent xform:")
                         #print(phroot.localmat4)
                         #print("To parent xform:")
@@ -834,7 +778,6 @@ class GroupReader(DefaultMAReader):
                         #print(node.getName(), "is trying to work out localmat4 with xp = ", node.xformparent, "phroot =", phroot.getName(), "and phxp =", phroot.xformparent)
                         node.localmat4 = parent_branch_xform.inverse() * own_branch_xform
                         node.xformparent = phroot
-                        #print("%s got local translation %s." %(node.getName(), node.get_relative_pos()))
                         #sys.exit(1)
                         
                 else:
@@ -924,12 +867,13 @@ class GroupReader(DefaultMAReader):
                                         return dist.length()
                                 phys_nodes.sort(key=distance)
                                 parent = phys_nodes[0]
-                                if len(phys_nodes) > 1:
-                                        print("*********** Picked parent node", parent)
+                                #if len(phys_nodes) > 1:
+                                #        print("*********** Picked parent node", parent)
                                 break
                         else:
+                                #print("Skipping through phys parent %s!" % parent.getFullName())
                                 parent = parent.getParent()
-                #print("Phys %s has parent:" % phys.getFullName(), parent)
+                #print("Phys %s has parent %s" % (phys.getFullName(), parent.getFullName()))
                 if parent == None:
                         print("Error: phys node '%s' has no related parent phys node higher up in the hierarchy." % phys.getFullName())
                         return False
