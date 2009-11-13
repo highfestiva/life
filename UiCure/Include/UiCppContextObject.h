@@ -27,8 +27,14 @@ namespace UiCure
 
 class CppContextObject: public Cure::CppContextObject
 {
-public:
 	typedef Cure::CppContextObject Parent;
+public:
+	enum DebugPrimitive
+	{
+		DEBUG_AXES = 1,
+		DEBUG_JOINTS,
+		DEBUG_SHAPES,
+	};
 
 	CppContextObject(const Lepra::String& pClassId, GameUiManager* pUiManager);
 	virtual ~CppContextObject();
@@ -37,7 +43,7 @@ public:
 
 	void OnPhysicsTick();
 
-	void DebugDrawAxes();
+	void DebugDrawPrimitive(DebugPrimitive pPrimitive);
 
 private:
 	void __GetFuckedUpMeshesRemoveMe(UiTbc::ChunkyClass* pClass) const;

@@ -111,7 +111,9 @@ void NetworkClient::Disconnect(bool pSendDisconnect)
 		SendStatusMessage(mSocket, 0, Cure::REMOTE_NO_CONNECTION, L"", lPacket);
 		GetPacketFactory()->Release(lPacket);
 	}
+	SendAll();
 	SetLoginAccountId(0);
+	Lepra::Thread::Sleep(0.01);	// Try to wait until data sent. SO_LINGER doesn't seem trustworthy.
 	Stop();
 }
 

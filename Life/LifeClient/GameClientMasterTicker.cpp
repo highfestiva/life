@@ -30,9 +30,14 @@ namespace Life
 
 
 
+#define SET_PLAYER_COUNT	_T("set-player-count")
+
+
+
 GameClientMasterTicker::GameClientMasterTicker(UiCure::GameUiManager* pUiManager, Cure::ResourceManager* pResourceManager):
 	mUiManager(pUiManager),
 	mResourceManager(pResourceManager),
+	mPlayerCountView(0),
 	mRestartUi(false),
 	mInitialized(false),
 	mActiveWidth(0),
@@ -40,13 +45,20 @@ GameClientMasterTicker::GameClientMasterTicker(UiCure::GameUiManager* pUiManager
 {
 	UiLepra::DisplayManager::EnableScreensaver(false);
 
-	ConsoleManager lConsole(0, UiCure::GetSettings(), 0, 0);
-	lConsole.Init();
-	lConsole.ExecuteCommand(_T("execute-file -i ClientBase.lsh"));
+	mConsole = new ConsoleManager(0, UiCure::GetSettings(), 0, 0);
+	mConsole->Init();
+	mConsole->GetConsoleCommandManager()->AddExecutor(
+		new Lepra::ConsoleExecutor<GameClientMasterTicker>(
+			this, &GameClientMasterTicker::OnCommandLocal, &GameClientMasterTicker::OnCommandError));
+	mConsole->GetConsoleCommandManager()->AddCommand(SET_PLAYER_COUNT);
+	mConsole->ExecuteCommand(_T("execute-file -i ClientBase.lsh"));
 }
 
 GameClientMasterTicker::~GameClientMasterTicker()
 {
+	delete (mConsole);
+	mConsole = 0;
+
 	UiLepra::DisplayManager::EnableScreensaver(true);
 
 	{
@@ -65,6 +77,9 @@ GameClientMasterTicker::~GameClientMasterTicker()
 		delete (lSlave);
 	}
 	mSlaveSet.RemoveAll();
+
+	delete (mPlayerCountView);
+	mPlayerCountView = 0;
 
 	mResourceManager = 0;
 	mUiManager = 0;
@@ -187,6 +202,10 @@ bool GameClientMasterTicker::Tick()
 		}
 		mRestartUi = false;
 	}
+	else
+	{
+		mConsole->ExecuteYieldCommand();
+	}
 
 	return (lOk);
 }
@@ -250,9 +269,10 @@ bool GameClientMasterTicker::Initialize()
 
 void GameClientMasterTicker::CreatePlayerCountWindow()
 {
-	UiTbc::Window* lWindow = new PlayerCountView(mUiManager->GetPainter(), this);
+	assert(!mPlayerCountView);
+	mPlayerCountView = new PlayerCountView(mUiManager->GetPainter(), this);
 	mUiManager->AssertDesktopLayout(new UiTbc::CenterLayout());
-	mUiManager->GetDesktopWindow()->AddChild(lWindow);
+	mUiManager->GetDesktopWindow()->AddChild(mPlayerCountView);
 	mUiManager->GetDesktopWindow()->UpdateLayout();
 }
 
@@ -416,6 +436,38 @@ float GameClientMasterTicker::GetPowerSaveAmount() const
 
 
 
+int GameClientMasterTicker::OnCommandLocal(const Lepra::String& pCommand, const Lepra::StringUtility::StringVector& pParameterVector)
+{
+	if (pCommand == SET_PLAYER_COUNT)
+	{
+		int lPlayerCount = 0;
+		if (pParameterVector.size() == 1 && Lepra::StringUtility::StringToInt(pParameterVector[0], lPlayerCount))
+		{
+			if (lPlayerCount >= 1 && lPlayerCount <= 4)
+			{
+				OnSetPlayerCount(lPlayerCount);
+				return (0);
+			}
+			else
+			{
+				mLog.AError("player count must lie between 1 and 4");
+			}
+		}
+		else
+		{
+			mLog.Warningf(_T("usage: %s <no. of players>"), pCommand.c_str());
+		}
+		return (1);
+	}
+	return (-1);
+}
+
+void GameClientMasterTicker::OnCommandError(const Lepra::String&, const Lepra::StringUtility::StringVector&, int)
+{
+}
+
+
+
 bool GameClientMasterTicker::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 {
 	bool lConsumed = false;
@@ -454,18 +506,23 @@ void GameClientMasterTicker::OnInput(UiLepra::InputElement* pElement)
 
 
 
-void GameClientMasterTicker::OnExit(View* pPlayerCountView)
+void GameClientMasterTicker::OnExit()
 {
 	mLog.Headline(_T("Number of players not picked, quitting."));
 	Lepra::SystemManager::SetQuitRequest(true);
-	mUiManager->GetDesktopWindow()->RemoveChild(pPlayerCountView, 0);
-	delete (pPlayerCountView);
+	mUiManager->GetDesktopWindow()->RemoveChild(mPlayerCountView, 0);
+	delete (mPlayerCountView);
+	mPlayerCountView = 0;
 }
 
-void GameClientMasterTicker::OnSetPlayerCount(View* pPlayerCountView, int pPlayerCount)
+void GameClientMasterTicker::OnSetPlayerCount(int pPlayerCount)
 {
-	mUiManager->GetDesktopWindow()->RemoveChild(pPlayerCountView, 0);
-	delete (pPlayerCountView);
+	if (mPlayerCountView)
+	{
+		mUiManager->GetDesktopWindow()->RemoveChild(mPlayerCountView, 0);
+		delete (mPlayerCountView);
+		mPlayerCountView = 0;
+	}
 
 	for (int x = 0; x < pPlayerCount; ++x)
 	{

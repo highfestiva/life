@@ -469,6 +469,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Source\UiChunkyClass.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Source\UiChunkyLoader.cpp"
 				>
 			</File>
@@ -891,6 +895,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Include\UiChunkyClass.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Include\UiChunkyLoader.h"
 				>
 			</File>
@@ -952,6 +960,10 @@
 			</File>
 			<File
 				RelativePath=".\Include\UiPainter.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\UiPainter.inl"
 				>
 			</File>
 			<File

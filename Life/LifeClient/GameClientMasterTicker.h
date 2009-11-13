@@ -25,6 +25,7 @@ namespace Life
 
 
 
+class ConsoleManager;
 class GameClientSlaveManager;
 
 
@@ -53,12 +54,15 @@ private:
 
 	float GetPowerSaveAmount() const;
 
+	int OnCommandLocal(const Lepra::String& pCommand, const Lepra::StringUtility::StringVector& pParameterVector);
+	void OnCommandError(const Lepra::String& pCommand, const Lepra::StringUtility::StringVector& pParameterVector, int pResult);
+
 	bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
 	bool OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode);
 	void OnInput(UiLepra::InputElement* pElement);
 
-	void OnExit(View* pPlayerCountView);
-	void OnSetPlayerCount(View* pPlayerCountView, int pPlayerCount);
+	void OnExit();
+	void OnSetPlayerCount(int pPlayerCount);
 
 	class MasterInputFunctor: public UiLepra::InputFunctor
 	{
@@ -76,6 +80,8 @@ private:
 	UiCure::GameUiManager* mUiManager;
 	Lepra::PerformanceData mResourceTime;
 	Cure::ResourceManager* mResourceManager;
+	View* mPlayerCountView;
+	ConsoleManager* mConsole;
 	bool mRestartUi;
 	bool mInitialized;
 	unsigned mActiveWidth;

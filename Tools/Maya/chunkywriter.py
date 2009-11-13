@@ -2,9 +2,11 @@
 # Created by Jonas Byström, 2009-07-17 for Righteous Engine tool chain.
 
 
+from mat3 import mat3
 from mat4 import mat4
 from mayaascii import *
 from quat import quat
+from vec3 import vec3
 from vec4 import vec4
 import shape
 
@@ -60,24 +62,56 @@ class ChunkyWriter:
                 self.group = group
                 self.config = config
                 self.feats = {}
-                self.bodies = self._sortbodies(group)
 
 
-        def printfeats(self):
+        def write(self):
+                self.bodies, self.meshes = self._sortgroup(self.group)
+                self.dowrite()
+
+
+        def _regunique(self, category, name):
+                if not hasattr(self.__class__, category):
+                        setattr(self.__class__, category, {})
+                if getattr(self.__class__, category).get(name):
+                        print("Error: multiple objects of type %s with same name %s causing ambiguity!" % (category, name))
+                        sys.exit(3)
+                getattr(self.__class__, category)[name] = True
+
+
+        def _fileopenwrite(self, filename):
+                self._regunique("file", filename)
+                return open(filename, "wb")
+
+
+        def _verifywritten(self, when, nodes):
+                #print("nodes[0].writecount =", nodes[0], nodes[0].writecount)
+                notwritten = list(filter(lambda n: n.writecount != 1, nodes))
+                if notwritten:
+                        print("Error: the following objects were missed, and never written to disk, or written more than once (when writing %s):" % when)
+                        def _p(n):
+                                print("  - %s (written %i times)" % (n.getFullName(), n.writecount))
+                        [_p(n) for n in notwritten]
+                        sys.exit(3)
+
+
+        def addfeats(self, feats):
                 for k,v in self.feats.items():
-                        singular, plural = k.split(":")
-                        if v == 1:
-                                name = singular
+                        oldv = feats.get(k)
+                        if oldv:
+                                feats[k] += v
                         else:
-                                name = plural
-                        print("Wrote %6i %s." % (v, name))
+                                feats[k] = v
 
 
-        def _sortbodies(self, group):
+        def _sortgroup(self, group):
                 bodies = []
+                meshes = []
                 for node in self.group:
+                        node.writecount = 0
                         if node.getName().startswith("phys_") and node.nodetype == "transform":
                                 bodies += [node]
+                        if node.getName().startswith("m_") and node.nodetype == "transform":
+                                meshes += [node]
                 def childlevel(node):
                         c = 0;
                         while node.getParent():
@@ -85,7 +119,8 @@ class ChunkyWriter:
                                 c += 1
                         return c
                 bodies.sort(key=childlevel)
-                return bodies
+                meshes.sort(key=childlevel)
+                return bodies, meshes
 
 
         def _addfeat(self, k, v):
@@ -149,6 +184,9 @@ class ChunkyWriter:
                                 self._writebone(node)
                         elif node.nodetype.startswith("engine:"):
                                 self._writeengine(node)
+                        else:
+                                print("Error: can not write node '%s' of type '%s'" % (node.getFullName(), node.nodetype))
+                                sys.exit(17)
                 elif t == shape.Shape:
                         shapeChunk = chunks
                         self._writeshape(shapeChunk)
@@ -159,23 +197,14 @@ class ChunkyWriter:
                         sys.exit(17)
 
 
-        def _writebone(self, node):
-                q = node.get_local_quat()
-                if not q:
-                        print("Error: trying to get rotation from node '%s', but none available." % node.getFullName())
-                        sys.exit(18)
-                pos = node.get_local_translation()
-                data = q[:]+pos[:3]
-                #print("Writing bone with data", data)
-                self._addfeat("bone:bones", 1)
-                self._writexform(data)
-
-
         def _writexform(self, xform):
                 if len(xform) != 7:
                         print("Error: trying to store transform with len != 7!")
                         sys.exit(18)
+                #x = 0
                 for f in xform:
+                        #print("Writing transform", x, ": ", f)
+                        #x += 1
                         self._writefloat(f)
 
 
@@ -219,10 +248,14 @@ class ChunkyWriter:
                         sys.exit(15)
 
         def _writefloat(self, val, name="float"):
+                if type(val) != float:
+                        raise ValueError("Error: trying to pass '" + str(type(val)) + "' (with value " + str(val) + ") off as 'float'.")
                 data = struct.pack(">f", val)
                 self._dowrite(data, 4, name)
 
         def _writeint(self, val, name="int"):
+                if type(val) != int:
+                        raise ValueError("Error: trying to pass '%s' off as 'int'." % str(type(val)))
                 data = struct.pack(">i", val)
                 self._dowrite(data, 4, name)
 
@@ -235,7 +268,7 @@ class ChunkyWriter:
 
         @staticmethod
         def _geteuler(node):
-                q = node.get_local_quat()
+                q = quat(node.get_local_transform().decompose()[1])
                 w2 = q[0]*q[0]
                 x2 = q[1]*q[1]
                 y2 = q[2]*q[2]
@@ -260,7 +293,7 @@ class ChunkyWriter:
 
 
         def _getaxes(self, node):
-                q = node.get_local_quat()
+                q = quat(node.get_local_transform().decompose()[1])
                 return q.rotateVec((1,0,0)), q.rotateVec((0,1,0)), q.rotateVec((0,0,1))
 
 
@@ -281,8 +314,9 @@ class PhysWriter(ChunkyWriter):
 
 
         def dowrite(self):
+                #print(self.bodies)
                 filename = self.basename+".phys"
-                with open(filename, "wb") as f:
+                with self._fileopenwrite(filename) as f:
                         self.f = f
                         bones = []
                         engines = []
@@ -297,9 +331,9 @@ class PhysWriter(ChunkyWriter):
                                         )
                                 )
                         for node in self.bodies:
-                                print("Children of %s: %s." % (node.getFullName(), repr(node.phys_children)))
-                                map(lambda n: print("  - "+n.getName()), node.phys_children)
-                                childlist = list(map(lambda n: self.bodies.index(n), node.phys_children))
+                                #print("Children of %s: %s." % (node.getFullName(), repr(node.phys_children)))
+                                #[print("  - "+n.getName()) for n in node.phys_children]
+                                childlist = [self.bodies.index(n) for n in node.phys_children]
                                 bones.append((CHUNK_PHYSICS_BONE_CHILD_LIST, childlist))
                                 bones.append((CHUNK_PHYSICS_BONE_TRANSFORM, node))
                                 bones.append((CHUNK_PHYSICS_BONE_SHAPE, self._getshape(node)))
@@ -308,6 +342,48 @@ class PhysWriter(ChunkyWriter):
                                         engines.append((CHUNK_PHYSICS_ENGINE, node))
                         #pprint.pprint(data)
                         self._writechunk(data)
+                self._verifywritten("physics", self.bodies)
+                self._addfeat("file:files", 1)
+
+
+        def _writebone(self, node):
+                ipm = mat4.identity()
+                usescale = False
+                if node.xformparent:
+                        t, r, s = node.xformparent.get_world_transform().inverse().decompose()
+                        ipm = mat4.translation(t) * r
+                        if node.xformparent.getName().startswith("phys_") and node.xformparent.is_phys_root and node.xformparent.phys_root:
+                                usescale = True
+                                ipm = node.xformparent.get_world_transform().inverse()
+                                print("%s's parent %s singing up as phys_root!!!" % (node.getName(), node.xformparent.getName()))
+                wt = node.get_world_transform()
+                if not node.phys_root:
+                        # Use inverse initial rotation (only when writing root physics).
+                        wt = node.gettransformto(None, "inverse_initial_r")
+                        #print("Specialcasing", node.getName())
+                m = ipm * wt
+                t, r, s = m.decompose()
+                q = quat(r).normalize()
+                pos = t
+                if usescale:
+                        s = node.xformparent.get_world_transform().decompose()[2]
+                        pos = mat4.scaling(s) * vec4(*t)
+                #if node.getName() == "phys_hangbar_back":
+                print("Writing %s (parent %s) with relative pos %s." %
+                        (node.getName(), node.xformparent.getName(), pos))
+                #pos = [0.5, -0.866, -3.2]
+                data = q[:]+pos[:3]
+                #print("Writing bone %s with pos" % node.getName(), data)
+                self._addfeat("bone:bones", 1)
+                self._writexform(data)
+                node.writecount += 1
+
+
+        def _gettotalmass(self):
+                totalmass = 0.0
+                for body in self.bodies:
+                        totalmass += body.get_fixed_attribute("mass")
+                return totalmass
 
 
         def _writeshape(self, shape):
@@ -315,39 +391,68 @@ class PhysWriter(ChunkyWriter):
                 types = {"capsule":1, "sphere":2, "box":3}
                 self._writeint(types[shape.type])
                 node = shape.getnode()
-                self._writefloat(node.get_fixed_attribute("mass"))
-                self._writefloat(node.get_fixed_attribute("friction"))
-                self._writefloat(node.get_fixed_attribute("bounce"))
-                self._writeint(-1 if not node.phys_parent else self.bodies.index(node.phys_parent))
+                self._writefloat(float(node.get_fixed_attribute("mass")))
+                self._writefloat(float(node.get_fixed_attribute("friction")))
+                self._writefloat(float(node.get_fixed_attribute("bounce")))
+                self._writeint(-1 if not node.phys_root else self.bodies.index(node.phys_root))
                 joints = {None:1, "exclude":1, "suspend_hinge":2, "hinge2":3, "hinge":4, "ball":5, "universal":6}
                 jointtype = node.get_fixed_attribute("joint", True)
                 jointvalue = joints[jointtype]
+                #print(node.getName(), "is jointed by type", jointvalue)
                 if jointtype:
                         self._addfeat("joint:joints", 1)
                 self._writeint(jointvalue)
                 self._writeint(1 if node.get_fixed_attribute("affected_by_gravity") else 0)
                 # Write joint parameters.
                 parameters = [0.0]*16
-                parameters[0] = node.get_fixed_attribute("spring_constant", True, 0.0)
-                parameters[1] = node.get_fixed_attribute("spring_damping", True, 0.0)
-                yaw, pitch, roll = ChunkyWriter._geteuler(node)
-                #if jointvalue != 1 and (pitch < -0.1 or pitch > 0.1):
-                #        print("Error: euler rotation pitch of jointed body '%s' must be zero." % node.getFullName())
-                #        sys.exit(19)
+                totalmass = self._gettotalmass()
+                #print("Total mass:", totalmass)
+                parameters[0] = node.get_fixed_attribute("joint_spring_constant", True, 0.0) * totalmass
+                parameters[1] = node.get_fixed_attribute("joint_spring_damping", True, 0.0) * totalmass
+
+                ir = node.getabsirot()
+
+                yaw = node.get_fixed_attribute("joint_yaw", True, 0.0)*math.pi/180
+                pitch = node.get_fixed_attribute("joint_pitch", True, 0.0)*math.pi/180
+                m = mat4.identity()
+                m.setMat3(mat3.fromEulerXZY(0, pitch, yaw))
+                v = ir * m * vec4(0,0,1,0)
+                # Project onto XY plane.
+                xyv = vec3(v[:3])
+                xyv[2] = 0
+                xyv = xyv.normalize()
+                # Yaw is angle of projection on the XY plane.
+                if xyv.length():
+                        yaw = math.asin(xyv.y/xyv.length())
+                else:
+                        yaw = 0
+                v = v.normalize()
+                v = vec3(v[:3])
+                pitch = math.asin(v*xyv)
+
                 parameters[2] = yaw
-                parameters[3] = roll
+                parameters[3] = pitch
                 joint_min, joint_max = node.get_fixed_attribute("joint_angles", True, [0.0,0.0])
                 joint_min, joint_max = math.radians(joint_min), math.radians(joint_max)
                 parameters[4] = joint_min
                 parameters[5] = joint_max
-                lq = node.get_local_quat()
-                lp = node.get_local_pivot()
-                j = lq*lp
-                parameters[6] = j.x
-                parameters[7] = j.y
-                parameters[8] = j.z
+
+                mp = node.get_world_pivot_transform()
+                mt = node.get_world_transform()
+                wp = mp * vec4(0,0,0,1)
+                wt = mt * vec4(0,0,0,1)
+                j = wp-wt
+                j = ir * j
+                #j[1] = -j[1]
+                if jointvalue != 1:
+                        print("Joint on %s at %s (world pivot at %s, transl at %s)." % (node.getFullName(), j, wp, wt))
+                        print(ir)
+                #j[3] = 0
+                #j = (node.get_world_transform().inverse()).decompose()[1] * j
+
+                parameters[6:9] = j[:3]
                 for x in parameters:
-                        self._writefloat(x)
+                        self._writefloat(float(x))
                 # Write connecor type (may hook other stuff, may get hooked by hookers :).
                 connectors = node.get_fixed_attribute("connector_types", True)
                 if connectors:
@@ -362,19 +467,20 @@ class PhysWriter(ChunkyWriter):
                         self._writeint(0)
                 # Write shape data (dimensions of shape).
                 for x in shape.data:
-                        self._writefloat(x)
+                        self._writefloat(math.fabs(x))
                 #print("Wrote shape with axes", self._getaxes(node))
                 self._addfeat("physical geometry:physical geometries", 1)
 
 
         def _writeengine(self, node):
                 # Write all general parameters first.
-                types = {"walk":1, "cam_flat_push":2, "hinge_roll":3, "hinge2_roll":3, "hinge2_turn":4, "hinge2_break":5, "hinge":6, "glue":7}
+                types = {"walk":1, "cam_flat_push":2, "hinge2_roll":3, "hinge2_turn":4, "hinge2_break":5, "hinge":6, "glue":7}
                 self._writeint(types[node.get_fixed_attribute("type")])
-                self._writefloat(node.get_fixed_attribute("strength"))
-                self._writefloat(node.get_fixed_attribute("max_velocity")[0])
-                self._writefloat(node.get_fixed_attribute("max_velocity")[1])
-                self._writefloat(node.get_fixed_attribute("controller_index"))
+                totalmass = self._gettotalmass()
+                self._writefloat(node.get_fixed_attribute("strength")*totalmass)
+                self._writefloat(float(node.get_fixed_attribute("max_velocity")[0]))
+                self._writefloat(float(node.get_fixed_attribute("max_velocity")[1]))
+                self._writeint(node.get_fixed_attribute("controller_index"))
                 connected_to = node.get_fixed_attribute("connected_to")
                 connected_to = self._expand_connected_list(connected_to)
                 if len(connected_to) < 1:
@@ -383,11 +489,14 @@ class PhysWriter(ChunkyWriter):
                 self._writeint(len(connected_to))
                 for connection in connected_to:
                         body, scale, connectiontype = connection
-                        self._writeint(self.bodies.index(body))
-                        self._writefloat(scale)
+                        idx = self.bodies.index(body)
+                        #print("Engine '%s's body index is %i."% (node.getName(), idx))
+                        self._writeint(idx)
+                        self._writefloat(float(scale))
                         connectiontypes = {"normal":1, "half_lock":2}
                         self._writeint(connectiontypes[connectiontype])
                 #print("Wrote engine '%s' for %i nodes." % (node.getName()[6:], len(connected_to)))
+                node.writecount += 1
                 self._addfeat("physical engine:physical engines", 1)
 
 
@@ -457,14 +566,16 @@ class MeshWriter(ChunkyWriter):
                                 if nodemeshname.startswith("m_"):
                                         nodemeshname = nodemeshname[2:]
                                 meshbasename = self.basename+"_"+nodemeshname
+                                #print("Setting", node.getParent(), "meshbasename.")
                                 node.getParent().meshbasename = meshbasename
                                 self.writemesh(meshbasename+".mesh", node)
+                self._verifywritten("meshes", self.meshes)
 
         def writemesh(self, filename, node):
                 #print("Writing mesh %s with %i triangles..." % (filename, len(node.get_fixed_attribute("rgtri"))/3))
                 self._addfeat("mesh:meshes", 1)
                 self._addfeat("gfx triangle:gfx triangles", len(node.get_fixed_attribute("rgtri"))/3)
-                with open(filename, "wb") as f:
+                with self._fileopenwrite(filename) as f:
                         self.f = f
                         default_mesh_type = {"static":1, "dynamic":2, "volatile":3}
                         data =  (
@@ -476,6 +587,8 @@ class MeshWriter(ChunkyWriter):
                                         )
                                 )
                         self._writechunk(data)
+                node.getParent().writecount += 1
+                self._addfeat("file:files", 1)
 
 
 
@@ -489,35 +602,80 @@ class ClassWriter(ChunkyWriter):
         def dowrite(self):
                 self._listchildmeshes()
                 filename = self.basename+".class"
-                with open(filename, "wb") as f:
+                with self._fileopenwrite(filename) as f:
                         self.f = f
-                        meshes = []
+                        meshptrs = []
                         physidx = 0
-                        for phys in self.bodies:
-                                #print("%s:" % phys.getFullName())
-                                for m in phys.childmeshes:
-                                        tm = m.get_world_transform()
-                                        tp = phys.get_world_transform()
-                                        lpm = tm * vec4(m.get_local_pivot()[:]+[1])
-                                        lpp = tp * vec4(phys.get_local_pivot()[:]+[1])
-                                        t = tp.inverse() * tm
-                                        q = quat().fromMat(t).normalize()
-                                        p = (lpm-lpp)[0:3]
-                                        meshes += [(CHUNK_CLASS_PHYS_MESH, PhysMeshPtr(physidx, m.meshbasename, q, p))]
-                                physidx += 1
+                        #print("These are the bodies:", self.bodies)
+                        #print("These are the meshes:", self.meshes)
+                        for m in self.meshes:
+                                def _getparentphys(m):
+                                        ph = None
+                                        mesh = m
+                                        while mesh and not ph:
+                                                for phys in self.bodies:
+                                                        meshes = list(filter(None, [ch == mesh for ch in phys.childmeshes]))
+                                                        if len(meshes) == 1:
+                                                                if not ph:
+                                                                        ph = phys
+                                                                else:
+                                                                        print("Error: both phys %s and %s has mesh refs to %s." % (ph.getFullName(), phys.getFullName(), mesh.getFullName()))
+                                                                        print(ph.childmeshes, meshes)
+                                                                        sys.exit(3)
+                                                        elif len(meshes) > 1:
+                                                                print("Error: phys %s has multiple mesh children refs to %s." % (phys.getFullName(), mesh.getFullName()))
+                                                                sys.exit(3)
+                                                mesh = mesh.getParent()
+                                        if not ph:
+                                                print("Warning: mesh %s is not attached to any physics object!" % m.getFullName())
+                                        return ph
+                                phys = _getparentphys(m)
+                                if not phys:
+                                        continue
+                                phys.writecount = 1
+                                m.writecount += 1
+                                tm = m.get_world_transform()
+                                tp = phys.get_world_transform()
+                                tmt, tmr, tms = tm.decompose()
+                                tpt, tpr, tps = tp.decompose()
+                                tpt = mat4.translation(tpt)
+                                tps = mat4.scaling(tps)
+                                #tmr = quat(tmr).normalize().toMat4()
+                                #tpr = quat(tpr).normalize().toMat4()
+                                wpm = m.get_world_translation()
+                                wpp = phys.get_world_translation()
+                                mat = tps.inverse() * tpt.inverse() * tpr.inverse() * mat4.translation(tmt)
+                                mat = tp.inverse() * mat4.translation(tmt)
+                                mat = tpt.inverse() * tpr.inverse() * tps.inverse() * mat4.translation(tmt)
+                                _, r, _ = mat.decompose()
+                                q = quat(r).normalize()
+                                p = wpm-wpp
+                                p = q.toMat4() * p
+                                #p = t-vec3((lpm-lpp)[0:3])
+                                if m.meshbasename == "fjask_backbar":
+                                        #q = quat(1,0,0,0)
+                                        #p = [0.0,0.0,0.0]
+                                        pass
+                                p = p[0:3]
+                                #print("Writing class", m.meshbasename, "relative to", phys.getName(), "with", q[:]+p[:])
+                                physidx = self.bodies.index(phys)
+                                meshptrs += [(CHUNK_CLASS_PHYS_MESH, PhysMeshPtr(physidx, m.meshbasename, q, p))]
                         data =  (
                                         CHUNK_CLASS,
                                         (
                                                 (CHUNK_CLASS_PHYSICS, self.basename),
-                                                (CHUNK_CLASS_MESH_LIST, meshes),
+                                                (CHUNK_CLASS_MESH_LIST, meshptrs),
                                         )
                                 )
                         #pprint.pprint(data)
                         self._writechunk(data)
                         self._addfeat("class:classes", 1)
+                self._verifywritten("physics->mesh links", self.meshes)
+                self._addfeat("file:files", 1)
 
 
         def _writephysmeshptr(self, physmeshptr):
+                self._regunique("meshname", physmeshptr.meshbasename)
                 self._writeint(physmeshptr.physidx)
                 self._writestr(physmeshptr.meshbasename)
                 self._writexform(physmeshptr.t)
@@ -525,19 +683,28 @@ class ClassWriter(ChunkyWriter):
 
 
         def _listchildmeshes(self):
+                for node in self.meshes:
+                        node.isphyschild = False
                 for node in self.bodies:
                         node.childmeshes = []
-                        if not node.getParent().getName().startswith("m_"):
+                        if not node.getParent() in self.meshes:
                                 continue
+                        if node.getParent().isphyschild:
+                                continue
+                        node.getParent().isphyschild = True
                         parent = node.getParent()
                         node.childmeshes += [parent]
-                        def recurselistmeshes(n, to):
+                        def recurselistmeshes(n):
                                 mc = []
-                                if not n.phys_children:
+                                if n and not n.phys_children:
+                                        #print("Entering mesh", n)
                                         for m in n.mesh_children:
                                                 mc += [n]
-                                #print(n.getName(), str(n.mesh_children))
-                                for cn in n.mesh_children:
-                                        mc += recurselistmeshes(cn, to)
+                                        for cn in n.mesh_children:
+                                                mc += recurselistmeshes(cn)
                                 return mc
-                        node.childmeshes += recurselistmeshes(parent, parent.getParent())
+                        cm = list(map(lambda x: x[0], filter(None, [recurselistmeshes(c) for c in parent.mesh_children])))
+                        #print("Taking ownership of", cm, "to", node.getName())
+                        node.childmeshes += cm
+                #for node in self.bodies:
+                #        print(node, "has mesh children", node.childmeshes)

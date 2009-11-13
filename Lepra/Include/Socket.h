@@ -49,9 +49,9 @@ public:
 
 	enum ShutdownFlag
 	{
-		SHUT_READ  = 0,
-		SHUT_WRITE = 1,
-		SHUT_BOTH  = 2
+		SHUTDOWN_RECV = 1,
+		SHUTDOWN_SEND = 2,
+		SHUTDOWN_BOTH  = (SHUTDOWN_RECV|SHUTDOWN_SEND)
 	};
 
 	static sys_socket InitSocket(sys_socket pSocket, int pSize);

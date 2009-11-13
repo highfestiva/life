@@ -212,7 +212,7 @@ BOOL CALLBACK Win32InputDevice::EnumElementsCallback(LPCDIDEVICEOBJECTINSTANCE l
 		// Set absolute axis range.
 		if ((lpddoi->dwType & DIDFT_ABSAXIS) != 0)
 		{
-			log_volatile(mLog.Infof(_T("Found absolute axis element '%s' = '%s'.\n"),
+			log_volatile(mLog.Infof(_T("Found absolute axis element '%s' = '%s'."),
 				lElement->GetFullName().c_str(),
 				lElement->GetIdentifier().c_str()));
 

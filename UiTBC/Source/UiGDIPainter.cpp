@@ -1,12 +1,12 @@
-/*
-	Class:  GDIPainter
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Alexander Hugestrand
-*/
 
-#include <Windows.h>
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2006, Alexander Hugestrand
+
+
+
 #include "../../Lepra/Include/Canvas.h"
 #include "../../Lepra/Include/DllLoader.h"
+#include "../../Lepra/Include/LepraTarget.h"
 #include "../../Lepra/Include/Math.h"
 #include "../../UiLepra/Include/UiDisplayManager.h"
 #include "../../UiLepra/Include/Win32/UiWin32DisplayManager.h"
@@ -14,8 +14,12 @@
 
 #pragma comment(lib, "msimg32.lib")
 
+
+
 namespace UiTbc
 {
+
+
 
 GDIPainter::GDIPainter(UiLepra::Win32DisplayManager* pDisplayManager) :
 	mDisplayManager(pDisplayManager),
@@ -1219,4 +1223,6 @@ void GDIPainter::DoRenderDisplayList(std::vector<DisplayEntity*>* pDisplayList)
 	PopAttrib();
 }
 
-} // End namespace.
+
+
+}

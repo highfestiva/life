@@ -108,7 +108,7 @@ void CppContextObject::OnPhysicsTick()
 
 
 
-void CppContextObject::DebugDrawAxes()
+void CppContextObject::DebugDrawPrimitive(DebugPrimitive pPrimitive)
 {
 	if (!mPhysics)
 	{
@@ -118,6 +118,25 @@ void CppContextObject::DebugDrawAxes()
 	const int lBoneCount = mPhysics->GetBoneCount();
 	for (int x = 0; x < lBoneCount; ++x)
 	{
+		if (x == 5)	// TODO: remove whole scope!
+		{
+			static int lDrawHoeShapeCount = 0;
+			++lDrawHoeShapeCount;
+			if (lDrawHoeShapeCount&0x100)
+			{
+				continue;
+			}
+		}
+		if (x == 8)	// TODO: remove whole scope!
+		{
+			static int lDrawHoeShapeCount = 0;
+			++lDrawHoeShapeCount;
+			if (lDrawHoeShapeCount&0x40)
+			{
+				continue;
+			}
+		}
+
 		const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(x);
 		if (lGeometry->GetBodyId() != TBC::INVALID_BODY)
 		{
@@ -125,13 +144,84 @@ void CppContextObject::DebugDrawAxes()
 			mManager->GetGameManager()->GetPhysicsManager()->GetBodyTransform(
 				lGeometry->GetBodyId(), lPhysicsTransform);
 			Lepra::Vector3DF lPos = lPhysicsTransform.GetPosition();
-			const float lLength = 2;
-			Lepra::Vector3DF lAxis = lPhysicsTransform.GetOrientation().GetAxisX();
-			mUiManager->GetRenderer()->DrawLine(lPos, lAxis*lLength, Lepra::RED);
-			lAxis = lPhysicsTransform.GetOrientation().GetAxisY();
-			mUiManager->GetRenderer()->DrawLine(lPos, lAxis*lLength, Lepra::GREEN);
-			lAxis = lPhysicsTransform.GetOrientation().GetAxisZ();
-			mUiManager->GetRenderer()->DrawLine(lPos, lAxis*lLength, Lepra::BLUE);
+			switch (pPrimitive)
+			{
+				case DEBUG_AXES:
+				{
+					const float lLength = 2;
+					const Lepra::Vector3DF& lAxisX = lPhysicsTransform.GetOrientation().GetAxisX();
+					mUiManager->GetRenderer()->DrawLine(lPos, lAxisX*lLength, Lepra::RED);
+					const Lepra::Vector3DF& lAxisY = lPhysicsTransform.GetOrientation().GetAxisY();
+					mUiManager->GetRenderer()->DrawLine(lPos, lAxisY*lLength, Lepra::GREEN);
+					const Lepra::Vector3DF& lAxisZ = lPhysicsTransform.GetOrientation().GetAxisZ();
+					mUiManager->GetRenderer()->DrawLine(lPos, lAxisZ*lLength, Lepra::BLUE);
+				}
+				break;
+				case DEBUG_JOINTS:
+				{
+					const TBC::PhysicsManager::JointID lJoint = lGeometry->GetJointId();
+					if (lJoint != TBC::INVALID_JOINT)
+					{
+						Lepra::Vector3DF lAnchor;
+						if (mManager->GetGameManager()->GetPhysicsManager()->GetAnchorPos(lJoint, lAnchor))
+						{
+							const float lLength = 1;
+							Lepra::Vector3DF lAxis;
+							if (mManager->GetGameManager()->GetPhysicsManager()->GetAxis1(lJoint, lAxis))
+							{
+								mUiManager->GetRenderer()->DrawLine(lAnchor, lAxis*lLength, Lepra::DARK_GRAY);
+							}
+							else
+							{
+								assert(false);
+							}
+							if (mManager->GetGameManager()->GetPhysicsManager()->GetAxis2(lJoint, lAxis))
+							{
+								mUiManager->GetRenderer()->DrawLine(lAnchor, lAxis*lLength, Lepra::BLACK);
+							}
+						}
+						else
+						{
+							assert(false);
+						}
+					}
+				}
+				break;
+				case DEBUG_SHAPES:
+				{
+					if (lGeometry->GetGeometryType() == TBC::ChunkyBoneGeometry::GEOMETRY_BOX)
+					{
+						const Lepra::Vector3DF lSize = ((TBC::ChunkyBoneBox*)lGeometry)->GetShapeSize() / 2;
+						const Lepra::QuaternionF& lRot = lPhysicsTransform.GetOrientation();
+						Lepra::Vector3DF lVertex[8];
+						for (int x = 0; x < 8; ++x)
+						{
+							lVertex[x] = lPos - lRot *
+								Lepra::Vector3DF(lSize.x*((x&4)? 1 : -1),
+									lSize.y*((x&1)? 1 : -1),
+									lSize.z*((x&2)? 1 : -1));
+						}
+						mUiManager->GetRenderer()->DrawLine(lVertex[0], lVertex[1]-lVertex[0], Lepra::YELLOW);
+						mUiManager->GetRenderer()->DrawLine(lVertex[1], lVertex[3]-lVertex[1], Lepra::YELLOW);
+						mUiManager->GetRenderer()->DrawLine(lVertex[3], lVertex[2]-lVertex[3], Lepra::YELLOW);
+						mUiManager->GetRenderer()->DrawLine(lVertex[2], lVertex[0]-lVertex[2], Lepra::YELLOW);
+						mUiManager->GetRenderer()->DrawLine(lVertex[4], lVertex[5]-lVertex[4], Lepra::MAGENTA);
+						mUiManager->GetRenderer()->DrawLine(lVertex[5], lVertex[7]-lVertex[5], Lepra::MAGENTA);
+						mUiManager->GetRenderer()->DrawLine(lVertex[7], lVertex[6]-lVertex[7], Lepra::MAGENTA);
+						mUiManager->GetRenderer()->DrawLine(lVertex[6], lVertex[4]-lVertex[6], Lepra::MAGENTA);
+						mUiManager->GetRenderer()->DrawLine(lVertex[0], lVertex[4]-lVertex[0], Lepra::CYAN);
+						mUiManager->GetRenderer()->DrawLine(lVertex[1], lVertex[5]-lVertex[1], Lepra::CYAN);
+						mUiManager->GetRenderer()->DrawLine(lVertex[2], lVertex[6]-lVertex[2], Lepra::ORANGE);
+						mUiManager->GetRenderer()->DrawLine(lVertex[3], lVertex[7]-lVertex[3], Lepra::ORANGE);
+					}
+				}
+				break;
+				default:
+				{
+					assert(false);
+				}
+				break;
+			}
 		}
 	}
 }

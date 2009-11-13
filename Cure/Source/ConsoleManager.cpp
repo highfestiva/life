@@ -72,6 +72,31 @@ int ConsoleManager::ExecuteCommand(const Lepra::String& pCommand)
 	return (mConsoleCommandManager->Execute(pCommand, false));
 }
 
+int ConsoleManager::ExecuteYieldCommand()
+{
+	Lepra::String lYieldCommand;
+	{
+		Lepra::ScopeLock lLock(&mLock);
+		if (!mYieldCommandList.empty())
+		{
+			lYieldCommand = mYieldCommandList.front();
+			mYieldCommandList.pop_front();
+		}
+	}
+	if (!lYieldCommand.empty())
+	{
+		return (mConsoleCommandManager->Execute(lYieldCommand, false));
+	}
+	return (-1);
+}
+
+Lepra::ConsoleCommandManager* ConsoleManager::GetConsoleCommandManager() const
+{
+	return (mConsoleCommandManager);
+}
+
+
+
 bool ConsoleManager::ForkExecuteCommand(const Lepra::String& pCommand)
 {
 	class ForkThread: public Lepra::Thread
@@ -104,7 +129,8 @@ bool ConsoleManager::ForkExecuteCommand(const Lepra::String& pCommand)
 
 void ConsoleManager::Init()
 {
-	mConsoleCommandManager = new Lepra::ConsoleExecutor<ConsoleManager>(this, &ConsoleManager::OnCommandLocal, &ConsoleManager::OnCommandError);
+	mConsoleCommandManager = new Lepra::ConsoleCommandManager();
+	mConsoleCommandManager->AddExecutor(new Lepra::ConsoleExecutor<ConsoleManager>(this, &ConsoleManager::OnCommandLocal, &ConsoleManager::OnCommandError));
 	AddCommands();
 }
 
@@ -170,11 +196,6 @@ Lepra::ConsolePrompt* ConsoleManager::GetConsolePrompt() const
 	return (mConsolePrompt);
 }
 
-Lepra::ConsoleCommandManager* ConsoleManager::GetConsoleCommandManager() const
-{
-	return (mConsoleCommandManager);
-}
-
 
 
 RuntimeVariableScope* ConsoleManager::GetVariableScope() const
@@ -203,18 +224,8 @@ void ConsoleManager::ConsoleThreadEntry()
 		// Execute any pending yield command.
 		if (lInputText.empty())
 		{
-			Lepra::String lYieldCommand;
+			if (ExecuteYieldCommand() >= 0)
 			{
-				Lepra::ScopeLock lLock(&mLock);
-				if (!mYieldCommandList.empty())
-				{
-					lYieldCommand = mYieldCommandList.front();
-					mYieldCommandList.pop_front();
-				}
-			}
-			if (!lYieldCommand.empty())
-			{
-				mConsoleCommandManager->Execute(lYieldCommand, false);
 				continue;
 			}
 		}

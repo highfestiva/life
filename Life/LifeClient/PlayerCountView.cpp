@@ -35,12 +35,12 @@ PlayerCountView::PlayerCountView(UiTbc::Painter* pPainter, PlayerCountObserver* 
 
 void PlayerCountView::OnExit()
 {
-	mPlayerCountObserver->OnExit(this);
+	mPlayerCountObserver->OnExit();
 }
 
 void PlayerCountView::OnClick(UiTbc::Button*, int pIndex)
 {
-	mPlayerCountObserver->OnSetPlayerCount(this, pIndex);
+	mPlayerCountObserver->OnSetPlayerCount(pIndex);
 }
 
 

@@ -37,6 +37,9 @@ public:
 
 	void PushYieldCommand(const Lepra::String& pCommand);
 	int ExecuteCommand(const Lepra::String& pCommand);
+	int ExecuteYieldCommand();
+
+	Lepra::ConsoleCommandManager* GetConsoleCommandManager() const;
 
 protected:
 	bool ForkExecuteCommand(const Lepra::String& pCommand);
@@ -53,7 +56,6 @@ protected:
 	void PrintCommandList(const std::list<Lepra::String>& pCommandList);
 	Lepra::InteractiveConsoleLogListener* GetConsoleLogger() const;
 	Lepra::ConsolePrompt* GetConsolePrompt() const;
-	Lepra::ConsoleCommandManager* GetConsoleCommandManager() const;
 
 	RuntimeVariableScope* GetVariableScope() const;
 

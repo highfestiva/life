@@ -369,7 +369,10 @@ class vec4(object):
         else:
             raise TypeError("unsupported operand type for *=")
 
-    def __idiv__(self, other):
+    def __floordiv__(self, other):
+        self.__truediv__(other)
+
+    def __truediv__(self, other):
         """Inline division with scalar
 
         >>> a=vec4(1.0, 0.5, -1.8, 0.2)
@@ -379,7 +382,7 @@ class vec4(object):
         """
         T = type(other)
         # vec4/=scalar
-        if T==float or T==int or T==int:
+        if T==float or T==int:
             self.x/=other
             self.y/=other
             self.z/=other
@@ -486,6 +489,15 @@ class vec4(object):
         (1.5000, 0.7000, -0.3000, 0.2000)
         """
         T=type(key)
+        if T==slice:
+            start, stop, step = key.start, key.stop, key.step
+            start = 0 if start==None else start
+            stop  = 4 if stop ==None else stop
+            step  = 1 if step ==None else step
+            #print("__setitem__: key", key, "value is", value)
+            for x in range(start, stop, step):
+                self.__setitem__(x, value[x])
+            return
         if T!=int and T!=int:
             raise TypeError("index must be integer")
 

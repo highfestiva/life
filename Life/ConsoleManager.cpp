@@ -204,9 +204,12 @@ int ConsoleManager::OnCommand(const Lepra::String& pCommand, const Lepra::String
 		break;
 		case COMMAND_HELP:
 		{
-			GetConsoleLogger()->OnLogRawMessage(_T("These are the available commands:\n"));
-			std::list<Lepra::String> lCommandList = GetCommandList();
-			PrintCommandList(lCommandList);
+			if (GetConsoleLogger())
+			{
+				GetConsoleLogger()->OnLogRawMessage(_T("These are the available commands:\n"));
+				std::list<Lepra::String> lCommandList = GetCommandList();
+				PrintCommandList(lCommandList);
+			}
 		}
 		break;
 		case COMMAND_SET_SUBSYSTEM_LOG_LEVEL:
@@ -237,19 +240,22 @@ int ConsoleManager::OnCommand(const Lepra::String& pCommand, const Lepra::String
 		break;
 		case COMMAND_SET_STDOUT_LOG_LEVEL:
 		{
-			if (!GetConsoleLogger())
-			{
-				break;
-			}
-
 			int lLogLevel = 0;
 			if (pParameterVector.size() == 1 && Lepra::StringUtility::StringToInt(pParameterVector[0], lLogLevel))
 			{
-				GetConsoleLogger()->SetLevelThreashold((Lepra::Log::LogLevel)lLogLevel);
-				Lepra::Log::LogLevel lNewLogLevel = GetConsoleLogger()->GetLevelThreashold();
-				if (lNewLogLevel != lLogLevel)
+				Lepra::LogListener* lConsoleLogger = GetConsoleLogger();
+				if (!lConsoleLogger)
 				{
-					mLog.Infof(_T("Console log level clamped to %i."), lNewLogLevel);
+					lConsoleLogger = Lepra::LogType::GetLog(Lepra::LogType::SUB_ROOT)->GetListener(_T("console"));
+				}
+				if (lConsoleLogger)
+				{
+					lConsoleLogger->SetLevelThreashold((Lepra::Log::LogLevel)lLogLevel);
+					Lepra::Log::LogLevel lNewLogLevel = lConsoleLogger->GetLevelThreashold();
+					if (lNewLogLevel != lLogLevel)
+					{
+						mLog.Infof(_T("Console log level clamped to %i."), lNewLogLevel);
+					}
 				}
 				Lepra::LogListener* lFileLogger = Lepra::LogType::GetLog(Lepra::LogType::SUB_ROOT)->GetListener(_T("file"));
 				if (lFileLogger)

@@ -1,31 +1,31 @@
-/*
-	Class:  GDIPainter
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Alexander Hugestrand
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2006, Alexander Hugestrand
+//
+// NOTES: 
+//
+// 1. GDIPainter must be created AFTER the screen/window is opened/created.
+// 2. Requires link with msimg32.lib, and msimg32.dll installed on the system.
+// 3. Does not support additive, xor or alpha tested materials.
+// 4. Only supports alpha blending when rendering bitmaps, not solid geometry.
+// 5. Renders directly to the front buffer (to the screen), so watch out for
+//    flickering!
+// 6. Since GDI is part of Microsoft Windows, the mouse is rendered by the OS
+//    and cannot be rendered explicitly by calling DrawDefaultMouseCursor().
+// 7. Recommendation: If you want to do something more advanced, used SoftwarePainter
+//    instead.
+// 8. What use do you have for GDIPainter? You can render text using the system fonts!
 
-	NOTES: 
-	
-	1. GDIPainter must be created AFTER the screen/window is opened/created.
-	2. Requires link with msimg32.lib, and msimg32.dll installed on the system.
-	3. Does not support additive, xor or alpha tested materials.
-	4. Only supports alpha blending when rendering bitmaps, not solid geometry.
-	5. Renders directly to the front buffer (to the screen), so watch out for
-	   flickering!
-	6. Since GDI is part of Microsoft Windows, the mouse is rendered by the OS
-	   and cannot be rendered explicitly by calling DrawDefaultMouseCursor().
-	7. Recommendation: If you want to do something more advanced, used SoftwarePainter
-	   instead.
-	8. What use do you have for GDIPainter? You can render text using the system fonts!
-*/
 
-#ifndef UIGDIPAINTER_H
-#define UIGDIPAINTER_H
+
+#pragma once
 
 #include "../../Lepra/Include/HashTable.h"
 #include "../../Lepra/Include/IdManager.h"
+#include "../../Lepra/Include/LepraTarget.h"
 #include "UiSystemPainter.h"
 #include "UiTBC.h"
-#include <Windows.h>
+
+
 
 namespace UiLepra
 {
@@ -234,6 +234,4 @@ private:
 	HPEN mNullPen;
 };
 
-} // End namespace.
-
-#endif
+}

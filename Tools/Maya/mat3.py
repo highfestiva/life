@@ -608,11 +608,11 @@ class mat3:
         A = math.cos(x)
 
         if (A>_epsilon):
-            y = math.acos(r3.z/A)
-            z = math.acos(r2.y/A)
+            y = mat3.acos(r3.z/A)
+            z = mat3.acos(r2.y/A)
         else:
             z = 0.0
-            y = math.acos(r1.x)
+            y = mat3.acos(r1.x)
             
         return (x,y,z)
 
@@ -631,11 +631,11 @@ class mat3:
         A = math.cos(x)
 
         if (A>_epsilon):
-            y = math.acos(r3.z/A)
-            z = math.acos(r2.y/A)
+            y = mat3.acos(r3.z/A)
+            z = mat3.acos(r2.y/A)
         else:
             z = 0.0
-            y = math.acos(r1.x)
+            y = mat3.acos(r1.x)
 
         return (x,y,z)
 
@@ -654,11 +654,11 @@ class mat3:
         C = math.cos(y)
 
         if (C>_epsilon):
-            x = math.acos(r3.z/C)
-            z = math.acos(r1.x/C)
+            x = mat3.acos(r3.z/C)
+            z = mat3.acos(r1.x/C)
         else:
             z = 0.0
-            x = math.acos(-r2.y)
+            x = mat3.acos(-r2.y)
 
         return (x,y,z)
 
@@ -677,8 +677,8 @@ class mat3:
         E = math.cos(z)
 
         if (E>_epsilon):
-            x = math.acos(r2.y/E)
-            y = math.acos(r1.x/E)
+            x = mat3.acos(r2.y/E)
+            y = mat3.acos(r1.x/E)
         else:
             y = 0.0
             x = math.asin(r3.y)
@@ -700,11 +700,11 @@ class mat3:
         E = math.cos(z)
 
         if (E>_epsilon):
-            x = math.acos(r2.y/E)
-            y = math.acos(r1.x/E)
+            x = mat3.acos(r2.y/E)
+            y = mat3.acos(r1.x/E)
         else:
             y = 0.0
-            x = math.acos(r3.z)
+            x = mat3.acos(r3.z)
 
         return (x,y,z)
 
@@ -723,11 +723,11 @@ class mat3:
         C = math.cos(y)
 
         if (C>_epsilon):
-            x = math.acos(r3.z/C)
-            z = math.acos(r1.x/C)
+            x = mat3.acos(r3.z/C)
+            z = mat3.acos(r1.x/C)
         else:
             z = 0.0
-            x = math.acos(r2.y)
+            x = mat3.acos(r2.y)
 
         return (x,y,z)
 
@@ -807,6 +807,16 @@ class mat3:
             return mat3(m11,m12,m13,m21,m22,m23,m31,m32,m33)
 
     fromToRotation = staticmethod(fromToRotation)
+
+
+    @staticmethod
+    def acos(angle):
+        global _epsilon
+        if angle+_epsilon >= 1:
+            return math.pi
+        if angle-_epsilon < -1:
+            return 0
+        return math.acos(angle)
 
 
 ######################################################################

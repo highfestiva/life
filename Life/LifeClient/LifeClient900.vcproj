@@ -560,10 +560,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\GfxContextResource.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\LifeApplication.cpp"
 				>
 			</File>
@@ -607,10 +603,6 @@
 			</File>
 			<File
 				RelativePath=".\GameClientSlaveManager.h"
-				>
-			</File>
-			<File
-				RelativePath=".\GfxContextResource.h"
 				>
 			</File>
 			<File

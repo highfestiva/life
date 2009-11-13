@@ -36,8 +36,8 @@ private:
 class PlayerCountObserver
 {
 public:
-	virtual void OnExit(View* pPlayerCountView) = 0;
-	virtual void OnSetPlayerCount(View* pPlayerCountView, int pPlayerCount) = 0;
+	virtual void OnExit() = 0;
+	virtual void OnSetPlayerCount(int pPlayerCount) = 0;
 };
 
 

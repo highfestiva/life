@@ -84,6 +84,18 @@ bool GameServerManager::Tick()
 	bool lOk = Parent::BeginTick();
 	lOk = (lOk && Parent::EndTick());
 	GetResourceManager()->Tick();
+
+#ifdef LEPRA_DEBUG
+	static size_t lMaxLoginCount = 0;
+	size_t lUserCount = ListUsers().size();
+	lMaxLoginCount = (lUserCount > lMaxLoginCount)? lUserCount : lMaxLoginCount;
+	if (lMaxLoginCount > 0 && lUserCount == 0)
+	{
+		mLog.AWarning("Server automatically shuts down in debug when all users have logged off.");
+		Lepra::SystemManager::SetQuitRequest(true);
+	}
+#endif // Debug.
+
 	return (lOk);
 }
 
@@ -101,8 +113,16 @@ Lepra::UnicodeStringUtility::StringVector GameServerManager::ListUsers()
 		{
 			const Client* lClient = x.GetObject();
 			Lepra::UnicodeString lUserInfo = lClient->GetUserConnection()->GetLoginName();
-			Lepra::Vector3DF lPosition = GetContext()->GetObject(lClient->GetAvatarId())->GetPosition();
-			lUserInfo += Lepra::UnicodeStringUtility::Format(L" at (%f, %f, %f)", lPosition.x, lPosition.y, lPosition.z);
+			Cure::ContextObject* lObject = GetContext()->GetObject(lClient->GetAvatarId());
+			if (lObject)
+			{
+				Lepra::Vector3DF lPosition = lObject->GetPosition();
+				lUserInfo += Lepra::UnicodeStringUtility::Format(L" at (%f, %f, %f)", lPosition.x, lPosition.y, lPosition.z);
+			}
+			else
+			{
+				lUserInfo += L" [not loaded]";
+			}
 			lVector.push_back(lUserInfo);
 		}
 	}
@@ -270,7 +290,18 @@ bool GameServerManager::Initialize()
 			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
 			if (lOk)
 			{
-				lOk = mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("tractor_01")));
+				lOk = mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("tractor_02")));
+			}
+		}
+		for (x = 0; lOk && x < 100; ++x)
+		{
+			const Lepra::UnicodeString lUserName = Lepra::UnicodeStringUtility::Format(L"Fjask%i", x);
+			Lepra::UnicodeString lReadablePassword(L"CarPassword");
+			Cure::MangledPassword lPassword(lReadablePassword);
+			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
+			if (lOk)
+			{
+				lOk = mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("fjask")));
 			}
 		}
 	}
@@ -283,8 +314,8 @@ bool GameServerManager::Initialize()
 	}
 
 	// TODO: remove!!!
-	Cure::ContextObject* lTractor = Parent::CreateContextObject(_T("tractor_01"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
-	lTractor->StartLoading();
+	//Cure::ContextObject* lTractor = Parent::CreateContextObject(_T("tractor_01"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
+	//lTractor->StartLoading();
 
 	Lepra::String lAcceptAddress = CURE_RTVAR_GETSET(GetVariableScope(), RTVAR_NETWORK_LISTEN_ADDRESS, _T("0.0.0.0:16650"));
 	if (lOk)

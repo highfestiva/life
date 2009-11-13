@@ -524,14 +524,12 @@ void ResourceManager::StopClear()
 	}
 	ForceFreeCache();	// Must be before and after active resources' are deleted (caused by hierarchical resource structures).
 
-	ResourceSet::iterator x = mResourceSafeLookup.begin();
-	for (; x != mResourceSafeLookup.end(); ++x)
+	while (!mResourceSafeLookup.empty())
 	{
-		Resource* lResource = *x;
+		Resource* lResource = *mResourceSafeLookup.begin();
 		mLog.Errorf(_T("Resource '%s' not freed! Going for the kill!"), lResource->GetName().c_str());
 		DeleteResource(lResource);
 	}
-	mResourceSafeLookup.clear();
 
 	// These just contain pointers, they are not data owners. Thus no delete required.
 	mRequestLoadList.RemoveAll();

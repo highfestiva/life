@@ -32,6 +32,10 @@ sys_socket SocketBase::InitSocket(sys_socket pSocket, int pSize)
 	::setsockopt(pSocket, SOL_SOCKET, SO_RCVBUF, (const char*)&lBufferSize, sizeof(lBufferSize));
 	lBufferSize = pSize;
 	::setsockopt(pSocket, SOL_SOCKET, SO_SNDBUF, (const char*)&lBufferSize, sizeof(lBufferSize));
+	linger lLinger;
+	lLinger.l_onoff = 0;	// Graceful shutdown.
+	lLinger.l_linger = 1;	// Wait this many seconds.
+	::setsockopt(pSocket, SOL_SOCKET, SO_LINGER, (const char*)&lLinger, sizeof(lLinger));
 #ifndef LEPRA_WINDOWS
 	int lFlag = 1;
 	::setsockopt(pSocket, SOL_SOCKET, SO_REUSEADDR, (const char*)&lFlag, sizeof(lFlag));
@@ -84,7 +88,7 @@ void SocketBase::CloseKeepHandle()
 {
 	if (mSocket != INVALID_SOCKET)
 	{
-		Shutdown(SHUT_WRITE);
+		Shutdown(SHUTDOWN_SEND);
 		CloseSysSocket(mSocket);
 	}
 }
@@ -125,7 +129,19 @@ void SocketBase::MakeNonBlocking()
 
 void SocketBase::Shutdown(ShutdownFlag pHow)
 {
-	// TODO: Verify that this works on all platforms.
+	int lHow = 0;
+	switch (pHow)
+	{
+#ifdef LEPRA_WINDOWS
+		case SHUTDOWN_RECV:	lHow = SD_RECEIVE;	break;
+		case SHUTDOWN_SEND:	lHow = SD_SEND;		break;
+		case SHUTDOWN_BOTH:	lHow = SD_BOTH;		break;
+#else // Posix
+		case SHUTDOWN_RECV:	lHow = SHUT_RECV;	break;
+		case SHUTDOWN_SEND:	lHow = SHUT_SEND;	break;
+		case SHUTDOWN_BOTH:	lHow = SHUT_BOTH;	break;
+#endif // Win32 / Posix
+	}
 	::shutdown(mSocket, (int)pHow);
 }
 
@@ -638,7 +654,7 @@ TcpMuxSocket::TcpMuxSocket(const String& pName, const SocketAddress& pLocalAddre
 	mSelectThread(pName+_T("TcpMuxSelect ")+pLocalAddress.GetAsString()),
 	mConnectIdTimeout(DEFAULT_CONNECT_ID_TIMEOUT),
 	mActiveReceiverMapChanged(false),
-	mConnectedSocketSemaphore(1),
+	mConnectedSocketSemaphore(100),
 	mVSentByteCount(0),
 	mVReceivedByteCount(0)
 {
@@ -790,7 +806,11 @@ void TcpMuxSocket::CloseSocket(TcpVSocket* pSocket, bool pForceDelete)
 TcpVSocket* TcpMuxSocket::PopReceiverSocket()
 {
 	TcpVSocket* lSocket = (TcpVSocket*)PopReceiver();
-	mActiveReceiverMapChanged = true;
+	if (lSocket)
+	{
+		mActiveReceiverMapChanged = true;
+		mConnectedSocketSemaphore.Signal();
+	}
 	return (lSocket);
 }
 
@@ -889,6 +909,7 @@ void TcpMuxSocket::PushReceiverSockets(const FdSet& pSocketSet)
 {
 	ScopeLock lLock(&mIoLock);
 	// TODO: optimize (using platform specifics?).
+	bool lAdded = false;
 	for (SocketVMap::iterator y = mConnectedSocketMap.begin(); y != mConnectedSocketMap.end(); ++y)
 	{
 		sys_socket lSysSocket = y->first;
@@ -897,12 +918,17 @@ void TcpMuxSocket::PushReceiverSockets(const FdSet& pSocketSet)
 			TcpVSocket* lSocket = y->second;
 			log_adebug("Adding receiver socket. Does this mean disconnected client?");
 			AddReceiverNoLock(lSocket);
-			mActiveReceiverMapChanged = true;
+			lAdded = true;
 		}
 		else
 		{
 			log_adebug("Didn't add receiver socket.");
 		}
+	}
+	if (lAdded)
+	{
+		mActiveReceiverMapChanged = true;
+		mConnectedSocketSemaphore.Signal();
 	}
 }
 
@@ -1043,7 +1069,9 @@ void TcpMuxSocket::SelectThreadEntry()
 		}
 		else
 		{
+			log_debug(_T("Going into \"wait for socket connect\" state."));
 			mConnectedSocketSemaphore.Wait(10.0f);
+			log_debug(_T("Leaving \"wait for socket connect\" state."));
 		}
 	}
 }

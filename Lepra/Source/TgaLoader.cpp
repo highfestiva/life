@@ -1059,15 +1059,16 @@ TgaLoader::Status TgaLoader::LoadRLETrueColorImage(Canvas& pCanvas, TGAFileHeade
 					if (lRLEPacket == true)
 					{
 						// RLE packet.
-						uint8 lPixelValue[4];
-						pFile.ReadData(&lPixelValue, 4);
+						uint8 lBGRA[4];
+						pFile.ReadData(&lBGRA, 4);
 
 						for (int lCount = 0; lCount < (int)lRepetitionCount; lCount++)
 						{
-							lData[lYOffset + x * 4 + 0] = lPixelValue[0];
-							lData[lYOffset + x * 4 + 1] = lPixelValue[1];
-							lData[lYOffset + x * 4 + 2] = lPixelValue[2];
-							lData[lYOffset + x * 4 + 3] = lPixelValue[3];
+							// Jonte: RLE stores color as BGR.
+							lData[lYOffset + x * 4 + 0] = lBGRA[2];
+							lData[lYOffset + x * 4 + 1] = lBGRA[1];
+							lData[lYOffset + x * 4 + 2] = lBGRA[0];
+							lData[lYOffset + x * 4 + 3] = lBGRA[3];
 
 							x += lXAdd;
 						}
@@ -1077,10 +1078,15 @@ TgaLoader::Status TgaLoader::LoadRLETrueColorImage(Canvas& pCanvas, TGAFileHeade
 						// Raw packet.
 						for (int lCount = 0; lCount < (int)lRepetitionCount; lCount++)
 						{
-							if (pFile.ReadData(&lData[lYOffset + x * 4], 4) != IO_OK)
+							uint8 lBGRA[4];
+							if (pFile.ReadData(lBGRA, sizeof(lBGRA)) != IO_OK)
 							{
 								return (STATUS_READSTREAM_ERROR);	// TRICKY: RAII!
 							}
+							lData[lYOffset + x * 4 + 0] = lBGRA[2];
+							lData[lYOffset + x * 4 + 1] = lBGRA[1];
+							lData[lYOffset + x * 4 + 2] = lBGRA[0];
+							lData[lYOffset + x * 4 + 3] = lBGRA[3];
 							x += lXAdd;
 						}
 					}

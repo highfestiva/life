@@ -36,6 +36,7 @@
 
 import types, math
 from vec3 import vec3 as _vec3
+from vec4 import vec4 as _vec4
 from mat3 import mat3 as _mat3
 from mat4 import mat4 as _mat4
 
@@ -216,7 +217,7 @@ class quat:
                         w1*y2+y1*w2-x1*z2+z1*x2,
                         w1*z2+z1*w2+x1*y2-y1*x2)
         # quat*vec3
-        if isinstance(other, _vec3):
+        if isinstance(other, _vec3) or isinstance(other, _vec4):
             return self.rotateVec(other)
         # unsupported
         else:
@@ -242,7 +243,9 @@ class quat:
         # unsupported
         else:
             raise TypeError("unsupported operand type for /")
-        
+
+    __truediv__ = __div__
+
     def __pow__(self, other):
         """Return self**q."""
 #        if modulo!=None:
@@ -410,40 +413,103 @@ class quat:
                      xz-yw, yz+xw, 1.0-xx-yy, 0.0,
                      0.0, 0.0, 0.0, 1.0)
 
+
     def fromMat(self, m):
+        try:
+            return self._fromMat(m)
+        except:
+            pass
+        qlist = []
+        cnt = 0
+        for axis in [(-1,0,0),(+1,0,0),(0,-1,0),(0,1,0),(0,0,-1),(0,0,1)]:
+            rot = m * _mat4.rotation(0.01, axis)
+            try:
+                qlist += [self._fromMat(rot)]
+            except:
+                pass
+        r = quat(0,0,0,0)
+        for q in qlist:
+            r += q
+        r = r.normalize()
+        #print("Got a matrix-2-quaternion lerp of", r, "using", len(qlist), "checks!")
+        self.w, self.x, self.y, self.z = r[:]
+        return self
+
+
+    def _fromMat(self, m):
         """Initialize self from either a mat3 or mat4 and returns self."""
         global _epsilon
-        
-        d1,d2,d3 = m[0,0],m[1,1],m[2,2]
-        t = d1+d2+d3+1.0
-        if t>_epsilon:
-            s = 0.5/math.sqrt(t)
-            self.w = 0.25/s
-            self.x = (m[2,1]-m[1,2])*s
-            self.y = (m[0,2]-m[2,0])*s
-            self.z = (m[1,0]-m[0,1])*s
-        else:
-            ad1 = d1
-            ad2 = d2
-            ad3 = d3
-            if ad1>=ad2 and ad1>=ad3:
-                s = math.sqrt(1.0+d1-d2-d3)*2.0
-                self.x = 0.5/s
-                self.y = (m[0,1]+m[1,0])/s
-                self.z = (m[0,2]+m[2,0])/s
-                self.w = (m[1,2]+m[2,1])/s
-            elif ad2>=ad1 and ad2>=ad3:
-                s = math.sqrt(1.0+d2-d1-d3)*2.0
-                self.x = (m[0,1]+m[1,0])/s
-                self.y = 0.5/s
-                self.z = (m[1,2]+m[2,1])/s
-                self.w = (m[0,2]+m[2,0])/s
+
+        # Jonte: start out by fetching the rotation matrix' rotation vector.
+        angle = 0
+        cosa = (m[0,0] + m[1,1] + m[2,2] - 1.0) * 0.5
+        try:
+            angle = math.acos(cosa)
+        except ValueError as e:
+            print("Got an matrix-to-quaternion error:", e)
+            print(m)
+            raise
+        #print("Angle is", angle)
+
+        v = _vec3(m[2,1] - m[1,2],
+                  m[0,2] - m[2,0],
+                  m[1,0] - m[0,1])
+        #print("Vector is", v)
+
+        if v.length() < _epsilon:
+            lEpsilonOne = 1.0 - _epsilon
+            if m[0,0] >= lEpsilonOne:
+                v.x = 1.0
+                v.y = 0.0
+                v.z = 0.0
+            elif m[1,1] >= lEpsilonOne:
+                v.x = 0.0
+                v.y = 1.0
+                v.z = 0.0
+            elif m[2,2] >= lEpsilonOne:
+                v.x = 0.0
+                v.y = 0.0
+                v.z = 1.0
             else:
-                s = math.sqrt(1.0+d3-d1-d2)*2.0
-                self.x = (m[0,2]+m[2,0])/s
-                self.y = (m[1,2]+m[2,1])/s
-                self.z = 0.5/s
-                self.w = (m[0,1]+m[1,0])/s
+                raise Exception("Uh-uh! Bad matrix!")
+
+        # Now set the vector.
+        self.fromAngleAxis(angle, v)
+        
+##        d1,d2,d3 = m[0,0],m[1,1],m[2,2]
+##        t = d1+d2+d3+1.0
+##        if t>_epsilon:
+##            #print("Probable OK1!")
+##            s = 0.5/math.sqrt(t)
+##            self.w = 0.25/s
+##            self.x = (m[2,1]-m[1,2])*s
+##            self.y = (m[0,2]-m[2,0])*s
+##            self.z = (m[1,0]-m[0,1])*s
+##        else:
+##            ad1 = d1
+##            ad2 = d2
+##            ad3 = d3
+##            if ad1>=ad2 and ad1>=ad3:
+##                print("Probable OK2!")
+##                s = math.sqrt(1.0+d1-d2-d3)*2.0
+##                self.x = 0.5/s
+##                self.y = (m[0,1]+m[1,0])/s
+##                self.z = (m[0,2]+m[2,0])/s
+##                self.w = (m[1,2]+m[2,1])/s
+##            elif ad2>=ad1 and ad2>=ad3:
+##                s = math.sqrt(1.0+d2-d1-d3)*2.0
+##                print("Probable failure!!! s is", s)
+##                self.x = (m[0,1]+m[1,0])/s
+##                self.y = 0.5/s
+##                self.z = (m[1,2]+m[2,1])/s
+##                self.w = (m[0,2]+m[2,0])/s
+##            else:
+##                print("Probable OK3!")
+##                s = math.sqrt(1.0+d3-d1-d2)*2.0
+##                self.x = (m[0,2]+m[2,0])/s
+##                self.y = (m[1,2]+m[2,1])/s
+##                self.z = 0.5/s
+##                self.w = (m[0,1]+m[1,0])/s
 
         return self
 
@@ -508,7 +574,7 @@ class quat:
         self*v*self.conjugate() and turning the result back into a vec3.
         """
 
-        v = _vec3(v)
+        u = _vec3(v[:3])
         ww = self.w*self.w
         xx = self.x*self.x
         yy = self.y*self.y
@@ -520,9 +586,13 @@ class quat:
         xz = self.x*self.z
         yz = self.y*self.z
 
-        return _vec3(ww*v.x + xx*v.x - yy*v.x - zz*v.x + 2*((xy-wz)*v.y + (xz+wy)*v.z),
-                     ww*v.y - xx*v.y + yy*v.y - zz*v.y + 2*((xy+wz)*v.x + (yz-wx)*v.z),
-                     ww*v.z - xx*v.z - yy*v.z + zz*v.z + 2*((xz-wy)*v.x + (yz+wx)*v.y))
+        u = (ww*u.x + xx*u.x - yy*u.x - zz*u.x + 2*((xy-wz)*u.y + (xz+wy)*u.z),
+             ww*u.y - xx*u.y + yy*u.y - zz*u.y + 2*((xy+wz)*u.x + (yz-wx)*u.z),
+             ww*u.z - xx*u.z - yy*u.z + zz*u.z + 2*((xz-wy)*u.x + (yz+wx)*u.y))
+        if isinstance(v, _vec4):
+            return _vec4(u)
+        return _vec3(u)
+        
     
 
 def slerp(t, q0, q1, shortest=True):

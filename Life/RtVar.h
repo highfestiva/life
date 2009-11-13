@@ -28,5 +28,7 @@
 // Internal use only.
 #define RTVAR_DEBUG_ENABLED		"Debug.Enable"
 #define RTVAR_DEBUG_3D_ENABLEAXES	"Debug.3D.EnableAxes"
+#define RTVAR_DEBUG_3D_ENABLEJOINTS	"Debug.3D.EnableJoints"
+#define RTVAR_DEBUG_3D_ENABLESHAPES	"Debug.3D.EnableShapes"
 #define RTVAR_DEBUG_NET_SENDPOSCNT	"Debug.Net.SendPositionCount"
 #define RTVAR_DEBUG_NET_RECVPOSCNT	"Debug.Net.ReceivePositionCount"

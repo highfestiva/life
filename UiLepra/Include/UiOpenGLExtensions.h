@@ -1,15 +1,15 @@
-/*
-	Class:  OpenGLExtensions
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Righteous Games
-*/
 
-#ifndef UILEPRA_OPENGLEXTENSIONS_H
-#define UILEPRA_OPENGLEXTENSIONS_H
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2006, Righteous Games
+
+
+
+#pragma once
 
 // Unreachable code warning below (MSVC8). For some reason just this file happens to temper with some shitty template.
 #define LEPRA_INCLUDE_NO_OS
 #include "../../Lepra/Include/LepraTarget.h"
+#undef LEPRA_INCLUDE_NO_OS
 #ifdef LEPRA_MSVC
 #pragma warning(push)
 #pragma warning(disable: 4702)
@@ -18,11 +18,11 @@
 #ifdef LEPRA_MSVC
 #pragma warning(pop)
 #endif // LEPRA_MSVC
+#include "../../Lepra/Include/LepraTarget.h"
 
 
 #ifdef LEPRA_WINDOWS
 
-#include <windows.h>
 #include <gl/gl.h>
 #include <gl/glu.h>
 #include "Win32/WGLEXT.h"
@@ -43,8 +43,12 @@
 
 #endif // LEPRA_WINDOWS/LEPRA_POSIX/LEPRA_MACOSX
 
+
+
 namespace UiLepra
 {
+
+
 
 class OpenGLExtensions
 {
@@ -358,6 +362,6 @@ bool OpenGLExtensions::IsVSyncEnabled()
 #endif
 }
 
-} // End namespace.
 
-#endif // !LEPRA_OPENGLEXTENSIONS_H
+
+}
