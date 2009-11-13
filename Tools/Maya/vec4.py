@@ -489,6 +489,15 @@ class vec4(object):
         (1.5000, 0.7000, -0.3000, 0.2000)
         """
         T=type(key)
+        if T==slice:
+            start, stop, step = key.start, key.stop, key.step
+            start = 0 if start==None else start
+            stop  = 4 if stop ==None else stop
+            step  = 1 if step ==None else step
+            #print("__setitem__: key", key, "value is", value)
+            for x in range(start, stop, step):
+                self.__setitem__(x, value[x])
+            return
         if T!=int and T!=int:
             raise TypeError("index must be integer")
 

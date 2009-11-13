@@ -348,9 +348,14 @@ class PhysWriter(ChunkyWriter):
 
         def _writebone(self, node):
                 ipm = mat4.identity()
+                usescale = False
                 if node.xformparent:
                         t, r, s = node.xformparent.get_world_transform().inverse().decompose()
                         ipm = mat4.translation(t) * r
+                        if node.xformparent.getName().startswith("phys_") and node.xformparent.is_phys_root and node.xformparent.phys_root:
+                                usescale = True
+                                ipm = node.xformparent.get_world_transform().inverse()
+                                print("%s's parent %s singing up as phys_root!!!" % (node.getName(), node.xformparent.getName()))
                 wt = node.get_world_transform()
                 if not node.phys_root:
                         # Use inverse initial rotation (only when writing root physics).
@@ -360,8 +365,15 @@ class PhysWriter(ChunkyWriter):
                 t, r, s = m.decompose()
                 q = quat(r).normalize()
                 pos = t
+                if usescale:
+                        s = node.xformparent.get_world_transform().decompose()[2]
+                        pos = mat4.scaling(s) * vec4(*t)
+                #if node.getName() == "phys_hangbar_back":
+                print("Writing %s (parent %s) with relative pos %s." %
+                        (node.getName(), node.xformparent.getName(), pos))
+                #pos = [0.5, -0.866, -3.2]
                 data = q[:]+pos[:3]
-                print("Writing bone %s with pos" % node.getName(), data)
+                #print("Writing bone %s with pos" % node.getName(), data)
                 self._addfeat("bone:bones", 1)
                 self._writexform(data)
                 node.writecount += 1
@@ -397,53 +409,43 @@ class PhysWriter(ChunkyWriter):
                 #print("Total mass:", totalmass)
                 parameters[0] = node.get_fixed_attribute("joint_spring_constant", True, 0.0) * totalmass
                 parameters[1] = node.get_fixed_attribute("joint_spring_damping", True, 0.0) * totalmass
-                #yaw, pitch, roll = ChunkyWriter._geteuler(node)
+
+                r = node.getabsirot()
+
                 yaw = node.get_fixed_attribute("joint_yaw", True, 0.0)*math.pi/180
                 pitch = node.get_fixed_attribute("joint_pitch", True, 0.0)*math.pi/180
-                #if jointvalue != 1 and (pitch < -0.1 or pitch > 0.1):
-                #        print("Error: euler rotation pitch of jointed body '%s' must be zero." % node.getFullName())
-                #        sys.exit(19)
-                #print("Euler angles for", shape.getnode().getName(), ":", yaw, pitch)
                 m = mat4.identity()
-                yaw = math.pi/2
-                pitch = math.pi/2
-                ööö - do proper Euler from vector rotation, ignoring aligned rotation.
-                m.setMat3(mat3.fromEulerXZY(pitch, 0, yaw))
-                print("This is it:", type(m), type(node.get_local_transform()))
-                print(m)
-                #print(node.get_local_transform())
-                if True:
-                        ipm = mat4.identity()
-                        t, r, s = node.xformparent.get_world_transform().inverse().decompose()
-                        ipm = mat4.translation(t) * r
-                        wt = node.get_world_transform()
-                        mat = ipm * wt
-                        t, r, s = mat.decompose()
+                m.setMat3(mat3.fromEulerXZY(0, pitch, yaw))
+                v = r * m * vec4(0,0,1,0)
+                # Project onto XY plane.
+                xyv = vec3(v[:3])
+                xyv[2] = 0
+                xyv = xyv.normalize()
+                # Yaw is angle of projection on the XY plane.
+                if xyv.length():
+                        yaw = math.asin(xyv.y/xyv.length())
+                else:
+                        yaw = 0
+                v = v.normalize()
+                v = vec3(v[:3])
+                pitch = math.asin(v*xyv)
 
-                #m = node.get_world_transform().inverse().decompose()[1] * m
-                #m = r.inverse() * m
-                m = m.decompose()[1].getMat3()
-                print(m)
-                pitch, _, yaw = m.toEulerXZY()
-                #pitch = -pitch
-                #yaw = -yaw
                 parameters[2] = yaw
                 parameters[3] = pitch
                 joint_min, joint_max = node.get_fixed_attribute("joint_angles", True, [0.0,0.0])
                 joint_min, joint_max = math.radians(joint_min), math.radians(joint_max)
-                #print("Joint angles for '%s': (%f, %f)." % (node.getName(), joint_min, joint_max))
                 parameters[4] = joint_min
                 parameters[5] = joint_max
-                #lq = node.get_local_quat()
-                #j = lq.toMat4()*lp
-                j = node.get_world_translation() - node.get_world_pivot()
-                #j = node.get_world_transform().decompose()[1] * j
-                j = node._get_local_rpivot()
-                #j = vec3(0.0,0.0,0.0)
-                print("Writing joint point", j)
-                parameters[6] = j.x
-                parameters[7] = j.y
-                parameters[8] = j.z
+
+                mp = r * node.get_world_pivot_transform()
+                mt = r * node.get_world_transform()
+                wp = mp * vec4(0,0,0,1)
+                wt = mt * vec4(0,0,0,1)
+                j = wp-wt
+                #j[3] = 0
+                #j = (node.get_world_transform().inverse()).decompose()[1] * j
+
+                parameters[6:9] = j[:3]
                 for x in parameters:
                         self._writefloat(float(x))
                 # Write connecor type (may hook other stuff, may get hooked by hookers :).
@@ -650,7 +652,7 @@ class ClassWriter(ChunkyWriter):
                                         #p = [0.0,0.0,0.0]
                                         pass
                                 p = p[0:3]
-                                print("Writing class", m.meshbasename, "relative to", phys.getName(), "with", q[:]+p[:])
+                                #print("Writing class", m.meshbasename, "relative to", phys.getName(), "with", q[:]+p[:])
                                 physidx = self.bodies.index(phys)
                                 meshptrs += [(CHUNK_CLASS_PHYS_MESH, PhysMeshPtr(physidx, m.meshbasename, q, p))]
                         data =  (
