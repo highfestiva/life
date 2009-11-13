@@ -199,13 +199,14 @@ def adjustnode(node):
                 mra = eval(rotorder[ro])
                 #print("Result of rot:", mra*vec4(0,1,0,0))
                 return mra
-        def getphysroot(self):
+        def getphysmaster(self):
                 phys = self
                 while phys.phys_root:
                         phys = phys.phys_root
                 return phys
         def getabsirot(self):
-                root = self.getphysroot()
+                root = self.getphysmaster().getParent()
+                print("getabsirot checking", root)
                 return root.gettransformto(None, "inverse_initial_r").inverse().decompose()[1]
         node.fix_attribute = types.MethodType(fix_attribute, node)
         node.get_fixed_attribute = types.MethodType(get_fixed_attribute, node)
@@ -225,6 +226,6 @@ def adjustnode(node):
         node._get_local_ar = types.MethodType(_get_local_ar, node)
         node.__class__.csetprinttransform = types.MethodType(csetprinttransform, node.__class__)
         node.setprinttransform = types.MethodType(setprinttransform, node)
-        node.getphysroot = types.MethodType(getphysroot, node)
+        node.getphysmaster = types.MethodType(getphysmaster, node)
         node.getabsirot = types.MethodType(getabsirot, node)
         return node

@@ -114,6 +114,8 @@ class GroupReader(DefaultMAReader):
                         sys.exit(3)
                 self.makevertsrelative(group)
 
+                self.printnodes(group)
+
                 self.group = group
 
 
@@ -246,7 +248,8 @@ class GroupReader(DefaultMAReader):
                 # Store inverse of rotation for later, then  set our preferred rotation angles in the exported vehicle.
                 t.fix_attribute("ra", -t.get_fixed_attribute("ra"))
                 #t.fix_attribute("r", -t.get_fixed_attribute("r"))
-                t.gettransformto(None, "inverse_initial_r")       # Store transformation for writing.
+                ir = t.gettransformto(None, "inverse_initial_r")       # Store transformation for writing.
+                print("Had this inverse_initial_r:\n", ir)
                 t.fix_attribute("ra", vec3(math.pi/2, 0, math.pi))
                 t.fix_attribute("r", vec3(0,0,0))
 
@@ -279,7 +282,7 @@ class GroupReader(DefaultMAReader):
                                 if not m_tr:
                                         print("Mesh crash!")
                                 m_t, m_r, m_s = m_tr.decompose()
-                                transform = m_r * mat4.scaling(m_s)
+                                transform = mat4.translation(-m_t) * m_tr
                                 vp = vec4(0,0,0,1);
                                 for idx in range(0, len(vtx), 3):
                                         vp[:3] = vtx[idx:idx+3]
@@ -455,6 +458,8 @@ class GroupReader(DefaultMAReader):
                                                 break
                                         root = root.phys_root
                                         if root and root.getName().startswith("phys_"):
+                                                print("Moving %s from parent %s (meshp %s) into root %s" %
+                                                      (node.getName(), current_parent.getName(), node.getParent().getName(), root.getName()))
                                                 node.phys_root = root
                                                 current_parent.phys_children.index(node)
                                                 current_parent.phys_children.remove(node)
@@ -529,8 +534,12 @@ class GroupReader(DefaultMAReader):
                                         print("Error:   - '%s'" % phys.getFullName())
                         elif not mesh.phys_ref:
                                 if self._is_valid_phys_ref(group, None, mesh, False):
+                                        if not mesh.phys_ref:
+                                                ok = False
+                                                print("Error: mesh %s has no suitable physics nodes to hook up to." % mesh.getName())
+                                elif mesh.nodetype == "transform":
                                         ok = False
-                                        print("Error: mesh node '%s' must be referenced by a phys node, but is not!" % mesh.getFullName())
+                                        print("Error: mesh %s has invalid connections to phys nodes." % mesh.getName())
                 return ok
 
 
@@ -628,12 +637,23 @@ class GroupReader(DefaultMAReader):
                 return ok
 
 
-        def printnode(self, node, nodes, lvl=0):
-                if node.nodetype == "transform":
-                        print("%s" % node.getFullName())
-                children = self._listchildnodes(node.getFullName(), node, "", nodes, False)
-                for child in children:
-                        self.printnode(child, nodes, lvl+1)
+        def printnodes(self, nodes):
+                def printnode(node, lvl=0):
+                        if not node.isprinted and node.nodetype == "transform":
+                                node.isprinted = True
+                                if lvl == 0:
+                                        print("----------")
+                                print("  "*lvl + node.getFullName(), node.xformparent)
+                                def printattr(attr):
+                                        if hasattr(node, attr):
+                                                for child in getattr(node, attr):
+                                                        printnode(child, lvl+1)
+                                printattr("mesh_ref")
+                                printattr("phys_ref")
+                for node in nodes:
+                        for n in nodes:
+                                n.isprinted = False
+                        printnode(node)
 
 
         def _resolve_phys(self, phys, group):
@@ -651,22 +671,21 @@ class GroupReader(DefaultMAReader):
                         else:
                                 parent.phys_children += [phys]
                         return True
-                # Check children of grandparents.
-                parent = parent.getParent()
-                while parent != None:
-                        phys_nodes = self._listchildnodes(parent.getFullName(), parent, "phys_", group, False)
-                        if len(phys_nodes) >= 1:
-                                def distance(node):
-                                        dist = phys.get_world_translation()-node.get_world_translation()
-                                        return dist.length()
-                                phys_nodes.sort(key=distance)
-                                parent = phys_nodes[0]
-                                #if len(phys_nodes) > 1:
-                                #        print("*********** Picked parent node", parent)
-                                break
+                # Check children of parents, grandparents...
+                mparent = parent
+                parent = None
+                while mparent != None:
+                        print("Looking for phys parent for %s in %s..." % (phys.getName(), mparent.getName()))
+                        children = self._listchildnodes(mparent.getFullName(), mparent, "phys_", group, False)
+                        phys_nodes = list(filter(lambda x: x.getName() != phys.getName(), children))
+                        if phys_nodes:
+                                parent = self.find_phys_root(mparent, phys_nodes)
+                                if parent:
+                                        print("*********** Picked parent node", parent)
+                                        break
                         else:
-                                #print("Skipping through phys parent %s!" % parent.getFullName())
-                                parent = parent.getParent()
+                                print("Skipping through mesh parent %s!" % mparent.getFullName())
+                        mparent = mparent.getParent()
                 #print("Phys %s has parent %s" % (phys.getFullName(), parent.getFullName()))
                 if parent == None:
                         print("Error: phys node '%s' has no related parent phys node higher up in the hierarchy." % phys.getFullName())
@@ -682,6 +701,21 @@ class GroupReader(DefaultMAReader):
                 return True
 
 
+        def find_phys_root(self, mesh, physlist):
+                r = None
+                for phys in physlist:
+                        if phys.getName()[5:] == mesh.getName()[2:]:
+                                if r:
+                                        print("Error: mesh %s holds more than one phys root!" % node.getFullName())
+                                        sys.exit(3)
+                                r = phys
+##                if not r and physlist:
+##                        print("Error: could not find phys parent to mesh %s!" % mesh.getName())
+##                        sys.exit(3)
+                print("Found phys root", r, "for", mesh)
+                return r
+
+
         def _is_valid_phys_ref(self, group, phys, mesh, loose):
                 if mesh.nodetype != "transform":
                         return False
@@ -695,6 +729,19 @@ class GroupReader(DefaultMAReader):
                                 meshcnt += 1
                         if child in invalid_child_list:
                                 invcnt += 1
+
+                while not phys:
+                        p = mesh.getParent()
+                        while p:
+                                if p.phys_ref:
+                                        phys = self.find_phys_root(p, p.phys_ref)
+                                        if phys:
+                                                print("Mesh %s hooking onto phys %s." % (mesh.getName(), phys.getName()))
+                                                mesh.phys_ref += [phys]
+                                                phys.mesh_ref += [mesh]
+                                                break
+                                p = p.getParent()
+
                 hangaround_child = False
                 if mesh.getParent() and phys in mesh.getParent().phys_ref:
                         hangaround_child = True
@@ -713,10 +760,10 @@ class GroupReader(DefaultMAReader):
                                 valid_ref = False
                                 print("Error: mesh '%s' (referenced by '%s') contains %i invalid child nodes." %
                                       (mesh.getFullName(), phys.getFullName(), invcnt))
-                        if not phys.phys_root and mesh.getParent():
-                                valid_ref = False
-                                print("Error: root mesh node '%s' (referenced by '%s') erroneously has parent." %
-                                      (mesh.getFullName(), phys.getFullName()))
+##                        if not phys.phys_root and mesh.getParent():
+##                                valid_ref = False
+##                                print("Error: root mesh node '%s' (referenced by '%s') erroneously has parent." %
+##                                      (mesh.getFullName(), phys.getFullName()))
                         if not loose and phys.phys_root and not phys.get_fixed_attribute("joint", optional=True):
                                 valid_ref = False
                                 print("Error: mesh '%s' referenced by non-jointed phys node '%s'." %
@@ -731,13 +778,15 @@ class GroupReader(DefaultMAReader):
                         eps = 0.0001
                         if d.length() >= eps:
                                 valid_ref = False
-                                print("Error: mesh '%s' and jointed phys node '%s' do not share the exact same World Space Pivot (%s and %s). " \
+                                print("Error: mesh '%s' and phys node '%s' do not share the exact same World Space Pivot (%s and %s). " \
                                       "Note that Y and Z axes are transformed compared to Maya." %
                                       (mesh.getFullName(), phys.getFullName(), str(mt), str(pt)))
                 else:
                         valid_ref = False
+                        print("Error: no phys...")
                         if meshcnt > 0:
-                                print("Error: mesh '%s' contains mesh shape, but is not linked to phys node." % mesh.getFullName())
+                                print("Error: mesh '%s' contains mesh shape, but is not linked to phys node. loose=%s" %
+                                      (mesh.getFullName(), loose))
                                 sys.exit(3)
                 return valid_ref
 

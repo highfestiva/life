@@ -410,13 +410,13 @@ class PhysWriter(ChunkyWriter):
                 parameters[0] = node.get_fixed_attribute("joint_spring_constant", True, 0.0) * totalmass
                 parameters[1] = node.get_fixed_attribute("joint_spring_damping", True, 0.0) * totalmass
 
-                r = node.getabsirot()
+                ir = node.getabsirot()
 
                 yaw = node.get_fixed_attribute("joint_yaw", True, 0.0)*math.pi/180
                 pitch = node.get_fixed_attribute("joint_pitch", True, 0.0)*math.pi/180
                 m = mat4.identity()
                 m.setMat3(mat3.fromEulerXZY(0, pitch, yaw))
-                v = r * m * vec4(0,0,1,0)
+                v = ir * m * vec4(0,0,1,0)
                 # Project onto XY plane.
                 xyv = vec3(v[:3])
                 xyv[2] = 0
@@ -437,11 +437,16 @@ class PhysWriter(ChunkyWriter):
                 parameters[4] = joint_min
                 parameters[5] = joint_max
 
-                mp = r * node.get_world_pivot_transform()
-                mt = r * node.get_world_transform()
+                mp = node.get_world_pivot_transform()
+                mt = node.get_world_transform()
                 wp = mp * vec4(0,0,0,1)
                 wt = mt * vec4(0,0,0,1)
                 j = wp-wt
+                j = ir * j
+                #j[1] = -j[1]
+                if jointvalue != 1:
+                        print("Joint on %s at %s (world pivot at %s, transl at %s)." % (node.getFullName(), j, wp, wt))
+                        print(ir)
                 #j[3] = 0
                 #j = (node.get_world_transform().inverse()).decompose()[1] * j
 
@@ -642,7 +647,7 @@ class ClassWriter(ChunkyWriter):
                                 mat = tps.inverse() * tpt.inverse() * tpr.inverse() * mat4.translation(tmt)
                                 mat = tp.inverse() * mat4.translation(tmt)
                                 mat = tpt.inverse() * tpr.inverse() * tps.inverse() * mat4.translation(tmt)
-                                t, r, s = mat.decompose()
+                                _, r, _ = mat.decompose()
                                 q = quat(r).normalize()
                                 p = wpm-wpp
                                 p = q.toMat4() * p
