@@ -266,37 +266,6 @@ class ChunkyWriter:
                 self.f.write(data)
 
 
-        @staticmethod
-        def _geteuler(node):
-                q = quat(node.get_local_transform().decompose()[1])
-                w2 = q[0]*q[0]
-                x2 = q[1]*q[1]
-                y2 = q[2]*q[2]
-                z2 = q[3]*q[3]
-                unitlength = w2 + x2 + y2 + z2  # Normalised == 1, otherwise correction divisor.
-                abcd = q[0]*q[1] + q[2]*q[3]
-                if abcd > (0.5-0.0001)*unitlength:
-                        yaw = 2 * atan2(q[2], q[0])
-                        pitch = math.pi
-                        roll = 0
-                elif abcd < (-0.5+0.0001)*unitlength:
-                        yaw = -2 * math.atan2(q[2], q[0])
-                        pitch = -math.pi
-                        roll = 0
-                else:
-                        adbc = q[0]*q[3] - q[1]*q[2]
-                        acbd = q[0]*q[2] - q[1]*q[3]
-                        yaw = math.atan2(2*adbc, 1 - 2*(z2+x2))
-                        pitch = math.asin(2*abcd/unitlength)
-                        roll = math.atan2(2*acbd, 1 - 2*(y2+x2))
-                return yaw, pitch, roll
-
-
-        def _getaxes(self, node):
-                q = quat(node.get_local_transform().decompose()[1])
-                return q.rotateVec((1,0,0)), q.rotateVec((0,1,0)), q.rotateVec((0,0,1))
-
-
         def _findglobalnode(self, simplename):
                 for node in self.group:
                         if node.getName() == simplename:
@@ -349,13 +318,16 @@ class PhysWriter(ChunkyWriter):
         def _writebone(self, node):
                 ipm = mat4.identity()
                 usescale = False
+                #if node.is_phys_root:
+                #        print("%s is a physics root with relative translation %s!" %
+                #              (node.getName(), node.get_local_transform().decompose()[0]))
                 if node.xformparent:
                         t, r, s = node.xformparent.get_world_transform().inverse().decompose()
                         ipm = mat4.translation(t) * r
                         if node.xformparent.getName().startswith("phys_") and node.xformparent.is_phys_root and node.xformparent.phys_root:
                                 usescale = True
                                 ipm = node.xformparent.get_world_transform().inverse()
-                                print("%s's parent %s singing up as phys_root!!!" % (node.getName(), node.xformparent.getName()))
+                                #print("%s's parent %s singing up as phys_root!!!" % (node.getName(), node.xformparent.getName()))
                 wt = node.get_world_transform()
                 if not node.phys_root:
                         # Use inverse initial rotation (only when writing root physics).
@@ -367,10 +339,11 @@ class PhysWriter(ChunkyWriter):
                 pos = t
                 if usescale:
                         s = node.xformparent.get_world_transform().decompose()[2]
+                        #print("Before transformation of", node.getName(), "t =", t, "s =", s)
                         pos = mat4.scaling(s) * vec4(*t)
                 #if node.getName() == "phys_hangbar_back":
-                print("Writing %s (parent %s) with relative pos %s." %
-                        (node.getName(), node.xformparent.getName(), pos))
+                #print("Writing %s (parent %s) with relative pos %s." %
+                #        (node.getName(), node.xformparent.getName(), pos))
                 #pos = [0.5, -0.866, -3.2]
                 data = q[:]+pos[:3]
                 #print("Writing bone %s with pos" % node.getName(), data)
@@ -420,15 +393,22 @@ class PhysWriter(ChunkyWriter):
                 # Project onto XY plane.
                 xyv = vec3(v[:3])
                 xyv[2] = 0
-                xyv = xyv.normalize()
-                # Yaw is angle of projection on the XY plane.
-                if xyv.length():
-                        yaw = math.asin(xyv.y/xyv.length())
-                else:
+                if xyv.length() < 1e-12:
                         yaw = 0
-                v = v.normalize()
-                v = vec3(v[:3])
-                pitch = math.asin(v*xyv)
+                        if v[2] < 0:
+                                pitch = math.pi
+                        else:
+                                pitch = 0
+                else:
+                        xyv = xyv.normalize()
+                        # Yaw is angle of projection on the XY plane.
+                        if xyv.length():
+                                yaw = math.asin(xyv.y/xyv.length())
+                        else:
+                                yaw = 0
+                        v = v.normalize()
+                        v = vec3(v[:3])
+                        pitch = math.asin(v*xyv)
 
                 parameters[2] = yaw
                 parameters[3] = pitch
@@ -443,12 +423,6 @@ class PhysWriter(ChunkyWriter):
                 wt = mt * vec4(0,0,0,1)
                 j = wp-wt
                 j = ir * j
-                #j[1] = -j[1]
-                if jointvalue != 1:
-                        print("Joint on %s at %s (world pivot at %s, transl at %s)." % (node.getFullName(), j, wp, wt))
-                        print(ir)
-                #j[3] = 0
-                #j = (node.get_world_transform().inverse()).decompose()[1] * j
 
                 parameters[6:9] = j[:3]
                 for x in parameters:
@@ -468,7 +442,6 @@ class PhysWriter(ChunkyWriter):
                 # Write shape data (dimensions of shape).
                 for x in shape.data:
                         self._writefloat(math.fabs(x))
-                #print("Wrote shape with axes", self._getaxes(node))
                 self._addfeat("physical geometry:physical geometries", 1)
 
 
@@ -606,8 +579,6 @@ class ClassWriter(ChunkyWriter):
                         self.f = f
                         meshptrs = []
                         physidx = 0
-                        #print("These are the bodies:", self.bodies)
-                        #print("These are the meshes:", self.meshes)
                         for m in self.meshes:
                                 def _getparentphys(m):
                                         ph = None
@@ -636,26 +607,17 @@ class ClassWriter(ChunkyWriter):
                                 m.writecount += 1
                                 tm = m.get_world_transform()
                                 tp = phys.get_world_transform()
-                                tmt, tmr, tms = tm.decompose()
+                                tmt = tm.decompose()[0]
                                 tpt, tpr, tps = tp.decompose()
                                 tpt = mat4.translation(tpt)
                                 tps = mat4.scaling(tps)
-                                #tmr = quat(tmr).normalize().toMat4()
-                                #tpr = quat(tpr).normalize().toMat4()
                                 wpm = m.get_world_translation()
                                 wpp = phys.get_world_translation()
-                                mat = tps.inverse() * tpt.inverse() * tpr.inverse() * mat4.translation(tmt)
-                                mat = tp.inverse() * mat4.translation(tmt)
+                                #mat = tp.inverse() * mat4.translation(tmt)
                                 mat = tpt.inverse() * tpr.inverse() * tps.inverse() * mat4.translation(tmt)
-                                _, r, _ = mat.decompose()
-                                q = quat(r).normalize()
+                                q = quat(mat.decompose()[1]).normalize()
                                 p = wpm-wpp
                                 p = q.toMat4() * p
-                                #p = t-vec3((lpm-lpp)[0:3])
-                                if m.meshbasename == "fjask_backbar":
-                                        #q = quat(1,0,0,0)
-                                        #p = [0.0,0.0,0.0]
-                                        pass
                                 p = p[0:3]
                                 #print("Writing class", m.meshbasename, "relative to", phys.getName(), "with", q[:]+p[:])
                                 physidx = self.bodies.index(phys)

@@ -13,6 +13,7 @@ import chunkywriter
 from functools import reduce
 import configparser
 import datetime
+import optparse
 import re
 import sys
 import types
@@ -49,7 +50,7 @@ class GroupReader(DefaultMAReader):
                 self.bad_types = ["camera", "lightLinker", "displayLayerManager", "displayLayer", \
                                   "renderLayerManager", "renderLayer", "script", "<unknown>", "phong", \
                                   "shadingEngine", "materialInfo", "groupId", "groupParts", "lambert", \
-                                  "layeredShader"]
+                                  "layeredShader", "deleteComponent"]
                 self.basename = basename
 
 
@@ -97,13 +98,13 @@ class GroupReader(DefaultMAReader):
                 if not self.validate_orthogonality(group):
                         print("Error: the group is not completely orthogonal!")
                         #sys.exit(3)
-                if not self.validateMeshGroup(group):
+                if not self.validate_mesh_group(group):
                         print("Invalid mesh group! Terminating due to error.")
                         sys.exit(3)
-                if not self.applyPhysConfig(config, group):
+                if not self.apply_phys_config(config, group):
                         print("Error: could not apply configuration.")
                         sys.exit(4)
-                if not self.validatePhysGroup(group):
+                if not self.validate_phys_group(group):
                         print("Invalid physics group! Terminating due to error.")
                         sys.exit(3)
                 if not self.validategroup(group):
@@ -114,7 +115,7 @@ class GroupReader(DefaultMAReader):
                         sys.exit(3)
                 self.makevertsrelative(group)
 
-                self.printnodes(group)
+                #self.printnodes(group)
 
                 self.group = group
 
@@ -153,12 +154,12 @@ class GroupReader(DefaultMAReader):
                                         if not parentNode:
                                                 print("Error: parent %s does not exist!" % parentName)
                                                 return None
-                                        if not self._insertInSameIslandAs(islands, parentNode, node, False):
+                                        if not self._insert_in_same_island_as(islands, parentNode, node, False):
                                                 return None
                                         nodes.remove(node)
                                 outnodes = node.getOutNodes("out", "out")
                                 if len(outnodes) == 1:
-                                        if self._insertInSameIslandAs(islands, outnodes[0][0], node, allow_no_association):
+                                        if self._insert_in_same_island_as(islands, outnodes[0][0], node, allow_no_association):
                                                 nodes.remove(node)
                                 elif len(outnodes) > 1:
                                         print("Error: more than one output node not yet supported!")
@@ -249,9 +250,15 @@ class GroupReader(DefaultMAReader):
                 t.fix_attribute("ra", -t.get_fixed_attribute("ra"))
                 #t.fix_attribute("r", -t.get_fixed_attribute("r"))
                 ir = t.gettransformto(None, "inverse_initial_r")       # Store transformation for writing.
-                print("Had this inverse_initial_r:\n", ir)
+                #print("Had this inverse_initial_r:\n", ir)
                 t.fix_attribute("ra", vec3(math.pi/2, 0, math.pi))
                 t.fix_attribute("r", vec3(0,0,0))
+
+                o = t.get_fixed_attribute("t", optional=True, default=(0,0,0))
+                if vec3(o).length() > 1e-12:
+                        print("Error: root object %s must be placed in origo!" % t.getName())
+                        sys.exit(3)
+
 
 
         def faces2triangles(self, group):
@@ -306,7 +313,7 @@ class GroupReader(DefaultMAReader):
                 return isGroupValid
 
 
-        def validateMeshGroup(self, group):
+        def validate_mesh_group(self, group):
                 isGroupValid = True
                 if not isGroupValid:
                         print("Error: hierarchy graph recursion not allowed!")
@@ -347,7 +354,7 @@ class GroupReader(DefaultMAReader):
                 return isGroupValid
 
                                 
-        def applyPhysConfig(self, config, group):
+        def apply_phys_config(self, config, group):
                 allApplied = True
 
                 used_sections = {}
@@ -388,7 +395,7 @@ class GroupReader(DefaultMAReader):
                                                 ok &= (len(connected_to) > 0)
                                                 for cn in connected_to:
                                                         ok &= cn.getName().startswith("phys_")
-                                                        isValid, hasJoint = self._queryAttribute(cn, "joint", lambda x: True, False)
+                                                        isValid, hasJoint = self._query_attribute(cn, "joint", lambda x: True, False)
                                                         if not hasJoint:
                                                                 ok = False
                                                                 print("Error: %s is not jointed, but has an engine connected_to it!" % cn.getFullName())
@@ -399,7 +406,7 @@ class GroupReader(DefaultMAReader):
                                             ("controller_index", lambda x: x >= 0 and x < 20),
                                             ("connected_to", check_connected_to)]
                                 for name, engine_check in required:
-                                        allApplied &= self._queryAttribute(node, name, engine_check)[0]
+                                        allApplied &= self._query_attribute(node, name, engine_check)[0]
                                 group.append(node)
                                 used_sections[section] = True
 
@@ -422,7 +429,7 @@ class GroupReader(DefaultMAReader):
                 return allApplied
 
 
-        def validatePhysGroup(self, group):
+        def validate_phys_group(self, group):
                 isGroupValid = True
                 for node in group:
                         #print("Checking physics for", node)
@@ -435,22 +442,22 @@ class GroupReader(DefaultMAReader):
                                 # Check attributes.
                                 def jointCheck(t):
                                         return (t == "suspend_hinge") or (t == "hinge2") or (t == "hinge")
-                                isValid, hasJoint = self._queryAttribute(node, "joint", jointCheck, False)
+                                isValid, hasJoint = self._query_attribute(node, "joint", jointCheck, False)
                                 isGroupValid &= isValid
                                 if not node.phys_root and isValid and hasJoint:
                                         print("Error: root node %s may not be jointed to anything else!" % node.getFullName())
                                         isGroupValid = False
-                                isGroupValid &= self._queryAttribute(node, "mass", lambda x: (x > 0 and x < 1000000))[0]
-                                isGroupValid &= self._queryAttribute(node, "bounce", lambda x: (x >= 0 and x <= 1))[0]
-                                isGroupValid &= self._queryAttribute(node, "friction", lambda x: (x >= 0 and x <= 100))[0]
-                                isGroupValid &= self._queryAttribute(node, "affected_by_gravity", lambda x: x==True or x==False)[0]
+                                isGroupValid &= self._query_attribute(node, "mass", lambda x: (x > 0 and x < 1000000))[0]
+                                isGroupValid &= self._query_attribute(node, "bounce", lambda x: (x >= 0 and x <= 1))[0]
+                                isGroupValid &= self._query_attribute(node, "friction", lambda x: (x >= 0 and x <= 100))[0]
+                                isGroupValid &= self._query_attribute(node, "affected_by_gravity", lambda x: x==True or x==False)[0]
                 for node in group:
                         #print("Checking physics II for", node)
                         if node.getName().startswith("phys_") and node.nodetype == "transform":
                                 root = node
                                 current_parent = node.phys_parent
                                 del node.phys_parent
-                                isValid, hasJoint = self._queryAttribute(root, "joint", jointCheck, False)
+                                isValid, hasJoint = self._query_attribute(root, "joint", jointCheck, False)
                                 while root and isValid and not hasJoint:
                                         if not hasattr(root, "phys_root"):
                                                 isGroupValid = False
@@ -458,8 +465,8 @@ class GroupReader(DefaultMAReader):
                                                 break
                                         root = root.phys_root
                                         if root and root.getName().startswith("phys_"):
-                                                print("Moving %s from parent %s (meshp %s) into root %s" %
-                                                      (node.getName(), current_parent.getName(), node.getParent().getName(), root.getName()))
+                                                #print("Moving %s from parent %s (meshp %s) into root %s" %
+                                                #      (node.getName(), current_parent.getName(), node.getParent().getName(), root.getName()))
                                                 node.phys_root = root
                                                 current_parent.phys_children.index(node)
                                                 current_parent.phys_children.remove(node)
@@ -471,7 +478,7 @@ class GroupReader(DefaultMAReader):
                                                         pass
                                                 root.phys_children += [node]
                                                 current_parent = root
-                                                isValid, hasJoint = self._queryAttribute(root, "joint", jointCheck, False)
+                                                isValid, hasJoint = self._query_attribute(root, "joint", jointCheck, False)
                                 if node.phys_root:
                                         node.phys_root.is_phys_root = True
                 return isGroupValid
@@ -675,16 +682,14 @@ class GroupReader(DefaultMAReader):
                 mparent = parent
                 parent = None
                 while mparent != None:
-                        print("Looking for phys parent for %s in %s..." % (phys.getName(), mparent.getName()))
+                        #print("Looking for phys parent for %s in %s..." % (phys.getName(), mparent.getName()))
                         children = self._listchildnodes(mparent.getFullName(), mparent, "phys_", group, False)
                         phys_nodes = list(filter(lambda x: x.getName() != phys.getName(), children))
                         if phys_nodes:
                                 parent = self.find_phys_root(mparent, phys_nodes)
                                 if parent:
-                                        print("*********** Picked parent node", parent)
+                                        #print("*********** Picked parent node", parent)
                                         break
-                        else:
-                                print("Skipping through mesh parent %s!" % mparent.getFullName())
                         mparent = mparent.getParent()
                 #print("Phys %s has parent %s" % (phys.getFullName(), parent.getFullName()))
                 if parent == None:
@@ -712,7 +717,7 @@ class GroupReader(DefaultMAReader):
 ##                if not r and physlist:
 ##                        print("Error: could not find phys parent to mesh %s!" % mesh.getName())
 ##                        sys.exit(3)
-                print("Found phys root", r, "for", mesh)
+                #print("Found phys root", r, "for", mesh)
                 return r
 
 
@@ -736,7 +741,7 @@ class GroupReader(DefaultMAReader):
                                 if p.phys_ref:
                                         phys = self.find_phys_root(p, p.phys_ref)
                                         if phys:
-                                                print("Mesh %s hooking onto phys %s." % (mesh.getName(), phys.getName()))
+                                                #print("Mesh %s hooking onto phys %s." % (mesh.getName(), phys.getName()))
                                                 mesh.phys_ref += [phys]
                                                 phys.mesh_ref += [mesh]
                                                 break
@@ -813,7 +818,7 @@ class GroupReader(DefaultMAReader):
                 return childlist+grandchildlist
 
 
-        def _queryAttribute(self, node, attrname, check, err_missing=True):
+        def _query_attribute(self, node, attrname, check, err_missing=True):
                 try:
                         value = node.get_fixed_attribute(attrname)
                 except KeyError:
@@ -826,7 +831,7 @@ class GroupReader(DefaultMAReader):
                 return isValid, value
 
 
-        def _insertInSameIslandAs(self, islands, same, node, allow_disconnected):
+        def _insert_in_same_island_as(self, islands, same, node, allow_disconnected):
                 if self._isInIslands(islands, node):
                         print("Error: trying to re-insert already inserted node '%s'!" % node.getFullName())
                         return False
@@ -861,11 +866,18 @@ def printfeats(feats):
 
 
 def main():
-        if len(sys.argv) != 2:
-                print("Usage: %s <basename>")
-                print("Reads basename.ma and basename.ini and writes some output chunky files.")
-                sys.exit(20)
-        rd = GroupReader(sys.argv[1])
+        usage = "usage: %prog [options] <filebasename>\n" + \
+                "Reads filebasename.ma and filebasename.ini and writes some output chunky files."
+        parser = optparse.OptionParser(usage=usage, version="%prog 0.1")
+        parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False, help="make lots of noise")
+        (options, args) = parser.parse_args()
+
+        if len(args) != 1:
+                if not args:
+                        parser.error("no filebasename supplied")
+                else:
+                        parser.error("only one filebasename can be supplied")
+        rd = GroupReader(args[0])
         rd.doread()
 
         #print()
@@ -877,18 +889,19 @@ def main():
         #[p_p(root) for root in filter(lambda n: n.getName()=="phys_body", rd.group)]
         #print()
 
-        pwr = chunkywriter.PhysWriter(sys.argv[1], rd.group, rd.config)
-        mwr = chunkywriter.MeshWriter(sys.argv[1], rd.group, rd.config)
-        cwr = chunkywriter.ClassWriter(sys.argv[1], rd.group, rd.config)
+        pwr = chunkywriter.PhysWriter(args[0], rd.group, rd.config)
+        mwr = chunkywriter.MeshWriter(args[0], rd.group, rd.config)
+        cwr = chunkywriter.ClassWriter(args[0], rd.group, rd.config)
         pwr.write()
         mwr.write()
         cwr.write()
-        feats = {}
-        pwr.addfeats(feats)
-        mwr.addfeats(feats)
-        cwr.addfeats(feats)
-        printfeats(feats)
-        print("Import successful.")
+        if options.verbose:
+                feats = {}
+                pwr.addfeats(feats)
+                mwr.addfeats(feats)
+                cwr.addfeats(feats)
+                printfeats(feats)
+        print("%s - import ok." % args[0])
 
 
 if __name__=="__main__":

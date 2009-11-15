@@ -187,13 +187,6 @@ def adjustnode(node):
                 z[0,1] = +math.sin(ra.z)
                 z[1,0] = -math.sin(ra.z)
                 z[1,1] = +math.cos(ra.z)
-##                        if ra.x:
-##                                print("X:")
-##                                print(x)
-##                                print("Y:")
-##                                print(y)
-##                                print("Z:")
-##                                print(z)
                 ro = self.getAttrValue("ro", "ro", "int", default=0)
                 rotorder = ["x*y*z", "y*z*x", "z*x*y", "x*z*y", "y*x*z", "z*y*x"]
                 mra = eval(rotorder[ro])
@@ -206,7 +199,7 @@ def adjustnode(node):
                 return phys
         def getabsirot(self):
                 root = self.getphysmaster().getParent()
-                print("getabsirot checking", root)
+                #print("getabsirot checking", root)
                 return root.gettransformto(None, "inverse_initial_r").inverse().decompose()[1]
         node.fix_attribute = types.MethodType(fix_attribute, node)
         node.get_fixed_attribute = types.MethodType(get_fixed_attribute, node)
