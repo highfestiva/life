@@ -484,15 +484,16 @@ class PhysWriter(ChunkyWriter):
 
 
         def _getshape(self, node):
-                shapenode = self._findphyschildnode(parent=node, nodetype="mesh")
-                if not shapenode:
-                        print("Error: shape for node '%s' does not exist." % node.getFullName())
-                        sys.exit(11)
-                in_nodename = shapenode.getInNode("i", "i")[0]
-                if not in_nodename:
-                        print("Error: input shape for node '%s' does not exist." % shapenode.getFullName())
-                        sys.exit(12)
-                in_node = self._findglobalnode(in_nodename)
+##                shapenode = self._findphyschildnode(parent=node, nodetype="mesh")
+##                if not shapenode:
+##                        print("Error: shape for node '%s' does not exist." % node.getFullName())
+##                        sys.exit(11)
+##                in_nodename = shapenode.getInNode("i", "i")[0]
+##                if not in_nodename:
+##                        print("Error: input shape for node '%s' does not exist." % shapenode.getFullName())
+##                        sys.exit(12)
+##                in_node = self._findglobalnode(in_nodename)
+                in_node = node.shape
                 if not in_node:
                         print("Error: unable to find input shape node '%s'." % in_nodename)
                         sys.exit(13)
@@ -503,11 +504,12 @@ class PhysWriter(ChunkyWriter):
 
 
         def _findphyschildnode(self, parent, nodetype):
-                for node in self.group:
-                        if node.getName().startswith("phys_") and node.nodetype == nodetype and node.getParent() == parent:
-                                return node
-                print("Warning: certain node not found!")
-                return None
+                return parent.shape
+##                for node in self.group:
+##                        if node.getName().startswith("phys_") and node.nodetype == nodetype and node.getParent() == parent:
+##                                return node
+##                print("Warning: certain node not found!")
+##                return None
 
 
         def _count_transforms(self):

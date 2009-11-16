@@ -48,7 +48,7 @@ class GroupReader(DefaultMAReader):
         def __init__(self, basename):
                 DefaultMAReader.__init__(self)
                 self.bad_types = ["camera", "lightLinker", "displayLayerManager", "displayLayer", \
-                                  "renderLayerManager", "renderLayer", "script", "<unknown>", "phong", \
+                                  "renderLayerManager", "renderLayer", "script", "phong", \
                                   "shadingEngine", "materialInfo", "groupId", "groupParts", "lambert", \
                                   "layeredShader", "deleteComponent"]
                 self.basename = basename
@@ -106,6 +106,9 @@ class GroupReader(DefaultMAReader):
                         sys.exit(4)
                 if not self.validate_phys_group(group):
                         print("Invalid physics group! Terminating due to error.")
+                        sys.exit(3)
+                if not self.validate_phys_shapes(group):
+                        print("Invalid physics shapes! Terminating due to error.")
                         sys.exit(3)
                 if not self.validategroup(group):
                         print("Invalid group! Terminating due to error.")
@@ -183,6 +186,9 @@ class GroupReader(DefaultMAReader):
                 for island in islands:
                         for n in island:
                                 if n.getName() == "rg_export":
+                                        if not modified_time:
+                                                print("Error: maya file does not contain the v2009 format modification string.")
+                                                sys.exit(3)
                                         t = n.get_fixed_attribute("time").strip("\"")
                                         t0 = datetime.datetime.strptime(t.split(".")[0], "%Y-%m-%dT%H:%M:%S")
                                         t1 = datetime.datetime.strptime(modified_time.split(".")[0], "%Y-%m-%dT%H:%M:%S")
@@ -193,6 +199,9 @@ class GroupReader(DefaultMAReader):
                                                 print("Error: .ma file was not saved within %i seconds from internal export. Time diff is %s." % (secondlimit, str(diff)))
                                                 sys.exit(19)
                                         return True
+                                else:
+                                        #print(islands.index(island), n.getName(), "-", n.nodetype)
+                                        pass
                 print("Error: you need to manually do an internal export of meshes.")
                 sys.exit(19)
 
@@ -202,10 +211,15 @@ class GroupReader(DefaultMAReader):
                         for n in island:
                                 if n.nodetype in self.bad_types or \
                                         (island.index(n) == 0 and n.getName().startswith("ignore_")):
-                                        #print("Removing %s." % n.nodetype)
+                                        #print("Removing bad %s." % n.nodetype)
                                         islands.remove(island)
                                         self.filterIslands(islands)
                                         break
+                                if n.nodetype == "<unknown>" and n.getParent() == None:
+                                        islands.remove(island)
+                                        self.filterIslands(islands)
+                                        break
+
                 return islands
 
 
@@ -431,9 +445,10 @@ class GroupReader(DefaultMAReader):
 
         def validate_phys_group(self, group):
                 isGroupValid = True
+                # Check that joints and tweaks are correct.
                 for node in group:
-                        #print("Checking physics for", node)
                         if node.getName().startswith("phys_") and node.nodetype == "transform":
+                                node.shape = None
                                 node.is_phys_root = False
                                 #print("Before resolve...")
                                 isGroupValid &= self._resolve_phys(node, group)
@@ -451,8 +466,8 @@ class GroupReader(DefaultMAReader):
                                 isGroupValid &= self._query_attribute(node, "bounce", lambda x: (x >= 0 and x <= 1))[0]
                                 isGroupValid &= self._query_attribute(node, "friction", lambda x: (x >= 0 and x <= 100))[0]
                                 isGroupValid &= self._query_attribute(node, "affected_by_gravity", lambda x: x==True or x==False)[0]
+                # Check move all physics nodes to their respective physics root.
                 for node in group:
-                        #print("Checking physics II for", node)
                         if node.getName().startswith("phys_") and node.nodetype == "transform":
                                 root = node
                                 current_parent = node.phys_parent
@@ -481,6 +496,34 @@ class GroupReader(DefaultMAReader):
                                                 isValid, hasJoint = self._query_attribute(root, "joint", jointCheck, False)
                                 if node.phys_root:
                                         node.phys_root.is_phys_root = True
+                return isGroupValid
+
+
+        def validate_phys_shapes(self, group):
+                isGroupValid = True
+                # Connect phys transform with shape.
+                for node in group:
+                        if node.getName().startswith("phys_") and node.nodetype == "mesh":
+                                for parent in node.getparents():
+                                        if parent.getName().startswith("phys_") and parent.nodetype == "transform":
+                                                if not parent.shape:
+                                                        in_nodename = node.getInNode("i", "i")[0]
+                                                        if in_nodename:
+                                                                parent.shape = self.findNode(in_nodename)
+                                                                if not parent.shape:
+                                                                        print("Error: %s's input node %s does not exist!" % (node.getFullName(), in_nodename))
+                                                                        isGroupValid = False
+                                                        else:
+                                                                print("Error: %s does not have an input node. Create node by instancing instead." % (node.getFullName()))
+                                                                isGroupValid = False
+                                                else:
+                                                        print("Error: %s's parent %s seems to have >1 shape!" % (node.getName(), parent.getFullName()))
+                                                        isGroupValid = False
+                for node in group:
+                        if node.getName().startswith("phys_") and node.nodetype == "transform":
+                                if not node.shape:
+                                        print("Error: %s has no primitive shape for physics (did you 'delete history'?)!" % node.getFullName())
+                                        isGroupValid = False
                 return isGroupValid
 
 
