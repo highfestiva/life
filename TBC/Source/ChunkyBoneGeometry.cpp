@@ -105,8 +105,7 @@ bool ChunkyBoneGeometry::CreateJoint(ChunkyPhysics* pStructure, PhysicsManager* 
 
 			const Lepra::TransformationF& lBodyTransform = pStructure->GetTransformation(this);
 			const Lepra::Vector3DF lAnchor = lBodyTransform.GetPosition() +
-				(lBodyTransform.GetOrientation() *
-				Lepra::Vector3DF(mBodyData.mParameter[6], mBodyData.mParameter[7], mBodyData.mParameter[8]));
+				Lepra::Vector3DF(mBodyData.mParameter[6], mBodyData.mParameter[7], mBodyData.mParameter[8]);
 			mJointId = pPhysics->CreateHingeJoint(mBodyData.mParent->GetBodyId(),
 				GetBodyId(), lAnchor, lHingeAxis);
 			pPhysics->SetJointParams(mJointId, mBodyData.mParameter[4], mBodyData.mParameter[5], 0);

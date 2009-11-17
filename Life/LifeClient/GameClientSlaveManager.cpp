@@ -940,8 +940,9 @@ void GameClientSlaveManager::DrawDebugStaple(int pIndex, int pHeight, const Lepr
 void GameClientSlaveManager::DrawSyncDebugInfo()
 {
 	const bool lDebugAxes = CURE_RTVAR_TRYGET(GetVariableScope(), RTVAR_DEBUG_3D_ENABLEAXES, false);
-	const bool lDebugShape = CURE_RTVAR_TRYGET(GetVariableScope(), RTVAR_DEBUG_3D_ENABLESHAPE, false);
-	if (lDebugAxes || lDebugShape)
+	const bool lDebugJoints = CURE_RTVAR_TRYGET(GetVariableScope(), RTVAR_DEBUG_3D_ENABLEJOINTS, false);
+	const bool lDebugShapes = CURE_RTVAR_TRYGET(GetVariableScope(), RTVAR_DEBUG_3D_ENABLESHAPES, false);
+	if (lDebugAxes || lDebugJoints || lDebugShapes)
 	{
 		Lepra::ScopeLock lLock(GetTickLock());
 		mUiManager->GetRenderer()->ResetClippingRect();
@@ -963,9 +964,13 @@ void GameClientSlaveManager::DrawSyncDebugInfo()
 			{
 				lObject->DebugDrawPrimitive(UiCure::CppContextObject::DEBUG_AXES);
 			}
-			if (lDebugShape)
+			if (lDebugJoints)
 			{
-				lObject->DebugDrawPrimitive(UiCure::CppContextObject::DEBUG_SHAPE);
+				lObject->DebugDrawPrimitive(UiCure::CppContextObject::DEBUG_JOINTS);
+			}
+			if (lDebugShapes)
+			{
+				lObject->DebugDrawPrimitive(UiCure::CppContextObject::DEBUG_SHAPES);
 			}
 		}
 	}

@@ -161,6 +161,11 @@ class PreProcessor:
                 # Read another line before processing the line
                 self.context.linenr += 1
                 continue
+            elif line[:2]!="//" and line[-1:]!=';':    # Jonte's addition.
+                linebuffer += line
+                # Read another line before processing the line
+                self.context.linenr += 1
+                continue
             else:
                 linebuffer += line
                 
