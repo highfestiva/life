@@ -8,6 +8,7 @@ from mayaascii import *
 from quat import quat
 from vec3 import vec3
 from vec4 import vec4
+import options
 import shape
 
 import math
@@ -346,7 +347,8 @@ class PhysWriter(ChunkyWriter):
                 #        (node.getName(), node.xformparent.getName(), pos))
                 #pos = [0.5, -0.866, -3.2]
                 data = q[:]+pos[:3]
-                #print("Writing bone %s with pos" % node.getName(), data)
+                if options.options.verbose:
+                        print("Writing bone %s with world pos %s." % (node.getName(), node.get_world_translation()))
                 self._addfeat("bone:bones", 1)
                 self._writexform(data)
                 node.writecount += 1

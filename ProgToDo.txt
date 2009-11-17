@@ -1,0 +1,132 @@
+Game
+---------
++ Better friction on tires.
++ Reduce TCP collision packets sent when having multiple collisions in quick sequence.
++ Create excavator that can "dig".
++ Make sphere work again.
++ Fix multi-splitscreen-controls (including save of settings files).
++ Move system settings file execution into master ticker.
++ Write settings file every time, add user settings file.
++ Import vehicle colors.
++ Flip axes correctly in CppContextObject and UI ditto.
+. Create base world. Use mesh, not primitives, for collision.
+. Create crane that can pull wire up.
+. Bug fix attachments (i.e. crane picks up car) so that they work properly (without crashing).
+. Add wind mill to world.
+. Add server-triggered garage door to world. Make sure trigger coding is easy!!!
+. Add elevator to world. Trigger five seconds when after the vehicle enters zone.
+. Add possibility to easily change vehicle during play.
+. Add different physical worlds on all sides of the box, and add gravity change! Cewlness x 0x1000000!!!
+. Take some action when falling over the edge of the "World Box".
+. Make vehicle flip over to correct rotation whenever it accidentally flipped to its side/front/back.
+. Add options menu.
+. Picking best possible default control options.
+. Add login progress bar.
+. Adjust the camera view according to the vehicle: huge crane, small ball...
+. Show logo when starting game.
+. Add "what you're missing out on when not running Pro" in the end of the demo (=release client?).
+. Update and adjust what messages are shown on screen when starting up.
+
+ 
+Engine
+----------
++ Make sure that splitscreen1 sees that splitscreen2 logs out.
++ Only render "red send square" when debug flag is enabled.
++ Add rendering of "green receive square" when receiving positional data.
++ Fix splitscreen lag. Currently not acceptable.
++ Fix initial-drag-on-client-window-generates-GUI-click.
++ Don't allow client to send out a change in physics state (transform+vel+acc) when colliding, this should be done by the server.
++ Add more input controllers: mouse, joy, pad... Add both force and max-vel to interface?
++ Separate up/down from handbreak/break. Create GTA-steering!
++ Change controlls to be more dynamic. For instance: control breaks by means of using roll engine force (re-use engine).
++ Fix so that TAB in GUI does not enter an empty char.
++ Make sure Delete key in GUI deletes a char at once, not at next caret update time.
++ Simple <enter> to "click" default button in dialog (especially true for login).
++ Fix calibration end-values from start (at least on Win32).
++ GUI border corners are not rendered. Fix!
+. Currently all geometry (mesh) instances are visible when running splitscreen. Remove all but one.
+. Make import tool position all jointed objects correctly (currently seems to disregard some offset - such as own scaling - cause e.g. truck_01 wheels to be misplaced).
+. Add basic material loading (ambient, diffuse, specular).
+. Port client to Linux.
+. Port client to Mac OS X.
+. Fix laggy/jerky camera motion by interpolation/extrapolation. Cam only moves when physics moves?
+. Add loading of all formats, especially world format.
+. Add some type of spawn engine for player vehicles.
+. Restrict flying/bouncing to a certain volume.
+. Add "switch to splitscreen" by buttonpress ingame.
+. Port Posix' SystemManager.
+. Creating a less jittery experience: a) sync lag/jitter immediately after logging in, b) sorting out old msgs on client, c) keeping track of jitter on client side.
+. Use animated texture instead of wheels for excavator/bandwagon.
+. Creating physics objects as resources.
+. Create an import thingie/module for graphics/physics - must be included in C++.
+. Loading physics objects from disk.
+. Loading graphics objects from disk.
+. Sounds. Music.
+. Endianify all Chunky saves/loads.
+. Creating group objects as resources.
+. Loading group objects from disk.
+. Moving out platform specifics from (Ui)CppContextObject.cpp to LifeXxx.cpp.
+. Dropping all non-game components from any other file out there (Cure, UiCure).
+. Disabling keyboard steering when any splitscreen console window is down.
+. Chat - client side UI.
+. Logging on in two steps: a) normal login, server returns avatars, and b) enter world by selecting avatar. (After (a) the sync goes.)
+. Text/console clients, plural. Run in same process.
+. Include server in same binary.
+. Include (optional) object position when creating an object over the network.
+. Add context-sensitive and more degrees of freedom for control mechanisms: ball+ufo needs analogue fwd-bkg, cranes, excavators, etc.
+. Make camera always keep a free line of sight to the controlled object.
+. Make ODE wheels keep straight using dBodySetFiniteRotationMode() and dBodySetFiniteRotationAxis() instead of a friggen motor!
+. Wrap physics frame counter (game could go on forever).
+. Try to fixate hardware devices, so that Device0 doesn't mean game pad one day and joystick the next.
+. Design GUI. Menus as well as toolbars during play. Also icons for picking vehicle.
+. Create a master server, which at first only receives user feedback.
+. Add questionaire to end of demo game (=release client?). Send answers to master server.
+. Make sure memfile log always gets everything (including trace+debug+performance). Tail contents to con and file upon crash.
+. Improve vehicle wheel friction.
+. Fix cursor in GUI (used to cause XOR problems).
+. Do not resend positional info frequently when pushed/collided similarly (i.e. excavator holding down monster truck).
+. Make import tool position vehicle at [z + distance from origin to lowest mesh point on vehicle].
+
+ 
+Quality
+----------
++ Make sure shutting down client with two simultaneously logged-in users gets logged out from the server.
++ Fix ODE box rotation bug by simply keeping the angular velocity below a certain threashold.
++ Fix bug sometimes induced on Excavator: server says it stops on each frame!
++ Make key settings save as strings, not as numbers in the console save files.
++ Resetting the "threadsafe" flag in the right place/thread after the physics thread is done (not in physics thread, but in main).
+. Being able to log in/out on one splitscreen while running normally on the other (no freeze).
+. Make build in one step: server, client, Linux, Windows...
+. Make framerate smooth, don't sleep a fixed number of milliseconds per frame. Ensure non-shaking excavator.
+. Don't allow program to become unresponsive when starting up (alt-tab away and back). Related to some other issue in this list.
+. Print Git (or some other) revision to log when starting.
+. Add support for checking if loaded controller configuration contains devices no longer present in the system when starting, and if so reset 'em.
+. Add support for auto-configuring best controller configuration.
+. Produce autostarting autotest after commit. Run in Linux at least.
+. Give feedback while logging in. Especially after a few seconds of nothingness.
+. Check heap regularly (using _heapchk() in Win32).
+. Assertions on getting access to "wrong" parts of the system with the wrong thread. (Such as dropping users in NetworkServer.cpp from the TCP thread.)
+. Add relevant thread safety to classes here and there (NetworkServer, for instance). Add interfaces to isolate functionality. Use Sigges design pattern.
+. When input is hindered (such as when pulling joystick back, then taking down the console) the excavator behaves jerkily.
+. Assertions on high and stable frame rate. Includes the network sliding average frame rate (should be filtered?).
+. Stresstest (use .lsh).
+. Add crash control.
+. Update concept of performance measurements; those which are dynamically laid out as called in hierarchy. Use "copy on write" with pointer ref to hash table to avoid thread clashes.
+. Debug graphs and follow-up optimization.
+. Create and use "lag socket" (sys_socket through factory?).
+. Start alpha-testing with human users.
+. Go through all TODOs.
+. Fix all source file header comments (Righteous games, 2010?).
+. If clicking "slowly" the game starts with the mouse state shown as "down". Perhaps the same applies when clicking in another app? This makes it inpossible to click a button on the first attempt after going back to the game.
+. Rename PhysicsEngine and ChunkyXxx classes to sensible names.
+. Verify that destruction of ContextObject during load does not cause an invalid resource to float around the resource manager.
+. Remove memory all leaks.
+. Test thoroughly!
+. Polish.
+. Refactor.
+. Run Simian Analyzer, remove duplicate code.
+. Go through all RG e-mail to ensure all is in place.
+. Add homepage for both Righteous Games as well as The Game.
+. Always use unicode script files.
+. Exchange "varning: flerteckens teckenkonstant" (ChunkyLoader.h) to something portable and beautiful.
+ 

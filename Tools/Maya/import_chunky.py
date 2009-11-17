@@ -9,6 +9,7 @@ from vec3 import *
 from vec4 import *
 import rgnode
 import chunkywriter
+import options
 
 from functools import reduce
 import configparser
@@ -913,7 +914,7 @@ def main():
                 "Reads filebasename.ma and filebasename.ini and writes some output chunky files."
         parser = optparse.OptionParser(usage=usage, version="%prog 0.1")
         parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False, help="make lots of noise")
-        (options, args) = parser.parse_args()
+        options.options, args = parser.parse_args()
 
         if len(args) != 1:
                 if not args:
@@ -938,7 +939,7 @@ def main():
         pwr.write()
         mwr.write()
         cwr.write()
-        if options.verbose:
+        if options.options.verbose:
                 feats = {}
                 pwr.addfeats(feats)
                 mwr.addfeats(feats)
