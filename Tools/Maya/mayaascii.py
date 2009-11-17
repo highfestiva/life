@@ -692,7 +692,7 @@ class Node:
                 # Remove self from the previous parent's children list...
                 if self._parent!=None:
                         self._parent._children.remove(self)
-                        self._parents.remove(parent)
+                        self._parents.remove(self._parent)
 
                 # Set the new parent...
                 self._parent = parent
