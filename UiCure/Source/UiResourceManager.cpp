@@ -262,8 +262,12 @@ bool GeometryResource::Load()
 
 	UiTbc::TriangleBasedGeometry* lGeometry = 0;
 
+	//Lepra::StringUtility::StringVector lParts = Lepra::StringUtility::Split(GetName(), _T(";"));
+	//const Lepra::String& lFilename = lParts[0];
+	const Lepra::String& lFilename = GetName();
+
 	Lepra::DiskFile lFile;
-	if (lFile.Open(GetName(), Lepra::DiskFile::MODE_READ))
+	if (lFile.Open(lFilename, Lepra::DiskFile::MODE_READ))
 	{
 		UiTbc::ChunkyMeshLoader lLoader(&lFile, false);
 		lGeometry = new UiTbc::TriangleBasedGeometry();
@@ -275,125 +279,125 @@ bool GeometryResource::Load()
 			lGeometry = 0;
 		}
 	}
-	else if (GetName().find(_T("box_002_mesh")) != Lepra::String::npos)
+	else if (lFilename.find(_T("box_002_mesh")) != Lepra::String::npos)
 	{
 		Lepra::Vector3DF lDimensions(2.0f, 1.0f, 3.5f);
 		lGeometry = UiTbc::BasicMeshCreator::CreateFlatBox(lDimensions.x, lDimensions.y, lDimensions.z);
 		lMaterial.SetColor(0, 1, 0);
 		lCubeMappingScale = lGeometry->GetBoundingRadius();
 	}
-	else if (GetName().find(_T("sphere_002_mesh")) != Lepra::String::npos)
+	else if (lFilename.find(_T("sphere_002_mesh")) != Lepra::String::npos)
 	{
 		float lRadius = 1.0f;
 		lGeometry = UiTbc::BasicMeshCreator::CreateEllipsoid(lRadius, lRadius, lRadius, 10, 10);
 		lMaterial.SetColor(1, 0, 1);
 	}
-	else if (GetName().find(_T("car_001_body_mesh")) != Lepra::String::npos)
+	else if (lFilename.find(_T("car_001_body_mesh")) != Lepra::String::npos)
 	{
 		Lepra::Vector3DF lBodyDimensions(1.9f, 4.9f, 0.6f);
 		lGeometry = UiTbc::BasicMeshCreator::CreateFlatBox(lBodyDimensions.x, lBodyDimensions.y, lBodyDimensions.z);
 		lMaterial.SetColor(0.9f, 0.8f, 0.3f);
 		lCubeMappingScale = lGeometry->GetBoundingRadius();
 	}
-	else if (GetName().find(_T("car_001_top_mesh")) != Lepra::String::npos)
+	else if (lFilename.find(_T("car_001_top_mesh")) != Lepra::String::npos)
 	{
 		Lepra::Vector3DF lBodyDimensions(1.6f, 2.9f, 0.6f);
 		lGeometry = UiTbc::BasicMeshCreator::CreateFlatBox(lBodyDimensions.x, lBodyDimensions.y, lBodyDimensions.z);
 		lMaterial.SetColor(0.8f, 0.6f, 0.2f);
 	}
-	else if (GetName().find(_T("monster_001_body_mesh")) != Lepra::String::npos)
+	else if (lFilename.find(_T("monster_001_body_mesh")) != Lepra::String::npos)
 	{
 		Lepra::Vector3DF lBodyDimensions(3.0f, 5.0f, 0.7f);
 		lGeometry = UiTbc::BasicMeshCreator::CreateFlatBox(lBodyDimensions.x, lBodyDimensions.y, lBodyDimensions.z);
 		lMaterial.SetColor(0.0f, 0.0f, 0.5f);
 	}
-	else if (GetName().find(_T("monster_001_top_mesh")) != Lepra::String::npos)
+	else if (lFilename.find(_T("monster_001_top_mesh")) != Lepra::String::npos)
 	{
 		Lepra::Vector3DF lBodyDimensions(3.0f, 3.0f, 0.7f);
 		lGeometry = UiTbc::BasicMeshCreator::CreateFlatBox(lBodyDimensions.x, lBodyDimensions.y, lBodyDimensions.z);
 		lMaterial.SetColor(1, 1, 1);
 		lCubeMappingScale = lGeometry->GetBoundingRadius();
 	}
-	else if (GetName().find(_T("excavator_703_body_mesh")) != Lepra::String::npos)
+	else if (lFilename.find(_T("excavator_703_body_mesh")) != Lepra::String::npos)
 	{
 		Lepra::Vector3DF lBodyDimensions(2.9f, 3.0f, 1.5f);
 		lGeometry = UiTbc::BasicMeshCreator::CreateFlatBox(lBodyDimensions.x, lBodyDimensions.y, lBodyDimensions.z);
 		lMaterial.SetColor(0.7f, 0.2f, 0.2f);
 	}
-	else if (GetName().find(_T("excavator_703_top_mesh")) != Lepra::String::npos)
+	else if (lFilename.find(_T("excavator_703_top_mesh")) != Lepra::String::npos)
 	{
 		Lepra::Vector3DF lBodyDimensions(1.0f, 1.5f, 0.6f);
 		lGeometry = UiTbc::BasicMeshCreator::CreateFlatBox(lBodyDimensions.x, lBodyDimensions.y, lBodyDimensions.z);
 		lMaterial.SetColor(0.2f, 0.8f, 0.9f, 0.6f);
 	}
-	else if (GetName().find(_T("car_antenna_mesh")) != Lepra::String::npos)
+	else if (lFilename.find(_T("car_antenna_mesh")) != Lepra::String::npos)
 	{
 		lGeometry = UiTbc::BasicMeshCreator::CreateCylinder(0.1f, 0.05f, 2, 8);
 	}
-	else if (GetName().find(_T("car_001_wheel_mesh")) != Lepra::String::npos)
+	else if (lFilename.find(_T("car_001_wheel_mesh")) != Lepra::String::npos)
 	{
 		const float lWheelRadius = 0.3f;
 		const float lWheelWidth = lWheelRadius*1;
 		lGeometry = UiTbc::BasicMeshCreator::CreateCylinder(lWheelRadius, lWheelRadius, lWheelWidth, 10);
 		lMaterial.SetColor(0.1f, 0.1f, 0.1f);
 	}
-	else if (GetName().find(_T("monster_001_wheel_mesh")) != Lepra::String::npos)
+	else if (lFilename.find(_T("monster_001_wheel_mesh")) != Lepra::String::npos)
 	{
 		const float lWheelRadius = 1.0f;
 		const float lWheelWidth = lWheelRadius*0.8f;
 		lGeometry = UiTbc::BasicMeshCreator::CreateCylinder(lWheelRadius, lWheelRadius, lWheelWidth, 10);
 		lMaterial.SetColor(0.1f, 0.1f, 0.1f);
 	}
-	else if (GetName().find(_T("excavator_703_boom1_mesh")) != Lepra::String::npos)
+	else if (lFilename.find(_T("excavator_703_boom1_mesh")) != Lepra::String::npos)
 	{
 		Lepra::Vector3DF lBodyDimensions(0.6f, 0.6f, 2.5f);
 		lGeometry = UiTbc::BasicMeshCreator::CreateFlatBox(lBodyDimensions.x, lBodyDimensions.y, lBodyDimensions.z);
 		lMaterial.SetColor(0.7f, 0.2f, 0.2f);
 	}
-	else if (GetName().find(_T("excavator_703_boom2_mesh")) != Lepra::String::npos)
+	else if (lFilename.find(_T("excavator_703_boom2_mesh")) != Lepra::String::npos)
 	{
 		Lepra::Vector3DF lBodyDimensions(0.6f, 0.6f, 3.2f);
 		lGeometry = UiTbc::BasicMeshCreator::CreateFlatBox(lBodyDimensions.x, lBodyDimensions.y, lBodyDimensions.z);
 		lMaterial.SetColor(0.7f, 0.2f, 0.2f);
 	}
-	else if (GetName().find(_T("excavator_703_arm_mesh")) != Lepra::String::npos)
+	else if (lFilename.find(_T("excavator_703_arm_mesh")) != Lepra::String::npos)
 	{
 		Lepra::Vector3DF lBodyDimensions(0.4f, 3.0f, 0.4f);
 		lGeometry = UiTbc::BasicMeshCreator::CreateFlatBox(lBodyDimensions.x, lBodyDimensions.y, lBodyDimensions.z);
 		lMaterial.SetColor(0.7f, 0.2f, 0.2f);
 	}
-	else if (GetName().find(_T("excavator_703_bucket_back_mesh")) != Lepra::String::npos)
+	else if (lFilename.find(_T("excavator_703_bucket_back_mesh")) != Lepra::String::npos)
 	{
 		Lepra::Vector3DF lBodyDimensions(1.5f, 0.8f, 0.1f);
 		lGeometry = UiTbc::BasicMeshCreator::CreateFlatBox(lBodyDimensions.x, lBodyDimensions.y, lBodyDimensions.z);
 		lMaterial.SetColor(0.3f, 0.2f, 0.1f);
 	}
-	else if (GetName().find(_T("excavator_703_bucket_floor_mesh")) != Lepra::String::npos)
+	else if (lFilename.find(_T("excavator_703_bucket_floor_mesh")) != Lepra::String::npos)
 	{
 		Lepra::Vector3DF lBodyDimensions(1.5f, 1.0f, 0.1f);
 		lGeometry = UiTbc::BasicMeshCreator::CreateFlatBox(lBodyDimensions.x, lBodyDimensions.y, lBodyDimensions.z);
 		lMaterial.SetColor(0.3f, 0.2f, 0.1f);
 	}
-	else if (GetName().find(_T("crane_whatever_tower_mesh")) != Lepra::String::npos)
+	else if (lFilename.find(_T("crane_whatever_tower_mesh")) != Lepra::String::npos)
 	{
 		Lepra::Vector3DF lBodyDimensions(2.5f, 2.5f, 25.0f);
 		lGeometry = UiTbc::BasicMeshCreator::CreateFlatBox(lBodyDimensions.x, lBodyDimensions.y, lBodyDimensions.z);
 	}
-	else if (GetName().find(_T("crane_whatever_jib_mesh")) != Lepra::String::npos)
+	else if (lFilename.find(_T("crane_whatever_jib_mesh")) != Lepra::String::npos)
 	{
 		Lepra::Vector3DF lBodyDimensions(2.5f, 20.0f, 2.5f);
 		lGeometry = UiTbc::BasicMeshCreator::CreateFlatBox(lBodyDimensions.x, lBodyDimensions.y, lBodyDimensions.z);
 	}
-	else if (GetName().find(_T("crane_whatever_wire_mesh")) != Lepra::String::npos)
+	else if (lFilename.find(_T("crane_whatever_wire_mesh")) != Lepra::String::npos)
 	{
 		lGeometry = UiTbc::BasicMeshCreator::CreateCylinder(0.05f, 0.05f, 4.75f, 10);
 	}
-	else if (GetName().find(_T("crane_whatever_hook_mesh")) != Lepra::String::npos)
+	else if (lFilename.find(_T("crane_whatever_hook_mesh")) != Lepra::String::npos)
 	{
 		Lepra::Vector3DF lBodyDimensions(0.25f, 0.25f, 0.5f);
 		lGeometry = UiTbc::BasicMeshCreator::CreateFlatBox(lBodyDimensions.x, lBodyDimensions.y, lBodyDimensions.z);
 	}
-	else if (GetName().find(_T("ground_002_")) != Lepra::String::npos)
+	else if (lFilename.find(_T("ground_002_")) != Lepra::String::npos)
 	{
 		static const float lRoadWidth = 5;
 		static const float lRoadHeight = 7;
@@ -403,27 +407,27 @@ bool GeometryResource::Load()
 		static const float lPlateauLengthCompensation = lRoadHeight/1.5f;
 		static const float lFloorSize = 500;
 		Lepra::Vector3DF lDimensions;
-		if (GetName().find(_T("ground_002_0_mesh")) != Lepra::String::npos)
+		if (lFilename.find(_T("ground_002_0_mesh")) != Lepra::String::npos)
 		{
 			lDimensions.Set(lFloorSize, lFloorSize, lFloorSize);
 		}
-		else if (GetName().find(_T("ground_002_1_mesh")) != Lepra::String::npos)
+		else if (lFilename.find(_T("ground_002_1_mesh")) != Lepra::String::npos)
 		{
 			lDimensions.Set(lRoadWidth, lUphillLength, lRoadHeight);
 		}
-		else if (GetName().find(_T("ground_002_2_mesh")) != Lepra::String::npos)
+		else if (lFilename.find(_T("ground_002_2_mesh")) != Lepra::String::npos)
 		{
 			lDimensions.Set(lUphillLength, lRoadWidth, lRoadHeight);
 		}
-		else if (GetName().find(_T("ground_002_3_mesh")) != Lepra::String::npos)
+		else if (lFilename.find(_T("ground_002_3_mesh")) != Lepra::String::npos)
 		{
 			lDimensions.Set(lRoadWidth, lPlateauLength+lPlateauLengthCompensation, lRoadHeight);
 		}
-		else if (GetName().find(_T("ground_002_4_mesh")) != Lepra::String::npos)
+		else if (lFilename.find(_T("ground_002_4_mesh")) != Lepra::String::npos)
 		{
 			lDimensions.Set(lPlateauLength, lRoadWidth, lRoadHeight);
 		}
-		else if (GetName().find(_T("ground_002_5_mesh")) != Lepra::String::npos)
+		else if (lFilename.find(_T("ground_002_5_mesh")) != Lepra::String::npos)
 		{
 			lDimensions.Set(lPlateauLength+lPlateauLengthCompensation, lRoadWidth, lRoadHeight);
 		}
@@ -437,7 +441,7 @@ bool GeometryResource::Load()
 	}
 	else
 	{
-		mLog.Errorf(_T("Could not load mesh with name '%s'."), GetName().c_str());
+		mLog.Errorf(_T("Could not load mesh with name '%s'."), lFilename.c_str());
 		assert(false);
 	}
 	if (lGeometry)
@@ -485,7 +489,7 @@ LOG_CLASS_DEFINE(UI_GFX_3D, GeometryResource);
 
 
 
-/*GeometryReferenceResource::GeometryReferenceResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const Lepra::String& pName):
+GeometryReferenceResource::GeometryReferenceResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const Lepra::String& pName):
 	GeometryResource(pUiManager, pManager, pName),
 	mClassResource(new ClassResource(pUiManager))
 {
@@ -498,9 +502,9 @@ GeometryReferenceResource::~GeometryReferenceResource()
 
 void GeometryReferenceResource::ReleaseGeometry()
 {
-	Parent::ReleaseGeometry();
 	delete (mClassResource);
 	mClassResource = 0;
+	Parent::ReleaseGeometry();
 }
 
 const Lepra::String GeometryReferenceResource::GetType() const
@@ -510,29 +514,27 @@ const Lepra::String GeometryReferenceResource::GetType() const
 
 bool GeometryReferenceResource::Load()
 {
-	assert(IsUnique());
+	//assert(IsUnique());
 	bool lOk = (mClassResource != 0);
 	assert(lOk);
 	if (lOk)
 	{
-		Lepra::StringUtility::StringVector lIdClass = Lepra::StringUtility::Split(GetName(), _T(":"), 1);
-		// TODO: remove ID splitting!
-		if (lIdClass.size() == 1)
-		{
-			mClassResource->Load(GetManager(), GetName(), ClassResource::TypeLoadCallback(this,
-				&GeometryReferenceResource::OnLoadClass));
-		}
-		else
-		{
-			mClassResource->Load(GetManager(), lIdClass[1], ClassResource::TypeLoadCallback(this,
-				&GeometryReferenceResource::OnLoadClass));
-		}
+		const Lepra::String lFilename = Lepra::StringUtility::Split(GetName(), _T(";"), 1)[0];
+		mClassResource->Load(GetManager(), lFilename, ClassResource::TypeLoadCallback(this,
+			&GeometryReferenceResource::OnLoadClass));
 	}
 	return (lOk);
 }
 
 Cure::ResourceLoadState GeometryReferenceResource::PostProcess()
 {
+	assert(mClassResource);
+	return (CreateInstance());
+}
+
+Cure::ResourceLoadState GeometryReferenceResource::CreateInstance()
+{
+	assert(mClassResource);
 	Cure::ResourceLoadState lLoadState = mClassResource->GetLoadState();
 	if (lLoadState == Cure::RESOURCE_LOAD_COMPLETE)
 	{
@@ -559,7 +561,7 @@ void GeometryReferenceResource::OnLoadClass(ClassResource*)
 {
 }
 
-LOG_CLASS_DEFINE(UI_GFX_3D, GeometryReferenceResource);*/
+LOG_CLASS_DEFINE(UI_GFX_3D, GeometryReferenceResource);
 
 
 
@@ -569,55 +571,55 @@ LOG_CLASS_DEFINE(UI_GFX_3D, GeometryReferenceResource);*/
 
 UserGeometryReferenceResource::UserGeometryReferenceResource(GameUiManager* pUiManager, const GeometryOffset& pOffset):
 	UiResource(pUiManager),
-	mOffset(pOffset),
-	mGeometryReference(0),
-	mGeometryReferenceId(UiTbc::Renderer::INVALID_GEOMETRY)
+	mOffset(pOffset)
+	//mGeometryReference(0),
+	//mGeometryReferenceId(UiTbc::Renderer::INVALID_GEOMETRY)
 {
 }
 
 UserGeometryReferenceResource::~UserGeometryReferenceResource()
 {
-	if (mGeometryReferenceId)
-	{
-		GetUiManager()->GetRenderer()->RemoveGeometry(mGeometryReferenceId);
-		mGeometryReferenceId = UiTbc::Renderer::INVALID_GEOMETRY;
-	}
-	delete (mGeometryReference);
-	mGeometryReference = 0;
+	//if (mGeometryReferenceId)
+	//{
+	//	GetUiManager()->GetRenderer()->RemoveGeometry(mGeometryReferenceId);
+	//	mGeometryReferenceId = UiTbc::Renderer::INVALID_GEOMETRY;
+	//}
+	//delete (mGeometryReference);
+	//mGeometryReference = 0;
 }
 
-void UserGeometryReferenceResource::PostProcess()
-{
-	assert(mGeometryReferenceId == UiTbc::Renderer::INVALID_GEOMETRY);
-	assert(mGeometryReference == 0);
-
-	TBC::GeometryBase* lOriginal = Parent::GetRamData();
-	mGeometryReference = new TBC::GeometryReference(lOriginal);
-	mGeometryReference->SetAlwaysVisible(true);
-	mGeometryReference->SetBasicMaterialSettings(lOriginal->GetBasicMaterialSettings());
-	mGeometryReferenceId = GetUiManager()->GetRenderer()->AddGeometry(
-		mGeometryReference, UiTbc::Renderer::MAT_NULL, UiTbc::Renderer::NO_SHADOWS);
-	assert(mGeometryReferenceId != UiTbc::Renderer::INVALID_GEOMETRY);
-}
+//void UserGeometryReferenceResource::PostProcess()
+//{
+//	assert(mGeometryReferenceId == UiTbc::Renderer::INVALID_GEOMETRY);
+//	assert(mGeometryReference == 0);
+//
+//	TBC::GeometryBase* lOriginal = Parent::GetRamData();
+//	mGeometryReference = new TBC::GeometryReference(lOriginal);
+//	mGeometryReference->SetAlwaysVisible(true);
+//	mGeometryReference->SetBasicMaterialSettings(lOriginal->GetBasicMaterialSettings());
+//	mGeometryReferenceId = GetUiManager()->GetRenderer()->AddGeometry(
+//		mGeometryReference, UiTbc::Renderer::MAT_NULL, UiTbc::Renderer::NO_SHADOWS);
+//	assert(mGeometryReferenceId != UiTbc::Renderer::INVALID_GEOMETRY);
+//}
 
 const GeometryOffset& UserGeometryReferenceResource::GetOffset() const
 {
 	return (mOffset);
 }
 
-TBC::GeometryBase* UserGeometryReferenceResource::GetRamData() const
-{
-	return (mGeometryReference);
-}
-
-UiTbc::Renderer::GeometryID UserGeometryReferenceResource::GetData() const
-{
-	return (mGeometryReferenceId);
-}
+//TBC::GeometryBase* UserGeometryReferenceResource::GetRamData() const
+//{
+//	return (mGeometryReference);
+//}
+//
+//UiTbc::Renderer::GeometryID UserGeometryReferenceResource::GetData() const
+//{
+//	return (mGeometryReferenceId);
+//}
 
 Cure::Resource* UserGeometryReferenceResource::CreateResource(Cure::ResourceManager* pManager, const Lepra::String& pName) const
 {
-	return (new GeometryResource(GetUiManager(), pManager, pName));
+	return (new GeometryReferenceResource(GetUiManager(), pManager, pName));
 }
 
 LOG_CLASS_DEFINE(UI_GFX_3D, UserGeometryReferenceResource);

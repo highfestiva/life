@@ -44,9 +44,12 @@ Engine
 + Simple <enter> to "click" default button in dialog (especially true for login).
 + Fix calibration end-values from start (at least on Win32).
 + GUI border corners are not rendered. Fix!
-. Currently all geometry (mesh) instances are visible when running splitscreen. Remove all but one.
++ Currently all geometry (mesh) instances are visible when running splitscreen. Remove all but one.
++ Make sure that meshes are reused, such as wheels on the vehicles.
 . Make import tool position all jointed objects correctly (currently seems to disregard some offset - such as own scaling - cause e.g. truck_01 wheels to be misplaced).
+. Make friction parameters in import ortogonal against top speed and mass (already orthogonal against mass). Calculate top speed by (wheel radius * wheel top rotation speed * pi * 2)...
 . Add basic material loading (ambient, diffuse, specular).
+. Update ODE to 0.11.whatevah.
 . Port client to Linux.
 . Port client to Mac OS X.
 . Fix laggy/jerky camera motion by interpolation/extrapolation. Cam only moves when physics moves?
@@ -129,4 +132,4 @@ Quality
 . Add homepage for both Righteous Games as well as The Game.
 . Always use unicode script files.
 . Exchange "varning: flerteckens teckenkonstant" (ChunkyLoader.h) to something portable and beautiful.
- 
+. Add unit test for making sure that loading more than one instance of same resource results in a single instance.

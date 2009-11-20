@@ -118,6 +118,7 @@ class GroupReader(DefaultMAReader):
                         print("Internal vector math failed! Terminating due to error.")
                         sys.exit(3)
                 self.makevertsrelative(group)
+                self.mesh_instance_reuse(group)
 
                 #self.printnodes(group)
 
@@ -310,6 +311,29 @@ class GroupReader(DefaultMAReader):
                                         vp[:3] = vtx[idx:idx+3]
                                         vp = transform*vp
                                         vtx[idx:idx+3] = vp[:3]
+
+
+        def mesh_instance_reuse(self, group):
+                meshnames = {}
+                for node in group:
+                        if node.get_fixed_attribute("rgvtx", optional=True):
+                                nodemeshname = node.getName().replace("Shape", "")
+                                if nodemeshname.startswith("m_"):
+                                        nodemeshname = nodemeshname[2:]
+                                meshbasename = self.basename+"_"+nodemeshname
+                                cnt = meshnames.get(meshbasename)
+                                if cnt == None:
+                                        cnt = 0
+                                cnt += 1
+                                meshnames[meshbasename] = cnt
+                                #print("Setting", node.getParent(), "meshbasename to", meshbasename)
+                                node.getParent().meshbasename = meshbasename
+                hasInstance = False
+                for k,v in meshnames.items():
+                        if v > 1:
+                                hasInstance = True
+                if len(group) >= 8 and not hasInstance:
+                        print("Warning: %s has no instances; highly unlikely! At least the wheels should be, right?" % options.args[0])
 
 
         def validate_orthogonality(self, group):
@@ -914,14 +938,14 @@ def main():
                 "Reads filebasename.ma and filebasename.ini and writes some output chunky files."
         parser = optparse.OptionParser(usage=usage, version="%prog 0.1")
         parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False, help="make lots of noise")
-        options.options, args = parser.parse_args()
+        options.options, options.args = parser.parse_args()
 
-        if len(args) != 1:
-                if not args:
+        if len(options.args) != 1:
+                if not options.args:
                         parser.error("no filebasename supplied")
                 else:
                         parser.error("only one filebasename can be supplied")
-        rd = GroupReader(args[0])
+        rd = GroupReader(options.args[0])
         rd.doread()
 
         #print()
@@ -933,9 +957,9 @@ def main():
         #[p_p(root) for root in filter(lambda n: n.getName()=="phys_body", rd.group)]
         #print()
 
-        pwr = chunkywriter.PhysWriter(args[0], rd.group, rd.config)
-        mwr = chunkywriter.MeshWriter(args[0], rd.group, rd.config)
-        cwr = chunkywriter.ClassWriter(args[0], rd.group, rd.config)
+        pwr = chunkywriter.PhysWriter(options.args[0], rd.group, rd.config)
+        mwr = chunkywriter.MeshWriter(options.args[0], rd.group, rd.config)
+        cwr = chunkywriter.ClassWriter(options.args[0], rd.group, rd.config)
         pwr.write()
         mwr.write()
         cwr.write()
@@ -945,7 +969,7 @@ def main():
                 mwr.addfeats(feats)
                 cwr.addfeats(feats)
                 printfeats(feats)
-        print("%s - import ok." % args[0])
+        print("%s - import ok." % options.args[0])
 
 
 if __name__=="__main__":

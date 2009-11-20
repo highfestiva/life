@@ -133,7 +133,7 @@ private:
 
 
 
-/*class GeometryReferenceResource: public GeometryResource
+class GeometryReferenceResource: public GeometryResource
 {
 	typedef GeometryResource Parent;
 public:
@@ -146,6 +146,7 @@ public:
 
 	bool Load();
 	Cure::ResourceLoadState PostProcess();
+	Cure::ResourceLoadState CreateInstance();
 
 private:
 	void Resume();
@@ -155,7 +156,7 @@ private:
 	ClassResource* mClassResource;
 
 	LOG_CLASS_DECLARE();
-};*/
+};
 
 struct GeometryOffset
 {
@@ -181,26 +182,26 @@ struct GeometryOffset
 
 
 class UserGeometryReferenceResource: public Cure::UserTypeResourceBase<
-	UserGeometryReferenceResource, GeometryResource>, public UiResource
+	UserGeometryReferenceResource, GeometryReferenceResource>, public UiResource
 {
-	typedef Cure::UserTypeResourceBase<UserGeometryReferenceResource, GeometryResource> Parent;
+	typedef Cure::UserTypeResourceBase<UserGeometryReferenceResource, GeometryReferenceResource> Parent;
 public:
 	UserGeometryReferenceResource(GameUiManager* pUiManager, const GeometryOffset& pOffset);
 	virtual ~UserGeometryReferenceResource();
 
-	virtual void PostProcess();
+	//virtual void PostProcess();
 
 	const GeometryOffset& GetOffset() const;
-	TBC::GeometryBase* GetRamData() const;
-	UiTbc::Renderer::GeometryID GetData() const;
+	//TBC::GeometryBase* GetRamData() const;
+	//UiTbc::Renderer::GeometryID GetData() const;
 
 protected:
 	Cure::Resource* CreateResource(Cure::ResourceManager* pManager, const Lepra::String& pName) const;
 
 private:
 	GeometryOffset mOffset;
-	TBC::GeometryBase* mGeometryReference;
-	UiTbc::Renderer::GeometryID mGeometryReferenceId;
+	//TBC::GeometryBase* mGeometryReference;
+	//UiTbc::Renderer::GeometryID mGeometryReferenceId;
 
 	LOG_CLASS_DECLARE();
 };

@@ -356,7 +356,7 @@ Lepra::Vector3DF PhysicsManagerODE::GetBodyPosition(BodyID pBodyId) const
 	Object* lObject = (Object*)pBodyId;
 	if (lObject->mWorldID != mWorldID)
 	{
-		mLog.Errorf(_T("GetBodyTransform() - Body %i is not part of this world!"), pBodyId);
+		mLog.Errorf(_T("GetBodyPosition() - Body %i is not part of this world!"), pBodyId);
 		return (Lepra::Vector3DF());
 	}
 
@@ -515,7 +515,7 @@ float PhysicsManagerODE::GetBodyMass(BodyID pBodyId)
 	Object* lObject = (Object*)pBodyId;
 	if (lObject->mWorldID != mWorldID)
 	{
-		mLog.Errorf(_T("SetBodyData() - Body %i is not part of this world!"), pBodyId);
+		mLog.Errorf(_T("GetBodyMass() - Body %i is not part of this world!"), pBodyId);
 		return (0);
 	}
 	return (lObject->mMass);

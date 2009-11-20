@@ -70,10 +70,15 @@ class ChunkyWriter:
                 self.dowrite()
 
 
-        def _regunique(self, category, name):
+        def _isunique(self, category, name):
                 if not hasattr(self.__class__, category):
                         setattr(self.__class__, category, {})
                 if getattr(self.__class__, category).get(name):
+                        return False
+                return True
+
+        def _regunique(self, category, name):
+                if not self._isunique(category, name):
                         print("Error: multiple objects of type %s with same name %s causing ambiguity!" % (category, name))
                         sys.exit(3)
                 getattr(self.__class__, category)[name] = True
@@ -284,7 +289,7 @@ class PhysWriter(ChunkyWriter):
 
 
         def dowrite(self):
-                #print(self.bodies)
+                #print("Writing physics...", self.bodies)
                 filename = self.basename+".phys"
                 with self._fileopenwrite(filename) as f:
                         self.f = f
@@ -539,16 +544,17 @@ class MeshWriter(ChunkyWriter):
         def dowrite(self):
                 for node in self.group:
                         if node.get_fixed_attribute("rgvtx", optional=True):
-                                nodemeshname = node.getName().replace("Shape", "")
-                                if nodemeshname.startswith("m_"):
-                                        nodemeshname = nodemeshname[2:]
-                                meshbasename = self.basename+"_"+nodemeshname
-                                #print("Setting", node.getParent(), "meshbasename.")
-                                node.getParent().meshbasename = meshbasename
+                                meshbasename = node.getParent().meshbasename
                                 self.writemesh(meshbasename+".mesh", node)
                 self._verifywritten("meshes", self.meshes)
 
         def writemesh(self, filename, node):
+                if not self._isunique("file", filename):
+                        if options.options.verbose:
+                                print("Skipping write of instance %s." % filename)
+                        self._addfeat("mesh instance:mesh instances", 1)
+                        node.getParent().writecount += 1
+                        return
                 #print("Writing mesh %s with %i triangles..." % (filename, len(node.get_fixed_attribute("rgtri"))/3))
                 self._addfeat("mesh:meshes", 1)
                 self._addfeat("gfx triangle:gfx triangles", len(node.get_fixed_attribute("rgtri"))/3)
@@ -641,6 +647,19 @@ class ClassWriter(ChunkyWriter):
 
 
         def _writephysmeshptr(self, physmeshptr):
+                meshbasename = physmeshptr.meshbasename
+                if not self._isunique("meshname", meshbasename):
+                        physmeshptr.meshbasename = None
+                        for x in range(2, 5000):
+                                meshinstancename = meshbasename+";"+str(x)
+                                if self._isunique("meshname", meshinstancename):
+                                        physmeshptr.meshbasename = meshinstancename
+                                        if options.options.verbose:
+                                                print("Mesh instance %s picked." % meshinstancename)
+                                        break
+                        if not physmeshptr.meshbasename:
+                                print("Error: could not find free mesh instance name!")
+                                sys.exit(3)
                 self._regunique("meshname", physmeshptr.meshbasename)
                 self._writeint(physmeshptr.physidx)
                 self._writestr(physmeshptr.meshbasename)

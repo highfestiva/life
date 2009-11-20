@@ -55,7 +55,7 @@ void CppContextObject::StartLoading()
 	assert(mUiClassResource == 0);
 	mUiClassResource = new UserClassResource(mUiManager);
 	const Lepra::String lAssetName = _T("../../Data/")+GetClassId()+_T(".class");	// TODO: move to central source file.
-	mUiClassResource->LoadUnique(GetManager()->GetGameManager()->GetResourceManager(), lAssetName,
+	mUiClassResource->Load(GetManager()->GetGameManager()->GetResourceManager(), lAssetName,
 		UserClassResource::TypeLoadCallback(this, &CppContextObject::OnLoadClass));
 }
 
@@ -343,12 +343,23 @@ void CppContextObject::OnLoadClass(UserClassResource* pClassResource)
 		Lepra::String lMeshName;
 		Lepra::TransformationF lTransform;
 		lClass->GetMesh(x, lPhysIndex, lMeshName, lTransform);
+		Lepra::String lMeshInstance;
+		Lepra::StringUtility::StringVector lMeshNameList = Lepra::StringUtility::Split(lMeshName, _T(";"), 1);
+		lMeshName = lMeshNameList[0];
+		if (lMeshNameList.size() == 1)
+		{
+			lMeshInstance = Lepra::StringUtility::Format(_T("%u"), GetInstanceId());
+		}
+		else
+		{
+			lMeshInstance = Lepra::StringUtility::Format(_T("%s_%u"), lMeshNameList[1].c_str(), GetInstanceId());
+		}
 		UiCure::UserGeometryReferenceResource* lMesh = new UiCure::UserGeometryReferenceResource(
 			mUiManager, UiCure::GeometryOffset(lPhysIndex, lTransform));
 		mMeshResourceArray.push_back(lMesh);
 		lMesh->Load(lResourceManager,
-			_T("../../Data/")+lMeshName+_T(".mesh"), UiCure::UserGeometryReferenceResource::TypeLoadCallback(this,
-				&CppContextObject::OnLoadMesh));
+			Lepra::StringUtility::Format(_T("../../Data/%s.mesh;%s"), lMeshName.c_str(), lMeshInstance.c_str()),
+			UiCure::UserGeometryReferenceResource::TypeLoadCallback(this,&CppContextObject::OnLoadMesh));
 	}
 	// TODO: not everybody should load the texture, not everybody should load *A* texture. Load from group file definition.
 	mTextureResource.Load(lResourceManager, _T("Checker.tga"),
