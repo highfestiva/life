@@ -10,6 +10,7 @@ from vec4 import *
 import rgnode
 import chunkywriter
 import options
+import shape
 
 from functools import reduce
 import configparser
@@ -119,6 +120,7 @@ class GroupReader(DefaultMAReader):
                         sys.exit(3)
                 self.makevertsrelative(group)
                 self.mesh_instance_reuse(group)
+                self.setphyspivot(group)
 
                 #self.printnodes(group)
 
@@ -334,6 +336,21 @@ class GroupReader(DefaultMAReader):
                                 hasInstance = True
                 if len(group) >= 8 and not hasInstance:
                         print("Warning: %s has no instances; highly unlikely! At least the wheels should be, right?" % options.args[0])
+
+
+        def setphyspivot(self, group):
+                physroot = None
+                lowestp = None
+                for node in group:
+                        if node.getName().startswith("phys_") and node.nodetype == "transform":
+                                if not node.phys_root and node.getParent().phys_children[0] == node:
+                                        physroot = node
+                                physshape = shape.Shape(node, node.shape)
+                                p = physshape.get_lowest_world_point()
+                                if not lowestp or p.z < lowestp.z:
+                                        lowestp = p
+                #print("Setting physics lowest pos to", lowestp, "on", physroot)
+                physroot.lowestpos = lowestp
 
 
         def validate_orthogonality(self, group):

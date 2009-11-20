@@ -11,6 +11,7 @@ Game
 + Flip axes correctly in CppContextObject and UI ditto.
 . Create base world. Use mesh, not primitives, for collision.
 . Create crane that can pull wire up.
+. Create fork-lift.
 . Bug fix attachments (i.e. crane picks up car) so that they work properly (without crashing).
 . Add wind mill to world.
 . Add server-triggered garage door to world. Make sure trigger coding is easy!!!
@@ -46,7 +47,7 @@ Engine
 + GUI border corners are not rendered. Fix!
 + Currently all geometry (mesh) instances are visible when running splitscreen. Remove all but one.
 + Make sure that meshes are reused, such as wheels on the vehicles.
-. Make import tool position all jointed objects correctly (currently seems to disregard some offset - such as own scaling - cause e.g. truck_01 wheels to be misplaced).
++ Make import tool position all jointed objects correctly (currently seems to disregard some offset - such as own scaling - cause e.g. truck_01 wheels to be misplaced).
 . Make friction parameters in import ortogonal against top speed and mass (already orthogonal against mass). Calculate top speed by (wheel radius * wheel top rotation speed * pi * 2)...
 . Add basic material loading (ambient, diffuse, specular).
 . Update ODE to 0.11.whatevah.

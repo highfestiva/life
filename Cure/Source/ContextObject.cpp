@@ -753,7 +753,7 @@ bool ContextObject::SetPhysics(TBC::ChunkyPhysics* pStructure)
 	{
 		const float lX = (float)Lepra::Random::Uniform(-200, 200);
 		const float lY = (float)Lepra::Random::Uniform(-200, 200);
-		lTransformation.SetPosition(Lepra::Vector3DF(lX, lY, 250+7));
+		lTransformation.SetPosition(Lepra::Vector3DF(lX, lY, 250));
 	}
 
 	bool lOk = (mPhysics == 0 && pStructure->FinalizeInit(lPhysics, lPhysicsFps, &lTransformation, 0, this));

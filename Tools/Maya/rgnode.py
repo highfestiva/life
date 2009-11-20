@@ -31,6 +31,17 @@ def adjustnode(node):
                                         raise KeyError("Error fetching required attribute '%s'." % name)
                                 value = default
                         return value
+        def get_final_local_transform(self):
+                pm = self.xformparent.get_world_transform()
+                wt = self.get_world_transform()
+                if not self.phys_root:
+                        wt = node.gettransformto(None, "inverse_initial_r")
+                m = pm.inverse() * wt
+                t, r, _ = m.decompose()
+                q = quat(r).normalize()
+                ps = pm.decompose()[2]
+                pos = mat4.scaling(ps) * vec4(*t)
+                return pos, q
         def get_world_pivot(self):
                 return vec4(*self.get_world_pivot_transform().decompose()[0])
         def get_world_pivot_transform(self):
@@ -203,6 +214,7 @@ def adjustnode(node):
                 return root.gettransformto(None, "inverse_initial_r").inverse().decompose()[1]
         node.fix_attribute = types.MethodType(fix_attribute, node)
         node.get_fixed_attribute = types.MethodType(get_fixed_attribute, node)
+        node.get_final_local_transform = types.MethodType(get_final_local_transform, node)
         node.get_world_translation = types.MethodType(get_world_translation, node)
         node.get_world_pivot = types.MethodType(get_world_pivot, node)
         node.get_world_pivot_transform = types.MethodType(get_world_pivot_transform, node)

@@ -25,7 +25,8 @@ class Shape:
         def __init__(self, scalenode, shapenode):
                 d = []
                 self.data = d
-                self._attrnode = scalenode
+                self._scalenode = scalenode
+                self._shapenode = shapenode
 
                 wt = scalenode.get_world_transform()
                 v0 = wt*vec4(1,0,0,0)
@@ -45,29 +46,15 @@ class Shape:
                         self.type = "box"
                         check_orthonormal = False
                         scale = scalenode.get_world_scale()
-                        #d.append(shapenode.getAttrValue("w", "w", None, default=1.0)*scale[0])
-                        #d.append(shapenode.getAttrValue("d", "d", None, default=1.0)*scale[1])
-                        #d.append(shapenode.getAttrValue("h", "h", None, default=1.0)*scale[2])
                         x = shapenode.getAttrValue("w", "w", None, default=1.0)
                         y = shapenode.getAttrValue("h", "h", None, default=1.0)
                         z = shapenode.getAttrValue("d", "d", None, default=1.0)
-                        s = list(map(lambda x,y: x*y, [x,y,z], scale))
-                        #print(scalenode.getName(), "has scale", scale, "and size", [x,y,z])
-                        d += s
-                        s = wt * vec4(x,y,z,0)
-                        #d += s[:3]
-                        #s = map(lambda x,y: x*y, [x,y,z], scale)
-                        #d += map(lambda x, y: x*y, s[:3], scale)
-                        #_w = shapenode.getAttrValue("w", "w", None, default=1.0)
-                        #_d = shapenode.getAttrValue("d", "d", None, default=1.0)
-                        #_h = shapenode.getAttrValue("h", "h", None, default=1.0)
-                        #size = (wt*vec4(_w,_d,_h,0))[:3]
-                        #d += size
+                        d += list(map(lambda x,y: x*y, [x,y,z], scale))
                 elif shapenode.nodetype == "polySphere":
                         self.type = "sphere"
                         d.append(shapenode.getAttrValue("r", "r", None, default=1.0)*v0.length())
                 else:
-                        print("Error: shape type '%s' on node '%s' is unknown." % (shapenode.nodetype, shapenode.getFullName()))
+                        print("Error: primitive physics shape type '%s' on node '%s' is unknown." % (shapenode.nodetype, shapenode.getFullName()))
                         sys.exit(22)
 
                 if check_orthonormal:
@@ -79,5 +66,24 @@ class Shape:
         def __str__(self):
                 return "<Shape %s %s>" % (self.type, " ".join(map(lambda x: str(x), self.data)))
 
+
+        def get_lowest_world_point(self):
+                p = self._scalenode.get_world_translation() - self._scalenode.getphysmaster().get_world_translation()
+                lp = p[:3]
+                if self._shapenode.nodetype == "polyCube":
+                        lp[0] -= self.data[0]/2
+                        lp[1] -= self.data[2]/2
+                        lp[2] -= self.data[1]/2
+                elif self._shapenode.nodetype == "polySphere":
+                        lp[0] -= self.data[0]
+                        lp[1] -= self.data[0]
+                        lp[2] -= self.data[0]
+                else:
+                        print("Error: (2) primitive physics shape type '%s' on node '%s' is unknown." % (shapenode.nodetype, shapenode.getFullName()))
+                        sys.exit(22)
+                #print("Shape %s at %s says it has a lowest point of %s with size %s." %(self._scalenode.getName(), p, lp, self.data))
+                return vec3(lp[:3])
+
+
         def getnode(self):
-                return self._attrnode
+                return self._scalenode

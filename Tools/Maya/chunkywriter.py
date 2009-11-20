@@ -322,38 +322,12 @@ class PhysWriter(ChunkyWriter):
 
 
         def _writebone(self, node):
-                ipm = mat4.identity()
-                usescale = False
-                #if node.is_phys_root:
-                #        print("%s is a physics root with relative translation %s!" %
-                #              (node.getName(), node.get_local_transform().decompose()[0]))
-                if node.xformparent:
-                        t, r, s = node.xformparent.get_world_transform().inverse().decompose()
-                        ipm = mat4.translation(t) * r
-                        if node.xformparent.getName().startswith("phys_") and node.xformparent.is_phys_root and node.xformparent.phys_root:
-                                usescale = True
-                                ipm = node.xformparent.get_world_transform().inverse()
-                                #print("%s's parent %s singing up as phys_root!!!" % (node.getName(), node.xformparent.getName()))
-                wt = node.get_world_transform()
-                if not node.phys_root:
-                        # Use inverse initial rotation (only when writing root physics).
-                        wt = node.gettransformto(None, "inverse_initial_r")
-                        #print("Specialcasing", node.getName())
-                m = ipm * wt
-                t, r, s = m.decompose()
-                q = quat(r).normalize()
-                pos = t
-                if usescale:
-                        s = node.xformparent.get_world_transform().decompose()[2]
-                        #print("Before transformation of", node.getName(), "t =", t, "s =", s)
-                        pos = mat4.scaling(s) * vec4(*t)
-                #if node.getName() == "phys_hangbar_back":
-                #print("Writing %s (parent %s) with relative pos %s." %
-                #        (node.getName(), node.xformparent.getName(), pos))
-                #pos = [0.5, -0.866, -3.2]
+                pos, q = node.get_final_local_transform()
+                if not node.phys_root and node.getParent().phys_children[0] == node:
+                        pos = [pos.x, pos.y, -node.lowestpos.z]
                 data = q[:]+pos[:3]
                 if options.options.verbose:
-                        print("Writing bone %s with world pos %s." % (node.getName(), node.get_world_translation()))
+                        print("Writing bone %s with relative pos %s." % (node.getName(), pos))
                 self._addfeat("bone:bones", 1)
                 self._writexform(data)
                 node.writecount += 1
