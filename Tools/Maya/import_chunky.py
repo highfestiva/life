@@ -335,7 +335,7 @@ class GroupReader(DefaultMAReader):
                         if v > 1:
                                 hasInstance = True
                 if len(group) >= 8 and not hasInstance:
-                        print("Warning: %s has no instances; highly unlikely! At least the wheels should be, right?" % options.args[0])
+                        print("%s: warning: has no instances; highly unlikely! At least the wheels should be, right?" % self.basename)
 
 
         def setphyspivot(self, group):
@@ -950,19 +950,8 @@ def printfeats(feats):
                 print("Wrote %6i %s." % (v, name))
 
 
-def main():
-        usage = "usage: %prog [options] <filebasename>\n" + \
-                "Reads filebasename.ma and filebasename.ini and writes some output chunky files."
-        parser = optparse.OptionParser(usage=usage, version="%prog 0.1")
-        parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False, help="make lots of noise")
-        options.options, options.args = parser.parse_args()
-
-        if len(options.args) != 1:
-                if not options.args:
-                        parser.error("no filebasename supplied")
-                else:
-                        parser.error("only one filebasename can be supplied")
-        rd = GroupReader(options.args[0])
+def _maimport(filebasename):
+        rd = GroupReader(filebasename)
         rd.doread()
 
         #print()
@@ -974,9 +963,9 @@ def main():
         #[p_p(root) for root in filter(lambda n: n.getName()=="phys_body", rd.group)]
         #print()
 
-        pwr = chunkywriter.PhysWriter(options.args[0], rd.group, rd.config)
-        mwr = chunkywriter.MeshWriter(options.args[0], rd.group, rd.config)
-        cwr = chunkywriter.ClassWriter(options.args[0], rd.group, rd.config)
+        pwr = chunkywriter.PhysWriter(filebasename, rd.group, rd.config)
+        mwr = chunkywriter.MeshWriter(filebasename, rd.group, rd.config)
+        cwr = chunkywriter.ClassWriter(filebasename, rd.group, rd.config)
         pwr.write()
         mwr.write()
         cwr.write()
@@ -986,7 +975,26 @@ def main():
                 mwr.addfeats(feats)
                 cwr.addfeats(feats)
                 printfeats(feats)
-        print("%s - import ok." % options.args[0])
+        print("%s: import ok." % filebasename)
+
+
+def main():
+        usage = "usage: %prog [options] <filespec>\n" + \
+                "Reads filespec.ma and filespec.ini and writes some output chunky files."
+        parser = optparse.OptionParser(usage=usage, version="%prog 0.1")
+        parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False, help="make lots of noise")
+        options.options, options.args = parser.parse_args()
+
+        if len(options.args) < 1:
+                parser.error("no filebasename supplied")
+
+        import glob
+        import os.path
+        for arg in options.args:
+                files = glob.glob(arg)
+                for fn in files:
+                        fn = os.path.splitext(fn)[0]
+                        _maimport(fn)
 
 
 if __name__=="__main__":

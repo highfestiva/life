@@ -9,6 +9,7 @@ Game
 + Write settings file every time, add user settings file.
 + Import vehicle colors.
 + Flip axes correctly in CppContextObject and UI ditto.
+. Create arcade-style helicopter.
 . Create base world. Use mesh, not primitives, for collision.
 . Create crane that can pull wire up.
 . Create fork-lift.
@@ -48,7 +49,7 @@ Engine
 + Currently all geometry (mesh) instances are visible when running splitscreen. Remove all but one.
 + Make sure that meshes are reused, such as wheels on the vehicles.
 + Make import tool position all jointed objects correctly (currently seems to disregard some offset - such as own scaling - cause e.g. truck_01 wheels to be misplaced).
-. Make friction parameters in import ortogonal against top speed and mass (already orthogonal against mass). Calculate top speed by (wheel radius * wheel top rotation speed * pi * 2)...
++ Make friction parameters in import ortogonal against mass.
 . Add basic material loading (ambient, diffuse, specular).
 . Update ODE to 0.11.whatevah.
 . Port client to Linux.
@@ -111,6 +112,7 @@ Quality
 . Check heap regularly (using _heapchk() in Win32).
 . Assertions on getting access to "wrong" parts of the system with the wrong thread. (Such as dropping users in NetworkServer.cpp from the TCP thread.)
 . Add relevant thread safety to classes here and there (NetworkServer, for instance). Add interfaces to isolate functionality. Use Sigges design pattern.
+. Make the console appear the correct size after having added/removed splitscreen player (currently appears smaller if splitscreen player previously removed).
 . When input is hindered (such as when pulling joystick back, then taking down the console) the excavator behaves jerkily.
 . Assertions on high and stable frame rate. Includes the network sliding average frame rate (should be filtered?).
 . Stresstest (use .lsh).

@@ -345,8 +345,10 @@ class PhysWriter(ChunkyWriter):
                 types = {"capsule":1, "sphere":2, "box":3}
                 self._writeint(types[shape.type])
                 node = shape.getnode()
+                totalmass = self._gettotalmass()
                 self._writefloat(float(node.get_fixed_attribute("mass")))
-                self._writefloat(float(node.get_fixed_attribute("friction")))
+                friction = node.get_fixed_attribute("friction") * totalmass / 1000.0
+                self._writefloat(friction)
                 self._writefloat(float(node.get_fixed_attribute("bounce")))
                 self._writeint(-1 if not node.phys_root else self.bodies.index(node.phys_root))
                 joints = {None:1, "exclude":1, "suspend_hinge":2, "hinge2":3, "hinge":4, "ball":5, "universal":6}
@@ -359,7 +361,6 @@ class PhysWriter(ChunkyWriter):
                 self._writeint(1 if node.get_fixed_attribute("affected_by_gravity") else 0)
                 # Write joint parameters.
                 parameters = [0.0]*16
-                totalmass = self._gettotalmass()
                 #print("Total mass:", totalmass)
                 parameters[0] = node.get_fixed_attribute("joint_spring_constant", True, 0.0) * totalmass
                 parameters[1] = node.get_fixed_attribute("joint_spring_damping", True, 0.0) * totalmass
