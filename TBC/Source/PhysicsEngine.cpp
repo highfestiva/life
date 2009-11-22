@@ -100,7 +100,25 @@ bool PhysicsEngine::SetValue(unsigned pAspect, float pValue, float pZAngle)
 			}
 		}
 		break;
-		case ENGINE_HINGE2_ROLL:
+		case ENGINE_HINGE_ROLL:
+		{
+			if (pAspect == mControllerIndex)
+			{
+				mValue[0] = pValue;
+				return (true);
+			}
+		}
+		break;
+		case ENGINE_HINGE_BREAK:
+		{
+			if (pAspect == mControllerIndex)
+			{
+				mValue[0] = pValue;
+				return (true);
+			}
+		}
+		break;
+		case ENGINE_HINGE_TORQUE:
 		{
 			if (pAspect == mControllerIndex)
 			{
@@ -110,24 +128,6 @@ bool PhysicsEngine::SetValue(unsigned pAspect, float pValue, float pZAngle)
 		}
 		break;
 		case ENGINE_HINGE2_TURN:
-		{
-			if (pAspect == mControllerIndex)
-			{
-				mValue[0] = pValue;
-				return (true);
-			}
-		}
-		break;
-		case ENGINE_HINGE2_BREAK:
-		{
-			if (pAspect == mControllerIndex)
-			{
-				mValue[0] = pValue;
-				return (true);
-			}
-		}
-		break;
-		case ENGINE_HINGE:
 		{
 			if (pAspect == mControllerIndex)
 			{
@@ -193,7 +193,7 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, float pFrameTime)
 					}
 				}
 				break;
-				case ENGINE_HINGE2_ROLL:
+				case ENGINE_HINGE_ROLL:
 				{
 					assert(lGeometry->GetJointId() != INVALID_JOINT);
 					if (lGeometry->GetJointId() != INVALID_JOINT)
@@ -214,22 +214,7 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, float pFrameTime)
 					}
 				}
 				break;
-				case ENGINE_ROLL_STRAIGHT:
-				{
-					assert(lGeometry->GetJointId() != INVALID_JOINT);
-					if (lGeometry->GetJointId() != INVALID_JOINT)
-					{
-						pPhysicsManager->SetAngle1(lGeometry->GetBodyId(), lGeometry->GetJointId(), 0);
-					}
-				}
-				break;
-				case ENGINE_HINGE2_TURN:
-				case ENGINE_HINGE:
-				{
-					ApplyTorque(pPhysicsManager, pFrameTime, lGeometry, lEngineNode);
-				}
-				break;
-				case ENGINE_HINGE2_BREAK:
+				case ENGINE_HINGE_BREAK:
 				{
 					assert(lGeometry->GetJointId() != INVALID_JOINT);
 					if (lGeometry->GetJointId() != INVALID_JOINT)
@@ -253,6 +238,21 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, float pFrameTime)
 					else
 					{
 						mLog.AError("Missing break joint!");
+					}
+				}
+				break;
+				case ENGINE_HINGE_TORQUE:
+				case ENGINE_HINGE2_TURN:
+				{
+					ApplyTorque(pPhysicsManager, pFrameTime, lGeometry, lEngineNode);
+				}
+				break;
+				case ENGINE_ROLL_STRAIGHT:
+				{
+					assert(lGeometry->GetJointId() != INVALID_JOINT);
+					if (lGeometry->GetJointId() != INVALID_JOINT)
+					{
+						pPhysicsManager->SetAngle1(lGeometry->GetBodyId(), lGeometry->GetJointId(), 0);
 					}
 				}
 				break;

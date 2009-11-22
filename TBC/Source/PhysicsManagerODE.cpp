@@ -2193,6 +2193,12 @@ bool PhysicsManagerODE::SetAngularMotorMaxForce(JointID pJointId, Lepra::float32
 		dJointSetHinge2Param(lJoint->mJointID, dParamFMax2, pMaxForce);
 		return (true);
 	}
+	else if (lJoint->mType == JOINT_HINGE)
+	{
+		dJointSetHingeParam(lJoint->mJointID, dParamFMax, pMaxForce);
+		dJointSetHingeParam(lJoint->mJointID, dParamFMax2, pMaxForce);
+		return (true);
+	}
 	mLog.AError("SetAngularMotorMaxForce() - Joint is not an angular motor!");
 	return (false);
 }
@@ -2211,6 +2217,13 @@ bool PhysicsManagerODE::SetAngularMotorRoll(JointID pJointId, Lepra::float32 pMa
 	{
 		::dJointSetHinge2Param(lJoint->mJointID, dParamFMax2, pMaxForce);
 		::dJointSetHinge2Param(lJoint->mJointID, dParamVel2, pTargetVelocity);
+		::dBodyEnable(::dJointGetBody(lJoint->mJointID, 1));
+		return (true);
+	}
+	else if (lJoint->mType == JOINT_HINGE)
+	{
+		::dJointSetHingeParam(lJoint->mJointID, dParamFMax, pMaxForce);
+		::dJointSetHingeParam(lJoint->mJointID, dParamVel, pTargetVelocity);
 		::dBodyEnable(::dJointGetBody(lJoint->mJointID, 1));
 		return (true);
 	}
@@ -2241,6 +2254,12 @@ bool PhysicsManagerODE::GetAngularMotorRoll(JointID pJointId, Lepra::float32& pM
 	{
 		pMaxForce = ::dJointGetHinge2Param(lJoint->mJointID, dParamFMax2);
 		pTargetVelocity = ::dJointGetHinge2Param(lJoint->mJointID, dParamVel2);
+		return (true);
+	}
+	else if (lJoint->mType == JOINT_HINGE)
+	{
+		pMaxForce = ::dJointGetHingeParam(lJoint->mJointID, dParamFMax2);
+		pTargetVelocity = ::dJointGetHingeParam(lJoint->mJointID, dParamVel2);
 		return (true);
 	}
 	mLog.AError("GetAngularMotorRoll() - Joint is not an angular motor!");

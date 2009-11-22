@@ -418,10 +418,10 @@ bool ContextObject::UpdateFullPosition(const ObjectPositionalData*& pPositionalD
 				::memcpy(lData->mValue, lEngine->GetValues(), sizeof(float)*4);
 			}
 			break;
-			case TBC::PhysicsEngine::ENGINE_HINGE2_ROLL:
+			case TBC::PhysicsEngine::ENGINE_HINGE_ROLL:
+			case TBC::PhysicsEngine::ENGINE_HINGE_BREAK:
+			case TBC::PhysicsEngine::ENGINE_HINGE_TORQUE:
 			case TBC::PhysicsEngine::ENGINE_HINGE2_TURN:
-			case TBC::PhysicsEngine::ENGINE_HINGE2_BREAK:
-			case TBC::PhysicsEngine::ENGINE_HINGE:
 			{
 				GETSET_OBJECT_POSITIONAL_AT(mPosition, y, RealData1, lData, PositionalData::TYPE_REAL_1, 1);
 				++y;
@@ -649,10 +649,10 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData)
 				SetEnginePower(3, lData->mValue[2], lData->mValue[3]);	// TRICKY: specialcasing.
 			}
 			break;
-			case TBC::PhysicsEngine::ENGINE_HINGE2_ROLL:
+			case TBC::PhysicsEngine::ENGINE_HINGE_ROLL:
+			case TBC::PhysicsEngine::ENGINE_HINGE_BREAK:
+			case TBC::PhysicsEngine::ENGINE_HINGE_TORQUE:
 			case TBC::PhysicsEngine::ENGINE_HINGE2_TURN:
-			case TBC::PhysicsEngine::ENGINE_HINGE2_BREAK:
-			case TBC::PhysicsEngine::ENGINE_HINGE:
 			{
 				assert(mPosition.mBodyPositionArray.size() > y);
 				assert(mPosition.mBodyPositionArray[y]->GetType() == PositionalData::TYPE_REAL_1);

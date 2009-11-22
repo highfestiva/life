@@ -369,35 +369,34 @@ class PhysWriter(ChunkyWriter):
 
                 yaw = node.get_fixed_attribute("joint_yaw", True, 0.0)*math.pi/180
                 pitch = node.get_fixed_attribute("joint_pitch", True, 0.0)*math.pi/180
-                m = mat4.identity()
-                m.setMat3(mat3.fromEulerXZY(0, pitch, yaw))
-                v = ir * m * vec4(0,0,1,0)
-                # Project onto XY plane.
-                xyv = vec3(v[:3])
-                xyv[2] = 0
-                if xyv.length() < 1e-12:
-                        yaw = 0
-                        if v[2] < 0:
-                                pitch = math.pi
-                        else:
-                                pitch = 0
-                else:
-                        xyv = xyv.normalize()
-                        # Yaw is angle of projection on the XY plane.
-                        if xyv.length():
-                                yaw = math.asin(xyv.y/xyv.length())
-                        else:
-                                yaw = 0
-                        v = v.normalize()
-                        v = vec3(v[:3])
-                        pitch = math.asin(v*xyv)
+##                m = mat4.identity()
+##                m.setMat3(mat3.fromEulerXZY(0, pitch, yaw))
+##                v = ir * m * vec4(0,0,1,0)
+##                # Project onto XY plane.
+##                xyv = vec3(v[:3])
+##                xyv[2] = 0
+##                if xyv.length() < 1e-12:
+##                        yaw = 0
+##                        if v[2] < 0:
+##                                pitch = math.pi
+##                        else:
+##                                pitch = 0
+##                else:
+##                        xyv = xyv.normalize()
+##                        # Yaw is angle of projection on the XY plane.
+##                        if xyv.length():
+##                                yaw = math.asin(xyv.y/xyv.length())
+##                        else:
+##                                yaw = 0
+##                        v = v.normalize()
+##                        v = vec3(v[:3])
+##                        pitch = math.asin(v*xyv)
+                if options.options.verbose and jointvalue >= 2:
+                        print("Joint %s euler angles are: %s." % (node.getName(), (yaw, pitch)))
+                parameters[2:4] = yaw, pitch
 
-                parameters[2] = yaw
-                parameters[3] = pitch
                 joint_min, joint_max = node.get_fixed_attribute("joint_angles", True, [0.0,0.0])
-                joint_min, joint_max = math.radians(joint_min), math.radians(joint_max)
-                parameters[4] = joint_min
-                parameters[5] = joint_max
+                parameters[4:6] = math.radians(joint_min), math.radians(joint_max)
 
                 mp = node.get_world_pivot_transform()
                 mt = node.get_world_transform()
@@ -422,6 +421,8 @@ class PhysWriter(ChunkyWriter):
                 else:
                         self._writeint(0)
                 # Write shape data (dimensions of shape).
+                if options.options.verbose:
+                        print("Writing physical shape %s with data %s." % (node.getName(), shape.data))
                 for x in shape.data:
                         self._writefloat(math.fabs(x))
                 self._addfeat("physical geometry:physical geometries", 1)
@@ -429,7 +430,7 @@ class PhysWriter(ChunkyWriter):
 
         def _writeengine(self, node):
                 # Write all general parameters first.
-                types = {"walk":1, "cam_flat_push":2, "hinge2_roll":3, "hinge2_turn":4, "hinge2_break":5, "hinge":6, "glue":7}
+                types = {"walk":1, "cam_flat_push":2, "hinge_roll":3, "hinge_break":4, "hinge_torque":5, "hinge2_turn":6, "glue":7}
                 self._writeint(types[node.get_fixed_attribute("type")])
                 totalmass = self._gettotalmass()
                 self._writefloat(node.get_fixed_attribute("strength")*totalmass)
@@ -545,7 +546,8 @@ class MeshWriter(ChunkyWriter):
                                         )
                                 )
                         self._writechunk(data)
-                node.getParent().writecount += 1
+                for p in node.getparents():
+                        p.writecount += 1
                 self._addfeat("file:files", 1)
 
 

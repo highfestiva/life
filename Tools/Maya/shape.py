@@ -35,9 +35,11 @@ class Shape:
                 nv0 = v0.normalize()
                 nv1 = v1.normalize()
                 nv2 = v2.normalize()
-                if math.fabs(nv0*nv1) > 0.05 or math.fabs(nv0*nv2) > 0.05 or math.fabs(nv1*nv2) > 0.05:
+                d0, d1, d2 = map(lambda x,y: math.fabs(x*y), [nv0, nv0, nv1], [nv1, nv2, nv2])
+                if d0 > 0.1 or d1 > 0.1 or d2 > 0.1:
                         print("Error: scale for physical shape '%s' is not orthogonal!" % scalenode.getFullName())
                         print(nv0, nv1, nv2)
+                        print(d0, d1, d2)
                         print(wt)
                         sys.exit(21)
                 check_orthonormal = True
@@ -58,7 +60,7 @@ class Shape:
                         sys.exit(22)
 
                 if check_orthonormal:
-                        if math.fabs(v0.length()-v1.length()) > 0.05 or math.fabs(v0.length()-v2.length()) > 0.05 or math.fabs(v1.length()-v2.length()) > 0.05:
+                        if math.fabs(v0.length()-v1.length()) > 0.1 or math.fabs(v0.length()-v2.length()) > 0.1 or math.fabs(v1.length()-v2.length()) > 0.1:
                                 print("Error: scale for physical shape '%s' is not orthonormal!" % scalenode.getFullName())
                                 sys.exit(21)
 
