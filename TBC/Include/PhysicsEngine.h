@@ -8,6 +8,7 @@
 
 #include <vector>
 #include "../../Lepra/Include/Log.h"
+#include "../../Lepra/Include/Vector3D.h"
 
 
 
@@ -33,6 +34,8 @@ public:
 		ENGINE_HINGE_BREAK,
 		ENGINE_HINGE_TORQUE,
 		ENGINE_HINGE2_TURN,
+		ENGINE_ROTOR,
+		ENGINE_TILTER,
 		ENGINE_GLUE,
 
 		ENGINE_ROLL_STRAIGHT = 100,	// TODO: remove!
@@ -44,7 +47,7 @@ public:
 	};
 
 	PhysicsEngine(EngineType pEngineType, float pStrength,
-		float pMaxSpeed, float pMaxSpeed2, unsigned pControllerIndex);
+		float pMaxSpeed, float pMaxSpeed2, float pFriction, unsigned pControllerIndex);
 	virtual ~PhysicsEngine();
 
 	static PhysicsEngine* Load(ChunkyPhysics* pStructure, const void* pData, unsigned pByteCount);
@@ -79,6 +82,7 @@ private:
 		EngineMode mMode;
 	};
 
+	Lepra::Vector3DF GetRotorLiftForce(TBC::PhysicsManager* pPhysicsManager, ChunkyBoneGeometry* pGeometry, const EngineNode& pEngineNode) const;
 	void ApplyTorque(TBC::PhysicsManager* pPhysicsManager, float pFrameTime, ChunkyBoneGeometry* pGeometry, const EngineNode& pEngineNode);
 
 	typedef std::vector<EngineNode> EngineNodeArray;
@@ -87,6 +91,7 @@ private:
 	float mStrength;
 	float mMaxSpeed;
 	float mMaxSpeed2;
+	float mFriction;
 	unsigned mControllerIndex;
 	EngineNodeArray mEngineNodeArray;
 	float mValue[4];

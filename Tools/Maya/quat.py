@@ -419,19 +419,28 @@ class quat:
             return self._fromMat(m)
         except:
             pass
-        qlist = []
-        cnt = 0
-        for axis in [(-1,0,0),(+1,0,0),(0,-1,0),(0,1,0),(0,0,-1),(0,0,1)]:
-            rot = m * _mat4.rotation(0.01, axis)
-            try:
-                qlist += [self._fromMat(rot)]
-            except:
-                pass
+        bestqlist = []
+        bestcnt = 0
+        for exponent in range(2, 7):
+            qlist = []
+            dist = 10**-exponent
+            for axis in [(-1,0,0),(+1,0,0),(0,-1,0),(0,1,0),(0,0,-1),(0,0,1)]:
+                rot = m * _mat4.rotation(dist, axis)
+                try:
+                    qlist += [self._fromMat(rot)]
+                except:
+                    pass
+            if len(qlist) >= bestcnt:
+                bestcnt = len(qlist)
+                bestqlist += qlist
+            else:
+                break
+        qlist = bestqlist
         r = quat(0,0,0,0)
         for q in qlist:
             r += q
         r = r.normalize()
-        #print("Got a matrix-2-quaternion lerp of", r, "using", len(qlist), "checks!")
+        #print("Got a matrix-2-quaternion lerp of", r, "using", len(qlist), "checks and dist", dist)
         self.w, self.x, self.y, self.z = r[:]
         return self
 
@@ -446,8 +455,8 @@ class quat:
         try:
             angle = math.acos(cosa)
         except ValueError as e:
-            print("Got an matrix-to-quaternion error:", e)
-            print(m)
+            #print("Got an matrix-to-quaternion error:", e)
+            #print(m)
             raise
         #print("Angle is", angle)
 

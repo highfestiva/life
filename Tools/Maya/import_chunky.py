@@ -436,7 +436,7 @@ class GroupReader(DefaultMAReader):
                         if section.startswith("engine:"):
                                 enginetype = stripQuotes(config.get(section, "type"))
                                 pushengines = ["cam_flat_push"]
-                                engineOk = enginetype in pushengines+["hinge_roll", "hinge_break", "hinge_torque", "hinge2_turn"]
+                                engineOk = enginetype in pushengines+["hinge_roll", "hinge_break", "hinge_torque", "hinge2_turn", "rotor", "tilter"]
                                 allApplied &= engineOk
                                 if not engineOk:
                                         print("Error: invalid engine type '%s'." % enginetype)
@@ -469,6 +469,8 @@ class GroupReader(DefaultMAReader):
                                             ("connected_to", check_connected_to)]
                                 for name, engine_check in required:
                                         allApplied &= self._query_attribute(node, name, engine_check)[0]
+                                friction = node.get_fixed_attribute("friction", optional=True, default=0.01)
+                                node.fix_attribute("friction", friction)
                                 group.append(node)
                                 used_sections[section] = True
 

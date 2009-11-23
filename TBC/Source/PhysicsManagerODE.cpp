@@ -5,8 +5,12 @@
 
 
 #include <assert.h>
+#pragma warning(push)
+#pragma warning(disable: 4100)	// Warning: unreferenced formal parameter (in ODE).
 #include <../ode/src/collision_kernel.h>
-#include <../ode/src/joint.h>
+#include <../ode/src/joints/hinge.h>
+#include <../ode/src/joints/universal.h>
+#pragma warning(pop)
 #include "../../Lepra/Include/Log.h"
 #include "../../Lepra/Include/Math.h"
 #include "../Include/PhysicsManagerODE.h"
@@ -85,14 +89,12 @@ PhysicsManager::BodyID PhysicsManagerODE::CreateSphere(bool pIsRoot, const Lepra
 	{
 		dMass lMass;
 		::dMassSetSphereTotal(&lMass, (dReal)pMass, (dReal)pRadius);
-	
 		lObject->mBodyID = dBodyCreate(mWorldID);
 		::dBodySetMass(lObject->mBodyID, &lMass);
-
+		::dGeomSetBody(lObject->mGeomID, lObject->mBodyID);
 		::dBodySetAutoDisableDefaults(lObject->mBodyID);
 	}
 
-	::dGeomSetBody(lObject->mGeomID, lObject->mBodyID);
 	::dGeomSetData(lObject->mGeomID, lObject);
 
 	lObject->mGeometryData[0] = pRadius;
@@ -124,14 +126,12 @@ PhysicsManager::BodyID PhysicsManagerODE::CreateCylinder(bool pIsRoot, const Lep
 	{
 		dMass lMass;
 		::dMassSetCylinderTotal(&lMass, (dReal)pMass, 3, (dReal)pRadius, (dReal)pLength);
-	
 		lObject->mBodyID = dBodyCreate(mWorldID);
 		::dBodySetMass(lObject->mBodyID, &lMass);
-
+		::dGeomSetBody(lObject->mGeomID, lObject->mBodyID);
 		::dBodySetAutoDisableDefaults(lObject->mBodyID);
 	}
 
-	::dGeomSetBody(lObject->mGeomID, lObject->mBodyID);
 	::dGeomSetData(lObject->mGeomID, lObject);
 
 	lObject->mGeometryData[0] = pRadius;
@@ -160,17 +160,15 @@ PhysicsManager::BodyID PhysicsManagerODE::CreateCapsule(bool pIsRoot, const Lepr
 	if (pType == PhysicsManager::DYNAMIC)
 	{
 		dMass lMass;
-		::dMassSetCappedCylinderTotal(&lMass, (dReal)pMass, 3, (dReal)pRadius, (dReal)pLength);
-	
+		::dMassSetCylinderTotal(&lMass, (dReal)pMass, 3, (dReal)pRadius, (dReal)pLength);
 		lObject->mBodyID = dBodyCreate(mWorldID);
-		dBodySetMass(lObject->mBodyID, &lMass);
-
-		dBodySetAutoDisableDefaults(lObject->mBodyID);
+		::dBodySetMass(lObject->mBodyID, &lMass);
+		::dGeomSetBody(lObject->mGeomID, lObject->mBodyID);
+		::dBodySetAutoDisableDefaults(lObject->mBodyID);
 	}
 
 	lObject->mGeometryData[0] = pRadius;
 	lObject->mGeometryData[1] = pLength;
-	dGeomSetBody(lObject->mGeomID, lObject->mBodyID);
 	dGeomSetData(lObject->mGeomID, lObject);
 
 	lObject->mMass = pMass;
@@ -200,8 +198,8 @@ PhysicsManager::BodyID PhysicsManagerODE::CreateBox(bool pIsRoot, const Lepra::T
 		::dMassSetBoxTotal(&lMass, (dReal)pMass, (dReal)pSize.x, (dReal)pSize.y, (dReal)pSize.z);
 		lObject->mBodyID = ::dBodyCreate(mWorldID);
 		::dBodySetMass(lObject->mBodyID, &lMass);
-		::dBodySetAutoDisableDefaults(lObject->mBodyID);
 		::dGeomSetBody(lObject->mGeomID, lObject->mBodyID);
+		::dBodySetAutoDisableDefaults(lObject->mBodyID);
 	}
 
 	::dGeomSetData(lObject->mGeomID, lObject);
@@ -235,16 +233,18 @@ bool PhysicsManagerODE::Attach(BodyID pStaticBody, BodyID pMainBody)
 	}
 	Object* lStaticObject = *x;
 	Object* lMainObject = *y;
-	if (lStaticObject->mBodyID || !lMainObject->mBodyID)
+	dBodyID lBodyId = lMainObject->mBodyID;
+	if (lStaticObject->mBodyID || !lBodyId)
 	{
 		mLog.AError("Attach() with non-static/static.");
 		assert(false);
 		return (false);
 	}
-	const dReal* lPos = ::dGeomGetPosition(lStaticObject->mGeomID);
+	dVector3 lPos;
+	::dGeomCopyPosition(lStaticObject->mGeomID, lPos);
 	dQuaternion o;
 	::dGeomGetQuaternion(lStaticObject->mGeomID, o);
-	::dGeomSetBody(lStaticObject->mGeomID, lMainObject->mBodyID);
+	::dGeomSetBody(lStaticObject->mGeomID, lBodyId);
 	::dGeomSetOffsetWorldPosition(lStaticObject->mGeomID, lPos[0], lPos[1], lPos[2]);
 	::dGeomSetOffsetWorldQuaternion(lStaticObject->mGeomID, o);
 
@@ -260,7 +260,7 @@ bool PhysicsManagerODE::Attach(BodyID pStaticBody, BodyID pMainBody)
 			case dSphereClass:	::dMassSetSphereTotal(&lMass, lMassScalar, (dReal)lSize[0]);					break;
 			case dBoxClass:		::dMassSetBoxTotal(&lMass, lMassScalar, (dReal)lSize[0], (dReal)lSize[1], (dReal)lSize[2]);	break;
 			case dCCylinderClass:	::dMassSetCylinderTotal(&lMass, lMassScalar, 3, (dReal)lSize[0], (dReal)lSize[1]);		break;
-			case dCylinderClass:	::dMassSetCappedCylinderTotal(&lMass, lMassScalar, 3, (dReal)lSize[0], (dReal)lSize[1]);	break;
+			case dCylinderClass:	::dMassSetCylinderTotal(&lMass, lMassScalar, 3, (dReal)lSize[0], (dReal)lSize[1]);	break;
 			default:
 			{
 				mLog.AError("Trying to attach object of unknown type!");
@@ -268,14 +268,15 @@ bool PhysicsManagerODE::Attach(BodyID pStaticBody, BodyID pMainBody)
 				return (false);
 			}
 		}
-		const dReal* lRelPos = ::dGeomGetOffsetPosition(lStaticObject->mGeomID);
 		const dReal* lRelRot = ::dGeomGetOffsetRotation(lStaticObject->mGeomID);
+		const dReal* lRelPos = ::dGeomGetOffsetPosition(lStaticObject->mGeomID);
 		::dMassTranslate(&lMass, lRelPos[0], lRelPos[1], lRelPos[2]);
 		::dMassRotate(&lMass, lRelRot);
+
 		dMass lDynamicMass;
-		::dBodyGetMass(lMainObject->mBodyID, &lDynamicMass);
-		::dMassAdd(&lDynamicMass, &lMass);
-		::dBodySetMass(lMainObject->mBodyID, &lDynamicMass);
+		::dBodyGetMass(lBodyId, &lDynamicMass);
+		::dMassAdd(&lMass, &lDynamicMass);
+		//::dBodySetMass(lBodyId, &lMass);
 	}
 
 	return (true);
@@ -521,6 +522,38 @@ float PhysicsManagerODE::GetBodyMass(BodyID pBodyId)
 	return (lObject->mMass);
 }
 
+void PhysicsManagerODE::MassAdjustBody(BodyID pBodyId)
+{
+	Object* lObject = (Object*)pBodyId;
+	if (lObject->mWorldID != mWorldID)
+	{
+		mLog.Errorf(_T("MassAdjustBody() - Body %i is not part of this world!"), pBodyId);
+		return;
+	}
+
+	dBodyID lBody = lObject->mBodyID;
+	if (!lBody)
+	{
+		//mLog.Warningf(_T("MassAdjustBody() - static geometry %i does not have a body!"), pBodyId);
+		return;
+	}
+	// Move geometries and body to center of mass.
+	dMass m;
+	::dBodyGetMass(lBody, &m);
+	if (m.c[0] != 0 || m.c[1] != 0 || m.c[2] != 0)
+	{
+		for (dGeomID lGeometry = lBody->geom; lGeometry; lGeometry = lGeometry->body_next)
+		{
+			const dReal* g = ::dGeomGetOffsetPosition(lGeometry);
+			::dGeomSetOffsetPosition(lGeometry, g[0]-m.c[0], g[1]-m.c[1], g[2]-m.c[2]);
+		}
+		const dReal* p = ::dBodyGetPosition(lBody);
+		::dBodySetPosition(lBody, p[0]-m.c[0], p[1]-m.c[1], p[2]-m.c[2]);
+		::dMassTranslate(&m, -m.c[0], -m.c[1], -m.c[2]);
+		::dBodySetMass(lBody, &m);
+	}
+}
+
 void PhysicsManagerODE::SetBodyData(BodyID pBodyId, void* pUserData)
 {
 	Object* lObject = (Object*)pBodyId;
@@ -553,7 +586,6 @@ PhysicsManager::TriggerID PhysicsManagerODE::CreateSphereTrigger(const Lepra::Tr
 	Object* lObject = new Object(mWorldID, false);
 	lObject->mGeomID = dCreateSphere(mSpaceID, (dReal)pRadius);
 
-	dGeomSetBody(lObject->mGeomID, 0);
 	dGeomSetData(lObject->mGeomID, lObject);
 
 	lObject->mTriggerListener = pForceListener;
@@ -573,7 +605,6 @@ PhysicsManager::TriggerID PhysicsManagerODE::CreateCylinderTrigger(const Lepra::
 	lObject->mGeomID = dCreateCCylinder(mSpaceID, (dReal)pRadius, (dReal)(pLength - pRadius * 2));
 	mLog.AWarning("Warning! Cylinders are not accurately supported by ODE!");
 
-	dGeomSetBody(lObject->mGeomID, 0);
 	dGeomSetData(lObject->mGeomID, lObject);
 
 	lObject->mTriggerListener = pForceListener;
@@ -591,7 +622,6 @@ PhysicsManager::TriggerID PhysicsManagerODE::CreateCapsuleTrigger(const Lepra::T
 
 	lObject->mGeomID = dCreateCCylinder(mSpaceID, (dReal)pRadius, (dReal)pLength);
 
-	dGeomSetBody(lObject->mGeomID, 0);
 	dGeomSetData(lObject->mGeomID, lObject);
 
 	lObject->mTriggerListener = pForceListener;
@@ -609,7 +639,6 @@ PhysicsManager::TriggerID PhysicsManagerODE::CreateBoxTrigger(const Lepra::Trans
 
 	lObject->mGeomID = dCreateBox(mSpaceID, (dReal)pSize.x, (dReal)pSize.y, (dReal)pSize.z);
 
-	dGeomSetBody(lObject->mGeomID, 0);
 	dGeomSetData(lObject->mGeomID, lObject);
 
 	lObject->mTriggerListener = pForceListener;
@@ -633,7 +662,6 @@ PhysicsManager::TriggerID PhysicsManagerODE::CreateRayTrigger(const Lepra::Trans
 
 	lObject->mGeomID = dCreateRay(mSpaceID, lLength);
 
-	dGeomSetBody(lObject->mGeomID, 0);
 	dGeomSetData(lObject->mGeomID, lObject);
 
 	dGeomRaySet(lObject->mGeomID, pFromPos.x, pFromPos.y, pFromPos.z, lDir.x, lDir.y, lDir.z);
@@ -1654,17 +1682,29 @@ bool PhysicsManagerODE::SetBallDiff(BodyID pBodyId, JointID pJointId, const Join
 void PhysicsManagerODE::SetGeomTransform(dGeomID pGeomID, const Lepra::TransformationF& pTransform)
 {
 	const Lepra::Vector3D<Lepra::float32>& lPos = pTransform.GetPosition();
-	dGeomSetPosition(pGeomID, lPos.x, lPos.y, lPos.z);
+	::dGeomSetPosition(pGeomID, lPos.x, lPos.y, lPos.z);
 
-	const Lepra::Quaternion<Lepra::float32>& lQuat = pTransform.GetOrientation();
-	dReal lQ[4];
-
-	lQ[0] = lQuat.GetA();
-	lQ[1] = lQuat.GetB();
-	lQ[2] = lQuat.GetC();
-	lQ[3] = lQuat.GetD();
-
-	dGeomSetQuaternion(pGeomID, lQ);
+	Lepra::RotationMatrixF lNative = pTransform.GetOrientation().GetAsRotationMatrix();
+	dMatrix3 lRot;
+	::memset(lRot, 0, sizeof(lRot));
+	for (int y = 0; y < 3; ++y)
+	{
+		for (int x = 0; x < 3; ++x)
+		{
+			float lValue = lNative.GetElement(y*3+x);
+			const float lAbsValue = ::fabs(lValue);
+			if (lAbsValue < 1e-3)
+			{
+				lValue = 0.0f;
+			}
+			else if (lAbsValue <= 1-1e-3 && lAbsValue > 1)
+			{
+				lValue = (lValue < 0)? -1.0f : 1.0f;
+			}
+			lRot[y*4+x] = lValue;
+		}
+	}
+	::dGeomSetRotation(pGeomID, lRot);
 }
 
 bool PhysicsManagerODE::CheckBodies(BodyID& pBody1, BodyID& pBody2, Object*& pObject1, Object*& pObject2, const Lepra::tchar* pFunction)

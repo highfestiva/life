@@ -203,14 +203,44 @@ class ChunkyWriter:
                         sys.exit(17)
 
 
+        def _clampdata(self, xform, length):
+                for x in range(length):
+                        xabs = math.fabs(xform[x])
+                        if xabs <= 1e-3:        # Close to zero -> 0.
+                                xform[x] = 0.0
+                        elif xabs >= 1-1e-3 and xabs <= 1:      # Close to one -> 1.
+                                xform[x] = math.copysign(1.0, xform[x])
+                        else:
+                                for y in range(x+1, length): # Close to other value -> both gets average.
+                                        yabs = math.fabs(xform[y])
+                                        if math.fabs(xabs-yabs) < 1e-3:
+                                                avg = (xabs+yabs)/2
+                                                xform[x] = math.copysign(avg, xform[x])
+                                                xform[y] = math.copysign(avg, xform[y])
+
+
+        def _normalizexform(self, xform):
+                "Normalize the hard way. Most importantly the orientation."
+##                self._clampdata(xform, 4)
+##                xform[:4] = quat(xform[:4]).normalize()[:]
+##                m = quat(xform[:4]).toMat4()
+##                self._clampdata(m.mlist, 16)
+##                xform[:4] = quat().fromMat(m).normalize()[:]
+                self._clampdata(xform, 4)
+                xform[:4] = quat(xform[:4]).normalize()[:]
+
+                for x in range(4, 7):
+                        xround = round(xform[x], 1)
+                        if math.fabs(xround-xform[x]) < 1e-3:
+                                xform[x] = xround
+                return xform
+
+
         def _writexform(self, xform):
                 if len(xform) != 7:
                         print("Error: trying to store transform with len != 7!")
                         sys.exit(18)
-                #x = 0
                 for f in xform:
-                        #print("Writing transform", x, ": ", f)
-                        #x += 1
                         self._writefloat(f)
 
 
@@ -326,8 +356,9 @@ class PhysWriter(ChunkyWriter):
                 if not node.phys_root and node.getParent().phys_children[0] == node:
                         pos = [pos.x, pos.y, -node.lowestpos.z]
                 data = q[:]+pos[:3]
+                self._normalizexform(data)
                 if options.options.verbose:
-                        print("Writing bone %s with relative pos %s." % (node.getName(), pos))
+                        print("Writing bone %s with relative data %s." % (node.getName(), data))
                 self._addfeat("bone:bones", 1)
                 self._writexform(data)
                 node.writecount += 1
@@ -431,12 +462,13 @@ class PhysWriter(ChunkyWriter):
 
         def _writeengine(self, node):
                 # Write all general parameters first.
-                types = {"walk":1, "cam_flat_push":2, "hinge_roll":3, "hinge_break":4, "hinge_torque":5, "hinge2_turn":6, "glue":7}
+                types = {"walk":1, "cam_flat_push":2, "hinge_roll":3, "hinge_break":4, "hinge_torque":5, "hinge2_turn":6, "rotor":7, "tilter":8, "glue":8}
                 self._writeint(types[node.get_fixed_attribute("type")])
                 totalmass = self._gettotalmass()
                 self._writefloat(node.get_fixed_attribute("strength")*totalmass)
                 self._writefloat(float(node.get_fixed_attribute("max_velocity")[0]))
                 self._writefloat(float(node.get_fixed_attribute("max_velocity")[1]))
+                self._writefloat(float(node.get_fixed_attribute("friction")))
                 self._writeint(node.get_fixed_attribute("controller_index"))
                 connected_to = node.get_fixed_attribute("connected_to")
                 connected_to = self._expand_connected_list(connected_to)
@@ -641,6 +673,7 @@ class ClassWriter(ChunkyWriter):
                 self._regunique("meshname", physmeshptr.meshbasename)
                 self._writeint(physmeshptr.physidx)
                 self._writestr(physmeshptr.meshbasename)
+                self._normalizexform(physmeshptr.t)
                 self._writexform(physmeshptr.t)
                 self._addfeat("phys->mesh ptr:phys->mesh ptrs", 1)
 

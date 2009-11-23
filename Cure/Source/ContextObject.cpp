@@ -422,6 +422,8 @@ bool ContextObject::UpdateFullPosition(const ObjectPositionalData*& pPositionalD
 			case TBC::PhysicsEngine::ENGINE_HINGE_BREAK:
 			case TBC::PhysicsEngine::ENGINE_HINGE_TORQUE:
 			case TBC::PhysicsEngine::ENGINE_HINGE2_TURN:
+			case TBC::PhysicsEngine::ENGINE_ROTOR:
+			case TBC::PhysicsEngine::ENGINE_TILTER:
 			{
 				GETSET_OBJECT_POSITIONAL_AT(mPosition, y, RealData1, lData, PositionalData::TYPE_REAL_1, 1);
 				++y;
@@ -653,6 +655,8 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData)
 			case TBC::PhysicsEngine::ENGINE_HINGE_BREAK:
 			case TBC::PhysicsEngine::ENGINE_HINGE_TORQUE:
 			case TBC::PhysicsEngine::ENGINE_HINGE2_TURN:
+			case TBC::PhysicsEngine::ENGINE_ROTOR:
+			case TBC::PhysicsEngine::ENGINE_TILTER:
 			{
 				assert(mPosition.mBodyPositionArray.size() > y);
 				assert(mPosition.mBodyPositionArray[y]->GetType() == PositionalData::TYPE_REAL_1);

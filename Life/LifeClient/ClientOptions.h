@@ -32,6 +32,8 @@ struct ClientOptions
 			float mBreakAndBack;
 			float mLeft;
 			float mRight;
+			float mLeft3d;
+			float mRight3d;
 			float mUp;
 			float mDown;
 			float mHandBreak;

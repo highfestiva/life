@@ -42,7 +42,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;..\..\ThirdParty\ode-060223\include&quot;;&quot;..\..\ThirdParty\stlport\stlport&quot;"
+				AdditionalIncludeDirectories="&quot;..\..\ThirdParty\ode-0.11.1\include&quot;;&quot;..\..\ThirdParty\stlport\stlport&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="false"
 				BasicRuntimeChecks="0"
@@ -125,7 +125,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="&quot;..\..\ThirdParty\ode-060223\include&quot;;&quot;..\..\ThirdParty\stlport\stlport&quot;"
+				AdditionalIncludeDirectories="&quot;..\..\ThirdParty\ode-0.11.1\include&quot;;&quot;..\..\ThirdParty\stlport\stlport&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
@@ -207,7 +207,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="&quot;..\..\ThirdParty\ode-060223\include&quot;;&quot;..\..\ThirdParty\stlport\stlport&quot;"
+				AdditionalIncludeDirectories="&quot;..\..\ThirdParty\ode-0.11.1\include&quot;;&quot;..\..\ThirdParty\stlport\stlport&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
@@ -289,7 +289,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;..\..\ThirdParty\ode-060223\include&quot;;&quot;..\..\ThirdParty\stlport\stlport&quot;"
+				AdditionalIncludeDirectories="&quot;..\..\ThirdParty\ode-0.11.1\include&quot;;&quot;..\..\ThirdParty\stlport\stlport&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="false"
 				BasicRuntimeChecks="0"
@@ -372,7 +372,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="&quot;..\..\ThirdParty\ode-060223\include&quot;;&quot;..\..\ThirdParty\stlport\stlport&quot;"
+				AdditionalIncludeDirectories="&quot;..\..\ThirdParty\ode-0.11.1\include&quot;;&quot;..\..\ThirdParty\stlport\stlport&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
@@ -453,7 +453,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="&quot;..\..\ThirdParty\ode-060223\include&quot;;&quot;..\..\ThirdParty\stlport\stlport&quot;"
+				AdditionalIncludeDirectories="&quot;..\..\ThirdParty\ode-0.11.1\include&quot;;&quot;..\..\ThirdParty\stlport\stlport&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				MinimalRebuild="false"
 				RuntimeLibrary="0"

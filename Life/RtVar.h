@@ -15,6 +15,8 @@
 #define RTVAR_CTRL_STEER_BRKBACK	"Control.Steer.BreakAndBack"
 #define RTVAR_CTRL_STEER_LEFT		"Control.Steer.Left"
 #define RTVAR_CTRL_STEER_RIGHT		"Control.Steer.Right"
+#define RTVAR_CTRL_STEER_LEFT3D		"Control.Steer.Left3d"
+#define RTVAR_CTRL_STEER_RIGHT3D	"Control.Steer.Right3d"
 #define RTVAR_CTRL_STEER_UP		"Control.Steer.Up"
 #define RTVAR_CTRL_STEER_HANDBRK	"Control.Steer.HandBreak"
 #define RTVAR_CTRL_STEER_DOWN		"Control.Steer.Down"

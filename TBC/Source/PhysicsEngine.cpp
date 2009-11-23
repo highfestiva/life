@@ -18,11 +18,12 @@ namespace TBC
 
 
 PhysicsEngine::PhysicsEngine(EngineType pEngineType, float pStrength, float pMaxSpeed,
-	float pMaxSpeed2, unsigned pControllerIndex):
+	float pMaxSpeed2, float pFriction, unsigned pControllerIndex):
 	mEngineType(pEngineType),
 	mStrength(pStrength),
 	mMaxSpeed(pMaxSpeed),
 	mMaxSpeed2(pMaxSpeed2),
+	mFriction(pFriction),
 	mControllerIndex(pControllerIndex)
 {
 	::memset(mValue, 0, sizeof(mValue));
@@ -37,14 +38,14 @@ PhysicsEngine::~PhysicsEngine()
 PhysicsEngine* PhysicsEngine::Load(ChunkyPhysics* pStructure, const void* pData, unsigned pByteCount)
 {
 	const Lepra::uint32* lData = (const Lepra::uint32*)pData;
-	if (pByteCount != sizeof(Lepra::uint32)*6 + Lepra::Endian::BigToHost(lData[5])*sizeof(Lepra::uint32)*3)
+	if (pByteCount != sizeof(Lepra::uint32)*7 + Lepra::Endian::BigToHost(lData[6])*sizeof(Lepra::uint32)*3)
 	{
 		mLog.AError("Could not load; wrong data size.");
 		assert(false);
 		return (0);
 	}
 
-	PhysicsEngine* lEngine = new PhysicsEngine(ENGINE_WALK, 0, 0, 0, 0);
+	PhysicsEngine* lEngine = new PhysicsEngine(ENGINE_WALK, 0, 0, 0, 0, 0);
 	lEngine->LoadChunkyData(pStructure, pData);
 	if (lEngine->GetChunkySize() != pByteCount)
 	{
@@ -85,7 +86,7 @@ bool PhysicsEngine::SetValue(unsigned pAspect, float pValue, float pZAngle)
 		break;
 		case ENGINE_CAMERA_FLAT_PUSH:
 		{
-			if (pAspect >= 0 && pAspect <= 4)
+			if (pAspect >= mControllerIndex+0 && pAspect <= mControllerIndex+4)
 			{
 				switch (pAspect)
 				{
@@ -101,33 +102,11 @@ bool PhysicsEngine::SetValue(unsigned pAspect, float pValue, float pZAngle)
 		}
 		break;
 		case ENGINE_HINGE_ROLL:
-		{
-			if (pAspect == mControllerIndex)
-			{
-				mValue[0] = pValue;
-				return (true);
-			}
-		}
-		break;
 		case ENGINE_HINGE_BREAK:
-		{
-			if (pAspect == mControllerIndex)
-			{
-				mValue[0] = pValue;
-				return (true);
-			}
-		}
-		break;
 		case ENGINE_HINGE_TORQUE:
-		{
-			if (pAspect == mControllerIndex)
-			{
-				mValue[0] = pValue;
-				return (true);
-			}
-		}
-		break;
 		case ENGINE_HINGE2_TURN:
+		case ENGINE_ROTOR:
+		case ENGINE_TILTER:
 		{
 			if (pAspect == mControllerIndex)
 			{
@@ -199,7 +178,7 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, float pFrameTime)
 					if (lGeometry->GetJointId() != INVALID_JOINT)
 					{
 						// TODO: implement torque "curve" instead of constant angular force.
-						const float lUsedStrength = mStrength*(::fabs(mValue[0])+0.01f);
+						const float lUsedStrength = mStrength*(::fabs(mValue[0]) + mFriction);
 						const float lDirectionalMaxSpeed = (mValue[0] >= 0)? mMaxSpeed : mMaxSpeed2;
 						float lCurrentUsedStrength = 0;
 						float lCurrentTargetSpeed = 0;
@@ -245,6 +224,35 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, float pFrameTime)
 				case ENGINE_HINGE2_TURN:
 				{
 					ApplyTorque(pPhysicsManager, pFrameTime, lGeometry, lEngineNode);
+				}
+				break;
+				case ENGINE_ROTOR:
+				{
+					assert(lGeometry->GetJointId() != INVALID_JOINT);
+					if (lGeometry->GetJointId() != INVALID_JOINT)
+					{
+						const Lepra::Vector3DF lLiftForce = GetRotorLiftForce(pPhysicsManager, lGeometry, lEngineNode);
+						pPhysicsManager->AddForce(lGeometry->GetBodyId(), lLiftForce);
+					}
+					else
+					{
+						mLog.AError("Missing rotor joint!");
+					}
+				}
+				break;
+				case ENGINE_TILTER:
+				{
+					assert(lGeometry->GetJointId() != INVALID_JOINT);
+					if (lGeometry->GetJointId() != INVALID_JOINT)
+					{
+						const Lepra::Vector3DF lLiftForce = GetRotorLiftForce(pPhysicsManager, lGeometry, lEngineNode);
+						const Lepra::Vector3DF lPos(mMaxSpeed, mMaxSpeed2, 0);
+						pPhysicsManager->AddForceAtPos(lGeometry->GetBodyId(), lLiftForce, lPos);
+					}
+					else
+					{
+						mLog.AError("Missing rotor joint!");
+					}
 				}
 				break;
 				case ENGINE_ROLL_STRAIGHT:
@@ -300,7 +308,7 @@ const float* PhysicsEngine::GetValues() const
 
 unsigned PhysicsEngine::GetChunkySize() const
 {
-	return ((unsigned)(sizeof(Lepra::uint32)*5 +
+	return ((unsigned)(sizeof(Lepra::uint32)*6 +
 		sizeof(Lepra::uint32) + sizeof(Lepra::uint32)*3*mEngineNodeArray.size()));
 }
 
@@ -311,15 +319,16 @@ void PhysicsEngine::SaveChunkyData(const ChunkyPhysics* pStructure, void* pData)
 	lData[1] = Lepra::Endian::HostToBigF(mStrength);
 	lData[2] = Lepra::Endian::HostToBigF(mMaxSpeed);
 	lData[3] = Lepra::Endian::HostToBigF(mMaxSpeed2);
-	lData[4] = Lepra::Endian::HostToBig(mControllerIndex);
-	lData[5] = Lepra::Endian::HostToBig((Lepra::uint32)mEngineNodeArray.size());
+	lData[4] = Lepra::Endian::HostToBigF(mFriction);
+	lData[5] = Lepra::Endian::HostToBig(mControllerIndex);
+	lData[6] = Lepra::Endian::HostToBig((Lepra::uint32)mEngineNodeArray.size());
 	int x;
 	for (x = 0; x < (int)mEngineNodeArray.size(); ++x)
 	{
 		const EngineNode& lControlledNode = mEngineNodeArray[x];
-		lData[6+x*3] = Lepra::Endian::HostToBig(pStructure->GetIndex(lControlledNode.mGeometry));
-		lData[7+x*3] = Lepra::Endian::HostToBigF(lControlledNode.mScale);
-		lData[8+x*3] = Lepra::Endian::HostToBig(lControlledNode.mMode);
+		lData[7+x*3] = Lepra::Endian::HostToBig(pStructure->GetIndex(lControlledNode.mGeometry));
+		lData[8+x*3] = Lepra::Endian::HostToBigF(lControlledNode.mScale);
+		lData[9+x*3] = Lepra::Endian::HostToBig(lControlledNode.mMode);
 	}
 }
 
@@ -331,20 +340,31 @@ void PhysicsEngine::LoadChunkyData(ChunkyPhysics* pStructure, const void* pData)
 	mStrength = Lepra::Endian::BigToHostF(lData[1]);
 	mMaxSpeed = Lepra::Endian::BigToHostF(lData[2]);
 	mMaxSpeed2 = Lepra::Endian::BigToHostF(lData[3]);
-	mControllerIndex = Lepra::Endian::BigToHost(lData[4]);
-	const int lControlledNodeCount = Lepra::Endian::BigToHost(lData[5]);
+	mFriction = Lepra::Endian::BigToHostF(lData[4]);
+	mControllerIndex = Lepra::Endian::BigToHost(lData[5]);
+	const int lControlledNodeCount = Lepra::Endian::BigToHost(lData[6]);
 	int x;
 	for (x = 0; x < lControlledNodeCount; ++x)
 	{
-		ChunkyBoneGeometry* lGeometry = pStructure->GetBoneGeometry(Lepra::Endian::BigToHost(lData[6+x*3]));
+		ChunkyBoneGeometry* lGeometry = pStructure->GetBoneGeometry(Lepra::Endian::BigToHost(lData[7+x*3]));
 		assert(lGeometry);
-		float lScale = Lepra::Endian::BigToHostF(lData[7+x*3]);
-		EngineMode lMode = (EngineMode)Lepra::Endian::BigToHost(lData[8+x*3]);
+		float lScale = Lepra::Endian::BigToHostF(lData[8+x*3]);
+		EngineMode lMode = (EngineMode)Lepra::Endian::BigToHost(lData[9+x*3]);
 		AddControlledGeometry(lGeometry, lScale, lMode);
 	}
 }
 
 
+
+Lepra::Vector3DF PhysicsEngine::GetRotorLiftForce(PhysicsManager* pPhysicsManager, ChunkyBoneGeometry* pGeometry, const EngineNode& pEngineNode) const
+{
+	Lepra::Vector3DF lAxis;
+	pPhysicsManager->GetAxis1(pGeometry->GetJointId(), lAxis);
+	float lAngularRotorSpeed = 0;
+	pPhysicsManager->GetAngleRate1(pGeometry->GetJointId(), lAngularRotorSpeed);
+	const float lLiftForce = lAngularRotorSpeed*mStrength*mValue[0]*pEngineNode.mScale;
+	return (lAxis * lLiftForce);
+}
 
 void PhysicsEngine::ApplyTorque(PhysicsManager* pPhysicsManager, float pFrameTime, ChunkyBoneGeometry* pGeometry, const EngineNode& pEngineNode)
 {

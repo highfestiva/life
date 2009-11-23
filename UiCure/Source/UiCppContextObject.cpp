@@ -118,25 +118,6 @@ void CppContextObject::DebugDrawPrimitive(DebugPrimitive pPrimitive)
 	const int lBoneCount = mPhysics->GetBoneCount();
 	for (int x = 0; x < lBoneCount; ++x)
 	{
-		if (x == 5)	// TODO: remove whole scope!
-		{
-			static int lDrawHoeShapeCount = 0;
-			++lDrawHoeShapeCount;
-			if (lDrawHoeShapeCount&0x100)
-			{
-				continue;
-			}
-		}
-		if (x == 8)	// TODO: remove whole scope!
-		{
-			static int lDrawHoeShapeCount = 0;
-			++lDrawHoeShapeCount;
-			if (lDrawHoeShapeCount&0x40)
-			{
-				continue;
-			}
-		}
-
 		const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(x);
 		if (lGeometry->GetBodyId() != TBC::INVALID_BODY)
 		{
