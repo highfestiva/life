@@ -350,7 +350,8 @@ class PhysWriter(ChunkyWriter):
                 friction = node.get_fixed_attribute("friction") * totalmass / 1000.0
                 self._writefloat(friction)
                 self._writefloat(float(node.get_fixed_attribute("bounce")))
-                self._writeint(-1 if not node.phys_root else self.bodies.index(node.phys_root))
+                rootindex = -1 if not node.phys_root else self.bodies.index(node.phys_root)
+                self._writeint(rootindex)
                 joints = {None:1, "exclude":1, "suspend_hinge":2, "hinge2":3, "hinge":4, "ball":5, "universal":6}
                 jointtype = node.get_fixed_attribute("joint", True)
                 jointvalue = joints[jointtype]
@@ -422,7 +423,7 @@ class PhysWriter(ChunkyWriter):
                         self._writeint(0)
                 # Write shape data (dimensions of shape).
                 if options.options.verbose:
-                        print("Writing physical shape %s with data %s." % (node.getName(), shape.data))
+                        print("Writing shape %s with rootindex %i." % (node.getName(), rootindex))
                 for x in shape.data:
                         self._writefloat(math.fabs(x))
                 self._addfeat("physical geometry:physical geometries", 1)

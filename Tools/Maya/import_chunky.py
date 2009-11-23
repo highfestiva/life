@@ -544,6 +544,25 @@ class GroupReader(DefaultMAReader):
                                                 isValid, hasJoint = self._query_attribute(root, "joint", jointCheck, False)
                                 if node.phys_root:
                                         node.phys_root.is_phys_root = True
+                # Make it so that we only have one physical root.
+                physroots = 0
+                for node in group:
+                        if node.getName().startswith("phys_") and node.nodetype == "transform":
+                                if not node.phys_root:
+                                        if node.getParent().phys_children.index(node) > 0:
+                                                # Move to actual root.
+                                                root = node.getParent().phys_children[0]
+                                                root_xform = root.gettransformto(node.getParent(), "original", lambda n: n.getParent())
+                                                own_xform = node.gettransformto(node.getParent(), "original", lambda n: n.getParent())
+                                                node.localmat4 = root_xform.inverse() * own_xform
+                                                node.phys_root = root
+                                                node.xformparent = root
+                                                root.phys_children += [node]
+                                        else:
+                                                physroots += 1
+                if physroots != 1:
+                        isGroupValid = False
+                        print("Internal error: model has %i phys roots, must have exactly one!" % physroots)
                 return isGroupValid
 
 
