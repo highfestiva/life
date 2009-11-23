@@ -110,6 +110,7 @@ bool ChunkyBoneGeometry::CreateJoint(ChunkyPhysics* pStructure, PhysicsManager* 
 				GetBodyId(), lAnchor, lHingeAxis);
 			pPhysics->SetJointParams(mJointId, mBodyData.mParameter[4], mBodyData.mParameter[5], 0);
 			pPhysics->SetAngularMotorTurn(mJointId, 0, 0);
+			//pPhysics->GetAxis1(mJointId, lHingeAxis);
 			lOk = true;
 		}
 		else if (mBodyData.mJointType == JOINT_UNIVERSAL)

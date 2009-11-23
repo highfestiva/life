@@ -65,6 +65,7 @@ public:
 	void SetBodyAngularAcceleration(BodyID pBodyId, const Lepra::Vector3DF& pAngularAcceleration);
 
 	virtual float GetBodyMass(BodyID pBodyId);
+	virtual void MassAdjustBody(BodyID pBodyId);
 
 	// Set and get user data.
 	virtual void SetBodyData(BodyID pBodyId, void* pUserData);

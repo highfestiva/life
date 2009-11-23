@@ -98,7 +98,7 @@ void CppContextObject::StartLoading()
 	assert(mClassResource == 0);
 	mClassResource = new UserClassResource();
 	const Lepra::String lAssetName = _T("../../Data/")+GetClassId()+_T(".class");	// TODO: move to central source file.
-	mClassResource->LoadUnique(GetManager()->GetGameManager()->GetResourceManager(), lAssetName,
+	mClassResource->Load(GetManager()->GetGameManager()->GetResourceManager(), lAssetName,
 		UserClassResource::TypeLoadCallback(this, &CppContextObject::OnLoadClass));
 }
 

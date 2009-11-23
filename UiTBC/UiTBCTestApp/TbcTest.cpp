@@ -127,7 +127,7 @@ bool ExportStructure()
 		lStructure.AddBoneGeometry(Lepra::TransformationF(), lGeometry);
 
 		TBC::PhysicsEngine* lEngine = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_CAMERA_FLAT_PUSH,
-			55, 50, 0, 0);
+			55, 50, 0, 0.01f, 0);
 		lEngine->AddControlledGeometry(lGeometry, 1);
 		lStructure.AddEngine(lEngine);
 
@@ -242,25 +242,25 @@ bool ExportStructure()
 		lStructure.AddBoneGeometry(lTransformation, lGeometry, lBodyData.mParent);
 
 		// Front wheel drive engine.
-		TBC::PhysicsEngine* lEngine = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_HINGE2_ROLL, 1*lVolvoMass, 300, 20, 0);
+		TBC::PhysicsEngine* lEngine = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_HINGE_ROLL, 1*lVolvoMass, 300, 20, 0.01f, 0);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(4), -1);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(5), +1);
 		lStructure.AddEngine(lEngine);
 		// Turning front wheels.
-		lEngine = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_HINGE2_TURN, 1*lVolvoMass, 1.0f, 0, 1);
+		lEngine = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_HINGE2_TURN, 1*lVolvoMass, 1.0f, 0, 0.01f, 1);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(4), +1);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(5), +1);
 		lStructure.AddEngine(lEngine);
 		// Normal breaks (all nodes, scaled >= 0) and handbreak (rear wheels, nodes with high scaling values).
 		const float lBreakInputThreashold = 0.02f;
-		TBC::PhysicsEngine* lBreak = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_HINGE2_BREAK, 8*lVolvoMass, lBreakInputThreashold, 0, 2);
+		TBC::PhysicsEngine* lBreak = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_HINGE_BREAK, 8*lVolvoMass, lBreakInputThreashold, 0, 0.01f, 2);
 		lBreak->AddControlledGeometry(lStructure.GetBoneGeometry(2), 100);
 		lBreak->AddControlledGeometry(lStructure.GetBoneGeometry(3), 100);
 		lBreak->AddControlledGeometry(lStructure.GetBoneGeometry(4), 0);
 		lBreak->AddControlledGeometry(lStructure.GetBoneGeometry(5), 0);
 		lStructure.AddEngine(lBreak);
 		// Just a "dummy engine" to keep rear wheel straight at all times.
-		lEngine = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_ROLL_STRAIGHT, 0, 0, 0, 0);
+		lEngine = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_ROLL_STRAIGHT, 0, 0, 0, 0.01f, 0);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(2), -1);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(3), +1);
 		lStructure.AddEngine(lEngine);
@@ -435,25 +435,25 @@ bool ExportStructure()
 		lStructure.AddBoneGeometry(lTransformation, lGeometry, lBodyData.mParent);
 
 		// Rear wheel drive engine.
-		TBC::PhysicsEngine* lEngine = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_HINGE2_ROLL, 5*lCarWeight, 300, 20, 0);
+		TBC::PhysicsEngine* lEngine = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_HINGE_ROLL, 5*lCarWeight, 300, 20, 0.01f, 0);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(2), -1);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(3), 1);
 		lStructure.AddEngine(lEngine);
 		// Turning front wheels.
-		lEngine = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_HINGE2_TURN, 1*lCarWeight, 0.5f, 0, 1);
+		lEngine = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_HINGE2_TURN, 1*lCarWeight, 0.5f, 0, 0.01f, 1);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(4), 1);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(5), 1);
 		lStructure.AddEngine(lEngine);
 		// Normal breaks (all nodes, scaled >= 0) and handbreak (rear wheels, nodes with high scaling values).
 		const float lBreakInputThreashold = 0.02f;
-		TBC::PhysicsEngine* lBreak = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_HINGE2_BREAK, 8*lCarWeight, lBreakInputThreashold, 0, 2);
+		TBC::PhysicsEngine* lBreak = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_HINGE_BREAK, 8*lCarWeight, lBreakInputThreashold, 0, 0.01f, 2);
 		lBreak->AddControlledGeometry(lStructure.GetBoneGeometry(2), 100);
 		lBreak->AddControlledGeometry(lStructure.GetBoneGeometry(3), 100);
 		lBreak->AddControlledGeometry(lStructure.GetBoneGeometry(4), 0);
 		lBreak->AddControlledGeometry(lStructure.GetBoneGeometry(5), 0);
 		lStructure.AddEngine(lBreak);
 		// Just a "dummy engine" to keep rear wheel straight at all times.
-		lEngine = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_ROLL_STRAIGHT, 0, 0, 0, 0);
+		lEngine = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_ROLL_STRAIGHT, 0, 0, 0, 0.01f, 0);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(2), -1);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(3), 1);
 		lStructure.AddEngine(lEngine);
@@ -666,7 +666,7 @@ bool ExportStructure()
 		lStructure.AddBoneGeometry(lBucketFloorTransform, lGeometry, lBodyData.mParent);
 
 		// All wheel drive engine.
-		TBC::PhysicsEngine* lEngine = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_HINGE2_ROLL, lCarWeight, 25, 25, 0);
+		TBC::PhysicsEngine* lEngine = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_HINGE_ROLL, lCarWeight, 25, 25, 0.01f, 0);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(2), -1);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(3), 1);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(4), -1);
@@ -675,7 +675,7 @@ bool ExportStructure()
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(7), 1);
 		lStructure.AddEngine(lEngine);
 		// Turning with tracks are controlled by rolling of the wheels.
-		lEngine = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_HINGE2_ROLL, lCarWeight, 20, 20, 1);
+		lEngine = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_HINGE_ROLL, lCarWeight, 20, 20, 0.01f, 1);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(2), 1);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(3), 1);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(4), 1);
@@ -685,7 +685,7 @@ bool ExportStructure()
 		lStructure.AddEngine(lEngine);
 		// Normal breaks (all nodes, scaled >= 0) and handbreak (nodes with high scaling values).
 		const float lBreakInputThreashold = 0.02f;
-		TBC::PhysicsEngine* lBreak = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_HINGE2_BREAK, lCarWeight, lBreakInputThreashold, 0, 2);
+		TBC::PhysicsEngine* lBreak = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_HINGE_BREAK, lCarWeight, lBreakInputThreashold, 0, 0.01f, 2);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(2), 100);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(3), 100);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(4), 100);
@@ -694,13 +694,13 @@ bool ExportStructure()
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(7), 100);
 		lStructure.AddEngine(lBreak);
 		// The boom, arm and bucket are hinge-controlled.
-		lEngine = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_HINGE, 20*lCarWeight, 2.0f, 1.0f, 3);
+		lEngine = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_HINGE_TORQUE, 20*lCarWeight, 2.0f, 1.0f, 0.01f, 3);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(8), 5);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(10), 2, TBC::PhysicsEngine::MODE_HALF_LOCK);	// MODE_HALF_LOCK = has neutral/freeze position outside mid value.
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(11), 1, TBC::PhysicsEngine::MODE_HALF_LOCK);	// MODE_HALF_LOCK = has neutral/freeze position outside mid value.
 		lStructure.AddEngine(lEngine);
 		// Just a "dummy engine" to keep wheels straight at all times.
-		lEngine = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_ROLL_STRAIGHT, 0, 0, 0, 0);
+		lEngine = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_ROLL_STRAIGHT, 0, 0, 0, 0.01f, 0);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(2), -1);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(3), 1);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(4), -1);
@@ -873,7 +873,7 @@ bool ExportStructure()
 		lStructure.AddBoneGeometry(lHookTransform, lGeometry, lBodyData.mParent);
 
 		// Jib rotational engine.
-		TBC::PhysicsEngine* lEngine = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_HINGE, lJibWeight, 2.0f, 1.0f, 1);
+		TBC::PhysicsEngine* lEngine = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_HINGE_TORQUE, lJibWeight, 2.0f, 1.0f, 0.01f, 1);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(1), 1.0f);
 		lStructure.AddEngine(lEngine);
 

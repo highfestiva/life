@@ -369,6 +369,8 @@ void GameClientSlaveManager::TickUiInput()
 			lObject->SetEnginePower(3, lPower, mCameraOrientation.x);
 			lPower = v.mForward3d - v.mBackward3d;
 			lObject->SetEnginePower(4, lPower, mCameraOrientation.x);
+			lPower = v.mLeft3d - v.mRight3d;
+			lObject->SetEnginePower(5, lPower, mCameraOrientation.x);
 		}
 	}
 }

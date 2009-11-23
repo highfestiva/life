@@ -20,8 +20,8 @@ namespace Cure
 ContextManager::ContextManager(GameManager* pGameManager):
 	mGameManager(pGameManager),
 	mIsObjectOwner(true),
-	mLocalObjectIdManager(0x4FFFFFFF, 0x7FFFFFFF-1, 0xFFFFFFFF),
-	mRemoteObjectIdManager(1, 0x4FFFFFFF-1, 0xFFFFFFFF)
+	mLocalObjectIdManager(0x40000000, 0x7FFFFFFF-1, 0xFFFFFFFF),
+	mRemoteObjectIdManager(1, 0x40000000-1, 0xFFFFFFFF)
 {
 }
 

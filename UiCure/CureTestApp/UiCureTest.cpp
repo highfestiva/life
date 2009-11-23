@@ -231,7 +231,7 @@ bool ResourceTest::TestClass()
 	{
 		lContext = _T("load class");
 		UiCure::UserClassResource lClass(mUiManager);
-		lClass.LoadUnique(mResourceManager, _T("tractor_01.class"), UiCure::UserClassResource::TypeLoadCallback(this, &ResourceTest::ClassLoadCallback));
+		lClass.Load(mResourceManager, _T("tractor_01.class"), UiCure::UserClassResource::TypeLoadCallback(this, &ResourceTest::ClassLoadCallback));
 		for (int x = 0; gResourceLoadCount != 13 && x < 100; ++x)
 		{
 			Lepra::Thread::Sleep(0.01);

@@ -8,6 +8,7 @@ from mayaascii import *
 from quat import quat
 from vec3 import vec3
 from vec4 import vec4
+import options
 import shape
 
 import math
@@ -69,10 +70,15 @@ class ChunkyWriter:
                 self.dowrite()
 
 
-        def _regunique(self, category, name):
+        def _isunique(self, category, name):
                 if not hasattr(self.__class__, category):
                         setattr(self.__class__, category, {})
                 if getattr(self.__class__, category).get(name):
+                        return False
+                return True
+
+        def _regunique(self, category, name):
+                if not self._isunique(category, name):
                         print("Error: multiple objects of type %s with same name %s causing ambiguity!" % (category, name))
                         sys.exit(3)
                 getattr(self.__class__, category)[name] = True
@@ -197,14 +203,44 @@ class ChunkyWriter:
                         sys.exit(17)
 
 
+        def _clampdata(self, xform, length):
+                for x in range(length):
+                        xabs = math.fabs(xform[x])
+                        if xabs <= 1e-3:        # Close to zero -> 0.
+                                xform[x] = 0.0
+                        elif xabs >= 1-1e-3 and xabs <= 1:      # Close to one -> 1.
+                                xform[x] = math.copysign(1.0, xform[x])
+                        else:
+                                for y in range(x+1, length): # Close to other value -> both gets average.
+                                        yabs = math.fabs(xform[y])
+                                        if math.fabs(xabs-yabs) < 1e-3:
+                                                avg = (xabs+yabs)/2
+                                                xform[x] = math.copysign(avg, xform[x])
+                                                xform[y] = math.copysign(avg, xform[y])
+
+
+        def _normalizexform(self, xform):
+                "Normalize the hard way. Most importantly the orientation."
+##                self._clampdata(xform, 4)
+##                xform[:4] = quat(xform[:4]).normalize()[:]
+##                m = quat(xform[:4]).toMat4()
+##                self._clampdata(m.mlist, 16)
+##                xform[:4] = quat().fromMat(m).normalize()[:]
+                self._clampdata(xform, 4)
+                xform[:4] = quat(xform[:4]).normalize()[:]
+
+                for x in range(4, 7):
+                        xround = round(xform[x], 1)
+                        if math.fabs(xround-xform[x]) < 1e-3:
+                                xform[x] = xround
+                return xform
+
+
         def _writexform(self, xform):
                 if len(xform) != 7:
                         print("Error: trying to store transform with len != 7!")
                         sys.exit(18)
-                #x = 0
                 for f in xform:
-                        #print("Writing transform", x, ": ", f)
-                        #x += 1
                         self._writefloat(f)
 
 
@@ -266,37 +302,6 @@ class ChunkyWriter:
                 self.f.write(data)
 
 
-        @staticmethod
-        def _geteuler(node):
-                q = quat(node.get_local_transform().decompose()[1])
-                w2 = q[0]*q[0]
-                x2 = q[1]*q[1]
-                y2 = q[2]*q[2]
-                z2 = q[3]*q[3]
-                unitlength = w2 + x2 + y2 + z2  # Normalised == 1, otherwise correction divisor.
-                abcd = q[0]*q[1] + q[2]*q[3]
-                if abcd > (0.5-0.0001)*unitlength:
-                        yaw = 2 * atan2(q[2], q[0])
-                        pitch = math.pi
-                        roll = 0
-                elif abcd < (-0.5+0.0001)*unitlength:
-                        yaw = -2 * math.atan2(q[2], q[0])
-                        pitch = -math.pi
-                        roll = 0
-                else:
-                        adbc = q[0]*q[3] - q[1]*q[2]
-                        acbd = q[0]*q[2] - q[1]*q[3]
-                        yaw = math.atan2(2*adbc, 1 - 2*(z2+x2))
-                        pitch = math.asin(2*abcd/unitlength)
-                        roll = math.atan2(2*acbd, 1 - 2*(y2+x2))
-                return yaw, pitch, roll
-
-
-        def _getaxes(self, node):
-                q = quat(node.get_local_transform().decompose()[1])
-                return q.rotateVec((1,0,0)), q.rotateVec((0,1,0)), q.rotateVec((0,0,1))
-
-
         def _findglobalnode(self, simplename):
                 for node in self.group:
                         if node.getName() == simplename:
@@ -314,7 +319,7 @@ class PhysWriter(ChunkyWriter):
 
 
         def dowrite(self):
-                #print(self.bodies)
+                #print("Writing physics...", self.bodies)
                 filename = self.basename+".phys"
                 with self._fileopenwrite(filename) as f:
                         self.f = f
@@ -347,33 +352,13 @@ class PhysWriter(ChunkyWriter):
 
 
         def _writebone(self, node):
-                ipm = mat4.identity()
-                usescale = False
-                if node.xformparent:
-                        t, r, s = node.xformparent.get_world_transform().inverse().decompose()
-                        ipm = mat4.translation(t) * r
-                        if node.xformparent.getName().startswith("phys_") and node.xformparent.is_phys_root and node.xformparent.phys_root:
-                                usescale = True
-                                ipm = node.xformparent.get_world_transform().inverse()
-                                print("%s's parent %s singing up as phys_root!!!" % (node.getName(), node.xformparent.getName()))
-                wt = node.get_world_transform()
-                if not node.phys_root:
-                        # Use inverse initial rotation (only when writing root physics).
-                        wt = node.gettransformto(None, "inverse_initial_r")
-                        #print("Specialcasing", node.getName())
-                m = ipm * wt
-                t, r, s = m.decompose()
-                q = quat(r).normalize()
-                pos = t
-                if usescale:
-                        s = node.xformparent.get_world_transform().decompose()[2]
-                        pos = mat4.scaling(s) * vec4(*t)
-                #if node.getName() == "phys_hangbar_back":
-                print("Writing %s (parent %s) with relative pos %s." %
-                        (node.getName(), node.xformparent.getName(), pos))
-                #pos = [0.5, -0.866, -3.2]
+                pos, q = node.get_final_local_transform()
+                if not node.phys_root and node.getParent().phys_children[0] == node:
+                        pos = [pos.x, pos.y, -node.lowestpos.z]
                 data = q[:]+pos[:3]
-                #print("Writing bone %s with pos" % node.getName(), data)
+                self._normalizexform(data)
+                if options.options.verbose:
+                        print("Writing bone %s with relative data %s." % (node.getName(), data))
                 self._addfeat("bone:bones", 1)
                 self._writexform(data)
                 node.writecount += 1
@@ -391,10 +376,13 @@ class PhysWriter(ChunkyWriter):
                 types = {"capsule":1, "sphere":2, "box":3}
                 self._writeint(types[shape.type])
                 node = shape.getnode()
+                totalmass = self._gettotalmass()
                 self._writefloat(float(node.get_fixed_attribute("mass")))
-                self._writefloat(float(node.get_fixed_attribute("friction")))
+                friction = node.get_fixed_attribute("friction") * totalmass / 1000.0
+                self._writefloat(friction)
                 self._writefloat(float(node.get_fixed_attribute("bounce")))
-                self._writeint(-1 if not node.phys_root else self.bodies.index(node.phys_root))
+                rootindex = -1 if not node.phys_root else self.bodies.index(node.phys_root)
+                self._writeint(rootindex)
                 joints = {None:1, "exclude":1, "suspend_hinge":2, "hinge2":3, "hinge":4, "ball":5, "universal":6}
                 jointtype = node.get_fixed_attribute("joint", True)
                 jointvalue = joints[jointtype]
@@ -405,7 +393,6 @@ class PhysWriter(ChunkyWriter):
                 self._writeint(1 if node.get_fixed_attribute("affected_by_gravity") else 0)
                 # Write joint parameters.
                 parameters = [0.0]*16
-                totalmass = self._gettotalmass()
                 #print("Total mass:", totalmass)
                 parameters[0] = node.get_fixed_attribute("joint_spring_constant", True, 0.0) * totalmass
                 parameters[1] = node.get_fixed_attribute("joint_spring_damping", True, 0.0) * totalmass
@@ -414,28 +401,34 @@ class PhysWriter(ChunkyWriter):
 
                 yaw = node.get_fixed_attribute("joint_yaw", True, 0.0)*math.pi/180
                 pitch = node.get_fixed_attribute("joint_pitch", True, 0.0)*math.pi/180
-                m = mat4.identity()
-                m.setMat3(mat3.fromEulerXZY(0, pitch, yaw))
-                v = ir * m * vec4(0,0,1,0)
-                # Project onto XY plane.
-                xyv = vec3(v[:3])
-                xyv[2] = 0
-                xyv = xyv.normalize()
-                # Yaw is angle of projection on the XY plane.
-                if xyv.length():
-                        yaw = math.asin(xyv.y/xyv.length())
-                else:
-                        yaw = 0
-                v = v.normalize()
-                v = vec3(v[:3])
-                pitch = math.asin(v*xyv)
+##                m = mat4.identity()
+##                m.setMat3(mat3.fromEulerXZY(0, pitch, yaw))
+##                v = ir * m * vec4(0,0,1,0)
+##                # Project onto XY plane.
+##                xyv = vec3(v[:3])
+##                xyv[2] = 0
+##                if xyv.length() < 1e-12:
+##                        yaw = 0
+##                        if v[2] < 0:
+##                                pitch = math.pi
+##                        else:
+##                                pitch = 0
+##                else:
+##                        xyv = xyv.normalize()
+##                        # Yaw is angle of projection on the XY plane.
+##                        if xyv.length():
+##                                yaw = math.asin(xyv.y/xyv.length())
+##                        else:
+##                                yaw = 0
+##                        v = v.normalize()
+##                        v = vec3(v[:3])
+##                        pitch = math.asin(v*xyv)
+                if options.options.verbose and jointvalue >= 2:
+                        print("Joint %s euler angles are: %s." % (node.getName(), (yaw, pitch)))
+                parameters[2:4] = yaw, pitch
 
-                parameters[2] = yaw
-                parameters[3] = pitch
                 joint_min, joint_max = node.get_fixed_attribute("joint_angles", True, [0.0,0.0])
-                joint_min, joint_max = math.radians(joint_min), math.radians(joint_max)
-                parameters[4] = joint_min
-                parameters[5] = joint_max
+                parameters[4:6] = math.radians(joint_min), math.radians(joint_max)
 
                 mp = node.get_world_pivot_transform()
                 mt = node.get_world_transform()
@@ -443,12 +436,6 @@ class PhysWriter(ChunkyWriter):
                 wt = mt * vec4(0,0,0,1)
                 j = wp-wt
                 j = ir * j
-                #j[1] = -j[1]
-                if jointvalue != 1:
-                        print("Joint on %s at %s (world pivot at %s, transl at %s)." % (node.getFullName(), j, wp, wt))
-                        print(ir)
-                #j[3] = 0
-                #j = (node.get_world_transform().inverse()).decompose()[1] * j
 
                 parameters[6:9] = j[:3]
                 for x in parameters:
@@ -466,20 +453,22 @@ class PhysWriter(ChunkyWriter):
                 else:
                         self._writeint(0)
                 # Write shape data (dimensions of shape).
+                if options.options.verbose:
+                        print("Writing shape %s with rootindex %i." % (node.getName(), rootindex))
                 for x in shape.data:
                         self._writefloat(math.fabs(x))
-                #print("Wrote shape with axes", self._getaxes(node))
                 self._addfeat("physical geometry:physical geometries", 1)
 
 
         def _writeengine(self, node):
                 # Write all general parameters first.
-                types = {"walk":1, "cam_flat_push":2, "hinge2_roll":3, "hinge2_turn":4, "hinge2_break":5, "hinge":6, "glue":7}
+                types = {"walk":1, "cam_flat_push":2, "hinge_roll":3, "hinge_break":4, "hinge_torque":5, "hinge2_turn":6, "rotor":7, "tilter":8, "glue":8}
                 self._writeint(types[node.get_fixed_attribute("type")])
                 totalmass = self._gettotalmass()
                 self._writefloat(node.get_fixed_attribute("strength")*totalmass)
                 self._writefloat(float(node.get_fixed_attribute("max_velocity")[0]))
                 self._writefloat(float(node.get_fixed_attribute("max_velocity")[1]))
+                self._writefloat(float(node.get_fixed_attribute("friction")))
                 self._writeint(node.get_fixed_attribute("controller_index"))
                 connected_to = node.get_fixed_attribute("connected_to")
                 connected_to = self._expand_connected_list(connected_to)
@@ -511,15 +500,16 @@ class PhysWriter(ChunkyWriter):
 
 
         def _getshape(self, node):
-                shapenode = self._findphyschildnode(parent=node, nodetype="mesh")
-                if not shapenode:
-                        print("Error: shape for node '%s' does not exist." % node.getFullName())
-                        sys.exit(11)
-                in_nodename = shapenode.getInNode("i", "i")[0]
-                if not in_nodename:
-                        print("Error: input shape for node '%s' does not exist." % shapenode.getFullName())
-                        sys.exit(12)
-                in_node = self._findglobalnode(in_nodename)
+##                shapenode = self._findphyschildnode(parent=node, nodetype="mesh")
+##                if not shapenode:
+##                        print("Error: shape for node '%s' does not exist." % node.getFullName())
+##                        sys.exit(11)
+##                in_nodename = shapenode.getInNode("i", "i")[0]
+##                if not in_nodename:
+##                        print("Error: input shape for node '%s' does not exist." % shapenode.getFullName())
+##                        sys.exit(12)
+##                in_node = self._findglobalnode(in_nodename)
+                in_node = node.shape
                 if not in_node:
                         print("Error: unable to find input shape node '%s'." % in_nodename)
                         sys.exit(13)
@@ -530,11 +520,12 @@ class PhysWriter(ChunkyWriter):
 
 
         def _findphyschildnode(self, parent, nodetype):
-                for node in self.group:
-                        if node.getName().startswith("phys_") and node.nodetype == nodetype and node.getParent() == parent:
-                                return node
-                print("Warning: certain node not found!")
-                return None
+                return parent.shape
+##                for node in self.group:
+##                        if node.getName().startswith("phys_") and node.nodetype == nodetype and node.getParent() == parent:
+##                                return node
+##                print("Warning: certain node not found!")
+##                return None
 
 
         def _count_transforms(self):
@@ -562,16 +553,17 @@ class MeshWriter(ChunkyWriter):
         def dowrite(self):
                 for node in self.group:
                         if node.get_fixed_attribute("rgvtx", optional=True):
-                                nodemeshname = node.getName().replace("Shape", "")
-                                if nodemeshname.startswith("m_"):
-                                        nodemeshname = nodemeshname[2:]
-                                meshbasename = self.basename+"_"+nodemeshname
-                                #print("Setting", node.getParent(), "meshbasename.")
-                                node.getParent().meshbasename = meshbasename
+                                meshbasename = node.getParent().meshbasename
                                 self.writemesh(meshbasename+".mesh", node)
                 self._verifywritten("meshes", self.meshes)
 
         def writemesh(self, filename, node):
+                if not self._isunique("file", filename):
+                        if options.options.verbose:
+                                print("Skipping write of instance %s." % filename)
+                        self._addfeat("mesh instance:mesh instances", 1)
+                        node.getParent().writecount += 1
+                        return
                 #print("Writing mesh %s with %i triangles..." % (filename, len(node.get_fixed_attribute("rgtri"))/3))
                 self._addfeat("mesh:meshes", 1)
                 self._addfeat("gfx triangle:gfx triangles", len(node.get_fixed_attribute("rgtri"))/3)
@@ -587,7 +579,8 @@ class MeshWriter(ChunkyWriter):
                                         )
                                 )
                         self._writechunk(data)
-                node.getParent().writecount += 1
+                for p in node.getparents():
+                        p.writecount += 1
                 self._addfeat("file:files", 1)
 
 
@@ -606,8 +599,6 @@ class ClassWriter(ChunkyWriter):
                         self.f = f
                         meshptrs = []
                         physidx = 0
-                        #print("These are the bodies:", self.bodies)
-                        #print("These are the meshes:", self.meshes)
                         for m in self.meshes:
                                 def _getparentphys(m):
                                         ph = None
@@ -636,26 +627,17 @@ class ClassWriter(ChunkyWriter):
                                 m.writecount += 1
                                 tm = m.get_world_transform()
                                 tp = phys.get_world_transform()
-                                tmt, tmr, tms = tm.decompose()
+                                tmt = tm.decompose()[0]
                                 tpt, tpr, tps = tp.decompose()
                                 tpt = mat4.translation(tpt)
                                 tps = mat4.scaling(tps)
-                                #tmr = quat(tmr).normalize().toMat4()
-                                #tpr = quat(tpr).normalize().toMat4()
                                 wpm = m.get_world_translation()
                                 wpp = phys.get_world_translation()
-                                mat = tps.inverse() * tpt.inverse() * tpr.inverse() * mat4.translation(tmt)
-                                mat = tp.inverse() * mat4.translation(tmt)
+                                #mat = tp.inverse() * mat4.translation(tmt)
                                 mat = tpt.inverse() * tpr.inverse() * tps.inverse() * mat4.translation(tmt)
-                                _, r, _ = mat.decompose()
-                                q = quat(r).normalize()
+                                q = quat(mat.decompose()[1]).normalize()
                                 p = wpm-wpp
                                 p = q.toMat4() * p
-                                #p = t-vec3((lpm-lpp)[0:3])
-                                if m.meshbasename == "fjask_backbar":
-                                        #q = quat(1,0,0,0)
-                                        #p = [0.0,0.0,0.0]
-                                        pass
                                 p = p[0:3]
                                 #print("Writing class", m.meshbasename, "relative to", phys.getName(), "with", q[:]+p[:])
                                 physidx = self.bodies.index(phys)
@@ -675,9 +657,23 @@ class ClassWriter(ChunkyWriter):
 
 
         def _writephysmeshptr(self, physmeshptr):
+                meshbasename = physmeshptr.meshbasename
+                if not self._isunique("meshname", meshbasename):
+                        physmeshptr.meshbasename = None
+                        for x in range(2, 5000):
+                                meshinstancename = meshbasename+";"+str(x)
+                                if self._isunique("meshname", meshinstancename):
+                                        physmeshptr.meshbasename = meshinstancename
+                                        if options.options.verbose:
+                                                print("Mesh instance %s picked." % meshinstancename)
+                                        break
+                        if not physmeshptr.meshbasename:
+                                print("Error: could not find free mesh instance name!")
+                                sys.exit(3)
                 self._regunique("meshname", physmeshptr.meshbasename)
                 self._writeint(physmeshptr.physidx)
                 self._writestr(physmeshptr.meshbasename)
+                self._normalizexform(physmeshptr.t)
                 self._writexform(physmeshptr.t)
                 self._addfeat("phys->mesh ptr:phys->mesh ptrs", 1)
 

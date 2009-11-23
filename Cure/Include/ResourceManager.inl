@@ -50,12 +50,13 @@ void UserTypeResourceBase<UserResourceType, ResourceType>::LoadUnique(
 template<class UserResourceType, class ResourceType>
 typename ResourceType::UserRamData UserTypeResourceBase<UserResourceType, ResourceType>::GetRamData() const
 {
-	return (((ResourceType*)GetConstResource())->GetRamData());
+	return (((const ResourceType*)GetConstResource())->GetRamData());
 }
 
 template<class UserResourceType, class ResourceType>
 typename ResourceType::UserData UserTypeResourceBase<UserResourceType, ResourceType>::GetData() const
 {
+	// TODO: fix this unsafe cast from const!
 	return (((ResourceType*)GetConstResource())->GetUserData(this));
 }
 

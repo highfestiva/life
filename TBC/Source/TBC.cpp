@@ -1,22 +1,28 @@
-/*
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Righteous Games
-*/
+// Author: Jonas Byström
+// Copyright (c) 2002-2009, Righteous Games
+
+
 
 #include "../Include/TBC.h"
+#include <ode/ode.h>
 
-#include "../Include/PortalManager.h"
-#include "../../Lepra/Include/String.h"
+
 
 namespace TBC
 {
 
+
+
 void Init()
 {
+	::dInitODE();
 }
 
 void Shutdown()
 {
+	::dCloseODE();
 }
+
+
 
 }
