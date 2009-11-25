@@ -154,6 +154,7 @@ public:
 	virtual void DeleteBody(BodyID pBodyId) = 0;
 
 	virtual Lepra::Vector3DF GetBodyPosition(BodyID pBodyId) const = 0;
+	virtual Lepra::QuaternionF GetBodyOrientation(BodyID pBodyId) const = 0;
 	virtual void GetBodyTransform(BodyID pBodyId, Lepra::Transformation<Lepra::float32>& pTransform) const = 0;
 	virtual void SetBodyTransform(BodyID pBodyId, const Lepra::Transformation<Lepra::float32>& pTransform) = 0;
 	virtual void GetBodyVelocity(BodyID pBodyId, Lepra::Vector3DF& pVelocity) const = 0;
@@ -236,6 +237,7 @@ public:
 	virtual void DeleteJoint(JointID pJointId) = 0;
 
 	virtual bool StabilizeJoint(JointID pJointId) = 0;
+	virtual void SetIsGyroscope(BodyID pBodyId, bool pIsGyro) = 0;
 
 	virtual bool GetJoint1Diff(BodyID pBodyId, JointID pJointId, Joint1Diff& pDiff) const = 0;
 	virtual bool SetJoint1Diff(BodyID pBodyId, JointID pJointId, const Joint1Diff& pDiff) = 0;

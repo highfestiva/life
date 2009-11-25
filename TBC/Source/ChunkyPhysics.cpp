@@ -36,7 +36,7 @@ void ChunkyPhysics::OnTick(PhysicsManager* pPhysicsManager, float pFrameTime)
 	EngineArray::iterator x = mEngineArray.begin();
 	for (; x != mEngineArray.end(); ++x)
 	{
-		(*x)->OnTick(pPhysicsManager, pFrameTime);
+		(*x)->OnTick(pPhysicsManager, this, pFrameTime);
 	}
 }
 

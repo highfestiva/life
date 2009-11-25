@@ -276,7 +276,7 @@ bool PhysicsManagerODE::Attach(BodyID pStaticBody, BodyID pMainBody)
 		dMass lDynamicMass;
 		::dBodyGetMass(lBodyId, &lDynamicMass);
 		::dMassAdd(&lMass, &lDynamicMass);
-		//::dBodySetMass(lBodyId, &lMass);
+		::dBodySetMass(lBodyId, &lMass);
 	}
 
 	return (true);
@@ -365,10 +365,23 @@ Lepra::Vector3DF PhysicsManagerODE::GetBodyPosition(BodyID pBodyId) const
 	return (Lepra::Vector3DF(lPosition[0], lPosition[1], lPosition[2]));
 }
 
+Lepra::QuaternionF PhysicsManagerODE::GetBodyOrientation(BodyID pBodyId) const
+{
+	Object* lObject = (Object*)pBodyId;
+	if (lObject->mWorldID != mWorldID)
+	{
+		mLog.Errorf(_T("GetBodyOrientation() - Body %i is not part of this world!"), pBodyId);
+		return (Lepra::QuaternionF());
+	}
+
+	dQuaternion q;
+	::dGeomGetQuaternion(lObject->mGeomID, q);
+	return (Lepra::QuaternionF(q[0], q[1], q[2], q[3]));
+}
+
 void PhysicsManagerODE::GetBodyTransform(BodyID pBodyId, Lepra::TransformationF& pTransform) const
 {
 	Object* lObject = (Object*)pBodyId;
-
 	if (lObject->mWorldID != mWorldID)
 	{
 		mLog.Errorf(_T("GetBodyTransform() - Body %i is not part of this world!"), pBodyId);
@@ -1046,6 +1059,15 @@ bool PhysicsManagerODE::StabilizeJoint(JointID pJointId)
 		break;
 	}
 	return (lOk);
+}
+
+void PhysicsManagerODE::SetIsGyroscope(BodyID pBodyId, bool pIsGyro)
+{
+	Object* lObject = (Object*)pBodyId;
+	if (lObject->mBodyID)
+	{
+		::dBodySetGyroscopicMode(lObject->mBodyID, pIsGyro);
+	}
 }
 
 bool PhysicsManagerODE::GetJoint1Diff(BodyID pBodyId, JointID pJointId, Joint1Diff& pDiff) const

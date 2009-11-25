@@ -57,7 +57,7 @@ public:
 	void AddControlledGeometry(ChunkyBoneGeometry* pGeometry, float pScale, EngineMode pMode = MODE_NORMAL);
 	bool SetValue(unsigned pAspect, float pValue, float pZAngle);
 
-	void OnTick(PhysicsManager* pPhysicsManager, float pFrameTime);
+	void OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics* pStructure, float pFrameTime);
 
 	unsigned GetControllerIndex() const;
 	float GetValue() const;

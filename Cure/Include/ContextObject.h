@@ -65,6 +65,8 @@ public:
 	bool UpdateFullPosition(const ObjectPositionalData*& pPositionalData);
 	void SetFullPosition(const ObjectPositionalData& pPositionalData);
 	Lepra::Vector3DF GetPosition() const;
+	Lepra::QuaternionF GetOrientation() const;
+	Lepra::Vector3DF GetVelocity() const;
 	float GetForwardSpeed() const;
 	float GetMass() const;
 
