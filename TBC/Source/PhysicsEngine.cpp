@@ -231,8 +231,6 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics*
 					assert(lGeometry->GetJointId() != INVALID_JOINT);
 					if (lGeometry->GetJointId() != INVALID_JOINT)
 					{
-						//pPhysicsManager->SetIsGyroscope(lGeometry->GetBodyId(), false);
-
 						const int lForcesUsed = 4;
 						const Lepra::Vector3DF lRotorForce = GetRotorLiftForce(pPhysicsManager, lGeometry, lEngineNode);
 						const Lepra::Vector3DF lLiftForce = lRotorForce * (mValue[0]/lForcesUsed);
@@ -241,38 +239,28 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics*
 							pPhysicsManager->GetBodyOrientation(lGeometry->GetParent()->GetBodyId()) *
 							pStructure->GetOriginalBoneTransformation(lParentBone).GetOrientation().GetInverse();
 
-						// Stabilization.
-						Lepra::Vector3DF lParentAngularVelocity;
-						pPhysicsManager->GetBodyAngularVelocity(lGeometry->GetParent()->GetBodyId(), lParentAngularVelocity);
-						lParentAngularVelocity = lOrientation.GetInverse() * lParentAngularVelocity;
-						const Lepra::Vector3DF lParentAngle = lOrientation.GetInverse() * Lepra::Vector3DF(0, 0, 1);	// TRICKY: assumes original joint direction is towards heaven.
-						//const float lStabilityX = -lParentAngle.x + 0.1f * (lParentAngularVelocity.y * mFriction);
-						//const float lStabilityY = -lParentAngle.y - 0.1f * (lParentAngularVelocity.x * mFriction);
-						//const float lStabilityX = -lParentAngle.x * mFriction;
-						//const float lStabilityY = -lParentAngle.y * mFriction;
-						//const float lLiftStrength = lLiftForce.GetLength();
-						//const Lepra::Vector3DF lFrontForce = lOrientation * Lepra::Vector3DF(-lParentAngle.x*lLiftStrength*0.1f, 0, 0);
-						//const float lStabilityX = lParentAngularVelocity.y * mFriction;
-						//const float lStabilityY = lParentAngularVelocity.x * mFriction;
+						Lepra::Vector3DF lRotorPivot = pPhysicsManager->GetBodyPosition(lGeometry->GetBodyId());
+
+						const float lAbsFriction = ::fabs(mFriction);
+						if (mFriction < 0)
+						{
+							// Arcade stabilization for VTOL rotor.
+							Lepra::Vector3DF lParentAngularVelocity;
+							pPhysicsManager->GetBodyAngularVelocity(lGeometry->GetParent()->GetBodyId(), lParentAngularVelocity);
+							lParentAngularVelocity = lOrientation.GetInverse() * lParentAngularVelocity;
+							const Lepra::Vector3DF lParentAngle = lOrientation.GetInverse() * Lepra::Vector3DF(0, 0, 1);	// TRICKY: assumes original joint direction is towards heaven.
+							const float lStabilityX = -lParentAngle.x * 0.5f + lParentAngularVelocity.y * lAbsFriction;
+							const float lStabilityY = -lParentAngle.y * 0.5f - lParentAngularVelocity.x * lAbsFriction;
+							lRotorPivot += lOrientation * Lepra::Vector3DF(lStabilityX, lStabilityY, 0);
+						}
 
 						// Counteract rotor's movement through perpendicular air.
 						Lepra::Vector3DF lDragForce;
 						pPhysicsManager->GetBodyVelocity(lGeometry->GetBodyId(), lDragForce);
-						lDragForce = (-lDragForce*lRotorForce.GetNormalized()) * mFriction * lRotorForce;
+						lDragForce = (-lDragForce*lRotorForce.GetNormalized()) * lAbsFriction * lRotorForce;
 
 						// Apply rotor force.
-						const Lepra::Vector3DF lWorldCenter = pPhysicsManager->GetBodyPosition(lGeometry->GetBodyId());
-						//const float lPlacement[lForcesUsed][2] = { {1+lStabilityX,0}, {0,1+lStabilityY}, {-1+lStabilityX,0}, {0,-1+lStabilityY} };
-						const float lPlacement[lForcesUsed][2] = { {1,0}, {0,1}, {-1,0}, {0,-1} };
-						//const float lLiftForceStrength = lLiftForce.GetLength();
-						for (int i = 0; i < lForcesUsed; ++i)
-						{
-							const Lepra::Vector3DF lOffset = lOrientation *
-								Lepra::Vector3DF(lPlacement[i][0]*mMaxSpeed, lPlacement[i][1]*mMaxSpeed, 0);
-							//const Lepra::Vector3DF lConeForce = lLiftForce -
-							//	lLiftForceStrength*lOffset.GetNormalized(0.1f);
-							pPhysicsManager->AddForceAtPos(lGeometry->GetParent()->GetBodyId(), lLiftForce + lDragForce, lWorldCenter+lOffset);
-						}
+						pPhysicsManager->AddForceAtPos(lGeometry->GetParent()->GetBodyId(), (lLiftForce + lDragForce)*4, lRotorPivot);
 					}
 					else
 					{
