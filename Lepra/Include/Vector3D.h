@@ -73,6 +73,7 @@ class Vector3D
 		inline _TVarType GetPolarCoordAngleY() const;
 
 		void Normalize(_TVarType pLength = 1);
+		Vector3D<_TVarType> GetNormalized(_TVarType pLength = 1) const;
 
 		void Cross(const Vector3D<_TVarType>& pV1, const Vector3D<_TVarType>& pV2);
 		inline void CrossUnit(const Vector3D<_TVarType>& pV1, const Vector3D<_TVarType>& pV2);

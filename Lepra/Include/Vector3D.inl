@@ -69,6 +69,13 @@ V3D_TEMPLATE void V3D_QUAL::Normalize(_TVarType pLength)
 	}
 }
 
+V3D_TEMPLATE V3D_QUAL V3D_QUAL::GetNormalized(_TVarType pLength) const
+{
+	V3D_QUAL lVector(*this);
+	lVector.Normalize(pLength);
+	return (lVector);
+}
+
 V3D_TEMPLATE void V3D_QUAL::GetOrthogonals(Vector3D<_TVarType>& pY, Vector3D<_TVarType>& pZ) const
 {
 	if (fabs(z) > 0.7071)

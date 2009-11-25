@@ -136,3 +136,4 @@ Quality
 . Always use unicode script files.
 . Exchange "varning: flerteckens teckenkonstant" (ChunkyLoader.h) to something portable and beautiful.
 . Add unit test for making sure that loading more than one instance of same resource results in a single instance.
+. Testrun in lower frame rates! Make sure sim works in 10 Hz!

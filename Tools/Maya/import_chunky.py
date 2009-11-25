@@ -54,7 +54,7 @@ class GroupReader(DefaultMAReader):
                                   "renderLayerManager", "renderLayer", "script", "phong", \
                                   "shadingEngine", "materialInfo", "groupId", "groupParts", "lambert", \
                                   "layeredShader", "deleteComponent", "softModHandle", "softMod", \
-                                  "objectSet", "tweak"]
+                                  "objectSet", "tweak", "imagePlane", "blinn", "file", "place2dTexture"]
                 self.basename = basename
 
 
@@ -102,6 +102,7 @@ class GroupReader(DefaultMAReader):
                 #if not self.validate_orthogonality(group):
                 #        print("Error: the group is not completely orthogonal!")
                 #        sys.exit(3)
+                group = self.sortgroup(group)
                 if not self.validate_mesh_group(group):
                         print("Invalid mesh group! Terminating due to error.")
                         sys.exit(3)
@@ -373,6 +374,21 @@ class GroupReader(DefaultMAReader):
                 return isGroupValid
 
 
+        def sortgroup(self, group):
+                meshes = []
+                phys = []
+                meshes = list(filter(lambda n: n.getName().startswith("m_"), group))
+                rest = list(filter(lambda n: n not in meshes, group))
+                physes = []
+                for m in meshes:
+                        phys = self.find_phys_root(m, rest)
+                        if phys:
+                                physes.append(phys)
+                                rest.remove(phys)
+                group = list(meshes) + physes + rest
+                return group
+
+
         def validate_mesh_group(self, group):
                 isGroupValid = True
                 if not isGroupValid:
@@ -405,9 +421,9 @@ class GroupReader(DefaultMAReader):
                                 if not usedlastvertex:
                                         isGroupValid = False
                                         print("Error: not all vertices in '%s' is used." % node.getFullName())
-                        elif node.nodetype == "mesh" and not node.getName().startswith("phys_") and not node.getName().startswith("m_"):
-                                isGroupValid = False
-                                print("Error: mesh '%s' must be named prefixed 'phys_' or 'm_'." % node.getFullName())
+##                        elif node.nodetype == "mesh" and not node.getName().startswith("phys_") and not node.getName().startswith("m_"):
+##                                isGroupValid = False
+##                                print("Error: mesh '%s' must be prefixed 'phys_' or 'm_'." % node.getFullName())
                         if node.getName().startswith("m_") and node.nodetype == "transform":
                                 node.mesh_children = list(filter(lambda x: x.nodetype == "transform", self._listchildnodes(node.getFullName(), node, "m_", group, False)))
                                 node.phys_children = self._listchildnodes(node.getFullName(), node, "phys_", group, False)
@@ -464,7 +480,7 @@ class GroupReader(DefaultMAReader):
                                         return ok
                                 required = [("type", lambda x: type(x) == str),
                                             ("strength", lambda x: x > 0 and x < 30000),
-                                            ("max_velocity", lambda x: len(x)==2 and x[0]>=0 and x[0]<=300 and x[1]>=0 and x[1]<=300),
+                                            ("max_velocity", lambda x: len(x)==2 and x[0]>=-300 and x[0]<=300 and x[1]>=-300 and x[1]<=300),
                                             ("controller_index", lambda x: x >= 0 and x < 20),
                                             ("connected_to", check_connected_to)]
                                 for name, engine_check in required:
@@ -588,13 +604,13 @@ class GroupReader(DefaultMAReader):
                                                         elif node.getName().startswith("phys_"):
                                                                 print("Error: %s does not have an input node. Create node by instancing instead." % (node.getFullName()))
                                                                 isGroupValid = False
-                                                else:
+                                                elif node.getName().startswith("phys_"):
                                                         print("Error: %s's parent %s seems to have >1 shape!" % (node.getName(), parent.getFullName()))
                                                         isGroupValid = False
                 for node in group:
                         if node.getName().startswith("phys_") and node.nodetype == "transform":
                                 if not node.shape:
-                                        print("Error: %s has no primitive shape for physics (did you 'delete history'?)!" % node.getFullName())
+                                        print("Error: %s has no primitive shape for physics (did you 'delete history or copy without instancing'?)!" % node.getFullName())
                                         isGroupValid = False
                 return isGroupValid
 
@@ -660,8 +676,13 @@ class GroupReader(DefaultMAReader):
                                                 ok = False
                                                 print("Error: mesh %s has no suitable physics nodes to hook up to." % mesh.getName())
                                 elif mesh.nodetype == "transform":
-                                        ok = False
-                                        print("Error: mesh %s has invalid connections to phys nodes." % mesh.getName())
+                                        p = mesh.getParent()
+                                        if p and p.phys_ref:
+                                                p.phys_ref[0].mesh_ref += [mesh]
+                                                mesh.phys_ref += [p.phys_ref[0]]
+                                        else:
+                                                ok = False
+                                                print("Error: mesh %s has invalid connections to phys nodes." % mesh.getName())
                 return ok
 
 
@@ -888,8 +909,8 @@ class GroupReader(DefaultMAReader):
 ##                                      (mesh.getFullName(), phys.getFullName()))
                         if not loose and phys.phys_root and not phys.get_fixed_attribute("joint", optional=True):
                                 valid_ref = False
-                                print("Error: mesh '%s' referenced by non-jointed phys node '%s'." %
-                                      (mesh.getFullName(), phys.getFullName()))
+                                print("Error: mesh '%s' referenced by non-jointed phys node '%s' (root %s)." %
+                                      (mesh.getFullName(), phys.getFullName(), phys.phys_root.getName()))
                         if loose and (not phys.phys_root or phys.get_fixed_attribute("joint", optional=True)):
                                 valid_ref = False
                                 print("Error: attached mesh '%s' referenced by jointed phys node '%s'." %

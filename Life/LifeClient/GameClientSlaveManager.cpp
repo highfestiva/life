@@ -402,6 +402,13 @@ void GameClientSlaveManager::TickUiUpdate()
 			lTargetCameraPosition.z = 255.0f;
 		}
 
+		/*// Temporary: changed to "cam stay behind" mode.
+		lTargetCameraPosition = lObject->GetOrientation() *
+			Lepra::Vector3DF(0, -lTargetCameraXyDistance, lTargetCameraXyDistance/4) +
+			lAvatarPosition;
+		static Lepra::Vector3DF s = lTargetCameraPosition;
+		lTargetCameraPosition = s;*/
+
 		// Camera moves in a "moving average" kinda curve (halfs the distance in x seconds).
 		const float lHalfDistanceTime = 0.1f;	// Time it takes to half the distance from where it is now to where it should be.
 		float lMovingAveragePart = 0.5f*GetTimeManager()->GetCurrentFrameTime()/lHalfDistanceTime;
@@ -409,6 +416,7 @@ void GameClientSlaveManager::TickUiUpdate()
 		{
 			lMovingAveragePart = 0.8f;
 		}
+		lMovingAveragePart = 1;
 		mCameraPosition = Lepra::Math::Lerp<Lepra::Vector3DF, float>(mCameraPosition, lTargetCameraPosition, lMovingAveragePart);
 
 		// "Roll" camera towards avatar.

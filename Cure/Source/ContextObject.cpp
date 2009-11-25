@@ -689,22 +689,50 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData)
 
 Lepra::Vector3DF ContextObject::GetPosition() const
 {
-	Lepra::Vector3DF lPosition;
 	const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
 	if (lGeometry && lGeometry->GetBodyId() != TBC::INVALID_BODY)
 	{
-		Lepra::TransformationF lTransform;
-		mManager->GetGameManager()->GetPhysicsManager()->GetBodyTransform(lGeometry->GetBodyId(), lTransform);
-		lPosition.x = lTransform.GetPosition().x;
-		lPosition.y = lTransform.GetPosition().y;
-		lPosition.z = lTransform.GetPosition().z;
+		return (mManager->GetGameManager()->GetPhysicsManager()->GetBodyPosition(lGeometry->GetBodyId()));
 	}
 	else
 	{
 		assert(false);
 		// TODO: throw something here...
 	}
-	return (lPosition);
+	return (Lepra::Vector3DF());
+}
+
+Lepra::QuaternionF ContextObject::GetOrientation() const
+{
+	const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
+	if (lGeometry && lGeometry->GetBodyId() != TBC::INVALID_BODY)
+	{
+		const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
+		return (mManager->GetGameManager()->GetPhysicsManager()->GetBodyOrientation(lGeometry->GetBodyId()) *
+			mPhysics->GetOriginalBoneTransformation(0).GetOrientation());
+	}
+	else
+	{
+		assert(false);
+		// TODO: throw something here...
+	}
+	return (Lepra::QuaternionF());
+}
+
+Lepra::Vector3DF ContextObject::GetVelocity() const
+{
+	Lepra::Vector3DF lVelocity;
+	const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
+	if (lGeometry && lGeometry->GetBodyId() != TBC::INVALID_BODY)
+	{
+		mManager->GetGameManager()->GetPhysicsManager()->GetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
+	}
+	else
+	{
+		assert(false);
+		// TODO: throw something here...
+	}
+	return (lVelocity);
 }
 
 float ContextObject::GetForwardSpeed() const
@@ -713,7 +741,7 @@ float ContextObject::GetForwardSpeed() const
 	const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
 	if (lGeometry && lGeometry->GetBodyId() != TBC::INVALID_BODY)
 	{
-		const Lepra::TransformationF lOriginalTransform =
+		const Lepra::TransformationF& lOriginalTransform =
 			mPhysics->GetOriginalBoneTransformation(0);
 		const Lepra::Vector3DF lForwardAxis = lOriginalTransform.GetOrientation().GetInverse() * Lepra::Vector3DF(0, 1, 0);
 		Lepra::TransformationF lTransform;
