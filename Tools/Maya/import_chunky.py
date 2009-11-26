@@ -742,7 +742,7 @@ class GroupReader(DefaultMAReader):
                         count += 1
                         childcount[node] = count
                 for key, count in childcount.items():
-                        if count > 1:
+                        if key.nodetype == "transform" and count > 1:
                                 print("Error: more than one path (currently %i paths) lead to node '%s'." % (count, key.getFullName()))
                                 isHierarchyValid = False
                 return isHierarchyValid
@@ -867,7 +867,9 @@ class GroupReader(DefaultMAReader):
                 if mesh.shape:
                         meshcnt += 1
                 children = self._listchildnodes(mesh.getFullName(), mesh, "m_", group, False)
+                #print("Mesh %s has kids:" % mesh.getName())
                 for child in children:
+                        #print(" - Child %s.", child.getName())
                         if child.get_fixed_attribute("rgvtx", optional=True):
                                 meshcnt += 1
                         if child in invalid_child_list:
@@ -946,7 +948,7 @@ class GroupReader(DefaultMAReader):
         def _listchildnodes(self, path, basenode, prefix, group, recursive):
                 childlist = []
                 for node in group:
-                        if node.getParent() == basenode and node.getName().startswith(prefix):
+                        if node.getName().startswith(prefix) and basenode in node.getparents():
                               childlist += [node]
                 grandchildlist = []
                 if recursive:
