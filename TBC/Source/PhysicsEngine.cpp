@@ -423,7 +423,8 @@ void PhysicsEngine::ApplyTorque(PhysicsManager* pPhysicsManager, float pFrameTim
 		float lHiStop;
 		float lBounce;
 		pPhysicsManager->GetJointParams(pGeometry->GetJointId(), lLoStop, lHiStop, lBounce);
-		const float lMiddle = (lLoStop+lHiStop)*0.5f;
+		//const float lMiddle = (lLoStop+lHiStop)*0.5f;
+		const float lTarget = 0;
 		if (lLoStop < -1000 || lHiStop > 1000)
 		{
 			// Open interval -> relative torque.
@@ -440,8 +441,8 @@ void PhysicsEngine::ApplyTorque(PhysicsManager* pPhysicsManager, float pFrameTim
 
 		if (pEngineNode.mMode == MODE_HALF_LOCK)
 		{
-			if ((lForce < 0.02f && lIrlAngle < lMiddle) ||
-				(lForce > -0.02f && lIrlAngle > lMiddle))
+			if ((lForce < 0.02f && lIrlAngle < lTarget) ||
+				(lForce > -0.02f && lIrlAngle > lTarget))
 			{
 				if (::fabs(mValue[1]) < ::fabs(lForce))
 				{
@@ -458,7 +459,7 @@ void PhysicsEngine::ApplyTorque(PhysicsManager* pPhysicsManager, float pFrameTim
 			}
 		}
 		const float lAngleSpan = (lHiStop-lLoStop)*0.9f;
-		const float lTargetAngle = lForce*lAngleSpan*0.5f + lMiddle;
+		const float lTargetAngle = (lForce < 0)? -lForce*lLoStop+lTarget : lForce*lHiStop+lTarget;
 		const float lDiff = (lTargetAngle-lIrlAngle);
 		const float lAbsDiff = ::fabs(lDiff);
 		if (lAbsDiff > 0.0001f)

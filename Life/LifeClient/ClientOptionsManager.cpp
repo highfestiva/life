@@ -95,6 +95,8 @@ bool ClientOptionsManager::SetDefault(int pPriority)
 			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_RIGHT3D, _T(""));
 			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_UP, _T("Key.NUMPAD_4"));
 			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_DOWN, _T("Key.NUMPAD_1"));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_UP3D, _T("Key.NUMPAD_4"));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_DOWN3D, _T("Key.NUMPAD_1"));
 			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_HANDBRK, _T("Key.NUMPAD_0"));
 			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_BRK, _T(""));
 			lOk = true;
@@ -114,6 +116,8 @@ bool ClientOptionsManager::SetDefault(int pPriority)
 			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_RIGHT3D, _T("Device0.AbsoluteAxis1+"));
 			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_UP, _T("Device0.AbsoluteAxis0-"));
 			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_DOWN, _T("Device0.AbsoluteAxis0+"));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_UP3D, _T("Device0.AbsoluteAxis0-"));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_DOWN3D, _T("Device0.AbsoluteAxis0+"));
 			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_HANDBRK, _T("Device0.Button5"));
 			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_BRK, _T(""));
 			lOk = true;
@@ -133,6 +137,8 @@ bool ClientOptionsManager::SetDefault(int pPriority)
 			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_RIGHT3D, _T(""));
 			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_UP, _T("Key.E"));
 			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_DOWN, _T("Key.Q"));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_UP3D, _T("Key.E"));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_DOWN3D, _T("Key.Q"));
 			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_HANDBRK, _T("Key.E"));
 			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_BRK, _T(""));
 			lOk = true;
@@ -152,6 +158,8 @@ bool ClientOptionsManager::SetDefault(int pPriority)
 			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_RIGHT3D, _T(""));
 			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_UP, _T("Key.NUMPAD_9"));
 			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_DOWN, _T("Key.NUMPAD_7"));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_UP3D, _T("Key.NUMPAD_9"));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_DOWN3D, _T("Key.NUMPAD_7"));
 			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_HANDBRK, _T("Key.NUMPAD_9"));
 			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_BRK, _T("Key.NUMPAD_7"));
 			lOk = true;
@@ -168,22 +176,23 @@ const Lepra::String ClientOptionsManager::ConvertToString(UiLepra::InputManager:
 
 bool ClientOptionsManager::SetValue(const Lepra::String& pKey, float pValue)
 {
-	bool lIsSteeringValue;
-	float* lValuePointer = GetValuePointer(pKey, lIsSteeringValue);
-	if (lValuePointer)
+	bool lIsAnySteeringValue;
+	std::vector<float*> lValuePointers = GetValuePointers(pKey, lIsAnySteeringValue);
+	for (std::vector<float*>::iterator x = lValuePointers.begin(); x != lValuePointers.end(); ++x)
 	{
-		if (!Lepra::Math::IsEpsEqual(*lValuePointer, pValue))
+		if (!Lepra::Math::IsEpsEqual(*(*x), pValue))
 		{
-			*lValuePointer = pValue;
-			return (lIsSteeringValue);	// RAII.
+			*(*x) = pValue;
 		}
 	}
-	return (false);
+	return (lIsAnySteeringValue);
 }
 
-float* ClientOptionsManager::GetValuePointer(const Lepra::String& pKey, bool& pIsSteeringValue)
+std::vector<float*> ClientOptionsManager::GetValuePointers(const Lepra::String& pKey, bool& pIsAnySteeringValue)
 {
-	pIsSteeringValue = false;
+	std::vector<float*> lPointers;
+
+	pIsAnySteeringValue = false;
 
 	typedef std::pair<const Lepra::String, float*> KeyValue;
 	const KeyValue lEntries[] =
@@ -200,6 +209,8 @@ float* ClientOptionsManager::GetValuePointer(const Lepra::String& pKey, bool& pI
 		KeyValue(_T(RTVAR_CTRL_STEER_RIGHT3D), &mOptions.mControl.mVehicle.mRight3d),
 		KeyValue(_T(RTVAR_CTRL_STEER_UP), &mOptions.mControl.mVehicle.mUp),
 		KeyValue(_T(RTVAR_CTRL_STEER_DOWN), &mOptions.mControl.mVehicle.mDown),
+		KeyValue(_T(RTVAR_CTRL_STEER_UP3D), &mOptions.mControl.mVehicle.mUp3d),
+		KeyValue(_T(RTVAR_CTRL_STEER_DOWN3D), &mOptions.mControl.mVehicle.mDown3d),
 		KeyValue(_T(RTVAR_CTRL_STEER_HANDBRK), &mOptions.mControl.mVehicle.mHandBreak),
 		KeyValue(_T(RTVAR_CTRL_STEER_BRK), &mOptions.mControl.mVehicle.mBreak),
 	};
@@ -213,12 +224,15 @@ float* ClientOptionsManager::GetValuePointer(const Lepra::String& pKey, bool& pI
 		{
 			if ((*y) == pKey)
 			{
-				pIsSteeringValue = (lEntries[x].first.find(_T("Steer")) != Lepra::String::npos);
-				return (lEntries[x].second);
+				if (lEntries[x].first.find(_T("Steer")) != Lepra::String::npos)
+				{
+					pIsAnySteeringValue = true;
+				}
+				lPointers.push_back(lEntries[x].second);
 			}
 		}
 	}
-	return (0);
+	return (lPointers);
 }
 
 

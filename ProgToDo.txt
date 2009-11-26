@@ -9,7 +9,8 @@ Game
 + Write settings file every time, add user settings file.
 + Import vehicle colors.
 + Flip axes correctly in CppContextObject and UI ditto.
-. Create arcade-style helicopter.
++ Create arcade-style helicopter.
+. Load objects dynamically, without having to hard-code an account and class/phys/meshes name.
 . Create base world. Use mesh, not primitives, for collision.
 . Create crane that can pull wire up.
 . Create fork-lift.
@@ -54,7 +55,8 @@ Engine
 . Update ODE to 0.11.whatevah.
 . Port client to Linux.
 . Port client to Mac OS X.
-. Fix laggy/jerky camera motion by interpolation/extrapolation. Cam only moves when physics moves?
+. Mash together meshes into single file!!!
+. Fix laggy/jerky camera motion by interpolation/extrapolation. Cam adjusts interpolation factor to velocity?
 . Add loading of all formats, especially world format.
 . Add some type of spawn engine for player vehicles.
 . Restrict flying/bouncing to a certain volume.
@@ -91,6 +93,8 @@ Engine
 . Fix cursor in GUI (used to cause XOR problems).
 . Do not resend positional info frequently when pushed/collided similarly (i.e. excavator holding down monster truck).
 . Make import tool position vehicle at [z + distance from origin to lowest mesh point on vehicle].
+. Make export script (Maya) auto-run before save.
+. Make engine and import tool externally available to Pelle!
 
  
 Quality

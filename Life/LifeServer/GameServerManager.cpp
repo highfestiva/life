@@ -348,6 +348,17 @@ bool GameServerManager::Initialize()
 				lOk = mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("helicopter_01")));
 			}
 		}
+		for (x = 0; lOk && x < 100; ++x)
+		{
+			const Lepra::UnicodeString lUserName = Lepra::UnicodeStringUtility::Format(L"Loader%i", x);
+			Lepra::UnicodeString lReadablePassword(L"CarPassword");
+			Cure::MangledPassword lPassword(lReadablePassword);
+			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
+			if (lOk)
+			{
+				lOk = mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("frontloader")));
+			}
+		}
 	}
 
 	if (lOk)

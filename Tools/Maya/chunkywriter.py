@@ -91,12 +91,12 @@ class ChunkyWriter:
 
         def _verifywritten(self, when, nodes):
                 #print("nodes[0].writecount =", nodes[0], nodes[0].writecount)
-                notwritten = list(filter(lambda n: n.writecount != 1, nodes))
-                if notwritten:
+                writeerror = list(filter(lambda n: n.writecount != 1, nodes))
+                if writeerror:
                         print("Error: the following objects were missed, and never written to disk, or written more than once (when writing %s):" % when)
                         def _p(n):
                                 print("  - %s (written %i times)" % (n.getFullName(), n.writecount))
-                        [_p(n) for n in notwritten]
+                        [_p(n) for n in writeerror]
                         sys.exit(3)
 
 

@@ -18,8 +18,10 @@
 #define RTVAR_CTRL_STEER_LEFT3D		"Control.Steer.Left3d"
 #define RTVAR_CTRL_STEER_RIGHT3D	"Control.Steer.Right3d"
 #define RTVAR_CTRL_STEER_UP		"Control.Steer.Up"
-#define RTVAR_CTRL_STEER_HANDBRK	"Control.Steer.HandBreak"
 #define RTVAR_CTRL_STEER_DOWN		"Control.Steer.Down"
+#define RTVAR_CTRL_STEER_UP3D		"Control.Steer.Up3d"
+#define RTVAR_CTRL_STEER_DOWN3D		"Control.Steer.Down3d"
+#define RTVAR_CTRL_STEER_HANDBRK	"Control.Steer.HandBreak"
 #define RTVAR_CTRL_STEER_BRK		"Control.Steer.Break"
 
 #define RTVAR_LOGIN_SERVER		"Login.Server"
