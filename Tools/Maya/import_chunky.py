@@ -300,6 +300,9 @@ class GroupReader(DefaultMAReader):
                 for node in group:
                         vtx = node.get_fixed_attribute("rgvtx", optional=True)
                         if vtx:
+                                for p in node.getparents():
+                                        if not p.shape:
+                                                p.shape = node
                                 mnode = node.getParent()
                                 #phys = node.getParent().phys_ref[0]
                                 # Get transformation to origo without rescaling.
@@ -310,12 +313,19 @@ class GroupReader(DefaultMAReader):
                                 if not m_tr:
                                         print("Mesh crash!")
                                 m_t, m_r, m_s = m_tr.decompose()
-                                transform = mat4.translation(-m_t) * m_tr
-                                vp = vec4(0,0,0,1);
+                                pt = mat4.identity() if not mnode.getParent() else mnode.getParent().get_world_transform()
+                                m_t = (pt.inverse() * mnode.get_world_pivot_transform()).decompose()[0]
+                                #transform = mat4.translation(-m_t) * m_tr
+                                transform = mat4.translation(-m_t) * m_r * mat4.scaling(m_s)
+                                #transform = m_r * mat4.scaling(m_s)
+                                tot = vec4(0,0,0,1)
+                                vp = vec4(0,0,0,1)
                                 for idx in range(0, len(vtx), 3):
                                         vp[:3] = vtx[idx:idx+3]
                                         vp = transform*vp
                                         vtx[idx:idx+3] = vp[:3]
+                                        tot += vp
+                                print("%s Got a total mesh vertex sum of: %s" % (node.getName(), tot))
 
 
         def mesh_instance_reuse(self, group):
@@ -333,12 +343,17 @@ class GroupReader(DefaultMAReader):
                                 cnt += 1
                                 meshnames[meshbasename] = cnt
                                 #print("Setting", node.getParent(), "meshbasename to", meshbasename)
+                                pcnt = 0
                                 for p in node.getparents():
                                         p.meshbasename = meshbasename
-                                        instancecount += 1
+                                        if pcnt > 0:
+                                                instancecount += 1
+                                                #print("Got mesh instance:", meshbasename)
+                                        pcnt += 1
                 for k,v in meshnames.items():
                         if v > 1:
                                 instancecount += 1
+                                #print("Got mesh instance:", k, v)
                 if len(group) >= 8 and instancecount == 0:
                         print("%s: warning: has no mesh instances; highly unlikely! At least the wheels should be, right?" % self.basename)
 

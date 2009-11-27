@@ -49,10 +49,10 @@ CHUNK_MESH_VOLATILITY              = "MEVO"
 
 
 class PhysMeshPtr:
-        def __init__(self, physidx, meshbasename, q, p):
+        def __init__(self, physidx, meshbasename, t):
                 self.physidx = physidx
                 self.meshbasename = meshbasename
-                self.t = q[:]+p[:3]
+                self.t = t
                 #print(self.t)
 
 
@@ -358,7 +358,7 @@ class PhysWriter(ChunkyWriter):
                 data = q[:]+pos[:3]
                 self._normalizexform(data)
                 if options.options.verbose:
-                        print("Writing bone %s with relative data %s." % (node.getName(), data))
+                        print("Writing bone %s (index %i) with relative data %s." % (node.getName(), self.bodies.index(node), data))
                 self._addfeat("bone:bones", 1)
                 self._writexform(data)
                 node.writecount += 1
@@ -628,20 +628,28 @@ class ClassWriter(ChunkyWriter):
                                 tm = m.get_world_transform()
                                 tp = phys.get_world_transform()
                                 tmt = tm.decompose()[0]
+                                tmr = m.get_local_transform().decompose()[1]
                                 tpt, tpr, tps = tp.decompose()
                                 tpt = mat4.translation(tpt)
                                 tps = mat4.scaling(tps)
                                 wpm = m.get_world_translation()
                                 wpp = phys.get_world_translation()
-                                #mat = tp.inverse() * mat4.translation(tmt)
-                                mat = tpt.inverse() * tpr.inverse() * tps.inverse() * mat4.translation(tmt)
-                                q = quat(mat.decompose()[1]).normalize()
+                                wpm = m.get_world_pivot()
+                                wpp = phys.get_world_pivot()
+                                mat = tpr.inverse()
+                                q = quat(tmr.inverse() * mat).normalize()
                                 p = wpm-wpp
                                 p = q.toMat4() * p
+                                q = quat(tpr.inverse() * tmr).normalize()
                                 p = p[0:3]
-                                #print("Writing class", m.meshbasename, "relative to", phys.getName(), "with", q[:]+p[:])
+                                t = self._normalizexform(q[:]+p[:])
+                                if phys.getName().find("wheel") >= 0:
+                                        print("Wheel info:")
+                                        print("Writing class", m.meshbasename, "relative to", phys.getName(), "(index %i) with" % self.bodies.index(phys), t)
+                                        print(tmt)
+                                        print(tmr)
                                 physidx = self.bodies.index(phys)
-                                meshptrs += [(CHUNK_CLASS_PHYS_MESH, PhysMeshPtr(physidx, m.meshbasename, q, p))]
+                                meshptrs += [(CHUNK_CLASS_PHYS_MESH, PhysMeshPtr(physidx, m.meshbasename, t))]
                         data =  (
                                         CHUNK_CLASS,
                                         (
@@ -673,7 +681,6 @@ class ClassWriter(ChunkyWriter):
                 self._regunique("meshname", physmeshptr.meshbasename)
                 self._writeint(physmeshptr.physidx)
                 self._writestr(physmeshptr.meshbasename)
-                self._normalizexform(physmeshptr.t)
                 self._writexform(physmeshptr.t)
                 self._addfeat("phys->mesh ptr:phys->mesh ptrs", 1)
 
