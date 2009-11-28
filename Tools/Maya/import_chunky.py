@@ -304,28 +304,17 @@ class GroupReader(DefaultMAReader):
                                         if not p.shape:
                                                 p.shape = node
                                 mnode = node.getParent()
-                                #phys = node.getParent().phys_ref[0]
-                                # Get transformation to origo without rescaling.
-                                #meshroot = phys.getParent() if phys.is_phys_root else phys.phys_root.getParent()
                                 meshroot = None
-                                #m_tr = phys.getParent().gettransformto(meshroot, "original", getparent=lambda n: n.getParent())
                                 m_tr = mnode.gettransformto(meshroot, "original", getparent=lambda n: n.getParent())
                                 if not m_tr:
                                         print("Mesh crash!")
-                                m_t, m_r, m_s = m_tr.decompose()
-                                pt = mat4.identity() if not mnode.getParent() else mnode.getParent().get_world_transform()
-                                m_t = (pt.inverse() * mnode.get_world_pivot_transform()).decompose()[0]
-                                #transform = mat4.translation(-m_t) * m_tr
-                                transform = mat4.translation(-m_t) * m_r * mat4.scaling(m_s)
-                                #transform = m_r * mat4.scaling(m_s)
-                                tot = vec4(0,0,0,1)
+                                m_s = m_tr.decompose()[2]
+                                transform = mat4.scaling(m_s)
                                 vp = vec4(0,0,0,1)
                                 for idx in range(0, len(vtx), 3):
                                         vp[:3] = vtx[idx:idx+3]
                                         vp = transform*vp
                                         vtx[idx:idx+3] = vp[:3]
-                                        tot += vp
-                                print("%s Got a total mesh vertex sum of: %s" % (node.getName(), tot))
 
 
         def mesh_instance_reuse(self, group):
@@ -467,7 +456,7 @@ class GroupReader(DefaultMAReader):
                         if section.startswith("engine:"):
                                 enginetype = stripQuotes(config.get(section, "type"))
                                 pushengines = ["cam_flat_push"]
-                                engineOk = enginetype in pushengines+["hinge_roll", "hinge_break", "hinge_torque", "hinge2_turn", "rotor", "tilter"]
+                                engineOk = enginetype in pushengines+["hinge_roll", "hinge_gyro", "hinge_break", "hinge_torque", "hinge2_turn", "rotor", "tilter"]
                                 allApplied &= engineOk
                                 if not engineOk:
                                         print("Error: invalid engine type '%s'." % enginetype)

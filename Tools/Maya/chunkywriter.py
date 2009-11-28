@@ -462,7 +462,7 @@ class PhysWriter(ChunkyWriter):
 
         def _writeengine(self, node):
                 # Write all general parameters first.
-                types = {"walk":1, "cam_flat_push":2, "hinge_roll":3, "hinge_break":4, "hinge_torque":5, "hinge2_turn":6, "rotor":7, "tilter":8, "glue":8}
+                types = {"walk":1, "cam_flat_push":2, "hinge_roll":3, "hinge_gyro":4, "hinge_break":5, "hinge_torque":6, "hinge2_turn":7, "rotor":8, "tilter":9, "glue":10}
                 self._writeint(types[node.get_fixed_attribute("type")])
                 totalmass = self._gettotalmass()
                 self._writefloat(node.get_fixed_attribute("strength")*totalmass)
@@ -627,27 +627,14 @@ class ClassWriter(ChunkyWriter):
                                 m.writecount += 1
                                 tm = m.get_world_transform()
                                 tp = phys.get_world_transform()
-                                tmt = tm.decompose()[0]
-                                tmr = m.get_local_transform().decompose()[1]
-                                tpt, tpr, tps = tp.decompose()
-                                tpt = mat4.translation(tpt)
-                                tps = mat4.scaling(tps)
-                                wpm = m.get_world_translation()
-                                wpp = phys.get_world_translation()
-                                wpm = m.get_world_pivot()
-                                wpp = phys.get_world_pivot()
-                                mat = tpr.inverse()
-                                q = quat(tmr.inverse() * mat).normalize()
-                                p = wpm-wpp
-                                p = q.toMat4() * p
+                                tmt, tmr, _ = tm.decompose()
+                                tpt, tpr, _ = tp.decompose()
+                                q = quat(tpr.inverse()).normalize()
+                                p = tmt-tpt
+                                p = q.toMat4() * vec4(p[:])
                                 q = quat(tpr.inverse() * tmr).normalize()
                                 p = p[0:3]
                                 t = self._normalizexform(q[:]+p[:])
-                                if phys.getName().find("wheel") >= 0:
-                                        print("Wheel info:")
-                                        print("Writing class", m.meshbasename, "relative to", phys.getName(), "(index %i) with" % self.bodies.index(phys), t)
-                                        print(tmt)
-                                        print(tmr)
                                 physidx = self.bodies.index(phys)
                                 meshptrs += [(CHUNK_CLASS_PHYS_MESH, PhysMeshPtr(physidx, m.meshbasename, t))]
                         data =  (

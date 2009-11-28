@@ -419,6 +419,7 @@ bool ContextObject::UpdateFullPosition(const ObjectPositionalData*& pPositionalD
 			}
 			break;
 			case TBC::PhysicsEngine::ENGINE_HINGE_ROLL:
+			case TBC::PhysicsEngine::ENGINE_HINGE_GYRO:
 			case TBC::PhysicsEngine::ENGINE_HINGE_BREAK:
 			case TBC::PhysicsEngine::ENGINE_HINGE_TORQUE:
 			case TBC::PhysicsEngine::ENGINE_HINGE2_TURN:
@@ -651,6 +652,7 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData)
 			}
 			break;
 			case TBC::PhysicsEngine::ENGINE_HINGE_ROLL:
+			case TBC::PhysicsEngine::ENGINE_HINGE_GYRO:
 			case TBC::PhysicsEngine::ENGINE_HINGE_BREAK:
 			case TBC::PhysicsEngine::ENGINE_HINGE_TORQUE:
 			case TBC::PhysicsEngine::ENGINE_HINGE2_TURN:

@@ -52,7 +52,6 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
-				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -123,7 +122,6 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
-				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="0"
 			/>
 			<Tool
@@ -194,7 +192,6 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
-				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -262,7 +259,6 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
-				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -333,7 +329,6 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
-				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="0"
 			/>
 			<Tool
@@ -404,7 +399,6 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
-				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -499,11 +493,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Include\UiGraphicsObject.h"
+				RelativePath=".\Include\UiResourceManager.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Include\UiResourceManager.h"
+				RelativePath=".\Include\UiResourceManager.inl"
+				>
+			</File>
+			<File
+				RelativePath=".\Include\UiRuntimeVariableName.h"
 				>
 			</File>
 			<File

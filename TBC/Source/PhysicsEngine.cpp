@@ -102,6 +102,7 @@ bool PhysicsEngine::SetValue(unsigned pAspect, float pValue, float pZAngle)
 		}
 		break;
 		case ENGINE_HINGE_ROLL:
+		case ENGINE_HINGE_GYRO:
 		case ENGINE_HINGE_BREAK:
 		case ENGINE_HINGE_TORQUE:
 		case ENGINE_HINGE2_TURN:
@@ -172,18 +173,46 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics*
 					}
 				}
 				break;
+				case ENGINE_HINGE_GYRO:
+				{
+					// Apply a fake gyro torque to parent in order to emulate a heavier gyro than
+					// it actually is. The gyro must be light weight, or physics simulation will be
+					// unstable when rolling bodies around any other axis than the hinge one.
+					assert(lGeometry->GetJointId() != INVALID_JOINT);
+					if (lGeometry->GetJointId() != INVALID_JOINT && mFriction >= 0)
+					{
+						Lepra::Vector3DF lAxis;
+						pPhysicsManager->GetAxis1(lGeometry->GetJointId(), lAxis);
+						Lepra::Vector3DF lY;
+						Lepra::Vector3DF lZ;
+						lAxis.GetNormalized().GetOrthogonals(lY, lZ);
+						const float lStrength = 3 * mValue[0] * lEngineNode.mScale * mStrength;
+						lZ *= lStrength;
+						Lepra::Vector3DF lPos;
+						pPhysicsManager->GetAnchorPos(lGeometry->GetJointId(), lPos);
+						pPhysicsManager->AddForceAtPos(lGeometry->GetParent()->GetBodyId(), lZ, lPos+lY);
+						pPhysicsManager->AddForceAtPos(lGeometry->GetParent()->GetBodyId(), -lZ, lPos-lY);
+					}
+				}
+				// TRICKY: fall through.
 				case ENGINE_HINGE_ROLL:
 				{
 					assert(lGeometry->GetJointId() != INVALID_JOINT);
 					if (lGeometry->GetJointId() != INVALID_JOINT)
 					{
 						// TODO: implement torque "curve" instead of constant angular force.
-						const float lUsedStrength = mStrength*(::fabs(mValue[0]) + mFriction);
-						const float lDirectionalMaxSpeed = (mValue[0] >= 0)? mMaxSpeed : -mMaxSpeed2;
+						float lValue = mValue[0];
+						float lDirectionalMaxSpeed = ((lValue >= 0)? mMaxSpeed : -mMaxSpeed2) * lValue;
+						if (mEngineType == ENGINE_HINGE_GYRO)
+						{
+							lValue = (lValue+1)*0.5f;
+							lDirectionalMaxSpeed = lValue * (mMaxSpeed - mMaxSpeed2) + mMaxSpeed2;
+						}
+						const float lUsedStrength = mStrength*(::fabs(lValue) + ::fabs(mFriction));
 						float lPreviousStrength = 0;
 						float lPreviousTargetSpeed = 0;
 						pPhysicsManager->GetAngularMotorRoll(lGeometry->GetJointId(), lPreviousStrength, lPreviousTargetSpeed);
-						const float lTargetSpeed = Lepra::Math::Lerp(lPreviousTargetSpeed, lDirectionalMaxSpeed*mValue[0], 0.5f);
+						const float lTargetSpeed = Lepra::Math::Lerp(lPreviousTargetSpeed, lDirectionalMaxSpeed, 0.5f);
 						const float lTargetStrength = Lepra::Math::Lerp(lPreviousStrength, lUsedStrength*lScale, 0.5f);
 						pPhysicsManager->SetAngularMotorRoll(lGeometry->GetJointId(), lTargetStrength, lTargetSpeed);
 					}
@@ -231,15 +260,16 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics*
 					assert(lGeometry->GetJointId() != INVALID_JOINT);
 					if (lGeometry->GetJointId() != INVALID_JOINT)
 					{
-						const int lForcesUsed = 4;
 						const Lepra::Vector3DF lRotorForce = GetRotorLiftForce(pPhysicsManager, lGeometry, lEngineNode);
-						const Lepra::Vector3DF lLiftForce = lRotorForce * (mValue[0]/lForcesUsed);
+						Lepra::Vector3DF lLiftForce = lRotorForce * mValue[0];
+						//const float lLerpValue = (mValue[0]+1)*0.5f * (mMaxSpeed-mMaxSpeed2) + mMaxSpeed2;
 						const int lParentBone = pStructure->GetIndex(lGeometry->GetParent());
 						const Lepra::QuaternionF lOrientation =
 							pPhysicsManager->GetBodyOrientation(lGeometry->GetParent()->GetBodyId()) *
 							pStructure->GetOriginalBoneTransformation(lParentBone).GetOrientation().GetInverse();
 
-						Lepra::Vector3DF lRotorPivot = pPhysicsManager->GetBodyPosition(lGeometry->GetBodyId());
+						Lepra::Vector3DF lRotorPivot;
+						pPhysicsManager->GetAnchorPos(lGeometry->GetJointId(), lRotorPivot);
 
 						const float lAbsFriction = ::fabs(mFriction);
 						if (mFriction < 0)
@@ -254,13 +284,18 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics*
 							lRotorPivot += lOrientation * Lepra::Vector3DF(lStabilityX, lStabilityY, 0);
 						}
 
+						// Smooth rotor force - for digital controls and to make acceleration seem more realistic.
+						const float lSmooth = 0.05f * lEngineNode.mScale;
+						lLiftForce.x = mValue[1] = Lepra::Math::Lerp(mValue[1], lLiftForce.x, lSmooth);
+						lLiftForce.y = mValue[2] = Lepra::Math::Lerp(mValue[2], lLiftForce.y, lSmooth);
+						lLiftForce.z = mValue[3] = Lepra::Math::Lerp(mValue[3], lLiftForce.z, lSmooth);
+
 						// Counteract rotor's movement through perpendicular air.
 						Lepra::Vector3DF lDragForce;
 						pPhysicsManager->GetBodyVelocity(lGeometry->GetBodyId(), lDragForce);
 						lDragForce = (-lDragForce*lRotorForce.GetNormalized()) * lAbsFriction * lRotorForce;
 
-						// Apply rotor force.
-						pPhysicsManager->AddForceAtPos(lGeometry->GetParent()->GetBodyId(), (lLiftForce + lDragForce)*4, lRotorPivot);
+						pPhysicsManager->AddForceAtPos(lGeometry->GetParent()->GetBodyId(), lLiftForce + lDragForce, lRotorPivot);
 					}
 					else
 					{

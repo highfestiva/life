@@ -52,7 +52,6 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
-				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -128,14 +127,13 @@
 				InlineFunctionExpansion="2"
 				FavorSizeOrSpeed="1"
 				AdditionalIncludeDirectories="&quot;..\..\ThirdParty\stlport\stlport&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;NO_LOG_DEBUG_INFO;_STLP_NO_OWN_NAMESPACE"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;NO_LOG_DEBUG_INFO"
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
 				TreatWChar_tAsBuiltInType="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
-				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="0"
 			/>
 			<Tool
@@ -218,7 +216,6 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
-				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -300,7 +297,6 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
-				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -375,14 +371,13 @@
 				InlineFunctionExpansion="2"
 				FavorSizeOrSpeed="1"
 				AdditionalIncludeDirectories="&quot;..\..\ThirdParty\stlport\stlport&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_STLP_NO_OWN_NAMESPACE"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;NO_LOG_DEBUG_INFO"
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
 				TreatWChar_tAsBuiltInType="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
-				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="0"
 			/>
 			<Tool
@@ -436,6 +431,7 @@
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="1"
 			ManagedExtensions="0"
+			WholeProgramOptimization="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -464,7 +460,6 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
-				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -480,7 +475,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="Netapi32.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
-				LinkIncremental="2"
+				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\ThirdParty\stlport\lib;..\..\ThirdParty\fmod\api\lib"
 				IgnoreDefaultLibraryNames="msvcrt.lib"
 				GenerateDebugInformation="true"
@@ -543,10 +538,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\LifeApplication.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\ServerApplication.cpp"
 				>
 			</File>
@@ -566,14 +557,6 @@
 			</File>
 			<File
 				RelativePath=".\GameServerManager.h"
-				>
-			</File>
-			<File
-				RelativePath="..\LifeApplication.h"
-				>
-			</File>
-			<File
-				RelativePath="..\LifeDefinitions.h"
 				>
 			</File>
 			<File

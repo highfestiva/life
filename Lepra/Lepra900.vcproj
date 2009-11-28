@@ -51,7 +51,6 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
-				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -65,7 +64,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(ProjectDir)/Lib/LepraD.lib"
+				OutputFile="$(ProjectDir)/Lib/$(InputName)D.lib"
 				IgnoreDefaultLibraryNames=""
 			/>
 			<Tool
@@ -123,7 +122,6 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
-				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -137,7 +135,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(ProjectDir)/Lib/LepraRC.lib"
+				OutputFile="$(ProjectDir)/Lib/$(InputName)RC.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -191,7 +189,6 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
-				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -205,7 +202,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(ProjectDir)/Lib/LepraUD.lib"
+				OutputFile="$(ProjectDir)/Lib/$(InputName)UD.lib"
 				IgnoreDefaultLibraryNames=""
 			/>
 			<Tool
@@ -263,7 +260,6 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
-				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -277,7 +273,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(ProjectDir)/Lib/LepraURC.lib"
+				OutputFile="$(ProjectDir)/Lib/$(InputName)URC.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -334,7 +330,6 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
-				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="0"
 			/>
 			<Tool
@@ -348,7 +343,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(ProjectDir)/Lib/Lepra.lib"
+				OutputFile="$(ProjectDir)/Lib/$(InputName).lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -405,7 +400,6 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
-				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="0"
 			/>
 			<Tool
@@ -419,7 +413,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(ProjectDir)/Lib/LepraU.lib"
+				OutputFile="$(ProjectDir)/Lib/$(InputName)U.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -491,10 +485,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Include\CDPlayer.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Include\Checksum.h"
 				>
 			</File>
@@ -516,18 +506,6 @@
 			</File>
 			<File
 				RelativePath=".\Include\CollisionDetector3D.inl"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\Comparator.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\ComplexNumber.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\ComplexNumber.inl"
 				>
 			</File>
 			<File
@@ -587,14 +565,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Include\FFT.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\FIFOQueue.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Include\File.h"
 				>
 			</File>
@@ -635,11 +605,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Include\IDManager.h"
+				RelativePath=".\Include\IdManager.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Include\IDManager.inl"
+				RelativePath=".\Include\IdManager.inl"
 				>
 			</File>
 			<File
@@ -680,10 +650,6 @@
 			</File>
 			<File
 				RelativePath=".\Include\LepraUndef.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\LinkedList.h"
 				>
 			</File>
 			<File
@@ -736,10 +702,6 @@
 			</File>
 			<File
 				RelativePath=".\Include\MemFile.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\Memory.h"
 				>
 			</File>
 			<File
@@ -807,14 +769,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Include\PrimeNumberEnumerator.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\PriorityMap.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Include\ProgressCallback.h"
 				>
 			</File>
@@ -844,10 +798,6 @@
 			</File>
 			<File
 				RelativePath=".\Include\RotationMatrix.inl"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\RSACrypto.h"
 				>
 			</File>
 			<File
@@ -948,14 +898,6 @@
 			</File>
 			<File
 				RelativePath=".\Include\Writer.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\XorReader.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\XorWriter.h"
 				>
 			</File>
 			<File
