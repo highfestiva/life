@@ -49,11 +49,11 @@ CHUNK_MESH_VOLATILITY              = "MEVO"
 
 
 class PhysMeshPtr:
-        def __init__(self, physidx, meshbasename, t):
+        def __init__(self, physidx, meshbasename, t, mat):
                 self.physidx = physidx
                 self.meshbasename = meshbasename
                 self.t = t
-                #print(self.t)
+                self.mat = mat
 
 
 
@@ -243,7 +243,13 @@ class ChunkyWriter:
                 for f in xform:
                         self._writefloat(f)
 
-        def _writematerial(self, ambient, diffuse, specular, textures, shader):
+
+        def _writematerial(self, mat):
+                self._writematerial_(mat.ambient, mat.diffuse, mat.specular, \
+                        mat.textures, mat.shader)
+
+
+        def _writematerial_(self, ambient, diffuse, specular, textures, shader):
                 if len(ambient) != 4 or len(diffuse) != 4 or len(specular) != 4:
                         print("Error: bad number of material elements!")
                         sys.exit(18)
@@ -647,7 +653,7 @@ class ClassWriter(ChunkyWriter):
                                 p = p[0:3]
                                 t = self._normalizexform(q[:]+p[:])
                                 physidx = self.bodies.index(phys)
-                                meshptrs += [(CHUNK_CLASS_PHYS_MESH, PhysMeshPtr(physidx, m.meshbasename, t))]
+                                meshptrs += [(CHUNK_CLASS_PHYS_MESH, PhysMeshPtr(physidx, m.meshbasename, t, m.mat))]
                         data =  (
                                         CHUNK_CLASS,
                                         (
@@ -681,7 +687,8 @@ class ClassWriter(ChunkyWriter):
                 self._writestr(physmeshptr.meshbasename)
                 self._writexform(physmeshptr.t)
                 col = [1.0, 0.0, 0.0, 1.0]
-                self._writematerial(col, col, col, ["da_texture"], "da_shader")
+                #self._writematerial(col, col, col, ["da_texture"], "da_shader")
+                self._writematerial(physmeshptr.mat)
                 self._addfeat("phys->mesh ptr:phys->mesh ptrs", 1)
 
 

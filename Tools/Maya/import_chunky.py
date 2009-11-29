@@ -51,10 +51,12 @@ class GroupReader(DefaultMAReader):
         def __init__(self, basename):
                 DefaultMAReader.__init__(self)
                 self.bad_types = ["camera", "lightLinker", "displayLayerManager", "displayLayer", \
-                                  "renderLayerManager", "renderLayer", "script", "phong", \
-                                  "shadingEngine", "materialInfo", "groupId", "groupParts", "lambert", \
-                                  "layeredShader", "deleteComponent", "softModHandle", "softMod", \
-                                  "objectSet", "tweak", "imagePlane", "blinn", "file", "place2dTexture"]
+                                  "renderLayerManager", "renderLayer", "script", \
+                                  "materialInfo", "groupId", "groupParts", \
+                                  "deleteComponent", "softModHandle", "softMod", \
+                                  "objectSet", "tweak", "imagePlane", "place2dTexture"]
+                self.mat_types = ["lambert", "blinn", "phong", "shadingEngine", "layeredShader", \
+                                  "file"]
                 self.basename = basename
 
 
@@ -74,7 +76,7 @@ class GroupReader(DefaultMAReader):
                         print("Bad file! Terminating due to error.")
                         sys.exit(1)
                 self.check_mesh_export(islands)
-                islands = self.filterIslands(islands)
+                islands, mat_islands = self.filterIslands(islands)
                 if len(islands) != 1:
                         print("The number of standalone groups is not one (is totally %i) in the .ma file! These are the groups:" % len(islands))
                         for i in islands:
@@ -83,6 +85,9 @@ class GroupReader(DefaultMAReader):
                         print("Terminating due to error.")
                         sys.exit(2)
                 group = islands[0]
+                mat_group = []
+                for mati in mat_islands:
+                        mat_group.extend(mati)
                 if not group[0].getName().startswith("m_"):
                         print("Error: root must be a mesh named 'm_...' something, not '%s'." % group[0].getName())
                         sys.exit(2)
@@ -124,6 +129,10 @@ class GroupReader(DefaultMAReader):
                 self.makevertsrelative(group)
                 self.mesh_instance_reuse(group)
                 self.setphyspivot(group)
+
+                if not self.fixmaterials(group, mat_group):
+                        print("Materials are incorrectly modelled! Terminating due to error.")
+                        sys.exit(3)
 
                 #self.printnodes(group)
 
@@ -214,20 +223,21 @@ class GroupReader(DefaultMAReader):
 
 
         def filterIslands(self, islands):
-                for island in islands:
+                mat_islands = []
+                for_islands = islands[:]
+                for island in for_islands:
                         for n in island:
-                                if n.nodetype in self.bad_types or \
-                                        (island.index(n) == 0 and n.getName().startswith("ignore_")):
+                                if n.nodetype in self.bad_types or n.getName().startswith("ignore_"):
                                         #print("Removing bad %s." % n.nodetype)
                                         islands.remove(island)
-                                        self.filterIslands(islands)
                                         break
                                 if n.nodetype == "<unknown>" and n.getParent() == None:
                                         islands.remove(island)
-                                        self.filterIslands(islands)
                                         break
-
-                return islands
+                                if n.nodetype in self.mat_types:
+                                        islands.remove(island)
+                                        mat_islands.append(island)
+                return islands, mat_islands
 
 
         def fixparams(self, group):
@@ -360,6 +370,42 @@ class GroupReader(DefaultMAReader):
                                         lowestp = p
                 #print("Setting physics lowest pos to", lowestp, "on", physroot)
                 physroot.lowestpos = lowestp
+
+
+        def fixmaterials(self, group, mat_group):
+                ok = True
+                for node in group:
+                        if node.getName().startswith("m_") and node.nodetype == "transform":
+                                class Material:
+                                        pass
+                                node.mat = Material()
+                                node.mat.ambient  = [1.0]*3 + [1.0]
+                                node.mat.diffuse  = [1.0, 0.0, 1.0, 1.0]
+                                node.mat.specular = [0.7]*3 + [1.0]
+                                node.mat.textures = []
+                                node.mat.shader   = "???"
+
+                                mesh = self._listchildnodes(node.getFullName(), node, "m_", group, False, \
+                                        lambda n: n.get_fixed_attribute("rgvtx", optional=True))[0]
+                                outs = mesh.getOutNodes("iog", "iog")
+                                shaders = []
+                                for o, _, attr in outs:
+                                        if o.nodetype == "shadingEngine":
+                                                if not o in shaders:
+                                                        shaders.append(o)
+                                if len(shaders) != 1:
+                                        print("Warning: mesh %s om %s has wrong number of materials (%i)." % (mesh.getName(), node.getName(), len(shaders)))
+                                        continue
+                                shader = shaders[0]
+                                material = shader.getInNode("ss", "ss")
+                                material = self._getnode(material[0], mat_group)
+                                node.mat.ambient  = [0.5]*3 + [1.0]
+                                c = material.get_fixed_attribute("c", optional=True, default=[0.5]*3)
+                                node.mat.diffuse  = list(c) + [1.0]
+                                node.mat.specular = [0.7]*3 + [1.0]
+                                node.mat.textures = ["some_texture.png"]
+                                node.mat.shader   = "SomeShader"
+                return ok
 
 
         def validate_orthogonality(self, group):
@@ -949,16 +995,17 @@ class GroupReader(DefaultMAReader):
                 return valid_ref
 
 
-        def _listchildnodes(self, path, basenode, prefix, group, recursive):
+        def _listchildnodes(self, path, basenode, prefix, group, recursive, f=None):
                 childlist = []
                 for node in group:
                         if node.getName().startswith(prefix) and basenode in node.getparents():
-                              childlist += [node]
+                                if not f or f(node):
+                                        childlist += [node]
                 grandchildlist = []
                 if recursive:
                         for child in childlist:
                                 childpath = path+"|"+child.getName()
-                                grandchildlist += self._listchildnodes(childpath, child, prefix, group, True)
+                                grandchildlist += self._listchildnodes(childpath, child, prefix, group, True, f)
                 return childlist+grandchildlist
 
 
@@ -995,6 +1042,13 @@ class GroupReader(DefaultMAReader):
                                 if n == node:
                                         return True
                 return False
+
+
+        def _getnode(self, nodename, group):
+                for node in group:
+                        if node.getName() == nodename:
+                                return node
+                return None
 
 
 def printfeats(feats):
