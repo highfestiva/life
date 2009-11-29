@@ -243,6 +243,17 @@ class ChunkyWriter:
                 for f in xform:
                         self._writefloat(f)
 
+        def _writematerial(self, ambient, diffuse, specular, textures, shader):
+                if len(ambient) != 4 or len(diffuse) != 4 or len(specular) != 4:
+                        print("Error: bad number of material elements!")
+                        sys.exit(18)
+                for f in ambient+diffuse+specular:
+                        self._writefloat(f)
+                self._writeint(len(textures))
+                for texture in textures:
+                        self._writestr(texture)
+                self._writestr(shader)
+
 
         def _writeheader(self, signature, size=0):
                 self._writesignature(signature)
@@ -669,6 +680,8 @@ class ClassWriter(ChunkyWriter):
                 self._writeint(physmeshptr.physidx)
                 self._writestr(physmeshptr.meshbasename)
                 self._writexform(physmeshptr.t)
+                col = [1.0, 0.0, 0.0, 1.0]
+                self._writematerial(col, col, col, ["da_texture"], "da_shader")
                 self._addfeat("phys->mesh ptr:phys->mesh ptrs", 1)
 
 
