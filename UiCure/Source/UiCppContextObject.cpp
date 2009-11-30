@@ -370,7 +370,7 @@ void CppContextObject::OnLoadMesh(UserGeometryReferenceResource* pMeshResource)
 			lLoadedMaterial.mDiffuse.GetBf(),
 			lLoadedMaterial.mSpecular.SumRgb()/(255.0f*3),
 			lLoadedMaterial.mDiffuse.GetAf(),
-			false);
+			true);
 		pMeshResource->GetRamData()->SetBasicMaterialSettings(lMaterial);
 
 		((TBC::GeometryReference*)pMeshResource->GetRamData())->SetOffsetTransformation(pMeshResource->GetOffset().mOffset);

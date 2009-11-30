@@ -381,9 +381,9 @@ class GroupReader(DefaultMAReader):
                                 node.mat = Material()
                                 node.mat.ambient  = [1.0]*3 + [1.0]
                                 node.mat.diffuse  = [1.0, 0.0, 1.0, 1.0]
-                                node.mat.specular = [0.7]*3 + [1.0]
+                                node.mat.specular = [0.1]*3 + [1.0]
                                 node.mat.textures = []
-                                node.mat.shader   = "???"
+                                node.mat.shader   = ""
 
                                 mesh = self._listchildnodes(node.getFullName(), node, "m_", group, False, \
                                         lambda n: n.get_fixed_attribute("rgvtx", optional=True))[0]
@@ -395,16 +395,17 @@ class GroupReader(DefaultMAReader):
                                                         shaders.append(o)
                                 if len(shaders) != 1:
                                         print("Warning: mesh %s om %s has wrong number of materials (%i)." % (mesh.getName(), node.getName(), len(shaders)))
-                                        continue
+                                        if not shaders:
+                                                continue
                                 shader = shaders[0]
                                 material = shader.getInNode("ss", "ss")
                                 material = self._getnode(material[0], mat_group)
-                                node.mat.ambient  = [0.5]*3 + [1.0]
+                                #node.mat.ambient  = [0.5]*3 + [1.0]
                                 c = material.get_fixed_attribute("c", optional=True, default=[0.5]*3)
                                 node.mat.diffuse  = list(c) + [1.0]
-                                node.mat.specular = [0.7]*3 + [1.0]
-                                node.mat.textures = ["some_texture.png"]
-                                node.mat.shader   = "SomeShader"
+                                #node.mat.specular = [0.7]*3 + [1.0]
+                                #node.mat.textures = ["some_texture.png"]
+                                #node.mat.shader   = "SomeShader"
                 return ok
 
 

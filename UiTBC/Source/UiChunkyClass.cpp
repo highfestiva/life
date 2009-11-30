@@ -16,8 +16,8 @@ namespace UiTbc
 
 
 ChunkyClass::Material::Material():
-	mDiffuse(128, 128, 128, 255),
-	mSpecular(255, 255, 255, 255)
+	mDiffuse(192, 192, 192, 255),
+	mSpecular(10, 10, 10, 255)
 {
 }
 
