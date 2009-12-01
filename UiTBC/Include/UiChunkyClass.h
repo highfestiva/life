@@ -23,9 +23,11 @@ class ChunkyClass: public TBC::ChunkyClass
 public:
 	struct Material
 	{
-		Lepra::Color mAmbient;
-		Lepra::Color mDiffuse;
-		Lepra::Color mSpecular;
+		Lepra::Vector3DF mAmbient;
+		Lepra::Vector3DF mDiffuse;
+		Lepra::Vector3DF mSpecular;
+		float mShininess;
+		float mAlpha;
 		std::vector<Lepra::UnicodeString> mTextureList;
 		Lepra::UnicodeString mShaderName;
 

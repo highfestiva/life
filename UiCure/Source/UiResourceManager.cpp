@@ -328,7 +328,7 @@ bool GeometryResource::Load()
 	{
 		Lepra::Vector3DF lBodyDimensions(1.0f, 1.5f, 0.6f);
 		lGeometry = UiTbc::BasicMeshCreator::CreateFlatBox(lBodyDimensions.x, lBodyDimensions.y, lBodyDimensions.z);
-		lMaterial.SetColor(0.2f, 0.8f, 0.9f, 0.6f);
+		lMaterial.SetColor(0.2f, 0.8f, 0.9f);
 	}
 	else if (lFilename.find(_T("car_antenna_mesh")) != Lepra::String::npos)
 	{

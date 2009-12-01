@@ -376,14 +376,13 @@ class GroupReader(DefaultMAReader):
                 ok = True
                 for node in group:
                         if node.getName().startswith("m_") and node.nodetype == "transform":
-                                class Material:
-                                        pass
-                                node.mat = Material()
-                                node.mat.ambient  = [1.0]*3 + [1.0]
-                                node.mat.diffuse  = [1.0, 0.0, 1.0, 1.0]
-                                node.mat.specular = [0.1]*3 + [1.0]
-                                node.mat.textures = []
-                                node.mat.shader   = ""
+                                ambient = [1.0]*3
+                                diffuse  = [1.0, 0.0, 1.0]
+                                specular = [0.5]*3
+                                shininess = 0.0
+                                alpha = 1.0
+                                textureNames = []
+                                shaderName   = ""
 
                                 mesh = self._listchildnodes(node.getFullName(), node, "m_", group, False, \
                                         lambda n: n.get_fixed_attribute("rgvtx", optional=True))[0]
@@ -393,19 +392,46 @@ class GroupReader(DefaultMAReader):
                                         if o.nodetype == "shadingEngine":
                                                 if not o in shaders:
                                                         shaders.append(o)
+                                useShader = True
                                 if len(shaders) != 1:
                                         print("Warning: mesh %s om %s has wrong number of materials (%i)." % (mesh.getName(), node.getName(), len(shaders)))
                                         if not shaders:
-                                                continue
-                                shader = shaders[0]
-                                material = shader.getInNode("ss", "ss")
-                                material = self._getnode(material[0], mat_group)
-                                #node.mat.ambient  = [0.5]*3 + [1.0]
-                                c = material.get_fixed_attribute("c", optional=True, default=[0.5]*3)
-                                node.mat.diffuse  = list(c) + [1.0]
-                                #node.mat.specular = [0.7]*3 + [1.0]
-                                #node.mat.textures = ["some_texture.png"]
-                                #node.mat.shader   = "SomeShader"
+                                                useShader = False
+                                if useShader:
+                                        shader = shaders[0]
+                                        material = shader.getInNode("ss", "ss")
+                                        material = self._getnode(material[0], mat_group)
+
+                                        ambc = material.get_fixed_attribute("ambc", optional=True, default=[0.0]*3)
+                                        incandescence = material.get_fixed_attribute("ic", optional=True, default=[0.0]*3)
+                                        ambient = map(lambda x,y: x+y, ambc, incandescence)
+
+                                        dc = material.get_fixed_attribute("dc", optional=True, default=1.0)
+                                        c = material.get_fixed_attribute("c", optional=True, default=[0.5]*3)
+                                        diffuse = map(lambda i: i*dc, c)
+
+                                        sro = material.get_fixed_attribute("sro", optional=True, default=1.0)
+                                        sc = material.get_fixed_attribute("c", optional=True, default=[0.5]*3)
+                                        specular = map(lambda i: sro*i, sc)
+
+                                        ec = material.get_fixed_attribute("ec", optional=True, default=1.0)
+                                        shininess = 1.0-ec
+
+                                        trans = material.get_fixed_attribute("it", optional=True, default=[0.0]*3)
+                                        alpha = 1.0 - sum(trans)/3
+
+                                class Material:
+                                        pass
+                                node.mat = Material()
+                                node.mat.ambient   = list(ambient)
+                                node.mat.diffuse   = list(diffuse)
+                                node.mat.specular  = list(specular)
+##                                if len(node.mat.ambient) != 3 or len(node.mat.diffuse) != 3 or len(node.mat.specular) != 3:
+##                                        print("Error:", node, node.mat.ambient, node.mat.diffuse, node.mat.specular)
+                                node.mat.shininess = shininess
+                                node.mat.alpha     = alpha
+                                node.mat.textures  = textureNames
+                                node.mat.shader    = shaderName
                 return ok
 
 

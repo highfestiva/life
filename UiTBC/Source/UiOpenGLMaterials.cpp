@@ -16,9 +16,17 @@
 namespace UiTbc
 {
 
-/*
-	OpenGLMaterial
-*/
+
+
+OpenGLMaterial::OpenGLMaterial(OpenGLRenderer* pRenderer, Material::DepthSortHint pSortHint, Material* pFallBackMaterial) :
+	Material(pRenderer, pSortHint),
+	mFallBackMaterial(pFallBackMaterial)
+{
+}
+
+OpenGLMaterial::~OpenGLMaterial()
+{
+}
 
 Material::RemoveStatus OpenGLMaterial::RemoveGeometry(TBC::GeometryBase* pGeometry)
 {
@@ -34,6 +42,42 @@ Material::RemoveStatus OpenGLMaterial::RemoveGeometry(TBC::GeometryBase* pGeomet
 	}
 	return (lStatus);
 }
+
+GLenum OpenGLMaterial::GetGLElementType(TBC::GeometryBase* pGeometry)
+{
+	switch (pGeometry->GetPrimitiveType())
+	{
+		case TBC::GeometryBase::TRIANGLES:	return (GL_TRIANGLES);
+		case TBC::GeometryBase::TRIANGLE_STRIP:	return (GL_TRIANGLE_STRIP);
+	}
+	assert(false);
+	return (GL_TRIANGLES);
+}
+
+void OpenGLMaterial::SetMaterial(const TBC::GeometryBase* pGeometry)
+{
+	const TBC::GeometryBase::BasicMaterialSettings& lMatSettings =
+		pGeometry->GetBasicMaterialSettings();
+
+	const float lAmbient[]  = { lMatSettings.mAmbient.x,  lMatSettings.mAmbient.y,  lMatSettings.mAmbient.z,  lMatSettings.mAlpha };
+	const float lDiffuse[]  = { lMatSettings.mDiffuse.x,  lMatSettings.mDiffuse.y,  lMatSettings.mDiffuse.z,  lMatSettings.mAlpha };
+	const float lSpecular[] = { lMatSettings.mSpecular.x, lMatSettings.mSpecular.y, lMatSettings.mSpecular.z, lMatSettings.mAlpha };
+
+	::glColor4fv(lDiffuse);
+	::glMaterialfv(GL_FRONT, GL_AMBIENT, lAmbient);
+	::glMaterialfv(GL_FRONT, GL_DIFFUSE, lDiffuse);
+	::glMaterialfv(GL_FRONT, GL_SPECULAR, lSpecular);
+	::glMateriali(GL_FRONT, GL_SHININESS, (int)(lMatSettings.mShininess * 128.0f));
+	::glShadeModel(lMatSettings.mSmooth ? GL_SMOOTH : GL_FLAT);
+
+	((OpenGLRenderer*)GetRenderer())->SetGlobalMaterialReflectance(lMatSettings.mDiffuse.x,
+		lMatSettings.mDiffuse.y, lMatSettings.mDiffuse.z, lMatSettings.mShininess);
+
+	((OpenGLRenderer*)GetRenderer())->AddAmbience(lMatSettings.mAmbient.x,
+		lMatSettings.mAmbient.y, lMatSettings.mAmbient.z);
+}
+
+
 
 void OpenGLMaterial::UpdateTextureMatrix(TBC::GeometryBase* pGeometry)
 {
@@ -121,47 +165,7 @@ void OpenGLMatSingleColorSolid::RenderGeometry(TBC::GeometryBase* pGeometry)
 
 void OpenGLMatSingleColorSolid::PrepareBasicMaterialSettings(TBC::GeometryBase* pGeometry)
 {
-	const TBC::GeometryBase::BasicMaterialSettings& lMatSettings =
-		pGeometry->GetBasicMaterialSettings();
-
-	glColor4f(lMatSettings.mRed,
-		  lMatSettings.mGreen,
-		  lMatSettings.mBlue,
-		  lMatSettings.mAlpha);
-
-	float lDiffuse = 1.0f - lMatSettings.mSpecular;
-	float lDiffuseColor[] = 
-	{
-		lMatSettings.mRed   * lDiffuse,
-		lMatSettings.mGreen * lDiffuse,
-		lMatSettings.mBlue  * lDiffuse,
-		1.0f
-	};
-	float lSpecularColor[] = 
-	{
-		lMatSettings.mRed   * lMatSettings.mSpecular,
-		lMatSettings.mGreen * lMatSettings.mSpecular,
-		lMatSettings.mBlue  * lMatSettings.mSpecular,
-		1.0f
-	};
-	static float lWhite[] = {1.0f, 1.0f, 1.0f, 1.0f};
-
-	glMaterialfv(GL_FRONT, GL_AMBIENT, lWhite);
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, lDiffuseColor);
-	glMaterialfv(GL_FRONT, GL_SPECULAR, lSpecularColor);
-	//glMateriali(GL_FRONT, GL_SHININESS, (int)floor(lMatSettings.mSpecular * 128.0f));
-	glMateriali(GL_FRONT, GL_SHININESS, 128);
-
-	glShadeModel(lMatSettings.mSmooth ? GL_SMOOTH : GL_FLAT);
-
-	((OpenGLRenderer*)GetRenderer())->SetGlobalMaterialReflectance(lMatSettings.mRed,
-						  lMatSettings.mGreen,
-						  lMatSettings.mBlue,
-						  lMatSettings.mSpecular);
-
-	((OpenGLRenderer*)GetRenderer())->AddAmbience(lMatSettings.mSelfIllumination,
-				 lMatSettings.mSelfIllumination,
-				 lMatSettings.mSelfIllumination);
+	SetMaterial(pGeometry);
 }
 
 /*
@@ -407,9 +411,7 @@ void OpenGLMatSingleTextureBlended::RenderAllGeometry(unsigned int pCurrentFrame
 //	glDisable(GL_BLEND);
 }
 
-/*
-	OpenGLMatSingleTextureAlphaTested
-*/
+
 
 void OpenGLMatSingleTextureAlphaTested::RenderAllGeometry(unsigned int pCurrentFrame)
 {
@@ -427,9 +429,7 @@ void OpenGLMatSingleTextureAlphaTested::RenderGeometry(TBC::GeometryBase* pGeome
 	OpenGLMatSingleTextureSolid::RenderGeometry(pGeometry);
 }
 
-/*
-	OpenGLMatSingleColorEnvMapSolid
-*/
+
 
 bool OpenGLMatSingleColorEnvMapSolid::AddGeometry(TBC::GeometryBase* pGeometry)
 {
@@ -578,42 +578,12 @@ void OpenGLMatSingleColorEnvMapSolid::PrepareBasicMaterialSettings(TBC::Geometry
 	}
 	else
 	{
-		// Prepare basic material settings using 100% specularity.
-		const TBC::GeometryBase::BasicMaterialSettings& lMatSettings =
-			pGeometry->GetBasicMaterialSettings();
-
-		glColor4f(lMatSettings.mRed,
-			  lMatSettings.mGreen,
-			  lMatSettings.mBlue,
-			  lMatSettings.mSpecular);
-
-		float lDiffuse[] = { 0, 0, 0, 1.0f };
-		float lSpecular[] =
-		{
-			lMatSettings.mRed,
-			lMatSettings.mGreen,
-			lMatSettings.mBlue,
-			1.0f
-		};
-		static float lWhite[] = {1.0f, 1.0f, 1.0f, 1.0f};
-
-		glMaterialfv(GL_FRONT, GL_AMBIENT, lWhite);
-		glMaterialfv(GL_FRONT, GL_DIFFUSE, lDiffuse);
-		glMaterialfv(GL_FRONT, GL_SPECULAR, lSpecular);
-		glMateriali(GL_FRONT, GL_SHININESS, 128);
-
-		glShadeModel(lMatSettings.mSmooth ? GL_SMOOTH : GL_FLAT);
-
-		((OpenGLRenderer*)GetRenderer())->SetGlobalMaterialReflectance(lMatSettings.mRed,
-							  lMatSettings.mGreen,
-							  lMatSettings.mBlue,
-							  lMatSettings.mSpecular);
+		SetMaterial(pGeometry);
 	}
 }
 
-/*
-	OpenGLMatSingleEnvMapBlended
-*/
+
+
 /*
 void OpenGLMatSingleColorEnvMapBlended::RenderAllGeometry(unsigned int pCurrentFrame)
 {
@@ -630,41 +600,11 @@ void OpenGLMatSingleColorEnvMapBlended::PrepareBasicMaterialSettings(TBC::Geomet
 	}
 	else
 	{
-		// Prepare basic material settings using 100% specularity.
-		const TBC::GeometryBase::BasicMaterialSettings& lMatSettings =
-			pGeometry->GetBasicMaterialSettings();
-
-		glColor4f(lMatSettings.mRed,
-			  lMatSettings.mGreen,
-			  lMatSettings.mBlue,
-			  lMatSettings.mSpecular * lMatSettings.mAlpha);
-
-		float lDiffuse[] = { 0, 0, 0, 1.0f };
-		float lSpecular[] =
-		{
-			lMatSettings.mRed,
-			lMatSettings.mGreen,
-			lMatSettings.mBlue,
-			1.0f
-		};
-		static float lWhite[] = {1.0f, 1.0f, 1.0f, 1.0f};
-
-		glMaterialfv(GL_FRONT, GL_AMBIENT, lWhite);
-		glMaterialfv(GL_FRONT, GL_DIFFUSE, lDiffuse);
-		glMaterialfv(GL_FRONT, GL_SPECULAR, lSpecular);
-		glMateriali(GL_FRONT, GL_SHININESS, 128);
-
-		((OpenGLRenderer*)GetRenderer())->SetGlobalMaterialReflectance(lMatSettings.mRed,
-							  lMatSettings.mGreen,
-							  lMatSettings.mBlue,
-							  lMatSettings.mSpecular);
+		SetMaterial(pGeometry);
 	}
 }
 
 
-/*
-	OpenGLMatSingleTextureEnvMapSolid
-*/
 
 bool OpenGLMatSingleTextureEnvMapSolid::AddGeometry(TBC::GeometryBase* pGeometry)
 {
@@ -874,34 +814,7 @@ void OpenGLMatSingleTextureEnvMapSolid::PrepareBasicMaterialSettings(TBC::Geomet
 	}
 	else
 	{
-		// Prepare basic material settings using 100% specularity.
-		const TBC::GeometryBase::BasicMaterialSettings& lMatSettings =
-			pGeometry->GetBasicMaterialSettings();
-
-		glColor4f(lMatSettings.mRed,
-			  lMatSettings.mGreen,
-			  lMatSettings.mBlue,
-			  lMatSettings.mSpecular);
-
-		float lDiffuse[] = { 0, 0, 0, 1.0f };
-		float lSpecular[] =
-		{
-			lMatSettings.mRed,
-			lMatSettings.mGreen,
-			lMatSettings.mBlue,
-			1.0f
-		};
-		static float lWhite[] = {1.0f, 1.0f, 1.0f, 1.0f};
-
-		glMaterialfv(GL_FRONT, GL_AMBIENT, lWhite);
-		glMaterialfv(GL_FRONT, GL_DIFFUSE, lDiffuse);
-		glMaterialfv(GL_FRONT, GL_SPECULAR, lSpecular);
-		glMateriali(GL_FRONT, GL_SHININESS, 128);
-
-		((OpenGLRenderer*)GetRenderer())->SetGlobalMaterialReflectance(lMatSettings.mRed,
-							  lMatSettings.mGreen,
-							  lMatSettings.mBlue,
-							  lMatSettings.mSpecular);
+		SetMaterial(pGeometry);
 	}
 }
 
@@ -925,34 +838,7 @@ void OpenGLMatSingleTextureEnvMapBlended::PrepareBasicMaterialSettings(TBC::Geom
 	}
 	else
 	{
-		// Prepare basic material settings using 100% specularity.
-		const TBC::GeometryBase::BasicMaterialSettings& lMatSettings =
-			pGeometry->GetBasicMaterialSettings();
-
-		glColor4f(lMatSettings.mRed,
-			  lMatSettings.mGreen,
-			  lMatSettings.mBlue,
-			  lMatSettings.mSpecular * lMatSettings.mAlpha);
-
-		float lDiffuse[] = { 0, 0, 0, 1.0f };
-		float lSpecular[] =
-		{
-			lMatSettings.mRed,
-			lMatSettings.mGreen,
-			lMatSettings.mBlue,
-			1.0f
-		};
-		static float lWhite[] = {1.0f, 1.0f, 1.0f, 1.0f};
-
-		glMaterialfv(GL_FRONT, GL_AMBIENT, lWhite);
-		glMaterialfv(GL_FRONT, GL_DIFFUSE, lDiffuse);
-		glMaterialfv(GL_FRONT, GL_SPECULAR, lSpecular);
-		glMateriali(GL_FRONT, GL_SHININESS, 128);
-
-		((OpenGLRenderer*)GetRenderer())->SetGlobalMaterialReflectance(lMatSettings.mRed,
-							  lMatSettings.mGreen,
-							  lMatSettings.mBlue,
-							  lMatSettings.mSpecular);
+		SetMaterial(pGeometry);
 	}
 }
 
@@ -1546,22 +1432,22 @@ void OpenGLMatPXS::SetAmbientLight(OpenGLRenderer* pRenderer, TBC::GeometryBase*
 	const TBC::GeometryBase::BasicMaterialSettings& lMat =
 		pGeometry->GetBasicMaterialSettings();
 
-	r += lMat.mSelfIllumination;
-	g += lMat.mSelfIllumination;
-	b += lMat.mSelfIllumination;
+	r += lMat.mAmbient.x;
+	g += lMat.mAmbient.y;
+	b += lMat.mAmbient.z;
 
-	if (r > 1.0f) 
-	{
-		r = 1.0f;
-	}
-	if (g > 1.0f) 
-	{
-		g = 1.0f;
-	}
-	if (b > 1.0f) 
-	{
-		b = 1.0f;
-	}
+	//if (r > 1.0f) 
+	//{
+	//	r = 1.0f;
+	//}
+	//if (g > 1.0f) 
+	//{
+	//	g = 1.0f;
+	//}
+	//if (b > 1.0f) 
+	//{
+	//	b = 1.0f;
+	//}
 
 	// Set the ambient light.
 	GLfloat lLightAmbient[4];
@@ -1628,10 +1514,10 @@ void OpenGLMatSingleColorSolidPXS::RenderGeometry(TBC::GeometryBase* pGeometry)
 
 	float lSpecular[4];
 	const TBC::GeometryBase::BasicMaterialSettings& lMatSettings = pGeometry->GetBasicMaterialSettings();
-	lSpecular[0] = lMatSettings.mSpecular;
-	lSpecular[1] = lMatSettings.mSpecular;
-	lSpecular[2] = lMatSettings.mSpecular;
-	lSpecular[3] = lMatSettings.mSpecular;
+	lSpecular[0] = lMatSettings.mShininess;
+	lSpecular[1] = lMatSettings.mShininess;
+	lSpecular[2] = lMatSettings.mShininess;
+	lSpecular[3] = lMatSettings.mShininess;
 	UiLepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, 0, lSpecular);
 
 	if (UiLepra::OpenGLExtensions::BufferObjectsSupported() == true)
@@ -1734,10 +1620,10 @@ void OpenGLMatSingleTextureSolidPXS::RenderGeometry(TBC::GeometryBase* pGeometry
 	
 	float lSpecular[4];
 	const TBC::GeometryBase::BasicMaterialSettings& lMatSettings = pGeometry->GetBasicMaterialSettings();
-	lSpecular[0] = lMatSettings.mSpecular;
-	lSpecular[1] = lMatSettings.mSpecular;
-	lSpecular[2] = lMatSettings.mSpecular;
-	lSpecular[3] = lMatSettings.mSpecular;
+	lSpecular[0] = lMatSettings.mShininess;
+	lSpecular[1] = lMatSettings.mShininess;
+	lSpecular[2] = lMatSettings.mShininess;
+	lSpecular[3] = lMatSettings.mShininess;
 	UiLepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, 0, lSpecular);
 
 	if (UiLepra::OpenGLExtensions::BufferObjectsSupported() == true)
@@ -1883,10 +1769,10 @@ void OpenGLMatTextureAndLightmapPXS::RenderGeometry(TBC::GeometryBase* pGeometry
 
 	float lSpecular[4];
 	const TBC::GeometryBase::BasicMaterialSettings& lMatSettings = pGeometry->GetBasicMaterialSettings();
-	lSpecular[0] = lMatSettings.mSpecular;
-	lSpecular[1] = lMatSettings.mSpecular;
-	lSpecular[2] = lMatSettings.mSpecular;
-	lSpecular[3] = lMatSettings.mSpecular;
+	lSpecular[0] = lMatSettings.mShininess;
+	lSpecular[1] = lMatSettings.mShininess;
+	lSpecular[2] = lMatSettings.mShininess;
+	lSpecular[3] = lMatSettings.mShininess;
 	UiLepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, 0, lSpecular);
 
 	if (UiLepra::OpenGLExtensions::BufferObjectsSupported() == true)
@@ -2068,10 +1954,10 @@ void OpenGLMatTextureSBMapPXS::RenderGeometry(TBC::GeometryBase* pGeometry)
 
 	float lSpecular[4];
 	const TBC::GeometryBase::BasicMaterialSettings& lMatSettings = pGeometry->GetBasicMaterialSettings();
-	lSpecular[0] = lMatSettings.mSpecular;
-	lSpecular[1] = lMatSettings.mSpecular;
-	lSpecular[2] = lMatSettings.mSpecular;
-	lSpecular[3] = lMatSettings.mSpecular;
+	lSpecular[0] = lMatSettings.mShininess;
+	lSpecular[1] = lMatSettings.mShininess;
+	lSpecular[2] = lMatSettings.mShininess;
+	lSpecular[3] = lMatSettings.mShininess;
 	UiLepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, 0, lSpecular);
 
 	if (UiLepra::OpenGLExtensions::BufferObjectsSupported() == true)

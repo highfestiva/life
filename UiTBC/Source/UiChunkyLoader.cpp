@@ -441,7 +441,7 @@ bool ChunkyClassLoader::LoadElementCallback(TBC::ChunkyType pType, Lepra::uint32
 			lPhysicsIndex = Lepra::Endian::BigToHost(*(Lepra::int32*)&lBuffer[lIndex]);
 			lIndex += sizeof(lPhysicsIndex);
 			Lepra::UnicodeString lUnicodeMeshName;
-			const size_t lExcludeByteCount = (1+7+4*3)*4;	// Index+transform.
+			const size_t lExcludeByteCount = (1+7+11)*4;	// Index+transform+colors.
 			int lStrSize = Lepra::PackerUnicodeString::Unpack(&lUnicodeMeshName, &lBuffer[lIndex], pSize-lExcludeByteCount);
 			lStrSize = (lStrSize+3)&(~3);
 			lOk = (lStrSize < (int)(pSize-lExcludeByteCount));
@@ -457,13 +457,13 @@ bool ChunkyClassLoader::LoadElementCallback(TBC::ChunkyType pType, Lepra::uint32
 				lTransformArray[x] = Lepra::Endian::BigToHostF(*(Lepra::uint32*)&lBuffer[lIndex+x*sizeof(float)]);
 			}
 			lIndex += lTransformFloatCount * sizeof(float);
-			lOk = (lIndex < (int)(pSize - 4*3*sizeof(float) - 4));
+			lOk = (lIndex < (int)(pSize - 11*sizeof(float) - 4));
 			lClass->AddMesh(lPhysicsIndex, lMeshBaseName, Lepra::TransformationF(lTransformArray));
 		}
 		UiTbc::ChunkyClass::Material lMaterial;
 		if (lOk)
 		{
-			const int lMaterialFloatCount = 4*3;
+			const int lMaterialFloatCount = 11;
 			float lMaterialArray[lMaterialFloatCount];
 			for (int x = 0; x < lMaterialFloatCount; ++x)
 			{
@@ -471,9 +471,11 @@ bool ChunkyClassLoader::LoadElementCallback(TBC::ChunkyType pType, Lepra::uint32
 			}
 			lIndex += lMaterialFloatCount * sizeof(float);
 			lOk = (lIndex <= (int)(pSize-4-4));
-			lMaterial.mAmbient.Set(lMaterialArray[0], lMaterialArray[1], lMaterialArray[2], lMaterialArray[3]);
-			lMaterial.mDiffuse.Set(lMaterialArray[4], lMaterialArray[5], lMaterialArray[6], lMaterialArray[7]);
-			lMaterial.mSpecular.Set(lMaterialArray[8], lMaterialArray[9], lMaterialArray[10], lMaterialArray[11]);
+			lMaterial.mAmbient.Set(lMaterialArray[0], lMaterialArray[1], lMaterialArray[2]);
+			lMaterial.mDiffuse.Set(lMaterialArray[3], lMaterialArray[4], lMaterialArray[5]);
+			lMaterial.mSpecular.Set(lMaterialArray[6], lMaterialArray[7], lMaterialArray[8]);
+			lMaterial.mShininess = lMaterialArray[9];
+			lMaterial.mAlpha = lMaterialArray[10];
 		}
 		if (lOk)
 		{

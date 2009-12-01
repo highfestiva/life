@@ -105,85 +105,50 @@ public:
 	{
 	public:
 		BasicMaterialSettings() :
-			mRed(1.0f),
-			mGreen(1.0f),
-			mBlue(1.0f),
-			mSpecular(0.0f),
-			mAlpha(1.0f),
-			mSmooth(true),
-			mSelfIllumination(0)
+			mAmbient(0,0,0),
+			mDiffuse(1,0,1),
+			mSpecular(0,0,0),
+			mShininess(0),
+			mAlpha(1),
+			mSmooth(true)
 		{
 		}
 
-		BasicMaterialSettings(float pRed, float pGreen, float pBlue,
-				      float pSpecular, float pAlpha,
-				      bool pSmooth = true,
-				      float pSelfIllumination = 0) :
-			mRed(pRed),
-			mGreen(pGreen),
-			mBlue(pBlue),
+		BasicMaterialSettings(Lepra::Vector3DF pAmbient, Lepra::Vector3DF pDiffuse,
+			Lepra::Vector3DF pSpecular, float pShininess,
+			float pAlpha, bool pSmooth):
+			mAmbient(pAmbient),
+			mDiffuse(pDiffuse),
 			mSpecular(pSpecular),
+			mShininess(pShininess),
 			mAlpha(pAlpha),
-			mSmooth(pSmooth),
-			mSelfIllumination(pSelfIllumination)
+			mSmooth(pSmooth)
 		{
 		}
 
 		void SetColor(float pRed, float pGreen, float pBlue)
 		{
-			mRed      = pRed;
-			mGreen    = pGreen;
-			mBlue     = pBlue;
+			mDiffuse.Set(pRed, pGreen, pBlue);
 		}
-		void SetColor(float pRed, float pGreen, float pBlue, float pAlpha)
+
+		void Set(Lepra::Vector3DF pAmbient, Lepra::Vector3DF pDiffuse,
+			Lepra::Vector3DF pSpecular, float pShininess,
+			float pAlpha, bool pSmooth)
 		{
-			mRed	= pRed;
-			mGreen	= pGreen;
-			mBlue	= pBlue;
-			mAlpha	= pAlpha;
-		}
-		void Set(float pRed, float pGreen, float pBlue,
-			 float pSpecular, float pAlpha, 
-			 bool pSmooth, 
-			 float pSelfIllumination)
-		{
-			mRed      		= pRed;
-			mGreen    		= pGreen;
-			mBlue     		= pBlue;
-			mSpecular 		= pSpecular;
-			mAlpha    		= pAlpha;
-			mSmooth   		= pSmooth;
-			mSelfIllumination	= pSelfIllumination;
+			mAmbient	= pAmbient;
+			mDiffuse	= pDiffuse;
+			mSpecular	= pSpecular;
+			mShininess	= pShininess;
+			mAlpha		= pAlpha;
+			mSmooth		= pSmooth;
 		}
 
-		// Surface color.
-		float mRed, mGreen, mBlue;
-
-		// Discussion about the missing diffuse parameter:
-		//
-		// "Diffuse" when speaking in terms of hardware accelerated 3D graphics,
-		// doesn't make any sense to me.
-		//
-		// A surface can reflect light at different wavelengths, which defines its
-		// "color". The only other parameter there is, is the specularity, which
-		// means how "mirrorlike" the surface is. 100% mirror, and you can't see the
-		// surface at all (try to see the actual surface of a mirror). In the case of
-		// a mirror, there is no "diffuse" at all, and vice versa. The correct amount 
-		// of diffuse can be easily calculated as 1 - specular, assuming specularity 
-		// being in the range [0, 1].
-		//
-		// In OpenGL you can set both diffuse and specular to 100% (value 1.0).
-		// But what kind of surface is that in reality? Such a surface doesn't
-		// even exist.
-		float mSpecular;
-
-		// Used on blended materials.
-		float mAlpha;
-
-		// Smooth shaded or flat shaded?
-		bool mSmooth;
-
-		float mSelfIllumination;
+		Lepra::Vector3DF mAmbient;
+		Lepra::Vector3DF mDiffuse;
+		Lepra::Vector3DF mSpecular;
+		float mShininess;	// Specular "exponent".
+		float mAlpha;	// Used on blended (and transparent? materials.
+		bool mSmooth;	// Smooth shaded or flat shaded?
 	};
 
 	GeometryBase();
