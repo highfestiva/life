@@ -809,16 +809,6 @@ class mat3:
     fromToRotation = staticmethod(fromToRotation)
 
 
-    @staticmethod
-    def acos(angle):
-        global _epsilon
-        if angle+_epsilon >= 1:
-            return math.pi
-        if angle-_epsilon < -1:
-            return 0
-        return math.acos(angle)
-
-
 ######################################################################
 
 if __name__=="__main__":

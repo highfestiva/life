@@ -588,14 +588,19 @@ class MeshWriter(ChunkyWriter):
                 with self._fileopenwrite(filename) as f:
                         self.f = f
                         default_mesh_type = {"static":1, "dynamic":2, "volatile":3}
-                        data =  (
+                        inner_data = [
+                                (CHUNK_MESH_VERTICES, node.get_fixed_attribute("rgvtx")),
+                                (CHUNK_MESH_TRIANGLES, node.get_fixed_attribute("rgtri")),
+                                (CHUNK_MESH_VOLATILITY, default_mesh_type["static"]),
+                        ]
+                        ns = node.get_fixed_attribute("rgn", optional=True)
+                        if ns:
+                                #inner_data.append((CHUNK_MESH_NORMALS, ns))
+                                pass
+                        data = (
                                         CHUNK_MESH,
-                                        (
-                                                (CHUNK_MESH_VERTICES, node.get_fixed_attribute("rgvtx")),
-                                                (CHUNK_MESH_TRIANGLES, node.get_fixed_attribute("rgtri")),
-                                                (CHUNK_MESH_VOLATILITY, default_mesh_type["static"]),
-                                        )
-                                )
+                                        inner_data
+                        )
                         self._writechunk(data)
                 for p in node.getparents():
                         p.writecount += 1

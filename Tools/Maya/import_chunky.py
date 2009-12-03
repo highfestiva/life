@@ -108,7 +108,7 @@ class GroupReader(DefaultMAReader):
                 #        print("Error: the group is not completely orthogonal!")
                 #        sys.exit(3)
                 group = self.sortgroup(group)
-                if not self.validate_mesh_group(group):
+                if not self.validate_mesh_group(group, checknorms=False):
                         print("Invalid mesh group! Terminating due to error.")
                         sys.exit(3)
                 if not self.apply_phys_config(config, group):
@@ -127,8 +127,14 @@ class GroupReader(DefaultMAReader):
                         print("Internal vector math failed! Terminating due to error.")
                         sys.exit(3)
                 self.makevertsrelative(group)
+                self.splitverts(group)
                 self.mesh_instance_reuse(group)
                 self.setphyspivot(group)
+
+                # Check again to assert no internal failure when splitting vertices / joining normals.
+                if not self.validate_mesh_group(group, checknorms=True):
+                        print("Internal error: meshes are invalid after splitting vertices and joining normals! Terminating due to error.")
+                        sys.exit(3)
 
                 if not self.fixmaterials(group, mat_group):
                         print("Materials are incorrectly modelled! Terminating due to error.")
@@ -262,6 +268,9 @@ class GroupReader(DefaultMAReader):
                         vtx = node.getAttrValue("rgvtx", "rgvtx", None, n=None)
                         if vtx:
                                 node.fix_attribute("rgvtx", vtx)
+                        n = node.getAttrValue("rgn", "rgn", None, n=None)
+                        if n:
+                                node.fix_attribute("rgn", n)
 
 
         def fixroottrans(self, group):
@@ -295,15 +304,32 @@ class GroupReader(DefaultMAReader):
         def faces2triangles(self, group):
                 for node in group:
                         faces = node.get_fixed_attribute("rgf", optional=True)
+                        norms = node.get_fixed_attribute("rgn", optional=True)
+                        if norms:
+                                if type(norms) == str:
+                                        norms = norms[1]        # From ("(", "...", ")") to "..."
+                                        norms = eval(norms[1:-1])
+                                newnorms = []
                         if faces:
                                 triangles = []
                                 if not type(faces) == str:
                                         faces = faces[1]        # From ("(", "...", ")") to "..."
                                 faces = eval(faces[1:-1])
+                                facec = 0
                                 for face in faces:
                                         for x in range(1, len(face)-1):
                                                 triangles += [face[0], face[x], face[x+1]]
+                                                if norms:
+                                                        newnorms += [norms[(facec+0)*3+0], norms[(facec+0)*3+1], norms[(facec+0)*3+2]]
+                                                        newnorms += [norms[(facec+x)*3+0], norms[(facec+x)*3+1], norms[(facec+x)*3+2]]
+                                                        newnorms += [norms[(facec+x+1)*3+0], norms[(facec+x+1)*3+1], norms[(facec+x+1)*3+2]]
+                                        facec += len(face)
+                                                
                                 node.fix_attribute("rgtri", triangles)
+                                if norms:
+##                                        print("Before: normal count=%i, face count*3=%i." % (len(norms), facec*3))
+##                                        print("After:  normal count=%i,  tri count*3=%i." % (len(newnorms), len(triangles)*3))
+                                        node.fix_attribute("rgn", newnorms)
 
 
         def makevertsrelative(self, group):
@@ -325,6 +351,78 @@ class GroupReader(DefaultMAReader):
                                         vp[:3] = vtx[idx:idx+3]
                                         vp = transform*vp
                                         vtx[idx:idx+3] = vp[:3]
+
+
+        def splitverts(self, group):
+                """Split mesh vertices that have normals (=hard edges). But to complicate things,
+                   I keep vertices together that share a similar normal."""
+                for node in group:
+                        vs = node.get_fixed_attribute("rgvtx", optional=True)
+                        ts = node.get_fixed_attribute("rgtri", optional=True)
+                        ns = node.get_fixed_attribute("rgn", optional=True)
+                        if ns:
+                                def vertex(idx):
+                                        return vec3(vs[idx*3+0], vs[idx*3+1], vs[idx*3+2])
+                                def normal(idx):
+                                        return vec3(ns[idx*3+0], ns[idx*3+1], ns[idx*3+2])
+                                def angle(n1, n2):
+                                        if n1.length() == 0 or n2.length() == 0:
+                                                if n1.length() == 0 and n2.length() == 0:
+                                                        return 0
+                                                return 180
+                                        return math.degrees(math.fabs(n1.angle(n2)))
+
+                                original_vsc = len(vs)
+
+                                # Create a number of UNIQUE empty lists. Hence the for loop.
+                                normal_indices = []
+                                for u in range(len(vs)//3):
+                                        normal_indices += [[]]
+
+                                end = len(ts)
+                                x = 0
+                                while x < end:
+                                        normal_indices[ts[x]] += [x]
+                                        x += 1
+                                x = 0
+                                while x < end:
+                                        c = normal(normal_indices[ts[x]][0])
+                                        split = []
+                                        for s in normal_indices[ts[x]][1:]:
+                                                if angle(c, normal(s)) > 80:
+                                                        split += [s]
+                                        # Push all the once that we don't join together at the end.
+                                        if split:
+                                                new_index = len(vs)//3
+                                                v = vertex(ts[x])
+                                                vs += v[:]
+                                                normal_indices += [[]]
+                                                for s in split:
+                                                        normal_indices[ts[s]].remove(s)
+                                                        ts[s] = new_index
+                                                        normal_indices[ts[s]] += [s]
+                                                if len(normal_indices) != len(vs)/3:
+                                                        print("Internal error: normals no longer corresponds to vertices!")
+                                                # We don't need to restart after we split a vertex, since the lower indexed siamese of this vertex
+                                                # already approved of all contained herein, otherwise they would not still lie in the same bucket.
+                                                #x = -1 
+                                        x += 1
+                                normals = [0.0]*len(vs)
+                                for join_indices in normal_indices:
+                                        # Join 'em by simply adding normals together and normalizing.
+                                        n = vec3(0,0,0)
+                                        for j in join_indices:
+                                                n += normal(j)
+                                        idx = ts[join_indices[0]]
+                                        idx = idx*3+0
+                                        try:
+                                                normals[idx:idx+3] = n.normalize()[:]
+                                        except ZeroDivisionError:
+                                                pass
+                                node.fix_attribute("rgn", normals)
+                                if options.options.verbose:
+                                        print("Mesh %s was made %.1f times larger due to (hard?) edges, and %.1f %% of worst-case size." %
+                                              (node.getName(), len(normals)/original_vsc-1, len(normals)*100/len(ns)))
 
 
         def mesh_instance_reuse(self, group):
@@ -466,19 +564,23 @@ class GroupReader(DefaultMAReader):
                 return group
 
 
-        def validate_mesh_group(self, group):
+        def validate_mesh_group(self, group, checknorms):
                 isGroupValid = True
                 if not isGroupValid:
                         print("Error: hierarchy graph recursion not allowed!")
                 for node in group:
                         vtx = node.get_fixed_attribute("rgvtx", optional=True)
                         polys = node.get_fixed_attribute("rgtri", optional=True)
+                        norms = node.get_fixed_attribute("rgn", optional=True)
                         if vtx and not polys:
                                 isGroupValid = False
                                 print("Error: mesh '%s' contains vertices, but no triangle definition." % node.getFullName())
                         elif not vtx and polys:
                                 isGroupValid = False
                                 print("Error: mesh '%s' contains triangle definitions but no vertices." % node.getFullName())
+                        elif norms and not (vtx and polys):
+                                isGroupValid = False
+                                print("Error: mesh '%s' contains normal definitions but not both vertices and triangles." % node.getFullName())
                         elif vtx and polys:
                                 node.physcnt = 0
                                 #print("Found mesh:", node.getName())
@@ -498,6 +600,11 @@ class GroupReader(DefaultMAReader):
                                 if not usedlastvertex:
                                         isGroupValid = False
                                         print("Error: not all vertices in '%s' is used." % node.getFullName())
+                                if checknorms and norms:
+                                        if len(norms) != len(vtx):
+                                                isGroupValid = False
+                                                print("Error: not the same amount of vertices and normals in '%s' (%i verts, %i normals)." %
+                                                      (node.getFullName(), len(vtx), len(norms)))
 ##                        elif node.nodetype == "mesh" and not node.getName().startswith("phys_") and not node.getName().startswith("m_"):
 ##                                isGroupValid = False
 ##                                print("Error: mesh '%s' must be prefixed 'phys_' or 'm_'." % node.getFullName())
