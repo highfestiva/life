@@ -36,3 +36,5 @@
 #define RTVAR_DEBUG_3D_ENABLESHAPES	"Debug.3D.EnableShapes"
 #define RTVAR_DEBUG_NET_SENDPOSCNT	"Debug.Net.SendPositionCount"
 #define RTVAR_DEBUG_NET_RECVPOSCNT	"Debug.Net.ReceivePositionCount"
+#define RTVAR_DEBUG_POWERSAVEFACTOR	"Debug.PowerSaveFactor"
+#define RTVAR_DEBUG_EXTRASLEEPTIME	"Debug.ExtraSleepTime"

@@ -448,6 +448,8 @@ Lepra::Vector3DF PhysicsEngine::GetRotorLiftForce(PhysicsManager* pPhysicsManage
 
 void PhysicsEngine::ApplyTorque(PhysicsManager* pPhysicsManager, float pFrameTime, ChunkyBoneGeometry* pGeometry, const EngineNode& pEngineNode)
 {
+	pFrameTime;
+
 	assert(pGeometry->GetJointId() != INVALID_JOINT);
 	if (pGeometry->GetJointId() != INVALID_JOINT)
 	{
@@ -497,10 +499,10 @@ void PhysicsEngine::ApplyTorque(PhysicsManager* pPhysicsManager, float pFrameTim
 		const float lTargetAngle = (lForce < 0)? -lForce*lLoStop+lTarget : lForce*lHiStop+lTarget;
 		const float lDiff = (lTargetAngle-lIrlAngle);
 		const float lAbsDiff = ::fabs(lDiff);
-		if (lAbsDiff > 0.0001f)
+		//if (lAbsDiff > 0.00001f)
 		{
 			float lAngleSpeed;
-			const float lBigDiff = lAngleSpan/20;
+			const float lBigDiff = lAngleSpan/7;
 			if (lAbsDiff > lBigDiff)
 			{
 				lAngleSpeed = (lDiff > 0)? mMaxSpeed : -mMaxSpeed;
@@ -520,8 +522,7 @@ void PhysicsEngine::ApplyTorque(PhysicsManager* pPhysicsManager, float pFrameTim
 			{
 				float lAngleRate = 0;
 				pPhysicsManager->GetAngleRate1(pGeometry->GetJointId(), lAngleRate);
-				lAngleSpeed += (lAngleSpeed-lAngleRate)*pFrameTime*mMaxSpeed2*50.0f*lScale*lScale/mMaxSpeed;
-
+				lAngleSpeed += (lAngleSpeed-lAngleRate)*mMaxSpeed2*lScale*lScale/mMaxSpeed;
 			}
 			pPhysicsManager->SetAngularMotorTurn(pGeometry->GetJointId(), mStrength, lAngleSpeed);
 		}

@@ -22,7 +22,7 @@ namespace Cure
 class TimeManager
 {
 public:
-	TimeManager(int pFixedFrameRate);
+	TimeManager();
 	virtual ~TimeManager();
 
 	void Clear(int pPhysicsFrameCounter);
@@ -45,12 +45,12 @@ public:
 	// Setting the current physics frame is only done on the client during login, all other times
 	// are set using adjustment rather than direct setting.
 	void SetCurrentPhysicsFrame(int pPhysicsFrame);
-	// Returns how many "fixed normal" physics steps s we must take this frame. s >= 0.
-	int GetCurrentPhysicsStepCount() const;
 	// Returns how many "actual" physics steps a we can take this frame without ending up lagged behind. a >= 1.
 	int GetAffordedPhysicsStepCount() const;
 	// Return how long each physics step should be if we want to progress total time of s in a steps.
-	float GetAffordedStepPeriod() const;
+	float GetAffordedPhysicsStepTime() const;
+	// Return how long each physics step should be if we want to progress total time of s in a steps.
+	float GetAffordedPhysicsTotalTime() const;
 	// Returns the desired physics FPS.
 	int GetDesiredPhysicsFps() const;
 
@@ -64,16 +64,20 @@ public:
 	float ConvertPhysicsFramesToSeconds(int pSteps) const;
 
 private:
-	int mFixedFrameRate;	// Physics frame rate (at which the physics system is updated).
+	int mTargetFrameRate;	// Physics frame rate (at which the physics system is updated).
 	Lepra::HiResTimer mTime;	// Absolute time.
 	float mAbsoluteTime;	// Cache of absolute time.
 	float mTickTimeModulo;	// Contains the time that was "left over" since last physics step.
 	float mPhysicsSpeedAdjustmentTime;	// Total number of seconds that our our physics time needs adjusting.
 	int mPhysicsSpeedAdjustmentFrameCount;	// The number of physics steps to adjust our physics time over.
-	float mCurrentFrameTime;	// The time of the current frame (not physics, but "UI").
 	int mPhysicsFrameCounter;	// Holds the index of the current physics frame.
 	float mAverageFrameTime;	// The sliding average step length.
-	int mCurrentPhysicsStepCount;	// The number of discrete physics steps to perform this frame.
+	float mPhysicsFrameTime;	// How much time we should move forward each physics step.
+	int mPhysicsStepCount;
+	int mTargetPhysicsStepCount;	// The number of discrete physics steps to perform this frame.
+	int mReportFrame;	// The physics frame we will print status next time.
+
+	LOG_CLASS_DECLARE();
 };
 
 

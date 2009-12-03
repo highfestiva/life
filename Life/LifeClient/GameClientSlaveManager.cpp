@@ -350,7 +350,7 @@ void GameClientSlaveManager::TickInput()
 
 void GameClientSlaveManager::TickUiInput()
 {
-	int lPhysicsStepCount = GetTimeManager()->GetCurrentPhysicsStepCount();
+	int lPhysicsStepCount = GetTimeManager()->GetAffordedPhysicsStepCount();
 	if (lPhysicsStepCount > 0 && mAllowMovementInput)
 	{
 		Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
@@ -413,12 +413,12 @@ void GameClientSlaveManager::TickUiUpdate()
 
 		// Camera moves in a "moving average" kinda curve (halfs the distance in x seconds).
 		const float lHalfDistanceTime = 0.1f;	// Time it takes to half the distance from where it is now to where it should be.
-		float lMovingAveragePart = 0.5f*GetTimeManager()->GetCurrentFrameTime()/lHalfDistanceTime;
+		float lMovingAveragePart = 0.5f*GetTimeManager()->GetAffordedPhysicsTotalTime()/lHalfDistanceTime;
 		if (lMovingAveragePart > 0.8f)
 		{
 			lMovingAveragePart = 0.8f;
 		}
-		lMovingAveragePart = 1;
+		//lMovingAveragePart = 1;
 		mCameraPosition = Lepra::Math::Lerp<Lepra::Vector3DF, float>(mCameraPosition, lTargetCameraPosition, lMovingAveragePart);
 
 		// "Roll" camera towards avatar.
@@ -601,8 +601,8 @@ void GameClientSlaveManager::PhysicsTick()
 	Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
 	if (lObject)
 	{
-		int lStepCount = GetTimeManager()->GetCurrentPhysicsStepCount();
-		float lPhysicsFrameTime = (float)GetTimeManager()->ConvertPhysicsFramesToSeconds(1);
+		const int lStepCount = GetTimeManager()->GetAffordedPhysicsStepCount();
+		const float lPhysicsFrameTime = GetTimeManager()->GetAffordedPhysicsStepTime();
 		mNetworkOutputGhost.GhostStep(lStepCount, lPhysicsFrameTime);
 	}
 
@@ -733,8 +733,8 @@ void GameClientSlaveManager::ProcessNumber(Cure::MessageNumber::InfoType pType, 
 			if (GetNetworkClient()->GetSocket())
 			{
 				mPingAttemptCount = 0;
-				float lPingTime = GetTimeManager()->ConvertPhysicsFramesToSeconds(GetTimeManager()->GetCurrentPhysicsFrame()-pInteger);
-				float lServerStriveTime = GetTimeManager()->ConvertPhysicsFramesToSeconds((int)pFloat)*2;
+				const float lPingTime = GetTimeManager()->ConvertPhysicsFramesToSeconds(GetTimeManager()->GetCurrentPhysicsFrame()-pInteger);
+				const float lServerStriveTime = GetTimeManager()->ConvertPhysicsFramesToSeconds((int)pFloat)*2;
 				mLog.Infof(_T("Pong: this=%ss, server sim strives to be x2=%ss ahead, (self=%s)."),
 					Lepra::Number::ConvertToPostfixNumber(lPingTime, 2).c_str(),
 					Lepra::Number::ConvertToPostfixNumber(lServerStriveTime, 2).c_str(),

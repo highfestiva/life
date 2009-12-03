@@ -56,7 +56,7 @@ public:
 	void SetAlarmCallback(ContextObject* pObject, int pAlarmId, float pSeconds);
 	void CancelPendingAlarmCallbacks(ContextObject* pObject);
 
-	void Tick();
+	void Tick(float pTimeDelta);
 	void TickPhysics();
 	void HandleIdledBodies();
 	void HandlePhysicsSend();

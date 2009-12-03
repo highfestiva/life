@@ -36,7 +36,7 @@ GameManager::GameManager(RuntimeVariableScope* pVariableScope, ResourceManager* 
 	mVariableScope(pVariableScope),
 	mResource(pResourceManager),
 	mNetwork(0),
-	mTime(new TimeManager(CURE_RTVAR_GET(pVariableScope, RTVAR_PHYSICS_FPS, 60))),
+	mTime(new TimeManager),
 	mPhysics(TBC::PhysicsManagerFactory::Create(TBC::PhysicsManagerFactory::ENGINE_ODE)),
 	mContext(0),
 	mTerrain(new TerrainManager(pResourceManager)),
@@ -110,7 +110,7 @@ bool GameManager::BeginTick()
 		ScriptPhysicsTick();
 	}
 
-	if (mTime->GetCurrentPhysicsStepCount() > 0)
+	if (mTime->GetAffordedPhysicsStepCount() > 0)
 	{
 		// Physics thread
 		// 1. does *NOT* add/delete objects,
@@ -127,7 +127,7 @@ bool GameManager::BeginTick()
 
 bool GameManager::EndTick()
 {
-	if (mTime->GetCurrentPhysicsStepCount() > 0)
+	if (mTime->GetAffordedPhysicsStepCount() > 0)
 	{
 		Lepra::ScopeTimer lTime(&mWaitPhysicsTime);
 		GetTickLock()->Release();
@@ -350,16 +350,17 @@ void GameManager::PhysicsTick()
 {
 	Lepra::HiResTimer lTime;
 
-	const int lAffordedStepCount = mTime->GetAffordedPhysicsStepCount();
-	const float lStepIncrement = mTime->GetAffordedStepPeriod();
-	if (lAffordedStepCount != 1 && !Lepra::Math::IsEpsEqual(lStepIncrement, 1/60.0f))
+	const int lMicroSteps = CURE_RTVAR_GET(GetVariableScope(), RTVAR_PHYSICS_MICROSTEPS, 3);
+	const int lAffordedStepCount = mTime->GetAffordedPhysicsStepCount() * lMicroSteps;
+	const float lStepIncrement = mTime->GetAffordedPhysicsStepTime() / lMicroSteps;
+	/*if (lAffordedStepCount != 1 && !Lepra::Math::IsEpsEqual(lStepIncrement, 1/60.0f))
 	{
 		mLog.Warningf(_T("Game time allows for %i physics steps in increments of %f."),
 			lAffordedStepCount, lStepIncrement);
-	}
+	}*/
 	for (int x = 0; x < lAffordedStepCount; ++x)
 	{
-		ScriptTick();
+		ScriptTick(lStepIncrement);
 		mPhysics->StepFast(lStepIncrement);
 	}
 
@@ -395,14 +396,14 @@ bool GameManager::IsThreadSafe() const
 	return (mIsThreadSafe);
 }
 
-void GameManager::ScriptTick()
+void GameManager::ScriptTick(float pTimeDelta)
 {
-	mContext->Tick();
+	mContext->Tick(pTimeDelta);
 }
 
 void GameManager::ScriptPhysicsTick()
 {
-	//if (mTime->GetCurrentPhysicsStepCount() > 0)
+	//if (mTime->GetAffordedPhysicsStepCount() > 0)
 	{
 		mContext->TickPhysics();
 	}

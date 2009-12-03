@@ -215,9 +215,9 @@ void ContextManager::CancelPendingAlarmCallbacks(ContextObject* pObject)
 
 
 
-void ContextManager::Tick()
+void ContextManager::Tick(float pTimeDelta)
 {
-	DispatchTickCallbacks(mGameManager->GetConstTimeManager()->GetCurrentFrameTime());
+	DispatchTickCallbacks(pTimeDelta);
 	DispatchAlarmCallbacks();
 }
 
@@ -275,12 +275,12 @@ void ContextManager::DispatchPhysicsUpdateCallbacks()
 	}
 }
 
-void ContextManager::DispatchTickCallbacks(float pFrameTimeDelta)
+void ContextManager::DispatchTickCallbacks(float pTimeDelta)
 {
 	ContextObjectTable::iterator x = mTickCallbackObjectTable.begin();
 	for (; x != mTickCallbackObjectTable.end(); ++x)
 	{
-		x->second->OnTick(pFrameTimeDelta);
+		x->second->OnTick(pTimeDelta);
 	}
 }
 

@@ -12,6 +12,9 @@ Game
 + Create arcade-style helicopter.
 . Load objects dynamically, without having to hard-code an account and class/phys/meshes name.
 . Create base world. Use mesh, not primitives, for collision.
+
+. Create UI for picking new vehicle. Don't auto-pick when logging in!
+. Make it possible to be logged in without vehicle. Make it possible to drop vehicle.
 . Create crane that can pull wire up.
 . Create fork-lift.
 . Bug fix attachments (i.e. crane picks up car) so that they work properly (without crashing).
@@ -30,7 +33,7 @@ Game
 . Add "what you're missing out on when not running Pro" in the end of the demo (=release client?).
 . Update and adjust what messages are shown on screen when starting up.
 
- 
+
 Engine
 ----------
 + Make sure that splitscreen1 sees that splitscreen2 logs out.
@@ -51,38 +54,44 @@ Engine
 + Make sure that meshes are reused, such as wheels on the vehicles.
 + Make import tool position all jointed objects correctly (currently seems to disregard some offset - such as own scaling - cause e.g. truck_01 wheels to be misplaced).
 + Make friction parameters in import ortogonal against mass.
-. Add basic material loading (ambient, diffuse, specular).
-. Update ODE to 0.11.whatevah.
++ Add basic material loading (ambient, diffuse, specular).
++ Update ODE to 0.11.whatevah.
++ Make import tool position vehicle at [z + distance from origin to lowest mesh point on vehicle].
++ Creating physics objects as resources.
++ Create an import thingie/module for graphics/physics - must be included in C++.
++ Loading physics objects from disk.
++ Loading graphics objects from disk.
++ Make ODE wheels keep straight using dBodySetFiniteRotationMode() and dBodySetFiniteRotationAxis() instead of a friggen motor!
++ Fix laggy/jerky camera motion by interpolation/extrapolation. Cam adjusts interpolation factor to velocity?
+. Dropping all non-game components from any other file out there (Cure, UiCure).
+. Port Posix' SystemManager (mostly placeholders at the moment).
 . Port client to Linux.
 . Port client to Mac OS X.
-. Mash together meshes into single file!!!
-. Fix laggy/jerky camera motion by interpolation/extrapolation. Cam adjusts interpolation factor to velocity?
+
+. Make export script (Maya) auto-run before save.
+. Make engine and import tool externally available to Pelle!
+. Logging on in two steps: a) normal login, server returns avatars, and b) enter world by selecting avatar. (After (a) the sync goes.)
+. Moving out platform specifics from (Ui)CppContextObject.cpp to LifeXxx.cpp.
+. Spawn engine and load world. Must be able to manage both.
+. Make importer capable of getting texturing.
+. Use a zipped archive for data.
 . Add loading of all formats, especially world format.
 . Add some type of spawn engine for player vehicles.
-. Restrict flying/bouncing to a certain volume.
+. Restrict flying/bouncing to a certain volume. Going outside means destroyed avatar = pick new one.
 . Add "switch to splitscreen" by buttonpress ingame.
-. Port Posix' SystemManager.
 . Creating a less jittery experience: a) sync lag/jitter immediately after logging in, b) sorting out old msgs on client, c) keeping track of jitter on client side.
 . Use animated texture instead of wheels for excavator/bandwagon.
-. Creating physics objects as resources.
-. Create an import thingie/module for graphics/physics - must be included in C++.
-. Loading physics objects from disk.
-. Loading graphics objects from disk.
 . Sounds. Music.
 . Endianify all Chunky saves/loads.
-. Creating group objects as resources.
-. Loading group objects from disk.
-. Moving out platform specifics from (Ui)CppContextObject.cpp to LifeXxx.cpp.
-. Dropping all non-game components from any other file out there (Cure, UiCure).
+. Creating group/world objects as resources.
+. Loading group/world objects from disk.
 . Disabling keyboard steering when any splitscreen console window is down.
 . Chat - client side UI.
-. Logging on in two steps: a) normal login, server returns avatars, and b) enter world by selecting avatar. (After (a) the sync goes.)
 . Text/console clients, plural. Run in same process.
 . Include server in same binary.
 . Include (optional) object position when creating an object over the network.
 . Add context-sensitive and more degrees of freedom for control mechanisms: ball+ufo needs analogue fwd-bkg, cranes, excavators, etc.
 . Make camera always keep a free line of sight to the controlled object.
-. Make ODE wheels keep straight using dBodySetFiniteRotationMode() and dBodySetFiniteRotationAxis() instead of a friggen motor!
 . Wrap physics frame counter (game could go on forever).
 . Try to fixate hardware devices, so that Device0 doesn't mean game pad one day and joystick the next.
 . Design GUI. Menus as well as toolbars during play. Also icons for picking vehicle.
@@ -92,9 +101,6 @@ Engine
 . Improve vehicle wheel friction.
 . Fix cursor in GUI (used to cause XOR problems).
 . Do not resend positional info frequently when pushed/collided similarly (i.e. excavator holding down monster truck).
-. Make import tool position vehicle at [z + distance from origin to lowest mesh point on vehicle].
-. Make export script (Maya) auto-run before save.
-. Make engine and import tool externally available to Pelle!
 
  
 Quality
@@ -104,9 +110,20 @@ Quality
 + Fix bug sometimes induced on Excavator: server says it stops on each frame!
 + Make key settings save as strings, not as numbers in the console save files.
 + Resetting the "threadsafe" flag in the right place/thread after the physics thread is done (not in physics thread, but in main).
++ Testrun in lower frame rates! Make sure sim works in 3 Hz!
++ Make framerate smooth, don't sleep a fixed number of milliseconds per frame. Ensure non-shaking excavator.
++ Remove shakes when a strong motor tries to hold a wheight (such as the hoe of a front loader).
+. Add unit test for making sure that loading more than one instance of same resource results in a single instance.
+. Check if it's possible to physical model wheels with cylinders instead of spheres in ODE 0.11.1.
+. Make build in one step: server, client, **DATA**, Linux, Windows...
+. Assertions on getting access to "wrong" parts of the system with the wrong thread. (Such as dropping users in NetworkServer.cpp from the TCP thread.)
+. Make the console immediately appear the correct size after having added/removed splitscreen player (currently appears smaller if splitscreen player previously removed).
+. Stresstest (use .lsh).
+. Update concept of performance measurements; those which are dynamically laid out as called in hierarchy. Use "copy on write" with pointer ref to hash table to avoid thread clashes.
+. Debug graphs and follow-up optimization.
+
+. Add better camera control, such as for the truck (just looking at the trailer looks like shit).
 . Being able to log in/out on one splitscreen while running normally on the other (no freeze).
-. Make build in one step: server, client, Linux, Windows...
-. Make framerate smooth, don't sleep a fixed number of milliseconds per frame. Ensure non-shaking excavator.
 . Don't allow program to become unresponsive when starting up (alt-tab away and back). Related to some other issue in this list.
 . Print Git (or some other) revision to log when starting.
 . Add support for checking if loaded controller configuration contains devices no longer present in the system when starting, and if so reset 'em.
@@ -114,23 +131,19 @@ Quality
 . Produce autostarting autotest after commit. Run in Linux at least.
 . Give feedback while logging in. Especially after a few seconds of nothingness.
 . Check heap regularly (using _heapchk() in Win32).
-. Assertions on getting access to "wrong" parts of the system with the wrong thread. (Such as dropping users in NetworkServer.cpp from the TCP thread.)
 . Add relevant thread safety to classes here and there (NetworkServer, for instance). Add interfaces to isolate functionality. Use Sigges design pattern.
-. Make the console appear the correct size after having added/removed splitscreen player (currently appears smaller if splitscreen player previously removed).
 . When input is hindered (such as when pulling joystick back, then taking down the console) the excavator behaves jerkily.
 . Assertions on high and stable frame rate. Includes the network sliding average frame rate (should be filtered?).
-. Stresstest (use .lsh).
 . Add crash control.
-. Update concept of performance measurements; those which are dynamically laid out as called in hierarchy. Use "copy on write" with pointer ref to hash table to avoid thread clashes.
-. Debug graphs and follow-up optimization.
+. Add handling of ODE crashes (numerical overflow, etc).
 . Create and use "lag socket" (sys_socket through factory?).
 . Start alpha-testing with human users.
 . Go through all TODOs.
-. Fix all source file header comments (Righteous games, 2010?).
+. Fix all source file header comments (Righteous games, 2010).
 . If clicking "slowly" the game starts with the mouse state shown as "down". Perhaps the same applies when clicking in another app? This makes it inpossible to click a button on the first attempt after going back to the game.
 . Rename PhysicsEngine and ChunkyXxx classes to sensible names.
 . Verify that destruction of ContextObject during load does not cause an invalid resource to float around the resource manager.
-. Remove memory all leaks.
+. Remove all memory leaks.
 . Test thoroughly!
 . Polish.
 . Refactor.
@@ -139,6 +152,5 @@ Quality
 . Add homepage for both Righteous Games as well as The Game.
 . Always use unicode script files.
 . Exchange "varning: flerteckens teckenkonstant" (ChunkyLoader.h) to something portable and beautiful.
-. Add unit test for making sure that loading more than one instance of same resource results in a single instance.
-. Testrun in lower frame rates! Make sure sim works in 10 Hz!
-. Check if it's possible to physical model wheels with cylinders instead of spheres in ODE 0.11.1.
+. Create a small master server which receives crash reports and feedback.
+. Create feedback form which can be entered and transmitted by any user at any time. Received by master server.

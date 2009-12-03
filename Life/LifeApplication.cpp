@@ -12,6 +12,7 @@
 #include "../Lepra/Include/SystemManager.h"
 #include "LifeApplication.h"
 #include "LifeDefinitions.h"
+#include "RtVar.h"
 
 
 
@@ -148,7 +149,8 @@ Lepra::LogListener* Application::CreateConsoleLogListener() const
 
 void Application::TickSleep(double pMeasuredFrameTime) const
 {
-	const float lPowerSaveAmount = mGameTicker->GetPowerSaveAmount();
+	const float lPowerSaveFactor = (float)CURE_RTVAR_TRYGET(Cure::GetSettings(), RTVAR_DEBUG_POWERSAVEFACTOR, 1.0);
+	const float lPowerSaveAmount = mGameTicker->GetPowerSaveAmount() * lPowerSaveFactor;
 	if (lPowerSaveAmount > 0)
 	{
 		if (!mIsPowerSaving)
@@ -176,6 +178,12 @@ void Application::TickSleep(double pMeasuredFrameTime) const
 		{
 			Lepra::Thread::YieldCpu();
 		}
+	}
+
+	const float lExtraSleep = (float)CURE_RTVAR_TRYGET(Cure::GetSettings(), RTVAR_DEBUG_EXTRASLEEPTIME, 0.0);
+	if (lExtraSleep > 0)
+	{
+		Lepra::Thread::Sleep(lExtraSleep);
 	}
 }
 

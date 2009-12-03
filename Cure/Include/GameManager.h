@@ -98,7 +98,7 @@ protected:
 	bool IsThreadSafe() const;
 
 private:
-	void ScriptTick();
+	void ScriptTick(float pTimeDelta);
 	void ScriptPhysicsTick();
 
 	virtual bool InitializeTerrain() = 0;
