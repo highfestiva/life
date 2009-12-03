@@ -186,7 +186,7 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics*
 						Lepra::Vector3DF lY;
 						Lepra::Vector3DF lZ;
 						lAxis.GetNormalized().GetOrthogonals(lY, lZ);
-						const float lStrength = 3 * mValue[0] * lEngineNode.mScale * mStrength;
+						const float lStrength = 3 * mValue[0] * mStrength;
 						lZ *= lStrength;
 						Lepra::Vector3DF lPos;
 						pPhysicsManager->GetAnchorPos(lGeometry->GetJointId(), lPos);
