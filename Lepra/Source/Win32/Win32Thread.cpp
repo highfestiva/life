@@ -16,7 +16,8 @@ namespace Lepra
 
 
 
-ThreadPointerStorage ThreadPointerStorage::smTPS;
+static ThreadPointerStorage gThreadStorage;
+static ThreadPointerStorage gExtraDataStorage;
 
 
 
@@ -30,14 +31,14 @@ ThreadPointerStorage::~ThreadPointerStorage()
 	::TlsFree(mTLSIndex);
 }
 
-void ThreadPointerStorage::SetPointer(Thread* pThread)
+void ThreadPointerStorage::SetPointer(void* pData)
 {
-	::TlsSetValue(smTPS.mTLSIndex, (LPVOID)pThread);
+	::TlsSetValue(mTLSIndex, (LPVOID)pData);
 }
 
-Thread* ThreadPointerStorage::GetPointer()
+void* ThreadPointerStorage::GetPointer()
 {
-	return (Thread*)::TlsGetValue(smTPS.mTLSIndex);
+	return ::TlsGetValue(mTLSIndex);
 }
 
 
@@ -74,8 +75,9 @@ void SetVisualStudioThreadName(const char* szThreadName, DWORD dwThreadId)
 DWORD __stdcall ThreadEntry(void* pThread)
 {
 	Thread* lThread = (Thread*)pThread;
-	ThreadPointerStorage::SetPointer(lThread);
-	assert(ThreadPointerStorage::GetPointer() == lThread);
+	gThreadStorage.SetPointer(lThread);
+	gExtraDataStorage.SetPointer(0);
+	assert(gThreadStorage.GetPointer() == lThread);
 	assert(Thread::GetCurrentThread() == lThread);
 	SetVisualStudioThreadName(AnsiStringUtility::ToOwnCode(lThread->GetThreadName()).c_str(), (DWORD)-1);
 	RunThread(lThread);
@@ -619,7 +621,6 @@ Win32RWLock::Win32RWLock(const String& pRWLockName) :
 	mNumPendingWriters(0),
 	mIsWriting(false)
 {
-
 }
 
 Win32RWLock::~Win32RWLock()
@@ -704,9 +705,10 @@ void Win32RWLock::Release()
 
 void Thread::InitializeMainThread(const String& pThreadName)
 {
-	ThreadPointerStorage::SetPointer(&gMainThread);
+	gThreadStorage.SetPointer(&gMainThread);
+	gExtraDataStorage.SetPointer(0);
 	gMainThread.SetThreadId(GetCurrentThreadId());
-	assert(ThreadPointerStorage::GetPointer() == &gMainThread);
+	assert(gThreadStorage.GetPointer() == &gMainThread);
 	assert(Thread::GetCurrentThread() == &gMainThread);
 	SetVisualStudioThreadName(AnsiStringUtility::ToOwnCode(pThreadName).c_str(), (DWORD)-1);
 }
@@ -718,7 +720,17 @@ size_t Thread::GetCurrentThreadId()
 
 Thread* Thread::GetCurrentThread()
 {
-	return ThreadPointerStorage::GetPointer();
+	return ((Thread*)gThreadStorage.GetPointer());
+}
+
+void* Thread::GetExtraData()
+{
+	return (gExtraDataStorage.GetPointer());
+}
+
+void Thread::SetExtraData(void* pData)
+{
+	gExtraDataStorage.SetPointer(pData);
 }
 
 void Thread::SetCpuAffinityMask(uint64 pAffinityMask)

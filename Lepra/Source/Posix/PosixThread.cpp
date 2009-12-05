@@ -21,6 +21,11 @@ namespace Lepra
 
 
 
+static Win32ThreadPointerStorage gThreadStorage;
+static Win32ThreadPointerStorage gExtraDataStorage;
+
+
+
 void GetAbsTime(float64 pDeltaTime, timespec& pTimeSpec)
 {
 	float64 lSeconds = floor(pDeltaTime);
@@ -32,26 +37,24 @@ void GetAbsTime(float64 pDeltaTime, timespec& pTimeSpec)
 
 
 	
-ThreadPointerStorage ThreadPointerStorage::smTPS;
-
 ThreadPointerStorage::ThreadPointerStorage()
 {
-     ::pthread_key_create(&smTPS.mKey, NULL);
+     ::pthread_key_create(&mKey, NULL);
 }
 
 ThreadPointerStorage::~ThreadPointerStorage()
 {
-     ::pthread_key_delete(smTPS.mKey);
+     ::pthread_key_delete(mKey);
 }
 
-void ThreadPointerStorage::SetPointer(Thread* pThread)
+void ThreadPointerStorage::SetPointer(void* pThread)
 {
-     ::pthread_setspecific(smTPS.mKey, (void*)pThread);
+     ::pthread_setspecific(mKey, pThread);
 }
 
-Thread* ThreadPointerStorage::GetPointer()
+void* ThreadPointerStorage::GetPointer()
 {
-     return (Thread*)::pthread_getspecific(smTPS.mKey);
+     return ::pthread_getspecific(mKey);
 }
 
 

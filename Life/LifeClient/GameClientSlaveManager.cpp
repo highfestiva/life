@@ -143,19 +143,19 @@ bool GameClientSlaveManager::Render()
 	double lClipFar = CURE_RTVAR_GET(GetVariableScope(), RTVAR_UI_3D_CLIPFAR, 1000.0);
 	mUiManager->GetRenderer()->SetViewFrustum((float)lFOV, (float)lClipNear, (float)lClipFar);
 
+	LEPRA_MEASURE_SCOPE(SlaveRender);
 	mUiManager->Render(mRenderArea);
 	return (true);
 }
 
 bool GameClientSlaveManager::EndTick()
 {
-	bool lIsDebugging = CURE_RTVAR_TRYGET(GetVariableScope(), RTVAR_DEBUG_ENABLED, false);
+	bool lIsDebugging = CURE_RTVAR_TRYGET(GetVariableScope(), RTVAR_DEBUG_ENABLE, false);
 	if (lIsDebugging)
 	{
 		DrawAsyncDebugInfo();
 	}
 
-	Lepra::ScopeLock lLock(GetTickLock());
 	bool lOk = Parent::EndTick();
 	if (lOk)
 	{
@@ -931,6 +931,7 @@ void GameClientSlaveManager::DrawAsyncDebugInfo()
 	mUiManager->GetPainter()->ResetClippingRect();
 	mUiManager->GetPainter()->SetClippingRect(mRenderArea);
 
+	// Draw send and receive staples.
 	int lCount = CURE_RTVAR_TRYGET(GetVariableScope(), RTVAR_DEBUG_NET_SENDPOSCNT, 0);
 	DrawDebugStaple(0, lCount*10, Lepra::Color(255, 0, 0));
 	lCount = CURE_RTVAR_TRYGET(GetVariableScope(), RTVAR_DEBUG_NET_RECVPOSCNT, 0);

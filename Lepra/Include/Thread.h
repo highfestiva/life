@@ -355,6 +355,8 @@ public:
 
 	static size_t GetCurrentThreadId();
 	static Thread* GetCurrentThread();
+	static void* GetExtraData();
+	static void SetExtraData(void* pData);
 	void SetCpuAffinityMask(uint64 pAffinityMask);
 
 	bool Start();

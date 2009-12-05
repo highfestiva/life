@@ -37,6 +37,7 @@ public:
 	virtual bool Initialize() = 0;
 	virtual bool Tick() = 0;
 	virtual float GetPowerSaveAmount() const = 0;
+	virtual void Profile();	// Make sure it's quick, since it runs outside all profiling timers.
 };
 
 
@@ -71,7 +72,7 @@ public:
 	virtual void SendAttach(ContextObject* pObject1, unsigned pId1, ContextObject* pObject2, unsigned pId2) = 0;
 	virtual void SendDetach(ContextObject* pObject1, ContextObject* pObject2) = 0;
 
-	void ReportPerformance(double pReportInterval);
+	void TryReportPerformance(double pReportInterval);
 	void ClearPerformanceData();
 
 protected:
@@ -86,7 +87,7 @@ protected:
 
 	virtual ContextObject* CreateContextObject(const Lepra::String& pClassId) const = 0;
 
-	void ReportPerformance(const Lepra::String& pHead, const Lepra::PerformanceData& pPerformance);
+	void ReportPerformance(const Lepra::ScopePerformanceData::NodeArray& pNodes, int pRecursion);
 
 	void StartPhysicsTick();
 	void WaitPhysicsTick();
@@ -125,11 +126,6 @@ private:
 	Lepra::Timer mPerformanceReportTimer;
 	Lepra::SequencialPerformanceData<Lepra::uint64> mSendBandwidth;
 	Lepra::SequencialPerformanceData<Lepra::uint64> mReceiveBandwidth;
-	Lepra::PerformanceData mPhysicsTime;
-	Lepra::PerformanceData mPhysicsPropagationTime;
-	Lepra::PerformanceData mNetworkAndInputTime;
-	Lepra::PerformanceData mWaitPhysicsTime;
-	Lepra::PerformanceData mWallTime;
 
 	LOG_CLASS_DECLARE();
 };

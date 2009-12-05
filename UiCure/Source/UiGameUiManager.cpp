@@ -145,7 +145,7 @@ bool GameUiManager::Open()
 #ifdef LEPRA_WINDOWS
 		mFontPainter = new UiTbc::GDIPainter((UiLepra::Win32DisplayManager*)mDisplay);
 #else // !Windows.
-#error "Unknown system to create system painter for."
+#error "Unknown system to create font painter for."
 #endif
 		UiTbc::Painter::FontID lFontId;
 		lFontId = mFontPainter->AddSystemFont(_T("Courier New"), 14.0, 0, UiTbc::SystemPainter::ANSI);
@@ -352,7 +352,7 @@ void GameUiManager::SetViewport(int pLeft, int pTop, int lDisplayWidth, int lDis
 
 void GameUiManager::Clear(float pRed, float pGreen, float pBlue, bool pClearDepth)
 {
-	mDisplay->Activate();
+	//mDisplay->Activate();
 
 	Lepra::Color lColor;
 	lColor.Set(pRed, pGreen, pBlue, 1.0f);

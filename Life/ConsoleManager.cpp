@@ -279,12 +279,12 @@ int ConsoleManager::OnCommand(const Lepra::String& pCommand, const Lepra::String
 		break;
 		case COMMAND_DUMP_PERFORMANCE_INFO:
 		{
-			mGameManager->ReportPerformance(0);
+			mGameManager->TryReportPerformance(0);
 		}
 		break;
 		case COMMAND_CLEAR_PERFORMANCE_INFO:
 		{
-			mLog.AInfo("Clearing performance data.");
+			log_performance("Clearing performance data.");
 			mGameManager->ClearPerformanceData();
 		}
 		break;

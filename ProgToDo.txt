@@ -15,8 +15,9 @@ Game
 
 . Create UI for picking new vehicle. Don't auto-pick when logging in!
 . Make it possible to be logged in without vehicle. Make it possible to drop vehicle.
-. Create crane that can pull wire up.
 . Create fork-lift.
+. Create material that can easily can be picked-up, loaded and moved around.
+. Create crane that can pull wire up.
 . Bug fix attachments (i.e. crane picks up car) so that they work properly (without crashing).
 . Add wind mill to world.
 . Add server-triggered garage door to world. Make sure trigger coding is easy!!!
@@ -64,6 +65,8 @@ Engine
 + Make ODE wheels keep straight using dBodySetFiniteRotationMode() and dBodySetFiniteRotationAxis() instead of a friggen motor!
 + Fix laggy/jerky camera motion by interpolation/extrapolation. Cam adjusts interpolation factor to velocity?
 . Dropping all non-game components from any other file out there (Cure, UiCure).
+. Port font rendering.
+. Exchange SoundManager basics to a portable one. Or fix FMod.
 . Port Posix' SystemManager (mostly placeholders at the moment).
 . Port client to Linux.
 . Port client to Mac OS X.
@@ -101,6 +104,7 @@ Engine
 . Improve vehicle wheel friction.
 . Fix cursor in GUI (used to cause XOR problems).
 . Do not resend positional info frequently when pushed/collided similarly (i.e. excavator holding down monster truck).
+. Make sure that analogue input devices are thresholded, so they don't cause constant socket transmits when moved.
 
  
 Quality
@@ -113,15 +117,17 @@ Quality
 + Testrun in lower frame rates! Make sure sim works in 3 Hz!
 + Make framerate smooth, don't sleep a fixed number of milliseconds per frame. Ensure non-shaking excavator.
 + Remove shakes when a strong motor tries to hold a wheight (such as the hoe of a front loader).
++ Update concept of performance measurements; those which are dynamically laid out as called in hierarchy. Use "copy on write" with pointer ref to hash table to avoid thread clashes.
++ Debug graphs and follow-up optimization.
 . Add unit test for making sure that loading more than one instance of same resource results in a single instance.
 . Check if it's possible to physical model wheels with cylinders instead of spheres in ODE 0.11.1.
 . Make build in one step: server, client, **DATA**, Linux, Windows...
 . Assertions on getting access to "wrong" parts of the system with the wrong thread. (Such as dropping users in NetworkServer.cpp from the TCP thread.)
-. Make the console immediately appear the correct size after having added/removed splitscreen player (currently appears smaller if splitscreen player previously removed).
+. Make the console appear the correct size (immediately when bringing it up) after having added/removed splitscreen player (currently appears smaller if splitscreen player previously removed).
 . Stresstest (use .lsh).
-. Update concept of performance measurements; those which are dynamically laid out as called in hierarchy. Use "copy on write" with pointer ref to hash table to avoid thread clashes.
-. Debug graphs and follow-up optimization.
+. Optimize font rendering.
 
+. Make font rendering look good instead of ugly.
 . Add better camera control, such as for the truck (just looking at the trailer looks like shit).
 . Being able to log in/out on one splitscreen while running normally on the other (no freeze).
 . Don't allow program to become unresponsive when starting up (alt-tab away and back). Related to some other issue in this list.

@@ -174,6 +174,7 @@ void Win32SoftwareDisplay::OnResize(int pWidth, int pHeight)
 {
 	Resize(pWidth, pHeight);
 	::ShowWindow(mWnd, SW_SHOWNORMAL);
+	Activate();
 }
 
 void Win32SoftwareDisplay::Resize(int pWidth, int pHeight)
@@ -234,6 +235,7 @@ void Win32SoftwareDisplay::OnMaximize(int pWidth, int pHeight)
 {
 	Resize(pWidth, pHeight);
 	::ShowWindow(mWnd, SW_SHOWMAXIMIZED);
+	Activate();
 }
 
 bool Win32SoftwareDisplay::InitScreen()
