@@ -182,7 +182,6 @@ bool GameClientMasterTicker::Tick()
 	{
 		LEPRA_MEASURE_SCOPE(UiPaint);
 		mUiManager->Paint();
-		mUiManager->GetPainter()->Draw3DRect(10, 20, 100, 200, 2, true);
 
 	}
 
@@ -197,6 +196,7 @@ bool GameClientMasterTicker::Tick()
 
 	{
 		LEPRA_MEASURE_SCOPE(DrawGraph);
+		DrawFps();
 		DrawPerformanceLineGraph2d();
 	}
 
@@ -488,6 +488,23 @@ void GameClientMasterTicker::Profile()
 			mPerformanceGraphList[lRootIndex].AddSegment(lNode->GetName(), lStart, lStart + lNode->GetLast());
 		}
 	}
+}
+
+void GameClientMasterTicker::DrawFps() const
+{
+	const bool lDebugging = CURE_RTVAR_TRYGET(UiCure::GetSettings(), RTVAR_DEBUG_ENABLE, false);
+	if (!lDebugging)
+	{
+		return;
+	}
+
+	Lepra::ScopePerformanceData* lMainLoop = Lepra::ScopePerformanceData::GetRoots()[0];
+	Lepra::String lFps = Lepra::StringUtility::Format(_T("%.1f"), 1/lMainLoop->GetSlidingAverage());
+	mUiManager->GetPainter()->SetColor(Lepra::Color(0, 0, 0));
+	const int lRight = mUiManager->GetDisplayManager()->GetWidth();
+	mUiManager->GetPainter()->FillRect(lRight-45, 3, lRight-5, 20);
+	mUiManager->GetPainter()->SetColor(Lepra::Color(200, 200, 0));
+	mUiManager->GetPainter()->PrintText(lFps, lRight-40, 5);
 }
 
 void GameClientMasterTicker::DrawPerformanceLineGraph2d() const

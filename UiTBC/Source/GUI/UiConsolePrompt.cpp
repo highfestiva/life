@@ -53,7 +53,7 @@ bool ConsolePrompt::OnChar(Lepra::tchar pChar)
 {
 	{
 		Lepra::ScopeLock lLock(&mLock);
-		int lChar = pChar;
+		int lChar = (int)(Lepra::utchar)pChar;
 		if (lChar == 27)
 		{
 			lChar = CON_KEY_ESCAPE;

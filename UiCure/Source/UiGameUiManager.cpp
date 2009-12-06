@@ -140,16 +140,33 @@ bool GameUiManager::Open()
 #ifdef LEPRA_WINDOWS
 		mFontPainter = new UiTbc::GDIPainter((UiLepra::Win32DisplayManager*)mDisplay);
 #else // !Windows.
-#error "Unknown system to create font painter for."
+#error "Unknown system to create font painter for non-Windows system."
 #endif
+		mFontPainter->SetColor(Lepra::Color(255, 255, 255, 255), 0);
+		mFontPainter->SetColor(Lepra::Color(0, 0, 0, 0), 1);
+		mPainter->SetFontPainter(mFontPainter);
+
 		UiTbc::Painter::FontID lFontId;
-		lFontId = mFontPainter->AddSystemFont(_T("Courier New"), 14.0, 0, UiTbc::SystemPainter::ANSI);
+		lFontId = mFontPainter->AddSystemFont(_T("Times New Roman"), 14.0);
+		if (lFontId == UiTbc::Painter::INVALID_FONTID)
+		{
+			lFontId = mFontPainter->AddSystemFont(_T("Arial"), 14.0);
+		}
+		if (lFontId == UiTbc::Painter::INVALID_FONTID)
+		{
+			lFontId = mFontPainter->AddSystemFont(_T("Courier New"), 14.0);
+		}
+		if (lFontId == UiTbc::Painter::INVALID_FONTID)
+		{
+			lFontId = mFontPainter->AddSystemFont(_T("Verdana"), 14.0);
+		}
+		if (lFontId == UiTbc::Painter::INVALID_FONTID)
+		{
+			lFontId = mFontPainter->AddSystemFont(_T("Helvetica"), 14.0);
+		}
 		if (lFontId != UiTbc::Painter::INVALID_FONTID)
 		{
 			mFontPainter->SetActiveFont(lFontId);
-			mFontPainter->SetColor(Lepra::Color(255, 255, 255, 255), 0);
-			mFontPainter->SetColor(Lepra::Color(0, 0, 0, 0), 1);
-			mPainter->SetFontPainter(mFontPainter);
 		}
 	}
 	if (lOk)

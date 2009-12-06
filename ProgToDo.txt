@@ -65,6 +65,8 @@ Engine
 + Make ODE wheels keep straight using dBodySetFiniteRotationMode() and dBodySetFiniteRotationAxis() instead of a friggen motor!
 + Fix laggy/jerky camera motion by interpolation/extrapolation. Cam adjusts interpolation factor to velocity?
 . Dropping all non-game components from any other file out there (Cure, UiCure).
+. Make SystemPainter a standalone class that does not inherit UiTbc::Painter!
+. Remove all possible classes to enable easier porting to Mac.
 . Port font rendering.
 . Exchange SoundManager basics to a portable one. Or fix FMod.
 . Port Posix' SystemManager (mostly placeholders at the moment).
@@ -126,6 +128,7 @@ Quality
 . Make the console appear the correct size (immediately when bringing it up) after having added/removed splitscreen player (currently appears smaller if splitscreen player previously removed).
 . Stresstest (use .lsh).
 . Optimize font rendering.
+. Get unicode on track. Make script files all unicode.
 
 . Make font rendering look good instead of ugly.
 . Add better camera control, such as for the truck (just looking at the trailer looks like shit).

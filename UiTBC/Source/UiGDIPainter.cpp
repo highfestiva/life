@@ -819,7 +819,7 @@ Painter::FontID GDIPainter::AddSystemFont(const Lepra::String& pFont, double pSi
 	Painter::FontID lID = INVALID_FONTID;
 	if (lFontHandle != NULL)
 	{
-		SystemFont* lFont = new SystemFont();
+		SystemFont* lFont = new SystemFont(pFont);
 		lFont->mFont = lFontHandle;
 		lFont->mSize = pSize;
 		Painter::AddFont(lFont);
@@ -893,20 +893,25 @@ bool GDIPainter::RenderGlyph(Lepra::tchar pChar, Lepra::Canvas& pImage, const Le
 	}
 	if (lOk)
 	{
-		Lepra::Canvas::BitDepth lBitDepth = Lepra::Canvas::IntToBitDepth(lBpp);
-		Lepra::Canvas lBitmapImage(pRect.GetWidth(), pRect.GetHeight(), lBitDepth);
-		lBitmapImage.SetBuffer(lBitmap, false);
-		lBitmapImage.ConvertBitDepth(pImage.GetBitDepth());
+		Lepra::Canvas::BitDepth lSourceBitDepth = Lepra::Canvas::IntToBitDepth(lBpp);
+		Lepra::Canvas::BitDepth lTargetBitDepth = pImage.GetBitDepth();
+		pImage.Reset(pRect.GetWidth(), pRect.GetHeight(), lSourceBitDepth);
+		pImage.SetBuffer(lBitmap, true);
+		lBitmap = 0;	// Don't delete it, ownership now taken by calling canvas.
+		pImage.ConvertBitDepth(lTargetBitDepth);
+		pImage.FlipVertical();	// Bitmap is upside down...
+		pImage.SwapRGBOrder();	// ... and BGR.
 		for (int y = 0; y < pRect.GetHeight(); ++y)
 		{
 			for (int x = 0; x < pRect.GetWidth(); ++x)
 			{
 				Lepra::Color lColor;
-				lBitmapImage.GetPixelColor(x, y, lColor);
-				if (lColor.SumRgb() > 0)
-				{
-					lColor.mAlpha = 255;
-				}
+				pImage.GetPixelColor(x, y, lColor);
+				int lIntensity = lColor.SumRgb();
+				//// Sum controls biggest part of light intensity, average controls a minor part.
+				lIntensity = (lIntensity*70 + lIntensity/3*30) / 100;
+				lIntensity = (lIntensity > 255)? 255 : lIntensity;
+				lColor.mAlpha = (Lepra::uint8)(lIntensity);
 				pImage.SetPixelColor(x, y, lColor);
 			}
 		}
@@ -925,13 +930,19 @@ bool GDIPainter::RenderGlyph(Lepra::tchar pChar, Lepra::Canvas& pImage, const Le
 	}
 	return (lOk);
 }
+
+Lepra::String GDIPainter::GetFontName() const
+{
+	return (((SystemFont*)GetCurrentFontInternal())->mName);
+}
+
 void GDIPainter::SetActiveFont(FontID pFontID)
 {
 	Painter::SetActiveFont(pFontID);
 
 	if (GetCurrentFontInternal()->IsSystemFont())
 	{
-		::SetTextAlign(mDC, TA_TOP | TA_LEFT);
+		::SetTextAlign(mDC, TA_BASELINE | TA_LEFT);
 	}
 }
 

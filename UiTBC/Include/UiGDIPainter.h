@@ -54,13 +54,15 @@ public:
 	 void UpdateImage(ImageID pImageID, const Lepra::Canvas* pBitmap, const Lepra::Canvas* pAlphaBuffer, Painter::UpdateHint pHint);
 	 void RemoveImage(ImageID pImageID);
 
-	 Painter::FontID AddSystemFont(const Lepra::String& pFont, double pSize, Lepra::uint32 pFlags, CharacterSet pCharSet);
+	 Painter::FontID AddSystemFont(const Lepra::String& pFont, double pSize, Lepra::uint32 pFlags = NORMAL, CharacterSet pCharSet = NATIVE);
 
 	 void SetActiveFont(FontID pFontID);
 
 	 // TODO: Remove. GDIPainter should be able to render text to a Canvas through
 	 // the functions SetDestCanvas() and PrintText().
 	virtual bool RenderGlyph(Lepra::tchar pChar, Lepra::Canvas& pImage, const Lepra::PixelRect& pRect);
+
+	Lepra::String GetFontName() const;
 
 	// Returns the width of the rendered string in pixels.
 	 int GetCharWidth(const Lepra::tchar pChar);
@@ -193,8 +195,9 @@ private:
 	class SystemFont : public Painter::Font
 	{
 	public:
-		SystemFont() :
+		SystemFont(const Lepra::String pName):
 			Font(0, 0),
+			mName(pName),
 			mFont(0),
 			mSize(0)
 		{
@@ -210,6 +213,7 @@ private:
 
 		bool IsSystemFont() { return true; }
 
+		Lepra::String mName;
 		HFONT mFont;
 		double mSize;
 	};

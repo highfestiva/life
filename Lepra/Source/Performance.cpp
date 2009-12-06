@@ -46,7 +46,7 @@ void PerformanceData::Append(double pPeriodValue, double pTimeOfLastMeasure)
 	{
 		mMinimum = (pPeriodValue < mMinimum)? pPeriodValue : mMinimum;
 		mLast = pPeriodValue;
-		mSlidingAverage = Lepra::Math::Lerp(mSlidingAverage, mLast, 0.1);
+		mSlidingAverage = Lepra::Math::Lerp(mSlidingAverage, mLast, 0.05);
 		mMaximum = (pPeriodValue > mMaximum)? pPeriodValue : mMaximum;
 	}
 }

@@ -53,6 +53,7 @@ private:
 	bool Reinitialize();
 	void UpdateSlaveLayout();
 	void Profile();
+	void DrawFps() const;
 	void DrawPerformanceLineGraph2d() const;
 
 	float GetPowerSaveAmount() const;

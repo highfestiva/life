@@ -20,12 +20,13 @@ namespace UiTbc
 class SystemPainter: public Painter
 {
 public:
-	enum // FontFlags
+	enum FontFlags
 	{
-		BOLD      = (1 << 0),
-		ITALIC    = (1 << 1),
-		UNDERLINE = (1 << 2),
-		STRIKEOUT = (1 << 3),
+		NORMAL		= 0,
+		BOLD		= (1 << 0),
+		ITALIC		= (1 << 1),
+		UNDERLINE	= (1 << 2),
+		STRIKEOUT	= (1 << 3),
 	};
 
 	enum CharacterSet
@@ -37,9 +38,11 @@ public:
 	SystemPainter();
 	virtual ~SystemPainter();
 
-	virtual Painter::FontID AddSystemFont(const Lepra::String& pFont, double pSize, Lepra::uint32 pFlags, CharacterSet pCharSet) = 0;
+	virtual Painter::FontID AddSystemFont(const Lepra::String& pFont, double pSize, Lepra::uint32 pFlags = NORMAL, CharacterSet pCharSet = NATIVE) = 0;
 
 	virtual bool RenderGlyph(Lepra::tchar pChar, Lepra::Canvas& pImage, const Lepra::PixelRect& pRect) = 0;
+
+	virtual Lepra::String GetFontName() const = 0;
 };
 
 

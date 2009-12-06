@@ -6,6 +6,7 @@
 
 #include "../Include/UiOpenGLPainter.h"
 #include <math.h>
+#include "../Include/UiSystemPainter.h"
 
 
 
@@ -16,12 +17,15 @@ namespace UiTbc
 
 OpenGLPainter::OpenGLPainter() :
 	mTextureIDManager(3, 10000, 0),
-	mRenderModeChanged(true)
+	mRenderModeChanged(true),
+	mSmoothFont(false)
 {
 }
 
 OpenGLPainter::~OpenGLPainter()
 {
+	ClearFontBuffers();
+
 	TextureTable::Iterator lIter = mTextureTable.First();
 	while (lIter != mTextureTable.End())
 	{
@@ -1200,89 +1204,111 @@ int OpenGLPainter::DoPrintText(const Lepra::String& pString, int x, int y)
 	UpdateRenderMode();
 
 	int lCurrentX = x;
-	int lCurrentY = y;
+	int lCurrentY = y+2;	// GL fonts are offset by a little bit.
 
 	glPushAttrib(GL_TEXTURE_BIT);
 	glPushAttrib(GL_COLOR_BUFFER_BIT);
 
-	glEnable(GL_TEXTURE_2D);
-
-	glBindTexture (GL_TEXTURE_2D, GetCurrentFontInternal()->mTextureID);
-	glPixelStorei (GL_UNPACK_ALIGNMENT, 1);
-	glPixelStorei (GL_UNPACK_ROW_LENGTH, 0);
-	glPixelStorei (GL_UNPACK_SKIP_ROWS, 0);
-	glPixelStorei (GL_UNPACK_SKIP_PIXELS, 0);
-	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-
-	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-
-	Lepra::Color& lColor = GetColorInternal(0);
-	if (GetRenderMode() == RM_ALPHATEST)
+	if (mSmoothFont)
 	{
-		glColor4ub(lColor.mRed, lColor.mGreen, lColor.mBlue, 255);
+		::glEnable(GL_BLEND);
 	}
 	else
 	{
-		glColor4ub(lColor.mRed, lColor.mGreen, lColor.mBlue, GetAlphaValue());
+		::glDisable(GL_BLEND);
 	}
 
-	OpenGLFont* lFont = (OpenGLFont*)GetCurrentFontInternal();
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+	glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
+	glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
+
+	const int lFontHeight = GetFontPainter()->GetFontHeight();
+	const int lLineHeight = GetFontPainter()->GetLineHeight();
+	const int lSpaceSize = GetFontPainter()->GetCharWidth(' ');
+	const int lTabSize = lSpaceSize*4;
+
+	const Lepra::Color lColor = GetColorInternal(0);
+	GetFontPainter()->SetColor(lColor);
+	::glColor4f(lColor.GetRf(), lColor.GetGf(), lColor.GetBf(), lColor.GetAf());
+	Lepra::uint32 lColorHash = lColor.To32();
+	lColorHash = (lColorHash&0xC0000000) + ((lColorHash&0x00C00000)<<6) + ((lColorHash&0x0000C000)<<12);
+	const std::hash<Lepra::String> lFontNameHasher;
+	const size_t lFontNameHash = (lFontNameHasher)(GetFontPainter()->GetFontName());
+	const Lepra::uint64 lFontHash = ((Lepra::uint64)(lColorHash+lFontNameHash+lFontHeight)) << 32;
 
 	for (size_t i = 0; i < pString.length(); i++)
 	{
-		Lepra::tchar lChar = pString[i];
-		assert(lChar >= lFont->mFirstChar && lChar <= lFont->mLastChar);
-
+		const Lepra::tchar lChar = pString[i];
 		if (lChar == _T('\n'))
 		{
-			lCurrentY += (lFont->mCharHeight + lFont->mNewLineOffset);
+			lCurrentY += lLineHeight;
 			lCurrentX = x;
 		}
-		else if(lChar != _T('\r') && 
-			lChar != _T('\b') &&
-			lChar != _T('\t'))
+		else if (lChar == _T(' '))
 		{
-			GLfloat lCharWidth = (GLfloat)lFont->mTileWidth;
-			GLfloat lLeft   = (GLfloat)lCurrentX - 0.5f;
-			GLfloat lRight  = (GLfloat)(lCurrentX + lCharWidth) - 0.5f;
-			GLfloat lTop    = (GLfloat)lCurrentY - 0.5f;
-			GLfloat lBottom = (GLfloat)(lCurrentY + lFont->mCharHeight) - 0.5f;
-
-			OpenGLFont::FRect& lRect = lFont->mCharRect[lChar - lFont->mFirstChar];
-
-			glBegin(GL_TRIANGLE_STRIP);
-
-			glTexCoord2f((GLfloat)lRect.mLeft, (GLfloat)lRect.mBottom);
-			glVertex2f(lLeft, lBottom);
-
-			glTexCoord2f((GLfloat)lRect.mLeft, (GLfloat)lRect.mTop);
-			glVertex2f(lLeft, lTop);
-
-			glTexCoord2f((GLfloat)lRect.mRight, (GLfloat)lRect.mBottom);
-			glVertex2f(lRight, lBottom);
-
-			glTexCoord2f((GLfloat)lRect.mRight, (GLfloat)lRect.mTop);
-			glVertex2f(lRight, lTop);
-
-			glEnd();
-
-			lCurrentX += lFont->mCharWidth[lChar - lFont->mFirstChar] + lFont->mCharOffset;
-		}
-
-		if (lChar == _T(' '))
-		{
-			lCurrentX += lFont->mDefaultSpaceWidth;
+			lCurrentX += lSpaceSize;
 		}
 		else if(lChar == _T('\t'))
 		{
-			lCurrentX = GetTabOriginX() + (((lCurrentX - GetTabOriginX()) / lFont->mTabWidth) + 1) * lFont->mTabWidth;
+			lCurrentX = GetTabOriginX() + (((lCurrentX - GetTabOriginX()) / lTabSize) + 1) * lTabSize;
+		}
+		else if(lChar != _T('\r') && 
+			lChar != _T('\b'))
+		{
+			int lExtraY = -lFontHeight/4;
+			if (mSmoothFont)
+			{
+				lExtraY = lFontHeight*3/4;
+			}
+			::glRasterPos2i(lCurrentX, lCurrentY + lExtraY);
+
+			const int lCharWidth = GetFontPainter()->GetCharWidth(lChar);
+			GlyphTable::iterator lGlyph = mGlyphTable.find(lFontHash+lChar);
+			if (lGlyph != mGlyphTable.end())
+			{
+				::glCallList(lGlyph->second);
+			}
+			else
+			{
+				GLuint lGlGlyph = glGenLists(1);
+				mGlyphTable.insert(GlyphTable::value_type(lFontHash+lChar, lGlGlyph));
+				const int lWidth = lCharWidth;
+				const int lHeight = lFontHeight;
+				Lepra::Canvas lGlyphImage(lWidth, lHeight, Lepra::Canvas::BITDEPTH_32_BIT);
+				GetFontPainter()->RenderGlyph(lChar, lGlyphImage, Lepra::PixelRect(0, 0, lWidth, lHeight));
+				::glNewList(lGlGlyph, GL_COMPILE_AND_EXECUTE);
+				if (mSmoothFont)
+				{
+					::glDrawPixels(lWidth,lHeight, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8_REV, lGlyphImage.GetBuffer());
+				}
+				else
+				{
+					// Convert 32-bit image to monochrome *BIT* map.
+					const int lMaxSize = 120;
+					assert(lWidth < lMaxSize && lHeight < lMaxSize);
+					unsigned char lData[lMaxSize*lMaxSize/8];
+					::memset(lData, 0, sizeof(lData));
+					const int lStride = (lWidth+7)/8;
+					for (int y = 0; y < lHeight; ++y)
+					{
+						for (int x = 0; x < lWidth; ++x)
+						{
+							if (lGlyphImage.GetPixelColor(x, y).mAlpha > 1)
+							{
+								const int lByte = x/8;
+								const int lMask = 1 << (7-(x%8));
+								lData[y*lStride + lByte] |= lMask;
+							}
+						}
+					}
+					::glBitmap(lWidth,lHeight, 0,(float)lHeight-1, (float)lWidth,0, lData);
+				}
+				::glEndList();
+			}
+			lCurrentX += lCharWidth;
 		}
 	}
-
-	glEnd();
 
 	glPopAttrib();
 	glPopAttrib();
@@ -1376,6 +1402,29 @@ Painter::RGBOrder OpenGLPainter::GetRGBOrder()
 	return RGB;
 }
 
+bool OpenGLPainter::SetFont(const Lepra::String& pName, int pSize, bool pSmooth)
+{
+	bool lOk = true;
+	if (GetFontPainter()->GetFontName() != pName ||
+		GetFontPainter()->GetFontHeight() != pSize ||
+		mSmoothFont != pSmooth)
+	{
+		lOk = false;
+		Painter::FontID lFont = GetFontPainter()->AddSystemFont(pName, pSize);
+		if (lFont != Painter::INVALID_FONTID)
+		{
+			lOk = true;
+			GetFontPainter()->SetActiveFont(lFont);
+			mSmoothFont = pSmooth;
+			ClearFontBuffers();
+		}
+
+	}
+	return (lOk);
+}
+
+
+
 void OpenGLPainter::DoRenderDisplayList(std::vector<DisplayEntity*>* pDisplayList)
 {
 	PushAttrib(ATTR_ALL);
@@ -1385,39 +1434,10 @@ void OpenGLPainter::DoRenderDisplayList(std::vector<DisplayEntity*>* pDisplayLis
 	UiLepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, 0);
 	UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-	//ResetClippingRect();
-
-//::glDisable(GL_SCISSOR_TEST);
-//::glDisable(GL_COLOR_MATERIAL);
-//::glDisable(GL_COLOR_MATERIAL);
-//::glDisable(GL_BLEND);
-//::glDisable(GL_TEXTURE_2D);
-//::glDisable(GL_ALPHA_TEST);
-//::glDisable(GL_TEXTURE_CUBE_MAP);
-//::glDisable(GL_TEXTURE_GEN_S);
-//::glDisable(GL_TEXTURE_GEN_T);
-//::glDisable(GL_TEXTURE_GEN_R);
-//::glDisable(GL_LIGHTING);
-//::glDisable(GL_VERTEX_PROGRAM_ARB);
-//::glDisable(GL_FRAGMENT_PROGRAM_ARB);
-//::glDisable(GL_COLOR_LOGIC_OP);
-//::glDisable(GL_DEPTH_TEST);
-//::glDisable(GL_LIGHT0);
-//::glDisable(GL_LIGHT0+1);
-//::glDisable(GL_LIGHT0+2);
-//::glDisable(GL_LIGHT0+3);
-//::glDisable(GL_LIGHT0+4);
-//::glDisable(GL_CULL_FACE);
-//::glDisable(GL_STENCIL_TEST);
-//::glDisable(GL_POLYGON_OFFSET_EXT);
-//::glDisable(GL_POLYGON_OFFSET_FILL);
-
 	std::vector<DisplayEntity*>::iterator it;
 	for(it = pDisplayList->begin(); it != pDisplayList->end(); ++it)
 	{
 		glPushAttrib(GL_TEXTURE_BIT);
-
-		//glColor4f(0.7f, 0.2f, 0.1f, 1.0f);
 
 		DisplayEntity* lSE = *it;
 		Painter::SetClippingRect(lSE->GetClippingRect());
@@ -1482,6 +1502,19 @@ void OpenGLPainter::DoRenderDisplayList(std::vector<DisplayEntity*>* pDisplayLis
 	glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	PopAttrib();
+}
+
+
+
+
+void OpenGLPainter::ClearFontBuffers()
+{
+	GlyphTable::iterator x = mGlyphTable.begin();
+	for (; x != mGlyphTable.end(); ++x)
+	{
+		::glDeleteLists(x->second, 1);
+	}
+	mGlyphTable.clear();
 }
 
 

@@ -1,17 +1,16 @@
-/*
-	Class:  OpenGLPainter
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Alexander Hugestrand
 
-	NOTES: 
-	
-	This class can only render bitmaps with dimensions of a power of 2.
-	The openGL texture "names" (or IDs) between 1-10000 are reserved to bitmap rendering.
-	1 is reserved for text, and 2 is reserved for the default mouse cursor.
-*/
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2009, Righteous Games
+//
+// NOTES: 
+//
+// This class can only render bitmaps with dimensions of a power of 2.
+// The openGL texture "names" (or IDs) between 1-10000 are reserved to bitmap rendering.
+// 1 is reserved for text, and 2 is reserved for the default mouse cursor.
 
-#ifndef UIOPENGLPAINTER_H
-#define UIOPENGLPAINTER_H
+
+
+#pragma once
 
 #include "UiTBC.h"
 #include "../../Lepra/Include/Graphics2D.h"
@@ -23,10 +22,14 @@
 #include "UiPainter.h"
 #include <list>
 
+
+
 namespace UiTbc
 {
 
-class OpenGLPainter : public Painter
+
+
+class OpenGLPainter: public Painter
 {
 public:
 	OpenGLPainter();
@@ -56,11 +59,9 @@ public:
 
 	RGBOrder GetRGBOrder();
 
-protected:
-	/*
-		Rendering functions.
-	*/
+	bool SetFont(const Lepra::String& pName, int pSize, bool pSmooth);
 
+protected:
 	void DoDrawPixel(int x, int y);
 	void DoDrawLine(int pX1, int pY1, int pX2, int pY2);
 	void DoFillTriangle(float pX1, float pY1,
@@ -89,8 +90,10 @@ protected:
 	int DoPrintText(const Lepra::String& pString, int x, int y);
 
 	void DoRenderDisplayList(std::vector<DisplayEntity*>* pDisplayList);
-private:
 
+	void ClearFontBuffers();
+
+private:
 	Lepra::Vector3DF mRCol[4];
 
 	class Texture
@@ -143,16 +146,19 @@ private:
 	};
 
 	typedef Lepra::HashTable<int, Texture*> TextureTable;
+	typedef std::hash_map<Lepra::uint64, GLuint> GlyphTable;
 
 	void UpdateRenderMode();
 
 	Lepra::IdManager<int> mTextureIDManager;
 	TextureTable mTextureTable;
+	GlyphTable mGlyphTable;
 
 	bool mRenderModeChanged;
+
+	bool mSmoothFont;
 };
 
 
-} // End namespace.
 
-#endif
+}

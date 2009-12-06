@@ -347,6 +347,7 @@ public:
 	inline float GetGf() const;
 	inline float GetBf() const;
 	inline float GetAf() const;
+	inline uint32 To32() const;
 
 	inline Color operator = (const Color& pColor);
 	
@@ -538,6 +539,12 @@ float Color::GetBf() const
 float Color::GetAf() const
 {
 	return (mAlpha/255.0f);
+}
+
+uint32 Color::To32() const
+{
+	typedef uint32 u;
+	return ((((u)mRed)<<24) + (((u)mGreen)<<16) + (((u)mBlue)<<8) + (u)mAlpha);
 }
 
 Color Color::operator = (const Color& pColor)
