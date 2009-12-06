@@ -58,7 +58,7 @@ PopupList* FileNameField::CreatePopupList()
 	DesktopWindow* lDesktopWindow = (DesktopWindow*)GetParentOfType(DESKTOPWINDOW);
 	if (lDesktopWindow != 0)
 	{
-		lPainter = lDesktopWindow->GetInternalPainter();
+		lPainter = lDesktopWindow->GetPainter();
 	}
 
 	std::list<FileInfo> lFileList;

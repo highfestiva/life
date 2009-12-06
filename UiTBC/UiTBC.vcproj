@@ -561,10 +561,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Source\UiMouseTheme.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\Source\UiOpenGLMaterial_DiffuseBumpMapShaders.cpp"
 				>
 			</File>
@@ -626,10 +622,6 @@
 			</File>
 			<File
 				RelativePath=".\Source\UiSoftwareRenderer.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Source\UiStandardMouseTheme.cpp"
 				>
 			</File>
 			<File
@@ -939,10 +931,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Include\UiMouseTheme.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Include\UiOpenGLMaterials.h"
 				>
 			</File>
@@ -956,10 +944,6 @@
 			</File>
 			<File
 				RelativePath=".\Include\UiPainter.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Source\UiPainter.inl"
 				>
 			</File>
 			<File
@@ -1004,10 +988,6 @@
 			</File>
 			<File
 				RelativePath=".\Source\UiStandardFont2.inl"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\UiStandardMouseTheme.h"
 				>
 			</File>
 			<File

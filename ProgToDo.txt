@@ -119,8 +119,8 @@ Quality
 + Remove shakes when a strong motor tries to hold a wheight (such as the hoe of a front loader).
 + Update concept of performance measurements; those which are dynamically laid out as called in hierarchy. Use "copy on write" with pointer ref to hash table to avoid thread clashes.
 + Debug graphs and follow-up optimization.
++ Check if it's possible to physical model wheels with cylinders instead of spheres in ODE 0.11.1. --- RESULT: NOT POSSIBLE!
 . Add unit test for making sure that loading more than one instance of same resource results in a single instance.
-. Check if it's possible to physical model wheels with cylinders instead of spheres in ODE 0.11.1.
 . Make build in one step: server, client, **DATA**, Linux, Windows...
 . Assertions on getting access to "wrong" parts of the system with the wrong thread. (Such as dropping users in NetworkServer.cpp from the TCP thread.)
 . Make the console appear the correct size (immediately when bringing it up) after having added/removed splitscreen player (currently appears smaller if splitscreen player previously removed).

@@ -1,31 +1,30 @@
-/*
-	Class:  Painter
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Alexander Hugestrand
 
-	NOTES:
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2006, Alexander Hugestrand
+//
+// NOTES:
+//
+// The Painter is the base class, interface or API to render 2D graphics.
+//
+// Usage:
+// 1. Create an instance and call DefineCoordinates() in order to define
+//    the coordinate system.
+// 2. Call SetDestCanvas() to set the destination buffer which represents
+//    the surface to which the Painter should draw.
+// 3. Upload the images to use to the Painter through AddImage().
+// 3. Configure the state of the Painter using the functions:
+//	* SetRenderMode()
+//	* SetAlphaValue()
+//	* Reset/Reduce/SetClippingRect()
+//	* SetColor()
+// 4. Render some graphics by calling the various Draw- or Fill-functions.
+// 5. Print text using the function PrintText().
+// 6. For better performance on hardware accelerated Painters, you may create
+//    a static display list using the various Create-functions.
 
-	The Painter is the base class, interface or API to render 2D graphics.
-	
-	Usage:
-	1. Create an instance and call DefineCoordinates() in order to define
-	   the coordinate system.
-	2. Call SetDestCanvas() to set the destination buffer which represents
-	   the surface to which the Painter should draw.
-	3. Upload the images to use to the Painter through AddImage().
-	3. Configure the state of the Painter using the functions:
-		* SetRenderMode()
-		* SetAlphaValue()
-		* Reset/Reduce/SetClippingRect()
-		* SetColor()
-	4. Render some graphics by calling the various Draw- or Fill-functions.
-	5. Print text using the function PrintText().
-	6. For better performance on hardware accelerated Painters, you may create
-	   a static display list using the various Create-functions.
-*/
 
-#ifndef UIPAINTER_H
-#define UIPAINTER_H
+
+#pragma once
 
 #include "../../Lepra/Include/Graphics2D.h"
 #include "../../Lepra/Include/HashTable.h"
@@ -36,10 +35,16 @@
 #include "UiGeometry2D.h"
 #include <list>
 
+
+
 namespace UiTbc
 {
 
+
+
 class SystemPainter;
+
+
 
 class Painter
 {
@@ -122,90 +127,82 @@ public:
 	// screen coordinates" - relative to the top left corner, x increasing to the right
 	// and y increasing downwards.
 	void DefineCoordinates(int pOrigoX, int pOrigoY, XDir pXDir, YDir pYDir);
-	inline int GetOrigoX();
-	inline int GetOrigoY();
-	inline XDir GetXDir();
-	inline YDir GetYDir();
+	int GetOrigoX();
+	int GetOrigoY();
+	XDir GetXDir();
+	YDir GetYDir();
 
 	// Set the drawing surface.
 	virtual void SetDestCanvas(Lepra::Canvas* pCanvas);
-	inline Lepra::Canvas* GetCanvas();
+	Lepra::Canvas* GetCanvas();
+
+	void BeginPaint();
+	void EndPaint();
 
 	// Returns false only if stack owerflow/underflow.
 	bool PushAttrib(unsigned pAttrib);
 	bool PopAttrib();
 
 	virtual void SetRenderMode(RenderMode pRM);
-	inline RenderMode GetRenderMode();
+	RenderMode GetRenderMode();
 	
 	// Set the current alpha value. Overrides alpha buffer...
 	// In 8-bit color mode, this is a specific color that will "be" transparent.
 	virtual void SetAlphaValue(Lepra::uint8 pAlpha);
-	inline Lepra::uint8 GetAlphaValue();
+	Lepra::uint8 GetAlphaValue();
 
 	virtual void ResetClippingRect() = 0;
 	virtual void SetClippingRect(int pLeft, int pTop, int pRight, int pBottom);
-	inline  void SetClippingRect(const Lepra::PixelRect& pClippingRect);
-	        void ReduceClippingRect(int pLeft, int pTop, int pRight, int pBottom);
-	inline  void ReduceClippingRect(const Lepra::PixelRect& pClippingRect);
-	inline  void GetClippingRect(Lepra::PixelRect& pClippingRect);
+	void SetClippingRect(const Lepra::PixelRect& pClippingRect);
+	void ReduceClippingRect(int pLeft, int pTop, int pRight, int pBottom);
+	void ReduceClippingRect(const Lepra::PixelRect& pClippingRect);
+	void GetClippingRect(Lepra::PixelRect& pClippingRect);
 
 	virtual void SetColor(const Lepra::Color& pColor, unsigned pColorIndex = 0);
-	inline  void SetColor(Lepra::uint8 pRed, Lepra::uint8 pGreen, Lepra::uint8 pBlue, Lepra::uint8 pPaletteIndex, unsigned pColorIndex = 0);
-	inline  Lepra::Color GetColor(unsigned pColorIndex);
+	void SetColor(Lepra::uint8 pRed, Lepra::uint8 pGreen, Lepra::uint8 pBlue, Lepra::uint8 pPaletteIndex, unsigned pColorIndex = 0);
+	Lepra::Color GetColor(unsigned pColorIndex);
 
-	inline  void DrawPixel(int x, int y);
-	inline  void DrawPixel(const Lepra::PixelCoords& pCoords);
+	void DrawPixel(int x, int y);
+	void DrawPixel(const Lepra::PixelCoords& pCoords);
 
-	inline  void DrawLine(int pX1, int pY1, int pX2, int pY2);
-	inline  void DrawLine(const Lepra::PixelCoords& pPoint1, const Lepra::PixelCoords& pPoint2);
+	void DrawLine(int pX1, int pY1, int pX2, int pY2);
+	void DrawLine(const Lepra::PixelCoords& pPoint1, const Lepra::PixelCoords& pPoint2);
 
 	// Renders a rectangular frame. The given coordinates defines the outer edges of the frame,
 	// expanding inwards 'pWidth' pixels.
 	// Color 0 defines the outer color.
 	// Color 1 defines the inner color.
-	inline  void DrawRect(int pLeft, int pTop, int pRight, int pBottom, int pWidth);
-	inline  void DrawRect(const Lepra::PixelCoords& pTopLeft, const Lepra::PixelCoords& pBottomRight, int pWidth);
-	inline  void DrawRect(const Lepra::PixelRect& pRect, int pWidth);
+	void DrawRect(int pLeft, int pTop, int pRight, int pBottom, int pWidth);
+	void DrawRect(const Lepra::PixelCoords& pTopLeft, const Lepra::PixelCoords& pBottomRight, int pWidth);
+	void DrawRect(const Lepra::PixelRect& pRect, int pWidth);
 
-	inline  void FillRect(int pLeft, int pTop, int pRight, int pBottom);
-	inline  void FillRect(const Lepra::PixelCoords& pTopLeft, const Lepra::PixelCoords& pBottomRight);
-	inline  void FillRect(const Lepra::PixelRect& pRect);
+	void FillRect(int pLeft, int pTop, int pRight, int pBottom);
+	void FillRect(const Lepra::PixelCoords& pTopLeft, const Lepra::PixelCoords& pBottomRight);
+	void FillRect(const Lepra::PixelRect& pRect);
 
 	// Same as DrawRect(), but with two different color gradients. Good for GUI rendering.
 	// Color 0 and 1 are the outer top left and bottom right colors, respectively.
 	// Color 2 and 3 are the inner ditos.
-	inline  void Draw3DRect(int pLeft, int pTop, int pRight, int pBottom, int pWidth, bool pSunken);
-	inline  void Draw3DRect(const Lepra::PixelCoords& pTopLeft, const Lepra::PixelCoords& pBottomRight, int pWidth, bool pSunken);
-	inline  void Draw3DRect(const Lepra::PixelRect& pRect, int pWidth, bool pSunken);
+	void Draw3DRect(int pLeft, int pTop, int pRight, int pBottom, int pWidth, bool pSunken);
+	void Draw3DRect(const Lepra::PixelCoords& pTopLeft, const Lepra::PixelCoords& pBottomRight, int pWidth, bool pSunken);
+	void Draw3DRect(const Lepra::PixelRect& pRect, int pWidth, bool pSunken);
 
 	// FillShadeRect uses all colors...
-	inline  void FillShadedRect(int pLeft, int pTop, int pRight, int pBottom);
-	inline  void FillShadedRect(const Lepra::PixelCoords& pTopLeft, const Lepra::PixelCoords& pBottomRight);
-	inline  void FillShadedRect(const Lepra::PixelRect& pRect);
+	void FillShadedRect(int pLeft, int pTop, int pRight, int pBottom);
+	void FillShadedRect(const Lepra::PixelCoords& pTopLeft, const Lepra::PixelCoords& pBottomRight);
+	void FillShadedRect(const Lepra::PixelRect& pRect);
 
-	inline  void FillTriangle(float pX1, float pY1,
-				  float pX2, float pY2,
-				  float pX3, float pY3);
-	inline  void FillTriangle(const Lepra::PixelCoords& pPoint1,
-				  const Lepra::PixelCoords& pPoint2,
-				  const Lepra::PixelCoords& pPoint3);
+	void FillTriangle(float pX1, float pY1, float pX2, float pY2, float pX3, float pY3);
+	void FillTriangle(const Lepra::PixelCoords& pPoint1, const Lepra::PixelCoords& pPoint2, const Lepra::PixelCoords& pPoint3);
 
-	inline  void FillShadedTriangle(float pX1, float pY1,
-					float pX2, float pY2,
-					float pX3, float pY3);
-	inline  void FillShadedTriangle(const Lepra::PixelCoords& pPoint1,
-					const Lepra::PixelCoords& pPoint2,
-					const Lepra::PixelCoords& pPoint3);
+	void FillShadedTriangle(float pX1, float pY1, float pX2, float pY2, float pX3, float pY3);
+	void FillShadedTriangle(const Lepra::PixelCoords& pPoint1, const Lepra::PixelCoords& pPoint2, const Lepra::PixelCoords& pPoint3);
 
-	inline  void FillTriangle(float pX1, float pY1, float pU1, float pV1,
-				  float pX2, float pY2, float pU2, float pV2,
-				  float pX3, float pY3, float pU3, float pV3,
-				  ImageID pImageID);
-	inline  void FillTriangle(const Lepra::PixelCoords& pPoint1, float pU1, float pV1,
-				  const Lepra::PixelCoords& pPoint2, float pU2, float pV2,
-				  const Lepra::PixelCoords& pPoint3, float pU3, float pV3,
-				  ImageID pImageID);
+	void FillTriangle(float pX1, float pY1, float pU1, float pV1, float pX2, float pY2, float pU2, float pV2,
+		float pX3, float pY3, float pU3, float pV3, ImageID pImageID);
+	void FillTriangle(const Lepra::PixelCoords& pPoint1, float pU1, float pV1,
+		const Lepra::PixelCoords& pPoint2, float pU2, float pV2,
+		const Lepra::PixelCoords& pPoint3, float pU3, float pV3, ImageID pImageID);
 
 
 	// Returns an ID to the added bitmap. Returns 0 if error. 
@@ -224,20 +221,20 @@ public:
 	virtual void RemoveImage(ImageID pImageID) = 0;
 
 	// Renders a bitmap.
-	inline  void DrawImage(ImageID pImageID, int x, int y);
-	inline  void DrawImage(ImageID pImageID, const Lepra::PixelCoords& pTopLeft);
+	void DrawImage(ImageID pImageID, int x, int y);
+	void DrawImage(ImageID pImageID, const Lepra::PixelCoords& pTopLeft);
 	// Renders a subsquare of a bitmap.
-	inline  void DrawImage(ImageID pImageID, int x, int y, const Lepra::PixelRect& pSubpatchRect);
-	inline  void DrawImage(ImageID pImageID, const Lepra::PixelCoords& pTopLeft, const Lepra::PixelRect& pSubpatchRect);
+	void DrawImage(ImageID pImageID, int x, int y, const Lepra::PixelRect& pSubpatchRect);
+	void DrawImage(ImageID pImageID, const Lepra::PixelCoords& pTopLeft, const Lepra::PixelRect& pSubpatchRect);
 	// Renders and stretches a bitmap.
-	inline  void DrawImage(ImageID pImageID, const Lepra::PixelRect& pRect);
-	inline  void DrawImage(ImageID pImageID, const Lepra::PixelRect& pRect, const Lepra::PixelRect& pSubpatchRect);
+	void DrawImage(ImageID pImageID, const Lepra::PixelRect& pRect);
+	void DrawImage(ImageID pImageID, const Lepra::PixelRect& pRect, const Lepra::PixelRect& pSubpatchRect);
 
 	// Renders the associated alpha buffer, if there is one.
-	inline  void DrawAlphaImage(ImageID pImageID, int x, int y);
-	inline  void DrawAlphaImage(ImageID pImageID, const Lepra::PixelCoords& pTopLeft);
+	void DrawAlphaImage(ImageID pImageID, int x, int y);
+	void DrawAlphaImage(ImageID pImageID, const Lepra::PixelCoords& pTopLeft);
 
-	inline  void DrawDefaultMouseCursor(int x, int y);
+	void DrawDefaultMouseCursor(int x, int y);
 
 	/*
 		Image Font Functions.
@@ -286,7 +283,7 @@ public:
 	FontID GetStandardFont(int pFontIndex);
 	FontID GetCurrentFont();
 
-	inline void SetTabOriginX(int pTabOriginX);
+	void SetTabOriginX(int pTabOriginX);
 
 	// Returns the width of the rendered string in pixels.
 	virtual int GetCharWidth(const Lepra::tchar pChar);
@@ -320,11 +317,11 @@ protected:
 	{
 	public:
 		friend class Painter;
-		inline RenderMode GetRenderMode() const;
-		inline Lepra::uint8 GetAlpha() const;
-		inline ImageID GetImageID() const;
-		inline const Lepra::PixelRect& GetClippingRect() const;
-		inline Geometry2D& GetGeometry();
+		RenderMode GetRenderMode() const;
+		Lepra::uint8 GetAlpha() const;
+		ImageID GetImageID() const;
+		const Lepra::PixelRect& GetClippingRect() const;
+		Geometry2D& GetGeometry();
 	private:
 		DisplayEntity(RenderMode pRM,
 		              Lepra::uint8 pAlpha,
@@ -349,7 +346,7 @@ protected:
 			mAlpha = pAlpha;
 			mImageID = pImageID;
 			mClippingRect = pClippingRect;
-			mGeometry = pVertexFormat;
+			mGeometry.Init(pVertexFormat);
 		}
 
 		RenderMode mRM;
@@ -417,19 +414,6 @@ protected:
 	typedef std::list<Lepra::PixelRect> RectList;
 	typedef Lepra::HashTable<Lepra::String, ImageID> FilenameToImageTable;
 	typedef Lepra::HashTable<int, Font*> FontTable;
-
-	struct GlyphInfo
-	{
-		GlyphInfo(ImageID pImageId, Lepra::PixelRect& pRect):
-			mImageId(pImageId),
-			mRect(pRect)
-		{
-		}
-		ImageID mImageId;
-		Lepra::PixelRect mRect;
-	};
-	bool CacheCharImage(Lepra::tchar pChar, ImageID& pImageId, Lepra::PixelRect& pCharSquare);
-	void DeleteCharCache();
 
 	virtual void DoDrawPixel(int x, int y) = 0;
 	virtual void DoDrawLine(int pX1, int pY1, int pX2, int pY2) = 0;
@@ -503,53 +487,52 @@ protected:
 	static int CalcAverageWidth(int pCharCount, int* pCharWidthArray);
 	void CalcCharWidths(Lepra::uint8* pFont, int* pWidth);
 
-	inline static bool IsPowerOf2(unsigned pNumber);
+	static bool IsPowerOf2(unsigned pNumber);
 	static unsigned GetClosestPowerOf2(unsigned pNumber, bool pGreater = false);
 	static unsigned GetExponent(unsigned pPowerOf2);
 
-	inline static Lepra::uint8* GetStandardFont1();
-	inline static Lepra::uint8* GetStandardFont2();
-	inline static int* GetCharWidthStdFont1();
-	inline static int* GetCharWidthStdFont2();
-	inline static Lepra::uint8* GetStandardMouseCursor();
+	static Lepra::uint8* GetStandardFont1();
+	static Lepra::uint8* GetStandardFont2();
+	static int* GetCharWidthStdFont1();
+	static int* GetCharWidthStdFont2();
+	static Lepra::uint8* GetStandardMouseCursor();
 
 	// Coordinate convertion...
-	inline void ToScreenCoords(int& x, int& y) const;
-	inline void ToUserCoords(int& x, int& y) const;
-	inline void ToScreenCoords(float& x, float& y) const;
-	inline void ToUserCoords(float& x, float& y) const;
+	void ToScreenCoords(int& x, int& y) const;
+	void ToUserCoords(int& x, int& y) const;
+	void ToScreenCoords(float& x, float& y) const;
+	void ToUserCoords(float& x, float& y) const;
 
 	// The coordinate to the following functions are given in user coordinate space.
-	inline bool XLT(int x1, int x2); // True if x1 is left of x2.
-	inline bool XLE(int x1, int x2); // True if x1 is left of or equal to x2.
-	inline bool XGT(int x1, int x2); // True if x1 is right of x2.
-	inline bool XGE(int x1, int x2); // True if x1 is right of or equal to x2.
-	inline bool YLT(int y1, int y2); // True if y1 is above y2.
-	inline bool YLE(int y1, int y2); // True if y1 is above or equal to y2.
-	inline bool YGT(int y1, int y2); // True if y1 is below y2.
-	inline bool YGE(int y1, int y2); // True if y1 is below or equal to y2.
+	bool XLT(int x1, int x2); // True if x1 is left of x2.
+	bool XLE(int x1, int x2); // True if x1 is left of or equal to x2.
+	bool XGT(int x1, int x2); // True if x1 is right of x2.
+	bool XGE(int x1, int x2); // True if x1 is right of or equal to x2.
+	bool YLT(int y1, int y2); // True if y1 is above y2.
+	bool YLE(int y1, int y2); // True if y1 is above or equal to y2.
+	bool YGT(int y1, int y2); // True if y1 is below y2.
+	bool YGE(int y1, int y2); // True if y1 is below or equal to y2.
 
 	// Internal access to private members.
 	void GetScreenCoordClippingRect(Lepra::PixelRect& pClippingRect) const;
 
-	inline Font* GetCurrentFontInternal() const;
-	inline int GetTabOriginX() const;
-	inline Lepra::Color& GetColorInternal(int pColorIndex);
+	Font* GetCurrentFontInternal() const;
+	int GetTabOriginX() const;
+	Lepra::Color& GetColorInternal(int pColorIndex);
 
 	// Used by SystemPainters that need to instantiate own font types. Will set
 	// Font::mFontID.
 	void AddFont(Font* pFont);
 private:
-	typedef std::hash_map<unsigned, GlyphInfo> GlyphMap;
 	typedef std::hash_map<unsigned, std::vector<DisplayEntity*>* > DisplayListMap;
 
 	SystemPainter* mFontPainter;
-	GlyphMap mGlyphMap;
 
 	DisplayListMap mDisplayListMap;
 	Lepra::IdManager<int> mDisplayListIDManager;
 	std::vector<DisplayEntity*>* mCurrentDisplayList;
 	std::vector<DisplayEntity*>::iterator mDisplayListIter;
+	DisplayListID mDefaultDisplayList;
 
 	// Two standard bitmap fonts, mStandardFont1 and mStandardFont2.
 	// mStandardFont1 is actually a copy of the system font (the font used in text mode, MS-DOS).
@@ -599,8 +582,6 @@ private:
 	Lepra::uint8 mAlphaValue;
 };
 
-#include "../Source/UiPainter.inl"
 
-} // End namespace.
 
-#endif
+}

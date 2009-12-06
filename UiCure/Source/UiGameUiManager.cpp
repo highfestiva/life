@@ -133,11 +133,6 @@ bool GameUiManager::Open()
 		{
 			mRenderer = new TBC::Direct3DRenderer(mCanvas);
 			mPainter = new TBC::DirectXPainter;
-		}
-		else
-		{
-			mRenderer = new TBC::SoftwareRenderer(mCanvas);
-			mPainter = new TBC::SoftwarePainter;
 		}*/
 	}
 	if (lOk)
@@ -169,16 +164,7 @@ bool GameUiManager::Open()
 	}
 	if (lOk)
 	{
-		UiTbc::DesktopWindow::RenderMode lUpdateMode = UiTbc::DesktopWindow::RM_EVERY_FRAME;
-		if (lUpdateModeString == _T("EveryFrame"))
-		{
-			lUpdateMode = UiTbc::DesktopWindow::RM_EVERY_FRAME;
-		}
-		else if (lUpdateModeString == _T("OptimizeStatic"))
-		{
-			lUpdateMode = UiTbc::DesktopWindow::RM_OPTIMIZE_STATIC;
-		}
-		mDesktopWindow = new UiTbc::DesktopWindow(mInput, mPainter, new UiTbc::FloatingLayout(), 0, 0, lUpdateMode);
+		mDesktopWindow = new UiTbc::DesktopWindow(mInput, mPainter, new UiTbc::FloatingLayout(), 0, 0);
 		mDesktopWindow->SetIsHollow(true);
 		mDesktopWindow->SetPreferredSize(mCanvas->GetWidth(), mCanvas->GetHeight());
 	}
@@ -278,12 +264,15 @@ void GameUiManager::Paint()
 		mCanvas->SetBuffer(mDisplay->GetScreenPtr());
 		mPainter->SetDestCanvas(mCanvas);
 		mPainter->ResetClippingRect();
+		mPainter->BeginPaint();
 		mDesktopWindow->Repaint(mPainter);
 	}
 }
 
 void GameUiManager::EndRender()
 {
+	mPainter->EndPaint();
+
 	if (mDisplay->IsVisible())
 	{
 		UpdateSettings();
@@ -372,7 +361,7 @@ void GameUiManager::ClearDepth()
 
 void GameUiManager::PrintText(int pX, int pY, const Lepra::String& pText)
 {
-	mPainter->ResetClippingRect();
+	//mPainter->ResetClippingRect();
 	mPainter->SetColor(Lepra::Color(255, 255, 255, 255), 0);
 	mPainter->SetColor(Lepra::Color(0, 0, 0, 0), 1);
 	mPainter->PrintText(pText, pX, pY);

@@ -1159,10 +1159,10 @@ void GDIPainter::DoRenderDisplayList(std::vector<DisplayEntity*>* pDisplayList)
 		SetRenderMode(lSE->GetRenderMode());
 
 		const Lepra::Vector2DF& lPos = lSE->GetGeometry().GetPos();
-		float* lVertex = (float*)lSE->GetGeometry().GetVertexData();
-		float* lColor = lSE->GetGeometry().GetColorData();
-		float* lUV = lSE->GetGeometry().GetUVData();
-		Lepra::uint32* lTriangle = lSE->GetGeometry().GetTriangleData();
+		const float* lVertex = (float*)lSE->GetGeometry().GetVertexData();
+		const float* lColor = lSE->GetGeometry().GetColorData();
+		const float* lUV = lSE->GetGeometry().GetUVData();
+		const Lepra::uint32* lTriangle = lSE->GetGeometry().GetTriangleData();
 		int lTriangleMax = lSE->GetGeometry().GetTriangleCount() * 3;
 
 		for(int i = 0; i < lTriangleMax; i += 3)

@@ -8,8 +8,6 @@
 #include "../../../Lepra/Include/Log.h"
 #include "../../../Lepra/Include/ListUtil.h"
 #include "../../Include/GUI/UiDesktopWindow.h"
-#include "../../Include/UiMouseTheme.h"
-#include "../../Include/UiStandardMouseTheme.h"
 
 
 
@@ -20,39 +18,33 @@ namespace UiTbc
 
 DesktopWindow::DesktopWindow(UiLepra::InputManager* pInputManager, Painter* pPainter, 
 	Layout* pLayout, const Lepra::tchar* pImageDefinitionFile,
-	const Lepra::tchar* pArchive, RenderMode pRenderMode):
+	const Lepra::tchar* pArchive):
 	RectComponent(_T("DesktopWindow"), pLayout),
 	mInputManager(pInputManager),
 	mMouseEnabled(true),
 	mKeyboardEnabled(true),
-	mMouseTheme(0),
 	mMouseArea(0, 0, 0, 0),
 	mMouseX(0),
 	mMouseY(0),
 	mMousePrevX(0),
 	mMousePrevY(0),
-	mRenderMode(pRenderMode),
-	mUserPainter(pPainter)
+	mPainter(pPainter)
 {
-	mPainter.SetFontPainter(pPainter->GetFontPainter());
 	Init(pImageDefinitionFile, pArchive);
 }
 
 DesktopWindow::DesktopWindow(UiLepra::InputManager* pInputManager, Painter* pPainter, const Lepra::Color& pColor,
-	Layout* pLayout, const Lepra::tchar* pImageDefinitionFile, const Lepra::tchar* pArchive,
-	RenderMode pRenderMode):
+	Layout* pLayout, const Lepra::tchar* pImageDefinitionFile, const Lepra::tchar* pArchive):
 	RectComponent(pColor, _T("DesktopWindow"), pLayout),
 	mInputManager(pInputManager),
 	mMouseEnabled(true),
 	mKeyboardEnabled(true),
-	mMouseTheme(0),
 	mMouseArea(0, 0, 0, 0),
 	mMouseX(0),
 	mMouseY(0),
 	mMousePrevX(0),
 	mMousePrevY(0),
-	mRenderMode(pRenderMode),
-	mUserPainter(pPainter)
+	mPainter(pPainter)
 {
 	Init(pImageDefinitionFile, pArchive);
 }
@@ -61,38 +53,33 @@ DesktopWindow::DesktopWindow(UiLepra::InputManager* pInputManager, Painter* pPai
 	const Lepra::Color& pTopLeftColor, const Lepra::Color& pTopRightColor,
 	const Lepra::Color& pBottomRightColor, const Lepra::Color& pBottomLeftColor,
 	Layout* pLayout, const Lepra::tchar* pImageDefinitionFile,
-	const Lepra::tchar* pArchive, RenderMode pRenderMode):
+	const Lepra::tchar* pArchive):
 	RectComponent(pTopLeftColor, pTopRightColor, pBottomRightColor, pBottomLeftColor, _T("DesktopWindow"), pLayout),
 	mInputManager(pInputManager),
 	mMouseEnabled(true),
 	mKeyboardEnabled(true),
-	mMouseTheme(0),
 	mMouseArea(0, 0, 0, 0),
 	mMouseX(0),
 	mMouseY(0),
 	mMousePrevX(0),
 	mMousePrevY(0),
-	mRenderMode(pRenderMode),
-	mUserPainter(pPainter)
+	mPainter(pPainter)
 {
 	Init(pImageDefinitionFile, pArchive);
 }
 
 DesktopWindow::DesktopWindow(UiLepra::InputManager* pInputManager, Painter* pPainter, Painter::ImageID pImageID,
-	Layout* pLayout, const Lepra::tchar* pImageDefinitionFile, const Lepra::tchar* pArchive,
-	RenderMode pRenderMode):
+	Layout* pLayout, const Lepra::tchar* pImageDefinitionFile, const Lepra::tchar* pArchive):
 	RectComponent(pImageID, _T("DesktopWindow"), pLayout),
 	mInputManager(pInputManager),
 	mMouseEnabled(true),
 	mKeyboardEnabled(true),
-	mMouseTheme(0),
 	mMouseArea(0, 0, 0, 0),
 	mMouseX(0),
 	mMouseY(0),
 	mMousePrevX(0),
 	mMousePrevY(0),
-	mRenderMode(pRenderMode),
-	mUserPainter(pPainter)
+	mPainter(pPainter)
 {
 	Init(pImageDefinitionFile, pArchive);
 }
@@ -102,11 +89,6 @@ DesktopWindow::~DesktopWindow()
 	PurgeDeleted();
 
 	Lepra::ListUtil::DeleteAll(mCleanerList);
-
-	if (mMouseTheme != 0)
-	{
-		delete mMouseTheme;
-	}
 
 	mInputManager->RemoveTextInputObserver(this);
 	mInputManager->RemoveKeyCodeInputObserver(this);
@@ -124,33 +106,7 @@ void DesktopWindow::Init(const Lepra::tchar* /*pImageDefinitionFile*/, const Lep
 	// Let all components access the image manager.
 	SetImageManager(&mImageManager);
 
-	if (mRenderMode == RM_EVERY_FRAME)
-	{
-		mImageManager.SetPainter(mUserPainter);
-	}
-	else
-	{
-		if (mPainter.GetRGBOrder() != mUserPainter->GetRGBOrder())
-		{
-			mPainter.SwapRGB();
-			mImageManager.SwapRGB();
-		}
-
-		mImageManager.SetPainter(&mPainter);
-	}
-
-	/* TODO: come up with a way to avoid invoking the image loader from basic TBC.
-	if (pImageDefinitionFile != 0)
-	{
-		mImageManager.LoadImages(pImageDefinitionFile, pArchive);
-	}*/
-
-	if (mMouseTheme == 0)
-	{
-		mMouseTheme = new StandardMouseTheme();
-	}
-
-	mMouseTheme->LoadArrowCursor();
+	mImageManager.SetPainter(mPainter);
 
 	mInputManager->AddTextInputObserver(this);
 	mInputManager->AddKeyCodeInputObserver(this);
@@ -200,7 +156,7 @@ void DesktopWindow::PurgeDeleted()
 		Component* lChild = *lIter;
 		if (lChild->mImageID != Painter::INVALID_IMAGEID)
 		{
-			mUserPainter->RemoveImage(lChild->mImageID);
+			mPainter->RemoveImage(lChild->mImageID);
 			lChild->ReleaseKeyboardFocus();
 		}
 	}
@@ -215,29 +171,9 @@ void DesktopWindow::DoSetSize(int pWidth, int pHeight)
 	mMouseArea.Set(lPos.x, lPos.y, lPos.x + pWidth, lPos.y + pHeight);
 }
 
-void DesktopWindow::SetMouseTheme(MouseTheme* pMouseTheme)
-{
-	if (mMouseTheme != 0)
-	{
-		delete mMouseTheme;
-	}
-
-	mMouseTheme = pMouseTheme;
-
-	if (mMouseTheme != 0)
-	{
-		mMouseTheme->LoadArrowCursor();
-	}
-}
-
 void DesktopWindow::SetMouseEnabled(bool pEnabled)
 {
 	mMouseEnabled = pEnabled;
-
-	if (mMouseEnabled == false)
-	{
-		mMouseTheme->UnloadCursor();
-	}
 }
 
 void DesktopWindow::ClampMouse(int& x, int& y)
@@ -279,8 +215,6 @@ void DesktopWindow::Repaint(Painter* /*pPainter*/)
 {
 	PurgeDeleted();
 
-	mMouseTheme->SetPainter(mUserPainter);
-
 	// Call OnIdle() on all subscribers.
 	ComponentList::iterator lIter;
 	for (lIter = mIdleSubscribers.begin(); 
@@ -319,67 +253,14 @@ void DesktopWindow::Repaint(Painter* /*pPainter*/)
 			mUpdateLayout = false;
 		}
 
-		Parent::Repaint(mUserPainter);
+		Parent::Repaint(mPainter);
 		lLoopCount++;
 	} while (NeedsRepaint() == true && lLoopCount < 4);
-
-	// Finally, render the mouse cursor on top of everything.
-	if (mMouseEnabled == true)
-	{
-		mMouseTheme->DrawCursor(mMouseX, mMouseY);
-	}
 }
 
 void DesktopWindow::RepaintChild(Component* pChild, Painter* pPainter)
 {
-	if (mRenderMode == RM_EVERY_FRAME)
-	{
-		pChild->Repaint(pPainter);
-	}
-	else // mRenderMode == RM_OPTIMIZE_STATIC
-	{
-		const Lepra::PixelCoords lPos(pChild->GetPos());
-
-		if (pChild->NeedsRepaint() == true)
-		{
-			// TODO: Check if pPainter has changed. Create a new image in that case.
-
-			const Lepra::PixelCoords lSize(pChild->GetSize());
-			// Check if we need to allocate an image.
-			if (pChild->mImageID == Painter::INVALID_IMAGEID)
-			{
-				// Create the image...
-				pChild->mImage.Reset(Lepra::Canvas::PowerUp(lSize.x), 
-							Lepra::Canvas::PowerUp(lSize.y), 
-							Lepra::Canvas::BITDEPTH_32_BIT);
-				pChild->mImage.CreateBuffer();
-				pChild->mImage.Clear();
-				pChild->mImageID = pPainter->AddImage(&pChild->mImage, 0);
-			}
-			else
-			{
-				unsigned int lNewWidth  = (unsigned int)Lepra::Canvas::PowerUp(lSize.x);
-				unsigned int lNewHeight = (unsigned int)Lepra::Canvas::PowerUp(lSize.y);
-
-				if (lNewWidth != pChild->mImage.GetWidth() || lNewHeight != pChild->mImage.GetHeight())
-				{
-					pChild->mImage.Crop(0, 0, lNewWidth, lNewHeight);
-				}
-			}
-
-			mPainter.DefineCoordinates(-lPos.x, -lPos.y, Painter::X_RIGHT, Painter::Y_DOWN);
-			mPainter.SetDestCanvas(&pChild->mImage);	// TRICKY: must be after DefineCoordinates()!
-			mPainter.SetIncrementalAlpha(true);
-			pChild->mImage.Clear();
-			pChild->Repaint(&mPainter);
-			pPainter->UpdateImage(pChild->mImageID, &pChild->mImage, 0);
-
-		}
-
-		pPainter->SetRenderMode(Painter::RM_ALPHABLEND);
-		pPainter->SetAlphaValue(255);
-		pPainter->DrawImage(pChild->mImageID, lPos.x, lPos.y);
-	}
+	pChild->Repaint(pPainter);
 }
 
 void DesktopWindow::OnButton1(UiLepra::InputElement* pElement)
@@ -493,19 +374,39 @@ void DesktopWindow::DeleteComponent(Component* pComponent, int pLayer)
 
 Painter* DesktopWindow::GetPainter()
 {
-	return mUserPainter;
+	return (mPainter);
 }
 
-Painter* DesktopWindow::GetInternalPainter()
+void DesktopWindow::SetKeyboardEnabled(bool pEnabled)
 {
-	Painter* lPainter = &mPainter;
+	mKeyboardEnabled = pEnabled;
+}
 
-	if (mRenderMode == RM_EVERY_FRAME)
-	{
-		lPainter = mUserPainter;
-	}
+void DesktopWindow::SetUpdateLayout(bool pUpdateLayout)
+{
+	mUpdateLayout = pUpdateLayout;
+}
 
-	return lPainter;
+void DesktopWindow::AddIdleSubscriber(Component* pComponent)
+{
+	mIdleSubscribers.push_back(pComponent);
+	mIdleSubscribers.unique();
+}
+
+void DesktopWindow::RemoveIdleSubscriber(Component* pComponent)
+{
+	mIdleSubscribers.remove(pComponent);
+}
+
+void DesktopWindow::AddCleaner(Cleaner* pCleaner)
+{
+	mCleanerList.push_back(pCleaner);
+	mCleanerList.unique();
+}
+
+Component::Type DesktopWindow::GetType()
+{
+	return Component::DESKTOPWINDOW;
 }
 
 

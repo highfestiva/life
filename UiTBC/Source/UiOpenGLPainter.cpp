@@ -1,14 +1,18 @@
-/*
-	Class:  OpenGLPainter
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Alexander Hugestrand
-*/
+
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2009, Jonas Byström
+
+
 
 #include "../Include/UiOpenGLPainter.h"
 #include <math.h>
 
+
+
 namespace UiTbc
 {
+
+
 
 OpenGLPainter::OpenGLPainter() :
 	mTextureIDManager(3, 10000, 0),
@@ -516,14 +520,13 @@ void OpenGLPainter::DoDraw3DRect(int pLeft, int pTop, int pRight, int pBottom, i
 
 	const static GLuint lsIndices[] = {0,1,7, 0,7,6, 0,6,10, 0,10,4, 8,2,3, 8,3,9, 11,9,3, 11,3,5};
 
+	::glDisableClientState(GL_NORMAL_ARRAY);
+	::glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	// Enabled in ResetClippingRect().
 	glVertexPointer(2, GL_FLOAT, 0, lVertex);
 	glEnableClientState(GL_COLOR_ARRAY);
 	glColorPointer(3, GL_FLOAT, 0, lColor);
-	glDrawElements(GL_TRIANGLES,
-			12,
-			GL_UNSIGNED_INT,
-			lsIndices);
+	//glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, lsIndices);
 	glDisableClientState(GL_COLOR_ARRAY);
 }
 
@@ -1377,10 +1380,44 @@ void OpenGLPainter::DoRenderDisplayList(std::vector<DisplayEntity*>* pDisplayLis
 {
 	PushAttrib(ATTR_ALL);
 
+	::glDisableClientState(GL_NORMAL_ARRAY);
+	::glDisableClientState(GL_INDEX_ARRAY);
+	UiLepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, 0);
+	UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+	//ResetClippingRect();
+
+//::glDisable(GL_SCISSOR_TEST);
+//::glDisable(GL_COLOR_MATERIAL);
+//::glDisable(GL_COLOR_MATERIAL);
+//::glDisable(GL_BLEND);
+//::glDisable(GL_TEXTURE_2D);
+//::glDisable(GL_ALPHA_TEST);
+//::glDisable(GL_TEXTURE_CUBE_MAP);
+//::glDisable(GL_TEXTURE_GEN_S);
+//::glDisable(GL_TEXTURE_GEN_T);
+//::glDisable(GL_TEXTURE_GEN_R);
+//::glDisable(GL_LIGHTING);
+//::glDisable(GL_VERTEX_PROGRAM_ARB);
+//::glDisable(GL_FRAGMENT_PROGRAM_ARB);
+//::glDisable(GL_COLOR_LOGIC_OP);
+//::glDisable(GL_DEPTH_TEST);
+//::glDisable(GL_LIGHT0);
+//::glDisable(GL_LIGHT0+1);
+//::glDisable(GL_LIGHT0+2);
+//::glDisable(GL_LIGHT0+3);
+//::glDisable(GL_LIGHT0+4);
+//::glDisable(GL_CULL_FACE);
+//::glDisable(GL_STENCIL_TEST);
+//::glDisable(GL_POLYGON_OFFSET_EXT);
+//::glDisable(GL_POLYGON_OFFSET_FILL);
+
 	std::vector<DisplayEntity*>::iterator it;
 	for(it = pDisplayList->begin(); it != pDisplayList->end(); ++it)
 	{
 		glPushAttrib(GL_TEXTURE_BIT);
+
+		//glColor4f(0.7f, 0.2f, 0.1f, 1.0f);
 
 		DisplayEntity* lSE = *it;
 		Painter::SetClippingRect(lSE->GetClippingRect());
@@ -1391,7 +1428,7 @@ void OpenGLPainter::DoRenderDisplayList(std::vector<DisplayEntity*>* pDisplayLis
 		// Enabled in ResetClippingRect().
 		glVertexPointer(2, GL_FLOAT, 0, lSE->GetGeometry().GetVertexData());
 
-		if(lSE->GetGeometry().GetColorData() != 0)
+		if (lSE->GetGeometry().GetColorData() != 0)
 		{
 			glEnableClientState(GL_COLOR_ARRAY);
 			glColorPointer(3, GL_FLOAT, 0, lSE->GetGeometry().GetColorData());
@@ -1401,7 +1438,7 @@ void OpenGLPainter::DoRenderDisplayList(std::vector<DisplayEntity*>* pDisplayLis
 			glDisableClientState(GL_COLOR_ARRAY);
 		}
 
-		if(lSE->GetImageID() != INVALID_IMAGEID)
+		if (lSE->GetImageID() != INVALID_IMAGEID)
 		{
 			assert(lSE->GetGeometry().GetUVData() != 0);
 			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -1435,15 +1472,18 @@ void OpenGLPainter::DoRenderDisplayList(std::vector<DisplayEntity*>* pDisplayLis
 			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 		}
 
-		glDrawElements(GL_TRIANGLES,
-				lSE->GetGeometry().GetTriangleCount() * 3,
-				GL_UNSIGNED_INT,
-				lSE->GetGeometry().GetTriangleData());
-		glPopAttrib();
+		const int lTriangleEntryCount = lSE->GetGeometry().GetTriangleCount() * 3;
+		const Lepra::uint32* lTriangleData = lSE->GetGeometry().GetTriangleData();
+		::glDrawElements(GL_TRIANGLES, lTriangleEntryCount, GL_UNSIGNED_INT, lTriangleData);
+
+		::glPopAttrib();
 	}
 
 	glDisableClientState(GL_COLOR_ARRAY);
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	PopAttrib();
 }
 
-} // End namespace.
+
+
+}

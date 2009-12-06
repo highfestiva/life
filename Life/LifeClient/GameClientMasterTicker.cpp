@@ -182,6 +182,8 @@ bool GameClientMasterTicker::Tick()
 	{
 		LEPRA_MEASURE_SCOPE(UiPaint);
 		mUiManager->Paint();
+		mUiManager->GetPainter()->Draw3DRect(10, 20, 100, 200, 2, true);
+
 	}
 
 	{

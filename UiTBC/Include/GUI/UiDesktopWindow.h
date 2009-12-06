@@ -7,11 +7,10 @@
 #pragma once
 
 #include "UiRectComponent.h"
-#include "UiGUIImageManager.h"
-#include "UiCleaner.h"
-#include "../UiSoftwarePainter.h"
-#include "../../../UiLepra/Include/UiInput.h"
 #include <list>
+#include "../../../UiLepra/Include/UiInput.h"
+#include "UiCleaner.h"
+#include "UiGUIImageManager.h"
 
 
 
@@ -20,7 +19,6 @@ namespace UiTbc
 
 
 
-class MouseTheme;
 class Cleaner;
 
 
@@ -29,36 +27,17 @@ class DesktopWindow: public RectComponent
 {
 	typedef RectComponent Parent;
 public:
-
-	// The render mode defines what algorithm the GUI will use when rendered.
-	// RM_EVERY_FRAME is the default mode, and repaints EVERYTHING EVERY FRAME.
-	// This mode is recommended if you are using resizable windows, or if the
-	// rendering is performed by a software painter.
-	// RM_OPTIMIZE_STATIC will prerender all top level components as static images. 
-	// The images are updated when the component's appearance change. This mode 
-	// requires static components (not resizable), since the image's size is determined 
-	// the first time the component is rendered. Top level components are those
-	// who's first parent is the DesktopWindow. A hardware renderer is recommended,
-	// since the rendering is perfomed using alpha blending.
-	enum RenderMode
-	{
-		RM_EVERY_FRAME = 0,
-		RM_OPTIMIZE_STATIC,
-	};
-
 	DesktopWindow(UiLepra::InputManager* pInputManager,
 		Painter* pPainter,
 		Layout* pLayout = 0,
 		const Lepra::tchar* pImageDefinitionFile = 0,
-		const Lepra::tchar* pArchive = 0,
-		RenderMode pRenderMode = RM_EVERY_FRAME);
+		const Lepra::tchar* pArchive = 0);
 	DesktopWindow(UiLepra::InputManager* pInputManager,
 		Painter* pPainter,
 		const Lepra::Color& pColor,
 		Layout* pLayout = 0,
 		const Lepra::tchar* pImageDefinitionFile = 0,
-		const Lepra::tchar* pArchive = 0,
-		RenderMode pRenderMode = RM_EVERY_FRAME);
+		const Lepra::tchar* pArchive = 0);
 	DesktopWindow(UiLepra::InputManager* pInputManager,
 		Painter* pPainter,
 		const Lepra::Color& pTopLeftColor,
@@ -67,38 +46,33 @@ public:
 		const Lepra::Color& pBottomLeftColor,
 		Layout* pLayout = 0,
 		const Lepra::tchar* pImageDefinitionFile = 0,
-		const Lepra::tchar* pArchive = 0,
-		RenderMode pRenderMode = RM_EVERY_FRAME);
+		const Lepra::tchar* pArchive = 0);
 	DesktopWindow(UiLepra::InputManager* pInputManager,
 		Painter* pPainter,
 		Painter::ImageID pImageID,
 		Layout* pLayout = 0,
 		const Lepra::tchar* pImageDefinitionFile = 0,
-		const Lepra::tchar* pArchive = 0,
-		RenderMode pRenderMode = RM_EVERY_FRAME);
+		const Lepra::tchar* pArchive = 0);
 
 	virtual ~DesktopWindow();
 
 	UiLepra::InputManager* GetInputManager() const;
 
-	inline MouseTheme* GetMouseTheme() const;
-	void SetMouseTheme(MouseTheme* pMouseTheme);
-
 	void SetMouseEnabled(bool pEnabled);
-	inline void SetKeyboardEnabled(bool pEnabled);
+	void SetKeyboardEnabled(bool pEnabled);
 	
-	inline void SetUpdateLayout(bool pUpdateLayout);
+	void SetUpdateLayout(bool pUpdateLayout);
 
 	// Note: If the component is a child component of one of the DesktopWindow's
 	// children, you have to make sure that it removes itself from the subscriber
 	// list before it is deleted. Otherwise you have added a crash bug to the code.
-	inline void AddIdleSubscriber(Component* pComponent);
-	inline void RemoveIdleSubscriber(Component* pComponent);
+	void AddIdleSubscriber(Component* pComponent);
+	void RemoveIdleSubscriber(Component* pComponent);
 
 	// Wait for destruction of the DesktopWindow, in which case all cleaners will 
 	// be deleted. This is a special solution to cope with the problem of cleaning up
 	// among static variables stored in various GUI component classes.
-	inline void AddCleaner(Cleaner* pCleaner);
+	void AddCleaner(Cleaner* pCleaner);
 
 	virtual void AddChild(Component* pChild, int pParam1 = 0, int pParam2 = 0, int pLayer = 0);
 
@@ -114,7 +88,7 @@ public:
 
 	virtual void DoSetSize(int pWidth, int pHeight);
 
-	inline virtual Component::Type GetType();
+	virtual Component::Type GetType();
 
 	// This function will put the component in the delete queue
 	// which is processed once for every call to Repaint().
@@ -122,11 +96,6 @@ public:
 
 	// Returns the painter given in the constructor.
 	Painter* GetPainter();
-
-	// Returns the painter used internally drawing the windows.
-	// If RenderMode is set to RM_EVERY_FRAME this will be the same
-	// painter as the one returned by GetPainter().
-	Painter* GetInternalPainter();
 
 protected:
 private:
@@ -148,7 +117,6 @@ private:
 	bool mRenderRect;
 	bool mUpdateLayout;
 
-	MouseTheme* mMouseTheme;
 	ComponentList mIdleSubscribers;
 	std::list<Cleaner*> mCleanerList;
 	ComponentList mDeleteQueue;
@@ -160,51 +128,12 @@ private:
 	int mMousePrevX;
 	int mMousePrevY;
 
-	RenderMode mRenderMode;
-	SoftwarePainter mPainter;
-	Painter* mUserPainter;
+	Painter* mPainter;
 
 	GUIImageManager mImageManager;
 
 	LOG_CLASS_DECLARE();
 };
-
-MouseTheme* DesktopWindow::GetMouseTheme() const
-{
-	return mMouseTheme;
-}
-
-void DesktopWindow::SetKeyboardEnabled(bool pEnabled)
-{
-	mKeyboardEnabled = pEnabled;
-}
-
-void DesktopWindow::SetUpdateLayout(bool pUpdateLayout)
-{
-	mUpdateLayout = pUpdateLayout;
-}
-
-void DesktopWindow::AddIdleSubscriber(Component* pComponent)
-{
-	mIdleSubscribers.push_back(pComponent);
-	mIdleSubscribers.unique();
-}
-
-void DesktopWindow::RemoveIdleSubscriber(Component* pComponent)
-{
-	mIdleSubscribers.remove(pComponent);
-}
-
-void DesktopWindow::AddCleaner(Cleaner* pCleaner)
-{
-	mCleanerList.push_back(pCleaner);
-	mCleanerList.unique();
-}
-
-Component::Type DesktopWindow::GetType()
-{
-	return Component::DESKTOPWINDOW;
-}
 
 
 
