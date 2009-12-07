@@ -197,8 +197,6 @@ void TextArea::Repaint(Painter* pPainter)
 {
 	Parent::Repaint(pPainter);
 
-	pPainter->SetActiveFont(GetFontId());
-
 	mFontHeight = pPainter->GetLineHeight();
 	UpdateVisibleSize();
 

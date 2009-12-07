@@ -13,9 +13,9 @@
 #include "../../UiLepra/Include/UiInput.h"
 #include "../../UiTbc/Include/GUI/UiDesktopWindow.h"
 #include "../../UiTbc/Include/GUI/UiFloatingLayout.h"
+#include "../../UiTbc/Include/UiFontManager.h"
 #include "../../UiTbc/Include/UiOpenGLPainter.h"
 #include "../../UiTbc/Include/UiOpenGLRenderer.h"
-#include "../../UiTbc/Include/UiGDIPainter.h"
 #include "../Include/UiGameUiManager.h"
 #include "../Include/UiRuntimeVariableName.h"
 #include "../Include/UiSoundManager.h"
@@ -33,7 +33,7 @@ GameUiManager::GameUiManager(Cure::RuntimeVariableScope* pVariableScope):
 	mCanvas(0),
 	mRenderer(0),
 	mPainter(0),
-	mFontPainter(0),
+	mFontManager(0),
 	mDesktopWindow(0),
 	mInput(0),
 	mSound(0)
@@ -133,28 +133,36 @@ bool GameUiManager::Open()
 		{
 			mRenderer = new TBC::Direct3DRenderer(mCanvas);
 			mPainter = new TBC::DirectXPainter;
-		}
-		else
-		{
-			mRenderer = new TBC::SoftwareRenderer(mCanvas);
-			mPainter = new TBC::SoftwarePainter;
 		}*/
 	}
 	if (lOk)
 	{
-#ifdef LEPRA_WINDOWS
-		mFontPainter = new UiTbc::GDIPainter((UiLepra::Win32DisplayManager*)mDisplay);
-#else // !Windows.
-#error "Unknown system to create system painter for."
-#endif
-		UiTbc::Painter::FontID lFontId;
-		lFontId = mFontPainter->AddSystemFont(_T("Courier New"), 14.0, 0, UiTbc::SystemPainter::ANSI);
-		if (lFontId != UiTbc::Painter::INVALID_FONTID)
+		mFontManager = UiTbc::FontManager::Create(mDisplay);
+		//mFontManager->SetColor(Lepra::Color(255, 255, 255, 255), 0);
+		//mFontManager->SetColor(Lepra::Color(0, 0, 0, 0), 1);
+		mPainter->SetFontManager(mFontManager);
+
+		UiTbc::FontManager::FontId lFontId;
+		lFontId = mFontManager->AddFont(_T("Times New Roman"), 14.0);
+		if (lFontId == UiTbc::FontManager::INVALID_FONTID)
 		{
-			mFontPainter->SetActiveFont(lFontId);
-			mFontPainter->SetColor(Lepra::Color(255, 255, 255, 255), 0);
-			mFontPainter->SetColor(Lepra::Color(0, 0, 0, 0), 1);
-			mPainter->SetFontPainter(mFontPainter);
+			lFontId = mFontManager->AddFont(_T("Arial"), 14.0);
+		}
+		if (lFontId == UiTbc::FontManager::INVALID_FONTID)
+		{
+			lFontId = mFontManager->AddFont(_T("Courier New"), 14.0);
+		}
+		if (lFontId == UiTbc::FontManager::INVALID_FONTID)
+		{
+			lFontId = mFontManager->AddFont(_T("Verdana"), 14.0);
+		}
+		if (lFontId == UiTbc::FontManager::INVALID_FONTID)
+		{
+			lFontId = mFontManager->AddFont(_T("Helvetica"), 14.0);
+		}
+		if (lFontId != UiTbc::FontManager::INVALID_FONTID)
+		{
+			mFontManager->SetActiveFont(lFontId);
 		}
 	}
 	if (lOk)
@@ -169,16 +177,7 @@ bool GameUiManager::Open()
 	}
 	if (lOk)
 	{
-		UiTbc::DesktopWindow::RenderMode lUpdateMode = UiTbc::DesktopWindow::RM_EVERY_FRAME;
-		if (lUpdateModeString == _T("EveryFrame"))
-		{
-			lUpdateMode = UiTbc::DesktopWindow::RM_EVERY_FRAME;
-		}
-		else if (lUpdateModeString == _T("OptimizeStatic"))
-		{
-			lUpdateMode = UiTbc::DesktopWindow::RM_OPTIMIZE_STATIC;
-		}
-		mDesktopWindow = new UiTbc::DesktopWindow(mInput, mPainter, new UiTbc::FloatingLayout(), 0, 0, lUpdateMode);
+		mDesktopWindow = new UiTbc::DesktopWindow(mInput, mPainter, new UiTbc::FloatingLayout(), 0, 0);
 		mDesktopWindow->SetIsHollow(true);
 		mDesktopWindow->SetPreferredSize(mCanvas->GetWidth(), mCanvas->GetHeight());
 	}
@@ -211,8 +210,8 @@ void GameUiManager::Close()
 	delete (mInput);
 	mInput = 0;
 
-	delete (mFontPainter);
-	mFontPainter = 0;
+	delete (mFontManager);
+	mFontManager = 0;
 	delete (mPainter);
 	mPainter = 0;
 	delete (mRenderer);
@@ -278,6 +277,7 @@ void GameUiManager::Paint()
 		mCanvas->SetBuffer(mDisplay->GetScreenPtr());
 		mPainter->SetDestCanvas(mCanvas);
 		mPainter->ResetClippingRect();
+		mPainter->BeginPaint();
 		mDesktopWindow->Repaint(mPainter);
 	}
 }
@@ -287,6 +287,7 @@ void GameUiManager::EndRender()
 	if (mDisplay->IsVisible())
 	{
 		UpdateSettings();
+		mPainter->EndPaint();
 		mDisplay->UpdateScreen();
 	}
 }
@@ -352,7 +353,7 @@ void GameUiManager::SetViewport(int pLeft, int pTop, int lDisplayWidth, int lDis
 
 void GameUiManager::Clear(float pRed, float pGreen, float pBlue, bool pClearDepth)
 {
-	mDisplay->Activate();
+	//mDisplay->Activate();
 
 	Lepra::Color lColor;
 	lColor.Set(pRed, pGreen, pBlue, 1.0f);
@@ -372,7 +373,7 @@ void GameUiManager::ClearDepth()
 
 void GameUiManager::PrintText(int pX, int pY, const Lepra::String& pText)
 {
-	mPainter->ResetClippingRect();
+	//mPainter->ResetClippingRect();
 	mPainter->SetColor(Lepra::Color(255, 255, 255, 255), 0);
 	mPainter->SetColor(Lepra::Color(0, 0, 0, 0), 1);
 	mPainter->PrintText(pText, pX, pY);

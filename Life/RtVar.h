@@ -18,8 +18,10 @@
 #define RTVAR_CTRL_STEER_LEFT3D		"Control.Steer.Left3d"
 #define RTVAR_CTRL_STEER_RIGHT3D	"Control.Steer.Right3d"
 #define RTVAR_CTRL_STEER_UP		"Control.Steer.Up"
-#define RTVAR_CTRL_STEER_HANDBRK	"Control.Steer.HandBreak"
 #define RTVAR_CTRL_STEER_DOWN		"Control.Steer.Down"
+#define RTVAR_CTRL_STEER_UP3D		"Control.Steer.Up3d"
+#define RTVAR_CTRL_STEER_DOWN3D		"Control.Steer.Down3d"
+#define RTVAR_CTRL_STEER_HANDBRK	"Control.Steer.HandBreak"
 #define RTVAR_CTRL_STEER_BRK		"Control.Steer.Break"
 
 #define RTVAR_LOGIN_SERVER		"Login.Server"
@@ -28,9 +30,13 @@
 #define RTVAR_NETWORK_LISTEN_ADDRESS	"Network.Listen.Address"
 
 // Internal use only.
-#define RTVAR_DEBUG_ENABLED		"Debug.Enable"
+#define RTVAR_DEBUG_ENABLE		"Debug.Enable"
 #define RTVAR_DEBUG_3D_ENABLEAXES	"Debug.3D.EnableAxes"
 #define RTVAR_DEBUG_3D_ENABLEJOINTS	"Debug.3D.EnableJoints"
 #define RTVAR_DEBUG_3D_ENABLESHAPES	"Debug.3D.EnableShapes"
 #define RTVAR_DEBUG_NET_SENDPOSCNT	"Debug.Net.SendPositionCount"
 #define RTVAR_DEBUG_NET_RECVPOSCNT	"Debug.Net.ReceivePositionCount"
+#define RTVAR_DEBUG_PERFORMANCE_GRAPH	"Debug.Performance.Graph"
+#define RTVAR_DEBUG_PERFORMANCE_NAMES	"Debug.Performance.Names"
+#define RTVAR_DEBUG_POWERSAVEFACTOR	"Debug.PowerSaveFactor"
+#define RTVAR_DEBUG_EXTRASLEEPTIME	"Debug.ExtraSleepTime"

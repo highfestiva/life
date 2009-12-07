@@ -25,6 +25,8 @@
 #define INVALID_SOCKET (-1)
 #define SOCKET_ERROR (-1)
 
+#define LEPRA_HEAP_CHECK()
+
 #define WIDE_SPRINTF(buf, size, fmt, arg)	::vswprintf(buf, size, fmt, arg)
 #define WIDE_ATOI(str)				{wchar_t* lTemp = 0; (int)::wcstol(str, &lTemp, 10);}
 

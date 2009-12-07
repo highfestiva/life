@@ -287,7 +287,7 @@ bool ContextObject::UpdateFullPosition(const ObjectPositionalData*& pPositionalD
 	size_t y = 0;
 	for (int x = 0; x < lGeometryCount; ++x)
 	{
-		// TODO: add support for parent ID??? JB 2009-07-07: Don't know anymore what this might mean.
+		// TODO: add support for parent ID??? (JB 2009-07-07: Don't know anymore what this comment might mean.)
 		const TBC::ChunkyBoneGeometry* lStructureGeometry = mPhysics->GetBoneGeometry(x);
 		if (!lStructureGeometry)
 		{
@@ -419,6 +419,7 @@ bool ContextObject::UpdateFullPosition(const ObjectPositionalData*& pPositionalD
 			}
 			break;
 			case TBC::PhysicsEngine::ENGINE_HINGE_ROLL:
+			case TBC::PhysicsEngine::ENGINE_HINGE_GYRO:
 			case TBC::PhysicsEngine::ENGINE_HINGE_BREAK:
 			case TBC::PhysicsEngine::ENGINE_HINGE_TORQUE:
 			case TBC::PhysicsEngine::ENGINE_HINGE2_TURN:
@@ -502,9 +503,8 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData)
 
 	const int lBoneCount = mPhysics->GetBoneCount();
 	size_t y = 0;
-	for (int x = 0; x < lBoneCount; ++x)
+	for (int x = 0; x < lBoneCount && y < mPosition.mBodyPositionArray.size(); ++x)
 	{
-		assert(mPosition.mBodyPositionArray.size() > y);
 		// TODO: add support for parent ID.
 		const TBC::ChunkyBoneGeometry* lStructureGeometry = mPhysics->GetBoneGeometry(x);
 		lBody = lStructureGeometry->GetBodyId();
@@ -652,6 +652,7 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData)
 			}
 			break;
 			case TBC::PhysicsEngine::ENGINE_HINGE_ROLL:
+			case TBC::PhysicsEngine::ENGINE_HINGE_GYRO:
 			case TBC::PhysicsEngine::ENGINE_HINGE_BREAK:
 			case TBC::PhysicsEngine::ENGINE_HINGE_TORQUE:
 			case TBC::PhysicsEngine::ENGINE_HINGE2_TURN:

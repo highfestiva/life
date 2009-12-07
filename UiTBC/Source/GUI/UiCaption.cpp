@@ -44,7 +44,7 @@ Caption::Caption(const Lepra::Color& pActiveColor, const Lepra::Color& pInactive
 	mActive(true),
 	mStyle(SINGLECOLOR_STYLE)
 {
-	SetFont(Painter::INVALID_FONTID, Lepra::Color(0, 0, 0), NO_BLEND, 128);
+	SetFont(Lepra::Color(0, 0, 0), NO_BLEND, 128);
 
 	SetMinSize(0, pHeight);
 	SetPreferredSize(Lepra::PixelCoords(0, pHeight));
@@ -105,7 +105,7 @@ Caption::Caption(const Lepra::Color& pActiveTopLeftColor, const Lepra::Color& pA
 	mActive(true),
 	mStyle(MULTICOLOR_STYLE)
 {
-	SetFont(Painter::INVALID_FONTID, Lepra::Color(0, 0, 0), NO_BLEND, 128);
+	SetFont(Lepra::Color(0, 0, 0), NO_BLEND, 128);
 
 	SetMinSize(0, pHeight);
 	SetPreferredSize(Lepra::PixelCoords(0, pHeight));
@@ -164,7 +164,7 @@ Caption::Caption(Painter::ImageID pActiveLeftImageID, Painter::ImageID pActiveRi
 	mActive(true),
 	mStyle(IMAGE_STYLE)
 {
-	SetFont(Painter::INVALID_FONTID, Lepra::Color(0, 0, 0), NO_BLEND, 128);
+	SetFont(Lepra::Color(0, 0, 0), NO_BLEND, 128);
 
 	GUIImageManager* lIMan = GetImageManager();
 
@@ -323,11 +323,11 @@ void Caption::SetActive(bool pActive)
 
 	if (mActive == true)
 	{
-		mLabel->SetText(mText, GetFontId(), GetTextColor(), mActiveTextBackgColor, GetTextBlendFunc(), GetTextAlpha());
+		mLabel->SetText(mText, GetTextColor(), mActiveTextBackgColor, GetTextBlendFunc(), GetTextAlpha());
 	}
 	else
 	{
-		mLabel->SetText(mText, GetFontId(), mInactiveTextColor, mInactiveTextBackgColor, GetTextBlendFunc(), GetTextAlpha());
+		mLabel->SetText(mText, mInactiveTextColor, mInactiveTextBackgColor, GetTextBlendFunc(), GetTextAlpha());
 	}
 }
 

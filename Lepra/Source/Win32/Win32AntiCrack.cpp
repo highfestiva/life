@@ -15,7 +15,7 @@ AntiCrack::AntiCrack()
 	BOOL lPresent = FALSE;
 	if (CheckRemoteDebuggerPresent(GetCurrentProcess(), &lPresent) && lPresent)
 	{
-		// TODO: enable when ready for release.
+		// TODO: enable when shipping something really commercially viable.
 		//SetBsodOnProcessExit();
 	}
 }

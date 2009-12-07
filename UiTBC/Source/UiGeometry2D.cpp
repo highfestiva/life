@@ -1,49 +1,32 @@
-/*
-	Class:  Geometry2D
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Alexander Hugestrand
-*/
+
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2009, Righteous Games
+
+
 
 #include "../Include/UiGeometry2D.h"
+#include <assert.h>
 #include "../Include/UiTbc.h"
+
+
 
 namespace UiTbc
 {
 
-Geometry2D::Geometry2D(Lepra::uint16 pVertexFormat, int pVertexCapacity, int pTriangleCapacity) :
+
+
+Geometry2D::Geometry2D(Lepra::uint16 pVertexFormat, int pVertexCapacity, int pTriangleCapacity):
 	mVertexFormat(pVertexFormat),
 	mVertexData(0),
 	mColorData(0),
 	mUVData(0),
 	mTriangleData(new Lepra::uint32[pTriangleCapacity * 3]),
-	mVertexCapacity(pVertexCapacity),
+	mVertexCapacity(0),
 	mTriangleCapacity(pTriangleCapacity),
 	mVertexCount(0),
 	mTriangleCount(0)
 {
-	if(IsFlagSet(VTX_INTERLEAVED))
-	{
-		Lepra::uint16 lFlags = (mVertexFormat & (VTX_UV | VTX_RGB));
-		switch(lFlags)
-		{
-			case 0: mVertexData = new VertexXY[pVertexCapacity]; break;
-			case VTX_UV: mVertexData = new VertexXYUV[pVertexCapacity]; break;
-			case VTX_RGB: mVertexData = new VertexXYRGB[pVertexCapacity]; break;
-			case VTX_UV | VTX_RGB: mVertexData = new VertexXYUVRGB[pVertexCapacity]; break;
-		}
-	}
-	else
-	{
-		mVertexData = new float[pVertexCapacity * 2];
-		if(IsFlagSet(VTX_UV))
-		{
-			mUVData = new float[pVertexCapacity * 2];
-		}
-		if(IsFlagSet(VTX_RGB))
-		{
-			mColorData = new float[pVertexCapacity * 3];
-		}
-	}
+	Init(pVertexFormat, pVertexCapacity, pTriangleCapacity);
 }
 
 Geometry2D::~Geometry2D()
@@ -54,17 +37,73 @@ Geometry2D::~Geometry2D()
 	delete[] mTriangleData;
 }
 
-void Geometry2D::Realloc(void** pData, size_t pNewSize, size_t pBytesToCopy)
+void Geometry2D::Init(Lepra::uint16 pVertexFormat, int pVertexCapacity, int pTriangleCapacity)
 {
-	Lepra::uint8* lNewData = new Lepra::uint8[pNewSize];
-	::memcpy(lNewData, *pData, std::min(pNewSize, pBytesToCopy));
-	delete[] *pData;
-	*pData = lNewData;
+	mVertexFormat = pVertexFormat;
+
+	if (mVertexData == 0)
+	{
+		if (IsFlagSet(VTX_INTERLEAVED))
+		{
+			Lepra::uint16 lFlags = (mVertexFormat & (VTX_UV | VTX_RGB));
+			switch(lFlags)
+			{
+				case 0: mVertexData = new VertexXY[pVertexCapacity]; break;
+				case VTX_UV: mVertexData = new VertexXYUV[pVertexCapacity]; break;
+				case VTX_RGB: mVertexData = new VertexXYRGB[pVertexCapacity]; break;
+				case VTX_UV | VTX_RGB: mVertexData = new VertexXYUVRGB[pVertexCapacity]; break;
+			}
+		}
+		else
+		{
+			mVertexData = new float[pVertexCapacity * 2];
+			if (IsFlagSet(VTX_UV))
+			{
+				mUVData = new float[pVertexCapacity * 2];
+			}
+			if (IsFlagSet(VTX_RGB))
+			{
+				mColorData = new float[pVertexCapacity * 3];
+			}
+		}
+	}
+	else
+	{
+		assert(!IsFlagSet(VTX_INTERLEAVED));	// Cannot handle interleaved yet.
+
+		if (IsFlagSet(VTX_UV) != (mUVData != 0))
+		{
+			if (mUVData)
+			{
+				delete (mUVData);
+				mUVData = 0;
+			}
+			else
+			{
+				mUVData = new float[pVertexCapacity * 2];
+			}
+		}
+		if (IsFlagSet(VTX_RGB) != (mColorData != 0))
+		{
+			if (mColorData)
+			{
+				delete (mColorData);
+				mColorData = 0;
+			}
+			else
+			{
+				mColorData = new float[pVertexCapacity * 3];
+			}
+		}
+		AssureVertexCapacity(pVertexCapacity);
+		AssureTriangleCapacity(pTriangleCapacity);
+		Reset();
+	}
 }
 
 void Geometry2D::ReallocVertexBuffers(int pVertexCapacity)
 {
-	if(IsFlagSet(VTX_INTERLEAVED))
+	if (IsFlagSet(VTX_INTERLEAVED))
 	{
 		Lepra::uint16 lFlags = (mVertexFormat & (VTX_UV | VTX_RGB));
 		switch(lFlags)
@@ -78,9 +117,12 @@ void Geometry2D::ReallocVertexBuffers(int pVertexCapacity)
 	else
 	{
 		Realloc(&mVertexData, pVertexCapacity * 2 * sizeof(float), mVertexCount * 2 * sizeof(float));
-		void* lTempColor = (void*)mColorData;
-		Realloc(&lTempColor, pVertexCapacity * 3 * sizeof(float), mVertexCount * 3 * sizeof(float));
-		mColorData = (float*)lTempColor;
+		if (mColorData)
+		{
+			void* lTempColor = (void*)mColorData;
+			Realloc(&lTempColor, pVertexCapacity * 3 * sizeof(float), mVertexCount * 3 * sizeof(float));
+			mColorData = (float*)lTempColor;
+		}
 		if (mUVData)
 		{
 			void* lTempUV = (void*)mUVData;
@@ -97,12 +139,12 @@ void Geometry2D::ReallocTriangleBuffer(int pTriangleCapacity)
 	::memcpy(lTriangleData, mTriangleData, std::min(pTriangleCapacity, mTriangleCount) * 3 * sizeof(Lepra::uint32));
 	delete[] mTriangleData;
 	mTriangleData = lTriangleData;
-	mTriangleCapacity = mTriangleCapacity;
+	mTriangleCapacity = pTriangleCapacity;
 }
 
 void Geometry2D::AssureVertexCapacity(int pVertexCapacity)
 {
-	if(pVertexCapacity >= mVertexCapacity)
+	if (pVertexCapacity > mVertexCapacity)
 	{
 		int lNewCapacity = pVertexCapacity + mVertexCapacity / 2;
 		ReallocVertexBuffers(lNewCapacity);
@@ -111,7 +153,7 @@ void Geometry2D::AssureVertexCapacity(int pVertexCapacity)
 
 void Geometry2D::AssureTriangleCapacity(int pTriangleCapacity)
 {
-	if(pTriangleCapacity >= mTriangleCapacity)
+	if (pTriangleCapacity > mTriangleCapacity)
 	{
 		int lNewCapacity = pTriangleCapacity + mTriangleCapacity / 2;
 		ReallocTriangleBuffer(lNewCapacity);
@@ -122,7 +164,7 @@ Lepra::uint32 Geometry2D::SetVertex(float x, float y)
 {
 	AssureVertexCapacity(mVertexCount + 1);
 
-	if(IsFlagSet(VTX_INTERLEAVED))
+	if (IsFlagSet(VTX_INTERLEAVED))
 	{
 		VertexXY* lVertexData = (VertexXY*)mVertexData;
 		lVertexData[mVertexCount].x = x;
@@ -142,7 +184,7 @@ Lepra::uint32 Geometry2D::SetVertex(float x, float y, float u, float v)
 {
 	AssureVertexCapacity(mVertexCount + 1);
 
-	if(IsFlagSet(VTX_INTERLEAVED))
+	if (IsFlagSet(VTX_INTERLEAVED))
 	{
 		VertexXYUV* lVertexData = (VertexXYUV*)mVertexData;
 		lVertexData[mVertexCount].x = x;
@@ -166,9 +208,14 @@ Lepra::uint32 Geometry2D::SetVertex(float x, float y, float u, float v)
 
 Lepra::uint32 Geometry2D::SetVertex(float x, float y, float r, float g, float b)
 {
+	const bool bo = (mColorData[0] != 0);
 	AssureVertexCapacity(mVertexCount + 1);
+	if (bo)
+	{
+		assert(mColorData[0] != 0);
+	}
 
-	if(IsFlagSet(VTX_INTERLEAVED))
+	if (IsFlagSet(VTX_INTERLEAVED))
 	{
 		VertexXYRGB* lVertexData = (VertexXYRGB*)mVertexData;
 		lVertexData[mVertexCount].x = x;
@@ -199,7 +246,7 @@ Lepra::uint32 Geometry2D::SetVertex(float x, float y, float u, float v, float r,
 {
 	AssureVertexCapacity(mVertexCount + 1);
 
-	if(IsFlagSet(VTX_INTERLEAVED))
+	if (IsFlagSet(VTX_INTERLEAVED))
 	{
 		VertexXYUVRGB* lVertexData = (VertexXYUVRGB*)mVertexData;
 		lVertexData[mVertexCount].x = x;
@@ -248,4 +295,24 @@ void Geometry2D::Reset()
 	mTriangleCount = 0;
 }
 
-} // End namespace.
+void Geometry2D::Realloc(void** pData, size_t pNewSize, size_t pBytesToCopy)
+{
+	Lepra::uint8* lNewData = new Lepra::uint8[pNewSize];
+	::memcpy(lNewData, *pData, std::min(pNewSize, pBytesToCopy));
+	delete[] *pData;
+	*pData = lNewData;
+}
+
+Geometry2D::Geometry2D(const Geometry2D&)
+{
+	assert(false);
+}
+
+void Geometry2D::operator=(const Geometry2D&)
+{
+	assert(false);
+}
+
+
+
+}

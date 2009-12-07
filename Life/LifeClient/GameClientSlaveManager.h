@@ -131,8 +131,6 @@ private:
 	Lepra::Alarm mCollisionExpireAlarm;
 	Lepra::Alarm mInputExpireAlarm;
 
-	Lepra::PerformanceData mUiOutputTime;
-
 	Lepra::Vector3DF mCameraPosition;		// TODO: remove hack (should context object controlled)!
 	Lepra::Vector3DF mCameraOrientation;		// TODO: remove hack (should context object controlled)!
 	Cure::ObjectPositionalData mNetworkOutputGhost;	// TODO: remove hack (should be one per controllable object)!

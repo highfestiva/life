@@ -515,7 +515,7 @@ class vec3:
         """
 
         other = vec3(other)
-        return math.acos((self*other) / (abs(self)*abs(other)))
+        return vec3.acos((self*other) / (abs(self)*abs(other)))
 
     def reflect(self, N):
         """Return the reflection vector.
@@ -642,6 +642,16 @@ class vec3:
             return 1
         else:
             return 2
+
+
+    @staticmethod
+    def acos(angle):
+        global _epsilon
+        if angle+_epsilon >= 1:
+            return 0
+        if angle-_epsilon <= -1:
+            return math.pi
+        return math.acos(angle)
 
 
 ######################################################################

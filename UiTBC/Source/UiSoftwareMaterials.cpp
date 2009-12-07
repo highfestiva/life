@@ -41,8 +41,8 @@ void SoftMatSingleColorSolid::RenderGeometry(TBC::GeometryBase* pGeometry)
 	m3DPainter->SetAlphaTestEnabled(false);
 	m3DPainter->SetTextureMappingEnabled(false);
 
-	const TBC::GeometryBase::BasicMaterialSettings& lMatSettings = pGeometry->GetBasicMaterialSettings();
-	m3DPainter->SetDefaultColor(lMatSettings.mRed, lMatSettings.mGreen, lMatSettings.mBlue);
+	const TBC::GeometryBase::BasicMaterialSettings& lMat = pGeometry->GetBasicMaterialSettings();
+	m3DPainter->SetDefaultColor(lMat.mDiffuse.x, lMat.mDiffuse.y, lMat.mDiffuse.z);
 
 	m3DPainter->SetVertexPointer(pGeometry->GetVertexCount(), pGeometry->GetVertexData());
 	m3DPainter->SetNormalPointer(pGeometry->GetNormalData());

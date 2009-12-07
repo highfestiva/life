@@ -51,10 +51,12 @@ class GroupReader(DefaultMAReader):
         def __init__(self, basename):
                 DefaultMAReader.__init__(self)
                 self.bad_types = ["camera", "lightLinker", "displayLayerManager", "displayLayer", \
-                                  "renderLayerManager", "renderLayer", "script", "phong", \
-                                  "shadingEngine", "materialInfo", "groupId", "groupParts", "lambert", \
-                                  "layeredShader", "deleteComponent", "softModHandle", "softMod", \
-                                  "objectSet", "tweak", "imagePlane", "blinn", "file", "place2dTexture"]
+                                  "renderLayerManager", "renderLayer", "script", \
+                                  "materialInfo", "groupId", "groupParts", \
+                                  "deleteComponent", "softModHandle", "softMod", \
+                                  "objectSet", "tweak", "imagePlane", "place2dTexture"]
+                self.mat_types = ["lambert", "blinn", "phong", "shadingEngine", "layeredShader", \
+                                  "file"]
                 self.basename = basename
 
 
@@ -74,7 +76,7 @@ class GroupReader(DefaultMAReader):
                         print("Bad file! Terminating due to error.")
                         sys.exit(1)
                 self.check_mesh_export(islands)
-                islands = self.filterIslands(islands)
+                islands, mat_islands = self.filterIslands(islands)
                 if len(islands) != 1:
                         print("The number of standalone groups is not one (is totally %i) in the .ma file! These are the groups:" % len(islands))
                         for i in islands:
@@ -83,6 +85,9 @@ class GroupReader(DefaultMAReader):
                         print("Terminating due to error.")
                         sys.exit(2)
                 group = islands[0]
+                mat_group = []
+                for mati in mat_islands:
+                        mat_group.extend(mati)
                 if not group[0].getName().startswith("m_"):
                         print("Error: root must be a mesh named 'm_...' something, not '%s'." % group[0].getName())
                         sys.exit(2)
@@ -103,7 +108,7 @@ class GroupReader(DefaultMAReader):
                 #        print("Error: the group is not completely orthogonal!")
                 #        sys.exit(3)
                 group = self.sortgroup(group)
-                if not self.validate_mesh_group(group):
+                if not self.validate_mesh_group(group, checknorms=False):
                         print("Invalid mesh group! Terminating due to error.")
                         sys.exit(3)
                 if not self.apply_phys_config(config, group):
@@ -122,8 +127,18 @@ class GroupReader(DefaultMAReader):
                         print("Internal vector math failed! Terminating due to error.")
                         sys.exit(3)
                 self.makevertsrelative(group)
+                self.splitverts(group)
                 self.mesh_instance_reuse(group)
                 self.setphyspivot(group)
+
+                # Check again to assert no internal failure when splitting vertices / joining normals.
+                if not self.validate_mesh_group(group, checknorms=True):
+                        print("Internal error: meshes are invalid after splitting vertices and joining normals! Terminating due to error.")
+                        sys.exit(3)
+
+                if not self.fixmaterials(group, mat_group):
+                        print("Materials are incorrectly modelled! Terminating due to error.")
+                        sys.exit(3)
 
                 #self.printnodes(group)
 
@@ -214,20 +229,21 @@ class GroupReader(DefaultMAReader):
 
 
         def filterIslands(self, islands):
-                for island in islands:
+                mat_islands = []
+                for_islands = islands[:]
+                for island in for_islands:
                         for n in island:
-                                if n.nodetype in self.bad_types or \
-                                        (island.index(n) == 0 and n.getName().startswith("ignore_")):
+                                if n.nodetype in self.bad_types or n.getName().startswith("ignore_"):
                                         #print("Removing bad %s." % n.nodetype)
                                         islands.remove(island)
-                                        self.filterIslands(islands)
                                         break
                                 if n.nodetype == "<unknown>" and n.getParent() == None:
                                         islands.remove(island)
-                                        self.filterIslands(islands)
                                         break
-
-                return islands
+                                if n.nodetype in self.mat_types:
+                                        islands.remove(island)
+                                        mat_islands.append(island)
+                return islands, mat_islands
 
 
         def fixparams(self, group):
@@ -252,6 +268,9 @@ class GroupReader(DefaultMAReader):
                         vtx = node.getAttrValue("rgvtx", "rgvtx", None, n=None)
                         if vtx:
                                 node.fix_attribute("rgvtx", vtx)
+                        n = node.getAttrValue("rgn", "rgn", None, n=None)
+                        if n:
+                                node.fix_attribute("rgn", n)
 
 
         def fixroottrans(self, group):
@@ -285,37 +304,125 @@ class GroupReader(DefaultMAReader):
         def faces2triangles(self, group):
                 for node in group:
                         faces = node.get_fixed_attribute("rgf", optional=True)
+                        norms = node.get_fixed_attribute("rgn", optional=True)
+                        if norms:
+                                if type(norms) == str:
+                                        norms = norms[1]        # From ("(", "...", ")") to "..."
+                                        norms = eval(norms[1:-1])
+                                newnorms = []
                         if faces:
                                 triangles = []
                                 if not type(faces) == str:
                                         faces = faces[1]        # From ("(", "...", ")") to "..."
                                 faces = eval(faces[1:-1])
+                                facec = 0
                                 for face in faces:
                                         for x in range(1, len(face)-1):
                                                 triangles += [face[0], face[x], face[x+1]]
+                                                if norms:
+                                                        newnorms += [norms[(facec+0)*3+0], norms[(facec+0)*3+1], norms[(facec+0)*3+2]]
+                                                        newnorms += [norms[(facec+x)*3+0], norms[(facec+x)*3+1], norms[(facec+x)*3+2]]
+                                                        newnorms += [norms[(facec+x+1)*3+0], norms[(facec+x+1)*3+1], norms[(facec+x+1)*3+2]]
+                                        facec += len(face)
+                                                
                                 node.fix_attribute("rgtri", triangles)
+                                if norms:
+##                                        print("Before: normal count=%i, face count*3=%i." % (len(norms), facec*3))
+##                                        print("After:  normal count=%i,  tri count*3=%i." % (len(newnorms), len(triangles)*3))
+                                        node.fix_attribute("rgn", newnorms)
 
 
         def makevertsrelative(self, group):
                 for node in group:
                         vtx = node.get_fixed_attribute("rgvtx", optional=True)
                         if vtx:
+                                for p in node.getparents():
+                                        if not p.shape:
+                                                p.shape = node
                                 mnode = node.getParent()
-                                #phys = node.getParent().phys_ref[0]
-                                # Get transformation to origo without rescaling.
-                                #meshroot = phys.getParent() if phys.is_phys_root else phys.phys_root.getParent()
                                 meshroot = None
-                                #m_tr = phys.getParent().gettransformto(meshroot, "original", getparent=lambda n: n.getParent())
                                 m_tr = mnode.gettransformto(meshroot, "original", getparent=lambda n: n.getParent())
                                 if not m_tr:
                                         print("Mesh crash!")
-                                m_t, m_r, m_s = m_tr.decompose()
-                                transform = mat4.translation(-m_t) * m_tr
-                                vp = vec4(0,0,0,1);
+                                m_s = m_tr.decompose()[2]
+                                transform = mat4.scaling(m_s)
+                                vp = vec4(0,0,0,1)
                                 for idx in range(0, len(vtx), 3):
                                         vp[:3] = vtx[idx:idx+3]
                                         vp = transform*vp
                                         vtx[idx:idx+3] = vp[:3]
+
+
+        def splitverts(self, group):
+                """Split mesh vertices that have normals (=hard edges). But to complicate things,
+                   I keep vertices together that share a similar normal."""
+                for node in group:
+                        vs = node.get_fixed_attribute("rgvtx", optional=True)
+                        ts = node.get_fixed_attribute("rgtri", optional=True)
+                        ns = node.get_fixed_attribute("rgn", optional=True)
+                        if ns:
+                                def vertex(idx):
+                                        return vec3(vs[idx*3+0], vs[idx*3+1], vs[idx*3+2])
+                                def normal(idx):
+                                        return vec3(ns[idx*3+0], ns[idx*3+1], ns[idx*3+2])
+                                def angle(n1, n2):
+                                        if n1.length() == 0 or n2.length() == 0:
+                                                if n1.length() == 0 and n2.length() == 0:
+                                                        return 0
+                                                return 180
+                                        return math.degrees(math.fabs(n1.angle(n2)))
+
+                                original_vsc = len(vs)
+
+                                # Create a number of UNIQUE empty lists. Hence the for loop.
+                                normal_indices = []
+                                for u in range(len(vs)//3):
+                                        normal_indices += [[]]
+
+                                end = len(ts)
+                                x = 0
+                                while x < end:
+                                        normal_indices[ts[x]] += [x]
+                                        x += 1
+                                x = 0
+                                while x < end:
+                                        c = normal(normal_indices[ts[x]][0])
+                                        split = []
+                                        for s in normal_indices[ts[x]][1:]:
+                                                if angle(c, normal(s)) > 80:
+                                                        split += [s]
+                                        # Push all the once that we don't join together at the end.
+                                        if split:
+                                                new_index = len(vs)//3
+                                                v = vertex(ts[x])
+                                                vs += v[:]
+                                                normal_indices += [[]]
+                                                for s in split:
+                                                        normal_indices[ts[s]].remove(s)
+                                                        ts[s] = new_index
+                                                        normal_indices[ts[s]] += [s]
+                                                if len(normal_indices) != len(vs)/3:
+                                                        print("Internal error: normals no longer corresponds to vertices!")
+                                                # We don't need to restart after we split a vertex, since the lower indexed siamese of this vertex
+                                                # already approved of all contained herein, otherwise they would not still lie in the same bucket.
+                                                #x = -1 
+                                        x += 1
+                                normals = [0.0]*len(vs)
+                                for join_indices in normal_indices:
+                                        # Join 'em by simply adding normals together and normalizing.
+                                        n = vec3(0,0,0)
+                                        for j in join_indices:
+                                                n += normal(j)
+                                        idx = ts[join_indices[0]]
+                                        idx = idx*3+0
+                                        try:
+                                                normals[idx:idx+3] = n.normalize()[:]
+                                        except ZeroDivisionError:
+                                                pass
+                                node.fix_attribute("rgn", normals)
+                                if options.options.verbose:
+                                        print("Mesh %s was made %.1f times larger due to (hard?) edges, and %.1f %% of worst-case size." %
+                                              (node.getName(), len(normals)/original_vsc-1, len(normals)*100/len(ns)))
 
 
         def mesh_instance_reuse(self, group):
@@ -333,12 +440,17 @@ class GroupReader(DefaultMAReader):
                                 cnt += 1
                                 meshnames[meshbasename] = cnt
                                 #print("Setting", node.getParent(), "meshbasename to", meshbasename)
+                                pcnt = 0
                                 for p in node.getparents():
                                         p.meshbasename = meshbasename
-                                        instancecount += 1
+                                        if pcnt > 0:
+                                                instancecount += 1
+                                                #print("Got mesh instance:", meshbasename)
+                                        pcnt += 1
                 for k,v in meshnames.items():
                         if v > 1:
                                 instancecount += 1
+                                #print("Got mesh instance:", k, v)
                 if len(group) >= 8 and instancecount == 0:
                         print("%s: warning: has no mesh instances; highly unlikely! At least the wheels should be, right?" % self.basename)
 
@@ -356,6 +468,69 @@ class GroupReader(DefaultMAReader):
                                         lowestp = p
                 #print("Setting physics lowest pos to", lowestp, "on", physroot)
                 physroot.lowestpos = lowestp
+
+
+        def fixmaterials(self, group, mat_group):
+                ok = True
+                for node in group:
+                        if node.getName().startswith("m_") and node.nodetype == "transform":
+                                ambient = [1.0]*3
+                                diffuse  = [1.0, 0.0, 1.0]
+                                specular = [0.5]*3
+                                shininess = 0.0
+                                alpha = 1.0
+                                textureNames = []
+                                shaderName   = ""
+
+                                mesh = self._listchildnodes(node.getFullName(), node, "m_", group, False, \
+                                        lambda n: n.get_fixed_attribute("rgvtx", optional=True))[0]
+                                outs = mesh.getOutNodes("iog", "iog")
+                                shaders = []
+                                for o, _, attr in outs:
+                                        if o.nodetype == "shadingEngine":
+                                                if not o in shaders:
+                                                        shaders.append(o)
+                                useShader = True
+                                if len(shaders) != 1:
+                                        print("Warning: mesh %s om %s has wrong number of materials (%i)." % (mesh.getName(), node.getName(), len(shaders)))
+                                        if not shaders:
+                                                useShader = False
+                                if useShader:
+                                        shader = shaders[0]
+                                        material = shader.getInNode("ss", "ss")
+                                        material = self._getnode(material[0], mat_group)
+
+                                        ambc = material.get_fixed_attribute("ambc", optional=True, default=[0.0]*3)
+                                        incandescence = material.get_fixed_attribute("ic", optional=True, default=[0.0]*3)
+                                        ambient = map(lambda x,y: x+y, ambc, incandescence)
+
+                                        dc = material.get_fixed_attribute("dc", optional=True, default=1.0)
+                                        c = material.get_fixed_attribute("c", optional=True, default=[0.5]*3)
+                                        diffuse = map(lambda i: i*dc, c)
+
+                                        sro = material.get_fixed_attribute("sro", optional=True, default=1.0)
+                                        sc = material.get_fixed_attribute("c", optional=True, default=[0.5]*3)
+                                        specular = map(lambda i: sro*i, sc)
+
+                                        ec = material.get_fixed_attribute("ec", optional=True, default=1.0)
+                                        shininess = 1.0-ec
+
+                                        trans = material.get_fixed_attribute("it", optional=True, default=[0.0]*3)
+                                        alpha = 1.0 - sum(trans)/3
+
+                                class Material:
+                                        pass
+                                node.mat = Material()
+                                node.mat.ambient   = list(ambient)
+                                node.mat.diffuse   = list(diffuse)
+                                node.mat.specular  = list(specular)
+##                                if len(node.mat.ambient) != 3 or len(node.mat.diffuse) != 3 or len(node.mat.specular) != 3:
+##                                        print("Error:", node, node.mat.ambient, node.mat.diffuse, node.mat.specular)
+                                node.mat.shininess = shininess
+                                node.mat.alpha     = alpha
+                                node.mat.textures  = textureNames
+                                node.mat.shader    = shaderName
+                return ok
 
 
         def validate_orthogonality(self, group):
@@ -389,19 +564,23 @@ class GroupReader(DefaultMAReader):
                 return group
 
 
-        def validate_mesh_group(self, group):
+        def validate_mesh_group(self, group, checknorms):
                 isGroupValid = True
                 if not isGroupValid:
                         print("Error: hierarchy graph recursion not allowed!")
                 for node in group:
                         vtx = node.get_fixed_attribute("rgvtx", optional=True)
                         polys = node.get_fixed_attribute("rgtri", optional=True)
+                        norms = node.get_fixed_attribute("rgn", optional=True)
                         if vtx and not polys:
                                 isGroupValid = False
                                 print("Error: mesh '%s' contains vertices, but no triangle definition." % node.getFullName())
                         elif not vtx and polys:
                                 isGroupValid = False
                                 print("Error: mesh '%s' contains triangle definitions but no vertices." % node.getFullName())
+                        elif norms and not (vtx and polys):
+                                isGroupValid = False
+                                print("Error: mesh '%s' contains normal definitions but not both vertices and triangles." % node.getFullName())
                         elif vtx and polys:
                                 node.physcnt = 0
                                 #print("Found mesh:", node.getName())
@@ -421,6 +600,11 @@ class GroupReader(DefaultMAReader):
                                 if not usedlastvertex:
                                         isGroupValid = False
                                         print("Error: not all vertices in '%s' is used." % node.getFullName())
+                                if checknorms and norms:
+                                        if len(norms) != len(vtx):
+                                                isGroupValid = False
+                                                print("Error: not the same amount of vertices and normals in '%s' (%i verts, %i normals)." %
+                                                      (node.getFullName(), len(vtx), len(norms)))
 ##                        elif node.nodetype == "mesh" and not node.getName().startswith("phys_") and not node.getName().startswith("m_"):
 ##                                isGroupValid = False
 ##                                print("Error: mesh '%s' must be prefixed 'phys_' or 'm_'." % node.getFullName())
@@ -452,7 +636,7 @@ class GroupReader(DefaultMAReader):
                         if section.startswith("engine:"):
                                 enginetype = stripQuotes(config.get(section, "type"))
                                 pushengines = ["cam_flat_push"]
-                                engineOk = enginetype in pushengines+["hinge_roll", "hinge_break", "hinge_torque", "hinge2_turn", "rotor", "tilter"]
+                                engineOk = enginetype in pushengines+["hinge_roll", "hinge_gyro", "hinge_break", "hinge_torque", "hinge2_turn", "rotor", "tilter"]
                                 allApplied &= engineOk
                                 if not engineOk:
                                         print("Error: invalid engine type '%s'." % enginetype)
@@ -742,7 +926,7 @@ class GroupReader(DefaultMAReader):
                         count += 1
                         childcount[node] = count
                 for key, count in childcount.items():
-                        if count > 1:
+                        if key.nodetype == "transform" and count > 1:
                                 print("Error: more than one path (currently %i paths) lead to node '%s'." % (count, key.getFullName()))
                                 isHierarchyValid = False
                 return isHierarchyValid
@@ -867,7 +1051,9 @@ class GroupReader(DefaultMAReader):
                 if mesh.shape:
                         meshcnt += 1
                 children = self._listchildnodes(mesh.getFullName(), mesh, "m_", group, False)
+                #print("Mesh %s has kids:" % mesh.getName())
                 for child in children:
+                        #print(" - Child %s.", child.getName())
                         if child.get_fixed_attribute("rgvtx", optional=True):
                                 meshcnt += 1
                         if child in invalid_child_list:
@@ -943,16 +1129,17 @@ class GroupReader(DefaultMAReader):
                 return valid_ref
 
 
-        def _listchildnodes(self, path, basenode, prefix, group, recursive):
+        def _listchildnodes(self, path, basenode, prefix, group, recursive, f=None):
                 childlist = []
                 for node in group:
-                        if node.getParent() == basenode and node.getName().startswith(prefix):
-                              childlist += [node]
+                        if node.getName().startswith(prefix) and basenode in node.getparents():
+                                if not f or f(node):
+                                        childlist += [node]
                 grandchildlist = []
                 if recursive:
                         for child in childlist:
                                 childpath = path+"|"+child.getName()
-                                grandchildlist += self._listchildnodes(childpath, child, prefix, group, True)
+                                grandchildlist += self._listchildnodes(childpath, child, prefix, group, True, f)
                 return childlist+grandchildlist
 
 
@@ -989,6 +1176,13 @@ class GroupReader(DefaultMAReader):
                                 if n == node:
                                         return True
                 return False
+
+
+        def _getnode(self, nodename, group):
+                for node in group:
+                        if node.getName() == nodename:
+                                return node
+                return None
 
 
 def printfeats(feats):

@@ -17,7 +17,6 @@ Button::Button(const Lepra::String& pName) :
 	Window(pName),
 	mIconID(Painter::INVALID_IMAGEID),
 	mIconAlignment(ICON_CENTER),
-	mFontID(Painter::INVALID_FONTID),
 	mText(_T("")),
 	mTextColor(0, 0, 0),
 	mTextBackgColor(255, 255, 255),
@@ -38,7 +37,6 @@ Button::Button(const Lepra::Color& pColor, const Lepra::String& pName):
 	Window(pColor, pName),
 	mIconID(Painter::INVALID_IMAGEID),
 	mIconAlignment(ICON_CENTER),
-	mFontID(Painter::INVALID_FONTID),
 	mText(_T("")),
 	mTextColor(0, 0, 0),
 	mTextBackgColor(255, 255, 255),
@@ -60,7 +58,6 @@ Button::Button(BorderComponent::BorderShadeFunc pShadeFunc, int pBorderWidth, co
 	Window((pShadeFunc == BorderComponent::LINEAR ? Parent::BORDER_LINEARSHADING : 0), pBorderWidth, pColor, pName),
 	mIconID(Painter::INVALID_IMAGEID),
 	mIconAlignment(ICON_CENTER),
-	mFontID(Painter::INVALID_FONTID),
 	mText(_T("")),
 	mTextColor(0, 0, 0),
 	mTextBackgColor(255, 255, 255),
@@ -90,7 +87,6 @@ Button::Button(Painter::ImageID pReleasedImageID, Painter::ImageID pPressedImage
 	mPressingImageID(pPressingImageID),
 	mIconID(Painter::INVALID_IMAGEID),
 	mIconAlignment(ICON_CENTER),
-	mFontID(Painter::INVALID_FONTID),
 	mText(_T("")),
 	mTextColor(0, 0, 0),
 	mTextBackgColor(255, 255, 255),
@@ -313,8 +309,6 @@ void Button::PrintText(Painter* pPainter, int x, int y)
 
 	pPainter->SetColor(mTextColor, 0);
 	pPainter->SetColor(mTextBackgColor, 1);
-	pPainter->SetActiveFont(mFontID);
-
 	pPainter->PrintText(mText.c_str(), x, y);
 }
 
@@ -452,14 +446,12 @@ void Button::SetIcon(Painter::ImageID pIconID,
 }
 
 void Button::SetText(const Lepra::String& pText, 
-		     Painter::FontID pFontID,
 		     const Lepra::Color& pTextColor,
 		     const Lepra::Color& pBackgColor,
 		     BlendFunc pBlendFunc,
 		     Lepra::uint8 pAlphaTreshold)
 {
 	mText           = pText;
-	mFontID         = pFontID;
 	mTextColor      = pTextColor;
 	mTextBackgColor = pBackgColor;
 	mTextBlendFunc  = pBlendFunc;
@@ -476,11 +468,6 @@ const Lepra::String& Button::GetText()
 Component::Type Button::GetType()
 {
 	return Component::BUTTON;
-}
-
-Painter::FontID Button::GetFontID()
-{
-	return mFontID;
 }
 
 void Button::OnTextChanged()

@@ -9,8 +9,12 @@
 #include "UiRectComponent.h"
 #include "UiTextComponent.h"
 
+
+
 namespace UiTbc
 {
+
+
 
 class Label: public RectComponent, public TextComponent
 {
@@ -75,16 +79,14 @@ public:
 
 	virtual ~Label();
 
-	inline void SetIcon(Painter::ImageID pIconID);
+	void SetIcon(Painter::ImageID pIconID);
 	void SetText(const Lepra::String& pText,
-		     Painter::FontID pFontID,
 		     const Lepra::Color& pTextColor,
 		     const Lepra::Color& pBackgColor,
 		     BlendFunc pBlendFunc = ALPHATEST,
 		     Lepra::uint8 pAlphaTreshold = 128,
 		     Painter* pPainter = 0);
 	void SetText(const Lepra::String& pText,
-		     Painter::FontID pFontID,
 		     const Lepra::Color& pTextColor,
 		     const Lepra::Color& pBackgColor,
 		     const Lepra::Color& pSelectedTextColor,
@@ -101,7 +103,7 @@ public:
 
 	virtual void OnConnectedToDesktopWindow();
 
-	inline virtual Component::Type GetType();
+	virtual Component::Type GetType();
 
 	virtual void SetSelected(bool pSelected);
 	virtual void SetKeyboardFocus();
@@ -131,14 +133,6 @@ protected:
 	Painter::ImageID mLCLSelectedImageID;
 };
 
-void Label::SetIcon(Painter::ImageID pIconID)
-{
-	mIconID = pIconID;
-}
 
-Component::Type Label::GetType()
-{
-	return Component::LABEL;
-}
 
 }

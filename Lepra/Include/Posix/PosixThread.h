@@ -26,12 +26,11 @@ public:
 	ThreadPointerStorage();
 	virtual ~ThreadPointerStorage();
 
-	static void SetPointer(Thread* pThread);
-	static Thread* GetPointer();
+	void SetPointer(void* pThread);
+	void* GetPointer();
 
 private:
 	pthread_key_t mKey;
-	static ThreadPointerStorage smTPS;
 };
 
 

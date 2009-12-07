@@ -7,6 +7,7 @@
 #include "../../Cure/Include/ResourceManager.h"
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../../Lepra/Include/AntiCrack.h"
+#include "../../Lepra/Include/Performance.h"
 #include "../../Lepra/Include/SystemManager.h"
 #include "../../UiCure/Include/UiGameUiManager.h"
 #include "../../UiCure/Include/UiCppContextObject.h"
@@ -15,6 +16,7 @@
 #include "../../UiTbc/Include/GUI/UiDesktopWindow.h"
 #include "../../UiTbc/Include/GUI/UiFloatingLayout.h"
 #include "../../UiTbc/Include/UiRenderer.h"
+#include "../RtVar.h"
 #include "GameClientMasterTicker.h"
 #include "GameClientSlaveManager.h"
 
@@ -129,13 +131,19 @@ bool GameClientMasterTicker::CreateSlave()
 
 bool GameClientMasterTicker::Tick()
 {
+	LEPRA_MEASURE_SCOPE(MasterTicker);
+
 	bool lOk = true;
 
 	Lepra::ScopeLock lLock(&mLock);
 
-	mUiManager->BeginRender();
+	{
+		mUiManager->BeginRender();
+	}
 
-	mUiManager->InputTick();
+	{
+		mUiManager->InputTick();
+	}
 
 	SlaveMap::Iterator x;
 	for (x = mSlaveSet.First(); x != mSlaveSet.End();)
@@ -158,32 +166,54 @@ bool GameClientMasterTicker::Tick()
 		}
 	}
 
-	for (x = mSlaveSet.First(); lOk && x != mSlaveSet.End(); ++x)
 	{
-		lOk = x.GetObject()->BeginTick();
-		if (lOk)
+		LEPRA_MEASURE_SCOPE(RenderSlaves);
+
+		// Kickstart physics so no slaves have to wait too long for completion.
+		for (x = mSlaveSet.First(); lOk && x != mSlaveSet.End(); ++x)
+		{
+			lOk = x.GetObject()->BeginTick();
+		}
+		// Start rendering machine directly afterwards.
+		for (x = mSlaveSet.First(); lOk && x != mSlaveSet.End(); ++x)
 		{
 			lOk = x.GetObject()->Render();
 		}
 	}
 
-	mUiManager->Paint();
-
-	int lSlaveIndex = 0;
-	for (x = mSlaveSet.First(); lOk && x != mSlaveSet.End(); ++x, ++lSlaveIndex)
 	{
-		mUiManager->GetSoundManager()->SetActiveListener(lSlaveIndex);
-		lOk = x.GetObject()->EndTick();
+		LEPRA_MEASURE_SCOPE(UiPaint);
+		mUiManager->Paint();
+
 	}
 
 	{
-		Lepra::ScopeTimer lTime(&mResourceTime);
+		LEPRA_MEASURE_SCOPE(DrawGraph);
+		DrawFps();
+		DrawPerformanceLineGraph2d();
+	}
+
+	{
+		int lSlaveIndex = 0;
+		for (x = mSlaveSet.First(); lOk && x != mSlaveSet.End(); ++x, ++lSlaveIndex)
+		{
+			mUiManager->GetSoundManager()->SetActiveListener(lSlaveIndex);
+			lOk = x.GetObject()->EndTick();
+		}
+	}
+
+	{
+		LEPRA_MEASURE_SCOPE(ResourceTick);
 		// This must be synchronous. The reason is that it may add objects to "script" or "physics" enginges,
-		// which are run by a separate thread; parallelization here will certainly cause threading errors.
+		// as well as upload data to the GPU and so forth; parallelization here will certainly cause threading
+		// errors.
 		mResourceManager->Tick();
 	}
 
-	mUiManager->EndRender();
+	{
+		LEPRA_MEASURE_SCOPE(UiEndRender);
+		mUiManager->EndRender();
+	}
 
 	if (mActiveWidth != mUiManager->GetDisplayManager()->GetWidth() ||
 		mActiveHeight != mUiManager->GetDisplayManager()->GetHeight())
@@ -204,6 +234,7 @@ bool GameClientMasterTicker::Tick()
 	}
 	else
 	{
+		LEPRA_MEASURE_SCOPE(RunYieldCommand);
 		mConsole->ExecuteYieldCommand();
 	}
 
@@ -424,6 +455,103 @@ void GameClientMasterTicker::UpdateSlaveLayout()
 		}
 		break;
 	}
+}
+
+void GameClientMasterTicker::Profile()
+{
+	const bool lDebugGraph = CURE_RTVAR_TRYGET(UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_GRAPH, false);
+	if (!lDebugGraph)
+	{
+		return;
+	}
+
+	const int lHeight = 100;
+	typedef Lepra::ScopePerformanceData::NodeArray ScopeArray;
+	ScopeArray lRoots = Lepra::ScopePerformanceData::GetRoots();
+	ScopeArray lNodes;
+	lNodes.reserve(100);
+	for (size_t lRootIndex = 0; lRootIndex < lRoots.size(); ++lRootIndex)
+	{
+		if (mPerformanceGraphList.size() <= lRootIndex)
+		{
+			mPerformanceGraphList.push_back(UiCure::LineGraph2d());
+		}
+		mPerformanceGraphList[lRootIndex].TickLine(lHeight);
+
+		lNodes.clear();
+		lNodes.push_back(lRoots[lRootIndex]);
+		const double lRootStart = lNodes[0]->GetTimeOfLastMeasure();
+		for (size_t x = 0; x < lNodes.size(); ++x)
+		{
+			const Lepra::ScopePerformanceData* lNode = lNodes[x];
+			const ScopeArray& lChildren = lNode->GetChildren();
+			lNodes.insert(lNodes.end(), lChildren.begin(), lChildren.end());
+
+			const double lStart = lNode->GetTimeOfLastMeasure() - lRootStart;
+			mPerformanceGraphList[lRootIndex].AddSegment(lNode->GetName(), lStart, lStart + lNode->GetLast());
+		}
+	}
+}
+
+void GameClientMasterTicker::DrawFps() const
+{
+	const bool lDebugging = CURE_RTVAR_TRYGET(UiCure::GetSettings(), RTVAR_DEBUG_ENABLE, false);
+	if (!lDebugging)
+	{
+		return;
+	}
+
+	Lepra::ScopePerformanceData* lMainLoop = Lepra::ScopePerformanceData::GetRoots()[0];
+	Lepra::String lFps = Lepra::StringUtility::Format(_T("%.1f"), 1/lMainLoop->GetSlidingAverage());
+	mUiManager->GetPainter()->SetColor(Lepra::Color(0, 0, 0));
+	const int lRight = mUiManager->GetDisplayManager()->GetWidth();
+	mUiManager->GetPainter()->FillRect(lRight-45, 3, lRight-5, 20);
+	mUiManager->GetPainter()->SetColor(Lepra::Color(200, 200, 0));
+	mUiManager->GetPainter()->PrintText(lFps, lRight-40, 5);
+}
+
+void GameClientMasterTicker::DrawPerformanceLineGraph2d() const
+{
+	const bool lDebugGraph = CURE_RTVAR_TRYGET(UiCure::GetSettings(), RTVAR_DEBUG_ENABLE, false) &&
+		CURE_RTVAR_TRYGET(UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_GRAPH, false);
+	if (!lDebugGraph)
+	{
+		return;
+	}
+
+	// Draw all scope nodes as line segments in one hunky graph.
+	typedef Lepra::ScopePerformanceData::NodeArray ScopeArray;
+
+	float lLongestRootTime = 1e-15f;
+	ScopeArray lRoots = Lepra::ScopePerformanceData::GetRoots();
+	for (size_t lRootIndex = 0; lRootIndex < lRoots.size(); ++lRootIndex)
+	{
+		const float lRootDelta = (float)lRoots[lRootIndex]->GetMaximum();
+		if (lRootDelta > lLongestRootTime)
+		{
+			lLongestRootTime = lRootDelta;
+		}
+	}
+
+	const int lMargin = 10;
+	const float lScale = (mUiManager->GetDisplayManager()->GetWidth() - lMargin*2)/lLongestRootTime;
+	int lY = lMargin;
+	for (size_t lRootIndex = 0; lRootIndex < lRoots.size(); ++lRootIndex)
+	{
+		if (mPerformanceGraphList.size() <= lRootIndex)
+		{
+			return;
+		}
+
+		mPerformanceGraphList[lRootIndex].Render(mUiManager->GetPainter(), lMargin, lScale, lY);
+
+		const bool lDebugNames = CURE_RTVAR_TRYGET(UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_NAMES, false);
+		if (lDebugNames)
+		{
+			mPerformanceGraphList[lRootIndex].RenderNames(mUiManager->GetPainter(), lMargin, lY);
+		}
+	}
+
 }
 
 

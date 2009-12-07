@@ -197,8 +197,8 @@ void ClientConsoleManager::InitGraphics()
 	SetRenderArea(mArea);
 
 	mConsoleOutput->SetFocusAnchor(UiTbc::TextArea::ANCHOR_BOTTOM_LINE);
-	mConsoleOutput->SetFont(mUiManager->GetPainter()->GetStandardFont(0), Lepra::WHITE, UiTbc::Component::ALPHATEST, 128);
-	mConsoleInput->SetFont(mUiManager->GetPainter()->GetStandardFont(0), Lepra::WHITE, UiTbc::Component::ALPHATEST, 128);
+	mConsoleOutput->SetFont(Lepra::WHITE, UiTbc::Component::ALPHATEST, 128);
+	mConsoleInput->SetFont(Lepra::WHITE, UiTbc::Component::ALPHATEST, 128);
 
 	mConsoleComponent->AddChild(mConsoleOutput);
 	mConsoleComponent->AddChild(mConsoleInput);
@@ -234,6 +234,7 @@ void ClientConsoleManager::OnConsoleChange()
 	if (mIsConsoleActive)
 	{
 		mConsoleComponent->SetVisible(true);
+		mUiManager->GetDesktopWindow()->UpdateLayout();
 		GetConsolePrompt()->SetFocus(true);
 	}
 	else

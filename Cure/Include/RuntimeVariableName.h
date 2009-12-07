@@ -41,5 +41,4 @@
 #define RTVAR_PERFORMANCE_TEXT_ENABLE		"Performance.Text.Enable"
 
 #define RTVAR_PHYSICS_FPS			"Physics.FPS"
-
-#define RTVAR_TICK_INTERVAL			"Tick.Interval"
+#define RTVAR_PHYSICS_MICROSTEPS		"Physics.MicroSteps"

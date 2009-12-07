@@ -49,11 +49,11 @@ CHUNK_MESH_VOLATILITY              = "MEVO"
 
 
 class PhysMeshPtr:
-        def __init__(self, physidx, meshbasename, q, p):
+        def __init__(self, physidx, meshbasename, t, mat):
                 self.physidx = physidx
                 self.meshbasename = meshbasename
-                self.t = q[:]+p[:3]
-                #print(self.t)
+                self.t = t
+                self.mat = mat
 
 
 
@@ -91,12 +91,12 @@ class ChunkyWriter:
 
         def _verifywritten(self, when, nodes):
                 #print("nodes[0].writecount =", nodes[0], nodes[0].writecount)
-                notwritten = list(filter(lambda n: n.writecount != 1, nodes))
-                if notwritten:
+                writeerror = list(filter(lambda n: n.writecount != 1, nodes))
+                if writeerror:
                         print("Error: the following objects were missed, and never written to disk, or written more than once (when writing %s):" % when)
                         def _p(n):
                                 print("  - %s (written %i times)" % (n.getFullName(), n.writecount))
-                        [_p(n) for n in notwritten]
+                        [_p(n) for n in writeerror]
                         sys.exit(3)
 
 
@@ -244,6 +244,24 @@ class ChunkyWriter:
                         self._writefloat(f)
 
 
+        def _writematerial(self, mat):
+                self._writematerial_(mat.ambient, mat.diffuse, mat.specular, \
+                        mat.shininess, mat.alpha, mat.textures, mat.shader)
+
+
+        def _writematerial_(self, ambient, diffuse, specular, shininess, alpha, textures, shader):
+                if len(ambient) != 3 or len(diffuse) != 3 or len(specular) != 3:
+                        print("Error: bad number of material elements!")
+                        #print(ambient, diffuse, specular)
+                        sys.exit(18)
+                for f in ambient+diffuse+specular+[shininess,alpha]:
+                        self._writefloat(f)
+                self._writeint(len(textures))
+                for texture in textures:
+                        self._writestr(texture)
+                self._writestr(shader)
+
+
         def _writeheader(self, signature, size=0):
                 self._writesignature(signature)
                 sizeoffset = self.f.tell()
@@ -358,7 +376,7 @@ class PhysWriter(ChunkyWriter):
                 data = q[:]+pos[:3]
                 self._normalizexform(data)
                 if options.options.verbose:
-                        print("Writing bone %s with relative data %s." % (node.getName(), data))
+                        print("Writing bone %s (index %i) with relative data %s." % (node.getName(), self.bodies.index(node), data))
                 self._addfeat("bone:bones", 1)
                 self._writexform(data)
                 node.writecount += 1
@@ -462,7 +480,7 @@ class PhysWriter(ChunkyWriter):
 
         def _writeengine(self, node):
                 # Write all general parameters first.
-                types = {"walk":1, "cam_flat_push":2, "hinge_roll":3, "hinge_break":4, "hinge_torque":5, "hinge2_turn":6, "rotor":7, "tilter":8, "glue":8}
+                types = {"walk":1, "cam_flat_push":2, "hinge_roll":3, "hinge_gyro":4, "hinge_break":5, "hinge_torque":6, "hinge2_turn":7, "rotor":8, "tilter":9, "glue":10}
                 self._writeint(types[node.get_fixed_attribute("type")])
                 totalmass = self._gettotalmass()
                 self._writefloat(node.get_fixed_attribute("strength")*totalmass)
@@ -570,14 +588,19 @@ class MeshWriter(ChunkyWriter):
                 with self._fileopenwrite(filename) as f:
                         self.f = f
                         default_mesh_type = {"static":1, "dynamic":2, "volatile":3}
-                        data =  (
+                        inner_data = [
+                                (CHUNK_MESH_VERTICES, node.get_fixed_attribute("rgvtx")),
+                                (CHUNK_MESH_TRIANGLES, node.get_fixed_attribute("rgtri")),
+                                (CHUNK_MESH_VOLATILITY, default_mesh_type["static"]),
+                        ]
+                        ns = node.get_fixed_attribute("rgn", optional=True)
+                        if ns:
+                                #inner_data.append((CHUNK_MESH_NORMALS, ns))
+                                pass
+                        data = (
                                         CHUNK_MESH,
-                                        (
-                                                (CHUNK_MESH_VERTICES, node.get_fixed_attribute("rgvtx")),
-                                                (CHUNK_MESH_TRIANGLES, node.get_fixed_attribute("rgtri")),
-                                                (CHUNK_MESH_VOLATILITY, default_mesh_type["static"]),
-                                        )
-                                )
+                                        inner_data
+                        )
                         self._writechunk(data)
                 for p in node.getparents():
                         p.writecount += 1
@@ -627,21 +650,16 @@ class ClassWriter(ChunkyWriter):
                                 m.writecount += 1
                                 tm = m.get_world_transform()
                                 tp = phys.get_world_transform()
-                                tmt = tm.decompose()[0]
-                                tpt, tpr, tps = tp.decompose()
-                                tpt = mat4.translation(tpt)
-                                tps = mat4.scaling(tps)
-                                wpm = m.get_world_translation()
-                                wpp = phys.get_world_translation()
-                                #mat = tp.inverse() * mat4.translation(tmt)
-                                mat = tpt.inverse() * tpr.inverse() * tps.inverse() * mat4.translation(tmt)
-                                q = quat(mat.decompose()[1]).normalize()
-                                p = wpm-wpp
-                                p = q.toMat4() * p
+                                tmt, tmr, _ = tm.decompose()
+                                tpt, tpr, _ = tp.decompose()
+                                q = quat(tpr.inverse()).normalize()
+                                p = tmt-tpt
+                                p = q.toMat4() * vec4(p[:])
+                                q = quat(tpr.inverse() * tmr).normalize()
                                 p = p[0:3]
-                                #print("Writing class", m.meshbasename, "relative to", phys.getName(), "with", q[:]+p[:])
+                                t = self._normalizexform(q[:]+p[:])
                                 physidx = self.bodies.index(phys)
-                                meshptrs += [(CHUNK_CLASS_PHYS_MESH, PhysMeshPtr(physidx, m.meshbasename, q, p))]
+                                meshptrs += [(CHUNK_CLASS_PHYS_MESH, PhysMeshPtr(physidx, m.meshbasename, t, m.mat))]
                         data =  (
                                         CHUNK_CLASS,
                                         (
@@ -673,8 +691,10 @@ class ClassWriter(ChunkyWriter):
                 self._regunique("meshname", physmeshptr.meshbasename)
                 self._writeint(physmeshptr.physidx)
                 self._writestr(physmeshptr.meshbasename)
-                self._normalizexform(physmeshptr.t)
                 self._writexform(physmeshptr.t)
+                col = [1.0, 0.0, 0.0, 1.0]
+                #self._writematerial(col, col, col, ["da_texture"], "da_shader")
+                self._writematerial(physmeshptr.mat)
                 self._addfeat("phys->mesh ptr:phys->mesh ptrs", 1)
 
 

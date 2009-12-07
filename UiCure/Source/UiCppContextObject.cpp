@@ -352,6 +352,23 @@ void CppContextObject::OnLoadMesh(UserGeometryReferenceResource* pMeshResource)
 	++mMeshLoadCount;
 	if (pMeshResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
+		size_t lMeshIndex = (size_t)-1;
+		for (size_t x = 0; x < mMeshResourceArray.size(); ++x)
+		{
+			if (mMeshResourceArray[x] == pMeshResource)
+			{
+				lMeshIndex = x;
+				break;
+			}
+		}
+		assert((int)lMeshIndex >= 0);
+		const UiTbc::ChunkyClass::Material& lLoadedMaterial =
+			((UiTbc::ChunkyClass*)mUiClassResource->GetRamData())->GetMaterial(lMeshIndex);
+		TBC::GeometryBase::BasicMaterialSettings lMaterial(lLoadedMaterial.mAmbient,
+			lLoadedMaterial.mDiffuse, lLoadedMaterial.mSpecular,
+			lLoadedMaterial.mShininess, lLoadedMaterial.mAlpha, true);
+		pMeshResource->GetRamData()->SetBasicMaterialSettings(lMaterial);
+
 		((TBC::GeometryReference*)pMeshResource->GetRamData())->SetOffsetTransformation(pMeshResource->GetOffset().mOffset);
 		TryAddTexture();
 	}

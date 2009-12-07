@@ -70,6 +70,7 @@ void ConsoleManager::Init()
 	Parent::Init();
 	GetConsoleCommandManager()->SetComment(_T("//"));
 	GetConsoleCommandManager()->AddCompleter(new Cure::RuntimeVariableCompleter(GetVariableScope(), _T("#")));
+	GetConsoleCommandManager()->AddCompleter(new Cure::RuntimeVariableCompleter(Cure::GetSettings(), _T("##")));
 
 	ExecuteCommand(_T("alias trace-log-level \"set-stdout-log-level 0; set-subsystem-log-level Root 0\""));
 	ExecuteCommand(_T("alias debug-log-level \"set-stdout-log-level 1; set-subsystem-log-level Root 1\""));
@@ -278,12 +279,12 @@ int ConsoleManager::OnCommand(const Lepra::String& pCommand, const Lepra::String
 		break;
 		case COMMAND_DUMP_PERFORMANCE_INFO:
 		{
-			mGameManager->ReportPerformance(0);
+			mGameManager->TryReportPerformance(0);
 		}
 		break;
 		case COMMAND_CLEAR_PERFORMANCE_INFO:
 		{
-			mLog.AInfo("Clearing performance data.");
+			log_performance("Clearing performance data.");
 			mGameManager->ClearPerformanceData();
 		}
 		break;
@@ -522,12 +523,14 @@ int ConsoleManager::OnCommand(const Lepra::String& pCommand, const Lepra::String
 		{
 			if (!pCommand.empty() && pCommand[0] == '#')
 			{
-				const Lepra::String lVariable = pCommand.substr(1);
+				const int lVariableNameIndex = (pCommand[1] == '#')? 2 : 1;
+				Cure::RuntimeVariableScope* lScope = (lVariableNameIndex == 2)? Cure::GetSettings() : GetVariableScope();
+				const Lepra::String lVariable = pCommand.substr(lVariableNameIndex);
 				if (pParameterVector.size() == 0)
 				{
-					if (GetVariableScope()->IsDefined(lVariable))
+					if (lScope->IsDefined(lVariable))
 					{
-						Lepra::String lValue = GetVariableScope()->GetDefaultValue(Cure::RuntimeVariableScope::READ_ONLY, lVariable);
+						Lepra::String lValue = lScope->GetDefaultValue(Cure::RuntimeVariableScope::READ_ONLY, lVariable);
 						lValue = Lepra::StringUtility::StringToCString(lValue);
 						mLog.Infof(_T("%s"), lValue.c_str());
 					}
@@ -541,9 +544,9 @@ int ConsoleManager::OnCommand(const Lepra::String& pCommand, const Lepra::String
 				{
 					Lepra::String lValue;
 					Lepra::StringUtility::CStringToString(pParameterVector[0], lValue);
-					if (GetVariableScope()->SetValue(Cure::RuntimeVariableScope::SET_OVERWRITE, lVariable, lValue))
+					if (lScope->SetValue(Cure::RuntimeVariableScope::SET_OVERWRITE, lVariable, lValue))
 					{
-						Lepra::String lValue = GetVariableScope()->GetDefaultValue(Cure::RuntimeVariableScope::READ_ONLY, lVariable);
+						Lepra::String lValue = lScope->GetDefaultValue(Cure::RuntimeVariableScope::READ_ONLY, lVariable);
 						lValue = Lepra::StringUtility::StringToCString(lValue);
 						mLog.Infof(_T("%s <- %s"), lVariable.c_str(), lValue.c_str());
 					}

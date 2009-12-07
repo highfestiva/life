@@ -111,6 +111,7 @@ void Win32DirectXDisplay::OnResize(int pWidth, int pHeight)
 {
 	Resize(pWidth, pHeight);
 	::ShowWindow(mWnd, SW_SHOWNORMAL);
+	Activate();
 }
 
 void Win32DirectXDisplay::OnMinimize()
@@ -127,6 +128,7 @@ void Win32DirectXDisplay::OnMaximize(int pWidth, int pHeight)
 {
 	Resize(pWidth, pHeight);
 	::ShowWindow(mWnd, SW_SHOWMAXIMIZED);
+	Activate();
 }
 
 bool Win32DirectXDisplay::InitScreen()

@@ -348,6 +348,17 @@ bool GameServerManager::Initialize()
 				lOk = mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("helicopter_01")));
 			}
 		}
+		for (x = 0; lOk && x < 100; ++x)
+		{
+			const Lepra::UnicodeString lUserName = Lepra::UnicodeStringUtility::Format(L"Loader%i", x);
+			Lepra::UnicodeString lReadablePassword(L"CarPassword");
+			Cure::MangledPassword lPassword(lReadablePassword);
+			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
+			if (lOk)
+			{
+				lOk = mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("frontloader")));
+			}
+		}
 	}
 
 	if (lOk)
@@ -635,12 +646,12 @@ void GameServerManager::StoreMovement(int pClientFrameIndex, Cure::MessageObject
 void GameServerManager::ApplyStoredMovement()
 {
 	// Walk through all steps (including missed steps due to slow computer).
-	int lCurrentPhysicsSteps = GetTimeManager()->GetCurrentPhysicsStepCount();
+	int lCurrentPhysicsSteps = GetTimeManager()->GetAffordedPhysicsStepCount();
 	if (lCurrentPhysicsSteps >= NETWORK_POSITIONAL_AHEAD_BUFFER_SIZE)
 	{
 		if (GetLoggedInClientCount() > 0)
 		{
-			mLog.Errorf(_T("Too small network positional buffer: had to skip %i steps!"), lCurrentPhysicsSteps-NETWORK_POSITIONAL_AHEAD_BUFFER_SIZE+1);
+			mLog.Warningf(_T("Network positional buffer overrun: had to skip %i steps!"), lCurrentPhysicsSteps-NETWORK_POSITIONAL_AHEAD_BUFFER_SIZE+1);
 		}
 		lCurrentPhysicsSteps = NETWORK_POSITIONAL_AHEAD_BUFFER_SIZE-1;
 	}

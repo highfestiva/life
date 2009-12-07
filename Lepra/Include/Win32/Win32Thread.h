@@ -26,12 +26,11 @@ public:
 	ThreadPointerStorage();
 	virtual ~ThreadPointerStorage();
 
-	static void SetPointer(Thread* pThread);
-	static Thread* GetPointer();
+	void SetPointer(void* pThread);
+	void* GetPointer();
 
 private:
 	DWORD mTLSIndex;
-	static ThreadPointerStorage smTPS;
 };
 
 

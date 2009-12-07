@@ -43,7 +43,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;..\ThirdParty\ode-060223\include&quot;;..\ThirdParty\stlport\stlport"
+				AdditionalIncludeDirectories="&quot;..\ThirdParty\ode-0.11.1\include&quot;;..\ThirdParty\stlport\stlport"
 				PreprocessorDefinitions="WIN32;_DEBUG"
 				MinimalRebuild="false"
 				BasicRuntimeChecks="0"
@@ -52,7 +52,6 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
-				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -115,7 +114,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="&quot;..\ThirdParty\ode-060223\include&quot;;..\ThirdParty\stlport\stlport"
+				AdditionalIncludeDirectories="&quot;..\ThirdParty\ode-0.11.1\include&quot;;..\ThirdParty\stlport\stlport"
 				PreprocessorDefinitions="WIN32;NDEBUG;NO_LOG_DEBUG_INFO"
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
@@ -123,7 +122,6 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
-				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="0"
 			/>
 			<Tool
@@ -186,7 +184,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="&quot;..\ThirdParty\ode-060223\include&quot;;..\ThirdParty\stlport\stlport"
+				AdditionalIncludeDirectories="&quot;..\ThirdParty\ode-0.11.1\include&quot;;..\ThirdParty\stlport\stlport"
 				PreprocessorDefinitions="WIN32;NDEBUG"
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
@@ -194,7 +192,6 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
-				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -253,7 +250,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;..\ThirdParty\ode-060223\include&quot;;..\ThirdParty\stlport\stlport"
+				AdditionalIncludeDirectories="&quot;..\ThirdParty\ode-0.11.1\include&quot;;..\ThirdParty\stlport\stlport"
 				PreprocessorDefinitions="WIN32;_DEBUG"
 				MinimalRebuild="false"
 				BasicRuntimeChecks="0"
@@ -262,7 +259,6 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
-				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -325,7 +321,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="&quot;..\ThirdParty\ode-060223\include&quot;;..\ThirdParty\stlport\stlport"
+				AdditionalIncludeDirectories="&quot;..\ThirdParty\ode-0.11.1\include&quot;;..\ThirdParty\stlport\stlport"
 				PreprocessorDefinitions="WIN32;NDEBUG;NO_LOG_DEBUG_INFO"
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
@@ -333,7 +329,6 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
-				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="0"
 			/>
 			<Tool
@@ -396,7 +391,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="&quot;..\ThirdParty\ode-060223\include&quot;;..\ThirdParty\stlport\stlport"
+				AdditionalIncludeDirectories="&quot;..\ThirdParty\ode-0.11.1\include&quot;;..\ThirdParty\stlport\stlport"
 				PreprocessorDefinitions="WIN32;NDEBUG"
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
@@ -404,7 +399,6 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
-				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -552,14 +546,6 @@
 			</File>
 			<File
 				RelativePath=".\Include\GeometryReference.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\ImageAnimator.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\ImageAnimator.inl"
 				>
 			</File>
 			<File

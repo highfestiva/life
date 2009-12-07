@@ -343,6 +343,12 @@ public:
 	inline void Set(float32 pRed,  float32 pGreen,  float32 pBlue,  float32 pColorIndex);
 	inline void Set(float64 pRed,  float64 pGreen,  float64 pBlue,  float64 pColorIndex);
 
+	inline float GetRf() const;
+	inline float GetGf() const;
+	inline float GetBf() const;
+	inline float GetAf() const;
+	inline uint32 To32() const;
+
 	inline Color operator = (const Color& pColor);
 	
 	// The following operators will operate on all color components 
@@ -513,6 +519,32 @@ void Color::Set(float64 pRed, float64 pGreen, float64 pBlue, float64 pColorIndex
 		(uint8)(pGreen * 255.0), 
 		(uint8)(pBlue * 255.0), 
 		(uint8)(pColorIndex * 255.0)); // Color index treated as alpha channel.
+}
+
+float Color::GetRf() const
+{
+	return (mRed/255.0f);
+}
+
+float Color::GetGf() const
+{
+	return (mGreen/255.0f);
+}
+
+float Color::GetBf() const
+{
+	return (mBlue/255.0f);
+}
+
+float Color::GetAf() const
+{
+	return (mAlpha/255.0f);
+}
+
+uint32 Color::To32() const
+{
+	typedef uint32 u;
+	return ((((u)mRed)<<24) + (((u)mGreen)<<16) + (((u)mBlue)<<8) + (u)mAlpha);
 }
 
 Color Color::operator = (const Color& pColor)

@@ -65,6 +65,7 @@ public:
 
 	static inline void InitFrequency();
 	static inline int64 GetFrequency();
+	static inline double GetPeriod();
 	static inline uint64 GetSystemCounter();
 
 private:
@@ -212,6 +213,11 @@ void HiResTimer::InitFrequency()
 int64 HiResTimer::GetFrequency()
 {
 	return (mFrequency);
+}
+
+double HiResTimer::GetPeriod()
+{
+	return (mPeriod);
 }
 
 uint64 HiResTimer::GetSystemCounter()

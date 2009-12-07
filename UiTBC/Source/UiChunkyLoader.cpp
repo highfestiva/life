@@ -441,10 +441,10 @@ bool ChunkyClassLoader::LoadElementCallback(TBC::ChunkyType pType, Lepra::uint32
 			lPhysicsIndex = Lepra::Endian::BigToHost(*(Lepra::int32*)&lBuffer[lIndex]);
 			lIndex += sizeof(lPhysicsIndex);
 			Lepra::UnicodeString lUnicodeMeshName;
-			const size_t lExcludeByteCount = (1+7)*4;	// Index+transform.
+			const size_t lExcludeByteCount = (1+7+11)*4;	// Index+transform+colors.
 			int lStrSize = Lepra::PackerUnicodeString::Unpack(&lUnicodeMeshName, &lBuffer[lIndex], pSize-lExcludeByteCount);
 			lStrSize = (lStrSize+3)&(~3);
-			lOk = (lStrSize == (int)(pSize-lExcludeByteCount));
+			lOk = (lStrSize < (int)(pSize-lExcludeByteCount));
 			lIndex += lStrSize;
 			lMeshBaseName = Lepra::UnicodeStringUtility::ToCurrentCode(lUnicodeMeshName);
 		}
@@ -456,8 +456,54 @@ bool ChunkyClassLoader::LoadElementCallback(TBC::ChunkyType pType, Lepra::uint32
 			{
 				lTransformArray[x] = Lepra::Endian::BigToHostF(*(Lepra::uint32*)&lBuffer[lIndex+x*sizeof(float)]);
 			}
+			lIndex += lTransformFloatCount * sizeof(float);
+			lOk = (lIndex < (int)(pSize - 11*sizeof(float) - 4));
 			lClass->AddMesh(lPhysicsIndex, lMeshBaseName, Lepra::TransformationF(lTransformArray));
 		}
+		UiTbc::ChunkyClass::Material lMaterial;
+		if (lOk)
+		{
+			const int lMaterialFloatCount = 11;
+			float lMaterialArray[lMaterialFloatCount];
+			for (int x = 0; x < lMaterialFloatCount; ++x)
+			{
+				lMaterialArray[x] = Lepra::Endian::BigToHostF(*(Lepra::uint32*)&lBuffer[lIndex+x*sizeof(float)]);
+			}
+			lIndex += lMaterialFloatCount * sizeof(float);
+			lOk = (lIndex <= (int)(pSize-4-4));
+			lMaterial.mAmbient.Set(lMaterialArray[0], lMaterialArray[1], lMaterialArray[2]);
+			lMaterial.mDiffuse.Set(lMaterialArray[3], lMaterialArray[4], lMaterialArray[5]);
+			lMaterial.mSpecular.Set(lMaterialArray[6], lMaterialArray[7], lMaterialArray[8]);
+			lMaterial.mShininess = lMaterialArray[9];
+			lMaterial.mAlpha = lMaterialArray[10];
+		}
+		if (lOk)
+		{
+			Lepra::int32 lTextureCount = Lepra::Endian::BigToHost(*(Lepra::int32*)&lBuffer[lIndex]);
+			lIndex += sizeof(lTextureCount);
+			lOk = (lIndex <= (int)(pSize-2*lTextureCount-2));
+			for (int x = 0; lOk && x < lTextureCount; ++x)
+			{
+				Lepra::UnicodeString lTextureName;
+				int lStrSize = Lepra::PackerUnicodeString::Unpack(&lTextureName, &lBuffer[lIndex], pSize-lIndex);
+				lStrSize = (lStrSize+3)&(~3);
+				lOk = (lStrSize <= (int)(pSize-2));
+				lIndex += lStrSize;
+				lMaterial.mTextureList.push_back(lTextureName);
+			}
+		}
+		if (lOk)
+		{
+			int lStrSize = Lepra::PackerUnicodeString::Unpack(&lMaterial.mShaderName, &lBuffer[lIndex], pSize-lIndex);
+			lStrSize = (lStrSize+3)&(~3);
+			lOk = (lStrSize == (int)(pSize-lIndex));
+			lIndex += lStrSize;
+		}
+		if (lOk)
+		{
+			lClass->SetLastMeshMaterial(lMaterial);
+		}
+		assert(lOk);
 	}
 	else
 	{

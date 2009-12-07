@@ -40,7 +40,7 @@ private:
 
 	const Lepra::String ConvertToString(UiLepra::InputManager::KeyCode pKeyCode) const;
 	bool SetValue(const Lepra::String& pKey, float pValue);
-	float* GetValuePointer(const Lepra::String& pKey, bool& pIsSteeringValue);
+	std::vector<float*> GetValuePointers(const Lepra::String& pKey, bool& pIsAnySteeringValue);
 
 	Cure::RuntimeVariableScope* mVariableScope;
 	ClientOptions mOptions;

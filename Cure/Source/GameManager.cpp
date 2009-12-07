@@ -29,6 +29,10 @@ GameTicker::~GameTicker()
 {
 }
 
+void GameTicker::Profile()
+{
+}
+
 
 
 GameManager::GameManager(RuntimeVariableScope* pVariableScope, ResourceManager* pResourceManager, bool pForceSynchronous):
@@ -36,7 +40,7 @@ GameManager::GameManager(RuntimeVariableScope* pVariableScope, ResourceManager* 
 	mVariableScope(pVariableScope),
 	mResource(pResourceManager),
 	mNetwork(0),
-	mTime(new TimeManager(CURE_RTVAR_GET(pVariableScope, RTVAR_PHYSICS_FPS, 60))),
+	mTime(new TimeManager),
 	mPhysics(TBC::PhysicsManagerFactory::Create(TBC::PhysicsManagerFactory::ENGINE_ODE)),
 	mContext(0),
 	mTerrain(new TerrainManager(pResourceManager)),
@@ -83,21 +87,20 @@ void GameManager::ResetPhysicsTime(int pStartPhysicsFrame)
 
 bool GameManager::BeginTick()
 {
+	LEPRA_MEASURE_SCOPE(BeginTick);
+
 	if (CURE_RTVAR_GET(GetVariableScope(), RTVAR_PERFORMANCE_TEXT_ENABLE, false))
 	{
 		const double lReportInterval = CURE_RTVAR_GET(GetVariableScope(), RTVAR_PERFORMANCE_TEXT_INTERVAL, 10.0);
-		ReportPerformance(lReportInterval);
+		TryReportPerformance(lReportInterval);
 	}
-
-	Lepra::ScopeTimer lWallTimer(&mWallTime);
 
 	GetTickLock()->Acquire();
 
 	{
-		Lepra::ScopeTimer lTime(&mNetworkAndInputTime);
+		LEPRA_MEASURE_SCOPE(NetworkAndInput);
 
 		mTime->TickTime();
-
 		mTime->TickPhysics();
 
 		// Sorts up incoming network data; adds/removes objects (for instance via remote create/delete).
@@ -106,12 +109,14 @@ bool GameManager::BeginTick()
 	}
 
 	{
-		Lepra::ScopeTimer lTime(&mPhysicsPropagationTime);
+		LEPRA_MEASURE_SCOPE(PhysicsPropagation);
 		ScriptPhysicsTick();
 	}
 
-	if (mTime->GetCurrentPhysicsStepCount() > 0)
+	if (mTime->GetAffordedPhysicsStepCount() > 0)
 	{
+		LEPRA_MEASURE_SCOPE(StartPhysics);
+
 		// Physics thread
 		// 1. does *NOT* add/delete objects,
 		// 2. processes context objects ("scripts"),
@@ -127,9 +132,11 @@ bool GameManager::BeginTick()
 
 bool GameManager::EndTick()
 {
-	if (mTime->GetCurrentPhysicsStepCount() > 0)
+	LEPRA_MEASURE_SCOPE(EndTick);
+
+	if (mTime->GetAffordedPhysicsStepCount() > 0)
 	{
-		Lepra::ScopeTimer lTime(&mWaitPhysicsTime);
+		LEPRA_MEASURE_SCOPE(WaitPhysics);
 		GetTickLock()->Release();
 		// Wait for physics thread to complete integration. If we run physics synchronously,
 		// this does nothing.
@@ -142,6 +149,8 @@ bool GameManager::EndTick()
 
 
 	{
+		LEPRA_MEASURE_SCOPE(NetworkSend);
+
 		// Sends network packets. Among other things, movement of locally-controlled objects are sent.
 		// This must be run after input processing, otherwise input-physics-output loop won't have
 		// the desired effect.
@@ -229,7 +238,7 @@ ContextObject* GameManager::CreateContextObject(const Lepra::String& pClassId, N
 
 
 
-void GameManager::ReportPerformance(double pReportInterval)
+void GameManager::TryReportPerformance(double pReportInterval)
 {
 	mPerformanceReportTimer.UpdateTimer();
 	const double lTimeDiff = mPerformanceReportTimer.GetTimeDiffF();
@@ -239,8 +248,8 @@ void GameManager::ReportPerformance(double pReportInterval)
 
 		if (mNetwork->IsOpen())
 		{
-			mSendBandwidth.Update(lTimeDiff, mNetwork->GetTotalSentByteCount());
-			mReceiveBandwidth.Update(lTimeDiff, mNetwork->GetTotalReceivedByteCount());
+			mSendBandwidth.Append(lTimeDiff, 0, mNetwork->GetTotalSentByteCount());
+			mReceiveBandwidth.Append(lTimeDiff, 0, mNetwork->GetTotalReceivedByteCount());
 			mLog.Performancef(_T("Network bandwith. Up: %sB/s (peak %sB/s). Down: %sB/s (peak %sB/s)."), 
 				Lepra::Number::ConvertToPostfixNumber(mSendBandwidth.GetLast(), 2).c_str(),
 				Lepra::Number::ConvertToPostfixNumber(mSendBandwidth.GetMaximum(), 2).c_str(),
@@ -253,23 +262,17 @@ void GameManager::ReportPerformance(double pReportInterval)
 			mReceiveBandwidth.Clear();
 		}
 
-		ReportPerformance(_T("Physics time."), mPhysicsTime);
-		ReportPerformance(_T("Network, user input time."), mNetworkAndInputTime);
-		ReportPerformance(_T("Wait physics time."), mWaitPhysicsTime);
-		ReportPerformance(_T("Wall time."), mWallTime);
-		if (mWallTime.GetLast())
-		{
-			mLog.Performancef(_T("FPS: %f, worst: %f."), 1/mWallTime.GetLast(), 1/mWallTime.GetMaximum());
-		}
+		const Lepra::ScopePerformanceData::NodeArray lRoots = Lepra::ScopePerformanceData::GetRoots();
+		ReportPerformance(Lepra::ScopePerformanceData::GetRoots(), 0);
 	}
 }
 
 void GameManager::ClearPerformanceData()
 {
-	mPhysicsTime.Clear();
-	mNetworkAndInputTime.Clear();
-	mWaitPhysicsTime.Clear();
-	mWallTime.Clear();
+	mSendBandwidth.Clear();
+	mReceiveBandwidth.Clear();
+
+	Lepra::ScopePerformanceData::ClearAll(Lepra::ScopePerformanceData::GetRoots());
 }
 
 
@@ -306,13 +309,21 @@ bool GameManager::TickNetworkOutput()
 
 
 
-void GameManager::ReportPerformance(const Lepra::String& pHead, const Lepra::PerformanceData& pPerformance)
+void GameManager::ReportPerformance(const Lepra::ScopePerformanceData::NodeArray& pNodes, int pRecursion)
 {
-	mLog.Performancef((pHead+_T(" Min: %ss, last: %ss, savg: %ss, max: %ss.")).c_str(), 
-		Lepra::Number::ConvertToPostfixNumber(pPerformance.GetMinimum(), 2).c_str(),
-		Lepra::Number::ConvertToPostfixNumber(pPerformance.GetLast(), 2).c_str(),
-		Lepra::Number::ConvertToPostfixNumber(pPerformance.GetSlidingAverage(), 2).c_str(),
-		Lepra::Number::ConvertToPostfixNumber(pPerformance.GetMaximum(), 2).c_str());
+	const Lepra::String lIndent = Lepra::String(pRecursion*3, ' ');
+	Lepra::ScopePerformanceData::NodeArray::const_iterator x = pNodes.begin();
+	for (; x != pNodes.end(); ++x)
+	{
+		const Lepra::ScopePerformanceData* lNode = *x;
+		Lepra::String lName = Lepra::StringUtility::Split(lNode->GetName(), _T(";"))[0];
+		mLog.Performancef((lIndent+lName+_T(" Min: %ss, last: %ss, savg: %ss, max: %ss.")).c_str(), 
+			Lepra::Number::ConvertToPostfixNumber(lNode->GetMinimum(), 2).c_str(),
+			Lepra::Number::ConvertToPostfixNumber(lNode->GetLast(), 2).c_str(),
+			Lepra::Number::ConvertToPostfixNumber(lNode->GetSlidingAverage(), 2).c_str(),
+			Lepra::Number::ConvertToPostfixNumber(lNode->GetMaximum(), 2).c_str());
+		ReportPerformance(lNode->GetChildren(), pRecursion+1);
+	}
 }
 
 
@@ -348,25 +359,24 @@ void GameManager::WaitPhysicsTick()
 
 void GameManager::PhysicsTick()
 {
-	Lepra::HiResTimer lTime;
+	LEPRA_MEASURE_SCOPE(Physics);
 
-	const int lAffordedStepCount = mTime->GetAffordedPhysicsStepCount();
-	const float lStepIncrement = mTime->GetAffordedStepPeriod();
-	if (lAffordedStepCount != 1 && !Lepra::Math::IsEpsEqual(lStepIncrement, 1/60.0f))
+	const int lMicroSteps = CURE_RTVAR_GET(GetVariableScope(), RTVAR_PHYSICS_MICROSTEPS, 3);
+	const int lAffordedStepCount = mTime->GetAffordedPhysicsStepCount() * lMicroSteps;
+	const float lStepIncrement = mTime->GetAffordedPhysicsStepTime() / lMicroSteps;
+	/*if (lAffordedStepCount != 1 && !Lepra::Math::IsEpsEqual(lStepIncrement, 1/60.0f))
 	{
 		mLog.Warningf(_T("Game time allows for %i physics steps in increments of %f."),
 			lAffordedStepCount, lStepIncrement);
-	}
+	}*/
 	for (int x = 0; x < lAffordedStepCount; ++x)
 	{
-		ScriptTick();
+		ScriptTick(lStepIncrement);
 		mPhysics->StepFast(lStepIncrement);
 	}
 
 	mContext->HandleIdledBodies();
 	mContext->HandlePhysicsSend();
-
-	mPhysicsTime.Update(lTime.PopTimeDiff());
 }
 
 bool GameManager::IsHighImpact(float pScaleFactor, const ContextObject* pObject, const Lepra::Vector3DF& pForce,
@@ -395,14 +405,14 @@ bool GameManager::IsThreadSafe() const
 	return (mIsThreadSafe);
 }
 
-void GameManager::ScriptTick()
+void GameManager::ScriptTick(float pTimeDelta)
 {
-	mContext->Tick();
+	mContext->Tick(pTimeDelta);
 }
 
 void GameManager::ScriptPhysicsTick()
 {
-	//if (mTime->GetCurrentPhysicsStepCount() > 0)
+	//if (mTime->GetAffordedPhysicsStepCount() > 0)
 	{
 		mContext->TickPhysics();
 	}

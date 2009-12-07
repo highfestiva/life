@@ -160,7 +160,7 @@ int ConsoleCommandManager::Execute(const String& pCommand, bool pAppendToHistory
 			for (; x != mCommandExecutorSet.end() && lExecutionResult < 0; ++x)
 			{
 				lExecutionResult = (*x)->Execute(lCommand, lParameterTokenList);
-				if (lExecutionResult > 0)
+				if (lExecutionResult != 0)
 				{
 					(*x)->OnExecutionError(lCommand, lParameterTokenList, lExecutionResult);
 				}

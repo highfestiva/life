@@ -12,6 +12,7 @@
 #include "../Lepra/Include/SystemManager.h"
 #include "LifeApplication.h"
 #include "LifeDefinitions.h"
+#include "RtVar.h"
 
 
 
@@ -93,10 +94,21 @@ int Application::Run()
 	lTimeInfo.Set(1/60.0, 1/60.0, 1/60.0);
 	while (lOk && !lQuit)
 	{
-		Lepra::ScopeTimer lTimer(&lTimeInfo);
-		lOk = mGameTicker->Tick();
+		mGameTicker->Profile();
+
+		LEPRA_MEASURE_SCOPE(AppTick);
+		{
+			Lepra::ScopeTimer lTimer(&lTimeInfo);
+			lOk = mGameTicker->Tick();
+			const float lExtraSleep = (float)CURE_RTVAR_TRYGET(Cure::GetSettings(), RTVAR_DEBUG_EXTRASLEEPTIME, 0.0);
+			if (lExtraSleep > 0)
+			{
+				Lepra::Thread::Sleep(lExtraSleep);
+			}
+		}
 		if (lOk)
 		{
+			LEPRA_MEASURE_SCOPE(AppSleep);
 			TickSleep(lTimeInfo.GetSlidingAverage());
 		}
 		lQuit = Lepra::SystemManager::GetQuitRequest();
@@ -148,7 +160,8 @@ Lepra::LogListener* Application::CreateConsoleLogListener() const
 
 void Application::TickSleep(double pMeasuredFrameTime) const
 {
-	const float lPowerSaveAmount = mGameTicker->GetPowerSaveAmount();
+	const float lPowerSaveFactor = (float)CURE_RTVAR_TRYGET(Cure::GetSettings(), RTVAR_DEBUG_POWERSAVEFACTOR, 1.0);
+	const float lPowerSaveAmount = mGameTicker->GetPowerSaveAmount() * lPowerSaveFactor;
 	if (lPowerSaveAmount > 0)
 	{
 		if (!mIsPowerSaving)
@@ -170,11 +183,17 @@ void Application::TickSleep(double pMeasuredFrameTime) const
 		double lWantedFrameTime = lFps? 1.0/lFps : 1;
 		if (lWantedFrameTime > pMeasuredFrameTime)
 		{
-			Lepra::Thread::Sleep(lWantedFrameTime-pMeasuredFrameTime);
+			Lepra::HiResTimer lTimer;
+			double lSleepTime = lWantedFrameTime-pMeasuredFrameTime;
+			while (lSleepTime >= 0.001)
+			{
+				Lepra::Thread::Sleep(lSleepTime);
+				lSleepTime -= lTimer.PopTimeDiff();
+			}
 		}
 		else
 		{
-			Lepra::Thread::YieldCpu();
+			Lepra::Thread::YieldCpu();	// Play nice.
 		}
 	}
 }

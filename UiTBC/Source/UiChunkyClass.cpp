@@ -15,6 +15,17 @@ namespace UiTbc
 
 
 
+ChunkyClass::Material::Material():
+	mAmbient(0,0,0),
+	mDiffuse(1,1,1),
+	mSpecular(0.1f,0.1f,0.1f),
+	mShininess(0),
+	mAlpha(1)
+{
+}
+
+
+
 ChunkyClass::ChunkyClass()
 {
 }
@@ -55,6 +66,19 @@ void ChunkyClass::GetMesh(size_t pIndex, int& pPhysIndex, Lepra::String& pMeshBa
 	pPhysIndex = mMeshArray[pIndex].mPhysIndex;
 	pMeshBaseName = mMeshArray[pIndex].mMeshBaseName;
 	pTransform = mMeshArray[pIndex].mTransform;
+}
+
+void ChunkyClass::SetLastMeshMaterial(const Material& pMaterial)
+{
+	assert(!mMeshArray.empty());
+	const size_t lLastMesh = mMeshArray.size()-1;
+	mMeshArray[lLastMesh].mMaterial = pMaterial;
+}
+
+const ChunkyClass::Material& ChunkyClass::GetMaterial(size_t pMeshIndex) const
+{
+	assert(pMeshIndex < mMeshArray.size());
+	return (mMeshArray[pMeshIndex].mMaterial);
 }
 
 

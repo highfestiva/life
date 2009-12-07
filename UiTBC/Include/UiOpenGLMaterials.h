@@ -24,20 +24,14 @@ class OpenGLRenderer;
 class OpenGLMaterial: public Material
 {
 public:
-
-	inline OpenGLMaterial(OpenGLRenderer* pRenderer,
-			      Material::DepthSortHint pSortHint,
-			      Material* pFallBackMaterial) :
-		Material(pRenderer, pSortHint),
-		mFallBackMaterial(pFallBackMaterial)
-	{
-	}
-
-	inline virtual ~OpenGLMaterial(){}
+	OpenGLMaterial(OpenGLRenderer* pRenderer, Material::DepthSortHint pSortHint, Material* pFallBackMaterial);
+	virtual ~OpenGLMaterial();
 
 	virtual Material::RemoveStatus RemoveGeometry(TBC::GeometryBase* pGeometry);
 
-	inline GLenum GetGLElementType(TBC::GeometryBase* pGeometry);
+	GLenum GetGLElementType(TBC::GeometryBase* pGeometry);
+
+	void SetMaterial(const TBC::GeometryBase* pGeometry);
 
 protected:
 
@@ -46,21 +40,7 @@ protected:
 	Material* mFallBackMaterial;	// If geometry doesn't contain all data needed.
 };
 
-GLenum OpenGLMaterial::GetGLElementType(TBC::GeometryBase* pGeometry)
-{
-	switch (pGeometry->GetPrimitiveType())
-	{
-		case TBC::GeometryBase::TRIANGLES:	return (GL_TRIANGLES);
-		case TBC::GeometryBase::TRIANGLE_STRIP:	return (GL_TRIANGLE_STRIP);
-	}
-	assert(false);
-	return (GL_TRIANGLES);
-}
 
-
-//
-//	OpenGLMatSingleColorSolid
-//
 
 class OpenGLMatSingleColorSolid: public OpenGLMaterial
 {

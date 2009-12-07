@@ -76,8 +76,7 @@ public:
 
 	// Specifies the font to be used when creating new TreeNodes. Doesn't affect
 	// currently existing nodes.
-	static void UseFont(Painter::FontID pFontID, 
-			    const Lepra::Color& pTextColor,
+	static void UseFont(const Lepra::Color& pTextColor,
 			    const Lepra::Color& pTextBackgColor,
 			    const Lepra::Color& pTextSelectedColor,
 			    const Lepra::Color& pTextSelectedBackgColor,
@@ -122,7 +121,6 @@ private:
 	static Painter* smPrevPainter;
 
 	// Factory members.
-	static Painter::FontID smFactoryFontID;
 	static Lepra::Color smFactoryTextColor;
 	static Lepra::Color smFactoryTextBackgColor;
 	static Lepra::Color smFactoryTextSelectedColor;

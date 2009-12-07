@@ -1756,7 +1756,7 @@ GameMuxSocket::~GameMuxSocket()
 bool GameMuxSocket::IsOpen() const
 {
 	ScopeLock lLock(&mLock);
-	return (mTcpMuxSocket->IsOpen() && mUdpMuxSocket->IsOpen());
+	return (mTcpMuxSocket && mUdpMuxSocket && mTcpMuxSocket->IsOpen() && mUdpMuxSocket->IsOpen());
 }
 
 GameSocket* GameMuxSocket::Connect(const SocketAddress& pTargetAddress, double pTimeout)

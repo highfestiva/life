@@ -6,7 +6,6 @@
 
 #include "../../Include/GUI/UiComponent.h"
 #include "../../Include/GUI/UiDesktopWindow.h"
-#include "../../Include/UiMouseTheme.h"
 #include "../../../Lepra/Include/Log.h"
 
 

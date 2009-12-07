@@ -25,15 +25,39 @@ template<class _Data> void SequencialPerformanceData<_Data>::Set(double pMinimum
 	Parent::Set(pMinimum, pThis, pMaximum);
 }
 
-template<class _Data> void SequencialPerformanceData<_Data>::Update(double pTime, _Data pValue)
+template<class _Data> void SequencialPerformanceData<_Data>::Append(double pTime, double pStartTime, _Data pValue)
 {
 	assert (pTime >= 0);
 	if (pTime > 0)
 	{
 		double lPeriodValue = (pValue-mPreviousValue)/pTime;
 		mPreviousValue = pValue;
-		Parent::Update(lPeriodValue);
+		Parent::Append(lPeriodValue, pStartTime);
 	}
+}
+
+
+
+template<class _T> BasicScopeTimer<_T>::BasicScopeTimer()
+{
+}
+
+template<class _T> BasicScopeTimer<_T>::BasicScopeTimer(_T* pData):
+	mData(pData)
+{
+}
+
+template<class _T> BasicScopeTimer<_T>::~BasicScopeTimer()
+{
+	const double lStart = mTime.GetTime();
+	const double lDelta = mTime.PopTimeDiff();
+	mData->Append(lDelta, lStart);
+	mData = 0;
+}
+
+template<class _T> void BasicScopeTimer<_T>::Attach(_T* pData)
+{
+	mData = pData;
 }
 
 

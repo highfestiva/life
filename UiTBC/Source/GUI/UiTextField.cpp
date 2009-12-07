@@ -8,7 +8,6 @@
 #include "../../Include/GUI/UiDesktopWindow.h"
 #include "../../Include/GUI/UiPopupList.h"
 #include "../../Include/GUI/UiFloatingLayout.h"
-#include "../../Include/UiMouseTheme.h"
 #include "../../../UiLepra/Include/UiInput.h"
 
 
@@ -468,24 +467,9 @@ bool TextField::OnLButtonUp(int pMouseX, int pMouseY)
 	return Parent::OnLButtonUp(pMouseX, pMouseY);
 }
 
-bool TextField::OnMouseMove(int pMouseX, int pMouseY, int, int)
+bool TextField::OnMouseMove(int, int, int, int)
 {
-	pMouseX;
-	pMouseY;
-
-	DesktopWindow* lDWin = (DesktopWindow*)Component::GetParentOfType(DESKTOPWINDOW);
-	MouseTheme* lMTheme = 0;
-
-	if (lDWin != 0)
-	{
-		lMTheme = lDWin->GetMouseTheme();
-	}
-
-	if (lMTheme != 0)
-	{
-		lMTheme->LoadTextCursor();
-	}
-
+	// TODO: set mouse cursor: text.
 	return true;
 }
 
@@ -569,8 +553,6 @@ void TextField::DoSetSize(int pWidth, int pHeight)
 void TextField::Repaint(Painter* pPainter)
 {
 	Parent::Repaint(pPainter);
-
-	pPainter->SetActiveFont(GetFontId());
 
 	if (mUpdateMarkerPosOnNextRepaint == true)
 	{

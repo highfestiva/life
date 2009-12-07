@@ -38,6 +38,8 @@
 // Drop asshole M$ #defines.
 #include "../LepraUndef.h"
 
+#define LEPRA_HEAP_CHECK()			::_heapchk()
+
 #if _MSC_VER > 1310	// <MSVS 2005+>
 #define WIDE_SPRINTF(buf, size, fmt, arg)	::vswprintf_s(buf, size, fmt, arg)
 #else // <MSVS 2003 .NET->

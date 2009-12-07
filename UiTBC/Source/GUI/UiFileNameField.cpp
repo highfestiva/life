@@ -58,7 +58,7 @@ PopupList* FileNameField::CreatePopupList()
 	DesktopWindow* lDesktopWindow = (DesktopWindow*)GetParentOfType(DESKTOPWINDOW);
 	if (lDesktopWindow != 0)
 	{
-		lPainter = lDesktopWindow->GetInternalPainter();
+		lPainter = lDesktopWindow->GetPainter();
 	}
 
 	std::list<FileInfo> lFileList;
@@ -97,7 +97,6 @@ PopupList* FileNameField::CreatePopupList()
 		{
 			Label* lLabel = new Label(Lepra::WHITE, Lepra::LIGHT_BLUE);
 			lLabel->SetText((*lIter).mName, 
-					 GetFontId(), 
 					 GetTextColor(),
 					 Lepra::WHITE,
 					 Lepra::BLACK,

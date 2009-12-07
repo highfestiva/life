@@ -1,25 +1,30 @@
-/*
-	Class:  Geometry2D
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Alexander Hugestrand
 
-	NOTES:
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2009, Righteous Games
+//
+// NOTES:
+//
+// This class was implemented in order to optimize 2D rendering using hardware 
+// accelerated Painters (see Painter.h). While OpenGLPainter and DirectXPainter
+// benefits from this class and can perform faster, the opposite unfortunately 
+// applies to SoftwarePainter.
+//
+// Use this class with care! This class is implemented with performance in mind,
+// not safety.
 
-	This class was implemented in order to optimize 2D rendering using hardware 
-	accelerated Painters (see Painter.h). While OpenGLPainter and DirectXPainter
-	benefits from this class and can perform faster, the opposite unfortunately 
-	applies to SoftwarePainter.
 
-	Use this class with care! This class is implemented with performance in mind,
-	not safety.
-*/
 
 #include "../../Lepra/Include/LepraTypes.h"
 #include "../../Lepra/Include/Vector2D.h"
 #include "UiTBC.h"
 
+
+
 namespace UiTbc
 {
+
+
+
 class Geometry2D
 {
 public:
@@ -83,6 +88,8 @@ public:
 	Geometry2D(Lepra::uint16 pVertexFormat = VTX_RGB,
 		int pVertexCapacity = 16, int pTriangleCapacity = 8);
 	~Geometry2D();
+	void Init(Lepra::uint16 pVertexFormat = VTX_RGB,
+		int pVertexCapacity = 16, int pTriangleCapacity = 8);
 
 	inline Lepra::uint16 GetVertexFormat() const { return mVertexFormat; }
 
@@ -110,23 +117,25 @@ public:
 	// Returns valid buffer pointers to buffers specified by the vertex format.
 	// If VTX_INTERLEAVED is set, the pointer from GetVertexData() should be
 	// casted to either a void or a byte pointer, float pointer otherwise.
-	inline void* GetVertexData() const { return mVertexData; }
-	inline float* GetColorData() const { return mColorData; }
-	inline float* GetUVData() const { return mUVData; }
-	inline Lepra::uint32* GetTriangleData() const { return mTriangleData; }
+	inline const void* GetVertexData() const { return mVertexData; }
+	inline const float* GetColorData() const { return mColorData; }
+	inline const float* GetUVData() const { return mUVData; }
+	inline const Lepra::uint32* GetTriangleData() const { return mTriangleData; }
 	inline int GetVertexCapacity() const { return mVertexCapacity; }
 	inline int GetTriangleCapacity() const { return mTriangleCapacity; }
 	inline int GetVertexCount() const { return mVertexCount; }
 	inline int GetTriangleCount() const { return mTriangleCount; }
 
-	inline const Lepra::Vector2D<float>& GetPos() const { return mPos; }
-	inline void SetPos(const Lepra::Vector2D<float>& pPos) { mPos = pPos; }
+	inline const Lepra::Vector2DF& GetPos() const { return mPos; }
+	inline void SetPos(const Lepra::Vector2DF& pPos) { mPos = pPos; }
 
 	inline bool IsFlagSet(Lepra::uint16 pFlag) { return ((mVertexFormat & pFlag) != 0); }
 
 private:
-
 	void Realloc(void** pData, size_t pNewSize, size_t pBytesToCopy);
+
+	Geometry2D(const Geometry2D&);
+	void operator=(const Geometry2D&);
 
 	Lepra::uint16 mVertexFormat;
 
@@ -142,4 +151,6 @@ private:
 	Lepra::Vector2D<float> mPos;
 };
 
-} // End namespace.
+
+
+}

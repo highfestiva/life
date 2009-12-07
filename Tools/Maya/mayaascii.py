@@ -643,7 +643,7 @@ class Node:
                         ma = MultiAttrStorage()
                         setattr(self, name, ma)
                         return ma
-                raise AttributeError(name)
+                raise AttributeError(name+" (in %s)" % repr(self))
 
         # getName
         def getName(self):

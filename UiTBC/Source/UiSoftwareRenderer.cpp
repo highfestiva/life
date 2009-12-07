@@ -252,17 +252,14 @@ bool SoftwareRenderer::PreRender(TBC::GeometryBase* pGeometry)
 
 	TextureTable::Iterator lIter = lGeometryData->mTA? mTextureTable.Find(lGeometryData->mTA->mTextureID[0]) : mTextureTable.End();
 
-	const TBC::GeometryBase::BasicMaterialSettings& lMatSettings = pGeometry->GetBasicMaterialSettings();
-	float lRed   = lMatSettings.mRed;
-	float lGreen = lMatSettings.mGreen;
-	float lBlue  = lMatSettings.mBlue;
+	const TBC::GeometryBase::BasicMaterialSettings& lMat = pGeometry->GetBasicMaterialSettings();
 
 	if (lIter != mTextureTable.End())
 	{
 		m3DPainter.SetTexture((*lIter));
 	}
 
-	m3DPainter.SetDefaultColor(lRed, lGreen, lBlue);
+	m3DPainter.SetDefaultColor(lMat.mDiffuse.x, lMat.mDiffuse.y, lMat.mDiffuse.z);
 	m3DPainter.SetTextureTransform(pGeometry->GetUVTransform());
 
 	return Renderer::CheckCulling(m3DPainter.GetCameraTransform().InverseTransform(pGeometry->GetTransformation()), pGeometry->GetBoundingRadius());

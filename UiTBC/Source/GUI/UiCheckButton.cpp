@@ -207,7 +207,6 @@ void CheckButton::Repaint(Painter* pPainter)
 						   lButtonRect.mTop + 3);
 		}
 
-		pPainter->SetActiveFont(GetFontID());
 		Button::PrintText(pPainter, lButtonRect.mRight + lTextDisplacement, lButtonRect.mBottom - pPainter->GetFontHeight() - 2);
 	}
 

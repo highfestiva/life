@@ -19,6 +19,9 @@
 #ifdef GetCurrentDirectory
 #undef GetCurrentDirectory
 #endif
+#ifdef GetCharWidth
+#undef GetCharWidth
+#endif
 #ifdef GetObject
 #undef GetObject
 #endif

@@ -52,7 +52,6 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
-				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -123,7 +122,6 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
-				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="0"
 			/>
 			<Tool
@@ -194,7 +192,6 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
-				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -262,7 +259,6 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
-				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -333,7 +329,6 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
-				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="0"
 			/>
 			<Tool
@@ -404,7 +399,6 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
-				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -528,14 +522,6 @@
 				RelativePath=".\Source\TimeManager.cpp"
 				>
 			</File>
-			<File
-				RelativePath=".\Source\UserAccount.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Source\UserAccountManager.cpp"
-				>
-			</File>
 			<Filter
 				Name="Client"
 				>
@@ -549,6 +535,14 @@
 				>
 				<File
 					RelativePath=".\Source\NetworkServer.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\UserAccount.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\UserAccountManager.cpp"
 					>
 				</File>
 				<File
@@ -619,6 +613,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Include\RuntimeVariableName.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Include\TerrainFunctionManager.h"
 				>
 			</File>
@@ -638,21 +636,9 @@
 				RelativePath=".\Include\TimeManager.h"
 				>
 			</File>
-			<File
-				RelativePath=".\Include\UserAccount.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\UserAccountManager.h"
-				>
-			</File>
 			<Filter
 				Name="Client"
 				>
-				<File
-					RelativePath=".\Include\GameUiManager.h"
-					>
-				</File>
 				<File
 					RelativePath=".\Include\NetworkClient.h"
 					>
@@ -663,6 +649,14 @@
 				>
 				<File
 					RelativePath=".\Include\NetworkServer.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Include\UserAccount.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Include\UserAccountManager.h"
 					>
 				</File>
 				<File

@@ -1,17 +1,16 @@
-/*
-	Class:  OpenGLPainter
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Alexander Hugestrand
 
-	NOTES: 
-	
-	This class can only render bitmaps with dimensions of a power of 2.
-	The openGL texture "names" (or IDs) between 1-10000 are reserved to bitmap rendering.
-	1 is reserved for text, and 2 is reserved for the default mouse cursor.
-*/
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2009, Righteous Games
+//
+// NOTES: 
+//
+// This class can only render bitmaps with dimensions of a power of 2.
+// The openGL texture "names" (or IDs) between 1-10000 are reserved to bitmap rendering.
+// 1 is reserved for text, and 2 is reserved for the default mouse cursor.
 
-#ifndef UIOPENGLPAINTER_H
-#define UIOPENGLPAINTER_H
+
+
+#pragma once
 
 #include "UiTBC.h"
 #include "../../Lepra/Include/Graphics2D.h"
@@ -23,10 +22,14 @@
 #include "UiPainter.h"
 #include <list>
 
+
+
 namespace UiTbc
 {
 
-class OpenGLPainter : public Painter
+
+
+class OpenGLPainter: public Painter
 {
 public:
 	OpenGLPainter();
@@ -56,11 +59,9 @@ public:
 
 	RGBOrder GetRGBOrder();
 
-protected:
-	/*
-		Rendering functions.
-	*/
+	virtual void SetFontSmoothness(bool pSmooth);	// TODO: move to base class!
 
+protected:
 	void DoDrawPixel(int x, int y);
 	void DoDrawLine(int pX1, int pY1, int pX2, int pY2);
 	void DoFillTriangle(float pX1, float pY1,
@@ -83,14 +84,14 @@ protected:
 	void DoDrawImage(ImageID pImageID, const Lepra::PixelRect& pRect);
 	void DoDrawAlphaImage(ImageID pImageID, int x, int y);
 
-	Font* NewFont(int pFirstChar, int pLastChar) const { return new OpenGLFont(pFirstChar, pLastChar); }
-	void InitFont(Font* pFont, const Lepra::Canvas& pFontImage);
 	void GetImageSize(ImageID pImageID, int& pWidth, int& pHeight);
-	int DoPrintText(const Lepra::String& pString, int x, int y);
+	int PrintText(const Lepra::String& pString, int x, int y);
 
 	void DoRenderDisplayList(std::vector<DisplayEntity*>* pDisplayList);
-private:
 
+	void ClearFontBuffers();
+
+private:
 	Lepra::Vector3DF mRCol[4];
 
 	class Texture
@@ -106,53 +107,20 @@ private:
 		int mHeight;
 	};
 
-	class OpenGLFont : public Painter::Font
-	{
-	public:
-		OpenGLFont(int pFirstChar, int pLastChar) :
-			Font(pFirstChar, pLastChar),
-			mCharRect(new FRect[pLastChar - pFirstChar + 1]),
-			mTexture(0)
-		{
-		}
-
-		~OpenGLFont()
-		{
-			delete[] mCharRect;
-		}
-
-		void GetUVRect(const Lepra::tchar& pChar, float& pU1, float& pV1, float& pU2, float& pV2) const
-		{
-			FRect& lFRect = mCharRect[pChar - mFirstChar];
-			pU1 = lFRect.mLeft;
-			pV1 = lFRect.mTop;
-			pU2 = lFRect.mRight;
-			pV2 = lFRect.mBottom;
-		}
-
-		struct FRect
-		{
-			float mLeft;
-			float mRight;
-			float mTop;
-			float mBottom;
-		};
-
-		FRect* mCharRect;
-		Texture* mTexture;
-	};
-
 	typedef Lepra::HashTable<int, Texture*> TextureTable;
+	typedef std::hash_map<Lepra::uint64, GLuint> GlyphTable;
 
 	void UpdateRenderMode();
 
 	Lepra::IdManager<int> mTextureIDManager;
 	TextureTable mTextureTable;
+	GlyphTable mGlyphTable;
 
 	bool mRenderModeChanged;
+
+	bool mSmoothFont;
 };
 
 
-} // End namespace.
 
-#endif
+}

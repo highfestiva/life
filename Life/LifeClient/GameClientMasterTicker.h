@@ -8,6 +8,7 @@
 
 #include "../../Cure/Include/GameManager.h"
 #include "../../Lepra/Include/Thread.h"
+#include "../../UiCure/Include/UiLineGraph2d.h"
 #include "InputObserver.h"
 #include "PlayerCountView.h"
 
@@ -51,6 +52,9 @@ private:
 	void CreatePlayerCountWindow();
 	bool Reinitialize();
 	void UpdateSlaveLayout();
+	void Profile();
+	void DrawFps() const;
+	void DrawPerformanceLineGraph2d() const;
 
 	float GetPowerSaveAmount() const;
 
@@ -78,7 +82,6 @@ private:
 
 	Lepra::Lock mLock;
 	UiCure::GameUiManager* mUiManager;
-	Lepra::PerformanceData mResourceTime;
 	Cure::ResourceManager* mResourceManager;
 	View* mPlayerCountView;
 	ConsoleManager* mConsole;
@@ -87,6 +90,7 @@ private:
 	unsigned mActiveWidth;
 	unsigned mActiveHeight;
 	SlaveMap mSlaveSet;
+	std::vector<UiCure::LineGraph2d> mPerformanceGraphList;
 
 	LOG_CLASS_DECLARE();
 };

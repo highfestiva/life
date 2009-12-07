@@ -52,7 +52,6 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
-				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -128,14 +127,13 @@
 				InlineFunctionExpansion="2"
 				FavorSizeOrSpeed="1"
 				AdditionalIncludeDirectories="&quot;..\..\ThirdParty\stlport\stlport&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;NO_LOG_DEBUG_INFO"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;NO_LOG_DEBUG_INFO"
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
 				TreatWChar_tAsBuiltInType="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
-				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="0"
 			/>
 			<Tool
@@ -155,7 +153,7 @@
 				AdditionalLibraryDirectories="..\..\ThirdParty\stlport\lib;..\..\ThirdParty\fmod\api\lib"
 				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="true"
-				SubSystem="1"
+				SubSystem="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
 			/>
@@ -218,7 +216,6 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
-				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -300,7 +297,6 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
-				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -355,6 +351,7 @@
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="1"
 			ManagedExtensions="0"
+			WholeProgramOptimization="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -376,14 +373,13 @@
 				InlineFunctionExpansion="2"
 				FavorSizeOrSpeed="1"
 				AdditionalIncludeDirectories="&quot;..\..\ThirdParty\stlport\stlport&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;NO_LOG_DEBUG_INFO"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;NO_LOG_DEBUG_INFO"
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
 				TreatWChar_tAsBuiltInType="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
-				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="0"
 			/>
 			<Tool
@@ -403,7 +399,7 @@
 				AdditionalLibraryDirectories="..\..\ThirdParty\stlport\lib;..\..\ThirdParty\fmod\api\lib"
 				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="true"
-				SubSystem="1"
+				SubSystem="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
 			/>
@@ -437,6 +433,7 @@
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="1"
 			ManagedExtensions="0"
+			WholeProgramOptimization="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -465,7 +462,6 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
-				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -481,7 +477,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="fmodvc.lib Netapi32.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
-				LinkIncremental="2"
+				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\ThirdParty\stlport\lib;..\..\ThirdParty\fmod\api\lib"
 				IgnoreDefaultLibraryNames="msvcrt.lib"
 				GenerateDebugInformation="true"
@@ -560,10 +556,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\LifeApplication.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\PlayerCountView.cpp"
 				>
 			</File>
@@ -594,10 +586,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\GameClientManager.h"
-				>
-			</File>
-			<File
 				RelativePath=".\GameClientMasterTicker.h"
 				>
 			</File>
@@ -607,14 +595,6 @@
 			</File>
 			<File
 				RelativePath=".\InputObserver.h"
-				>
-			</File>
-			<File
-				RelativePath="..\LifeApplication.h"
-				>
-			</File>
-			<File
-				RelativePath="..\LifeDefinitions.h"
 				>
 			</File>
 			<File

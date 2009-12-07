@@ -1,17 +1,19 @@
-/*
-	Class:  BorderComponent
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Alexander Hugestrand
-*/
+
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2006, Righteous Games
+
+
 
 #include "../../Include/GUI/UiBorderComponent.h"
-#include "../../Include/GUI/UiDesktopWindow.h"
-#include "../../Include/UiMouseTheme.h"
-
 #include <math.h>
+#include "../../Include/GUI/UiDesktopWindow.h"
+
+
 
 namespace UiTbc
 {
+
+
 
 BorderComponent::BorderComponent(BorderPart pPart, const Lepra::Color& pColor, BorderShadeFunc pShadeFunc,
 	const Lepra::String& pName):
@@ -513,39 +515,28 @@ bool BorderComponent::OnMouseMove(int /*pMouseX*/, int /*pMouseY*/, int pMouseDX
 	}
 	else if(mResizable == true)
 	{
-		DesktopWindow* lDWin = (DesktopWindow*)GetParentOfType(DESKTOPWINDOW);
-		MouseTheme* lMTheme = 0;
-
-		if (lDWin != 0)
-		{
-			lMTheme = lDWin->GetMouseTheme();
-		}
-
-		if (lMTheme != 0)
-		{
-			switch(mPart)
-			{
-			case TOPLEFT_CORNER:
-			case BOTTOMRIGHT_CORNER:
-				lMTheme->LoadDiagonal1ResizeCursor();
-				break;
-			case BOTTOMLEFT_CORNER:
-			case TOPRIGHT_CORNER:
-				lMTheme->LoadDiagonal2ResizeCursor();
-				break;
-			case TOP_BORDER:
-			case BOTTOM_BORDER:
-				lMTheme->LoadVResizeCursor();
-				break;
-			case LEFT_BORDER:
-			case RIGHT_BORDER:
-				lMTheme->LoadHResizeCursor();
-				break;
-			default:
-				lMTheme->LoadArrowCursor();
-			};
-		}
-
+		// TODO: set mouse cursor:
+		//switch(mPart)
+		//{
+		//case TOPLEFT_CORNER:
+		//case BOTTOMRIGHT_CORNER:
+		//	lMTheme->LoadDiagonal1ResizeCursor();
+		//	break;
+		//case BOTTOMLEFT_CORNER:
+		//case TOPRIGHT_CORNER:
+		//	lMTheme->LoadDiagonal2ResizeCursor();
+		//	break;
+		//case TOP_BORDER:
+		//case BOTTOM_BORDER:
+		//	lMTheme->LoadVResizeCursor();
+		//	break;
+		//case LEFT_BORDER:
+		//case RIGHT_BORDER:
+		//	lMTheme->LoadHResizeCursor();
+		//	break;
+		//default:
+		//	lMTheme->LoadArrowCursor();
+		//};
 		return true;
 	}
 	else
@@ -554,4 +545,6 @@ bool BorderComponent::OnMouseMove(int /*pMouseX*/, int /*pMouseY*/, int pMouseDX
 	}
 }
 
-} // End namespace.
+
+
+}

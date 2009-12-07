@@ -45,15 +45,15 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				WholeProgramOptimization="false"
-				AdditionalIncludeDirectories="&quot;ode-060223/include&quot;;..\ThirdParty\stlport\stlport"
-				PreprocessorDefinitions="WIN32;_DEBUG;dCYLINDER_ENABLED"
+				AdditionalIncludeDirectories="../ThirdParty/stlport/stlport;../ThirdParty/ode-0.11.1/include;../ThirdParty/ode-0.11.1/ode/src;../ThirdParty/ode-0.11.1/ode/src/joints;../ThirdParty/ode-0.11.1/OPCODE;../ThirdParty/ode-0.11.1/GIMPACT/include;../ThirdParty/ode-0.11.1/ou/include"
+				PreprocessorDefinitions="WIN32;_DEBUG;dSINGLE;ODE_LIB"
 				ExceptionHandling="1"
 				RuntimeLibrary="1"
 				BufferSecurityCheck="false"
 				TreatWChar_tAsBuiltInType="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="false"
+				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -113,8 +113,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				FavorSizeOrSpeed="1"
-				AdditionalIncludeDirectories="&quot;ode-060223/include&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;dCYLINDER_ENABLED"
+				AdditionalIncludeDirectories="../ThirdParty/stlport/stlport;../ThirdParty/ode-0.11.1/include;../ThirdParty/ode-0.11.1/ode/src;../ThirdParty/ode-0.11.1/ode/src/joints;../ThirdParty/ode-0.11.1/OPCODE;../ThirdParty/ode-0.11.1/GIMPACT/include;../ThirdParty/ode-0.11.1/ou/include"
+				PreprocessorDefinitions="WIN32;NDEBUG;dSINGLE;ODE_LIB"
 				ExceptionHandling="1"
 				RuntimeLibrary="0"
 				BufferSecurityCheck="false"
@@ -227,14 +227,6 @@
 				Name="Source Files"
 				Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
 				>
-				<File
-					RelativePath=".\jpeg-6b\cdjpeg.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\jpeg-6b\ckconfig.cpp"
-					>
-				</File>
 				<File
 					RelativePath=".\jpeg-6b\jcapimin.cpp"
 					>
@@ -417,58 +409,6 @@
 				</File>
 				<File
 					RelativePath=".\jpeg-6b\jutils.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\jpeg-6b\rdbmp.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\jpeg-6b\rdcolmap.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\jpeg-6b\rdgif.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\jpeg-6b\rdppm.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\jpeg-6b\rdrle.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\jpeg-6b\rdswitch.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\jpeg-6b\rdtarga.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\jpeg-6b\transupp.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\jpeg-6b\wrbmp.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\jpeg-6b\wrgif.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\jpeg-6b\wrppm.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\jpeg-6b\wrrle.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\jpeg-6b\wrtarga.cpp"
 					>
 				</File>
 			</Filter>
@@ -734,706 +674,900 @@
 			Name="ODE"
 			>
 			<Filter
-				Name="Header Files"
-				Filter="h;hpp;hxx;hm;inl;inc;xsd"
+				Name="Source Files"
 				>
 				<File
-					RelativePath=".\ode-060223\ode\src\array.h"
+					RelativePath=".\ode-0.11.1\ode\src\array.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\include\ode\collision.h"
+					RelativePath=".\ode-0.11.1\ode\src\array.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\ode\src\collision_kernel.h"
+					RelativePath=".\ode-0.11.1\ode\src\box.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\include\ode\collision_space.h"
+					RelativePath=".\ode-0.11.1\ode\src\capsule.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\ode\src\collision_space_internal.h"
+					RelativePath=".\ode-0.11.1\ode\src\collision_cylinder_box.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\ode\src\collision_std.h"
+					RelativePath=".\ode-0.11.1\ode\src\collision_cylinder_plane.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\ode\src\collision_transform.h"
+					RelativePath=".\ode-0.11.1\ode\src\collision_cylinder_sphere.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\include\ode\collision_trimesh.h"
+					RelativePath=".\ode-0.11.1\ode\src\collision_cylinder_trimesh.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\ode\src\collision_trimesh_internal.h"
+					RelativePath=".\ode-0.11.1\ode\src\collision_kernel.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\ode\src\collision_util.h"
+					RelativePath=".\ode-0.11.1\ode\src\collision_kernel.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\include\ode\common.h"
+					RelativePath=".\ode-0.11.1\ode\src\collision_quadtreespace.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\include\ode\compatibility.h"
+					RelativePath=".\ode-0.11.1\ode\src\collision_sapspace.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\include\ode\config.h"
+					RelativePath=".\ode-0.11.1\ode\src\collision_space.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\include\ode\contact.h"
+					RelativePath=".\ode-0.11.1\ode\src\collision_space_internal.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\contrib\dCylinder\dCylinder.h"
+					RelativePath=".\ode-0.11.1\ode\src\collision_std.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\include\ode\error.h"
+					RelativePath=".\ode-0.11.1\ode\src\collision_transform.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\include\ode\export-dif.h"
+					RelativePath=".\ode-0.11.1\ode\src\collision_transform.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\Ice\IceAABB.h"
+					RelativePath=".\ode-0.11.1\ode\src\collision_trimesh_box.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\Ice\IceAxes.h"
+					RelativePath=".\ode-0.11.1\ode\src\collision_trimesh_ccylinder.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\Ice\IceBoundingSphere.h"
+					RelativePath=".\ode-0.11.1\ode\src\collision_trimesh_colliders.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\Ice\IceContainer.h"
+					RelativePath=".\ode-0.11.1\ode\src\collision_trimesh_disabled.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\Ice\IceFPU.h"
+					RelativePath=".\ode-0.11.1\ode\src\collision_trimesh_distance.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\Ice\IceHPoint.h"
+					RelativePath=".\ode-0.11.1\ode\src\collision_trimesh_gimpact.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\Ice\IceIndexedTriangle.h"
+					RelativePath=".\ode-0.11.1\ode\src\collision_trimesh_internal.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\Ice\IceLSS.h"
+					RelativePath=".\ode-0.11.1\ode\src\collision_trimesh_opcode.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\Ice\IceMatrix3x3.h"
+					RelativePath=".\ode-0.11.1\ode\src\collision_trimesh_plane.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\Ice\IceMatrix4x4.h"
+					RelativePath=".\ode-0.11.1\ode\src\collision_trimesh_ray.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\Ice\IceMemoryMacros.h"
+					RelativePath=".\ode-0.11.1\ode\src\collision_trimesh_sphere.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\Ice\IceOBB.h"
+					RelativePath=".\ode-0.11.1\ode\src\collision_trimesh_trimesh.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\Ice\IcePairs.h"
+					RelativePath=".\ode-0.11.1\ode\src\collision_trimesh_trimesh_new.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\Ice\IcePlane.h"
+					RelativePath=".\ode-0.11.1\ode\src\collision_util.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\Ice\IcePoint.h"
+					RelativePath=".\ode-0.11.1\ode\src\collision_util.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\Ice\IcePreprocessor.h"
+					RelativePath=".\ode-0.11.1\ode\src\config.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\Ice\IceRandom.h"
+					RelativePath=".\ode-0.11.1\ode\src\convex.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\Ice\IceRay.h"
+					RelativePath=".\ode-0.11.1\ode\src\cylinder.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\Ice\IceRevisitedRadix.h"
+					RelativePath=".\ode-0.11.1\ode\src\error.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\Ice\IceSegment.h"
+					RelativePath=".\ode-0.11.1\ode\src\export-dif.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\Ice\IceTriangle.h"
+					RelativePath=".\ode-0.11.1\ode\src\fastdot.c"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\Ice\IceTriList.h"
+					RelativePath=".\ode-0.11.1\ode\src\fastldlt.c"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\Ice\IceTypes.h"
+					RelativePath=".\ode-0.11.1\ode\src\fastlsolve.c"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\Ice\IceUtils.h"
+					RelativePath=".\ode-0.11.1\ode\src\fastltsolve.c"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\ode\src\joint.h"
+					RelativePath=".\ode-0.11.1\ode\src\heightfield.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\ode\src\lcp.h"
+					RelativePath=".\ode-0.11.1\ode\src\heightfield.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\include\ode\mass.h"
+					RelativePath=".\ode-0.11.1\ode\src\lcp.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\ode\src\mat.h"
+					RelativePath=".\ode-0.11.1\ode\src\lcp.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\include\ode\matrix.h"
+					RelativePath=".\ode-0.11.1\ode\src\mass.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\include\ode\memory.h"
+					RelativePath=".\ode-0.11.1\ode\src\mat.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\include\ode\misc.h"
+					RelativePath=".\ode-0.11.1\ode\src\mat.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\ode\src\objects.h"
+					RelativePath=".\ode-0.11.1\ode\src\matrix.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\include\ode\objects.h"
+					RelativePath=".\ode-0.11.1\ode\src\memory.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\ode\src\obstack.h"
+					RelativePath=".\ode-0.11.1\ode\src\misc.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\include\ode\ode.h"
+					RelativePath=".\ode-0.11.1\ode\src\objects.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\include\ode\odecpp.h"
+					RelativePath=".\ode-0.11.1\ode\src\obstack.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\include\ode\odecpp_collision.h"
+					RelativePath=".\ode-0.11.1\ode\src\obstack.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\include\ode\odecpp_old.h"
+					RelativePath=".\ode-0.11.1\ode\src\ode.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\include\ode\odemath.h"
+					RelativePath=".\ode-0.11.1\ode\src\odeinit.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_AABBCollider.h"
+					RelativePath=".\ode-0.11.1\ode\src\odemath.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_AABBTree.h"
+					RelativePath=".\ode-0.11.1\ode\src\odeou.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_BaseModel.h"
+					RelativePath=".\ode-0.11.1\ode\src\odeou.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_BoxBoxOverlap.h"
+					RelativePath=".\ode-0.11.1\ode\src\odetls.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_BoxPruning.h"
+					RelativePath=".\ode-0.11.1\ode\src\odetls.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_Collider.h"
+					RelativePath=".\ode-0.11.1\ode\src\plane.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_Common.h"
+					RelativePath=".\ode-0.11.1\ode\src\quickstep.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_HybridModel.h"
+					RelativePath=".\ode-0.11.1\ode\src\quickstep.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_IceHook.h"
+					RelativePath=".\ode-0.11.1\ode\src\ray.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_LSSAABBOverlap.h"
+					RelativePath=".\ode-0.11.1\ode\src\rotation.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_LSSCollider.h"
+					RelativePath=".\ode-0.11.1\ode\src\sphere.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_LSSTriOverlap.h"
+					RelativePath=".\ode-0.11.1\ode\src\step.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_MeshInterface.h"
+					RelativePath=".\ode-0.11.1\ode\src\step.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_Model.h"
+					RelativePath=".\ode-0.11.1\ode\src\stepfast.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_OBBCollider.h"
+					RelativePath=".\ode-0.11.1\ode\src\testing.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_OptimizedTree.h"
+					RelativePath=".\ode-0.11.1\ode\src\testing.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_Picking.h"
+					RelativePath=".\ode-0.11.1\ode\src\timer.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_PlanesAABBOverlap.h"
+					RelativePath=".\ode-0.11.1\ode\src\util.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_PlanesCollider.h"
+					RelativePath=".\ode-0.11.1\ode\src\util.h"
 					>
 				</File>
-				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_PlanesTriOverlap.h"
+				<Filter
+					Name="Joints"
 					>
-				</File>
+					<File
+						RelativePath=".\ode-0.11.1\ode\src\joints\amotor.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\ode\src\joints\amotor.h"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\ode\src\joints\ball.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\ode\src\joints\ball.h"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\ode\src\joints\contact.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\ode\src\joints\contact.h"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\ode\src\joints\fixed.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\ode\src\joints\fixed.h"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\ode\src\joints\hinge.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\ode\src\joints\hinge.h"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\ode\src\joints\hinge2.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\ode\src\joints\hinge2.h"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\ode\src\joints\joint.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\ode\src\joints\joint.h"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\ode\src\joints\joint_internal.h"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\ode\src\joints\joints.h"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\ode\src\joints\lmotor.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\ode\src\joints\lmotor.h"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\ode\src\joints\null.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\ode\src\joints\null.h"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\ode\src\joints\piston.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\ode\src\joints\piston.h"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\ode\src\joints\plane2d.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\ode\src\joints\plane2d.h"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\ode\src\joints\pr.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\ode\src\joints\pr.h"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\ode\src\joints\pu.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\ode\src\joints\pu.h"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\ode\src\joints\slider.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\ode\src\joints\slider.h"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\ode\src\joints\universal.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\ode\src\joints\universal.h"
+						>
+					</File>
+				</Filter>
+			</Filter>
+			<Filter
+				Name="HeaderFiles"
+				>
 				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_RayAABBOverlap.h"
+					RelativePath=".\ode-0.11.1\include\ode\collision.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_RayCollider.h"
+					RelativePath=".\ode-0.11.1\include\ode\collision_space.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_RayTriOverlap.h"
+					RelativePath=".\ode-0.11.1\include\ode\collision_trimesh.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_Settings.h"
+					RelativePath=".\ode-0.11.1\include\ode\common.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_SphereAABBOverlap.h"
+					RelativePath=".\ode-0.11.1\include\ode\compatibility.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_SphereCollider.h"
+					RelativePath=".\ode-0.11.1\include\ode\contact.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_SphereTriOverlap.h"
+					RelativePath=".\ode-0.11.1\include\ode\error.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_SweepAndPrune.h"
+					RelativePath=".\ode-0.11.1\include\ode\export-dif.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_TreeBuilders.h"
+					RelativePath=".\ode-0.11.1\include\ode\mass.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_TreeCollider.h"
+					RelativePath=".\ode-0.11.1\include\ode\matrix.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_TriBoxOverlap.h"
+					RelativePath=".\ode-0.11.1\include\ode\memory.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_TriTriOverlap.h"
+					RelativePath=".\ode-0.11.1\include\ode\misc.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_VolumeCollider.h"
+					RelativePath=".\ode-0.11.1\include\ode\objects.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\Opcode.h"
+					RelativePath=".\ode-0.11.1\include\ode\ode.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\ode\src\quickstep.h"
+					RelativePath=".\ode-0.11.1\include\ode\odeconfig.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\include\ode\rotation.h"
+					RelativePath=".\ode-0.11.1\include\ode\odecpp.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\ode\src\stack.h"
+					RelativePath=".\ode-0.11.1\include\ode\odecpp_collision.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\ode\src\step.h"
+					RelativePath=".\ode-0.11.1\include\ode\odeinit.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\ode\src\testing.h"
+					RelativePath=".\ode-0.11.1\include\ode\odemath.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\include\ode\timer.h"
+					RelativePath=".\ode-0.11.1\include\ode\rotation.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\ode\src\util.h"
+					RelativePath=".\ode-0.11.1\include\ode\timer.h"
 					>
 				</File>
 			</Filter>
 			<Filter
-				Name="Source Files"
-				Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
+				Name="OPCODE"
 				>
 				<File
-					RelativePath=".\ode-060223\ode\src\array.cpp"
+					RelativePath=".\ode-0.11.1\OPCODE\OPC_AABBCollider.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\ode\src\collision_cylinder_box.cpp"
+					RelativePath=".\ode-0.11.1\OPCODE\OPC_AABBCollider.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\ode\src\collision_cylinder_sphere.cpp"
+					RelativePath=".\ode-0.11.1\OPCODE\OPC_AABBTree.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\ode\src\collision_cylinder_trimesh.cpp"
+					RelativePath=".\ode-0.11.1\OPCODE\OPC_AABBTree.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\ode\src\collision_kernel.cpp"
+					RelativePath=".\ode-0.11.1\OPCODE\OPC_BaseModel.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\ode\src\collision_quadtreespace.cpp"
+					RelativePath=".\ode-0.11.1\OPCODE\OPC_BaseModel.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\ode\src\collision_space.cpp"
+					RelativePath=".\ode-0.11.1\OPCODE\OPC_BoxBoxOverlap.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\ode\src\collision_std.cpp"
+					RelativePath=".\ode-0.11.1\OPCODE\OPC_Collider.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\ode\src\collision_transform.cpp"
+					RelativePath=".\ode-0.11.1\OPCODE\OPC_Collider.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\ode\src\collision_trimesh.cpp"
+					RelativePath=".\ode-0.11.1\OPCODE\OPC_Common.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\ode\src\collision_trimesh_box.cpp"
+					RelativePath=".\ode-0.11.1\OPCODE\OPC_Common.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\ode\src\collision_trimesh_ccylinder.cpp"
+					RelativePath=".\ode-0.11.1\OPCODE\OPC_HybridModel.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\ode\src\collision_trimesh_distance.cpp"
+					RelativePath=".\ode-0.11.1\OPCODE\OPC_HybridModel.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\ode\src\collision_trimesh_ray.cpp"
+					RelativePath=".\ode-0.11.1\OPCODE\OPC_IceHook.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\ode\src\collision_trimesh_sphere.cpp"
+					RelativePath=".\ode-0.11.1\OPCODE\OPC_LSSAABBOverlap.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\ode\src\collision_trimesh_trimesh.cpp"
+					RelativePath=".\ode-0.11.1\OPCODE\OPC_LSSCollider.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\ode\src\collision_util.cpp"
+					RelativePath=".\ode-0.11.1\OPCODE\OPC_LSSCollider.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\ode\src\error.cpp"
+					RelativePath=".\ode-0.11.1\OPCODE\OPC_LSSTriOverlap.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\ode\src\export-dif.cpp"
+					RelativePath=".\ode-0.11.1\OPCODE\OPC_MeshInterface.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\ode\src\fastdot.c"
+					RelativePath=".\ode-0.11.1\OPCODE\OPC_MeshInterface.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\ode\src\fastldlt.c"
+					RelativePath=".\ode-0.11.1\OPCODE\OPC_Model.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\ode\src\fastlsolve.c"
+					RelativePath=".\ode-0.11.1\OPCODE\OPC_Model.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\ode\src\fastltsolve.c"
+					RelativePath=".\ode-0.11.1\OPCODE\OPC_OBBCollider.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\Ice\IceAABB.cpp"
+					RelativePath=".\ode-0.11.1\OPCODE\OPC_OBBCollider.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\Ice\IceContainer.cpp"
+					RelativePath=".\ode-0.11.1\OPCODE\OPC_OptimizedTree.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\Ice\IceHPoint.cpp"
+					RelativePath=".\ode-0.11.1\OPCODE\OPC_OptimizedTree.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\Ice\IceIndexedTriangle.cpp"
+					RelativePath=".\ode-0.11.1\OPCODE\OPC_Picking.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\Ice\IceMatrix3x3.cpp"
+					RelativePath=".\ode-0.11.1\OPCODE\OPC_Picking.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\Ice\IceMatrix4x4.cpp"
+					RelativePath=".\ode-0.11.1\OPCODE\OPC_PlanesAABBOverlap.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\Ice\IceOBB.cpp"
+					RelativePath=".\ode-0.11.1\OPCODE\OPC_PlanesCollider.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\Ice\IcePlane.cpp"
+					RelativePath=".\ode-0.11.1\OPCODE\OPC_PlanesCollider.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\Ice\IcePoint.cpp"
+					RelativePath=".\ode-0.11.1\OPCODE\OPC_PlanesTriOverlap.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\Ice\IceRandom.cpp"
+					RelativePath=".\ode-0.11.1\OPCODE\OPC_RayAABBOverlap.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\Ice\IceRay.cpp"
+					RelativePath=".\ode-0.11.1\OPCODE\OPC_RayCollider.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\Ice\IceRevisitedRadix.cpp"
+					RelativePath=".\ode-0.11.1\OPCODE\OPC_RayCollider.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\Ice\IceSegment.cpp"
+					RelativePath=".\ode-0.11.1\OPCODE\OPC_RayTriOverlap.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\Ice\IceTriangle.cpp"
+					RelativePath=".\ode-0.11.1\OPCODE\OPC_Settings.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\Ice\IceUtils.cpp"
+					RelativePath=".\ode-0.11.1\OPCODE\OPC_SphereAABBOverlap.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\ode\src\joint.cpp"
+					RelativePath=".\ode-0.11.1\OPCODE\OPC_SphereCollider.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\ode\src\lcp.cpp"
+					RelativePath=".\ode-0.11.1\OPCODE\OPC_SphereCollider.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\ode\src\mass.cpp"
+					RelativePath=".\ode-0.11.1\OPCODE\OPC_SphereTriOverlap.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\ode\src\mat.cpp"
+					RelativePath=".\ode-0.11.1\OPCODE\OPC_TreeBuilders.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\ode\src\matrix.cpp"
+					RelativePath=".\ode-0.11.1\OPCODE\OPC_TreeBuilders.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\ode\src\memory.cpp"
+					RelativePath=".\ode-0.11.1\OPCODE\OPC_TreeCollider.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\ode\src\misc.cpp"
+					RelativePath=".\ode-0.11.1\OPCODE\OPC_TreeCollider.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\ode\src\obstack.cpp"
+					RelativePath=".\ode-0.11.1\OPCODE\OPC_TriBoxOverlap.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\ode\src\ode.cpp"
+					RelativePath=".\ode-0.11.1\OPCODE\OPC_TriTriOverlap.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\ode\src\odemath.cpp"
+					RelativePath=".\ode-0.11.1\OPCODE\OPC_VolumeCollider.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_AABBCollider.cpp"
+					RelativePath=".\ode-0.11.1\OPCODE\OPC_VolumeCollider.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_AABBTree.cpp"
+					RelativePath=".\ode-0.11.1\OPCODE\Opcode.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_BaseModel.cpp"
+					RelativePath=".\ode-0.11.1\OPCODE\Opcode.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_BoxPruning.cpp"
+					RelativePath=".\ode-0.11.1\OPCODE\Stdafx.h"
 					>
 				</File>
-				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_Collider.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_Common.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_HybridModel.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_LSSCollider.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_MeshInterface.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_Model.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_OBBCollider.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_OptimizedTree.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_Picking.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_PlanesCollider.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_RayCollider.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_SphereCollider.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_SweepAndPrune.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_TreeBuilders.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_TreeCollider.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\ode-060223\OPCODE\OPC_VolumeCollider.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\ode-060223\OPCODE\Opcode.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\ode-060223\ode\src\quickstep.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\ode-060223\ode\src\rotation.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\ode-060223\ode\src\step.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\ode-060223\ode\src\stepfast.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\ode-060223\ode\src\testing.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\ode-060223\ode\src\timer.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\ode-060223\ode\src\util.cpp"
+				<Filter
+					Name="Ice"
 					>
-				</File>
+					<File
+						RelativePath=".\ode-0.11.1\OPCODE\Ice\IceAABB.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\OPCODE\Ice\IceAABB.h"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\OPCODE\Ice\IceAxes.h"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\OPCODE\Ice\IceBoundingSphere.h"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\OPCODE\Ice\IceContainer.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\OPCODE\Ice\IceContainer.h"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\OPCODE\Ice\IceFPU.h"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\OPCODE\Ice\IceHPoint.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\OPCODE\Ice\IceHPoint.h"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\OPCODE\Ice\IceIndexedTriangle.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\OPCODE\Ice\IceIndexedTriangle.h"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\OPCODE\Ice\IceLSS.h"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\OPCODE\Ice\IceMatrix3x3.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\OPCODE\Ice\IceMatrix3x3.h"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\OPCODE\Ice\IceMatrix4x4.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\OPCODE\Ice\IceMatrix4x4.h"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\OPCODE\Ice\IceMemoryMacros.h"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\OPCODE\Ice\IceOBB.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\OPCODE\Ice\IceOBB.h"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\OPCODE\Ice\IcePairs.h"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\OPCODE\Ice\IcePlane.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\OPCODE\Ice\IcePlane.h"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\OPCODE\Ice\IcePoint.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\OPCODE\Ice\IcePoint.h"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\OPCODE\Ice\IcePreprocessor.h"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\OPCODE\Ice\IceRandom.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\OPCODE\Ice\IceRandom.h"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\OPCODE\Ice\IceRay.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\OPCODE\Ice\IceRay.h"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\OPCODE\Ice\IceRevisitedRadix.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\OPCODE\Ice\IceRevisitedRadix.h"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\OPCODE\Ice\IceSegment.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\OPCODE\Ice\IceSegment.h"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\OPCODE\Ice\IceTriangle.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\OPCODE\Ice\IceTriangle.h"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\OPCODE\Ice\IceTriList.h"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\OPCODE\Ice\IceTypes.h"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\OPCODE\Ice\IceUtils.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\ode-0.11.1\OPCODE\Ice\IceUtils.h"
+						>
+					</File>
+				</Filter>
 			</Filter>
 		</Filter>
 		<Filter

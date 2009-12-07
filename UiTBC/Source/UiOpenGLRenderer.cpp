@@ -5,6 +5,7 @@
 #include "../../Lepra/Include/Canvas.h"
 #include "../../Lepra/Include/Log.h"
 #include "../../Lepra/Include/Math.h"
+#include "../../Lepra/Include/Performance.h"
 #include "../../Lepra/Include/Transformation.h"
 #include "../../TBC/Include/GeometryBase.h"
 #include "../../UiLepra/Include/UiOpenGLExtensions.h"
@@ -1041,124 +1042,135 @@ void OpenGLRenderer::DrawLine(const Lepra::Vector3DF& pPosition, const Lepra::Ve
 
 unsigned int OpenGLRenderer::RenderScene()
 {
-	int i;
+	LEPRA_MEASURE_SCOPE(RenderScene);
 
-	// Prepare projection data in order to be able to call CheckCulling().
-	Renderer::PrepareProjectionData();
+	{
+		// Prepare projection data in order to be able to call CheckCulling().
+		Renderer::PrepareProjectionData();
 
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
 
-	// Transform lights (among other things).
-	ProcessLights();
+		// Transform lights (among other things).
+		ProcessLights();
 
-	//Reset viewport and frustum every frame. This may look silly,
-	//but the Get-functions will return the values stored in Renderer,
-	//while the Set-functions are virtual and will call the OpenGLRenderer-ditto.
-	Renderer::SetViewport(GetViewport());
-	float lFOVAngle;
-	float lNear;
-	float lFar;
-	GetViewFrustum(lFOVAngle, lNear, lFar);
-	SetViewFrustum(lFOVAngle, lNear, lFar);
+		//Reset viewport and frustum every frame. This may look silly,
+		//but the Get-functions will return the values stored in Renderer,
+		//while the Set-functions are virtual and will call the OpenGLRenderer-ditto.
+		Renderer::SetViewport(GetViewport());
+		float lFOVAngle;
+		float lNear;
+		float lFar;
+		GetViewFrustum(lFOVAngle, lNear, lFar);
+		SetViewFrustum(lFOVAngle, lNear, lFar);
 
-	glPushAttrib(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_ENABLE_BIT | GL_VIEWPORT_BIT);
+		glPushAttrib(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_ENABLE_BIT | GL_VIEWPORT_BIT);
 
-	glEnable(GL_CULL_FACE);
-	glEnable(GL_DEPTH_TEST);
-	glDepthMask(GL_TRUE);
-	glFrontFace(GL_CCW);
-	glShadeModel(GL_SMOOTH);
+		glEnable(GL_CULL_FACE);
+		glEnable(GL_DEPTH_TEST);
+		glDepthMask(GL_TRUE);
+		glFrontFace(GL_CCW);
+		glShadeModel(GL_SMOOTH);
 
-	glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, 1);
-
-	Renderer::UpdateShadowMaps();
+		glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, 1);
+	}
+	{
+		Renderer::UpdateShadowMaps();
+	}
 
 	// Now it's time to render the scene...
 	if (GetShadowsEnabled() == false || 
 	   glIsEnabled(GL_LIGHTING) == false ||
 	   (GetNumSpotLights() == 0 && GetShadowVolumeTable().IsEmpty()))
 	{
-		// Prepare the pixel shader materials.
-		OpenGLMatPXS::PrepareLights(this);
-
-		// Single pass rendering (no shadows).
-		for (i = 0; i < (int)NUM_MATERIALTYPES; i++)
 		{
-			if (GetMaterial((MaterialType)i) != 0)
+			// Prepare the pixel shader materials.
+			OpenGLMatPXS::PrepareLights(this);
+		}
+		{
+			// Single pass rendering (no shadows).
+			for (int i = 0; i < (int)NUM_MATERIALTYPES; i++)
 			{
-				GetMaterial((MaterialType)i)->RenderAllGeometry(GetCurrentFrame());
+				if (GetMaterial((MaterialType)i) != 0)
+				{
+					GetMaterial((MaterialType)i)->RenderAllGeometry(GetCurrentFrame());
+				}
 			}
 		}
 	}
 	else
 	{
-		// Disable all lights.
-		for (i = 0; i < GetLightCount(); i++)
 		{
-			glDisable(GL_LIGHT0 + GetLightIndex(i));
-		}
-
-		// Prepare the pixel shader materials.
-		OpenGLMatPXS::PrepareLights(this);
-
-		// Render the scene darkened.
-		for (i = 0; i < (int)NUM_MATERIALTYPES; i++)
-		{
-			if (GetMaterial((MaterialType)i) != 0)
+			// Disable all lights.
+			for (int i = 0; i < GetLightCount(); i++)
 			{
-				GetMaterial((MaterialType)i)->RenderAllGeometry(GetCurrentFrame());
+				glDisable(GL_LIGHT0 + GetLightIndex(i));
+			}
+
+			// Prepare the pixel shader materials.
+			OpenGLMatPXS::PrepareLights(this);
+
+			// Render the scene darkened.
+			for (int i = 0; i < (int)NUM_MATERIALTYPES; i++)
+			{
+				if (GetMaterial((MaterialType)i) != 0)
+				{
+					GetMaterial((MaterialType)i)->RenderAllGeometry(GetCurrentFrame());
+				}
+			}
+
+			glEnable(GL_STENCIL_TEST);
+			glStencilFunc(GL_ALWAYS, 128, 0xFF);
+			glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
+
+			// Render all shadow maps. In this step, we only render the shadows
+			// using alpha testing to the stencil buffer (no output to the color buffer).
+			if (GetNumSpotLights() > 0 && GetShadowHint() == Renderer::SH_VOLUMES_AND_MAPS)
+				RenderShadowMaps();
+
+			// Render scene with stencil shadows.
+			if (GetShadowVolumeTable().IsEmpty() == false)
+				RenderShadowVolumes();
+
+			// Enable all lights again.
+			for (int i = 0; i < GetLightCount(); i++)
+			{
+				glEnable(GL_LIGHT0 + GetLightIndex(i));
 			}
 		}
-
-		glEnable(GL_STENCIL_TEST);
-		glStencilFunc(GL_ALWAYS, 128, 0xFF);
-		glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
-
-		// Render all shadow maps. In this step, we only render the shadows
-		// using alpha testing to the stencil buffer (no output to the color buffer).
-		if (GetNumSpotLights() > 0 && GetShadowHint() == Renderer::SH_VOLUMES_AND_MAPS)
-			RenderShadowMaps();
-
-		// Render scene with stencil shadows.
-		if (GetShadowVolumeTable().IsEmpty() == false)
-			RenderShadowVolumes();
-
-		// Enable all lights again.
-		for (i = 0; i < GetLightCount(); i++)
 		{
-			glEnable(GL_LIGHT0 + GetLightIndex(i));
+			// Setup the correct stencil buffer operations.
+			glEnable(GL_STENCIL_TEST);
+			glStencilFunc(GL_GEQUAL, 128, 0xFF);
+			glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+
+			// Prepare the pixel shader materials.
+			OpenGLMatPXS::PrepareLights(this);
 		}
-
-		// Setup the correct stencil buffer operations.
-		glEnable(GL_STENCIL_TEST);
-		glStencilFunc(GL_GEQUAL, 128, 0xFF);
-		glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-
-		// Prepare the pixel shader materials.
-		OpenGLMatPXS::PrepareLights(this);
-
-		// Render the scene with full light.
-		for (i = 0; i < (int)NUM_MATERIALTYPES; i++)
 		{
-			if (GetMaterial((MaterialType)i) != 0)
+			// Render the scene with full light.
+			for (int i = 0; i < (int)NUM_MATERIALTYPES; i++)
 			{
-				GetMaterial((MaterialType)i)->RenderAllGeometry(GetCurrentFrame());
+				if (GetMaterial((MaterialType)i) != 0)
+				{
+					GetMaterial((MaterialType)i)->RenderAllGeometry(GetCurrentFrame());
+				}
 			}
+			glDisable(GL_STENCIL_TEST);
 		}
-
-		glDisable(GL_STENCIL_TEST);
 	}
 
-	for (int i = 0; i < GetLightCount(); i++)
 	{
-		Renderer::LightData& lLight = GetLightData(GetLightIndex(i));
-		lLight.mTransformationChanged = false;
+		for (int i = 0; i < GetLightCount(); i++)
+		{
+			Renderer::LightData& lLight = GetLightData(GetLightIndex(i));
+			lLight.mTransformationChanged = false;
+		}
+
+		StepCurrentFrame();
+
+		glPopAttrib();
 	}
-
-	StepCurrentFrame();
-
-	glPopAttrib();
 
 	return GetCurrentFrame();
 }
