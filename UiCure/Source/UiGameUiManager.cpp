@@ -13,9 +13,9 @@
 #include "../../UiLepra/Include/UiInput.h"
 #include "../../UiTbc/Include/GUI/UiDesktopWindow.h"
 #include "../../UiTbc/Include/GUI/UiFloatingLayout.h"
+#include "../../UiTbc/Include/UiFontManager.h"
 #include "../../UiTbc/Include/UiOpenGLPainter.h"
 #include "../../UiTbc/Include/UiOpenGLRenderer.h"
-#include "../../UiTbc/Include/UiGDIPainter.h"
 #include "../Include/UiGameUiManager.h"
 #include "../Include/UiRuntimeVariableName.h"
 #include "../Include/UiSoundManager.h"
@@ -33,7 +33,7 @@ GameUiManager::GameUiManager(Cure::RuntimeVariableScope* pVariableScope):
 	mCanvas(0),
 	mRenderer(0),
 	mPainter(0),
-	mFontPainter(0),
+	mFontManager(0),
 	mDesktopWindow(0),
 	mInput(0),
 	mSound(0)
@@ -137,36 +137,32 @@ bool GameUiManager::Open()
 	}
 	if (lOk)
 	{
-#ifdef LEPRA_WINDOWS
-		mFontPainter = new UiTbc::GDIPainter((UiLepra::Win32DisplayManager*)mDisplay);
-#else // !Windows.
-#error "Unknown system to create font painter for non-Windows system."
-#endif
-		mFontPainter->SetColor(Lepra::Color(255, 255, 255, 255), 0);
-		mFontPainter->SetColor(Lepra::Color(0, 0, 0, 0), 1);
-		mPainter->SetFontPainter(mFontPainter);
+		mFontManager = UiTbc::FontManager::Create(mDisplay);
+		//mFontManager->SetColor(Lepra::Color(255, 255, 255, 255), 0);
+		//mFontManager->SetColor(Lepra::Color(0, 0, 0, 0), 1);
+		mPainter->SetFontManager(mFontManager);
 
-		UiTbc::Painter::FontID lFontId;
-		lFontId = mFontPainter->AddSystemFont(_T("Times New Roman"), 14.0);
-		if (lFontId == UiTbc::Painter::INVALID_FONTID)
+		UiTbc::FontManager::FontId lFontId;
+		lFontId = mFontManager->AddFont(_T("Times New Roman"), 14.0);
+		if (lFontId == UiTbc::FontManager::INVALID_FONTID)
 		{
-			lFontId = mFontPainter->AddSystemFont(_T("Arial"), 14.0);
+			lFontId = mFontManager->AddFont(_T("Arial"), 14.0);
 		}
-		if (lFontId == UiTbc::Painter::INVALID_FONTID)
+		if (lFontId == UiTbc::FontManager::INVALID_FONTID)
 		{
-			lFontId = mFontPainter->AddSystemFont(_T("Courier New"), 14.0);
+			lFontId = mFontManager->AddFont(_T("Courier New"), 14.0);
 		}
-		if (lFontId == UiTbc::Painter::INVALID_FONTID)
+		if (lFontId == UiTbc::FontManager::INVALID_FONTID)
 		{
-			lFontId = mFontPainter->AddSystemFont(_T("Verdana"), 14.0);
+			lFontId = mFontManager->AddFont(_T("Verdana"), 14.0);
 		}
-		if (lFontId == UiTbc::Painter::INVALID_FONTID)
+		if (lFontId == UiTbc::FontManager::INVALID_FONTID)
 		{
-			lFontId = mFontPainter->AddSystemFont(_T("Helvetica"), 14.0);
+			lFontId = mFontManager->AddFont(_T("Helvetica"), 14.0);
 		}
-		if (lFontId != UiTbc::Painter::INVALID_FONTID)
+		if (lFontId != UiTbc::FontManager::INVALID_FONTID)
 		{
-			mFontPainter->SetActiveFont(lFontId);
+			mFontManager->SetActiveFont(lFontId);
 		}
 	}
 	if (lOk)
@@ -214,8 +210,8 @@ void GameUiManager::Close()
 	delete (mInput);
 	mInput = 0;
 
-	delete (mFontPainter);
-	mFontPainter = 0;
+	delete (mFontManager);
+	mFontManager = 0;
 	delete (mPainter);
 	mPainter = 0;
 	delete (mRenderer);
@@ -288,11 +284,10 @@ void GameUiManager::Paint()
 
 void GameUiManager::EndRender()
 {
-	mPainter->EndPaint();
-
 	if (mDisplay->IsVisible())
 	{
 		UpdateSettings();
+		mPainter->EndPaint();
 		mDisplay->UpdateScreen();
 	}
 }

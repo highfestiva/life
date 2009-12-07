@@ -24,7 +24,7 @@ Label::Label(bool pSelectable, const Lepra::String& pName) :
 	mLCLImageID(Painter::INVALID_IMAGEID),
 	mLCLSelectedImageID(Painter::INVALID_IMAGEID)
 {
-	SetFont(Painter::INVALID_FONTID, Lepra::Color(0, 0, 0), Parent::NO_BLEND, 128);
+	SetFont(Lepra::Color(0, 0, 0), Parent::NO_BLEND, 128);
 }
 
 Label::Label(const Lepra::Color& pColor, const Lepra::String& pName):
@@ -40,7 +40,7 @@ Label::Label(const Lepra::Color& pColor, const Lepra::String& pName):
 	mLCLImageID(Painter::INVALID_IMAGEID),
 	mLCLSelectedImageID(Painter::INVALID_IMAGEID)
 {
-	SetFont(Painter::INVALID_FONTID, Lepra::Color(0, 0, 0), Parent::NO_BLEND, 128);
+	SetFont(Lepra::Color(0, 0, 0), Parent::NO_BLEND, 128);
 }
 
 Label::Label(const Lepra::Color& pTopLeftColor,
@@ -60,7 +60,7 @@ Label::Label(const Lepra::Color& pTopLeftColor,
 	mLCLImageID(Painter::INVALID_IMAGEID),
 	mLCLSelectedImageID(Painter::INVALID_IMAGEID)
 {
-	SetFont(Painter::INVALID_FONTID, Lepra::Color(0, 0, 0), Parent::NO_BLEND, 128);
+	SetFont(Lepra::Color(0, 0, 0), Parent::NO_BLEND, 128);
 }
 
 Label::Label(Painter::ImageID pImageID, const Lepra::String& pName):
@@ -76,7 +76,7 @@ Label::Label(Painter::ImageID pImageID, const Lepra::String& pName):
 	mLCLImageID(Painter::INVALID_IMAGEID),
 	mLCLSelectedImageID(Painter::INVALID_IMAGEID)
 {
-	SetFont(Painter::INVALID_FONTID, Lepra::Color(0, 0, 0), Parent::NO_BLEND, 128);
+	SetFont(Lepra::Color(0, 0, 0), Parent::NO_BLEND, 128);
 }
 
 Label::Label(const Lepra::Color& pColor, const Lepra::Color& pSelectedColor, const Lepra::String& pName):
@@ -92,7 +92,7 @@ Label::Label(const Lepra::Color& pColor, const Lepra::Color& pSelectedColor, con
 	mLCLImageID(Painter::INVALID_IMAGEID),
 	mLCLSelectedImageID(Painter::INVALID_IMAGEID)
 {
-	SetFont(Painter::INVALID_FONTID, Lepra::Color(0, 0, 0), Parent::NO_BLEND, 128);
+	SetFont(Lepra::Color(0, 0, 0), Parent::NO_BLEND, 128);
 
 	mColor[0] = pColor;
 	mSelectedColor[0] = pSelectedColor;
@@ -119,7 +119,7 @@ Label::Label(const Lepra::Color& pTopLeftColor,
 	mLCLImageID(Painter::INVALID_IMAGEID),
 	mLCLSelectedImageID(Painter::INVALID_IMAGEID)
 {
-	SetFont(Painter::INVALID_FONTID, Lepra::Color(0, 0, 0), Parent::NO_BLEND, 128);
+	SetFont(Lepra::Color(0, 0, 0), Parent::NO_BLEND, 128);
 
 	mColor[0] = pTopLeftColor;
 	mColor[1] = pTopRightColor;
@@ -144,7 +144,7 @@ Label::Label(Painter::ImageID pImageID, Painter::ImageID pSelectedImageID, Paint
 	mLCLImageID(pLCLImageID),
 	mLCLSelectedImageID(pLCLSelectedImageID)
 {
-	SetFont(Painter::INVALID_FONTID, Lepra::Color(0, 0, 0), Parent::NO_BLEND, 128);
+	SetFont(Lepra::Color(0, 0, 0), Parent::NO_BLEND, 128);
 }
 
 
@@ -154,13 +154,8 @@ Label::~Label()
 
 void Label::Repaint(Painter* pPainter)
 {
-	pPainter->SetActiveFont(GetFontId());
-
-	if (mTextWidth < 0 || mTextHeight < 0)
-	{
-		mTextWidth  = pPainter->GetStringWidth(_T(" ")+mText);
-		mTextHeight = pPainter->GetLineHeight();
-	}
+	mTextWidth  = pPainter->GetStringWidth(_T(" ")+mText);
+	mTextHeight = pPainter->GetFontHeight();
 
 	GUIImageManager* lIMan = GetImageManager();
 
@@ -293,88 +288,37 @@ Lepra::PixelCoords Label::GetPreferredSize(bool pForceAdaptive)
 
 
 void Label::SetText(const Lepra::String& pText,
-			Painter::FontID pFontID,
 			const Lepra::Color& pTextColor,
 			const Lepra::Color& pBackgColor,
 			BlendFunc pBlendFunc,
 			Lepra::uint8 pAlphaTreshold,
-			Painter* pPainter)
+			Painter*)
 {
-	SetFont(pFontID, pTextColor, pBlendFunc, pAlphaTreshold);
+	SetFont(pTextColor, pBlendFunc, pAlphaTreshold);
 	mText                   = pText;
 	mTextBackgColor         = pBackgColor;
 	mSelectedTextColor      = pTextColor;
 	mSelectedTextBackgColor = pBackgColor;
-
-	if (pPainter != 0)
-	{
-		Painter::FontID lFontID = pPainter->GetCurrentFont();
-		pPainter->SetActiveFont(GetFontId());
-		mTextWidth = pPainter->GetStringWidth(_T(" ")+mText);
-		mTextHeight = pPainter->GetLineHeight();
-		pPainter->SetActiveFont(lFontID);
-	}
-	else
-	{
-		mTextWidth = -1;
-		mTextHeight = -1;
-	}
 }
 
 void Label::SetText(const Lepra::String& pText,
-			Painter::FontID pFontID,
 			const Lepra::Color& pTextColor,
 			const Lepra::Color& pBackgColor,
 			const Lepra::Color& pSelectedTextColor,
 			const Lepra::Color& pSelectedBackgColor,
 			BlendFunc pBlendFunc,
 			Lepra::uint8 pAlphaTreshold,
-			Painter* pPainter)
+			Painter*)
 {
-	SetFont(pFontID, pTextColor, pBlendFunc, pAlphaTreshold);
+	SetFont(pTextColor, pBlendFunc, pAlphaTreshold);
 	mText                   = pText;
 	mTextBackgColor         = pBackgColor;
 	mSelectedTextColor      = pSelectedTextColor;
 	mSelectedTextBackgColor = pSelectedBackgColor;
-
-	if (pPainter != 0)
-	{
-		Painter::FontID lFontID = pPainter->GetCurrentFont();
-		pPainter->SetActiveFont(GetFontId());
-		mTextWidth = pPainter->GetStringWidth(_T(" ")+mText);
-		mTextHeight = pPainter->GetLineHeight();
-		pPainter->SetActiveFont(lFontID);
-	}
-	else
-	{
-		// We can't initialize the text dimensions. This can result in wrong
-		// layouts and disturbing "corrections" when the user interacts with
-		// the GUI. A seconds attempt to fix this is made below in
-		// OnConnectedToDesktopWindow().
-		mTextWidth = -1;
-		mTextHeight = -1;
-	}
 }
 
 void Label::OnConnectedToDesktopWindow()
 {
-	// If we have uninitialized text dimensions, try to initialize again.
-	if(mTextWidth < 0 || mTextHeight < 0)
-	{
-		DesktopWindow* lDesktopWindow = (DesktopWindow*)GetParentOfType(DESKTOPWINDOW);
-
-		// Hopefully there is a Painter...
-		Painter* lPainter = lDesktopWindow->GetPainter();
-		if (lPainter != 0)
-		{
-			// Yes! We can initialize the text dimensions! =)
-			Painter::FontID lFontID = lPainter->GetCurrentFont();
-			lPainter->SetActiveFont(GetFontId());
-			mTextWidth = lPainter->GetStringWidth(_T(" ")+mText);
-			mTextHeight = lPainter->GetLineHeight();
-			lPainter->SetActiveFont(lFontID);
-		}
-	}
 }
 
 const Lepra::String& Label::GetText() const
@@ -477,6 +421,16 @@ void Label::UpdateBackground()
 void Label::ForceRepaint()
 {
 	SetNeedsRepaint(true);
+}
+
+void Label::SetIcon(Painter::ImageID pIconID)
+{
+	mIconID = pIconID;
+}
+
+Component::Type Label::GetType()
+{
+	return Component::LABEL;
 }
 
 

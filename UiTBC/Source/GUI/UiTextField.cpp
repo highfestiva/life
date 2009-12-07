@@ -554,8 +554,6 @@ void TextField::Repaint(Painter* pPainter)
 {
 	Parent::Repaint(pPainter);
 
-	pPainter->SetActiveFont(GetFontId());
-
 	if (mUpdateMarkerPosOnNextRepaint == true)
 	{
 		UpdateMarkerPos(pPainter);

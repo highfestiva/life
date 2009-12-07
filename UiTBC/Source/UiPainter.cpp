@@ -1,12 +1,13 @@
 
-// Author: Alexander Hugestrand
+// Author: Alexander Hugestrand, Jonas Byström
 // Copyright (c) 2002-2009, Righteous Games
 
 
 
+#include "../Include/UiPainter.h"
 #include <assert.h>
 #include "../../Lepra/Include/Canvas.h"
-#include "../Include/UiSystemPainter.h"
+#include "../Include/UiFontManager.h"
 
 
 
@@ -15,93 +16,25 @@ namespace UiTbc
 
 
 
-int Painter::smFont1CharWidth[256];
-int Painter::smFont2CharWidth[256];
-bool Painter::smCharWidthsCalculated = false;
-
-#include "UiStandardFont1.inl"
-#include "UiStandardFont2.inl"
-
-Lepra::uint8 Painter::smStandardMouseCursor[] = 
-{
-	1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //1
-	1, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //2
-	1, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //3
-	1, 2, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //4
-	1, 2, 2, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //5
-	1, 2, 2, 2, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, //6
-	1, 2, 2, 2, 2, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, //7
-	1, 2, 2, 2, 2, 2, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0, //8
-	1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 0, 0, 0, 0, 0, 0, //9
-	1, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, //10
-	1, 2, 2, 1, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, //11
-	1, 2, 1, 0, 1, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, //12
-	1, 1, 0, 0, 1, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, //13
-	1, 0, 0, 0, 0, 1, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0, //14
-	0, 0, 0, 0, 0, 1, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0, //15
-	0, 0, 0, 0, 0, 0, 1, 2, 2, 1, 0, 0, 0, 0, 0, 0, //16
-	0, 0, 0, 0, 0, 0, 1, 2, 2, 1, 0, 0, 0, 0, 0, 0, //17
-	0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, //18
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //19
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //20
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //21
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //22
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //23
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //24
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //25
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //26
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //27
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //28
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //29
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //30
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //31
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //32
-};
-
-
-
 Painter::Painter() :
-	mFontPainter(0),
+	mFontManager(0),
 	mDisplayListIDManager(1, 100000, 0),
 	mCurrentDisplayList(0),
-	mTabOriginX(0),
-	mFontsAndCursorInitialized(false),
 	mRenderMode(RM_NORMAL),
 	mOrigoX(0),
 	mOrigoY(0),
 	mXDir(X_RIGHT),
 	mYDir(Y_DOWN),
-	mFontIDManager(1, 10000, 0),
-	mCurrentFont(0),
-	mStandardFontID0(INVALID_FONTID),
-	mStandardFontID1(INVALID_FONTID),
-	mMouseCursorID(INVALID_IMAGEID),
 	mCanvas(0),
 	mAlphaValue(255)
 {
-	if (smCharWidthsCalculated == false)
-	{
-		CalcCharWidths(smStandardFont1, smFont1CharWidth);
-		CalcCharWidths(smStandardFont2, smFont2CharWidth);
-		smCharWidthsCalculated = true;
-	}
-
 	mDefaultDisplayList = NewDisplayList();
 }
 
 Painter::~Painter()
 {
 	DeleteDisplayList(mDefaultDisplayList);
-
-	FontTable::Iterator lFontIter = mFontTable.First();
-	while (lFontIter != mFontTable.End())
-	{
-		Font* lFont = *lFontIter;
-		delete lFont;
-		++lFontIter;
-	}
-
-	mFontPainter = 0;
+	mFontManager = 0;
 }
 
 void Painter::DefineCoordinates(int pOrigoX, int pOrigoY, XDir pXDir, YDir pYDir)
@@ -112,130 +45,17 @@ void Painter::DefineCoordinates(int pOrigoX, int pOrigoY, XDir pXDir, YDir pYDir
 	mYDir = pYDir;
 }
 
-int Painter::CalcAverageWidth(int pCharCount, int* pCharWidthArray)
-{
-	int lSum = 0;
-	for (int x = 0; x < pCharCount; ++x)
-	{
-		lSum += pCharWidthArray[x];
-	}
-	return (lSum/pCharCount);
-}
-
-void Painter::CalcCharWidths(Lepra::uint8* pFont, int* pWidth)
-{
-	const int lPitch = 16;
-
-	// Calculate width of each character in the font.
-	// (This function should only be used with the standard fonts.)
-	for (int i = 0; i < 256; i++)
-	{
-		// Character x and y.
-		int cx = i % 2;
-		int cy = i / 2;
-		Lepra::uint8* lCharData = &pFont[(cy * lPitch + cx) * 8];
-
-		// Find maximum x where we have a pixel of a value
-		// other than zero.
-
-		int lMaxX = -1;
-
-		for (int y = 0; y < 8; y++)
-		{
-			for (int x = 0; x < 8; x++)
-			{
-				if (lCharData[y * lPitch + x] != 0 && x > lMaxX)
-				{
-					lMaxX = x;
-				}
-			}
-		}
-
-		if (lMaxX == -1)
-		{
-			lMaxX = 0;
-		}
-		else
-		{
-			lMaxX++;
-
-			if (lMaxX > 8)
-			{
-				lMaxX = 8;
-			}
-		}
-
-		pWidth[i] = lMaxX;
-	}
-}
-
 void Painter::SetDestCanvas(Lepra::Canvas* pCanvas)
 {
 	mCanvas = pCanvas;
-
-	// Initialize fonts and mouse cursor here. Can't do it in the constructor 
-	// since we need to call virtual functions.
-	if (mFontsAndCursorInitialized == false)
-	{
-		// Grayscale palette.
-		Lepra::Color lPalette[256];
-		for (int i = 0; i < 256; i++)
-		{
-			lPalette[i].Set(i, i, i, 0);
-		}
-
-		// Create standard fonts.
-		Lepra::Canvas lFont0(16, 8 * 128, Lepra::Canvas::BITDEPTH_8_BIT);
-		Lepra::Canvas lFont1(16, 8 * 128, Lepra::Canvas::BITDEPTH_8_BIT);
-
-		lFont0.SetBuffer(smStandardFont1);
-		lFont1.SetBuffer(smStandardFont2);
-
-		lFont0.SetPalette(lPalette);
-		lFont1.SetPalette(lPalette);
-
-		mStandardFontID0 = AddImageFont(lFont0, 8, 8, smFont1CharWidth, 8, 0, 255, -1, 2, 1, 32);
-		mStandardFontID1 = AddImageFont(lFont1, 8, 8, smFont2CharWidth, 8, 0, 255, -1, 2, 1, 32);
-
-		SetActiveFont(GetStandardFont(0));
-
-		// Black & white palette.
-		lPalette[0].Set(0, 0, 0, 0);
-		lPalette[1].Set(255, 255, 255, 0);
-
-		// Mouse cursor canvas.
-		Lepra::Canvas lCursor(16, 32, Lepra::Canvas::BITDEPTH_8_BIT);
-		lCursor.SetBuffer(smStandardMouseCursor);
-		lCursor.SetPalette(lPalette);
-
-		// Create a correct alpha buffer.
-		Lepra::Canvas lCursorAlpha(16, 32, Lepra::Canvas::BITDEPTH_8_BIT);
-		lCursorAlpha.SetBuffer(smStandardMouseCursor, true);
-
-		Lepra::uint8* lAlpha = (Lepra::uint8*)lCursorAlpha.GetBuffer();
-		for (int i = 0; i < 16 * 32; i++)
-		{
-			lAlpha[i] = (smStandardMouseCursor[i] == 0) ? 0 : 255;
-		}
-
-		// Merge cursor bitmap with alpha buffer.
-		lCursor.ConvertTo32BitWithAlpha(lCursorAlpha);
-
-		mMouseCursorID = AddImage(&lCursor, 0);
-
-		mFontsAndCursorInitialized = true;
-	}
 }
 
 void Painter::BeginPaint()
 {
-	//BeginDisplayList(mDefaultDisplayList);
 }
 
 void Painter::EndPaint()
 {
-	//RenderDisplayList(mDefaultDisplayList);
-	//EndDisplayList();
 }
 
 bool Painter::PushAttrib(unsigned pAttrib)
@@ -473,267 +293,42 @@ void Painter::SetColor(const Lepra::Color& pColor, unsigned pColorIndex)
 	mColor[pColorIndex] = pColor;
 }
 
-void Painter::SetFontPainter(SystemPainter* pFontPainter)
+void Painter::SetFontManager(FontManager* pFontManager)
 {
-	mFontPainter = pFontPainter;
+	mFontManager = pFontManager;
 }
 
-SystemPainter* Painter::GetFontPainter() const
+FontManager* Painter::GetFontManager() const
 {
-	return (mFontPainter);
-}
-
-int Painter::PrintText(const Lepra::String& pString, int x, int y)
-{
-	return (DoPrintText(pString, x, y));
-
-	/*int lCurrentX = x;
-	int lCurrentY = y;
-
-	for (size_t z = 0; z < pString.length(); ++z)
-	{
-		Lepra::tchar lChar = pString[z];
-
-		if (lChar == _T('\n'))
-		{
-			lCurrentY += GetLineHeight();
-			lCurrentX = x;
-		}
-		else if(lChar != _T('\r') && 
-			lChar != _T('\b') &&
-			lChar != _T('\t'))
-		{
-			Lepra::PixelRect lCharSquare;
-			ImageID lCharImageId;
-			if (CacheCharImage(lChar, lCharImageId, lCharSquare))
-			{
-				DrawAlphaImage(lCharImageId, lCurrentX, lCurrentY, lCharSquare);
-				//DrawImage(lCharImageId, lCurrentX, lCurrentY, lCharSquare);
-				lCurrentX += lCharSquare.GetWidth();
-			}
-		}
-	}
-	return (lCurrentY+GetLineHeight());*/
-}
-
-void Painter::SetActiveFont(FontID pFontId)
-{
-	if (mFontPainter)
-	{
-		// TODO: implement well when the system font rendering is tidied up.
-	}
-	FontTable::Iterator lIter = mFontTable.Find(pFontId);
-	if (lIter != mFontTable.End())
-	{
-		mCurrentFont = *lIter;
-	}
-}
-
-Painter::FontID Painter::GetCurrentFont()
-{
-	if (mFontPainter)
-	{
-		// TODO: implement well when the system font rendering is tidied up.
-		return (mFontPainter->GetCurrentFont());
-	}
-	return mCurrentFont->mFontID;
-}
-
-int Painter::GetCharWidth(const Lepra::tchar pChar)
-{
-	if (mFontPainter)
-	{
-		return (mFontPainter->GetCharWidth(pChar));
-	}
-
-	unsigned int lChar = (unsigned int)((Lepra::utchar)pChar) - mCurrentFont->mFirstChar;
-
-	if (pChar == _T(' '))
-	{
-		return mCurrentFont->mCharWidth[lChar] + mCurrentFont->mDefaultSpaceWidth + mCurrentFont->mCharOffset;
-	}
-	else if(pChar == _T('\t'))
-	{
-		return mCurrentFont->mTabWidth;
-	}
-
-	return mCurrentFont->mCharWidth[lChar] + mCurrentFont->mCharOffset;
+	assert(mFontManager);
+	return (mFontManager);
 }
 
 int Painter::GetStringWidth(const Lepra::String& pString)
 {
-	if (mFontPainter)
+	if (!mFontManager)
 	{
-		return (mFontPainter->GetStringWidth(pString));
+		return (0);
 	}
-
-	int lCurrentX = 0;
-	int lMaxX = 0;
-
-	for (size_t i = 0; i < pString.length(); i++)
-	{
-		Lepra::utchar lChar = (Lepra::utchar)pString[i];
-		assert(lChar >= mCurrentFont->mFirstChar && lChar <= mCurrentFont->mLastChar);
-
-		if (lChar == _T('\n'))
-		{
-			lCurrentX = 0;
-		}
-		else if(lChar != _T('\r') && 
-			lChar != _T('\b'))
-		{
-			lCurrentX += mCurrentFont->mCharWidth[lChar - mCurrentFont->mFirstChar] + mCurrentFont->mCharOffset;
-		}
-
-		if (lChar == _T(' '))
-		{
-			lCurrentX += mCurrentFont->mDefaultSpaceWidth;
-		}
-		else if(lChar == _T('\t'))
-		{
-			lCurrentX = ((lCurrentX / mCurrentFont->mTabWidth) + 1) * mCurrentFont->mTabWidth;
-		}
-
-		if (lCurrentX > lMaxX)
-		{
-			lMaxX = lCurrentX;
-		}
-	}
-
-	return lMaxX;
+	return (mFontManager->GetStringWidth(pString));
 }
 
 int Painter::GetFontHeight()
 {
-	if (mFontPainter)
+	if (!mFontManager)
 	{
-		return (mFontPainter->GetFontHeight());
+		return (0);
 	}
-	
-	return mCurrentFont->mCharHeight;
+	return (mFontManager->GetFontHeight());
 }
 
 int Painter::GetLineHeight()
 {
-	if (mFontPainter)
+	if (!mFontManager)
 	{
-		return (mFontPainter->GetLineHeight());
+		return (0);
 	}
-
-	return mCurrentFont->mCharHeight + mCurrentFont->mNewLineOffset;
-}
-
-Painter::FontID Painter::AddImageFont(const Lepra::Canvas& pFont,
-				      int pTileWidth,
-				      int pTileHeight,
-				      int pCharWidth,
-				      int pCharHeight,
-				      int pFirstChar,
-				      int pLastChar,
-				      int pDefaultSpaceWidth,
-				      int pNewLineOffset,
-				      int pCharOffset,
-				      int pTabWidth)
-{
-	int lNumChars = pLastChar - pFirstChar + 1;
-	int* lCharWidth = new int[lNumChars];
-	for (int i = 0; i < lNumChars; i++)
-	{
-		lCharWidth[i] = pCharWidth;
-	}
-
-	FontID lFontID = AddImageFont(pFont, 
-				       pTileWidth, pTileHeight, 
-				       lCharWidth, pCharHeight,
-				       pFirstChar, pLastChar,
-				       pDefaultSpaceWidth,
-				       pNewLineOffset,
-				       pCharOffset,
-				       pTabWidth);
-
-	delete[] lCharWidth;
-
-	return lFontID;
-}
-
-Painter::FontID Painter::AddImageFont(const Lepra::Canvas& pFont, 
-				      int pTileWidth,
-				      int pTileHeight,
-				      int* pCharWidth, 
-				      int pCharHeight,
-				      int pFirstChar,
-				      int pLastChar,
-				      int pDefaultSpaceWidth,
-				      int pNewLineOffset,
-				      int pCharOffset,
-				      int pTabWidth)
-{
-	const int lNumChars = pLastChar - pFirstChar + 1;
-	pDefaultSpaceWidth = (pDefaultSpaceWidth < 0)? CalcAverageWidth(lNumChars, pCharWidth) : pDefaultSpaceWidth;
-
-	int lID = mFontIDManager.GetFreeId();
-
-	if (lID != 0)
-	{
-		Font* lFont = NewFont(pFirstChar, pLastChar);
-
-		lFont->mFontID = (Painter::FontID)lID;
-
-		if (Lepra::Canvas::BitDepthToInt(pFont.GetBitDepth()) > 8 ||
-		   (mCanvas != 0 && Lepra::Canvas::BitDepthToInt(mCanvas->GetBitDepth()) == 8))
-		{
-			lFont->mTextureID = AddImage(&pFont, 0);
-			lFont->mAlphaImage = false;
-		}
-		else
-		{
-			lFont->mTextureID = AddImage(0, &pFont);
-			lFont->mAlphaImage = true;
-		}
-
-		if (lFont->mTextureID == 0)
-		{
-			delete lFont;
-			return Painter::INVALID_FONTID;
-		}
-
-		// Set font data.
-		lFont->mTileWidth  = pTileWidth;
-		lFont->mTileHeight = pTileHeight;
-		lFont->mCharHeight = pCharHeight;
-
-		lFont->mDefaultSpaceWidth = pDefaultSpaceWidth;
-		lFont->mNewLineOffset = pNewLineOffset;
-		lFont->mCharOffset = pCharOffset;
-		lFont->mTabWidth = pTabWidth;
-
-		::memcpy(lFont->mCharWidth, pCharWidth, (pLastChar - pFirstChar + 1) * sizeof(int));
-
-		// Let the child class do whatever it has to do.
-		InitFont(lFont, pFont);
-
-		mFontTable.Insert(lID, lFont);
-	}
-
-	return (FontID)lID;
-}
-
-Painter::FontID Painter::GetStandardFont(int pFontIndex)
-{
-	switch(pFontIndex)
-	{
-	case 0:
-		return mStandardFontID0;
-	case 1:
-		return mStandardFontID1;
-	default:
-		return mStandardFontID0;
-	}
-}
-
-bool Painter::Font::IsSystemFont()
-{
-	return false;
+	return (mFontManager->GetLineHeight());
 }
 
 Painter::DisplayListID Painter::NewDisplayList()
@@ -793,12 +388,12 @@ void Painter::RenderDisplayList(DisplayListID pDisplayListID)
 	DisplayListMap::iterator it = mDisplayListMap.find(pDisplayListID);
 	if(it != mDisplayListMap.end())
 	{
-		//std::vector<DisplayEntity*>* lDisplayList = (*it).second;
-		//DoRenderDisplayList(lDisplayList);
+		std::vector<DisplayEntity*>* lDisplayList = (*it).second;
+		DoRenderDisplayList(lDisplayList);
 	}
 }
 
-Geometry2D* Painter::FetchDisplayEntity(Lepra::uint16 pVertexFormat, ImageID pImageID, FontID pFontID)
+Geometry2D* Painter::FetchDisplayEntity(Lepra::uint16 pVertexFormat, ImageID pImageID)
 {
 	AdjustVertexFormat(pVertexFormat);
 
@@ -807,18 +402,6 @@ Geometry2D* Painter::FetchDisplayEntity(Lepra::uint16 pVertexFormat, ImageID pIm
 	{
 		lEntity = *mDisplayListIter;
 	}
-
-	// Find the image ID connected to the font.
-	if(pFontID != INVALID_FONTID)
-	{
-		FontTable::Iterator lIter(mFontTable.Find((int)pFontID));
-		if(lIter != mFontTable.End())
-		{
-			Font* lFont = *lIter;
-			pImageID = (ImageID)lFont->mTextureID;
-		}
-	}
-
 
 	Lepra::PixelRect lClippingRect;
 	GetClippingRect(lClippingRect);
@@ -848,60 +431,6 @@ Geometry2D* Painter::FetchDisplayEntity(Lepra::uint16 pVertexFormat, ImageID pIm
 		}
 	}
 	return &lEntity->mGeometry;
-}
-
-void Painter::CreateText(const Lepra::String& pString, int x, int y)
-{
-	ToScreenCoords(x, y);
-	int lCurrentX = x;
-	int lCurrentY = y;
-
-	Geometry2D* lGeometry = FetchDisplayEntity(Geometry2D::VTX_UV, INVALID_IMAGEID, GetCurrentFont());
-
-	for (size_t i = 0; i < pString.length(); i++)
-	{
-		Lepra::tchar lChar = pString[i];
-		assert(lChar >= mCurrentFont->mFirstChar && lChar <= mCurrentFont->mLastChar);
-
-		if (lChar == _T('\n'))
-		{
-			lCurrentY += (mCurrentFont->mCharHeight + mCurrentFont->mNewLineOffset);
-			lCurrentX = x;
-		}
-		else if(lChar != _T('\r') && 
-			lChar != _T('\b') &&
-			lChar != _T('\t'))
-		{
-			float lCharWidth = (float)mCurrentFont->mTileWidth;
-			float lLeft   = (float)lCurrentX - 0.5f;
-			float lRight  = (float)(lCurrentX + lCharWidth) - 0.5f;
-			float lTop    = (float)lCurrentY - 0.5f;
-			float lBottom = (float)(lCurrentY + mCurrentFont->mCharHeight) - 0.5f;
-
-			float lU1;
-			float lV1;
-			float lU2;
-			float lV2;
-			mCurrentFont->GetUVRect(lChar, lU1, lV1, lU2, lV2);
-			Lepra::uint32 lVtx1 = lGeometry->SetVertex(lLeft, lTop, lU1, lV1);
-			Lepra::uint32 lVtx2 = lGeometry->SetVertex(lRight, lTop, lU2, lV1);
-			Lepra::uint32 lVtx3 = lGeometry->SetVertex(lRight, lBottom, lU2, lV2);
-			Lepra::uint32 lVtx4 = lGeometry->SetVertex(lLeft, lBottom, lU1, lV2);
-			lGeometry->SetTriangle(lVtx1, lVtx2, lVtx3);
-			lGeometry->SetTriangle(lVtx1, lVtx3, lVtx4);
-
-			lCurrentX += mCurrentFont->mCharWidth[lChar - mCurrentFont->mFirstChar] + mCurrentFont->mCharOffset;
-		}
-
-		if (lChar == _T(' '))
-		{
-			lCurrentX += mCurrentFont->mDefaultSpaceWidth;
-		}
-		else if(lChar == _T('\t'))
-		{
-			lCurrentX = mTabOriginX + (((lCurrentX - mTabOriginX) / mCurrentFont->mTabWidth) + 1) * mCurrentFont->mTabWidth;
-		}
-	}
 }
 
 void Painter::CreateLine(int pX1, int pY1, int pX2, int pY2)
@@ -1263,15 +792,6 @@ void Painter::GetScreenCoordClippingRect(Lepra::PixelRect& pClippingRect) const
 	ToScreenCoords(pClippingRect.mRight, pClippingRect.mBottom);
 }
 
-void Painter::AddFont(Font* pFont)
-{
-	pFont->mFontID = (FontID)mFontIDManager.GetFreeId();
-	if(pFont->mFontID != INVALID_FONTID)
-	{
-		mFontTable.Insert((int)pFont->mFontID, pFont);
-	}
-}
-
 void Painter::AdjustVertexFormat(Lepra::uint16&)
 {
 	// Default behaviour. Do nothing.
@@ -1550,16 +1070,6 @@ void Painter::DrawAlphaImage(ImageID pImageID, const Lepra::PixelCoords& pTopLef
 	DrawAlphaImage(pImageID, pTopLeft.x, pTopLeft.y);
 }
 
-void Painter::DrawDefaultMouseCursor(int x, int y)
-{
-	DrawImage(mMouseCursorID, x, y);
-}
-
-void Painter::SetTabOriginX(int pTabOriginX)
-{
-	mTabOriginX = pTabOriginX;
-}
-
 Painter::RenderMode Painter::DisplayEntity::GetRenderMode() const
 {
 	return mRM;
@@ -1588,31 +1098,6 @@ Geometry2D& Painter::DisplayEntity::GetGeometry()
 bool Painter::IsPowerOf2(unsigned pNumber)
 {
 	return (pNumber == GetClosestPowerOf2(pNumber));
-}
-
-Lepra::uint8* Painter::GetStandardFont1()
-{
-	return smStandardFont1;
-}
-
-Lepra::uint8* Painter::GetStandardFont2()
-{
-	return smStandardFont2;
-}
-
-int* Painter::GetCharWidthStdFont1()
-{
-	return smFont1CharWidth;
-}
-
-int* Painter::GetCharWidthStdFont2()
-{
-	return smFont2CharWidth;
-}
-
-Lepra::uint8* Painter::GetStandardMouseCursor()
-{
-	return smStandardMouseCursor;
 }
 
 void Painter::ToScreenCoords(int& x, int& y) const
@@ -1677,16 +1162,6 @@ bool Painter::YGT(int y1, int y2)
 bool Painter::YGE(int y1, int y2)
 {
 	return (y1 * (int)mYDir) >= (y2 * (int)mYDir);
-}
-
-Painter::Font* Painter::GetCurrentFontInternal() const
-{
-	return mCurrentFont;
-}
-
-int Painter::GetTabOriginX() const
-{
-	return mTabOriginX;
 }
 
 Lepra::Color& Painter::GetColorInternal(int pColorIndex)

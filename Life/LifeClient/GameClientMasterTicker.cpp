@@ -169,13 +169,15 @@ bool GameClientMasterTicker::Tick()
 	{
 		LEPRA_MEASURE_SCOPE(RenderSlaves);
 
+		// Kickstart physics so no slaves have to wait too long for completion.
 		for (x = mSlaveSet.First(); lOk && x != mSlaveSet.End(); ++x)
 		{
 			lOk = x.GetObject()->BeginTick();
-			if (lOk)
-			{
-				lOk = x.GetObject()->Render();
-			}
+		}
+		// Start rendering machine directly afterwards.
+		for (x = mSlaveSet.First(); lOk && x != mSlaveSet.End(); ++x)
+		{
+			lOk = x.GetObject()->Render();
 		}
 	}
 
@@ -183,6 +185,12 @@ bool GameClientMasterTicker::Tick()
 		LEPRA_MEASURE_SCOPE(UiPaint);
 		mUiManager->Paint();
 
+	}
+
+	{
+		LEPRA_MEASURE_SCOPE(DrawGraph);
+		DrawFps();
+		DrawPerformanceLineGraph2d();
 	}
 
 	{
@@ -195,15 +203,10 @@ bool GameClientMasterTicker::Tick()
 	}
 
 	{
-		LEPRA_MEASURE_SCOPE(DrawGraph);
-		DrawFps();
-		DrawPerformanceLineGraph2d();
-	}
-
-	{
 		LEPRA_MEASURE_SCOPE(ResourceTick);
 		// This must be synchronous. The reason is that it may add objects to "script" or "physics" enginges,
-		// which are run by a separate thread; parallelization here will certainly cause threading errors.
+		// as well as upload data to the GPU and so forth; parallelization here will certainly cause threading
+		// errors.
 		mResourceManager->Tick();
 	}
 

@@ -473,10 +473,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Source\UiDirectX9Painter.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\Source\UiDirectX9Renderer.cpp"
 				>
 				<FileConfiguration
@@ -533,7 +529,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Source\UiGDIPainter.cpp"
+				RelativePath=".\Source\UiFontManager.cpp"
 				>
 			</File>
 			<File
@@ -622,10 +618,6 @@
 			</File>
 			<File
 				RelativePath=".\Source\UiSoftwareRenderer.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Source\UiSystemPainter.cpp"
 				>
 			</File>
 			<File
@@ -868,6 +860,18 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="Win32"
+				>
+				<File
+					RelativePath=".\Source\Win32\UiWin32FontManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Win32\UWin32iDirectX9Painter.cpp"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -891,19 +895,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Include\UiDirectX9Painter.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\UiDirectX9Renderer.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Include\UiEdge.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\UiGDIPainter.h"
 				>
 			</File>
 			<File
@@ -980,14 +972,6 @@
 			</File>
 			<File
 				RelativePath=".\Include\UiSoftwareRenderer.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Source\UiStandardFont1.inl"
-				>
-			</File>
-			<File
-				RelativePath=".\Source\UiStandardFont2.inl"
 				>
 			</File>
 			<File
@@ -1139,6 +1123,18 @@
 				</File>
 				<File
 					RelativePath=".\Include\GUI\UiWindow.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Win32"
+				>
+				<File
+					RelativePath=".\Include\Win32\UiWin32DirectX9Painter.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Include\Win32\UiWin32FontManager.h"
 					>
 				</File>
 			</Filter>

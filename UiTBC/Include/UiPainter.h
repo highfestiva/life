@@ -26,14 +26,14 @@
 
 #pragma once
 
+#include <hash_map>
+#include <list>
 #include "../../Lepra/Include/Graphics2D.h"
-#include "../../Lepra/Include/HashTable.h"
 #include "../../Lepra/Include/String.h"
 #include "../../Lepra/Include/Canvas.h"
 #include "../../Lepra/Include/IdManager.h"
 #include "UiTBC.h"
 #include "UiGeometry2D.h"
-#include <list>
 
 
 
@@ -42,7 +42,7 @@ namespace UiTbc
 
 
 
-class SystemPainter;
+class FontManager;
 
 
 
@@ -108,11 +108,6 @@ public:
 	enum ImageID
 	{
 		INVALID_IMAGEID = 0,
-	};
-
-	enum FontID
-	{
-		INVALID_FONTID = 0,
 	};
 
 	enum DisplayListID
@@ -234,67 +229,12 @@ public:
 	void DrawAlphaImage(ImageID pImageID, int x, int y);
 	void DrawAlphaImage(ImageID pImageID, const Lepra::PixelCoords& pTopLeft);
 
-	void DrawDefaultMouseCursor(int x, int y);
-
-	/*
-		Image Font Functions.
-	*/
-
-	void SetFontPainter(SystemPainter* pFontPainter);
-	SystemPainter* GetFontPainter() const;
-
-	//
-	// Param 1: pFont - the image that contains all characters, numbers e.t.c.
-	// Param 2: pTileWidth  - the width of one tile which contains one character.
-	// Param 3: pTileHeight - the height of one tile...
-	// Param 4: pCharWidth  - the width of the characters when displayed.
-	// Param 5: pCharHeight - the height of the characters when displayed (height of one line).
-	// Param 6: pFirstChar  - the first character code (in ascii or unicode) defined by
-	//                          the font.
-	// Param 7: pLastChar   - the last character code (in ascii or unicode) defined by
-	//                          the font.
-	FontID AddImageFont(const Lepra::Canvas& pFont,
-			    int pTileWidth,
-			    int pTileHeight,
-			    int pCharWidth,
-			    int pCharHeight,
-			    int pFirstChar,
-			    int pLastChar,
-			    int pDefaultSpaceWidth = 0,
-			    int pNewLineOffset = 0,
-			    int pCharOffset = 0,
-			    int pTabWidth = 32);
-
-	// Almost same as above, but each character may have a unique width.
-	// pCharWidth contains pLastChar - pFirstChar + 1 entries.
-	FontID AddImageFont(const Lepra::Canvas& pFont, 
-			    int pTileWidth,
-			    int pTileHeight,
-			    int* pCharWidth,
-			    int pCharHeight,
-			    int pFirstChar,
-			    int pLastChar,
-			    int pDefaultSpaceWidth = 0,
-			    int pNewLineOffset = 0,
-			    int pCharOffset = 0,
-			    int pTabWidth = 32);
-
-	virtual void SetActiveFont(FontID pFontID);
-	FontID GetStandardFont(int pFontIndex);
-	FontID GetCurrentFont();
-
-	void SetTabOriginX(int pTabOriginX);
-
-	// Returns the width of the rendered string in pixels.
-	virtual int GetCharWidth(const Lepra::tchar pChar);
-	virtual int GetStringWidth(const Lepra::String& pString);
-	virtual int GetFontHeight();
-	virtual int GetLineHeight();
-
-	// Draws a null-terminated C-string at coordinates (x, y). If the method encounters a '\n',
-	// the text followed after that will be drawn at (x, y + CharHeight).
-	// The return value is the x-coordinate where the next character should be written.
-	int PrintText(const Lepra::String& pString, int x, int y);
+	void SetFontManager(FontManager* pFontManager);
+	FontManager* GetFontManager() const;
+	int GetStringWidth(const Lepra::String& pString);
+	int GetFontHeight();
+	int GetLineHeight();
+	virtual int PrintText(const Lepra::String& pString, int x, int y) = 0;
 
 	Lepra::uint8 FindMatchingColor(const Lepra::Color& pColor);
 	virtual void ReadPixels(Lepra::Canvas& pDestCanvas, const Lepra::PixelRect& pRect) = 0;
@@ -312,6 +252,7 @@ public:
 	void EndDisplayList();
 
 	void RenderDisplayList(DisplayListID pDisplayListID);
+
 protected:
 	class DisplayEntity
 	{
@@ -356,64 +297,11 @@ protected:
 		Geometry2D mGeometry;
 	};
 
-	// The following class represents the base class of all image fonts.
-	// It is however used as the base class for system fonts as well (see 
-	// SystemPainter and GDIPainter) in order to avoid duplicated handling
-	// of fonts. 
-	class Font
-	{
-	public:
-		Font(int pFirstChar, int pLastChar) :
-			mTextureID(0),
-			mTileWidth(0),
-			mTileHeight(0),
-			mCharWidth(new int[pLastChar - pFirstChar + 1]),
-			mCharHeight(0),
-			mFirstChar(pFirstChar),
-			mLastChar(pLastChar),
-			mDefaultSpaceWidth(0),
-			mNewLineOffset(0),
-			mCharOffset(0),
-			mTabWidth(0),
-			mAlphaImage(false)
-		{
-			::memset(mCharWidth, 0, (pLastChar - pFirstChar + 1) * sizeof(int));
-		}
-
-		virtual ~Font()
-		{
-			delete[] mCharWidth;
-		}
-
-		// Only makes sense in image fonts.
-		virtual void GetUVRect(const Lepra::tchar& pChar, float& pU1, float& pV1, float& pU2, float& pV2) const = 0;
-		virtual bool IsSystemFont();
-
-		int mTextureID;
-		int mTileWidth;
-		int mTileHeight;
-		int* mCharWidth;
-		int mCharHeight;
-		int mFirstChar;
-		int mLastChar;
-
-		// Misc settings.
-		int mDefaultSpaceWidth;
-		int mNewLineOffset;
-		int mCharOffset;
-		int mTabWidth;
-
-		FontID mFontID;
-		bool mAlphaImage;
-	};
-
 	typedef std::list<unsigned> AttribList;
 	typedef std::list<RenderMode> RMList;
 	typedef std::list<Lepra::uint8> UCharList;
 	typedef std::list<Lepra::Color> ColorList;
 	typedef std::list<Lepra::PixelRect> RectList;
-	typedef Lepra::HashTable<Lepra::String, ImageID> FilenameToImageTable;
-	typedef Lepra::HashTable<int, Font*> FontTable;
 
 	virtual void DoDrawPixel(int x, int y) = 0;
 	virtual void DoDrawLine(int pX1, int pY1, int pX2, int pY2) = 0;
@@ -437,10 +325,7 @@ protected:
 	virtual void DoDrawImage(ImageID pImageID, const Lepra::PixelRect& pRect, const Lepra::PixelRect& pSubpatchRect) = 0;
 	virtual void DoDrawAlphaImage(ImageID pImageID, int x, int y) = 0;
 
-	virtual Font* NewFont(int pFirstChar, int pLastChar) const = 0;
-	virtual void InitFont(Font* pFont, const Lepra::Canvas& pFontImage) = 0;
 	virtual void GetImageSize(ImageID pImageID, int& pWidth, int& pHeight) = 0;
-	virtual int  DoPrintText(const Lepra::String& pString, int x, int y) = 0;
 
 	virtual void DoRenderDisplayList(std::vector<DisplayEntity*>* pDisplayList) = 0;
 
@@ -451,13 +336,9 @@ protected:
 	// This function will return the geometry of either a newly create DisplayEntity 
 	// or the current (last) one in the current display list, depending on wether the 
 	// last entity matches the given parameters. The newly created DisplayEntity will 
-	// be  appended at the end of the display list. Note that pImageID and pFontID 
-	// mustn't be valid at the same time.
-	Geometry2D* FetchDisplayEntity(Lepra::uint16 pVertexFormat = 0,
-		ImageID pImageID = INVALID_IMAGEID, FontID pFontID = INVALID_FONTID);
+	// be  appended at the end of the display list.
+	Geometry2D* FetchDisplayEntity(Lepra::uint16 pVertexFormat = 0, ImageID pImageID = INVALID_IMAGEID);
 
-	// Only works with image fonts.
-	void CreateText(const Lepra::String& pString, int x, int y);
 	void CreateLine(int pX1, int pY1, int pX2, int pY2);
 	void CreateRectFrame(int pLeft, int pTop, int pRight, int pBottom, int pWidth);
 	void Create3DRectFrame(int pLeft, int pTop, int pRight, int pBottom, int pWidth, bool pSunken);
@@ -483,19 +364,9 @@ protected:
 	void CreateImage(ImageID pImageID, const Lepra::PixelRect& pRect);
 	void CreateImage(ImageID pImageID, const Lepra::PixelRect& pRect, const Lepra::PixelRect& pSubpatchRect);
 
-	// Some helper functions.
-	static int CalcAverageWidth(int pCharCount, int* pCharWidthArray);
-	void CalcCharWidths(Lepra::uint8* pFont, int* pWidth);
-
 	static bool IsPowerOf2(unsigned pNumber);
 	static unsigned GetClosestPowerOf2(unsigned pNumber, bool pGreater = false);
 	static unsigned GetExponent(unsigned pPowerOf2);
-
-	static Lepra::uint8* GetStandardFont1();
-	static Lepra::uint8* GetStandardFont2();
-	static int* GetCharWidthStdFont1();
-	static int* GetCharWidthStdFont2();
-	static Lepra::uint8* GetStandardMouseCursor();
 
 	// Coordinate convertion...
 	void ToScreenCoords(int& x, int& y) const;
@@ -516,40 +387,18 @@ protected:
 	// Internal access to private members.
 	void GetScreenCoordClippingRect(Lepra::PixelRect& pClippingRect) const;
 
-	Font* GetCurrentFontInternal() const;
-	int GetTabOriginX() const;
 	Lepra::Color& GetColorInternal(int pColorIndex);
 
-	// Used by SystemPainters that need to instantiate own font types. Will set
-	// Font::mFontID.
-	void AddFont(Font* pFont);
 private:
 	typedef std::hash_map<unsigned, std::vector<DisplayEntity*>* > DisplayListMap;
 
-	SystemPainter* mFontPainter;
+	FontManager* mFontManager;
 
 	DisplayListMap mDisplayListMap;
 	Lepra::IdManager<int> mDisplayListIDManager;
 	std::vector<DisplayEntity*>* mCurrentDisplayList;
 	std::vector<DisplayEntity*>::iterator mDisplayListIter;
 	DisplayListID mDefaultDisplayList;
-
-	// Two standard bitmap fonts, mStandardFont1 and mStandardFont2.
-	// mStandardFont1 is actually a copy of the system font (the font used in text mode, MS-DOS).
-	// mStandardFont2 is a little bit more "cool".
-	static Lepra::uint8 smStandardFont1[];
-	static Lepra::uint8 smStandardFont2[];
-	static Lepra::uint8 smStandardMouseCursor[];
-
-	static int smFont1CharWidth[256];
-	static int smFont2CharWidth[256];
-
-	static bool smCharWidthsCalculated;
-
-	int mTabOriginX;
-
-	bool m8BitColorSearchMode;
-	bool mFontsAndCursorInitialized;
 
 	RenderMode mRenderMode;
 
@@ -566,14 +415,6 @@ private:
 	int mOrigoY;
 	XDir mXDir;
 	YDir mYDir;
-
-	Lepra::IdManager<int> mFontIDManager;
-	FontTable    mFontTable;
-	Font*        mCurrentFont;
-
-	FontID mStandardFontID0;
-	FontID mStandardFontID1;
-	ImageID mMouseCursorID;
 
 	Lepra::Canvas* mCanvas;
 	Lepra::PixelRect mClippingRect;

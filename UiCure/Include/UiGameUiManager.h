@@ -20,10 +20,10 @@ class Canvas;
 namespace UiTbc
 {
 class DesktopWindow;
+class FontManager;
 class Layout;
 class Painter;
 class Renderer;
-class SystemPainter;
 }
 namespace UiLepra
 {
@@ -86,7 +86,7 @@ private:
 	Lepra::Canvas* mCanvas;
 	UiTbc::Renderer* mRenderer;
 	UiTbc::Painter* mPainter;
-	UiTbc::SystemPainter* mFontPainter;
+	UiTbc::FontManager* mFontManager;
 	UiTbc::DesktopWindow* mDesktopWindow;
 	UiLepra::InputManager* mInput;
 	SoundManager* mSound;

@@ -221,7 +221,6 @@ public:
 			    IconAlignment pAlignment);
 
 	void SetText(const Lepra::String& pText,
-			    Painter::FontID pFontID,
 			    const Lepra::Color& pTextColor,
 			    const Lepra::Color& pBackgColor,
 			    BlendFunc pBlendFunc = ALPHATEST,
@@ -250,7 +249,6 @@ protected:
 	};
 
 	void PrintText(Painter* pPainter, int x, int y);
-	Painter::FontID GetFontID();
 
 	virtual void OnTextChanged();
 	State GetState();
@@ -277,7 +275,6 @@ private:
 	Painter::ImageID mIconID;
 	IconAlignment mIconAlignment;
 
-	Painter::FontID mFontID;
 	Lepra::String mText;
 	Lepra::Color mTextColor;
 	Lepra::Color mTextBackgColor;

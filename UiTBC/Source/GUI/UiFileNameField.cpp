@@ -97,7 +97,6 @@ PopupList* FileNameField::CreatePopupList()
 		{
 			Label* lLabel = new Label(Lepra::WHITE, Lepra::LIGHT_BLUE);
 			lLabel->SetText((*lIter).mName, 
-					 GetFontId(), 
 					 GetTextColor(),
 					 Lepra::WHITE,
 					 Lepra::BLACK,

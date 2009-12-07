@@ -4,8 +4,9 @@
 	Copyright (c) 2002-2006, Alexander Hugestrand
 */
 
-#ifndef UISOFTWAREPAINTER_H
-#define UISOFTWAREPAINTER_H
+
+
+#pragma once
 
 #include "../../Lepra/Include/HashTable.h"
 #include "../../Lepra/Include/IdManager.h"
@@ -15,10 +16,14 @@
 #include "UiTBC.h"
 #include <list>
 
+
+
 namespace UiTbc
 {
 
-class SoftwarePainter : public Painter
+
+
+class SoftwarePainter: public Painter
 {
 public:
 	SoftwarePainter();
@@ -407,58 +412,10 @@ private:
 		Lepra::Canvas* mAlphaBuffer;
 	};
 
-	class SoftwareFont : public Painter::Font
-	{
-	public:
-		SoftwareFont(int pFirstChar, int pLastChar) :
-			Font(pFirstChar, pLastChar),
-			mAlphaImage(false),
-			mCharRect(new Lepra::PixelRect[pLastChar - pFirstChar + 1]),
-			mChar(new Lepra::Canvas[pLastChar - pFirstChar + 1])
-		{
-		}
-
-		~SoftwareFont()
-		{
-			delete[] mCharRect;
-			delete[] mChar;
-		}
-
-		void GetUVRect(const Lepra::tchar& pChar, float& pU1, float& pV1, float& pU2, float& pV2) const
-		{
-			float lTWidthRecip;
-			float lTHeightRecip;
-			if(mAlphaImage)
-			{
-				lTWidthRecip = 1.0f / (float)mChar->GetWidth();
-				lTHeightRecip = 1.0f / (float)mChar->GetHeight();
-			}
-			else
-			{
-				lTWidthRecip = 1.0f / (float)mTexture->mColorMap->GetWidth();
-				lTHeightRecip = 1.0f / (float)mTexture->mColorMap->GetHeight();
-			}
-
-			Lepra::PixelRect& lCharRect = mCharRect[pChar];
-			pU1 = (float)lCharRect.mLeft * lTWidthRecip;
-			pV1 = (float)lCharRect.mTop * lTHeightRecip;
-			pU2 = (float)lCharRect.mRight * lTWidthRecip;
-			pV2 = (float)lCharRect.mBottom * lTHeightRecip;
-		}
-
-		Texture* mTexture;
-		bool mAlphaImage;
-
-		Lepra::PixelRect* mCharRect;
-		Lepra::Canvas*    mChar;
-	};
-
 	typedef Lepra::HashTable<int, Texture*> TextureTable;
 
-	Font* NewFont(int pFirstChar, int pLastChar) const;
-	void InitFont(Font* pFont, const Lepra::Canvas& pFontImage);
 	void GetImageSize(ImageID pImageID, int& pWidth, int& pHeight);
-	int DoPrintText(const Lepra::String& pString, int x, int y);
+	int PrintText(const Lepra::String& pString, int x, int y);
 
 	Lepra::IdManager<int> mTextureIDManager;
 	TextureTable mTextureTable;
@@ -474,6 +431,6 @@ void SoftwarePainter::SetIncrementalAlpha(bool pIncrementalAlpha)
 	mIncrementalAlpha = pIncrementalAlpha;
 }
 
-} // End namespace.
 
-#endif
+
+}

@@ -6,7 +6,7 @@
 
 #include "../Include/UiOpenGLPainter.h"
 #include <math.h>
-#include "../Include/UiSystemPainter.h"
+#include "../Include/UiFontManager.h"
 
 
 
@@ -1149,40 +1149,6 @@ void OpenGLPainter::DoDrawImage(ImageID pImageID, const Lepra::PixelRect& pRect,
 	glPopAttrib();
 }
 
-void OpenGLPainter::InitFont(Font* pFont, const Lepra::Canvas& pFontImage)
-{
-	OpenGLFont* lFont = (OpenGLFont*)pFont;
-
-	// Get the texture.
-	TextureTable::Iterator lTIter = mTextureTable.Find(lFont->mTextureID);
-	lFont->mTexture = *lTIter;
-
-	float lTW = 1.0f / (float)lFont->mTexture->mWidth;
-	float lTH = 1.0f / (float)lFont->mTexture->mHeight;
-
-	int lLeft = 0;
-	int lTop  = 0;
-	int lCharCount = pFont->mLastChar - pFont->mFirstChar + 1;
-	for (int i = 0; i < lCharCount; i++)
-	{
-		lFont->mCharRect[i].mLeft   = (float)lLeft * lTW;
-		lFont->mCharRect[i].mRight  = (float)(lLeft + lFont->mTileWidth) * lTW;
-		lFont->mCharRect[i].mTop    = (float)lTop * lTH;
-		lFont->mCharRect[i].mBottom = (float)(lTop + lFont->mTileHeight) * lTH;
-
-		if (lFont->mCharWidth[i] >= 0)
-		{
-			lLeft += lFont->mTileWidth;
-
-			if ((lLeft + lFont->mTileWidth) > (int)pFontImage.GetWidth())
-			{
-				lLeft = 0;
-				lTop += lFont->mTileHeight;
-			}
-		}
-	}
-}
-
 void OpenGLPainter::GetImageSize(ImageID pImageID, int& pWidth, int& pHeight)
 {
 	pWidth = 0;
@@ -1197,7 +1163,7 @@ void OpenGLPainter::GetImageSize(ImageID pImageID, int& pWidth, int& pHeight)
 	}
 }
 
-int OpenGLPainter::DoPrintText(const Lepra::String& pString, int x, int y)
+int OpenGLPainter::PrintText(const Lepra::String& pString, int x, int y)
 {
 	ToScreenCoords(x, y);
 
@@ -1218,24 +1184,25 @@ int OpenGLPainter::DoPrintText(const Lepra::String& pString, int x, int y)
 		::glDisable(GL_BLEND);
 	}
 
+	::glDisable(GL_SCISSOR_TEST);
+
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 	glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
 	glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
 
-	const int lFontHeight = GetFontPainter()->GetFontHeight();
-	const int lLineHeight = GetFontPainter()->GetLineHeight();
-	const int lSpaceSize = GetFontPainter()->GetCharWidth(' ');
+	const int lFontHeight = GetFontManager()->GetFontHeight();
+	const int lLineHeight = GetFontManager()->GetLineHeight();
+	const int lSpaceSize = GetFontManager()->GetCharWidth(' ');
 	const int lTabSize = lSpaceSize*4;
 
 	const Lepra::Color lColor = GetColorInternal(0);
-	GetFontPainter()->SetColor(lColor);
+	GetFontManager()->SetColor(lColor);
 	::glColor4f(lColor.GetRf(), lColor.GetGf(), lColor.GetBf(), lColor.GetAf());
 	Lepra::uint32 lColorHash = lColor.To32();
 	lColorHash = (lColorHash&0xC0000000) + ((lColorHash&0x00C00000)<<6) + ((lColorHash&0x0000C000)<<12);
-	const std::hash<Lepra::String> lFontNameHasher;
-	const size_t lFontNameHash = (lFontNameHasher)(GetFontPainter()->GetFontName());
-	const Lepra::uint64 lFontHash = ((Lepra::uint64)(lColorHash+lFontNameHash+lFontHeight)) << 32;
+	const Lepra::uint32 lFontId = GetFontManager()->GetActiveFont() << 16;
+	const Lepra::uint64 lFontHash = ((Lepra::uint64)(lColorHash+lFontId+lFontHeight)) << 32;
 
 	for (size_t i = 0; i < pString.length(); i++)
 	{
@@ -1251,7 +1218,7 @@ int OpenGLPainter::DoPrintText(const Lepra::String& pString, int x, int y)
 		}
 		else if(lChar == _T('\t'))
 		{
-			lCurrentX = GetTabOriginX() + (((lCurrentX - GetTabOriginX()) / lTabSize) + 1) * lTabSize;
+			lCurrentX = (lCurrentX/lTabSize+1) * lTabSize;
 		}
 		else if(lChar != _T('\r') && 
 			lChar != _T('\b'))
@@ -1263,7 +1230,7 @@ int OpenGLPainter::DoPrintText(const Lepra::String& pString, int x, int y)
 			}
 			::glRasterPos2i(lCurrentX, lCurrentY + lExtraY);
 
-			const int lCharWidth = GetFontPainter()->GetCharWidth(lChar);
+			const int lCharWidth = GetFontManager()->GetCharWidth(lChar);
 			GlyphTable::iterator lGlyph = mGlyphTable.find(lFontHash+lChar);
 			if (lGlyph != mGlyphTable.end())
 			{
@@ -1276,7 +1243,7 @@ int OpenGLPainter::DoPrintText(const Lepra::String& pString, int x, int y)
 				const int lWidth = lCharWidth;
 				const int lHeight = lFontHeight;
 				Lepra::Canvas lGlyphImage(lWidth, lHeight, Lepra::Canvas::BITDEPTH_32_BIT);
-				GetFontPainter()->RenderGlyph(lChar, lGlyphImage, Lepra::PixelRect(0, 0, lWidth, lHeight));
+				GetFontManager()->RenderGlyph(lChar, lGlyphImage, Lepra::PixelRect(0, 0, lWidth, lHeight));
 				::glNewList(lGlGlyph, GL_COMPILE_AND_EXECUTE);
 				if (mSmoothFont)
 				{
@@ -1402,25 +1369,13 @@ Painter::RGBOrder OpenGLPainter::GetRGBOrder()
 	return RGB;
 }
 
-bool OpenGLPainter::SetFont(const Lepra::String& pName, int pSize, bool pSmooth)
+void OpenGLPainter::SetFontSmoothness(bool pSmooth)
 {
-	bool lOk = true;
-	if (GetFontPainter()->GetFontName() != pName ||
-		GetFontPainter()->GetFontHeight() != pSize ||
-		mSmoothFont != pSmooth)
+	if (mSmoothFont != pSmooth)
 	{
-		lOk = false;
-		Painter::FontID lFont = GetFontPainter()->AddSystemFont(pName, pSize);
-		if (lFont != Painter::INVALID_FONTID)
-		{
-			lOk = true;
-			GetFontPainter()->SetActiveFont(lFont);
-			mSmoothFont = pSmooth;
-			ClearFontBuffers();
-		}
-
+		mSmoothFont = pSmooth;
+		ClearFontBuffers();
 	}
-	return (lOk);
 }
 
 
@@ -1439,34 +1394,34 @@ void OpenGLPainter::DoRenderDisplayList(std::vector<DisplayEntity*>* pDisplayLis
 	{
 		glPushAttrib(GL_TEXTURE_BIT);
 
-		DisplayEntity* lSE = *it;
-		Painter::SetClippingRect(lSE->GetClippingRect());
-		SetAlphaValue(lSE->GetAlpha());
-		SetRenderMode(lSE->GetRenderMode());
+		DisplayEntity* lGeneratedGeometry = *it;
+		Painter::SetClippingRect(lGeneratedGeometry->GetClippingRect());
+		SetAlphaValue(lGeneratedGeometry->GetAlpha());
+		SetRenderMode(lGeneratedGeometry->GetRenderMode());
 		UpdateRenderMode();
 
 		// Enabled in ResetClippingRect().
-		glVertexPointer(2, GL_FLOAT, 0, lSE->GetGeometry().GetVertexData());
+		glVertexPointer(2, GL_FLOAT, 0, lGeneratedGeometry->GetGeometry().GetVertexData());
 
-		if (lSE->GetGeometry().GetColorData() != 0)
+		if (lGeneratedGeometry->GetGeometry().GetColorData() != 0)
 		{
 			glEnableClientState(GL_COLOR_ARRAY);
-			glColorPointer(3, GL_FLOAT, 0, lSE->GetGeometry().GetColorData());
+			glColorPointer(3, GL_FLOAT, 0, lGeneratedGeometry->GetGeometry().GetColorData());
 		}
 		else
 		{
 			glDisableClientState(GL_COLOR_ARRAY);
 		}
 
-		if (lSE->GetImageID() != INVALID_IMAGEID)
+		if (lGeneratedGeometry->GetImageID() != INVALID_IMAGEID)
 		{
-			assert(lSE->GetGeometry().GetUVData() != 0);
+			assert(lGeneratedGeometry->GetGeometry().GetUVData() != 0);
 			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-			glTexCoordPointer(2, GL_FLOAT, 0, lSE->GetGeometry().GetUVData());
+			glTexCoordPointer(2, GL_FLOAT, 0, lGeneratedGeometry->GetGeometry().GetUVData());
 
 			glEnable(GL_TEXTURE_2D);
 
-			glBindTexture (GL_TEXTURE_2D, lSE->GetImageID());
+			glBindTexture (GL_TEXTURE_2D, lGeneratedGeometry->GetImageID());
 			glPixelStorei (GL_UNPACK_ALIGNMENT, 1);
 			glPixelStorei (GL_UNPACK_ROW_LENGTH, 0);
 			glPixelStorei (GL_UNPACK_SKIP_ROWS, 0);
@@ -1492,8 +1447,8 @@ void OpenGLPainter::DoRenderDisplayList(std::vector<DisplayEntity*>* pDisplayLis
 			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 		}
 
-		const int lTriangleEntryCount = lSE->GetGeometry().GetTriangleCount() * 3;
-		const Lepra::uint32* lTriangleData = lSE->GetGeometry().GetTriangleData();
+		const int lTriangleEntryCount = lGeneratedGeometry->GetGeometry().GetTriangleCount() * 3;
+		const Lepra::uint32* lTriangleData = lGeneratedGeometry->GetGeometry().GetTriangleData();
 		::glDrawElements(GL_TRIANGLES, lTriangleEntryCount, GL_UNSIGNED_INT, lTriangleData);
 
 		::glPopAttrib();

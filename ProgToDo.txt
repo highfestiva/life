@@ -14,6 +14,11 @@ Game
 . Create base world. Use mesh, not primitives, for collision.
 
 . Create UI for picking new vehicle. Don't auto-pick when logging in!
+  - Use road signs as buttons.
+  - Have a road sign for each vehicle.
+  - Use road signs (think high way green) for other settings as well: nationality, number of splitscreen users, fullscreen, online play...
+  - Show big title text (translated) for all buttons.
+  - Hilight current selection where applicable. Hilight using red/blue signs instead of red/yellow.
 . Make it possible to be logged in without vehicle. Make it possible to drop vehicle.
 . Create fork-lift.
 . Create material that can easily can be picked-up, loaded and moved around.
@@ -33,6 +38,27 @@ Game
 . Show logo when starting game.
 . Add "what you're missing out on when not running Pro" in the end of the demo (=release client?).
 . Update and adjust what messages are shown on screen when starting up.
+. Make a start screen with all settings. Start screen heavily fogged.
+. Make a "what you're missing out on" end screen in demo version. Add link to home page.
+. Implement the following settings in the heavily fogged start screen:
+  - Nationality (switched real time).
+  - Full screen / windowed.
+  - Start locally -> select number of splitscreen players. Slider for green-ness.
+  - Start online: in own server, on someone else's server, usernames, passwords.
+. Implement the following in the end screen as "what you're missing out on":
+  - Robot on wheels.
+  - Towing truck.
+  - Huge UFO (which can have vehicles parked inside).
+  - Football.
+  - Big world.
+  - Play online - and make sure that you add tag line "you can play with your kids even if you travel".
+. Implement the following settings ingame:
+  - Controls (joysticks, control pads, wheels, keyboards...)
+  - Change vehicle.
+. Make a "change avatar" functionality.
+  - When abandoning a vehicle, the vehicle remains in the world.
+  - If there IS a vehicle and it is NOT OCCUPIED of the type that is requested, use it, otherwise create a new one.
+. Server regularly checks vehicles that don't seem ok (flipped, i.e. "up not pointing up", etc). If the "un-ok" vehicle is unused for x consecutive checks, remove it.
 
 
 Engine
@@ -69,6 +95,7 @@ Engine
 . Remove all possible classes to enable easier porting to Mac.
 . Port font rendering.
 . Exchange SoundManager basics to a portable one. Or fix FMod.
+. Add support for "http links". I.e. start browser at specific address.
 . Port Posix' SystemManager (mostly placeholders at the moment).
 . Port client to Linux.
 . Port client to Mac OS X.
@@ -107,6 +134,13 @@ Engine
 . Fix cursor in GUI (used to cause XOR problems).
 . Do not resend positional info frequently when pushed/collided similarly (i.e. excavator holding down monster truck).
 . Make sure that analogue input devices are thresholded, so they don't cause constant socket transmits when moved.
+. Add support for a demo version, which among other things has an end screen, and some disabled features.
+. In demo version, add "termination attempt goes to end screen".
+. Make scene recording functionality that:
+  - Stores all key presses and time stamps.
+  - Every n seconds stores all object states at time stamps (so that randomized replay can start from any of those time stamps).
+  - Use for start/end screen.
+. Make replay functionality for start/end screen.
 
  
 Quality
@@ -122,13 +156,15 @@ Quality
 + Update concept of performance measurements; those which are dynamically laid out as called in hierarchy. Use "copy on write" with pointer ref to hash table to avoid thread clashes.
 + Debug graphs and follow-up optimization.
 + Check if it's possible to physical model wheels with cylinders instead of spheres in ODE 0.11.1. --- RESULT: NOT POSSIBLE!
++ Optimize font rendering.
++ Show debug graphs and FPS also in split screen.
++ Make the console appear the correct size (immediately when bringing it up) after having added/removed splitscreen player (currently appears smaller if splitscreen player previously removed).
 . Add unit test for making sure that loading more than one instance of same resource results in a single instance.
 . Make build in one step: server, client, **DATA**, Linux, Windows...
 . Assertions on getting access to "wrong" parts of the system with the wrong thread. (Such as dropping users in NetworkServer.cpp from the TCP thread.)
-. Make the console appear the correct size (immediately when bringing it up) after having added/removed splitscreen player (currently appears smaller if splitscreen player previously removed).
 . Stresstest (use .lsh).
-. Optimize font rendering.
 . Get unicode on track. Make script files all unicode.
+. Replace copyright notice to Righteous Games.
 
 . Make font rendering look good instead of ugly.
 . Add better camera control, such as for the truck (just looking at the trailer looks like shit).
@@ -163,3 +199,8 @@ Quality
 . Exchange "varning: flerteckens teckenkonstant" (ChunkyLoader.h) to something portable and beautiful.
 . Create a small master server which receives crash reports and feedback.
 . Create feedback form which can be entered and transmitted by any user at any time. Received by master server.
+. Remove engine mode "half_lock" (or make it synchronized or otherwise improved).
+. Go over demo version and release version, making sure that all functionality is in place.
+. Add click sounds to buttons.
+. Remove unused rtvars (such as Ui.2D.PaintMode).
+. Port to D3D rendering + painter. Painter only needs working fonts?

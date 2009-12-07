@@ -59,7 +59,7 @@ public:
 
 	RGBOrder GetRGBOrder();
 
-	bool SetFont(const Lepra::String& pName, int pSize, bool pSmooth);
+	virtual void SetFontSmoothness(bool pSmooth);	// TODO: move to base class!
 
 protected:
 	void DoDrawPixel(int x, int y);
@@ -84,10 +84,8 @@ protected:
 	void DoDrawImage(ImageID pImageID, const Lepra::PixelRect& pRect);
 	void DoDrawAlphaImage(ImageID pImageID, int x, int y);
 
-	Font* NewFont(int pFirstChar, int pLastChar) const { return new OpenGLFont(pFirstChar, pLastChar); }
-	void InitFont(Font* pFont, const Lepra::Canvas& pFontImage);
 	void GetImageSize(ImageID pImageID, int& pWidth, int& pHeight);
-	int DoPrintText(const Lepra::String& pString, int x, int y);
+	int PrintText(const Lepra::String& pString, int x, int y);
 
 	void DoRenderDisplayList(std::vector<DisplayEntity*>* pDisplayList);
 
@@ -107,42 +105,6 @@ private:
 
 		int mWidth;
 		int mHeight;
-	};
-
-	class OpenGLFont : public Painter::Font
-	{
-	public:
-		OpenGLFont(int pFirstChar, int pLastChar) :
-			Font(pFirstChar, pLastChar),
-			mCharRect(new FRect[pLastChar - pFirstChar + 1]),
-			mTexture(0)
-		{
-		}
-
-		~OpenGLFont()
-		{
-			delete[] mCharRect;
-		}
-
-		void GetUVRect(const Lepra::tchar& pChar, float& pU1, float& pV1, float& pU2, float& pV2) const
-		{
-			FRect& lFRect = mCharRect[pChar - mFirstChar];
-			pU1 = lFRect.mLeft;
-			pV1 = lFRect.mTop;
-			pU2 = lFRect.mRight;
-			pV2 = lFRect.mBottom;
-		}
-
-		struct FRect
-		{
-			float mLeft;
-			float mRight;
-			float mTop;
-			float mBottom;
-		};
-
-		FRect* mCharRect;
-		Texture* mTexture;
 	};
 
 	typedef Lepra::HashTable<int, Texture*> TextureTable;

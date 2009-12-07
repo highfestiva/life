@@ -1139,8 +1139,14 @@ void SoftwarePainter::DoDrawAlphaImage(ImageID pImageID, int x, int y)
 	}
 }
 
-int SoftwarePainter::DoPrintText(const Lepra::String& pString, int x, int y)
+int SoftwarePainter::PrintText(const Lepra::String& pString, int x, int y)
 {
+	pString;
+	x;
+	y;
+	return (0);
+
+	/* URK!
 	ToScreenCoords(x, y);
 
 	int lCurrentX = x;
@@ -1195,7 +1201,7 @@ int SoftwarePainter::DoPrintText(const Lepra::String& pString, int x, int y)
 
 	int lTemp = 0;
 	ToUserCoords(lCurrentX, lTemp);
-	return lCurrentX;
+	return lCurrentX;*/
 }
 
 void SoftwarePainter::DoFillTriangle(float pX0, float pY0, 
@@ -2194,52 +2200,6 @@ void SoftwarePainter::DoRenderDisplayList(std::vector<DisplayEntity*>* pDisplayL
 	}
 
 	PopAttrib();
-}
-
-Painter::Font* SoftwarePainter::NewFont(int pFirstChar, int pLastChar) const
-{
-	return new SoftwareFont(pFirstChar, pLastChar);
-}
-
-void SoftwarePainter::InitFont(Font* pFont, const Lepra::Canvas& pFontImage)
-{
-	SoftwareFont* lSoftFont = (SoftwareFont*)pFont;
-
-	// Get the texture.
-	lSoftFont->mTexture = *mTextureTable.Find(lSoftFont->mTextureID);
-
-	// Pick either color map or alpha buffer as the image buffer.
-	Lepra::Canvas* lImage;
-	if (lSoftFont->mTexture->mColorMap != 0)
-	{
-		lImage = lSoftFont->mTexture->mColorMap;
-	}
-	else
-	{
-		lImage = lSoftFont->mTexture->mAlphaBuffer;
-	}
-
-	int lCharCount = lSoftFont->mLastChar - lSoftFont->mFirstChar + 1;
-	int lLeft = 0;
-	int lTop  = 0;
-	for (int i = 0; i < lCharCount; i++)
-	{
-		lSoftFont->mChar[i].Reset(lSoftFont->mTileWidth, lSoftFont->mTileHeight, pFontImage.GetBitDepth());
-		lSoftFont->mChar[i].SetPitch(pFontImage.GetPitch());
-		lSoftFont->mChar[i].SetBuffer((Lepra::uint8*)lImage->GetBuffer() + 
-			(lTop * lImage->GetPitch() + lLeft) * lImage->GetPixelByteSize());
-
-		if (lSoftFont->mCharWidth[i] >= 0)
-		{
-			lLeft += lSoftFont->mTileWidth;
-
-			if ((lLeft + lSoftFont->mTileWidth) > (int)pFontImage.GetWidth())
-			{
-				lLeft = 0;
-				lTop += lSoftFont->mTileHeight;
-			}
-		}
-	}
 }
 
 void SoftwarePainter::GetImageSize(ImageID pImageID, int& pWidth, int& pHeight)

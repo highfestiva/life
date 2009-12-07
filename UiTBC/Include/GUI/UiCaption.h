@@ -54,7 +54,6 @@ public:
 
 	inline void SetIcon(Painter::ImageID pIconID);
 	inline void SetText(const Lepra::String& pText,
-						Painter::FontID pFontID,
 						const Lepra::Color& pActiveTextColor,
 						const Lepra::Color& pActiveBackgColor,
 						const Lepra::Color& pInactiveTextColor,
@@ -133,7 +132,6 @@ void Caption::SetIcon(Painter::ImageID pIconID)
 }
 
 void Caption::SetText(const Lepra::String& pText,
-					  Painter::FontID pFontID,
 					  const Lepra::Color& pActiveTextColor,
 					  const Lepra::Color& pActiveBackgColor,
 					  const Lepra::Color& pInactiveTextColor,
@@ -145,9 +143,9 @@ void Caption::SetText(const Lepra::String& pText,
 	mActiveTextBackgColor   = pActiveBackgColor;
 	mInactiveTextColor      = pInactiveTextColor;
 	mInactiveTextBackgColor = pInactiveBackgColor;
-	SetFont(pFontID, pActiveTextColor, pBlendFunc, pAlphaTreshold);
+	SetFont(pActiveTextColor, pBlendFunc, pAlphaTreshold);
 
-	mLabel->SetText(mText, GetFontId(), GetTextColor(), mActiveTextBackgColor, GetTextBlendFunc(), GetTextAlpha());
+	mLabel->SetText(mText, GetTextColor(), mActiveTextBackgColor, GetTextBlendFunc(), GetTextAlpha());
 }
 
 bool Caption::Check(unsigned pFlags, unsigned pFlag)

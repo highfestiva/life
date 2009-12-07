@@ -4,12 +4,12 @@
 
 
 
-#include "../../Lepra/Include/LepraTarget.h"
+#include "../../../Lepra/Include/LepraTarget.h"
+#include "../../Include/Win32/UiWin32DirectX9Painter.h"
 #include <math.h>
 #include <D3dx9math.h>
-#include "../../Lepra/Include/Log.h"
-#include "../../UiLepra/Include/Win32/UiWin32DirectXDisplay.h"
-#include "../Include/UiDirectX9Painter.h"
+#include "../../../Lepra/Include/Log.h"
+#include "../../../UiLepra/Include/Win32/UiWin32DirectXDisplay.h"
 
 #ifdef DEBUG
 #pragma comment(lib, "d3dx9d.lib")
@@ -1348,8 +1348,15 @@ void DirectX9Painter::DoDrawAlphaImage(ImageID pImageID, int x, int y)
 	mD3DDevice->SetTexture(0, 0);
 }
 
-int DirectX9Painter::DoPrintText(const Lepra::String& pString, int x, int y)
+int DirectX9Painter::PrintText(const Lepra::String& pString, int x, int y)
 {
+	pString;
+	x;
+	y;
+	return (0);
+
+	/*TODO! - There's probably some smart and fast way to render fonts already in DX.
+
 	ToScreenCoords(x, y);
 
 	UpdateRenderMode();
@@ -1452,7 +1459,7 @@ int DirectX9Painter::DoPrintText(const Lepra::String& pString, int x, int y)
 	int lTemp = 0;
 	ToUserCoords(lCurrentX, lTemp);
 
-	return lCurrentX;
+	return lCurrentX;*/
 }
 
 void DirectX9Painter::AdjustVertexFormat(Lepra::uint16& pVertexFormat)

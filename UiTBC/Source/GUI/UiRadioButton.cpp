@@ -310,7 +310,6 @@ void RadioButton::Repaint(Painter* pPainter)
 						   lButtonPos.y + 4);
 		}
 
-		pPainter->SetActiveFont(GetFontID());
 		Button::PrintText(pPainter, lButtonPos.x + lButtonWidth + lTextDisplacement, (lButtonPos.y + lButtonWidth) - pPainter->GetFontHeight() - 2);
 	}
 
