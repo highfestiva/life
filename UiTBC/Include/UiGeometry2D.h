@@ -5,9 +5,7 @@
 // NOTES:
 //
 // This class was implemented in order to optimize 2D rendering using hardware 
-// accelerated Painters (see Painter.h). While OpenGLPainter and DirectXPainter
-// benefits from this class and can perform faster, the opposite unfortunately 
-// applies to SoftwarePainter.
+// accelerated Painters (see Painter.h).
 //
 // Use this class with care! This class is implemented with performance in mind,
 // not safety.

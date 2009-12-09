@@ -90,8 +90,8 @@ Engine
 + Loading graphics objects from disk.
 + Make ODE wheels keep straight using dBodySetFiniteRotationMode() and dBodySetFiniteRotationAxis() instead of a friggen motor!
 + Fix laggy/jerky camera motion by interpolation/extrapolation. Cam adjusts interpolation factor to velocity?
++ Make SystemPainter a standalone class that does not inherit UiTbc::Painter!
 . Dropping all non-game components from any other file out there (Cure, UiCure).
-. Make SystemPainter a standalone class that does not inherit UiTbc::Painter!
 . Remove all possible classes to enable easier porting to Mac.
 . Port font rendering.
 . Exchange SoundManager basics to a portable one. Or fix FMod.

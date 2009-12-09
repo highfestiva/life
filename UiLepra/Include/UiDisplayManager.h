@@ -93,13 +93,10 @@ public:
 		FULLSCREEN,
 	};
 
-	// On other platforms than Windows, DIRECTX_CONTEXT may 
-	// be equivalent to OPENGL_CONTEXT.
 	enum ContextType
 	{
 		OPENGL_CONTEXT,
 		DIRECTX_CONTEXT,
-		SOFTWARE_CONTEXT
 	};
 
 	// Creates a platform dependent display manager. This function

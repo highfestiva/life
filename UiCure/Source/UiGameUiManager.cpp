@@ -63,13 +63,9 @@ bool GameUiManager::Open()
 	{
 		lRenderingContext = UiLepra::DisplayManager::OPENGL_CONTEXT;
 	}
-	else if (lRenderTypeString == _T("Direct3D") || lRenderTypeString == _T("DirectX"))
+	else if (lRenderTypeString == _T("DirectX"))
 	{
 		lRenderingContext = UiLepra::DisplayManager::DIRECTX_CONTEXT;
-	}
-	else if (lRenderTypeString == _T("Software"))
-	{
-		lRenderingContext = UiLepra::DisplayManager::SOFTWARE_CONTEXT;
 	}
 
 	// Initialize UI based on settings parameters.

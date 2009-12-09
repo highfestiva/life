@@ -36,8 +36,10 @@ void Win32DirectXDisplay::CloseScreen()
 	if (mD3DDevice != 0)
 		mD3DDevice->Release();
 
-    if(mD3D != 0)
-        mD3D->Release();
+	if(mD3D != 0)
+	{
+		mD3D->Release();
+	}
 
 	if (IsFullScreen() == true)
 	{
@@ -45,6 +47,12 @@ void Win32DirectXDisplay::CloseScreen()
 	}
 
 	Win32DisplayManager::CloseScreen();
+}
+
+bool Win32DirectXDisplay::Activate()
+{
+	// TODO: implement!
+	return (true);
 }
 
 bool Win32DirectXDisplay::UpdateScreen()
@@ -138,9 +146,9 @@ bool Win32DirectXDisplay::InitScreen()
 	if (mScreenMode == FULLSCREEN)
 	{
 		DEVMODE lNewMode;
-		lNewMode.dmSize             = sizeof(lNewMode);
+		lNewMode.dmSize	     = sizeof(lNewMode);
 		lNewMode.dmBitsPerPel       = mDisplayMode.mBitDepth;
-		lNewMode.dmPelsWidth        = mDisplayMode.mWidth;
+		lNewMode.dmPelsWidth	= mDisplayMode.mWidth;
 		lNewMode.dmPelsHeight       = mDisplayMode.mHeight;
 		lNewMode.dmDisplayFrequency = mDisplayMode.mRefreshRate;
 		lNewMode.dmFields = DM_BITSPERPEL | 
@@ -228,7 +236,7 @@ void Win32DirectXDisplay::Resize(int pWidth, int pHeight)
 		{
 			DEVMODE lNewMode;
 			lNewMode.dmBitsPerPel       = mDisplayMode.mBitDepth;
-			lNewMode.dmPelsWidth        = mDisplayMode.mWidth;
+			lNewMode.dmPelsWidth	= mDisplayMode.mWidth;
 			lNewMode.dmPelsHeight       = mDisplayMode.mHeight;
 			lNewMode.dmDisplayFrequency = mDisplayMode.mRefreshRate;
 			lNewMode.dmFields = DM_BITSPERPEL | 

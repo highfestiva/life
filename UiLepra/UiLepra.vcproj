@@ -502,10 +502,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\Include\Win32\UiWin32SoftwareDisplay.h"
-					>
-				</File>
-				<File
 					RelativePath=".\Include\Win32\WGLEXT.H"
 					>
 				</File>
@@ -561,10 +557,6 @@
 				</File>
 				<File
 					RelativePath=".\Source\Win32\UiWin32OpenGLDisplay.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\Win32\UiWin32SoftwareDisplay.cpp"
 					>
 				</File>
 			</Filter>
