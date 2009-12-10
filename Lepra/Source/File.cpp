@@ -102,4 +102,24 @@ bool File::WriteStringZero(const String& pString)
 
 
 
+bool File::HasSameContent(File& pOtherFile, int64 pLength)
+{
+	char lThisChar;
+	char lOtherChar;
+	for (int64 x = 0; x < pLength; ++x)
+	{
+		if (Read(lThisChar) != IO_OK || pOtherFile.Read(lOtherChar) != IO_OK)
+		{
+			return (false);
+		}
+		if (lThisChar != lOtherChar)
+		{
+			return (false);
+		}
+	}
+	return ((Read(lThisChar) != IO_OK) == (pOtherFile.Read(lOtherChar) != IO_OK));
+}
+
+
+
 }

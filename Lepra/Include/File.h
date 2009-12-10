@@ -60,9 +60,7 @@ public:
 
 	virtual void Flush() = 0;
 
-	// Compares a filename against a string which may contain wild cards (* and ?).
-	// JB: doesn't work: static bool CompareFileName(const String& pFileName, const String& pCompareString);
-	// (and still has to be moved into a more sensible spot like Lepra::Path.
+	bool HasSameContent(File& pOtherFile, int64 pLength);	// Compares content by reading the both files byte by byte.
 
 protected:
 	enum //Mode flags.

@@ -95,7 +95,7 @@ Engine
 . Dropping all non-game components from any other file out there (Cure, UiCure).
 . Remove all possible classes to enable easier porting to Mac.
 . Make sure that synchronizing doesn't happen every frame on the heli when a control is changed!
-. Make input configuration better - use 
+. Make input configuration better - use other type of ID than enumeration??? I'm a bit unsure here...
 . Port font rendering.
 . Exchange SoundManager basics to a portable one. Or fix FMod.
 . Add support for "http links". I.e. start browser at specific address.
@@ -168,6 +168,7 @@ Quality
 . Get unicode on track. Make script files all unicode.
 . Replace copyright notice to Righteous Games.
 . Run test app in Windows and Linux.
+. Make sure default settings are good on a no-good computer. Like 60 FPS.
 
 . Make sure shutting down client with two simultaneously logged-in users gets logged out from the server.
 . Make font rendering look good instead of ugly.

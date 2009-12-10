@@ -463,23 +463,31 @@ int ConsoleManager::OnCommand(const Lepra::String& pCommand, const Lepra::String
 					if (!lIgnoreIfExists || !Lepra::DiskFile::Exists(lFilename))
 					{
 						Lepra::String lUserConfig;
-						Lepra::DiskFile lFile;
-						if (lFile.Open(lFilename, Lepra::DiskFile::MODE_TEXT_READ))
+						Lepra::DiskFile lDiskFile;
+						if (lDiskFile.Open(lFilename, Lepra::DiskFile::MODE_TEXT_READ))
 						{
-							lUserConfig = LoadUserConfig(&lFile);
+							lUserConfig = LoadUserConfig(&lDiskFile);
 						}
-						if (lFile.Open(lFilename, Lepra::DiskFile::MODE_TEXT_WRITE))
+						Lepra::MemFile lMemFile;
+						bool lStoreResult;
+						if (lCommand == COMMAND_SAVE_SYSTEM_CONFIG_FILE)
 						{
-							bool lSaveResult;
-							if (lCommand == COMMAND_SAVE_SYSTEM_CONFIG_FILE)
-							{
-								lSaveResult = SaveSystemConfigFile(lScopeSkipCount, &lFile, lUserConfig);
-							}
-							else
-							{
-								lSaveResult = SaveApplicationConfigFile(&lFile, lUserConfig);
-							}
-							if (lSaveResult)
+							lStoreResult = SaveSystemConfigFile(lScopeSkipCount, &lMemFile, lUserConfig);
+						}
+						else
+						{
+							lStoreResult = SaveApplicationConfigFile(&lMemFile, lUserConfig);
+						}
+						lDiskFile.SeekSet(0);
+						lMemFile.SeekSet(0);
+						if (lDiskFile.HasSameContent(lMemFile, lMemFile.GetSize()))
+						{
+							// Skip silently, there is no need to rewrite the file on disk.
+						}
+						else if (lDiskFile.Open(lFilename, Lepra::DiskFile::MODE_TEXT_WRITE))
+						{
+							lStoreResult = (lDiskFile.WriteData(lMemFile.GetBuffer(), (size_t)lMemFile.GetSize()) == Lepra::IO_OK);
+							if (lStoreResult)
 							{
 								mLog.Infof(_T("Successfully wrote script %s to disk."), lFilename.c_str());
 							}
