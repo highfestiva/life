@@ -11,6 +11,7 @@
 #include "../../UiTbc/Include/GUI/UiConsolePrompt.h"
 #include "../../UiTbc/Include/GUI/UiDesktopWindow.h"
 #include "../../UiTbc/Include/GUI/UiFileNameField.h"
+#include "../RtVar.h"
 #include "GameClientSlaveManager.h"
 #include "GameClientMasterTicker.h"
 #include "ClientConsoleManager.h"
@@ -48,6 +49,7 @@ ClientConsoleManager::ClientConsoleManager(Cure::GameManager* pGameManager, UiCu
 	mConsoleOutput(0),
 	mConsoleInput(0),
 	mIsConsoleActive(false),
+	mIsFirstConsoleUse(true),
 	mConsoleTargetPosition(0)
 {
 	Init();
@@ -236,11 +238,40 @@ void ClientConsoleManager::OnConsoleChange()
 		mConsoleComponent->SetVisible(true);
 		mUiManager->GetDesktopWindow()->UpdateLayout();
 		GetConsolePrompt()->SetFocus(true);
+		if (mIsFirstConsoleUse)
+		{
+			mIsFirstConsoleUse = false;
+			PrintHelp();
+		}
 	}
 	else
 	{
 		GetConsolePrompt()->SetFocus(false);
 	}
+}
+
+void ClientConsoleManager::PrintHelp()
+{
+	Lepra::String lKeys = CURE_RTVAR_GET(GetVariableScope(), RTVAR_CTRL_UI_CONTOGGLE, _T("???"));
+	typedef Lepra::StringUtility::StringVector SV;
+	SV lKeyArray = Lepra::StringUtility::Split(lKeys, _T(", \t"));
+	SV lNiceKeys;
+	for (SV::iterator x = lKeyArray.begin(); x != lKeyArray.end(); ++x)
+	{
+		const Lepra::String lKey = Lepra::StringUtility::ReplaceAll(*x, _T("Key."), _T(""));
+		lNiceKeys.push_back(lKey);
+	}
+	Lepra::String lKeyInfo;
+	if (lKeyArray.size() == 1)
+	{
+		lKeyInfo = _T("key ");
+	}
+	else
+	{
+		lKeyInfo = _T("any of the following keys: ");
+	}
+	lKeyInfo += Lepra::StringUtility::Join(lNiceKeys, _T(", "));
+	mLog.Infof(_T("To bring this console up again press %s."), lKeyInfo.c_str());
 }
 
 

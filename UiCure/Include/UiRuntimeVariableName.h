@@ -31,4 +31,4 @@
 #define RTVAR_UI_3D_SHADOWS			"Ui.3D.Shadows"
 
 #define RTVAR_UI_2D_PAINTMODE			"Ui.2D.PaintMode"
-#define RTVAR_UI_2D_UPDATEMODE			"Ui.2D.UpdateMode"
+#define RTVAR_UI_2D_SMOOTHFONTS			"Ui.2D.SmoothFonts"

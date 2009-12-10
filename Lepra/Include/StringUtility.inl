@@ -264,6 +264,17 @@ STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::ReplaceAll(const _String& pString, type
 	return (lString);
 }
 
+STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::ReplaceAll(const _String& pString, const _String& pFrom, const String& pTo)
+{
+	_String lString = pString;
+	_String::size_type lPosition;
+	while ((lPosition = lString.find(pFrom)) != Lepra::String::npos)
+	{
+		lString.replace(lPosition, pFrom.length(), pTo);
+	}
+	return (lString);
+}
+
 
 
 STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::Format(const typename _String::value_type* pFormat, ...)

@@ -230,6 +230,7 @@ Lepra::String TextField::GetVisibleText() const
 void TextField::SetText(const Lepra::String& pText)
 {
 	mText = pText;
+	mTextX = 0;
 	SetMarkerPosition(pText.length());
 	SetNeedsRepaint(true);
 }
@@ -619,7 +620,6 @@ void TextField::Repaint(Painter* pPainter)
 		else
 		{
 			int lMarkerY = lRect.mTop + (lRect.GetHeight() - lTextHeight) / 2;
-			pPainter->SetColor(Lepra::WHITE);
 			pPainter->DrawLine(lRect.mLeft + lMarkerX, lMarkerY, lRect.mLeft + lMarkerX, lMarkerY + lTextHeight);
 		}
 	}

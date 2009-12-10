@@ -441,9 +441,9 @@ void ShadowVolume::UpdateShadowVolume(const Lepra::Vector3DF& pLightPos, float p
 	{
 		Edge& lEdge = lEdges[i];
 
-		_ASSERT(lEdge.mTriangleCount == 1 || lEdge.mTriangleCount == 2);
-		_ASSERT(lEdge.mVertex[0] != lEdge.mVertex[1]);
-		_ASSERT(lEdge.mTriangle[0] != lEdge.mTriangle[1]);
+		//_ASSERT(lEdge.mTriangleCount == 1 || lEdge.mTriangleCount == 2);
+		//_ASSERT(lEdge.mVertex[0] != lEdge.mVertex[1]);
+		//_ASSERT(lEdge.mTriangle[0] != lEdge.mTriangle[1]);
 
 		// Set this to true if we have a silhouette edge.
 		bool lExtrudeEdge = false;
@@ -455,8 +455,8 @@ void ShadowVolume::UpdateShadowVolume(const Lepra::Vector3DF& pLightPos, float p
 			TriangleOrientation& lT0 = mTriangleOrientation[lEdge.mTriangle[0]];
 			TriangleOrientation& lT1 = mTriangleOrientation[lEdge.mTriangle[1]];
 
-			_ASSERT(lT0.mTO != TO_INVALID);
-			_ASSERT(lT1.mTO != TO_INVALID);
+			//_ASSERT(lT0.mTO != TO_INVALID);
+			//_ASSERT(lT1.mTO != TO_INVALID);
 
 			lIndex = mTriangleCount * 3;
 

@@ -18,8 +18,7 @@ public:
 	IPAddress(unsigned pIP4Address);
 	IPAddress(const uint8* pIPAddress, int pNumBytes);
 	IPAddress(const String& pIPv4Address);
-
-	virtual ~IPAddress();
+	~IPAddress();
 
 	void Set(const uint8* pIPAddress, int pNumBytes);
 	inline void Set(const IPAddress& pIP);

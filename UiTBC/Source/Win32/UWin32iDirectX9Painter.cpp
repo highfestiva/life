@@ -34,8 +34,7 @@ DWORD ToArgb(DWORD pAlpha, const Lepra::Color& pColor)
 DirectX9Painter::DirectX9Painter(UiLepra::DisplayManager* pDisplayManager):
 	mTextureIDManager(3, 10000, 0),
 	mD3DDevice(0),
-	mD3DDefaultMouseCursor(0),
-	mRenderModeChanged(true)
+	mD3DDefaultMouseCursor(0)
 {
 	if (pDisplayManager == 0 || pDisplayManager->GetContextType() != UiLepra::DisplayManager::DIRECTX_CONTEXT)
 	{
@@ -73,73 +72,13 @@ void DirectX9Painter::SetRenderMode(RenderMode pRM)
 	if (pRM != GetRenderMode())
 	{
 		Painter::SetRenderMode(pRM);
-		mRenderModeChanged = true;
+		DoSetRenderMode();
 	}
 }
 
-void DirectX9Painter::UpdateRenderMode()
+void DirectX9Painter::PrePaint()
 {
-	if (mRenderModeChanged == true)
-	{
-		switch(GetRenderMode())
-		{
-			case Painter::RM_ALPHATEST:
-			{
-				mD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
-				mD3DDevice->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
-				mD3DDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL);
-				mD3DDevice->SetRenderState(D3DRS_ALPHAREF, GetAlphaValue());
-				mD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
-				mD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
-				mD3DDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
-				break;
-			}
-			case Painter::RM_ALPHABLEND:
-			{
-				mD3DDevice->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
-				mD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-				mD3DDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_ALWAYS);
-				mD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-				mD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
-				mD3DDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
-				break;
-			}
-			case Painter::RM_XOR:
-			{
-				// There is no support of logical operations. Just do something. 
-				// Do just about anything! We are desperate here! :)
-				mD3DDevice->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
-				mD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-				mD3DDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_ALWAYS);
-				mD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
-				mD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
-				mD3DDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_REVSUBTRACT);
-				break;
-			}
-			case Painter::RM_ADD:
-			{
-				mD3DDevice->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
-				mD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-				mD3DDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_ALWAYS);
-				mD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
-				mD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
-				mD3DDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
-				break;
-			}
-			case Painter::RM_NORMAL:
-			default:
-			{
-				mD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
-				mD3DDevice->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
-				mD3DDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_ALWAYS);
-				mD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
-				mD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
-				break;
-			}
-		}
-
-		mRenderModeChanged = false;
-	}
+	DoSetRenderMode();
 }
 
 void DirectX9Painter::SetAlphaValue(Lepra::uint8 pAlpha)
@@ -189,13 +128,71 @@ void DirectX9Painter::ResetClippingRect()
 	SetClippingRect(lLeft, lTop, lRight, lBottom);
 }
 
+void DirectX9Painter::DoSetRenderMode() const
+{
+	switch(GetRenderMode())
+	{
+		case Painter::RM_ALPHATEST:
+		{
+			mD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
+			mD3DDevice->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
+			mD3DDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL);
+			mD3DDevice->SetRenderState(D3DRS_ALPHAREF, GetAlphaValue());
+			mD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
+			mD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
+			mD3DDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
+			break;
+		}
+		case Painter::RM_ALPHABLEND:
+		{
+			mD3DDevice->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
+			mD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+			mD3DDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_ALWAYS);
+			mD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+			mD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+			mD3DDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
+			break;
+		}
+		case Painter::RM_XOR:
+		{
+			// There is no support of logical operations. Just do something. 
+			// Do just about anything! We are desperate here! :)
+			mD3DDevice->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
+			mD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+			mD3DDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_ALWAYS);
+			mD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
+			mD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
+			mD3DDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_REVSUBTRACT);
+			break;
+		}
+		case Painter::RM_ADD:
+		{
+			mD3DDevice->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
+			mD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+			mD3DDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_ALWAYS);
+			mD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
+			mD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
+			mD3DDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
+			break;
+		}
+		case Painter::RM_NORMAL:
+		default:
+		{
+			mD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
+			mD3DDevice->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
+			mD3DDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_ALWAYS);
+			mD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
+			mD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
+			break;
+		}
+	}
+}
+
 void DirectX9Painter::DoDrawPixel(int x, int y)
 {
 	mD3DDevice->BeginScene();
 
 	ToScreenCoords(x, y);
-
-	UpdateRenderMode();
 
 	struct VertexData
 	{
@@ -227,8 +224,6 @@ void DirectX9Painter::DoDrawLine(int pX1, int pY1, int pX2, int pY2)
 
 	ToScreenCoords(pX1, pY1);
 	ToScreenCoords(pX2, pY2);
-
-	UpdateRenderMode();
 
 	struct VertexData
 	{
@@ -265,8 +260,6 @@ void DirectX9Painter::DoDrawRect(int pLeft, int pTop, int pRight, int pBottom, i
 
 	ToScreenCoords(pLeft, pTop);
 	ToScreenCoords(pRight, pBottom);
-
-	UpdateRenderMode();
 
 	float lLeft   = (float)pLeft;
 	float lTop    = (float)pTop;
@@ -334,8 +327,6 @@ void DirectX9Painter::DoFillRect(int pLeft, int pTop, int pRight, int pBottom)
 	ToScreenCoords(pLeft, pTop);
 	ToScreenCoords(pRight, pBottom);
 
-	UpdateRenderMode();
-
 	float lLeft   = (float)pLeft;
 	float lTop    = (float)pTop;
 	float lRight  = (float)pRight;
@@ -380,8 +371,6 @@ void DirectX9Painter::DoDraw3DRect(int pLeft, int pTop, int pRight, int pBottom,
 
 	ToScreenCoords(pLeft, pTop);
 	ToScreenCoords(pRight, pBottom);
-
-	UpdateRenderMode();
 
 	float lLeft   = (float)pLeft;
 	float lTop    = (float)pTop;
@@ -486,8 +475,6 @@ void DirectX9Painter::DoFillShadedRect(int pLeft, int pTop, int pRight, int pBot
 	ToScreenCoords(pLeft, pTop);
 	ToScreenCoords(pRight, pBottom);
 
-	UpdateRenderMode();
-
 	float lLeft   = (float)pLeft;
 	float lTop    = (float)pTop;
 	float lRight  = (float)pRight;
@@ -566,8 +553,6 @@ void DirectX9Painter::DoFillTriangle(float pX1, float pY1,
 	ToScreenCoords(pX2, pY2);
 	ToScreenCoords(pX3, pY3);
 
-	UpdateRenderMode();
-
 	struct VertexData
 	{
 		FLOAT x, y, z, rhw; // The transformed position for the vertex.
@@ -608,8 +593,6 @@ void DirectX9Painter::DoFillShadedTriangle(float pX1, float pY1,
 	ToScreenCoords(pX1, pY1);
 	ToScreenCoords(pX2, pY2);
 	ToScreenCoords(pX3, pY3);
-
-	UpdateRenderMode();
 
 	struct VertexData
 	{
@@ -660,8 +643,6 @@ void DirectX9Painter::DoFillTriangle(float pX1, float pY1, float pU1, float pV1,
 	ToScreenCoords(pX1, pY1);
 	ToScreenCoords(pX2, pY2);
 	ToScreenCoords(pX3, pY3);
-
-	UpdateRenderMode();
 
 	struct VertexData
 	{
@@ -1094,8 +1075,6 @@ void DirectX9Painter::DoDrawImage(ImageID pImageID, const Lepra::PixelRect& pRec
 
 	mD3DDevice->BeginScene();
 
-	UpdateRenderMode();
-
 	float lLeft   = (float)pRect.mLeft;
 	float lRight  = (float)pRect.mRight;
 	float lTop    = (float)pRect.mTop;
@@ -1181,8 +1160,6 @@ void DirectX9Painter::DoDrawImage(ImageID pImageID, const Lepra::PixelRect& pRec
 
 	mD3DDevice->BeginScene();
 
-	UpdateRenderMode();
-
 	float lLeft   = (float)pRect.mLeft;
 	float lRight  = (float)pRect.mRight;
 	float lTop    = (float)pRect.mTop;
@@ -1266,8 +1243,6 @@ void DirectX9Painter::DoDrawImage(ImageID pImageID, const Lepra::PixelRect& pRec
 void DirectX9Painter::DoDrawAlphaImage(ImageID pImageID, int x, int y)
 {
 	ToScreenCoords(x, y);
-
-	UpdateRenderMode();
 
 	TextureTable::Iterator lIter = mTextureTable.Find(pImageID);
 
@@ -1355,111 +1330,12 @@ int DirectX9Painter::PrintText(const Lepra::String& pString, int x, int y)
 	y;
 	return (0);
 
-	/*TODO! - There's probably some smart and fast way to render fonts already in DX.
+	// TODO: there's probably some smart and fast way to render fonts already in DX.
+}
 
-	ToScreenCoords(x, y);
-
-	UpdateRenderMode();
-
-	int lCurrentX = x;
-	int lCurrentY = y;
-
-	mD3DDevice->BeginScene();
-
-	struct VertexData
-	{
-		FLOAT x, y, z, rhw; // The transformed position for the vertex.
-		DWORD color;        // The vertex color.
-		FLOAT u, v;
-	};
-
-	VertexData lVertex[4];
-
-	unsigned lAlpha = (unsigned)GetAlphaValue();
-	if (GetRenderMode() == RM_ALPHATEST)
-	{
-		lAlpha = 0xFF000000;
-	}
-
-	Lepra::Color& lColor = GetColorInternal(0);
-	for (int i = 0; i < 4; i++)
-	{
-		lVertex[i].z   = 0;
-		lVertex[i].rhw = 1;
-		lVertex[i].color = ToArgb(lAlpha, lColor);
-	}
-
-	mD3DDevice->SetTexture(0, ((DirectX9Font*)GetCurrentFont())->mTexture->mD3DTexture);
-
-	mD3DDevice->SetTextureStageState(0, D3DTSS_COLOROP,   D3DTOP_MODULATE);
-	mD3DDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-	mD3DDevice->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
-	mD3DDevice->SetTextureStageState(0, D3DTSS_ALPHAOP,   D3DTOP_SELECTARG1);
-
-	mD3DDevice->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1);
-
-	DirectX9Font* lFont = (DirectX9Font*)GetCurrentFont();
-
-	for (size_t i = 0; i < pString.length(); i++)
-	{
-		char lChar = (char)pString[i];
-
-		if (lChar == '\n')
-		{
-			lCurrentY += (lFont->mCharHeight + lFont->mNewLineOffset);
-			lCurrentX = x;
-		}
-		else if(lChar != '\r' && 
-			lChar != '\b' &&
-			lChar != '\t')
-		{
-			float lCharWidth = (float)lFont->mTileWidth;
-			float lLeft   = (float)lCurrentX;
-			float lRight  = (float)(lCurrentX + lCharWidth);
-			float lTop    = (float)lCurrentY;
-			float lBottom = (float)(lCurrentY + lFont->mCharHeight);
-
-			DirectX9Font::FRect& lRect = lFont->mCharRect[(Lepra::uint8)lChar];
-
-			lVertex[0].x   = lLeft;
-			lVertex[0].y   = lTop;
-			lVertex[0].u   = (float)lRect.mLeft;
-			lVertex[0].v   = (float)lRect.mTop;
-			lVertex[1].x   = lRight;
-			lVertex[1].y   = lTop;
-			lVertex[1].u   = (float)lRect.mRight;
-			lVertex[1].v   = (float)lRect.mTop;
-			lVertex[2].x   = lRight;
-			lVertex[2].y   = lBottom;
-			lVertex[2].u   = (float)lRect.mRight;
-			lVertex[2].v   = (float)lRect.mBottom;
-			lVertex[3].x   = lLeft;
-			lVertex[3].y   = lBottom;
-			lVertex[3].u   = (float)lRect.mLeft;
-			lVertex[3].v   = (float)lRect.mBottom;
-
-			mD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, lVertex, sizeof(VertexData));
-
-			lCurrentX += lFont->mCharWidth[(Lepra::uint8)lChar] + lFont->mCharOffset;
-		}
-
-		if (lChar == ' ')
-		{
-			lCurrentX += lFont->mDefaultSpaceWidth;
-		}
-		else if(lChar == '\t')
-		{
-			lCurrentX = GetTabOriginX() + (((lCurrentX - GetTabOriginX()) / lFont->mTabWidth) + 1) * lFont->mTabWidth;
-		}
-	}
-
-	mD3DDevice->EndScene();
-	mD3DDevice->SetTexture(0, 0);
-
-	int lTemp = 0;
-	ToUserCoords(lCurrentX, lTemp);
-
-	return lCurrentX;*/
+void DirectX9Painter::SetFontSmoothness(bool)
+{
+	// TODO: ?
 }
 
 void DirectX9Painter::AdjustVertexFormat(Lepra::uint16& pVertexFormat)
@@ -1597,7 +1473,7 @@ void DirectX9Painter::ReadPixels(Lepra::Canvas& pDestCanvas, const Lepra::PixelR
 	lInMemTarget->Release();
 }
 
-Painter::RGBOrder DirectX9Painter::GetRGBOrder()
+Painter::RGBOrder DirectX9Painter::GetRGBOrder() const
 {
 	return Painter::RGB;
 }
@@ -1615,7 +1491,6 @@ void DirectX9Painter::DoRenderDisplayList(std::vector<DisplayEntity*>* pDisplayL
 		Painter::SetClippingRect(lSE->GetClippingRect());
 		SetAlphaValue(lSE->GetAlpha());
 		SetRenderMode(lSE->GetRenderMode());
-		UpdateRenderMode();
 
 		DWORD lFVF = D3DFVF_XYZRHW;
 

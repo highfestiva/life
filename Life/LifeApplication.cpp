@@ -78,7 +78,9 @@ int Application::Run()
 	// which may differ between different CPU cores. Several seconds can differ between different cores.
 	// The main thread is locked to the first CPU. If there are more CPUs, the physics thread will lock to
 	// another CPU later on.
-	Lepra::Thread::GetCurrentThread()->SetCpuAffinityMask(0x0001);
+	// JB 2009-12: dropped this, probably not a good idea since we need to run multiple
+	// physics instances when running split screen.
+	//Lepra::Thread::GetCurrentThread()->SetCpuAffinityMask(0x0001);
 
 	bool lOk = true;
 	if (lOk)
@@ -181,10 +183,10 @@ void Application::TickSleep(double pMeasuredFrameTime) const
 
 		const int lFps = CURE_RTVAR_GET(Cure::GetSettings(), RTVAR_PHYSICS_FPS, 2);
 		double lWantedFrameTime = lFps? 1.0/lFps : 1;
-		if (lWantedFrameTime > pMeasuredFrameTime)
+		double lSleepTime = lWantedFrameTime - pMeasuredFrameTime;
+		if (lSleepTime > 0)
 		{
 			Lepra::HiResTimer lTimer;
-			double lSleepTime = lWantedFrameTime-pMeasuredFrameTime;
 			while (lSleepTime >= 0.001)
 			{
 				Lepra::Thread::Sleep(lSleepTime);

@@ -7,8 +7,8 @@
 
 #pragma once
 
-#include "LepraTypes.h"
 #include "GammaLookup.h"
+#include "Math.h"
 
 
 
@@ -326,11 +326,11 @@ public:
 	inline Color(uint8 pRed, uint8 pGreen, uint8 pBlue, uint8 pColorIndex);
 
 	// Interpolation constructor.
-	inline Color(const Color& pColor1, const Color& pColor2, float64 t, bool pGammaCorrect = true);
+	inline Color(const Color& pColor1, const Color& pColor2, float t);
 
 	// Set()-overloads for all standard types. This makes life easier when setting the color,
 	// because you don't have to typecast all variables to uint8 all the time.
-	// The float32 and float64 overloads assumes that the rgb values are in the range [0, 1].
+	// The float overloads assumes that the rgb values are in the range [0, 1].
 	// All integer types in the range [0, 255].
 	inline void Set(int8 pRed, int8 pGreen, int8 pBlue, int8 pColorIndex);
 	inline void Set(uint8 pRed, uint8 pGreen, uint8 pBlue, uint8 pColorIndex);
@@ -340,8 +340,7 @@ public:
 	inline void Set(uint32 pRed, uint32 pGreen, uint32 pBlue, uint32 pColorIndex);
 	inline void Set(int64   pRed,  int64   pGreen,  int64   pBlue,  int64   pColorIndex);
 	inline void Set(uint64  pRed, uint64  pGreen, uint64  pBlue, uint64  pColorIndex);
-	inline void Set(float32 pRed,  float32 pGreen,  float32 pBlue,  float32 pColorIndex);
-	inline void Set(float64 pRed,  float64 pGreen,  float64 pBlue,  float64 pColorIndex);
+	inline void Set(float pRed,  float pGreen,  float pBlue,  float pColorIndex);
 
 	inline float GetRf() const;
 	inline float GetGf() const;
@@ -366,10 +365,10 @@ public:
 	inline Color operator *  (int pScalar) const;
 	inline Color operator /= (int pScalar);
 	inline Color operator /  (int pScalar) const;
-	inline Color operator *= (float32 pScalar);
-	inline Color operator *  (float32 pScalar) const;
-	inline Color operator /= (float32 pScalar);
-	inline Color operator /  (float32 pScalar) const;
+	inline Color operator *= (float pScalar);
+	inline Color operator *  (float pScalar) const;
+	inline Color operator /= (float pScalar);
+	inline Color operator /  (float pScalar) const;
 
 	inline bool operator==(const Color& pOther) const;
 	inline bool operator!=(const Color& pOther) const;
@@ -418,38 +417,18 @@ Color::Color(uint8 pRed, uint8 pGreen, uint8 pBlue, uint8 pColorIndex)
 	mAlpha = pColorIndex;
 }
 
-Color::Color(const Color& pColor1, const Color& pColor2, float64 t, bool pGammaCorrect)
+Color::Color(const Color& pColor1, const Color& pColor2, float t)
 {
-	t = t < 0 ? 0 : (t > 1 ? 1 : t);
+	const float r1 = GammaLookup::GammaToLinearFloat(pColor1.mRed);
+	const float g1 = GammaLookup::GammaToLinearFloat(pColor1.mGreen);
+	const float b1 = GammaLookup::GammaToLinearFloat(pColor1.mBlue);
+	const float r2 = GammaLookup::GammaToLinearFloat(pColor2.mRed);
+	const float g2 = GammaLookup::GammaToLinearFloat(pColor2.mGreen);
+	const float b2 = GammaLookup::GammaToLinearFloat(pColor2.mBlue);
 
-	if (pGammaCorrect == true)
-	{
-		float64 r1 = (float64)GammaLookup::GammaToLinear(pColor1.mRed);
-		float64 g1 = (float64)GammaLookup::GammaToLinear(pColor1.mGreen);
-		float64 b1 = (float64)GammaLookup::GammaToLinear(pColor1.mBlue);
-
-		float64 r2 = (float64)GammaLookup::GammaToLinear(pColor2.mRed);
-		float64 g2 = (float64)GammaLookup::GammaToLinear(pColor2.mGreen);
-		float64 b2 = (float64)GammaLookup::GammaToLinear(pColor2.mBlue);
-
-		mRed   = GammaLookup::LinearToGamma((uint16)(r1 * (1.0 - t) + r2 * t));
-		mGreen = GammaLookup::LinearToGamma((uint16)(g1 * (1.0 - t) + g2 * t));
-		mBlue  = GammaLookup::LinearToGamma((uint16)(b1 * (1.0 - t) + b2 * t));
-	}
-	else
-	{
-		float64 r1 = (float64)pColor1.mRed;
-		float64 g1 = (float64)pColor1.mGreen;
-		float64 b1 = (float64)pColor1.mBlue;
-
-		float64 r2 = (float64)pColor2.mRed;
-		float64 g2 = (float64)pColor2.mGreen;
-		float64 b2 = (float64)pColor2.mBlue;
-
-		mRed   = (uint8)(r1 * (1.0 - t) + r2 * t);
-		mGreen = (uint8)(g1 * (1.0 - t) + g2 * t);
-		mBlue  = (uint8)(b1 * (1.0 - t) + b2 * t);
-	}
+	mRed   = GammaLookup::LinearToGamma((int)Math::Lerp(r1, r2, t));
+	mGreen = GammaLookup::LinearToGamma((int)Math::Lerp(g1, g2, t));
+	mBlue  = GammaLookup::LinearToGamma((int)Math::Lerp(b1, b2, t));
 }
 
 int Color::Max(int v1, int v2) const
@@ -505,20 +484,12 @@ void Color::Set(uint64 pRed, uint64 pGreen, uint64 pBlue, uint64 pColorIndex)
 	Set((uint8)pRed, (uint8)pGreen, (uint8)pBlue, (uint8)pColorIndex);
 }
 
-void Color::Set(float32 pRed, float32 pGreen, float32 pBlue, float32 pColorIndex)
+void Color::Set(float pRed, float pGreen, float pBlue, float pColorIndex)
 {
 	Set((uint8)(pRed * 255.0f), 
 		(uint8)(pGreen * 255.0f), 
 		(uint8)(pBlue * 255.0f), 
 		(uint8)(pColorIndex * 255.0f)); // Color index treated as alpha channel.
-}
-
-void Color::Set(float64 pRed, float64 pGreen, float64 pBlue, float64 pColorIndex)
-{
-	Set((uint8)(pRed * 255.0), 
-		(uint8)(pGreen * 255.0), 
-		(uint8)(pBlue * 255.0), 
-		(uint8)(pColorIndex * 255.0)); // Color index treated as alpha channel.
 }
 
 float Color::GetRf() const
@@ -655,35 +626,35 @@ Color Color::operator / (int pScalar) const
 				 mAlpha);
 }
 
-Color Color::operator *= (float32 pScalar)
+Color Color::operator *= (float pScalar)
 {
-	mRed   = (uint8)Max(0, Min(255, (int)((float32)mRed   * pScalar)));
-	mGreen = (uint8)Max(0, Min(255, (int)((float32)mGreen * pScalar)));
-	mBlue  = (uint8)Max(0, Min(255, (int)((float32)mBlue  * pScalar)));
+	mRed   = (uint8)Max(0, Min(255, (int)((float)mRed   * pScalar)));
+	mGreen = (uint8)Max(0, Min(255, (int)((float)mGreen * pScalar)));
+	mBlue  = (uint8)Max(0, Min(255, (int)((float)mBlue  * pScalar)));
 	return *this;
 }
 
-Color Color::operator * (float32 pScalar) const
+Color Color::operator * (float pScalar) const
 {
-	return Color((uint8)Max(0, Min(255, (int)((float32)mRed   * pScalar))),
-		         (uint8)Max(0, Min(255, (int)((float32)mGreen * pScalar))),
-				 (uint8)Max(0, Min(255, (int)((float32)mBlue  * pScalar))),
+	return Color((uint8)Max(0, Min(255, (int)((float)mRed   * pScalar))),
+		         (uint8)Max(0, Min(255, (int)((float)mGreen * pScalar))),
+				 (uint8)Max(0, Min(255, (int)((float)mBlue  * pScalar))),
 				 mAlpha);
 }
 
-Color Color::operator /= (float32 pScalar)
+Color Color::operator /= (float pScalar)
 {
-	mRed   = (uint8)Max(0, Min(255, (int)((float32)mRed   / pScalar)));
-	mGreen = (uint8)Max(0, Min(255, (int)((float32)mGreen / pScalar)));
-	mBlue  = (uint8)Max(0, Min(255, (int)((float32)mBlue  / pScalar)));
+	mRed   = (uint8)Max(0, Min(255, (int)((float)mRed   / pScalar)));
+	mGreen = (uint8)Max(0, Min(255, (int)((float)mGreen / pScalar)));
+	mBlue  = (uint8)Max(0, Min(255, (int)((float)mBlue  / pScalar)));
 	return *this;
 }
 
-Color Color::operator / (float32 pScalar) const
+Color Color::operator / (float pScalar) const
 {
-	return Color((uint8)Max(0, Min(255, (int)((float32)mRed   / pScalar))),
-		         (uint8)Max(0, Min(255, (int)((float32)mGreen / pScalar))),
-				 (uint8)Max(0, Min(255, (int)((float32)mBlue  / pScalar))),
+	return Color((uint8)Max(0, Min(255, (int)((float)mRed   / pScalar))),
+		         (uint8)Max(0, Min(255, (int)((float)mGreen / pScalar))),
+				 (uint8)Max(0, Min(255, (int)((float)mBlue  / pScalar))),
 				 mAlpha);
 }
 

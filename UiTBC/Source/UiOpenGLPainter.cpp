@@ -17,7 +17,6 @@ namespace UiTbc
 
 OpenGLPainter::OpenGLPainter() :
 	mTextureIDManager(3, 10000, 0),
-	mRenderModeChanged(true),
 	mSmoothFont(false)
 {
 }
@@ -57,61 +56,13 @@ void OpenGLPainter::SetRenderMode(RenderMode pRM)
 	if (pRM != GetRenderMode())
 	{
 		Painter::SetRenderMode(pRM);
-		mRenderModeChanged = true;
+		DoSetRenderMode();
 	}
 }
 
-void OpenGLPainter::UpdateRenderMode()
+void OpenGLPainter::PrePaint()
 {
-	if (mRenderModeChanged == true)
-	{
-		switch(GetRenderMode())
-		{
-			case Painter::RM_ALPHATEST:
-			{
-				glDisable(GL_COLOR_LOGIC_OP);
-				glDisable(GL_BLEND);
-				glEnable(GL_ALPHA_TEST);
-				float lAlpha = (float)GetAlphaValue() / 255.0f;
-				glAlphaFunc(GL_GEQUAL, (GLclampf)lAlpha);
-				break;
-			}
-			case Painter::RM_ALPHABLEND:
-			{
-				glDisable(GL_ALPHA_TEST);
-				glDisable(GL_COLOR_LOGIC_OP);
-				glEnable(GL_BLEND);
-				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-				break;
-			}
-			case Painter::RM_XOR:
-			{
-				glDisable(GL_ALPHA_TEST);
-				glDisable(GL_BLEND);
-				glEnable(GL_COLOR_LOGIC_OP);
-				glLogicOp(GL_XOR);
-				break;
-			}
-			case Painter::RM_ADD:
-			{
-				glDisable(GL_ALPHA_TEST);
-				glDisable(GL_COLOR_LOGIC_OP);
-				glEnable(GL_BLEND);
-				glBlendFunc(GL_ONE, GL_ONE);
-				break;
-			}
-			case Painter::RM_NORMAL:
-			default:
-			{
-				glDisable(GL_COLOR_LOGIC_OP);
-				glDisable(GL_ALPHA_TEST);
-				glDisable(GL_BLEND);
-				break;
-			}
-		}
-
-		mRenderModeChanged = false;
-	}
+	DoSetRenderMode();
 }
 
 void OpenGLPainter::SetClippingRect(int pLeft, int pTop, int pRight, int pBottom)
@@ -168,11 +119,57 @@ void OpenGLPainter::SetColor(const Lepra::Color& pColor, unsigned pColorIndex)
 			       (float)pColor.mBlue / 255.0f);
 }
 
+void OpenGLPainter::DoSetRenderMode() const
+{
+	switch(GetRenderMode())
+	{
+		case Painter::RM_ALPHATEST:
+		{
+			glDisable(GL_COLOR_LOGIC_OP);
+			glDisable(GL_BLEND);
+			glEnable(GL_ALPHA_TEST);
+			float lAlpha = (float)GetAlphaValue() / 255.0f;
+			glAlphaFunc(GL_GEQUAL, (GLclampf)lAlpha);
+			break;
+		}
+		case Painter::RM_ALPHABLEND:
+		{
+			glDisable(GL_ALPHA_TEST);
+			glDisable(GL_COLOR_LOGIC_OP);
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			break;
+		}
+		case Painter::RM_XOR:
+		{
+			glDisable(GL_ALPHA_TEST);
+			glDisable(GL_BLEND);
+			glEnable(GL_COLOR_LOGIC_OP);
+			glLogicOp(GL_XOR);
+			break;
+		}
+		case Painter::RM_ADD:
+		{
+			glDisable(GL_ALPHA_TEST);
+			glDisable(GL_COLOR_LOGIC_OP);
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_ONE, GL_ONE);
+			break;
+		}
+		case Painter::RM_NORMAL:
+		default:
+		{
+			glDisable(GL_COLOR_LOGIC_OP);
+			glDisable(GL_ALPHA_TEST);
+			glDisable(GL_BLEND);
+			break;
+		}
+	}
+}
+
 void OpenGLPainter::DoDrawPixel(int x, int y)
 {
 	ToScreenCoords(x, y);
-
-	UpdateRenderMode();
 
 	GLfloat lX = (GLfloat)x;
 	GLfloat lY = (GLfloat)y;
@@ -190,20 +187,13 @@ void OpenGLPainter::DoDrawLine(int pX1, int pY1, int pX2, int pY2)
 	ToScreenCoords(pX1, pY1);
 	ToScreenCoords(pX2, pY2);
 
-	UpdateRenderMode();
-
-	GLfloat lX1 = (GLfloat)pX1;
-	GLfloat lY1 = (GLfloat)pY1;
-	GLfloat lX2 = (GLfloat)pX2;
-	GLfloat lY2 = (GLfloat)pY2;
-
 	Lepra::Color& lColor = GetColorInternal(0);
 	glColor4ub(lColor.mRed, lColor.mGreen, lColor.mBlue, GetAlphaValue());
 
-	glLineWidth(1);
+	//glLineWidth(1);
 	glBegin(GL_LINES);
-	glVertex2f(lX1, lY1);
-	glVertex2f(lX2, lY2);
+	glVertex2i(pX1, pY1);
+	glVertex2i(pX2, pY2);
 	glEnd();
 }
 
@@ -214,8 +204,6 @@ void OpenGLPainter::DoFillTriangle(float pX1, float pY1,
 	ToScreenCoords(pX1, pY1);
 	ToScreenCoords(pX2, pY2);
 	ToScreenCoords(pX3, pY3);
-
-	UpdateRenderMode();
 
 	pX1 = pX1 - 0.5f;
 	pX2 = pX2 - 0.5f;
@@ -243,8 +231,6 @@ void OpenGLPainter::DoFillShadedTriangle(float pX1, float pY1,
 	ToScreenCoords(pX1, pY1);
 	ToScreenCoords(pX2, pY2);
 	ToScreenCoords(pX3, pY3);
-
-	UpdateRenderMode();
 
 	pX1 = pX1 - 0.5f;
 	pX2 = pX2 - 0.5f;
@@ -274,8 +260,6 @@ void OpenGLPainter::DoFillTriangle(float pX1, float pY1, float pU1, float pV1,
 	ToScreenCoords(pX1, pY1);
 	ToScreenCoords(pX2, pY2);
 	ToScreenCoords(pX3, pY3);
-
-	UpdateRenderMode();
 
 	TextureTable::Iterator lIter = mTextureTable.Find(pImageID);
 
@@ -332,8 +316,6 @@ void OpenGLPainter::DoDrawRect(int pLeft, int pTop, int pRight, int pBottom, int
 {
 	ToScreenCoords(pLeft, pTop);
 	ToScreenCoords(pRight, pBottom);
-
-	UpdateRenderMode();
 
 	GLfloat lLeft   = (GLfloat)pLeft - 0.5f;
 	GLfloat lRight  = (GLfloat)pRight - 0.5f;
@@ -408,8 +390,6 @@ void OpenGLPainter::DoFillRect(int pLeft, int pTop, int pRight, int pBottom)
 	ToScreenCoords(pLeft, pTop);
 	ToScreenCoords(pRight, pBottom);
 
-	UpdateRenderMode();
-
 	GLfloat lLeft   = (GLfloat)pLeft - 0.5f;
 	GLfloat lRight  = (GLfloat)pRight - 0.5f;
 	GLfloat lTop    = (GLfloat)pTop - 0.5f;
@@ -432,8 +412,6 @@ void OpenGLPainter::DoDraw3DRect(int pLeft, int pTop, int pRight, int pBottom, i
 {
 	ToScreenCoords(pLeft, pTop);
 	ToScreenCoords(pRight, pBottom);
-
-	UpdateRenderMode();
 
 	GLfloat lLeft   = (GLfloat)pLeft - 0.5f;
 	GLfloat lRight  = (GLfloat)pRight - 0.5f;
@@ -538,8 +516,6 @@ void OpenGLPainter::DoFillShadedRect(int pLeft, int pTop, int pRight, int pBotto
 {
 	ToScreenCoords(pLeft, pTop);
 	ToScreenCoords(pRight, pBottom);
-
-	UpdateRenderMode();
 
 	GLfloat lLeft   = (GLfloat)pLeft - 0.5f;
 	GLfloat lRight  = (GLfloat)pRight - 0.5f;
@@ -942,8 +918,6 @@ void OpenGLPainter::DoDrawAlphaImage(ImageID pImageID, int x, int y)
 {
 	ToScreenCoords(x, y);
 
-	UpdateRenderMode();
-
 	TextureTable::Iterator lIter = mTextureTable.Find(pImageID);
 
 	if (lIter == mTextureTable.End())
@@ -1007,8 +981,6 @@ void OpenGLPainter::DoDrawAlphaImage(ImageID pImageID, int x, int y)
 
 void OpenGLPainter::DoDrawImage(ImageID pImageID, const Lepra::PixelRect& pRect)
 {
-	UpdateRenderMode();
-
 	TextureTable::Iterator lIter = mTextureTable.Find(pImageID);
 
 	if (lIter == mTextureTable.End())
@@ -1079,8 +1051,6 @@ void OpenGLPainter::DoDrawImage(ImageID pImageID, int x, int y, const Lepra::Pix
 
 void OpenGLPainter::DoDrawImage(ImageID pImageID, const Lepra::PixelRect& pRect, const Lepra::PixelRect& pSubpatchRect)
 {
-	UpdateRenderMode();
-
 	TextureTable::Iterator lIter = mTextureTable.Find(pImageID);
 
 	if (lIter == mTextureTable.End())
@@ -1149,12 +1119,12 @@ void OpenGLPainter::DoDrawImage(ImageID pImageID, const Lepra::PixelRect& pRect,
 	glPopAttrib();
 }
 
-void OpenGLPainter::GetImageSize(ImageID pImageID, int& pWidth, int& pHeight)
+void OpenGLPainter::GetImageSize(ImageID pImageID, int& pWidth, int& pHeight) const
 {
 	pWidth = 0;
 	pHeight = 0;
 
-	TextureTable::Iterator lIter = mTextureTable.Find((int)pImageID);
+	TextureTable::ConstIterator lIter = mTextureTable.Find((int)pImageID);
 	if(lIter != mTextureTable.End())
 	{
 		Texture* lTexture = *lIter;
@@ -1166,8 +1136,6 @@ void OpenGLPainter::GetImageSize(ImageID pImageID, int& pWidth, int& pHeight)
 int OpenGLPainter::PrintText(const Lepra::String& pString, int x, int y)
 {
 	ToScreenCoords(x, y);
-
-	UpdateRenderMode();
 
 	int lCurrentX = x;
 	int lCurrentY = y+2;	// GL fonts are offset by a little bit.
@@ -1184,7 +1152,7 @@ int OpenGLPainter::PrintText(const Lepra::String& pString, int x, int y)
 		::glDisable(GL_BLEND);
 	}
 
-	::glDisable(GL_SCISSOR_TEST);
+	::glEnable(GL_SCISSOR_TEST);
 
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
@@ -1252,7 +1220,7 @@ int OpenGLPainter::PrintText(const Lepra::String& pString, int x, int y)
 				else
 				{
 					// Convert 32-bit image to monochrome *BIT* map.
-					const int lMaxSize = 120;
+					const int lMaxSize = 350;
 					assert(lWidth < lMaxSize && lHeight < lMaxSize);
 					unsigned char lData[lMaxSize*lMaxSize/8];
 					::memset(lData, 0, sizeof(lData));
@@ -1279,6 +1247,7 @@ int OpenGLPainter::PrintText(const Lepra::String& pString, int x, int y)
 
 	glPopAttrib();
 	glPopAttrib();
+	::glDisable(GL_SCISSOR_TEST);
 
 	int lTemp = 0;
 	ToUserCoords(lCurrentX, lTemp);
@@ -1364,7 +1333,7 @@ void OpenGLPainter::ReadPixels(Lepra::Canvas& pDestCanvas, const Lepra::PixelRec
 	pDestCanvas.FlipVertical();
 }
 
-Painter::RGBOrder OpenGLPainter::GetRGBOrder()
+Painter::RGBOrder OpenGLPainter::GetRGBOrder() const
 {
 	return RGB;
 }
@@ -1398,7 +1367,6 @@ void OpenGLPainter::DoRenderDisplayList(std::vector<DisplayEntity*>* pDisplayLis
 		Painter::SetClippingRect(lGeneratedGeometry->GetClippingRect());
 		SetAlphaValue(lGeneratedGeometry->GetAlpha());
 		SetRenderMode(lGeneratedGeometry->GetRenderMode());
-		UpdateRenderMode();
 
 		// Enabled in ResetClippingRect().
 		glVertexPointer(2, GL_FLOAT, 0, lGeneratedGeometry->GetGeometry().GetVertexData());

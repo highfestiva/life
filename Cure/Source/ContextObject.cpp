@@ -778,7 +778,7 @@ float ContextObject::GetMass() const
 bool ContextObject::SetPhysics(TBC::ChunkyPhysics* pStructure)
 {
 	TBC::PhysicsManager* lPhysics = mManager->GetGameManager()->GetPhysicsManager();
-	const int lPhysicsFps = mManager->GetGameManager()->GetConstTimeManager()->GetDesiredPhysicsFps();
+	const int lPhysicsFps = mManager->GetGameManager()->GetConstTimeManager()->GetDesiredMicroSteps();
 
 	// TODO: drop hard-coding, this should come from world loader or spawn engine?
 	Lepra::TransformationF lTransformation;

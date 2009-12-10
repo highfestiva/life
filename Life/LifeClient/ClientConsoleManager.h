@@ -46,6 +46,7 @@ private:
 	void InitGraphics();
 	void CloseGraphics();
 	void OnConsoleChange();
+	void PrintHelp();
 
 	enum CommandClient
 	{
@@ -69,6 +70,7 @@ private:
 	UiTbc::TextArea* mConsoleOutput;
 	UiTbc::TextField* mConsoleInput;
 	bool mIsConsoleActive;
+	bool mIsFirstConsoleUse;
 	double mConsoleTargetPosition;
 
 	static const CommandPair mCommandIdList[];

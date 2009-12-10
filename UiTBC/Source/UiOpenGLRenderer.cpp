@@ -1044,6 +1044,10 @@ unsigned int OpenGLRenderer::RenderScene()
 {
 	LEPRA_MEASURE_SCOPE(RenderScene);
 
+	::glDisable(GL_COLOR_LOGIC_OP);
+	::glDisable(GL_ALPHA_TEST);
+	::glDisable(GL_BLEND);
+
 	{
 		// Prepare projection data in order to be able to call CheckCulling().
 		Renderer::PrepareProjectionData();

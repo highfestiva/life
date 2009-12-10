@@ -464,7 +464,7 @@ Cure::ResourceLoadState GeometryResource::PostProcess()
 {
 	assert(mOptimizedData == UiTbc::Renderer::INVALID_GEOMETRY);
 	mOptimizedData = GetUiManager()->GetRenderer()->AddGeometry(
-		GetRamData(), UiTbc::Renderer::MAT_NULL, UiTbc::Renderer::NO_SHADOWS);
+		GetRamData(), UiTbc::Renderer::MAT_NULL, UiTbc::Renderer::CAST_SHADOWS);
 	assert(mOptimizedData != UiTbc::Renderer::INVALID_GEOMETRY);
 	Cure::ResourceLoadState lLoadState;
 	if (mOptimizedData == UiTbc::Renderer::INVALID_GEOMETRY)

@@ -4,10 +4,7 @@
 
 
 
-#ifndef LEPRA_NUMBER_H
-#define LEPRA_NUMBER_H
-
-
+#pragma once
 
 #include "String.h"
 
@@ -27,7 +24,3 @@ public:
 
 
 }
-
-
-
-#endif // !LEPRA_NUMBER_H

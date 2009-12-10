@@ -1,52 +1,53 @@
-/*
-	Class:  GammaLookup
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Righteous Games
-*/
+
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2009, Righteous Games
+
+
 
 #include "../Include/GammaLookup.h"
 #include <math.h>
 
+
+
 namespace Lepra
 {
 
-bool GammaLookup::smInitialized = false;
-const float32 GammaLookup::smGamma = 2.2f;
 
-uint16 GammaLookup::smGammaToLinearInt[256];
-float32 GammaLookup::smGammaToLinearFloat[256];
-uint8 GammaLookup::smLinearToGammaInt[65536];
+
+#define GAMMA_FACTOR	2.2f
+
+
 
 void GammaLookup::Initialize()
 {
-	if (smInitialized == false)
+	for (int i = 0; i < 256; i++)
 	{
-		int i;
-
-		for (i = 0; i < 256; i++)
-		{
-			smGammaToLinearFloat[i] = (float32)pow((float32)i / 255.0f, smGamma) * 65535.0f;
-			smGammaToLinearInt[i] = (uint16)floor(smGammaToLinearFloat[i] + 0.5f);
-		}
-
-		for (i = 0; i < 65536; i++)
-		{
-			int lResult = (int)floor(pow((float32)i / 65535.0f, 1.0f / smGamma) * 255.0 + 0.5);
-			smLinearToGammaInt[i] = (uint8)lResult;
-		}
-
-		smInitialized = true;
+		smGammaToLinearFloat[i] = ::powf(i/255.0f, GAMMA_FACTOR) * 65535.0f;
+		smGammaToLinearInt[i] = (int)::floorf(smGammaToLinearFloat[i] + 0.5f);
+	}
+	for (int i = 0; i < 65536; i++)
+	{
+		int lResult = (int)::floorf(powf(i/65535.0f, 1.0f/GAMMA_FACTOR) * 255.0f + 0.5f);
+		smLinearToGammaInt[i] = (uint8)lResult;
 	}
 }
 
-float32 GammaLookup::GammaToLinearF(float32 pGammaValue)
+float GammaLookup::GammaToLinearF(float pGammaValue)
 {
-	return (float32)pow(pGammaValue, smGamma);
+	return (powf(pGammaValue, GAMMA_FACTOR));
 }
 
-float32 GammaLookup::LinearToGammaF(float32 pLinearValue)
+float GammaLookup::LinearToGammaF(float pLinearValue)
 {
-	return (float32)pow(pLinearValue, 1.0f / smGamma);
+	return (powf(pLinearValue, 1.0f / GAMMA_FACTOR));
 }
 
-} // End namespace.
+
+
+int GammaLookup::smGammaToLinearInt[256];
+float GammaLookup::smGammaToLinearFloat[256];
+uint8 GammaLookup::smLinearToGammaInt[65536];
+
+
+
+}

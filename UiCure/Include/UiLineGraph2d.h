@@ -8,13 +8,7 @@
 
 #include <list>
 #include "../../Lepra/Include/String.h"
-
-
-
-namespace UiTbc
-{
-class Painter;
-}
+#include "../../UiTbc/Include/UiPainter.h"
 
 
 
@@ -23,13 +17,16 @@ namespace UiCure
 
 
 
-// This is really just a container for being able to draw a "2D line graph".
 struct LineGraph2d
 {
+	LineGraph2d(UiTbc::Painter* mPainter);
+	LineGraph2d(const LineGraph2d&);
+	virtual ~LineGraph2d();
+
 	void TickLine(size_t pNewSize);	// Rolls up the graph by one step and inserts a "blank line".
 	void AddSegment(const Lepra::String& pName, double p1, double p2);
-	void Render(UiTbc::Painter* pPainter, int pMarginX, float pScaleX, int& pOffsetY) const;
-	void RenderNames(UiTbc::Painter* pPainter, int x, int& y) const;
+	void Render(int pMarginX, float pScaleX, int& pOffsetY) const;
+	void RenderNames(int x, int& y) const;
 
 private:
 	class ColorPicker
@@ -47,8 +44,13 @@ private:
 	typedef std::list<Segments> Fill;
 	typedef Lepra::StringUtility::StringVector SegmentNames;
 
+	UiTbc::Painter* mPainter;
+	UiTbc::Painter::DisplayListID mDisplayListId;
+
 	Fill mData;
 	SegmentNames mNames;
+
+	void operator=(const LineGraph2d&);
 };
 
 

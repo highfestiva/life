@@ -550,14 +550,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Include\DllLoader.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\DynamicArray.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Include\Endian.h"
 				>
 			</File>
@@ -575,10 +567,6 @@
 			</File>
 			<File
 				RelativePath=".\Include\FileArchive.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\FixedPointMath.h"
 				>
 			</File>
 			<File
@@ -746,14 +734,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Include\ParamLoader.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\Params.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Include\Path.h"
 				>
 			</File>
@@ -763,10 +743,6 @@
 			</File>
 			<File
 				RelativePath=".\Include\Performance.inl"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\PerformanceScope.h"
 				>
 			</File>
 			<File
@@ -1080,10 +1056,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Source\DllLoader.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\Source\Endian.cpp"
 				>
 			</File>
@@ -1181,23 +1153,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Source\ParamLoader.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Source\Params.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\Source\Path.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\Source\Performance.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Source\PerformanceScope.cpp"
 				>
 			</File>
 			<File

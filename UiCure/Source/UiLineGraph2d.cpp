@@ -6,7 +6,6 @@
 
 #include "../Include/UiLineGraph2d.h"
 #include <assert.h>
-#include "../../UiTbc/Include/UiPainter.h"
 
 
 
@@ -22,6 +21,27 @@ LineGraph2d::Segment::Segment(double pp1, double pp2):
 }
 
 
+
+LineGraph2d::LineGraph2d(UiTbc::Painter* mPainter):
+	mPainter(mPainter)
+{
+	mDisplayListId = mPainter->NewDisplayList();
+}
+
+LineGraph2d::LineGraph2d(const LineGraph2d& pCopy):
+	mPainter(pCopy.mPainter),
+	mData(pCopy.mData),
+	mNames(pCopy.mNames)
+{
+	
+	mDisplayListId = mPainter->NewDisplayList();
+}
+
+LineGraph2d::~LineGraph2d()
+{
+	mPainter->DeleteDisplayList(mDisplayListId);
+	mPainter = 0;
+}
 
 void LineGraph2d::TickLine(size_t pNewSize)
 {
@@ -41,7 +61,7 @@ void LineGraph2d::AddSegment(const Lepra::String& pName, double p1, double p2)
 	mNames.push_back(pName);
 }
 
-void LineGraph2d::Render(UiTbc::Painter* pPainter, int pMarginX, float pScaleX, int& pOffsetY) const
+void LineGraph2d::Render(int pMarginX, float pScaleX, int& pOffsetY) const
 {
 	int y = pOffsetY;
 	for (Fill::const_iterator iy = mData.begin(); iy != mData.end(); ++iy, ++y)
@@ -50,16 +70,16 @@ void LineGraph2d::Render(UiTbc::Painter* pPainter, int pMarginX, float pScaleX, 
 		int lIndex = 0;
 		for (Segments::const_iterator ix = lLines.begin(); ix != lLines.end(); ++ix, ++lIndex)
 		{
-			ColorPicker lPicker(lIndex, pPainter);
+			ColorPicker lPicker(lIndex, mPainter);
 			const int x1 = (int)(ix->p1*pScaleX) + pMarginX;
 			const int x2 = (int)(ix->p2*pScaleX) + pMarginX;
-			pPainter->DrawLine(x1, y, x2, y);
+			mPainter->DrawLine(x1, y, x2, y);
 		}
 	}
 	pOffsetY = y;
 }
 
-void LineGraph2d::RenderNames(UiTbc::Painter* pPainter, int x, int& pIoY) const
+void LineGraph2d::RenderNames(int x, int& pIoY) const
 {
 	assert(mData.size() > 0);
 	const Segments& lLines = mData.front();
@@ -70,17 +90,17 @@ void LineGraph2d::RenderNames(UiTbc::Painter* pPainter, int x, int& pIoY) const
 	int y = pIoY;
 	for (; ix != lLines.end() && in != mNames.end(); ++lIndex, ++ix, ++in, y+=10)
 	{
-		ColorPicker lPicker(lIndex, pPainter);
-		pPainter->FillRect(x, y+1, x+8, y+8);
+		ColorPicker lPicker(lIndex, mPainter);
+		mPainter->FillRect(x, y+1, x+8, y+8);
 		//const double lPercent = (ix->x2 - ix->x1) / lLongest;
-		pPainter->PrintText(*in, x+12, y);
+		mPainter->PrintText(*in, x+12, y);
 	}
 	pIoY = y;
 }
 
 
 
-LineGraph2d::ColorPicker::ColorPicker(int pIndex, UiTbc::Painter* pPainter)
+LineGraph2d::ColorPicker::ColorPicker(int pIndex, UiTbc::Painter* mPainter)
 {
 	/*int lColor = 0;
 	for (int lBit = 0; lBit < 24; ++lBit)
@@ -97,8 +117,16 @@ LineGraph2d::ColorPicker::ColorPicker(int pIndex, UiTbc::Painter* pPainter)
 	};
 	int lColor = lColorTable[pIndex%(sizeof(lColorTable)/sizeof(lColorTable[0]))];
 	typedef Lepra::uint8 u8;
-	pPainter->SetColor((u8)(lColor>>16), (u8)(lColor>>8), (u8)lColor, 0);
+	mPainter->SetColor((u8)(lColor>>16), (u8)(lColor>>8), (u8)lColor, 0);
 }
+
+
+
+void LineGraph2d::operator=(const LineGraph2d&)
+{
+	assert(false);
+}
+
 
 
 

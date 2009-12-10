@@ -62,7 +62,7 @@ void SetDefault(Cure::RuntimeVariableScope* pSettings)
 	CURE_RTVAR_SET(pSettings, RTVAR_UI_3D_CLIPFAR, 1000.0);
 	CURE_RTVAR_SET(pSettings, RTVAR_UI_3D_SHADOWS, _T("VolumesOnly"));
 	CURE_RTVAR_SET(pSettings, RTVAR_UI_2D_PAINTMODE, _T("AlphaBlend"));
-	CURE_RTVAR_SET(pSettings, RTVAR_UI_2D_UPDATEMODE, _T("OptimizeStatic"));
+	CURE_RTVAR_SET(pSettings, RTVAR_UI_2D_SMOOTHFONTS, false);
 }
 
 Cure::RuntimeVariableScope* GetSettings()

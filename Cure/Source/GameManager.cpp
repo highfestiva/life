@@ -425,7 +425,9 @@ void GameManager::PhysicsThreadEntry()
 	// which may differ between different CPU cores. Several seconds can differ between
 	// different cores. The main thread is locked to the first CPU, therefore this one
 	// goes to the last one.
-	Lepra::Thread::GetCurrentThread()->SetCpuAffinityMask(1<<(Lepra::SystemManager::GetLogicalCpuCount()-1));
+	// JB 2009-12: dropped this, probably not a good idea since we need to run multiple
+	// physics instances when running split screen.
+	//Lepra::Thread::GetCurrentThread()->SetCpuAffinityMask(1<<(Lepra::SystemManager::GetLogicalCpuCount()-1));
 
 	while (mPhysicsWorkerThread && !mPhysicsWorkerThread->GetStopRequest())
 	{

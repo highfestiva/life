@@ -36,19 +36,6 @@ ChunkyClass::~ChunkyClass()
 
 
 
-/*		int lPhysIndex = -1;
-		Lepra::String lName;
-		Lepra::TransformationF lTransform;
-		GetRamData()->GetMesh(x, lPhysIndex, lName, lTransform);
-		UserGeometryReferenceResource* lMesh;
-		lMesh = new UserGeometryReferenceResource(mUiManager, GeometryOffset(lPhysIndex, lTransform));
-		lMesh->SetParentResource(GetFirstUserResource());
-		lMesh->Load(lName+_T(".mesh"),
-			UiCure::UserGeometryReferenceResource::TypeLoadCallback(this,
-				&ResourceTest::MeshLoadCallback));*/
-
-
-
 void ChunkyClass::AddMesh(int pPhysIndex, const Lepra::String& pMeshBaseName, const Lepra::TransformationF& pTransform)
 {
 	mMeshArray.push_back(PhysMeshEntry(pPhysIndex, pMeshBaseName, pTransform));

@@ -51,8 +51,8 @@ public:
 	float GetAffordedPhysicsStepTime() const;
 	// Return how long each physics step should be if we want to progress total time of s in a steps.
 	float GetAffordedPhysicsTotalTime() const;
-	// Returns the desired physics FPS.
-	int GetDesiredPhysicsFps() const;
+	// Returns the desired physics FPS in micro steps.
+	int GetDesiredMicroSteps() const;
 
 	// Temporarily sets a physics speed adjustmed, which is active for a number of
 	// physics frames. When the speed has been adjusted by a certain time, it goes back to

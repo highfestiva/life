@@ -184,7 +184,6 @@ bool GameClientMasterTicker::Tick()
 	{
 		LEPRA_MEASURE_SCOPE(UiPaint);
 		mUiManager->Paint();
-
 	}
 
 	{
@@ -474,7 +473,7 @@ void GameClientMasterTicker::Profile()
 	{
 		if (mPerformanceGraphList.size() <= lRootIndex)
 		{
-			mPerformanceGraphList.push_back(UiCure::LineGraph2d());
+			mPerformanceGraphList.push_back(UiCure::LineGraph2d(mUiManager->GetPainter()));
 		}
 		mPerformanceGraphList[lRootIndex].TickLine(lHeight);
 
@@ -543,12 +542,12 @@ void GameClientMasterTicker::DrawPerformanceLineGraph2d() const
 			return;
 		}
 
-		mPerformanceGraphList[lRootIndex].Render(mUiManager->GetPainter(), lMargin, lScale, lY);
+		mPerformanceGraphList[lRootIndex].Render(lMargin, lScale, lY);
 
 		const bool lDebugNames = CURE_RTVAR_TRYGET(UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_NAMES, false);
 		if (lDebugNames)
 		{
-			mPerformanceGraphList[lRootIndex].RenderNames(mUiManager->GetPainter(), lMargin, lY);
+			mPerformanceGraphList[lRootIndex].RenderNames(lMargin, lY);
 		}
 	}
 
