@@ -537,7 +537,7 @@ bool GameClientSlaveManager::TickNetworkOutput()
 				}
 				const bool lIsCollisionExpired = mCollisionExpireAlarm.PopExpired(0.6);
 				const bool lIsInputExpired = mInputExpireAlarm.PopExpired(0.0);
-				bool lIsPositionExpired = (lIsCollisionExpired || lIsInputExpired);
+				const bool lIsPositionExpired = (lIsCollisionExpired || lIsInputExpired);
 				if (lIsPositionExpired)
 				{
 					log_adebug("Position expires.");

@@ -177,15 +177,17 @@ const Lepra::String ClientOptionsManager::ConvertToString(UiLepra::InputManager:
 bool ClientOptionsManager::SetValue(const Lepra::String& pKey, float pValue)
 {
 	bool lIsAnySteeringValue;
+	bool lInputChanged = false;
 	std::vector<float*> lValuePointers = GetValuePointers(pKey, lIsAnySteeringValue);
 	for (std::vector<float*>::iterator x = lValuePointers.begin(); x != lValuePointers.end(); ++x)
 	{
 		if (!Lepra::Math::IsEpsEqual(*(*x), pValue))
 		{
+			lInputChanged = true;
 			*(*x) = pValue;
 		}
 	}
-	return (lIsAnySteeringValue);
+	return (lIsAnySteeringValue && lInputChanged);
 }
 
 std::vector<float*> ClientOptionsManager::GetValuePointers(const Lepra::String& pKey, bool& pIsAnySteeringValue)
