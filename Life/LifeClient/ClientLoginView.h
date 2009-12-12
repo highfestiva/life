@@ -30,7 +30,7 @@ class ClientLoginObserver;
 class ClientLoginView: public View
 {
 public:
-	ClientLoginView(UiTbc::Painter* pPainter, ClientLoginObserver* pLoginObserver, const Lepra::String& pErrorMessage);
+	ClientLoginView(ClientLoginObserver* pLoginObserver, const Lepra::String& pErrorMessage);
 
 private:
 	void OnExit();

@@ -40,7 +40,7 @@ public:
 	void Tick();
 
 protected:
-	bool SaveApplicationConfigFile(Lepra::File* pFile, const Lepra::String& pUserConfig);
+	bool SaveApplicationConfigFile(Lepra::File* pFile, const Lepra::UnicodeString& pUserConfig);
 
 private:
 	void InitGraphics();

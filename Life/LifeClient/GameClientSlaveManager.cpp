@@ -20,6 +20,7 @@
 #include "../../UiCure/Include/UiRuntimeVariableName.h"
 #include "../../UiTbc/Include/GUI/UiDesktopWindow.h"
 #include "../../UiTbc/Include/GUI/UiFloatingLayout.h"
+#include "../LifeApplication.h"
 #include "../RtVar.h"
 #include "GameClientMasterTicker.h"
 
@@ -274,14 +275,11 @@ bool GameClientSlaveManager::ExportAll(const Lepra::String& pDirectory)
 
 
 
-Lepra::String GameClientSlaveManager::GetName() const
-{
-	return (_T("Client")+Lepra::StringUtility::IntToString(mSlaveIndex, 10));
-}
-
 Lepra::String GameClientSlaveManager::GetApplicationCommandFilename() const
 {
-	return (GetName()+_T("Application") _TEXT_ALTERNATIVE("", L"U") _T(".lsh"));
+	return (Application::GetIoFile(
+		_T("Application")+Lepra::StringUtility::IntToString(mSlaveIndex, 10),
+		_T("lsh")));
 }
 
 
@@ -298,7 +296,7 @@ bool GameClientSlaveManager::Reset()	// Run when disconnected. Removes all objec
 
 	if (!mLoginWindow && !GetNetworkClient()->IsActive())
 	{
-		mLoginWindow = new ClientLoginView(mUiManager->GetPainter(), this, mDisconnectReason);
+		mLoginWindow = new ClientLoginView(this, mDisconnectReason);
 		mUiManager->AssertDesktopLayout(new UiTbc::FloatingLayout());
 		mUiManager->GetDesktopWindow()->AddChild(mLoginWindow);
 		mLoginWindow->SetPos(mRenderArea.GetCenterX()-mLoginWindow->GetSize().x/2,
@@ -567,7 +565,7 @@ bool GameClientSlaveManager::TickNetworkOutput()
 				if (++mPingAttemptCount <= CURE_RTVAR_GET(GetVariableScope(), RTVAR_NETWORK_KEEPALIVE_PINGRETRYCOUNT, 4))
 				{
 					mLastUnsafeReceiveTime.ReduceTimeDiff(CURE_RTVAR_GET(GetVariableScope(), RTVAR_NETWORK_KEEPALIVE_PINGINTERVAL, 7.0));
-					log_volatile(mLog.Debugf(_T("%s sending ping."), GetName().c_str()));
+					log_volatile(mLog.Debugf(_T("Slave %i sending ping."), mSlaveIndex));
 					lSendOk = GetNetworkAgent()->SendNumberMessage(false, GetNetworkClient()->GetSocket(),
 						Cure::MessageNumber::INFO_PING, GetTimeManager()->GetCurrentPhysicsFrame(), 0);
 				}
@@ -649,7 +647,7 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 				{
 					lChatMessage = L"<Player?>: "+lChatMessage;
 				}
-				mLog.Info(Lepra::UnicodeStringUtility::ToCurrentCode(lChatMessage));
+				mLog.Headline(Lepra::UnicodeStringUtility::ToCurrentCode(lChatMessage));
 			}
 		}
 		break;
@@ -762,7 +760,7 @@ bool GameClientSlaveManager::CreateObject(Cure::GameObjectId pInstanceId, const 
 	//assert(!lPreviousObject);
 	if (!lPreviousObject)
 	{
-		mLog.Infof(_T("%s creating context object %s."), GetName().c_str(), pClassId.c_str());
+		mLog.Infof(_T("Slave %i creating context object %s."), mSlaveIndex, pClassId.c_str());
 		Cure::ContextObject* lObject = Parent::CreateContextObject(pClassId, pNetworkType, pInstanceId);
 		lObject->StartLoading();
 	}
@@ -821,7 +819,7 @@ void GameClientSlaveManager::SetMovement(Cure::GameObjectId pInstanceId, Lepra::
 		}
 		else
 		{
-			mLog.Warningf(_T("%s could not set position for object %i."), GetName().c_str(), pInstanceId);
+			mLog.Warningf(_T("Slave %i could not set position for object %i."), mSlaveIndex, pInstanceId);
 		}
 	}
 	else

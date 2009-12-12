@@ -4,8 +4,13 @@
 
 
 
-#include "../Include/String.h"
 #include "../Include/StringUtility.h"
+#include <assert.h>
+#ifdef _MSC_VER
+#pragma warning(disable: 4127)	// Conditional if (sizeof()...) results in constant expression.
+#pragma warning(disable: 4244)	// Converting UTF-32 code point to wchar_t on 16-bit system.
+#endif // VC++.
+#include <utf8.h>
 
 
 
@@ -202,26 +207,32 @@ template<> const AnsiString AnsiStringUtility::ToOwnCode(const AnsiString& pStri
 
 template<> const AnsiString AnsiStringUtility::ToOwnCode(const UnicodeString& pString)
 {
-	// "Convert" to ANSI.
-	// TODO: improve - use system call instead.
+	// Convert to UTF-8.
 	AnsiString lAnsi;
-	lAnsi.resize(pString.length());
-	for (size_t x = 0; x < pString.length(); ++x)
+	if (sizeof(wchar_t) == 2)
 	{
-		lAnsi[x] = (char)pString[x];
+		utf8::utf16to8(pString.begin(), pString.end(), back_inserter(lAnsi));
+	}
+	else
+	{
+		assert(sizeof(wchar_t) == 4);
+		utf8::utf32to8(pString.begin(), pString.end(), back_inserter(lAnsi));
 	}
 	return (lAnsi);
 }
 
 template<> const UnicodeString UnicodeStringUtility::ToOwnCode(const AnsiString& pString)
 {
-	// "Convert" to Unicode.
-	// TODO: improve - use system call instead.
+	// Convert to UTF-16 or UTF-32.
 	UnicodeString lUnicode;
-	lUnicode.resize(pString.length());
-	for (size_t x = 0; x < pString.length(); ++x)
+	if (sizeof(wchar_t) == 2)
 	{
-		lUnicode[x] = (wchar_t)pString[x];
+		utf8::utf8to16(pString.begin(), pString.end(), back_inserter(lUnicode));
+	}
+	else
+	{
+		assert(sizeof(wchar_t) == 4);
+		utf8::utf8to32(pString.begin(), pString.end(), back_inserter(lUnicode));
 	}
 	return (lUnicode);
 }

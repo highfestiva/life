@@ -355,8 +355,7 @@ bool TreeNode::ValidateIconRect(const Lepra::String& pText)
 
 		mIconLabel->SetText(pText,
 			smFactoryTextColor, smFactoryTextBackgColor, 
-			smFactoryTextSelectedColor, smFactoryTextSelectedBackgColor,
-			smFactoryBlendFunc, smFactoryAlphaTreshold);
+			smFactoryTextSelectedColor, smFactoryTextSelectedBackgColor);
 
 		int lImageHeight = lIMan->GetImageSize(mCollapsedIconID).y;
 		int lFontHeight = lIMan->GetPainter()->GetFontHeight();
@@ -422,16 +421,12 @@ bool TreeNode::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 void TreeNode::UseFont(const Lepra::Color& pTextColor,
 		       const Lepra::Color& pTextBackgColor,
 		       const Lepra::Color& pTextSelectedColor,
-		       const Lepra::Color& pTextSelectedBackgColor,
-		       Parent::BlendFunc pBlendFunc,
-		       Lepra::uint8 pAlphaTreshold)
+		       const Lepra::Color& pTextSelectedBackgColor)
 {
 	smFactoryTextColor = pTextColor;
 	smFactoryTextBackgColor = pTextBackgColor;
 	smFactoryTextSelectedColor = pTextSelectedColor;
 	smFactoryTextSelectedBackgColor = pTextSelectedBackgColor;
-	smFactoryBlendFunc = pBlendFunc;
-	smFactoryAlphaTreshold = pAlphaTreshold;
 }
 
 
@@ -525,8 +520,6 @@ Lepra::Color TreeNode::smFactoryTextColor              = Lepra::BLACK;
 Lepra::Color TreeNode::smFactoryTextBackgColor         = Lepra::WHITE;
 Lepra::Color TreeNode::smFactoryTextSelectedColor      = Lepra::BLACK;
 Lepra::Color TreeNode::smFactoryTextSelectedBackgColor = Lepra::LIGHT_BLUE;
-Component::BlendFunc TreeNode::smFactoryBlendFunc      = Parent::ALPHATEST;
-Lepra::uint8 TreeNode::smFactoryAlphaTreshold          = 128;
 
 
 } // End namespace.

@@ -72,7 +72,6 @@ PhysicsManagerODE::~PhysicsManagerODE()
 	::dWorldDestroy(mWorldID);
 	::dSpaceDestroy(mSpaceID);
 	::dJointGroupDestroy(mContactJointGroupID);
-	//::dCloseODE();
 }
 
 PhysicsManager::BodyID PhysicsManagerODE::CreateSphere(bool pIsRoot, const Lepra::TransformationF& pTransform,

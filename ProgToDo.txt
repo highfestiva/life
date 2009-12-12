@@ -161,11 +161,12 @@ Quality
 + Optimize font rendering.
 + Show debug graphs and FPS also in split screen.
 + Make the console appear the correct size (immediately when bringing it up) after having added/removed splitscreen player (currently appears smaller if splitscreen player previously removed).
-. Add unit test for making sure that loading more than one instance of same resource results in a single instance.
++ Get unicode on track. Make script files all UTF-8.
++ Always use unicode script files (UTF-8).
++ Add unit test for making sure that loading more than one instance of same resource results in a single instance.
 . Make build in one step: server, client, **DATA**, Linux, Windows...
 . Assertions on getting access to "wrong" parts of the system with the wrong thread. (Such as dropping users in NetworkServer.cpp from the TCP thread.)
 . Stresstest (use .lsh).
-. Get unicode on track. Make script files all unicode.
 . Replace copyright notice to Righteous Games.
 . Run test app in Windows and Linux.
 . Make sure default settings are good on a no-good computer. Like 60 FPS.
@@ -200,7 +201,6 @@ Quality
 . Run Simian Analyzer, remove duplicate code.
 . Go through all RG e-mail to ensure all is in place.
 . Add homepage for both Righteous Games as well as The Game.
-. Always use unicode script files.
 . Exchange "varning: flerteckens teckenkonstant" (ChunkyLoader.h) to something portable and beautiful.
 . Create a small master server which receives crash reports and feedback.
 . Create feedback form which can be entered and transmitted by any user at any time. Received by master server.
@@ -209,3 +209,4 @@ Quality
 . Add click sounds to buttons.
 . Remove unused rtvars (such as Ui.2D.PaintMode).
 . Port to D3D rendering + painter. Painter only needs working fonts?
+. Automatically downsize rendering (shadows) and physics micro steps if FPS are low.

@@ -101,8 +101,6 @@ PopupList* FileNameField::CreatePopupList()
 					 Lepra::WHITE,
 					 Lepra::BLACK,
 					 Lepra::LIGHT_BLUE,
-					 GetTextBlendFunc(),
-					 GetTextAlpha(),
 					 lPainter);
 			lLabel->SetPreferredSize(0, 12);
 			lPopupList->AddChild(lLabel);

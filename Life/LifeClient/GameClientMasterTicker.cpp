@@ -16,6 +16,7 @@
 #include "../../UiTbc/Include/GUI/UiDesktopWindow.h"
 #include "../../UiTbc/Include/GUI/UiFloatingLayout.h"
 #include "../../UiTbc/Include/UiRenderer.h"
+#include "../LifeApplication.h"
 #include "../RtVar.h"
 #include "GameClientMasterTicker.h"
 #include "GameClientSlaveManager.h"
@@ -53,7 +54,9 @@ GameClientMasterTicker::GameClientMasterTicker(UiCure::GameUiManager* pUiManager
 		new Lepra::ConsoleExecutor<GameClientMasterTicker>(
 			this, &GameClientMasterTicker::OnCommandLocal, &GameClientMasterTicker::OnCommandError));
 	mConsole->GetConsoleCommandManager()->AddCommand(SET_PLAYER_COUNT);
-	mConsole->ExecuteCommand(_T("execute-file -i ClientBase.lsh"));
+
+	mConsole->ExecuteCommand(_T("execute-file -i ClientDefault.lsh"));
+	mConsole->ExecuteCommand(_T("execute-file -i ") + Application::GetIoFile(_T("Base"), _T("lsh")));
 }
 
 GameClientMasterTicker::~GameClientMasterTicker()
@@ -66,7 +69,7 @@ GameClientMasterTicker::~GameClientMasterTicker()
 	{
 		ConsoleManager lConsole(0, UiCure::GetSettings(), 0, 0);
 		lConsole.Init();
-		lConsole.ExecuteCommand(_T("save-system-config-file 0 ClientBase.lsh"));
+		lConsole.ExecuteCommand(_T("save-system-config-file 0 " + Application::GetIoFile(_T("Base"), _T("lsh"))));
 	}
 
 	mUiManager->GetInputManager()->ReleaseAll();
@@ -80,8 +83,7 @@ GameClientMasterTicker::~GameClientMasterTicker()
 	}
 	mSlaveSet.RemoveAll();
 
-	delete (mPlayerCountView);
-	mPlayerCountView = 0;
+	ClosePlayerCountGui();
 
 	mResourceManager = 0;
 	mUiManager = 0;
@@ -300,7 +302,7 @@ bool GameClientMasterTicker::Initialize()
 void GameClientMasterTicker::CreatePlayerCountWindow()
 {
 	assert(!mPlayerCountView);
-	mPlayerCountView = new PlayerCountView(mUiManager->GetPainter(), this);
+	mPlayerCountView = new PlayerCountView(this);
 	mUiManager->AssertDesktopLayout(new UiTbc::CenterLayout());
 	mUiManager->GetDesktopWindow()->AddChild(mPlayerCountView);
 	mUiManager->GetDesktopWindow()->UpdateLayout();
@@ -633,16 +635,7 @@ void GameClientMasterTicker::OnInput(UiLepra::InputElement* pElement)
 
 
 
-void GameClientMasterTicker::OnExit()
-{
-	mLog.Headline(_T("Number of players not picked, quitting."));
-	Lepra::SystemManager::SetQuitRequest(true);
-	mUiManager->GetDesktopWindow()->RemoveChild(mPlayerCountView, 0);
-	delete (mPlayerCountView);
-	mPlayerCountView = 0;
-}
-
-void GameClientMasterTicker::OnSetPlayerCount(int pPlayerCount)
+void GameClientMasterTicker::ClosePlayerCountGui()
 {
 	if (mPlayerCountView)
 	{
@@ -650,6 +643,18 @@ void GameClientMasterTicker::OnSetPlayerCount(int pPlayerCount)
 		delete (mPlayerCountView);
 		mPlayerCountView = 0;
 	}
+}
+
+void GameClientMasterTicker::OnExit()
+{
+	mLog.Headline(_T("Number of players not picked, quitting."));
+	Lepra::SystemManager::SetQuitRequest(true);
+	ClosePlayerCountGui();
+}
+
+void GameClientMasterTicker::OnSetPlayerCount(int pPlayerCount)
+{
+	ClosePlayerCountGui();
 
 	for (int x = 0; x < pPlayerCount; ++x)
 	{

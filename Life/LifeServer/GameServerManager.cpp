@@ -15,6 +15,7 @@
 #include "../../Lepra/Include/AntiCrack.h"
 #include "../../Lepra/Include/Network.h"
 #include "../../Lepra/Include/SystemManager.h"
+#include "../LifeApplication.h"
 #include "../LifeDefinitions.h"
 #include "../RtVar.h"
 #include "Client.h"
@@ -46,7 +47,8 @@ GameServerManager::GameServerManager(Cure::RuntimeVariableScope* pVariableScope,
 {
 	ConsoleManager lConsole(0, Cure::GetSettings(), 0, 0);
 	lConsole.Init();
-	lConsole.ExecuteCommand(_T("execute-file -i ServerBase.lsh"));
+	lConsole.ExecuteCommand(_T("execute-file -i ServerDefault.lsh"));
+	lConsole.ExecuteCommand(_T("execute-file -i ") + Application::GetIoFile(_T("Base"), _T("lsh")));
 
 	GetResourceManager()->InitDefault();
 
@@ -55,7 +57,7 @@ GameServerManager::GameServerManager(Cure::RuntimeVariableScope* pVariableScope,
 	SetNetworkAgent(new Cure::NetworkServer(pVariableScope, this));
 
 	SetConsoleManager(new ServerConsoleManager(this, GetVariableScope(), pConsoleLogger, new Lepra::StdioConsolePrompt()));
-	GetConsoleManager()->PushYieldCommand(_T("execute-file -i ")+GetApplicationCommandFilename());
+	GetConsoleManager()->PushYieldCommand(_T("execute-file -i ") + Application::GetIoFile(_T("Application"), _T("lsh")));
 	GetConsoleManager()->Start();
 }
 
@@ -64,7 +66,7 @@ GameServerManager::~GameServerManager()
 	{
 		ConsoleManager lConsole(0, Cure::GetSettings(), 0, 0);
 		lConsole.Init();
-		lConsole.ExecuteCommand(_T("save-system-config-file 0 ServerBase.lsh"));
+		lConsole.ExecuteCommand(_T("save-system-config-file 0 ") + Application::GetIoFile(_T("Base"), _T("lsh")));
 	}
 
 	DeleteAllClients();
@@ -72,7 +74,7 @@ GameServerManager::~GameServerManager()
 	delete (mUserAccountManager);
 	mUserAccountManager = 0;
 
-	GetConsoleManager()->ExecuteCommand(_T("save-application-config-file ")+GetApplicationCommandFilename());
+	GetConsoleManager()->ExecuteCommand(_T("save-application-config-file ") + Application::GetIoFile(_T("Application"), _T("lsh")));
 }
 
 
@@ -177,18 +179,6 @@ int GameServerManager::GetLoggedInClientCount() const
 	Lepra::ScopeLock lTickLock(GetTickLock());
 	Lepra::ScopeLock lNetLock(GetNetworkAgent()->GetLock());
 	return (mAccountClientTable.GetCount());
-}
-
-
-
-Lepra::String GameServerManager::GetName() const
-{
-	return (_T("Server"));
-}
-
-Lepra::String GameServerManager::GetApplicationCommandFilename() const
-{
-	return (Lepra::SystemManager::GetLoginName()+GetName()+(_T("Application") _TEXT_ALTERNATIVE("", L"U") _T(".lsh")));
 }
 
 

@@ -35,14 +35,6 @@ public:
 
 	friend class DesktopWindow;
 
-	// Used in combination with text rendering.
-	enum BlendFunc
-	{
-		NO_BLEND = 0,
-		ALPHATEST,
-		ALPHABLEND
-	};
-
 	enum Type
 	{
 		COMPONENT = 0,

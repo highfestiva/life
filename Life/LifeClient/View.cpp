@@ -17,9 +17,8 @@ namespace Life
 
 
 
-View::View(UiTbc::Painter* pPainter, const Lepra::String& pTitle, UiTbc::Layout* pLayout):
-	UiTbc::Window(UiTbc::Window::BORDER_LINEARSHADING, 2, Lepra::WHITE, pTitle, pLayout),
-	mPainter(pPainter)
+View::View(const Lepra::String& pTitle, UiTbc::Layout* pLayout):
+	UiTbc::Window(UiTbc::Window::BORDER_LINEARSHADING, 2, Lepra::WHITE, pTitle, pLayout)
 {
 	UiTbc::Caption* lCaption = new UiTbc::Caption(Lepra::DARK_GRAY, Lepra::GRAY, Lepra::GRAY, Lepra::LIGHT_GRAY,
 		Lepra::BLACK, Lepra::DARK_GRAY, Lepra::DARK_GRAY, Lepra::GRAY, 20);
@@ -40,7 +39,7 @@ UiTbc::Label* View::AddLabel(const Lepra::String& pText, const Lepra::Color& pCo
 {
 	UiTbc::Label* lLabel = new UiTbc::Label(Lepra::DARK_GRAY, Lepra::RED);
 	lLabel->SetPreferredSize(0, 24);
-	lLabel->SetText(pText, pColor, Lepra::RED, UiTbc::Component::ALPHATEST, 128, mPainter);
+	lLabel->SetText(pText, pColor, Lepra::RED);
 	AddChild(lLabel);
 	return (lLabel);
 }
@@ -50,7 +49,7 @@ UiTbc::TextField* View::AddTextField(const Lepra::String& pDefaultText, const Le
 	UiTbc::TextField* lTextField = new UiTbc::TextField(GetClientRectComponent(), UiTbc::Window::BORDER_SUNKEN | UiTbc::Window::BORDER_LINEARSHADING,
 		3, Lepra::BLACK, pName);
 	lTextField->SetPreferredSize(0, 24);
-	lTextField->SetFont(Lepra::WHITE, UiTbc::Component::ALPHATEST, 128);
+	lTextField->SetFontColor(Lepra::WHITE);
 	lTextField->SetText(pDefaultText);
 	AddChild(lTextField);
 	return (lTextField);

@@ -59,7 +59,7 @@ void MangledPassword::MangleAndSet(Lepra::UnicodeString& pPassword)
 	mMangledPassword.resize(20);
 
 	const size_t lStringLength = pPassword.length();
-	std::vector<Lepra::uint8> lData(lStringLength*2 + 32);
+	std::vector<Lepra::uint8> lData(lStringLength*4 + 32);
 	Lepra::uint8* lRawData = &lData[0];
 	const int lRawDataSize = Lepra::PackerUnicodeString::Pack(lRawData, pPassword);
 	Lepra::uint8 lHashData[20];

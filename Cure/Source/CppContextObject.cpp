@@ -97,7 +97,7 @@ void CppContextObject::StartLoading()
 {
 	assert(mClassResource == 0);
 	mClassResource = new UserClassResource();
-	const Lepra::String lAssetName = _T("../../Data/")+GetClassId()+_T(".class");	// TODO: move to central source file.
+	const Lepra::String lAssetName = GetClassId()+_T(".class");	// TODO: move to central source file.
 	mClassResource->Load(GetManager()->GetGameManager()->GetResourceManager(), lAssetName,
 		UserClassResource::TypeLoadCallback(this, &CppContextObject::OnLoadClass));
 }
@@ -106,7 +106,7 @@ void CppContextObject::StartLoadingPhysics(const Lepra::String& pPhysicsName)
 {
 	assert(mPhysicsResource == 0);
 	mPhysicsResource = new UserPhysicsResource();
-	const Lepra::String lAssetName = _T("../../Data/")+pPhysicsName+_T(".phys");	// TODO: move to central source file.
+	const Lepra::String lAssetName = pPhysicsName+_T(".phys");	// TODO: move to central source file.
 	mPhysicsResource->LoadUnique(GetManager()->GetGameManager()->GetResourceManager(), lAssetName,
 		UserPhysicsResource::TypeLoadCallback(this, &CppContextObject::OnLoadPhysics));
 }

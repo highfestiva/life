@@ -17,6 +17,9 @@
 #include "../../UiTbc/Include/UiTriangleBasedGeometry.h"
 #include "../../UiTbc/Include/UiGeometryBatch.h"
 
+typedef Lepra::Vector3DF vec3;
+typedef Lepra::Random rnd;
+
 class Object
 {
 public:
@@ -77,10 +80,11 @@ public:
 		mBodyID = mPhysics->CreateBox(true, mTransform, lVolume, lSize, mBodyType);
 		mGeomID = mRenderer->AddGeometry(mGfxGeom, UiTbc::Renderer::MAT_SINGLE_COLOR_SOLID_PXS, UiTbc::Renderer::CAST_SHADOWS);
 
-		TBC::GeometryBase::BasicMaterialSettings lMat((float)Lepra::Random::Uniform(0.5f, 1.0f), 
-		                                              (float)Lepra::Random::Uniform(0.5f, 1.0f), 
-							      (float)Lepra::Random::Uniform(0.5f, 1.0f), 
-							      0.0f, 1.0f);
+		TBC::GeometryBase::BasicMaterialSettings lMat(
+			vec3((float)rnd::Uniform(0.0, 0.3), (float)rnd::Uniform(0.0, 0.3), (float)rnd::Uniform(0.0, 0.3)),
+			vec3((float)rnd::Uniform(0.5, 1.0), (float)rnd::Uniform(0.5, 1.0), (float)rnd::Uniform(0.5, 1.0)),
+			vec3((float)rnd::Uniform(0.0, 1.0), (float)rnd::Uniform(0.0, 1.0), (float)rnd::Uniform(0.0, 1.0)),
+			(float)rnd::Uniform(0.0, 0.5), 1.0f, true);
 		mGfxGeom->SetBasicMaterialSettings(lMat);
 		UpdateTransformation();
 		mGfxGeom->SetAlwaysVisible(true);
@@ -97,10 +101,11 @@ public:
 		mBodyID = mPhysics->CreateSphere(true, mTransform, lVolume, pRadius, mBodyType);
 		mGeomID = mRenderer->AddGeometry(mGfxGeom, UiTbc::Renderer::MAT_SINGLE_COLOR_SOLID_PXS, UiTbc::Renderer::CAST_SHADOWS);
 
-		TBC::GeometryBase::BasicMaterialSettings lMat((float)Lepra::Random::Uniform(0.5f, 1.0f), 
-		                                              (float)Lepra::Random::Uniform(0.5f, 1.0f), 
-							      (float)Lepra::Random::Uniform(0.5f, 1.0f), 
-							      0.0f, 1.0f);
+		TBC::GeometryBase::BasicMaterialSettings lMat(
+			vec3((float)rnd::Uniform(0.0, 0.3), (float)rnd::Uniform(0.0, 0.3), (float)rnd::Uniform(0.0, 0.3)),
+			vec3((float)rnd::Uniform(0.5, 1.0), (float)rnd::Uniform(0.5, 1.0), (float)rnd::Uniform(0.5, 1.0)),
+			vec3((float)rnd::Uniform(0.0, 1.0), (float)rnd::Uniform(0.0, 1.0), (float)rnd::Uniform(0.0, 1.0)),
+			(float)rnd::Uniform(0.0, 0.5), 1.0f, true);
 		mGfxGeom->SetBasicMaterialSettings(lMat);
 		UpdateTransformation();
 		mGfxGeom->SetAlwaysVisible(true);
@@ -108,9 +113,9 @@ public:
 
 	void SetRandomPos(const Lepra::Vector3DF& pMin, const Lepra::Vector3DF& pMax)
 	{
-		Lepra::Vector3DF lPos((float)Lepra::Random::Uniform(pMin.x, pMax.x),
-		                      (float)Lepra::Random::Uniform(pMin.y, pMax.y),
-				      (float)Lepra::Random::Uniform(pMin.z, pMax.z));
+		Lepra::Vector3DF lPos((float)rnd::Uniform(pMin.x, pMax.x),
+		                      (float)rnd::Uniform(pMin.y, pMax.y),
+				      (float)rnd::Uniform(pMin.z, pMax.z));
 		mTransform.SetPosition(lPos);
 		mPhysics->SetBodyTransform(mBodyID, mTransform);
 		UpdateTransformation();
@@ -118,11 +123,11 @@ public:
 
 	void SetRandomRot()
 	{
-		Lepra::Vector3DF lRotAxis((float)Lepra::Random::Uniform(-1.0f, 1.0f),
-		                          (float)Lepra::Random::Uniform(-1.0f, 1.0f),
-					  (float)Lepra::Random::Uniform(-1.0f, 1.0f));
+		Lepra::Vector3DF lRotAxis((float)rnd::Uniform(-1.0f, 1.0f),
+		                          (float)rnd::Uniform(-1.0f, 1.0f),
+					  (float)rnd::Uniform(-1.0f, 1.0f));
 		lRotAxis.Normalize();
-		float lAngle = (float)Lepra::Random::Uniform(0, 2.0f * Lepra::PIF);
+		float lAngle = (float)rnd::Uniform(0, 2.0f * Lepra::PIF);
 		mTransform.SetOrientation(Lepra::QuaternionF(lAngle, lRotAxis));
 		mPhysics->SetBodyTransform(mBodyID, mTransform);
 		UpdateTransformation();
@@ -237,10 +242,11 @@ void RunRotationalAgreementTest()
 			lStaticObj[i]->mBodyID = lPhysics.CreateBox(true, lTransformation, 0, lDimensions, TBC::PhysicsManager::STATIC, 0.5f, 1.0f, 0);
 
 			// Then graphics.
-			TBC::GeometryBase::BasicMaterialSettings lMaterial;
-			lMaterial.mRed = 0.85f;
-			lMaterial.mGreen = 0.85f;
-			lMaterial.mBlue = 0.85f;
+			TBC::GeometryBase::BasicMaterialSettings lMaterial(
+				vec3(0, 0, 0),
+				vec3(0.85f, 0.85f, 0.85f),
+				vec3(0.5f, 0.5f, 0.5f),
+				0.1f, 1.0f, true);
 			UiTbc::Renderer::MaterialType lMaterialType = UiTbc::Renderer::MAT_SINGLE_COLOR_SOLID;
 			UiTbc::Renderer::TextureID lTextureId = UiTbc::Renderer::INVALID_TEXTURE;
 			UiTbc::Renderer::Shadows lShadow = UiTbc::Renderer::CAST_SHADOWS;
@@ -266,12 +272,12 @@ void RunRotationalAgreementTest()
 	for(i = 0; i < DYNAMIC_COUNT; i++)
 	{
 		lDynamicObj[i] = new Object(&lRenderer, &lPhysics, TBC::PhysicsManager::DYNAMIC);
-		//switch((Object::Type)(Lepra::Random::GetRandomNumber() % Object::TYPE_COUNT))
+		//switch((Object::Type)(rnd::GetRandomNumber() % Object::TYPE_COUNT))
 		//{
-		//case Object::BOX: lDynamicObj[i]->MakeBox(Lepra::Vector3DF((float)Lepra::Random::Uniform(0.1f, 0.9f), (float)Lepra::Random::Uniform(0.1f, 0.9f), (float)Lepra::Random::Uniform(0.1f, 0.9f))); break;
-		//case Object::SPHERE: lDynamicObj[i]->MakeSphere((float)Lepra::Random::Uniform(0.1f, 0.9f)); break;
+		//case Object::BOX: lDynamicObj[i]->MakeBox(Lepra::Vector3DF((float)rnd::Uniform(0.1f, 0.9f), (float)rnd::Uniform(0.1f, 0.9f), (float)rnd::Uniform(0.1f, 0.9f))); break;
+		//case Object::SPHERE: lDynamicObj[i]->MakeSphere((float)rnd::Uniform(0.1f, 0.9f)); break;
 		//}
-		lDynamicObj[i]->MakeSphere((float)Lepra::Random::Uniform(0.2f, 0.4f));
+		lDynamicObj[i]->MakeSphere((float)rnd::Uniform(0.2f, 0.4f));
 
 		lDynamicObj[i]->SetRandomPos(Lepra::Vector3DF(-5.0f, -5.0f, 8.0f), Lepra::Vector3DF(5.0f, 5.0f, 8.0f));
 		lDynamicObj[i]->mTTL = (float)i;

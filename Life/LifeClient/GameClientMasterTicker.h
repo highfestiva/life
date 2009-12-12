@@ -65,6 +65,7 @@ private:
 	bool OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode);
 	void OnInput(UiLepra::InputElement* pElement);
 
+	void ClosePlayerCountGui();
 	void OnExit();
 	void OnSetPlayerCount(int pPlayerCount);
 

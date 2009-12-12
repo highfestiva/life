@@ -302,7 +302,7 @@ IOError FileArchive::WriteHeader()
 	}
 
 	mArchiveFile.WriteData(&lHeaderOffset, sizeof(lHeaderOffset));
-	mArchiveFile.WriteString(_T("BUNT"));
+	mArchiveFile.WriteString<Lepra::tchar>(_T("BUNT"));
 
 	return IO_OK;
 }

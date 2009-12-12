@@ -22,7 +22,7 @@ class PlayerCountObserver;
 class PlayerCountView: public View
 {
 public:
-	PlayerCountView(UiTbc::Painter* pPainter, PlayerCountObserver* pPlayerCountObserver);
+	PlayerCountView(PlayerCountObserver* pPlayerCountObserver);
 
 private:
 	void OnExit();

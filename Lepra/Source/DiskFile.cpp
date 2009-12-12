@@ -123,9 +123,9 @@ FILE* DiskFile::FileOpen(const String& pFileName, const String& pMode)
 
 #if _MSC_VER > 1310	// MS compiler version 13 1.0 = 2003 .NET.
 #ifdef LEPRA_UNICODE
-	if (::_wfopen_s(&lFile, UnicodeStringUtility::ToOwnCode(pFileName).c_str(), UnicodeStringUtility::ToOwnCode(pMode+_T(", ccs=UTF-16LE")).c_str()) != 0)
-#else
-	if (::fopen_s(&lFile, AnsiStringUtility::ToOwnCode(pFileName).c_str(), AnsiStringUtility::ToOwnCode(pMode).c_str()) != 0)
+	if (::_wfopen_s(&lFile, pFileName.c_str(), pMode.c_str()) != 0)
+#else // ANSI
+	if (::fopen_s(&lFile, pFileName.c_str(), pMode.c_str()) != 0)
 #endif // Unicode / ANSI.
 	{
 		lFile = 0;
@@ -373,6 +373,11 @@ int64 DiskFile::Tell() const
 
 int64 DiskFile::Seek(int64 pOffset, FileOrigin pFrom)
 {
+	if (!IsOpen())
+	{
+		return (-1);
+	}
+
 	int lOrigin;
 	
 	switch (pFrom)

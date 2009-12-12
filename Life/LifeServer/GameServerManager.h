@@ -40,9 +40,6 @@ public:
 	int GetLoggedInClientCount() const;
 
 private:
-	Lepra::String GetName() const;
-	Lepra::String GetApplicationCommandFilename() const;
-
 	void Logout(Cure::UserAccount::AccountId pAccountId, const Lepra::String& pReason);
 	void DeleteAllClients();
 

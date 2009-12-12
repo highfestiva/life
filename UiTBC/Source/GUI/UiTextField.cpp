@@ -591,23 +591,6 @@ void TextField::Repaint(Painter* pPainter)
 	int lTextX = lRect.mLeft + mTextX;
 	int lTextY = lRect.mTop + (lRect.GetHeight() - lTextHeight) / 2;
 
-	switch(GetTextBlendFunc())
-	{
-	case NO_BLEND:
-		pPainter->SetRenderMode(Painter::RM_NORMAL);
-		break;
-	case ALPHATEST:
-		pPainter->SetRenderMode(Painter::RM_ALPHATEST);
-		break;
-	case ALPHABLEND:
-		pPainter->SetRenderMode(Painter::RM_ALPHABLEND);
-		break;
-	default:
-		pPainter->SetRenderMode(Painter::RM_NORMAL);
-		break;
-	}
-
-	pPainter->SetAlphaValue(GetTextAlpha());
 	pPainter->SetColor(GetTextColor());
 	pPainter->PrintText(GetVisibleText(), lTextX, lTextY);
 

@@ -166,7 +166,7 @@ bool ExportStructure()
 		lStructure.ClearAll(lPhysics);
 	}
 
-	const float lVolvoMass = 1800;
+	/*const float lVolvoMass = 1800;
 	// Wheels and suspension.
 	const float lVolvoSpringConstant = lVolvoMass*50;
 	const float lVolvoDampingConstant = lVolvoMass/5;
@@ -259,11 +259,6 @@ bool ExportStructure()
 		lBreak->AddControlledGeometry(lStructure.GetBoneGeometry(4), 0);
 		lBreak->AddControlledGeometry(lStructure.GetBoneGeometry(5), 0);
 		lStructure.AddEngine(lBreak);
-		// Just a "dummy engine" to keep rear wheel straight at all times.
-		lEngine = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_ROLL_STRAIGHT, 0, 0, 0, 0.01f, 0);
-		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(2), -1);
-		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(3), +1);
-		lStructure.AddEngine(lEngine);
 
 		lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, 0, 0, 0);
 		if (lOk)
@@ -910,7 +905,7 @@ bool ExportStructure()
 			assert(lOk);
 		}
 		lStructure.ClearAll(lPhysics);
-	}
+	}*/
 	if (lOk)
 	{
 		lContext = _T("world save");
@@ -1033,7 +1028,7 @@ bool ExportStructure()
 				lStructure.GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC &&
 				lStructure.GetBoneGeometry(0) != 0 &&
 				lStructure.GetBoneGeometry(0)->GetBodyId() != TBC::INVALID_BODY &&
-				lStructure.GetEngineCount() == 3);
+				lStructure.GetEngineCount() == 4);
 			assert(lOk);
 		}
 		lStructure.ClearAll(lPhysics);

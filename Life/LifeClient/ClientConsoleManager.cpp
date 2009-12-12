@@ -175,12 +175,12 @@ void ClientConsoleManager::Tick()
 
 
 
-bool ClientConsoleManager::SaveApplicationConfigFile(Lepra::File* pFile, const Lepra::String& pUserConfig)
+bool ClientConsoleManager::SaveApplicationConfigFile(Lepra::File* pFile, const Lepra::UnicodeString& pUserConfig)
 {
 	bool lOk = Parent::SaveApplicationConfigFile(pFile, pUserConfig);
 	if (lOk && pUserConfig.empty())
 	{
-		pFile->WriteString(_T("//push \"start-login server:port username password\"\n"));
+		pFile->WriteString<wchar_t>(L"//push \"start-login server:port username password\"\n");
 		lOk = true;	// TODO: check if all writes went well.
 	}
 	return (lOk);
@@ -199,8 +199,8 @@ void ClientConsoleManager::InitGraphics()
 	SetRenderArea(mArea);
 
 	mConsoleOutput->SetFocusAnchor(UiTbc::TextArea::ANCHOR_BOTTOM_LINE);
-	mConsoleOutput->SetFont(Lepra::WHITE, UiTbc::Component::ALPHATEST, 128);
-	mConsoleInput->SetFont(Lepra::WHITE, UiTbc::Component::ALPHATEST, 128);
+	mConsoleOutput->SetFontColor(Lepra::WHITE);
+	mConsoleInput->SetFontColor(Lepra::WHITE);
 
 	mConsoleComponent->AddChild(mConsoleOutput);
 	mConsoleComponent->AddChild(mConsoleInput);

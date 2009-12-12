@@ -34,7 +34,7 @@ void SetDefault(RuntimeVariableScope* pSettings)
 {
 	CURE_RTVAR_SET(pSettings, RTVAR_CONSOLE_COLUMNSPACING, 2);
 	CURE_RTVAR_SET(pSettings, RTVAR_CONSOLE_CHARACTERWIDTH, 80);
-	CURE_RTVAR_SET(pSettings, RTVAR_CONSOLE_CHARACTERDELIMITORS, _T(" \t\v\r\n.,!?:;/\\'\"()&%#@{[]+-*|<>^_$`´"));
+	CURE_RTVAR_SET(pSettings, RTVAR_CONSOLE_CHARACTERDELIMITORS, _T(" \t\v\r\n.,!?:;/\\'\"()&%#@{[]+-*|<>^_$`"));
 	CURE_RTVAR_SET(pSettings, RTVAR_CONSOLE_KEY_COMPLETION, (int)'\t');
 	CURE_RTVAR_SET(pSettings, RTVAR_CONSOLE_KEY_ENTER, (int)'\r');
 	CURE_RTVAR_SET(pSettings, RTVAR_CONSOLE_KEY_BACKSPACE, (int)'\b');

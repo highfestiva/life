@@ -1152,8 +1152,6 @@ int OpenGLPainter::PrintText(const Lepra::String& pString, int x, int y)
 		::glDisable(GL_BLEND);
 	}
 
-	::glEnable(GL_SCISSOR_TEST);
-
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 	glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
@@ -1165,6 +1163,7 @@ int OpenGLPainter::PrintText(const Lepra::String& pString, int x, int y)
 	const int lTabSize = lSpaceSize*4;
 
 	const Lepra::Color lColor = GetColorInternal(0);
+	assert(lColor != Lepra::BLACK);	// Does not show.
 	GetFontManager()->SetColor(lColor);
 	::glColor4f(lColor.GetRf(), lColor.GetGf(), lColor.GetBf(), lColor.GetAf());
 	Lepra::uint32 lColorHash = lColor.To32();
@@ -1247,7 +1246,6 @@ int OpenGLPainter::PrintText(const Lepra::String& pString, int x, int y)
 
 	glPopAttrib();
 	glPopAttrib();
-	::glDisable(GL_SCISSOR_TEST);
 
 	int lTemp = 0;
 	ToUserCoords(lCurrentX, lTemp);

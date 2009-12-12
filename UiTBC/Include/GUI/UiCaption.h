@@ -1,19 +1,22 @@
-/*
-	Class:  Caption
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Alexander Hugestrand
-*/
 
-#ifndef UICAPTION_H
-#define UICAPTION_H
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2009, Righteous Games
+
+
+
+#pragma once
 
 #include "UiRectComponent.h"
 #include "UiButton.h"
 #include "UiLabel.h"
 #include "UiTextComponent.h"
 
+
+
 namespace UiTbc
 {
+
+
 
 class Caption: public RectComponent, public TextComponent
 {
@@ -52,24 +55,22 @@ public:
 	Button* SetRightButton(Button* pButton);
 	Button* SetMiddleButton(Button* pButton);
 
-	inline void SetIcon(Painter::ImageID pIconID);
-	inline void SetText(const Lepra::String& pText,
+	void SetIcon(Painter::ImageID pIconID);
+	void SetText(const Lepra::String& pText,
 						const Lepra::Color& pActiveTextColor,
 						const Lepra::Color& pActiveBackgColor,
 						const Lepra::Color& pInactiveTextColor,
-						const Lepra::Color& pInactiveBackgColor,
-						BlendFunc pBlendFunc = ALPHATEST,
-						Lepra::uint8 pAlphaTreshold = 128);
+						const Lepra::Color& pInactiveBackgColor);
 
 	void SetActive(bool pActive);
-	inline bool GetActive() const;
+	bool GetActive() const;
 
 	virtual bool OnLButtonDown(int pMouseX, int pMouseY);
 	virtual bool OnLButtonUp(int pMouseX, int pMouseY);
 
 	virtual bool OnMouseMove(int pMouseX, int pMouseY, int pDeltaX, int pDeltaY);
 
-	inline virtual Component::Type GetType();
+	virtual Component::Type GetType();
 
 protected:
 	Button* SetButton(Button*& pMemberButton, Button* pNewButton);
@@ -86,7 +87,7 @@ private:
 
 	void InitCaption();
 
-	inline bool Check(unsigned pFlags, unsigned pFlag);
+	bool Check(unsigned pFlags, unsigned pFlag);
 
 	Label* mLabel;
 	RectComponent* mCaptionRect;
@@ -126,43 +127,6 @@ private:
 	Style mStyle;
 };
 
-void Caption::SetIcon(Painter::ImageID pIconID)
-{
-	mLabel->SetIcon(pIconID);
+
+
 }
-
-void Caption::SetText(const Lepra::String& pText,
-					  const Lepra::Color& pActiveTextColor,
-					  const Lepra::Color& pActiveBackgColor,
-					  const Lepra::Color& pInactiveTextColor,
-					  const Lepra::Color& pInactiveBackgColor,
-					  BlendFunc pBlendFunc,
-					  Lepra::uint8 pAlphaTreshold)
-{
-	mText                   = pText;
-	mActiveTextBackgColor   = pActiveBackgColor;
-	mInactiveTextColor      = pInactiveTextColor;
-	mInactiveTextBackgColor = pInactiveBackgColor;
-	SetFont(pActiveTextColor, pBlendFunc, pAlphaTreshold);
-
-	mLabel->SetText(mText, GetTextColor(), mActiveTextBackgColor, GetTextBlendFunc(), GetTextAlpha());
-}
-
-bool Caption::Check(unsigned pFlags, unsigned pFlag)
-{
-	return ((pFlags & pFlag) != 0);
-}
-
-Component::Type Caption::GetType()
-{
-	return Component::CAPTION;
-}
-
-bool Caption::GetActive() const
-{
-	return mActive;
-}
-
-} // End namespace.
-
-#endif

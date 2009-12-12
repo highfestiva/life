@@ -520,6 +520,7 @@ bool GeometryReferenceResource::Load()
 	if (lOk)
 	{
 		const Lepra::String lFilename = Lepra::StringUtility::Split(GetName(), _T(";"), 1)[0];
+		assert(lFilename != GetName());
 		mClassResource->Load(GetManager(), lFilename, ClassResource::TypeLoadCallback(this,
 			&GeometryReferenceResource::OnLoadClass));
 	}

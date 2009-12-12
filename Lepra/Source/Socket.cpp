@@ -2061,7 +2061,7 @@ void GameMuxSocket::AddSocket(GameSocket* pSocket, TcpVSocket* pTcpSocket, UdpVS
 	else
 	{
 		log_debug(_T("Appending info to GameSocket with ID ")+
-			StringUtility::ReplaceCtrlChars(AnsiStringUtility::ToCurrentCode(pSocket->GetConnectionId()), _T('.'))+
+			AnsiStringUtility::ToCurrentCode(AnsiStringUtility::ReplaceCtrlChars(pSocket->GetConnectionId(), '.')) +
 			(pSocket->GetTcpSocket()?_T(" TCP set,"):_T(" no TCP,"))+Lepra::String()+
 			(pSocket->GetUdpSocket()?_T(" UDP set."):_T(" no UDP.")));
 	}

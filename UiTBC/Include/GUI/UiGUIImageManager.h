@@ -59,7 +59,7 @@ public:
 	~GUIImageManager();
 
 	void SetPainter(Painter* pPainter);
-	inline Painter* GetPainter() const;
+	Painter* GetPainter() const;
 
 	// TODO: come up with a way to avoid using an image loader directly in a
 	// void LoadImages(const Lepra::tchar* pImageDefinitionFile, const Lepra::tchar* pArchive = 0);
@@ -79,20 +79,14 @@ public:
 			 int pScreenX, int pScreenY, 
 			 const Lepra::PixelRect& pScreenRect);
 
-	inline void SwapRGB();
+	void SwapRGB();
 
 private:
-
-	// TODO: come up with a way to avoid using an image loader directly in a
-	//       widely used class.
-	//void LoadStruct(Lepra::Params* pStruct, ImageStyle pStyle, BlendFunc pBlendFunc, int pAlpha, Lepra::String pArchive);
-
 	void ClearImageTable();
 
 	class Image
 	{
 	public:
-
 		inline Image(Painter::ImageID pID,
 					 const Lepra::Canvas& pCanvas,
 					 ImageStyle pStyle,
@@ -129,16 +123,6 @@ private:
 
 	bool mSwapRGB;
 };
-
-Painter* GUIImageManager::GetPainter() const
-{
-	return mPainter;
-}
-
-void GUIImageManager::SwapRGB()
-{
-	mSwapRGB = !mSwapRGB;
-}
 
 
 

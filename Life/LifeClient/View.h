@@ -27,7 +27,7 @@ namespace Life
 class View: public UiTbc::Window
 {
 public:
-	View(UiTbc::Painter* pPainter, const Lepra::String& pTitle, UiTbc::Layout* pLayout);
+	View(const Lepra::String& pTitle, UiTbc::Layout* pLayout);
 
 protected:
 	UiTbc::Label* AddLabel(const Lepra::String& pText, const Lepra::Color& pColor);
@@ -37,8 +37,6 @@ protected:
 private:
 	void OnExit(UiTbc::Button*);
 	virtual void OnExit() = 0;
-
-	UiTbc::Painter* mPainter;
 };
 
 

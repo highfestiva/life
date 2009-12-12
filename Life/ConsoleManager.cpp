@@ -12,7 +12,7 @@
 
 
 
-#define USER_SECTION_MARK "//!MARK!//"
+#define USER_SECTION_MARK	L"//!MARK!//"
 
 
 
@@ -284,7 +284,7 @@ int ConsoleManager::OnCommand(const Lepra::String& pCommand, const Lepra::String
 		break;
 		case COMMAND_CLEAR_PERFORMANCE_INFO:
 		{
-			log_performance("Clearing performance data.");
+			log_performance(_T("Clearing performance data."));
 			mGameManager->ClearPerformanceData();
 		}
 		break;
@@ -357,11 +357,12 @@ int ConsoleManager::OnCommand(const Lepra::String& pCommand, const Lepra::String
 				Lepra::DiskFile lFile;
 				if (lFile.Open(pParameterVector[lFilenameIndex], Lepra::DiskFile::MODE_TEXT_READ))
 				{
-					Lepra::String lLine;
+					Lepra::UnicodeString lLine;
 					int lLineNumber = 1;
 					for (; lResult == 0 && lFile.ReadLine(lLine) == Lepra::IO_OK; ++lLineNumber)
 					{
-						lResult = ExecuteCommand(lLine);
+						const Lepra::String lConvertedLine = Lepra::UnicodeStringUtility::ToCurrentCode(lLine);
+						lResult = ExecuteCommand(lConvertedLine);
 					}
 					if (lResult == 0)
 					{
@@ -462,7 +463,7 @@ int ConsoleManager::OnCommand(const Lepra::String& pCommand, const Lepra::String
 					Lepra::String lFilename = pParameterVector[lFilenameIndex];
 					if (!lIgnoreIfExists || !Lepra::DiskFile::Exists(lFilename))
 					{
-						Lepra::String lUserConfig;
+						Lepra::UnicodeString lUserConfig;
 						Lepra::DiskFile lDiskFile;
 						if (lDiskFile.Open(lFilename, Lepra::DiskFile::MODE_TEXT_READ))
 						{
@@ -582,29 +583,29 @@ int ConsoleManager::OnCommand(const Lepra::String& pCommand, const Lepra::String
 
 
 
-bool ConsoleManager::SaveApplicationConfigFile(Lepra::File* pFile, const Lepra::String& pUserConfig)
+bool ConsoleManager::SaveApplicationConfigFile(Lepra::File* pFile, const Lepra::UnicodeString& pUserConfig)
 {
-	pFile->WriteString(_T("// Generated application shell script section.\n"));
+	pFile->WriteString(Lepra::UnicodeString(L"// Generated application shell script section.\n"));
 	std::list<Lepra::String> lVariableList = GetVariableScope()->GetVariableNameList(true, 0, 0);
 	bool lSaved = SaveConfigFile(pFile, lVariableList, pUserConfig);
 	if (pUserConfig.empty())
 	{
-		pFile->WriteString(_T("\npush \"echo 4 Welcome ")+Lepra::SystemManager::QueryFullUserName()+_T("!\"\n"));
+		pFile->WriteString(Lepra::UnicodeStringUtility::ToOwnCode(_T("\npush \"echo 4 Welcome ")+Lepra::SystemManager::QueryFullUserName()+_T("!\"\n")));
 	}
 	return (lSaved);
 }
 
-Lepra::String ConsoleManager::LoadUserConfig(Lepra::File* pFile)
+Lepra::UnicodeString ConsoleManager::LoadUserConfig(Lepra::File* pFile)
 {
-	Lepra::String lUserConfig;
-	Lepra::String lLine;
+	Lepra::UnicodeString lUserConfig;
+	Lepra::UnicodeString lLine;
 	for (bool lInUserConfig = false; pFile->ReadLine(lLine) == Lepra::IO_OK; )
 	{
 		if (lInUserConfig)
 		{
-			lUserConfig += lLine+_T("\n");
+			lUserConfig += lLine + L"\n";
 		}
-		else if (lLine.find(_T(USER_SECTION_MARK)) != Lepra::String::npos)
+		else if (lLine.find(USER_SECTION_MARK) != Lepra::String::npos)
 		{
 			lInUserConfig = true;
 		}
@@ -612,17 +613,17 @@ Lepra::String ConsoleManager::LoadUserConfig(Lepra::File* pFile)
 	return (lUserConfig);
 }
 
-bool ConsoleManager::SaveSystemConfigFile(int pScopeSkipCount, Lepra::File* pFile, const Lepra::String& pUserConfig)
+bool ConsoleManager::SaveSystemConfigFile(int pScopeSkipCount, Lepra::File* pFile, const Lepra::UnicodeString& pUserConfig)
 {
-	pFile->WriteString(_T("// Generated system shell script section.\n"));
+	pFile->WriteString<wchar_t>(L"// Generated system shell script section.\n");
 	std::list<Lepra::String> lVariableList = GetVariableScope()->GetVariableNameList(true, pScopeSkipCount);
 	return (SaveConfigFile(pFile, lVariableList, pUserConfig));
 }
 
-bool ConsoleManager::SaveConfigFile(Lepra::File* pFile, std::list<Lepra::String>& pVariableList, const Lepra::String& pUserConfig)
+bool ConsoleManager::SaveConfigFile(Lepra::File* pFile, std::list<Lepra::String>& pVariableList, const Lepra::UnicodeString& pUserConfig)
 {
-	pFile->WriteString(_T("// Only change variable values below - use user section for all else.\n"));
-	pFile->WriteString(_T("set-stdout-log-level 4\n"));
+	pFile->WriteString<wchar_t>(L"// Only change variable values below - use user section for all else.\n");
+	pFile->WriteString<wchar_t>(L"set-stdout-log-level 4\n");
 
 	pVariableList.sort();
 	Lepra::String lLastGroup;
@@ -634,7 +635,7 @@ bool ConsoleManager::SaveConfigFile(Lepra::File* pFile, std::list<Lepra::String>
 		const Lepra::String lGroup = Lepra::StringUtility::Split(lVariable, lGroupDelimitors, 1)[0];
 		if (lLastGroup != lGroup)
 		{
-			pFile->WriteString(_T("\n"));
+			pFile->WriteString<wchar_t>(L"\n");
 			lLastGroup = lGroup;
 		}
 		Lepra::String lValue = GetVariableScope()->GetDefaultValue(Cure::RuntimeVariableScope::READ_ONLY, lVariable);
@@ -650,10 +651,10 @@ bool ConsoleManager::SaveConfigFile(Lepra::File* pFile, std::list<Lepra::String>
 			lDefaultValue = _T('"')+lDefaultValue+_T('"');
 		}
 		lDefaultValue = (lValue != lDefaultValue)? _T("\t// Default is ")+lDefaultValue+_T(".\n") : _T("\n");
-		pFile->WriteString(_T("#")+lVariable+_T(" ")+lValue+lDefaultValue);
+		pFile->WriteString(Lepra::UnicodeStringUtility::ToOwnCode(_T("#")+lVariable+_T(" ")+lValue+lDefaultValue));
 	}
-	pFile->WriteString(_T("\nset-stdout-log-level 1\n"));
-	pFile->WriteString(_T("\n") _T(USER_SECTION_MARK) _T(" -- User config. Everything but variable values will be overwritten above this section!\n"));
+	pFile->WriteString<wchar_t>(L"\nset-stdout-log-level 1\n");
+	pFile->WriteString<wchar_t>(L"\n" USER_SECTION_MARK L" -- User config. Everything but variable values will be overwritten above this section!\n");
 	pFile->WriteString(pUserConfig);
 	return (true);	// TODO: check if all writes went well.
 }

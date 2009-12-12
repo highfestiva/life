@@ -53,10 +53,7 @@ void GUIImageManager::SetPainter(Painter* pPainter)
 	mPainter = pPainter;
 }
 
-Painter::ImageID GUIImageManager::AddImage(const Lepra::Canvas& pImage,
-					   ImageStyle pStyle,
-					   BlendFunc pBlendFunc,
-					   Lepra::uint8 pAlphaValue)
+Painter::ImageID GUIImageManager::AddImage(const Lepra::Canvas& pImage, ImageStyle pStyle, BlendFunc pBlendFunc, Lepra::uint8 pAlphaValue)
 {
 	Lepra::Canvas lImage(pImage, true);
 
@@ -244,6 +241,18 @@ bool GUIImageManager::IsOverImage(Painter::ImageID pImageID, int pScreenX, int p
 	}
 
 	return false;
+}
+
+
+
+Painter* GUIImageManager::GetPainter() const
+{
+	return mPainter;
+}
+
+void GUIImageManager::SwapRGB()
+{
+	mSwapRGB = !mSwapRGB;
 }
 
 

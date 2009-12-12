@@ -67,7 +67,7 @@ void ServerThread::Run()
 	
 	mTestOK = (lString == _T("Hi Server! I am Client!"));
 
-	lWriter.WriteString(_T("Hi Client! I am Server!\n"));
+	lWriter.WriteString<Lepra::tchar>(_T("Hi Client! I am Server!\n"));
 	lSocket->Flush();
 
 	mUdpMuxSocket->CloseSocket(lSocket);
@@ -120,7 +120,7 @@ void ClientThread::Run()
 		Reader lReader(lSocket);
 		Writer lWriter(lSocket);
 
-		lWriter.WriteString(_T("Hi Server! I am Client!\n"));
+		lWriter.WriteString<Lepra::tchar>(_T("Hi Server! I am Client!\n"));
 		lSocket->Flush();
 
 		lSocket->WaitAvailable(0.5);

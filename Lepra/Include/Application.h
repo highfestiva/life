@@ -35,7 +35,7 @@ int main(int argc, const char* argv[])	\
 #define LEPRA_RUN_APPLICATION(ClassName)	\
 int WINAPI wWinMain(HINSTANCE, HINSTANCE, PTSTR, int)	\
 {	\
-	Lepra::StringUtility::StringVector lArguments(Lepra::StringUtility::BlockSplit(::GetCommandLine(), _T(" \t\v\r\n"), false));	\
+	Lepra::StringUtility::StringVector lArguments(Lepra::StringUtility::BlockSplit(::GetCommandLine(), _T(" \t\v\r\n"), false, false));	\
 	ClassName lApplication(lArguments);	\
 	return (lApplication.Run());	\
 }

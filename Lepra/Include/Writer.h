@@ -1,21 +1,26 @@
-/*
-	Class:  Writer
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Righteous Games
-*/
 
-#ifndef LEPRA_WRITER_H
-#define LEPRA_WRITER_H
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2009, Righteous Games
+
+
+
+#pragma once
 
 #include "LepraTypes.h"
 #include "String.h"
 #include "Endian.h"
 #include "IOError.h"
 
+
+
 namespace Lepra
 {
 
+
+
 class OutputStream;
+
+
 
 class Writer
 {
@@ -25,48 +30,35 @@ public:
 	friend class ArchiveFile;
 	friend class MemFile;
 
-	inline Writer(Endian::EndianType pEndian = Endian::TYPE_BIG_ENDIAN) :
-		mOutStream(0),
-		mWriterEndian(pEndian)
-	{
-	}
+	Writer(Endian::EndianType pEndian = Endian::TYPE_BIG_ENDIAN);
+	Writer(OutputStream* pOut, Endian::EndianType pEndian = Endian::TYPE_BIG_ENDIAN);
+	virtual ~Writer();
 
-	inline Writer(OutputStream* pOut,
-				  Endian::EndianType pEndian = Endian::TYPE_BIG_ENDIAN) :
-		mOutStream(pOut),
-		mWriterEndian(pEndian)
-	{
-	}
-
-	inline virtual ~Writer()
-	{
-	}
-
-	inline IOError Write(const char& pData);
-	inline IOError Write(const wchar_t& pData);
-	inline IOError Write(const int8& pData);
-	inline IOError Write(const uint8& pData);
-	inline IOError Write(const int16& pData);
-	inline IOError Write(const uint16& pData);
-	inline IOError Write(const int32& pData);
-	inline IOError Write(const uint32& pData);
-	inline IOError Write(const int64& pData);
-	inline IOError Write(const uint64& pData);
-	inline IOError Write(const float32& pData);
-	inline IOError Write(const float64& pData);
+	IOError Write(const char& pData);
+	IOError Write(const wchar_t& pData);
+	IOError Write(const int8& pData);
+	IOError Write(const uint8& pData);
+	IOError Write(const int16& pData);
+	IOError Write(const uint16& pData);
+	IOError Write(const int32& pData);
+	IOError Write(const uint32& pData);
+	IOError Write(const int64& pData);
+	IOError Write(const uint64& pData);
+	IOError Write(const float32& pData);
+	IOError Write(const float64& pData);
 
 	virtual IOError WriteData(const void* pBuffer, size_t pSize);
 
+	void SetWriterEndian(Endian::EndianType pWriterEndian);
+	Endian::EndianType GetWriterEndian() const;
+	
+	const String& GetStreamName();
+	
 	// Writes the length of the string (excluding the implicit null-character).
-	inline IOError WriteString(const String& pString);
+	template<class _T> IOError WriteString(const std::basic_string<_T>& pString);
 
-	inline void SetWriterEndian(Endian::EndianType pWriterEndian);
-	inline Endian::EndianType GetWriterEndian() const;
-	
-	inline const String& GetStreamName();
-	
 protected:
-	inline void SetOutputStream(OutputStream* pOutStream);
+	void SetOutputStream(OutputStream* pOutStream);
 
 private:
 
@@ -74,94 +66,15 @@ private:
 	Endian::EndianType mWriterEndian;
 };
 
-IOError Writer::Write(const char& pData)
+
+
+template<class _T>
+IOError Writer::WriteString(const std::basic_string<_T>& pString)
 {
-	return (WriteData(&pData, sizeof(pData)));
+	Lepra::AnsiString lUtf8 = Lepra::AnsiStringUtility::ToOwnCode(pString);
+	return (WriteData(lUtf8.c_str(), (unsigned)lUtf8.length()));
 }
 
-IOError Writer::Write(const wchar_t& pData)
-{
-	return (WriteData(&pData, sizeof(pData)));
+
+
 }
-
-IOError Writer::Write(const int8& pData)
-{
-	return WriteData(&pData, sizeof(int8));
-}
-
-IOError Writer::Write(const uint8& pData)
-{
-	return WriteData(&pData, sizeof(uint8));
-}
-
-IOError Writer::Write(const int16& pData)
-{
-	int16 lData = Endian::HostTo(mWriterEndian, pData);
-	return WriteData(&lData, sizeof(int16));
-}
-
-IOError Writer::Write(const uint16& pData)
-{
-	uint16 lData = Endian::HostTo(mWriterEndian, pData);
-	return WriteData(&lData, sizeof(uint16));
-}
-
-IOError Writer::Write(const int32& pData)
-{
-	int lData = Endian::HostTo(mWriterEndian, pData);
-	return WriteData(&lData, sizeof(int));
-}
-
-IOError Writer::Write(const uint32& pData)
-{
-	unsigned lData = Endian::HostTo(mWriterEndian, pData);
-	return WriteData(&lData, sizeof(unsigned));
-}
-
-IOError Writer::Write(const int64& pData)
-{
-	int64 lData = Endian::HostTo(mWriterEndian, pData);
-	return WriteData(&lData, sizeof(int64));
-}
-
-IOError Writer::Write(const uint64& pData)
-{
-	uint64 lData = Endian::HostTo(mWriterEndian, pData);
-	return WriteData(&lData, sizeof(uint64));
-}
-
-IOError Writer::Write(const float32& pData)
-{
-	float32 lData = Endian::HostTo(mWriterEndian, pData);
-	return WriteData(&lData, sizeof(float32));
-}
-
-IOError Writer::Write(const float64& pData)
-{
-	float64 lData = Endian::HostTo(mWriterEndian, pData);
-	return WriteData(&lData, sizeof(float64));
-}
-
-IOError Writer::WriteString(const String& pString)
-{
-	return (WriteData(pString.c_str(), (unsigned)pString.length()*sizeof(tchar)));
-}
-
-void Writer::SetWriterEndian(Endian::EndianType pWriterEndian)
-{
-	mWriterEndian = pWriterEndian;
-}
-
-Endian::EndianType Writer::GetWriterEndian() const
-{
-	return mWriterEndian;
-}
-
-void Writer::SetOutputStream(OutputStream* pOutStream)
-{
-	mOutStream = pOutStream;
-}
-
-} // End namespace.
-
-#endif // !LEPRA_WRITER_H

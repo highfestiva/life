@@ -22,8 +22,8 @@ public:
 	// Get root directory ( '/', 'C:\', 'Macintosh HD', etc..).
 	static String GetRootDirectory();
 	static String GetCurrentDirectory();
-	// Get preferred documents location.
 	static String GetUserDirectory();
+	static String GetIoDirectory(const String& pAppName);
 	static String GetLoginName();
 	static String QueryFullUserName();
 	static std::string GetRandomId();
