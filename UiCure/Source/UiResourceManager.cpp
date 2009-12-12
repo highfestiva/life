@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2007, Righteous Games
+// Copyright (c) 2002-2009, Righteous Games
 
 
 
@@ -464,7 +464,7 @@ Cure::ResourceLoadState GeometryResource::PostProcess()
 {
 	assert(mOptimizedData == UiTbc::Renderer::INVALID_GEOMETRY);
 	mOptimizedData = GetUiManager()->GetRenderer()->AddGeometry(
-		GetRamData(), UiTbc::Renderer::MAT_NULL, UiTbc::Renderer::NO_SHADOWS);
+		GetRamData(), UiTbc::Renderer::MAT_NULL, UiTbc::Renderer::CAST_SHADOWS);
 	assert(mOptimizedData != UiTbc::Renderer::INVALID_GEOMETRY);
 	Cure::ResourceLoadState lLoadState;
 	if (mOptimizedData == UiTbc::Renderer::INVALID_GEOMETRY)
@@ -520,6 +520,7 @@ bool GeometryReferenceResource::Load()
 	if (lOk)
 	{
 		const Lepra::String lFilename = Lepra::StringUtility::Split(GetName(), _T(";"), 1)[0];
+		assert(lFilename != GetName());
 		mClassResource->Load(GetManager(), lFilename, ClassResource::TypeLoadCallback(this,
 			&GeometryReferenceResource::OnLoadClass));
 	}

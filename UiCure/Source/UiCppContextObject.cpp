@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2007, Righteous Games
+// Copyright (c) 2002-2009, Righteous Games
 
 
 
@@ -54,7 +54,7 @@ void CppContextObject::StartLoading()
 {
 	assert(mUiClassResource == 0);
 	mUiClassResource = new UserClassResource(mUiManager);
-	const Lepra::String lAssetName = _T("../../Data/")+GetClassId()+_T(".class");	// TODO: move to central source file.
+	const Lepra::String lAssetName = GetClassId()+_T(".class");	// TODO: move to central source file.
 	mUiClassResource->Load(GetManager()->GetGameManager()->GetResourceManager(), lAssetName,
 		UserClassResource::TypeLoadCallback(this, &CppContextObject::OnLoadClass));
 }
@@ -339,7 +339,7 @@ void CppContextObject::OnLoadClass(UserClassResource* pClassResource)
 			mUiManager, UiCure::GeometryOffset(lPhysIndex, lTransform));
 		mMeshResourceArray.push_back(lMesh);
 		lMesh->Load(lResourceManager,
-			Lepra::StringUtility::Format(_T("../../Data/%s.mesh;%s"), lMeshName.c_str(), lMeshInstance.c_str()),
+			Lepra::StringUtility::Format(_T("%s.mesh;%s"), lMeshName.c_str(), lMeshInstance.c_str()),
 			UiCure::UserGeometryReferenceResource::TypeLoadCallback(this,&CppContextObject::OnLoadMesh));
 	}
 	// TODO: not everybody should load the texture, not everybody should load *A* texture. Load from group file definition.

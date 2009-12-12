@@ -157,11 +157,11 @@ void StdioConsoleLogListener::WriteLog(const String& pFullMessage, Log::LogLevel
 	switch(pLevel)
 	{
 		case Log::LEVEL_TRACE:	// Fall through.
-		case Log::LEVEL_DEBUG:	// Fall through.
+		case Log::LEVEL_DEBUG:		lAttributes = FOREGROUND_BLUE;									break;
 		case Log::LEVEL_INFO:		lAttributes = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE;				break;
 		case Log::LEVEL_PERFORMANCE:	lAttributes = FOREGROUND_INTENSITY | FOREGROUND_GREEN;						break;
 		case Log::LEVEL_HEADLINE:	lAttributes = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE;	break;
-		case Log::LEVEL_WARNING:	lAttributes = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN;			break;
+		case Log::LEVEL_WARNING:	lAttributes = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN;				break;
 		case Log::LEVEL_ERROR:		lAttributes = FOREGROUND_INTENSITY | FOREGROUND_RED;						break;
 		default:	// Fall through.
 		case Log::LEVEL_FATAL:		lAttributes = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN | BACKGROUND_INTENSITY | BACKGROUND_RED;	break;

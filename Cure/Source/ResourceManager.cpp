@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2007, Righteous Games
+// Copyright (c) 2002-2009, Righteous Games
 
 
 
@@ -809,7 +809,7 @@ void ResourceManager::StartLoad(Resource* pResource)
 	assert(pResource->GetReferenceCount() > 0);
 	pResource->SetLoadState(RESOURCE_LOAD_IN_PROGRESS);
 	assert(mRequestLoadList.GetCount() < 10000);	// Just run GetCount() to validate internal integrity.
-	const Lepra::String& lName = pResource->GetName();
+	log_volatile(const Lepra::String& lName = pResource->GetName());
 	log_volatile(mLog.Debugf(_T("Requesting load of '%s' (%s)."), lName.c_str(), pResource->GetType().c_str()));
 	assert(mRequestLoadList.Find(pResource) == mRequestLoadList.End());
 	mRequestLoadList.PushBack(pResource, pResource);

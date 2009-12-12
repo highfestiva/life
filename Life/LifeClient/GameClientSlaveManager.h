@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2008, Righteous Games
+// Copyright (c) 2002-2009, Righteous Games
 
 
 
@@ -65,7 +65,6 @@ public:
 	bool ExportAll(const Lepra::String& pDirectory);
 
 private:
-	Lepra::String GetName() const;
 	Lepra::String GetApplicationCommandFilename() const;
 
 	bool Reset();

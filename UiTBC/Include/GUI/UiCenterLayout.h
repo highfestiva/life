@@ -1,7 +1,7 @@
 /*
 	Class:  CenterLayout
 	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Alexander Hugestrand
+	Copyright (c) 2002-2009, Righteous Games
 */
 
 #ifndef UICENTERLAYOUT_H

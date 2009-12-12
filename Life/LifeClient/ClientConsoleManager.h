@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2008, Righteous Games
+// Copyright (c) 2002-2009, Righteous Games
 
 
 
@@ -40,12 +40,13 @@ public:
 	void Tick();
 
 protected:
-	bool SaveApplicationConfigFile(Lepra::File* pFile, const Lepra::String& pUserConfig);
+	bool SaveApplicationConfigFile(Lepra::File* pFile, const Lepra::UnicodeString& pUserConfig);
 
 private:
 	void InitGraphics();
 	void CloseGraphics();
 	void OnConsoleChange();
+	void PrintHelp();
 
 	enum CommandClient
 	{
@@ -69,6 +70,7 @@ private:
 	UiTbc::TextArea* mConsoleOutput;
 	UiTbc::TextField* mConsoleInput;
 	bool mIsConsoleActive;
+	bool mIsFirstConsoleUse;
 	double mConsoleTargetPosition;
 
 	static const CommandPair mCommandIdList[];

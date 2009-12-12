@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2007, Righteous Games
+// Copyright (c) 2002-2009, Righteous Games
 
 // TODO: check if IEEE-doubles are stored in network byte order by the FPU.
 //       If not - add ntohll() on each long long (__int64).
@@ -185,81 +185,36 @@ int PackerOctetString::Unpack(uint8* pDestination, const uint8* pSource, int pSi
 
 
 
-#pragma warning(disable: 4127)	// Conditional expression is constant - for sizeof(wchar_t).
-
 int PackerUnicodeString::Pack(uint8* pDestination, const UnicodeString& pSource)
 {
-	// TODO: improve Unicode packer. Could be optimized, and implemented to support
-	// horrid UTF-16 characters (which are 24 and 32 bits in length).
-	size_t lCharCount = pSource.length()+1;
+	const Lepra::AnsiString lUtf8 = Lepra::AnsiStringUtility::ToOwnCode(pSource);
+	size_t lCharCount = lUtf8.length()+1;
 	pDestination[0] = (uint8)lCharCount;
 	pDestination[1] = (uint8)(lCharCount>>8);
-	if (sizeof(wchar_t) == 2)	// UTF-16 (Windows)
-	{
-		::memcpy(pDestination+2, pSource.c_str(), (lCharCount-1)*2);
-	}
-	else if (sizeof(wchar_t) == 4)	// UTF-32 (Posix)
-	{
-		for (size_t x = 0; x < lCharCount-1; ++x)
-		{
-			*(uint16*)&pDestination[2+x*2] = (uint16)pSource[x];
-		}
-	}
-	else
-	{
-		assert(false);
-	}
-	*(uint16*)&pDestination[2+(lCharCount-1)*2] = 0;
-	return (2+(int)lCharCount*2);
+	::memcpy(pDestination+2, lUtf8.c_str(), lCharCount-1);
+	pDestination[2+lCharCount-1] = '\0';
+	return (2+(int)lCharCount);
 }
 
 int PackerUnicodeString::Unpack(UnicodeString* pDestination, const uint8* pSource, int pSize)
 {
 	int lSize = -1;
-	if (pSize >= 4)
+	if (pSize >= 3)
 	{
-		const int pCharCount = pSource[0]|(((unsigned)pSource[1])<<8);
-		if (pCharCount >= 1 && pCharCount*2+2 <= pSize)
+		const int lCharCount = pSource[0]|(((unsigned)pSource[1])<<8);
+		if (lCharCount >= 1 && lCharCount+2 <= pSize && pSource[2+lCharCount-1] == '\0')
 		{
-			const uint16* lSource = (const uint16*)&pSource[2];
-			// Check that the string is non-null everywhere but on the terminating zero.
-			for (int x = 0; x < pCharCount-1; ++x)
+			lSize = 2+lCharCount;
+			// TODO: catch UTF-8 encoding errors (might be DoS attempts).
+			const Lepra::UnicodeString lConversion = Lepra::UnicodeStringUtility::ToOwnCode((const char*)pSource+2);
+			if (pDestination)
 			{
-				if (lSource[x] == _T('\0'))
-				{
-					return (-1);	// TRICKY: optimized and simplified code.
-				}
-			}
-			if (lSource[pCharCount-1] == _T('\0'))
-			{
-				lSize = 2+pCharCount*2;
-				if (pDestination)
-				{
-					if (sizeof(wchar_t) == 2)	// UTF-16 (Windows)
-					{
-						pDestination->assign((wchar_t*)lSource, pCharCount-1);
-					}
-					else if (sizeof(wchar_t) == 4)	// UTF-32 (Posix)
-					{
-						pDestination->clear();
-						pDestination->reserve(pCharCount);
-						for (int x = 0; x < pCharCount-1; ++x)
-						{
-							pDestination->push_back(lSource[x]);
-						}
-					}
-					else
-					{
-						assert(false);
-					}
-				}
+				*pDestination = lConversion;
 			}
 		}
 	}
 	return (lSize);
 }
-
-#pragma warning(default: 4127)
 
 
 

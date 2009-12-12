@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2008, Righteous Games
+// Copyright (c) 2002-2009, Righteous Games
 
 
 
@@ -260,6 +260,17 @@ STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::ReplaceAll(const _String& pString, type
 		{
 			lString[x] = pToChar;
 		}
+	}
+	return (lString);
+}
+
+STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::ReplaceAll(const _String& pString, const _String& pFrom, const String& pTo)
+{
+	_String lString = pString;
+	_String::size_type lPosition;
+	while ((lPosition = lString.find(pFrom)) != Lepra::String::npos)
+	{
+		lString.replace(lPosition, pFrom.length(), pTo);
 	}
 	return (lString);
 }

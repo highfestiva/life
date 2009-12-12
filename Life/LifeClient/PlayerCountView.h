@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2008, Righteous Games
+// Copyright (c) 2002-2009, Righteous Games
 
 
 
@@ -22,7 +22,7 @@ class PlayerCountObserver;
 class PlayerCountView: public View
 {
 public:
-	PlayerCountView(UiTbc::Painter* pPainter, PlayerCountObserver* pPlayerCountObserver);
+	PlayerCountView(PlayerCountObserver* pPlayerCountObserver);
 
 private:
 	void OnExit();

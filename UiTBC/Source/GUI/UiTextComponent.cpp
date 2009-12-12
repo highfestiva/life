@@ -14,9 +14,7 @@ namespace UiTbc
 
 
 TextComponent::TextComponent():
-	mTextColor(Lepra::BLACK),
-	mTextBlendFunc(Component::NO_BLEND),
-	mTextAlpha(128)
+	mTextColor(Lepra::OFF_BLACK)
 {
 }
 
@@ -24,12 +22,10 @@ TextComponent::~TextComponent()
 {
 }
 
-void TextComponent::SetFont(const Lepra::Color& pTextColor,
-	Component::BlendFunc pTextBlendFunc, Lepra::uint8 pTextAlpha)
+void TextComponent::SetFontColor(const Lepra::Color& pTextColor)
 {
+	assert(pTextColor != Lepra::BLACK);
 	mTextColor = pTextColor;
-	mTextBlendFunc = pTextBlendFunc;
-	mTextAlpha = pTextAlpha;
 	ForceRepaint();
 }
 
@@ -38,16 +34,6 @@ void TextComponent::SetFont(const Lepra::Color& pTextColor,
 Lepra::Color TextComponent::GetTextColor() const
 {
 	return (mTextColor);
-}
-
-Component::BlendFunc TextComponent::GetTextBlendFunc() const
-{
-	return (mTextBlendFunc);
-}
-
-Lepra::uint8 TextComponent::GetTextAlpha() const
-{
-	return (mTextAlpha);
 }
 
 

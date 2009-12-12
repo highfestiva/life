@@ -1,8 +1,6 @@
-/*
-	Class:  SystemManager
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Righteous Games
-*/
+
+// Author: Jonas Byström
+// Copyright (c) 2002-2009, Righteous Games
 
 
 

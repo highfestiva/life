@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2006, Righteous Games
+// Copyright (c) 2002-2009, Righteous Games
 
 
 
@@ -31,7 +31,7 @@
 #include "../Include/Network.h"
 #include "../Include/Number.h"
 #include "../Include/Path.h"
-#include "../Include/PerformanceScope.h"
+#include "../Include/Performance.h"
 #include "../Include/Random.h"
 #include "../Include/RotationMatrix.h"
 #include "../Include/SHA1.h"
@@ -2022,24 +2022,24 @@ bool TestPerformance(const Lepra::LogDecorator& pAccount)
 	{
 		if (z == 1)	// Reset time from first loop (only measure time second loop).
 		{
-			Lepra::PerformanceScope::ResetTime();
+			Lepra::ScopePerformanceData::ClearAll(Lepra::ScopePerformanceData::GetRoots());
 			Lepra::Thread::Sleep(0.3);	// Try to make the scheduler rank us high.
 		}
 
 		{
-			LEPRA_PERFORMANCE_SCOPE("Cpu category");
+			LEPRA_MEASURE_SCOPE(Cpucategory);
 
 			{
 				Lepra::Thread::YieldCpu();	// Yield to not get a starved Cpu time slice.
-				LEPRA_PERFORMANCE_SCOPE("NOP1");
+				LEPRA_MEASURE_SCOPE(NOP1);
 				{
-					LEPRA_PERFORMANCE_SCOPE("NOP2");
+					LEPRA_MEASURE_SCOPE(NOP2);
 				}
 			}
 
 			{
 				Lepra::Thread::YieldCpu();	// Yield to not get a starved Cpu time slice.
-				LEPRA_PERFORMANCE_SCOPE("for x = 0 to 1000");
+				LEPRA_MEASURE_SCOPE(forx0to1000);
 				int y = 7;
 				for (int x = 0; x < 1000; ++x)
 				{
@@ -2050,7 +2050,7 @@ bool TestPerformance(const Lepra::LogDecorator& pAccount)
 
 			{
 				Lepra::Thread::YieldCpu();	// Yield to not get a starved Cpu time slice.
-				LEPRA_PERFORMANCE_SCOPE("String");
+				LEPRA_MEASURE_SCOPE(String);
 				Lepra::String lString(_T("Apa"));
 				lString += _T("Esau");
 				lString.rfind(_T("e"), lString.length()-1);
@@ -2058,7 +2058,7 @@ bool TestPerformance(const Lepra::LogDecorator& pAccount)
 
 //			{
 //				Lepra::Thread::YieldCpu();	// Yield to not get a starved Cpu time slice.
-//				LEPRA_PERFORMANCE_SCOPE("BigInt");
+//				LEPRA_MEASURE_SCOPE(BigInt);
 //				Lepra::BigInt lBigInt(_T("84879234798733231872345687123101"));
 //				lBigInt >>= 8;
 //				lBigInt.Sqrt();
@@ -2066,32 +2066,32 @@ bool TestPerformance(const Lepra::LogDecorator& pAccount)
 		}
 
 		{
-			LEPRA_PERFORMANCE_SCOPE("Thread category");
+			LEPRA_MEASURE_SCOPE(Threadcategory);
 
 			{
 				Lepra::Thread::YieldCpu();	// Yield to not get a starved Cpu time slice.
-				LEPRA_PERFORMANCE_SCOPE("Lock");
+				LEPRA_MEASURE_SCOPE(Lock);
 				Lepra::Lock lMutex;
 				{
-					LEPRA_PERFORMANCE_SCOPE("Acquire");
+					LEPRA_MEASURE_SCOPE(Acquire);
 					lMutex.Acquire();
 				}
 				{
-					LEPRA_PERFORMANCE_SCOPE("Release");
+					LEPRA_MEASURE_SCOPE(Release);
 					lMutex.Release();
 				}
 			}
 
 			{
 				Lepra::Thread::YieldCpu();	// Yield to not get a starved Cpu time slice.
-				LEPRA_PERFORMANCE_SCOPE("CompatibleLock");
+				LEPRA_MEASURE_SCOPE(CompatibleLock);
 				Lepra::CompatibleLock lMutex;
 				{
-					LEPRA_PERFORMANCE_SCOPE("Acquire");
+					LEPRA_MEASURE_SCOPE(Acquire);
 					lMutex.Acquire();
 				}
 				{
-					LEPRA_PERFORMANCE_SCOPE("Release");
+					LEPRA_MEASURE_SCOPE(Release);
 					lMutex.Release();
 				}
 			}
@@ -2099,15 +2099,15 @@ bool TestPerformance(const Lepra::LogDecorator& pAccount)
 #ifdef LEPRA_WINDOWS
 			{
 				Lepra::Thread::YieldCpu();	// Yield to not get a starved Cpu time slice.
-				LEPRA_PERFORMANCE_SCOPE("CRITICAL_SECTION");
+				LEPRA_MEASURE_SCOPE(CRITICAL_SECTION);
 				CRITICAL_SECTION lSection;
 				::InitializeCriticalSection(&lSection);
 				{
-					LEPRA_PERFORMANCE_SCOPE("Enter");
+					LEPRA_MEASURE_SCOPE(Enter);
 					::EnterCriticalSection(&lSection);
 				}
 				{
-					LEPRA_PERFORMANCE_SCOPE("Leave");
+					LEPRA_MEASURE_SCOPE(Leave);
 					::LeaveCriticalSection(&lSection);
 				}
 				::DeleteCriticalSection(&lSection);
@@ -2117,14 +2117,14 @@ bool TestPerformance(const Lepra::LogDecorator& pAccount)
 #ifdef LEPRA_WINDOWS
 			{
 				Lepra::Thread::YieldCpu();	// Yield to not get a starved Cpu time slice.
-				LEPRA_PERFORMANCE_SCOPE("SpinLock");
+				LEPRA_MEASURE_SCOPE(SpinLock);
 				Lepra::SpinLock lLock;
 				{
-					LEPRA_PERFORMANCE_SCOPE("Acquire");
+					LEPRA_MEASURE_SCOPE(Acquire);
 					lLock.Acquire();
 				}
 				{
-					LEPRA_PERFORMANCE_SCOPE("Release");
+					LEPRA_MEASURE_SCOPE(Release);
 					lLock.Release();
 				}
 			}
@@ -2132,14 +2132,14 @@ bool TestPerformance(const Lepra::LogDecorator& pAccount)
 
 			{
 				Lepra::Thread::YieldCpu();	// Yield to not get a starved Cpu time slice.
-				LEPRA_PERFORMANCE_SCOPE("Semaphore");
+				LEPRA_MEASURE_SCOPE(Semaphore);
 				Lepra::Semaphore lSemaphore;
 				{
-					LEPRA_PERFORMANCE_SCOPE("Signal");
+					LEPRA_MEASURE_SCOPE(Signal);
 					lSemaphore.Signal();
 				}
 				{
-					LEPRA_PERFORMANCE_SCOPE("Wait");
+					LEPRA_MEASURE_SCOPE(Wait);
 					lSemaphore.Wait();
 				}
 			}
@@ -2150,17 +2150,17 @@ bool TestPerformance(const Lepra::LogDecorator& pAccount)
 				gCondition = &lCondition;
 				lThread.Start(ConditionThread, 0);
 				Lepra::Thread::Sleep(0.1);	// Yield to not get a starved Cpu time slice.
-				LEPRA_PERFORMANCE_SCOPE("Condition");
+				LEPRA_MEASURE_SCOPE(Condition);
 				{
-					LEPRA_PERFORMANCE_SCOPE("Signal");
+					LEPRA_MEASURE_SCOPE(Signal);
 					lCondition.Signal();
 				}
 				{
-					LEPRA_PERFORMANCE_SCOPE("SignalAll");
+					LEPRA_MEASURE_SCOPE(SignalAll);
 					lCondition.SignalAll();
 				}
 				{
-					LEPRA_PERFORMANCE_SCOPE("Wait(0)");
+					LEPRA_MEASURE_SCOPE(Wait(0));
 					lCondition.Wait(0);
 				}
 			}
@@ -2171,31 +2171,31 @@ bool TestPerformance(const Lepra::LogDecorator& pAccount)
 				gCompatibleCondition = &lCondition;
 				lThread.Start(CompatibleConditionThread, 0);
 				Lepra::Thread::Sleep(0.1);	// Yield to not get a starved Cpu time slice.
-				LEPRA_PERFORMANCE_SCOPE("CompatibleCondition");
+				LEPRA_MEASURE_SCOPE(CompatibleCondition);
 				{
-					LEPRA_PERFORMANCE_SCOPE("Signal");
+					LEPRA_MEASURE_SCOPE(Signal);
 					lCondition.Signal();
 				}
 				{
-					LEPRA_PERFORMANCE_SCOPE("SignalAll");
+					LEPRA_MEASURE_SCOPE(SignalAll);
 					lCondition.SignalAll();
 				}
 				{
-					LEPRA_PERFORMANCE_SCOPE("Wait(0)");
+					LEPRA_MEASURE_SCOPE(Wait(0));
 					lCondition.Wait(0);
 				}
 			}
 
 			{
 				Lepra::Thread::YieldCpu();	// Yield to not get a starved Cpu time slice.
-				LEPRA_PERFORMANCE_SCOPE("StaticThread");
+				LEPRA_MEASURE_SCOPE(StaticThread);
 				Lepra::StaticThread lThread(_T("PerformanceTest"));
 				{
-					LEPRA_PERFORMANCE_SCOPE("Start");
+					LEPRA_MEASURE_SCOPE(Start);
 					lThread.Start(DummyThread, 0);
 				}
 				{
-					LEPRA_PERFORMANCE_SCOPE("Join");
+					LEPRA_MEASURE_SCOPE(Join);
 					lThread.Join();
 				}
 				assert(!lThread.IsRunning());
@@ -2203,11 +2203,11 @@ bool TestPerformance(const Lepra::LogDecorator& pAccount)
 		}
 
 		{
-			LEPRA_PERFORMANCE_SCOPE("Network category");
+			LEPRA_MEASURE_SCOPE(Networkcategory);
 
 			{
 				Lepra::Thread::YieldCpu();	// Yield to not get a starved Cpu time slice.
-				LEPRA_PERFORMANCE_SCOPE("sys_socket (UDP)");
+				LEPRA_MEASURE_SCOPE(sys_socket(UDP));
 				Lepra::sys_socket fd = ::socket(PF_INET, SOCK_DGRAM, 0);
 				assert(fd > 0);
 				sockaddr_in sa;
@@ -2220,11 +2220,11 @@ bool TestPerformance(const Lepra::LogDecorator& pAccount)
 				lTestOk = (::bind(fd, (sockaddr*)&sa, sizeof(sa)) >= 0);
 				assert(lTestOk);
 				{
-					LEPRA_PERFORMANCE_SCOPE("sendto");
+					LEPRA_MEASURE_SCOPE(sendto);
 					::sendto(fd, "Hello World", 12, 0, (sockaddr*)&sa, sizeof(sa));
 				}
 				{
-					LEPRA_PERFORMANCE_SCOPE("recvfrom");
+					LEPRA_MEASURE_SCOPE(recvfrom);
 					char buf[12] = "";
 					socklen_t fromlen = sizeof(sa);
 					::recvfrom(fd, buf, 12, 0, (sockaddr*)&sa, &fromlen);
@@ -2239,16 +2239,16 @@ bool TestPerformance(const Lepra::LogDecorator& pAccount)
 
 			{
 				Lepra::Thread::YieldCpu();	// Yield to not get a starved Cpu time slice.
-				LEPRA_PERFORMANCE_SCOPE("UdpSocket");
+				LEPRA_MEASURE_SCOPE(UdpSocket);
 				Lepra::SocketAddress lAddress;
 				lAddress.Resolve(_T("localhost:46666"));
 				Lepra::UdpSocket lSocket(lAddress);
 				{
-					LEPRA_PERFORMANCE_SCOPE("SendTo");
+					LEPRA_MEASURE_SCOPE(SendTo);
 					lSocket.SendTo((const Lepra::uint8*)"Hello World", 12, lAddress);
 				}
 				{
-					LEPRA_PERFORMANCE_SCOPE("ReceiveFrom");
+					LEPRA_MEASURE_SCOPE(ReceiveFrom);
 					char lBuffer[12] = "";
 					lSocket.ReceiveFrom((Lepra::uint8*)lBuffer, 12, lAddress);
 					assert(::strcmp(lBuffer, "Hello World") == 0);
@@ -2257,7 +2257,7 @@ bool TestPerformance(const Lepra::LogDecorator& pAccount)
 
 			{
 				Lepra::Thread::YieldCpu();	// Yield to not get a starved Cpu time slice.
-				LEPRA_PERFORMANCE_SCOPE("UdpMuxSocket");
+				LEPRA_MEASURE_SCOPE(UdpMuxSocket);
 				Lepra::SocketAddress lAddress1;
 				lAddress1.Resolve(_T("localhost:46666"));
 				Lepra::SocketAddress lAddress2;
@@ -2297,12 +2297,12 @@ bool TestPerformance(const Lepra::LogDecorator& pAccount)
 				DummyAcceptor lAcceptor(&lMuxSocket2);
 				lAcceptor.Start();
 				{
-					LEPRA_PERFORMANCE_SCOPE("Connect");
+					LEPRA_MEASURE_SCOPE(Connect);
 					lSocket = lMuxSocket1.Connect(lAddress2, "", 0.5);
 					assert(lSocket);
 				}
 				{
-					LEPRA_PERFORMANCE_SCOPE("WriteRaw+Flush");
+					LEPRA_MEASURE_SCOPE(WriteRaw+Flush);
 					Lepra::IOError lIo = lSocket->AppendSendBuffer("Hello Server", 13);
 					assert(lIo == Lepra::IO_OK);
 					if (lIo == Lepra::IO_OK) {}	// TRICKY.
@@ -2311,7 +2311,7 @@ bool TestPerformance(const Lepra::LogDecorator& pAccount)
 					if (r == 13) {}	// TRICKY.
 				}
 				{
-					LEPRA_PERFORMANCE_SCOPE("Refill+ReadRaw");
+					LEPRA_MEASURE_SCOPE(Refill+ReadRaw);
 					lSocket->WaitAvailable(0.5);
 					char lBuffer[13] = "";
 					lSocket->ReadRaw(lBuffer, 13);
@@ -2319,7 +2319,7 @@ bool TestPerformance(const Lepra::LogDecorator& pAccount)
 					assert(lTestOk);
 				}
 				{
-					LEPRA_PERFORMANCE_SCOPE("Close");
+					LEPRA_MEASURE_SCOPE(Close);
 					lMuxSocket1.CloseSocket(lSocket);
 				}
 			}

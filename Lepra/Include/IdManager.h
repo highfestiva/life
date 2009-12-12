@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2008, Righteous Games
+// Copyright (c) 2002-2009, Righteous Games
 
 // JB 2008-07-15: totally rewrote from scratch. Reduced the number of lines by 76 %!
 //

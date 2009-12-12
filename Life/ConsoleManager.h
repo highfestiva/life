@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2008, Righteous Games
+// Copyright (c) 2002-2009, Righteous Games
 
 
 
@@ -68,14 +68,14 @@ protected:
 	int TranslateCommand(const Lepra::String& pCommand) const;
 	int OnCommand(const Lepra::String& pCommand, const Lepra::StringUtility::StringVector& pParameterVector);
 
-	virtual bool SaveApplicationConfigFile(Lepra::File* pFile, const Lepra::String& pUserConfig);
+	virtual bool SaveApplicationConfigFile(Lepra::File* pFile, const Lepra::UnicodeString& pUserConfig);
 
 	Cure::GameManager* mGameManager;
 
 private:
-	Lepra::String LoadUserConfig(Lepra::File* pFile);
-	bool SaveSystemConfigFile(int pScopeSkipCount, Lepra::File* pFile, const Lepra::String& pUserConfig);
-	bool SaveConfigFile(Lepra::File* pFile, std::list<Lepra::String>& pVariableList, const Lepra::String& pUserConfig);
+	Lepra::UnicodeString LoadUserConfig(Lepra::File* pFile);
+	bool SaveSystemConfigFile(int pScopeSkipCount, Lepra::File* pFile, const Lepra::UnicodeString& pUserConfig);
+	bool SaveConfigFile(Lepra::File* pFile, std::list<Lepra::String>& pVariableList, const Lepra::UnicodeString& pUserConfig);
 
 	static const CommandPair mCommandIdList[];
 	typedef std::hash_map<Lepra::String, Lepra::String> AliasMap;

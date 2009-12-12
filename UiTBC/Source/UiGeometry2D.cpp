@@ -144,7 +144,7 @@ void Geometry2D::ReallocTriangleBuffer(int pTriangleCapacity)
 
 void Geometry2D::AssureVertexCapacity(int pVertexCapacity)
 {
-	if (pVertexCapacity > mVertexCapacity)
+	if (pVertexCapacity >= mVertexCapacity)
 	{
 		int lNewCapacity = pVertexCapacity + mVertexCapacity / 2;
 		ReallocVertexBuffers(lNewCapacity);
@@ -153,7 +153,7 @@ void Geometry2D::AssureVertexCapacity(int pVertexCapacity)
 
 void Geometry2D::AssureTriangleCapacity(int pTriangleCapacity)
 {
-	if (pTriangleCapacity > mTriangleCapacity)
+	if (pTriangleCapacity >= mTriangleCapacity)
 	{
 		int lNewCapacity = pTriangleCapacity + mTriangleCapacity / 2;
 		ReallocTriangleBuffer(lNewCapacity);
@@ -208,12 +208,7 @@ Lepra::uint32 Geometry2D::SetVertex(float x, float y, float u, float v)
 
 Lepra::uint32 Geometry2D::SetVertex(float x, float y, float r, float g, float b)
 {
-	const bool bo = (mColorData[0] != 0);
 	AssureVertexCapacity(mVertexCount + 1);
-	if (bo)
-	{
-		assert(mColorData[0] != 0);
-	}
 
 	if (IsFlagSet(VTX_INTERLEAVED))
 	{

@@ -280,15 +280,15 @@ class ChunkyWriter:
                 self._dowrite(sign.encode('latin-1'), 4, "signature")
 
         def _writestr(self, string):
-                res = list(string.encode('utf-16'))
-                res += [0, 0]
+                res = list(string.encode('utf-8'))
+                res += [0]      # C-string: zero termination character.
                 # Overwrite 2-byte Unicode BOM with string length.
-                chrcnt = (len(res)-2)//2
-                res[0] = (chrcnt&0xFF)
-                res[1] = (chrcnt>>8)
+                chrcnt = len(res)
+                res = [chrcnt&0xFF, chrcnt>>8] + res
                 reslen = ((len(res)+3) & (~3))
                 resremainder = reslen - len(res)
                 res += [0] * resremainder
+                #print("Writing string", res)
                 res = bytes(res)
                 self._dowrite(res, reslen, "str data")
 

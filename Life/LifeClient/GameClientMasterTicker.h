@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2008, Righteous Games
+// Copyright (c) 2002-2009, Righteous Games
 
 
 
@@ -65,6 +65,7 @@ private:
 	bool OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode);
 	void OnInput(UiLepra::InputElement* pElement);
 
+	void ClosePlayerCountGui();
 	void OnExit();
 	void OnSetPlayerCount(int pPlayerCount);
 

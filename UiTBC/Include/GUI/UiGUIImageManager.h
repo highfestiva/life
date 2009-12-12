@@ -1,40 +1,42 @@
-/*
-	Class:  GUIImageManager
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Alexander Hugestrand
 
-	NOTES:
-
-	This class manages all images used in the GUI. Since it is so
-	tightly connected to the GUI, there are some things I want to mention
-	about how it is supposed to be used:
-
-	Assumption 1: All GUI components always have exactly ONE DesktopWindow at 
-	              the top level.
-	Assumption 2: The DesktopWindow contains one and only one instance of this 
-	              class, OR (exclusively or) one and only one pointer to it.
-	Assumption 3: All components reach their corresponding GUIImageManager
-	              through their one and only parent DesktopWindow.
-    
-	The GUIImageManager must be created before any GUI components are created.
-	The DesktopWindow must be created either directly after it or at the same 
-	time (by creating the GUIImageManager in the constructor of DesktopWindow). 
-	Due to how DesktopWindow handles rendering, it must be responsible of setting
-	the pointer to the painter. To be 100% safe from bugs, this should be done
-	before any other GUI components are created.
-*/
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2009, Righteous Games
+//
+// NOTES:
+//
+// This class manages all images used in the GUI. Since it is so
+// tightly connected to the GUI, there are some things I want to mention
+// about how it is supposed to be used:
+//
+// Assumption 1: All GUI components always have exactly ONE DesktopWindow at 
+//               the top level.
+// Assumption 2: The DesktopWindow contains one and only one instance of this 
+//               class, OR (exclusively or) one and only one pointer to it.
+// Assumption 3: All components reach their corresponding GUIImageManager
+//               through their one and only parent DesktopWindow.
+//
+// The GUIImageManager must be created before any GUI components are created.
+// The DesktopWindow must be created either directly after it or at the same 
+// time (by creating the GUIImageManager in the constructor of DesktopWindow). 
+// Due to how DesktopWindow handles rendering, it must be responsible of setting
+// the pointer to the painter. To be 100% safe from bugs, this should be done
+// before any other GUI components are created.
 
 
-#ifndef UIGUIIMAGEMANAGER_H
-#define UIGUIIMAGEMANAGER_H
 
-#include "../UiTBC.h"
+#pragma once
+
+#include "../../../Lepra/Include/HashTable.h"
 #include "../UiPainter.h"
-#include "../../../Lepra/Include/Params.h"
+#include "../UiTBC.h"
+
+
 
 
 namespace UiTbc
 {
+
+
 
 class GUIImageManager
 {
@@ -57,7 +59,7 @@ public:
 	~GUIImageManager();
 
 	void SetPainter(Painter* pPainter);
-	inline Painter* GetPainter() const;
+	Painter* GetPainter() const;
 
 	// TODO: come up with a way to avoid using an image loader directly in a
 	// void LoadImages(const Lepra::tchar* pImageDefinitionFile, const Lepra::tchar* pArchive = 0);
@@ -77,20 +79,14 @@ public:
 			 int pScreenX, int pScreenY, 
 			 const Lepra::PixelRect& pScreenRect);
 
-	inline void SwapRGB();
+	void SwapRGB();
 
 private:
-
-	// TODO: come up with a way to avoid using an image loader directly in a
-	//       widely used class.
-	//void LoadStruct(Lepra::Params* pStruct, ImageStyle pStyle, BlendFunc pBlendFunc, int pAlpha, Lepra::String pArchive);
-
 	void ClearImageTable();
 
 	class Image
 	{
 	public:
-
 		inline Image(Painter::ImageID pID,
 					 const Lepra::Canvas& pCanvas,
 					 ImageStyle pStyle,
@@ -128,16 +124,6 @@ private:
 	bool mSwapRGB;
 };
 
-Painter* GUIImageManager::GetPainter() const
-{
-	return mPainter;
+
+
 }
-
-void GUIImageManager::SwapRGB()
-{
-	mSwapRGB = !mSwapRGB;
-}
-
-} // End namespace.
-
-#endif

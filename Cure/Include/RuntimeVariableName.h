@@ -1,10 +1,12 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2008, Righteous Games
+// Copyright (c) 2002-2009, Righteous Games
 
 
 
 #pragma once
+
+#define RTVAR_APPLICATION_NAME			"Application.Name"
 
 #define RTVAR_CONSOLE_COLUMNSPACING		"Console.ColumnSpacing"
 #define RTVAR_CONSOLE_CHARACTERWIDTH		"Console.WidthInCharacters"

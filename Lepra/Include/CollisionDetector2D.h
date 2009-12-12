@@ -1,7 +1,7 @@
 /*
 	Class:  CollisionDetector2D
 	Author: Alexander Hugestrand
-	Copyright (c) 2002-2005, Alexander Hugestrand
+	Copyright (c) 2002-2009, Righteous Games
 
 	A class used to test collisions between 2D geometrical shapes.
 	AABR = Axis Aligned Bounding Rectangle

@@ -230,6 +230,7 @@ Lepra::String TextField::GetVisibleText() const
 void TextField::SetText(const Lepra::String& pText)
 {
 	mText = pText;
+	mTextX = 0;
 	SetMarkerPosition(pText.length());
 	SetNeedsRepaint(true);
 }
@@ -590,23 +591,6 @@ void TextField::Repaint(Painter* pPainter)
 	int lTextX = lRect.mLeft + mTextX;
 	int lTextY = lRect.mTop + (lRect.GetHeight() - lTextHeight) / 2;
 
-	switch(GetTextBlendFunc())
-	{
-	case NO_BLEND:
-		pPainter->SetRenderMode(Painter::RM_NORMAL);
-		break;
-	case ALPHATEST:
-		pPainter->SetRenderMode(Painter::RM_ALPHATEST);
-		break;
-	case ALPHABLEND:
-		pPainter->SetRenderMode(Painter::RM_ALPHABLEND);
-		break;
-	default:
-		pPainter->SetRenderMode(Painter::RM_NORMAL);
-		break;
-	}
-
-	pPainter->SetAlphaValue(GetTextAlpha());
 	pPainter->SetColor(GetTextColor());
 	pPainter->PrintText(GetVisibleText(), lTextX, lTextY);
 
@@ -619,7 +603,6 @@ void TextField::Repaint(Painter* pPainter)
 		else
 		{
 			int lMarkerY = lRect.mTop + (lRect.GetHeight() - lTextHeight) / 2;
-			pPainter->SetColor(Lepra::WHITE);
 			pPainter->DrawLine(lRect.mLeft + lMarkerX, lMarkerY, lRect.mLeft + lMarkerX, lMarkerY + lTextHeight);
 		}
 	}

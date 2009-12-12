@@ -1,7 +1,7 @@
 /*
 	Class:  Reader
 	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Righteous Games
+	Copyright (c) 2002-2009, Righteous Games
 */
 
 #include "../Include/Reader.h"
@@ -147,39 +147,6 @@ IOError Reader::AllocReadData(void** pBuffer, size_t pSize)
 		delete[] (lData);
 	}
 	return (lStatus);
-}
-
-IOError Reader::ReadLine(String& pString)
-{
-	pString.clear();
-
-	tchar lChar;
-	IOError lErr = Read(lChar);
-	
-	if (lErr != IO_OK)
-	{
-		return (lErr);
-	}
-
-	while (lChar != 0 && lChar != _T('\n'))
-	{
-		if (lChar != '\r')
-		{
-			pString += lChar;
-		}
-
-		lErr = Read(lChar);
-		if (lErr != IO_OK)
-		{
-			if (lErr == IO_ERROR_READING_FROM_STREAM)
-			{
-				break;	// We'll take the error on the next (=empty) line.
-			}
-			return (lErr);
-		}
-	}
-
-	return (IO_OK);
 }
 
 IOError Reader::Skip(size_t pSize)

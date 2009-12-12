@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2007, Righteous Games
+// Copyright (c) 2002-2009, Righteous Games
 
 
 
@@ -135,9 +135,9 @@ float TimeManager::GetAffordedPhysicsTotalTime() const
 	return (GetAffordedPhysicsStepCount() * GetAffordedPhysicsStepTime());
 }
 
-int TimeManager::GetDesiredPhysicsFps() const
+int TimeManager::GetDesiredMicroSteps() const
 {
-	return (mTargetFrameRate);
+	return (mTargetFrameRate * CURE_RTVAR_GET(Cure::GetSettings(), RTVAR_PHYSICS_MICROSTEPS, 1));
 }
 
 

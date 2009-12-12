@@ -1,6 +1,6 @@
 
 // Author: Alexander Hugestrand
-// Copyright (c) 2002-2006, Righteous Games
+// Copyright (c) 2002-2009, Righteous Games
 
 
 // To be able to index the table, the key must be converted to a size_t.

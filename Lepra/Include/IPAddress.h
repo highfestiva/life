@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2008, Righteous Games
+// Copyright (c) 2002-2009, Righteous Games
 
 #pragma once
 
@@ -18,8 +18,7 @@ public:
 	IPAddress(unsigned pIP4Address);
 	IPAddress(const uint8* pIPAddress, int pNumBytes);
 	IPAddress(const String& pIPv4Address);
-
-	virtual ~IPAddress();
+	~IPAddress();
 
 	void Set(const uint8* pIPAddress, int pNumBytes);
 	inline void Set(const IPAddress& pIP);

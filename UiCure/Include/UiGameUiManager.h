@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2007, Righteous Games
+// Copyright (c) 2002-2009, Righteous Games
 
 
 
@@ -17,6 +17,10 @@ namespace Lepra
 {
 class Canvas;
 }
+namespace UiLepra
+{
+class InputManager;
+}
 namespace UiTbc
 {
 class DesktopWindow;
@@ -24,10 +28,6 @@ class FontManager;
 class Layout;
 class Painter;
 class Renderer;
-}
-namespace UiLepra
-{
-class InputManager;
 }
 
 
@@ -64,7 +64,6 @@ public:
 	UiTbc::DesktopWindow* GetDesktopWindow() const;
 	SoundManager* GetSoundManager() const;
 
-	// TODO: remove hack (should be context object controlled, and several cameras should be available).
 	void SetCameraPosition(float pX, float pY, float pZ);
 	void SetCameraOrientation(float pTheta, float pPhi, float pGimbal);
 	void SetViewport(int pLeft, int pTop, int pWidth, int pHeight);

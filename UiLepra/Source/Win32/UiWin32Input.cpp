@@ -1,7 +1,7 @@
 /*
 	Class:  Win32InputElement, Win32InputDevice, Win32InputManager
 	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Righteous Games
+	Copyright (c) 2002-2009, Righteous Games
 */
 
 #include "../../../Lepra/Include/Log.h"
@@ -223,9 +223,13 @@ BOOL CALLBACK Win32InputDevice::EnumElementsCallback(LPCDIDEVICEOBJECTINSTANCE l
 			lRange.diph.dwObj = lpddoi->dwType;
 			if (lDevice->mDIDevice->GetProperty(DIPROP_RANGE, &lRange.diph) == DI_OK)
 			{
-				lElement->SetValue(lRange.lMin);
-				lElement->SetValue(lRange.lMax);
-				lElement->SetValue((lRange.lMin+lRange.lMax) / 2);
+				const int lIntervalRange = lRange.lMax-lRange.lMin;
+				const int lMid = lIntervalRange / 2 + lRange.lMin;
+				const int lMin = lMid - lIntervalRange/2/3;	// Don't use full range, might not be physically accessible.
+				const int lMax = lMid + lIntervalRange/2/3;	// Don't use full range, might not be physically accessible.
+				lElement->SetValue(lMin);
+				lElement->SetValue(lMax);
+				lElement->SetValue(lMid);
 			}
 		}
 	}

@@ -1,6 +1,6 @@
 
 // Author: Alexander Hugestrand
-// Copyright (c) 2002-2008, Righteous games
+// Copyright (c) 2002-2009, Righteous Games
 
 // Base class of all GUI components.
 
@@ -34,14 +34,6 @@ class Component: public UiLepra::TextInputObserver, public UiLepra::KeyCodeInput
 public:
 
 	friend class DesktopWindow;
-
-	// Used in combination with text rendering.
-	enum BlendFunc
-	{
-		NO_BLEND = 0,
-		ALPHATEST,
-		ALPHABLEND
-	};
 
 	enum Type
 	{

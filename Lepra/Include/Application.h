@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2006, Righteous Games
+// Copyright (c) 2002-2009, Righteous Games
 //
 // The Application class handles the program arguments
 // and keeps the application from being platform specific,
@@ -35,7 +35,7 @@ int main(int argc, const char* argv[])	\
 #define LEPRA_RUN_APPLICATION(ClassName)	\
 int WINAPI wWinMain(HINSTANCE, HINSTANCE, PTSTR, int)	\
 {	\
-	Lepra::StringUtility::StringVector lArguments(Lepra::StringUtility::BlockSplit(::GetCommandLine(), _T(" \t\v\r\n"), false));	\
+	Lepra::StringUtility::StringVector lArguments(Lepra::StringUtility::BlockSplit(::GetCommandLine(), _T(" \t\v\r\n"), false, false));	\
 	ClassName lApplication(lArguments);	\
 	return (lApplication.Run());	\
 }

@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2008, Righteous Games
+// Copyright (c) 2002-2009, Righteous Games
 
 
 
@@ -17,8 +17,8 @@ namespace Life
 
 
 
-PlayerCountView::PlayerCountView(UiTbc::Painter* pPainter, PlayerCountObserver* pPlayerCountObserver):
-	View(pPainter, _T("Splitscreen player count"), new UiTbc::GridLayout(4, 1)),
+PlayerCountView::PlayerCountView(PlayerCountObserver* pPlayerCountObserver):
+	View(_T("Splitscreen player count"), new UiTbc::GridLayout(4, 1)),
 	mPlayerCountObserver(pPlayerCountObserver)
 {
 	SetPreferredSize(200, 300);

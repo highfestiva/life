@@ -1,15 +1,10 @@
-/*
-	Class:  Reader
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Righteous Games
 
-	NOTES:
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2009, Righteous Games
 
-	A data reader interface. Base class of all kinds of input streams.
-*/
 
-#ifndef READER_H
-#define READER_H
+
+#pragma once
 
 #include "LepraTypes.h"
 #include "Endian.h"
@@ -19,7 +14,11 @@
 namespace Lepra
 {
 
+
+
 class InputStream;
+
+
 
 class Reader
 {
@@ -51,9 +50,6 @@ public:
 	// Allocates (new[]) memory before read. If read failes, the memory is always freed before return.
 	IOError AllocReadData(void** pBuffer, size_t pSize);
 
-	// Read one line of text (until '\n').
-	IOError ReadLine(String& pString);
-
 	// Use this to ignore data.
 	virtual IOError Skip(size_t pSize);
 
@@ -66,6 +62,9 @@ public:
 
 	uint64 GetReadCount();
 
+	// Read one line of text (until '\n').
+	template<class _T> IOError ReadLine(std::basic_string<_T>& pString);
+
 protected:
 	void SetInputStream(InputStream* pInStream);
 private:
@@ -75,6 +74,40 @@ private:
 	Endian::EndianType mReaderEndian;
 };
 
-} // End namespace.
 
-#endif
+
+template<class _T>
+IOError Reader::ReadLine(std::basic_string<_T>& pString)
+{
+	Lepra::AnsiString lUtf8Line;
+	char lChar = '\0';
+	IOError lErr = Read(lChar);
+	if (lErr != IO_OK)
+	{
+		return (lErr);
+	}
+	while (lChar != '\0' && lChar != _T('\n'))
+	{
+		if (lChar != '\r')
+		{
+			lUtf8Line += lChar;
+		}
+		lErr = Read(lChar);
+		if (lErr != IO_OK)
+		{
+			if (lErr == IO_ERROR_READING_FROM_STREAM)
+			{
+				break;	// We'll take the error on the next (=empty) line.
+			}
+			return (lErr);
+		}
+	}
+
+	pString = Lepra::StringUtilityTemplate<std::basic_string<_T> >::ToOwnCode(lUtf8Line);
+
+	return (IO_OK);
+}
+
+
+
+}

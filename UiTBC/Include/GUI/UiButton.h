@@ -222,9 +222,7 @@ public:
 
 	void SetText(const Lepra::String& pText,
 			    const Lepra::Color& pTextColor,
-			    const Lepra::Color& pBackgColor,
-			    BlendFunc pBlendFunc = ALPHATEST,
-			    Lepra::uint8 pAlphaTreshold = 128);
+			    const Lepra::Color& pBackgColor);
 	const Lepra::String& GetText();
 
 	virtual void Repaint(Painter* pPainter);
@@ -278,8 +276,6 @@ private:
 	Lepra::String mText;
 	Lepra::Color mTextColor;
 	Lepra::Color mTextBackgColor;
-	BlendFunc mTextBlendFunc;
-	Lepra::uint8 mTextAlpha;
 
 	Lepra::Color mHooverColor;
 	Lepra::Color mPressColor;

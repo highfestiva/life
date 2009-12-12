@@ -1,7 +1,7 @@
 /*
 	Class:  Caption
 	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Alexander Hugestrand
+	Copyright (c) 2002-2009, Righteous Games
 */
 
 #include "../../Include/GUI/UiCaption.h"
@@ -44,7 +44,7 @@ Caption::Caption(const Lepra::Color& pActiveColor, const Lepra::Color& pInactive
 	mActive(true),
 	mStyle(SINGLECOLOR_STYLE)
 {
-	SetFont(Lepra::Color(0, 0, 0), NO_BLEND, 128);
+	SetFontColor(Lepra::OFF_BLACK);
 
 	SetMinSize(0, pHeight);
 	SetPreferredSize(Lepra::PixelCoords(0, pHeight));
@@ -105,7 +105,7 @@ Caption::Caption(const Lepra::Color& pActiveTopLeftColor, const Lepra::Color& pA
 	mActive(true),
 	mStyle(MULTICOLOR_STYLE)
 {
-	SetFont(Lepra::Color(0, 0, 0), NO_BLEND, 128);
+	SetFontColor(Lepra::OFF_BLACK);
 
 	SetMinSize(0, pHeight);
 	SetPreferredSize(Lepra::PixelCoords(0, pHeight));
@@ -164,7 +164,7 @@ Caption::Caption(Painter::ImageID pActiveLeftImageID, Painter::ImageID pActiveRi
 	mActive(true),
 	mStyle(IMAGE_STYLE)
 {
-	SetFont(Lepra::Color(0, 0, 0), NO_BLEND, 128);
+	SetFontColor(Lepra::OFF_BLACK);
 
 	GUIImageManager* lIMan = GetImageManager();
 
@@ -323,11 +323,11 @@ void Caption::SetActive(bool pActive)
 
 	if (mActive == true)
 	{
-		mLabel->SetText(mText, GetTextColor(), mActiveTextBackgColor, GetTextBlendFunc(), GetTextAlpha());
+		mLabel->SetText(mText, GetTextColor(), mActiveTextBackgColor);
 	}
 	else
 	{
-		mLabel->SetText(mText, mInactiveTextColor, mInactiveTextBackgColor, GetTextBlendFunc(), GetTextAlpha());
+		mLabel->SetText(mText, mInactiveTextColor, mInactiveTextBackgColor);
 	}
 }
 
@@ -387,4 +387,41 @@ bool Caption::OnMouseMove(int pMouseX, int pMouseY, int pDeltaX, int pDeltaY)
 	}
 }
 
-} // End namespace.
+void Caption::SetIcon(Painter::ImageID pIconID)
+{
+	mLabel->SetIcon(pIconID);
+}
+
+void Caption::SetText(const Lepra::String& pText,
+					  const Lepra::Color& pActiveTextColor,
+					  const Lepra::Color& pActiveBackgColor,
+					  const Lepra::Color& pInactiveTextColor,
+					  const Lepra::Color& pInactiveBackgColor)
+{
+	mText                   = pText;
+	mActiveTextBackgColor   = pActiveBackgColor;
+	mInactiveTextColor      = pInactiveTextColor;
+	mInactiveTextBackgColor = pInactiveBackgColor;
+	SetFontColor(pActiveTextColor);
+
+	mLabel->SetText(mText, GetTextColor(), mActiveTextBackgColor);
+}
+
+bool Caption::Check(unsigned pFlags, unsigned pFlag)
+{
+	return ((pFlags & pFlag) != 0);
+}
+
+Component::Type Caption::GetType()
+{
+	return Component::CAPTION;
+}
+
+bool Caption::GetActive() const
+{
+	return mActive;
+}
+
+
+
+}

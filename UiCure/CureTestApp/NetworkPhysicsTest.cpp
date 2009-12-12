@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2006, Righteous Games
+// Copyright (c) 2002-2009, Righteous Games
 
 
 
@@ -12,7 +12,6 @@
 #include "../../Cure/Include/NetworkServer.h"
 #include "../../Cure/Include/Packet.h"
 #include "../../Cure/Include/PositionalData.h"
-#include "../../Lepra/Include/DynamicArray.h"
 #include "../../Lepra/Include/HiResTimer.h"
 #include "../../Lepra/Include/Math.h"
 #include "../../Lepra/Include/Network.h"
@@ -373,10 +372,11 @@ bool CreateWorld(AgentData& pAgentData)
 		pAgentData.mPhysics->ActivateGravity(lPhysicsId);
 		lGeometry = UiTbc::BasicMeshCreator::CreateEllipsoid(lClientSize, lClientSize, lClientSize, 10, 10);
 		lGeometry->SetAlwaysVisible(true);
-		TBC::GeometryBase::BasicMaterialSettings lMaterial;
-		lMaterial.mRed = (float)(y%2);
-		lMaterial.mGreen = (float)(y/2%2);
-		lMaterial.mBlue = (float)(y/3%2);
+		TBC::GeometryBase::BasicMaterialSettings lMaterial(
+			Lepra::Vector3DF(0, 0, 0),
+			Lepra::Vector3DF((float)(y%2), (float)(y/2%2), (float)(y/3%2)),
+			Lepra::Vector3DF(0.1f, 0.1f, 0.1f),
+			0.8f, 1.0f, true);
 		lGeometry->SetBasicMaterialSettings(lMaterial);
 		lGraphicsId = pAgentData.mRenderer->AddGeometry(lGeometry, UiTbc::Renderer::MAT_SINGLE_COLOR_SOLID, UiTbc::Renderer::NO_SHADOWS);
 		pAgentData.AddBody(_T("DynamicSphere"), lPhysicsId, lGeometry, lGraphicsId);

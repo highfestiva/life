@@ -1,17 +1,21 @@
-/*
-	Class:  Label
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Alexander Hugestrand
-*/
+
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2009, Righteous Games
+
+
 
 #include "../../Include/GUI/UiLabel.h"
 #include "../../Include/GUI/UiDesktopWindow.h"
 #include "../../Include/UiPainter.h"
 
+
+
 namespace UiTbc
 {
 
-Label::Label(bool pSelectable, const Lepra::String& pName) :
+
+
+Label::Label(bool pSelectable, const Lepra::String& pName):
 	RectComponent(pName),
 	mIconID(Painter::INVALID_IMAGEID),
 	mText(_T("")),
@@ -24,7 +28,7 @@ Label::Label(bool pSelectable, const Lepra::String& pName) :
 	mLCLImageID(Painter::INVALID_IMAGEID),
 	mLCLSelectedImageID(Painter::INVALID_IMAGEID)
 {
-	SetFont(Lepra::Color(0, 0, 0), Parent::NO_BLEND, 128);
+	SetFontColor(Lepra::OFF_BLACK);
 }
 
 Label::Label(const Lepra::Color& pColor, const Lepra::String& pName):
@@ -40,7 +44,7 @@ Label::Label(const Lepra::Color& pColor, const Lepra::String& pName):
 	mLCLImageID(Painter::INVALID_IMAGEID),
 	mLCLSelectedImageID(Painter::INVALID_IMAGEID)
 {
-	SetFont(Lepra::Color(0, 0, 0), Parent::NO_BLEND, 128);
+	SetFontColor(Lepra::OFF_BLACK);
 }
 
 Label::Label(const Lepra::Color& pTopLeftColor,
@@ -60,7 +64,7 @@ Label::Label(const Lepra::Color& pTopLeftColor,
 	mLCLImageID(Painter::INVALID_IMAGEID),
 	mLCLSelectedImageID(Painter::INVALID_IMAGEID)
 {
-	SetFont(Lepra::Color(0, 0, 0), Parent::NO_BLEND, 128);
+	SetFontColor(Lepra::OFF_BLACK);
 }
 
 Label::Label(Painter::ImageID pImageID, const Lepra::String& pName):
@@ -76,7 +80,7 @@ Label::Label(Painter::ImageID pImageID, const Lepra::String& pName):
 	mLCLImageID(Painter::INVALID_IMAGEID),
 	mLCLSelectedImageID(Painter::INVALID_IMAGEID)
 {
-	SetFont(Lepra::Color(0, 0, 0), Parent::NO_BLEND, 128);
+	SetFontColor(Lepra::OFF_BLACK);
 }
 
 Label::Label(const Lepra::Color& pColor, const Lepra::Color& pSelectedColor, const Lepra::String& pName):
@@ -92,7 +96,7 @@ Label::Label(const Lepra::Color& pColor, const Lepra::Color& pSelectedColor, con
 	mLCLImageID(Painter::INVALID_IMAGEID),
 	mLCLSelectedImageID(Painter::INVALID_IMAGEID)
 {
-	SetFont(Lepra::Color(0, 0, 0), Parent::NO_BLEND, 128);
+	SetFontColor(Lepra::OFF_BLACK);
 
 	mColor[0] = pColor;
 	mSelectedColor[0] = pSelectedColor;
@@ -119,7 +123,7 @@ Label::Label(const Lepra::Color& pTopLeftColor,
 	mLCLImageID(Painter::INVALID_IMAGEID),
 	mLCLSelectedImageID(Painter::INVALID_IMAGEID)
 {
-	SetFont(Lepra::Color(0, 0, 0), Parent::NO_BLEND, 128);
+	SetFontColor(Lepra::OFF_BLACK);
 
 	mColor[0] = pTopLeftColor;
 	mColor[1] = pTopRightColor;
@@ -144,7 +148,7 @@ Label::Label(Painter::ImageID pImageID, Painter::ImageID pSelectedImageID, Paint
 	mLCLImageID(pLCLImageID),
 	mLCLSelectedImageID(pLCLSelectedImageID)
 {
-	SetFont(Lepra::Color(0, 0, 0), Parent::NO_BLEND, 128);
+	SetFontColor(Lepra::OFF_BLACK);
 }
 
 
@@ -181,24 +185,6 @@ void Label::Repaint(Painter* pPainter)
 		lIMan->DrawImage(mIconID, lRect.mLeft, lIconY);
 		lTextX = lRect.mLeft + lIconSize.x;
 	}
-
-	switch(GetTextBlendFunc())
-	{
-	case NO_BLEND:
-		pPainter->SetRenderMode(Painter::RM_NORMAL);
-		break;
-	case ALPHATEST:
-		pPainter->SetRenderMode(Painter::RM_ALPHATEST);
-		break;
-	case ALPHABLEND:
-		pPainter->SetRenderMode(Painter::RM_ALPHABLEND);
-		break;
-	default:
-		pPainter->SetRenderMode(Painter::RM_NORMAL);
-		break;
-	}
-
-	pPainter->SetAlphaValue(GetTextAlpha());
 
 	if (GetSelected() == true)
 	{
@@ -290,11 +276,9 @@ Lepra::PixelCoords Label::GetPreferredSize(bool pForceAdaptive)
 void Label::SetText(const Lepra::String& pText,
 			const Lepra::Color& pTextColor,
 			const Lepra::Color& pBackgColor,
-			BlendFunc pBlendFunc,
-			Lepra::uint8 pAlphaTreshold,
 			Painter*)
 {
-	SetFont(pTextColor, pBlendFunc, pAlphaTreshold);
+	SetFontColor(pTextColor);
 	mText                   = pText;
 	mTextBackgColor         = pBackgColor;
 	mSelectedTextColor      = pTextColor;
@@ -306,11 +290,9 @@ void Label::SetText(const Lepra::String& pText,
 			const Lepra::Color& pBackgColor,
 			const Lepra::Color& pSelectedTextColor,
 			const Lepra::Color& pSelectedBackgColor,
-			BlendFunc pBlendFunc,
-			Lepra::uint8 pAlphaTreshold,
 			Painter*)
 {
-	SetFont(pTextColor, pBlendFunc, pAlphaTreshold);
+	SetFontColor(pTextColor);
 	mText                   = pText;
 	mTextBackgColor         = pBackgColor;
 	mSelectedTextColor      = pSelectedTextColor;

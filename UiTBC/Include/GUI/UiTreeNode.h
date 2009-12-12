@@ -1,7 +1,7 @@
 /*
 	Class:  TreeNode
 	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Alexander Hugestrand
+	Copyright (c) 2002-2009, Righteous Games
 
 	NOTES:
 
@@ -79,9 +79,7 @@ public:
 	static void UseFont(const Lepra::Color& pTextColor,
 			    const Lepra::Color& pTextBackgColor,
 			    const Lepra::Color& pTextSelectedColor,
-			    const Lepra::Color& pTextSelectedBackgColor,
-			    Component::BlendFunc pBlendFunc = ALPHATEST,
-			    Lepra::uint8 pAlphaTreshold = 128);
+			    const Lepra::Color& pTextSelectedBackgColor);
 
 
 	virtual bool OnDoubleClick(int pMouseX, int pMouseY);
@@ -125,7 +123,6 @@ private:
 	static Lepra::Color smFactoryTextBackgColor;
 	static Lepra::Color smFactoryTextSelectedColor;
 	static Lepra::Color smFactoryTextSelectedBackgColor;
-	static Component::BlendFunc smFactoryBlendFunc;
 	static Lepra::uint8 smFactoryAlphaTreshold;
 
 	TreeNode* mParentNode;

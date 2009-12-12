@@ -9,9 +9,8 @@
 #include "../../../Lepra/Include/String.h"
 #include "../../../Lepra/Include/SystemManager.h"
 #include "../../Include/UiLepra.h"
-//#include "../../Include/Win32/UiWin32DirectXDisplay.h"
+#include "../../Include/Win32/UiWin32DirectXDisplay.h"
 #include "../../Include/Win32/UiWin32OpenGLDisplay.h"
-#include "../../Include/Win32/UiWin32SoftwareDisplay.h"
 
 
 
@@ -26,8 +25,7 @@ DisplayManager* DisplayManager::CreateDisplayManager(ContextType pCT)
 	switch(pCT)
 	{
 		case DisplayManager::OPENGL_CONTEXT:	lDisplayManager = new Win32OpenGLDisplay;				break;
-		//case DisplayManager::DIRECTX_CONTEXT:	lDisplayManager = new Win32DirectXDisplay;				break;
-		case DisplayManager::SOFTWARE_CONTEXT:	lDisplayManager = new Win32SoftwareDisplay;				break;
+		case DisplayManager::DIRECTX_CONTEXT:	lDisplayManager = new Win32DirectXDisplay;				break;
 		default:				mLog.AError("Invalid context type in CreateDisplayManager().");	break;
 	}
 	return (lDisplayManager);

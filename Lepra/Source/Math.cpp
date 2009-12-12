@@ -1,5 +1,5 @@
 // Author: Alexander Hugestrand and Jonas Byström
-// Copyright (c) 2002-2007, Righteous Games
+// Copyright (c) 2002-2009, Righteous Games
 
 #include "../Include/LepraTarget.h"
 #include "../Include/Math.h"

@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2007, Righteous Games
+// Copyright (c) 2002-2009, Righteous Games
 
 
 
@@ -778,7 +778,7 @@ float ContextObject::GetMass() const
 bool ContextObject::SetPhysics(TBC::ChunkyPhysics* pStructure)
 {
 	TBC::PhysicsManager* lPhysics = mManager->GetGameManager()->GetPhysicsManager();
-	const int lPhysicsFps = mManager->GetGameManager()->GetConstTimeManager()->GetDesiredPhysicsFps();
+	const int lPhysicsFps = mManager->GetGameManager()->GetConstTimeManager()->GetDesiredMicroSteps();
 
 	// TODO: drop hard-coding, this should come from world loader or spawn engine?
 	Lepra::TransformationF lTransformation;

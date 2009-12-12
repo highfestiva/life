@@ -38,6 +38,7 @@ public:
 	// Set the drawing surface.
 	void SetDestCanvas(Lepra::Canvas* pCanvas);
 	void SetRenderMode(RenderMode pRM);
+	void PrePaint();
 
 	// Set the current alpha value. Overrides alpha buffer...
 	// In 8-bit color mode, this is a specific color that will "be" transparent.
@@ -57,11 +58,11 @@ public:
 
 	void ReadPixels(Lepra::Canvas& pDestCanvas, const Lepra::PixelRect& pRect);
 
-	RGBOrder GetRGBOrder();
-
-	virtual void SetFontSmoothness(bool pSmooth);	// TODO: move to base class!
+	RGBOrder GetRGBOrder() const;
 
 protected:
+	void DoSetRenderMode() const;
+
 	void DoDrawPixel(int x, int y);
 	void DoDrawLine(int pX1, int pY1, int pX2, int pY2);
 	void DoFillTriangle(float pX1, float pY1,
@@ -84,8 +85,9 @@ protected:
 	void DoDrawImage(ImageID pImageID, const Lepra::PixelRect& pRect);
 	void DoDrawAlphaImage(ImageID pImageID, int x, int y);
 
-	void GetImageSize(ImageID pImageID, int& pWidth, int& pHeight);
+	void GetImageSize(ImageID pImageID, int& pWidth, int& pHeight) const;
 	int PrintText(const Lepra::String& pString, int x, int y);
+	void SetFontSmoothness(bool pSmooth);
 
 	void DoRenderDisplayList(std::vector<DisplayEntity*>* pDisplayList);
 
@@ -110,13 +112,9 @@ private:
 	typedef Lepra::HashTable<int, Texture*> TextureTable;
 	typedef std::hash_map<Lepra::uint64, GLuint> GlyphTable;
 
-	void UpdateRenderMode();
-
 	Lepra::IdManager<int> mTextureIDManager;
 	TextureTable mTextureTable;
 	GlyphTable mGlyphTable;
-
-	bool mRenderModeChanged;
 
 	bool mSmoothFont;
 };

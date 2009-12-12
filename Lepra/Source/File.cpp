@@ -1,6 +1,6 @@
 
 // Author: Alexander Hugestrand
-// Copyright (c) 2002-2006, Righteous Games
+// Copyright (c) 2002-2009, Righteous Games
 
 
 
@@ -13,6 +13,37 @@ namespace Lepra
 {
 
 
+
+File::File(Endian::EndianType pReaderEndian, Endian::EndianType pWriterEndian,
+	InputStream* pIn, OutputStream* pOut):
+	Reader(pIn, pReaderEndian),
+	Writer(pOut, pWriterEndian),
+	mModeFlags(0)
+{
+}
+
+File::~File()
+{
+}
+
+void File::Close()
+{
+}
+
+void File::SetMode(unsigned pMode)
+{
+	mModeFlags |= pMode;
+}
+
+void File::ClearMode(unsigned pMode)
+{
+	mModeFlags &= ~pMode;
+}
+
+bool File::GetMode(unsigned pMode)
+{
+	return (mModeFlags & pMode) != 0;
+}
 
 void File::SetEndian(Endian::EndianType pEndian)
 {
@@ -46,58 +77,22 @@ int64 File::SeekEnd(int64 pOffset)
 	return (Seek(pOffset, FSEEK_END));
 }
 
-int64 File::ReadString(String& pString)
+bool File::HasSameContent(File& pOtherFile, int64 pLength)
 {
-	if (GetMode(READ_MODE) == false)
+	char lThisChar;
+	char lOtherChar;
+	for (int64 x = 0; x < pLength; ++x)
 	{
-		return -1;
+		if (Read(lThisChar) != IO_OK || pOtherFile.Read(lOtherChar) != IO_OK)
+		{
+			return (false);
+		}
+		if (lThisChar != lOtherChar)
+		{
+			return (false);
+		}
 	}
-
-	pString = _T("");
-
-	bool lDone = false;
-	while (!lDone)
-	{
-		int lReadSize = 128*sizeof(tchar);
-		int64 lFileSize = GetSize();
-
-		int64 lPrevPos = Tell();
-		if (lPrevPos + (int64)lReadSize > lFileSize)
-		{
-			lReadSize = (int)(lFileSize - Tell());
-		}
-
-		tchar lData[128];
-		ReadData(lData, lReadSize);
-
-		// Get the string length..
-		int lLength;
-		for (lLength = 0; lLength < lReadSize && lData[lLength] != 0; ++lLength)
-			;	// TRICKY: loop expression does the checking = no body.
-
-		// If we found the null character, we are done.
-		if (lData[lLength] == 0)
-		{
-			SeekSet(lPrevPos + (int64)lLength + 1);
-			lDone = true;
-		}
-		else
-		{
-			SeekSet(lPrevPos + (int64)lLength);
-		}
-
-		pString.assign(lData, lLength);
-	}
-
-	return pString.length();
-}
-
-bool File::WriteStringZero(const String& pString)
-{
-	if (GetMode(WRITE_MODE) == false)
-		return false;
-
-	return (WriteData(pString.c_str(), pString.length()*sizeof(Lepra::tchar) + 1) == (int)pString.length() + 1);
+	return ((Read(lThisChar) != IO_OK) == (pOtherFile.Read(lOtherChar) != IO_OK));
 }
 
 

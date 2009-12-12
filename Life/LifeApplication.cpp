@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2008, Righteous Games
+// Copyright (c) 2002-2009, Righteous Games
 
 
 
@@ -9,6 +9,7 @@
 #include "../Cure/Include/RuntimeVariable.h"
 #include "../Lepra/Include/LogListener.h"
 #include "../Lepra/Include/Network.h"
+#include "../Lepra/Include/Path.h"
 #include "../Lepra/Include/SystemManager.h"
 #include "LifeApplication.h"
 #include "LifeDefinitions.h"
@@ -32,6 +33,7 @@ Application::Application(const Lepra::StringUtility::StringVector& pArgumentList
 	mPerformanceLogger(0),
 	mMemLogger(0)
 {
+	mApplication = this;
 }
 
 Application::~Application()
@@ -52,16 +54,17 @@ Application::~Application()
 void Application::Init()
 {
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_PHYSICS_FPS, PHYSICS_FPS);
+	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_APPLICATION_NAME, _T("Life"));
 
 	mConsoleLogger = CreateConsoleLogListener();
 	//mConsoleLogger->SetLevelThreashold(Lepra::Log::LEVEL_INFO);
 #ifndef NO_LOG_DEBUG_INFO
 	mDebugLogger = new Lepra::DebuggerLogListener();
 #endif // Showing debug information.
-	mFileLogger = new Lepra::FileLogListener(_TEXT_ALTERNATIVE(GetName()+".log", GetName()+L"U.log"));
+	mFileLogger = new Lepra::FileLogListener(GetIoFile(_T(""), _T("log"), false));
 	//mFileLogger->SetLevelThreashold(Lepra::Log::LEVEL_INFO);
 	mFileLogger->WriteLog(_T("\n\n"), Lepra::Log::LEVEL_INFO);
-	mPerformanceLogger = new Lepra::FileLogListener(_TEXT_ALTERNATIVE(GetName()+"Performance.log", GetName()+L"PerformanceU.log"));
+	mPerformanceLogger = new Lepra::FileLogListener(GetIoFile(_T("Performance"), _T("log"), false));
 	mMemLogger = new Lepra::MemFileLogListener(100*1024);
 	Lepra::LogType::GetLog(Lepra::LogType::SUB_ROOT)->SetupBasicListeners(mConsoleLogger, mDebugLogger, mFileLogger, mPerformanceLogger, mMemLogger);
 
@@ -78,7 +81,9 @@ int Application::Run()
 	// which may differ between different CPU cores. Several seconds can differ between different cores.
 	// The main thread is locked to the first CPU. If there are more CPUs, the physics thread will lock to
 	// another CPU later on.
-	Lepra::Thread::GetCurrentThread()->SetCpuAffinityMask(0x0001);
+	// JB 2009-12: dropped this, probably not a good idea since we need to run multiple
+	// physics instances when running split screen.
+	//Lepra::Thread::GetCurrentThread()->SetCpuAffinityMask(0x0001);
 
 	bool lOk = true;
 	if (lOk)
@@ -151,6 +156,20 @@ void Application::Destroy()
 
 
 
+Lepra::String Application::GetIoFile(const Lepra::String& pEnd, const Lepra::String& pExt, bool pAddQuotes)
+{
+	Lepra::String lIoName = Lepra::Path::JoinPath(
+		Lepra::SystemManager::GetIoDirectory(CURE_RTVAR_GET(Cure::GetSettings(), RTVAR_APPLICATION_NAME, _T("?"))),
+		mApplication->GetName()+pEnd+_TEXT_ALTERNATIVE("", L"U"), pExt);
+	if (pAddQuotes)
+	{
+		lIoName = _T("\"") + lIoName + _T("\"");
+	}
+	return (lIoName);
+}
+
+
+
 Lepra::LogListener* Application::CreateConsoleLogListener() const
 {
 	return (new Lepra::StdioConsoleLogListener());
@@ -181,10 +200,10 @@ void Application::TickSleep(double pMeasuredFrameTime) const
 
 		const int lFps = CURE_RTVAR_GET(Cure::GetSettings(), RTVAR_PHYSICS_FPS, 2);
 		double lWantedFrameTime = lFps? 1.0/lFps : 1;
-		if (lWantedFrameTime > pMeasuredFrameTime)
+		double lSleepTime = lWantedFrameTime - pMeasuredFrameTime;
+		if (lSleepTime > 0)
 		{
 			Lepra::HiResTimer lTimer;
-			double lSleepTime = lWantedFrameTime-pMeasuredFrameTime;
 			while (lSleepTime >= 0.001)
 			{
 				Lepra::Thread::Sleep(lSleepTime);
@@ -197,6 +216,11 @@ void Application::TickSleep(double pMeasuredFrameTime) const
 		}
 	}
 }
+
+
+
+Application* Application::mApplication;
+
 
 
 LOG_CLASS_DEFINE(GAME, Application);

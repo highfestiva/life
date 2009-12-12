@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2008, Righteous Games
+// Copyright (c) 2002-2009, Righteous Games
 
 // The base class TerrainFunction should be sub-classed; this is where the actual implementation goes.
 // All terrain functions inherit a behavior where the range of the function is restricted by two radii.

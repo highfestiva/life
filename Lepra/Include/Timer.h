@@ -1,6 +1,6 @@
 
 // Author: Alexander Hugestrand
-// Copyright (c) 2002-2007, Righteous Games
+// Copyright (c) 2002-2009, Righteous Games
 
 // A time class that counts milliseconds and seconds.
 

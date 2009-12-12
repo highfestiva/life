@@ -1,7 +1,7 @@
 /*
 	Class:  CollisionDetector3D
 	Author: Alexander Hugestrand
-	Copyright (c) 2002-2005, Alexander Hugestrand
+	Copyright (c) 2002-2009, Righteous Games
 */
 
 template<class _TVarType>

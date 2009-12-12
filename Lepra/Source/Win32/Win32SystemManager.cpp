@@ -1,6 +1,6 @@
 
 // Author: Alexander Hugestrand
-// Copyright (c) 2002-2008, Righteous Games
+// Copyright (c) 2002-2009, Righteous Games
 
 
 
@@ -12,10 +12,12 @@
 #include <MMSystem.h>
 #pragma warning(pop)
 #include <ShlObj.h>
+#include "../../Include/DiskFile.h"
 #include "../../Include/Lepra.h"
+#include "../../Include/Log.h"
+#include "../../Include/Path.h"
 #include "../../Include/String.h"
 #include "../../Include/SystemManager.h"
-#include "../../Include/Log.h"
 #include "../../Include/Thread.h"
 
 
@@ -148,6 +150,23 @@ String SystemManager::GetUserDirectory()
 	String lString(lHomeDir);
 	lString = StringUtility::ReplaceAll(lString, _T('\\'), _T('/'));
 	return (lString);
+}
+
+String SystemManager::GetIoDirectory(const String& pAppName)
+{
+	tchar lAppDir[2048];
+	if (FAILED(::SHGetFolderPath(0, CSIDL_APPDATA, NULL, 0, lAppDir)))
+	{
+		mLog.AWarning("Failed in GetIoDirectory()");
+	}
+	String lIoDir(lAppDir);
+	lIoDir = StringUtility::ReplaceAll(lIoDir, _T('\\'), _T('/'));
+	lIoDir = Path::JoinPath(lIoDir, pAppName, _T(""));
+	if (!DiskFile::PathExists(lIoDir))
+	{
+		DiskFile::CreateDir(lIoDir);
+	}
+	return (lIoDir);
 }
 
 String SystemManager::GetLoginName()

@@ -1,7 +1,7 @@
 /*
 	Class:  FileNameField
 	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Alexander Hugestrand
+	Copyright (c) 2002-2009, Righteous Games
 */
 
 #include "../../../Lepra/Include/DiskFile.h"
@@ -101,8 +101,6 @@ PopupList* FileNameField::CreatePopupList()
 					 Lepra::WHITE,
 					 Lepra::BLACK,
 					 Lepra::LIGHT_BLUE,
-					 GetTextBlendFunc(),
-					 GetTextAlpha(),
 					 lPainter);
 			lLabel->SetPreferredSize(0, 12);
 			lPopupList->AddChild(lLabel);

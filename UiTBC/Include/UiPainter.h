@@ -1,6 +1,6 @@
 
 // Author: Alexander Hugestrand
-// Copyright (c) 2002-2006, Alexander Hugestrand
+// Copyright (c) 2002-2009, Righteous Games
 //
 // NOTES:
 //
@@ -122,40 +122,39 @@ public:
 	// screen coordinates" - relative to the top left corner, x increasing to the right
 	// and y increasing downwards.
 	void DefineCoordinates(int pOrigoX, int pOrigoY, XDir pXDir, YDir pYDir);
-	int GetOrigoX();
-	int GetOrigoY();
-	XDir GetXDir();
-	YDir GetYDir();
+	int GetOrigoX() const;
+	int GetOrigoY() const;
+	XDir GetXDir() const;
+	YDir GetYDir() const;
 
 	// Set the drawing surface.
 	virtual void SetDestCanvas(Lepra::Canvas* pCanvas);
-	Lepra::Canvas* GetCanvas();
+	Lepra::Canvas* GetCanvas() const;
 
-	void BeginPaint();
-	void EndPaint();
+	virtual void PrePaint() = 0;
 
 	// Returns false only if stack owerflow/underflow.
 	bool PushAttrib(unsigned pAttrib);
 	bool PopAttrib();
 
 	virtual void SetRenderMode(RenderMode pRM);
-	RenderMode GetRenderMode();
+	RenderMode GetRenderMode() const;
 	
 	// Set the current alpha value. Overrides alpha buffer...
 	// In 8-bit color mode, this is a specific color that will "be" transparent.
 	virtual void SetAlphaValue(Lepra::uint8 pAlpha);
-	Lepra::uint8 GetAlphaValue();
+	Lepra::uint8 GetAlphaValue() const;
 
 	virtual void ResetClippingRect() = 0;
 	virtual void SetClippingRect(int pLeft, int pTop, int pRight, int pBottom);
 	void SetClippingRect(const Lepra::PixelRect& pClippingRect);
 	void ReduceClippingRect(int pLeft, int pTop, int pRight, int pBottom);
 	void ReduceClippingRect(const Lepra::PixelRect& pClippingRect);
-	void GetClippingRect(Lepra::PixelRect& pClippingRect);
+	void GetClippingRect(Lepra::PixelRect& pClippingRect) const;
 
 	virtual void SetColor(const Lepra::Color& pColor, unsigned pColorIndex = 0);
 	void SetColor(Lepra::uint8 pRed, Lepra::uint8 pGreen, Lepra::uint8 pBlue, Lepra::uint8 pPaletteIndex, unsigned pColorIndex = 0);
-	Lepra::Color GetColor(unsigned pColorIndex);
+	Lepra::Color GetColor(unsigned pColorIndex) const;
 
 	void DrawPixel(int x, int y);
 	void DrawPixel(const Lepra::PixelCoords& pCoords);
@@ -231,16 +230,17 @@ public:
 
 	void SetFontManager(FontManager* pFontManager);
 	FontManager* GetFontManager() const;
-	int GetStringWidth(const Lepra::String& pString);
-	int GetFontHeight();
-	int GetLineHeight();
+	virtual void SetFontSmoothness(bool pSmooth) = 0;
+	int GetStringWidth(const Lepra::String& pString) const;
+	int GetFontHeight() const;
+	int GetLineHeight() const;
 	virtual int PrintText(const Lepra::String& pString, int x, int y) = 0;
 
 	Lepra::uint8 FindMatchingColor(const Lepra::Color& pColor);
 	virtual void ReadPixels(Lepra::Canvas& pDestCanvas, const Lepra::PixelRect& pRect) = 0;
 
 	// Returns the internal RGB order.
-	virtual RGBOrder GetRGBOrder() = 0;
+	virtual RGBOrder GetRGBOrder() const = 0;
 
 	//
 	// Display list creation functions. 
@@ -325,7 +325,7 @@ protected:
 	virtual void DoDrawImage(ImageID pImageID, const Lepra::PixelRect& pRect, const Lepra::PixelRect& pSubpatchRect) = 0;
 	virtual void DoDrawAlphaImage(ImageID pImageID, int x, int y) = 0;
 
-	virtual void GetImageSize(ImageID pImageID, int& pWidth, int& pHeight) = 0;
+	virtual void GetImageSize(ImageID pImageID, int& pWidth, int& pHeight) const = 0;
 
 	virtual void DoRenderDisplayList(std::vector<DisplayEntity*>* pDisplayList) = 0;
 

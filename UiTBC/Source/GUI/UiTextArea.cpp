@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2008, Righteous Games
+// Copyright (c) 2002-2009, Righteous Games
 
 
 
@@ -204,24 +204,6 @@ void TextArea::Repaint(Painter* pPainter)
 
 	Lepra::PixelRect lRect(GetClientRect());
 	pPainter->ReduceClippingRect(lRect);
-
-	switch(GetTextBlendFunc())
-	{
-	case NO_BLEND:
-		pPainter->SetRenderMode(Painter::RM_NORMAL);
-		break;
-	case ALPHATEST:
-		pPainter->SetRenderMode(Painter::RM_ALPHATEST);
-		break;
-	case ALPHABLEND:
-		pPainter->SetRenderMode(Painter::RM_ALPHABLEND);
-		break;
-	default:
-		pPainter->SetRenderMode(Painter::RM_NORMAL);
-		break;
-	}
-
-	pPainter->SetAlphaValue(GetTextAlpha());
 
 	int lBeginY;
 	int lEndY;

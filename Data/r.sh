@@ -1,7 +1,4 @@
 #!/bin/bash
 
-cd ../Life/LifeClient/
-start ./Debug/LifeClient.exe
-cd ../LifeServer/
-./Debug/LifeServer.exe
-cd ../../Data/
+../Life/LifeClient/Unicode\ Debug/LifeClient.exe &
+../Life/LifeServer/Unicode\ Debug/LifeServer.exe

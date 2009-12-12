@@ -2,7 +2,7 @@
 	Lepra::File:   ShadowVolume.h
 	Class:  ShadowVolume
 	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Righteous Games
+	Copyright (c) 2002-2009, Righteous Games
 */
 
 #ifndef UISHADOWVOLUME_H

@@ -2,7 +2,7 @@
 	Lepra::File:   TBC.h
 	Class:  TBC
 	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Alexander Hugestrand
+	Copyright (c) 2002-2009, Righteous Games
 */
 
 #define LEPRA_INCLUDE_NO_OS

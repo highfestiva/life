@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2008, Righteous Games
+// Copyright (c) 2002-2009, Righteous Games
 
 
 
@@ -39,14 +39,14 @@ void ConsoleLogListener::WriteLog(const Lepra::String& pFullMessage, Lepra::Log:
 		switch(pLevel)
 		{
 			case Lepra::Log::LEVEL_TRACE:	// Fall through.
-			case Lepra::Log::LEVEL_DEBUG:	// Fall through.
-			case Lepra::Log::LEVEL_INFO:		lColor.Set(0.7, 0.7, 0.7, 1.0);	break;
-			case Lepra::Log::LEVEL_PERFORMANCE:	lColor.Set(0.0, 1.0, 0.0, 1.0);	break;
-			case Lepra::Log::LEVEL_HEADLINE:	lColor.Set(1.0, 1.0, 1.0, 1.0);	break;
-			case Lepra::Log::LEVEL_WARNING:		lColor.Set(1.0, 1.0, 0.0, 1.0);	break;
-			case Lepra::Log::LEVEL_ERROR:		lColor.Set(1.0, 0.0, 0.0, 1.0);	break;
+			case Lepra::Log::LEVEL_DEBUG:		lColor.Set(0.2f, 0.2f, 0.7f, 1.0f);	break;
+			case Lepra::Log::LEVEL_INFO:		lColor.Set(0.7f, 0.7f, 0.7f, 1.0f);	break;
+			case Lepra::Log::LEVEL_PERFORMANCE:	lColor.Set(0.0f, 1.0f, 0.0f, 1.0f);	break;
+			case Lepra::Log::LEVEL_HEADLINE:	lColor.Set(1.0f, 1.0f, 1.0f, 1.0f);	break;
+			case Lepra::Log::LEVEL_WARNING:		lColor.Set(1.0f, 1.0f, 0.0f, 1.0f);	break;
+			case Lepra::Log::LEVEL_ERROR:		lColor.Set(1.0f, 0.0f, 0.0f, 1.0f);	break;
 			default:	// Fall through.
-			case Lepra::Log::LEVEL_FATAL:		lColor.Set(1.0, 0.5, 0.0, 1.0);	break;
+			case Lepra::Log::LEVEL_FATAL:		lColor.Set(1.0f, 0.5f, 0.0f, 1.0f);	break;
 		}
 		Lepra::String lText(pFullMessage);
 		if (mLineFeed)

@@ -1,6 +1,6 @@
 
 // Author: Jonas Byströ
-// Copyright (c) 2002-2008, Righteous Games
+// Copyright (c) 2002-2009, Righteous Games
 
 
 
@@ -38,6 +38,7 @@ public:
 	static _String StripLeft(const _String& pString, const _String& pCharDelimitors);
 
 	static _String ReplaceAll(const _String& pString, typename _String::value_type pFromChar, typename _String::value_type pToChar);
+	static _String ReplaceAll(const _String& pString, const _String& pFrom, const String& pTo);
 
 	static _String Format(const typename _String::value_type* ppFormat, ...);
 	static _String VFormat(const typename _String::value_type* ppFormat, va_list pArguments);

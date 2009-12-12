@@ -473,62 +473,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Source\UiDirectX9Renderer.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Final|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release Candidate|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Unicode Debug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Unicode Final|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Unicode Release Candidate|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\Source\UiEdge.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\Source\UiFontManager.cpp"
 				>
 			</File>
@@ -538,14 +482,6 @@
 			</File>
 			<File
 				RelativePath=".\Source\UiGeometryBatch.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Source\UiGeometrySeparator.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Source\UiGradients.cpp"
 				>
 			</File>
 			<File
@@ -613,14 +549,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Source\UiSoftwareMaterials.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Source\UiSoftwareRenderer.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\Source\UiTBC.cpp"
 				>
 			</File>
@@ -644,110 +572,6 @@
 				RelativePath=".\Source\UiUVMapper.cpp"
 				>
 			</File>
-			<Filter
-				Name="SoftwarePainter"
-				>
-				<File
-					RelativePath=".\Source\SoftwarePainter\UiSoftwarePainter.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\SoftwarePainter\UiSoftwarePainter_DrawAlphaImage.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\SoftwarePainter\UiSoftwarePainter_DrawHLine.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\SoftwarePainter\UiSoftwarePainter_DrawImage.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\SoftwarePainter\UiSoftwarePainter_DrawImageStretch.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\SoftwarePainter\UiSoftwarePainter_DrawLine.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\SoftwarePainter\UiSoftwarePainter_DrawPixel.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\SoftwarePainter\UiSoftwarePainter_DrawPixelMacros.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\SoftwarePainter\UiSoftwarePainter_DrawScanLine.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\SoftwarePainter\UiSoftwarePainter_DrawShadedHLine.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\SoftwarePainter\UiSoftwarePainter_DrawVLine.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\SoftwarePainter\UiSoftwarePainter_FillShadedRect.cpp"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="Software3DPainter"
-				>
-				<File
-					RelativePath=".\Source\Software3DPainter\UiSoftware3DPainter.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\Software3DPainter\UiSoftware3DPainter_Clip.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\Software3DPainter\UiSoftware3DPainter_DrawLineFast.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\Software3DPainter\UiSoftware3DPainter_DrawLineNicest.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\Software3DPainter\UiSoftware3DPainter_Macros.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\Software3DPainter\UiSoftware3DPainter_PixelWriters.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\Software3DPainter\UiSoftware3DPainter_RenderPrimitiveLines.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\Software3DPainter\UiSoftware3DPainter_RenderPrimitiveTriangle.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\Software3DPainter\UiSoftware3DPainter_ScanLineFast.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\Software3DPainter\UiSoftware3DPainter_ScanLineNicest.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\Software3DPainter\UiSoftware3DPainter_TextureReaders.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\Software3DPainter\UiSoftware3DPainter_Triangle.cpp"
-					>
-				</File>
-			</Filter>
 			<Filter
 				Name="GUI"
 				>
@@ -895,23 +719,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Include\UiEdge.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Include\UiGeometry2D.h"
 				>
 			</File>
 			<File
 				RelativePath=".\Include\UiGeometryBatch.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\UiGeometrySeparator.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\UiGradients.h"
 				>
 			</File>
 			<File
@@ -959,26 +771,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Include\UiSoftware3DPainter.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\UiSoftwareMaterials.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\UiSoftwarePainter.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\UiSoftwareRenderer.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\UiSystemPainter.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Include\UiTBC.h"
 				>
 			</File>
@@ -1000,10 +792,6 @@
 			</File>
 			<File
 				RelativePath=".\Include\UiUVMapper.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\UiVertex.h"
 				>
 			</File>
 			<Filter

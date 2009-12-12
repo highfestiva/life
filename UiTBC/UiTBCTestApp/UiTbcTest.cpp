@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2006, Righteous Games
+// Copyright (c) 2002-2009, Righteous Games
 
 
 
@@ -15,9 +15,10 @@
 #include "../../Lepra/Include/Log.h"
 #include "../../Lepra/Include/Math.h"
 #include "../../Lepra/Include/Number.h"
-#include "../../Lepra/Include/PerformanceScope.h"
+#include "../../Lepra/Include/Performance.h"
 #include "../../Lepra/Include/Random.h"
 #include "../../Lepra/Include/String.h"
+#include "../../Lepra/Include/SystemManager.h"
 #include "../../Lepra/Include/TgaLoader.h"
 #include "../../Lepra/Include/Thread.h"
 #include "../../Lepra/Include/Timer.h"
@@ -46,23 +47,15 @@
 #include "../Include/UiBasicMeshCreator.h"
 #include "../Include/UiChunkyClass.h"
 #include "../Include/UiChunkyLoader.h"
+#include "../Include/UiFontManager.h"
+#include "../Include/UiGeometryBatch.h"
 #include "../Include/UiGraphicalModel.h"
 #include "../Include/UiOpenGLPainter.h"
 #include "../Include/UiOpenGLRenderer.h"
-#include "../Include/UiSoftwareRenderer.h"
 #include "../Include/UiTEXLoader.h"
 #include "../Include/UiTriangleBasedGeometry.h"
-#include "../Include/UiGeometryBatch.h"
 #include "../Include/UiUVMapper.h"
 #include "RotationalAgreementTest.h"
-
-
-
-#ifdef LEPRA_WINDOWS
-#include "../Include/UiGDIPainter.h"
-#else // !Windows
-#error "Not implemented for other platform that Windows yet."
-#endif // Windows/!Windows
 
 
 
@@ -72,7 +65,7 @@ bool CloseRenderer();
 
 
 
-//#define TEST_SOFTWARE_RENDERER		// Uncomment to drop software renderer test.
+//#define TEST_D3D_RENDERER		// Uncomment to drop software renderer test.
 #define OBJECT_DISTANCE		30
 
 #define TEXTUREMAP 0
@@ -87,11 +80,7 @@ UiLepra::DisplayManager* gDisplay = 0;
 Lepra::Canvas* gScreen = 0;
 UiTbc::Renderer* gRenderer = 0;
 UiTbc::Painter* gPainter = 0;
-#ifdef LEPRA_WINDOWS
-UiTbc::GDIPainter* gGDIPainter = 0;
-#else // !Windows
-#error "Not implemented for other platform that Windows yet."
-#endif // Windows/!Windows
+UiTbc::FontManager* gFontManager = 0;
 
 UiLepra::InputManager* gInput = 0;
 int gTextureMapCount = 0;
@@ -101,7 +90,7 @@ UiTbc::Painter::ImageID gImageId[10];
 int gX = 0;
 int gY = 0;
 double gTotalFps = 0;
-UiTbc::Painter::FontID gSystemFontID;
+
 
 class UiTbcTest
 {
@@ -119,12 +108,11 @@ public:
 
 		UiTbc::Caption* lCaption = new UiTbc::Caption(Lepra::BLUE, Lepra::DARK_BLUE, Lepra::BLUE, Lepra::DARK_BLUE,
 			Lepra::LIGHT_GRAY, Lepra::GRAY, Lepra::LIGHT_GRAY, Lepra::GRAY, 20);
-		lCaption->SetText(_T("My Test Window"), gPainter->GetStandardFont(0),
-			Lepra::WHITE, Lepra::BLACK, Lepra::BLACK, Lepra::BLACK);
+		lCaption->SetText(_T("My Test Window"), Lepra::WHITE, Lepra::BLACK, Lepra::OFF_BLACK, Lepra::BLACK);
 		SetCaption(lCaption);
 
 		UiTbc::Button* lCloseButton = new UiTbc::Button(UiTbc::BorderComponent::ZIGZAG, 2, Lepra::RED, _T("Close Button"));
-		lCloseButton->SetText(_T("y"), gPainter->GetStandardFont(0), Lepra::WHITE, Lepra::BLACK);
+		lCloseButton->SetText(_T("y"), Lepra::WHITE, Lepra::BLACK);
 		lCloseButton->SetPreferredSize(16, 16);
 		lCloseButton->SetMinSize(16, 16);
 
@@ -135,7 +123,7 @@ public:
 /*
 		UiTbc::ListControl* lListControl = new UiTbc::ListControl(UiTbc::ListControl::BORDER_LINEARSHADING | UiTbc::ListControl::BORDER_SUNKEN, 3, Lepra::LIGHT_GRAY);
 		lListControl->SetStyle(UiTbc::ListControl::MULTI_SELECT);
-		UiTbc::TreeNode::UseFont(gPainter->GetStandardFont(0), Lepra::BLACK, Lepra::LIGHT_GRAY, Lepra::BLACK, Lepra::LIGHT_BLUE);
+		UiTbc::TreeNode::UseFont(Lepra::BLACK, Lepra::LIGHT_GRAY, Lepra::BLACK, Lepra::LIGHT_BLUE);
 		UiTbc::TreeNode* lTopNode = new UiTbc::TreeNode(_T("TopNode"), _T("TopNode"));
 
 		int i;
@@ -166,15 +154,16 @@ public:
 
 		AddChild(lListControl);
 */
-		UiTbc::FileNameField* lTextField = new UiTbc::FileNameField(GetClientRectComponent(), UiTbc::Window::BORDER_SUNKEN | UiTbc::Window::BORDER_LINEARSHADING, 
+		UiTbc::FileNameField* lTextField = new UiTbc::FileNameField(GetClientRectComponent(), UiTbc::Window::BORDER_SUNKEN | UiTbc::Window::BORDER_LINEARSHADING,
 			3, Lepra::WHITE, _T("TextField"));
 		lTextField->SetPreferredSize(0, 24);
-		lTextField->SetFont(gPainter->GetStandardFont(0), Lepra::BLACK, UiTbc::Component::ALPHATEST, 128);
+		lTextField->SetFontColor(Lepra::OFF_BLACK);
+		lTextField->SetText(_T("Hullo!"));
 		AddChild(lTextField);
 
 		UiTbc::Label* lLabel = new UiTbc::Label(Lepra::LIGHT_GRAY, Lepra::RED);
 		lLabel->SetPreferredSize(0, 24, false);
-		lLabel->SetText(_T("A Row List:"), gPainter->GetStandardFont(0), Lepra::BLACK, Lepra::BLACK);
+		lLabel->SetText(_T("A Row List:"), Lepra::OFF_BLACK, Lepra::BLACK);
 		AddChild(lLabel);
 
 		UiTbc::ListControl* lListControl = new UiTbc::ListControl(UiTbc::ListControl::BORDER_LINEARSHADING | UiTbc::ListControl::BORDER_SUNKEN, 3, Lepra::LIGHT_GRAY, UiTbc::ListLayout::ROW);
@@ -182,14 +171,14 @@ public:
 		for (int i = 0; i < 20; i++)
 		{
 			UiTbc::Label* lListItem = new UiTbc::Label(Lepra::LIGHT_GRAY, Lepra::LIGHT_BLUE);
-			lListItem->SetText(Lepra::StringUtility::Format(_T("Apa %i"), i), gPainter->GetStandardFont(0), Lepra::BLACK, Lepra::BLACK);
+			lListItem->SetText(Lepra::StringUtility::Format(_T("Apa %i"), i), Lepra::OFF_BLACK, Lepra::BLACK);
 			lListItem->SetPreferredWidth(12 * 6);
 			lListControl->AddChild(lListItem);
 		}
 		AddChild(lListControl);
 
 		UiTbc::Button* lButton = new UiTbc::Button(UiTbc::BorderComponent::ZIGZAG, 3, Lepra::GRAY, _T("NewWindow"));
-		lButton->SetText(_T("New Window"), gPainter->GetStandardFont(0), Lepra::BLACK, Lepra::BLACK);
+		lButton->SetText(_T("New Window"), Lepra::OFF_BLACK, Lepra::BLACK);
 		lButton->SetPreferredSize(0, 40);
 		lButton->SetMinSize(20, 20);
 		lButton->SetOnUnclickedFunc(GUITestWindow, OnNewWindow);
@@ -224,7 +213,7 @@ public:
 	{
 		ResetAndClearFrame();
 
-		mDesktopWindow = new UiTbc::DesktopWindow(gInput, gPainter, new UiTbc::FloatingLayout(), 0, 0, UiTbc::DesktopWindow::RM_EVERY_FRAME);
+		mDesktopWindow = new UiTbc::DesktopWindow(gInput, gPainter, new UiTbc::FloatingLayout(), 0, 0);
 		mDesktopWindow->SetPreferredSize(gScreen->GetWidth(), gScreen->GetHeight());
 		mDesktopWindow->AddChild(new GUITestWindow);
 		//mDesktopWindow->AddChild(new UiTbc::ASEFileConverter(mDesktopWindow));
@@ -320,7 +309,7 @@ bool SceneTest::Run(double pTime)
 			gRenderer->SetCameraTransformation(lCam);
 
 			{
-				LEPRA_PERFORMANCE_SCOPE("Render scene");
+				LEPRA_MEASURE_SCOPE(RenderScene);
 				//gRenderer->ResetClippingRect();
 				gRenderer->RenderScene();
 				gPainter->ResetClippingRect();
@@ -335,12 +324,12 @@ bool SceneTest::Run(double pTime)
 			UpdateScene(lTotalTimer.GetTimeDiffF(), lDeltaTime);
 
 			{
-				LEPRA_PERFORMANCE_SCOPE("Update screen");
+				LEPRA_MEASURE_SCOPE(UpdateScreen);
 				gDisplay->UpdateScreen();
 			}
 
 			{
-				LEPRA_PERFORMANCE_SCOPE("Clear screen");
+				LEPRA_MEASURE_SCOPE(ClearScreen);
 				gRenderer->Clear(UiTbc::Renderer::CLEAR_COLORBUFFER |
 						  UiTbc::Renderer::CLEAR_DEPTHBUFFER |
 						  UiTbc::Renderer::CLEAR_STENCILBUFFER);
@@ -366,19 +355,17 @@ bool SceneTest::Run(double pTime)
 
 void SceneTest::RenderGDITestImage(const Lepra::tchar* pText = 0)
 {
-	LEPRA_PERFORMANCE_SCOPE("Text output");
+	LEPRA_MEASURE_SCOPE(TextOutput);
 
 	static int x = 0;
 	static int dir = 1;
 
-	gGDIPainter->SetColor(Lepra::GREEN);
-	gGDIPainter->SetRenderMode(UiTbc::Painter::RM_ALPHABLEND);
-	gGDIPainter->SetActiveFont(gSystemFontID);
+	gFontManager->SetColor(Lepra::GREEN);
 	if (!pText)
 	{
 		pText = _T("This text is printed using GDI!");
 	}
-	gGDIPainter->PrintText(pText, x, 20);
+	gPainter->PrintText(pText, x, 20);
 
 	if (x >= 100 || x < 0)
 	{
@@ -475,8 +462,8 @@ bool CloseRenderer()
 	gRenderer = 0;
 	delete (gPainter);
 	gPainter = 0;
-	delete (gGDIPainter);
-	gGDIPainter = 0;
+	delete (gFontManager);
+	gFontManager = 0;
 	delete (gScreen);
 	gScreen = 0;
 	delete (gDisplay);
@@ -517,7 +504,7 @@ bool OpenRenderer(const Lepra::LogDecorator& pLog, UiLepra::DisplayManager::Cont
 	gScreen = 0;
 	gRenderer = 0;
 	gPainter = 0;
-	gGDIPainter = 0;
+	gFontManager = 0;
 	if (lOk)
 	{
 		lContext = _T("create renderer");
@@ -530,12 +517,12 @@ bool OpenRenderer(const Lepra::LogDecorator& pLog, UiLepra::DisplayManager::Cont
 		}
 		else
 		{
-			gRenderer = new UiTbc::SoftwareRenderer(gScreen);
-			gPainter = new UiTbc::SoftwarePainter;
+			assert(false);
 		}
-		gGDIPainter = new UiTbc::GDIPainter((UiLepra::Win32DisplayManager*)gDisplay);
-		gGDIPainter->SetDestCanvas(gScreen);
-		gSystemFontID = gGDIPainter->AddSystemFont(_T("Arial"), 16, 0, UiTbc::SystemPainter::NATIVE);
+		gFontManager = UiTbc::FontManager::Create(gDisplay);
+		UiTbc::FontManager::FontId lFontId = gFontManager->AddFont(_T("Arial"), 16, 0, UiTbc::FontManager::NATIVE);
+		gFontManager->SetActiveFont(lFontId);
+		gPainter->SetFontManager(gFontManager);
 
 		gRenderer->SetFallbackMaterialEnabled(true);
 		gPainter->SetDestCanvas(gScreen);
@@ -545,11 +532,7 @@ bool OpenRenderer(const Lepra::LogDecorator& pLog, UiLepra::DisplayManager::Cont
 	if (lOk)
 	{
 		lContext = _T("disable vsync");
-		gDisplay->SetVSyncEnabled(true);
-		if (pContext != UiLepra::DisplayManager::SOFTWARE_CONTEXT)
-		{
-			lOk = gDisplay->SetVSyncEnabled(false);
-		}
+		lOk = gDisplay->SetVSyncEnabled(false);
 	}
 
 	UiTbc::Texture lTextureMap;
@@ -771,7 +754,7 @@ bool OpenRenderer(const Lepra::LogDecorator& pLog, UiLepra::DisplayManager::Cont
 
 bool ClearBackground()
 {
-	LEPRA_PERFORMANCE_SCOPE("Clear screen");
+	LEPRA_MEASURE_SCOPE(ClearScreen);
 	gRenderer->SetViewport(Lepra::PixelRect(0, 0, gScreen->GetWidth(), gScreen->GetHeight()));
 	gRenderer->SetViewFrustum(90, 0.1f, 10000);
 	gRenderer->SetClippingRect(Lepra::PixelRect(0, 0, gScreen->GetWidth(), gScreen->GetHeight()));
@@ -782,7 +765,7 @@ bool ClearBackground()
 
 bool ClearSubframe(int pXBox = 0, int pYBox = 0, int pSplitsX = 1, int pSplitsY = 1, int pFrameFatso = 4, bool lClearColorOnly = true)
 {
-	LEPRA_PERFORMANCE_SCOPE("Clear frame");
+	LEPRA_MEASURE_SCOPE(ClearFrame);
 
 	const int lFrameXSize = gScreen->GetWidth()/pSplitsX - pSplitsX + 1;
 	const int lFrameYSize = gScreen->GetHeight()/pSplitsY - pSplitsY + 1;
@@ -844,13 +827,11 @@ bool InitializeGeometry(TBC::GeometryBase* pGeometry)
 	lRotation.MakeIdentity();
 	Lepra::TransformationF lObjectTrans(lRotation, Lepra::Vector3DF(0, OBJECT_DISTANCE, 0));
 	pGeometry->SetTransformation(lObjectTrans);
-	TBC::GeometryBase::BasicMaterialSettings lMaterial;
-	lMaterial.mSmooth = true;
-	lMaterial.mAlpha = 1;
-	lMaterial.mRed = 0.8f;
-	lMaterial.mGreen = 0.9f;
-	lMaterial.mBlue = 0.7f;
-	lMaterial.mSpecular = 0.8f;
+	TBC::GeometryBase::BasicMaterialSettings lMaterial(
+		Lepra::Vector3DF(0, 0, 0),
+		Lepra::Vector3DF(0.8f, 0.9f, 0.7f),
+		Lepra::Vector3DF(0.1f, 0.1f, 0.1f),
+		0.8f, 1.0f, true);
 	pGeometry->SetBasicMaterialSettings(lMaterial);
 	return (true);
 }
@@ -909,7 +890,7 @@ bool QuickRender(TBC::GeometryBase* pGeometry, const UiTbc::Renderer::MaterialTy
 		{
 			if (pClearScreen)
 			{
-				LEPRA_PERFORMANCE_SCOPE("Clear screen");
+				LEPRA_MEASURE_SCOPE(ClearScreen);
 				gRenderer->Clear();
 			}
 
@@ -945,7 +926,7 @@ bool QuickRender(TBC::GeometryBase* pGeometry, const UiTbc::Renderer::MaterialTy
 			pGeometry->SetTransformation(lObjectMovement);
 			pGeometry->SetLastFrameVisible(gRenderer->GetCurrentFrame());
 			{
-				LEPRA_PERFORMANCE_SCOPE("Render scene");
+				LEPRA_MEASURE_SCOPE(RenderScene);
 				gRenderer->RenderScene();
 			}
 			i++;
@@ -954,7 +935,7 @@ bool QuickRender(TBC::GeometryBase* pGeometry, const UiTbc::Renderer::MaterialTy
 			{
 				//RenderGDITestImage(pText);
 
-				LEPRA_PERFORMANCE_SCOPE("Update screen");
+				LEPRA_MEASURE_SCOPE(UpdateScreen);
 				gDisplay->UpdateScreen();
 				UiLepra::Core::ProcessMessages();
 				if (Lepra::SystemManager::GetQuitRequest())
@@ -1712,7 +1693,7 @@ bool TestMaterials(const Lepra::LogDecorator& pLog, double pShowTime)
 		// ----------------------- Update geometry orientation. -----------------------
 		if (lTestOk)
 		{
-			LEPRA_PERFORMANCE_SCOPE("Update screen");
+			LEPRA_MEASURE_SCOPE(UpdateScreen);
 
 			lFrameTimer.UpdateTimer();
 			gDisplay->UpdateScreen();
@@ -1851,17 +1832,16 @@ GeometryReferenceTest::GeometryReferenceTest(const Lepra::LogDecorator& pLog) :
 	gRenderer->SetClearColor(Lepra::YELLOW);
 
 	// Default material...
-	TBC::GeometryBase::BasicMaterialSettings lMaterial;
-	lMaterial.mSmooth = true;
-	lMaterial.mAlpha = 1;
-	lMaterial.mRed   = 1;
-	lMaterial.mGreen = 1;
-	lMaterial.mBlue  = 1;
-	lMaterial.mSpecular = 0.7f;
-	lMaterial.mSelfIllumination = 0.0f;
+	TBC::GeometryBase::BasicMaterialSettings lMaterial(
+		Lepra::Vector3DF(0, 0, 0),
+		Lepra::Vector3DF(1.0f, 1.0f, 1.0f),
+		Lepra::Vector3DF(0.1f, 0.1f, 0.1f),
+		0.8f, 1.0f, true);
 
 	mSphere = UiTbc::BasicMeshCreator::CreateEllipsoid(1, 1, 1, 16, 8);
-	lMaterial.mSelfIllumination = 1.0f;
+	lMaterial.mAmbient.x = 1.0f;
+	lMaterial.mAmbient.y = 1.0f;
+	lMaterial.mAmbient.z = 1.0f;
 	mSphere->SetBasicMaterialSettings(lMaterial);
 
 	mSphere->SetAlwaysVisible(false);
@@ -1906,14 +1886,11 @@ BumpMapSceneTest::BumpMapSceneTest(const Lepra::LogDecorator& pLog) :
 	gRenderer->SetClearColor(Lepra::RED);
 
 	// Default material...
-	TBC::GeometryBase::BasicMaterialSettings lMaterial;
-	lMaterial.mSmooth = true;
-	lMaterial.mAlpha = 1;
-	lMaterial.mRed   = 1;
-	lMaterial.mGreen = 1;
-	lMaterial.mBlue  = 1;
-	lMaterial.mSpecular = 0.7f;
-	lMaterial.mSelfIllumination = 0.0f;
+	TBC::GeometryBase::BasicMaterialSettings lMaterial(
+		Lepra::Vector3DF(0, 0, 0),
+		Lepra::Vector3DF(1.0f, 1.0f, 1.0f),
+		Lepra::Vector3DF(0.1f, 0.1f, 0.1f),
+		0.8f, 1.0f, true);
 
 	InitTerrain();
 
@@ -1925,9 +1902,9 @@ BumpMapSceneTest::BumpMapSceneTest(const Lepra::LogDecorator& pLog) :
 	mTorus->SplitVertices();
 
 	// Setup sphere.
-	lMaterial.mSelfIllumination = 1.0f;
+	lMaterial.mAmbient = Lepra::Vector3DF(1,1,1);
 	mSphere->SetBasicMaterialSettings(lMaterial);
-	lMaterial.mSelfIllumination = 0.0f;
+	lMaterial.mAmbient = Lepra::Vector3DF(0,0,0);
 	//AddRandomVertexColor(mSphere);
 	AddMappingCoords(mSphere);
 	mSphere->SetAlwaysVisible(true);
@@ -1935,10 +1912,7 @@ BumpMapSceneTest::BumpMapSceneTest(const Lepra::LogDecorator& pLog) :
 	gRenderer->TryAddGeometryTexture(lGraphicId, gTextureId[TEXTUREMAP]);
 
 	// Setup cone forest.
-	lMaterial.mRed = 0.2f;
-	lMaterial.mGreen = 1;
-	lMaterial.mBlue = 0.2f;
-	lMaterial.mSpecular = 0.1f;
+	lMaterial.mDiffuse = Lepra::Vector3DF(0.2f,1,0.2f);
 	mCone->SetBasicMaterialSettings(lMaterial);
 	UiTbc::GeometryBatch* lConeBatch = new UiTbc::GeometryBatch(mCone);
 	Lepra::Vector3DF lPositions[100];
@@ -1960,11 +1934,7 @@ BumpMapSceneTest::BumpMapSceneTest(const Lepra::LogDecorator& pLog) :
 	gRenderer->TryAddGeometryTexture(lGraphicId2, gTextureId[TEXTUREMAP]);
 
 	// Setup torus using the Model-class.
-	lMaterial.mRed = 1;
-	lMaterial.mGreen = 1;
-	lMaterial.mBlue = 1;
-	lMaterial.mSpecular = 0.9f;
-	lMaterial.mSelfIllumination = 0.0f;
+	lMaterial.mDiffuse = Lepra::Vector3DF(1,1,1);
 	mTorus->SetBasicMaterialSettings(lMaterial);
 	AddUVAnimation(mTorus);
 	AddRandomVertexColor(mTorus);
@@ -2078,14 +2048,11 @@ BumpMapSceneTest::~BumpMapSceneTest()
 
 void BumpMapSceneTest::InitTerrain()
 {
-	TBC::GeometryBase::BasicMaterialSettings lMaterial;
-	lMaterial.mSmooth = true;
-	lMaterial.mAlpha = 1;
-	lMaterial.mRed   = 1;
-	lMaterial.mGreen = 1;
-	lMaterial.mBlue  = 1;
-	lMaterial.mSpecular = 0.7f;
-	lMaterial.mSelfIllumination = 0.0f;
+	TBC::GeometryBase::BasicMaterialSettings lMaterial(
+		Lepra::Vector3DF(0, 0, 0),
+		Lepra::Vector3DF(1.0f, 1.0f, 1.0f),
+		Lepra::Vector3DF(0.1f, 0.1f, 0.1f),
+		0.7f, 1.0f, true);
 
 	TBC::TerrainFunction* lTF[3];
 	lTF[0] = new TBC::TerrainConeFunction(15.0f, Lepra::Vector2DF(-50, -50), 20.0f, 30.0f);
@@ -2238,7 +2205,7 @@ bool TestGUI(const Lepra::LogDecorator& /*pLog*/, double pShowTime)
 	gPainter->ResetClippingRect();
 	gPainter->SetRenderMode(UiTbc::Painter::RM_NORMAL);
 
-	UiTbc::DesktopWindow* lDesktopWindow = new UiTbc::DesktopWindow(gInput, gPainter, Lepra::DARK_BLUE, new UiTbc::FloatingLayout(), 0, 0, UiTbc::DesktopWindow::RM_EVERY_FRAME);
+	UiTbc::DesktopWindow* lDesktopWindow = new UiTbc::DesktopWindow(gInput, gPainter, Lepra::DARK_GREEN, new UiTbc::FloatingLayout(), 0, 0);
 	lDesktopWindow->SetPreferredSize(gScreen->GetWidth(), gScreen->GetHeight());
 	lDesktopWindow->AddChild(new GUITestWindow);
 	//lDesktopWindow->AddChild(new UiTbc::ASEFileConverter(lDesktopWindow));
@@ -2263,11 +2230,12 @@ bool TestGUI(const Lepra::LogDecorator& /*pLog*/, double pShowTime)
 		gInput->PollEvents();
 
 		gScreen->SetBuffer(gDisplay->GetScreenPtr());
-		gPainter->SetColor(Lepra::BLACK);
+		//gPainter->SetColor(Lepra::OFF_BLACK);
 		gPainter->FillRect(0, 0, gScreen->GetWidth(), gScreen->GetHeight());
+		//gFontManager->SetColor(Lepra::OFF_BLACK);
 		lDesktopWindow->Repaint();
 		{
-			LEPRA_PERFORMANCE_SCOPE("Update screen");
+			LEPRA_MEASURE_SCOPE(UpdateScreen);
 			gDisplay->UpdateScreen();
 		}
 
@@ -2375,44 +2343,41 @@ bool TestUiTbc()
 	
 
 	bool lTestOk = true;
-	// > Men cp-störd!!! Bara för att din dator är så jävla snabb då eller?
-	// Du själv, ap-balle!!! Bara för att din grafikmotor skalar så fantastiskt då elle? Det är väl bara att ta bort lite pixelshaders och trianglar så går väl allt skitfort?
-	const double lAverageFps[2] = { 200.0, 2.0 };
-#ifdef TEST_SOFTWARE_RENDERER
+#ifdef TEST_D3D_RENDERER
 	for (unsigned y = 0; y < 2; ++y)
-#else // TEST_SOFTWARE_RENDERER
+#else // TEST_D3D_RENDERER
 	for (unsigned y = 0; y < 1; ++y)
-#endif // TEST_SOFTWARE_RENDERER/!TEST_SOFTWARE_RENDERER
+#endif // TEST_D3D_RENDERER/!TEST_D3D_RENDERER
 	{
-		LEPRA_PERFORMANCE_SCOPE("Graphics");
+		LEPRA_MEASURE_SCOPE(Graphics);
 		bool lRendererOpenedOk = false;
 		if (lTestOk)
 		{
-			LEPRA_PERFORMANCE_SCOPE("Open renderer");
+			LEPRA_MEASURE_SCOPE(OpenRenderer);
 			if (y == 0)
 			{
 				lRendererOpenedOk = OpenRenderer(gUiTbcLog, UiLepra::DisplayManager::OPENGL_CONTEXT);
 			}
 			else
 			{
-				lRendererOpenedOk = OpenRenderer(gUiTbcLog, UiLepra::DisplayManager::SOFTWARE_CONTEXT);
+				assert(false);
 			}
 			lTestOk = lRendererOpenedOk;
 		}
 		//TestOpenGLPainter();
 		if (lTestOk)
 		{
-			LEPRA_PERFORMANCE_SCOPE("Generate test");
+			LEPRA_MEASURE_SCOPE(GenerateTest);
 			lTestOk = TestGenerate(gUiTbcLog, 2.0);
 		}
 		if (lTestOk)
 		{
-			LEPRA_PERFORMANCE_SCOPE("Material test");
+			LEPRA_MEASURE_SCOPE(MaterialTest);
 			lTestOk = TestMaterials(gUiTbcLog, 2.0);
 		}
 		if (lTestOk)
 		{
-			lTestOk = TestFps(gUiTbcLog, lAverageFps[y]);
+			lTestOk = TestFps(gUiTbcLog, 150.0);
 		}
 		if (lTestOk)
 		{
@@ -2442,19 +2407,18 @@ bool TestUiTbc()
 		}
 		if (lTestOk && y == 0)
 		{
-			LEPRA_PERFORMANCE_SCOPE("Complete scene");
+			LEPRA_MEASURE_SCOPE(CompleteScene);
 			BumpMapSceneTest lTest(gUiTbcLog);
 			lTestOk = lTest.Run(3.0f);
 		}
-
 		if (lTestOk)
 		{
-			LEPRA_PERFORMANCE_SCOPE("GUI test");
+			LEPRA_MEASURE_SCOPE(GuiTest);
 			lTestOk = TestGUI(gUiTbcLog, 3.0);
 		}
 
 		{
-			LEPRA_PERFORMANCE_SCOPE("Close renderer");
+			LEPRA_MEASURE_SCOPE(CloseRenderer);
 			CloseRenderer()? 1: lTestOk = false;
 		}
 	}

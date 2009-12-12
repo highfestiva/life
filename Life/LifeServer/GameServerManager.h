@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2008, Righteous Games
+// Copyright (c) 2002-2009, Righteous Games
 
 
 
@@ -40,9 +40,6 @@ public:
 	int GetLoggedInClientCount() const;
 
 private:
-	Lepra::String GetName() const;
-	Lepra::String GetApplicationCommandFilename() const;
-
 	void Logout(Cure::UserAccount::AccountId pAccountId, const Lepra::String& pReason);
 	void DeleteAllClients();
 

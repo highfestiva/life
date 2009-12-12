@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2007, Righteous Games
+// Copyright (c) 2002-2009, Righteous Games
 
 
 
@@ -56,20 +56,15 @@ bool GameUiManager::Open()
 	int lDisplayBpp = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_DISPLAY_BITSPERPIXEL, 0);
 	int lDisplayFrequency = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_DISPLAY_FREQUENCY, 0);
 	bool lDisplayFullScreen = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_DISPLAY_FULLSCREEN, false);
-	Lepra::String lUpdateModeString = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_2D_UPDATEMODE, _T("OptimizeStatic"));
 
 	UiLepra::DisplayManager::ContextType lRenderingContext = UiLepra::DisplayManager::OPENGL_CONTEXT;
 	if (lRenderTypeString == _T("OpenGL"))
 	{
 		lRenderingContext = UiLepra::DisplayManager::OPENGL_CONTEXT;
 	}
-	else if (lRenderTypeString == _T("Direct3D") || lRenderTypeString == _T("DirectX"))
+	else if (lRenderTypeString == _T("DirectX"))
 	{
 		lRenderingContext = UiLepra::DisplayManager::DIRECTX_CONTEXT;
-	}
-	else if (lRenderTypeString == _T("Software"))
-	{
-		lRenderingContext = UiLepra::DisplayManager::SOFTWARE_CONTEXT;
 	}
 
 	// Initialize UI based on settings parameters.
@@ -247,13 +242,17 @@ void GameUiManager::BeginRender()
 {
 	if (mDisplay->IsVisible())
 	{
+		mRenderer->ResetClippingRect();
 		if (CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_ENABLECLEAR, true))
 		{
-			mRenderer->ResetClippingRect();
 			float r = (float)CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_CLEARRED, 0.75);
 			float g = (float)CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_CLEARGREEN, 0.80);
 			float b = (float)CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_CLEARBLUE, 0.85);
 			Clear(r, g, b);
+		}
+		else
+		{
+			ClearDepth();
 		}
 		mSound->Tick(0.0);
 	}
@@ -277,7 +276,7 @@ void GameUiManager::Paint()
 		mCanvas->SetBuffer(mDisplay->GetScreenPtr());
 		mPainter->SetDestCanvas(mCanvas);
 		mPainter->ResetClippingRect();
-		mPainter->BeginPaint();
+		mPainter->PrePaint();
 		mDesktopWindow->Repaint(mPainter);
 	}
 }
@@ -287,7 +286,6 @@ void GameUiManager::EndRender()
 	if (mDisplay->IsVisible())
 	{
 		UpdateSettings();
-		mPainter->EndPaint();
 		mDisplay->UpdateScreen();
 	}
 }
@@ -484,6 +482,9 @@ void GameUiManager::UpdateSettings()
 		lPainterRenderMode = UiTbc::Painter::RM_XOR;
 	}
 	mPainter->SetRenderMode(lPainterRenderMode);
+
+	bool lSmoothFonts = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_2D_SMOOTHFONTS, false);
+	mPainter->SetFontSmoothness(lSmoothFonts);
 }
 
 

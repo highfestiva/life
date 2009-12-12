@@ -50,14 +50,6 @@ void Painter::SetDestCanvas(Lepra::Canvas* pCanvas)
 	mCanvas = pCanvas;
 }
 
-void Painter::BeginPaint()
-{
-}
-
-void Painter::EndPaint()
-{
-}
-
 bool Painter::PushAttrib(unsigned pAttrib)
 {
 	bool pReturnValue = true;
@@ -304,7 +296,7 @@ FontManager* Painter::GetFontManager() const
 	return (mFontManager);
 }
 
-int Painter::GetStringWidth(const Lepra::String& pString)
+int Painter::GetStringWidth(const Lepra::String& pString) const
 {
 	if (!mFontManager)
 	{
@@ -313,7 +305,7 @@ int Painter::GetStringWidth(const Lepra::String& pString)
 	return (mFontManager->GetStringWidth(pString));
 }
 
-int Painter::GetFontHeight()
+int Painter::GetFontHeight() const
 {
 	if (!mFontManager)
 	{
@@ -322,7 +314,7 @@ int Painter::GetFontHeight()
 	return (mFontManager->GetFontHeight());
 }
 
-int Painter::GetLineHeight()
+int Painter::GetLineHeight() const
 {
 	if (!mFontManager)
 	{
@@ -375,9 +367,9 @@ void Painter::EndDisplayList()
 		std::vector<DisplayEntity*>::iterator lListIter;
 		for (lListIter = mCurrentDisplayList->begin(); lListIter != mCurrentDisplayList->end(); ++lListIter)
 		{
-			delete (*lListIter);
+			DisplayEntity* lEntity = *lListIter;
+			lEntity->mGeometry.Reset();
 		}
-		mCurrentDisplayList->clear();
 		mDisplayListIter = mCurrentDisplayList->begin();
 		mCurrentDisplayList = 0;
 	}
@@ -798,37 +790,37 @@ void Painter::AdjustVertexFormat(Lepra::uint16&)
 }
 
 
-int Painter::GetOrigoX()
+int Painter::GetOrigoX() const
 {
 	return mOrigoX;
 }
 
-int Painter::GetOrigoY()
+int Painter::GetOrigoY() const
 {
 	return mOrigoY;
 }
 
-Painter::XDir Painter::GetXDir()
+Painter::XDir Painter::GetXDir() const
 {
 	return mXDir;
 }
 
-Painter::YDir Painter::GetYDir()
+Painter::YDir Painter::GetYDir() const
 {
 	return mYDir;
 }
 
-Lepra::Canvas* Painter::GetCanvas()
+Lepra::Canvas* Painter::GetCanvas() const
 {
 	return mCanvas;
 }
 
-Painter::RenderMode Painter::GetRenderMode()
+Painter::RenderMode Painter::GetRenderMode() const
 {
 	return mRenderMode;
 }
 
-Lepra::uint8 Painter::GetAlphaValue()
+Lepra::uint8 Painter::GetAlphaValue() const
 {
 	return mAlphaValue;
 }
@@ -843,7 +835,7 @@ void Painter::ReduceClippingRect(const Lepra::PixelRect& pClippingRect)
 	ReduceClippingRect(pClippingRect.mLeft, pClippingRect.mTop, pClippingRect.mRight, pClippingRect.mBottom);
 }
 
-void Painter::GetClippingRect(Lepra::PixelRect& pClippingRect)
+void Painter::GetClippingRect(Lepra::PixelRect& pClippingRect) const
 {
 	pClippingRect = mClippingRect;
 }
@@ -853,7 +845,7 @@ void Painter::SetColor(Lepra::uint8 pRed, Lepra::uint8 pGreen, Lepra::uint8 pBlu
 	SetColor(Lepra::Color(pRed, pGreen, pBlue, pPaletteIndex), pColorIndex);
 }
 
-Lepra::Color Painter::GetColor(unsigned pColorIndex)
+Lepra::Color Painter::GetColor(unsigned pColorIndex) const
 {
 	return mColor[pColorIndex];
 }

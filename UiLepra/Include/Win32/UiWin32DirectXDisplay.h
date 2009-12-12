@@ -1,7 +1,7 @@
 /*
 	Class:  Win32DirectXDisplay
 	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Righteous Games
+	Copyright (c) 2002-2009, Righteous Games
 */
 
 #ifndef UIWIN32DIRECTXDISPLAY_H
@@ -21,6 +21,7 @@ public:
 	virtual ~Win32DirectXDisplay();
 
 	void CloseScreen();
+	bool Activate();
 	bool UpdateScreen();
 
 	bool IsVSyncEnabled() const;

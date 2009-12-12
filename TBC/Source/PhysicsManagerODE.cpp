@@ -1,6 +1,6 @@
 
 // Author: Alexander Hugestrand
-// Copyright (c) 2002-2008, Righteous Games
+// Copyright (c) 2002-2009, Righteous Games
 
 
 
@@ -72,7 +72,6 @@ PhysicsManagerODE::~PhysicsManagerODE()
 	::dWorldDestroy(mWorldID);
 	::dSpaceDestroy(mSpaceID);
 	::dJointGroupDestroy(mContactJointGroupID);
-	//::dCloseODE();
 }
 
 PhysicsManager::BodyID PhysicsManagerODE::CreateSphere(bool pIsRoot, const Lepra::TransformationF& pTransform,

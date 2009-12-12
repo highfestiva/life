@@ -1,7 +1,7 @@
 /*
 	Class:  Checksum
 	Author: Jonas Bystr�
-	Copyright (c) 2002-2006, Righteous Games
+	Copyright (c) 2002-2009, Righteous Games
 
 	The Checksum class defines methods for calculating
 	LRC and CRC-32.

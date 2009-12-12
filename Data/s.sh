@@ -1,5 +1,3 @@
 #!/bin/bash
 
-cd ../Life/LifeServer/
-./Debug/LifeServer.exe
-cd ../../Data/
+../Life/LifeServer/Unicode\ Debug/LifeServer.exe

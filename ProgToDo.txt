@@ -10,6 +10,7 @@ Game
 + Import vehicle colors.
 + Flip axes correctly in CppContextObject and UI ditto.
 + Create arcade-style helicopter.
++ Add help text when dropping down console.
 . Load objects dynamically, without having to hard-code an account and class/phys/meshes name.
 . Create base world. Use mesh, not primitives, for collision.
 
@@ -71,7 +72,7 @@ Engine
 + Don't allow client to send out a change in physics state (transform+vel+acc) when colliding, this should be done by the server.
 + Add more input controllers: mouse, joy, pad... Add both force and max-vel to interface?
 + Separate up/down from handbreak/break. Create GTA-steering!
-+ Change controlls to be more dynamic. For instance: control breaks by means of using roll engine force (re-use engine).
++ Change controls to be more dynamic. For instance: control breaks by means of using roll engine force (re-use engine).
 + Fix so that TAB in GUI does not enter an empty char.
 + Make sure Delete key in GUI deletes a char at once, not at next caret update time.
 + Simple <enter> to "click" default button in dialog (especially true for login).
@@ -90,9 +91,11 @@ Engine
 + Loading graphics objects from disk.
 + Make ODE wheels keep straight using dBodySetFiniteRotationMode() and dBodySetFiniteRotationAxis() instead of a friggen motor!
 + Fix laggy/jerky camera motion by interpolation/extrapolation. Cam adjusts interpolation factor to velocity?
++ Make SystemPainter a standalone class that does not inherit UiTbc::Painter!
 . Dropping all non-game components from any other file out there (Cure, UiCure).
-. Make SystemPainter a standalone class that does not inherit UiTbc::Painter!
 . Remove all possible classes to enable easier porting to Mac.
+. Make sure that synchronizing doesn't happen every frame on the heli when a control is changed!
+. Make input configuration better - use other type of ID than enumeration??? I'm a bit unsure here...
 . Port font rendering.
 . Exchange SoundManager basics to a portable one. Or fix FMod.
 . Add support for "http links". I.e. start browser at specific address.
@@ -145,7 +148,6 @@ Engine
  
 Quality
 ----------
-+ Make sure shutting down client with two simultaneously logged-in users gets logged out from the server.
 + Fix ODE box rotation bug by simply keeping the angular velocity below a certain threashold.
 + Fix bug sometimes induced on Excavator: server says it stops on each frame!
 + Make key settings save as strings, not as numbers in the console save files.
@@ -159,13 +161,17 @@ Quality
 + Optimize font rendering.
 + Show debug graphs and FPS also in split screen.
 + Make the console appear the correct size (immediately when bringing it up) after having added/removed splitscreen player (currently appears smaller if splitscreen player previously removed).
-. Add unit test for making sure that loading more than one instance of same resource results in a single instance.
++ Get unicode on track. Make script files all UTF-8.
++ Always use unicode script files (UTF-8).
++ Add unit test for making sure that loading more than one instance of same resource results in a single instance.
 . Make build in one step: server, client, **DATA**, Linux, Windows...
 . Assertions on getting access to "wrong" parts of the system with the wrong thread. (Such as dropping users in NetworkServer.cpp from the TCP thread.)
 . Stresstest (use .lsh).
-. Get unicode on track. Make script files all unicode.
 . Replace copyright notice to Righteous Games.
+. Run test app in Windows and Linux.
+. Make sure default settings are good on a no-good computer. Like 60 FPS.
 
+. Make sure shutting down client with two simultaneously logged-in users gets logged out from the server.
 . Make font rendering look good instead of ugly.
 . Add better camera control, such as for the truck (just looking at the trailer looks like shit).
 . Being able to log in/out on one splitscreen while running normally on the other (no freeze).
@@ -195,7 +201,6 @@ Quality
 . Run Simian Analyzer, remove duplicate code.
 . Go through all RG e-mail to ensure all is in place.
 . Add homepage for both Righteous Games as well as The Game.
-. Always use unicode script files.
 . Exchange "varning: flerteckens teckenkonstant" (ChunkyLoader.h) to something portable and beautiful.
 . Create a small master server which receives crash reports and feedback.
 . Create feedback form which can be entered and transmitted by any user at any time. Received by master server.
@@ -204,3 +209,4 @@ Quality
 . Add click sounds to buttons.
 . Remove unused rtvars (such as Ui.2D.PaintMode).
 . Port to D3D rendering + painter. Painter only needs working fonts?
+. Automatically downsize rendering (shadows) and physics micro steps if FPS are low.

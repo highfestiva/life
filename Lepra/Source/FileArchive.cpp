@@ -1,6 +1,6 @@
 
 // Author: Alexander Hugestrand
-// Copyright (c) 2002-2008, Righteous Games
+// Copyright (c) 2002-2009, Righteous Games
 
 
 
@@ -302,7 +302,7 @@ IOError FileArchive::WriteHeader()
 	}
 
 	mArchiveFile.WriteData(&lHeaderOffset, sizeof(lHeaderOffset));
-	mArchiveFile.WriteString(_T("BUNT"));
+	mArchiveFile.WriteString<Lepra::tchar>(_T("BUNT"));
 
 	return IO_OK;
 }

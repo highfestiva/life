@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2008, Righteous Games
+// Copyright (c) 2002-2009, Righteous Games
 
 
 
@@ -19,8 +19,8 @@ namespace Life
 
 
 
-ClientLoginView::ClientLoginView(UiTbc::Painter* pPainter, ClientLoginObserver* pLoginObserver, const Lepra::String& pErrorMessage):
-	View(pPainter, _T("Login"), new UiTbc::GridLayout(7, 1)),
+ClientLoginView::ClientLoginView(ClientLoginObserver* pLoginObserver, const Lepra::String& pErrorMessage):
+	View(_T("Login"), new UiTbc::GridLayout(7, 1)),
 	mLoginObserver(pLoginObserver)
 {
 	SetPreferredSize(200, 200);

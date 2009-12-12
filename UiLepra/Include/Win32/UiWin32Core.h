@@ -2,7 +2,7 @@
 	Class:  Win32Core, 
 		Win32Observer
 	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Righteous Games
+	Copyright (c) 2002-2009, Righteous Games
 
 	NOTES:
 

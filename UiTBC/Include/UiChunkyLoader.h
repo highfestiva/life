@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2007, Righteous Games
+// Copyright (c) 2002-2009, Righteous Games
 
 
 
@@ -22,10 +22,7 @@
 
 
 
-#ifndef UICHUNKYLOADER_H
-#define UICHUNKYLOADER_H
-
-
+#pragma once
 
 #include "../../TBC/Include/ChunkyLoader.h"
 #include "UiAnimatedGeometry.h"
@@ -42,16 +39,6 @@ class ChunkyClass;
 class TriangleBasedGeometry;
 
 
-
-/*// Contans information on base-class stuff (structure and animation names), sound names, meshes and their attributes.
-class ChunkyClassLoader: public TBC::ChunkyClassLoader
-{
-public:
-	ChunkyClassLoader(Lepra::File* pFile, bool pIsFileOwner);
-	virtual ~ChunkyClassLoader();
-	bool Load(ChunkyClass* pData);
-	bool Save(const ChunkyClass* pData);
-};*/
 
 class ChunkyMeshLoader: public TBC::ChunkyLoader	// Contains the mesh. Excluded is skin weight information and materials.
 {
@@ -93,7 +80,3 @@ private:
 
 
 }
-
-
-
-#endif // !UICHUNKYLOADER_H

@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2006, Righteous Games
+// Copyright (c) 2002-2009, Righteous Games
 
 
 
@@ -73,7 +73,7 @@ private:
 			mMeshResourceArray.push_back(new UiCure::UserGeometryReferenceResource(
 				mUiManager, UiCure::GeometryOffset(lPhysIndex, lTransform)));
 			mMeshResourceArray[x]->Load(pResource->GetConstResource()->GetManager(),
-				lName+_T(".mesh"),
+				lName+_T(".mesh;0"),
 				UiCure::UserGeometryReferenceResource::TypeLoadCallback(this,
 					&ResourceTest::MeshRefLoadCallback));
 		}
@@ -232,7 +232,7 @@ bool ResourceTest::TestClass()
 		lContext = _T("load class");
 		UiCure::UserClassResource lClass(mUiManager);
 		lClass.Load(mResourceManager, _T("tractor_01.class"), UiCure::UserClassResource::TypeLoadCallback(this, &ResourceTest::ClassLoadCallback));
-		for (int x = 0; gResourceLoadCount != 13 && x < 100; ++x)
+		for (int x = 0; gResourceLoadCount != 6 && x < 100; ++x)
 		{
 			Lepra::Thread::Sleep(0.01);
 			mResourceManager->Tick();	// Continue loading of physics and meshes.
@@ -240,7 +240,7 @@ bool ResourceTest::TestClass()
 		// Make sure nothing more makes it through.
 		Lepra::Thread::Sleep(0.1);
 		mResourceManager->Tick();
-		lTestOk = (gResourceLoadCount == 13 && gResourceLoadErrorCount == 1);
+		lTestOk = (gResourceLoadCount == 6 && gResourceLoadErrorCount == 1);
 		mResourceManager->SafeRelease(&lClass);
 		assert(lTestOk);
 	}
@@ -288,6 +288,12 @@ bool ResourceTest::TestStress()
 		lTestOk = (mResourceManager->QueryResourceCount() == 0);
 		assert(lTestOk);
 	}
+	if (lTestOk)
+	{
+		lContext = _T("caching 0");
+		lTestOk = (mResourceManager->QueryCachedResourceCount() == 0);
+		assert(lTestOk);
+	}
 
 	if (lTestOk)
 	{
@@ -298,10 +304,10 @@ bool ResourceTest::TestStress()
 				new UiCure::UserGeometryReferenceResource(mUiManager, UiCure::GeometryOffset(0));
 			UiCure::UserGeometryReferenceResource* lMesh1 =
 				new UiCure::UserGeometryReferenceResource(mUiManager, UiCure::GeometryOffset(0));
-			lMesh0->Load(mResourceManager, _T("tractor_01_rear_wheel0.mesh"),
+			lMesh0->LoadUnique(mResourceManager, _T("tractor_01_rear_wheel0.mesh;0"),
 				UiCure::UserGeometryReferenceResource::TypeLoadCallback(this,
 					&ResourceTest::MeshRefLoadCallback));
-			lMesh1->Load(mResourceManager, _T("tractor_01_rear_wheel0.mesh"),
+			lMesh1->LoadUnique(mResourceManager, _T("tractor_01_rear_wheel0.mesh;0"),
 				UiCure::UserGeometryReferenceResource::TypeLoadCallback(this,
 					&ResourceTest::MeshRefLoadCallback));
 			delete (lMesh1);
@@ -456,13 +462,13 @@ bool ResourceTest::TestStress()
 			{
 				UiCure::UserGeometryReferenceResource* lMesh =
 					new UiCure::UserGeometryReferenceResource(mUiManager, UiCure::GeometryOffset(0));
-				lMesh->Load(mResourceManager, _T("tractor_01_front_wheel0.mesh"),
+				lMesh->Load(mResourceManager, _T("tractor_01_front_wheel0.mesh;0"),
 					UiCure::UserGeometryReferenceResource::TypeLoadCallback(this,
 						&ResourceTest::MeshRefLoadCallback));
 				lResources.push_back(lMesh);
 			}
 			size_t c = mResourceManager->QueryResourceCount();
-			assert(c == 1);
+			assert(c <= 2);
 			for (int z = 0; z < lDecCount; ++z)
 			{
 				int lDropIndex = Lepra::Random::GetRandomNumber()%lAddCount;
@@ -474,13 +480,20 @@ bool ResourceTest::TestStress()
 			}
 			TickRM lTick(mResourceManager);
 			c = mResourceManager->QueryResourceCount();
-			lTestOk = (c == 1);
+			lTestOk = (c <= 2);
+			assert(lTestOk);
+		}
+		if (lTestOk)
+		{
+			lContext = _T("resource load count");
+			TickRM lTick(mResourceManager, 0.1);
+			size_t c = mResourceManager->QueryResourceCount();
+			lTestOk = (c == 2);
 			assert(lTestOk);
 		}
 		if (lTestOk)
 		{
 			lContext = _T("mass load completeness");
-			TickRM lTick(mResourceManager, 0.1);
 			MeshList::iterator y = lResources.begin();
 			int u = 0;
 			for (; lTestOk && y != lResources.end(); ++y, ++u)
@@ -488,8 +501,8 @@ bool ResourceTest::TestStress()
 				lTestOk = ((*y)->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE);
 				if (!lTestOk)
 				{
-					mLog.Warningf(_T("Failed on the %ith element; load state = %i."),
-						u, (*y)->GetLoadState());
+					mLog.Warningf(_T("Failed on the %ith element (of %u); load state = %i."),
+						u, lResources.size(), (*y)->GetLoadState());
 				}
 			}
 			assert(lTestOk);
@@ -503,7 +516,7 @@ bool ResourceTest::TestStress()
 				delete (*y);
 			}
 			lResources.clear();
-			lTestOk = (mResourceManager->QueryResourceCount() == 1);
+			lTestOk = (mResourceManager->QueryResourceCount() == 2);
 			assert(lTestOk);
 		}
 		if (lTestOk)

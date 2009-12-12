@@ -1,6 +1,6 @@
 
 // Author: Alexander Hugestrand
-// Copyright (c) 2002-2008, Righteous Games
+// Copyright (c) 2002-2009, Righteous Games
 
 
 
@@ -83,16 +83,12 @@ public:
 	void SetText(const Lepra::String& pText,
 		     const Lepra::Color& pTextColor,
 		     const Lepra::Color& pBackgColor,
-		     BlendFunc pBlendFunc = ALPHATEST,
-		     Lepra::uint8 pAlphaTreshold = 128,
 		     Painter* pPainter = 0);
 	void SetText(const Lepra::String& pText,
 		     const Lepra::Color& pTextColor,
 		     const Lepra::Color& pBackgColor,
 		     const Lepra::Color& pSelectedTextColor,
 		     const Lepra::Color& pSelectedBackgColor,
-		     BlendFunc pBlendFunc = ALPHATEST,
-		     Lepra::uint8 pAlphaTreshold = 128,
 		     Painter* pPainter = 0);
 
 	const Lepra::String& GetText() const;

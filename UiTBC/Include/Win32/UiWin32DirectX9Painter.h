@@ -1,7 +1,7 @@
 /*
 	Class:  DirectX9Painter
 	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Alexander Hugestrand
+	Copyright (c) 2002-2009, Righteous Games
 
 */
 
@@ -41,6 +41,7 @@ public:
 
 	void SetDestCanvas(Lepra::Canvas* pCanvas);
 	void SetRenderMode(RenderMode pRM);
+	void PrePaint();
 
 	void SetAlphaValue(Lepra::uint8 pAlpha);
 
@@ -56,9 +57,11 @@ public:
 
 	void ReadPixels(Lepra::Canvas& pDestCanvas, const Lepra::PixelRect& pRect);
 
-	RGBOrder GetRGBOrder();
+	RGBOrder GetRGBOrder() const;
 
 protected:
+	void DoSetRenderMode() const;
+
 	void DoDrawPixel(int x, int y);
 	void DoDrawLine(int pX1, int pY1, int pX2, int pY2);
 	void DoDrawRect(int pLeft, int pTop, int pRight, int pWidth, int pBottom);
@@ -100,20 +103,17 @@ private:
 
 	typedef Lepra::HashTable<int, Texture*> TextureTable;
 
-	void GetImageSize(ImageID pImageID, int& pWidth, int& pHeight);
+	void GetImageSize(ImageID pImageID, int& pWidth, int& pHeight) const;
 	int PrintText(const Lepra::String& pString, int x, int y);
+	void SetFontSmoothness(bool pSmooth);
 
 	void AdjustVertexFormat(Lepra::uint16& pVertexFormat);
-
-	void UpdateRenderMode();
 
 	Lepra::IdManager<int> mTextureIDManager;
 	TextureTable mTextureTable;
 
 	IDirect3DDevice9* mD3DDevice;
 	IDirect3DTexture9* mD3DDefaultMouseCursor;
-
-	bool mRenderModeChanged;
 
 	LOG_CLASS_DECLARE();
 };

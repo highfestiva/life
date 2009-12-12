@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2006, Righteous Games
+// Copyright (c) 2002-2009, Righteous Games
 
 
 
@@ -13,7 +13,7 @@
 #include "../../Lepra/Include/Log.h"
 #include "../../Lepra/Include/Network.h"
 #include "../../Lepra/Include/Packer.h"
-#include "../../Lepra/Include/PerformanceScope.h"
+#include "../../Lepra/Include/SystemManager.h"
 
 
 
@@ -22,67 +22,6 @@ static Lepra::LogDecorator gCLog(Lepra::LogType::GetLog(Lepra::LogType::SUB_TEST
 void ReportTestResult(const Lepra::LogDecorator& pLog, const Lepra::String& pTestName, const Lepra::String& pContext, bool pbResult);
 
 
-
-/*
-bool TestPython(const Lepra::LogDecorator& pLog)
-{
-	Lepra::String lContext;
-	bool lTestOk = true;
-
-	LEPRA_INFO_PERFORMANCE_SCOPE("All");
-
-	{
-		Cure::PythonContextManager lContextManager(60.0);
-
-		// Test some basic Python.
-		if (lTestOk)
-		{
-			LEPRA_INFO_PERFORMANCE_SCOPE("Pyhon:RunModule");
-
-			lContext = _T("basic Python");
-			int lResult = Cure::PythonContextManager::RunModule(_T("CureTest01.py"));
-			lTestOk = (lResult == 0);
-			assert(lTestOk);
-		}
-
-		// Test some basic Python.
-		if (lTestOk)
-		{
-			LEPRA_INFO_PERFORMANCE_SCOPE("Pyhon:RunModule");
-
-			lContext = _T("Python application");
-			int lResult = Cure::PythonContextManager::RunModule(_T("curetest02.py"));
-
-			Lepra::HiResTimer lTime;
-			lTime.UpdateTimer();
-			lTime.ClearTimeDiff();
-	
-			{
-				LEPRA_INFO_PERFORMANCE_SCOPE("MainLoop");
-
-				lContextManager.ClearTime();
-
-				while (lResult == 0 && lTime.GetTimeDiff() < 50.0 && !Lepra::SystemManager::GetQuitRequest())
-				{
-					lContextManager.OnTick();
-
-					Lepra::SystemManager::PollOSMessages();
-					Lepra::Thread::YieldCPU();
-
-					lTime.UpdateTimer();
-
-					lContextManager.OnEndTick();
-				}
-			}
-
-			lTestOk = (lResult == 0);
-			assert(lTestOk);
-		}
-	}
-
-	ReportTestResult(pLog, _T("Python"), lContext, lTestOk);
-	return (lTestOk);
-}*/
 
 bool TestPacker(const Lepra::LogDecorator& pAccount)
 {

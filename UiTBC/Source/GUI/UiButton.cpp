@@ -1,6 +1,6 @@
 
 // Author: Alexander Hugestrand
-// Copyright (c) 2002-2009, Alexander Hugestrand
+// Copyright (c) 2002-2009, Righteous Games
 
 
 
@@ -18,10 +18,8 @@ Button::Button(const Lepra::String& pName) :
 	mIconID(Painter::INVALID_IMAGEID),
 	mIconAlignment(ICON_CENTER),
 	mText(_T("")),
-	mTextColor(0, 0, 0),
+	mTextColor(Lepra::OFF_BLACK),
 	mTextBackgColor(255, 255, 255),
-	mTextBlendFunc(NO_BLEND),
-	mTextAlpha(128),
 	mPressed(false),
 	mState(RELEASED),
 	mOnPressedFunctor(0),
@@ -38,10 +36,8 @@ Button::Button(const Lepra::Color& pColor, const Lepra::String& pName):
 	mIconID(Painter::INVALID_IMAGEID),
 	mIconAlignment(ICON_CENTER),
 	mText(_T("")),
-	mTextColor(0, 0, 0),
+	mTextColor(Lepra::OFF_BLACK),
 	mTextBackgColor(255, 255, 255),
-	mTextBlendFunc(NO_BLEND),
-	mTextAlpha(128),
 	mPressed(false),
 	mState(RELEASED),
 	mOnPressedFunctor(0),
@@ -59,10 +55,8 @@ Button::Button(BorderComponent::BorderShadeFunc pShadeFunc, int pBorderWidth, co
 	mIconID(Painter::INVALID_IMAGEID),
 	mIconAlignment(ICON_CENTER),
 	mText(_T("")),
-	mTextColor(0, 0, 0),
+	mTextColor(Lepra::OFF_BLACK),
 	mTextBackgColor(255, 255, 255),
-	mTextBlendFunc(NO_BLEND),
-	mTextAlpha(128),
 	mPressed(false),
 	mState(RELEASED),
 	mOnPressedFunctor(0),
@@ -88,10 +82,8 @@ Button::Button(Painter::ImageID pReleasedImageID, Painter::ImageID pPressedImage
 	mIconID(Painter::INVALID_IMAGEID),
 	mIconAlignment(ICON_CENTER),
 	mText(_T("")),
-	mTextColor(0, 0, 0),
+	mTextColor(Lepra::OFF_BLACK),
 	mTextBackgColor(255, 255, 255),
-	mTextBlendFunc(NO_BLEND),
-	mTextAlpha(128),
 	mPressed(false),
 	mState(RELEASED),
 	mOnPressedFunctor(0),
@@ -289,24 +281,6 @@ void Button::Repaint(Painter* pPainter)
 
 void Button::PrintText(Painter* pPainter, int x, int y)
 {
-	switch(mTextBlendFunc)
-	{
-	case NO_BLEND:
-		pPainter->SetRenderMode(Painter::RM_NORMAL);
-		break;
-	case ALPHATEST:
-		pPainter->SetRenderMode(Painter::RM_ALPHATEST);
-		break;
-	case ALPHABLEND:
-		pPainter->SetRenderMode(Painter::RM_ALPHABLEND);
-		break;
-	default:
-		pPainter->SetRenderMode(Painter::RM_NORMAL);
-		break;
-	}
-
-	pPainter->SetAlphaValue(mTextAlpha);
-
 	pPainter->SetColor(mTextColor, 0);
 	pPainter->SetColor(mTextBackgColor, 1);
 	pPainter->PrintText(mText.c_str(), x, y);
@@ -447,15 +421,12 @@ void Button::SetIcon(Painter::ImageID pIconID,
 
 void Button::SetText(const Lepra::String& pText, 
 		     const Lepra::Color& pTextColor,
-		     const Lepra::Color& pBackgColor,
-		     BlendFunc pBlendFunc,
-		     Lepra::uint8 pAlphaTreshold)
+		     const Lepra::Color& pBackgColor)
 {
+	assert(mTextColor != Lepra::BLACK);
 	mText           = pText;
 	mTextColor      = pTextColor;
 	mTextBackgColor = pBackgColor;
-	mTextBlendFunc  = pBlendFunc;
-	mTextAlpha    = pAlphaTreshold;
 
 	OnTextChanged();
 }
