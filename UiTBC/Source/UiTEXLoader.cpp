@@ -2,7 +2,7 @@
 	Lepra::File:   TEXLoader.cpp
 	Class:  TEXLoader
 	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Alexander Hugestrand
+	Copyright (c) 2002-2009, Righteous Games
 */
 
 #include "../../ThirdParty/jpeg-6b/jinclude.h"

@@ -1,6 +1,6 @@
 
 // Author: Alexander Hugestrand
-// Copyright (c) 2002-2008, Righteous games
+// Copyright (c) 2002-2009, Righteous Games
 
 // Base class of all GUI components.
 

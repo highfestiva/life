@@ -2,7 +2,7 @@
 	Lepra::File:   Texture.cpp
 	Class:  Texture
 	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Alexander Hugestrand
+	Copyright (c) 2002-2009, Righteous Games
 */
 
 #include "../Include/UiTBC.h"

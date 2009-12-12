@@ -1,6 +1,6 @@
 
 // Author: Alexander Hugestrand
-// Copyright (c) 2002-2008, Righteous Games
+// Copyright (c) 2002-2009, Righteous Games
 
 #include "../../Lepra/Include/Canvas.h"
 #include "../../Lepra/Include/Log.h"

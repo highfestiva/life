@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2007, Righteous Games
+// Copyright (c) 2002-2009, Righteous Games
 
 // TODO: check if IEEE-doubles are stored in network byte order by the FPU.
 //       If not - add ntohll() on each long long (__int64).

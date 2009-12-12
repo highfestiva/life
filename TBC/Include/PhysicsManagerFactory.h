@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2008, Righteous Games
+// Copyright (c) 2002-2009, Righteous Games
 
 // The sole purpose of this file is to not have to include ode.h, PhysX.h
 // or any other junk file in the rest of the system (which fucks up path

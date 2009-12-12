@@ -1,7 +1,7 @@
 /*
 	Class:  Sphere
 	Author: Alexander Hugestrand
-	Copyright (c) 2002-2005, Alexander Hugestrand
+	Copyright (c) 2002-2009, Righteous Games
 
 	NOTES:
 

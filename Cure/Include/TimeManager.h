@@ -1,6 +1,6 @@
 
 // Author: Jonas Byström
-// Copyright (c) 2002-2007, Righteous Games
+// Copyright (c) 2002-2009, Righteous Games
 
 // This is the heart of the physics and network physics and also the client prediction.
 // The time manager is responsible for the game time and for the physics steps and their

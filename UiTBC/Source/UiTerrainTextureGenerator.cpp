@@ -2,7 +2,7 @@
 	Lepra::File:   TerrainTextureGenerator.cpp
 	Class:  TerrainTextureGenerator
 	Author: Alexander Hugestrand
-	Copyright (c) 2002-2006, Righteous Games
+	Copyright (c) 2002-2009, Righteous Games
 */
 
 #include "../Include/UiTerrainTextureGenerator.h"
