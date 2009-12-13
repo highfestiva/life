@@ -531,9 +531,9 @@ class PhysWriter(ChunkyWriter):
                 if not in_node:
                         print("Error: unable to find input shape node '%s'." % in_nodename)
                         sys.exit(13)
-                if not in_node.nodetype in ["polyCube", "polySphere"]:
-                        print("Error: input shape node '%s' is of unknown type '%s'." % (in_node.getFullName(), in_node.nodetype))
-                        sys.exit(14)
+##                if not in_node.nodetype in ["polyCube", "polySphere", "polyCylinder"]:
+##                        print("Error: input shape node '%s' is of unknown type '%s'." % (in_node.getFullName(), in_node.nodetype))
+##                        sys.exit(14)
                 return shape.Shape(node, in_node)
 
 

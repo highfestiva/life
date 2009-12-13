@@ -54,7 +54,8 @@ class GroupReader(DefaultMAReader):
                                   "renderLayerManager", "renderLayer", "script", \
                                   "materialInfo", "groupId", "groupParts", \
                                   "deleteComponent", "softModHandle", "softMod", \
-                                  "objectSet", "tweak", "imagePlane", "place2dTexture"]
+                                  "objectSet", "tweak", "imagePlane", "place2dTexture", \
+                                  "polyBridgeEdge"]
                 self.mat_types = ["lambert", "blinn", "phong", "shadingEngine", "layeredShader", \
                                   "file"]
                 self.basename = basename
@@ -234,7 +235,7 @@ class GroupReader(DefaultMAReader):
                 for island in for_islands:
                         for n in island:
                                 if n.nodetype in self.bad_types or n.getName().startswith("ignore_"):
-                                        #print("Removing bad %s." % n.nodetype)
+                                        #print("Removing bad %s (%s)." % (n.nodetype, n.getFullName()))
                                         islands.remove(island)
                                         break
                                 if n.nodetype == "<unknown>" and n.getParent() == None:

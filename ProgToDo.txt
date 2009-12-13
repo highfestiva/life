@@ -12,7 +12,7 @@ Game
 + Create arcade-style helicopter.
 + Add help text when dropping down console.
 . Load objects dynamically, without having to hard-code an account and class/phys/meshes name.
-. Create base world. Use mesh, not primitives, for collision.
+. Create base world. Use mesh, not primitives, for collision. (Modelling, import, load and engine.)
 
 . Create UI for picking new vehicle. Don't auto-pick when logging in!
   - Use road signs as buttons.
@@ -92,9 +92,9 @@ Engine
 + Make ODE wheels keep straight using dBodySetFiniteRotationMode() and dBodySetFiniteRotationAxis() instead of a friggen motor!
 + Fix laggy/jerky camera motion by interpolation/extrapolation. Cam adjusts interpolation factor to velocity?
 + Make SystemPainter a standalone class that does not inherit UiTbc::Painter!
-. Dropping all non-game components from any other file out there (Cure, UiCure).
-. Remove all possible classes to enable easier porting to Mac.
-. Make sure that synchronizing doesn't happen every frame on the heli when a control is changed!
++ Remove all possible classes to enable easier porting.
++ Make sure that synchronizing doesn't happen every frame on the heli when a control is changed!
+. Drop game components from engine source code (Cure, UiCure).
 . Make input configuration better - use other type of ID than enumeration??? I'm a bit unsure here...
 . Port font rendering.
 . Exchange SoundManager basics to a portable one. Or fix FMod.
@@ -103,6 +103,9 @@ Engine
 . Port client to Linux.
 . Port client to Mac OS X.
 
+. Add UV-maps to the import tool.
+. Add phys_capsule as allowed shape in the import tool and load part in engine.
+. Add support for moving stuff in static world (elevator, wind mill, etc).
 . Make export script (Maya) auto-run before save.
 . Make engine and import tool externally available to Pelle!
 . Logging on in two steps: a) normal login, server returns avatars, and b) enter world by selecting avatar. (After (a) the sync goes.)
@@ -164,10 +167,10 @@ Quality
 + Get unicode on track. Make script files all UTF-8.
 + Always use unicode script files (UTF-8).
 + Add unit test for making sure that loading more than one instance of same resource results in a single instance.
++ Replace copyright notice to Righteous Games.
 . Make build in one step: server, client, **DATA**, Linux, Windows...
-. Assertions on getting access to "wrong" parts of the system with the wrong thread. (Such as dropping users in NetworkServer.cpp from the TCP thread.)
+. Assertions on getting access to wrong parts of the system with the wrong thread. (Such as dropping users in NetworkServer.cpp from the TCP thread.)
 . Stresstest (use .lsh).
-. Replace copyright notice to Righteous Games.
 . Run test app in Windows and Linux.
 . Make sure default settings are good on a no-good computer. Like 60 FPS.
 

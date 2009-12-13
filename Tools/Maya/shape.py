@@ -55,6 +55,14 @@ class Shape:
                 elif shapenode.nodetype == "polySphere":
                         self.type = "sphere"
                         d.append(shapenode.getAttrValue("r", "r", None, default=1.0)*v0.length())
+                elif shapenode.nodetype == "polyCylinder":
+                        self.type = "capsule"
+                        r = shapenode.getAttrValue("r", "r", None, default=0.0)*v0.length()
+                        h = shapenode.getAttrValue("h", "h", None, default=0.0)*v0.length() - 2*r
+                        if r <= 0 or h <= 0:
+                                print("Error: the %s shape is used as a capsule for %s, and must have a greater height than radius*2. (r=%f, h=%f)" %
+                                      (shapenode.nodetype, scalenode.getFullName(), r, h))
+                        d += [r, h]
                 else:
                         print("Error: primitive physics shape type '%s' on node '%s' is unknown." % (shapenode.nodetype, shapenode.getFullName()))
                         sys.exit(22)
@@ -77,6 +85,11 @@ class Shape:
                         lp[1] -= self.data[2]/2
                         lp[2] -= self.data[1]/2
                 elif self._shapenode.nodetype == "polySphere":
+                        lp[0] -= self.data[0]
+                        lp[1] -= self.data[0]
+                        lp[2] -= self.data[0]
+                elif self._shapenode.nodetype == "polyCylinder":
+                        # TODO: could be improved...
                         lp[0] -= self.data[0]
                         lp[1] -= self.data[0]
                         lp[2] -= self.data[0]
