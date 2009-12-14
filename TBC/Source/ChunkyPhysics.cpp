@@ -206,9 +206,16 @@ bool ChunkyPhysics::FinalizeInit(PhysicsManager* pPhysics, unsigned pPhysicsFps,
 			if (mPhysicsType == DYNAMIC || mPhysicsType == STATIC)
 			{
 				PhysicsManager::BodyType lBodyType = (mPhysicsType == DYNAMIC)? PhysicsManager::DYNAMIC : PhysicsManager::STATIC;
-				if (lGeometry->GetParent() && lGeometry->GetJointType() == ChunkyBoneGeometry::JOINT_EXCLUDE)
+				if (lGeometry->GetParent())
 				{
-					lBodyType = PhysicsManager::STATIC;
+					if (lGeometry->GetJointType() == ChunkyBoneGeometry::JOINT_EXCLUDE)
+					{
+						lBodyType = PhysicsManager::STATIC;
+					}
+					else
+					{
+						lBodyType = PhysicsManager::DYNAMIC;
+					}
 				}
 				const Lepra::TransformationF& lBone = GetBoneTransformation(x);
 				//Lepra::QuaternionF q = lBone.GetOrientation();

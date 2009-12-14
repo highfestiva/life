@@ -193,7 +193,7 @@ int PackerUnicodeString::Pack(uint8* pDestination, const UnicodeString& pSource)
 	pDestination[1] = (uint8)(lCharCount>>8);
 	::memcpy(pDestination+2, lUtf8.c_str(), lCharCount-1);
 	pDestination[2+lCharCount-1] = '\0';
-	return (2+(int)lCharCount);
+	return ((2+(int)lCharCount+3) & (~3));
 }
 
 int PackerUnicodeString::Unpack(UnicodeString* pDestination, const uint8* pSource, int pSize)
@@ -204,7 +204,7 @@ int PackerUnicodeString::Unpack(UnicodeString* pDestination, const uint8* pSourc
 		const int lCharCount = pSource[0]|(((unsigned)pSource[1])<<8);
 		if (lCharCount >= 1 && lCharCount+2 <= pSize && pSource[2+lCharCount-1] == '\0')
 		{
-			lSize = 2+lCharCount;
+			lSize = (2+lCharCount+3) & (~3);
 			// TODO: catch UTF-8 encoding errors (might be DoS attempts).
 			const Lepra::UnicodeString lConversion = Lepra::UnicodeStringUtility::ToOwnCode((const char*)pSource+2);
 			if (pDestination)

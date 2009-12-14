@@ -58,6 +58,7 @@ class Shape:
                 elif shapenode.nodetype == "polyCylinder":
                         self.type = "capsule"
                         r = shapenode.getAttrValue("r", "r", None, default=0.0)*v0.length()
+                        # Reduce height the radius in each end, so it won't bulge out.
                         h = shapenode.getAttrValue("h", "h", None, default=0.0)*v0.length() - 2*r
                         if r <= 0 or h <= 0:
                                 print("Error: the %s shape is used as a capsule for %s, and must have a greater height than radius*2. (r=%f, h=%f)" %
@@ -89,7 +90,7 @@ class Shape:
                         lp[1] -= self.data[0]
                         lp[2] -= self.data[0]
                 elif self._shapenode.nodetype == "polyCylinder":
-                        # TODO: could be improved...
+                        # TODO: could be improved; radius is far from sufficient...
                         lp[0] -= self.data[0]
                         lp[1] -= self.data[0]
                         lp[2] -= self.data[0]

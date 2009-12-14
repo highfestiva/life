@@ -213,3 +213,4 @@ Quality
 . Remove unused rtvars (such as Ui.2D.PaintMode).
 . Port to D3D rendering + painter. Painter only needs working fonts?
 . Automatically downsize rendering (shadows) and physics micro steps if FPS are low.
+. Check that all log destinations write strings, not raw data, to disk. LogFileXxx (single one) was checked and corrected from WriteData() to WriteString().

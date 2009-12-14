@@ -232,10 +232,9 @@ bool PhysicsManagerODE::Attach(BodyID pStaticBody, BodyID pMainBody)
 	}
 	Object* lStaticObject = *x;
 	Object* lMainObject = *y;
-	dBodyID lBodyId = lMainObject->mBodyID;
-	if (lStaticObject->mBodyID || !lBodyId)
+	if (lStaticObject->mBodyID)
 	{
-		mLog.AError("Attach() with non-static/static.");
+		mLog.AError("Attach() with non-static.");
 		assert(false);
 		return (false);
 	}
@@ -243,11 +242,14 @@ bool PhysicsManagerODE::Attach(BodyID pStaticBody, BodyID pMainBody)
 	::dGeomCopyPosition(lStaticObject->mGeomID, lPos);
 	dQuaternion o;
 	::dGeomGetQuaternion(lStaticObject->mGeomID, o);
-	::dGeomSetBody(lStaticObject->mGeomID, lBodyId);
-	::dGeomSetOffsetWorldPosition(lStaticObject->mGeomID, lPos[0], lPos[1], lPos[2]);
-	::dGeomSetOffsetWorldQuaternion(lStaticObject->mGeomID, o);
 
+	dBodyID lBodyId = lMainObject->mBodyID;
+	if (lBodyId)
 	{
+		::dGeomSetBody(lStaticObject->mGeomID, lBodyId);
+		::dGeomSetOffsetWorldPosition(lStaticObject->mGeomID, lPos[0], lPos[1], lPos[2]);
+		::dGeomSetOffsetWorldQuaternion(lStaticObject->mGeomID, o);
+
 		dMass lMass;
 		const dReal lMassScalar = (dReal)lStaticObject->mMass;
 		assert(lMassScalar > 0);
@@ -375,6 +377,7 @@ Lepra::QuaternionF PhysicsManagerODE::GetBodyOrientation(BodyID pBodyId) const
 
 	dQuaternion q;
 	::dGeomGetQuaternion(lObject->mGeomID, q);
+	Lepra::QuaternionF lQuat(q[0], q[1], q[2], q[3]);
 	return (Lepra::QuaternionF(q[0], q[1], q[2], q[3]));
 }
 
@@ -388,11 +391,12 @@ void PhysicsManagerODE::GetBodyTransform(BodyID pBodyId, Lepra::TransformationF&
 	}
 
 	const dReal* lPos = dGeomGetPosition(lObject->mGeomID);
-	dQuaternion lQ;
-	dGeomGetQuaternion(lObject->mGeomID, lQ);
+	dQuaternion q;
+	dGeomGetQuaternion(lObject->mGeomID, q);
 
-	pTransform.SetPosition(Lepra::Vector3D<Lepra::float32>(lPos[0], lPos[1], lPos[2]));
-	pTransform.SetOrientation(Lepra::Quaternion<Lepra::float32>(lQ[0], lQ[1], lQ[2], lQ[3]));
+	pTransform.SetPosition(Lepra::Vector3DF(lPos[0], lPos[1], lPos[2]));
+	Lepra::QuaternionF lQuat(q[0], q[1], q[2], q[3]);
+	pTransform.SetOrientation(lQuat);
 }
 
 void PhysicsManagerODE::SetBodyTransform(BodyID pBodyId, const Lepra::TransformationF& pTransform)
@@ -410,7 +414,7 @@ void PhysicsManagerODE::SetBodyTransform(BodyID pBodyId, const Lepra::Transforma
 		const Lepra::Vector3D<Lepra::float32>& lPos = pTransform.GetPosition();
 		::dBodySetPosition(lObject->mBodyID, lPos.x, lPos.y, lPos.z);
 
-		const Lepra::Quaternion<Lepra::float32>& lQuat = pTransform.GetOrientation();
+		Lepra::QuaternionF lQuat = pTransform.GetOrientation();
 		dReal lQ[4];
 		lQ[0] = lQuat.GetA();
 		lQ[1] = lQuat.GetB();
@@ -2319,8 +2323,8 @@ bool PhysicsManagerODE::GetAngularMotorRoll(JointID pJointId, Lepra::float32& pM
 	}
 	else if (lJoint->mType == JOINT_HINGE)
 	{
-		pMaxForce = ::dJointGetHingeParam(lJoint->mJointID, dParamFMax2);
-		pTargetVelocity = ::dJointGetHingeParam(lJoint->mJointID, dParamVel2);
+		pMaxForce = ::dJointGetHingeParam(lJoint->mJointID, dParamFMax);
+		pTargetVelocity = ::dJointGetHingeParam(lJoint->mJointID, dParamVel);
 		return (true);
 	}
 	mLog.AError("GetAngularMotorRoll() - Joint is not an angular motor!");

@@ -98,6 +98,7 @@ class GroupReader(DefaultMAReader):
                         print("Error: could not open tweak file '%s'!" % ininame)
                         sys.exit(3)
                 self.fixparams(group)
+                self.extract_base_config(config)
 
                 self.fixroottrans(group)
 
@@ -275,14 +276,10 @@ class GroupReader(DefaultMAReader):
 
 
         def fixroottrans(self, group):
-                '''Do some magic with the (mesh) root transformation. When writing the physics root we
-                   will need the inverted initial transform, but 'til then we'll use our own coordinate
-                   system (more natural when playing, less so when editing).'''
+                '''Do some magic with the (mesh) root transformation. When writing the physics root (for dynamic
+                   objects, not "levels") we will need the inverted initial transform, but 'til then we'll use
+                   our own coordinate system (more natural when playing, less so when editing).'''
                 t = group[0]
-                #o = t.get_fixed_attribute("t")
-                #if o.length() != 0:
-                #        print("Error: root node %s must be placed in origo." % t.getName())
-                #        sys.exit(3)
                 ro = t.get_fixed_attribute("ro", optional=True, default=0)
                 if ro != 0:
                         print("Error: root %s must have xyz rotation order!" % t.getName())
@@ -292,7 +289,8 @@ class GroupReader(DefaultMAReader):
                 #t.fix_attribute("r", -t.get_fixed_attribute("r"))
                 ir = t.gettransformto(None, "inverse_initial_r")       # Store transformation for writing.
                 #print("Had this inverse_initial_r:\n", ir)
-                t.fix_attribute("ra", vec3(math.pi/2, 0, math.pi))
+                xa, ya, za = (math.pi/2, 0, math.pi) if self.config["type"] == "dynamic" else (math.pi/2, 0, 0)
+                t.fix_attribute("ra", vec3(xa, ya, za))
                 t.fix_attribute("r", vec3(0,0,0))
 
                 o = t.get_fixed_attribute("t", optional=True, default=(0,0,0))
@@ -467,6 +465,8 @@ class GroupReader(DefaultMAReader):
                                 p = physshape.get_lowest_world_point()
                                 if not lowestp or p.z < lowestp.z:
                                         lowestp = p
+                if self.config["type"] != "dynamic":
+                        lowestp = vec3(0,0,0)
                 #print("Setting physics lowest pos to", lowestp, "on", physroot)
                 physroot.lowestpos = lowestp
 
@@ -615,6 +615,15 @@ class GroupReader(DefaultMAReader):
                 return isGroupValid
 
                                 
+        def extract_base_config(self, config):
+                self.config = {}
+                for section in config.sections():
+                        if section.startswith("config:"):
+                                params = config.items(section)
+                                for name, value in params:
+                                        self.config[name] = stripQuotes(value)
+
+
         def apply_phys_config(self, config, group):
                 allApplied = True
 
@@ -675,17 +684,16 @@ class GroupReader(DefaultMAReader):
                                 group.append(node)
                                 used_sections[section] = True
 
-                # Fetch general settings.
-                self.config = {}
+                # General settings always used.
                 for section in config.sections():
                         if section.startswith("config:"):
-                                params = config.items(section)
-                                for name, value in params:
-                                        self.config[name] = stripQuotes(value)
                                 used_sections[section] = True
                 required = [("type", lambda x: chunkywriter.physics_type.get(x) != None)]
                 for name, config_check in required:
-                        allApplied &= config_check(self.config.get(name))
+                        ok = config_check(self.config.get(name))
+                        allApplied &= ok
+                        if not ok:
+                                print("Error: configuration \"%s\" is invalid!" % name)
 
                 for section in config.sections():
                         if not used_sections.get(section):

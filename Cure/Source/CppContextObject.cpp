@@ -115,7 +115,7 @@ bool CppContextObject::TryComplete()
 {
 	if (mPhysicsResource->GetLoadState() == RESOURCE_LOAD_COMPLETE)
 	{
-		if (GetPhysics() && GetPhysics()->GetPhysicsType() != TBC::ChunkyPhysics::STATIC)
+		if (GetPhysics())
 		{
 			GetManager()->EnableTickCallback(this);	// TODO: clear out this mess. How to use these two callback types?
 		}
