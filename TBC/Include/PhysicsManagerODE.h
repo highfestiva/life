@@ -208,6 +208,8 @@ private:
 
 	void NormalizeRotation(BodyID pObject);
 
+	void AdjustOrientation(dGeomID pGeom, Lepra::QuaternionF& pQ, bool pSetter) const;
+
 	enum JointType
 	{
 		JOINT_INVALID = 0,
@@ -287,7 +289,6 @@ private:
 	bool GetBallDiff(BodyID pBodyId, JointID pJointId, Joint3Diff& pDiff) const;
 	bool SetBallDiff(BodyID pBodyId, JointID pJointId, const Joint3Diff& pDiff);
 
-	void SetGeomTransform(dGeomID pGeomID, const Lepra::TransformationF& pTransform);
 	bool CheckBodies(BodyID& pBody1, BodyID& pBody2, Object*& pObject1, Object*& pObject2, const Lepra::tchar* pFunction);
 	bool CheckBodies2(BodyID& pBody1, BodyID& pBody2, Object*& pObject1, Object*& pObject2, const Lepra::tchar* pFunction);
 	

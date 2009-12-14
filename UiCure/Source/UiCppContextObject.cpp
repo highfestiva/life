@@ -459,7 +459,7 @@ bool CppContextObject::TryComplete()
 	}
 
 	OnPhysicsTick();
-	if (GetPhysics() && GetPhysics()->GetPhysicsType() != TBC::ChunkyPhysics::STATIC)
+	if (GetPhysics())
 	{
 		GetManager()->EnablePhysicsUpdateCallback(this);	// TODO: clear out this mess. How to use these two callback types?
 	}
