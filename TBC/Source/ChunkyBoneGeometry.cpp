@@ -6,6 +6,7 @@
 
 #include "../Include/ChunkyBoneGeometry.h"
 #include "../Include/ChunkyPhysics.h"
+#include "../Include/GeometryBase.h"
 
 
 
@@ -44,9 +45,10 @@ ChunkyBoneGeometry* ChunkyBoneGeometry::Load(ChunkyPhysics* pStructure, const vo
 	BodyData lBodyData(0, 0, 0);
 	switch (Lepra::Endian::BigToHost(lData[0]))
 	{
-		case GEOMETRY_CAPSULE:	lGeometry = new ChunkyBoneCapsule(lBodyData, 0, 0);			break;
-		case GEOMETRY_SPHERE:	lGeometry = new ChunkyBoneSphere(lBodyData, 0);				break;
-		case GEOMETRY_BOX:	lGeometry = new ChunkyBoneBox(lBodyData, Lepra::Vector3DF(0, 0, 0));	break;
+		case GEOMETRY_CAPSULE:	lGeometry = new ChunkyBoneCapsule(lBodyData);	break;
+		case GEOMETRY_SPHERE:	lGeometry = new ChunkyBoneSphere(lBodyData);	break;
+		case GEOMETRY_BOX:	lGeometry = new ChunkyBoneBox(lBodyData);	break;
+		case GEOMETRY_MESH:	lGeometry = new ChunkyBoneMesh(lBodyData);	break;
 	}
 	if (lGeometry)
 	{
@@ -286,10 +288,10 @@ void ChunkyBoneGeometry::LoadChunkyData(ChunkyPhysics* pStructure, const void* p
 
 
 
-ChunkyBoneCapsule::ChunkyBoneCapsule(const BodyData& pBodyData, Lepra::float32 pRadius, Lepra::float32 pLength):
+ChunkyBoneCapsule::ChunkyBoneCapsule(const BodyData& pBodyData):
 	Parent(pBodyData),
-	mRadius(pRadius),
-	mLength(pLength)
+	mRadius(0),
+	mLength(0)
 {
 }
 
@@ -325,6 +327,11 @@ void ChunkyBoneCapsule::SaveChunkyData(const ChunkyPhysics* pStructure, void* pD
 	lData[1] = Lepra::Endian::HostToBigF(mLength);
 }
 
+Lepra::Vector3DF ChunkyBoneCapsule::GetShapeSize() const
+{
+	return (Lepra::Vector3DF(mRadius*2, mLength+mRadius*2, mRadius*2));
+}
+
 void ChunkyBoneCapsule::LoadChunkyData(ChunkyPhysics* pStructure, const void* pData)
 {
 	Parent::LoadChunkyData(pStructure, pData);
@@ -334,16 +341,16 @@ void ChunkyBoneCapsule::LoadChunkyData(ChunkyPhysics* pStructure, const void* pD
 	mLength = Lepra::Endian::BigToHostF(lData[1]);
 }
 
-ChunkyBoneCapsule::GeometryType ChunkyBoneCapsule::GetGeometryType() const
+ChunkyBoneGeometry::GeometryType ChunkyBoneCapsule::GetGeometryType() const
 {
 	return (GEOMETRY_CAPSULE);
 }
 
 
 
-ChunkyBoneSphere::ChunkyBoneSphere(const BodyData& pBodyData, Lepra::float32 pRadius):
+ChunkyBoneSphere::ChunkyBoneSphere(const BodyData& pBodyData):
 	Parent(pBodyData),
-	mRadius(pRadius)
+	mRadius(0)
 {
 }
 
@@ -378,6 +385,11 @@ void ChunkyBoneSphere::SaveChunkyData(const ChunkyPhysics* pStructure, void* pDa
 	lData[0] = Lepra::Endian::HostToBigF(mRadius);
 }
 
+Lepra::Vector3DF ChunkyBoneSphere::GetShapeSize() const
+{
+	return (Lepra::Vector3DF(mRadius*2, mRadius*2, mRadius*2));
+}
+
 void ChunkyBoneSphere::LoadChunkyData(ChunkyPhysics* pStructure, const void* pData)
 {
 	Parent::LoadChunkyData(pStructure, pData);
@@ -386,16 +398,15 @@ void ChunkyBoneSphere::LoadChunkyData(ChunkyPhysics* pStructure, const void* pDa
 	mRadius = Lepra::Endian::BigToHostF(lData[0]);
 }
 
-ChunkyBoneCapsule::GeometryType ChunkyBoneSphere::GetGeometryType() const
+ChunkyBoneGeometry::GeometryType ChunkyBoneSphere::GetGeometryType() const
 {
 	return (GEOMETRY_SPHERE);
 }
 
 
 
-ChunkyBoneBox::ChunkyBoneBox(const BodyData& pBodyData, const Lepra::Vector3DF& pSize):
-	Parent(pBodyData),
-	mSize(pSize)
+ChunkyBoneBox::ChunkyBoneBox(const BodyData& pBodyData):
+	Parent(pBodyData)
 {
 }
 
@@ -432,7 +443,7 @@ void ChunkyBoneBox::SaveChunkyData(const ChunkyPhysics* pStructure, void* pData)
 	lData[2] = Lepra::Endian::HostToBigF(mSize.z);
 }
 
-const Lepra::Vector3DF& ChunkyBoneBox::GetShapeSize() const
+Lepra::Vector3DF ChunkyBoneBox::GetShapeSize() const
 {
 	return (mSize);
 }
@@ -447,9 +458,125 @@ void ChunkyBoneBox::LoadChunkyData(ChunkyPhysics* pStructure, const void* pData)
 	mSize.z = Lepra::Endian::BigToHostF(lData[2]);
 }
 
-ChunkyBoneCapsule::GeometryType ChunkyBoneBox::GetGeometryType() const
+ChunkyBoneGeometry::GeometryType ChunkyBoneBox::GetGeometryType() const
 {
 	return (GEOMETRY_BOX);
+}
+
+
+
+ChunkyBoneMesh::ChunkyBoneMesh(const BodyData& pBodyData):
+	Parent(pBodyData),
+	mVertexCount(0),
+	mVertices(0),
+	mTriangleCount(0),
+	mIndices(0)
+{
+}
+
+ChunkyBoneMesh::~ChunkyBoneMesh()
+{
+	Clear();
+}
+
+bool ChunkyBoneMesh::CreateBody(PhysicsManager* pPhysics, bool pIsRoot, PhysicsManager::TriggerListener* pTrigListener,
+	PhysicsManager::ForceFeedbackListener* pForceListener, PhysicsManager::BodyType,
+	const Lepra::TransformationF& pTransform)
+{
+	RemovePhysics(pPhysics);
+	mBodyId = pPhysics->CreateTriMesh(pIsRoot, mVertexCount, mVertices, mTriangleCount, mIndices,
+		pTransform, mBodyData.mFriction, mBodyData.mBounce, pTrigListener, pForceListener);
+	return (mBodyId != INVALID_BODY);
+}
+
+bool ChunkyBoneMesh::CreateTrigger(PhysicsManager*, PhysicsManager::TriggerListener*, const Lepra::TransformationF&)
+{
+	assert(false);
+	return (false);
+}
+
+unsigned ChunkyBoneMesh::GetChunkySize(const void* pData) const
+{
+	unsigned lSize = Parent::GetChunkySize(pData);
+	Lepra::uint32 lVertexCount;
+	Lepra::uint32 lTriangleCount;
+	if (mVertexCount)	// Checking size when already loaded?
+	{
+		lVertexCount = mVertexCount;
+		lTriangleCount = mTriangleCount;
+	}
+	else
+	{
+		const Lepra::uint32* lData = (const Lepra::uint32*)&((const Lepra::uint8*)pData)[lSize];
+		lVertexCount = Lepra::Endian::BigToHost(lData[0]);
+		lTriangleCount = Lepra::Endian::BigToHost(lData[1]);
+	}
+	lSize += sizeof(mVertexCount)*2 + lVertexCount*sizeof(mVertices[0])*3 +
+		lTriangleCount*sizeof(mIndices[0])*3;
+	return (lSize);
+}
+
+void ChunkyBoneMesh::SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const
+{
+	Parent::SaveChunkyData(pStructure, pData);
+
+	Lepra::uint32* lData = (Lepra::uint32*)&((char*)pData)[Parent::GetChunkySize()];
+	lData[0] = Lepra::Endian::HostToBig(mVertexCount);
+	lData[1] = Lepra::Endian::HostToBig(mTriangleCount);
+	Lepra::uint32 lBase = 2;
+	Lepra::uint32 x;
+	for (x = 0; x < mVertexCount*3; ++x)
+	{
+		lData[lBase+x] = Lepra::Endian::HostToBigF(mVertices[x]);
+	}
+	lBase += x;
+	for (x = 0; x < mTriangleCount*3; ++x)
+	{
+		lData[lBase+x] = Lepra::Endian::HostToBig(mIndices[x]);
+	}
+}
+
+Lepra::Vector3DF ChunkyBoneMesh::GetShapeSize() const
+{
+	return (Lepra::Vector3DF(10,10,10));	// Implement if you want to be able to debug mesh EXTENTS. Doesn't seem very interesting...
+}
+
+void ChunkyBoneMesh::LoadChunkyData(ChunkyPhysics* pStructure, const void* pData)
+{
+	Parent::LoadChunkyData(pStructure, pData);
+
+	const Lepra::uint32* lData = (const Lepra::uint32*)&((const char*)pData)[Parent::GetChunkySize()];
+	mVertexCount = Lepra::Endian::BigToHost(lData[0]);
+	mTriangleCount = Lepra::Endian::BigToHost(lData[1]);
+	assert(!mVertices && !mIndices);
+	mVertices = new float[mVertexCount*3];
+	mIndices = new Lepra::uint32[mTriangleCount*3];
+	Lepra::uint32 lBase = 2;
+	Lepra::uint32 x;
+	for (x = 0; x < mVertexCount*3; ++x)
+	{
+		mVertices[x] = Lepra::Endian::BigToHostF(lData[lBase+x]);
+	}
+	lBase += x;
+	for (x = 0; x < mTriangleCount*3; ++x)
+	{
+		mIndices[x] = Lepra::Endian::BigToHost(lData[lBase+x]);
+	}
+}
+
+void ChunkyBoneMesh::Clear()
+{
+	mVertexCount = 0;
+	delete (mVertices);
+	mVertices = 0;
+	mTriangleCount = 0;
+	delete (mIndices);
+	mIndices = 0;
+}
+
+ChunkyBoneGeometry::GeometryType ChunkyBoneMesh::GetGeometryType() const
+{
+	return (GEOMETRY_MESH);
 }
 
 

@@ -11,9 +11,9 @@ Game
 + Flip axes correctly in CppContextObject and UI ditto.
 + Create arcade-style helicopter.
 + Add help text when dropping down console.
-. Load objects dynamically, without having to hard-code an account and class/phys/meshes name.
-. Create base world. Use mesh, not primitives, for collision. (Modelling, import, load and engine.)
++ Create base world. Use mesh, not primitives, for collision. (Modelling, import, load and engine.)
 
+. Load objects dynamically, without having to hard-code an account and class/phys/meshes name.
 . Create UI for picking new vehicle. Don't auto-pick when logging in!
   - Use road signs as buttons.
   - Have a road sign for each vehicle.
@@ -94,15 +94,17 @@ Engine
 + Make SystemPainter a standalone class that does not inherit UiTbc::Painter!
 + Remove all possible classes to enable easier porting.
 + Make sure that synchronizing doesn't happen every frame on the heli when a control is changed!
-. Drop game components from engine source code (Cure, UiCure).
 . Make input configuration better - use other type of ID than enumeration??? I'm a bit unsure here...
-. Port font rendering.
-. Exchange SoundManager basics to a portable one. Or fix FMod.
 . Add support for "http links". I.e. start browser at specific address.
+. Exchange SoundManager basics to a portable one. Or fix FMod.
+. Port font rendering.
 . Port Posix' SystemManager (mostly placeholders at the moment).
+. Update server port in Linux.
 . Port client to Linux.
 . Port client to Mac OS X.
 
+. Remove game source code from engine source code: camera, hard-coded object placements, input handling, etc.
+. Spawn points. Matching against vehicle types...
 . Add UV-maps to the import tool.
 . Add phys_capsule as allowed shape in the import tool and load part in engine.
 . Add support for moving stuff in static world (elevator, wind mill, etc).
@@ -147,6 +149,7 @@ Engine
   - Every n seconds stores all object states at time stamps (so that randomized replay can start from any of those time stamps).
   - Use for start/end screen.
 . Make replay functionality for start/end screen.
+. Clear top of log files when too big. Preferrably copy to .log.old and start a new one.
 
  
 Quality
@@ -173,6 +176,7 @@ Quality
 . Stresstest (use .lsh).
 . Run test app in Windows and Linux.
 . Make sure default settings are good on a no-good computer. Like 60 FPS.
+. Check optimizations quickly.
 
 . Make sure shutting down client with two simultaneously logged-in users gets logged out from the server.
 . Make font rendering look good instead of ugly.

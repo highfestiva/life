@@ -784,9 +784,9 @@ bool ContextObject::SetPhysics(TBC::ChunkyPhysics* pStructure)
 	Lepra::TransformationF lTransformation;
 	if (GetNetworkObjectType() != NETWORK_OBJECT_LOCAL_ONLY)
 	{
-		const float lX = (float)Lepra::Random::Uniform(-200, 200);
-		const float lY = (float)Lepra::Random::Uniform(-200, 200);
-		lTransformation.SetPosition(Lepra::Vector3DF(lX, lY, 1.5));
+		const float lX = (float)Lepra::Random::Uniform(-63, 27);
+		const float lY = (float)Lepra::Random::Uniform(-67, 23);
+		lTransformation.SetPosition(Lepra::Vector3DF(lX, lY, 43.5));
 	}
 
 	bool lOk = (mPhysics == 0 && pStructure->FinalizeInit(lPhysics, lPhysicsFps, &lTransformation, 0, this));

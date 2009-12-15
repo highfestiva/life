@@ -789,7 +789,9 @@ class GroupReader(DefaultMAReader):
                                         if parent.nodetype == "transform":
                                                 if not parent.shape:
                                                         in_nodename = node.getInNode("i", "i")[0]
-                                                        if in_nodename:
+                                                        if node.getName().startswith("m_phys_"):
+                                                                parent.shape = node     # Use triangle mesh as physics shape.
+                                                        elif in_nodename:
                                                                 parent.shape = self.findNode(in_nodename)
                                                                 if not parent.shape:
                                                                         print("Error: %s's input node %s does not exist!" % (node.getFullName(), in_nodename))
@@ -803,7 +805,7 @@ class GroupReader(DefaultMAReader):
                 for node in group:
                         if node.getName().startswith("phys_") and node.nodetype == "transform":
                                 if not node.shape:
-                                        print("Error: %s has no primitive shape for physics (did you 'delete history or copy without instancing'?)!" % node.getFullName())
+                                        print("Error: %s has no primitive shape for physics (did you 'delete history' or 'copy without instancing'?)!" % node.getFullName())
                                         isGroupValid = False
                 return isGroupValid
 

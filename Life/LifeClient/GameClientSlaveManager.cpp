@@ -393,13 +393,13 @@ void GameClientSlaveManager::TickUiUpdate()
 		const float lTargetCameraXyDistance = 20.0f;
 		const float lCurrentCameraXyDistance = lTargetCameraPosition.GetDistance(lAvatarXyPosition);
 		lTargetCameraPosition = lAvatarXyPosition + (lTargetCameraPosition-lAvatarXyPosition)*(lTargetCameraXyDistance/lCurrentCameraXyDistance);
-		if (lAvatarPosition.z > 5)
+		if (lAvatarPosition.z > -20)
 		{
 			lTargetCameraPosition.z = lAvatarPosition.z;
 		}
 		else
 		{
-			lTargetCameraPosition.z = 5.0f;
+			lTargetCameraPosition.z = -20.0f;
 		}
 
 		/*// Temporary: changed to "cam stay behind" mode.

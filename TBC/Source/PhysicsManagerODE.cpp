@@ -51,23 +51,11 @@ PhysicsManagerODE::PhysicsManagerODE()
 
 PhysicsManagerODE::~PhysicsManagerODE()
 {
-	ObjectTable::iterator x = mObjectTable.begin();
-	for (; x != mObjectTable.end(); ++x)
+	while (!mObjectTable.empty())
 	{
-		Object* lObject = *x;
-		if (lObject->mTriMeshID != 0)
-		{
-			::dGeomTriMeshDataDestroy(lObject->mTriMeshID);
-		}
-		if (lObject->mBodyID != 0)
-		{
-			::dBodyDestroy(lObject->mBodyID);
-		}
-		::dGeomDestroy(lObject->mGeomID);
-		delete lObject;
+		Object* lObject = *mObjectTable.begin();
+		DeleteBody((BodyID)lObject);
 	}
-
-	JointTable::iterator lJIter;
 
 	::dWorldDestroy(mWorldID);
 	::dSpaceDestroy(mSpaceID);
@@ -287,24 +275,25 @@ bool PhysicsManagerODE::Attach(BodyID pStaticBody, BodyID pMainBody)
 	return (true);
 }
 
-PhysicsManager::BodyID PhysicsManagerODE::CreateTriMesh(bool pIsRoot, const GeometryBase* pMesh,
+PhysicsManager::BodyID PhysicsManagerODE::CreateTriMesh(bool pIsRoot, Lepra::uint32 pVertexCount,
+	const float* pVertices, Lepra::uint32 pTriangleCount, const Lepra::uint32* pIndices,
 	const Lepra::TransformationF& pTransform, Lepra::float32 pFriction, Lepra::float32 pBounce,
 	TriggerListener* pTriggerListener, ForceFeedbackListener* pForceListener)
 {
 	Object* lObject = new Object(mWorldID, pIsRoot);
-	lObject->mTriMeshID = dGeomTriMeshDataCreate();
 
-	dGeomTriMeshDataBuildSingle(lObject->mTriMeshID,
-				    (const dReal*)pMesh->GetVertexData(),
-				    sizeof(Lepra::float32) * 3,
-				    (int)pMesh->GetVertexCount(),
-				    (const int*)pMesh->GetIndexData(),
-				    (int)pMesh->GetTriangleCount() * 3,
-				    sizeof(int) * 3);
+	lObject->mTriMeshID = ::dGeomTriMeshDataCreate();
+	::dGeomTriMeshDataBuildSingle(lObject->mTriMeshID,
+				    pVertices,
+				    sizeof(pVertices[0]) * 3,
+				    pVertexCount,
+				    pIndices,
+				    pTriangleCount * 3,
+				    sizeof(pIndices[0]) * 3);
 
-	lObject->mGeomID = dCreateTriMesh(mSpaceID, lObject->mTriMeshID, 0, 0, 0);
-	dGeomSetBody(lObject->mGeomID, lObject->mBodyID);
-	dGeomSetData(lObject->mGeomID, lObject);
+	lObject->mGeomID = ::dCreateTriMesh(mSpaceID, lObject->mTriMeshID, 0, 0, 0);
+	//::dGeomSetBody(lObject->mGeomID, lObject->mBodyID);
+	::dGeomSetData(lObject->mGeomID, lObject);
 	lObject->mTriggerListener = pTriggerListener;
 	lObject->mForceFeedbackListener = pForceListener;
 	assert(lObject->mForceFeedbackListener);
@@ -314,7 +303,7 @@ PhysicsManager::BodyID PhysicsManagerODE::CreateTriMesh(bool pIsRoot, const Geom
 	// TODO: add body approximation (sphere).
 
 	lObject->mGeometryData[0] = 1.0f;	// TODO: approximate sphere radius by calculating average vertex distance.
-	lObject->mMass = 1.0f;	// TODO: add mass to interface when suitable.
+	lObject->mMass = 1.0f;	// TODO: add mass to interface when/if suitable.
 	lObject->mFriction = -pFriction;
 	lObject->mBounce = pBounce;
 
@@ -344,10 +333,14 @@ void PhysicsManagerODE::DeleteBody(BodyID pBodyId)
 		Object* lObject = *x;
 		if (lObject->mBodyID != 0)
 		{
-			dBodyDestroy(lObject->mBodyID);
+			::dBodyDestroy(lObject->mBodyID);
 		}
-		dGeomDestroy(lObject->mGeomID);
-		delete lObject;
+		if (lObject->mTriMeshID != 0)
+		{
+			::dGeomTriMeshDataDestroy(lObject->mTriMeshID);
+		}
+		::dGeomDestroy(lObject->mGeomID);
+		delete (lObject);
 		mObjectTable.erase(x);
 		mAutoDisabledObjectSet.erase(lObject);
 	}

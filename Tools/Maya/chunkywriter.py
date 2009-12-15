@@ -391,7 +391,7 @@ class PhysWriter(ChunkyWriter):
 
         def _writeshape(self, shape):
                 # Write all general parameters first.
-                types = {"capsule":1, "sphere":2, "box":3}
+                types = {"capsule":1, "sphere":2, "box":3, "mesh":4}
                 self._writeint(types[shape.type])
                 node = shape.getnode()
                 totalmass = self._gettotalmass()
@@ -474,7 +474,7 @@ class PhysWriter(ChunkyWriter):
                 if options.options.verbose:
                         print("Writing shape %s with rootindex %i." % (node.getName(), rootindex))
                 for x in shape.data:
-                        self._writefloat(math.fabs(x))
+                        self._writenumber(x)
                 self._addfeat("physical geometry:physical geometries", 1)
 
 

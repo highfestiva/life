@@ -144,8 +144,9 @@ public:
 	virtual bool Attach(BodyID pStaticBody, BodyID pMainBody) = 0;
 
 	// Tri meshes are always static.
-	virtual BodyID CreateTriMesh(bool pIsRoot, const GeometryBase* pMesh,
-		const Lepra::Transformation<Lepra::float32>& pTransform, Lepra::float32 pFriction = 1,
+	virtual BodyID CreateTriMesh(bool pIsRoot, Lepra::uint32 pVertexCount, const float* pVertices,
+		Lepra::uint32 pTriangleCount, const Lepra::uint32* pIndices,
+		const Lepra::TransformationF& pTransform, Lepra::float32 pFriction = 1,
 		Lepra::float32 pBounce = 0, TriggerListener* pTriggerListener = 0,
 		ForceFeedbackListener* pForceListener = 0) = 0;
 

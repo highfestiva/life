@@ -64,8 +64,16 @@ class Shape:
                                 print("Error: the %s shape is used as a capsule for %s, and must have a greater height than radius*2. (r=%f, h=%f)" %
                                       (shapenode.nodetype, scalenode.getFullName(), r, h))
                         d += [r, h]
+                elif shapenode.nodetype == "mesh":
+                        self.type = "mesh"
+                        #print(shapenode._fixattr)
+                        vtx = shapenode.get_fixed_attribute("rgvtx")
+                        tri = shapenode.get_fixed_attribute("rgtri")
+                        d += [len(vtx)//3, len(tri)//3]
+                        d += list(map(lambda x: float(x), vtx))
+                        d += list(map(lambda x: int(x), tri))
                 else:
-                        print("Error: primitive physics shape type '%s' on node '%s' is unknown." % (shapenode.nodetype, shapenode.getFullName()))
+                        print("Error: primitive physics shape type '%s' on node '%s' is unknown." % (shapenode.nodetype, shapenode.getName()))
                         sys.exit(22)
 
                 if check_orthonormal:
@@ -94,6 +102,9 @@ class Shape:
                         lp[0] -= self.data[0]
                         lp[1] -= self.data[0]
                         lp[2] -= self.data[0]
+                elif self._shapenode.nodetype == "mesh":
+                        # Could be improved; currently seem unnecessary.
+                        pass
                 else:
                         print("Error: (2) primitive physics shape type '%s' on node '%s' is unknown." % (shapenode.nodetype, shapenode.getFullName()))
                         sys.exit(22)
