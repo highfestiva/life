@@ -44,13 +44,13 @@ bool TEST_RUN_LEPRA();
 bool TEST_RUN_TBC();
 bool TEST_RUN_CURE();
 bool TEST_RUN_NETPHYS();
-bool ExportStructure();
+//bool ExportStructure();
 bool EXPORT_MESH();
 void ShowTestResult(const Lepra::LogDecorator& pAccount, bool pbTestOk);
 
 
 
-static bool ExportData()
+/*static bool ExportData()
 {
 	bool lTestOk = ExportStructure();
 	if (lTestOk)
@@ -58,7 +58,7 @@ static bool ExportData()
 		//lTestOk = EXPORT_MESH();
 	}
 	return (lTestOk);
-}
+}*/
 
 
 
@@ -75,7 +75,7 @@ private:
 		TBC_BIT = (1<<1),
 		CURE_BIT = (1<<2),
 		NETWORK_PHYSICS_BIT = (1<<3),
-		EXPORT_BIT = (1<<4),
+		//EXPORT_BIT = (1<<4),
 	};
 	unsigned mTestBits;
 	LOG_CLASS_DECLARE();
@@ -100,10 +100,10 @@ CureTestApplication::CureTestApplication(const Lepra::StringUtility::StringVecto
 		{
 			lMask |= TBC_BIT;
 		}
-		else if (lArgument == _T("EXPORT"))
+		/*else if (lArgument == _T("EXPORT"))
 		{
 			lMask |= EXPORT_BIT;
-		}
+		}*/
 		else if (lArgument == _T("CURE"))
 		{
 			lMask |= CURE_BIT;
@@ -161,10 +161,10 @@ int CureTestApplication::Run()
 	{
 		lTestOk = TEST_RUN_TBC();
 	}
-	if (lTestOk && mTestBits&EXPORT_BIT)
+	/*if (lTestOk && mTestBits&EXPORT_BIT)
 	{
 		lTestOk = ExportData();
-	}
+	}*/
 	if (lTestOk && mTestBits&CURE_BIT)
 	{
 		lTestOk = TEST_RUN_CURE();

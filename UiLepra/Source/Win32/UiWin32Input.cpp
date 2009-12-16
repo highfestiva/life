@@ -1,8 +1,9 @@
-/*
-	Class:  Win32InputElement, Win32InputDevice, Win32InputManager
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2009, Righteous Games
-*/
+
+// Author: Jonas Byström, Alexander Hugestrand
+// Copyright (c) 2002-2009, Righteous Games
+
+
+
 
 #include "../../../Lepra/Include/Log.h"
 #include "../../Include/Win32/UiWin32Input.h"
@@ -12,8 +13,12 @@
 #pragma comment(lib, "dinput8.lib")
 #pragma comment(lib, "dxguid.lib")
 
+
+
 namespace UiLepra
 {
+
+
 
 InputManager* InputManager::CreateInputManager(DisplayManager* pDisplayManager)
 {
@@ -81,21 +86,26 @@ void Win32InputElement::SetValue(int pValue)
 	}
 }
 
-unsigned Win32InputElement::GetCalibrationDataSize()
+Lepra::String Win32InputElement::GetCalibration() const
 {
-	return sizeof(mMin) + sizeof(mMax);
+	Lepra::String lData;
+	lData += Lepra::StringUtility::IntToString(mMin, 10);
+	lData += _T(", ");
+	lData += Lepra::StringUtility::IntToString(mMax, 10);
+	return (lData);
 }
 
-void Win32InputElement::GetCalibrationData(Lepra::uint8* pData)
+bool Win32InputElement::SetCalibration(const Lepra::String& pData)
 {
-	((unsigned*)pData)[0] = mMin;
-	((unsigned*)pData)[1] = mMax;
-}
-
-void Win32InputElement::SetCalibrationData(const Lepra::uint8* pData)
-{
-	mMin = ((unsigned*)pData)[0];
-	mMax = ((unsigned*)pData)[1];
+	bool lOk = false;
+	Lepra::StringUtility::StringVector lData = Lepra::StringUtility::Split(pData, _T(", "));
+	if (lData.size() >= 2)
+	{
+		lOk = true;
+		lOk &= Lepra::StringUtility::StringToInt(lData[0], mMin, 10);
+		lOk &= Lepra::StringUtility::StringToInt(lData[1], mMax, 10);
+	}
+	return (lOk);
 }
 
 
@@ -225,8 +235,8 @@ BOOL CALLBACK Win32InputDevice::EnumElementsCallback(LPCDIDEVICEOBJECTINSTANCE l
 			{
 				const int lIntervalRange = lRange.lMax-lRange.lMin;
 				const int lMid = lIntervalRange / 2 + lRange.lMin;
-				const int lMin = lMid - lIntervalRange/2/3;	// Don't use full range, might not be physically accessible.
-				const int lMax = lMid + lIntervalRange/2/3;	// Don't use full range, might not be physically accessible.
+				const int lMin = lMid - lIntervalRange/2/8;	// Don't use full range, might not be physically accessible.
+				const int lMax = lMid + lIntervalRange/2/8;	// Don't use full range, might not be physically accessible.
 				lElement->SetValue(lMin);
 				lElement->SetValue(lMax);
 				lElement->SetValue(lMid);
@@ -535,7 +545,7 @@ void Win32InputManager::SetKey(KeyCode pWParam, long pLParam, bool pIsDown)
 	{
 		pWParam = IN_KBD_RSHIFT;
 	}
-	InputManager::SetKey(pWParam, pIsDown);
+	Parent::SetKey(pWParam, pIsDown);
 }
 
 BOOL CALLBACK Win32InputManager::EnumDeviceCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvRef)
@@ -554,32 +564,56 @@ BOOL CALLBACK Win32InputManager::EnumDeviceCallback(LPCDIDEVICEINSTANCE lpddi, L
 	}
 
 	Win32InputDevice* lDevice = new Win32InputDevice(lDIDevice, lpddi, lInputManager);
-	// Since we can't detect the mouse and keyboard by string comparisons 
-	// due to the language of the OS, we have to make a qualified guess.
-	if (lDevice->GetNumAnalogueElements() >= 2 &&
-	   lDevice->HaveRelativeAxes() == true &&
-	   lDevice->GetNumDigitalElements() >= 1)
+	InputDevice::Interpretation lInterpretation = InputDevice::TYPE_OTHER;
+	switch (lpddi->dwDevType & 0xFF)
 	{
-		lDevice->SetInterpretation(InputDevice::TYPE_MOUSE, lInputManager->mTypeCount[InputDevice::TYPE_MOUSE]);
-		++lInputManager->mTypeCount[InputDevice::TYPE_MOUSE];
-		if (lInputManager->mMouse == 0)
+		case DI8DEVTYPE_MOUSE:		lInterpretation = InputDevice::TYPE_MOUSE;	break;
+		case DI8DEVTYPE_KEYBOARD:	lInterpretation = InputDevice::TYPE_KEYBOARD;	break;
+		case DI8DEVTYPE_JOYSTICK:	lInterpretation = InputDevice::TYPE_JOYSTICK;	break;
+		case DI8DEVTYPE_GAMEPAD:	lInterpretation = InputDevice::TYPE_GAMEPAD;	break;
+		case DI8DEVTYPE_1STPERSON:	lInterpretation = InputDevice::TYPE_1STPERSON;	break;
+		case DI8DEVTYPE_DRIVING:
 		{
-			lInputManager->mMouse = lDevice;
+			switch ((lpddi->dwDevType>>8) & 0xFF)
+			{
+				case DI8DEVTYPEDRIVING_COMBINEDPEDALS:
+				case DI8DEVTYPEDRIVING_DUALPEDALS:
+				case DI8DEVTYPEDRIVING_THREEPEDALS:	lInterpretation = InputDevice::TYPE_PEDALS;	break;
+				default:				lInterpretation = InputDevice::TYPE_WHEEL;	break;
+			}
 		}
-	}
-	else if (lDevice->GetNumDigitalElements() >= 64)
-	{
-		lDevice->SetInterpretation(InputDevice::TYPE_KEYBOARD, lInputManager->mTypeCount[InputDevice::TYPE_KEYBOARD]);
-		++lInputManager->mTypeCount[InputDevice::TYPE_KEYBOARD];
-		if (lInputManager->mKeyboard == 0)
+		break;
+		case DI8DEVTYPE_FLIGHT:
 		{
-			lInputManager->mKeyboard = lDevice;
+			switch ((lpddi->dwDevType>>8) & 0xFF)
+			{
+				case DI8DEVTYPEFLIGHT_RC:	lInterpretation = InputDevice::TYPE_GAMEPAD;	break;
+				case DI8DEVTYPEFLIGHT_STICK:	lInterpretation = InputDevice::TYPE_JOYSTICK;	break;
+				default:			lInterpretation = InputDevice::TYPE_FLIGHT;	break;
+			}
 		}
+		break;
+		case DI8DEVTYPE_SUPPLEMENTAL:
+		{
+			switch ((lpddi->dwDevType>>8) & 0xFF)
+			{
+				case DI8DEVTYPESUPPLEMENTAL_COMBINEDPEDALS:
+				case DI8DEVTYPESUPPLEMENTAL_DUALPEDALS:
+				case DI8DEVTYPESUPPLEMENTAL_RUDDERPEDALS:
+				case DI8DEVTYPESUPPLEMENTAL_THREEPEDALS:	lInterpretation = InputDevice::TYPE_PEDALS;	break;
+			}
+		}
+		break;
 	}
-	else
+	lDevice->SetInterpretation(lInterpretation, lInputManager->mTypeCount[lInterpretation]);
+	++lInputManager->mTypeCount[lInterpretation];
+	if (lInterpretation == InputDevice::TYPE_MOUSE && lInputManager->mMouse == 0)
 	{
-		lDevice->SetInterpretation(InputDevice::TYPE_OTHER, lInputManager->mTypeCount[InputDevice::TYPE_OTHER]);
-		++lInputManager->mTypeCount[InputDevice::TYPE_OTHER];
+		lInputManager->mMouse = lDevice;
+	}
+	else if (lInterpretation == InputDevice::TYPE_KEYBOARD && lInputManager->mKeyboard == 0)
+	{
+		lInputManager->mKeyboard = lDevice;
 	}
 	lInputManager->mDeviceList.push_back(lDevice);
 
@@ -656,8 +690,6 @@ void Win32InputManager::RemoveObserver()
 	}
 }
 
-
-
 void Win32InputManager::SetMousePosition(int pMsg, int x, int y)
 {
 	if (pMsg == WM_NCMOUSEMOVE && mDisplayManager)
@@ -672,6 +704,11 @@ void Win32InputManager::SetMousePosition(int pMsg, int x, int y)
 
 	mCursorX = 2.0 * (double)x / (double)mScreenWidth  - 1.0;
 	mCursorY = 2.0 * (double)y / (double)mScreenHeight - 1.0;
+}
+
+bool Win32InputManager::IsInitialized()
+{
+	return mInitialized;
 }
 
 

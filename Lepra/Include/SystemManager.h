@@ -1,5 +1,5 @@
 
-// Author: Alexander Hugestrand
+// Author: Jonas Byström
 // Copyright (c) 2002-2009, Righteous Games
 
 
@@ -16,9 +16,14 @@
 namespace Lepra
 {
 
+
+
 class SystemManager
 {
 public:
+	static void Init();
+	static void Shutdown();
+
 	// Get root directory ( '/', 'C:\', 'Macintosh HD', etc..).
 	static String GetRootDirectory();
 	static String GetCurrentDirectory();
@@ -28,9 +33,8 @@ public:
 	static String QueryFullUserName();
 	static std::string GetRandomId();
 
-	//
-	// Hardware info.
-	//
+	static void WebBrowseTo(const String& pUrl);
+
 	static String GetUniqueHardwareString();
 
 	// The Cpu frequency may be an approximation, which means that it may vary 
@@ -48,40 +52,31 @@ public:
 	static uint64 GetAmountVirtualMemory();
 	static uint64 GetAvailVirtualMemory();
 
-	static bool GetQuitRequest();
-	static void SetQuitRequest(bool pQuitRequest);
-
-	// Platform specific functions.
-
-	static void Init();
-	static void Shutdown();
-
-	// Exit this application NOW.
-	static void ExitProcess(int pExitCode);
+	static int GetQuitRequest();
+	static void AddQuitRequest(int pValue);
+	static void ExitProcess(int pExitCode);	// Exit this application NOW.
 
 private:
 	static uint64 SingleCpuTest();
 	static inline unsigned SingleMipsTest();
 	static inline void BOGOMIPSDelay(unsigned pLoopCount);
 
-#if defined(LEPRA_WINDOWS)
-	static BOOL CtrlCallback(DWORD fdwCtrlType);
-#endif // LEPRA_WINDOWS
-
-	static bool smQuitRequest;
+	static int mQuitRequest;
 
 	LOG_CLASS_DECLARE();
 };
+
+
 
 inline uint64 SystemManager::GetCpuTick()
 {
 #ifdef LEPRA_MSVC_X86
 	__asm rdtsc;
-#elif defined (LEPRA_GCC) && defined(__i386__)
+#elif defined(LEPRA_GCC) && defined(__i386__)
 	uint64 x;
 	__asm__ volatile (".byte 0x0f, 0x31" : "=A" (x));
 	return x;
-#elif defined (LEPRA_GCC) && defined(__x86_64__)
+#elif defined(LEPRA_GCC) && defined(__x86_64__)
 	unsigned hi, lo;
 	__asm__ __volatile__ ("rdtsc" : "=a"(lo), "=d"(hi));
 	return ((uint64)lo) | (((uint64)hi)<<32);
@@ -89,5 +84,7 @@ inline uint64 SystemManager::GetCpuTick()
 #error "GetCpuTick() not yet implemented on this platform."
 #endif // LEPRA_MSVC_X86/<Unimplemented target>
 }
+
+
 
 }

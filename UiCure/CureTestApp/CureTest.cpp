@@ -95,7 +95,7 @@ bool TerrainTest::Test()
 	lTerrainManager.Clear();
 	delete (lResourceManager);
 
-	Lepra::SystemManager::SetQuitRequest(false);
+	Lepra::SystemManager::AddQuitRequest(-1);
 
 	ReportTestResult(mLog, _T("TerrainManager"), lContext, lTestOk);
 	return (lTestOk);

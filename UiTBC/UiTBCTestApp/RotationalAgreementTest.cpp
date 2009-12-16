@@ -298,7 +298,7 @@ void RunRotationalAgreementTest()
 
 	if(lOk)
 	{
-		Lepra::SystemManager::SetQuitRequest(false);
+		Lepra::SystemManager::AddQuitRequest(-1);
 		Lepra::Timer lTotalTimer;
 		Lepra::Timer lDeltaTimer;
 		i = 0;

@@ -1567,36 +1567,6 @@
 			</Filter>
 		</Filter>
 		<Filter
-			Name="MTwist"
-			>
-			<Filter
-				Name="Header Files"
-				Filter="h;hpp;hxx;hm;inl;inc;xsd"
-				>
-				<File
-					RelativePath=".\mtwist-0.8\mtwist.h"
-					>
-				</File>
-				<File
-					RelativePath=".\mtwist-0.8\randistrs.h"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="Source Files"
-				Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
-				>
-				<File
-					RelativePath=".\mtwist-0.8\mtwist.c"
-					>
-				</File>
-				<File
-					RelativePath=".\mtwist-0.8\randistrs.c"
-					>
-				</File>
-			</Filter>
-		</Filter>
-		<Filter
 			Name="FastDelegate"
 			>
 			<File

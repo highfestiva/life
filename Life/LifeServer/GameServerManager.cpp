@@ -94,7 +94,7 @@ bool GameServerManager::Tick()
 	if (lMaxLoginCount > 0 && lUserCount == 0)
 	{
 		mLog.AWarning("Server automatically shuts down in debug when all users have logged off.");
-		Lepra::SystemManager::SetQuitRequest(true);
+		Lepra::SystemManager::AddQuitRequest(+1);
 	}
 #endif // Debug.
 

@@ -785,7 +785,7 @@ bool ContextObject::SetPhysics(TBC::ChunkyPhysics* pStructure)
 	if (GetNetworkObjectType() != NETWORK_OBJECT_LOCAL_ONLY)
 	{
 		const float lX = (float)Lepra::Random::Uniform(-63, 27);
-		const float lY = (float)Lepra::Random::Uniform(-67, 23);
+		const float lY = (float)Lepra::Random::Uniform(-23, 67);
 		lTransformation.SetPosition(Lepra::Vector3DF(lX, lY, 43.5));
 	}
 

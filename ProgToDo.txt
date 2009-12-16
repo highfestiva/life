@@ -94,8 +94,8 @@ Engine
 + Make SystemPainter a standalone class that does not inherit UiTbc::Painter!
 + Remove all possible classes to enable easier porting.
 + Make sure that synchronizing doesn't happen every frame on the heli when a control is changed!
-. Make input configuration better - use other type of ID than enumeration??? I'm a bit unsure here...
-. Add support for "http links". I.e. start browser at specific address.
++ Make input configuration better - use other type of ID than enumeration??? I'm a bit unsure here...
++ Add support for "http links". I.e. start browser at specific address.
 . Exchange SoundManager basics to a portable one. Or fix FMod.
 . Port font rendering.
 . Port Posix' SystemManager (mostly placeholders at the moment).
@@ -218,3 +218,5 @@ Quality
 . Port to D3D rendering + painter. Painter only needs working fonts?
 . Automatically downsize rendering (shadows) and physics micro steps if FPS are low.
 . Check that all log destinations write strings, not raw data, to disk. LogFileXxx (single one) was checked and corrected from WriteData() to WriteString().
+. Get licences in order. Both C++ and Python. Both mine and third party.
+. Separate input and output data in the data folder. Create a proper directory structure for external release.

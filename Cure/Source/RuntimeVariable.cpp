@@ -454,7 +454,7 @@ std::list<Lepra::String> RuntimeVariableCompleter::CompleteCommand(const Lepra::
 		for (; x != lVariableList.end(); ++x)
 		{
 			const Lepra::String& lCompletion = *x;
-			if (lCompletion.substr(0, lPartialVariableName.length()) == lPartialVariableName)
+			if (Lepra::StringUtility::StartsWith(lCompletion, lPartialVariableName))
 			{
 				// Add to list.
 				lCompletionList.push_back(mPrefix+lCompletion);

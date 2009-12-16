@@ -76,7 +76,7 @@ int ServerConsoleManager::OnCommand(const Lepra::String& pCommand, const Lepra::
 					if (pParameterVector.size() == 1 && pParameterVector[0] == _T("!"))
 					{
 						mLog.Warningf(_T("Forced termination with %i logged-in clients."), lClientCount);
-						Lepra::SystemManager::SetQuitRequest(true);
+						Lepra::SystemManager::AddQuitRequest(+1);
 					}
 					else
 					{
@@ -86,7 +86,7 @@ int ServerConsoleManager::OnCommand(const Lepra::String& pCommand, const Lepra::
 				else
 				{
 					mLog.AHeadline("Terminating due to user command.");
-					Lepra::SystemManager::SetQuitRequest(true);
+					Lepra::SystemManager::AddQuitRequest(+1);
 				}
 			}
 			break;

@@ -1,50 +1,10 @@
-/*
-	Class:  TextInputObserver,
-		KeyCodeInputObserver,
-		MouseInputObserver,
-		InputFunctor,
-		InputElement,
-		InputDevice,
-		InputManager,
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2009, Righteous Games
 
-	NOTES:
+// Author: Jonas Byström
+// Copyright (c) 2002-2009, Righteous Games
 
-	These classes constitutes the input system. This system offers a variety 
-	of ways of reading input from the keyboard and the mouse, but only one way 
-	to read other devices.
 
-	The InputDevice- and the InputElement-interfaces are preferrably used for
-	in-game action like steering the player's character, and nothing else.
-	There is no way to tell which button on the keyboard (for instance) an 
-	InputElement is associated with before the key is actually pressed and
-	you can find out which index it has, unless all keyboards in the world
-	are indexed in the same way.
 
-	Other ways of reading input from the mouse and the keyboard are:
-
-	1. Read the current state of a button and the mouse cursor. This is the
-	   easiest way of reading input when you don't care about how many times 
-	   the user clicks/presses a button.
-	2. Implement one of the following interfaces:
-
-	   * TextInputObserver. This makes life easy to read text from the 
-	     keyboard. You don't even have to care about the language settings
-	     since this is handled by the underlying OS.
-
-	   * KeyCodeInputObserver. Use this if it is important to read every
-	     keypress including the repeated keypresses that occur automatically 
-	     when a key is pressed for a longer period of time.
-
-	   * MouseInputObserver. This interface is intentionally limited to only
-	     one function - OnDoubleClick(). All other functionality is 
-	     implemented much better using the InputDevice of the mouse, or by
-	     reading the state directly through InputManager.
-*/
-
-#ifndef INPUT_H
-#define INPUT_H
+#pragma once
 
 #include <hash_set>
 #include <list>
@@ -53,19 +13,19 @@
 #include "../../Lepra/Include/String.h"
 #include "../../Lepra/Include/HashTable.h"
 
+
+
 namespace UiLepra
 {
+
+
 
 class DisplayManager;
 class InputDevice;
 class InputElement;
 class InputManager;
 
-/*
-	class TextInputObserver,
-	      KeyCodeInputObserver,
-	      MouseInputObserver
-*/
+
 
 class TextInputObserver
 {
@@ -73,7 +33,7 @@ public:
 	virtual bool OnChar(Lepra::tchar pChar) = 0;
 };
 
-class KeyCodeInputObserver; // Declared at the end of the file.
+class KeyCodeInputObserver;
 
 class MouseInputObserver
 {
@@ -83,61 +43,6 @@ public:
 
 
 
-/*
-	class InputFunctor
-	template class TInputFunctor
-
-	These classes are used to manage function pointers to functions that 
-	aren't static, where the functions themselves are declared as:
-
-	void FunctionName(InputElement* pElement);
-
-	This makes it easy to listen to input, whether you like to see it as
-	regular input events, or "actions".
-
-	To illustrate what I'm talking about, consider the following class:
-
-	class Player
-	{
-	public:
-		void OnJump(InputElement* pElement);
-		void OnShoot(InputElement* pElement);
-		...
-
-		void BindInput();
-	};
-
-	Now, in BindInput(), given that we have two InputElements e1 and e2,
-	we can write:
-
-	BIND_INPUT(e1, OnJump, Player);    
-	BIND_INPUT(e2, OnShoot, Player);
-
-	...where BIND_INPUT(_e, _func, _class) is a macro defined as:
-	(e)->AddFunctor(new TInputFunctor<_class>(this, (_func)));
-
-	When the state of e1 and e2 changes, the functions OnJump() and OnShoot()
-	will be called.
-
-	To unbind elements, just make the call "element->ClearFunctorArray()" on that 
-	element.
-
-	In order to store keybindings in a file, you need to identify the exact
-	element to bind. To do this, store the following information:
-
-	1. The device's identifier. Can be found through element->
-	   GetParentDevice()->GetIdentifier().
-	2. The device's index (in case there are more than one device with the 
-	   same identifier). This can be found through InputManager::
-	   GetDeviceManager()->GetDeviceIndex(element->GetParentDevice()).
-	3. The element's identifier or index. (element->GetIdentifier() or 
-	   element->GetParentDevice()->GetElementIndex(element)).
-
-	If you have deviceID, deviceIndex and elementID, you can then find the
-	element e like this:
-	e = InputManager::GetDeviceManager()->FindDevice(deviceID, deviceIndex)->
-	GetElement(elementID).
-*/
 class InputFunctor
 {
 public:
@@ -171,31 +76,6 @@ private:
 
 
 
-
-
-
-/*
-	class InputElement
-
-	This class represents any input element on an input device.
-	It can be either "digital" (boolean - true or false) like a 
-	button, or analogue like the axes of a joystick.
-
-	The identification string should not be used to search for 
-	(or identify) elements, since the actual string depends on 
-	the language of the OS among other things. If you need to
-	find a specific element on a device, you have to know its 
-	type (digital or analogue) and its index.
-
-	All analogue elements that give absolute coordinates (like
-	the axes on a joystick) should be calibrated before use.
-	The element will always auto-calibrate wile being used.
-	So all you need to do to calibrate your joystick is to move
-	it around to its extents, and then you are ready to go.
-	
-	To spare the user from doing this every time, you can get
-	and set the calibration data as raw data (a byte-array).
-*/
 class InputElement
 {
 public:
@@ -244,19 +124,15 @@ public:
 	void SetIdentifier(const Lepra::String& pIdentifier);
 	const Lepra::String& GetIdentifier() const;
 	Lepra::String GetFullName() const;
+	Lepra::String GetName() const;
 
 	// Sets the input listener functor. The InputElement will be responsible
 	// of deleting it.
 	void AddFunctor(InputFunctor* pFunctor);
 	void ClearFunctors();
 
-	// Returns the required size in bytes of the calibration data.
-	// This value is always valid.
-	virtual unsigned GetCalibrationDataSize() = 0;
-
-	// Gets and sets raw calibration data.
-	virtual void GetCalibrationData(Lepra::uint8* pData) = 0;
-	virtual void SetCalibrationData(const Lepra::uint8* pData) = 0;
+	virtual Lepra::String GetCalibration() const = 0;
+	virtual bool SetCalibration(const Lepra::String& pData) = 0;
 
 protected:
 	void SetValue(Lepra::float64 pNewValue);
@@ -276,22 +152,10 @@ private:
 	FunctorArray mFunctorArray;
 };
 
-#define BIND_INPUT(_e, _func, _class) \
+#define ADD_INPUT_CALLBACK(_e, _func, _class) \
 	(_e)->AddFunctor(new UiLepra::TInputFunctor<_class>(this, &_class::_func));
 
 
-
-
-
-
-
-/*
-	class InputDevice
-
-	This class represents an input device, which can be anything
-	from a regular mouse or keyboard, to a joystick or even a
-	VR-helmet.
-*/
 
 class InputDevice
 {
@@ -302,8 +166,18 @@ public:
 	{
 		TYPE_MOUSE = 0,
 		TYPE_KEYBOARD,
+		TYPE_JOYSTICK,
+		TYPE_GAMEPAD,
+		TYPE_1STPERSON,
+		TYPE_PEDALS,
+		TYPE_WHEEL,
+		TYPE_FLIGHT,
 		TYPE_OTHER,
+		TYPE_COUNT = TYPE_OTHER
 	};
+
+	typedef std::pair<Lepra::String, Lepra::String> CalibrationElement;
+	typedef std::vector<CalibrationElement> CalibrationData;
 
 	InputDevice(InputManager* pManager);
 	virtual ~InputDevice();
@@ -349,9 +223,8 @@ public:
 	void AddFunctor(InputFunctor* pFunctor);
 	void ClearFunctors();
 
-	unsigned GetCalibrationDataSize();
-	void GetCalibrationData(Lepra::uint8* pData);
-	void SetCalibrationData(Lepra::uint8* pData);
+	CalibrationData GetCalibration() const;
+	bool SetCalibration(const CalibrationData& pData);
 
 protected:
 
@@ -648,6 +521,5 @@ public:
 };
 
 
-} // End namespace.
 
-#endif
+}

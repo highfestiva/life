@@ -802,7 +802,7 @@ LRESULT CALLBACK Win32DisplayManager::WndProc(HWND pWnd, unsigned int pMessage, 
 		--msWindowCount;
 		if (msWindowCount == 0)
 		{
-			Lepra::SystemManager::SetQuitRequest(true);
+			Lepra::SystemManager::AddQuitRequest(+1);
 		}
 	}
 

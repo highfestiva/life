@@ -541,7 +541,25 @@ STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::Reverse(const _String& pString)
 
 STR_UTIL_TEMPLATE const _String STR_UTIL_QUAL::Right(const _String& pString, size_t pCharCount)
 {
-	return (pString.substr(pString.length()-pCharCount, pCharCount));
+	if (pCharCount <= pString.length())
+	{
+		return (pString.substr(pString.length()-pCharCount, pCharCount));
+	}
+	return (pString);
+}
+
+STR_UTIL_TEMPLATE bool STR_UTIL_QUAL::StartsWith(const _String& pString, const _String& pStart)
+{
+	if (pString.length() >= pStart.length())
+	{
+		return (pString.substr(0, pStart.length()) == pStart);
+	}
+	return (false);
+}
+
+STR_UTIL_TEMPLATE bool STR_UTIL_QUAL::EndsWith(const _String& pString, const _String& pEnd)
+{
+	return (Right(pString, pEnd.length()) == pEnd);
 }
 
 
