@@ -170,31 +170,28 @@ void CppContextObject::DebugDrawPrimitive(DebugPrimitive pPrimitive)
 				break;
 				case DEBUG_SHAPES:
 				{
-					if (lGeometry->GetGeometryType() == TBC::ChunkyBoneGeometry::GEOMETRY_BOX)
+					const Lepra::Vector3DF lSize = lGeometry->GetShapeSize() / 2;
+					const Lepra::QuaternionF& lRot = lPhysicsTransform.GetOrientation();
+					Lepra::Vector3DF lVertex[8];
+					for (int x = 0; x < 8; ++x)
 					{
-						const Lepra::Vector3DF lSize = ((TBC::ChunkyBoneBox*)lGeometry)->GetShapeSize() / 2;
-						const Lepra::QuaternionF& lRot = lPhysicsTransform.GetOrientation();
-						Lepra::Vector3DF lVertex[8];
-						for (int x = 0; x < 8; ++x)
-						{
-							lVertex[x] = lPos - lRot *
-								Lepra::Vector3DF(lSize.x*((x&4)? 1 : -1),
-									lSize.y*((x&1)? 1 : -1),
-									lSize.z*((x&2)? 1 : -1));
-						}
-						mUiManager->GetRenderer()->DrawLine(lVertex[0], lVertex[1]-lVertex[0], Lepra::YELLOW);
-						mUiManager->GetRenderer()->DrawLine(lVertex[1], lVertex[3]-lVertex[1], Lepra::YELLOW);
-						mUiManager->GetRenderer()->DrawLine(lVertex[3], lVertex[2]-lVertex[3], Lepra::YELLOW);
-						mUiManager->GetRenderer()->DrawLine(lVertex[2], lVertex[0]-lVertex[2], Lepra::YELLOW);
-						mUiManager->GetRenderer()->DrawLine(lVertex[4], lVertex[5]-lVertex[4], Lepra::MAGENTA);
-						mUiManager->GetRenderer()->DrawLine(lVertex[5], lVertex[7]-lVertex[5], Lepra::MAGENTA);
-						mUiManager->GetRenderer()->DrawLine(lVertex[7], lVertex[6]-lVertex[7], Lepra::MAGENTA);
-						mUiManager->GetRenderer()->DrawLine(lVertex[6], lVertex[4]-lVertex[6], Lepra::MAGENTA);
-						mUiManager->GetRenderer()->DrawLine(lVertex[0], lVertex[4]-lVertex[0], Lepra::CYAN);
-						mUiManager->GetRenderer()->DrawLine(lVertex[1], lVertex[5]-lVertex[1], Lepra::CYAN);
-						mUiManager->GetRenderer()->DrawLine(lVertex[2], lVertex[6]-lVertex[2], Lepra::ORANGE);
-						mUiManager->GetRenderer()->DrawLine(lVertex[3], lVertex[7]-lVertex[3], Lepra::ORANGE);
+						lVertex[x] = lPos - lRot *
+							Lepra::Vector3DF(lSize.x*((x&4)? 1 : -1),
+								lSize.y*((x&1)? 1 : -1),
+								lSize.z*((x&2)? 1 : -1));
 					}
+					mUiManager->GetRenderer()->DrawLine(lVertex[0], lVertex[1]-lVertex[0], Lepra::YELLOW);
+					mUiManager->GetRenderer()->DrawLine(lVertex[1], lVertex[3]-lVertex[1], Lepra::YELLOW);
+					mUiManager->GetRenderer()->DrawLine(lVertex[3], lVertex[2]-lVertex[3], Lepra::YELLOW);
+					mUiManager->GetRenderer()->DrawLine(lVertex[2], lVertex[0]-lVertex[2], Lepra::YELLOW);
+					mUiManager->GetRenderer()->DrawLine(lVertex[4], lVertex[5]-lVertex[4], Lepra::MAGENTA);
+					mUiManager->GetRenderer()->DrawLine(lVertex[5], lVertex[7]-lVertex[5], Lepra::MAGENTA);
+					mUiManager->GetRenderer()->DrawLine(lVertex[7], lVertex[6]-lVertex[7], Lepra::MAGENTA);
+					mUiManager->GetRenderer()->DrawLine(lVertex[6], lVertex[4]-lVertex[6], Lepra::MAGENTA);
+					mUiManager->GetRenderer()->DrawLine(lVertex[0], lVertex[4]-lVertex[0], Lepra::CYAN);
+					mUiManager->GetRenderer()->DrawLine(lVertex[1], lVertex[5]-lVertex[1], Lepra::CYAN);
+					mUiManager->GetRenderer()->DrawLine(lVertex[2], lVertex[6]-lVertex[2], Lepra::ORANGE);
+					mUiManager->GetRenderer()->DrawLine(lVertex[3], lVertex[7]-lVertex[3], Lepra::ORANGE);
 				}
 				break;
 				default:
@@ -459,7 +456,7 @@ bool CppContextObject::TryComplete()
 	}
 
 	OnPhysicsTick();
-	if (GetPhysics() && GetPhysics()->GetPhysicsType() != TBC::ChunkyPhysics::STATIC)
+	if (GetPhysics())
 	{
 		GetManager()->EnablePhysicsUpdateCallback(this);	// TODO: clear out this mess. How to use these two callback types?
 	}

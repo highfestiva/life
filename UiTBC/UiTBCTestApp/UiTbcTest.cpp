@@ -479,7 +479,7 @@ bool OpenRenderer(const Lepra::LogDecorator& pLog, UiLepra::DisplayManager::Cont
 	if (lOk)
 	{
 		lContext = _T("create display manager");
-		Lepra::SystemManager::SetQuitRequest(false);
+		Lepra::SystemManager::AddQuitRequest(-1);
 		gDisplay = UiLepra::DisplayManager::CreateDisplayManager(pContext);
 		lOk = (gDisplay != 0);
 	}

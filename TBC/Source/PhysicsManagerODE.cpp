@@ -51,23 +51,11 @@ PhysicsManagerODE::PhysicsManagerODE()
 
 PhysicsManagerODE::~PhysicsManagerODE()
 {
-	ObjectTable::iterator x = mObjectTable.begin();
-	for (; x != mObjectTable.end(); ++x)
+	while (!mObjectTable.empty())
 	{
-		Object* lObject = *x;
-		if (lObject->mTriMeshID != 0)
-		{
-			::dGeomTriMeshDataDestroy(lObject->mTriMeshID);
-		}
-		if (lObject->mBodyID != 0)
-		{
-			::dBodyDestroy(lObject->mBodyID);
-		}
-		::dGeomDestroy(lObject->mGeomID);
-		delete lObject;
+		Object* lObject = *mObjectTable.begin();
+		DeleteBody((BodyID)lObject);
 	}
-
-	JointTable::iterator lJIter;
 
 	::dWorldDestroy(mWorldID);
 	::dSpaceDestroy(mSpaceID);
@@ -101,9 +89,10 @@ PhysicsManager::BodyID PhysicsManagerODE::CreateSphere(bool pIsRoot, const Lepra
 	lObject->mFriction = pFriction;
 	lObject->mBounce   = pBounce;
 
-	SetGeomTransform(lObject->mGeomID, pTransform);
-
 	mObjectTable.insert(lObject);
+
+	SetBodyTransform((BodyID)lObject, pTransform);
+
 	return ((BodyID)lObject);
 }
 
@@ -114,7 +103,7 @@ PhysicsManager::BodyID PhysicsManagerODE::CreateCylinder(bool pIsRoot, const Lep
 	Object* lObject = new Object(mWorldID, pIsRoot);
 
 	// TODO: Create a real cylinder when ODE supports it.
-	lObject->mGeomID = ::dCreateCCylinder(mSpaceID, (dReal)pRadius, (dReal)pLength);
+	lObject->mGeomID = ::dCreateCylinder(mSpaceID, (dReal)pRadius, (dReal)pLength);
 	mLog.AWarning("Warning! Cylinders are not accurately supported by ODE!");
 
 	lObject->mTriggerListener = pTriggerListener;
@@ -139,10 +128,11 @@ PhysicsManager::BodyID PhysicsManagerODE::CreateCylinder(bool pIsRoot, const Lep
 	lObject->mFriction = pFriction;
 	lObject->mBounce   = pBounce;
 
-	SetGeomTransform(lObject->mGeomID, pTransform);
-
 	mObjectTable.insert(lObject);
-	return (BodyID)(Lepra::uint64)lObject;
+
+	SetBodyTransform((BodyID)lObject, pTransform);
+
+	return (BodyID)lObject;
 }
 
 PhysicsManager::BodyID PhysicsManagerODE::CreateCapsule(bool pIsRoot, const Lepra::TransformationF& pTransform,
@@ -151,7 +141,7 @@ PhysicsManager::BodyID PhysicsManagerODE::CreateCapsule(bool pIsRoot, const Lepr
 {
 	Object* lObject = new Object(mWorldID, pIsRoot);
 
-	lObject->mGeomID = dCreateCCylinder(mSpaceID, (dReal)pRadius, (dReal)pLength);
+	lObject->mGeomID = ::dCreateCapsule(mSpaceID, (dReal)pRadius, (dReal)pLength);
 	lObject->mTriggerListener = pTriggerListener;
 	lObject->mForceFeedbackListener = pForceListener;
 	//assert(pType == STATIC || lObject->mForceFeedbackListener);
@@ -174,10 +164,11 @@ PhysicsManager::BodyID PhysicsManagerODE::CreateCapsule(bool pIsRoot, const Lepr
 	lObject->mFriction = pFriction;
 	lObject->mBounce = pBounce;
 
-	SetGeomTransform(lObject->mGeomID, pTransform);
-
 	mObjectTable.insert(lObject);
-	return (BodyID)(Lepra::uint64)lObject;
+
+	SetBodyTransform((BodyID)lObject, pTransform);
+
+	return (BodyID)lObject;
 }
 
 PhysicsManager::BodyID PhysicsManagerODE::CreateBox(bool pIsRoot, const Lepra::TransformationF& pTransform,
@@ -210,10 +201,11 @@ PhysicsManager::BodyID PhysicsManagerODE::CreateBox(bool pIsRoot, const Lepra::T
 	lObject->mFriction = -pFriction;
 	lObject->mBounce = pBounce;
 
-	SetGeomTransform(lObject->mGeomID, pTransform);
-
 	mObjectTable.insert(lObject);
-	return (BodyID)(Lepra::uint64)lObject;
+
+	SetBodyTransform((BodyID)lObject, pTransform);
+
+	return (BodyID)lObject;
 }
 
 bool PhysicsManagerODE::Attach(BodyID pStaticBody, BodyID pMainBody)
@@ -232,10 +224,9 @@ bool PhysicsManagerODE::Attach(BodyID pStaticBody, BodyID pMainBody)
 	}
 	Object* lStaticObject = *x;
 	Object* lMainObject = *y;
-	dBodyID lBodyId = lMainObject->mBodyID;
-	if (lStaticObject->mBodyID || !lBodyId)
+	if (lStaticObject->mBodyID)
 	{
-		mLog.AError("Attach() with non-static/static.");
+		mLog.AError("Attach() with non-static.");
 		assert(false);
 		return (false);
 	}
@@ -243,11 +234,14 @@ bool PhysicsManagerODE::Attach(BodyID pStaticBody, BodyID pMainBody)
 	::dGeomCopyPosition(lStaticObject->mGeomID, lPos);
 	dQuaternion o;
 	::dGeomGetQuaternion(lStaticObject->mGeomID, o);
-	::dGeomSetBody(lStaticObject->mGeomID, lBodyId);
-	::dGeomSetOffsetWorldPosition(lStaticObject->mGeomID, lPos[0], lPos[1], lPos[2]);
-	::dGeomSetOffsetWorldQuaternion(lStaticObject->mGeomID, o);
 
+	dBodyID lBodyId = lMainObject->mBodyID;
+	if (lBodyId)
 	{
+		::dGeomSetBody(lStaticObject->mGeomID, lBodyId);
+		::dGeomSetOffsetWorldPosition(lStaticObject->mGeomID, lPos[0], lPos[1], lPos[2]);
+		::dGeomSetOffsetWorldQuaternion(lStaticObject->mGeomID, o);
+
 		dMass lMass;
 		const dReal lMassScalar = (dReal)lStaticObject->mMass;
 		assert(lMassScalar > 0);
@@ -258,7 +252,7 @@ bool PhysicsManagerODE::Attach(BodyID pStaticBody, BodyID pMainBody)
 			case dTriMeshClass:	// TRICKY: fall through (act as sphere).
 			case dSphereClass:	::dMassSetSphereTotal(&lMass, lMassScalar, (dReal)lSize[0]);					break;
 			case dBoxClass:		::dMassSetBoxTotal(&lMass, lMassScalar, (dReal)lSize[0], (dReal)lSize[1], (dReal)lSize[2]);	break;
-			case dCCylinderClass:	::dMassSetCylinderTotal(&lMass, lMassScalar, 3, (dReal)lSize[0], (dReal)lSize[1]);		break;
+			case dCapsuleClass:	::dMassSetCylinderTotal(&lMass, lMassScalar, 3, (dReal)lSize[0], (dReal)lSize[1]);		break;
 			case dCylinderClass:	::dMassSetCylinderTotal(&lMass, lMassScalar, 3, (dReal)lSize[0], (dReal)lSize[1]);	break;
 			default:
 			{
@@ -281,24 +275,25 @@ bool PhysicsManagerODE::Attach(BodyID pStaticBody, BodyID pMainBody)
 	return (true);
 }
 
-PhysicsManager::BodyID PhysicsManagerODE::CreateTriMesh(bool pIsRoot, const GeometryBase* pMesh,
+PhysicsManager::BodyID PhysicsManagerODE::CreateTriMesh(bool pIsRoot, Lepra::uint32 pVertexCount,
+	const float* pVertices, Lepra::uint32 pTriangleCount, const Lepra::uint32* pIndices,
 	const Lepra::TransformationF& pTransform, Lepra::float32 pFriction, Lepra::float32 pBounce,
 	TriggerListener* pTriggerListener, ForceFeedbackListener* pForceListener)
 {
 	Object* lObject = new Object(mWorldID, pIsRoot);
-	lObject->mTriMeshID = dGeomTriMeshDataCreate();
 
-	dGeomTriMeshDataBuildSingle(lObject->mTriMeshID,
-				    (const dReal*)pMesh->GetVertexData(),
-				    sizeof(Lepra::float32) * 3,
-				    (int)pMesh->GetVertexCount(),
-				    (const int*)pMesh->GetIndexData(),
-				    (int)pMesh->GetTriangleCount() * 3,
-				    sizeof(int) * 3);
+	lObject->mTriMeshID = ::dGeomTriMeshDataCreate();
+	::dGeomTriMeshDataBuildSingle(lObject->mTriMeshID,
+				    pVertices,
+				    sizeof(pVertices[0]) * 3,
+				    pVertexCount,
+				    pIndices,
+				    pTriangleCount * 3,
+				    sizeof(pIndices[0]) * 3);
 
-	lObject->mGeomID = dCreateTriMesh(mSpaceID, lObject->mTriMeshID, 0, 0, 0);
-	dGeomSetBody(lObject->mGeomID, lObject->mBodyID);
-	dGeomSetData(lObject->mGeomID, lObject);
+	lObject->mGeomID = ::dCreateTriMesh(mSpaceID, lObject->mTriMeshID, 0, 0, 0);
+	//::dGeomSetBody(lObject->mGeomID, lObject->mBodyID);
+	::dGeomSetData(lObject->mGeomID, lObject);
 	lObject->mTriggerListener = pTriggerListener;
 	lObject->mForceFeedbackListener = pForceListener;
 	assert(lObject->mForceFeedbackListener);
@@ -308,14 +303,15 @@ PhysicsManager::BodyID PhysicsManagerODE::CreateTriMesh(bool pIsRoot, const Geom
 	// TODO: add body approximation (sphere).
 
 	lObject->mGeometryData[0] = 1.0f;	// TODO: approximate sphere radius by calculating average vertex distance.
-	lObject->mMass = 1.0f;	// TODO: add mass to interface when suitable.
+	lObject->mMass = 1.0f;	// TODO: add mass to interface when/if suitable.
 	lObject->mFriction = -pFriction;
 	lObject->mBounce = pBounce;
 
-	SetGeomTransform(lObject->mGeomID, pTransform);
-
 	mObjectTable.insert(lObject);
-	return (BodyID)(Lepra::uint64)lObject;
+
+	SetBodyTransform((BodyID)lObject, pTransform);
+
+	return (BodyID)lObject;
 }
 
 bool PhysicsManagerODE::IsStaticBody(BodyID pBodyId) const
@@ -337,10 +333,14 @@ void PhysicsManagerODE::DeleteBody(BodyID pBodyId)
 		Object* lObject = *x;
 		if (lObject->mBodyID != 0)
 		{
-			dBodyDestroy(lObject->mBodyID);
+			::dBodyDestroy(lObject->mBodyID);
 		}
-		dGeomDestroy(lObject->mGeomID);
-		delete lObject;
+		if (lObject->mTriMeshID != 0)
+		{
+			::dGeomTriMeshDataDestroy(lObject->mTriMeshID);
+		}
+		::dGeomDestroy(lObject->mGeomID);
+		delete (lObject);
 		mObjectTable.erase(x);
 		mAutoDisabledObjectSet.erase(lObject);
 	}
@@ -375,7 +375,10 @@ Lepra::QuaternionF PhysicsManagerODE::GetBodyOrientation(BodyID pBodyId) const
 
 	dQuaternion q;
 	::dGeomGetQuaternion(lObject->mGeomID, q);
-	return (Lepra::QuaternionF(q[0], q[1], q[2], q[3]));
+	Lepra::QuaternionF lQuat(q[0], q[1], q[2], q[3]);
+	AdjustOrientation(lObject->mGeomID, lQuat, false);
+
+	return (lQuat);
 }
 
 void PhysicsManagerODE::GetBodyTransform(BodyID pBodyId, Lepra::TransformationF& pTransform) const
@@ -387,12 +390,15 @@ void PhysicsManagerODE::GetBodyTransform(BodyID pBodyId, Lepra::TransformationF&
 		return;
 	}
 
-	const dReal* lPos = dGeomGetPosition(lObject->mGeomID);
-	dQuaternion lQ;
-	dGeomGetQuaternion(lObject->mGeomID, lQ);
+	const dReal* p = dGeomGetPosition(lObject->mGeomID);
+	dQuaternion q;
+	dGeomGetQuaternion(lObject->mGeomID, q);
 
-	pTransform.SetPosition(Lepra::Vector3D<Lepra::float32>(lPos[0], lPos[1], lPos[2]));
-	pTransform.SetOrientation(Lepra::Quaternion<Lepra::float32>(lQ[0], lQ[1], lQ[2], lQ[3]));
+	const Lepra::Vector3DF lPos(p[0], p[1], p[2]);
+	pTransform.SetPosition(lPos);
+	Lepra::QuaternionF lQuat(q[0], q[1], q[2], q[3]);
+	AdjustOrientation(lObject->mGeomID, lQuat, false);
+	pTransform.SetOrientation(lQuat);
 }
 
 void PhysicsManagerODE::SetBodyTransform(BodyID pBodyId, const Lepra::TransformationF& pTransform)
@@ -405,23 +411,25 @@ void PhysicsManagerODE::SetBodyTransform(BodyID pBodyId, const Lepra::Transforma
 		return;
 	}
 
+	Lepra::TransformationF lTransform(pTransform);
+	const Lepra::Vector3DF lPos(pTransform.GetPosition());
+	Lepra::QuaternionF lQuat = lTransform.GetOrientation();
+	AdjustOrientation(lObject->mGeomID, lQuat, true);
+	dReal lQ[4];
+	lQ[0] = lQuat.GetA();
+	lQ[1] = lQuat.GetB();
+	lQ[2] = lQuat.GetC();
+	lQ[3] = lQuat.GetD();
 	if(lObject->mBodyID)
 	{
-		const Lepra::Vector3D<Lepra::float32>& lPos = pTransform.GetPosition();
 		::dBodySetPosition(lObject->mBodyID, lPos.x, lPos.y, lPos.z);
-
-		const Lepra::Quaternion<Lepra::float32>& lQuat = pTransform.GetOrientation();
-		dReal lQ[4];
-		lQ[0] = lQuat.GetA();
-		lQ[1] = lQuat.GetB();
-		lQ[2] = lQuat.GetC();
-		lQ[3] = lQuat.GetD();
 		::dBodySetQuaternion(lObject->mBodyID, lQ);
 		::dBodyEnable(lObject->mBodyID);
 	}
 	else
 	{
-		SetGeomTransform(lObject->mGeomID, pTransform);
+		::dGeomSetPosition(lObject->mGeomID, lPos.x, lPos.y, lPos.z);
+		::dGeomSetQuaternion(lObject->mGeomID, lQ);
 	}
 }
 
@@ -602,10 +610,11 @@ PhysicsManager::TriggerID PhysicsManagerODE::CreateSphereTrigger(const Lepra::Tr
 
 	lObject->mTriggerListener = pForceListener;
 
-	SetGeomTransform(lObject->mGeomID, pTransform);
-
 	mObjectTable.insert(lObject);
-	return (TriggerID)lObject->mGeomID;
+
+	SetBodyTransform((BodyID)lObject, pTransform);
+
+	return (TriggerID)lObject;
 }
 
 PhysicsManager::TriggerID PhysicsManagerODE::CreateCylinderTrigger(const Lepra::TransformationF& pTransform,
@@ -614,17 +623,18 @@ PhysicsManager::TriggerID PhysicsManagerODE::CreateCylinderTrigger(const Lepra::
 	Object* lObject = new Object(mWorldID, false);
 
 	// TODO: Create a real cylinder when ODE supports it.
-	lObject->mGeomID = dCreateCCylinder(mSpaceID, (dReal)pRadius, (dReal)(pLength - pRadius * 2));
+	lObject->mGeomID = ::dCreateCylinder(mSpaceID, (dReal)pRadius, (dReal)pLength);
 	mLog.AWarning("Warning! Cylinders are not accurately supported by ODE!");
 
 	dGeomSetData(lObject->mGeomID, lObject);
 
 	lObject->mTriggerListener = pForceListener;
 
-	SetGeomTransform(lObject->mGeomID, pTransform);
-
 	mObjectTable.insert(lObject);
-	return (TriggerID)lObject->mGeomID;
+
+	SetBodyTransform((BodyID)lObject, pTransform);
+
+	return (TriggerID)lObject;
 }
 
 PhysicsManager::TriggerID PhysicsManagerODE::CreateCapsuleTrigger(const Lepra::TransformationF& pTransform,
@@ -632,16 +642,17 @@ PhysicsManager::TriggerID PhysicsManagerODE::CreateCapsuleTrigger(const Lepra::T
 {
 	Object* lObject = new Object(mWorldID, false);
 
-	lObject->mGeomID = dCreateCCylinder(mSpaceID, (dReal)pRadius, (dReal)pLength);
+	lObject->mGeomID = ::dCreateCapsule(mSpaceID, (dReal)pRadius, (dReal)pLength);
 
 	dGeomSetData(lObject->mGeomID, lObject);
 
 	lObject->mTriggerListener = pForceListener;
 
-	SetGeomTransform(lObject->mGeomID, pTransform);
-
 	mObjectTable.insert(lObject);
-	return (TriggerID)lObject->mGeomID;
+
+	SetBodyTransform((BodyID)lObject, pTransform);
+
+	return (TriggerID)lObject;
 }
 
 PhysicsManager::TriggerID PhysicsManagerODE::CreateBoxTrigger(const Lepra::TransformationF& pTransform,
@@ -655,10 +666,11 @@ PhysicsManager::TriggerID PhysicsManagerODE::CreateBoxTrigger(const Lepra::Trans
 
 	lObject->mTriggerListener = pForceListener;
 
-	SetGeomTransform(lObject->mGeomID, pTransform);
-
 	mObjectTable.insert(lObject);
-	return (TriggerID)lObject->mGeomID;
+
+	SetBodyTransform((BodyID)lObject, pTransform);
+
+	return (TriggerID)lObject;
 }
 
 PhysicsManager::TriggerID PhysicsManagerODE::CreateRayTrigger(const Lepra::TransformationF& pTransform,
@@ -680,10 +692,11 @@ PhysicsManager::TriggerID PhysicsManagerODE::CreateRayTrigger(const Lepra::Trans
 
 	lObject->mTriggerListener = pForceListener;
 
-	SetGeomTransform(lObject->mGeomID, pTransform);
-
 	mObjectTable.insert(lObject);
-	return (TriggerID)lObject->mGeomID;
+
+	SetBodyTransform((BodyID)lObject, pTransform);
+
+	return (TriggerID)lObject;
 }
 
 void PhysicsManagerODE::DeleteTrigger(TriggerID pTriggerID)
@@ -716,33 +729,12 @@ PhysicsManager::ForceFeedbackListener* PhysicsManagerODE::GetForceFeedbackListen
 
 void PhysicsManagerODE::GetTriggerTransform(TriggerID pTriggerID, Lepra::TransformationF& pTransform)
 {
-	Object* lObject = (Object*)pTriggerID;
-
-	if (lObject->mWorldID != mWorldID)
-	{
-		mLog.Errorf(_T("GetTriggerTransform() - Body %i is not part of this world!"), pTriggerID);
-		return;
-	}
-
-	const dReal* lPos = dGeomGetPosition(lObject->mGeomID);
-	dQuaternion lQ;
-	dGeomGetQuaternion(lObject->mGeomID, lQ);
-
-	pTransform.SetPosition(Lepra::Vector3D<Lepra::float32>(lPos[0], lPos[1], lPos[2]));
-	pTransform.SetOrientation(Lepra::Quaternion<Lepra::float32>(lQ[0], lQ[1], lQ[2], lQ[3]));
+	GetBodyTransform((BodyID)pTriggerID, pTransform);
 }
 
 void PhysicsManagerODE::SetTriggerTransform(TriggerID pTriggerID, const Lepra::TransformationF& pTransform)
 {
-	Object* lObject = (Object*)pTriggerID;
-
-	if (lObject->mWorldID != mWorldID)
-	{
-		mLog.Errorf(_T("SetBodyTransform() - Body %i is not part of this world!"), pTriggerID);
-		return;
-	}
-
-	SetGeomTransform(lObject->mGeomID, pTransform);
+	SetBodyTransform((BodyID)pTriggerID, pTransform);
 }
 
 PhysicsManager::JointID PhysicsManagerODE::CreateBallJoint(BodyID pBody1, BodyID pBody2, const Lepra::Vector3D<Lepra::float32>& pAnchorPos)
@@ -1700,34 +1692,6 @@ bool PhysicsManagerODE::SetBallDiff(BodyID pBodyId, JointID pJointId, const Join
 	return (true);
 }
 
-void PhysicsManagerODE::SetGeomTransform(dGeomID pGeomID, const Lepra::TransformationF& pTransform)
-{
-	const Lepra::Vector3D<Lepra::float32>& lPos = pTransform.GetPosition();
-	::dGeomSetPosition(pGeomID, lPos.x, lPos.y, lPos.z);
-
-	Lepra::RotationMatrixF lNative = pTransform.GetOrientation().GetAsRotationMatrix();
-	dMatrix3 lRot;
-	::memset(lRot, 0, sizeof(lRot));
-	for (int y = 0; y < 3; ++y)
-	{
-		for (int x = 0; x < 3; ++x)
-		{
-			float lValue = lNative.GetElement(y*3+x);
-			const float lAbsValue = ::fabs(lValue);
-			if (lAbsValue < 1e-3)
-			{
-				lValue = 0.0f;
-			}
-			else if (lAbsValue <= 1-1e-3 && lAbsValue > 1)
-			{
-				lValue = (lValue < 0)? -1.0f : 1.0f;
-			}
-			lRot[y*4+x] = lValue;
-		}
-	}
-	::dGeomSetRotation(pGeomID, lRot);
-}
-
 bool PhysicsManagerODE::CheckBodies(BodyID& pBody1, BodyID& pBody2, Object*& pObject1, Object*& pObject2, const Lepra::tchar* pFunction)
 {
 	if (pBody1 == 0 && pBody2 == 0)
@@ -2319,8 +2283,8 @@ bool PhysicsManagerODE::GetAngularMotorRoll(JointID pJointId, Lepra::float32& pM
 	}
 	else if (lJoint->mType == JOINT_HINGE)
 	{
-		pMaxForce = ::dJointGetHingeParam(lJoint->mJointID, dParamFMax2);
-		pTargetVelocity = ::dJointGetHingeParam(lJoint->mJointID, dParamVel2);
+		pMaxForce = ::dJointGetHingeParam(lJoint->mJointID, dParamFMax);
+		pTargetVelocity = ::dJointGetHingeParam(lJoint->mJointID, dParamVel);
 		return (true);
 	}
 	mLog.AError("GetAngularMotorRoll() - Joint is not an angular motor!");
@@ -3143,6 +3107,23 @@ void PhysicsManagerODE::NormalizeRotation(BodyID pObject)
 			SetBodyAngularVelocity(lObject, lVelocity);
 			SetBodyAngularAcceleration(lObject, Lepra::Vector3DF());
 		}
+	}
+}
+
+
+
+void PhysicsManagerODE::AdjustOrientation(dGeomID pGeom, Lepra::QuaternionF& pQ, bool pSetter) const
+{
+	if (pGeom->type == dCapsuleClass)
+	{
+		// Capsules have different orientations in editor (along Y-axis) and ODE (along Z).
+		Lepra::QuaternionF lQ;
+		lQ.RotateAroundOwnX(-Lepra::PIF/2);
+		if (!pSetter)
+		{
+			lQ.MakeInverse();
+		}
+		pQ = lQ * pQ;
 	}
 }
 

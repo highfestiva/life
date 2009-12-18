@@ -122,15 +122,15 @@ void DesktopWindow::Init(const Lepra::tchar* /*pImageDefinitionFile*/, const Lep
 
 		if (lButton1 != 0)
 		{
-			BIND_INPUT(lButton1, OnButton1, DesktopWindow);
+			ADD_INPUT_CALLBACK(lButton1, OnButton1, DesktopWindow);
 		}
 		if (lButton2 != 0)
 		{
-			BIND_INPUT(lButton2, OnButton2, DesktopWindow);
+			ADD_INPUT_CALLBACK(lButton2, OnButton2, DesktopWindow);
 		}
 		if (lButton3 != 0)
 		{
-			BIND_INPUT(lButton3, OnButton3, DesktopWindow);
+			ADD_INPUT_CALLBACK(lButton3, OnButton3, DesktopWindow);
 		}
 	}
 

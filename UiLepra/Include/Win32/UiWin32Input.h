@@ -1,10 +1,8 @@
-/*
-	Class:  Win32InputElement,
-			Win32InputDevice,
-			Win32InputManager
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2009, Righteous Games
-*/
+
+// Author: Jonas Byström, Alexander Hugestrand
+// Copyright (c) 2002-2009, Righteous Games
+
+
 
 #pragma once
 
@@ -14,8 +12,12 @@
 #include "../UiInput.h"
 #include "../UiLepra.h"
 
+
+
 namespace UiLepra
 {
+
+
 
 class Win32InputDevice;
 
@@ -36,9 +38,8 @@ public:
 	// (Only useful with analogue elements).
 	void SetValue(int pValue);
 
-	unsigned GetCalibrationDataSize();
-	void GetCalibrationData(Lepra::uint8* pData);
-	void SetCalibrationData(const Lepra::uint8* pData);
+	Lepra::String GetCalibration() const;
+	bool SetCalibration(const Lepra::String& pData);
 
 protected:
 private:
@@ -52,8 +53,8 @@ private:
 	LPCDIDEVICEOBJECTINSTANCE mElement;
 	DIOBJECTDATAFORMAT mDataFormat;
 
-	int mMin;
-	int mMax;
+	Lepra::int32 mMin;
+	Lepra::int32 mMax;
 
 	LOG_CLASS_DECLARE();
 };
@@ -107,6 +108,7 @@ private:
 
 class Win32InputManager: public InputManager, public Win32Observer
 {
+	typedef InputManager Parent;
 public:
 	// Declared as friend in order to get access to screen width and height.
 	friend class Win32InputElement;
@@ -166,12 +168,9 @@ private:
 	// Default devices.
 	UiLepra::InputDevice* mKeyboard;
 	UiLepra::InputDevice* mMouse;
-	int mTypeCount[3];
+	int mTypeCount[InputDevice::TYPE_COUNT];
 };
 
-bool Win32InputManager::IsInitialized()
-{
-	return mInitialized;
-}
+
 
 }

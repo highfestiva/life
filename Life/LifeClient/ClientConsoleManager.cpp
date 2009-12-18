@@ -308,7 +308,7 @@ int ClientConsoleManager::OnCommand(const Lepra::String& pCommand, const Lepra::
 			case COMMAND_QUIT:
 			{
 				mLog.AInfo("Terminating due to user command.");
-				Lepra::SystemManager::SetQuitRequest(true);
+				Lepra::SystemManager::AddQuitRequest(+1);
 			}
 			break;
 			case COMMAND_BYE:

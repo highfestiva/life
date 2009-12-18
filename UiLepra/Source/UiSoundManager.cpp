@@ -5,6 +5,7 @@
 
 
 #include "../Include/UiSoundManagerFMod.h"
+#include "../Include/UiSoundManagerOpenAL.h"
 
 
 
@@ -13,9 +14,13 @@ namespace UiLepra
 
 
 
-SoundManager* SoundManager::CreateSoundManager(ContextType /*pType*/)
+SoundManager* SoundManager::CreateSoundManager(ContextType pType)
 {
-	return (new SoundManagerFMod(44100));
+	if (pType == CONTEXT_FMOD)
+	{
+		return (new SoundManagerFMod(44100));
+	}
+	return (new SoundManagerOpenAL(44100));
 }
 
 

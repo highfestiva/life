@@ -53,6 +53,8 @@ public:
 
 	static _String Reverse(const _String& pString);
 	static const _String Right(const _String& pString, size_t pCharCount);
+	static bool StartsWith(const _String& pString, const _String& pStart);
+	static bool EndsWith(const _String& pString, const _String& pEnd);
 
 	static size_t FindPreviousWord(const _String& pLine, const _String& pDelimitors, size_t pStartIndex);
 	static size_t FindNextWord(const _String& pLine, const _String& pDelimitors, size_t pStartIndex);

@@ -54,7 +54,7 @@ Application::~Application()
 void Application::Init()
 {
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_PHYSICS_FPS, PHYSICS_FPS);
-	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_APPLICATION_NAME, _T("Life"));
+	CURE_RTVAR_INTERNAL(Cure::GetSettings(), RTVAR_APPLICATION_NAME, _T("Life"));
 
 	mConsoleLogger = CreateConsoleLogListener();
 	//mConsoleLogger->SetLevelThreashold(Lepra::Log::LEVEL_INFO);
@@ -116,7 +116,7 @@ int Application::Run()
 			LEPRA_MEASURE_SCOPE(AppSleep);
 			TickSleep(lTimeInfo.GetSlidingAverage());
 		}
-		lQuit = Lepra::SystemManager::GetQuitRequest();
+		lQuit = (Lepra::SystemManager::GetQuitRequest() != 0);
 	}
 
 	if (lQuit)
@@ -160,7 +160,7 @@ Lepra::String Application::GetIoFile(const Lepra::String& pEnd, const Lepra::Str
 {
 	Lepra::String lIoName = Lepra::Path::JoinPath(
 		Lepra::SystemManager::GetIoDirectory(CURE_RTVAR_GET(Cure::GetSettings(), RTVAR_APPLICATION_NAME, _T("?"))),
-		mApplication->GetName()+pEnd+_TEXT_ALTERNATIVE("", L"U"), pExt);
+		mApplication->GetName()+pEnd, pExt);
 	if (pAddQuotes)
 	{
 		lIoName = _T("\"") + lIoName + _T("\"");

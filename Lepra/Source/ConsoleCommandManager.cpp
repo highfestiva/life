@@ -235,7 +235,7 @@ std::list<String> ConsoleCommandManager::CompleteCommand(const String& pPartialC
 	for (; x != mCommandSet.end(); ++x)
 	{
 		const String& lCompletion = *x;
-		if (lCompletion.substr(0, pPartialCommand.length()) == pPartialCommand)
+		if (StringUtility::StartsWith(lCompletion, pPartialCommand))
 		{
 			// Add to list.
 			lCompletionList.push_back(lCompletion);

@@ -4,7 +4,7 @@
 
 
 
-#include <assert.h>
+/*#include <assert.h>
 #include "../../Lepra/Include/Log.h"
 #include "../../Lepra/Include/DiskFile.h"
 #include "../../TBC/Include/ChunkyBoneGeometry.h"
@@ -166,7 +166,7 @@ bool ExportStructure()
 		lStructure.ClearAll(lPhysics);
 	}
 
-	/*const float lVolvoMass = 1800;
+	const float lVolvoMass = 1800;
 	// Wheels and suspension.
 	const float lVolvoSpringConstant = lVolvoMass*50;
 	const float lVolvoDampingConstant = lVolvoMass/5;
@@ -905,7 +905,7 @@ bool ExportStructure()
 			assert(lOk);
 		}
 		lStructure.ClearAll(lPhysics);
-	}*/
+	}
 	if (lOk)
 	{
 		lContext = _T("world save");
@@ -1038,4 +1038,4 @@ bool ExportStructure()
 
 	ReportTestResult(gTbcLog, _T("ExportStructure"), lContext, lOk);
 	return (lOk);
-}
+}*/

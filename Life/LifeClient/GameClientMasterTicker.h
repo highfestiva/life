@@ -69,6 +69,9 @@ private:
 	void OnExit();
 	void OnSetPlayerCount(int pPlayerCount);
 
+	bool ApplyCalibration();
+	void StashCalibration();
+
 	class MasterInputFunctor: public UiLepra::InputFunctor
 	{
 	public:

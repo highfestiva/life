@@ -285,7 +285,7 @@ File& FileLogListener::GetFile()
 
 void FileLogListener::WriteLog(const String& pFullMessage, Log::LogLevel)
 {
-	mFile.WriteData(pFullMessage.c_str(), pFullMessage.length()*sizeof(tchar));
+	mFile.WriteString(pFullMessage);
 	mFile.Flush();
 }
 
@@ -364,7 +364,7 @@ bool MemFileLogListener::Dump(File* pFile, LogListener* pLogListener, Log::LogLe
 
 void MemFileLogListener::WriteLog(const String& pFullMessage, Log::LogLevel pLogLevel)
 {
-	mFile.WriteData(pFullMessage.c_str(), pFullMessage.length()*sizeof(tchar));
+	mFile.WriteString(pFullMessage);
 
 #ifndef NO_ASSERT_ON_LOG_FLOOD
 	if (pLogLevel >= Log::LEVEL_INFO)

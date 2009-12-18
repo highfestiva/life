@@ -11,6 +11,7 @@
 #pragma warning(disable: 4201)	// Non-standard extension used: unnamed struct.
 #include <MMSystem.h>
 #pragma warning(pop)
+#include <ShellAPI.h>
 #include <ShlObj.h>
 #include "../../Include/DiskFile.h"
 #include "../../Include/Lepra.h"
@@ -29,65 +30,19 @@
 namespace Lepra
 {
 
+
+
+LogDecorator gLog(LogType::GetLog(LogType::SUB_GENERAL), typeid(SystemManager));
+
+
+
 //
-// First some global helper functions.
+// Helper functions.
 //
 
-// Returns true if the cpuid instruction is available.
-bool IsCpuIDAvailable()
+static bool IsHyperThreadingSupported()
 {
-	enum { AVAILABLE, NOT_AVAILABLE };
-
-	int lCpuID = NOT_AVAILABLE;
-#ifdef LEPRA_MSVC_X86
-	__asm
-	{
-		pushfd				// Get original EFLAGS.
-		pop	eax
-		mov 	ecx, eax
-		xor	 eax, 200000h		// Flip ID bit in EFLAGS.
-		push	eax			// Save new EFLAGS value on stack.
-		popfd				// Replace current EFLAGS value.
-		pushfd				// Get new EFLAGS.
-		pop	 eax			// Store new EFLAGS in EAX.
-		xor	 eax, ecx		// Can not toggle ID bit.
-		jz	  cpuid_not_supported	// Processor = 80486.
-		mov	 lCpuID, AVAILABLE
-	cpuid_not_supported:
-	}
-#else // <Unimplemented target>
-#error "Only LEPRA_MSVC_X86 supports IsCpuIDAvailable() as of yet."
-#endif // LEPRA_MSVC_X86/<Unimplemented target>
-
-	return (lCpuID == AVAILABLE);
-}
-
-// Returns true if the rdtsc instruction is available.
-bool IsRdtscAvailable()
-{
-	if (!IsCpuIDAvailable())
-		return false;
-
-	unsigned lFeat;
-
-#ifdef LEPRA_MSVC_X86
-	__asm
-	{
-		mov	eax, 1
-		cpuid
-		mov	lFeat,edx
-	}
-#else // <Unimplemented target>
-#error "Only LEPRA_MSVC_X86 supports TSC as of yet."
-#endif // LEPRA_MSVC_X86/<Unimplemented target>
-
-	// If bit 4 is set in edx then rdtsc is available.
-	return ((lFeat & 0x00000010) != 0);
-}
-
-bool IsHyperThreadingSupported()
-{
-#ifdef LEPRA_MSVC_X86
+#ifdef LEPRA_MSVC_X86_32
 	int lSupported = 0;
 	__asm
 	{
@@ -99,8 +54,34 @@ bool IsHyperThreadingSupported()
 	}
 	return (lSupported != 0);
 #else // <Unimplemented target>
-#error "Only LEPRA_MSVC_X86 supports TSC as of yet."
+#error "Only LEPRA_MSVC_X86_32 supports hyper thread checking as of yet."
 #endif // LEPRA_MSVC_X86/<Unimplemented target>
+}
+
+BOOL CtrlCallback(DWORD fdwCtrlType)
+{
+	BOOL lHandled = FALSE;
+	switch (fdwCtrlType)
+	{
+		case CTRL_CLOSE_EVENT:
+		case CTRL_SHUTDOWN_EVENT:
+		case CTRL_C_EVENT:
+		case CTRL_BREAK_EVENT:
+		{
+			gLog.AInfo("Setting quit state on console break event.");
+			lHandled = TRUE;
+			SystemManager::AddQuitRequest(+1);
+		}
+		break;
+		case CTRL_LOGOFF_EVENT:
+		default:
+		{
+			gLog.AInfo("Ignoring console break event (i.e. logoff or similar).");
+			lHandled = TRUE;
+		}
+		break;
+	}
+	return (lHandled);
 }
 
 
@@ -111,7 +92,7 @@ void SystemManager::Init()
 
 	Thread::InitializeMainThread(_T("MainThread"));
 
-	// Increase resolution on Win32 ::Sleep() to 1 ms!
+	// Increase resolution on Win32's ::Sleep() to 1 ms.
 	::timeBeginPeriod(1);
 }
 
@@ -201,6 +182,11 @@ String SystemManager::QueryFullUserName()
 		::NetApiBufferFree(lDomainControllerName);
 	}
 	return (lFullName);
+}
+
+void SystemManager::WebBrowseTo(const String& pUrl)
+{
+	::ShellExecute(0, _T("open"), pUrl.c_str(), 0, 0, SW_SHOWDEFAULT);
 }
 
 unsigned SystemManager::GetLogicalCpuCount()
@@ -321,44 +307,6 @@ uint64 SystemManager::GetAvailVirtualMemory()
 void SystemManager::ExitProcess(int pExitCode)
 {
 	::ExitProcess(pExitCode);
-}
-
-
-
-BOOL SystemManager::CtrlCallback(DWORD fdwCtrlType)
-{
-	BOOL lHandled = FALSE;
-	switch (fdwCtrlType)
-	{
-		case CTRL_CLOSE_EVENT:
-		case CTRL_SHUTDOWN_EVENT:
-		{
-			mLog.AInfo("Setting quit state on console break event.");
-			lHandled = TRUE;
-			/*if (SystemManager::GetQuitRequest())
-			{
-				if (::MessageBox(0, _T("Do you really want to hard-terminate?"), _T("Termination"), MB_YESNO) == IDYES)
-				{
-					mLog.AWarning("Hard user termination.");
-					Lepra::Log::Shutdown();
-					Thread::Sleep(0.5);
-					::ExitProcess(1);
-				}
-			}*/
-			SystemManager::SetQuitRequest(true);
-		}
-		break;
-		case CTRL_C_EVENT:
-		case CTRL_BREAK_EVENT:
-		case CTRL_LOGOFF_EVENT:
-		default:
-		{
-			mLog.AInfo("Ignoring console break event (i.e. CTRL-C, logoff or similar).");
-			lHandled = TRUE;
-		}
-		break;
-	}
-	return (lHandled);
 }
 
 

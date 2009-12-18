@@ -19,8 +19,12 @@
 #if defined(_MSC_VER)	// Microsoft Visual C++.
 
 #define LEPRA_MSVC
-#if defined(_M_IX86)
+#if defined(_M_IA64) || defined(_M_X64)
 #define LEPRA_MSVC_X86
+#define LEPRA_MSVC_X86_64
+#elif defined(_M_IX86)
+#define LEPRA_MSVC_X86
+#define LEPRA_MSVC_X86_32
 #elif defined(_ARM) || defined(ARM)
 #define LEPRA_MSVC_ARM
 #else	// Unknown hardware.
@@ -55,7 +59,7 @@
 #elif defined(__GNUG__)	// GCC (C++).
 
 #define LEPRA_GCC
-#if defined(__x86_64__)
+#if defined(__x86_64__) || defined(__ia64__)
 #define LEPRA_GCC_X86
 #define LEPRA_GCC_X86_64
 #elif defined(__i386__)

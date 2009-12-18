@@ -72,6 +72,7 @@
 				IgnoreDefaultLibraryNames="msvcrtd.lib"
 				GenerateDebugInformation="true"
 				AssemblyDebug="1"
+				GenerateMapFile="true"
 				SubSystem="1"
 			/>
 			<Tool
@@ -153,6 +154,7 @@
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				AdditionalLibraryDirectories="..\..\ThirdParty\stlport\lib;..\..\ThirdParty\fmod\api\lib"
 				IgnoreDefaultLibraryNames=""
+				GenerateMapFile="true"
 				SubSystem="2"
 			/>
 			<Tool
@@ -237,6 +239,7 @@
 				AdditionalLibraryDirectories="..\..\ThirdParty\stlport\lib;..\..\ThirdParty\fmod\api\lib"
 				IgnoreDefaultLibraryNames="msvcrt.lib"
 				GenerateDebugInformation="true"
+				GenerateMapFile="true"
 				SubSystem="1"
 			/>
 			<Tool
@@ -321,6 +324,7 @@
 				IgnoreDefaultLibraryNames="msvcrtd.lib"
 				GenerateDebugInformation="true"
 				AssemblyDebug="1"
+				GenerateMapFile="true"
 				SubSystem="1"
 			/>
 			<Tool
@@ -405,6 +409,7 @@
 				AdditionalLibraryDirectories="..\..\ThirdParty\stlport\lib;..\..\ThirdParty\fmod\api\lib"
 				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="true"
+				GenerateMapFile="true"
 				SubSystem="2"
 			/>
 			<Tool
@@ -489,6 +494,7 @@
 				AdditionalLibraryDirectories="..\..\ThirdParty\stlport\lib;..\..\ThirdParty\fmod\api\lib"
 				IgnoreDefaultLibraryNames="msvcrt.lib"
 				GenerateDebugInformation="true"
+				GenerateMapFile="true"
 				SubSystem="1"
 			/>
 			<Tool

@@ -110,14 +110,28 @@ unsigned SystemManager::QueryCpuMips()
 
 
 
-bool SystemManager::GetQuitRequest()
+int SystemManager::GetQuitRequest()
 {
-	return smQuitRequest;
+	return (mQuitRequest);
 }
 
-void SystemManager::SetQuitRequest(bool pQuitRequest)
+void SystemManager::AddQuitRequest(int pValue)
 {
-	smQuitRequest = pQuitRequest;
+	mQuitRequest += pValue;
+	if (mQuitRequest >= 6)
+	{
+		ExitProcess(2);	// Seems our attempt to log+exit failed, so just finish us off.
+	}
+	else if (mQuitRequest >= 4)
+	{
+		mLog.AWarning("Hard termination due to several termination requests.");
+		Thread::Sleep(0.5);	// Try to flush logs to disk.
+		ExitProcess(1);
+	}
+	else if (mQuitRequest < 0)
+	{
+		mQuitRequest = 0;
+	}
 }
 
 
@@ -140,7 +154,7 @@ unsigned SystemManager::SingleMipsTest()
 
 inline void SystemManager::BOGOMIPSDelay(unsigned pLoopCount)
 {
-#if defined(LEPRA_MSVC_X86)
+#if defined(LEPRA_MSVC_X86_32)
 	__asm
 	{
 		mov	ecx,[pLoopCount]
@@ -149,12 +163,12 @@ BogoLoop:	loop	BogoLoop
 #else // <Generic target>
 	for (unsigned x = pLoopCount; x; --x)
 		;
-#endif // LEPRA_MSVC_X86/<Generic target>
+#endif // LEPRA_MSVC_X86_32/<Generic target>
 }
 
 
 
-bool SystemManager::smQuitRequest = false;
+int SystemManager::mQuitRequest = 0;
 
 LOG_CLASS_DEFINE(GENERAL, SystemManager);
 

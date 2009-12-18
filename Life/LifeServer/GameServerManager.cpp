@@ -94,7 +94,7 @@ bool GameServerManager::Tick()
 	if (lMaxLoginCount > 0 && lUserCount == 0)
 	{
 		mLog.AWarning("Server automatically shuts down in debug when all users have logged off.");
-		Lepra::SystemManager::SetQuitRequest(true);
+		Lepra::SystemManager::AddQuitRequest(+1);
 	}
 #endif // Debug.
 
@@ -351,12 +351,12 @@ bool GameServerManager::Initialize()
 		}
 	}
 
-	if (lOk)
+	/*if (lOk)
 	{
 		assert(mBoxObject == 0);
 		mBoxObject = Parent::CreateContextObject(_T("box_002"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
 		mBoxObject->StartLoading();
-	}
+	}*/
 
 	// TODO: remove!!!
 	//Cure::ContextObject* lTractor = Parent::CreateContextObject(_T("tractor_01"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
@@ -391,7 +391,7 @@ bool GameServerManager::Initialize()
 bool GameServerManager::InitializeTerrain()
 {
 	assert(mTerrainObject == 0);
-	mTerrainObject = Parent::CreateContextObject(_T("ground_002"), Cure::NETWORK_OBJECT_LOCAL_ONLY);
+	mTerrainObject = Parent::CreateContextObject(_T("level_01"), Cure::NETWORK_OBJECT_LOCAL_ONLY);
 	mTerrainObject->StartLoading();
 	return (true);
 }

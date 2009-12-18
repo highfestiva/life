@@ -1011,7 +1011,7 @@ bool ChunkyClassLoader::Load(ChunkyClass* pData)
 			true);	// TODO: check other tags (e.g. settings).
 		if (!lOk)
 		{
-			mLog.AError("Could not load contents of class file %s!");
+			mLog.Errorf(_T("Could not load contents of class file %s!"), pData->GetPhysicsBaseName().c_str());
 		}
 	}
 

@@ -67,6 +67,8 @@ GameClientMasterTicker::~GameClientMasterTicker()
 	UiLepra::DisplayManager::EnableScreensaver(true);
 
 	{
+		StashCalibration();
+
 		ConsoleManager lConsole(0, UiCure::GetSettings(), 0, 0);
 		lConsole.Init();
 		lConsole.ExecuteCommand(_T("save-system-config-file 0 " + Application::GetIoFile(_T("Base"), _T("lsh"))));
@@ -229,7 +231,7 @@ bool GameClientMasterTicker::Tick()
 		if (!Reinitialize())
 		{
 			mLog.Fatal(_T("Failure to re-initialize UI! Going down now!"));
-			Lepra::SystemManager::SetQuitRequest(true);
+			Lepra::SystemManager::AddQuitRequest(+1);
 		}
 		mRestartUi = false;
 	}
@@ -294,6 +296,10 @@ bool GameClientMasterTicker::Initialize()
 	bool lOk = Reinitialize();
 	if (lOk)
 	{
+		if (!ApplyCalibration())
+		{
+			mLog.AError("An error ocurred when applying calibration.");
+		}
 		CreatePlayerCountWindow();
 	}
 	return (lOk);
@@ -323,9 +329,8 @@ bool GameClientMasterTicker::Reinitialize()
 		x.GetObject()->Close();
 	}
 	mResourceManager->StopClear();
-	bool lQuit = Lepra::SystemManager::GetQuitRequest();
 	mUiManager->Close();
-	Lepra::SystemManager::SetQuitRequest(lQuit);
+	Lepra::SystemManager::AddQuitRequest(-1);
 
 	// Reopen.
 	bool lOk = mResourceManager->InitDefault();
@@ -648,7 +653,7 @@ void GameClientMasterTicker::ClosePlayerCountGui()
 void GameClientMasterTicker::OnExit()
 {
 	mLog.Headline(_T("Number of players not picked, quitting."));
-	Lepra::SystemManager::SetQuitRequest(true);
+	Lepra::SystemManager::AddQuitRequest(+1);
 	ClosePlayerCountGui();
 }
 
@@ -661,6 +666,64 @@ void GameClientMasterTicker::OnSetPlayerCount(int pPlayerCount)
 		CreateSlave();
 	}
 }
+
+
+
+bool GameClientMasterTicker::ApplyCalibration()
+{
+	bool lOk = true;
+	const UiLepra::InputManager::DeviceList& lDevices = mUiManager->GetInputManager()->GetDeviceList();
+	UiLepra::InputManager::DeviceList::const_iterator x = lDevices.begin();
+	for (; x != lDevices.end(); ++x)
+	{
+		UiLepra::InputDevice* lDevice = *x;
+		Lepra::String lDeviceId = Lepra::StringUtility::ReplaceAll(lDevice->GetIdentifier(), ' ', '_');
+		lDeviceId = Lepra::StringUtility::ReplaceAll(lDeviceId, '.', '_');
+		UiLepra::InputDevice::CalibrationData lCalibration;
+
+		const std::list<Lepra::String> lVariableNames = UiCure::GetSettings()->GetVariableNameList(true);
+		std::list<Lepra::String>::const_iterator y = lVariableNames.begin();
+		for (; y != lVariableNames.end(); ++y)
+		{
+			const Lepra::String& lVarName = *y;
+			const Lepra::StringUtility::StringVector lVarNames = Lepra::StringUtility::Split(lVarName, _T("."), 2);
+			if (lVarNames.size() != 3)
+			{
+				continue;
+			}
+			if (lVarNames[0] == _T("Calibration") && lVarNames[1] == lDeviceId)
+			{
+				Lepra::String lValue = UiCure::GetSettings()->GetDefaultValue(
+					Cure::RuntimeVariableScope::READ_ONLY, lVarName, _T(""));
+				lCalibration.push_back(UiLepra::InputDevice::CalibrationElement(lVarNames[2], lValue));
+			}
+		}
+		lOk &= lDevice->SetCalibration(lCalibration);
+	}
+	return (lOk);
+}
+
+void GameClientMasterTicker::StashCalibration()
+{
+	const UiLepra::InputManager::DeviceList& lDevices = mUiManager->GetInputManager()->GetDeviceList();
+	UiLepra::InputManager::DeviceList::const_iterator x = lDevices.begin();
+	for (; x != lDevices.end(); ++x)
+	{
+		UiLepra::InputDevice* lDevice = *x;
+		Lepra::String lDeviceId = Lepra::StringUtility::ReplaceAll(lDevice->GetIdentifier(), ' ', '_');
+		lDeviceId = Lepra::StringUtility::ReplaceAll(lDeviceId, '.', '_');
+		const UiLepra::InputDevice::CalibrationData lCalibration = lDevice->GetCalibration();
+
+		UiLepra::InputDevice::CalibrationData::const_iterator y = lCalibration.begin();
+		for (; y != lCalibration.end(); ++y)
+		{
+			const UiLepra::InputDevice::CalibrationElement& lElement = *y;
+			UiCure::GetSettings()->SetValue(Cure::RuntimeVariableScope::SET_OVERWRITE,
+				_T("Calibration.")+lDeviceId+_T(".")+lElement.first, lElement.second);
+		}
+	}
+}
+
 
 
 GameClientMasterTicker::MasterInputFunctor::MasterInputFunctor(GameClientMasterTicker* pManager):

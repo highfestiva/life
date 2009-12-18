@@ -304,7 +304,7 @@ bool GameClientSlaveManager::Reset()	// Run when disconnected. Removes all objec
 		mLoginWindow->GetChild(_T("User"), 0)->SetKeyboardFocus();
 	}
 
-	mCameraPosition.Set(0, -100, 255);
+	mCameraPosition.Set(0, -200, 5);
 	mCameraOrientation.Set(Lepra::PIF/2.0f, Lepra::PIF/2.0f, 0);
 
 	mObjectFrameIndexMap.clear();
@@ -320,7 +320,7 @@ bool GameClientSlaveManager::Reset()	// Run when disconnected. Removes all objec
 bool GameClientSlaveManager::InitializeTerrain()
 {
 	Cure::GameObjectId lGameObjectId = GetContext()->AllocateGameObjectId(Cure::NETWORK_OBJECT_LOCAL_ONLY);
-	bool lOk = CreateObject(lGameObjectId, _T("ground_002"),
+	bool lOk = CreateObject(lGameObjectId, _T("level_01"),
 		Cure::NETWORK_OBJECT_LOCAL_ONLY);
 	return (lOk);
 }
@@ -393,13 +393,13 @@ void GameClientSlaveManager::TickUiUpdate()
 		const float lTargetCameraXyDistance = 20.0f;
 		const float lCurrentCameraXyDistance = lTargetCameraPosition.GetDistance(lAvatarXyPosition);
 		lTargetCameraPosition = lAvatarXyPosition + (lTargetCameraPosition-lAvatarXyPosition)*(lTargetCameraXyDistance/lCurrentCameraXyDistance);
-		if (lAvatarPosition.z > 255)
+		if (lAvatarPosition.z > -20)
 		{
 			lTargetCameraPosition.z = lAvatarPosition.z;
 		}
 		else
 		{
-			lTargetCameraPosition.z = 255.0f;
+			lTargetCameraPosition.z = -20.0f;
 		}
 
 		/*// Temporary: changed to "cam stay behind" mode.

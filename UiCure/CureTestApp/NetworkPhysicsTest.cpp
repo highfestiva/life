@@ -1095,7 +1095,7 @@ bool Tick(float pTickTime, int pAgentIndex)
 bool Tick(float pTickTime, bool& pQuit)
 {
 	UiLepra::Core::ProcessMessages();
-	pQuit = Lepra::SystemManager::GetQuitRequest();
+	pQuit = (Lepra::SystemManager::GetQuitRequest() != 0);
 	if (!pQuit)
 	{
 		pQuit = !gServer.mActive;
@@ -1121,7 +1121,7 @@ bool TestPrototypeNetworkPhysics()
 {
 	bool lTestOk = true;
 
-	Lepra::SystemManager::SetQuitRequest(false);
+	Lepra::SystemManager::AddQuitRequest(-1);
 
 	if (lTestOk)
 	{

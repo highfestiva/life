@@ -1,5 +1,5 @@
 
-// Author: Alexander Hugestrand
+// Author: Alexander Hugestrand, Jonas Byström
 // Copyright (c) 2002-2009, Righteous Games
 
 
@@ -74,17 +74,29 @@ Lepra::String InputElement::GetFullName() const
 	Lepra::String lName;
 	switch (GetParentDevice()->GetInterpretation())
 	{
-		case UiLepra::InputDevice::TYPE_MOUSE:		lName = _T("Mouse");	break;
-		case UiLepra::InputDevice::TYPE_KEYBOARD:	lName = _T("Keyboard");	break;
-		default:					lName = _T("Device");	break;
+		case InputDevice::TYPE_MOUSE:		lName += _T("Mouse");		break;
+		case InputDevice::TYPE_KEYBOARD:	lName += _T("Keyboard");	break;
+		case InputDevice::TYPE_JOYSTICK:	lName += _T("Joystick");	break;
+		case InputDevice::TYPE_GAMEPAD:		lName += _T("GamePad");		break;
+		case InputDevice::TYPE_1STPERSON:	lName += _T("1stPerson");	break;
+		case InputDevice::TYPE_PEDALS:		lName += _T("Pedals");		break;
+		case InputDevice::TYPE_WHEEL:		lName += _T("Wheel");		break;
+		case InputDevice::TYPE_FLIGHT:		lName += _T("Flight");		break;
+		default:				lName += _T("Device");		break;
 	}
 	lName += Lepra::StringUtility::IntToString(GetParentDevice()->GetTypeIndex(), 10)+_T(".");
+	lName += GetName();
+	return (lName);
+}
 
+Lepra::String InputElement::GetName() const
+{
+	Lepra::String lName;
 	switch (GetInterpretation())
 	{
-		case UiLepra::InputElement::ABSOLUTE_AXIS:	lName += _T("AbsoluteAxis");	break;
-		case UiLepra::InputElement::RELATIVE_AXIS:	lName += _T("RelativeAxis");	break;
-		default:					lName += _T("Button");		break;
+		case InputElement::ABSOLUTE_AXIS:	lName += _T("AbsoluteAxis");	break;
+		case InputElement::RELATIVE_AXIS:	lName += _T("RelativeAxis");	break;
+		default:				lName += _T("Button");		break;
 	}
 	lName += Lepra::StringUtility::IntToString(GetTypeIndex(), 10);
 	return (lName);
@@ -368,48 +380,39 @@ void InputDevice::ClearFunctors()
 	}
 }
 
-unsigned InputDevice::GetCalibrationDataSize()
+InputDevice::CalibrationData InputDevice::GetCalibration() const
 {
-	unsigned lDataSize = 0;
-
-	ElementArray::iterator x;
-	for (x = mElementArray.begin();
-		x != mElementArray.end();
-		++x)
+	CalibrationData lData;
+	ElementArray::const_iterator x = mElementArray.begin();
+	for (; x != mElementArray.end(); ++x)
 	{
 		InputElement* lElement = *x;
-		lDataSize += lElement->GetCalibrationDataSize();
+		if (lElement->GetInterpretation() == InputElement::ABSOLUTE_AXIS)
+		{
+			lData.push_back(CalibrationElement(lElement->GetName(), lElement->GetCalibration()));
+		}
 	}
-
-	return lDataSize;
+	return (lData);
 }
 
-void InputDevice::GetCalibrationData(Lepra::uint8* pData)
+bool InputDevice::SetCalibration(const CalibrationData& pData)
 {
-	unsigned lOffset = 0;
-	ElementArray::iterator x;
-	for (x = mElementArray.begin();
-		x != mElementArray.end();
-		++x)
+	bool lOk = true;
+	CalibrationData::const_iterator y = pData.begin();
+	for (; y != pData.end(); ++y)
 	{
-		InputElement* lElement = *x;
-		lElement->GetCalibrationData(&pData[lOffset]);
-		lOffset += lElement->GetCalibrationDataSize();
+		const CalibrationElement& lCalibration = *y;
+		ElementArray::iterator x = mElementArray.begin();
+		for (; x != mElementArray.end(); ++x)
+		{
+			InputElement* lElement = *x;
+			if (lElement->GetName() == lCalibration.first)
+			{
+				lOk &= lElement->SetCalibration(lCalibration.second);
+			}
+		}
 	}
-}
-
-void InputDevice::SetCalibrationData(Lepra::uint8* pData)
-{
-	unsigned lOffset = 0;
-	ElementArray::iterator x;
-	for (x = mElementArray.begin();
-		x != mElementArray.end();
-		++x)
-	{
-		InputElement* lElement = *x;
-		lElement->SetCalibrationData(&pData[lOffset]);
-		lOffset += lElement->GetCalibrationDataSize();
-	}
+	return (lOk);
 }
 
 
@@ -548,7 +551,7 @@ Lepra::String InputManager::GetKeyName(KeyCode pKeyCode)
 		X(PLUS);
 		X(COMMA);
 		X(MINUS);
-;		X(DOT);
+		X(DOT);
 		X(APOSTROPHE);
 		X(ACUTE);
 		X(PARAGRAPH);

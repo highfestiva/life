@@ -11,9 +11,9 @@ Game
 + Flip axes correctly in CppContextObject and UI ditto.
 + Create arcade-style helicopter.
 + Add help text when dropping down console.
-. Load objects dynamically, without having to hard-code an account and class/phys/meshes name.
-. Create base world. Use mesh, not primitives, for collision.
++ Create base world. Use mesh, not primitives, for collision. (Modelling, import, load and engine.)
 
+. Load objects dynamically, without having to hard-code an account and class/phys/meshes name.
 . Create UI for picking new vehicle. Don't auto-pick when logging in!
   - Use road signs as buttons.
   - Have a road sign for each vehicle.
@@ -92,17 +92,23 @@ Engine
 + Make ODE wheels keep straight using dBodySetFiniteRotationMode() and dBodySetFiniteRotationAxis() instead of a friggen motor!
 + Fix laggy/jerky camera motion by interpolation/extrapolation. Cam adjusts interpolation factor to velocity?
 + Make SystemPainter a standalone class that does not inherit UiTbc::Painter!
-. Dropping all non-game components from any other file out there (Cure, UiCure).
-. Remove all possible classes to enable easier porting to Mac.
-. Make sure that synchronizing doesn't happen every frame on the heli when a control is changed!
-. Make input configuration better - use other type of ID than enumeration??? I'm a bit unsure here...
++ Remove all possible classes to enable easier porting.
++ Make sure that synchronizing doesn't happen every frame on the heli when a control is changed!
++ Make input configuration better - use other type of ID than enumeration??? I'm a bit unsure here...
++ Add support for "http links". I.e. start browser at specific address.
++ Load+save calibration.
++ Exchange SoundManager basics to a portable one.
 . Port font rendering.
-. Exchange SoundManager basics to a portable one. Or fix FMod.
-. Add support for "http links". I.e. start browser at specific address.
 . Port Posix' SystemManager (mostly placeholders at the moment).
+. Update server port in Linux.
 . Port client to Linux.
 . Port client to Mac OS X.
 
+. Remove game source code from engine source code: camera, hard-coded object placements, input handling, etc.
+. Spawn points. Matching against vehicle types...
+. Add UV-maps to the import tool.
+. Add phys_capsule as allowed shape in the import tool and load part in engine.
+. Add support for moving stuff in static world (elevator, wind mill, etc).
 . Make export script (Maya) auto-run before save.
 . Make engine and import tool externally available to Pelle!
 . Logging on in two steps: a) normal login, server returns avatars, and b) enter world by selecting avatar. (After (a) the sync goes.)
@@ -144,6 +150,7 @@ Engine
   - Every n seconds stores all object states at time stamps (so that randomized replay can start from any of those time stamps).
   - Use for start/end screen.
 . Make replay functionality for start/end screen.
+. Clear top of log files when too big. Preferrably copy to .log.old and start a new one.
 
  
 Quality
@@ -164,12 +171,13 @@ Quality
 + Get unicode on track. Make script files all UTF-8.
 + Always use unicode script files (UTF-8).
 + Add unit test for making sure that loading more than one instance of same resource results in a single instance.
++ Replace copyright notice to Righteous Games.
 . Make build in one step: server, client, **DATA**, Linux, Windows...
-. Assertions on getting access to "wrong" parts of the system with the wrong thread. (Such as dropping users in NetworkServer.cpp from the TCP thread.)
+. Assertions on getting access to wrong parts of the system with the wrong thread. (Such as dropping users in NetworkServer.cpp from the TCP thread.)
 . Stresstest (use .lsh).
-. Replace copyright notice to Righteous Games.
 . Run test app in Windows and Linux.
 . Make sure default settings are good on a no-good computer. Like 60 FPS.
+. Check optimizations quickly.
 
 . Make sure shutting down client with two simultaneously logged-in users gets logged out from the server.
 . Make font rendering look good instead of ugly.
@@ -210,3 +218,6 @@ Quality
 . Remove unused rtvars (such as Ui.2D.PaintMode).
 . Port to D3D rendering + painter. Painter only needs working fonts?
 . Automatically downsize rendering (shadows) and physics micro steps if FPS are low.
+. Check that all log destinations write strings, not raw data, to disk. LogFileXxx (single one) was checked and corrected from WriteData() to WriteString().
+. Get licences in order. Both C++ and Python. Both mine and third party.
+. Separate input and output data in the data folder. Create a proper directory structure for external release.

@@ -94,6 +94,18 @@ bool TestString(const Lepra::LogDecorator& pAccount)
 		assert(lTestOk);
 	}
 
+	// Verify Lepra::String basics.
+	if (lTestOk)
+	{
+		lContext = _T("String start/end");
+		Lepra::String lData(_T("This is the start of something new!"));
+		lTestOk = (Lepra::StringUtility::StartsWith(lData, _T("This is")) &&
+			!Lepra::StringUtility::StartsWith(lData, _T("That is")) &&
+			Lepra::StringUtility::EndsWith(lData, _T(" new!")) &&
+			!Lepra::StringUtility::EndsWith(lData, _T(" old!")));
+		assert(lTestOk);
+	}
+
 	// Verify Lepra::StringUtility::Format.
 	if (lTestOk)
 	{
@@ -1127,6 +1139,11 @@ bool TestSystemManager(const Lepra::LogDecorator& pAccount)
 		lTestOk = (Lepra::SystemManager::GetAvailVirtualMemory() >= 100*1024*1024 &&
 			Lepra::SystemManager::GetAvailVirtualMemory() <= (Lepra::uint64)19*1024*1024*1024);
 		assert(lTestOk);
+	}
+	if (lTestOk)
+	{
+		// Just make sure we don't crash. Need manual verification that it works anyhoo.
+		Lepra::SystemManager::WebBrowseTo(_T("http://trialepicfail.blogspot.com/"));
 	}
 
 	ReportTestResult(pAccount, _T("System"), lContext, lTestOk);
