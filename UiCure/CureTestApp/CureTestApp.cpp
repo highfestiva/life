@@ -143,8 +143,8 @@ int CureTestApplication::Run()
 	lConsoleLogPointer = &lConsoleLogger;
 #endif // LEPRA_CONSOLE
 	Lepra::DebuggerLogListener lDebugLogger;
-	Lepra::FileLogListener lFileLogger(_TEXT_ALTERNATIVE("CureTestApp.log", L"CureTestAppU.log"));
-	Lepra::FileLogListener lPerformanceLogger(_TEXT_ALTERNATIVE("CureTestPerformance.log", L"CureTestPerformanceU.log"));
+	Lepra::FileLogListener lFileLogger(_T("CureTestApp.log"));
+	Lepra::FileLogListener lPerformanceLogger(_T("CureTestPerformance.log"));
 	Lepra::MemFileLogListener lMemLogger(100*1024);
 	Lepra::LogType::GetLog(Lepra::LogType::SUB_ROOT)->SetupBasicListeners(lConsoleLogPointer, &lDebugLogger,
 		&lFileLogger, &lPerformanceLogger, &lMemLogger);

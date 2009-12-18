@@ -96,7 +96,8 @@ Engine
 + Make sure that synchronizing doesn't happen every frame on the heli when a control is changed!
 + Make input configuration better - use other type of ID than enumeration??? I'm a bit unsure here...
 + Add support for "http links". I.e. start browser at specific address.
-. Exchange SoundManager basics to a portable one. Or fix FMod.
++ Load+save calibration.
++ Exchange SoundManager basics to a portable one.
 . Port font rendering.
 . Port Posix' SystemManager (mostly placeholders at the moment).
 . Update server port in Linux.

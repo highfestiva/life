@@ -72,17 +72,17 @@ inline uint64 SystemManager::GetCpuTick()
 {
 #ifdef LEPRA_MSVC_X86
 	__asm rdtsc;
-#elif defined(LEPRA_GCC) && defined(__i386__)
+#elif defined(LEPRA_GCC_X86_32)
 	uint64 x;
 	__asm__ volatile (".byte 0x0f, 0x31" : "=A" (x));
 	return x;
-#elif defined(LEPRA_GCC) && defined(__x86_64__)
+#elif defined(LEPRA_GCC_X86_64)
 	unsigned hi, lo;
 	__asm__ __volatile__ ("rdtsc" : "=a"(lo), "=d"(hi));
 	return ((uint64)lo) | (((uint64)hi)<<32);
-#else // <Unimplemented target>
+#else
 #error "GetCpuTick() not yet implemented on this platform."
-#endif // LEPRA_MSVC_X86/<Unimplemented target>
+#endif // Platform.
 }
 
 

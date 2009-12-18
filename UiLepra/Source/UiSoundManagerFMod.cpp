@@ -1,13 +1,14 @@
 
 // Author: Alexander Hugestrand
-//	Copyright (c) 2002-2009, Righteous Games
+// Copyright (c) 2002-2009, Righteous Games
 
 
 
-#include "../Include/UiOpenGLExtensions.h"
-#include "../../Lepra/Include/Log.h"
-#include "../Include/UiLepra.h"
 #include "../Include/UiSoundManagerFMod.h"
+
+
+
+// TODO: refactor and remove unthinkable crap. Move resource ownership into resource manager where it belongs.
 
 
 
@@ -17,17 +18,15 @@ namespace UiLepra
 
 
 SoundManagerFMod::SoundManagerFMod(int pMixRate):
-	mInitialized(false),
 	mSampleIDManager(1, 99999, 0),
 	mStreamIDManager(100000, 199999, 0),
-	mSoundInstanceIDManager(200000, 299999, 0)
+	mSoundInstanceIDManager(200000, 299999, 0),
+	mChannel(0)
 {
 	if (FSOUND_Init(pMixRate, 32, 0) != 0)
 	{
 		mNumChannels = FSOUND_GetMaxChannels();
 		mChannel = new Channel[mNumChannels];
-
-		mInitialized = true;
 	}
 	else
 	{
@@ -38,10 +37,7 @@ SoundManagerFMod::SoundManagerFMod(int pMixRate):
 SoundManagerFMod::~SoundManagerFMod()
 {
 	FSOUND_Close();
-	if (mInitialized == true)
-	{
-		delete[] mChannel;
-	}
+	delete[] (mChannel);
 }
 
 void SoundManagerFMod::Update()
@@ -50,13 +46,11 @@ void SoundManagerFMod::Update()
 
 SoundManager::SoundID SoundManagerFMod::LoadSound2D(const Lepra::String& pFileName, LoopMode pLoopMode, int pPriority)
 {
-	Clamp(pPriority, 0, 255);
-
 	FileNameToSampleTable::Iterator lIter = mFileNameToSampleTable.Find(pFileName);
 	if (lIter != mFileNameToSampleTable.End())
 	{
 		(*lIter)->mReferenceCount++;
-		return (SoundID)(*lIter)->mID;
+		return (*lIter)->mID;
 	}
 	else
 	{
@@ -81,14 +75,14 @@ SoundManager::SoundID SoundManagerFMod::LoadSound2D(const Lepra::String& pFileNa
 		Sample* lSample = new Sample();
 		lSample->mFileName = pFileName;
 		lSample->mID = mSampleIDManager.GetFreeId();
-		lSample->mSample = FSOUND_Sample_Load(lSample->mID,
+		lSample->mSample = FSOUND_Sample_Load((int)lSample->mID,
 			Lepra::AnsiStringUtility::ToOwnCode(pFileName).c_str(), lFlags, 0, 0);
 
 		if (lSample->mSample == 0)
 		{
 			mSampleIDManager.RecycleId(lSample->mID);
 			delete lSample;
-			return (SoundID)mSampleIDManager.GetInvalidId();
+			return mSampleIDManager.GetInvalidId();
 		}
 
 		FSOUND_Sample_SetDefaults(lSample->mSample, -1, -1, -1, pPriority);
@@ -96,19 +90,17 @@ SoundManager::SoundID SoundManagerFMod::LoadSound2D(const Lepra::String& pFileNa
 		mFileNameToSampleTable.Insert(pFileName, lSample);
 		mIDToSampleTable.Insert(lSample->mID, lSample);
 
-		return (SoundID)lSample->mID;
+		return lSample->mID;
 	}
 }
 
 SoundManager::SoundID SoundManagerFMod::LoadSound3D(const Lepra::String& pFileName, LoopMode pLoopMode, int pPriority)
 {
-	Clamp(pPriority, 0, 255);
-
 	FileNameToSampleTable::Iterator lIter = mFileNameToSampleTable.Find(pFileName);
 	if (lIter != mFileNameToSampleTable.End())
 	{
 		(*lIter)->mReferenceCount++;
-		return (SoundID)(*lIter)->mID;
+		return (*lIter)->mID;
 	}
 	else
 	{
@@ -133,14 +125,14 @@ SoundManager::SoundID SoundManagerFMod::LoadSound3D(const Lepra::String& pFileNa
 		Sample* lSample = new Sample();
 		lSample->mFileName = pFileName;
 		lSample->mID = mSampleIDManager.GetFreeId();
-		lSample->mSample = FSOUND_Sample_Load(lSample->mID,
+		lSample->mSample = FSOUND_Sample_Load((int)lSample->mID,
 			Lepra::AnsiStringUtility::ToOwnCode(pFileName).c_str(), lFlags, 0, 0);
 
 		if (lSample->mSample == 0)
 		{
 			mSampleIDManager.RecycleId(lSample->mID);
 			delete lSample;
-			return (SoundID)mSampleIDManager.GetInvalidId();
+			return mSampleIDManager.GetInvalidId();
 		}
 
 		FSOUND_Sample_SetDefaults(lSample->mSample, -1, -1, -1, pPriority);
@@ -148,19 +140,17 @@ SoundManager::SoundID SoundManagerFMod::LoadSound3D(const Lepra::String& pFileNa
 		mFileNameToSampleTable.Insert(pFileName, lSample);
 		mIDToSampleTable.Insert(lSample->mID, lSample);
 
-		return (SoundID)lSample->mID;
+		return lSample->mID;
 	}
 }
 
 SoundManager::SoundID SoundManagerFMod::LoadStream(const Lepra::String& pFileName, LoopMode pLoopMode, int pPriority)
 {
-	Clamp(pPriority, 0, 255);
-
 	FileNameToSampleTable::Iterator lIter = mFileNameToSampleTable.Find(pFileName);
 	if (lIter != mFileNameToSampleTable.End())
 	{
 		(*lIter)->mReferenceCount++;
-		return (SoundID)(*lIter)->mID;
+		return (*lIter)->mID;
 	}
 	else
 	{
@@ -192,7 +182,7 @@ SoundManager::SoundID SoundManagerFMod::LoadStream(const Lepra::String& pFileNam
 		{
 			mStreamIDManager.RecycleId(lSample->mID);
 			delete lSample;
-			return (SoundID)mStreamIDManager.GetInvalidId();
+			return mStreamIDManager.GetInvalidId();
 		}
 
 		FSOUND_Sample_SetDefaults(FSOUND_Stream_GetSample(lSample->mStream), -1, -1, -1, pPriority);
@@ -200,7 +190,7 @@ SoundManager::SoundID SoundManagerFMod::LoadStream(const Lepra::String& pFileNam
 		mFileNameToSampleTable.Insert(pFileName, lSample);
 		mIDToSampleTable.Insert(lSample->mID, lSample);
 
-		return (SoundID)lSample->mID;
+		return lSample->mID;
 	}
 }
 
@@ -236,13 +226,12 @@ void SoundManagerFMod::Release(SoundID pSoundID)
 	}
 }
 
-double SoundManagerFMod::GetStreamTime(SoundID pStreamID)
+double SoundManagerFMod::GetStreamTime(SoundID pSoundID)
 {
-	IDToSampleTable::Iterator lIter = mIDToSampleTable.Find((int)pStreamID);
+	IDToSampleTable::Iterator lIter = mIDToSampleTable.Find((int)pSoundID);
 	if (lIter != mIDToSampleTable.End())
 	{
 		Sample* lSample = *lIter;
-
 		if (lSample->mStream != 0)
 		{
 			return (double)FSOUND_Stream_GetTime(lSample->mStream) / 1000.0;
@@ -253,11 +242,6 @@ double SoundManagerFMod::GetStreamTime(SoundID pStreamID)
 }
 
 SoundManager::SoundInstanceID SoundManagerFMod::CreateSoundInstance(SoundID pSoundID)
-{
-	return CreateSoundInstance(pSoundID, false);
-}
-
-SoundManager::SoundInstanceID SoundManagerFMod::CreateSoundInstance(SoundID pSoundID, bool pAutoDelete)
 {
 	IDToSampleTable::Iterator lIter = mIDToSampleTable.Find((int)pSoundID);
 
@@ -285,7 +269,7 @@ SoundManager::SoundInstanceID SoundManagerFMod::CreateSoundInstance(SoundID pSou
 		lChannel &= 0x00000FFF;
 
 		// Remove the currently playing sound instance. The ID is still allocated though.
-		DiscardSoundInstance(mChannel[lChannel].mSoundInstance.mSoundIID);
+		DeleteSoundInstance(mChannel[lChannel].mSoundInstance.mSoundIID);
 
 		// Allocate a new ID and update the channel.
 		lSoundIID = (SoundInstanceID)mSoundInstanceIDManager.GetFreeId();
@@ -293,7 +277,6 @@ SoundManager::SoundInstanceID SoundManagerFMod::CreateSoundInstance(SoundID pSou
 		mChannel[lChannel].mSoundInstance.mSoundID = pSoundID;
 		mChannel[lChannel].mSoundInstance.mSoundIID = lSoundIID;
 		mChannel[lChannel].mSoundInstance.mChannel = lChannel;
-		mChannel[lChannel].mSoundInstance.mAutoDelete = pAutoDelete;
 
 		mSoundInstanceTable.Insert((int)lSoundIID, mChannel[lChannel].mSoundInstance);
 	}
@@ -303,18 +286,22 @@ SoundManager::SoundInstanceID SoundManagerFMod::CreateSoundInstance(SoundID pSou
 
 void SoundManagerFMod::DeleteSoundInstance(SoundInstanceID pSoundIID)
 {
-	if (pSoundIID == mSoundInstanceIDManager.GetInvalidId())
+	SoundInstanceTable::Iterator lIter;
+	lIter = mSoundInstanceTable.Find((int)pSoundIID);
+	if (lIter == mSoundInstanceTable.End())
 	{
 		return;
 	}
 
-	DiscardSoundInstance(pSoundIID);
-	mSoundInstanceIDManager.RecycleId(pSoundIID);
-}
+	SoundInstance lSI = *lIter;
+	mSoundInstanceTable.Remove(lIter);
 
-bool SoundManagerFMod::Play(SoundID pSoundID, float pVolume, float pPitch)
-{
-	return Play(CreateSoundInstance(pSoundID, true), pVolume, pPitch);
+	if (mChannel[lSI.mChannel].mSoundInstance.mSoundIID == pSoundIID)
+	{
+		mChannel[lSI.mChannel].mSoundInstance.mSoundIID = (SoundInstanceID)mSoundInstanceIDManager.GetInvalidId();
+	}
+
+	mSoundInstanceIDManager.RecycleId(pSoundIID);
 }
 
 bool SoundManagerFMod::Play(SoundInstanceID pSoundIID, float pVolume, float pPitch)
@@ -327,14 +314,11 @@ bool SoundManagerFMod::Play(SoundInstanceID pSoundIID, float pVolume, float pPit
 
 	SoundInstance lSI = *lSIIter;
 
-	Clamp(pVolume, 0.0f, 1.0f);
-
 	FSOUND_SetPan(lSI.mChannel, FSOUND_STEREOPAN);
 	FSOUND_SetVolume(lSI.mChannel, (int)(pVolume * 255.0f));
 
 	if (pPitch != 1.0f)
 	{
-		//Clamp(pFrequency, 100, 705600);
 		// TODO: Fix the pitch to be relative to the sample frequency.
 		FSOUND_SetFrequency(lSI.mChannel, (int)(44100.0f * pPitch) );
 	}
@@ -362,7 +346,7 @@ void SoundManagerFMod::Stop(SoundInstanceID pSoundIID)
 	FSOUND_StopSound((*lSIIter).mChannel);
 }
 
-void SoundManagerFMod::Pause(SoundInstanceID pSoundIID)
+void SoundManagerFMod::TogglePause(SoundInstanceID pSoundIID)
 {
 	SoundInstanceTable::Iterator lSIIter = mSoundInstanceTable.Find(pSoundIID);
 	if (lSIIter == mSoundInstanceTable.End())
@@ -370,18 +354,8 @@ void SoundManagerFMod::Pause(SoundInstanceID pSoundIID)
 		return;
 	}
 
-	FSOUND_SetPaused((*lSIIter).mChannel, 1);
-}
-
-void SoundManagerFMod::Unpause(SoundInstanceID pSoundIID)
-{
-	SoundInstanceTable::Iterator lSIIter = mSoundInstanceTable.Find(pSoundIID);
-	if (lSIIter == mSoundInstanceTable.End())
-	{
-		return;
-	}
-
-	FSOUND_SetPaused((*lSIIter).mChannel, 0);
+	signed char lSetPause = !FSOUND_GetPaused((*lSIIter).mChannel);
+	FSOUND_SetPaused((*lSIIter).mChannel, lSetPause);
 }
 
 bool SoundManagerFMod::IsPlaying(SoundInstanceID pSoundIID)
@@ -414,19 +388,7 @@ void SoundManagerFMod::SetPan(SoundInstanceID pSoundIID, float pPan)
 		return;
 	}
 
-	Clamp(pPan, -1.0f, 1.0f);
 	FSOUND_SetPan((*lSIIter).mChannel, (int)((pPan + 1.0f) * 127.5f));
-}
-
-float SoundManagerFMod::GetPan(SoundInstanceID pSoundIID)
-{
-	SoundInstanceTable::Iterator lSIIter = mSoundInstanceTable.Find(pSoundIID);
-	if (lSIIter == mSoundInstanceTable.End())
-	{
-		return 0;
-	}
-
-	return ((float)FSOUND_GetPan((*lSIIter).mChannel) / 127.5f) - 1.0f;
 }
 
 void SoundManagerFMod::SetVolume(SoundInstanceID pSoundIID, float pVolume)
@@ -437,19 +399,7 @@ void SoundManagerFMod::SetVolume(SoundInstanceID pSoundIID, float pVolume)
 		return;
 	}
 
-	Clamp(pVolume, 0.0f, 1.0f);
 	FSOUND_SetVolume((*lSIIter).mChannel, (int)(pVolume * 255.0f));
-}
-
-float SoundManagerFMod::GetVolume(SoundInstanceID pSoundIID)
-{
-	SoundInstanceTable::Iterator lSIIter = mSoundInstanceTable.Find(pSoundIID);
-	if (lSIIter == mSoundInstanceTable.End())
-	{
-		return 0;
-	}
-
-	return (float)FSOUND_GetVolume((*lSIIter).mChannel) / 255.0f;
 }
 
 void SoundManagerFMod::SetFrequency(SoundInstanceID pSoundIID, int pFrequency)
@@ -460,7 +410,6 @@ void SoundManagerFMod::SetFrequency(SoundInstanceID pSoundIID, int pFrequency)
 		return;
 	}
 
-	Clamp(pFrequency, 100, 705600);
 	FSOUND_SetFrequency((*lSIIter).mChannel, pFrequency);
 }
 
@@ -475,7 +424,7 @@ int SoundManagerFMod::GetFrequency(SoundInstanceID pSoundIID)
 	return FSOUND_GetFrequency((*lSIIter).mChannel);
 }
 
-void SoundManagerFMod::Set3DSoundAttributes(SoundInstanceID pSoundIID, const Lepra::Vector3DF& pPos, const Lepra::Vector3DF& pVel)
+void SoundManagerFMod::SetSoundPosition(SoundInstanceID pSoundIID, const Lepra::Vector3DF& pPos, const Lepra::Vector3DF& pVel)
 {
 	SoundInstanceTable::Iterator lSIIter = mSoundInstanceTable.Find(pSoundIID);
 	if (lSIIter == mSoundInstanceTable.End())
@@ -497,7 +446,7 @@ void SoundManagerFMod::Set3DSoundAttributes(SoundInstanceID pSoundIID, const Lep
 	FSOUND_3D_SetAttributes((*lSIIter).mChannel, lPos, lVel);
 }
 
-void SoundManagerFMod::Get3DSoundAttributes(SoundInstanceID pSoundIID, Lepra::Vector3DF& pPos, Lepra::Vector3DF& pVel)
+void SoundManagerFMod::GetSoundPosition(SoundInstanceID pSoundIID, Lepra::Vector3DF& pPos, Lepra::Vector3DF& pVel)
 {
 	SoundInstanceTable::Iterator lSIIter = mSoundInstanceTable.Find(pSoundIID);
 	if (lSIIter == mSoundInstanceTable.End())
@@ -519,12 +468,12 @@ void SoundManagerFMod::Get3DSoundAttributes(SoundInstanceID pSoundIID, Lepra::Ve
 	pVel.z = lVel[2];
 }
 
-void SoundManagerFMod::Set3dCurrentListener(int pListenerIndex, int pListenerCount)
+void SoundManagerFMod::SetCurrentListener(int pListenerIndex, int pListenerCount)
 {
 	FSOUND_3D_Listener_SetCurrent(pListenerIndex, pListenerCount);
 }
 
-void SoundManagerFMod::Set3DListenerAttributes(const Lepra::Vector3DF& pPos, const Lepra::Vector3DF& pVel,
+void SoundManagerFMod::SetListenerPosition(const Lepra::Vector3DF& pPos, const Lepra::Vector3DF& pVel,
 	const Lepra::Vector3DF& pUp, const Lepra::Vector3DF& pForward)
 {
 	float lPos[3];
@@ -541,7 +490,7 @@ void SoundManagerFMod::Set3DListenerAttributes(const Lepra::Vector3DF& pPos, con
 	FSOUND_3D_Listener_SetAttributes(lPos, lVel, pForward.x, pForward.y, pForward.z, pUp.x, pUp.y, pUp.z);
 }
 
-void SoundManagerFMod::Get3DListenerAttributes(Lepra::Vector3DF& pPos, Lepra::Vector3DF& pVel,
+void SoundManagerFMod::GetListenerPosition(Lepra::Vector3DF& pPos, Lepra::Vector3DF& pVel,
 	Lepra::Vector3DF& pUp, Lepra::Vector3DF& pForward)
 {
 	float lPos[3];
@@ -558,15 +507,50 @@ void SoundManagerFMod::Get3DListenerAttributes(Lepra::Vector3DF& pPos, Lepra::Ve
 	pVel.z = lVel[2];
 }
 
-void SoundManagerFMod::Set3DDopplerFactor(float pFactor)
+void SoundManagerFMod::SetDopplerFactor(float pFactor)
 {
 	FSOUND_3D_SetDopplerFactor(pFactor);
 }
 
-void SoundManagerFMod::Set3DRollOffFactor(float pFactor)
+void SoundManagerFMod::SetRollOffFactor(float pFactor)
 {
 	FSOUND_3D_SetRolloffFactor(pFactor);
 }
+
+void SoundManagerFMod::SetChorus(SoundInstanceID pSoundIID, int pFXIndex, float /*pDelay*/, float pFeedback,
+	float pRate, float pDepth, float pWetness)
+{
+	int lFXID = mFXHandles.Get(GetChannel(pSoundIID), pFXIndex);
+	FSOUND_FX_SetChorus(lFXID, pWetness, pDepth, pFeedback, pRate, 1, 0, 2);
+}
+
+void SoundManagerFMod::SetFlanger(SoundInstanceID pSoundIID, int pFXIndex, float /*pDelay*/, float pFeedback,
+	float pRate, float pDepth, float pWetness)
+{
+	int lFXID = mFXHandles.Get(GetChannel(pSoundIID), pFXIndex);
+	FSOUND_FX_SetFlanger(lFXID, pWetness, pDepth, pFeedback, pRate, 1, 0, 2);
+}
+
+void SoundManagerFMod::SetCompressor(SoundInstanceID pSoundIID, int pFXIndex, float pRatio, float pThreshold,
+	float pAttack, float pRelease)
+{
+	int lFXID = mFXHandles.Get(GetChannel(pSoundIID), pFXIndex);
+	FSOUND_FX_SetCompressor(lFXID, 0, pAttack, pRelease, pThreshold, pRatio, 0);
+}
+
+void SoundManagerFMod::SetEcho(SoundInstanceID pSoundIID, int pFXIndex, float pFeedback, float pDelay, float pWetness)
+{
+	int lFXID = mFXHandles.Get(GetChannel(pSoundIID), pFXIndex);
+	FSOUND_FX_SetEcho(lFXID, pWetness, pFeedback, pDelay, pDelay, 0);
+}
+
+void SoundManagerFMod::SetParamEQ(SoundInstanceID pSoundIID, int pFXIndex, float pCenter, float pBandwidth, float pGain)
+{
+	int lFXID = mFXHandles.Get(GetChannel(pSoundIID), pFXIndex);
+	FSOUND_FX_SetParamEQ(lFXID, pCenter, pBandwidth, pGain);
+}
+
+
 
 int SoundManagerFMod::GetChannel(SoundInstanceID pSoundIID)
 {
@@ -577,115 +561,6 @@ int SoundManagerFMod::GetChannel(SoundInstanceID pSoundIID)
 	}
 
 	return (*lSIIter).mChannel;
-}
-
-void SoundManagerFMod::SetChorus(int pChannelIndex,
-								int pFXIndex,
-								float /*pDelay*/,
-								float pFeedback,
-								float pRate,
-								float pDepth,
-								float pWetness)
-{
-	int lFXID = mFXHandles.Get(pChannelIndex, pFXIndex);
-	FSOUND_FX_SetChorus(lFXID, pWetness, pDepth, pFeedback, pRate, 1, 0, 2);
-}
-
-void SoundManagerFMod::SetFlanger(int pChannelIndex, 
-								 int pFXIndex,
-								 float /*pDelay*/,
-								 float pFeedback,
-								 float pRate,
-								 float pDepth,
-								 float pWetness)
-{
-	int lFXID = mFXHandles.Get(pChannelIndex, pFXIndex);
-	FSOUND_FX_SetFlanger(lFXID, pWetness, pDepth, pFeedback, pRate, 1, 0, 2);
-}
-
-void SoundManagerFMod::SetCompressor(int pChannelIndex, 
-									int pFXIndex,
-									float pRatio,
-									float pThreshold,
-									float pAttack,
-									float pRelease)
-{
-	int lFXID = mFXHandles.Get(pChannelIndex, pFXIndex);
-	FSOUND_FX_SetCompressor(lFXID, 0, pAttack, pRelease, pThreshold, pRatio, 0);
-}
-
-void SoundManagerFMod::SetEcho(int pChannelIndex, 
-							  int pFXIndex,
-							  float pFeedback,
-							  float pDelay,
-							  float pWetness)
-{
-	int lFXID = mFXHandles.Get(pChannelIndex, pFXIndex);
-	FSOUND_FX_SetEcho(lFXID, pWetness, pFeedback, pDelay, pDelay, 0);
-}
-
-void SoundManagerFMod::SetParamEQ(int pChannelIndex, 
-								 int pFXIndex,
-								 float pCenter,
-								 float pBandwidth,
-								 float pGain)
-{
-	int lFXID = mFXHandles.Get(pChannelIndex, pFXIndex);
-	FSOUND_FX_SetParamEQ(lFXID, pCenter, pBandwidth, pGain);
-}
-
-void SoundManagerFMod::DiscardSoundInstance(SoundInstanceID pSoundIID)
-{
-	if (pSoundIID == mSoundInstanceIDManager.GetInvalidId())
-	{
-		return;
-	}
-
-	SoundInstanceTable::Iterator lIter;
-	lIter = mSoundInstanceTable.Find((int)pSoundIID);
-	if (lIter == mSoundInstanceTable.End())
-	{
-		return;
-	}
-
-	SoundInstance lSI = *lIter;
-	mSoundInstanceTable.Remove(lIter);
-
-	if (mChannel[lSI.mChannel].mSoundInstance.mSoundIID == pSoundIID)
-	{
-		mChannel[lSI.mChannel].mSoundInstance.mSoundIID = (SoundInstanceID)mSoundInstanceIDManager.GetInvalidId();
-	}
-
-	if (lSI.mAutoDelete == true)
-	{
-		mSoundInstanceIDManager.RecycleId(lSI.mSoundIID);
-	}
-}
-
-void SoundManagerFMod::Clamp(float& pValue, float pMin, float pMax)
-{
-	if (pValue < pMin)
-	{
-		pValue = pMin;
-	}
-	
-	if (pValue > pMax)
-	{
-		pValue = pMax;
-	}
-}
-
-void SoundManagerFMod::Clamp(int& pValue, int pMin, int pMax)
-{
-	if (pValue < pMin)
-	{
-		pValue = pMin;
-	}
-	
-	if (pValue > pMax)
-	{
-		pValue = pMax;
-	}
 }
 
 

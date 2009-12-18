@@ -42,7 +42,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;..\ThirdParty\stlport\stlport&quot;"
+				AdditionalIncludeDirectories="..\ThirdParty\stlport\stlport;&quot;../ThirdParty/openal-soft-1.10.622/Include&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG"
 				MinimalRebuild="false"
 				BasicRuntimeChecks="0"
@@ -115,7 +115,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="&quot;..\ThirdParty\stlport\stlport&quot;"
+				AdditionalIncludeDirectories="..\ThirdParty\stlport\stlport;&quot;../ThirdParty/openal-soft-1.10.622/Include&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG"
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
@@ -182,7 +182,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;..\ThirdParty\stlport\stlport&quot;"
+				AdditionalIncludeDirectories="..\ThirdParty\stlport\stlport;&quot;../ThirdParty/openal-soft-1.10.622/Include&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG"
 				MinimalRebuild="false"
 				BasicRuntimeChecks="0"
@@ -255,7 +255,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="&quot;..\ThirdParty\stlport\stlport&quot;"
+				AdditionalIncludeDirectories="..\ThirdParty\stlport\stlport;&quot;../ThirdParty/openal-soft-1.10.622/Include&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG"
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
@@ -326,7 +326,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="&quot;..\ThirdParty\stlport\stlport&quot;"
+				AdditionalIncludeDirectories="..\ThirdParty\stlport\stlport;&quot;../ThirdParty/openal-soft-1.10.622/Include&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;NO_LOG_DEBUG_INFO"
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
@@ -397,7 +397,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="&quot;..\ThirdParty\stlport\stlport&quot;"
+				AdditionalIncludeDirectories="..\ThirdParty\stlport\stlport;&quot;../ThirdParty/openal-soft-1.10.622/Include&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;NO_LOG_DEBUG_INFO"
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
@@ -478,6 +478,10 @@
 				RelativePath=".\Include\UiSoundManagerFMod.h"
 				>
 			</File>
+			<File
+				RelativePath=".\Include\UiSoundManagerOpenAL.h"
+				>
+			</File>
 			<Filter
 				Name="Win32"
 				>
@@ -534,6 +538,10 @@
 			</File>
 			<File
 				RelativePath=".\Source\UiSoundManagerFMod.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\UiSoundManagerOpenAL.cpp"
 				>
 			</File>
 			<Filter

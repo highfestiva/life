@@ -42,7 +42,7 @@ LogDecorator gLog(LogType::GetLog(LogType::SUB_GENERAL), typeid(SystemManager));
 
 static bool IsHyperThreadingSupported()
 {
-#ifdef LEPRA_MSVC_X86
+#ifdef LEPRA_MSVC_X86_32
 	int lSupported = 0;
 	__asm
 	{
@@ -54,7 +54,7 @@ static bool IsHyperThreadingSupported()
 	}
 	return (lSupported != 0);
 #else // <Unimplemented target>
-#error "Only LEPRA_MSVC_X86 supports TSC as of yet."
+#error "Only LEPRA_MSVC_X86_32 supports hyper thread checking as of yet."
 #endif // LEPRA_MSVC_X86/<Unimplemented target>
 }
 

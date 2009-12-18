@@ -121,35 +121,41 @@ bool TestSound(const Lepra::LogDecorator& pLog)
 	Lepra::String lContext;
 	bool lTestOk = true;
 
-	UiLepra::SoundManager::SoundID lSound = UiLepra::SoundManager::INVALID_SOUNDID;
-	UiLepra::SoundManager* lSoundManager = UiLepra::SoundManager::CreateSoundManager(UiLepra::SoundManager::CONTEXT_FMOD);
+	UiLepra::SoundManager::SoundID lSound = UiLepra::INVALID_SOUNDID;
+	UiLepra::SoundManager* lSoundManager = UiLepra::SoundManager::CreateSoundManager(UiLepra::SoundManager::CONTEXT_OPENAL);
 	assert(lSoundManager);
 	if (lTestOk)
 	{
 		lContext = _T("load sound");
-		lSound = lSoundManager->LoadSound2D(_T("Bark.wav"), UiLepra::SoundManager::LOOP_NONE, 0);
-		lTestOk = (lSound != UiLepra::SoundManager::INVALID_SOUNDID);
+		lSound = lSoundManager->LoadSound3D(_T("Bark.wav"), UiLepra::SoundManager::LOOP_FORWARD, 0);
+		lTestOk = (lSound != UiLepra::INVALID_SOUNDID);
 		assert(lTestOk);
 	}
-	UiLepra::SoundManager::SoundInstanceID lSoundInstance = UiLepra::SoundManager::INVALID_SOUNDINSTANCEID;
+	UiLepra::SoundManager::SoundInstanceID lSoundInstance = UiLepra::INVALID_SOUNDINSTANCEID;
 	if (lTestOk)
 	{
 		lContext = _T("create sound instance");
 		lSoundInstance = lSoundManager->CreateSoundInstance(lSound);
-		lTestOk = (lSoundInstance != UiLepra::SoundManager::INVALID_SOUNDID);
+		lTestOk = (lSoundInstance != UiLepra::INVALID_SOUNDID);
 		assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("play sound");
 		lSoundManager->Play(lSoundInstance, 1, 1);
-		Lepra::Thread::Sleep(0.5);
+		for (float x = 0; x < 6*5; x += 2.0f)
+		{
+			Lepra::Vector3DF lPosition(::sinf(x)*10, ::cosf(x)*10, 0);
+			Lepra::Vector3DF lVelocity;
+			lSoundManager->SetSoundPosition(lSoundInstance, lPosition, lVelocity);
+			Lepra::Thread::Sleep(0.3);
+		}
 	}
-	if (lSoundInstance != UiLepra::SoundManager::INVALID_SOUNDINSTANCEID)
+	if (lSoundInstance != UiLepra::INVALID_SOUNDINSTANCEID)
 	{
 		lSoundManager->DeleteSoundInstance(lSoundInstance);
 	}
-	if (lSound != UiLepra::SoundManager::INVALID_SOUNDID)
+	if (lSound != UiLepra::INVALID_SOUNDID)
 	{
 		lSoundManager->Release(lSound);
 	}

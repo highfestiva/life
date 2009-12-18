@@ -154,7 +154,7 @@ unsigned SystemManager::SingleMipsTest()
 
 inline void SystemManager::BOGOMIPSDelay(unsigned pLoopCount)
 {
-#if defined(LEPRA_MSVC_X86)
+#if defined(LEPRA_MSVC_X86_32)
 	__asm
 	{
 		mov	ecx,[pLoopCount]
@@ -163,7 +163,7 @@ BogoLoop:	loop	BogoLoop
 #else // <Generic target>
 	for (unsigned x = pLoopCount; x; --x)
 		;
-#endif // LEPRA_MSVC_X86/<Generic target>
+#endif // LEPRA_MSVC_X86_32/<Generic target>
 }
 
 

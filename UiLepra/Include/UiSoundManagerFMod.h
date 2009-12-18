@@ -9,7 +9,6 @@
 #include "../../Lepra/Include/HashTable.h"
 #include "../../Lepra/Include/IdManager.h"
 #include "../../Lepra/Include/String.h"
-#include "../../Lepra/Include/String.h"
 #include "../../ThirdParty/fmod/api/inc/fmod.h"
 #include "UiSoundManager.h"
 
@@ -22,71 +21,55 @@ namespace UiLepra
 
 class SoundManagerFMod: public SoundManager
 {
+	typedef SoundManager Parent;
 public:
-	friend class SoundManager;
-
+	SoundManagerFMod(int pMixRate);
 	virtual ~SoundManagerFMod();
 
 	void Update();
 
-	/*
-		Sample load & playback functions.
-	*/
-
-	SoundID LoadSound2D(const Lepra::String& pFileName, LoopMode pLoopMode = LOOP_NONE, int pPriority = 0);
-	SoundID LoadSound3D(const Lepra::String& pFileName, LoopMode pLoopMode = LOOP_NONE, int pPriority = 0);
-	SoundID LoadStream(const Lepra::String& pFileName, LoopMode pLoopMode = LOOP_NONE, int pPriority = 0);
+	SoundID LoadSound2D(const Lepra::String& pFileName, LoopMode pLoopMode, int pPriority);
+	SoundID LoadSound3D(const Lepra::String& pFileName, LoopMode LoopMode, int pPriority);
+	SoundID LoadStream(const Lepra::String& pFileName, LoopMode LoopMode, int pPriority);
 
 	void Release(SoundID pSoundID);
 
-	double GetStreamTime(SoundID pStreamID);
+	double GetStreamTime(SoundID pSoundID);
 
 	SoundInstanceID CreateSoundInstance(SoundID pSoundID);
 	void DeleteSoundInstance(SoundInstanceID pSoundIID);
 
-	bool Play(SoundID pSoundID,
-			  float pVolume,
-			  float pPitch);
 	bool Play(SoundInstanceID pSoundIID,
 			  float pVolume,
 			  float pPitch);
 
 	void Stop(SoundInstanceID pSoundIID);
 	void StopAll();
-	void Pause(SoundInstanceID pSoundIID);
-	void Unpause(SoundInstanceID pSoundIID);
+	void TogglePause(SoundInstanceID pSoundIID);
 
 	bool IsPlaying(SoundInstanceID pSoundIID);
 	bool IsPaused(SoundInstanceID pSoundIID);
 
 	void SetPan(SoundInstanceID pSoundIID, float pPan);
-	float GetPan(SoundInstanceID pSoundIID);
 
 	void SetVolume(SoundInstanceID pSoundIID, float pVolume);
-	float GetVolume(SoundInstanceID pSoundIID);
 
 	void SetFrequency(SoundInstanceID pSoundIID, int pFrequency);
 	int GetFrequency(SoundInstanceID pSoundIID);
 
-	void Set3DSoundAttributes(SoundInstanceID pSoundIID, const Lepra::Vector3DF& pPos, const Lepra::Vector3DF& pVel);
-	void Get3DSoundAttributes(SoundInstanceID pSoundIID, Lepra::Vector3DF& pPos, Lepra::Vector3DF& pVel);
+	void SetSoundPosition(SoundInstanceID pSoundIID, const Lepra::Vector3DF& pPos, const Lepra::Vector3DF& pVel);
+	void GetSoundPosition(SoundInstanceID pSoundIID, Lepra::Vector3DF& pPos, Lepra::Vector3DF& pVel);
 
-	void Set3dCurrentListener(int pListenerIndex, int pListenerCount);
-	void Set3DListenerAttributes(const Lepra::Vector3DF& pPos, const Lepra::Vector3DF& pVel,
+	void SetCurrentListener(int pListenerIndex, int pListenerCount);
+	void SetListenerPosition(const Lepra::Vector3DF& pPos, const Lepra::Vector3DF& pVel,
 		const Lepra::Vector3DF& pUp, const Lepra::Vector3DF& pForward);
-	void Get3DListenerAttributes(Lepra::Vector3DF& pPos, Lepra::Vector3DF& pVel,
+	void GetListenerPosition(Lepra::Vector3DF& pPos, Lepra::Vector3DF& pVel,
 		Lepra::Vector3DF& pUp, Lepra::Vector3DF& pForward);
 
-	void Set3DDopplerFactor(float pFactor);
-	void Set3DRollOffFactor(float pFactor);
-	
-	/*
-		Sound FX.
-	*/
+	void SetDopplerFactor(float pFactor);
+	void SetRollOffFactor(float pFactor);
 
-	int GetChannel(SoundInstanceID pSoundIID);
-
-	void SetChorus(int pChannelIndex, 
+	void SetChorus(SoundInstanceID pSoundIID, 
 				   int pFXIndex,
 				   float pDelay,
 				   float pFeedback,
@@ -94,7 +77,7 @@ public:
 				   float pDepth,		// Mod amount...
 				   float pWetness);
 
-	void SetFlanger(int pChannelIndex, 
+	void SetFlanger(SoundInstanceID pSoundIID, 
 					int pFXIndex,
 					float pDelay,
 					float pFeedback,
@@ -102,20 +85,20 @@ public:
 					float pDepth,		// Mod amount...
 					float pWetness);
 
-	void SetCompressor(int pChannelIndex, 
+	void SetCompressor(SoundInstanceID pSoundIID, 
 					   int pFXIndex,
 					   float pRatio,
 					   float pThreshold,
 					   float pAttack,
 					   float pRelease);
 
-	void SetEcho(int pChannelIndex, 
+	void SetEcho(SoundInstanceID pSoundIID, 
 				 int pFXIndex,
 				 float pFeedback,
 				 float pDelay,
 				 float pWetness);
 
-	void SetParamEQ(int pChannelIndex, 
+	void SetParamEQ(SoundInstanceID pSoundIID, 
 					int pFXIndex,
 					float pCenter,
 					float pBandwidth,
@@ -123,21 +106,20 @@ public:
 
 protected:
 private:
-
-	SoundInstanceID CreateSoundInstance(SoundID pSoundID, bool pAutoDelete);
+	int GetChannel(SoundInstanceID pSoundIID);
 
 	class Sample
 	{
 	public:
 		Sample() :
-			mID(-1),
+			mID(INVALID_SOUNDID),
 			mReferenceCount(1),
 			mSample(0),
 			mStream(0)
 		{
 		}
 
-		int mID;
+		SoundID mID;
 		int mReferenceCount;
 		Lepra::String mFileName;
 		FSOUND_SAMPLE* mSample;
@@ -227,15 +209,13 @@ private:
 		inline SoundInstance() :
 			mSoundID((SoundID)-1),
 			mSoundIID((SoundInstanceID)-1),
-			mChannel(-1),
-			mAutoDelete(false)
+			mChannel(-1)
 		{
 		}
 
 		SoundID mSoundID;
 		SoundInstanceID mSoundIID;
 		int mChannel;
-		bool mAutoDelete;
 	};
 
 	class Channel
@@ -248,22 +228,13 @@ private:
 	typedef Lepra::HashTable<int, Sample*> IDToSampleTable;
 	typedef Lepra::HashTable<int, SoundInstance> SoundInstanceTable;
 
-	SoundManagerFMod(int pMixRate = 44100);
-
-	inline void Clamp(float& pValue, float pMin, float pMax);
-	inline void Clamp(int& pValue, int pMin, int pMax);
-
-	void DiscardSoundInstance(SoundInstanceID pSoundIID);
-
-	bool mInitialized;
-
 	FileNameToSampleTable mFileNameToSampleTable;
 	IDToSampleTable mIDToSampleTable;
 	SoundInstanceTable mSoundInstanceTable;
 
-	Lepra::IdManager<int> mSampleIDManager;
-	Lepra::IdManager<int> mStreamIDManager;
-	Lepra::IdManager<int> mSoundInstanceIDManager;
+	Lepra::IdManager<SoundID> mSampleIDManager;
+	Lepra::IdManager<SoundID> mStreamIDManager;
+	Lepra::IdManager<SoundInstanceID> mSoundInstanceIDManager;
 
 	FXHandles mFXHandles;
 

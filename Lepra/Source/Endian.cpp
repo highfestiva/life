@@ -49,7 +49,7 @@ int32 Endian::SwapBytes(int32 pValue)
 
 uint32 Endian::SwapBytes(uint32 pValue)
 {
-#ifdef LEPRA_MSVC_X86
+#ifdef LEPRA_MSVC_X86_32
 // Nifty X86 optimization.
 	__asm
 	{
@@ -59,14 +59,8 @@ uint32 Endian::SwapBytes(uint32 pValue)
 	}
 	return (pValue);
 #else // <Generic target>
-	uint8* lOldData = (uint8*)&pValue;
-	uint8 lNewData[4];
-	lNewData[0] = lOldData[3];
-	lNewData[1] = lOldData[2];
-	lNewData[2] = lOldData[1];
-	lNewData[3] = lOldData[0];
-	return *((uint32*)lNewData);
-#endif // LEPRA_MSVC_X86/<Generic target>
+	return ((pValue>>24) + ((pValue>>8)&0xFF00) + ((pValue<<8)&0xFF0000) + (pValue<<24));
+#endif // LEPRA_MSVC_X86_32/<Generic target>
 }
 
 
