@@ -10,8 +10,9 @@
 #include "../../Cure/Include/GameManager.h"
 #include "../../Lepra/Include/Math.h"
 #include "../../Lepra/Include/Random.h"
-#include "../../TBC/Include/PhysicsManager.h"
 #include "../../TBC/Include/ChunkyPhysics.h"
+#include "../../TBC/Include/PhysicsEngine.h"
+#include "../../TBC/Include/PhysicsManager.h"
 #include "../Include/UiCppContextObject.h"
 #include "../Include/UiCure.h"
 #include "../Include/UiGameUiManager.h"
@@ -28,7 +29,8 @@ CppContextObject::CppContextObject(const Lepra::String& pClassId, GameUiManager*
 	mUiManager(pUiManager),
 	mUiClassResource(0),
 	mMeshLoadCount(0),
-	mTextureResource(pUiManager)
+	mTextureResource(pUiManager),
+	mSoundResource(new UserSound3dResource(pUiManager, UiLepra::SoundManager::LOOP_FORWARD))
 {
 	log_volatile(mLog.Tracef(_T("Construct CppCO %s."), pClassId.c_str()));
 }
@@ -36,12 +38,15 @@ CppContextObject::CppContextObject(const Lepra::String& pClassId, GameUiManager*
 CppContextObject::~CppContextObject()
 {
 	log_volatile(mLog.Tracef(_T("Delete CppCO %X:%s."), GetInstanceId(), GetClassId().c_str()));
+
 	for (MeshArray::iterator x = mMeshResourceArray.begin(); x != mMeshResourceArray.end(); ++x)
 	{
 		delete (*x);
 	}
 	mMeshResourceArray.clear();
 
+	delete (mSoundResource);
+	mSoundResource = 0;
 	delete (mUiClassResource);
 	mUiClassResource = 0;
 
@@ -57,6 +62,12 @@ void CppContextObject::StartLoading()
 	const Lepra::String lAssetName = GetClassId()+_T(".class");	// TODO: move to central source file.
 	mUiClassResource->Load(GetManager()->GetGameManager()->GetResourceManager(), lAssetName,
 		UserClassResource::TypeLoadCallback(this, &CppContextObject::OnLoadClass));
+
+	if (Lepra::StringUtility::StartsWith(GetClassId(), _T("helicopter")))
+	{
+		mSoundResource->Load(GetManager()->GetGameManager()->GetResourceManager(), _T("Bark.wav"),
+			UserSound3dResource::TypeLoadCallback(this, &CppContextObject::OnLoadSound3d));
+	}
 }
 
 
@@ -103,6 +114,28 @@ void CppContextObject::OnPhysicsTick()
 			}
 		}*/
 		lGfxGeometry->SetTransformation(lPhysicsTransform);
+	}
+
+	if (mSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
+	{
+		TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());	// TODO: add sound->engine index in class info!
+		if (lGeometry == 0 || lGeometry->GetBodyId() == TBC::INVALID_BODY)
+		{
+			mLog.Warningf(_T("Physical body for %s not loaded!"), mSoundResource->GetName().c_str());
+		}
+		else
+		{
+			Lepra::Vector3DF lPosition =
+				mManager->GetGameManager()->GetPhysicsManager()->GetBodyPosition(lGeometry->GetBodyId());
+			Lepra::Vector3DF lVelocity;
+			mManager->GetGameManager()->GetPhysicsManager()->GetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
+			mUiManager->GetSoundManager()->SetSoundPosition(mSoundResource->GetData(), lPosition, lVelocity);
+			if (mPhysics->GetEngineCount() > 0)
+			{
+				const TBC::PhysicsEngine* lEngine = mPhysics->GetEngine(0);
+				mUiManager->GetSoundManager()->SetPitch(mSoundResource->GetData(), ::fabs(lEngine->GetValue())*10 + 1);
+			}
+		}
 	}
 }
 
@@ -461,6 +494,15 @@ bool CppContextObject::TryComplete()
 		GetManager()->EnablePhysicsUpdateCallback(this);	// TODO: clear out this mess. How to use these two callback types?
 	}
 	return (true);
+}
+
+void CppContextObject::OnLoadSound3d(UserSound3dResource* pSoundResource)
+{
+	assert(pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE);
+	if (pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
+	{
+		mUiManager->GetSoundManager()->Play(pSoundResource->GetData(), 1, 1.0);
+	}
 }
 
 

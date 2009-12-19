@@ -11,6 +11,7 @@
 #include "../../TBC/Include/PhysicsManager.h"
 #include "../../UiLepra/Include/UiCore.h"
 #include "../../UiLepra/Include/UiInput.h"
+#include "../../UiLepra/Include/UiSoundManager.h"
 #include "../../UiTbc/Include/GUI/UiDesktopWindow.h"
 #include "../../UiTbc/Include/GUI/UiFloatingLayout.h"
 #include "../../UiTbc/Include/UiFontManager.h"
@@ -18,7 +19,6 @@
 #include "../../UiTbc/Include/UiOpenGLRenderer.h"
 #include "../Include/UiGameUiManager.h"
 #include "../Include/UiRuntimeVariableName.h"
-#include "../Include/UiSoundManager.h"
 
 
 
@@ -178,7 +178,7 @@ bool GameUiManager::Open()
 	}
 	if (lOk)
 	{
-		mSound = new SoundManager();
+		mSound = UiLepra::SoundManager::CreateSoundManager(UiLepra::SoundManager::CONTEXT_OPENAL);
 	}
 	if (lOk)
 	{
@@ -254,7 +254,6 @@ void GameUiManager::BeginRender()
 		{
 			ClearDepth();
 		}
-		mSound->Tick(0.0);
 	}
 }
 
@@ -317,30 +316,20 @@ UiTbc::DesktopWindow* GameUiManager::GetDesktopWindow() const
 	return (mDesktopWindow);
 }
 
-SoundManager* GameUiManager::GetSoundManager() const
+UiLepra::SoundManager* GameUiManager::GetSoundManager() const
 {
 	return (mSound);
 }
 
 
 
-void GameUiManager::SetCameraPosition(float pX, float pY, float pZ)
+void GameUiManager::SetCameraPosition(const Lepra::TransformationF& pTransform, const Lepra::Vector3DF& pVelocity)
 {
-	Lepra::TransformationF lTransformation = mRenderer->GetCameraTransformation();
-	lTransformation.SetPosition(Lepra::Vector3DF(pX, pY, pZ));
-	mRenderer->SetCameraTransformation(lTransformation);
-}
+	mRenderer->SetCameraTransformation(pTransform);
 
-void GameUiManager::SetCameraOrientation(float pTheta, float pPhi, float pGimbal)
-{
-	Lepra::TransformationF lTransformation = mRenderer->GetCameraTransformation();
-	Lepra::RotationMatrixF lRotation;
-	lRotation.MakeIdentity();
-	lRotation.RotateAroundWorldX(Lepra::PIF/2-pPhi);
-	lRotation.RotateAroundWorldZ(pTheta-Lepra::PIF/2);
-	lRotation.RotateAroundOwnY(pGimbal);
-	lTransformation.SetOrientation(lRotation);
-	mRenderer->SetCameraTransformation(lTransformation);
+	Lepra::Vector3DF lUp = pTransform.GetOrientation() * Lepra::Vector3DF(0,0,1);
+	Lepra::Vector3DF lForward = pTransform.GetOrientation() * Lepra::Vector3DF(0,1,0);
+	mSound->SetListenerPosition(pTransform.GetPosition(), pVelocity, lUp, lForward);
 }
 
 void GameUiManager::SetViewport(int pLeft, int pTop, int lDisplayWidth, int lDisplayHeight)

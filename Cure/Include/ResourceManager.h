@@ -126,6 +126,7 @@ public:
 	virtual ~UserExtraTypeResource();
 
 	ExtraType& GetExtraData() const;
+	void SetExtraData(const ExtraType& pExtraData);
 
 protected:
 	virtual Resource* CreateResource(ResourceManager* pManager, const Lepra::String& pName) const;

@@ -40,10 +40,6 @@ SoundManagerFMod::~SoundManagerFMod()
 	delete[] (mChannel);
 }
 
-void SoundManagerFMod::Update()
-{
-}
-
 SoundManager::SoundID SoundManagerFMod::LoadSound2D(const Lepra::String& pFileName, LoopMode pLoopMode, int pPriority)
 {
 	FileNameToSampleTable::Iterator lIter = mFileNameToSampleTable.Find(pFileName);
@@ -400,6 +396,18 @@ void SoundManagerFMod::SetVolume(SoundInstanceID pSoundIID, float pVolume)
 	}
 
 	FSOUND_SetVolume((*lSIIter).mChannel, (int)(pVolume * 255.0f));
+}
+
+void SoundManagerFMod::SetPitch(SoundInstanceID pSoundIID, float pPitch)
+{
+	SoundInstanceTable::Iterator lSIIter = mSoundInstanceTable.Find(pSoundIID);
+	if (lSIIter == mSoundInstanceTable.End())
+	{
+		return;
+	}
+
+	// TODO: Fix the pitch to be relative to the sample frequency.
+	FSOUND_SetFrequency((*lSIIter).mChannel, (int)(44100.0f * pPitch) );
 }
 
 void SoundManagerFMod::SetFrequency(SoundInstanceID pSoundIID, int pFrequency)

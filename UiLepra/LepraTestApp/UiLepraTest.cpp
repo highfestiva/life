@@ -121,6 +121,7 @@ bool TestSound(const Lepra::LogDecorator& pLog)
 	Lepra::String lContext;
 	bool lTestOk = true;
 
+todo: extend sounds tests!
 	UiLepra::SoundManager::SoundID lSound = UiLepra::INVALID_SOUNDID;
 	UiLepra::SoundManager* lSoundManager = UiLepra::SoundManager::CreateSoundManager(UiLepra::SoundManager::CONTEXT_OPENAL);
 	assert(lSoundManager);

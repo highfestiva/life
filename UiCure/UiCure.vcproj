@@ -476,10 +476,6 @@
 				RelativePath=".\Source\UiResourceManager.cpp"
 				>
 			</File>
-			<File
-				RelativePath=".\Source\UiSoundManager.cpp"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -512,10 +508,6 @@
 			</File>
 			<File
 				RelativePath=".\Include\UiRuntimeVariableName.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\UiSoundManager.h"
 				>
 			</File>
 			<File

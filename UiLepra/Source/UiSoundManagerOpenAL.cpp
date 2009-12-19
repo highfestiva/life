@@ -70,10 +70,6 @@ SoundManagerOpenAL::~SoundManagerOpenAL()
 	}
 }
 
-void SoundManagerOpenAL::Update()
-{
-}
-
 SoundManager::SoundID SoundManagerOpenAL::LoadSound2D(const Lepra::String& pFileName, LoopMode pLoopMode, int pPriority)
 {
 	Sample* lSample = (Sample*)LoadSound3D(pFileName, pLoopMode, pPriority);
@@ -257,6 +253,16 @@ void SoundManagerOpenAL::SetVolume(SoundInstanceID pSoundIID, float pVolume)
 		return;
 	}
 	::alSourcef(lSource->mSid, AL_GAIN, pVolume);
+}
+
+void SoundManagerOpenAL::SetPitch(SoundInstanceID pSoundIID, float pPitch)
+{
+	Source* lSource = GetSource(pSoundIID);
+	if (!lSource)
+	{
+		return;
+	}
+	::alSourcef(lSource->mSid, AL_PITCH, pPitch);
 }
 
 void SoundManagerOpenAL::SetFrequency(SoundInstanceID, int)

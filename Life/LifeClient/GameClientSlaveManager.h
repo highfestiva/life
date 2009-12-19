@@ -102,6 +102,8 @@ private:
 
 	Cure::NetworkClient* GetNetworkClient() const;
 
+	void UpdateCameraPosition();
+
 	void DrawAsyncDebugInfo();
 	void DrawDebugStaple(int pIndex, int pHeight, const Lepra::Color& pColor);
 	void DrawSyncDebugInfo();
@@ -131,6 +133,7 @@ private:
 	Lepra::Alarm mInputExpireAlarm;
 
 	Lepra::Vector3DF mCameraPosition;		// TODO: remove hack (should context object controlled)!
+	Lepra::Vector3DF mCameraPreviousPosition;	// TODO: remove hack (should context object controlled)!
 	Lepra::Vector3DF mCameraOrientation;		// TODO: remove hack (should context object controlled)!
 	Cure::ObjectPositionalData mNetworkOutputGhost;	// TODO: remove hack (should be one per controllable object)!
 	bool mAllowMovementInput;

@@ -11,7 +11,6 @@
 #include "../../Lepra/Include/SystemManager.h"
 #include "../../UiCure/Include/UiGameUiManager.h"
 #include "../../UiCure/Include/UiCppContextObject.h"
-#include "../../UiCure/Include/UiSoundManager.h"
 #include "../../UiTbc/Include/GUI/UiCenterLayout.h"
 #include "../../UiTbc/Include/GUI/UiDesktopWindow.h"
 #include "../../UiTbc/Include/GUI/UiFloatingLayout.h"
@@ -200,7 +199,7 @@ bool GameClientMasterTicker::Tick()
 		int lSlaveIndex = 0;
 		for (x = mSlaveSet.First(); lOk && x != mSlaveSet.End(); ++x, ++lSlaveIndex)
 		{
-			mUiManager->GetSoundManager()->SetActiveListener(lSlaveIndex);
+			mUiManager->GetSoundManager()->SetCurrentListener(lSlaveIndex, (int)mSlaveSet.GetCount());
 			lOk = x.GetObject()->EndTick();
 		}
 	}
@@ -270,10 +269,6 @@ void GameClientMasterTicker::AddSlave(GameClientSlaveManager* pSlave)
 		pSlave->LoadSettings();
 		mSlaveSet.PushBack(pSlave, pSlave);
 	}
-	if (mUiManager->GetSoundManager())
-	{
-		mUiManager->GetSoundManager()->SetListenerCount((int)mSlaveSet.GetCount());
-	}
 }
 
 void GameClientMasterTicker::RemoveSlave(GameClientSlaveManager* pSlave)
@@ -282,10 +277,6 @@ void GameClientMasterTicker::RemoveSlave(GameClientSlaveManager* pSlave)
 		Lepra::ScopeLock lLock(&mLock);
 		mSlaveSet.Remove(pSlave);
 		UpdateSlaveLayout();
-	}
-	if (mUiManager->GetSoundManager())
-	{
-		mUiManager->GetSoundManager()->SetListenerCount((int)mSlaveSet.GetCount());
 	}
 }
 
@@ -341,8 +332,6 @@ bool GameClientMasterTicker::Reinitialize()
 	if (lOk)
 	{
 		mUiManager->GetDesktopWindow()->CreateLayer(new UiTbc::FloatingLayout());
-
-		mUiManager->GetSoundManager()->SetListenerCount((int)mSlaveSet.GetCount());
 
 		// TODO: replace with world-load.
 		mUiManager->GetRenderer()->AddDirectionalLight(

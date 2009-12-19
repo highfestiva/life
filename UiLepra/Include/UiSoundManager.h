@@ -38,9 +38,6 @@ public:
 		LOOP_PINGPONG,
 	};
 
-	// Updates the sound system. Should be called every frame.
-	virtual void Update() = 0;
-
 	/*
 		Sample load & playback functions.
 		2D refers to normal stereo/mono sounds.
@@ -78,9 +75,9 @@ public:
 
 	// Panning: -1.0f = 100% left, 0.0f = middle, 1.0f = 100% right.
 	virtual void SetPan(SoundInstanceID pSoundIID, float pPan) = 0;
-
 	// Volume between 0.0f and 1.0f.
 	virtual void SetVolume(SoundInstanceID pSoundIID, float pVolume) = 0;
+	virtual void SetPitch(SoundInstanceID pSoundIID, float pPitch) = 0;
 
 	// Frequency in Hertz.
 	virtual void SetFrequency(SoundInstanceID pSoundIID, int pFrequency) = 0;

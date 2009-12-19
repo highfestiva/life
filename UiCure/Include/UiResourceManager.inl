@@ -29,4 +29,37 @@ Cure::Resource* UserUiTypeResource<ResourceType>::CreateResource(
 
 
 
+template<class ResourceType, class SubtypeExtraType>
+UserUiExtraTypeResource<ResourceType, SubtypeExtraType>::UserUiExtraTypeResource(GameUiManager* pUiManager, const ExtraType& pExtraData):
+	UiResource(pUiManager),
+	mExtraData(pExtraData)
+{
+}
+
+template<class ResourceType, class SubtypeExtraType>
+UserUiExtraTypeResource<ResourceType, SubtypeExtraType>::~UserUiExtraTypeResource()
+{
+}
+
+template<class ResourceType, class SubtypeExtraType>
+Cure::Resource* UserUiExtraTypeResource<ResourceType, SubtypeExtraType>::CreateResource(
+	Cure::ResourceManager* pManager, const Lepra::String& pName) const
+{
+	return (new ResourceType(GetUiManager(), pManager, pName, mExtraData));
+}
+
+template<class ResourceType, class SubtypeExtraType>
+typename SubtypeExtraType& UserUiExtraTypeResource<ResourceType, SubtypeExtraType>::GetExtraData() const
+{
+	return (mExtraData);
+}
+
+template<class ResourceType, class SubtypeExtraType>
+void UserUiExtraTypeResource<ResourceType, SubtypeExtraType>::SetExtraData(const SubtypeExtraType& pExtraData)
+{
+	mExtraData = pExtraData;
+}
+
+
+
 }

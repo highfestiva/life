@@ -136,8 +136,8 @@ GameClientMasterTicker* GameClientSlaveManager::GetMaster() const
 bool GameClientSlaveManager::Render()
 {
 	Lepra::ScopeLock lLock(GetTickLock());
-	mUiManager->SetCameraPosition(mCameraPosition.x, mCameraPosition.y, mCameraPosition.z);
-	mUiManager->SetCameraOrientation(mCameraOrientation.x, mCameraOrientation.y, mCameraOrientation.z);
+
+	UpdateCameraPosition();
 
 	double lFOV = CURE_RTVAR_GET(GetVariableScope(), RTVAR_UI_3D_FOV, 90.0);
 	double lClipNear = CURE_RTVAR_GET(GetVariableScope(), RTVAR_UI_3D_CLIPNEAR, 0.1);
@@ -382,6 +382,7 @@ void GameClientSlaveManager::TickUiUpdate()
 	// TODO: update sound position and velocity.
 
 	// TODO: remove camera hack (camera position should be context object controlled).
+	mCameraPreviousPosition = mCameraPosition;
 	Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
 	if (lObject)
 	{
@@ -924,6 +925,28 @@ Cure::NetworkClient* GameClientSlaveManager::GetNetworkClient() const
 
 
 
+void GameClientSlaveManager::UpdateCameraPosition()
+{
+	Lepra::TransformationF lCameraTransform;
+	lCameraTransform.SetPosition(mCameraPosition);
+
+	const float lTheta = mCameraOrientation.x;
+	const float lPhi = mCameraOrientation.y;
+	const float lGimbal = mCameraOrientation.z;
+	Lepra::RotationMatrixF lRotation;
+	lRotation.MakeIdentity();
+	lRotation.RotateAroundWorldX(Lepra::PIF/2-lPhi);
+	lRotation.RotateAroundWorldZ(lTheta-Lepra::PIF/2);
+	lRotation.RotateAroundOwnY(lGimbal);
+	lCameraTransform.SetOrientation(lRotation);
+
+	const float lFrameTime = GetTimeManager()->GetNormalFrameTime();
+	Lepra::Vector3DF lVelocity = (mCameraPosition-mCameraPreviousPosition) / lFrameTime;
+	mUiManager->SetCameraPosition(lCameraTransform, lVelocity);
+}
+
+
+
 void GameClientSlaveManager::DrawAsyncDebugInfo()
 {
 	mUiManager->GetPainter()->ResetClippingRect();
@@ -959,8 +982,7 @@ void GameClientSlaveManager::DrawSyncDebugInfo()
 		mUiManager->GetRenderer()->ResetClippingRect();
 		mUiManager->GetRenderer()->SetClippingRect(mRenderArea);
 		mUiManager->GetRenderer()->SetViewport(mRenderArea);
-		mUiManager->SetCameraPosition(mCameraPosition.x, mCameraPosition.y, mCameraPosition.z);
-		mUiManager->SetCameraOrientation(mCameraOrientation.x, mCameraOrientation.y, mCameraOrientation.z);
+		UpdateCameraPosition();
 		double lFOV = CURE_RTVAR_GET(GetVariableScope(), RTVAR_UI_3D_FOV, 90.0);
 		double lClipNear = CURE_RTVAR_GET(GetVariableScope(), RTVAR_UI_3D_CLIPNEAR, 0.1);
 		double lClipFar = CURE_RTVAR_GET(GetVariableScope(), RTVAR_UI_3D_CLIPFAR, 1000.0);
