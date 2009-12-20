@@ -30,7 +30,6 @@ namespace UiCure
 
 
 class GameUiManager;
-class SoundManager;
 
 
 

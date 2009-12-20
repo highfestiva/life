@@ -173,12 +173,15 @@ Quality
 + Add unit test for making sure that loading more than one instance of same resource results in a single instance.
 + Replace copyright notice to Righteous Games.
 . Shorten code by typedeffing the Lepra::String, Lepra::StringUtility, Lepra::uint8 and so forth in all namespaces.
-. Make build in one step: server, client, **DATA**, Linux, Windows...
+. Make build in one step: server, client, **DATA**, stlport, Linux, Windows...
 . Assertions on getting access to wrong parts of the system with the wrong thread. (Such as dropping users in NetworkServer.cpp from the TCP thread.)
 . Stresstest (use .lsh).
 . Run test app in Windows and Linux.
 . Make sure default settings are good on a no-good computer. Like 60 FPS.
 . Check optimizations quickly.
+| Test with "simulating" single CPU system. (Don't put me out, place me at bottom of checklist.)
+| Test with corrupt/missing resources. (Don't put me out, place me at bottom of checklist.)
+. Run Simian Analyzer, remove duplicate code.
 
 . Make sure shutting down client with two simultaneously logged-in users gets logged out from the server.
 . Make font rendering look good instead of ugly.
@@ -207,7 +210,6 @@ Quality
 . Test thoroughly!
 . Polish.
 . Refactor.
-. Run Simian Analyzer, remove duplicate code.
 . Go through all RG e-mail to ensure all is in place.
 . Add homepage for both Righteous Games as well as The Game.
 . Exchange "varning: flerteckens teckenkonstant" (ChunkyLoader.h) to something portable and beautiful.
@@ -222,3 +224,6 @@ Quality
 . Check that all log destinations write strings, not raw data, to disk. LogFileXxx (single one) was checked and corrected from WriteData() to WriteString().
 . Get licences in order. Both C++ and Python. Both mine and third party.
 . Separate input and output data in the data folder. Create a proper directory structure for external release.
+. Runtime optimize by turning off pixel shaders, shadow volumes, etc.
+. Descide how to accomodate several split-screen sound "listeners" on OpenAL. Implement.
+. Perhaps (?) add ogg/vorbis support if music is wanted.

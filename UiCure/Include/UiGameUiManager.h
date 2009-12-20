@@ -61,7 +61,8 @@ public:
 	UiTbc::DesktopWindow* GetDesktopWindow() const;
 	UiLepra::SoundManager* GetSoundManager() const;
 
-	void SetCameraPosition(const Lepra::TransformationF& pTransform, const Lepra::Vector3DF& pVelocity);
+	void SetCameraPosition(const Lepra::TransformationF& pTransform);
+	void SetMicrophonePosition(const Lepra::TransformationF& pTransform, const Lepra::Vector3DF& pVelocity);
 	void SetViewport(int pLeft, int pTop, int pWidth, int pHeight);
 	void Clear(float pRed, float pGreen, float pBlue, bool pClearDepth = true);
 	void ClearDepth();

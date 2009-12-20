@@ -24,7 +24,8 @@ PhysicsEngine::PhysicsEngine(EngineType pEngineType, float pStrength, float pMax
 	mMaxSpeed(pMaxSpeed),
 	mMaxSpeed2(pMaxSpeed2),
 	mFriction(pFriction),
-	mControllerIndex(pControllerIndex)
+	mControllerIndex(pControllerIndex),
+	mIntensity(0)
 {
 	::memset(mValue, 0, sizeof(mValue));
 }
@@ -135,6 +136,7 @@ bool PhysicsEngine::SetValue(unsigned pAspect, float pValue, float pZAngle)
 
 void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics* pStructure, float pFrameTime)
 {
+	mIntensity = 0;
 	EngineNodeArray::const_iterator i = mEngineNodeArray.begin();
 	for (; i != mEngineNodeArray.end(); ++i)
 	{
@@ -171,6 +173,7 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics*
 							pPhysicsManager->AddForce(lGeometry->GetBodyId(), mValue[i]*lAxis[i]*mStrength*lScale);
 						}
 					}
+					mIntensity += lVelocityVector.GetLength() / mMaxSpeed;
 				}
 				break;
 				case ENGINE_HINGE_GYRO:
@@ -215,6 +218,8 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics*
 						const float lTargetSpeed = Lepra::Math::Lerp(lPreviousTargetSpeed, lDirectionalMaxSpeed, 0.5f);
 						const float lTargetStrength = Lepra::Math::Lerp(lPreviousStrength, lUsedStrength*lScale, 0.5f);
 						pPhysicsManager->SetAngularMotorRoll(lGeometry->GetJointId(), lTargetStrength, lTargetSpeed);
+						pPhysicsManager->GetAngleRate1(lGeometry->GetJointId(), lPreviousTargetSpeed);
+						mIntensity += lPreviousTargetSpeed / mMaxSpeed;
 					}
 					else
 					{
@@ -365,6 +370,7 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics*
 			mLog.AError("Missing node!");
 		}
 	}
+	mIntensity /= mEngineNodeArray.size();
 }
 
 
@@ -384,6 +390,15 @@ const float* PhysicsEngine::GetValues() const
 	return (mValue);
 }
 
+float PhysicsEngine::GetIntensity() const
+{
+	return (mIntensity);
+}
+
+float PhysicsEngine::GetMaxSpeed() const
+{
+	return (mMaxSpeed);
+}
 
 
 unsigned PhysicsEngine::GetChunkySize() const
@@ -465,7 +480,11 @@ void PhysicsEngine::ApplyTorque(PhysicsManager* pPhysicsManager, float pFrameTim
 		if (lLoStop < -1000 || lHiStop > 1000)
 		{
 			// Open interval -> relative torque.
-			pPhysicsManager->SetAngularMotorTurn(pGeometry->GetJointId(), mStrength, lForce*lScale*mMaxSpeed);
+			const float lTargetSpeed = lForce*lScale*mMaxSpeed;
+			pPhysicsManager->SetAngularMotorTurn(pGeometry->GetJointId(), mStrength, lTargetSpeed);
+			float lActualSpeed = 0;
+			pPhysicsManager->GetAngleRate2(pGeometry->GetJointId(), lActualSpeed);
+			mIntensity += (lTargetSpeed - lActualSpeed) / mMaxSpeed;
 			return;
 		}
 
@@ -499,33 +518,30 @@ void PhysicsEngine::ApplyTorque(PhysicsManager* pPhysicsManager, float pFrameTim
 		const float lTargetAngle = (lForce < 0)? -lForce*lLoStop+lTarget : lForce*lHiStop+lTarget;
 		const float lDiff = (lTargetAngle-lIrlAngle);
 		const float lAbsDiff = ::fabs(lDiff);
-		//if (lAbsDiff > 0.00001f)
+		float lTargetSpeed;
+		const float lBigDiff = lAngleSpan/7;
+		if (lAbsDiff > lBigDiff)
 		{
-			float lAngleSpeed;
-			const float lBigDiff = lAngleSpan/7;
-			if (lAbsDiff > lBigDiff)
-			{
-				lAngleSpeed = (lDiff > 0)? mMaxSpeed : -mMaxSpeed;
-			}
-			else
-			{
-				lAngleSpeed = mMaxSpeed*lDiff/lBigDiff;
-			}
-			lAngleSpeed /= lScale;
-			if (mEngineType == ENGINE_HINGE2_TURN)
-			{
-				float lAngleRate = 0;
-				pPhysicsManager->GetAngleRate2(pGeometry->GetJointId(), lAngleRate);
-				lAngleSpeed *= 1+::fabs(lAngleRate)/30;
-			}
-			else
-			{
-				float lAngleRate = 0;
-				pPhysicsManager->GetAngleRate1(pGeometry->GetJointId(), lAngleRate);
-				lAngleSpeed += (lAngleSpeed-lAngleRate)*mMaxSpeed2*lScale*lScale/mMaxSpeed;
-			}
-			pPhysicsManager->SetAngularMotorTurn(pGeometry->GetJointId(), mStrength, lAngleSpeed);
+			lTargetSpeed = (lDiff > 0)? mMaxSpeed : -mMaxSpeed;
 		}
+		else
+		{
+			lTargetSpeed = mMaxSpeed*lDiff/lBigDiff;
+		}
+		lTargetSpeed /= lScale;
+		float lCurrentSpeed = 0;
+		if (mEngineType == ENGINE_HINGE2_TURN)
+		{
+			pPhysicsManager->GetAngleRate2(pGeometry->GetJointId(), lCurrentSpeed);
+			lTargetSpeed *= 1+::fabs(lCurrentSpeed)/30;
+		}
+		else
+		{
+			pPhysicsManager->GetAngleRate1(pGeometry->GetJointId(), lCurrentSpeed);
+			lTargetSpeed += (lTargetSpeed-lCurrentSpeed)*mMaxSpeed2*lScale*lScale/mMaxSpeed;
+		}
+		pPhysicsManager->SetAngularMotorTurn(pGeometry->GetJointId(), mStrength, lTargetSpeed);
+		mIntensity += (lTargetSpeed - lCurrentSpeed) / mMaxSpeed;
 	}
 	else
 	{

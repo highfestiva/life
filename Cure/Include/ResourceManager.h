@@ -150,7 +150,7 @@ public:
 	// Increases/decreases the reference counter. Returns the new value.
 	int Reference();
 	int Dereference();
-	int GetReferenceCount();
+	int GetReferenceCount() const;
 	virtual void Resume();	// Resource goes from cache -> live.
 	virtual void Suspend();	// Resource enters cache.
 	bool IsUnique() const;
@@ -391,8 +391,6 @@ public:
 	size_t QueryResourceCount() const;
 	size_t QueryCachedResourceCount() const;
 	NameTypeList QueryResourceNames();
-
-	bool ExportAll(const Lepra::String& pDirectory);
 
 protected:
 	Resource* GetAddCachedResource(const Lepra::String& pName, UserResource* pUserResource, bool& pMustLoad);

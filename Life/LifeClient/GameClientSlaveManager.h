@@ -55,14 +55,14 @@ public:
 	void RequestLogin(const Lepra::String& pServerAddress, const Cure::LoginId& pLoginToken);
 	void Logout();
 	bool IsLoggingIn() const;
+	bool IsUiMoveForbidden(Cure::GameObjectId pObjectId) const;
+	void AddLocalObjects(std::set<Cure::GameObjectId>& pLocalObjectSet) const;
 
 	bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
 	bool OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode);
 	void OnInput(UiLepra::InputElement* pElement);
 
 	int GetSlaveIndex() const;
-
-	bool ExportAll(const Lepra::String& pDirectory);
 
 private:
 	Lepra::String GetApplicationCommandFilename() const;

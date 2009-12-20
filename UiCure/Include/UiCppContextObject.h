@@ -54,14 +54,20 @@ private:
 	void TryAddTexture();
 	virtual bool TryComplete();
 	void OnLoadSound3d(UserSound3dResource* pSoundResource);
+	UserSound3dResource* CreateSharedSound(const Lepra::String& pId);
+	void DeleteSharedSound(const Lepra::String& pId);
+
+	typedef std::vector<UserGeometryReferenceResource*> MeshArray;
+	typedef std::hash_map<Lepra::String, UserSound3dResource*> SoundTable;
 
 	GameUiManager* mUiManager;
 	UserClassResource* mUiClassResource;
-	typedef std::vector<UserGeometryReferenceResource*> MeshArray;
 	MeshArray mMeshResourceArray;
 	size_t mMeshLoadCount;
 	UserRendererImageResource mTextureResource;
 	UserSound3dResource* mSoundResource;
+
+	static SoundTable mSoundTable;	// Sound resources are shared between split-screen players.
 
 	LOG_CLASS_DECLARE();
 };

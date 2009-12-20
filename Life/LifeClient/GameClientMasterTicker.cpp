@@ -140,15 +140,19 @@ bool GameClientMasterTicker::Tick()
 
 	Lepra::ScopeLock lLock(&mLock);
 
-	{
-		mUiManager->BeginRender();
-	}
+	SlaveMap::Iterator x;
 
 	{
+		mLocalObjectSet.clear();
+		for (x = mSlaveSet.First(); x != mSlaveSet.End(); ++x)
+		{
+			x.GetObject()->AddLocalObjects(mLocalObjectSet);
+		}
+
+		mUiManager->BeginRender();
 		mUiManager->InputTick();
 	}
 
-	SlaveMap::Iterator x;
 	for (x = mSlaveSet.First(); x != mSlaveSet.End();)
 	{
 		bool lDropSlave = x.GetObject()->IsQuitting();
@@ -258,6 +262,11 @@ bool GameClientMasterTicker::WaitResetUi()
 		Lepra::Thread::Sleep(0.1);
 	}
 	return (!mRestartUi);
+}
+
+bool GameClientMasterTicker::IsLocalObject(Cure::GameObjectId pInstanceId) const
+{
+	return (mLocalObjectSet.find(pInstanceId) != mLocalObjectSet.end());
 }
 
 

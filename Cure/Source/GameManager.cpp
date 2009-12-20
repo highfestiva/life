@@ -236,6 +236,11 @@ ContextObject* GameManager::CreateContextObject(const Lepra::String& pClassId, N
 	return (lObject);
 }
 
+bool GameManager::IsUiMoveForbidden(GameObjectId) const
+{
+	return (false);	// Non-UI implementors need to bother.
+}
+
 
 
 void GameManager::TryReportPerformance(double pReportInterval)

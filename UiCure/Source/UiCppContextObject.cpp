@@ -30,7 +30,7 @@ CppContextObject::CppContextObject(const Lepra::String& pClassId, GameUiManager*
 	mUiClassResource(0),
 	mMeshLoadCount(0),
 	mTextureResource(pUiManager),
-	mSoundResource(new UserSound3dResource(pUiManager, UiLepra::SoundManager::LOOP_FORWARD))
+	mSoundResource(0)
 {
 	log_volatile(mLog.Tracef(_T("Construct CppCO %s."), pClassId.c_str()));
 }
@@ -45,8 +45,11 @@ CppContextObject::~CppContextObject()
 	}
 	mMeshResourceArray.clear();
 
-	delete (mSoundResource);
-	mSoundResource = 0;
+	if (mSoundResource)
+	{
+		mSoundResource = 0;
+		DeleteSharedSound(_T("Bark.wav"));
+	}
 	delete (mUiClassResource);
 	mUiClassResource = 0;
 
@@ -59,13 +62,15 @@ void CppContextObject::StartLoading()
 {
 	assert(mUiClassResource == 0);
 	mUiClassResource = new UserClassResource(mUiManager);
-	const Lepra::String lAssetName = GetClassId()+_T(".class");	// TODO: move to central source file.
-	mUiClassResource->Load(GetManager()->GetGameManager()->GetResourceManager(), lAssetName,
+	const Lepra::String lClassName = GetClassId()+_T(".class");	// TODO: move to central source file.
+	mUiClassResource->Load(GetManager()->GetGameManager()->GetResourceManager(), lClassName,
 		UserClassResource::TypeLoadCallback(this, &CppContextObject::OnLoadClass));
 
 	if (Lepra::StringUtility::StartsWith(GetClassId(), _T("helicopter")))
 	{
-		mSoundResource->Load(GetManager()->GetGameManager()->GetResourceManager(), _T("Bark.wav"),
+		const Lepra::String lSoundName = _T("Bark.wav");
+		mSoundResource = CreateSharedSound(lSoundName);
+		mSoundResource->Load(GetManager()->GetGameManager()->GetResourceManager(), lSoundName,
 			UserSound3dResource::TypeLoadCallback(this, &CppContextObject::OnLoadSound3d));
 	}
 }
@@ -78,6 +83,11 @@ void CppContextObject::OnPhysicsTick()
 	{
 		mLog.Warningf(_T("Physical body for %s not loaded!"), GetClassId().c_str());
 		return;
+	}
+
+	if (GetManager()->GetGameManager()->IsUiMoveForbidden(GetInstanceId()))
+	{
+		return;	// Don't move UI representation of objects owned by other split screen players.
 	}
 
 	Lepra::TransformationF lPhysicsTransform;
@@ -116,7 +126,7 @@ void CppContextObject::OnPhysicsTick()
 		lGfxGeometry->SetTransformation(lPhysicsTransform);
 	}
 
-	if (mSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
+	if (mSoundResource && mSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
 		TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());	// TODO: add sound->engine index in class info!
 		if (lGeometry == 0 || lGeometry->GetBodyId() == TBC::INVALID_BODY)
@@ -133,7 +143,11 @@ void CppContextObject::OnPhysicsTick()
 			if (mPhysics->GetEngineCount() > 0)
 			{
 				const TBC::PhysicsEngine* lEngine = mPhysics->GetEngine(0);
-				mUiManager->GetSoundManager()->SetPitch(mSoundResource->GetData(), ::fabs(lEngine->GetValue())*10 + 1);
+				const float lIntensity = ::fabs(lEngine->GetIntensity());
+				const float lRpm = lIntensity * lEngine->GetMaxSpeed() * 0.2f;
+				mUiManager->GetSoundManager()->SetPitch(mSoundResource->GetData(), lRpm);
+				const float lVolume = (lIntensity < 1/5.0f)? lIntensity*5 : 1;
+				mUiManager->GetSoundManager()->SetVolume(mSoundResource->GetData(), lVolume);
 			}
 		}
 	}
@@ -505,7 +519,37 @@ void CppContextObject::OnLoadSound3d(UserSound3dResource* pSoundResource)
 	}
 }
 
+UserSound3dResource* CppContextObject::CreateSharedSound(const Lepra::String& pSoundName)
+{
+	const Lepra::String lId = pSoundName + _T(";") + GetClassId();
+	SoundTable::iterator x = mSoundTable.find(lId);
+	if (x == mSoundTable.end())
+	{
+		UserSound3dResource* lSound = new UserSound3dResource(mUiManager, UiLepra::SoundManager::LOOP_FORWARD);
+		mSoundTable.insert(SoundTable::value_type(lId, lSound));
+		return (lSound);
+	}
+	return (x->second);
+}
 
+void CppContextObject::DeleteSharedSound(const Lepra::String& pSoundName)
+{
+	const Lepra::String lId = pSoundName + _T(";") + GetClassId();
+	SoundTable::iterator x = mSoundTable.find(lId);
+	if (x != mSoundTable.end())
+	{
+		UserSound3dResource* lSound = x->second;
+		if (lSound->GetConstResource()->GetReferenceCount() <= 1)
+		{
+			mSoundTable.erase(x);
+			delete (lSound);
+		}
+	}
+}
+
+
+
+CppContextObject::SoundTable CppContextObject::mSoundTable;
 
 LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, CppContextObject);
 

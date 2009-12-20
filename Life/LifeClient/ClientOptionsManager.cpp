@@ -181,7 +181,7 @@ bool ClientOptionsManager::SetValue(const Lepra::String& pKey, float pValue)
 	std::vector<float*> lValuePointers = GetValuePointers(pKey, lIsAnySteeringValue);
 	for (std::vector<float*>::iterator x = lValuePointers.begin(); x != lValuePointers.end(); ++x)
 	{
-		if (!Lepra::Math::IsEpsEqual(*(*x), pValue, 0.03f))
+		if (!Lepra::Math::IsEpsEqual(*(*x), pValue, 0.06f))
 		{
 			lInputChanged = true;
 			*(*x) = pValue;

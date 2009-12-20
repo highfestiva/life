@@ -44,6 +44,8 @@ public:
 	bool StartResetUi();
 	bool WaitResetUi();
 
+	bool IsLocalObject(Cure::GameObjectId pInstanceId) const;
+
 private:
 	void AddSlave(GameClientSlaveManager* pSlave);
 	void RemoveSlave(GameClientSlaveManager* pSlave);
@@ -95,6 +97,7 @@ private:
 	unsigned mActiveHeight;
 	SlaveMap mSlaveSet;
 	std::vector<UiCure::LineGraph2d> mPerformanceGraphList;
+	std::set<Cure::GameObjectId> mLocalObjectSet;
 
 	LOG_CLASS_DECLARE();
 };

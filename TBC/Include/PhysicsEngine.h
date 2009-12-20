@@ -63,6 +63,8 @@ public:
 	unsigned GetControllerIndex() const;
 	float GetValue() const;
 	const float* GetValues() const;
+	float GetIntensity() const;
+	float GetMaxSpeed() const;
 
 	unsigned GetChunkySize() const;
 	void SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const;
@@ -96,6 +98,7 @@ private:
 	unsigned mControllerIndex;
 	EngineNodeArray mEngineNodeArray;
 	float mValue[4];
+	float mIntensity;
 
 	LOG_CLASS_DECLARE();
 };

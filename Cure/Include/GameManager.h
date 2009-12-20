@@ -63,6 +63,7 @@ public:
 
 	ContextObject* CreateContextObject(const Lepra::String& pClassId, NetworkObjectType pNetworkType,
 		GameObjectId pInstanceId = 0);
+	virtual bool IsUiMoveForbidden(GameObjectId pObjectId) const;
 	virtual void OnLoadCompleted(ContextObject* pObject, bool pOk) = 0;
 	virtual void OnCollision(const Lepra::Vector3DF& pForce, const Lepra::Vector3DF& pTorque,
 		ContextObject* pObject1, ContextObject* pObject2) = 0;

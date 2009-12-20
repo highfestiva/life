@@ -180,7 +180,7 @@ int Resource::Dereference()
 	return (mReferenceCount);
 }
 
-int Resource::GetReferenceCount()
+int Resource::GetReferenceCount() const
 {
 	return (mReferenceCount);
 }
@@ -735,21 +735,6 @@ ResourceManager::NameTypeList ResourceManager::QueryResourceNames()
 		lNames.push_back(lPair);
 	}
 	return (lNames);
-}
-
-
-
-bool ResourceManager::ExportAll(const Lepra::String& pDirectory)
-{
-	Lepra::ScopeLock lLock(&mThreadLock);
-	ResourceTable::Iterator x = mActiveResourceTable.First();
-	for (; x != mActiveResourceTable.End(); ++x)
-	{
-		Resource* lResource = *x;
-		StringPair lPair(lResource->GetName(), lResource->GetType());
-		mLog.Infof(_T("  - Resource: '%s' -> '%s'"), lPair.first.c_str(), pDirectory.c_str());
-	}
-	return (true);
 }
 
 

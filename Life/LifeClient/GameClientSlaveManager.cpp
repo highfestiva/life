@@ -214,6 +214,15 @@ bool GameClientSlaveManager::IsLoggingIn() const
 	return (GetNetworkClient()->IsConnecting() || GetNetworkClient()->IsLoggingIn());
 }
 
+bool GameClientSlaveManager::IsUiMoveForbidden(Cure::GameObjectId pObjectId) const
+{
+	return (pObjectId != mAvatarId && GetMaster()->IsLocalObject(pObjectId));
+}
+
+void GameClientSlaveManager::AddLocalObjects(std::set<Cure::GameObjectId>& pLocalObjectSet) const
+{
+	pLocalObjectSet.insert(mAvatarId);
+}
 
 
 bool GameClientSlaveManager::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
@@ -252,25 +261,6 @@ void GameClientSlaveManager::OnInput(UiLepra::InputElement* pElement)
 int GameClientSlaveManager::GetSlaveIndex() const
 {
 	return (mSlaveIndex);
-}
-
-
-
-bool GameClientSlaveManager::ExportAll(const Lepra::String& pDirectory)
-{
-	bool lOk = GetResourceManager()->ExportAll(pDirectory);
-	if (lOk)
-	{
-		Lepra::ScopeLock lLock(GetTickLock());
-		const Cure::ContextManager::ContextObjectTable& lObjectList = GetContext()->GetObjectTable();
-		Cure::ContextManager::ContextObjectTable::const_iterator x = lObjectList.begin();
-		for (; x != lObjectList.end(); ++x)
-		{
-			const Cure::ContextObject* lObject = x->second;
-			mLog.Infof(_T("  - Context object: '%s' -> '%s'"), lObject->GetClassId().c_str(), pDirectory.c_str());
-		}
-	}
-	return (true);
 }
 
 
@@ -942,7 +932,11 @@ void GameClientSlaveManager::UpdateCameraPosition()
 
 	const float lFrameTime = GetTimeManager()->GetNormalFrameTime();
 	Lepra::Vector3DF lVelocity = (mCameraPosition-mCameraPreviousPosition) / lFrameTime;
-	mUiManager->SetCameraPosition(lCameraTransform, lVelocity);
+	mUiManager->SetCameraPosition(lCameraTransform);
+	if (mSlaveIndex == 1)	// TODO: replace with something thought-through.
+	{
+		mUiManager->SetMicrophonePosition(lCameraTransform, lVelocity);
+	}
 }
 
 

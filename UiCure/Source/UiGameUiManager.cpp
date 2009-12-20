@@ -179,6 +179,7 @@ bool GameUiManager::Open()
 	if (lOk)
 	{
 		mSound = UiLepra::SoundManager::CreateSoundManager(UiLepra::SoundManager::CONTEXT_OPENAL);
+		mSound->SetRollOffFactor(0.1f);
 	}
 	if (lOk)
 	{
@@ -323,10 +324,13 @@ UiLepra::SoundManager* GameUiManager::GetSoundManager() const
 
 
 
-void GameUiManager::SetCameraPosition(const Lepra::TransformationF& pTransform, const Lepra::Vector3DF& pVelocity)
+void GameUiManager::SetCameraPosition(const Lepra::TransformationF& pTransform)
 {
 	mRenderer->SetCameraTransformation(pTransform);
+}
 
+void GameUiManager::SetMicrophonePosition(const Lepra::TransformationF& pTransform, const Lepra::Vector3DF& pVelocity)
+{
 	Lepra::Vector3DF lUp = pTransform.GetOrientation() * Lepra::Vector3DF(0,0,1);
 	Lepra::Vector3DF lForward = pTransform.GetOrientation() * Lepra::Vector3DF(0,1,0);
 	mSound->SetListenerPosition(pTransform.GetPosition(), pVelocity, lUp, lForward);

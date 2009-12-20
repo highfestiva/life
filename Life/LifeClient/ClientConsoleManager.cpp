@@ -34,8 +34,6 @@ const ClientConsoleManager::CommandPair ClientConsoleManager::mCommandIdList[] =
 	{_T("start-reset-ui"), COMMAND_START_RESET_UI},
 	{_T("wait-reset-ui"), COMMAND_WAIT_RESET_UI},
 	{_T("add-player"), COMMAND_ADD_PLAYER},
-
-	{_T("export-all-types"), 1001001},
 };
 
 
@@ -391,15 +389,6 @@ int ClientConsoleManager::OnCommand(const Lepra::String& pCommand, const Lepra::
 				{
 					mLog.AError("Could not add another player!");
 					lResult = 1;
-				}
-			}
-			break;
-			case 1001001:	// TODO: remove entirely when import is up and running!
-			{
-				mLog.AWarning("This is a command used for development purposes only. Don't use unless you know what you're doing!");
-				if (pParameterVector.size() == 1 && pParameterVector[0] == _T("!"))
-				{
-					((GameClientSlaveManager*)mGameManager)->ExportAll(_T("."));
 				}
 			}
 			break;
