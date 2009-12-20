@@ -52,6 +52,7 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
+				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -122,6 +123,7 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
+				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="0"
 			/>
 			<Tool
@@ -192,6 +194,7 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
+				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -259,6 +262,7 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
+				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -329,6 +333,7 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
+				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="0"
 			/>
 			<Tool
@@ -399,6 +404,7 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
+				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -471,67 +477,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Source\UiDirectX9Painter.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Source\UiDirectX9Renderer.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Final|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release Candidate|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Unicode Debug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Unicode Final|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Unicode Release Candidate|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\Source\UiEdge.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Source\UiGDIPainter.cpp"
+				RelativePath=".\Source\UiFontManager.cpp"
 				>
 			</File>
 			<File
@@ -543,23 +489,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Source\UiGeometrySeparator.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Source\UiGradients.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\Source\UiGraphicalModel.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\Source\UiMaterial.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Source\UiMouseTheme.cpp"
 				>
 			</File>
 			<File
@@ -619,22 +553,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Source\UiSoftwareMaterials.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Source\UiSoftwareRenderer.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Source\UiStandardMouseTheme.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Source\UiSystemPainter.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\Source\UiTBC.cpp"
 				>
 			</File>
@@ -658,110 +576,6 @@
 				RelativePath=".\Source\UiUVMapper.cpp"
 				>
 			</File>
-			<Filter
-				Name="SoftwarePainter"
-				>
-				<File
-					RelativePath=".\Source\SoftwarePainter\UiSoftwarePainter.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\SoftwarePainter\UiSoftwarePainter_DrawAlphaImage.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\SoftwarePainter\UiSoftwarePainter_DrawHLine.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\SoftwarePainter\UiSoftwarePainter_DrawImage.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\SoftwarePainter\UiSoftwarePainter_DrawImageStretch.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\SoftwarePainter\UiSoftwarePainter_DrawLine.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\SoftwarePainter\UiSoftwarePainter_DrawPixel.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\SoftwarePainter\UiSoftwarePainter_DrawPixelMacros.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\SoftwarePainter\UiSoftwarePainter_DrawScanLine.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\SoftwarePainter\UiSoftwarePainter_DrawShadedHLine.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\SoftwarePainter\UiSoftwarePainter_DrawVLine.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\SoftwarePainter\UiSoftwarePainter_FillShadedRect.cpp"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="Software3DPainter"
-				>
-				<File
-					RelativePath=".\Source\Software3DPainter\UiSoftware3DPainter.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\Software3DPainter\UiSoftware3DPainter_Clip.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\Software3DPainter\UiSoftware3DPainter_DrawLineFast.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\Software3DPainter\UiSoftware3DPainter_DrawLineNicest.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\Software3DPainter\UiSoftware3DPainter_Macros.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\Software3DPainter\UiSoftware3DPainter_PixelWriters.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\Software3DPainter\UiSoftware3DPainter_RenderPrimitiveLines.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\Software3DPainter\UiSoftware3DPainter_RenderPrimitiveTriangle.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\Software3DPainter\UiSoftware3DPainter_ScanLineFast.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\Software3DPainter\UiSoftware3DPainter_ScanLineNicest.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\Software3DPainter\UiSoftware3DPainter_TextureReaders.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\Software3DPainter\UiSoftware3DPainter_Triangle.cpp"
-					>
-				</File>
-			</Filter>
 			<Filter
 				Name="GUI"
 				>
@@ -874,6 +688,18 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="Win32"
+				>
+				<File
+					RelativePath=".\Source\Win32\UiWin32FontManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Win32\UWin32iDirectX9Painter.cpp"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -897,22 +723,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Include\UiDirectX9Painter.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\UiDirectX9Renderer.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\UiEdge.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\UiGDIPainter.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Include\UiGeometry2D.h"
 				>
 			</File>
@@ -921,23 +731,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Include\UiGeometrySeparator.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\UiGradients.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Include\UiGraphicalModel.h"
 				>
 			</File>
 			<File
 				RelativePath=".\Include\UiMaterial.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\UiMouseTheme.h"
 				>
 			</File>
 			<File
@@ -954,10 +752,6 @@
 			</File>
 			<File
 				RelativePath=".\Include\UiPainter.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Source\UiPainter.inl"
 				>
 			</File>
 			<File
@@ -978,38 +772,6 @@
 			</File>
 			<File
 				RelativePath=".\Include\UiShadowVolume.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\UiSoftware3DPainter.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\UiSoftwareMaterials.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\UiSoftwarePainter.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\UiSoftwareRenderer.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Source\UiStandardFont1.inl"
-				>
-			</File>
-			<File
-				RelativePath=".\Source\UiStandardFont2.inl"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\UiStandardMouseTheme.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\UiSystemPainter.h"
 				>
 			</File>
 			<File
@@ -1034,10 +796,6 @@
 			</File>
 			<File
 				RelativePath=".\Include\UiUVMapper.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\UiVertex.h"
 				>
 			</File>
 			<Filter
@@ -1157,6 +915,18 @@
 				</File>
 				<File
 					RelativePath=".\Include\GUI\UiWindow.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Win32"
+				>
+				<File
+					RelativePath=".\Include\Win32\UiWin32DirectX9Painter.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Include\Win32\UiWin32FontManager.h"
 					>
 				</File>
 			</Filter>
