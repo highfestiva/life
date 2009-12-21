@@ -48,7 +48,7 @@ class TerrainManager
 {
 public:
 	typedef int CameraId;
-	typedef Lepra::AABR<float> PatchArea;
+	typedef AABR<float> PatchArea;
 
 	TerrainManager(ResourceManager* pResourceManager);
 	virtual ~TerrainManager();
@@ -57,9 +57,9 @@ public:
 	static TBC::TerrainPatch* CreatePatch(const PatchArea& pArea, float pLod);
 	static void DeletePatch(TBC::TerrainPatch* pPatch);
 
-	CameraId AddCamera(const Lepra::Vector3DF& pPosition, float pVisibleRadius);
+	CameraId AddCamera(const Vector3DF& pPosition, float pVisibleRadius);
 	void RemoveCamera(CameraId pCameraId);
-	void MoveCamera(CameraId pCameraId, const Lepra::Vector3DF& pPosition);
+	void MoveCamera(CameraId pCameraId, const Vector3DF& pPosition);
 
 	void GetLoadCount(int& pLoadPatchOkCount, int& pLoadPatchErrorCount);
 
@@ -67,7 +67,7 @@ private:
 	void UpdatePatchTree();
 	void TerrainPatchLoadCallback(UserPhysicalTerrainResource* pLoadedResource);
 
-	Lepra::Lock* mTerrainLock;
+	Lock* mTerrainLock;
 
 	ResourceManager* mResourceManager;
 
@@ -76,20 +76,20 @@ private:
 
 	TerrainPatchManager* mPatchManager;
 
-	typedef Lepra::IdManager<CameraId> CameraIdManager;
+	typedef IdManager<CameraId> CameraIdManager;
 	CameraIdManager mCameraIdManager;
 
 	struct CameraInfo
 	{
-		inline CameraInfo(const Lepra::Vector3DF& pPosition, float pVisibleRadius):
+		inline CameraInfo(const Vector3DF& pPosition, float pVisibleRadius):
 			mPosition(pPosition),
 			mVisibleRadius(pVisibleRadius)
 		{
 		}
-		Lepra::Vector3DF mPosition;
+		Vector3DF mPosition;
 		float mVisibleRadius;
 	};
-	typedef Lepra::HashTable<CameraId, CameraInfo> CameraTable;
+	typedef HashTable<CameraId, CameraInfo> CameraTable;
 	CameraTable mCameraTable;
 
 	LOG_CLASS_DECLARE();

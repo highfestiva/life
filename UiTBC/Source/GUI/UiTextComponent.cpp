@@ -14,7 +14,7 @@ namespace UiTbc
 
 
 TextComponent::TextComponent():
-	mTextColor(Lepra::OFF_BLACK)
+	mTextColor(OFF_BLACK)
 {
 }
 
@@ -22,16 +22,16 @@ TextComponent::~TextComponent()
 {
 }
 
-void TextComponent::SetFontColor(const Lepra::Color& pTextColor)
+void TextComponent::SetFontColor(const Color& pTextColor)
 {
-	assert(pTextColor != Lepra::BLACK);
+	assert(pTextColor != BLACK);
 	mTextColor = pTextColor;
 	ForceRepaint();
 }
 
 
 
-Lepra::Color TextComponent::GetTextColor() const
+Color TextComponent::GetTextColor() const
 {
 	return (mTextColor);
 }

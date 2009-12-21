@@ -1,5 +1,5 @@
 /*
-	Lepra::File:   BasicMeshCreator.cpp
+	File:   BasicMeshCreator.cpp
 	Class:  BasicMeshCreator
 	Author: Alexander Hugestrand
 	Copyright (c) 2002-2009, Righteous Games
@@ -31,11 +31,11 @@ TriangleBasedGeometry* BasicMeshCreator::CreateFlatBox(float pXSize, float pYSiz
 			     pXSegments * pZSegments * 4 +
 			     pYSegments * pZSegments * 4;
 
-	Lepra::Vector3DF* lV = new Lepra::Vector3DF[lVertexCount];
-	Lepra::Vector3DF* lN = new Lepra::Vector3DF[lVertexCount];
-	Lepra::uint32* lIndices = new Lepra::uint32[lNumTriangles * 3];
+	Vector3DF* lV = new Vector3DF[lVertexCount];
+	Vector3DF* lN = new Vector3DF[lVertexCount];
+	uint32* lIndices = new uint32[lNumTriangles * 3];
 
-	::memset(lIndices, 0, lNumTriangles * 3 * sizeof(Lepra::uint32));
+	::memset(lIndices, 0, lNumTriangles * 3 * sizeof(uint32));
 
 	float lXStep = pXSize / (float)pXSegments;
 	float lYStep = pYSize / (float)pYSegments;
@@ -262,12 +262,12 @@ TriangleBasedGeometry* BasicMeshCreator::CreateEllipsoid(float pXRadius,
 	int lVertexCount = pNumLongitudeSegments * (pNumLatitudeSegments - 1) + 2;
 	int lNumTriangles = pNumLongitudeSegments * (pNumLatitudeSegments - 2) * 2 + pNumLongitudeSegments * 2;
 
-	Lepra::Vector3D<float>* lV = new Lepra::Vector3D<float>[lVertexCount];
-	Lepra::Vector3D<float>* lN = new Lepra::Vector3D<float>[lVertexCount];
-	Lepra::uint32* lI = new Lepra::uint32[lNumTriangles * 3];
+	Vector3D<float>* lV = new Vector3D<float>[lVertexCount];
+	Vector3D<float>* lN = new Vector3D<float>[lVertexCount];
+	uint32* lI = new uint32[lNumTriangles * 3];
 
-	const float lLatAngleStep = Lepra::PIF / (float)pNumLatitudeSegments;
-	const float lLongAngleStep = Lepra::PIF * 2.0f / (float)pNumLongitudeSegments;
+	const float lLatAngleStep = PIF / (float)pNumLatitudeSegments;
+	const float lLongAngleStep = PIF * 2.0f / (float)pNumLongitudeSegments;
 
 	// Setup top and bottom vertex.
 	lV[0].Set(0, pYRadius, 0);
@@ -371,15 +371,15 @@ TriangleBasedGeometry* BasicMeshCreator::CreateCone(float pBaseRadius,
 	int lVertexCount = pNumSegments + 1;
 	int lNumTriangles = pNumSegments * 2 - 2;
 
-	Lepra::Vector3D<float>* lV = new Lepra::Vector3D<float>[lVertexCount];
-	Lepra::Vector3D<float>* lN = new Lepra::Vector3D<float>[lVertexCount];
-	Lepra::uint32* lI = new Lepra::uint32[lNumTriangles * 3];
+	Vector3D<float>* lV = new Vector3D<float>[lVertexCount];
+	Vector3D<float>* lN = new Vector3D<float>[lVertexCount];
+	uint32* lI = new uint32[lNumTriangles * 3];
 
 	// Set the top vertex.
 	lV[0].Set(0, 0, pHeight);
 	lN[0].Set(0, 0, 1.0f);
 
-	const float lAngleStep = (2.0f * Lepra::PIF) / (float)pNumSegments;
+	const float lAngleStep = (2.0f * PIF) / (float)pNumSegments;
 	float lAngle = 0.0f;
 
 	int lIndex = 0;
@@ -446,11 +446,11 @@ TriangleBasedGeometry* BasicMeshCreator::CreateCylinder(float pBaseRadius,
 	int lVertexCount = pNumSegments * 2;
 	int lNumTriangles = pNumSegments * 2 + (pNumSegments - 2) * 2;
 
-	Lepra::Vector3D<float>* lV = new Lepra::Vector3D<float>[lVertexCount];
-	Lepra::Vector3D<float>* lN = new Lepra::Vector3D<float>[lVertexCount];
-	Lepra::uint32* lI = new Lepra::uint32[lNumTriangles * 3];
+	Vector3D<float>* lV = new Vector3D<float>[lVertexCount];
+	Vector3D<float>* lN = new Vector3D<float>[lVertexCount];
+	uint32* lI = new uint32[lNumTriangles * 3];
 
-	const float lAngleStep = (2.0f * Lepra::PIF) / (float)pNumSegments;
+	const float lAngleStep = (2.0f * PIF) / (float)pNumSegments;
 	float lAngle = 0.0f;
 
 	float lRadiusDiff = pBaseRadius - pTopRadius;
@@ -557,12 +557,12 @@ TriangleBasedGeometry* BasicMeshCreator::CreateTorus(float pRadius,
 	int lVertexCount = pNumSegments * pNumRingSegments;
 	int lNumTriangles = pNumSegments * pNumRingSegments * 2;
 
-	Lepra::Vector3D<float>* lV = new Lepra::Vector3D<float>[lVertexCount];
-	Lepra::Vector3D<float>* lN = new Lepra::Vector3D<float>[lVertexCount];
-	Lepra::uint32* lI = new Lepra::uint32[lNumTriangles * 3];
+	Vector3D<float>* lV = new Vector3D<float>[lVertexCount];
+	Vector3D<float>* lN = new Vector3D<float>[lVertexCount];
+	uint32* lI = new uint32[lNumTriangles * 3];
 
-	const float lAngleStep = 2.0f * Lepra::PIF / (float)pNumSegments;
-	const float lRingAngleStep = 2.0f * Lepra::PIF / (float)pNumRingSegments;
+	const float lAngleStep = 2.0f * PIF / (float)pNumSegments;
+	const float lRingAngleStep = 2.0f * PIF / (float)pNumRingSegments;
 
 	float lAngle = 0.0f;
 
@@ -640,11 +640,11 @@ void BasicMeshCreator::CreateYBonedSkin(float pStartY, float pEndY, const Triang
 	for (v = 0; v < pGeometry->GetVertexCount(); ++v)
 	{
 		float y = pGeometry->GetVertexData()[v*3+1];
-		if (y <= pStartY+Lepra::eps_f)
+		if (y <= pStartY+eps_f)
 		{
 			lMinimaList.push_back(v);
 		}
-		else if (y >= pEndY-Lepra::eps_f)
+		else if (y >= pEndY-eps_f)
 		{
 			lMaximaList.push_back(v);
 		}
@@ -673,8 +673,8 @@ void BasicMeshCreator::CreateYBonedSkin(float pStartY, float pEndY, const Triang
 	const int lSegments = pBoneCount-1;
 	for (int y = 0; y < lSegments; ++y)
 	{
-		const float lPartMin = Lepra::Math::Lerp(pStartY, pEndY, (float)y/lSegments);
-		const float lPartMax = Lepra::Math::Lerp(pStartY, pEndY, (float)(y+1)/lSegments);
+		const float lPartMin = Math::Lerp(pStartY, pEndY, (float)y/lSegments);
+		const float lPartMax = Math::Lerp(pStartY, pEndY, (float)(y+1)/lSegments);
 		std::list<int> lSegmentList;
 		for (v = 0; v < pGeometry->GetVertexCount(); ++v)
 		{

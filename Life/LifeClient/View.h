@@ -27,12 +27,12 @@ namespace Life
 class View: public UiTbc::Window
 {
 public:
-	View(const Lepra::String& pTitle, UiTbc::Layout* pLayout);
+	View(const str& pTitle, UiTbc::Layout* pLayout);
 
 protected:
-	UiTbc::Label* AddLabel(const Lepra::String& pText, const Lepra::Color& pColor);
-	UiTbc::TextField* AddTextField(const Lepra::String& pDefaultText, const Lepra::String& pName);
-	UiTbc::Button* AddButton(const Lepra::String& pText);
+	UiTbc::Label* AddLabel(const str& pText, const Color& pColor);
+	UiTbc::TextField* AddTextField(const str& pDefaultText, const str& pName);
+	UiTbc::Button* AddButton(const str& pText);
 
 private:
 	void OnExit(UiTbc::Button*);

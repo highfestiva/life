@@ -40,12 +40,12 @@ void SystemManager::Shutdown()
 	::tcsetattr(STDIN_FILENO, TCSANOW, &gInitialTermios);
 }
 
-String SystemManager::GetRootDirectory()
+str SystemManager::GetRootDirectory()
 {
 	return (_T("/"));
 }
 
-String SystemManager::GetCurrentDirectory()
+str SystemManager::GetCurrentDirectory()
 {
 	char lBuffer[2048];
 	lBuffer[0] = 0;
@@ -53,26 +53,26 @@ String SystemManager::GetCurrentDirectory()
 	{
 		mLog.AError("Failed in GetCurrentDirectory()");
 	}
-	String lString(AnsiStringUtility::ToCurrentCode(AnsiString(lBuffer)));
+	str lString(astrutil::ToCurrentCode(astr(lBuffer)));
 	return (lString);
 }
 
-String SystemManager::GetUserDirectory()
+str SystemManager::GetUserDirectory()
 {
-	return (AnsiStringUtility::ToCurrentCode(AnsiString(::getenv("HOME"))));
+	return (astrutil::ToCurrentCode(astr(::getenv("HOME"))));
 }
 
-String SystemManager::GetLoginName()
+str SystemManager::GetLoginName()
 {
 	const char* lLoginName = ::getlogin();
 	if (!lLoginName)
 	{
 		lLoginName = "<Unknown>";
 	}
-	return (AnsiStringUtility::ToCurrentCode(AnsiString(lLoginName)));
+	return (astrutil::ToCurrentCode(astr(lLoginName)));
 }
 
-String SystemManager::QueryFullUserName()
+str SystemManager::QueryFullUserName()
 {
 	// TODO: use ::getlogin() to search /usr/passwd or something similarly gory.
 	return (GetLoginName());
@@ -94,13 +94,13 @@ unsigned SystemManager::GetCoreCount()
 	return (1);	// TODO: ... something...
 }
 
-String SystemManager::GetCpuName()
+str SystemManager::GetCpuName()
 {
 	// TODO: search /proc/cpuinfo by brute force.
 	return (_T("GenuineIntel"));
 }
 
-String SystemManager::GetOsName()
+str SystemManager::GetOsName()
 {
 	// TODO: probably something like popen("uname -o").read()...
 	return (_T("Posix"));

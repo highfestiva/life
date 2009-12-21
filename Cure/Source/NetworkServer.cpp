@@ -4,11 +4,11 @@
  
 
 
+#include "../Include/NetworkServer.h"
 #include "../../Lepra/Include/Endian.h"
 #include "../../Lepra/Include/HashUtil.h"
 #include "../../Lepra/Include/Log.h"
 #include "../Include/ContextObject.h"
-#include "../Include/NetworkServer.h"
 #include "../Include/Packet.h"
 #include "../Include/RuntimeVariable.h"
 #include "../Include/UserConnection.h"
@@ -46,10 +46,10 @@ NetworkServer::~NetworkServer()
 	mUserConnectionFactory = 0;
 }
 
-bool NetworkServer::Start(const Lepra::String& pHostAddress)
+bool NetworkServer::Start(const str& pHostAddress)
 {
 	bool lOk = true;
-	Lepra::SocketAddress lAddress;
+	SocketAddress lAddress;
 	if (lOk)
 	{
 		lOk = lAddress.Resolve(pHostAddress);
@@ -57,8 +57,8 @@ bool NetworkServer::Start(const Lepra::String& pHostAddress)
 	if (lOk)
 	{
 		mLog.Info(_T("Server listening to address ") + lAddress.GetAsString() + _T("."));
-		Lepra::ScopeLock lLock(&mLock);
-		SetMuxSocket(new Lepra::GameMuxSocket(_T("Srv "), lAddress, true, 100, 1000));
+		ScopeLock lLock(&mLock);
+		SetMuxSocket(new GameMuxSocket(_T("Srv "), lAddress, true, 100, 1000));
 		mMuxSocket->SetCloseCallback(this, &NetworkServer::OnCloseSocket);
 		lOk = mMuxSocket->IsOpen();
 	}
@@ -67,7 +67,7 @@ bool NetworkServer::Start(const Lepra::String& pHostAddress)
 
 void NetworkServer::Stop()
 {
-	Lepra::ScopeLock lLock(&mLock);
+	ScopeLock lLock(&mLock);
 	while (!mLoggedInIdUserTable.empty())
 	{
 		LoggedInIdUserTable::iterator x = mLoggedInIdUserTable.begin();
@@ -79,7 +79,7 @@ void NetworkServer::Stop()
 
 
 
-void NetworkServer::Disconnect(UserAccount::AccountId pAccountId, const Lepra::String& pReason, bool pSendDisconnect)
+void NetworkServer::Disconnect(UserAccount::AccountId pAccountId, const str& pReason, bool pSendDisconnect)
 {
 	UserConnection* lUser = GetUser(pAccountId);
 	if (lUser)
@@ -87,7 +87,7 @@ void NetworkServer::Disconnect(UserAccount::AccountId pAccountId, const Lepra::S
 		if (pSendDisconnect)
 		{
 			Cure::Packet* lPacket = GetPacketFactory()->Allocate();
-			Parent::SendStatusMessage(lUser->GetSocket(), 0, Cure::REMOTE_NO_CONNECTION, Lepra::UnicodeStringUtility::ToOwnCode(pReason), lPacket);
+			Parent::SendStatusMessage(lUser->GetSocket(), 0, Cure::REMOTE_NO_CONNECTION, wstrutil::ToOwnCode(pReason), lPacket);
 			GetPacketFactory()->Release(lPacket);
 		}
 		else if (lUser->GetSocket())
@@ -120,7 +120,7 @@ bool NetworkServer::PlaceInSendBuffer(bool pSafe, Packet* pPacket, UserAccount::
 bool NetworkServer::SendAll()
 {
 	bool lAllSendsOk = true;
-	Lepra::GameSocket* lSocket;
+	GameSocket* lSocket;
 	while ((lSocket = mMuxSocket->PopSenderSocket()) != 0)
 	{
 		int lSendCount = lSocket->SendBuffer();
@@ -140,7 +140,7 @@ bool NetworkServer::SendAll()
 			// Socket disconnected: drop user or socket.
 			UserConnection* lUser;
 			{
-				lUser = Lepra::HashUtil::FindMapObject(mSocketUserTable, lSocket);
+				lUser = HashUtil::FindMapObject(mSocketUserTable, lSocket);
 			}
 			if (lUser)
 			{
@@ -162,7 +162,7 @@ NetworkServer::ReceiveStatus NetworkServer::ReceiveFirstPacket(Packet* pPacket, 
 	KillDeadSockets();
 
 	ReceiveStatus lStatus = RECEIVE_NO_DATA;
-	Lepra::GameSocket* lSocket;
+	GameSocket* lSocket;
 	// Walk through TCP and UDP connections.
 	for (int x = 0; lStatus == RECEIVE_NO_DATA && x < 2; ++x)
 	{
@@ -171,7 +171,7 @@ NetworkServer::ReceiveStatus NetworkServer::ReceiveFirstPacket(Packet* pPacket, 
 			int lDataLength = lSocket->Receive(x == 0, pPacket->GetWriteBuffer(), pPacket->GetBufferSize());
 			UserConnection* lUser;
 			{
-				lUser = Lepra::HashUtil::FindMapObject(mSocketUserTable, lSocket);
+				lUser = HashUtil::FindMapObject(mSocketUserTable, lSocket);
 				if (lUser)
 				{
 					pAccountId = lUser->GetAccountId();
@@ -234,7 +234,7 @@ void NetworkServer::PollAccept()
 {
 	if (mPendingLoginTable.size() < 1000)
 	{
-		Lepra::GameSocket* lSocket = mMuxSocket->PollAccept();
+		GameSocket* lSocket = mMuxSocket->PollAccept();
 		// TODO: add banning techniques to avoid DoS attacks.
 		if (lSocket)
 		{
@@ -243,7 +243,7 @@ void NetworkServer::PollAccept()
 	}
 }
 
-void NetworkServer::TryLogin(Lepra::GameSocket* pSocket, Packet* pPacket, int pDataLength)
+void NetworkServer::TryLogin(GameSocket* pSocket, Packet* pPacket, int pDataLength)
 {
 	{
 		PendingSocketTable::iterator x = mPendingLoginTable.find(pSocket);
@@ -289,40 +289,40 @@ void NetworkServer::TryLogin(Lepra::GameSocket* pSocket, Packet* pPacket, int pD
 	// TODO: add timeout for sockets in pending state.
 }
 
-RemoteStatus NetworkServer::ManageLogin(Lepra::GameSocket* pSocket, Packet* pPacket)
+RemoteStatus NetworkServer::ManageLogin(GameSocket* pSocket, Packet* pPacket)
 {
 	Message* lMessage = pPacket->GetMessageAt(0);
 	MessageLoginRequest* lLoginMessage = (MessageLoginRequest*)lMessage;
-	Lepra::UnicodeString lPacketLoginName;
+	wstr lPacketLoginName;
 	lLoginMessage->GetLoginName(lPacketLoginName);
-	Lepra::UnicodeString lLoginName(lPacketLoginName);
+	wstr lLoginName(lPacketLoginName);
 	UserAccount::AccountId lAccountId;
 	RemoteStatus lStatus = QueryLogin(lLoginName, lLoginMessage, lAccountId);
 	switch (lStatus)
 	{
 		case REMOTE_OK:
 		{
-			mLog.Info(_T("Logging in user ")+Lepra::UnicodeStringUtility::ToCurrentCode(lLoginName)+_T("."));
+			mLog.Info(_T("Logging in user ")+wstrutil::ToCurrentCode(lLoginName)+_T("."));
 			Login(lLoginName, lAccountId, pSocket, pPacket);
 		}
 		break;
 		case REMOTE_LOGIN_ALREADY:
 		{
-			mLog.Warning(_T("User ")+Lepra::UnicodeStringUtility::ToCurrentCode(lLoginName)+_T(" already logged in."));
+			mLog.Warning(_T("User ")+wstrutil::ToCurrentCode(lLoginName)+_T(" already logged in."));
 			Parent::SendStatusMessage(pSocket, 0, lStatus, L"You have already been logged in.", pPacket);
 			DropSocket(pSocket);
 		}
 		break;
 		case REMOTE_LOGIN_ERRONOUS_DATA:
 		{
-			mLog.Warning(_T("User ")+Lepra::UnicodeStringUtility::ToCurrentCode(lLoginName)+_T(" attempted with wrong username or password."));
+			mLog.Warning(_T("User ")+wstrutil::ToCurrentCode(lLoginName)+_T(" attempted with wrong username or password."));
 			Parent::SendStatusMessage(pSocket, 0, lStatus, L"Wrong username or password. Try again.", pPacket);
 			DropSocket(pSocket);
 		}
 		break;
 		case REMOTE_LOGIN_BAN:
 		{
-			mLog.Warning(_T("User ")+Lepra::UnicodeStringUtility::ToCurrentCode(lLoginName)+_T(" tried logging in, but was banned."));
+			mLog.Warning(_T("User ")+wstrutil::ToCurrentCode(lLoginName)+_T(" tried logging in, but was banned."));
 			Parent::SendStatusMessage(pSocket, 0, lStatus, L"Sorry, you are banned. Try again later.", pPacket);
 			DropSocket(pSocket);
 		}
@@ -330,7 +330,7 @@ RemoteStatus NetworkServer::ManageLogin(Lepra::GameSocket* pSocket, Packet* pPac
 		case REMOTE_NO_CONNECTION:	// TODO: check me out!
 		case REMOTE_UNKNOWN:
 		{
-			mLog.Error(_T("An unknown error occurred when user ")+Lepra::UnicodeStringUtility::ToCurrentCode(lLoginName)+_T(" tried logging in."));
+			mLog.Error(_T("An unknown error occurred when user ")+wstrutil::ToCurrentCode(lLoginName)+_T(" tried logging in."));
 			Parent::SendStatusMessage(pSocket, 0, lStatus, L"Unknown login error, please contact support.", pPacket);
 			DropSocket(pSocket);
 		}
@@ -339,11 +339,11 @@ RemoteStatus NetworkServer::ManageLogin(Lepra::GameSocket* pSocket, Packet* pPac
 	return (lStatus);
 }
 
-RemoteStatus NetworkServer::QueryLogin(const Lepra::UnicodeString& pLoginName, MessageLoginRequest* pLoginRequest, UserAccount::AccountId& pAccountId)
+RemoteStatus NetworkServer::QueryLogin(const wstr& pLoginName, MessageLoginRequest* pLoginRequest, UserAccount::AccountId& pAccountId)
 {
 	RemoteStatus lLoginResult = REMOTE_UNKNOWN;
 
-	UserConnection* lAccount = Lepra::HashUtil::FindMapObject(mLoggedInNameUserTable, pLoginName);
+	UserConnection* lAccount = HashUtil::FindMapObject(mLoggedInNameUserTable, pLoginName);
 	if (lAccount == 0)
 	{
 		MangledPassword lMangledPassword = pLoginRequest->GetPassword();
@@ -380,7 +380,7 @@ RemoteStatus NetworkServer::QueryLogin(const Lepra::UnicodeString& pLoginName, M
 	return (lLoginResult);
 }
 
-void NetworkServer::Login(const Lepra::UnicodeString& pLoginName, UserAccount::AccountId pAccountId, Lepra::GameSocket* pSocket, Packet* pPacket)
+void NetworkServer::Login(const wstr& pLoginName, UserAccount::AccountId pAccountId, GameSocket* pSocket, Packet* pPacket)
 {
 	UserConnection* lUser = mUserConnectionFactory->AllocateUserConnection();
 	lUser->SetLoginName(pLoginName);
@@ -421,7 +421,7 @@ bool NetworkServer::RemoveUser(UserAccount::AccountId pAccountId, bool pDestroy)
 	}
 	if (lUser)
 	{
-		Lepra::GameSocket* lSocket = lUser->GetSocket();
+		GameSocket* lSocket = lUser->GetSocket();
 		if (lSocket)
 		{
 			lUser->SetSocket(0);
@@ -439,13 +439,13 @@ bool NetworkServer::RemoveUser(UserAccount::AccountId pAccountId, bool pDestroy)
 void NetworkServer::KillDeadSockets()
 {
 	{
-		Lepra::ScopeLock lLock(&mLock);
+		ScopeLock lLock(&mLock);
 		AccountIdSet::iterator x = mDropUserList.begin();
 		for (; x != mDropUserList.end(); ++x)
 		{
 			UserAccount::AccountId lUserAccountId = *x;
 			mLog.Infof(_T("Kicking user ID %i in drop zone silently."), lUserAccountId);
-			Disconnect(lUserAccountId, Lepra::EmptyString, false);
+			Disconnect(lUserAccountId, EmptyString, false);
 		}
 		mDropUserList.clear();
 	}
@@ -459,14 +459,14 @@ void NetworkServer::KillDeadSockets()
 		// Kill all old and dead connections.
 		while (!mSocketTimeoutTable.empty())
 		{
-			Lepra::GameSocket* lSocket = *mSocketTimeoutTable.begin();
+			GameSocket* lSocket = *mSocketTimeoutTable.begin();
 			SocketUserTable::iterator y = mSocketUserTable.find(lSocket);
 			if (y != mSocketUserTable.end())
 			{
 				UserConnection* lUser = y->second;
 				UserAccount::AccountId lUserAccountId = lUser->GetAccountId();
 				mLog.Infof(_T("Dropping user %s (ID %i) due to network keepalive timeout."),
-					Lepra::UnicodeStringUtility::ToCurrentCode(lUser->GetLoginName()).c_str(), lUserAccountId);
+					wstrutil::ToCurrentCode(lUser->GetLoginName()).c_str(), lUserAccountId);
 				Disconnect(lUserAccountId, _T("Network timeout"), true);
 			}
 			else
@@ -491,7 +491,7 @@ void NetworkServer::KillDeadSockets()
 	}
 }
 
-void NetworkServer::DropSocket(Lepra::GameSocket* pSocket)
+void NetworkServer::DropSocket(GameSocket* pSocket)
 {
 	pSocket->SendBuffer();
 	mSocketTimeoutTable.erase(pSocket);
@@ -501,13 +501,13 @@ void NetworkServer::DropSocket(Lepra::GameSocket* pSocket)
 
 UserConnection* NetworkServer::GetUser(UserAccount::AccountId pAccountId)
 {
-	UserConnection* lUser = Lepra::HashUtil::FindMapObject(mLoggedInIdUserTable, pAccountId);
+	UserConnection* lUser = HashUtil::FindMapObject(mLoggedInIdUserTable, pAccountId);
 	return (lUser);
 }
 
 
 
-bool NetworkServer::SendStatusMessage(UserAccount::AccountId pAccountId, Lepra::int32 pInteger, RemoteStatus pStatus, Lepra::UnicodeString pMessage, Packet* pPacket)
+bool NetworkServer::SendStatusMessage(UserAccount::AccountId pAccountId, int32 pInteger, RemoteStatus pStatus, wstr pMessage, Packet* pPacket)
 {
 	pPacket->Release();
 	MessageStatus* lStatus = (MessageStatus*)mPacketFactory->GetMessageFactory()->Allocate(MESSAGE_TYPE_STATUS);
@@ -519,16 +519,16 @@ bool NetworkServer::SendStatusMessage(UserAccount::AccountId pAccountId, Lepra::
 
 
 
-void NetworkServer::OnCloseSocket(Lepra::GameSocket* pSocket)
+void NetworkServer::OnCloseSocket(GameSocket* pSocket)
 {
-	Lepra::ScopeLock lLock(&mLock);
+	ScopeLock lLock(&mLock);
 	SocketUserTable::iterator x = mSocketUserTable.find(pSocket);
 	if (x != mSocketUserTable.end())
 	{
 		UserConnection* lUser = x->second;
 		UserAccount::AccountId lUserAccountId = lUser->GetAccountId();
 		mLog.Infof(_T("Placing user %s (ID %i) in drop zone (due to OOB? kill). Will drop next frame."),
-			Lepra::UnicodeStringUtility::ToCurrentCode(lUser->GetLoginName()).c_str(), lUserAccountId);
+			wstrutil::ToCurrentCode(lUser->GetLoginName()).c_str(), lUserAccountId);
 		RemoveUser(lUserAccountId, false);
 		mDropUserList.insert(lUserAccountId);
 	}

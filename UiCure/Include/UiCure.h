@@ -23,8 +23,8 @@ namespace UiCure
 
 
 
-// Two global functions that are responsible of initializing and cleaning up
-// all global (static) instances.
+using namespace Lepra;
+
 void Init();
 void Shutdown();
 void SetDefault(Cure::RuntimeVariableScope* pSettings);

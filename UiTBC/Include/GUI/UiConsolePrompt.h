@@ -30,7 +30,7 @@ public:
 	void SetInputComponent(TextField* pInputComponent);
 
 protected:
-	bool OnChar(Lepra::tchar pChar);
+	bool OnChar(tchar pChar);
 	bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
 	bool OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode);
 	void SetFocus(bool pFocus);
@@ -38,14 +38,14 @@ protected:
 	void ReleaseWaitCharThread();
 	void Backspace(size_t pCount);
 	void EraseText(size_t pCount);
-	void PrintPrompt(const Lepra::String& pPrompt, const Lepra::String& pInputText, size_t pEditIndex);
+	void PrintPrompt(const str& pPrompt, const str& pInputText, size_t pEditIndex);
 
 	TextField* mParent;
 	bool mIsCtrlPressed;
 	bool mIsAltPressed;
 	bool mIsShiftPressed;
-	Lepra::Lock mLock;
-	Lepra::Semaphore mSemaphore;
+	Lock mLock;
+	Semaphore mSemaphore;
 	std::list<int> mBufferedChars;
 };
 

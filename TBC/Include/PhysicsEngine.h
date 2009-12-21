@@ -9,6 +9,7 @@
 #include <vector>
 #include "../../Lepra/Include/Log.h"
 #include "../../Lepra/Include/Vector3D.h"
+#include "../Include/TBC.h"
 
 
 
@@ -85,7 +86,7 @@ private:
 		EngineMode mMode;
 	};
 
-	Lepra::Vector3DF GetRotorLiftForce(TBC::PhysicsManager* pPhysicsManager, ChunkyBoneGeometry* pGeometry, const EngineNode& pEngineNode) const;
+	Vector3DF GetRotorLiftForce(TBC::PhysicsManager* pPhysicsManager, ChunkyBoneGeometry* pGeometry, const EngineNode& pEngineNode) const;
 	void ApplyTorque(TBC::PhysicsManager* pPhysicsManager, float pFrameTime, ChunkyBoneGeometry* pGeometry, const EngineNode& pEngineNode);
 
 	typedef std::vector<EngineNode> EngineNodeArray;

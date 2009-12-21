@@ -19,7 +19,7 @@ namespace Life
 
 
 
-ClientLoginView::ClientLoginView(ClientLoginObserver* pLoginObserver, const Lepra::String& pErrorMessage):
+ClientLoginView::ClientLoginView(ClientLoginObserver* pLoginObserver, const str& pErrorMessage):
 	View(_T("Login"), new UiTbc::GridLayout(7, 1)),
 	mLoginObserver(pLoginObserver)
 {
@@ -28,21 +28,21 @@ ClientLoginView::ClientLoginView(ClientLoginObserver* pLoginObserver, const Lepr
 	if (!pErrorMessage.empty())
 	{
 		((UiTbc::GridLayout*)GetClientRectComponent()->GetLayout())->InsertRow(0);
-		AddLabel(pErrorMessage, Lepra::RED);
+		AddLabel(pErrorMessage, RED);
 	}
 
-	AddLabel(_T("Username"), Lepra::WHITE);
+	AddLabel(_T("Username"), WHITE);
 
-	Lepra::String lUserName = CURE_RTVAR_GETSET(mLoginObserver->GetVariableScope(), RTVAR_LOGIN_USERNAME, _T("Car0"));
+	str lUserName = CURE_RTVAR_GETSET(mLoginObserver->GetVariableScope(), RTVAR_LOGIN_USERNAME, _T("Car0"));
 	AddTextField(lUserName, _T("User"));
 
-	AddLabel(_T("Password"), Lepra::WHITE);
+	AddLabel(_T("Password"), WHITE);
 
 	AddTextField(_T("CarPassword"), _T("Pass"))->SetPasswordCharacter(_T('*'));
 
-	AddLabel(_T("Server"), Lepra::WHITE);
+	AddLabel(_T("Server"), WHITE);
 
-	Lepra::String lServerName = _T("rg.servegame.org:16650");
+	str lServerName = _T("rg.servegame.org:16650");
 	lServerName = CURE_RTVAR_GETSET(mLoginObserver->GetVariableScope(), RTVAR_LOGIN_SERVER, lServerName);
 	AddTextField(lServerName, _T("Server"));
 
@@ -61,12 +61,12 @@ void ClientLoginView::OnExit()
 void ClientLoginView::OnLogin(UiTbc::Button*)
 {
 	// Save user's login info.
-	Lepra::String lServer = ((UiTbc::TextField*)GetChild(_T("Server"), 0))->GetText();
+	str lServer = ((UiTbc::TextField*)GetChild(_T("Server"), 0))->GetText();
 
 	// Pick strings from UI.
-	Lepra::UnicodeString lUsername = Lepra::UnicodeStringUtility::ToOwnCode(((UiTbc::TextField*)GetChild(_T("User"), 0))->GetText());
+	wstr lUsername = wstrutil::ToOwnCode(((UiTbc::TextField*)GetChild(_T("User"), 0))->GetText());
 	UiTbc::TextField* lPasswordComponent = (UiTbc::TextField*)GetChild(_T("Pass"), 0);
-	Lepra::UnicodeString lReadablePassword = Lepra::UnicodeStringUtility::ToOwnCode(lPasswordComponent->GetText());
+	wstr lReadablePassword = wstrutil::ToOwnCode(lPasswordComponent->GetText());
 	lPasswordComponent->SetText(_T("?"));	// Clear out password traces in component.
 
 	// Convert into login format.

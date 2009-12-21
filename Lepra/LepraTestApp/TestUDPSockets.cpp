@@ -15,7 +15,7 @@
 
 using namespace Lepra;
 
-void ReportTestResult(const Lepra::LogDecorator& pLog, const String& pTestName, const String& pContext, bool pResult);
+void ReportTestResult(const Lepra::LogDecorator& pLog, const str& pTestName, const str& pContext, bool pResult);
 
 class ServerThread : public Thread
 {
@@ -60,10 +60,10 @@ void ServerThread::Run()
 
 	lSocket->WaitAvailable(0.5);
 
-	String lString;
+	str lString;
 	lReader.ReadLine(lString);
 
-//	printf("\nServer received \"%s\".", AnsiStringUtility::ToOwnCode(lString).c_str());
+//	printf("\nServer received \"%s\".", astrutil::ToOwnCode(lString).c_str());
 	
 	mTestOK = (lString == _T("Hi Server! I am Client!"));
 
@@ -124,10 +124,10 @@ void ClientThread::Run()
 		lSocket->Flush();
 
 		lSocket->WaitAvailable(0.5);
-		String lString;
+		str lString;
 		lReader.ReadLine(lString);
 
-	//	printf("Client received \"%s\".", AnsiStringUtility::ToOwnCode(lString).c_str());
+	//	printf("Client received \"%s\".", astrutil::ToOwnCode(lString).c_str());
 		
 		mTestOK = (lString == _T("Hi Client! I am Server!"));
 
@@ -141,7 +141,7 @@ void ClientThread::Run()
 
 bool TestUDPSockets(const LogDecorator& pAccount)
 {
-	String lContext;
+	str lContext;
 	bool lTestOk = Network::Start();
 
 	if (lTestOk)

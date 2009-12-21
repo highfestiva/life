@@ -40,7 +40,7 @@ public:
 	void AddPatch(UserPhysicalTerrainResource* pPatchResource);
 
 	void MarkAllDirty();
-	void MarkInUse(const Lepra::Vector3DF& pPosition, float pRadius);
+	void MarkInUse(const Vector3DF& pPosition, float pRadius);
 	void DeleteDirty();
 
 private:
@@ -58,7 +58,7 @@ private:
 
 	void Delete(bool pDirtyOnly);
 
-	typedef Lepra::HashTable<PatchId, PatchDirtyInfo> PatchTable;
+	typedef HashTable<PatchId, PatchDirtyInfo> PatchTable;
 	PatchTable* mPatchTable;
 };
 

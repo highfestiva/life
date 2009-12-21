@@ -79,27 +79,27 @@ public:
 	void SetChildIndex(int pParentBoneIndex, int pParentChildIndex, int pChildBoneIndex);
 	void AddChild(int pParentBoneIndex, int pChildBoneIndex);
 	int GetChildIndex(int pParentBoneIndex, int pParentChildIndex) const;
-	void SetOriginalBoneTransformation(int pBoneIndex, const Lepra::TransformationF& pTransformation, int pParentBoneIndex = -1);
-	const Lepra::TransformationF& GetOriginalBoneTransformation(int pBoneIndex) const;
+	void SetOriginalBoneTransformation(int pBoneIndex, const TransformationF& pTransformation, int pParentBoneIndex = -1);
+	const TransformationF& GetOriginalBoneTransformation(int pBoneIndex) const;
 	// Call this when the whole skeleton is complete.
 	bool FinalizeInit(TransformOperation pTransformOperation);
 
 	void Connect(BoneHierarchy* pParentBones, int pParentBoneIndex);
 
 	// Returns the current local transform.
-	const Lepra::TransformationF& GetBoneTransformation(int pBoneIndex) const;
-	void SetBoneTransformation(int pBoneIndex, const Lepra::TransformationF& pTransformation);
+	const TransformationF& GetBoneTransformation(int pBoneIndex) const;
+	void SetBoneTransformation(int pBoneIndex, const TransformationF& pTransformation);
 	// Returns the current transform relative to the root bone's origo,
 	// which is in object space.
-	const Lepra::TransformationF& GetBoneObjectTransformation(int pBoneIndex) const;
+	const TransformationF& GetBoneObjectTransformation(int pBoneIndex) const;
 	// Same as above, but relative to the original transform.
-	const Lepra::TransformationF& GetRelativeBoneTransformation(int pBoneIndex) const;
+	const TransformationF& GetRelativeBoneTransformation(int pBoneIndex) const;
 
 private:
 	friend class BoneAnimator;
 
 	void Transform(int pBoneIndex, TransformOperation pTransformOperation);
-	void UpdateBonesObjectTransformation(int pBoneIndex, const Lepra::TransformationF& pParentTransformation);
+	void UpdateBonesObjectTransformation(int pBoneIndex, const TransformationF& pParentTransformation);
 
 	int mBoneCount;
 	int mRootBoneIndex;
@@ -107,10 +107,10 @@ private:
 	BoneHierarchy* mParent;
 	int mParentBoneIndex;
 
-	Lepra::TransformationF* mOriginalBoneTransformation;
-	Lepra::TransformationF* mRelativeBoneTransformation;
-	Lepra::TransformationF* mCurrentBoneTransformation;
-	Lepra::TransformationF* mCurrentBoneObjectTransformation;
+	TransformationF* mOriginalBoneTransformation;
+	TransformationF* mRelativeBoneTransformation;
+	TransformationF* mCurrentBoneTransformation;
+	TransformationF* mCurrentBoneObjectTransformation;
 };
 
 
@@ -132,8 +132,8 @@ public:
 	// Functions used to setup the animation.
 	void SetDefaultMode(Mode pDefaultMode);
 	Mode GetDefaultMode() const;
-	void SetRootNodeName(const Lepra::String& pRootNodeName);
-	const Lepra::String& GetRootNodeName() const;
+	void SetRootNodeName(const str& pRootNodeName);
+	const str& GetRootNodeName() const;
 	void SetKeyframeCount(int pKeyframeCount, bool pUseSplines);
 	int GetKeyframeCount() const;
 	bool GetUseSplines() const;
@@ -141,23 +141,23 @@ public:
 	int GetBoneCount() const;
 	void SetTimeTag(int pKeyframe, float pTimeTag);
 	float GetTimeTag(int pKeyframe) const;
-	void SetBoneTransformation(int pKeyframe, int pBoneIndex, const Lepra::TransformationF& pTransformation);
-	const Lepra::TransformationF& GetBoneTransformation(int pKeyframe, int pBoneIndex) const;
+	void SetBoneTransformation(int pKeyframe, int pBoneIndex, const TransformationF& pTransformation);
+	const TransformationF& GetBoneTransformation(int pKeyframe, int pBoneIndex) const;
 
 	// pTransformation points to an array of transformations. One transformation per bone.
-	void GetAnimationState(Lepra::TransformationF* pTransformation, float pTime, Mode pMode);
-	void GetAnimationStateInterpolated(Lepra::TransformationF* pTransformation, float pTime, Mode pMode, float pFactor);
+	void GetAnimationState(TransformationF* pTransformation, float pTime, Mode pMode);
+	void GetAnimationStateInterpolated(TransformationF* pTransformation, float pTime, Mode pMode, float pFactor);
 
 private:
 	Mode mDefaultMode;
-	Lepra::String mRootNodeName;
+	str mRootNodeName;
 	int mKeyframeCount;
 	int mBoneCount;
 
 	// mTransformation[KeyframeCount][BoneCount]
 	// mSpline[BoneCount]
-	Lepra::TransformationF** mTransformation;
-	Lepra::CubicSpline* mSpline;
+	TransformationF** mTransformation;
+	CubicSpline* mSpline;
 	bool mUseSplines;
 
 	// Time tag for each key frame. The first one is always 0.
@@ -174,9 +174,9 @@ public:
 	BoneAnimator(BoneHierarchy* pBones);
 	~BoneAnimator();
 
-	void AddAnimation(const Lepra::String& pName, BoneAnimation* pAnimation);
+	void AddAnimation(const str& pName, BoneAnimation* pAnimation);
 
-	void StartAnimation(const Lepra::String& pAnimationName, float pBlendingTime, BoneAnimation::Mode pMode = BoneAnimation::MODE_PLAY_DEFAULT);
+	void StartAnimation(const str& pAnimationName, float pBlendingTime, BoneAnimation::Mode pMode = BoneAnimation::MODE_PLAY_DEFAULT);
 
 	// Steps all animations.
 	void Step(float pStepTime);
@@ -193,7 +193,7 @@ private:
 		BoneAnimation::Mode mMode;
 	};
 
-	typedef Lepra::HashTable<Lepra::String, BoneAnimation*, std::hash<Lepra::String>, 16> AnimTable;
+	typedef HashTable<str, BoneAnimation*, std::hash<str>, 16> AnimTable;
 	typedef std::list<AnimData> AnimList;
 
 	BoneHierarchy* mBones;

@@ -1,5 +1,5 @@
 /*
-	Lepra::File:   TerrainTextureGenerator.cpp
+	File:   TerrainTextureGenerator.cpp
 	Class:  TerrainTextureGenerator
 	Author: Alexander Hugestrand
 	Copyright (c) 2002-2009, Righteous Games
@@ -23,7 +23,7 @@ TerrainTextureGenerator::~TerrainTextureGenerator()
 	}
 }
 
-bool TerrainTextureGenerator::AddNewRange(float pMaxLevel, float pFadeRange, Lepra::Canvas* pImages,
+bool TerrainTextureGenerator::AddNewRange(float pMaxLevel, float pFadeRange, Canvas* pImages,
 	float* pMinNormalY, float* pMaxNormalY, float* pAngularFadeRange, int pNumImages)
 {
 	if (mRangeList.empty() == true)
@@ -46,7 +46,7 @@ bool TerrainTextureGenerator::AddNewRange(float pMaxLevel, float pFadeRange, Lep
 	}
 }
 
-/*void TerrainTextureGenerator::RenderTexture(const TerrainPatch& pPatch, Lepra::Canvas& pCanvas)
+/*void TerrainTextureGenerator::RenderTexture(const TerrainPatch& pPatch, Canvas& pCanvas)
 {
 	pCanvas.CreateBuffer();
 	pCanvas.Clear();
@@ -54,8 +54,8 @@ bool TerrainTextureGenerator::AddNewRange(float pMaxLevel, float pFadeRange, Lep
 	float lOneOverWidth = 1.0f / ((float)pCanvas.GetWidth() - 1);
 	float lOneOverHeight = 1.0f / ((float)pCanvas.GetHeight() - 1);
 
-	Lepra::Vector3DF* lPos = 0;
-	Lepra::Vector3DF* lNormal = 0;
+	Vector3DF* lPos = 0;
+	Vector3DF* lNormal = 0;
 
 	for (unsigned y = 0; y < pCanvas.GetHeight(); y++)
 	{
@@ -65,8 +65,8 @@ bool TerrainTextureGenerator::AddNewRange(float pMaxLevel, float pFadeRange, Lep
 		{
 			float lU = (float)x * lOneOverWidth;
 
-			Lepra::Vector3DF lPos;
-			Lepra::Vector3DF lNormal;
+			Vector3DF lPos;
+			Vector3DF lNormal;
 
 			pPatch.GetPosAndNormal(lU, lV, lPos, lNormal);
 
@@ -75,7 +75,7 @@ bool TerrainTextureGenerator::AddNewRange(float pMaxLevel, float pFadeRange, Lep
 			float b = 0;
 			GetHeightDependentRGB(lPos, lNormal, lU, lV, r, g, b);
 
-			Lepra::Color lColor((Lepra::uint8)floor(r * 255.0f), (Lepra::uint8)floor(g * 255.0f), (Lepra::uint8)floor(b * 255.0f));
+			Color lColor((uint8)floor(r * 255.0f), (uint8)floor(g * 255.0f), (uint8)floor(b * 255.0f));
 			pCanvas.SetPixelColor(x, y, lColor);
 		}
 	}
@@ -90,8 +90,8 @@ bool TerrainTextureGenerator::AddNewRange(float pMaxLevel, float pFadeRange, Lep
 	}
 }*/
 
-void TerrainTextureGenerator::GetHeightDependentRGB(const Lepra::Vector3DF& pPos,
-													const Lepra::Vector3DF& pNormal,
+void TerrainTextureGenerator::GetHeightDependentRGB(const Vector3DF& pPos,
+													const Vector3DF& pNormal,
 													float pU, float pV,
 													float& r, float& g, float& b)
 {
@@ -171,13 +171,13 @@ void TerrainTextureGenerator::GetHeightDependentRGB(const Lepra::Vector3DF& pPos
 }
 
 void TerrainTextureGenerator::GetAngleDependentRGB(Range* pRange, 
-												   const Lepra::Vector3DF& pNormal, 
+												   const Vector3DF& pNormal, 
 												   float pU, float pV,
 												   float& r, float& g, float& b)
 {
 	for (int i = 0; i < pRange->mNumImages; i++)
 	{
-		Lepra::Color lColor;
+		Color lColor;
 		pRange->mImages[i].GetPixelColor((unsigned)(pU * (float)(pRange->mImages[i].GetWidth() - 1)), 
 											 (unsigned)(pV * (float)(pRange->mImages[i].GetHeight() - 1)),
 											 lColor);
@@ -231,7 +231,7 @@ void TerrainTextureGenerator::GetAngleDependentRGB(Range* pRange,
 
 TerrainTextureGenerator::Range::Range(float pMaxLevel,
 									  float pFadeRange,
-									  Lepra::Canvas* pImages, 
+									  Canvas* pImages, 
 									  float* pMinNormalY, 
 									  float* pMaxNormalY, 
 									  float* pAngularFadeRange,
@@ -244,7 +244,7 @@ TerrainTextureGenerator::Range::Range(float pMaxLevel,
 	mFadeRange = pFadeRange;
 	mNumImages = pNumImages;
 
-	mImages = new Lepra::Canvas[mNumImages];
+	mImages = new Canvas[mNumImages];
 	mMinNormalY = new float[mNumImages];
 	mMaxNormalY = new float[mNumImages];
 	mAngularFadeRange = new float[mNumImages];
@@ -261,7 +261,7 @@ TerrainTextureGenerator::Range::Range(float pMaxLevel,
 TerrainTextureGenerator::Range::Range(float pMinLevel,
 									  float pMaxLevel,
 									  float pFadeRange,
-									  Lepra::Canvas* pImages, 
+									  Canvas* pImages, 
 									  float* pMinNormalY, 
 									  float* pMaxNormalY, 
 									  float* pAngularFadeRange,
@@ -272,7 +272,7 @@ TerrainTextureGenerator::Range::Range(float pMinLevel,
 	mFadeRange = pFadeRange;
 	mNumImages = pNumImages;
 
-	mImages = new Lepra::Canvas[mNumImages];
+	mImages = new Canvas[mNumImages];
 	mMinNormalY = new float[mNumImages];
 	mMaxNormalY = new float[mNumImages];
 	mAngularFadeRange = new float[mNumImages];

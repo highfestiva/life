@@ -30,29 +30,29 @@ public:
 	DesktopWindow(UiLepra::InputManager* pInputManager,
 		Painter* pPainter,
 		Layout* pLayout = 0,
-		const Lepra::tchar* pImageDefinitionFile = 0,
-		const Lepra::tchar* pArchive = 0);
+		const tchar* pImageDefinitionFile = 0,
+		const tchar* pArchive = 0);
 	DesktopWindow(UiLepra::InputManager* pInputManager,
 		Painter* pPainter,
-		const Lepra::Color& pColor,
+		const Color& pColor,
 		Layout* pLayout = 0,
-		const Lepra::tchar* pImageDefinitionFile = 0,
-		const Lepra::tchar* pArchive = 0);
+		const tchar* pImageDefinitionFile = 0,
+		const tchar* pArchive = 0);
 	DesktopWindow(UiLepra::InputManager* pInputManager,
 		Painter* pPainter,
-		const Lepra::Color& pTopLeftColor,
-		const Lepra::Color& pTopRightColor,
-		const Lepra::Color& pBottomRightColor,
-		const Lepra::Color& pBottomLeftColor,
+		const Color& pTopLeftColor,
+		const Color& pTopRightColor,
+		const Color& pBottomRightColor,
+		const Color& pBottomLeftColor,
 		Layout* pLayout = 0,
-		const Lepra::tchar* pImageDefinitionFile = 0,
-		const Lepra::tchar* pArchive = 0);
+		const tchar* pImageDefinitionFile = 0,
+		const tchar* pArchive = 0);
 	DesktopWindow(UiLepra::InputManager* pInputManager,
 		Painter* pPainter,
 		Painter::ImageID pImageID,
 		Layout* pLayout = 0,
-		const Lepra::tchar* pImageDefinitionFile = 0,
-		const Lepra::tchar* pArchive = 0);
+		const tchar* pImageDefinitionFile = 0,
+		const tchar* pArchive = 0);
 
 	virtual ~DesktopWindow();
 
@@ -81,7 +81,7 @@ public:
 	virtual void Repaint(Painter* pPainter = 0);
 	virtual void RepaintChild(Component* pChild, Painter* pPainter);
 
-	virtual bool OnChar(Lepra::tchar pChar);
+	virtual bool OnChar(tchar pChar);
 	virtual bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
 	virtual bool OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode);
 	virtual bool OnDoubleClick();
@@ -105,7 +105,7 @@ private:
 	void OnButton2(UiLepra::InputElement* pElement);
 	void OnButton3(UiLepra::InputElement* pElement);
 
-	void Init(const Lepra::tchar* pImageDefinitionFile, const Lepra::tchar* pArchive);
+	void Init(const tchar* pImageDefinitionFile, const tchar* pArchive);
 	void ClampMouse(int& x, int& y);
 
 	void PurgeDeleted();
@@ -121,7 +121,7 @@ private:
 	std::list<Cleaner*> mCleanerList;
 	ComponentList mDeleteQueue;
 
-	Lepra::PixelRect mMouseArea;
+	PixelRect mMouseArea;
 
 	int mMouseX;
 	int mMouseY;

@@ -37,13 +37,13 @@ FileArchive::~FileArchive()
 	CloseArchive();
 }
 
-IOError FileArchive::OpenArchive(const String& pArchiveFileName, IOType pIOType)
+IOError FileArchive::OpenArchive(const str& pArchiveFileName, IOType pIOType)
 {
 	CloseArchive();
 
 	mArchiveFileName = pArchiveFileName;
 
-	String lTempFileName(pArchiveFileName + _T(".tmp"));
+	str lTempFileName(pArchiveFileName + _T(".tmp"));
 
 	mIOType = pIOType;
 
@@ -129,8 +129,8 @@ void FileArchive::CloseArchive()
 			if (mIOType == WRITE_ONLY)
 			{
 				// Replace the original file with the temp file.
-				remove(AnsiStringUtility::ToOwnCode(mArchiveFileName).c_str());
-				rename(AnsiStringUtility::ToOwnCode(mTempFileName).c_str(), AnsiStringUtility::ToOwnCode(mArchiveFileName).c_str());
+				remove(astrutil::ToOwnCode(mArchiveFileName).c_str());
+				rename(astrutil::ToOwnCode(mTempFileName).c_str(), astrutil::ToOwnCode(mArchiveFileName).c_str());
 			}
 		}
 	}
@@ -174,17 +174,17 @@ void FileArchive::CloseAndRemoveArchive()
 	if (mIOType == READ_ONLY)
 	{
 #ifdef LEPRA_POSIX
-		::remove(AnsiStringUtility::ToOwnCode(mArchiveFileName).c_str()); // TODO: Find a unicode-version of this.
+		::remove(astrutil::ToOwnCode(mArchiveFileName).c_str()); // TODO: Find a unicode-version of this.
 #else
-		::_wremove(UnicodeStringUtility::ToOwnCode(mArchiveFileName).c_str());
+		::_wremove(wstrutil::ToOwnCode(mArchiveFileName).c_str());
 #endif
 	}
 	else
 	{
 #ifdef LEPRA_POSIX
-		::remove(AnsiStringUtility::ToOwnCode(mTempFileName).c_str()); // TODO: Find a unicode-version of this.
+		::remove(astrutil::ToOwnCode(mTempFileName).c_str()); // TODO: Find a unicode-version of this.
 #else
-		::_wremove(UnicodeStringUtility::ToOwnCode(mTempFileName).c_str());
+		::_wremove(wstrutil::ToOwnCode(mTempFileName).c_str());
 #endif
 	}
 
@@ -208,7 +208,7 @@ void FileArchive::CloseAndRemoveArchive()
 		{
 			// Delete filename, since it was allocated and inserted 
 			// in FileOpen().
-			String& lFileName = lIter.GetKey();
+			str& lFileName = lIter.GetKey();
 			delete[] lFileName;
 		}*/
 
@@ -247,9 +247,9 @@ IOError FileArchive::ReadHeader(int64* pHeaderOffset, bool pFillFileNameList)
 
 		for (int i = 0; i < lFileCount; i++)
 		{
-			String lFileName;
+			str lFileName;
 			mArchiveFile.ReadLine(lFileName);
-			StringUtility::ToLower(lFileName);
+			strutil::ToLower(lFileName);
 
 			FileArchiveFile* lFile = new FileArchiveFile(lFileName);
 
@@ -302,7 +302,7 @@ IOError FileArchive::WriteHeader()
 	}
 
 	mArchiveFile.WriteData(&lHeaderOffset, sizeof(lHeaderOffset));
-	mArchiveFile.WriteString<Lepra::tchar>(_T("BUNT"));
+	mArchiveFile.WriteString<tchar>(_T("BUNT"));
 
 	return IO_OK;
 }
@@ -312,9 +312,9 @@ int FileArchive::GetFileCount()
 	return mFileNameTable.GetCount();
 }
 
-String FileArchive::FileFindFirst()
+str FileArchive::FileFindFirst()
 {
-	String lFileName;
+	str lFileName;
 
 	if (mIOType == READ_ONLY)
 	{
@@ -331,9 +331,9 @@ String FileArchive::FileFindFirst()
 	return lFileName;
 }
 
-String FileArchive::FileFindNext()
+str FileArchive::FileFindNext()
 {
-	String lFileName;
+	str lFileName;
 
 	if (mIOType == READ_ONLY)
 	{
@@ -348,7 +348,7 @@ String FileArchive::FileFindNext()
 	return lFileName;
 }
 
-int FileArchive::FileOpen(const String& pFileName)
+int FileArchive::FileOpen(const str& pFileName)
 {
 	if (pFileName == _T("") ||
 	   mIOType == INSERT_ONLY ||
@@ -357,8 +357,8 @@ int FileArchive::FileOpen(const String& pFileName)
 		return 0;
 	}
 
-	String lFileName(pFileName);
-	StringUtility::ToLower(lFileName);
+	str lFileName(pFileName);
+	strutil::ToLower(lFileName);
 
 	// Find the file...
 	FileNameTable::Iterator lIter = mFileNameTable.First();
@@ -367,7 +367,7 @@ int FileArchive::FileOpen(const String& pFileName)
 	{
 		FileArchiveFile* lTempFile = *lIter;
 
-		if (StringUtility::CompareIgnoreCase(lFileName, lTempFile->mFileName) == 0)
+		if (strutil::CompareIgnoreCase(lFileName, lTempFile->mFileName) == 0)
 		{
 			lFile = lTempFile;
 			break;
@@ -443,10 +443,10 @@ void FileArchive::FileClose(int pFileHandle)
 	}
 }
 
-bool FileArchive::FileExist(const String& pFileName)
+bool FileArchive::FileExist(const str& pFileName)
 {
-	String lFileName(pFileName);
-	StringUtility::ToLower(lFileName);
+	str lFileName(pFileName);
+	strutil::ToLower(lFileName);
 
 	return mFileNameTable.Find(lFileName) != mFileNameTable.End();
 }
@@ -603,7 +603,7 @@ void FileArchive::FileSeek(int64 pOffset, FileOrigin pOrigin, int pFileHandle)
 	}
 }
 
-IOError FileArchive::InsertArchive(const String& pArchiveFileName)
+IOError FileArchive::InsertArchive(const str& pArchiveFileName)
 {
 /*
 	if (mCallback)
@@ -756,7 +756,7 @@ void FileArchive::SetProgressCallback(ProgressCallback* pCallback)
 	mCallback = pCallback;
 }
 
-bool FileArchive::AddFile(const String& pFileName, const String& pDestFileName, 
+bool FileArchive::AddFile(const str& pFileName, const str& pDestFileName, 
 						  int pBufferSize, SizeUnit pUnit)
 {
 	if (mIOType != WRITE_ONLY && mIOType != WRITE_APPEND)
@@ -801,7 +801,7 @@ bool FileArchive::AddFile(const String& pFileName, const String& pDestFileName,
 	}
 }
 
-bool FileArchive::ExtractFile(const String& pFileName, const String& pDestFileName,
+bool FileArchive::ExtractFile(const str& pFileName, const str& pDestFileName,
 							  int pBufferSize, SizeUnit pUnit)
 {
 	if (mIOType != READ_ONLY)

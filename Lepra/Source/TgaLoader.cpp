@@ -19,7 +19,7 @@ namespace Lepra
 
 
 
-TgaLoader::Status TgaLoader::Load(const String& pFileName, Canvas& pCanvas)
+TgaLoader::Status TgaLoader::Load(const str& pFileName, Canvas& pCanvas)
 {
 	Status lStatus = STATUS_SUCCESS;
 	MetaFile lFile;
@@ -36,7 +36,7 @@ TgaLoader::Status TgaLoader::Load(const String& pFileName, Canvas& pCanvas)
 	return lStatus;
 }
 
-TgaLoader::Status TgaLoader::Save(const String& pFileName, const Canvas& pCanvas)
+TgaLoader::Status TgaLoader::Save(const str& pFileName, const Canvas& pCanvas)
 {
 	Status lStatus = STATUS_SUCCESS;
 	DiskFile lFile;
@@ -53,7 +53,7 @@ TgaLoader::Status TgaLoader::Save(const String& pFileName, const Canvas& pCanvas
 	return lStatus;
 }
 
-TgaLoader::Status TgaLoader::Load(const String& pArchiveName, const String& pFileName, Canvas& pCanvas)
+TgaLoader::Status TgaLoader::Load(const str& pArchiveName, const str& pFileName, Canvas& pCanvas)
 {
 	Status lStatus = STATUS_SUCCESS;
 	ArchiveFile lFile(pArchiveName);
@@ -70,7 +70,7 @@ TgaLoader::Status TgaLoader::Load(const String& pArchiveName, const String& pFil
 	return lStatus;
 }
 
-TgaLoader::Status TgaLoader::Save(const String& pArchiveName, const String& pFileName, const Canvas& pCanvas)
+TgaLoader::Status TgaLoader::Save(const str& pArchiveName, const str& pFileName, const Canvas& pCanvas)
 {
 	Status lStatus = STATUS_SUCCESS;
 	ArchiveFile lFile(pArchiveName);

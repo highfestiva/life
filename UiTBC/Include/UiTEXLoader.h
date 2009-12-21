@@ -1,12 +1,10 @@
 /*
-	Lepra::File:   TEXLoader.h
-	Class:  TEXLoader
 	Author: Alexander Hugestrand
 	Copyright (c) 2002-2009, Righteous Games
 
 	NOTES:
 
-	Loads tex-files into a Lepra::Canvas.
+	Loads tex-files into a Canvas.
 
 	TEX (Texture) is partially my own texture file format,
 	specially designed to use with games. It doesn't only store 
@@ -27,19 +25,29 @@
 	TEX uses Intel little endian byte ordering.
 */
 
-#ifndef UITEXLOADER_H
-#define UITEXLOADER_H
+
+
+#pragma once
 
 #include "../../Lepra/Include/DiskFile.h"
 #include "../../Lepra/Include/Canvas.h"
+#include "../Include/UiTBC.h"
+
+
 
 struct jpeg_decompress_struct;
 struct jpeg_compress_struct;
 
+
+
 namespace UiTbc
 {
 
+
+
 class Texture;
+
+
 
 class TEXLoader
 {
@@ -60,11 +68,11 @@ public:
 		STATUS_COMPRESSION_ERROR,
 	};
 
-	Status Load(const Lepra::String& pFileName, Texture& pTexture, bool pMergeColorAndAlpha);
-	Status Save(const Lepra::String& pFileName, const Texture& pTexture, bool pCompressed);
+	Status Load(const str& pFileName, Texture& pTexture, bool pMergeColorAndAlpha);
+	Status Save(const str& pFileName, const Texture& pTexture, bool pCompressed);
 
-	Status Load(const Lepra::String& pArchiveName, const Lepra::String& pFileName, Texture& pTexture, bool pMergeColorAndAlpha);
-	Status Save(const Lepra::String& pArchiveName, const Lepra::String& pFileName, const Texture& pTexture, bool pCompressed);
+	Status Load(const str& pArchiveName, const str& pFileName, Texture& pTexture, bool pMergeColorAndAlpha);
+	Status Save(const str& pArchiveName, const str& pFileName, const Texture& pTexture, bool pCompressed);
 
 protected:
 private:
@@ -100,18 +108,18 @@ private:
 		int mHeight;
 		int mNumMipMapLevels;
 
-		inline bool ReadHeader(Lepra::File* pFile)
+		inline bool ReadHeader(File* pFile)
 		{
-			if (pFile->ReadData(mTEXMagic, 4) != Lepra::IO_OK ||
-			   pFile->Read(mVersion) != Lepra::IO_OK)
+			if (pFile->ReadData(mTEXMagic, 4) != IO_OK ||
+			   pFile->Read(mVersion) != IO_OK)
 			{
 				return false;
 			}
 			
-			if (pFile->Read(mDataOffset) != Lepra::IO_OK ||
-			   pFile->Read(mDimensionPowers) != Lepra::IO_OK ||
-			   pFile->Read(mCompressionFlag) != Lepra::IO_OK ||
-			   pFile->Read(mMapFlags) != Lepra::IO_OK)
+			if (pFile->Read(mDataOffset) != IO_OK ||
+			   pFile->Read(mDimensionPowers) != IO_OK ||
+			   pFile->Read(mCompressionFlag) != IO_OK ||
+			   pFile->Read(mMapFlags) != IO_OK)
 			{
 				return false;
 			}
@@ -153,16 +161,16 @@ private:
 		}
 	};
 
-	Status ReadJpeg(Lepra::Canvas& pCanvas);
-	Status WriteJpeg(const Lepra::Canvas& pCanvas);
+	Status ReadJpeg(Canvas& pCanvas);
+	Status WriteJpeg(const Canvas& pCanvas);
 
 	void InitSourceManager(jpeg_decompress_struct* pCInfo);
 	void InitDestinationManager(jpeg_compress_struct* pCInfo);
 
-	Lepra::File* mLoadFile;
-	Lepra::File* mSaveFile;
+	File* mLoadFile;
+	File* mSaveFile;
 };
 
-} // End namespace.
 
-#endif
+
+}

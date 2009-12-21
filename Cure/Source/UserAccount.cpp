@@ -19,7 +19,7 @@ MangledPassword::MangledPassword()
 {
 }
 
-MangledPassword::MangledPassword(Lepra::UnicodeString& pMangledPassword)
+MangledPassword::MangledPassword(wstr& pMangledPassword)
 {
 	MangleAndSet(pMangledPassword);
 }
@@ -53,17 +53,17 @@ const std::string& MangledPassword::Get() const
 	return (mMangledPassword);
 }
 
-void MangledPassword::MangleAndSet(Lepra::UnicodeString& pPassword)
+void MangledPassword::MangleAndSet(wstr& pPassword)
 {
 	Clear();
 	mMangledPassword.resize(20);
 
 	const size_t lStringLength = pPassword.length();
-	std::vector<Lepra::uint8> lData(lStringLength*4 + 32);
-	Lepra::uint8* lRawData = &lData[0];
-	const int lRawDataSize = Lepra::PackerUnicodeString::Pack(lRawData, pPassword);
-	Lepra::uint8 lHashData[20];
-	Lepra::SHA1::Hash(lRawData, lRawDataSize, lHashData);
+	std::vector<uint8> lData(lStringLength*4 + 32);
+	uint8* lRawData = &lData[0];
+	const int lRawDataSize = PackerUnicodeString::Pack(lRawData, pPassword);
+	uint8 lHashData[20];
+	SHA1::Hash(lRawData, lRawDataSize, lHashData);
 	for (size_t x = 0; x < 20; ++x)
 	{
 		mMangledPassword[x] = lHashData[x];
@@ -94,7 +94,7 @@ LoginId::LoginId()
 {
 }
 
-LoginId::LoginId(const Lepra::UnicodeString& pUserName, const MangledPassword& pMangledPassword):
+LoginId::LoginId(const wstr& pUserName, const MangledPassword& pMangledPassword):
 	mUserName(pUserName),
 	mMangledPassword(pMangledPassword)
 {
@@ -104,7 +104,7 @@ LoginId::~LoginId()
 {
 }
 
-const Lepra::UnicodeString& LoginId::GetName() const
+const wstr& LoginId::GetName() const
 {
 	return (mUserName);
 }
@@ -129,7 +129,7 @@ UserAccount::UserAccount(const LoginId& pLoginId, AccountId pId):
 {
 }
 
-/*UserAccount::UserAccount(const Lepra::UnicodeString& pUserName, const MangledPassword& pMangledPassword):
+/*UserAccount::UserAccount(const wstr& pUserName, const MangledPassword& pMangledPassword):
 	LoginId(pUserName, pMangledPassword),
 	mStatus(STATUS_OK)
 {

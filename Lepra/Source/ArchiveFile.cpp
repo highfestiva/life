@@ -17,7 +17,7 @@ namespace Lepra
 
 
 
-ArchiveFile::ArchiveFile(const String& pArchiveName):
+ArchiveFile::ArchiveFile(const str& pArchiveName):
 	File(Endian::TYPE_BIG_ENDIAN, Endian::TYPE_BIG_ENDIAN, 0, 0),
 	mArchiveFileName(pArchiveName),
 	mIsZipArchive(false),
@@ -39,10 +39,10 @@ ArchiveFile::ArchiveFile(const String& pArchiveName):
 
 	mDataBuffer = new uint8[(int)mDataBufferSize];
 
-	mIsZipArchive = (StringUtility::CompareIgnoreCase(StringUtility::Right(mArchiveFileName, 4), _T(".zip")) == 0);
+	mIsZipArchive = (strutil::CompareIgnoreCase(strutil::Right(mArchiveFileName, 4), _T(".zip")) == 0);
 }
 
-ArchiveFile::ArchiveFile(const String& pArchiveName, Reader* pReader):
+ArchiveFile::ArchiveFile(const str& pArchiveName, Reader* pReader):
 	File(Endian::TYPE_BIG_ENDIAN, Endian::TYPE_BIG_ENDIAN, 0, 0),
 	mArchiveFileName(pArchiveName),
 	mIsZipArchive(false),
@@ -69,10 +69,10 @@ ArchiveFile::ArchiveFile(const String& pArchiveName, Reader* pReader):
 
 	mDataBuffer = new uint8[(int)mDataBufferSize];
 
-	mIsZipArchive = (StringUtility::CompareIgnoreCase(StringUtility::Right(mArchiveFileName, 4), _T(".zip")) == 0);
+	mIsZipArchive = (strutil::CompareIgnoreCase(strutil::Right(mArchiveFileName, 4), _T(".zip")) == 0);
 }
 
-ArchiveFile::ArchiveFile(const String& pArchiveName, Writer* pWriter):
+ArchiveFile::ArchiveFile(const str& pArchiveName, Writer* pWriter):
 	File(Endian::TYPE_BIG_ENDIAN, Endian::TYPE_BIG_ENDIAN, 0, 0),
 	mArchiveFileName(pArchiveName),
 	mIsZipArchive(false),
@@ -99,10 +99,10 @@ ArchiveFile::ArchiveFile(const String& pArchiveName, Writer* pWriter):
 
 	mDataBuffer = new uint8[(int)mDataBufferSize];
 
-	mIsZipArchive = (StringUtility::CompareIgnoreCase(StringUtility::Right(mArchiveFileName, 4), _T(".zip")) == 0);
+	mIsZipArchive = (strutil::CompareIgnoreCase(strutil::Right(mArchiveFileName, 4), _T(".zip")) == 0);
 }
 
-ArchiveFile::ArchiveFile(const String& pArchiveName, Reader* pReader, Writer* pWriter):
+ArchiveFile::ArchiveFile(const str& pArchiveName, Reader* pReader, Writer* pWriter):
 	File(Endian::TYPE_BIG_ENDIAN, Endian::TYPE_BIG_ENDIAN, 0, 0),
 	mArchiveFileName(pArchiveName),
 	mIsZipArchive(false),
@@ -134,7 +134,7 @@ ArchiveFile::ArchiveFile(const String& pArchiveName, Reader* pReader, Writer* pW
 
 	mDataBuffer = new uint8[(int)mDataBufferSize];
 
-	mIsZipArchive = (StringUtility::CompareIgnoreCase(StringUtility::Right(mArchiveFileName, 4), _T(".zip")) == 0);
+	mIsZipArchive = (strutil::CompareIgnoreCase(strutil::Right(mArchiveFileName, 4), _T(".zip")) == 0);
 }
 
 ArchiveFile::~ArchiveFile()
@@ -144,14 +144,14 @@ ArchiveFile::~ArchiveFile()
 	delete[] mDataBuffer;
 }
 
-void ArchiveFile::ExtractPathAndFileName(const String& pFileName)
+void ArchiveFile::ExtractPathAndFileName(const str& pFileName)
 {
 	Path::SplitPath(pFileName, mPath, mFileName);
 	InputStream::SetName(mFileName);
 	OutputStream::SetName(mFileName);
 }
 
-bool ArchiveFile::Open(const String& pFileName, OpenMode pMode, Endian::EndianType pEndian)
+bool ArchiveFile::Open(const str& pFileName, OpenMode pMode, Endian::EndianType pEndian)
 {
 	Close();
 
@@ -210,7 +210,7 @@ bool ArchiveFile::Open(const String& pFileName, OpenMode pMode, Endian::EndianTy
 	return lOK;
 }
 
-bool ArchiveFile::OpenForReading(const String& pFileName, OpenMode pMode)
+bool ArchiveFile::OpenForReading(const str& pFileName, OpenMode pMode)
 {
 	bool lOK = (mArchive.OpenArchive(mArchiveFileName, FileArchive::READ_ONLY) == IO_OK);
 
@@ -233,7 +233,7 @@ bool ArchiveFile::OpenForReading(const String& pFileName, OpenMode pMode)
 	return lOK;
 }
 
-bool ArchiveFile::OpenZipForReading(const String& pFileName, OpenMode pMode)
+bool ArchiveFile::OpenZipForReading(const str& pFileName, OpenMode pMode)
 {
 	bool lOK = (mZipArchive.OpenArchive(mArchiveFileName, ZipArchive::READ_ONLY) == IO_OK);
 
@@ -258,7 +258,7 @@ bool ArchiveFile::OpenZipForReading(const String& pFileName, OpenMode pMode)
 	return lOK;
 }
 
-bool ArchiveFile::OpenForWriting(const String& pFileName, OpenMode pMode)
+bool ArchiveFile::OpenForWriting(const str& pFileName, OpenMode pMode)
 {
 	bool lOK = true;
 
@@ -269,7 +269,7 @@ bool ArchiveFile::OpenForWriting(const String& pFileName, OpenMode pMode)
 	FileArchive lOriginal;
 	lOK = (lOriginal.OpenArchive(mArchiveFileName, FileArchive::READ_ONLY) == IO_OK);
 
-	String lTempFile;
+	str lTempFile;
 
 	if (lOK == true)
 	{
@@ -277,7 +277,7 @@ bool ArchiveFile::OpenForWriting(const String& pFileName, OpenMode pMode)
 		{
 			// The file exists in the archive, thus we have to remove or extract it.
 			// First generate a temporary file name for the target archive.
-			String lTempName = DiskFile::GenerateUniqueFileName(mPath);
+			str lTempName = DiskFile::GenerateUniqueFileName(mPath);
 			lOK = (mArchive.OpenArchive(lTempName, FileArchive::WRITE_ONLY) == IO_OK);
 
 			if (lOK == true)
@@ -358,7 +358,7 @@ bool ArchiveFile::OpenForWriting(const String& pFileName, OpenMode pMode)
 	return lOK;
 }
 
-bool ArchiveFile::OpenZipForWriting(const String& pFileName, OpenMode pMode)
+bool ArchiveFile::OpenZipForWriting(const str& pFileName, OpenMode pMode)
 {
 	bool lOK = true;
 
@@ -369,7 +369,7 @@ bool ArchiveFile::OpenZipForWriting(const String& pFileName, OpenMode pMode)
 	ZipArchive lOriginal;
 	lOK = (lOriginal.OpenArchive(mArchiveFileName, ZipArchive::READ_ONLY) == IO_OK);
 
-	String lTempFile;
+	str lTempFile;
 
 	if (lOK == true)
 	{
@@ -377,7 +377,7 @@ bool ArchiveFile::OpenZipForWriting(const String& pFileName, OpenMode pMode)
 		{
 			// The file exists in the archive, thus we have to remove or extract it.
 			// First generate a temporary file name for the target archive.
-			String lTempName = DiskFile::GenerateUniqueFileName(mPath);
+			str lTempName = DiskFile::GenerateUniqueFileName(mPath);
 			lOK = (mZipArchive.OpenArchive(lTempName, ZipArchive::WRITE_ONLY) == IO_OK);
 
 			if (lOK == true)
@@ -491,13 +491,13 @@ void ArchiveFile::Close()
 	mDataSize = 0;
 }
 
-void ArchiveFile::CopyArchiveFiles(FileArchive& pSource, FileArchive& pDest, const String& pExceptThisFile)
+void ArchiveFile::CopyArchiveFiles(FileArchive& pSource, FileArchive& pDest, const str& pExceptThisFile)
 {
-	String lFileName = pSource.FileFindFirst();
+	str lFileName = pSource.FileFindFirst();
 	
 	while (lFileName != _T(""))
 	{
-		if (StringUtility::CompareIgnoreCase(pExceptThisFile, lFileName) != 0)
+		if (strutil::CompareIgnoreCase(pExceptThisFile, lFileName) != 0)
 		{
 			CopyFileBetweenArchives(pSource, pDest, lFileName);
 		}
@@ -506,13 +506,13 @@ void ArchiveFile::CopyArchiveFiles(FileArchive& pSource, FileArchive& pDest, con
 	}
 }
 
-void ArchiveFile::CopyZipArchiveFiles(ZipArchive& pSource, ZipArchive& pDest, const String& pExceptThisFile)
+void ArchiveFile::CopyZipArchiveFiles(ZipArchive& pSource, ZipArchive& pDest, const str& pExceptThisFile)
 {
-	String lFileName = pSource.FileFindFirst();
+	str lFileName = pSource.FileFindFirst();
 	
 	while (lFileName != _T(""))
 	{
-		if (StringUtility::CompareIgnoreCase(pExceptThisFile, lFileName) != 0)
+		if (strutil::CompareIgnoreCase(pExceptThisFile, lFileName) != 0)
 		{
 			CopyFileBetweenZipArchives(pSource, pDest, lFileName);
 		}
@@ -521,7 +521,7 @@ void ArchiveFile::CopyZipArchiveFiles(ZipArchive& pSource, ZipArchive& pDest, co
 	}
 }
 
-bool ArchiveFile::CopyFileBetweenArchives(FileArchive& pSource, FileArchive& pDest, const String& pFileName)
+bool ArchiveFile::CopyFileBetweenArchives(FileArchive& pSource, FileArchive& pDest, const str& pFileName)
 {
 	bool lOK = true;
 
@@ -565,7 +565,7 @@ bool ArchiveFile::CopyFileBetweenArchives(FileArchive& pSource, FileArchive& pDe
 	return lOK;
 }
 
-bool ArchiveFile::CopyFileBetweenZipArchives(ZipArchive& pSource, ZipArchive& pDest, const String& pFileName)
+bool ArchiveFile::CopyFileBetweenZipArchives(ZipArchive& pSource, ZipArchive& pDest, const str& pFileName)
 {
 	bool lOK = true;
 
@@ -624,17 +624,17 @@ void ArchiveFile::SetEndian(Endian::EndianType pEndian)
 	}
 }
 
-String ArchiveFile::GetFullName() const
+str ArchiveFile::GetFullName() const
 {
 	return mPath + _T("/") + mFileName;
 }
 
-String ArchiveFile::GetName() const
+str ArchiveFile::GetName() const
 {
 	return mFileName;
 }
 
-String ArchiveFile::GetPath() const
+str ArchiveFile::GetPath() const
 {
 	return mPath;
 }
@@ -920,12 +920,12 @@ int64 ArchiveFile::Seek(int64 pOffset, FileOrigin pFrom)
 // Static functions.
 //
 
-bool ArchiveFile::ExtractFileFromArchive(const String& pArchiveName, const String& pFileName, bool pLocal)
+bool ArchiveFile::ExtractFileFromArchive(const str& pArchiveName, const str& pFileName, bool pLocal)
 {
 	return ExtractFileFromArchive(pArchiveName, pFileName, pFileName, pLocal);
 }
 
-bool ArchiveFile::ExtractFileFromArchive(const String& pArchiveName, const String& pFileName, const String& pExtractedFileName, bool pLocal)
+bool ArchiveFile::ExtractFileFromArchive(const str& pArchiveName, const str& pFileName, const str& pExtractedFileName, bool pLocal)
 {
 	bool lRet = false;
 
@@ -941,7 +941,7 @@ bool ArchiveFile::ExtractFileFromArchive(const String& pArchiveName, const Strin
 		}
 		else
 		{
-			String lFileName = Path::GetCompositeFilename(pExtractedFileName);
+			str lFileName = Path::GetCompositeFilename(pExtractedFileName);
 			lOpened = lDiskFile.Open(lFileName, DiskFile::MODE_WRITE, false, Endian::TYPE_LITTLE_ENDIAN);
 		}
 
@@ -976,12 +976,12 @@ bool ArchiveFile::ExtractFileFromArchive(const String& pArchiveName, const Strin
 	return lRet;
 }
 
-bool ArchiveFile::InsertFileIntoArchive(const String& pArchiveName, const String& pFileName, bool pLocal)
+bool ArchiveFile::InsertFileIntoArchive(const str& pArchiveName, const str& pFileName, bool pLocal)
 {
 	return InsertFileIntoArchive(pArchiveName, pFileName, pFileName, pLocal);
 }
 
-bool ArchiveFile::InsertFileIntoArchive(const String& pArchiveName, const String& pFileName, const String& pInsertedFileName, bool pLocal)
+bool ArchiveFile::InsertFileIntoArchive(const str& pArchiveName, const str& pFileName, const str& pInsertedFileName, bool pLocal)
 {
 	bool lRet = false;
 
@@ -998,7 +998,7 @@ bool ArchiveFile::InsertFileIntoArchive(const String& pArchiveName, const String
 		}
 		else
 		{
-			String lFileName = Path::GetCompositeFilename(pInsertedFileName);
+			str lFileName = Path::GetCompositeFilename(pInsertedFileName);
 			lOpened = lArchiveFile.Open(lFileName, ArchiveFile::WRITE_ONLY, Endian::TYPE_LITTLE_ENDIAN);
 		}
 

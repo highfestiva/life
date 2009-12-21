@@ -7,6 +7,7 @@
 #pragma once
 
 #include "../../../Lepra/Include/LogListener.h"
+#include "../../Include/UiTBC.h"
 
 
 
@@ -19,7 +20,7 @@ class TextArea;
 
 
 
-class ConsoleLogListener: public Lepra::InteractiveConsoleLogListener
+class ConsoleLogListener: public InteractiveConsoleLogListener
 {
 public:
 	ConsoleLogListener(OutputFormat pFormat = FORMAT_PLAIN);
@@ -27,9 +28,9 @@ public:
 	void SetOutputComponent(TextArea* pOutputComponent);
 
 protected:
-	void WriteLog(const Lepra::String& pFullMessage, Lepra::Log::LogLevel pLevel);
+	void WriteLog(const str& pFullMessage, Log::LogLevel pLevel);
 	void StepPage(int pPageCount);
-	void OnLogRawMessage(const Lepra::String& pText);
+	void OnLogRawMessage(const str& pText);
 
 	TextArea* mOutputComponent;
 	bool mLineFeed;

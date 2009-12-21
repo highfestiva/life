@@ -50,7 +50,7 @@ GameClientMasterTicker::GameClientMasterTicker(UiCure::GameUiManager* pUiManager
 	mConsole = new ConsoleManager(0, UiCure::GetSettings(), 0, 0);
 	mConsole->Init();
 	mConsole->GetConsoleCommandManager()->AddExecutor(
-		new Lepra::ConsoleExecutor<GameClientMasterTicker>(
+		new ConsoleExecutor<GameClientMasterTicker>(
 			this, &GameClientMasterTicker::OnCommandLocal, &GameClientMasterTicker::OnCommandError));
 	mConsole->GetConsoleCommandManager()->AddCommand(SET_PLAYER_COUNT);
 
@@ -94,8 +94,8 @@ GameClientMasterTicker::~GameClientMasterTicker()
 
 bool GameClientMasterTicker::CreateSlave()
 {
-	const Lepra::PixelRect lRenderArea(0, 0, mUiManager->GetDisplayManager()->GetWidth(), mUiManager->GetDisplayManager()->GetHeight());
-	Lepra::ScopeLock lLock(&mLock);
+	const PixelRect lRenderArea(0, 0, mUiManager->GetDisplayManager()->GetWidth(), mUiManager->GetDisplayManager()->GetHeight());
+	ScopeLock lLock(&mLock);
 	bool lOk = (mSlaveSet.GetCount() < 4);
 	if (lOk)
 	{
@@ -138,7 +138,7 @@ bool GameClientMasterTicker::Tick()
 
 	bool lOk = true;
 
-	Lepra::ScopeLock lLock(&mLock);
+	ScopeLock lLock(&mLock);
 
 	SlaveMap::Iterator x;
 
@@ -234,7 +234,7 @@ bool GameClientMasterTicker::Tick()
 		if (!Reinitialize())
 		{
 			mLog.Fatal(_T("Failure to re-initialize UI! Going down now!"));
-			Lepra::SystemManager::AddQuitRequest(+1);
+			SystemManager::AddQuitRequest(+1);
 		}
 		mRestartUi = false;
 	}
@@ -259,7 +259,7 @@ bool GameClientMasterTicker::WaitResetUi()
 {
 	for (int x = 0; mRestartUi && x < 50; ++x)
 	{
-		Lepra::Thread::Sleep(0.1);
+		Thread::Sleep(0.1);
 	}
 	return (!mRestartUi);
 }
@@ -274,7 +274,7 @@ bool GameClientMasterTicker::IsLocalObject(Cure::GameObjectId pInstanceId) const
 void GameClientMasterTicker::AddSlave(GameClientSlaveManager* pSlave)
 {
 	{
-		Lepra::ScopeLock lLock(&mLock);
+		ScopeLock lLock(&mLock);
 		pSlave->LoadSettings();
 		mSlaveSet.PushBack(pSlave, pSlave);
 	}
@@ -283,7 +283,7 @@ void GameClientMasterTicker::AddSlave(GameClientSlaveManager* pSlave)
 void GameClientMasterTicker::RemoveSlave(GameClientSlaveManager* pSlave)
 {
 	{
-		Lepra::ScopeLock lLock(&mLock);
+		ScopeLock lLock(&mLock);
 		mSlaveSet.Remove(pSlave);
 		UpdateSlaveLayout();
 	}
@@ -330,7 +330,7 @@ bool GameClientMasterTicker::Reinitialize()
 	}
 	mResourceManager->StopClear();
 	mUiManager->Close();
-	Lepra::SystemManager::AddQuitRequest(-1);
+	SystemManager::AddQuitRequest(-1);
 
 	// Reopen.
 	bool lOk = mResourceManager->InitDefault();
@@ -344,8 +344,8 @@ bool GameClientMasterTicker::Reinitialize()
 
 		// TODO: replace with world-load.
 		mUiManager->GetRenderer()->AddDirectionalLight(
-			UiTbc::Renderer::LIGHT_STATIC, Lepra::Vector3DF(0, 0.5f, -1),
-			Lepra::Color::Color(255, 255, 255), 1, 100);
+			UiTbc::Renderer::LIGHT_STATIC, Vector3DF(0, 0.5f, -1),
+			Color::Color(255, 255, 255), 1, 100);
 		mUiManager->GetInputManager()->AddKeyCodeInputObserver(this);
 	}
 	if (lOk)
@@ -366,7 +366,7 @@ bool GameClientMasterTicker::Reinitialize()
 				for (unsigned e = 0; e < lDevice->GetNumElements(); ++e)
 				{
 					UiLepra::InputElement* lElement = lDevice->GetElement(e);
-					Lepra::String lInterpretation;
+					str lInterpretation;
 					switch (lElement->GetInterpretation())
 					{
 						case UiLepra::InputElement::ABSOLUTE_AXIS:	lInterpretation += _T("AbsoluteAxis");	break;
@@ -404,7 +404,7 @@ void GameClientMasterTicker::UpdateSlaveLayout()
 		return;
 	}
 
-	const Lepra::PixelRect lRenderArea(0, 0, mUiManager->GetDisplayManager()->GetWidth(), mUiManager->GetDisplayManager()->GetHeight());
+	const PixelRect lRenderArea(0, 0, mUiManager->GetDisplayManager()->GetWidth(), mUiManager->GetDisplayManager()->GetHeight());
 	switch (mSlaveSet.GetCount())
 	{
 		case 0:
@@ -419,7 +419,7 @@ void GameClientMasterTicker::UpdateSlaveLayout()
 		break;
 		case 2:
 		{
-			Lepra::PixelRect lSideRenderArea(lRenderArea);
+			PixelRect lSideRenderArea(lRenderArea);
 			lSideRenderArea.mRight /= 2;
 			mSlaveSet.First().GetObject()->SetRenderArea(lSideRenderArea);
 			lSideRenderArea.Offset(lSideRenderArea.GetWidth(), 0);
@@ -428,20 +428,20 @@ void GameClientMasterTicker::UpdateSlaveLayout()
 		break;
 		case 3:
 		{
-			Lepra::PixelRect lTopRenderArea(lRenderArea);
+			PixelRect lTopRenderArea(lRenderArea);
 			lTopRenderArea.mRight /= 2;
 			lTopRenderArea.mBottom = (int)(lTopRenderArea.mBottom*0.6);
 			mSlaveSet.First().GetObject()->SetRenderArea(lTopRenderArea);
 			lTopRenderArea.Offset(lTopRenderArea.GetWidth(), 0);
 			(++mSlaveSet.First()).GetObject()->SetRenderArea(lTopRenderArea);
-			Lepra::PixelRect lBottomRenderArea(lRenderArea);
+			PixelRect lBottomRenderArea(lRenderArea);
 			lBottomRenderArea.mTop = lTopRenderArea.mBottom;
 			(++(++mSlaveSet.First())).GetObject()->SetRenderArea(lBottomRenderArea);
 		}
 		break;
 		case 4:
 		{
-			Lepra::PixelRect lPartRenderArea(lRenderArea);
+			PixelRect lPartRenderArea(lRenderArea);
 			lPartRenderArea.mRight /= 2;
 			lPartRenderArea.mBottom /= 2;
 			mSlaveSet.First().GetObject()->SetRenderArea(lPartRenderArea);
@@ -470,8 +470,8 @@ void GameClientMasterTicker::Profile()
 	}
 
 	const int lHeight = 100;
-	typedef Lepra::ScopePerformanceData::NodeArray ScopeArray;
-	ScopeArray lRoots = Lepra::ScopePerformanceData::GetRoots();
+	typedef ScopePerformanceData::NodeArray ScopeArray;
+	ScopeArray lRoots = ScopePerformanceData::GetRoots();
 	ScopeArray lNodes;
 	lNodes.reserve(100);
 	for (size_t lRootIndex = 0; lRootIndex < lRoots.size(); ++lRootIndex)
@@ -487,7 +487,7 @@ void GameClientMasterTicker::Profile()
 		const double lRootStart = lNodes[0]->GetTimeOfLastMeasure();
 		for (size_t x = 0; x < lNodes.size(); ++x)
 		{
-			const Lepra::ScopePerformanceData* lNode = lNodes[x];
+			const ScopePerformanceData* lNode = lNodes[x];
 			const ScopeArray& lChildren = lNode->GetChildren();
 			lNodes.insert(lNodes.end(), lChildren.begin(), lChildren.end());
 
@@ -505,12 +505,12 @@ void GameClientMasterTicker::DrawFps() const
 		return;
 	}
 
-	Lepra::ScopePerformanceData* lMainLoop = Lepra::ScopePerformanceData::GetRoots()[0];
-	Lepra::String lFps = Lepra::StringUtility::Format(_T("%.1f"), 1/lMainLoop->GetSlidingAverage());
-	mUiManager->GetPainter()->SetColor(Lepra::Color(0, 0, 0));
+	ScopePerformanceData* lMainLoop = ScopePerformanceData::GetRoots()[0];
+	str lFps = strutil::Format(_T("%.1f"), 1/lMainLoop->GetSlidingAverage());
+	mUiManager->GetPainter()->SetColor(Color(0, 0, 0));
 	const int lRight = mUiManager->GetDisplayManager()->GetWidth();
 	mUiManager->GetPainter()->FillRect(lRight-45, 3, lRight-5, 20);
-	mUiManager->GetPainter()->SetColor(Lepra::Color(200, 200, 0));
+	mUiManager->GetPainter()->SetColor(Color(200, 200, 0));
 	mUiManager->GetPainter()->PrintText(lFps, lRight-40, 5);
 }
 
@@ -524,10 +524,10 @@ void GameClientMasterTicker::DrawPerformanceLineGraph2d() const
 	}
 
 	// Draw all scope nodes as line segments in one hunky graph.
-	typedef Lepra::ScopePerformanceData::NodeArray ScopeArray;
+	typedef ScopePerformanceData::NodeArray ScopeArray;
 
 	float lLongestRootTime = 1e-15f;
-	ScopeArray lRoots = Lepra::ScopePerformanceData::GetRoots();
+	ScopeArray lRoots = ScopePerformanceData::GetRoots();
 	for (size_t lRootIndex = 0; lRootIndex < lRoots.size(); ++lRootIndex)
 	{
 		const float lRootDelta = (float)lRoots[lRootIndex]->GetMaximum();
@@ -568,12 +568,12 @@ float GameClientMasterTicker::GetPowerSaveAmount() const
 
 
 
-int GameClientMasterTicker::OnCommandLocal(const Lepra::String& pCommand, const Lepra::StringUtility::StringVector& pParameterVector)
+int GameClientMasterTicker::OnCommandLocal(const str& pCommand, const strutil::strvec& pParameterVector)
 {
 	if (pCommand == SET_PLAYER_COUNT)
 	{
 		int lPlayerCount = 0;
-		if (pParameterVector.size() == 1 && Lepra::StringUtility::StringToInt(pParameterVector[0], lPlayerCount))
+		if (pParameterVector.size() == 1 && strutil::StringToInt(pParameterVector[0], lPlayerCount))
 		{
 			if (lPlayerCount >= 1 && lPlayerCount <= 4)
 			{
@@ -594,7 +594,7 @@ int GameClientMasterTicker::OnCommandLocal(const Lepra::String& pCommand, const 
 	return (-1);
 }
 
-void GameClientMasterTicker::OnCommandError(const Lepra::String&, const Lepra::StringUtility::StringVector&, int)
+void GameClientMasterTicker::OnCommandError(const str&, const strutil::strvec&, int)
 {
 }
 
@@ -651,7 +651,7 @@ void GameClientMasterTicker::ClosePlayerCountGui()
 void GameClientMasterTicker::OnExit()
 {
 	mLog.Headline(_T("Number of players not picked, quitting."));
-	Lepra::SystemManager::AddQuitRequest(+1);
+	SystemManager::AddQuitRequest(+1);
 	ClosePlayerCountGui();
 }
 
@@ -675,23 +675,23 @@ bool GameClientMasterTicker::ApplyCalibration()
 	for (; x != lDevices.end(); ++x)
 	{
 		UiLepra::InputDevice* lDevice = *x;
-		Lepra::String lDeviceId = Lepra::StringUtility::ReplaceAll(lDevice->GetIdentifier(), ' ', '_');
-		lDeviceId = Lepra::StringUtility::ReplaceAll(lDeviceId, '.', '_');
+		str lDeviceId = strutil::ReplaceAll(lDevice->GetIdentifier(), ' ', '_');
+		lDeviceId = strutil::ReplaceAll(lDeviceId, '.', '_');
 		UiLepra::InputDevice::CalibrationData lCalibration;
 
-		const std::list<Lepra::String> lVariableNames = UiCure::GetSettings()->GetVariableNameList(true);
-		std::list<Lepra::String>::const_iterator y = lVariableNames.begin();
+		const std::list<str> lVariableNames = UiCure::GetSettings()->GetVariableNameList(true);
+		std::list<str>::const_iterator y = lVariableNames.begin();
 		for (; y != lVariableNames.end(); ++y)
 		{
-			const Lepra::String& lVarName = *y;
-			const Lepra::StringUtility::StringVector lVarNames = Lepra::StringUtility::Split(lVarName, _T("."), 2);
+			const str& lVarName = *y;
+			const strutil::strvec lVarNames = strutil::Split(lVarName, _T("."), 2);
 			if (lVarNames.size() != 3)
 			{
 				continue;
 			}
 			if (lVarNames[0] == _T("Calibration") && lVarNames[1] == lDeviceId)
 			{
-				Lepra::String lValue = UiCure::GetSettings()->GetDefaultValue(
+				str lValue = UiCure::GetSettings()->GetDefaultValue(
 					Cure::RuntimeVariableScope::READ_ONLY, lVarName, _T(""));
 				lCalibration.push_back(UiLepra::InputDevice::CalibrationElement(lVarNames[2], lValue));
 			}
@@ -708,8 +708,8 @@ void GameClientMasterTicker::StashCalibration()
 	for (; x != lDevices.end(); ++x)
 	{
 		UiLepra::InputDevice* lDevice = *x;
-		Lepra::String lDeviceId = Lepra::StringUtility::ReplaceAll(lDevice->GetIdentifier(), ' ', '_');
-		lDeviceId = Lepra::StringUtility::ReplaceAll(lDeviceId, '.', '_');
+		str lDeviceId = strutil::ReplaceAll(lDevice->GetIdentifier(), ' ', '_');
+		lDeviceId = strutil::ReplaceAll(lDeviceId, '.', '_');
 		const UiLepra::InputDevice::CalibrationData lCalibration = lDevice->GetCalibration();
 
 		UiLepra::InputDevice::CalibrationData::const_iterator y = lCalibration.begin();

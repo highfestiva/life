@@ -154,7 +154,7 @@ CompatibleSemaphoreBC::~CompatibleSemaphoreBC()
 
 
 
-RWLockBC::RWLockBC(const String& pRWLockName) :
+RWLockBC::RWLockBC(const str& pRWLockName) :
 	mName(pRWLockName)
 {
 }
@@ -163,14 +163,14 @@ RWLockBC::~RWLockBC()
 {
 }
 
-String RWLockBC::GetName()
+str RWLockBC::GetName()
 {
 	return mName;
 }
 
 
 
-Thread::Thread(const String& pThreadName) :
+Thread::Thread(const str& pThreadName) :
 	mThreadName(pThreadName),
 	mRunning(false),
 	mStopRequested(false),
@@ -232,7 +232,7 @@ void Thread::RequestSelfDestruct()
 	mSelfDestruct = true;
 }
 
-const String& Thread::GetThreadName()
+const str& Thread::GetThreadName()
 {
 	return (mThreadName);
 }
@@ -278,7 +278,7 @@ LOG_CLASS_DEFINE(GENERAL, Thread);
 
 
 
-StaticThread::StaticThread(const String& pThreadName):
+StaticThread::StaticThread(const str& pThreadName):
 	Thread(pThreadName),
 	mThreadEntry(0),
 	mData(0)

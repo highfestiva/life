@@ -44,7 +44,7 @@ public:
 
 	virtual void Add(Component* pComponent, int pParam1, int pParam2) = 0;
 	virtual void Remove(Component* pComponent) = 0;
-	virtual Component* Find(const Lepra::String& pComponentName) = 0;
+	virtual Component* Find(const str& pComponentName) = 0;
 	virtual int GetNumComponents() const = 0;
 
 	virtual Component* GetFirst() = 0;
@@ -55,9 +55,9 @@ public:
 
 	virtual void UpdateLayout() = 0;
 
-	virtual Lepra::PixelCoords GetPreferredSize(bool pForceAdaptive) = 0;
-	virtual Lepra::PixelCoords GetMinSize() = 0;
-	virtual Lepra::PixelCoords GetContentSize() = 0;
+	virtual PixelCoords GetPreferredSize(bool pForceAdaptive) = 0;
+	virtual PixelCoords GetMinSize() = 0;
+	virtual PixelCoords GetContentSize() = 0;
 
 protected:
 	inline Component* GetOwner();

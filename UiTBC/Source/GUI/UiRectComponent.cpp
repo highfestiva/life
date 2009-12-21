@@ -10,7 +10,7 @@
 namespace UiTbc
 {
 
-RectComponent::RectComponent(const Lepra::String& pName, Layout* pLayout) :
+RectComponent::RectComponent(const str& pName, Layout* pLayout) :
 	Component(pName, pLayout),
 	mShaded(false),
 	mHollow(true),
@@ -19,7 +19,7 @@ RectComponent::RectComponent(const Lepra::String& pName, Layout* pLayout) :
 {
 }
 
-RectComponent::RectComponent(const Lepra::Color& pColor, const Lepra::String& pName, Layout* pLayout) :
+RectComponent::RectComponent(const Color& pColor, const str& pName, Layout* pLayout) :
 	Component(pName, pLayout),
 	mShaded(false),
 	mHollow(false),
@@ -32,11 +32,11 @@ RectComponent::RectComponent(const Lepra::Color& pColor, const Lepra::String& pN
 	mColor[3].Set(0, 0, 0, 0);
 }
 
-RectComponent::RectComponent(const Lepra::Color& pTopLeftColor,
-			     const Lepra::Color& pTopRightColor,
-			     const Lepra::Color& pBottomRightColor,
-			     const Lepra::Color& pBottomLeftColor,
-			     const Lepra::String& pName,
+RectComponent::RectComponent(const Color& pTopLeftColor,
+			     const Color& pTopRightColor,
+			     const Color& pBottomRightColor,
+			     const Color& pBottomLeftColor,
+			     const str& pName,
 			     Layout* pLayout) :
 	Component(pName, pLayout),
 	mShaded(true),
@@ -50,7 +50,7 @@ RectComponent::RectComponent(const Lepra::Color& pTopLeftColor,
 	mColor[3] = pBottomLeftColor;
 }
 
-RectComponent::RectComponent(Painter::ImageID pImageID, const Lepra::String& pName, Layout* pLayout) :
+RectComponent::RectComponent(Painter::ImageID pImageID, const str& pName, Layout* pLayout) :
 	Component(pName, pLayout),
 	mShaded(false),
 	mHollow(false),
@@ -73,11 +73,11 @@ void RectComponent::Repaint(Painter* pPainter)
 
 	GUIImageManager* lIMan = GetImageManager();
 
-	Lepra::PixelCoords lPos(GetScreenPos());
-	Lepra::PixelCoords lSize(GetSize());
-	Lepra::PixelRect lRect(lPos, lPos + lSize);
+	PixelCoords lPos(GetScreenPos());
+	PixelCoords lSize(GetSize());
+	PixelRect lRect(lPos, lPos + lSize);
 
-	Lepra::PixelRect lClippingRect(lRect);
+	PixelRect lClippingRect(lRect);
 	lClippingRect.mRight++;
 	lClippingRect.mBottom++;
 	pPainter->ReduceClippingRect(lClippingRect);
@@ -141,9 +141,9 @@ bool RectComponent::IsOver(int pScreenX, int pScreenY)
 	}
 	else
 	{
-		Lepra::PixelCoords lPos(GetScreenPos());
-		Lepra::PixelCoords lSize(GetSize());
-		Lepra::PixelRect lRect(lPos, lPos + lSize);
+		PixelCoords lPos(GetScreenPos());
+		PixelCoords lSize(GetSize());
+		PixelRect lRect(lPos, lPos + lSize);
 
 		GUIImageManager* lIMan = GetImageManager();
 

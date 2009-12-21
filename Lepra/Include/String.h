@@ -18,12 +18,12 @@
 
 namespace Lepra
 {
-typedef std::string AnsiString;
-typedef std::wstring UnicodeString;
+typedef std::string	astr;
+typedef std::wstring	wstr;
 #ifdef LEPRA_UNICODE
-typedef UnicodeString	String;
+typedef wstr		str;
 #else // !LEPRA_UNICODE
-typedef AnsiString	String;
+typedef astr		str;
 #endif // LEPRA_UNICODE/!LEPRA_UNICODE
 }
 
@@ -53,18 +53,18 @@ template<> struct LEPRA_STD_HASHER<const wchar_t*>
 		return (__stl_hash_wstring(__s));
 	}
 };
-template<> struct LEPRA_STD_HASHER<Lepra::AnsiString>
+template<> struct LEPRA_STD_HASHER<Lepra::astr>
 {
 public:
-	size_t operator() (const Lepra::AnsiString& __s) const
+	size_t operator() (const Lepra::astr& __s) const
 	{
 		return (priv::__stl_hash_string(__s.c_str()));
 	}
 };
-template<> struct LEPRA_STD_HASHER<Lepra::UnicodeString>
+template<> struct LEPRA_STD_HASHER<Lepra::wstr>
 {
 public:
-	size_t operator() (const Lepra::UnicodeString& __w) const
+	size_t operator() (const Lepra::wstr& __w) const
 	{
 		return (__stl_hash_wstring(__w.c_str()));
 	}

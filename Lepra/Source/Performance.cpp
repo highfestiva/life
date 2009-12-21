@@ -46,7 +46,7 @@ void PerformanceData::Append(double pPeriodValue, double pTimeOfLastMeasure)
 	{
 		mMinimum = (pPeriodValue < mMinimum)? pPeriodValue : mMinimum;
 		mLast = pPeriodValue;
-		mSlidingAverage = Lepra::Math::Lerp(mSlidingAverage, mLast, 0.05);
+		mSlidingAverage = Math::Lerp(mSlidingAverage, mLast, 0.05);
 		mMaximum = (pPeriodValue > mMaximum)? pPeriodValue : mMaximum;
 	}
 }
@@ -78,7 +78,7 @@ double PerformanceData::GetMaximum() const
 
 
 
-ScopePerformanceData* ScopePerformanceData::Insert(const Lepra::String& pName, size_t pHash)
+ScopePerformanceData* ScopePerformanceData::Insert(const str& pName, size_t pHash)
 {
 	ScopePerformanceData* lParent = GetActive();
 	if (!lParent)
@@ -106,7 +106,7 @@ ScopePerformanceData* ScopePerformanceData::Insert(const Lepra::String& pName, s
 	return (lNode);
 }
 
-ScopePerformanceData::ScopePerformanceData(ScopePerformanceData* pParent, const Lepra::String& pName, size_t pHash):
+ScopePerformanceData::ScopePerformanceData(ScopePerformanceData* pParent, const str& pName, size_t pHash):
 	mName(pName),
 	mHash(pHash),
 	mParent(pParent)
@@ -143,7 +143,7 @@ ScopePerformanceData::NodeArray ScopePerformanceData::GetRoots()
 	return (lRootsCopy);
 }
 
-const Lepra::String& ScopePerformanceData::GetName() const
+const str& ScopePerformanceData::GetName() const
 {
 	return (mName);
 }
@@ -153,7 +153,7 @@ const ScopePerformanceData::NodeArray& ScopePerformanceData::GetChildren() const
 	return (mChildArray);
 }
 
-ScopePerformanceData* ScopePerformanceData::FindChild(/*const Lepra::String& pName,*/ size_t pHash) const
+ScopePerformanceData* ScopePerformanceData::FindChild(/*const str& pName,*/ size_t pHash) const
 {
 	NodeArray::const_iterator x = mChildArray.begin();
 	for (; x != mChildArray.end(); ++x)

@@ -15,8 +15,8 @@
 #include "../../Lepra/Include/AntiCrack.h"
 #include "../../Lepra/Include/Network.h"
 #include "../../Lepra/Include/SystemManager.h"
+#include "../Life.h"
 #include "../LifeApplication.h"
-#include "../LifeDefinitions.h"
 #include "../RtVar.h"
 #include "Client.h"
 #include "ServerConsoleManager.h"
@@ -38,7 +38,7 @@ const int NETWORK_POSITIONAL_AHEAD_BUFFER_SIZE = PHYSICS_FPS/2;
 
 
 GameServerManager::GameServerManager(Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
-	Lepra::InteractiveConsoleLogListener* pConsoleLogger):
+	InteractiveConsoleLogListener* pConsoleLogger):
 	Cure::GameManager(pVariableScope, pResourceManager, false),
 	mUserAccountManager(new Cure::MemoryUserAccountManager()),
 	mTerrainObject(0),
@@ -56,7 +56,7 @@ GameServerManager::GameServerManager(Cure::RuntimeVariableScope* pVariableScope,
 
 	SetNetworkAgent(new Cure::NetworkServer(pVariableScope, this));
 
-	SetConsoleManager(new ServerConsoleManager(this, GetVariableScope(), pConsoleLogger, new Lepra::StdioConsolePrompt()));
+	SetConsoleManager(new ServerConsoleManager(this, GetVariableScope(), pConsoleLogger, new StdioConsolePrompt()));
 	GetConsoleManager()->PushYieldCommand(_T("execute-file -i ") + Application::GetIoFile(_T("Application"), _T("lsh")));
 	GetConsoleManager()->Start();
 }
@@ -82,7 +82,7 @@ GameServerManager::~GameServerManager()
 bool GameServerManager::Tick()
 {
 	// Don't do this here! Done explicitly in parent.
-	//          ==>  Lepra::ScopeLock lTickLock(GetTickLock());
+	//          ==>  ScopeLock lTickLock(GetTickLock());
 	bool lOk = Parent::BeginTick();
 	lOk = (lOk && Parent::EndTick());
 	GetResourceManager()->Tick();
@@ -94,7 +94,7 @@ bool GameServerManager::Tick()
 	if (lMaxLoginCount > 0 && lUserCount == 0)
 	{
 		mLog.AWarning("Server automatically shuts down in debug when all users have logged off.");
-		Lepra::SystemManager::AddQuitRequest(+1);
+		SystemManager::AddQuitRequest(+1);
 	}
 #endif // Debug.
 
@@ -103,23 +103,23 @@ bool GameServerManager::Tick()
 
 
 
-Lepra::UnicodeStringUtility::StringVector GameServerManager::ListUsers()
+wstrutil::strvec GameServerManager::ListUsers()
 {
-	Lepra::UnicodeStringUtility::StringVector lVector;
+	wstrutil::strvec lVector;
 	{
-		Lepra::ScopeLock lTickLock(GetTickLock());
-		Lepra::ScopeLock lNetLock(GetNetworkAgent()->GetLock());
+		ScopeLock lTickLock(GetTickLock());
+		ScopeLock lNetLock(GetNetworkAgent()->GetLock());
 
 		AccountClientTable::Iterator x = mAccountClientTable.First();
 		for (; x != mAccountClientTable.End(); ++x)
 		{
 			const Client* lClient = x.GetObject();
-			Lepra::UnicodeString lUserInfo = lClient->GetUserConnection()->GetLoginName();
+			wstr lUserInfo = lClient->GetUserConnection()->GetLoginName();
 			Cure::ContextObject* lObject = GetContext()->GetObject(lClient->GetAvatarId());
 			if (lObject)
 			{
-				Lepra::Vector3DF lPosition = lObject->GetPosition();
-				lUserInfo += Lepra::UnicodeStringUtility::Format(L" at (%f, %f, %f)", lPosition.x, lPosition.y, lPosition.z);
+				Vector3DF lPosition = lObject->GetPosition();
+				lUserInfo += wstrutil::Format(L" at (%f, %f, %f)", lPosition.x, lPosition.y, lPosition.z);
 			}
 			else
 			{
@@ -131,14 +131,14 @@ Lepra::UnicodeStringUtility::StringVector GameServerManager::ListUsers()
 	return (lVector);
 }
 
-bool GameServerManager::BroadcastChatMessage(const Lepra::UnicodeString& pMessage)
+bool GameServerManager::BroadcastChatMessage(const wstr& pMessage)
 {
 	bool lOk = false;
 
 	Cure::Packet* lPacket = GetNetworkAgent()->GetPacketFactory()->Allocate();
 	{
-		Lepra::ScopeLock lTickLock(GetTickLock());
-		Lepra::ScopeLock lNetLock(GetNetworkAgent()->GetLock());
+		ScopeLock lTickLock(GetTickLock());
+		ScopeLock lNetLock(GetNetworkAgent()->GetLock());
 		AccountClientTable::Iterator x = mAccountClientTable.First();
 		for (; x != mAccountClientTable.End(); ++x)
 		{
@@ -150,10 +150,10 @@ bool GameServerManager::BroadcastChatMessage(const Lepra::UnicodeString& pMessag
 	return (lOk);
 }
 
-bool GameServerManager::SendChatMessage(const Lepra::UnicodeString& pClientUserName, const Lepra::UnicodeString& pMessage)
+bool GameServerManager::SendChatMessage(const wstr& pClientUserName, const wstr& pMessage)
 {
-	Lepra::ScopeLock lTickLock(GetTickLock());
-	Lepra::ScopeLock lNetLock(GetNetworkAgent()->GetLock());
+	ScopeLock lTickLock(GetTickLock());
+	ScopeLock lNetLock(GetNetworkAgent()->GetLock());
 
 	Cure::UserAccount::AccountId lAccountId;
 	bool lOk = mUserAccountManager->GetUserAccountId(pClientUserName, lAccountId);
@@ -176,14 +176,14 @@ bool GameServerManager::SendChatMessage(const Lepra::UnicodeString& pClientUserN
 
 int GameServerManager::GetLoggedInClientCount() const
 {
-	Lepra::ScopeLock lTickLock(GetTickLock());
-	Lepra::ScopeLock lNetLock(GetNetworkAgent()->GetLock());
+	ScopeLock lTickLock(GetTickLock());
+	ScopeLock lNetLock(GetNetworkAgent()->GetLock());
 	return (mAccountClientTable.GetCount());
 }
 
 
 
-void GameServerManager::Logout(Cure::UserAccount::AccountId pAccountId, const Lepra::String& pReason)
+void GameServerManager::Logout(Cure::UserAccount::AccountId pAccountId, const str& pReason)
 {
 	GetNetworkServer()->Disconnect(pAccountId, pReason, true);
 }
@@ -219,8 +219,8 @@ bool GameServerManager::Initialize()
 		int x;
 		for (x = 0; lOk && x < 100; ++x)
 		{
-			const Lepra::UnicodeString lUserName = Lepra::UnicodeStringUtility::Format(L"Ball%i", x);
-			Lepra::UnicodeString lReadablePassword(L"CarPassword");
+			const wstr lUserName = wstrutil::Format(L"Ball%i", x);
+			wstr lReadablePassword(L"CarPassword");
 			Cure::MangledPassword lPassword(lReadablePassword);
 			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
 			if (lOk)
@@ -230,8 +230,8 @@ bool GameServerManager::Initialize()
 		}
 		for (x = 0; lOk && x < 100; ++x)
 		{
-			const Lepra::UnicodeString lUserName = Lepra::UnicodeStringUtility::Format(L"Car%i", x);
-			Lepra::UnicodeString lReadablePassword(L"CarPassword");
+			const wstr lUserName = wstrutil::Format(L"Car%i", x);
+			wstr lReadablePassword(L"CarPassword");
 			Cure::MangledPassword lPassword(lReadablePassword);
 			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
 			if (lOk)
@@ -241,8 +241,8 @@ bool GameServerManager::Initialize()
 		}
 		for (x = 0; lOk && x < 100; ++x)
 		{
-			const Lepra::UnicodeString lUserName = Lepra::UnicodeStringUtility::Format(L"Monster%i", x);
-			Lepra::UnicodeString lReadablePassword(L"CarPassword");
+			const wstr lUserName = wstrutil::Format(L"Monster%i", x);
+			wstr lReadablePassword(L"CarPassword");
 			Cure::MangledPassword lPassword(lReadablePassword);
 			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
 			if (lOk)
@@ -252,8 +252,8 @@ bool GameServerManager::Initialize()
 		}
 		for (x = 0; lOk && x < 100; ++x)
 		{
-			const Lepra::UnicodeString lUserName = Lepra::UnicodeStringUtility::Format(L"Excavator%i", x);
-			Lepra::UnicodeString lReadablePassword(L"CarPassword");
+			const wstr lUserName = wstrutil::Format(L"Excavator%i", x);
+			wstr lReadablePassword(L"CarPassword");
 			Cure::MangledPassword lPassword(lReadablePassword);
 			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
 			if (lOk)
@@ -263,8 +263,8 @@ bool GameServerManager::Initialize()
 		}
 		for (x = 0; lOk && x < 100; ++x)
 		{
-			const Lepra::UnicodeString lUserName = Lepra::UnicodeStringUtility::Format(L"Crane%i", x);
-			Lepra::UnicodeString lReadablePassword(L"CarPassword");
+			const wstr lUserName = wstrutil::Format(L"Crane%i", x);
+			wstr lReadablePassword(L"CarPassword");
 			Cure::MangledPassword lPassword(lReadablePassword);
 			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
 			if (lOk)
@@ -274,8 +274,8 @@ bool GameServerManager::Initialize()
 		}
 		for (x = 0; lOk && x < 100; ++x)
 		{
-			const Lepra::UnicodeString lUserName = Lepra::UnicodeStringUtility::Format(L"Tractor%i", x);
-			Lepra::UnicodeString lReadablePassword(L"CarPassword");
+			const wstr lUserName = wstrutil::Format(L"Tractor%i", x);
+			wstr lReadablePassword(L"CarPassword");
 			Cure::MangledPassword lPassword(lReadablePassword);
 			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
 			if (lOk)
@@ -285,8 +285,8 @@ bool GameServerManager::Initialize()
 		}
 		for (x = 0; lOk && x < 100; ++x)
 		{
-			const Lepra::UnicodeString lUserName = Lepra::UnicodeStringUtility::Format(L"OriginalTractor%i", x);
-			Lepra::UnicodeString lReadablePassword(L"CarPassword");
+			const wstr lUserName = wstrutil::Format(L"OriginalTractor%i", x);
+			wstr lReadablePassword(L"CarPassword");
 			Cure::MangledPassword lPassword(lReadablePassword);
 			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
 			if (lOk)
@@ -296,8 +296,8 @@ bool GameServerManager::Initialize()
 		}
 		for (x = 0; lOk && x < 100; ++x)
 		{
-			const Lepra::UnicodeString lUserName = Lepra::UnicodeStringUtility::Format(L"Fjask%i", x);
-			Lepra::UnicodeString lReadablePassword(L"CarPassword");
+			const wstr lUserName = wstrutil::Format(L"Fjask%i", x);
+			wstr lReadablePassword(L"CarPassword");
 			Cure::MangledPassword lPassword(lReadablePassword);
 			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
 			if (lOk)
@@ -307,8 +307,8 @@ bool GameServerManager::Initialize()
 		}
 		for (x = 0; lOk && x < 100; ++x)
 		{
-			const Lepra::UnicodeString lUserName = Lepra::UnicodeStringUtility::Format(L"RoadRoller%i", x);
-			Lepra::UnicodeString lReadablePassword(L"CarPassword");
+			const wstr lUserName = wstrutil::Format(L"RoadRoller%i", x);
+			wstr lReadablePassword(L"CarPassword");
 			Cure::MangledPassword lPassword(lReadablePassword);
 			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
 			if (lOk)
@@ -318,8 +318,8 @@ bool GameServerManager::Initialize()
 		}
 		for (x = 0; lOk && x < 100; ++x)
 		{
-			const Lepra::UnicodeString lUserName = Lepra::UnicodeStringUtility::Format(L"Truck%i", x);
-			Lepra::UnicodeString lReadablePassword(L"CarPassword");
+			const wstr lUserName = wstrutil::Format(L"Truck%i", x);
+			wstr lReadablePassword(L"CarPassword");
 			Cure::MangledPassword lPassword(lReadablePassword);
 			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
 			if (lOk)
@@ -329,8 +329,8 @@ bool GameServerManager::Initialize()
 		}
 		for (x = 0; lOk && x < 100; ++x)
 		{
-			const Lepra::UnicodeString lUserName = Lepra::UnicodeStringUtility::Format(L"Heli%i", x);
-			Lepra::UnicodeString lReadablePassword(L"CarPassword");
+			const wstr lUserName = wstrutil::Format(L"Heli%i", x);
+			wstr lReadablePassword(L"CarPassword");
 			Cure::MangledPassword lPassword(lReadablePassword);
 			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
 			if (lOk)
@@ -340,8 +340,8 @@ bool GameServerManager::Initialize()
 		}
 		for (x = 0; lOk && x < 100; ++x)
 		{
-			const Lepra::UnicodeString lUserName = Lepra::UnicodeStringUtility::Format(L"Loader%i", x);
-			Lepra::UnicodeString lReadablePassword(L"CarPassword");
+			const wstr lUserName = wstrutil::Format(L"Loader%i", x);
+			wstr lReadablePassword(L"CarPassword");
 			Cure::MangledPassword lPassword(lReadablePassword);
 			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
 			if (lOk)
@@ -362,10 +362,10 @@ bool GameServerManager::Initialize()
 	//Cure::ContextObject* lTractor = Parent::CreateContextObject(_T("tractor_01"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
 	//lTractor->StartLoading();
 
-	Lepra::String lAcceptAddress = CURE_RTVAR_GETSET(GetVariableScope(), RTVAR_NETWORK_LISTEN_ADDRESS, _T("0.0.0.0:16650"));
+	str lAcceptAddress = CURE_RTVAR_GETSET(GetVariableScope(), RTVAR_NETWORK_LISTEN_ADDRESS, _T("0.0.0.0:16650"));
 	if (lOk)
 	{
-		Lepra::SocketAddress lAddress;
+		SocketAddress lAddress;
 		if (!lAddress.Resolve(lAcceptAddress))
 		{
 			mLog.Warningf(_T("Could not resolve address '%s'."), lAcceptAddress.c_str());
@@ -503,7 +503,7 @@ void GameServerManager::ProcessNetworkInputMessage(Client* pClient, Cure::Messag
 			Cure::MessageObjectPosition* lMovement = (Cure::MessageObjectPosition*)pMessage;
 			// TODO: make sure client is authorized to control object with given ID.
 			Cure::GameObjectId lInstanceId = lMovement->GetObjectId();
-			Lepra::int32 lClientFrameIndex = lMovement->GetFrameIndex();
+			int32 lClientFrameIndex = lMovement->GetFrameIndex();
 			AdjustClientSimulationSpeed(pClient, lClientFrameIndex);
 
 			// TODO:
@@ -518,7 +518,7 @@ void GameServerManager::ProcessNetworkInputMessage(Client* pClient, Cure::Messag
 			else
 			{
 				mLog.Warningf(_T("Client %i tried to control instance ID %i."),
-					Lepra::StringUtility::ToCurrentCode(pClient->GetUserConnection()->GetLoginName()).c_str(),
+					strutil::ToCurrentCode(pClient->GetUserConnection()->GetLoginName()).c_str(),
 					lInstanceId);
 			}*/
 		}
@@ -552,13 +552,13 @@ void GameServerManager::ProcessNetworkInputMessage(Client* pClient, Cure::Messag
 
 Cure::UserAccount::Availability GameServerManager::QueryLogin(const Cure::LoginId& pLoginId, Cure::UserAccount::AccountId& pAccountId)
 {
-	Lepra::ScopeLock lLock(GetNetworkAgent()->GetLock());
+	ScopeLock lLock(GetNetworkAgent()->GetLock());
 	return (mUserAccountManager->GetUserAccountStatus(pLoginId, pAccountId));
 }
 
 void GameServerManager::OnLogin(Cure::UserConnection* pUserConnection)
 {
-	Lepra::ScopeLock lLock(GetNetworkAgent()->GetLock());
+	ScopeLock lLock(GetNetworkAgent()->GetLock());
 
 	Client* lClient = GetClientByAccount(pUserConnection->GetAccountId());
 	assert(!lClient);
@@ -571,7 +571,7 @@ void GameServerManager::OnLogin(Cure::UserConnection* pUserConnection)
 		lClient->SendPhysicsFrame(GetTimeManager()->GetCurrentPhysicsFrame());
 
 		const Cure::UserAccount::AvatarId& lAvatarId = *lAvatarIdSet->begin();
-		mLog.Info(_T("Loading avatar '")+lAvatarId+_T("' for user ")+Lepra::UnicodeStringUtility::ToCurrentCode(lClient->GetUserConnection()->GetLoginName())+_T("."));
+		mLog.Info(_T("Loading avatar '")+lAvatarId+_T("' for user ")+wstrutil::ToCurrentCode(lClient->GetUserConnection()->GetLoginName())+_T("."));
 		Cure::ContextObject* lObject = Parent::CreateContextObject(lAvatarId,
 			Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
 		lClient->SetAvatarId(lObject->GetInstanceId());
@@ -580,14 +580,14 @@ void GameServerManager::OnLogin(Cure::UserConnection* pUserConnection)
 	}
 	else
 	{
-		mLog.Error(_T("User ") + Lepra::UnicodeStringUtility::ToCurrentCode(pUserConnection->GetLoginName()) + _T(" does not exist or has no avatar!"));
+		mLog.Error(_T("User ") + wstrutil::ToCurrentCode(pUserConnection->GetLoginName()) + _T(" does not exist or has no avatar!"));
 	}
 }
 
 void GameServerManager::OnLogout(Cure::UserConnection* pUserConnection)
 {
-	Lepra::ScopeLock lTickLock(GetTickLock());
-	Lepra::ScopeLock lNetLock(GetNetworkAgent()->GetLock());
+	ScopeLock lTickLock(GetTickLock());
+	ScopeLock lNetLock(GetNetworkAgent()->GetLock());
 
 	// TODO: logout with some timer, and also be able to reconnect the
 	// client with his/her avatar again if logged in within the time frame.
@@ -600,7 +600,7 @@ void GameServerManager::OnLogout(Cure::UserConnection* pUserConnection)
 	GetContext()->DeleteObject(lAvatarId);
 	BroadcastDeleteObject(lAvatarId);
 
-	mLog.Info(_T("User ") + Lepra::UnicodeStringUtility::ToCurrentCode(pUserConnection->GetLoginName()) + _T(" logged out."));
+	mLog.Info(_T("User ") + wstrutil::ToCurrentCode(pUserConnection->GetLoginName()) + _T(" logged out."));
 }
 
 
@@ -688,7 +688,7 @@ void GameServerManager::BroadcastAvatar(Client* pClient)
 {
 	Cure::ContextObject* lObject = GetContext()->GetObject(pClient->GetAvatarId());
 	Cure::GameObjectId lInstanceId = lObject->GetInstanceId();
-	mLog.Info(_T("User ")+Lepra::UnicodeStringUtility::ToCurrentCode(pClient->GetUserConnection()->GetLoginName())+_T(" login complete (avatar loaded)."));
+	mLog.Info(_T("User ")+wstrutil::ToCurrentCode(pClient->GetUserConnection()->GetLoginName())+_T(" login complete (avatar loaded)."));
 
 	// TODO: this is hard-coded. Use a general replication-mechanism instead (where visible and added/updated objects gets replicated automatically).
 	Cure::Packet* lPacket = GetNetworkAgent()->GetPacketFactory()->Allocate();
@@ -702,7 +702,7 @@ void GameServerManager::BroadcastAvatar(Client* pClient)
 
 
 
-Cure::ContextObject* GameServerManager::CreateContextObject(const Lepra::String& pClassId) const
+Cure::ContextObject* GameServerManager::CreateContextObject(const str& pClassId) const
 {
 	return (new Cure::CppContextObject(pClassId));
 }
@@ -729,7 +729,7 @@ void GameServerManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 		if (lClient)
 		{
 			mLog.Infof(_T("Yeeha! Loaded avatar for %s."),
-				Lepra::UnicodeStringUtility::ToCurrentCode(lClient->GetUserConnection()->GetLoginName()).c_str());
+				wstrutil::ToCurrentCode(lClient->GetUserConnection()->GetLoginName()).c_str());
 			BroadcastAvatar(lClient);
 		}
 		else
@@ -754,7 +754,7 @@ void GameServerManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 	}
 }
 
-void GameServerManager::OnCollision(const Lepra::Vector3DF& pForce, const Lepra::Vector3DF& pTorque,
+void GameServerManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque,
 	Cure::ContextObject* pObject1, Cure::ContextObject* pObject2)
 {
 	if (pObject1 != pObject2 &&	// I.e. car where a wheel collides with the body.
@@ -832,7 +832,7 @@ void GameServerManager::SendAttach(Cure::ContextObject* pObject1, unsigned pId1,
 	Cure::MessageObjectAttach* lAttach = (Cure::MessageObjectAttach*)GetNetworkAgent()->
 		GetPacketFactory()->GetMessageFactory()->Allocate(Cure::MESSAGE_TYPE_OBJECT_ATTACH);
 	lPacket->AddMessage(lAttach);
-	lAttach->Store(lPacket, pObject1->GetInstanceId(), pObject2->GetInstanceId(), (Lepra::uint16)pId1, (Lepra::uint16)pId2);
+	lAttach->Store(lPacket, pObject1->GetInstanceId(), pObject2->GetInstanceId(), (uint16)pId1, (uint16)pId2);
 
 	BroadcastPacket(0, lPacket, true);
 
@@ -860,7 +860,7 @@ void GameServerManager::BroadcastCreateObject(Cure::ContextObject* pObject)
 	Cure::MessageCreateObject* lCreate = (Cure::MessageCreateObject*)GetNetworkAgent()->
 		GetPacketFactory()->GetMessageFactory()->Allocate(Cure::MESSAGE_TYPE_CREATE_OBJECT);
 	lPacket->AddMessage(lCreate);
-	lCreate->Store(lPacket, pObject->GetInstanceId(), Lepra::UnicodeStringUtility::ToOwnCode(pObject->GetClassId()));
+	lCreate->Store(lPacket, pObject->GetInstanceId(), wstrutil::ToOwnCode(pObject->GetClassId()));
 	BroadcastPacket(0, lPacket, true);
 	GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
 
@@ -882,7 +882,7 @@ void GameServerManager::BroadcastDeleteObject(Cure::GameObjectId pInstanceId)
 	for (; x != mAccountClientTable.End(); ++x)
 	{
 		const Client* lClient = x.GetObject();
-		Lepra::GameSocket* lSocket = lClient->GetUserConnection()->GetSocket();
+		GameSocket* lSocket = lClient->GetUserConnection()->GetSocket();
 		if (lSocket)
 		{
 			GetNetworkAgent()->PlaceInSendBuffer(true, lSocket, lPacket);
@@ -914,7 +914,7 @@ void GameServerManager::SendCreateAllObjects(Client* pClient)
 			// Store creation info.
 			lPacket->AddMessage(lCreateMessage);
 			lCreateMessage->Store(lPacket, lObject->GetInstanceId(),
-				Lepra::UnicodeStringUtility::ToOwnCode(lObject->GetClassId()));
+				wstrutil::ToOwnCode(lObject->GetClassId()));
 
 			// Store positional info.
 			lPacket->AddMessage(lPositionMessage);
@@ -944,7 +944,7 @@ void GameServerManager::BroadcastObjectPosition(Cure::GameObjectId pInstanceId,
 	lPacket->AddMessage(lPosition);
 	lPosition->Store(lPacket, pInstanceId, GetTimeManager()->GetCurrentPhysicsFrame(), pPosition);
 
-	Lepra::ScopeLock lTickLock(GetTickLock());
+	ScopeLock lTickLock(GetTickLock());
 	BroadcastPacket(pExcludeClient, lPacket, pSafe);
 
 	GetNetworkAgent()->GetPacketFactory()->Release(lPacket);

@@ -28,12 +28,12 @@ bool GeometryReference::IsGeometryReference()
 	return true;
 }
 
-void GeometryReference::SetOffsetTransformation(const Lepra::TransformationF& pOffset)
+void GeometryReference::SetOffsetTransformation(const TransformationF& pOffset)
 {
 	mOffset = pOffset;
 }
 
-const Lepra::TransformationF& GeometryReference::GetTransformation() const
+const TransformationF& GeometryReference::GetTransformation() const
 {
 	mReturnTransformation = GetBaseTransformation();
 	mReturnTransformation.GetPosition() += mReturnTransformation.GetOrientation() * mOffset.GetPosition();
@@ -91,12 +91,12 @@ float* GeometryReference::GetUVData(unsigned int pUVSet) const
 	return mGeometry->GetUVData(pUVSet);
 }
 
-Lepra::uint32* GeometryReference::GetIndexData() const
+uint32* GeometryReference::GetIndexData() const
 {
 	return mGeometry->GetIndexData();
 }
 
-Lepra::uint8* GeometryReference::GetColorData() const
+uint8* GeometryReference::GetColorData() const
 {
 	return mGeometry->GetColorData();
 }

@@ -48,9 +48,9 @@ public:
 	typedef intptr_t SoundInstanceID;
 
 	// LoadSound2D/3D() loads an entire sound into memory. Returns the handle to the sound.
-	virtual SoundID LoadSound2D(const Lepra::String& pFileName, LoopMode pLoopMode, int pPriority) = 0;
-	virtual SoundID LoadSound3D(const Lepra::String& pFileName, LoopMode pLoopMode, int pPriority) = 0;
-	virtual SoundID LoadStream(const Lepra::String& pFileName, LoopMode pLoopMode, int pPriority) = 0;
+	virtual SoundID LoadSound2D(const str& pFileName, LoopMode pLoopMode, int pPriority) = 0;
+	virtual SoundID LoadSound3D(const str& pFileName, LoopMode pLoopMode, int pPriority) = 0;
+	virtual SoundID LoadStream(const str& pFileName, LoopMode pLoopMode, int pPriority) = 0;
 
 	virtual void Release(SoundID pSoundID) = 0;
 
@@ -90,14 +90,14 @@ public:
 		Orientation in world space.
 	*/
 
-	virtual void SetSoundPosition(SoundInstanceID pSoundIID, const Lepra::Vector3DF& pPos, const Lepra::Vector3DF& pVel) = 0;
-	virtual void GetSoundPosition(SoundInstanceID pSoundIID, Lepra::Vector3DF& pPos, Lepra::Vector3DF& pVel) = 0;
+	virtual void SetSoundPosition(SoundInstanceID pSoundIID, const Vector3DF& pPos, const Vector3DF& pVel) = 0;
+	virtual void GetSoundPosition(SoundInstanceID pSoundIID, Vector3DF& pPos, Vector3DF& pVel) = 0;
 
 	virtual void SetCurrentListener(int pListenerIndex, int pListenerCount) = 0;
-	virtual void SetListenerPosition(const Lepra::Vector3DF& pPos, const Lepra::Vector3DF& pVel,
-		const Lepra::Vector3DF& pUp, const Lepra::Vector3DF& pForward) = 0;
-	virtual void GetListenerPosition(Lepra::Vector3DF& pPos, Lepra::Vector3DF& pVel,
-		Lepra::Vector3DF& pUp, Lepra::Vector3DF& pForward) = 0;
+	virtual void SetListenerPosition(const Vector3DF& pPos, const Vector3DF& pVel,
+		const Vector3DF& pUp, const Vector3DF& pForward) = 0;
+	virtual void GetListenerPosition(Vector3DF& pPos, Vector3DF& pVel,
+		Vector3DF& pUp, Vector3DF& pForward) = 0;
 
 	// 0 removes the doppler effect, values greater than 1 exaggerates the effect.
 	// The speed of sound using a doppler factor of 1 is 340 m/s.

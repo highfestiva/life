@@ -33,7 +33,7 @@ namespace Life
 
 GameClientSlaveManager::GameClientSlaveManager(GameClientMasterTicker* pMaster, Cure::RuntimeVariableScope* pVariableScope,
 	Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager, int pSlaveIndex,
-	const Lepra::PixelRect& pRenderArea):
+	const PixelRect& pRenderArea):
 	Cure::GameManager(pVariableScope, pResourceManager, false),
 	mMaster(pMaster),
 	mUiManager(pUiManager),
@@ -71,7 +71,7 @@ void GameClientSlaveManager::LoadSettings()
 	GetConsoleManager()->ExecuteCommand(_T("execute-file -i ")+GetApplicationCommandFilename());
 }
 
-void GameClientSlaveManager::SetRenderArea(const Lepra::PixelRect& pRenderArea)
+void GameClientSlaveManager::SetRenderArea(const PixelRect& pRenderArea)
 {
 	mRenderArea = pRenderArea;
 	if (mLoginWindow)
@@ -91,7 +91,7 @@ void GameClientSlaveManager::SetRenderArea(const Lepra::PixelRect& pRenderArea)
 bool GameClientSlaveManager::Open()
 {
 	Close();
-	Lepra::ScopeLock lLock(GetTickLock());
+	ScopeLock lLock(GetTickLock());
 	bool lOk = Reset();
 	if (lOk)
 	{
@@ -102,7 +102,7 @@ bool GameClientSlaveManager::Open()
 
 void GameClientSlaveManager::Close()
 {
-	Lepra::ScopeLock lLock(GetTickLock());
+	ScopeLock lLock(GetTickLock());
 
 	// Drop all physics and renderer objects.
 	GetContext()->ClearObjects();
@@ -135,7 +135,7 @@ GameClientMasterTicker* GameClientSlaveManager::GetMaster() const
 
 bool GameClientSlaveManager::Render()
 {
-	Lepra::ScopeLock lLock(GetTickLock());
+	ScopeLock lLock(GetTickLock());
 
 	UpdateCameraPosition();
 
@@ -178,15 +178,15 @@ void GameClientSlaveManager::ToggleConsole()
 
 
 
-void GameClientSlaveManager::RequestLogin(const Lepra::String& pServerAddress, const Cure::LoginId& pLoginToken)
+void GameClientSlaveManager::RequestLogin(const str& pServerAddress, const Cure::LoginId& pLoginToken)
 {
 	//mMaster->RemoveSlave(this);
 
-	Lepra::ScopeLock lLock(GetTickLock());
+	ScopeLock lLock(GetTickLock());
 
 	CloseLoginGui();
 
-	mConnectUserName = Lepra::UnicodeStringUtility::ToCurrentCode(pLoginToken.GetName());
+	mConnectUserName = wstrutil::ToCurrentCode(pLoginToken.GetName());
 	mConnectServerAddress = pServerAddress;
 	mDisconnectReason = _T("Connect failed.");
 	mIsReset = false;
@@ -204,7 +204,7 @@ void GameClientSlaveManager::Logout()
 		GetNetworkClient()->Disconnect(true);
 		for (int x = 0; !mIsResetComplete && x < 10; ++x)
 		{
-			Lepra::Thread::Sleep(0.05);
+			Thread::Sleep(0.05);
 		}
 	}
 }
@@ -265,10 +265,10 @@ int GameClientSlaveManager::GetSlaveIndex() const
 
 
 
-Lepra::String GameClientSlaveManager::GetApplicationCommandFilename() const
+str GameClientSlaveManager::GetApplicationCommandFilename() const
 {
 	return (Application::GetIoFile(
-		_T("Application")+Lepra::StringUtility::IntToString(mSlaveIndex, 10),
+		_T("Application")+strutil::IntToString(mSlaveIndex, 10),
 		_T("lsh")));
 }
 
@@ -276,7 +276,7 @@ Lepra::String GameClientSlaveManager::GetApplicationCommandFilename() const
 
 bool GameClientSlaveManager::Reset()	// Run when disconnected. Removes all objects and displays login GUI.
 {
-	Lepra::ScopeLock lLock(GetTickLock());
+	ScopeLock lLock(GetTickLock());
 
 	mIsReset = true;
 
@@ -295,7 +295,7 @@ bool GameClientSlaveManager::Reset()	// Run when disconnected. Removes all objec
 	}
 
 	mCameraPosition.Set(0, -200, 5);
-	mCameraOrientation.Set(Lepra::PIF/2.0f, Lepra::PIF/2.0f, 0);
+	mCameraOrientation.Set(PIF/2.0f, PIF/2.0f, 0);
 
 	mObjectFrameIndexMap.clear();
 
@@ -319,7 +319,7 @@ void GameClientSlaveManager::CloseLoginGui()
 {
 	if (mLoginWindow)
 	{
-		Lepra::ScopeLock lLock(GetTickLock());
+		ScopeLock lLock(GetTickLock());
 		mUiManager->GetDesktopWindow()->RemoveChild(mLoginWindow, 0);
 		delete (mLoginWindow);
 		mLoginWindow = 0;
@@ -378,9 +378,9 @@ void GameClientSlaveManager::TickUiUpdate()
 	{
 		// Target position is <cam> distance from the avatar along a straight line
 		// (in the XY plane) to where the camera currently is.
-		const Lepra::Vector3DF lAvatarPosition(lObject->GetPosition());
-		const Lepra::Vector3DF lAvatarXyPosition(lObject->GetPosition().x, lObject->GetPosition().y, mCameraPosition.z);
-		Lepra::Vector3DF lTargetCameraPosition(mCameraPosition);
+		const Vector3DF lAvatarPosition(lObject->GetPosition());
+		const Vector3DF lAvatarXyPosition(lObject->GetPosition().x, lObject->GetPosition().y, mCameraPosition.z);
+		Vector3DF lTargetCameraPosition(mCameraPosition);
 		const float lTargetCameraXyDistance = 20.0f;
 		const float lCurrentCameraXyDistance = lTargetCameraPosition.GetDistance(lAvatarXyPosition);
 		lTargetCameraPosition = lAvatarXyPosition + (lTargetCameraPosition-lAvatarXyPosition)*(lTargetCameraXyDistance/lCurrentCameraXyDistance);
@@ -395,9 +395,9 @@ void GameClientSlaveManager::TickUiUpdate()
 
 		/*// Temporary: changed to "cam stay behind" mode.
 		lTargetCameraPosition = lObject->GetOrientation() *
-			Lepra::Vector3DF(0, -lTargetCameraXyDistance, lTargetCameraXyDistance/4) +
+			Vector3DF(0, -lTargetCameraXyDistance, lTargetCameraXyDistance/4) +
 			lAvatarPosition;
-		static Lepra::Vector3DF s = lTargetCameraPosition;
+		static Vector3DF s = lTargetCameraPosition;
 		lTargetCameraPosition = s;*/
 
 		// Camera moves in a "moving average" kinda curve (halfs the distance in x seconds).
@@ -408,13 +408,13 @@ void GameClientSlaveManager::TickUiUpdate()
 			lMovingAveragePart = 0.8f;
 		}
 		//lMovingAveragePart = 1;
-		mCameraPosition = Lepra::Math::Lerp<Lepra::Vector3DF, float>(mCameraPosition, lTargetCameraPosition, lMovingAveragePart);
+		mCameraPosition = Math::Lerp<Vector3DF, float>(mCameraPosition, lTargetCameraPosition, lMovingAveragePart);
 
 		// "Roll" camera towards avatar.
 		const float lNewTargetCameraXyDistance = mCameraPosition.GetDistance(lAvatarXyPosition);
 		const float lNewTargetCameraDistance = mCameraPosition.GetDistance(lAvatarPosition);
-		Lepra::Vector3DF lTargetCameraOrientation;
-		lTargetCameraOrientation.Set(::asin((mCameraPosition.x-lAvatarXyPosition.x)/lNewTargetCameraXyDistance) + Lepra::PIF/2,
+		Vector3DF lTargetCameraOrientation;
+		lTargetCameraOrientation.Set(::asin((mCameraPosition.x-lAvatarXyPosition.x)/lNewTargetCameraXyDistance) + PIF/2,
 			::acos((lAvatarPosition.z-mCameraPosition.z)/lNewTargetCameraDistance), 0);
 		if (lAvatarXyPosition.y-mCameraPosition.y < 0)
 		{
@@ -422,10 +422,10 @@ void GameClientSlaveManager::TickUiUpdate()
 		}
 		float lYawChange = lTargetCameraOrientation.x-mCameraOrientation.x;
 		lTargetCameraOrientation.z = -lYawChange;
-		Lepra::Math::RangeAngles(mCameraOrientation.x, lTargetCameraOrientation.x);
-		Lepra::Math::RangeAngles(mCameraOrientation.y, lTargetCameraOrientation.y);
-		Lepra::Math::RangeAngles(mCameraOrientation.z, lTargetCameraOrientation.z);
-		mCameraOrientation = Lepra::Math::Lerp<Lepra::Vector3DF, float>(mCameraOrientation, lTargetCameraOrientation, lMovingAveragePart);
+		Math::RangeAngles(mCameraOrientation.x, lTargetCameraOrientation.x);
+		Math::RangeAngles(mCameraOrientation.y, lTargetCameraOrientation.y);
+		Math::RangeAngles(mCameraOrientation.z, lTargetCameraOrientation.z);
+		mCameraOrientation = Math::Lerp<Vector3DF, float>(mCameraOrientation, lTargetCameraOrientation, lMovingAveragePart);
 	}
 }
 
@@ -612,9 +612,9 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 			mLog.Infof(_T("Got remote status %i with ID %u."), lRemoteStatus, lMessageStatus->GetInteger());
 			if (lRemoteStatus != Cure::REMOTE_OK)
 			{
-				Lepra::UnicodeString lErrorMessage;
+				wstr lErrorMessage;
 				lMessageStatus->GetMessageString(lErrorMessage);
-				mDisconnectReason = Lepra::UnicodeStringUtility::ToCurrentCode(lErrorMessage);
+				mDisconnectReason = wstrutil::ToCurrentCode(lErrorMessage);
 				mLog.Warning(mDisconnectReason);
 				GetNetworkClient()->Disconnect(false);
 			}
@@ -628,7 +628,7 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 			}
 			else
 			{
-				Lepra::UnicodeString lChatMessage;
+				wstr lChatMessage;
 				lMessageStatus->GetMessageString(lChatMessage);
 				if (lMessageStatus->GetInteger() == 0)
 				{
@@ -638,7 +638,7 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 				{
 					lChatMessage = L"<Player?>: "+lChatMessage;
 				}
-				mLog.Headline(Lepra::UnicodeStringUtility::ToCurrentCode(lChatMessage));
+				mLog.Headline(wstrutil::ToCurrentCode(lChatMessage));
 			}
 		}
 		break;
@@ -651,10 +651,10 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 		case Cure::MESSAGE_TYPE_CREATE_OBJECT:
 		{
 			Cure::MessageCreateObject* lMessageCreateObject = (Cure::MessageCreateObject*)pMessage;
-			Lepra::UnicodeString lClassId;
+			wstr lClassId;
 			lMessageCreateObject->GetClassId(lClassId);
 			CreateObject(lMessageCreateObject->GetObjectId(),
-				Lepra::UnicodeStringUtility::ToCurrentCode(lClassId),
+				wstrutil::ToCurrentCode(lClassId),
 				Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
 		}
 		break;
@@ -668,7 +668,7 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 		{
 			Cure::MessageObjectPosition* lMessageMovement = (Cure::MessageObjectPosition*)pMessage;
 			Cure::GameObjectId lInstanceId = lMessageMovement->GetObjectId();
-			Lepra::int32 lFrameIndex = lMessageMovement->GetFrameIndex();
+			int32 lFrameIndex = lMessageMovement->GetFrameIndex();
 			Cure::ObjectPositionalData& lData = lMessageMovement->GetPositionalData();
 			SetMovement(lInstanceId, lFrameIndex, lData);
 
@@ -701,7 +701,7 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 	}
 }
 
-void GameClientSlaveManager::ProcessNumber(Cure::MessageNumber::InfoType pType, Lepra::int32 pInteger, Lepra::float32 pFloat)
+void GameClientSlaveManager::ProcessNumber(Cure::MessageNumber::InfoType pType, int32 pInteger, float32 pFloat)
 {
 	switch (pType)
 	{
@@ -725,8 +725,8 @@ void GameClientSlaveManager::ProcessNumber(Cure::MessageNumber::InfoType pType, 
 				const float lPingTime = GetTimeManager()->ConvertPhysicsFramesToSeconds(GetTimeManager()->GetCurrentPhysicsFrame()-pInteger);
 				const float lServerStriveTime = GetTimeManager()->ConvertPhysicsFramesToSeconds((int)pFloat)*2;
 				mLog.Infof(_T("Pong: this=%ss, server sim strives to be x2=%ss ahead, (self=%s)."),
-					Lepra::Number::ConvertToPostfixNumber(lPingTime, 2).c_str(),
-					Lepra::Number::ConvertToPostfixNumber(lServerStriveTime, 2).c_str(),
+					Number::ConvertToPostfixNumber(lPingTime, 2).c_str(),
+					Number::ConvertToPostfixNumber(lServerStriveTime, 2).c_str(),
 					GetNetworkClient()->GetSocket()->GetLocalAddress().GetAsString().c_str());
 			}
 		}
@@ -745,7 +745,7 @@ void GameClientSlaveManager::ProcessNumber(Cure::MessageNumber::InfoType pType, 
 	}
 }
 
-bool GameClientSlaveManager::CreateObject(Cure::GameObjectId pInstanceId, const Lepra::String& pClassId, Cure::NetworkObjectType pNetworkType)
+bool GameClientSlaveManager::CreateObject(Cure::GameObjectId pInstanceId, const str& pClassId, Cure::NetworkObjectType pNetworkType)
 {
 	Cure::ContextObject* lPreviousObject = GetContext()->GetObject(pInstanceId, true);
 	//assert(!lPreviousObject);
@@ -762,7 +762,7 @@ bool GameClientSlaveManager::CreateObject(Cure::GameObjectId pInstanceId, const 
 	return (true);
 }
 
-Cure::ContextObject* GameClientSlaveManager::CreateContextObject(const Lepra::String& pClassId) const
+Cure::ContextObject* GameClientSlaveManager::CreateContextObject(const str& pClassId) const
 {
 	return (new UiCure::CppContextObject(pClassId, mUiManager));
 }
@@ -788,7 +788,7 @@ void GameClientSlaveManager::OnLoadCompleted(Cure::ContextObject* pObject, bool 
 	}
 }
 
-void GameClientSlaveManager::SetMovement(Cure::GameObjectId pInstanceId, Lepra::int32 pFrameIndex, Cure::ObjectPositionalData& pData)
+void GameClientSlaveManager::SetMovement(Cure::GameObjectId pInstanceId, int32 pFrameIndex, Cure::ObjectPositionalData& pData)
 {
 	ObjectFrameIndexMap::iterator x = mObjectFrameIndexMap.find(pInstanceId);
 	if (x == mObjectFrameIndexMap.end())
@@ -801,7 +801,7 @@ void GameClientSlaveManager::SetMovement(Cure::GameObjectId pInstanceId, Lepra::
 	{
 		x->second = pFrameIndex;
 
-		//Lepra::String s = Lepra::StringUtility::Format(_T("client %i at frame %i"), pClientIndex, pFrameIndex);
+		//str s = strutil::Format(_T("client %i at frame %i"), pClientIndex, pFrameIndex);
 		//log_debug(_T("Client set pos of other client"), s);
 		Cure::ContextObject* lObject = GetContext()->GetObject(pInstanceId, true);
 		if (lObject)
@@ -819,7 +819,7 @@ void GameClientSlaveManager::SetMovement(Cure::GameObjectId pInstanceId, Lepra::
 	}
 }
 
-void GameClientSlaveManager::OnCollision(const Lepra::Vector3DF& pForce, const Lepra::Vector3DF& pTorque,
+void GameClientSlaveManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque,
 	Cure::ContextObject* pObject1, Cure::ContextObject* pObject2)
 {
 	if (pObject2 && pObject1 != pObject2 && pObject1->GetInstanceId() == mAvatarId &&
@@ -917,21 +917,21 @@ Cure::NetworkClient* GameClientSlaveManager::GetNetworkClient() const
 
 void GameClientSlaveManager::UpdateCameraPosition()
 {
-	Lepra::TransformationF lCameraTransform;
+	TransformationF lCameraTransform;
 	lCameraTransform.SetPosition(mCameraPosition);
 
 	const float lTheta = mCameraOrientation.x;
 	const float lPhi = mCameraOrientation.y;
 	const float lGimbal = mCameraOrientation.z;
-	Lepra::RotationMatrixF lRotation;
+	RotationMatrixF lRotation;
 	lRotation.MakeIdentity();
-	lRotation.RotateAroundWorldX(Lepra::PIF/2-lPhi);
-	lRotation.RotateAroundWorldZ(lTheta-Lepra::PIF/2);
+	lRotation.RotateAroundWorldX(PIF/2-lPhi);
+	lRotation.RotateAroundWorldZ(lTheta-PIF/2);
 	lRotation.RotateAroundOwnY(lGimbal);
 	lCameraTransform.SetOrientation(lRotation);
 
 	const float lFrameTime = GetTimeManager()->GetNormalFrameTime();
-	Lepra::Vector3DF lVelocity = (mCameraPosition-mCameraPreviousPosition) / lFrameTime;
+	Vector3DF lVelocity = (mCameraPosition-mCameraPreviousPosition) / lFrameTime;
 	mUiManager->SetCameraPosition(lCameraTransform);
 	if (mSlaveIndex == 1)	// TODO: replace with something thought-through.
 	{
@@ -948,12 +948,12 @@ void GameClientSlaveManager::DrawAsyncDebugInfo()
 
 	// Draw send and receive staples.
 	int lCount = CURE_RTVAR_TRYGET(GetVariableScope(), RTVAR_DEBUG_NET_SENDPOSCNT, 0);
-	DrawDebugStaple(0, lCount*10, Lepra::Color(255, 0, 0));
+	DrawDebugStaple(0, lCount*10, Color(255, 0, 0));
 	lCount = CURE_RTVAR_TRYGET(GetVariableScope(), RTVAR_DEBUG_NET_RECVPOSCNT, 0);
-	DrawDebugStaple(1, lCount*10, Lepra::Color(0, 255, 0));
+	DrawDebugStaple(1, lCount*10, Color(0, 255, 0));
 }
 
-void GameClientSlaveManager::DrawDebugStaple(int pIndex, int pHeight, const Lepra::Color& pColor)
+void GameClientSlaveManager::DrawDebugStaple(int pIndex, int pHeight, const Color& pColor)
 {
 	if (pHeight > 0)
 	{
@@ -972,7 +972,7 @@ void GameClientSlaveManager::DrawSyncDebugInfo()
 	const bool lDebugShapes = CURE_RTVAR_TRYGET(GetVariableScope(), RTVAR_DEBUG_3D_ENABLESHAPES, false);
 	if (lDebugAxes || lDebugJoints || lDebugShapes)
 	{
-		Lepra::ScopeLock lLock(GetTickLock());
+		ScopeLock lLock(GetTickLock());
 		mUiManager->GetRenderer()->ResetClippingRect();
 		mUiManager->GetRenderer()->SetClippingRect(mRenderArea);
 		mUiManager->GetRenderer()->SetViewport(mRenderArea);

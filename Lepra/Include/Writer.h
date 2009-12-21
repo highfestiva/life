@@ -52,7 +52,7 @@ public:
 	void SetWriterEndian(Endian::EndianType pWriterEndian);
 	Endian::EndianType GetWriterEndian() const;
 	
-	const String& GetStreamName();
+	const str& GetStreamName();
 	
 	// Writes the length of the string (excluding the implicit null-character).
 	template<class _T> IOError WriteString(const std::basic_string<_T>& pString);
@@ -71,7 +71,7 @@ private:
 template<class _T>
 IOError Writer::WriteString(const std::basic_string<_T>& pString)
 {
-	Lepra::AnsiString lUtf8 = Lepra::AnsiStringUtility::ToOwnCode(pString);
+	astr lUtf8 = astrutil::ToOwnCode(pString);
 	return (WriteData(lUtf8.c_str(), (unsigned)lUtf8.length()));
 }
 

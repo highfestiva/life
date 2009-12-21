@@ -98,7 +98,7 @@ JpegLoader::~JpegLoader()
 {
 }
 
-JpegLoader::Status JpegLoader::Load(const String& pFileName, Canvas& pCanvas, ProgressCallback* pProgress)
+JpegLoader::Status JpegLoader::Load(const str& pFileName, Canvas& pCanvas, ProgressCallback* pProgress)
 {
 	Status lStatus = STATUS_SUCCESS;
 	MetaFile lFile;
@@ -118,7 +118,7 @@ JpegLoader::Status JpegLoader::Load(const String& pFileName, Canvas& pCanvas, Pr
 	return lStatus;
 }
 
-JpegLoader::Status JpegLoader::Save(const String& pFileName, const Canvas& pCanvas)
+JpegLoader::Status JpegLoader::Save(const str& pFileName, const Canvas& pCanvas)
 {
 	Status lStatus = STATUS_SUCCESS;
 	DiskFile lFile;
@@ -138,7 +138,7 @@ JpegLoader::Status JpegLoader::Save(const String& pFileName, const Canvas& pCanv
 	return lStatus;
 }
 
-JpegLoader::Status JpegLoader::Load(const String& pArchiveName, const String& pFileName, Canvas& pCanvas, ProgressCallback* pProgress)
+JpegLoader::Status JpegLoader::Load(const str& pArchiveName, const str& pFileName, Canvas& pCanvas, ProgressCallback* pProgress)
 {
 	Status lStatus = STATUS_SUCCESS;
 	ArchiveFile lFile(pArchiveName);
@@ -158,7 +158,7 @@ JpegLoader::Status JpegLoader::Load(const String& pArchiveName, const String& pF
 	return lStatus;
 }
 
-JpegLoader::Status JpegLoader::Save(const String& pArchiveName, const String& pFileName, const Canvas& pCanvas)
+JpegLoader::Status JpegLoader::Save(const str& pArchiveName, const str& pFileName, const Canvas& pCanvas)
 {
 	Status lStatus = STATUS_SUCCESS;
 	ArchiveFile lFile(pArchiveName);

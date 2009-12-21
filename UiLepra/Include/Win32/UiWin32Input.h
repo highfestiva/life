@@ -38,8 +38,8 @@ public:
 	// (Only useful with analogue elements).
 	void SetValue(int pValue);
 
-	Lepra::String GetCalibration() const;
-	bool SetCalibration(const Lepra::String& pData);
+	str GetCalibration() const;
+	bool SetCalibration(const str& pData);
 
 protected:
 private:
@@ -53,8 +53,8 @@ private:
 	LPCDIDEVICEOBJECTINSTANCE mElement;
 	DIOBJECTDATAFORMAT mDataFormat;
 
-	Lepra::int32 mMin;
-	Lepra::int32 mMax;
+	int32 mMin;
+	int32 mMax;
 
 	LOG_CLASS_DECLARE();
 };

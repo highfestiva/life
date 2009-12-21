@@ -28,19 +28,19 @@ public:
 	typedef Cure::GameManager Parent;
 
 	GameServerManager(Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
-		Lepra::InteractiveConsoleLogListener* pConsoleLogger);
+		InteractiveConsoleLogListener* pConsoleLogger);
 	virtual ~GameServerManager();
 
 	bool Tick();
 
-	Lepra::UnicodeStringUtility::StringVector ListUsers();
-	bool BroadcastChatMessage(const Lepra::UnicodeString& pMessage);
-	bool SendChatMessage(const Lepra::UnicodeString& pClientUserName, const Lepra::UnicodeString& pMessage);
+	wstrutil::strvec ListUsers();
+	bool BroadcastChatMessage(const wstr& pMessage);
+	bool SendChatMessage(const wstr& pClientUserName, const wstr& pMessage);
 
 	int GetLoggedInClientCount() const;
 
 private:
-	void Logout(Cure::UserAccount::AccountId pAccountId, const Lepra::String& pReason);
+	void Logout(Cure::UserAccount::AccountId pAccountId, const str& pReason);
 	void DeleteAllClients();
 
 	Client* GetClientByAccount(Cure::UserAccount::AccountId pAccountId) const;
@@ -63,9 +63,9 @@ private:
 
 	void BroadcastAvatar(Client* pClient);
 
-	Cure::ContextObject* CreateContextObject(const Lepra::String& pClassId) const;
+	Cure::ContextObject* CreateContextObject(const str& pClassId) const;
 	void OnLoadCompleted(Cure::ContextObject* pObject, bool pOk);
-	void OnCollision(const Lepra::Vector3DF& pForce, const Lepra::Vector3DF& pTorque,
+	void OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque,
 		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2);
 	void OnStopped(Cure::ContextObject* pObject, TBC::PhysicsManager::BodyID pBodyId);
 	bool OnPhysicsSend(Cure::ContextObject* pObject);
@@ -84,15 +84,15 @@ private:
 
 	typedef std::list<Cure::MessageObjectMovement*> MovementList;
 	typedef std::vector<MovementList> MovementArrayList;
-	typedef Lepra::HashTable<Cure::UserAccount::AccountId, Client*> AccountClientTable;
-	typedef Lepra::HashTable<Cure::UserAccount::AccountId, Client*> AvatarClientTable;
+	typedef HashTable<Cure::UserAccount::AccountId, Client*> AccountClientTable;
+	typedef HashTable<Cure::UserAccount::AccountId, Client*> AvatarClientTable;
 
 	Cure::UserAccountManager* mUserAccountManager;
 	AccountClientTable mAccountClientTable;
 	Cure::ContextObject* mTerrainObject;	// TODO: remove when applicable.
 	Cure::ContextObject* mBoxObject;	// TODO: remove when applicable.
 	MovementArrayList mMovementArrayList;
-	mutable Lepra::Timer mPowerSaveTimer;
+	mutable Timer mPowerSaveTimer;
 
 	LOG_CLASS_DECLARE();
 };

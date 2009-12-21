@@ -15,7 +15,7 @@ namespace UiTbc
 
 
 
-Label::Label(bool pSelectable, const Lepra::String& pName):
+Label::Label(bool pSelectable, const str& pName):
 	RectComponent(pName),
 	mIconID(Painter::INVALID_IMAGEID),
 	mText(_T("")),
@@ -28,10 +28,10 @@ Label::Label(bool pSelectable, const Lepra::String& pName):
 	mLCLImageID(Painter::INVALID_IMAGEID),
 	mLCLSelectedImageID(Painter::INVALID_IMAGEID)
 {
-	SetFontColor(Lepra::OFF_BLACK);
+	SetFontColor(OFF_BLACK);
 }
 
-Label::Label(const Lepra::Color& pColor, const Lepra::String& pName):
+Label::Label(const Color& pColor, const str& pName):
 	RectComponent(pColor, pName),
 	mIconID(Painter::INVALID_IMAGEID),
 	mText(_T("")),
@@ -44,14 +44,14 @@ Label::Label(const Lepra::Color& pColor, const Lepra::String& pName):
 	mLCLImageID(Painter::INVALID_IMAGEID),
 	mLCLSelectedImageID(Painter::INVALID_IMAGEID)
 {
-	SetFontColor(Lepra::OFF_BLACK);
+	SetFontColor(OFF_BLACK);
 }
 
-Label::Label(const Lepra::Color& pTopLeftColor,
-	     const Lepra::Color& pTopRightColor,
-	     const Lepra::Color& pBottomRightColor,
-	     const Lepra::Color& pBottomLeftColor,
-	     const Lepra::String& pName) :
+Label::Label(const Color& pTopLeftColor,
+	     const Color& pTopRightColor,
+	     const Color& pBottomRightColor,
+	     const Color& pBottomLeftColor,
+	     const str& pName) :
 	RectComponent(pTopLeftColor, pTopRightColor, pBottomRightColor, pBottomLeftColor, pName),
 	mIconID(Painter::INVALID_IMAGEID),
 	mText(_T("")),
@@ -64,10 +64,10 @@ Label::Label(const Lepra::Color& pTopLeftColor,
 	mLCLImageID(Painter::INVALID_IMAGEID),
 	mLCLSelectedImageID(Painter::INVALID_IMAGEID)
 {
-	SetFontColor(Lepra::OFF_BLACK);
+	SetFontColor(OFF_BLACK);
 }
 
-Label::Label(Painter::ImageID pImageID, const Lepra::String& pName):
+Label::Label(Painter::ImageID pImageID, const str& pName):
 	RectComponent(pImageID, pName),
 	mIconID(Painter::INVALID_IMAGEID),
 	mText(_T("")),
@@ -80,10 +80,10 @@ Label::Label(Painter::ImageID pImageID, const Lepra::String& pName):
 	mLCLImageID(Painter::INVALID_IMAGEID),
 	mLCLSelectedImageID(Painter::INVALID_IMAGEID)
 {
-	SetFontColor(Lepra::OFF_BLACK);
+	SetFontColor(OFF_BLACK);
 }
 
-Label::Label(const Lepra::Color& pColor, const Lepra::Color& pSelectedColor, const Lepra::String& pName):
+Label::Label(const Color& pColor, const Color& pSelectedColor, const str& pName):
 	RectComponent(pColor, pName),
 	mIconID(Painter::INVALID_IMAGEID),
 	mText(_T("")),
@@ -96,21 +96,21 @@ Label::Label(const Lepra::Color& pColor, const Lepra::Color& pSelectedColor, con
 	mLCLImageID(Painter::INVALID_IMAGEID),
 	mLCLSelectedImageID(Painter::INVALID_IMAGEID)
 {
-	SetFontColor(Lepra::OFF_BLACK);
+	SetFontColor(OFF_BLACK);
 
 	mColor[0] = pColor;
 	mSelectedColor[0] = pSelectedColor;
 }
 
-Label::Label(const Lepra::Color& pTopLeftColor,
-		const Lepra::Color& pTopRightColor,
-		const Lepra::Color& pBottomRightColor,
-		const Lepra::Color& pBottomLeftColor,
-		const Lepra::Color& pSelectedTopLeftColor,
-		const Lepra::Color& pSelectedTopRightColor,
-		const Lepra::Color& pSelectedBottomRightColor,
-		const Lepra::Color& pSelectedBottomLeftColor,
-		const Lepra::String& pName) :
+Label::Label(const Color& pTopLeftColor,
+		const Color& pTopRightColor,
+		const Color& pBottomRightColor,
+		const Color& pBottomLeftColor,
+		const Color& pSelectedTopLeftColor,
+		const Color& pSelectedTopRightColor,
+		const Color& pSelectedBottomRightColor,
+		const Color& pSelectedBottomLeftColor,
+		const str& pName) :
 	RectComponent(pTopLeftColor, pTopRightColor, pBottomRightColor, pBottomLeftColor, pName),
 	mIconID(Painter::INVALID_IMAGEID),
 	mText(_T("")),
@@ -123,7 +123,7 @@ Label::Label(const Lepra::Color& pTopLeftColor,
 	mLCLImageID(Painter::INVALID_IMAGEID),
 	mLCLSelectedImageID(Painter::INVALID_IMAGEID)
 {
-	SetFontColor(Lepra::OFF_BLACK);
+	SetFontColor(OFF_BLACK);
 
 	mColor[0] = pTopLeftColor;
 	mColor[1] = pTopRightColor;
@@ -135,7 +135,7 @@ Label::Label(const Lepra::Color& pTopLeftColor,
 	mSelectedColor[3] = pSelectedBottomLeftColor;
 }
 
-Label::Label(Painter::ImageID pImageID, Painter::ImageID pSelectedImageID, Painter::ImageID pLCLImageID, Painter::ImageID pLCLSelectedImageID, const Lepra::String& pName) :
+Label::Label(Painter::ImageID pImageID, Painter::ImageID pSelectedImageID, Painter::ImageID pLCLImageID, Painter::ImageID pLCLSelectedImageID, const str& pName) :
 	RectComponent(pImageID, pName),
 	mIconID(Painter::INVALID_IMAGEID),
 	mText(_T("")),
@@ -148,7 +148,7 @@ Label::Label(Painter::ImageID pImageID, Painter::ImageID pSelectedImageID, Paint
 	mLCLImageID(pLCLImageID),
 	mLCLSelectedImageID(pLCLSelectedImageID)
 {
-	SetFontColor(Lepra::OFF_BLACK);
+	SetFontColor(OFF_BLACK);
 }
 
 
@@ -167,8 +167,8 @@ void Label::Repaint(Painter* pPainter)
 
 	pPainter->PushAttrib(Painter::ATTR_ALL);
 
-	Lepra::PixelCoords lPos(GetScreenPos());
-	Lepra::PixelRect lRect(lPos, lPos + GetSize());
+	PixelCoords lPos(GetScreenPos());
+	PixelRect lRect(lPos, lPos + GetSize());
 	pPainter->ReduceClippingRect(lRect);
 
 	int lFontHeight = pPainter->GetLineHeight();
@@ -177,7 +177,7 @@ void Label::Repaint(Painter* pPainter)
 
 	if (mIconID != Painter::INVALID_IMAGEID)
 	{
-		Lepra::PixelCoords lIconSize(lIMan->GetImageSize(mIconID));
+		PixelCoords lIconSize(lIMan->GetImageSize(mIconID));
 
 		int lIconY = lTextY + lFontHeight - lIconSize.y + 1;
 			//lRect.mTop + (lRect.GetHeight() - lIconSize.y) / 2;
@@ -204,7 +204,7 @@ void Label::Repaint(Painter* pPainter)
 		((GetSelected() == false && (mImageID == Painter::INVALID_IMAGEID || mLCLImageID == Painter::INVALID_IMAGEID)) ||
 		(GetSelected() == true && (mSelectedImageID == Painter::INVALID_IMAGEID || mLCLSelectedImageID == Painter::INVALID_IMAGEID))))
 	{
-		pPainter->SetColor(Lepra::WHITE);
+		pPainter->SetColor(WHITE);
 		pPainter->SetRenderMode(Painter::RM_XOR);
 
 		lRect.mRight--;
@@ -242,17 +242,17 @@ void Label::Repaint(Painter* pPainter)
 	pPainter->PopAttrib();
 }
 
-Lepra::PixelCoords Label::GetPreferredSize(bool pForceAdaptive)
+PixelCoords Label::GetPreferredSize(bool pForceAdaptive)
 {
 	GUIImageManager* lIMan = GetImageManager();
 
-	Lepra::PixelCoords lIconSize(0, 0);
+	PixelCoords lIconSize(0, 0);
 	if (mIconID != Painter::INVALID_IMAGEID)
 	{
 		lIconSize = lIMan->GetImageSize(mIconID);
 	}
 
-	Lepra::PixelCoords lSize(RectComponent::GetPreferredSize());
+	PixelCoords lSize(RectComponent::GetPreferredSize());
 
 	if (pForceAdaptive == true || IsAdaptive() == true)
 	{
@@ -273,9 +273,9 @@ Lepra::PixelCoords Label::GetPreferredSize(bool pForceAdaptive)
 }
 
 
-void Label::SetText(const Lepra::String& pText,
-			const Lepra::Color& pTextColor,
-			const Lepra::Color& pBackgColor,
+void Label::SetText(const str& pText,
+			const Color& pTextColor,
+			const Color& pBackgColor,
 			Painter*)
 {
 	SetFontColor(pTextColor);
@@ -285,11 +285,11 @@ void Label::SetText(const Lepra::String& pText,
 	mSelectedTextBackgColor = pBackgColor;
 }
 
-void Label::SetText(const Lepra::String& pText,
-			const Lepra::Color& pTextColor,
-			const Lepra::Color& pBackgColor,
-			const Lepra::Color& pSelectedTextColor,
-			const Lepra::Color& pSelectedBackgColor,
+void Label::SetText(const str& pText,
+			const Color& pTextColor,
+			const Color& pBackgColor,
+			const Color& pSelectedTextColor,
+			const Color& pSelectedBackgColor,
 			Painter*)
 {
 	SetFontColor(pTextColor);
@@ -303,7 +303,7 @@ void Label::OnConnectedToDesktopWindow()
 {
 }
 
-const Lepra::String& Label::GetText() const
+const str& Label::GetText() const
 {
 	return mText;
 }

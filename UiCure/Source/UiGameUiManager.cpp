@@ -50,7 +50,7 @@ GameUiManager::~GameUiManager()
 
 bool GameUiManager::Open()
 {
-	Lepra::String lRenderTypeString = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_RENDERENGINE, _T("OpenGL"));
+	str lRenderTypeString = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_RENDERENGINE, _T("OpenGL"));
 	int lDisplayWidth = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_DISPLAY_WIDTH, 640);
 	int lDisplayHeight = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_DISPLAY_HEIGHT, 480);
 	int lDisplayBpp = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_DISPLAY_BITSPERPIXEL, 0);
@@ -85,7 +85,7 @@ bool GameUiManager::Open()
 	}
 	if (!lOk)
 	{
-		Lepra::String lError(Lepra::StringUtility::Format(_T("Unsupported resolution %ux%u."), lDisplayWidth, lDisplayHeight));
+		str lError(strutil::Format(_T("Unsupported resolution %ux%u."), lDisplayWidth, lDisplayHeight));
 		if (lDisplayFullScreen)
 		{
 			mLog.Error(lError);
@@ -115,7 +115,7 @@ bool GameUiManager::Open()
 	{
 		mDisplay->AddResizeObserver(this);
 
-		mCanvas = new Lepra::Canvas(lDisplayMode.mWidth, lDisplayMode.mHeight, Lepra::Canvas::IntToBitDepth(lDisplayMode.mBitDepth));
+		mCanvas = new Canvas(lDisplayMode.mWidth, lDisplayMode.mHeight, Canvas::IntToBitDepth(lDisplayMode.mBitDepth));
 	}
 	if (lOk)
 	{
@@ -133,8 +133,8 @@ bool GameUiManager::Open()
 	if (lOk)
 	{
 		mFontManager = UiTbc::FontManager::Create(mDisplay);
-		//mFontManager->SetColor(Lepra::Color(255, 255, 255, 255), 0);
-		//mFontManager->SetColor(Lepra::Color(0, 0, 0, 0), 1);
+		//mFontManager->SetColor(Color(255, 255, 255, 255), 0);
+		//mFontManager->SetColor(Color(0, 0, 0, 0), 1);
 		mPainter->SetFontManager(mFontManager);
 
 		UiTbc::FontManager::FontId lFontId;
@@ -194,7 +194,7 @@ void GameUiManager::Close()
 {
 	// Poll system to let go of old windows.
 	UiLepra::Core::ProcessMessages();
-	Lepra::Thread::Sleep(0.05);
+	Thread::Sleep(0.05);
 	UiLepra::Core::ProcessMessages();
 
 	delete (mSound);
@@ -224,7 +224,7 @@ void GameUiManager::Close()
 
 	// Poll system to let go of old windows.
 	UiLepra::Core::ProcessMessages();
-	Lepra::Thread::Sleep(0.05);
+	Thread::Sleep(0.05);
 	UiLepra::Core::ProcessMessages();
 }
 
@@ -258,7 +258,7 @@ void GameUiManager::BeginRender()
 	}
 }
 
-void GameUiManager::Render(const Lepra::PixelRect& pArea)
+void GameUiManager::Render(const PixelRect& pArea)
 {
 	if (mDisplay->IsVisible())
 	{
@@ -324,29 +324,29 @@ UiLepra::SoundManager* GameUiManager::GetSoundManager() const
 
 
 
-void GameUiManager::SetCameraPosition(const Lepra::TransformationF& pTransform)
+void GameUiManager::SetCameraPosition(const TransformationF& pTransform)
 {
 	mRenderer->SetCameraTransformation(pTransform);
 }
 
-void GameUiManager::SetMicrophonePosition(const Lepra::TransformationF& pTransform, const Lepra::Vector3DF& pVelocity)
+void GameUiManager::SetMicrophonePosition(const TransformationF& pTransform, const Vector3DF& pVelocity)
 {
-	Lepra::Vector3DF lUp = pTransform.GetOrientation() * Lepra::Vector3DF(0,0,1);
-	Lepra::Vector3DF lForward = pTransform.GetOrientation() * Lepra::Vector3DF(0,1,0);
+	Vector3DF lUp = pTransform.GetOrientation() * Vector3DF(0,0,1);
+	Vector3DF lForward = pTransform.GetOrientation() * Vector3DF(0,1,0);
 	mSound->SetListenerPosition(pTransform.GetPosition(), pVelocity, lUp, lForward);
 }
 
 void GameUiManager::SetViewport(int pLeft, int pTop, int lDisplayWidth, int lDisplayHeight)
 {
-	mRenderer->SetViewport(Lepra::PixelRect(pLeft, pTop, pLeft+lDisplayWidth, pTop+lDisplayHeight));
-	mRenderer->SetClippingRect(Lepra::PixelRect(pLeft, pTop, pLeft+lDisplayWidth, pTop+lDisplayHeight));
+	mRenderer->SetViewport(PixelRect(pLeft, pTop, pLeft+lDisplayWidth, pTop+lDisplayHeight));
+	mRenderer->SetClippingRect(PixelRect(pLeft, pTop, pLeft+lDisplayWidth, pTop+lDisplayHeight));
 }
 
 void GameUiManager::Clear(float pRed, float pGreen, float pBlue, bool pClearDepth)
 {
 	//mDisplay->Activate();
 
-	Lepra::Color lColor;
+	Color lColor;
 	lColor.Set(pRed, pGreen, pBlue, 1.0f);
 	mRenderer->SetClearColor(lColor);
 	unsigned lClearFlags = UiTbc::Renderer::CLEAR_COLORBUFFER;
@@ -362,11 +362,11 @@ void GameUiManager::ClearDepth()
 	mRenderer->Clear(UiTbc::Renderer::CLEAR_DEPTHBUFFER);
 }
 
-void GameUiManager::PrintText(int pX, int pY, const Lepra::String& pText)
+void GameUiManager::PrintText(int pX, int pY, const str& pText)
 {
 	//mPainter->ResetClippingRect();
-	mPainter->SetColor(Lepra::Color(255, 255, 255, 255), 0);
-	mPainter->SetColor(Lepra::Color(0, 0, 0, 0), 1);
+	mPainter->SetColor(Color(255, 255, 255, 255), 0);
+	mPainter->SetColor(Color(0, 0, 0, 0), 1);
 	mPainter->PrintText(pText, pX, pY);
 }
 
@@ -427,7 +427,7 @@ void GameUiManager::UpdateSettings()
 	double lFOV = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_FOV, 90.0);
 	double lClipNear = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_CLIPNEAR, 0.1);
 	double lClipFar = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_CLIPFAR, 1000.0);
-	Lepra::String lShadowsString = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_SHADOWS, _T("VolumesOnly"));
+	str lShadowsString = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_SHADOWS, _T("VolumesOnly"));
 
 	mRenderer->SetLightsEnabled(lEnableLights);
 	mRenderer->SetAmbientLight((float)lAmbientRed, (float)lAmbientGreen, (float)lAmbientBlue);
@@ -452,7 +452,7 @@ void GameUiManager::UpdateSettings()
 
 	// ----------------------------------------
 	// 2D rendering settings.
-	Lepra::String lPaintModeString = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_2D_PAINTMODE, _T("AlphaBlend"));
+	str lPaintModeString = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_2D_PAINTMODE, _T("AlphaBlend"));
 	UiTbc::Painter::RenderMode lPainterRenderMode = UiTbc::Painter::RM_ALPHABLEND;
 	if (lPaintModeString == _T("Add"))
 	{

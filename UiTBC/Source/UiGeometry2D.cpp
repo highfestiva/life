@@ -15,12 +15,12 @@ namespace UiTbc
 
 
 
-Geometry2D::Geometry2D(Lepra::uint16 pVertexFormat, int pVertexCapacity, int pTriangleCapacity):
+Geometry2D::Geometry2D(uint16 pVertexFormat, int pVertexCapacity, int pTriangleCapacity):
 	mVertexFormat(pVertexFormat),
 	mVertexData(0),
 	mColorData(0),
 	mUVData(0),
-	mTriangleData(new Lepra::uint32[pTriangleCapacity * 3]),
+	mTriangleData(new uint32[pTriangleCapacity * 3]),
 	mVertexCapacity(0),
 	mTriangleCapacity(pTriangleCapacity),
 	mVertexCount(0),
@@ -37,7 +37,7 @@ Geometry2D::~Geometry2D()
 	delete[] mTriangleData;
 }
 
-void Geometry2D::Init(Lepra::uint16 pVertexFormat, int pVertexCapacity, int pTriangleCapacity)
+void Geometry2D::Init(uint16 pVertexFormat, int pVertexCapacity, int pTriangleCapacity)
 {
 	mVertexFormat = pVertexFormat;
 
@@ -45,7 +45,7 @@ void Geometry2D::Init(Lepra::uint16 pVertexFormat, int pVertexCapacity, int pTri
 	{
 		if (IsFlagSet(VTX_INTERLEAVED))
 		{
-			Lepra::uint16 lFlags = (mVertexFormat & (VTX_UV | VTX_RGB));
+			uint16 lFlags = (mVertexFormat & (VTX_UV | VTX_RGB));
 			switch(lFlags)
 			{
 				case 0: mVertexData = new VertexXY[pVertexCapacity]; break;
@@ -105,7 +105,7 @@ void Geometry2D::ReallocVertexBuffers(int pVertexCapacity)
 {
 	if (IsFlagSet(VTX_INTERLEAVED))
 	{
-		Lepra::uint16 lFlags = (mVertexFormat & (VTX_UV | VTX_RGB));
+		uint16 lFlags = (mVertexFormat & (VTX_UV | VTX_RGB));
 		switch(lFlags)
 		{
 			case 0: Realloc(&mVertexData, pVertexCapacity * sizeof(VertexXY), mVertexCount * sizeof(VertexXY)); break;
@@ -135,8 +135,8 @@ void Geometry2D::ReallocVertexBuffers(int pVertexCapacity)
 
 void Geometry2D::ReallocTriangleBuffer(int pTriangleCapacity)
 {
-	Lepra::uint32* lTriangleData = new Lepra::uint32[pTriangleCapacity * 3];
-	::memcpy(lTriangleData, mTriangleData, std::min(pTriangleCapacity, mTriangleCount) * 3 * sizeof(Lepra::uint32));
+	uint32* lTriangleData = new uint32[pTriangleCapacity * 3];
+	::memcpy(lTriangleData, mTriangleData, std::min(pTriangleCapacity, mTriangleCount) * 3 * sizeof(uint32));
 	delete[] mTriangleData;
 	mTriangleData = lTriangleData;
 	mTriangleCapacity = pTriangleCapacity;
@@ -160,7 +160,7 @@ void Geometry2D::AssureTriangleCapacity(int pTriangleCapacity)
 	}
 }
 
-Lepra::uint32 Geometry2D::SetVertex(float x, float y)
+uint32 Geometry2D::SetVertex(float x, float y)
 {
 	AssureVertexCapacity(mVertexCount + 1);
 
@@ -180,7 +180,7 @@ Lepra::uint32 Geometry2D::SetVertex(float x, float y)
 	return mVertexCount++;
 }
 
-Lepra::uint32 Geometry2D::SetVertex(float x, float y, float u, float v)
+uint32 Geometry2D::SetVertex(float x, float y, float u, float v)
 {
 	AssureVertexCapacity(mVertexCount + 1);
 
@@ -206,7 +206,7 @@ Lepra::uint32 Geometry2D::SetVertex(float x, float y, float u, float v)
 	return mVertexCount++;
 }
 
-Lepra::uint32 Geometry2D::SetVertex(float x, float y, float r, float g, float b)
+uint32 Geometry2D::SetVertex(float x, float y, float r, float g, float b)
 {
 	AssureVertexCapacity(mVertexCount + 1);
 
@@ -217,9 +217,9 @@ Lepra::uint32 Geometry2D::SetVertex(float x, float y, float r, float g, float b)
 		lVertexData[mVertexCount].y = y;
 		lVertexData[mVertexCount].z = 0;
 		lVertexData[mVertexCount].w = 1;
-		lVertexData[mVertexCount].mBlue  = (Lepra::uint8)(b * 255.0f);
-		lVertexData[mVertexCount].mGreen = (Lepra::uint8)(g * 255.0f);
-		lVertexData[mVertexCount].mRed   = (Lepra::uint8)(r * 255.0f);
+		lVertexData[mVertexCount].mBlue  = (uint8)(b * 255.0f);
+		lVertexData[mVertexCount].mGreen = (uint8)(g * 255.0f);
+		lVertexData[mVertexCount].mRed   = (uint8)(r * 255.0f);
 		lVertexData[mVertexCount].mAlpha = 255;
 	}
 	else
@@ -237,7 +237,7 @@ Lepra::uint32 Geometry2D::SetVertex(float x, float y, float r, float g, float b)
 	return mVertexCount++;
 }
 
-Lepra::uint32 Geometry2D::SetVertex(float x, float y, float u, float v, float r, float g, float b)
+uint32 Geometry2D::SetVertex(float x, float y, float u, float v, float r, float g, float b)
 {
 	AssureVertexCapacity(mVertexCount + 1);
 
@@ -251,9 +251,9 @@ Lepra::uint32 Geometry2D::SetVertex(float x, float y, float u, float v, float r,
 		lVertexData[mVertexCount].u = u;
 		lVertexData[mVertexCount].v = v;
 
-		lVertexData[mVertexCount].mBlue  = (Lepra::uint8)(b * 255.0f);
-		lVertexData[mVertexCount].mGreen = (Lepra::uint8)(g * 255.0f);
-		lVertexData[mVertexCount].mRed   = (Lepra::uint8)(r * 255.0f);
+		lVertexData[mVertexCount].mBlue  = (uint8)(b * 255.0f);
+		lVertexData[mVertexCount].mGreen = (uint8)(g * 255.0f);
+		lVertexData[mVertexCount].mRed   = (uint8)(r * 255.0f);
 		lVertexData[mVertexCount].mAlpha = 255;
 	}
 	else
@@ -273,7 +273,7 @@ Lepra::uint32 Geometry2D::SetVertex(float x, float y, float u, float v, float r,
 	return mVertexCount++;
 }
 
-void Geometry2D::SetTriangle(Lepra::uint32 pV1, Lepra::uint32 pV2, Lepra::uint32 pV3)
+void Geometry2D::SetTriangle(uint32 pV1, uint32 pV2, uint32 pV3)
 {
 	AssureTriangleCapacity(mTriangleCount + 1);
 
@@ -292,7 +292,7 @@ void Geometry2D::Reset()
 
 void Geometry2D::Realloc(void** pData, size_t pNewSize, size_t pBytesToCopy)
 {
-	Lepra::uint8* lNewData = new Lepra::uint8[pNewSize];
+	uint8* lNewData = new uint8[pNewSize];
 	::memcpy(lNewData, *pData, std::min(pNewSize, pBytesToCopy));
 	delete[] *pData;
 	*pData = lNewData;

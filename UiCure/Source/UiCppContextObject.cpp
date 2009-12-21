@@ -24,7 +24,7 @@ namespace UiCure
 
 
 
-CppContextObject::CppContextObject(const Lepra::String& pClassId, GameUiManager* pUiManager):
+CppContextObject::CppContextObject(const str& pClassId, GameUiManager* pUiManager):
 	Cure::CppContextObject(pClassId),
 	mUiManager(pUiManager),
 	mUiClassResource(0),
@@ -62,13 +62,13 @@ void CppContextObject::StartLoading()
 {
 	assert(mUiClassResource == 0);
 	mUiClassResource = new UserClassResource(mUiManager);
-	const Lepra::String lClassName = GetClassId()+_T(".class");	// TODO: move to central source file.
+	const str lClassName = GetClassId()+_T(".class");	// TODO: move to central source file.
 	mUiClassResource->Load(GetManager()->GetGameManager()->GetResourceManager(), lClassName,
 		UserClassResource::TypeLoadCallback(this, &CppContextObject::OnLoadClass));
 
-	if (Lepra::StringUtility::StartsWith(GetClassId(), _T("helicopter")))
+	if (strutil::StartsWith(GetClassId(), _T("helicopter")))
 	{
-		const Lepra::String lSoundName = _T("Bark.wav");
+		const str lSoundName = _T("Bark.wav");
 		mSoundResource = CreateSharedSound(lSoundName);
 		mSoundResource->Load(GetManager()->GetGameManager()->GetResourceManager(), lSoundName,
 			UserSound3dResource::TypeLoadCallback(this, &CppContextObject::OnLoadSound3d));
@@ -90,7 +90,7 @@ void CppContextObject::OnPhysicsTick()
 		return;	// Don't move UI representation of objects owned by other split screen players.
 	}
 
-	Lepra::TransformationF lPhysicsTransform;
+	TransformationF lPhysicsTransform;
 	for (size_t x = 0; x < mMeshResourceArray.size(); ++x)
 	{
 		UserGeometryReferenceResource* lResource = mMeshResourceArray[x];
@@ -111,16 +111,16 @@ void CppContextObject::OnPhysicsTick()
 		//if (GetNetworkObjectType() == Cure::NETWORK_OBJECT_REMOTE_CONTROLLED)
 		/*{
 			// Smooth (sliding average) to the physics position if we're close enough. Otherwise warp.
-			Lepra::Vector3DF lPhysicsVelocity;
+			Vector3DF lPhysicsVelocity;
 			mManager->GetGameManager()->GetPhysicsManager()->GetBodyVelocity(lNode->GetBodyId(), lPhysicsVelocity);
-			const Lepra::Vector3DF& lPosition = lGfxGeometry->GetBaseTransformation().GetPosition();
+			const Vector3DF& lPosition = lGfxGeometry->GetBaseTransformation().GetPosition();
 			const float lCloseTime = 0.5f;
 			const float lCloseStandStillDistance = 1.5f;
 			float lClose = lPhysicsVelocity.GetLength()*lCloseTime;
 			lClose = std::max(lCloseStandStillDistance, lClose);
 			if (lPosition.GetDistanceSquared(lPhysicsTransform.GetPosition()) < lClose*lClose)
 			{
-				lPhysicsTransform.SetPosition(Lepra::Math::Lerp(lPosition, lPhysicsTransform.GetPosition(), 0.1f));
+				lPhysicsTransform.SetPosition(Math::Lerp(lPosition, lPhysicsTransform.GetPosition(), 0.1f));
 			}
 		}*/
 		lGfxGeometry->SetTransformation(lPhysicsTransform);
@@ -135,9 +135,9 @@ void CppContextObject::OnPhysicsTick()
 		}
 		else
 		{
-			Lepra::Vector3DF lPosition =
+			Vector3DF lPosition =
 				mManager->GetGameManager()->GetPhysicsManager()->GetBodyPosition(lGeometry->GetBodyId());
-			Lepra::Vector3DF lVelocity;
+			Vector3DF lVelocity;
 			mManager->GetGameManager()->GetPhysicsManager()->GetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
 			mUiManager->GetSoundManager()->SetSoundPosition(mSoundResource->GetData(), lPosition, lVelocity);
 			if (mPhysics->GetEngineCount() > 0)
@@ -168,21 +168,21 @@ void CppContextObject::DebugDrawPrimitive(DebugPrimitive pPrimitive)
 		const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(x);
 		if (lGeometry->GetBodyId() != TBC::INVALID_BODY)
 		{
-			Lepra::TransformationF lPhysicsTransform;
+			TransformationF lPhysicsTransform;
 			mManager->GetGameManager()->GetPhysicsManager()->GetBodyTransform(
 				lGeometry->GetBodyId(), lPhysicsTransform);
-			Lepra::Vector3DF lPos = lPhysicsTransform.GetPosition();
+			Vector3DF lPos = lPhysicsTransform.GetPosition();
 			switch (pPrimitive)
 			{
 				case DEBUG_AXES:
 				{
 					const float lLength = 2;
-					const Lepra::Vector3DF& lAxisX = lPhysicsTransform.GetOrientation().GetAxisX();
-					mUiManager->GetRenderer()->DrawLine(lPos, lAxisX*lLength, Lepra::RED);
-					const Lepra::Vector3DF& lAxisY = lPhysicsTransform.GetOrientation().GetAxisY();
-					mUiManager->GetRenderer()->DrawLine(lPos, lAxisY*lLength, Lepra::GREEN);
-					const Lepra::Vector3DF& lAxisZ = lPhysicsTransform.GetOrientation().GetAxisZ();
-					mUiManager->GetRenderer()->DrawLine(lPos, lAxisZ*lLength, Lepra::BLUE);
+					const Vector3DF& lAxisX = lPhysicsTransform.GetOrientation().GetAxisX();
+					mUiManager->GetRenderer()->DrawLine(lPos, lAxisX*lLength, RED);
+					const Vector3DF& lAxisY = lPhysicsTransform.GetOrientation().GetAxisY();
+					mUiManager->GetRenderer()->DrawLine(lPos, lAxisY*lLength, GREEN);
+					const Vector3DF& lAxisZ = lPhysicsTransform.GetOrientation().GetAxisZ();
+					mUiManager->GetRenderer()->DrawLine(lPos, lAxisZ*lLength, BLUE);
 				}
 				break;
 				case DEBUG_JOINTS:
@@ -190,14 +190,14 @@ void CppContextObject::DebugDrawPrimitive(DebugPrimitive pPrimitive)
 					const TBC::PhysicsManager::JointID lJoint = lGeometry->GetJointId();
 					if (lJoint != TBC::INVALID_JOINT)
 					{
-						Lepra::Vector3DF lAnchor;
+						Vector3DF lAnchor;
 						if (mManager->GetGameManager()->GetPhysicsManager()->GetAnchorPos(lJoint, lAnchor))
 						{
 							const float lLength = 1;
-							Lepra::Vector3DF lAxis;
+							Vector3DF lAxis;
 							if (mManager->GetGameManager()->GetPhysicsManager()->GetAxis1(lJoint, lAxis))
 							{
-								mUiManager->GetRenderer()->DrawLine(lAnchor, lAxis*lLength, Lepra::DARK_GRAY);
+								mUiManager->GetRenderer()->DrawLine(lAnchor, lAxis*lLength, DARK_GRAY);
 							}
 							else
 							{
@@ -205,7 +205,7 @@ void CppContextObject::DebugDrawPrimitive(DebugPrimitive pPrimitive)
 							}
 							if (mManager->GetGameManager()->GetPhysicsManager()->GetAxis2(lJoint, lAxis))
 							{
-								mUiManager->GetRenderer()->DrawLine(lAnchor, lAxis*lLength, Lepra::BLACK);
+								mUiManager->GetRenderer()->DrawLine(lAnchor, lAxis*lLength, BLACK);
 							}
 						}
 						else
@@ -217,28 +217,28 @@ void CppContextObject::DebugDrawPrimitive(DebugPrimitive pPrimitive)
 				break;
 				case DEBUG_SHAPES:
 				{
-					const Lepra::Vector3DF lSize = lGeometry->GetShapeSize() / 2;
-					const Lepra::QuaternionF& lRot = lPhysicsTransform.GetOrientation();
-					Lepra::Vector3DF lVertex[8];
+					const Vector3DF lSize = lGeometry->GetShapeSize() / 2;
+					const QuaternionF& lRot = lPhysicsTransform.GetOrientation();
+					Vector3DF lVertex[8];
 					for (int x = 0; x < 8; ++x)
 					{
 						lVertex[x] = lPos - lRot *
-							Lepra::Vector3DF(lSize.x*((x&4)? 1 : -1),
+							Vector3DF(lSize.x*((x&4)? 1 : -1),
 								lSize.y*((x&1)? 1 : -1),
 								lSize.z*((x&2)? 1 : -1));
 					}
-					mUiManager->GetRenderer()->DrawLine(lVertex[0], lVertex[1]-lVertex[0], Lepra::YELLOW);
-					mUiManager->GetRenderer()->DrawLine(lVertex[1], lVertex[3]-lVertex[1], Lepra::YELLOW);
-					mUiManager->GetRenderer()->DrawLine(lVertex[3], lVertex[2]-lVertex[3], Lepra::YELLOW);
-					mUiManager->GetRenderer()->DrawLine(lVertex[2], lVertex[0]-lVertex[2], Lepra::YELLOW);
-					mUiManager->GetRenderer()->DrawLine(lVertex[4], lVertex[5]-lVertex[4], Lepra::MAGENTA);
-					mUiManager->GetRenderer()->DrawLine(lVertex[5], lVertex[7]-lVertex[5], Lepra::MAGENTA);
-					mUiManager->GetRenderer()->DrawLine(lVertex[7], lVertex[6]-lVertex[7], Lepra::MAGENTA);
-					mUiManager->GetRenderer()->DrawLine(lVertex[6], lVertex[4]-lVertex[6], Lepra::MAGENTA);
-					mUiManager->GetRenderer()->DrawLine(lVertex[0], lVertex[4]-lVertex[0], Lepra::CYAN);
-					mUiManager->GetRenderer()->DrawLine(lVertex[1], lVertex[5]-lVertex[1], Lepra::CYAN);
-					mUiManager->GetRenderer()->DrawLine(lVertex[2], lVertex[6]-lVertex[2], Lepra::ORANGE);
-					mUiManager->GetRenderer()->DrawLine(lVertex[3], lVertex[7]-lVertex[3], Lepra::ORANGE);
+					mUiManager->GetRenderer()->DrawLine(lVertex[0], lVertex[1]-lVertex[0], YELLOW);
+					mUiManager->GetRenderer()->DrawLine(lVertex[1], lVertex[3]-lVertex[1], YELLOW);
+					mUiManager->GetRenderer()->DrawLine(lVertex[3], lVertex[2]-lVertex[3], YELLOW);
+					mUiManager->GetRenderer()->DrawLine(lVertex[2], lVertex[0]-lVertex[2], YELLOW);
+					mUiManager->GetRenderer()->DrawLine(lVertex[4], lVertex[5]-lVertex[4], MAGENTA);
+					mUiManager->GetRenderer()->DrawLine(lVertex[5], lVertex[7]-lVertex[5], MAGENTA);
+					mUiManager->GetRenderer()->DrawLine(lVertex[7], lVertex[6]-lVertex[7], MAGENTA);
+					mUiManager->GetRenderer()->DrawLine(lVertex[6], lVertex[4]-lVertex[6], MAGENTA);
+					mUiManager->GetRenderer()->DrawLine(lVertex[0], lVertex[4]-lVertex[0], CYAN);
+					mUiManager->GetRenderer()->DrawLine(lVertex[1], lVertex[5]-lVertex[1], CYAN);
+					mUiManager->GetRenderer()->DrawLine(lVertex[2], lVertex[6]-lVertex[2], ORANGE);
+					mUiManager->GetRenderer()->DrawLine(lVertex[3], lVertex[7]-lVertex[3], ORANGE);
 				}
 				break;
 				default:
@@ -255,82 +255,82 @@ void CppContextObject::DebugDrawPrimitive(DebugPrimitive pPrimitive)
 
 void CppContextObject::__GetFuckedUpMeshesRemoveMe(UiTbc::ChunkyClass* pClass) const
 {
-	if (GetClassId().find(_T("box_002")) != Lepra::String::npos)
+	if (GetClassId().find(_T("box_002")) != str::npos)
 	{
-		pClass->AddMesh(0, _T("box_002_mesh"), Lepra::TransformationF());
+		pClass->AddMesh(0, _T("box_002_mesh"), TransformationF());
 	}
-	else if (GetClassId().find(_T("sphere_002")) != Lepra::String::npos)
+	else if (GetClassId().find(_T("sphere_002")) != str::npos)
 	{
-		pClass->AddMesh(0, _T("sphere_002_mesh"), Lepra::TransformationF());
+		pClass->AddMesh(0, _T("sphere_002_mesh"), TransformationF());
 	}
-	else if (GetClassId().find(_T("car_001")) != Lepra::String::npos)
+	else if (GetClassId().find(_T("car_001")) != str::npos)
 	{
-		pClass->AddMesh(0, _T("car_001_body_mesh"), Lepra::TransformationF());
-		pClass->AddMesh(0, _T("car_001_top_mesh"), Lepra::TransformationF(Lepra::QuaternionF(), Lepra::Vector3DF(0, 1, 0.6f)));
-		const Lepra::QuaternionF lOrientation(Lepra::PIF/2, Lepra::Vector3DF(1, 0, 0));
-		const Lepra::TransformationF lTransform(lOrientation, Lepra::Vector3DF(0.9f, 0.9f, 1.2f));
+		pClass->AddMesh(0, _T("car_001_body_mesh"), TransformationF());
+		pClass->AddMesh(0, _T("car_001_top_mesh"), TransformationF(QuaternionF(), Vector3DF(0, 1, 0.6f)));
+		const QuaternionF lOrientation(PIF/2, Vector3DF(1, 0, 0));
+		const TransformationF lTransform(lOrientation, Vector3DF(0.9f, 0.9f, 1.2f));
 		pClass->AddMesh(0, _T("car_001_car_antenna_mesh"), lTransform);
-		pClass->AddMesh(2, _T("car_001_wheel_mesh"), Lepra::TransformationF());
-		pClass->AddMesh(3, _T("car_001_wheel_mesh"), Lepra::TransformationF());
-		pClass->AddMesh(4, _T("car_001_wheel_mesh"), Lepra::TransformationF());
-		pClass->AddMesh(5, _T("car_001_wheel_mesh"), Lepra::TransformationF());
+		pClass->AddMesh(2, _T("car_001_wheel_mesh"), TransformationF());
+		pClass->AddMesh(3, _T("car_001_wheel_mesh"), TransformationF());
+		pClass->AddMesh(4, _T("car_001_wheel_mesh"), TransformationF());
+		pClass->AddMesh(5, _T("car_001_wheel_mesh"), TransformationF());
 	}
-	else if (GetClassId().find(_T("monster_001")) != Lepra::String::npos)
+	else if (GetClassId().find(_T("monster_001")) != str::npos)
 	{
-		pClass->AddMesh(0, _T("monster_001_body_mesh"), Lepra::TransformationF());
-		pClass->AddMesh(0, _T("monster_001_top_mesh"), Lepra::TransformationF(Lepra::QuaternionF(), Lepra::Vector3DF(0, 0, 0.7f)));
-		const Lepra::QuaternionF lOrientation(Lepra::PIF/2, Lepra::Vector3DF(1, 0, 0));
-		const Lepra::TransformationF lTransform(lOrientation, Lepra::Vector3DF(1.4f, 1, 2.4f));
+		pClass->AddMesh(0, _T("monster_001_body_mesh"), TransformationF());
+		pClass->AddMesh(0, _T("monster_001_top_mesh"), TransformationF(QuaternionF(), Vector3DF(0, 0, 0.7f)));
+		const QuaternionF lOrientation(PIF/2, Vector3DF(1, 0, 0));
+		const TransformationF lTransform(lOrientation, Vector3DF(1.4f, 1, 2.4f));
 		pClass->AddMesh(0, _T("monster_001_car_antenna_mesh"), lTransform);
-		pClass->AddMesh(2, _T("monster_001_wheel_mesh"), Lepra::TransformationF());
-		pClass->AddMesh(3, _T("monster_001_wheel_mesh"), Lepra::TransformationF());
-		pClass->AddMesh(4, _T("monster_001_wheel_mesh"), Lepra::TransformationF());
-		pClass->AddMesh(5, _T("monster_001_wheel_mesh"), Lepra::TransformationF());
+		pClass->AddMesh(2, _T("monster_001_wheel_mesh"), TransformationF());
+		pClass->AddMesh(3, _T("monster_001_wheel_mesh"), TransformationF());
+		pClass->AddMesh(4, _T("monster_001_wheel_mesh"), TransformationF());
+		pClass->AddMesh(5, _T("monster_001_wheel_mesh"), TransformationF());
 	}
-	else if (GetClassId().find(_T("excavator_703")) != Lepra::String::npos)
+	else if (GetClassId().find(_T("excavator_703")) != str::npos)
 	{
-		pClass->AddMesh(0, _T("excavator_703_body_mesh"), Lepra::TransformationF());
-		pClass->AddMesh(0, _T("excavator_703_top_mesh"), Lepra::TransformationF(Lepra::QuaternionF(), Lepra::Vector3DF(1.0f, -0.75f, 1.00f)));
-		pClass->AddMesh(2, _T("monster_001_wheel_mesh"), Lepra::TransformationF());
-		pClass->AddMesh(3, _T("monster_001_wheel_mesh"), Lepra::TransformationF());
-		pClass->AddMesh(4, _T("monster_001_wheel_mesh"), Lepra::TransformationF());
-		pClass->AddMesh(5, _T("monster_001_wheel_mesh"), Lepra::TransformationF());
-		pClass->AddMesh(6, _T("monster_001_wheel_mesh"), Lepra::TransformationF());
-		pClass->AddMesh(7, _T("monster_001_wheel_mesh"), Lepra::TransformationF());
-		pClass->AddMesh(8, _T("excavator_703_boom1_mesh"), Lepra::TransformationF());
-		const float lBoom2Angle = Lepra::PIF/4;
-		Lepra::TransformationF lBoom2Offset;
+		pClass->AddMesh(0, _T("excavator_703_body_mesh"), TransformationF());
+		pClass->AddMesh(0, _T("excavator_703_top_mesh"), TransformationF(QuaternionF(), Vector3DF(1.0f, -0.75f, 1.00f)));
+		pClass->AddMesh(2, _T("monster_001_wheel_mesh"), TransformationF());
+		pClass->AddMesh(3, _T("monster_001_wheel_mesh"), TransformationF());
+		pClass->AddMesh(4, _T("monster_001_wheel_mesh"), TransformationF());
+		pClass->AddMesh(5, _T("monster_001_wheel_mesh"), TransformationF());
+		pClass->AddMesh(6, _T("monster_001_wheel_mesh"), TransformationF());
+		pClass->AddMesh(7, _T("monster_001_wheel_mesh"), TransformationF());
+		pClass->AddMesh(8, _T("excavator_703_boom1_mesh"), TransformationF());
+		const float lBoom2Angle = PIF/4;
+		TransformationF lBoom2Offset;
 		lBoom2Offset.RotatePitch(lBoom2Angle);
 		lBoom2Offset.GetPosition().Set(0, -3.2f/2*::sin(lBoom2Angle), (2.5f+3.2f*::cos(lBoom2Angle))/2);
 		pClass->AddMesh(8, _T("excavator_703_boom2_mesh"), lBoom2Offset);
-		pClass->AddMesh(10, _T("excavator_703_arm_mesh"), Lepra::TransformationF());
-		pClass->AddMesh(11, _T("excavator_703_bucket_back_mesh"), Lepra::TransformationF());
-		const float lBucketBackAngle = Lepra::PIF/4;
-		const float lBucketFloorAngle = Lepra::PIF/4;
-		Lepra::TransformationF lBucketFloorOffset;
+		pClass->AddMesh(10, _T("excavator_703_arm_mesh"), TransformationF());
+		pClass->AddMesh(11, _T("excavator_703_bucket_back_mesh"), TransformationF());
+		const float lBucketBackAngle = PIF/4;
+		const float lBucketFloorAngle = PIF/4;
+		TransformationF lBucketFloorOffset;
 		lBucketFloorOffset.RotatePitch(lBucketBackAngle+lBucketFloorAngle);
 		lBucketFloorOffset.GetPosition().Set(0, -0.4f, -0.5f);
 		pClass->AddMesh(11, _T("excavator_703_bucket_floor_mesh"), lBucketFloorOffset);
 	}
-	else if (GetClassId().find(_T("crane_whatever")) != Lepra::String::npos)
+	else if (GetClassId().find(_T("crane_whatever")) != str::npos)
 	{
-		pClass->AddMesh(0, _T("crane_whatever_tower_mesh"), Lepra::TransformationF());
-		pClass->AddMesh(1, _T("crane_whatever_jib_mesh0"), Lepra::TransformationF());
-		Lepra::TransformationF lWireTransform(Lepra::QuaternionF(Lepra::PIF/2,  Lepra::Vector3DF(1, 0, 0)), Lepra::Vector3DF());
+		pClass->AddMesh(0, _T("crane_whatever_tower_mesh"), TransformationF());
+		pClass->AddMesh(1, _T("crane_whatever_jib_mesh0"), TransformationF());
+		TransformationF lWireTransform(QuaternionF(PIF/2,  Vector3DF(1, 0, 0)), Vector3DF());
 		pClass->AddMesh(2, _T("crane_whatever_wire_mesh1"), lWireTransform);
 		pClass->AddMesh(3, _T("crane_whatever_wire_mesh2"), lWireTransform);
 		pClass->AddMesh(4, _T("crane_whatever_wire_mesh3"), lWireTransform);
 		pClass->AddMesh(5, _T("crane_whatever_wire_mesh4"), lWireTransform);
 		pClass->AddMesh(6, _T("crane_whatever_hook_mesh"), lWireTransform);
 	}
-	else if (GetClassId().find(_T("ground_002")) != Lepra::String::npos)
+	else if (GetClassId().find(_T("ground_002")) != str::npos)
 	{
-		pClass->AddMesh(0, _T("ground_002_0_mesh"), Lepra::TransformationF());
-		pClass->AddMesh(1, _T("ground_002_1_mesh"), Lepra::TransformationF());
-		pClass->AddMesh(2, _T("ground_002_2_mesh"), Lepra::TransformationF());
-		pClass->AddMesh(3, _T("ground_002_3_mesh"), Lepra::TransformationF());
-		pClass->AddMesh(4, _T("ground_002_4_mesh"), Lepra::TransformationF());
-		pClass->AddMesh(5, _T("ground_002_5_mesh"), Lepra::TransformationF());
+		pClass->AddMesh(0, _T("ground_002_0_mesh"), TransformationF());
+		pClass->AddMesh(1, _T("ground_002_1_mesh"), TransformationF());
+		pClass->AddMesh(2, _T("ground_002_2_mesh"), TransformationF());
+		pClass->AddMesh(3, _T("ground_002_3_mesh"), TransformationF());
+		pClass->AddMesh(4, _T("ground_002_4_mesh"), TransformationF());
+		pClass->AddMesh(5, _T("ground_002_5_mesh"), TransformationF());
 	}
 	else
 	{
@@ -365,25 +365,25 @@ void CppContextObject::OnLoadClass(UserClassResource* pClassResource)
 	for (size_t x = 0; x < lMeshCount; ++x)
 	{
 		int lPhysIndex = -1;
-		Lepra::String lMeshName;
-		Lepra::TransformationF lTransform;
+		str lMeshName;
+		TransformationF lTransform;
 		lClass->GetMesh(x, lPhysIndex, lMeshName, lTransform);
-		Lepra::String lMeshInstance;
-		Lepra::StringUtility::StringVector lMeshNameList = Lepra::StringUtility::Split(lMeshName, _T(";"), 1);
+		str lMeshInstance;
+		strutil::strvec lMeshNameList = strutil::Split(lMeshName, _T(";"), 1);
 		lMeshName = lMeshNameList[0];
 		if (lMeshNameList.size() == 1)
 		{
-			lMeshInstance = Lepra::StringUtility::Format(_T("%u"), GetInstanceId());
+			lMeshInstance = strutil::Format(_T("%u"), GetInstanceId());
 		}
 		else
 		{
-			lMeshInstance = Lepra::StringUtility::Format(_T("%s_%u"), lMeshNameList[1].c_str(), GetInstanceId());
+			lMeshInstance = strutil::Format(_T("%s_%u"), lMeshNameList[1].c_str(), GetInstanceId());
 		}
 		UiCure::UserGeometryReferenceResource* lMesh = new UiCure::UserGeometryReferenceResource(
 			mUiManager, UiCure::GeometryOffset(lPhysIndex, lTransform));
 		mMeshResourceArray.push_back(lMesh);
 		lMesh->Load(lResourceManager,
-			Lepra::StringUtility::Format(_T("%s.mesh;%s"), lMeshName.c_str(), lMeshInstance.c_str()),
+			strutil::Format(_T("%s.mesh;%s"), lMeshName.c_str(), lMeshInstance.c_str()),
 			UiCure::UserGeometryReferenceResource::TypeLoadCallback(this,&CppContextObject::OnLoadMesh));
 	}
 	// TODO: not everybody should load the texture, not everybody should load *A* texture. Load from group file definition.
@@ -519,9 +519,9 @@ void CppContextObject::OnLoadSound3d(UserSound3dResource* pSoundResource)
 	}
 }
 
-UserSound3dResource* CppContextObject::CreateSharedSound(const Lepra::String& pSoundName)
+UserSound3dResource* CppContextObject::CreateSharedSound(const str& pSoundName)
 {
-	const Lepra::String lId = pSoundName + _T(";") + GetClassId();
+	const str lId = pSoundName + _T(";") + GetClassId();
 	SoundTable::iterator x = mSoundTable.find(lId);
 	if (x == mSoundTable.end())
 	{
@@ -532,9 +532,9 @@ UserSound3dResource* CppContextObject::CreateSharedSound(const Lepra::String& pS
 	return (x->second);
 }
 
-void CppContextObject::DeleteSharedSound(const Lepra::String& pSoundName)
+void CppContextObject::DeleteSharedSound(const str& pSoundName)
 {
-	const Lepra::String lId = pSoundName + _T(";") + GetClassId();
+	const str lId = pSoundName + _T(";") + GetClassId();
 	SoundTable::iterator x = mSoundTable.find(lId);
 	if (x != mSoundTable.end())
 	{

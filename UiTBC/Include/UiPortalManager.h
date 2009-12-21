@@ -15,16 +15,24 @@
 	calling TestPortalCollision().
 */
 
-#ifndef UIPORTALMANAGER_H
-#define UIPORTALMANAGER_H
+
+
+#pragma once
 
 #include "../../TBC/Include/PortalManager.h"
 #include "../../Lepra/Include/String.h"
+#include "../Include/UiTBC.h"
+
+
 
 namespace UiTbc
 {
 
+
+
 class Renderer;
+
+
 
 class PortalManager: public TBC::PortalManager
 {
@@ -33,7 +41,7 @@ public:
 	PortalManager(){}
 	virtual ~PortalManager(){}
 
-	void TraverseGraph(Renderer* pRenderer, const Lepra::String& pCellID);
+	void TraverseGraph(Renderer* pRenderer, const str& pCellID);
 
 private:
 
@@ -43,39 +51,39 @@ private:
 	{
 	public:
 		Portal(int pNumVertices,
-		       Lepra::Vector3DF* pVertex,
+		       Vector3DF* pVertex,
 		       Cell* pCell1,
 		       Cell* pCell2);
 		virtual ~Portal();
 
-		void Traverse(Renderer* pRenderer, const Lepra::PixelRect& pRect, Cell* pFrom);
+		void Traverse(Renderer* pRenderer, const PixelRect& pRect, Cell* pFrom);
 	};
 
 	class Cell : public TBC::PortalManager::Cell
 	{
 	public:
-		inline Cell(const Lepra::String& pCellID, 
-			    const Lepra::String& pCellDescription,
+		inline Cell(const str& pCellID, 
+			    const str& pCellDescription,
 			    PortalManager* pPortalManager);
 		inline virtual ~Cell();
 
-		void Traverse(Renderer* pRenderer, const Lepra::PixelRect& pRect);
+		void Traverse(Renderer* pRenderer, const PixelRect& pRect);
 
 	private:
 		int mLastFrameVisible;
 	};
 
 	virtual TBC::PortalManager::Portal* NewPortal(int pNumVertices,
-						      Lepra::Vector3DF* pVertex,
+						      Vector3DF* pVertex,
 						      Cell* pCell1,
 						      Cell* pCell2);
-	virtual TBC::PortalManager::Cell* NewCell(const Lepra::String& pCellID, 
-						  const Lepra::String& pCellDescription,
+	virtual TBC::PortalManager::Cell* NewCell(const str& pCellID, 
+						  const str& pCellDescription,
 						  PortalManager* pPortalManager);
 
 	LOG_CLASS_DECLARE();
 };
 
-} // End namespace.
 
-#endif
+
+}

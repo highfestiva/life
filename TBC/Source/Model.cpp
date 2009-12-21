@@ -33,12 +33,12 @@ void Model::RemoveAll()
 	mAnimatorTable.RemoveAll();
 }
 
-void Model::AddAnimator(const Lepra::String& pName, BoneAnimator* pBonesAnimator)
+void Model::AddAnimator(const str& pName, BoneAnimator* pBonesAnimator)
 {
 	mAnimatorTable.Insert(pName, pBonesAnimator);
 }
 
-BoneAnimator* Model::GetAnimator(const Lepra::String& pName)
+BoneAnimator* Model::GetAnimator(const str& pName)
 {
 	BoneAnimator* lAnimator = 0;
 	AnimatorTable::Iterator x = mAnimatorTable.Find(pName);
@@ -50,7 +50,7 @@ BoneAnimator* Model::GetAnimator(const Lepra::String& pName)
 	return lAnimator;
 }
 
-void Model::StartAnimation(const Lepra::String& pAnimName, float pBlendingTime, BoneAnimation::Mode pMode)
+void Model::StartAnimation(const str& pAnimName, float pBlendingTime, BoneAnimation::Mode pMode)
 {
 	AnimatorTable::Iterator x;
 	for (x = mAnimatorTable.First(); x != mAnimatorTable.End(); ++x)
@@ -72,12 +72,12 @@ void Model::Update(double pDeltaTime)
 
 
 
-void Model::SetTransformation(const Lepra::TransformationF& pTransformation)
+void Model::SetTransformation(const TransformationF& pTransformation)
 {
 	mTransformation = pTransformation;
 }
 
-const Lepra::TransformationF& Model::GetTransformation() const
+const TransformationF& Model::GetTransformation() const
 {
 	return (mTransformation);
 }

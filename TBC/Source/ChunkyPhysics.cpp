@@ -80,7 +80,7 @@ void ChunkyPhysics::AddBoneGeometry(ChunkyBoneGeometry* pGeometry)
 	mGeometryArray.push_back(pGeometry);
 }
 
-void ChunkyPhysics::AddBoneGeometry(const Lepra::TransformationF& pTransformation,
+void ChunkyPhysics::AddBoneGeometry(const TransformationF& pTransformation,
 	ChunkyBoneGeometry* pGeometry, const ChunkyBoneGeometry* pParent)
 {
 	const int lChildIndex = (int)mGeometryArray.size();
@@ -108,7 +108,7 @@ int ChunkyPhysics::GetIndex(const ChunkyBoneGeometry* pGeometry) const
 	return (-1);
 }
 
-const Lepra::TransformationF& ChunkyPhysics::GetTransformation(const ChunkyBoneGeometry* pGeometry) const
+const TransformationF& ChunkyPhysics::GetTransformation(const ChunkyBoneGeometry* pGeometry) const
 {
 	return (GetBoneTransformation(GetIndex(pGeometry)));
 }
@@ -183,7 +183,7 @@ void ChunkyPhysics::SetBoneCount(int pBoneCount)
 	mUniqeGeometryIndex = GetBoneCount();
 }
 
-bool ChunkyPhysics::FinalizeInit(PhysicsManager* pPhysics, unsigned pPhysicsFps, Lepra::TransformationF* pTransform,
+bool ChunkyPhysics::FinalizeInit(PhysicsManager* pPhysics, unsigned pPhysicsFps, TransformationF* pTransform,
 	PhysicsManager::TriggerListener* pTrigListener, PhysicsManager::ForceFeedbackListener* pForceListener)
 {
 	bool lOk = ((int)mGeometryArray.size() == GetBoneCount());
@@ -217,32 +217,32 @@ bool ChunkyPhysics::FinalizeInit(PhysicsManager* pPhysics, unsigned pPhysicsFps,
 						lBodyType = PhysicsManager::DYNAMIC;
 					}
 				}
-				const Lepra::TransformationF& lBone = GetBoneTransformation(x);
-				//Lepra::QuaternionF q = lBone.GetOrientation();
+				const TransformationF& lBone = GetBoneTransformation(x);
+				//QuaternionF q = lBone.GetOrientation();
 				////q.Normalize();
-				//Lepra::RotationMatrixF rm = q.GetAsRotationMatrix();
+				//RotationMatrixF rm = q.GetAsRotationMatrix();
 				////rm.Reorthogonalize();
-				//const Lepra::Vector3DF lArrow0(0, 1, 0);
-				//Lepra::Vector3DF lArrow1 = rm*lArrow0;
+				//const Vector3DF lArrow0(0, 1, 0);
+				//Vector3DF lArrow1 = rm*lArrow0;
 				//lArrow1.x = 0;	// Project onto YZ.
 				//mLog.Tracef(_T("Creating bone %i that has v1=(%f; %f; %f) from q=(%f; %f; %f; %f)."),
 				//	x, lArrow1.x, lArrow1.y, lArrow1.z,
 				//	q.GetA(), q.GetB(), q.GetC(), q.GetD());
-				//const float lXAngle = ::acos(lArrow0*lArrow1) * 180/Lepra::PIF;
+				//const float lXAngle = ::acos(lArrow0*lArrow1) * 180/PIF;
 				//const int lParentIndex = lGeometry->GetParent()? GetIndex(lGeometry->GetParent()) : -1;
 				//mLog.Headlinef(_T("Creating bone %i (with parent %i) at (%f; %f; %f) with world x angle %f."),
 				//	x, lParentIndex,
 				//	lBone.GetPosition().x, lBone.GetPosition().y, lBone.GetPosition().z,
 				//	lXAngle);
 				//{	// TODO: remove entire scope!
-				//	const Lepra::TransformationF& lBone = GetOriginalBoneTransformation(x);
-				//	Lepra::QuaternionF q = lBone.GetOrientation();
+				//	const TransformationF& lBone = GetOriginalBoneTransformation(x);
+				//	QuaternionF q = lBone.GetOrientation();
 				//	//q.Normalize();
-				//	Lepra::RotationMatrixF rm = q.GetAsRotationMatrix();
-				//	const Lepra::Vector3DF lArrow0(0, 1, 0);
-				//	Lepra::Vector3DF lArrow1 = rm*lArrow0;
+				//	RotationMatrixF rm = q.GetAsRotationMatrix();
+				//	const Vector3DF lArrow0(0, 1, 0);
+				//	Vector3DF lArrow1 = rm*lArrow0;
 				//	lArrow1.x = 0;	// Project onto YZ.
-				//	const float lXAngle = ::acos(lArrow0*lArrow1) * 180/Lepra::PIF;
+				//	const float lXAngle = ::acos(lArrow0*lArrow1) * 180/PIF;
 				//	mLog.Headlinef(_T("Creating bone %i with local x angle %f from q=(%f; %f; %f; %f)."),
 				//		x, lXAngle,
 				//		q.GetA(), q.GetB(), q.GetC(), q.GetD());

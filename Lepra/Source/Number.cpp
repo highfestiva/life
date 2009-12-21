@@ -14,9 +14,9 @@ namespace Lepra
 
 
 
-String Number::ConvertToPostfixNumber(double pNumber, unsigned decimals)
+str Number::ConvertToPostfixNumber(double pNumber, unsigned decimals)
 {
-	String lResultString;
+	str lResultString;
 	if (pNumber != 0)
 	{
 		struct PrefixInfo
@@ -39,8 +39,8 @@ String Number::ConvertToPostfixNumber(double pNumber, unsigned decimals)
 				break;
 			}
 		}
-		String lFormatString = StringUtility::IntToString(decimals, 10);
-		lResultString = StringUtility::Format((_T("%.")+lFormatString+_T("f %s")).c_str(), lResult, lPrefixList[x].mPrefix);
+		str lFormatString = strutil::IntToString(decimals, 10);
+		lResultString = strutil::Format((_T("%.")+lFormatString+_T("f %s")).c_str(), lResult, lPrefixList[x].mPrefix);
 	}
 	else
 	{

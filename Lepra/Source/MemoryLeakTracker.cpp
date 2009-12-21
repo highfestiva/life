@@ -15,7 +15,7 @@
 // Remove the definition...
 #undef new
 
-#pragma warning(disable: 4996)	// Deprecated functions are not to be used, as they may be removed in future versions. Circumvent problem for example in strings by using Lepra::String instead.
+#pragma warning(disable: 4996)	// Deprecated functions are not to be used, as they may be removed in future versions. Circumvent problem for example in strings by using str instead.
 
 #include <new>
 #include <exception>
@@ -30,7 +30,7 @@ void* operator new(size_t pSize, const char* pFileName, int pLine)
 	if (lPointer == 0)
 		throw std::bad_alloc(); // ANSI/ISO compliant behavior
 
-	Lepra::MemoryLeakTracker::AddTrack(lPointer, (unsigned long)pSize, pFileName, pLine);
+	MemoryLeakTracker::AddTrack(lPointer, (unsigned long)pSize, pFileName, pLine);
 
 	return lPointer;
 }
@@ -41,7 +41,7 @@ void* operator new(size_t pSize, const char* pFileName, int pLine)
 	if (lPointer == 0)
 		throw std::bad_alloc(); // ANSI/ISO compliant behavior
 
-	Lepra::MemoryLeakTracker::AddTrack(lPointer, pSize, "<Unknown file - make sure to include Lepra.h>", 0);
+	MemoryLeakTracker::AddTrack(lPointer, pSize, "<Unknown file - make sure to include Lepra.h>", 0);
 
 	return lPointer;
 }
@@ -51,7 +51,7 @@ void operator delete(void* pPointer, const char*, int)
 	//_ASSERT(pPointer != 0);
 	if (pPointer != 0)
 	{
-		Lepra::MemoryLeakTracker::RemoveTrack(pPointer);
+		MemoryLeakTracker::RemoveTrack(pPointer);
 		free(pPointer);
 	}
 }
@@ -61,7 +61,7 @@ void operator delete(void* pPointer)
 	//_ASSERT(pPointer != 0);
 	if (pPointer != 0)
 	{
-		Lepra::MemoryLeakTracker::RemoveTrack(pPointer);
+		MemoryLeakTracker::RemoveTrack(pPointer);
 		free(pPointer);
 	}
 }
@@ -71,7 +71,7 @@ void operator delete[](void* pPointer)
 	//_ASSERT(pPointer != 0);
 	if (pPointer != 0)
 	{
-		Lepra::MemoryLeakTracker::RemoveTrack(pPointer);
+		MemoryLeakTracker::RemoveTrack(pPointer);
 		free(pPointer);
 	}
 }

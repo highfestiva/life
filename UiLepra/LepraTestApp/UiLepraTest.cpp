@@ -26,14 +26,14 @@ static Lepra::LogDecorator gUiLLog(Lepra::LogType::GetLog(Lepra::LogType::SUB_TE
 
 
 
-void ReportTestResult(const Lepra::LogDecorator& pLog, const Lepra::String& pTestName, const Lepra::String& pContext, bool pResult);
+void ReportTestResult(const Lepra::LogDecorator& pLog, const str& pTestName, const str& pContext, bool pResult);
 bool TestLepra();
 
 
 
 bool TestInput(const Lepra::LogDecorator& pLog)
 {
-	Lepra::String lContext;
+	str lContext;
 	bool lTestOk = true;
 	const UiLepra::InputManager* lInputManager = 0;
 
@@ -73,7 +73,7 @@ bool TestInput(const Lepra::LogDecorator& pLog)
 
 bool TestGraphics(const Lepra::LogDecorator& pLog)
 {
-	Lepra::String lContext;
+	str lContext;
 	bool lTestOk = true;
 
 	UiLepra::DisplayManager* lDisplay = UiLepra::DisplayManager::CreateDisplayManager(UiLepra::DisplayManager::OPENGL_CONTEXT);
@@ -118,10 +118,9 @@ bool TestGraphics(const Lepra::LogDecorator& pLog)
 
 bool TestSound(const Lepra::LogDecorator& pLog)
 {
-	Lepra::String lContext;
+	str lContext;
 	bool lTestOk = true;
 
-todo: extend sounds tests!
 	UiLepra::SoundManager::SoundID lSound = UiLepra::INVALID_SOUNDID;
 	UiLepra::SoundManager* lSoundManager = UiLepra::SoundManager::CreateSoundManager(UiLepra::SoundManager::CONTEXT_OPENAL);
 	assert(lSoundManager);

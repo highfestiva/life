@@ -175,7 +175,7 @@ protected:
 class Win32RWLock: public RWLockBC
 {
 public:
-	Win32RWLock(const String& pRWLockName);
+	Win32RWLock(const str& pRWLockName);
 	virtual ~Win32RWLock();
 
 	void AcquireRead();

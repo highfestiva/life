@@ -20,13 +20,13 @@ class ServerApplication: public Application
 public:
 	typedef Application Parent;
 
-	ServerApplication(const Lepra::StringUtility::StringVector& pArgumentList);
+	ServerApplication(const strutil::strvec& pArgumentList);
 	virtual ~ServerApplication();
-	Lepra::String GetName() const;
+	str GetName() const;
 	Cure::GameTicker* CreateGameTicker() const;
 
 private:
-	Lepra::LogListener* CreateConsoleLogListener() const;
+	LogListener* CreateConsoleLogListener() const;
 };
 
 
@@ -44,7 +44,7 @@ namespace Life
 
 
 
-ServerApplication::ServerApplication(const Lepra::StringUtility::StringVector& pArgumentList):
+ServerApplication::ServerApplication(const strutil::strvec& pArgumentList):
 	Application(pArgumentList)
 {
 	Lepra::Init();
@@ -63,7 +63,7 @@ ServerApplication::~ServerApplication()
 	Lepra::Shutdown();
 };
 
-Lepra::String ServerApplication::GetName() const
+str ServerApplication::GetName() const
 {
 	return (_T("Server"));
 }
@@ -72,13 +72,13 @@ Cure::GameTicker* ServerApplication::CreateGameTicker() const
 {
 	Cure::RuntimeVariableScope* lVariables = new Cure::RuntimeVariableScope(Cure::GetSettings());
 	return (new GameServerManager(lVariables, mResourceManager,
-		(Lepra::InteractiveStdioConsoleLogListener*)mConsoleLogger));
+		(InteractiveStdioConsoleLogListener*)mConsoleLogger));
 }
 
-Lepra::LogListener* ServerApplication::CreateConsoleLogListener() const
+LogListener* ServerApplication::CreateConsoleLogListener() const
 {
 #ifdef LEPRA_CONSOLE
-	return (new Lepra::InteractiveStdioConsoleLogListener());
+	return (new InteractiveStdioConsoleLogListener());
 #else // !LEPRA_CONSOLE
 	return (Parent::CreateConsoleLogListener());
 #endif // LEPRA_CONSOLE / !LEPRA_CONSOLE

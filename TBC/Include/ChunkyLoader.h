@@ -129,7 +129,7 @@ enum ChunkyType
 	CHUNK_CLASS                        = ENUMIFY('C','L','A','S'),	// Class file type.
 	CHUNK_CLASS_INHERITANCE_LIST       = ENUMIFY('C','L','I','L'),	// Parent class information. List arranged after parent priority. Optional.
 	CHUNK_CLASS_PHYSICS                = ENUMIFY('C','L','P','H'),	// An physics filename of the physics that forms the shapes of this class. Optional - absent when physics inherited or for abstract nouns ("clan" and "weather").
-	CHUNK_CLASS_SETTINGS               = ENUMIFY('C','L','S','E'),	// String keys and their corresponding default string values. Example "stand_animation":"heavy_walk". Optional.
+	CHUNK_CLASS_SETTINGS               = ENUMIFY('C','L','S','E'),	// str keys and their corresponding default string values. Example "stand_animation":"heavy_walk". Optional.
 	CHUNK_CLASS_MESH_LIST              = ENUMIFY('C','L','M','L'),	// A list of mesh filenames that forms the looks of this class. Only used by graphics applications, and completly ignored by text applications. Optional - absent when using inherited or for abstract nouns.
 	CHUNK_CLASS_PHYS_MESH              = ENUMIFY('C','L','P','M'),	// Connection between a bone and a mesh. Mandatory in sub-chunk array.
 
@@ -156,11 +156,11 @@ public:
 		ChunkyFileElement();
 		// Used for any non-32 bit, statically formed data. Allocates a byte array for each element loaded.
 		// Field sizes are stored in pFieldSize[e], where e is the element index.
-		ChunkyFileElement(ChunkyType pType, void** pPointer, Lepra::uint32* pFieldSize, int pElementCount = 1);
+		ChunkyFileElement(ChunkyType pType, void** pPointer, uint32* pFieldSize, int pElementCount = 1);
 		// Used for 32-bits (floats may use them too). Does not allocate. Stores total field size in *pFieldSize.
-		ChunkyFileElement(ChunkyType pType, Lepra::int32* pInt, Lepra::uint32* pFieldSize = 0, int pElementCount = 1);
+		ChunkyFileElement(ChunkyType pType, int32* pInt, uint32* pFieldSize = 0, int pElementCount = 1);
 		// Used for strings.
-		ChunkyFileElement(ChunkyType pType, Lepra::String* pString, int pElementCount = 1);
+		ChunkyFileElement(ChunkyType pType, str* pString, int pElementCount = 1);
 		// Used for receiving callbacks. Will call LoadElementCallback if this chunk type is found.
 		ChunkyFileElement(ChunkyType pType, void* pPointer, int pElementCount = 1);
 		ChunkyFileElement(const ChunkyFileElement& pOriginal);
@@ -168,10 +168,10 @@ public:
 
 		ChunkyType mType;
 		bool mLoadCallback;
-		Lepra::int32* mIntPointer;
+		int32* mIntPointer;
 		void** mPointer;
-		Lepra::String* mString;
-		Lepra::uint32* mFieldSize;
+		str* mString;
+		uint32* mFieldSize;
 		int mElementCount;
 
 		bool mIsElementLoaded;
@@ -179,34 +179,34 @@ public:
 
 	typedef std::list<ChunkyFileElement> FileElementList;
 
-	ChunkyLoader(Lepra::File* pFile, bool pIsFileOwner);
+	ChunkyLoader(File* pFile, bool pIsFileOwner);
 	virtual ~ChunkyLoader();
 
-	//bool LoadSingleString(ChunkyType pType, Lepra::String& pString);
-	//bool LoadStringList(std::list<Lepra::String>& pStringList);
-	//bool LoadInt(ChunkyType pType, Lepra::int32& pInt);
-	bool AllocLoadChunkyList(FileElementList& pLoadList, Lepra::int64 pChunkEnd);
+	//bool LoadSingleString(ChunkyType pType, str& pString);
+	//bool LoadStringList(std::list<str>& pStringList);
+	//bool LoadInt(ChunkyType pType, int32& pInt);
+	bool AllocLoadChunkyList(FileElementList& pLoadList, int64 pChunkEnd);
 
-	bool SaveSingleString(ChunkyType pType, const Lepra::String& pString);
-	//bool SaveStringList(const std::list<Lepra::String>& pStringList, ChunkyType pType);
-	bool SaveInt(ChunkyType pType, Lepra::int32 pInt);
+	bool SaveSingleString(ChunkyType pType, const str& pString);
+	//bool SaveStringList(const std::list<str>& pStringList, ChunkyType pType);
+	bool SaveInt(ChunkyType pType, int32 pInt);
 	bool SaveChunkyList(const FileElementList& pSaveList);
 
 protected:
-	virtual bool LoadElementCallback(ChunkyType pType, Lepra::uint32 pSize, Lepra::int64 pChunkEndPosition, void* pStorage);
+	virtual bool LoadElementCallback(ChunkyType pType, uint32 pSize, int64 pChunkEndPosition, void* pStorage);
 
 	bool VerifyFileType(ChunkyType pType);
 	bool WriteFileType(ChunkyType pType);
 
-	bool LoadHead(ChunkyType& pType, Lepra::uint32& pSize, Lepra::int64& pChunkEndPosition);
-	bool LoadRequiredHead(ChunkyType pRequiredType, Lepra::uint32& pSize, Lepra::int64& pChunkEndPosition);
-	bool SaveHead(ChunkyType pType, Lepra::uint32 pSize, Lepra::int64& pChunkEndPosition);
-	bool RewriteChunkSize(Lepra::int64 pChunkStartPosition);
+	bool LoadHead(ChunkyType& pType, uint32& pSize, int64& pChunkEndPosition);
+	bool LoadRequiredHead(ChunkyType pRequiredType, uint32& pSize, int64& pChunkEndPosition);
+	bool SaveHead(ChunkyType pType, uint32 pSize, int64& pChunkEndPosition);
+	bool RewriteChunkSize(int64 pChunkStartPosition);
 
-	Lepra::uint32* AllocInitBigEndian(const float* pData, unsigned pCount);
-	Lepra::uint32* AllocInitBigEndian(const Lepra::uint32* pData, unsigned pCount);
+	uint32* AllocInitBigEndian(const float* pData, unsigned pCount);
+	uint32* AllocInitBigEndian(const uint32* pData, unsigned pCount);
 
-	Lepra::File* mFile;
+	File* mFile;
 	bool mIsFileOwner;
 
 	LOG_CLASS_DECLARE();
@@ -218,17 +218,17 @@ class ChunkyAnimationLoader: public ChunkyLoader	// For bone animations.
 {
 	typedef ChunkyLoader Parent;
 public:
-	ChunkyAnimationLoader(Lepra::File* pFile, bool pIsFileOwner);
+	ChunkyAnimationLoader(File* pFile, bool pIsFileOwner);
 	virtual ~ChunkyAnimationLoader();
 	virtual bool Load(BoneAnimation* pAnimation);
 	virtual bool Save(const BoneAnimation* pAnimation);
 
 private:
-	bool LoadElementCallback(TBC::ChunkyType pType, Lepra::uint32 pSize, Lepra::int64 pChunkEndPosition, void* pStorage);
+	bool LoadElementCallback(TBC::ChunkyType pType, uint32 pSize, int64 pChunkEndPosition, void* pStorage);
 
-	Lepra::int32 mKeyframeCount;
-	Lepra::int32 mBoneCount;
-	Lepra::int32 mCurrentKeyframe;
+	int32 mKeyframeCount;
+	int32 mBoneCount;
+	int32 mCurrentKeyframe;
 
 	LOG_CLASS_DECLARE();
 };
@@ -237,16 +237,16 @@ class ChunkyPhysicsLoader: public ChunkyLoader	// For physics and skinning. Load
 {
 	typedef ChunkyLoader Parent;
 public:
-	ChunkyPhysicsLoader(Lepra::File* pFile, bool pIsFileOwner);
+	ChunkyPhysicsLoader(File* pFile, bool pIsFileOwner);
 	virtual ~ChunkyPhysicsLoader();
 	virtual bool Load(ChunkyPhysics* pData);
 	virtual bool Save(const ChunkyPhysics* pData);
 
 private:
-	bool LoadElementCallback(TBC::ChunkyType pType, Lepra::uint32 pSize, Lepra::int64 pChunkEndPosition, void* pStorage);
+	bool LoadElementCallback(TBC::ChunkyType pType, uint32 pSize, int64 pChunkEndPosition, void* pStorage);
 	void SetBoneChildren(int pBoneIndex);
 
-	Lepra::int32 mCurrentBoneIndex;
+	int32 mCurrentBoneIndex;
 
 	LOG_CLASS_DECLARE();
 };
@@ -256,7 +256,7 @@ class ChunkyClassLoader: public ChunkyLoader
 {
 	typedef ChunkyLoader Parent;
 public:
-	ChunkyClassLoader(Lepra::File* pFile, bool pIsFileOwner);
+	ChunkyClassLoader(File* pFile, bool pIsFileOwner);
 	virtual ~ChunkyClassLoader();
 	virtual bool Load(ChunkyClass* pData);
 
@@ -271,7 +271,7 @@ private:
 class ChunkyGroupLoader: public ChunkyLoader
 {
 public:
-	ChunkyGroupLoader(Lepra::File* pFile, bool pIsFileOwner);
+	ChunkyGroupLoader(File* pFile, bool pIsFileOwner);
 	virtual ~ChunkyGroupLoader();
 	virtual bool Load(ChunkyGroup* pData);
 	virtual bool Save(const ChunkyGroup* pData);
@@ -280,7 +280,7 @@ public:
 class ChunkyWorldLoader: public ChunkyLoader	// Contains groups and terrain. A bit bold at this point? :)
 {
 public:
-	ChunkyWorldLoader(Lepra::File* pFile, bool pIsFileOwner);
+	ChunkyWorldLoader(File* pFile, bool pIsFileOwner);
 	virtual ~ChunkyWorldLoader();
 	virtual bool Load(ChunkyWorld* pData);
 	virtual bool Save(const ChunkyWorld* pData);

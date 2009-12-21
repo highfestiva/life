@@ -770,16 +770,16 @@ TEMPLATE void QUAL::GetEulerAngles(_TVarType& pYaw, _TVarType& pPitch, _TVarType
 	_TVarType lYaw;
 	_TVarType lPitch;
 	_TVarType lRoll;
-	if (abcd > ((_TVarType)0.5-Lepra::MathTraits<_TVarType>::FullEps())*lUnitLength)
+	if (abcd > ((_TVarType)0.5-MathTraits<_TVarType>::FullEps())*lUnitLength)
 	{
 		lYaw = 2 * atan2(GetC(), GetA());
-		lPitch = (_TVarType)Lepra::PI/2;
+		lPitch = (_TVarType)PI/2;
 		lRoll = 0;
 	}
-	else if (abcd < (-(_TVarType)0.5+Lepra::MathTraits<_TVarType>::FullEps())*lUnitLength)
+	else if (abcd < (-(_TVarType)0.5+MathTraits<_TVarType>::FullEps())*lUnitLength)
 	{
 		lYaw = -2 * ::atan2(GetC(), GetA());
-		lPitch = -(_TVarType)Lepra::PI/2;
+		lPitch = -(_TVarType)PI/2;
 		lRoll = 0;
 	}
 	else

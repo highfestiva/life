@@ -183,20 +183,20 @@ public:
 		ICON_RIGHT,
 	};
 
-	Button(const Lepra::String& pName);
-	Button(const Lepra::Color& pColor,
-		   const Lepra::String& pName);
+	Button(const str& pName);
+	Button(const Color& pColor,
+		   const str& pName);
 	Button(BorderComponent::BorderShadeFunc pShadeFunc,
 		   int pBorderWidth,
-		   const Lepra::Color& pColor,
-		   const Lepra::String& pName);
+		   const Color& pColor,
+		   const str& pName);
 	Button(Painter::ImageID pReleasedImageID,
 		   Painter::ImageID pPressedImageID,
 		   Painter::ImageID pReleasedActiveImageID,	// Mouse over.
 		   Painter::ImageID pPressedActiveImageID,
 		   Painter::ImageID pReleasingImageID,
 		   Painter::ImageID pPressingImageID,
-		   const Lepra::String& pName);
+		   const str& pName);
 
 	virtual ~Button();
 
@@ -220,10 +220,10 @@ public:
 	void SetIcon(Painter::ImageID pIconID,
 			    IconAlignment pAlignment);
 
-	void SetText(const Lepra::String& pText,
-			    const Lepra::Color& pTextColor,
-			    const Lepra::Color& pBackgColor);
-	const Lepra::String& GetText();
+	void SetText(const str& pText,
+			    const Color& pTextColor,
+			    const Color& pBackgColor);
+	const str& GetText();
 
 	virtual void Repaint(Painter* pPainter);
 
@@ -273,12 +273,12 @@ private:
 	Painter::ImageID mIconID;
 	IconAlignment mIconAlignment;
 
-	Lepra::String mText;
-	Lepra::Color mTextColor;
-	Lepra::Color mTextBackgColor;
+	str mText;
+	Color mTextColor;
+	Color mTextBackgColor;
 
-	Lepra::Color mHooverColor;
-	Lepra::Color mPressColor;
+	Color mHooverColor;
+	Color mPressColor;
 	
 	bool mPressed;
 	bool mImageButton;

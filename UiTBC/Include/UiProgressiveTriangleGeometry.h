@@ -47,8 +47,8 @@ public:
 	// the results of any future calls to the member functions is undefined.
 	inline virtual float*         GetVertexData() const;
 	inline virtual float*         GetUVData(unsigned int pUVSet) const;
-	inline virtual Lepra::uint32* GetIndices() const;
-	inline virtual Lepra::uint8*  GetColorData() const;
+	inline virtual uint32* GetIndices() const;
+	inline virtual uint8*  GetColorData() const;
 	inline virtual float*         GetNormalData() const; // Vertex normals..
 
 	inline virtual void ClearVertexNormalData();
@@ -210,7 +210,7 @@ private:
 		Vertex* mV2;
 		Vertex* mV3;
 
-		Lepra::Vector3DF mNormal;    // Used in FindEdgeToCollapse().
+		Vector3DF mNormal;    // Used in FindEdgeToCollapse().
 		std::list<int> mVertexIndexHistory;
 		VertexList mVertexHistory;
 
@@ -393,14 +393,14 @@ private:
 	float* mCurrentUVData;				// Doublets of (u, v).
 	float* mCurrentColorData;
 	float* mCurrentNormalData;			// Triplets of (x, y, z).
-	Lepra::uint8* mCurrentColorData8;
-	Lepra::uint32* mCurrentIndices;		// Triplets of vertex indices.
+	uint8* mCurrentColorData8;
+	uint32* mCurrentIndices;		// Triplets of vertex indices.
 
 	float* mBaseVertexData;			// Triplets of (x, y, z).
 	float* mBaseUVData;				// Doublets of (u, v).
 	float* mBaseColorData;
 	float* mBaseNormalData;			// Triplets of (x, y, z).
-	Lepra::uint32* mBaseIndices;	// Triplets of vertex indices.
+	uint32* mBaseIndices;	// Triplets of vertex indices.
 
 	unsigned int mCurrentVSplit;
 	unsigned int mNumVertexSplits;
@@ -447,12 +447,12 @@ float* ProgressiveTriangleGeometry::GetUVData(unsigned int /*pUVSet*/) const
 	return mCurrentUVData;
 }
 
-Lepra::uint32* ProgressiveTriangleGeometry::GetIndices() const
+uint32* ProgressiveTriangleGeometry::GetIndices() const
 {
 	return mCurrentIndices;
 }
 
-Lepra::uint8* ProgressiveTriangleGeometry::GetColorData() const
+uint8* ProgressiveTriangleGeometry::GetColorData() const
 {
 	return mCurrentColorData8;
 }

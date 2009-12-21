@@ -23,7 +23,7 @@ public:
 
 	virtual void Add(Component* pComponent, int pParam1, int pParam2);
 	virtual void Remove(Component* pComponent);
-	virtual Component* Find(const Lepra::String& pComponentName);
+	virtual Component* Find(const str& pComponentName);
 	virtual int GetNumComponents() const;
 
 	virtual Component* GetComponentAt(int pRow, int pCol);
@@ -36,9 +36,9 @@ public:
 
 	virtual void UpdateLayout();
 
-	virtual Lepra::PixelCoords GetPreferredSize(bool pForceAdaptive);
-	virtual Lepra::PixelCoords GetMinSize();
-	virtual Lepra::PixelCoords GetContentSize();
+	virtual PixelCoords GetPreferredSize(bool pForceAdaptive);
+	virtual PixelCoords GetMinSize();
+	virtual PixelCoords GetContentSize();
 
 	inline int GetNumRows() const;
 	inline int GetNumCols() const;

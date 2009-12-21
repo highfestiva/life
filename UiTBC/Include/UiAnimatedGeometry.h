@@ -67,8 +67,8 @@ public:
 
 	float*         GetVertexData() const;
 	float*         GetUVData(unsigned int pUVSet) const;
-	Lepra::uint32* GetIndexData() const;
-	Lepra::uint8*  GetColorData() const;
+	uint32* GetIndexData() const;
+	uint8*  GetColorData() const;
 	float*         GetNormalData() const;
 
 	ColorFormat GetColorFormat() const;

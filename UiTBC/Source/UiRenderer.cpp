@@ -13,7 +13,7 @@
 namespace UiTbc
 {
 
-Renderer::Renderer(Lepra::Canvas* pScreen) :
+Renderer::Renderer(Canvas* pScreen) :
 	mTriangleCount(0),
 	mScreen(pScreen),
 	mDX(1),
@@ -86,12 +86,12 @@ void Renderer::DeletingGeometry(TBC::GeometryBase* pGeometry)
 	}
 }
 
-const Lepra::Canvas* Renderer::GetScreen() const
+const Canvas* Renderer::GetScreen() const
 {
 	return mScreen;
 }
 
-void Renderer::SetViewport(const Lepra::PixelRect& pViewport)
+void Renderer::SetViewport(const PixelRect& pViewport)
 {
 	assert(pViewport.mLeft <= pViewport.mRight && 
 		pViewport.mTop <= pViewport.mBottom);
@@ -99,7 +99,7 @@ void Renderer::SetViewport(const Lepra::PixelRect& pViewport)
 	RecalculateFrustumPlanes();
 }
 
-const Lepra::PixelRect& Renderer::GetViewport() const
+const PixelRect& Renderer::GetViewport() const
 {
 	return mViewport;
 }
@@ -122,7 +122,7 @@ void Renderer::GetViewFrustum(float& pFOVAngle, float& pNear, float& pFar)
 
 void Renderer::RecalculateFrustumPlanes()
 {
-	float lAngle = Lepra::Math::Deg2Rad(90.0f - mFOVAngle * 0.5f);
+	float lAngle = Math::Deg2Rad(90.0f - mFOVAngle * 0.5f);
 	mFrustumPlanes[0].Set(-(float)sin(lAngle), (float)cos(lAngle), 0); // Right plane.
 	mFrustumPlanes[1].Set( (float)sin(lAngle), (float)cos(lAngle), 0); // Left plane.
 
@@ -134,35 +134,35 @@ void Renderer::RecalculateFrustumPlanes()
 float Renderer::CalcFOVAngle(float pReferenceAngle, float pAspectRatio)
 {
 	float lRatio = pAspectRatio * 3.0f / 4.0f;
-	return Lepra::Math::Rad2Deg(atan(tan(Lepra::Math::Deg2Rad(pReferenceAngle * 0.5f)) * lRatio) * 2.0f);
+	return Math::Rad2Deg(atan(tan(Math::Deg2Rad(pReferenceAngle * 0.5f)) * lRatio) * 2.0f);
 }
 
-void Renderer::SetClippingRect(const Lepra::PixelRect& pRect)
+void Renderer::SetClippingRect(const PixelRect& pRect)
 {
 	mClippingRect = pRect;
 }
 
-void Renderer::ReduceClippingRect(const Lepra::PixelRect& pRect)
+void Renderer::ReduceClippingRect(const PixelRect& pRect)
 {
 	Renderer::SetClippingRect(mClippingRect.GetOverlap(pRect));
 }
 
 void Renderer::ResetClippingRect()
 {
-	SetClippingRect(Lepra::PixelRect(0, 0, mScreen->GetWidth(), mScreen->GetHeight()));
+	SetClippingRect(PixelRect(0, 0, mScreen->GetWidth(), mScreen->GetHeight()));
 }
 
-const Lepra::PixelRect& Renderer::GetClippingRect() const
+const PixelRect& Renderer::GetClippingRect() const
 {
 	return mClippingRect;
 }
 
-void Renderer::SetCameraTransformation(const Lepra::TransformationF& pTransformation)
+void Renderer::SetCameraTransformation(const TransformationF& pTransformation)
 {
 	mCameraTransformation = pTransformation;
 }
 
-const Lepra::TransformationF& Renderer::GetCameraTransformation()
+const TransformationF& Renderer::GetCameraTransformation()
 {
 	return mCameraTransformation;
 }
@@ -393,20 +393,20 @@ Renderer::LightID Renderer::AddSpotLight(LightHint pHint,
 	const float lEpsilon = 1e-6f;
 
 	// Generate an orientation for the light.
-	Lepra::Vector3DF lAxisX;
-	Lepra::Vector3DF lAxisY;
-	Lepra::Vector3DF lAxisZ;
+	Vector3DF lAxisX;
+	Vector3DF lAxisY;
+	Vector3DF lAxisZ;
 
 	// If light direction is pointing up.
 	if (mLightData[lLightIndex].mDirection.y >= (1.0f - lEpsilon))
 	{
-		lAxisX = mLightData[lLightIndex].mDirection / Lepra::Vector3DF(0, 0, 1);
+		lAxisX = mLightData[lLightIndex].mDirection / Vector3DF(0, 0, 1);
 		lAxisY = lAxisX / mLightData[lLightIndex].mDirection;
 		lAxisZ = mLightData[lLightIndex].mDirection;
 	}
 	else
 	{
-		lAxisX = mLightData[lLightIndex].mDirection / Lepra::Vector3DF(0, 1, 0);
+		lAxisX = mLightData[lLightIndex].mDirection / Vector3DF(0, 1, 0);
 		lAxisY = lAxisX / mLightData[lLightIndex].mDirection;
 		lAxisZ = mLightData[lLightIndex].mDirection;
 	}
@@ -506,7 +506,7 @@ void Renderer::SetLightPosition(LightID pLightID, float pX, float pY, float pZ)
 	if (mLightData[lLightIndex].mType == Renderer::LIGHT_POINT ||
 	   mLightData[lLightIndex].mType == Renderer::LIGHT_SPOT)
 	{
-		if (mLightData[lLightIndex].mPosition != Lepra::Vector3DF(pX, pY, pZ))
+		if (mLightData[lLightIndex].mPosition != Vector3DF(pX, pY, pZ))
 		{
 			mLightData[lLightIndex].mTransformationChanged = true;
 		}
@@ -525,7 +525,7 @@ void Renderer::SetLightDirection(LightID pLightID, float pX, float pY, float pZ)
 	if (mLightData[lLightIndex].mType == Renderer::LIGHT_DIRECTIONAL ||
 	   mLightData[lLightIndex].mType == Renderer::LIGHT_SPOT)
 	{
-		Lepra::Vector3DF lPrevDir(mLightData[lLightIndex].mDirection);
+		Vector3DF lPrevDir(mLightData[lLightIndex].mDirection);
 		mLightData[lLightIndex].mDirection.Set(pX, pY, pZ);
 		mLightData[lLightIndex].mDirection.Normalize();
 
@@ -539,20 +539,20 @@ void Renderer::SetLightDirection(LightID pLightID, float pX, float pY, float pZ)
 			const float lEpsilon = 1e-6f;
 
 			// Generate an orientation for the light.
-			Lepra::Vector3DF lAxisX;
-			Lepra::Vector3DF lAxisY;
-			Lepra::Vector3DF lAxisZ;
+			Vector3DF lAxisX;
+			Vector3DF lAxisY;
+			Vector3DF lAxisZ;
 
 			// If light direction is pointing up.
 			if (mLightData[lLightIndex].mDirection.y >= (1.0f - lEpsilon))
 			{
-				lAxisX = mLightData[lLightIndex].mDirection / Lepra::Vector3DF(1, 0, 0);
+				lAxisX = mLightData[lLightIndex].mDirection / Vector3DF(1, 0, 0);
 				lAxisY = mLightData[lLightIndex].mDirection / lAxisX;
 				lAxisZ = mLightData[lLightIndex].mDirection;
 			}
 			else
 			{
-				lAxisX = Lepra::Vector3DF(0, 1, 0) / mLightData[lLightIndex].mDirection;
+				lAxisX = Vector3DF(0, 1, 0) / mLightData[lLightIndex].mDirection;
 				lAxisY = mLightData[lLightIndex].mDirection / lAxisX;
 				lAxisZ = mLightData[lLightIndex].mDirection;
 			}
@@ -646,7 +646,7 @@ float Renderer::GetLightSpotExponent(LightID pLightID)
 	return mLightData[lLightIndex].mSpotExponent;
 }
 
-void Renderer::SortLights(const Lepra::Vector3DF& pReferencePosition)
+void Renderer::SortLights(const Vector3DF& pReferencePosition)
 {
 	smRenderer = this;
 	smReferencePosition = pReferencePosition;
@@ -1251,17 +1251,17 @@ bool Renderer::CheckFlag(unsigned int pFlags, unsigned int pFlag)
 	return (pFlags & pFlag) != 0;
 }
 
-Renderer::LightID Renderer::AddDirectionalLight(LightHint pHint, const Lepra::Vector3DF& pDir, const Lepra::Color& pColor, float pLightIntensity, float pShadowRange)
+Renderer::LightID Renderer::AddDirectionalLight(LightHint pHint, const Vector3DF& pDir, const Color& pColor, float pLightIntensity, float pShadowRange)
 {
 	return AddDirectionalLight(pHint, (float)pDir.x, (float)pDir.y, (float)pDir.z, pLightIntensity * (float)pColor.mRed / 255.0f, pLightIntensity * (float)pColor.mGreen / 255.0f, pLightIntensity * (float)pColor.mBlue  / 255.0f, pShadowRange);
 }
 
-Renderer::LightID Renderer::AddPointLight(LightHint pHint, const Lepra::Vector3DF& pPos, const Lepra::Color& pColor, float pLightIntensity, float pLightRadius, float pShadowRange)
+Renderer::LightID Renderer::AddPointLight(LightHint pHint, const Vector3DF& pPos, const Color& pColor, float pLightIntensity, float pLightRadius, float pShadowRange)
 {
 	return AddPointLight(pHint, (float)pPos.x, (float)pPos.y, (float)pPos.z, pLightIntensity * (float)pColor.mRed   / 255.0f, pLightIntensity * (float)pColor.mGreen / 255.0f, pLightIntensity * (float)pColor.mBlue  / 255.0f, pLightRadius, pShadowRange);
 }
 
-Renderer::LightID Renderer::AddSpotLight(LightHint pHint, const Lepra::Vector3DF& pPos, const Lepra::Vector3DF& pDir, const Lepra::Color& pColor, float pLightIntensity, float pCutoffAngle, float pSpotExponent, float pLightRadius, float pShadowRange)
+Renderer::LightID Renderer::AddSpotLight(LightHint pHint, const Vector3DF& pPos, const Vector3DF& pDir, const Color& pColor, float pLightIntensity, float pCutoffAngle, float pSpotExponent, float pLightRadius, float pShadowRange)
 {
 	return AddSpotLight(pHint, (float)pPos.x, (float)pPos.y, (float)pPos.z, (float)pDir.x, (float)pDir.y, (float)pDir.z, pLightIntensity * (float)pColor.mRed   / 255.0f, pLightIntensity * (float)pColor.mGreen / 255.0f, pLightIntensity * (float)pColor.mBlue  / 255.0f, pCutoffAngle, pSpotExponent, pLightRadius, pShadowRange);
 }
@@ -1313,38 +1313,38 @@ Renderer::ShadowHint Renderer::GetShadowHint() const
 
 void Renderer::PrepareProjectionData()
 {
-	Lepra::float32 lFOVAngle;
-	Lepra::float32 lNear;
-	Lepra::float32 lFar;
+	float32 lFOVAngle;
+	float32 lNear;
+	float32 lFar;
 	GetViewFrustum(lFOVAngle, lNear, lFar);
 
-	Lepra::PixelRect lViewPort(GetViewport());
+	PixelRect lViewPort(GetViewport());
 
-	const Lepra::Canvas* lScreen = GetScreen();
-	Lepra::float64 lAspect = (Lepra::float64)lScreen->GetWidth() / (Lepra::float64)lScreen->GetHeight();
+	const Canvas* lScreen = GetScreen();
+	float64 lAspect = (float64)lScreen->GetWidth() / (float64)lScreen->GetHeight();
 
 
 	// Convert to radians.
-	Lepra::float64 lFOVAngleRad = (double)lFOVAngle * Lepra::PI / 180.0;
+	float64 lFOVAngleRad = (double)lFOVAngle * PI / 180.0;
 
 	mDX = (1.0 / tan(lFOVAngleRad / 2.0));
 	mDY = mDX * lAspect;
 }
 
-Lepra::PixelRect Renderer::GetBoundingRect(const Lepra::Vector3DF* pVertex, int pNumVertices) const
+PixelRect Renderer::GetBoundingRect(const Vector3DF* pVertex, int pNumVertices) const
 {
-	const Lepra::Canvas* lScreen = GetScreen();
+	const Canvas* lScreen = GetScreen();
 
 	if (pNumVertices <= 2)
 	{
 		mLog.AError("GetBoundingRect() - NumVertices < 3!");
-		return Lepra::PixelRect(0,0,0,0);
+		return PixelRect(0,0,0,0);
 	}
 
-	Lepra::PixelRect lRect(0, 0, 0, 0);
+	PixelRect lRect(0, 0, 0, 0);
 
 	int lPrevIndex = pNumVertices - 1;
-	Lepra::Vector3DF lPrev(mCamTransform.InverseTransform(Lepra::Vector3DF(pVertex[lPrevIndex].x, pVertex[lPrevIndex].y, pVertex[lPrevIndex].z)));
+	Vector3DF lPrev(mCamTransform.InverseTransform(Vector3DF(pVertex[lPrevIndex].x, pVertex[lPrevIndex].y, pVertex[lPrevIndex].z)));
 
 	bool lLeftOK   = false;
 	bool lRightOK  = false;
@@ -1360,14 +1360,14 @@ Lepra::PixelRect Renderer::GetBoundingRect(const Lepra::Vector3DF* pVertex, int 
 
 	for (int i = 0; i < pNumVertices; i++)
 	{
-		Lepra::Vector3DF lCurrent(mCamTransform.InverseTransform(Lepra::Vector3DF(pVertex[i].x, pVertex[i].y, pVertex[i].z)));
+		Vector3DF lCurrent(mCamTransform.InverseTransform(Vector3DF(pVertex[i].x, pVertex[i].y, pVertex[i].z)));
 
 		if (lPrev.y <= 0 && lCurrent.y > 0 ||
 		   lPrev.y >  0 && lCurrent.y <= 0)
 		{
 			// Clip at z = 0.
-			Lepra::Vector3DF lDiff = lCurrent - lPrev;
-			Lepra::Vector3DF lClipPos = lPrev + lDiff * (-lPrev.y / lDiff.y);
+			Vector3DF lDiff = lCurrent - lPrev;
+			Vector3DF lClipPos = lPrev + lDiff * (-lPrev.y / lDiff.y);
 
 			// Determine wether the clipped position is to the left or to the right.
 			if (lClipPos.x <= 0)
@@ -1439,22 +1439,22 @@ Lepra::PixelRect Renderer::GetBoundingRect(const Lepra::Vector3DF* pVertex, int 
 	}
 
 	// Finally, we need to clamp the bounding rect to the coordinates of the screen.
-	lRect.mLeft   = (int)floor(Lepra::Math::Clamp(lRectLeft,   -0.5, lScreenWidth  + 0.5) + 0.5);
-	lRect.mRight  = (int)floor(Lepra::Math::Clamp(lRectRight,  -0.5, lScreenWidth  + 0.5) + 0.5);
-	lRect.mTop    = (int)floor(Lepra::Math::Clamp(lRectTop,    -0.5, lScreenHeight + 0.5) + 0.5);
-	lRect.mBottom = (int)floor(Lepra::Math::Clamp(lRectBottom, -0.5, lScreenHeight + 0.5) + 0.5);
+	lRect.mLeft   = (int)floor(Math::Clamp(lRectLeft,   -0.5, lScreenWidth  + 0.5) + 0.5);
+	lRect.mRight  = (int)floor(Math::Clamp(lRectRight,  -0.5, lScreenWidth  + 0.5) + 0.5);
+	lRect.mTop    = (int)floor(Math::Clamp(lRectTop,    -0.5, lScreenHeight + 0.5) + 0.5);
+	lRect.mBottom = (int)floor(Math::Clamp(lRectBottom, -0.5, lScreenHeight + 0.5) + 0.5);
 
 	return lRect;
 }
 
-bool Renderer::IsFacingFront(const Lepra::Vector3DF* pVertex, int pNumVertices)
+bool Renderer::IsFacingFront(const Vector3DF* pVertex, int pNumVertices)
 {
 	if (pNumVertices < 3)
 		return false;
 
 	// Use the cross product constructor to create the surface normal.
-	Lepra::Vector3DF lNormal(pVertex[1] - pVertex[0], pVertex[2] - pVertex[0]);
-	Lepra::Vector3DF lCamVector(pVertex[0] - mCamTransform.GetPosition());
+	Vector3DF lNormal(pVertex[1] - pVertex[0], pVertex[2] - pVertex[0]);
+	Vector3DF lCamVector(pVertex[0] - mCamTransform.GetPosition());
 
 	return lNormal.Dot(lCamVector) > 0;
 }
@@ -1464,9 +1464,9 @@ float Renderer::GetAspectRatio() const
 	return (float)mViewport.GetWidth() / (float)mViewport.GetHeight();
 }
 
-bool Renderer::CheckCulling(const Lepra::TransformationF& pTransform, double pBoundingRadius)
+bool Renderer::CheckCulling(const TransformationF& pTransform, double pBoundingRadius)
 {
-	const Lepra::Vector3DF& lPos = pTransform.GetPosition();
+	const Vector3DF& lPos = pTransform.GetPosition();
 
 	bool lVisible = true;
 	if (lVisible)
@@ -1588,7 +1588,7 @@ int Renderer::QueryTriangleCount(bool pVisibleOnly)
 }
 
 Renderer* Renderer::smRenderer = 0;
-Lepra::Vector3DF Renderer::smReferencePosition;
+Vector3DF Renderer::smReferencePosition;
 LOG_CLASS_DEFINE(UI_GFX_3D, Renderer);
 
 } // End namespace.

@@ -34,7 +34,7 @@ namespace Lepra
 template<class _Base> class MemberThread: public Thread
 {
 public:
-	MemberThread(const String& pThreadName);
+	MemberThread(const str& pThreadName);
 	virtual ~MemberThread();
 
 	bool Start(_Base* pObject, void (_Base::*pThreadEntry)());
@@ -49,7 +49,7 @@ private:
 
 
 
-template<class _Base> MemberThread<_Base>::MemberThread(const String& pThreadName):
+template<class _Base> MemberThread<_Base>::MemberThread(const str& pThreadName):
 	Thread(pThreadName),
 	mObject(0),
 	mThreadEntry(0)

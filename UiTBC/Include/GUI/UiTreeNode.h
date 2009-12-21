@@ -44,23 +44,23 @@ class TreeNode: public Component
 	typedef Component Parent;
 public:
 	// Uses the default icons.
-	TreeNode(const Lepra::String& pText,
-		 const Lepra::String& pName);
+	TreeNode(const str& pText,
+		 const str& pName);
 
 	// User specifies his own node icons. The default 
 	// expand/collapse icons are still used.
 	TreeNode(Painter::ImageID pCollapsedIconID,
 		 Painter::ImageID pExpandedIconID,
-		 const Lepra::String& pText,
-		 const Lepra::String& pName);
+		 const str& pText,
+		 const str& pName);
 
 	// User defines all icons.
 	TreeNode(Painter::ImageID pCollapsedIconID,
 		 Painter::ImageID pExpandedIconID,
 		 Painter::ImageID pCollapseIconID,
 		 Painter::ImageID pExpandeIconID,
-		 const Lepra::String& pText,
-		 const Lepra::String& pName);
+		 const str& pText,
+		 const str& pName);
 
 	~TreeNode();
 
@@ -76,10 +76,10 @@ public:
 
 	// Specifies the font to be used when creating new TreeNodes. Doesn't affect
 	// currently existing nodes.
-	static void UseFont(const Lepra::Color& pTextColor,
-			    const Lepra::Color& pTextBackgColor,
-			    const Lepra::Color& pTextSelectedColor,
-			    const Lepra::Color& pTextSelectedBackgColor);
+	static void UseFont(const Color& pTextColor,
+			    const Color& pTextBackgColor,
+			    const Color& pTextSelectedColor,
+			    const Color& pTextSelectedBackgColor);
 
 
 	virtual bool OnDoubleClick(int pMouseX, int pMouseY);
@@ -95,10 +95,10 @@ private:
 	// with ListControl::AddChildrenAfter().
 	typedef std::list<Component*> NodeList;
 
-	void Init(const Lepra::String& pText);
+	void Init(const str& pText);
 	void ValidatePainterAndIcons();
 	bool ValidateExpandButton();
-	bool ValidateIconRect(const Lepra::String& pText);
+	bool ValidateIconRect(const str& pText);
 
 	void AddDefaultIconIfNeeded(Painter::ImageID& pLocalIconID, Painter::ImageID& pStaticIconID, void* pBuffer, int pXOffset, int pYOffset);
 	void ResetUserIcons();
@@ -112,18 +112,18 @@ private:
 	static Painter::ImageID smCollapseIconID;
 	static Painter::ImageID smExpandedIconID;
 	static Painter::ImageID smCollapsedIconID;
-	static Lepra::uint8 smIconExpand[];
-	static Lepra::uint8 smIconCollapse[];
-	static Lepra::uint8 smIconCollapsed[];
-	static Lepra::uint8 smIconExpanded[];
+	static uint8 smIconExpand[];
+	static uint8 smIconCollapse[];
+	static uint8 smIconCollapsed[];
+	static uint8 smIconExpanded[];
 	static Painter* smPrevPainter;
 
 	// Factory members.
-	static Lepra::Color smFactoryTextColor;
-	static Lepra::Color smFactoryTextBackgColor;
-	static Lepra::Color smFactoryTextSelectedColor;
-	static Lepra::Color smFactoryTextSelectedBackgColor;
-	static Lepra::uint8 smFactoryAlphaTreshold;
+	static Color smFactoryTextColor;
+	static Color smFactoryTextBackgColor;
+	static Color smFactoryTextSelectedColor;
+	static Color smFactoryTextSelectedBackgColor;
+	static uint8 smFactoryAlphaTreshold;
 
 	TreeNode* mParentNode;
 	NodeList* mChildNodes;

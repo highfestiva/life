@@ -44,21 +44,21 @@ void PortalManager::ClearAll()
 }
 
 PortalManager::Portal* PortalManager::NewPortal(int pNumVertices,
-						Lepra::Vector3DF* pVertex,
+						Vector3DF* pVertex,
 						Cell* pCell1,
 						Cell* pCell2)
 {
 	return new Portal(pNumVertices, pVertex, pCell1, pCell2);
 }
 
-PortalManager::Cell* PortalManager::NewCell(const Lepra::String& pCellID, 
-					    const Lepra::String& pCellDescription,
+PortalManager::Cell* PortalManager::NewCell(const str& pCellID, 
+					    const str& pCellDescription,
 					    PortalManager* pPortalManager)
 {
 	return new Cell(pCellID, pCellDescription, pPortalManager);
 }
 
-bool PortalManager::AddCell(const Lepra::String& pCellID, const Lepra::String& pCellDescription)
+bool PortalManager::AddCell(const str& pCellID, const str& pCellDescription)
 {
 	CellTable::Iterator lIter;
 	lIter = mCellTable.Find(pCellID);
@@ -76,9 +76,9 @@ bool PortalManager::AddCell(const Lepra::String& pCellID, const Lepra::String& p
 }
 
 bool PortalManager::AddPortal(int pNumVertices,
-			      Lepra::Vector3DF* pVertex,
-			      const Lepra::String& pCellID1,
-			      const Lepra::String& pCellID2)
+			      Vector3DF* pVertex,
+			      const str& pCellID1,
+			      const str& pCellID2)
 {
 	if (pNumVertices < 3)
 	{
@@ -112,7 +112,7 @@ bool PortalManager::AddPortal(int pNumVertices,
 	return true;
 }
 
-bool PortalManager::AddGeometry(GeometryBase* pGeometry, const Lepra::String& pParentCellID)
+bool PortalManager::AddGeometry(GeometryBase* pGeometry, const str& pParentCellID)
 {
 	if (mGeomSet.Find(pGeometry) != mGeomSet.End())
 	{
@@ -155,7 +155,7 @@ void PortalManager::RemoveGeometry(GeometryBase* pGeometry)
 	pGeometry->SetParentCell(0);
 }
 
-Lepra::String PortalManager::GetParentCellID(GeometryBase* pGeometry)
+str PortalManager::GetParentCellID(GeometryBase* pGeometry)
 {
 	Cell* lCell = (Cell*)pGeometry->GetParentCell();
 	if (lCell != 0)
@@ -169,8 +169,8 @@ Lepra::String PortalManager::GetParentCellID(GeometryBase* pGeometry)
 	}
 }
 
-Lepra::String PortalManager::TestPortalCollision(const Lepra::Vector3DF& pFromPos,
-						  const Lepra::Vector3DF& pToPos,
+str PortalManager::TestPortalCollision(const Vector3DF& pFromPos,
+						  const Vector3DF& pToPos,
 						  GeometryBase* pGeometry)
 {
 	Cell* lCell = (Cell*)pGeometry->GetParentCell();
@@ -180,7 +180,7 @@ Lepra::String PortalManager::TestPortalCollision(const Lepra::Vector3DF& pFromPo
 		return *smInvalidCellID;
 	}
 
-	Lepra::Vector3DF lFromPos(pFromPos);
+	Vector3DF lFromPos(pFromPos);
 
 	// Loop as long as we are colliding with portals.
 	for (;;)
@@ -191,7 +191,7 @@ Lepra::String PortalManager::TestPortalCollision(const Lepra::Vector3DF& pFromPo
 		{
 			// We have collided. Step into the other cell and update the step vector.
 			lCell = lOtherCell;
-			Lepra::Vector3DF lDiff(pToPos - lFromPos);
+			Vector3DF lDiff(pToPos - lFromPos);
 			lFromPos += lDiff * lTTC;
 		}
 		else
@@ -204,9 +204,9 @@ Lepra::String PortalManager::TestPortalCollision(const Lepra::Vector3DF& pFromPo
 	return lCell->GetID();
 }
 
-Lepra::String PortalManager::TestPortalCollision(const Lepra::Vector3DF& pFromPos,
-						  const Lepra::Vector3DF& pToPos,
-						  const Lepra::String& pCellID)
+str PortalManager::TestPortalCollision(const Vector3DF& pFromPos,
+						  const Vector3DF& pToPos,
+						  const str& pCellID)
 {
 	CellTable::Iterator lIter = mCellTable.Find(pCellID);
 	if (lIter == mCellTable.End())
@@ -217,7 +217,7 @@ Lepra::String PortalManager::TestPortalCollision(const Lepra::Vector3DF& pFromPo
 
 	Cell* lCell = *lIter;
 
-	Lepra::Vector3DF lFromPos(pFromPos);
+	Vector3DF lFromPos(pFromPos);
 
 	// Loop as long as we are colliding with portals.
 	for (;;)
@@ -228,7 +228,7 @@ Lepra::String PortalManager::TestPortalCollision(const Lepra::Vector3DF& pFromPo
 		{
 			// We have collided. Step into the other cell and update the step vector.
 			lCell = lOtherCell;
-			Lepra::Vector3DF lDiff(pToPos - lFromPos);
+			Vector3DF lDiff(pToPos - lFromPos);
 			lFromPos += lDiff * lTTC;
 		}
 		else
@@ -240,8 +240,8 @@ Lepra::String PortalManager::TestPortalCollision(const Lepra::Vector3DF& pFromPo
 	return lCell->GetID();
 }
 
-PortalManager::Cell* PortalManager::Cell::TestPortalCollision(const Lepra::Vector3DF& pFromPos,
-							      const Lepra::Vector3DF& pToPos,
+PortalManager::Cell* PortalManager::Cell::TestPortalCollision(const Vector3DF& pFromPos,
+							      const Vector3DF& pToPos,
 							      float& pTimeToCollision)
 {
 	PortalList::iterator lIter;
@@ -278,7 +278,7 @@ PortalManager::Cell* PortalManager::Cell::TestPortalCollision(const Lepra::Vecto
 
 
 PortalManager::Portal::Portal(int pNumVertices,
-			      Lepra::Vector3DF* pVertex,
+			      Vector3DF* pVertex,
 			      Cell* pCell1,
 			      Cell* pCell2) :
 	mNumVertices(pNumVertices),
@@ -298,8 +298,8 @@ PortalManager::Portal::Portal(int pNumVertices,
 
 	mD = -mNormal.Dot(pVertex[0]);
 
-	mVertex     = new Lepra::Vector3DF[mNumVertices];
-	mEdgeNormal = new Lepra::Vector3DF[mNumVertices];
+	mVertex     = new Vector3DF[mNumVertices];
+	mEdgeNormal = new Vector3DF[mNumVertices];
 	mEdgeD = new float[mNumVertices];
 
 	for (i = 0; i < mNumVertices; i++)
@@ -331,8 +331,8 @@ PortalManager::Cell* PortalManager::Portal::GetOtherCell(Cell* pCell)
 	return 0;
 }
 
-bool PortalManager::Portal::TestCollision(const Lepra::Vector3DF& pFromPos,
-					  const Lepra::Vector3DF& pToPos,
+bool PortalManager::Portal::TestCollision(const Vector3DF& pFromPos,
+					  const Vector3DF& pToPos,
 					  Cell* pFrom,
 					  float& pTimeToCollision)
 {
@@ -370,10 +370,10 @@ bool PortalManager::Portal::TestCollision(const Lepra::Vector3DF& pFromPos,
 	}
 
 	// The vector is crossing the plane. Find the point of intersection (POI).
-	Lepra::Vector3DF lDiff(pToPos - pFromPos);
+	Vector3DF lDiff(pToPos - pFromPos);
 	float lTTC = (mNormal.Dot(pToPos) + mD) / mNormal.Dot(lDiff);
 	
-	Lepra::Vector3DF lPOI(pFromPos + lDiff * lTTC);
+	Vector3DF lPOI(pFromPos + lDiff * lTTC);
 
 	// Now check if the POI is on the portal polygon.
 	for (int i = 0; i < mNumVertices; i++)
@@ -392,7 +392,7 @@ bool PortalManager::Portal::TestCollision(const Lepra::Vector3DF& pFromPos,
 
 
 
-PortalManager::Cell::Cell(const Lepra::String& pCellID, const Lepra::String& pCellDescription, PortalManager* pPortalManager) :
+PortalManager::Cell::Cell(const str& pCellID, const str& pCellDescription, PortalManager* pPortalManager) :
 	mCellID(pCellID),
 	mCellDescription(pCellDescription),
 	mPortalManager(pPortalManager)
@@ -403,12 +403,12 @@ PortalManager::Cell::~Cell()
 {
 }
 
-const Lepra::String& PortalManager::Cell::GetID()
+const str& PortalManager::Cell::GetID()
 {
 	return mCellID;
 }
 
-const Lepra::String& PortalManager::Cell::GetDescription()
+const str& PortalManager::Cell::GetDescription()
 {
 	return mCellDescription;
 }
@@ -436,7 +436,7 @@ void PortalManager::Cell::RemoveGeometry(GeometryBase* pGeometry)
 
 
 // Initialized in TBC::Init().
-Lepra::String* PortalManager::smInvalidCellID = 0;
+str* PortalManager::smInvalidCellID = 0;
 
 LOG_CLASS_DEFINE(UI_GFX_3D, PortalManager);
 

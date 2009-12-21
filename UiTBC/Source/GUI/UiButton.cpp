@@ -13,12 +13,12 @@ namespace UiTbc
 
 
 
-Button::Button(const Lepra::String& pName) :
+Button::Button(const str& pName) :
 	Window(pName),
 	mIconID(Painter::INVALID_IMAGEID),
 	mIconAlignment(ICON_CENTER),
 	mText(_T("")),
-	mTextColor(Lepra::OFF_BLACK),
+	mTextColor(OFF_BLACK),
 	mTextBackgColor(255, 255, 255),
 	mPressed(false),
 	mState(RELEASED),
@@ -31,12 +31,12 @@ Button::Button(const Lepra::String& pName) :
 	InitializeHoover();
 }
 
-Button::Button(const Lepra::Color& pColor, const Lepra::String& pName):
+Button::Button(const Color& pColor, const str& pName):
 	Window(pColor, pName),
 	mIconID(Painter::INVALID_IMAGEID),
 	mIconAlignment(ICON_CENTER),
 	mText(_T("")),
-	mTextColor(Lepra::OFF_BLACK),
+	mTextColor(OFF_BLACK),
 	mTextBackgColor(255, 255, 255),
 	mPressed(false),
 	mState(RELEASED),
@@ -49,13 +49,13 @@ Button::Button(const Lepra::Color& pColor, const Lepra::String& pName):
 	InitializeHoover();
 }
 
-Button::Button(BorderComponent::BorderShadeFunc pShadeFunc, int pBorderWidth, const Lepra::Color& pColor,
-	const Lepra::String& pName):
+Button::Button(BorderComponent::BorderShadeFunc pShadeFunc, int pBorderWidth, const Color& pColor,
+	const str& pName):
 	Window((pShadeFunc == BorderComponent::LINEAR ? Parent::BORDER_LINEARSHADING : 0), pBorderWidth, pColor, pName),
 	mIconID(Painter::INVALID_IMAGEID),
 	mIconAlignment(ICON_CENTER),
 	mText(_T("")),
-	mTextColor(Lepra::OFF_BLACK),
+	mTextColor(OFF_BLACK),
 	mTextBackgColor(255, 255, 255),
 	mPressed(false),
 	mState(RELEASED),
@@ -71,7 +71,7 @@ Button::Button(BorderComponent::BorderShadeFunc pShadeFunc, int pBorderWidth, co
 Button::Button(Painter::ImageID pReleasedImageID, Painter::ImageID pPressedImageID,
 	Painter::ImageID pReleasedActiveImageID,	// Mouse over.
 	Painter::ImageID pPressedActiveImageID, Painter::ImageID pReleasingImageID,
-	Painter::ImageID pPressingImageID, const Lepra::String& pName) :
+	Painter::ImageID pPressingImageID, const str& pName) :
 	Window(pReleasedImageID, pName),
 	mReleasedImageID(pReleasedImageID),
 	mPressedImageID(pPressedImageID),
@@ -82,7 +82,7 @@ Button::Button(Painter::ImageID pReleasedImageID, Painter::ImageID pPressedImage
 	mIconID(Painter::INVALID_IMAGEID),
 	mIconAlignment(ICON_CENTER),
 	mText(_T("")),
-	mTextColor(Lepra::OFF_BLACK),
+	mTextColor(OFF_BLACK),
 	mTextBackgColor(255, 255, 255),
 	mPressed(false),
 	mState(RELEASED),
@@ -233,7 +233,7 @@ void Button::Repaint(Painter* pPainter)
 	GUIImageManager* lIMan = GetImageManager();
 
 	pPainter->PushAttrib(Painter::ATTR_ALL);
-	Lepra::PixelRect lRect(Parent::GetClientRect());
+	PixelRect lRect(Parent::GetClientRect());
 	pPainter->ReduceClippingRect(lRect);
 
 	int lOffset = GetPressed() ? 1 : 0;
@@ -241,7 +241,7 @@ void Button::Repaint(Painter* pPainter)
 
 	if (mIconID != Painter::INVALID_IMAGEID)
 	{
-		Lepra::PixelCoords lImageSize(lIMan->GetImageSize(mIconID));
+		PixelCoords lImageSize(lIMan->GetImageSize(mIconID));
 
 		switch(mIconAlignment)
 		{
@@ -419,11 +419,11 @@ void Button::SetIcon(Painter::ImageID pIconID,
 	SetNeedsRepaint(true);
 }
 
-void Button::SetText(const Lepra::String& pText, 
-		     const Lepra::Color& pTextColor,
-		     const Lepra::Color& pBackgColor)
+void Button::SetText(const str& pText, 
+		     const Color& pTextColor,
+		     const Color& pBackgColor)
 {
-	assert(mTextColor != Lepra::BLACK);
+	assert(mTextColor != BLACK);
 	mText           = pText;
 	mTextColor      = pTextColor;
 	mTextBackgColor = pBackgColor;
@@ -431,7 +431,7 @@ void Button::SetText(const Lepra::String& pText,
 	OnTextChanged();
 }
 
-const Lepra::String& Button::GetText()
+const str& Button::GetText()
 {
 	return mText;
 }

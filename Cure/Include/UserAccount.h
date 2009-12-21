@@ -21,14 +21,14 @@ class MangledPassword
 {
 public:
 	MangledPassword();
-	MangledPassword(Lepra::UnicodeString& pPassword);
+	MangledPassword(wstr& pPassword);
 	MangledPassword(const MangledPassword& pPassword);
 	~MangledPassword();
 	void operator=(const MangledPassword& pPassword);
 	void Clear();
 
 	const std::string& Get() const;
-	void MangleAndSet(Lepra::UnicodeString& pPassword);
+	void MangleAndSet(wstr& pPassword);
 	void SetUnmodified(const std::string& pPassword);
 	bool operator==(const MangledPassword& pPassword) const;
 
@@ -42,16 +42,16 @@ class LoginId
 {
 public:
 	LoginId();
-	LoginId(const Lepra::UnicodeString& pUserAccountName, const MangledPassword& pPassword);
+	LoginId(const wstr& pUserAccountName, const MangledPassword& pPassword);
 	virtual ~LoginId();
 
-	const Lepra::UnicodeString& GetName() const;
+	const wstr& GetName() const;
 	const MangledPassword& GetMangledPassword() const;
 
 	bool operator==(const LoginId& pUserAccount) const;
 
 private:
-	Lepra::UnicodeString mUserName;
+	wstr mUserName;
 	MangledPassword mMangledPassword;
 };
 
@@ -60,8 +60,8 @@ private:
 class UserAccount: public LoginId
 {
 public:
-	typedef Lepra::uint32 AccountId;
-	typedef Lepra::String AvatarId;
+	typedef uint32 AccountId;
+	typedef str AvatarId;
 	typedef std::set<AvatarId> AvatarIdSet;
 	enum Availability
 	{

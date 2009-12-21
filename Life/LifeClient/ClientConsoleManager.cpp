@@ -39,7 +39,7 @@ const ClientConsoleManager::CommandPair ClientConsoleManager::mCommandIdList[] =
 
 
 ClientConsoleManager::ClientConsoleManager(Cure::GameManager* pGameManager, UiCure::GameUiManager* pUiManager,
-	Cure::RuntimeVariableScope* pVariableScope, const Lepra::PixelRect& pArea):
+	Cure::RuntimeVariableScope* pVariableScope, const PixelRect& pArea):
 	ConsoleManager(pGameManager, pVariableScope, new UiTbc::ConsoleLogListener(), new UiTbc::ConsolePrompt()),
 	mUiManager(pUiManager),
 	mArea(pArea),
@@ -53,13 +53,13 @@ ClientConsoleManager::ClientConsoleManager(Cure::GameManager* pGameManager, UiCu
 	Init();
 
 #ifdef NO_LOG_DEBUG_INFO
-	const Lepra::Log::LogLevel lAllowedLevel = Lepra::Log::LEVEL_INFO;
+	const Log::LogLevel lAllowedLevel = Log::LEVEL_INFO;
 #else // Allow debug logging.
-	const Lepra::Log::LogLevel lAllowedLevel = Lepra::Log::LEVEL_LOWEST_TYPE;
+	const Log::LogLevel lAllowedLevel = Log::LEVEL_LOWEST_TYPE;
 #endif // Disallow/allow debug logging.
-	for (int x = lAllowedLevel; x < Lepra::Log::LEVEL_TYPE_COUNT; ++x)
+	for (int x = lAllowedLevel; x < Log::LEVEL_TYPE_COUNT; ++x)
 	{
-		Lepra::LogType::GetLog(Lepra::LogType::SUB_ROOT)->AddListener(GetConsoleLogger(), (Lepra::Log::LogLevel)x);
+		LogType::GetLog(LogType::SUB_ROOT)->AddListener(GetConsoleLogger(), (Log::LogLevel)x);
 	}
 }
 
@@ -95,13 +95,13 @@ void ClientConsoleManager::Join()
 
 
 
-void ClientConsoleManager::SetRenderArea(const Lepra::PixelRect& pRenderArea)
+void ClientConsoleManager::SetRenderArea(const PixelRect& pRenderArea)
 {
 	mArea = pRenderArea;
 
 	if (mConsoleComponent)
 	{
-		Lepra::PixelCoords lSize = mArea.GetSize();
+		PixelCoords lSize = mArea.GetSize();
 		lSize.y = (int)(lSize.y*0.6);	// TODO: use setting for how high console should be.
 		mConsoleComponent->SetPreferredSize(lSize);
 		int lInputHeight = mUiManager->GetPainter()->GetFontHeight()+4;
@@ -126,12 +126,12 @@ void ClientConsoleManager::Tick()
 	{
 		if (mArea.mTop == 0)	// Slide down.
 		{
-			mConsoleTargetPosition = Lepra::Math::Lerp(mConsoleTargetPosition, (double)mArea.mTop, CONSOLE_SPEED);
+			mConsoleTargetPosition = Math::Lerp(mConsoleTargetPosition, (double)mArea.mTop, CONSOLE_SPEED);
 			mConsoleComponent->SetPos(mArea.mLeft, (int)mConsoleTargetPosition);
 		}
 		else	// Slide sideways.
 		{
-			mConsoleTargetPosition = Lepra::Math::Lerp(mConsoleTargetPosition, (double)mArea.mLeft, CONSOLE_SPEED);
+			mConsoleTargetPosition = Math::Lerp(mConsoleTargetPosition, (double)mArea.mLeft, CONSOLE_SPEED);
 			mConsoleComponent->SetPos((int)mConsoleTargetPosition, mArea.mTop);
 		}
 	}
@@ -141,7 +141,7 @@ void ClientConsoleManager::Tick()
 		if (mArea.mTop == 0)	// Slide out top.
 		{
 			const int lTarget = -mConsoleComponent->GetSize().y-lMargin;
-			mConsoleTargetPosition = Lepra::Math::Lerp(mConsoleTargetPosition, (double)lTarget, CONSOLE_SPEED);
+			mConsoleTargetPosition = Math::Lerp(mConsoleTargetPosition, (double)lTarget, CONSOLE_SPEED);
 			mConsoleComponent->SetPos(mArea.mLeft, (int)mConsoleTargetPosition);
 			if (mConsoleComponent->GetPos().y <= lTarget+lMargin)
 			{
@@ -151,7 +151,7 @@ void ClientConsoleManager::Tick()
 		else if (mArea.mLeft == 0)	// Slide out left.
 		{
 			const int lTarget = -mConsoleComponent->GetSize().x-lMargin;
-			mConsoleTargetPosition = Lepra::Math::Lerp(mConsoleTargetPosition, (double)lTarget, CONSOLE_SPEED);
+			mConsoleTargetPosition = Math::Lerp(mConsoleTargetPosition, (double)lTarget, CONSOLE_SPEED);
 			mConsoleComponent->SetPos((int)mConsoleTargetPosition, mArea.mTop);
 			if (mConsoleComponent->GetPos().x <= lTarget+lMargin)
 			{
@@ -161,7 +161,7 @@ void ClientConsoleManager::Tick()
 		else	// Slide out right.
 		{
 			const int lTarget = mUiManager->GetDisplayManager()->GetWidth()+lMargin;
-			mConsoleTargetPosition = Lepra::Math::Lerp(mConsoleTargetPosition, (double)lTarget, CONSOLE_SPEED);
+			mConsoleTargetPosition = Math::Lerp(mConsoleTargetPosition, (double)lTarget, CONSOLE_SPEED);
 			mConsoleComponent->SetPos((int)mConsoleTargetPosition, mArea.mTop);
 			if (mConsoleComponent->GetPos().x >= lTarget+lMargin)
 			{
@@ -173,7 +173,7 @@ void ClientConsoleManager::Tick()
 
 
 
-bool ClientConsoleManager::SaveApplicationConfigFile(Lepra::File* pFile, const Lepra::UnicodeString& pUserConfig)
+bool ClientConsoleManager::SaveApplicationConfigFile(File* pFile, const wstr& pUserConfig)
 {
 	bool lOk = Parent::SaveApplicationConfigFile(pFile, pUserConfig);
 	if (lOk && pUserConfig.empty())
@@ -191,14 +191,14 @@ void ClientConsoleManager::InitGraphics()
 	CloseGraphics();
 
 	mConsoleComponent = new UiTbc::Component(_T("CON:"), new UiTbc::ListLayout());
-	mConsoleOutput = new UiTbc::TextArea(Lepra::Color(20, 20, 30, 150));
-	mConsoleInput = new UiTbc::TextField(mConsoleComponent, Lepra::Color(20, 20, 30, 150), _T("CONI:"));
+	mConsoleOutput = new UiTbc::TextArea(Color(20, 20, 30, 150));
+	mConsoleInput = new UiTbc::TextField(mConsoleComponent, Color(20, 20, 30, 150), _T("CONI:"));
 
 	SetRenderArea(mArea);
 
 	mConsoleOutput->SetFocusAnchor(UiTbc::TextArea::ANCHOR_BOTTOM_LINE);
-	mConsoleOutput->SetFontColor(Lepra::WHITE);
-	mConsoleInput->SetFontColor(Lepra::WHITE);
+	mConsoleOutput->SetFontColor(WHITE);
+	mConsoleInput->SetFontColor(WHITE);
 
 	mConsoleComponent->AddChild(mConsoleOutput);
 	mConsoleComponent->AddChild(mConsoleInput);
@@ -250,16 +250,16 @@ void ClientConsoleManager::OnConsoleChange()
 
 void ClientConsoleManager::PrintHelp()
 {
-	Lepra::String lKeys = CURE_RTVAR_GET(GetVariableScope(), RTVAR_CTRL_UI_CONTOGGLE, _T("???"));
-	typedef Lepra::StringUtility::StringVector SV;
-	SV lKeyArray = Lepra::StringUtility::Split(lKeys, _T(", \t"));
+	str lKeys = CURE_RTVAR_GET(GetVariableScope(), RTVAR_CTRL_UI_CONTOGGLE, _T("???"));
+	typedef strutil::strvec SV;
+	SV lKeyArray = strutil::Split(lKeys, _T(", \t"));
 	SV lNiceKeys;
 	for (SV::iterator x = lKeyArray.begin(); x != lKeyArray.end(); ++x)
 	{
-		const Lepra::String lKey = Lepra::StringUtility::ReplaceAll(*x, _T("Key."), _T(""));
+		const str lKey = strutil::ReplaceAll(*x, _T("Key."), _T(""));
 		lNiceKeys.push_back(lKey);
 	}
-	Lepra::String lKeyInfo;
+	str lKeyInfo;
 	if (lKeyArray.size() == 1)
 	{
 		lKeyInfo = _T("key ");
@@ -268,7 +268,7 @@ void ClientConsoleManager::PrintHelp()
 	{
 		lKeyInfo = _T("any of the following keys: ");
 	}
-	lKeyInfo += Lepra::StringUtility::Join(lNiceKeys, _T(", "));
+	lKeyInfo += strutil::Join(lNiceKeys, _T(", "));
 	mLog.Infof(_T("To bring this console up again press %s."), lKeyInfo.c_str());
 }
 
@@ -288,7 +288,7 @@ const ClientConsoleManager::CommandPair& ClientConsoleManager::GetCommand(unsign
 	return (mCommandIdList[pIndex-Parent::GetCommandCount()]);
 }
 
-int ClientConsoleManager::OnCommand(const Lepra::String& pCommand, const Lepra::StringUtility::StringVector& pParameterVector)
+int ClientConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParameterVector)
 {
 	int lResult = Parent::OnCommand(pCommand, pParameterVector);
 	if (lResult < 0)
@@ -306,7 +306,7 @@ int ClientConsoleManager::OnCommand(const Lepra::String& pCommand, const Lepra::
 			case COMMAND_QUIT:
 			{
 				mLog.AInfo("Terminating due to user command.");
-				Lepra::SystemManager::AddQuitRequest(+1);
+				SystemManager::AddQuitRequest(+1);
 			}
 			break;
 			case COMMAND_BYE:
@@ -320,8 +320,8 @@ int ClientConsoleManager::OnCommand(const Lepra::String& pCommand, const Lepra::
 
 				if (pParameterVector.size() == 3)
 				{
-					Lepra::UnicodeString lUsername = Lepra::UnicodeStringUtility::ToOwnCode(pParameterVector[1]);
-					Lepra::UnicodeString lReadablePassword = Lepra::UnicodeStringUtility::ToOwnCode(pParameterVector[2]);
+					wstr lUsername = wstrutil::ToOwnCode(pParameterVector[1]);
+					wstr lReadablePassword = wstrutil::ToOwnCode(pParameterVector[2]);
 					//pParameterVector[2] = _T("        ");
 					// Convert into login format.
 					Cure::MangledPassword lPassword(lReadablePassword);
@@ -340,7 +340,7 @@ int ClientConsoleManager::OnCommand(const Lepra::String& pCommand, const Lepra::
 				mLog.AInfo("Waiting for login to finish...");
 				while (((GameClientSlaveManager*)mGameManager)->IsLoggingIn())
 				{
-					Lepra::Thread::Sleep(0.01);
+					Thread::Sleep(0.01);
 				}
 			}
 			break;

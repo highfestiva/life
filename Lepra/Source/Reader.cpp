@@ -17,7 +17,7 @@ Reader::Reader() :
 {
 }
 
-Reader::Reader(Lepra::Endian::EndianType pEndian) :
+Reader::Reader(Endian::EndianType pEndian) :
 	mReadCount(0),
 	mInStream(0),
 	mReaderEndian(pEndian)
@@ -164,7 +164,7 @@ Endian::EndianType Reader::GetReaderEndian() const
 	return mReaderEndian;
 }
 
-const String& Reader::GetStreamName()
+const str& Reader::GetStreamName()
 {
 	return mInStream->GetName();
 }

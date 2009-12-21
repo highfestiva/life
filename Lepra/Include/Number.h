@@ -18,7 +18,7 @@ namespace Lepra
 class Number
 {
 public:
-	static String ConvertToPostfixNumber(double pNumber, unsigned decimals);
+	static str ConvertToPostfixNumber(double pNumber, unsigned decimals);
 };
 
 

@@ -57,15 +57,15 @@ void TerrainPatchManager::MarkAllDirty()
 	}
 }
 
-void TerrainPatchManager::MarkInUse(const Lepra::Vector3DF& pPosition, float pRadius)
+void TerrainPatchManager::MarkInUse(const Vector3DF& pPosition, float pRadius)
 {
 	const float lRadiusSquare = pRadius*pRadius;
-	const Lepra::Vector2DF lCameraPosition(pPosition.x, pPosition.y);	// Assume on ground for now.
+	const Vector2DF lCameraPosition(pPosition.x, pPosition.y);	// Assume on ground for now.
 	for (PatchTable::Iterator x = mPatchTable->First(); x != mPatchTable->End(); ++x)
 	{
 		PatchDirtyInfo& lResourcePatchInfo = x.GetObject();
 		TBC::TerrainPatch* lPatch = lResourcePatchInfo.mResourcePatch->GetData();
-		const Lepra::Vector2DF lPatchPosition((lPatch->GetSouthWest()+lPatch->GetNorthEast())*0.5f);
+		const Vector2DF lPatchPosition((lPatch->GetSouthWest()+lPatch->GetNorthEast())*0.5f);
 		if (lPatchPosition.GetDistanceSquared(lCameraPosition) < lRadiusSquare)
 		{
 			lResourcePatchInfo.mIsDirty = false;

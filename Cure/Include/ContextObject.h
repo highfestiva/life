@@ -35,7 +35,7 @@ class ContextObjectAttribute;
 class ContextObject: public TBC::PhysicsManager::TriggerListener, public TBC::PhysicsManager::ForceFeedbackListener
 {
 public:
-	ContextObject(const Lepra::String& pClassId);
+	ContextObject(const str& pClassId);
 	virtual ~ContextObject();
 
 	ContextManager* GetManager() const;
@@ -43,7 +43,7 @@ public:
 
 	GameObjectId GetInstanceId() const;
 	void SetInstanceId(GameObjectId pInstanceId);
-	const Lepra::String& GetClassId() const;
+	const str& GetClassId() const;
 
 	NetworkObjectType GetNetworkObjectType() const;
 	void SetNetworkObjectType(NetworkObjectType pType);
@@ -64,9 +64,9 @@ public:
 
 	bool UpdateFullPosition(const ObjectPositionalData*& pPositionalData);
 	void SetFullPosition(const ObjectPositionalData& pPositionalData);
-	Lepra::Vector3DF GetPosition() const;
-	Lepra::QuaternionF GetOrientation() const;
-	Lepra::Vector3DF GetVelocity() const;
+	Vector3DF GetPosition() const;
+	QuaternionF GetOrientation() const;
+	Vector3DF GetVelocity() const;
 	float GetForwardSpeed() const;
 	float GetMass() const;
 
@@ -106,7 +106,7 @@ protected:
 
 	ContextManager* mManager;
 	GameObjectId mInstanceId;
-	Lepra::String mClassId;
+	str mClassId;
 	NetworkObjectType mNetworkObjectType;
 	void* mExtraData;
 	bool mIsLoaded;

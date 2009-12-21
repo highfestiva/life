@@ -279,10 +279,10 @@ public:
 			mColor[3] = 1.0f;
 		}
 
-		typedef Lepra::HashSet<GeometryData*, std::hash<void*> > GeometrySet;
+		typedef HashSet<GeometryData*, std::hash<void*> > GeometrySet;
 
-		Lepra::Vector3DF mPosition;
-		Lepra::Vector3DF mDirection;
+		Vector3DF mPosition;
+		Vector3DF mDirection;
 		LightType mType;
 		LightHint mHint;
 		bool mEnabled;
@@ -307,25 +307,25 @@ public:
 		// Used to be GLfloat in OpenGLRenderer...
 		float mLightProjectionMatrix[16];
 
-		Lepra::RotationMatrixF mOrientation;
+		RotationMatrixF mOrientation;
 	};
 
-	Renderer(Lepra::Canvas* pScreen);
+	Renderer(Canvas* pScreen);
 	virtual ~Renderer();
 
 	// Implementing the GeometryBase::Listener interface.
 	void DeletingGeometry(TBC::GeometryBase* pGeometry);
 
-	const Lepra::Canvas* GetScreen() const;
+	const Canvas* GetScreen() const;
 
 	virtual void Clear(unsigned int pClearFlags = CLEAR_COLORBUFFER | CLEAR_DEPTHBUFFER) = 0;
-	virtual void SetClearColor(const Lepra::Color& pColor) = 0;
+	virtual void SetClearColor(const Color& pColor) = 0;
 
 	// A viewport is a portion of the screen where the graphics will be rendered.
 	// The center of the viewport is also the center of perspective. The viewport may
 	// be partially outside the actual screen. Note that pBottom > pTop.
-	virtual void SetViewport(const Lepra::PixelRect& pViewport);
-	const Lepra::PixelRect& GetViewport() const;
+	virtual void SetViewport(const PixelRect& pViewport);
+	const PixelRect& GetViewport() const;
 
 	// A view frustum defines the Field Of View (FOV). The pFOVAngle is given 
 	// in degrees and defines the angle between the left and the right edge of the 
@@ -348,13 +348,13 @@ public:
 	// within the one previously set. This means that setting the clipping rect one time 
 	// after another will reduce the size of the clipping area each time. Call 
 	// ResetClippingRect() to set the clipping rect back to cover the entire screen.
-	virtual void SetClippingRect(const Lepra::PixelRect& pRect);
-	void ReduceClippingRect(const Lepra::PixelRect& pRect);
+	virtual void SetClippingRect(const PixelRect& pRect);
+	void ReduceClippingRect(const PixelRect& pRect);
 	virtual void ResetClippingRect();
-	const Lepra::PixelRect& GetClippingRect() const;
+	const PixelRect& GetClippingRect() const;
 
-	virtual void SetCameraTransformation(const Lepra::TransformationF& pTransformation);
-	const Lepra::TransformationF& GetCameraTransformation();
+	virtual void SetCameraTransformation(const TransformationF& pTransformation);
+	const TransformationF& GetCameraTransformation();
 
 	virtual void SetLightsEnabled(bool pEnabled);
 	bool GetLightsEnabled();
@@ -417,9 +417,9 @@ public:
 			     float pLightRadius,
 			     float pShadowRange);
 
-	LightID AddDirectionalLight(LightHint pHint, const Lepra::Vector3DF& pDir, const Lepra::Color& pColor, float pLightIntensity, float pShadowRange);
-	LightID AddPointLight(LightHint pHint, const Lepra::Vector3DF& pPos, const Lepra::Color& pColor, float pLightIntensity, float pLightRadius, float pShadowRange);
-	LightID AddSpotLight(LightHint pHint, const Lepra::Vector3DF& pPos, const Lepra::Vector3DF& pDir, const Lepra::Color& pColor, float pLightIntensity, float pCutoffAngle, float pSpotExponent, float pLightRadius, float pShadowRange);
+	LightID AddDirectionalLight(LightHint pHint, const Vector3DF& pDir, const Color& pColor, float pLightIntensity, float pShadowRange);
+	LightID AddPointLight(LightHint pHint, const Vector3DF& pPos, const Color& pColor, float pLightIntensity, float pLightRadius, float pShadowRange);
+	LightID AddSpotLight(LightHint pHint, const Vector3DF& pPos, const Vector3DF& pDir, const Color& pColor, float pLightIntensity, float pCutoffAngle, float pSpotExponent, float pLightRadius, float pShadowRange);
 
 	virtual void RemoveLight(LightID pLightID);
 	void RemoveAllLights();
@@ -444,7 +444,7 @@ public:
 
 	// First sort the lights by "influence", then retrieve them one by one
 	// by calling GetClosestLight().
-	void SortLights(const Lepra::Vector3DF& pReferencePosition);
+	void SortLights(const Vector3DF& pReferencePosition);
 	LightID GetClosestLight(int pIndex);
 
 	virtual TextureID AddTexture(Texture* pTexture);
@@ -489,16 +489,16 @@ public:
 
 	// Given a polygon (pVertex) in world space, this function returns the
 	// projected bounding rectangle in screen coordinates.
-	Lepra::PixelRect GetBoundingRect(const Lepra::Vector3DF* pVertex, int pNumVertices) const;
+	PixelRect GetBoundingRect(const Vector3DF* pVertex, int pNumVertices) const;
 
 	// Returns true if the front face is turned towards the camera.
-	bool IsFacingFront(const Lepra::Vector3DF* pVertex, int pNumVertices);
+	bool IsFacingFront(const Vector3DF* pVertex, int pNumVertices);
 
 	// Returns the triangle count in the scene. 
 	// If pVisibleOnly == true, only counting visible objects.
 	int QueryTriangleCount(bool pVisibleOnly);
 
-	virtual void DrawLine(const Lepra::Vector3DF& pPosition, const Lepra::Vector3DF& pVector, const Lepra::Color& pColor) = 0;
+	virtual void DrawLine(const Vector3DF& pPosition, const Vector3DF& pVector, const Color& pColor) = 0;
 
 protected:
 	enum GeomReleaseOption
@@ -507,9 +507,9 @@ protected:
 		GRO_REMOVE_FROM_MATERIAL
 	};
 
-	typedef Lepra::HashTable<int, GeometryData*> GeometryTable;
-	typedef Lepra::HashTable<int, GeometryData*> ShadowVolumeTable;
-	typedef Lepra::HashTable<int, TextureData*> TextureTable;
+	typedef HashTable<int, GeometryData*> GeometryTable;
+	typedef HashTable<int, GeometryData*> ShadowVolumeTable;
+	typedef HashTable<int, TextureData*> TextureTable;
 
 	// Call these from the child class' constructor and destructor, respectively.
 	void InitRenderer();
@@ -537,7 +537,7 @@ protected:
 	static bool CheckFlag(unsigned int pFlags, unsigned int pFlag);
 	float GetAspectRatio() const;
 
-	bool CheckCulling(const Lepra::TransformationF& pTransform, double pBoundingRadius);
+	bool CheckCulling(const TransformationF& pTransform, double pBoundingRadius);
 
 	virtual void BindMap(int pMapType, 
 			     TextureData* pTextureData,
@@ -574,25 +574,25 @@ private:
 
 	unsigned int mTriangleCount;
 
-	Lepra::Canvas* mScreen;
+	Canvas* mScreen;
 
 	// Used for portal rendering.
 	double mDX;
 	double mDY;
-	Lepra::TransformationF mCamTransform;
+	TransformationF mCamTransform;
 
 	// View frustum.
 	float mFOVAngle;
 	float mNear;
 	float mFar;
-	Lepra::Vector3DF mFrustumPlanes[4];
+	Vector3DF mFrustumPlanes[4];
 
 	// Viewport.
-	Lepra::PixelRect mViewport;
+	PixelRect mViewport;
 
-	Lepra::IdManager<int> mGeometryIDManager;
-	Lepra::IdManager<int> mTextureIDManager;
-	Lepra::IdManager<int> mLightIDManager;
+	IdManager<int> mGeometryIDManager;
+	IdManager<int> mTextureIDManager;
+	IdManager<int> mLightIDManager;
 	GeometryTable mGeometryTable;
 	TextureTable mTextureTable;
 	ShadowVolumeTable mShadowVolumeTable;
@@ -623,13 +623,13 @@ private:
 	ShadowHint mShadowHint;
 	unsigned int mShadowUpdateFrameDelay;
 
-	Lepra::PixelRect mClippingRect;
-	Lepra::TransformationF mCameraTransformation;
+	PixelRect mClippingRect;
+	TransformationF mCameraTransformation;
 
 	// Since distance sorting lights is implemented using ::qsort(),
 	// we need to store the following variables "globally".
 	static Renderer* smRenderer;
-	static Lepra::Vector3DF smReferencePosition;
+	static Vector3DF smReferencePosition;
 
 	LOG_CLASS_DECLARE();
 };

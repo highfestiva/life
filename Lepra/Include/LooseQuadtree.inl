@@ -65,7 +65,7 @@ LQ_TEMPLATE void LQ_QUAL::InsertObject(_TKey pKey, typename Node::Entry pEntry, 
 	// Calculate the position, size and index values of the child node.
 	_TVarType lChildNodeSizeHalf = pNode->GetSizeHalf() * 0.5;
 
-	Lepra::Vector2D<_TVarType> lChildNodePos;
+	Vector2D<_TVarType> lChildNodePos;
 	uint8 lChildIndex = GetChild(pEntry.mArea->GetPosition(), pNode, lChildNodePos);
 
 	// Check if the object fits in the child node or not.
@@ -88,7 +88,7 @@ LQ_TEMPLATE void LQ_QUAL::InsertObject(_TKey pKey, typename Node::Entry pEntry, 
 		{
 			Node* lNewChildNode = NewNode(pNode, lChildIndex, pNode->GetFixedSizeHalf() * 0.5);
 			lNewChildNode->mNodeBox.SetPosition(lChildNodePos);
-			lNewChildNode->mNodeBox.SetSize(Lepra::Vector2D<_TVarType>(lChildNodeSizeHalf, lChildNodeSizeHalf));
+			lNewChildNode->mNodeBox.SetSize(Vector2D<_TVarType>(lChildNodeSizeHalf, lChildNodeSizeHalf));
 			pNode->mChildMask |= (1 << lChildIndex);
 			mNumNodes++;
 			pNode->mChildren[lChildIndex] = lNewChildNode;
@@ -459,7 +459,7 @@ LQ_TEMPLATE unsigned LQ_QUAL::GetFullTreeMemSize() const
 
 
 /*
-LQ_TEMPLATE String LQ_QUAL::ToString() const
+LQ_TEMPLATE str LQ_QUAL::ToString() const
 {
 	std::stringstream lStrm;
 	mRootNode->ToString(lStrm, 0, -1);

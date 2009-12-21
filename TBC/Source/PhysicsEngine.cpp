@@ -38,8 +38,8 @@ PhysicsEngine::~PhysicsEngine()
 
 PhysicsEngine* PhysicsEngine::Load(ChunkyPhysics* pStructure, const void* pData, unsigned pByteCount)
 {
-	const Lepra::uint32* lData = (const Lepra::uint32*)pData;
-	if (pByteCount != sizeof(Lepra::uint32)*7 + Lepra::Endian::BigToHost(lData[6])*sizeof(Lepra::uint32)*3)
+	const uint32* lData = (const uint32*)pData;
+	if (pByteCount != sizeof(uint32)*7 + Endian::BigToHost(lData[6])*sizeof(uint32)*3)
 	{
 		mLog.AError("Could not load; wrong data size.");
 		assert(false);
@@ -155,13 +155,13 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics*
 				break;
 				case ENGINE_CAMERA_FLAT_PUSH:
 				{
-					Lepra::Vector3DF lAxis[3] = {Lepra::Vector3DF(0, 1, 0),
-						Lepra::Vector3DF(1, 0, 0), Lepra::Vector3DF(0, 0, 1)};
-					Lepra::QuaternionF lRotation;
-					lRotation.RotateAroundWorldZ(mValue[3] - Lepra::MathTraits<float>::Pi() / 2);
+					Vector3DF lAxis[3] = {Vector3DF(0, 1, 0),
+						Vector3DF(1, 0, 0), Vector3DF(0, 0, 1)};
+					QuaternionF lRotation;
+					lRotation.RotateAroundWorldZ(mValue[3] - MathTraits<float>::Pi() / 2);
 					lAxis[0] = lRotation*lAxis[0];
 					lAxis[1] = lRotation*lAxis[1];
-					Lepra::Vector3DF lVelocityVector;
+					Vector3DF lVelocityVector;
 					pPhysicsManager->GetBodyVelocity(lGeometry->GetBodyId(), lVelocityVector);
 					lVelocityVector = lRotation*lVelocityVector;
 					float lVelocity[3] = { lVelocityVector.y, lVelocityVector.x, lVelocityVector.z };
@@ -184,14 +184,14 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics*
 					assert(lGeometry->GetJointId() != INVALID_JOINT);
 					if (lGeometry->GetJointId() != INVALID_JOINT && mFriction >= 0)
 					{
-						Lepra::Vector3DF lAxis;
+						Vector3DF lAxis;
 						pPhysicsManager->GetAxis1(lGeometry->GetJointId(), lAxis);
-						Lepra::Vector3DF lY;
-						Lepra::Vector3DF lZ;
+						Vector3DF lY;
+						Vector3DF lZ;
 						lAxis.GetNormalized().GetOrthogonals(lY, lZ);
 						const float lStrength = 3 * mValue[0] * mStrength;
 						lZ *= lStrength;
-						Lepra::Vector3DF lPos;
+						Vector3DF lPos;
 						pPhysicsManager->GetAnchorPos(lGeometry->GetJointId(), lPos);
 						pPhysicsManager->AddForceAtPos(lGeometry->GetParent()->GetBodyId(), lZ, lPos+lY);
 						pPhysicsManager->AddForceAtPos(lGeometry->GetParent()->GetBodyId(), -lZ, lPos-lY);
@@ -215,8 +215,8 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics*
 						float lPreviousStrength = 0;
 						float lPreviousTargetSpeed = 0;
 						pPhysicsManager->GetAngularMotorRoll(lGeometry->GetJointId(), lPreviousStrength, lPreviousTargetSpeed);
-						const float lTargetSpeed = Lepra::Math::Lerp(lPreviousTargetSpeed, lDirectionalMaxSpeed, 0.5f);
-						const float lTargetStrength = Lepra::Math::Lerp(lPreviousStrength, lUsedStrength*lScale, 0.5f);
+						const float lTargetSpeed = Math::Lerp(lPreviousTargetSpeed, lDirectionalMaxSpeed, 0.5f);
+						const float lTargetStrength = Math::Lerp(lPreviousStrength, lUsedStrength*lScale, 0.5f);
 						pPhysicsManager->SetAngularMotorRoll(lGeometry->GetJointId(), lTargetStrength, lTargetSpeed);
 						pPhysicsManager->GetAngleRate1(lGeometry->GetJointId(), lPreviousTargetSpeed);
 						mIntensity += lPreviousTargetSpeed / mMaxSpeed;
@@ -265,38 +265,38 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics*
 					assert(lGeometry->GetJointId() != INVALID_JOINT);
 					if (lGeometry->GetJointId() != INVALID_JOINT)
 					{
-						const Lepra::Vector3DF lRotorForce = GetRotorLiftForce(pPhysicsManager, lGeometry, lEngineNode);
-						Lepra::Vector3DF lLiftForce = lRotorForce * mValue[0];
+						const Vector3DF lRotorForce = GetRotorLiftForce(pPhysicsManager, lGeometry, lEngineNode);
+						Vector3DF lLiftForce = lRotorForce * mValue[0];
 						//const float lLerpValue = (mValue[0]+1)*0.5f * (mMaxSpeed-mMaxSpeed2) + mMaxSpeed2;
 						const int lParentBone = pStructure->GetIndex(lGeometry->GetParent());
-						const Lepra::QuaternionF lOrientation =
+						const QuaternionF lOrientation =
 							pPhysicsManager->GetBodyOrientation(lGeometry->GetParent()->GetBodyId()) *
 							pStructure->GetOriginalBoneTransformation(lParentBone).GetOrientation().GetInverse();
 
-						Lepra::Vector3DF lRotorPivot;
+						Vector3DF lRotorPivot;
 						pPhysicsManager->GetAnchorPos(lGeometry->GetJointId(), lRotorPivot);
 
 						const float lAbsFriction = ::fabs(mFriction);
 						if (mFriction < 0)
 						{
 							// Arcade stabilization for VTOL rotor.
-							Lepra::Vector3DF lParentAngularVelocity;
+							Vector3DF lParentAngularVelocity;
 							pPhysicsManager->GetBodyAngularVelocity(lGeometry->GetParent()->GetBodyId(), lParentAngularVelocity);
 							lParentAngularVelocity = lOrientation.GetInverse() * lParentAngularVelocity;
-							const Lepra::Vector3DF lParentAngle = lOrientation.GetInverse() * Lepra::Vector3DF(0, 0, 1);	// TRICKY: assumes original joint direction is towards heaven.
+							const Vector3DF lParentAngle = lOrientation.GetInverse() * Vector3DF(0, 0, 1);	// TRICKY: assumes original joint direction is towards heaven.
 							const float lStabilityX = -lParentAngle.x * 0.5f + lParentAngularVelocity.y * lAbsFriction;
 							const float lStabilityY = -lParentAngle.y * 0.5f - lParentAngularVelocity.x * lAbsFriction;
-							lRotorPivot += lOrientation * Lepra::Vector3DF(lStabilityX, lStabilityY, 0);
+							lRotorPivot += lOrientation * Vector3DF(lStabilityX, lStabilityY, 0);
 						}
 
 						// Smooth rotor force - for digital controls and to make acceleration seem more realistic.
 						const float lSmooth = 0.05f * lEngineNode.mScale;
-						lLiftForce.x = mValue[1] = Lepra::Math::Lerp(mValue[1], lLiftForce.x, lSmooth);
-						lLiftForce.y = mValue[2] = Lepra::Math::Lerp(mValue[2], lLiftForce.y, lSmooth);
-						lLiftForce.z = mValue[3] = Lepra::Math::Lerp(mValue[3], lLiftForce.z, lSmooth);
+						lLiftForce.x = mValue[1] = Math::Lerp(mValue[1], lLiftForce.x, lSmooth);
+						lLiftForce.y = mValue[2] = Math::Lerp(mValue[2], lLiftForce.y, lSmooth);
+						lLiftForce.z = mValue[3] = Math::Lerp(mValue[3], lLiftForce.z, lSmooth);
 
 						// Counteract rotor's movement through perpendicular air.
-						Lepra::Vector3DF lDragForce;
+						Vector3DF lDragForce;
 						pPhysicsManager->GetBodyVelocity(lGeometry->GetBodyId(), lDragForce);
 						lDragForce = (-lDragForce*lRotorForce.GetNormalized()) * lAbsFriction * lRotorForce;
 
@@ -313,23 +313,23 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics*
 					assert(lGeometry->GetJointId() != INVALID_JOINT);
 					if (lGeometry->GetJointId() != INVALID_JOINT)
 					{
-						const Lepra::Vector3DF lLiftForce = GetRotorLiftForce(pPhysicsManager, lGeometry, lEngineNode) * ::fabs(mValue[0]);
+						const Vector3DF lLiftForce = GetRotorLiftForce(pPhysicsManager, lGeometry, lEngineNode) * ::fabs(mValue[0]);
 						const int lParentBone = pStructure->GetIndex(lGeometry->GetParent());
 						const float lPlacement = (mValue[0] >= 0)? 1.0f : -1.0f;
-						const Lepra::Vector3DF lOffset =
+						const Vector3DF lOffset =
 							pPhysicsManager->GetBodyOrientation(lGeometry->GetParent()->GetBodyId()) *
 							pStructure->GetOriginalBoneTransformation(lParentBone).GetOrientation().GetInverse() *
-							Lepra::Vector3DF(lPlacement*mMaxSpeed, -lPlacement*mMaxSpeed2, 0);
-						const Lepra::Vector3DF lWorldPos = lOffset + pPhysicsManager->GetBodyPosition(lGeometry->GetBodyId());
+							Vector3DF(lPlacement*mMaxSpeed, -lPlacement*mMaxSpeed2, 0);
+						const Vector3DF lWorldPos = lOffset + pPhysicsManager->GetBodyPosition(lGeometry->GetBodyId());
 						pPhysicsManager->AddForceAtPos(lGeometry->GetParent()->GetBodyId(), lLiftForce, lWorldPos);
 						//{
 						//	static int cnt = 0;
 						//	if ((++cnt)%300 == 0)
 						//	{
-						//		//Lepra::Vector3DF r = pPhysicsManager->GetBodyOrientation(lGeometry->GetBodyId()).GetInverse() * lRelPos;
-						//		//Lepra::Vector3DF r = lRelPos;
-						//		Lepra::Vector3DF r = lOffset;
-						//		Lepra::Vector3DF w = pPhysicsManager->GetBodyPosition(lGeometry->GetBodyId());
+						//		//Vector3DF r = pPhysicsManager->GetBodyOrientation(lGeometry->GetBodyId()).GetInverse() * lRelPos;
+						//		//Vector3DF r = lRelPos;
+						//		Vector3DF r = lOffset;
+						//		Vector3DF w = pPhysicsManager->GetBodyPosition(lGeometry->GetBodyId());
 						//		mLog.Infof(_T("Got pos (%f, %f, %f) - world pos is (%f, %f, %f)."), r.x, r.y, r.z, w.x, w.y, w.z);
 						//	}
 						//}
@@ -403,57 +403,57 @@ float PhysicsEngine::GetMaxSpeed() const
 
 unsigned PhysicsEngine::GetChunkySize() const
 {
-	return ((unsigned)(sizeof(Lepra::uint32)*6 +
-		sizeof(Lepra::uint32) + sizeof(Lepra::uint32)*3*mEngineNodeArray.size()));
+	return ((unsigned)(sizeof(uint32)*6 +
+		sizeof(uint32) + sizeof(uint32)*3*mEngineNodeArray.size()));
 }
 
 void PhysicsEngine::SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const
 {
-	Lepra::uint32* lData = (Lepra::uint32*)pData;
-	lData[0] = Lepra::Endian::HostToBig(GetEngineType());
-	lData[1] = Lepra::Endian::HostToBigF(mStrength);
-	lData[2] = Lepra::Endian::HostToBigF(mMaxSpeed);
-	lData[3] = Lepra::Endian::HostToBigF(mMaxSpeed2);
-	lData[4] = Lepra::Endian::HostToBigF(mFriction);
-	lData[5] = Lepra::Endian::HostToBig(mControllerIndex);
-	lData[6] = Lepra::Endian::HostToBig((Lepra::uint32)mEngineNodeArray.size());
+	uint32* lData = (uint32*)pData;
+	lData[0] = Endian::HostToBig(GetEngineType());
+	lData[1] = Endian::HostToBigF(mStrength);
+	lData[2] = Endian::HostToBigF(mMaxSpeed);
+	lData[3] = Endian::HostToBigF(mMaxSpeed2);
+	lData[4] = Endian::HostToBigF(mFriction);
+	lData[5] = Endian::HostToBig(mControllerIndex);
+	lData[6] = Endian::HostToBig((uint32)mEngineNodeArray.size());
 	int x;
 	for (x = 0; x < (int)mEngineNodeArray.size(); ++x)
 	{
 		const EngineNode& lControlledNode = mEngineNodeArray[x];
-		lData[7+x*3] = Lepra::Endian::HostToBig(pStructure->GetIndex(lControlledNode.mGeometry));
-		lData[8+x*3] = Lepra::Endian::HostToBigF(lControlledNode.mScale);
-		lData[9+x*3] = Lepra::Endian::HostToBig(lControlledNode.mMode);
+		lData[7+x*3] = Endian::HostToBig(pStructure->GetIndex(lControlledNode.mGeometry));
+		lData[8+x*3] = Endian::HostToBigF(lControlledNode.mScale);
+		lData[9+x*3] = Endian::HostToBig(lControlledNode.mMode);
 	}
 }
 
 void PhysicsEngine::LoadChunkyData(ChunkyPhysics* pStructure, const void* pData)
 {
-	const Lepra::uint32* lData = (const Lepra::uint32*)pData;
+	const uint32* lData = (const uint32*)pData;
 
-	mEngineType = (EngineType)Lepra::Endian::BigToHost(lData[0]);
-	mStrength = Lepra::Endian::BigToHostF(lData[1]);
-	mMaxSpeed = Lepra::Endian::BigToHostF(lData[2]);
-	mMaxSpeed2 = Lepra::Endian::BigToHostF(lData[3]);
-	mFriction = Lepra::Endian::BigToHostF(lData[4]);
-	mControllerIndex = Lepra::Endian::BigToHost(lData[5]);
-	const int lControlledNodeCount = Lepra::Endian::BigToHost(lData[6]);
+	mEngineType = (EngineType)Endian::BigToHost(lData[0]);
+	mStrength = Endian::BigToHostF(lData[1]);
+	mMaxSpeed = Endian::BigToHostF(lData[2]);
+	mMaxSpeed2 = Endian::BigToHostF(lData[3]);
+	mFriction = Endian::BigToHostF(lData[4]);
+	mControllerIndex = Endian::BigToHost(lData[5]);
+	const int lControlledNodeCount = Endian::BigToHost(lData[6]);
 	int x;
 	for (x = 0; x < lControlledNodeCount; ++x)
 	{
-		ChunkyBoneGeometry* lGeometry = pStructure->GetBoneGeometry(Lepra::Endian::BigToHost(lData[7+x*3]));
+		ChunkyBoneGeometry* lGeometry = pStructure->GetBoneGeometry(Endian::BigToHost(lData[7+x*3]));
 		assert(lGeometry);
-		float lScale = Lepra::Endian::BigToHostF(lData[8+x*3]);
-		EngineMode lMode = (EngineMode)Lepra::Endian::BigToHost(lData[9+x*3]);
+		float lScale = Endian::BigToHostF(lData[8+x*3]);
+		EngineMode lMode = (EngineMode)Endian::BigToHost(lData[9+x*3]);
 		AddControlledGeometry(lGeometry, lScale, lMode);
 	}
 }
 
 
 
-Lepra::Vector3DF PhysicsEngine::GetRotorLiftForce(PhysicsManager* pPhysicsManager, ChunkyBoneGeometry* pGeometry, const EngineNode& pEngineNode) const
+Vector3DF PhysicsEngine::GetRotorLiftForce(PhysicsManager* pPhysicsManager, ChunkyBoneGeometry* pGeometry, const EngineNode& pEngineNode) const
 {
-	Lepra::Vector3DF lAxis;
+	Vector3DF lAxis;
 	pPhysicsManager->GetAxis1(pGeometry->GetJointId(), lAxis);
 	float lAngularRotorSpeed = 0;
 	pPhysicsManager->GetAngleRate1(pGeometry->GetJointId(), lAngularRotorSpeed);

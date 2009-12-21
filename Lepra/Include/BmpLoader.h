@@ -47,11 +47,11 @@ public:
 		COMP_BI_BITFIELDS,
 	};
 
-	Status Load(const String& pFileName, Canvas& pCanvas);
-	Status Save(const String& pFileName, const Canvas& pCanvas);
+	Status Load(const str& pFileName, Canvas& pCanvas);
+	Status Save(const str& pFileName, const Canvas& pCanvas);
 
-	Status Load(const String& pArchiveName, const String& pFileName, Canvas& pCanvas);
-	Status Save(const String& pArchiveName, const String& pFileName, const Canvas& pCanvas);
+	Status Load(const str& pArchiveName, const str& pFileName, Canvas& pCanvas);
+	Status Save(const str& pArchiveName, const str& pFileName, const Canvas& pCanvas);
 
 	Status Load(Reader& pReader, Canvas& pCanvas);
 	Status Save(Writer& pWriter, const Canvas& pCanvas);

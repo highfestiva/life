@@ -192,7 +192,7 @@ void PosixSemaphore::Signal()
 
 
 
-PosixRWLock::PosixRWLock(const String& pRWLockName):
+PosixRWLock::PosixRWLock(const str& pRWLockName):
 	RWLockBC(pRWLockName)
 {
 	::pthread_rwlock_init(&mReadWriteLock, 0);
@@ -232,7 +232,7 @@ void* ThreadEntry(void* pThread)
 	return (0);
 }
 
-void Thread::InitializeMainThread(const String& pThreadName)
+void Thread::InitializeMainThread(const str& pThreadName)
 {
 	ThreadPointerStorage::SetPointer(&gMainThread);
 	gMainThread.SetThreadId(GetCurrentThreadId());

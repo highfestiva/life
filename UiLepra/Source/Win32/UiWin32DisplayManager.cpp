@@ -180,12 +180,12 @@ bool Win32DisplayManager::IsFullScreen()
 	return (mScreenMode == DisplayManager::FULLSCREEN);
 }
 
-void Win32DisplayManager::SetCaption(const Lepra::String& pCaption)
+void Win32DisplayManager::SetCaption(const str& pCaption)
 {
 	SetCaption(pCaption, false);
 }
 
-void Win32DisplayManager::SetCaption(const Lepra::String& pCaption, bool pInternalCall)
+void Win32DisplayManager::SetCaption(const str& pCaption, bool pInternalCall)
 {
 	if (mInitialized)
 	{
@@ -201,12 +201,12 @@ void Win32DisplayManager::SetCaption(const Lepra::String& pCaption, bool pIntern
 	}
 }
 
-const Lepra::Color* Win32DisplayManager::GetPaletteColor(unsigned pIndex)
+const Color* Win32DisplayManager::GetPaletteColor(unsigned pIndex)
 {
 	return &mPalette[pIndex];
 }
 
-Lepra::uint8 Win32DisplayManager::GetPaletteColor(int pRed, int pGreen, int pBlue) 
+uint8 Win32DisplayManager::GetPaletteColor(int pRed, int pGreen, int pBlue) 
 {
 	int	lBestColorIndex = 0;
 	int	i;
@@ -241,7 +241,7 @@ Lepra::uint8 Win32DisplayManager::GetPaletteColor(int pRed, int pGreen, int pBlu
 		mLog.AWarning("GetPaletteColor() - DisplayManager not initialized.");
 	}
 
-	return (Lepra::uint8)lBestColorIndex;
+	return (uint8)lBestColorIndex;
 }
 
 bool Win32DisplayManager::OpenScreen(const DisplayMode& pDisplayMode, ScreenMode pScreenMode)
@@ -298,7 +298,7 @@ bool Win32DisplayManager::OpenScreen(const DisplayMode& pDisplayMode, ScreenMode
 
 			if (lSupportedMode == false)
 			{
-				Lepra::String lErr(Lepra::StringUtility::Format(_T("OpenScreen() - Display mode %i-bit %ix%i at %i Hz is not supported!"),
+				str lErr(strutil::Format(_T("OpenScreen() - Display mode %i-bit %ix%i at %i Hz is not supported!"),
 						 pDisplayMode.mBitDepth, 
 						 pDisplayMode.mWidth, 
 						 pDisplayMode.mHeight, 
@@ -692,7 +692,7 @@ bool Win32DisplayManager::FindDisplayMode(DisplayMode& pDisplayMode, int pWidth,
 	return lOk;
 }
 
-void Win32DisplayManager::SetPalette(const Lepra::Color* pPalette)
+void Win32DisplayManager::SetPalette(const Color* pPalette)
 {
 	// This method is meant to be overridden...
 	for (int i = 0; i < 256; i++)
@@ -802,7 +802,7 @@ LRESULT CALLBACK Win32DisplayManager::WndProc(HWND pWnd, unsigned int pMessage, 
 		--msWindowCount;
 		if (msWindowCount == 0)
 		{
-			Lepra::SystemManager::AddQuitRequest(+1);
+			SystemManager::AddQuitRequest(+1);
 		}
 	}
 
@@ -932,7 +932,7 @@ void Win32DisplayManager::RemoveObserver(Win32Observer* pObserver)
 	}
 }
 
-void Win32DisplayManager::ShowMessageBox(const Lepra::String& pMsg, const Lepra::String& pCaption)
+void Win32DisplayManager::ShowMessageBox(const str& pMsg, const str& pCaption)
 {
 	::MessageBox(mWnd, pMsg.c_str(), pCaption.c_str(), MB_OK);
 }
@@ -955,7 +955,7 @@ bool Win32DisplayManager::OnMessage(int pMsg, int pwParam, long plParam)
 		} break;
 		case WM_SIZING:
 		{
-			LPRECT lRect = (LPRECT)(Lepra::uint64)plParam;
+			LPRECT lRect = (LPRECT)(uint64)plParam;
 
 			int lClientWidth  = GetClientWidth(lRect->right - lRect->left);
 			int lClientHeight = GetClientHeight(lRect->bottom - lRect->top);

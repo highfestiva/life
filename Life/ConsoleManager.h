@@ -28,8 +28,8 @@ class ConsoleManager: public Cure::ConsoleManager
 public:
 	ConsoleManager(Cure::GameManager* pGameManager,
 		Cure::RuntimeVariableScope* pVariableScope,
-		Lepra::InteractiveConsoleLogListener* pConsoleLogger,
-		Lepra::ConsolePrompt* pConsolePrompt);
+		InteractiveConsoleLogListener* pConsoleLogger,
+		ConsolePrompt* pConsolePrompt);
 	virtual ~ConsoleManager();
 
 	void Init();
@@ -65,22 +65,22 @@ protected:
 
 	unsigned GetCommandCount() const;
 	const CommandPair& GetCommand(unsigned pIndex) const;
-	int TranslateCommand(const Lepra::String& pCommand) const;
-	int OnCommand(const Lepra::String& pCommand, const Lepra::StringUtility::StringVector& pParameterVector);
+	int TranslateCommand(const str& pCommand) const;
+	int OnCommand(const str& pCommand, const strutil::strvec& pParameterVector);
 
-	virtual bool SaveApplicationConfigFile(Lepra::File* pFile, const Lepra::UnicodeString& pUserConfig);
+	virtual bool SaveApplicationConfigFile(File* pFile, const wstr& pUserConfig);
 
 	Cure::GameManager* mGameManager;
 
 private:
-	Lepra::UnicodeString LoadUserConfig(Lepra::File* pFile);
-	bool SaveSystemConfigFile(int pScopeSkipCount, Lepra::File* pFile, const Lepra::UnicodeString& pUserConfig);
-	bool SaveConfigFile(Lepra::File* pFile, std::list<Lepra::String>& pVariableList, const Lepra::UnicodeString& pUserConfig);
+	wstr LoadUserConfig(File* pFile);
+	bool SaveSystemConfigFile(int pScopeSkipCount, File* pFile, const wstr& pUserConfig);
+	bool SaveConfigFile(File* pFile, std::list<str>& pVariableList, const wstr& pUserConfig);
 
 	static const CommandPair mCommandIdList[];
-	typedef std::hash_map<Lepra::String, Lepra::String> AliasMap;
+	typedef std::hash_map<str, str> AliasMap;
 	AliasMap mAliasMap;
-	Lepra::LogListener* mLogger;
+	LogListener* mLogger;
 	LOG_CLASS_DECLARE();
 };
 

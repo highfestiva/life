@@ -36,27 +36,27 @@ public:
 	virtual ~OpenGLPainter();
 
 	// Set the drawing surface.
-	void SetDestCanvas(Lepra::Canvas* pCanvas);
+	void SetDestCanvas(Canvas* pCanvas);
 	void SetRenderMode(RenderMode pRM);
 	void PrePaint();
 
 	// Set the current alpha value. Overrides alpha buffer...
 	// In 8-bit color mode, this is a specific color that will "be" transparent.
-	void SetAlphaValue(Lepra::uint8 pAlpha);
+	void SetAlphaValue(uint8 pAlpha);
 
 	void SetClippingRect(int pLeft, int pTop, int pRight, int pBottom);
 	void ResetClippingRect();
 
-	void SetColor(const Lepra::Color& pColor, unsigned pColorIndex = 0);
+	void SetColor(const Color& pColor, unsigned pColorIndex = 0);
 
-	ImageID AddImage(const Lepra::Canvas* pImage, const Lepra::Canvas* pAlphaBuffer);
+	ImageID AddImage(const Canvas* pImage, const Canvas* pAlphaBuffer);
 	void UpdateImage(ImageID pImageID, 
-			 const Lepra::Canvas* pImage, 
-			 const Lepra::Canvas* pAlphaBuffer, 
+			 const Canvas* pImage, 
+			 const Canvas* pAlphaBuffer, 
 			 UpdateHint pHint = UPDATE_ACCURATE);
 	void RemoveImage(ImageID pImageID);
 
-	void ReadPixels(Lepra::Canvas& pDestCanvas, const Lepra::PixelRect& pRect);
+	void ReadPixels(Canvas& pDestCanvas, const PixelRect& pRect);
 
 	RGBOrder GetRGBOrder() const;
 
@@ -80,13 +80,13 @@ protected:
 	void DoDraw3DRect(int pLeft, int pTop, int pRight, int pBottom, int pWidth, bool pSunken);
 	void DoFillShadedRect(int pLeft, int pTop, int pRight, int pBottom);
 	void DoDrawImage(ImageID pImageID, int x, int y);
-	void DoDrawImage(ImageID pImageID, int x, int y, const Lepra::PixelRect& pSubpatchRect);
-	void DoDrawImage(ImageID pImageID, const Lepra::PixelRect& pRect, const Lepra::PixelRect& pSubpatchRect);
-	void DoDrawImage(ImageID pImageID, const Lepra::PixelRect& pRect);
+	void DoDrawImage(ImageID pImageID, int x, int y, const PixelRect& pSubpatchRect);
+	void DoDrawImage(ImageID pImageID, const PixelRect& pRect, const PixelRect& pSubpatchRect);
+	void DoDrawImage(ImageID pImageID, const PixelRect& pRect);
 	void DoDrawAlphaImage(ImageID pImageID, int x, int y);
 
 	void GetImageSize(ImageID pImageID, int& pWidth, int& pHeight) const;
-	int PrintText(const Lepra::String& pString, int x, int y);
+	int PrintText(const str& pString, int x, int y);
 	void SetFontSmoothness(bool pSmooth);
 
 	void DoRenderDisplayList(std::vector<DisplayEntity*>* pDisplayList);
@@ -94,7 +94,7 @@ protected:
 	void ClearFontBuffers();
 
 private:
-	Lepra::Vector3DF mRCol[4];
+	Vector3DF mRCol[4];
 
 	class Texture
 	{
@@ -109,10 +109,10 @@ private:
 		int mHeight;
 	};
 
-	typedef Lepra::HashTable<int, Texture*> TextureTable;
-	typedef std::hash_map<Lepra::uint64, GLuint> GlyphTable;
+	typedef HashTable<int, Texture*> TextureTable;
+	typedef std::hash_map<uint64, GLuint> GlyphTable;
 
-	Lepra::IdManager<int> mTextureIDManager;
+	IdManager<int> mTextureIDManager;
 	TextureTable mTextureTable;
 	GlyphTable mGlyphTable;
 

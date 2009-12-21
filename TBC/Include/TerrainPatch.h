@@ -22,7 +22,7 @@ public:
 	class Modifier
 	{
 	public:
-		virtual void ModifyVertex(const Lepra::Vector2DF& pWorldFlatPos, Lepra::Vector3DF& pVertex) const = 0;
+		virtual void ModifyVertex(const Vector2DF& pWorldFlatPos, Vector3DF& pVertex) const = 0;
 	};
 	
 	// Edge resolution flags.
@@ -61,8 +61,8 @@ public:
 	// where each entry is a boolean telling whether the terrain is solid or not.
 	// A value of 0 (= FALSE) means that there is a hole in the terrain, while
 	// any other value is interpreted as solid terrain.
-	TerrainPatch(const Lepra::Vector2D<int>& pPosition,
-		     Lepra::uint8* pHoleMap = 0,
+	TerrainPatch(const Vector2D<int>& pPosition,
+		     uint8* pHoleMap = 0,
 		     unsigned int pSizeExponent = 0,
 		     unsigned int pHiResEdgeFlags = 0,
 		     float pWestU1 = 0, float pEastU1 = 1, float pSouthV1 = 1, float pNorthV1 = 0,
@@ -75,12 +75,12 @@ public:
 	inline float GetPatchSize() const;
 	inline int GetPatchSizeMultiplier() const;
 
-	const Lepra::Vector2DF& GetSouthWest();
-	const Lepra::Vector2DF& GetNorthEast();
+	const Vector2DF& GetSouthWest();
+	const Vector2DF& GetNorthEast();
 
 	bool GetEdgeFlagValue(unsigned int pEdgeFlag);
 
-	void GetPosAndNormal(float pNormalizedX, float pNormalizedY, Lepra::Vector3DF& pPos, Lepra::Vector3DF& pNormal) const;
+	void GetPosAndNormal(float pNormalizedX, float pNormalizedY, Vector3DF& pPos, Vector3DF& pNormal) const;
 
 	void ShareVerticesWithNorthNeighbour(TerrainPatch& pNorthNeighbour);
 	void ShareVerticesWithSouthNeighbour(TerrainPatch& pSouthNeighbour);
@@ -113,8 +113,8 @@ public:
 
 	float*         GetVertexData() const;
 	float*         GetUVData(unsigned int pUVSet) const;
-	Lepra::uint32* GetIndexData() const;
-	Lepra::uint8*  GetColorData() const;
+	uint32* GetIndexData() const;
+	uint8*  GetColorData() const;
 
 protected:
 	// Returns the pointer to the vertex data. Treats pIndex as if the vertices
@@ -133,40 +133,40 @@ protected:
 	// This is the function that gets the actual work done.
 	float* GetEdgeVertex(int pIndex, unsigned int pEdgeFlag, int pRegularStartIndex, int pExtraStartIndex, int pPitch, float* pVertexData);
 
-	Lepra::Vector2D<int> GetSouthWestUnitPos() const;
-	Lepra::Vector2D<int> GetNorthEastUnitPos() const;
+	Vector2D<int> GetSouthWestUnitPos() const;
+	Vector2D<int> GetNorthEastUnitPos() const;
 
 	void ProcessSharedEdge(TerrainPatch& pNeighbour,
 			       int pEdge, int pOppositeEdge,
-			       void (TerrainPatch::*pAssertAlignment)(const Lepra::Vector2D<int>&, const Lepra::Vector2D<int>&, const Lepra::Vector2D<int>&, const Lepra::Vector2D<int>&),
-			       int (TerrainPatch::*pGetVertexDisplacement)(const Lepra::Vector2D<int>&, const Lepra::Vector2D<int>&),
+			       void (TerrainPatch::*pAssertAlignment)(const Vector2D<int>&, const Vector2D<int>&, const Vector2D<int>&, const Vector2D<int>&),
+			       int (TerrainPatch::*pGetVertexDisplacement)(const Vector2D<int>&, const Vector2D<int>&),
 			       float* (TerrainPatch::*pGetEdgeElement)(int pIndex),
 			       float* (TerrainPatch::*pGetOppositeEdgeElement)(int pIndex),
 			       void (TerrainPatch::*pProcessElement)(float* pDst, float* pSrs),
 			       void (TerrainPatch::*pOppositeShareEdgeFunction)(TerrainPatch& pNorthNeighbour));
 
-	void AssertNorthAlignment(const Lepra::Vector2D<int>& pSouthWest,
-				  const Lepra::Vector2D<int>& pNorthEast,
-				  const Lepra::Vector2D<int>& pSouthWestNeighbour,
-				  const Lepra::Vector2D<int>& pNorthEastNeighbour);
+	void AssertNorthAlignment(const Vector2D<int>& pSouthWest,
+				  const Vector2D<int>& pNorthEast,
+				  const Vector2D<int>& pSouthWestNeighbour,
+				  const Vector2D<int>& pNorthEastNeighbour);
 
-	void AssertSouthAlignment(const Lepra::Vector2D<int>& pSouthWest,
-				  const Lepra::Vector2D<int>& pNorthEast,
-				  const Lepra::Vector2D<int>& pSouthWestNeighbour,
-				  const Lepra::Vector2D<int>& pNorthEastNeighbour);
+	void AssertSouthAlignment(const Vector2D<int>& pSouthWest,
+				  const Vector2D<int>& pNorthEast,
+				  const Vector2D<int>& pSouthWestNeighbour,
+				  const Vector2D<int>& pNorthEastNeighbour);
 
-	void AssertEastAlignment(const Lepra::Vector2D<int>& pSouthWest,
-				 const Lepra::Vector2D<int>& pNorthEast,
-				 const Lepra::Vector2D<int>& pSouthWestNeighbour,
-				 const Lepra::Vector2D<int>& pNorthEastNeighbour);
+	void AssertEastAlignment(const Vector2D<int>& pSouthWest,
+				 const Vector2D<int>& pNorthEast,
+				 const Vector2D<int>& pSouthWestNeighbour,
+				 const Vector2D<int>& pNorthEastNeighbour);
 
-	void AssertWestAlignment(const Lepra::Vector2D<int>& pSouthWest,
-				 const Lepra::Vector2D<int>& pNorthEast,
-				 const Lepra::Vector2D<int>& pSouthWestNeighbour,
-				 const Lepra::Vector2D<int>& pNorthEastNeighbour);
+	void AssertWestAlignment(const Vector2D<int>& pSouthWest,
+				 const Vector2D<int>& pNorthEast,
+				 const Vector2D<int>& pSouthWestNeighbour,
+				 const Vector2D<int>& pNorthEastNeighbour);
 
-	int GetHorizontalDisplacement(const Lepra::Vector2D<int>& pSouthWest, const Lepra::Vector2D<int>& pSouthWestNeighbour);
-	int GetVerticalDisplacement(const Lepra::Vector2D<int>& pSouthWest, const Lepra::Vector2D<int>& pSouthWestNeighbour);
+	int GetHorizontalDisplacement(const Vector2D<int>& pSouthWest, const Vector2D<int>& pSouthWestNeighbour);
+	int GetVerticalDisplacement(const Vector2D<int>& pSouthWest, const Vector2D<int>& pSouthWestNeighbour);
 
 	void CopyElement(float* pDst, float* pSrs);
 	void SetElementsToMean(float* pDst, float* pSrs);
@@ -176,14 +176,14 @@ private:
 	void GenerateUVData(float pWestU1, float pEastU1, float pSouthV1, float pNorthV1,
 			    float pWestU2, float pEastU2, float pSouthV2, float pNorthV2);
 
-	void GenerateIndexData(Lepra::uint8* pHoleMap);
-	void AddTriangles(int pTriCount, int pExtraVertexStartIndex, Lepra::uint32 pCenter, Lepra::uint32 pV1, Lepra::uint32 pV2, unsigned int& pTriIndex, bool pSwap);
+	void GenerateIndexData(uint8* pHoleMap);
+	void AddTriangles(int pTriCount, int pExtraVertexStartIndex, uint32 pCenter, uint32 pV1, uint32 pV2, unsigned int& pTriIndex, bool pSwap);
 
 	void SetToFlatTerrainPatch();
 
-	static void SetFlatCallback(float pFlatX, float pFlatY, Lepra::Vector3DF& pCurrentPoint);
-//	void SetVertexData(const Lepra::Vector3DF* pVertexData);
-//	void SetEdgeVertexData(const Lepra::Vector3DF* pVertexData, int pDstVertexIndex, int pSrcVertexStartIndex, int pPitch);
+	static void SetFlatCallback(float pFlatX, float pFlatY, Vector3DF& pCurrentPoint);
+//	void SetVertexData(const Vector3DF* pVertexData);
+//	void SetEdgeVertexData(const Vector3DF* pVertexData, int pDstVertexIndex, int pSrcVertexStartIndex, int pPitch);
 
 	inline bool CheckFlag(unsigned int pFlags, unsigned int pFlag) const;
 
@@ -200,12 +200,12 @@ private:
 
 	float* mVertexData;
 	float* mUVData[2];
-	Lepra::uint32* mIndexData;
+	uint32* mIndexData;
 
 	// Misc data.
-	Lepra::Vector2DF mSouthWestCorner;
-	Lepra::Vector2DF mNorthEastCorner;
-	Lepra::Vector2D<int> mUnitPosition;
+	Vector2DF mSouthWestCorner;
+	Vector2DF mNorthEastCorner;
+	Vector2D<int> mUnitPosition;
 
 	static int smNumPatches;
 	static float smPatchUnitSize;

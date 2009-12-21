@@ -36,10 +36,10 @@ class GameClientSlaveManager: public Cure::GameManager, public InputObserver, pr
 public:
 	GameClientSlaveManager(GameClientMasterTicker* pMaster, Cure::RuntimeVariableScope* pVariableScope,
 		Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager, int pSlaveIndex,
-		const Lepra::PixelRect& pRenderArea);
+		const PixelRect& pRenderArea);
 	virtual ~GameClientSlaveManager();
 	void LoadSettings();
-	void SetRenderArea(const Lepra::PixelRect& pRenderArea);
+	void SetRenderArea(const PixelRect& pRenderArea);
 	bool Open();
 	void Close();
 	bool IsQuitting() const;
@@ -52,7 +52,7 @@ public:
 
 	void ToggleConsole();
 
-	void RequestLogin(const Lepra::String& pServerAddress, const Cure::LoginId& pLoginToken);
+	void RequestLogin(const str& pServerAddress, const Cure::LoginId& pLoginToken);
 	void Logout();
 	bool IsLoggingIn() const;
 	bool IsUiMoveForbidden(Cure::GameObjectId pObjectId) const;
@@ -65,7 +65,7 @@ public:
 	int GetSlaveIndex() const;
 
 private:
-	Lepra::String GetApplicationCommandFilename() const;
+	str GetApplicationCommandFilename() const;
 
 	bool Reset();
 	bool InitializeTerrain();
@@ -82,12 +82,12 @@ private:
 	void PhysicsTick();
 
 	void ProcessNetworkInputMessage(Cure::Message* pMessage);
-	void ProcessNumber(Cure::MessageNumber::InfoType pType, Lepra::int32 pInteger, Lepra::float32 pFloat);
-	bool CreateObject(Cure::GameObjectId pInstanceId, const Lepra::String& pClassId, Cure::NetworkObjectType pNetworkType);
-	Cure::ContextObject* CreateContextObject(const Lepra::String& pClassId) const;
+	void ProcessNumber(Cure::MessageNumber::InfoType pType, int32 pInteger, float32 pFloat);
+	bool CreateObject(Cure::GameObjectId pInstanceId, const str& pClassId, Cure::NetworkObjectType pNetworkType);
+	Cure::ContextObject* CreateContextObject(const str& pClassId) const;
 	void OnLoadCompleted(Cure::ContextObject* pObject, bool pOk);
-	void SetMovement(Cure::GameObjectId pInstanceId, Lepra::int32 pFrameIndex, Cure::ObjectPositionalData& pData);
-	void OnCollision(const Lepra::Vector3DF& pForce, const Lepra::Vector3DF& pTorque,
+	void SetMovement(Cure::GameObjectId pInstanceId, int32 pFrameIndex, Cure::ObjectPositionalData& pData);
+	void OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque,
 		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2);
 	void OnStopped(Cure::ContextObject* pObject, TBC::PhysicsManager::BodyID pBodyId);
 	bool OnPhysicsSend(Cure::ContextObject* pObject);
@@ -105,7 +105,7 @@ private:
 	void UpdateCameraPosition();
 
 	void DrawAsyncDebugInfo();
-	void DrawDebugStaple(int pIndex, int pHeight, const Lepra::Color& pColor);
+	void DrawDebugStaple(int pIndex, int pHeight, const Color& pColor);
 	void DrawSyncDebugInfo();
 
 	typedef std::hash_map<Cure::GameObjectId, int> ObjectFrameIndexMap;
@@ -114,7 +114,7 @@ private:
 	GameClientMasterTicker* mMaster;
 	UiCure::GameUiManager* mUiManager;
 	const int mSlaveIndex;
-	Lepra::PixelRect mRenderArea;
+	PixelRect mRenderArea;
 
 	ObjectFrameIndexMap mObjectFrameIndexMap;
 
@@ -125,23 +125,23 @@ private:
 
 	// Network transmission and keepalive info.
 	Cure::GameObjectId mAvatarId;
-	Lepra::uint64 mLastUnsafeSentByteCount;
-	Lepra::Timer mLastUnsafeSendTime;
+	uint64 mLastUnsafeSentByteCount;
+	Timer mLastUnsafeSendTime;
 	int mPingAttemptCount;
-	Lepra::Timer mLastUnsafeReceiveTime;
-	Lepra::Alarm mCollisionExpireAlarm;
-	Lepra::Alarm mInputExpireAlarm;
+	Timer mLastUnsafeReceiveTime;
+	Alarm mCollisionExpireAlarm;
+	Alarm mInputExpireAlarm;
 
-	Lepra::Vector3DF mCameraPosition;		// TODO: remove hack (should context object controlled)!
-	Lepra::Vector3DF mCameraPreviousPosition;	// TODO: remove hack (should context object controlled)!
-	Lepra::Vector3DF mCameraOrientation;		// TODO: remove hack (should context object controlled)!
+	Vector3DF mCameraPosition;		// TODO: remove hack (should context object controlled)!
+	Vector3DF mCameraPreviousPosition;	// TODO: remove hack (should context object controlled)!
+	Vector3DF mCameraOrientation;		// TODO: remove hack (should context object controlled)!
 	Cure::ObjectPositionalData mNetworkOutputGhost;	// TODO: remove hack (should be one per controllable object)!
 	bool mAllowMovementInput;
 	Options::ClientOptionsManager mOptions;
 	UiTbc::Window* mLoginWindow;
-	Lepra::String mConnectUserName;
-	Lepra::String mConnectServerAddress;
-	Lepra::String mDisconnectReason;
+	str mConnectUserName;
+	str mConnectServerAddress;
+	str mDisconnectReason;
 
 	LOG_CLASS_DECLARE();
 };

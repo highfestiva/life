@@ -150,24 +150,24 @@ void SocketAddress::operator=(const SocketAddress& pAddr)
 	::memcpy(&mSockAddr, &pAddr.mSockAddr, sizeof(mSockAddr));
 }
 
-String SocketAddress::GetAsString() const
+str SocketAddress::GetAsString() const
 {
-	String s = GetIP().GetAsString();
-	s += StringUtility::Format(_T(":%i"), GetPort());
+	str s = GetIP().GetAsString();
+	s += strutil::Format(_T(":%i"), GetPort());
 	return (s);
 }
 
-bool SocketAddress::Resolve(const String& pAddress)
+bool SocketAddress::Resolve(const str& pAddress)
 {
 	bool lOk = true;
-	StringUtility::StringVector lVector;
+	strutil::strvec lVector;
 	int lPort = 0;
 	if (lOk)
 	{
-		lVector = Lepra::StringUtility::Split(pAddress, _T(":"));
+		lVector = strutil::Split(pAddress, _T(":"));
 		lOk = (lVector.size() == 2 &&
 			lVector[1].length() > 0 &&
-			StringUtility::StringToInt(lVector[1], lPort) && lPort > 1024);
+			strutil::StringToInt(lVector[1], lPort) && lPort > 1024);
 	}
 	if (lOk)
 	{
@@ -180,9 +180,9 @@ bool SocketAddress::Resolve(const String& pAddress)
 	return (lOk);
 }
 
-bool SocketAddress::ResolveRange(const String& pAddress, uint16& pEndPort)
+bool SocketAddress::ResolveRange(const str& pAddress, uint16& pEndPort)
 {
-	StringUtility::StringVector lLocalAddressComponents = StringUtility::Split(pAddress, _T("-"));
+	strutil::strvec lLocalAddressComponents = strutil::Split(pAddress, _T("-"));
 	bool lOk = (lLocalAddressComponents.size() >= 1 && lLocalAddressComponents.size() <= 2);
 	if (lOk)
 	{
@@ -195,7 +195,7 @@ bool SocketAddress::ResolveRange(const String& pAddress, uint16& pEndPort)
 		if (lLocalAddressComponents.size() == 2)
 		{
 			int lEndPortInt;
-			lOk = (Lepra::StringUtility::StringToInt(lLocalAddressComponents[1], lEndPortInt) && lEndPortInt >= 0);
+			lOk = (strutil::StringToInt(lLocalAddressComponents[1], lEndPortInt) && lEndPortInt >= 0);
 			if (lOk)
 			{
 				pEndPort = (uint16)lEndPortInt;
@@ -205,7 +205,7 @@ bool SocketAddress::ResolveRange(const String& pAddress, uint16& pEndPort)
 	return (lOk);
 }
 
-bool SocketAddress::ResolveHost(const String& pHostname)
+bool SocketAddress::ResolveHost(const str& pHostname)
 {
 #ifdef LEPRA_NETWORK_IPV6
 	// TODO: fixme!
@@ -222,9 +222,9 @@ bool SocketAddress::ResolveHost(const String& pHostname)
 	}
 #ifdef LEPRA_NETWORK_IPV6
 	// TODO: fixme!
-	else if ((lIp = inet_addr(AnsiStringUtility::ToOwnCode(pHostname).c_str())) != 0xFFFFFFFF)
+	else if ((lIp = inet_addr(astrutil::ToOwnCode(pHostname).c_str())) != 0xFFFFFFFF)
 #else // IPV4
-	else if ((lIp = inet_addr(AnsiStringUtility::ToOwnCode(pHostname).c_str())) != 0xFFFFFFFF)
+	else if ((lIp = inet_addr(astrutil::ToOwnCode(pHostname).c_str())) != 0xFFFFFFFF)
 #endif // IPv6/IPV4
 	{
 		lOk = true;

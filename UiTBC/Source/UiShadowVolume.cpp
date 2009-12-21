@@ -1,5 +1,5 @@
 /*
-	Lepra::File:   ShadowVolume.cpp
+	File:   ShadowVolume.cpp
 	Class:  ShadowVolume
 	Author: Alexander Hugestrand
 	Copyright (c) 2002-2009, Righteous Games
@@ -118,12 +118,12 @@ float* ShadowVolume::GetUVData(unsigned int) const
 	return 0;
 }
 
-Lepra::uint32* ShadowVolume::GetIndexData() const
+uint32* ShadowVolume::GetIndexData() const
 {
 	return mIndexData;
 }
 
-Lepra::uint8* ShadowVolume::GetColorData() const
+uint8* ShadowVolume::GetColorData() const
 {
 	return 0;
 }
@@ -239,7 +239,7 @@ void ShadowVolume::InitTO()
 
 	if (mIndexData == 0)
 	{
-		mIndexData = new Lepra::uint32[mMaxTriangleCount * 3];
+		mIndexData = new uint32[mMaxTriangleCount * 3];
 	}
 }
 
@@ -285,7 +285,7 @@ void ShadowVolume::InitTO()
 	} \
 }
 
-void ShadowVolume::UpdateShadowVolume(const Lepra::Vector3DF& pLightPos, float pShadowRange, bool pDirectional)
+void ShadowVolume::UpdateShadowVolume(const Vector3DF& pLightPos, float pShadowRange, bool pDirectional)
 {
 	TBC::GeometryBase::SetLastFrameVisible(mParentGeometry->GetLastFrameVisible());
 
@@ -300,7 +300,7 @@ void ShadowVolume::UpdateShadowVolume(const Lepra::Vector3DF& pLightPos, float p
 	// Transform the light position in object space.
 	//
 
-	Lepra::Vector3DF lLightPos;
+	Vector3DF lLightPos;
 	
 	if (pDirectional == true)
 	{
@@ -327,11 +327,11 @@ void ShadowVolume::UpdateShadowVolume(const Lepra::Vector3DF& pLightPos, float p
 		// Calculate triangle orientations relative to light source.
 		for (i = 0; i < lTriangleCount; i++)
 		{
-			Lepra::uint32 lVertexIndex[3];
+			uint32 lVertexIndex[3];
 			mParentGeometry->GetTriangleIndices(i, lVertexIndex);
 			
 			unsigned int lTriIndex = i * 3;
-			Lepra::Vector3DF lSurfaceNormal(lSurfaceNormalData[lTriIndex + 0],
+			Vector3DF lSurfaceNormal(lSurfaceNormalData[lTriIndex + 0],
 							 lSurfaceNormalData[lTriIndex + 1],
 							 lSurfaceNormalData[lTriIndex + 2]);
 
@@ -371,17 +371,17 @@ void ShadowVolume::UpdateShadowVolume(const Lepra::Vector3DF& pLightPos, float p
 		// Calculate triangle orientations relative to light source.
 		for (i = 0; i < lTriangleCount; i++)
 		{
-			Lepra::uint32 lVertexIndex[3];
+			uint32 lVertexIndex[3];
 			mParentGeometry->GetTriangleIndices(i, lVertexIndex);
 			
 			unsigned int lTriIndex = i * 3;
-			Lepra::Vector3DF lSurfaceNormal(lSurfaceNormalData[lTriIndex + 0],
+			Vector3DF lSurfaceNormal(lSurfaceNormalData[lTriIndex + 0],
 							 lSurfaceNormalData[lTriIndex + 1],
 							 lSurfaceNormalData[lTriIndex + 2]);
 
 			// Get the vector between one corner of the triangle and the light source.
 			unsigned int lIndex = lVertexIndex[0] * 3;
-			Lepra::Vector3DF lVector(lVertexData[lIndex + 0] - lLightPos.x,
+			Vector3DF lVector(lVertexData[lIndex + 0] - lLightPos.x,
 						  lVertexData[lIndex + 1] - lLightPos.y,
 						  lVertexData[lIndex + 2] - lLightPos.z);
 
@@ -408,7 +408,7 @@ void ShadowVolume::UpdateShadowVolume(const Lepra::Vector3DF& pLightPos, float p
 		{
 			// Read original vertex.
 			int lIndex0 = i * 3;
-			Lepra::Vector3DF lVector(mVertexData[lIndex0 + 0] - lLightPos.x,
+			Vector3DF lVector(mVertexData[lIndex0 + 0] - lLightPos.x,
 						  mVertexData[lIndex0 + 1] - lLightPos.y,
 						  mVertexData[lIndex0 + 2] - lLightPos.z);
 

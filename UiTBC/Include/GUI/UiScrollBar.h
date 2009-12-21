@@ -31,32 +31,32 @@ public:
 
 	ScrollBar(Style pStyle = HORIZONTAL,
 		  int pSize = 16, int pButtonSize = 16,
-		  const Lepra::Color& pBodyColor = Lepra::Color(192, 192, 192),
-		  const Lepra::Color& pBackgColor = Lepra::Color(192, 192, 192),
+		  const Color& pBodyColor = Color(192, 192, 192),
+		  const Color& pBackgColor = Color(192, 192, 192),
 		  BorderComponent::BorderShadeFunc pBorderShadeFunc = BorderComponent::LINEAR,
 		  int pBorderWidth = 3,
-		  const Lepra::String& pName = _T("ScrollBar"));
+		  const str& pName = _T("ScrollBar"));
 
 	ScrollBar(Style pStyle,
 		  Painter::ImageID pBackgImageID,
 		  Button* pTopLeftButton,
 		  Button* pBottomRightButton,
 		  Button* pScrollerButton,
-		  const Lepra::String& pName = _T("ScrollBar"));
+		  const str& pName = _T("ScrollBar"));
 
 	// 0 <= visible <= max.
-	void SetScrollRatio(Lepra::float64 pVisible, Lepra::float64 pMax);
-	Lepra::float64 GetScrollRatioVisible() const;
-	Lepra::float64 GetScrollRatioMax() const;
+	void SetScrollRatio(float64 pVisible, float64 pMax);
+	float64 GetScrollRatioVisible() const;
+	float64 GetScrollRatioMax() const;
 
 	// Makes the scroller width/height static with the given size.
 	inline void SetStaticScrollerSize(int pScrollerSize);
 
 	// Scroll position is in the range [0, 1].
-	inline Lepra::float64 GetScrollPos();
-	void SetScrollPos(Lepra::float64 pPos);
+	inline float64 GetScrollPos();
+	void SetScrollPos(float64 pPos);
 
-	inline void SetScrollDelay(Lepra::float64 pFirstDelay, Lepra::float64 pDelay);
+	inline void SetScrollDelay(float64 pFirstDelay, float64 pDelay);
 
 	virtual void Repaint(Painter* pPainter);
 
@@ -87,7 +87,7 @@ protected:
 
 private:
 
-	void AddImage(Painter::ImageID& pImageID, Lepra::uint8 pImage[], int pDim);
+	void AddImage(Painter::ImageID& pImageID, uint8 pImage[], int pDim);
 
 	// Cleans up among the static variables.
 	class ScrollbarCleaner : public Cleaner
@@ -104,10 +104,10 @@ private:
 		}
 	};
 
-	static Lepra::uint8 smIconArrowLeft[];
-	static Lepra::uint8 smIconArrowRight[];
-	static Lepra::uint8 smIconArrowUp[];
-	static Lepra::uint8 smIconArrowDown[];
+	static uint8 smIconArrowLeft[];
+	static uint8 smIconArrowRight[];
+	static uint8 smIconArrowUp[];
+	static uint8 smIconArrowDown[];
 
 	static Painter::ImageID smIconLeftID;
 	static Painter::ImageID smIconRightID;
@@ -128,16 +128,16 @@ private:
 	RectComponent* mTLRect;
 	RectComponent* mBRRect;
 
-	Lepra::Color mBodyColor;
+	Color mBodyColor;
 
-	Lepra::float64 mVisible;
-	Lepra::float64 mMax;
-	Lepra::float64 mPos;
-	Lepra::float64 mScrollSpeed;
-	Lepra::float64 mFirstDelay;
-	Lepra::float64 mDelay;
+	float64 mVisible;
+	float64 mMax;
+	float64 mPos;
+	float64 mScrollSpeed;
+	float64 mFirstDelay;
+	float64 mDelay;
 
-	Lepra::Timer mTimer;
+	Timer mTimer;
 	bool mFirstDelayDone;
 
 	int mSize;
@@ -149,12 +149,12 @@ private:
 	Component* mOwner;
 };
 
-Lepra::float64 ScrollBar::GetScrollPos()
+float64 ScrollBar::GetScrollPos()
 {
 	return mPos;
 }
 
-void ScrollBar::SetScrollDelay(Lepra::float64 pFirstDelay, Lepra::float64 pDelay)
+void ScrollBar::SetScrollDelay(float64 pFirstDelay, float64 pDelay)
 {
 	mFirstDelay = pFirstDelay;
 	mDelay = pDelay;

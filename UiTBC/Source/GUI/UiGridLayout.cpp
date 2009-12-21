@@ -100,7 +100,7 @@ void GridLayout::Remove(Component* pComponent)
 	}
 }
 
-Component* GridLayout::Find(const Lepra::String& pComponentName)
+Component* GridLayout::Find(const str& pComponentName)
 {
 	if (mComponent == 0)
 	{
@@ -212,7 +212,7 @@ void GridLayout::UpdateLayout()
 		return;
 	}
 
-	Lepra::PixelCoords lOwnerSize(GetOwner()->GetSize());
+	PixelCoords lOwnerSize(GetOwner()->GetSize());
 
 	std::list<int> lWidthList;
 	std::list<int> lHeightList;
@@ -239,7 +239,7 @@ void GridLayout::UpdateLayout()
 			{
 				lEmptyRow = false;
 
-				Lepra::PixelCoords lSize(mComponent[lIndex]->GetPreferredSize());
+				PixelCoords lSize(mComponent[lIndex]->GetPreferredSize());
 
 				if (lSize.y > lMaxHeight)
 				{
@@ -280,7 +280,7 @@ void GridLayout::UpdateLayout()
 			{
 				lEmptyCol = false;
 
-				Lepra::PixelCoords lSize(mComponent[lIndex]->GetPreferredSize());
+				PixelCoords lSize(mComponent[lIndex]->GetPreferredSize());
 
 				if (lSize.x > lMaxWidth)
 				{
@@ -378,8 +378,8 @@ void GridLayout::UpdateLayout()
 					
 				if (mComponent[lIndex] != 0 && mComponent[lIndex]->IsVisible() == true)
 				{
-					Lepra::PixelCoords lPos(mComponent[lIndex]->GetPos());
-					Lepra::PixelCoords lSize(mComponent[lIndex]->GetSize());
+					PixelCoords lPos(mComponent[lIndex]->GetPos());
+					PixelCoords lSize(mComponent[lIndex]->GetSize());
 					lPos.y  = lPosYInt;
 					lSize.y = lSizeY;
 					mComponent[lIndex]->SetPos(lPos);
@@ -422,8 +422,8 @@ void GridLayout::UpdateLayout()
 					
 				if (mComponent[lIndex] != 0 && mComponent[lIndex]->IsVisible() == true)
 				{
-					Lepra::PixelCoords lPos(mComponent[lIndex]->GetPos());
-					Lepra::PixelCoords lSize(mComponent[lIndex]->GetSize());
+					PixelCoords lPos(mComponent[lIndex]->GetPos());
+					PixelCoords lSize(mComponent[lIndex]->GetSize());
 					lPos.x  = lPosXInt;
 					lSize.x = lSizeX;
 					mComponent[lIndex]->SetPos(lPos);
@@ -436,9 +436,9 @@ void GridLayout::UpdateLayout()
 	}
 }
 
-Lepra::PixelCoords GridLayout::GetPreferredSize(bool pForceAdaptive)
+PixelCoords GridLayout::GetPreferredSize(bool pForceAdaptive)
 {
-	Lepra::PixelCoords lSize(0, 0);
+	PixelCoords lSize(0, 0);
 
 	int x, y;
 
@@ -485,14 +485,14 @@ Lepra::PixelCoords GridLayout::GetPreferredSize(bool pForceAdaptive)
 	return lSize;
 }
 
-Lepra::PixelCoords GridLayout::GetContentSize()
+PixelCoords GridLayout::GetContentSize()
 {
 	return GetOwner()->GetSize();
 }
 
-Lepra::PixelCoords GridLayout::GetMinSize()
+PixelCoords GridLayout::GetMinSize()
 {
-	Lepra::PixelCoords lSize(0, 0);
+	PixelCoords lSize(0, 0);
 
 	int x, y;
 

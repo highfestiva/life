@@ -21,15 +21,15 @@ public:
 	TextComponent();
 	virtual ~TextComponent();
 
-	void SetFontColor(const Lepra::Color& pTextColor);
+	void SetFontColor(const Color& pTextColor);
 
 protected:
 	virtual void ForceRepaint() = 0;
 
-	Lepra::Color GetTextColor() const;
+	Color GetTextColor() const;
 
 private:
-	Lepra::Color mTextColor;
+	Color mTextColor;
 };
 
 

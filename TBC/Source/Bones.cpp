@@ -100,10 +100,10 @@ void BoneHierarchy::SetBoneCount(int pBoneCount)
 	mBoneCount = pBoneCount;
 
 	mBone = new Bone[mBoneCount];
-	mOriginalBoneTransformation       = new Lepra::TransformationF[mBoneCount];
-	mRelativeBoneTransformation       = new Lepra::TransformationF[mBoneCount];
-	mCurrentBoneTransformation        = new Lepra::TransformationF[mBoneCount];
-	mCurrentBoneObjectTransformation  = new Lepra::TransformationF[mBoneCount];
+	mOriginalBoneTransformation       = new TransformationF[mBoneCount];
+	mRelativeBoneTransformation       = new TransformationF[mBoneCount];
+	mCurrentBoneTransformation        = new TransformationF[mBoneCount];
+	mCurrentBoneObjectTransformation  = new TransformationF[mBoneCount];
 }
 
 int BoneHierarchy::GetBoneCount() const
@@ -155,7 +155,7 @@ int BoneHierarchy::GetChildIndex(int pParentBoneIndex, int pParentChildIndex) co
 	return (mBone[pParentBoneIndex].GetChild(pParentChildIndex));
 }
 
-void BoneHierarchy::SetOriginalBoneTransformation(int pBoneIndex, const Lepra::TransformationF& pTransformation, int pParentBoneIndex)
+void BoneHierarchy::SetOriginalBoneTransformation(int pBoneIndex, const TransformationF& pTransformation, int pParentBoneIndex)
 {
 	assert(pBoneIndex >= 0 && pBoneIndex < mBoneCount);
 	mOriginalBoneTransformation[pBoneIndex] = pTransformation;
@@ -165,7 +165,7 @@ void BoneHierarchy::SetOriginalBoneTransformation(int pBoneIndex, const Lepra::T
 	}
 }
 
-const Lepra::TransformationF& BoneHierarchy::GetOriginalBoneTransformation(int pBoneIndex) const
+const TransformationF& BoneHierarchy::GetOriginalBoneTransformation(int pBoneIndex) const
 {
 	assert(pBoneIndex >= 0 && pBoneIndex < mBoneCount);
 	return (mOriginalBoneTransformation[pBoneIndex]);
@@ -193,25 +193,25 @@ void BoneHierarchy::Connect(BoneHierarchy* pParentBones, int pParentBoneIndex)
 
 
 
-const Lepra::TransformationF& BoneHierarchy::GetBoneTransformation(int pBoneIndex) const
+const TransformationF& BoneHierarchy::GetBoneTransformation(int pBoneIndex) const
 {
 	assert(pBoneIndex >= 0 && pBoneIndex < mBoneCount);
 	return mCurrentBoneTransformation[pBoneIndex];
 }
 
-void BoneHierarchy::SetBoneTransformation(int pBoneIndex, const Lepra::TransformationF& pTransformation)
+void BoneHierarchy::SetBoneTransformation(int pBoneIndex, const TransformationF& pTransformation)
 {
 	assert(pBoneIndex >= 0 && pBoneIndex < mBoneCount);
 	mCurrentBoneTransformation[pBoneIndex] = pTransformation;
 }
 
-const Lepra::TransformationF& BoneHierarchy::GetBoneObjectTransformation(int pBoneIndex) const
+const TransformationF& BoneHierarchy::GetBoneObjectTransformation(int pBoneIndex) const
 {
 	assert(pBoneIndex >= 0 && pBoneIndex < mBoneCount);
 	return mCurrentBoneObjectTransformation[pBoneIndex];
 }
 
-const Lepra::TransformationF& BoneHierarchy::GetRelativeBoneTransformation(int pBoneIndex) const
+const TransformationF& BoneHierarchy::GetRelativeBoneTransformation(int pBoneIndex) const
 {
 	assert(pBoneIndex >= 0 && pBoneIndex < mBoneCount);
 	return mRelativeBoneTransformation[pBoneIndex];
@@ -230,8 +230,8 @@ void BoneHierarchy::Transform(int pBoneIndex, TransformOperation pTransformOpera
 
 		if (pTransformOperation == TRANSFORM_LOCAL2WORLD)
 		{
-			const Lepra::TransformationF& lThisTransform = mCurrentBoneTransformation[pBoneIndex];
-			Lepra::TransformationF& lChildTransform = mCurrentBoneTransformation[lChildIndex];
+			const TransformationF& lThisTransform = mCurrentBoneTransformation[pBoneIndex];
+			TransformationF& lChildTransform = mCurrentBoneTransformation[lChildIndex];
 			lChildTransform = lThisTransform*lChildTransform;
 		}
 
@@ -239,19 +239,19 @@ void BoneHierarchy::Transform(int pBoneIndex, TransformOperation pTransformOpera
 
 		if (pTransformOperation == TRANSFORM_WORLD2LOCAL)
 		{
-			const Lepra::TransformationF& lThisTransform = mCurrentBoneTransformation[pBoneIndex];
-			Lepra::TransformationF& lChildTransform = mCurrentBoneTransformation[lChildIndex];
+			const TransformationF& lThisTransform = mCurrentBoneTransformation[pBoneIndex];
+			TransformationF& lChildTransform = mCurrentBoneTransformation[lChildIndex];
 			lChildTransform = lThisTransform.InverseTransform(lChildTransform);
 		}
 	}
 }
 
-void BoneHierarchy::UpdateBonesObjectTransformation(int pBoneIndex, const Lepra::TransformationF& pParentTransformation)
+void BoneHierarchy::UpdateBonesObjectTransformation(int pBoneIndex, const TransformationF& pParentTransformation)
 {
 	assert(pBoneIndex >= 0 && pBoneIndex < mBoneCount);
 
 	mCurrentBoneObjectTransformation[pBoneIndex] = pParentTransformation * mCurrentBoneTransformation[pBoneIndex];
-	Lepra::TransformationF lOrgObjTransf(pParentTransformation * mOriginalBoneTransformation[pBoneIndex]);
+	TransformationF lOrgObjTransf(pParentTransformation * mOriginalBoneTransformation[pBoneIndex]);
 
 	mRelativeBoneTransformation[pBoneIndex] = pParentTransformation * (lOrgObjTransf / mCurrentBoneObjectTransformation[pBoneIndex]);
 
@@ -311,12 +311,12 @@ BoneAnimation::Mode BoneAnimation::GetDefaultMode() const
 	return (mDefaultMode);
 }
 
-void BoneAnimation::SetRootNodeName(const Lepra::String& pRootNodeName)
+void BoneAnimation::SetRootNodeName(const str& pRootNodeName)
 {
 	mRootNodeName = pRootNodeName;
 }
 
-const Lepra::String& BoneAnimation::GetRootNodeName() const
+const str& BoneAnimation::GetRootNodeName() const
 {
 	return (mRootNodeName);
 }
@@ -349,7 +349,7 @@ void BoneAnimation::SetKeyframeCount(int pKeyframeCount, bool pUseSplines)
 
 	mKeyframeCount = pKeyframeCount;
 
-	mTransformation = new Lepra::TransformationF*[mKeyframeCount];
+	mTransformation = new TransformationF*[mKeyframeCount];
 	mTimeTag = new float[mKeyframeCount];
 
 	for (int i = 0; i < mKeyframeCount; i++)
@@ -383,7 +383,7 @@ void BoneAnimation::SetBoneCount(int pBoneCount)
 		}
 
 		mBoneCount = pBoneCount;
-		mTransformation[i] = new Lepra::TransformationF[mBoneCount];
+		mTransformation[i] = new TransformationF[mBoneCount];
 	}
 
 	if (mSpline != 0)
@@ -394,7 +394,7 @@ void BoneAnimation::SetBoneCount(int pBoneCount)
 
 	if (mUseSplines == true)
 	{
-		mSpline = new Lepra::CubicSpline[mBoneCount];
+		mSpline = new CubicSpline[mBoneCount];
 		for (i = 0; i < mBoneCount; i++)
 		{
 			mSpline[i].Init(mKeyframeCount, 3);
@@ -433,13 +433,13 @@ float BoneAnimation::GetTimeTag(int pKeyframe) const
 	return (lTimeTag);
 }
 
-void BoneAnimation::SetBoneTransformation(int pKeyframe, int pBoneIndex, const Lepra::TransformationF& pTransformation)
+void BoneAnimation::SetBoneTransformation(int pKeyframe, int pBoneIndex, const TransformationF& pTransformation)
 {
 	mTransformation[pKeyframe][pBoneIndex] = pTransformation;
 
 	if (mUseSplines == true)
 	{
-		const Lepra::Vector3DF& lPosition = pTransformation.GetPosition();
+		const Vector3DF& lPosition = pTransformation.GetPosition();
 		float lValue[3];
 		lValue[0] = lPosition.x;
 		lValue[1] = lPosition.y;
@@ -448,17 +448,17 @@ void BoneAnimation::SetBoneTransformation(int pKeyframe, int pBoneIndex, const L
 	}
 }
 
-const Lepra::TransformationF& BoneAnimation::GetBoneTransformation(int pKeyframe, int pBoneIndex) const
+const TransformationF& BoneAnimation::GetBoneTransformation(int pKeyframe, int pBoneIndex) const
 {
 	return (mTransformation[pKeyframe][pBoneIndex]);
 }
 
-void BoneAnimation::GetAnimationState(Lepra::TransformationF* pTransformation, float pTime, Mode pMode)
+void BoneAnimation::GetAnimationState(TransformationF* pTransformation, float pTime, Mode pMode)
 {
 	GetAnimationStateInterpolated(pTransformation, pTime, pMode, 1);
 }
 
-void BoneAnimation::GetAnimationStateInterpolated(Lepra::TransformationF* pTransformation, float pTime, Mode pMode, float pFactor)
+void BoneAnimation::GetAnimationStateInterpolated(TransformationF* pTransformation, float pTime, Mode pMode, float pFactor)
 {
 	if (pFactor <= 0)
 	{
@@ -539,8 +539,8 @@ void BoneAnimation::GetAnimationStateInterpolated(Lepra::TransformationF* pTrans
 	}
 
 	int lNextKeyframe = (lCurrentKeyframe + 1) % mKeyframeCount;
-	Lepra::TransformationF* lCurrentTransformation = mTransformation[lCurrentKeyframe];
-	Lepra::TransformationF* lNextTransformation = mTransformation[lNextKeyframe];
+	TransformationF* lCurrentTransformation = mTransformation[lCurrentKeyframe];
+	TransformationF* lNextTransformation = mTransformation[lNextKeyframe];
 	float lFrameFactor = (pTime - lCurrentTimeTag) / (lNextTimeTag - lCurrentTimeTag);
 
 	if (mUseSplines == false)
@@ -548,7 +548,7 @@ void BoneAnimation::GetAnimationStateInterpolated(Lepra::TransformationF* pTrans
 		// Linear interpolation (no splines).
 		for (int i = 0; i < mBoneCount; i++)
 		{
-			Lepra::TransformationF lFinalTransform;
+			TransformationF lFinalTransform;
 			lFinalTransform.Interpolate(lCurrentTransformation[i],
 						     lNextTransformation[i],
 						     lFrameFactor);
@@ -569,16 +569,16 @@ void BoneAnimation::GetAnimationStateInterpolated(Lepra::TransformationF* pTrans
 		int lNextNextKeyframe = (lNextKeyframe + 1) % mKeyframeCount;
 		int lPrevKeyframe = (lCurrentKeyframe + mKeyframeCount - 1) % mKeyframeCount;
 
-		Lepra::TransformationF* lNextNextTransformation = mTransformation[lNextNextKeyframe];
-		Lepra::TransformationF* lPrevTransformation = mTransformation[lPrevKeyframe];
+		TransformationF* lNextNextTransformation = mTransformation[lNextNextKeyframe];
+		TransformationF* lPrevTransformation = mTransformation[lPrevKeyframe];
 
 		for (int i = 0; i < mBoneCount; i++)
 		{
-			Lepra::Vector3DF lPosition(mSpline[i].GetValue(0),
+			Vector3DF lPosition(mSpline[i].GetValue(0),
 						mSpline[i].GetValue(1),
 						mSpline[i].GetValue(2));
 
-			Lepra::TransformationF lFinalTransform;
+			TransformationF lFinalTransform;
 			lFinalTransform.SetPosition(lPosition);
 
 
@@ -588,9 +588,9 @@ void BoneAnimation::GetAnimationStateInterpolated(Lepra::TransformationF* pTrans
 			// We have 4 frames, numbered from 1 to 4, where the current frame 
 			// is number 2. Using these, we are doing a Catmull-Rom spline.
 			// TODO: Test this with uneven time tags.
-			Lepra::QuaternionF lQTemp12;
-			Lepra::QuaternionF lQTemp23;
-			Lepra::QuaternionF lQTemp34;
+			QuaternionF lQTemp12;
+			QuaternionF lQTemp23;
+			QuaternionF lQTemp34;
 
 			lQTemp12.Slerp(lPrevTransformation[i].GetOrientation(), 
 					lCurrentTransformation[i].GetOrientation(), t + 1);
@@ -599,14 +599,14 @@ void BoneAnimation::GetAnimationStateInterpolated(Lepra::TransformationF* pTrans
 			lQTemp34.Slerp(lNextTransformation[i].GetOrientation(), 
 					lNextNextTransformation[i].GetOrientation(), t - 1);
 
-			Lepra::QuaternionF lQTemp123;
-			Lepra::QuaternionF lQTemp234;
+			QuaternionF lQTemp123;
+			QuaternionF lQTemp234;
 
 			lQTemp123.Slerp(lQTemp12, lQTemp23, (t + 1) / 2.0f);
 			lQTemp234.Slerp(lQTemp23, lQTemp34, t / 2.0f);
 
 			// And finally...
-			Lepra::QuaternionF lRot;
+			QuaternionF lRot;
 			lRot.Slerp(lQTemp123, lQTemp234, t);
 
 			lFinalTransform.SetOrientation(lRot);
@@ -639,14 +639,14 @@ BoneAnimator::~BoneAnimator()
 
 
 
-void BoneAnimator::AddAnimation(const Lepra::String& pName, BoneAnimation* pAnimation)
+void BoneAnimator::AddAnimation(const str& pName, BoneAnimation* pAnimation)
 {
 	mAnimTable.Insert(pName, pAnimation);
 }
 
 
 
-void BoneAnimator::StartAnimation(const Lepra::String& pAnimationName, float pBlendingTime, BoneAnimation::Mode pMode)
+void BoneAnimator::StartAnimation(const str& pAnimationName, float pBlendingTime, BoneAnimation::Mode pMode)
 {
 	AnimTable::Iterator lIter = mAnimTable.Find(pAnimationName);
 
@@ -706,7 +706,7 @@ void BoneAnimator::Step(float pStepTime)
 
 		if (mBones->mParent == 0)
 		{
-			mBones->UpdateBonesObjectTransformation(mBones->mRootBoneIndex, Lepra::gIdentityTransformationF);
+			mBones->UpdateBonesObjectTransformation(mBones->mRootBoneIndex, gIdentityTransformationF);
 		}
 		else
 		{

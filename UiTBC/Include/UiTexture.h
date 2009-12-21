@@ -1,5 +1,5 @@
 /*
-	Lepra::File:   Texture.h
+	File:   Texture.h
 	Class:  Texture
 	Author: Alexander Hugestrand
 	Copyright (c) 2002-2009, Righteous Games
@@ -33,29 +33,29 @@ public:
 	// The constructor makes a copy of the data, and is not responsible
 	// for deleting the canvas.
 	Texture();
-	Texture(const Lepra::Canvas& pColorMap); // Will generate mipmaps.
+	Texture(const Canvas& pColorMap); // Will generate mipmaps.
 	Texture(Texture* pTexture);
 	virtual ~Texture();
 
 	void ClearAll();
 
-	void ConvertBitDepth(Lepra::Canvas::BitDepth pBitDepth);
+	void ConvertBitDepth(Canvas::BitDepth pBitDepth);
 
 	// Normal texture set. If both specular and normal maps are used, they will be merged
 	// such that the specular value will be stored in the alpha-channel of the normal map.
-	void Set(const Lepra::Canvas& pColorMap,		// Required.
-		 const Lepra::Canvas* pAlphaMap    = 0,	// Optional, will be embedded in the color map.
-		 const Lepra::Canvas* pNormalMap   = 0,	// Optional.
-		 const Lepra::Canvas* pSpecularMap = 0,	// Optional.
+	void Set(const Canvas& pColorMap,		// Required.
+		 const Canvas* pAlphaMap    = 0,	// Optional, will be embedded in the color map.
+		 const Canvas* pNormalMap   = 0,	// Optional.
+		 const Canvas* pSpecularMap = 0,	// Optional.
 		 bool pMergeColorWithAlpha = true);
 
 	// Set cube map.
-	void Set(const Lepra::Canvas& pCubeMapPosX,			// Required.
-		 const Lepra::Canvas& pCubeMapNegX,			// Required.
-		 const Lepra::Canvas& pCubeMapPosY,			// Required.
-		 const Lepra::Canvas& pCubeMapNegY,			// Required.
-		 const Lepra::Canvas& pCubeMapPosZ,			// Required.
-		 const Lepra::Canvas& pCubeMapNegZ);			// Required.
+	void Set(const Canvas& pCubeMapPosX,			// Required.
+		 const Canvas& pCubeMapNegX,			// Required.
+		 const Canvas& pCubeMapPosY,			// Required.
+		 const Canvas& pCubeMapNegY,			// Required.
+		 const Canvas& pCubeMapPosZ,			// Required.
+		 const Canvas& pCubeMapNegZ);			// Required.
 
 	void Copy(Texture* pTexture);
 
@@ -64,18 +64,18 @@ public:
 
 	inline bool IsCubeMap() const;
 
-	// Lepra::Color map contains alpha channel.
-	const Lepra::Canvas* GetColorMap   (unsigned int pMipMapLevel) const;
-	const Lepra::Canvas* GetAlphaMap   (unsigned int pMipMapLevel) const;
-	const Lepra::Canvas* GetNormalMap  (unsigned int pMipMapLevel) const;
-	const Lepra::Canvas* GetSpecularMap(unsigned int pMipMapLevel) const;
+	// Color map contains alpha channel.
+	const Canvas* GetColorMap   (unsigned int pMipMapLevel) const;
+	const Canvas* GetAlphaMap   (unsigned int pMipMapLevel) const;
+	const Canvas* GetNormalMap  (unsigned int pMipMapLevel) const;
+	const Canvas* GetSpecularMap(unsigned int pMipMapLevel) const;
 
-	const Lepra::Canvas* GetCubeMapPosX (unsigned int pMipMapLevel) const;
-	const Lepra::Canvas* GetCubeMapNegX (unsigned int pMipMapLevel) const;
-	const Lepra::Canvas* GetCubeMapPosY (unsigned int pMipMapLevel) const;
-	const Lepra::Canvas* GetCubeMapNegY (unsigned int pMipMapLevel) const;
-	const Lepra::Canvas* GetCubeMapPosZ (unsigned int pMipMapLevel) const;
-	const Lepra::Canvas* GetCubeMapNegZ (unsigned int pMipMapLevel) const;
+	const Canvas* GetCubeMapPosX (unsigned int pMipMapLevel) const;
+	const Canvas* GetCubeMapNegX (unsigned int pMipMapLevel) const;
+	const Canvas* GetCubeMapPosY (unsigned int pMipMapLevel) const;
+	const Canvas* GetCubeMapNegY (unsigned int pMipMapLevel) const;
+	const Canvas* GetCubeMapPosZ (unsigned int pMipMapLevel) const;
+	const Canvas* GetCubeMapNegZ (unsigned int pMipMapLevel) const;
 
 	inline unsigned int GetWidth(int pMipMapLevel = 0) const;
 	inline unsigned int GetHeight(int pMipMapLevel = 0) const;
@@ -83,7 +83,7 @@ public:
 
 	// Generate a normal map from a grayscale bump map. The scale parameter is multiplied
 	// with the bumpmap, which can control the steepness of the edges in the bumpmap.
-	static void GenerateNormalMap(Lepra::Canvas& pNormalMap, const Lepra::Canvas& pBumpMap, double pScale = 1.0);
+	static void GenerateNormalMap(Canvas& pNormalMap, const Canvas& pBumpMap, double pScale = 1.0);
 
 	void SwapRGBOrder();
 private:
@@ -97,34 +97,34 @@ private:
 		     unsigned int pWidth,
 		     unsigned int pHeight);
 
-	Lepra::Canvas* _GetColorMap   (unsigned int pMipMapLevel);
-	Lepra::Canvas* _GetAlphaMap   (unsigned int pMipMapLevel);
-	Lepra::Canvas* _GetNormalMap  (unsigned int pMipMapLevel);
-	Lepra::Canvas* _GetSpecularMap(unsigned int pMipMapLevel);
+	Canvas* _GetColorMap   (unsigned int pMipMapLevel);
+	Canvas* _GetAlphaMap   (unsigned int pMipMapLevel);
+	Canvas* _GetNormalMap  (unsigned int pMipMapLevel);
+	Canvas* _GetSpecularMap(unsigned int pMipMapLevel);
 
-	Lepra::Canvas* _GetCubeMapPosX (unsigned int pMipMapLevel);
-	Lepra::Canvas* _GetCubeMapNegX (unsigned int pMipMapLevel);
-	Lepra::Canvas* _GetCubeMapPosY (unsigned int pMipMapLevel);
-	Lepra::Canvas* _GetCubeMapNegY (unsigned int pMipMapLevel);
-	Lepra::Canvas* _GetCubeMapPosZ (unsigned int pMipMapLevel);
-	Lepra::Canvas* _GetCubeMapNegZ (unsigned int pMipMapLevel);
+	Canvas* _GetCubeMapPosX (unsigned int pMipMapLevel);
+	Canvas* _GetCubeMapNegX (unsigned int pMipMapLevel);
+	Canvas* _GetCubeMapPosY (unsigned int pMipMapLevel);
+	Canvas* _GetCubeMapNegY (unsigned int pMipMapLevel);
+	Canvas* _GetCubeMapPosZ (unsigned int pMipMapLevel);
+	Canvas* _GetCubeMapNegZ (unsigned int pMipMapLevel);
 
 
 
 	int mNumMipMapLevels;
 	bool mIsCubeMap;
 
-	Lepra::Canvas* mColorMap;
-	Lepra::Canvas* mAlphaMap;
-	Lepra::Canvas* mNormalMap;
-	Lepra::Canvas* mSpecularMap;
+	Canvas* mColorMap;
+	Canvas* mAlphaMap;
+	Canvas* mNormalMap;
+	Canvas* mSpecularMap;
 
-	Lepra::Canvas* mCubeMapPosX;
-	Lepra::Canvas* mCubeMapNegX;
-	Lepra::Canvas* mCubeMapPosY;
-	Lepra::Canvas* mCubeMapNegY;
-	Lepra::Canvas* mCubeMapPosZ;
-	Lepra::Canvas* mCubeMapNegZ;
+	Canvas* mCubeMapPosX;
+	Canvas* mCubeMapNegX;
+	Canvas* mCubeMapPosY;
+	Canvas* mCubeMapNegY;
+	Canvas* mCubeMapPosZ;
+	Canvas* mCubeMapNegZ;
 };
 
 int Texture::GetNumMipMapLevels() const

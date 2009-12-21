@@ -9,6 +9,7 @@
 #include <set>
 #include "../../Lepra/Include/Canvas.h"
 #include "../../Lepra/Include/Log.h"
+#include "../Include/UiLepra.h"
 
 
 
@@ -115,7 +116,7 @@ public:
 	virtual ContextType GetContextType() = 0;
 
 	// Sets the caption of the window.
-	virtual void SetCaption(const Lepra::String& pCaption) = 0;
+	virtual void SetCaption(const str& pCaption) = 0;
 
 	// Creates a window in windowed or fullscreen mode on the main display device.
 	virtual bool OpenScreen(const DisplayMode& pDisplayMode, ScreenMode pMode) = 0;
@@ -175,21 +176,21 @@ public:
 	// (OpenGL, DirectX etc) you can't assume that there is a valid pointer
 	// to the display memory. If there is a valid pointer, it's only valid
 	// for the current frame.
-	void GetScreenCanvas(Lepra::Canvas& pCanvas);
-	inline void GetScreenCanvas(Lepra::Canvas* pCanvas);
+	void GetScreenCanvas(Canvas& pCanvas);
+	inline void GetScreenCanvas(Canvas* pCanvas);
 
 	// Returns true if the 16 bit mode (565) really is 15 bit (555).
 	virtual bool Is15Bit() = 0;
 
 	// Returns the color that is closest to the desired color (pRed, pGreen, pBlue).
 	// Do not use this in time critical loops!
-	virtual Lepra::uint8 GetPaletteColor(int pRed, int pGreen, int pBlue) = 0;
-	virtual const Lepra::Color* GetPaletteColor(unsigned pIndex) = 0;
+	virtual uint8 GetPaletteColor(int pRed, int pGreen, int pBlue) = 0;
+	virtual const Color* GetPaletteColor(unsigned pIndex) = 0;
 
-	virtual void SetPalette(const Lepra::Color* pPalette) = 0;
+	virtual void SetPalette(const Color* pPalette) = 0;
 
 	// Functions implemented for conveniency.
-	static Lepra::uint8 GetPaletteColor(int pRed, int pGreen, int pBlue, const Lepra::Color* pPalette);
+	static uint8 GetPaletteColor(int pRed, int pGreen, int pBlue, const Color* pPalette);
 
 protected:
 	typedef std::set<DisplayResizeObserver*> ResizeObserverSet;
@@ -199,7 +200,7 @@ private:
 	LOG_CLASS_DECLARE();
 };
 
-void DisplayManager::GetScreenCanvas(Lepra::Canvas* pCanvas)
+void DisplayManager::GetScreenCanvas(Canvas* pCanvas)
 {
 	GetScreenCanvas(*pCanvas);
 }

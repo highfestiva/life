@@ -21,14 +21,14 @@ GraphicalModel::~GraphicalModel()
 {
 }
 
-void GraphicalModel::AddGeometry(const Lepra::String& pName, GeometryHandler* pGeometry, const Lepra::String& pTransformAnimator)
+void GraphicalModel::AddGeometry(const str& pName, GeometryHandler* pGeometry, const str& pTransformAnimator)
 {
 	pGeometry->SetTransformAnimator(Model::GetAnimator(pTransformAnimator));
 	pGeometry->UpdateGeometry((float)mLevelOfDetail);
 	mGeometryTable.Insert(pName, pGeometry);
 }
 
-TBC::GeometryBase* GraphicalModel::GetGeometry(const Lepra::String& pName)
+TBC::GeometryBase* GraphicalModel::GetGeometry(const str& pName)
 {
 	TBC::GeometryBase* lGeometry = 0;
 	GeometryTable::Iterator lIter = mGeometryTable.Find(pName);
@@ -54,7 +54,7 @@ void GraphicalModel::Update(double pDeltaTime)
 		TBC::BoneAnimator* lAnimator = lGeometryHandler->GetTransformAnimator();
 
 		// Set transformation.
-		Lepra::TransformationF lTransform;
+		TransformationF lTransform;
 		if (lAnimator != 0)
 		{
 			lTransform = mTransformation.Transform(lAnimator->GetBones()->GetRelativeBoneTransformation(0));

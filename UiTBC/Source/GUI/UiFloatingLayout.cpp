@@ -80,7 +80,7 @@ void FloatingLayout::Remove(Component* pComponent)
 	}
 }
 
-Component* FloatingLayout::Find(const Lepra::String& pComponentName)
+Component* FloatingLayout::Find(const str& pComponentName)
 {
 	ComponentList::iterator lIter;
 
@@ -160,19 +160,19 @@ void FloatingLayout::UpdateLayout()
 	}
 }
 
-Lepra::PixelCoords FloatingLayout::GetPreferredSize(bool /*pForceAdaptive*/)
+PixelCoords FloatingLayout::GetPreferredSize(bool /*pForceAdaptive*/)
 {
-	return Lepra::PixelCoords(0, 0);
+	return PixelCoords(0, 0);
 }
 
-Lepra::PixelCoords FloatingLayout::GetMinSize()
+PixelCoords FloatingLayout::GetMinSize()
 {
-	return Lepra::PixelCoords(0, 0);
+	return PixelCoords(0, 0);
 }
 
-Lepra::PixelCoords FloatingLayout::GetContentSize()
+PixelCoords FloatingLayout::GetContentSize()
 {
-	return Lepra::PixelCoords(0, 0);
+	return PixelCoords(0, 0);
 }
 
 void FloatingLayout::MoveToTop(Component* pComponent)

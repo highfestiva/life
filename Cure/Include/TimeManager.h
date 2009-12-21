@@ -65,7 +65,7 @@ public:
 
 private:
 	int mTargetFrameRate;	// Physics frame rate (at which the physics system is updated).
-	Lepra::HiResTimer mTime;	// Absolute time.
+	HiResTimer mTime;	// Absolute time.
 	float mAbsoluteTime;	// Cache of absolute time.
 	float mTickTimeModulo;	// Contains the time that was "left over" since last physics step.
 	float mPhysicsSpeedAdjustmentTime;	// Total number of seconds that our our physics time needs adjusting.

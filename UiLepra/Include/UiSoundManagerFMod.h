@@ -26,9 +26,9 @@ public:
 	SoundManagerFMod(int pMixRate);
 	virtual ~SoundManagerFMod();
 
-	SoundID LoadSound2D(const Lepra::String& pFileName, LoopMode pLoopMode, int pPriority);
-	SoundID LoadSound3D(const Lepra::String& pFileName, LoopMode LoopMode, int pPriority);
-	SoundID LoadStream(const Lepra::String& pFileName, LoopMode LoopMode, int pPriority);
+	SoundID LoadSound2D(const str& pFileName, LoopMode pLoopMode, int pPriority);
+	SoundID LoadSound3D(const str& pFileName, LoopMode LoopMode, int pPriority);
+	SoundID LoadStream(const str& pFileName, LoopMode LoopMode, int pPriority);
 
 	void Release(SoundID pSoundID);
 
@@ -55,14 +55,14 @@ public:
 	void SetFrequency(SoundInstanceID pSoundIID, int pFrequency);
 	int GetFrequency(SoundInstanceID pSoundIID);
 
-	void SetSoundPosition(SoundInstanceID pSoundIID, const Lepra::Vector3DF& pPos, const Lepra::Vector3DF& pVel);
-	void GetSoundPosition(SoundInstanceID pSoundIID, Lepra::Vector3DF& pPos, Lepra::Vector3DF& pVel);
+	void SetSoundPosition(SoundInstanceID pSoundIID, const Vector3DF& pPos, const Vector3DF& pVel);
+	void GetSoundPosition(SoundInstanceID pSoundIID, Vector3DF& pPos, Vector3DF& pVel);
 
 	void SetCurrentListener(int pListenerIndex, int pListenerCount);
-	void SetListenerPosition(const Lepra::Vector3DF& pPos, const Lepra::Vector3DF& pVel,
-		const Lepra::Vector3DF& pUp, const Lepra::Vector3DF& pForward);
-	void GetListenerPosition(Lepra::Vector3DF& pPos, Lepra::Vector3DF& pVel,
-		Lepra::Vector3DF& pUp, Lepra::Vector3DF& pForward);
+	void SetListenerPosition(const Vector3DF& pPos, const Vector3DF& pVel,
+		const Vector3DF& pUp, const Vector3DF& pForward);
+	void GetListenerPosition(Vector3DF& pPos, Vector3DF& pVel,
+		Vector3DF& pUp, Vector3DF& pForward);
 
 	void SetDopplerFactor(float pFactor);
 	void SetRollOffFactor(float pFactor);
@@ -119,7 +119,7 @@ private:
 
 		SoundID mID;
 		int mReferenceCount;
-		Lepra::String mFileName;
+		str mFileName;
 		FSOUND_SAMPLE* mSample;
 		FSOUND_STREAM* mStream;
 	};
@@ -222,17 +222,17 @@ private:
 		SoundInstance mSoundInstance;
 	};
 
-	typedef Lepra::HashTable<Lepra::String, Sample*> FileNameToSampleTable;
-	typedef Lepra::HashTable<int, Sample*> IDToSampleTable;
-	typedef Lepra::HashTable<int, SoundInstance> SoundInstanceTable;
+	typedef HashTable<str, Sample*> FileNameToSampleTable;
+	typedef HashTable<int, Sample*> IDToSampleTable;
+	typedef HashTable<int, SoundInstance> SoundInstanceTable;
 
 	FileNameToSampleTable mFileNameToSampleTable;
 	IDToSampleTable mIDToSampleTable;
 	SoundInstanceTable mSoundInstanceTable;
 
-	Lepra::IdManager<SoundID> mSampleIDManager;
-	Lepra::IdManager<SoundID> mStreamIDManager;
-	Lepra::IdManager<SoundInstanceID> mSoundInstanceIDManager;
+	IdManager<SoundID> mSampleIDManager;
+	IdManager<SoundID> mStreamIDManager;
+	IdManager<SoundInstanceID> mSoundInstanceIDManager;
 
 	FXHandles mFXHandles;
 

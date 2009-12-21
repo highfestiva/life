@@ -719,6 +719,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Include\UiFontManager.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Include\UiGeometry2D.h"
 				>
 			</File>

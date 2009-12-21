@@ -35,17 +35,17 @@ public:
 	void RemoveAll();
 
 	// Bones and animations all come with the animator.
-	void AddAnimator(const Lepra::String& pName, BoneAnimator* pBoneAnimator);
-	BoneAnimator* GetAnimator(const Lepra::String& pName);
+	void AddAnimator(const str& pName, BoneAnimator* pBoneAnimator);
+	BoneAnimator* GetAnimator(const str& pName);
 
-	void StartAnimation(const Lepra::String& pAnimName, float pBlendingTime, BoneAnimation::Mode pMode = BoneAnimation::MODE_PLAY_DEFAULT);
+	void StartAnimation(const str& pAnimName, float pBlendingTime, BoneAnimation::Mode pMode = BoneAnimation::MODE_PLAY_DEFAULT);
 
 	// Updates animations.
 	virtual void Update(double pDeltaTime);
 
 	// Sets and gets the transformation of the entire model.
-	void SetTransformation(const Lepra::TransformationF& pTransformation);
-	const Lepra::TransformationF& GetTransformation() const;
+	void SetTransformation(const TransformationF& pTransformation);
+	const TransformationF& GetTransformation() const;
 
 protected:
 
@@ -56,11 +56,11 @@ protected:
 	{
 	public:
 		PhysicsFrame() {}
-		PhysicsFrame(const Lepra::TransformationF& pTransformation,
-			     const Lepra::Vector3DF& pVelocity,
-			     const Lepra::Vector3DF& pRotationalVelocity,
-			     const Lepra::Vector3DF& pAcceleration,
-			     const Lepra::Vector3DF& pRotationalAcceleration,
+		PhysicsFrame(const TransformationF& pTransformation,
+			     const Vector3DF& pVelocity,
+			     const Vector3DF& pRotationalVelocity,
+			     const Vector3DF& pAcceleration,
+			     const Vector3DF& pRotationalAcceleration,
 			     int pFrame) :
 			mTransformation(pTransformation),
 			mVelocity(pVelocity),
@@ -71,13 +71,13 @@ protected:
 		{	
 		}
 
-		Lepra::TransformationF mTransformation;
+		TransformationF mTransformation;
 
-		Lepra::Vector3DF mVelocity;
-		Lepra::Vector3DF mRotationalVelocity;
+		Vector3DF mVelocity;
+		Vector3DF mRotationalVelocity;
 
-		Lepra::Vector3DF mAcceleration;
-		Lepra::Vector3DF mRotationalAcceleration;
+		Vector3DF mAcceleration;
+		Vector3DF mRotationalAcceleration;
 
 		int mFrame;
 	};
@@ -87,13 +87,13 @@ protected:
 	int mNumPhysFrames;
 	int mFirstPhysFrame;
 */
-	typedef Lepra::HashTable<Lepra::String, BoneAnimator*, std::hash<Lepra::String> , 16> AnimatorTable;
+	typedef HashTable<str, BoneAnimator*, std::hash<str> , 16> AnimatorTable;
 
 	AnimatorTable mAnimatorTable;
 
 	// This is the transformation of the entire model. Transform animations
 	// are relative to this.
-	Lepra::TransformationF mTransformation;
+	TransformationF mTransformation;
 };
 
 

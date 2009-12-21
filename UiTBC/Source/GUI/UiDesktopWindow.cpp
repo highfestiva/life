@@ -17,8 +17,8 @@ namespace UiTbc
 
 
 DesktopWindow::DesktopWindow(UiLepra::InputManager* pInputManager, Painter* pPainter, 
-	Layout* pLayout, const Lepra::tchar* pImageDefinitionFile,
-	const Lepra::tchar* pArchive):
+	Layout* pLayout, const tchar* pImageDefinitionFile,
+	const tchar* pArchive):
 	RectComponent(_T("DesktopWindow"), pLayout),
 	mInputManager(pInputManager),
 	mMouseEnabled(true),
@@ -33,8 +33,8 @@ DesktopWindow::DesktopWindow(UiLepra::InputManager* pInputManager, Painter* pPai
 	Init(pImageDefinitionFile, pArchive);
 }
 
-DesktopWindow::DesktopWindow(UiLepra::InputManager* pInputManager, Painter* pPainter, const Lepra::Color& pColor,
-	Layout* pLayout, const Lepra::tchar* pImageDefinitionFile, const Lepra::tchar* pArchive):
+DesktopWindow::DesktopWindow(UiLepra::InputManager* pInputManager, Painter* pPainter, const Color& pColor,
+	Layout* pLayout, const tchar* pImageDefinitionFile, const tchar* pArchive):
 	RectComponent(pColor, _T("DesktopWindow"), pLayout),
 	mInputManager(pInputManager),
 	mMouseEnabled(true),
@@ -50,10 +50,10 @@ DesktopWindow::DesktopWindow(UiLepra::InputManager* pInputManager, Painter* pPai
 }
 
 DesktopWindow::DesktopWindow(UiLepra::InputManager* pInputManager, Painter* pPainter,
-	const Lepra::Color& pTopLeftColor, const Lepra::Color& pTopRightColor,
-	const Lepra::Color& pBottomRightColor, const Lepra::Color& pBottomLeftColor,
-	Layout* pLayout, const Lepra::tchar* pImageDefinitionFile,
-	const Lepra::tchar* pArchive):
+	const Color& pTopLeftColor, const Color& pTopRightColor,
+	const Color& pBottomRightColor, const Color& pBottomLeftColor,
+	Layout* pLayout, const tchar* pImageDefinitionFile,
+	const tchar* pArchive):
 	RectComponent(pTopLeftColor, pTopRightColor, pBottomRightColor, pBottomLeftColor, _T("DesktopWindow"), pLayout),
 	mInputManager(pInputManager),
 	mMouseEnabled(true),
@@ -69,7 +69,7 @@ DesktopWindow::DesktopWindow(UiLepra::InputManager* pInputManager, Painter* pPai
 }
 
 DesktopWindow::DesktopWindow(UiLepra::InputManager* pInputManager, Painter* pPainter, Painter::ImageID pImageID,
-	Layout* pLayout, const Lepra::tchar* pImageDefinitionFile, const Lepra::tchar* pArchive):
+	Layout* pLayout, const tchar* pImageDefinitionFile, const tchar* pArchive):
 	RectComponent(pImageID, _T("DesktopWindow"), pLayout),
 	mInputManager(pInputManager),
 	mMouseEnabled(true),
@@ -88,7 +88,7 @@ DesktopWindow::~DesktopWindow()
 {
 	PurgeDeleted();
 
-	Lepra::ListUtil::DeleteAll(mCleanerList);
+	ListUtil::DeleteAll(mCleanerList);
 
 	mInputManager->RemoveTextInputObserver(this);
 	mInputManager->RemoveKeyCodeInputObserver(this);
@@ -101,7 +101,7 @@ UiLepra::InputManager* DesktopWindow::GetInputManager() const
 	return (mInputManager);
 }
 
-void DesktopWindow::Init(const Lepra::tchar* /*pImageDefinitionFile*/, const Lepra::tchar* /*pArchive*/)
+void DesktopWindow::Init(const tchar* /*pImageDefinitionFile*/, const tchar* /*pArchive*/)
 {
 	// Let all components access the image manager.
 	SetImageManager(&mImageManager);
@@ -161,13 +161,13 @@ void DesktopWindow::PurgeDeleted()
 		}
 	}
 	// Delete all queued components.
-	Lepra::ListUtil::DeleteAll(mDeleteQueue);
+	ListUtil::DeleteAll(mDeleteQueue);
 }
 
 void DesktopWindow::DoSetSize(int pWidth, int pHeight)
 {
 	Parent::DoSetSize(pWidth, pHeight);
-	Lepra::PixelCoords lPos(GetScreenPos());
+	PixelCoords lPos(GetScreenPos());
 	mMouseArea.Set(lPos.x, lPos.y, lPos.x + pWidth, lPos.y + pHeight);
 }
 
@@ -224,8 +224,8 @@ void DesktopWindow::Repaint(Painter* /*pPainter*/)
 	}
 
 	// Handle mouse...
-	Lepra::float64 lWidth  = (Lepra::float64)mMouseArea.GetWidth();
-	Lepra::float64 lHeight = (Lepra::float64)mMouseArea.GetHeight();
+	float64 lWidth  = (float64)mMouseArea.GetWidth();
+	float64 lHeight = (float64)mMouseArea.GetHeight();
 
 	mMouseX = (int)((mInputManager->GetCursorX() + 1.0) * lWidth / 2.0);
 	mMouseY = (int)((mInputManager->GetCursorY() + 1.0) * lHeight / 2.0);
@@ -267,8 +267,8 @@ void DesktopWindow::OnButton1(UiLepra::InputElement* pElement)
 {
 	if (mMouseEnabled == true)
 	{
-		Lepra::float64 lWidth  = (Lepra::float64)mMouseArea.GetWidth();
-		Lepra::float64 lHeight = (Lepra::float64)mMouseArea.GetHeight();
+		float64 lWidth  = (float64)mMouseArea.GetWidth();
+		float64 lHeight = (float64)mMouseArea.GetHeight();
 
 		int lMouseX = (int)((mInputManager->GetCursorX() + 1.0) * lWidth / 2.0);
 		int lMouseY = (int)((mInputManager->GetCursorY() + 1.0) * lHeight / 2.0);
@@ -290,8 +290,8 @@ void DesktopWindow::OnButton2(UiLepra::InputElement* pElement)
 {
 	if (mMouseEnabled == true)
 	{
-		Lepra::float64 lWidth  = (Lepra::float64)mMouseArea.GetWidth();
-		Lepra::float64 lHeight = (Lepra::float64)mMouseArea.GetHeight();
+		float64 lWidth  = (float64)mMouseArea.GetWidth();
+		float64 lHeight = (float64)mMouseArea.GetHeight();
 
 		int lMouseX = (int)((mInputManager->GetCursorX() + 1.0) * lWidth / 2.0);
 		int lMouseY = (int)((mInputManager->GetCursorY() + 1.0) * lHeight / 2.0);
@@ -313,8 +313,8 @@ void DesktopWindow::OnButton3(UiLepra::InputElement* pElement)
 {
 	if (mMouseEnabled == true)
 	{
-		Lepra::float64 lWidth  = (Lepra::float64)mMouseArea.GetWidth();
-		Lepra::float64 lHeight = (Lepra::float64)mMouseArea.GetHeight();
+		float64 lWidth  = (float64)mMouseArea.GetWidth();
+		float64 lHeight = (float64)mMouseArea.GetHeight();
 
 		int lMouseX = (int)((mInputManager->GetCursorX() + 1.0) * lWidth / 2.0);
 		int lMouseY = (int)((mInputManager->GetCursorY() + 1.0) * lHeight / 2.0);
@@ -332,7 +332,7 @@ void DesktopWindow::OnButton3(UiLepra::InputElement* pElement)
 	}
 }
 
-bool DesktopWindow::OnChar(Lepra::tchar pChar)
+bool DesktopWindow::OnChar(tchar pChar)
 {
 	return (Parent::OnChar(pChar));
 }
@@ -353,8 +353,8 @@ bool DesktopWindow::OnDoubleClick()
 
 	if (mMouseEnabled == true)
 	{
-		Lepra::float64 lWidth  = (Lepra::float64)mMouseArea.GetWidth();
-		Lepra::float64 lHeight = (Lepra::float64)mMouseArea.GetHeight();
+		float64 lWidth  = (float64)mMouseArea.GetWidth();
+		float64 lHeight = (float64)mMouseArea.GetHeight();
 
 		int lMouseX = (int)((mInputManager->GetCursorX() + 1.0) * lWidth / 2.0);
 		int lMouseY = (int)((mInputManager->GetCursorY() + 1.0) * lHeight / 2.0);

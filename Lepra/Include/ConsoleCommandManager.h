@@ -36,7 +36,7 @@ namespace Lepra
 class CommandCompleter
 {
 public:
-	virtual std::list<String> CompleteCommand(const String& pPartialCommand) const = 0;
+	virtual std::list<str> CompleteCommand(const str& pPartialCommand) const = 0;
 };
 
 
@@ -47,22 +47,22 @@ public:
 	ConsoleCommandExecutor();
 	virtual ~ConsoleCommandExecutor();
 
-	virtual int Execute(const String& pCommand, const StringUtility::StringVector& pParameterList) = 0;
-	virtual void OnExecutionError(const String& pCommand, const StringUtility::StringVector& pParameterList, int pResult) = 0;
+	virtual int Execute(const str& pCommand, const strutil::strvec& pParameterList) = 0;
+	virtual void OnExecutionError(const str& pCommand, const strutil::strvec& pParameterList, int pResult) = 0;
 };
 
 template<class _Base> class ConsoleExecutor: public ConsoleCommandExecutor
 {
 public:
-	typedef int (_Base::*CommandCallback)(const String&, const StringUtility::StringVector&);
-	typedef void (_Base::*CommandErrorCallback)(const String&, const StringUtility::StringVector&, int);
+	typedef int (_Base::*CommandCallback)(const str&, const strutil::strvec&);
+	typedef void (_Base::*CommandErrorCallback)(const str&, const strutil::strvec&, int);
 
 	ConsoleExecutor(_Base* pInstance, CommandCallback pCommandListener, CommandErrorCallback pCommandErrorListener);
 	virtual ~ConsoleExecutor();
 
 protected:
-	int Execute(const String& pCommand, const StringUtility::StringVector& pParameterList);
-	void OnExecutionError(const String& pCommand, const StringUtility::StringVector& pParameterList, int pResult);
+	int Execute(const str& pCommand, const strutil::strvec& pParameterList);
+	void OnExecutionError(const str& pCommand, const strutil::strvec& pParameterList, int pResult);
 
 private:
 	_Base* mInstance;
@@ -76,7 +76,7 @@ private:
 class ConsoleCommandManager: public CommandCompleter
 {
 public:
-	typedef std::list<String> CommandList;
+	typedef std::list<str> CommandList;
 
 	ConsoleCommandManager();
 	virtual ~ConsoleCommandManager();
@@ -84,30 +84,30 @@ public:
 	void AddExecutor(ConsoleCommandExecutor* lExecutor);	// Takes ownership!
 	void DeleteExecutor(ConsoleCommandExecutor* lExecutor);
 
-	void SetComment(const String& pComment);
-	bool AddCommand(const String& pCommand);
-	bool RemoveCommand(const String& pCommand);
-	int Execute(const String& pCommand, bool pAppendToHistory);
+	void SetComment(const str& pComment);
+	bool AddCommand(const str& pCommand);
+	bool RemoveCommand(const str& pCommand);
+	int Execute(const str& pCommand, bool pAppendToHistory);
 	void AddCompleter(CommandCompleter* pCompleter);
 	void RemoveCompleter(CommandCompleter* pCompleter);
-	CommandList GetCommandCompletionList(const String& pPartialCommand, String& pCompleted) const;
-	std::list<String> CompleteCommand(const String& pPartialCommand) const;
+	CommandList GetCommandCompletionList(const str& pPartialCommand, str& pCompleted) const;
+	std::list<str> CompleteCommand(const str& pPartialCommand) const;
 	unsigned GetHistoryCount() const;
 	void SetCurrentHistoryIndex(int pIndex);
 	int GetCurrentHistoryIndex() const;
-	String GetHistory(int pIndex) const;
-	void AppendHistory(const String& pCommand);
+	str GetHistory(int pIndex) const;
+	void AppendHistory(const str& pCommand);
 
 private:
 	typedef std::set<ConsoleCommandExecutor*> CommandExecutorSet;
-	typedef std::set<String> CommandSet;
-	typedef std::vector<String> CommandVector;
+	typedef std::set<str> CommandSet;
+	typedef std::vector<str> CommandVector;
 	typedef std::set<CommandCompleter*> CommandCompleterSet;
 	CommandExecutorSet mCommandExecutorSet;
 	CommandCompleterSet mCommandCompleterList;
 	CommandSet mCommandSet;
 	CommandVector mHistoryVector;
-	String mComment;
+	str mComment;
 	int mCurrentHistoryIndex;
 };
 
@@ -159,7 +159,7 @@ public:
 	virtual void ReleaseWaitCharThread() = 0;
 	virtual void Backspace(size_t pCount) = 0;
 	virtual void EraseText(size_t pCount) = 0;
-	virtual void PrintPrompt(const Lepra::String& pPrompt, const Lepra::String& pInputText, size_t pEditIndex) = 0;
+	virtual void PrintPrompt(const str& pPrompt, const str& pInputText, size_t pEditIndex) = 0;
 };
 
 // Uses ::printf() and termios (or corresponding).
@@ -174,7 +174,7 @@ public:
 	void ReleaseWaitCharThread();
 	void Backspace(size_t pCount);
 	void EraseText(size_t pCount);
-	void PrintPrompt(const Lepra::String& pPrompt, const Lepra::String& pInputText, size_t pEditIndex);
+	void PrintPrompt(const str& pPrompt, const str& pInputText, size_t pEditIndex);
 };
 
 

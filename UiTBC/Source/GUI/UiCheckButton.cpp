@@ -12,7 +12,7 @@ namespace UiTbc
 Painter::ImageID CheckButton::smCheckIconID = Painter::INVALID_IMAGEID;
 Painter* CheckButton::smPrevPainter = 0;
 
-const Lepra::uint8 CheckButton::smIconCheck[] =
+const uint8 CheckButton::smIconCheck[] =
 {
 	0  , 0  , 0  , 0  , 0  , 0  , 255, 0  ,
 	0  , 0  , 0  , 0  , 0  , 255, 255, 0  ,
@@ -25,12 +25,12 @@ const Lepra::uint8 CheckButton::smIconCheck[] =
 };
 
 
-CheckButton::CheckButton(const Lepra::Color& pBodyColor, const Lepra::String& pName) :
+CheckButton::CheckButton(const Color& pBodyColor, const str& pName) :
 	Button(pName),
 	mUserDefinedGfx(false),
 	mUpdateSize(true),
 	mBodyColor(pBodyColor),
-	mLightColor(pBodyColor + Lepra::Color(255 - pBodyColor.mRed, 255 - pBodyColor.mGreen, 255 - pBodyColor.mBlue) / 2 + 8),
+	mLightColor(pBodyColor + Color(255 - pBodyColor.mRed, 255 - pBodyColor.mGreen, 255 - pBodyColor.mBlue) / 2 + 8),
 	mDarkColor1(pBodyColor / 3),
 	mDarkColor2(pBodyColor * (2.0f / 3.0f)),
 	mReleasedID(Painter::INVALID_IMAGEID),
@@ -46,7 +46,7 @@ CheckButton::CheckButton(Painter::ImageID pReleasedImageID,
 			 Painter::ImageID pPressedActiveImageID,
 			 Painter::ImageID pReleasingImageID,
 			 Painter::ImageID pPressingImageID,
-			 const Lepra::String& pName) :
+			 const str& pName) :
 	Button(pName),
 	mUserDefinedGfx(true),
 	mUpdateSize(true),
@@ -75,7 +75,7 @@ void CheckButton::Repaint(Painter* pPainter)
 
 	if (mUpdateSize == true)
 	{
-		Lepra::PixelCoords lSize(0, 0);
+		PixelCoords lSize(0, 0);
 
 		if (mUserDefinedGfx == true)
 		{
@@ -123,7 +123,7 @@ void CheckButton::Repaint(Painter* pPainter)
 	Window::Repaint(pPainter);
 
 	pPainter->PushAttrib(Painter::ATTR_ALL);
-	Lepra::PixelRect lRect(Window::GetClientRect());
+	PixelRect lRect(Window::GetClientRect());
 	pPainter->ReduceClippingRect(lRect);
 
 	pPainter->SetRenderMode(Painter::RM_NORMAL);
@@ -156,7 +156,7 @@ void CheckButton::Repaint(Painter* pPainter)
 
 		if (lImageID != Painter::INVALID_IMAGEID)
 		{
-			Lepra::PixelCoords lImageSize(lIMan->GetImageSize(lImageID));
+			PixelCoords lImageSize(lIMan->GetImageSize(lImageID));
 			lIMan->DrawImage(lImageID, 
 					   lRect.mLeft, 
 					   lRect.mTop + (lRect.GetHeight() - lImageSize.y) / 2);
@@ -167,19 +167,19 @@ void CheckButton::Repaint(Painter* pPainter)
 		if (smCheckIconID == Painter::INVALID_IMAGEID || smPrevPainter != pPainter)
 		{
 			smPrevPainter = pPainter;
-			Lepra::Canvas lCanvas(8, 8, Lepra::Canvas::BITDEPTH_8_BIT);
+			Canvas lCanvas(8, 8, Canvas::BITDEPTH_8_BIT);
 			lCanvas.SetBuffer((void*)smIconCheck);
 			smCheckIconID = pPainter->AddImage(&lCanvas, &lCanvas);
 		}
 
-		Lepra::Color lBody(255, 255, 255);
+		Color lBody(255, 255, 255);
 
 		if (GetState() == RELEASING || GetState() == PRESSING)
 		{
 			lBody = mBodyColor;
 		}
 
-		Lepra::PixelRect lButtonRect(0, 0, 13, 13);
+		PixelRect lButtonRect(0, 0, 13, 13);
 		lButtonRect.Offset(lRect.mLeft,
 				    lRect.mTop + (lRect.GetHeight() - lButtonRect.GetHeight()) / 2);
 
@@ -187,7 +187,7 @@ void CheckButton::Repaint(Painter* pPainter)
 		pPainter->SetAlphaValue(lBody.mAlpha);
 		pPainter->FillRect(lButtonRect);
 
-		Lepra::PixelRect lInnerRect(lButtonRect);
+		PixelRect lInnerRect(lButtonRect);
 
 		pPainter->SetColor(mLightColor, 0);
 		pPainter->SetColor(mDarkColor2, 1);
@@ -201,7 +201,7 @@ void CheckButton::Repaint(Painter* pPainter)
 		if (GetPressed() == true)
 		{
 			pPainter->SetRenderMode(Painter::RM_ALPHATEST);
-			pPainter->SetColor(Lepra::Color(0, 0, 0));
+			pPainter->SetColor(Color(0, 0, 0));
 			pPainter->DrawAlphaImage(smCheckIconID,
 						   lButtonRect.mLeft + 3,
 						   lButtonRect.mTop + 3);

@@ -49,13 +49,13 @@ FontManager::FontId FontManager::GetActiveFont() const
 
 
 
-int FontManager::GetStringWidth(const Lepra::String& pString) const
+int FontManager::GetStringWidth(const str& pString) const
 {
 	int lMaxX = 0;
 	int lCurrentX = 0;
 	for (size_t i = 0; i < pString.length(); i++)
 	{
-		Lepra::tchar lChar = pString[i];
+		tchar lChar = pString[i];
 
 		if (lChar == _T('\n'))
 		{

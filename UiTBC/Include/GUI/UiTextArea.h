@@ -30,14 +30,14 @@ public:
 		ANCHOR_BOTTOM_LINE,
 	};
 
-	TextArea(const Lepra::Color& pColor, const Lepra::String& pName = _T("TextArea"));
-	TextArea(Painter::ImageID pImageId, const Lepra::String& pName = _T("TextArea"));
+	TextArea(const Color& pColor, const str& pName = _T("TextArea"));
+	TextArea(Painter::ImageID pImageId, const str& pName = _T("TextArea"));
 	virtual ~TextArea();
 
 	void Clear();
-	bool InsertLine(unsigned pLineIndex, const Lepra::String& pText, Lepra::Color* pColor = 0);
-	unsigned AddLine(const Lepra::String& pText, Lepra::Color* pColor = 0);
-	void AddText(const Lepra::String& pText, Lepra::Color* pColor = 0);
+	bool InsertLine(unsigned pLineIndex, const str& pText, Color* pColor = 0);
+	unsigned AddLine(const str& pText, Color* pColor = 0);
+	void AddText(const str& pText, Color* pColor = 0);
 	bool RemoveLine(unsigned pLineIndex);
 	unsigned GetLineCount() const;
 	unsigned GetFirstVisibleLineIndex() const;
@@ -57,8 +57,8 @@ protected:
 private:
 	struct LineInfo
 	{
-		Lepra::String mText;
-		Lepra::Color mColor;
+		str mText;
+		Color mColor;
 	};
 	typedef std::list<LineInfo> TextLineList;
 
@@ -68,7 +68,7 @@ private:
 	void UpdateVisibleSize();
 	void ScrollToLastLine();
 
-	mutable Lepra::Lock mLock;
+	mutable Lock mLock;
 	TextLineList mLineList;
 	unsigned mFirstVisibleLine;
 	unsigned mVisibleLineCount;

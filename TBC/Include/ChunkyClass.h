@@ -25,12 +25,12 @@ public:
 	ChunkyClass();
 	virtual ~ChunkyClass();
 
-	const Lepra::String& GetPhysicsBaseName() const;
-	Lepra::String& GetPhysicsBaseName();
+	const str& GetPhysicsBaseName() const;
+	str& GetPhysicsBaseName();
 
 protected:
 private:
-	Lepra::String mPhysicsBaseName;
+	str mPhysicsBaseName;
 
 	LOG_CLASS_DECLARE();
 };

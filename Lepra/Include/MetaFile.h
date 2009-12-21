@@ -65,7 +65,7 @@ public:
 	MetaFile(Reader* pReader, Writer* pWriter);
 	virtual ~MetaFile();
 
-	bool Open(const String& pFileName, OpenMode pMode, bool pCreatePath = false, Endian::EndianType pEndian = Endian::TYPE_BIG_ENDIAN);
+	bool Open(const str& pFileName, OpenMode pMode, bool pCreatePath = false, Endian::EndianType pEndian = Endian::TYPE_BIG_ENDIAN);
 	void Close();
 
 	void SetEndian(Endian::EndianType pEndian);
@@ -76,16 +76,16 @@ public:
 	int64 Tell() const;
 	int64 Seek(int64 pOffset, FileOrigin pFrom);
 
-	String GetFullName() const;	// Returns path+filename.
-	String GetName() const;		// Returns filename only.
-	String GetPath() const;		// Returns path.
+	str GetFullName() const;	// Returns path+filename.
+	str GetName() const;		// Returns filename only.
+	str GetPath() const;		// Returns path.
 
 	// Overrided from Reader/Writer.
 	IOError ReadData(void* pBuffer, size_t pSize);
 	IOError WriteData(const void* pBuffer, size_t pSize);
 
-	static void AddZipExtension(const String& pExtension);
-	static void AddUncompressedExtension(const String& pExtension);
+	static void AddZipExtension(const str& pExtension);
+	static void AddUncompressedExtension(const str& pExtension);
 	static void ClearExtensions();
 
 //protected:
@@ -101,15 +101,15 @@ public:
 private:
 
 	void AllocDiskFile();
-	void AllocArchiveFile(const String& pArchiveName);
+	void AllocArchiveFile(const str& pArchiveName);
 	DiskFile::OpenMode ToDiskFileMode(OpenMode pMode);
 	ArchiveFile::OpenMode ToArchiveMode(OpenMode pMode);
 
-	static std::list<String>* smZipExtensions;
-	static std::list<String>* smArchiveExtensions;
+	static std::list<str>* smZipExtensions;
+	static std::list<str>* smArchiveExtensions;
 
-	static bool IsZipFile(const String& pExtension);
-	static bool IsUncompressedArchive(const String& pExtension);
+	static bool IsZipFile(const str& pExtension);
+	static bool IsUncompressedArchive(const str& pExtension);
 
 	// Splits the filename into an archive name and a filename at
 	// the '/' pointed to by pSplitIndex, counting from right to
@@ -119,9 +119,9 @@ private:
 	//
 	// pSplitIndex = 0 returns pLeft = "C:/My/Current/Directory/Filename.file" and pRight = "".
 	// pSplitIndex = 1 returns pLeft = "C:/My/Current/Directory" and pFile = "Filename.file".
-	static bool SplitPath(const String& pFilename, String& pLeft, String& pRight, size_t pSplitIndex);
+	static bool SplitPath(const str& pFilename, str& pLeft, str& pRight, size_t pSplitIndex);
 
-	static bool FindValidArchiveName(const String& pArchivePrefix, String& pFullArchiveName);
+	static bool FindValidArchiveName(const str& pArchivePrefix, str& pFullArchiveName);
 
 	DiskFile* mDiskFile;
 	ArchiveFile* mArchiveFile;

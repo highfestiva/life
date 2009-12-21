@@ -12,7 +12,7 @@ namespace UiTbc
 {
 
 ListLayout::ListLayout(ListType pListType) :
-	mComponentTree(0, (Lepra::float64)(1 << 30), 1.0),
+	mComponentTree(0, (float64)(1 << 30), 1.0),
 	mContentSize(0,0),
 	mPosDX(0),
 	mPosDY(0),
@@ -34,8 +34,8 @@ Layout::Type ListLayout::GetType()
 
 void ListLayout::Add(Component* pComponent, int pParam1, int /*pParam2*/)
 {
-	Lepra::float64 lHalfHW = (Lepra::float64)GetPreferredHW(pComponent) / 2.0;
-	Lepra::float64 lPos    = (Lepra::float64)mListHW + lHalfHW;
+	float64 lHalfHW = (float64)GetPreferredHW(pComponent) / 2.0;
+	float64 lPos    = (float64)mListHW + lHalfHW;
 	mComponentTree.InsertObject(pComponent, pComponent, lPos, lHalfHW);
 
 	mNodeList.push_back(Node(pComponent, pParam1));
@@ -59,22 +59,22 @@ void ListLayout::AddChildAfter(Component* pChild, Component* pAfterThis, int pIn
 		mListHW += lHW;
 
 		// Get the size and position of the existing child.
-		Lepra::float64 lPrevHalfHW;
-		Lepra::float64 lPrevPos;
+		float64 lPrevHalfHW;
+		float64 lPrevPos;
 		mComponentTree.GetObjectSizeAndPos((*(*lTIter)).mComponent, lPrevPos, lPrevHalfHW);
 
 		// The position and the size of the new child.
-		Lepra::float64 lHalfHW = (Lepra::float64)lHW / 2.0;
-		Lepra::float64 lPos    = lPrevPos + lPrevHalfHW + lHalfHW;
+		float64 lHalfHW = (float64)lHW / 2.0;
+		float64 lPos    = lPrevPos + lPrevHalfHW + lHalfHW;
 		
-		Lepra::float64 lNewPos = lPos + lHalfHW;
+		float64 lNewPos = lPos + lHalfHW;
 
 		// Move all affected objects in the component tree.
 		NodeList::iterator lIter2(lChildIter);
 		++lIter2;
 		for (lIter2; lIter2 != mNodeList.end(); ++lIter2)
 		{
-			Lepra::float64 lNewHW = GetPreferredHW((*lIter2).mComponent);
+			float64 lNewHW = GetPreferredHW((*lIter2).mComponent);
 			mComponentTree.MoveObject((*lIter2).mComponent, lNewPos + lNewHW / 2.0, lNewHW / 2.0);
 			lNewPos += lNewHW;
 		}
@@ -93,8 +93,8 @@ void ListLayout::AddChildrenAfter(std::list<Component*>& pChildList, Component* 
 		NodeList::iterator lAfterThisIter(*lTIter);
 
 		// Get the size and position of the existing child.
-		Lepra::float64 lHalfHW;
-		Lepra::float64 lPos;
+		float64 lHalfHW;
+		float64 lPos;
 		mComponentTree.GetObjectSizeAndPos((*lAfterThisIter).mComponent, lPos, lHalfHW);
 		lPos += lHalfHW;
 
@@ -113,19 +113,19 @@ void ListLayout::AddChildrenAfter(std::list<Component*>& pChildList, Component* 
 			int lHW = GetPreferredHW(lChild);
 			mListHW += lHW;
 
-			lHalfHW = (Lepra::float64)lHW / 2.0;
+			lHalfHW = (float64)lHW / 2.0;
 
 			// Insert the new child in the component tree.
 			mComponentTree.InsertObject(lChild, lChild, lPos + lHalfHW, lHalfHW);
 
-			lPos += (Lepra::float64)lHW;
+			lPos += (float64)lHW;
 		}
 
 		
 		// Move all affected objects in the component tree.
 		for (lNext; lNext != mNodeList.end(); ++lNext)
 		{
-			Lepra::float64 lNewHW = GetPreferredHW((*lNext).mComponent);
+			float64 lNewHW = GetPreferredHW((*lNext).mComponent);
 			mComponentTree.MoveObject((*lNext).mComponent, lPos + lNewHW / 2.0, lNewHW / 2.0);
 			lPos += lNewHW;
 		}
@@ -152,8 +152,8 @@ void ListLayout::Remove(Component* pComponent)
 			Node& lNode = *lIter;
 			int lHW = GetPreferredHW(lNode.mComponent);
 			
-			Lepra::float64 lHalfHW = (Lepra::float64)lHW / 2.0;
-			Lepra::float64 lPos    = (Lepra::float64)mListHW + lHalfHW;
+			float64 lHalfHW = (float64)lHW / 2.0;
+			float64 lPos    = (float64)mListHW + lHalfHW;
 			mComponentTree.MoveObject(lNode.mComponent, lPos, lHalfHW);
 			mListHW += lHW;
 			i++;
@@ -161,7 +161,7 @@ void ListLayout::Remove(Component* pComponent)
 	}
 }
 
-Component* ListLayout::Find(const Lepra::String& pComponentName)
+Component* ListLayout::Find(const str& pComponentName)
 {
 	NodeList::iterator lIter;
 	for (lIter = mNodeList.begin(); lIter != mNodeList.end(); ++lIter)
@@ -183,16 +183,16 @@ int ListLayout::GetNumComponents() const
 
 Component* ListLayout::Find(int pScreenXY)
 {
-	Lepra::PixelCoords lOwnerPos(GetOwner()->GetScreenPos());
-	Lepra::float64 lPos = 0;
+	PixelCoords lOwnerPos(GetOwner()->GetScreenPos());
+	float64 lPos = 0;
 	
 	if (mListType == COLUMN)
 	{
-		lPos = (Lepra::float64)(pScreenXY - lOwnerPos.y - mPosDY);
+		lPos = (float64)(pScreenXY - lOwnerPos.y - mPosDY);
 	}
 	else // if (mListType == ROW)
 	{
-		lPos = (Lepra::float64)(pScreenXY - lOwnerPos.x - mPosDX);
+		lPos = (float64)(pScreenXY - lOwnerPos.x - mPosDX);
 	}
 
 	ComponentTree::ObjectList lList;
@@ -214,7 +214,7 @@ Component* ListLayout::Find(int pScreenXY)
 	for (lIter = lList.begin(); lIter != lList.end(); ++lIter)
 	{
 		Component* lComp = *lIter;
-		Lepra::PixelRect lRect(lComp->GetScreenRect());
+		PixelRect lRect(lComp->GetScreenRect());
 
 		if (mListType == COLUMN && lRect.IsInside(lRect.GetCenterX(), pScreenXY) == true ||
 		    mListType == ROW && lRect.IsInside(pScreenXY, lRect.GetCenterY()) == true)
@@ -228,7 +228,7 @@ Component* ListLayout::Find(int pScreenXY)
 
 void ListLayout::Find(ComponentList& pComponents, int pScreenXY1, int pScreenXY2)
 {
-	Lepra::PixelCoords lOwnerPos(GetOwner()->GetScreenPos());
+	PixelCoords lOwnerPos(GetOwner()->GetScreenPos());
 
 	if (pScreenXY1 > pScreenXY2)
 	{
@@ -237,18 +237,18 @@ void ListLayout::Find(ComponentList& pComponents, int pScreenXY1, int pScreenXY2
 		pScreenXY2 = lTemp;
 	}
 
-	Lepra::float64 lUpper = 0;
-	Lepra::float64 lLower = 0;
+	float64 lUpper = 0;
+	float64 lLower = 0;
 	
 	if (mListType == COLUMN)
 	{
-		lUpper = (Lepra::float64)(pScreenXY1 - lOwnerPos.y - mPosDY);
-		lLower = (Lepra::float64)(pScreenXY2 - lOwnerPos.y - mPosDY);
+		lUpper = (float64)(pScreenXY1 - lOwnerPos.y - mPosDY);
+		lLower = (float64)(pScreenXY2 - lOwnerPos.y - mPosDY);
 	}
 	else // if (mListType == ROW)
 	{
-		lUpper = (Lepra::float64)(pScreenXY1 - lOwnerPos.x - mPosDX);
-		lLower = (Lepra::float64)(pScreenXY2 - lOwnerPos.x - mPosDX);
+		lUpper = (float64)(pScreenXY1 - lOwnerPos.x - mPosDX);
+		lLower = (float64)(pScreenXY2 - lOwnerPos.x - mPosDX);
 	}
 
 	mComponentTree.GetObjects(pComponents, (lLower + lUpper) * 0.5, (lLower - lUpper) * 0.5);
@@ -260,7 +260,7 @@ Component* ListLayout::FindIndex(int pIndex)
 
 	if (pIndex >= 0 && pIndex < (int)mNodeList.size())
 	{
-		lComponent = (*Lepra::ListUtil::FindByIndex(mNodeList, pIndex)).mComponent;
+		lComponent = (*ListUtil::FindByIndex(mNodeList, pIndex)).mComponent;
 	}
 
 	return lComponent;
@@ -353,7 +353,7 @@ void ListLayout::UpdateLayout()
 	mContentSize.x = 0;
 	mContentSize.y = 0;
 
-	Lepra::PixelCoords lOwnerSize(GetOwner()->GetSize());
+	PixelCoords lOwnerSize(GetOwner()->GetSize());
 	NodeList::iterator lIter;
 
 	if (mListType == COLUMN)
@@ -361,7 +361,7 @@ void ListLayout::UpdateLayout()
 		for (lIter = mNodeList.begin(); lIter != mNodeList.end(); ++lIter)
 		{
 			Node& lNode = *lIter;
-			Lepra::PixelCoords lSize(lNode.mComponent->GetPreferredWidth(true), lNode.mComponent->GetPreferredHeight());
+			PixelCoords lSize(lNode.mComponent->GetPreferredWidth(true), lNode.mComponent->GetPreferredHeight());
 
 			lSize.x += lNode.mIndentationLevel * mIndentationSize;
 
@@ -383,7 +383,7 @@ void ListLayout::UpdateLayout()
 		{
 			Node& lNode = *lIter;
 			lNode.mComponent->SetPos(mPosDX + lNode.mIndentationLevel * mIndentationSize, y);
-			Lepra::PixelCoords lSize(lNode.mComponent->GetPreferredSize());
+			PixelCoords lSize(lNode.mComponent->GetPreferredSize());
 
 			lSize.x = mContentSize.x;
 			lNode.mComponent->SetSize(lSize);
@@ -396,7 +396,7 @@ void ListLayout::UpdateLayout()
 		for (lIter = mNodeList.begin(); lIter != mNodeList.end(); ++lIter)
 		{
 			Node& lNode = *lIter;
-			Lepra::PixelCoords lSize(lNode.mComponent->GetPreferredWidth(), lNode.mComponent->GetPreferredHeight(true));
+			PixelCoords lSize(lNode.mComponent->GetPreferredWidth(), lNode.mComponent->GetPreferredHeight(true));
 
 			lSize.y += lNode.mIndentationLevel * mIndentationSize;
 
@@ -418,7 +418,7 @@ void ListLayout::UpdateLayout()
 		{
 			Node& lNode = *lIter;
 			lNode.mComponent->SetPos(x, mPosDY + lNode.mIndentationLevel * mIndentationSize);
-			Lepra::PixelCoords lSize(lNode.mComponent->GetPreferredSize());
+			PixelCoords lSize(lNode.mComponent->GetPreferredSize());
 
 			lSize.y = mContentSize.y;
 			lNode.mComponent->SetSize(lSize);
@@ -428,17 +428,17 @@ void ListLayout::UpdateLayout()
 	}
 }
 
-Lepra::PixelCoords ListLayout::GetPreferredSize(bool /*pForceAdaptive*/)
+PixelCoords ListLayout::GetPreferredSize(bool /*pForceAdaptive*/)
 {
-	return Lepra::PixelCoords(0, 0);
+	return PixelCoords(0, 0);
 }
 
-Lepra::PixelCoords ListLayout::GetMinSize()
+PixelCoords ListLayout::GetMinSize()
 {
-	return Lepra::PixelCoords(0, 0);
+	return PixelCoords(0, 0);
 }
 
-Lepra::PixelCoords ListLayout::GetContentSize()
+PixelCoords ListLayout::GetContentSize()
 {
 	return mContentSize;
 }

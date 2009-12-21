@@ -146,14 +146,14 @@ void AnimatedGeometry::UpdateAnimatedGeometry()
 			const unsigned lVectorIndex = lGroup.mVectorIndexArray[y] * 3;
 			assert(lVectorIndex+2 < mOriginalGeometry->GetVertexCount()*3);
 
-			const Lepra::Vector3DF v(lOriginalVData[lVectorIndex+0], lOriginalVData[lVectorIndex+1], lOriginalVData[lVectorIndex+2]);
-			const Lepra::Vector3DF n(lOriginalNData[lVectorIndex+0], lOriginalNData[lVectorIndex+1], lOriginalNData[lVectorIndex+2]);
-			Lepra::Vector3DF lWeightedVertex;
-			Lepra::Vector3DF lWeightedNormal;
+			const Vector3DF v(lOriginalVData[lVectorIndex+0], lOriginalVData[lVectorIndex+1], lOriginalVData[lVectorIndex+2]);
+			const Vector3DF n(lOriginalNData[lVectorIndex+0], lOriginalNData[lVectorIndex+1], lOriginalNData[lVectorIndex+2]);
+			Vector3DF lWeightedVertex;
+			Vector3DF lWeightedNormal;
 			for (int z = 0; z < lGroup.mBoneCount; ++z, ++lVectorWeightIndex)
 			{
 				const int lBoneIndex = lGroup.mBoneIndexArray[z];
-				const Lepra::TransformationF& lTransform = mBones->GetRelativeBoneTransformation(lBoneIndex);
+				const TransformationF& lTransform = mBones->GetRelativeBoneTransformation(lBoneIndex);
 				const float lWeight = lGroup.mVectorWeightArray[lVectorWeightIndex];
 				lWeightedVertex += lTransform.Transform(v)*lWeight;
 				lWeightedNormal += lTransform.Transform(n)*lWeight;
@@ -219,12 +219,12 @@ float* AnimatedGeometry::GetUVData(unsigned int pUVSet) const
 	return mOriginalGeometry->GetUVData(pUVSet);
 }
 
-Lepra::uint32* AnimatedGeometry::GetIndexData() const
+uint32* AnimatedGeometry::GetIndexData() const
 {
 	return mOriginalGeometry->GetIndexData();
 }
 
-Lepra::uint8* AnimatedGeometry::GetColorData() const
+uint8* AnimatedGeometry::GetColorData() const
 {
 	return mOriginalGeometry->GetColorData();
 }

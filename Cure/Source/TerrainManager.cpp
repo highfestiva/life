@@ -18,7 +18,7 @@ namespace Cure
 
 
 TerrainManager::TerrainManager(ResourceManager* pResourceManager):
-	mTerrainLock(new Lepra::Lock()),
+	mTerrainLock(new Lock()),
 	mResourceManager(pResourceManager),
 	mLoadPatchOkCount(0),
 	mLoadPatchErrorCount(0),
@@ -54,7 +54,7 @@ void TerrainManager::Clear()
 TBC::TerrainPatch* TerrainManager::CreatePatch(const PatchArea&, float)
 {
 	// TODO: fill in the construction parameters correct.
-	const Lepra::Vector2D<int> lIntegerArea(3, 4);
+	const Vector2D<int> lIntegerArea(3, 4);
 	TBC::TerrainPatch* lPatch = new TBC::TerrainPatch(lIntegerArea);
 	return (lPatch);
 }
@@ -66,7 +66,7 @@ void TerrainManager::DeletePatch(TBC::TerrainPatch* pPatch)
 
 
 
-TerrainManager::CameraId TerrainManager::AddCamera(const Lepra::Vector3DF& pPosition, float pVisibleRadius)
+TerrainManager::CameraId TerrainManager::AddCamera(const Vector3DF& pPosition, float pVisibleRadius)
 {
 	CameraId lCameraId = mCameraIdManager.GetFreeId();
 	mCameraTable.Insert(lCameraId, CameraInfo(pPosition, pVisibleRadius));
@@ -81,7 +81,7 @@ void TerrainManager::RemoveCamera(CameraId pCameraId)
 	UpdatePatchTree();
 }
 
-void TerrainManager::MoveCamera(CameraId pCameraId, const Lepra::Vector3DF& pPosition)
+void TerrainManager::MoveCamera(CameraId pCameraId, const Vector3DF& pPosition)
 {
 	CameraTable::Iterator x = mCameraTable.Find(pCameraId);
 	if (x != mCameraTable.End())
@@ -112,7 +112,7 @@ void TerrainManager::UpdatePatchTree()
 	// 2.2. Find patches that are not yet loaded, but should be loaded. TODO: implement!
 	// 3. Remove the patches and functions that are still marked as "not used".  TODO: implement!
 
-	Lepra::ScopeLock lLock(mTerrainLock);
+	ScopeLock lLock(mTerrainLock);
 
 	// Assume all patches+functions are "not used".
 	mPatchManager->MarkAllDirty();
@@ -123,7 +123,7 @@ void TerrainManager::UpdatePatchTree()
 	for (; x != mCameraTable.End(); ++x)
 	{
 		const CameraInfo& lCameraInfo = x.GetObject();
-		const Lepra::Vector3DF& lCameraPosition = lCameraInfo.mPosition;
+		const Vector3DF& lCameraPosition = lCameraInfo.mPosition;
 		const float lLoadRadius = lCameraInfo.mVisibleRadius;
 
 		// Walk through all patches+functions and mark those near this camera as "in use".
@@ -153,7 +153,7 @@ void TerrainManager::TerrainPatchLoadCallback(UserPhysicalTerrainResource* pLoad
 	if (pLoadedResource->GetConstResource()->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
 		log_adebug("Terrain patch asynchronously loaded.");
-		Lepra::ScopeLock lLock(mTerrainLock);
+		ScopeLock lLock(mTerrainLock);
 		// TODO: insert patch into tree.
 		mPatchManager->AddPatch(pLoadedResource);
 		++mLoadPatchOkCount;

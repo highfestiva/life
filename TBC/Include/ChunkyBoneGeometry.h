@@ -88,9 +88,9 @@ public:
 	bool CreateJoint(ChunkyPhysics* pStructure, PhysicsManager* pPhysics, unsigned pPhysicsFps);
 	virtual bool CreateBody(PhysicsManager* pPhysics, bool pIsRoot, PhysicsManager::TriggerListener* pTrigListener,
 		PhysicsManager::ForceFeedbackListener* pForceListener, PhysicsManager::BodyType pType,
-		const Lepra::TransformationF& pTransform) = 0;
+		const TransformationF& pTransform) = 0;
 	virtual bool CreateTrigger(PhysicsManager* pPhysics, PhysicsManager::TriggerListener* pTrigListener,
-		const Lepra::TransformationF& pTransform) = 0;
+		const TransformationF& pTransform) = 0;
 	void RemovePhysics(PhysicsManager* pPhysics);
 
 	ChunkyBoneGeometry* GetParent() const;
@@ -107,7 +107,7 @@ public:
 	virtual unsigned GetChunkySize(const void* pData = 0) const;
 	virtual void SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const;
 
-	virtual Lepra::Vector3DF GetShapeSize() const = 0;
+	virtual Vector3DF GetShapeSize() const = 0;
 
 protected:
 	virtual void LoadChunkyData(ChunkyPhysics* pStructure, const void* pData);
@@ -133,20 +133,20 @@ public:
 	ChunkyBoneCapsule(const BodyData& pBodyData);
 	bool CreateBody(PhysicsManager* pPhysics, bool pIsRoot, PhysicsManager::TriggerListener* pTrigListener,
 		PhysicsManager::ForceFeedbackListener* pForceListener, PhysicsManager::BodyType pType,
-		const Lepra::TransformationF& pTransform);
+		const TransformationF& pTransform);
 	bool CreateTrigger(PhysicsManager* pPhysics, PhysicsManager::TriggerListener* pTrigListener,
-		const Lepra::TransformationF& pTransform);
+		const TransformationF& pTransform);
 
 	unsigned GetChunkySize(const void* pData = 0) const;
 	void SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const;
 
 private:
-	Lepra::Vector3DF GetShapeSize() const;
+	Vector3DF GetShapeSize() const;
 	void LoadChunkyData(ChunkyPhysics* pStructure, const void* pData);
 	GeometryType GetGeometryType() const;
 
-	Lepra::float32 mRadius;
-	Lepra::float32 mLength;
+	float32 mRadius;
+	float32 mLength;
 };
 
 
@@ -158,19 +158,19 @@ public:
 	ChunkyBoneSphere(const BodyData& pBodyData);
 	bool CreateBody(PhysicsManager* pPhysics, bool pIsRoot, PhysicsManager::TriggerListener* pTrigListener,
 		PhysicsManager::ForceFeedbackListener* pForceListener, PhysicsManager::BodyType pType,
-		const Lepra::TransformationF& pTransform);
+		const TransformationF& pTransform);
 	bool CreateTrigger(PhysicsManager* pPhysics, PhysicsManager::TriggerListener* pTrigListener,
-		const Lepra::TransformationF& pTransform);
+		const TransformationF& pTransform);
 
 	unsigned GetChunkySize(const void* pData = 0) const;
 	void SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const;
 
 private:
-	Lepra::Vector3DF GetShapeSize() const;
+	Vector3DF GetShapeSize() const;
 	void LoadChunkyData(ChunkyPhysics* pStructure, const void* pData);
 	GeometryType GetGeometryType() const;
 
-	Lepra::float32 mRadius;
+	float32 mRadius;
 };
 
 
@@ -182,19 +182,19 @@ public:
 	ChunkyBoneBox(const BodyData& pBodyData);
 	bool CreateBody(PhysicsManager* pPhysics, bool pIsRoot, PhysicsManager::TriggerListener* pTrigListener,
 		PhysicsManager::ForceFeedbackListener* pForceListener, PhysicsManager::BodyType pType,
-		const Lepra::TransformationF& pTransform);
+		const TransformationF& pTransform);
 	bool CreateTrigger(PhysicsManager* pPhysics, PhysicsManager::TriggerListener* pTrigListener,
-		const Lepra::TransformationF& pTransform);
+		const TransformationF& pTransform);
 
 	unsigned GetChunkySize(const void* pData = 0) const;
 	void SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const;
 
 private:
-	Lepra::Vector3DF GetShapeSize() const;
+	Vector3DF GetShapeSize() const;
 	void LoadChunkyData(ChunkyPhysics* pStructure, const void* pData);
 	GeometryType GetGeometryType() const;
 
-	Lepra::Vector3DF mSize;
+	Vector3DF mSize;
 };
 
 
@@ -207,23 +207,23 @@ public:
 	virtual ~ChunkyBoneMesh();
 	bool CreateBody(PhysicsManager* pPhysics, bool pIsRoot, PhysicsManager::TriggerListener* pTrigListener,
 		PhysicsManager::ForceFeedbackListener* pForceListener, PhysicsManager::BodyType pType,
-		const Lepra::TransformationF& pTransform);
+		const TransformationF& pTransform);
 	bool CreateTrigger(PhysicsManager* pPhysics, PhysicsManager::TriggerListener* pTrigListener,
-		const Lepra::TransformationF& pTransform);
+		const TransformationF& pTransform);
 
 	unsigned GetChunkySize(const void* pData = 0) const;
 	void SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const;
 
 private:
-	Lepra::Vector3DF GetShapeSize() const;
+	Vector3DF GetShapeSize() const;
 	void LoadChunkyData(ChunkyPhysics* pStructure, const void* pData);
 	void Clear();
 	GeometryType GetGeometryType() const;
 
-	Lepra::uint32 mVertexCount;
+	uint32 mVertexCount;
 	float* mVertices;
-	Lepra::uint32 mTriangleCount;
-	Lepra::uint32* mIndices;
+	uint32 mTriangleCount;
+	uint32* mIndices;
 };
 
 

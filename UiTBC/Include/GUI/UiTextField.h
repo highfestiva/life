@@ -42,37 +42,37 @@ public:
 	// pTopParent points to the window that contains this textfield.
 	// If this pointer is null the popup list feature will be disabled.
 	// The popup list will be a child of this parent, in an upper layer.
-	TextField(Component* pTopParent, const Lepra::String& pName);
+	TextField(Component* pTopParent, const str& pName);
 	TextField(Component* pTopParent, 
-		  unsigned pBorderStyle, int pBorderWidth, const Lepra::Color& pColor,
-		  const Lepra::String& pName);
+		  unsigned pBorderStyle, int pBorderWidth, const Color& pColor,
+		  const str& pName);
 	TextField(Component* pTopParent, 
 		  unsigned pBorderStyle, int pBorderWidth, Painter::ImageID pImageID,
-		  const Lepra::String& pName);
+		  const str& pName);
 	TextField(Component* pTopParent, 
-		  const Lepra::Color& pColor, const Lepra::String& pName);
+		  const Color& pColor, const str& pName);
 	TextField(Component* pTopParent, 
-		  Painter::ImageID pImageID, const Lepra::String& pName);
+		  Painter::ImageID pImageID, const str& pName);
 	virtual ~TextField();
 
 	Component* GetTopParent() const;
 	void SetTopParent(Component* pTopParent);
 
 	void SetIsReadOnly(bool pIsReadOnly);
-	void SetPasswordCharacter(Lepra::tchar pCharacter);
+	void SetPasswordCharacter(tchar pCharacter);
 
-	Lepra::String GetVisibleText() const;
-	void SetText(const Lepra::String& pText);
-	const Lepra::String& GetText() const;
+	str GetVisibleText() const;
+	void SetText(const str& pText);
+	const str& GetText() const;
 
 	void SetMarker(Painter::ImageID pImageID);
-	void SetMarkerBlinkRate(Lepra::float64 pVisibleTime, Lepra::float64 pInvisibleTime);
+	void SetMarkerBlinkRate(float64 pVisibleTime, float64 pInvisibleTime);
 	void SetMarkerPosition(size_t pIndex);
 	size_t GetMarkerPosition() const;
 
 	virtual void Repaint(Painter* pPainter);
 
-	virtual bool OnChar(Lepra::tchar pChar);
+	virtual bool OnChar(tchar pChar);
 	virtual bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
 	virtual void OnIdle();
 
@@ -118,17 +118,17 @@ protected:
 	void ForceRepaint();
 
 private:
-	Lepra::String mText;
+	str mText;
 	bool mIsReadOnly;
-	Lepra::tchar mPasswordCharacter;
+	tchar mPasswordCharacter;
 	int mTextX;
 
 	Painter::ImageID mMarkerID;
 	size_t mMarkerPos;
 	bool mMarkerVisible;
-	Lepra::Timer mMarkerTimer;
-	Lepra::float64 mMarkerVisibleTime;
-	Lepra::float64 mMarkerInvisibleTime;
+	Timer mMarkerTimer;
+	float64 mMarkerVisibleTime;
+	float64 mMarkerInvisibleTime;
 
 	bool mUpdateMarkerPosOnNextRepaint;
 	int mClickX;

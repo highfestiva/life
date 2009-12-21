@@ -114,8 +114,8 @@ public:
 		{
 		}
 
-		BasicMaterialSettings(Lepra::Vector3DF pAmbient, Lepra::Vector3DF pDiffuse,
-			Lepra::Vector3DF pSpecular, float pShininess,
+		BasicMaterialSettings(Vector3DF pAmbient, Vector3DF pDiffuse,
+			Vector3DF pSpecular, float pShininess,
 			float pAlpha, bool pSmooth):
 			mAmbient(pAmbient),
 			mDiffuse(pDiffuse),
@@ -131,8 +131,8 @@ public:
 			mDiffuse.Set(pRed, pGreen, pBlue);
 		}
 
-		void Set(Lepra::Vector3DF pAmbient, Lepra::Vector3DF pDiffuse,
-			Lepra::Vector3DF pSpecular, float pShininess,
+		void Set(Vector3DF pAmbient, Vector3DF pDiffuse,
+			Vector3DF pSpecular, float pShininess,
 			float pAlpha, bool pSmooth)
 		{
 			mAmbient	= pAmbient;
@@ -143,9 +143,9 @@ public:
 			mSmooth		= pSmooth;
 		}
 
-		Lepra::Vector3DF mAmbient;
-		Lepra::Vector3DF mDiffuse;
-		Lepra::Vector3DF mSpecular;
+		Vector3DF mAmbient;
+		Vector3DF mDiffuse;
+		Vector3DF mSpecular;
 		float mShininess;	// Specular "exponent".
 		float mAlpha;	// Used on blended (and transparent? materials.
 		bool mSmooth;	// Smooth shaded or flat shaded?
@@ -180,8 +180,8 @@ public:
 
 	virtual float*         GetVertexData() const                   = 0;
 	virtual float*         GetUVData(unsigned int pUVSet) const   = 0;
-	virtual Lepra::uint32* GetIndexData() const                    = 0;
-	virtual Lepra::uint8*  GetColorData() const                    = 0;
+	virtual uint32* GetIndexData() const                    = 0;
+	virtual uint8*  GetColorData() const                    = 0;
 
 	virtual float* GetNormalData() const;
 	float*         GetSurfaceNormalData() const;
@@ -192,7 +192,7 @@ public:
 	// 0 <= pTriangle < GetNumTriangles().
 	// Given the triangle index (pTriangle), the function returns the three
 	// indices by setting the values in pIndices.
-	void GetTriangleIndices(int pTriangle, Lepra::uint32 pIndices[3]);
+	void GetTriangleIndices(int pTriangle, uint32 pIndices[3]);
 
 	// Deletes the corresponding arrays and cleans stuff up.
 	virtual void ClearVertexNormalData();
@@ -244,9 +244,9 @@ public:
 	size_t GetExtraData() const;
 	void SetExtraData(size_t pExtraData);
 
-	void SetTransformation(const Lepra::TransformationF& pTransformation);
-	const Lepra::TransformationF& GetBaseTransformation() const;
-	virtual const Lepra::TransformationF& GetTransformation() const;
+	void SetTransformation(const TransformationF& pTransformation);
+	const TransformationF& GetBaseTransformation() const;
+	virtual const TransformationF& GetTransformation() const;
 	bool GetTransformationChanged() const { return CheckFlag(TRANSFORMATION_CHANGED); }
 	void SetTransformationChanged(bool pTransformationChanged) { SetFlag(TRANSFORMATION_CHANGED, pTransformationChanged); }
 
@@ -284,7 +284,7 @@ public:
 	// better place to put this code.
 	void SetUVAnimator(BoneAnimator* pUVAnimator);
 	BoneAnimator* GetUVAnimator();
-	const Lepra::TransformationF& GetUVTransform();
+	const TransformationF& GetUVTransform();
 
 protected:
 	void SetSurfaceNormalData(float* pSurfaceNormalData);
@@ -326,12 +326,12 @@ private:
 		TRANSFORMATION_CHANGED       = (1 << 16),
 	};
 
-	void SetFlag(Lepra::uint32 pFlag, bool pValue) { if(pValue) SetFlag(pFlag); else ClearFlag(pFlag); }
-	void SetFlag(Lepra::uint32 pFlag) { mFlags |= pFlag; }
-	void ClearFlag(Lepra::uint32 pFlag) { mFlags &= (~pFlag); }
-	bool CheckFlag(Lepra::uint32 pFlag) const { return (mFlags & pFlag) != 0; }
+	void SetFlag(uint32 pFlag, bool pValue) { if(pValue) SetFlag(pFlag); else ClearFlag(pFlag); }
+	void SetFlag(uint32 pFlag) { mFlags |= pFlag; }
+	void ClearFlag(uint32 pFlag) { mFlags &= (~pFlag); }
+	bool CheckFlag(uint32 pFlag) const { return (mFlags & pFlag) != 0; }
 
-	Lepra::uint32 mFlags;
+	uint32 mFlags;
 
 	BasicMaterialSettings mMaterialSettings;
 
@@ -361,7 +361,7 @@ private:
 
 	unsigned int mLastFrameVisible;
 
-	Lepra::TransformationF mTransformation;
+	TransformationF mTransformation;
 
 	BoneAnimator* mUVAnimator;
 

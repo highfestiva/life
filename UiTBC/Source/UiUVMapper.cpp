@@ -13,9 +13,9 @@ namespace UiTbc
 {
 
 bool UVMapper::ApplyPlanarMapping(TBC::GeometryBase* pGeometry, unsigned int pUVSet, 
-				  const Lepra::Vector2DD& pUVOffset,
-				  const Lepra::Vector3DD& pPlaneX, 
-				  const Lepra::Vector3DD& pPlaneY)
+				  const Vector2DD& pUVOffset,
+				  const Vector3DD& pPlaneX, 
+				  const Vector3DD& pPlaneY)
 {
 	const double lEpsilon = 1e-15;
 
@@ -39,7 +39,7 @@ bool UVMapper::ApplyPlanarMapping(TBC::GeometryBase* pGeometry, unsigned int pUV
 		{
 			int lVIndex = i * 3;
 			int lUVIndex = i * 2;
-			Lepra::Vector3DD lV((double)lVertexData[lVIndex + 0],
+			Vector3DD lV((double)lVertexData[lVIndex + 0],
 					     (double)lVertexData[lVIndex + 1],
 					     (double)lVertexData[lVIndex + 2]);
 			
@@ -54,18 +54,18 @@ bool UVMapper::ApplyPlanarMapping(TBC::GeometryBase* pGeometry, unsigned int pUV
 
 bool UVMapper::ApplyCubeMapping(TBC::GeometryBase* pGeometry, unsigned int pUVSet, 
 				float pScale,
-				const Lepra::Vector2DD& pUVOffsetLeft,
-				const Lepra::Vector2DD& pUVOffsetRight,
-				const Lepra::Vector2DD& pUVOffsetTop,
-				const Lepra::Vector2DD& pUVOffsetBottom,
-				const Lepra::Vector2DD& pUVOffsetFront,
-				const Lepra::Vector2DD& pUVOffsetBack)
+				const Vector2DD& pUVOffsetLeft,
+				const Vector2DD& pUVOffsetRight,
+				const Vector2DD& pUVOffsetTop,
+				const Vector2DD& pUVOffsetBottom,
+				const Vector2DD& pUVOffsetFront,
+				const Vector2DD& pUVOffsetBack)
 {
 	pGeometry->GenerateSurfaceNormalData();
 
 	float* lVertexData = pGeometry->GetVertexData();
 	float* lSurfaceNormal = pGeometry->GetSurfaceNormalData();
-	Lepra::uint32* lIndex = pGeometry->GetIndexData();
+	uint32* lIndex = pGeometry->GetIndexData();
 	float* lUVData = pGeometry->GetUVData(pUVSet);
 
 	pScale = 1.0f / pScale;
@@ -93,9 +93,9 @@ bool UVMapper::ApplyCubeMapping(TBC::GeometryBase* pGeometry, unsigned int pUVSe
 			float lAbsY = abs(y);
 			float lAbsZ = abs(z);
 
-			Lepra::Vector3DF lXAxis;
-			Lepra::Vector3DF lYAxis;
-			Lepra::Vector2DF lUVOffset;
+			Vector3DF lXAxis;
+			Vector3DF lYAxis;
+			Vector2DF lUVOffset;
 
 			if (lAbsX > lAbsY && lAbsX > lAbsZ)
 			{
@@ -143,13 +143,13 @@ bool UVMapper::ApplyCubeMapping(TBC::GeometryBase* pGeometry, unsigned int pUVSe
 				lXAxis.Set(1.0f, 0, 0);
 			}
 
-			Lepra::Vector3DF lV1(lVertexData[lV1Index + 0],
+			Vector3DF lV1(lVertexData[lV1Index + 0],
 			                     lVertexData[lV1Index + 1],
 			                     lVertexData[lV1Index + 2]);
-			Lepra::Vector3DF lV2(lVertexData[lV2Index + 0],
+			Vector3DF lV2(lVertexData[lV2Index + 0],
 			                     lVertexData[lV2Index + 1],
 			                     lVertexData[lV2Index + 2]);
-			Lepra::Vector3DF lV3(lVertexData[lV3Index + 0],
+			Vector3DF lV3(lVertexData[lV3Index + 0],
 			                     lVertexData[lV3Index + 1],
 			                     lVertexData[lV3Index + 2]);
 			

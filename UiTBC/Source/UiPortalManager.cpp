@@ -13,21 +13,21 @@ namespace UiTbc
 {
 
 TBC::PortalManager::Portal* PortalManager::NewPortal(int pNumVertices,
-						     Lepra::Vector3DF* pVertex,
+						     Vector3DF* pVertex,
 						     Cell* pCell1,
 						     Cell* pCell2)
 {
 	return new Portal(pNumVertices, pVertex, pCell1, pCell2);
 }
 
-TBC::PortalManager::Cell* PortalManager::NewCell(const Lepra::String& pCellID, 
-						 const Lepra::String& pCellDescription,
+TBC::PortalManager::Cell* PortalManager::NewCell(const str& pCellID, 
+						 const str& pCellDescription,
 						 PortalManager* pPortalManager)
 {
 	return new Cell(pCellID, pCellDescription, pPortalManager);
 }
 
-void PortalManager::TraverseGraph(Renderer* pRenderer, const Lepra::String& pCellID)
+void PortalManager::TraverseGraph(Renderer* pRenderer, const str& pCellID)
 {
 	CellTable::Iterator lIter = mCellTable.Find(pCellID);
 	if (lIter == mCellTable.End())
@@ -40,9 +40,9 @@ void PortalManager::TraverseGraph(Renderer* pRenderer, const Lepra::String& pCel
 	lCell->Traverse(pRenderer, pRenderer->GetClippingRect());
 }
 
-void PortalManager::Portal::Traverse(Renderer* pRenderer, const Lepra::PixelRect& pRect, Cell* pFrom)
+void PortalManager::Portal::Traverse(Renderer* pRenderer, const PixelRect& pRect, Cell* pFrom)
 {
-	Lepra::PixelRect lRect(pRenderer->GetBoundingRect(mVertex, mNumVertices));
+	PixelRect lRect(pRenderer->GetBoundingRect(mVertex, mNumVertices));
 	bool lFront = pRenderer->IsFacingFront(mVertex, mNumVertices);
 
 	// Stop the recursion if we try to traverse this portal from the "wrong" direction.
@@ -59,7 +59,7 @@ void PortalManager::Portal::Traverse(Renderer* pRenderer, const Lepra::PixelRect
 	}
 }
 
-void PortalManager::Cell::Traverse(Renderer* pRenderer, const Lepra::PixelRect& pRect)
+void PortalManager::Cell::Traverse(Renderer* pRenderer, const PixelRect& pRect)
 {
 	// If not already visited, tag all geometry. Since two cells can be attached 
 	// to each other with more than one portal, we can't just return if the cell
@@ -89,7 +89,7 @@ void PortalManager::Cell::Traverse(Renderer* pRenderer, const Lepra::PixelRect& 
 }
 
 PortalManager::Portal::Portal(int pNumVertices,
-			      Lepra::Vector3DF* pVertex,
+			      Vector3DF* pVertex,
 			      Cell* pCell1,
 			      Cell* pCell2) :
 	TBC::PortalManager::Portal(pNumVertices, pVertex, pCell1, pCell2)
@@ -101,8 +101,8 @@ PortalManager::Portal::~Portal()
 }
 
 
-PortalManager::Cell::Cell(const Lepra::String& pCellID, 
-			  const Lepra::String& pCellDescription,
+PortalManager::Cell::Cell(const str& pCellID, 
+			  const str& pCellDescription,
 			  PortalManager* pPortalManager) :
 	TBC::PortalManager::Cell(pCellID, pCellDescription, pPortalManager),
 	mLastFrameVisible(-1)

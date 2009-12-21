@@ -23,19 +23,19 @@ class RectComponent : public Component
 {
 public:
 	
-	RectComponent(const Lepra::String& pName,
+	RectComponent(const str& pName,
 				  Layout* pLayout = 0);
-	RectComponent(const Lepra::Color& pColor,
-				  const Lepra::String& pName,
+	RectComponent(const Color& pColor,
+				  const str& pName,
 				  Layout* pLayout = 0);
-	RectComponent(const Lepra::Color& pTopLeftColor,
-				  const Lepra::Color& pTopRightColor,
-				  const Lepra::Color& pBottomRightColor,
-				  const Lepra::Color& pBottomLeftColor,
-				  const Lepra::String& pName,
+	RectComponent(const Color& pTopLeftColor,
+				  const Color& pTopRightColor,
+				  const Color& pBottomRightColor,
+				  const Color& pBottomLeftColor,
+				  const str& pName,
 				  Layout* pLayout = 0);
 	RectComponent(Painter::ImageID pImageID,
-				  const Lepra::String& pName,
+				  const str& pName,
 				  Layout* pLayout = 0);
 
 	virtual ~RectComponent();
@@ -44,18 +44,18 @@ public:
 	virtual bool IsOver(int pScreenX, int pScreenY);
 
 	inline void SetImage(Painter::ImageID pImageID);
-	inline void SetColor(const Lepra::Color& pColor);
-	inline void SetColor(const Lepra::Color& pTopLeftColor,
-			     const Lepra::Color& pTopRightColor,
-			     const Lepra::Color& pBottomRightColor,
-			     const Lepra::Color& pBottomLeftColor);
+	inline void SetColor(const Color& pColor);
+	inline void SetColor(const Color& pTopLeftColor,
+			     const Color& pTopRightColor,
+			     const Color& pBottomRightColor,
+			     const Color& pBottomLeftColor);
 
 	inline Painter::ImageID GetImage();
-	inline Lepra::Color GetColor();
-	inline void GetColor(Lepra::Color& pTopLeftColor,
-			     Lepra::Color& pTopRightColor,
-			     Lepra::Color& pBottomRightColor,
-			     Lepra::Color& pBottomLeftColor);
+	inline Color GetColor();
+	inline void GetColor(Color& pTopLeftColor,
+			     Color& pTopRightColor,
+			     Color& pBottomRightColor,
+			     Color& pBottomLeftColor);
 
 	inline virtual Component::Type GetType();
 
@@ -70,7 +70,7 @@ protected:
 
 private:
 
-	Lepra::Color mColor[4];
+	Color mColor[4];
 	bool mShaded;
 	bool mHollow;
 	bool mBehaveSolid;
@@ -84,17 +84,17 @@ void RectComponent::SetImage(Painter::ImageID pImageID)
 	SetNeedsRepaint(true);
 }
 
-void RectComponent::SetColor(const Lepra::Color& pColor)
+void RectComponent::SetColor(const Color& pColor)
 {
 	mShaded = false;
 	SetNeedsRepaint(mColor[0] != pColor);
 	mColor[0] = pColor;
 }
 
-void RectComponent::SetColor(const Lepra::Color& pTopLeftColor,
-			     const Lepra::Color& pTopRightColor,
-			     const Lepra::Color& pBottomRightColor,
-			     const Lepra::Color& pBottomLeftColor)
+void RectComponent::SetColor(const Color& pTopLeftColor,
+			     const Color& pTopRightColor,
+			     const Color& pBottomRightColor,
+			     const Color& pBottomLeftColor)
 {
 	mShaded = true;
 	SetNeedsRepaint(mColor[0] != pTopLeftColor || mColor[1] != pTopRightColor || 
@@ -110,15 +110,15 @@ Painter::ImageID RectComponent::GetImage()
 	return mImageID;
 }
 
-Lepra::Color RectComponent::GetColor()
+Color RectComponent::GetColor()
 {
 	return mColor[0];
 }
 
-void RectComponent::GetColor(Lepra::Color& pTopLeftColor,
-			     Lepra::Color& pTopRightColor,
-			     Lepra::Color& pBottomRightColor,
-			     Lepra::Color& pBottomLeftColor)
+void RectComponent::GetColor(Color& pTopLeftColor,
+			     Color& pTopRightColor,
+			     Color& pBottomRightColor,
+			     Color& pBottomLeftColor)
 {
 	pTopLeftColor     = mColor[0];
 	pTopRightColor    = mColor[1];

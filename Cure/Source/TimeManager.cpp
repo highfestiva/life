@@ -55,7 +55,7 @@ void TimeManager::TickTime()
 
 	mTickTimeModulo += lCurrentFrameTime;
 
-	mAverageFrameTime = Lepra::Math::Lerp(mAverageFrameTime, lCurrentFrameTime, 0.01f);
+	mAverageFrameTime = Math::Lerp(mAverageFrameTime, lCurrentFrameTime, 0.01f);
 
 	mPhysicsFrameTime = 1/(float)mTargetFrameRate;
 	while (mPhysicsFrameTime*2 < mAverageFrameTime)

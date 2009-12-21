@@ -13,24 +13,24 @@ namespace UiTbc
 
 
 
-PopupList::PopupList(unsigned pBorderStyle, int pBorderWidth, const Lepra::Color& pColor, 
-			 ListLayout::ListType pListType, const Lepra::String& pName):
+PopupList::PopupList(unsigned pBorderStyle, int pBorderWidth, const Color& pColor, 
+			 ListLayout::ListType pListType, const str& pName):
 	ListControl(pBorderStyle, pBorderWidth, pColor, pListType, pName)
 {
 }
 
 PopupList::PopupList(unsigned pBorderStyle, int pBorderWidth, Painter::ImageID pImageID,
-			 ListLayout::ListType pListType, const Lepra::String& pName):
+			 ListLayout::ListType pListType, const str& pName):
 	ListControl(pBorderStyle, pBorderWidth, pImageID, pListType, pName)
 {
 }
 
-PopupList::PopupList(const Lepra::Color& pColor, ListLayout::ListType pListType, const Lepra::String& pName):
+PopupList::PopupList(const Color& pColor, ListLayout::ListType pListType, const str& pName):
 	ListControl(pColor, pListType, pName)
 {
 }
 
-PopupList::PopupList(Painter::ImageID pImageID, ListLayout::ListType pListType, const Lepra::String& pName):
+PopupList::PopupList(Painter::ImageID pImageID, ListLayout::ListType pListType, const str& pName):
 	ListControl(pImageID, pListType, pName)
 {
 }

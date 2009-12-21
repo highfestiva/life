@@ -63,7 +63,7 @@ public:
 	void IncreaseCallbackBlockCount();
 	int DecreaseCallbackBlockCount();
 
-	const Lepra::String& GetName() const;
+	const str& GetName() const;
 	ResourceLoadState GetLoadState() const;
 	// JB-TRICKY: for some god-awful reason polymorfism stops working here, so I changed name for this method.
 	const Resource* GetConstResource() const;
@@ -74,7 +74,7 @@ protected:
 	Resource* GetResource() const;
 	void SetResource(Resource* pResource);
 	virtual void PostProcess();
-	virtual Resource* CreateResource(ResourceManager* pManager, const Lepra::String& pName) const = 0;
+	virtual Resource* CreateResource(ResourceManager* pManager, const str& pName) const = 0;
 
 private:
 	Resource* mResource;
@@ -93,8 +93,8 @@ public:
 	UserTypeResourceBase();
 	virtual ~UserTypeResourceBase();
 
-	void Load(ResourceManager* pResourceManager, const Lepra::String& pName, TypeLoadCallback pCallback);
-	void LoadUnique(ResourceManager* pResourceManager, const Lepra::String& pName, TypeLoadCallback pCallback);
+	void Load(ResourceManager* pResourceManager, const str& pName, TypeLoadCallback pCallback);
+	void LoadUnique(ResourceManager* pResourceManager, const str& pName, TypeLoadCallback pCallback);
 
 	typename ResourceType::UserRamData GetRamData() const;
 	typename ResourceType::UserData GetData() const;
@@ -110,7 +110,7 @@ public:
 	virtual ~UserTypeResource();
 
 protected:
-	virtual Resource* CreateResource(ResourceManager* pManager, const Lepra::String& pName) const;
+	virtual Resource* CreateResource(ResourceManager* pManager, const str& pName) const;
 };
 
 
@@ -129,7 +129,7 @@ public:
 	void SetExtraData(const ExtraType& pExtraData);
 
 protected:
-	virtual Resource* CreateResource(ResourceManager* pManager, const Lepra::String& pName) const;
+	virtual Resource* CreateResource(ResourceManager* pManager, const str& pName) const;
 
 private:
 	mutable ExtraType mExtraData;
@@ -140,12 +140,12 @@ private:
 class Resource
 {
 public:
-	Resource(ResourceManager* pManager, const Lepra::String& pName);
+	Resource(ResourceManager* pManager, const str& pName);
 	virtual ~Resource();
 
 	ResourceManager* GetManager() const;
-	const Lepra::String& GetName() const;
-	virtual const Lepra::String GetType() const = 0;
+	const str& GetName() const;
+	virtual const str GetType() const = 0;
 
 	// Increases/decreases the reference counter. Returns the new value.
 	int Reference();
@@ -185,13 +185,13 @@ private:
 	};
 
 	ResourceManager* mManager;
-	const Lepra::String mName;
+	const str mName;
 	int mReferenceCount;
 	ResourceLoadState mState;
 	typedef std::list<UserResourceCallbackInfo> CallbackList;
 	CallbackList mLoadCallbackList;
 	bool mIsUnique;
-	static Lepra::Lock mMutex;
+	static Lock mMutex;
 
 	LOG_CLASS_DECLARE();
 
@@ -209,7 +209,7 @@ public:
 	void SetRamDataType(RamData pData);
 
 protected:
-	RamResource(ResourceManager* pManager, const Lepra::String& pName);
+	RamResource(ResourceManager* pManager, const str& pName);
 	virtual ~RamResource();
 
 	void SetRamData(RamData pData);
@@ -226,7 +226,7 @@ template<class RamData, class OptimizedData>
 class OptimizedResource: public RamResource<RamData>
 {
 public:
-	OptimizedResource(ResourceManager* pManager, const Lepra::String& pName);
+	OptimizedResource(ResourceManager* pManager, const str& pName);
 	virtual ~OptimizedResource();
 
 	void SetOptimizedData(OptimizedData pData);
@@ -243,7 +243,7 @@ template<class RamData, class DiversifiedData>
 class DiversifiedResource: public RamResource<RamData>
 {
 public:
-	DiversifiedResource(ResourceManager* pManager, const Lepra::String& pName);
+	DiversifiedResource(ResourceManager* pManager, const str& pName);
 	virtual ~DiversifiedResource();
 
 	DiversifiedData GetUserData(const UserResource* pUserResource);
@@ -253,7 +253,7 @@ protected:
 	virtual DiversifiedData CreateDiversifiedData() const = 0;
 	virtual void ReleaseDiversifiedData(DiversifiedData pData) const = 0;
 
-	typedef Lepra::HashTable<const UserResource*, DiversifiedData, std::hash<const void*> > UserDataTable;
+	typedef HashTable<const UserResource*, DiversifiedData, std::hash<const void*> > UserDataTable;
 	UserDataTable mUserDiversifiedTable;
 };
 
@@ -265,9 +265,9 @@ class PhysicsResource: public RamResource<TBC::ChunkyPhysics*>
 public:
 	typedef TBC::ChunkyPhysics* UserData;
 
-	PhysicsResource(ResourceManager* pManager, const Lepra::String& pName);
+	PhysicsResource(ResourceManager* pManager, const str& pName);
 	virtual ~PhysicsResource();
-	const Lepra::String GetType() const;
+	const str GetType() const;
 	UserData GetUserData(const UserResource*) const;
 	bool Load();
 
@@ -282,7 +282,7 @@ private:
 public:
 	typedef void* UserData;
 
-	AnimationResource(const Lepra::String& pName);
+	AnimationResource(const str& pName);
 
 	bool Load();
 };*/
@@ -296,9 +296,9 @@ class ClassResourceBase: public RamResource<_Class*>
 public:
 	typedef _Class* UserData;
 
-	ClassResourceBase(ResourceManager* pManager, const Lepra::String& pName);
+	ClassResourceBase(ResourceManager* pManager, const str& pName);
 	virtual ~ClassResourceBase();
-	const Lepra::String GetType() const;
+	const str GetType() const;
 	UserData GetUserData(const UserResource*) const;
 	bool Load();
 
@@ -310,7 +310,7 @@ class ClassResource: public ClassResourceBase<TBC::ChunkyClass, TBC::ChunkyClass
 {
 	typedef ClassResourceBase<TBC::ChunkyClass, TBC::ChunkyClassLoader> Parent;
 public:
-	ClassResource(ResourceManager* pManager, const Lepra::String& pName);
+	ClassResource(ResourceManager* pManager, const str& pName);
 	virtual ~ClassResource();
 };
 
@@ -322,9 +322,9 @@ public:
 public:
 	typedef ContextObject* UserData;
 
-	ContextObjectResource(ResourceManager* pManager, const Lepra::String& pName);
+	ContextObjectResource(ResourceManager* pManager, const str& pName);
 	virtual ~ContextObjectResource();
-	const Lepra::String GetType() const;
+	const str GetType() const;
 	UserData GetUserData(const UserResource*) const;
 	bool Load();
 	ResourceLoadState PostProcess();	// TODO: remove this method when ContextObject::LoadGroup has been implemented correctly (thread safe).
@@ -341,9 +341,9 @@ class PhysicalTerrainResource: public RamResource<TBC::TerrainPatch*>
 public:
 	typedef TBC::TerrainPatch* UserData;
 
-	PhysicalTerrainResource(ResourceManager* pManager, const Lepra::String& pName);
+	PhysicalTerrainResource(ResourceManager* pManager, const str& pName);
 	virtual ~PhysicalTerrainResource();
-	const Lepra::String GetType() const;
+	const str GetType() const;
 	UserData GetUserData(const UserResource*) const;
 	bool Load();
 
@@ -364,7 +364,7 @@ typedef UserTypeResource<PhysicalTerrainResource>	UserPhysicalTerrainResource;
 class ResourceManager
 {
 public:
-	typedef std::pair<Lepra::String, Lepra::String> StringPair;
+	typedef std::pair<str, str> StringPair;
 	typedef std::list<StringPair> NameTypeList;
 
 	ResourceManager(unsigned pLoaderThreadCount);
@@ -379,9 +379,9 @@ public:
 	// it may be loaded as many times as you wish. For instance: loading an
 	// image as a painter resource and at the same time loading the same image
 	// name as a renderer resource is an error with undefined behaviour.
-	void Load(const Lepra::String& pName, UserResource* pUserResource, UserResource::LoadCallback pCallback);
-	void LoadUnique(const Lepra::String& pName, UserResource* pUserResource, UserResource::LoadCallback pCallback);
-	bool IsCreated(const Lepra::String& pName) const;
+	void Load(const str& pName, UserResource* pUserResource, UserResource::LoadCallback pCallback);
+	void LoadUnique(const str& pName, UserResource* pUserResource, UserResource::LoadCallback pCallback);
+	bool IsCreated(const str& pName) const;
 	void SafeRelease(UserResource* pUserResource);
 	void Release(Resource* pResource);
 
@@ -393,7 +393,7 @@ public:
 	NameTypeList QueryResourceNames();
 
 protected:
-	Resource* GetAddCachedResource(const Lepra::String& pName, UserResource* pUserResource, bool& pMustLoad);
+	Resource* GetAddCachedResource(const str& pName, UserResource* pUserResource, bool& pMustLoad);
 	void StartLoad(Resource* pResource);
 
 	// Called by Tick (main thread) to push objects into the active table, optimize them and callback waiters.
@@ -413,20 +413,20 @@ protected:
 	}
 
 private:
-	Resource* CreateResource(UserResource* pUserResource, const Lepra::String& pName);
+	Resource* CreateResource(UserResource* pUserResource, const str& pName);
 	void DeleteResource(Resource* pResource);
 
-	typedef Lepra::HashTable<Lepra::String, Resource*> ResourceTable;
-	typedef Lepra::OrderedMap<Lepra::String, Resource*> ResourceMap;
-	typedef Lepra::OrderedMap<Resource*, Resource*, std::hash<void*> > ResourceMapList;
+	typedef HashTable<str, Resource*> ResourceTable;
+	typedef OrderedMap<str, Resource*> ResourceMap;
+	typedef OrderedMap<Resource*, Resource*, std::hash<void*> > ResourceMapList;
 	typedef std::set<Resource*> ResourceSet;
 
 	TerrainFunctionManager* mTerrainFunctionManager;
 
 	unsigned mLoaderThreadCount;
-	Lepra::MemberThread<ResourceManager> mLoaderThread;	// TODO: increase max loader thread count (put in list).
-	Lepra::Semaphore mLoadSemaphore;
-	mutable Lepra::Lock mThreadLock;
+	MemberThread<ResourceManager> mLoaderThread;	// TODO: increase max loader thread count (put in list).
+	Semaphore mLoadSemaphore;
+	mutable Lock mThreadLock;
 	ResourceTable mActiveResourceTable;	// In use. Holds non-unique resources.
 	ResourceTable mCachedResourceTable;	// On the way out. Holds non-unique resources.
 	ResourceMapList mRequestLoadList;	// Under way to be loaded by worker thread. TODO: priority map thingie!

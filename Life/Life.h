@@ -4,22 +4,18 @@
 
 
 
-
 #pragma once
 
-#include "../../Lepra/Include/Lepra.h"
 
 
-
-namespace UiLepra
+namespace Life
 {
 
 
 
 using namespace Lepra;
 
-void Init();
-void Shutdown();
+const int PHYSICS_FPS = 60;
 
 
 

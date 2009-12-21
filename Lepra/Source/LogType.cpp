@@ -68,7 +68,7 @@ Log* LogType::GetLog(Subsystem pSubsystem)
 	return (mLogArray[0]);
 }
 
-Log* LogType::GetLog(const String& pName)
+Log* LogType::GetLog(const str& pName)
 {
 	Init();
 

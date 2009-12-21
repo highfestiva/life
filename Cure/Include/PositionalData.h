@@ -10,6 +10,7 @@
 #include "../../Lepra/Include/Log.h"
 #include "../../Lepra/Include/Transformation.h"
 #include "../../Lepra/Include/Vector3D.h"
+#include "../Include/Cure.h"
 
 
 
@@ -38,8 +39,8 @@ public:
 	PositionalData();
 	virtual ~PositionalData();
 	virtual int GetPackSize() const = 0;
-	virtual int Pack(Lepra::uint8* pData) const = 0;
-	virtual int Unpack(const Lepra::uint8* pData, int pSize) = 0;
+	virtual int Pack(uint8* pData) const = 0;
+	virtual int Unpack(const uint8* pData, int pSize) = 0;
 	float GetScaledDifference(const PositionalData* pReference) const;
 	void SetScale(float pScale);
 	virtual Type GetType() const = 0;
@@ -57,21 +58,21 @@ private:
 class PositionalData6: public PositionalData
 {
 public:
-	Lepra::TransformationF mTransformation;
-	Lepra::Vector3DF mVelocity;
-	Lepra::Vector3DF mAcceleration;
-	Lepra::Vector3DF mAngularVelocity;
-	Lepra::Vector3DF mAngularAcceleration;
+	TransformationF mTransformation;
+	Vector3DF mVelocity;
+	Vector3DF mAcceleration;
+	Vector3DF mAngularVelocity;
+	Vector3DF mAngularAcceleration;
 
 	static int GetStaticPackSize();
 	int GetPackSize() const;
-	int Pack(Lepra::uint8* pData) const;
-	int Unpack(const Lepra::uint8* pData, int pSize);
+	int Pack(uint8* pData) const;
+	int Unpack(const uint8* pData, int pSize);
 	float GetBiasedDifference(const PositionalData* pReference) const;
 
 private:
-	static float GetDifference(const Lepra::QuaternionF& pQ1, const Lepra::QuaternionF& pQ2);
-	static float GetDifference(const Lepra::Vector3DF& pV1, const Lepra::Vector3DF& pV2);
+	static float GetDifference(const QuaternionF& pQ1, const QuaternionF& pQ2);
+	static float GetDifference(const Vector3DF& pV1, const Vector3DF& pV2);
 
 	Type GetType() const;
 	void CopyData(const PositionalData* pData);
@@ -89,8 +90,8 @@ public:
 	float mAcceleration[3];
 
 	int GetPackSize() const;
-	int Pack(Lepra::uint8* pData) const;
-	int Unpack(const Lepra::uint8* pData, int pSize);
+	int Pack(uint8* pData) const;
+	int Unpack(const uint8* pData, int pSize);
 	float GetBiasedDifference(const PositionalData* pReference) const;
 
 	Type GetType() const;
@@ -107,8 +108,8 @@ public:
 	float mAcceleration[2];
 
 	int GetPackSize() const;
-	int Pack(Lepra::uint8* pData) const;
-	int Unpack(const Lepra::uint8* pData, int pSize);
+	int Pack(uint8* pData) const;
+	int Unpack(const uint8* pData, int pSize);
 	float GetBiasedDifference(const PositionalData* pReference) const;
 
 	Type GetType() const;
@@ -125,8 +126,8 @@ public:
 	float mAcceleration;
 
 	int GetPackSize() const;
-	int Pack(Lepra::uint8* pData) const;
-	int Unpack(const Lepra::uint8* pData, int pSize);
+	int Pack(uint8* pData) const;
+	int Unpack(const uint8* pData, int pSize);
 	float GetBiasedDifference(const PositionalData* pReference) const;
 
 	Type GetType() const;
@@ -151,8 +152,8 @@ public:
 
 	void Clear();
 	int GetPackSize() const;
-	int Pack(Lepra::uint8* pData) const;
-	int Unpack(const Lepra::uint8* pData, int pSize);
+	int Pack(uint8* pData) const;
+	int Unpack(const uint8* pData, int pSize);
 	float GetBiasedDifference(const PositionalData* pReference) const;
 
 	PositionalData* GetAt(size_t pIndex) const;
@@ -178,8 +179,8 @@ public:
 	float mValue[4];
 
 	int GetPackSize() const;
-	int Pack(Lepra::uint8* pData) const;
-	int Unpack(const Lepra::uint8* pData, int pSize);
+	int Pack(uint8* pData) const;
+	int Unpack(const uint8* pData, int pSize);
 	float GetBiasedDifference(const PositionalData* pReference) const;
 
 	Type GetType() const;
@@ -194,8 +195,8 @@ public:
 	bool mBool;
 
 	int GetPackSize() const;
-	int Pack(Lepra::uint8* pData) const;
-	int Unpack(const Lepra::uint8* pData, int pSize);
+	int Pack(uint8* pData) const;
+	int Unpack(const uint8* pData, int pSize);
 	float GetBiasedDifference(const PositionalData* pReference) const;
 
 	Type GetType() const;
@@ -209,8 +210,8 @@ public:
 	float mValue;
 
 	int GetPackSize() const;
-	int Pack(Lepra::uint8* pData) const;
-	int Unpack(const Lepra::uint8* pData, int pSize);
+	int Pack(uint8* pData) const;
+	int Unpack(const uint8* pData, int pSize);
 	float GetBiasedDifference(const PositionalData* pReference) const;
 
 	Type GetType() const;

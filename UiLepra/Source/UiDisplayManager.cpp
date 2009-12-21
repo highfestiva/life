@@ -66,7 +66,7 @@ void DisplayManager::DispatchMaximize(int pWidth, int pHeight)
 
 
 
-Lepra::uint8 DisplayManager::GetPaletteColor(int pRed, int pGreen, int pBlue, const Lepra::Color* pPalette)
+uint8 DisplayManager::GetPaletteColor(int pRed, int pGreen, int pBlue, const Color* pPalette)
 {
 	int	lBestMatch = 0;
 	int	i;
@@ -94,18 +94,18 @@ Lepra::uint8 DisplayManager::GetPaletteColor(int pRed, int pGreen, int pBlue, co
 		}
 	}
 
-	return (Lepra::uint8)lBestMatch;
+	return (uint8)lBestMatch;
 }
 
-void DisplayManager::GetScreenCanvas(Lepra::Canvas& pCanvas)
+void DisplayManager::GetScreenCanvas(Canvas& pCanvas)
 {
-	pCanvas.Reset(GetWidth(), GetHeight(), Lepra::Canvas::IntToBitDepth(GetBitDepth()));
+	pCanvas.Reset(GetWidth(), GetHeight(), Canvas::IntToBitDepth(GetBitDepth()));
 	pCanvas.SetPitch(GetPitch());
 	pCanvas.SetBuffer(GetScreenPtr());
 
-	if (pCanvas.GetBitDepth() == Lepra::Canvas::BITDEPTH_8_BIT)
+	if (pCanvas.GetBitDepth() == Canvas::BITDEPTH_8_BIT)
 	{
-		Lepra::Color lPalette[256];
+		Color lPalette[256];
 		for (unsigned i = 0; i < 256; i++)
 		{
 			lPalette[i] = *GetPaletteColor(i);

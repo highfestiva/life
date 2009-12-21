@@ -67,7 +67,7 @@ void StackLayout::Remove(Component* pComponent)
 	}
 }
 
-Component* StackLayout::Find(const Lepra::String& pComponentName)
+Component* StackLayout::Find(const str& pComponentName)
 {
 	for (int i = 0; i < mNumLevels; i++)
 	{
@@ -147,7 +147,7 @@ Component* StackLayout::GetPrev()
 
 void StackLayout::UpdateLayout()
 {
-	Lepra::PixelCoords lOwnerSize(GetOwner()->GetSize());
+	PixelCoords lOwnerSize(GetOwner()->GetSize());
 
 	for (int i = 0; i < mNumLevels; i++)
 	{
@@ -159,14 +159,14 @@ void StackLayout::UpdateLayout()
 	}
 }
 
-Lepra::PixelCoords StackLayout::GetPreferredSize(bool pForceAdaptive)
+PixelCoords StackLayout::GetPreferredSize(bool pForceAdaptive)
 {
-	Lepra::PixelCoords lSize(0, 0);
+	PixelCoords lSize(0, 0);
 	for (int i = 0; i < mNumLevels; i++)
 	{
 		if (mChild[i] != 0)
 		{
-			Lepra::PixelCoords lTemp(mChild[i]->GetPreferredSize(pForceAdaptive));
+			PixelCoords lTemp(mChild[i]->GetPreferredSize(pForceAdaptive));
 			if (lTemp.x > lSize.x)
 			{
 				lSize.x = lTemp.x;
@@ -181,14 +181,14 @@ Lepra::PixelCoords StackLayout::GetPreferredSize(bool pForceAdaptive)
 	return lSize;
 }
 
-Lepra::PixelCoords StackLayout::GetMinSize()
+PixelCoords StackLayout::GetMinSize()
 {
-	Lepra::PixelCoords lSize(0, 0);
+	PixelCoords lSize(0, 0);
 	for (int i = 0; i < mNumLevels; i++)
 	{
 		if (mChild[i] != 0)
 		{
-			Lepra::PixelCoords lTemp(mChild[i]->GetMinSize());
+			PixelCoords lTemp(mChild[i]->GetMinSize());
 			if (lTemp.x > lSize.x)
 			{
 				lSize.x = lTemp.x;
@@ -203,14 +203,14 @@ Lepra::PixelCoords StackLayout::GetMinSize()
 	return lSize;
 }
 
-Lepra::PixelCoords StackLayout::GetContentSize()
+PixelCoords StackLayout::GetContentSize()
 {
-	Lepra::PixelCoords lSize(0, 0);
+	PixelCoords lSize(0, 0);
 	for (int i = 0; i < mNumLevels; i++)
 	{
 		if (mChild[i] != 0)
 		{
-			Lepra::PixelCoords lTemp(mChild[i]->GetPreferredSize());
+			PixelCoords lTemp(mChild[i]->GetPreferredSize());
 			if (lTemp.x > lSize.x)
 			{
 				lSize.x = lTemp.x;

@@ -224,7 +224,7 @@ void ProgressiveTriangleGeometry::Copy(const ProgressiveTriangleGeometry& pProgr
 	if (pProgressiveGeometry.mCurrentColorData8 != 0)
 	{
 		int lNumElements = (mBaseVertexCount + mNumVertexSplits) * 4;
-		mCurrentColorData8 = new Lepra::uint8[lNumElements];
+		mCurrentColorData8 = new uint8[lNumElements];
 		for (i = 0; i < lNumElements; i++)
 		{
 			mCurrentColorData8[i] = pProgressiveGeometry.mCurrentColorData8[i];
@@ -234,7 +234,7 @@ void ProgressiveTriangleGeometry::Copy(const ProgressiveTriangleGeometry& pProgr
 	if (pProgressiveGeometry.mCurrentIndices != 0)
 	{
 		int lNumElements = (mBaseTriangleCount + mNumVertexSplits * 2) * 3;
-		mCurrentIndices = new Lepra::uint32[lNumElements];
+		mCurrentIndices = new uint32[lNumElements];
 		for (i = 0; i < lNumElements; i++)
 		{
 			mCurrentIndices[i] = pProgressiveGeometry.mCurrentIndices[i];
@@ -275,7 +275,7 @@ void ProgressiveTriangleGeometry::Copy(const ProgressiveTriangleGeometry& pProgr
 	if (pProgressiveGeometry.mBaseIndices != 0)
 	{
 		int lNumElements = mBaseTriangleCount * 3;
-		mBaseIndices = new Lepra::uint32[lNumElements];
+		mBaseIndices = new uint32[lNumElements];
 		for (i = 0; i < lNumElements; i++)
 		{
 			mBaseIndices[i] = pProgressiveGeometry.mBaseIndices[i];
@@ -340,8 +340,8 @@ void ProgressiveTriangleGeometry::FindEdgeToCollapse(VertexList& /*pOrgVertexLis
 	     ++lTriIter)
 	{
 		Triangle* lTriangle = *lTriIter;
-		Lepra::Vector3DF lDiff1;
-		Lepra::Vector3DF lDiff2;
+		Vector3DF lDiff1;
+		Vector3DF lDiff2;
 		Vertex lMid;
 
 		// Test V1 and V2.
@@ -539,16 +539,16 @@ void ProgressiveTriangleGeometry::Set(TriangleBasedGeometry& pGeometry)
 		Triangle* lTriangle = new Triangle;
 		Triangle* lTriangle2 = new Triangle;
 
-		Lepra::uint32 lIndices[3];
+		uint32 lIndices[3];
 		pGeometry.GetTriangleIndices(i, lIndices);
 
-		lTriangle->mV1 = *Lepra::ListUtil::FindByIndex(lVertexList, lIndices[0]);
-		lTriangle->mV2 = *Lepra::ListUtil::FindByIndex(lVertexList, lIndices[1]);
-		lTriangle->mV3 = *Lepra::ListUtil::FindByIndex(lVertexList, lIndices[2]);
+		lTriangle->mV1 = *ListUtil::FindByIndex(lVertexList, lIndices[0]);
+		lTriangle->mV2 = *ListUtil::FindByIndex(lVertexList, lIndices[1]);
+		lTriangle->mV3 = *ListUtil::FindByIndex(lVertexList, lIndices[2]);
 
-		lTriangle2->mV1 = *Lepra::ListUtil::FindByIndex(lOrgVertexList, lIndices[0]);
-		lTriangle2->mV2 = *Lepra::ListUtil::FindByIndex(lOrgVertexList, lIndices[1]);
-		lTriangle2->mV3 = *Lepra::ListUtil::FindByIndex(lOrgVertexList, lIndices[2]);
+		lTriangle2->mV1 = *ListUtil::FindByIndex(lOrgVertexList, lIndices[0]);
+		lTriangle2->mV2 = *ListUtil::FindByIndex(lOrgVertexList, lIndices[1]);
+		lTriangle2->mV3 = *ListUtil::FindByIndex(lOrgVertexList, lIndices[2]);
 
 		lTriangleList.push_back(lTriangle);
 		lOrgTriangleList.push_back(lTriangle2);
@@ -656,7 +656,7 @@ void ProgressiveTriangleGeometry::Set(TriangleBasedGeometry& pGeometry)
 	{
 		mBaseColorData = new float[mBaseVertexCount * 4];
 		mCurrentColorData = new float[(mCurrentVertexCount + mNumVertexSplits) * 4];
-		mCurrentColorData8 = new Lepra::uint8[(mCurrentVertexCount + mNumVertexSplits) * 4];
+		mCurrentColorData8 = new uint8[(mCurrentVertexCount + mNumVertexSplits) * 4];
 	}
 
 	VertexList::iterator lVertexIter;
@@ -702,18 +702,18 @@ void ProgressiveTriangleGeometry::Set(TriangleBasedGeometry& pGeometry)
 			mCurrentColorData[i * 4 + 2] = lVertex->b();
 			mCurrentColorData[i * 4 + 3] = lVertex->a();
 
-			mCurrentColorData8[i * 4 + 0] = (Lepra::uint8)(lVertex->r() * 255.0f);
-			mCurrentColorData8[i * 4 + 1] = (Lepra::uint8)(lVertex->g() * 255.0f);
-			mCurrentColorData8[i * 4 + 2] = (Lepra::uint8)(lVertex->b() * 255.0f);
-			mCurrentColorData8[i * 4 + 3] = (Lepra::uint8)(lVertex->a() * 255.0f);
+			mCurrentColorData8[i * 4 + 0] = (uint8)(lVertex->r() * 255.0f);
+			mCurrentColorData8[i * 4 + 1] = (uint8)(lVertex->g() * 255.0f);
+			mCurrentColorData8[i * 4 + 2] = (uint8)(lVertex->b() * 255.0f);
+			mCurrentColorData8[i * 4 + 3] = (uint8)(lVertex->a() * 255.0f);
 		}
 	}
 
-	mCurrentIndices = new Lepra::uint32[lTriangleList.size() * 3];
+	mCurrentIndices = new uint32[lTriangleList.size() * 3];
 
 	if (lTriangleList.empty() == false)
 	{
-		mBaseIndices = new Lepra::uint32[lTriangleList.size() * 3];
+		mBaseIndices = new uint32[lTriangleList.size() * 3];
 
 		TriangleList::iterator lTriIter;
 		for (lTriIter = lTriangleList.begin(), i = 0;
@@ -722,9 +722,9 @@ void ProgressiveTriangleGeometry::Set(TriangleBasedGeometry& pGeometry)
 		{
 			Triangle* lTriangle = *lTriIter;
 
-			unsigned long lIndex0 = Lepra::ListUtil::FindIndexOf(lVertexList, lTriangle->mV1);
-			unsigned long lIndex1 = Lepra::ListUtil::FindIndexOf(lVertexList, lTriangle->mV2);
-			unsigned long lIndex2 = Lepra::ListUtil::FindIndexOf(lVertexList, lTriangle->mV3);
+			unsigned long lIndex0 = ListUtil::FindIndexOf(lVertexList, lTriangle->mV1);
+			unsigned long lIndex1 = ListUtil::FindIndexOf(lVertexList, lTriangle->mV2);
+			unsigned long lIndex2 = ListUtil::FindIndexOf(lVertexList, lTriangle->mV3);
 
 			assert(lIndex0 >= 0);
 			assert(lIndex1 >= 0);
@@ -758,7 +758,7 @@ void ProgressiveTriangleGeometry::Set(TriangleBasedGeometry& pGeometry)
 			mVertexSplit[i].mNumNewTriangles    = (int)lVS->mNewTriangles.size();
 			mVertexSplit[i].mNumOldTriangles    = (int)lTriangleList.size();
 			mVertexSplit[i].mNumOldVertices     = (int)lVertexList.size();
-			mVertexSplit[i].mVertexToSplitIndex = Lepra::ListUtil::FindIndexOf(lVertexList, lVS->mVertexToSplit);
+			mVertexSplit[i].mVertexToSplitIndex = ListUtil::FindIndexOf(lVertexList, lVS->mVertexToSplit);
 			mVertexSplit[i].mNumIndexFixes      = (int)lVS->mFixTriangles.size();
 			mVertexSplit[i].mIndexFix           = new int[mVertexSplit[i].mNumIndexFixes];
 			mVertexSplit[i].mIndexFixIndex      = new int[mVertexSplit[i].mNumIndexFixes * 2];
@@ -787,10 +787,10 @@ void ProgressiveTriangleGeometry::Set(TriangleBasedGeometry& pGeometry)
 				mCurrentColorData[lVertexIndex * 4 + 2] = lVS->mNewVertex->b();
 				mCurrentColorData[lVertexIndex * 4 + 3] = lVS->mNewVertex->a();
 
-				mCurrentColorData8[lVertexIndex * 4 + 0] = (Lepra::uint8)(lVS->mNewVertex->r() * 255.0f);
-				mCurrentColorData8[lVertexIndex * 4 + 1] = (Lepra::uint8)(lVS->mNewVertex->g() * 255.0f);
-				mCurrentColorData8[lVertexIndex * 4 + 2] = (Lepra::uint8)(lVS->mNewVertex->b() * 255.0f);
-				mCurrentColorData8[lVertexIndex * 4 + 3] = (Lepra::uint8)(lVS->mNewVertex->a() * 255.0f);
+				mCurrentColorData8[lVertexIndex * 4 + 0] = (uint8)(lVS->mNewVertex->r() * 255.0f);
+				mCurrentColorData8[lVertexIndex * 4 + 1] = (uint8)(lVS->mNewVertex->g() * 255.0f);
+				mCurrentColorData8[lVertexIndex * 4 + 2] = (uint8)(lVS->mNewVertex->b() * 255.0f);
+				mCurrentColorData8[lVertexIndex * 4 + 3] = (uint8)(lVS->mNewVertex->a() * 255.0f);
 			}
 
 			lVertexIndex++;
@@ -808,7 +808,7 @@ void ProgressiveTriangleGeometry::Set(TriangleBasedGeometry& pGeometry)
 				assert(lTriangle->mVertexIndexHistory.size() > 0);
 				assert(lTriangle->mVertexHistory.size() > 0);
 
-				int lTriIndex = Lepra::ListUtil::FindIndexOf(lTriangleList, lTriangle);
+				int lTriIndex = ListUtil::FindIndexOf(lTriangleList, lTriangle);
 				int lVertex = lTriangle->mVertexIndexHistory.back();
 				lTriangle->mVertexIndexHistory.pop_back();
 				int lIndex = lTriIndex * 3 + lVertex;
@@ -820,22 +820,22 @@ void ProgressiveTriangleGeometry::Set(TriangleBasedGeometry& pGeometry)
 				switch(lVertex)
 				{
 				case 0:
-					lOldValue = Lepra::ListUtil::FindIndexOf(lVertexList, lTriangle->mV1);
+					lOldValue = ListUtil::FindIndexOf(lVertexList, lTriangle->mV1);
 					lTriangle->mV1 = lTriangle->mVertexHistory.back();
 					lTriangle->mVertexHistory.pop_back();
-					lNewValue = Lepra::ListUtil::FindIndexOf(lVertexList, lTriangle->mV1);
+					lNewValue = ListUtil::FindIndexOf(lVertexList, lTriangle->mV1);
 					break;
 				case 1:
-					lOldValue = Lepra::ListUtil::FindIndexOf(lVertexList, lTriangle->mV2);
+					lOldValue = ListUtil::FindIndexOf(lVertexList, lTriangle->mV2);
 					lTriangle->mV2 = lTriangle->mVertexHistory.back();
 					lTriangle->mVertexHistory.pop_back();
-					lNewValue = Lepra::ListUtil::FindIndexOf(lVertexList, lTriangle->mV2);
+					lNewValue = ListUtil::FindIndexOf(lVertexList, lTriangle->mV2);
 					break;
 				case 2:
-					lOldValue = Lepra::ListUtil::FindIndexOf(lVertexList, lTriangle->mV3);
+					lOldValue = ListUtil::FindIndexOf(lVertexList, lTriangle->mV3);
 					lTriangle->mV3 = lTriangle->mVertexHistory.back();
 					lTriangle->mVertexHistory.pop_back();
-					lNewValue = Lepra::ListUtil::FindIndexOf(lVertexList, lTriangle->mV3);
+					lNewValue = ListUtil::FindIndexOf(lVertexList, lTriangle->mV3);
 					break;
 				};
 
@@ -852,9 +852,9 @@ void ProgressiveTriangleGeometry::Set(TriangleBasedGeometry& pGeometry)
 				lTriangleList.push_back(lTriangle);
 				int lTriIndex = (int)lTriangleList.size() - 1;
 
-				unsigned long lIndex0 = Lepra::ListUtil::FindIndexOf(lVertexList, lTriangle->mV1);
-				unsigned long lIndex1 = Lepra::ListUtil::FindIndexOf(lVertexList, lTriangle->mV2);
-				unsigned long lIndex2 = Lepra::ListUtil::FindIndexOf(lVertexList, lTriangle->mV3);
+				unsigned long lIndex0 = ListUtil::FindIndexOf(lVertexList, lTriangle->mV1);
+				unsigned long lIndex1 = ListUtil::FindIndexOf(lVertexList, lTriangle->mV2);
+				unsigned long lIndex2 = ListUtil::FindIndexOf(lVertexList, lTriangle->mV3);
 
 				mCurrentIndices[lTriIndex * 3 + 0] = lIndex0;
 				mCurrentIndices[lTriIndex * 3 + 1] = lIndex1;
@@ -864,9 +864,9 @@ void ProgressiveTriangleGeometry::Set(TriangleBasedGeometry& pGeometry)
 	}
 
 	// Delete all memory allocated.
-	Lepra::ListUtil::DeleteAll(lTriangleList);
-	Lepra::ListUtil::DeleteAll(lVertexList);
-	Lepra::ListUtil::DeleteAll(lVertexSplitList);
+	ListUtil::DeleteAll(lTriangleList);
+	ListUtil::DeleteAll(lVertexList);
+	ListUtil::DeleteAll(lVertexSplitList);
 
 	if (lClearNormalData == true)
 	{

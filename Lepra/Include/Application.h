@@ -23,10 +23,10 @@
 #define LEPRA_RUN_APPLICATION(ClassName)	\
 int main(int argc, const char* argv[])	\
 {	\
-	Lepra::StringUtility::StringVector lArguments;	\
+	strutil::strvec lArguments;	\
 	for (int x = 0; x < argc; ++x)	\
 	{	\
-		lArguments.push_back(Lepra::AnsiStringUtility::ToCurrentCode(Lepra::AnsiString(argv[x])));	\
+		lArguments.push_back(astrutil::ToCurrentCode(astr(argv[x])));	\
 	}	\
 	ClassName lApplication(lArguments);	\
 	return (lApplication.Run());	\
@@ -35,7 +35,7 @@ int main(int argc, const char* argv[])	\
 #define LEPRA_RUN_APPLICATION(ClassName)	\
 int WINAPI wWinMain(HINSTANCE, HINSTANCE, PTSTR, int)	\
 {	\
-	Lepra::StringUtility::StringVector lArguments(Lepra::StringUtility::BlockSplit(::GetCommandLine(), _T(" \t\v\r\n"), false, false));	\
+	strutil::strvec lArguments(strutil::BlockSplit(::GetCommandLine(), _T(" \t\v\r\n"), false, false));	\
 	ClassName lApplication(lArguments);	\
 	return (lApplication.Run());	\
 }
@@ -51,13 +51,13 @@ namespace Lepra
 class Application
 {
 public:
-	Application(const StringUtility::StringVector& pArgumentVector);
+	Application(const strutil::strvec& pArgumentVector);
 	virtual ~Application();
 
 	virtual int Run() = 0;
 
 protected:
-	StringUtility::StringVector mArgumentVector;
+	strutil::strvec mArgumentVector;
 };
 
 

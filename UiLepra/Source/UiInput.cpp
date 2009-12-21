@@ -49,29 +49,29 @@ InputDevice* InputElement::GetParentDevice() const
 	return (mParentDevice);
 }
 
-bool InputElement::GetBooleanValue(Lepra::float64 pThreshold) const
+bool InputElement::GetBooleanValue(float64 pThreshold) const
 {
 	return (mValue >= pThreshold);
 }
 
-Lepra::float64 InputElement::GetValue() const
+float64 InputElement::GetValue() const
 {
 	return mValue;
 }
 
-Lepra::float64 InputElement::GetDeltaValue() const
+float64 InputElement::GetDeltaValue() const
 {
 	return (mValue - mPrevValue);
 }
 
-const Lepra::String& InputElement::GetIdentifier() const
+const str& InputElement::GetIdentifier() const
 {
 	return mIdentifier;
 }
 
-Lepra::String InputElement::GetFullName() const
+str InputElement::GetFullName() const
 {
-	Lepra::String lName;
+	str lName;
 	switch (GetParentDevice()->GetInterpretation())
 	{
 		case InputDevice::TYPE_MOUSE:		lName += _T("Mouse");		break;
@@ -84,25 +84,25 @@ Lepra::String InputElement::GetFullName() const
 		case InputDevice::TYPE_FLIGHT:		lName += _T("Flight");		break;
 		default:				lName += _T("Device");		break;
 	}
-	lName += Lepra::StringUtility::IntToString(GetParentDevice()->GetTypeIndex(), 10)+_T(".");
+	lName += strutil::IntToString(GetParentDevice()->GetTypeIndex(), 10)+_T(".");
 	lName += GetName();
 	return (lName);
 }
 
-Lepra::String InputElement::GetName() const
+str InputElement::GetName() const
 {
-	Lepra::String lName;
+	str lName;
 	switch (GetInterpretation())
 	{
 		case InputElement::ABSOLUTE_AXIS:	lName += _T("AbsoluteAxis");	break;
 		case InputElement::RELATIVE_AXIS:	lName += _T("RelativeAxis");	break;
 		default:				lName += _T("Button");		break;
 	}
-	lName += Lepra::StringUtility::IntToString(GetTypeIndex(), 10);
+	lName += strutil::IntToString(GetTypeIndex(), 10);
 	return (lName);
 }
 
-void InputElement::SetIdentifier(const Lepra::String& pIdentifier)
+void InputElement::SetIdentifier(const str& pIdentifier)
 {
 	mIdentifier = pIdentifier;
 }
@@ -121,9 +121,9 @@ void InputElement::ClearFunctors()
 	mFunctorArray.clear();
 }
 
-void InputElement::SetValue(Lepra::float64 pNewValue)
+void InputElement::SetValue(float64 pNewValue)
 {
-	static const Lepra::float64 lInputEpsilon = 1e-8;
+	static const float64 lInputEpsilon = 1e-8;
 	if (fabs(pNewValue - mValue) > lInputEpsilon)
 	{
 		//::printf("%s(%i) = %f", GetIdentifier().c_str(), GetTypeIndex(), pNewValue);
@@ -186,7 +186,7 @@ void InputDevice::SetActive(bool pActive)
 	mActive = pActive;
 }
 
-void InputDevice::SetElementValue(InputElement* pElement, Lepra::float64 pValue)
+void InputDevice::SetElementValue(InputElement* pElement, float64 pValue)
 {
 	pElement->SetValue(pValue);
 }
@@ -224,17 +224,17 @@ unsigned InputDevice::GetNumAnalogueElements()
 	return mNumAnalogueElements;
 }
 
-void InputDevice::SetIdentifier(const Lepra::String& pIdentifier)
+void InputDevice::SetIdentifier(const str& pIdentifier)
 {
 	mIdentifier = pIdentifier;
 }
 
-const Lepra::String& InputDevice::GetIdentifier() const
+const str& InputDevice::GetIdentifier() const
 {
 	return mIdentifier;
 }
 
-const InputElement* InputDevice::GetElement(const Lepra::String& pIdentifier) const
+const InputElement* InputDevice::GetElement(const str& pIdentifier) const
 {
 	ElementArray::const_iterator x;
 	for (x = mElementArray.begin();
@@ -252,7 +252,7 @@ const InputElement* InputDevice::GetElement(const Lepra::String& pIdentifier) co
 }
 
 
-InputElement* InputDevice::GetElement(const Lepra::String& pIdentifier)
+InputElement* InputDevice::GetElement(const str& pIdentifier)
 {
 	ElementArray::iterator x;
 
@@ -470,9 +470,9 @@ bool InputManager::ReadKey(KeyCode pKeyCode)
 	return (mKeyDown[(int)pKeyCode]);
 }
 
-Lepra::String InputManager::GetKeyName(KeyCode pKeyCode)
+str InputManager::GetKeyName(KeyCode pKeyCode)
 {
-	const Lepra::tchar* lKeyName = 0;
+	const tchar* lKeyName = 0;
 #define X(name)	case IN_KBD_##name:	lKeyName = _T(#name);	break
 	switch (pKeyCode)
 	{
@@ -565,7 +565,7 @@ Lepra::String InputManager::GetKeyName(KeyCode pKeyCode)
 	{
 		return (lKeyName);
 	}
-	return (Lepra::String(1, (Lepra::tchar)pKeyCode));
+	return (str(1, (tchar)pKeyCode));
 }
 
 void InputManager::SetKey(KeyCode pKeyCode, bool pValue)
@@ -573,7 +573,7 @@ void InputManager::SetKey(KeyCode pKeyCode, bool pValue)
 	mKeyDown[(int)pKeyCode] = pValue;
 }
 
-bool InputManager::NotifyOnChar(Lepra::tchar pChar)
+bool InputManager::NotifyOnChar(tchar pChar)
 {
 	bool lConsumed = false;
 	TextObserverList::iterator x = mTextObserverList.begin();
@@ -672,7 +672,7 @@ void InputManager::ReleaseAll()
 	}
 }
 
-InputDevice* InputManager::FindDevice(const Lepra::String& pDeviceIdentifier, int pN)
+InputDevice* InputManager::FindDevice(const str& pDeviceIdentifier, int pN)
 {
 	int lN = 0;
 
@@ -698,7 +698,7 @@ InputDevice* InputManager::FindDevice(const Lepra::String& pDeviceIdentifier, in
 	return 0;
 }
 
-int InputManager::GetDeviceCount(const Lepra::String& pDeviceIdentifier) const
+int InputManager::GetDeviceCount(const str& pDeviceIdentifier) const
 {
 	int lCount = 0;
 

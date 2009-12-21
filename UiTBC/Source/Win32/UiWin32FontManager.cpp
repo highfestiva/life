@@ -52,7 +52,7 @@ Win32FontManager::~Win32FontManager()
 
 
 
-void Win32FontManager::SetColor(const Lepra::Color& pColor, unsigned pColorIndex)
+void Win32FontManager::SetColor(const Color& pColor, unsigned pColorIndex)
 {
 	assert(pColorIndex <= 1);
 
@@ -60,7 +60,7 @@ void Win32FontManager::SetColor(const Lepra::Color& pColor, unsigned pColorIndex
 	mColorRef[pColorIndex] = lColor;
 }
 
-Win32FontManager::FontId Win32FontManager::AddFont(const Lepra::String& pFontName, double pSize, Lepra::uint32 pFlags, CharacterSet pCharSet)
+Win32FontManager::FontId Win32FontManager::AddFont(const str& pFontName, double pSize, uint32 pFlags, CharacterSet pCharSet)
 {
 	int lWeight  = ((pFlags & BOLD) != 0) ? FW_BOLD : FW_NORMAL;
 	DWORD lItalic = ((pFlags & ITALIC) != 0) ? TRUE : FALSE;
@@ -101,7 +101,7 @@ Win32FontManager::FontId Win32FontManager::AddFont(const Lepra::String& pFontNam
 	return (FontId)lId;
 }
 
-bool Win32FontManager::RenderGlyph(Lepra::tchar pChar, Lepra::Canvas& pImage, const Lepra::PixelRect& pRect)
+bool Win32FontManager::RenderGlyph(tchar pChar, Canvas& pImage, const PixelRect& pRect)
 {
 	bool lOk = (mCurrentFont != 0);
 	if (lOk)
@@ -142,7 +142,7 @@ bool Win32FontManager::RenderGlyph(Lepra::tchar pChar, Lepra::Canvas& pImage, co
 		lOk = (::TextOut(lRamDc, 0, 0, &pChar, 1) != FALSE);
 		::SelectObject(lRamDc, lDefaultObject);
 	}
-	Lepra::uint8* lBitmap = 0;
+	uint8* lBitmap = 0;
 	int lBpp = -1;
 	if (lOk)
 	{
@@ -151,14 +151,14 @@ bool Win32FontManager::RenderGlyph(Lepra::tchar pChar, Lepra::Canvas& pImage, co
 		lBpp = lBitmapInfo.bmiHeader.biBitCount;
 		int lBytePerPixel = (lBpp+7)/8;
 		int lByteCount = pRect.GetWidth()*pRect.GetHeight()*lBytePerPixel;
-		lBitmap = new Lepra::uint8[lByteCount];
+		lBitmap = new uint8[lByteCount];
 		lOk = (::GetDIBits(lRamDc, lRamBitmap, 0, pRect.GetHeight(), lBitmap, &lBitmapInfo, DIB_RGB_COLORS) == pRect.GetHeight());
 		::SelectObject(lRamDc, lDefaultBitmap);
 	}
 	if (lOk)
 	{
-		Lepra::Canvas::BitDepth lSourceBitDepth = Lepra::Canvas::IntToBitDepth(lBpp);
-		Lepra::Canvas::BitDepth lTargetBitDepth = pImage.GetBitDepth();
+		Canvas::BitDepth lSourceBitDepth = Canvas::IntToBitDepth(lBpp);
+		Canvas::BitDepth lTargetBitDepth = pImage.GetBitDepth();
 		pImage.Reset(pRect.GetWidth(), pRect.GetHeight(), lSourceBitDepth);
 		pImage.SetBuffer(lBitmap, true);
 		lBitmap = 0;	// Don't delete it, ownership now taken by calling canvas.
@@ -169,13 +169,13 @@ bool Win32FontManager::RenderGlyph(Lepra::tchar pChar, Lepra::Canvas& pImage, co
 		{
 			for (int x = 0; x < pRect.GetWidth(); ++x)
 			{
-				Lepra::Color lColor;
+				Color lColor;
 				pImage.GetPixelColor(x, y, lColor);
 				int lIntensity = lColor.SumRgb();
 				//// Sum controls biggest part of light intensity, average controls a minor part.
 				lIntensity = (lIntensity*70 + lIntensity/3*30) / 100;
 				lIntensity = (lIntensity > 255)? 255 : lIntensity;
-				lColor.mAlpha = (Lepra::uint8)(lIntensity);
+				lColor.mAlpha = (uint8)(lIntensity);
 				pImage.SetPixelColor(x, y, lColor);
 			}
 		}
@@ -197,18 +197,18 @@ bool Win32FontManager::RenderGlyph(Lepra::tchar pChar, Lepra::Canvas& pImage, co
 
 
 
-int Win32FontManager::GetCharWidth(const Lepra::tchar pChar) const
+int Win32FontManager::GetCharWidth(const tchar pChar) const
 {
 	Win32Font* lFont = (Win32Font*)mCurrentFont;
 	HGDIOBJ lDefaultObject = ::SelectObject(mDC, lFont->mWin32FontHandle);
 	ABC lABC;
 	INT lWidth;
 	int lCharWidth = 0;
-	if (::GetCharABCWidths(mDC, (Lepra::utchar)pChar, (Lepra::utchar)pChar, &lABC) != FALSE)
+	if (::GetCharABCWidths(mDC, (utchar)pChar, (utchar)pChar, &lABC) != FALSE)
 	{
 		lCharWidth = (int)lABC.abcA + (int)lABC.abcB + (int)lABC.abcC;
 	}
-	else if (::GetCharWidth32(mDC, (Lepra::utchar)pChar, (Lepra::utchar)pChar, &lWidth) != FALSE)
+	else if (::GetCharWidth32(mDC, (utchar)pChar, (utchar)pChar, &lWidth) != FALSE)
 	{
 		lCharWidth = (int)lWidth;
 	}

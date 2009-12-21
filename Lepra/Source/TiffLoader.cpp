@@ -18,7 +18,7 @@
 namespace Lepra
 {
 
-TiffLoader::Status TiffLoader::Load(const String& pFileName, Canvas& pCanvas)
+TiffLoader::Status TiffLoader::Load(const str& pFileName, Canvas& pCanvas)
 {
 	MetaFile lFile;
 	Status lStatus = STATUS_SUCCESS;
@@ -37,7 +37,7 @@ TiffLoader::Status TiffLoader::Load(const String& pFileName, Canvas& pCanvas)
 	return lStatus;
 }
 
-TiffLoader::Status TiffLoader::Save(const String& pFileName, const Canvas& pCanvas)
+TiffLoader::Status TiffLoader::Save(const str& pFileName, const Canvas& pCanvas)
 {
 	DiskFile lFile;
 	Status lStatus = STATUS_SUCCESS;
@@ -56,7 +56,7 @@ TiffLoader::Status TiffLoader::Save(const String& pFileName, const Canvas& pCanv
 	return lStatus;
 }
 
-TiffLoader::Status TiffLoader::Load(const String& pArchiveName, const String& pFileName, Canvas& pCanvas)
+TiffLoader::Status TiffLoader::Load(const str& pArchiveName, const str& pFileName, Canvas& pCanvas)
 {
 	ArchiveFile lFile(pArchiveName);
 	Status lStatus = STATUS_SUCCESS;
@@ -75,7 +75,7 @@ TiffLoader::Status TiffLoader::Load(const String& pArchiveName, const String& pF
 	return lStatus;
 }
 
-TiffLoader::Status TiffLoader::Save(const String& pArchiveName, const String& pFileName,
+TiffLoader::Status TiffLoader::Save(const str& pArchiveName, const str& pFileName,
 									const Canvas& pCanvas)
 {
 	ArchiveFile lFile(pArchiveName);
@@ -388,21 +388,21 @@ TiffLoader::Status TiffLoader::Load(File& pFile, Canvas& pCanvas)
 	return lStatus;
 }
 
-TiffLoader::Status TiffLoader::ReadHeader(const String& pFileName, Header& pHeader)
+TiffLoader::Status TiffLoader::ReadHeader(const str& pFileName, Header& pHeader)
 {
 	Status lReturn = StartLoad(pFileName, pHeader);
 	EndLoad();
 	return lReturn;
 }
 
-TiffLoader::Status TiffLoader::ReadHeader(const String& pArchiveName, const String& pFileName, Header& pHeader)
+TiffLoader::Status TiffLoader::ReadHeader(const str& pArchiveName, const str& pFileName, Header& pHeader)
 {
 	Status lReturn = StartLoad(pArchiveName, pFileName, pHeader);
 	EndLoad();
 	return lReturn;
 }
 
-TiffLoader::Status TiffLoader::StartLoad(const String& pArchiveName, const String& pFileName, Header& pHeader)
+TiffLoader::Status TiffLoader::StartLoad(const str& pArchiveName, const str& pFileName, Header& pHeader)
 {
 	Status lStatus = STATUS_SUCCESS;
 
@@ -422,7 +422,7 @@ TiffLoader::Status TiffLoader::StartLoad(const String& pArchiveName, const Strin
 	return lStatus;
 }
 
-TiffLoader::Status TiffLoader::StartLoad(const String& pFileName, Header& pHeader)
+TiffLoader::Status TiffLoader::StartLoad(const str& pFileName, Header& pHeader)
 {
 	Status lStatus = STATUS_SUCCESS;
 

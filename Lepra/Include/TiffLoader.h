@@ -47,17 +47,17 @@ public:
 		int mBitsPerPixel;
 	};
 
-	Status Load(const String& pFileName, Canvas& pCanvas);
-	Status Save(const String& pFileName, const Canvas& pCanvas);
+	Status Load(const str& pFileName, Canvas& pCanvas);
+	Status Save(const str& pFileName, const Canvas& pCanvas);
 
-	Status Load(const String& pArchiveName, const String& pFileName, Canvas& pCanvas);
-	Status Save(const String& pArchiveName, const String& pFileName, const Canvas& pCanvas);
+	Status Load(const str& pArchiveName, const str& pFileName, Canvas& pCanvas);
+	Status Save(const str& pArchiveName, const str& pFileName, const Canvas& pCanvas);
 
 	Status Load(Reader& pReader, Canvas& pCanvas);
 	Status Save(Writer& pWriter, const Canvas& pCanvas);
 
-	Status ReadHeader(const String& pFileName, Header& pHeader);
-	Status ReadHeader(const String& pArchiveName, const String& pFileName, Header& pHeader);
+	Status ReadHeader(const str& pFileName, Header& pHeader);
+	Status ReadHeader(const str& pArchiveName, const str& pFileName, Header& pHeader);
 
 
 	/*
@@ -67,8 +67,8 @@ public:
 
 	// Will open the file, read the header, and return.
 	// The user must call EndLoad() when finished.
-	Status StartLoad(const String& pFileName, Header& pHeader);
-	Status StartLoad(const String& pArchiveName, const String& pFileName, Header& pHeader);
+	Status StartLoad(const str& pFileName, Header& pHeader);
+	Status StartLoad(const str& pArchiveName, const str& pFileName, Header& pHeader);
 
 	// Will load the given rectangle into pCanvas. 
 	// The coordinates may be outside the image, in which 

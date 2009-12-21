@@ -28,12 +28,12 @@ public:
 	TriangleBasedGeometry();
 	TriangleBasedGeometry(const TriangleBasedGeometry& pGeometry);
 
-	TriangleBasedGeometry(Lepra::Vector3DF* pVertices,      // Must containt pVertexCount elements.
-			      Lepra::Vector3DF* pVertexNormals, // NULL or must contain pVertexCount elements.
-			      Lepra::Vector2D<float>* pUV,      // NULL or must contain pVertexCount elements.
-			      Lepra::Color* pColor,             // NULL or must contain pVertexCount elements.
+	TriangleBasedGeometry(Vector3DF* pVertices,      // Must containt pVertexCount elements.
+			      Vector3DF* pVertexNormals, // NULL or must contain pVertexCount elements.
+			      Vector2D<float>* pUV,      // NULL or must contain pVertexCount elements.
+			      Color* pColor,             // NULL or must contain pVertexCount elements.
 			      ColorFormat pColorFormat,
-			      Lepra::uint32* pIndices,
+			      uint32* pIndices,
 			      unsigned int pVertexCount,
 			      unsigned int pIndexCount,
 			      TBC::GeometryBase::PrimitiveType pPrimitiveType,
@@ -42,9 +42,9 @@ public:
 	TriangleBasedGeometry(float* pVertexData,
 			      float* pVertexNormals,
 			      float* pUVData,
-			      Lepra::uint8* pColorData,
+			      uint8* pColorData,
 			      ColorFormat pColorFormat,
-			      Lepra::uint32* pIndices,
+			      uint32* pIndices,
 			      unsigned int pVertexCount,
 			      unsigned int pIndexCount,
 			      TBC::GeometryBase::PrimitiveType pPrimitiveType,
@@ -53,12 +53,12 @@ public:
 
 	void Copy(const TriangleBasedGeometry& pGeometry);
 
-	void Set(Lepra::Vector3DF* pVertices,
-		 Lepra::Vector3DF* pVertexNormals,
-		 Lepra::Vector2D<float>* pUV,
-		 Lepra::Color* pColor,
+	void Set(Vector3DF* pVertices,
+		 Vector3DF* pVertexNormals,
+		 Vector2D<float>* pUV,
+		 Color* pColor,
 		 ColorFormat pColorFormat,
-		 Lepra::uint32* pIndices,
+		 uint32* pIndices,
 		 unsigned int pVertexCount,
 		 unsigned int pIndexCount,
 		 TBC::GeometryBase::PrimitiveType pPrimitiveType,
@@ -67,9 +67,9 @@ public:
 	void Set(float* pVertexData,
 		 float* pVertexNormals,
 		 float* pUVData,
-		 Lepra::uint8* pColorData,
+		 uint8* pColorData,
 		 ColorFormat pColorFormat,
-		 Lepra::uint32* pIndices,
+		 uint32* pIndices,
 		 unsigned int pVertexCount,
 		 unsigned int pIndexCount,
 		 TBC::GeometryBase::PrimitiveType pPrimitiveType,
@@ -78,7 +78,7 @@ public:
 	// AddUVSet() returns the index of the uv set.
 	// pUVData must contain mVertexCount * 2 elements.
 	int AddUVSet(float* pUVData);
-	int AddUVSet(Lepra::Vector2D<float>* pUVData);
+	int AddUVSet(Vector2D<float>* pUVData);
 	int AddEmptyUVSet();
 	int DupUVSet(int pUVSet);
 
@@ -93,8 +93,8 @@ public:
 
 	virtual float* GetVertexData() const;
 	virtual float* GetUVData(unsigned int pUVSet = 0) const;
-	virtual Lepra::uint32* GetIndexData() const;
-	virtual Lepra::uint8* GetColorData() const;
+	virtual uint32* GetIndexData() const;
+	virtual uint8* GetColorData() const;
 
 	void SetColorData(unsigned char* pColorData, ColorFormat pColorFormat);
 	void ConvertColorData(ColorFormat pColorFormat, unsigned char pAlpha);
@@ -104,7 +104,7 @@ public:
 	void ClearAll();
 
 	// Will erase all current data.
-	void SetPolygon(Lepra::Vector3DF* pVertices, unsigned int pVertexCount);
+	void SetPolygon(Vector3DF* pVertices, unsigned int pVertexCount);
 
 	// Flips the triangles from being clockwise to counter clockwise,
 	// and vice versa. FlipTriangle() only works if the primitive type
@@ -118,8 +118,8 @@ public:
 	// so use it with care. 
 	void SplitVertices();
 
-	void Translate(const Lepra::Vector3DF& pPositionOffset);
-	void Rotate(const Lepra::RotationMatrix<float>& pRotation);
+	void Translate(const Vector3DF& pPositionOffset);
+	void Rotate(const RotationMatrix<float>& pRotation);
 
 	// This definitly won't work if "this" has a primitive type other than TRIANGLES.
 	void AddGeometry(TriangleBasedGeometry* pGeometry);
@@ -143,7 +143,7 @@ private:
 	unsigned char* mColorData;
 	ColorFormat mColorFormat;
 
-	Lepra::uint32* mIndexData;	// Triplets of vertex indices.
+	uint32* mIndexData;	// Triplets of vertex indices.
 	unsigned int mVertexCount;
 	unsigned int mIndexCount;
 	unsigned int mUVSetCount;

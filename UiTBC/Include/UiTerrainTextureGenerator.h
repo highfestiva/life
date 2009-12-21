@@ -33,7 +33,7 @@ public:
 	// between two textures, while a higher value will result in smoother transitions.
 	bool AddNewRange(float pMaxLevel,          // Maximum height for this range
 					 float pFadeRange,         // Height dependent fading.
-					 Lepra::Canvas* pImages, 
+					 Canvas* pImages, 
 					 float* pMinNormalY,       // Defines the angle for each image.
 					 float* pMaxNormalY,       // ...
 					 float* pAngularFadeRange, // Angular fading between images.
@@ -41,7 +41,7 @@ public:
 
 	// Renders the final texture to match pPatch. The canvas must be initialized with
 	// the desired resolution of the texture.
-//	void RenderTexture(const TerrainPatch& pPatch, Lepra::Canvas& pCanvas);
+//	void RenderTexture(const TerrainPatch& pPatch, Canvas& pCanvas);
 
 private:
 
@@ -50,7 +50,7 @@ private:
 	public:
 		Range(float pMaxLevel,
 			  float pFadeRange,
-			  Lepra::Canvas* pImages, 
+			  Canvas* pImages, 
 			  float* pMinNormalY, 
 			  float* pMaxNormalY, 
 			  float* pAngularFadeRange,
@@ -58,7 +58,7 @@ private:
 		Range(float pMinLevel,
 			  float pMaxLevel,
 			  float pFadeRange,
-			  Lepra::Canvas* pImages, 
+			  Canvas* pImages, 
 			  float* pMinNormalY, 
 			  float* pMaxNormalY, 
 			  float* pAngularFadeRange,
@@ -71,15 +71,15 @@ private:
 		float* mMinNormalY;
 		float* mMaxNormalY;
 		float* mAngularFadeRange;
-		Lepra::Canvas* mImages;
+		Canvas* mImages;
 		int mNumImages;
 	};
 
 	typedef std::list<Range*> RangeList;
 
-	void GetAngleDependentRGB(Range* pRange, const Lepra::Vector3DF& pNormal, 
+	void GetAngleDependentRGB(Range* pRange, const Vector3DF& pNormal, 
 		float pU, float pV, float& r, float& g, float& b);
-	void GetHeightDependentRGB(const Lepra::Vector3DF& pPos, const Lepra::Vector3DF& pNormal,
+	void GetHeightDependentRGB(const Vector3DF& pPos, const Vector3DF& pNormal,
 		float pU, float pV, float& r, float& g, float& b);
 
 	RangeList mRangeList;

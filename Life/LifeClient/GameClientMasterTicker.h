@@ -60,8 +60,8 @@ private:
 
 	float GetPowerSaveAmount() const;
 
-	int OnCommandLocal(const Lepra::String& pCommand, const Lepra::StringUtility::StringVector& pParameterVector);
-	void OnCommandError(const Lepra::String& pCommand, const Lepra::StringUtility::StringVector& pParameterVector, int pResult);
+	int OnCommandLocal(const str& pCommand, const strutil::strvec& pParameterVector);
+	void OnCommandError(const str& pCommand, const strutil::strvec& pParameterVector, int pResult);
 
 	bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
 	bool OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode);
@@ -84,9 +84,9 @@ private:
 		GameClientMasterTicker* mManager;
 	};
 
-	typedef Lepra::OrderedMap<GameClientSlaveManager*, GameClientSlaveManager*, std::hash<void*> > SlaveMap;
+	typedef OrderedMap<GameClientSlaveManager*, GameClientSlaveManager*, std::hash<void*> > SlaveMap;
 
-	Lepra::Lock mLock;
+	Lock mLock;
 	UiCure::GameUiManager* mUiManager;
 	Cure::ResourceManager* mResourceManager;
 	View* mPlayerCountView;

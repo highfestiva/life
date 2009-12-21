@@ -25,17 +25,17 @@ public:
 	static void Shutdown();
 
 	// Get root directory ( '/', 'C:\', 'Macintosh HD', etc..).
-	static String GetRootDirectory();
-	static String GetCurrentDirectory();
-	static String GetUserDirectory();
-	static String GetIoDirectory(const String& pAppName);
-	static String GetLoginName();
-	static String QueryFullUserName();
+	static str GetRootDirectory();
+	static str GetCurrentDirectory();
+	static str GetUserDirectory();
+	static str GetIoDirectory(const str& pAppName);
+	static str GetLoginName();
+	static str QueryFullUserName();
 	static std::string GetRandomId();
 
-	static void WebBrowseTo(const String& pUrl);
+	static void WebBrowseTo(const str& pUrl);
 
-	static String GetUniqueHardwareString();
+	static str GetUniqueHardwareString();
 
 	// The Cpu frequency may be an approximation, which means that it may vary 
 	// from call to call.
@@ -44,9 +44,9 @@ public:
 	static unsigned GetLogicalCpuCount();
 	static unsigned GetPhysicalCpuCount();
 	static unsigned GetCoreCount();
-	static String GetCpuName();
+	static str GetCpuName();
 	static unsigned QueryCpuMips();
-	static String GetOsName();
+	static str GetOsName();
 	static uint64 GetAmountRam();
 	static uint64 GetAvailRam();
 	static uint64 GetAmountVirtualMemory();

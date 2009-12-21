@@ -36,7 +36,7 @@ public:
 	virtual ~Win32DisplayManager();
 
 	// Sets the caption of the window.
-	virtual void SetCaption(const Lepra::String& pCaption);
+	virtual void SetCaption(const str& pCaption);
 
 	// The border flag only has effect in windowed mode.
 	virtual bool OpenScreen(const DisplayMode& pDisplayMode, ScreenMode pMode);
@@ -81,10 +81,10 @@ public:
 
 	// Returns the color that is closest to the desired color (pRed, pGreen, pBlue).
 	// OBS! This is slow! Do not use in time critical loops!
-	virtual Lepra::uint8 GetPaletteColor(int pRed, int pGreen, int pBlue);
-	virtual const Lepra::Color* GetPaletteColor(unsigned pIndex);
+	virtual uint8 GetPaletteColor(int pRed, int pGreen, int pBlue);
+	virtual const Color* GetPaletteColor(unsigned pIndex);
 
-	virtual void SetPalette(const Lepra::Color* pPalette);
+	virtual void SetPalette(const Color* pPalette);
 
 	/*
 		Win32 implementation specific stuff...
@@ -101,7 +101,7 @@ public:
 	void RemoveObserver(unsigned int pMessage, Win32Observer* pObserver);
 	void RemoveObserver(Win32Observer* pObserver);
 	// Show a popup dialog with a message.
-	void ShowMessageBox(const Lepra::String& pMsg, const Lepra::String& pCaption);
+	void ShowMessageBox(const str& pMsg, const str& pCaption);
 
 	virtual bool OnMessage(int pMsg, int pwParam, long plParam);
 
@@ -122,7 +122,7 @@ protected:
 	void Unregister();
 	bool InitWindow();
 
-	void SetCaption(const Lepra::String& pCaption, bool pInternalCall);
+	void SetCaption(const str& pCaption, bool pInternalCall);
 
 	void GetBorderSize(int& pSizeX, int& pSizeY);
 	int GetWindowWidth(int pClientWidth);
@@ -147,7 +147,7 @@ protected:
 
 	void* mScreen;
 
-	Lepra::Color mPalette[256];
+	Color mPalette[256];
 
 	static int msWindowCount;
 	static int msRegisterCount;
@@ -172,7 +172,7 @@ private:
 	bool mConsumeChar;
 
 	typedef std::hash_set<Win32Observer*, std::hash<void*> > ObserverSet;
-	typedef Lepra::HashTable<unsigned int, ObserverSet*> ObserverSetTable;
+	typedef HashTable<unsigned int, ObserverSet*> ObserverSetTable;
 	// A table of lists of observers.
 	ObserverSetTable mObserverSetTable;
 

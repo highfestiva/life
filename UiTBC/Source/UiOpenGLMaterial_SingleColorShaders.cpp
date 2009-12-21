@@ -1,5 +1,5 @@
 /*
-	Lepra::File:   OpenGLMaterials_SingleColorShaders.cpp
+	File:   OpenGLMaterials_SingleColorShaders.cpp
 	Class:  -
 	Author: Alexander Hugestrand
 	Copyright (c) 2002-2009, Righteous Games

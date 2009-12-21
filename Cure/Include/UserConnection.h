@@ -23,17 +23,17 @@ public:
 	UserConnection();
 	virtual ~UserConnection();
 
-	const Lepra::UnicodeString& GetLoginName() const;
-	void SetLoginName(const Lepra::UnicodeString& pName);
+	const wstr& GetLoginName() const;
+	void SetLoginName(const wstr& pName);
 	UserAccount::AccountId GetAccountId() const;
 	void SetAccountId(UserAccount::AccountId pId);
-	Lepra::GameSocket* GetSocket() const;
-	void SetSocket(Lepra::GameSocket* pSocket);
+	GameSocket* GetSocket() const;
+	void SetSocket(GameSocket* pSocket);
 
 private:
-	Lepra::UnicodeString mName;
+	wstr mName;
 	UserAccount::AccountId mAccountId;
-	Lepra::GameSocket* mSocket;
+	GameSocket* mSocket;
 };
 
 

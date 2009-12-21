@@ -36,7 +36,7 @@ public:
 		DEBUG_SHAPES,
 	};
 
-	CppContextObject(const Lepra::String& pClassId, GameUiManager* pUiManager);
+	CppContextObject(const str& pClassId, GameUiManager* pUiManager);
 	virtual ~CppContextObject();
 
 	virtual void StartLoading();
@@ -54,11 +54,11 @@ private:
 	void TryAddTexture();
 	virtual bool TryComplete();
 	void OnLoadSound3d(UserSound3dResource* pSoundResource);
-	UserSound3dResource* CreateSharedSound(const Lepra::String& pId);
-	void DeleteSharedSound(const Lepra::String& pId);
+	UserSound3dResource* CreateSharedSound(const str& pId);
+	void DeleteSharedSound(const str& pId);
 
 	typedef std::vector<UserGeometryReferenceResource*> MeshArray;
-	typedef std::hash_map<Lepra::String, UserSound3dResource*> SoundTable;
+	typedef std::hash_map<str, UserSound3dResource*> SoundTable;
 
 	GameUiManager* mUiManager;
 	UserClassResource* mUiClassResource;

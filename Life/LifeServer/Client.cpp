@@ -12,7 +12,7 @@
 #include "../../Cure/Include/TimeManager.h"
 #include "../../Cure/Include/UserConnection.h"
 #include "../../Lepra/Include/Math.h"
-#include "../LifeDefinitions.h"
+#include "../Life.h"
 
 
 
@@ -82,11 +82,11 @@ void Client::StoreFrameDiff(int pFrameDiff)
 		mNetworkFrameLatencyArrayIndex = 0;
 	}
 
-	const int lMedian = Lepra::Math::CalculateMedian<int, NetworkLatencyArray>(mNetworkFrameLatencyArray);
-	const float lDeviation = Lepra::Math::CalculateDeviation<float, int, NetworkLatencyArray>(mNetworkFrameLatencyArray, lMedian);
+	const int lMedian = Math::CalculateMedian<int, NetworkLatencyArray>(mNetworkFrameLatencyArray);
+	const float lDeviation = Math::CalculateDeviation<float, int, NetworkLatencyArray>(mNetworkFrameLatencyArray, lMedian);
 	const float lSlidingMeanLerpFactor = 0.5f;
-	mMeasuredNetworkLatencyFrameCount = Lepra::Math::Lerp<float>((float)lMedian, mMeasuredNetworkLatencyFrameCount, lSlidingMeanLerpFactor);
-	mMeasuredNetworkJitterFrameCount = Lepra::Math::Lerp<float>(lDeviation, mMeasuredNetworkJitterFrameCount, lSlidingMeanLerpFactor);
+	mMeasuredNetworkLatencyFrameCount = Math::Lerp<float>((float)lMedian, mMeasuredNetworkLatencyFrameCount, lSlidingMeanLerpFactor);
+	mMeasuredNetworkJitterFrameCount = Math::Lerp<float>(lDeviation, mMeasuredNetworkJitterFrameCount, lSlidingMeanLerpFactor);
 }
 
 void Client::QuerySendStriveTimes()
@@ -115,14 +115,14 @@ void Client::QuerySendStriveTimes()
 		}
 		else
 		{
-			Lepra::String s;
+			str s;
 			if (lNetworkFrameDiffCount < 0)
 			{
-				s = Lepra::StringUtility::Format(_T("Client movement arrives %i frames early on average."), -lNetworkFrameDiffCount);
+				s = strutil::Format(_T("Client movement arrives %i frames early on average."), -lNetworkFrameDiffCount);
 			}
 			else
 			{
-				s = Lepra::StringUtility::Format(_T("Client movement arrives %i frames late on average."), lNetworkFrameDiffCount);
+				s = strutil::Format(_T("Client movement arrives %i frames late on average."), lNetworkFrameDiffCount);
 			}
 			log_debug(s);
 		}

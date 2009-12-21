@@ -71,17 +71,17 @@ public:
 		size_t mBitangentOffset; // Used with bump/normal mapping.
 	};
 
-	OpenGLRenderer(Lepra::Canvas* pScreen);
+	OpenGLRenderer(Canvas* pScreen);
 	virtual ~OpenGLRenderer();
 	
 	// Overloads from Renderer.
 	void Clear(unsigned int pClearFlags = CLEAR_COLORBUFFER | CLEAR_DEPTHBUFFER);
 
-	void SetClearColor(const Lepra::Color& pColor);
+	void SetClearColor(const Color& pColor);
 
-	void SetViewport(const Lepra::PixelRect& pViewport);
+	void SetViewport(const PixelRect& pViewport);
 	void SetViewFrustum(float pFOVAngle, float pNear, float pFar);
-	void SetClippingRect(const Lepra::PixelRect& pRect);
+	void SetClippingRect(const PixelRect& pRect);
 	void ResetClippingRect();
 
 	void SetShadowsEnabled(bool pEnabled, ShadowHint pHint);
@@ -130,7 +130,7 @@ public:
 	bool PreRender(TBC::GeometryBase* pGeometry);
 	void PostRender(TBC::GeometryBase* pGeometry);
 
-	virtual void DrawLine(const Lepra::Vector3DF& pPosition, const Lepra::Vector3DF& pVector, const Lepra::Color& pColor);
+	virtual void DrawLine(const Vector3DF& pPosition, const Vector3DF& pVector, const Color& pColor);
 
 protected:
 	// Overloads from HardwareRenderer
@@ -146,7 +146,7 @@ protected:
 			 Texture* pTexture);
 	void ReleaseMap(Renderer::TextureData* pTextureData);
 
-	const Lepra::Canvas* GetMap(int pMapType, int pMipMapLevel, Texture* pUserTexture);
+	const Canvas* GetMap(int pMapType, int pMipMapLevel, Texture* pUserTexture);
 
 	void BindGeometry(TBC::GeometryBase* pUserGeometry,
 			  Renderer::GeometryID pID,
@@ -180,10 +180,10 @@ private:
 	// frustum planes (left and right screen edges).
 	void Perspective(float pFOVAngle, float pAspectRatio, float pNear, float pFar);
 
-	void SetPixelFormat(int& pSize, GLenum& pPixelFormat, bool pCompress, const Lepra::String& pErrorMessage);
+	void SetPixelFormat(int& pSize, GLenum& pPixelFormat, bool pCompress, const str& pErrorMessage);
 
-	Lepra::IdManager<int> mBufferIDManager;
-	Lepra::IdManager<int> mTMapIDManager;
+	IdManager<int> mBufferIDManager;
+	IdManager<int> mTMapIDManager;
 
 	GLbitfield mGLClearMask;
 

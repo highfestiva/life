@@ -13,7 +13,7 @@ namespace Lepra
 
 
 
-Application::Application(const StringUtility::StringVector& pArgumentVector):
+Application::Application(const strutil::strvec& pArgumentVector):
 	mArgumentVector(pArgumentVector)
 {
 }

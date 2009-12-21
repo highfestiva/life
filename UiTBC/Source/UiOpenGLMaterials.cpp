@@ -1138,8 +1138,8 @@ OpenGLMatPXS::OpenGLMatPXS(char* pVP, char* pFP[NUM_FP]):
 		glGetIntegerv(GL_PROGRAM_ERROR_POSITION_ARB, &lErrorPos);
 		if (lErrorPos != -1)
 		{
-			Lepra::AnsiString lGlError((const char*)glGetString(GL_PROGRAM_ERROR_STRING_ARB));
-			mLog.Errorf(_T("Error in vertex shader at pos %i!\r\n%s\r\n"), lErrorPos, Lepra::AnsiStringUtility::ToCurrentCode(lGlError).c_str());
+			astr lGlError((const char*)glGetString(GL_PROGRAM_ERROR_STRING_ARB));
+			mLog.Errorf(_T("Error in vertex shader at pos %i!\r\n%s\r\n"), lErrorPos, astrutil::ToCurrentCode(lGlError).c_str());
 		}
 		glDisable(GL_VERTEX_PROGRAM_ARB);
 
@@ -1163,8 +1163,8 @@ OpenGLMatPXS::OpenGLMatPXS(char* pVP, char* pFP[NUM_FP]):
 			glGetIntegerv(GL_PROGRAM_ERROR_POSITION_ARB, &lErrorPos);
 			if (lErrorPos != -1)
 			{
-				Lepra::AnsiString lGlError((const char*)glGetString(GL_PROGRAM_ERROR_STRING_ARB));
-				mLog.Errorf(_T("Error in fragment shader %i at pos %i!\r\n%s\r\n"), i, lErrorPos, Lepra::AnsiStringUtility::ToCurrentCode(lGlError).c_str());
+				astr lGlError((const char*)glGetString(GL_PROGRAM_ERROR_STRING_ARB));
+				mLog.Errorf(_T("Error in fragment shader %i at pos %i!\r\n%s\r\n"), i, lErrorPos, astrutil::ToCurrentCode(lGlError).c_str());
 				mLog.AInfo("Setting fragment shader to fallback shader.");
 
 				SetToFallbackFP(i);
@@ -1336,7 +1336,7 @@ void OpenGLMatPXS::PrepareLights(OpenGLRenderer* pRenderer)
 						   lLightCol[lIndex + 2]);
 
 			float lCutoffAngle = pRenderer->GetLightCutoffAngle(lLightID);
-			lLightCut[lBucket * MAX_SHADER_LIGHTS + lLightIndex] = (float)cos(lCutoffAngle * Lepra::PIF / 180.0f);
+			lLightCut[lBucket * MAX_SHADER_LIGHTS + lLightIndex] = (float)cos(lCutoffAngle * PIF / 180.0f);
 
 			lLightExp[lBucket * MAX_SHADER_LIGHTS + lLightIndex] = pRenderer->GetLightSpotExponent(lLightID);
 

@@ -1,5 +1,5 @@
 /*
-	Lepra::File:   ShadowVolume.h
+	File:   ShadowVolume.h
 	Class:  ShadowVolume
 	Author: Alexander Hugestrand
 	Copyright (c) 2002-2009, Righteous Games
@@ -24,7 +24,7 @@ public:
 	virtual ~ShadowVolume();
 
 	// Light position in world coordinates. 
-	void UpdateShadowVolume(const Lepra::Vector3DF& pLightPos, float pLightRadius, bool pDirectional);
+	void UpdateShadowVolume(const Vector3DF& pLightPos, float pLightRadius, bool pDirectional);
 
 	TBC::GeometryBase* GetParentGeometry();
 	void SetParentGeometry(TBC::GeometryBase* pParentGeometry);
@@ -43,8 +43,8 @@ public:
 
 	float*         GetVertexData() const;
 	float*         GetUVData(unsigned int pUVSet) const;
-	Lepra::uint32* GetIndexData() const;
-	Lepra::uint8*  GetColorData() const;
+	uint32* GetIndexData() const;
+	uint8*  GetColorData() const;
 	float*         GetNormalData() const;
 
 	ColorFormat GetColorFormat() const;
@@ -79,7 +79,7 @@ private:
 	void InitTO();
 
 	float* mVertexData;
-	Lepra::uint32* mIndexData;
+	uint32* mIndexData;
 
 	// Array with mNumParentTriangles elements.
 	TriangleOrientation* mTriangleOrientation;
@@ -94,7 +94,7 @@ private:
 	float mGreen;
 	float mBlue;
 
-	Lepra::TransformationF mTransformation;
+	TransformationF mTransformation;
 	unsigned int mLastFrameVisible;
 
 	bool mTransformationChanged;

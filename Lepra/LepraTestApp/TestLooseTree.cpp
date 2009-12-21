@@ -12,12 +12,14 @@
 #include "../Include/Vector3D.h"
 #include "../Include/Random.h"
 
-void ReportTestResult(const Lepra::LogDecorator& pLog, const Lepra::String& pTestName, const Lepra::String& pContext, bool pResult);
+using namespace Lepra;
+
+void ReportTestResult(const Lepra::LogDecorator& pLog, const str& pTestName, const str& pContext, bool pResult);
 
 bool TestLooseBintree(const Lepra::LogDecorator& pAccount)
 {
-	Lepra::String lContext;
-	Lepra::LooseBinTree<int, Lepra::String, double> lLBT(Lepra::EmptyString);
+	str lContext;
+	Lepra::LooseBinTree<int, str, double> lLBT(Lepra::EmptyString);
 
 	double lMin  = Lepra::Random::Uniform(-1000.0, 1000.0);
 	double lMax  = Lepra::Random::Uniform(-1000.0, 1000.0);
@@ -35,11 +37,11 @@ bool TestLooseBintree(const Lepra::LogDecorator& pAccount)
 	double lSize2 = Lepra::Random::Uniform(0, lMax - lMin);
 	double lSize3 = Lepra::Random::Uniform(0, lMax - lMin);
 
-	lLBT.InsertObject(1, Lepra::String(_T("my")), lPos1, lSize1);
+	lLBT.InsertObject(1, str(_T("my")), lPos1, lSize1);
 	// Triggers a warning, which is good, but ugly to see in the console.
-	//lLBT.InsertObject(1, Lepra::String(_T("my")), lPos1, lSize1);
-	lLBT.InsertObject(2, Lepra::String(_T("name")), lPos2, lSize2);
-	lLBT.InsertObject(3, Lepra::String(_T("is")), lPos3, lSize3);
+	//lLBT.InsertObject(1, str(_T("my")), lPos1, lSize1);
+	lLBT.InsertObject(2, str(_T("name")), lPos2, lSize2);
+	lLBT.InsertObject(3, str(_T("is")), lPos3, lSize3);
 
 	bool lTestOk = true;
 	if(lTestOk)
@@ -48,7 +50,7 @@ bool TestLooseBintree(const Lepra::LogDecorator& pAccount)
 		lContext = _T("Object count");
 		lTestOk = (lLBT.GetNumObjects() == 3);
 	}
-	Lepra::LooseBinTree<int, Lepra::String, double>::ObjectList lList;
+	Lepra::LooseBinTree<int, str, double>::ObjectList lList;
 	if(lTestOk)
 	{
 		// Retreive all objects.
@@ -56,12 +58,12 @@ bool TestLooseBintree(const Lepra::LogDecorator& pAccount)
 		lLBT.GetObjects(lList, (lMax + lMin) * 0.5, (lMax - lMin) * 0.5);
 		lTestOk = (lList.size() == 3);
 	}
-	Lepra::String lStr[3];
+	str lStr[3];
 	if(lTestOk)
 	{
 		// All strings should be either "my", "name" or "is".
 		lContext = _T("Get objects, contents, 1");
-		Lepra::LooseBinTree<int, Lepra::String, double>::ObjectList::iterator lIter;
+		Lepra::LooseBinTree<int, str, double>::ObjectList::iterator lIter;
 		int i;
 		for(lIter = lList.begin(), i = 0; lIter != lList.end(); ++lIter, ++i)
 		{
@@ -95,8 +97,8 @@ bool TestLooseBintree(const Lepra::LogDecorator& pAccount)
 
 bool TestLooseQuadtree(const Lepra::LogDecorator& pAccount)
 {
-	Lepra::String lContext;
-	typedef Lepra::LooseQuadtree<int, Lepra::String, double> QuadTree;
+	str lContext;
+	typedef Lepra::LooseQuadtree<int, str, double> QuadTree;
 	QuadTree lLQT(Lepra::EmptyString);
 
 	double lMin  = Lepra::Random::Uniform(-1000.0, 1000.0);
@@ -120,9 +122,9 @@ bool TestLooseQuadtree(const Lepra::LogDecorator& pAccount)
 	Lepra::LQRectArea<double> lArea2(lPos2, Lepra::Vector2D<double>(lSize2, lSize2));
 	Lepra::LQRectArea<double> lArea3(lPos3, Lepra::Vector2D<double>(lSize3, lSize3));
 
-	lLQT.InsertObject(1, &lArea1, Lepra::String(_T("my")));
-	lLQT.InsertObject(2, &lArea2, Lepra::String(_T("name")));
-	lLQT.InsertObject(3, &lArea3, Lepra::String(_T("is")));
+	lLQT.InsertObject(1, &lArea1, str(_T("my")));
+	lLQT.InsertObject(2, &lArea2, str(_T("name")));
+	lLQT.InsertObject(3, &lArea3, str(_T("is")));
 
 	bool lTestOk = true;
 	if(lTestOk)
@@ -140,7 +142,7 @@ bool TestLooseQuadtree(const Lepra::LogDecorator& pAccount)
 						      (lMax - lMin) * 0.5, (lMax - lMin) * 0.5));
 		lTestOk = (lList.size() == 3);
 	}
-	Lepra::String lStr[3];
+	str lStr[3];
 	if(lTestOk)
 	{
 		// All strings should be either "my", "name" or "is".
@@ -180,8 +182,8 @@ bool TestLooseQuadtree(const Lepra::LogDecorator& pAccount)
 
 bool TestLooseOctree(const Lepra::LogDecorator& pAccount)
 {
-	Lepra::String lContext;
-	typedef Lepra::LooseOctree<int, Lepra::String, double> Octree;
+	str lContext;
+	typedef Lepra::LooseOctree<int, str, double> Octree;
 	Octree lLOct(Lepra::EmptyString);
 
 	double lMin  = -1000.0;
@@ -199,9 +201,9 @@ bool TestLooseOctree(const Lepra::LogDecorator& pAccount)
 	Lepra::LOAABBVolume<double> lVolume2(lPos2, Lepra::Vector3D<double>(lSize2, lSize2, lSize2));
 	Lepra::LOAABBVolume<double> lVolume3(lPos3, Lepra::Vector3D<double>(lSize3, lSize3, lSize3));
 
-	lLOct.InsertObject(1, &lVolume1, Lepra::String(_T("my")));
-	lLOct.InsertObject(2, &lVolume2, Lepra::String(_T("name")));
-	lLOct.InsertObject(3, &lVolume3, Lepra::String(_T("is")));
+	lLOct.InsertObject(1, &lVolume1, str(_T("my")));
+	lLOct.InsertObject(2, &lVolume2, str(_T("name")));
+	lLOct.InsertObject(3, &lVolume3, str(_T("is")));
 
 	bool lTestOk = true;
 	if(lTestOk)
@@ -221,7 +223,7 @@ bool TestLooseOctree(const Lepra::LogDecorator& pAccount)
 		lLOct.GetObjects(lList, Lepra::AABB<double>(lSearchPos, lSearchSize));
 		lTestOk = (lList.size() == 3);
 	}
-	Lepra::String lStr[3];
+	str lStr[3];
 	if(lTestOk)
 	{
 		// All strings should be either "my", "name" or "is".

@@ -63,7 +63,7 @@ Material* OpenGLRenderer::CreateMaterial(Renderer::MaterialType pMaterialType)
 
 
 
-OpenGLRenderer::OpenGLRenderer(Lepra::Canvas* pScreen) :
+OpenGLRenderer::OpenGLRenderer(Canvas* pScreen) :
 	Renderer(pScreen),
 	mBufferIDManager(1, 1000000, 0),
 	mTMapIDManager(10001, 1000000, INVALID_TEXTURE),	// 1-10000 is reserved by Painter.
@@ -117,7 +117,7 @@ void OpenGLRenderer::Clear(unsigned int pClearFlags)
 	glClear(mGLClearMask);
 }
 
-void OpenGLRenderer::SetClearColor(const Lepra::Color& pColor)
+void OpenGLRenderer::SetClearColor(const Color& pColor)
 {
 	glClearColor((float)pColor.mRed   / 255.0f,
 		     (float)pColor.mGreen / 255.0f,
@@ -125,7 +125,7 @@ void OpenGLRenderer::SetClearColor(const Lepra::Color& pColor)
 		     1.0f);
 }
 
-void OpenGLRenderer::SetViewport(const Lepra::PixelRect& pViewport)
+void OpenGLRenderer::SetViewport(const PixelRect& pViewport)
 {
 	Renderer::SetViewport(pViewport);
 	glViewport(pViewport.mLeft, GetScreen()->GetHeight() - pViewport.mBottom, 
@@ -141,7 +141,7 @@ void OpenGLRenderer::SetViewFrustum(float pFOVAngle, float pNear, float pFar)
 	glMatrixMode(GL_MODELVIEW);
 }
 
-void OpenGLRenderer::SetClippingRect(const Lepra::PixelRect& pRect)
+void OpenGLRenderer::SetClippingRect(const PixelRect& pRect)
 {
 	Renderer::SetClippingRect(pRect);
 	glScissor(pRect.mLeft, 
@@ -152,7 +152,7 @@ void OpenGLRenderer::SetClippingRect(const Lepra::PixelRect& pRect)
 void OpenGLRenderer::ResetClippingRect()
 {
 	Renderer::ResetClippingRect();
-	const Lepra::PixelRect& lClippingRect = Renderer::GetClippingRect();
+	const PixelRect& lClippingRect = Renderer::GetClippingRect();
 	glScissor(lClippingRect.mLeft, 
 		  GetScreen()->GetHeight() - lClippingRect.mBottom, 
 		  lClippingRect.GetWidth(), lClippingRect.GetHeight());
@@ -280,7 +280,7 @@ void OpenGLRenderer::SetupGLLight(int pLightIndex, const Renderer::LightData& pL
 	if (pLight.mType == Renderer::LIGHT_POINT ||
 	   pLight.mType == Renderer::LIGHT_SPOT)
 	{
-		Lepra::Vector3DF lLightPos = GetCameraTransformation().InverseTransform(pLight.mPosition);
+		Vector3DF lLightPos = GetCameraTransformation().InverseTransform(pLight.mPosition);
 		lPos[0] = (float)lLightPos.x;
 		lPos[1] = (float)lLightPos.y;
 		lPos[2] = (float)lLightPos.z;
@@ -288,7 +288,7 @@ void OpenGLRenderer::SetupGLLight(int pLightIndex, const Renderer::LightData& pL
 
 		if (pLight.mType == Renderer::LIGHT_SPOT)
 		{
-			Lepra::Vector3DF lLightDir = GetCameraTransformation().GetOrientation().GetInverseRotatedVector(pLight.mDirection);
+			Vector3DF lLightDir = GetCameraTransformation().GetOrientation().GetInverseRotatedVector(pLight.mDirection);
 
 			float lDir[3];
 			lDir[0] = (float)lLightDir.x;
@@ -453,7 +453,7 @@ Renderer::GeometryData* OpenGLRenderer::CreateGeometryData()
 	return new OGLGeometryData();
 }
 
-const Lepra::Canvas* OpenGLRenderer::GetMap(int pMapType, int pMipMapLevel, Texture* pUserTexture)
+const Canvas* OpenGLRenderer::GetMap(int pMapType, int pMipMapLevel, Texture* pUserTexture)
 {
 	switch (pMapType)
 	{
@@ -492,11 +492,11 @@ void OpenGLRenderer::BindMap(int pMapType,
 	
 	GLenum lPixelFormat;
 	SetPixelFormat(lSize, lPixelFormat, lCompress, 
-		Lepra::StringUtility::Format(_T("AddTexture() - the texture has an invalid pixel size of %i bytes!"), lSize));
+		strutil::Format(_T("AddTexture() - the texture has an invalid pixel size of %i bytes!"), lSize));
 
 	for (int i = 0; i < pTexture->GetNumMipMapLevels(); i++)
 	{
-		const Lepra::Canvas* lMap = GetMap(pMapType, i, pTexture);
+		const Canvas* lMap = GetMap(pMapType, i, pTexture);
 		glTexImage2D(GL_TEXTURE_2D, 
 			     i,
 			     lSize,
@@ -519,7 +519,7 @@ void OpenGLRenderer::BindCubeMap(Renderer::TextureData* pTextureData,
 	int lSize = pTexture->GetCubeMapPosX(0)->GetPixelByteSize();
 	GLenum lPixelFormat;
 	SetPixelFormat(lSize, lPixelFormat, lCompress, 
-		Lepra::StringUtility::Format(_T("AddTexture() - the cube map has an invalid pixel size of %i bytes!"), lSize));
+		strutil::Format(_T("AddTexture() - the cube map has an invalid pixel size of %i bytes!"), lSize));
 
 	if (pTextureData->mTMapID[Texture::CUBE_MAP] == mTMapIDManager.GetInvalidId())
 	{
@@ -1004,7 +1004,7 @@ bool OpenGLRenderer::ChangeMaterial(GeometryID pGeometryID, MaterialType pMateri
 
 bool OpenGLRenderer::PreRender(TBC::GeometryBase* pGeometry)
 {
-	Lepra::TransformationF lCamSpaceTransformation(GetCameraTransformation().InverseTransform(pGeometry->GetTransformation()));
+	TransformationF lCamSpaceTransformation(GetCameraTransformation().InverseTransform(pGeometry->GetTransformation()));
 
 	// Transform the geometry.
 	float lModelViewMatrix[16];
@@ -1022,10 +1022,10 @@ void OpenGLRenderer::PostRender(TBC::GeometryBase* pGeometry)
 
 
 
-void OpenGLRenderer::DrawLine(const Lepra::Vector3DF& pPosition, const Lepra::Vector3DF& pVector, const Lepra::Color& pColor)
+void OpenGLRenderer::DrawLine(const Vector3DF& pPosition, const Vector3DF& pVector, const Color& pColor)
 {
 	glEnable(GL_DEPTH_TEST);
-	Lepra::TransformationF lCamTransform = GetCameraTransformation().InverseTransform(Lepra::TransformationF());
+	TransformationF lCamTransform = GetCameraTransformation().InverseTransform(TransformationF());
 	float lModelViewMatrix[16];
 	lCamTransform.GetAs4x4TransposeMatrix(lModelViewMatrix);
 	glMatrixMode(GL_MODELVIEW);
@@ -1222,7 +1222,7 @@ void OpenGLRenderer::ProcessLights()
 
 		if (lLight.mType == Renderer::LIGHT_DIRECTIONAL)
 		{
-			Lepra::Vector3DF lLightDir = GetCameraTransformation().GetOrientation().GetInverseRotatedVector(lLight.mDirection);
+			Vector3DF lLightDir = GetCameraTransformation().GetOrientation().GetInverseRotatedVector(lLight.mDirection);
 			float lPos[4] =
 			{
 				(float)-lLightDir.x,
@@ -1235,7 +1235,7 @@ void OpenGLRenderer::ProcessLights()
 		}
 		else if(lLight.mType == Renderer::LIGHT_POINT)
 		{
-			Lepra::Vector3DF lLightPos = GetCameraTransformation().InverseTransform(lLight.mPosition);
+			Vector3DF lLightPos = GetCameraTransformation().InverseTransform(lLight.mPosition);
 			float lPos[4] =
 			{
 				(float)lLightPos.x,
@@ -1248,8 +1248,8 @@ void OpenGLRenderer::ProcessLights()
 		}
 		else if(lLight.mType == Renderer::LIGHT_SPOT)
 		{
-			Lepra::Vector3DF lLightPos = GetCameraTransformation().InverseTransform(lLight.mPosition);
-			Lepra::Vector3DF lLightDir = GetCameraTransformation().GetOrientation().GetInverseRotatedVector(lLight.mDirection);
+			Vector3DF lLightPos = GetCameraTransformation().InverseTransform(lLight.mPosition);
+			Vector3DF lLightDir = GetCameraTransformation().GetOrientation().GetInverseRotatedVector(lLight.mDirection);
 			float lPos[4] =
 			{
 				(float)lLightPos.x,
@@ -1481,7 +1481,7 @@ int OpenGLRenderer::RenderShadowMaps()
 				(GetCameraTransformation().InverseTransform(lGeometry->mGeometry->GetTransformation())).GetAs4x4TransposeMatrix(lModelViewMatrix);
 
 				float lLightModelViewMatrix[16];
-				Lepra::TransformationF lLightTransformation(lLight.mOrientation, lLight.mPosition);
+				TransformationF lLightTransformation(lLight.mOrientation, lLight.mPosition);
 				(lLightTransformation.InverseTransform(lGeometry->mGeometry->GetTransformation())).GetAs4x4TransposeMatrix(lLightModelViewMatrix);
 
 				// Camera model view matrix.
@@ -1581,7 +1581,7 @@ void OpenGLRenderer::RegenerateShadowMap(Renderer::LightData* pLight)
 	glMatrixMode(GL_MODELVIEW);
 
 
-	Lepra::TransformationF lLightTransformation(pLight->mOrientation, pLight->mPosition);
+	TransformationF lLightTransformation(pLight->mOrientation, pLight->mPosition);
     
 	// Clear depth buffer.
 	glClear(GL_DEPTH_BUFFER_BIT);
@@ -1664,7 +1664,7 @@ void OpenGLRenderer::RegenerateShadowMap(Renderer::LightData* pLight)
 void OpenGLRenderer::Perspective(float pFOVAngle, float pAspectRatio, float pNear, float pFar)
 {
 	// Convert to radians.
-	float lFOVAngle = pFOVAngle * Lepra::PIF / 180.0f;
+	float lFOVAngle = pFOVAngle * PIF / 180.0f;
 
 	/*
 	    Looking at the FOV from above.
@@ -1732,7 +1732,7 @@ void OpenGLRenderer::Perspective(float pFOVAngle, float pAspectRatio, float pNea
 	glMatrixMode(GL_MODELVIEW);
 }
 
-void OpenGLRenderer::SetPixelFormat(int& pSize, GLenum& pPixelFormat, bool pCompress, const Lepra::String& pErrorMessage)
+void OpenGLRenderer::SetPixelFormat(int& pSize, GLenum& pPixelFormat, bool pCompress, const str& pErrorMessage)
 {
 	switch(pSize)
 	{

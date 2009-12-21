@@ -36,7 +36,7 @@ ChunkyClass::~ChunkyClass()
 
 
 
-void ChunkyClass::AddMesh(int pPhysIndex, const Lepra::String& pMeshBaseName, const Lepra::TransformationF& pTransform)
+void ChunkyClass::AddMesh(int pPhysIndex, const str& pMeshBaseName, const TransformationF& pTransform)
 {
 	mMeshArray.push_back(PhysMeshEntry(pPhysIndex, pMeshBaseName, pTransform));
 }
@@ -46,8 +46,8 @@ size_t ChunkyClass::GetMeshCount() const
 	return (mMeshArray.size());
 }
 
-void ChunkyClass::GetMesh(size_t pIndex, int& pPhysIndex, Lepra::String& pMeshBaseName,
-	Lepra::TransformationF& pTransform) const
+void ChunkyClass::GetMesh(size_t pIndex, int& pPhysIndex, str& pMeshBaseName,
+	TransformationF& pTransform) const
 {
 	assert(pIndex < mMeshArray.size());
 	pPhysIndex = mMeshArray[pIndex].mPhysIndex;

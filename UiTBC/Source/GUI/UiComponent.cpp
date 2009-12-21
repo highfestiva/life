@@ -15,7 +15,7 @@ namespace UiTbc
 
 
 
-Component::Component(const Lepra::String& pName, Layout* pLayout) :
+Component::Component(const str& pName, Layout* pLayout) :
 	mName(pName),
 	mParent(0),
 	mMouseFocusChild(0),
@@ -137,14 +137,14 @@ void Component::ReplaceLayer(int pLayer, Layout* pLayout)
 	}
 }
 
-Lepra::PixelCoords Component::GetPreferredSize(bool pForceAdaptive)
+PixelCoords Component::GetPreferredSize(bool pForceAdaptive)
 {
-	Lepra::PixelCoords lSize(mPreferredSize);
+	PixelCoords lSize(mPreferredSize);
 	
 	if ((pForceAdaptive == true || mAdaptivePreferredSize == true) && mLayout[0] != 0 && 
 	   (lSize.x == 0 || lSize.y == 0))
 	{
-		Lepra::PixelCoords lTemp(mLayout[0]->GetPreferredSize(pForceAdaptive));
+		PixelCoords lTemp(mLayout[0]->GetPreferredSize(pForceAdaptive));
 
 		if (lSize.x == 0)
 		{
@@ -159,13 +159,13 @@ Lepra::PixelCoords Component::GetPreferredSize(bool pForceAdaptive)
 	return lSize;
 }
 
-Lepra::PixelCoords Component::GetMinSize()
+PixelCoords Component::GetMinSize()
 {
-	Lepra::PixelCoords lSize(mMinSize);
+	PixelCoords lSize(mMinSize);
 	
 	if (mLayout[0] != 0 && (lSize.x == 0 || lSize.y == 0))
 	{
-		Lepra::PixelCoords lTemp(mLayout[0]->GetMinSize());
+		PixelCoords lTemp(mLayout[0]->GetMinSize());
 
 		if (lSize.x == 0)
 		{
@@ -210,7 +210,7 @@ void Component::RemoveChild(Component* pChild, int pLayer)
 	}
 }
 
-Component* Component::GetChild(const Lepra::String& pName, int pLayer)
+Component* Component::GetChild(const str& pName, int pLayer)
 {
 	if (pLayer >= 0 && pLayer < mLayerCount && mLayout[pLayer] != 0)
 	{
@@ -516,7 +516,7 @@ bool Component::OnMouseMove(int pMouseX, int pMouseY, int pDeltaX, int pDeltaY)
 	return (true);
 }
 
-bool Component::OnChar(Lepra::tchar pChar)
+bool Component::OnChar(tchar pChar)
 {
 	DispatchChar(pChar);
 
@@ -625,8 +625,8 @@ bool Component::IsChildOf(Component* pParent)
 
 bool Component::IsOver(int pScreenX, int pScreenY)
 {
-	Lepra::PixelCoords lPos(GetScreenPos());
-	Lepra::PixelRect lRect(lPos, lPos + GetSize());
+	PixelCoords lPos(GetScreenPos());
+	PixelRect lRect(lPos, lPos + GetSize());
 	return lRect.IsInside(pScreenX, pScreenY);
 }
 
@@ -714,7 +714,7 @@ void Component::DoSetMinSize(int pWidth, int pHeight)
 	mMinSize.y = pHeight < 0 ? 0 : pHeight;
 }
 
-void Component::SetPreferredSize(const Lepra::PixelCoords& pSize, bool pAdaptive)
+void Component::SetPreferredSize(const PixelCoords& pSize, bool pAdaptive)
 {
 	if (mPreferredSize != pSize)
 	{
@@ -744,7 +744,7 @@ void Component::SetPreferredSize(const Lepra::PixelCoords& pSize, bool pAdaptive
 
 void Component::SetPreferredSize(int pWidth, int pHeight, bool pAdaptive)
 {
-	Lepra::PixelCoords lSize(pWidth, pHeight);
+	PixelCoords lSize(pWidth, pHeight);
 	SetPreferredSize(lSize, pAdaptive);
 }
 
@@ -780,7 +780,7 @@ void Component::SetMouseFocus(Component* pChild)
 	}
 }
 
-void Component::DispatchChar(Lepra::tchar pChar)
+void Component::DispatchChar(tchar pChar)
 {
 	TextListenerSet::iterator x = mTextListenerSet.begin();
 	for (; x != mTextListenerSet.end(); ++x)
@@ -856,7 +856,7 @@ void Component::ReleaseKeyboardFocus(RecurseDir pDir, Component* pFocusedCompone
 	}
 }
 
-const Lepra::String& Component::GetName()
+const str& Component::GetName()
 {
 	return mName;
 }
@@ -878,14 +878,14 @@ void Component::SetParent(Component* pParent)
 	// OnNewTopParentConnected();
 }
 
-const Lepra::PixelCoords& Component::GetPos()
+const PixelCoords& Component::GetPos()
 {
 	return mPos;
 }
 
-Lepra::PixelCoords Component::GetScreenPos()
+PixelCoords Component::GetScreenPos()
 {
-	Lepra::PixelCoords lPos(mPos);
+	PixelCoords lPos(mPos);
 
 	if (mParent != 0)
 	{
@@ -895,30 +895,30 @@ Lepra::PixelCoords Component::GetScreenPos()
 	return lPos;
 }
 
-void Component::SetPos(const Lepra::PixelCoords& pPos)
+void Component::SetPos(const PixelCoords& pPos)
 {
 	SetPos(pPos.x, pPos.y);
 }
 
-void Component::SetSize(const Lepra::PixelCoords& pSize)
+void Component::SetSize(const PixelCoords& pSize)
 {
 	SetSize(pSize.x, pSize.y);
 }
 
-void Component::SetMinSize(const Lepra::PixelCoords& pSize)
+void Component::SetMinSize(const PixelCoords& pSize)
 {
 	SetMinSize(pSize.x, pSize.y);
 }
 
-const Lepra::PixelCoords& Component::GetSize()
+const PixelCoords& Component::GetSize()
 {
 	return mSize;
 }
 
-Lepra::PixelRect Component::GetScreenRect()
+PixelRect Component::GetScreenRect()
 {
-	Lepra::PixelCoords lPos(GetScreenPos());
-	return Lepra::PixelRect(lPos, lPos + GetSize());
+	PixelCoords lPos(GetScreenPos());
+	return PixelRect(lPos, lPos + GetSize());
 }
 
 
@@ -972,72 +972,72 @@ bool Component::IsVisible()
 	return (lParentVisible);
 }
 
-Lepra::PixelCoords Component::ClientToWindow(const Lepra::PixelCoords& pCoords)
+PixelCoords Component::ClientToWindow(const PixelCoords& pCoords)
 {
 	return pCoords + mPos;
 }
 
-Lepra::PixelCoords Component::WindowToClient(const Lepra::PixelCoords& pCoords)
+PixelCoords Component::WindowToClient(const PixelCoords& pCoords)
 {
 	return pCoords - mPos;
 }
 
-Lepra::PixelCoords Component::WindowToScreen(const Lepra::PixelCoords& pCoords)
+PixelCoords Component::WindowToScreen(const PixelCoords& pCoords)
 {
 	return pCoords + GetScreenPos();
 }
 
-Lepra::PixelCoords Component::ScreenToWindow(const Lepra::PixelCoords& pCoords)
+PixelCoords Component::ScreenToWindow(const PixelCoords& pCoords)
 {
 	return pCoords - GetScreenPos();
 }
 
-Lepra::PixelCoords Component::ClientToScreen(const Lepra::PixelCoords& pCoords)
+PixelCoords Component::ClientToScreen(const PixelCoords& pCoords)
 {
 	return WindowToScreen(ClientToWindow(pCoords));
 }
 
-Lepra::PixelCoords Component::ScreenToClient(const Lepra::PixelCoords& pCoords)
+PixelCoords Component::ScreenToClient(const PixelCoords& pCoords)
 {
 	return WindowToClient(ScreenToWindow(pCoords));
 }
 
-Lepra::PixelRect Component::ClientToWindow(const Lepra::PixelRect& pRect)
+PixelRect Component::ClientToWindow(const PixelRect& pRect)
 {
-	Lepra::PixelRect lRect(pRect);
+	PixelRect lRect(pRect);
 	lRect.Offset(mPos.x, mPos.y);
 	return lRect;
 }
 
-Lepra::PixelRect Component::WindowToClient(const Lepra::PixelRect& pRect)
+PixelRect Component::WindowToClient(const PixelRect& pRect)
 {
-	Lepra::PixelRect lRect(pRect);
+	PixelRect lRect(pRect);
 	lRect.Offset(-mPos.x, -mPos.y);
 	return lRect;
 }
 
-Lepra::PixelRect Component::WindowToScreen(const Lepra::PixelRect& pRect)
+PixelRect Component::WindowToScreen(const PixelRect& pRect)
 {
-	Lepra::PixelRect lRect(pRect);
-	Lepra::PixelCoords lPos(GetScreenPos());
+	PixelRect lRect(pRect);
+	PixelCoords lPos(GetScreenPos());
 	lRect.Offset(lPos.x, lPos.y);
 	return lRect;
 }
 
-Lepra::PixelRect Component::ScreenToWindow(const Lepra::PixelRect& pRect)
+PixelRect Component::ScreenToWindow(const PixelRect& pRect)
 {
-	Lepra::PixelRect lRect(pRect);
-	Lepra::PixelCoords lPos(GetScreenPos());
+	PixelRect lRect(pRect);
+	PixelCoords lPos(GetScreenPos());
 	lRect.Offset(-lPos.x, -lPos.y);
 	return lRect;
 }
 
-Lepra::PixelRect Component::ClientToScreen(const Lepra::PixelRect& pRect)
+PixelRect Component::ClientToScreen(const PixelRect& pRect)
 {
 	return WindowToScreen(ClientToWindow(pRect));
 }
 
-Lepra::PixelRect Component::ScreenToClient(const Lepra::PixelRect& pRect)
+PixelRect Component::ScreenToClient(const PixelRect& pRect)
 {
 	return WindowToClient(ScreenToWindow(pRect));
 }

@@ -16,7 +16,7 @@ namespace Lepra
 
 
 
-LogListener::LogListener(Lepra::String pName, OutputFormat pFormat):
+LogListener::LogListener(str pName, OutputFormat pFormat):
 	mLog(0),
 	mName(pName),
 	mLevel(Log::LEVEL_LOWEST_TYPE),
@@ -52,7 +52,7 @@ void LogListener::RemoveLog(Log* pLog)
 	}
 }
 
-void LogListener::OnLog(const Log* pOriginator, const String& pAccount, const String& pMessage, Log::LogLevel pLevel)
+void LogListener::OnLog(const Log* pOriginator, const str& pAccount, const str& pMessage, Log::LogLevel pLevel)
 {
 	if (mFormat & FORMAT_CLASS)
 	{
@@ -64,18 +64,18 @@ void LogListener::OnLog(const Log* pOriginator, const String& pAccount, const St
 	}
 }
 
-void LogListener::OnLog(const Log* pOriginator, const String& pMessage, Log::LogLevel pLevel)
+void LogListener::OnLog(const Log* pOriginator, const str& pMessage, Log::LogLevel pLevel)
 {
 	if (pLevel < mLevel)
 	{
 		return;	// TRICKY: optimization by early return.
 	}
 
-	String lOutputString;
+	str lOutputString;
 
 	if (mFormat & FORMAT_LOGCOUNT)
 	{
-		lOutputString = StringUtility::Format(_T("%.5i. "), mLogCount);
+		lOutputString = strutil::Format(_T("%.5i. "), mLogCount);
 	}
 	++mLogCount;
 
@@ -103,20 +103,20 @@ void LogListener::OnLog(const Log* pOriginator, const String& pMessage, Log::Log
 	if (mFormat & FORMAT_TIME)
 	{
 		Time lTime;
-		lOutputString += StringUtility::Format(_T("(%i-%.2i-%.2i, %.2i:%.2i:%.2i) "), lTime.GetYear(), lTime.GetMonth(), lTime.GetDay(), lTime.GetHour(), lTime.GetMinute(), lTime.GetSecond());
+		lOutputString += strutil::Format(_T("(%i-%.2i-%.2i, %.2i:%.2i:%.2i) "), lTime.GetYear(), lTime.GetMonth(), lTime.GetDay(), lTime.GetHour(), lTime.GetMinute(), lTime.GetSecond());
 	}
 
 	if (mFormat & FORMAT_THREAD)
 	{
 		Thread* lThread = Thread::GetCurrentThread();
-		String lThreadName;
+		str lThreadName;
 		if (lThread)
 		{
-			lOutputString += StringUtility::Format(_T("%10s: "), lThread->GetThreadName().c_str());
+			lOutputString += strutil::Format(_T("%10s: "), lThread->GetThreadName().c_str());
 		}
 		else
 		{
-			lOutputString += StringUtility::Format(_T("%10s: "), _T("<Unknown>"));
+			lOutputString += strutil::Format(_T("%10s: "), _T("<Unknown>"));
 		}
 	}
 
@@ -135,7 +135,7 @@ void LogListener::SetLevelThreashold(Log::LogLevel pLevel)
 	mLevel = pLevel;
 }
 
-const Lepra::String& LogListener::GetName() const
+const str& LogListener::GetName() const
 {
 	return (mName);
 }
@@ -147,7 +147,7 @@ StdioConsoleLogListener::StdioConsoleLogListener(OutputFormat pFormat):
 {
 }
 
-void StdioConsoleLogListener::WriteLog(const String& pFullMessage, Log::LogLevel pLevel)
+void StdioConsoleLogListener::WriteLog(const str& pFullMessage, Log::LogLevel pLevel)
 {
 #if defined(LEPRA_WINDOWS)
 	HANDLE lStdOut = ::GetStdHandle(STD_OUTPUT_HANDLE);
@@ -175,7 +175,7 @@ void StdioConsoleLogListener::WriteLog(const String& pFullMessage, Log::LogLevel
 	lAttributes = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE;
 	::SetConsoleTextAttribute(lStdOut, lAttributes);
 #else // !LEPRA_WINDOWS
-	::printf("%s", AnsiStringUtility::ToOwnCode(pFullMessage).c_str());
+	::printf("%s", astrutil::ToOwnCode(pFullMessage).c_str());
 #endif // LEPRA_WINDOWS/!LEPRA_WINDOWS
 }
 
@@ -186,7 +186,7 @@ InteractiveConsoleLogListener::InteractiveConsoleLogListener(OutputFormat pForma
 {
 }
 
-void InteractiveConsoleLogListener::SetAutoPrompt(const String& pAutoPrompt)
+void InteractiveConsoleLogListener::SetAutoPrompt(const str& pAutoPrompt)
 {
 	ScopeLock lLock(&mLock);
 	mAutoPrompt = pAutoPrompt;
@@ -202,7 +202,7 @@ InteractiveStdioConsoleLogListener::InteractiveStdioConsoleLogListener()
 {
 }
 
-void InteractiveStdioConsoleLogListener::WriteLog(const String& pFullMessage, Log::LogLevel pLevel)
+void InteractiveStdioConsoleLogListener::WriteLog(const str& pFullMessage, Log::LogLevel pLevel)
 {
 	ScopeLock lLock(&mLock);
 
@@ -218,7 +218,7 @@ void InteractiveStdioConsoleLogListener::WriteLog(const String& pFullMessage, Lo
 	::printf("\r");
 	mStdioLogListener.WriteLog(pFullMessage, pLevel);
 
-	::printf("%s", AnsiStringUtility::ToOwnCode(mAutoPrompt).c_str());
+	::printf("%s", astrutil::ToOwnCode(mAutoPrompt).c_str());
 
 #ifdef LEPRA_WINDOWS
 	SHORT x = lConsoleInfo.dwCursorPosition.X;
@@ -240,9 +240,9 @@ void InteractiveStdioConsoleLogListener::WriteLog(const String& pFullMessage, Lo
 #endif // Windows / Posix / ?
 }
 
-void InteractiveStdioConsoleLogListener::OnLogRawMessage(const String& pText)
+void InteractiveStdioConsoleLogListener::OnLogRawMessage(const str& pText)
 {
-	::printf("%s", AnsiStringUtility::ToOwnCode(pText).c_str());
+	::printf("%s", astrutil::ToOwnCode(pText).c_str());
 }
 
 
@@ -252,7 +252,7 @@ DebuggerLogListener::DebuggerLogListener(OutputFormat pFormat):
 {
 }
 
-void DebuggerLogListener::WriteLog(const String& pFullMessage, Log::LogLevel)
+void DebuggerLogListener::WriteLog(const str& pFullMessage, Log::LogLevel)
 {
 #if !defined(NO_LOG_DEBUG_INFO)
 #if defined(LEPRA_WINDOWS)
@@ -267,7 +267,7 @@ void DebuggerLogListener::WriteLog(const String& pFullMessage, Log::LogLevel)
 
 
 
-FileLogListener::FileLogListener(const String& pFilename, OutputFormat pFormat):
+FileLogListener::FileLogListener(const str& pFilename, OutputFormat pFormat):
 	LogListener(_T("file"), pFormat)
 {
 	mFile.Open(pFilename, DiskFile::MODE_TEXT_WRITE_APPEND);
@@ -283,7 +283,7 @@ File& FileLogListener::GetFile()
 	return (mFile);
 }
 
-void FileLogListener::WriteLog(const String& pFullMessage, Log::LogLevel)
+void FileLogListener::WriteLog(const str& pFullMessage, Log::LogLevel)
 {
 	mFile.WriteString(pFullMessage);
 	mFile.Flush();
@@ -308,7 +308,7 @@ void MemFileLogListener::Clear()
 	mFile.Clear();
 }
 
-bool MemFileLogListener::Dump(const String& pFilename)
+bool MemFileLogListener::Dump(const str& pFilename)
 {
 	DiskFile lFile;
 	bool lOk = lFile.Open(pFilename, DiskFile::MODE_WRITE_APPEND);
@@ -332,7 +332,7 @@ bool MemFileLogListener::Dump(LogListener& pLogListener, Log::LogLevel pLevel)
 bool MemFileLogListener::Dump(File* pFile, LogListener* pLogListener, Log::LogLevel pLevel)
 {
 	IOError lStatus = IO_OK;
-	Lepra::String lLine;
+	str lLine;
 	int64 lPosition = mFile.Tell();
 	mFile.SeekSet(0);
 	while (lStatus == IO_OK)
@@ -362,7 +362,7 @@ bool MemFileLogListener::Dump(File* pFile, LogListener* pLogListener, Log::LogLe
 	return (lStatus == IO_OK || lStatus == IO_BUFFER_UNDERFLOW);
 }
 
-void MemFileLogListener::WriteLog(const String& pFullMessage, Log::LogLevel pLogLevel)
+void MemFileLogListener::WriteLog(const str& pFullMessage, Log::LogLevel pLogLevel)
 {
 	mFile.WriteString(pFullMessage);
 

@@ -124,13 +124,13 @@ bool ID_QUAL::RecycleId(_TInt pId)
 }
 
 ID_TEMPLATE
-String ID_QUAL::GetDebugState() const
+str ID_QUAL::GetDebugState() const
 {
-	String lDebugState;
+	str lDebugState;
 	typename IdSegmentList::const_iterator x = mIdSegmentList.begin();
 	for (; x != mIdSegmentList.end(); ++x)
 	{
-		lDebugState += StringUtility::Format(_T("%i-%i, %i-%i,\n"), x->mFirstAllocId, x->mFirstFreeId-1, x->mFirstFreeId, x->mLastFreeId);
+		lDebugState += strutil::Format(_T("%i-%i, %i-%i,\n"), x->mFirstAllocId, x->mFirstFreeId-1, x->mFirstFreeId, x->mLastFreeId);
 	}
 	return (lDebugState);
 }

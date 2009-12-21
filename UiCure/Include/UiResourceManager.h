@@ -56,7 +56,7 @@ public:
 	virtual ~UserUiTypeResource();
 
 protected:
-	Cure::Resource* CreateResource(Cure::ResourceManager* pManager, const Lepra::String& pName) const;
+	Cure::Resource* CreateResource(Cure::ResourceManager* pManager, const str& pName) const;
 };
 
 
@@ -76,7 +76,7 @@ public:
 	void SetExtraData(const ExtraType& pExtraData);
 
 protected:
-	Cure::Resource* CreateResource(Cure::ResourceManager* pManager, const Lepra::String& pName) const;
+	Cure::Resource* CreateResource(Cure::ResourceManager* pManager, const str& pName) const;
 
 private:
 	mutable ExtraType mExtraData;
@@ -84,15 +84,15 @@ private:
 
 
 
-class PainterImageResource: public Cure::OptimizedResource<Lepra::Canvas*, UiTbc::Painter::ImageID>, public UiResource
+class PainterImageResource: public Cure::OptimizedResource<Canvas*, UiTbc::Painter::ImageID>, public UiResource
 {
-	typedef Cure::OptimizedResource<Lepra::Canvas*, UiTbc::Painter::ImageID> Parent;
+	typedef Cure::OptimizedResource<Canvas*, UiTbc::Painter::ImageID> Parent;
 public:
 	typedef UiTbc::Painter::ImageID UserData;
 
-	PainterImageResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const Lepra::String& pName);
+	PainterImageResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const str& pName);
 	virtual ~PainterImageResource();
-	const Lepra::String GetType() const;
+	const str GetType() const;
 	UserData GetUserData(const Cure::UserResource* pUserResource) const;
 	bool Load();
 	Cure::ResourceLoadState PostProcess();
@@ -109,7 +109,7 @@ public:
 	UserData GetUserData(const Cure::UserResource* pUserResource) const;
 
 protected:
-	RendererImageBaseResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const Lepra::String& pName);
+	RendererImageBaseResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const str& pName);
 	virtual ~RendererImageBaseResource();
 	Cure::ResourceLoadState PostProcess();
 };
@@ -117,18 +117,18 @@ protected:
 class RendererImageResource: public RendererImageBaseResource
 {
 public:
-	RendererImageResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const Lepra::String& pName);
+	RendererImageResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const str& pName);
 	virtual ~RendererImageResource();
-	const Lepra::String GetType() const;
+	const str GetType() const;
 	bool Load();
 };
 
 class TextureResource: public RendererImageBaseResource
 {
 public:
-	TextureResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const Lepra::String& pName);
+	TextureResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const str& pName);
 	virtual ~TextureResource();
-	const Lepra::String GetType() const;
+	const str GetType() const;
 	bool Load();
 };
 
@@ -140,10 +140,10 @@ class GeometryResource: public Cure::OptimizedResource<TBC::GeometryBase*, UiTbc
 public:
 	typedef UiTbc::Renderer::GeometryID UserData;
 
-	GeometryResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const Lepra::String& pName);
+	GeometryResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const str& pName);
 	virtual ~GeometryResource();
 	void ReleaseGeometry();
-	const Lepra::String GetType() const;
+	const str GetType() const;
 
 	UserData GetUserData(const Cure::UserResource*) const;
 	bool Load();
@@ -161,10 +161,10 @@ class GeometryReferenceResource: public GeometryResource
 public:
 	typedef UserUiTypeResource<GeometryResource> ClassResource;
 
-	GeometryReferenceResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const Lepra::String& pName);
+	GeometryReferenceResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const str& pName);
 	virtual ~GeometryReferenceResource();
 	void ReleaseGeometry();
-	const Lepra::String GetType() const;
+	const str GetType() const;
 
 	bool Load();
 	Cure::ResourceLoadState PostProcess();
@@ -186,19 +186,19 @@ struct GeometryOffset
 		mGeometryIndex(pPhysicsNodeId)
 	{
 	}
-	GeometryOffset(unsigned pPhysicsNodeId, Lepra::Vector3DF pOffset):
+	GeometryOffset(unsigned pPhysicsNodeId, Vector3DF pOffset):
 		mGeometryIndex(pPhysicsNodeId)
 	{
 		mOffset.SetPosition(pOffset);
 	}
-	GeometryOffset(unsigned pPhysicsNodeId, Lepra::TransformationF pOffset):
+	GeometryOffset(unsigned pPhysicsNodeId, TransformationF pOffset):
 		mGeometryIndex(pPhysicsNodeId),
 		mOffset(pOffset)
 	{
 	}
 
 	unsigned mGeometryIndex;
-	Lepra::TransformationF mOffset;
+	TransformationF mOffset;
 };
 
 
@@ -218,7 +218,7 @@ public:
 	//UiTbc::Renderer::GeometryID GetData() const;
 
 protected:
-	Cure::Resource* CreateResource(Cure::ResourceManager* pManager, const Lepra::String& pName) const;
+	Cure::Resource* CreateResource(Cure::ResourceManager* pManager, const str& pName) const;
 
 private:
 	GeometryOffset mOffset;
@@ -246,7 +246,7 @@ public:
 	void ReleaseDiversifiedData(UserData pData) const;
 
 protected:
-	SoundResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const Lepra::String& pName,
+	SoundResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const str& pName,
 		SoundDimension pDimension, LoopMode pLoopMode);
 	virtual ~SoundResource();
 
@@ -258,17 +258,17 @@ private:
 class SoundResource2d: public SoundResource
 {
 public:
-	SoundResource2d(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const Lepra::String& pName,
+	SoundResource2d(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const str& pName,
 		LoopMode pLoopMode);
-	const Lepra::String GetType() const;
+	const str GetType() const;
 };
 
 class SoundResource3d: public SoundResource
 {
 public:
-	SoundResource3d(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const Lepra::String& pName,
+	SoundResource3d(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const str& pName,
 		LoopMode pLoopMode);
-	const Lepra::String GetType() const;
+	const str GetType() const;
 };
 
 
@@ -277,7 +277,7 @@ class ClassResource: public Cure::ClassResourceBase<UiTbc::ChunkyClass, UiTbc::C
 {
 	typedef Cure::ClassResourceBase<UiTbc::ChunkyClass, UiTbc::ChunkyClassLoader> Parent;
 public:
-	ClassResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const Lepra::String& pName);
+	ClassResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const str& pName);
 	virtual ~ClassResource();
 };
 
@@ -288,7 +288,7 @@ public:
 public:
 	typedef void* UserData;
 
-	AnimationResource(const Lepra::String& pName);
+	AnimationResource(const str& pName);
 
 	bool Load();
 };*/
@@ -298,7 +298,7 @@ public:
 /*class TerrainResource: public ???Resource<void*>	// ???
 {
 public:
-	TerrainResource(const Lepra::String& pName);
+	TerrainResource(const str& pName);
 
 	bool Load();
 };*/

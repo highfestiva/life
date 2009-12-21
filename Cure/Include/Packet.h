@@ -46,23 +46,23 @@ public:
 	ParseResult Parse(unsigned pOffset = 0);	// Offset used when overriding packet, if a header is added.
 	void StoreHeader(unsigned pOffset = 0);
 	void AddMessage(Message* pMessage);
-	bool AppendToPacketBuffer(Lepra::Datagram& pWriteBuffer) const;
+	bool AppendToPacketBuffer(Datagram& pWriteBuffer) const;
 	unsigned GetPacketSize() const;
 	void SetPacketSize(int pSize);
 	void AddPacketSize(int pSize);
 	int GetMessageCount() const;
 	Message* GetMessageAt(int pIndex) const;
-	const Lepra::uint8* GetReadBuffer() const;
-	Lepra::uint8* GetWriteBuffer() const;
+	const uint8* GetReadBuffer() const;
+	uint8* GetWriteBuffer() const;
 	int GetBufferSize() const;
 
-	static int Receive(Lepra::TcpSocket* pSocket, void* pBuffer, int pMaxSize);
+	static int Receive(TcpSocket* pSocket, void* pBuffer, int pMaxSize);
 
 protected:
-	static bool ReadHeader(int& pThisPacketSize, const Lepra::uint8* pBuffer, int pByteCount);
+	static bool ReadHeader(int& pThisPacketSize, const uint8* pBuffer, int pByteCount);
 
 	static const int PACKET_SIZE_MARKER_LENGTH = 2;
-	static const int PACKET_LENGTH = Lepra::SocketBase::BUFFER_SIZE;
+	static const int PACKET_LENGTH = SocketBase::BUFFER_SIZE;
 
 	MessageFactory* mMessageFactory;
 	std::vector<Message*> mMessageVector;
@@ -95,14 +95,14 @@ public:
 	Message();
 	~Message();
 	virtual MessageType GetType() const = 0;
-	virtual int Parse(const Lepra::uint8* pData, int pSize) = 0;
-	void SetStorage(Lepra::uint8* pData);
+	virtual int Parse(const uint8* pData, int pSize) = 0;
+	void SetStorage(uint8* pData);
 
 protected:
 	union
 	{
-		const Lepra::uint8* mData;
-		Lepra::uint8* mWritableData;
+		const uint8* mData;
+		uint8* mWritableData;
 	};
 	bool mIsDataOwner;
 };
@@ -112,14 +112,14 @@ class MessageLoginRequest: public Message
 public:
 	MessageLoginRequest();
 	MessageType GetType() const;
-	int Parse(const Lepra::uint8* pData, int pSize);
-	int Store(Packet* pPacket, const Lepra::UnicodeString& pLoginName, const MangledPassword& pPassword);
+	int Parse(const uint8* pData, int pSize);
+	int Store(Packet* pPacket, const wstr& pLoginName, const MangledPassword& pPassword);
 
-	void GetLoginName(Lepra::UnicodeString& pLoginName);
+	void GetLoginName(wstr& pLoginName);
 	MangledPassword GetPassword();
 
 private:
-	const Lepra::uint8* mPasswordData;
+	const uint8* mPasswordData;
 };
 
 class MessageStatus: public Message
@@ -127,12 +127,12 @@ class MessageStatus: public Message
 public:
 	MessageStatus();
 	MessageType GetType() const;
-	int Parse(const Lepra::uint8* pData, int pSize);
-	int Store(Packet* pPacket, RemoteStatus pStatus, Lepra::int32 pInteger, const Lepra::UnicodeString& pMessage);
+	int Parse(const uint8* pData, int pSize);
+	int Store(Packet* pPacket, RemoteStatus pStatus, int32 pInteger, const wstr& pMessage);
 
 	RemoteStatus GetRemoteStatus() const;
-	Lepra::int32 GetInteger() const;
-	void GetMessageString(Lepra::UnicodeString& pMessage) const;
+	int32 GetInteger() const;
+	void GetMessageString(wstr& pMessage) const;
 };
 
 class MessageNumber: public Message
@@ -149,24 +149,24 @@ public:
 
 	MessageNumber();
 	MessageType GetType() const;
-	int Parse(const Lepra::uint8* pData, int pSize);
-	int Store(Packet* pPacket, InfoType pInfo, Lepra::int32 pInteger, Lepra::float32 pFloat);
+	int Parse(const uint8* pData, int pSize);
+	int Store(Packet* pPacket, InfoType pInfo, int32 pInteger, float32 pFloat);
 
 	InfoType GetInfo() const;
-	Lepra::int32 GetInteger() const;
-	Lepra::float32 GetFloat() const;
+	int32 GetInteger() const;
+	float32 GetFloat() const;
 };
 
 class MessageObject: public Message
 {
 protected:
 	MessageObject();
-	int Parse(const Lepra::uint8* pData, int pSize);
+	int Parse(const uint8* pData, int pSize);
 
 public:
-	int Store(Packet* pPacket, Lepra::uint32 pInstanceId);
+	int Store(Packet* pPacket, uint32 pInstanceId);
 
-	Lepra::uint32 GetObjectId() const;
+	uint32 GetObjectId() const;
 };
 
 class MessageCreateObject: public MessageObject
@@ -176,10 +176,10 @@ public:
 
 	MessageCreateObject();
 	MessageType GetType() const;
-	int Parse(const Lepra::uint8* pData, int pSize);
-	int Store(Packet* pPacket, GameObjectId pInstanceId, const Lepra::UnicodeString& pClassId);
+	int Parse(const uint8* pData, int pSize);
+	int Store(Packet* pPacket, GameObjectId pInstanceId, const wstr& pClassId);
 
-	void GetClassId(Lepra::UnicodeString& pClassId) const;
+	void GetClassId(wstr& pClassId) const;
 };
 
 class MessageDeleteObject: public MessageObject
@@ -189,7 +189,7 @@ public:
 
 	MessageDeleteObject();
 	MessageType GetType() const;
-	int Parse(const Lepra::uint8* pData, int pSize);
+	int Parse(const uint8* pData, int pSize);
 	int Store(Packet* pPacket, GameObjectId pInstanceId);
 };
 
@@ -198,13 +198,13 @@ class MessageObjectMovement: public MessageObject
 	typedef MessageObject Parent;
 protected:
 	MessageObjectMovement();
-	int Parse(const Lepra::uint8* pData, int pSize);
-	int Store(Packet* pPacket, GameObjectId pInstanceId, Lepra::int32 pFrameIndex);
+	int Parse(const uint8* pData, int pSize);
+	int Store(Packet* pPacket, GameObjectId pInstanceId, int32 pFrameIndex);
 
 public:
 	virtual MessageObjectMovement* CloneToStandalone() = 0;
 
-	Lepra::int32 GetFrameIndex() const;
+	int32 GetFrameIndex() const;
 };
 
 class MessageObjectPosition: public MessageObjectMovement
@@ -213,14 +213,14 @@ class MessageObjectPosition: public MessageObjectMovement
 public:
 	MessageObjectPosition();
 	MessageType GetType() const;
-	int Parse(const Lepra::uint8* pData, int pSize);
-	int Store(Packet* pPacket, Lepra::uint32 pInstanceId, Lepra::int32 pFrameIndex, const ObjectPositionalData& pData);
+	int Parse(const uint8* pData, int pSize);
+	int Store(Packet* pPacket, uint32 pInstanceId, int32 pFrameIndex, const ObjectPositionalData& pData);
 	MessageObjectMovement* CloneToStandalone();
 
 	ObjectPositionalData& GetPositionalData();
 
 private:
-	MessageObjectPosition(const ObjectPositionalData& pPosition, Lepra::uint8* pData, int pSize);
+	MessageObjectPosition(const ObjectPositionalData& pPosition, uint8* pData, int pSize);
 
 	ObjectPositionalData mPosition;
 };
@@ -231,11 +231,11 @@ class MessageObjectAttach: public MessageObject
 public:
 	MessageObjectAttach();
 	MessageType GetType() const;
-	int Parse(const Lepra::uint8* pData, int pSize);
-	int Store(Packet* pPacket, Lepra::uint32 pObject1Id, Lepra::uint32 pObject2Id, Lepra::uint16 pBody1Id, Lepra::uint16 pBody2Id);
-	Lepra::uint32 GetObject2Id() const;
-	Lepra::uint16 GetBody1Id() const;
-	Lepra::uint16 GetBody2Id() const;
+	int Parse(const uint8* pData, int pSize);
+	int Store(Packet* pPacket, uint32 pObject1Id, uint32 pObject2Id, uint16 pBody1Id, uint16 pBody2Id);
+	uint32 GetObject2Id() const;
+	uint16 GetBody1Id() const;
+	uint16 GetBody2Id() const;
 };
 
 class MessageObjectDetach: public MessageObject
@@ -244,14 +244,14 @@ class MessageObjectDetach: public MessageObject
 public:
 	MessageObjectDetach();
 	MessageType GetType() const;
-	int Parse(const Lepra::uint8* pData, int pSize);
-	int Store(Packet* pPacket, Lepra::uint32 pObject1Id, Lepra::uint32 pObject2Id);
-	Lepra::uint32 GetObject2Id() const;
+	int Parse(const uint8* pData, int pSize);
+	int Store(Packet* pPacket, uint32 pObject1Id, uint32 pObject2Id);
+	uint32 GetObject2Id() const;
 };
 
 
 
-class PacketFactory: public Lepra::DatagramReceiver
+class PacketFactory: public DatagramReceiver
 {
 public:
 	PacketFactory(MessageFactory* pMessageFactory);
@@ -261,7 +261,7 @@ public:
 	void SetMessageFactory(MessageFactory* pMessageFactory);
 	MessageFactory* GetMessageFactory() const;
 
-	int Receive(Lepra::TcpSocket* pSocket, void* pBuffer, int pMaxSize);
+	int Receive(TcpSocket* pSocket, void* pBuffer, int pMaxSize);
 
 private:
 	MessageFactory* mMessageFactory;

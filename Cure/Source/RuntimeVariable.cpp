@@ -15,7 +15,7 @@ namespace Cure
 
 
 
-RuntimeVariable::RuntimeVariable(const Lepra::String& pName, const Lepra::String& pValue, bool pExport):
+RuntimeVariable::RuntimeVariable(const str& pName, const str& pValue, bool pExport):
 	mName(pName),
 	mValue(pValue),
 	mDefaultValue(pValue),
@@ -27,22 +27,22 @@ RuntimeVariable::~RuntimeVariable()
 {
 }
 
-const Lepra::String& RuntimeVariable::GetName() const
+const str& RuntimeVariable::GetName() const
 {
 	return (mName);
 }
 
-bool RuntimeVariable::operator==(const Lepra::String& pValue)
+bool RuntimeVariable::operator==(const str& pValue)
 {
 	return (mValue == pValue);
 }
 
-const Lepra::String& RuntimeVariable::GetValue() const
+const str& RuntimeVariable::GetValue() const
 {
 	return (mValue);
 }
 
-void RuntimeVariable::SetValue(const Lepra::String& pValue, bool pOverwriteDefault, bool pExport)
+void RuntimeVariable::SetValue(const str& pValue, bool pOverwriteDefault, bool pExport)
 {
 	mValue = pValue;
 	if (pOverwriteDefault)
@@ -52,12 +52,12 @@ void RuntimeVariable::SetValue(const Lepra::String& pValue, bool pOverwriteDefau
 	mIsExportable &= pExport;
 }
 
-const Lepra::String& RuntimeVariable::GetDefaultValue() const
+const str& RuntimeVariable::GetDefaultValue() const
 {
 	return (mDefaultValue);
 }
 
-void RuntimeVariable::SetDefaultValue(const Lepra::String& pDefaultValue)
+void RuntimeVariable::SetDefaultValue(const str& pDefaultValue)
 {
 	mDefaultValue = pDefaultValue;
 }
@@ -76,7 +76,7 @@ RuntimeVariableScope::RuntimeVariableScope(RuntimeVariableScope* pParentScope):
 
 RuntimeVariableScope::~RuntimeVariableScope()
 {
-	Lepra::ScopeLock lLock(&mLock);
+	ScopeLock lLock(&mLock);
 	VariableTable::iterator x = mVariableTable.begin();
 	while (!mVariableTable.empty())
 	{
@@ -86,47 +86,47 @@ RuntimeVariableScope::~RuntimeVariableScope()
 	mParentScope = 0;
 }
 
-Lepra::String RuntimeVariableScope::GetType(const Lepra::String& pValue)
+str RuntimeVariableScope::GetType(const str& pValue)
 {
 	bool lDummyBool;
-	if (Lepra::StringUtility::StringToBool(pValue, lDummyBool))
+	if (strutil::StringToBool(pValue, lDummyBool))
 	{
 		return (_T("boolean"));
 	}
 	int lDummyInt;
-	if (Lepra::StringUtility::StringToInt(pValue, lDummyInt))
+	if (strutil::StringToInt(pValue, lDummyInt))
 	{
 		return (_T("int"));
 	}
 	double lDummyDouble;
-	if (Lepra::StringUtility::StringToDouble(pValue, lDummyDouble))
+	if (strutil::StringToDouble(pValue, lDummyDouble))
 	{
 		return (_T("real"));
 	}
 	return (_T("string"));
 }
 
-Lepra::String RuntimeVariableScope::Cast(const Lepra::String& pValue)
+str RuntimeVariableScope::Cast(const str& pValue)
 {
-	Lepra::String lValue = pValue;
+	str lValue = pValue;
 	if (pValue.substr(0, 9) == _T("(boolean)"))
 	{
 		bool lBool = false;
-		size_t lConstantStart = Lepra::StringUtility::FindNextWord(pValue, _T(" \t\r\n)"), 9-1);
+		size_t lConstantStart = strutil::FindNextWord(pValue, _T(" \t\r\n)"), 9-1);
 		if (lConstantStart < pValue.length())
 		{
 			lValue = pValue.substr(lConstantStart);
 			int lInt;
 			double lDouble;
-			if (Lepra::StringUtility::StringToBool(lValue, lBool))
+			if (strutil::StringToBool(lValue, lBool))
 			{
 				// Redundant cast.
 			}
-			else if (Lepra::StringUtility::StringToInt(lValue, lInt))
+			else if (strutil::StringToInt(lValue, lInt))
 			{
 				lBool = (lInt != 0);
 			}
-			else if (Lepra::StringUtility::StringToDouble(lValue, lDouble))
+			else if (strutil::StringToDouble(lValue, lDouble))
 			{
 				lBool = (lDouble <= -0.5 || lDouble >= 0.5);
 			}
@@ -148,21 +148,21 @@ Lepra::String RuntimeVariableScope::Cast(const Lepra::String& pValue)
 	else if (pValue.substr(0, 5) == _T("(int)"))
 	{
 		int lInt = 0;
-		size_t lConstantStart = Lepra::StringUtility::FindNextWord(pValue, _T(" \t\r\n)"), 5-1);
+		size_t lConstantStart = strutil::FindNextWord(pValue, _T(" \t\r\n)"), 5-1);
 		if (lConstantStart < pValue.length())
 		{
 			lValue = pValue.substr(lConstantStart);
 			bool lBool;
 			double lDouble;
-			if (Lepra::StringUtility::StringToBool(lValue, lBool))
+			if (strutil::StringToBool(lValue, lBool))
 			{
 				lInt = (int)lBool;
 			}
-			else if (Lepra::StringUtility::StringToInt(lValue, lInt))
+			else if (strutil::StringToInt(lValue, lInt))
 			{
 				// Redundant cast.
 			}
-			else if (Lepra::StringUtility::StringToDouble(lValue, lDouble))
+			else if (strutil::StringToDouble(lValue, lDouble))
 			{
 				lInt = (int)lDouble;
 			}
@@ -176,26 +176,26 @@ Lepra::String RuntimeVariableScope::Cast(const Lepra::String& pValue)
 				return (pValue);
 			}
 		}
-		lValue = Lepra::StringUtility::IntToString(lInt, 10);
+		lValue = strutil::IntToString(lInt, 10);
 	}
 	else if (pValue.substr(0, 6) == _T("(real)"))
 	{
 		double lDouble = 0;
-		size_t lConstantStart = Lepra::StringUtility::FindNextWord(pValue, _T(" \t\r\n)"), 6-1);
+		size_t lConstantStart = strutil::FindNextWord(pValue, _T(" \t\r\n)"), 6-1);
 		if (lConstantStart < pValue.length())
 		{
 			lValue = pValue.substr(lConstantStart);
 			bool lBool;
 			int lInt;
-			if (Lepra::StringUtility::StringToBool(lValue, lBool))
+			if (strutil::StringToBool(lValue, lBool))
 			{
 				lDouble = (double)lBool;
 			}
-			else if (Lepra::StringUtility::StringToInt(lValue, lInt))
+			else if (strutil::StringToInt(lValue, lInt))
 			{
 				lDouble = lInt;
 			}
-			else if (Lepra::StringUtility::StringToDouble(lValue, lDouble))
+			else if (strutil::StringToDouble(lValue, lDouble))
 			{
 				// Redundant cast.
 			}
@@ -205,23 +205,23 @@ Lepra::String RuntimeVariableScope::Cast(const Lepra::String& pValue)
 				return (pValue);
 			}
 		}
-		lValue = Lepra::StringUtility::DoubleToString(lDouble, 16);
+		lValue = strutil::DoubleToString(lDouble, 16);
 	}
 	return (lValue);
 }
 
-bool RuntimeVariableScope::IsDefined(const Lepra::String& pName)
+bool RuntimeVariableScope::IsDefined(const str& pName)
 {
 	bool lFound = (GetVariable(pName) != 0);
 	return (lFound);
 }
 
-bool RuntimeVariableScope::SetValue(SetMode pSetMode, const Lepra::String& pName, const Lepra::String& pValue)
+bool RuntimeVariableScope::SetValue(SetMode pSetMode, const str& pName, const str& pValue)
 {
 	bool lTypeOk = true;
 
 	RuntimeVariable* lVariable = GetVariable(pName, pSetMode == SET_OVERWRITE);
-	Lepra::String lValue = Cast(pValue);
+	str lValue = Cast(pValue);
 	if (lVariable)
 	{
 		if (GetType(lValue) == GetType(lVariable->GetValue()))
@@ -242,34 +242,34 @@ bool RuntimeVariableScope::SetValue(SetMode pSetMode, const Lepra::String& pName
 	return (lTypeOk);
 }
 
-bool RuntimeVariableScope::SetValue(SetMode pSetMode, const Lepra::String& pName, const Lepra::tchar* pValue)
+bool RuntimeVariableScope::SetValue(SetMode pSetMode, const str& pName, const tchar* pValue)
 {
-	return (SetValue(pSetMode, pName, Lepra::String(pValue)));
+	return (SetValue(pSetMode, pName, str(pValue)));
 }
 
-bool RuntimeVariableScope::SetValue(SetMode pSetMode, const Lepra::String& pName, double pValue)
+bool RuntimeVariableScope::SetValue(SetMode pSetMode, const str& pName, double pValue)
 {
 	// We want the real format to be differentiatable from the int format.
-	Lepra::String lStringValue = Lepra::StringUtility::Format(_T("%g"), pValue);
-	if (lStringValue.find(_T('.')) == Lepra::String::npos &&
-		lStringValue.find(_T('e')) == Lepra::String::npos)
+	str lStringValue = strutil::Format(_T("%g"), pValue);
+	if (lStringValue.find(_T('.')) == str::npos &&
+		lStringValue.find(_T('e')) == str::npos)
 	{
-		lStringValue = Lepra::StringUtility::Format(_T("%.1f"), pValue);
+		lStringValue = strutil::Format(_T("%.1f"), pValue);
 	}
 	return (SetValue(pSetMode, pName, lStringValue));
 }
 
-bool RuntimeVariableScope::SetValue(SetMode pSetMode, const Lepra::String& pName, int pValue)
+bool RuntimeVariableScope::SetValue(SetMode pSetMode, const str& pName, int pValue)
 {
-	return (SetValue(pSetMode, pName, Lepra::StringUtility::IntToString(pValue, 10)));
+	return (SetValue(pSetMode, pName, strutil::IntToString(pValue, 10)));
 }
 
-bool RuntimeVariableScope::SetValue(SetMode pSetMode, const Lepra::String& pName, bool pValue)
+bool RuntimeVariableScope::SetValue(SetMode pSetMode, const str& pName, bool pValue)
 {
-	return (SetValue(pSetMode, pName, Lepra::StringUtility::BoolToString(pValue)));
+	return (SetValue(pSetMode, pName, strutil::BoolToString(pValue)));
 }
 
-const Lepra::String& RuntimeVariableScope::GetDefaultValue(GetMode pMode, const Lepra::String& pName, const Lepra::String& pDefaultValue)
+const str& RuntimeVariableScope::GetDefaultValue(GetMode pMode, const str& pName, const str& pDefaultValue)
 {
 	RuntimeVariable* lVariable = GetVariable(pName);
 	if (lVariable)
@@ -295,17 +295,17 @@ const Lepra::String& RuntimeVariableScope::GetDefaultValue(GetMode pMode, const 
 	return (pDefaultValue);
 }
 
-const Lepra::String RuntimeVariableScope::GetDefaultValue(GetMode pMode, const Lepra::String& pName, const Lepra::tchar* pDefaultValue)
+const str RuntimeVariableScope::GetDefaultValue(GetMode pMode, const str& pName, const tchar* pDefaultValue)
 {
-	return (GetDefaultValue(pMode, pName, Lepra::String(pDefaultValue)));
+	return (GetDefaultValue(pMode, pName, str(pDefaultValue)));
 }
 
-double RuntimeVariableScope::GetDefaultValue(GetMode pMode, const Lepra::String& pName, double pDefaultValue)
+double RuntimeVariableScope::GetDefaultValue(GetMode pMode, const str& pName, double pDefaultValue)
 {
-	Lepra::String lDefaultValue = Lepra::StringUtility::DoubleToString(pDefaultValue, 6);
-	Lepra::String lValueString = GetDefaultValue(pMode, pName, lDefaultValue);
+	str lDefaultValue = strutil::DoubleToString(pDefaultValue, 6);
+	str lValueString = GetDefaultValue(pMode, pName, lDefaultValue);
 	double lValue = pDefaultValue;
-	if (!Lepra::StringUtility::StringToDouble(lValueString, lValue))
+	if (!strutil::StringToDouble(lValueString, lValue))
 	{
 		mLog.Errorf(_T("RT variable %s is not of type double (value is %s)."), pName.c_str(), lValueString.c_str());
 		assert(false);
@@ -313,12 +313,12 @@ double RuntimeVariableScope::GetDefaultValue(GetMode pMode, const Lepra::String&
 	return (lValue);
 }
 
-int RuntimeVariableScope::GetDefaultValue(GetMode pMode, const Lepra::String& pName, int pDefaultValue)
+int RuntimeVariableScope::GetDefaultValue(GetMode pMode, const str& pName, int pDefaultValue)
 {
-	Lepra::String lDefaultValue = Lepra::StringUtility::IntToString(pDefaultValue, 10);
-	Lepra::String lValueString = GetDefaultValue(pMode, pName, lDefaultValue);
+	str lDefaultValue = strutil::IntToString(pDefaultValue, 10);
+	str lValueString = GetDefaultValue(pMode, pName, lDefaultValue);
 	int lValue = pDefaultValue;
-	if (!Lepra::StringUtility::StringToInt(lValueString, lValue))
+	if (!strutil::StringToInt(lValueString, lValue))
 	{
 		mLog.Errorf(_T("RT variable %s is not of type int (value is %s)."), pName.c_str(), lValueString.c_str());
 		assert(false);
@@ -326,12 +326,12 @@ int RuntimeVariableScope::GetDefaultValue(GetMode pMode, const Lepra::String& pN
 	return (lValue);
 }
 
-bool RuntimeVariableScope::GetDefaultValue(GetMode pMode, const Lepra::String& pName, bool pDefaultValue)
+bool RuntimeVariableScope::GetDefaultValue(GetMode pMode, const str& pName, bool pDefaultValue)
 {
-	Lepra::String lDefaultValue = Lepra::StringUtility::BoolToString(pDefaultValue);
-	Lepra::String lValueString = GetDefaultValue(pMode, pName, lDefaultValue);
+	str lDefaultValue = strutil::BoolToString(pDefaultValue);
+	str lValueString = GetDefaultValue(pMode, pName, lDefaultValue);
 	bool lValue = pDefaultValue;
-	if (!Lepra::StringUtility::StringToBool(lValueString, lValue))
+	if (!strutil::StringToBool(lValueString, lValue))
 	{
 		mLog.Errorf(_T("RT variable %s is not of type bool (value is %s)."), pName.c_str(), lValueString.c_str());
 		assert(false);
@@ -339,9 +339,9 @@ bool RuntimeVariableScope::GetDefaultValue(GetMode pMode, const Lepra::String& p
 	return (lValue);
 }
 
-bool RuntimeVariableScope::EraseVariable(const Lepra::String& pName)
+bool RuntimeVariableScope::EraseVariable(const str& pName)
 {
-	Lepra::ScopeLock lLock(&mLock);
+	ScopeLock lLock(&mLock);
 	bool lDeleted = DeleteLocalVariable(pName);
 	if (!lDeleted && mParentScope)
 	{
@@ -369,10 +369,10 @@ RuntimeVariableScope* RuntimeVariableScope::LockParentScope(RuntimeVariableScope
 
 
 
-std::list<Lepra::String> RuntimeVariableScope::GetVariableNameList(bool pSkipInternal, int pStartScopeIndex, int pEndScopeIndex)
+std::list<str> RuntimeVariableScope::GetVariableNameList(bool pSkipInternal, int pStartScopeIndex, int pEndScopeIndex)
 {
-	std::list<Lepra::String> lVariableNameList;
-	Lepra::ScopeLock lLock(&mLock);
+	std::list<str> lVariableNameList;
+	ScopeLock lLock(&mLock);
 	if (pEndScopeIndex > 0 && pStartScopeIndex < pEndScopeIndex && mParentScope)
 	{
 		lVariableNameList = mParentScope->GetVariableNameList(pSkipInternal, pStartScopeIndex-1, pEndScopeIndex-1);
@@ -393,17 +393,17 @@ std::list<Lepra::String> RuntimeVariableScope::GetVariableNameList(bool pSkipInt
 
 
 
-void RuntimeVariableScope::CreateLocalVariable(const Lepra::String& pName, const Lepra::String& pValue, bool pExport)
+void RuntimeVariableScope::CreateLocalVariable(const str& pName, const str& pValue, bool pExport)
 {
 	RuntimeVariable* lVariable = new RuntimeVariable(pName, pValue, pExport);
-	Lepra::ScopeLock lLock(&mLock);
+	ScopeLock lLock(&mLock);
 	mVariableTable.insert(VariablePair(pName, lVariable));
 }
 
-bool RuntimeVariableScope::DeleteLocalVariable(const Lepra::String& pName)
+bool RuntimeVariableScope::DeleteLocalVariable(const str& pName)
 {
 	bool lDeleted = false;
-	Lepra::ScopeLock lLock(&mLock);
+	ScopeLock lLock(&mLock);
 	VariableTable::iterator x = mVariableTable.find(pName);
 	if (x != mVariableTable.end())
 	{
@@ -415,10 +415,10 @@ bool RuntimeVariableScope::DeleteLocalVariable(const Lepra::String& pName)
 	return (lDeleted);
 }
 
-RuntimeVariable* RuntimeVariableScope::GetVariable(const Lepra::String& pName, bool pRecursive) const
+RuntimeVariable* RuntimeVariableScope::GetVariable(const str& pName, bool pRecursive) const
 {
-	Lepra::ScopeLock lLock(&mLock);
-	RuntimeVariable* lVariable = Lepra::HashUtil::FindMapObject(mVariableTable, pName);
+	ScopeLock lLock(&mLock);
+	RuntimeVariable* lVariable = HashUtil::FindMapObject(mVariableTable, pName);
 	if (pRecursive && !lVariable && mParentScope)
 	{
 		lVariable = mParentScope->GetVariable(pName);
@@ -432,7 +432,7 @@ LOG_CLASS_DEFINE(GENERAL, RuntimeVariableScope);
 
 
 
-RuntimeVariableCompleter::RuntimeVariableCompleter(RuntimeVariableScope* pVariableScope, const Lepra::String& pPrefix):
+RuntimeVariableCompleter::RuntimeVariableCompleter(RuntimeVariableScope* pVariableScope, const str& pPrefix):
 	mVariableScope(pVariableScope),
 	mPrefix(pPrefix)
 {
@@ -443,18 +443,18 @@ RuntimeVariableCompleter::~RuntimeVariableCompleter()
 	mVariableScope = 0;
 }
 
-std::list<Lepra::String> RuntimeVariableCompleter::CompleteCommand(const Lepra::String& pPartialCommand) const
+std::list<str> RuntimeVariableCompleter::CompleteCommand(const str& pPartialCommand) const
 {
-	std::list<Lepra::String> lCompletionList;
+	std::list<str> lCompletionList;
 	if (pPartialCommand.compare(0, mPrefix.length(), mPrefix) == 0)
 	{
-		const Lepra::String lPartialVariableName = pPartialCommand.substr(mPrefix.length());
-		std::list<Lepra::String> lVariableList = mVariableScope->GetVariableNameList(false);
-		std::list<Lepra::String>::const_iterator x = lVariableList.begin();
+		const str lPartialVariableName = pPartialCommand.substr(mPrefix.length());
+		std::list<str> lVariableList = mVariableScope->GetVariableNameList(false);
+		std::list<str>::const_iterator x = lVariableList.begin();
 		for (; x != lVariableList.end(); ++x)
 		{
-			const Lepra::String& lCompletion = *x;
-			if (Lepra::StringUtility::StartsWith(lCompletion, lPartialVariableName))
+			const str& lCompletion = *x;
+			if (strutil::StartsWith(lCompletion, lPartialVariableName))
 			{
 				// Add to list.
 				lCompletionList.push_back(mPrefix+lCompletion);

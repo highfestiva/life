@@ -42,11 +42,11 @@ public:
 	ImageLoader();
 	virtual ~ImageLoader();
 
-	bool Load(const String& pFileName, Canvas& pCanvas);
-	bool Save(const String& pFileName, const Canvas& pCanvas);
+	bool Load(const str& pFileName, Canvas& pCanvas);
+	bool Save(const str& pFileName, const Canvas& pCanvas);
 
-	bool Load(const String& pArchiveName, const String& pFileName, Canvas& pCanvas);
-	bool Save(const String& pArchiveName, const String& pFileName, const Canvas& pCanvas);
+	bool Load(const str& pArchiveName, const str& pFileName, Canvas& pCanvas);
+	bool Save(const str& pArchiveName, const str& pFileName, const Canvas& pCanvas);
 
 	bool Load(FileType pFileType, Reader& pReader, Canvas& pCanvas);
 	bool Save(FileType pFileType, Writer& pWriter, const Canvas& pCanvas);

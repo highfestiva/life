@@ -458,11 +458,11 @@
 				>
 			</File>
 			<File
-				RelativePath="LifeApplication.h"
+				RelativePath=".\Life.h"
 				>
 			</File>
 			<File
-				RelativePath="LifeDefinitions.h"
+				RelativePath="LifeApplication.h"
 				>
 			</File>
 			<File

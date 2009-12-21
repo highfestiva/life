@@ -63,10 +63,10 @@ public:
 		RECURSE_DOWN,
 	};
 
-	Component(const Lepra::String& pName, Layout* pLayout);
+	Component(const str& pName, Layout* pLayout);
 	virtual ~Component();
 
-	const Lepra::String& GetName();
+	const str& GetName();
 
 	Component* GetParent();
 	Layout* GetLayout(int pLayer = 0) const;
@@ -75,18 +75,18 @@ public:
 	void DeleteLayer(int pLayer);
 	void ReplaceLayer(int pLayer, Layout* pLayout);
 
-	const Lepra::PixelCoords& GetPos();
-	Lepra::PixelCoords GetScreenPos();
+	const PixelCoords& GetPos();
+	PixelCoords GetScreenPos();
 	
-	const Lepra::PixelCoords& GetSize();
-	virtual Lepra::PixelCoords GetMinSize();
-	Lepra::PixelRect GetScreenRect();
+	const PixelCoords& GetSize();
+	virtual PixelCoords GetMinSize();
+	PixelRect GetScreenRect();
 	
-	void SetPreferredSize(const Lepra::PixelCoords& pSize, bool pAdaptive = true);
+	void SetPreferredSize(const PixelCoords& pSize, bool pAdaptive = true);
 	virtual void SetPreferredSize(int pWidth, int pHeight, bool pAdaptive = true);
 	void SetPreferredWidth(int pWidth);
 	void SetPreferredHeight(int pHeight);
-	virtual Lepra::PixelCoords GetPreferredSize(bool pForceAdaptive = false);
+	virtual PixelCoords GetPreferredSize(bool pForceAdaptive = false);
 	int GetPreferredWidth(bool pForceAdaptive = false);
 	int GetPreferredHeight(bool pForceAdaptive = false);
 	void SetAdaptive(bool pAdaptive);
@@ -104,7 +104,7 @@ public:
 	// The exact interpretation of pParam1 and pParam2 depends on the layout.
 	virtual void AddChild(Component* pChild, int pParam1 = 0, int pParam2 = 0, int pLayer = 0);
 	virtual void RemoveChild(Component* pChild, int pLayer);
-	virtual Component* GetChild(const Lepra::String& pName, int pLayer);
+	virtual Component* GetChild(const str& pName, int pLayer);
 	virtual int GetNumChildren() const;
 	
 	void AddTextListener(UiLepra::TextInputObserver* pListener);
@@ -116,19 +116,19 @@ public:
 		Coordinate convertions.
 	*/
 
-	Lepra::PixelCoords ClientToWindow(const Lepra::PixelCoords& pCoords);
-	Lepra::PixelCoords WindowToClient(const Lepra::PixelCoords& pCoords);
-	Lepra::PixelCoords WindowToScreen(const Lepra::PixelCoords& pCoords);
-	Lepra::PixelCoords ScreenToWindow(const Lepra::PixelCoords& pCoords);
-	Lepra::PixelCoords ClientToScreen(const Lepra::PixelCoords& pCoords);
-	Lepra::PixelCoords ScreenToClient(const Lepra::PixelCoords& pCoords);
+	PixelCoords ClientToWindow(const PixelCoords& pCoords);
+	PixelCoords WindowToClient(const PixelCoords& pCoords);
+	PixelCoords WindowToScreen(const PixelCoords& pCoords);
+	PixelCoords ScreenToWindow(const PixelCoords& pCoords);
+	PixelCoords ClientToScreen(const PixelCoords& pCoords);
+	PixelCoords ScreenToClient(const PixelCoords& pCoords);
 
-	Lepra::PixelRect ClientToWindow(const Lepra::PixelRect& pRect);
-	Lepra::PixelRect WindowToClient(const Lepra::PixelRect& pRect);
-	Lepra::PixelRect WindowToScreen(const Lepra::PixelRect& pRect);
-	Lepra::PixelRect ScreenToWindow(const Lepra::PixelRect& pRect);
-	Lepra::PixelRect ClientToScreen(const Lepra::PixelRect& pRect);
-	Lepra::PixelRect ScreenToClient(const Lepra::PixelRect& pRect);
+	PixelRect ClientToWindow(const PixelRect& pRect);
+	PixelRect WindowToClient(const PixelRect& pRect);
+	PixelRect WindowToScreen(const PixelRect& pRect);
+	PixelRect ScreenToWindow(const PixelRect& pRect);
+	PixelRect ClientToScreen(const PixelRect& pRect);
+	PixelRect ScreenToClient(const PixelRect& pRect);
 
 	/*
 		Virtual functions and events.
@@ -152,7 +152,7 @@ public:
 	virtual bool OnMouseWheel(int pMouseX, int pMouseY, int pChange, bool pDown);
 	virtual bool OnMouseMove(int pMouseX, int pMouseY, int pDeltaX, int pDeltaY);
 
-	virtual bool OnChar(Lepra::tchar pChar);
+	virtual bool OnChar(tchar pChar);
 
 	virtual bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
 	virtual bool OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode);
@@ -171,11 +171,11 @@ public:
 	// what you are doing). For instance: Don't set the size by calling SetSize()... Call 
 	// SetPreferredSize() instead. SetSize() is used by the various layout classes in order
 	// to set the definite size of the window, just before it's rendered.
-	void SetPos(const Lepra::PixelCoords& pPos);
+	void SetPos(const PixelCoords& pPos);
 	virtual void SetPos(int x, int y);
-	void SetSize(const Lepra::PixelCoords& pSize);
+	void SetSize(const PixelCoords& pSize);
 	virtual void SetSize(int pWidth, int pHeight);
-	void SetMinSize(const Lepra::PixelCoords& pSize);
+	void SetMinSize(const PixelCoords& pSize);
 	virtual void SetMinSize(int pWidth, int pHeight);
 
 	virtual Type GetType();
@@ -225,7 +225,7 @@ protected:
 
 	virtual void SetKeyboardFocus(Component* pChild);
 	virtual void SetMouseFocus(Component* pChild);
-	void DispatchChar(Lepra::tchar pChar);
+	void DispatchChar(tchar pChar);
 	bool IsDispatcher() const;
 
 	void DeleteLayout(int pLayer);
@@ -236,16 +236,16 @@ private:
 	TextListenerSet mTextListenerSet;
 	KeyListenerSet mKeyListenerSet;
 
-	Lepra::String mName;
+	str mName;
 	Component* mParent;
 	Component* mMouseFocusChild;
 	Component* mKeyboardFocusChild;
 	Layout** mLayout;
 
-	Lepra::PixelCoords mPos;
-	Lepra::PixelCoords mPreferredSize;
-	Lepra::PixelCoords mSize;
-	Lepra::PixelCoords mMinSize;
+	PixelCoords mPos;
+	PixelCoords mPreferredSize;
+	PixelCoords mSize;
+	PixelCoords mMinSize;
 
 	bool mNeedsRepaint;
 	bool mVisible;
@@ -254,7 +254,7 @@ private:
 
 	// Used by DesktopWindow to optimize rendering.
 	Painter::ImageID mImageID;
-	Lepra::Canvas mImage;
+	Canvas mImage;
 
 	int mLayerCount;
 

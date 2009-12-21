@@ -46,7 +46,7 @@ namespace Cure
 
 
 
-ContextObject::ContextObject(const Lepra::String& pClassId):
+ContextObject::ContextObject(const str& pClassId):
 	mManager(0),
 	mInstanceId(0),
 	mClassId(pClassId),
@@ -131,7 +131,7 @@ void ContextObject::SetInstanceId(GameObjectId pInstanceId)
 	mInstanceId = pInstanceId;
 }
 
-const Lepra::String& ContextObject::GetClassId() const
+const str& ContextObject::GetClassId() const
 {
 	return (mClassId);
 }
@@ -688,7 +688,7 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData)
 	}
 }
 
-Lepra::Vector3DF ContextObject::GetPosition() const
+Vector3DF ContextObject::GetPosition() const
 {
 	const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
 	if (lGeometry && lGeometry->GetBodyId() != TBC::INVALID_BODY)
@@ -700,10 +700,10 @@ Lepra::Vector3DF ContextObject::GetPosition() const
 		assert(false);
 		// TODO: throw something here...
 	}
-	return (Lepra::Vector3DF());
+	return (Vector3DF());
 }
 
-Lepra::QuaternionF ContextObject::GetOrientation() const
+QuaternionF ContextObject::GetOrientation() const
 {
 	const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
 	if (lGeometry && lGeometry->GetBodyId() != TBC::INVALID_BODY)
@@ -717,12 +717,12 @@ Lepra::QuaternionF ContextObject::GetOrientation() const
 		assert(false);
 		// TODO: throw something here...
 	}
-	return (Lepra::QuaternionF());
+	return (QuaternionF());
 }
 
-Lepra::Vector3DF ContextObject::GetVelocity() const
+Vector3DF ContextObject::GetVelocity() const
 {
-	Lepra::Vector3DF lVelocity;
+	Vector3DF lVelocity;
 	const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
 	if (lGeometry && lGeometry->GetBodyId() != TBC::INVALID_BODY)
 	{
@@ -742,14 +742,14 @@ float ContextObject::GetForwardSpeed() const
 	const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
 	if (lGeometry && lGeometry->GetBodyId() != TBC::INVALID_BODY)
 	{
-		const Lepra::TransformationF& lOriginalTransform =
+		const TransformationF& lOriginalTransform =
 			mPhysics->GetOriginalBoneTransformation(0);
-		const Lepra::Vector3DF lForwardAxis = lOriginalTransform.GetOrientation().GetInverse() * Lepra::Vector3DF(0, 1, 0);
-		Lepra::TransformationF lTransform;
+		const Vector3DF lForwardAxis = lOriginalTransform.GetOrientation().GetInverse() * Vector3DF(0, 1, 0);
+		TransformationF lTransform;
 		mManager->GetGameManager()->GetPhysicsManager()->GetBodyTransform(lGeometry->GetBodyId(), lTransform);
-		Lepra::Vector3DF lVelocity;
+		Vector3DF lVelocity;
 		mManager->GetGameManager()->GetPhysicsManager()->GetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
-		Lepra::Vector3DF lAxis = lTransform.GetOrientation() * lForwardAxis;
+		Vector3DF lAxis = lTransform.GetOrientation() * lForwardAxis;
 		lAxis.Normalize();
 		lSpeed = lVelocity*lAxis;
 	}
@@ -781,12 +781,12 @@ bool ContextObject::SetPhysics(TBC::ChunkyPhysics* pStructure)
 	const int lPhysicsFps = mManager->GetGameManager()->GetConstTimeManager()->GetDesiredMicroSteps();
 
 	// TODO: drop hard-coding, this should come from world loader or spawn engine?
-	Lepra::TransformationF lTransformation;
+	TransformationF lTransformation;
 	if (GetNetworkObjectType() != NETWORK_OBJECT_LOCAL_ONLY)
 	{
-		const float lX = (float)Lepra::Random::Uniform(-63, 27);
-		const float lY = (float)Lepra::Random::Uniform(-23, 67);
-		lTransformation.SetPosition(Lepra::Vector3DF(lX, lY, 43.5));
+		const float lX = (float)Random::Uniform(-63, 27);
+		const float lY = (float)Random::Uniform(-23, 67);
+		lTransformation.SetPosition(Vector3DF(lX, lY, 43.5));
 	}
 
 	bool lOk = (mPhysics == 0 && pStructure->FinalizeInit(lPhysics, lPhysicsFps, &lTransformation, 0, this));
@@ -828,7 +828,7 @@ bool ContextObject::QueryResendTime(float pDeltaTime, bool pUnblockDelta)
 	if (mLastSendTime+pDeltaTime <= lAbsoluteTime)
 	{
 		lOkToSend = true;
-		mLastSendTime = lAbsoluteTime - (pUnblockDelta? pDeltaTime+Lepra::MathTraits<float>::FullEps() : 0);
+		mLastSendTime = lAbsoluteTime - (pUnblockDelta? pDeltaTime+MathTraits<float>::FullEps() : 0);
 	}
 	return (lOkToSend);
 }
@@ -888,7 +888,7 @@ void ContextObject::AttachToObject(TBC::ChunkyBoneGeometry* pBoneGeometry1, Cont
 
 		mLog.AInfo("Attaching two objects.");
 		// TODO: fix algo when new chunky structure in place.
-		/*Lepra::TransformationF lAnchor;
+		/*TransformationF lAnchor;
 		lPhysicsManager->GetBodyTransform(pBoneGeometry2->GetBodyId(), lAnchor);
 		TBC::PhysicsManager::JointID lJoint = lPhysicsManager->CreateBallJoint(pBoneGeometry1->GetBodyId(), lBody2Connectee, lAnchor.GetPosition());
 		unsigned lAttachNodeId = mPhysics->GetNextGeometryIndex();

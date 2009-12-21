@@ -19,7 +19,7 @@ namespace Lepra
 
 
 
-template<> AnsiString AnsiStringUtility::VFormat(const char* pFormat, va_list pArguments)
+template<> astr astrutil::VFormat(const char* pFormat, va_list pArguments)
 {
 	char lBuffer[1024];
 #ifdef LEPRA_WINDOWS
@@ -31,29 +31,29 @@ template<> AnsiString AnsiStringUtility::VFormat(const char* pFormat, va_list pA
 #else // !LEPRA_WINDOWS
 	::vsprintf(lBuffer, pFormat, pArguments);
 #endif // LEPRA_WINDOWS/!LEPRA_WINDOWS
-	return (AnsiString(lBuffer));
+	return (astr(lBuffer));
 }
 
-template<> UnicodeString UnicodeStringUtility::VFormat(const wchar_t* pFormat, va_list pArguments)
+template<> wstr wstrutil::VFormat(const wchar_t* pFormat, va_list pArguments)
 {
 	wchar_t lBuffer[1024];
 	WIDE_SPRINTF(lBuffer, sizeof(lBuffer)/sizeof(wchar_t), pFormat, pArguments);
-	return (UnicodeString(lBuffer));
+	return (wstr(lBuffer));
 }
 
 
 
-template<> long AnsiStringUtility::StrToL(const char* pString, char** pEndPtr, int pRadix)
+template<> long astrutil::StrToL(const char* pString, char** pEndPtr, int pRadix)
 {
 	return (::strtol(pString, pEndPtr, pRadix));
 }
 
-template<> long UnicodeStringUtility::StrToL(const wchar_t* pString, wchar_t** pEndPtr, int pRadix)
+template<> long wstrutil::StrToL(const wchar_t* pString, wchar_t** pEndPtr, int pRadix)
 {
 	return (::wcstol(pString, pEndPtr, pRadix));
 }
 
-template<> bool AnsiStringUtility::StringToDouble(const AnsiString& pString, double& pValue)
+template<> bool astrutil::StringToDouble(const astr& pString, double& pValue)
 {
 	if (pString.empty())
 	{
@@ -64,7 +64,7 @@ template<> bool AnsiStringUtility::StringToDouble(const AnsiString& pString, dou
 	return (pString.c_str()+pString.length() == lEndPtr);
 }
 
-template<> bool UnicodeStringUtility::StringToDouble(const UnicodeString& pString, double& pValue)
+template<> bool wstrutil::StringToDouble(const wstr& pString, double& pValue)
 {
 	if (pString.empty())
 	{
@@ -75,7 +75,7 @@ template<> bool UnicodeStringUtility::StringToDouble(const UnicodeString& pStrin
 	return (pString.c_str()+pString.length() == lEndPtr);
 }
 
-template<> void AnsiStringUtility::DoubleToString(double pValue, int pNumDecimals, AnsiString& pString)
+template<> void astrutil::DoubleToString(double pValue, int pNumDecimals, astr& pString)
 {
 	char lFormat[32];
 	char lResult[64];
@@ -96,7 +96,7 @@ template<> void AnsiStringUtility::DoubleToString(double pValue, int pNumDecimal
 	pString = lResult;
 }
 
-template<> void UnicodeStringUtility::DoubleToString(double pValue, int pNumDecimals, UnicodeString& pString)
+template<> void wstrutil::DoubleToString(double pValue, int pNumDecimals, wstr& pString)
 {
 	wchar_t lFormat[32];
 	wchar_t lResult[64];
@@ -119,29 +119,29 @@ template<> void UnicodeStringUtility::DoubleToString(double pValue, int pNumDeci
 
 
 
-template<> int AnsiStringUtility::StrLen(const char* pString)
+template<> int astrutil::StrLen(const char* pString)
 {
 	return (int)::strlen(pString);
 }
 
-template<> int UnicodeStringUtility::StrLen(const wchar_t* pString)
+template<> int wstrutil::StrLen(const wchar_t* pString)
 {
 	return (int)::wcslen(pString);
 }
 
-template<> int AnsiStringUtility::StrCmp(const char* pString1, const char* pString2)
+template<> int astrutil::StrCmp(const char* pString1, const char* pString2)
 {
 	return ::strcmp(pString1, pString2);
 }
 
-template<> int UnicodeStringUtility::StrCmp(const wchar_t* pString1, const wchar_t* pString2)
+template<> int wstrutil::StrCmp(const wchar_t* pString1, const wchar_t* pString2)
 {
 	return ::wcscmp(pString1, pString2);
 }
 
-#ifndef LEPRA_POSIX // Implemented in String.inl instead.
+#ifndef LEPRA_POSIX // Implemented in str.inl instead.
 
-template<> int AnsiStringUtility::StrCmpI(const char* pString1, const char* pString2)
+template<> int astrutil::StrCmpI(const char* pString1, const char* pString2)
 {
 #ifdef LEPRA_MSVC
 	return ::_stricmp(pString1, pString2);
@@ -151,7 +151,7 @@ template<> int AnsiStringUtility::StrCmpI(const char* pString1, const char* pStr
 #endif
 }
 
-template<> int UnicodeStringUtility::StrCmpI(const wchar_t* pString1, const wchar_t* pString2)
+template<> int wstrutil::StrCmpI(const wchar_t* pString1, const wchar_t* pString2)
 {
 #ifdef LEPRA_WINDOWS
 #if _MSC_VER > 1310 // = MSVC 2005
@@ -166,49 +166,49 @@ template<> int UnicodeStringUtility::StrCmpI(const wchar_t* pString1, const wcha
 
 #endif
 
-template<> int AnsiStringUtility::StrNCmp(const char* pString1, const char* pString2, int pMaxCount)
+template<> int astrutil::StrNCmp(const char* pString1, const char* pString2, int pMaxCount)
 {
 	return ::strncmp(pString1, pString2, pMaxCount);
 }
 
-template<> int UnicodeStringUtility::StrNCmp(const wchar_t* pString1, const wchar_t* pString2, int pMaxCount)
+template<> int wstrutil::StrNCmp(const wchar_t* pString1, const wchar_t* pString2, int pMaxCount)
 {
 	return ::wcsncmp(pString1, pString2, pMaxCount);
 }
 
-template<> const char* AnsiStringUtility::StrStr(const char* pString, const char* pStringSearch)
+template<> const char* astrutil::StrStr(const char* pString, const char* pStringSearch)
 {
 	return ::strstr(pString, pStringSearch);
 }
 
-template<> const wchar_t* UnicodeStringUtility::StrStr(const wchar_t* pString, const wchar_t* pStringSearch)
+template<> const wchar_t* wstrutil::StrStr(const wchar_t* pString, const wchar_t* pStringSearch)
 {
 	return ::wcsstr(pString, pStringSearch);
 }
 
 
 
-template<> bool AnsiStringUtility::IsWhiteSpace(char pChar)
+template<> bool astrutil::IsWhiteSpace(char pChar)
 {
 	return (pChar == ' ' || pChar == '\t' || pChar == '\v' || pChar == '\r' || pChar == '\n');
 }
 
-template<> bool UnicodeStringUtility::IsWhiteSpace(wchar_t pChar)
+template<> bool wstrutil::IsWhiteSpace(wchar_t pChar)
 {
 	return (pChar == L' ' || pChar == L'\t' || pChar == L'\v' || pChar == L'\r' || pChar == L'\n');
 }
 
 
 
-template<> const AnsiString AnsiStringUtility::ToOwnCode(const AnsiString& pString)
+template<> const astr astrutil::ToOwnCode(const astr& pString)
 {
 	return (pString);
 }
 
-template<> const AnsiString AnsiStringUtility::ToOwnCode(const UnicodeString& pString)
+template<> const astr astrutil::ToOwnCode(const wstr& pString)
 {
 	// Convert to UTF-8.
-	AnsiString lAnsi;
+	astr lAnsi;
 	if (sizeof(wchar_t) == 2)
 	{
 		utf8::utf16to8(pString.begin(), pString.end(), back_inserter(lAnsi));
@@ -221,10 +221,10 @@ template<> const AnsiString AnsiStringUtility::ToOwnCode(const UnicodeString& pS
 	return (lAnsi);
 }
 
-template<> const UnicodeString UnicodeStringUtility::ToOwnCode(const AnsiString& pString)
+template<> const wstr wstrutil::ToOwnCode(const astr& pString)
 {
 	// Convert to UTF-16 or UTF-32.
-	UnicodeString lUnicode;
+	wstr lUnicode;
 	if (sizeof(wchar_t) == 2)
 	{
 		utf8::utf8to16(pString.begin(), pString.end(), back_inserter(lUnicode));
@@ -237,18 +237,18 @@ template<> const UnicodeString UnicodeStringUtility::ToOwnCode(const AnsiString&
 	return (lUnicode);
 }
 
-template<> const UnicodeString UnicodeStringUtility::ToOwnCode(const UnicodeString& pString)
+template<> const wstr wstrutil::ToOwnCode(const wstr& pString)
 {
 	return (pString);
 }
 
 
 
-template<> std::locale AnsiStringUtility::mLocale("");
-template<> std::locale UnicodeStringUtility::mLocale("");
+template<> std::locale astrutil::mLocale("");
+template<> std::locale wstrutil::mLocale("");
 
-const AnsiString gEmptyAnsiString;
-const UnicodeString gEmptyUnicodeString;
+const astr gEmptyAnsiString;
+const wstr gEmptyUnicodeString;
 
 
 

@@ -21,8 +21,8 @@ class Network
 public:
 	static bool Start();
 	static bool Stop();
-	static String GetHostname();
-	static bool ResolveHostname(const String& pHostname, IPAddress& pIPAddress);
+	static str GetHostname();
+	static bool ResolveHostname(const str& pHostname, IPAddress& pIPAddress);
 
 private:
 	static bool mStarted;

@@ -40,7 +40,7 @@ SoundManagerFMod::~SoundManagerFMod()
 	delete[] (mChannel);
 }
 
-SoundManager::SoundID SoundManagerFMod::LoadSound2D(const Lepra::String& pFileName, LoopMode pLoopMode, int pPriority)
+SoundManager::SoundID SoundManagerFMod::LoadSound2D(const str& pFileName, LoopMode pLoopMode, int pPriority)
 {
 	FileNameToSampleTable::Iterator lIter = mFileNameToSampleTable.Find(pFileName);
 	if (lIter != mFileNameToSampleTable.End())
@@ -72,7 +72,7 @@ SoundManager::SoundID SoundManagerFMod::LoadSound2D(const Lepra::String& pFileNa
 		lSample->mFileName = pFileName;
 		lSample->mID = mSampleIDManager.GetFreeId();
 		lSample->mSample = FSOUND_Sample_Load((int)lSample->mID,
-			Lepra::AnsiStringUtility::ToOwnCode(pFileName).c_str(), lFlags, 0, 0);
+			astrutil::ToOwnCode(pFileName).c_str(), lFlags, 0, 0);
 
 		if (lSample->mSample == 0)
 		{
@@ -90,7 +90,7 @@ SoundManager::SoundID SoundManagerFMod::LoadSound2D(const Lepra::String& pFileNa
 	}
 }
 
-SoundManager::SoundID SoundManagerFMod::LoadSound3D(const Lepra::String& pFileName, LoopMode pLoopMode, int pPriority)
+SoundManager::SoundID SoundManagerFMod::LoadSound3D(const str& pFileName, LoopMode pLoopMode, int pPriority)
 {
 	FileNameToSampleTable::Iterator lIter = mFileNameToSampleTable.Find(pFileName);
 	if (lIter != mFileNameToSampleTable.End())
@@ -122,7 +122,7 @@ SoundManager::SoundID SoundManagerFMod::LoadSound3D(const Lepra::String& pFileNa
 		lSample->mFileName = pFileName;
 		lSample->mID = mSampleIDManager.GetFreeId();
 		lSample->mSample = FSOUND_Sample_Load((int)lSample->mID,
-			Lepra::AnsiStringUtility::ToOwnCode(pFileName).c_str(), lFlags, 0, 0);
+			astrutil::ToOwnCode(pFileName).c_str(), lFlags, 0, 0);
 
 		if (lSample->mSample == 0)
 		{
@@ -140,7 +140,7 @@ SoundManager::SoundID SoundManagerFMod::LoadSound3D(const Lepra::String& pFileNa
 	}
 }
 
-SoundManager::SoundID SoundManagerFMod::LoadStream(const Lepra::String& pFileName, LoopMode pLoopMode, int pPriority)
+SoundManager::SoundID SoundManagerFMod::LoadStream(const str& pFileName, LoopMode pLoopMode, int pPriority)
 {
 	FileNameToSampleTable::Iterator lIter = mFileNameToSampleTable.Find(pFileName);
 	if (lIter != mFileNameToSampleTable.End())
@@ -171,7 +171,7 @@ SoundManager::SoundID SoundManagerFMod::LoadStream(const Lepra::String& pFileNam
 		Sample* lSample = new Sample();
 		lSample->mFileName = pFileName;
 		lSample->mID = mStreamIDManager.GetFreeId();
-		lSample->mStream = FSOUND_Stream_Open(Lepra::AnsiStringUtility::ToOwnCode(pFileName).c_str(),
+		lSample->mStream = FSOUND_Stream_Open(astrutil::ToOwnCode(pFileName).c_str(),
 			lFlags, 0, 0);
 
 		if (lSample->mStream == 0)
@@ -432,7 +432,7 @@ int SoundManagerFMod::GetFrequency(SoundInstanceID pSoundIID)
 	return FSOUND_GetFrequency((*lSIIter).mChannel);
 }
 
-void SoundManagerFMod::SetSoundPosition(SoundInstanceID pSoundIID, const Lepra::Vector3DF& pPos, const Lepra::Vector3DF& pVel)
+void SoundManagerFMod::SetSoundPosition(SoundInstanceID pSoundIID, const Vector3DF& pPos, const Vector3DF& pVel)
 {
 	SoundInstanceTable::Iterator lSIIter = mSoundInstanceTable.Find(pSoundIID);
 	if (lSIIter == mSoundInstanceTable.End())
@@ -454,7 +454,7 @@ void SoundManagerFMod::SetSoundPosition(SoundInstanceID pSoundIID, const Lepra::
 	FSOUND_3D_SetAttributes((*lSIIter).mChannel, lPos, lVel);
 }
 
-void SoundManagerFMod::GetSoundPosition(SoundInstanceID pSoundIID, Lepra::Vector3DF& pPos, Lepra::Vector3DF& pVel)
+void SoundManagerFMod::GetSoundPosition(SoundInstanceID pSoundIID, Vector3DF& pPos, Vector3DF& pVel)
 {
 	SoundInstanceTable::Iterator lSIIter = mSoundInstanceTable.Find(pSoundIID);
 	if (lSIIter == mSoundInstanceTable.End())
@@ -481,8 +481,8 @@ void SoundManagerFMod::SetCurrentListener(int pListenerIndex, int pListenerCount
 	FSOUND_3D_Listener_SetCurrent(pListenerIndex, pListenerCount);
 }
 
-void SoundManagerFMod::SetListenerPosition(const Lepra::Vector3DF& pPos, const Lepra::Vector3DF& pVel,
-	const Lepra::Vector3DF& pUp, const Lepra::Vector3DF& pForward)
+void SoundManagerFMod::SetListenerPosition(const Vector3DF& pPos, const Vector3DF& pVel,
+	const Vector3DF& pUp, const Vector3DF& pForward)
 {
 	float lPos[3];
 	float lVel[3];
@@ -498,8 +498,8 @@ void SoundManagerFMod::SetListenerPosition(const Lepra::Vector3DF& pPos, const L
 	FSOUND_3D_Listener_SetAttributes(lPos, lVel, pForward.x, pForward.y, pForward.z, pUp.x, pUp.y, pUp.z);
 }
 
-void SoundManagerFMod::GetListenerPosition(Lepra::Vector3DF& pPos, Lepra::Vector3DF& pVel,
-	Lepra::Vector3DF& pUp, Lepra::Vector3DF& pForward)
+void SoundManagerFMod::GetListenerPosition(Vector3DF& pPos, Vector3DF& pVel,
+	Vector3DF& pUp, Vector3DF& pForward)
 {
 	float lPos[3];
 	float lVel[3];
