@@ -110,14 +110,14 @@ DiskFile::~DiskFile()
 	Close();
 }
 
-void DiskFile::ExtractPathAndFileName(const String& pFileName)
+void DiskFile::ExtractPathAndFileName(const str& pFileName)
 {
 	Path::SplitPath(pFileName, mPath, mFileName);
 	InputStream::SetName(mFileName);
 	OutputStream::SetName(mFileName);
 }
 
-FILE* DiskFile::FileOpen(const String& pFileName, const String& pMode)
+FILE* DiskFile::FileOpen(const str& pFileName, const str& pMode)
 {
 	FILE* lFile = 0;
 
@@ -131,13 +131,13 @@ FILE* DiskFile::FileOpen(const String& pFileName, const String& pMode)
 		lFile = 0;
 	}
 #else // _MSC_VER <= 1310
-	lFile = fopen(AnsiStringUtility::ToOwnCode(pFileName).c_str(), AnsiStringUtility::ToOwnCode(pMode).c_str());
+	lFile = fopen(astrutil::ToOwnCode(pFileName).c_str(), astrutil::ToOwnCode(pMode).c_str());
 #endif // _MSC_VER > 1310 / _MSC_VER <= 1310
 
 	return (lFile);
 }
 
-bool DiskFile::Open(const String& pFileName, OpenMode pMode, bool pCreatePath, Endian::EndianType pEndian)
+bool DiskFile::Open(const str& pFileName, OpenMode pMode, bool pCreatePath, Endian::EndianType pEndian)
 {
 	Close();
 
@@ -172,7 +172,7 @@ bool DiskFile::Open(const String& pFileName, OpenMode pMode, bool pCreatePath, E
 		}
 	}
 
-	Lepra::String lModeString;
+	str lModeString;
 	if (lOk)
 	{
 		if ((pMode&(MODE_READ|MODE_WRITE|MODE_WRITE_APPEND)) == MODE_READ)
@@ -263,17 +263,17 @@ void DiskFile::SetEndian(Endian::EndianType pEndian)
 	}
 }
 
-String DiskFile::GetFullName() const
+str DiskFile::GetFullName() const
 {
 	return mPath + _T("/") + mFileName;
 }
 
-String DiskFile::GetName() const
+str DiskFile::GetName() const
 {
 	return mFileName;
 }
 
-String DiskFile::GetPath() const
+str DiskFile::GetPath() const
 {
 	return mPath;
 }
@@ -420,7 +420,7 @@ int64 DiskFile::Seek(int64 pOffset, FileOrigin pFrom)
 // Static functions.
 //
 
-bool DiskFile::Exists(const String& pFileName)
+bool DiskFile::Exists(const str& pFileName)
 {
 	FILE* lFile = FileOpen(pFileName, _T("rb"));
 
@@ -434,58 +434,58 @@ bool DiskFile::Exists(const String& pFileName)
 	return lOk;
 }
 
-bool DiskFile::PathExists(const String& pPathName)
+bool DiskFile::PathExists(const str& pPathName)
 {
 	char lCurrentDir[300];
 
 #ifdef LEPRA_WINDOWS // Hugge/TRICKY: Should we check for Visual Studio instead?
 	::_getcwd(lCurrentDir, 299);
-	bool lSuccess = _chdir(AnsiStringUtility::ToOwnCode(pPathName).c_str()) == 0;
+	bool lSuccess = _chdir(astrutil::ToOwnCode(pPathName).c_str()) == 0;
 	::_chdir(lCurrentDir);
 #else
 	::getcwd(lCurrentDir, 299);
-	bool lSuccess = ::chdir(AnsiStringUtility::ToOwnCode(pPathName).c_str()) == 0;
+	bool lSuccess = ::chdir(astrutil::ToOwnCode(pPathName).c_str()) == 0;
 	::chdir(lCurrentDir);
 #endif
 
 	return lSuccess;
 }
 
-bool DiskFile::Delete(const String& pFileName)
+bool DiskFile::Delete(const str& pFileName)
 {
-	return (::remove(AnsiStringUtility::ToOwnCode(pFileName).c_str()) == 0);
+	return (::remove(astrutil::ToOwnCode(pFileName).c_str()) == 0);
 }
 
-bool DiskFile::Rename(const String& pOldFileName, const String& pNewFileName)
+bool DiskFile::Rename(const str& pOldFileName, const str& pNewFileName)
 {
-	return (::rename(AnsiStringUtility::ToOwnCode(pOldFileName).c_str(), AnsiStringUtility::ToOwnCode(pNewFileName).c_str()) == 0);
+	return (::rename(astrutil::ToOwnCode(pOldFileName).c_str(), astrutil::ToOwnCode(pNewFileName).c_str()) == 0);
 }
 
-bool DiskFile::CreateDir(const String& pPathName)
+bool DiskFile::CreateDir(const str& pPathName)
 {
 #ifdef LEPRA_POSIX 
-	return ::mkdir(AnsiStringUtility::ToOwnCode(pPathName).c_str(), 0775) != -1;
+	return ::mkdir(astrutil::ToOwnCode(pPathName).c_str(), 0775) != -1;
 #else
-	return ::_mkdir(AnsiStringUtility::ToOwnCode(pPathName).c_str()) != -1;
+	return ::_mkdir(astrutil::ToOwnCode(pPathName).c_str()) != -1;
 #endif
 }
 
-bool DiskFile::RemoveDir(const String& pPathName)
+bool DiskFile::RemoveDir(const str& pPathName)
 {
 #ifdef LEPRA_WINDOWS // Hugge/TRICKY: Should we check for Visual Studio instead?
-	return ::_rmdir(AnsiStringUtility::ToOwnCode(pPathName).c_str()) == 0;
+	return ::_rmdir(astrutil::ToOwnCode(pPathName).c_str()) == 0;
 #else
-	return ::rmdir(AnsiStringUtility::ToOwnCode(pPathName).c_str()) == 0;
+	return ::rmdir(astrutil::ToOwnCode(pPathName).c_str()) == 0;
 #endif
 }
 
 bool DiskFile::CreateSubDirs()
 {
-	String lDirectory = Path::GetDirectory(mPath);
-	StringUtility::StringVector lDirectoryArray = Path::SplitNodes(lDirectory);
+	str lDirectory = Path::GetDirectory(mPath);
+	strutil::strvec lDirectoryArray = Path::SplitNodes(lDirectory);
 
 	bool lOk = true;
-	String lNewPath;
+	str lNewPath;
 	for (size_t x = 0; x < lDirectoryArray.size(); ++x)
 	{
 		lNewPath += lDirectoryArray[x];
@@ -504,14 +504,14 @@ bool DiskFile::CreateSubDirs()
 	return lOk;
 }
 
-bool DiskFile::FindFirst(const String& pFileSpec, FindData& pFindData)
+bool DiskFile::FindFirst(const str& pFileSpec, FindData& pFindData)
 {
 	pFindData.Clear();
 	bool lOk = true;
 
 #if defined LEPRA_WINDOWS
 	_finddata_t lData;
-	pFindData.mFindHandle = _findfirst(AnsiStringUtility::ToOwnCode(pFileSpec).c_str(), &lData);
+	pFindData.mFindHandle = _findfirst(astrutil::ToOwnCode(pFileSpec).c_str(), &lData);
 
 	if (pFindData.mFindHandle == -1)
 	{
@@ -520,7 +520,7 @@ bool DiskFile::FindFirst(const String& pFileSpec, FindData& pFindData)
 
 	if (lOk == true)
 	{
-		pFindData.mName = AnsiStringUtility::ToCurrentCode(AnsiString(lData.name));	// TODO: needs real Unicode findxxx().
+		pFindData.mName = astrutil::ToCurrentCode(astr(lData.name));	// TODO: needs real Unicode findxxx().
 		pFindData.mSize = lData.size;
 
 		if ((lData.attrib & _A_SUBDIR) != 0)
@@ -533,11 +533,11 @@ bool DiskFile::FindFirst(const String& pFileSpec, FindData& pFindData)
 #elif defined LEPRA_POSIX
 	glob_t lGlobList;
 	lGlobList.gl_offs = 1;
-	::glob(AnsiStringUtility::ToOwnCode(pFileSpec).c_str(), GLOB_DOOFFS|GLOB_MARK, 0, &lGlobList);
+	::glob(astrutil::ToOwnCode(pFileSpec).c_str(), GLOB_DOOFFS|GLOB_MARK, 0, &lGlobList);
 	if (lGlobList.gl_pathc >= 1)
 	{
 		pFindData.mFileSpec = pFileSpec;
-		pFindData.mName = AnsiStringUtility::ToCurrentCode(lGlobList.gl_pathv[0]);
+		pFindData.mName = astrutil::ToCurrentCode(lGlobList.gl_pathv[0]);
 		struct stat lFileInfo;
 		::stat(lGlobList.gl_pathv[0], &lFileInfo);	// TODO: error check.
 		pFindData.mSize = lFileInfo.st_size;
@@ -569,7 +569,7 @@ bool DiskFile::FindNext(FindData& pFindData)
 	}
 	if (lOk == true)
 	{
-		pFindData.mName = AnsiStringUtility::ToCurrentCode(AnsiString(lData.name));	// TODO: needs real Unicode findxxx()!
+		pFindData.mName = astrutil::ToCurrentCode(astr(lData.name));	// TODO: needs real Unicode findxxx()!
 		pFindData.mSize = lData.size;
 
 		if ((lData.attrib & _A_SUBDIR) != 0)
@@ -583,18 +583,18 @@ bool DiskFile::FindNext(FindData& pFindData)
 	lOk = false;
 	glob_t lGlobList;
 	lGlobList.gl_offs = 1000;
-	::glob(AnsiStringUtility::ToOwnCode(pFindData.mFileSpec).c_str(), GLOB_DOOFFS|GLOB_MARK, 0, &lGlobList);
+	::glob(astrutil::ToOwnCode(pFindData.mFileSpec).c_str(), GLOB_DOOFFS|GLOB_MARK, 0, &lGlobList);
 	if (lGlobList.gl_pathc >= 1)
 	{
 		for (size_t x = 0; x < lGlobList.gl_pathc; ++x)
 		{
-			if (AnsiStringUtility::ToCurrentCode(lGlobList.gl_pathv[x]) == pFindData.mName)
+			if (astrutil::ToCurrentCode(lGlobList.gl_pathv[x]) == pFindData.mName)
 			{
 				++x;
 			  	if (x < lGlobList.gl_pathc)
 				{
 					lOk = true;
-					pFindData.mName = AnsiStringUtility::ToCurrentCode(lGlobList.gl_pathv[0]);
+					pFindData.mName = astrutil::ToCurrentCode(lGlobList.gl_pathv[0]);
 					struct stat lFileInfo;
 					::stat(lGlobList.gl_pathv[0], &lFileInfo);	// TODO: error check.
 					pFindData.mSize = lFileInfo.st_size;
@@ -613,16 +613,16 @@ bool DiskFile::FindNext(FindData& pFindData)
 	return lOk;
 }
 
-String DiskFile::GenerateUniqueFileName(const String& pPath)
+str DiskFile::GenerateUniqueFileName(const str& pPath)
 {
-	String lPath(pPath);
+	str lPath(pPath);
 	lPath += _T('/');
 
 	int64 lRandomNumber = (int64)Random::GetRandomNumber64();
 	if (lRandomNumber < 0)
 		lRandomNumber = -lRandomNumber;
 
-	String lName = StringUtility::IntToString(lRandomNumber, 16);
+	str lName = strutil::IntToString(lRandomNumber, 16);
 
 	while (Exists(pPath + lName) == true)
 	{
@@ -631,7 +631,7 @@ String DiskFile::GenerateUniqueFileName(const String& pPath)
 		{
 			lRandomNumber = -lRandomNumber;
 		}
-		lName = StringUtility::IntToString(lRandomNumber, 16);
+		lName = strutil::IntToString(lRandomNumber, 16);
 	}
 
 	return pPath + lName;

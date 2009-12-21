@@ -49,12 +49,12 @@ TriangleBasedGeometry::TriangleBasedGeometry(const TriangleBasedGeometry& pGeome
 	Copy(pGeometry);
 }
 
-TriangleBasedGeometry::TriangleBasedGeometry(Lepra::Vector3DF* pVertices,
-                                             Lepra::Vector3DF* pVertexNormals,
-                                             Lepra::Vector2D<float>* pUV,
-                                             Lepra::Color* pColor,
+TriangleBasedGeometry::TriangleBasedGeometry(Vector3DF* pVertices,
+                                             Vector3DF* pVertexNormals,
+                                             Vector2D<float>* pUV,
+                                             Color* pColor,
                                              ColorFormat pColorFormat,
-                                             Lepra::uint32* pIndices,
+                                             uint32* pIndices,
                                              unsigned int pVertexCount,
                                              unsigned int pIndexCount,
 					     TBC::GeometryBase::PrimitiveType pPrimitiveType,
@@ -88,9 +88,9 @@ TriangleBasedGeometry::TriangleBasedGeometry(Lepra::Vector3DF* pVertices,
 TriangleBasedGeometry::TriangleBasedGeometry(float* pVertexData,
                                              float* pVertexNormals,
                                              float* pUVData,
-                                             Lepra::uint8* pColorData,
+                                             uint8* pColorData,
                                              ColorFormat pColorFormat,
-                                             Lepra::uint32* pIndices,
+                                             uint32* pIndices,
                                              unsigned int pVertexCount,
                                              unsigned int pIndexCount,
 					     TBC::GeometryBase::PrimitiveType pPrimitiveType,
@@ -121,12 +121,12 @@ TriangleBasedGeometry::TriangleBasedGeometry(float* pVertexData,
 		pGeomType);
 }
 
-void TriangleBasedGeometry::Set(Lepra::Vector3DF* pVertices,
-                                Lepra::Vector3DF* pVertexNormals,
-                                Lepra::Vector2D<float>* pUV,
-                                Lepra::Color* pColor,
+void TriangleBasedGeometry::Set(Vector3DF* pVertices,
+                                Vector3DF* pVertexNormals,
+                                Vector2D<float>* pUV,
+                                Color* pColor,
                                 ColorFormat pColorFormat,
-                                Lepra::uint32* pIndices,
+                                uint32* pIndices,
                                 unsigned int pVertexCount,
                                 unsigned int pIndexCount,
 				TBC::GeometryBase::PrimitiveType pPrimitiveType,
@@ -181,7 +181,7 @@ void TriangleBasedGeometry::Set(Lepra::Vector3DF* pVertices,
 			if (mColorFormat == COLOR_RGB)
 				lSize = 3;
 
-			mColorData = new Lepra::uint8[mVertexCount * lSize];
+			mColorData = new uint8[mVertexCount * lSize];
 			for (i = 0, lIndex = 0; i < mVertexCount; i++, lIndex += lSize)
 			{
 				mColorData[lIndex + 0] = pColor[i].mRed;
@@ -196,7 +196,7 @@ void TriangleBasedGeometry::Set(Lepra::Vector3DF* pVertices,
 		if (pIndices != 0)
 		{
 			// Copy index data.
-			mIndexData = new Lepra::uint32[mIndexCount];
+			mIndexData = new uint32[mIndexCount];
 			for (i = 0; i < mIndexCount; i++)
 			{
 				mIndexData[i] = pIndices[i];
@@ -210,9 +210,9 @@ void TriangleBasedGeometry::Set(Lepra::Vector3DF* pVertices,
 void TriangleBasedGeometry::Set(float* pVertexData,
                                 float* pVertexNormals,
                                 float* pUVData,
-                                Lepra::uint8* pColorData,
+                                uint8* pColorData,
                                 ColorFormat pColorFormat,
-                                Lepra::uint32* pIndices,
+                                uint32* pIndices,
                                 unsigned int pVertexCount,
                                 unsigned int pIndexCount,
 				TBC::GeometryBase::PrimitiveType pPrimitiveType,
@@ -260,7 +260,7 @@ void TriangleBasedGeometry::Set(float* pVertexData,
 			if (mColorFormat == COLOR_RGB)
 				lSize = 3;
 
-			mColorData = new Lepra::uint8[mVertexCount * lSize];
+			mColorData = new uint8[mVertexCount * lSize];
 
 			for (i = 0, lIndex = 0; i < mVertexCount; i++, lIndex += lSize)
 			{
@@ -276,7 +276,7 @@ void TriangleBasedGeometry::Set(float* pVertexData,
 		if (pIndices != 0)
 		{
 			// Copy index data.
-			mIndexData = new Lepra::uint32[mIndexCount];
+			mIndexData = new uint32[mIndexCount];
 			for (i = 0; i < mIndexCount; i++)
 			{
 				mIndexData[i] = pIndices[i];
@@ -355,8 +355,8 @@ void TriangleBasedGeometry::Copy(const TriangleBasedGeometry& pGeometry)
 			if (mColorFormat == COLOR_RGB)
 				lSize = 3;
 
-			const Lepra::uint8* lColorData = lGeometry.GetColorData();
-			mColorData = new Lepra::uint8[mVertexCount * lSize];
+			const uint8* lColorData = lGeometry.GetColorData();
+			mColorData = new uint8[mVertexCount * lSize];
 			for (i = 0, lIndex = 0; i < mVertexCount; i++, lIndex += lSize)
 			{
 				mColorData[lIndex + 0] = lColorData[lIndex + 0];
@@ -371,8 +371,8 @@ void TriangleBasedGeometry::Copy(const TriangleBasedGeometry& pGeometry)
 		if (lGeometry.GetIndexData() != 0)
 		{
 			// Copy index data.
-			const Lepra::uint32* lIndices = lGeometry.GetIndexData();
-			mIndexData = new Lepra::uint32[mIndexCount];
+			const uint32* lIndices = lGeometry.GetIndexData();
+			mIndexData = new uint32[mIndexCount];
 			for (i = 0; i < mIndexCount; i++)
 			{
 				mIndexData[i] = lIndices[i];
@@ -427,7 +427,7 @@ void TriangleBasedGeometry::ClearAll()
 	TBC::GeometryBase::ClearAll();
 }
 
-void TriangleBasedGeometry::SetPolygon(Lepra::Vector3DF* pVertices, unsigned int pVertexCount)
+void TriangleBasedGeometry::SetPolygon(Vector3DF* pVertices, unsigned int pVertexCount)
 {
 	ClearAll();
 	mVertexData = new float[pVertexCount * 3];
@@ -484,7 +484,7 @@ int TriangleBasedGeometry::AddUVSet(float* pUVData)
 	return mUVSetCount - 1;
 }
 
-int TriangleBasedGeometry::AddUVSet(Lepra::Vector2D<float>* pUVData)
+int TriangleBasedGeometry::AddUVSet(Vector2D<float>* pUVData)
 {
 	unsigned int lUVSetCount = mUVSetCount + 1;
 	float** lUVData = new float*[lUVSetCount];
@@ -606,7 +606,7 @@ int TriangleBasedGeometry::DupUVSet(int pUVSet)
 	return lNewUVSet;
 }
 
-void TriangleBasedGeometry::SetColorData(Lepra::uint8* pColorData, ColorFormat pColorFormat)
+void TriangleBasedGeometry::SetColorData(uint8* pColorData, ColorFormat pColorFormat)
 {
 	if (mColorData != 0)
 	{
@@ -623,7 +623,7 @@ void TriangleBasedGeometry::SetColorData(Lepra::uint8* pColorData, ColorFormat p
 		if (mColorFormat == COLOR_RGB)
 			lSize = 3;
 
-		mColorData = new Lepra::uint8[mVertexCount * lSize];
+		mColorData = new uint8[mVertexCount * lSize];
 
 		unsigned int i;
 		unsigned int lIndex;
@@ -639,7 +639,7 @@ void TriangleBasedGeometry::SetColorData(Lepra::uint8* pColorData, ColorFormat p
 	}
 }
 
-void TriangleBasedGeometry::ConvertColorData(ColorFormat pColorFormat, Lepra::uint8 pAlpha)
+void TriangleBasedGeometry::ConvertColorData(ColorFormat pColorFormat, uint8 pAlpha)
 {
 	if (mColorFormat != pColorFormat)
 	{
@@ -647,7 +647,7 @@ void TriangleBasedGeometry::ConvertColorData(ColorFormat pColorFormat, Lepra::ui
 		if (pColorFormat == COLOR_RGB)
 			lSize = 3;
 
-		Lepra::uint8* lColorData = new Lepra::uint8[mVertexCount * lSize];
+		uint8* lColorData = new uint8[mVertexCount * lSize];
 		unsigned int i;
 		unsigned int lIndex;
 		for (i = 0, lIndex = 0; i < mVertexCount; i++, lIndex += lSize)
@@ -743,11 +743,11 @@ void TriangleBasedGeometry::SplitVertices()
 
 		unsigned int lVertexCount = GetTriangleCount() * 3;
 		unsigned int lUVSetCount = GetUVSetCount();
-		Lepra::uint32* lIndices = new Lepra::uint32[lVertexCount];
+		uint32* lIndices = new uint32[lVertexCount];
 		float* lVertexData = new float[lVertexCount * 3];
 		float* lNormalData = new float[lVertexCount * 3];
 		float** lUVData = 0;
-		Lepra::uint8* lColorData = 0;
+		uint8* lColorData = 0;
 		unsigned int i;
 		
 		if (lUVSetCount > 0)
@@ -762,7 +762,7 @@ void TriangleBasedGeometry::SplitVertices()
 		int lColorSize = (mColorFormat == COLOR_RGB ? 3 : 4);
 		if (mColorData != 0)
 		{
-			lColorData = new Lepra::uint8[lVertexCount * lColorSize];
+			lColorData = new uint8[lVertexCount * lColorSize];
 		}
 
 		//
@@ -915,7 +915,7 @@ void TriangleBasedGeometry::SplitVertices()
 	
 }
 
-void TriangleBasedGeometry::Translate(const Lepra::Vector3DF& pPositionOffset)
+void TriangleBasedGeometry::Translate(const Vector3DF& pPositionOffset)
 {
 	if (mVertexData != 0 && mVertexCount > 0)
 	{
@@ -931,11 +931,11 @@ void TriangleBasedGeometry::Translate(const Lepra::Vector3DF& pPositionOffset)
 	TBC::GeometryBase::CalculateBoundingRadius();
 }
 
-void TriangleBasedGeometry::Rotate(const Lepra::RotationMatrix<float>& pRotation)
+void TriangleBasedGeometry::Rotate(const RotationMatrix<float>& pRotation)
 {
-	Lepra::Vector3DF lAxisX(pRotation.GetInverseAxisX());
-	Lepra::Vector3DF lAxisY(pRotation.GetInverseAxisY());
-	Lepra::Vector3DF lAxisZ(pRotation.GetInverseAxisZ());
+	Vector3DF lAxisX(pRotation.GetInverseAxisX());
+	Vector3DF lAxisY(pRotation.GetInverseAxisY());
+	Vector3DF lAxisZ(pRotation.GetInverseAxisZ());
 
 	if (mVertexCount > 0)
 	{
@@ -1025,7 +1025,7 @@ void TriangleBasedGeometry::AddGeometry(TriangleBasedGeometry* pGeometry)
 	unsigned int lNumTriangles = GetTriangleCount() + pGeometry->GetTriangleCount();
 
 	float* lVertexData = new float[lVertexCount * 3];
-	Lepra::uint32* lIndices = new Lepra::uint32[lNumTriangles * 3];
+	uint32* lIndices = new uint32[lNumTriangles * 3];
 
 	unsigned int i;
 	int lIndex = 0;
@@ -1053,7 +1053,7 @@ void TriangleBasedGeometry::AddGeometry(TriangleBasedGeometry* pGeometry)
 
 	for (i = 0; i < pGeometry->GetTriangleCount(); i++, lIndex += 3)
 	{
-		Lepra::uint32 lTriIndex[3];
+		uint32 lTriIndex[3];
 		pGeometry->GetTriangleIndices(i, lTriIndex);
 
 		lIndices[lIndex + 0] = lTriIndex[0] + mVertexCount;
@@ -1110,7 +1110,7 @@ void TriangleBasedGeometry::AddGeometry(TriangleBasedGeometry* pGeometry)
 
 	if (mColorData != 0)
 	{
-		Lepra::uint8* lColorData = new Lepra::uint8[mVertexCount * 3];
+		uint8* lColorData = new uint8[mVertexCount * 3];
 
 		lIndex = 0;
 		for (i = 0; i < mVertexCount; i++, lIndex += 3)
@@ -1196,12 +1196,12 @@ float* TriangleBasedGeometry::GetUVData(unsigned int pUVSet) const
 	return mUVData[pUVSet];
 }
 
-Lepra::uint8* TriangleBasedGeometry::GetColorData() const
+uint8* TriangleBasedGeometry::GetColorData() const
 {
 	return mColorData;
 }
 
-Lepra::uint32* TriangleBasedGeometry::GetIndexData() const
+uint32* TriangleBasedGeometry::GetIndexData() const
 {
 	return mIndexData;
 }

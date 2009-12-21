@@ -72,7 +72,7 @@ void TerrainFunctionManager::MarkAllDirty()
 #endif
 }
 
-void TerrainFunctionManager::MarkInUse(const Lepra::Vector3DF& /*pPosition*/, float /*pRadius*/)
+void TerrainFunctionManager::MarkInUse(const Vector3DF& /*pPosition*/, float /*pRadius*/)
 {
 #if 0
 	FunctionTree::ObjectList lObjectList;

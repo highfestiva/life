@@ -13,35 +13,35 @@ namespace Lepra
 
 
 
-String Path::GetDirectory(const String& pPath)
+str Path::GetDirectory(const str& pPath)
 {
-	StringUtility::StringVector lPathParts = SplitPath(pPath);
+	strutil::strvec lPathParts = SplitPath(pPath);
 	return (lPathParts[0]);
 }
 
-String Path::GetFileBase(const String& pPath)
+str Path::GetFileBase(const str& pPath)
 {
-	StringUtility::StringVector lPathParts = SplitPath(pPath);
+	strutil::strvec lPathParts = SplitPath(pPath);
 	return (lPathParts[1]);
 }
 
-String Path::GetExtension(const String& pPath)
+str Path::GetExtension(const str& pPath)
 {
-	StringUtility::StringVector lPathParts = SplitPath(pPath);
+	strutil::strvec lPathParts = SplitPath(pPath);
 	return (lPathParts[2]);
 }
 
-String Path::GetCompositeFilename(const String& pPath)
+str Path::GetCompositeFilename(const str& pPath)
 {
-	String lDirectory;
-	String lCompositeFilename;
+	str lDirectory;
+	str lCompositeFilename;
 	SplitPath(pPath, lDirectory, lCompositeFilename);
 	return (lCompositeFilename);
 }
 
-StringUtility::StringVector Path::SplitPath(const String& pPath)
+strutil::strvec Path::SplitPath(const str& pPath)
 {
-	StringUtility::StringVector lPathParts(3);
+	strutil::strvec lPathParts(3);
 
 	// Search for extension.
 	int x;
@@ -90,32 +90,32 @@ StringUtility::StringVector Path::SplitPath(const String& pPath)
 	return (lPathParts);
 }
 
-void Path::SplitPath(const String& pPath, String& pDirectory, String& pFilename)
+void Path::SplitPath(const str& pPath, str& pDirectory, str& pFilename)
 {
-	StringUtility::StringVector lPathParts = SplitPath(pPath);
+	strutil::strvec lPathParts = SplitPath(pPath);
 	pDirectory = lPathParts[0];
 	pFilename = JoinPath(_T(""), lPathParts[1], lPathParts[2]);
 }
 
-StringUtility::StringVector Path::SplitNodes(const String& pDirectory, bool pExcludeLeadingDirectory, bool pExcludeTrailingDirectory)
+strutil::strvec Path::SplitNodes(const str& pDirectory, bool pExcludeLeadingDirectory, bool pExcludeTrailingDirectory)
 {
 #ifdef LEPRA_WINDOWS
-	String lDirectory;
+	str lDirectory;
 	// Include support for Win32 UNC names.
 	if (pDirectory.substr(0, 4) == _T("\\\\.\\"))
 	{
-		lDirectory = _T("\\\\.\\")+StringUtility::ReplaceAll(pDirectory.substr(4), _T('\\'), _T('/'));
+		lDirectory = _T("\\\\.\\")+strutil::ReplaceAll(pDirectory.substr(4), _T('\\'), _T('/'));
 	}
 	else if (pDirectory.substr(0, 2) == _T("\\\\"))
 	{
-		lDirectory = _T("\\\\")+StringUtility::ReplaceAll(pDirectory.substr(2), _T('\\'), _T('/'));
+		lDirectory = _T("\\\\")+strutil::ReplaceAll(pDirectory.substr(2), _T('\\'), _T('/'));
 	}
 	else
 	{
-		lDirectory = StringUtility::ReplaceAll(pDirectory, _T('\\'), _T('/'));
+		lDirectory = strutil::ReplaceAll(pDirectory, _T('\\'), _T('/'));
 	}
 #else // !LEPRA_WINDOWS
-	String lDirectory = pDirectory;
+	str lDirectory = pDirectory;
 #endif // LEPRA_WINDOWS / !LEPRA_WINDOWS
 	if (pExcludeLeadingDirectory && !lDirectory.empty() && IsPathSeparator(lDirectory[0]))
 	{
@@ -125,12 +125,12 @@ StringUtility::StringVector Path::SplitNodes(const String& pDirectory, bool pExc
 	{
 		lDirectory.resize(lDirectory.length()-1);
 	}
-	return (StringUtility::Split(lDirectory, _T("/")));
+	return (strutil::Split(lDirectory, _T("/")));
 }
 
-String Path::JoinPath(const String& pDirectory, const String& pFileBase, const String& pExtension)
+str Path::JoinPath(const str& pDirectory, const str& pFileBase, const str& pExtension)
 {
-	String lFullFilename;
+	str lFullFilename;
 	if (!pDirectory.empty())
 	{
 		lFullFilename = pDirectory;
@@ -147,11 +147,11 @@ String Path::JoinPath(const String& pDirectory, const String& pFileBase, const S
 	return (lFullFilename);
 }
 
-bool Path::NormalizePath(const String& pInputPath, String& pOutputPath)
+bool Path::NormalizePath(const str& pInputPath, str& pOutputPath)
 {
-	Lepra::StringUtility::StringVector lDirectoryArray = Lepra::Path::SplitNodes(pInputPath, false, false);
+	strutil::strvec lDirectoryArray = Path::SplitNodes(pInputPath, false, false);
 	// Drop irrelevant path info such as "./" and "../" (not leading of course).
-	Lepra::StringUtility::StringVector::iterator y = lDirectoryArray.begin();
+	strutil::strvec::iterator y = lDirectoryArray.begin();
 	for (int x = 0; y != lDirectoryArray.end(); ++x)
 	{
 		if (x >= 1 && *y == _T("."))	// Only drops non-leading "./".
@@ -173,7 +173,7 @@ bool Path::NormalizePath(const String& pInputPath, String& pOutputPath)
 			}
 			else
 			{
-				Lepra::StringUtility::StringVector::iterator z = y;
+				strutil::strvec::iterator z = y;
 				--z;
 				if (*z == _T(""))	// "/../" is illegal.
 				{
@@ -202,7 +202,7 @@ bool Path::NormalizePath(const String& pInputPath, String& pOutputPath)
 	}
 	else
 	{
-		pOutputPath = Lepra::StringUtility::Join(lDirectoryArray, _T("/"));
+		pOutputPath = strutil::Join(lDirectoryArray, _T("/"));
 	}
 	return (true);
 }

@@ -45,10 +45,10 @@ public:
 	NetworkServer(RuntimeVariableScope* pVariableScope, LoginListener* pLoginListener);
 	virtual ~NetworkServer();
 
-	virtual bool Start(const Lepra::String& pHostAddress);
+	virtual bool Start(const str& pHostAddress);
 	virtual void Stop();
 
-	void Disconnect(UserAccount::AccountId pAccountId, const Lepra::String& pReason, bool pSendDisconnect);
+	void Disconnect(UserAccount::AccountId pAccountId, const str& pReason, bool pSendDisconnect);
 
 	bool PlaceInSendBuffer(bool pSafe, Packet* pPacket, UserAccount::AccountId pAccountId);
 	bool SendAll();
@@ -56,28 +56,28 @@ public:
 
 private:
 	void PollAccept();
-	void TryLogin(Lepra::GameSocket* pSocket, Packet* pPacket, int pDataLength);
-	RemoteStatus QueryLogin(const Lepra::UnicodeString& pLoginName, MessageLoginRequest* pLoginRequest, UserAccount::AccountId& pAccountId);
-	void Login(const Lepra::UnicodeString& pUserName, UserAccount::AccountId pAccountId, Lepra::GameSocket* pSocket, Packet* pPacket);
-	RemoteStatus ManageLogin(Lepra::GameSocket* pSocket, Packet* pPacket);
+	void TryLogin(GameSocket* pSocket, Packet* pPacket, int pDataLength);
+	RemoteStatus QueryLogin(const wstr& pLoginName, MessageLoginRequest* pLoginRequest, UserAccount::AccountId& pAccountId);
+	void Login(const wstr& pUserName, UserAccount::AccountId pAccountId, GameSocket* pSocket, Packet* pPacket);
+	RemoteStatus ManageLogin(GameSocket* pSocket, Packet* pPacket);
 	void AddUser(UserConnection* pUserConnection, UserAccount::AccountId& pAccountId);
 	bool RemoveUser(UserAccount::AccountId pAccountId, bool pDestroy);
 	void KillDeadSockets();
-	void DropSocket(Lepra::GameSocket* pSocket);
+	void DropSocket(GameSocket* pSocket);
 	UserConnection* GetUser(UserAccount::AccountId pAccountId);
 
-	bool SendStatusMessage(UserAccount::AccountId pAccountId, Lepra::int32 pInteger, RemoteStatus pStatus, Lepra::UnicodeString pMessage, Packet* pPacket);
+	bool SendStatusMessage(UserAccount::AccountId pAccountId, int32 pInteger, RemoteStatus pStatus, wstr pMessage, Packet* pPacket);
 
-	void OnCloseSocket(Lepra::GameSocket* pSocket);
+	void OnCloseSocket(GameSocket* pSocket);
 
-	typedef std::hash_set<Lepra::GameSocket*, std::hash<void*> > SocketSet;
+	typedef std::hash_set<GameSocket*, std::hash<void*> > SocketSet;
 	typedef SocketSet PendingSocketTable;
 	typedef std::hash_map<UserAccount::AccountId, UserConnection*> LoggedInIdUserTable;
 	typedef std::pair<UserAccount::AccountId, UserConnection*> LoggedInIdUserPair;
-	typedef std::hash_map<Lepra::UnicodeString, UserConnection*> LoggedInNameUserTable;
-	typedef std::pair<Lepra::UnicodeString, UserConnection*> LoggedInNameUserPair;
-	typedef std::hash_map<Lepra::GameSocket*, UserConnection*, std::hash<void*> > SocketUserTable;
-	typedef std::pair<Lepra::GameSocket*, UserConnection*> SocketUserPair;
+	typedef std::hash_map<wstr, UserConnection*> LoggedInNameUserTable;
+	typedef std::pair<wstr, UserConnection*> LoggedInNameUserPair;
+	typedef std::hash_map<GameSocket*, UserConnection*, std::hash<void*> > SocketUserTable;
+	typedef std::pair<GameSocket*, UserConnection*> SocketUserPair;
 	typedef SocketSet SocketTimeoutTable;
 	typedef std::hash_set<UserAccount::AccountId> AccountIdSet;
 
@@ -90,7 +90,7 @@ private:
 	SocketTimeoutTable mSocketTimeoutTable;
 	AccountIdSet mDropUserList;
 
-	Lepra::Timer mKeepaliveTimer;
+	Timer mKeepaliveTimer;
 
 	LOG_CLASS_DECLARE();
 };

@@ -32,7 +32,7 @@ const ConsoleManager::CommandPair ServerConsoleManager::mCommandIdList[] =
 
 
 ServerConsoleManager::ServerConsoleManager(Cure::GameManager* pGameManager, Cure::RuntimeVariableScope* pVariableScope,
-	Lepra::InteractiveConsoleLogListener* pConsoleLogger, Lepra::ConsolePrompt* pConsolePrompt):
+	InteractiveConsoleLogListener* pConsoleLogger, ConsolePrompt* pConsolePrompt):
 	ConsoleManager(pGameManager, pVariableScope, pConsoleLogger, pConsolePrompt)
 {
 	Init();
@@ -58,7 +58,7 @@ const ServerConsoleManager::CommandPair& ServerConsoleManager::GetCommand(unsign
 	return (mCommandIdList[pIndex-Parent::GetCommandCount()]);
 }
 
-int ServerConsoleManager::OnCommand(const Lepra::String& pCommand, const Lepra::StringUtility::StringVector& pParameterVector)
+int ServerConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParameterVector)
 {
 	int lResult = Parent::OnCommand(pCommand, pParameterVector);
 	if (lResult < 0)
@@ -76,7 +76,7 @@ int ServerConsoleManager::OnCommand(const Lepra::String& pCommand, const Lepra::
 					if (pParameterVector.size() == 1 && pParameterVector[0] == _T("!"))
 					{
 						mLog.Warningf(_T("Forced termination with %i logged-in clients."), lClientCount);
-						Lepra::SystemManager::AddQuitRequest(+1);
+						SystemManager::AddQuitRequest(+1);
 					}
 					else
 					{
@@ -86,7 +86,7 @@ int ServerConsoleManager::OnCommand(const Lepra::String& pCommand, const Lepra::
 				else
 				{
 					mLog.AHeadline("Terminating due to user command.");
-					Lepra::SystemManager::AddQuitRequest(+1);
+					SystemManager::AddQuitRequest(+1);
 				}
 			}
 			break;
@@ -94,7 +94,7 @@ int ServerConsoleManager::OnCommand(const Lepra::String& pCommand, const Lepra::
 			{
 				if (pParameterVector.size() == 1)
 				{
-					Lepra::UnicodeString lMessage = Lepra::UnicodeStringUtility::ToOwnCode(pParameterVector[0]);
+					wstr lMessage = wstrutil::ToOwnCode(pParameterVector[0]);
 					if (((GameServerManager*)mGameManager)->BroadcastChatMessage(lMessage))
 					{
 						mLog.Infof(_T("BROADCAST CHAT: %s"), pParameterVector[0].c_str());
@@ -116,8 +116,8 @@ int ServerConsoleManager::OnCommand(const Lepra::String& pCommand, const Lepra::
 			{
 				if (pParameterVector.size() == 2)
 				{
-					Lepra::UnicodeString lClientUserName = Lepra::UnicodeStringUtility::ToOwnCode(pParameterVector[0]);
-					Lepra::UnicodeString lMessage = Lepra::UnicodeStringUtility::ToOwnCode(pParameterVector[1]);
+					wstr lClientUserName = wstrutil::ToOwnCode(pParameterVector[0]);
+					wstr lMessage = wstrutil::ToOwnCode(pParameterVector[1]);
 					if (((GameServerManager*)mGameManager)->SendChatMessage(lClientUserName, lMessage))
 					{
 						mLog.Infof(_T("PRIVATE CHAT ServerAdmin->%s: %s"), pParameterVector[0].c_str(), pParameterVector[1].c_str());
@@ -137,12 +137,12 @@ int ServerConsoleManager::OnCommand(const Lepra::String& pCommand, const Lepra::
 			break;
 			case COMMAND_LIST_USERS:
 			{
-				Lepra::UnicodeStringUtility::StringVector lUserNameList;
+				wstrutil::strvec lUserNameList;
 				lUserNameList = ((GameServerManager*)mGameManager)->ListUsers();
 				mLog.AInfo("Listing logged on users:");
 				for (size_t x = 0; x < lUserNameList.size(); ++x)
 				{
-					mLog.Info(_T("\t\"") + Lepra::UnicodeStringUtility::ToCurrentCode(lUserNameList[x]) + _T("\""));
+					mLog.Info(_T("\t\"") + wstrutil::ToCurrentCode(lUserNameList[x]) + _T("\""));
 				}
 				mLog.Infof(_T("A total of %u users logged in."), (unsigned)lUserNameList.size());
 			}

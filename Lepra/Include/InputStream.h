@@ -42,12 +42,12 @@ public:
 	// Skips over and discards pLength bytes of data from this input stream.
 	virtual IOError Skip(size_t pLength) = 0;
 
-	inline void SetName(const String& pName);
-	inline const String& GetName();
+	inline void SetName(const str& pName);
+	inline const str& GetName();
 
 protected:
 private:
-	String mName;
+	str mName;
 };
 
 InputStream::InputStream()
@@ -58,12 +58,12 @@ InputStream::~InputStream()
 {
 }
 
-void InputStream::SetName(const String& pName)
+void InputStream::SetName(const str& pName)
 {
 	mName = pName;
 }
 
-const String& InputStream::GetName()
+const str& InputStream::GetName()
 {
 	return mName;
 }

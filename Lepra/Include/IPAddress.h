@@ -17,7 +17,7 @@ public:
 	IPAddress(const IPAddress& pIPAddress);
 	IPAddress(unsigned pIP4Address);
 	IPAddress(const uint8* pIPAddress, int pNumBytes);
-	IPAddress(const String& pIPv4Address);
+	IPAddress(const str& pIPv4Address);
 	~IPAddress();
 
 	void Set(const uint8* pIPAddress, int pNumBytes);
@@ -27,7 +27,7 @@ public:
 	inline int GetNumBytes();
 	inline uint8 Read(int pIndex);
 
-	String GetAsString() const;
+	str GetAsString() const;
 
 	inline size_t operator() (const IPAddress& pAddr) const;
 

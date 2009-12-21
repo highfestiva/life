@@ -80,21 +80,21 @@ public:
 	FileArchive();
 	virtual ~FileArchive();
 
-	IOError OpenArchive(const String& pArchiveFileName, IOType pIOType);
+	IOError OpenArchive(const str& pArchiveFileName, IOType pIOType);
 	void CloseArchive();
 	void CloseAndRemoveArchive();
 
 	int GetFileCount();
 
-	IOError InsertArchive(const String& pArchiveFileName);
+	IOError InsertArchive(const str& pArchiveFileName);
 
-	String FileFindFirst();
-	String FileFindNext();
+	str FileFindFirst();
+	str FileFindNext();
 
-	int FileOpen(const String& pFileName);
+	int FileOpen(const str& pFileName);
 	void FileClose(int pFileHandle);
 
-	bool FileExist(const String& pFileName);
+	bool FileExist(const str& pFileName);
 
 	IOError FileRead(void* pDest, int pSize, int pFileHandle);
 	IOError FileWrite(void* pSource, int pSize);
@@ -104,9 +104,9 @@ public:
 
 	void SetProgressCallback(ProgressCallback* pCallback);
 
-	bool AddFile(const String& pFileName, const String& pDestFileName, 
+	bool AddFile(const str& pFileName, const str& pDestFileName, 
 		     int pCacheSize = 1, SizeUnit pUnit = MB);
-	bool ExtractFile(const String& pFileName, const String& pDestFileName, 
+	bool ExtractFile(const str& pFileName, const str& pDestFileName, 
 			 int pCacheSize = 1, SizeUnit pUnit = MB);
 
 private:
@@ -114,7 +114,7 @@ private:
 	class FileArchiveFile
 	{
 	public:
-		FileArchiveFile(const String& pFileName) :
+		FileArchiveFile(const str& pFileName) :
 			mFileName(pFileName)
 		{
 		}
@@ -123,7 +123,7 @@ private:
 		{
 		}
 
-		String mFileName;
+		str mFileName;
 		int64 mStartOffset;
 		int64 mCurrentPos;
 		int64 mSize;
@@ -131,7 +131,7 @@ private:
 
 
 	typedef HashTable<int, FileArchiveFile*> FileTable;
-	typedef HashTable<String, FileArchiveFile*> FileNameTable;
+	typedef HashTable<str, FileArchiveFile*> FileNameTable;
 	typedef std::list<FileArchiveFile*> FileList;
 
 	IOError ReadHeader(int64* pHeaderOffset = 0, bool pFillFileNameList = false);
@@ -143,8 +143,8 @@ private:
 	FileNameTable mFileNameTable;
 	FileList mFileNameList;  // Only used in WRITE_ONLY mode.
 
-	String mArchiveFileName;
-	String mTempFileName;
+	str mArchiveFileName;
+	str mTempFileName;
 
 	DiskFile mArchiveFile;
 	IOType mIOType;

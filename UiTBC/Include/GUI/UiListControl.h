@@ -45,20 +45,20 @@ public:
 
 	ListControl(unsigned pBorderStyle,
 		    int pBorderWidth,
-		    const Lepra::Color& pColor,
+		    const Color& pColor,
 		    ListLayout::ListType pListType = ListLayout::COLUMN,
-		    const Lepra::String& pName = _T("ListControl"));
+		    const str& pName = _T("ListControl"));
 	ListControl(unsigned pBorderStyle,
 		    int pBorderWidth,
 		    Painter::ImageID pImageID,
 		    ListLayout::ListType pListType = ListLayout::COLUMN,
-		    const Lepra::String& pName = _T("ListControl"));
-	ListControl(const Lepra::Color& pColor,
+		    const str& pName = _T("ListControl"));
+	ListControl(const Color& pColor,
 		    ListLayout::ListType pListType = ListLayout::COLUMN,
-		    const Lepra::String& pName = _T("ListControl"));
+		    const str& pName = _T("ListControl"));
 	ListControl(Painter::ImageID pImageID,
 		    ListLayout::ListType pListType = ListLayout::COLUMN,
-		    const Lepra::String& pName = _T("ListControl"));
+		    const str& pName = _T("ListControl"));
 
 	virtual ~ListControl();
 
@@ -69,7 +69,7 @@ public:
 
 	virtual void AddChild(Component* pChild, int pParam1 = 0, int pParam2 = 0);
 	virtual void RemoveChild(Component* pChild, int pLayer);
-	virtual Component* GetChild(const Lepra::String& pName, int pLayer);
+	virtual Component* GetChild(const str& pName, int pLayer);
 	virtual int GetNumChildren() const;
 
 	void AddChildAfter(Component* pChild, Component* pAfterThis, int pIndentationLevel);
@@ -100,7 +100,7 @@ public:
 
 	inline virtual Type GetType();
 
-	inline Lepra::PixelCoords GetContentSize();
+	inline PixelCoords GetContentSize();
 
 protected:
 	void Init(ListLayout::ListType pListType);
@@ -145,7 +145,7 @@ Component::Type ListControl::GetType()
 	return Component::LISTCONTROL;
 }
 
-Lepra::PixelCoords ListControl::GetContentSize()
+PixelCoords ListControl::GetContentSize()
 {
 	return ((ListLayout*)mListRect->GetLayout())->GetContentSize();
 }

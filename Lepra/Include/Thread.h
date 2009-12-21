@@ -278,17 +278,17 @@ class RWLockBC
 {
 public:
 
-	RWLockBC(const String& pRWLockName);
+	RWLockBC(const str& pRWLockName);
 	virtual ~RWLockBC();
 
 	virtual void AcquireRead() = 0;
 	virtual void AcquireWrite() = 0;
 	virtual void Release() = 0;
 
-	String GetName();
+	str GetName();
 
 private:
-	String mName;
+	str mName;
 };
 
 
@@ -335,12 +335,12 @@ namespace Lepra
 class Thread
 {
 public:
-	Thread(const String& pThreadName);
+	Thread(const str& pThreadName);
 	virtual ~Thread();
 
-	static void InitializeMainThread(const String& pThreadName);
+	static void InitializeMainThread(const str& pThreadName);
 
-	const String& GetThreadName();
+	const str& GetThreadName();
 	size_t GetThreadId();
 	size_t GetThreadHandle();
 
@@ -381,7 +381,7 @@ protected:
 	void SetThreadId(size_t pThreadId);
 
 private:
-	String mThreadName;
+	str mThreadName;
 
 	volatile bool mRunning;
 	volatile bool mStopRequested;
@@ -400,7 +400,7 @@ private:
 class StaticThread: public Thread
 {
 public:
-	StaticThread(const String& pThreadName);
+	StaticThread(const str& pThreadName);
 	virtual ~StaticThread();
 
 	bool Start(void (*pThreadEntry)(void*), void* pData);

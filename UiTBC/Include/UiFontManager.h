@@ -11,6 +11,7 @@
 #include "../../Lepra/Include/Canvas.h"
 #include "../../Lepra/Include/IdManager.h"
 #include "../../Lepra/Include/String.h"
+#include "../Include/UiTBC.h"
 
 
 
@@ -51,16 +52,16 @@ public:
 	FontManager();
 	virtual ~FontManager();
 
-	virtual void SetColor(const Lepra::Color& pColor, unsigned pColorIndex = 0) = 0;
+	virtual void SetColor(const Color& pColor, unsigned pColorIndex = 0) = 0;
 
-	virtual FontId AddFont(const Lepra::String& pFontName, double pSize, Lepra::uint32 pFlags = NORMAL, CharacterSet pCharSet = NATIVE) = 0;
+	virtual FontId AddFont(const str& pFontName, double pSize, uint32 pFlags = NORMAL, CharacterSet pCharSet = NATIVE) = 0;
 	void SetActiveFont(FontId pFontId);
 	FontId GetActiveFont() const;
 
-	virtual bool RenderGlyph(Lepra::tchar pChar, Lepra::Canvas& pImage, const Lepra::PixelRect& pRect) = 0;
+	virtual bool RenderGlyph(tchar pChar, Canvas& pImage, const PixelRect& pRect) = 0;
 
-	virtual int GetCharWidth(const Lepra::tchar pChar) const = 0;
-	int GetStringWidth(const Lepra::String& pString) const;
+	virtual int GetCharWidth(const tchar pChar) const = 0;
+	int GetStringWidth(const str& pString) const;
 	int GetFontHeight() const;
 	int GetLineHeight() const;	// Font height + some extra pixels as distance to next line.
 
@@ -78,7 +79,7 @@ protected:
 	Font* mCurrentFont;
 
 private:
-	Lepra::IdManager<int> mFontIdManager;
+	IdManager<int> mFontIdManager;
 };
 
 

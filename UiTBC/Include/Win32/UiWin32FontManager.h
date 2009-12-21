@@ -30,10 +30,10 @@ public:
 	Win32FontManager(UiLepra::Win32DisplayManager* pDisplayManager);
 	virtual ~Win32FontManager();
 
-	virtual void SetColor(const Lepra::Color& pColor, unsigned pColorIndex = 0);
-	virtual FontId AddFont(const Lepra::String& pFontName, double pSize, Lepra::uint32 pFlags = NORMAL, CharacterSet pCharSet = NATIVE);
-	virtual bool RenderGlyph(Lepra::tchar pChar, Lepra::Canvas& pImage, const Lepra::PixelRect& pRect);
-	virtual int GetCharWidth(const Lepra::tchar pChar) const;
+	virtual void SetColor(const Color& pColor, unsigned pColorIndex = 0);
+	virtual FontId AddFont(const str& pFontName, double pSize, uint32 pFlags = NORMAL, CharacterSet pCharSet = NATIVE);
+	virtual bool RenderGlyph(tchar pChar, Canvas& pImage, const PixelRect& pRect);
+	virtual int GetCharWidth(const tchar pChar) const;
 
 private:
 	struct Win32BitmapInfo

@@ -290,7 +290,7 @@ class TcpMuxSocket: public MuxIo, public TcpListenerSocket
 public:
 	friend class TcpVSocket;
 
-	TcpMuxSocket(const String& pName, const SocketAddress& pLocalAddress, bool pIsServer,
+	TcpMuxSocket(const str& pName, const SocketAddress& pLocalAddress, bool pIsServer,
 		unsigned pMaxPendingConnectionCount = 16, unsigned pMaxConnectionCount = 1024);
 	virtual ~TcpMuxSocket();
 
@@ -336,7 +336,7 @@ private:
 	void AcceptThreadEntry();
 	void SelectThreadEntry();
 
-	typedef Lepra::OrderedMap<TcpVSocket*, Timer, std::hash<void*> > SocketTimeMap;
+	typedef OrderedMap<TcpVSocket*, Timer, std::hash<void*> > SocketTimeMap;
 	typedef std::hash_map<sys_socket, TcpVSocket*> SocketVMap;
 
 	MemberThread<TcpMuxSocket> mAcceptThread;
@@ -411,7 +411,7 @@ class UdpMuxSocket: public MuxIo, protected Thread, public UdpSocket
 public:
 	friend class UdpVSocket;
 
-	UdpMuxSocket(const String& pName, const SocketAddress& pLocalAddress,
+	UdpMuxSocket(const str& pName, const SocketAddress& pLocalAddress,
 		unsigned pMaxPendingConnectionCount = 16, unsigned pMaxConnectionCount = 1024);
 	virtual ~UdpMuxSocket();
 
@@ -511,7 +511,7 @@ class GameSocket;
 class GameMuxSocket
 {
 public:
-	GameMuxSocket(const String& pName, const SocketAddress& pLocalAddress, bool pIsServer,
+	GameMuxSocket(const str& pName, const SocketAddress& pLocalAddress, bool pIsServer,
 		unsigned pMaxPendingConnectionCount = 16, unsigned pMaxConnectionCount = 256);
 	virtual ~GameMuxSocket();
 
@@ -556,7 +556,7 @@ private:
 	typedef std::hash_map<TcpVSocket*, GameSocket*, std::hash<void*> > TcpSocketMap;
 	typedef std::hash_map<UdpVSocket*, GameSocket*, std::hash<void*> > UdpSocketMap;
 	typedef std::hash_map<std::string, GameSocket*> IdSocketMap;
-	typedef Lepra::OrderedMap<GameSocket*, Timer, std::hash<void*> > SocketTimeMap;
+	typedef OrderedMap<GameSocket*, Timer, std::hash<void*> > SocketTimeMap;
 
 	mutable Lock mLock;
 	TcpMuxSocket* mTcpMuxSocket;
@@ -574,7 +574,7 @@ private:
 	template<class _MuxSocket, class _VSocket> class Connector: public Thread
 	{
 	public:
-		Connector(const String& pName, _MuxSocket* pMuxSocket, const SocketAddress& pTargetAddress,
+		Connector(const str& pName, _MuxSocket* pMuxSocket, const SocketAddress& pTargetAddress,
 			const std::string& pConnectionId, double pTimeout, Semaphore& pSemaphore):
 			Thread(pName),
 			mMuxSocket(pMuxSocket),

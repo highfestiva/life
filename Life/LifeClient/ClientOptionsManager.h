@@ -38,9 +38,9 @@ struct ClientOptionsManager
 private:
 	bool SetDefault(int pPriority);
 
-	const Lepra::String ConvertToString(UiLepra::InputManager::KeyCode pKeyCode) const;
-	bool SetValue(const Lepra::String& pKey, float pValue);
-	std::vector<float*> GetValuePointers(const Lepra::String& pKey, bool& pIsAnySteeringValue);
+	const str ConvertToString(UiLepra::InputManager::KeyCode pKeyCode) const;
+	bool SetValue(const str& pKey, float pValue);
+	std::vector<float*> GetValuePointers(const str& pKey, bool& pIsAnySteeringValue);
 
 	Cure::RuntimeVariableScope* mVariableScope;
 	ClientOptions mOptions;

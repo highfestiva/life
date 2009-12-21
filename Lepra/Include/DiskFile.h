@@ -89,12 +89,12 @@ public:
 #endif
 		}
 
-		inline String& GetName()
+		inline str& GetName()
 		{
 			return mName;
 		}
 
-		inline const String& GetName() const
+		inline const str& GetName() const
 		{
 			return mName;
 		}
@@ -127,12 +127,12 @@ public:
 		intptr_t mFindHandle;
 #elif defined LEPRA_POSIX
 		DIR* mDIR;	// Used with FindFirst() and FindNext().
-		String mFileSpec;
+		str mFileSpec;
 #else
-#error Lepra::DiskFile::FindData is not properly implemented on this platform!
+#error DiskFile::FindData is not properly implemented on this platform!
 #endif // LEPRA_POSIX
 
-		String mName;
+		str mName;
 		bool   mSubDir;
 		uint64 mSize;
 		int64 mTime;
@@ -147,7 +147,7 @@ public:
 	// If pCreatePath is set to true, the directory structure given by
 	// pFileName will be created if it doesn't already exist, and if
 	// pMode is set to WRITE_ONLY or WRITE_APPEND.
-	bool Open(const String& pFileName, OpenMode pMode, bool pCreatePath = false, Endian::EndianType pEndian = Endian::TYPE_BIG_ENDIAN);
+	bool Open(const str& pFileName, OpenMode pMode, bool pCreatePath = false, Endian::EndianType pEndian = Endian::TYPE_BIG_ENDIAN);
 
 	void Close();
 
@@ -156,9 +156,9 @@ public:
 	// Use this to change the endian in the middle of a file read/write.
 	void SetEndian(Endian::EndianType pEndian);
 
-	String GetFullName() const;	// Returns path+filename.
-	String GetName() const;		// Returns filename only.
-	String GetPath() const;		// Returns path.
+	str GetFullName() const;	// Returns path+filename.
+	str GetName() const;		// Returns filename only.
+	str GetPath() const;		// Returns path.
 
 	virtual int64 GetSize() const;
 
@@ -173,19 +173,19 @@ public:
 
 	// Static functions.
 
-	static bool Exists(const String& pFileName);
-	static bool PathExists(const String& pPathName);
-	static bool Delete(const String& pFileName);
-	static bool Rename(const String& pOldFileName, const String& pNewFileName);
-	static bool CreateDir(const String& pPathName);
-	static bool RemoveDir(const String& pPathName);
+	static bool Exists(const str& pFileName);
+	static bool PathExists(const str& pPathName);
+	static bool Delete(const str& pFileName);
+	static bool Rename(const str& pOldFileName, const str& pNewFileName);
+	static bool CreateDir(const str& pPathName);
+	static bool RemoveDir(const str& pPathName);
 
-	static bool FindFirst(const String& pFileSpec, FindData& pFindData);
+	static bool FindFirst(const str& pFileSpec, FindData& pFindData);
 	static bool FindNext(FindData& pFindData);
 
 	// Generates a unique random file name for the given path. The filename can then
 	// be used to create a temp-file.
-	static String GenerateUniqueFileName(const String& pPath);
+	static str GenerateUniqueFileName(const str& pPath);
 
 	// Overrided from InputStream.
 	int64 GetAvailable() const;
@@ -195,20 +195,20 @@ public:
 	// Overrided from OutputStream.
 	virtual IOError WriteRaw(const void* pBuffer, size_t pSize);
 private:
-	void ExtractPathAndFileName(const String& pFileName);
+	void ExtractPathAndFileName(const str& pFileName);
 
 	bool CreateSubDirs();
 
-	static FILE* FileOpen(const String& pFileName, const String& pMode);
+	static FILE* FileOpen(const str& pFileName, const str& pMode);
 
-	//void CopyArchiveFiles(FileArchive& pSource, FileArchive& pDest, const String& pExceptThisFile);
-	//bool CopyFileBetweenArchives(FileArchive& pSource, FileArchive& pDest, const String& pFileName);
+	//void CopyArchiveFiles(FileArchive& pSource, FileArchive& pDest, const str& pExceptThisFile);
+	//bool CopyFileBetweenArchives(FileArchive& pSource, FileArchive& pDest, const str& pFileName);
 
 	void operator=(const DiskFile&);
 
 	FILE* mFile;
-	String mFileName;
-	String mPath;
+	str mFileName;
+	str mPath;
 
 	int64 mFileSize;
 

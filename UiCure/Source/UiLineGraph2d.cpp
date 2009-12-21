@@ -54,7 +54,7 @@ void LineGraph2d::TickLine(size_t pNewSize)
 	mNames.clear();
 }
 
-void LineGraph2d::AddSegment(const Lepra::String& pName, double p1, double p2)
+void LineGraph2d::AddSegment(const str& pName, double p1, double p2)
 {
 	assert(mData.size() > 0);
 	mData.back().push_back(Segment(p1, p2));
@@ -86,7 +86,7 @@ void LineGraph2d::RenderNames(int x, int& pIoY) const
 	int lIndex = 0;
 	Segments::const_iterator ix = lLines.begin();
 	//const double lLongest = ix->x2 - ix->x1;
-	Lepra::StringUtility::StringVector::const_iterator in = mNames.begin();
+	strutil::strvec::const_iterator in = mNames.begin();
 	int y = pIoY;
 	for (; ix != lLines.end() && in != mNames.end(); ++lIndex, ++ix, ++in, y+=10)
 	{
@@ -116,7 +116,7 @@ LineGraph2d::ColorPicker::ColorPicker(int pIndex, UiTbc::Painter* mPainter)
 		0xFF8000, 0xFF0080, 0x80FF00, 0x00FF80, 0x8000FF, 0x0080FF, 0x804000, 0x800040,
 	};
 	int lColor = lColorTable[pIndex%(sizeof(lColorTable)/sizeof(lColorTable[0]))];
-	typedef Lepra::uint8 u8;
+	typedef uint8 u8;
 	mPainter->SetColor((u8)(lColor>>16), (u8)(lColor>>8), (u8)lColor, 0);
 }
 

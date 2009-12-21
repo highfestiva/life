@@ -66,7 +66,7 @@ private:
 	void DispatchTickCallbacks(float pFrameTimeDelta);
 	void DispatchAlarmCallbacks();
 
-	typedef Lepra::IdManager<GameObjectId> ObjectIdManager;
+	typedef IdManager<GameObjectId> ObjectIdManager;
 	typedef std::pair<GameObjectId, ContextObject*> ContextObjectPair;
 	struct AlarmInfo
 	{

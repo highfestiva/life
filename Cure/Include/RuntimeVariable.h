@@ -11,6 +11,7 @@
 #include "../../Lepra/Include/Log.h"
 #include "../../Lepra/Include/String.h"
 #include "../../Lepra/Include/Thread.h"
+#include "Cure.h"
 #include "RuntimeVariableName.h"
 
 
@@ -23,22 +24,22 @@ namespace Cure
 class RuntimeVariable
 {
 public:
-	RuntimeVariable(const Lepra::String& pName, const Lepra::String& pValue, bool pExport);
+	RuntimeVariable(const str& pName, const str& pValue, bool pExport);
 	~RuntimeVariable();
-	const Lepra::String& GetName() const;
-	bool operator==(const Lepra::String& pValue);
-	const Lepra::String& GetValue() const;
-	void SetValue(const Lepra::String& pValue, bool pOverwriteDefault, bool pExport);
-	const Lepra::String& GetDefaultValue() const;
-	void SetDefaultValue(const Lepra::String& pDefaultValue);
+	const str& GetName() const;
+	bool operator==(const str& pValue);
+	const str& GetValue() const;
+	void SetValue(const str& pValue, bool pOverwriteDefault, bool pExport);
+	const str& GetDefaultValue() const;
+	void SetDefaultValue(const str& pDefaultValue);
 	bool IsExportable() const;
 
 private:
 	void operator=(const RuntimeVariable&);
 
-	Lepra::String mName;
-	Lepra::String mValue;
-	Lepra::String mDefaultValue;
+	str mName;
+	str mValue;
+	str mDefaultValue;
 	bool mIsExportable;
 };
 
@@ -64,37 +65,37 @@ public:
 	RuntimeVariableScope(RuntimeVariableScope* pParentScope);
 	virtual ~RuntimeVariableScope();
 
-	static Lepra::String GetType(const Lepra::String& pValue);
-	static Lepra::String Cast(const Lepra::String& pValue);
-	bool IsDefined(const Lepra::String& pName);
-	bool SetValue(SetMode pSetMode, const Lepra::String& pName, const Lepra::String& pValue);
-	bool SetValue(SetMode pSetMode, const Lepra::String& pName, const Lepra::tchar* pValue);	// TRICKY: required for _T("") parameter to work.
-	bool SetValue(SetMode pSetMode, const Lepra::String& pName, double pValue);
-	bool SetValue(SetMode pSetMode, const Lepra::String& pName, int pValue);
-	bool SetValue(SetMode pSetMode, const Lepra::String& pName, bool pValue);
+	static str GetType(const str& pValue);
+	static str Cast(const str& pValue);
+	bool IsDefined(const str& pName);
+	bool SetValue(SetMode pSetMode, const str& pName, const str& pValue);
+	bool SetValue(SetMode pSetMode, const str& pName, const tchar* pValue);	// TRICKY: required for _T("") parameter to work.
+	bool SetValue(SetMode pSetMode, const str& pName, double pValue);
+	bool SetValue(SetMode pSetMode, const str& pName, int pValue);
+	bool SetValue(SetMode pSetMode, const str& pName, bool pValue);
 	// Returns the parameter default value if the runtime variable is not found.
-	const Lepra::String& GetDefaultValue(GetMode pMode, const Lepra::String& pName, const Lepra::String& pDefaultValue = Lepra::EmptyString);
-	const Lepra::String GetDefaultValue(GetMode pMode, const Lepra::String& pName, const Lepra::tchar* pDefaultValue);	// TRICKY: required for _T("") parameter to work.
-	double GetDefaultValue(GetMode pMode, const Lepra::String& pName, double pDefaultValue);
-	int GetDefaultValue(GetMode pMode, const Lepra::String& pName, int pDefaultValue);
-	bool GetDefaultValue(GetMode pMode, const Lepra::String& pName, bool pDefaultValue);
+	const str& GetDefaultValue(GetMode pMode, const str& pName, const str& pDefaultValue = EmptyString);
+	const str GetDefaultValue(GetMode pMode, const str& pName, const tchar* pDefaultValue);	// TRICKY: required for _T("") parameter to work.
+	double GetDefaultValue(GetMode pMode, const str& pName, double pDefaultValue);
+	int GetDefaultValue(GetMode pMode, const str& pName, int pDefaultValue);
+	bool GetDefaultValue(GetMode pMode, const str& pName, bool pDefaultValue);
 
-	bool EraseVariable(const Lepra::String& pName);
+	bool EraseVariable(const str& pName);
 
 	RuntimeVariableScope* LockParentScope(RuntimeVariableScope* pParentScope);
 
-	std::list<Lepra::String> GetVariableNameList(bool pSkipInternal = true, int pStartScopeIndex = 0, int pEndScopeIndex = 1000);
+	std::list<str> GetVariableNameList(bool pSkipInternal = true, int pStartScopeIndex = 0, int pEndScopeIndex = 1000);
 
 private:
-	void CreateLocalVariable(const Lepra::String& pName, const Lepra::String& pValue, bool pExport);
-	bool DeleteLocalVariable(const Lepra::String& pName);
+	void CreateLocalVariable(const str& pName, const str& pValue, bool pExport);
+	bool DeleteLocalVariable(const str& pName);
 
-	RuntimeVariable* GetVariable(const Lepra::String& pName, bool pRecursive = true) const;
+	RuntimeVariable* GetVariable(const str& pName, bool pRecursive = true) const;
 
-	typedef std::hash_map<Lepra::String, RuntimeVariable*> VariableTable;
-	typedef std::pair<Lepra::String, RuntimeVariable*> VariablePair;
+	typedef std::hash_map<str, RuntimeVariable*> VariableTable;
+	typedef std::pair<str, RuntimeVariable*> VariablePair;
 	RuntimeVariableScope* mParentScope;
-	mutable Lepra::Lock mLock;
+	mutable Lock mLock;
 	VariableTable mVariableTable;
 
 	LOG_CLASS_DECLARE();
@@ -103,17 +104,17 @@ private:
 
 
 // For adding variables to console completions.
-class RuntimeVariableCompleter: public Lepra::CommandCompleter
+class RuntimeVariableCompleter: public CommandCompleter
 {
 public:
-	RuntimeVariableCompleter(RuntimeVariableScope* pVariableScope, const Lepra::String& pPrefix);
+	RuntimeVariableCompleter(RuntimeVariableScope* pVariableScope, const str& pPrefix);
 	virtual ~RuntimeVariableCompleter();
 
 private:
-	std::list<Lepra::String> CompleteCommand(const Lepra::String& pPartialCommand) const;
+	std::list<str> CompleteCommand(const str& pPartialCommand) const;
 
 	RuntimeVariableScope* mVariableScope;
-	Lepra::String mPrefix;
+	str mPrefix;
 };
 
 

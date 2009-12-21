@@ -18,42 +18,42 @@ namespace Cure
 
 
 
-static Lepra::String RemoveMeTranslateToHardcodedShit(CppContextObject* pObject)
+static str RemoveMeTranslateToHardcodedShit(CppContextObject* pObject)
 {
-	if (pObject->GetClassId().find(_T("box_002")) != Lepra::String::npos)
+	if (pObject->GetClassId().find(_T("box_002")) != str::npos)
 	{
 		return (_T("box_01"));
 	}
-	else if (pObject->GetClassId().find(_T("sphere_002")) != Lepra::String::npos)
+	else if (pObject->GetClassId().find(_T("sphere_002")) != str::npos)
 	{
 		return (_T("sphere_01"));
 	}
-	else if (pObject->GetClassId().find(_T("car_001")) != Lepra::String::npos)
+	else if (pObject->GetClassId().find(_T("car_001")) != str::npos)
 	{
 		return (_T("car_01"));
 	}
-	else if (pObject->GetClassId().find(_T("monster_001")) != Lepra::String::npos)
+	else if (pObject->GetClassId().find(_T("monster_001")) != str::npos)
 	{
 		return (_T("monster_01"));
 	}
-	else if (pObject->GetClassId().find(_T("excavator_703")) != Lepra::String::npos)
+	else if (pObject->GetClassId().find(_T("excavator_703")) != str::npos)
 	{
 		return (_T("excavator_01"));
 	}
-	else if (pObject->GetClassId().find(_T("crane_whatever")) != Lepra::String::npos)
+	else if (pObject->GetClassId().find(_T("crane_whatever")) != str::npos)
 	{
 		return (_T("crane_01"));
 	}
-	else if (pObject->GetClassId().find(_T("ground_002")) != Lepra::String::npos)
+	else if (pObject->GetClassId().find(_T("ground_002")) != str::npos)
 	{
 		return (_T("world_01"));
 	}
-	return (Lepra::EmptyString);
+	return (EmptyString);
 }
 
 
 
-CppContextObject::CppContextObject(const Lepra::String& pClassId):
+CppContextObject::CppContextObject(const str& pClassId):
 	ContextObject(pClassId),
 	mClassResource(0),
 	mPhysicsResource(0)
@@ -72,7 +72,7 @@ CppContextObject::~CppContextObject()
 
 void CppContextObject::__StartLoadingFuckedUpPhysicsRemoveMe(Cure::UserResource* pClassResource, const TBC::ChunkyClass* pClass)
 {
-	Lepra::String lPhysics;
+	str lPhysics;
 	if (pClassResource->GetLoadState() != RESOURCE_LOAD_COMPLETE)
 	{
 		lPhysics = RemoveMeTranslateToHardcodedShit(this);
@@ -97,16 +97,16 @@ void CppContextObject::StartLoading()
 {
 	assert(mClassResource == 0);
 	mClassResource = new UserClassResource();
-	const Lepra::String lAssetName = GetClassId()+_T(".class");	// TODO: move to central source file.
+	const str lAssetName = GetClassId()+_T(".class");	// TODO: move to central source file.
 	mClassResource->Load(GetManager()->GetGameManager()->GetResourceManager(), lAssetName,
 		UserClassResource::TypeLoadCallback(this, &CppContextObject::OnLoadClass));
 }
 
-void CppContextObject::StartLoadingPhysics(const Lepra::String& pPhysicsName)
+void CppContextObject::StartLoadingPhysics(const str& pPhysicsName)
 {
 	assert(mPhysicsResource == 0);
 	mPhysicsResource = new UserPhysicsResource();
-	const Lepra::String lAssetName = pPhysicsName+_T(".phys");	// TODO: move to central source file.
+	const str lAssetName = pPhysicsName+_T(".phys");	// TODO: move to central source file.
 	mPhysicsResource->LoadUnique(GetManager()->GetGameManager()->GetResourceManager(), lAssetName,
 		UserPhysicsResource::TypeLoadCallback(this, &CppContextObject::OnLoadPhysics));
 }
@@ -163,7 +163,7 @@ void CppContextObject::OnTrigger(TBC::PhysicsManager::BodyID pBody1, TBC::Physic
 
 
 void CppContextObject::OnForceApplied(TBC::PhysicsManager::ForceFeedbackListener* pOtherObject,
-	const Lepra::Vector3DF& pForce, const Lepra::Vector3DF& pTorque)
+	const Vector3DF& pForce, const Vector3DF& pTorque)
 {
 	if (!IsAttachedTo((ContextObject*)pOtherObject))
 	{

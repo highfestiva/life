@@ -22,7 +22,7 @@ static int gResourceLoadErrorCount = 0;
 
 
 
-void ReportTestResult(const Lepra::LogDecorator& pLog, const Lepra::String& pTestName, const Lepra::String& pContext, bool pbResult);
+void ReportTestResult(const Lepra::LogDecorator& pLog, const str& pTestName, const str& pContext, bool pbResult);
 
 
 
@@ -66,7 +66,7 @@ private:
 		for (size_t x = 0; x < lMeshCount; ++x)
 		{
 			int lPhysIndex = -1;
-			Lepra::String lName;
+			str lName;
 			Lepra::TransformationF lTransform;
 			lClass->GetMesh(x, lPhysIndex, lName, lTransform);
 			mMeshResourceArray.push_back(new UiCure::UserGeometryReferenceResource(
@@ -131,7 +131,7 @@ ResourceTest::~ResourceTest()
 
 bool ResourceTest::TestAtom()
 {
-	Lepra::String lContext;
+	str lContext;
 	bool lTestOk = true;
 
 	// Test loading a 2D image.
@@ -220,15 +220,17 @@ bool ResourceTest::TestAtom()
 
 bool ResourceTest::TestClass()
 {
-	Lepra::String lContext;
+	str lContext;
 	bool lTestOk = true;
 
 	if (lTestOk)
 	{
 		lContext = _T("load class");
+		gResourceLoadCount = 0;
+		gResourceLoadErrorCount = 0;
 		UiCure::UserClassResource lClass(mUiManager);
 		lClass.Load(mResourceManager, _T("tractor_01.class"), UiCure::UserClassResource::TypeLoadCallback(this, &ResourceTest::ClassLoadCallback));
-		for (int x = 0; gResourceLoadCount != 6 && x < 100; ++x)
+		for (int x = 0; gResourceLoadCount != 12 && x < 100; ++x)
 		{
 			Lepra::Thread::Sleep(0.01);
 			mResourceManager->Tick();	// Continue loading of physics and meshes.
@@ -236,7 +238,7 @@ bool ResourceTest::TestClass()
 		// Make sure nothing more makes it through.
 		Lepra::Thread::Sleep(0.1);
 		mResourceManager->Tick();
-		lTestOk = (gResourceLoadCount == 6 && gResourceLoadErrorCount == 1);
+		lTestOk = (gResourceLoadCount == 12 && gResourceLoadErrorCount == 0);
 		mResourceManager->SafeRelease(&lClass);
 		assert(lTestOk);
 	}
@@ -257,7 +259,7 @@ bool ResourceTest::TestClass()
 
 bool ResourceTest::TestStress()
 {
-	Lepra::String lContext;
+	str lContext;
 	bool lTestOk = true;
 
 	class TickRM
@@ -310,9 +312,13 @@ bool ResourceTest::TestStress()
 			delete (lMesh0);
 			if ((x&7) == 0)
 			{
-				TickRM lTick(mResourceManager);
-				const size_t lCount = mResourceManager->QueryResourceCount();
-				lTestOk = (lCount <= 2);
+				lTestOk = false;
+				for (int i = 0; i < 5 && !lTestOk; ++i)
+				{
+					TickRM lTick(mResourceManager);
+					const size_t lCount = mResourceManager->QueryResourceCount();
+					lTestOk = (lCount <= 2);
+				}
 				assert(lTestOk);
 			}
 		}
@@ -348,9 +354,13 @@ bool ResourceTest::TestStress()
 			delete (lMesh0);
 			if ((x&7) == 0)
 			{
-				TickRM lTick(mResourceManager);
-				const size_t lCount = mResourceManager->QueryResourceCount();
-				lTestOk = (lCount <= 1);
+				lTestOk = false;
+				for (int i = 0; i < 5 && !lTestOk; ++i)
+				{
+					TickRM lTick(mResourceManager);
+					const size_t lCount = mResourceManager->QueryResourceCount();
+					lTestOk = (lCount <= 1);
+				}
 				assert(lTestOk);
 			}
 		}
@@ -399,9 +409,13 @@ bool ResourceTest::TestStress()
 				delete (*u);
 				lResources.erase(--u.base());
 			}
-			TickRM lTick(mResourceManager);
-			c = mResourceManager->QueryResourceCount();
-			lTestOk = (c == (size_t)((x+1)*(lAddCount-lDecCount)));
+			lTestOk = false;
+			for (int i = 0; i < 5 && !lTestOk; ++i)
+			{
+				TickRM lTick(mResourceManager);
+				c = mResourceManager->QueryResourceCount();
+				lTestOk = (c == (size_t)((x+1)*(lAddCount-lDecCount)));
+			}
 			assert(lTestOk);
 		}
 		lTestOk = (mResourceManager->QueryResourceCount() == lLoopCount*(lAddCount-lAddCount/3));
@@ -474,9 +488,13 @@ bool ResourceTest::TestStress()
 				delete (*u);
 				lResources.erase(--u.base());
 			}
-			TickRM lTick(mResourceManager);
-			c = mResourceManager->QueryResourceCount();
-			lTestOk = (c <= 2);
+			lTestOk = false;
+			for (int i = 0; i < 5 && !lTestOk; ++i)
+			{
+				TickRM lTick(mResourceManager);
+				c = mResourceManager->QueryResourceCount();
+				lTestOk = (c <= 2);
+			}
 			assert(lTestOk);
 		}
 		if (lTestOk)

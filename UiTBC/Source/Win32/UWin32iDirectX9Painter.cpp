@@ -24,7 +24,7 @@ namespace UiTbc
 
 
 
-DWORD ToArgb(DWORD pAlpha, const Lepra::Color& pColor)
+DWORD ToArgb(DWORD pAlpha, const Color& pColor)
 {
 	return pAlpha | (((DWORD)pColor.mRed)   << 16) |
 	                (((DWORD)pColor.mGreen) << 8) |
@@ -61,7 +61,7 @@ DirectX9Painter::~DirectX9Painter()
 	}
 }
 
-void DirectX9Painter::SetDestCanvas(Lepra::Canvas* pCanvas)
+void DirectX9Painter::SetDestCanvas(Canvas* pCanvas)
 {
 	Painter::SetDestCanvas(pCanvas);
 	ResetClippingRect();
@@ -81,7 +81,7 @@ void DirectX9Painter::PrePaint()
 	DoSetRenderMode();
 }
 
-void DirectX9Painter::SetAlphaValue(Lepra::uint8 pAlpha)
+void DirectX9Painter::SetAlphaValue(uint8 pAlpha)
 {
 	Painter::SetAlphaValue(pAlpha);
 	mD3DDevice->SetRenderState(D3DRS_ALPHAREF, GetAlphaValue());
@@ -204,7 +204,7 @@ void DirectX9Painter::DoDrawPixel(int x, int y)
 
 	DWORD lAlpha = ((DWORD)GetAlphaValue()) << 24;
 
-	Lepra::Color& lColor = GetColorInternal(0);
+	Color& lColor = GetColorInternal(0);
 	lVertex.x   = (float)x;
 	lVertex.y   = (float)y;
 	lVertex.z   = 0;
@@ -235,7 +235,7 @@ void DirectX9Painter::DoDrawLine(int pX1, int pY1, int pX2, int pY2)
 
 	DWORD lAlpha = ((DWORD)GetAlphaValue()) << 24;
 
-	Lepra::Color& lColor = GetColorInternal(0);
+	Color& lColor = GetColorInternal(0);
 	for (int i = 0; i < 2; i++)
 	{
 		lVertex[i].z   = 0;
@@ -278,7 +278,7 @@ void DirectX9Painter::DoDrawRect(int pLeft, int pTop, int pRight, int pBottom, i
 	int i;
 	for (i = 0; i < 8; i++)
 	{
-		Lepra::Color* lColor;
+		Color* lColor;
 		if(i < 4)
 			lColor = &GetColorInternal(0);
 		else
@@ -312,7 +312,7 @@ void DirectX9Painter::DoDrawRect(int pLeft, int pTop, int pRight, int pBottom, i
 	lVertex[7].x   = lLeft;
 	lVertex[7].y   = lBottom;
 
-	const static Lepra::uint16 lIndices[] = {0,4,7, 0,7,3, 0,1,5, 0,5,4, 1,2,6, 1,6,5, 7,6,2, 7,2,3};
+	const static uint16 lIndices[] = {0,4,7, 0,7,3, 0,1,5, 0,5,4, 1,2,6, 1,6,5, 7,6,2, 7,2,3};
 
 	mD3DDevice->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
 	mD3DDevice->DrawIndexedPrimitiveUP(D3DPT_TRIANGLELIST, 0, 8, 8, lIndices, D3DFMT_INDEX16, lVertex, sizeof(VertexData));
@@ -341,7 +341,7 @@ void DirectX9Painter::DoFillRect(int pLeft, int pTop, int pRight, int pBottom)
 	VertexData lVertex[4];
 
 	DWORD lAlpha = ((DWORD)GetAlphaValue()) << 24;
-	Lepra::Color& lColor = GetColorInternal(0);
+	Color& lColor = GetColorInternal(0);
 
 	for (int i = 0; i < 4; i++)
 	{
@@ -405,7 +405,7 @@ void DirectX9Painter::DoDraw3DRect(int pLeft, int pTop, int pRight, int pBottom,
 		lTwo   = 0;
 		lThree = 1;
 	}
-	Lepra::Color* lColor = &GetColorInternal(0);
+	Color* lColor = &GetColorInternal(0);
 
 	lVertex[0].x = lLeft; // Outer top left.
 	lVertex[0].y = lTop;
@@ -460,7 +460,7 @@ void DirectX9Painter::DoDraw3DRect(int pLeft, int pTop, int pRight, int pBottom,
 	lVertex[11].y = lBottom;
 	lVertex[11].color = ToArgb(lAlpha, lColor[lThree]);
 
-	const static Lepra::uint16 lsIndices[] = {0,1,7, 0,7,6, 0,6,10, 0,10,4, 8,2,3, 8,3,9, 11,9,3, 11,3,5};
+	const static uint16 lsIndices[] = {0,1,7, 0,7,6, 0,6,10, 0,10,4, 8,2,3, 8,3,9, 11,9,3, 11,3,5};
 
 	mD3DDevice->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
 	mD3DDevice->DrawIndexedPrimitiveUP(D3DPT_TRIANGLELIST, 0, 12, 8, lsIndices, D3DFMT_INDEX16, lVertex, sizeof(VertexData));
@@ -480,7 +480,7 @@ void DirectX9Painter::DoFillShadedRect(int pLeft, int pTop, int pRight, int pBot
 	float lRight  = (float)pRight;
 	float lBottom = (float)pBottom;
 
-	Lepra::Color* lColor = &GetColorInternal(0);
+	Color* lColor = &GetColorInternal(0);
 
 	// Calculate center color.
 	DWORD lTopR = (DWORD)lColor[0].mRed   + (DWORD)lColor[1].mRed;
@@ -562,7 +562,7 @@ void DirectX9Painter::DoFillTriangle(float pX1, float pY1,
 	VertexData lVertex[3];
 
 	DWORD lAlpha = ((DWORD)GetAlphaValue()) << 24;
-	Lepra::Color& lColor = GetColorInternal(0);
+	Color& lColor = GetColorInternal(0);
 
 	for (int i = 0; i < 3; i++)
 	{
@@ -603,7 +603,7 @@ void DirectX9Painter::DoFillShadedTriangle(float pX1, float pY1,
 	VertexData lVertex[3];
 
 	DWORD lAlpha = ((DWORD)GetAlphaValue()) << 24;
-	Lepra::Color* lColor = &GetColorInternal(0);
+	Color* lColor = &GetColorInternal(0);
 
 	for (int i = 0; i < 3; i++)
 	{
@@ -654,7 +654,7 @@ void DirectX9Painter::DoFillTriangle(float pX1, float pY1, float pU1, float pV1,
 	VertexData lVertex[3];
 
 	DWORD lAlpha = ((DWORD)GetAlphaValue()) << 24;
-	Lepra::Color* lColor = &GetColorInternal(0);
+	Color* lColor = &GetColorInternal(0);
 
 	for (int i = 0; i < 3; i++)
 	{
@@ -688,7 +688,7 @@ void DirectX9Painter::DoFillTriangle(float pX1, float pY1, float pU1, float pV1,
 	mD3DDevice->SetTexture(0, 0);
 }
 
-Painter::ImageID DirectX9Painter::AddImage(const Lepra::Canvas* pImage, const Lepra::Canvas* pAlphaBuffer)
+Painter::ImageID DirectX9Painter::AddImage(const Canvas* pImage, const Canvas* pAlphaBuffer)
 {
 	if (pImage == 0 && pAlphaBuffer == 0)
 	{
@@ -704,7 +704,7 @@ Painter::ImageID DirectX9Painter::AddImage(const Lepra::Canvas* pImage, const Le
 	{
 		lColor = true;
 
-		if (pImage->GetBitDepth() == Lepra::Canvas::BITDEPTH_32_BIT)
+		if (pImage->GetBitDepth() == Canvas::BITDEPTH_32_BIT)
 		{
 			lAlpha = true;
 		}
@@ -719,7 +719,7 @@ Painter::ImageID DirectX9Painter::AddImage(const Lepra::Canvas* pImage, const Le
 
 	if (lID != mTextureIDManager.GetInvalidId())
 	{
-		Lepra::Canvas lImage;
+		Canvas lImage;
 		D3DFORMAT lFormat = D3DFMT_R8G8B8;
 		bool lCreateTexture = false;
 
@@ -732,19 +732,19 @@ Painter::ImageID DirectX9Painter::AddImage(const Lepra::Canvas* pImage, const Le
 
 			if (lNewWidth != lImage.GetWidth() || lNewHeight != lImage.GetHeight())
 			{
-				lImage.Resize(lNewWidth, lNewHeight, Lepra::Canvas::RESIZE_NICEST);
+				lImage.Resize(lNewWidth, lNewHeight, Canvas::RESIZE_NICEST);
 			}
 
 			if (pAlphaBuffer != 0)
 			{
-				Lepra::Canvas lAlphaBuffer(*pAlphaBuffer, true);
+				Canvas lAlphaBuffer(*pAlphaBuffer, true);
 
 				if (lAlphaBuffer.GetWidth() != lImage.GetWidth() ||
 				   lAlphaBuffer.GetHeight() != lImage.GetHeight())
 				{
-					lAlphaBuffer.Resize(lImage.GetWidth(), lImage.GetHeight(), Lepra::Canvas::RESIZE_FAST);
+					lAlphaBuffer.Resize(lImage.GetWidth(), lImage.GetHeight(), Canvas::RESIZE_FAST);
 				}
-				if (lAlphaBuffer.GetBitDepth() != Lepra::Canvas::BITDEPTH_8_BIT)
+				if (lAlphaBuffer.GetBitDepth() != Canvas::BITDEPTH_8_BIT)
 				{
 					lAlphaBuffer.ConvertToGrayscale(true);
 				}
@@ -758,13 +758,13 @@ Painter::ImageID DirectX9Painter::AddImage(const Lepra::Canvas* pImage, const Le
 		else if(lColor == true)
 		{
 			lImage.Copy(*pImage);
-			lImage.ConvertBitDepth(Lepra::Canvas::BITDEPTH_24_BIT);
+			lImage.ConvertBitDepth(Canvas::BITDEPTH_24_BIT);
 
 			unsigned lNewWidth  = GetClosestPowerOf2(lImage.GetWidth(), true);
 			unsigned lNewHeight = GetClosestPowerOf2(lImage.GetHeight(), true);
 			if (lNewWidth != lImage.GetWidth() || lNewHeight != lImage.GetHeight())
 			{
-				lImage.Resize(lNewWidth, lNewHeight, Lepra::Canvas::RESIZE_FAST);
+				lImage.Resize(lNewWidth, lNewHeight, Canvas::RESIZE_FAST);
 			}
 
 			lFormat = D3DFMT_R8G8B8;
@@ -774,12 +774,12 @@ Painter::ImageID DirectX9Painter::AddImage(const Lepra::Canvas* pImage, const Le
 		{
 			lImage.Copy(*pAlphaBuffer);
 
-			Lepra::Color lPalette[256];
+			Color lPalette[256];
 			for (int i = 0; i < 256; i++)
 			{
-				lPalette[i].mRed   = (Lepra::uint8)i;
-				lPalette[i].mGreen = (Lepra::uint8)i;
-				lPalette[i].mBlue  = (Lepra::uint8)i;
+				lPalette[i].mRed   = (uint8)i;
+				lPalette[i].mGreen = (uint8)i;
+				lPalette[i].mBlue  = (uint8)i;
 			}
 
 			lImage.SetPalette(lPalette);
@@ -841,7 +841,7 @@ Painter::ImageID DirectX9Painter::AddImage(const Lepra::Canvas* pImage, const Le
 	return (ImageID)lID;
 }
 
-void DirectX9Painter::UpdateImage(ImageID pImageID, const Lepra::Canvas* pImage, const Lepra::Canvas* pAlphaBuffer, UpdateHint pHint)
+void DirectX9Painter::UpdateImage(ImageID pImageID, const Canvas* pImage, const Canvas* pAlphaBuffer, UpdateHint pHint)
 {
 	TextureTable::Iterator lIter = mTextureTable.Find(pImageID);
 	if (lIter == mTextureTable.End())
@@ -870,13 +870,13 @@ void DirectX9Painter::UpdateImage(ImageID pImageID, const Lepra::Canvas* pImage,
 			lRect.bottom = pImage->GetHeight();
 			lRect.right = pImage->GetWidth();
 
-			if (pImage->GetBitDepth() == Lepra::Canvas::BITDEPTH_24_BIT)
+			if (pImage->GetBitDepth() == Canvas::BITDEPTH_24_BIT)
 			{
 				D3DXLoadSurfaceFromMemory(lSurface, 0, 0, pImage->GetBuffer(), 
 							  D3DFMT_R8G8B8, pImage->GetPitch() * pImage->GetPixelByteSize(),
 							  0, &lRect, D3DX_FILTER_NONE, 0);
 			}
-			else if(pImage->GetBitDepth() == Lepra::Canvas::BITDEPTH_32_BIT)
+			else if(pImage->GetBitDepth() == Canvas::BITDEPTH_32_BIT)
 			{
 				D3DXLoadSurfaceFromMemory(lSurface, 0, 0, pImage->GetBuffer(), 
 							  D3DFMT_A8R8G8B8, pImage->GetPitch() * pImage->GetPixelByteSize(),
@@ -894,7 +894,7 @@ void DirectX9Painter::UpdateImage(ImageID pImageID, const Lepra::Canvas* pImage,
 	{
 		lColor = true;
 
-		if (pImage->GetBitDepth() == Lepra::Canvas::BITDEPTH_32_BIT)
+		if (pImage->GetBitDepth() == Canvas::BITDEPTH_32_BIT)
 		{
 			lAlpha = true;
 		}
@@ -905,7 +905,7 @@ void DirectX9Painter::UpdateImage(ImageID pImageID, const Lepra::Canvas* pImage,
 		lAlpha = true;
 	}
 
-	Lepra::Canvas lImage;
+	Canvas lImage;
 	D3DFORMAT lFormat = D3DFMT_R8G8B8;
 	bool lCreateTexture = false;
 
@@ -918,19 +918,19 @@ void DirectX9Painter::UpdateImage(ImageID pImageID, const Lepra::Canvas* pImage,
 
 		if (lNewWidth != lImage.GetWidth() || lNewHeight != lImage.GetHeight())
 		{
-			lImage.Resize(lNewWidth, lNewHeight, Lepra::Canvas::RESIZE_NICEST);
+			lImage.Resize(lNewWidth, lNewHeight, Canvas::RESIZE_NICEST);
 		}
 
 		if (pAlphaBuffer != 0)
 		{
-			Lepra::Canvas lAlphaBuffer(*pAlphaBuffer, true);
+			Canvas lAlphaBuffer(*pAlphaBuffer, true);
 
 			if (lAlphaBuffer.GetWidth() != lImage.GetWidth() ||
 			   lAlphaBuffer.GetHeight() != lImage.GetHeight())
 			{
-				lAlphaBuffer.Resize(lImage.GetWidth(), lImage.GetHeight(), Lepra::Canvas::RESIZE_FAST);
+				lAlphaBuffer.Resize(lImage.GetWidth(), lImage.GetHeight(), Canvas::RESIZE_FAST);
 			}
-			if (lAlphaBuffer.GetBitDepth() != Lepra::Canvas::BITDEPTH_8_BIT)
+			if (lAlphaBuffer.GetBitDepth() != Canvas::BITDEPTH_8_BIT)
 			{
 				lAlphaBuffer.ConvertToGrayscale(true);
 			}
@@ -943,14 +943,14 @@ void DirectX9Painter::UpdateImage(ImageID pImageID, const Lepra::Canvas* pImage,
 	}
 	else if(lColor == true)
 	{
-		Lepra::Canvas lImage(*pImage, true);
-		lImage.ConvertBitDepth(Lepra::Canvas::BITDEPTH_24_BIT);
+		Canvas lImage(*pImage, true);
+		lImage.ConvertBitDepth(Canvas::BITDEPTH_24_BIT);
 
 		unsigned lNewWidth  = GetClosestPowerOf2(lImage.GetWidth(), true);
 		unsigned lNewHeight = GetClosestPowerOf2(lImage.GetHeight(), true);
 		if (lNewWidth != lImage.GetWidth() || lNewHeight != lImage.GetHeight())
 		{
-			lImage.Resize(lNewWidth, lNewHeight, Lepra::Canvas::RESIZE_FAST);
+			lImage.Resize(lNewWidth, lNewHeight, Canvas::RESIZE_FAST);
 		}
 
 		lFormat = D3DFMT_R8G8B8;
@@ -958,14 +958,14 @@ void DirectX9Painter::UpdateImage(ImageID pImageID, const Lepra::Canvas* pImage,
 	}
 	else if(pAlphaBuffer != 0)
 	{
-		Lepra::Canvas lImage(*pAlphaBuffer, true);
+		Canvas lImage(*pAlphaBuffer, true);
 
-		Lepra::Color lPalette[256];
+		Color lPalette[256];
 		for (int i = 0; i < 256; i++)
 		{
-			lPalette[i].mRed   = (Lepra::uint8)i;
-			lPalette[i].mGreen = (Lepra::uint8)i;
-			lPalette[i].mBlue  = (Lepra::uint8)i;
+			lPalette[i].mRed   = (uint8)i;
+			lPalette[i].mGreen = (uint8)i;
+			lPalette[i].mBlue  = (uint8)i;
 		}
 
 		lImage.SetPalette(lPalette);
@@ -1039,13 +1039,13 @@ void DirectX9Painter::DoDrawImage(ImageID pImageID, int x, int y)
 	Texture* lTexture = *lIter;
 
 	ToScreenCoords(x, y);
-	Lepra::PixelRect lRect(x, y, x + lTexture->mWidth, y + lTexture->mHeight);
+	PixelRect lRect(x, y, x + lTexture->mWidth, y + lTexture->mHeight);
 	ToUserCoords(lRect.mLeft, lRect.mTop);
 	ToUserCoords(lRect.mRight, lRect.mBottom);
 	DrawImage(pImageID, lRect);
 }
 
-void DirectX9Painter::DoDrawImage(ImageID pImageID, int x, int y, const Lepra::PixelRect& pSubpatchRect)
+void DirectX9Painter::DoDrawImage(ImageID pImageID, int x, int y, const PixelRect& pSubpatchRect)
 {
 	TextureTable::Iterator lIter = mTextureTable.Find(pImageID);
 
@@ -1057,13 +1057,13 @@ void DirectX9Painter::DoDrawImage(ImageID pImageID, int x, int y, const Lepra::P
 	Texture* lTexture = *lIter;
 
 	ToScreenCoords(x, y);
-	Lepra::PixelRect lRect(x, y, x + lTexture->mWidth, y + lTexture->mHeight);
+	PixelRect lRect(x, y, x + lTexture->mWidth, y + lTexture->mHeight);
 	ToUserCoords(lRect.mLeft, lRect.mTop);
 	ToUserCoords(lRect.mRight, lRect.mBottom);
 	DrawImage(pImageID, lRect, pSubpatchRect);
 }
 
-void DirectX9Painter::DoDrawImage(ImageID pImageID, const Lepra::PixelRect& pRect)
+void DirectX9Painter::DoDrawImage(ImageID pImageID, const PixelRect& pRect)
 {
 	TextureTable::Iterator lIter = mTextureTable.Find((int)pImageID);
 	if (lIter == mTextureTable.End())
@@ -1099,7 +1099,7 @@ void DirectX9Painter::DoDrawImage(ImageID pImageID, const Lepra::PixelRect& pRec
 		lAlpha = 0xFF000000;
 	}
 
-	Lepra::Color& lColor = GetColorInternal(0);
+	Color& lColor = GetColorInternal(0);
 	for (int i = 0; i < 4; i++)
 	{
 		lVertex[i].z   = 0;
@@ -1148,7 +1148,7 @@ void DirectX9Painter::DoDrawImage(ImageID pImageID, const Lepra::PixelRect& pRec
 	mD3DDevice->SetTexture(0, 0);
 }
 
-void DirectX9Painter::DoDrawImage(ImageID pImageID, const Lepra::PixelRect& pRect, const Lepra::PixelRect& pSubpatchRect)
+void DirectX9Painter::DoDrawImage(ImageID pImageID, const PixelRect& pRect, const PixelRect& pSubpatchRect)
 {
 	TextureTable::Iterator lIter = mTextureTable.Find((int)pImageID);
 	if (lIter == mTextureTable.End())
@@ -1191,7 +1191,7 @@ void DirectX9Painter::DoDrawImage(ImageID pImageID, const Lepra::PixelRect& pRec
 		lAlpha = 0xFF000000;
 	}
 
-	Lepra::Color& lColor = GetColorInternal(0);
+	Color& lColor = GetColorInternal(0);
 	for (int i = 0; i < 4; i++)
 	{
 		lVertex[i].z   = 0;
@@ -1274,7 +1274,7 @@ void DirectX9Painter::DoDrawAlphaImage(ImageID pImageID, int x, int y)
 		lAlpha = 0xFF000000;
 	}
 
-	Lepra::Color& lColor = GetColorInternal(0);
+	Color& lColor = GetColorInternal(0);
 	for (int i = 0; i < 4; i++)
 	{
 		lVertex[i].z   = 0;
@@ -1323,7 +1323,7 @@ void DirectX9Painter::DoDrawAlphaImage(ImageID pImageID, int x, int y)
 	mD3DDevice->SetTexture(0, 0);
 }
 
-int DirectX9Painter::PrintText(const Lepra::String& pString, int x, int y)
+int DirectX9Painter::PrintText(const str& pString, int x, int y)
 {
 	pString;
 	x;
@@ -1338,20 +1338,20 @@ void DirectX9Painter::SetFontSmoothness(bool)
 	// TODO: ?
 }
 
-void DirectX9Painter::AdjustVertexFormat(Lepra::uint16& pVertexFormat)
+void DirectX9Painter::AdjustVertexFormat(uint16& pVertexFormat)
 {
 	pVertexFormat |= Geometry2D::VTX_INTERLEAVED;
 }
 
-void DirectX9Painter::ReadPixels(Lepra::Canvas& pDestCanvas, const Lepra::PixelRect& pRect)
+void DirectX9Painter::ReadPixels(Canvas& pDestCanvas, const PixelRect& pRect)
 {
-	if (GetCanvas() == 0 || GetCanvas()->GetBitDepth() == Lepra::Canvas::BITDEPTH_8_BIT)
+	if (GetCanvas() == 0 || GetCanvas()->GetBitDepth() == Canvas::BITDEPTH_8_BIT)
 	{
-		pDestCanvas.Reset(0, 0, Lepra::Canvas::BITDEPTH_32_BIT);
+		pDestCanvas.Reset(0, 0, Canvas::BITDEPTH_32_BIT);
 		return;
 	}
 
-	Lepra::PixelRect lRect(pRect);
+	PixelRect lRect(pRect);
 
 	ToScreenCoords(lRect.mLeft, lRect.mTop);
 	ToScreenCoords(lRect.mRight, lRect.mBottom);
@@ -1376,7 +1376,7 @@ void DirectX9Painter::ReadPixels(Lepra::Canvas& pDestCanvas, const Lepra::PixelR
 	if (lRect.mRight <= lRect.mLeft ||
 	   lRect.mBottom <= lRect.mTop)
 	{
-		pDestCanvas.Reset(0, 0, Lepra::Canvas::BITDEPTH_32_BIT);
+		pDestCanvas.Reset(0, 0, Canvas::BITDEPTH_32_BIT);
 		return;
 	}
 
@@ -1426,36 +1426,36 @@ void DirectX9Painter::ReadPixels(Lepra::Canvas& pDestCanvas, const Lepra::PixelR
 		return;
 	}
 
-	Lepra::Canvas::BitDepth lBitDepth = Lepra::Canvas::BITDEPTH_32_BIT;
+	Canvas::BitDepth lBitDepth = Canvas::BITDEPTH_32_BIT;
 
 	switch(lSurfDesc.Format)
 	{
 	case D3DFMT_R8G8B8:
-		lBitDepth = Lepra::Canvas::BITDEPTH_24_BIT;
+		lBitDepth = Canvas::BITDEPTH_24_BIT;
 		break;
 	case D3DFMT_A8R8G8B8:
 	case D3DFMT_X8R8G8B8:
 	case D3DFMT_A8B8G8R8:
 	case D3DFMT_X8B8G8R8:
-		lBitDepth = Lepra::Canvas::BITDEPTH_32_BIT;
+		lBitDepth = Canvas::BITDEPTH_32_BIT;
 		break;
 	case D3DFMT_R5G6B5:
-		lBitDepth = Lepra::Canvas::BITDEPTH_16_BIT;
+		lBitDepth = Canvas::BITDEPTH_16_BIT;
 		break;
 	case D3DFMT_A1R5G5B5:
 	case D3DFMT_X1R5G5B5:
-		lBitDepth = Lepra::Canvas::BITDEPTH_15_BIT;
+		lBitDepth = Canvas::BITDEPTH_15_BIT;
 		break;
 	case D3DFMT_R3G3B2:
 	case D3DFMT_A8:
 	case D3DFMT_L8:
 	case D3DFMT_P8:
-		lBitDepth = Lepra::Canvas::BITDEPTH_8_BIT;
+		lBitDepth = Canvas::BITDEPTH_8_BIT;
 		pDestCanvas.SetPalette(GetCanvas()->GetPalette());
 		break;
 	default:
 		mLog.AError("Invalid pixel format in ReadPixels().");
-		pDestCanvas.Reset(0, 0, Lepra::Canvas::BITDEPTH_32_BIT);
+		pDestCanvas.Reset(0, 0, Canvas::BITDEPTH_32_BIT);
 		lInMemTarget->UnlockRect();
 		lInMemTarget->Release();
 		return;
@@ -1518,7 +1518,7 @@ void DirectX9Painter::DoRenderDisplayList(std::vector<DisplayEntity*>* pDisplayL
 			}
 		}
 
-		Lepra::uint16 lVertexFormat = lSE->GetGeometry().GetVertexFormat() & (Geometry2D::VTX_UV | Geometry2D::VTX_RGB);
+		uint16 lVertexFormat = lSE->GetGeometry().GetVertexFormat() & (Geometry2D::VTX_UV | Geometry2D::VTX_RGB);
 		UINT lVertexSize = 0;
 		switch(lVertexFormat)
 		{

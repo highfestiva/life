@@ -50,8 +50,8 @@ public:
 	static Win32DisplayManager* GetDisplayManager(HWND pWindowHandle);
 
 private:
-	static Lepra::Lock* mLock;
-	typedef Lepra::HashTable<HWND, Win32DisplayManager*, std::hash<void*> > WindowTable;
+	static Lock* mLock;
+	typedef HashTable<HWND, Win32DisplayManager*, std::hash<void*> > WindowTable;
 	static WindowTable mWindowTable;
 };
 

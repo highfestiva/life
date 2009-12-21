@@ -22,7 +22,7 @@ class ServerConsoleManager: public ConsoleManager
 	typedef ConsoleManager Parent;
 public:
 	ServerConsoleManager(Cure::GameManager* pGameServerManager, Cure::RuntimeVariableScope* pVariableScope,
-		Lepra::InteractiveConsoleLogListener* pConsoleLogger, Lepra::ConsolePrompt* pConsolePrompt);
+		InteractiveConsoleLogListener* pConsoleLogger, ConsolePrompt* pConsolePrompt);
 	virtual ~ServerConsoleManager();
 
 private:
@@ -41,7 +41,7 @@ private:
 
 	unsigned GetCommandCount() const;
 	const CommandPair& GetCommand(unsigned pIndex) const;
-	int OnCommand(const Lepra::String& pCommand, const Lepra::StringUtility::StringVector& pParameterVector);
+	int OnCommand(const str& pCommand, const strutil::strvec& pParameterVector);
 
 	static const CommandPair mCommandIdList[];
 	LOG_CLASS_DECLARE();

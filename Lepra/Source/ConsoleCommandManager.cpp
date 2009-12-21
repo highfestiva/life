@@ -101,34 +101,34 @@ void ConsoleCommandManager::DeleteExecutor(ConsoleCommandExecutor* lExecutor)
 
 
 
-void ConsoleCommandManager::SetComment(const String& pComment)
+void ConsoleCommandManager::SetComment(const str& pComment)
 {
 	mComment = pComment;
 }
 
-bool ConsoleCommandManager::AddCommand(const String& pCommand)
+bool ConsoleCommandManager::AddCommand(const str& pCommand)
 {
 	return mCommandSet.insert(pCommand).second;
 }
 
-bool ConsoleCommandManager::RemoveCommand(const String& pCommand)
+bool ConsoleCommandManager::RemoveCommand(const str& pCommand)
 {
 	return (mCommandSet.erase(pCommand) != 0);
 }
 
-int ConsoleCommandManager::Execute(const String& pCommand, bool pAppendToHistory)
+int ConsoleCommandManager::Execute(const str& pCommand, bool pAppendToHistory)
 {
 	int lExecutionResult = 0;
-	String lCommandDelimitors(_T(" \t\v\r\n"));
+	str lCommandDelimitors(_T(" \t\v\r\n"));
 
-	String lInCommand(pCommand);
+	str lInCommand(pCommand);
 	if (!mComment.empty())
 	{
 		// Drop comments (ignore if inside string).
 		lInCommand = lInCommand.substr(0, lInCommand.find(mComment, 0));
 	}
 
-	StringUtility::StringVector lCommandList = StringUtility::BlockSplit(lInCommand, _T(";"), true, true);
+	strutil::strvec lCommandList = strutil::BlockSplit(lInCommand, _T(";"), true, true);
 
 	if (lCommandList.size() == 0)
 	{
@@ -141,18 +141,18 @@ int ConsoleCommandManager::Execute(const String& pCommand, bool pAppendToHistory
 
 	for (size_t lCommandIndex = 0; lExecutionResult == 0 && lCommandIndex < lCommandList.size(); ++lCommandIndex)
 	{
-		const String& lTempCommand = lCommandList[lCommandIndex];
-		String lCommand = StringUtility::StripLeft(lTempCommand, lCommandDelimitors);
-		StringUtility::StringVector lCommandTokenList = StringUtility::BlockSplit(lCommand, lCommandDelimitors, 1, false, true);
+		const str& lTempCommand = lCommandList[lCommandIndex];
+		str lCommand = strutil::StripLeft(lTempCommand, lCommandDelimitors);
+		strutil::strvec lCommandTokenList = strutil::BlockSplit(lCommand, lCommandDelimitors, 1, false, true);
 		if (lCommandTokenList.size() > 0)
 		{
 			lCommand = lCommandTokenList[0];
-			StringUtility::StringVector lParameterTokenList;
+			strutil::strvec lParameterTokenList;
 			if (lCommandTokenList.size() > 1)
 			{
-				String lParameters = lCommandTokenList[1];
-				lParameters = StringUtility::StripLeft(lParameters, lCommandDelimitors);
-				lParameterTokenList = StringUtility::BlockSplit(lParameters, lCommandDelimitors, false, true);
+				str lParameters = lCommandTokenList[1];
+				lParameters = strutil::StripLeft(lParameters, lCommandDelimitors);
+				lParameterTokenList = strutil::BlockSplit(lParameters, lCommandDelimitors, false, true);
 			}
 
 			lExecutionResult = -1;
@@ -181,11 +181,11 @@ void ConsoleCommandManager::RemoveCompleter(CommandCompleter* pCompleter)
 }
 
 ConsoleCommandManager::CommandList ConsoleCommandManager::GetCommandCompletionList(
-	const String& pPartialCommand, String& pCompleted) const
+	const str& pPartialCommand, str& pCompleted) const
 {
 	// Pick partial command.
-	const String lCommandDelimitors(_T(" \t\v\r\n"));
-	const String lPartialCommand = StringUtility::StripLeft(pPartialCommand, lCommandDelimitors);
+	const str lCommandDelimitors(_T(" \t\v\r\n"));
+	const str lPartialCommand = strutil::StripLeft(pPartialCommand, lCommandDelimitors);
 	pCompleted = lPartialCommand;
 
 	// Complete partial command.
@@ -203,7 +203,7 @@ ConsoleCommandManager::CommandList ConsoleCommandManager::GetCommandCompletionLi
 	CommandList::const_iterator y = lCompletionList.begin();
 	for (; y != lCompletionList.end(); ++y)
 	{
-		const String& lCompletion = *y;
+		const str& lCompletion = *y;
 		// Trim completed string, depending on completion matching.
 		if (lCompletion.length() < lCompletionLetterCount)
 		{
@@ -228,14 +228,14 @@ ConsoleCommandManager::CommandList ConsoleCommandManager::GetCommandCompletionLi
 	return (lCompletionList);
 }
 
-std::list<String> ConsoleCommandManager::CompleteCommand(const String& pPartialCommand) const
+std::list<str> ConsoleCommandManager::CompleteCommand(const str& pPartialCommand) const
 {
-	std::list<String> lCompletionList;
+	std::list<str> lCompletionList;
 	CommandSet::const_iterator x = mCommandSet.begin();
 	for (; x != mCommandSet.end(); ++x)
 	{
-		const String& lCompletion = *x;
-		if (StringUtility::StartsWith(lCompletion, pPartialCommand))
+		const str& lCompletion = *x;
+		if (strutil::StartsWith(lCompletion, pPartialCommand))
 		{
 			// Add to list.
 			lCompletionList.push_back(lCompletion);
@@ -267,9 +267,9 @@ int ConsoleCommandManager::GetCurrentHistoryIndex() const
 	return (mCurrentHistoryIndex);
 }
 
-String ConsoleCommandManager::GetHistory(int pIndex) const
+str ConsoleCommandManager::GetHistory(int pIndex) const
 {
-	String lHistory;
+	str lHistory;
 	if (pIndex >= 0 && pIndex < (int)mHistoryVector.size())
 	{
 		lHistory = mHistoryVector[pIndex];
@@ -277,7 +277,7 @@ String ConsoleCommandManager::GetHistory(int pIndex) const
 	return (lHistory);
 }
 
-void ConsoleCommandManager::AppendHistory(const String& pCommand)
+void ConsoleCommandManager::AppendHistory(const str& pCommand)
 {
 	// Only append if this isn't exactly the same as the last command.
 	if (mHistoryVector.size() == 0 || (pCommand != mHistoryVector.back()))
@@ -377,7 +377,7 @@ int StdioConsolePrompt::WaitChar()
 		if (c2 == '[')
 		{
 			c = '?';
-			UnicodeString lSequence;
+			wstr lSequence;
 			for (int x = 0; x < 30 && c2 > 0 && c2 != '~'; ++x)
 			{
 				c2 = Getc(0.5f);
@@ -449,9 +449,9 @@ void StdioConsolePrompt::EraseText(size_t pCount)
 	Backspace(pCount);
 }
 
-void StdioConsolePrompt::PrintPrompt(const Lepra::String& pPrompt, const Lepra::String& pInputText, size_t pEditIndex)
+void StdioConsolePrompt::PrintPrompt(const str& pPrompt, const str& pInputText, size_t pEditIndex)
 {
-	::printf("\r%s%s", Lepra::AnsiStringUtility::ToOwnCode(pPrompt).c_str(), Lepra::AnsiStringUtility::ToOwnCode(pInputText).c_str());
+	::printf("\r%s%s", astrutil::ToOwnCode(pPrompt).c_str(), astrutil::ToOwnCode(pInputText).c_str());
 	// Back up to edit index.
 	for (size_t x = pInputText.length(); x > pEditIndex; --x)
 	{

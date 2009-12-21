@@ -160,7 +160,7 @@ bool GameManager::EndTick()
 	return (true);
 }
 
-Lepra::Lock* GameManager::GetTickLock() const
+Lock* GameManager::GetTickLock() const
 {
 	return (&mLock);
 }
@@ -202,7 +202,7 @@ TBC::PhysicsManager* GameManager::GetPhysicsManager() const
 	{
 		// We have a physics thread. Are we it?
 		size_t lPhysicsThreadId = mPhysicsWorkerThread->GetThreadId();
-		size_t lThisThreadId = Lepra::Thread::GetCurrentThreadId();
+		size_t lThisThreadId = Thread::GetCurrentThreadId();
 		// Make sure we're the physics thread, otherwise we're not allowed to
 		// read/write any physical stuff.
 		assert(lPhysicsThreadId == lThisThreadId);
@@ -218,7 +218,7 @@ ConsoleManager* GameManager::GetConsoleManager() const
 
 
 
-ContextObject* GameManager::CreateContextObject(const Lepra::String& pClassId, NetworkObjectType pNetworkType,
+ContextObject* GameManager::CreateContextObject(const str& pClassId, NetworkObjectType pNetworkType,
 	GameObjectId pInstanceId)
 {
 	ContextObject* lObject = CreateContextObject(pClassId);
@@ -236,6 +236,11 @@ ContextObject* GameManager::CreateContextObject(const Lepra::String& pClassId, N
 	return (lObject);
 }
 
+bool GameManager::IsUiMoveForbidden(GameObjectId) const
+{
+	return (false);	// Non-UI implementors need to bother.
+}
+
 
 
 void GameManager::TryReportPerformance(double pReportInterval)
@@ -251,10 +256,10 @@ void GameManager::TryReportPerformance(double pReportInterval)
 			mSendBandwidth.Append(lTimeDiff, 0, mNetwork->GetTotalSentByteCount());
 			mReceiveBandwidth.Append(lTimeDiff, 0, mNetwork->GetTotalReceivedByteCount());
 			mLog.Performancef(_T("Network bandwith. Up: %sB/s (peak %sB/s). Down: %sB/s (peak %sB/s)."), 
-				Lepra::Number::ConvertToPostfixNumber(mSendBandwidth.GetLast(), 2).c_str(),
-				Lepra::Number::ConvertToPostfixNumber(mSendBandwidth.GetMaximum(), 2).c_str(),
-				Lepra::Number::ConvertToPostfixNumber(mReceiveBandwidth.GetLast(), 2).c_str(),
-				Lepra::Number::ConvertToPostfixNumber(mReceiveBandwidth.GetMaximum(), 2).c_str());
+				Number::ConvertToPostfixNumber(mSendBandwidth.GetLast(), 2).c_str(),
+				Number::ConvertToPostfixNumber(mSendBandwidth.GetMaximum(), 2).c_str(),
+				Number::ConvertToPostfixNumber(mReceiveBandwidth.GetLast(), 2).c_str(),
+				Number::ConvertToPostfixNumber(mReceiveBandwidth.GetMaximum(), 2).c_str());
 		}
 		else
 		{
@@ -262,8 +267,8 @@ void GameManager::TryReportPerformance(double pReportInterval)
 			mReceiveBandwidth.Clear();
 		}
 
-		const Lepra::ScopePerformanceData::NodeArray lRoots = Lepra::ScopePerformanceData::GetRoots();
-		ReportPerformance(Lepra::ScopePerformanceData::GetRoots(), 0);
+		const ScopePerformanceData::NodeArray lRoots = ScopePerformanceData::GetRoots();
+		ReportPerformance(ScopePerformanceData::GetRoots(), 0);
 	}
 }
 
@@ -272,7 +277,7 @@ void GameManager::ClearPerformanceData()
 	mSendBandwidth.Clear();
 	mReceiveBandwidth.Clear();
 
-	Lepra::ScopePerformanceData::ClearAll(Lepra::ScopePerformanceData::GetRoots());
+	ScopePerformanceData::ClearAll(ScopePerformanceData::GetRoots());
 }
 
 
@@ -309,19 +314,19 @@ bool GameManager::TickNetworkOutput()
 
 
 
-void GameManager::ReportPerformance(const Lepra::ScopePerformanceData::NodeArray& pNodes, int pRecursion)
+void GameManager::ReportPerformance(const ScopePerformanceData::NodeArray& pNodes, int pRecursion)
 {
-	const Lepra::String lIndent = Lepra::String(pRecursion*3, ' ');
-	Lepra::ScopePerformanceData::NodeArray::const_iterator x = pNodes.begin();
+	const str lIndent = str(pRecursion*3, ' ');
+	ScopePerformanceData::NodeArray::const_iterator x = pNodes.begin();
 	for (; x != pNodes.end(); ++x)
 	{
-		const Lepra::ScopePerformanceData* lNode = *x;
-		Lepra::String lName = Lepra::StringUtility::Split(lNode->GetName(), _T(";"))[0];
+		const ScopePerformanceData* lNode = *x;
+		str lName = strutil::Split(lNode->GetName(), _T(";"))[0];
 		mLog.Performancef((lIndent+lName+_T(" Min: %ss, last: %ss, savg: %ss, max: %ss.")).c_str(), 
-			Lepra::Number::ConvertToPostfixNumber(lNode->GetMinimum(), 2).c_str(),
-			Lepra::Number::ConvertToPostfixNumber(lNode->GetLast(), 2).c_str(),
-			Lepra::Number::ConvertToPostfixNumber(lNode->GetSlidingAverage(), 2).c_str(),
-			Lepra::Number::ConvertToPostfixNumber(lNode->GetMaximum(), 2).c_str());
+			Number::ConvertToPostfixNumber(lNode->GetMinimum(), 2).c_str(),
+			Number::ConvertToPostfixNumber(lNode->GetLast(), 2).c_str(),
+			Number::ConvertToPostfixNumber(lNode->GetSlidingAverage(), 2).c_str(),
+			Number::ConvertToPostfixNumber(lNode->GetMaximum(), 2).c_str());
 		ReportPerformance(lNode->GetChildren(), pRecursion+1);
 	}
 }
@@ -364,7 +369,7 @@ void GameManager::PhysicsTick()
 	const int lMicroSteps = CURE_RTVAR_GET(GetVariableScope(), RTVAR_PHYSICS_MICROSTEPS, 3);
 	const int lAffordedStepCount = mTime->GetAffordedPhysicsStepCount() * lMicroSteps;
 	const float lStepIncrement = mTime->GetAffordedPhysicsStepTime() / lMicroSteps;
-	/*if (lAffordedStepCount != 1 && !Lepra::Math::IsEpsEqual(lStepIncrement, 1/60.0f))
+	/*if (lAffordedStepCount != 1 && !Math::IsEpsEqual(lStepIncrement, 1/60.0f))
 	{
 		mLog.Warningf(_T("Game time allows for %i physics steps in increments of %f."),
 			lAffordedStepCount, lStepIncrement);
@@ -379,11 +384,11 @@ void GameManager::PhysicsTick()
 	mContext->HandlePhysicsSend();
 }
 
-bool GameManager::IsHighImpact(float pScaleFactor, const ContextObject* pObject, const Lepra::Vector3DF& pForce,
-	const Lepra::Vector3DF& pTorque) const
+bool GameManager::IsHighImpact(float pScaleFactor, const ContextObject* pObject, const Vector3DF& pForce,
+	const Vector3DF& pTorque) const
 {
 	const float lMassFactor = 1/pObject->GetMass();
-	Lepra::Vector3DF lGravityDirection = GetPhysicsManager()->GetGravity();
+	Vector3DF lGravityDirection = GetPhysicsManager()->GetGravity();
 	lGravityDirection.Normalize();
 	// High angle against direction of gravity means high impact.
 	const float lForceWithoutGravityFactor = (pForce * lGravityDirection) - pForce.Cross(lGravityDirection).GetLength();
@@ -427,7 +432,7 @@ void GameManager::PhysicsThreadEntry()
 	// goes to the last one.
 	// JB 2009-12: dropped this, probably not a good idea since we need to run multiple
 	// physics instances when running split screen.
-	//Lepra::Thread::GetCurrentThread()->SetCpuAffinityMask(1<<(Lepra::SystemManager::GetLogicalCpuCount()-1));
+	//Thread::GetCurrentThread()->SetCpuAffinityMask(1<<(SystemManager::GetLogicalCpuCount()-1));
 
 	while (mPhysicsWorkerThread && !mPhysicsWorkerThread->GetStopRequest())
 	{
@@ -445,14 +450,14 @@ void GameManager::PhysicsThreadEntry()
 void GameManager::CreatePhysicsThread()
 {
 	// If we have more than one CPU, we run a separate physics thread.
-	if (Lepra::SystemManager::GetLogicalCpuCount() > 1)	// TODO: check performance to see if we should check for logical or physical CPUs.
+	if (SystemManager::GetLogicalCpuCount() > 1)	// TODO: check performance to see if we should check for logical or physical CPUs.
 	{
 		assert(!mPhysicsWorkerThread);
 
-		mPhysicsTickStartSemaphore = new Lepra::Semaphore();
-		mPhysicsTickDoneSemaphore = new Lepra::Semaphore();
+		mPhysicsTickStartSemaphore = new Semaphore();
+		mPhysicsTickDoneSemaphore = new Semaphore();
 
-		mPhysicsWorkerThread = new Lepra::MemberThread<GameManager>(_T("PhysicsThread"));
+		mPhysicsWorkerThread = new MemberThread<GameManager>(_T("PhysicsThread"));
 		mPhysicsWorkerThread->Start(this, &GameManager::PhysicsThreadEntry);
 	}
 }

@@ -1,5 +1,4 @@
 /*
-	Class:  GeometryBatch
 	Author: Alexander Hugestrand
 	Copyright (c) 2002-2009, Righteous Games
 
@@ -15,13 +14,21 @@
 	if this geometry is a low-poly mesh.
 */
 
-#ifndef UIGEOMETRYBATCH_H
-#define UIGEOMETRYBATCH_H
+
+
+#pragma once
+
+
 
 #include "../../TBC/Include/GeometryBase.h"
+#include "../Include/UiTBC.h"
+
+
 
 namespace UiTbc
 {
+
+
 
 class GeometryBatch: public TBC::GeometryBase
 {
@@ -31,12 +38,12 @@ public:
 	virtual ~GeometryBatch();
 
 	// Creates new instances.
-	void SetInstances(const Lepra::Vector3DF* pDisplacement, 
+	void SetInstances(const Vector3DF* pDisplacement, 
 			  int pNumInstances,
 			  float pXScaleMin = 1.0f, float pXScaleMax = 1.0f,
 			  float pYScaleMin = 1.0f, float pYScaleMax = 1.0f,
 			  float pZScaleMin = 1.0f, float pZScaleMax = 1.0f);
-	void SetInstances(const Lepra::Vector3DD* pDisplacement, 
+	void SetInstances(const Vector3DD* pDisplacement, 
 			  int pNumInstances,
 			  float pXScaleMin = 1.0f, float pXScaleMax = 1.0f,
 			  float pYScaleMin = 1.0f, float pYScaleMax = 1.0f,
@@ -58,15 +65,15 @@ public:
 
 	virtual float*         GetVertexData() const;
 	virtual float*         GetUVData(unsigned int pUVSet) const;
-	virtual Lepra::uint32* GetIndexData() const;
-	virtual Lepra::uint8*  GetColorData() const;
+	virtual uint32* GetIndexData() const;
+	virtual uint8*  GetColorData() const;
 
 protected:
 private:
 	float* mVertex;
 	float** mUV;
-	Lepra::uint32* mIndex;
-	Lepra::uint8* mColor;
+	uint32* mIndex;
+	uint8* mColor;
 	unsigned int mVertexCount;
 	unsigned int mIndexCount;
 	unsigned int mUVSetCount;
@@ -74,6 +81,6 @@ private:
 	TBC::GeometryBase* mGeometryInstance;
 };
 
-} // End namespace.
 
-#endif
+
+}

@@ -35,15 +35,15 @@ void TerrainPatch::SetDimensions(int pPatchResLog2,
 }
 
 
-TerrainPatch::TerrainPatch(const Lepra::Vector2D<int>& pPosition,
-			   Lepra::uint8* pHoleMap,
+TerrainPatch::TerrainPatch(const Vector2D<int>& pPosition,
+			   uint8* pHoleMap,
 			   unsigned int pSizeExponent,
 			   unsigned int pHiResEdgeFlags,
 			   float pWestU1, float pEastU1, float pSouthV1, float pNorthV1,
 			   float pWestU2, float pEastU2, float pSouthV2, float pNorthV2):
 	mVertexCount(0),
 	mTriangleCount(0),
-	mSizeMultiplier(Lepra::Math::Pow(smPatchSizeMultiplier, pSizeExponent)),
+	mSizeMultiplier(Math::Pow(smPatchSizeMultiplier, pSizeExponent)),
 	mHiResEdgeFlags(pHiResEdgeFlags),
 	mNorthEdgeIndex(0),
 	mSouthEdgeIndex(0),
@@ -101,7 +101,7 @@ TerrainPatch::TerrainPatch(const Lepra::Vector2D<int>& pPosition,
 	mVertexData = new float[mVertexCount * 3];
 	mUVData[0] = new float[mVertexCount * 2];
 	mUVData[1] = new float[mVertexCount * 2];
-	mIndexData = new Lepra::uint32[mTriangleCount * 3];
+	mIndexData = new uint32[mTriangleCount * 3];
 
 	//SetVertexData(pVertexData);
 	SetToFlatTerrainPatch();
@@ -250,7 +250,7 @@ void TerrainPatch::GenerateUVData(float pWestU1, float pEastU1, float pSouthV1, 
 	}
 }
 
-void TerrainPatch::GenerateIndexData(Lepra::uint8* pHoleMap)
+void TerrainPatch::GenerateIndexData(uint8* pHoleMap)
 {
 	int lMidVertexStartIndex = (smPatchRes + 1) * (smPatchRes + 1);
 
@@ -313,7 +313,7 @@ void TerrainPatch::GenerateIndexData(Lepra::uint8* pHoleMap)
 }
 
 void TerrainPatch::AddTriangles(int pTriCount, int pExtraVertexStartIndex,
-				Lepra::uint32 pCenter, Lepra::uint32 pV1, Lepra::uint32 pV2, 
+				uint32 pCenter, uint32 pV1, uint32 pV2, 
 				unsigned int& pTriIndex, bool pSwap)
 {
 	int lV1 = pV1;
@@ -365,7 +365,7 @@ void TerrainPatch::IterateOverPatch(const Modifier& pModifier, int pMinXIndex, i
 			int lVertexIndex = (y * (smPatchRes + 1) + x) * 3;
 			// TRICKY: Typecasting float-array to Vector3DF is risky if the implementation
 			// of Vector3D changes.
-			pModifier.ModifyVertex(Lepra::Vector2DF(lWorldX, lWorldY), *((Lepra::Vector3DF*)&mVertexData[lVertexIndex]));
+			pModifier.ModifyVertex(Vector2DF(lWorldX, lWorldY), *((Vector3DF*)&mVertexData[lVertexIndex]));
 			lWorldX += lScaleX;
 		}
 
@@ -382,7 +382,7 @@ void TerrainPatch::IterateOverPatch(const Modifier& pModifier, int pMinXIndex, i
 			int lVertexIndex = ((smPatchRes + 1) * (smPatchRes + 1) + y * smPatchRes + x) * 3;
 			// TRICKY: Typecasting float-array to Vector3DF is risky if the implementation
 			// of Vector3D changes.
-			pModifier.ModifyVertex(Lepra::Vector2DF(lWorldX, lWorldY), *((Lepra::Vector3DF*)&mVertexData[lVertexIndex]));
+			pModifier.ModifyVertex(Vector2DF(lWorldX, lWorldY), *((Vector3DF*)&mVertexData[lVertexIndex]));
 			lWorldX += lScaleX;
 		}
 
@@ -402,7 +402,7 @@ void TerrainPatch::IterateOverPatch(const Modifier& pModifier, int pMinXIndex, i
 			{
 				// TRICKY: Typecasting float-array to Vector3DF is risky if the implementation
 				// of Vector3D changes.
-				pModifier.ModifyVertex(Lepra::Vector2DF(lWorldX, mSouthWestCorner.y), *((Lepra::Vector3DF*)&mVertexData[lVertexIndex]));
+				pModifier.ModifyVertex(Vector2DF(lWorldX, mSouthWestCorner.y), *((Vector3DF*)&mVertexData[lVertexIndex]));
 				lWorldX += lSmallXStep;
 				lVertexIndex += 3;
 			}
@@ -419,7 +419,7 @@ void TerrainPatch::IterateOverPatch(const Modifier& pModifier, int pMinXIndex, i
 			{
 				// TRICKY: Typecasting float-array to Vector3DF is risky if the implementation
 				// of Vector3D changes.
-				pModifier.ModifyVertex(Lepra::Vector2DF(lWorldX, mNorthEastCorner.y), *((Lepra::Vector3DF*)&mVertexData[lVertexIndex]));
+				pModifier.ModifyVertex(Vector2DF(lWorldX, mNorthEastCorner.y), *((Vector3DF*)&mVertexData[lVertexIndex]));
 				lWorldX += lSmallXStep;
 				lVertexIndex += 3;
 			}
@@ -436,7 +436,7 @@ void TerrainPatch::IterateOverPatch(const Modifier& pModifier, int pMinXIndex, i
 			{
 				// TRICKY: Typecasting float-array to Vector3DF is risky if the implementation
 				// of Vector3D changes.
-				pModifier.ModifyVertex(Lepra::Vector2DF(mSouthWestCorner.x, lWorldY), *((Lepra::Vector3DF*)&mVertexData[lVertexIndex]));
+				pModifier.ModifyVertex(Vector2DF(mSouthWestCorner.x, lWorldY), *((Vector3DF*)&mVertexData[lVertexIndex]));
 				lWorldY += lSmallYStep;
 				lVertexIndex += 3;
 			}
@@ -454,7 +454,7 @@ void TerrainPatch::IterateOverPatch(const Modifier& pModifier, int pMinXIndex, i
 			{
 				// TRICKY: Typecasting float-array to Vector3DF is risky if the implementation
 				// of Vector3D changes.
-				pModifier.ModifyVertex(Lepra::Vector2DF(mNorthEastCorner.x, lWorldY), *((Lepra::Vector3DF*)&mVertexData[lVertexIndex]));
+				pModifier.ModifyVertex(Vector2DF(mNorthEastCorner.x, lWorldY), *((Vector3DF*)&mVertexData[lVertexIndex]));
 				lWorldY += lSmallYStep;
 				lVertexIndex += 3;
 			}
@@ -466,7 +466,7 @@ void TerrainPatch::IterateOverPatch(const Modifier& pModifier, int pMinXIndex, i
 class FlatModifier : public TerrainPatch::Modifier
 {
 public:
-	void ModifyVertex(const Lepra::Vector2DF& pWorldFlatPos, Lepra::Vector3DF& pVertex) const
+	void ModifyVertex(const Vector2DF& pWorldFlatPos, Vector3DF& pVertex) const
 	{
 		pVertex.x = pWorldFlatPos.x;
 		pVertex.y = pWorldFlatPos.y;
@@ -480,7 +480,7 @@ void TerrainPatch::SetToFlatTerrainPatch()
 	IterateOverPatch(lModifier, 0, GetVertexRes(), 0, GetVertexRes());
 }
 
-void TerrainPatch::SetFlatCallback(float pWorldX, float pWorldY, Lepra::Vector3DF& pCurrentPoint)
+void TerrainPatch::SetFlatCallback(float pWorldX, float pWorldY, Vector3DF& pCurrentPoint)
 {
 	pCurrentPoint.x = pWorldX;
 	pCurrentPoint.y = pWorldY;
@@ -488,7 +488,7 @@ void TerrainPatch::SetFlatCallback(float pWorldX, float pWorldY, Lepra::Vector3D
 }
 
 /*
-void TerrainPatch::SetVertexData(const Lepra::Vector3DF* pVertexData)
+void TerrainPatch::SetVertexData(const Vector3DF* pVertexData)
 {
 	int x;
 	int y;
@@ -541,7 +541,7 @@ void TerrainPatch::SetVertexData(const Lepra::Vector3DF* pVertexData)
 	}
 }
 
-void TerrainPatch::SetEdgeVertexData(const Lepra::Vector3DF* pVertexData, int pDstVertexIndex, int pSrcVertexStartIndex, int pPitch)
+void TerrainPatch::SetEdgeVertexData(const Vector3DF* pVertexData, int pDstVertexIndex, int pSrcVertexStartIndex, int pPitch)
 {
 	for (int x = 0; x < smPatchRes; ++x)
 	{
@@ -552,18 +552,18 @@ void TerrainPatch::SetEdgeVertexData(const Lepra::Vector3DF* pVertexData, int pD
 		for (i = 0; i < lMid; i++)
 		{
 			float t = (float)(i + 1) / (float)smPatchSizeMultiplier;
-			mVertexData[pDstVertexIndex + 0] = Lepra::Math::Lerp(pVertexData[lSrcVertexIndex].x, pVertexData[lSrcVertexIndex + pPitch].x, t);// + mSouthWestCorner.x;
-			mVertexData[pDstVertexIndex + 1] = Lepra::Math::Lerp(pVertexData[lSrcVertexIndex].y, pVertexData[lSrcVertexIndex + pPitch].y, t);// + mSouthWestCorner.y;
-			mVertexData[pDstVertexIndex + 2] = Lepra::Math::Lerp(pVertexData[lSrcVertexIndex].z, pVertexData[lSrcVertexIndex + pPitch].z, t);
+			mVertexData[pDstVertexIndex + 0] = Math::Lerp(pVertexData[lSrcVertexIndex].x, pVertexData[lSrcVertexIndex + pPitch].x, t);// + mSouthWestCorner.x;
+			mVertexData[pDstVertexIndex + 1] = Math::Lerp(pVertexData[lSrcVertexIndex].y, pVertexData[lSrcVertexIndex + pPitch].y, t);// + mSouthWestCorner.y;
+			mVertexData[pDstVertexIndex + 2] = Math::Lerp(pVertexData[lSrcVertexIndex].z, pVertexData[lSrcVertexIndex + pPitch].z, t);
 			pDstVertexIndex += 3;
 		}
 		lSrcVertexIndex += pPitch;
 		for (i = lMid; i < smPatchSizeMultiplier - 1; i++)
 		{
 			float t = (float)(i + 1) / (float)smPatchSizeMultiplier;
-			mVertexData[pDstVertexIndex + 0] = Lepra::Math::Lerp(pVertexData[lSrcVertexIndex].x, pVertexData[lSrcVertexIndex + pPitch].x, t);// + mSouthWestCorner.x;
-			mVertexData[pDstVertexIndex + 1] = Lepra::Math::Lerp(pVertexData[lSrcVertexIndex].y, pVertexData[lSrcVertexIndex + pPitch].y, t);// + mSouthWestCorner.y;
-			mVertexData[pDstVertexIndex + 2] = Lepra::Math::Lerp(pVertexData[lSrcVertexIndex].z, pVertexData[lSrcVertexIndex + pPitch].z, t);
+			mVertexData[pDstVertexIndex + 0] = Math::Lerp(pVertexData[lSrcVertexIndex].x, pVertexData[lSrcVertexIndex + pPitch].x, t);// + mSouthWestCorner.x;
+			mVertexData[pDstVertexIndex + 1] = Math::Lerp(pVertexData[lSrcVertexIndex].y, pVertexData[lSrcVertexIndex + pPitch].y, t);// + mSouthWestCorner.y;
+			mVertexData[pDstVertexIndex + 2] = Math::Lerp(pVertexData[lSrcVertexIndex].z, pVertexData[lSrcVertexIndex + pPitch].z, t);
 			pDstVertexIndex += 3;
 		}
 	}
@@ -734,8 +734,8 @@ void TerrainPatch::MergeNormalsWithWestNeighbour(TerrainPatch& pWestNeighbour)
 
 void TerrainPatch::ProcessSharedEdge(TerrainPatch& pNeighbour,
 				     int pEdge, int pOppositeEdge,
-				     void (TerrainPatch::*pAssertAlignment)(const Lepra::Vector2D<int>&, const Lepra::Vector2D<int>&, const Lepra::Vector2D<int>&, const Lepra::Vector2D<int>&),
-				     int (TerrainPatch::*pGetVertexDisplacement)(const Lepra::Vector2D<int>&, const Lepra::Vector2D<int>&),
+				     void (TerrainPatch::*pAssertAlignment)(const Vector2D<int>&, const Vector2D<int>&, const Vector2D<int>&, const Vector2D<int>&),
+				     int (TerrainPatch::*pGetVertexDisplacement)(const Vector2D<int>&, const Vector2D<int>&),
 				     float* (TerrainPatch::*pGetEdgeElement)(int pIndex),
 				     float* (TerrainPatch::*pGetOppositeEdgeElement)(int pIndex),
 				     void (TerrainPatch::*pProcessElement)(float* pDst, float* pSrs),
@@ -745,10 +745,10 @@ void TerrainPatch::ProcessSharedEdge(TerrainPatch& pNeighbour,
 	pEdge;
 	pOppositeEdge;
 
-	Lepra::Vector2D<int> lSouthWest(GetSouthWestUnitPos());
-	Lepra::Vector2D<int> lNorthEast(GetNorthEastUnitPos());
-	Lepra::Vector2D<int> lSouthWestNeighbour(pNeighbour.GetSouthWestUnitPos());
-	Lepra::Vector2D<int> lNorthEastNeighbour(pNeighbour.GetNorthEastUnitPos());
+	Vector2D<int> lSouthWest(GetSouthWestUnitPos());
+	Vector2D<int> lNorthEast(GetNorthEastUnitPos());
+	Vector2D<int> lSouthWestNeighbour(pNeighbour.GetSouthWestUnitPos());
+	Vector2D<int> lNorthEastNeighbour(pNeighbour.GetNorthEastUnitPos());
 
 	(this->*pAssertAlignment)(lSouthWest, lNorthEast, lSouthWestNeighbour, lNorthEastNeighbour);
 
@@ -782,7 +782,7 @@ void TerrainPatch::ProcessSharedEdge(TerrainPatch& pNeighbour,
 	}
 }
 
-void TerrainPatch::AssertNorthAlignment(const Lepra::Vector2D<int>&, const Lepra::Vector2D<int>& pNorthEast, const Lepra::Vector2D<int>& pSouthWestNeighbour,	const Lepra::Vector2D<int>&)
+void TerrainPatch::AssertNorthAlignment(const Vector2D<int>&, const Vector2D<int>& pNorthEast, const Vector2D<int>& pSouthWestNeighbour,	const Vector2D<int>&)
 {
 	// TODO: Implement a check along the x-axis!?
 	assert(pNorthEast.y == pSouthWestNeighbour.y);
@@ -790,7 +790,7 @@ void TerrainPatch::AssertNorthAlignment(const Lepra::Vector2D<int>&, const Lepra
 	pSouthWestNeighbour;
 }
 
-void TerrainPatch::AssertSouthAlignment(const Lepra::Vector2D<int>& pSouthWest, const Lepra::Vector2D<int>&, const Lepra::Vector2D<int>&, const Lepra::Vector2D<int>& pNorthEastNeighbour)
+void TerrainPatch::AssertSouthAlignment(const Vector2D<int>& pSouthWest, const Vector2D<int>&, const Vector2D<int>&, const Vector2D<int>& pNorthEastNeighbour)
 {
 	// TODO: Implement a check along the x-axis!?
 	assert(pSouthWest.y == pNorthEastNeighbour.y);
@@ -798,7 +798,7 @@ void TerrainPatch::AssertSouthAlignment(const Lepra::Vector2D<int>& pSouthWest, 
 	pNorthEastNeighbour;
 }
 
-void TerrainPatch::AssertEastAlignment(const Lepra::Vector2D<int>&, const Lepra::Vector2D<int>& pNorthEast, const Lepra::Vector2D<int>& pSouthWestNeighbour, const Lepra::Vector2D<int>&)
+void TerrainPatch::AssertEastAlignment(const Vector2D<int>&, const Vector2D<int>& pNorthEast, const Vector2D<int>& pSouthWestNeighbour, const Vector2D<int>&)
 {
 	// TODO: Implement a check along the y-axis!?
 	assert(pNorthEast.x == pSouthWestNeighbour.x);
@@ -806,7 +806,7 @@ void TerrainPatch::AssertEastAlignment(const Lepra::Vector2D<int>&, const Lepra:
 	pSouthWestNeighbour;
 }
 
-void TerrainPatch::AssertWestAlignment(const Lepra::Vector2D<int>& pSouthWest, const Lepra::Vector2D<int>&, const Lepra::Vector2D<int>&, const Lepra::Vector2D<int>& pNorthEastNeighbour)
+void TerrainPatch::AssertWestAlignment(const Vector2D<int>& pSouthWest, const Vector2D<int>&, const Vector2D<int>&, const Vector2D<int>& pNorthEastNeighbour)
 {
 	// TODO: Implement a check along the y-axis!?
 	assert(pSouthWest.x == pNorthEastNeighbour.x);
@@ -814,12 +814,12 @@ void TerrainPatch::AssertWestAlignment(const Lepra::Vector2D<int>& pSouthWest, c
 	pNorthEastNeighbour;
 }
 
-int TerrainPatch::GetHorizontalDisplacement(const Lepra::Vector2D<int>& pSouthWest, const Lepra::Vector2D<int>& pSouthWestNeighbour)
+int TerrainPatch::GetHorizontalDisplacement(const Vector2D<int>& pSouthWest, const Vector2D<int>& pSouthWestNeighbour)
 {
 	return (pSouthWestNeighbour.x - pSouthWest.x);
 }
 
-int TerrainPatch::GetVerticalDisplacement(const Lepra::Vector2D<int>& pSouthWest, const Lepra::Vector2D<int>& pSouthWestNeighbour)
+int TerrainPatch::GetVerticalDisplacement(const Vector2D<int>& pSouthWest, const Vector2D<int>& pSouthWestNeighbour)
 {
 	return (pSouthWestNeighbour.y - pSouthWest.y);
 }
@@ -833,7 +833,7 @@ void TerrainPatch::CopyElement(float* pDst, float* pSrc)
 
 void TerrainPatch::SetElementsToMean(float* pDst, float* pSrc)
 {
-	Lepra::Vector3DF lV((pDst[0] + pSrc[0]) * 0.5f,
+	Vector3DF lV((pDst[0] + pSrc[0]) * 0.5f,
 			     (pDst[1] + pSrc[1]) * 0.5f,
 			     (pDst[2] + pSrc[2]) * 0.5f);
 	lV.Normalize();
@@ -842,22 +842,22 @@ void TerrainPatch::SetElementsToMean(float* pDst, float* pSrc)
 	pDst[2] = pSrc[2] = lV.z;
 }
 
-Lepra::Vector2D<int> TerrainPatch::GetSouthWestUnitPos() const
+Vector2D<int> TerrainPatch::GetSouthWestUnitPos() const
 {
 	return mUnitPosition;
 }
 
-Lepra::Vector2D<int> TerrainPatch::GetNorthEastUnitPos() const
+Vector2D<int> TerrainPatch::GetNorthEastUnitPos() const
 {
-	return mUnitPosition + Lepra::Vector2D<int>(mSizeMultiplier, mSizeMultiplier);
+	return mUnitPosition + Vector2D<int>(mSizeMultiplier, mSizeMultiplier);
 }
 
-const Lepra::Vector2DF& TerrainPatch::GetSouthWest()
+const Vector2DF& TerrainPatch::GetSouthWest()
 {
 	return mSouthWestCorner;
 }
 
-const Lepra::Vector2DF& TerrainPatch::GetNorthEast()
+const Vector2DF& TerrainPatch::GetNorthEast()
 {
 	return mNorthEastCorner;
 }
@@ -867,7 +867,7 @@ bool TerrainPatch::GetEdgeFlagValue(unsigned int pEdgeFlag)
 	return CheckFlag(mHiResEdgeFlags, pEdgeFlag);
 }
 
-void TerrainPatch::GetPosAndNormal(float pNormalizedX, float pNormalizedY, Lepra::Vector3DF& pPos, Lepra::Vector3DF& pNormal) const
+void TerrainPatch::GetPosAndNormal(float pNormalizedX, float pNormalizedY, Vector3DF& pPos, Vector3DF& pNormal) const
 {
 	pNormalizedX; pNormalizedY; pPos; pNormal;
 }
@@ -926,12 +926,12 @@ float* TerrainPatch::GetUVData(unsigned int pUVSet) const
 	return lUVSet;
 }
 
-Lepra::uint32* TerrainPatch::GetIndexData() const
+uint32* TerrainPatch::GetIndexData() const
 {
 	return mIndexData;
 }
 
-Lepra::uint8* TerrainPatch::GetColorData() const
+uint8* TerrainPatch::GetColorData() const
 {
 	return 0;
 }

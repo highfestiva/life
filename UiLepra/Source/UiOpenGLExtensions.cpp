@@ -194,13 +194,13 @@ PFNGLGETSHADERSOURCEARBPROC            OpenGLExtensions::glGetShaderSourceARB   
 
 bool OpenGLExtensions::IsExtensionSupported(const char* pExtension)
 {
-	Lepra::AnsiString lExtension(pExtension);
-	Lepra::AnsiStringUtility::StripWhiteSpaces(lExtension);
+	astr lExtension(pExtension);
+	astrutil::StripWhiteSpaces(lExtension);
 
 	if (lExtension.length() == 0)
 		return false;
 
-	Lepra::AnsiString lGLExtensions((char*)glGetString(GL_EXTENSIONS));
+	astr lGLExtensions((char*)glGetString(GL_EXTENSIONS));
 	return (lGLExtensions.find(lExtension.c_str(), 0) >= 0);
 }
 

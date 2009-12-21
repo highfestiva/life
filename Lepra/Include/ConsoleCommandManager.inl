@@ -25,13 +25,13 @@ template<class _Base> ConsoleExecutor<_Base>::~ConsoleExecutor()
 
 
 
-template<class _Base> int ConsoleExecutor<_Base>::Execute(const String& pCommand, const StringUtility::StringVector& pParameterList)
+template<class _Base> int ConsoleExecutor<_Base>::Execute(const str& pCommand, const strutil::strvec& pParameterList)
 {
 	return ((mInstance->*mCommandListener)(pCommand, pParameterList));
 }
 
-template<class _Base> void ConsoleExecutor<_Base>::OnExecutionError(const String& pCommand,
-	const StringUtility::StringVector& pParameterList, int pResult)
+template<class _Base> void ConsoleExecutor<_Base>::OnExecutionError(const str& pCommand,
+	const strutil::strvec& pParameterList, int pResult)
 {
 	(mInstance->*(mCommandErrorListener))(pCommand, pParameterList, pResult);
 }

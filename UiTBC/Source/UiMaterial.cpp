@@ -70,7 +70,7 @@ int GeometryGroup::CalculateDepths(bool pF2B)
 {
 	mMeanDepth = 0.0f;
 
-	const Lepra::TransformationF& lCam = mParentMaterial->GetRenderer()->GetCameraTransformation();
+	const TransformationF& lCam = mParentMaterial->GetRenderer()->GetCameraTransformation();
 	int lInversionCount = 0;
 
 	// The first depth goes outside the loop...
@@ -110,7 +110,7 @@ void GeometryGroup::F2BSortGroup()
 		return;
 	}
 
-	if (mGeometryCount < 4 || lInversionCount < Lepra::Math::Log2(mGeometryCount))
+	if (mGeometryCount < 4 || lInversionCount < Math::Log2(mGeometryCount))
 	{
 		// Bubble sorting is faster for almost sorted lists.
 		BubbleSort(F2BCompare);
@@ -131,7 +131,7 @@ void GeometryGroup::B2FSortGroup()
 		return;
 	}
 
-	if (mGeometryCount < 4 || lInversionCount < Lepra::Math::Log2(mGeometryCount))
+	if (mGeometryCount < 4 || lInversionCount < Math::Log2(mGeometryCount))
 	{
 		// Bubble sorting is faster for almost sorted lists.
 		BubbleSort(B2FCompare);

@@ -10,7 +10,7 @@
 	B-splines. 
 	
 	All that is required of the template argument is that it can be
-	linearily interpolated using Lepra::Math::Lerp().
+	linearily interpolated using Math::Lerp().
 
 	Due to the nature of the algorithm, no values can be sampled from the 
 	extreme endpoints of the spline. To avoid this problem the array of

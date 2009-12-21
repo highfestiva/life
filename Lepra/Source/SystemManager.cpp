@@ -19,28 +19,28 @@ namespace Lepra
 
 std::string SystemManager::GetRandomId()
 {
-	String s;
+	str s;
 	s += GetLoginName();
 	s += GetUniqueHardwareString();
-	s += StringUtility::IntToString(Random::GetRandomNumber64(), 16);
-	s += StringUtility::IntToString(GetCpuTick(), 16);
-	s += StringUtility::IntToString(GetAvailRam(), 16);
-	s += StringUtility::IntToString(GetAvailVirtualMemory(), 16);
-	Lepra::uint8 lHashData[20];
-	Lepra::SHA1::Hash((const Lepra::uint8*)s.c_str(), s.length()*sizeof(Lepra::tchar), lHashData);
+	s += strutil::IntToString(Random::GetRandomNumber64(), 16);
+	s += strutil::IntToString(GetCpuTick(), 16);
+	s += strutil::IntToString(GetAvailRam(), 16);
+	s += strutil::IntToString(GetAvailVirtualMemory(), 16);
+	uint8 lHashData[20];
+	SHA1::Hash((const uint8*)s.c_str(), s.length()*sizeof(tchar), lHashData);
 	return (std::string((const char*)lHashData, sizeof(lHashData)));
 }
 
-String SystemManager::GetUniqueHardwareString()
+str SystemManager::GetUniqueHardwareString()
 {
-	String s;
-	s += StringUtility::IntToString(QueryCpuFrequency(), 16);
-	s += StringUtility::IntToString(GetLogicalCpuCount(), 16);
-	s += StringUtility::IntToString(GetPhysicalCpuCount(), 16);
-	s += StringUtility::IntToString(GetCoreCount(), 16);
+	str s;
+	s += strutil::IntToString(QueryCpuFrequency(), 16);
+	s += strutil::IntToString(GetLogicalCpuCount(), 16);
+	s += strutil::IntToString(GetPhysicalCpuCount(), 16);
+	s += strutil::IntToString(GetCoreCount(), 16);
 	s += GetOsName();
-	s += StringUtility::IntToString(GetAmountRam(), 16);
-	s += StringUtility::IntToString(GetAmountVirtualMemory(), 16);
+	s += strutil::IntToString(GetAmountRam(), 16);
+	s += strutil::IntToString(GetAmountVirtualMemory(), 16);
 	return (s);
 }
 

@@ -52,7 +52,7 @@ public:
 	void ResetPhysicsTime(int pStartPhysicsFrame);
 	virtual bool BeginTick();
 	virtual bool EndTick();
-	Lepra::Lock* GetTickLock() const;
+	Lock* GetTickLock() const;
 
 	RuntimeVariableScope* GetVariableScope() const;
 	ResourceManager* GetResourceManager() const;
@@ -61,10 +61,11 @@ public:
 	TBC::PhysicsManager* GetPhysicsManager() const;
 	ConsoleManager* GetConsoleManager() const;
 
-	ContextObject* CreateContextObject(const Lepra::String& pClassId, NetworkObjectType pNetworkType,
+	ContextObject* CreateContextObject(const str& pClassId, NetworkObjectType pNetworkType,
 		GameObjectId pInstanceId = 0);
+	virtual bool IsUiMoveForbidden(GameObjectId pObjectId) const;
 	virtual void OnLoadCompleted(ContextObject* pObject, bool pOk) = 0;
-	virtual void OnCollision(const Lepra::Vector3DF& pForce, const Lepra::Vector3DF& pTorque,
+	virtual void OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque,
 		ContextObject* pObject1, ContextObject* pObject2) = 0;
 	virtual void OnStopped(ContextObject* pObject, TBC::PhysicsManager::BodyID pBodyId) = 0;
 	virtual bool OnPhysicsSend(ContextObject* pObject) = 0;
@@ -85,16 +86,16 @@ protected:
 	virtual void TickInput() = 0;
 	virtual bool TickNetworkOutput();
 
-	virtual ContextObject* CreateContextObject(const Lepra::String& pClassId) const = 0;
+	virtual ContextObject* CreateContextObject(const str& pClassId) const = 0;
 
-	void ReportPerformance(const Lepra::ScopePerformanceData::NodeArray& pNodes, int pRecursion);
+	void ReportPerformance(const ScopePerformanceData::NodeArray& pNodes, int pRecursion);
 
 	void StartPhysicsTick();
 	void WaitPhysicsTick();
 
 	virtual void PhysicsTick();
-	bool IsHighImpact(float pScaleFactor, const ContextObject* pObject, const Lepra::Vector3DF& pForce,
-		const Lepra::Vector3DF& pTorque) const;
+	bool IsHighImpact(float pScaleFactor, const ContextObject* pObject, const Vector3DF& pForce,
+		const Vector3DF& pTorque) const;
 
 	bool IsThreadSafe() const;
 
@@ -108,7 +109,7 @@ private:
 	void CreatePhysicsThread();
 	void DeletePhysicsThread();
 
-	mutable Lepra::Lock mLock;
+	mutable Lock mLock;
 	volatile bool mIsThreadSafe;
 
 	RuntimeVariableScope* mVariableScope;
@@ -119,13 +120,13 @@ private:
 	ContextManager* mContext;
 	TerrainManager* mTerrain;
 	ConsoleManager* mConsole;
-	Lepra::MemberThread<GameManager>* mPhysicsWorkerThread;
-	Lepra::Semaphore* mPhysicsTickStartSemaphore;
-	Lepra::Semaphore* mPhysicsTickDoneSemaphore;
+	MemberThread<GameManager>* mPhysicsWorkerThread;
+	Semaphore* mPhysicsTickStartSemaphore;
+	Semaphore* mPhysicsTickDoneSemaphore;
 
-	Lepra::Timer mPerformanceReportTimer;
-	Lepra::SequencialPerformanceData<Lepra::uint64> mSendBandwidth;
-	Lepra::SequencialPerformanceData<Lepra::uint64> mReceiveBandwidth;
+	Timer mPerformanceReportTimer;
+	SequencialPerformanceData<uint64> mSendBandwidth;
+	SequencialPerformanceData<uint64> mReceiveBandwidth;
 
 	LOG_CLASS_DECLARE();
 };

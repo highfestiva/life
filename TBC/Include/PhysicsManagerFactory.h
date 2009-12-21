@@ -11,6 +11,7 @@
 #pragma once
 
 #include "../../Lepra/Include/Log.h"
+#include "../Include/TBC.h"
 
 
 

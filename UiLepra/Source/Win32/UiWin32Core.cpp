@@ -36,7 +36,7 @@ void Core::ProcessMessages()
 
 void Win32Core::Init()
 {
-	mLock = new Lepra::Lock();
+	mLock = new Lock();
 }
 
 void Win32Core::Shutdown()
@@ -52,7 +52,7 @@ HINSTANCE Win32Core::GetAppInstance()
 
 void Win32Core::ProcessMessages()
 {
-	Lepra::ScopeLock lLock(mLock);
+	ScopeLock lLock(mLock);
 	for (WindowTable::Iterator x = mWindowTable.First(); x != mWindowTable.End(); ++x)
 	{
 		Win32DisplayManager* lDisplayManager = x.GetObject();
@@ -62,25 +62,25 @@ void Win32Core::ProcessMessages()
 
 void Win32Core::AddDisplayManager(Win32DisplayManager* pDisplayManager)
 {
-	Lepra::ScopeLock lLock(mLock);
+	ScopeLock lLock(mLock);
 	mWindowTable.Insert(pDisplayManager->GetHWND(), pDisplayManager);
 }
 
 void Win32Core::RemoveDisplayManager(Win32DisplayManager* pDisplayManager)
 {
-	Lepra::ScopeLock lLock(mLock);
+	ScopeLock lLock(mLock);
 	mWindowTable.Remove(pDisplayManager->GetHWND());
 }
 
 Win32DisplayManager* Win32Core::GetDisplayManager(HWND pWindowHandle)
 {
-	Lepra::ScopeLock lLock(mLock);
+	ScopeLock lLock(mLock);
 	return (mWindowTable.FindObject(pWindowHandle));
 }
 
 
 
-Lepra::Lock* Win32Core::mLock = 0;
+Lock* Win32Core::mLock = 0;
 Win32Core::WindowTable Win32Core::mWindowTable;
 
 

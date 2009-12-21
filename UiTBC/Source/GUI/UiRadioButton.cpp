@@ -17,7 +17,7 @@ Painter::ImageID RadioButton::smRadioButtonDark1ID  = Painter::INVALID_IMAGEID;
 Painter::ImageID RadioButton::smRadioButtonDark2ID  = Painter::INVALID_IMAGEID;
 Painter* RadioButton::smPrevPainter = 0;
 
-const Lepra::uint8 RadioButton::smIconRadioCheck[] =
+const uint8 RadioButton::smIconRadioCheck[] =
 {
 	0  , 255, 255, 0  ,
 	255, 255, 255, 255,
@@ -31,7 +31,7 @@ const Lepra::uint8 RadioButton::smIconRadioCheck[] =
 	of each part. They will be combined into one picture.
 */
 
-const Lepra::uint8 RadioButton::smRadioButtonInner[] =
+const uint8 RadioButton::smRadioButtonInner[] =
 {   0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 
     0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 
     0  , 0  , 0  , 0  , 255, 255, 255, 255, 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 
@@ -50,7 +50,7 @@ const Lepra::uint8 RadioButton::smRadioButtonInner[] =
     0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 
 };
 
-const Lepra::uint8 RadioButton::smRadioButtonLight1Col[] =
+const uint8 RadioButton::smRadioButtonLight1Col[] =
 {   0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 
     0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 
     0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 
@@ -69,7 +69,7 @@ const Lepra::uint8 RadioButton::smRadioButtonLight1Col[] =
     0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 
 };
 
-const Lepra::uint8 RadioButton::smRadioButtonLight2Col[] =
+const uint8 RadioButton::smRadioButtonLight2Col[] =
 {   0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 
     0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 
     0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 255, 0  , 0  , 0  , 0  , 0  , 
@@ -88,7 +88,7 @@ const Lepra::uint8 RadioButton::smRadioButtonLight2Col[] =
     0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 
 };
 
-const Lepra::uint8 RadioButton::smRadioButtonDark1Col[] =
+const uint8 RadioButton::smRadioButtonDark1Col[] =
 {   0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 
     0  , 0  , 0  , 0  , 255, 255, 255, 255, 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 
     0  , 0  , 255, 255, 0  , 0  , 0  , 0  , 255, 255, 0  , 0  , 0  , 0  , 0  , 0  , 
@@ -107,7 +107,7 @@ const Lepra::uint8 RadioButton::smRadioButtonDark1Col[] =
     0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 
 };
 
-const Lepra::uint8 RadioButton::smRadioButtonDark2Col[] =
+const uint8 RadioButton::smRadioButtonDark2Col[] =
 {   0  , 0  , 0  , 0  , 255, 255, 255, 255, 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 
     0  , 0  , 255, 255, 0  , 0  , 0  , 0  , 255, 255, 0  , 0  , 0  , 0  , 0  , 0  , 
     0  , 255, 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 
@@ -127,12 +127,12 @@ const Lepra::uint8 RadioButton::smRadioButtonDark2Col[] =
 };
 
 
-RadioButton::RadioButton(const Lepra::Color& pBodyColor, const Lepra::String& pName):
+RadioButton::RadioButton(const Color& pBodyColor, const str& pName):
 	Button(pName),
 	mUserDefinedGfx(false),
 	mUpdateSize(true),
 	mBodyColor(pBodyColor),
-	mLightColor(pBodyColor + Lepra::Color(255 - pBodyColor.mRed, 255 - pBodyColor.mGreen, 255 - pBodyColor.mBlue) / 2 + 8),
+	mLightColor(pBodyColor + Color(255 - pBodyColor.mRed, 255 - pBodyColor.mGreen, 255 - pBodyColor.mBlue) / 2 + 8),
 	mDarkColor1(pBodyColor / 3),
 	mDarkColor2(pBodyColor * (2.0f / 3.0f)),
 	mReleasedID(Painter::INVALID_IMAGEID),
@@ -148,7 +148,7 @@ RadioButton::RadioButton(Painter::ImageID pReleasedImageID,
 			 Painter::ImageID pPressedActiveImageID,
 			 Painter::ImageID pReleasingImageID,
 			 Painter::ImageID pPressingImageID,
-			 const Lepra::String& pName) :
+			 const str& pName) :
 	Button(pName),
 	mUserDefinedGfx(true),
 	mUpdateSize(true),
@@ -177,7 +177,7 @@ void RadioButton::Repaint(Painter* pPainter)
 
 	if (mUpdateSize == true)
 	{
-		Lepra::PixelCoords lRect(0, 0);
+		PixelCoords lRect(0, 0);
 
 		if (mUserDefinedGfx == true)
 		{
@@ -225,7 +225,7 @@ void RadioButton::Repaint(Painter* pPainter)
 	Window::Repaint(pPainter);
 
 	pPainter->PushAttrib(Painter::ATTR_ALL);
-	Lepra::PixelRect lRect(Window::GetClientRect());
+	PixelRect lRect(Window::GetClientRect());
 	pPainter->ReduceClippingRect(lRect);
 
 	pPainter->SetRenderMode(Painter::RM_NORMAL);
@@ -258,7 +258,7 @@ void RadioButton::Repaint(Painter* pPainter)
 
 		if (lImageID != Painter::INVALID_IMAGEID)
 		{
-			Lepra::PixelCoords lImageSize(lIMan->GetImageSize(lImageID));
+			PixelCoords lImageSize(lIMan->GetImageSize(lImageID));
 			lIMan->DrawImage(lImageID, 
 					   lRect.mLeft, 
 					   lRect.mTop + (lRect.GetHeight() - lImageSize.y) / 2);
@@ -277,14 +277,14 @@ void RadioButton::Repaint(Painter* pPainter)
 		AddImageToPainter(smRadioButtonDark1ID, smRadioButtonDark1Col, 16, pPainter);
 		AddImageToPainter(smRadioButtonDark2ID, smRadioButtonDark2Col, 16, pPainter);
 
-		Lepra::Color lBody(255, 255, 255);
+		Color lBody(255, 255, 255);
 
 		if (GetState() == RELEASING || GetState() == PRESSING)
 		{
 			lBody = mBodyColor;
 		}
 
-		Lepra::PixelCoords lButtonPos(lRect.mLeft, lRect.mTop + (lRect.GetHeight() - lButtonWidth) / 2);
+		PixelCoords lButtonPos(lRect.mLeft, lRect.mTop + (lRect.GetHeight() - lButtonWidth) / 2);
 
 		pPainter->SetColor(lBody);
 		pPainter->DrawAlphaImage(smRadioButtonInnerID, lButtonPos);
@@ -304,7 +304,7 @@ void RadioButton::Repaint(Painter* pPainter)
 		if (GetPressed() == true)
 		{
 			pPainter->SetRenderMode(Painter::RM_ALPHATEST);
-			pPainter->SetColor(Lepra::Color(0, 0, 0));
+			pPainter->SetColor(Color(0, 0, 0));
 			pPainter->DrawAlphaImage(smIconRadioCheckID,
 						   lButtonPos.x + 4,
 						   lButtonPos.y + 4);
@@ -316,7 +316,7 @@ void RadioButton::Repaint(Painter* pPainter)
 	pPainter->PopAttrib();
 }
 
-void RadioButton::AddImageToPainter(Painter::ImageID& pImageID, const Lepra::uint8 pImage[], int pDim, Painter* pPainter)
+void RadioButton::AddImageToPainter(Painter::ImageID& pImageID, const uint8 pImage[], int pDim, Painter* pPainter)
 {
 	if (smPrevPainter != pPainter)
 	{
@@ -333,7 +333,7 @@ void RadioButton::AddImageToPainter(Painter::ImageID& pImageID, const Lepra::uin
 
 	if (pImageID == Painter::INVALID_IMAGEID)
 	{
-		Lepra::Canvas lCanvas(pDim, pDim, Lepra::Canvas::BITDEPTH_8_BIT);
+		Canvas lCanvas(pDim, pDim, Canvas::BITDEPTH_8_BIT);
 		lCanvas.SetBuffer((void*)pImage);
 		pImageID = pPainter->AddImage(&lCanvas, &lCanvas);
 	}

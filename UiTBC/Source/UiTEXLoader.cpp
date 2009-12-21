@@ -1,28 +1,31 @@
-/*
-	Lepra::File:   TEXLoader.cpp
-	Class:  TEXLoader
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2009, Righteous Games
-*/
 
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2009, Righteous Games
+
+
+
+#define INT32 a_workaround_that_undefines_INT32_typedef
+#define LEPRA_INCLUDE_NO_OS
+#include "../Include/UiTEXLoader.h"
 #include "../../ThirdParty/jpeg-6b/jinclude.h"
 #include "../../ThirdParty/jpeg-6b/jpeglib.h"
 #include "../../ThirdParty/jpeg-6b/jerror.h"
-#define INT32 a_workaround_that_undefines_INT32_typedef
-#define LEPRA_INCLUDE_NO_OS
 #include "../../Lepra/Include/ArchiveFile.h"
 #include "../../Lepra/Include/Canvas.h"
 #include "../../Lepra/Include/DiskFile.h"
 #include "../../Lepra/Include/MetaFile.h"
 #include "../../Lepra/Include/Graphics2D.h"
-#include "../Include/UiTEXLoader.h"
 #include "../Include/UiTexture.h"
 #include "../Include/UiTBC.h"
 #undef LEPRA_INCLUDE_NO_OS
 #undef INT32
 
+
+
 namespace UiTbc
 {
+
+
 
 enum
 {
@@ -38,11 +41,11 @@ enum
 class TEXFriend
 {
 public:
-	static inline Lepra::File* GetLoadFile(TEXLoader* pTEXLoader)
+	static inline File* GetLoadFile(TEXLoader* pTEXLoader)
 	{
 		return pTEXLoader->mLoadFile;
 	}
-	static inline Lepra::File* GetSaveFile(TEXLoader* pTEXLoader)
+	static inline File* GetSaveFile(TEXLoader* pTEXLoader)
 	{
 		return pTEXLoader->mSaveFile;
 	}
@@ -142,12 +145,12 @@ boolean TEXFillInputBuffer(j_decompress_ptr pCInfo)
 {
 	SourceManager* lSrc = (SourceManager*)pCInfo->src;
 
-	Lepra::File* lFile = TEXFriend::GetLoadFile(lSrc->mTEXLoader);
+	File* lFile = TEXFriend::GetLoadFile(lSrc->mTEXLoader);
 
-	Lepra::uint64 lPrevPos = lFile->Tell();
+	uint64 lPrevPos = lFile->Tell();
 	/* TODO: use assigned variable!
-	Lepra::IOError lErr = */ lFile->ReadData(lSrc->mIOBuffer, IO_BUFFER_SIZE);
-	Lepra::uint64 lNewPos = lFile->Tell();
+	IOError lErr = */ lFile->ReadData(lSrc->mIOBuffer, IO_BUFFER_SIZE);
+	uint64 lNewPos = lFile->Tell();
 	int lNumBytes = (int)(lNewPos - lPrevPos);
 
 	if (lNumBytes == 0)
@@ -238,7 +241,7 @@ void TEXTerminateDestination(j_compress_ptr pCInfo)
 	delete lDest;
 }
 
-TEXLoader::Status TEXLoader::ReadJpeg(Lepra::Canvas& pCanvas)
+TEXLoader::Status TEXLoader::ReadJpeg(Canvas& pCanvas)
 {
 	unsigned lSize;
 	mLoadFile->Read(lSize);
@@ -266,7 +269,7 @@ TEXLoader::Status TEXLoader::ReadJpeg(Lepra::Canvas& pCanvas)
 	if (lCInfo.output_components == 1)
 	{
 		// Create grayscale palette.
-		Lepra::Color lPalette[256];
+		Color lPalette[256];
 		for (int i = 0; i < 256; i++)
 		{
 			lPalette[i].Set(i, i, i, i);
@@ -274,7 +277,7 @@ TEXLoader::Status TEXLoader::ReadJpeg(Lepra::Canvas& pCanvas)
 		pCanvas.SetPalette(lPalette);
 	}
 
-	Lepra::uint8* lBuffer = (Lepra::uint8*)pCanvas.GetBuffer();
+	uint8* lBuffer = (uint8*)pCanvas.GetBuffer();
 	int lRowStride = pCanvas.GetPitch() * pCanvas.GetPixelByteSize();
 	int lScanLines = pCanvas.GetHeight();
 
@@ -295,7 +298,7 @@ TEXLoader::Status TEXLoader::ReadJpeg(Lepra::Canvas& pCanvas)
 	return STATUS_SUCCESS;
 }
 
-TEXLoader::Status TEXLoader::WriteJpeg(const Lepra::Canvas& pCanvas)
+TEXLoader::Status TEXLoader::WriteJpeg(const Canvas& pCanvas)
 {
 	int lSizeOffset = (int)mSaveFile->Tell();
 	unsigned lSize = 0;
@@ -312,7 +315,7 @@ TEXLoader::Status TEXLoader::WriteJpeg(const Lepra::Canvas& pCanvas)
 	lCInfo.image_width = pCanvas.GetWidth();
 	lCInfo.image_height = pCanvas.GetHeight();
 
-	if (pCanvas.GetBitDepth() == Lepra::Canvas::BITDEPTH_8_BIT)
+	if (pCanvas.GetBitDepth() == Canvas::BITDEPTH_8_BIT)
 	{
 		lCInfo.input_components = 1;
 		lCInfo.in_color_space = JCS_GRAYSCALE;
@@ -325,17 +328,17 @@ TEXLoader::Status TEXLoader::WriteJpeg(const Lepra::Canvas& pCanvas)
 
 	// If the image is in 8-bit mode, it is considered to be a grayscale image.
 	// Otherwise, we must make sure that the image is in 24-bit RGB mode.
-	Lepra::Canvas lCopy(pCanvas, true);
-	if (lCopy.GetBitDepth() != Lepra::Canvas::BITDEPTH_24_BIT &&
-	   lCopy.GetBitDepth() != Lepra::Canvas::BITDEPTH_8_BIT)
+	Canvas lCopy(pCanvas, true);
+	if (lCopy.GetBitDepth() != Canvas::BITDEPTH_24_BIT &&
+	   lCopy.GetBitDepth() != Canvas::BITDEPTH_8_BIT)
 	{
-		lCopy.ConvertBitDepth(Lepra::Canvas::BITDEPTH_24_BIT);
+		lCopy.ConvertBitDepth(Canvas::BITDEPTH_24_BIT);
 	}
 
 	jpeg_set_defaults(&lCInfo);
 	jpeg_start_compress(&lCInfo, TRUE);
 
-	Lepra::uint8* lBuffer = (Lepra::uint8*)lCopy.GetBuffer();
+	uint8* lBuffer = (uint8*)lCopy.GetBuffer();
 	int lRowStride = lCopy.GetPitch() * lCopy.GetPixelByteSize();
 	int lScanLines = lCopy.GetHeight();
 
@@ -363,13 +366,13 @@ TEXLoader::Status TEXLoader::WriteJpeg(const Lepra::Canvas& pCanvas)
 	return STATUS_SUCCESS;
 }
 
-TEXLoader::Status TEXLoader::Load(const Lepra::String& pFileName, Texture& pTexture, bool pMergeColorAndAlpha)
+TEXLoader::Status TEXLoader::Load(const str& pFileName, Texture& pTexture, bool pMergeColorAndAlpha)
 {
 	Status lStatus = STATUS_SUCCESS;
-	Lepra::MetaFile lFile;
+	MetaFile lFile;
 	mLoadFile = &lFile;
 
-	if (lFile.Open(pFileName, Lepra::MetaFile::READ_ONLY) == false)
+	if (lFile.Open(pFileName, MetaFile::READ_ONLY) == false)
 	{
 		lStatus = STATUS_OPEN_ERROR;
 	}
@@ -382,13 +385,13 @@ TEXLoader::Status TEXLoader::Load(const Lepra::String& pFileName, Texture& pText
 	return lStatus;
 }
 
-TEXLoader::Status TEXLoader::Save(const Lepra::String& pFileName, const Texture& pTexture, bool pCompressed)
+TEXLoader::Status TEXLoader::Save(const str& pFileName, const Texture& pTexture, bool pCompressed)
 {
 	Status lStatus = STATUS_SUCCESS;
-	Lepra::DiskFile lFile;
+	DiskFile lFile;
 	mSaveFile = &lFile;
 
-	if (lFile.Open(pFileName, Lepra::DiskFile::MODE_WRITE) == false)
+	if (lFile.Open(pFileName, DiskFile::MODE_WRITE) == false)
 	{
 		lStatus = STATUS_OPEN_ERROR;
 	}
@@ -401,13 +404,13 @@ TEXLoader::Status TEXLoader::Save(const Lepra::String& pFileName, const Texture&
 	return lStatus;
 }
 
-TEXLoader::Status TEXLoader::Load(const Lepra::String& pArchiveName, const Lepra::String& pFileName, Texture& pTexture, bool pMergeColorAndAlpha)
+TEXLoader::Status TEXLoader::Load(const str& pArchiveName, const str& pFileName, Texture& pTexture, bool pMergeColorAndAlpha)
 {
 	Status lStatus = STATUS_SUCCESS;
-	Lepra::ArchiveFile lFile(pArchiveName);
+	ArchiveFile lFile(pArchiveName);
 	mLoadFile = &lFile;
 
-	if (lFile.Open(pFileName, Lepra::ArchiveFile::READ_ONLY) == false)
+	if (lFile.Open(pFileName, ArchiveFile::READ_ONLY) == false)
 	{
 		lStatus = STATUS_OPEN_ERROR;
 	}
@@ -420,13 +423,13 @@ TEXLoader::Status TEXLoader::Load(const Lepra::String& pArchiveName, const Lepra
 	return lStatus;
 }
 
-TEXLoader::Status TEXLoader::Save(const Lepra::String& pArchiveName, const Lepra::String& pFileName, const Texture& pTexture, bool pCompressed)
+TEXLoader::Status TEXLoader::Save(const str& pArchiveName, const str& pFileName, const Texture& pTexture, bool pCompressed)
 {
 	Status lStatus = STATUS_SUCCESS;
-	Lepra::ArchiveFile lFile(pArchiveName);
+	ArchiveFile lFile(pArchiveName);
 	mSaveFile = &lFile;
 
-	if (lFile.Open(pFileName, Lepra::ArchiveFile::WRITE_ONLY) == false)
+	if (lFile.Open(pFileName, ArchiveFile::WRITE_ONLY) == false)
 	{
 		lStatus = STATUS_OPEN_ERROR;
 	}
@@ -644,7 +647,7 @@ TEXLoader::Status TEXLoader::Save(const Texture& pTexture, bool pCompressed)
 
 	lFileHeader.mVersion = 1;
 	lFileHeader.mDataOffset = 16; // Size of file header.
-	lFileHeader.mDimensionPowers = (Lepra::uint8)((lLog2Height << 4) | lLog2Width);
+	lFileHeader.mDimensionPowers = (uint8)((lLog2Height << 4) | lLog2Width);
 
 	lFileHeader.mCompressionFlag = pCompressed == true ? 1 : 0;
 	lFileHeader.mMapFlags = 0;
@@ -652,7 +655,7 @@ TEXLoader::Status TEXLoader::Save(const Texture& pTexture, bool pCompressed)
 	if (pTexture.IsCubeMap() == false)
 	{
 		if (pTexture.GetAlphaMap(0) != 0 || 
-		   pTexture.GetColorMap(0)->GetBitDepth() == Lepra::Canvas::BITDEPTH_32_BIT)
+		   pTexture.GetColorMap(0)->GetBitDepth() == Canvas::BITDEPTH_32_BIT)
 			lFileHeader.mMapFlags |= ALPHA_MAP;
 		if (pTexture.GetNormalMap(0) != 0)
 			lFileHeader.mMapFlags |= NORMAL_MAP;
@@ -679,10 +682,10 @@ TEXLoader::Status TEXLoader::Save(const Texture& pTexture, bool pCompressed)
 		int i;
 		for (i = 0; i < lNumLevels; i++)
 		{
-			if (pTexture.GetColorMap(i)->GetBitDepth() != Lepra::Canvas::BITDEPTH_24_BIT)
+			if (pTexture.GetColorMap(i)->GetBitDepth() != Canvas::BITDEPTH_24_BIT)
 			{
-				Lepra::Canvas lTemp(*pTexture.GetColorMap(i), true);
-				lTemp.ConvertBitDepth(Lepra::Canvas::BITDEPTH_24_BIT);
+				Canvas lTemp(*pTexture.GetColorMap(i), true);
+				lTemp.ConvertBitDepth(Canvas::BITDEPTH_24_BIT);
 
 				if (i < (lNumLevels - 2) && pCompressed == true)
 					WriteJpeg(lTemp);
@@ -708,11 +711,11 @@ TEXLoader::Status TEXLoader::Save(const Texture& pTexture, bool pCompressed)
 					mSaveFile->WriteData(pTexture.GetAlphaMap(i)->GetBuffer(), pTexture.GetAlphaMap(i)->GetBufferByteSize());
 			}
 		}
-		else if(pTexture.GetColorMap(0)->GetBitDepth() == Lepra::Canvas::BITDEPTH_32_BIT)
+		else if(pTexture.GetColorMap(0)->GetBitDepth() == Canvas::BITDEPTH_32_BIT)
 		{
 			for (i = 0; i < pTexture.GetNumMipMapLevels(); i++)
 			{
-				Lepra::Canvas lAlphaMap;
+				Canvas lAlphaMap;
 				pTexture.GetColorMap(i)->GetAlphaChannel(lAlphaMap);
 
 				if (i < (lNumLevels - 2) && pCompressed == true)
@@ -801,4 +804,6 @@ TEXLoader::Status TEXLoader::Save(const Texture& pTexture, bool pCompressed)
 	return STATUS_SUCCESS;
 }
 
-} // End namespace.
+
+
+}

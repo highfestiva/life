@@ -127,7 +127,7 @@ public:
 	// (Only the nodes, not the objects).
 	unsigned GetFullTreeMemSize() const;
 
-	String ToString() const;
+	str ToString() const;
 	void GetNodeBoxes(AABBList& pBoxes) const;
 
 private:

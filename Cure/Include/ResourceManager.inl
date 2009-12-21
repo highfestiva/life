@@ -27,7 +27,7 @@ UserTypeResourceBase<UserResourceType, ResourceType>::~UserTypeResourceBase()
 
 template<class UserResourceType, class ResourceType>
 void UserTypeResourceBase<UserResourceType, ResourceType>::Load(
-	ResourceManager* pResourceManager, const Lepra::String& pName, TypeLoadCallback pCallback)
+	ResourceManager* pResourceManager, const str& pName, TypeLoadCallback pCallback)
 {
 	// JB-TRICKY: this is what I gather that it takes to cast a callback parameter.
 	//            The memento contains the "this" and "method" pointers...
@@ -38,7 +38,7 @@ void UserTypeResourceBase<UserResourceType, ResourceType>::Load(
 
 template<class UserResourceType, class ResourceType>
 void UserTypeResourceBase<UserResourceType, ResourceType>::LoadUnique(
-	ResourceManager* pResourceManager, const Lepra::String& pName, TypeLoadCallback pCallback)
+	ResourceManager* pResourceManager, const str& pName, TypeLoadCallback pCallback)
 {
 	// JB-TRICKY: this is what I gather that it takes to cast a callback parameter.
 	//            The memento contains the "this" and "method" pointers...
@@ -77,7 +77,7 @@ UserTypeResource<ResourceType>::~UserTypeResource()
 }
 
 template<class ResourceType>
-Resource* UserTypeResource<ResourceType>::CreateResource(ResourceManager* pManager, const Lepra::String& pName) const
+Resource* UserTypeResource<ResourceType>::CreateResource(ResourceManager* pManager, const str& pName) const
 {
 	return (new ResourceType(pManager, pName));
 }
@@ -100,7 +100,7 @@ UserExtraTypeResource<ResourceType, SubtypeExtraType>::~UserExtraTypeResource()
 }
 
 template<class ResourceType, class SubtypeExtraType>
-Resource* UserExtraTypeResource<ResourceType, SubtypeExtraType>::CreateResource(ResourceManager* pManager, const Lepra::String& pName) const
+Resource* UserExtraTypeResource<ResourceType, SubtypeExtraType>::CreateResource(ResourceManager* pManager, const str& pName) const
 {
 	return (new ResourceType(pManager, pName, GetExtraData()));
 }
@@ -136,7 +136,7 @@ void RamResource<RamData>::SetRamDataType(RamData pData)
 }
 
 template<class RamData>
-RamResource<RamData>::RamResource(ResourceManager* pManager, const Lepra::String& pName):
+RamResource<RamData>::RamResource(ResourceManager* pManager, const str& pName):
 	Resource(pManager, pName),
 	mRamData((RamData)0)
 {
@@ -162,7 +162,7 @@ void RamResource<RamData>::SetRamData(RamData pData)
 
 template<class RamData, class OptimizedData>
 OptimizedResource<RamData, OptimizedData>::OptimizedResource(
-	ResourceManager* pManager, const Lepra::String& pName):
+	ResourceManager* pManager, const str& pName):
 	RamResource<RamData>(pManager, pName),
 	mOptimizedData((OptimizedData)0)
 {
@@ -187,7 +187,7 @@ void OptimizedResource<RamData, OptimizedData>::SetOptimizedData(OptimizedData p
 
 
 template<class RamData, class DiversifiedData>
-DiversifiedResource<RamData, DiversifiedData>::DiversifiedResource(ResourceManager* pManager, const Lepra::String& pName):
+DiversifiedResource<RamData, DiversifiedData>::DiversifiedResource(ResourceManager* pManager, const str& pName):
 	RamResource<RamData>(pManager, pName)
 {
 }
@@ -236,7 +236,7 @@ void DiversifiedResource<RamData, DiversifiedData>::FreeDiversified(UserResource
 
 
 template<class _Class, class _ClassLoader>
-ClassResourceBase<_Class, _ClassLoader>::ClassResourceBase(Cure::ResourceManager* pManager, const Lepra::String& pName):
+ClassResourceBase<_Class, _ClassLoader>::ClassResourceBase(Cure::ResourceManager* pManager, const str& pName):
 	Parent(pManager, pName)
 {
 }
@@ -247,7 +247,7 @@ ClassResourceBase<_Class, _ClassLoader>::~ClassResourceBase()
 }
 
 template<class _Class, class _ClassLoader>
-const Lepra::String ClassResourceBase<_Class, _ClassLoader>::GetType() const
+const str ClassResourceBase<_Class, _ClassLoader>::GetType() const
 {
 	return (_T("Class"));
 }
@@ -263,8 +263,8 @@ bool ClassResourceBase<_Class, _ClassLoader>::Load()
 {
 	assert(Parent::GetRamData() == 0);
 	SetRamData(new _Class());
-	Lepra::DiskFile lFile;
-	bool lOk = lFile.Open(Parent::GetName(), Lepra::DiskFile::MODE_READ);
+	DiskFile lFile;
+	bool lOk = lFile.Open(Parent::GetName(), DiskFile::MODE_READ);
 	if (lOk)
 	{
 		_ClassLoader lLoader(&lFile, false);

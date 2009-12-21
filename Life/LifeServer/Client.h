@@ -7,6 +7,7 @@
 #pragma once
 
 #include "../../Cure/Include/Cure.h"
+#include "../Life.h"
 
 
 

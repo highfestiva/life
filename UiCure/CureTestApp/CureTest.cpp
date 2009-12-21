@@ -18,36 +18,34 @@
 
 
 class CureTest{};
-static Lepra::LogDecorator gCLog(Lepra::LogType::GetLog(Lepra::LogType::SUB_TEST), typeid(CureTest));
-void ReportTestResult(const Lepra::LogDecorator& pLog, const Lepra::String& pTestName, const Lepra::String& pContext, bool pbResult);
+static LogDecorator gCLog(LogType::GetLog(LogType::SUB_TEST), typeid(CureTest));
+void ReportTestResult(const LogDecorator& pLog, const str& pTestName, const str& pContext, bool pbResult);
 
 
 
-bool TestPacker(const Lepra::LogDecorator& pAccount)
+bool TestPacker(const LogDecorator& pAccount)
 {
-	Lepra::String lContext;
+	str lContext;
 	bool lTestOk = true;
 
-	Lepra::uint8 lRawData[1024];
+	uint8 lRawData[1024];
 	if (lTestOk)
 	{
 		lContext = _T("pack unicode");
-		lTestOk = (Lepra::PackerUnicodeString::Pack(lRawData, L"ABC") == 10);
+		lTestOk = (PackerUnicodeString::Pack(lRawData, L"ABC") == 8);
 		assert(lTestOk);
 		if (lTestOk)
 		{
 			lTestOk = (lRawData[0] == 4 && lRawData[1] == 0 && lRawData[2] == 'A' &&
-				lRawData[3] == 0 && lRawData[4] == 'B' && lRawData[5] == 0 &&
-				lRawData[6] == 'C' && lRawData[7] == 0 && lRawData[8] == 0 &&
-				lRawData[9] == 0);
+				lRawData[3] == 'B' && lRawData[4] == 'C' && lRawData[5] == 0);
 			assert(lTestOk);
 		}
 	}
 	if (lTestOk)
 	{
 		lContext = _T("unpack unicode");
-		Lepra::UnicodeString lUnpacked;
-		lTestOk = (Lepra::PackerUnicodeString::Unpack(&lUnpacked, lRawData, 10) == 10);
+		wstr lUnpacked;
+		lTestOk = (PackerUnicodeString::Unpack(&lUnpacked, lRawData, 8) == 8);
 		assert(lTestOk);
 		if (lTestOk)
 		{
@@ -71,7 +69,7 @@ private:
 
 bool TerrainTest::Test()
 {
-	Lepra::String lContext;
+	str lContext;
 	bool lTestOk = true;
 
 	Cure::ResourceManager* lResourceManager = new Cure::ResourceManager(1);
@@ -82,8 +80,8 @@ bool TerrainTest::Test()
 	if (lTestOk)
 	{
 		lContext = _T("load terrain");
-		lTerrainManager.AddCamera(Lepra::Vector3DF(0, 0, 0), 10000);
-		Lepra::Thread::Sleep(0.2);
+		lTerrainManager.AddCamera(Vector3DF(0, 0, 0), 10000);
+		Thread::Sleep(0.2);
 		lResourceManager->Tick();
 		int lOkCount = 0;
 		int lErrorCount = 0;
@@ -95,7 +93,7 @@ bool TerrainTest::Test()
 	lTerrainManager.Clear();
 	delete (lResourceManager);
 
-	Lepra::SystemManager::AddQuitRequest(-1);
+	SystemManager::AddQuitRequest(-1);
 
 	ReportTestResult(mLog, _T("TerrainManager"), lContext, lTestOk);
 	return (lTestOk);
@@ -109,7 +107,7 @@ public:
 	bool Test();
 
 private:
-	bool TestSpecific(const Lepra::String& pPrefix, bool pSafe);
+	bool TestSpecific(const str& pPrefix, bool pSafe);
 
 	LOG_CLASS_DECLARE();
 };
@@ -124,19 +122,19 @@ bool NetworkClientServerTest::Test()
 	return (lTestOk);
 }
 
-bool NetworkClientServerTest::TestSpecific(const Lepra::String& pPrefix, bool pSafe)
+bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 {
-	Lepra::String lContext;
+	str lContext;
 	bool lTestOk = true;
 
-	//Lepra::Log::SetMainLevelThreashold(Lepra::Log::LEVEL_ERROR);
+	//Log::SetMainLevelThreashold(Log::LEVEL_ERROR);
 
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_NETWORK_LOGIN_TIMEOUT, 2.0);
 
 	if (lTestOk)
 	{
 		lContext = pPrefix+_T(" network startup error");
-		lTestOk = Lepra::Network::Start();
+		lTestOk = Network::Start();
 		assert(lTestOk);
 	}
 
@@ -184,7 +182,7 @@ bool NetworkClientServerTest::TestSpecific(const Lepra::String& pPrefix, bool pS
 		assert(lTestOk);
 	}
 
-	class ServerPoller: public Lepra::Thread
+	class ServerPoller: public Thread
 	{
 	public:
 		ServerPoller(Cure::NetworkServer* pServer):
@@ -198,7 +196,7 @@ bool NetworkClientServerTest::TestSpecific(const Lepra::String& pPrefix, bool pS
 			lPacket->Release();
 			while (!GetStopRequest())
 			{
-				Lepra::uint32 lClientId;
+				uint32 lClientId;
 				mServer->ReceiveFirstPacket(lPacket, lClientId);
 				mServer->SendAll();
 				Thread::Sleep(0.05);
@@ -214,9 +212,9 @@ bool NetworkClientServerTest::TestSpecific(const Lepra::String& pPrefix, bool pS
 	if (lTestOk)
 	{
 		lContext = pPrefix+_T(" invalid client1 unconnected login");
-		Lepra::UnicodeString lBadPassword(L"feddo");
+		wstr lBadPassword(L"feddo");
 		Cure::MangledPassword lPassword(lBadPassword);
-		Cure::LoginId lUser(Lepra::UnicodeString(L"client1"), lPassword);
+		Cure::LoginId lUser(wstr(L"client1"), lPassword);
 		lClient->StartConnectLogin(_T(""), -1, lUser);
 		Cure::RemoteStatus lStatus = lClient->WaitLogin();
 		lTestOk = (lStatus == Cure::REMOTE_NO_CONNECTION);
@@ -233,9 +231,9 @@ bool NetworkClientServerTest::TestSpecific(const Lepra::String& pPrefix, bool pS
 	if (lTestOk)
 	{
 		lContext = pPrefix+_T(" invalid client1 username");
-		Lepra::UnicodeString lBadPassword(L"feddo");
+		wstr lBadPassword(L"feddo");
 		Cure::MangledPassword lPassword(lBadPassword);
-		Cure::LoginId lUser(Lepra::UnicodeString(L"client2"), lPassword);
+		Cure::LoginId lUser(wstr(L"client2"), lPassword);
 		lClient->StartConnectLogin(_T(""), -1, lUser);
 		Cure::RemoteStatus lStatus = lClient->WaitLogin();
 		lTestOk = (lStatus == Cure::REMOTE_LOGIN_ERRONOUS_DATA);
@@ -252,9 +250,9 @@ bool NetworkClientServerTest::TestSpecific(const Lepra::String& pPrefix, bool pS
 	if (lTestOk)
 	{
 		lContext = pPrefix+_T(" invalid client1 password");
-		Lepra::UnicodeString lBadPassword(L"feddn");
+		wstr lBadPassword(L"feddn");
 		Cure::MangledPassword lPassword(lBadPassword);
-		Cure::LoginId lUser(Lepra::UnicodeString(L"client1"), lPassword);
+		Cure::LoginId lUser(wstr(L"client1"), lPassword);
 		lClient->StartConnectLogin(_T(""), -1, lUser);
 		Cure::RemoteStatus lStatus = lClient->WaitLogin();
 		lTestOk = (lStatus == Cure::REMOTE_LOGIN_ERRONOUS_DATA);
@@ -264,9 +262,9 @@ bool NetworkClientServerTest::TestSpecific(const Lepra::String& pPrefix, bool pS
 	if (lTestOk)
 	{
 		lContext = pPrefix+_T(" create user");
-		Lepra::UnicodeString lBadPassword(L"feddo");
+		wstr lBadPassword(L"feddo");
 		Cure::MangledPassword lPassword(lBadPassword);
-		Cure::LoginId lUser(Lepra::UnicodeString(L"client1"), lPassword);
+		Cure::LoginId lUser(wstr(L"client1"), lPassword);
 		lTestOk = lUserAccountManager->AddUserAccount(lUser);
 		assert(lTestOk);
 	}
@@ -274,9 +272,9 @@ bool NetworkClientServerTest::TestSpecific(const Lepra::String& pPrefix, bool pS
 	if (lTestOk)
 	{
 		lContext = pPrefix+_T(" connect+login client");
-		Lepra::UnicodeString lBadPassword(L"feddo");
+		wstr lBadPassword(L"feddo");
 		Cure::MangledPassword lPassword(lBadPassword);
-		Cure::LoginId lUser(Lepra::UnicodeString(L"client1"), lPassword);
+		Cure::LoginId lUser(wstr(L"client1"), lPassword);
 		lClient->StartConnectLogin(_T("localhost:25344"), 2.0, lUser);
 		Cure::RemoteStatus lStatus = lClient->WaitLogin();
 		lTestOk = (lStatus == Cure::REMOTE_OK);
@@ -295,9 +293,9 @@ bool NetworkClientServerTest::TestSpecific(const Lepra::String& pPrefix, bool pS
 	if (lTestOk)
 	{
 		lContext = pPrefix+_T(" invalid double login client");
-		Lepra::UnicodeString lBadPassword(L"feddo");
+		wstr lBadPassword(L"feddo");
 		Cure::MangledPassword lPassword(lBadPassword);
-		Cure::LoginId lUser(Lepra::UnicodeString(L"client1"), lPassword);
+		Cure::LoginId lUser(wstr(L"client1"), lPassword);
 		lClient2->StartConnectLogin(_T(""), -1, lUser);
 		Cure::RemoteStatus lStatus = lClient2->WaitLogin();
 		lTestOk = (lStatus == Cure::REMOTE_LOGIN_ALREADY);
@@ -307,9 +305,9 @@ bool NetworkClientServerTest::TestSpecific(const Lepra::String& pPrefix, bool pS
 	if (lTestOk)
 	{
 		lContext = pPrefix+_T(" create user #2");
-		Lepra::UnicodeString lBadPassword(L"feddo");
+		wstr lBadPassword(L"feddo");
 		Cure::MangledPassword lPassword(lBadPassword);
-		Cure::LoginId lUser(Lepra::UnicodeString(L"client2"), lPassword);
+		Cure::LoginId lUser(wstr(L"client2"), lPassword);
 		lTestOk = lUserAccountManager->AddUserAccount(lUser);
 		assert(lTestOk);
 	}
@@ -317,23 +315,23 @@ bool NetworkClientServerTest::TestSpecific(const Lepra::String& pPrefix, bool pS
 	if (lTestOk)
 	{
 		lContext = pPrefix+_T(" connect+login 2, client2");
-		Lepra::UnicodeString lBadPassword(L"feddo");
+		wstr lBadPassword(L"feddo");
 		Cure::MangledPassword lPassword(lBadPassword);
-		Cure::LoginId lUser(Lepra::UnicodeString(L"client2"), lPassword);
+		Cure::LoginId lUser(wstr(L"client2"), lPassword);
 		lClient2->StartConnectLogin(_T("localhost:25344"), 2.0, lUser);
 		Cure::RemoteStatus lStatus = lClient2->WaitLogin();
 		lTestOk = (lStatus == Cure::REMOTE_OK);
 		assert(lTestOk);
 	}
 
-	Lepra::uint32 lClient2Id = 0;
+	uint32 lClient2Id = 0;
 	if (lTestOk)
 	{
 		lClient2Id = lClient2->GetLoginAccountId();
 		lTestOk = (lClient2Id >= 1000 && lClient2Id < 0x7FFFFFFF);
 		assert(lTestOk);
 	}
-	Lepra::uint32 lClientId = 0;
+	uint32 lClientId = 0;
 	if (lTestOk)
 	{
 		lClientId = lClient->GetLoginAccountId();
@@ -370,9 +368,9 @@ bool NetworkClientServerTest::TestSpecific(const Lepra::String& pPrefix, bool pS
 	if (lTestOk)
 	{
 		lContext = pPrefix+_T(" server receive from client2");
-		Lepra::Thread::Sleep(0.2);
+		Thread::Sleep(0.2);
 		Cure::Packet* lPacket = lServer->GetPacketFactory()->Allocate();
-		Lepra::uint32 lId = 0xFFFFFFFF;
+		uint32 lId = 0xFFFFFFFF;
 		lTestOk = (lServer->ReceiveFirstPacket(lPacket, lId) == Cure::NetworkAgent::RECEIVE_OK && lId == lClient2Id);
 		assert(lTestOk);
 		for (int x = 0; lTestOk && x < lPacketCount; ++x)
@@ -383,7 +381,7 @@ bool NetworkClientServerTest::TestSpecific(const Lepra::String& pPrefix, bool pS
 			if (lTestOk)
 			{
 				Cure::MessageStatus* lMessage = (Cure::MessageStatus*)(lPacket->GetMessageAt(0));
-				Lepra::UnicodeString lText;
+				wstr lText;
 				lMessage->GetMessageString(lText);
 				lTestOk = (lText == L"Client2ToServer");
 				assert(lTestOk);
@@ -441,7 +439,7 @@ bool NetworkClientServerTest::TestSpecific(const Lepra::String& pPrefix, bool pS
 	if (lTestOk)
 	{
 		lContext = pPrefix+_T(" client2 receive");
-		Lepra::Thread::Sleep(0.2);
+		Thread::Sleep(0.2);
 		Cure::Packet* lPacket = lClient2->GetPacketFactory()->Allocate();
 		lTestOk = (lClient2->ReceiveTimeout(lPacket, 0.3)  == Cure::NetworkAgent::RECEIVE_OK);
 		if (lTestOk)
@@ -450,7 +448,7 @@ bool NetworkClientServerTest::TestSpecific(const Lepra::String& pPrefix, bool pS
 			if (lTestOk)
 			{
 				Cure::MessageStatus* lMessage = (Cure::MessageStatus*)(lPacket->GetMessageAt(0));
-				Lepra::UnicodeString lText;
+				wstr lText;
 				lMessage->GetMessageString(lText);
 				lTestOk = (lText == L"BajsOxe");
 			}
@@ -478,13 +476,13 @@ bool NetworkClientServerTest::TestSpecific(const Lepra::String& pPrefix, bool pS
 	if (lTestOk)
 	{
 		lContext = pPrefix+_T(" server receive from client1");
-		Lepra::Thread::Sleep(0.2);
+		Thread::Sleep(0.2);
 		Cure::Packet* lPacket = lServer->GetPacketFactory()->Allocate();
-		Lepra::uint32 lId;
+		uint32 lId;
 		lTestOk = (lServer->ReceiveFirstPacket(lPacket, lId) == Cure::NetworkAgent::RECEIVE_OK && lId == lClientId);
 		/*if (lTestOk)
 		{
-			lTestOk = lMessage.IsEqual((const Lepra::uint8*)"123456", 6);
+			lTestOk = lMessage.IsEqual((const uint8*)"123456", 6);
 		}*/
 		lServer->GetPacketFactory()->Release(lPacket);
 		assert(lTestOk);
@@ -506,12 +504,12 @@ bool NetworkClientServerTest::TestSpecific(const Lepra::String& pPrefix, bool pS
 	if (lTestOk)
 	{
 		lContext = pPrefix+_T(" client1 receive");
-		Lepra::Thread::Sleep(0.2);
+		Thread::Sleep(0.2);
 		Cure::Packet* lPacket = lClient->GetPacketFactory()->Allocate();
 		lTestOk = (lClient->ReceiveTimeout(lPacket, 0.3) == Cure::NetworkAgent::RECEIVE_OK);
 		/*if (lTestOk)
 		{
-			lTestOk = lMessage.IsEqual((const Lepra::uint8*)"BajsOxe", 7);
+			lTestOk = lMessage.IsEqual((const uint8*)"BajsOxe", 7);
 		}*/
 		lClient->GetPacketFactory()->Release(lPacket);
 		assert(lTestOk);
@@ -525,7 +523,7 @@ bool NetworkClientServerTest::TestSpecific(const Lepra::String& pPrefix, bool pS
 	if (lTestOk)
 	{
 		lContext = pPrefix+_T(" network shutdown error");
-		lTestOk = Lepra::Network::Stop();
+		lTestOk = Network::Stop();
 		assert(lTestOk);
 	}
 

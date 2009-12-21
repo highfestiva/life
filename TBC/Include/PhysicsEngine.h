@@ -9,6 +9,7 @@
 #include <vector>
 #include "../../Lepra/Include/Log.h"
 #include "../../Lepra/Include/Vector3D.h"
+#include "../Include/TBC.h"
 
 
 
@@ -63,6 +64,8 @@ public:
 	unsigned GetControllerIndex() const;
 	float GetValue() const;
 	const float* GetValues() const;
+	float GetIntensity() const;
+	float GetMaxSpeed() const;
 
 	unsigned GetChunkySize() const;
 	void SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const;
@@ -83,7 +86,7 @@ private:
 		EngineMode mMode;
 	};
 
-	Lepra::Vector3DF GetRotorLiftForce(TBC::PhysicsManager* pPhysicsManager, ChunkyBoneGeometry* pGeometry, const EngineNode& pEngineNode) const;
+	Vector3DF GetRotorLiftForce(TBC::PhysicsManager* pPhysicsManager, ChunkyBoneGeometry* pGeometry, const EngineNode& pEngineNode) const;
 	void ApplyTorque(TBC::PhysicsManager* pPhysicsManager, float pFrameTime, ChunkyBoneGeometry* pGeometry, const EngineNode& pEngineNode);
 
 	typedef std::vector<EngineNode> EngineNodeArray;
@@ -96,6 +99,7 @@ private:
 	unsigned mControllerIndex;
 	EngineNodeArray mEngineNodeArray;
 	float mValue[4];
+	float mIntensity;
 
 	LOG_CLASS_DECLARE();
 };

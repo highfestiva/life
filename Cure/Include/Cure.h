@@ -16,6 +16,8 @@ namespace Cure
 
 
 
+using namespace Lepra;
+
 class RuntimeVariableScope;
 
 void Init();
@@ -30,7 +32,7 @@ RuntimeVariableScope* GetSettings();
 // GameObjectId number of an object is, in most cases, created by the server.
 // Exceptions are local objects that are local-only; such as a graphical
 // effect or a local part of the world (on the client computer only).
-typedef Lepra::uint32 GameObjectId;
+typedef uint32 GameObjectId;
 
 
 

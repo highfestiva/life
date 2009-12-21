@@ -30,7 +30,7 @@ NetworkAgent::~NetworkAgent()
 
 void NetworkAgent::Stop()
 {
-	Lepra::ScopeLock lLock(&mLock);
+	ScopeLock lLock(&mLock);
 	SetMuxSocket(0);
 }
 
@@ -38,7 +38,7 @@ void NetworkAgent::Stop()
 
 void NetworkAgent::SetPacketFactory(PacketFactory* pPacketFactory)
 {
-	Lepra::ScopeLock lLock(&mLock);
+	ScopeLock lLock(&mLock);
 	delete (mPacketFactory);
 	mPacketFactory = pPacketFactory;
 	if (mMuxSocket)
@@ -54,7 +54,7 @@ PacketFactory* NetworkAgent::GetPacketFactory() const
 
 
 
-Lepra::Lock* NetworkAgent::GetLock() const
+Lock* NetworkAgent::GetLock() const
 {
 	return (&mLock);
 }
@@ -66,22 +66,22 @@ bool NetworkAgent::IsOpen() const
 	return (mMuxSocket && mMuxSocket->IsOpen());
 }
 
-Lepra::uint64 NetworkAgent::GetSentByteCount(bool pSafe) const
+uint64 NetworkAgent::GetSentByteCount(bool pSafe) const
 {
 	return (mMuxSocket->GetSentByteCount(pSafe));
 }
 
-Lepra::uint64 NetworkAgent::GetReceivedByteCount(bool pSafe) const
+uint64 NetworkAgent::GetReceivedByteCount(bool pSafe) const
 {
 	return (mMuxSocket->GetReceivedByteCount(pSafe));
 }
 
-Lepra::uint64 NetworkAgent::GetTotalSentByteCount() const
+uint64 NetworkAgent::GetTotalSentByteCount() const
 {
 	return (mMuxSocket->GetSentByteCount(true)+mMuxSocket->GetSentByteCount(false));
 }
 
-Lepra::uint64 NetworkAgent::GetTotalReceivedByteCount() const
+uint64 NetworkAgent::GetTotalReceivedByteCount() const
 {
 	return (mMuxSocket->GetReceivedByteCount(true)+mMuxSocket->GetReceivedByteCount(false));
 }
@@ -92,7 +92,7 @@ unsigned NetworkAgent::GetConnectionCount() const
 }
 
 
-bool NetworkAgent::SendStatusMessage(Lepra::GameSocket* pSocket, Lepra::int32 pInteger, RemoteStatus pStatus, Lepra::UnicodeString pMessage, Packet* pPacket)
+bool NetworkAgent::SendStatusMessage(GameSocket* pSocket, int32 pInteger, RemoteStatus pStatus, wstr pMessage, Packet* pPacket)
 {
 	pPacket->Release();
 	MessageStatus* lStatus = (MessageStatus*)mPacketFactory->GetMessageFactory()->Allocate(MESSAGE_TYPE_STATUS);
@@ -102,7 +102,7 @@ bool NetworkAgent::SendStatusMessage(Lepra::GameSocket* pSocket, Lepra::int32 pI
 	return (lOk);
 }
 
-bool NetworkAgent::SendNumberMessage(bool pSafe, Lepra::GameSocket* pSocket, Cure::MessageNumber::InfoType pInfo, Lepra::int32 pInteger, Lepra::float32 pFloat)
+bool NetworkAgent::SendNumberMessage(bool pSafe, GameSocket* pSocket, Cure::MessageNumber::InfoType pInfo, int32 pInteger, float32 pFloat)
 {
 	Packet* lPacket = mPacketFactory->Allocate();
 	MessageNumber* lNumber = (MessageNumber*)mPacketFactory->GetMessageFactory()->Allocate(MESSAGE_TYPE_NUMBER);
@@ -113,7 +113,7 @@ bool NetworkAgent::SendNumberMessage(bool pSafe, Lepra::GameSocket* pSocket, Cur
 	return (lOk);
 }
 
-bool NetworkAgent::SendObjectFullPosition(Lepra::GameSocket* pSocket, GameObjectId pInstanceId, Lepra::int32 pFrameIndex, const ObjectPositionalData& pData)
+bool NetworkAgent::SendObjectFullPosition(GameSocket* pSocket, GameObjectId pInstanceId, int32 pFrameIndex, const ObjectPositionalData& pData)
 {
 	Packet* lPacket = mPacketFactory->Allocate();
 	MessageObjectPosition* lPosition = (MessageObjectPosition*)mPacketFactory->GetMessageFactory()->Allocate(MESSAGE_TYPE_OBJECT_POSITION);
@@ -124,7 +124,7 @@ bool NetworkAgent::SendObjectFullPosition(Lepra::GameSocket* pSocket, GameObject
 	return (lOk);
 }
 
-bool NetworkAgent::PlaceInSendBuffer(bool pSafe, Lepra::GameSocket* pSocket, Packet* pPacket)
+bool NetworkAgent::PlaceInSendBuffer(bool pSafe, GameSocket* pSocket, Packet* pPacket)
 {
 	bool lOk = (pSocket != 0);
 
@@ -142,7 +142,7 @@ bool NetworkAgent::PlaceInSendBuffer(bool pSafe, Lepra::GameSocket* pSocket, Pac
 	{
 		pPacket->StoreHeader();
 		// Buffer was full. We go for the socket way (send existing buffer, then copy this one for next send).
-		lOk = (pSocket->AppendSendBuffer(pSafe, pPacket->GetReadBuffer(), pPacket->GetPacketSize()) == Lepra::IO_OK);
+		lOk = (pSocket->AppendSendBuffer(pSafe, pPacket->GetReadBuffer(), pPacket->GetPacketSize()) == IO_OK);
 	}
 	if (!lOk)
 	{
@@ -151,7 +151,7 @@ bool NetworkAgent::PlaceInSendBuffer(bool pSafe, Lepra::GameSocket* pSocket, Pac
 	return (lOk);
 }
 
-void NetworkAgent::SetMuxSocket(Lepra::GameMuxSocket* pSocket)
+void NetworkAgent::SetMuxSocket(GameMuxSocket* pSocket)
 {
 	delete (mMuxSocket);
 	mMuxSocket = pSocket;

@@ -18,7 +18,7 @@ namespace UiTbc
 
 
 
-Lepra::uint8 ScrollBar::smIconArrowLeft[] = 
+uint8 ScrollBar::smIconArrowLeft[] = 
 
 {	0  , 0  ,0  , 0  , 0  , 255, 0  , 0  ,
 	0  , 0  ,0  , 0  , 255, 255, 0  , 0  ,
@@ -30,7 +30,7 @@ Lepra::uint8 ScrollBar::smIconArrowLeft[] =
 	0  , 0  ,0  , 0  , 0  , 0  , 0  , 0  ,
 };
 
-Lepra::uint8 ScrollBar::smIconArrowRight[] = 
+uint8 ScrollBar::smIconArrowRight[] = 
 
 {	 0  , 0  ,255, 0  , 0  , 0  , 0  , 0  ,
 	 0  , 0  ,255, 255, 0  , 0  , 0  , 0  ,
@@ -42,7 +42,7 @@ Lepra::uint8 ScrollBar::smIconArrowRight[] =
 	 0  , 0  ,0  , 0  , 0  , 0  , 0  , 0  ,
 };
 
-Lepra::uint8 ScrollBar::smIconArrowUp[] = 
+uint8 ScrollBar::smIconArrowUp[] = 
 
 {	0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  ,
 	0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  ,
@@ -54,7 +54,7 @@ Lepra::uint8 ScrollBar::smIconArrowUp[] =
 	0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  ,
 };
 
-Lepra::uint8 ScrollBar::smIconArrowDown[] = 
+uint8 ScrollBar::smIconArrowDown[] = 
 
 {	0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  ,
 	0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  ,
@@ -74,9 +74,9 @@ Painter::ImageID ScrollBar::smIconDownID  = Painter::INVALID_IMAGEID;
 Painter* ScrollBar::smPrevPainter = 0;
 ScrollBar::ScrollbarCleaner* ScrollBar::smCleaner = 0;
 
-ScrollBar::ScrollBar(Style pStyle, int pSize,  int pButtonSize, const Lepra::Color& pBodyColor,
-	const Lepra::Color& pBackgColor, BorderComponent::BorderShadeFunc pBorderShadeFunc,
-	int pBorderWidth, const Lepra::String& pName):
+ScrollBar::ScrollBar(Style pStyle, int pSize,  int pButtonSize, const Color& pBodyColor,
+	const Color& pBackgColor, BorderComponent::BorderShadeFunc pBorderShadeFunc,
+	int pBorderWidth, const str& pName):
 	RectComponent(pBackgColor, pName, CreateLayout(pStyle)),
 	mStyle(pStyle),
 	mUserDefinedGfx(false),
@@ -113,7 +113,7 @@ ScrollBar::ScrollBar(Style pStyle, int pSize,  int pButtonSize, const Lepra::Col
 }
 
 ScrollBar::ScrollBar(Style pStyle, Painter::ImageID pBackgImageID, Button* pTopLeftButton,
-	Button* pBottomRightButton, Button* pScrollerButton, const Lepra::String& pName):
+	Button* pBottomRightButton, Button* pScrollerButton, const str& pName):
 	RectComponent(pBackgImageID, pName, CreateLayout(pStyle)),
 	mStyle(pStyle),
 	mUserDefinedGfx(true),
@@ -170,7 +170,7 @@ void ScrollBar::Repaint(Painter* pPainter)
 	Parent::Repaint(pPainter);
 }
 
-void ScrollBar::SetScrollRatio(Lepra::float64 pVisible, Lepra::float64 pMax)
+void ScrollBar::SetScrollRatio(float64 pVisible, float64 pMax)
 {
 	if (pMax > 0.0)
 	{
@@ -181,7 +181,7 @@ void ScrollBar::SetScrollRatio(Lepra::float64 pVisible, Lepra::float64 pMax)
 		{
 			if (mScrollerSize == 0)
 			{
-				SetMinSize(2 * mButtonSize + (int)((Lepra::float64)mBorderWidth * 2.0), mSize);
+				SetMinSize(2 * mButtonSize + (int)((float64)mBorderWidth * 2.0), mSize);
 			}
 			else
 			{
@@ -192,7 +192,7 @@ void ScrollBar::SetScrollRatio(Lepra::float64 pVisible, Lepra::float64 pMax)
 		{
 			if (mScrollerSize == 0)
 			{
-				SetMinSize(mSize, 2 * mButtonSize + (int)((Lepra::float64)mBorderWidth * 2.0));
+				SetMinSize(mSize, 2 * mButtonSize + (int)((float64)mBorderWidth * 2.0));
 			}
 			else
 			{
@@ -204,17 +204,17 @@ void ScrollBar::SetScrollRatio(Lepra::float64 pVisible, Lepra::float64 pMax)
 	SetNeedsRepaint(true);
 }
 
-Lepra::float64 ScrollBar::GetScrollRatioVisible() const
+float64 ScrollBar::GetScrollRatioVisible() const
 {
 	return mVisible;
 }
 
-Lepra::float64 ScrollBar::GetScrollRatioMax() const
+float64 ScrollBar::GetScrollRatioMax() const
 {
 	return mMax;
 }
 
-void ScrollBar::SetScrollPos(Lepra::float64 pPos)
+void ScrollBar::SetScrollPos(float64 pPos)
 {
 	mPos = pPos < 0 ? 0 : (pPos > 1 ? 1 : pPos);
 	SetNeedsRepaint(true);
@@ -244,7 +244,7 @@ void ScrollBar::LoadIcons()
 	}
 }
 
-void ScrollBar::AddImage(Painter::ImageID& pImageID, Lepra::uint8 pImage[], int pDim)
+void ScrollBar::AddImage(Painter::ImageID& pImageID, uint8 pImage[], int pDim)
 {
 	GUIImageManager* lIMan = GetImageManager();
 
@@ -259,9 +259,9 @@ void ScrollBar::AddImage(Painter::ImageID& pImageID, Lepra::uint8 pImage[], int 
 
 	if (pImageID == Painter::INVALID_IMAGEID)
 	{
-		Lepra::Canvas lCanvas(pDim, pDim, Lepra::Canvas::BITDEPTH_8_BIT);
+		Canvas lCanvas(pDim, pDim, Canvas::BITDEPTH_8_BIT);
 		lCanvas.SetBuffer(pImage);
-		Lepra::Canvas lAlpha(lCanvas, true);
+		Canvas lAlpha(lCanvas, true);
 		lCanvas.ConvertTo32BitWithAlpha(lAlpha);
 		pImageID = lIMan->AddImage(lCanvas, GUIImageManager::CENTERED, GUIImageManager::ALPHATEST, 128);
 	}
@@ -462,10 +462,10 @@ void ScrollBar::InitPreferredSize()
 
 void ScrollBar::DoLayout()
 {
-	Lepra::PixelRect lRect(Parent::GetScreenRect());
-	Lepra::float64 lRatio = mVisible / mMax;
+	PixelRect lRect(Parent::GetScreenRect());
+	float64 lRatio = mVisible / mMax;
 
-	Lepra::PixelCoords lMinSize(GetMinSize());
+	PixelCoords lMinSize(GetMinSize());
 
 	if (mStyle == HORIZONTAL)
 	{
@@ -476,7 +476,7 @@ void ScrollBar::DoLayout()
 		}*/
 
 		int lWidth = lRect.GetWidth() - mButtonSize * 2;
-		int lScrollerWidth = (int)floor(((Lepra::float64)lWidth * lRatio));
+		int lScrollerWidth = (int)floor(((float64)lWidth * lRatio));
 
 		if (mScrollerSize != 0)
 		{
@@ -488,7 +488,7 @@ void ScrollBar::DoLayout()
 		}
 
 		int lRest = lWidth - lScrollerWidth;
-		int lScrollPos = (int)floor((Lepra::float64)lRest * mPos);
+		int lScrollPos = (int)floor((float64)lRest * mPos);
 
 		mScrollerButton->SetPreferredSize(lScrollerWidth, mSize);
 
@@ -508,7 +508,7 @@ void ScrollBar::DoLayout()
 	else
 	{
 		int lHeight = lRect.GetHeight() - mButtonSize * 2;
-		int lScrollerHeight = (int)floor(((Lepra::float64)lHeight * lRatio));
+		int lScrollerHeight = (int)floor(((float64)lHeight * lRatio));
 
 		if (mScrollerSize != 0)
 		{
@@ -520,7 +520,7 @@ void ScrollBar::DoLayout()
 		}
 
 		int lRest = lHeight - lScrollerHeight;
-		int lScrollPos = (int)floor((Lepra::float64)lRest * mPos);
+		int lScrollPos = (int)floor((float64)lRest * mPos);
 
 		mScrollerButton->SetPreferredSize(mSize, lScrollerHeight);
 		mTLRect->SetPreferredSize(mSize, lScrollPos);
@@ -574,18 +574,18 @@ void ScrollBar::OnScrollerDown(Button* pButton)
 
 void ScrollBar::OnScrollerDragged(Button* pButton, int pDeltaX, int pDeltaY)
 {
-	Lepra::float64 lDeltaPos = 0;
+	float64 lDeltaPos = 0;
 
-	Lepra::PixelRect lRect(GetScreenRect());
-	Lepra::PixelCoords lScrollerSize(mScrollerButton->GetSize());
+	PixelRect lRect(GetScreenRect());
+	PixelCoords lScrollerSize(mScrollerButton->GetSize());
 
 	if (mStyle == HORIZONTAL)
 	{
-		lDeltaPos = (Lepra::float64)pDeltaX / (Lepra::float64)(lRect.GetWidth() - (lScrollerSize.x + 2 * mButtonSize));
+		lDeltaPos = (float64)pDeltaX / (float64)(lRect.GetWidth() - (lScrollerSize.x + 2 * mButtonSize));
 	}
 	else
 	{
-		lDeltaPos = (Lepra::float64)pDeltaY / (Lepra::float64)(lRect.GetHeight() - (lScrollerSize.y + 2 * mButtonSize));
+		lDeltaPos = (float64)pDeltaY / (float64)(lRect.GetHeight() - (lScrollerSize.y + 2 * mButtonSize));
 	}
 	SetScrollPos(GetScrollPos() + lDeltaPos);
 
@@ -615,7 +615,7 @@ void ScrollBar::OnIdle()
 	if (mScrollSpeed != 0)
 	{
 		mTimer.UpdateTimer();
-		Lepra::float64 lDelay = mFirstDelay;
+		float64 lDelay = mFirstDelay;
 
 		if (mFirstDelayDone == true)
 		{
@@ -625,7 +625,7 @@ void ScrollBar::OnIdle()
 		while (mTimer.GetTimeDiffF() > lDelay)
 		{
 			SetScrollPos(GetScrollPos() + mScrollSpeed);
-			mTimer.ReduceTimeDiff((Lepra::uint64)(1000.0 * lDelay));
+			mTimer.ReduceTimeDiff((uint64)(1000.0 * lDelay));
 			mFirstDelayDone = true;
 			lDelay = mDelay;
 		}

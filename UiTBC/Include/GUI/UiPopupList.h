@@ -35,20 +35,20 @@ public:
 
 	PopupList(unsigned pBorderStyle,
 		  int pBorderWidth,
-		  const Lepra::Color& pColor,
+		  const Color& pColor,
 		  ListLayout::ListType pListType = ListLayout::COLUMN,
-		  const Lepra::String& pName = _T("PopupList"));
+		  const str& pName = _T("PopupList"));
 	PopupList(unsigned pBorderStyle,
 		  int pBorderWidth,
 		  Painter::ImageID pImageID,
 		  ListLayout::ListType pListType = ListLayout::COLUMN,
-		  const Lepra::String& pName = _T("PopupList"));
-	PopupList(const Lepra::Color& pColor,
+		  const str& pName = _T("PopupList"));
+	PopupList(const Color& pColor,
 		  ListLayout::ListType pListType = ListLayout::COLUMN,
-		  const Lepra::String& pName = _T("PopupList"));
+		  const str& pName = _T("PopupList"));
 	PopupList(Painter::ImageID pImageID,
 		  ListLayout::ListType pListType = ListLayout::COLUMN,
-		  const Lepra::String& pName = _T("PopupList"));
+		  const str& pName = _T("PopupList"));
 
 	virtual ~PopupList();
 

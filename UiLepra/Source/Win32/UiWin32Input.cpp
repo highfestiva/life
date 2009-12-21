@@ -86,24 +86,24 @@ void Win32InputElement::SetValue(int pValue)
 	}
 }
 
-Lepra::String Win32InputElement::GetCalibration() const
+str Win32InputElement::GetCalibration() const
 {
-	Lepra::String lData;
-	lData += Lepra::StringUtility::IntToString(mMin, 10);
+	str lData;
+	lData += strutil::IntToString(mMin, 10);
 	lData += _T(", ");
-	lData += Lepra::StringUtility::IntToString(mMax, 10);
+	lData += strutil::IntToString(mMax, 10);
 	return (lData);
 }
 
-bool Win32InputElement::SetCalibration(const Lepra::String& pData)
+bool Win32InputElement::SetCalibration(const str& pData)
 {
 	bool lOk = false;
-	Lepra::StringUtility::StringVector lData = Lepra::StringUtility::Split(pData, _T(", "));
+	strutil::strvec lData = strutil::Split(pData, _T(", "));
 	if (lData.size() >= 2)
 	{
 		lOk = true;
-		lOk &= Lepra::StringUtility::StringToInt(lData[0], mMin, 10);
-		lOk &= Lepra::StringUtility::StringToInt(lData[1], mMax, 10);
+		lOk &= strutil::StringToInt(lData[0], mMin, 10);
+		lOk &= strutil::StringToInt(lData[1], mMax, 10);
 	}
 	return (lOk);
 }
@@ -487,7 +487,7 @@ bool Win32InputManager::OnMessage(int pMsg, int pwParam, long plParam)
 	{
 		case WM_CHAR:
 		{
-			lConsumed = NotifyOnChar((Lepra::tchar)pwParam);
+			lConsumed = NotifyOnChar((tchar)pwParam);
 		}
 		break;
 		case WM_LBUTTONDBLCLK:

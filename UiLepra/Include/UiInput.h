@@ -12,6 +12,7 @@
 #include "../../Lepra/Include/LepraTypes.h"
 #include "../../Lepra/Include/String.h"
 #include "../../Lepra/Include/HashTable.h"
+#include "../Include/UiLepra.h"
 
 
 
@@ -30,7 +31,7 @@ class InputManager;
 class TextInputObserver
 {
 public:
-	virtual bool OnChar(Lepra::tchar pChar) = 0;
+	virtual bool OnChar(tchar pChar) = 0;
 };
 
 class KeyCodeInputObserver;
@@ -110,43 +111,43 @@ public:
 	//    Returns true if "pressed", false otherwise.
 	// If analogue:
 	//    Returns true if the analogue value is greater than pThreshold.
-	bool GetBooleanValue(Lepra::float64 pThreshold = 0.5) const;
+	bool GetBooleanValue(float64 pThreshold = 0.5) const;
 
 	// If digital:
 	//    Returns 1 if "pressed", 0 otherwise.
 	// If analogue:
 	//    Returns the analogue value normalized around -1 and 1.
-	Lepra::float64 GetValue() const;
+	float64 GetValue() const;
 
 	// Returns the difference between the current value and the previous value.
-	Lepra::float64 GetDeltaValue() const;
+	float64 GetDeltaValue() const;
 
-	void SetIdentifier(const Lepra::String& pIdentifier);
-	const Lepra::String& GetIdentifier() const;
-	Lepra::String GetFullName() const;
-	Lepra::String GetName() const;
+	void SetIdentifier(const str& pIdentifier);
+	const str& GetIdentifier() const;
+	str GetFullName() const;
+	str GetName() const;
 
 	// Sets the input listener functor. The InputElement will be responsible
 	// of deleting it.
 	void AddFunctor(InputFunctor* pFunctor);
 	void ClearFunctors();
 
-	virtual Lepra::String GetCalibration() const = 0;
-	virtual bool SetCalibration(const Lepra::String& pData) = 0;
+	virtual str GetCalibration() const = 0;
+	virtual bool SetCalibration(const str& pData) = 0;
 
 protected:
-	void SetValue(Lepra::float64 pNewValue);
+	void SetValue(float64 pNewValue);
 private:
 
-	Lepra::float64 mPrevValue;
-	Lepra::float64 mValue;
+	float64 mPrevValue;
+	float64 mValue;
 
 	Type mType;
 	Interpretation mInterpretation;
 	int mTypeIndex;
 	InputDevice* mParentDevice;
 
-	Lepra::String mIdentifier;
+	str mIdentifier;
 
 	typedef std::vector<InputFunctor*> FunctorArray;
 	FunctorArray mFunctorArray;
@@ -176,7 +177,7 @@ public:
 		TYPE_COUNT = TYPE_OTHER
 	};
 
-	typedef std::pair<Lepra::String, Lepra::String> CalibrationElement;
+	typedef std::pair<str, str> CalibrationElement;
 	typedef std::vector<CalibrationElement> CalibrationData;
 
 	InputDevice(InputManager* pManager);
@@ -203,8 +204,8 @@ public:
 
 	// Returns the first input element identified by pIdentifier.
 	// Returns NULL if no element was found.
-	const InputElement* GetElement(const Lepra::String& pIdentifier) const;
-	InputElement* GetElement(const Lepra::String& pIdentifier);
+	const InputElement* GetElement(const str& pIdentifier) const;
+	InputElement* GetElement(const str& pIdentifier);
 	InputElement* GetElement(unsigned pElementIndex) const;
 	unsigned GetElementIndex(InputElement* pElement) const;
 
@@ -215,8 +216,8 @@ public:
 	unsigned GetNumDigitalElements();
 	unsigned GetNumAnalogueElements();
 
-	void SetIdentifier(const Lepra::String& pIdentifier);
-	const Lepra::String& GetIdentifier() const;
+	void SetIdentifier(const str& pIdentifier);
+	const str& GetIdentifier() const;
 
 	// Sets an observer on the entire device. (All elements).
 	// The device takes care of deleting the functor.
@@ -230,7 +231,7 @@ protected:
 
 	void SetActive(bool pActive);
 
-	void SetElementValue(InputElement* pElement, Lepra::float64 pValue);
+	void SetElementValue(InputElement* pElement, float64 pValue);
 
 	ElementArray mElementArray;
 
@@ -246,7 +247,7 @@ private:
 
 	bool mActive;
 
-	Lepra::String mIdentifier;
+	str mIdentifier;
 };
 
 
@@ -435,10 +436,10 @@ public:
 	virtual InputDevice* GetMouse() = 0;
 
 	// Searches for device number pN, with identifier pDeviceIdentifier.
-	InputDevice* FindDevice(const Lepra::String& pDeviceIdentifier, int pN = 0);
+	InputDevice* FindDevice(const str& pDeviceIdentifier, int pN = 0);
 
 	// Returns the number of devices with the same identifier.
-	int GetDeviceCount(const Lepra::String& pDeviceIdentifier) const;
+	int GetDeviceCount(const str& pDeviceIdentifier) const;
 
 	// Returns which index the device has in the list of devices with the
 	// same identifier. Thus, if there are two gamepads, and we pass one
@@ -477,12 +478,12 @@ public:
 	virtual void HideCursor() = 0;
 
 	// Range: [-1, 1] (Left and right, up and down)
-	virtual Lepra::float64 GetCursorX() = 0;
-	virtual Lepra::float64 GetCursorY() = 0;
+	virtual float64 GetCursorX() = 0;
+	virtual float64 GetCursorY() = 0;
 
 	bool ReadKey(KeyCode pKeyCode);
 
-	static Lepra::String GetKeyName(KeyCode pKeyCode);
+	static str GetKeyName(KeyCode pKeyCode);
 
 protected:
 
@@ -492,7 +493,7 @@ protected:
 
 	// Will notify all text input observers...
 	// Is called from the subclass.
-	bool NotifyOnChar(Lepra::tchar pChar);
+	bool NotifyOnChar(tchar pChar);
 	bool NotifyOnKeyDown(KeyCode pKeyCode);
 	bool NotifyOnKeyUp(KeyCode pKeyCode);
 	bool NotifyMouseDoubleClick();

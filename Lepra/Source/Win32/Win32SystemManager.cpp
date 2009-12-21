@@ -101,12 +101,12 @@ void SystemManager::Shutdown()
 	::timeEndPeriod(1);
 }
 
-String SystemManager::GetRootDirectory()
+str SystemManager::GetRootDirectory()
 {
-	return (StringUtility::Format(_T("%c:/"), (tchar)(::_getdrive() + 'A' - 1)));
+	return (strutil::Format(_T("%c:/"), (tchar)(::_getdrive() + 'A' - 1)));
 }
 
-String SystemManager::GetCurrentDirectory()
+str SystemManager::GetCurrentDirectory()
 {
 	char lBuffer[2048];
 	lBuffer[0] = 0;
@@ -115,33 +115,33 @@ String SystemManager::GetCurrentDirectory()
 		mLog.AError("Failed in GetCurrentDirectory()");
 	}
 
-	String lString(AnsiStringUtility::ToCurrentCode(AnsiString(lBuffer)));
-	lString = StringUtility::ReplaceAll(lString, _T('\\'), _T('/'));
+	str lString(astrutil::ToCurrentCode(astr(lBuffer)));
+	lString = strutil::ReplaceAll(lString, _T('\\'), _T('/'));
 
 	return (lString);
 }
 
-String SystemManager::GetUserDirectory()
+str SystemManager::GetUserDirectory()
 {
 	tchar lHomeDir[2048];
 	if (FAILED(::SHGetFolderPath(0, CSIDL_PROFILE, NULL, 0, lHomeDir)))
 	{
 		mLog.AWarning("Failed in GetUserDirectory()");
 	}
-	String lString(lHomeDir);
-	lString = StringUtility::ReplaceAll(lString, _T('\\'), _T('/'));
+	str lString(lHomeDir);
+	lString = strutil::ReplaceAll(lString, _T('\\'), _T('/'));
 	return (lString);
 }
 
-String SystemManager::GetIoDirectory(const String& pAppName)
+str SystemManager::GetIoDirectory(const str& pAppName)
 {
 	tchar lAppDir[2048];
 	if (FAILED(::SHGetFolderPath(0, CSIDL_APPDATA, NULL, 0, lAppDir)))
 	{
 		mLog.AWarning("Failed in GetIoDirectory()");
 	}
-	String lIoDir(lAppDir);
-	lIoDir = StringUtility::ReplaceAll(lIoDir, _T('\\'), _T('/'));
+	str lIoDir(lAppDir);
+	lIoDir = strutil::ReplaceAll(lIoDir, _T('\\'), _T('/'));
 	lIoDir = Path::JoinPath(lIoDir, pAppName, _T(""));
 	if (!DiskFile::PathExists(lIoDir))
 	{
@@ -150,29 +150,29 @@ String SystemManager::GetIoDirectory(const String& pAppName)
 	return (lIoDir);
 }
 
-String SystemManager::GetLoginName()
+str SystemManager::GetLoginName()
 {
 	wchar_t lLoginName[128];
 	DWORD lLength = sizeof(lLoginName);
 	::GetUserNameW(lLoginName, &lLength);
-	return (UnicodeStringUtility::ToCurrentCode(UnicodeString(lLoginName)));
+	return (wstrutil::ToCurrentCode(wstr(lLoginName)));
 }
 
-String SystemManager::QueryFullUserName()
+str SystemManager::QueryFullUserName()
 {
-	String lFullName(GetLoginName());
+	str lFullName(GetLoginName());
 	LPBYTE lDomainControllerName = 0;
 	bool lOk = (::NetGetDCName(0, 0, &lDomainControllerName) == NERR_Success);
 	struct _USER_INFO_2* lUserInfo;
 	//if (lOk)
 	{
-		UnicodeString lUnicodeLoginName = UnicodeStringUtility::ToOwnCode(lFullName).c_str();
+		wstr lUnicodeLoginName = wstrutil::ToOwnCode(lFullName).c_str();
 		lOk = (::NetUserGetInfo((LPWSTR)lDomainControllerName, lUnicodeLoginName.c_str(), 2, (LPBYTE*)&lUserInfo) == NERR_Success);
 		if (lOk)
 		{
 			if (lUserInfo->usri2_full_name[0])
 			{
-				lFullName = UnicodeStringUtility::ToCurrentCode(lUserInfo->usri2_full_name);
+				lFullName = wstrutil::ToCurrentCode(lUserInfo->usri2_full_name);
 			}
 			::NetApiBufferFree(lUserInfo);
 		}
@@ -184,7 +184,7 @@ String SystemManager::QueryFullUserName()
 	return (lFullName);
 }
 
-void SystemManager::WebBrowseTo(const String& pUrl)
+void SystemManager::WebBrowseTo(const str& pUrl)
 {
 	::ShellExecute(0, _T("open"), pUrl.c_str(), 0, 0, SW_SHOWDEFAULT);
 }
@@ -232,7 +232,7 @@ unsigned SystemManager::GetCoreCount()
 	return (lCpuCoreCountPerPhysicalProcessor);
 }
 
-String SystemManager::GetCpuName()
+str SystemManager::GetCpuName()
 {
 	char lCpuName[13];
 	__asm
@@ -247,10 +247,10 @@ String SystemManager::GetCpuName()
 		popa
 	}
 	lCpuName[12] = 0;
-	return (AnsiStringUtility::ToCurrentCode(AnsiString(lCpuName)));
+	return (astrutil::ToCurrentCode(astr(lCpuName)));
 }
 
-String SystemManager::GetOsName()
+str SystemManager::GetOsName()
 {
 	OSVERSIONINFO lOsVer;
 	lOsVer.dwOSVersionInfoSize = sizeof(lOsVer);

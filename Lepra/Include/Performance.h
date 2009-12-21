@@ -74,26 +74,26 @@ class ScopePerformanceData: public PerformanceData
 public:
 	typedef std::vector<ScopePerformanceData*> NodeArray;
 
-	static ScopePerformanceData* Insert(const Lepra::String& pName, size_t pHash);
+	static ScopePerformanceData* Insert(const str& pName, size_t pHash);
 
-	ScopePerformanceData(ScopePerformanceData* pParent, const Lepra::String& pName, size_t pHash);
+	ScopePerformanceData(ScopePerformanceData* pParent, const str& pName, size_t pHash);
 
 	static void ClearAll(const NodeArray& pNodes);
 	void Append(double pPeriodValue, double pTimeOfLastMeasure);
 
 	static NodeArray GetRoots();
-	const Lepra::String& GetName() const;
+	const str& GetName() const;
 	const NodeArray& GetChildren() const;
 
 protected:
-	ScopePerformanceData* FindChild(/*const Lepra::String& pName,*/ size_t pHash) const;
+	ScopePerformanceData* FindChild(/*const str& pName,*/ size_t pHash) const;
 
 private:
 	static void AddRoot(ScopePerformanceData* pNode);
 	static void SetActive(ScopePerformanceData* pNode);
 	static ScopePerformanceData* GetActive();
 
-	const Lepra::String mName;
+	const str mName;
 	const size_t mHash;
 	ScopePerformanceData* mParent;
 	NodeArray mChildArray;
@@ -126,11 +126,11 @@ typedef BasicScopeTimer<ScopePerformanceData> CallScopeTimer;
 // is that we want the performance data container CREATION time listed in THIS scope, not in the
 // parent scope.
 #define LEPRA_MEASURE_SCOPE(name)	\
-static const Lepra::String __lMeasureName(Lepra::StringUtility::Format(_T(#name) _T(";") _T(__FILE__) _T(";%i"), __LINE__));	\
-static const std::LEPRA_STD_HASHER<Lepra::String> __lMeasureHasher;	\
+static const str __lMeasureName(strutil::Format(_T(#name) _T(";") _T(__FILE__) _T(";%i"), __LINE__));	\
+static const std::LEPRA_STD_HASHER<str> __lMeasureHasher;	\
 static const size_t __lMeasureHash = (__lMeasureHasher)(__lMeasureName);	\
-Lepra::CallScopeTimer __lMeasureTimer;	\
-__lMeasureTimer.Attach(Lepra::ScopePerformanceData::Insert(__lMeasureName, __lMeasureHash))
+CallScopeTimer __lMeasureTimer;	\
+__lMeasureTimer.Attach(ScopePerformanceData::Insert(__lMeasureName, __lMeasureHash))
 
 
 

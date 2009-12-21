@@ -35,7 +35,7 @@ IOError Writer::WriteData(const void* pBuffer, size_t pSize)
 	return mOutStream->WriteRaw(pBuffer, pSize);
 }
 
-const String& Writer::GetStreamName()
+const str& Writer::GetStreamName()
 {
 	return mOutStream->GetName();
 }

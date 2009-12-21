@@ -53,9 +53,9 @@ void GUIImageManager::SetPainter(Painter* pPainter)
 	mPainter = pPainter;
 }
 
-Painter::ImageID GUIImageManager::AddImage(const Lepra::Canvas& pImage, ImageStyle pStyle, BlendFunc pBlendFunc, Lepra::uint8 pAlphaValue)
+Painter::ImageID GUIImageManager::AddImage(const Canvas& pImage, ImageStyle pStyle, BlendFunc pBlendFunc, uint8 pAlphaValue)
 {
-	Lepra::Canvas lImage(pImage, true);
+	Canvas lImage(pImage, true);
 
 	if (mSwapRGB == true)
 	{
@@ -78,7 +78,7 @@ void GUIImageManager::SetImageOffset(Painter::ImageID pImageID, int pXOffset, in
 	}
 }
 
-Painter::ImageID GUIImageManager::GetImageID(const Lepra::String& pImageName)
+Painter::ImageID GUIImageManager::GetImageID(const str& pImageName)
 {
 	IDTable::Iterator lIter(mIDTable.Find(pImageName));
 	if (lIter == mIDTable.End())
@@ -118,7 +118,7 @@ void GUIImageManager::DrawImage(Painter::ImageID pImageID, int x, int y)
 	}
 }
 
-void GUIImageManager::DrawImage(Painter::ImageID pImageID, const Lepra::PixelRect& pRect)
+void GUIImageManager::DrawImage(Painter::ImageID pImageID, const PixelRect& pRect)
 {
 	if (pImageID != Painter::INVALID_IMAGEID)
 	{
@@ -142,14 +142,14 @@ void GUIImageManager::DrawImage(Painter::ImageID pImageID, const Lepra::PixelRec
 				mPainter->SetRenderMode(Painter::RM_NORMAL);
 			}
 
-			Lepra::PixelRect lRect(pRect);
+			PixelRect lRect(pRect);
 			lRect.Offset(lImage->mXOffset, lImage->mYOffset);
-			Lepra::PixelCoords lPos(lRect.mLeft, lRect.mTop);
+			PixelCoords lPos(lRect.mLeft, lRect.mTop);
 
 			switch(lImage->mStyle)
 			{
 			case TILED:
-				mPainter->DrawImage(pImageID, lPos, Lepra::PixelRect(0, 0, lRect.GetWidth(), lRect.GetHeight()));
+				mPainter->DrawImage(pImageID, lPos, PixelRect(0, 0, lRect.GetWidth(), lRect.GetHeight()));
 				break;
 			case CENTERED:
 				mPainter->DrawImage(pImageID, 
@@ -166,9 +166,9 @@ void GUIImageManager::DrawImage(Painter::ImageID pImageID, const Lepra::PixelRec
 	}
 }
 
-Lepra::PixelCoords GUIImageManager::GetImageSize(Painter::ImageID pImageID)
+PixelCoords GUIImageManager::GetImageSize(Painter::ImageID pImageID)
 {
-	Lepra::PixelCoords lSize(0, 0);
+	PixelCoords lSize(0, 0);
 
 	if (pImageID != Painter::INVALID_IMAGEID)
 	{
@@ -184,7 +184,7 @@ Lepra::PixelCoords GUIImageManager::GetImageSize(Painter::ImageID pImageID)
 	return lSize;
 }
 
-bool GUIImageManager::IsOverImage(Painter::ImageID pImageID, int pScreenX, int pScreenY, const Lepra::PixelRect& pScreenRect)
+bool GUIImageManager::IsOverImage(Painter::ImageID pImageID, int pScreenX, int pScreenY, const PixelRect& pScreenRect)
 {
 	if (pImageID != Painter::INVALID_IMAGEID)
 	{
@@ -192,7 +192,7 @@ bool GUIImageManager::IsOverImage(Painter::ImageID pImageID, int pScreenX, int p
 		if (lIter != mImageTable.End())
 		{
 			Image* lImage = *lIter;
-			Lepra::Canvas* lCanvas = &lImage->mCanvas;
+			Canvas* lCanvas = &lImage->mCanvas;
 
 			if (lImage->mBlendFunc == NO_BLEND)
 			{
@@ -211,9 +211,9 @@ bool GUIImageManager::IsOverImage(Painter::ImageID pImageID, int pScreenX, int p
 				break;
 			case CENTERED:
 			{
-				Lepra::PixelCoords lTopLeft(pScreenRect.mLeft + (pScreenRect.GetWidth()  - lCanvas->GetWidth()) / 2,
+				PixelCoords lTopLeft(pScreenRect.mLeft + (pScreenRect.GetWidth()  - lCanvas->GetWidth()) / 2,
 									  pScreenRect.mTop  + (pScreenRect.GetHeight() - lCanvas->GetHeight()) / 2);
-				Lepra::PixelRect lImageRect(lTopLeft, lTopLeft + Lepra::PixelCoords(lCanvas->GetWidth(), lCanvas->GetHeight()));
+				PixelRect lImageRect(lTopLeft, lTopLeft + PixelCoords(lCanvas->GetWidth(), lCanvas->GetHeight()));
 				if (lImageRect.IsInside(pScreenX, pScreenY) == false)
 				{
 					return false;
@@ -233,7 +233,7 @@ bool GUIImageManager::IsOverImage(Painter::ImageID pImageID, int pScreenX, int p
 				return false;
 			}
 			
-			Lepra::Color lColor;
+			Color lColor;
 			lCanvas->GetPixelColor(x, y, lColor);
 
 			return (lColor.mAlpha >= lImage->mAlphaValue);

@@ -62,22 +62,22 @@ public:
 	Painter* GetPainter() const;
 
 	// TODO: come up with a way to avoid using an image loader directly in a
-	// void LoadImages(const Lepra::tchar* pImageDefinitionFile, const Lepra::tchar* pArchive = 0);
-	Painter::ImageID AddImage(const Lepra::Canvas& pImage, ImageStyle pStyle, BlendFunc pBlendFunc, Lepra::uint8 pAlphaValue);
+	// void LoadImages(const tchar* pImageDefinitionFile, const tchar* pArchive = 0);
+	Painter::ImageID AddImage(const Canvas& pImage, ImageStyle pStyle, BlendFunc pBlendFunc, uint8 pAlphaValue);
 
 	void SetImageOffset(Painter::ImageID pImageID, int pXOffset, int pYOffset);
 
 	// Translates the name of the image to the corresponding ImageID.
 	// The name is the name of the structure in the image definition file.
-	Painter::ImageID GetImageID(const Lepra::String& pImageName);
+	Painter::ImageID GetImageID(const str& pImageName);
 
 	void DrawImage(Painter::ImageID pImageID, int x, int y);
-	void DrawImage(Painter::ImageID pImageID, const Lepra::PixelRect& pRect);
+	void DrawImage(Painter::ImageID pImageID, const PixelRect& pRect);
 
-	Lepra::PixelCoords GetImageSize(Painter::ImageID pImageID);
+	PixelCoords GetImageSize(Painter::ImageID pImageID);
 	bool IsOverImage(Painter::ImageID pImageID, 
 			 int pScreenX, int pScreenY, 
-			 const Lepra::PixelRect& pScreenRect);
+			 const PixelRect& pScreenRect);
 
 	void SwapRGB();
 
@@ -88,10 +88,10 @@ private:
 	{
 	public:
 		inline Image(Painter::ImageID pID,
-					 const Lepra::Canvas& pCanvas,
+					 const Canvas& pCanvas,
 					 ImageStyle pStyle,
 					 BlendFunc pBlendFunc,
-					 Lepra::uint8 pAlphaValue)
+					 uint8 pAlphaValue)
 		{
 			mID = pID;
 			mCanvas.Copy(pCanvas);
@@ -103,10 +103,10 @@ private:
 		}
 
 		Painter::ImageID mID;
-		Lepra::Canvas mCanvas;
+		Canvas mCanvas;
 		ImageStyle mStyle;
 		BlendFunc mBlendFunc;
-		Lepra::uint8 mAlphaValue;
+		uint8 mAlphaValue;
 
 		int mXOffset;
 		int mYOffset;
@@ -114,8 +114,8 @@ private:
 
 	// An image table used by all components that need to store icons and 
 	// other common images.
-	typedef Lepra::HashTable<Painter::ImageID, Image*, std::hash<int> > ImageTable;
-	typedef Lepra::HashTable<Lepra::String, Painter::ImageID> IDTable;
+	typedef HashTable<Painter::ImageID, Image*, std::hash<int> > ImageTable;
+	typedef HashTable<str, Painter::ImageID> IDTable;
 	ImageTable mImageTable;
 	IDTable mIDTable;
 

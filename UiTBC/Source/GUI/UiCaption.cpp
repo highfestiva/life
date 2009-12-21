@@ -11,7 +11,7 @@
 namespace UiTbc
 {
 
-Caption::Caption(const Lepra::Color& pActiveColor, const Lepra::Color& pInactiveColor, int pHeight) :
+Caption::Caption(const Color& pActiveColor, const Color& pInactiveColor, int pHeight) :
 	RectComponent(pActiveColor, _T("Caption"), new StackLayout(1)),
 	mLabel(0),
 	mCaptionRect(0),
@@ -44,10 +44,10 @@ Caption::Caption(const Lepra::Color& pActiveColor, const Lepra::Color& pInactive
 	mActive(true),
 	mStyle(SINGLECOLOR_STYLE)
 {
-	SetFontColor(Lepra::OFF_BLACK);
+	SetFontColor(OFF_BLACK);
 
 	SetMinSize(0, pHeight);
-	SetPreferredSize(Lepra::PixelCoords(0, pHeight));
+	SetPreferredSize(PixelCoords(0, pHeight));
 
 	mLabel = new Label(false, _T("Label"));
 
@@ -63,15 +63,15 @@ Caption::Caption(const Lepra::Color& pActiveColor, const Lepra::Color& pInactive
 	lButtonRect->SetPreferredSize(0, 0);
 	lTopLayer->AddChild(lButtonRect);
 
-	mButtonRect = new RectComponent(Lepra::Color(255, 255, 255), _T("ButtonRect"), new GridLayout(1, 3));
+	mButtonRect = new RectComponent(Color(255, 255, 255), _T("ButtonRect"), new GridLayout(1, 3));
 	mButtonRect->SetPreferredSize(1, 0);
 	lButtonRect->AddChild(mButtonRect);
 }
 
-Caption::Caption(const Lepra::Color& pActiveTopLeftColor, const Lepra::Color& pActiveTopRightColor,
-	const Lepra::Color& pActiveBottomLeftColor, const Lepra::Color& pActiveBottomRightColor,
-	const Lepra::Color& pInactiveTopLeftColor, const Lepra::Color& pInactiveTopRightColor,
-	const Lepra::Color& pInactiveBottomLeftColor, const Lepra::Color& pInactiveBottomRightColor,
+Caption::Caption(const Color& pActiveTopLeftColor, const Color& pActiveTopRightColor,
+	const Color& pActiveBottomLeftColor, const Color& pActiveBottomRightColor,
+	const Color& pInactiveTopLeftColor, const Color& pInactiveTopRightColor,
+	const Color& pInactiveBottomLeftColor, const Color& pInactiveBottomRightColor,
 	int pHeight) :
 	RectComponent(pActiveTopLeftColor, pActiveTopRightColor, pActiveBottomRightColor, pActiveBottomLeftColor, _T("Caption"), new StackLayout(1)),
 	mLabel(0),
@@ -105,10 +105,10 @@ Caption::Caption(const Lepra::Color& pActiveTopLeftColor, const Lepra::Color& pA
 	mActive(true),
 	mStyle(MULTICOLOR_STYLE)
 {
-	SetFontColor(Lepra::OFF_BLACK);
+	SetFontColor(OFF_BLACK);
 
 	SetMinSize(0, pHeight);
-	SetPreferredSize(Lepra::PixelCoords(0, pHeight));
+	SetPreferredSize(PixelCoords(0, pHeight));
 
 	mLabel = new Label(false, _T("Label"));
 
@@ -123,7 +123,7 @@ Caption::Caption(const Lepra::Color& pActiveTopLeftColor, const Lepra::Color& pA
 	lButtonRect->SetPreferredSize(0, 0);
 	lTopLayer->AddChild(lButtonRect);
 
-	mButtonRect = new RectComponent(Lepra::Color(255, 255, 255), _T("ButtonRect"), new GridLayout(1, 3));
+	mButtonRect = new RectComponent(Color(255, 255, 255), _T("ButtonRect"), new GridLayout(1, 3));
 	mButtonRect->SetPreferredSize(1, 0);
 	lButtonRect->AddChild(mButtonRect);
 }
@@ -164,13 +164,13 @@ Caption::Caption(Painter::ImageID pActiveLeftImageID, Painter::ImageID pActiveRi
 	mActive(true),
 	mStyle(IMAGE_STYLE)
 {
-	SetFontColor(Lepra::OFF_BLACK);
+	SetFontColor(OFF_BLACK);
 
 	GUIImageManager* lIMan = GetImageManager();
 
-	Lepra::PixelCoords lLeftImageSize(lIMan->GetImageSize(pActiveLeftImageID));
-	Lepra::PixelCoords lRightImageSize(lIMan->GetImageSize(pActiveRightImageID));
-	Lepra::PixelCoords lCenterImageSize(lIMan->GetImageSize(pActiveCenterImageID));
+	PixelCoords lLeftImageSize(lIMan->GetImageSize(pActiveLeftImageID));
+	PixelCoords lRightImageSize(lIMan->GetImageSize(pActiveRightImageID));
+	PixelCoords lCenterImageSize(lIMan->GetImageSize(pActiveCenterImageID));
 
 	SetMinSize(lLeftImageSize.x + lRightImageSize.x, pHeight);
 	SetPreferredSize(0, pHeight);
@@ -310,9 +310,9 @@ void Caption::SetActive(bool pActive)
 			mRightImageRect->SetImage(mInactiveRightImageID);
 		}
 
-		Lepra::PixelCoords lLeftImageSize(lIMan->GetImageSize(mActiveLeftImageID));
-		Lepra::PixelCoords lRightImageSize(lIMan->GetImageSize(mActiveRightImageID));
-		Lepra::PixelCoords lCenterImageSize(lIMan->GetImageSize(mActiveCenterImageID));
+		PixelCoords lLeftImageSize(lIMan->GetImageSize(mActiveLeftImageID));
+		PixelCoords lRightImageSize(lIMan->GetImageSize(mActiveRightImageID));
+		PixelCoords lCenterImageSize(lIMan->GetImageSize(mActiveCenterImageID));
 
 		mLeftImageRect->SetPreferredSize(lLeftImageSize);
 		mCenterImageRect->SetPreferredSize(0, lCenterImageSize.y);
@@ -376,7 +376,7 @@ bool Caption::OnMouseMove(int pMouseX, int pMouseY, int pDeltaX, int pDeltaY)
 
 		if (lParentWindow != 0)
 		{
-			lParentWindow->SetPos(lParentWindow->GetPos() + Lepra::PixelCoords(pDeltaX, pDeltaY));
+			lParentWindow->SetPos(lParentWindow->GetPos() + PixelCoords(pDeltaX, pDeltaY));
 		}
 
 		return true;
@@ -392,11 +392,11 @@ void Caption::SetIcon(Painter::ImageID pIconID)
 	mLabel->SetIcon(pIconID);
 }
 
-void Caption::SetText(const Lepra::String& pText,
-					  const Lepra::Color& pActiveTextColor,
-					  const Lepra::Color& pActiveBackgColor,
-					  const Lepra::Color& pInactiveTextColor,
-					  const Lepra::Color& pInactiveBackgColor)
+void Caption::SetText(const str& pText,
+					  const Color& pActiveTextColor,
+					  const Color& pActiveBackgColor,
+					  const Color& pInactiveTextColor,
+					  const Color& pInactiveBackgColor)
 {
 	mText                   = pText;
 	mActiveTextBackgColor   = pActiveBackgColor;

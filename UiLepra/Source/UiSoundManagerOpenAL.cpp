@@ -70,7 +70,7 @@ SoundManagerOpenAL::~SoundManagerOpenAL()
 	}
 }
 
-SoundManager::SoundID SoundManagerOpenAL::LoadSound2D(const Lepra::String& pFileName, LoopMode pLoopMode, int pPriority)
+SoundManager::SoundID SoundManagerOpenAL::LoadSound2D(const str& pFileName, LoopMode pLoopMode, int pPriority)
 {
 	Sample* lSample = (Sample*)LoadSound3D(pFileName, pLoopMode, pPriority);
 	if (lSample)
@@ -80,7 +80,7 @@ SoundManager::SoundID SoundManagerOpenAL::LoadSound2D(const Lepra::String& pFile
 	return ((SoundID)lSample);
 }
 
-SoundManager::SoundID SoundManagerOpenAL::LoadSound3D(const Lepra::String& pFileName, LoopMode pLoopMode, int pPriority)
+SoundManager::SoundID SoundManagerOpenAL::LoadSound3D(const str& pFileName, LoopMode pLoopMode, int pPriority)
 {
 	Sample* lSample = new Sample(pLoopMode != LOOP_NONE, pPriority);
 	if (lSample->Load(pFileName))
@@ -96,7 +96,7 @@ SoundManager::SoundID SoundManagerOpenAL::LoadSound3D(const Lepra::String& pFile
 	return ((SoundID)lSample);
 }
 
-SoundManager::SoundID SoundManagerOpenAL::LoadStream(const Lepra::String& pFileName, LoopMode pLoopMode, int pPriority)
+SoundManager::SoundID SoundManagerOpenAL::LoadStream(const str& pFileName, LoopMode pLoopMode, int pPriority)
 {
 	// TODO: should read a stream, not buffer the thing.
 	return (LoadSound2D(pFileName, pLoopMode, pPriority));
@@ -274,7 +274,7 @@ int SoundManagerOpenAL::GetFrequency(SoundInstanceID)
 	return (0);
 }
 
-void SoundManagerOpenAL::SetSoundPosition(SoundInstanceID pSoundIID, const Lepra::Vector3DF& pPos, const Lepra::Vector3DF& pVel)
+void SoundManagerOpenAL::SetSoundPosition(SoundInstanceID pSoundIID, const Vector3DF& pPos, const Vector3DF& pVel)
 {
 	Source* lSource = GetSource(pSoundIID);
 	if (!lSource)
@@ -294,7 +294,7 @@ void SoundManagerOpenAL::SetSoundPosition(SoundInstanceID pSoundIID, const Lepra
 	::alSourcefv(lSource->mSid, AL_VELOCITY, lVel);
 }
 
-void SoundManagerOpenAL::GetSoundPosition(SoundInstanceID pSoundIID, Lepra::Vector3DF& pPos, Lepra::Vector3DF& pVel)
+void SoundManagerOpenAL::GetSoundPosition(SoundInstanceID pSoundIID, Vector3DF& pPos, Vector3DF& pVel)
 {
 	Source* lSource = GetSource(pSoundIID);
 	if (!lSource)
@@ -319,8 +319,8 @@ void SoundManagerOpenAL::SetCurrentListener(int /*pListenerIndex*/, int /*pListe
 	//mListener = GetListener(pListenerIndex);
 }
 
-void SoundManagerOpenAL::SetListenerPosition(const Lepra::Vector3DF& pPos, const Lepra::Vector3DF& pVel,
-	const Lepra::Vector3DF& pUp, const Lepra::Vector3DF& pForward)
+void SoundManagerOpenAL::SetListenerPosition(const Vector3DF& pPos, const Vector3DF& pVel,
+	const Vector3DF& pUp, const Vector3DF& pForward)
 {
 	/*if (!mListener)
 	{
@@ -348,8 +348,8 @@ void SoundManagerOpenAL::SetListenerPosition(const Lepra::Vector3DF& pPos, const
 	::alListenerfv(AL_ORIENTATION, lDirection);
 }
 
-void SoundManagerOpenAL::GetListenerPosition(Lepra::Vector3DF& pPos, Lepra::Vector3DF& pVel,
-	Lepra::Vector3DF& pUp, Lepra::Vector3DF& pForward)
+void SoundManagerOpenAL::GetListenerPosition(Vector3DF& pPos, Vector3DF& pVel,
+	Vector3DF& pUp, Vector3DF& pForward)
 {
 	/*if (!mListener)
 	{
@@ -456,10 +456,10 @@ SoundManagerOpenAL::Sample::~Sample()
 	}
 }
 
-bool SoundManagerOpenAL::Sample::Load(const Lepra::String& pFileName)
+bool SoundManagerOpenAL::Sample::Load(const str& pFileName)
 {
 	assert(mBuffer == AL_NONE);
-	mBuffer = ::alutCreateBufferFromFile(Lepra::AnsiStringUtility::ToOwnCode(pFileName).c_str());
+	mBuffer = ::alutCreateBufferFromFile(astrutil::ToOwnCode(pFileName).c_str());
 	return (mBuffer != AL_NONE);
 }
 

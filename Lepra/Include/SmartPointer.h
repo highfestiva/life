@@ -16,7 +16,7 @@ namespace Lepra
 
 
 
-#define	SMART_POINTER_REFERENCE	public:	Lepra::SmartPointerReference _mRef;
+#define	SMART_POINTER_REFERENCE	public:	SmartPointerReference _mRef;
 
 
 

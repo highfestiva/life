@@ -34,7 +34,7 @@ namespace Cure
 class TerrainFunctionManager
 {
 public:
-	typedef Lepra::AABR<float> FunctionArea;
+	typedef AABR<float> FunctionArea;
 
 	TerrainFunctionManager();
 	virtual ~TerrainFunctionManager();
@@ -44,7 +44,7 @@ public:
 	TBC::TerrainPatch* GeneratePatchMesh(const FunctionArea& pArea, float pLod);
 
 	void MarkAllDirty();
-	void MarkInUse(const Lepra::Vector3DF& pPosition, float pRadius);
+	void MarkInUse(const Vector3DF& pPosition, float pRadius);
 	void DeleteDirty();
 
 private:
@@ -53,7 +53,7 @@ private:
 	// TODO: move to some game logic file!
 	static const int msTerrainFunctionSize = (int)1e6;
 
-	typedef Lepra::LooseQuadtree<TBC::TerrainFunction*, TBC::TerrainFunction*, float> FunctionTree;
+	typedef LooseQuadtree<TBC::TerrainFunction*, TBC::TerrainFunction*, float> FunctionTree;
 	FunctionTree* mFunctionTree;
 
 	// TODO: remove the dummy!

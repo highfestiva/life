@@ -26,10 +26,10 @@ public:
 
 	bool IsGeometryReference();
 
-	void SetOffsetTransformation(const Lepra::TransformationF& pOffset);
+	void SetOffsetTransformation(const TransformationF& pOffset);
 
 	// Overloads from GeometryBase.
-	const Lepra::TransformationF& GetTransformation() const;
+	const TransformationF& GetTransformation() const;
 	GeometryVolatility GetGeometryVolatility() const;
 	void SetGeometryVolatility(GeometryVolatility pVolatility);
 
@@ -44,8 +44,8 @@ public:
 
 	float*         GetVertexData() const;
 	float*         GetUVData(unsigned int pUVSet) const;
-	Lepra::uint32* GetIndexData() const;
-	Lepra::uint8*  GetColorData() const;
+	uint32* GetIndexData() const;
+	uint8*  GetColorData() const;
 	float*         GetNormalData() const;
 
 	GeometryBase* GetParentGeometry() const;
@@ -54,8 +54,8 @@ protected:
 private:
 	GeometryBase* mGeometry;
 
-	Lepra::TransformationF mOffset;
-	mutable Lepra::TransformationF mReturnTransformation;
+	TransformationF mOffset;
+	mutable TransformationF mReturnTransformation;
 };
 
 

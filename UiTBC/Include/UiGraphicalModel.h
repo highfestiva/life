@@ -64,9 +64,9 @@ public:
 
 	// Takes ownership of the geometry handler (takes care of destruction).
 	// pTransformAnimator = The animator (see TBC::Model and BoneAnimator) to use for transform animations.
-	void AddGeometry(const Lepra::String& pName, GeometryHandler* pGeometry, const Lepra::String& pTransformAnimator = _T(""));
+	void AddGeometry(const str& pName, GeometryHandler* pGeometry, const str& pTransformAnimator = _T(""));
 
-	TBC::GeometryBase* GetGeometry(const Lepra::String& pName);
+	TBC::GeometryBase* GetGeometry(const str& pName);
 
 	// Overloaded from TBC::Model where it is declared as public.
 	void Update(double pDeltaTime);
@@ -104,13 +104,13 @@ private:
 		Renderer::TextureID* mTextureID;
 		int mNumTextures;
 		Renderer::Shadows mShadows;
-		Lepra::String mName;
+		str mName;
 		TBC::BoneAnimator* mTransformAnimator;
 	};
 
 	int CalcLODIndex(int pMaxIndex);
 
-	typedef Lepra::HashTable<Lepra::String, GeometryHandler*, std::hash<Lepra::String>, 8> GeometryTable;
+	typedef HashTable<str, GeometryHandler*, std::hash<str>, 8> GeometryTable;
 
 	GeometryTable mGeometryTable;
 	double mLevelOfDetail;

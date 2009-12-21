@@ -11,8 +11,8 @@
 #include "../Lepra/Include/Network.h"
 #include "../Lepra/Include/Path.h"
 #include "../Lepra/Include/SystemManager.h"
+#include "Life.h"
 #include "LifeApplication.h"
-#include "LifeDefinitions.h"
 #include "RtVar.h"
 
 
@@ -22,7 +22,7 @@ namespace Life
 
 
 
-Application::Application(const Lepra::StringUtility::StringVector& pArgumentList):
+Application::Application(const strutil::strvec& pArgumentList):
 	Lepra::Application(pArgumentList),
 	mResourceManager(0),
 	mGameTicker(0),
@@ -57,19 +57,19 @@ void Application::Init()
 	CURE_RTVAR_INTERNAL(Cure::GetSettings(), RTVAR_APPLICATION_NAME, _T("Life"));
 
 	mConsoleLogger = CreateConsoleLogListener();
-	//mConsoleLogger->SetLevelThreashold(Lepra::Log::LEVEL_INFO);
+	//mConsoleLogger->SetLevelThreashold(Log::LEVEL_INFO);
 #ifndef NO_LOG_DEBUG_INFO
-	mDebugLogger = new Lepra::DebuggerLogListener();
+	mDebugLogger = new DebuggerLogListener();
 #endif // Showing debug information.
-	mFileLogger = new Lepra::FileLogListener(GetIoFile(_T(""), _T("log"), false));
-	//mFileLogger->SetLevelThreashold(Lepra::Log::LEVEL_INFO);
-	mFileLogger->WriteLog(_T("\n\n"), Lepra::Log::LEVEL_INFO);
-	mPerformanceLogger = new Lepra::FileLogListener(GetIoFile(_T("Performance"), _T("log"), false));
-	mMemLogger = new Lepra::MemFileLogListener(100*1024);
-	Lepra::LogType::GetLog(Lepra::LogType::SUB_ROOT)->SetupBasicListeners(mConsoleLogger, mDebugLogger, mFileLogger, mPerformanceLogger, mMemLogger);
+	mFileLogger = new FileLogListener(GetIoFile(_T(""), _T("log"), false));
+	//mFileLogger->SetLevelThreashold(Log::LEVEL_INFO);
+	mFileLogger->WriteLog(_T("\n\n"), Log::LEVEL_INFO);
+	mPerformanceLogger = new FileLogListener(GetIoFile(_T("Performance"), _T("log"), false));
+	mMemLogger = new MemFileLogListener(100*1024);
+	LogType::GetLog(LogType::SUB_ROOT)->SetupBasicListeners(mConsoleLogger, mDebugLogger, mFileLogger, mPerformanceLogger, mMemLogger);
 
-	Lepra::String lStartMessage = _T("---------- Starting ") + GetName() + _T(". Build type: ") _T(LEPRA_STRING_TYPE_TEXT) _T(" ") _T(LEPRA_BUILD_TYPE_TEXT) _T(" ----------\n");
-	mLog.RawPrint(Lepra::Log::LEVEL_HEADLINE, lStartMessage);
+	str lStartMessage = _T("---------- Starting ") + GetName() + _T(". Build type: ") _T(LEPRA_STRING_TYPE_TEXT) _T(" ") _T(LEPRA_BUILD_TYPE_TEXT) _T(" ----------\n");
+	mLog.RawPrint(Log::LEVEL_HEADLINE, lStartMessage);
 
 	mResourceManager = new Cure::ResourceManager(1);
 	mGameTicker = CreateGameTicker();
@@ -83,19 +83,19 @@ int Application::Run()
 	// another CPU later on.
 	// JB 2009-12: dropped this, probably not a good idea since we need to run multiple
 	// physics instances when running split screen.
-	//Lepra::Thread::GetCurrentThread()->SetCpuAffinityMask(0x0001);
+	//Thread::GetCurrentThread()->SetCpuAffinityMask(0x0001);
 
 	bool lOk = true;
 	if (lOk)
 	{
-		lOk = Lepra::Network::Start();
+		lOk = Network::Start();
 	}
 	if (lOk)
 	{
 		lOk = mGameTicker->Initialize();
 	}
 	bool lQuit = false;
-	Lepra::PerformanceData lTimeInfo;
+	PerformanceData lTimeInfo;
 	lTimeInfo.Set(1/60.0, 1/60.0, 1/60.0);
 	while (lOk && !lQuit)
 	{
@@ -103,12 +103,12 @@ int Application::Run()
 
 		LEPRA_MEASURE_SCOPE(AppTick);
 		{
-			Lepra::ScopeTimer lTimer(&lTimeInfo);
+			ScopeTimer lTimer(&lTimeInfo);
 			lOk = mGameTicker->Tick();
 			const float lExtraSleep = (float)CURE_RTVAR_TRYGET(Cure::GetSettings(), RTVAR_DEBUG_EXTRASLEEPTIME, 0.0);
 			if (lExtraSleep > 0)
 			{
-				Lepra::Thread::Sleep(lExtraSleep);
+				Thread::Sleep(lExtraSleep);
 			}
 		}
 		if (lOk)
@@ -116,7 +116,7 @@ int Application::Run()
 			LEPRA_MEASURE_SCOPE(AppSleep);
 			TickSleep(lTimeInfo.GetSlidingAverage());
 		}
-		lQuit = (Lepra::SystemManager::GetQuitRequest() != 0);
+		lQuit = (SystemManager::GetQuitRequest() != 0);
 	}
 
 	if (lQuit)
@@ -127,14 +127,14 @@ int Application::Run()
 	{
 		if (mMemLogger)
 		{
-			Lepra::LogType::GetLog(Lepra::LogType::SUB_ROOT)->RemoveListener(mMemLogger);
+			LogType::GetLog(LogType::SUB_ROOT)->RemoveListener(mMemLogger);
 		}
 		mLog.AFatal("Terminating application due to fatal error.");
 		if (mMemLogger && mFileLogger)
 		{
-			mLog.RawPrint(Lepra::Log::LEVEL_FATAL, _T("\nStart dump hires logs.\n--------------------------------------------------------------------------------\n"));
+			mLog.RawPrint(Log::LEVEL_FATAL, _T("\nStart dump hires logs.\n--------------------------------------------------------------------------------\n"));
 			mMemLogger->Dump(mFileLogger->GetFile());
-			mLog.RawPrint(Lepra::Log::LEVEL_FATAL, _T("--------------------------------------------------------------------------------\nEnd dump hires logs.\n\n"));
+			mLog.RawPrint(Log::LEVEL_FATAL, _T("--------------------------------------------------------------------------------\nEnd dump hires logs.\n\n"));
 		}
 	}
 
@@ -151,15 +151,15 @@ void Application::Destroy()
 	delete (mResourceManager);	// Resource manager lives long enough for all volontary resources to disappear.
 	mResourceManager = 0;
 
-	Lepra::Network::Stop();
+	Network::Stop();
 }
 
 
 
-Lepra::String Application::GetIoFile(const Lepra::String& pEnd, const Lepra::String& pExt, bool pAddQuotes)
+str Application::GetIoFile(const str& pEnd, const str& pExt, bool pAddQuotes)
 {
-	Lepra::String lIoName = Lepra::Path::JoinPath(
-		Lepra::SystemManager::GetIoDirectory(CURE_RTVAR_GET(Cure::GetSettings(), RTVAR_APPLICATION_NAME, _T("?"))),
+	str lIoName = Path::JoinPath(
+		SystemManager::GetIoDirectory(CURE_RTVAR_GET(Cure::GetSettings(), RTVAR_APPLICATION_NAME, _T("?"))),
 		mApplication->GetName()+pEnd, pExt);
 	if (pAddQuotes)
 	{
@@ -170,9 +170,9 @@ Lepra::String Application::GetIoFile(const Lepra::String& pEnd, const Lepra::Str
 
 
 
-Lepra::LogListener* Application::CreateConsoleLogListener() const
+LogListener* Application::CreateConsoleLogListener() const
 {
-	return (new Lepra::StdioConsoleLogListener());
+	return (new StdioConsoleLogListener());
 }
 
 
@@ -188,7 +188,7 @@ void Application::TickSleep(double pMeasuredFrameTime) const
 			mLog.AInfo("Entering power save mode.");
 			mIsPowerSaving = true;
 		}
-		Lepra::Thread::Sleep(1.0*lPowerSaveAmount);
+		Thread::Sleep(1.0*lPowerSaveAmount);
 	}
 	else
 	{
@@ -203,16 +203,16 @@ void Application::TickSleep(double pMeasuredFrameTime) const
 		double lSleepTime = lWantedFrameTime - pMeasuredFrameTime;
 		if (lSleepTime > 0)
 		{
-			Lepra::HiResTimer lTimer;
+			HiResTimer lTimer;
 			while (lSleepTime >= 0.001)
 			{
-				Lepra::Thread::Sleep(lSleepTime);
+				Thread::Sleep(lSleepTime);
 				lSleepTime -= lTimer.PopTimeDiff();
 			}
 		}
 		else
 		{
-			Lepra::Thread::YieldCpu();	// Play nice.
+			Thread::YieldCpu();	// Play nice.
 		}
 	}
 }

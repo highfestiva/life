@@ -49,7 +49,7 @@ MetaFile::~MetaFile()
 	Close();
 }
 
-bool MetaFile::Open(const String& pFileName, OpenMode pMode, bool pCreatePath, Endian::EndianType pEndian)
+bool MetaFile::Open(const str& pFileName, OpenMode pMode, bool pCreatePath, Endian::EndianType pEndian)
 {
 	Close();
 	SetEndian(pEndian);
@@ -57,8 +57,8 @@ bool MetaFile::Open(const String& pFileName, OpenMode pMode, bool pCreatePath, E
 	bool lOk = false;
 
 	size_t lSplitIndex = 0;
-	String lPath;
-	String lFile;
+	str lPath;
+	str lFile;
 	bool lContinue = true;
 
 	// Find a valid combination of archive and file...
@@ -85,7 +85,7 @@ bool MetaFile::Open(const String& pFileName, OpenMode pMode, bool pCreatePath, E
 		}
 		else
 		{
-			String lArchiveName;
+			str lArchiveName;
 			lOk = FindValidArchiveName(lPath, lArchiveName);
 
 			if (lOk)
@@ -195,7 +195,7 @@ int64 MetaFile::Seek(int64 pOffset, FileOrigin pFrom)
 	return lOffset;
 }
 
-String MetaFile::GetFullName() const
+str MetaFile::GetFullName() const
 {
 	if (mDiskFile != 0)
 	{
@@ -209,7 +209,7 @@ String MetaFile::GetFullName() const
 	return _T("");
 }
 
-String MetaFile::GetName() const
+str MetaFile::GetName() const
 {
 	if (mDiskFile != 0)
 	{
@@ -223,7 +223,7 @@ String MetaFile::GetName() const
 	return _T("");
 }
 
-String MetaFile::GetPath() const
+str MetaFile::GetPath() const
 {
 	if (mDiskFile != 0)
 	{
@@ -357,7 +357,7 @@ void MetaFile::AllocDiskFile()
 	mDiskFile->SetEndian(mEndian);
 }
 
-void MetaFile::AllocArchiveFile(const String& pArchiveName)
+void MetaFile::AllocArchiveFile(const str& pArchiveName)
 {
 	if(mReader != 0 && mWriter != 0)
 	{
@@ -440,7 +440,7 @@ ArchiveFile::OpenMode MetaFile::ToArchiveMode(OpenMode pMode)
 }
 
 
-bool MetaFile::IsZipFile(const String& pExtension)
+bool MetaFile::IsZipFile(const str& pExtension)
 {
 	bool lOk = false;
 
@@ -451,7 +451,7 @@ bool MetaFile::IsZipFile(const String& pExtension)
 	return lOk;
 }
 
-bool MetaFile::IsUncompressedArchive(const String& pExtension)
+bool MetaFile::IsUncompressedArchive(const str& pExtension)
 {
 	bool lOk = false;
 
@@ -463,22 +463,22 @@ bool MetaFile::IsUncompressedArchive(const String& pExtension)
 	return lOk;
 }
 
-void MetaFile::AddZipExtension(const String& pExtension)
+void MetaFile::AddZipExtension(const str& pExtension)
 {
 	if (smZipExtensions == 0)
 	{
-		smZipExtensions = new std::list<String>();
+		smZipExtensions = new std::list<str>();
 	}
 
 	smZipExtensions->push_back(pExtension);
 	smZipExtensions->unique();
 }
 
-void MetaFile::AddUncompressedExtension(const String& pExtension)
+void MetaFile::AddUncompressedExtension(const str& pExtension)
 {
 	if (smArchiveExtensions == 0)
 	{
-		smArchiveExtensions = new std::list<String>();
+		smArchiveExtensions = new std::list<str>();
 	}
 
 	smArchiveExtensions->push_back(pExtension);
@@ -502,10 +502,10 @@ void MetaFile::ClearExtensions()
 	}
 }
 
-std::list<String>* MetaFile::smZipExtensions;
-std::list<String>* MetaFile::smArchiveExtensions;
+std::list<str>* MetaFile::smZipExtensions;
+std::list<str>* MetaFile::smArchiveExtensions;
 
-bool MetaFile::SplitPath(const String& pFilename, String& pLeft, String& pRight, size_t pSplitIndex)
+bool MetaFile::SplitPath(const str& pFilename, str& pLeft, str& pRight, size_t pSplitIndex)
 {
 	bool lOk = true;
 	size_t lSplitIndex = pFilename.length();
@@ -543,9 +543,9 @@ bool MetaFile::SplitPath(const String& pFilename, String& pLeft, String& pRight,
 	return lOk;
 }
 
-bool MetaFile::FindValidArchiveName(const String& pArchivePrefix, String& pFullArchiveName)
+bool MetaFile::FindValidArchiveName(const str& pArchivePrefix, str& pFullArchiveName)
 {
-	std::list<String>::iterator lIter;
+	std::list<str>::iterator lIter;
 
 	bool lOk = false;
 
@@ -553,7 +553,7 @@ bool MetaFile::FindValidArchiveName(const String& pArchivePrefix, String& pFullA
 	{
 		for (lIter = smZipExtensions->begin(); lIter != smZipExtensions->end(); ++lIter)
 		{
-			String lFileName(pArchivePrefix + (*lIter));
+			str lFileName(pArchivePrefix + (*lIter));
 			if (DiskFile::Exists(lFileName) == true)
 			{
 				pFullArchiveName = lFileName;
@@ -567,7 +567,7 @@ bool MetaFile::FindValidArchiveName(const String& pArchivePrefix, String& pFullA
 	{
 		for (lIter = smArchiveExtensions->begin(); lIter != smArchiveExtensions->end(); ++lIter)
 		{
-			String lFileName(pArchivePrefix + (*lIter));
+			str lFileName(pArchivePrefix + (*lIter));
 			if (DiskFile::Exists(lFileName) == true)
 			{
 				pFullArchiveName = lFileName;

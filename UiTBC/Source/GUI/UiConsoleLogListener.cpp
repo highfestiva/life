@@ -4,8 +4,8 @@
 
 
 
-#include "../../../Lepra/Include/Math.h"
 #include "../../Include/GUI/UiConsoleLogListener.h"
+#include "../../../Lepra/Include/Math.h"
 #include "../../Include/GUI/UiTextArea.h"
 
 
@@ -31,24 +31,24 @@ void ConsoleLogListener::SetOutputComponent(TextArea* pOutputComponent)
 
 
 
-void ConsoleLogListener::WriteLog(const Lepra::String& pFullMessage, Lepra::Log::LogLevel pLevel)
+void ConsoleLogListener::WriteLog(const str& pFullMessage, Log::LogLevel pLevel)
 {
 	if (mOutputComponent)
 	{
-		Lepra::Color lColor;
+		Color lColor;
 		switch(pLevel)
 		{
-			case Lepra::Log::LEVEL_TRACE:	// Fall through.
-			case Lepra::Log::LEVEL_DEBUG:		lColor.Set(0.2f, 0.2f, 0.7f, 1.0f);	break;
-			case Lepra::Log::LEVEL_INFO:		lColor.Set(0.7f, 0.7f, 0.7f, 1.0f);	break;
-			case Lepra::Log::LEVEL_PERFORMANCE:	lColor.Set(0.0f, 1.0f, 0.0f, 1.0f);	break;
-			case Lepra::Log::LEVEL_HEADLINE:	lColor.Set(1.0f, 1.0f, 1.0f, 1.0f);	break;
-			case Lepra::Log::LEVEL_WARNING:		lColor.Set(1.0f, 1.0f, 0.0f, 1.0f);	break;
-			case Lepra::Log::LEVEL_ERROR:		lColor.Set(1.0f, 0.0f, 0.0f, 1.0f);	break;
+			case Log::LEVEL_TRACE:	// Fall through.
+			case Log::LEVEL_DEBUG:		lColor.Set(0.2f, 0.2f, 0.7f, 1.0f);	break;
+			case Log::LEVEL_INFO:		lColor.Set(0.7f, 0.7f, 0.7f, 1.0f);	break;
+			case Log::LEVEL_PERFORMANCE:	lColor.Set(0.0f, 1.0f, 0.0f, 1.0f);	break;
+			case Log::LEVEL_HEADLINE:	lColor.Set(1.0f, 1.0f, 1.0f, 1.0f);	break;
+			case Log::LEVEL_WARNING:		lColor.Set(1.0f, 1.0f, 0.0f, 1.0f);	break;
+			case Log::LEVEL_ERROR:		lColor.Set(1.0f, 0.0f, 0.0f, 1.0f);	break;
 			default:	// Fall through.
-			case Lepra::Log::LEVEL_FATAL:		lColor.Set(1.0f, 0.5f, 0.0f, 1.0f);	break;
+			case Log::LEVEL_FATAL:		lColor.Set(1.0f, 0.5f, 0.0f, 1.0f);	break;
 		}
-		Lepra::String lText(pFullMessage);
+		str lText(pFullMessage);
 		if (mLineFeed)
 		{
 			lText = _T("\n")+lText;
@@ -68,14 +68,14 @@ void ConsoleLogListener::StepPage(int pPageCount)
 	int lFirstVisibleLine = mOutputComponent->GetFirstVisibleLineIndex();
 	const int lVisibleLineCount = mOutputComponent->GetVisibleLineCount();
 	const int lLineCount = mOutputComponent->GetLineCount();
-	const int lStepSign = Lepra::Math::Clamp(pPageCount, -1, 1);
-	lFirstVisibleLine = Lepra::Math::Clamp(lFirstVisibleLine+lVisibleLineCount*pPageCount-lStepSign, 0, lLineCount);
+	const int lStepSign = Math::Clamp(pPageCount, -1, 1);
+	lFirstVisibleLine = Math::Clamp(lFirstVisibleLine+lVisibleLineCount*pPageCount-lStepSign, 0, lLineCount);
 	mOutputComponent->SetFirstVisibleLineIndex(lFirstVisibleLine);
 }
 
-void ConsoleLogListener::OnLogRawMessage(const Lepra::String& pText)
+void ConsoleLogListener::OnLogRawMessage(const str& pText)
 {
-	WriteLog(pText, Lepra::Log::LEVEL_INFO);
+	WriteLog(pText, Log::LEVEL_INFO);
 }
 
 

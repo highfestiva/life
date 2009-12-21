@@ -40,7 +40,7 @@ void CenterLayout::Remove(Component* pComponent)
 	}
 }
 
-Component* CenterLayout::Find(const Lepra::String& pComponentName)
+Component* CenterLayout::Find(const str& pComponentName)
 {
 	if (mChild && mChild->GetName() == pComponentName)
 	{
@@ -79,8 +79,8 @@ void CenterLayout::UpdateLayout()
 {
 	if (mChild != 0)
 	{
-		Lepra::PixelCoords lOwnerSize(GetOwner()->GetSize());
-		Lepra::PixelCoords lChildSize(mChild->GetPreferredSize());
+		PixelCoords lOwnerSize(GetOwner()->GetSize());
+		PixelCoords lChildSize(mChild->GetPreferredSize());
 
 		if (lChildSize.x > lOwnerSize.x)
 		{
@@ -97,7 +97,7 @@ void CenterLayout::UpdateLayout()
 	}
 }
 
-Lepra::PixelCoords CenterLayout::GetPreferredSize(bool pForceAdaptive)
+PixelCoords CenterLayout::GetPreferredSize(bool pForceAdaptive)
 {
 	if (mChild != 0)
 	{
@@ -105,11 +105,11 @@ Lepra::PixelCoords CenterLayout::GetPreferredSize(bool pForceAdaptive)
 	}
 	else
 	{
-		return Lepra::PixelCoords(0, 0);
+		return PixelCoords(0, 0);
 	}
 }
 
-Lepra::PixelCoords CenterLayout::GetMinSize()
+PixelCoords CenterLayout::GetMinSize()
 {
 	if (mChild != 0)
 	{
@@ -117,11 +117,11 @@ Lepra::PixelCoords CenterLayout::GetMinSize()
 	}
 	else
 	{
-		return Lepra::PixelCoords(0, 0);
+		return PixelCoords(0, 0);
 	}
 }
 
-Lepra::PixelCoords CenterLayout::GetContentSize()
+PixelCoords CenterLayout::GetContentSize()
 {
 	if (mChild != 0)
 	{
@@ -129,7 +129,7 @@ Lepra::PixelCoords CenterLayout::GetContentSize()
 	}
 	else
 	{
-		return Lepra::PixelCoords(0, 0);
+		return PixelCoords(0, 0);
 	}
 }
 

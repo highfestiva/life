@@ -24,12 +24,12 @@ public:
 	virtual ~UserAccountManager();
 
 	virtual bool AddUserAccount(const LoginId& pLoginId) = 0;
-	virtual bool DeleteUserAccount(const Lepra::UnicodeString& pUserAccountName) = 0;
+	virtual bool DeleteUserAccount(const wstr& pUserAccountName) = 0;
 	virtual UserAccount::Availability GetUserAccountStatus(const LoginId& pLoginId, UserAccount::AccountId& pAccountId) = 0;
-	virtual bool SetUserAccountStatus(const Lepra::UnicodeString& pUserAccountName, UserAccount::Availability pStatus) = 0;
-	virtual bool GetUserAccountId(const Lepra::UnicodeString& pUserName, UserAccount::AccountId& pAccountId) = 0;
-	virtual bool AddUserAvatarId(const Lepra::UnicodeString& pUserName, const UserAccount::AvatarId& pAvatarId) = 0;
-	virtual const UserAccount::AvatarIdSet* GetUserAvatarIdSet(const Lepra::UnicodeString& pUserName) = 0;
+	virtual bool SetUserAccountStatus(const wstr& pUserAccountName, UserAccount::Availability pStatus) = 0;
+	virtual bool GetUserAccountId(const wstr& pUserName, UserAccount::AccountId& pAccountId) = 0;
+	virtual bool AddUserAvatarId(const wstr& pUserName, const UserAccount::AvatarId& pAvatarId) = 0;
+	virtual const UserAccount::AvatarIdSet* GetUserAvatarIdSet(const wstr& pUserName) = 0;
 };
 
 
@@ -41,18 +41,18 @@ public:
 	virtual ~MemoryUserAccountManager();
 
 	bool AddUserAccount(const LoginId& pLoginId);
-	bool DeleteUserAccount(const Lepra::UnicodeString& pUserName);
+	bool DeleteUserAccount(const wstr& pUserName);
 	UserAccount::Availability GetUserAccountStatus(const LoginId& pLoginId, UserAccount::AccountId& pAccountId);
-	bool SetUserAccountStatus(const Lepra::UnicodeString& pUserAccountName, UserAccount::Availability pStatus);
-	bool GetUserAccountId(const Lepra::UnicodeString& pUserName, UserAccount::AccountId& pAccountId);
-	bool AddUserAvatarId(const Lepra::UnicodeString& pUserName, const UserAccount::AvatarId& pAvatarId);
-	const UserAccount::AvatarIdSet* GetUserAvatarIdSet(const Lepra::UnicodeString& pUserName);
+	bool SetUserAccountStatus(const wstr& pUserAccountName, UserAccount::Availability pStatus);
+	bool GetUserAccountId(const wstr& pUserName, UserAccount::AccountId& pAccountId);
+	bool AddUserAvatarId(const wstr& pUserName, const UserAccount::AvatarId& pAvatarId);
+	const UserAccount::AvatarIdSet* GetUserAvatarIdSet(const wstr& pUserName);
 
 	void RemoveAllUserAccounts();
 
 private:
-	typedef Lepra::IdManager<UserAccount::AccountId> LoggedInUserIdManager;
-	typedef Lepra::HashTable<Lepra::UnicodeString, UserAccount*>  UserAccountTable;
+	typedef IdManager<UserAccount::AccountId> LoggedInUserIdManager;
+	typedef HashTable<wstr, UserAccount*>  UserAccountTable;
 
 	LoggedInUserIdManager mLoggedInUserIdManager;
 	UserAccountTable mUserAccountTable;

@@ -17,7 +17,7 @@ namespace UiTbc
 
 
 
-TextField::TextField(Component* pTopParent, const Lepra::String& pName) :
+TextField::TextField(Component* pTopParent, const str& pName) :
 	Window(pName),
 	mIsReadOnly(false),
 	mPasswordCharacter(0),
@@ -39,7 +39,7 @@ TextField::TextField(Component* pTopParent, const Lepra::String& pName) :
 
 TextField::TextField(Component* pTopParent, 
 		     unsigned pBorderStyle, int pBorderWidth, 
-		     const Lepra::Color& pColor, const Lepra::String& pName) :
+		     const Color& pColor, const str& pName) :
 	Window(pBorderStyle, pBorderWidth, pColor, pName),
 	mIsReadOnly(false),
 	mPasswordCharacter(0),
@@ -61,7 +61,7 @@ TextField::TextField(Component* pTopParent,
 
 TextField::TextField(Component* pTopParent, 
 		     unsigned pBorderStyle, int pBorderWidth, 
-		     Painter::ImageID pImageID, const Lepra::String& pName) :
+		     Painter::ImageID pImageID, const str& pName) :
 	Window(pBorderStyle, pBorderWidth, pImageID, pName),
 	mIsReadOnly(false),
 	mPasswordCharacter(0),
@@ -82,7 +82,7 @@ TextField::TextField(Component* pTopParent,
 }
 
 TextField::TextField(Component* pTopParent, 
-		     const Lepra::Color& pColor, const Lepra::String& pName) :
+		     const Color& pColor, const str& pName) :
 	Window(pColor, pName),
 	mIsReadOnly(false),
 	mPasswordCharacter(0),
@@ -103,7 +103,7 @@ TextField::TextField(Component* pTopParent,
 }
 
 TextField::TextField(Component* pTopParent, 
-		     Painter::ImageID pImageID, const Lepra::String& pName) :
+		     Painter::ImageID pImageID, const str& pName) :
 	Window(pImageID, pName),
 	mIsReadOnly(false),
 	mPasswordCharacter(0),
@@ -160,10 +160,10 @@ void TextField::SpawnPopupList()
 	
 		if (mListControl != 0)
 		{
-			Lepra::PixelRect lScreenRect(GetScreenRect());
-			Lepra::PixelRect lClientScreenRect(mTopParent->GetScreenRect());
+			PixelRect lScreenRect(GetScreenRect());
+			PixelRect lClientScreenRect(mTopParent->GetScreenRect());
 
-			Lepra::PixelRect lRect(mTopParent->ScreenToWindow(GetScreenRect()));
+			PixelRect lRect(mTopParent->ScreenToWindow(GetScreenRect()));
 
 			mListControl->UpdateLayout();
 			int lHeight = (int)std::min(mListControl->GetPreferredHeight(), std::min(mListControl->GetContentSize().y, lClientScreenRect.mBottom - lScreenRect.mBottom));
@@ -208,14 +208,14 @@ void TextField::SetIsReadOnly(bool pIsReadOnly)
 	mIsReadOnly = pIsReadOnly;
 }
 
-void TextField::SetPasswordCharacter(Lepra::tchar pCharacter)
+void TextField::SetPasswordCharacter(tchar pCharacter)
 {
 	mPasswordCharacter = pCharacter;
 }
 
-Lepra::String TextField::GetVisibleText() const
+str TextField::GetVisibleText() const
 {
-	Lepra::String lText;
+	str lText;
 	if (mPasswordCharacter)
 	{
 		lText.assign(mText.length(), mPasswordCharacter);
@@ -227,7 +227,7 @@ Lepra::String TextField::GetVisibleText() const
 	return (lText);
 }
 
-void TextField::SetText(const Lepra::String& pText)
+void TextField::SetText(const str& pText)
 {
 	mText = pText;
 	mTextX = 0;
@@ -235,7 +235,7 @@ void TextField::SetText(const Lepra::String& pText)
 	SetNeedsRepaint(true);
 }
 
-const Lepra::String& TextField::GetText() const
+const str& TextField::GetText() const
 {
 	return mText;
 }
@@ -246,7 +246,7 @@ void TextField::SetMarker(Painter::ImageID pImageID)
 	SetNeedsRepaint(true);
 }
 
-void TextField::SetMarkerBlinkRate(Lepra::float64 pVisibleTime, Lepra::float64 pInvisibleTime)
+void TextField::SetMarkerBlinkRate(float64 pVisibleTime, float64 pInvisibleTime)
 {
 	mMarkerVisibleTime = pVisibleTime;
 	mMarkerInvisibleTime = pInvisibleTime;
@@ -261,7 +261,7 @@ void TextField::SetMarkerPosition(size_t pIndex)
 	}
 }
 
-bool TextField::OnChar(Lepra::tchar pChar)
+bool TextField::OnChar(tchar pChar)
 {
 	Parent::OnChar(pChar);
 	if (mIsReadOnly)
@@ -313,7 +313,7 @@ bool TextField::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 
 	bool lCtrlDown = lInputManager->ReadKey(UiLepra::InputManager::IN_KBD_LCTRL) ||
 		lInputManager->ReadKey(UiLepra::InputManager::IN_KBD_RCTRL);
-	const Lepra::String lDelimitors = _T(" \t");
+	const str lDelimitors = _T(" \t");
 
 
 	switch(pKeyCode)
@@ -324,7 +324,7 @@ bool TextField::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 			{
 				if (lCtrlDown == true)
 				{
-					mMarkerPos = Lepra::StringUtility::FindPreviousWord(GetVisibleText(), lDelimitors, mMarkerPos);
+					mMarkerPos = strutil::FindPreviousWord(GetVisibleText(), lDelimitors, mMarkerPos);
 				}
 				else
 				{
@@ -342,7 +342,7 @@ bool TextField::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 				{
 					size_t lIndex = GetVisibleText().find_first_not_of(lDelimitors, mMarkerPos);
 					lIndex = GetVisibleText().find_first_of(lDelimitors, lIndex);
-					if (lIndex == Lepra::String::npos)
+					if (lIndex == str::npos)
 					{
 						// We have reached the end.
 						mMarkerPos = mText.length();
@@ -537,7 +537,7 @@ void TextField::DoSetPos(int x, int y)
 	Parent::DoSetPos(x, y);
 	if (mListControl != 0)
 	{
-		Lepra::PixelRect lRect(mTopParent->ScreenToWindow(GetScreenRect()));
+		PixelRect lRect(mTopParent->ScreenToWindow(GetScreenRect()));
 		mListControl->SetPos(lRect.mLeft, lRect.mBottom);
 	}
 }
@@ -565,7 +565,7 @@ void TextField::Repaint(Painter* pPainter)
 
 	pPainter->PushAttrib(Painter::ATTR_ALL);
 
-	Lepra::PixelRect lRect(GetClientRect());
+	PixelRect lRect(GetClientRect());
 	pPainter->ReduceClippingRect(lRect);
 
 	int lMarkerX  = mTextX + pPainter->GetStringWidth(GetVisibleText().substr(0, mMarkerPos));
@@ -631,7 +631,7 @@ Component::StateComponentList TextField::GetStateList(ComponentState pState) con
 
 void TextField::UpdateMarkerPos(Painter* pPainter)
 {
-	Lepra::PixelRect lRect(GetClientRect());
+	PixelRect lRect(GetClientRect());
 	int lTextX = (mClickX - lRect.mLeft) - mTextX;
 
 	// Search for the correct marker position using binary search.

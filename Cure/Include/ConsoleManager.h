@@ -12,6 +12,7 @@
 #include "../../Lepra/Include/Log.h"
 #include "../../Lepra/Include/LogListener.h"
 #include "../../Lepra/Include/MemberThread.h"
+#include "../Include/Cure.h"
 
 
 
@@ -27,55 +28,55 @@ class RuntimeVariableScope;
 class ConsoleManager
 {
 public:
-	ConsoleManager(RuntimeVariableScope* pVariableScope, Lepra::InteractiveConsoleLogListener* pConsoleLogger,
-		Lepra::ConsolePrompt* pConsolePrompt);
+	ConsoleManager(RuntimeVariableScope* pVariableScope, InteractiveConsoleLogListener* pConsoleLogger,
+		ConsolePrompt* pConsolePrompt);
 	virtual ~ConsoleManager();
-	void SetConsoleLogger(Lepra::InteractiveConsoleLogListener* pLogger);
+	void SetConsoleLogger(InteractiveConsoleLogListener* pLogger);
 
 	virtual bool Start();
 	virtual void Join();
 
-	void PushYieldCommand(const Lepra::String& pCommand);
-	int ExecuteCommand(const Lepra::String& pCommand);
+	void PushYieldCommand(const str& pCommand);
+	int ExecuteCommand(const str& pCommand);
 	int ExecuteYieldCommand();
 
-	Lepra::ConsoleCommandManager* GetConsoleCommandManager() const;
+	ConsoleCommandManager* GetConsoleCommandManager() const;
 
 protected:
-	bool ForkExecuteCommand(const Lepra::String& pCommand);
+	bool ForkExecuteCommand(const str& pCommand);
 
 	struct CommandPair
 	{
-		const Lepra::tchar* mCommandName;
+		const tchar* mCommandName;
 		int mCommandId;
 	};
 
 	virtual void Init();
-	std::list<Lepra::String> GetCommandList() const;
-	virtual int TranslateCommand(const Lepra::String& pCommand) const;
-	void PrintCommandList(const std::list<Lepra::String>& pCommandList);
-	Lepra::InteractiveConsoleLogListener* GetConsoleLogger() const;
-	Lepra::ConsolePrompt* GetConsolePrompt() const;
+	std::list<str> GetCommandList() const;
+	virtual int TranslateCommand(const str& pCommand) const;
+	void PrintCommandList(const std::list<str>& pCommandList);
+	InteractiveConsoleLogListener* GetConsoleLogger() const;
+	ConsolePrompt* GetConsolePrompt() const;
 
 	RuntimeVariableScope* GetVariableScope() const;
 
 private:
 	void AddCommands();
 	void ConsoleThreadEntry();
-	int OnCommandLocal(const Lepra::String& pCommand, const Lepra::StringUtility::StringVector& pParameterVector);
-	void OnCommandError(const Lepra::String& pCommand, const Lepra::StringUtility::StringVector& pParameterVector, int pResult);
+	int OnCommandLocal(const str& pCommand, const strutil::strvec& pParameterVector);
+	void OnCommandError(const str& pCommand, const strutil::strvec& pParameterVector, int pResult);
 
 	virtual unsigned GetCommandCount() const = 0;
 	virtual const CommandPair& GetCommand(unsigned pIndex) const = 0;
-	virtual int OnCommand(const Lepra::String& pCommand, const Lepra::StringUtility::StringVector& pParameterVector) = 0;
+	virtual int OnCommand(const str& pCommand, const strutil::strvec& pParameterVector) = 0;
 
 	RuntimeVariableScope* mVariableScope;
-	Lepra::InteractiveConsoleLogListener* mConsoleLogger;
-	Lepra::ConsolePrompt* mConsolePrompt;
-	Lepra::ConsoleCommandManager* mConsoleCommandManager;
-	Lepra::MemberThread<ConsoleManager> mConsoleThread;
-	Lepra::Lock mLock;
-	std::list<Lepra::String> mYieldCommandList;
+	InteractiveConsoleLogListener* mConsoleLogger;
+	ConsolePrompt* mConsolePrompt;
+	ConsoleCommandManager* mConsoleCommandManager;
+	MemberThread<ConsoleManager> mConsoleThread;
+	Lock mLock;
+	std::list<str> mYieldCommandList;
 
 	LOG_CLASS_DECLARE();
 };

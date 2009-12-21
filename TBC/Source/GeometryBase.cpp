@@ -352,9 +352,9 @@ unsigned int GeometryBase::GetTriangleCount() const
 	}
 }
 
-void GeometryBase::GetTriangleIndices(int pTriangle, Lepra::uint32 pIndices[3])
+void GeometryBase::GetTriangleIndices(int pTriangle, uint32 pIndices[3])
 {
-	const Lepra::uint32* lIndices = GetIndexData();
+	const uint32* lIndices = GetIndexData();
 	switch (GetPrimitiveType())
 	{
 		case TRIANGLES:
@@ -384,9 +384,9 @@ void GeometryBase::GetTriangleIndices(int pTriangle, Lepra::uint32 pIndices[3])
 		{
 			assert(false);
 			// These values should hopefully cause a crash.
-			pIndices[0] = (Lepra::uint32)-100000;
-			pIndices[1] = (Lepra::uint32)-100000;
-			pIndices[2] = (Lepra::uint32)-100000;
+			pIndices[0] = (uint32)-100000;
+			pIndices[1] = (uint32)-100000;
+			pIndices[2] = (uint32)-100000;
 		} break;
 	}
 }
@@ -628,18 +628,18 @@ unsigned int GeometryBase::GetLastFrameVisible() const
 	return mLastFrameVisible;
 }
 
-void GeometryBase::SetTransformation(const Lepra::TransformationF& pTransformation)
+void GeometryBase::SetTransformation(const TransformationF& pTransformation)
 {
 	SetFlag(TRANSFORMATION_CHANGED, mTransformation != pTransformation);
 	mTransformation = pTransformation;
 }
 
-const Lepra::TransformationF& GeometryBase::GetBaseTransformation() const
+const TransformationF& GeometryBase::GetBaseTransformation() const
 {
 	return (mTransformation);
 }
 
-const Lepra::TransformationF& GeometryBase::GetTransformation() const
+const TransformationF& GeometryBase::GetTransformation() const
 {
 	return (GetBaseTransformation());
 }
@@ -750,7 +750,7 @@ bool GeometryBase::IsSingleObject()
 	}
 
 	unsigned int lTriangleCount = GetTriangleCount();
-	Lepra::uint32* lIndices   = GetIndexData();
+	uint32* lIndices   = GetIndexData();
 
 	if (lIndices == 0 || lTriangleCount == 0)
 	{
@@ -906,12 +906,12 @@ bool GeometryBase::IsConvexVolume()
 		int lT0Index = lT0 * 3;
 		//int lT1Index = lT1 * 3;
 
-		Lepra::Vector3DF lT0Normal(mSurfaceNormalData[lT0Index + 0],
+		Vector3DF lT0Normal(mSurfaceNormalData[lT0Index + 0],
 					    mSurfaceNormalData[lT0Index + 1],
 					    mSurfaceNormalData[lT0Index + 2]);
 
-		Lepra::uint32 lT0TriIndex[3];
-		Lepra::uint32 lT1TriIndex[3];
+		uint32 lT0TriIndex[3];
+		uint32 lT1TriIndex[3];
 		GetTriangleIndices(lT0, lT0TriIndex);
 		GetTriangleIndices(lT1, lT1TriIndex);
 
@@ -935,7 +935,7 @@ bool GeometryBase::IsConvexVolume()
 		lT1V0 *= 3;
 		lT1V1 *= 3;
 
-		Lepra::Vector3DF lT1Edge(lVertexData[lT1V1 + 0] - lVertexData[lT1V0 + 0],
+		Vector3DF lT1Edge(lVertexData[lT1V1 + 0] - lVertexData[lT1V0 + 0],
 					  lVertexData[lT1V1 + 1] - lVertexData[lT1V0 + 1],
 					  lVertexData[lT1V1 + 2] - lVertexData[lT1V0 + 2]);
 		lT1Edge.Normalize();
@@ -1040,7 +1040,7 @@ void GeometryBase::GenerateVertexNormalData()
 	// Now calculate the vertex normals.
 	for (i = 0; i < lTriangleCount; i++, lIndex += 3)
 	{
-		Lepra::uint32 lT[3];
+		uint32 lT[3];
 		GetTriangleIndices(i, lT);
 		int lI0 = lT[0] * 3;
 		int lI1 = lT[1] * 3;
@@ -1107,20 +1107,20 @@ void GeometryBase::GenerateSurfaceNormalData()
 	int lIndex = 0;
 	for (unsigned int i = 0; i < lTriangleCount; i++, lIndex += 3)
 	{
-		Lepra::uint32 lT[3];
+		uint32 lT[3];
 		GetTriangleIndices(i, lT);
 
 		int lI0 = lT[0] * 3;
 		int lI1 = lT[1] * 3;
 		int lI2 = lT[2] * 3;
 
-		Lepra::Vector3DF lV0(lVertexData[lI1 + 0] - lVertexData[lI0 + 0],
+		Vector3DF lV0(lVertexData[lI1 + 0] - lVertexData[lI0 + 0],
 				      lVertexData[lI1 + 1] - lVertexData[lI0 + 1],
 				      lVertexData[lI1 + 2] - lVertexData[lI0 + 2]);
-		Lepra::Vector3DF lV1(lVertexData[lI2 + 0] - lVertexData[lI0 + 0],
+		Vector3DF lV1(lVertexData[lI2 + 0] - lVertexData[lI0 + 0],
 				      lVertexData[lI2 + 1] - lVertexData[lI0 + 1],
 				      lVertexData[lI2 + 2] - lVertexData[lI0 + 2]);
-		Lepra::Vector3DF lC;
+		Vector3DF lC;
 		lC.CrossUnit(lV0, lV1);
 
 		mSurfaceNormalData[lIndex + 0] = lC.x;
@@ -1160,25 +1160,25 @@ void GeometryBase::GenerateEdgeData()
 	for (i = 0; i < lTriangleCount; i++, lIndex += 3)
 	{
 		// Get vertex indices.
-		Lepra::uint32 lV[3];
+		uint32 lV[3];
 		GetTriangleIndices(i, lV);
 
 		// Sort them.
 		if (lV[0] > lV[1])
 		{
-			Lepra::uint32 lT = lV[0];
+			uint32 lT = lV[0];
 			lV[0] = lV[1];
 			lV[1] = lT;
 		}
 		if (lV[1] > lV[2])
 		{
-			Lepra::uint32 lT = lV[1];
+			uint32 lT = lV[1];
 			lV[1] = lV[2];
 			lV[2] = lT;
 		}
 		if (lV[0] > lV[1])
 		{
-			Lepra::uint32 lT = lV[0];
+			uint32 lT = lV[0];
 			lV[0] = lV[1];
 			lV[1] = lT;
 		}
@@ -1299,7 +1299,7 @@ void GeometryBase::GenerateTangentAndBitangentData()
 
 	for (i = 0; i < lTriangleCount; i++)
 	{
-		Lepra::uint32 lTriIndex[3];
+		uint32 lTriIndex[3];
 		GetTriangleIndices(i, lTriIndex);
 
 		int lV1  = lTriIndex[0] * 3;
@@ -1309,16 +1309,16 @@ void GeometryBase::GenerateTangentAndBitangentData()
 		int lUV2 = lTriIndex[1] * 2;
 		int lUV3 = lTriIndex[2] * 2;
 
-		Lepra::Vector3DF lEdge1(lVertexData[lV2 + 0] - lVertexData[lV1 + 0],
+		Vector3DF lEdge1(lVertexData[lV2 + 0] - lVertexData[lV1 + 0],
 					 lVertexData[lV2 + 1] - lVertexData[lV1 + 1],
 					 lVertexData[lV2 + 2] - lVertexData[lV1 + 2]);
-		Lepra::Vector3DF lEdge2(lVertexData[lV3 + 0] - lVertexData[lV1 + 0],
+		Vector3DF lEdge2(lVertexData[lV3 + 0] - lVertexData[lV1 + 0],
 					 lVertexData[lV3 + 1] - lVertexData[lV1 + 1],
 					 lVertexData[lV3 + 2] - lVertexData[lV1 + 2]);
 
-		Lepra::Vector2DF lEdge1UV(lUVData[lUV2 + 0] - lUVData[lUV1 + 0],
+		Vector2DF lEdge1UV(lUVData[lUV2 + 0] - lUVData[lUV1 + 0],
 					   lUVData[lUV2 + 1] - lUVData[lUV1 + 1]);
-		Lepra::Vector2DF lEdge2UV(lUVData[lUV3 + 0] - lUVData[lUV1 + 0],
+		Vector2DF lEdge2UV(lUVData[lUV3 + 0] - lUVData[lUV1 + 0],
 					   lUVData[lUV3 + 1] - lUVData[lUV1 + 1]);
 
 		float lCP = lEdge1UV.y * lEdge2UV.x - lEdge1UV.x * lEdge2UV.y;
@@ -1328,10 +1328,10 @@ void GeometryBase::GenerateTangentAndBitangentData()
 		{
 			float lCPRecip = 1.0f / lCP;
 
-			Lepra::Vector3DF lTangent((lEdge1 * -lEdge2UV.y + lEdge2 * lEdge1UV.y) * lCPRecip);
-			Lepra::Vector3DF lBitangent((lEdge1 * -lEdge2UV.x + lEdge2 * lEdge1UV.x) * lCPRecip);
-			//Lepra::Vector3DF lTangent((lEdge2UV.y * lEdge1 - lEdge1UV.y * lEdge2) * lCPRecip);
-			//Lepra::Vector3DF lBitangent((lEdge1UV.x * lEdge2 - lEdge2UV.x * lEdge1) * lCPRecip);
+			Vector3DF lTangent((lEdge1 * -lEdge2UV.y + lEdge2 * lEdge1UV.y) * lCPRecip);
+			Vector3DF lBitangent((lEdge1 * -lEdge2UV.x + lEdge2 * lEdge1UV.x) * lCPRecip);
+			//Vector3DF lTangent((lEdge2UV.y * lEdge1 - lEdge1UV.y * lEdge2) * lCPRecip);
+			//Vector3DF lBitangent((lEdge1UV.x * lEdge2 - lEdge2UV.x * lEdge1) * lCPRecip);
 
 			lTangent.Normalize();
 			lBitangent.Normalize();
@@ -1393,7 +1393,7 @@ void GeometryBase::GenerateTangentAndBitangentData()
 
 bool GeometryBase::VerifyIndexData()
 {
-	Lepra::uint32* lIndex = GetIndexData();
+	uint32* lIndex = GetIndexData();
 	unsigned int lNumIndex = GetTriangleCount() * 3;
 	unsigned int lNumVertex = GetVertexCount();
 
@@ -1406,7 +1406,7 @@ bool GeometryBase::VerifyIndexData()
 	return lOk;
 }
 
-const Lepra::TransformationF& GeometryBase::GetUVTransform()
+const TransformationF& GeometryBase::GetUVTransform()
 {
 	if(mUVAnimator != 0)
 	{
@@ -1414,7 +1414,7 @@ const Lepra::TransformationF& GeometryBase::GetUVTransform()
 	}
 	else
 	{
-		return Lepra::gIdentityTransformationF;
+		return gIdentityTransformationF;
 	}
 }
 

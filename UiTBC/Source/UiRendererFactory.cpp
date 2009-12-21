@@ -15,7 +15,7 @@ namespace UiTbc
 
 
 
-Renderer* RendererFactory::Create(UiLepra::DisplayManager::ContextType pType, Lepra::Canvas* pScreen)
+Renderer* RendererFactory::Create(UiLepra::DisplayManager::ContextType pType, Canvas* pScreen)
 {
 	Renderer* lRenderer = 0;
 	switch (pType)

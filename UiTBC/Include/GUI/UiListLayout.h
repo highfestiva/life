@@ -39,7 +39,7 @@ public:
 	// pParam2 is not used.
 	virtual void Add(Component* pComponent, int pParam1, int pParam2);
 	virtual void Remove(Component* pComponent);
-	virtual Component* Find(const Lepra::String& pComponentName);
+	virtual Component* Find(const str& pComponentName);
 
 	void AddChildAfter(Component* pChild, Component* pAfterThis, int pIndentationLevel);
 	void AddChildrenAfter(std::list<Component*>& pChildList, Component* pAfterThis, int pIndentationLevel);
@@ -66,9 +66,9 @@ public:
 
 	virtual void UpdateLayout();
 
-	virtual Lepra::PixelCoords GetPreferredSize(bool pForceAdaptive);
-	virtual Lepra::PixelCoords GetMinSize();
-	virtual Lepra::PixelCoords GetContentSize();
+	virtual PixelCoords GetPreferredSize(bool pForceAdaptive);
+	virtual PixelCoords GetMinSize();
+	virtual PixelCoords GetContentSize();
 
 	inline void SetPosOffset(int pDX, int pDY);
 	inline int GetPosDX() const;
@@ -82,7 +82,7 @@ public:
 	// HW = Height or Width. Depends on ListType:
 	// COLUMN -> Height
 	// ROW -> Width
-	inline Lepra::float64 GetAverageComponentHW();
+	inline float64 GetAverageComponentHW();
 
 	inline bool IsEmpty();
 
@@ -116,15 +116,15 @@ private:
 	int GetPreferredHW(Component* pComponent);
 
 	typedef std::list<Node> NodeList;
-	typedef Lepra::LooseBinTree<Component*, Component*, Lepra::float64, std::hash<void*> > ComponentTree;
-	typedef Lepra::HashTable<Component*, NodeList::iterator, std::hash<void*> > ComponentTable;
+	typedef LooseBinTree<Component*, Component*, float64, std::hash<void*> > ComponentTree;
+	typedef HashTable<Component*, NodeList::iterator, std::hash<void*> > ComponentTable;
 
 	NodeList::iterator mIter;
 	NodeList mNodeList;
 	ComponentTree mComponentTree;
 	ComponentTable mComponentTable;
 
-	Lepra::PixelCoords mContentSize;
+	PixelCoords mContentSize;
 
 	int mPosDX;
 	int mPosDY;
@@ -156,16 +156,16 @@ int ListLayout::GetPosDY() const
 	return mPosDY;
 }
 
-Lepra::float64 ListLayout::GetAverageComponentHW()
+float64 ListLayout::GetAverageComponentHW()
 {
-	Lepra::float64 lHW = 0;
+	float64 lHW = 0;
 	if (mListType == COLUMN)
 	{
-		lHW = (Lepra::float64)mContentSize.y / (Lepra::float64)mNodeList.size();
+		lHW = (float64)mContentSize.y / (float64)mNodeList.size();
 	}
 	else // if (mListType == ROW)
 	{
-		lHW = (Lepra::float64)mContentSize.x / (Lepra::float64)mNodeList.size();
+		lHW = (float64)mContentSize.x / (float64)mNodeList.size();
 	}
 
 	return lHW;

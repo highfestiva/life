@@ -14,7 +14,7 @@
 namespace UiTbc
 {
 
-TreeNode::TreeNode(const Lepra::String& pText, const Lepra::String& pName) :
+TreeNode::TreeNode(const str& pText, const str& pName) :
 	Component(pName, new GridLayout(1, 1)),
 	mParentNode(0),
 	mChildNodes(0),
@@ -32,8 +32,8 @@ TreeNode::TreeNode(const Lepra::String& pText, const Lepra::String& pName) :
 
 TreeNode::TreeNode(Painter::ImageID pCollapsedIconID,
 		   Painter::ImageID pExpandedIconID,
-		   const Lepra::String& pText, 
-		   const Lepra::String& pName) :
+		   const str& pText, 
+		   const str& pName) :
 	Component(pName, new GridLayout(1, 1)),
 	mParentNode(0),
 	mChildNodes(0),
@@ -53,8 +53,8 @@ TreeNode::TreeNode(Painter::ImageID pCollapsedIconID,
 		   Painter::ImageID pExpandedIconID,
 		   Painter::ImageID pCollapseIconID,
 		   Painter::ImageID pExpandeIconID,
-		   const Lepra::String& pText, 
-		   const Lepra::String& pName) :
+		   const str& pText, 
+		   const str& pName) :
 	Component(pName, new GridLayout(1, 1)),
 	mParentNode(0),
 	mChildNodes(0),
@@ -80,7 +80,7 @@ TreeNode::~TreeNode()
 		// If expanded, the ListControl will delete these.
 		if (mExpandButton->GetPressed() == false)
 		{
-			Lepra::ListUtil::DeleteAll(*mChildNodes);
+			ListUtil::DeleteAll(*mChildNodes);
 		}
 
 		delete mChildNodes;
@@ -88,7 +88,7 @@ TreeNode::~TreeNode()
 	}
 }
 
-void TreeNode::Init(const Lepra::String& pText)
+void TreeNode::Init(const str& pText)
 {
 	ValidatePainterAndIcons();
 	ValidateExpandButton();
@@ -242,7 +242,7 @@ void TreeNode::AddDefaultIconIfNeeded(Painter::ImageID& pLocalIconID, Painter::I
 	if (pLocalIconID == Painter::INVALID_IMAGEID ||
 	    pStaticIconID != Painter::INVALID_IMAGEID)
 	{
-		Lepra::Color lPalette[256];
+		Color lPalette[256];
 		lPalette[0].Set(0, 0, 0, 0); 
 		lPalette[1].Set(0, 0, 0, 255);
 		lPalette[2].Set(251, 233, 160, 255);
@@ -251,12 +251,12 @@ void TreeNode::AddDefaultIconIfNeeded(Painter::ImageID& pLocalIconID, Painter::I
 		lPalette[106].Set(149, 149, 149, 255);
 		lPalette[255].Set(0, 0, 0, 255);
 
-		Lepra::Canvas lCanvas(16, 16, Lepra::Canvas::BITDEPTH_8_BIT);
+		Canvas lCanvas(16, 16, Canvas::BITDEPTH_8_BIT);
 		lCanvas.SetPalette(lPalette);
 		lCanvas.SetBuffer(pBuffer);
 
-		Lepra::Canvas lAlpha;
-		Lepra::uint8 lTransparentColor = 0;
+		Canvas lAlpha;
+		uint8 lTransparentColor = 0;
 		lCanvas.GetAlphaChannel(lAlpha, &lTransparentColor, 1);
 		lCanvas.ConvertTo32BitWithAlpha(lAlpha);
 
@@ -342,7 +342,7 @@ bool TreeNode::ValidateExpandButton()
 	return lRepaint;
 }
 
-bool TreeNode::ValidateIconRect(const Lepra::String& pText)
+bool TreeNode::ValidateIconRect(const str& pText)
 {
 	bool lRepaint = false;
 
@@ -418,10 +418,10 @@ bool TreeNode::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 }
 
 
-void TreeNode::UseFont(const Lepra::Color& pTextColor,
-		       const Lepra::Color& pTextBackgColor,
-		       const Lepra::Color& pTextSelectedColor,
-		       const Lepra::Color& pTextSelectedBackgColor)
+void TreeNode::UseFont(const Color& pTextColor,
+		       const Color& pTextBackgColor,
+		       const Color& pTextSelectedColor,
+		       const Color& pTextSelectedBackgColor)
 {
 	smFactoryTextColor = pTextColor;
 	smFactoryTextBackgColor = pTextBackgColor;
@@ -436,7 +436,7 @@ Painter::ImageID TreeNode::smExpandedIconID = Painter::INVALID_IMAGEID;
 Painter::ImageID TreeNode::smCollapsedIconID = Painter::INVALID_IMAGEID;
 Painter* TreeNode::smPrevPainter = 0;
 
-Lepra::uint8 TreeNode::smIconExpand[] =
+uint8 TreeNode::smIconExpand[] =
 {
 	106, 106, 106, 106, 106, 106, 106, 106, 106,   0,   0,   0,   0,   0,   0,   0,
 	106,   3,   3,   3,   3,   3,   3,   3, 106,   0,   0,   0,   0,   0,   0,   0,
@@ -456,7 +456,7 @@ Lepra::uint8 TreeNode::smIconExpand[] =
 	  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
 };
 
-Lepra::uint8 TreeNode::smIconCollapse[] =
+uint8 TreeNode::smIconCollapse[] =
 {
 	106, 106, 106, 106, 106, 106, 106, 106, 106,   0,   0,   0,   0,   0,   0,   0,
 	106,   3,   3,   3,   3,   3,   3,   3, 106,   0,   0,   0,   0,   0,   0,   0,
@@ -476,7 +476,7 @@ Lepra::uint8 TreeNode::smIconCollapse[] =
 	  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
 };
 
-Lepra::uint8 TreeNode::smIconCollapsed[] =
+uint8 TreeNode::smIconCollapsed[] =
 {
 	  0,   1,   1,   1,   1,   1,   1,   0,   0,   0,   0,   0,   0,   0,   0,   0,
 	  1,   2,   2,   2,   2,   2,   2,   1,   0,   0,   0,   0,   0,   0,   0,   0,
@@ -496,7 +496,7 @@ Lepra::uint8 TreeNode::smIconCollapsed[] =
 	  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
 };
 
-Lepra::uint8 TreeNode::smIconExpanded[] =
+uint8 TreeNode::smIconExpanded[] =
 {
 	  0,   1,   1,   1,   1,   1,   1,   0,   0,   0,   0,   0,   0,   0,   0,   0,
 	  1,   2,   2,   2,   2,   2,   2,   1,   0,   0,   0,   0,   0,   0,   0,   0,
@@ -516,10 +516,10 @@ Lepra::uint8 TreeNode::smIconExpanded[] =
 	  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
 };
 
-Lepra::Color TreeNode::smFactoryTextColor              = Lepra::BLACK;
-Lepra::Color TreeNode::smFactoryTextBackgColor         = Lepra::WHITE;
-Lepra::Color TreeNode::smFactoryTextSelectedColor      = Lepra::BLACK;
-Lepra::Color TreeNode::smFactoryTextSelectedBackgColor = Lepra::LIGHT_BLUE;
+Color TreeNode::smFactoryTextColor              = BLACK;
+Color TreeNode::smFactoryTextBackgColor         = WHITE;
+Color TreeNode::smFactoryTextSelectedColor      = BLACK;
+Color TreeNode::smFactoryTextSelectedBackgColor = LIGHT_BLUE;
 
 
 } // End namespace.

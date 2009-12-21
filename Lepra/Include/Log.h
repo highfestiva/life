@@ -42,23 +42,23 @@ public:
 		LEVEL_TYPE_COUNT
 	};
 
-	Log(const String& pName, Log* pParent, LogLevel pLevel = LEVEL_LOWEST_TYPE);
+	Log(const str& pName, Log* pParent, LogLevel pLevel = LEVEL_LOWEST_TYPE);
 	void SetupBasicListeners(LogListener* pConsole = 0, LogListener* pDebug = 0,
 		LogListener* pFile = 0, LogListener* pPerformance = 0, LogListener* pMem = 0);
 	void AddListener(LogListener* pLogger, LogLevel pLevel);
 	void RemoveListener(LogListener* pLogger);
-	LogListener* GetListener(const Lepra::String& pName) const;
-	String GetName() const;
+	LogListener* GetListener(const str& pName) const;
+	str GetName() const;
 	LogLevel GetLevelThreashold() const;
 	void SetLevelThreashold(LogLevel pLevel);
-	void Print(const String& pAccount, const String& pMessage, LogLevel pLevel = LEVEL_INFO);
-	void RawPrint(const String& pMessage, LogLevel pLevel = LEVEL_INFO);
+	void Print(const str& pAccount, const str& pMessage, LogLevel pLevel = LEVEL_INFO);
+	void RawPrint(const str& pMessage, LogLevel pLevel = LEVEL_INFO);
 
 private:
-	void DoPrint(const Log* pOriginator, const String& pAccount, const String& pMessage, LogLevel pLevel = LEVEL_INFO);
-	void DoRawPrint(const String& pMessage, LogLevel pLevel = LEVEL_INFO);
+	void DoPrint(const Log* pOriginator, const str& pAccount, const str& pMessage, LogLevel pLevel = LEVEL_INFO);
+	void DoRawPrint(const str& pMessage, LogLevel pLevel = LEVEL_INFO);
 
-	String mName;
+	str mName;
 	Log* mParent;
 	std::vector<LogListener*> mLoggerList[LEVEL_TYPE_COUNT];
 	LogLevel mLevel;
@@ -71,32 +71,32 @@ class LogDecorator
 public:
 	LogDecorator(Log* pLog, const std::type_info& pTypeId);
 
-	void Print(Log::LogLevel pLogLevel, const String& pText) const;
-	void RawPrint(Log::LogLevel pLogLevel, const String& pText) const;
+	void Print(Log::LogLevel pLogLevel, const str& pText) const;
+	void RawPrint(Log::LogLevel pLogLevel, const str& pText) const;
 #ifndef NO_LOG_DEBUG_INFO
 	void Tracef(const tchar* pText, ...) const;
-	void Trace(const String& pText) const;
+	void Trace(const str& pText) const;
 	void Debugf(const tchar* pText, ...) const;
-	void Debug(const String& pText) const;
+	void Debug(const str& pText) const;
 #endif // !NO_LOG_DEBUG_INFO
 	void Performancef(const tchar* pText, ...) const;
-	void Performance(const String& pText) const;
+	void Performance(const str& pText) const;
 	void Infof(const tchar* pText, ...) const;
-	void Info(const String& pText) const;
+	void Info(const str& pText) const;
 	void Headlinef(const tchar* pText, ...) const;
-	void Headline(const String& pText) const;
+	void Headline(const str& pText) const;
 	void Warningf(const tchar* pText, ...) const;
-	void Warning(const String& pText) const;
+	void Warning(const str& pText) const;
 	void Errorf(const tchar* pText, ...) const;
-	void Error(const String& pText) const;
+	void Error(const str& pText) const;
 	void Fatalf(const tchar* pText, ...) const;
-	void Fatal(const String& pText) const;
+	void Fatal(const str& pText) const;
 
-	const String& GetClassName() const;
+	const str& GetClassName() const;
 
 private:
 	Log* mLog;
-	String mClassName;
+	str mClassName;
 };
 
 // Ansi comfort zone.

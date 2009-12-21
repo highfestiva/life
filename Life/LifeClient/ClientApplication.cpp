@@ -23,11 +23,11 @@ class ClientApplication: public Application
 public:
 	typedef Application Parent;
 
-	ClientApplication(const Lepra::StringUtility::StringVector& pArgumentList);
+	ClientApplication(const strutil::strvec& pArgumentList);
 	virtual ~ClientApplication();
 
 private:
-	Lepra::String GetName() const;
+	str GetName() const;
 	Cure::GameTicker* CreateGameTicker() const;
 
 	UiCure::GameUiManager* mUiManager;
@@ -48,7 +48,7 @@ namespace Life
 
 
 
-ClientApplication::ClientApplication(const Lepra::StringUtility::StringVector& pArgumentList):
+ClientApplication::ClientApplication(const strutil::strvec& pArgumentList):
 	Application(pArgumentList),
 	mUiManager(0)
 {
@@ -73,7 +73,7 @@ ClientApplication::~ClientApplication()
 	UiLepra::Shutdown();
 }
 
-Lepra::String ClientApplication::GetName() const
+str ClientApplication::GetName() const
 {
 	return (_T("Client"));
 }

@@ -36,13 +36,13 @@ public:
 		BORDER_HALF          = (1 << 3),
 	};
 
-	Window(const Lepra::String& pName, Layout* pLayout = 0);
-	Window(unsigned pBorderStyle, int pBorderWidth, const Lepra::Color& pColor,
-		const Lepra::String& pName, Layout* pLayout = 0);
+	Window(const str& pName, Layout* pLayout = 0);
+	Window(unsigned pBorderStyle, int pBorderWidth, const Color& pColor,
+		const str& pName, Layout* pLayout = 0);
 	Window(unsigned pBorderStyle, int pBorderWidth, Painter::ImageID pImageID,
-		const Lepra::String& pName, Layout* pLayout = 0);
-	Window(const Lepra::Color& pColor, const Lepra::String& pName, Layout* pLayout = 0);
-	Window(Painter::ImageID pImageID, const Lepra::String& pName, Layout* pLayout = 0);
+		const str& pName, Layout* pLayout = 0);
+	Window(const Color& pColor, const str& pName, Layout* pLayout = 0);
+	Window(Painter::ImageID pImageID, const str& pName, Layout* pLayout = 0);
 	virtual ~Window();
 
 	void SetBorder(unsigned pBorderStyle, int pWidth);
@@ -63,29 +63,29 @@ public:
 	virtual bool IsOver(int pScreenX, int pScreenY);
 
 	inline void SetBackgroundImage(Painter::ImageID pImageID);
-	inline void SetColor(const Lepra::Color& pColor);
+	inline void SetColor(const Color& pColor);
 
 	virtual void SetCaption(Caption* pCaption);
 	inline Caption* GetCaption();
 
 	inline Painter::ImageID GetBackgroundImage();
-	inline const Lepra::Color& GetColor();
+	inline const Color& GetColor();
 
 	virtual void AddChild(Component* pChild, int pParam1 = 0, int pParam2 = 0);
 	virtual void RemoveChild(Component* pChild, int pLayer);
-	virtual Component* GetChild(const Lepra::String& pName, int pLayer);
+	virtual Component* GetChild(const str& pName, int pLayer);
 	virtual int GetNumChildren() const;
 
 	inline virtual Component::Type GetType();
 
-	virtual bool OnChar(Lepra::tchar pChar);
+	virtual bool OnChar(tchar pChar);
 	virtual bool OnLButtonDown(int pMouseX, int pMouseY);
 	virtual bool OnRButtonDown(int pMouseX, int pMouseY);
 	virtual bool OnMButtonDown(int pMouseX, int pMouseY);
 
 protected:
 	// Returns the client rect in screen coordinates.
-	virtual Lepra::PixelRect GetClientRect();
+	virtual PixelRect GetClientRect();
 
 	// A convenience function.
 	RectComponent* GetClientRectComponent();
@@ -114,7 +114,7 @@ private:
 
 	bool mBorder;
 	int mBorderWidth;
-	Lepra::Color mBodyColor;
+	Color mBodyColor;
 	unsigned mBorderStyle;
 };
 
@@ -134,7 +134,7 @@ void Window::SetBackgroundImage(Painter::ImageID pImageID)
 	mClientRect->SetImage(pImageID);
 }
 
-void Window::SetColor(const Lepra::Color& pColor)
+void Window::SetColor(const Color& pColor)
 {
 	SetNeedsRepaint(pColor != mClientRect->GetColor());
 	mClientRect->SetColor(pColor);
@@ -145,7 +145,7 @@ Painter::ImageID Window::GetBackgroundImage()
 	return mClientRect->GetImage();
 }
 
-const Lepra::Color& Window::GetColor()
+const Color& Window::GetColor()
 {
 	return mBodyColor;
 }

@@ -18,7 +18,7 @@ namespace Lepra
 
 
 
-Log::Log(const String& pName, Log* pParent, LogLevel pLevel):
+Log::Log(const str& pName, Log* pParent, LogLevel pLevel):
 	mName(pName),
 	mParent(pParent),
 	mLevel(pLevel)
@@ -109,7 +109,7 @@ void Log::RemoveListener(LogListener* pLogger)
 	pLogger->RemoveLog(this);
 }
 
-LogListener* Log::GetListener(const Lepra::String& pName) const
+LogListener* Log::GetListener(const str& pName) const
 {
 	LogListener* lListener = 0;
 	for (int x = LEVEL_LOWEST_TYPE; !lListener && x < LEVEL_TYPE_COUNT; ++x)
@@ -126,7 +126,7 @@ LogListener* Log::GetListener(const Lepra::String& pName) const
 	return (lListener);
 }
 
-String Log::GetName() const
+str Log::GetName() const
 {
 	return (mName);
 }
@@ -149,17 +149,17 @@ void Log::SetLevelThreashold(LogLevel pLevel)
 	mLevel = pLevel;
 }
 
-void Log::Print(const String& pAccount, const String& pMessage, LogLevel pLevel)
+void Log::Print(const str& pAccount, const str& pMessage, LogLevel pLevel)
 {
 	DoPrint(this, pAccount, pMessage, pLevel);
 }
 
-void Log::RawPrint(const String& pMessage, LogLevel pLevel)
+void Log::RawPrint(const str& pMessage, LogLevel pLevel)
 {
 	DoRawPrint(pMessage, pLevel);
 }
 
-void Log::DoPrint(const Log* pOriginator, const String& pAccount, const String& pMessage, LogLevel pLevel)
+void Log::DoPrint(const Log* pOriginator, const str& pAccount, const str& pMessage, LogLevel pLevel)
 {
 	if (pLevel >= mLevel && pLevel < LEVEL_TYPE_COUNT)
 	{
@@ -176,7 +176,7 @@ void Log::DoPrint(const Log* pOriginator, const String& pAccount, const String& 
 	}
 }
 
-void Log::DoRawPrint(const String& pMessage, LogLevel pLevel)
+void Log::DoRawPrint(const str& pMessage, LogLevel pLevel)
 {
 	if (pLevel >= mLevel && pLevel < LEVEL_TYPE_COUNT)
 	{
@@ -199,7 +199,7 @@ LogDecorator::LogDecorator(Log* pLog, const std::type_info& pTypeId):
 	mLog(pLog)
 #ifdef LEPRA_MSVC
 	// Skip "class " in beginning of name.
-	, mClassName(AnsiStringUtility::ToCurrentCode(Lepra::AnsiString(pTypeId.name()+6)))
+	, mClassName(astrutil::ToCurrentCode(astr(pTypeId.name()+6)))
 {
 #elif defined(LEPRA_POSIX)
 {
@@ -218,7 +218,7 @@ LogDecorator::LogDecorator(Log* pLog, const std::type_info& pTypeId):
 		for (; x < lLength && ::isalpha(s[x]); ++x)
 			;
 		char* lEndPtr;
-		long lWordLength = AnsiStringUtility::StrToL(&s[x], &lEndPtr, 10);
+		long lWordLength = astrutil::StrToL(&s[x], &lEndPtr, 10);
 		lStepLength = lEndPtr-&s[x];
 		lStartOfWord = x+lStepLength;
 		lStepLength = (lStepLength < 1)? 1 : lStepLength;
@@ -230,24 +230,24 @@ LogDecorator::LogDecorator(Log* pLog, const std::type_info& pTypeId):
 	}
 	if (x <= lLength)
 	{
-		Lepra::AnsiString lCrop(&s[lStartOfWord], x-lStartOfWord);
-		mClassName = AnsiStringUtility::ToCurrentCode(lCrop);
+		astr lCrop(&s[lStartOfWord], x-lStartOfWord);
+		mClassName = astrutil::ToCurrentCode(lCrop);
 	}
 	else
 	{
-		mClassName = AnsiStringUtility::ToCurrentCode(s);
+		mClassName = astrutil::ToCurrentCode(s);
 	}
 #else // !MSVC
 #error typeid parsing not implemented.
 #endif // MSVC/!MSVC
 }
 
-void LogDecorator::Print(Log::LogLevel pLogLevel, const String& pText) const
+void LogDecorator::Print(Log::LogLevel pLogLevel, const str& pText) const
 {
 	mLog->Print(mClassName, pText, pLogLevel);
 }
 
-void LogDecorator::RawPrint(Log::LogLevel pLogLevel, const String& pText) const
+void LogDecorator::RawPrint(Log::LogLevel pLogLevel, const str& pText) const
 {
 	mLog->RawPrint(pText, pLogLevel);
 }
@@ -255,7 +255,7 @@ void LogDecorator::RawPrint(Log::LogLevel pLogLevel, const String& pText) const
 #define StrV()	\
 	va_list	lArguments;	\
 	va_start(lArguments, pText);	\
-	String lText = StringUtility::VFormat(pText, lArguments)
+	str lText = strutil::VFormat(pText, lArguments)
 
 #define StrVLog(level)	\
 	StrV();	\
@@ -267,7 +267,7 @@ void LogDecorator::Tracef(const tchar* pText, ...) const
 	StrVLog(Log::LEVEL_TRACE);
 }
 
-void LogDecorator::Trace(const String& pText) const
+void LogDecorator::Trace(const str& pText) const
 {
 	Print(Log::LEVEL_TRACE, pText);
 }
@@ -277,7 +277,7 @@ void LogDecorator::Debugf(const tchar* pText, ...) const
 	StrVLog(Log::LEVEL_DEBUG);
 }
 
-void LogDecorator::Debug(const String& pText) const
+void LogDecorator::Debug(const str& pText) const
 {
 	Print(Log::LEVEL_DEBUG, pText);
 }
@@ -288,7 +288,7 @@ void LogDecorator::Performancef(const tchar* pText, ...) const
 	StrVLog(Log::LEVEL_PERFORMANCE);
 }
 
-void LogDecorator::Performance(const String& pText) const
+void LogDecorator::Performance(const str& pText) const
 {
 	Print(Log::LEVEL_PERFORMANCE, pText);
 }
@@ -298,7 +298,7 @@ void LogDecorator::Infof(const tchar* pText, ...) const
 	StrVLog(Log::LEVEL_INFO);
 }
 
-void LogDecorator::Info(const String& pText) const
+void LogDecorator::Info(const str& pText) const
 {
 	Print(Log::LEVEL_INFO, pText);
 }
@@ -308,7 +308,7 @@ void LogDecorator::Headlinef(const tchar* pText, ...) const
 	StrVLog(Log::LEVEL_HEADLINE);
 }
 
-void LogDecorator::Headline(const String& pText) const
+void LogDecorator::Headline(const str& pText) const
 {
 	Print(Log::LEVEL_HEADLINE, pText);
 }
@@ -318,7 +318,7 @@ void LogDecorator::Warningf(const tchar* pText, ...) const
 	StrVLog(Log::LEVEL_WARNING);
 }
 
-void LogDecorator::Warning(const String& pText) const
+void LogDecorator::Warning(const str& pText) const
 {
 	Print(Log::LEVEL_WARNING, pText);
 }
@@ -328,7 +328,7 @@ void LogDecorator::Errorf(const tchar* pText, ...) const
 	StrVLog(Log::LEVEL_ERROR);
 }
 
-void LogDecorator::Error(const String& pText) const
+void LogDecorator::Error(const str& pText) const
 {
 	Print(Log::LEVEL_ERROR, pText);
 }
@@ -338,12 +338,12 @@ void LogDecorator::Fatalf(const tchar* pText, ...) const
 	StrVLog(Log::LEVEL_FATAL);
 }
 
-void LogDecorator::Fatal(const String& pText) const
+void LogDecorator::Fatal(const str& pText) const
 {
 	Print(Log::LEVEL_FATAL, pText);
 }
 
-const String& LogDecorator::GetClassName() const
+const str& LogDecorator::GetClassName() const
 {
 	return (mClassName);
 }

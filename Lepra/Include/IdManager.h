@@ -48,7 +48,7 @@ public:
 	bool ReserveId(_TInt pId);
 	bool RecycleId(_TInt pId);
 
-	String GetDebugState() const;
+	str GetDebugState() const;
 
 private:
 	struct AllocFreeSegment

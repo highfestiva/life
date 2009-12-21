@@ -22,33 +22,33 @@ ImageLoader::~ImageLoader()
 {
 }
 
-bool ImageLoader::Load(const String& pFileName, Canvas& pCanvas)
+bool ImageLoader::Load(const str& pFileName, Canvas& pCanvas)
 {
 	bool lOk = false;
-	String lFileExtension = Path::GetExtension(pFileName);
+	str lFileExtension = Path::GetExtension(pFileName);
 	if (!lFileExtension.empty())
 	{
-		if (StringUtility::CompareIgnoreCase(lFileExtension, _T("bmp")) == 0)
+		if (strutil::CompareIgnoreCase(lFileExtension, _T("bmp")) == 0)
 		{
 			BmpLoader lBmpLoader;
 			lOk = (lBmpLoader.Load(pFileName, pCanvas) == BmpLoader::STATUS_SUCCESS);
 		}
-		else if(StringUtility::CompareIgnoreCase(lFileExtension, _T("tga")) == 0)
+		else if(strutil::CompareIgnoreCase(lFileExtension, _T("tga")) == 0)
 		{
 			TgaLoader lTgaLoader;
 			lOk = (lTgaLoader.Load(pFileName, pCanvas) == TgaLoader::STATUS_SUCCESS);
 		}
-		else if(StringUtility::CompareIgnoreCase(lFileExtension, _T("tif")) == 0 || StringUtility::CompareIgnoreCase(lFileExtension, _T("tiff")) == 0)
+		else if(strutil::CompareIgnoreCase(lFileExtension, _T("tif")) == 0 || strutil::CompareIgnoreCase(lFileExtension, _T("tiff")) == 0)
 		{
 			TiffLoader lTiffLoader;
 			lOk = (lTiffLoader.Load(pFileName, pCanvas) == TiffLoader::STATUS_SUCCESS);
 		}
-		else if(StringUtility::CompareIgnoreCase(lFileExtension, _T("jpg")) == 0 || StringUtility::CompareIgnoreCase(lFileExtension, _T("jpeg")) == 0)
+		else if(strutil::CompareIgnoreCase(lFileExtension, _T("jpg")) == 0 || strutil::CompareIgnoreCase(lFileExtension, _T("jpeg")) == 0)
 		{
 			JpegLoader lJpegLoader;
 			lOk = (lJpegLoader.Load(pFileName, pCanvas) == JpegLoader::STATUS_SUCCESS);
 		}
-		else if(StringUtility::CompareIgnoreCase(lFileExtension, _T("png")) == 0 || StringUtility::CompareIgnoreCase(lFileExtension, _T("pngf")) == 0)
+		else if(strutil::CompareIgnoreCase(lFileExtension, _T("png")) == 0 || strutil::CompareIgnoreCase(lFileExtension, _T("pngf")) == 0)
 		{
 			PngLoader lPngLoader;
 			lOk = (lPngLoader.Load(pFileName, pCanvas) == PngLoader::STATUS_SUCCESS);
@@ -61,31 +61,31 @@ bool ImageLoader::Load(const String& pFileName, Canvas& pCanvas)
 	return (lOk);
 }
 
-bool ImageLoader::Save(const String& pFileName, const Canvas& pCanvas)
+bool ImageLoader::Save(const str& pFileName, const Canvas& pCanvas)
 {
-	String lFileExtension = Path::GetExtension(pFileName);
+	str lFileExtension = Path::GetExtension(pFileName);
 
-	if (StringUtility::CompareIgnoreCase(lFileExtension, _T("bmp")) == 0)
+	if (strutil::CompareIgnoreCase(lFileExtension, _T("bmp")) == 0)
 	{
 		BmpLoader lBmpLoader;
 		return lBmpLoader.Save(pFileName, pCanvas) == BmpLoader::STATUS_SUCCESS;
 	}
-	else if(StringUtility::CompareIgnoreCase(lFileExtension, _T("tga")) == 0)
+	else if(strutil::CompareIgnoreCase(lFileExtension, _T("tga")) == 0)
 	{
 		TgaLoader lTgaLoader;
 		return lTgaLoader.Save(pFileName, pCanvas) == TgaLoader::STATUS_SUCCESS;
 	}
-	else if(StringUtility::CompareIgnoreCase(lFileExtension, _T("tif")) == 0 || StringUtility::CompareIgnoreCase(lFileExtension, _T("tiff")) == 0)
+	else if(strutil::CompareIgnoreCase(lFileExtension, _T("tif")) == 0 || strutil::CompareIgnoreCase(lFileExtension, _T("tiff")) == 0)
 	{
 		TiffLoader lTiffLoader;
 		return lTiffLoader.Save(pFileName, pCanvas) == TiffLoader::STATUS_SUCCESS;
 	}
-	else if(StringUtility::CompareIgnoreCase(lFileExtension, _T("jpg")) == 0 || StringUtility::CompareIgnoreCase(lFileExtension, _T("jpeg")) == 0)
+	else if(strutil::CompareIgnoreCase(lFileExtension, _T("jpg")) == 0 || strutil::CompareIgnoreCase(lFileExtension, _T("jpeg")) == 0)
 	{
 		JpegLoader lJpegLoader;
 		return lJpegLoader.Save(pFileName, pCanvas) == JpegLoader::STATUS_SUCCESS;
 	}
-	else if(StringUtility::CompareIgnoreCase(lFileExtension, _T("png")) == 0 || StringUtility::CompareIgnoreCase(lFileExtension, _T("pngf")) == 0)
+	else if(strutil::CompareIgnoreCase(lFileExtension, _T("png")) == 0 || strutil::CompareIgnoreCase(lFileExtension, _T("pngf")) == 0)
 	{
 		PngLoader lPngLoader;
 		return lPngLoader.Save(pFileName, pCanvas) == PngLoader::STATUS_SUCCESS;
@@ -96,31 +96,31 @@ bool ImageLoader::Save(const String& pFileName, const Canvas& pCanvas)
 	}
 }
 
-bool ImageLoader::Load(const String& pArchiveName, const String& pFileName, Canvas& pCanvas)
+bool ImageLoader::Load(const str& pArchiveName, const str& pFileName, Canvas& pCanvas)
 {
-	String lFileExtension = Path::GetExtension(pFileName);
+	str lFileExtension = Path::GetExtension(pFileName);
 
-	if (StringUtility::CompareIgnoreCase(lFileExtension, _T("bmp")) == 0)
+	if (strutil::CompareIgnoreCase(lFileExtension, _T("bmp")) == 0)
 	{
 		BmpLoader lBmpLoader;
 		return lBmpLoader.Load(pArchiveName, pFileName, pCanvas) == BmpLoader::STATUS_SUCCESS;
 	}
-	else if(StringUtility::CompareIgnoreCase(lFileExtension, _T("tga")) == 0)
+	else if(strutil::CompareIgnoreCase(lFileExtension, _T("tga")) == 0)
 	{
 		TgaLoader lTgaLoader;
 		return lTgaLoader.Load(pArchiveName, pFileName, pCanvas) == TgaLoader::STATUS_SUCCESS;
 	}
-	else if(StringUtility::CompareIgnoreCase(lFileExtension, _T("tif")) == 0 || StringUtility::CompareIgnoreCase(lFileExtension, _T("tiff")) == 0)
+	else if(strutil::CompareIgnoreCase(lFileExtension, _T("tif")) == 0 || strutil::CompareIgnoreCase(lFileExtension, _T("tiff")) == 0)
 	{
 		TiffLoader lTiffLoader;
 		return lTiffLoader.Load(pArchiveName, pFileName, pCanvas) == TiffLoader::STATUS_SUCCESS;
 	}
-	else if(StringUtility::CompareIgnoreCase(lFileExtension, _T("jpg")) == 0 || StringUtility::CompareIgnoreCase(lFileExtension, _T("jpeg")) == 0)
+	else if(strutil::CompareIgnoreCase(lFileExtension, _T("jpg")) == 0 || strutil::CompareIgnoreCase(lFileExtension, _T("jpeg")) == 0)
 	{
 		JpegLoader lJpegLoader;
 		return lJpegLoader.Load(pArchiveName, pFileName, pCanvas) == JpegLoader::STATUS_SUCCESS;
 	}
-	else if(StringUtility::CompareIgnoreCase(lFileExtension, _T("png")) == 0 || StringUtility::CompareIgnoreCase(lFileExtension, _T("pngf")) == 0)
+	else if(strutil::CompareIgnoreCase(lFileExtension, _T("png")) == 0 || strutil::CompareIgnoreCase(lFileExtension, _T("pngf")) == 0)
 	{
 		PngLoader lPngLoader;
 		return lPngLoader.Load(pArchiveName, pFileName, pCanvas) == PngLoader::STATUS_SUCCESS;
@@ -131,31 +131,31 @@ bool ImageLoader::Load(const String& pArchiveName, const String& pFileName, Canv
 	}
 }
 
-bool ImageLoader::Save(const String& pArchiveName, const String& pFileName, const Canvas& pCanvas)
+bool ImageLoader::Save(const str& pArchiveName, const str& pFileName, const Canvas& pCanvas)
 {
-	String lFileExtension = Path::GetExtension(pFileName);
+	str lFileExtension = Path::GetExtension(pFileName);
 
-	if (StringUtility::CompareIgnoreCase(lFileExtension, _T("bmp")) == 0)
+	if (strutil::CompareIgnoreCase(lFileExtension, _T("bmp")) == 0)
 	{
 		BmpLoader lBmpLoader;
 		return lBmpLoader.Save(pArchiveName, pFileName, pCanvas) == BmpLoader::STATUS_SUCCESS;
 	}
-	else if(StringUtility::CompareIgnoreCase(lFileExtension, _T("tga")) == 0)
+	else if(strutil::CompareIgnoreCase(lFileExtension, _T("tga")) == 0)
 	{
 		TgaLoader lTgaLoader;
 		return lTgaLoader.Save(pArchiveName, pFileName, pCanvas) == TgaLoader::STATUS_SUCCESS;
 	}
-	else if(StringUtility::CompareIgnoreCase(lFileExtension, _T("tif")) == 0 || StringUtility::CompareIgnoreCase(lFileExtension, _T("tiff")) == 0)
+	else if(strutil::CompareIgnoreCase(lFileExtension, _T("tif")) == 0 || strutil::CompareIgnoreCase(lFileExtension, _T("tiff")) == 0)
 	{
 		TiffLoader lTiffLoader;
 		return lTiffLoader.Save(pArchiveName, pFileName, pCanvas) == TiffLoader::STATUS_SUCCESS;
 	}
-	else if(StringUtility::CompareIgnoreCase(lFileExtension, _T("jpg")) == 0 || StringUtility::CompareIgnoreCase(lFileExtension, _T("jpeg")) == 0)
+	else if(strutil::CompareIgnoreCase(lFileExtension, _T("jpg")) == 0 || strutil::CompareIgnoreCase(lFileExtension, _T("jpeg")) == 0)
 	{
 		JpegLoader lJpegLoader;
 		return lJpegLoader.Save(pArchiveName, pFileName, pCanvas) == JpegLoader::STATUS_SUCCESS;
 	}
-	else if(StringUtility::CompareIgnoreCase(lFileExtension, _T("png")) == 0 || StringUtility::CompareIgnoreCase(lFileExtension, _T("pngf")) == 0)
+	else if(strutil::CompareIgnoreCase(lFileExtension, _T("png")) == 0 || strutil::CompareIgnoreCase(lFileExtension, _T("pngf")) == 0)
 	{
 		PngLoader lPngLoader;
 		return lPngLoader.Save(pArchiveName, pFileName, pCanvas) == PngLoader::STATUS_SUCCESS;

@@ -514,7 +514,7 @@ TEMPLATE unsigned QUAL::GetFullTreeMemSize() const
 
 
 /*
-TEMPLATE String QUAL::ToString() const
+TEMPLATE str QUAL::ToString() const
 {
 	std::stringstream lStrm;
 	mRootNode->ToString(lStrm, 0, -1);

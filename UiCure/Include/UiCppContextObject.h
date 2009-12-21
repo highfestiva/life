@@ -36,7 +36,7 @@ public:
 		DEBUG_SHAPES,
 	};
 
-	CppContextObject(const Lepra::String& pClassId, GameUiManager* pUiManager);
+	CppContextObject(const str& pClassId, GameUiManager* pUiManager);
 	virtual ~CppContextObject();
 
 	virtual void StartLoading();
@@ -54,14 +54,20 @@ private:
 	void TryAddTexture();
 	virtual bool TryComplete();
 	void OnLoadSound3d(UserSound3dResource* pSoundResource);
+	UserSound3dResource* CreateSharedSound(const str& pId);
+	void DeleteSharedSound(const str& pId);
+
+	typedef std::vector<UserGeometryReferenceResource*> MeshArray;
+	typedef std::hash_map<str, UserSound3dResource*> SoundTable;
 
 	GameUiManager* mUiManager;
 	UserClassResource* mUiClassResource;
-	typedef std::vector<UserGeometryReferenceResource*> MeshArray;
 	MeshArray mMeshResourceArray;
 	size_t mMeshLoadCount;
 	UserRendererImageResource mTextureResource;
 	UserSound3dResource* mSoundResource;
+
+	static SoundTable mSoundTable;	// Sound resources are shared between split-screen players.
 
 	LOG_CLASS_DECLARE();
 };

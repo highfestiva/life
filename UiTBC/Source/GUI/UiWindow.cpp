@@ -17,7 +17,7 @@ namespace UiTbc
 
 
 
-Window::Window(const Lepra::String& pName,
+Window::Window(const str& pName,
 			   Layout* pLayout) :
 	Component(pName, new GridLayout(1, 1)),
 	mTLBorder(0),
@@ -44,8 +44,8 @@ Window::Window(const Lepra::String& pName,
 
 Window::Window(unsigned pBorderStyle,
 			   int pBorderWidth,
-			   const Lepra::Color& pColor,
-			   const Lepra::String& pName,
+			   const Color& pColor,
+			   const str& pName,
 			   Layout* pLayout) :
 	Component(pName, new GridLayout(3, 3)),
 	mTLBorder(0),
@@ -74,7 +74,7 @@ Window::Window(unsigned pBorderStyle,
 Window::Window(unsigned pBorderStyle,
 			 int pBorderWidth,
 			 Painter::ImageID pImageID,
-			 const Lepra::String& pName,
+			 const str& pName,
 			 Layout* pLayout) :
 	Component(pName, new GridLayout(3, 3)),
 	mTLBorder(0),
@@ -100,8 +100,8 @@ Window::Window(unsigned pBorderStyle,
 	Init();
 }
 
-Window::Window(const Lepra::Color& pColor,
-			 const Lepra::String& pName,
+Window::Window(const Color& pColor,
+			 const str& pName,
 			 Layout* pLayout) :
 	Component(pName, new GridLayout(1, 1)),
 	mTLBorder(0),
@@ -128,7 +128,7 @@ Window::Window(const Lepra::Color& pColor,
 }
 
 Window::Window(Painter::ImageID pImageID,
-			 const Lepra::String& pName,
+			 const str& pName,
 			 Layout* pLayout) :
 	Component(pName, new GridLayout(1, 1)),
 	mTLBorder(0),
@@ -376,7 +376,7 @@ void Window::SetCaption(Caption* pCaption)
 	}
 }
 
-Lepra::PixelRect Window::GetClientRect()
+PixelRect Window::GetClientRect()
 {
 	return mCenterComponent->GetScreenRect();
 }
@@ -396,7 +396,7 @@ void Window::RemoveChild(Component* pChild, int pLayer)
 	mClientRect->RemoveChild(pChild, pLayer);
 }
 
-Component* Window::GetChild(const Lepra::String& pName, int pLayer)
+Component* Window::GetChild(const str& pName, int pLayer)
 {
 	return mClientRect->GetChild(pName, pLayer);
 }
@@ -444,7 +444,7 @@ void Window::SetActive(bool pActive)
 	}
 }
 
-bool Window::OnChar(Lepra::tchar pChar)
+bool Window::OnChar(tchar pChar)
 {
 	bool lOk;
 	if (pChar == _T('\t'))

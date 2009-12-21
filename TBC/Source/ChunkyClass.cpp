@@ -23,12 +23,12 @@ ChunkyClass::~ChunkyClass()
 
 
 
-const Lepra::String& ChunkyClass::GetPhysicsBaseName() const
+const str& ChunkyClass::GetPhysicsBaseName() const
 {
 	return (mPhysicsBaseName);
 }
 
-Lepra::String& ChunkyClass::GetPhysicsBaseName()
+str& ChunkyClass::GetPhysicsBaseName()
 {
 	return (mPhysicsBaseName);
 }

@@ -59,7 +59,7 @@
 
 
 
-void ReportTestResult(const Lepra::LogDecorator& pLog, const Lepra::String& pTestName, const Lepra::String& pContext, bool pResult);
+void ReportTestResult(const Lepra::LogDecorator& pLog, const str& pTestName, const str& pContext, bool pResult);
 bool ResetAndClearFrame();
 bool CloseRenderer();
 
@@ -133,17 +133,17 @@ public:
 
 			if (i == 5)
 			{
-				lTreeNode = new UiTbc::TreeNode(Lepra::StringUtility::Format(_T("SubDirectory"), i), _T("TreeNode"));
+				lTreeNode = new UiTbc::TreeNode(Lepra::strutil::Format(_T("SubDirectory"), i), _T("TreeNode"));
 
 				for (int j = 0; j < 5; j++)
 				{
-					UiTbc::TreeNode* lChildNode = new UiTbc::TreeNode(Lepra::StringUtility::Format(_T("List Item %i"), i), _T("TreeNode"));
+					UiTbc::TreeNode* lChildNode = new UiTbc::TreeNode(Lepra::strutil::Format(_T("List Item %i"), i), _T("TreeNode"));
 					lTreeNode->AddChildNode(lChildNode);
 				}
 			}
 			else
 			{
-				lTreeNode = new UiTbc::TreeNode(Lepra::StringUtility::Format(_T("List Item %i"), Lepra::Random::GetRandomNumber() % 1024), _T("TreeNode"));
+				lTreeNode = new UiTbc::TreeNode(Lepra::strutil::Format(_T("List Item %i"), Lepra::Random::GetRandomNumber() % 1024), _T("TreeNode"));
 			}
 
 			lTopNode->AddChildNode(lTreeNode);
@@ -171,7 +171,7 @@ public:
 		for (int i = 0; i < 20; i++)
 		{
 			UiTbc::Label* lListItem = new UiTbc::Label(Lepra::LIGHT_GRAY, Lepra::LIGHT_BLUE);
-			lListItem->SetText(Lepra::StringUtility::Format(_T("Apa %i"), i), Lepra::OFF_BLACK, Lepra::BLACK);
+			lListItem->SetText(Lepra::strutil::Format(_T("Apa %i"), i), Lepra::OFF_BLACK, Lepra::BLACK);
 			lListItem->SetPreferredWidth(12 * 6);
 			lListControl->AddChild(lListItem);
 		}
@@ -203,7 +203,7 @@ class SceneTest
 {
 public:
 	SceneTest(const Lepra::LogDecorator& pLog,
-		const Lepra::String& pSceneName, 
+		const str& pSceneName, 
 		float pCamRotSpeed = 1.0f, float pCamMoveSpeed = 8.0f): 
 		mTestOk(true),
 		mLog(pLog),
@@ -233,15 +233,15 @@ protected:
 
 	bool mTestOk;
 	const Lepra::LogDecorator& mLog;
-	Lepra::String mContext;
-	Lepra::String mExtraInfo;
+	str mContext;
+	str mExtraInfo;
 
 private:
 	void operator=(const SceneTest&)
 	{
 		assert(false);
 	}
-	Lepra::String mSceneName;
+	str mSceneName;
 	float mCamRotSpeed;
 	float mCamMoveSpeed;
 	UiTbc::DesktopWindow* mDesktopWindow;
@@ -316,7 +316,7 @@ bool SceneTest::Run(double pTime)
 
 				gPainter->SetColor(Lepra::WHITE);
 				const Lepra::Vector3DF& lPos = lCam.GetPosition();
-				gPainter->PrintText(Lepra::StringUtility::Format(_T("(%.2f, %.2f, %.2f)"), lPos.x, lPos.y, lPos.z)+mExtraInfo, 10, 10);
+				gPainter->PrintText(Lepra::strutil::Format(_T("(%.2f, %.2f, %.2f)"), lPos.x, lPos.y, lPos.z)+mExtraInfo, 10, 10);
 
 				mDesktopWindow->Repaint();
 			}
@@ -384,7 +384,7 @@ void SceneTest::PrintFps(double pFps)
 		lFrameCount = 0;
 		lFps = pFps;
 	}
-	Lepra::String lText = Lepra::StringUtility::Format(_T("%f FPS"), lFps);
+	str lText = Lepra::strutil::Format(_T("%f FPS"), lFps);
 	RenderGDITestImage(lText.c_str());
 }
 
@@ -429,7 +429,7 @@ public:
 	void UpdateScene(double pTotalTime, double pDeltaTime);
 
 private:
-	Lepra::String mTriangleCountInfo;
+	str mTriangleCountInfo;
 	LOG_CLASS_DECLARE();
 };
 LOG_CLASS_DEFINE(TEST, TerrainFunctionTest);
@@ -474,7 +474,7 @@ bool CloseRenderer()
 bool OpenRenderer(const Lepra::LogDecorator& pLog, UiLepra::DisplayManager::ContextType pContext)
 {
 	bool lOk = true;
-	Lepra::String lContext;
+	str lContext;
 
 	if (lOk)
 	{
@@ -742,7 +742,7 @@ bool OpenRenderer(const Lepra::LogDecorator& pLog, UiLepra::DisplayManager::Cont
 	}
 
 
-	Lepra::String lRendererType = _T("OpenGL");
+	str lRendererType = _T("OpenGL");
 	if (pContext != UiLepra::DisplayManager::OPENGL_CONTEXT)
 	{
 		lRendererType = _T("Software");
@@ -813,7 +813,7 @@ bool ResetAndClearFrame()
 	return (lCleared);
 }
 
-void PrintInfo(const Lepra::String& pInfo)
+void PrintInfo(const str& pInfo)
 {
 	gPainter->ResetClippingRect();
 	gPainter->SetColor(Lepra::Color(255, 255, 255, 255), 0);
@@ -1060,7 +1060,7 @@ bool AddUVAnimation(TBC::GeometryBase* pGeometry)
 				       Lepra::Vector3DF(-0.5, 0.5, 0)));
 
 	TBC::BoneAnimator* lAnimator = new TBC::BoneAnimator(lBones);
-	Lepra::String lAnimName(_T("UVAnimation"));
+	str lAnimName(_T("UVAnimation"));
 	lAnimator->AddAnimation(lAnimName, lAnimation);
 	lAnimator->StartAnimation(lAnimName, 0, TBC::BoneAnimation::MODE_PLAY_LOOP);
 
@@ -1087,15 +1087,15 @@ bool TestSkinningSaveLoad(const Lepra::LogDecorator& pLog, double pShowTime)
 	// 13. Set two different materials on the two meshes.
 	// 14. Render+animate the bloody thing!
 
-	Lepra::String lContext;
+	str lContext;
 	bool lTestOk = true;
-	const Lepra::String lFileName(_T("chain"));
+	const str lFileName(_T("chain"));
 
 	const float lCuboidLength = 40.0f;
 	UiTbc::TriangleBasedGeometry lGeometry[2];
 	for (int lMeshIndex = 0; lMeshIndex < 2; ++lMeshIndex)
 	{
-		const Lepra::String lThisMeshName = lFileName+Lepra::StringUtility::Format(_T("%i.mesh"), lMeshIndex);
+		const str lThisMeshName = lFileName+Lepra::strutil::Format(_T("%i.mesh"), lMeshIndex);
 		if (lTestOk)
 		{
 			lContext = _T("save chain mesh");
@@ -1141,7 +1141,7 @@ bool TestSkinningSaveLoad(const Lepra::LogDecorator& pLog, double pShowTime)
 	UiTbc::AnimatedGeometry lSkin[2];
 	for (int lSkinIndex = 0; lSkinIndex < 2; ++lSkinIndex)
 	{
-		const Lepra::String lThisSkinName = lFileName+Lepra::StringUtility::Format(_T("%i.skin"), lSkinIndex);
+		const str lThisSkinName = lFileName+Lepra::strutil::Format(_T("%i.skin"), lSkinIndex);
 		if (lTestOk)
 		{
 			lContext = _T("save chain skin");
@@ -1168,7 +1168,7 @@ bool TestSkinningSaveLoad(const Lepra::LogDecorator& pLog, double pShowTime)
 		Lepra::DiskFile::Delete(lThisSkinName);
 	}
 
-	const Lepra::String lAnimationName(lFileName+_T(".animation"));
+	const str lAnimationName(lFileName+_T(".animation"));
 	if (lTestOk)
 	{
 		lContext = _T("save chain animation");
@@ -1211,7 +1211,7 @@ bool TestSkinningSaveLoad(const Lepra::LogDecorator& pLog, double pShowTime)
 	}
 	Lepra::DiskFile::Delete(lAnimationName);
 
-	const Lepra::String lStructureName(lFileName+_T(".structure"));
+	const str lStructureName(lFileName+_T(".structure"));
 	if (lTestOk)
 	{
 		lContext = _T("save chain structure");
@@ -1298,14 +1298,14 @@ bool TestSkinningSaveLoad(const Lepra::LogDecorator& pLog, double pShowTime)
 
 bool TestMeshImport(const Lepra::LogDecorator& pLog, double pShowTime)
 {
-	Lepra::String lContext;
+	str lContext;
 	bool lTestOk = true;
 
 	UiTbc::TriangleBasedGeometry lGeometry;
 	if (lTestOk)
 	{
 		lContext = _T("load imported mesh");
-		const Lepra::String lMeshName = _T("tractor_01_rear_wheel0.mesh");
+		const str lMeshName = _T("tractor_01_rear_wheel0.mesh");
 		Lepra::DiskFile lFile;
 		lTestOk = lFile.Open(lMeshName, Lepra::DiskFile::MODE_READ);
 		assert(lTestOk);
@@ -1361,14 +1361,14 @@ bool TestMeshImport(const Lepra::LogDecorator& pLog, double pShowTime)
 
 bool TestLoadClass(const Lepra::LogDecorator& pLog)
 {
-	Lepra::String lContext;
+	str lContext;
 	bool lTestOk = true;
 
 	Lepra::DiskFile lFile;
 	if (lTestOk)
 	{
 		lContext = _T("open file");
-		const Lepra::String lClassName = _T("tractor_01.class");
+		const str lClassName = _T("tractor_01.class");
 		lTestOk = lFile.Open(lClassName, Lepra::DiskFile::MODE_READ);
 		assert(lTestOk);
 	}
@@ -1507,7 +1507,7 @@ bool TestMaterials(const Lepra::LogDecorator& pLog, double pShowTime)
 {
 	gTotalFps = 0;
 
-	Lepra::String lContext = _T("clear");
+	str lContext = _T("clear");
 	bool lTestOk = ResetAndClearFrame();
 
 	//UiTbc::TriangleBasedGeometry* lGeometry = UiTbc::BasicMeshCreator::CreateCone(15, 40, 24);
@@ -1556,7 +1556,7 @@ bool TestMaterials(const Lepra::LogDecorator& pLog, double pShowTime)
 		lLights[1] = UiTbc::Renderer::INVALID_LIGHT;
 		for (int y = 0; y < 4; y += 2)
 		{
-			Lepra::String lModeInfo;
+			str lModeInfo;
 			// Set lighting according to what row we're rendering.
 			if (y == 0)
 			{
@@ -1733,20 +1733,20 @@ bool TestMaterials(const Lepra::LogDecorator& pLog, double pShowTime)
 
 bool TestFps(const Lepra::LogDecorator& pLog, double pAverageFps)
 {
-	Lepra::String lContext = _T("too low");
+	str lContext = _T("too low");
 	bool lTestOk = (gTotalFps > pAverageFps/8.0);
 	if (lTestOk)
 	{
 		lContext = _T("too high");
 		lTestOk = (gTotalFps < pAverageFps*8.0);
 	}
-	ReportTestResult(pLog, Lepra::StringUtility::Format(_T("FPS (%.1f)"), gTotalFps), lContext, lTestOk);
+	ReportTestResult(pLog, Lepra::strutil::Format(_T("FPS (%.1f)"), gTotalFps), lContext, lTestOk);
 	return (lTestOk);
 }
 
 bool TestGenerate(const Lepra::LogDecorator& pLog, double pShowTime)
 {
-	Lepra::String lContext;
+	str lContext;
 	bool lTestOk = true;
 
 	float lRotationSpeed = Lepra::PIF * 0.25f;

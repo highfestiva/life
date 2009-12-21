@@ -259,7 +259,7 @@ void Win32DirectXDisplay::Resize(int pWidth, int pHeight)
 
 void Win32DirectXDisplay::UpdateCaption()
 {
-	Lepra::String lString = Lepra::StringUtility::Format(_T("Lepra::Win32DirectXDisplay (%ix%i %iBit %iHz) %s"),
+	str lString = strutil::Format(_T("Win32DirectXDisplay (%ix%i %iBit %iHz) %s"),
 		 mDisplayMode.mWidth, mDisplayMode.mHeight,
 		mDisplayMode.mBitDepth, mDisplayMode.mRefreshRate, LEPRA_BUILD_TYPE_TEXT);
 	SetCaption(lString, true);

@@ -254,7 +254,7 @@ bool Win32OpenGLDisplay::InitScreen()
 
 void Win32OpenGLDisplay::UpdateCaption()
 {
-	Lepra::String lString = Lepra::StringUtility::Format(_T("Win32OpenGLDisplay (%ix%i %iBit %iHz) %s"),
+	str lString = strutil::Format(_T("Win32OpenGLDisplay (%ix%i %iBit %iHz) %s"),
 		mDisplayMode.mWidth, mDisplayMode.mHeight,
 		mDisplayMode.mBitDepth, mDisplayMode.mRefreshRate,
 		 _T(LEPRA_STRING_TYPE_TEXT) _T(" ") _T(LEPRA_BUILD_TYPE_TEXT));

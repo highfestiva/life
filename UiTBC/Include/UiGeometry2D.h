@@ -53,10 +53,10 @@ public:
 		float y;
 		float z; // = 0
 		float w; // = 1
-		Lepra::uint8 mBlue;
-		Lepra::uint8 mGreen;
-		Lepra::uint8 mRed;
-		Lepra::uint8 mAlpha;
+		uint8 mBlue;
+		uint8 mGreen;
+		uint8 mRed;
+		uint8 mAlpha;
 	};
 
 	struct VertexXYUV
@@ -75,21 +75,21 @@ public:
 		float y;
 		float z; // = 0
 		float w; // = 1
-		Lepra::uint8 mBlue;
-		Lepra::uint8 mGreen;
-		Lepra::uint8 mRed;
-		Lepra::uint8 mAlpha;
+		uint8 mBlue;
+		uint8 mGreen;
+		uint8 mRed;
+		uint8 mAlpha;
 		float u;
 		float v;
 	};
 
-	Geometry2D(Lepra::uint16 pVertexFormat = VTX_RGB,
+	Geometry2D(uint16 pVertexFormat = VTX_RGB,
 		int pVertexCapacity = 16, int pTriangleCapacity = 8);
 	~Geometry2D();
-	void Init(Lepra::uint16 pVertexFormat = VTX_RGB,
+	void Init(uint16 pVertexFormat = VTX_RGB,
 		int pVertexCapacity = 16, int pTriangleCapacity = 8);
 
-	inline Lepra::uint16 GetVertexFormat() const { return mVertexFormat; }
+	inline uint16 GetVertexFormat() const { return mVertexFormat; }
 
 	// Will allocate exactly the amount of space specified by the parameter.
 	void ReallocVertexBuffers(int pVertexCapacity);
@@ -103,11 +103,11 @@ public:
 	// vertex count will remain constant, but the "current vertex"-index will
 	// increase by each call. Make sure to use the function that matches the
 	// declared vertex format.
-	Lepra::uint32 SetVertex(float x, float y);
-	Lepra::uint32 SetVertex(float x, float y, float u, float v);
-	Lepra::uint32 SetVertex(float x, float y, float r, float g, float b);
-	Lepra::uint32 SetVertex(float x, float y, float u, float v, float r, float g, float b);
-	void SetTriangle(Lepra::uint32 pV1, Lepra::uint32 pV2, Lepra::uint32 pV3);
+	uint32 SetVertex(float x, float y);
+	uint32 SetVertex(float x, float y, float u, float v);
+	uint32 SetVertex(float x, float y, float r, float g, float b);
+	uint32 SetVertex(float x, float y, float u, float v, float r, float g, float b);
+	void SetTriangle(uint32 pV1, uint32 pV2, uint32 pV3);
 
 	// Sets the VertexCount and the TriangleCount to zero.
 	void Reset();
@@ -118,16 +118,16 @@ public:
 	inline const void* GetVertexData() const { return mVertexData; }
 	inline const float* GetColorData() const { return mColorData; }
 	inline const float* GetUVData() const { return mUVData; }
-	inline const Lepra::uint32* GetTriangleData() const { return mTriangleData; }
+	inline const uint32* GetTriangleData() const { return mTriangleData; }
 	inline int GetVertexCapacity() const { return mVertexCapacity; }
 	inline int GetTriangleCapacity() const { return mTriangleCapacity; }
 	inline int GetVertexCount() const { return mVertexCount; }
 	inline int GetTriangleCount() const { return mTriangleCount; }
 
-	inline const Lepra::Vector2DF& GetPos() const { return mPos; }
-	inline void SetPos(const Lepra::Vector2DF& pPos) { mPos = pPos; }
+	inline const Vector2DF& GetPos() const { return mPos; }
+	inline void SetPos(const Vector2DF& pPos) { mPos = pPos; }
 
-	inline bool IsFlagSet(Lepra::uint16 pFlag) { return ((mVertexFormat & pFlag) != 0); }
+	inline bool IsFlagSet(uint16 pFlag) { return ((mVertexFormat & pFlag) != 0); }
 
 private:
 	void Realloc(void** pData, size_t pNewSize, size_t pBytesToCopy);
@@ -135,18 +135,18 @@ private:
 	Geometry2D(const Geometry2D&);
 	void operator=(const Geometry2D&);
 
-	Lepra::uint16 mVertexFormat;
+	uint16 mVertexFormat;
 
 	void* mVertexData;
 	float* mColorData;
 	float* mUVData;
-	Lepra::uint32* mTriangleData;
+	uint32* mTriangleData;
 	int mVertexCapacity;
 	int mTriangleCapacity;
 	int mVertexCount;
 	int mTriangleCount;
 
-	Lepra::Vector2D<float> mPos;
+	Vector2D<float> mPos;
 };
 
 

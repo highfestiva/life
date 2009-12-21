@@ -48,11 +48,11 @@ public:
 	bool operator!=(const SocketAddress& pAddr) const;
 	void operator=(const SocketAddress& pAddr);
 
-	String GetAsString() const;
+	str GetAsString() const;
 
-	bool Resolve(const String& pAddress);
-	bool ResolveRange(const String& pAddress, uint16& pEndPort);
-	bool ResolveHost(const String& pHostname);	// Only changes address, not port.
+	bool Resolve(const str& pAddress);
+	bool ResolveRange(const str& pAddress, uint16& pEndPort);
+	bool ResolveHost(const str& pHostname);	// Only changes address, not port.
 
 private:
 	#ifdef LEPRA_NETWORK_IPV6

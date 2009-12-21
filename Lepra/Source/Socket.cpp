@@ -544,9 +544,9 @@ int TcpSocket::Send(const void* pData, int pSize)
 		}
 		else
 		{
-			log_volatile(String lLocalAddress);
+			log_volatile(str lLocalAddress);
 			log_volatile(if (mServerSocket) lLocalAddress = mServerSocket->GetLocalAddress().GetAsString());
-			log_volatile(String lData = StringUtility::DumpData((uint8*)pData, std::min((int)pSize, 20)));
+			log_volatile(str lData = strutil::DumpData((uint8*)pData, std::min((int)pSize, 20)));
 			log_volatile(mLog.Tracef(_T("TCP -> %u bytes (%s -> %s): %s."), pSize,
 				lLocalAddress.c_str(), mTargetAddress.GetAsString().c_str(), lData.c_str()));
 
@@ -589,9 +589,9 @@ int TcpSocket::Receive(void* pData, int pMaxSize)
 		}
 		else
 		{
-			log_volatile(String lLocalAddress);
+			log_volatile(str lLocalAddress);
 			log_volatile(if (mServerSocket) lLocalAddress = mServerSocket->GetLocalAddress().GetAsString());
-			log_volatile(String lData = StringUtility::DumpData((uint8*)pData, std::min(lSize, 20)));
+			log_volatile(str lData = strutil::DumpData((uint8*)pData, std::min(lSize, 20)));
 			log_volatile(mLog.Tracef(_T("TCP <- %u bytes (%s <- %s): %s."), lSize,
 				lLocalAddress.c_str(), mTargetAddress.GetAsString().c_str(), lData.c_str()));
 
@@ -646,7 +646,7 @@ LOG_CLASS_DEFINE(NETWORK, TcpSocket);
 
 
 
-TcpMuxSocket::TcpMuxSocket(const String& pName, const SocketAddress& pLocalAddress, bool pIsServer,
+TcpMuxSocket::TcpMuxSocket(const str& pName, const SocketAddress& pLocalAddress, bool pIsServer,
 	unsigned pMaxPendingConnectionCount, unsigned pMaxConnectionCount):
 	MuxIo(pMaxPendingConnectionCount, pMaxConnectionCount),
 	TcpListenerSocket(pLocalAddress),
@@ -1208,7 +1208,7 @@ int UdpSocket::SendTo(const uint8* pData, unsigned pSize, const SocketAddress& p
 		}
 		else
 		{
-			log_volatile(String lData = StringUtility::DumpData((uint8*)pData, std::min(pSize, (unsigned)20)));
+			log_volatile(str lData = strutil::DumpData((uint8*)pData, std::min(pSize, (unsigned)20)));
 			log_volatile(mLog.Tracef(_T("UDP -> %u bytes (%s -> %s): %s."), pSize,
 				mLocalAddress.GetAsString().c_str(), pTargetAddress.GetAsString().c_str(),
 				lData.c_str()));
@@ -1233,7 +1233,7 @@ int UdpSocket::ReceiveFrom(uint8* pData, unsigned pMaxSize, SocketAddress& pSour
 		}
 		else
 		{
-			log_volatile(String lData = StringUtility::DumpData((uint8*)pData, std::min(lSize, 20)));
+			log_volatile(str lData = strutil::DumpData((uint8*)pData, std::min(lSize, 20)));
 			log_volatile(mLog.Tracef(_T("UDP <- %u bytes (%s <- %s): %s."), lSize,
 				mLocalAddress.GetAsString().c_str(), pSourceAddress.GetAsString().c_str(),
 				lData.c_str()));
@@ -1247,7 +1247,7 @@ LOG_CLASS_DEFINE(NETWORK, UdpSocket);
 
 
 
-UdpMuxSocket::UdpMuxSocket(const String& pName, const SocketAddress& pLocalAddress,
+UdpMuxSocket::UdpMuxSocket(const str& pName, const SocketAddress& pLocalAddress,
 	unsigned pMaxPendingConnectionCount, unsigned pMaxConnectionCount):
 	MuxIo(pMaxPendingConnectionCount, pMaxConnectionCount),
 	Thread(pName+_T("UdpMuxRecv ")+pLocalAddress.GetAsString()),
@@ -1727,7 +1727,7 @@ LOG_CLASS_DEFINE(NETWORK, UdpVSocket);
 
 
 
-GameMuxSocket::GameMuxSocket(const String& pName, const SocketAddress& pLocalAddress, bool pIsServer,
+GameMuxSocket::GameMuxSocket(const str& pName, const SocketAddress& pLocalAddress, bool pIsServer,
 	unsigned pMaxPendingConnectionCount, unsigned pMaxConnectionCount):
 	mTcpMuxSocket(new TcpMuxSocket(pName, pLocalAddress, pIsServer, pMaxConnectionCount)),
 	mUdpMuxSocket(new UdpMuxSocket(pName, pLocalAddress, pMaxPendingConnectionCount, pMaxConnectionCount)),
@@ -2053,16 +2053,16 @@ void GameMuxSocket::AddSocket(GameSocket* pSocket, TcpVSocket* pTcpSocket, UdpVS
 	if (!HashUtil::FindMapObject(mIdSocketMap, pSocket->GetConnectionId()))
 	{
 		log_trace(_T("Adding GameSocket with ID ")+
-			AnsiStringUtility::ToCurrentCode(AnsiStringUtility::ReplaceCtrlChars(pSocket->GetConnectionId(), '.'))+
-			(pSocket->GetTcpSocket()?_T(" TCP set,"):_T(" no TCP,"))+Lepra::String()+
+			astrutil::ToCurrentCode(astrutil::ReplaceCtrlChars(pSocket->GetConnectionId(), '.'))+
+			(pSocket->GetTcpSocket()?_T(" TCP set,"):_T(" no TCP,"))+str()+
 			(pSocket->GetUdpSocket()?_T(" UDP set."):_T(" no UDP.")));
 		mIdSocketMap.insert(std::pair<std::string, GameSocket*>(pSocket->GetConnectionId(), pSocket));
 	}
 	else
 	{
 		log_debug(_T("Appending info to GameSocket with ID ")+
-			AnsiStringUtility::ToCurrentCode(AnsiStringUtility::ReplaceCtrlChars(pSocket->GetConnectionId(), '.')) +
-			(pSocket->GetTcpSocket()?_T(" TCP set,"):_T(" no TCP,"))+Lepra::String()+
+			astrutil::ToCurrentCode(astrutil::ReplaceCtrlChars(pSocket->GetConnectionId(), '.')) +
+			(pSocket->GetTcpSocket()?_T(" TCP set,"):_T(" no TCP,"))+str()+
 			(pSocket->GetUdpSocket()?_T(" UDP set."):_T(" no UDP.")));
 	}
 	if (!pSocket->GetTcpSocket() || !pSocket->GetUdpSocket())

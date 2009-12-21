@@ -38,13 +38,13 @@ OpenGLPainter::~OpenGLPainter()
 	}
 }
 
-void OpenGLPainter::SetDestCanvas(Lepra::Canvas* pCanvas)
+void OpenGLPainter::SetDestCanvas(Canvas* pCanvas)
 {
 	Painter::SetDestCanvas(pCanvas);
 	ResetClippingRect();
 }
 
-void OpenGLPainter::SetAlphaValue(Lepra::uint8 pAlpha)
+void OpenGLPainter::SetAlphaValue(uint8 pAlpha)
 {
 	Painter::SetAlphaValue(pAlpha);
 	float lAlpha = (float)GetAlphaValue() / 255.0f;
@@ -84,8 +84,8 @@ void OpenGLPainter::ResetClippingRect()
 	// Definition of the viewport. The point (0, 0) is defined as the center of the
 	// pixel in the top left corner. Thus, the top left corner of the screen has
 	// the coordinates (-0.5, -0.5).
-	glOrtho(-0.5, (Lepra::float32)GetCanvas()->GetWidth() - 0.5,
-			(Lepra::float32)GetCanvas()->GetHeight() - 0.5, -0.5,
+	glOrtho(-0.5, (float32)GetCanvas()->GetWidth() - 0.5,
+			(float32)GetCanvas()->GetHeight() - 0.5, -0.5,
 			0.0f, 1.0f);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -111,7 +111,7 @@ void OpenGLPainter::ResetClippingRect()
 	//glDisableClientState(GL_VERTEX_ARRAY);
 }
 
-void OpenGLPainter::SetColor(const Lepra::Color& pColor, unsigned pColorIndex)
+void OpenGLPainter::SetColor(const Color& pColor, unsigned pColorIndex)
 {
 	Painter::SetColor(pColor, pColorIndex);
 	mRCol[pColorIndex].Set((float)pColor.mRed / 255.0f,
@@ -174,7 +174,7 @@ void OpenGLPainter::DoDrawPixel(int x, int y)
 	GLfloat lX = (GLfloat)x;
 	GLfloat lY = (GLfloat)y;
 
-	Lepra::Color& lColor = GetColorInternal(0);
+	Color& lColor = GetColorInternal(0);
 	glColor4ub(lColor.mRed, lColor.mGreen, lColor.mBlue, GetAlphaValue());
 	glPointSize(1);
 	glBegin(GL_POINTS);
@@ -187,7 +187,7 @@ void OpenGLPainter::DoDrawLine(int pX1, int pY1, int pX2, int pY2)
 	ToScreenCoords(pX1, pY1);
 	ToScreenCoords(pX2, pY2);
 
-	Lepra::Color& lColor = GetColorInternal(0);
+	Color& lColor = GetColorInternal(0);
 	glColor4ub(lColor.mRed, lColor.mGreen, lColor.mBlue, GetAlphaValue());
 
 	//glLineWidth(1);
@@ -212,7 +212,7 @@ void OpenGLPainter::DoFillTriangle(float pX1, float pY1,
 	pY2 = pY2 - 0.5f;
 	pY3 = pY3 - 0.5f;
 
-	Lepra::Color& lColor = GetColorInternal(0);
+	Color& lColor = GetColorInternal(0);
 	glColor4ub(lColor.mRed, lColor.mGreen, lColor.mBlue, GetAlphaValue());
 
 	glBegin(GL_TRIANGLES);
@@ -241,7 +241,7 @@ void OpenGLPainter::DoFillShadedTriangle(float pX1, float pY1,
 
 	glBegin(GL_TRIANGLES);
 
-	Lepra::Color* lColor = &GetColorInternal(0);
+	Color* lColor = &GetColorInternal(0);
 	glColor4ub(lColor[0].mRed, lColor[0].mGreen, lColor[0].mBlue, GetAlphaValue());
 	glVertex2f(pX1, pY1);
 	glColor4ub(lColor[1].mRed, lColor[1].mGreen, lColor[1].mBlue, GetAlphaValue());
@@ -395,7 +395,7 @@ void OpenGLPainter::DoFillRect(int pLeft, int pTop, int pRight, int pBottom)
 	GLfloat lTop    = (GLfloat)pTop - 0.5f;
 	GLfloat lBottom = (GLfloat)pBottom - 0.5f;
 
-	Lepra::Color& lColor = GetColorInternal(0);
+	Color& lColor = GetColorInternal(0);
 	glColor4ub(lColor.mRed, lColor.mGreen, lColor.mBlue, GetAlphaValue());
 
 	glBegin(GL_TRIANGLE_FAN);
@@ -536,7 +536,7 @@ void OpenGLPainter::DoFillShadedRect(int pLeft, int pTop, int pRight, int pBotto
 	glColor4f((lTopR + lBotR) * 0.5f, (lTopG + lBotG) * 0.5f, (lTopB + lBotB) * 0.5f, (GLfloat)GetAlphaValue() / 255.0f);
 	glVertex2f((lLeft + lRight) * 0.5f, (lTop + lBottom) * 0.5f);
 
-	Lepra::Color* lColor = &GetColorInternal(0);
+	Color* lColor = &GetColorInternal(0);
 	glColor4ub(lColor[0].mRed, lColor[0].mGreen, lColor[0].mBlue, GetAlphaValue());
 	glVertex2f(lLeft, lTop);
 
@@ -555,7 +555,7 @@ void OpenGLPainter::DoFillShadedRect(int pLeft, int pTop, int pRight, int pBotto
 	glEnd();
 }
 
-Painter::ImageID OpenGLPainter::AddImage(const Lepra::Canvas* pImage, const Lepra::Canvas* pAlphaBuffer)
+Painter::ImageID OpenGLPainter::AddImage(const Canvas* pImage, const Canvas* pAlphaBuffer)
 {
 	int lID = 0;
 
@@ -566,7 +566,7 @@ Painter::ImageID OpenGLPainter::AddImage(const Lepra::Canvas* pImage, const Lepr
 	{
 		lColor = true;
 
-		if (pImage->GetBitDepth() == Lepra::Canvas::BITDEPTH_32_BIT)
+		if (pImage->GetBitDepth() == Canvas::BITDEPTH_32_BIT)
 		{
 			lAlpha = true;
 		}
@@ -583,26 +583,26 @@ Painter::ImageID OpenGLPainter::AddImage(const Lepra::Canvas* pImage, const Lepr
 	{
 		if (lColor == true && lAlpha == true)
 		{
-			Lepra::Canvas lImage(*pImage, true);
+			Canvas lImage(*pImage, true);
 			lImage.SwapRGBOrder();
 			unsigned lNewWidth  = GetClosestPowerOf2(lImage.GetWidth(), true);
 			unsigned lNewHeight = GetClosestPowerOf2(lImage.GetHeight(), true);
 
 			if (lNewWidth != lImage.GetWidth() || lNewHeight != lImage.GetHeight())
 			{
-				lImage.Resize(lNewWidth, lNewHeight, Lepra::Canvas::RESIZE_NICEST);
+				lImage.Resize(lNewWidth, lNewHeight, Canvas::RESIZE_NICEST);
 			}
 
 			if (pAlphaBuffer != 0)
 			{
-				Lepra::Canvas lAlphaBuffer(*pAlphaBuffer, true);
+				Canvas lAlphaBuffer(*pAlphaBuffer, true);
 
 				if (lAlphaBuffer.GetWidth() != lImage.GetWidth() ||
 				   lAlphaBuffer.GetHeight() != lImage.GetHeight())
 				{
-					lAlphaBuffer.Resize(lImage.GetWidth(), lImage.GetHeight(), Lepra::Canvas::RESIZE_FAST);
+					lAlphaBuffer.Resize(lImage.GetWidth(), lImage.GetHeight(), Canvas::RESIZE_FAST);
 				}
-				if (lAlphaBuffer.GetBitDepth() != Lepra::Canvas::BITDEPTH_8_BIT)
+				if (lAlphaBuffer.GetBitDepth() != Canvas::BITDEPTH_8_BIT)
 				{
 					lAlphaBuffer.ConvertToGrayscale(true);
 				}
@@ -631,15 +631,15 @@ Painter::ImageID OpenGLPainter::AddImage(const Lepra::Canvas* pImage, const Lepr
 		}
 		else if(lColor == true)
 		{
-			Lepra::Canvas lImage(*pImage, true);
+			Canvas lImage(*pImage, true);
 			lImage.SwapRGBOrder();
-			lImage.ConvertBitDepth(Lepra::Canvas::BITDEPTH_24_BIT);
+			lImage.ConvertBitDepth(Canvas::BITDEPTH_24_BIT);
 
 			unsigned lNewWidth  = GetClosestPowerOf2(lImage.GetWidth(), true);
 			unsigned lNewHeight = GetClosestPowerOf2(lImage.GetHeight(), true);
 			if (lNewWidth != lImage.GetWidth() || lNewHeight != lImage.GetHeight())
 			{
-				lImage.Resize(lNewWidth, lNewHeight, Lepra::Canvas::RESIZE_FAST);
+				lImage.Resize(lNewWidth, lNewHeight, Canvas::RESIZE_FAST);
 			}
 
 			Texture* lTexture = new Texture();
@@ -663,14 +663,14 @@ Painter::ImageID OpenGLPainter::AddImage(const Lepra::Canvas* pImage, const Lepr
 		}
 		else if(pAlphaBuffer != 0)
 		{
-			Lepra::Canvas lImage(*pAlphaBuffer, true);
+			Canvas lImage(*pAlphaBuffer, true);
 
-			Lepra::Color lPalette[256];
+			Color lPalette[256];
 			for (int i = 0; i < 256; i++)
 			{
-				lPalette[i].mRed   = (Lepra::uint8)i;
-				lPalette[i].mGreen = (Lepra::uint8)i;
-				lPalette[i].mBlue  = (Lepra::uint8)i;
+				lPalette[i].mRed   = (uint8)i;
+				lPalette[i].mGreen = (uint8)i;
+				lPalette[i].mBlue  = (uint8)i;
 			}
 
 			lImage.SetPalette(lPalette);
@@ -701,8 +701,8 @@ Painter::ImageID OpenGLPainter::AddImage(const Lepra::Canvas* pImage, const Lepr
 }
 
 void OpenGLPainter::UpdateImage(ImageID pImageID, 
-				const Lepra::Canvas* pImage, 
-				const Lepra::Canvas* pAlphaBuffer,
+				const Canvas* pImage, 
+				const Canvas* pAlphaBuffer,
 				UpdateHint pHint)
 {
 	TextureTable::Iterator lIter = mTextureTable.Find(pImageID);
@@ -721,7 +721,7 @@ void OpenGLPainter::UpdateImage(ImageID pImageID,
 		   (int)pImage->GetWidth() == lTexture->mWidth && 
 		   (int)pImage->GetHeight() == lTexture->mHeight)
 		{
-			if (pImage->GetBitDepth() == Lepra::Canvas::BITDEPTH_24_BIT)
+			if (pImage->GetBitDepth() == Canvas::BITDEPTH_24_BIT)
 			{
 				glBindTexture (GL_TEXTURE_2D, pImageID);
 				glTexImage2D (GL_TEXTURE_2D, 
@@ -734,7 +734,7 @@ void OpenGLPainter::UpdateImage(ImageID pImageID,
 							  GL_UNSIGNED_BYTE, 
 							  pImage->GetBuffer());
 			}
-			else if(pImage->GetBitDepth() == Lepra::Canvas::BITDEPTH_32_BIT)
+			else if(pImage->GetBitDepth() == Canvas::BITDEPTH_32_BIT)
 			{
 				glBindTexture (GL_TEXTURE_2D, pImageID);
 				glTexImage2D (GL_TEXTURE_2D, 
@@ -758,7 +758,7 @@ void OpenGLPainter::UpdateImage(ImageID pImageID,
 	{
 		lColor = true;
 
-		if (pImage->GetBitDepth() == Lepra::Canvas::BITDEPTH_32_BIT)
+		if (pImage->GetBitDepth() == Canvas::BITDEPTH_32_BIT)
 		{
 			lAlpha = true;
 		}
@@ -771,24 +771,24 @@ void OpenGLPainter::UpdateImage(ImageID pImageID,
 
 	if (lColor == true && lAlpha == true)
 	{
-		Lepra::Canvas lImage(*pImage, true);
+		Canvas lImage(*pImage, true);
 		unsigned lNewWidth  = GetClosestPowerOf2(lImage.GetWidth(), true);
 		unsigned lNewHeight = GetClosestPowerOf2(lImage.GetHeight(), true);
 		if (lNewWidth != lImage.GetWidth() || lNewHeight != lImage.GetHeight())
 		{
-			lImage.Resize(lNewWidth, lNewHeight, Lepra::Canvas::RESIZE_FAST);
+			lImage.Resize(lNewWidth, lNewHeight, Canvas::RESIZE_FAST);
 		}
 
 		if (pAlphaBuffer != 0)
 		{
-			Lepra::Canvas lAlphaBuffer(*pAlphaBuffer, true);
+			Canvas lAlphaBuffer(*pAlphaBuffer, true);
 
 			if (lAlphaBuffer.GetWidth() != lImage.GetWidth() ||
 			   lAlphaBuffer.GetHeight() != lImage.GetHeight())
 			{
-				lAlphaBuffer.Resize(lImage.GetWidth(), lImage.GetHeight(), Lepra::Canvas::RESIZE_NICEST);
+				lAlphaBuffer.Resize(lImage.GetWidth(), lImage.GetHeight(), Canvas::RESIZE_NICEST);
 			}
-			if (lAlphaBuffer.GetBitDepth() != Lepra::Canvas::BITDEPTH_8_BIT)
+			if (lAlphaBuffer.GetBitDepth() != Canvas::BITDEPTH_8_BIT)
 			{
 				lAlphaBuffer.ConvertToGrayscale(true);
 			}
@@ -813,13 +813,13 @@ void OpenGLPainter::UpdateImage(ImageID pImageID,
 	}
 	else if(lColor == true)
 	{
-		Lepra::Canvas lImage(*pImage, false);
-		lImage.ConvertBitDepth(Lepra::Canvas::BITDEPTH_24_BIT);
+		Canvas lImage(*pImage, false);
+		lImage.ConvertBitDepth(Canvas::BITDEPTH_24_BIT);
 		unsigned lNewWidth  = GetClosestPowerOf2(lImage.GetWidth(), true);
 		unsigned lNewHeight = GetClosestPowerOf2(lImage.GetHeight(), true);
 		if (lNewWidth != lImage.GetWidth() || lNewHeight != lImage.GetHeight())
 		{
-			lImage.Resize(lNewWidth, lNewHeight, Lepra::Canvas::RESIZE_FAST);
+			lImage.Resize(lNewWidth, lNewHeight, Canvas::RESIZE_FAST);
 		}
 
 		lTexture->mWidth = pImage->GetWidth();
@@ -841,13 +841,13 @@ void OpenGLPainter::UpdateImage(ImageID pImageID,
 	}
 	else if(pAlphaBuffer != 0)
 	{
-		Lepra::Canvas lImage(*pAlphaBuffer, true);
+		Canvas lImage(*pAlphaBuffer, true);
 		lImage.ConvertTo32BitWithAlpha(*pAlphaBuffer);
 		unsigned lNewWidth  = GetClosestPowerOf2(lImage.GetWidth(), true);
 		unsigned lNewHeight = GetClosestPowerOf2(lImage.GetHeight(), true);
 		if (lNewWidth != lImage.GetWidth() || lNewHeight != lImage.GetHeight())
 		{
-			lImage.Resize(lNewWidth, lNewHeight, Lepra::Canvas::RESIZE_FAST);
+			lImage.Resize(lNewWidth, lNewHeight, Canvas::RESIZE_FAST);
 		}
 
 		Texture* lTexture = new Texture();
@@ -908,7 +908,7 @@ void OpenGLPainter::DoDrawImage(ImageID pImageID, int x, int y)
 	Texture* lTexture = *lIter;
 
 	ToScreenCoords(x, y);
-	Lepra::PixelRect lRect(x, y, x + lTexture->mWidth, y + lTexture->mHeight);
+	PixelRect lRect(x, y, x + lTexture->mWidth, y + lTexture->mHeight);
 	ToUserCoords(lRect.mLeft, lRect.mTop);
 	ToUserCoords(lRect.mRight, lRect.mBottom);
 	DrawImage(pImageID, lRect);
@@ -949,7 +949,7 @@ void OpenGLPainter::DoDrawAlphaImage(ImageID pImageID, int x, int y)
 
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
-	Lepra::Color& lColor = GetColorInternal(0);
+	Color& lColor = GetColorInternal(0);
 	if (GetRenderMode() == RM_ALPHATEST)
 	{
 		glColor4ub(lColor.mRed, lColor.mGreen, lColor.mBlue, 255);
@@ -979,7 +979,7 @@ void OpenGLPainter::DoDrawAlphaImage(ImageID pImageID, int x, int y)
 	glPopAttrib();
 }
 
-void OpenGLPainter::DoDrawImage(ImageID pImageID, const Lepra::PixelRect& pRect)
+void OpenGLPainter::DoDrawImage(ImageID pImageID, const PixelRect& pRect)
 {
 	TextureTable::Iterator lIter = mTextureTable.Find(pImageID);
 
@@ -1040,16 +1040,16 @@ void OpenGLPainter::DoDrawImage(ImageID pImageID, const Lepra::PixelRect& pRect)
 	glPopAttrib();
 }
 
-void OpenGLPainter::DoDrawImage(ImageID pImageID, int x, int y, const Lepra::PixelRect& pSubpatchRect)
+void OpenGLPainter::DoDrawImage(ImageID pImageID, int x, int y, const PixelRect& pSubpatchRect)
 {
 	ToScreenCoords(x, y);
-	Lepra::PixelRect lRect(x, y, x + pSubpatchRect.GetWidth(), y + pSubpatchRect.GetHeight());
+	PixelRect lRect(x, y, x + pSubpatchRect.GetWidth(), y + pSubpatchRect.GetHeight());
 	ToUserCoords(lRect.mLeft, lRect.mTop);
 	ToUserCoords(lRect.mRight, lRect.mBottom);
 	DrawImage(pImageID, lRect, pSubpatchRect);
 }
 
-void OpenGLPainter::DoDrawImage(ImageID pImageID, const Lepra::PixelRect& pRect, const Lepra::PixelRect& pSubpatchRect)
+void OpenGLPainter::DoDrawImage(ImageID pImageID, const PixelRect& pRect, const PixelRect& pSubpatchRect)
 {
 	TextureTable::Iterator lIter = mTextureTable.Find(pImageID);
 
@@ -1133,7 +1133,7 @@ void OpenGLPainter::GetImageSize(ImageID pImageID, int& pWidth, int& pHeight) co
 	}
 }
 
-int OpenGLPainter::PrintText(const Lepra::String& pString, int x, int y)
+int OpenGLPainter::PrintText(const str& pString, int x, int y)
 {
 	ToScreenCoords(x, y);
 
@@ -1162,18 +1162,18 @@ int OpenGLPainter::PrintText(const Lepra::String& pString, int x, int y)
 	const int lSpaceSize = GetFontManager()->GetCharWidth(' ');
 	const int lTabSize = lSpaceSize*4;
 
-	const Lepra::Color lColor = GetColorInternal(0);
-	assert(lColor != Lepra::BLACK);	// Does not show.
+	const Color lColor = GetColorInternal(0);
+	assert(lColor != BLACK);	// Does not show.
 	GetFontManager()->SetColor(lColor);
 	::glColor4f(lColor.GetRf(), lColor.GetGf(), lColor.GetBf(), lColor.GetAf());
-	Lepra::uint32 lColorHash = lColor.To32();
+	uint32 lColorHash = lColor.To32();
 	lColorHash = (lColorHash&0xC0000000) + ((lColorHash&0x00C00000)<<6) + ((lColorHash&0x0000C000)<<12);
-	const Lepra::uint32 lFontId = GetFontManager()->GetActiveFont() << 16;
-	const Lepra::uint64 lFontHash = ((Lepra::uint64)(lColorHash+lFontId+lFontHeight)) << 32;
+	const uint32 lFontId = GetFontManager()->GetActiveFont() << 16;
+	const uint64 lFontHash = ((uint64)(lColorHash+lFontId+lFontHeight)) << 32;
 
 	for (size_t i = 0; i < pString.length(); i++)
 	{
-		const Lepra::tchar lChar = pString[i];
+		const tchar lChar = pString[i];
 		if (lChar == _T('\n'))
 		{
 			lCurrentY += lLineHeight;
@@ -1209,8 +1209,8 @@ int OpenGLPainter::PrintText(const Lepra::String& pString, int x, int y)
 				mGlyphTable.insert(GlyphTable::value_type(lFontHash+lChar, lGlGlyph));
 				const int lWidth = lCharWidth;
 				const int lHeight = lFontHeight;
-				Lepra::Canvas lGlyphImage(lWidth, lHeight, Lepra::Canvas::BITDEPTH_32_BIT);
-				GetFontManager()->RenderGlyph(lChar, lGlyphImage, Lepra::PixelRect(0, 0, lWidth, lHeight));
+				Canvas lGlyphImage(lWidth, lHeight, Canvas::BITDEPTH_32_BIT);
+				GetFontManager()->RenderGlyph(lChar, lGlyphImage, PixelRect(0, 0, lWidth, lHeight));
 				::glNewList(lGlGlyph, GL_COMPILE_AND_EXECUTE);
 				if (mSmoothFont)
 				{
@@ -1253,15 +1253,15 @@ int OpenGLPainter::PrintText(const Lepra::String& pString, int x, int y)
 	return lCurrentX;
 }
 
-void OpenGLPainter::ReadPixels(Lepra::Canvas& pDestCanvas, const Lepra::PixelRect& pRect)
+void OpenGLPainter::ReadPixels(Canvas& pDestCanvas, const PixelRect& pRect)
 {
-	if (GetCanvas() == 0 || GetCanvas()->GetBitDepth() == Lepra::Canvas::BITDEPTH_8_BIT)
+	if (GetCanvas() == 0 || GetCanvas()->GetBitDepth() == Canvas::BITDEPTH_8_BIT)
 	{
-		pDestCanvas.Reset(0, 0, Lepra::Canvas::BITDEPTH_32_BIT);
+		pDestCanvas.Reset(0, 0, Canvas::BITDEPTH_32_BIT);
 		return;
 	}
 
-	Lepra::PixelRect lRect(pRect);
+	PixelRect lRect(pRect);
 
 	ToScreenCoords(lRect.mLeft, lRect.mTop);
 	ToScreenCoords(lRect.mRight, lRect.mBottom);
@@ -1286,7 +1286,7 @@ void OpenGLPainter::ReadPixels(Lepra::Canvas& pDestCanvas, const Lepra::PixelRec
 	if (lRect.mRight <= lRect.mLeft ||
 	   lRect.mBottom <= lRect.mTop)
 	{
-		pDestCanvas.Reset(0, 0, Lepra::Canvas::BITDEPTH_32_BIT);
+		pDestCanvas.Reset(0, 0, Canvas::BITDEPTH_32_BIT);
 		return;
 	}
 
@@ -1297,7 +1297,7 @@ void OpenGLPainter::ReadPixels(Lepra::Canvas& pDestCanvas, const Lepra::PixelRec
 	   pDestCanvas.GetWidth() != lWidth ||
 	   pDestCanvas.GetHeight() != lHeight)
 	{
-		pDestCanvas.Reset(lWidth, lHeight, Lepra::Canvas::BITDEPTH_32_BIT);
+		pDestCanvas.Reset(lWidth, lHeight, Canvas::BITDEPTH_32_BIT);
 		pDestCanvas.CreateBuffer();
 	}
 
@@ -1309,10 +1309,10 @@ void OpenGLPainter::ReadPixels(Lepra::Canvas& pDestCanvas, const Lepra::PixelRec
 
 	switch(GetCanvas()->GetBitDepth())
 	{
-		case Lepra::Canvas::BITDEPTH_15_BIT:
-		case Lepra::Canvas::BITDEPTH_16_BIT:
-		case Lepra::Canvas::BITDEPTH_24_BIT:
-		case Lepra::Canvas::BITDEPTH_32_BIT:
+		case Canvas::BITDEPTH_15_BIT:
+		case Canvas::BITDEPTH_16_BIT:
+		case Canvas::BITDEPTH_24_BIT:
+		case Canvas::BITDEPTH_32_BIT:
 		{
 			glReadPixels(lRect.mLeft,
 						 GetCanvas()->GetHeight() - lRect.mBottom,
@@ -1414,7 +1414,7 @@ void OpenGLPainter::DoRenderDisplayList(std::vector<DisplayEntity*>* pDisplayLis
 		}
 
 		const int lTriangleEntryCount = lGeneratedGeometry->GetGeometry().GetTriangleCount() * 3;
-		const Lepra::uint32* lTriangleData = lGeneratedGeometry->GetGeometry().GetTriangleData();
+		const uint32* lTriangleData = lGeneratedGeometry->GetGeometry().GetTriangleData();
 		::glDrawElements(GL_TRIANGLES, lTriangleEntryCount, GL_UNSIGNED_INT, lTriangleData);
 
 		::glPopAttrib();

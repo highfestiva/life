@@ -28,22 +28,22 @@ public:
 
 	// A hollow label (transparent background).
 	Label(bool pSelectable = false,
-	      const Lepra::String& pName = _T("Label"));
+	      const str& pName = _T("Label"));
 
 	// Single background color.
-	Label(const Lepra::Color& pColor,
-	      const Lepra::String& pName = _T("Label"));
+	Label(const Color& pColor,
+	      const str& pName = _T("Label"));
 
 	// Interpolated background color ("gradients").
-	Label(const Lepra::Color& pTopLeftColor,
-	      const Lepra::Color& pTopRightColor,
-	      const Lepra::Color& pBottomRightColor,
-	      const Lepra::Color& pBottomLeftColor,
-	      const Lepra::String& pName = _T("Label"));
+	Label(const Color& pTopLeftColor,
+	      const Color& pTopRightColor,
+	      const Color& pBottomRightColor,
+	      const Color& pBottomLeftColor,
+	      const str& pName = _T("Label"));
 
 	// Image as background.
 	Label(Painter::ImageID pImageID,
-	      const Lepra::String& pName = _T("Label"));
+	      const str& pName = _T("Label"));
 
 	//
 	// The following constructors can be used with labels that can
@@ -52,21 +52,21 @@ public:
 	//
 
 	// Single background color. LSL is marked with a dotted line.
-	Label(const Lepra::Color& pColor,
-	      const Lepra::Color& pSelectedColor,
-	      const Lepra::String& pName = _T("Label"));
+	Label(const Color& pColor,
+	      const Color& pSelectedColor,
+	      const str& pName = _T("Label"));
 
 	// Interpolated background color ("gradients").
 	// LSL is marked with a dotted line.
-	Label(const Lepra::Color& pTopLeftColor,
-	      const Lepra::Color& pTopRightColor,
-	      const Lepra::Color& pBottomRightColor,
-	      const Lepra::Color& pBottomLeftColor,
-	      const Lepra::Color& pSelectedTopLeftColor,
-	      const Lepra::Color& pSelectedTopRightColor,
-	      const Lepra::Color& pSelectedBottomRightColor,
-	      const Lepra::Color& pSelectedBottomLeftColor,
-	      const Lepra::String& pName = _T("Label"));
+	Label(const Color& pTopLeftColor,
+	      const Color& pTopRightColor,
+	      const Color& pBottomRightColor,
+	      const Color& pBottomLeftColor,
+	      const Color& pSelectedTopLeftColor,
+	      const Color& pSelectedTopRightColor,
+	      const Color& pSelectedBottomRightColor,
+	      const Color& pSelectedBottomLeftColor,
+	      const str& pName = _T("Label"));
 
 	// LCL = Last Clicked Label. If these are set to INVALID_IMAGEID
 	// pImageID and pSelectedImageID will be used with the default
@@ -75,27 +75,27 @@ public:
 	      Painter::ImageID pSelectedImageID,
 	      Painter::ImageID pLCLImageID,
 	      Painter::ImageID pLCLSelectedImageID,
-	      const Lepra::String& pName = _T("Label"));
+	      const str& pName = _T("Label"));
 
 	virtual ~Label();
 
 	void SetIcon(Painter::ImageID pIconID);
-	void SetText(const Lepra::String& pText,
-		     const Lepra::Color& pTextColor,
-		     const Lepra::Color& pBackgColor,
+	void SetText(const str& pText,
+		     const Color& pTextColor,
+		     const Color& pBackgColor,
 		     Painter* pPainter = 0);
-	void SetText(const Lepra::String& pText,
-		     const Lepra::Color& pTextColor,
-		     const Lepra::Color& pBackgColor,
-		     const Lepra::Color& pSelectedTextColor,
-		     const Lepra::Color& pSelectedBackgColor,
+	void SetText(const str& pText,
+		     const Color& pTextColor,
+		     const Color& pBackgColor,
+		     const Color& pSelectedTextColor,
+		     const Color& pSelectedBackgColor,
 		     Painter* pPainter = 0);
 
-	const Lepra::String& GetText() const;
+	const str& GetText() const;
 
 	virtual void Repaint(Painter* pPainter);
 
-	virtual Lepra::PixelCoords GetPreferredSize(bool pForceAdaptive);
+	virtual PixelCoords GetPreferredSize(bool pForceAdaptive);
 
 	virtual void OnConnectedToDesktopWindow();
 
@@ -111,18 +111,18 @@ protected:
 
 	Painter::ImageID mIconID;
 
-	Lepra::String mText;
-	Lepra::Color mTextBackgColor;
-	Lepra::Color mSelectedTextColor;
-	Lepra::Color mSelectedTextBackgColor;
+	str mText;
+	Color mTextBackgColor;
+	Color mSelectedTextColor;
+	Color mSelectedTextBackgColor;
 
 	int mTextWidth;
 	int mTextHeight;
 
 	// The following is only used if the label is selectable.
 	bool mSelectable;
-	Lepra::Color mColor[4];
-	Lepra::Color mSelectedColor[4];
+	Color mColor[4];
+	Color mSelectedColor[4];
 	Painter::ImageID mImageID;
 	Painter::ImageID mSelectedImageID;
 	Painter::ImageID mLCLImageID;

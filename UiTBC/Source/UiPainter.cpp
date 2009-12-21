@@ -45,7 +45,7 @@ void Painter::DefineCoordinates(int pOrigoX, int pOrigoY, XDir pXDir, YDir pYDir
 	mYDir = pYDir;
 }
 
-void Painter::SetDestCanvas(Lepra::Canvas* pCanvas)
+void Painter::SetDestCanvas(Canvas* pCanvas)
 {
 	mCanvas = pCanvas;
 }
@@ -118,7 +118,7 @@ bool Painter::PushAttrib(unsigned pAttrib)
 
 	if ((pAttrib & ATTR_CLIPRECT) != 0)
 	{
-		Lepra::PixelRect lClippingRect;
+		PixelRect lClippingRect;
 		GetClippingRect(lClippingRect);
 		mAttribClipRectStack.push_back(lClippingRect);
 		if (mAttribClipRectStack.size() > lMaxCount)
@@ -225,7 +225,7 @@ bool Painter::PopAttrib()
 	{
 		if (!mAttribClipRectStack.empty())
 		{
-			Lepra::PixelRect lRect = mAttribClipRectStack.back();
+			PixelRect lRect = mAttribClipRectStack.back();
 			mAttribClipRectStack.pop_back();
 			SetClippingRect(lRect.mLeft, lRect.mTop, lRect.mRight, lRect.mBottom);
 		}
@@ -243,7 +243,7 @@ void Painter::SetRenderMode(RenderMode pRM)
 	mRenderMode = pRM;
 }
 
-void Painter::SetAlphaValue(Lepra::uint8 pAlpha)
+void Painter::SetAlphaValue(uint8 pAlpha)
 {
 	mAlphaValue = pAlpha;
 }
@@ -255,7 +255,7 @@ void Painter::SetClippingRect(int pLeft, int pTop, int pRight, int pBottom)
 
 void Painter::ReduceClippingRect(int pLeft, int pTop, int pRight, int pBottom)
 {
-	Lepra::PixelRect lClippingRect(mClippingRect);
+	PixelRect lClippingRect(mClippingRect);
 
 	if (XLT(lClippingRect.mLeft, pLeft) == true)
 	{
@@ -280,7 +280,7 @@ void Painter::ReduceClippingRect(int pLeft, int pTop, int pRight, int pBottom)
 	SetClippingRect(lClippingRect);
 }
 
-void Painter::SetColor(const Lepra::Color& pColor, unsigned pColorIndex)
+void Painter::SetColor(const Color& pColor, unsigned pColorIndex)
 {
 	mColor[pColorIndex] = pColor;
 }
@@ -296,7 +296,7 @@ FontManager* Painter::GetFontManager() const
 	return (mFontManager);
 }
 
-int Painter::GetStringWidth(const Lepra::String& pString) const
+int Painter::GetStringWidth(const str& pString) const
 {
 	if (!mFontManager)
 	{
@@ -385,7 +385,7 @@ void Painter::RenderDisplayList(DisplayListID pDisplayListID)
 	}
 }
 
-Geometry2D* Painter::FetchDisplayEntity(Lepra::uint16 pVertexFormat, ImageID pImageID)
+Geometry2D* Painter::FetchDisplayEntity(uint16 pVertexFormat, ImageID pImageID)
 {
 	AdjustVertexFormat(pVertexFormat);
 
@@ -395,7 +395,7 @@ Geometry2D* Painter::FetchDisplayEntity(Lepra::uint16 pVertexFormat, ImageID pIm
 		lEntity = *mDisplayListIter;
 	}
 
-	Lepra::PixelRect lClippingRect;
+	PixelRect lClippingRect;
 	GetClippingRect(lClippingRect);
 	if(lEntity == 0 ||
 	   lEntity->mRM != mRenderMode ||
@@ -438,13 +438,13 @@ void Painter::CreateLine(int pX1, int pY1, int pX2, int pY2)
 	float g = (float)mColor[0].mGreen / 255.0f;
 	float b = (float)mColor[0].mBlue / 255.0f;
 
-	Lepra::Vector2DF lNormal(lY2 - lY1, lX1 - lX2);
+	Vector2DF lNormal(lY2 - lY1, lX1 - lX2);
 	lNormal.Normalize();
 
-	Lepra::uint32 lV0 = lGeometry->SetVertex(lX1 - lNormal.x, lY1 - lNormal.y, r, g, b);
-	Lepra::uint32 lV1 = lGeometry->SetVertex(lX1 + lNormal.x, lY1 + lNormal.y, r, g, b);
-	Lepra::uint32 lV2 = lGeometry->SetVertex(lX2 + lNormal.x, lY2 + lNormal.y, r, g, b);
-	Lepra::uint32 lV3 = lGeometry->SetVertex(lX2 - lNormal.x, lY2 - lNormal.y, r, g, b);
+	uint32 lV0 = lGeometry->SetVertex(lX1 - lNormal.x, lY1 - lNormal.y, r, g, b);
+	uint32 lV1 = lGeometry->SetVertex(lX1 + lNormal.x, lY1 + lNormal.y, r, g, b);
+	uint32 lV2 = lGeometry->SetVertex(lX2 + lNormal.x, lY2 + lNormal.y, r, g, b);
+	uint32 lV3 = lGeometry->SetVertex(lX2 - lNormal.x, lY2 - lNormal.y, r, g, b);
 
 	lGeometry->SetTriangle(lV0, lV1, lV2);
 	lGeometry->SetTriangle(lV0, lV2, lV3);
@@ -463,20 +463,20 @@ void Painter::CreateRectFrame(int pLeft, int pTop, int pRight, int pBottom, int 
 	float g = (float)mColor[0].mGreen / 255.0f;
 	float b = (float)mColor[0].mBlue / 255.0f;
 
-	Lepra::uint32 lV0 = lGeometry->SetVertex(lLeft, lTop, r, g, b);     // Outer top left.
-	Lepra::uint32 lV1 = lGeometry->SetVertex(lRight, lTop, r, g, b);    // Outer top right.
-	Lepra::uint32 lV2 = lGeometry->SetVertex(lRight, lBottom, r, g, b); // Outer bottom right.
-	Lepra::uint32 lV3 = lGeometry->SetVertex(lLeft, lBottom, r, g, b);  // Outer bottom left.
+	uint32 lV0 = lGeometry->SetVertex(lLeft, lTop, r, g, b);     // Outer top left.
+	uint32 lV1 = lGeometry->SetVertex(lRight, lTop, r, g, b);    // Outer top right.
+	uint32 lV2 = lGeometry->SetVertex(lRight, lBottom, r, g, b); // Outer bottom right.
+	uint32 lV3 = lGeometry->SetVertex(lLeft, lBottom, r, g, b);  // Outer bottom left.
 
 	lLeft += pWidth;
 	lTop += pWidth;
 	lRight -= pWidth;
 	lBottom -= pWidth;
 
-	Lepra::uint32 lV4 = lGeometry->SetVertex(lLeft, lTop, r, g, b);     // Inner top left.
-	Lepra::uint32 lV5 = lGeometry->SetVertex(lRight, lTop, r, g, b);    // Inner top right.
-	Lepra::uint32 lV6 = lGeometry->SetVertex(lRight, lBottom, r, g, b); // Inner bottom right.
-	Lepra::uint32 lV7 = lGeometry->SetVertex(lLeft, lBottom, r, g, b);  // Inner bottom left.
+	uint32 lV4 = lGeometry->SetVertex(lLeft, lTop, r, g, b);     // Inner top left.
+	uint32 lV5 = lGeometry->SetVertex(lRight, lTop, r, g, b);    // Inner top right.
+	uint32 lV6 = lGeometry->SetVertex(lRight, lBottom, r, g, b); // Inner bottom right.
+	uint32 lV7 = lGeometry->SetVertex(lLeft, lBottom, r, g, b);  // Inner bottom left.
 
 	lGeometry->SetTriangle(lV0, lV4, lV7);
 	lGeometry->SetTriangle(lV0, lV7, lV3);
@@ -517,24 +517,24 @@ void Painter::Create3DRectFrame(int pLeft, int pTop, int pRight, int pBottom, in
 		b[i] = (float)mColor[lI[i]].mBlue / 255.0f;
 	}
 
-	Lepra::uint32 lV0 = lGeometry->SetVertex(lLeft, lTop, r[0], g[0], b[0]);     // Outer top left.
-	Lepra::uint32 lV1 = lGeometry->SetVertex(lRight, lTop, r[0], g[0], b[0]);    // Outer top right #1.
-	Lepra::uint32 lV2 = lGeometry->SetVertex(lRight, lTop, r[1], g[1], b[1]);    // Outer top right #2.
-	Lepra::uint32 lV3 = lGeometry->SetVertex(lRight, lBottom, r[1], g[1], b[1]); // Outer bottom right.
-	Lepra::uint32 lV4 = lGeometry->SetVertex(lLeft, lBottom, r[0], g[0], b[0]);  // Outer bottom left #1.
-	Lepra::uint32 lV5 = lGeometry->SetVertex(lLeft, lBottom, r[1], g[1], b[1]);  // Outer bottom left #2.
+	uint32 lV0 = lGeometry->SetVertex(lLeft, lTop, r[0], g[0], b[0]);     // Outer top left.
+	uint32 lV1 = lGeometry->SetVertex(lRight, lTop, r[0], g[0], b[0]);    // Outer top right #1.
+	uint32 lV2 = lGeometry->SetVertex(lRight, lTop, r[1], g[1], b[1]);    // Outer top right #2.
+	uint32 lV3 = lGeometry->SetVertex(lRight, lBottom, r[1], g[1], b[1]); // Outer bottom right.
+	uint32 lV4 = lGeometry->SetVertex(lLeft, lBottom, r[0], g[0], b[0]);  // Outer bottom left #1.
+	uint32 lV5 = lGeometry->SetVertex(lLeft, lBottom, r[1], g[1], b[1]);  // Outer bottom left #2.
 
 	lLeft += pWidth;
 	lTop += pWidth;
 	lRight -= pWidth;
 	lBottom -= pWidth;
 
-	Lepra::uint32 lV6 = lGeometry->SetVertex(lLeft, lTop, r[2], g[2], b[2]);     // Inner top left.
-	Lepra::uint32 lV7 = lGeometry->SetVertex(lRight, lTop, r[2], g[2], b[2]);    // Inner top right #1.
-	Lepra::uint32 lV8 = lGeometry->SetVertex(lRight, lTop, r[3], g[3], b[3]);    // Inner top right #2.
-	Lepra::uint32 lV9 = lGeometry->SetVertex(lRight, lBottom, r[3], g[3], b[3]); // Inner bottom right.
-	Lepra::uint32 lV10 = lGeometry->SetVertex(lLeft, lBottom, r[2], g[2], b[2]);  // Inner bottom left #1.
-	Lepra::uint32 lV11 = lGeometry->SetVertex(lLeft, lBottom, r[3], g[3], b[3]);  // Inner bottom left #2.
+	uint32 lV6 = lGeometry->SetVertex(lLeft, lTop, r[2], g[2], b[2]);     // Inner top left.
+	uint32 lV7 = lGeometry->SetVertex(lRight, lTop, r[2], g[2], b[2]);    // Inner top right #1.
+	uint32 lV8 = lGeometry->SetVertex(lRight, lTop, r[3], g[3], b[3]);    // Inner top right #2.
+	uint32 lV9 = lGeometry->SetVertex(lRight, lBottom, r[3], g[3], b[3]); // Inner bottom right.
+	uint32 lV10 = lGeometry->SetVertex(lLeft, lBottom, r[2], g[2], b[2]);  // Inner bottom left #1.
+	uint32 lV11 = lGeometry->SetVertex(lLeft, lBottom, r[3], g[3], b[3]);  // Inner bottom left #2.
 
 	//     0--------------------------1,2
 	//     |                           |
@@ -573,10 +573,10 @@ void Painter::CreateRect(int pLeft, int pTop, int pRight, int pBottom)
 	float g = (float)mColor[0].mGreen / 255.0f;
 	float b = (float)mColor[0].mBlue / 255.0f;
 
-	Lepra::uint32 lV0 = lGeometry->SetVertex(lLeft, lTop, r, g, b);
-	Lepra::uint32 lV1 = lGeometry->SetVertex(lRight, lTop, r, g, b);
-	Lepra::uint32 lV2 = lGeometry->SetVertex(lRight, lBottom, r, g, b);
-	Lepra::uint32 lV3 = lGeometry->SetVertex(lLeft, lBottom, r, g, b);
+	uint32 lV0 = lGeometry->SetVertex(lLeft, lTop, r, g, b);
+	uint32 lV1 = lGeometry->SetVertex(lRight, lTop, r, g, b);
+	uint32 lV2 = lGeometry->SetVertex(lRight, lBottom, r, g, b);
+	uint32 lV3 = lGeometry->SetVertex(lLeft, lBottom, r, g, b);
 
 	lGeometry->SetTriangle(lV0, lV1, lV2);
 	lGeometry->SetTriangle(lV0, lV2, lV3);
@@ -601,11 +601,11 @@ void Painter::CreateShadedRect(int pLeft, int pTop, int pRight, int pBottom)
 		b[i] = (float)mColor[i].mBlue / 255.0f;
 	}
 
-	Lepra::uint32 lV0 = lGeometry->SetVertex(lLeft, lTop, r[0], g[0], b[0]);
-	Lepra::uint32 lV1 = lGeometry->SetVertex(lRight, lTop, r[1], g[1], b[1]);
-	Lepra::uint32 lV2 = lGeometry->SetVertex(lRight, lBottom, r[2], g[2], b[2]);
-	Lepra::uint32 lV3 = lGeometry->SetVertex(lLeft, lBottom, r[3], g[3], b[3]);
-	Lepra::uint32 lV4 = lGeometry->SetVertex((lLeft + lRight) * 0.5f, (lTop + lBottom) * 0.5f, 
+	uint32 lV0 = lGeometry->SetVertex(lLeft, lTop, r[0], g[0], b[0]);
+	uint32 lV1 = lGeometry->SetVertex(lRight, lTop, r[1], g[1], b[1]);
+	uint32 lV2 = lGeometry->SetVertex(lRight, lBottom, r[2], g[2], b[2]);
+	uint32 lV3 = lGeometry->SetVertex(lLeft, lBottom, r[3], g[3], b[3]);
+	uint32 lV4 = lGeometry->SetVertex((lLeft + lRight) * 0.5f, (lTop + lBottom) * 0.5f, 
 		(r[0] + r[1] + r[2] + r[3]) * 0.25f, 
 		(g[0] + g[1] + g[2] + g[3]) * 0.25f,
 		(b[0] + b[1] + b[2] + b[3]) * 0.25f);
@@ -624,9 +624,9 @@ void Painter::CreateTriangle(float pX1, float pY1, float pX2, float pY2, float p
 	float g = (float)mColor[0].mGreen / 255.0f;
 	float b = (float)mColor[0].mBlue / 255.0f;
 	
-	Lepra::uint32 lV0 = lGeometry->SetVertex(pX1, pY1, r, g, b);
-	Lepra::uint32 lV1 = lGeometry->SetVertex(pX2, pY2, r, g, b);
-	Lepra::uint32 lV2 = lGeometry->SetVertex(pX3, pY3, r, g, b);
+	uint32 lV0 = lGeometry->SetVertex(pX1, pY1, r, g, b);
+	uint32 lV1 = lGeometry->SetVertex(pX2, pY2, r, g, b);
+	uint32 lV2 = lGeometry->SetVertex(pX3, pY3, r, g, b);
 	lGeometry->SetTriangle(lV0, lV1, lV2);
 }
 
@@ -644,9 +644,9 @@ void Painter::CreateShadedTriangle(float pX1, float pY1, float pX2, float pY2, f
 		b[i] = (float)mColor[i].mBlue / 255.0f;
 	}
 
-	Lepra::uint32 lV0 = lGeometry->SetVertex(pX1, pY1, r[0], g[0], b[0]);
-	Lepra::uint32 lV1 = lGeometry->SetVertex(pX2, pY2, r[1], g[1], b[1]);
-	Lepra::uint32 lV2 = lGeometry->SetVertex(pX3, pY3, r[2], g[2], b[2]);
+	uint32 lV0 = lGeometry->SetVertex(pX1, pY1, r[0], g[0], b[0]);
+	uint32 lV1 = lGeometry->SetVertex(pX2, pY2, r[1], g[1], b[1]);
+	uint32 lV2 = lGeometry->SetVertex(pX3, pY3, r[2], g[2], b[2]);
 	lGeometry->SetTriangle(lV0, lV1, lV2);
 }
 
@@ -657,9 +657,9 @@ void Painter::CreateTriangle(float pX1, float pY1, float pU1, float pV1,
 {
 	Geometry2D* lGeometry = FetchDisplayEntity(Geometry2D::VTX_UV, pImageID);
 
-	Lepra::uint32 lV0 = lGeometry->SetVertex(pX1, pY1, pU1, pV1);
-	Lepra::uint32 lV1 = lGeometry->SetVertex(pX2, pY2, pU2, pV2);
-	Lepra::uint32 lV2 = lGeometry->SetVertex(pX3, pY3, pU3, pV3);
+	uint32 lV0 = lGeometry->SetVertex(pX1, pY1, pU1, pV1);
+	uint32 lV1 = lGeometry->SetVertex(pX2, pY2, pU2, pV2);
+	uint32 lV2 = lGeometry->SetVertex(pX3, pY3, pU3, pV3);
 	lGeometry->SetTriangle(lV0, lV1, lV2);
 }
 
@@ -669,25 +669,25 @@ void Painter::CreateImage(ImageID pImageID, int x, int y)
 	int h;
 	GetImageSize(pImageID, w, h);
 
-	Lepra::PixelRect lRect(x, y, x + w, y + h);
-	Lepra::PixelRect lSubpatchRect(0, 0, w, h);
+	PixelRect lRect(x, y, x + w, y + h);
+	PixelRect lSubpatchRect(0, 0, w, h);
 	CreateImage(pImageID, lRect, lSubpatchRect);
 }
 
-void Painter::CreateImage(ImageID pImageID, int x, int y, const Lepra::PixelRect& pSubpatchRect)
+void Painter::CreateImage(ImageID pImageID, int x, int y, const PixelRect& pSubpatchRect)
 {
-	Lepra::PixelRect lRect(x, y, x + pSubpatchRect.GetWidth(), y + pSubpatchRect.GetHeight());
+	PixelRect lRect(x, y, x + pSubpatchRect.GetWidth(), y + pSubpatchRect.GetHeight());
 	CreateImage(pImageID, lRect, pSubpatchRect);
 }
 
-void Painter::CreateImage(ImageID pImageID, const Lepra::PixelRect& pRect)
+void Painter::CreateImage(ImageID pImageID, const PixelRect& pRect)
 {
-	Lepra::PixelRect lSubpatchRect(0, 0, 0, 0);
+	PixelRect lSubpatchRect(0, 0, 0, 0);
 	GetImageSize(pImageID, lSubpatchRect.mRight, lSubpatchRect.mBottom);
 	CreateImage(pImageID, pRect, lSubpatchRect);
 }
 
-void Painter::CreateImage(ImageID pImageID, const Lepra::PixelRect& pRect, const Lepra::PixelRect& pSubpatchRect)
+void Painter::CreateImage(ImageID pImageID, const PixelRect& pRect, const PixelRect& pSubpatchRect)
 {
 	Geometry2D* lGeometry = FetchDisplayEntity(Geometry2D::VTX_UV, pImageID);
 
@@ -705,10 +705,10 @@ void Painter::CreateImage(ImageID pImageID, const Lepra::PixelRect& pRect, const
 	float lU2 = (float)pSubpatchRect.mRight / (float)lWidth;
 	float lV2 = (float)pSubpatchRect.mBottom / (float)lHeight;
 
-	Lepra::uint32 lVtx0 = lGeometry->SetVertex(lLeft, lTop, lU1, lV1);
-	Lepra::uint32 lVtx1 = lGeometry->SetVertex(lRight, lTop, lU2, lV1);
-	Lepra::uint32 lVtx2 = lGeometry->SetVertex(lRight, lBottom, lU2, lV2);
-	Lepra::uint32 lVtx3 = lGeometry->SetVertex(lLeft, lBottom, lU1, lV2);
+	uint32 lVtx0 = lGeometry->SetVertex(lLeft, lTop, lU1, lV1);
+	uint32 lVtx1 = lGeometry->SetVertex(lRight, lTop, lU2, lV1);
+	uint32 lVtx2 = lGeometry->SetVertex(lRight, lBottom, lU2, lV2);
+	uint32 lVtx3 = lGeometry->SetVertex(lLeft, lBottom, lU1, lV2);
 
 	lGeometry->SetTriangle(lVtx0, lVtx1, lVtx2);
 	lGeometry->SetTriangle(lVtx0, lVtx2, lVtx3);	
@@ -748,16 +748,16 @@ unsigned Painter::GetExponent(unsigned pPowerOf2)
 	return lExp;
 }
 
-Lepra::uint8 Painter::FindMatchingColor(const Lepra::Color& pColor)
+uint8 Painter::FindMatchingColor(const Color& pColor)
 {
 	long lTargetR = pColor.mRed;
 	long lTargetG = pColor.mGreen;
 	long lTargetB = pColor.mBlue;
 
 	long lMinError = 0x7FFFFFFF;
-	Lepra::uint8 lBestMatch = 0;
+	uint8 lBestMatch = 0;
 
-	const Lepra::Color* lPalette = GetCanvas()->GetPalette();
+	const Color* lPalette = GetCanvas()->GetPalette();
 
 	for (int i = 0; i < 256; i++)
 	{
@@ -770,21 +770,21 @@ Lepra::uint8 Painter::FindMatchingColor(const Lepra::Color& pColor)
 		if (i == 0 || lError < lMinError)
 		{
 			lMinError = lError;
-			lBestMatch = (Lepra::uint8)i;
+			lBestMatch = (uint8)i;
 		}
 	}
 
 	return lBestMatch;
 }
 
-void Painter::GetScreenCoordClippingRect(Lepra::PixelRect& pClippingRect) const
+void Painter::GetScreenCoordClippingRect(PixelRect& pClippingRect) const
 {
 	pClippingRect = mClippingRect;
 	ToScreenCoords(pClippingRect.mLeft, pClippingRect.mTop);
 	ToScreenCoords(pClippingRect.mRight, pClippingRect.mBottom);
 }
 
-void Painter::AdjustVertexFormat(Lepra::uint16&)
+void Painter::AdjustVertexFormat(uint16&)
 {
 	// Default behaviour. Do nothing.
 }
@@ -810,7 +810,7 @@ Painter::YDir Painter::GetYDir() const
 	return mYDir;
 }
 
-Lepra::Canvas* Painter::GetCanvas() const
+Canvas* Painter::GetCanvas() const
 {
 	return mCanvas;
 }
@@ -820,32 +820,32 @@ Painter::RenderMode Painter::GetRenderMode() const
 	return mRenderMode;
 }
 
-Lepra::uint8 Painter::GetAlphaValue() const
+uint8 Painter::GetAlphaValue() const
 {
 	return mAlphaValue;
 }
 
-void Painter::SetClippingRect(const Lepra::PixelRect& pClippingRect)
+void Painter::SetClippingRect(const PixelRect& pClippingRect)
 {
 	SetClippingRect(pClippingRect.mLeft, pClippingRect.mTop, pClippingRect.mRight, pClippingRect.mBottom);
 }
 
-void Painter::ReduceClippingRect(const Lepra::PixelRect& pClippingRect)
+void Painter::ReduceClippingRect(const PixelRect& pClippingRect)
 {
 	ReduceClippingRect(pClippingRect.mLeft, pClippingRect.mTop, pClippingRect.mRight, pClippingRect.mBottom);
 }
 
-void Painter::GetClippingRect(Lepra::PixelRect& pClippingRect) const
+void Painter::GetClippingRect(PixelRect& pClippingRect) const
 {
 	pClippingRect = mClippingRect;
 }
 
-void Painter::SetColor(Lepra::uint8 pRed, Lepra::uint8 pGreen, Lepra::uint8 pBlue, Lepra::uint8 pPaletteIndex, unsigned pColorIndex)
+void Painter::SetColor(uint8 pRed, uint8 pGreen, uint8 pBlue, uint8 pPaletteIndex, unsigned pColorIndex)
 {
-	SetColor(Lepra::Color(pRed, pGreen, pBlue, pPaletteIndex), pColorIndex);
+	SetColor(Color(pRed, pGreen, pBlue, pPaletteIndex), pColorIndex);
 }
 
-Lepra::Color Painter::GetColor(unsigned pColorIndex) const
+Color Painter::GetColor(unsigned pColorIndex) const
 {
 	return mColor[pColorIndex];
 }
@@ -858,7 +858,7 @@ void Painter::DrawPixel(int x, int y)
 		CreateRect(x, y, x, y);
 }
 
-void Painter::DrawPixel(const Lepra::PixelCoords& pCoords)
+void Painter::DrawPixel(const PixelCoords& pCoords)
 {
 	DrawPixel(pCoords.x, pCoords.y);
 }
@@ -871,7 +871,7 @@ void Painter::DrawLine(int pX1, int pY1, int pX2, int pY2)
 		CreateLine(pX1, pY1, pX2, pY2);
 }
 
-void Painter::DrawLine(const Lepra::PixelCoords& pPoint1, const Lepra::PixelCoords& pPoint2)
+void Painter::DrawLine(const PixelCoords& pPoint1, const PixelCoords& pPoint2)
 {
 	DrawLine(pPoint1.x, pPoint1.y, pPoint2.x, pPoint2.y);
 }
@@ -884,12 +884,12 @@ void Painter::DrawRect(int pLeft, int pTop, int pRight, int pBottom, int pWidth)
 		CreateRectFrame(pLeft, pTop, pRight, pBottom, pWidth);
 }
 
-void Painter::DrawRect(const Lepra::PixelCoords& pTopLeft, const Lepra::PixelCoords& pBottomRight, int pWidth)
+void Painter::DrawRect(const PixelCoords& pTopLeft, const PixelCoords& pBottomRight, int pWidth)
 {
 	DrawRect(pTopLeft.x, pTopLeft.y, pBottomRight.x, pBottomRight.y, pWidth);
 }
 
-void Painter::DrawRect(const Lepra::PixelRect& pRect, int pWidth)
+void Painter::DrawRect(const PixelRect& pRect, int pWidth)
 {
 	DrawRect(pRect.mLeft, pRect.mTop, pRect.mRight, pRect.mBottom, pWidth);
 }
@@ -902,12 +902,12 @@ void Painter::FillRect(int pLeft, int pTop, int pRight, int pBottom)
 		CreateRect(pLeft, pTop, pRight, pBottom);
 }
 
-void Painter::FillRect(const Lepra::PixelCoords& pTopLeft, const Lepra::PixelCoords& pBottomRight)
+void Painter::FillRect(const PixelCoords& pTopLeft, const PixelCoords& pBottomRight)
 {
 	FillRect(pTopLeft.x, pTopLeft.y, pBottomRight.x, pBottomRight.y);
 }
 
-void Painter::FillRect(const Lepra::PixelRect& pRect)
+void Painter::FillRect(const PixelRect& pRect)
 {
 	FillRect(pRect.mLeft, pRect.mTop, pRect.mRight, pRect.mBottom);
 }
@@ -920,12 +920,12 @@ void Painter::Draw3DRect(int pLeft, int pTop, int pRight, int pBottom, int pWidt
 	//	Create3DRectFrame(pLeft, pTop, pRight, pBottom, pWidth, pSunken);
 }
 
-void Painter::Draw3DRect(const Lepra::PixelCoords& pTopLeft, const Lepra::PixelCoords& pBottomRight, int pWidth, bool pSunken)
+void Painter::Draw3DRect(const PixelCoords& pTopLeft, const PixelCoords& pBottomRight, int pWidth, bool pSunken)
 {
 	Draw3DRect(pTopLeft.x, pTopLeft.y, pBottomRight.x, pBottomRight.y, pWidth, pSunken);
 }
 
-void Painter::Draw3DRect(const Lepra::PixelRect& pRect, int pWidth, bool pSunken)
+void Painter::Draw3DRect(const PixelRect& pRect, int pWidth, bool pSunken)
 {
 	Draw3DRect(pRect.mLeft, pRect.mTop, pRect.mRight, pRect.mBottom, pWidth, pSunken);
 }
@@ -938,12 +938,12 @@ void Painter::FillShadedRect(int pLeft, int pTop, int pRight, int pBottom)
 		CreateShadedRect(pLeft, pTop, pRight, pBottom);
 }
 
-void Painter::FillShadedRect(const Lepra::PixelCoords& pTopLeft, const Lepra::PixelCoords& pBottomRight)
+void Painter::FillShadedRect(const PixelCoords& pTopLeft, const PixelCoords& pBottomRight)
 {
 	FillShadedRect(pTopLeft.x, pTopLeft.y, pBottomRight.x, pBottomRight.y);
 }
 
-void Painter::FillShadedRect(const Lepra::PixelRect& pRect)
+void Painter::FillShadedRect(const PixelRect& pRect)
 {
 	FillShadedRect(pRect.mLeft, pRect.mTop, pRect.mRight, pRect.mBottom);
 }
@@ -958,9 +958,9 @@ void Painter::FillTriangle(float pX1, float pY1,
 		CreateTriangle(pX1, pY1, pX2, pY2, pX3, pY3);
 }
 
-void Painter::FillTriangle(const Lepra::PixelCoords& pPoint1,
-			   const Lepra::PixelCoords& pPoint2,
-			   const Lepra::PixelCoords& pPoint3)
+void Painter::FillTriangle(const PixelCoords& pPoint1,
+			   const PixelCoords& pPoint2,
+			   const PixelCoords& pPoint3)
 {
 	FillTriangle((float)pPoint1.x, (float)pPoint1.y,
 	             (float)pPoint2.x, (float)pPoint2.y,
@@ -977,9 +977,9 @@ void Painter::FillShadedTriangle(float pX1, float pY1,
 		CreateShadedTriangle(pX1, pY1, pX2, pY2, pX3, pY3);
 }
 
-void Painter::FillShadedTriangle(const Lepra::PixelCoords& pPoint1,
-			         const Lepra::PixelCoords& pPoint2,
-			         const Lepra::PixelCoords& pPoint3)
+void Painter::FillShadedTriangle(const PixelCoords& pPoint1,
+			         const PixelCoords& pPoint2,
+			         const PixelCoords& pPoint3)
 {
 	FillShadedTriangle((float)pPoint1.x, (float)pPoint1.y, 
 	                   (float)pPoint2.x, (float)pPoint2.y, 
@@ -997,9 +997,9 @@ void Painter::FillTriangle(float pX1, float pY1, float pU1, float pV1,
 		CreateTriangle(pX1, pY1, pU1, pV1, pX2, pY2, pU2, pV2, pX3, pY3, pU3, pV3, pImageID);
 }
 
-void Painter::FillTriangle(const Lepra::PixelCoords& pPoint1, float pU1, float pV1,
-			   const Lepra::PixelCoords& pPoint2, float pU2, float pV2,
-			   const Lepra::PixelCoords& pPoint3, float pU3, float pV3,
+void Painter::FillTriangle(const PixelCoords& pPoint1, float pU1, float pV1,
+			   const PixelCoords& pPoint2, float pU2, float pV2,
+			   const PixelCoords& pPoint3, float pU3, float pV3,
 			   ImageID pImageID)
 {
 	FillTriangle((float)pPoint1.x, (float)pPoint1.y, pU1, pV1, 
@@ -1015,12 +1015,12 @@ void Painter::DrawImage(ImageID pImageID, int x, int y)
 		CreateImage(pImageID, x, y);
 }
 
-void Painter::DrawImage(ImageID pImageID, const Lepra::PixelCoords& pTopLeft)
+void Painter::DrawImage(ImageID pImageID, const PixelCoords& pTopLeft)
 {
 	DrawImage(pImageID, pTopLeft.x, pTopLeft.y);
 }
 
-void Painter::DrawImage(ImageID pImageID, int x, int y, const Lepra::PixelRect& pSubpatchRect)
+void Painter::DrawImage(ImageID pImageID, int x, int y, const PixelRect& pSubpatchRect)
 {
 	if(mCurrentDisplayList == 0)
 		DoDrawImage(pImageID, x, y, pSubpatchRect);
@@ -1028,12 +1028,12 @@ void Painter::DrawImage(ImageID pImageID, int x, int y, const Lepra::PixelRect& 
 		CreateImage(pImageID, x, y, pSubpatchRect);
 }
 
-void Painter::DrawImage(ImageID pImageID, const Lepra::PixelCoords& pTopLeft, const Lepra::PixelRect& pSubpatchRect)
+void Painter::DrawImage(ImageID pImageID, const PixelCoords& pTopLeft, const PixelRect& pSubpatchRect)
 {
 	DrawImage(pImageID, pTopLeft.x, pTopLeft.y, pSubpatchRect);
 }
 
-void Painter::DrawImage(ImageID pImageID, const Lepra::PixelRect& pRect)
+void Painter::DrawImage(ImageID pImageID, const PixelRect& pRect)
 {
 	if(mCurrentDisplayList == 0)
 		DoDrawImage(pImageID, pRect);
@@ -1041,7 +1041,7 @@ void Painter::DrawImage(ImageID pImageID, const Lepra::PixelRect& pRect)
 		CreateImage(pImageID, pRect);
 }
 
-void Painter::DrawImage(ImageID pImageID, const Lepra::PixelRect& pRect, const Lepra::PixelRect& pSubpatchRect)
+void Painter::DrawImage(ImageID pImageID, const PixelRect& pRect, const PixelRect& pSubpatchRect)
 {
 	if(mCurrentDisplayList == 0)
 		DoDrawImage(pImageID, pRect, pSubpatchRect);
@@ -1057,7 +1057,7 @@ void Painter::DrawAlphaImage(ImageID pImageID, int x, int y)
 		CreateImage(pImageID, x, y);
 }
 
-void Painter::DrawAlphaImage(ImageID pImageID, const Lepra::PixelCoords& pTopLeft)
+void Painter::DrawAlphaImage(ImageID pImageID, const PixelCoords& pTopLeft)
 {
 	DrawAlphaImage(pImageID, pTopLeft.x, pTopLeft.y);
 }
@@ -1067,7 +1067,7 @@ Painter::RenderMode Painter::DisplayEntity::GetRenderMode() const
 	return mRM;
 }
 
-Lepra::uint8 Painter::DisplayEntity::GetAlpha() const
+uint8 Painter::DisplayEntity::GetAlpha() const
 {
 	return mAlpha;
 }
@@ -1077,7 +1077,7 @@ Painter::ImageID Painter::DisplayEntity::GetImageID() const
 	return mImageID;
 }
 
-const Lepra::PixelRect& Painter::DisplayEntity::GetClippingRect() const
+const PixelRect& Painter::DisplayEntity::GetClippingRect() const
 {
 	return mClippingRect;
 }
@@ -1156,7 +1156,7 @@ bool Painter::YGE(int y1, int y2)
 	return (y1 * (int)mYDir) >= (y2 * (int)mYDir);
 }
 
-Lepra::Color& Painter::GetColorInternal(int pColorIndex)
+Color& Painter::GetColorInternal(int pColorIndex)
 {
 	return mColor[pColorIndex];
 }

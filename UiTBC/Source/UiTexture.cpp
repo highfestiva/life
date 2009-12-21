@@ -1,5 +1,5 @@
 /*
-	Lepra::File:   Texture.cpp
+	File:   Texture.cpp
 	Class:  Texture
 	Author: Alexander Hugestrand
 	Copyright (c) 2002-2009, Righteous Games
@@ -29,7 +29,7 @@ Texture::Texture() :
 {
 }
 
-Texture::Texture(const Lepra::Canvas& pColorMap) :
+Texture::Texture(const Canvas& pColorMap) :
 	mNumMipMapLevels(0),
 	mIsCubeMap(false),
 	mColorMap(0),
@@ -143,7 +143,7 @@ void Texture::Copy(Texture* pTexture)
 
 	if (pTexture->mColorMap != 0)
 	{
-		mColorMap = new Lepra::Canvas[mNumMipMapLevels];
+		mColorMap = new Canvas[mNumMipMapLevels];
 		for (int i = 0; i < mNumMipMapLevels; i++)
 		{
 			mColorMap[i].Copy(pTexture->mColorMap[i]);
@@ -152,7 +152,7 @@ void Texture::Copy(Texture* pTexture)
 
 	if (pTexture->mAlphaMap != 0)
 	{
-		mAlphaMap = new Lepra::Canvas[mNumMipMapLevels];
+		mAlphaMap = new Canvas[mNumMipMapLevels];
 		for (int i = 0; i < mNumMipMapLevels; i++)
 		{
 			mAlphaMap[i].Copy(pTexture->mAlphaMap[i]);
@@ -161,7 +161,7 @@ void Texture::Copy(Texture* pTexture)
 
 	if (pTexture->mNormalMap != 0)
 	{
-		mNormalMap = new Lepra::Canvas[mNumMipMapLevels];
+		mNormalMap = new Canvas[mNumMipMapLevels];
 		for (int i = 0; i < mNumMipMapLevels; i++)
 		{
 			mNormalMap[i].Copy(pTexture->mNormalMap[i]);
@@ -170,7 +170,7 @@ void Texture::Copy(Texture* pTexture)
 
 	if (pTexture->mSpecularMap != 0)
 	{
-		mSpecularMap = new Lepra::Canvas[mNumMipMapLevels];
+		mSpecularMap = new Canvas[mNumMipMapLevels];
 		for (int i = 0; i < mNumMipMapLevels; i++)
 		{
 			mSpecularMap[i].Copy(pTexture->mSpecularMap[i]);
@@ -179,7 +179,7 @@ void Texture::Copy(Texture* pTexture)
 
 	if (pTexture->mCubeMapPosX != 0)
 	{
-		mCubeMapPosX = new Lepra::Canvas[mNumMipMapLevels];
+		mCubeMapPosX = new Canvas[mNumMipMapLevels];
 		for (int i = 0; i < mNumMipMapLevels; i++)
 		{
 			mCubeMapPosX[i].Copy(pTexture->mCubeMapPosX[i]);
@@ -188,7 +188,7 @@ void Texture::Copy(Texture* pTexture)
 
 	if (pTexture->mCubeMapNegX != 0)
 	{
-		mCubeMapNegX = new Lepra::Canvas[mNumMipMapLevels];
+		mCubeMapNegX = new Canvas[mNumMipMapLevels];
 		for (int i = 0; i < mNumMipMapLevels; i++)
 		{
 			mCubeMapNegX[i].Copy(pTexture->mCubeMapNegX[i]);
@@ -197,7 +197,7 @@ void Texture::Copy(Texture* pTexture)
 
 	if (pTexture->mCubeMapPosY != 0)
 	{
-		mCubeMapPosY = new Lepra::Canvas[mNumMipMapLevels];
+		mCubeMapPosY = new Canvas[mNumMipMapLevels];
 		for (int i = 0; i < mNumMipMapLevels; i++)
 		{
 			mCubeMapPosY[i].Copy(pTexture->mCubeMapPosY[i]);
@@ -206,7 +206,7 @@ void Texture::Copy(Texture* pTexture)
 
 	if (pTexture->mCubeMapNegY != 0)
 	{
-		mCubeMapNegY = new Lepra::Canvas[mNumMipMapLevels];
+		mCubeMapNegY = new Canvas[mNumMipMapLevels];
 		for (int i = 0; i < mNumMipMapLevels; i++)
 		{
 			mCubeMapNegY[i].Copy(pTexture->mCubeMapNegY[i]);
@@ -215,7 +215,7 @@ void Texture::Copy(Texture* pTexture)
 
 	if (pTexture->mCubeMapPosZ != 0)
 	{
-		mCubeMapPosZ = new Lepra::Canvas[mNumMipMapLevels];
+		mCubeMapPosZ = new Canvas[mNumMipMapLevels];
 		for (int i = 0; i < mNumMipMapLevels; i++)
 		{
 			mCubeMapPosZ[i].Copy(pTexture->mCubeMapPosZ[i]);
@@ -224,7 +224,7 @@ void Texture::Copy(Texture* pTexture)
 
 	if (pTexture->mCubeMapNegZ != 0)
 	{
-		mCubeMapNegZ = new Lepra::Canvas[mNumMipMapLevels];
+		mCubeMapNegZ = new Canvas[mNumMipMapLevels];
 		for (int i = 0; i < mNumMipMapLevels; i++)
 		{
 			mCubeMapNegZ[i].Copy(pTexture->mCubeMapNegZ[i]);
@@ -232,10 +232,10 @@ void Texture::Copy(Texture* pTexture)
 	}
 }
 
-void Texture::Set(const Lepra::Canvas& pColorMap,
-		  const Lepra::Canvas* pAlphaMap,
-		  const Lepra::Canvas* pNormalMap,
-		  const Lepra::Canvas* pSpecularMap,
+void Texture::Set(const Canvas& pColorMap,
+		  const Canvas* pAlphaMap,
+		  const Canvas* pNormalMap,
+		  const Canvas* pSpecularMap,
 		  bool pMergeColorWithAlpha)
 {
 	ClearAll();
@@ -270,14 +270,14 @@ void Texture::Set(const Lepra::Canvas& pColorMap,
 	lNumLevels++;
 
 	// Now create all textures.
-	mColorMap = new Lepra::Canvas[lNumLevels];
+	mColorMap = new Canvas[lNumLevels];
 
 	if (pAlphaMap != 0 && pMergeColorWithAlpha == false)
-		pAlphaMap = new Lepra::Canvas[lNumLevels];
+		pAlphaMap = new Canvas[lNumLevels];
 	if (pNormalMap != 0)
-		mNormalMap = new Lepra::Canvas[lNumLevels];
+		mNormalMap = new Canvas[lNumLevels];
 	if (pSpecularMap != 0)
-		mSpecularMap = new Lepra::Canvas[lNumLevels];
+		mSpecularMap = new Canvas[lNumLevels];
 
 	// And finally, resize them to their respective size.
 	for (unsigned int lLevel = 0; lLevel < lNumLevels; lLevel++)
@@ -299,34 +299,34 @@ void Texture::Set(const Lepra::Canvas& pColorMap,
 		{
 			if (pAlphaMap != 0)
 			{
-				Lepra::Canvas lAlphaMap(*pAlphaMap);
-				lAlphaMap.Resize(mColorMap[lLevel].GetWidth(), mColorMap[lLevel].GetHeight(), Lepra::Canvas::RESIZE_NICEST);
+				Canvas lAlphaMap(*pAlphaMap);
+				lAlphaMap.Resize(mColorMap[lLevel].GetWidth(), mColorMap[lLevel].GetHeight(), Canvas::RESIZE_NICEST);
 				mColorMap[lLevel].ConvertTo32BitWithAlpha(lAlphaMap);
 			}
 			else
-				mColorMap[lLevel].ConvertBitDepth(Lepra::Canvas::BITDEPTH_32_BIT);
+				mColorMap[lLevel].ConvertBitDepth(Canvas::BITDEPTH_32_BIT);
 		}
 		else if(pAlphaMap != 0)
 		{
 			// Alpha map is stored separately and color map keeps its bitrate.
 			mAlphaMap[lLevel].Copy(*pAlphaMap);
 			mAlphaMap[lLevel].ConvertToGrayscale();
-			mAlphaMap[lLevel].Resize(lWidth, lHeight, Lepra::Canvas::RESIZE_NICEST);
+			mAlphaMap[lLevel].Resize(lWidth, lHeight, Canvas::RESIZE_NICEST);
 		}
 
-		mColorMap[lLevel].Resize(lWidth, lHeight, Lepra::Canvas::RESIZE_NICEST);
+		mColorMap[lLevel].Resize(lWidth, lHeight, Canvas::RESIZE_NICEST);
 
 		if (pNormalMap != 0)
 		{
 			mNormalMap[lLevel].Copy(*pNormalMap);
-			mNormalMap[lLevel].ConvertBitDepth(Lepra::Canvas::BITDEPTH_24_BIT);
-			mNormalMap[lLevel].Resize(lWidth, lHeight, Lepra::Canvas::RESIZE_NICEST);
+			mNormalMap[lLevel].ConvertBitDepth(Canvas::BITDEPTH_24_BIT);
+			mNormalMap[lLevel].Resize(lWidth, lHeight, Canvas::RESIZE_NICEST);
 		}
 		if (pSpecularMap != 0)
 		{
 			mSpecularMap[lLevel].Copy(*pSpecularMap);
 			mSpecularMap[lLevel].ConvertToGrayscale();
-			mSpecularMap[lLevel].Resize(lWidth, lHeight, Lepra::Canvas::RESIZE_NICEST);
+			mSpecularMap[lLevel].Resize(lWidth, lHeight, Canvas::RESIZE_NICEST);
 		}
 	}
 
@@ -334,12 +334,12 @@ void Texture::Set(const Lepra::Canvas& pColorMap,
 	mIsCubeMap = false;
 }
 
-void Texture::Set(const Lepra::Canvas& pCubeMapPosX,
-		  const Lepra::Canvas& pCubeMapNegX,
-		  const Lepra::Canvas& pCubeMapPosY,
-		  const Lepra::Canvas& pCubeMapNegY,
-		  const Lepra::Canvas& pCubeMapPosZ,
-		  const Lepra::Canvas& pCubeMapNegZ)
+void Texture::Set(const Canvas& pCubeMapPosX,
+		  const Canvas& pCubeMapNegX,
+		  const Canvas& pCubeMapPosY,
+		  const Canvas& pCubeMapNegY,
+		  const Canvas& pCubeMapPosZ,
+		  const Canvas& pCubeMapNegZ)
 {
 	ClearAll();
 
@@ -373,12 +373,12 @@ void Texture::Set(const Lepra::Canvas& pCubeMapPosX,
 	lNumLevels++;
 
 	// Now create all textures.
-	mCubeMapPosX = new Lepra::Canvas[lNumLevels];
-	mCubeMapNegX = new Lepra::Canvas[lNumLevels];
-	mCubeMapPosY = new Lepra::Canvas[lNumLevels];
-	mCubeMapNegY = new Lepra::Canvas[lNumLevels];
-	mCubeMapPosZ = new Lepra::Canvas[lNumLevels];
-	mCubeMapNegZ = new Lepra::Canvas[lNumLevels];
+	mCubeMapPosX = new Canvas[lNumLevels];
+	mCubeMapNegX = new Canvas[lNumLevels];
+	mCubeMapPosY = new Canvas[lNumLevels];
+	mCubeMapNegY = new Canvas[lNumLevels];
+	mCubeMapPosZ = new Canvas[lNumLevels];
+	mCubeMapNegZ = new Canvas[lNumLevels];
 
 	// And finally, resize them to their respective size.
 	for (unsigned int lLevel = 0; lLevel < lNumLevels; lLevel++)
@@ -401,12 +401,12 @@ void Texture::Set(const Lepra::Canvas& pCubeMapPosX,
 		mCubeMapPosZ[lLevel].Copy(pCubeMapPosZ);
 		mCubeMapNegZ[lLevel].Copy(pCubeMapNegZ);
 
-		mCubeMapPosX[lLevel].Resize(lWidth, lHeight, Lepra::Canvas::RESIZE_NICEST);
-		mCubeMapNegX[lLevel].Resize(lWidth, lHeight, Lepra::Canvas::RESIZE_NICEST);
-		mCubeMapPosY[lLevel].Resize(lWidth, lHeight, Lepra::Canvas::RESIZE_NICEST);
-		mCubeMapNegY[lLevel].Resize(lWidth, lHeight, Lepra::Canvas::RESIZE_NICEST);
-		mCubeMapPosZ[lLevel].Resize(lWidth, lHeight, Lepra::Canvas::RESIZE_NICEST);
-		mCubeMapNegZ[lLevel].Resize(lWidth, lHeight, Lepra::Canvas::RESIZE_NICEST);
+		mCubeMapPosX[lLevel].Resize(lWidth, lHeight, Canvas::RESIZE_NICEST);
+		mCubeMapNegX[lLevel].Resize(lWidth, lHeight, Canvas::RESIZE_NICEST);
+		mCubeMapPosY[lLevel].Resize(lWidth, lHeight, Canvas::RESIZE_NICEST);
+		mCubeMapNegY[lLevel].Resize(lWidth, lHeight, Canvas::RESIZE_NICEST);
+		mCubeMapPosZ[lLevel].Resize(lWidth, lHeight, Canvas::RESIZE_NICEST);
+		mCubeMapNegZ[lLevel].Resize(lWidth, lHeight, Canvas::RESIZE_NICEST);
 	}
 
 	mNumMipMapLevels = lNumLevels;
@@ -456,13 +456,13 @@ void Texture::Prepare(bool pColorMap,
 	if (pCubeMap == false)
 	{
 		if (pColorMap == true)
-			mColorMap = new Lepra::Canvas[lNumLevels];
+			mColorMap = new Canvas[lNumLevels];
 		if (pAlphaMap == true)
-			mAlphaMap = new Lepra::Canvas[lNumLevels];
+			mAlphaMap = new Canvas[lNumLevels];
 		if (pNormalMap == true)
-			mNormalMap = new Lepra::Canvas[lNumLevels];
+			mNormalMap = new Canvas[lNumLevels];
 		if (pSpecularMap == true)
-			mSpecularMap = new Lepra::Canvas[lNumLevels];
+			mSpecularMap = new Canvas[lNumLevels];
 
 		for (unsigned int lLevel = 0; lLevel < lNumLevels; lLevel++)
 		{
@@ -479,26 +479,26 @@ void Texture::Prepare(bool pColorMap,
 
 			if (pColorMap == true)
 			{
-				mColorMap[lLevel].Reset(lWidth, lHeight, Lepra::Canvas::BITDEPTH_24_BIT);
+				mColorMap[lLevel].Reset(lWidth, lHeight, Canvas::BITDEPTH_24_BIT);
 				mColorMap[lLevel].CreateBuffer();
 			}
 
 			if (pAlphaMap == true)
 			{
-				mAlphaMap[lLevel].Reset(lWidth, lHeight, Lepra::Canvas::BITDEPTH_8_BIT);
+				mAlphaMap[lLevel].Reset(lWidth, lHeight, Canvas::BITDEPTH_8_BIT);
 				mAlphaMap[lLevel].CreateBuffer();
 				mAlphaMap[lLevel].SetGrayscalePalette();
 			}
 
 			if (pNormalMap == true)
 			{
-				mNormalMap[lLevel].Reset(lWidth, lHeight, Lepra::Canvas::BITDEPTH_24_BIT);
+				mNormalMap[lLevel].Reset(lWidth, lHeight, Canvas::BITDEPTH_24_BIT);
 				mNormalMap[lLevel].CreateBuffer();
 			}
 
 			if (pSpecularMap == true)
 			{
-				mSpecularMap[lLevel].Reset(lWidth, lHeight, Lepra::Canvas::BITDEPTH_8_BIT);
+				mSpecularMap[lLevel].Reset(lWidth, lHeight, Canvas::BITDEPTH_8_BIT);
 				mSpecularMap[lLevel].CreateBuffer();
 				mSpecularMap[lLevel].SetGrayscalePalette();
 			}
@@ -506,12 +506,12 @@ void Texture::Prepare(bool pColorMap,
 	}
 	else
 	{
-		mCubeMapPosX = new Lepra::Canvas[lNumLevels];
-		mCubeMapNegX = new Lepra::Canvas[lNumLevels];
-		mCubeMapPosY = new Lepra::Canvas[lNumLevels];
-		mCubeMapNegY = new Lepra::Canvas[lNumLevels];
-		mCubeMapPosZ = new Lepra::Canvas[lNumLevels];
-		mCubeMapNegZ = new Lepra::Canvas[lNumLevels];
+		mCubeMapPosX = new Canvas[lNumLevels];
+		mCubeMapNegX = new Canvas[lNumLevels];
+		mCubeMapPosY = new Canvas[lNumLevels];
+		mCubeMapNegY = new Canvas[lNumLevels];
+		mCubeMapPosZ = new Canvas[lNumLevels];
+		mCubeMapNegZ = new Canvas[lNumLevels];
 
 		for (unsigned int lLevel = 0; lLevel < lNumLevels; lLevel++)
 		{
@@ -526,12 +526,12 @@ void Texture::Prepare(bool pColorMap,
 			if (lHeight == 0)
 				lHeight = 1;
 
-			mCubeMapPosX[lLevel].Reset(lWidth, lHeight, Lepra::Canvas::BITDEPTH_24_BIT);
-			mCubeMapNegX[lLevel].Reset(lWidth, lHeight, Lepra::Canvas::BITDEPTH_24_BIT);
-			mCubeMapPosY[lLevel].Reset(lWidth, lHeight, Lepra::Canvas::BITDEPTH_24_BIT);
-			mCubeMapNegY[lLevel].Reset(lWidth, lHeight, Lepra::Canvas::BITDEPTH_24_BIT);
-			mCubeMapPosZ[lLevel].Reset(lWidth, lHeight, Lepra::Canvas::BITDEPTH_24_BIT);
-			mCubeMapNegZ[lLevel].Reset(lWidth, lHeight, Lepra::Canvas::BITDEPTH_24_BIT);
+			mCubeMapPosX[lLevel].Reset(lWidth, lHeight, Canvas::BITDEPTH_24_BIT);
+			mCubeMapNegX[lLevel].Reset(lWidth, lHeight, Canvas::BITDEPTH_24_BIT);
+			mCubeMapPosY[lLevel].Reset(lWidth, lHeight, Canvas::BITDEPTH_24_BIT);
+			mCubeMapNegY[lLevel].Reset(lWidth, lHeight, Canvas::BITDEPTH_24_BIT);
+			mCubeMapPosZ[lLevel].Reset(lWidth, lHeight, Canvas::BITDEPTH_24_BIT);
+			mCubeMapNegZ[lLevel].Reset(lWidth, lHeight, Canvas::BITDEPTH_24_BIT);
 
 			mCubeMapPosX[lLevel].CreateBuffer();
 			mCubeMapNegX[lLevel].CreateBuffer();
@@ -543,7 +543,7 @@ void Texture::Prepare(bool pColorMap,
 	}
 }
 
-const Lepra::Canvas* Texture::GetColorMap(unsigned int pMipMapLevel) const
+const Canvas* Texture::GetColorMap(unsigned int pMipMapLevel) const
 {
 	if (mColorMap != 0 && pMipMapLevel < (unsigned int)mNumMipMapLevels)
 		return &mColorMap[pMipMapLevel];
@@ -551,7 +551,7 @@ const Lepra::Canvas* Texture::GetColorMap(unsigned int pMipMapLevel) const
 	return 0;
 }
 
-const Lepra::Canvas* Texture::GetAlphaMap(unsigned int pMipMapLevel) const
+const Canvas* Texture::GetAlphaMap(unsigned int pMipMapLevel) const
 {
 	if (mAlphaMap != 0 && pMipMapLevel < (unsigned int)mNumMipMapLevels)
 		return &mAlphaMap[pMipMapLevel];
@@ -559,7 +559,7 @@ const Lepra::Canvas* Texture::GetAlphaMap(unsigned int pMipMapLevel) const
 	return 0;
 }
 
-const Lepra::Canvas* Texture::GetNormalMap(unsigned int pMipMapLevel) const
+const Canvas* Texture::GetNormalMap(unsigned int pMipMapLevel) const
 {
 	if (mNormalMap != 0 && pMipMapLevel < (unsigned int)mNumMipMapLevels)
 		return &mNormalMap[pMipMapLevel];
@@ -567,7 +567,7 @@ const Lepra::Canvas* Texture::GetNormalMap(unsigned int pMipMapLevel) const
 	return 0;
 }
 
-const Lepra::Canvas* Texture::GetSpecularMap(unsigned int pMipMapLevel) const
+const Canvas* Texture::GetSpecularMap(unsigned int pMipMapLevel) const
 {
 	if (mSpecularMap != 0 && pMipMapLevel < (unsigned int)mNumMipMapLevels)
 		return &mSpecularMap[pMipMapLevel];
@@ -575,7 +575,7 @@ const Lepra::Canvas* Texture::GetSpecularMap(unsigned int pMipMapLevel) const
 	return 0;
 }
 
-const Lepra::Canvas* Texture::GetCubeMapPosX(unsigned int pMipMapLevel) const
+const Canvas* Texture::GetCubeMapPosX(unsigned int pMipMapLevel) const
 {
 	if (mCubeMapPosX != 0 && pMipMapLevel < (unsigned int)mNumMipMapLevels)
 		return &mCubeMapPosX[pMipMapLevel];
@@ -583,7 +583,7 @@ const Lepra::Canvas* Texture::GetCubeMapPosX(unsigned int pMipMapLevel) const
 	return 0;
 }
 
-const Lepra::Canvas* Texture::GetCubeMapNegX(unsigned int pMipMapLevel) const
+const Canvas* Texture::GetCubeMapNegX(unsigned int pMipMapLevel) const
 {
 	if (mCubeMapNegX != 0 && pMipMapLevel < (unsigned int)mNumMipMapLevels)
 		return &mCubeMapNegX[pMipMapLevel];
@@ -591,7 +591,7 @@ const Lepra::Canvas* Texture::GetCubeMapNegX(unsigned int pMipMapLevel) const
 	return 0;
 }
 
-const Lepra::Canvas* Texture::GetCubeMapPosY(unsigned int pMipMapLevel) const
+const Canvas* Texture::GetCubeMapPosY(unsigned int pMipMapLevel) const
 {
 	if (mCubeMapPosY != 0 && pMipMapLevel < (unsigned int)mNumMipMapLevels)
 		return &mCubeMapPosY[pMipMapLevel];
@@ -599,7 +599,7 @@ const Lepra::Canvas* Texture::GetCubeMapPosY(unsigned int pMipMapLevel) const
 	return 0;
 }
 
-const Lepra::Canvas* Texture::GetCubeMapNegY(unsigned int pMipMapLevel) const
+const Canvas* Texture::GetCubeMapNegY(unsigned int pMipMapLevel) const
 {
 	if (mCubeMapNegY != 0 && pMipMapLevel < (unsigned int)mNumMipMapLevels)
 		return &mCubeMapNegY[pMipMapLevel];
@@ -607,7 +607,7 @@ const Lepra::Canvas* Texture::GetCubeMapNegY(unsigned int pMipMapLevel) const
 	return 0;
 }
 
-const Lepra::Canvas* Texture::GetCubeMapPosZ(unsigned int pMipMapLevel) const
+const Canvas* Texture::GetCubeMapPosZ(unsigned int pMipMapLevel) const
 {
 	if (mCubeMapPosZ != 0 && pMipMapLevel < (unsigned int)mNumMipMapLevels)
 		return &mCubeMapPosZ[pMipMapLevel];
@@ -615,7 +615,7 @@ const Lepra::Canvas* Texture::GetCubeMapPosZ(unsigned int pMipMapLevel) const
 	return 0;
 }
 
-const Lepra::Canvas* Texture::GetCubeMapNegZ(unsigned int pMipMapLevel) const
+const Canvas* Texture::GetCubeMapNegZ(unsigned int pMipMapLevel) const
 {
 	if (mCubeMapNegZ != 0 && pMipMapLevel < (unsigned int)mNumMipMapLevels)
 		return &mCubeMapNegZ[pMipMapLevel];
@@ -623,7 +623,7 @@ const Lepra::Canvas* Texture::GetCubeMapNegZ(unsigned int pMipMapLevel) const
 	return 0;
 }
 
-Lepra::Canvas* Texture::_GetColorMap(unsigned int pMipMapLevel)
+Canvas* Texture::_GetColorMap(unsigned int pMipMapLevel)
 {
 	if (mColorMap != 0 && pMipMapLevel < (unsigned int)mNumMipMapLevels)
 		return &mColorMap[pMipMapLevel];
@@ -631,7 +631,7 @@ Lepra::Canvas* Texture::_GetColorMap(unsigned int pMipMapLevel)
 	return 0;
 }
 
-Lepra::Canvas* Texture::_GetAlphaMap(unsigned int pMipMapLevel)
+Canvas* Texture::_GetAlphaMap(unsigned int pMipMapLevel)
 {
 	if (mAlphaMap != 0 && pMipMapLevel < (unsigned int)mNumMipMapLevels)
 		return &mAlphaMap[pMipMapLevel];
@@ -639,7 +639,7 @@ Lepra::Canvas* Texture::_GetAlphaMap(unsigned int pMipMapLevel)
 	return 0;
 }
 
-Lepra::Canvas* Texture::_GetNormalMap(unsigned int pMipMapLevel)
+Canvas* Texture::_GetNormalMap(unsigned int pMipMapLevel)
 {
 	if (mNormalMap != 0 && pMipMapLevel < (unsigned int)mNumMipMapLevels)
 		return &mNormalMap[pMipMapLevel];
@@ -647,7 +647,7 @@ Lepra::Canvas* Texture::_GetNormalMap(unsigned int pMipMapLevel)
 	return 0;
 }
 
-Lepra::Canvas* Texture::_GetSpecularMap(unsigned int pMipMapLevel)
+Canvas* Texture::_GetSpecularMap(unsigned int pMipMapLevel)
 {
 	if (mSpecularMap != 0 && pMipMapLevel < (unsigned int)mNumMipMapLevels)
 		return &mSpecularMap[pMipMapLevel];
@@ -655,7 +655,7 @@ Lepra::Canvas* Texture::_GetSpecularMap(unsigned int pMipMapLevel)
 	return 0;
 }
 
-Lepra::Canvas* Texture::_GetCubeMapPosX(unsigned int pMipMapLevel)
+Canvas* Texture::_GetCubeMapPosX(unsigned int pMipMapLevel)
 {
 	if (mCubeMapPosX != 0 && pMipMapLevel < (unsigned int)mNumMipMapLevels)
 		return &mCubeMapPosX[pMipMapLevel];
@@ -663,7 +663,7 @@ Lepra::Canvas* Texture::_GetCubeMapPosX(unsigned int pMipMapLevel)
 	return 0;
 }
 
-Lepra::Canvas* Texture::_GetCubeMapNegX(unsigned int pMipMapLevel)
+Canvas* Texture::_GetCubeMapNegX(unsigned int pMipMapLevel)
 {
 	if (mCubeMapNegX != 0 && pMipMapLevel < (unsigned int)mNumMipMapLevels)
 		return &mCubeMapNegX[pMipMapLevel];
@@ -671,7 +671,7 @@ Lepra::Canvas* Texture::_GetCubeMapNegX(unsigned int pMipMapLevel)
 	return 0;
 }
 
-Lepra::Canvas* Texture::_GetCubeMapPosY(unsigned int pMipMapLevel)
+Canvas* Texture::_GetCubeMapPosY(unsigned int pMipMapLevel)
 {
 	if (mCubeMapPosY != 0 && pMipMapLevel < (unsigned int)mNumMipMapLevels)
 		return &mCubeMapPosY[pMipMapLevel];
@@ -679,7 +679,7 @@ Lepra::Canvas* Texture::_GetCubeMapPosY(unsigned int pMipMapLevel)
 	return 0;
 }
 
-Lepra::Canvas* Texture::_GetCubeMapNegY(unsigned int pMipMapLevel)
+Canvas* Texture::_GetCubeMapNegY(unsigned int pMipMapLevel)
 {
 	if (mCubeMapNegY != 0 && pMipMapLevel < (unsigned int)mNumMipMapLevels)
 		return &mCubeMapNegY[pMipMapLevel];
@@ -687,7 +687,7 @@ Lepra::Canvas* Texture::_GetCubeMapNegY(unsigned int pMipMapLevel)
 	return 0;
 }
 
-Lepra::Canvas* Texture::_GetCubeMapPosZ(unsigned int pMipMapLevel)
+Canvas* Texture::_GetCubeMapPosZ(unsigned int pMipMapLevel)
 {
 	if (mCubeMapPosZ != 0 && pMipMapLevel < (unsigned int)mNumMipMapLevels)
 		return &mCubeMapPosZ[pMipMapLevel];
@@ -695,7 +695,7 @@ Lepra::Canvas* Texture::_GetCubeMapPosZ(unsigned int pMipMapLevel)
 	return 0;
 }
 
-Lepra::Canvas* Texture::_GetCubeMapNegZ(unsigned int pMipMapLevel)
+Canvas* Texture::_GetCubeMapNegZ(unsigned int pMipMapLevel)
 {
 	if (mCubeMapNegZ != 0 && pMipMapLevel < (unsigned int)mNumMipMapLevels)
 		return &mCubeMapNegZ[pMipMapLevel];
@@ -740,7 +740,7 @@ void Texture::SwapRGBOrder()
 	}
 }
 
-void Texture::ConvertBitDepth(Lepra::Canvas::BitDepth pBitDepth)
+void Texture::ConvertBitDepth(Canvas::BitDepth pBitDepth)
 {
 	if (mColorMap != 0)
 	{
@@ -751,12 +751,12 @@ void Texture::ConvertBitDepth(Lepra::Canvas::BitDepth pBitDepth)
 	}
 }
 
-void Texture::GenerateNormalMap(Lepra::Canvas& pNormalMap, const Lepra::Canvas& pBumpMap, double pScale)
+void Texture::GenerateNormalMap(Canvas& pNormalMap, const Canvas& pBumpMap, double pScale)
 {
-	Lepra::Canvas lBumpMap(pBumpMap, true);
+	Canvas lBumpMap(pBumpMap, true);
 	lBumpMap.ConvertToGrayscale();
 
-	pNormalMap.Reset(lBumpMap.GetWidth(), lBumpMap.GetHeight(), Lepra::Canvas::BITDEPTH_24_BIT);
+	pNormalMap.Reset(lBumpMap.GetWidth(), lBumpMap.GetHeight(), Canvas::BITDEPTH_24_BIT);
 	pNormalMap.CreateBuffer();
 
 	for (unsigned y = 0; y < lBumpMap.GetHeight(); y++)
@@ -770,25 +770,25 @@ void Texture::GenerateNormalMap(Lepra::Canvas& pNormalMap, const Lepra::Canvas& 
 
 			if (y > 0)
 			{
-				Lepra::Color lColor;
+				Color lColor;
 				lBumpMap.GetPixelColor(x, y - 1, lColor);
 				lNorthValue = (double)lColor.mRed * pScale;
 			}
 			if (y < lBumpMap.GetHeight() - 1)
 			{
-				Lepra::Color lColor;
+				Color lColor;
 				lBumpMap.GetPixelColor(x, y + 1, lColor);
 				lSouthValue = (double)lColor.mRed * pScale;
 			}
 			if (x > 0)
 			{
-				Lepra::Color lColor;
+				Color lColor;
 				lBumpMap.GetPixelColor(x - 1, y, lColor);
 				lWestValue = (double)lColor.mRed * pScale;
 			}
 			if (x < lBumpMap.GetWidth() - 1)
 			{
-				Lepra::Color lColor;
+				Color lColor;
 				lBumpMap.GetPixelColor(x + 1, y, lColor);
 				lEastValue = (double)lColor.mRed * pScale;
 			}
@@ -797,7 +797,7 @@ void Texture::GenerateNormalMap(Lepra::Canvas& pNormalMap, const Lepra::Canvas& 
 			double lNY = sin(atan((lSouthValue - lNorthValue) / 255.0));
 			double lNZ = 1.0 - (lNX * lNX + lNY * lNY);
 
-			Lepra::Color lColor((Lepra::uint8)(lNX * 127.0) + 128, (Lepra::uint8)(lNY * 127.0) + 128, (Lepra::uint8)(lNZ * 127.0) + 128);
+			Color lColor((uint8)(lNX * 127.0) + 128, (uint8)(lNY * 127.0) + 128, (uint8)(lNZ * 127.0) + 128);
 			pNormalMap.SetPixelColor(x, y, lColor);
 		}
 	}

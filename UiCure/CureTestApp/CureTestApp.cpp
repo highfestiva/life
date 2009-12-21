@@ -40,32 +40,22 @@ static bool TestRunDummy() { return (true); }
 #define CURE_NS			Cure
 #endif // With / without UI.
 
+using namespace Lepra;
+
 bool TEST_RUN_LEPRA();
 bool TEST_RUN_TBC();
 bool TEST_RUN_CURE();
 bool TEST_RUN_NETPHYS();
 //bool ExportStructure();
 bool EXPORT_MESH();
-void ShowTestResult(const Lepra::LogDecorator& pAccount, bool pbTestOk);
+void ShowTestResult(const LogDecorator& pAccount, bool pbTestOk);
 
 
 
-/*static bool ExportData()
-{
-	bool lTestOk = ExportStructure();
-	if (lTestOk)
-	{
-		//lTestOk = EXPORT_MESH();
-	}
-	return (lTestOk);
-}*/
-
-
-
-class CureTestApplication: public Lepra::Application
+class CureTestApplication: public Application
 {
 public:
-	CureTestApplication(const Lepra::StringUtility::StringVector& pArgumentList);
+	CureTestApplication(const strutil::strvec& pArgumentList);
 	int Run();
 
 private:
@@ -75,7 +65,6 @@ private:
 		TBC_BIT = (1<<1),
 		CURE_BIT = (1<<2),
 		NETWORK_PHYSICS_BIT = (1<<3),
-		//EXPORT_BIT = (1<<4),
 	};
 	unsigned mTestBits;
 	LOG_CLASS_DECLARE();
@@ -83,14 +72,14 @@ private:
 
 LEPRA_RUN_APPLICATION(CureTestApplication);
 
-CureTestApplication::CureTestApplication(const Lepra::StringUtility::StringVector& pArgumentList):
-	Lepra::Application(pArgumentList),
+CureTestApplication::CureTestApplication(const strutil::strvec& pArgumentList):
+	Application(pArgumentList),
 	mTestBits((unsigned)~0)
 {
 	for (size_t x = 1; x < pArgumentList.size(); ++x)
 	{
-		Lepra::String lArgument = pArgumentList[x];
-		Lepra::StringUtility::ToUpper(lArgument);
+		str lArgument = pArgumentList[x];
+		strutil::ToUpper(lArgument);
 		int lMask = 0;
 		if (lArgument == _T("LEPRA"))
 		{
@@ -100,10 +89,6 @@ CureTestApplication::CureTestApplication(const Lepra::StringUtility::StringVecto
 		{
 			lMask |= TBC_BIT;
 		}
-		/*else if (lArgument == _T("EXPORT"))
-		{
-			lMask |= EXPORT_BIT;
-		}*/
 		else if (lArgument == _T("CURE"))
 		{
 			lMask |= CURE_BIT;
@@ -134,21 +119,21 @@ int CureTestApplication::Run()
 
 	// We like to be on a single CPU on the time measuring thread, due to high resolution timers,
 	// which may differ between different CPU cores. Several seconds can differ between different cores.
-	Lepra::Thread::GetCurrentThread()->SetCpuAffinityMask(0x0001);
+	Thread::GetCurrentThread()->SetCpuAffinityMask(0x0001);
 
-	Lepra::StdioConsoleLogListener* lConsoleLogPointer = 0;
+	StdioConsoleLogListener* lConsoleLogPointer = 0;
 #ifdef LEPRA_CONSOLE
-	Lepra::StdioConsoleLogListener lConsoleLogger;
-	lConsoleLogger.SetLevelThreashold(Lepra::Log::LEVEL_HEADLINE);
+	StdioConsoleLogListener lConsoleLogger;
+	lConsoleLogger.SetLevelThreashold(Log::LEVEL_HEADLINE);
 	lConsoleLogPointer = &lConsoleLogger;
 #endif // LEPRA_CONSOLE
-	Lepra::DebuggerLogListener lDebugLogger;
-	Lepra::FileLogListener lFileLogger(_T("CureTestApp.log"));
-	Lepra::FileLogListener lPerformanceLogger(_T("CureTestPerformance.log"));
-	Lepra::MemFileLogListener lMemLogger(100*1024);
-	Lepra::LogType::GetLog(Lepra::LogType::SUB_ROOT)->SetupBasicListeners(lConsoleLogPointer, &lDebugLogger,
+	DebuggerLogListener lDebugLogger;
+	FileLogListener lFileLogger(_T("CureTestApp.log"));
+	FileLogListener lPerformanceLogger(_T("CureTestPerformance.log"));
+	MemFileLogListener lMemLogger(100*1024);
+	LogType::GetLog(LogType::SUB_ROOT)->SetupBasicListeners(lConsoleLogPointer, &lDebugLogger,
 		&lFileLogger, &lPerformanceLogger, &lMemLogger);
-	Lepra::LogType::GetLog(Lepra::LogType::SUB_ROOT)->SetLevelThreashold(Lepra::Log::LEVEL_TRACE);
+	LogType::GetLog(LogType::SUB_ROOT)->SetLevelThreashold(Log::LEVEL_TRACE);
 
 	mLog.Headline(_T("\n\n--- Build type: ") _T(LEPRA_STRING_TYPE_TEXT) _T(" ") _T(LEPRA_BUILD_TYPE_TEXT) _T(" ---\n"));
 
@@ -161,10 +146,6 @@ int CureTestApplication::Run()
 	{
 		lTestOk = TEST_RUN_TBC();
 	}
-	/*if (lTestOk && mTestBits&EXPORT_BIT)
-	{
-		lTestOk = ExportData();
-	}*/
 	if (lTestOk && mTestBits&CURE_BIT)
 	{
 		lTestOk = TEST_RUN_CURE();
@@ -176,7 +157,7 @@ int CureTestApplication::Run()
 #ifdef LEPRA_CONSOLE
 	if (!lTestOk)
 	{
-		lMemLogger.Dump(lConsoleLogger, Lepra::Log::LEVEL_ERROR);
+		lMemLogger.Dump(lConsoleLogger, Log::LEVEL_ERROR);
 	}
 #endif // LEPRA_CONSOLE
 	ShowTestResult(mLog, lTestOk);

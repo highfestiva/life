@@ -40,21 +40,23 @@
 #include "../Include/Transformation.h"
 
 
+using namespace Lepra;
+
 class LepraTest{};
-static Lepra::LogDecorator gLLog(Lepra::LogType::GetLog(Lepra::LogType::SUB_TEST), typeid(LepraTest));
+static LogDecorator gLLog(LogType::GetLog(LogType::SUB_TEST), typeid(LepraTest));
 
 
 
-//bool TestSkipList(const Lepra::LogDecorator& pAccount);
-bool TestBinTree(const Lepra::LogDecorator& pAccount);
-bool TestLooseBintree(const Lepra::LogDecorator& pAccount);
-bool TestLooseQuadtree(const Lepra::LogDecorator& pAccount);
-bool TestLooseOctree(const Lepra::LogDecorator& pAccount);
-bool TestThreading(const Lepra::LogDecorator& pAccount);
-bool TestUDPSockets(const Lepra::LogDecorator& pAccount);
-bool TestRotationMatrix(const Lepra::LogDecorator& pAccount);
+//bool TestSkipList(const LogDecorator& pAccount);
+bool TestBinTree(const LogDecorator& pAccount);
+bool TestLooseBintree(const LogDecorator& pAccount);
+bool TestLooseQuadtree(const LogDecorator& pAccount);
+bool TestLooseOctree(const LogDecorator& pAccount);
+bool TestThreading(const LogDecorator& pAccount);
+bool TestUDPSockets(const LogDecorator& pAccount);
+bool TestRotationMatrix(const LogDecorator& pAccount);
 
-void ReportTestResult(const Lepra::LogDecorator& pLog, const Lepra::String& pTestName, const Lepra::String& pContext, bool pResult)
+void ReportTestResult(const LogDecorator& pLog, const str& pTestName, const str& pContext, bool pResult)
 {
 	if (pResult)
 	{
@@ -66,65 +68,65 @@ void ReportTestResult(const Lepra::LogDecorator& pLog, const Lepra::String& pTes
 	}
 }
 
-bool TestString(const Lepra::LogDecorator& pAccount)
+bool TestString(const LogDecorator& pAccount)
 {
-	Lepra::String lContext;
+	str lContext;
 	bool lTestOk = true;
 
-	// Verify Lepra::String basics.
+	// Verify str basics.
 	if (lTestOk)
 	{
 		lContext = _T("String basics");
-		Lepra::String lString = _T("ABCdefghijklmnopqrstUvwxyz");
+		str lString = _T("ABCdefghijklmnopqrstUvwxyz");
 		lString += _T("97531") + lString + _T("02468");
 		lString.erase(31, 4);	// Remove second ABCd.
-		lString = Lepra::StringUtility::ReplaceAll(lString, _T('x'), _T(' '));
-		Lepra::String lTmp1 = _T("oA");
-		Lepra::StringUtility::ToUpper(lTmp1);
-		Lepra::String lTmp2 = _T("Oa");
-		Lepra::StringUtility::ToLower(lTmp2);
+		lString = strutil::ReplaceAll(lString, _T('x'), _T(' '));
+		str lTmp1 = _T("oA");
+		strutil::ToUpper(lTmp1);
+		str lTmp2 = _T("Oa");
+		strutil::ToLower(lTmp2);
 		lString.insert(10, lTmp1+lTmp2);
 		lTmp1 = _T("*!\" #\t%&/\r()=\n\v");
-		Lepra::StringUtility::StripWhiteSpaces(lTmp1);
+		strutil::StripWhiteSpaces(lTmp1);
 		lString.insert(30, lTmp1);
-		lString.insert(0, Lepra::StringUtility::Right(_T("Johannes"), 6) + Lepra::String(_T("Sune")).substr(0, 1));
+		lString.insert(0, strutil::Right(_T("Johannes"), 6) + str(_T("Sune")).substr(0, 1));
 		lTestOk = (lString == _T("hannesSABCdefghijOAoaklmnopqrstUvw yz*!\"#%&/()=97531efghijklmnopqrstUvw yz02468") &&
 			lString.find(_T('S'), 0) == 6 &&
 			lString.rfind(_T('S'), lString.length()-1) == 6);
 		assert(lTestOk);
 	}
 
-	// Verify Lepra::String basics.
+	// Verify str basics.
 	if (lTestOk)
 	{
 		lContext = _T("String start/end");
-		Lepra::String lData(_T("This is the start of something new!"));
-		lTestOk = (Lepra::StringUtility::StartsWith(lData, _T("This is")) &&
-			!Lepra::StringUtility::StartsWith(lData, _T("That is")) &&
-			Lepra::StringUtility::EndsWith(lData, _T(" new!")) &&
-			!Lepra::StringUtility::EndsWith(lData, _T(" old!")));
+		str lData(_T("This is the start of something new!"));
+		lTestOk = (strutil::StartsWith(lData, _T("This is")) &&
+			!strutil::StartsWith(lData, _T("That is")) &&
+			strutil::EndsWith(lData, _T(" new!")) &&
+			!strutil::EndsWith(lData, _T(" old!")));
 		assert(lTestOk);
 	}
 
-	// Verify Lepra::StringUtility::Format.
+	// Verify strutil::Format.
 	if (lTestOk)
 	{
-		lContext = _T("StringUtility::Format()");
+		lContext = _T("strutil::Format()");
 		int i = 123;
 		float f = 123.321f;
-		Lepra::String lString = _T("String ") + Lepra::StringUtility::Format(_T("format test: %i, %.4f, %s"), i, f, _T("Hello World!"));
+		str lString = _T("String ") + strutil::Format(_T("format test: %i, %.4f, %s"), i, f, _T("Hello World!"));
 		lTestOk = (lString == _T("String format test: 123, 123.3210, Hello World!"));
 		assert(lTestOk);
 	}
 
-	// Verify Lepra::String conversion to/from Ansi/Unicode.
+	// Verify str conversion to/from Ansi/Unicode.
 	if (lTestOk)
 	{
 		lContext = _T("Ansi/Unicode conversion");
 		const char* lTestData1	=  "Knastest !\"#%&/()=?'-_+\\}][{$@'*.:,;~^<>|";
 		const wchar_t* lTestData2	= L"Knastest !\"#%&/()=?'-_+\\}][{$@'*.:,;~^<>|";
-		Lepra::UnicodeString lUnicode = Lepra::UnicodeStringUtility::ToOwnCode(Lepra::AnsiString(lTestData1));
-		Lepra::AnsiString lAnsi = Lepra::AnsiStringUtility::ToOwnCode(Lepra::UnicodeString(lTestData2));
+		wstr lUnicode = wstrutil::ToOwnCode(astr(lTestData1));
+		astr lAnsi = astrutil::ToOwnCode(wstr(lTestData2));
 		lTestOk = (lAnsi == lTestData1 && lUnicode == lTestData2);
 		assert(lTestOk);
 	}
@@ -134,7 +136,7 @@ bool TestString(const Lepra::LogDecorator& pAccount)
 	{
 		lContext = _T("empty int conversion");
 		int lValue = 0;
-		lTestOk = !Lepra::StringUtility::StringToInt(_T(""), lValue);
+		lTestOk = !strutil::StringToInt(_T(""), lValue);
 		assert(lTestOk);
 	}
 
@@ -142,9 +144,9 @@ bool TestString(const Lepra::LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = _T("float conversion");
-		Lepra::float64 lValue = 1.5;
-		Lepra::String lString = Lepra::StringUtility::Format(_T("%.5f"), lValue);
-		lTestOk = Lepra::StringUtility::StringToDouble(lString, lValue);
+		float64 lValue = 1.5;
+		str lString = strutil::Format(_T("%.5f"), lValue);
+		lTestOk = strutil::StringToDouble(lString, lValue);
 		if (lTestOk)
 		{
 			lTestOk = (lString == _T("1.50000") && lValue == 1.5f);
@@ -157,22 +159,22 @@ bool TestString(const Lepra::LogDecorator& pAccount)
 	{
 		lContext = _T("empty float conversion");
 		double lValue = 0;
-		lTestOk = !Lepra::StringUtility::StringToDouble(_T(""), lValue);
+		lTestOk = !strutil::StringToDouble(_T(""), lValue);
 		assert(lTestOk);
 	}
 
 	if (lTestOk)
 	{
 		lContext = _T("string -> C string");
-		lTestOk = (Lepra::StringUtility::StringToCString(_T("Hej\"\\\n'!#\r\t")) == _T("Hej\\\"\\\\\\n'!#\\r\\t"));
+		lTestOk = (strutil::StringToCString(_T("Hej\"\\\n'!#\r\t")) == _T("Hej\\\"\\\\\\n'!#\\r\\t"));
 		assert(lTestOk);
 	}
 
 	if (lTestOk)
 	{
 		lContext = _T("C string -> string");
-		Lepra::String lValue;
-		lTestOk = Lepra::StringUtility::CStringToString(_T("Hej\\\"\\\\\\n'!#\\r\\t"), lValue);
+		str lValue;
+		lTestOk = strutil::CStringToString(_T("Hej\\\"\\\\\\n'!#\\r\\t"), lValue);
 		assert(lTestOk);
 		if (lTestOk)
 		{
@@ -181,11 +183,11 @@ bool TestString(const Lepra::LogDecorator& pAccount)
 		}
 	}
 
-	Lepra::StringUtility::StringVector lTestWords;
+	strutil::strvec lTestWords;
 	if (lTestOk)
 	{
 		lContext = _T("plain string splitting");
-		lTestWords = Lepra::StringUtility::Split(_T("Den \"kyliga Trazan'\"\tapansson\r\n\v.\t\t"), _T(" \t\v\r\n"));
+		lTestWords = strutil::Split(_T("Den \"kyliga Trazan'\"\tapansson\r\n\v.\t\t"), _T(" \t\v\r\n"));
 		lTestOk = (lTestWords.size() == 6 && lTestWords[0] == _T("Den") && lTestWords[1] == _T("\"kyliga") &&
 			lTestWords[2] == _T("Trazan'\"") && lTestWords[3] == _T("apansson") && lTestWords[4] == _T(".") &&
 			lTestWords[5].empty());
@@ -195,7 +197,7 @@ bool TestString(const Lepra::LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = _T("string stripping");
-		lTestWords[1] = Lepra::StringUtility::StripLeft(lTestWords[1], _T("\""));
+		lTestWords[1] = strutil::StripLeft(lTestWords[1], _T("\""));
 		lTestOk = (lTestWords[1] == _T("kyliga"));
 		assert(lTestOk);
 	}
@@ -203,7 +205,7 @@ bool TestString(const Lepra::LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = _T("string joining");
-		Lepra::String lString = Lepra::StringUtility::Join(lTestWords, _T(" "));
+		str lString = strutil::Join(lTestWords, _T(" "));
 		lTestOk = (lString == _T("Den kyliga Trazan'\" apansson . "));
 		assert(lTestOk);
 	}
@@ -211,13 +213,13 @@ bool TestString(const Lepra::LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = _T("block string splitting 1");
-		Lepra::StringUtility::StringVector lWords = Lepra::StringUtility::BlockSplit(_T("\"Hej du glade\" sade jag  \ttill\n\n\r\vhonom igen."), _T(" \t\v\r\n"), false, false, 4);
+		strutil::strvec lWords = strutil::BlockSplit(_T("\"Hej du glade\" sade jag  \ttill\n\n\r\vhonom igen."), _T(" \t\v\r\n"), false, false, 4);
 		size_t lPhraseCount = lWords.size();
-		const Lepra::String& lWord0 = lWords[0];
-		const Lepra::String& lWord1 = lWords[1];
-		const Lepra::String& lWord2 = lWords[2];
-		const Lepra::String& lWord3 = lWords[3];
-		const Lepra::String& lWord4 = lWords[4];
+		const str& lWord0 = lWords[0];
+		const str& lWord1 = lWords[1];
+		const str& lWord2 = lWords[2];
+		const str& lWord3 = lWords[3];
+		const str& lWord4 = lWords[4];
 		lTestOk = (lPhraseCount == 5 && lWord0 == _T("Hej du glade") && lWord1 == _T("sade") &&
 			lWord2 == _T("jag") && lWord3 == _T("till") && lWord4 == _T("\n\n\r\vhonom igen."));
 		assert(lTestOk);
@@ -226,7 +228,7 @@ bool TestString(const Lepra::LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = _T("block string splitting 2");
-		Lepra::StringUtility::StringVector lWords = Lepra::StringUtility::BlockSplit(_T("\"Hej du glade \" sade jag  \t\"till\n\"\n\r\vhan..\nhonom igen."), _T(" \t\v\r\n"), true, false, 4);
+		strutil::strvec lWords = strutil::BlockSplit(_T("\"Hej du glade \" sade jag  \t\"till\n\"\n\r\vhan..\nhonom igen."), _T(" \t\v\r\n"), true, false, 4);
 		lTestOk = (lWords.size() == 5 && lWords[0] == _T("\"Hej du glade \"") && lWords[1] == _T("sade") &&
 			lWords[2] == _T("jag") && lWords[3] == _T("\"till\n\"") && lWords[4] == _T("\n\r\vhan..\nhonom igen."));
 		assert(lTestOk);
@@ -235,7 +237,7 @@ bool TestString(const Lepra::LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = _T("block string splitting 3");
-		Lepra::StringUtility::StringVector lWords = Lepra::StringUtility::BlockSplit(_T("\"a\\\"b\""), _T(" \t\v\r\n\""), false, true, 4);
+		strutil::strvec lWords = strutil::BlockSplit(_T("\"a\\\"b\""), _T(" \t\v\r\n\""), false, true, 4);
 		lTestOk = (lWords.size() == 1 && lWords[0] == _T("a\\\"b"));
 		assert(lTestOk);
 	}
@@ -244,19 +246,19 @@ bool TestString(const Lepra::LogDecorator& pAccount)
 	return (lTestOk);
 }
 
-bool TestNumber(const Lepra::LogDecorator& pAccount)
+bool TestNumber(const LogDecorator& pAccount)
 {
 	// Verify Number basics.
-	Lepra::String lContext;
+	str lContext;
 	bool lTestOk = true;
-	Lepra::String lResult;
-	Lepra::String lDesiredResult;
+	str lResult;
+	str lDesiredResult;
 
 	if (lTestOk)
 	{
 		lDesiredResult = _T("1.00 ");
 		lContext = _T("testing ")+lDesiredResult;
-		lResult = Lepra::Number::ConvertToPostfixNumber(1, 2);
+		lResult = Number::ConvertToPostfixNumber(1, 2);
 		lTestOk = (lResult == lDesiredResult);
 		assert(lTestOk);
 	}
@@ -265,7 +267,7 @@ bool TestNumber(const Lepra::LogDecorator& pAccount)
 	{
 		lDesiredResult = _T("1.41 k");
 		lContext = _T("testing ")+lDesiredResult;
-		lResult = Lepra::Number::ConvertToPostfixNumber(1.414444e3, 2);
+		lResult = Number::ConvertToPostfixNumber(1.414444e3, 2);
 		lTestOk = (lResult == lDesiredResult);
 		assert(lTestOk);
 	}
@@ -274,7 +276,7 @@ bool TestNumber(const Lepra::LogDecorator& pAccount)
 	{
 		lDesiredResult = _T("7.6667 m");
 		lContext = _T("rounding ")+lDesiredResult;
-		lResult = Lepra::Number::ConvertToPostfixNumber(7.66666666666666e-3, 4);
+		lResult = Number::ConvertToPostfixNumber(7.66666666666666e-3, 4);
 		lTestOk = (lResult == lDesiredResult);
 		assert(lTestOk);
 	}
@@ -283,7 +285,7 @@ bool TestNumber(const Lepra::LogDecorator& pAccount)
 	{
 		lDesiredResult = _T("10 M");
 		lContext = _T("testing ")+lDesiredResult;
-		lResult = Lepra::Number::ConvertToPostfixNumber(10e6, 0);
+		lResult = Number::ConvertToPostfixNumber(10e6, 0);
 		lTestOk = (lResult == lDesiredResult);
 		assert(lTestOk);
 	}
@@ -292,12 +294,12 @@ bool TestNumber(const Lepra::LogDecorator& pAccount)
 	return (lTestOk);
 }
 
-bool TestOrderedMap(const Lepra::LogDecorator& pAccount)
+bool TestOrderedMap(const LogDecorator& pAccount)
 {
-	Lepra::String lContext;
+	str lContext;
 	bool lTestOk = true;
 
-	Lepra::OrderedMap<Lepra::AnsiString, int> lMap;
+	OrderedMap<astr, int> lMap;
 	if (lTestOk)
 	{
 		lContext = _T("empty start");
@@ -329,7 +331,7 @@ bool TestOrderedMap(const Lepra::LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = _T("pop front");
-		Lepra::AnsiString lKey;
+		astr lKey;
 		int lValue;
 		lMap.PopFront(lKey, lValue);
 		lTestOk = (lKey == "4" && lValue == 5 && lMap.GetCount() == 1);
@@ -338,7 +340,7 @@ bool TestOrderedMap(const Lepra::LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = _T("pop back");
-		Lepra::AnsiString lKey;
+		astr lKey;
 		int lValue;
 		lMap.PopBack(lKey, lValue);
 		lTestOk = (lKey == "5" && lValue == 4 && lMap.GetCount() == 0);
@@ -382,17 +384,17 @@ bool TestOrderedMap(const Lepra::LogDecorator& pAccount)
 	{
 		lContext = _T("random add/remove");
 		const int lEntries = 11;
-		Lepra::AnsiString lSet[lEntries];
+		astr lSet[lEntries];
 		size_t lSetCount = 0;
 		for (int x = 1; lTestOk && x < 10000; ++x)
 		{
 			assert(lMap.GetCount() == lSetCount);
-			int lIndex = Lepra::Random::GetRandomNumber()%lEntries;
+			int lIndex = Random::GetRandomNumber()%lEntries;
 			if (!(x%59))
 			{
 				for (int x = 0; x < lEntries; ++x)
 				{
-					lSet[x] = Lepra::EmptyAnsiString;
+					lSet[x] = EmptyAnsiString;
 				}
 				lMap.RemoveAll();
 				lSetCount = 0;
@@ -401,7 +403,7 @@ bool TestOrderedMap(const Lepra::LogDecorator& pAccount)
 			}
 			else if (lSet[lIndex].empty())
 			{
-				lSet[lIndex] = ":"+Lepra::AnsiStringUtility::Format("%i", x);
+				lSet[lIndex] = ":"+astrutil::Format("%i", x);
 				lTestOk = lMap.Find(lSet[lIndex]) == lMap.End();
 				assert(lTestOk);
 				if (lTestOk)
@@ -421,7 +423,7 @@ bool TestOrderedMap(const Lepra::LogDecorator& pAccount)
 				if (lTestOk)
 				{
 					int lValue = -1;
-					Lepra::AnsiStringUtility::StringToInt(lSet[lIndex].c_str()+1, lValue, 10);
+					astrutil::StringToInt(lSet[lIndex].c_str()+1, lValue, 10);
 					lTestOk = (lTestOk && lMap.Find(lSet[lIndex]).GetObject() == lValue);
 					assert(lTestOk);
 				}
@@ -452,13 +454,13 @@ bool TestOrderedMap(const Lepra::LogDecorator& pAccount)
 	return (lTestOk);
 }
 
-bool TestIdManager(const Lepra::LogDecorator& pAccount)
+bool TestIdManager(const LogDecorator& pAccount)
 {
-	Lepra::String lContext;
+	str lContext;
 	bool lTestOk = true;
-	Lepra::String lDebugState;
+	str lDebugState;
 
-	Lepra::IdManager<int> lIdManager(3, 100, -2);
+	IdManager<int> lIdManager(3, 100, -2);
 	if (lTestOk)
 	{
 		lContext = _T("min ID");
@@ -611,7 +613,7 @@ bool TestIdManager(const Lepra::LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		// Just simple an anti-crash test.
-		Lepra::IdManager<int> lIdManager2(1, 0x7FFFFFFF-1, 0xFFFFFFFF);
+		IdManager<int> lIdManager2(1, 0x7FFFFFFF-1, 0xFFFFFFFF);
 		lDebugState = lIdManager2.GetDebugState();
 		lTestOk = (lDebugState == _T("1-0, 1-2147483646,\n"));
 		assert(lTestOk);
@@ -765,125 +767,125 @@ bool TestIdManager(const Lepra::LogDecorator& pAccount)
 	return (lTestOk);
 }
 
-bool TestTransformation(const Lepra::LogDecorator& pAccount)
+bool TestTransformation(const LogDecorator& pAccount)
 {
-	Lepra::String lContext;
+	str lContext;
 	bool lTestOk = true;
-	Lepra::String lDebugState;
+	str lDebugState;
 
 	if (lTestOk)
 	{
 		lContext = _T("anchor rotate 1");
-		Lepra::TransformationD lTransformation;
-		lTransformation.SetPosition(Lepra::Vector3DD(4, 1, 1));
-		lTransformation.RotateAroundAnchor(Lepra::Vector3DD(3, 0, -0.41), Lepra::Vector3DD(0, 0, 1), Lepra::PIF/2);
-		lTestOk = (lTransformation.GetPosition().GetDistance(Lepra::Vector3DD(2, 1, 1)) < 0.0001);
+		TransformationD lTransformation;
+		lTransformation.SetPosition(Vector3DD(4, 1, 1));
+		lTransformation.RotateAroundAnchor(Vector3DD(3, 0, -0.41), Vector3DD(0, 0, 1), PIF/2);
+		lTestOk = (lTransformation.GetPosition().GetDistance(Vector3DD(2, 1, 1)) < 0.0001);
 		assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("matrix rotate");
-		const Lepra::Vector3DD lAxis(1, -1, 0);
-		Lepra::RotationMatrixD lMatrix1;
-		lMatrix1.RotateAroundVector(lAxis, Lepra::PI/4);
-		Lepra::RotationMatrixD lMatrix2;
-		lMatrix2.RotateAroundVector(lAxis, -Lepra::PI*3/4);
-		Lepra::Vector3DD lNewPosition1 = lMatrix1*Lepra::Vector3DD(2, 2, 2);
-		Lepra::Vector3DD lNewPosition2 = lMatrix2*Lepra::Vector3DD(-2, -2, -2);
+		const Vector3DD lAxis(1, -1, 0);
+		RotationMatrixD lMatrix1;
+		lMatrix1.RotateAroundVector(lAxis, PI/4);
+		RotationMatrixD lMatrix2;
+		lMatrix2.RotateAroundVector(lAxis, -PI*3/4);
+		Vector3DD lNewPosition1 = lMatrix1*Vector3DD(2, 2, 2);
+		Vector3DD lNewPosition2 = lMatrix2*Vector3DD(-2, -2, -2);
 		lTestOk = (lNewPosition1.GetDistance(lNewPosition2) < 0.0001 &&
-			lNewPosition1.GetDistance(Lepra::Vector3DD(0.4142, 0.4142, 3.4142)) < 0.0001);
+			lNewPosition1.GetDistance(Vector3DD(0.4142, 0.4142, 3.4142)) < 0.0001);
 		assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("quaternion rotate");
-		const Lepra::Vector3DD lAxis(1, -1, 0);
-		Lepra::QuaternionD lQuaternion1(Lepra::PI/4, lAxis);
-		Lepra::QuaternionD lQuaternion2(-Lepra::PI*3/4, lAxis);
-		Lepra::Vector3DD lNewPosition1 = lQuaternion1*Lepra::Vector3DD(2, 2, 2);
-		Lepra::Vector3DD lNewPosition2 = lQuaternion2*Lepra::Vector3DD(-2, -2, -2);
+		const Vector3DD lAxis(1, -1, 0);
+		QuaternionD lQuaternion1(PI/4, lAxis);
+		QuaternionD lQuaternion2(-PI*3/4, lAxis);
+		Vector3DD lNewPosition1 = lQuaternion1*Vector3DD(2, 2, 2);
+		Vector3DD lNewPosition2 = lQuaternion2*Vector3DD(-2, -2, -2);
 		lTestOk = (lNewPosition1.GetDistance(lNewPosition2) < 0.0001 &&
-			lNewPosition1.GetDistance(Lepra::Vector3DD(0.4142, 0.4142, 3.4142)) < 0.0001);
+			lNewPosition1.GetDistance(Vector3DD(0.4142, 0.4142, 3.4142)) < 0.0001);
 		assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("quaternion multiply");
-		Lepra::Vector3DD x(1, 0, 0);
-		Lepra::QuaternionD q1(Lepra::PI/2, Lepra::Vector3DD(0, -1, 0));
+		Vector3DD x(1, 0, 0);
+		QuaternionD q1(PI/2, Vector3DD(0, -1, 0));
 		x = q1*x;
-		lTestOk = (x.GetDistance(Lepra::Vector3DD(0, 0, 1)) < 0.0001);
+		lTestOk = (x.GetDistance(Vector3DD(0, 0, 1)) < 0.0001);
 		assert(lTestOk);
 		if (lTestOk)
 		{
-			Lepra::QuaternionD q2(-Lepra::PI*1.5, Lepra::Vector3DD(1, 0, 0));
+			QuaternionD q2(-PI*1.5, Vector3DD(1, 0, 0));
 			x = (q1*q2)*x;
-			lTestOk = (x.GetDistance(Lepra::Vector3DD(0, -1, 0)) < 0.0001);
+			lTestOk = (x.GetDistance(Vector3DD(0, -1, 0)) < 0.0001);
 			assert(lTestOk);
 		}
 	}
 	if (lTestOk)
 	{
 		lContext = _T("anchor rotate 2");
-		const Lepra::Vector3DD lAnchor(0, -1, -1);
-		Lepra::TransformationD lTransformation1;
-		lTransformation1.SetPosition(Lepra::Vector3DD(2, 1, -1));
-		const Lepra::Vector3DD lDiff1(lTransformation1.GetPosition()-lAnchor);
-		Lepra::TransformationD lTransformation2;
+		const Vector3DD lAnchor(0, -1, -1);
+		TransformationD lTransformation1;
+		lTransformation1.SetPosition(Vector3DD(2, 1, -1));
+		const Vector3DD lDiff1(lTransformation1.GetPosition()-lAnchor);
+		TransformationD lTransformation2;
 		double l2Side = lDiff1.GetLength()/::sqrt(2.0);
-		lTransformation2.SetPosition(Lepra::Vector3DD(-l2Side, l2Side-1, -1));
-		const Lepra::Vector3DD lDiff2(lTransformation2.GetPosition()-lAnchor);
+		lTransformation2.SetPosition(Vector3DD(-l2Side, l2Side-1, -1));
+		const Vector3DD lDiff2(lTransformation2.GetPosition()-lAnchor);
 		assert(::fabs(lDiff1.GetLength()-lDiff2.GetLength()) < 0.0001);
 
-		const Lepra::Vector3DD lAxis1(1, -1, 0);
-		lTransformation1.RotateAroundAnchor(lAnchor, lAxis1, Lepra::PI/2);
-		const Lepra::Vector3DD lAxis2(1, 1, 0);
-		lTransformation2.RotateAroundAnchor(lAnchor, lAxis2, Lepra::PI/2);
+		const Vector3DD lAxis1(1, -1, 0);
+		lTransformation1.RotateAroundAnchor(lAnchor, lAxis1, PI/2);
+		const Vector3DD lAxis2(1, 1, 0);
+		lTransformation2.RotateAroundAnchor(lAnchor, lAxis2, PI/2);
 		lTestOk = (lTransformation1.GetPosition().GetDistance(lTransformation2.GetPosition()) < 0.0001 &&
-			lTransformation1.GetPosition().GetDistance(Lepra::Vector3DD(0, -1, lDiff1.GetLength()-1)) < 0.0001);
+			lTransformation1.GetPosition().GetDistance(Vector3DD(0, -1, lDiff1.GetLength()-1)) < 0.0001);
 		assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("quaternion rotate 2");
-		Lepra::Vector3DD lVector(0, 1, 0);
-		Lepra::QuaternionD lQ(Lepra::PI/4, Lepra::Vector3DD(0, 0, 1));
-		lQ.RotateAroundOwnX(Lepra::PI/4);
+		Vector3DD lVector(0, 1, 0);
+		QuaternionD lQ(PI/4, Vector3DD(0, 0, 1));
+		lQ.RotateAroundOwnX(PI/4);
 		lVector = lQ*lVector;
 		lQ.SetIdentity();
-		lQ.RotateAroundVector(Lepra::Vector3DD(0, 0, 1), -Lepra::PI/4);
+		lQ.RotateAroundVector(Vector3DD(0, 0, 1), -PI/4);
 		lVector = lQ*lVector;
-		lQ.Set(Lepra::PI/4, Lepra::Vector3DD(1, 0, 0));
+		lQ.Set(PI/4, Vector3DD(1, 0, 0));
 		lQ.MakeInverse();
 		lVector = lQ*lVector;
-		lTestOk = (lVector.GetDistance(Lepra::Vector3DD(0, 1, 0)) < 0.0001);
+		lTestOk = (lVector.GetDistance(Vector3DD(0, 1, 0)) < 0.0001);
 		assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("quaternion back&forth 1");
-		const Lepra::QuaternionD lParentQ(0.95, Lepra::Vector3DD(1, 1, 0));
-		const Lepra::QuaternionD lChildRelativeQ(Lepra::PI/4, Lepra::Vector3DD(1, 0, 0));
-		const Lepra::QuaternionD lChildAbsoluteQ = lChildRelativeQ*lParentQ;
-		Lepra::Vector3DD lVector = lChildAbsoluteQ*Lepra::Vector3DD(-1, 1, 1);
-		lTestOk = (lVector.GetDistance(Lepra::Vector3DD(0, -1.2, 1.2)) < 0.06);
+		const QuaternionD lParentQ(0.95, Vector3DD(1, 1, 0));
+		const QuaternionD lChildRelativeQ(PI/4, Vector3DD(1, 0, 0));
+		const QuaternionD lChildAbsoluteQ = lChildRelativeQ*lParentQ;
+		Vector3DD lVector = lChildAbsoluteQ*Vector3DD(-1, 1, 1);
+		lTestOk = (lVector.GetDistance(Vector3DD(0, -1.2, 1.2)) < 0.06);
 		assert(lTestOk);
 		if (lTestOk)
 		{
-			lVector = (lChildAbsoluteQ/lParentQ)*Lepra::Vector3DD(0, 1, 0);
-			lTestOk = (lVector.GetDistance(Lepra::Vector3DD(0, 0.707, 0.707)) < 0.001);
+			lVector = (lChildAbsoluteQ/lParentQ)*Vector3DD(0, 1, 0);
+			lTestOk = (lVector.GetDistance(Vector3DD(0, 0.707, 0.707)) < 0.001);
 			assert(lTestOk);
 		}
-		Lepra::Vector3DD lEulerAngles1;
+		Vector3DD lEulerAngles1;
 		if (lTestOk)
 		{
 			(lChildAbsoluteQ/lParentQ).GetEulerAngles(lEulerAngles1);
-			lTestOk = (lEulerAngles1.GetDistance(Lepra::Vector3DD(0, Lepra::PI/4, 0)) < 2e-11);
+			lTestOk = (lEulerAngles1.GetDistance(Vector3DD(0, PI/4, 0)) < 2e-11);
 			assert(lTestOk);
 		}
 		if (lTestOk)
 		{
-			Lepra::Vector3DD lEulerAngles2;
+			Vector3DD lEulerAngles2;
 			lChildRelativeQ.GetEulerAngles(lEulerAngles2);
 			lTestOk = (lEulerAngles1.GetDistance(lEulerAngles1) < 2e-11);
 			assert(lTestOk);
@@ -892,19 +894,19 @@ bool TestTransformation(const Lepra::LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = _T("quaternion/matrix angle 1");
-		Lepra::QuaternionD lQ;
-		lQ.RotateAroundOwnZ(Lepra::PI/3);
-		lQ.RotateAroundOwnX(-Lepra::PI/7);
-		lQ.RotateAroundOwnY(Lepra::PI/5);
-		const Lepra::Vector3DD lAx = lQ.GetAxisX();
-		const Lepra::Vector3DD lAy = lQ.GetAxisY();
-		const Lepra::Vector3DD lAz = lQ.GetAxisZ();
-		Lepra::RotationMatrixD lMatrix(lAx, lAy, lAz);
-		Lepra::QuaternionD lTarget(lMatrix);
-		lTestOk = (Lepra::Math::IsEpsEqual(lQ.GetA(), lTarget.GetA()) &&
-			Lepra::Math::IsEpsEqual(lQ.GetB(), lTarget.GetB()) &&
-			Lepra::Math::IsEpsEqual(lQ.GetC(), lTarget.GetC()) &&
-			Lepra::Math::IsEpsEqual(lQ.GetD(), lTarget.GetD()));
+		QuaternionD lQ;
+		lQ.RotateAroundOwnZ(PI/3);
+		lQ.RotateAroundOwnX(-PI/7);
+		lQ.RotateAroundOwnY(PI/5);
+		const Vector3DD lAx = lQ.GetAxisX();
+		const Vector3DD lAy = lQ.GetAxisY();
+		const Vector3DD lAz = lQ.GetAxisZ();
+		RotationMatrixD lMatrix(lAx, lAy, lAz);
+		QuaternionD lTarget(lMatrix);
+		lTestOk = (Math::IsEpsEqual(lQ.GetA(), lTarget.GetA()) &&
+			Math::IsEpsEqual(lQ.GetB(), lTarget.GetB()) &&
+			Math::IsEpsEqual(lQ.GetC(), lTarget.GetC()) &&
+			Math::IsEpsEqual(lQ.GetD(), lTarget.GetD()));
 		assert(lTestOk);
 	}
 	if (lTestOk)
@@ -912,10 +914,10 @@ bool TestTransformation(const Lepra::LogDecorator& pAccount)
 		lContext = _T("vector spherical angles 1");
 		double lTheta = -1;
 		double lPhi = -1;
-		const double l45 = ::sin(Lepra::PI/4);
-		Lepra::Vector3DD(l45, l45, 1).GetSphericalAngles(lTheta, lPhi);
-		lTestOk = (Lepra::Math::IsEpsEqual(lTheta, Lepra::PI/4) &&
-			Lepra::Math::IsEpsEqual(lPhi, Lepra::PI/4));
+		const double l45 = ::sin(PI/4);
+		Vector3DD(l45, l45, 1).GetSphericalAngles(lTheta, lPhi);
+		lTestOk = (Math::IsEpsEqual(lTheta, PI/4) &&
+			Math::IsEpsEqual(lPhi, PI/4));
 		assert(lTestOk);
 	}
 	if (lTestOk)
@@ -923,10 +925,10 @@ bool TestTransformation(const Lepra::LogDecorator& pAccount)
 		lContext = _T("vector spherical angles 2");
 		double lTheta = -1;
 		double lPhi = -1;
-		const double l45 = ::sin(Lepra::PI/4);
-		Lepra::Vector3DD(-l45, -l45, -1).GetSphericalAngles(lTheta, lPhi);
-		lTestOk = (Lepra::Math::IsEpsEqual(lTheta, Lepra::PI*3/4) &&
-			Lepra::Math::IsEpsEqual(lPhi, Lepra::PI*5/4));
+		const double l45 = ::sin(PI/4);
+		Vector3DD(-l45, -l45, -1).GetSphericalAngles(lTheta, lPhi);
+		lTestOk = (Math::IsEpsEqual(lTheta, PI*3/4) &&
+			Math::IsEpsEqual(lPhi, PI*5/4));
 		assert(lTestOk);
 	}
 	if (lTestOk)
@@ -934,9 +936,9 @@ bool TestTransformation(const Lepra::LogDecorator& pAccount)
 		lContext = _T("vector spherical angles 3");
 		double lTheta = -1;
 		double lPhi = -1;
-		Lepra::Vector3DD(1, 0, 0).GetSphericalAngles(lTheta, lPhi);
-		lTestOk = (Lepra::Math::IsEpsEqual(lTheta, Lepra::PI/2) &&
-			Lepra::Math::IsEpsEqual(lPhi, 0.0));
+		Vector3DD(1, 0, 0).GetSphericalAngles(lTheta, lPhi);
+		lTestOk = (Math::IsEpsEqual(lTheta, PI/2) &&
+			Math::IsEpsEqual(lPhi, 0.0));
 		assert(lTestOk);
 	}
 	if (lTestOk)
@@ -944,9 +946,9 @@ bool TestTransformation(const Lepra::LogDecorator& pAccount)
 		lContext = _T("vector spherical angles 3");
 		double lTheta = -1;
 		double lPhi = -1;
-		Lepra::Vector3DD(0, 0, 1).GetSphericalAngles(lTheta, lPhi);
-		lTestOk = (Lepra::Math::IsEpsEqual(lTheta, 0.0) &&
-			Lepra::Math::IsEpsEqual(lPhi, 0.0));
+		Vector3DD(0, 0, 1).GetSphericalAngles(lTheta, lPhi);
+		lTestOk = (Math::IsEpsEqual(lTheta, 0.0) &&
+			Math::IsEpsEqual(lPhi, 0.0));
 		assert(lTestOk);
 	}
 	if (lTestOk)
@@ -954,9 +956,9 @@ bool TestTransformation(const Lepra::LogDecorator& pAccount)
 		lContext = _T("vector spherical angles 4");
 		double lTheta = -1;
 		double lPhi = -1;
-		Lepra::Vector3DD(0, -1, -1).GetSphericalAngles(lTheta, lPhi);
-		lTestOk = (Lepra::Math::IsEpsEqual(lTheta, Lepra::PI*3/4) &&
-			Lepra::Math::IsEpsEqual(lPhi, Lepra::PI*6/4));
+		Vector3DD(0, -1, -1).GetSphericalAngles(lTheta, lPhi);
+		lTestOk = (Math::IsEpsEqual(lTheta, PI*3/4) &&
+			Math::IsEpsEqual(lPhi, PI*6/4));
 		assert(lTestOk);
 	}
 	if (lTestOk)
@@ -964,11 +966,11 @@ bool TestTransformation(const Lepra::LogDecorator& pAccount)
 		lContext = _T("quaternion euler angles 1");
 
 		double lYaw = 0;
-		double lPitch = Lepra::PI/4;
+		double lPitch = PI/4;
 		double lRoll = 0;
-		for (double i = 0; lTestOk && i <= Lepra::PI*4; i += 0.001)
+		for (double i = 0; lTestOk && i <= PI*4; i += 0.001)
 		{
-			Lepra::QuaternionD lQ;
+			QuaternionD lQ;
 			lQ.RotateAroundOwnZ(lYaw);
 			lQ.RotateAroundOwnX(lPitch);
 			lQ.RotateAroundOwnY(lRoll);
@@ -976,15 +978,15 @@ bool TestTransformation(const Lepra::LogDecorator& pAccount)
 			lPitch += 0.001*3;
 			lRoll  += 0.001*5;
 
-			Lepra::Vector3DD lEuler;
+			Vector3DD lEuler;
 			lQ.GetEulerAngles(lEuler);
-			Lepra::QuaternionD lQ2;
+			QuaternionD lQ2;
 			lQ2.SetEulerAngles(lEuler);
-			const Lepra::Vector3DD lTest(1, 1, 1);
-			Lepra::Vector3DD lTest1 = lTest*lQ;
-			Lepra::Vector3DD lTest2 = lTest*lQ2;
+			const Vector3DD lTest(1, 1, 1);
+			Vector3DD lTest1 = lTest*lQ;
+			Vector3DD lTest2 = lTest*lQ2;
 			double lDistance = lTest1.GetDistance(lTest2);
-			lTestOk = (Lepra::Math::IsEpsEqual(lDistance, 0.0, 2e-11));
+			lTestOk = (Math::IsEpsEqual(lDistance, 0.0, 2e-11));
 			assert(lTestOk);
 		}
 	}
@@ -993,22 +995,22 @@ bool TestTransformation(const Lepra::LogDecorator& pAccount)
 	return (lTestOk);
 }
 
-bool TestSystemManager(const Lepra::LogDecorator& pAccount)
+bool TestSystemManager(const LogDecorator& pAccount)
 {
-	Lepra::String lContext;
+	str lContext;
 	bool lTestOk = true;
 
 	// Directory test.
 	if (lTestOk)
 	{
 		lContext = _T("root directory");
-		Lepra::String lRootDir = Lepra::SystemManager::GetRootDirectory();
+		str lRootDir = SystemManager::GetRootDirectory();
 
 #if defined(LEPRA_WINDOWS)
 		// Hugge: This test will fail if this app runs from another partition.
 		// lTestOk = (lRootDir ==_T("C:/")); 
-		Lepra::String lDriveLetter = lRootDir.substr(0, 1);
-		Lepra::String lRest = lRootDir.substr(1);
+		str lDriveLetter = lRootDir.substr(0, 1);
+		str lRest = lRootDir.substr(1);
 		lTestOk = lDriveLetter >= _T("A") && 
 				   lDriveLetter <= _T("Z") &&
 				   lRest == _T(":/");
@@ -1022,8 +1024,8 @@ bool TestSystemManager(const Lepra::LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = _T("current/documents directory");
-		lTestOk = (Lepra::SystemManager::GetCurrentDirectory().length() >= 4 &&
-			Lepra::SystemManager::GetUserDirectory().length() >= 4);
+		lTestOk = (SystemManager::GetCurrentDirectory().length() >= 4 &&
+			SystemManager::GetUserDirectory().length() >= 4);
 		assert(lTestOk);
 	}
 
@@ -1031,7 +1033,7 @@ bool TestSystemManager(const Lepra::LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = _T("Os name");
-		lTestOk = (Lepra::SystemManager::GetOsName() ==
+		lTestOk = (SystemManager::GetOsName() ==
 #if defined(LEPRA_WINDOWS)
 			_T("Windows NT"));
 #elif defined(LEPRA_POSIX)
@@ -1046,13 +1048,13 @@ bool TestSystemManager(const Lepra::LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = _T("login name");
-		lTestOk = (Lepra::SystemManager::GetLoginName().length() >= 1);
+		lTestOk = (SystemManager::GetLoginName().length() >= 1);
 		assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("user name");
-		lTestOk = (Lepra::SystemManager::QueryFullUserName().length() >= 1);
+		lTestOk = (SystemManager::QueryFullUserName().length() >= 1);
 		assert(lTestOk);
 	}
 
@@ -1060,25 +1062,25 @@ bool TestSystemManager(const Lepra::LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = _T("physical CPU count");
-		lTestOk = (Lepra::SystemManager::GetPhysicalCpuCount() >= 1 && Lepra::SystemManager::GetPhysicalCpuCount() <= 4);
+		lTestOk = (SystemManager::GetPhysicalCpuCount() >= 1 && SystemManager::GetPhysicalCpuCount() <= 4);
 		assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("logical CPU count");
-		lTestOk = (Lepra::SystemManager::GetLogicalCpuCount() >= 1 && Lepra::SystemManager::GetLogicalCpuCount() <= 8);
+		lTestOk = (SystemManager::GetLogicalCpuCount() >= 1 && SystemManager::GetLogicalCpuCount() <= 8);
 		assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("CPU core count");
-		lTestOk = (Lepra::SystemManager::GetCoreCount() >= 1 && Lepra::SystemManager::GetCoreCount() <= 4);
+		lTestOk = (SystemManager::GetCoreCount() >= 1 && SystemManager::GetCoreCount() <= 4);
 		assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("Cpu type");
-		Lepra::String lCpuName = Lepra::SystemManager::GetCpuName();
+		str lCpuName = SystemManager::GetCpuName();
 		lTestOk = (lCpuName == _T("GenuineIntel") ||
 			lCpuName == _T("AuthenticAMD"));
 		assert(lTestOk);
@@ -1086,15 +1088,15 @@ bool TestSystemManager(const Lepra::LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = _T("Cpu frequency");
-		Lepra::uint64 lCpuFrequency = Lepra::SystemManager::QueryCpuFrequency();
+		uint64 lCpuFrequency = SystemManager::QueryCpuFrequency();
 		lTestOk = (lCpuFrequency >= 700*1000*1000 &&
-			lCpuFrequency <= (Lepra::uint64)6*1000*1000*1000);
+			lCpuFrequency <= (uint64)6*1000*1000*1000);
 		assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("Cpu MIPS");
-		unsigned lCpuMips = Lepra::SystemManager::QueryCpuMips();
+		unsigned lCpuMips = SystemManager::QueryCpuMips();
 		lTestOk = (lCpuMips >= 200 && lCpuMips <= 3500);
 		assert(lTestOk);
 	}
@@ -1103,88 +1105,88 @@ bool TestSystemManager(const Lepra::LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = _T("Ram size");
-		lTestOk = (Lepra::SystemManager::GetAmountRam() >= 64*1024*1024 &&
-			Lepra::SystemManager::GetAmountRam() <= (Lepra::uint64)4*1024*1024*1024);
+		lTestOk = (SystemManager::GetAmountRam() >= 64*1024*1024 &&
+			SystemManager::GetAmountRam() <= (uint64)4*1024*1024*1024);
 		assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("available Ram >= total Ram");
-		lTestOk = (Lepra::SystemManager::GetAvailRam() <= Lepra::SystemManager::GetAmountRam());
+		lTestOk = (SystemManager::GetAvailRam() <= SystemManager::GetAmountRam());
 		assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("available Ram size");
-		lTestOk = (Lepra::SystemManager::GetAvailRam() >= 30*1024*1024 &&
-			Lepra::SystemManager::GetAvailRam() <= (Lepra::uint64)4*1024*1024*1024);
+		lTestOk = (SystemManager::GetAvailRam() >= 30*1024*1024 &&
+			SystemManager::GetAvailRam() <= (uint64)4*1024*1024*1024);
 		assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("virtual memory size");
-		lTestOk = (Lepra::SystemManager::GetAmountVirtualMemory() >= 150*1024*1024 &&
-			Lepra::SystemManager::GetAmountVirtualMemory() <= (Lepra::uint64)20*1024*1024*1024);
+		lTestOk = (SystemManager::GetAmountVirtualMemory() >= 150*1024*1024 &&
+			SystemManager::GetAmountVirtualMemory() <= (uint64)20*1024*1024*1024);
 		assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("available virtual memory > total virtual memory");
-		lTestOk = (Lepra::SystemManager::GetAvailVirtualMemory() <= Lepra::SystemManager::GetAmountVirtualMemory());
+		lTestOk = (SystemManager::GetAvailVirtualMemory() <= SystemManager::GetAmountVirtualMemory());
 		assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("available virtual memory size");
-		lTestOk = (Lepra::SystemManager::GetAvailVirtualMemory() >= 100*1024*1024 &&
-			Lepra::SystemManager::GetAvailVirtualMemory() <= (Lepra::uint64)19*1024*1024*1024);
+		lTestOk = (SystemManager::GetAvailVirtualMemory() >= 100*1024*1024 &&
+			SystemManager::GetAvailVirtualMemory() <= (uint64)19*1024*1024*1024);
 		assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		// Just make sure we don't crash. Need manual verification that it works anyhoo.
-		Lepra::SystemManager::WebBrowseTo(_T("http://trialepicfail.blogspot.com/"));
+		SystemManager::WebBrowseTo(_T("http://trialepicfail.blogspot.com/"));
 	}
 
 	ReportTestResult(pAccount, _T("System"), lContext, lTestOk);
 	return (lTestOk);
 }
 
-bool TestNetwork(const Lepra::LogDecorator& pAccount)
+bool TestNetwork(const LogDecorator& pAccount)
 {
-	Lepra::String lContext;
+	str lContext;
 	bool lTestOk = true;
 
 	if (lTestOk)
 	{
 		lContext = _T("network start");
-		lTestOk = Lepra::Network::Start();
+		lTestOk = Network::Start();
 		assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("DNS resolve");
-		Lepra::IPAddress lAddress;
-		lTestOk = Lepra::Network::ResolveHostname(_T("ftp.sunet.se"), lAddress);
+		IPAddress lAddress;
+		lTestOk = Network::ResolveHostname(_T("ftp.sunet.se"), lAddress);
 		assert(lTestOk);
 	}
 
 	if (lTestOk)
 	{
 		lContext = _T("UDP send");
-		Lepra::SocketAddress lReceiveAddress;
+		SocketAddress lReceiveAddress;
 		lReceiveAddress.Resolve(_T(":47346"));
-		Lepra::SocketAddress lSendAddress;
+		SocketAddress lSendAddress;
 		lSendAddress.Resolve(_T(":47347"));
-		Lepra::UdpSocket lReceiver(lReceiveAddress);
-		Lepra::UdpSocket lSender(lSendAddress);
-		lTestOk = (lSender.SendTo((const Lepra::uint8*)"Hello World", 12, lReceiveAddress) == 12);
+		UdpSocket lReceiver(lReceiveAddress);
+		UdpSocket lSender(lSendAddress);
+		lTestOk = (lSender.SendTo((const uint8*)"Hello World", 12, lReceiveAddress) == 12);
 		assert(lTestOk);
 		if (lTestOk)
 		{
 			lContext = _T("UDP receive");
-			Lepra::uint8 lMessage[12];
-			Lepra::SocketAddress lSourceAddress;
+			uint8 lMessage[12];
+			SocketAddress lSourceAddress;
 			int lRecvCount = lReceiver.ReceiveFrom(lMessage, sizeof(lMessage), lSourceAddress);
 			lTestOk = (lRecvCount == 12 && ::strncmp("Hello World", (const char*)lMessage, 12) == 0 &&
 				lSourceAddress.GetIP() == lSendAddress.GetIP() && lSourceAddress.GetPort() == lSendAddress.GetPort());
@@ -1195,18 +1197,18 @@ bool TestNetwork(const Lepra::LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = _T("TCP server init");
-		Lepra::SocketAddress lReceiveAddress;
+		SocketAddress lReceiveAddress;
 		lReceiveAddress.Resolve(_T(":47346"));
-		Lepra::SocketAddress lSendAddress;
+		SocketAddress lSendAddress;
 		lSendAddress.Resolve(_T(":47347"));
-		Lepra::TcpListenerSocket lServer(lReceiveAddress);
+		TcpListenerSocket lServer(lReceiveAddress);
 		lTestOk = lServer.IsOpen();
 		assert(lTestOk);
 
-		class DummyAcceptor: public Lepra::Thread
+		class DummyAcceptor: public Thread
 		{
 		public:
-			DummyAcceptor(Lepra::TcpListenerSocket* pServerSocket):
+			DummyAcceptor(TcpListenerSocket* pServerSocket):
 				Thread(_T("DummyAcceptor")),
 				mServerSocket(pServerSocket),
 				mConnectSocket(0)
@@ -1217,8 +1219,8 @@ bool TestNetwork(const Lepra::LogDecorator& pAccount)
 				mConnectSocket = mServerSocket->Accept();
 				assert(mConnectSocket);
 			}
-			Lepra::TcpListenerSocket* mServerSocket;
-			Lepra::TcpSocket* mConnectSocket;
+			TcpListenerSocket* mServerSocket;
+			TcpSocket* mConnectSocket;
 		};
 		DummyAcceptor* lAcceptor = 0;
 		if (lTestOk)
@@ -1228,15 +1230,15 @@ bool TestNetwork(const Lepra::LogDecorator& pAccount)
 			lTestOk = lAcceptor->Start();
 			assert(lTestOk);
 		}
-		Lepra::TcpSocket lSender(lSendAddress);
+		TcpSocket lSender(lSendAddress);
 		if (lTestOk)
 		{
 			lContext = _T("TCP connect");
-			Lepra::Thread::Sleep(0.01);
+			Thread::Sleep(0.01);
 			lTestOk = lSender.Connect(lReceiveAddress);
 			assert(lTestOk);
 		}
-		Lepra::TcpSocket* lReceiver = 0;
+		TcpSocket* lReceiver = 0;
 		if (lTestOk)
 		{
 			lContext = _T("TCP accept");
@@ -1245,7 +1247,7 @@ bool TestNetwork(const Lepra::LogDecorator& pAccount)
 				lReceiver = lAcceptor->mConnectSocket;
 				if (!lReceiver)
 				{
-					Lepra::Thread::Sleep(0.001);
+					Thread::Sleep(0.001);
 				}
 			}
 			lTestOk = (lReceiver != 0);
@@ -1258,10 +1260,10 @@ bool TestNetwork(const Lepra::LogDecorator& pAccount)
 			lContext = _T("TCP overflow sends");
 			for (int x = 0; lTestOk && x < lPacketCount; ++x)
 			{
-				Lepra::uint8 lValue[lPacketByteCount];
+				uint8 lValue[lPacketByteCount];
 				for (int y = 0; y < lPacketByteCount; ++y)
 				{
-					lValue[y] = (Lepra::uint8)x;
+					lValue[y] = (uint8)x;
 				}
 				lTestOk = (lSender.Send(lValue, lPacketByteCount) == lPacketByteCount);
 				assert(lTestOk);
@@ -1270,11 +1272,11 @@ bool TestNetwork(const Lepra::LogDecorator& pAccount)
 		if (lTestOk)
 		{
 			lContext = _T("TCP underflow receive");
-			Lepra::Thread::Sleep(0.2f);	// On POSIX, it actually takes some time to pass through firewall and stuff.
+			Thread::Sleep(0.2f);	// On POSIX, it actually takes some time to pass through firewall and stuff.
 			for (int x = 0; lTestOk && x < lPacketCount/10; ++x)
 			{
 				const int lReadSize = lPacketByteCount*10;
-				Lepra::uint8 lValue[lReadSize];
+				uint8 lValue[lReadSize];
 				int lActualReadSize = lReceiver->Receive(lValue, lReadSize);
 				lTestOk = (lActualReadSize == lReadSize);
 				assert(lTestOk);
@@ -1283,7 +1285,7 @@ bool TestNetwork(const Lepra::LogDecorator& pAccount)
 					for (int y = 0; lTestOk && y < lReadSize; ++y)
 					{
 						int z = x*10+y/lPacketByteCount;
-						lTestOk = (lValue[y] == (Lepra::uint8)z);
+						lTestOk = (lValue[y] == (uint8)z);
 						assert(lTestOk);
 					}
 				}
@@ -1295,9 +1297,9 @@ bool TestNetwork(const Lepra::LogDecorator& pAccount)
 		{
 			lContext = _T("TCP algo receiver");
 			lSender.Send("A1B2C3", 6);
-			class TestReceiver: public Lepra::DatagramReceiver
+			class TestReceiver: public DatagramReceiver
 			{
-				int Receive(Lepra::TcpSocket* pSocket, void* pBuffer, int)
+				int Receive(TcpSocket* pSocket, void* pBuffer, int)
 				{
 					static int x = 6;
 					x -= 2;
@@ -1322,7 +1324,7 @@ bool TestNetwork(const Lepra::LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = _T("network stop");
-		lTestOk = Lepra::Network::Stop();
+		lTestOk = Network::Stop();
 		assert(lTestOk);
 	}
 
@@ -1330,14 +1332,14 @@ bool TestNetwork(const Lepra::LogDecorator& pAccount)
 	return (lTestOk);
 }
 
-bool TestTcpMuxSocket(const Lepra::LogDecorator& pAccount)
+bool TestTcpMuxSocket(const LogDecorator& pAccount)
 {
-	Lepra::String lContext;
-	bool lTestOk = Lepra::Network::Start();
+	str lContext;
+	bool lTestOk = Network::Start();
 
-	//Lepra::uint16 lAcceptPort = (Lepra::uint16)Lepra::Random::Uniform(40000, 50000);
-	Lepra::SocketAddress lAcceptAddress;
-	Lepra::TcpMuxSocket* lAcceptSocket = 0;
+	//uint16 lAcceptPort = (uint16)Random::Uniform(40000, 50000);
+	SocketAddress lAcceptAddress;
+	TcpMuxSocket* lAcceptSocket = 0;
 	if (lTestOk)
 	{
 		lContext = _T("resolving acceptor");
@@ -1348,14 +1350,14 @@ bool TestTcpMuxSocket(const Lepra::LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = _T("opening TCP MUX");
-		lAcceptSocket = new Lepra::TcpMuxSocket(_T("T1"), lAcceptAddress, true);
+		lAcceptSocket = new TcpMuxSocket(_T("T1"), lAcceptAddress, true);
 		lAcceptSocket->SetConnectIdTimeout(5.0);
 		lTestOk = lAcceptSocket->IsOpen();
 		assert(lTestOk);
 	}
-	//Lepra::uint16 lConnectPort = (Lepra::uint16)Lepra::Random::Uniform(40000, 50000);
-	Lepra::SocketAddress lConnectorAddress;
-	Lepra::TcpSocket* lConnectSocket = 0;
+	//uint16 lConnectPort = (uint16)Random::Uniform(40000, 50000);
+	SocketAddress lConnectorAddress;
+	TcpSocket* lConnectSocket = 0;
 	if (lTestOk)
 	{
 		lContext = _T("resolving connector");
@@ -1366,7 +1368,7 @@ bool TestTcpMuxSocket(const Lepra::LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = _T("creating TCP");
-		lConnectSocket = new Lepra::TcpSocket(lConnectorAddress);
+		lConnectSocket = new TcpSocket(lConnectorAddress);
 		lTestOk = lConnectSocket->IsOpen();
 		assert(lTestOk);
 	}
@@ -1377,7 +1379,7 @@ bool TestTcpMuxSocket(const Lepra::LogDecorator& pAccount)
 		for (int x = 0; !lTestOk && x < 1000; ++x)
 		{
 			lTestOk = lConnectSocket->Connect(lAcceptAddress);
-			Lepra::Thread::Sleep(0.001);
+			Thread::Sleep(0.001);
 		}
 		assert(lTestOk);
 	}
@@ -1388,7 +1390,7 @@ bool TestTcpMuxSocket(const Lepra::LogDecorator& pAccount)
 		for (int x = 0; lConnectionCount == 0 && x < 500; ++x)
 		{
 			lConnectionCount = lAcceptSocket->GetConnectionCount();
-			Lepra::Thread::Sleep(0.001f);
+			Thread::Sleep(0.001f);
 		}
 		lTestOk = (lConnectionCount == 1);
 		assert(lTestOk);
@@ -1398,7 +1400,7 @@ bool TestTcpMuxSocket(const Lepra::LogDecorator& pAccount)
 		lContext = _T("dropping non-V TCP connect");
 		unsigned lConnectionCount = 1;
 		lAcceptSocket->SetConnectIdTimeout(0.01);
-		Lepra::Thread::Sleep(0.02);
+		Thread::Sleep(0.02);
 		lAcceptSocket->PollAccept();
 		lConnectionCount = lAcceptSocket->GetConnectionCount();
 		lTestOk = (lConnectionCount == 0);
@@ -1417,7 +1419,7 @@ bool TestTcpMuxSocket(const Lepra::LogDecorator& pAccount)
 		lAcceptSocket = 0;
 	}
 
-	Lepra::Network::Stop();
+	Network::Stop();
 
 	ReportTestResult(pAccount, _T("TcpMuxSocket"), lContext, lTestOk);
 	return (lTestOk);
@@ -1429,19 +1431,19 @@ public:
 	bool Test();
 
 private:
-	template<class _Server> bool TestClientServerTransmit(Lepra::String& pContext, _Server& pServer,
-		Lepra::GameMuxSocket& pClientMuxSocket, Lepra::GameSocket* pClientSocket, bool pSafe);
+	template<class _Server> bool TestClientServerTransmit(str& pContext, _Server& pServer,
+		GameMuxSocket& pClientMuxSocket, GameSocket* pClientSocket, bool pSafe);
 
 	LOG_CLASS_DECLARE();
 };
 
-template<class _MuxSocket, class _VSocket> class ServerSocketHandler: public Lepra::Thread
+template<class _MuxSocket, class _VSocket> class ServerSocketHandler: public Thread
 {
 public:
 	typedef _VSocket VSocket;
 	typedef _VSocket* (_MuxSocket::*_AcceptMethod)();
-	ServerSocketHandler(const Lepra::String& pName, _MuxSocket& pServerSocket, _AcceptMethod pAcceptMethod, bool pLoop):
-		Lepra::Thread(pName),
+	ServerSocketHandler(const str& pName, _MuxSocket& pServerSocket, _AcceptMethod pAcceptMethod, bool pLoop):
+		Thread(pName),
 		mServerSocket(0),
 		mServerMuxSocket(pServerSocket),
 		mAcceptMethod(pAcceptMethod),
@@ -1479,7 +1481,7 @@ private:
 			while (mLoop && !mServerSocket && !GetStopRequest());
 			while (mLoop && mServerSocket && !GetStopRequest())
 			{
-				Lepra::Thread::Sleep(0.01);
+				Thread::Sleep(0.01);
 			}
 		}
 		while (mLoop && !GetStopRequest());
@@ -1491,17 +1493,17 @@ private:
 
 bool GameSocketClientTest::Test()
 {
-	Lepra::String lContext;
+	str lContext;
 	bool lTestOk = true;
 
 	if (lTestOk)
 	{
 		lContext = _T("network startup error");
-		lTestOk = Lepra::Network::Start();
+		lTestOk = Network::Start();
 		assert(lTestOk);
 	}
 
-	Lepra::SocketAddress lLocalAddress;
+	SocketAddress lLocalAddress;
 	if (lTestOk)
 	{
 		lContext = _T("address resolve");
@@ -1510,9 +1512,9 @@ bool GameSocketClientTest::Test()
 	}
 
 	// Create client.
-	Lepra::SocketAddress lClientAddress(lLocalAddress);
+	SocketAddress lClientAddress(lLocalAddress);
 	lClientAddress.SetPort(55113);
-	Lepra::GameMuxSocket lClientMuxSocket(_T("Client "), lClientAddress, false);
+	GameMuxSocket lClientMuxSocket(_T("Client "), lClientAddress, false);
 	if (lTestOk)
 	{
 		lContext = _T("client socket open");
@@ -1521,9 +1523,9 @@ bool GameSocketClientTest::Test()
 	}
 
 	// Make sure server connect fails (server not up yet).
-	Lepra::SocketAddress lServerAddress(lLocalAddress);
+	SocketAddress lServerAddress(lLocalAddress);
 	lServerAddress.SetPort(55112);
-	Lepra::GameSocket* lClientSocket = 0;
+	GameSocket* lClientSocket = 0;
 	if (lTestOk)
 	{
 		mLog.AHeadline("Connect without TCP+UDP.");
@@ -1536,14 +1538,14 @@ bool GameSocketClientTest::Test()
 	// Create and start TCP server (connect should fail if not UDP is up).
 	{
 		mLog.AHeadline("Connect without UDP.");
-		Lepra::TcpMuxSocket lServerTcpMuxSocket(_T("Srv "), lServerAddress, true);
+		TcpMuxSocket lServerTcpMuxSocket(_T("Srv "), lServerAddress, true);
 		if (lTestOk)
 		{
 			lContext = _T("server TCP socket open");
 			lTestOk = lServerTcpMuxSocket.IsOpen();
 			assert(lTestOk);
 		}
-		ServerSocketHandler<Lepra::TcpMuxSocket, Lepra::TcpVSocket> lServer(_T("TcpDummyServerSocket"), lServerTcpMuxSocket, &Lepra::TcpMuxSocket::Accept, false);
+		ServerSocketHandler<TcpMuxSocket, TcpVSocket> lServer(_T("TcpDummyServerSocket"), lServerTcpMuxSocket, &TcpMuxSocket::Accept, false);
 		if (lTestOk)
 		{
 			lContext = _T("client connected without UDP");
@@ -1554,8 +1556,8 @@ bool GameSocketClientTest::Test()
 		if (lTestOk)
 		{
 			lContext = _T("server did not drop client TCP connection in time");
-			Lepra::Thread::Sleep(0.01);
-			Lepra::TcpVSocket* lConnectorSocket = lServerTcpMuxSocket.PopReceiverSocket();
+			Thread::Sleep(0.01);
+			TcpVSocket* lConnectorSocket = lServerTcpMuxSocket.PopReceiverSocket();
 			assert(lConnectorSocket != 0);
 			char a[1];
 			lTestOk = (lConnectorSocket->Receive(a, 1, false) < 0);
@@ -1565,14 +1567,14 @@ bool GameSocketClientTest::Test()
 
 	// Create and start UDP server (connect should fail if not TCP is up).
 	mLog.AHeadline("Connect without TCP.");
-	Lepra::UdpMuxSocket lServerUdpMuxSocket(_T("Srv "), lServerAddress);
+	UdpMuxSocket lServerUdpMuxSocket(_T("Srv "), lServerAddress);
 	if (lTestOk)
 	{
 		lContext = _T("server UDP socket open");
 		lTestOk = lServerUdpMuxSocket.IsOpen();
 		assert(lTestOk);
 	}
-	ServerSocketHandler<Lepra::UdpMuxSocket, Lepra::UdpVSocket> lUdpServer(_T("UDP Server"), lServerUdpMuxSocket, &Lepra::UdpMuxSocket::Accept, true);
+	ServerSocketHandler<UdpMuxSocket, UdpVSocket> lUdpServer(_T("UDP Server"), lServerUdpMuxSocket, &UdpMuxSocket::Accept, true);
 	if (lTestOk)
 	{
 		lContext = _T("client connected without TCP");
@@ -1596,18 +1598,18 @@ bool GameSocketClientTest::Test()
 
 	// With both TCP and UDP sockets setup, connect should pull through.
 	mLog.AHeadline("Connect for real.");
-	Lepra::TcpMuxSocket lServerTcpMuxSocket(_T("Srv "), lServerAddress, true);
+	TcpMuxSocket lServerTcpMuxSocket(_T("Srv "), lServerAddress, true);
 	if (lTestOk)
 	{
 		lContext = _T("server TCP socket open");
 		lTestOk = lServerTcpMuxSocket.IsOpen();
 		assert(lTestOk);
 	}
-	ServerSocketHandler<Lepra::TcpMuxSocket, Lepra::TcpVSocket> lTcpServer(_T("TCP Server"), lServerTcpMuxSocket, &Lepra::TcpMuxSocket::Accept, true);
+	ServerSocketHandler<TcpMuxSocket, TcpVSocket> lTcpServer(_T("TCP Server"), lServerTcpMuxSocket, &TcpMuxSocket::Accept, true);
 	if (lTestOk)
 	{
 		lContext = _T("client TCP+UDP connect");
-		Lepra::Thread::Sleep(0.2);
+		Thread::Sleep(0.2);
 		lClientSocket = lClientMuxSocket.Connect(lServerAddress, 1.0);
 		lTestOk = (lClientSocket != 0);
 		assert(lTestOk);
@@ -1626,7 +1628,7 @@ bool GameSocketClientTest::Test()
 	if (lTestOk)
 	{
 		lContext = _T("network shutdown error");
-		lTestOk = Lepra::Network::Stop();
+		lTestOk = Network::Stop();
 		assert(lTestOk);
 	}
 
@@ -1634,15 +1636,15 @@ bool GameSocketClientTest::Test()
 	return (lTestOk);
 }
 
-template<class _Server> bool GameSocketClientTest::TestClientServerTransmit(Lepra::String& pContext, _Server& pServer,
-		Lepra::GameMuxSocket& pClientMuxSocket, Lepra::GameSocket* pClientSocket, bool pSafe)
+template<class _Server> bool GameSocketClientTest::TestClientServerTransmit(str& pContext, _Server& pServer,
+		GameMuxSocket& pClientMuxSocket, GameSocket* pClientSocket, bool pSafe)
 {
 	bool lTestOk = true;
 	if (lTestOk)
 	{
 		pContext = _T("server append send");
-		Lepra::IOError lError = pServer.mServerSocket->AppendSendBuffer("Hi", 3);
-		lTestOk = (lError == Lepra::IO_OK);
+		IOError lError = pServer.mServerSocket->AppendSendBuffer("Hi", 3);
+		lTestOk = (lError == IO_OK);
 		assert(lTestOk);
 	}
 	if (lTestOk)
@@ -1662,11 +1664,11 @@ template<class _Server> bool GameSocketClientTest::TestClientServerTransmit(Lepr
 	if (lTestOk)
 	{
 		pContext = _T("client pop receiver");
-		Lepra::GameSocket* lSocket = 0;
+		GameSocket* lSocket = 0;
 		for (int x = 0; lSocket == 0 && x < 500; ++x)
 		{
 			lSocket = pClientMuxSocket.PopReceiverSocket(pSafe);
-			Lepra::Thread::Sleep(0.001f);
+			Thread::Sleep(0.001f);
 		}
 		lTestOk = (lSocket == pClientSocket);
 		assert(lTestOk);
@@ -1674,7 +1676,7 @@ template<class _Server> bool GameSocketClientTest::TestClientServerTransmit(Lepr
 	if (lTestOk)
 	{
 		pContext = _T("client receive");
-		Lepra::uint8 lBuffer[16];
+		uint8 lBuffer[16];
 		int lLength = pClientSocket->Receive(pSafe, lBuffer, 16);
 		lTestOk = (lLength == 3 && memcmp("Hi", lBuffer, 3) == 0);
 		assert(lTestOk);
@@ -1682,14 +1684,14 @@ template<class _Server> bool GameSocketClientTest::TestClientServerTransmit(Lepr
 	if (lTestOk)
 	{
 		pContext = _T("client append send");
-		Lepra::IOError lError = pClientSocket->AppendSendBuffer(pSafe, "Hi", 3);
-		lTestOk = (lError == Lepra::IO_OK);
+		IOError lError = pClientSocket->AppendSendBuffer(pSafe, "Hi", 3);
+		lTestOk = (lError == IO_OK);
 		assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		pContext = _T("client pop sender");
-		Lepra::GameSocket* lSocket = pClientMuxSocket.PopSenderSocket();
+		GameSocket* lSocket = pClientMuxSocket.PopSenderSocket();
 		lTestOk = (lSocket == pClientSocket);
 		assert(lTestOk);
 	}
@@ -1707,7 +1709,7 @@ template<class _Server> bool GameSocketClientTest::TestClientServerTransmit(Lepr
 		for (int x = 0; lSocket == 0 && x < 500; ++x)
 		{
 			lSocket = pServer.mServerMuxSocket.PopReceiverSocket();
-			Lepra::Thread::Sleep(0.001f);
+			Thread::Sleep(0.001f);
 		}
 		lTestOk = (lSocket != 0 && lSocket == pServer.mServerSocket);
 		assert(lTestOk);
@@ -1715,7 +1717,7 @@ template<class _Server> bool GameSocketClientTest::TestClientServerTransmit(Lepr
 	if (lTestOk)
 	{
 		pContext = _T("server receive");
-		Lepra::uint8 lBuffer[16];
+		uint8 lBuffer[16];
 		int lLength = pServer.mServerSocket->Receive(lBuffer, 16);
 		lTestOk = (lLength == 3 && memcmp("Hi", lBuffer, 3) == 0);
 		assert(lTestOk);
@@ -1735,17 +1737,17 @@ public:
 
 bool GameSocketServerTest::Test()
 {
-	Lepra::String lContext;
+	str lContext;
 	bool lTestOk = true;
 
 	if (lTestOk)
 	{
 		lContext = _T("network startup error");
-		lTestOk = Lepra::Network::Start();
+		lTestOk = Network::Start();
 		assert(lTestOk);
 	}
 
-	Lepra::SocketAddress lLocalAddress;
+	SocketAddress lLocalAddress;
 	if (lTestOk)
 	{
 		lContext = _T("address resolve");
@@ -1754,9 +1756,9 @@ bool GameSocketServerTest::Test()
 	}
 
 	// Create server.
-	Lepra::SocketAddress lServerAddress(lLocalAddress);
+	SocketAddress lServerAddress(lLocalAddress);
 	lServerAddress.SetPort(55113);
-	Lepra::GameMuxSocket lServerMuxSocket(_T("Server "), lServerAddress, true);
+	GameMuxSocket lServerMuxSocket(_T("Server "), lServerAddress, true);
 	lServerMuxSocket.SetConnectDualTimeout(0.5f);
 	if (lTestOk)
 	{
@@ -1764,11 +1766,11 @@ bool GameSocketServerTest::Test()
 		lTestOk = lServerMuxSocket.IsOpen();
 		assert(lTestOk);
 	}
-	class ServerSocketHandler: public Lepra::Thread
+	class ServerSocketHandler: public Thread
 	{
 	public:
-		ServerSocketHandler(Lepra::GameMuxSocket& pServerSocket):
-			Lepra::Thread(_T("GameServerSocket")),
+		ServerSocketHandler(GameMuxSocket& pServerSocket):
+			Thread(_T("GameServerSocket")),
 			mServerMuxSocket(pServerSocket)
 		{
 			bool started = Start();
@@ -1786,13 +1788,13 @@ bool GameSocketServerTest::Test()
 			}
 		}
 		void operator=(const ServerSocketHandler&) {};
-		Lepra::GameMuxSocket& mServerMuxSocket;
+		GameMuxSocket& mServerMuxSocket;
 	};
 
 	// Check one-sided client connect.
-	Lepra::SocketAddress lClientAddress(lLocalAddress);
+	SocketAddress lClientAddress(lLocalAddress);
 	lClientAddress.SetPort(55112);
-	Lepra::TcpMuxSocket lClientTcpSocket(_T("Client"), lClientAddress, false);
+	TcpMuxSocket lClientTcpSocket(_T("Client"), lClientAddress, false);
 	if (lTestOk)
 	{
 		lContext = _T("client TCP connect failed");
@@ -1805,7 +1807,7 @@ bool GameSocketServerTest::Test()
 		lContext = _T("server didn't let TCP connect through");
 		for (int x = 0; lServerMuxSocket.GetConnectionCount() == 0 && x < 500; ++x)
 		{
-			Lepra::Thread::Sleep(0.001);
+			Thread::Sleep(0.001);
 		}
 		lTestOk = (lServerMuxSocket.GetConnectionCount() == 1);
 		assert(lTestOk);
@@ -1816,7 +1818,7 @@ bool GameSocketServerTest::Test()
 		ServerSocketHandler lHandler(lServerMuxSocket);
 		for (int x = 0; lServerMuxSocket.GetConnectionCount() == 1 && x < 1000; ++x)
 		{
-			Lepra::Thread::Sleep(0.001);
+			Thread::Sleep(0.001);
 		}
 		lTestOk = (lServerMuxSocket.GetConnectionCount() == 0);
 		assert(lTestOk);
@@ -1826,7 +1828,7 @@ bool GameSocketServerTest::Test()
 	if (lTestOk)
 	{
 		lContext = _T("network shutdown error");
-		lTestOk = Lepra::Network::Stop();
+		lTestOk = Network::Stop();
 		assert(lTestOk);
 	}
 
@@ -1839,9 +1841,9 @@ LOG_CLASS_DEFINE(TEST, GameSocketServerTest);
 
 
 
-bool TestArchive(const Lepra::LogDecorator& pAccount)
+bool TestArchive(const LogDecorator& pAccount)
 {
-	Lepra::String lContext;
+	str lContext;
 	bool lTestOk = true;
 
 	if (lTestOk)
@@ -1856,9 +1858,9 @@ bool TestArchive(const Lepra::LogDecorator& pAccount)
 	return (lTestOk);
 }
 /*
-bool TestFFT(const Lepra::LogDecorator& pAccount)
+bool TestFFT(const LogDecorator& pAccount)
 {
-	Lepra::String lContext;
+	str lContext;
 	bool lTestOk = true;
 
 	enum
@@ -1866,8 +1868,8 @@ bool TestFFT(const Lepra::LogDecorator& pAccount)
 		NUM_POINTS = 256
 	};
 
-	Lepra::FFT lFFT(NUM_POINTS, NUM_POINTS);
-	Lepra::float32 lSignal[NUM_POINTS];
+	FFT lFFT(NUM_POINTS, NUM_POINTS);
+	float32 lSignal[NUM_POINTS];
 
 	if (lTestOk)
 	{
@@ -1883,7 +1885,7 @@ bool TestFFT(const Lepra::LogDecorator& pAccount)
 		lFFT.Transform(lSignal, NUM_POINTS);
 
 		// Check if it's close to what we expected...
-		Lepra::float32 lAmp = (Lepra::float32)lFFT.GetAmp(0);
+		float32 lAmp = (float32)lFFT.GetAmp(0);
 		lTestOk = abs(lAmp - 1.234f) < 1e-5f;
 
 		if (lTestOk)
@@ -1906,19 +1908,19 @@ bool TestFFT(const Lepra::LogDecorator& pAccount)
 		int i;
 		for (i = 0; i < NUM_POINTS; i++)
 		{
-			lSignal[i] = (Lepra::float32)(cos(2.0 * Lepra::PI * (Lepra::float64)i / (Lepra::float64)NUM_POINTS + 0.4f) * 1.234);
+			lSignal[i] = (float32)(cos(2.0 * PI * (float64)i / (float64)NUM_POINTS + 0.4f) * 1.234);
 		}
 
 		lFFT.Transform(lSignal, NUM_POINTS);
 
 		// Check if near...
-		Lepra::float32 lAmp   = (Lepra::float32)(lFFT.GetAmp(1) + lFFT.GetAmp(-1));
+		float32 lAmp   = (float32)(lFFT.GetAmp(1) + lFFT.GetAmp(-1));
 		lTestOk = abs(lAmp - 1.234f) < 1e-5f;
 
 		if (lTestOk)
 		{
-			Lepra::float32 lPhase1 = (Lepra::float32)lFFT.GetPhase(1);
-			Lepra::float32 lPhase2 = (Lepra::float32)lFFT.GetPhase(-1);
+			float32 lPhase1 = (float32)lFFT.GetPhase(1);
+			float32 lPhase2 = (float32)lFFT.GetPhase(-1);
 			lTestOk = (abs(lPhase1 - 0.4f) < 1e-5f) &&
 					(abs(lPhase2 + 0.4f) < 1e-5f);
 		}
@@ -1930,7 +1932,7 @@ bool TestFFT(const Lepra::LogDecorator& pAccount)
 			{
 				if (i != 1 && i != -1)
 				{
-					lAmp = (Lepra::float32)lFFT.GetAmp(i);
+					lAmp = (float32)lFFT.GetAmp(i);
 					lTestOk = abs(lAmp) < 1e-5f;
 				}
 			}
@@ -1943,18 +1945,18 @@ bool TestFFT(const Lepra::LogDecorator& pAccount)
 	return (lTestOk);
 }
 
-bool TestCrypto(const Lepra::LogDecorator& pAccount)
+bool TestCrypto(const LogDecorator& pAccount)
 {
-	Lepra::String lContext;
+	str lContext;
 	bool lTestOk = true;
 
 	if (lTestOk)
 	{
 		lContext = _T("DES encrypt failed.");
-		Lepra::DES lDES;
+		DES lDES;
 		lDES.SetKey(0x1234567890FEDABC);
 		const char lString[16] = "Hello World!!!!";
-		Lepra::uint8 lData[16];
+		uint8 lData[16];
 		::memcpy(lData, lString, sizeof(lData));
 		lDES.Encrypt(lData, 16);
 		lTestOk = (::memcmp(lData, lString, sizeof(lData)) != 0);
@@ -1975,7 +1977,7 @@ bool TestCrypto(const Lepra::LogDecorator& pAccount)
 //		RSA lRSA;
 //		lDES.SetKey(0x1234567890FEDABC);
 //		const char* lString = "Hello World 123!";
-//		Lepra::uint8 lData[17];
+//		uint8 lData[17];
 //		::memcpy(lData, lString, sizeof(lData));
 //		lDES.Encrypt(lData, 17);
 //		lTestOk = (::memcmp(lData, lString, sizeof(lData)) != 0);
@@ -1992,9 +1994,9 @@ bool TestCrypto(const Lepra::LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = _T("SHA-1 hashing failed.");
-		Lepra::SHA1 lSHA1;
-		Lepra::uint8 lHash[20];
-		lSHA1.Hash((const Lepra::uint8*)"Hello World!", 13, lHash);
+		SHA1 lSHA1;
+		uint8 lHash[20];
+		lSHA1.Hash((const uint8*)"Hello World!", 13, lHash);
 		// TODO: implement!
 //		lTestOk = (::memcmp(lData, lString, sizeof(lData)) != 0);
 //		assert(lTestOk);
@@ -2009,28 +2011,28 @@ void DummyThread(void*)
 {
 }
 
-Lepra::Condition* gCondition;
+Condition* gCondition;
 
 void ConditionThread(void*)
 {
 	gCondition->Wait();
-	Lepra::Thread::Sleep(0.1);
+	Thread::Sleep(0.1);
 }
 
-Lepra::CompatibleCondition* gCompatibleCondition;
+CompatibleCondition* gCompatibleCondition;
 
 void CompatibleConditionThread(void*)
 {
 	gCompatibleCondition->Wait();
-	Lepra::Thread::Sleep(0.1);
+	Thread::Sleep(0.1);
 }
 
-bool TestPerformance(const Lepra::LogDecorator& pAccount)
+bool TestPerformance(const LogDecorator& pAccount)
 {
-	Lepra::String lContext;
+	str lContext;
 	bool lTestOk = true;
 
-	Lepra::Network::Start();
+	Network::Start();
 
 	// Loop twice: first time to register nodes in
 	// the performance tree, second time to do the
@@ -2039,15 +2041,15 @@ bool TestPerformance(const Lepra::LogDecorator& pAccount)
 	{
 		if (z == 1)	// Reset time from first loop (only measure time second loop).
 		{
-			Lepra::ScopePerformanceData::ClearAll(Lepra::ScopePerformanceData::GetRoots());
-			Lepra::Thread::Sleep(0.3);	// Try to make the scheduler rank us high.
+			ScopePerformanceData::ClearAll(ScopePerformanceData::GetRoots());
+			Thread::Sleep(0.3);	// Try to make the scheduler rank us high.
 		}
 
 		{
 			LEPRA_MEASURE_SCOPE(Cpucategory);
 
 			{
-				Lepra::Thread::YieldCpu();	// Yield to not get a starved Cpu time slice.
+				Thread::YieldCpu();	// Yield to not get a starved Cpu time slice.
 				LEPRA_MEASURE_SCOPE(NOP1);
 				{
 					LEPRA_MEASURE_SCOPE(NOP2);
@@ -2055,7 +2057,7 @@ bool TestPerformance(const Lepra::LogDecorator& pAccount)
 			}
 
 			{
-				Lepra::Thread::YieldCpu();	// Yield to not get a starved Cpu time slice.
+				Thread::YieldCpu();	// Yield to not get a starved Cpu time slice.
 				LEPRA_MEASURE_SCOPE(forx0to1000);
 				int y = 7;
 				for (int x = 0; x < 1000; ++x)
@@ -2066,17 +2068,17 @@ bool TestPerformance(const Lepra::LogDecorator& pAccount)
 			}
 
 			{
-				Lepra::Thread::YieldCpu();	// Yield to not get a starved Cpu time slice.
+				Thread::YieldCpu();	// Yield to not get a starved Cpu time slice.
 				LEPRA_MEASURE_SCOPE(String);
-				Lepra::String lString(_T("Apa"));
+				str lString(_T("Apa"));
 				lString += _T("Esau");
 				lString.rfind(_T("e"), lString.length()-1);
 			}
 
 //			{
-//				Lepra::Thread::YieldCpu();	// Yield to not get a starved Cpu time slice.
+//				Thread::YieldCpu();	// Yield to not get a starved Cpu time slice.
 //				LEPRA_MEASURE_SCOPE(BigInt);
-//				Lepra::BigInt lBigInt(_T("84879234798733231872345687123101"));
+//				BigInt lBigInt(_T("84879234798733231872345687123101"));
 //				lBigInt >>= 8;
 //				lBigInt.Sqrt();
 //			}
@@ -2086,9 +2088,9 @@ bool TestPerformance(const Lepra::LogDecorator& pAccount)
 			LEPRA_MEASURE_SCOPE(Threadcategory);
 
 			{
-				Lepra::Thread::YieldCpu();	// Yield to not get a starved Cpu time slice.
+				Thread::YieldCpu();	// Yield to not get a starved Cpu time slice.
 				LEPRA_MEASURE_SCOPE(Lock);
-				Lepra::Lock lMutex;
+				Lock lMutex;
 				{
 					LEPRA_MEASURE_SCOPE(Acquire);
 					lMutex.Acquire();
@@ -2100,9 +2102,9 @@ bool TestPerformance(const Lepra::LogDecorator& pAccount)
 			}
 
 			{
-				Lepra::Thread::YieldCpu();	// Yield to not get a starved Cpu time slice.
+				Thread::YieldCpu();	// Yield to not get a starved Cpu time slice.
 				LEPRA_MEASURE_SCOPE(CompatibleLock);
-				Lepra::CompatibleLock lMutex;
+				CompatibleLock lMutex;
 				{
 					LEPRA_MEASURE_SCOPE(Acquire);
 					lMutex.Acquire();
@@ -2115,7 +2117,7 @@ bool TestPerformance(const Lepra::LogDecorator& pAccount)
 
 #ifdef LEPRA_WINDOWS
 			{
-				Lepra::Thread::YieldCpu();	// Yield to not get a starved Cpu time slice.
+				Thread::YieldCpu();	// Yield to not get a starved Cpu time slice.
 				LEPRA_MEASURE_SCOPE(CRITICAL_SECTION);
 				CRITICAL_SECTION lSection;
 				::InitializeCriticalSection(&lSection);
@@ -2133,9 +2135,9 @@ bool TestPerformance(const Lepra::LogDecorator& pAccount)
 
 #ifdef LEPRA_WINDOWS
 			{
-				Lepra::Thread::YieldCpu();	// Yield to not get a starved Cpu time slice.
+				Thread::YieldCpu();	// Yield to not get a starved Cpu time slice.
 				LEPRA_MEASURE_SCOPE(SpinLock);
-				Lepra::SpinLock lLock;
+				SpinLock lLock;
 				{
 					LEPRA_MEASURE_SCOPE(Acquire);
 					lLock.Acquire();
@@ -2148,9 +2150,9 @@ bool TestPerformance(const Lepra::LogDecorator& pAccount)
 #endif // LEPRA_WINDOWS
 
 			{
-				Lepra::Thread::YieldCpu();	// Yield to not get a starved Cpu time slice.
+				Thread::YieldCpu();	// Yield to not get a starved Cpu time slice.
 				LEPRA_MEASURE_SCOPE(Semaphore);
-				Lepra::Semaphore lSemaphore;
+				Semaphore lSemaphore;
 				{
 					LEPRA_MEASURE_SCOPE(Signal);
 					lSemaphore.Signal();
@@ -2162,11 +2164,11 @@ bool TestPerformance(const Lepra::LogDecorator& pAccount)
 			}
 
 			{
-				Lepra::StaticThread lThread(_T("Condition"));
-				Lepra::Condition lCondition;
+				StaticThread lThread(_T("Condition"));
+				Condition lCondition;
 				gCondition = &lCondition;
 				lThread.Start(ConditionThread, 0);
-				Lepra::Thread::Sleep(0.1);	// Yield to not get a starved Cpu time slice.
+				Thread::Sleep(0.1);	// Yield to not get a starved Cpu time slice.
 				LEPRA_MEASURE_SCOPE(Condition);
 				{
 					LEPRA_MEASURE_SCOPE(Signal);
@@ -2183,11 +2185,11 @@ bool TestPerformance(const Lepra::LogDecorator& pAccount)
 			}
 
 			{
-				Lepra::StaticThread lThread(_T("CompatibleCondition"));
-				Lepra::CompatibleCondition lCondition;
+				StaticThread lThread(_T("CompatibleCondition"));
+				CompatibleCondition lCondition;
 				gCompatibleCondition = &lCondition;
 				lThread.Start(CompatibleConditionThread, 0);
-				Lepra::Thread::Sleep(0.1);	// Yield to not get a starved Cpu time slice.
+				Thread::Sleep(0.1);	// Yield to not get a starved Cpu time slice.
 				LEPRA_MEASURE_SCOPE(CompatibleCondition);
 				{
 					LEPRA_MEASURE_SCOPE(Signal);
@@ -2204,9 +2206,9 @@ bool TestPerformance(const Lepra::LogDecorator& pAccount)
 			}
 
 			{
-				Lepra::Thread::YieldCpu();	// Yield to not get a starved Cpu time slice.
+				Thread::YieldCpu();	// Yield to not get a starved Cpu time slice.
 				LEPRA_MEASURE_SCOPE(StaticThread);
-				Lepra::StaticThread lThread(_T("PerformanceTest"));
+				StaticThread lThread(_T("PerformanceTest"));
 				{
 					LEPRA_MEASURE_SCOPE(Start);
 					lThread.Start(DummyThread, 0);
@@ -2223,9 +2225,9 @@ bool TestPerformance(const Lepra::LogDecorator& pAccount)
 			LEPRA_MEASURE_SCOPE(Networkcategory);
 
 			{
-				Lepra::Thread::YieldCpu();	// Yield to not get a starved Cpu time slice.
+				Thread::YieldCpu();	// Yield to not get a starved Cpu time slice.
 				LEPRA_MEASURE_SCOPE(sys_socket(UDP));
-				Lepra::sys_socket fd = ::socket(PF_INET, SOCK_DGRAM, 0);
+				sys_socket fd = ::socket(PF_INET, SOCK_DGRAM, 0);
 				assert(fd > 0);
 				sockaddr_in sa;
 				::memset(&sa, 0, sizeof(sa));
@@ -2233,7 +2235,7 @@ bool TestPerformance(const Lepra::LogDecorator& pAccount)
 				char lHostname[256] = "";
 				::gethostname(lHostname, sizeof(lHostname));
 				sa.sin_addr.s_addr = *(u_long*)(gethostbyname(lHostname)->h_addr);
-				sa.sin_port = Lepra::Endian::HostToBig((Lepra::uint16)46666);
+				sa.sin_port = Endian::HostToBig((uint16)46666);
 				lTestOk = (::bind(fd, (sockaddr*)&sa, sizeof(sa)) >= 0);
 				assert(lTestOk);
 				{
@@ -2255,37 +2257,37 @@ bool TestPerformance(const Lepra::LogDecorator& pAccount)
 			}
 
 			{
-				Lepra::Thread::YieldCpu();	// Yield to not get a starved Cpu time slice.
+				Thread::YieldCpu();	// Yield to not get a starved Cpu time slice.
 				LEPRA_MEASURE_SCOPE(UdpSocket);
-				Lepra::SocketAddress lAddress;
+				SocketAddress lAddress;
 				lAddress.Resolve(_T("localhost:46666"));
-				Lepra::UdpSocket lSocket(lAddress);
+				UdpSocket lSocket(lAddress);
 				{
 					LEPRA_MEASURE_SCOPE(SendTo);
-					lSocket.SendTo((const Lepra::uint8*)"Hello World", 12, lAddress);
+					lSocket.SendTo((const uint8*)"Hello World", 12, lAddress);
 				}
 				{
 					LEPRA_MEASURE_SCOPE(ReceiveFrom);
 					char lBuffer[12] = "";
-					lSocket.ReceiveFrom((Lepra::uint8*)lBuffer, 12, lAddress);
+					lSocket.ReceiveFrom((uint8*)lBuffer, 12, lAddress);
 					assert(::strcmp(lBuffer, "Hello World") == 0);
 				}
 			}
 
 			{
-				Lepra::Thread::YieldCpu();	// Yield to not get a starved Cpu time slice.
+				Thread::YieldCpu();	// Yield to not get a starved Cpu time slice.
 				LEPRA_MEASURE_SCOPE(UdpMuxSocket);
-				Lepra::SocketAddress lAddress1;
+				SocketAddress lAddress1;
 				lAddress1.Resolve(_T("localhost:46666"));
-				Lepra::SocketAddress lAddress2;
+				SocketAddress lAddress2;
 				lAddress2.Resolve(_T("localhost:46667"));
-				Lepra::UdpVSocket* lSocket = 0;
-				Lepra::UdpMuxSocket lMuxSocket1(_T("#1 "), lAddress1);
-				Lepra::UdpMuxSocket lMuxSocket2(_T("#2 "), lAddress2);
-				class DummyAcceptor: public Lepra::Thread
+				UdpVSocket* lSocket = 0;
+				UdpMuxSocket lMuxSocket1(_T("#1 "), lAddress1);
+				UdpMuxSocket lMuxSocket2(_T("#2 "), lAddress2);
+				class DummyAcceptor: public Thread
 				{
 				public:
-					DummyAcceptor(Lepra::UdpMuxSocket* pSocket):
+					DummyAcceptor(UdpMuxSocket* pSocket):
 						Thread(_T("DummyAcceptor")),
 						mSocket(pSocket)
 					{
@@ -2293,11 +2295,11 @@ bool TestPerformance(const Lepra::LogDecorator& pAccount)
 				private:
 					void Run()
 					{
-						Lepra::UdpVSocket* lSocket = mSocket->Accept();
+						UdpVSocket* lSocket = mSocket->Accept();
 						assert(lSocket);
-						Lepra::IOError lIo = lSocket->AppendSendBuffer("Hello Client", 13);
-						assert(lIo == Lepra::IO_OK);
-						if (lIo == Lepra::IO_OK) {}	// TRICKY.
+						IOError lIo = lSocket->AppendSendBuffer("Hello Client", 13);
+						assert(lIo == IO_OK);
+						if (lIo == IO_OK) {}	// TRICKY.
 						int r = lSocket->SendBuffer();
 						assert(r == 13);
 						if (r == 13) {}	// TRICKY.
@@ -2309,7 +2311,7 @@ bool TestPerformance(const Lepra::LogDecorator& pAccount)
 						if (lTestOk) {}	// TRICKY.
 						mSocket->CloseSocket(lSocket);
 					}
-					Lepra::UdpMuxSocket* mSocket;
+					UdpMuxSocket* mSocket;
 				};
 				DummyAcceptor lAcceptor(&lMuxSocket2);
 				lAcceptor.Start();
@@ -2320,9 +2322,9 @@ bool TestPerformance(const Lepra::LogDecorator& pAccount)
 				}
 				{
 					LEPRA_MEASURE_SCOPE(WriteRaw+Flush);
-					Lepra::IOError lIo = lSocket->AppendSendBuffer("Hello Server", 13);
-					assert(lIo == Lepra::IO_OK);
-					if (lIo == Lepra::IO_OK) {}	// TRICKY.
+					IOError lIo = lSocket->AppendSendBuffer("Hello Server", 13);
+					assert(lIo == IO_OK);
+					if (lIo == IO_OK) {}	// TRICKY.
 					int r = lSocket->SendBuffer();
 					assert(r == 13);
 					if (r == 13) {}	// TRICKY.
@@ -2343,7 +2345,7 @@ bool TestPerformance(const Lepra::LogDecorator& pAccount)
 		}
 	}
 
-	Lepra::Network::Stop();
+	Network::Stop();
 
 	if (lTestOk)
 	{
@@ -2356,38 +2358,38 @@ bool TestPerformance(const Lepra::LogDecorator& pAccount)
 	return (lTestOk);
 }
 
-bool TestPath(const Lepra::LogDecorator& pAccount)
+bool TestPath(const LogDecorator& pAccount)
 {
-	Lepra::String lContext;
+	str lContext;
 	bool lTestOk = true;
-	const Lepra::tchar* lTestPath1 = _T("/usr/bin/.hid");
-	const Lepra::tchar* lTestPath2 = _T("C:\\Documents and settings\\Sverker\\Mina dokument\\.skit...apansson");
+	const tchar* lTestPath1 = _T("/usr/bin/.hid");
+	const tchar* lTestPath2 = _T("C:\\Documents and settings\\Sverker\\Mina dokument\\.skit...apansson");
 
 	if (lTestOk)
 	{
 		lContext = _T("extension 1");
-		Lepra::String lExtension = Lepra::Path::GetExtension(lTestPath1);
+		str lExtension = Path::GetExtension(lTestPath1);
 		lTestOk = (lExtension == _T(""));
 		assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("file 1");
-		Lepra::String lFile = Lepra::Path::GetFileBase(lTestPath1);
+		str lFile = Path::GetFileBase(lTestPath1);
 		lTestOk = (lFile == _T(".hid"));
 		assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("directory 1");
-		Lepra::String lDirectory = Lepra::Path::GetDirectory(lTestPath1);
+		str lDirectory = Path::GetDirectory(lTestPath1);
 		lTestOk = (lDirectory == _T("/usr/bin/"));
 		assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("extension 2");
-		Lepra::String lExtension = Lepra::Path::GetExtension(lTestPath2);
+		str lExtension = Path::GetExtension(lTestPath2);
 		lTestOk = (lExtension == _T("apansson"));
 		assert(lTestOk);
 	}
@@ -2395,22 +2397,22 @@ bool TestPath(const Lepra::LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = _T("file 2");
-		Lepra::String lFile = Lepra::Path::GetFileBase(lTestPath2);
+		str lFile = Path::GetFileBase(lTestPath2);
 		lTestOk = (lFile == _T(".skit.."));
 		assert(lTestOk);
 	}
-	Lepra::String lDirectory;
+	str lDirectory;
 	if (lTestOk)
 	{
 		lContext = _T("directory 2");
-		lDirectory = Lepra::Path::GetDirectory(lTestPath2);
+		lDirectory = Path::GetDirectory(lTestPath2);
 		lTestOk = (lDirectory == _T("C:\\Documents and settings\\Sverker\\Mina dokument\\"));
 		assert(lTestOk);
 	}
 	if (lTestOk)
 	{
 		lContext = _T("directory 3");
-		Lepra::StringUtility::StringVector lDirectoryArray = Lepra::Path::SplitNodes(lDirectory);
+		strutil::strvec lDirectoryArray = Path::SplitNodes(lDirectory);
 		lTestOk = (lDirectoryArray.size() == 4 && lDirectoryArray[0] == _T("C:") &&
 			lDirectoryArray[1] == _T("Documents and settings") && lDirectoryArray[2] == _T("Sverker") &&
 			lDirectoryArray[3] == _T("Mina dokument"));
@@ -2419,7 +2421,7 @@ bool TestPath(const Lepra::LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = _T("directory 4");
-		Lepra::StringUtility::StringVector lDirectoryArray = Lepra::Path::SplitNodes(_T("\\WINDOWS.0\\"));
+		strutil::strvec lDirectoryArray = Path::SplitNodes(_T("\\WINDOWS.0\\"));
 		lTestOk = (lDirectoryArray.size() == 1 && lDirectoryArray[0] == _T("WINDOWS.0"));
 		assert(lTestOk);
 	}
@@ -2427,7 +2429,7 @@ bool TestPath(const Lepra::LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = _T("directory 5");
-		Lepra::StringUtility::StringVector lDirectoryArray = Lepra::Path::SplitNodes(lTestPath1);
+		strutil::strvec lDirectoryArray = Path::SplitNodes(lTestPath1);
 		lTestOk = (lDirectoryArray.size() == 3 && lDirectoryArray[0] == _T("usr") &&
 			lDirectoryArray[1] == _T("bin") && lDirectoryArray[2] == _T(".hid"));
 		assert(lTestOk);
@@ -2435,7 +2437,7 @@ bool TestPath(const Lepra::LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = _T("split");
-		Lepra::StringUtility::StringVector lPathParts = Lepra::Path::SplitPath(_T("a/b.c/d.e"));
+		strutil::strvec lPathParts = Path::SplitPath(_T("a/b.c/d.e"));
 		lTestOk = (lPathParts.size() == 3 && lPathParts[0] == _T("a/b.c/") &&
 			lPathParts[1] == _T("d") && lPathParts[2] == _T("e"));
 		assert(lTestOk);
@@ -2443,8 +2445,8 @@ bool TestPath(const Lepra::LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = _T("normalize 1");
-		Lepra::String lPath;
-		lTestOk = Lepra::Path::NormalizePath(_T("/./apa/../"), lPath);
+		str lPath;
+		lTestOk = Path::NormalizePath(_T("/./apa/../"), lPath);
 		if (lTestOk)
 		{
 			lTestOk = (lPath == _T("/"));
@@ -2454,8 +2456,8 @@ bool TestPath(const Lepra::LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = _T("normalize 2");
-		Lepra::String lPath;
-		lTestOk = Lepra::Path::NormalizePath(_T("/sune./apa/../"), lPath);
+		str lPath;
+		lTestOk = Path::NormalizePath(_T("/sune./apa/../"), lPath);
 		if (lTestOk)
 		{
 			lTestOk = (lPath == _T("/sune./"));
@@ -2465,8 +2467,8 @@ bool TestPath(const Lepra::LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = _T("normalize 3");
-		Lepra::String lPath;
-		lTestOk = Lepra::Path::NormalizePath(_T("./apa/../"), lPath);
+		str lPath;
+		lTestOk = Path::NormalizePath(_T("./apa/../"), lPath);
 		if (lTestOk)
 		{
 			lTestOk = (lPath == _T("./"));
@@ -2476,8 +2478,8 @@ bool TestPath(const Lepra::LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = _T("normalize 4");
-		Lepra::String lPath;
-		lTestOk = Lepra::Path::NormalizePath(_T("./apa/.."), lPath);
+		str lPath;
+		lTestOk = Path::NormalizePath(_T("./apa/.."), lPath);
 		if (lTestOk)
 		{
 			lTestOk = (lPath == _T("."));
@@ -2487,8 +2489,8 @@ bool TestPath(const Lepra::LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = _T("normalize 5");
-		Lepra::String lPath;
-		lTestOk = Lepra::Path::NormalizePath(_T("./apa/../sunk/.."), lPath);
+		str lPath;
+		lTestOk = Path::NormalizePath(_T("./apa/../sunk/.."), lPath);
 		if (lTestOk)
 		{
 			lTestOk = (lPath == _T("."));
@@ -2498,8 +2500,8 @@ bool TestPath(const Lepra::LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = _T("normalize 6");
-		Lepra::String lPath;
-		lTestOk = Lepra::Path::NormalizePath(_T("/apa/../sunk/.."), lPath);
+		str lPath;
+		lTestOk = Path::NormalizePath(_T("/apa/../sunk/.."), lPath);
 		if (lTestOk)
 		{
 			lTestOk = (lPath == _T("/"));
@@ -2509,8 +2511,8 @@ bool TestPath(const Lepra::LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = _T("normalize 7");
-		Lepra::String lPath;
-		lTestOk = Lepra::Path::NormalizePath(_T("/apa/../fagott/sunk/.."), lPath);
+		str lPath;
+		lTestOk = Path::NormalizePath(_T("/apa/../fagott/sunk/.."), lPath);
 		if (lTestOk)
 		{
 			lTestOk = (lPath == _T("/fagott"));
@@ -2520,8 +2522,8 @@ bool TestPath(const Lepra::LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = _T("normalize 8");
-		Lepra::String lPath;
-		lTestOk = Lepra::Path::NormalizePath(_T("./.."), lPath);
+		str lPath;
+		lTestOk = Path::NormalizePath(_T("./.."), lPath);
 		if (lTestOk)
 		{
 			lTestOk = (lPath == _T(".."));
@@ -2531,8 +2533,8 @@ bool TestPath(const Lepra::LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = _T("normalize 9");
-		Lepra::String lPath;
-		lTestOk = Lepra::Path::NormalizePath(_T(".//"), lPath);
+		str lPath;
+		lTestOk = Path::NormalizePath(_T(".//"), lPath);
 		if (lTestOk)
 		{
 			lTestOk = (lPath == _T("./"));
@@ -2542,8 +2544,8 @@ bool TestPath(const Lepra::LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = _T("normalize 10");
-		Lepra::String lPath;
-		lTestOk = Lepra::Path::NormalizePath(_T("//a"), lPath);
+		str lPath;
+		lTestOk = Path::NormalizePath(_T("//a"), lPath);
 		if (lTestOk)
 		{
 			lTestOk = (lPath == _T("/a"));
@@ -2554,8 +2556,8 @@ bool TestPath(const Lepra::LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = _T("normalize 11");
-		Lepra::String lPath;
-		lTestOk = Lepra::Path::NormalizePath(_T("C:\\a..\\b\\..\\c"), lPath);
+		str lPath;
+		lTestOk = Path::NormalizePath(_T("C:\\a..\\b\\..\\c"), lPath);
 		if (lTestOk)
 		{
 			lTestOk = (lPath == _T("C:/a../c"));
@@ -2565,8 +2567,8 @@ bool TestPath(const Lepra::LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = _T("normalize 12");
-		Lepra::String lPath;
-		lTestOk = Lepra::Path::NormalizePath(_T("\\\\.\\C:\\a\\\\b\\.\\.\\c\\"), lPath);	// UNC name.
+		str lPath;
+		lTestOk = Path::NormalizePath(_T("\\\\.\\C:\\a\\\\b\\.\\.\\c\\"), lPath);	// UNC name.
 		if (lTestOk)
 		{
 			lTestOk = (lPath == _T("\\\\.\\C:/a/b/c/"));
@@ -2576,8 +2578,8 @@ bool TestPath(const Lepra::LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = _T("normalize 13");
-		Lepra::String lPath;
-		lTestOk = Lepra::Path::NormalizePath(_T("\\\\MyServer\\$Share_1$\\.\\.\\Porn\\..\\Bible\\NT.txt"), lPath);
+		str lPath;
+		lTestOk = Path::NormalizePath(_T("\\\\MyServer\\$Share_1$\\.\\.\\Porn\\..\\Bible\\NT.txt"), lPath);
 		if (lTestOk)
 		{
 			lTestOk = (lPath == _T("\\\\MyServer/$Share_1$/Bible/NT.txt"));
@@ -2587,8 +2589,8 @@ bool TestPath(const Lepra::LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = _T("normalize 14");
-		Lepra::String lPath;
-		lTestOk = Lepra::Path::NormalizePath(_T("..\\..\\"), lPath);
+		str lPath;
+		lTestOk = Path::NormalizePath(_T("..\\..\\"), lPath);
 		if (lTestOk)
 		{
 			lTestOk = (lPath == _T("../../"));
@@ -2599,8 +2601,8 @@ bool TestPath(const Lepra::LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = _T("normalize error 1");
-		Lepra::String lPath;
-		lTestOk = !Lepra::Path::NormalizePath(_T("/../"), lPath);
+		str lPath;
+		lTestOk = !Path::NormalizePath(_T("/../"), lPath);
 		assert(lTestOk);
 	}
 
@@ -2608,18 +2610,18 @@ bool TestPath(const Lepra::LogDecorator& pAccount)
 	return (lTestOk);
 }
 
-bool TestMemFileConcurrency(const Lepra::LogDecorator& pAccount)
+bool TestMemFileConcurrency(const LogDecorator& pAccount)
 {
-	Lepra::String lContext;
+	str lContext;
 	bool lTestOk = true;
 
 	if (lTestOk)
 	{
 		lContext = _T("thread trashing");
-		class FileTrasher: public Lepra::Thread
+		class FileTrasher: public Thread
 		{
 		public:
-			FileTrasher(Lepra::LogListener& pFile, Lepra::Semaphore& pSemaphore):
+			FileTrasher(LogListener& pFile, Semaphore& pSemaphore):
 				Thread(_T("Trasher")),
 				mFile(pFile),
 				mSemaphore(pSemaphore)
@@ -2629,22 +2631,22 @@ bool TestMemFileConcurrency(const Lepra::LogDecorator& pAccount)
 			void Run()
 			{
 				mSemaphore.Wait();
-				Lepra::Log* lLog = Lepra::LogType::GetLog(Lepra::LogType::SUB_GENERAL_RESOURCES);
+				Log* lLog = LogType::GetLog(LogType::SUB_GENERAL_RESOURCES);
 				for (int x = 0; x < 1000; ++x)
 				{
-					mFile.OnLog(lLog, _T("?"), Lepra::Log::LEVEL_TRACE);
+					mFile.OnLog(lLog, _T("?"), Log::LEVEL_TRACE);
 				}
 			}
-			Lepra::LogListener& mFile;
-			Lepra::Semaphore& mSemaphore;
+			LogListener& mFile;
+			Semaphore& mSemaphore;
 			void operator=(const FileTrasher&) {};
 		};
 		const int lCount = 20;
 		FileTrasher* lTrashers[lCount];
 		::memset(lTrashers, 0, sizeof(lTrashers));
-		Lepra::MemFileLogListener lFile(5*1024);
+		MemFileLogListener lFile(5*1024);
 		lFile.Clear();
-		Lepra::Semaphore lSemaphore;
+		Semaphore lSemaphore;
 		for (int x = 0; x < lCount; ++x)
 		{
 			if (!lTrashers[x])
@@ -2656,12 +2658,12 @@ bool TestMemFileConcurrency(const Lepra::LogDecorator& pAccount)
 		{
 			lSemaphore.Signal();
 		}
-		Lepra::Thread::Sleep(0.1);
+		Thread::Sleep(0.1);
 		for (int z = 0; z < lCount; ++z)
 		{
 			if (lTrashers[z]->IsRunning())
 			{
-				Lepra::Thread::Sleep(0.001);
+				Thread::Sleep(0.001);
 				z = -1;
 			}
 		}
@@ -2675,7 +2677,7 @@ bool TestMemFileConcurrency(const Lepra::LogDecorator& pAccount)
 	return (lTestOk);
 }
 
-void ShowTestResult(const Lepra::LogDecorator& pAccount, bool pTestOk)
+void ShowTestResult(const LogDecorator& pAccount, bool pTestOk)
 {
 	::printf("\n");
 	ReportTestResult(pAccount, _T("Total test result"), _T("?"), pTestOk);
@@ -2694,7 +2696,7 @@ void ShowTestResult(const Lepra::LogDecorator& pAccount, bool pTestOk)
 	{
 		::printf("*");
 		::fflush(stdout);
-		Lepra::Thread::Sleep(lTerminationTime/lProgressBarSteps);
+		Thread::Sleep(lTerminationTime/lProgressBarSteps);
 	}
 	printf("]\n");
 }

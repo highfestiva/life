@@ -9,6 +9,7 @@
 #include <list>
 #include "../../Lepra/Include/String.h"
 #include "../../UiTbc/Include/UiPainter.h"
+#include "../Include/UiCure.h"
 
 
 
@@ -24,7 +25,7 @@ struct LineGraph2d
 	virtual ~LineGraph2d();
 
 	void TickLine(size_t pNewSize);	// Rolls up the graph by one step and inserts a "blank line".
-	void AddSegment(const Lepra::String& pName, double p1, double p2);
+	void AddSegment(const str& pName, double p1, double p2);
 	void Render(int pMarginX, float pScaleX, int& pOffsetY) const;
 	void RenderNames(int x, int& y) const;
 
@@ -42,7 +43,7 @@ private:
 	};
 	typedef std::vector<Segment> Segments;
 	typedef std::list<Segments> Fill;
-	typedef Lepra::StringUtility::StringVector SegmentNames;
+	typedef strutil::strvec SegmentNames;
 
 	UiTbc::Painter* mPainter;
 	UiTbc::Painter::DisplayListID mDisplayListId;

@@ -29,18 +29,18 @@ class ClientConsoleManager: public ConsoleManager
 	typedef ConsoleManager Parent;
 public:
 	ClientConsoleManager(Cure::GameManager* pGameManager, UiCure::GameUiManager* pUiManager,
-		Cure::RuntimeVariableScope* pVariableScope, const Lepra::PixelRect& pArea);
+		Cure::RuntimeVariableScope* pVariableScope, const PixelRect& pArea);
 	virtual ~ClientConsoleManager();
 
 	bool Start();
 	void Join();
 
-	void SetRenderArea(const Lepra::PixelRect& pRenderArea);
+	void SetRenderArea(const PixelRect& pRenderArea);
 	bool Toggle();
 	void Tick();
 
 protected:
-	bool SaveApplicationConfigFile(Lepra::File* pFile, const Lepra::UnicodeString& pUserConfig);
+	bool SaveApplicationConfigFile(File* pFile, const wstr& pUserConfig);
 
 private:
 	void InitGraphics();
@@ -62,10 +62,10 @@ private:
 
 	unsigned GetCommandCount() const;
 	const CommandPair& GetCommand(unsigned pIndex) const;
-	int OnCommand(const Lepra::String& pCommand, const Lepra::StringUtility::StringVector& pParameterVector);
+	int OnCommand(const str& pCommand, const strutil::strvec& pParameterVector);
 
 	UiCure::GameUiManager* mUiManager;
-	Lepra::PixelRect mArea;
+	PixelRect mArea;
 	UiTbc::Component* mConsoleComponent;
 	UiTbc::TextArea* mConsoleOutput;
 	UiTbc::TextField* mConsoleInput;

@@ -14,33 +14,33 @@
 namespace UiTbc
 {
 
-FileNameField::FileNameField(Component* pTopParent, const Lepra::String& pName) :
+FileNameField::FileNameField(Component* pTopParent, const str& pName) :
 	TextField(pTopParent, pName)
 {
 }
 
 FileNameField::FileNameField(Component* pTopParent, 
-			     unsigned pBorderStyle, int pBorderWidth, const Lepra::Color& pColor,
-			     const Lepra::String& pName) :
+			     unsigned pBorderStyle, int pBorderWidth, const Color& pColor,
+			     const str& pName) :
 	TextField(pTopParent, pBorderStyle, pBorderWidth, pColor, pName)
 {
 }
 
 FileNameField::FileNameField(Component* pTopParent, 
 			     unsigned pBorderStyle, int pBorderWidth, Painter::ImageID pImageID,
-			     const Lepra::String& pName) :
+			     const str& pName) :
 	TextField(pTopParent, pBorderStyle, pBorderWidth, pImageID, pName)
 {
 }
 
 FileNameField::FileNameField(Component* pTopParent, 
-			     const Lepra::Color& pColor, const Lepra::String& pName) :
+			     const Color& pColor, const str& pName) :
 	TextField(pTopParent, pColor, pName)
 {
 }
 
 FileNameField::FileNameField(Component* pTopParent, 
-			     Painter::ImageID pImageID, const Lepra::String& pName) :
+			     Painter::ImageID pImageID, const str& pName) :
 	TextField(pTopParent, pImageID, pName)
 {
 }
@@ -51,7 +51,7 @@ FileNameField::~FileNameField()
 
 PopupList* FileNameField::CreatePopupList()
 {
-	Lepra::String lSearchString(GetText());
+	str lSearchString(GetText());
 	lSearchString += _T("*");
 
 	Painter* lPainter = 0;
@@ -62,16 +62,16 @@ PopupList* FileNameField::CreatePopupList()
 	}
 
 	std::list<FileInfo> lFileList;
-	Lepra::DiskFile::FindData lFindData;
-	bool lOk = Lepra::DiskFile::FindFirst(lSearchString, lFindData);
+	DiskFile::FindData lFindData;
+	bool lOk = DiskFile::FindFirst(lSearchString, lFindData);
 	while (lOk)
 	{
 		bool lFileExtensionOk = true;
 
 		if (mFileExtensionList.empty() == false && lFindData.IsSubDir() == false)
 		{
-			Lepra::String lExtension = Lepra::Path::GetExtension(lFindData.GetName());
-			Lepra::StringUtility::ToLower(lExtension);
+			str lExtension = Path::GetExtension(lFindData.GetName());
+			strutil::ToLower(lExtension);
 			lFileExtensionOk = std::find(mFileExtensionList.begin(), mFileExtensionList.end(), lExtension) != mFileExtensionList.end();
 		}
 		
@@ -79,14 +79,14 @@ PopupList* FileNameField::CreatePopupList()
 		{
 			lFileList.push_back(FileInfo(lFindData.GetName(), lFindData.IsSubDir()));
 		}
-		lOk = Lepra::DiskFile::FindNext(lFindData);
+		lOk = DiskFile::FindNext(lFindData);
 	}
 
 	PopupList* lPopupList = 0;
 
 	if (!lFileList.empty())
 	{
-		lPopupList = new PopupList(BORDER_SUNKEN, 3, Lepra::WHITE);
+		lPopupList = new PopupList(BORDER_SUNKEN, 3, WHITE);
 		lPopupList->SetStyle(ListControl::SINGLE_SELECT);
 
 		lFileList.sort();
@@ -95,12 +95,12 @@ PopupList* FileNameField::CreatePopupList()
 		int lLabelHeight = 0;
 		for (lIter = lFileList.begin(); lIter != lFileList.end(); ++lIter)
 		{
-			Label* lLabel = new Label(Lepra::WHITE, Lepra::LIGHT_BLUE);
+			Label* lLabel = new Label(WHITE, LIGHT_BLUE);
 			lLabel->SetText((*lIter).mName, 
 					 GetTextColor(),
-					 Lepra::WHITE,
-					 Lepra::BLACK,
-					 Lepra::LIGHT_BLUE,
+					 WHITE,
+					 BLACK,
+					 LIGHT_BLUE,
 					 lPainter);
 			lLabel->SetPreferredSize(0, 12);
 			lPopupList->AddChild(lLabel);
@@ -146,20 +146,20 @@ bool FileNameField::NotifyDoubleClick(PopupList*, int pMouseX, int pMouseY)
 	return lReturnValue;
 }
 
-void FileNameField::ValidatePath(Lepra::String& pPath)
+void FileNameField::ValidatePath(str& pPath)
 {
-	Lepra::String lNormalizedPath;
-	if (!Lepra::Path::NormalizePath(pPath, lNormalizedPath))
+	str lNormalizedPath;
+	if (!Path::NormalizePath(pPath, lNormalizedPath))
 	{
 		// TRICKY: nothing to do - this is not a path!
 		return;
 	}
 
-	Lepra::DiskFile::FindData lFindData;
-	bool lOk = Lepra::DiskFile::FindFirst(lNormalizedPath, lFindData);
+	DiskFile::FindData lFindData;
+	bool lOk = DiskFile::FindFirst(lNormalizedPath, lFindData);
 	if (lOk == true)
 	{
-		if (lFindData.IsSubDir() && Lepra::StringUtility::Right(lNormalizedPath, 1) != _T("/"))
+		if (lFindData.IsSubDir() && strutil::Right(lNormalizedPath, 1) != _T("/"))
 		{
 			pPath += _T('/');
 		}
@@ -167,8 +167,8 @@ void FileNameField::ValidatePath(Lepra::String& pPath)
 	else
 	{
 		// TODO: verify code! How can the path exist if FindFirst did not find the path? Contradicting, to say the least.
-		lOk = Lepra::DiskFile::PathExists(lNormalizedPath);
-		if (lOk && Lepra::StringUtility::Right(lNormalizedPath, 2) == _T(".."))
+		lOk = DiskFile::PathExists(lNormalizedPath);
+		if (lOk && strutil::Right(lNormalizedPath, 2) == _T(".."))
 		{
 			lNormalizedPath += _T('/');
 		}
@@ -176,7 +176,7 @@ void FileNameField::ValidatePath(Lepra::String& pPath)
 	pPath = lNormalizedPath;
 }
 
-size_t FileNameField::FindSlash(Lepra::String& pPath, int n)
+size_t FileNameField::FindSlash(str& pPath, int n)
 {
 	size_t lIndex = pPath.length();
 	if (lIndex > 0)
@@ -198,7 +198,7 @@ void FileNameField::FinalizeSelection()
 {
 	if (GetPopupList() != 0)
 	{
-		Lepra::String lText(GetText());
+		str lText(GetText());
 
 		if (!lText.empty())
 		{
@@ -224,10 +224,10 @@ void FileNameField::FinalizeSelection()
 	}
 }
 
-void FileNameField::AddFileExtension(const Lepra::String& pExtension)
+void FileNameField::AddFileExtension(const str& pExtension)
 {
-	Lepra::String lExtension(pExtension);
-	Lepra::StringUtility::ToLower(lExtension);
+	str lExtension(pExtension);
+	strutil::ToLower(lExtension);
 	mFileExtensionList.push_back(lExtension);
 }
 

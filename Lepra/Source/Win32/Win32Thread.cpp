@@ -79,7 +79,7 @@ DWORD __stdcall ThreadEntry(void* pThread)
 	gExtraDataStorage.SetPointer(0);
 	assert(gThreadStorage.GetPointer() == lThread);
 	assert(Thread::GetCurrentThread() == lThread);
-	SetVisualStudioThreadName(AnsiStringUtility::ToOwnCode(lThread->GetThreadName()).c_str(), (DWORD)-1);
+	SetVisualStudioThreadName(astrutil::ToOwnCode(lThread->GetThreadName()).c_str(), (DWORD)-1);
 	RunThread(lThread);
 	return 0;
 }
@@ -612,7 +612,7 @@ void Win32CompatibleSemaphore::Release(int pNumPermits)
 
 
 
-Win32RWLock::Win32RWLock(const String& pRWLockName) :
+Win32RWLock::Win32RWLock(const str& pRWLockName) :
 	RWLockBC(pRWLockName),
 	mReadCondition(&mWriteLock),
 	mWriteCondition(&mWriteLock),
@@ -703,14 +703,14 @@ void Win32RWLock::Release()
 
 
 
-void Thread::InitializeMainThread(const String& pThreadName)
+void Thread::InitializeMainThread(const str& pThreadName)
 {
 	gThreadStorage.SetPointer(&gMainThread);
 	gExtraDataStorage.SetPointer(0);
 	gMainThread.SetThreadId(GetCurrentThreadId());
 	assert(gThreadStorage.GetPointer() == &gMainThread);
 	assert(Thread::GetCurrentThread() == &gMainThread);
-	SetVisualStudioThreadName(AnsiStringUtility::ToOwnCode(pThreadName).c_str(), (DWORD)-1);
+	SetVisualStudioThreadName(astrutil::ToOwnCode(pThreadName).c_str(), (DWORD)-1);
 }
 
 size_t Thread::GetCurrentThreadId()

@@ -31,7 +31,7 @@ ClientOptionsManager::ClientOptionsManager(Cure::RuntimeVariableScope* pVariable
 	
 bool ClientOptionsManager::UpdateInput(UiLepra::InputManager::KeyCode pKeyCode, bool pActive)
 {
-	const Lepra::String lInputElementName = ConvertToString(pKeyCode);
+	const str lInputElementName = ConvertToString(pKeyCode);
 	return (SetValue(lInputElementName, pActive? 1.0f : 0.0f));
 }
 
@@ -39,11 +39,11 @@ bool ClientOptionsManager::UpdateInput(UiLepra::InputElement* pElement)
 {
 	bool lValueSet;
 	float lValue = (float)pElement->GetValue();
-	const Lepra::String lInputElementName = pElement->GetFullName();
+	const str lInputElementName = pElement->GetFullName();
 	if (pElement->GetType() == UiLepra::InputElement::ANALOGUE)
 	{
 		// Clamp analogue to neutral when close enough.
-		if (Lepra::Math::IsEpsEqual(lValue, 0.0f, 0.1f))
+		if (Math::IsEpsEqual(lValue, 0.0f, 0.1f))
 		{
 			lValue = 0;
 		}
@@ -169,19 +169,19 @@ bool ClientOptionsManager::SetDefault(int pPriority)
 	return (lOk);
 }
 
-const Lepra::String ClientOptionsManager::ConvertToString(UiLepra::InputManager::KeyCode pKeyCode) const
+const str ClientOptionsManager::ConvertToString(UiLepra::InputManager::KeyCode pKeyCode) const
 {
 	return (_T("Key.")+UiLepra::InputManager::GetKeyName(pKeyCode));
 }
 
-bool ClientOptionsManager::SetValue(const Lepra::String& pKey, float pValue)
+bool ClientOptionsManager::SetValue(const str& pKey, float pValue)
 {
 	bool lIsAnySteeringValue;
 	bool lInputChanged = false;
 	std::vector<float*> lValuePointers = GetValuePointers(pKey, lIsAnySteeringValue);
 	for (std::vector<float*>::iterator x = lValuePointers.begin(); x != lValuePointers.end(); ++x)
 	{
-		if (!Lepra::Math::IsEpsEqual(*(*x), pValue, 0.03f))
+		if (!Math::IsEpsEqual(*(*x), pValue, 0.06f))
 		{
 			lInputChanged = true;
 			*(*x) = pValue;
@@ -190,13 +190,13 @@ bool ClientOptionsManager::SetValue(const Lepra::String& pKey, float pValue)
 	return (lIsAnySteeringValue && lInputChanged);
 }
 
-std::vector<float*> ClientOptionsManager::GetValuePointers(const Lepra::String& pKey, bool& pIsAnySteeringValue)
+std::vector<float*> ClientOptionsManager::GetValuePointers(const str& pKey, bool& pIsAnySteeringValue)
 {
 	std::vector<float*> lPointers;
 
 	pIsAnySteeringValue = false;
 
-	typedef std::pair<const Lepra::String, float*> KeyValue;
+	typedef std::pair<const str, float*> KeyValue;
 	const KeyValue lEntries[] =
 	{
 		KeyValue(_T(RTVAR_CTRL_UI_CONTOGGLE), &mOptions.mControl.mUi.mConsoleToggle),
@@ -218,15 +218,15 @@ std::vector<float*> ClientOptionsManager::GetValuePointers(const Lepra::String& 
 	};
 	for (int x = 0; x < sizeof(lEntries)/sizeof(lEntries[0]); ++x)
 	{
-		const Lepra::String lKeys = mVariableScope->GetDefaultValue(Cure::RuntimeVariableScope::READ_ONLY,
+		const str lKeys = mVariableScope->GetDefaultValue(Cure::RuntimeVariableScope::READ_ONLY,
 			lEntries[x].first);
-		typedef Lepra::StringUtility::StringVector SV;
-		SV lKeyArray = Lepra::StringUtility::Split(lKeys, _T(", \t"));
+		typedef strutil::strvec SV;
+		SV lKeyArray = strutil::Split(lKeys, _T(", \t"));
 		for (SV::iterator y = lKeyArray.begin(); y != lKeyArray.end(); ++y)
 		{
 			if ((*y) == pKey)
 			{
-				if (lEntries[x].first.find(_T("Steer")) != Lepra::String::npos)
+				if (lEntries[x].first.find(_T("Steer")) != str::npos)
 				{
 					pIsAnySteeringValue = true;
 				}

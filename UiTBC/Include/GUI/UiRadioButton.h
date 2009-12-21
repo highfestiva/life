@@ -16,14 +16,14 @@ class RadioButton : public Button
 {
 public:
 
-	RadioButton(const Lepra::Color& pBodyColor, const Lepra::String& pName);
+	RadioButton(const Color& pBodyColor, const str& pName);
 	RadioButton(Painter::ImageID pReleasedImageID,
 			    Painter::ImageID pPressedImageID,
 			    Painter::ImageID pReleasedActiveImageID,	// Mouse over.
 			    Painter::ImageID pPressedActiveImageID,
 			    Painter::ImageID pReleasingImageID,
 			    Painter::ImageID pPressingImageID,
-			    const Lepra::String& pName);
+			    const str& pName);
 
 	virtual ~RadioButton();
 
@@ -40,7 +40,7 @@ protected:
 
 private:
 
-	void AddImageToPainter(Painter::ImageID& pImageID, const Lepra::uint8 pImage[], int pDim, Painter* pPainter);
+	void AddImageToPainter(Painter::ImageID& pImageID, const uint8 pImage[], int pDim, Painter* pPainter);
 
 	static Painter::ImageID smIconRadioCheckID;
 	static Painter::ImageID smRadioButtonInnerID;
@@ -51,20 +51,20 @@ private:
 	static Painter* smPrevPainter;
 
 
-	static const Lepra::uint8 smIconRadioCheck[];
-	static const Lepra::uint8 smRadioButtonInner[];
-	static const Lepra::uint8 smRadioButtonLight1Col[];
-	static const Lepra::uint8 smRadioButtonLight2Col[];
-	static const Lepra::uint8 smRadioButtonDark1Col[];
-	static const Lepra::uint8 smRadioButtonDark2Col[];
+	static const uint8 smIconRadioCheck[];
+	static const uint8 smRadioButtonInner[];
+	static const uint8 smRadioButtonLight1Col[];
+	static const uint8 smRadioButtonLight2Col[];
+	static const uint8 smRadioButtonDark1Col[];
+	static const uint8 smRadioButtonDark2Col[];
 
 	bool mUserDefinedGfx;
 	bool mUpdateSize;
 
-	Lepra::Color mBodyColor;
-	Lepra::Color mLightColor;
-	Lepra::Color mDarkColor1;
-	Lepra::Color mDarkColor2;
+	Color mBodyColor;
+	Color mLightColor;
+	Color mDarkColor1;
+	Color mDarkColor2;
 
 	Painter::ImageID mReleasedID;
 	Painter::ImageID mReleasedActiveID;

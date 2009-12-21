@@ -48,38 +48,38 @@ public:
 	void ClearAll();
 
 	// Creates a new empty cell with the given ID.
-	bool AddCell(const Lepra::String& pCellID, const Lepra::String& pCellDescription);
+	bool AddCell(const str& pCellID, const str& pCellDescription);
 
 	// Adds a portal. Both cells must exist. Cell1 is the cell "in front" of the portal -
 	// in the direction of the surface normal.
 	bool AddPortal(int pNumVertices,
-			   Lepra::Vector3DF* pVertex,
-			   const Lepra::String& pCellID1,
-			   const Lepra::String& pCellID2);
+			   Vector3DF* pVertex,
+			   const str& pCellID1,
+			   const str& pCellID2);
 
 	// Adds the geometry to the given cell.
-	bool AddGeometry(GeometryBase* pGeometry, const Lepra::String& pParentCellID);
+	bool AddGeometry(GeometryBase* pGeometry, const str& pParentCellID);
 	void RemoveGeometry(GeometryBase* pGeometry);
 
-	Lepra::String GetParentCellID(GeometryBase* pGeometry);
+	str GetParentCellID(GeometryBase* pGeometry);
 
 	// Test collision against portals in the geometry's parent cell.
 	// Testing as if moving from pFromPos to pToPos (both given in world 
 	// coordinates), and updates the geometry's parent cell if a collision 
 	// occurs. Returns the ID of the geometry's parent cell after collision.
-	Lepra::String TestPortalCollision(const Lepra::Vector3DF& pFromPos,
-					   const Lepra::Vector3DF& pToPos,
+	str TestPortalCollision(const Vector3DF& pFromPos,
+					   const Vector3DF& pToPos,
 					   GeometryBase* pGeometry);
 
 	// Test collision against portals in the cell with the given ID.
 	// Testing as if moving from pFromPos to pToPos (both given in world
 	// coordinates). Returns the ID of the cell after collision.
-	Lepra::String TestPortalCollision(const Lepra::Vector3DF& pFromPos,
-					   const Lepra::Vector3DF& pToPos,
-					   const Lepra::String& pCellID);
+	str TestPortalCollision(const Vector3DF& pFromPos,
+					   const Vector3DF& pToPos,
+					   const str& pCellID);
 
 	// This function is implemented in UiPortalManager.
-	// void TraverseGraph(Renderer* pRenderer, const Lepra::String& pCellID);
+	// void TraverseGraph(Renderer* pRenderer, const str& pCellID);
 
 protected:
 
@@ -88,14 +88,14 @@ protected:
 	{
 	public:
 		Portal(int pNumVertices,
-		       Lepra::Vector3DF* pVertex,
+		       Vector3DF* pVertex,
 		       Cell* pCell1,
 		       Cell* pCell2);
 		virtual ~Portal();
 
 		// Returns "true" on collision and the time to collision.
-		bool TestCollision(const Lepra::Vector3DF& pFromPos,
-						   const Lepra::Vector3DF& pToPos,
+		bool TestCollision(const Vector3DF& pFromPos,
+						   const Vector3DF& pToPos,
 						   Cell* pFrom,
 						   float& pTimeToCollision);
 
@@ -104,15 +104,15 @@ protected:
 	protected:
 		int mNumVertices;
 
-		Lepra::Vector3DF* mVertex;
+		Vector3DF* mVertex;
 		// Generated normals which all point towards the center of the portal.
-		Lepra::Vector3DF* mEdgeNormal;
+		Vector3DF* mEdgeNormal;
 		float* mEdgeD; // The fourth constant in the plane equation.
 
 		Cell* mCell1;
 		Cell* mCell2;
 
-		Lepra::Vector3DF mNormal;
+		Vector3DF mNormal;
 		float mD;
 	};
 
@@ -120,13 +120,13 @@ protected:
 	{
 	public:
 
-		inline Cell(const Lepra::String& pCellID, 
-			    const Lepra::String& pCellDescription,
+		inline Cell(const str& pCellID, 
+			    const str& pCellDescription,
 			    PortalManager* pPortalManager);
 		inline virtual ~Cell();
 
-		inline const Lepra::String& GetID();
-		inline const Lepra::String& GetDescription();
+		inline const str& GetID();
+		inline const str& GetDescription();
 
 		inline void AddPortal(Portal* pPortal);
 		inline void RemovePortal(Portal* pPortal);
@@ -134,31 +134,31 @@ protected:
 		inline void AddGeometry(GeometryBase* pGeometry);
 		inline void RemoveGeometry(GeometryBase* pGeometry);
 
-		Cell* TestPortalCollision(const Lepra::Vector3DF& pFromPos,
-					  const Lepra::Vector3DF& pToPos,
+		Cell* TestPortalCollision(const Vector3DF& pFromPos,
+					  const Vector3DF& pToPos,
 					  float& pTimeToCollision);
 	protected:
 
-		typedef Lepra::HashSet<GeometryBase*, std::hash<void*> > GeomSet;
+		typedef HashSet<GeometryBase*, std::hash<void*> > GeomSet;
 		typedef std::list<Portal*> PortalList;
 
 		GeomSet mGeomSet;
 		PortalList mPortalList;
-		Lepra::String mCellID;
-		Lepra::String mCellDescription;
+		str mCellID;
+		str mCellDescription;
 		PortalManager* mPortalManager;
 	};
 
-	typedef Lepra::HashSet<GeometryBase*, std::hash<void*> > GeomSet;
-	typedef Lepra::HashTable<Lepra::String, Cell*> CellTable;
+	typedef HashSet<GeometryBase*, std::hash<void*> > GeomSet;
+	typedef HashTable<str, Cell*> CellTable;
 	typedef std::list<Portal*> PortalList;
 
 	virtual Portal* NewPortal(int pNumVertices,
-				 Lepra::Vector3DF* pVertex,
+				 Vector3DF* pVertex,
 				 Cell* pCell1,
 				 Cell* pCell2);
-	virtual Cell* NewCell(const Lepra::String& pCellID, 
-			      const Lepra::String& pCellDescription,
+	virtual Cell* NewCell(const str& pCellID, 
+			      const str& pCellDescription,
 			      PortalManager* pPortalManager);
 
 	GeomSet mGeomSet;
@@ -166,7 +166,7 @@ protected:
 	PortalList mPortalList;
 
 	// Initialized in TBC::Init().
-	static Lepra::String* smInvalidCellID;
+	static str* smInvalidCellID;
 
 	LOG_CLASS_DECLARE();
 };

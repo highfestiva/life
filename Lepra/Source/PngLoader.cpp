@@ -27,7 +27,7 @@
 namespace Lepra
 {
 
-PngLoader::Status PngLoader::Load(const String& pFileName, Canvas& pCanvas)
+PngLoader::Status PngLoader::Load(const str& pFileName, Canvas& pCanvas)
 {
 	Status lStatus = STATUS_SUCCESS;
 	MetaFile lFile;
@@ -46,7 +46,7 @@ PngLoader::Status PngLoader::Load(const String& pFileName, Canvas& pCanvas)
 	return lStatus;
 }
 
-PngLoader::Status PngLoader::Save(const String& pFileName, const Canvas& pCanvas)
+PngLoader::Status PngLoader::Save(const str& pFileName, const Canvas& pCanvas)
 {
 	Status lStatus = STATUS_SUCCESS;
 	DiskFile lFile;
@@ -65,7 +65,7 @@ PngLoader::Status PngLoader::Save(const String& pFileName, const Canvas& pCanvas
 	return lStatus;
 }
 
-PngLoader::Status PngLoader::Load(const String& pArchiveName, const String& pFileName, Canvas& pCanvas)
+PngLoader::Status PngLoader::Load(const str& pArchiveName, const str& pFileName, Canvas& pCanvas)
 {
 	Status lStatus = STATUS_SUCCESS;
 	ArchiveFile lFile(pArchiveName);
@@ -84,7 +84,7 @@ PngLoader::Status PngLoader::Load(const String& pArchiveName, const String& pFil
 	return lStatus;
 }
 
-PngLoader::Status PngLoader::Save(const String& pArchiveName, const String& pFileName, const Canvas& pCanvas)
+PngLoader::Status PngLoader::Save(const str& pArchiveName, const str& pFileName, const Canvas& pCanvas)
 {
 	Status lStatus = STATUS_SUCCESS;
 	ArchiveFile lFile(pArchiveName);

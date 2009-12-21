@@ -43,15 +43,15 @@ public:
 		ZIP,
 	};
 
-	ArchiveFile(const String& pArchiveName);
-	ArchiveFile(const String& pArchiveName, Reader* pReader);
-	ArchiveFile(const String& pArchiveName, Writer* pWriter);
-	ArchiveFile(const String& pArchiveName, Reader* pReader, Writer* pWriter);
+	ArchiveFile(const str& pArchiveName);
+	ArchiveFile(const str& pArchiveName, Reader* pReader);
+	ArchiveFile(const str& pArchiveName, Writer* pWriter);
+	ArchiveFile(const str& pArchiveName, Reader* pReader, Writer* pWriter);
 	virtual ~ArchiveFile();
 
 	void SetArchiveType(ArchiveType pType);
 
-	bool Open(const String& pFileName, OpenMode pMode, Endian::EndianType pEndian = Endian::TYPE_BIG_ENDIAN);
+	bool Open(const str& pFileName, OpenMode pMode, Endian::EndianType pEndian = Endian::TYPE_BIG_ENDIAN);
 
 	void Close();
 
@@ -60,9 +60,9 @@ public:
 	// Use this to change the endian in the middle of a file read/write.
 	void SetEndian(Endian::EndianType pEndian);
 
-	String GetFullName() const;	// Returns path+filename.
-	String GetName() const;		// Returns filename only.
-	String GetPath() const;		// Returns path.
+	str GetFullName() const;	// Returns path+filename.
+	str GetName() const;		// Returns filename only.
+	str GetPath() const;		// Returns path.
 
 	int64 GetSize() const;
 
@@ -77,10 +77,10 @@ public:
 	// name pFileName. If pLocal is set to true, the file will be written
 	// directly in the "current" directory or archive, as a local file. 
 	// With other words, the path is not taken into account.
-	static bool ExtractFileFromArchive(const String& pArchiveName, const String& pFileName, bool pLocal);
-	static bool ExtractFileFromArchive(const String& pArchiveName, const String& pFileName, const String& pExtractedFileName, bool pLocal);
-	static bool InsertFileIntoArchive(const String& pArchiveName, const String& pFileName, bool pLocal);
-	static bool InsertFileIntoArchive(const String& pArchiveName, const String& pFileName, const String& pInsertedFileName, bool pLocal);
+	static bool ExtractFileFromArchive(const str& pArchiveName, const str& pFileName, bool pLocal);
+	static bool ExtractFileFromArchive(const str& pArchiveName, const str& pFileName, const str& pExtractedFileName, bool pLocal);
+	static bool InsertFileIntoArchive(const str& pArchiveName, const str& pFileName, bool pLocal);
+	static bool InsertFileIntoArchive(const str& pArchiveName, const str& pFileName, const str& pInsertedFileName, bool pLocal);
 
 	// Overrided from InputStream.
 	int64 GetAvailable() const;
@@ -92,35 +92,35 @@ public:
 	void Flush();
 private:
 
-	bool OpenForReading(const String& pFileName, OpenMode pMode);
-	bool OpenZipForReading(const String& pFileName, OpenMode pMode);
-	bool OpenForWriting(const String& pFileName, OpenMode pMode);
-	bool OpenZipForWriting(const String& pFileName, OpenMode pMode);
+	bool OpenForReading(const str& pFileName, OpenMode pMode);
+	bool OpenZipForReading(const str& pFileName, OpenMode pMode);
+	bool OpenForWriting(const str& pFileName, OpenMode pMode);
+	bool OpenZipForWriting(const str& pFileName, OpenMode pMode);
 
 	bool FlushDataBuffer();
 	bool RefillDataBuffer();
 
-	void ExtractPathAndFileName(const String& pFileName);
+	void ExtractPathAndFileName(const str& pFileName);
 
-	void CopyArchiveFiles(FileArchive& pSource, FileArchive& pDest, const String& pExceptThisFile);
-	void CopyZipArchiveFiles(ZipArchive& pSource, ZipArchive& pDest, const String& pExceptThisFile);
+	void CopyArchiveFiles(FileArchive& pSource, FileArchive& pDest, const str& pExceptThisFile);
+	void CopyZipArchiveFiles(ZipArchive& pSource, ZipArchive& pDest, const str& pExceptThisFile);
 
-	bool CopyFileBetweenArchives(FileArchive& pSource, FileArchive& pDest, const String& pFileName);
-	bool CopyFileBetweenZipArchives(ZipArchive& pSource, ZipArchive& pDest, const String& pFileName);
+	bool CopyFileBetweenArchives(FileArchive& pSource, FileArchive& pDest, const str& pFileName);
+	bool CopyFileBetweenZipArchives(ZipArchive& pSource, ZipArchive& pDest, const str& pFileName);
 
 	void operator=(const ArchiveFile&);
 
 	Endian::EndianType mFileEndian;
 
-	String mArchiveFileName;
+	str mArchiveFileName;
 	bool mIsZipArchive;
 
 	ZipArchive mZipArchive;
 	FileArchive mArchive;
 	int mFileHandle;
 
-	String mFileName;
-	String mPath;
+	str mFileName;
+	str mPath;
 
 	int64 mFileSize;
 

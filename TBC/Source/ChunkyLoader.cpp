@@ -31,7 +31,7 @@ ChunkyLoader::ChunkyFileElement::ChunkyFileElement():
 {
 }
 
-ChunkyLoader::ChunkyFileElement::ChunkyFileElement(ChunkyType pType, void** pPointer, Lepra::uint32* pFieldSize, int pElementCount):
+ChunkyLoader::ChunkyFileElement::ChunkyFileElement(ChunkyType pType, void** pPointer, uint32* pFieldSize, int pElementCount):
 	mType(pType),
 	mLoadCallback(false),
 	mIntPointer(0),
@@ -43,7 +43,7 @@ ChunkyLoader::ChunkyFileElement::ChunkyFileElement(ChunkyType pType, void** pPoi
 {
 }
 
-ChunkyLoader::ChunkyFileElement::ChunkyFileElement(ChunkyType pType, Lepra::int32* pInt, Lepra::uint32* pFieldSize, int pElementCount):
+ChunkyLoader::ChunkyFileElement::ChunkyFileElement(ChunkyType pType, int32* pInt, uint32* pFieldSize, int pElementCount):
 	mType(pType),
 	mLoadCallback(false),
 	mIntPointer(pInt),
@@ -55,7 +55,7 @@ ChunkyLoader::ChunkyFileElement::ChunkyFileElement(ChunkyType pType, Lepra::int3
 {
 }
 
-ChunkyLoader::ChunkyFileElement::ChunkyFileElement(ChunkyType pType, Lepra::String* pString, int pElementCount):
+ChunkyLoader::ChunkyFileElement::ChunkyFileElement(ChunkyType pType, str* pString, int pElementCount):
 	mType(pType),
 	mLoadCallback(false),
 	mIntPointer(0),
@@ -98,7 +98,7 @@ void ChunkyLoader::ChunkyFileElement::operator=(const ChunkyFileElement& pOrigin
 
 
 
-ChunkyLoader::ChunkyLoader(Lepra::File* pFile, bool pIsFileOwner):
+ChunkyLoader::ChunkyLoader(File* pFile, bool pIsFileOwner):
 	mFile(pFile),
 	mIsFileOwner(pIsFileOwner)
 {
@@ -115,17 +115,17 @@ ChunkyLoader::~ChunkyLoader()
 
 
 
-bool ChunkyLoader::AllocLoadChunkyList(FileElementList& pLoadList, Lepra::int64 pChunkEnd)
+bool ChunkyLoader::AllocLoadChunkyList(FileElementList& pLoadList, int64 pChunkEnd)
 {
 	bool lLoadedAllElements = false;
 	bool lOk = true;
 	bool lAlreadyLoaded = false;
-	Lepra::int64 lHeadPosition = mFile->Tell();
+	int64 lHeadPosition = mFile->Tell();
 	while (!lLoadedAllElements && lOk && mFile->Tell() < pChunkEnd)
 	{
 		ChunkyType lType = (ChunkyType)0;
-		Lepra::uint32 lSize = 0;
-		Lepra::int64 lChunkEndPosition = 0;
+		uint32 lSize = 0;
+		int64 lChunkEndPosition = 0;
 
 		// Load element head.
 		if (lOk)
@@ -161,11 +161,11 @@ bool ChunkyLoader::AllocLoadChunkyList(FileElementList& pLoadList, Lepra::int64 
 					}
 					if (lOk)
 					{
-						Lepra::tchar c[4];
-						c[0] = (Lepra::tchar)((lType>>24)&0x7F);
-						c[1] = (Lepra::tchar)((lType>>16)&0x7F);
-						c[2] = (Lepra::tchar)((lType>>8)&0x7F);
-						c[3] = (Lepra::tchar)((lType>>0)&0x7F);
+						tchar c[4];
+						c[0] = (tchar)((lType>>24)&0x7F);
+						c[1] = (tchar)((lType>>16)&0x7F);
+						c[2] = (tchar)((lType>>8)&0x7F);
+						c[3] = (tchar)((lType>>0)&0x7F);
 						log_volatile(mLog.Debugf(_T("Loading chunk '%c%c%c%c'."),
 							c[0], c[1], c[2], c[3]));
 					}
@@ -179,15 +179,15 @@ bool ChunkyLoader::AllocLoadChunkyList(FileElementList& pLoadList, Lepra::int64 
 						}
 						else if (lElement.mIntPointer)
 						{
-							lOk = (mFile->Read(lElement.mIntPointer[y]) == Lepra::IO_OK);
+							lOk = (mFile->Read(lElement.mIntPointer[y]) == IO_OK);
 							if (lElement.mFieldSize)
 							{
-								*lElement.mFieldSize += sizeof(Lepra::int32);
+								*lElement.mFieldSize += sizeof(int32);
 							}
 						}
 						else if (lElement.mPointer)
 						{
-							lOk = (mFile->AllocReadData(&lElement.mPointer[y], lSize) == Lepra::IO_OK);
+							lOk = (mFile->AllocReadData(&lElement.mPointer[y], lSize) == IO_OK);
 							if (lOk)
 							{
 								lElement.mFieldSize[y] = lSize;
@@ -195,20 +195,20 @@ bool ChunkyLoader::AllocLoadChunkyList(FileElementList& pLoadList, Lepra::int64 
 						}
 						else if (lElement.mString)
 						{
-							Lepra::uint8* lString = 0;
+							uint8* lString = 0;
 							lOk = (lSize >= 4 && (lSize&1) == 0);
 							if (lOk)
 							{
-								lOk = (mFile->AllocReadData((void**)&lString, lSize) == Lepra::IO_OK);
+								lOk = (mFile->AllocReadData((void**)&lString, lSize) == IO_OK);
 							}
 							if (lOk)
 							{
-								Lepra::UnicodeString lUnicodeString;
-								int lStringLength = Lepra::PackerUnicodeString::Unpack(&lUnicodeString, lString, lSize);
+								wstr lUnicodeString;
+								int lStringLength = PackerUnicodeString::Unpack(&lUnicodeString, lString, lSize);
 								lOk = (lStringLength == (int)lSize || lStringLength == (int)lSize-2);
 								if (lOk)
 								{
-									lElement.mString[y] = Lepra::UnicodeStringUtility::ToCurrentCode(lUnicodeString);
+									lElement.mString[y] = wstrutil::ToCurrentCode(lUnicodeString);
 								}
 								else
 								{
@@ -241,7 +241,7 @@ bool ChunkyLoader::AllocLoadChunkyList(FileElementList& pLoadList, Lepra::int64 
 				else
 				{
 					// Unknown element, try to load it separately.
-					lOk = (mFile->Skip(lSize) == Lepra::IO_OK);
+					lOk = (mFile->Skip(lSize) == IO_OK);
 				}
 			}
 		}
@@ -275,11 +275,10 @@ bool ChunkyLoader::AllocLoadChunkyList(FileElementList& pLoadList, Lepra::int64 
 
 
 
-bool ChunkyLoader::SaveSingleString(ChunkyType pType, const Lepra::String& pString)
+bool ChunkyLoader::SaveSingleString(ChunkyType pType, const str& pString)
 {
-	// Write padding at once. No CPU safety border (a.k.a. page boundary) crosses the 4-byte alignment boundary.
-	const Lepra::uint32 lSize = (Lepra::uint32)((2 + pString.length()*2+2 + 3)&(~3));
-	Lepra::int64 lChunkEndPosition = 0;
+	const uint32 lSize = PackerUnicodeString::Pack(0, pString);	// Padding added.
+	int64 lChunkEndPosition = 0;
 	bool lOk = true;
 	if (lOk)
 	{
@@ -287,10 +286,10 @@ bool ChunkyLoader::SaveSingleString(ChunkyType pType, const Lepra::String& pStri
 	}
 	if (lOk)
 	{
-		Lepra::uint8* lData = new Lepra::uint8[lSize];
+		uint8* lData = new uint8[lSize];
 		::memset(lData, 0, lSize);
-		Lepra::PackerUnicodeString::Pack(lData, Lepra::UnicodeStringUtility::ToOwnCode(pString));
-		lOk = (mFile->WriteData(lData, lSize) == Lepra::IO_OK);
+		PackerUnicodeString::Pack(lData, wstrutil::ToOwnCode(pString));
+		lOk = (mFile->WriteData(lData, lSize) == IO_OK);
 		delete[] (lData);
 	}
 	if (lOk)
@@ -300,19 +299,19 @@ bool ChunkyLoader::SaveSingleString(ChunkyType pType, const Lepra::String& pStri
 	return (lOk);
 }
 
-/*bool ChunkyLoader::SaveStringList(const std::list<Lepra::String>& pStringList)
+/*bool ChunkyLoader::SaveStringList(const std::list<str>& pStringList)
 {
 	// Compute size of all strings.
 	size_t lSize = 0;
-	std::list<Lepra::String>::const_iterator x = pStringList.begin();
+	std::list<str>::const_iterator x = pStringList.begin();
 	for (; x != pStringList.end(); ++x)
 	{
-		const Lepra::String& lString = *x;
+		const str& lString = *x;
 		const int HEAD_SIZE = 4*2;
 		lSize += HEAD_SIZE + ((lString.length()+1+3)&(~3));
 	}
 
-	Lepra::int64 lChunkEndPosition = 0;
+	int64 lChunkEndPosition = 0;
 	bool lOk = true;
 	if (lOk)
 	{
@@ -321,7 +320,7 @@ bool ChunkyLoader::SaveSingleString(ChunkyType pType, const Lepra::String& pStri
 	x = pStringList.begin();
 	for (; lOk && x != pStringList.end(); ++x)
 	{
-		const Lepra::String& lString = *x;
+		const str& lString = *x;
 		lOk = SaveSingleString(lString);
 	}
 	if (lOk)
@@ -331,9 +330,9 @@ bool ChunkyLoader::SaveSingleString(ChunkyType pType, const Lepra::String& pStri
 	return (lOk);
 }*/
 
-bool ChunkyLoader::SaveInt(ChunkyType pType, Lepra::int32 pInt)
+bool ChunkyLoader::SaveInt(ChunkyType pType, int32 pInt)
 {
-	Lepra::int64 lChunkEndPosition = 0;
+	int64 lChunkEndPosition = 0;
 	bool lOk = true;
 	if (lOk)
 	{
@@ -341,7 +340,7 @@ bool ChunkyLoader::SaveInt(ChunkyType pType, Lepra::int32 pInt)
 	}
 	if (lOk)
 	{
-		lOk = (mFile->Write(pInt) == Lepra::IO_OK);
+		lOk = (mFile->Write(pInt) == IO_OK);
 	}
 	if (lOk)
 	{
@@ -359,7 +358,7 @@ bool ChunkyLoader::SaveChunkyList(const FileElementList& pSaveList)
 		const ChunkyFileElement& lElement = *x;
 		for (int y = 0; lOk && y < lElement.mElementCount; ++y)
 		{
-			Lepra::int64 lChunkEndPosition = 0;
+			int64 lChunkEndPosition = 0;
 			if (lElement.mIntPointer)
 			{
 				lOk = SaveInt(lElement.mType, lElement.mIntPointer[y]);
@@ -369,7 +368,7 @@ bool ChunkyLoader::SaveChunkyList(const FileElementList& pSaveList)
 				lOk = SaveHead(lElement.mType, lElement.mFieldSize[y], lChunkEndPosition);
 				if (lOk)
 				{
-					lOk = (mFile->WriteData(lElement.mPointer[y], lElement.mFieldSize[y]) == Lepra::IO_OK);
+					lOk = (mFile->WriteData(lElement.mPointer[y], lElement.mFieldSize[y]) == IO_OK);
 				}
 			}
 			else if (lElement.mString)
@@ -383,7 +382,7 @@ bool ChunkyLoader::SaveChunkyList(const FileElementList& pSaveList)
 
 
 
-bool ChunkyLoader::LoadElementCallback(ChunkyType, Lepra::uint32, Lepra::int64 pChunkEndPosition, void*)
+bool ChunkyLoader::LoadElementCallback(ChunkyType, uint32, int64 pChunkEndPosition, void*)
 {
 	// Default behavior is to simply skip the chunk.
 	bool lOk = (mFile->SeekSet(pChunkEndPosition) == pChunkEndPosition);
@@ -394,8 +393,8 @@ bool ChunkyLoader::LoadElementCallback(ChunkyType, Lepra::uint32, Lepra::int64 p
 
 bool ChunkyLoader::VerifyFileType(ChunkyType pType)
 {
-	Lepra::uint32 lSize = 0;
-	Lepra::int64 lChunkEndPosition = 0;
+	uint32 lSize = 0;
+	int64 lChunkEndPosition = 0;
 	bool lOk = LoadRequiredHead(pType, lSize, lChunkEndPosition);
 	if (lOk && lChunkEndPosition != mFile->GetSize())
 	{
@@ -406,27 +405,27 @@ bool ChunkyLoader::VerifyFileType(ChunkyType pType)
 
 bool ChunkyLoader::WriteFileType(ChunkyType pType)
 {
-	Lepra::uint32 lSize = 0;
-	Lepra::int64 lChunkEndPosition;
+	uint32 lSize = 0;
+	int64 lChunkEndPosition;
 	bool lOk = SaveHead(pType, lSize, lChunkEndPosition);
 	return (lOk);
 }
 
 
 
-bool ChunkyLoader::LoadHead(ChunkyType& pType, Lepra::uint32& pSize, Lepra::int64& pChunkEndPosition)
+bool ChunkyLoader::LoadHead(ChunkyType& pType, uint32& pSize, int64& pChunkEndPosition)
 {
 	bool lOk = true;
-	Lepra::int32 lTempType = 0;
+	int32 lTempType = 0;
 	if (lOk)
 	{
-		lOk = (mFile->Read(lTempType) == Lepra::IO_OK);
+		lOk = (mFile->Read(lTempType) == IO_OK);
 		pType = (ChunkyType)lTempType;
 	}
 	if (lOk)
 	{
-		Lepra::uint32 lSize;
-		lOk = (mFile->Read(lSize) == Lepra::IO_OK);
+		uint32 lSize;
+		lOk = (mFile->Read(lSize) == IO_OK);
 		pSize = lSize;
 	}
 	if (lOk)
@@ -436,7 +435,7 @@ bool ChunkyLoader::LoadHead(ChunkyType& pType, Lepra::uint32& pSize, Lepra::int6
 	return (lOk);
 }
 
-bool ChunkyLoader::LoadRequiredHead(ChunkyType pType, Lepra::uint32& pSize, Lepra::int64& pChunkEndPosition)
+bool ChunkyLoader::LoadRequiredHead(ChunkyType pType, uint32& pSize, int64& pChunkEndPosition)
 {
 	bool lOk = true;
 	ChunkyType lFileType = (ChunkyType)0;
@@ -451,18 +450,18 @@ bool ChunkyLoader::LoadRequiredHead(ChunkyType pType, Lepra::uint32& pSize, Lepr
 	return (lOk);
 }
 
-bool ChunkyLoader::SaveHead(ChunkyType pType, Lepra::uint32 pSize, Lepra::int64& pChunkEndPosition)
+bool ChunkyLoader::SaveHead(ChunkyType pType, uint32 pSize, int64& pChunkEndPosition)
 {
 	bool lOk = true;
 	if (lOk)
 	{
-		Lepra::int32 lTempType = (Lepra::int32)pType;
-		lOk = (mFile->Write(lTempType) == Lepra::IO_OK);
+		int32 lTempType = (int32)pType;
+		lOk = (mFile->Write(lTempType) == IO_OK);
 	}
 	if (lOk)
 	{
-		Lepra::uint32 lSize = (Lepra::uint32)pSize;
-		lOk = (mFile->Write(lSize) == Lepra::IO_OK);
+		uint32 lSize = (uint32)pSize;
+		lOk = (mFile->Write(lSize) == IO_OK);
 	}
 	if (lOk)
 	{
@@ -471,46 +470,46 @@ bool ChunkyLoader::SaveHead(ChunkyType pType, Lepra::uint32 pSize, Lepra::int64&
 	return (lOk);
 }
 
-bool ChunkyLoader::RewriteChunkSize(Lepra::int64 pChunkStartPosition)
+bool ChunkyLoader::RewriteChunkSize(int64 pChunkStartPosition)
 {
-	Lepra::uint32 lSize = (Lepra::uint32)(mFile->Tell() - pChunkStartPosition);
+	uint32 lSize = (uint32)(mFile->Tell() - pChunkStartPosition);
 	mFile->SeekSet(pChunkStartPosition-4);
-	bool lOk = (mFile->Write(lSize) == Lepra::IO_OK);
+	bool lOk = (mFile->Write(lSize) == IO_OK);
 	mFile->SeekEnd(0);
 	return (lOk);
 }
 
-Lepra::uint32* ChunkyLoader::AllocInitBigEndian(const float* pData, unsigned pCount)
+uint32* ChunkyLoader::AllocInitBigEndian(const float* pData, unsigned pCount)
 {
 	if (!pData || !pCount)
 	{
 		return (0);
 	}
-	Lepra::uint32* lData = new Lepra::uint32[pCount];
+	uint32* lData = new uint32[pCount];
 	for (unsigned x = 0; x < pCount; ++x)
 	{
-		lData[x] = Lepra::Endian::HostToBigF(pData[x]);
+		lData[x] = Endian::HostToBigF(pData[x]);
 	}
 	return (lData);
 }
 
-Lepra::uint32* ChunkyLoader::AllocInitBigEndian(const Lepra::uint32* pData, unsigned pCount)
+uint32* ChunkyLoader::AllocInitBigEndian(const uint32* pData, unsigned pCount)
 {
 	if (!pData || !pCount)
 	{
 		return (0);
 	}
-	Lepra::uint32* lData = new Lepra::uint32[pCount];
+	uint32* lData = new uint32[pCount];
 	for (unsigned x = 0; x < pCount; ++x)
 	{
-		lData[x] = Lepra::Endian::HostToBig(pData[x]);
+		lData[x] = Endian::HostToBig(pData[x]);
 	}
 	return (lData);
 }
 
 
 
-ChunkyAnimationLoader::ChunkyAnimationLoader(Lepra::File* pFile, bool pIsFileOwner):
+ChunkyAnimationLoader::ChunkyAnimationLoader(File* pFile, bool pIsFileOwner):
 	Parent(pFile, pIsFileOwner)
 {
 }
@@ -527,12 +526,12 @@ bool ChunkyAnimationLoader::Load(BoneAnimation* pAnimation)
 		lOk = VerifyFileType(CHUNK_ANIMATION);
 	}
 
-	Lepra::int32 lDefaultMode = -1;
+	int32 lDefaultMode = -1;
 	mKeyframeCount = -1;	// Using member variable for callback l8r on.
 	mBoneCount = -1;	// Using member variable for callback l8r on.
-	Lepra::int32 lUseSplines = -1;
+	int32 lUseSplines = -1;
 	float lAnimationTimeLength = 0;
-	Lepra::String lRootNodeName;
+	str lRootNodeName;
 	if (lOk)
 	{
 		FileElementList lLoadList;
@@ -540,7 +539,7 @@ bool ChunkyAnimationLoader::Load(BoneAnimation* pAnimation)
 		lLoadList.push_back(ChunkyFileElement(CHUNK_ANIMATION_FRAME_COUNT, &mKeyframeCount));
 		lLoadList.push_back(ChunkyFileElement(CHUNK_ANIMATION_BONE_COUNT, &mBoneCount));
 		lLoadList.push_back(ChunkyFileElement(CHUNK_ANIMATION_USE_SPLINES, &lUseSplines));
-		lLoadList.push_back(ChunkyFileElement(CHUNK_ANIMATION_TIME, (Lepra::int32*)&lAnimationTimeLength));
+		lLoadList.push_back(ChunkyFileElement(CHUNK_ANIMATION_TIME, (int32*)&lAnimationTimeLength));
 		lLoadList.push_back(ChunkyFileElement(CHUNK_ANIMATION_ROOT_NODE, &lRootNodeName));
 		lOk = AllocLoadChunkyList(lLoadList, mFile->GetSize());
 	}
@@ -576,15 +575,15 @@ bool ChunkyAnimationLoader::Save(const BoneAnimation* pAnimation)
 	{
 		lOk = WriteFileType(CHUNK_ANIMATION);
 	}
-	Lepra::int64 lFileDataStart = mFile->Tell();
+	int64 lFileDataStart = mFile->Tell();
 
 	// Write animation settings and similar stuff.
-	Lepra::int32 lDefaultMode = pAnimation->GetDefaultMode();
-	Lepra::int32 lKeyframeCount = pAnimation->GetKeyframeCount();
-	Lepra::int32 lBoneCount = pAnimation->GetBoneCount();
-	Lepra::int32 lUseSplines = pAnimation->GetUseSplines();
+	int32 lDefaultMode = pAnimation->GetDefaultMode();
+	int32 lKeyframeCount = pAnimation->GetKeyframeCount();
+	int32 lBoneCount = pAnimation->GetBoneCount();
+	int32 lUseSplines = pAnimation->GetUseSplines();
 	float lAnimationTimeLength = pAnimation->GetTimeTag(lKeyframeCount);
-	Lepra::String lRootNodeName = pAnimation->GetRootNodeName();
+	str lRootNodeName = pAnimation->GetRootNodeName();
 	if (lOk)
 	{
 		lOk = (lDefaultMode >= BoneAnimation::MODE_PLAY_ONCE && lKeyframeCount > 0 &&
@@ -597,7 +596,7 @@ bool ChunkyAnimationLoader::Save(const BoneAnimation* pAnimation)
 		lSaveList.push_back(ChunkyFileElement(CHUNK_ANIMATION_FRAME_COUNT, &lKeyframeCount));
 		lSaveList.push_back(ChunkyFileElement(CHUNK_ANIMATION_BONE_COUNT, &lBoneCount));
 		lSaveList.push_back(ChunkyFileElement(CHUNK_ANIMATION_USE_SPLINES, &lUseSplines));
-		lSaveList.push_back(ChunkyFileElement(CHUNK_ANIMATION_TIME, (Lepra::int32*)&lAnimationTimeLength));
+		lSaveList.push_back(ChunkyFileElement(CHUNK_ANIMATION_TIME, (int32*)&lAnimationTimeLength));
 		lSaveList.push_back(ChunkyFileElement(CHUNK_ANIMATION_ROOT_NODE, &lRootNodeName));
 		lOk = SaveChunkyList(lSaveList);
 	}
@@ -607,8 +606,8 @@ bool ChunkyAnimationLoader::Save(const BoneAnimation* pAnimation)
 	if (lOk)
 	{
 		// Write all keyframes into a single chunk (multiple element chunk).
-		const Lepra::uint32 lFrameSize = (sizeof(Lepra::uint32)*5 + lBoneCount*lTransformFloatCount*sizeof(float)) * lKeyframeCount;
-		Lepra::int64 lChunkEndPosition = 0;
+		const uint32 lFrameSize = (sizeof(uint32)*5 + lBoneCount*lTransformFloatCount*sizeof(float)) * lKeyframeCount;
+		int64 lChunkEndPosition = 0;
 		lOk = SaveHead(CHUNK_ANIMATION_KEYFRAME, lFrameSize, lChunkEndPosition);
 	}
 	if (lOk)
@@ -617,17 +616,17 @@ bool ChunkyAnimationLoader::Save(const BoneAnimation* pAnimation)
 		{
 			// Save time as sub-chunk to the keyframe chunk.
 			float lAnimationTime = pAnimation->GetTimeTag(kf);
-			lOk = SaveInt(CHUNK_ANIMATION_KEYFRAME_TIME, *(Lepra::int32*)&lAnimationTime);
+			lOk = SaveInt(CHUNK_ANIMATION_KEYFRAME_TIME, *(int32*)&lAnimationTime);
 
 			// Save transformations for all bones as sub-chunk to the keyframe chunk.
-			const Lepra::uint32 lTransformSize = lBoneCount*lTransformFloatCount*sizeof(float);
-			Lepra::int64 lChunkEndPosition = 0;
+			const uint32 lTransformSize = lBoneCount*lTransformFloatCount*sizeof(float);
+			int64 lChunkEndPosition = 0;
 			lOk = SaveHead(CHUNK_ANIMATION_KEYFRAME_TRANSFORM, lTransformSize, lChunkEndPosition);
 			for (int bc = 0; lOk && bc < lBoneCount; ++bc)
 			{
 				float lTransform[lTransformFloatCount];
 				pAnimation->GetBoneTransformation(kf, bc).Get(lTransform);
-				lOk = (mFile->WriteData(lTransform, sizeof(lTransform)) == Lepra::IO_OK);
+				lOk = (mFile->WriteData(lTransform, sizeof(lTransform)) == IO_OK);
 			}
 		}
 	}
@@ -643,7 +642,7 @@ bool ChunkyAnimationLoader::Save(const BoneAnimation* pAnimation)
 
 
 
-bool ChunkyAnimationLoader::LoadElementCallback(ChunkyType pType, Lepra::uint32 pSize, Lepra::int64 pChunkEndPosition, void* pStorage)
+bool ChunkyAnimationLoader::LoadElementCallback(ChunkyType pType, uint32 pSize, int64 pChunkEndPosition, void* pStorage)
 {
 	bool lOk = false;
 	if (pType == CHUNK_ANIMATION_KEYFRAME)
@@ -651,9 +650,9 @@ bool ChunkyAnimationLoader::LoadElementCallback(ChunkyType pType, Lepra::uint32 
 		// Setup pointers and counters for list loading.
 		float lKeyframeTime = 0;
 		float* lTransformArray = 0;
-		Lepra::uint32 lFloatByteSize = 0;
+		uint32 lFloatByteSize = 0;
 		FileElementList lLoadList;
-		lLoadList.push_back(ChunkyFileElement(CHUNK_ANIMATION_KEYFRAME_TIME, (Lepra::int32*)&lKeyframeTime));
+		lLoadList.push_back(ChunkyFileElement(CHUNK_ANIMATION_KEYFRAME_TIME, (int32*)&lKeyframeTime));
 		lLoadList.push_back(ChunkyFileElement(CHUNK_ANIMATION_KEYFRAME_TRANSFORM, (void**)&lTransformArray, &lFloatByteSize));
 		lOk = AllocLoadChunkyList(lLoadList, pChunkEndPosition);
 
@@ -670,7 +669,7 @@ bool ChunkyAnimationLoader::LoadElementCallback(ChunkyType pType, Lepra::uint32 
 			lAnimation->SetTimeTag(mCurrentKeyframe, lKeyframeTime);
 			for (int lBone = 0; lBone < mBoneCount; ++lBone)
 			{
-				Lepra::TransformationF lTransform(&lTransformArray[lBone*lTransformFloatCount]);
+				TransformationF lTransform(&lTransformArray[lBone*lTransformFloatCount]);
 				lAnimation->SetBoneTransformation(mCurrentKeyframe, lBone, lTransform);
 			}
 			++mCurrentKeyframe;
@@ -687,7 +686,7 @@ bool ChunkyAnimationLoader::LoadElementCallback(ChunkyType pType, Lepra::uint32 
 
 
 
-ChunkyPhysicsLoader::ChunkyPhysicsLoader(Lepra::File* pFile, bool pIsFileOwner):
+ChunkyPhysicsLoader::ChunkyPhysicsLoader(File* pFile, bool pIsFileOwner):
 	Parent(pFile, pIsFileOwner)
 {
 }
@@ -704,9 +703,9 @@ bool ChunkyPhysicsLoader::Load(ChunkyPhysics* pPhysics)
 		lOk = VerifyFileType(CHUNK_PHYSICS);
 	}
 
-	Lepra::int32 lBoneCount = -1;
-	Lepra::int32 lPhysicsType = -1;
-	Lepra::int32 lEngineCount = -1;
+	int32 lBoneCount = -1;
+	int32 lPhysicsType = -1;
+	int32 lEngineCount = -1;
 	if (lOk)
 	{
 		FileElementList lLoadList;
@@ -753,12 +752,12 @@ bool ChunkyPhysicsLoader::Save(const ChunkyPhysics* pPhysics)
 	{
 		lOk = WriteFileType(CHUNK_PHYSICS);
 	}
-	const Lepra::int64 lFileDataStart = mFile->Tell();
+	const int64 lFileDataStart = mFile->Tell();
 
 	// Write physics modes and similar stuff.
-	Lepra::int32 lBoneCount = pPhysics->GetBoneCount();
-	Lepra::int32 lPhysicsType = pPhysics->GetPhysicsType();
-	Lepra::int32 lEngineCount = pPhysics->GetEngineCount();
+	int32 lBoneCount = pPhysics->GetBoneCount();
+	int32 lPhysicsType = pPhysics->GetPhysicsType();
+	int32 lEngineCount = pPhysics->GetEngineCount();
 	if (lOk)
 	{
 		lOk = (lBoneCount > 0 && lBoneCount < 10000 &&
@@ -778,21 +777,21 @@ bool ChunkyPhysicsLoader::Save(const ChunkyPhysics* pPhysics)
 	if (lOk)
 	{
 		// Write all bone stuff into a single chunk (multiple element chunk).
-		Lepra::int64 lChunkEndPosition = 0;
+		int64 lChunkEndPosition = 0;
 		lOk = SaveHead(CHUNK_PHYSICS_BONE_CONTAINER, 0, lChunkEndPosition);
 	}
-	const Lepra::int64 lBoneChunkStart = mFile->Tell();
+	const int64 lBoneChunkStart = mFile->Tell();
 	for (int b = 0; lOk && b < lBoneCount; ++b)
 	{
 		// Save children.
 		const int cc = pPhysics->GetBoneChildCount(b);
 		if (cc > 0)
 		{
-			Lepra::int64 lChunkEndPosition = 0;
-			lOk = SaveHead(CHUNK_PHYSICS_BONE_CHILD_LIST, cc*sizeof(Lepra::int32), lChunkEndPosition);
+			int64 lChunkEndPosition = 0;
+			lOk = SaveHead(CHUNK_PHYSICS_BONE_CHILD_LIST, cc*sizeof(int32), lChunkEndPosition);
 			for (int c = 0; lOk && c < cc; ++c)
 			{
-				Lepra::int32 lChildIndex = pPhysics->GetChildIndex(b, c);
+				int32 lChildIndex = pPhysics->GetChildIndex(b, c);
 				mFile->Write(lChildIndex);
 			}
 		}
@@ -801,17 +800,17 @@ bool ChunkyPhysicsLoader::Save(const ChunkyPhysics* pPhysics)
 		if (lOk)
 		{
 			const unsigned lTransformFloatCount = 3+4;
-			const Lepra::uint32 lTransformSize = lTransformFloatCount*sizeof(float);
-			Lepra::int64 lChunkEndPosition = 0;
+			const uint32 lTransformSize = lTransformFloatCount*sizeof(float);
+			int64 lChunkEndPosition = 0;
 			lOk = SaveHead(CHUNK_PHYSICS_BONE_TRANSFORM, lTransformSize, lChunkEndPosition);
-			Lepra::uint32 lTransform[lTransformFloatCount];
+			uint32 lTransform[lTransformFloatCount];
 			pPhysics->GetBoneTransformation(b).Get((float*)lTransform);
 			// Convert to network byte order.
 			for (unsigned x = 0; x < lTransformFloatCount; ++x)
 			{
-				lTransform[x] = Lepra::Endian::HostToBig(lTransform[x]);
+				lTransform[x] = Endian::HostToBig(lTransform[x]);
 			}
-			lOk = (mFile->WriteData(lTransform, sizeof(lTransform)) == Lepra::IO_OK);
+			lOk = (mFile->WriteData(lTransform, sizeof(lTransform)) == IO_OK);
 		}
 
 		// Save geometries.
@@ -820,7 +819,7 @@ bool ChunkyPhysicsLoader::Save(const ChunkyPhysics* pPhysics)
 			ChunkyBoneGeometry* lGeometry = pPhysics->GetBoneGeometry(b);
 			if (lGeometry)
 			{
-				Lepra::int64 lChunkEndPosition = 0;
+				int64 lChunkEndPosition = 0;
 				unsigned lSize = lGeometry->GetChunkySize();
 				lOk = SaveHead(CHUNK_PHYSICS_BONE_SHAPE, lSize, lChunkEndPosition);
 				if (lOk)
@@ -828,7 +827,7 @@ bool ChunkyPhysicsLoader::Save(const ChunkyPhysics* pPhysics)
 					char* lData = new char[lSize];
 					lGeometry->SaveChunkyData(pPhysics, lData);
 					assert(lGeometry->GetChunkySize(lData) == lSize);
-					lOk = (mFile->WriteData(lData, lSize) == Lepra::IO_OK);
+					lOk = (mFile->WriteData(lData, lSize) == IO_OK);
 					delete (lData);
 				}
 			}
@@ -843,23 +842,23 @@ bool ChunkyPhysicsLoader::Save(const ChunkyPhysics* pPhysics)
 	if (lOk)
 	{
 		// Write all bone stuff into a single chunk (multiple element chunk).
-		Lepra::int64 lChunkEndPosition = 0;
+		int64 lChunkEndPosition = 0;
 		lOk = SaveHead(CHUNK_PHYSICS_ENGINE_CONTAINER, 0, lChunkEndPosition);
 	}
-	const Lepra::int64 lEngineChunkStart = mFile->Tell();
+	const int64 lEngineChunkStart = mFile->Tell();
 	// Write engines.
 	for (int e = 0; lOk && e < lEngineCount; ++e)
 	{
 		PhysicsEngine* lEngine = pPhysics->GetEngine(e);
 		assert(lEngine);
-		Lepra::int64 lChunkEndPosition = 0;
+		int64 lChunkEndPosition = 0;
 		unsigned lSize = lEngine->GetChunkySize();
 		lOk = SaveHead(CHUNK_PHYSICS_ENGINE, lSize, lChunkEndPosition);
 		if (lOk)
 		{
 			char* lData = new char[lSize];
 			lEngine->SaveChunkyData(pPhysics, lData);
-			lOk = (mFile->WriteData(lData, lSize) == Lepra::IO_OK);
+			lOk = (mFile->WriteData(lData, lSize) == IO_OK);
 			delete (lData);
 		}
 	}
@@ -877,7 +876,7 @@ bool ChunkyPhysicsLoader::Save(const ChunkyPhysics* pPhysics)
 	return (lOk);
 }
 
-bool ChunkyPhysicsLoader::LoadElementCallback(ChunkyType pType, Lepra::uint32 pSize, Lepra::int64 pChunkEndPosition, void* pStorage)
+bool ChunkyPhysicsLoader::LoadElementCallback(ChunkyType pType, uint32 pSize, int64 pChunkEndPosition, void* pStorage)
 {
 	ChunkyPhysics* lPhysics = (ChunkyPhysics*)pStorage;
 	bool lOk = false;
@@ -885,12 +884,12 @@ bool ChunkyPhysicsLoader::LoadElementCallback(ChunkyType pType, Lepra::uint32 pS
 	{
 		// Setup pointers and counters for list loading.
 		const int MAXIMUM_CHILD_BONES = 64;
-		Lepra::int32 lChildArray[MAXIMUM_CHILD_BONES];
+		int32 lChildArray[MAXIMUM_CHILD_BONES];
 		::memset(lChildArray, -1, sizeof(lChildArray));
 		unsigned lChildByteSize = 0;
-		Lepra::uint32* lTransformArray = 0;
+		uint32* lTransformArray = 0;
 		unsigned lFloatByteSize = 0;
-		Lepra::uint32* lGeometryArray = 0;
+		uint32* lGeometryArray = 0;
 		unsigned lGeometryByteSize = 0;
 		FileElementList lLoadList;
 		lLoadList.push_back(ChunkyFileElement(CHUNK_PHYSICS_BONE_CHILD_LIST, lChildArray, &lChildByteSize, -MAXIMUM_CHILD_BONES));
@@ -903,7 +902,7 @@ bool ChunkyPhysicsLoader::LoadElementCallback(ChunkyType pType, Lepra::uint32 pS
 		if (lOk)
 		{
 			lOk = ((lChildByteSize&3) == 0);
-			lChildCount = lChildByteSize/sizeof(Lepra::int32);
+			lChildCount = lChildByteSize/sizeof(int32);
 		}
 		// Check bone transformation byte size.
 		const unsigned lTransformFloatCount = 3+4;
@@ -929,9 +928,9 @@ bool ChunkyPhysicsLoader::LoadElementCallback(ChunkyType pType, Lepra::uint32 pS
 			// Convert to host endian.
 			for (unsigned x = 0; x < lTransformFloatCount; ++x)
 			{
-				lTransformArray[x] = Lepra::Endian::BigToHost(lTransformArray[x]);
+				lTransformArray[x] = Endian::BigToHost(lTransformArray[x]);
 			}
-			Lepra::TransformationF lTransform((const float*)lTransformArray);
+			TransformationF lTransform((const float*)lTransformArray);
 			lPhysics->SetOriginalBoneTransformation(mCurrentBoneIndex, lTransform);
 		}
 
@@ -954,7 +953,7 @@ bool ChunkyPhysicsLoader::LoadElementCallback(ChunkyType pType, Lepra::uint32 pS
 	}
 	else if (pType == CHUNK_PHYSICS_ENGINE_CONTAINER)
 	{
-		Lepra::uint32* lEngineArray = 0;
+		uint32* lEngineArray = 0;
 		unsigned lEngineByteSize = 0;
 		FileElementList lLoadList;
 		lLoadList.push_back(ChunkyFileElement(CHUNK_PHYSICS_ENGINE, (void**)&lEngineArray, (unsigned*)&lEngineByteSize));
@@ -982,7 +981,7 @@ bool ChunkyPhysicsLoader::LoadElementCallback(ChunkyType pType, Lepra::uint32 pS
 
 
 
-ChunkyClassLoader::ChunkyClassLoader(Lepra::File* pFile, bool pIsFileOwner):
+ChunkyClassLoader::ChunkyClassLoader(File* pFile, bool pIsFileOwner):
 	Parent(pFile, pIsFileOwner)
 {
 }

@@ -31,15 +31,15 @@ public:
 		CLOSE_BUTTON    = (1 << 2),
 	};
 
-	Caption(const Lepra::Color& pActiveColor, const Lepra::Color& pInactiveColor, int pHeight);
-	Caption(const Lepra::Color& pActiveTopLeftColor,
-			const Lepra::Color& pActiveTopRightColor,
-			const Lepra::Color& pActiveBottomLeftColor,
-			const Lepra::Color& pActiveBottomRightColor,
-			const Lepra::Color& pInactiveTopLeftColor,
-			const Lepra::Color& pInactiveTopRightColor,
-			const Lepra::Color& pInactiveBottomLeftColor,
-			const Lepra::Color& pInactiveBottomRightColor,
+	Caption(const Color& pActiveColor, const Color& pInactiveColor, int pHeight);
+	Caption(const Color& pActiveTopLeftColor,
+			const Color& pActiveTopRightColor,
+			const Color& pActiveBottomLeftColor,
+			const Color& pActiveBottomRightColor,
+			const Color& pInactiveTopLeftColor,
+			const Color& pInactiveTopRightColor,
+			const Color& pInactiveBottomLeftColor,
+			const Color& pInactiveBottomRightColor,
 			int pHeight);
 	Caption(Painter::ImageID pActiveLeftImageID,
 			Painter::ImageID pActiveRightImageID,
@@ -56,11 +56,11 @@ public:
 	Button* SetMiddleButton(Button* pButton);
 
 	void SetIcon(Painter::ImageID pIconID);
-	void SetText(const Lepra::String& pText,
-						const Lepra::Color& pActiveTextColor,
-						const Lepra::Color& pActiveBackgColor,
-						const Lepra::Color& pInactiveTextColor,
-						const Lepra::Color& pInactiveBackgColor);
+	void SetText(const str& pText,
+						const Color& pActiveTextColor,
+						const Color& pActiveBackgColor,
+						const Color& pInactiveTextColor,
+						const Color& pInactiveBackgColor);
 
 	void SetActive(bool pActive);
 	bool GetActive() const;
@@ -100,15 +100,15 @@ private:
 	Button* mRightButton;
 	Button* mMiddleButton;
 
-	Lepra::Color mActiveTLColor;
-	Lepra::Color mActiveTRColor;
-	Lepra::Color mActiveBLColor;
-	Lepra::Color mActiveBRColor;
+	Color mActiveTLColor;
+	Color mActiveTRColor;
+	Color mActiveBLColor;
+	Color mActiveBRColor;
 
-	Lepra::Color mInactiveTLColor;
-	Lepra::Color mInactiveTRColor;
-	Lepra::Color mInactiveBLColor;
-	Lepra::Color mInactiveBRColor;
+	Color mInactiveTLColor;
+	Color mInactiveTRColor;
+	Color mInactiveBLColor;
+	Color mInactiveBRColor;
 
 	Painter::ImageID mActiveLeftImageID;
 	Painter::ImageID mActiveRightImageID;
@@ -117,10 +117,10 @@ private:
 	Painter::ImageID mInactiveRightImageID;
 	Painter::ImageID mInactiveCenterImageID;
 
-	Lepra::String mText;
-	Lepra::Color mActiveTextBackgColor;
-	Lepra::Color mInactiveTextColor;
-	Lepra::Color mInactiveTextBackgColor;
+	str mText;
+	Color mActiveTextBackgColor;
+	Color mInactiveTextColor;
+	Color mInactiveTextBackgColor;
 
 	bool mMovingWindow;
 	bool mActive;

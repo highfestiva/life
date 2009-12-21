@@ -49,11 +49,11 @@ void ConsolePrompt::SetInputComponent(TextField* pInputComponent)
 
 
 
-bool ConsolePrompt::OnChar(Lepra::tchar pChar)
+bool ConsolePrompt::OnChar(tchar pChar)
 {
 	{
-		Lepra::ScopeLock lLock(&mLock);
-		int lChar = (int)(Lepra::utchar)pChar;
+		ScopeLock lLock(&mLock);
+		int lChar = (int)(utchar)pChar;
 		if (lChar == 27)
 		{
 			lChar = CON_KEY_ESCAPE;
@@ -80,7 +80,7 @@ bool ConsolePrompt::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 	}
 
 	{
-		Lepra::ScopeLock lLock(&mLock);
+		ScopeLock lLock(&mLock);
 		switch(pKeyCode)
 		{
 			case UiLepra::InputManager::IN_KBD_LEFT:
@@ -158,7 +158,7 @@ int ConsolePrompt::WaitChar()
 	mSemaphore.Wait();
 	int lChar = -100;
 	{
-		Lepra::ScopeLock lLock(&mLock);
+		ScopeLock lLock(&mLock);
 		if (!mBufferedChars.empty())
 		{
 			lChar = mBufferedChars.back();
@@ -183,7 +183,7 @@ void ConsolePrompt::EraseText(size_t)
 	// Handled by PrintPrompt() in this implementation.
 }
 
-void ConsolePrompt::PrintPrompt(const Lepra::String& pPrompt, const Lepra::String& pInputText, size_t pEditIndex)
+void ConsolePrompt::PrintPrompt(const str& pPrompt, const str& pInputText, size_t pEditIndex)
 {
 	if (mParent)
 	{

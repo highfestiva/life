@@ -26,9 +26,9 @@ public:
 	SoundManagerOpenAL(int pMixRate);
 	virtual ~SoundManagerOpenAL();
 
-	SoundID LoadSound2D(const Lepra::String& pFileName, LoopMode LoopMode, int pPriority);
-	SoundID LoadSound3D(const Lepra::String& pFileName, LoopMode LoopMode, int pPriority);
-	SoundID LoadStream(const Lepra::String& pFileName, LoopMode LoopMode, int pPriority);
+	SoundID LoadSound2D(const str& pFileName, LoopMode LoopMode, int pPriority);
+	SoundID LoadSound3D(const str& pFileName, LoopMode LoopMode, int pPriority);
+	SoundID LoadStream(const str& pFileName, LoopMode LoopMode, int pPriority);
 
 	void Release(SoundID pSoundID);
 
@@ -55,14 +55,14 @@ public:
 	void SetFrequency(SoundInstanceID pSoundIID, int pFrequency);
 	int GetFrequency(SoundInstanceID pSoundIID);
 
-	void SetSoundPosition(SoundInstanceID pSoundIID, const Lepra::Vector3DF& pPos, const Lepra::Vector3DF& pVel);
-	void GetSoundPosition(SoundInstanceID pSoundIID, Lepra::Vector3DF& pPos, Lepra::Vector3DF& pVel);
+	void SetSoundPosition(SoundInstanceID pSoundIID, const Vector3DF& pPos, const Vector3DF& pVel);
+	void GetSoundPosition(SoundInstanceID pSoundIID, Vector3DF& pPos, Vector3DF& pVel);
 
 	void SetCurrentListener(int pListenerIndex, int pListenerCount);
-	void SetListenerPosition(const Lepra::Vector3DF& pPos, const Lepra::Vector3DF& pVel,
-		const Lepra::Vector3DF& pUp, const Lepra::Vector3DF& pForward);
-	void GetListenerPosition(Lepra::Vector3DF& pPos, Lepra::Vector3DF& pVel,
-		Lepra::Vector3DF& pUp, Lepra::Vector3DF& pForward);
+	void SetListenerPosition(const Vector3DF& pPos, const Vector3DF& pVel,
+		const Vector3DF& pUp, const Vector3DF& pForward);
+	void GetListenerPosition(Vector3DF& pPos, Vector3DF& pVel,
+		Vector3DF& pUp, Vector3DF& pForward);
 
 	void SetDopplerFactor(float pFactor);
 	void SetRollOffFactor(float pFactor);
@@ -116,7 +116,7 @@ private:
 	{
 		Sample(bool pLooping, int pPriority);
 		~Sample();
-		bool Load(const Lepra::String& pFileName);
+		bool Load(const str& pFileName);
 
 		ALuint mBuffer;
 		bool mIsLooping;

@@ -22,7 +22,7 @@ namespace UiTbc
 class RendererFactory
 {
 public:
-	static Renderer* Create(UiLepra::DisplayManager::ContextType pType, Lepra::Canvas* pScreen);
+	static Renderer* Create(UiLepra::DisplayManager::ContextType pType, Canvas* pScreen);
 };
 
 

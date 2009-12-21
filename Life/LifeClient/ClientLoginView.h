@@ -30,7 +30,7 @@ class ClientLoginObserver;
 class ClientLoginView: public View
 {
 public:
-	ClientLoginView(ClientLoginObserver* pLoginObserver, const Lepra::String& pErrorMessage);
+	ClientLoginView(ClientLoginObserver* pLoginObserver, const str& pErrorMessage);
 
 private:
 	void OnExit();
@@ -45,7 +45,7 @@ class ClientLoginObserver
 {
 public:
 	virtual void CancelLogin() = 0;
-	virtual void RequestLogin(const Lepra::String& pServerAddress, const Cure::LoginId& pLoginToken) = 0;
+	virtual void RequestLogin(const str& pServerAddress, const Cure::LoginId& pLoginToken) = 0;
 	virtual Cure::RuntimeVariableScope* GetVariableScope() const = 0;
 };
 

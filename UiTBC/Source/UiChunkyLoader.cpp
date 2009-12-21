@@ -17,7 +17,7 @@ namespace UiTbc
 
 
 
-ChunkyMeshLoader::ChunkyMeshLoader(Lepra::File* pFile, bool pIsFileOwner):
+ChunkyMeshLoader::ChunkyMeshLoader(File* pFile, bool pIsFileOwner):
 	TBC::ChunkyLoader(pFile, pIsFileOwner)
 {
 }
@@ -34,21 +34,21 @@ bool ChunkyMeshLoader::Load(TriangleBasedGeometry* pMeshData)
 		lOk = VerifyFileType(TBC::CHUNK_MESH);
 	}
 
-	Lepra::uint32* lLoadVertices = 0;
+	uint32* lLoadVertices = 0;
 	unsigned lVerticesSize = 0;
-	Lepra::uint32* lLoadNormals = 0;
+	uint32* lLoadNormals = 0;
 	unsigned lNormalsSize = 0;
-	Lepra::uint32* lTriangleIndices = 0;
+	uint32* lTriangleIndices = 0;
 	unsigned lTriangleIndicesSize = 0;
-	Lepra::uint32* lStripsIndices = 0;
+	uint32* lStripsIndices = 0;
 	unsigned lStripsIndicesSize = 0;
 	const int lUvCount = 8;
-	Lepra::uint32* lLoadUvs[lUvCount] = {0, 0, 0, 0, 0, 0, 0, 0};
+	uint32* lLoadUvs[lUvCount] = {0, 0, 0, 0, 0, 0, 0, 0};
 	unsigned lUvsSize[lUvCount] = {0, 0, 0, 0, 0, 0, 0, 0};
-	Lepra::uint8* lColors = 0;
+	uint8* lColors = 0;
 	unsigned lColorsSize = 0;
-	Lepra::int32 lColorFormat = 0x7FFFFFFD;
-	Lepra::int32 lGeometryVolatility = 0x7FFFFFFD;
+	int32 lColorFormat = 0x7FFFFFFD;
+	int32 lGeometryVolatility = 0x7FFFFFFD;
 	if (lOk)
 	{
 		TBC::ChunkyLoader::FileElementList lLoadList;
@@ -85,16 +85,16 @@ bool ChunkyMeshLoader::Load(TriangleBasedGeometry* pMeshData)
 	}
 	if (lOk)
 	{
-		lOk = (lTriangleIndicesSize%(sizeof(Lepra::uint32)*3) == 0 &&
+		lOk = (lTriangleIndicesSize%(sizeof(uint32)*3) == 0 &&
 			lVerticesSize%(sizeof(float)*3) == 0);
 	}
 	if (lOk)
 	{
 		// TODO: add checks on normal, uv and color sizes, so that we don't overrun buffers.
 	}
-	const unsigned lIndexCount = (lTriangleIndices? lTriangleIndicesSize : lStripsIndicesSize) / sizeof(Lepra::uint32);
+	const unsigned lIndexCount = (lTriangleIndices? lTriangleIndicesSize : lStripsIndicesSize) / sizeof(uint32);
 	const unsigned lVertexCount = lVerticesSize / (sizeof(float)*3);
-	Lepra::uint32* lIndices = lTriangleIndices? lTriangleIndices : lStripsIndices;
+	uint32* lIndices = lTriangleIndices? lTriangleIndices : lStripsIndices;
 	float* lVertices = (float*)lLoadVertices;
 	float* lNormals = (float*)lLoadNormals;
 	float* lUvs[lUvCount] = {0, 0, 0, 0, 0, 0, 0, 0};
@@ -104,17 +104,17 @@ bool ChunkyMeshLoader::Load(TriangleBasedGeometry* pMeshData)
 		unsigned x;
 		for (x = 0; x < lIndexCount; ++x)
 		{
-			lIndices[x] = Lepra::Endian::BigToHost(lIndices[x]);
+			lIndices[x] = Endian::BigToHost(lIndices[x]);
 		}
 		for (x = 0; x < lVertexCount*3; ++x)
 		{
-			lVertices[x] = Lepra::Endian::BigToHostF(lLoadVertices[x]);
+			lVertices[x] = Endian::BigToHostF(lLoadVertices[x]);
 		}
 		if (lLoadNormals)
 		{
 			for (x = 0; x < lVertexCount*3; ++x)
 			{
-				lNormals[x] = Lepra::Endian::BigToHostF(lLoadNormals[x]);
+				lNormals[x] = Endian::BigToHostF(lLoadNormals[x]);
 			}
 		}
 		for (x = 0; lLoadUvs[x] && x < lUvCount; ++x)
@@ -122,7 +122,7 @@ bool ChunkyMeshLoader::Load(TriangleBasedGeometry* pMeshData)
 			lUvs[x] = (float*)lLoadUvs[x];
 			for (unsigned y = 0; y < lVertexCount*2; ++y)
 			{
-				lUvs[x][y] = Lepra::Endian::BigToHostF(lLoadUvs[x][y]);
+				lUvs[x][y] = Endian::BigToHostF(lLoadUvs[x][y]);
 			}
 		}
 	}
@@ -165,20 +165,20 @@ bool ChunkyMeshLoader::Save(const TriangleBasedGeometry* pMeshData)
 	{
 		lOk = WriteFileType(TBC::CHUNK_MESH);
 	}
-	Lepra::int64 lFileDataStart = mFile->Tell();
+	int64 lFileDataStart = mFile->Tell();
 
 	// Initialize data and write the mesh itself, exluding vertex weights.
 	unsigned lVerticesSize = pMeshData->GetVertexCount()*3*sizeof(float);
-	const Lepra::uint32* lVertices = AllocInitBigEndian(pMeshData->GetVertexData(), lVerticesSize/sizeof(float));
+	const uint32* lVertices = AllocInitBigEndian(pMeshData->GetVertexData(), lVerticesSize/sizeof(float));
 	const float* lSaveNormals = pMeshData->GetNormalData();
 	unsigned lNormalsSize = (lSaveNormals? lVerticesSize : 0);
-	const Lepra::uint32* lNormals = AllocInitBigEndian(lSaveNormals, lNormalsSize/sizeof(float));
-	unsigned lTriangleIndicesSize = pMeshData->GetIndexCount()*sizeof(Lepra::uint32);
-	const Lepra::uint32* lTriangleIndices = AllocInitBigEndian(pMeshData->GetIndexData(), lTriangleIndicesSize/sizeof(Lepra::uint32));
-	Lepra::uint32* lStripsIndices = 0;	// TODO: add strips when supported.
+	const uint32* lNormals = AllocInitBigEndian(lSaveNormals, lNormalsSize/sizeof(float));
+	unsigned lTriangleIndicesSize = pMeshData->GetIndexCount()*sizeof(uint32);
+	const uint32* lTriangleIndices = AllocInitBigEndian(pMeshData->GetIndexData(), lTriangleIndicesSize/sizeof(uint32));
+	uint32* lStripsIndices = 0;	// TODO: add strips when supported.
 	unsigned lStripsIndicesSize = 0;	// TODO: add strips when supported.
 	const int lUvCount = pMeshData->GetUVSetCount();
-	const Lepra::uint32* lUvs[32];
+	const uint32* lUvs[32];
 	unsigned lUvsSize[32];
 	const unsigned lFixedUvByteSize = pMeshData->GetVertexCount()*2*sizeof(float);
 	for (int x = 0; x < lUvCount; ++x)
@@ -199,8 +199,8 @@ bool ChunkyMeshLoader::Save(const TriangleBasedGeometry* pMeshData)
 			lColorsSize = pMeshData->GetVertexCount()*4;
 		}
 	}
-	Lepra::int32 lColorFormat = pMeshData->GetColorFormat();
-	Lepra::int32 lGeometryVolatility = pMeshData->GetGeometryVolatility();
+	int32 lColorFormat = pMeshData->GetColorFormat();
+	int32 lGeometryVolatility = pMeshData->GetGeometryVolatility();
 	if (lOk)
 	{
 		TBC::ChunkyLoader::FileElementList lSaveList;
@@ -233,9 +233,9 @@ bool ChunkyMeshLoader::Save(const TriangleBasedGeometry* pMeshData)
 	// Re-write file header size.
 	if (lOk)
 	{
-		Lepra::uint32 lSize = (Lepra::uint32)(mFile->Tell()-lFileDataStart);
+		uint32 lSize = (uint32)(mFile->Tell()-lFileDataStart);
 		mFile->SeekSet(lFileDataStart-4);
-		lOk = (mFile->Write(lSize) == Lepra::IO_OK);
+		lOk = (mFile->Write(lSize) == IO_OK);
 	}
 
 	delete[] (lVertices);
@@ -252,7 +252,7 @@ bool ChunkyMeshLoader::Save(const TriangleBasedGeometry* pMeshData)
 
 
 
-ChunkySkinLoader::ChunkySkinLoader(Lepra::File* pFile, bool pIsFileOwner):
+ChunkySkinLoader::ChunkySkinLoader(File* pFile, bool pIsFileOwner):
 	TBC::ChunkyLoader(pFile, pIsFileOwner)
 {
 }
@@ -285,7 +285,7 @@ bool ChunkySkinLoader::Save(const AnimatedGeometry* pSkinData)
 	{
 		lOk = WriteFileType(TBC::CHUNK_SKIN);
 	}
-	Lepra::int64 lFileDataStart = mFile->Tell();
+	int64 lFileDataStart = mFile->Tell();
 	if (lOk)
 	{
 		lOk = SaveBoneWeightChunkArray(pSkinData);
@@ -293,16 +293,16 @@ bool ChunkySkinLoader::Save(const AnimatedGeometry* pSkinData)
 	// Re-write file header size.
 	if (lOk)
 	{
-		Lepra::uint32 lSize = (Lepra::uint32)(mFile->Tell()-lFileDataStart);
+		uint32 lSize = (uint32)(mFile->Tell()-lFileDataStart);
 		mFile->SeekSet(lFileDataStart-4);
-		lOk = (mFile->Write(lSize) == Lepra::IO_OK);
+		lOk = (mFile->Write(lSize) == IO_OK);
 	}
 	return (lOk);
 }
 
 
 
-bool ChunkySkinLoader::LoadElementCallback(TBC::ChunkyType pType, Lepra::uint32 pSize, Lepra::int64 pChunkEndPosition, void* pStorage)
+bool ChunkySkinLoader::LoadElementCallback(TBC::ChunkyType pType, uint32 pSize, int64 pChunkEndPosition, void* pStorage)
 {
 	bool lOk = false;
 	if (pType == TBC::CHUNK_SKIN_BONE_WEIGHT_GROUP)
@@ -365,18 +365,18 @@ bool ChunkySkinLoader::SaveBoneWeightChunkArray(const AnimatedGeometry* pSkinDat
 	// We don't need to write file header or any of that junk, just straight to business.
 
 	bool lOk = (pSkinData->GetBoneWeightGroupCount() >= 1);
-	Lepra::int64 lChunkStartPosition = mFile->Tell();
+	int64 lChunkStartPosition = mFile->Tell();
 	if (lOk)
 	{
-		Lepra::int64 lChunkEndPosition = 0;
+		int64 lChunkEndPosition = 0;
 		lOk = SaveHead(TBC::CHUNK_SKIN_BONE_WEIGHT_GROUP, 0, lChunkEndPosition);
 	}
 	for (int x = 0; lOk && x < pSkinData->GetBoneWeightGroupCount(); ++x)
 	{
 		const AnimatedGeometry::BoneWeightGroup* lBoneWeightData = &pSkinData->GetBoneWeightGroup(x);
-		Lepra::uint32 bs = lBoneWeightData->mBoneCount*sizeof(Lepra::uint32);
-		Lepra::uint32 vs = lBoneWeightData->mVectorIndexCount*sizeof(Lepra::uint32);
-		Lepra::uint32 ws = lBoneWeightData->mBoneCount*lBoneWeightData->mVectorIndexCount*sizeof(Lepra::uint32);
+		uint32 bs = lBoneWeightData->mBoneCount*sizeof(uint32);
+		uint32 vs = lBoneWeightData->mVectorIndexCount*sizeof(uint32);
+		uint32 ws = lBoneWeightData->mBoneCount*lBoneWeightData->mVectorIndexCount*sizeof(uint32);
 		TBC::ChunkyLoader::FileElementList lSaveList;
 		const int* lBoneIndexArray = lBoneWeightData->mBoneIndexArray;	// TRICKY: intermediate pointer workaround for MSVC8 compiler bug.
 		lSaveList.push_back(ChunkyFileElement(TBC::CHUNK_SKIN_BWG_BONES, (void**)&lBoneIndexArray, &bs));
@@ -387,12 +387,12 @@ bool ChunkySkinLoader::SaveBoneWeightChunkArray(const AnimatedGeometry* pSkinDat
 	// Re-write chunk size.
 	if (lOk)
 	{
-		Lepra::int64 lChunkEndPosition = mFile->Tell();
+		int64 lChunkEndPosition = mFile->Tell();
 		lOk = (mFile->SeekSet(lChunkStartPosition+4) == lChunkStartPosition+4);
 		if (lOk)
 		{
-			Lepra::uint32 lSize = (Lepra::uint32)(lChunkEndPosition-lChunkStartPosition)-8;
-			lOk = (mFile->Write(lSize) == Lepra::IO_OK);
+			uint32 lSize = (uint32)(lChunkEndPosition-lChunkStartPosition)-8;
+			lOk = (mFile->Write(lSize) == IO_OK);
 		}
 		if (lOk)
 		{
@@ -404,7 +404,7 @@ bool ChunkySkinLoader::SaveBoneWeightChunkArray(const AnimatedGeometry* pSkinDat
 
 
 
-ChunkyClassLoader::ChunkyClassLoader(Lepra::File* pFile, bool pIsFileOwner):
+ChunkyClassLoader::ChunkyClassLoader(File* pFile, bool pIsFileOwner):
 	Parent(pFile, pIsFileOwner)
 {
 }
@@ -419,7 +419,7 @@ void ChunkyClassLoader::AddLoadElements(Parent::FileElementList& pElementList, T
 	pElementList.push_back(ChunkyFileElement(TBC::CHUNK_CLASS_MESH_LIST, (void*)pData, -1000));
 }
 
-bool ChunkyClassLoader::LoadElementCallback(TBC::ChunkyType pType, Lepra::uint32 pSize, Lepra::int64 pChunkEndPosition, void* pStorage)
+bool ChunkyClassLoader::LoadElementCallback(TBC::ChunkyType pType, uint32 pSize, int64 pChunkEndPosition, void* pStorage)
 {
 	ChunkyClass* lClass = (ChunkyClass*)pStorage;
 	bool lOk = false;
@@ -431,22 +431,22 @@ bool ChunkyClassLoader::LoadElementCallback(TBC::ChunkyType pType, Lepra::uint32
 	}
 	else if (pType == TBC::CHUNK_CLASS_PHYS_MESH)
 	{
-		Lepra::uint8* lBuffer = 0;
-		lOk = (mFile->AllocReadData((void**)&lBuffer, pSize) == Lepra::IO_OK);
-		Lepra::int32 lPhysicsIndex = -1;
-		Lepra::String lMeshBaseName;
+		uint8* lBuffer = 0;
+		lOk = (mFile->AllocReadData((void**)&lBuffer, pSize) == IO_OK);
+		int32 lPhysicsIndex = -1;
+		str lMeshBaseName;
 		int lIndex = 0;
 		if (lOk)
 		{
-			lPhysicsIndex = Lepra::Endian::BigToHost(*(Lepra::int32*)&lBuffer[lIndex]);
+			lPhysicsIndex = Endian::BigToHost(*(int32*)&lBuffer[lIndex]);
 			lIndex += sizeof(lPhysicsIndex);
-			Lepra::UnicodeString lUnicodeMeshName;
+			wstr lUnicodeMeshName;
 			const size_t lExcludeByteCount = (1+7+11)*4;	// Index+transform+colors.
-			int lStrSize = Lepra::PackerUnicodeString::Unpack(&lUnicodeMeshName, &lBuffer[lIndex], pSize-lExcludeByteCount);
+			int lStrSize = PackerUnicodeString::Unpack(&lUnicodeMeshName, &lBuffer[lIndex], pSize-lExcludeByteCount);
 			lStrSize = (lStrSize+3)&(~3);
 			lOk = (lStrSize < (int)(pSize-lExcludeByteCount));
 			lIndex += lStrSize;
-			lMeshBaseName = Lepra::UnicodeStringUtility::ToCurrentCode(lUnicodeMeshName);
+			lMeshBaseName = wstrutil::ToCurrentCode(lUnicodeMeshName);
 		}
 		if (lOk)
 		{
@@ -454,11 +454,11 @@ bool ChunkyClassLoader::LoadElementCallback(TBC::ChunkyType pType, Lepra::uint32
 			float lTransformArray[lTransformFloatCount];
 			for (int x = 0; x < lTransformFloatCount; ++x)
 			{
-				lTransformArray[x] = Lepra::Endian::BigToHostF(*(Lepra::uint32*)&lBuffer[lIndex+x*sizeof(float)]);
+				lTransformArray[x] = Endian::BigToHostF(*(uint32*)&lBuffer[lIndex+x*sizeof(float)]);
 			}
 			lIndex += lTransformFloatCount * sizeof(float);
 			lOk = (lIndex < (int)(pSize - 11*sizeof(float) - 4));
-			lClass->AddMesh(lPhysicsIndex, lMeshBaseName, Lepra::TransformationF(lTransformArray));
+			lClass->AddMesh(lPhysicsIndex, lMeshBaseName, TransformationF(lTransformArray));
 		}
 		UiTbc::ChunkyClass::Material lMaterial;
 		if (lOk)
@@ -467,7 +467,7 @@ bool ChunkyClassLoader::LoadElementCallback(TBC::ChunkyType pType, Lepra::uint32
 			float lMaterialArray[lMaterialFloatCount];
 			for (int x = 0; x < lMaterialFloatCount; ++x)
 			{
-				lMaterialArray[x] = Lepra::Endian::BigToHostF(*(Lepra::uint32*)&lBuffer[lIndex+x*sizeof(float)]);
+				lMaterialArray[x] = Endian::BigToHostF(*(uint32*)&lBuffer[lIndex+x*sizeof(float)]);
 			}
 			lIndex += lMaterialFloatCount * sizeof(float);
 			lOk = (lIndex <= (int)(pSize-4-4));
@@ -479,13 +479,13 @@ bool ChunkyClassLoader::LoadElementCallback(TBC::ChunkyType pType, Lepra::uint32
 		}
 		if (lOk)
 		{
-			Lepra::int32 lTextureCount = Lepra::Endian::BigToHost(*(Lepra::int32*)&lBuffer[lIndex]);
+			int32 lTextureCount = Endian::BigToHost(*(int32*)&lBuffer[lIndex]);
 			lIndex += sizeof(lTextureCount);
 			lOk = (lIndex <= (int)(pSize-2*lTextureCount-2));
 			for (int x = 0; lOk && x < lTextureCount; ++x)
 			{
-				Lepra::UnicodeString lTextureName;
-				int lStrSize = Lepra::PackerUnicodeString::Unpack(&lTextureName, &lBuffer[lIndex], pSize-lIndex);
+				wstr lTextureName;
+				int lStrSize = PackerUnicodeString::Unpack(&lTextureName, &lBuffer[lIndex], pSize-lIndex);
 				lStrSize = (lStrSize+3)&(~3);
 				lOk = (lStrSize <= (int)(pSize-2));
 				lIndex += lStrSize;
@@ -494,7 +494,7 @@ bool ChunkyClassLoader::LoadElementCallback(TBC::ChunkyType pType, Lepra::uint32
 		}
 		if (lOk)
 		{
-			int lStrSize = Lepra::PackerUnicodeString::Unpack(&lMaterial.mShaderName, &lBuffer[lIndex], pSize-lIndex);
+			int lStrSize = PackerUnicodeString::Unpack(&lMaterial.mShaderName, &lBuffer[lIndex], pSize-lIndex);
 			lStrSize = (lStrSize+3)&(~3);
 			lOk = (lStrSize == (int)(pSize-lIndex));
 			lIndex += lStrSize;

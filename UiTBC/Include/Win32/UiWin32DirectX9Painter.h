@@ -39,23 +39,23 @@ public:
 	DirectX9Painter(UiLepra::DisplayManager* pDisplayManager);
 	virtual ~DirectX9Painter();
 
-	void SetDestCanvas(Lepra::Canvas* pCanvas);
+	void SetDestCanvas(Canvas* pCanvas);
 	void SetRenderMode(RenderMode pRM);
 	void PrePaint();
 
-	void SetAlphaValue(Lepra::uint8 pAlpha);
+	void SetAlphaValue(uint8 pAlpha);
 
 	void ResetClippingRect();
 	void SetClippingRect(int pLeft, int pTop, int pRight, int pBottom);
 
-	ImageID AddImage(const Lepra::Canvas* pImage, const Lepra::Canvas* pAlphaBuffer);
+	ImageID AddImage(const Canvas* pImage, const Canvas* pAlphaBuffer);
 	void UpdateImage(ImageID pImageID, 
-			 const Lepra::Canvas* pImage, 
-			 const Lepra::Canvas* pAlphaBuffer,
+			 const Canvas* pImage, 
+			 const Canvas* pAlphaBuffer,
 			 UpdateHint pHint = UPDATE_ACCURATE);
 	void RemoveImage(ImageID pImageID);
 
-	void ReadPixels(Lepra::Canvas& pDestCanvas, const Lepra::PixelRect& pRect);
+	void ReadPixels(Canvas& pDestCanvas, const PixelRect& pRect);
 
 	RGBOrder GetRGBOrder() const;
 
@@ -79,9 +79,9 @@ protected:
 			  float pX3, float pY3, float pU3, float pV3,
 			  ImageID pImageID);
 	void DoDrawImage(ImageID pImageID, int x, int y);
-	void DoDrawImage(ImageID pImageID, int x, int y, const Lepra::PixelRect& pSubpatchRect);
-	void DoDrawImage(ImageID pImageID, const Lepra::PixelRect& pRect);
-	void DoDrawImage(ImageID pImageID, const Lepra::PixelRect& pRect, const Lepra::PixelRect& pSubpatchRect);
+	void DoDrawImage(ImageID pImageID, int x, int y, const PixelRect& pSubpatchRect);
+	void DoDrawImage(ImageID pImageID, const PixelRect& pRect);
+	void DoDrawImage(ImageID pImageID, const PixelRect& pRect, const PixelRect& pSubpatchRect);
 	void DoDrawAlphaImage(ImageID pImageID, int x, int y);
 
 	void DoRenderDisplayList(std::vector<DisplayEntity*>* pDisplayList);
@@ -101,15 +101,15 @@ private:
 		IDirect3DTexture9* mD3DTexture;
 	};
 
-	typedef Lepra::HashTable<int, Texture*> TextureTable;
+	typedef HashTable<int, Texture*> TextureTable;
 
 	void GetImageSize(ImageID pImageID, int& pWidth, int& pHeight) const;
-	int PrintText(const Lepra::String& pString, int x, int y);
+	int PrintText(const str& pString, int x, int y);
 	void SetFontSmoothness(bool pSmooth);
 
-	void AdjustVertexFormat(Lepra::uint16& pVertexFormat);
+	void AdjustVertexFormat(uint16& pVertexFormat);
 
-	Lepra::IdManager<int> mTextureIDManager;
+	IdManager<int> mTextureIDManager;
 	TextureTable mTextureTable;
 
 	IDirect3DDevice9* mD3DDevice;

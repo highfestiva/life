@@ -38,12 +38,12 @@ public:
 	// stream.
 	virtual IOError WriteRaw(const void* pData, size_t pLength) = 0;
 
-	inline void SetName(const String& pName);
-	inline const String& GetName();
+	inline void SetName(const str& pName);
+	inline const str& GetName();
 
 protected:
 private:
-	String mName;
+	str mName;
 };
 
 OutputStream::OutputStream()
@@ -54,12 +54,12 @@ OutputStream::~OutputStream()
 {
 }
 
-void OutputStream::SetName(const String& pName)
+void OutputStream::SetName(const str& pName)
 {
 	mName = pName;
 }
 
-const String& OutputStream::GetName()
+const str& OutputStream::GetName()
 {
 	return mName;
 }

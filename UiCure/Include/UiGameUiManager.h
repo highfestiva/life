@@ -50,7 +50,7 @@ public:
 
 	void InputTick();
 	void BeginRender();
-	void Render(const Lepra::PixelRect& pArea);
+	void Render(const PixelRect& pArea);
 	void Paint();
 	void EndRender();
 
@@ -61,11 +61,12 @@ public:
 	UiTbc::DesktopWindow* GetDesktopWindow() const;
 	UiLepra::SoundManager* GetSoundManager() const;
 
-	void SetCameraPosition(const Lepra::TransformationF& pTransform, const Lepra::Vector3DF& pVelocity);
+	void SetCameraPosition(const TransformationF& pTransform);
+	void SetMicrophonePosition(const TransformationF& pTransform, const Vector3DF& pVelocity);
 	void SetViewport(int pLeft, int pTop, int pWidth, int pHeight);
 	void Clear(float pRed, float pGreen, float pBlue, bool pClearDepth = true);
 	void ClearDepth();
-	void PrintText(int pX, int pY, const Lepra::String& pText);
+	void PrintText(int pX, int pY, const str& pText);
 
 	void AssertDesktopLayout(UiTbc::Layout* pLayout);
 
@@ -78,7 +79,7 @@ private:
 
 	Cure::RuntimeVariableScope* mVariableScope;
 	UiLepra::DisplayManager* mDisplay;
-	Lepra::Canvas* mCanvas;
+	Canvas* mCanvas;
 	UiTbc::Renderer* mRenderer;
 	UiTbc::Painter* mPainter;
 	UiTbc::FontManager* mFontManager;

@@ -11,8 +11,8 @@
 namespace UiTbc
 {
 
-ListControl::ListControl(unsigned pBorderStyle, int pBorderWidth, const Lepra::Color& pColor, 
-			 ListLayout::ListType pListType, const Lepra::String& pName):
+ListControl::ListControl(unsigned pBorderStyle, int pBorderWidth, const Color& pColor, 
+			 ListLayout::ListType pListType, const str& pName):
 	Window(pBorderStyle, pBorderWidth, pColor, pName, new GridLayout(2, 2)),
 	mStyle(SINGLE_SELECT),
 	mHScrollBar(0),
@@ -25,7 +25,7 @@ ListControl::ListControl(unsigned pBorderStyle, int pBorderWidth, const Lepra::C
 }
 
 ListControl::ListControl(unsigned pBorderStyle, int pBorderWidth, Painter::ImageID pImageID,
-			 ListLayout::ListType pListType, const Lepra::String& pName):
+			 ListLayout::ListType pListType, const str& pName):
 	Window(pBorderStyle, pBorderWidth, pImageID, pName, new GridLayout(2, 2)),
 	mStyle(SINGLE_SELECT),
 	mHScrollBar(0),
@@ -37,7 +37,7 @@ ListControl::ListControl(unsigned pBorderStyle, int pBorderWidth, Painter::Image
 	Init(pListType);
 }
 
-ListControl::ListControl(const Lepra::Color& pColor, ListLayout::ListType pListType, const Lepra::String& pName):
+ListControl::ListControl(const Color& pColor, ListLayout::ListType pListType, const str& pName):
 	Window(pColor, pName, new GridLayout(2, 2)),
 	mStyle(SINGLE_SELECT),
 	mHScrollBar(0),
@@ -49,7 +49,7 @@ ListControl::ListControl(const Lepra::Color& pColor, ListLayout::ListType pListT
 	Init(pListType);
 }
 
-ListControl::ListControl(Painter::ImageID pImageID, ListLayout::ListType pListType, const Lepra::String& pName):
+ListControl::ListControl(Painter::ImageID pImageID, ListLayout::ListType pListType, const str& pName):
 	Window(pImageID, pName, new GridLayout(2, 2)),
 	mStyle(SINGLE_SELECT),
 	mHScrollBar(0),
@@ -70,7 +70,7 @@ void ListControl::Init(ListLayout::ListType pListType)
 	mHScrollBar = new ScrollBar(ScrollBar::HORIZONTAL);
 	mVScrollBar = new ScrollBar(ScrollBar::VERTICAL);
 	mListRect   = new RectComponent(_T("ListRect"), new ListLayout(pListType));
-	mCornerRect = new RectComponent(Lepra::Color(192, 192, 192), _T("CornerRect"));
+	mCornerRect = new RectComponent(Color(192, 192, 192), _T("CornerRect"));
 
 	mHScrollBar->SetPreferredSize(0, 16, false);
 	mVScrollBar->SetPreferredSize(16, 0, false);
@@ -80,10 +80,10 @@ void ListControl::Init(ListLayout::ListType pListType)
 	mHScrollBar->SetOwner(mListRect);
 	mVScrollBar->SetOwner(mListRect);
 
-	Lepra::PixelCoords lVSBMinSize(mVScrollBar->GetMinSize());
-	Lepra::PixelCoords lHSBMinSize(mHScrollBar->GetMinSize());
-	Lepra::PixelCoords lCMinSize(mCornerRect->GetMinSize());
-	Lepra::PixelCoords lMinSize(lCMinSize.x + lHSBMinSize.x + GetTotalBorderWidth(),
+	PixelCoords lVSBMinSize(mVScrollBar->GetMinSize());
+	PixelCoords lHSBMinSize(mHScrollBar->GetMinSize());
+	PixelCoords lCMinSize(mCornerRect->GetMinSize());
+	PixelCoords lMinSize(lCMinSize.x + lHSBMinSize.x + GetTotalBorderWidth(),
 				     lCMinSize.y + lVSBMinSize.y + GetTotalBorderWidth());
 	SetMinSize(lMinSize);
 
@@ -129,10 +129,10 @@ void ListControl::SetScrollBars(ScrollBar* pHScrollBar,
 		mCornerRect->SetMinSize(mCornerRect->GetPreferredSize());
 	}
 
-	Lepra::PixelCoords lVSBMinSize(mVScrollBar->GetMinSize());
-	Lepra::PixelCoords lHSBMinSize(mHScrollBar->GetMinSize());
-	Lepra::PixelCoords lCMinSize(mCornerRect->GetMinSize());
-	Lepra::PixelCoords lMinSize(lCMinSize.x + lVSBMinSize.x, 
+	PixelCoords lVSBMinSize(mVScrollBar->GetMinSize());
+	PixelCoords lHSBMinSize(mHScrollBar->GetMinSize());
+	PixelCoords lCMinSize(mCornerRect->GetMinSize());
+	PixelCoords lMinSize(lCMinSize.x + lVSBMinSize.x, 
 				     lCMinSize.y + lHSBMinSize.y);
 	SetMinSize(lMinSize);
 
@@ -183,7 +183,7 @@ void ListControl::RemoveChild(Component* pChild, int pLayer)
 	mListRect->RemoveChild(pChild, pLayer);
 }
 
-Component* ListControl::GetChild(const Lepra::String& pName, int pLayer)
+Component* ListControl::GetChild(const str& pName, int pLayer)
 {
 	return mListRect->GetChild(pName, pLayer);
 }
@@ -285,7 +285,7 @@ bool ListControl::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 
 	if (lChildToSelect != 0)
 	{
-		Lepra::PixelRect lRect(lChildToSelect->GetScreenRect());
+		PixelRect lRect(lChildToSelect->GetScreenRect());
 		Select(lChildToSelect, lRect.GetCenterX(), lRect.GetCenterY());
 	}
 	return (false);
@@ -327,7 +327,7 @@ void ListControl::Select(Component* pChild, int pSelectedX, int pSelectedY)
 				}
 
 				ListLayout::ComponentList lList;
-				Lepra::PixelRect lRect(mLastSelected->GetScreenRect());
+				PixelRect lRect(mLastSelected->GetScreenRect());
 
 				if (lLayout->GetListType() == ListLayout::COLUMN)
 				{
@@ -440,7 +440,7 @@ void ListControl::UpdateScrollPos()
 void ListControl::GetScrollOffsets(int& pHorizontalOffset, int& pVerticalOffset) const
 {
 	ListLayout* lLayout = (ListLayout*)mListRect->GetLayout();
-	Lepra::PixelCoords lSizeDiff = mListRect->GetSize() - lLayout->GetContentSize();
+	PixelCoords lSizeDiff = mListRect->GetSize() - lLayout->GetContentSize();
 
 	pHorizontalOffset = (int)(mHScrollBar->GetScrollPos() * lSizeDiff.x);
 	pVerticalOffset = (int)(mVScrollBar->GetScrollPos() * lSizeDiff.y);
@@ -459,10 +459,10 @@ void ListControl::GetScrollOffsets(int& pHorizontalOffset, int& pVerticalOffset)
 void ListControl::SetScrollOffsets(int pHorizontalOffset, int pVerticalOffset)
 {
 	ListLayout* lLayout = (ListLayout*)mListRect->GetLayout();
-	Lepra::PixelCoords lSizeDiff = mListRect->GetSize() - lLayout->GetContentSize();
+	PixelCoords lSizeDiff = mListRect->GetSize() - lLayout->GetContentSize();
 
-	mHScrollBar->SetScrollPos((Lepra::float64)pHorizontalOffset / (Lepra::float64)lSizeDiff.x);
-	mVScrollBar->SetScrollPos((Lepra::float64)pVerticalOffset / (Lepra::float64)lSizeDiff.y);
+	mHScrollBar->SetScrollPos((float64)pHorizontalOffset / (float64)lSizeDiff.x);
+	mVScrollBar->SetScrollPos((float64)pVerticalOffset / (float64)lSizeDiff.y);
 
 	lLayout->SetPosOffset(pHorizontalOffset, pVerticalOffset);
 }
@@ -473,24 +473,24 @@ void ListControl::ScrollToChild(Component* pChild)
 	{
 		ListLayout* lLayout = (ListLayout*)mListRect->GetLayout();
 
-		Lepra::PixelRect lRect(pChild->GetScreenRect());
-		Lepra::PixelRect lClientRect(mListRect->GetScreenRect());
-		Lepra::PixelCoords lSizeDiff = lLayout->GetContentSize() - 
-			Lepra::PixelCoords(lClientRect.GetWidth(), lClientRect.GetHeight());
+		PixelRect lRect(pChild->GetScreenRect());
+		PixelRect lClientRect(mListRect->GetScreenRect());
+		PixelCoords lSizeDiff = lLayout->GetContentSize() - 
+			PixelCoords(lClientRect.GetWidth(), lClientRect.GetHeight());
 
 		if (lLayout->GetListType() == ListLayout::COLUMN)
 		{
 			// Check if we need to scroll down.
 			if (lRect.mBottom > lClientRect.mBottom)
 			{
-				Lepra::float64 lDY = (Lepra::float64)(lRect.mBottom - lClientRect.mBottom) / (Lepra::float64)lSizeDiff.y;
+				float64 lDY = (float64)(lRect.mBottom - lClientRect.mBottom) / (float64)lSizeDiff.y;
 				mVScrollBar->SetScrollPos(mVScrollBar->GetScrollPos() + lDY);
 			}
 
 			// Check if we need to scroll up.
 			if (lRect.mTop < lClientRect.mTop)
 			{
-				Lepra::float64 lDY = (Lepra::float64)(lRect.mTop - lClientRect.mTop) / (Lepra::float64)lSizeDiff.y;
+				float64 lDY = (float64)(lRect.mTop - lClientRect.mTop) / (float64)lSizeDiff.y;
 				mVScrollBar->SetScrollPos(mVScrollBar->GetScrollPos() + lDY);
 			}
 		}
@@ -499,14 +499,14 @@ void ListControl::ScrollToChild(Component* pChild)
 			// Check if we need to scroll right.
 			if (lRect.mRight > lClientRect.mRight)
 			{
-				Lepra::float64 lDX = (Lepra::float64)(lRect.mRight - lClientRect.mRight) / (Lepra::float64)lSizeDiff.x;
+				float64 lDX = (float64)(lRect.mRight - lClientRect.mRight) / (float64)lSizeDiff.x;
 				mHScrollBar->SetScrollPos(mHScrollBar->GetScrollPos() + lDX);
 			}
 
 			// Check if we need to scroll up.
 			if (lRect.mLeft < lClientRect.mLeft)
 			{
-				Lepra::float64 lDX = (Lepra::float64)(lRect.mLeft - lClientRect.mLeft) / (Lepra::float64)lSizeDiff.x;
+				float64 lDX = (float64)(lRect.mLeft - lClientRect.mLeft) / (float64)lSizeDiff.x;
 				mHScrollBar->SetScrollPos(mHScrollBar->GetScrollPos() + lDX);
 			}
 		}
@@ -522,7 +522,7 @@ void ListControl::UpdateLayout()
 {
 	Parent::UpdateLayout();
 
-	Lepra::float64 lAverage = ((ListLayout*)mListRect->GetLayout())->GetAverageComponentHW();
+	float64 lAverage = ((ListLayout*)mListRect->GetLayout())->GetAverageComponentHW();
 
 	bool lChanged;
 
@@ -530,11 +530,11 @@ void ListControl::UpdateLayout()
 	{
 		lChanged = false;
 
-		Lepra::PixelCoords lContentSize(mListRect->GetLayout()->GetContentSize());
-		Lepra::PixelCoords lSize(mListRect->GetSize());
+		PixelCoords lContentSize(mListRect->GetLayout()->GetContentSize());
+		PixelCoords lSize(mListRect->GetSize());
 		
-		mHScrollBar->SetScrollRatio((Lepra::float64)lSize.x / lAverage, (Lepra::float64)lContentSize.x / lAverage);
-		mVScrollBar->SetScrollRatio((Lepra::float64)lSize.y / lAverage, (Lepra::float64)lContentSize.y / lAverage);
+		mHScrollBar->SetScrollRatio((float64)lSize.x / lAverage, (float64)lContentSize.x / lAverage);
+		mVScrollBar->SetScrollRatio((float64)lSize.y / lAverage, (float64)lContentSize.y / lAverage);
 
 		if (lContentSize.x > lSize.x)
 		{

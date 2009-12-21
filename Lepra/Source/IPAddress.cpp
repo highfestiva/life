@@ -41,9 +41,9 @@ IPAddress::IPAddress(const uint8* pIPAddress, int pNumBytes)
 	Set(pIPAddress, pNumBytes);
 }
 
-IPAddress::IPAddress(const String& pIPv4Address)
+IPAddress::IPAddress(const str& pIPv4Address)
 {
-	unsigned lIpInt = inet_addr(AnsiStringUtility::ToOwnCode(pIPv4Address).c_str());
+	unsigned lIpInt = inet_addr(astrutil::ToOwnCode(pIPv4Address).c_str());
 	uint8* lIp = (uint8*)&lIpInt;
 	mAddress[0] = lIp[0];
 	mAddress[1] = lIp[1];
@@ -87,13 +87,13 @@ void IPAddress::Get(uint8* pIPAddress) const
 	}
 }
 
-String IPAddress::GetAsString() const
+str IPAddress::GetAsString() const
 {
-	String lString;
+	str lString;
 
 	if (mByteCount == 4)
 	{
-		lString = StringUtility::Format(_T("%i.%i.%i.%i"), mAddress[0], mAddress[1], mAddress[2], mAddress[3]);
+		lString = strutil::Format(_T("%i.%i.%i.%i"), mAddress[0], mAddress[1], mAddress[2], mAddress[3]);
 	}
 	else if(mByteCount == 16)
 	{

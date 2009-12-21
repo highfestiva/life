@@ -36,27 +36,27 @@ public:
 	void SetPacketFactory(PacketFactory* pPacketFactory);
 	PacketFactory* GetPacketFactory() const;
 
-	Lepra::Lock* GetLock() const;
+	Lock* GetLock() const;
 
 	virtual bool SendAll() = 0;
 	bool IsOpen() const;
-	Lepra::uint64 GetSentByteCount(bool pSafe) const;
-	Lepra::uint64 GetReceivedByteCount(bool pSafe) const;
-	Lepra::uint64 GetTotalSentByteCount() const;
-	Lepra::uint64 GetTotalReceivedByteCount() const;
+	uint64 GetSentByteCount(bool pSafe) const;
+	uint64 GetReceivedByteCount(bool pSafe) const;
+	uint64 GetTotalSentByteCount() const;
+	uint64 GetTotalReceivedByteCount() const;
 	unsigned GetConnectionCount() const;
 
-	bool SendStatusMessage(Lepra::GameSocket* pSocket, Lepra::int32 pInteger, RemoteStatus pStatus, Lepra::UnicodeString pMessage, Packet* pPacket);
-	bool SendNumberMessage(bool pSafe, Lepra::GameSocket* pSocket, Cure::MessageNumber::InfoType pInfo, Lepra::int32 pInteger, Lepra::float32 pFloat);
-	bool SendObjectFullPosition(Lepra::GameSocket* pSocket, GameObjectId pInstanceId, Lepra::int32 pFrameIndex, const ObjectPositionalData& pData);
-	bool PlaceInSendBuffer(bool pSafe, Lepra::GameSocket* pSocket, Packet* pPacket);
+	bool SendStatusMessage(GameSocket* pSocket, int32 pInteger, RemoteStatus pStatus, wstr pMessage, Packet* pPacket);
+	bool SendNumberMessage(bool pSafe, GameSocket* pSocket, Cure::MessageNumber::InfoType pInfo, int32 pInteger, float32 pFloat);
+	bool SendObjectFullPosition(GameSocket* pSocket, GameObjectId pInstanceId, int32 pFrameIndex, const ObjectPositionalData& pData);
+	bool PlaceInSendBuffer(bool pSafe, GameSocket* pSocket, Packet* pPacket);
 
 protected:
-	void SetMuxSocket(Lepra::GameMuxSocket* pSocket);
+	void SetMuxSocket(GameMuxSocket* pSocket);
 
-	mutable Lepra::Lock mLock;
+	mutable Lock mLock;
 	RuntimeVariableScope* mVariableScope;
-	Lepra::GameMuxSocket* mMuxSocket;
+	GameMuxSocket* mMuxSocket;
 	PacketFactory* mPacketFactory;
 
 private:

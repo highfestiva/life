@@ -42,7 +42,7 @@ NetworkClient::~NetworkClient()
 
 void NetworkClient::Stop()
 {
-	Lepra::ScopeLock lLock(&mLock);
+	ScopeLock lLock(&mLock);
 	if (mSocket)
 	{
 		mMuxSocket->CloseSocket(mSocket);
@@ -58,30 +58,30 @@ void NetworkClient::Stop()
 
 
 
-bool NetworkClient::Connect(const Lepra::String& pLocalAddress, const Lepra::String& pServerAddress, double pTimeout)
+bool NetworkClient::Connect(const str& pLocalAddress, const str& pServerAddress, double pTimeout)
 {
-	Lepra::ScopeLock lLock(&mLock);
+	ScopeLock lLock(&mLock);
 
 	Stop();
 
 	bool lOk = true;
-	Lepra::SocketAddress lLocalAddress;
-	Lepra::uint16 lEndPort = 0;
+	SocketAddress lLocalAddress;
+	uint16 lEndPort = 0;
 	if (lOk)
 	{
 		lOk = lLocalAddress.ResolveRange(pLocalAddress, lEndPort);
 	}
-	Lepra::SocketAddress lTargetAddress;
+	SocketAddress lTargetAddress;
 	if (lOk)
 	{
 		lOk = lTargetAddress.Resolve(pServerAddress);
 	}
 	if (lOk)
 	{
-		Lepra::ScopeLock lLock(&mLock);
+		ScopeLock lLock(&mLock);
 		for (; lLocalAddress.GetPort() <= lEndPort; lLocalAddress.SetPort(lLocalAddress.GetPort()+1))
 		{
-			SetMuxSocket(new Lepra::GameMuxSocket(_T("Client "), lLocalAddress, false));
+			SetMuxSocket(new GameMuxSocket(_T("Client "), lLocalAddress, false));
 			if (mMuxSocket->IsOpen())
 			{
 				mMuxSocket->SetCloseCallback(this, &NetworkClient::OnCloseSocket);
@@ -104,7 +104,7 @@ void NetworkClient::Disconnect(bool pSendDisconnect)
 {
 	StopLoginThread();
 
-	Lepra::ScopeLock lLock(&mLock);
+	ScopeLock lLock(&mLock);
 	if (mSocket && pSendDisconnect)
 	{
 		Cure::Packet* lPacket = GetPacketFactory()->Allocate();
@@ -113,13 +113,13 @@ void NetworkClient::Disconnect(bool pSendDisconnect)
 	}
 	SendAll();
 	SetLoginAccountId(0);
-	Lepra::Thread::Sleep(0.01);	// Try to wait until data sent. SO_LINGER doesn't seem trustworthy.
+	Thread::Sleep(0.01);	// Try to wait until data sent. SO_LINGER doesn't seem trustworthy.
 	Stop();
 }
 
 
 
-void NetworkClient::StartConnectLogin(const Lepra::String& pServerHost, double pConnectTimeout, const Cure::LoginId& pLoginToken)
+void NetworkClient::StartConnectLogin(const str& pServerHost, double pConnectTimeout, const Cure::LoginId& pLoginToken)
 {
 	assert(!mIsConnecting);
 	assert(!mIsLoggingIn);
@@ -140,7 +140,7 @@ RemoteStatus NetworkClient::WaitLogin()
 	const int lCheckCount = 50;
 	for (int x = 0; IsConnecting() && x < lCheckCount; ++x)
 	{
-		Lepra::Thread::Sleep(mConnectTimeout/lCheckCount);
+		Thread::Sleep(mConnectTimeout/lCheckCount);
 	}
 
 	RemoteStatus lStatus = REMOTE_UNKNOWN;
@@ -194,7 +194,7 @@ RemoteStatus NetworkClient::WaitLogin()
 
 			if (IsLoggingIn())
 			{
-				Lepra::Thread::Sleep(0.05);
+				Thread::Sleep(0.05);
 			}
 		}
 		GetPacketFactory()->Release(lPacket);
@@ -219,12 +219,12 @@ bool NetworkClient::IsLoggingIn() const
 	return (mIsLoggingIn);
 }
 
-Lepra::uint32 NetworkClient::GetLoginAccountId() const
+uint32 NetworkClient::GetLoginAccountId() const
 {
 	return (mLoginAccountId);
 }
 
-void NetworkClient::SetLoginAccountId(Lepra::uint32 pLoginAccountId)
+void NetworkClient::SetLoginAccountId(uint32 pLoginAccountId)
 {
 	mIsLoggingIn = false;
 	mLoginAccountId = pLoginAccountId;
@@ -232,7 +232,7 @@ void NetworkClient::SetLoginAccountId(Lepra::uint32 pLoginAccountId)
 
 
 
-Lepra::GameSocket* NetworkClient::GetSocket() const
+GameSocket* NetworkClient::GetSocket() const
 {
 	return (mSocket);
 }
@@ -241,7 +241,7 @@ Lepra::GameSocket* NetworkClient::GetSocket() const
 
 bool NetworkClient::SendAll()
 {
-	Lepra::ScopeLock lLock(&mLock);
+	ScopeLock lLock(&mLock);
 	bool lOk = true;
 	if (mSocket && mSocket->HasSendData())
 	{
@@ -256,7 +256,7 @@ bool NetworkClient::SendAll()
 NetworkAgent::ReceiveStatus NetworkClient::ReceiveNonBlocking(Packet* pPacket)
 {
 	ReceiveStatus lResult = RECEIVE_CONNECTION_BROKEN;
-	Lepra::ScopeLock lLock(&mLock);
+	ScopeLock lLock(&mLock);
 	if (mSocket)
 	{
 		pPacket->Release();
@@ -296,7 +296,7 @@ NetworkAgent::ReceiveStatus NetworkClient::ReceiveTimeout(Packet* pPacket, doubl
 		lStatus = ReceiveNonBlocking(pPacket);
 		if (lStatus == RECEIVE_NO_DATA)
 		{
-			Lepra::Thread::Sleep(lSingleLoopTime);
+			Thread::Sleep(lSingleLoopTime);
 		}
 	}
 	return (lStatus);
@@ -307,7 +307,7 @@ NetworkAgent::ReceiveStatus NetworkClient::ReceiveTimeout(Packet* pPacket, doubl
 bool NetworkClient::SendLoginRequest(const LoginId& pLoginId)
 {
 	bool lOk = false;
-	Lepra::ScopeLock lLock(&mLock);
+	ScopeLock lLock(&mLock);
 	if (mSocket)
 	{
 		Packet* lPacket = mPacketFactory->Allocate();
@@ -338,11 +338,11 @@ void NetworkClient::LoginEntry()
 			{
 				mLog.AInfo("Retrying connect...");
 			}
-			Lepra::String lPortRange = CURE_RTVAR_GET(mVariableScope, RTVAR_NETWORK_CONNECT_LOCALPORTRANGE, _T("1025-65535"));
+			str lPortRange = CURE_RTVAR_GET(mVariableScope, RTVAR_NETWORK_CONNECT_LOCALPORTRANGE, _T("1025-65535"));
 			lOk = Connect(_T(":")+lPortRange, mServerHost, mConnectTimeout);
 		}
 		while (++x <= CURE_RTVAR_GET(mVariableScope, RTVAR_NETWORK_CONNECT_RETRYCOUNT, 1) && !lOk &&
-			!Lepra::SystemManager::GetQuitRequest() && !mLoginThread.GetStopRequest());
+			!SystemManager::GetQuitRequest() && !mLoginThread.GetStopRequest());
 	}
 	mIsConnecting = false;
 	if (lOk)
@@ -357,11 +357,11 @@ void NetworkClient::LoginEntry()
 	}
 	if (lOk)
 	{
-		Lepra::Timer lTimer;
+		Timer lTimer;
 		while (mIsLoggingIn && lTimer.GetTimeDiffF() < mLoginTimeout &&
-			!Lepra::SystemManager::GetQuitRequest() && !mLoginThread.GetStopRequest())
+			!SystemManager::GetQuitRequest() && !mLoginThread.GetStopRequest())
 		{
-			Lepra::Thread::Sleep(0.05);
+			Thread::Sleep(0.05);
 			lTimer.UpdateTimer();
 		}
 		lOk = (mLoginAccountId != 0);
@@ -388,7 +388,7 @@ void NetworkClient::LoginEntry()
 
 void NetworkClient::StopLoginThread()
 {
-	if (Lepra::Thread::GetCurrentThreadId() != mLoginThread.GetThreadId())
+	if (Thread::GetCurrentThreadId() != mLoginThread.GetThreadId())
 	{
 		mLoginThread.Join(mConnectTimeout+mLoginTimeout+0.5);
 		mLoginThread.Kill();
@@ -397,7 +397,7 @@ void NetworkClient::StopLoginThread()
 
 
 
-void NetworkClient::OnCloseSocket(Lepra::GameSocket*)
+void NetworkClient::OnCloseSocket(GameSocket*)
 {
 	Disconnect(false);
 }

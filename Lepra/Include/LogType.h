@@ -51,7 +51,7 @@ public:
 	static void Close();
 
 	static Log* GetLog(Subsystem pSubsystem);
-	static Log* GetLog(const String& pName);
+	static Log* GetLog(const str& pName);
 
 private:
 	static bool mInitialized;

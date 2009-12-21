@@ -44,10 +44,10 @@ public:
 	ChunkyBoneGeometry* GetBoneGeometry(int pBoneIndex) const;
 	ChunkyBoneGeometry* GetBoneGeometry(TBC::PhysicsManager::BodyID pBodyId) const;
 	void AddBoneGeometry(ChunkyBoneGeometry* pGeometry);	// Takes ownership of the added geometry.
-	void AddBoneGeometry(const Lepra::TransformationF& pTransformation, ChunkyBoneGeometry* pGeometry,
+	void AddBoneGeometry(const TransformationF& pTransformation, ChunkyBoneGeometry* pGeometry,
 		const ChunkyBoneGeometry* pParent = 0);	// Takes ownership of the added geometry.
 	int GetIndex(const ChunkyBoneGeometry* pGeometry) const;
-	const Lepra::TransformationF& GetTransformation(const ChunkyBoneGeometry* pGeometry) const;
+	const TransformationF& GetTransformation(const ChunkyBoneGeometry* pGeometry) const;
 	void ClearBoneGeometries(PhysicsManager* pPhysics);
 
 	int GetEngineCount() const;
@@ -59,7 +59,7 @@ public:
 	// Overrides.
 	void ClearAll(PhysicsManager* pPhysics);
 	void SetBoneCount(int pBoneCount);
-	bool FinalizeInit(PhysicsManager* pPhysics, unsigned pPhysicsFps, Lepra::TransformationF* pTransform,
+	bool FinalizeInit(PhysicsManager* pPhysics, unsigned pPhysicsFps, TransformationF* pTransform,
 		PhysicsManager::TriggerListener* pTrigListener, PhysicsManager::ForceFeedbackListener* pForceListener);
 
 	unsigned GetNextGeometryIndex();

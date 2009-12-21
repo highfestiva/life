@@ -37,16 +37,16 @@ public:
 		ZIGZAG,
 	};
 
-	BorderComponent(BorderPart pPart, const Lepra::Color& pColor, BorderShadeFunc pShadeFunc,
-		const Lepra::String& pName);
-	BorderComponent(BorderPart pPart, Painter::ImageID pImageID, const Lepra::String& pName);
+	BorderComponent(BorderPart pPart, const Color& pColor, BorderShadeFunc pShadeFunc,
+		const str& pName);
+	BorderComponent(BorderPart pPart, Painter::ImageID pImageID, const str& pName);
 	virtual ~BorderComponent();
 
 	void SetSunken(bool pSunken);
 
 	inline void SetResizable(bool pResizable);
 
-	void Set(const Lepra::Color& pColor, BorderShadeFunc pShadeFunc);
+	void Set(const Color& pColor, BorderShadeFunc pShadeFunc);
 	void Set(Painter::ImageID pImageID);
 
 	virtual void Repaint(Painter* pPainter);
@@ -70,9 +70,9 @@ private:
 	BorderPart mPart;
 	BorderShadeFunc mShading;
 
-	Lepra::Color mBodyColor;
-	Lepra::Color mLightColor;
-	Lepra::Color mDarkColor;
+	Color mBodyColor;
+	Color mLightColor;
+	Color mDarkColor;
 };
 
 Component::Type BorderComponent::GetType()

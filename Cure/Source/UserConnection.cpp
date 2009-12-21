@@ -28,12 +28,12 @@ UserConnection::~UserConnection()
 
 
 
-const Lepra::UnicodeString& UserConnection::GetLoginName() const
+const wstr& UserConnection::GetLoginName() const
 {
 	return (mName);
 }
 
-void UserConnection::SetLoginName(const Lepra::UnicodeString& pName)
+void UserConnection::SetLoginName(const wstr& pName)
 {
 	mName = pName;
 }
@@ -48,12 +48,12 @@ void UserConnection::SetAccountId(UserAccount::AccountId pAccountId)
 	mAccountId = pAccountId;
 }
 
-Lepra::GameSocket* UserConnection::GetSocket() const
+GameSocket* UserConnection::GetSocket() const
 {
 	return (mSocket);
 }
 
-void UserConnection::SetSocket(Lepra::GameSocket* pSocket)
+void UserConnection::SetSocket(GameSocket* pSocket)
 {
 	mSocket = pSocket;
 }

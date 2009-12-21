@@ -15,7 +15,7 @@ namespace UiTbc
 
 
 
-TextArea::TextArea(const Lepra::Color& pColor, const Lepra::String& pName):
+TextArea::TextArea(const Color& pColor, const str& pName):
 	Parent(0, 1, pColor, pName),
 	mFirstVisibleLine(0),
 	mVisibleLineCount(0),
@@ -26,7 +26,7 @@ TextArea::TextArea(const Lepra::Color& pColor, const Lepra::String& pName):
 {
 }
 
-TextArea::TextArea(Painter::ImageID pImageId, const Lepra::String& pName):
+TextArea::TextArea(Painter::ImageID pImageId, const str& pName):
 	Parent(0, 1, pImageId, pName),
 	mFirstVisibleLine(0),
 	mVisibleLineCount(0),
@@ -45,7 +45,7 @@ TextArea::~TextArea()
 
 void TextArea::Clear()
 {
-	Lepra::ScopeLock lLock(&mLock);
+	ScopeLock lLock(&mLock);
 	mFirstVisibleLine = 0;
 	mVisibleLineCount = 0;
 	mFontHeight = 0;
@@ -53,9 +53,9 @@ void TextArea::Clear()
 	SetNeedsRepaint(true);
 }
 
-bool TextArea::InsertLine(unsigned pLineIndex, const Lepra::String& pText, Lepra::Color* pColor)
+bool TextArea::InsertLine(unsigned pLineIndex, const str& pText, Color* pColor)
 {
-	Lepra::ScopeLock lLock(&mLock);
+	ScopeLock lLock(&mLock);
 	bool lOk = false;
 	if (pLineIndex <= GetLineCount())
 	{
@@ -85,17 +85,17 @@ bool TextArea::InsertLine(unsigned pLineIndex, const Lepra::String& pText, Lepra
 	return (lOk);
 }
 
-unsigned TextArea::AddLine(const Lepra::String& pText, Lepra::Color* pColor)
+unsigned TextArea::AddLine(const str& pText, Color* pColor)
 {
 	InsertLine(GetLineCount(), pText, pColor);
 	return (GetLineCount()-1);
 }
 
-void TextArea::AddText(const Lepra::String& pText, Lepra::Color* pColor)
+void TextArea::AddText(const str& pText, Color* pColor)
 {
-	Lepra::ScopeLock lLock(&mLock);
+	ScopeLock lLock(&mLock);
 	bool lFirstLine = true;
-	Lepra::StringUtility::StringVector lLines = Lepra::StringUtility::Split(pText, _T("\n"));
+	strutil::strvec lLines = strutil::Split(pText, _T("\n"));
 	for (unsigned x = 0; x < lLines.size(); ++x)
 	{
 		if (lFirstLine)
@@ -127,7 +127,7 @@ void TextArea::AddText(const Lepra::String& pText, Lepra::Color* pColor)
 
 bool TextArea::RemoveLine(unsigned pLineIndex)
 {
-	Lepra::ScopeLock lLock(&mLock);
+	ScopeLock lLock(&mLock);
 	bool lOk = (pLineIndex < GetLineCount());
 	if (lOk)
 	{
@@ -143,7 +143,7 @@ bool TextArea::RemoveLine(unsigned pLineIndex)
 
 unsigned TextArea::GetLineCount() const
 {
-	Lepra::ScopeLock lLock(&mLock);
+	ScopeLock lLock(&mLock);
 	return ((unsigned)mLineList.size());
 }
 
@@ -154,9 +154,9 @@ unsigned TextArea::GetFirstVisibleLineIndex() const
 
 void TextArea::SetFirstVisibleLineIndex(unsigned pLineIndex)
 {
-	int lMaxDownIndex = Lepra::Math::Clamp(
+	int lMaxDownIndex = Math::Clamp(
 		(int)(GetLineCount()-GetVisibleLineCount()), 0, (int)mMaxLineCount);
-	pLineIndex = Lepra::Math::Clamp((int)pLineIndex, 0, lMaxDownIndex);
+	pLineIndex = Math::Clamp((int)pLineIndex, 0, lMaxDownIndex);
 	if (pLineIndex != mFirstVisibleLine)
 	{
 		mFirstVisibleLine = pLineIndex;
@@ -202,13 +202,13 @@ void TextArea::Repaint(Painter* pPainter)
 
 	pPainter->PushAttrib(Painter::ATTR_ALL);
 
-	Lepra::PixelRect lRect(GetClientRect());
+	PixelRect lRect(GetClientRect());
 	pPainter->ReduceClippingRect(lRect);
 
 	int lBeginY;
 	int lEndY;
 	int lPixelOffsetY;
-	int lPrintedLineCount = Lepra::Math::Clamp((int)GetVisibleLineCount(), 0, (int)GetLineCount());
+	int lPrintedLineCount = Math::Clamp((int)GetVisibleLineCount(), 0, (int)GetLineCount());
 	if (mFocusAnchor == ANCHOR_TOP_LINE)
 	{
 		lBeginY = 0;
@@ -221,7 +221,7 @@ void TextArea::Repaint(Painter* pPainter)
 		lEndY = 0;
 		lPixelOffsetY = lRect.GetHeight();
 	}
-	Lepra::ScopeLock lLock(&mLock);
+	ScopeLock lLock(&mLock);
 	TextLineList::iterator s = GetIterator(GetFirstVisibleLineIndex());
 	for (int y = lBeginY; s != mLineList.end() && y < lEndY; ++y, ++s)
 	{
@@ -244,7 +244,7 @@ void TextArea::ForceRepaint()
 TextArea::TextLineList::iterator TextArea::GetIterator(unsigned pLineIndex)
 {
 	assert(pLineIndex <= GetLineCount());
-	return Lepra::ListUtil::FindByIndex(mLineList, pLineIndex);
+	return ListUtil::FindByIndex(mLineList, pLineIndex);
 }
 
 
@@ -270,7 +270,7 @@ void TextArea::UpdateVisibleSize()
 
 void TextArea::ScrollToLastLine()
 {
-	int lScrollDownToIndex = Lepra::Math::Clamp((int)(GetLineCount()-GetVisibleLineCount()), 0, (int)mMaxLineCount);
+	int lScrollDownToIndex = Math::Clamp((int)(GetLineCount()-GetVisibleLineCount()), 0, (int)mMaxLineCount);
 	SetFirstVisibleLineIndex(lScrollDownToIndex);
 }
 

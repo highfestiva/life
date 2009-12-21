@@ -43,7 +43,7 @@ class TriangleBasedGeometry;
 class ChunkyMeshLoader: public TBC::ChunkyLoader	// Contains the mesh. Excluded is skin weight information and materials.
 {
 public:
-	ChunkyMeshLoader(Lepra::File* pFile, bool pIsFileOwner);
+	ChunkyMeshLoader(File* pFile, bool pIsFileOwner);
 	virtual ~ChunkyMeshLoader();
 	bool Load(TriangleBasedGeometry* pMeshData);
 	bool Save(const TriangleBasedGeometry* pMeshData);
@@ -52,13 +52,13 @@ public:
 class ChunkySkinLoader: public TBC::ChunkyLoader	// Contains mesh skin weight information. 1-1 relation to meshes.
 {
 public:
-	ChunkySkinLoader(Lepra::File* pFile, bool pIsFileOwner);
+	ChunkySkinLoader(File* pFile, bool pIsFileOwner);
 	virtual ~ChunkySkinLoader();
 	bool Load(AnimatedGeometry* pSkinData);
 	bool Save(const AnimatedGeometry* pSkinData);
 
 private:
-	bool LoadElementCallback(TBC::ChunkyType pType, Lepra::uint32 pSize, Lepra::int64 pChunkEndPosition, void* pStorage);
+	bool LoadElementCallback(TBC::ChunkyType pType, uint32 pSize, int64 pChunkEndPosition, void* pStorage);
 	bool SaveBoneWeightChunkArray(const AnimatedGeometry* pSkinData);
 };
 
@@ -66,11 +66,11 @@ class ChunkyClassLoader: public TBC::ChunkyClassLoader
 {
 	typedef TBC::ChunkyClassLoader Parent;
 public:
-	ChunkyClassLoader(Lepra::File* pFile, bool pIsFileOwner);
+	ChunkyClassLoader(File* pFile, bool pIsFileOwner);
 	virtual ~ChunkyClassLoader();
 
 protected:
-	bool LoadElementCallback(TBC::ChunkyType pType, Lepra::uint32 pSize, Lepra::int64 pChunkEndPosition, void* pStorage);
+	bool LoadElementCallback(TBC::ChunkyType pType, uint32 pSize, int64 pChunkEndPosition, void* pStorage);
 	virtual void AddLoadElements(Parent::FileElementList& pElementList, TBC::ChunkyClass* pData);
 
 private:

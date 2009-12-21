@@ -22,7 +22,7 @@ UserUiTypeResource<ResourceType>::~UserUiTypeResource()
 
 template<class ResourceType>
 Cure::Resource* UserUiTypeResource<ResourceType>::CreateResource(
-	Cure::ResourceManager* pManager, const Lepra::String& pName) const
+	Cure::ResourceManager* pManager, const str& pName) const
 {
 	return (new ResourceType(GetUiManager(), pManager, pName));
 }
@@ -43,7 +43,7 @@ UserUiExtraTypeResource<ResourceType, SubtypeExtraType>::~UserUiExtraTypeResourc
 
 template<class ResourceType, class SubtypeExtraType>
 Cure::Resource* UserUiExtraTypeResource<ResourceType, SubtypeExtraType>::CreateResource(
-	Cure::ResourceManager* pManager, const Lepra::String& pName) const
+	Cure::ResourceManager* pManager, const str& pName) const
 {
 	return (new ResourceType(GetUiManager(), pManager, pName, mExtraData));
 }

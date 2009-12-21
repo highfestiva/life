@@ -73,21 +73,21 @@ public:
 	ZipArchive();
 	virtual ~ZipArchive();
 
-	IOError OpenArchive(const String& pArchiveFileName, IOType pIOType);
+	IOError OpenArchive(const str& pArchiveFileName, IOType pIOType);
 	void CloseArchive();
 	void CloseAndRemoveArchive();
 
 	int GetFileCount();
 
-	IOError InsertArchive(const String& pArchiveFileName);
+	IOError InsertArchive(const str& pArchiveFileName);
 
-	String FileFindFirst();
-	String FileFindNext();
+	str FileFindFirst();
+	str FileFindNext();
 
-	bool FileOpen(const String& pFileName);
+	bool FileOpen(const str& pFileName);
 	void FileClose();
 
-	bool FileExist(const String& pFileName);
+	bool FileExist(const str& pFileName);
 
 	IOError FileRead(void* pDest, int pSize);
 	IOError FileWrite(void* pSource, int pSize);
@@ -95,13 +95,13 @@ public:
 	int64 FileSize();
 	void FileSeek(int64 pOffset, FileOrigin pOrigin);
 
-	bool ExtractFile(const String& pFileName, 
-			 const String& pDestFileName,
+	bool ExtractFile(const str& pFileName, 
+			 const str& pDestFileName,
 			 int pBufferSize, SizeUnit pUnit);
 
 private:
 
-	String mArchiveName;
+	str mArchiveName;
 
 	IOType mIOType;
 	

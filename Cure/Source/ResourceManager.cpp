@@ -90,7 +90,7 @@ int UserResource::DecreaseCallbackBlockCount()
 	return (lCallbackBlockCount);
 }
 
-const Lepra::String& UserResource::GetName() const
+const str& UserResource::GetName() const
 {
 	return (mResource->GetName());
 }
@@ -126,7 +126,7 @@ void UserResource::PostProcess()
 
 
 
-Resource::Resource(ResourceManager* pManager, const Lepra::String& pName):
+Resource::Resource(ResourceManager* pManager, const str& pName):
 	mManager(pManager),
 	mName(pName),
 	mReferenceCount(0),
@@ -138,7 +138,7 @@ Resource::Resource(ResourceManager* pManager, const Lepra::String& pName):
 Resource::~Resource()
 {
 	mState = RESOURCE_LOAD_ERROR;
-	log_volatile(mLog.Debugf((_T("Deleting resource ")+mName).c_str(), Lepra::Log::LEVEL_TRACE));
+	log_volatile(mLog.Debugf((_T("Deleting resource ")+mName).c_str(), Log::LEVEL_TRACE));
 	mManager = 0;
 
 	CallbackList::iterator x = mLoadCallbackList.begin();
@@ -162,7 +162,7 @@ ResourceManager* Resource::GetManager() const
 	return (mManager);
 }
 
-const Lepra::String& Resource::GetName() const
+const str& Resource::GetName() const
 {
 	return (mName);
 }
@@ -180,7 +180,7 @@ int Resource::Dereference()
 	return (mReferenceCount);
 }
 
-int Resource::GetReferenceCount()
+int Resource::GetReferenceCount() const
 {
 	return (mReferenceCount);
 }
@@ -215,13 +215,13 @@ void Resource::SetLoadState(ResourceLoadState pState)
 
 void Resource::AddCaller(UserResource* pUserResource, const UserResource::LoadCallback& pCallback)
 {
-	Lepra::ScopeLock lMutex(&mMutex);
+	ScopeLock lMutex(&mMutex);
 	mLoadCallbackList.push_back(UserResourceCallbackInfo(pUserResource, pCallback));
 }
 
 void Resource::RemoveCaller(UserResource* pUserResource)
 {
-	Lepra::ScopeLock lMutex(&mMutex);
+	ScopeLock lMutex(&mMutex);
 
 	CallbackList::iterator x = mLoadCallbackList.begin();
 	while (x != mLoadCallbackList.end())
@@ -249,7 +249,7 @@ void Resource::UserPostProcess()
 {
 	CallbackList lCallbackList;
 	{
-		Lepra::ScopeLock lMutex(&mMutex);
+		ScopeLock lMutex(&mMutex);
 		lCallbackList = mLoadCallbackList;
 	}
 
@@ -267,7 +267,7 @@ void Resource::Callback()
 
 	CallbackList lCallbackList;
 	{
-		Lepra::ScopeLock lMutex(&mMutex);
+		ScopeLock lMutex(&mMutex);
 		lCallbackList.splice(lCallbackList.begin(), mLoadCallbackList);
 	}
 	size_t lCallbackCount = lCallbackList.size();
@@ -296,7 +296,7 @@ void Resource::Callback()
 	}
 	if (lCallbackList.size() > 0)
 	{
-		Lepra::ScopeLock lMutex(&mMutex);
+		ScopeLock lMutex(&mMutex);
 		mLoadCallbackList.splice(mLoadCallbackList.begin(), lCallbackList);
 	}
 
@@ -322,13 +322,13 @@ void Resource::operator=(const Resource&)
 	assert(false);
 }
 
-Lepra::Lock Resource::mMutex;
+Lock Resource::mMutex;
 
 LOG_CLASS_DEFINE(GENERAL_RESOURCES, Resource);
 
 
 
-PhysicsResource::PhysicsResource(Cure::ResourceManager* pManager, const Lepra::String& pName):
+PhysicsResource::PhysicsResource(Cure::ResourceManager* pManager, const str& pName):
 	Parent(pManager, pName)
 {
 }
@@ -337,7 +337,7 @@ PhysicsResource::~PhysicsResource()
 {
 }
 
-const Lepra::String PhysicsResource::GetType() const
+const str PhysicsResource::GetType() const
 {
 	return (_T("Physics"));
 }
@@ -352,8 +352,8 @@ bool PhysicsResource::Load()
 	assert(IsUnique());
 	assert(GetRamData() == 0);
 	SetRamData(new TBC::ChunkyPhysics(TBC::ChunkyPhysics::TRANSFORM_LOCAL2WORLD));
-	Lepra::DiskFile lFile;
-	bool lOk = lFile.Open(GetName(), Lepra::DiskFile::MODE_READ);
+	DiskFile lFile;
+	bool lOk = lFile.Open(GetName(), DiskFile::MODE_READ);
 	if (lOk)
 	{
 		TBC::ChunkyPhysicsLoader lLoader(&lFile, false);
@@ -364,7 +364,7 @@ bool PhysicsResource::Load()
 
 
 
-ClassResource::ClassResource(Cure::ResourceManager* pManager, const Lepra::String& pName):
+ClassResource::ClassResource(Cure::ResourceManager* pManager, const str& pName):
 	Parent(pManager, pName)
 {
 }
@@ -375,7 +375,7 @@ ClassResource::~ClassResource()
 
 
 
-/*ContextObjectResource::ContextObjectResource(ResourceManager* pManager, const Lepra::String& pName):
+/*ContextObjectResource::ContextObjectResource(ResourceManager* pManager, const str& pName):
 	Parent(pManager, pName)
 {
 }
@@ -389,7 +389,7 @@ ContextObjectResource::~ContextObjectResource()
 	log_atrace("Deleting context object resource.");
 }
 
-const Lepra::String ContextObjectResource::GetType() const
+const str ContextObjectResource::GetType() const
 {
 	return (_T("Context"));
 }
@@ -426,7 +426,7 @@ LOG_CLASS_DEFINE(GAME_CONTEXT, ContextObjectResource);*/
 
 
 
-PhysicalTerrainResource::PhysicalTerrainResource(ResourceManager* pManager, const Lepra::String& pName):
+PhysicalTerrainResource::PhysicalTerrainResource(ResourceManager* pManager, const str& pName):
 	Parent(pManager, pName)
 {
 }
@@ -440,7 +440,7 @@ PhysicalTerrainResource::~PhysicalTerrainResource()
 	log_atrace("Deleting terrain patch resource.");
 }
 
-const Lepra::String PhysicalTerrainResource::GetType() const
+const str PhysicalTerrainResource::GetType() const
 {
 	return (_T("PhysTerrain"));
 }
@@ -506,7 +506,7 @@ void ResourceManager::StopClear()
 	}
 	mLoaderThread.Kill();
 
-	Lepra::ScopeLock lLock(&mThreadLock);	// Just here for mutex lock verification.
+	ScopeLock lLock(&mThreadLock);	// Just here for mutex lock verification.
 
 	// Free memory.
 	ForceFreeCache();	// Must be before and after active resources' are deleted (caused by hierarchical resource structures).
@@ -554,12 +554,12 @@ void ResourceManager::SetTerrainFunctionManager(TerrainFunctionManager* pTerrain
 
 
 
-void ResourceManager::Load(const Lepra::String& pName, UserResource* pUserResource, UserResource::LoadCallback pCallback)
+void ResourceManager::Load(const str& pName, UserResource* pUserResource, UserResource::LoadCallback pCallback)
 {
 	Resource* lResource;
 	{
 		bool lMustLoad = true;
-		Lepra::ScopeLock lLock(&mThreadLock);
+		ScopeLock lLock(&mThreadLock);
 		lResource = GetAddCachedResource(pName, pUserResource, lMustLoad);
 		pUserResource->SetResource(lResource);
 		lResource->AddCaller(pUserResource, pCallback);
@@ -588,9 +588,9 @@ void ResourceManager::Load(const Lepra::String& pName, UserResource* pUserResour
 	}
 }
 
-void ResourceManager::LoadUnique(const Lepra::String& pName, UserResource* pUserResource, UserResource::LoadCallback pCallback)
+void ResourceManager::LoadUnique(const str& pName, UserResource* pUserResource, UserResource::LoadCallback pCallback)
 {
-	Lepra::ScopeLock lLock(&mThreadLock);
+	ScopeLock lLock(&mThreadLock);
 	Resource* lResource = CreateResource(pUserResource, pName);
 	lResource->SetIsUnique(true);
 	pUserResource->SetResource(lResource);
@@ -599,7 +599,7 @@ void ResourceManager::LoadUnique(const Lepra::String& pName, UserResource* pUser
 	StartLoad(lResource);
 }
 
-bool ResourceManager::IsCreated(const Lepra::String& pName) const
+bool ResourceManager::IsCreated(const str& pName) const
 {
 	return (mActiveResourceTable.FindObject(pName) != 0);
 }
@@ -611,7 +611,7 @@ void ResourceManager::SafeRelease(UserResource* pUserResource)
 	{
 		pUserResource->SetResource(0);
 
-		Lepra::ScopeLock lLock(&mThreadLock);
+		ScopeLock lLock(&mThreadLock);
 		if (mResourceSafeLookup.find(lResource) != mResourceSafeLookup.end())
 		{
 			lResource->RemoveCaller(pUserResource);
@@ -625,7 +625,7 @@ void ResourceManager::Release(Resource* pResource)
 {
 	if (pResource->Dereference() <= 0)
 	{
-		Lepra::ScopeLock lMutex(&mThreadLock);
+		ScopeLock lMutex(&mThreadLock);
 
 		if (!pResource->IsUnique())
 		{
@@ -687,7 +687,7 @@ void ResourceManager::Tick()
 
 void ResourceManager::ForceFreeCache()
 {
-	Lepra::ScopeLock lLock(&mThreadLock);
+	ScopeLock lLock(&mThreadLock);
 	// TODO: optimize by keeping objects in cache for a while!
 
 	/*mLog.AHeadline("ForceFreeCache...");
@@ -713,20 +713,20 @@ void ResourceManager::ForceFreeCache()
 
 size_t ResourceManager::QueryResourceCount() const
 {
-	Lepra::ScopeLock lLock(&mThreadLock);
+	ScopeLock lLock(&mThreadLock);
 	return (mResourceSafeLookup.size());
 }
 
 size_t ResourceManager::QueryCachedResourceCount() const
 {
-	Lepra::ScopeLock lLock(&mThreadLock);
+	ScopeLock lLock(&mThreadLock);
 	return (mCachedResourceTable.GetCount());
 }
 
 ResourceManager::NameTypeList ResourceManager::QueryResourceNames()
 {
 	NameTypeList lNames;
-	Lepra::ScopeLock lLock(&mThreadLock);
+	ScopeLock lLock(&mThreadLock);
 	ResourceSet::iterator x = mResourceSafeLookup.begin();
 	for (; x != mResourceSafeLookup.end(); ++x)
 	{
@@ -739,22 +739,7 @@ ResourceManager::NameTypeList ResourceManager::QueryResourceNames()
 
 
 
-bool ResourceManager::ExportAll(const Lepra::String& pDirectory)
-{
-	Lepra::ScopeLock lLock(&mThreadLock);
-	ResourceTable::Iterator x = mActiveResourceTable.First();
-	for (; x != mActiveResourceTable.End(); ++x)
-	{
-		Resource* lResource = *x;
-		StringPair lPair(lResource->GetName(), lResource->GetType());
-		mLog.Infof(_T("  - Resource: '%s' -> '%s'"), lPair.first.c_str(), pDirectory.c_str());
-	}
-	return (true);
-}
-
-
-
-Resource* ResourceManager::GetAddCachedResource(const Lepra::String& pName, UserResource* pUserResource, bool& pMustLoad)
+Resource* ResourceManager::GetAddCachedResource(const str& pName, UserResource* pUserResource, bool& pMustLoad)
 {
 	pMustLoad = false;
 	Resource* lResource = mActiveResourceTable.FindObject(pName);
@@ -809,7 +794,7 @@ void ResourceManager::StartLoad(Resource* pResource)
 	assert(pResource->GetReferenceCount() > 0);
 	pResource->SetLoadState(RESOURCE_LOAD_IN_PROGRESS);
 	assert(mRequestLoadList.GetCount() < 10000);	// Just run GetCount() to validate internal integrity.
-	log_volatile(const Lepra::String& lName = pResource->GetName());
+	log_volatile(const str& lName = pResource->GetName());
 	log_volatile(mLog.Debugf(_T("Requesting load of '%s' (%s)."), lName.c_str(), pResource->GetType().c_str()));
 	assert(mRequestLoadList.Find(pResource) == mRequestLoadList.End());
 	mRequestLoadList.PushBack(pResource, pResource);
@@ -825,7 +810,7 @@ void ResourceManager::InjectResourceLoop()
 	// dips from the resource system.
 	ResourceMapList lInjectList;
 	{
-		Lepra::ScopeLock lLock(&mThreadLock);
+		ScopeLock lLock(&mThreadLock);
 		if (mLoadedList.GetCount() > 0)
 		{
 			lInjectList = mLoadedList;
@@ -849,7 +834,7 @@ void ResourceManager::InjectResourceLoop()
 	}
 	if (lInjectList.GetCount() > 0)
 	{
-		Lepra::ScopeLock lLock(&mThreadLock);
+		ScopeLock lLock(&mThreadLock);
 		for (ResourceMapList::Iterator x = lInjectList.First(); x != lInjectList.End(); ++x)
 		{
 			mLoadedList.PushBack(x.GetKey(), x.GetObject());
@@ -886,7 +871,7 @@ void ResourceManager::FreeCache()
 {
 	// TODO: optimize this algoritm by keeping track of time an object has spent
 	// in cache, dropping the oldest first, and so forth.
-	if (Lepra::SystemManager::GetAvailRam() < Lepra::SystemManager::GetAmountRam()/4)
+	if (SystemManager::GetAvailRam() < SystemManager::GetAmountRam()/4)
 	{
 		ForceFreeCache();
 	}
@@ -956,7 +941,7 @@ void ResourceManager::LoadSingleResource()
 	size_t lListCount = 0;
 	Resource* lResource = 0;
 	{
-		Lepra::ScopeLock lLock(&mThreadLock);
+		ScopeLock lLock(&mThreadLock);
 		lListCount = mRequestLoadList.GetCount();
 		if (lListCount > 0)
 		{
@@ -976,7 +961,7 @@ void ResourceManager::LoadSingleResource()
 			lResource->SetLoadState(RESOURCE_LOAD_ERROR);
 		}
 		{
-			Lepra::ScopeLock lLock(&mThreadLock);
+			ScopeLock lLock(&mThreadLock);
 			if (lResource == mRequestLoadList.First().GetObject())
 			{
 				assert(mRequestLoadList.GetCount() < 10000);
@@ -1000,7 +985,7 @@ void ResourceManager::LoadSingleResource()
 
 
 
-Resource* ResourceManager::CreateResource(UserResource* pUserResource, const Lepra::String& pName)
+Resource* ResourceManager::CreateResource(UserResource* pUserResource, const str& pName)
 {
 	AssertIsMutexOwner();
 

@@ -1,16 +1,20 @@
-/*
-	Class:  GeometryBatch
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2009, Righteous Games
-*/
+
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2009, Righteous Games
+
+
 
 #include "../Include/UiGeometryBatch.h"
 #include "../../Lepra/Include/Random.h"
 
+
+
 namespace UiTbc
 {
 
-GeometryBatch::GeometryBatch(TBC::GeometryBase* pGeometry) :
+
+
+GeometryBatch::GeometryBatch(TBC::GeometryBase* pGeometry):
 	mVertex(0),
 	mUV(0),
 	mIndex(0),
@@ -28,7 +32,7 @@ GeometryBatch::~GeometryBatch()
 	ClearAllInstances();
 }
 
-void GeometryBatch::SetInstances(const Lepra::Vector3DF* pDisplacement, 
+void GeometryBatch::SetInstances(const Vector3DF* pDisplacement, 
 				 int pNumInstances,
 				 float pXScaleMin, float pXScaleMax,
 				 float pYScaleMin, float pYScaleMax,
@@ -68,12 +72,12 @@ void GeometryBatch::SetInstances(const Lepra::Vector3DF* pDisplacement,
 
 		if (mIndexCount > 0)
 		{
-			mIndex = new Lepra::uint32[mIndexCount];
+			mIndex = new uint32[mIndexCount];
 		}
 
 		if (mGeometryInstance->GetColorData() != 0)
 		{
-			mColor = new Lepra::uint8[mVertexCount * 3];
+			mColor = new uint8[mVertexCount * 3];
 		}
 
 		//
@@ -90,11 +94,11 @@ void GeometryBatch::SetInstances(const Lepra::Vector3DF* pDisplacement,
 		int lUVIndex = 0;
 		for (i = 0; i < (unsigned int)pNumInstances; i++)
 		{
-			float lXScale = (float)Lepra::Random::Uniform(pXScaleMin, pXScaleMax);
-			float lYScale = (float)Lepra::Random::Uniform(pYScaleMin, pYScaleMax);
-			float lZScale = (float)Lepra::Random::Uniform(pZScaleMin, pZScaleMax);
+			float lXScale = (float)Random::Uniform(pXScaleMin, pXScaleMax);
+			float lYScale = (float)Random::Uniform(pYScaleMin, pYScaleMax);
+			float lZScale = (float)Random::Uniform(pZScaleMin, pZScaleMax);
 
-			const Lepra::Vector3DF& lPos = pDisplacement[i];
+			const Vector3DF& lPos = pDisplacement[i];
 			int lIndex = 0;
 			int lUVIndex2 = 0;
 			for (j = 0; j < lVertexCount; j++)
@@ -127,7 +131,7 @@ void GeometryBatch::SetInstances(const Lepra::Vector3DF* pDisplacement,
 			lIndex = 0;
 			for (j = 0; j < lTriangleCount; j++)
 			{
-				Lepra::uint32 lTriIndex[3];
+				uint32 lTriIndex[3];
 				mGeometryInstance->GetTriangleIndices(j, lTriIndex);
 				mIndex[lTIndex + 0] = lTriIndex[0] + lTIOffset;
 				mIndex[lTIndex + 1] = lTriIndex[1] + lTIOffset;
@@ -139,7 +143,7 @@ void GeometryBatch::SetInstances(const Lepra::Vector3DF* pDisplacement,
 	}
 }
 
-void GeometryBatch::SetInstances(const Lepra::Vector3DD* pDisplacement, 
+void GeometryBatch::SetInstances(const Vector3DD* pDisplacement, 
 				 int pNumInstances,
 				 float pXScaleMin, float pXScaleMax,
 				 float pYScaleMin, float pYScaleMax,
@@ -152,7 +156,7 @@ void GeometryBatch::SetInstances(const Lepra::Vector3DD* pDisplacement,
 		return;
 	}
 
-	Lepra::Vector3DF* lVTemp = new Lepra::Vector3DF[pNumInstances];
+	Vector3DF* lVTemp = new Vector3DF[pNumInstances];
 
 	for (int i = 0; i < pNumInstances; i++)
 	{
@@ -263,14 +267,16 @@ float* GeometryBatch::GetUVData(unsigned int pUVSet) const
 	return 0;
 }
 
-Lepra::uint32* GeometryBatch::GetIndexData() const
+uint32* GeometryBatch::GetIndexData() const
 {
 	return mIndex;
 }
 
-Lepra::uint8* GeometryBatch::GetColorData() const
+uint8* GeometryBatch::GetColorData() const
 {
 	return mColor;
 }
 
-} // End namespace.
+
+
+}

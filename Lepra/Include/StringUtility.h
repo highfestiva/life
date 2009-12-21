@@ -26,11 +26,11 @@ namespace Lepra
 STR_UTIL_TEMPLATE class StringUtilityTemplate
 {
 public:
-	typedef std::vector<_String> StringVector;
-	static StringVector Split(const _String& pString, const _String& pCharDelimitors, int pSplitMaxCount = 10000);
+	typedef std::vector<_String> strvec;
+	static strvec Split(const _String& pString, const _String& pCharDelimitors, int pSplitMaxCount = 10000);
 	// Splits strings, but also keeps track of quotes. Strings within quotes are left untouched from the delimitors.
-	static StringVector BlockSplit(const _String& pString, const _String& pCharDelimitors, bool pKeepQuotes, bool pIsCString, int pSplitMaxCount = 10000);
-	static _String Join(const StringVector& pStringVector, const _String& pJoinString, size_t pStartIndex = 0, size_t pEndIndex = _String::npos);
+	static strvec BlockSplit(const _String& pString, const _String& pCharDelimitors, bool pKeepQuotes, bool pIsCString, int pSplitMaxCount = 10000);
+	static _String Join(const strvec& pStringVector, const _String& pJoinString, size_t pStartIndex = 0, size_t pEndIndex = _String::npos);
 
 	static _String StringToCString(const _String& pString);
 	static bool CStringToString(const _String& pCString, _String& _pString);
@@ -38,7 +38,7 @@ public:
 	static _String StripLeft(const _String& pString, const _String& pCharDelimitors);
 
 	static _String ReplaceAll(const _String& pString, typename _String::value_type pFromChar, typename _String::value_type pToChar);
-	static _String ReplaceAll(const _String& pString, const _String& pFrom, const String& pTo);
+	static _String ReplaceAll(const _String& pString, const _String& pFrom, const _String& pTo);
 
 	static _String Format(const typename _String::value_type* ppFormat, ...);
 	static _String VFormat(const typename _String::value_type* ppFormat, va_list pArguments);
@@ -64,12 +64,12 @@ public:
 	static _String ReplaceCtrlChars(const _String& pString, typename _String::value_type pReplacement);
 	static _String DumpData(const uint8* pData, size_t pLength);
 
-	static const _String ToOwnCode(const AnsiString& pString);
-	static const _String ToOwnCode(const UnicodeString& pString);
+	static const _String ToOwnCode(const astr& pString);
+	static const _String ToOwnCode(const wstr& pString);
 #ifdef LEPRA_UNICODE
-	static const UnicodeString ToCurrentCode(const _String& pString);
+	static const wstr ToCurrentCode(const _String& pString);
 #else // !LEPRA_UNICODE
-	static const AnsiString ToCurrentCode(const _String& pString);
+	static const astr ToCurrentCode(const _String& pString);
 #endif // LEPRA_UNICODE/!LEPRA_UNICODE
 
 	static void ToLower(_String& pString);
@@ -88,15 +88,15 @@ private:
 	static std::locale mLocale;
 };
 
-typedef StringUtilityTemplate<AnsiString> AnsiStringUtility;
-typedef StringUtilityTemplate<UnicodeString> UnicodeStringUtility;
-extern const AnsiString gEmptyAnsiString;
-extern const UnicodeString gEmptyUnicodeString;
+typedef StringUtilityTemplate<astr> astrutil;
+typedef StringUtilityTemplate<wstr> wstrutil;
+extern const astr gEmptyAnsiString;
+extern const wstr gEmptyUnicodeString;
 #ifdef LEPRA_UNICODE
-typedef UnicodeStringUtility	StringUtility;
+typedef wstrutil		strutil;
 #define EmptyString		gEmptyUnicodeString
 #else // !LEPRA_UNICODE
-typedef AnsiStringUtility	StringUtility;
+typedef astr			strutil;
 #define EmptyString		gEmptyAnsiString
 #endif // LEPRA_UNICODE/!LEPRA_UNICODE
 #define EmptyAnsiString		gEmptyAnsiString

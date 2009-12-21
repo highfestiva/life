@@ -56,7 +56,7 @@ public:
 	void SetReaderEndian(Endian::EndianType pReaderEndian);
 	Endian::EndianType GetReaderEndian() const;
 
-	const String& GetStreamName();
+	const str& GetStreamName();
 
 	int64 GetAvailable() const;
 
@@ -79,7 +79,7 @@ private:
 template<class _T>
 IOError Reader::ReadLine(std::basic_string<_T>& pString)
 {
-	Lepra::AnsiString lUtf8Line;
+	astr lUtf8Line;
 	char lChar = '\0';
 	IOError lErr = Read(lChar);
 	if (lErr != IO_OK)
@@ -103,7 +103,7 @@ IOError Reader::ReadLine(std::basic_string<_T>& pString)
 		}
 	}
 
-	pString = Lepra::StringUtilityTemplate<std::basic_string<_T> >::ToOwnCode(lUtf8Line);
+	pString = StringUtilityTemplate<std::basic_string<_T> >::ToOwnCode(lUtf8Line);
 
 	return (IO_OK);
 }

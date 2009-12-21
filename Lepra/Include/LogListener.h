@@ -40,21 +40,21 @@ public:
 		FORMAT_THREADEX		= (FORMAT_THREAD_CLASS|FORMAT_TYPE|FORMAT_TIME),
 	};
 
-	LogListener(Lepra::String pName, OutputFormat pFormat = FORMAT_THREADEX);
+	LogListener(str pName, OutputFormat pFormat = FORMAT_THREADEX);
 	virtual ~LogListener();
 	void AddLog(Log* pLog);
 	void RemoveLog(Log* pLog);
-	void OnLog(const Log* pOriginator, const String& pAccount, const String& pMessage, Log::LogLevel pLevel);
-	void OnLog(const Log* pOriginator, const String& pMessage, Log::LogLevel pLevel);
-	virtual void WriteLog(const String& pMessage, Log::LogLevel pLevel) = 0;
+	void OnLog(const Log* pOriginator, const str& pAccount, const str& pMessage, Log::LogLevel pLevel);
+	void OnLog(const Log* pOriginator, const str& pMessage, Log::LogLevel pLevel);
+	virtual void WriteLog(const str& pMessage, Log::LogLevel pLevel) = 0;
 	Log::LogLevel GetLevelThreashold() const;
 	void SetLevelThreashold(Log::LogLevel pType);
 
-	const Lepra::String& GetName() const;
+	const str& GetName() const;
 
 protected:
 	Log* mLog;
-	Lepra::String mName;
+	str mName;
 	Log::LogLevel mLevel;
 	OutputFormat mFormat;
 	int mLogCount;
@@ -65,7 +65,7 @@ class StdioConsoleLogListener: public LogListener
 {
 public:
 	StdioConsoleLogListener(OutputFormat pFormat = FORMAT_THREAD_CLASS);
-	void WriteLog(const String& pFullMessage, Log::LogLevel pLevel);
+	void WriteLog(const str& pFullMessage, Log::LogLevel pLevel);
 };
 
 
@@ -75,13 +75,13 @@ class InteractiveConsoleLogListener: public LogListener
 {
 public:
 	InteractiveConsoleLogListener(OutputFormat pFormat = FORMAT_THREAD_CLASS);
-	void SetAutoPrompt(const String& pPrompt);
+	void SetAutoPrompt(const str& pPrompt);
 	virtual void StepPage(int pPageCount);
-	virtual void OnLogRawMessage(const String& pText) = 0;
+	virtual void OnLogRawMessage(const str& pText) = 0;
 
 protected:
 	Lock mLock;
-	String mAutoPrompt;
+	str mAutoPrompt;
 };
 
 class InteractiveStdioConsoleLogListener: public InteractiveConsoleLogListener
@@ -90,8 +90,8 @@ public:
 	InteractiveStdioConsoleLogListener();
 
 protected:
-	void WriteLog(const String& pFullMessage, Log::LogLevel pLevel);
-	void OnLogRawMessage(const String& pText);
+	void WriteLog(const str& pFullMessage, Log::LogLevel pLevel);
+	void OnLogRawMessage(const str& pText);
 
 	StdioConsoleLogListener mStdioLogListener;
 };
@@ -104,7 +104,7 @@ public:
 	DebuggerLogListener(OutputFormat pFormat = FORMAT_THREAD_CLASS);
 
 protected:
-	void WriteLog(const String& pFullMessage, Log::LogLevel pLevel);
+	void WriteLog(const str& pFullMessage, Log::LogLevel pLevel);
 };
 
 
@@ -112,12 +112,12 @@ protected:
 class FileLogListener: public LogListener
 {
 public:
-	FileLogListener(const String& pFilename, OutputFormat pFormat = FORMAT_THREADEX);
+	FileLogListener(const str& pFilename, OutputFormat pFormat = FORMAT_THREADEX);
 	~FileLogListener();
 
 	File& GetFile();
 
-	void WriteLog(const String& pFullMessage, Log::LogLevel pLevel);
+	void WriteLog(const str& pFullMessage, Log::LogLevel pLevel);
 
 protected:
 	DiskFile mFile;
@@ -132,14 +132,14 @@ public:
 	~MemFileLogListener();
 
 	void Clear();
-	bool Dump(const String& pFilename);
+	bool Dump(const str& pFilename);
 	bool Dump(File& pFile);
 	bool Dump(LogListener& pLogListener, Log::LogLevel pLevel);
 
 protected:
 	bool Dump(File* pFile, LogListener* pLogListener, Log::LogLevel pLevel);
 
-	void WriteLog(const String& pFullMessage, Log::LogLevel pLevel);
+	void WriteLog(const str& pFullMessage, Log::LogLevel pLevel);
 
 	MemFile mFile;
 	uint64 mMaxSize;

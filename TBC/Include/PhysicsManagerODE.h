@@ -29,43 +29,43 @@ public:
 	PhysicsManagerODE();
 	virtual ~PhysicsManagerODE();
 
-	virtual BodyID CreateSphere(bool pIsRoot, const Lepra::TransformationF& pTransform, Lepra::float32 pMass,
-		Lepra::float32 pRadius, BodyType pType, Lepra::float32 pFriction = 1, Lepra::float32 pBounce = 0,
+	virtual BodyID CreateSphere(bool pIsRoot, const TransformationF& pTransform, float32 pMass,
+		float32 pRadius, BodyType pType, float32 pFriction = 1, float32 pBounce = 0,
 		TriggerListener* pTriggerListener = 0, ForceFeedbackListener* pListener = 0);
-	virtual BodyID CreateCylinder(bool pIsRoot, const Lepra::TransformationF& pTransform, Lepra::float32 pMass,
-		Lepra::float32 pRadius, Lepra::float32 pLength, BodyType pType, Lepra::float32 pFriction = 1,
-		Lepra::float32 pBounce = 0, TriggerListener* pTriggerListener = 0, ForceFeedbackListener* pListener = 0);
-	virtual BodyID CreateCapsule(bool pIsRoot, const Lepra::TransformationF& pTransform, Lepra::float32 pMass,
-		Lepra::float32 pRadius, Lepra::float32 pLength, BodyType pType, Lepra::float32 pFriction = 1,
-		Lepra::float32 pBounce = 0, TriggerListener* pTriggerListener = 0, ForceFeedbackListener* pListener = 0);
-	virtual BodyID CreateBox(bool pIsRoot, const Lepra::TransformationF& pTransform, Lepra::float32 pMass,
-		const Lepra::Vector3D<Lepra::float32>& pSize, BodyType pType, Lepra::float32 pFriction = 1,
-		Lepra::float32 pBounce = 0, TriggerListener* pTriggerListener = 0, ForceFeedbackListener* pListener = 0);
+	virtual BodyID CreateCylinder(bool pIsRoot, const TransformationF& pTransform, float32 pMass,
+		float32 pRadius, float32 pLength, BodyType pType, float32 pFriction = 1,
+		float32 pBounce = 0, TriggerListener* pTriggerListener = 0, ForceFeedbackListener* pListener = 0);
+	virtual BodyID CreateCapsule(bool pIsRoot, const TransformationF& pTransform, float32 pMass,
+		float32 pRadius, float32 pLength, BodyType pType, float32 pFriction = 1,
+		float32 pBounce = 0, TriggerListener* pTriggerListener = 0, ForceFeedbackListener* pListener = 0);
+	virtual BodyID CreateBox(bool pIsRoot, const TransformationF& pTransform, float32 pMass,
+		const Vector3D<float32>& pSize, BodyType pType, float32 pFriction = 1,
+		float32 pBounce = 0, TriggerListener* pTriggerListener = 0, ForceFeedbackListener* pListener = 0);
 	virtual bool Attach(BodyID pStaticBody, BodyID pMainBody);
 
 	// Tri meshes are always static.
-	virtual BodyID CreateTriMesh(bool pIsRoot, Lepra::uint32 pVertexCount, const float* pVertices,
-		Lepra::uint32 pTriangleCount, const Lepra::uint32* pIndices,
-		const Lepra::TransformationF& pTransform, Lepra::float32 pFriction = 1,
-		Lepra::float32 pBounce = 0, TriggerListener* pTriggerListener = 0,
+	virtual BodyID CreateTriMesh(bool pIsRoot, unsigned pVertexCount, const float* pVertices,
+		unsigned pTriangleCount, const Lepra::uint32* pIndices,
+		const TransformationF& pTransform, float32 pFriction = 1,
+		float32 pBounce = 0, TriggerListener* pTriggerListener = 0,
 		ForceFeedbackListener* pListener = 0);
 
 	virtual bool IsStaticBody(BodyID pBodyId) const;
 
 	virtual void DeleteBody(BodyID pBodyId);
 
-	Lepra::Vector3DF GetBodyPosition(BodyID pBodyId) const;
-	Lepra::QuaternionF GetBodyOrientation(BodyID pBodyId) const;
-	void GetBodyTransform(BodyID pBodyId, Lepra::TransformationF& pTransform) const;
-	void SetBodyTransform(BodyID pBodyId, const Lepra::TransformationF& pTransform);
-	void GetBodyVelocity(BodyID pBodyId, Lepra::Vector3DF& pVelocity) const;
-	void SetBodyVelocity(BodyID pBodyId, const Lepra::Vector3DF& pVelocity);
-	void GetBodyAcceleration(BodyID pBodyId, Lepra::Vector3DF& pAcceleration) const;
-	void SetBodyAcceleration(BodyID pBodyId, const Lepra::Vector3DF& pAcceleration);
-	void GetBodyAngularVelocity(BodyID pBodyId, Lepra::Vector3DF& pAngularVelocity) const;
-	void SetBodyAngularVelocity(BodyID pBodyId, const Lepra::Vector3DF& pAngularVelocity);
-	void GetBodyAngularAcceleration(BodyID pBodyId, Lepra::Vector3DF& pAngularAcceleration) const;
-	void SetBodyAngularAcceleration(BodyID pBodyId, const Lepra::Vector3DF& pAngularAcceleration);
+	Vector3DF GetBodyPosition(BodyID pBodyId) const;
+	QuaternionF GetBodyOrientation(BodyID pBodyId) const;
+	void GetBodyTransform(BodyID pBodyId, TransformationF& pTransform) const;
+	void SetBodyTransform(BodyID pBodyId, const TransformationF& pTransform);
+	void GetBodyVelocity(BodyID pBodyId, Vector3DF& pVelocity) const;
+	void SetBodyVelocity(BodyID pBodyId, const Vector3DF& pVelocity);
+	void GetBodyAcceleration(BodyID pBodyId, Vector3DF& pAcceleration) const;
+	void SetBodyAcceleration(BodyID pBodyId, const Vector3DF& pAcceleration);
+	void GetBodyAngularVelocity(BodyID pBodyId, Vector3DF& pAngularVelocity) const;
+	void SetBodyAngularVelocity(BodyID pBodyId, const Vector3DF& pAngularVelocity);
+	void GetBodyAngularAcceleration(BodyID pBodyId, Vector3DF& pAngularAcceleration) const;
+	void SetBodyAngularAcceleration(BodyID pBodyId, const Vector3DF& pAngularAcceleration);
 
 	virtual float GetBodyMass(BodyID pBodyId);
 	virtual void MassAdjustBody(BodyID pBodyId);
@@ -79,60 +79,60 @@ public:
 	// affect the simulation. It's only purpose is to tell the listener
 	// when an object intersects the trigger volume.
 	//
-	virtual TriggerID CreateSphereTrigger(const Lepra::TransformationF& pTransform,
-										  Lepra::float32 pRadius,
+	virtual TriggerID CreateSphereTrigger(const TransformationF& pTransform,
+										  float32 pRadius,
 										  TriggerListener* pListener);
-	virtual TriggerID CreateCylinderTrigger(const Lepra::TransformationF& pTransform,
-											Lepra::float32 pRadius,
-											Lepra::float32 pLength,
+	virtual TriggerID CreateCylinderTrigger(const TransformationF& pTransform,
+											float32 pRadius,
+											float32 pLength,
 											TriggerListener* pListener);
-	virtual TriggerID CreateCapsuleTrigger(const Lepra::TransformationF& pTransform,
-											Lepra::float32 pRadius,
-											Lepra::float32 pLength,
+	virtual TriggerID CreateCapsuleTrigger(const TransformationF& pTransform,
+											float32 pRadius,
+											float32 pLength,
 											TriggerListener* pListener);
-	virtual TriggerID CreateBoxTrigger(const Lepra::TransformationF& pTransform,
-										const Lepra::Vector3D<Lepra::float32>& pSize,
+	virtual TriggerID CreateBoxTrigger(const TransformationF& pTransform,
+										const Vector3D<float32>& pSize,
 										TriggerListener* pListener);
-	virtual TriggerID CreateRayTrigger(const Lepra::TransformationF& pTransform,
-										const Lepra::Vector3D<Lepra::float32>& pFromPos,
-										const Lepra::Vector3D<Lepra::float32>& pToPos,
+	virtual TriggerID CreateRayTrigger(const TransformationF& pTransform,
+										const Vector3D<float32>& pFromPos,
+										const Vector3D<float32>& pToPos,
 										TriggerListener* pListener);
 
 	virtual void DeleteTrigger(TriggerID pTriggerID);
 
 	virtual ForceFeedbackListener* GetForceFeedbackListener(BodyID pBody);
 
-	virtual void GetTriggerTransform(TriggerID pTriggerID, Lepra::TransformationF& pTransform);
-	virtual void SetTriggerTransform(TriggerID pTriggerID, const Lepra::TransformationF& pTransform);
+	virtual void GetTriggerTransform(TriggerID pTriggerID, TransformationF& pTransform);
+	virtual void SetTriggerTransform(TriggerID pTriggerID, const TransformationF& pTransform);
 
 	//
 	// Create/delete joints.
 	//
 	virtual JointID CreateBallJoint(BodyID pBody1, 
 									BodyID pBody2, 
-									const Lepra::Vector3D<Lepra::float32>& pAnchorPos);
+									const Vector3D<float32>& pAnchorPos);
 	virtual JointID CreateHingeJoint(BodyID pBody1, 
 									 BodyID pBody2, 
-									 const Lepra::Vector3D<Lepra::float32>& pAnchorPos, 
-									 const Lepra::Vector3D<Lepra::float32>& pAxis);
+									 const Vector3D<float32>& pAnchorPos, 
+									 const Vector3D<float32>& pAxis);
 	virtual JointID CreateHinge2Joint(BodyID pBody1, 
 									  BodyID pBody2, 
-									  const Lepra::Vector3D<Lepra::float32>& pAnchorPos, 
-									  const Lepra::Vector3D<Lepra::float32>& pAxis1, 
-									  const Lepra::Vector3D<Lepra::float32>& pAxis2);
+									  const Vector3D<float32>& pAnchorPos, 
+									  const Vector3D<float32>& pAxis1, 
+									  const Vector3D<float32>& pAxis2);
 	virtual JointID CreateUniversalJoint(BodyID pBody1, 
 										 BodyID pBody2, 
-										 const Lepra::Vector3D<Lepra::float32>& pAnchorPos, 
-										 const Lepra::Vector3D<Lepra::float32>& pAxis1, 
-										 const Lepra::Vector3D<Lepra::float32>& pAxis2);
+										 const Vector3D<float32>& pAnchorPos, 
+										 const Vector3D<float32>& pAxis1, 
+										 const Vector3D<float32>& pAxis2);
 	virtual JointID CreateSliderJoint(BodyID pBody1, 
 									  BodyID pBody2, 
-									  const Lepra::Vector3D<Lepra::float32>& pAxis);
+									  const Vector3D<float32>& pAxis);
 	virtual JointID CreateFixedJoint(BodyID pBody1, 
 									 BodyID pBody2);
 	virtual JointID CreateAngularMotorJoint(BodyID pBody1, 
 											BodyID pBody2, 
-											const Lepra::Vector3D<Lepra::float32>& pAxis);
+											const Vector3D<float32>& pAxis);
 
 	virtual void DeleteJoint(JointID pJointId);
 
@@ -147,60 +147,60 @@ public:
 	bool SetJoint3Diff(BodyID pBodyId, JointID pJointId, const Joint3Diff& pDiff);
 
 	// Returns true on success, false if joint is of wrong type.
-	virtual bool GetAnchorPos(JointID pJointId, Lepra::Vector3D<Lepra::float32>& pAnchorPos) const;
-	virtual bool GetAxis1(JointID pJointId, Lepra::Vector3D<Lepra::float32>& pAxis1) const;
-	virtual bool GetAxis2(JointID pJointId, Lepra::Vector3D<Lepra::float32>& pAxis1) const;
-	virtual bool GetAngle1(JointID pJointId, Lepra::float32& pAngle) const;
-	virtual bool GetAngle2(JointID pJointId, Lepra::float32& pAngle) const;
-	virtual bool GetAngleRate1(JointID pJointId, Lepra::float32& pAngleRate) const;
-	virtual bool GetAngleRate2(JointID pJointId, Lepra::float32& pAngleRate) const;
-	virtual bool SetAngle1(BodyID pBodyId, JointID pJointId, Lepra::float32 pAngle);
+	virtual bool GetAnchorPos(JointID pJointId, Vector3D<float32>& pAnchorPos) const;
+	virtual bool GetAxis1(JointID pJointId, Vector3D<float32>& pAxis1) const;
+	virtual bool GetAxis2(JointID pJointId, Vector3D<float32>& pAxis1) const;
+	virtual bool GetAngle1(JointID pJointId, float32& pAngle) const;
+	virtual bool GetAngle2(JointID pJointId, float32& pAngle) const;
+	virtual bool GetAngleRate1(JointID pJointId, float32& pAngleRate) const;
+	virtual bool GetAngleRate2(JointID pJointId, float32& pAngleRate) const;
+	virtual bool SetAngle1(BodyID pBodyId, JointID pJointId, float32 pAngle);
 
-	virtual bool SetAngularMotorAngle(JointID pJointId, Lepra::float32 pAngle);
-	virtual bool SetAngularMotorSpeed(JointID pJointId, Lepra::float32 pSpeed);
-	virtual bool SetAngularMotorMaxForce(JointID pJointId, Lepra::float32 pMaxForce);
-	virtual bool SetAngularMotorRoll(JointID pJointId, Lepra::float32 pMaxForce, Lepra::float32 pTargetVelocity);
-	virtual bool GetAngularMotorRoll(JointID pJointId, Lepra::float32& pMaxForce, Lepra::float32& pTargetVelocity);
-	virtual bool SetAngularMotorTurn(JointID pJointId, Lepra::float32 pMaxForce, Lepra::float32 pTargetVelocity);
-	virtual bool GetAngularMotorAngle(JointID pJointId, Lepra::float32& pAngle) const;
-	virtual bool GetAngularMotorSpeed(JointID pJointId, Lepra::float32& pSpeed) const;
-	virtual bool GetAngularMotorMaxForce(JointID pJointId, Lepra::float32& pMaxForce) const;
+	virtual bool SetAngularMotorAngle(JointID pJointId, float32 pAngle);
+	virtual bool SetAngularMotorSpeed(JointID pJointId, float32 pSpeed);
+	virtual bool SetAngularMotorMaxForce(JointID pJointId, float32 pMaxForce);
+	virtual bool SetAngularMotorRoll(JointID pJointId, float32 pMaxForce, float32 pTargetVelocity);
+	virtual bool GetAngularMotorRoll(JointID pJointId, float32& pMaxForce, float32& pTargetVelocity);
+	virtual bool SetAngularMotorTurn(JointID pJointId, float32 pMaxForce, float32 pTargetVelocity);
+	virtual bool GetAngularMotorAngle(JointID pJointId, float32& pAngle) const;
+	virtual bool GetAngularMotorSpeed(JointID pJointId, float32& pSpeed) const;
+	virtual bool GetAngularMotorMaxForce(JointID pJointId, float32& pMaxForce) const;
 
-	virtual bool SetJointParams(JointID pJointId, Lepra::float32 pLowStop, Lepra::float32 pHighStop, Lepra::float32 pBounce);
-	virtual bool GetJointParams(JointID pJointId, Lepra::float32& pLowStop, Lepra::float32& pHighStop, Lepra::float32& pBounce) const;
-	virtual bool SetSuspension(JointID pJointId, Lepra::float32 pFrameTime, Lepra::float32 pSpringConstant, Lepra::float32 pDampingConstant);
-	virtual bool GetSuspension(JointID pJointId, Lepra::float32& pErp, Lepra::float32& pCfm) const;
+	virtual bool SetJointParams(JointID pJointId, float32 pLowStop, float32 pHighStop, float32 pBounce);
+	virtual bool GetJointParams(JointID pJointId, float32& pLowStop, float32& pHighStop, float32& pBounce) const;
+	virtual bool SetSuspension(JointID pJointId, float32 pFrameTime, float32 pSpringConstant, float32 pDampingConstant);
+	virtual bool GetSuspension(JointID pJointId, float32& pErp, float32& pCfm) const;
 
-	virtual bool GetSliderPos(JointID pJointId, Lepra::float32& pPos) const;
-	virtual bool GetSliderSpeed(JointID pJointId, Lepra::float32& pSpeed) const;
+	virtual bool GetSliderPos(JointID pJointId, float32& pPos) const;
+	virtual bool GetSliderSpeed(JointID pJointId, float32& pSpeed) const;
 
 	// Adding a force to a joint is only possible on slider joints.
-	virtual bool AddJointForce(JointID pJointId, Lepra::float32 pForce);
-	virtual bool AddJointTorque(JointID pJointId, Lepra::float32 pTorque);
-	virtual bool AddJointTorque(JointID pJointId, Lepra::float32 pTorque1, Lepra::float32 pTorque2);
+	virtual bool AddJointForce(JointID pJointId, float32 pForce);
+	virtual bool AddJointTorque(JointID pJointId, float32 pTorque);
+	virtual bool AddJointTorque(JointID pJointId, float32 pTorque1, float32 pTorque2);
 
-	virtual void AddForce            (BodyID pBodyId, const Lepra::Vector3D<Lepra::float32>& pForce);
-	virtual void AddTorque           (BodyID pBodyId, const Lepra::Vector3D<Lepra::float32>& pTorque);
-	virtual void AddRelForce         (BodyID pBodyId, const Lepra::Vector3D<Lepra::float32>& pForce);
-	virtual void AddRelTorque        (BodyID pBodyId, const Lepra::Vector3D<Lepra::float32>& pTorque);
-	virtual void AddForceAtPos       (BodyID pBodyId, const Lepra::Vector3D<Lepra::float32>& pForce,
-													   const Lepra::Vector3D<Lepra::float32>& pPos);
-	virtual void AddForceAtRelPos    (BodyID pBodyId, const Lepra::Vector3D<Lepra::float32>& pForce,
-													   const Lepra::Vector3D<Lepra::float32>& pPos);
-	virtual void AddRelForceAtPos    (BodyID pBodyId, const Lepra::Vector3D<Lepra::float32>& pForce,
-													   const Lepra::Vector3D<Lepra::float32>& pPos);
-	virtual void AddRelForceAtRelPos (BodyID pBodyId, const Lepra::Vector3D<Lepra::float32>& pForce,
-													   const Lepra::Vector3D<Lepra::float32>& pPos);
+	virtual void AddForce            (BodyID pBodyId, const Vector3D<float32>& pForce);
+	virtual void AddTorque           (BodyID pBodyId, const Vector3D<float32>& pTorque);
+	virtual void AddRelForce         (BodyID pBodyId, const Vector3D<float32>& pForce);
+	virtual void AddRelTorque        (BodyID pBodyId, const Vector3D<float32>& pTorque);
+	virtual void AddForceAtPos       (BodyID pBodyId, const Vector3D<float32>& pForce,
+													   const Vector3D<float32>& pPos);
+	virtual void AddForceAtRelPos    (BodyID pBodyId, const Vector3D<float32>& pForce,
+													   const Vector3D<float32>& pPos);
+	virtual void AddRelForceAtPos    (BodyID pBodyId, const Vector3D<float32>& pForce,
+													   const Vector3D<float32>& pPos);
+	virtual void AddRelForceAtRelPos (BodyID pBodyId, const Vector3D<float32>& pForce,
+													   const Vector3D<float32>& pPos);
 
-	virtual void RestrictBody(BodyID pBodyId, Lepra::float32 pMaxSpeed, Lepra::float32 pMaxAngularSpeed);
+	virtual void RestrictBody(BodyID pBodyId, float32 pMaxSpeed, float32 pMaxAngularSpeed);
 
 	virtual void ActivateGravity(BodyID pBodyId);
 	virtual void DeactivateGravity(BodyID pBodyId);
-	virtual void SetGravity(const Lepra::Vector3D<Lepra::float32>& pGravity);
-	virtual Lepra::Vector3DF GetGravity() const;
+	virtual void SetGravity(const Vector3D<float32>& pGravity);
+	virtual Vector3DF GetGravity() const;
 
-	virtual void StepAccurate(Lepra::float32 pStepSize);
-	virtual void StepFast(Lepra::float32 pStepSize);
+	virtual void StepAccurate(float32 pStepSize);
+	virtual void StepFast(float32 pStepSize);
 
 	virtual const BodySet& GetIdledBodies() const;
 
@@ -210,7 +210,7 @@ private:
 
 	void NormalizeRotation(BodyID pObject);
 
-	void AdjustOrientation(dGeomID pGeom, Lepra::QuaternionF& pQ, bool pSetter) const;
+	void AdjustOrientation(dGeomID pGeom, QuaternionF& pQ, bool pSetter) const;
 
 	enum JointType
 	{
@@ -248,8 +248,8 @@ private:
 		float mGeometryData[3];
 		dTriMeshDataID mTriMeshID;
 		float mMass;
-		Lepra::float32 mFriction;
-		Lepra::float32 mBounce;
+		float32 mFriction;
+		float32 mBounce;
 		void* mUserData;
 
 		// The only thing that differs between standard bodies and triggers
@@ -291,8 +291,8 @@ private:
 	bool GetBallDiff(BodyID pBodyId, JointID pJointId, Joint3Diff& pDiff) const;
 	bool SetBallDiff(BodyID pBodyId, JointID pJointId, const Joint3Diff& pDiff);
 
-	bool CheckBodies(BodyID& pBody1, BodyID& pBody2, Object*& pObject1, Object*& pObject2, const Lepra::tchar* pFunction);
-	bool CheckBodies2(BodyID& pBody1, BodyID& pBody2, Object*& pObject1, Object*& pObject2, const Lepra::tchar* pFunction);
+	bool CheckBodies(BodyID& pBody1, BodyID& pBody2, Object*& pObject1, Object*& pObject2, const tchar* pFunction);
+	bool CheckBodies2(BodyID& pBody1, BodyID& pBody2, Object*& pObject1, Object*& pObject2, const tchar* pFunction);
 	
 	void DoForceFeedback();
 
@@ -307,7 +307,7 @@ private:
 	JointTable mJointTable;
 	JointList mFeedbackJointList;
 
-	Lepra::FastAllocator<JointInfo> mJointInfoAllocator;
+	FastAllocator<JointInfo> mJointInfoAllocator;
 
 	LOG_CLASS_DECLARE();
 };

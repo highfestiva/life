@@ -13,7 +13,7 @@
 namespace UiTbc
 {
 
-class ProgressBar: public Window, public Lepra::ProgressCallback
+class ProgressBar: public Window, public ProgressCallback
 {
 	typedef Window Parent;
 public:
@@ -26,15 +26,15 @@ public:
 
 
 	ProgressBar(Style pStyle = STYLE_NORMAL,
-				const Lepra::Color& pBodyColor = Lepra::Color(192, 192, 192),
-				const Lepra::Color& pProgressColorLeft  = Lepra::Color(0, 0, 255),
-				const Lepra::Color& pProgressColorRight = Lepra::Color(0, 0, 255),
-				const Lepra::String& pName = _T("ProgressBar"));
+				const Color& pBodyColor = Color(192, 192, 192),
+				const Color& pProgressColorLeft  = Color(0, 0, 255),
+				const Color& pProgressColorRight = Color(0, 0, 255),
+				const str& pName = _T("ProgressBar"));
 
 	ProgressBar(Style pStyle,
 				Painter::ImageID pBackgroundImageID,
 				Painter::ImageID pProgressImageID,
-				const Lepra::String& pName = _T("ProgressBar"));
+				const str& pName = _T("ProgressBar"));
 
 	inline Style GetStyle();
 
@@ -60,8 +60,8 @@ private:
 
 	bool mUserDefinedGfx;
 
-	Lepra::Color mProgressColorLeft;
-	Lepra::Color mProgressColorRight;
+	Color mProgressColorLeft;
+	Color mProgressColorRight;
 
 	Painter::ImageID mProgressImageID;
 };

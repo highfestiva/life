@@ -10,10 +10,10 @@
 namespace UiTbc
 {
 ProgressBar::ProgressBar(Style pStyle,
-						 const Lepra::Color& pBodyColor,
-						 const Lepra::Color& pProgressColorLeft,
-						 const Lepra::Color& pProgressColorRight,
-						 const Lepra::String& pName) :
+						 const Color& pBodyColor,
+						 const Color& pProgressColorLeft,
+						 const Color& pProgressColorRight,
+						 const str& pName) :
 	Window(BORDER_SUNKEN | BORDER_LINEARSHADING, 2, pBodyColor, pName),
 	mStyle(pStyle),
 	mBoxSize(16),
@@ -29,7 +29,7 @@ ProgressBar::ProgressBar(Style pStyle,
 ProgressBar::ProgressBar(Style pStyle,
 						 Painter::ImageID pBackgroundImageID,
 						 Painter::ImageID pProgressImageID,
-						 const Lepra::String& pName) :
+						 const str& pName) :
 	Window(pBackgroundImageID, pName),
 	mStyle(pStyle),
 	mBoxSize(16),
@@ -88,10 +88,10 @@ void ProgressBar::Repaint(Painter* pPainter)
 	
 	pPainter->PushAttrib(Painter::ATTR_ALL);
 
-	Lepra::PixelRect lRect = GetClientRect();
+	PixelRect lRect = GetClientRect();
 	pPainter->SetClippingRect(lRect);
 
-	int lProgress = (int)floor(((Lepra::float64)mPos / (Lepra::float64)mMax) * (Lepra::float64)lRect.GetWidth() + 0.5);
+	int lProgress = (int)floor(((float64)mPos / (float64)mMax) * (float64)lRect.GetWidth() + 0.5);
 	int lNumBoxes = lProgress / (mBoxSize + 1);
 	if (lProgress % (mBoxSize + 1) > 0)
 	{
@@ -107,7 +107,7 @@ void ProgressBar::Repaint(Painter* pPainter)
 		}
 		else
 		{
-			Lepra::PixelRect lBoxRect(lRect.mLeft, lRect.mTop, lRect.mLeft + (mBoxSize + 1) * lNumBoxes, lRect.mBottom);
+			PixelRect lBoxRect(lRect.mLeft, lRect.mTop, lRect.mLeft + (mBoxSize + 1) * lNumBoxes, lRect.mBottom);
 			lIMan->DrawImage(mProgressImageID, lBoxRect);
 		}
 	}
@@ -115,7 +115,7 @@ void ProgressBar::Repaint(Painter* pPainter)
 	{
 		if (mStyle == STYLE_NORMAL)
 		{
-			Lepra::Color lRight(mProgressColorLeft, mProgressColorRight, mPos/(float)mMax);
+			Color lRight(mProgressColorLeft, mProgressColorRight, mPos/(float)mMax);
 			lRect.mRight = lRect.mLeft + lProgress;
 			pPainter->SetColor(mProgressColorLeft, 0);
 			pPainter->SetColor(lRight, 1);
@@ -128,7 +128,7 @@ void ProgressBar::Repaint(Painter* pPainter)
 			for (int i = 0; i < lNumBoxes; i++)
 			{
 				int x = i * (mBoxSize + 1);
-				pPainter->SetColor(Lepra::Color(mProgressColorLeft, mProgressColorRight, (x + (mBoxSize + 1) * 0.5f) / lRect.GetWidth()));
+				pPainter->SetColor(Color(mProgressColorLeft, mProgressColorRight, (x + (mBoxSize + 1) * 0.5f) / lRect.GetWidth()));
 				pPainter->SetAlphaValue(mProgressColorLeft.mAlpha);
 				pPainter->FillRect(x + lRect.mLeft, lRect.mTop, x + lRect.mLeft + mBoxSize, lRect.mBottom);
 			}

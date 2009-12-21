@@ -13,9 +13,9 @@ namespace Lepra
 
 
 
-STR_UTIL_TEMPLATE typename STR_UTIL_QUAL::StringVector STR_UTIL_QUAL::Split(const _String& pString, const _String& pCharDelimitors, int pSplitMaxCount)
+STR_UTIL_TEMPLATE typename STR_UTIL_QUAL::strvec STR_UTIL_QUAL::Split(const _String& pString, const _String& pCharDelimitors, int pSplitMaxCount)
 {
-	StringVector lTokenVector;
+	strvec lTokenVector;
 	size_t lLastPosition = 0;
 	// Find next delimiter at end of token
 	size_t lCurrentPosition = pString.find_first_of(pCharDelimitors, lLastPosition);
@@ -35,16 +35,16 @@ STR_UTIL_TEMPLATE typename STR_UTIL_QUAL::StringVector STR_UTIL_QUAL::Split(cons
 		lTokenVector.push_back(pString.substr(lLastPosition));
 	}
 	// If the string ends with a delimitor.
-	else if (pString.length() > 0 && pCharDelimitors.find_first_of(pString[pString.length()-1]) != String::npos)
+	else if (pString.length() > 0 && pCharDelimitors.find_first_of(pString[pString.length()-1]) != str::npos)
 	{
-		lTokenVector.push_back(String());
+		lTokenVector.push_back(str());
 	}
 	return (lTokenVector);
 }
 
-STR_UTIL_TEMPLATE typename STR_UTIL_QUAL::StringVector STR_UTIL_QUAL::BlockSplit(const _String& pString, const _String& pCharDelimitors, bool pKeepQuotes, bool pIsCString, int pSplitMaxCount)
+STR_UTIL_TEMPLATE typename STR_UTIL_QUAL::strvec STR_UTIL_QUAL::BlockSplit(const _String& pString, const _String& pCharDelimitors, bool pKeepQuotes, bool pIsCString, int pSplitMaxCount)
 {
-	StringVector lTokenVector;
+	strvec lTokenVector;
 	_String lCurrentToken;
 	bool lTakeNextString = true;
 	bool lInsideString = false;
@@ -64,7 +64,7 @@ STR_UTIL_TEMPLATE typename STR_UTIL_QUAL::StringVector STR_UTIL_QUAL::BlockSplit
 				lCurrentToken.push_back(pString[x]);
 			}
 		}
-		else if (!lInsideString && pCharDelimitors.find_first_of(pString[x]) != String::npos)
+		else if (!lInsideString && pCharDelimitors.find_first_of(pString[x]) != str::npos)
 		{
 			if (lTakeNextString)
 			{
@@ -95,7 +95,7 @@ STR_UTIL_TEMPLATE typename STR_UTIL_QUAL::StringVector STR_UTIL_QUAL::BlockSplit
 	return (lTokenVector);
 }
 
-STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::Join(const StringVector& pStringVector, const _String& pJoinString, size_t pStartIndex, size_t pEndIndex)
+STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::Join(const strvec& pStringVector, const _String& pJoinString, size_t pStartIndex, size_t pEndIndex)
 {
 	_String lResultString;
 	for (size_t x = pStartIndex; x < pStringVector.size() && x < pEndIndex; ++x)
@@ -264,11 +264,11 @@ STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::ReplaceAll(const _String& pString, type
 	return (lString);
 }
 
-STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::ReplaceAll(const _String& pString, const _String& pFrom, const String& pTo)
+STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::ReplaceAll(const _String& pString, const _String& pFrom, const _String& pTo)
 {
 	_String lString = pString;
 	_String::size_type lPosition;
-	while ((lPosition = lString.find(pFrom)) != Lepra::String::npos)
+	while ((lPosition = lString.find(pFrom)) != str::npos)
 	{
 		lString.replace(lPosition, pFrom.length(), pTo);
 	}
@@ -292,7 +292,7 @@ STR_UTIL_TEMPLATE size_t STR_UTIL_QUAL::FindPreviousWord(const _String& pLine, c
 	size_t lReverseIndex = pLine.length()-pStartIndex;
 	size_t lIndex = lReverseLine.find_first_not_of(pDelimitors, lReverseIndex);
 	lIndex = lReverseLine.find_first_of(pDelimitors, lIndex);
-	if (lIndex != Lepra::String::npos)
+	if (lIndex != str::npos)
 	{
 		lReverseIndex = lIndex;
 	}
@@ -308,7 +308,7 @@ STR_UTIL_TEMPLATE size_t STR_UTIL_QUAL::FindNextWord(const _String& pLine, const
 {
 	size_t lIndex = pLine.find_first_of(pDelimitors, pStartIndex);
 	lIndex = pLine.find_first_not_of(pDelimitors, lIndex);
-	if (lIndex != Lepra::String::npos)
+	if (lIndex != str::npos)
 	{
 		pStartIndex = lIndex;
 	}
@@ -366,7 +366,7 @@ STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::ReplaceCtrlChars(const _String& pString
 STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::DumpData(const uint8* pData, size_t pLength)
 {
 	const char lHexTable[] = "0123456789ABCDEF";
-	AnsiString lDataString((const char*)pData, pLength*2);
+	astr lDataString((const char*)pData, pLength*2);
 	for (size_t x = 0; x < pLength; ++x)
 	{
 		lDataString[x*2+0] = lHexTable[pData[x]>>4];
@@ -377,16 +377,16 @@ STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::DumpData(const uint8* pData, size_t pLe
 
 #ifdef LEPRA_UNICODE
 
-STR_UTIL_TEMPLATE const UnicodeString STR_UTIL_QUAL::ToCurrentCode(const _String& pString)
+STR_UTIL_TEMPLATE const wstr STR_UTIL_QUAL::ToCurrentCode(const _String& pString)
 {
-	return (UnicodeStringUtility::ToOwnCode(pString));
+	return (wstrutil::ToOwnCode(pString));
 }
 
 #else // !LEPRA_UNICODE
 
-STR_UTIL_TEMPLATE const AnsiString STR_UTIL_QUAL::ToCurrentCode(const _String& pString)
+STR_UTIL_TEMPLATE const astr STR_UTIL_QUAL::ToCurrentCode(const _String& pString)
 {
-	return (AnsiStringUtility::ToOwnCode(pString));
+	return (astrutil::ToOwnCode(pString));
 }
 
 #endif // LEPRA_UNICODE/!LEPRA_UNICODE

@@ -185,18 +185,21 @@ int PackerOctetString::Unpack(uint8* pDestination, const uint8* pSource, int pSi
 
 
 
-int PackerUnicodeString::Pack(uint8* pDestination, const UnicodeString& pSource)
+int PackerUnicodeString::Pack(uint8* pDestination, const wstr& pSource)
 {
-	const Lepra::AnsiString lUtf8 = Lepra::AnsiStringUtility::ToOwnCode(pSource);
-	size_t lCharCount = lUtf8.length()+1;
-	pDestination[0] = (uint8)lCharCount;
-	pDestination[1] = (uint8)(lCharCount>>8);
-	::memcpy(pDestination+2, lUtf8.c_str(), lCharCount-1);
-	pDestination[2+lCharCount-1] = '\0';
+	const astr lUtf8 = astrutil::ToOwnCode(pSource);
+	const size_t lCharCount = lUtf8.length()+1;
+	if (pDestination)
+	{
+		pDestination[0] = (uint8)lCharCount;
+		pDestination[1] = (uint8)(lCharCount>>8);
+		::memcpy(pDestination+2, lUtf8.c_str(), lCharCount-1);
+		pDestination[2+lCharCount-1] = '\0';
+	}
 	return ((2+(int)lCharCount+3) & (~3));
 }
 
-int PackerUnicodeString::Unpack(UnicodeString* pDestination, const uint8* pSource, int pSize)
+int PackerUnicodeString::Unpack(wstr* pDestination, const uint8* pSource, int pSize)
 {
 	int lSize = -1;
 	if (pSize >= 3)
@@ -206,7 +209,7 @@ int PackerUnicodeString::Unpack(UnicodeString* pDestination, const uint8* pSourc
 		{
 			lSize = (2+lCharCount+3) & (~3);
 			// TODO: catch UTF-8 encoding errors (might be DoS attempts).
-			const Lepra::UnicodeString lConversion = Lepra::UnicodeStringUtility::ToOwnCode((const char*)pSource+2);
+			const wstr lConversion = wstrutil::ToOwnCode((const char*)pSource+2);
 			if (pDestination)
 			{
 				*pDestination = lConversion;

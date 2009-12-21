@@ -12,11 +12,11 @@
 
 using namespace Lepra;
 
-void ReportTestResult(const Lepra::LogDecorator& pLog, const String& pTestName, const String& pContext, bool pResult);
+void ReportTestResult(const Lepra::LogDecorator& pLog, const str& pTestName, const str& pContext, bool pResult);
 
 /*bool TestSkipList(const LogDecorator& pAccount)
 {
-	String lContext;
+	str lContext;
 	bool lTestOk = true;
 
 	SkipList<int, int> lSkipList;

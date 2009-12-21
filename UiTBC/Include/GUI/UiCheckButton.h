@@ -16,14 +16,14 @@ class CheckButton : public Button
 {
 public:
 
-	CheckButton(const Lepra::Color& pBodyColor, const Lepra::String& pName);
+	CheckButton(const Color& pBodyColor, const str& pName);
 	CheckButton(Painter::ImageID pReleasedImageID,
 		    Painter::ImageID pPressedImageID,
 		    Painter::ImageID pReleasedActiveImageID,	// Mouse over.
 		    Painter::ImageID pPressedActiveImageID,
 		    Painter::ImageID pReleasingImageID,
 		    Painter::ImageID pPressingImageID,
-		    const Lepra::String& pName);
+		    const str& pName);
 
 	virtual ~CheckButton();
 
@@ -39,16 +39,16 @@ protected:
 private:
 
 	static Painter::ImageID smCheckIconID;
-	static const Lepra::uint8 smIconCheck[];
+	static const uint8 smIconCheck[];
 	static Painter* smPrevPainter;
 
 	bool mUserDefinedGfx;
 	bool mUpdateSize;
 
-	Lepra::Color mBodyColor;
-	Lepra::Color mLightColor;
-	Lepra::Color mDarkColor1;
-	Lepra::Color mDarkColor2;
+	Color mBodyColor;
+	Color mLightColor;
+	Color mDarkColor1;
+	Color mDarkColor2;
 
 	Painter::ImageID mReleasedID;
 	Painter::ImageID mReleasedActiveID;
