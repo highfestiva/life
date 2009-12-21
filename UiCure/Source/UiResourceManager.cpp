@@ -16,7 +16,6 @@
 #include "../Include/UiCure.h"
 #include "../Include/UiGameUiManager.h"
 #include "../Include/UiResourceManager.h"
-#include "../Include/UiSoundManager.h"
 
 
 
@@ -631,10 +630,12 @@ LOG_CLASS_DEFINE(UI_GFX_3D, UserGeometryReferenceResource);
 
 
 
-SoundResource::SoundResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const Lepra::String& pName, SoundDimension pDimension):
+SoundResource::SoundResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const Lepra::String& pName,
+	SoundDimension pDimension, LoopMode pLoopMode):
 	DiversifiedResource<UiLepra::SoundManager::SoundID, UiLepra::SoundManager::SoundInstanceID>(pManager, pName),
 	UiResource(pUiManager),
-	mDimension(pDimension)
+	mDimension(pDimension),
+	mLoopMode(pLoopMode)
 {
 	SetRamDataType(UiLepra::INVALID_SOUNDID);
 }
@@ -645,12 +646,12 @@ SoundResource::~SoundResource()
 	for (; x != mUserDiversifiedTable.End(); ++x)
 	{
 		UserData lInstanceId = *x;
-		GetUiManager()->GetSoundManager()->GetSoundManager()->DeleteSoundInstance(lInstanceId);
+		GetUiManager()->GetSoundManager()->DeleteSoundInstance(lInstanceId);
 	}
 	mUserDiversifiedTable.RemoveAll();
 	if (GetRamData() != UiLepra::INVALID_SOUNDID)
 	{
-		GetUiManager()->GetSoundManager()->GetSoundManager()->Release(GetRamData());
+		GetUiManager()->GetSoundManager()->Release(GetRamData());
 		SetRamDataType(UiLepra::INVALID_SOUNDID);
 	}
 }
@@ -661,28 +662,29 @@ bool SoundResource::Load()
 	assert(GetRamData() == UiLepra::INVALID_SOUNDID);
 	if (mDimension == DIMENSION_2D)
 	{
-		SetRamDataType(GetUiManager()->GetSoundManager()->GetSoundManager()->LoadSound2D(GetName(), UiLepra::SoundManager::LOOP_NONE, 0));
+		SetRamDataType(GetUiManager()->GetSoundManager()->LoadSound2D(GetName(), mLoopMode, 0));
 	}
 	else
 	{
-		SetRamDataType(GetUiManager()->GetSoundManager()->GetSoundManager()->LoadSound3D(GetName(), UiLepra::SoundManager::LOOP_NONE, 0));
+		SetRamDataType(GetUiManager()->GetSoundManager()->LoadSound3D(GetName(), mLoopMode, 0));
 	}
 	return (GetRamData() != UiLepra::INVALID_SOUNDID);
 }
 
 SoundResource::UserData SoundResource::CreateDiversifiedData() const
 {
-	UserData lInstanceId = GetUiManager()->GetSoundManager()->GetSoundManager()->CreateSoundInstance(GetRamData());
+	UserData lInstanceId = GetUiManager()->GetSoundManager()->CreateSoundInstance(GetRamData());
 	return (lInstanceId);
 }
 
 void SoundResource::ReleaseDiversifiedData(UserData pData) const
 {
-	GetUiManager()->GetSoundManager()->GetSoundManager()->DeleteSoundInstance(pData);
+	GetUiManager()->GetSoundManager()->DeleteSoundInstance(pData);
 }
 
-SoundResource2d::SoundResource2d(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const Lepra::String& pName):
-	SoundResource(pUiManager, pManager, pName, DIMENSION_2D)
+SoundResource2d::SoundResource2d(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const Lepra::String& pName,
+	LoopMode pLoopMode):
+	SoundResource(pUiManager, pManager, pName, DIMENSION_2D, pLoopMode)
 {
 }
 
@@ -691,8 +693,9 @@ const Lepra::String SoundResource2d::GetType() const
 	return (_T("Sound2D"));
 }
 
-SoundResource3d::SoundResource3d(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const Lepra::String& pName):
-	SoundResource(pUiManager, pManager, pName, DIMENSION_3D)
+SoundResource3d::SoundResource3d(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const Lepra::String& pName,
+	LoopMode pLoopMode):
+	SoundResource(pUiManager, pManager, pName, DIMENSION_3D, pLoopMode)
 {
 }
 

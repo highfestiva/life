@@ -26,8 +26,6 @@ public:
 	SoundManagerOpenAL(int pMixRate);
 	virtual ~SoundManagerOpenAL();
 
-	void Update();
-
 	SoundID LoadSound2D(const Lepra::String& pFileName, LoopMode LoopMode, int pPriority);
 	SoundID LoadSound3D(const Lepra::String& pFileName, LoopMode LoopMode, int pPriority);
 	SoundID LoadStream(const Lepra::String& pFileName, LoopMode LoopMode, int pPriority);
@@ -51,8 +49,8 @@ public:
 	bool IsPaused(SoundInstanceID pSoundIID);
 
 	void SetPan(SoundInstanceID pSoundIID, float pPan);
-
 	void SetVolume(SoundInstanceID pSoundIID, float pVolume);
+	void SetPitch(SoundInstanceID pSoundIID, float pPitch);
 
 	void SetFrequency(SoundInstanceID pSoundIID, int pFrequency);
 	int GetFrequency(SoundInstanceID pSoundIID);

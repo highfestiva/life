@@ -51,7 +51,7 @@ public:
 	void ClearBoneGeometries(PhysicsManager* pPhysics);
 
 	int GetEngineCount() const;
-	PhysicsEngine* GetEngine(int pBoneIndex) const;
+	PhysicsEngine* GetEngine(int pEngineIndex) const;
 	void AddEngine(PhysicsEngine* pEngine);	// Takes ownership of the given engine.
 	void SetEnginePower(unsigned pAspect, float pPower, float pAngle);
 	void ClearEngines();

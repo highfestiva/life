@@ -111,6 +111,12 @@ SubtypeExtraType& UserExtraTypeResource<ResourceType, SubtypeExtraType>::GetExtr
 	return (mExtraData);
 }
 
+template<class ResourceType, class SubtypeExtraType>
+void UserExtraTypeResource<ResourceType, SubtypeExtraType>::SetExtraData(const SubtypeExtraType& pExtraData)
+{
+	mExtraData = pExtraData;
+}
+
 
 
 // ----------------------------------------------------------------------------

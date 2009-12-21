@@ -42,7 +42,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;..\ThirdParty\stlport\stlport&quot;"
+				AdditionalIncludeDirectories="&quot;..\ThirdParty\stlport\stlport&quot;;&quot;..\ThirdParty\utf8cpp&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG"
 				MinimalRebuild="false"
 				BasicRuntimeChecks="0"
@@ -51,6 +51,7 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
+				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -114,7 +115,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="&quot;..\ThirdParty\stlport\stlport&quot;"
+				AdditionalIncludeDirectories="&quot;..\ThirdParty\stlport\stlport&quot;;&quot;..\ThirdParty\utf8cpp&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG"
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
@@ -122,6 +123,7 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
+				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -180,7 +182,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;..\ThirdParty\stlport\stlport&quot;"
+				AdditionalIncludeDirectories="&quot;..\ThirdParty\stlport\stlport&quot;;&quot;..\ThirdParty\utf8cpp&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG"
 				MinimalRebuild="false"
 				BasicRuntimeChecks="0"
@@ -189,6 +191,7 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
+				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -252,7 +255,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="&quot;..\ThirdParty\stlport\stlport&quot;"
+				AdditionalIncludeDirectories="&quot;..\ThirdParty\stlport\stlport&quot;;&quot;..\ThirdParty\utf8cpp&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG"
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
@@ -260,6 +263,7 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
+				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -322,7 +326,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="&quot;..\ThirdParty\stlport\stlport&quot;"
+				AdditionalIncludeDirectories="&quot;..\ThirdParty\stlport\stlport&quot;;&quot;..\ThirdParty\utf8cpp&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;NO_LOG_DEBUG_INFO"
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
@@ -330,6 +334,7 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
+				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="0"
 			/>
 			<Tool
@@ -392,7 +397,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="&quot;..\ThirdParty\stlport\stlport&quot;"
+				AdditionalIncludeDirectories="&quot;..\ThirdParty\stlport\stlport&quot;;&quot;..\ThirdParty\utf8cpp&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;NO_LOG_DEBUG_INFO"
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
@@ -400,6 +405,7 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
+				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="0"
 			/>
 			<Tool
@@ -545,14 +551,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Include\DllLoader.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\DynamicArray.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Include\Endian.h"
 				>
 			</File>
@@ -570,10 +568,6 @@
 			</File>
 			<File
 				RelativePath=".\Include\FileArchive.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\FixedPointMath.h"
 				>
 			</File>
 			<File
@@ -741,14 +735,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Include\ParamLoader.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\Params.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Include\Path.h"
 				>
 			</File>
@@ -758,10 +744,6 @@
 			</File>
 			<File
 				RelativePath=".\Include\Performance.inl"
-				>
-			</File>
-			<File
-				RelativePath=".\Include\PerformanceScope.h"
 				>
 			</File>
 			<File
@@ -1075,10 +1057,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Source\DllLoader.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\Source\Endian.cpp"
 				>
 			</File>
@@ -1176,23 +1154,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Source\ParamLoader.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Source\Params.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\Source\Path.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\Source\Performance.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Source\PerformanceScope.cpp"
 				>
 			</File>
 			<File

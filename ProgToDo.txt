@@ -172,6 +172,7 @@ Quality
 + Always use unicode script files (UTF-8).
 + Add unit test for making sure that loading more than one instance of same resource results in a single instance.
 + Replace copyright notice to Righteous Games.
+. Shorten code by typedeffing the Lepra::String, Lepra::StringUtility, Lepra::uint8 and so forth in all namespaces.
 . Make build in one step: server, client, **DATA**, Linux, Windows...
 . Assertions on getting access to wrong parts of the system with the wrong thread. (Such as dropping users in NetworkServer.cpp from the TCP thread.)
 . Stresstest (use .lsh).

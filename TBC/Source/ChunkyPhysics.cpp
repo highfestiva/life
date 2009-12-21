@@ -136,10 +136,10 @@ int ChunkyPhysics::GetEngineCount() const
 	return ((int)mEngineArray.size());
 }
 
-PhysicsEngine* ChunkyPhysics::GetEngine(int pBoneIndex) const
+PhysicsEngine* ChunkyPhysics::GetEngine(int pEngineIndex) const
 {
-	assert((size_t)pBoneIndex < mEngineArray.size());
-	return (mEngineArray[pBoneIndex]);
+	assert((size_t)pEngineIndex < mEngineArray.size());
+	return (mEngineArray[pEngineIndex]);
 }
 
 void ChunkyPhysics::AddEngine(PhysicsEngine* pEngine)

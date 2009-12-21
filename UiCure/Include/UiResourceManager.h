@@ -62,6 +62,29 @@ protected:
 
 
 
+template<class ResourceType, class SubtypeExtraType>
+class UserUiExtraTypeResource:
+	public Cure::UserTypeResourceBase<UserUiExtraTypeResource<ResourceType, SubtypeExtraType>, ResourceType>,
+	public UiResource
+{
+public:
+	typedef SubtypeExtraType ExtraType;
+
+	UserUiExtraTypeResource(GameUiManager* pUiManager, const ExtraType& pExtraData);
+	virtual ~UserUiExtraTypeResource();
+
+	ExtraType& GetExtraData() const;
+	void SetExtraData(const ExtraType& pExtraData);
+
+protected:
+	Cure::Resource* CreateResource(Cure::ResourceManager* pManager, const Lepra::String& pName) const;
+
+private:
+	mutable ExtraType mExtraData;
+};
+
+
+
 class PainterImageResource: public Cure::OptimizedResource<Lepra::Canvas*, UiTbc::Painter::ImageID>, public UiResource
 {
 	typedef Cure::OptimizedResource<Lepra::Canvas*, UiTbc::Painter::ImageID> Parent;
@@ -217,30 +240,35 @@ public:
 		DIMENSION_3D = 2,
 	};
 	typedef UiLepra::SoundManager::SoundInstanceID UserData;
+	typedef UiLepra::SoundManager::LoopMode LoopMode;
 
 	bool Load();
 	UserData CreateDiversifiedData() const;
 	void ReleaseDiversifiedData(UserData pData) const;
 
 protected:
-	SoundResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const Lepra::String& pName, SoundDimension pDimension);
+	SoundResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const Lepra::String& pName,
+		SoundDimension pDimension, LoopMode pLoopMode);
 	virtual ~SoundResource();
 
 private:
 	SoundDimension mDimension;
+	LoopMode mLoopMode;
 };
 
 class SoundResource2d: public SoundResource
 {
 public:
-	SoundResource2d(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const Lepra::String& pName);
+	SoundResource2d(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const Lepra::String& pName,
+		LoopMode pLoopMode);
 	const Lepra::String GetType() const;
 };
 
 class SoundResource3d: public SoundResource
 {
 public:
-	SoundResource3d(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const Lepra::String& pName);
+	SoundResource3d(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const Lepra::String& pName,
+		LoopMode pLoopMode);
 	const Lepra::String GetType() const;
 };
 
@@ -278,15 +306,15 @@ public:
 
 
 
-typedef UserUiTypeResource<PainterImageResource>			UserPainterImageResource;
-typedef UserUiTypeResource<RendererImageResource>			UserRendererImageResource;
-typedef UserUiTypeResource<TextureResource>				UserTextureResource;
-typedef UserUiTypeResource<SoundResource2d>				UserSound2dResource;
-typedef UserUiTypeResource<SoundResource3d>				UserSound3dResource;
-typedef UserUiTypeResource<ClassResource>				UserClassResource;
-//typedef Cure::UserTypeResource<TBC::...>				UserPhysicsResource;
-//typedef UserUiTypeResource<TBC::...>					UserAnimationResource;
-//typedef Cure::UserTypeResource<...>					UserTerrainResource;
+typedef UserUiTypeResource<PainterImageResource>				UserPainterImageResource;
+typedef UserUiTypeResource<RendererImageResource>				UserRendererImageResource;
+typedef UserUiTypeResource<TextureResource>					UserTextureResource;
+typedef UserUiExtraTypeResource<SoundResource2d, SoundResource::LoopMode>	UserSound2dResource;
+typedef UserUiExtraTypeResource<SoundResource3d, SoundResource::LoopMode>	UserSound3dResource;
+typedef UserUiTypeResource<ClassResource>					UserClassResource;
+//typedef Cure::UserTypeResource<TBC::...>					UserPhysicsResource;
+//typedef UserUiTypeResource<TBC::...>						UserAnimationResource;
+//typedef Cure::UserTypeResource<...>						UserTerrainResource;
 
 
 

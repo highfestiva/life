@@ -53,6 +53,7 @@ private:
 	void OnLoadTexture(UserRendererImageResource* pTextureResource);
 	void TryAddTexture();
 	virtual bool TryComplete();
+	void OnLoadSound3d(UserSound3dResource* pSoundResource);
 
 	GameUiManager* mUiManager;
 	UserClassResource* mUiClassResource;
@@ -60,6 +61,7 @@ private:
 	MeshArray mMeshResourceArray;
 	size_t mMeshLoadCount;
 	UserRendererImageResource mTextureResource;
+	UserSound3dResource* mSoundResource;
 
 	LOG_CLASS_DECLARE();
 };

@@ -11,7 +11,6 @@
 #include "../../Lepra/Include/Random.h"
 #include "../Include/UiGameUiManager.h"
 #include "../Include/UiResourceManager.h"
-#include "../Include/UiSoundManager.h"
 #include "../Include/UiCure.h"
 
 bool TestCure();
@@ -118,7 +117,6 @@ ResourceTest::ResourceTest()
 {
 	mUiManager = new UiCure::GameUiManager(UiCure::GetSettings());
 	mUiManager->Open();
-	mUiManager->GetSoundManager()->SetMicrophonePosition(Lepra::Vector3DF(0, 0, 0));
 	mResourceManager = new Cure::ResourceManager(1);
 	mResourceManager->InitDefault();
 
@@ -200,19 +198,17 @@ bool ResourceTest::TestAtom()
 	if (lTestOk)
 	{
 		lContext = _T("load sound");
-		UiCure::UserSound2dResource lSound(mUiManager);
+		UiCure::UserSound2dResource lSound(mUiManager, UiLepra::SoundManager::LOOP_NONE);
 		lSound.Load(mResourceManager, _T("Bark.wav"), UiCure::UserSound2dResource::TypeLoadCallback(this, &ResourceTest::Sound2dLoadCallback));
 		Lepra::Thread::Sleep(0.4);
 		mResourceManager->Tick();
 		lTestOk = (gResourceLoadCount == 4 && gResourceLoadErrorCount == 1);
 		if (lTestOk)
 		{
-			mUiManager->GetSoundManager()->GetSoundManager()->Play(lSound.GetData(), 1.0, 1.0);
-			for (int x = 0; x < 5; ++x)
-			{
-				mUiManager->GetSoundManager()->GetSoundManager()->Update();
-				Lepra::Thread::Sleep(0.1);
-			}
+			lContext = _T("play sound");
+			lTestOk = mUiManager->GetSoundManager()->Play(lSound.GetData(), 1.0, 1.0);
+			assert(lTestOk);
+			Lepra::Thread::Sleep(0.5);
 		}
 		mResourceManager->SafeRelease(&lSound);
 		assert(lTestOk);

@@ -8,6 +8,7 @@
 
 
 
+#include "../../Lepra/Include/Transformation.h"
 #include "../../UiLepra/Include/UiDisplayManager.h"
 #include "UiCure.h"
 
@@ -20,6 +21,7 @@ class Canvas;
 namespace UiLepra
 {
 class InputManager;
+class SoundManager;
 }
 namespace UiTbc
 {
@@ -34,11 +36,6 @@ class Renderer;
 
 namespace UiCure
 {
-
-
-
-class GraphicsObject;
-class SoundManager;
 
 
 
@@ -62,10 +59,9 @@ public:
 	UiTbc::Painter* GetPainter() const;
 	UiLepra::InputManager* GetInputManager() const;
 	UiTbc::DesktopWindow* GetDesktopWindow() const;
-	SoundManager* GetSoundManager() const;
+	UiLepra::SoundManager* GetSoundManager() const;
 
-	void SetCameraPosition(float pX, float pY, float pZ);
-	void SetCameraOrientation(float pTheta, float pPhi, float pGimbal);
+	void SetCameraPosition(const Lepra::TransformationF& pTransform, const Lepra::Vector3DF& pVelocity);
 	void SetViewport(int pLeft, int pTop, int pWidth, int pHeight);
 	void Clear(float pRed, float pGreen, float pBlue, bool pClearDepth = true);
 	void ClearDepth();
@@ -88,7 +84,7 @@ private:
 	UiTbc::FontManager* mFontManager;
 	UiTbc::DesktopWindow* mDesktopWindow;
 	UiLepra::InputManager* mInput;
-	SoundManager* mSound;
+	UiLepra::SoundManager* mSound;
 
 	LOG_CLASS_DECLARE();
 };
