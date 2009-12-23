@@ -982,7 +982,7 @@ TcpMuxSocket::AcceptStatus TcpMuxSocket::QueryReceiveConnectString(TcpVSocket* p
 	}
 	else
 	{
-		mLog.AWarning("Waited for connect magic, but none came.");
+		log_atrace("Waited for connect magic, but none came this loop.");
 	}
 	return (lAcceptStatus);
 }
