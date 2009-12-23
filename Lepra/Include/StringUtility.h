@@ -88,15 +88,14 @@ private:
 	static std::locale mLocale;
 };
 
-typedef StringUtilityTemplate<astr> astrutil;
-typedef StringUtilityTemplate<wstr> wstrutil;
+typedef StringUtilityTemplate<astr>	astrutil;
+typedef StringUtilityTemplate<wstr>	wstrutil;
+typedef StringUtilityTemplate<str>	strutil;
 extern const astr gEmptyAnsiString;
 extern const wstr gEmptyUnicodeString;
 #ifdef LEPRA_UNICODE
-typedef wstrutil		strutil;
 #define EmptyString		gEmptyUnicodeString
 #else // !LEPRA_UNICODE
-typedef astr			strutil;
 #define EmptyString		gEmptyAnsiString
 #endif // LEPRA_UNICODE/!LEPRA_UNICODE
 #define EmptyAnsiString		gEmptyAnsiString

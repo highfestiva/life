@@ -277,7 +277,7 @@ bool ChunkyLoader::AllocLoadChunkyList(FileElementList& pLoadList, int64 pChunkE
 
 bool ChunkyLoader::SaveSingleString(ChunkyType pType, const str& pString)
 {
-	const uint32 lSize = PackerUnicodeString::Pack(0, pString);	// Padding added.
+	const uint32 lSize = PackerUnicodeString::Pack(0, wstrutil::ToOwnCode(pString));	// Padding added.
 	int64 lChunkEndPosition = 0;
 	bool lOk = true;
 	if (lOk)

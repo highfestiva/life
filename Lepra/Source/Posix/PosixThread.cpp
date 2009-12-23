@@ -21,8 +21,8 @@ namespace Lepra
 
 
 
-static Win32ThreadPointerStorage gThreadStorage;
-static Win32ThreadPointerStorage gExtraDataStorage;
+static ThreadPointerStorage gThreadStorage;
+static ThreadPointerStorage gExtraDataStorage;
 
 
 
@@ -224,8 +224,9 @@ void PosixRWLock::Release()
 void* ThreadEntry(void* pThread)
 {
 	Thread* lThread = (Thread*)pThread;
-	ThreadPointerStorage::SetPointer(lThread);
-	assert(ThreadPointerStorage::GetPointer() == lThread);
+	gThreadStorage.SetPointer(lThread);
+	gExtraDataStorage.SetPointer(0);
+	assert(gThreadStorage.GetPointer() == lThread);
 	assert(Thread::GetCurrentThread() == lThread);
 	//InitializeSignalMask();
 	RunThread(lThread);
@@ -234,9 +235,10 @@ void* ThreadEntry(void* pThread)
 
 void Thread::InitializeMainThread(const str& pThreadName)
 {
-	ThreadPointerStorage::SetPointer(&gMainThread);
 	gMainThread.SetThreadId(GetCurrentThreadId());
-	assert(ThreadPointerStorage::GetPointer() == &gMainThread);
+	gThreadStorage.SetPointer(&gMainThread);
+	gExtraDataStorage.SetPointer(0);
+	assert(gThreadStorage.GetPointer() == &gMainThread);
 	assert(Thread::GetCurrentThread() == &gMainThread);
 	InitializeSignalMask();
 }
@@ -251,7 +253,17 @@ size_t Thread::GetCurrentThreadId()
 
 Thread* Thread::GetCurrentThread()
 {
-	return (ThreadPointerStorage::GetPointer());
+	return ((Thread*)gThreadStorage.GetPointer());
+}
+
+void* Thread::GetExtraData()
+{
+	return (gExtraDataStorage.GetPointer());
+}
+
+void Thread::SetExtraData(void* pData)
+{
+	gExtraDataStorage.SetPointer(pData);
 }
 
 void Thread::SetCpuAffinityMask(uint64 /*pAffinityMask*/)

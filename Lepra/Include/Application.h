@@ -9,8 +9,8 @@
 
 
 
-#include "StringUtility.h"
 #include "LepraTarget.h"
+#include "String.h"
 
 
 
@@ -23,10 +23,10 @@
 #define LEPRA_RUN_APPLICATION(ClassName)	\
 int main(int argc, const char* argv[])	\
 {	\
-	strutil::strvec lArguments;	\
+	Lepra::strutil::strvec lArguments;	\
 	for (int x = 0; x < argc; ++x)	\
 	{	\
-		lArguments.push_back(astrutil::ToCurrentCode(astr(argv[x])));	\
+		lArguments.push_back(Lepra::astrutil::ToCurrentCode(Lepra::astr(argv[x])));	\
 	}	\
 	ClassName lApplication(lArguments);	\
 	return (lApplication.Run());	\
@@ -35,7 +35,7 @@ int main(int argc, const char* argv[])	\
 #define LEPRA_RUN_APPLICATION(ClassName)	\
 int WINAPI wWinMain(HINSTANCE, HINSTANCE, PTSTR, int)	\
 {	\
-	strutil::strvec lArguments(strutil::BlockSplit(::GetCommandLine(), _T(" \t\v\r\n"), false, false));	\
+	Lepra::strutil::strvec lArguments(Lepra::strutil::BlockSplit(::GetCommandLine(), _T(" \t\v\r\n"), false, false));	\
 	ClassName lApplication(lArguments);	\
 	return (lApplication.Run());	\
 }

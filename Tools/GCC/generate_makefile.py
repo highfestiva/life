@@ -180,7 +180,13 @@ def generate_makefiles(basedir, vcfileinfolist):
         vcfile = os.path.join(basedir, vcfile)
         projdir = os.path.dirname(vcfile)
         includedirs = [os.path.relpath(basedir+"ThirdParty/stlport/stlport/", projdir),
-        	os.path.relpath(basedir+"ThirdParty/ode-060223/include/", projdir)]
+		os.path.relpath(basedir+"ThirdParty/utf8cpp", projdir),
+		os.path.relpath(basedir+"ThirdParty/ode-0.11.1/include", projdir),
+		os.path.relpath(basedir+"ThirdParty/ode-0.11.1/ode/src", projdir),
+		os.path.relpath(basedir+"ThirdParty/ode-0.11.1/ode/src/joints", projdir),
+		os.path.relpath(basedir+"ThirdParty/ode-0.11.1/OPCODE", projdir),
+		os.path.relpath(basedir+"ThirdParty/ode-0.11.1/GIMPACT/include", projdir),
+		os.path.relpath(basedir+"ThirdParty/ode-0.11.1/ou/include", projdir)]
 	libdirs = [os.path.relpath(basedir+"ThirdParty/stlport/build/lib/obj/gcc/so", projdir),
 		os.path.relpath(basedir+"ThirdParty", projdir),
 		os.path.relpath(basedir+"Lepra", projdir),

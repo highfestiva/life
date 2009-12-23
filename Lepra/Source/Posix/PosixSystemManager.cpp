@@ -4,12 +4,15 @@
 
 
 
+#include <stdlib.h>
 #include <termios.h>
+#include "../../Include/DiskFile.h"
+#include "../../Include/HiResTimer.h"
 #include "../../Include/Lepra.h"
+#include "../../Include/Log.h"
+#include "../../Include/Path.h"
 #include "../../Include/String.h"
 #include "../../Include/SystemManager.h"
-#include "../../Include/Log.h"
-#include "../../Include/HiResTimer.h"
 #include "../../Include/Thread.h"
 
 
@@ -62,6 +65,16 @@ str SystemManager::GetUserDirectory()
 	return (astrutil::ToCurrentCode(astr(::getenv("HOME"))));
 }
 
+str SystemManager::GetIoDirectory(const str& pAppName)
+{
+	const str lIoDir = Path::JoinPath(GetUserDirectory(), pAppName, _T(""));
+	if (!DiskFile::PathExists(lIoDir))
+	{
+		DiskFile::CreateDir(lIoDir);
+	}
+	return (lIoDir);
+}
+
 str SystemManager::GetLoginName()
 {
 	const char* lLoginName = ::getlogin();
@@ -76,6 +89,15 @@ str SystemManager::QueryFullUserName()
 {
 	// TODO: use ::getlogin() to search /usr/passwd or something similarly gory.
 	return (GetLoginName());
+}
+
+void SystemManager::WebBrowseTo(const str& pUrl)
+{
+	if (::fork() == 0)
+	{
+		::system(("sensible-browser "+astrutil::ToOwnCode(pUrl)).c_str());
+		::exit(0);
+	}
 }
 
 unsigned SystemManager::GetLogicalCpuCount()

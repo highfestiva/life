@@ -7,6 +7,7 @@
 #pragma once
 
 #include "../Cure/Include/ConsoleManager.h"
+#include "Life.h"
 
 
 

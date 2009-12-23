@@ -17,6 +17,8 @@
 
 
 
+using namespace Lepra;
+
 class CureTest{};
 static LogDecorator gCLog(LogType::GetLog(LogType::SUB_TEST), typeid(CureTest));
 void ReportTestResult(const LogDecorator& pLog, const str& pTestName, const str& pContext, bool pbResult);

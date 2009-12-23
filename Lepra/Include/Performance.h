@@ -126,10 +126,9 @@ typedef BasicScopeTimer<ScopePerformanceData> CallScopeTimer;
 // is that we want the performance data container CREATION time listed in THIS scope, not in the
 // parent scope.
 #define LEPRA_MEASURE_SCOPE(name)	\
-static const str __lMeasureName(strutil::Format(_T(#name) _T(";") _T(__FILE__) _T(";%i"), __LINE__));	\
-static const std::LEPRA_STD_HASHER<str> __lMeasureHasher;	\
-static const size_t __lMeasureHash = (__lMeasureHasher)(__lMeasureName);	\
 CallScopeTimer __lMeasureTimer;	\
+static const str __lMeasureName(strutil::Format(_T(#name) _T(";") _T(__FILE__) _T(";%i"), __LINE__));	\
+static const size_t __lMeasureHash = HashString(__lMeasureName.c_str());	\
 __lMeasureTimer.Attach(ScopePerformanceData::Insert(__lMeasureName, __lMeasureHash))
 
 

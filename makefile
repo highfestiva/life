@@ -1,4 +1,4 @@
-# 'Twas generated 2009-07-13, type='base'.
+# 'Twas generated 2009-12-22, type='base'.
 # Don't edit manually. See 'generate_makefile.py' for info.
 
 SRCS=	\

@@ -6,6 +6,7 @@
 
 #include "../Cure/Include/GameManager.h"
 #include "../Cure/Include/RuntimeVariable.h"
+#include "../Lepra/Include/LogListener.h"
 #include "../Lepra/Include/Number.h"
 #include "../Lepra/Include/SystemManager.h"
 #include "ConsoleManager.h"

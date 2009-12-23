@@ -1,7 +1,7 @@
-# 'Twas generated from ../../Cure/Cure.vcproj, 2009-07-13, type='lib'.
+# 'Twas generated from ../../Cure/Cure.vcproj, 2009-12-22, type='lib'.
 # Don't edit manually. See 'generate_makefile.py' for info.
 
-CFLAGS = -O0 -ggdb -fPIC -D_POSIX_PTHREAD_SEMANTICS -I../ThirdParty/stlport/stlport -I../ThirdParty/ode-060223/include -DPOSIX -D_DEBUG -D_CONSOLE -DPNG_NO_ASSEMBLER_CODE -DdCYLINDER_ENABLED -DCURE_TEST_WITHOUT_UI -Wall -Wno-unknown-pragmas
+CFLAGS = -O0 -ggdb -fPIC -D_POSIX_PTHREAD_SEMANTICS -I../ThirdParty/stlport/stlport -I../ThirdParty/utf8cpp -I../ThirdParty/ode-0.11.1/include -I../ThirdParty/ode-0.11.1/ode/src -I../ThirdParty/ode-0.11.1/ode/src/joints -I../ThirdParty/ode-0.11.1/OPCODE -I../ThirdParty/ode-0.11.1/GIMPACT/include -I../ThirdParty/ode-0.11.1/ou/include -DPOSIX -D_DEBUG -D_CONSOLE -DPNG_NO_ASSEMBLER_CODE -DdCYLINDER_ENABLED -DCURE_TEST_WITHOUT_UI -Wall -Wno-unknown-pragmas
 
 SRCS=	\
 Source/ConsoleManager.cpp	\
@@ -12,7 +12,6 @@ Source/CppContextObject.cpp	\
 Source/Cure.cpp	\
 Source/GameManager.cpp	\
 Source/NetworkAgent.cpp	\
-Source/Packer.cpp	\
 Source/Packet.cpp	\
 Source/PositionalData.cpp	\
 Source/ResourceManager.cpp	\
@@ -37,7 +36,6 @@ Source/CppContextObject.o	\
 Source/Cure.o	\
 Source/GameManager.o	\
 Source/NetworkAgent.o	\
-Source/Packer.o	\
 Source/Packet.o	\
 Source/PositionalData.o	\
 Source/ResourceManager.o	\

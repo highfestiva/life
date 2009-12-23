@@ -1145,7 +1145,7 @@ bool TestSystemManager(const LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		// Just make sure we don't crash. Need manual verification that it works anyhoo.
-		SystemManager::WebBrowseTo(_T("http://trialepicfail.blogspot.com/"));
+		//SystemManager::WebBrowseTo(_T("http://trialepicfail.blogspot.com/"));
 	}
 
 	ReportTestResult(pAccount, _T("System"), lContext, lTestOk);
@@ -1558,10 +1558,12 @@ bool GameSocketClientTest::Test()
 			lContext = _T("server did not drop client TCP connection in time");
 			Thread::Sleep(0.01);
 			TcpVSocket* lConnectorSocket = lServerTcpMuxSocket.PopReceiverSocket();
-			assert(lConnectorSocket != 0);
-			char a[1];
-			lTestOk = (lConnectorSocket->Receive(a, 1, false) < 0);
-			assert(lTestOk);
+			if (lConnectorSocket != 0)	// Already dropped?
+			{
+				char a[1];
+				lTestOk = (lConnectorSocket->Receive(a, 1, false) < 0);
+				assert(lTestOk);
+			}
 		}
 	}
 
@@ -1610,7 +1612,8 @@ bool GameSocketClientTest::Test()
 	{
 		lContext = _T("client TCP+UDP connect");
 		Thread::Sleep(0.2);
-		lClientSocket = lClientMuxSocket.Connect(lServerAddress, 1.0);
+		LogType::GetLog(LogType::SUB_ROOT)->SetLevelThreashold(Log::LEVEL_TRACE);
+		lClientSocket = lClientMuxSocket.Connect(lServerAddress, 2.0);
 		lTestOk = (lClientSocket != 0);
 		assert(lTestOk);
 	}

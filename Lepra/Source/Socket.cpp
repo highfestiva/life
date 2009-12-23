@@ -137,9 +137,9 @@ void SocketBase::Shutdown(ShutdownFlag pHow)
 		case SHUTDOWN_SEND:	lHow = SD_SEND;		break;
 		case SHUTDOWN_BOTH:	lHow = SD_BOTH;		break;
 #else // Posix
-		case SHUTDOWN_RECV:	lHow = SHUT_RECV;	break;
-		case SHUTDOWN_SEND:	lHow = SHUT_SEND;	break;
-		case SHUTDOWN_BOTH:	lHow = SHUT_BOTH;	break;
+		case SHUTDOWN_RECV:	lHow = SHUT_RD;		break;
+		case SHUTDOWN_SEND:	lHow = SHUT_WR;		break;
+		case SHUTDOWN_BOTH:	lHow = SHUT_RDWR;	break;
 #endif // Win32 / Posix
 	}
 	::shutdown(mSocket, (int)pHow);
@@ -730,7 +730,8 @@ TcpVSocket* TcpMuxSocket::Accept()
 	TcpVSocket* lSocket = 0;
 	while (IsOpen() && (lSocket = PollAccept()) == 0)
 	{
-		mAcceptSemaphore.Wait(10.0);
+		const double lWaitTime = (mPendingConnectIdMap.GetCountSafe() > 0)? 0.001 : 10.0;
+		mAcceptSemaphore.Wait(lWaitTime);
 	}
 	return (lSocket);
 }
@@ -979,7 +980,10 @@ TcpMuxSocket::AcceptStatus TcpMuxSocket::QueryReceiveConnectString(TcpVSocket* p
 			lAcceptStatus = ACCEPT_CLOSE;
 		}
 	}
-
+	else
+	{
+		mLog.AWarning("Waited for connect magic, but none came.");
+	}
 	return (lAcceptStatus);
 }
 
@@ -1770,10 +1774,11 @@ GameSocket* GameMuxSocket::Connect(const SocketAddress& pTargetAddress, double p
 	if (lTcpConnector.Start() && lUdpConnector.Start())
 	{
 		// Wait for both connectors to finish.
-		lConnectedSemaphore.Wait(pTimeout/2);
-		lConnectedSemaphore.Wait(pTimeout/2);
-		lTcpConnector.Join();
+		HiResTimer lTime;
+		lConnectedSemaphore.Wait(pTimeout);
+		lConnectedSemaphore.Wait(pTimeout - lTime.PopTimeDiff());
 		lUdpConnector.Join();
+		lTcpConnector.Join();	// Join TCP last, in hope that it'll have made it through.
 	}
 	GameSocket* lSocket = 0;
 	if (lTcpConnector.mSocket && lUdpConnector.mSocket)

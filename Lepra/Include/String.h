@@ -73,4 +73,18 @@ public:
 
 
 
+namespace Lepra
+{
+inline size_t HashString(const char* __s)
+{
+	return (std::priv::__stl_hash_string(__s));
+}
+inline size_t HashString(const wchar_t* __w)
+{
+	return (std::__stl_hash_wstring(__w));
+}
+}
+
+
+
 #include "StringUtility.h"
