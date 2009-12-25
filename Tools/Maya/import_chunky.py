@@ -13,6 +13,7 @@ import options
 import shape
 
 from functools import reduce
+import codecs
 import configparser
 import datetime
 import optparse
@@ -93,8 +94,11 @@ class GroupReader(DefaultMAReader):
                         print("Error: root must be a mesh named 'm_...' something, not '%s'." % group[0].getName())
                         sys.exit(2)
                 config = configparser.SafeConfigParser()
-                ininame = self.basename+".ini"
-                if not config.read(ininame):
+                try:
+                        ininame = self.basename+".ini"
+                        f = codecs.open(ininame, "r", encoding="latin-1")
+                        config.readfp(f, ininame)
+                except:
                         print("Error: could not open tweak file '%s'!" % ininame)
                         sys.exit(3)
                 self.fixparams(group)
