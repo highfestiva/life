@@ -67,6 +67,20 @@ bool GameUiManager::Open()
 		lRenderingContext = UiLepra::DisplayManager::DIRECTX_CONTEXT;
 	}
 
+	str lSoundTypeString = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_SOUND_ENGINE, _T("OpenAL"));
+	double lSoundRollOff = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_SOUND_ROLLOFF, 0.1);
+	double lSoundDoppler = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_SOUND_DOPPLER, 1.3);
+
+	UiLepra::SoundManager::ContextType lSoundContext = UiLepra::SoundManager::CONTEXT_OPENAL;
+	if (lSoundTypeString == _T("OpenAL"))
+	{
+		lSoundContext = UiLepra::SoundManager::CONTEXT_OPENAL;
+	}
+	else if (lSoundTypeString == _T("FMOD"))
+	{
+		lSoundContext = UiLepra::SoundManager::CONTEXT_FMOD;
+	}
+
 	// Initialize UI based on settings parameters.
 	bool lOk = true;
 	mDisplay = UiLepra::DisplayManager::CreateDisplayManager(lRenderingContext);
@@ -178,8 +192,12 @@ bool GameUiManager::Open()
 	}
 	if (lOk)
 	{
-		mSound = UiLepra::SoundManager::CreateSoundManager(UiLepra::SoundManager::CONTEXT_OPENAL);
-		mSound->SetRollOffFactor(0.1f);
+		mSound = UiLepra::SoundManager::CreateSoundManager(lSoundContext);
+		if (mSound)
+		{
+			mSound->SetRollOffFactor((float)lSoundRollOff);
+			mSound->SetDopplerFactor((float)lSoundDoppler);
+		}
 	}
 	if (lOk)
 	{

@@ -32,3 +32,7 @@
 
 #define RTVAR_UI_2D_PAINTMODE			"Ui.2D.PaintMode"
 #define RTVAR_UI_2D_SMOOTHFONTS			"Ui.2D.SmoothFonts"
+
+#define RTVAR_UI_SOUND_ENGINE			"Ui.Sound.Engine"
+#define RTVAR_UI_SOUND_ROLLOFF			"Ui.Sound.RollOff"
+#define RTVAR_UI_SOUND_DOPPLER			"Ui.Sound.Doppler"
