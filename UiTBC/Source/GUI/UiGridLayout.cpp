@@ -71,8 +71,7 @@ void GridLayout::Add(Component* pComponent, int pParam1, int pParam2)
 	// pParam1 = Row
 	// pParam2 = Column
 	int lIndex = pParam2 + pParam1 * mNumCols;
-
-	for (lIndex; lIndex < mNumRows * mNumCols; lIndex++)
+	for (; lIndex < mNumRows * mNumCols; lIndex++)
 	{
 		if (mComponent[lIndex] == 0)
 		{

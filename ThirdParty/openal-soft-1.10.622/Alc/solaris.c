@@ -20,6 +20,8 @@
 
 #include "config.h"
 
+#ifdef HAVE_PORTAUDIO
+
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -290,3 +292,5 @@ void alc_solaris_probe(ALCboolean capture)
     else if(type == ALL_DEVICE_PROBE)
         AppendAllDeviceList(solaris_device);
 }
+
+#endif // HAVE_SOLARIS

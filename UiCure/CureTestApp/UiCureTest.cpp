@@ -13,15 +13,12 @@
 #include "../Include/UiResourceManager.h"
 #include "../Include/UiCure.h"
 
-bool TestCure();
 
 
-
+using namespace Lepra;
 static int gResourceLoadCount = 0;
 static int gResourceLoadErrorCount = 0;
-
-
-
+bool TestCure();
 void ReportTestResult(const Lepra::LogDecorator& pLog, const str& pTestName, const str& pContext, bool pbResult);
 
 

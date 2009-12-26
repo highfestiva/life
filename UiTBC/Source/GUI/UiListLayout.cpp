@@ -72,7 +72,7 @@ void ListLayout::AddChildAfter(Component* pChild, Component* pAfterThis, int pIn
 		// Move all affected objects in the component tree.
 		NodeList::iterator lIter2(lChildIter);
 		++lIter2;
-		for (lIter2; lIter2 != mNodeList.end(); ++lIter2)
+		for (; lIter2 != mNodeList.end(); ++lIter2)
 		{
 			float64 lNewHW = GetPreferredHW((*lIter2).mComponent);
 			mComponentTree.MoveObject((*lIter2).mComponent, lNewPos + lNewHW / 2.0, lNewHW / 2.0);
@@ -123,7 +123,7 @@ void ListLayout::AddChildrenAfter(std::list<Component*>& pChildList, Component* 
 
 		
 		// Move all affected objects in the component tree.
-		for (lNext; lNext != mNodeList.end(); ++lNext)
+		for (; lNext != mNodeList.end(); ++lNext)
 		{
 			float64 lNewHW = GetPreferredHW((*lNext).mComponent);
 			mComponentTree.MoveObject((*lNext).mComponent, lPos + lNewHW / 2.0, lNewHW / 2.0);
@@ -216,8 +216,8 @@ Component* ListLayout::Find(int pScreenXY)
 		Component* lComp = *lIter;
 		PixelRect lRect(lComp->GetScreenRect());
 
-		if (mListType == COLUMN && lRect.IsInside(lRect.GetCenterX(), pScreenXY) == true ||
-		    mListType == ROW && lRect.IsInside(pScreenXY, lRect.GetCenterY()) == true)
+		if ((mListType == COLUMN && lRect.IsInside(lRect.GetCenterX(), pScreenXY) == true) ||
+		    (mListType == ROW && lRect.IsInside(pScreenXY, lRect.GetCenterY()) == true))
 		{
 			return lComp;
 		}

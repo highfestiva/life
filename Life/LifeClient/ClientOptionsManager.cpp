@@ -216,7 +216,7 @@ std::vector<float*> ClientOptionsManager::GetValuePointers(const str& pKey, bool
 		KeyValue(_T(RTVAR_CTRL_STEER_HANDBRK), &mOptions.mControl.mVehicle.mHandBreak),
 		KeyValue(_T(RTVAR_CTRL_STEER_BRK), &mOptions.mControl.mVehicle.mBreak),
 	};
-	for (int x = 0; x < sizeof(lEntries)/sizeof(lEntries[0]); ++x)
+	for (int x = 0; x < (int)(sizeof(lEntries)/sizeof(lEntries[0])); ++x)
 	{
 		const str lKeys = mVariableScope->GetDefaultValue(Cure::RuntimeVariableScope::READ_ONLY,
 			lEntries[x].first);

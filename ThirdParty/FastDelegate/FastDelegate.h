@@ -964,7 +964,7 @@ public:
 		return x.m_Closure.IsLess(m_Closure);	}
 	// Binding to non-const member functions
 	template < class X, class Y >
-*	FastDelegate1(Y *pthis, DesiredRetType (X::* function_to_bind)(Param1 p1) ) {
+	FastDelegate1(Y *pthis, DesiredRetType (X::* function_to_bind)(Param1 p1) ) {
 		m_Closure.bindmemfunc(detail::implicit_cast<X*>(pthis), function_to_bind); }
 	template < class X, class Y >
 	inline void bind(Y *pthis, DesiredRetType (X::* function_to_bind)(Param1 p1)) {

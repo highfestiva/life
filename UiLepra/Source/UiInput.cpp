@@ -559,6 +559,7 @@ str InputManager::GetKeyName(KeyCode pKeyCode)
 		X(RSHIFT);
 		X(RCTRL);
 		X(RALT);
+		default: break;
 	}
 #undef X
 	if (lKeyName)

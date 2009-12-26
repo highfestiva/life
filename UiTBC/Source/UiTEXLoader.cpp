@@ -241,7 +241,7 @@ void TEXTerminateDestination(j_compress_ptr pCInfo)
 	delete lDest;
 }
 
-TEXLoader::Status TEXLoader::ReadJpeg(Canvas& pCanvas)
+TEXLoader::IoStatus TEXLoader::ReadJpeg(Canvas& pCanvas)
 {
 	unsigned lSize;
 	mLoadFile->Read(lSize);
@@ -298,7 +298,7 @@ TEXLoader::Status TEXLoader::ReadJpeg(Canvas& pCanvas)
 	return STATUS_SUCCESS;
 }
 
-TEXLoader::Status TEXLoader::WriteJpeg(const Canvas& pCanvas)
+TEXLoader::IoStatus TEXLoader::WriteJpeg(const Canvas& pCanvas)
 {
 	int lSizeOffset = (int)mSaveFile->Tell();
 	unsigned lSize = 0;
@@ -366,83 +366,83 @@ TEXLoader::Status TEXLoader::WriteJpeg(const Canvas& pCanvas)
 	return STATUS_SUCCESS;
 }
 
-TEXLoader::Status TEXLoader::Load(const str& pFileName, Texture& pTexture, bool pMergeColorAndAlpha)
+TEXLoader::IoStatus TEXLoader::Load(const str& pFileName, Texture& pTexture, bool pMergeColorAndAlpha)
 {
-	Status lStatus = STATUS_SUCCESS;
+	IoStatus lIoStatus = STATUS_SUCCESS;
 	MetaFile lFile;
 	mLoadFile = &lFile;
 
 	if (lFile.Open(pFileName, MetaFile::READ_ONLY) == false)
 	{
-		lStatus = STATUS_OPEN_ERROR;
+		lIoStatus = STATUS_OPEN_ERROR;
 	}
 
-	if (lStatus == STATUS_SUCCESS)
+	if (lIoStatus == STATUS_SUCCESS)
 	{
-		lStatus = Load(pTexture, pMergeColorAndAlpha);
+		lIoStatus = Load(pTexture, pMergeColorAndAlpha);
 	}
 
-	return lStatus;
+	return lIoStatus;
 }
 
-TEXLoader::Status TEXLoader::Save(const str& pFileName, const Texture& pTexture, bool pCompressed)
+TEXLoader::IoStatus TEXLoader::Save(const str& pFileName, const Texture& pTexture, bool pCompressed)
 {
-	Status lStatus = STATUS_SUCCESS;
+	IoStatus lIoStatus = STATUS_SUCCESS;
 	DiskFile lFile;
 	mSaveFile = &lFile;
 
 	if (lFile.Open(pFileName, DiskFile::MODE_WRITE) == false)
 	{
-		lStatus = STATUS_OPEN_ERROR;
+		lIoStatus = STATUS_OPEN_ERROR;
 	}
 
-	if (lStatus == STATUS_SUCCESS)
+	if (lIoStatus == STATUS_SUCCESS)
 	{
-		lStatus = Save(pTexture, pCompressed);
+		lIoStatus = Save(pTexture, pCompressed);
 	}
 
-	return lStatus;
+	return lIoStatus;
 }
 
-TEXLoader::Status TEXLoader::Load(const str& pArchiveName, const str& pFileName, Texture& pTexture, bool pMergeColorAndAlpha)
+TEXLoader::IoStatus TEXLoader::Load(const str& pArchiveName, const str& pFileName, Texture& pTexture, bool pMergeColorAndAlpha)
 {
-	Status lStatus = STATUS_SUCCESS;
+	IoStatus lIoStatus = STATUS_SUCCESS;
 	ArchiveFile lFile(pArchiveName);
 	mLoadFile = &lFile;
 
 	if (lFile.Open(pFileName, ArchiveFile::READ_ONLY) == false)
 	{
-		lStatus = STATUS_OPEN_ERROR;
+		lIoStatus = STATUS_OPEN_ERROR;
 	}
 
-	if (lStatus == STATUS_SUCCESS)
+	if (lIoStatus == STATUS_SUCCESS)
 	{
-		lStatus = Load(pTexture, pMergeColorAndAlpha);
+		lIoStatus = Load(pTexture, pMergeColorAndAlpha);
 	}
 
-	return lStatus;
+	return lIoStatus;
 }
 
-TEXLoader::Status TEXLoader::Save(const str& pArchiveName, const str& pFileName, const Texture& pTexture, bool pCompressed)
+TEXLoader::IoStatus TEXLoader::Save(const str& pArchiveName, const str& pFileName, const Texture& pTexture, bool pCompressed)
 {
-	Status lStatus = STATUS_SUCCESS;
+	IoStatus lIoStatus = STATUS_SUCCESS;
 	ArchiveFile lFile(pArchiveName);
 	mSaveFile = &lFile;
 
 	if (lFile.Open(pFileName, ArchiveFile::WRITE_ONLY) == false)
 	{
-		lStatus = STATUS_OPEN_ERROR;
+		lIoStatus = STATUS_OPEN_ERROR;
 	}
 
-	if (lStatus == STATUS_SUCCESS)
+	if (lIoStatus == STATUS_SUCCESS)
 	{
-		lStatus = Save(pTexture, pCompressed);
+		lIoStatus = Save(pTexture, pCompressed);
 	}
 
-	return lStatus;
+	return lIoStatus;
 }
 
-TEXLoader::Status TEXLoader::Load(Texture& pTexture, bool pMergeColorAndAlpha)
+TEXLoader::IoStatus TEXLoader::Load(Texture& pTexture, bool pMergeColorAndAlpha)
 {
 	FileHeader lFileHeader;
 	if (lFileHeader.ReadHeader(mLoadFile) == false)
@@ -605,7 +605,7 @@ TEXLoader::Status TEXLoader::Load(Texture& pTexture, bool pMergeColorAndAlpha)
 	return STATUS_SUCCESS;
 }
 
-TEXLoader::Status TEXLoader::Save(const Texture& pTexture, bool pCompressed)
+TEXLoader::IoStatus TEXLoader::Save(const Texture& pTexture, bool pCompressed)
 {
 	if (pTexture.GetColorMap(0) == 0)
 	{

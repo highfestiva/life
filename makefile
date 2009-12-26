@@ -1,20 +1,25 @@
-# 'Twas generated 2009-12-22, type='base'.
+# 'Twas generated 2009-12-26, type='base'.
 # Don't edit manually. See 'generate_makefile.py' for info.
 
 SRCS=	\
 ThirdParty	\
+ThirdParty/openal-soft-1.10.622	\
+ThirdParty/freealut-1.1.0/admin/VisualStudioDotNET/alut	\
 Lepra	\
 TBC	\
 Cure	\
-Life
-
-OBJS=	\
-Life/LifeServer	\
+UiLepra	\
+UiTBC	\
+UiCure	\
+Life	\
+Life/LifeClient	\
 UiCure/CureTestApp
 
+OBJS=	\
+Life/LifeServer
+
 BINS=	\
-Life/LifeServer/LifeServer	\
-UiCure/CureTestApp/CureTestApp
+Life/LifeServer/LifeServer
 
 
 .PHONY:	$(BINS) $(OBJS) $(SRCS) all clean depend

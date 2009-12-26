@@ -117,7 +117,7 @@ bool ChunkyMeshLoader::Load(TriangleBasedGeometry* pMeshData)
 				lNormals[x] = Endian::BigToHostF(lLoadNormals[x]);
 			}
 		}
-		for (x = 0; lLoadUvs[x] && x < lUvCount; ++x)
+		for (x = 0; lLoadUvs[x] && (int)x < lUvCount; ++x)
 		{
 			lUvs[x] = (float*)lLoadUvs[x];
 			for (unsigned y = 0; y < lVertexCount*2; ++y)

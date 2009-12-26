@@ -333,7 +333,8 @@ bool TextField::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 
 				lResetMarker = true;
 			}
-		} break;
+		}
+		break;
 		case UiLepra::InputManager::IN_KBD_RIGHT:
 		{
 			if (mMarkerPos < mText.length())
@@ -358,17 +359,20 @@ bool TextField::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 				}
 				lResetMarker = true;
 			}
-		} break;
+		}
+		break;
 		case UiLepra::InputManager::IN_KBD_HOME:
 		{
 			mMarkerPos = 0;
 			lResetMarker = true;
-		} break;
+		}
+		break;
 		case UiLepra::InputManager::IN_KBD_END:
 		{
 			mMarkerPos = mText.length();
 			lResetMarker = true;
-		} break;
+		}
+		break;
 		case UiLepra::InputManager::IN_KBD_DOWN:
 		{
 			if (mListControl == 0)
@@ -380,7 +384,8 @@ bool TextField::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 				mListControl->OnKeyDown(pKeyCode);
 				Parent::SetKeyboardFocus();
 			}
-		} break;
+		}
+		break;
 		case UiLepra::InputManager::IN_KBD_UP:
 		{
 			if (mListControl != 0)
@@ -388,7 +393,8 @@ bool TextField::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 				mListControl->OnKeyDown(pKeyCode);
 				Parent::SetKeyboardFocus();
 			}
-		} break;
+		}
+		break;
 		case UiLepra::InputManager::IN_KBD_DEL:
 		{
 			if (mMarkerPos < mText.length())
@@ -396,7 +402,8 @@ bool TextField::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 				mText.erase(mMarkerPos, 1);
 				lResetMarker = true;
 			}
-		} break;
+		}
+		 break;
 		case UiLepra::InputManager::IN_KBD_ESC:
 		{
 			if (mListControl != 0)
@@ -404,7 +411,9 @@ bool TextField::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 				DestroyPopupList();
 				Parent::SetKeyboardFocus();
 			}
-		} break;
+		}
+		break;
+		default: break;
 	}
 
 	if (lResetMarker == true)

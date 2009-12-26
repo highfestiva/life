@@ -6,7 +6,6 @@
 
 #ifndef CURE_TEST_WITHOUT_UI
 
-#include "stdafx.h"
 #include <assert.h>
 #include "../../Lepra/Include/ArchiveFile.h"
 #include "../../Lepra/Include/CubicDeCasteljauSpline.h"
@@ -59,6 +58,7 @@
 
 
 
+using namespace Lepra;
 void ReportTestResult(const Lepra::LogDecorator& pLog, const str& pTestName, const str& pContext, bool pResult);
 bool ResetAndClearFrame();
 bool CloseRenderer();
@@ -1496,10 +1496,8 @@ TerrainFunctionTest::~TerrainFunctionTest()
 {
 }
 
-void TerrainFunctionTest::UpdateScene(double pTotalTime, double pDeltaTime)
+void TerrainFunctionTest::UpdateScene(double, double)
 {
-	pTotalTime;
-	pDeltaTime;
 	mExtraInfo = mTriangleCountInfo;
 }
 
@@ -1869,10 +1867,8 @@ GeometryReferenceTest::~GeometryReferenceTest()
 	delete (mSphereReference);
 }
 
-void GeometryReferenceTest::UpdateScene(double pTotalTime, double pDeltaTime)
+void GeometryReferenceTest::UpdateScene(double pTotalTime, double)
 {
-	pDeltaTime;
-
 	Lepra::TransformationF lTransf;
 	lTransf.SetPosition(Lepra::Vector3DF(0, 0, (float)::sin(pTotalTime)*3));
 	mSphereReference->SetTransformation(lTransf);

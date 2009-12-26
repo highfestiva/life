@@ -300,6 +300,7 @@ bool Button::OnLButtonDown(int pMouseX, int pMouseY)
 		case PRESSED_HOOVER:
 			SetState(RELEASING);
 			break;
+		default: break;
 		}
 
 		SetMouseFocus();

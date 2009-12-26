@@ -7,7 +7,7 @@
 #include "../../UiCure/Include/UiCure.h"
 #include "../../UiCure/Include/UiGameUiManager.h"
 #include "../../UiLepra/Include/UiLepra.h"
-#include "../../UiTbc/Include/UiTbc.h"
+#include "../../UiTBC/Include/UiTBC.h"
 #include "../LifeApplication.h"
 #include "GameClientMasterTicker.h"
 

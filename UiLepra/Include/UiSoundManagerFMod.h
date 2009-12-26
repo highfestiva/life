@@ -6,6 +6,8 @@
 
 #pragma once
 
+#if !defined(LEPRA_WITHOUT_FMOD)
+
 #include "../../Lepra/Include/HashTable.h"
 #include "../../Lepra/Include/IdManager.h"
 #include "../../Lepra/Include/String.h"
@@ -245,3 +247,7 @@ private:
 
 
 }
+
+
+
+#endif // !WITHOUT_FMOD

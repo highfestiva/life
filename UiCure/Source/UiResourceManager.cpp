@@ -12,7 +12,7 @@
 #include "../../UiTBC/Include/UiChunkyLoader.h"
 #include "../../UiTBC/Include/UiTEXLoader.h"
 #include "../../UiTBC/Include/UiTriangleBasedGeometry.h"
-#include "../../UiTBC/Include/UiUvMapper.h"
+#include "../../UiTBC/Include/UiUVMapper.h"
 #include "../Include/UiCure.h"
 #include "../Include/UiGameUiManager.h"
 #include "../Include/UiResourceManager.h"
@@ -45,7 +45,7 @@ GameUiManager* UiResource::GetUiManager() const
 
 
 PainterImageResource::PainterImageResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const str& pName):
-	OptimizedResource<Canvas*, UiTbc::Painter::ImageID>(pManager, pName),
+	Parent(pManager, pName),
 	UiResource(pUiManager)
 {
 }
@@ -110,7 +110,7 @@ Cure::ResourceLoadState PainterImageResource::PostProcess()
 
 
 RendererImageBaseResource::RendererImageBaseResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const str& pName):
-	OptimizedResource<UiTbc::Texture*, UiTbc::Renderer::TextureID>(pManager, pName),
+	Parent(pManager, pName),
 	UiResource(pUiManager)
 {
 }
@@ -220,7 +220,7 @@ bool TextureResource::Load()
 
 
 GeometryResource::GeometryResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const str& pName):
-	OptimizedResource(pManager, pName),
+	Parent(pManager, pName),
 	UiResource(pUiManager)
 {
 }
@@ -401,7 +401,6 @@ bool GeometryResource::Load()
 		static const float lRoadWidth = 5;
 		static const float lRoadHeight = 7;
 		static const float lUphillLength = 70;
-		static const float lUphillOrthogonalLength = lUphillLength*::sin(PIF/4);
 		static const float lPlateauLength = 15;
 		static const float lPlateauLengthCompensation = lRoadHeight/1.5f;
 		static const float lFloorSize = 500;
@@ -632,7 +631,7 @@ LOG_CLASS_DEFINE(UI_GFX_3D, UserGeometryReferenceResource);
 
 SoundResource::SoundResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const str& pName,
 	SoundDimension pDimension, LoopMode pLoopMode):
-	DiversifiedResource<UiLepra::SoundManager::SoundID, UiLepra::SoundManager::SoundInstanceID>(pManager, pName),
+	Parent(pManager, pName),
 	UiResource(pUiManager),
 	mDimension(pDimension),
 	mLoopMode(pLoopMode)

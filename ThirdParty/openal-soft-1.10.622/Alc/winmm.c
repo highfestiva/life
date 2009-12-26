@@ -20,6 +20,8 @@
 
 #include "config.h"
 
+#ifdef HAVE_WINMM
+
 #define _WIN32_WINNT 0x0500
 #include <stdlib.h>
 #include <stdio.h>
@@ -468,3 +470,5 @@ void alcWinMMProbe(int type)
             CaptureDeviceList[lLoop] = strdup("");
     }
 }
+
+#endif // HAVE_WINMM

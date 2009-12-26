@@ -7,7 +7,7 @@ import sys
 
 
 cflags_1 = """
-CFLAGS = -O0 -ggdb -fPIC -D_POSIX_PTHREAD_SEMANTICS %(includes)s -DPOSIX -D_DEBUG -D_CONSOLE -DPNG_NO_ASSEMBLER_CODE -DdCYLINDER_ENABLED -DCURE_TEST_WITHOUT_UI"""
+CFLAGS = -O0 -ggdb -fPIC -D_POSIX_PTHREAD_SEMANTICS %(includes)s -DPOSIX -D_XOPEN_SOURCE=600 -D_DEBUG -D_CONSOLE -DPNG_NO_ASSEMBLER_CODE -DdSingle -DHAVE_CONFIG_H=1 -DLEPRA_WITHOUT_FMOD"""
 cflags_2 = "-Wno-unknown-pragmas"
 
 head_lib = cflags_1+" -Wall "+cflags_2+"\n"
@@ -34,8 +34,14 @@ lib%(lib)s.so:\t$(OBJS)
 \tg++ -shared -o $@ $(OBJS)
 """+foot_rules
 
+foot_lib_nowarn = foot_lib
+
 head_bin = head_lib+"""
 LIBS = -lLife -lCure -lTBC -lLepra -lThirdParty -lstlport -lpthread -ldl -lrt %(libs)s
+"""
+
+head_gfx_bin = head_bin+"""
+LIBS = -lLife -lUiCure -lUiTBC -lUiLepra -lOpenAL -lalut -lCure -lTBC -lLepra -lThirdParty -lstlport -lpthread -ldl -lrt -lGL %(libs)s
 """
 
 foot_bin = """
@@ -45,6 +51,8 @@ clean:
 %(lib)s:\t$(OBJS)
 \tg++ $(LIBS) -o $@ $(OBJS)
 """+foot_rules
+
+foot_gfx_bin = foot_bin
 
 foot_base = """
 
@@ -82,16 +90,6 @@ $(SRCS):
 \t@cp $@/*.so bin/
 """
 
-makedict = \
-{
-"head_lib": head_lib,
-"head_lib_nowarn": head_lib_nowarn,
-"foot_lib": foot_lib,
-"foot_lib_nowarn": foot_lib,
-"head_bin": head_bin,
-"foot_bin": foot_bin,
-"foot_base": foot_base,
-}
 
 def printstart(makename):
     sys.stdout.write(os.path.abspath(makename)+":\t")
@@ -152,12 +150,11 @@ def generate_makefile(vcfile, makename, includedirs, libdirs, header, footer, ty
     f.close()
 
 def generate_base_make(makename, binlist, liblist):
-    global makedict
     f = create_makefile(makename, "", "base")
     bindirlist = [os.path.dirname(bin) for bin in binlist]
     libdirlist = [os.path.dirname(lib) for lib in liblist]
     write_contents(f, libdirlist, bindirlist, binlist)
-    f.write(makedict["foot_base"])
+    f.write(eval("foot_base"))
 #    for bin in binlist:
 #    	f.write(makedict["foot_clean_bin_base"] % {"bindir":os.path.dirname(bin)})
 #    for bin in binlist:
@@ -166,11 +163,9 @@ def generate_base_make(makename, binlist, liblist):
 #    f.write("\n")
 #    f.write(makedict["foot_lib_base"])
     f.close()
-	
+
 
 def generate_makefiles(basedir, vcfileinfolist):
-    global makedict
-
     files = {"bin":[], "lib":[]}
 
     for type, vcfile in vcfileinfolist:
@@ -181,6 +176,9 @@ def generate_makefiles(basedir, vcfileinfolist):
         projdir = os.path.dirname(vcfile)
         includedirs = [os.path.relpath(basedir+"ThirdParty/stlport/stlport/", projdir),
 		os.path.relpath(basedir+"ThirdParty/utf8cpp", projdir),
+		os.path.relpath(basedir+"ThirdParty/openal-soft-1.10.622/OpenAL32/Include/", projdir),
+		os.path.relpath(basedir+"ThirdParty/openal-soft-1.10.622/include/", projdir),
+		os.path.relpath(basedir+"ThirdParty/freealut-1.1.0/include/", projdir),
 		os.path.relpath(basedir+"ThirdParty/ode-0.11.1/include", projdir),
 		os.path.relpath(basedir+"ThirdParty/ode-0.11.1/ode/src", projdir),
 		os.path.relpath(basedir+"ThirdParty/ode-0.11.1/ode/src/joints", projdir),
@@ -189,13 +187,18 @@ def generate_makefiles(basedir, vcfileinfolist):
 		os.path.relpath(basedir+"ThirdParty/ode-0.11.1/ou/include", projdir)]
 	libdirs = [os.path.relpath(basedir+"ThirdParty/stlport/build/lib/obj/gcc/so", projdir),
 		os.path.relpath(basedir+"ThirdParty", projdir),
+		os.path.relpath(basedir+"ThirdParty/openal-soft-1.10.622", projdir),
+		os.path.relpath(basedir+"ThirdParty/freealut-1.1.0/admin/VisualStudioDotNET/alut", projdir),
 		os.path.relpath(basedir+"Lepra", projdir),
 		os.path.relpath(basedir+"TBC", projdir),
 		os.path.relpath(basedir+"Cure", projdir),
+		os.path.relpath(basedir+"UiLepra", projdir),
+		os.path.relpath(basedir+"UiTBC", projdir),
+		os.path.relpath(basedir+"UiCure", projdir),
 		os.path.relpath(basedir+"Life", projdir)]
         makename = os.path.join(os.path.dirname(vcfile), "makefile")
 	printstart(makename)
-        generate_makefile(vcfile, makename, includedirs, libdirs, makedict["head_"+type], makedict["foot_"+type], type)
+        generate_makefile(vcfile, makename, includedirs, libdirs, eval("head_"+type), eval("foot_"+type), type)
 	printend(type)
 
     makename = os.path.join(basedir, "makefile")
@@ -207,12 +210,18 @@ def generate_makefiles(basedir, vcfileinfolist):
 def main():
     basedir = "../../"
     projects = [["lib_nowarn", "ThirdParty/ThirdPartyLib_800.vcproj"],
-                ["lib", "Lepra/Lepra.vcproj"],
-                ["lib", "TBC/TBC.vcproj"],
-                ["lib", "Cure/Cure.vcproj"],
-                ["lib", "Life/Life.vcproj"],
-                ["bin", "Life/LifeServer/LifeServer.vcproj"],
-                ["bin", "UiCure/CureTestApp/CureTestApp.vcproj"]]
+		["lib_nowarn", "ThirdParty/openal-soft-1.10.622/OpenAL_800.vcproj"],
+		["lib_nowarn", "ThirdParty/freealut-1.1.0/admin/VisualStudioDotNET/alut/alut.vcproj"],
+                ["lib",        "Lepra/Lepra.vcproj"],
+                ["lib",        "TBC/TBC.vcproj"],
+                ["lib",        "Cure/Cure.vcproj"],
+                ["lib",        "UiLepra/UiLepra.vcproj"],
+                ["lib",        "UiTBC/UiTBC.vcproj"],
+                ["lib",        "UiCure/UiCure.vcproj"],
+                ["lib",        "Life/Life.vcproj"],
+                ["bin",        "Life/LifeServer/LifeServer.vcproj"],
+                ["gfx_bin",    "Life/LifeClient/LifeClient.vcproj"],
+                ["gfx_bin",    "UiCure/CureTestApp/CureTestApp.vcproj"]]
     generate_makefiles(basedir, projects)
 
 if __name__ == '__main__':

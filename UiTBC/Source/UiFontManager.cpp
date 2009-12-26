@@ -14,8 +14,8 @@ namespace UiTbc
 
 
 FontManager::FontManager():
-	mFontIdManager(1, 10000, 0),
-	mCurrentFont(0)
+	mCurrentFont(0),
+	mFontIdManager(1, 10000, 0)
 {
 }
 

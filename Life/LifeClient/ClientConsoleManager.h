@@ -7,7 +7,7 @@
 #pragma once
 
 #include "../../Lepra/Include/Graphics2D.h"
-#include "../../UiTbc/Include/GUI/UiTextField.h"
+#include "../../UiTBC/Include/GUI/UiTextField.h"
 #include "../ConsoleManager.h"
 
 

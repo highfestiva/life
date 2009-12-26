@@ -5,12 +5,12 @@
 
 #define AL_BUILD_LIBRARY
 #define ALUT_BUILD_LIBRARY
+#define ALSOFT_VERSION		"1.10.622"
 
 
 
-#ifdef WIN32
+#if defined(WIN32) || defined(_WIN32)
 
-#define ALSOFT_VERSION	"${LIB_VERSION}"
 #define HAVE_DSOUND		1
 #define HAVE_WINMM		1
 #define HAVE_SQRTF		1
@@ -25,18 +25,34 @@
 #define HAVE_STAT		1
 #define HAVE_TIME_H		1
 #define HAVE_WINDOWS_H		1
-//#define HAVE__STAT		1
 #define _CRT_SECURE_NO_WARNINGS
 #define snprintf		sprintf_s
 #define strncasecmp		strnicmp
 #define strcasecmp		stricmp
 #define isnan			_isnan
 
-#else // Not Windows
+#else	// Assume Posixy stuff... Currently compiles on my Ubuntu machine. :)
 
-#error "Not configured for this platform! See config.h.in for more info."
+//#define HAVE_ALSA		1
+#define HAVE_OSS		1
+//#define HAVE_SOLARIS		1
+//#define HAVE_PORTAUDIO		1
+//#define HAVE_PULSEAUDIO		1
+#define HAVE_DLFCN_H		1
+#define HAVE_SQRTF		1
+#define HAVE_ACOSF		1
+#define HAVE_ATANF		1
+#define HAVE_FABSF		1
+#define HAVE_STRTOF		1
+#define HAVE_STDINT_H		1
+#define HAVE_GCC_DESTRUCTOR	1
+//#define HAVE_PTHREAD_NP_H	1
+#define HAVE_FLOAT_H		1
+#define HAVE_FENV_H		1
+#define HAVE_FESETROUND		1
+#define HAVE__CONTROLFP		1
 
-#endif // WIN32
+#endif // WIN32 / GCC
 
 
 

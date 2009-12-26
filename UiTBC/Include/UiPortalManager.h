@@ -59,13 +59,11 @@ private:
 		void Traverse(Renderer* pRenderer, const PixelRect& pRect, Cell* pFrom);
 	};
 
-	class Cell : public TBC::PortalManager::Cell
+	class Cell: public TBC::PortalManager::Cell
 	{
 	public:
-		inline Cell(const str& pCellID, 
-			    const str& pCellDescription,
-			    PortalManager* pPortalManager);
-		inline virtual ~Cell();
+		Cell(const str& pCellID, const str& pCellDescription, PortalManager* pPortalManager);
+		virtual ~Cell();
 
 		void Traverse(Renderer* pRenderer, const PixelRect& pRect);
 

@@ -1047,7 +1047,7 @@ int OpenGLMatPXS::smNumSptLights = 0;
 int OpenGLMatPXS::smLightCount = 0;
 
 
-OpenGLMatPXS::OpenGLMatPXS(char* pVP, char* pFP[NUM_FP]):
+OpenGLMatPXS::OpenGLMatPXS(const char* pVP, const char* pFP[NUM_FP]):
 	mVPID(0)
 {
 	::memset(mFPID, 0, sizeof(mFPID));
@@ -1327,6 +1327,7 @@ void OpenGLMatPXS::PrepareLights(OpenGLRenderer* pRenderer)
 				smNumSptLights++;
 				break;
 			}
+			default: break;
 			}
 
 			// Get light color.
@@ -1806,8 +1807,8 @@ void OpenGLMatTextureAndLightmapPXS::RenderGeometry(TBC::GeometryBase* pGeometry
 
 OpenGLMatTextureSBMapPXS::OpenGLMatTextureSBMapPXS(OpenGLRenderer* pRenderer,
 						   Material* pFallBackMaterial,
-						   char* pVP,
-						   char** pFP) :
+						   const char* pVP,
+						   const char** pFP) :
 	OpenGLMatSingleTextureSolid(pRenderer, pFallBackMaterial),
 	OpenGLMatPXS(pVP, pFP)
 {

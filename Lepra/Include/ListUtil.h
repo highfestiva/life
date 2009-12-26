@@ -1,13 +1,17 @@
-/*
-	Class:  ListUtil
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2009, Righteous Games
-*/
+
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2009, Righteous Games
+
+
 
 #pragma once
 
+
+
 namespace Lepra
 {
+
+
 
 class ListUtil
 {
@@ -25,7 +29,7 @@ public:
 		if(pIndex < 0 || pIndex >= pList.size())
 			return pList.end();
 
-		_ListType::iterator it;
+		typename _ListType::iterator it;
 		if(pIndex <= pList.size() / 2)
 		{
 			size_t i;
@@ -45,7 +49,7 @@ public:
 	template<class _ListType> static int FindIndexOf(_ListType& pList, const typename _ListType::value_type& pValue)
 	{
 		int lIndex = 0;
-		_ListType::iterator it;
+		typename _ListType::iterator it;
 		for(it = pList.begin(); it != pList.end(); ++it, ++lIndex)
 		{
 			if(*it == pValue)
@@ -56,4 +60,6 @@ public:
 	}
 };
 
-} // End namespace.
+
+
+}

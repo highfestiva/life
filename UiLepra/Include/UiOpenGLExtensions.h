@@ -21,19 +21,14 @@
 #include "../../Lepra/Include/LepraTarget.h"
 
 
-#ifdef LEPRA_WINDOWS
+#if defined(LEPRA_WINDOWS)
 
 #include <gl/gl.h>
 #include <gl/glu.h>
 #include "Win32/WGLEXT.h"
 #include "GLEXT.H"
 
-#elif defined LEPRA_POSIX
-
-#include <GL/gl.h>
-#include "GLEXT.H"
-
-#elif defined LEPRA_MACOSX
+#elif defined(LEPRA_MACOSX)
 
 #include <Carbon/Carbon.h>
 #include <OpenGL/gl.h>
@@ -41,7 +36,19 @@
 #include <OpenGL/glext.h>
 #include <sys/time.h>
 
-#endif // LEPRA_WINDOWS/LEPRA_POSIX/LEPRA_MACOSX
+#elif defined(LEPRA_POSIX)
+
+#include <GL/glx.h>
+#include <GL/gl.h>
+#include <GL/glext.h>
+#include <GL/glxext.h>
+#include "GLEXT.H"
+
+#else // Unkonwn platform.
+
+#error "Bad GL platform!"
+
+#endif // Win / Mac / Posix
 
 
 

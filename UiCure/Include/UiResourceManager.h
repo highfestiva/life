@@ -232,6 +232,7 @@ private:
 
 class SoundResource: public Cure::DiversifiedResource<UiLepra::SoundManager::SoundID, UiLepra::SoundManager::SoundInstanceID>, public UiResource
 {
+	typedef Cure::DiversifiedResource<UiLepra::SoundManager::SoundID, UiLepra::SoundManager::SoundInstanceID> Parent;
 public:
 	enum SoundDimension
 	{

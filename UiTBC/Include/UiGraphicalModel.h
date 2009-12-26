@@ -1,29 +1,31 @@
-/*
-	Class:  GraphicalModel
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2009, Righteous Games
 
-	NOTES:
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2009, Righteous Games
 
-	This class extends TBC::Model with one or more geometries of different types.
-	It also provides functionality for the determination of the LOD-level.
-	
-*/
+// This class extends TBC::Model with one or more geometries of different types.
+// It also provides functionality for the determination of the LOD-level.
 
-#ifndef UIGRAPHICALMODEL_H
-#define UIGRAPHICALMODEL_H
+
+
+#pragma once
 
 #include "../../TBC/Include/Model.h"
 #include "UiRenderer.h"
 
+
+
 namespace UiTbc
 {
+
+
 
 class AnimatedGeometry;
 class TriangleBasedGeometry;
 class ProgressiveTriangleGeometry;
 
-class GraphicalModel : public TBC::Model
+
+
+class GraphicalModel: public TBC::Model
 {
 public:
 
@@ -33,7 +35,7 @@ public:
 	class GeometryHandler
 	{
 	public:
-		friend GraphicalModel;
+		friend class GraphicalModel;
 
 		GeometryHandler() :
 			mTransformAnimator(0)
@@ -222,6 +224,6 @@ private:
 	Renderer* mRenderer;
 };
 
-} // End namespace.
 
-#endif
+
+}

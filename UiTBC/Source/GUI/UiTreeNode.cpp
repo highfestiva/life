@@ -402,8 +402,8 @@ bool TreeNode::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 				mExpandButton->SetPressed(false);
 				SetExpanded(false);
 			}
-			break;
 		}
+		break;
 		case UiLepra::InputManager::IN_KBD_RIGHT:
 		{
 			if (IsExpandable() && IsExpanded() == false)
@@ -411,8 +411,9 @@ bool TreeNode::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 				mExpandButton->SetPressed(true);
 				SetExpanded(true);
 			}
-			break;
 		}
+		break;
+		default: break;
 	}
 	return (false);
 }

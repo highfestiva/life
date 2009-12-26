@@ -1,22 +1,22 @@
 #ifndef CURE_TEST_WITHOUT_UI
 
-#include "../../UiLepra/Include/UiLepra.h"
-#include "../../UiLepra/Include/UiCore.h"
-#include "../../UiTbc/Include/UiTbc.h"
 #include "../../Lepra/Include/Math.h"
+#include "../../Lepra/Include/Random.h"
 #include "../../Lepra/Include/SystemManager.h"
 #include "../../Lepra/Include/Timer.h"
 #include "../../Lepra/Include/Thread.h"
-#include "../../Lepra/Include/Random.h"
 #include "../../Lepra/Include/Transformation.h"
 #include "../../TBC/Include/PhysicsManager.h"
 #include "../../TBC/Include/PhysicsManagerFactory.h"
+#include "../../UiLepra/Include/UiCore.h"
 #include "../../UiLepra/Include/UiDisplayManager.h"
 #include "../../UiLepra/Include/UiInput.h"
-#include "../../UiTbc/Include/UiBasicMeshCreator.h"
-#include "../../UiTbc/Include/UiOpenGLRenderer.h"
-#include "../../UiTbc/Include/UiTriangleBasedGeometry.h"
-#include "../../UiTbc/Include/UiGeometryBatch.h"
+#include "../../UiLepra/Include/UiLepra.h"
+#include "../../UiTBC/Include/UiBasicMeshCreator.h"
+#include "../../UiTBC/Include/UiGeometryBatch.h"
+#include "../../UiTBC/Include/UiOpenGLRenderer.h"
+//#include "../../UiTBC/Include/UiTbc.h"
+#include "../../UiTBC/Include/UiTriangleBasedGeometry.h"
 
 typedef Lepra::Vector3DF vec3;
 typedef Lepra::Random rnd;

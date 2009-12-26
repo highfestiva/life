@@ -138,15 +138,16 @@ public:
 
 private:
 
-	float* mVertexData;			// Triplets of (x, y, z).
-	float** mUVData;			// Doublets of (u, v).
-	unsigned char* mColorData;
-	ColorFormat mColorFormat;
-
-	uint32* mIndexData;	// Triplets of vertex indices.
 	unsigned int mVertexCount;
 	unsigned int mIndexCount;
 	unsigned int mUVSetCount;
+
+	float* mVertexData;			// Triplets of (x, y, z).
+	float** mUVData;			// Doublets of (u, v).
+	unsigned char* mColorData;
+	uint32* mIndexData;	// Triplets of vertex indices.
+
+	ColorFormat mColorFormat;
 
 	TBC::GeometryBase::GeometryVolatility mGeometryVolatility;
 	TBC::GeometryBase::PrimitiveType mPrimitiveType;

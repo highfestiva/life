@@ -20,6 +20,8 @@
 
 #include "config.h"
 
+#ifdef HAVE_PULSEAUDIO
+
 #include "alMain.h"
 #ifdef HAVE_DLFCN_H
 #include <dlfcn.h>
@@ -812,3 +814,5 @@ void alc_pulse_probe(int type) //{{{
     pulse_unload();
 } //}}}
 //}}}
+
+#endif // HAVE_PULSEAUDIO

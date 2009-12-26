@@ -1,23 +1,20 @@
-/*
-	Class:  PortalManager
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2009, Righteous Games
 
-	NOTES:
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2009, Righteous Games
 
-	This class constitutes a portal/cell graph which can be used to
-	perform portal culling in an indoor scene. The actual culling
-	algorithm is implemented in UiPortalManager.h though.
+// This class constitutes a portal/cell graph which can be used to
+// perform portal culling in an indoor scene. The actual culling
+// algorithm is implemented in UiPortalManager.h though.
 
-	All portals are convex polygons. Concave polygons will result in errors.
+// All portals are convex polygons. Concave polygons will result in errors.
 
-	Performance hint: Keep the number of portals per cell as low as 
-	possible. All portals in a cell are tested for collision when 
-	calling TestPortalCollision().
-*/
+// Performance hint: Keep the number of portals per cell as low as 
+// possible. All portals in a cell are tested for collision when 
+// calling TestPortalCollision().
 
-#ifndef PORTALMANAGER_H
-#define PORTALMANAGER_H
+
+
+#pragma once
 
 #include "TBC.h"
 #include "../../Lepra/Include/Graphics2D.h"
@@ -28,10 +25,16 @@
 #include "../../Lepra/Include/String.h"
 #include <list>
 
+
+
 namespace TBC
 {
 
+
+
 class GeometryBase;
+
+
 
 class PortalManager
 {
@@ -120,19 +123,17 @@ protected:
 	{
 	public:
 
-		inline Cell(const str& pCellID, 
-			    const str& pCellDescription,
-			    PortalManager* pPortalManager);
-		inline virtual ~Cell();
+		Cell(const str& pCellID, const str& pCellDescription, PortalManager* pPortalManager);
+		virtual ~Cell();
 
-		inline const str& GetID();
-		inline const str& GetDescription();
+		const str& GetID();
+		const str& GetDescription();
 
-		inline void AddPortal(Portal* pPortal);
-		inline void RemovePortal(Portal* pPortal);
+		void AddPortal(Portal* pPortal);
+		void RemovePortal(Portal* pPortal);
 
-		inline void AddGeometry(GeometryBase* pGeometry);
-		inline void RemoveGeometry(GeometryBase* pGeometry);
+		void AddGeometry(GeometryBase* pGeometry);
+		void RemoveGeometry(GeometryBase* pGeometry);
 
 		Cell* TestPortalCollision(const Vector3DF& pFromPos,
 					  const Vector3DF& pToPos,
@@ -171,6 +172,6 @@ protected:
 	LOG_CLASS_DECLARE();
 };
 
-} // End namespace.
 
-#endif
+
+}
