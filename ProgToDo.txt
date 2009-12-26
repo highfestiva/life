@@ -98,10 +98,11 @@ Engine
 + Add support for "http links". I.e. start browser at specific address.
 + Load+save calibration.
 + Exchange SoundManager basics to a portable one.
-. Port font rendering.
-. Port Posix' SystemManager (mostly placeholders at the moment).
-. Update server port in Linux.
++ Make physics manager (ODE) work with >1 simultaneous thread.
++ Update server port in Linux.
 . Port client to Linux.
+. Port Posix' SystemManager (mostly placeholders at the moment).
+. Port font rendering.
 . Port client to Mac OS X.
 
 . Remove game source code from engine source code: camera, hard-coded object placements, input handling, etc.
@@ -172,17 +173,17 @@ Quality
 + Always use unicode script files (UTF-8).
 + Add unit test for making sure that loading more than one instance of same resource results in a single instance.
 + Replace copyright notice to Righteous Games.
-. Shorten code by typedeffing the Lepra::String, Lepra::StringUtility, Lepra::uint8 and so forth in all namespaces.
++ Shorten code by typedeffing the Lepra::String, Lepra::StringUtility, Lepra::uint8 and so forth in all namespaces.
 . Make build in one step: server, client, **DATA**, stlport, Linux, Windows...
 . Assertions on getting access to wrong parts of the system with the wrong thread. (Such as dropping users in NetworkServer.cpp from the TCP thread.)
 . Stresstest (use .lsh).
 . Run test app in Windows and Linux.
-. Make sure default settings are good on a no-good computer. Like 60 FPS.
 . Check optimizations quickly.
 | Test with "simulating" single CPU system. (Don't put me out, place me at bottom of checklist.)
 | Test with corrupt/missing resources. (Don't put me out, place me at bottom of checklist.)
 . Run Simian Analyzer, remove duplicate code.
 
+. Make sure default settings are good on a no-good computer. Like 60 FPS.
 . Make sure shutting down client with two simultaneously logged-in users gets logged out from the server.
 . Make font rendering look good instead of ugly.
 . Add better camera control, such as for the truck (just looking at the trailer looks like shit).
