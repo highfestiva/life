@@ -29,6 +29,8 @@ public:
 	PhysicsManagerODE();
 	virtual ~PhysicsManagerODE();
 
+	virtual bool InitCurrentThread();
+
 	virtual BodyID CreateSphere(bool pIsRoot, const TransformationF& pTransform, float32 pMass,
 		float32 pRadius, BodyType pType, float32 pFriction = 1, float32 pBounce = 0,
 		TriggerListener* pTriggerListener = 0, ForceFeedbackListener* pListener = 0);

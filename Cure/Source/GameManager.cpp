@@ -343,6 +343,7 @@ void GameManager::StartPhysicsTick()
 	}
 	else
 	{
+		mPhysics->InitCurrentThread();
 		PhysicsTick();
 	}
 }
@@ -433,6 +434,8 @@ void GameManager::PhysicsThreadEntry()
 	// JB 2009-12: dropped this, probably not a good idea since we need to run multiple
 	// physics instances when running split screen.
 	//Thread::GetCurrentThread()->SetCpuAffinityMask(1<<(SystemManager::GetLogicalCpuCount()-1));
+
+	mPhysics->InitCurrentThread();
 
 	while (mPhysicsWorkerThread && !mPhysicsWorkerThread->GetStopRequest())
 	{

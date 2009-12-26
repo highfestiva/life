@@ -117,6 +117,8 @@ public:
 
 	virtual ~PhysicsManager(){};
 
+	virtual bool InitCurrentThread() = 0;
+
 	// The "friction" parameter is a factor such that the friction coefficient
 	// between two bodies is calculated as mu = body1.friction * body2.friction.
 	// This is indeed a "hack", but it's there to make life easier writing games.

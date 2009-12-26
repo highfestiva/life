@@ -61,6 +61,11 @@ PhysicsManagerODE::~PhysicsManagerODE()
 	::dJointGroupDestroy(mContactJointGroupID);
 }
 
+bool PhysicsManagerODE::InitCurrentThread()
+{
+	return ::dAllocateODEDataForThread((unsigned)dAllocateMaskAll) != 0;
+}
+
 PhysicsManager::BodyID PhysicsManagerODE::CreateSphere(bool pIsRoot, const TransformationF& pTransform,
 	float32 pMass, float32 pRadius, BodyType pType, float32 pFriction, float32 pBounce,
 	TriggerListener* pTriggerListener, ForceFeedbackListener* pForceListener)

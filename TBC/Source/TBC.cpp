@@ -15,7 +15,7 @@ namespace TBC
 
 void Init()
 {
-	::dInitODE();
+	::dInitODE2(0);
 }
 
 void Shutdown()
