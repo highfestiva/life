@@ -49,7 +49,7 @@ Cure::Resource* UserUiExtraTypeResource<ResourceType, SubtypeExtraType>::CreateR
 }
 
 template<class ResourceType, class SubtypeExtraType>
-typename SubtypeExtraType& UserUiExtraTypeResource<ResourceType, SubtypeExtraType>::GetExtraData() const
+SubtypeExtraType& UserUiExtraTypeResource<ResourceType, SubtypeExtraType>::GetExtraData() const
 {
 	return (mExtraData);
 }

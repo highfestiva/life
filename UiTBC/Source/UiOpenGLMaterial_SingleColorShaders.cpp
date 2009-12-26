@@ -10,7 +10,7 @@
 namespace UiTbc
 {
 
-char* OpenGLMatSingleColorSolidPXS::smVP =
+const char* OpenGLMatSingleColorSolidPXS::smVP =
 {
 	"!!ARBvp1.0\n\
 	 OPTION ARB_position_invariant;\n\
@@ -165,7 +165,7 @@ MAD outCol.rgb, Temp, iPrimCol, N;\n\
 MOV outCol.a, iPrimCol.a;              # preserve alpha\n\
 END"
 
-char* OpenGLMatSingleColorSolidPXS::smFP[NUM_FP] =
+const char* OpenGLMatSingleColorSolidPXS::smFP[NUM_FP] =
 {
 	// Ambient light only.
 	"!!ARBfp1.0\n\

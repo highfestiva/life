@@ -8,8 +8,8 @@
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../../Cure/Include/UserAccount.h"
 #include "../../Lepra/Include/Network.h"
-#include "../../UiTbc/Include/GUI/UiCaption.h"
-#include "../../UiTbc/Include/GUI/UiTextField.h"
+#include "../../UiTBC/Include/GUI/UiCaption.h"
+#include "../../UiTBC/Include/GUI/UiTextField.h"
 #include "../RtVar.h"
 
 

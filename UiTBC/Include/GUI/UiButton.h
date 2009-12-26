@@ -79,7 +79,7 @@ public:
 	typedef _TFunc FuncType;
 
 	TButtonFunctorBase(_TClass* pObject, _TFunc pFunc):
-		TButtonTypeBase(pObject),
+		TButtonTypeBase<_TClass>(pObject),
 		mFunc(pFunc)
 	{
 	}
@@ -90,47 +90,48 @@ protected:
 template<class _TClass> class TButtonFunctor: public ButtonFunctor,
 	public TButtonFunctorBase<_TClass, typename TButtonTypeBase<_TClass>::_TButtonFunc>
 {
+	typedef TButtonFunctorBase<_TClass, typename TButtonTypeBase<_TClass>::_TButtonFunc> FuncParent;
 public:
-	TButtonFunctor(_TClass* pObject, FuncType pFunc):
-		TButtonFunctorBase(pObject, pFunc)
+	TButtonFunctor(_TClass* pObject, typename FuncParent::FuncType pFunc):
+		FuncParent(pObject, pFunc)
 	{
 	}
 	virtual void Call(Button* pButton)
 	{
-		(mObject->*mFunc)(pButton);
+		((TButtonTypeBase<_TClass>::mObject)->*(FuncParent::mFunc))(pButton);
 	}
 	ButtonFunctor* CreateCopy() const
 	{
-		return new TButtonFunctor(mObject, mFunc);
+		return new TButtonFunctor(TButtonTypeBase<_TClass>::mObject, FuncParent::mFunc);
 	}
 };
 
 template<class _TClass> class TButtonIndexFunctor: public ButtonFunctor,
 	public TButtonFunctorBase<_TClass, typename TButtonTypeBase<_TClass>::_TButtonIndexFunc>
 {
+	typedef TButtonFunctorBase<_TClass, typename TButtonTypeBase<_TClass>::_TButtonIndexFunc> FuncParent;
 public:
-	TButtonIndexFunctor(_TClass* pObject, FuncType pFunc, int pIndex):
-		TButtonFunctorBase(pObject, pFunc),
+	TButtonIndexFunctor(_TClass* pObject, typename FuncParent::FuncType pFunc, int pIndex):
+		FuncParent(pObject, pFunc),
 		mIndex(pIndex)
 	{
 	}
 	virtual void Call(Button* pButton)
 	{
-		(mObject->*mFunc)(pButton, mIndex);
+		(TButtonTypeBase<_TClass>::mObject->*(FuncParent::mFunc))(pButton, mIndex);
 	}
 	ButtonFunctor* CreateCopy() const
 	{
-		return new TButtonIndexFunctor(mObject, mFunc, mIndex);
+		return new TButtonIndexFunctor(TButtonTypeBase<_TClass>::mObject, FuncParent::mFunc, mIndex);
 	}
 protected:
 	int mIndex;
 };
 
-template<class _TClass> class TButtonDraggedFunctor : public ButtonDraggedFunctor
+template<class _TClass> class TButtonDraggedFunctor: public ButtonDraggedFunctor
 {
 public:
-	TButtonDraggedFunctor(_TClass* pObject, 
-				     void (_TClass::*pFunc)(Button* pButton, int pDeltaX, int pDeltaY)) :
+	TButtonDraggedFunctor(_TClass* pObject, void (_TClass::*pFunc)(Button*, int, int)) :
 		mObject(pObject),
 		mFunc(pFunc)
 	{
@@ -171,7 +172,7 @@ private:
 
 
 
-class Button : public Window
+class Button: public Window
 {
 	typedef Window Parent;
 public:

@@ -22,11 +22,13 @@
 #include "../../UiLepra/Include/UiCore.h"
 #include "../../UiLepra/Include/UiDisplayManager.h"
 #include "../../UiLepra/Include/UiInput.h"
-#include "../../UiTbc/Include/UiBasicMeshCreator.h"
-#include "../../UiTbc/Include/UiRendererFactory.h"
-#include "../../UiTbc/Include/UiTriangleBasedGeometry.h"
+#include "../../UiTBC/Include/UiBasicMeshCreator.h"
+#include "../../UiTBC/Include/UiRendererFactory.h"
+#include "../../UiTBC/Include/UiTriangleBasedGeometry.h"
 
 
+
+using namespace Lepra;
 
 const int CLIENT_COUNT = 2;
 const float PHYSICS_FPS = 60.0f;
@@ -175,6 +177,7 @@ struct AgentData: public UiLepra::KeyCodeInputObserver
 			case UiLepra::InputManager::IN_KBD_DOWN:	mMoveKeys |= 2;	break;
 			case UiLepra::InputManager::IN_KBD_LEFT:	mMoveKeys |= 4;	break;
 			case UiLepra::InputManager::IN_KBD_RIGHT:	mMoveKeys |= 8;	break;
+			default: break;
 		}
 		return (false);
 	}
@@ -186,6 +189,7 @@ struct AgentData: public UiLepra::KeyCodeInputObserver
 			case UiLepra::InputManager::IN_KBD_DOWN:	mMoveKeys &= ~2;	break;
 			case UiLepra::InputManager::IN_KBD_LEFT:	mMoveKeys &= ~4;	break;
 			case UiLepra::InputManager::IN_KBD_RIGHT:	mMoveKeys &= ~8;	break;
+			default: break;
 		}
 		mNetworkForceSend = true;
 		return (false);

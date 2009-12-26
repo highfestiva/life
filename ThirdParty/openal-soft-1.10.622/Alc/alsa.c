@@ -20,6 +20,8 @@
 
 #include "config.h"
 
+#ifdef HAVE_ALSA
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <memory.h>
@@ -1109,3 +1111,5 @@ void alc_alsa_probe(int type)
 
     alsa_unload();
 }
+
+#endif // HAVE_ALSA

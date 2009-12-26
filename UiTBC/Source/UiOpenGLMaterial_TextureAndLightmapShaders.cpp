@@ -10,7 +10,7 @@
 namespace UiTbc
 {
 
-char* OpenGLMatTextureAndLightmapPXS::smVP =
+const char* OpenGLMatTextureAndLightmapPXS::smVP =
 {
 	"!!ARBvp1.0\n\
 	 OPTION ARB_position_invariant;\n\
@@ -183,7 +183,7 @@ MAD outCol.rgb, Temp, primCol, N;\n\
 MOV outCol.a, iPrimCol.a;              # preserve alpha\n\
 END"
 
-char* OpenGLMatTextureAndLightmapPXS::smFP[NUM_FP] =
+const char* OpenGLMatTextureAndLightmapPXS::smFP[NUM_FP] =
 {
 	// Ambient light and lightmap only.
 	"!!ARBfp1.0\n\

@@ -15,7 +15,7 @@
 #include "../../TBC/Include/TBC.h"
 #ifndef CURE_TEST_WITHOUT_UI
 #include "../../UiLepra/Include/UiLepra.h"
-#include "../../UiTbc/Include/UiTBC.h"
+#include "../../UiTBC/Include/UiTBC.h"
 #include "../../UiCure/Include/UiCure.h"
 #endif // !CURE_TEST_WITHOUT_UI
 

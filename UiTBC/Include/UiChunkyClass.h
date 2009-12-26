@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "UiTbc.h"
+#include "UiTBC.h"
 #include "../../Lepra/Include/Graphics2D.h"
 #include "../../Lepra/Include/Transformation.h"
 #include "../../TBC/Include/ChunkyClass.h"

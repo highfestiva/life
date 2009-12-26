@@ -1,15 +1,19 @@
-/*
-	Class:  OpenGLMatTextureDiffuseBumpMapPXS
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2009, Righteous Games
-*/
+
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2009, Righteous Games
+
+
 
 #include "../Include/UiOpenGLMaterials.h"
+
+
 
 namespace UiTbc
 {
 
-char* OpenGLMatTextureDiffuseBumpMapPXS::smVP =
+
+
+const char* OpenGLMatTextureDiffuseBumpMapPXS::smVP =
 {
 	"!!ARBvp1.0\n\
 	 OPTION ARB_position_invariant;\n\
@@ -199,7 +203,7 @@ MUL outCol.rgb, DiffuseCol, primCol;\n\
 MOV outCol.a, iPrimCol.a;              # preserve alpha\n\
 END"
 
-char* OpenGLMatTextureDiffuseBumpMapPXS::smFP[NUM_FP] =
+const char* OpenGLMatTextureDiffuseBumpMapPXS::smFP[NUM_FP] =
 {
 	// Ambient light only.
 	"!!ARBfp1.0\n\
@@ -394,4 +398,6 @@ char* OpenGLMatTextureDiffuseBumpMapPXS::smFP[NUM_FP] =
 #undef FP_CALC_SPOT_LIGHT
 #undef FP_END
 
-} // End namespace.
+
+
+}

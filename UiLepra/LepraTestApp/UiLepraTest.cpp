@@ -6,7 +6,6 @@
 
 #ifndef CURE_TEST_WITHOUT_UI
 
-#include "stdafx.h"
 #include <assert.h>
 #include <math.h>
 #include "../../Lepra/Include/Log.h"
@@ -21,11 +20,9 @@
 
 
 
+using namespace Lepra;
 class UiLepraTest{};
 static Lepra::LogDecorator gUiLLog(Lepra::LogType::GetLog(Lepra::LogType::SUB_TEST), typeid(UiLepraTest));
-
-
-
 void ReportTestResult(const Lepra::LogDecorator& pLog, const str& pTestName, const str& pContext, bool pResult);
 bool TestLepra();
 

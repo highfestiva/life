@@ -23,8 +23,8 @@ Renderer::Renderer(Canvas* pScreen) :
 	mFar(10000.0f),
 	mViewport(0, 0, pScreen->GetWidth(), pScreen->GetHeight()),
 	mGeometryIDManager(1, 1000000, INVALID_GEOMETRY),
-	mLightIDManager(0, MAX_LIGHTS, INVALID_LIGHT),
 	mTextureIDManager(1, 1000000, INVALID_TEXTURE),
+	mLightIDManager(0, MAX_LIGHTS, INVALID_LIGHT),
 	mEnvTexture(0),
 	mLightCount(0),
 	mNumSpotLights(0),
@@ -689,9 +689,11 @@ float Renderer::GetLightInfluence(const LightData& pLightData)
 		case LIGHT_POINT:
 		{
 			lInfluence /= smReferencePosition.GetDistanceSquared(pLightData.mPosition);
-		} break;
+		}
+		break;
+		default: break;
 	}
-	return lInfluence;
+	return (lInfluence);
 }
 
 Renderer::LightID Renderer::GetClosestLight(int pIndex)
@@ -1362,8 +1364,8 @@ PixelRect Renderer::GetBoundingRect(const Vector3DF* pVertex, int pNumVertices) 
 	{
 		Vector3DF lCurrent(mCamTransform.InverseTransform(Vector3DF(pVertex[i].x, pVertex[i].y, pVertex[i].z)));
 
-		if (lPrev.y <= 0 && lCurrent.y > 0 ||
-		   lPrev.y >  0 && lCurrent.y <= 0)
+		if ((lPrev.y <= 0 && lCurrent.y > 0) ||
+		    (lPrev.y >  0 && lCurrent.y <= 0))
 		{
 			// Clip at z = 0.
 			Vector3DF lDiff = lCurrent - lPrev;

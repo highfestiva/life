@@ -1,22 +1,24 @@
-/*
-	File:   BasicMeshCreator.cpp
-	Class:  BasicMeshCreator
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2009, Righteous Games
-*/
 
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2009, Righteous Games
+
+
+
+#include "../Include/UiBasicMeshCreator.h"
+#include <assert.h>
+#include <list>
 #include "../../Lepra/Include/Math.h"
 #include "../../Lepra/Include/Vector3D.h"
 #include "../Include/UiAnimatedGeometry.h"
-#include "../Include/UiBasicMeshCreator.h"
 #include "../Include/UiTBC.h"
 #include "../Include/UiTriangleBasedGeometry.h"
 
-#include <crtdbg.h>
-#include <list>
+
 
 namespace UiTbc
 {
+
+
 
 TriangleBasedGeometry* BasicMeshCreator::CreateFlatBox(float pXSize, float pYSize, float pZSize,
 						   unsigned pXSegments,
@@ -140,7 +142,7 @@ TriangleBasedGeometry* BasicMeshCreator::CreateFlatBox(float pXSize, float pYSiz
 			lIndices[lTIndex++] = (y + 0) * (pXSegments + 1) + x + 0;
 			lIndices[lTIndex++] = (y + 1) * (pXSegments + 1) + x + 1;
 
-			_ASSERT(lTIndex <= lNumTriangles * 3);
+			assert(lTIndex <= lNumTriangles * 3);
 		}
 	}
 
@@ -159,7 +161,7 @@ TriangleBasedGeometry* BasicMeshCreator::CreateFlatBox(float pXSize, float pYSiz
 			lIndices[lTIndex++] = (z + 1) * (pXSegments + 1) + x + 0 + lBottomPlaneIndexOffset;
 			lIndices[lTIndex++] = (z + 1) * (pXSegments + 1) + x + 1 + lBottomPlaneIndexOffset;
 
-			_ASSERT(lTIndex <= lNumTriangles * 3);
+			assert(lTIndex <= lNumTriangles * 3);
 		}
 	}
 
@@ -178,7 +180,7 @@ TriangleBasedGeometry* BasicMeshCreator::CreateFlatBox(float pXSize, float pYSiz
 			lIndices[lTIndex++] = (z + 0) * (pXSegments + 1) + x + 0 + lFrontPlaneIndexOffset;
 			lIndices[lTIndex++] = (z + 1) * (pXSegments + 1) + x + 1 + lFrontPlaneIndexOffset;
 
-			_ASSERT(lTIndex <= lNumTriangles * 3);
+			assert(lTIndex <= lNumTriangles * 3);
 		}
 	}
 
@@ -197,7 +199,7 @@ TriangleBasedGeometry* BasicMeshCreator::CreateFlatBox(float pXSize, float pYSiz
 			lIndices[lTIndex++] = (z + 1) * (pXSegments + 1) + x + 0 + lBackPlaneIndexOffset;
 			lIndices[lTIndex++] = (z + 1) * (pXSegments + 1) + x + 1 + lBackPlaneIndexOffset;
 
-			_ASSERT(lTIndex <= lNumTriangles * 3);
+			assert(lTIndex <= lNumTriangles * 3);
 		}
 	}
 
@@ -216,7 +218,7 @@ TriangleBasedGeometry* BasicMeshCreator::CreateFlatBox(float pXSize, float pYSiz
 			lIndices[lTIndex++] = (z + 1) * (pYSegments + 1) + y + 0 + lLeftPlaneIndexOffset;
 			lIndices[lTIndex++] = (z + 1) * (pYSegments + 1) + y + 1 + lLeftPlaneIndexOffset;
 
-			_ASSERT(lTIndex <= lNumTriangles * 3);
+			assert(lTIndex <= lNumTriangles * 3);
 		}
 	}
 
@@ -235,7 +237,7 @@ TriangleBasedGeometry* BasicMeshCreator::CreateFlatBox(float pXSize, float pYSiz
 			lIndices[lTIndex++] = (z + 0) * (pYSegments + 1) + y + 0 + lRightPlaneIndexOffset;
 			lIndices[lTIndex++] = (z + 1) * (pYSegments + 1) + y + 1 + lRightPlaneIndexOffset;
 
-			_ASSERT(lTIndex <= lNumTriangles * 3);
+			assert(lTIndex <= lNumTriangles * 3);
 		}
 	}
 
@@ -737,4 +739,6 @@ void BasicMeshCreator::CreateYBonedSkin(float pStartY, float pEndY, const Triang
 	}
 }
 
-} // End namespace.
+
+
+}

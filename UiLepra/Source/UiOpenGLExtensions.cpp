@@ -206,11 +206,9 @@ bool OpenGLExtensions::IsExtensionSupported(const char* pExtension)
 
 void* OpenGLExtensions::GetExtensionPointer(const char* pFunctionName)
 {
-#ifdef LEPRA_WINDOWS
+#if defined(LEPRA_WINDOWS)
     return (void*)wglGetProcAddress(pFunctionName);
-#endif // LEPRA_WINDOWS
-
-#ifdef LEPRA_MACOSX
+#elif defined(LEPRA_MACOSX)
     // Mac is a bit more tricky.
     // First we need the bundle
     CFBundleRef openGL = 0;
@@ -243,7 +241,11 @@ void* OpenGLExtensions::GetExtensionPointer(const char* pFunctionName)
     
     // Return the function ponter
     return pFunc;
-#endif // LEPRA_MACOSX
+#elif defined(LEPRA_POSIX)
+	return ((void*)glXGetProcAddress((const GLubyte*)pFunctionName));
+#else // Unkonwn platform
+#error "WTF! Waco platform!"
+#endif // Win / Mac / Posix
 }
 
 void OpenGLExtensions::InitExtensions()

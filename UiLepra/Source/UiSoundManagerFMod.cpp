@@ -6,6 +6,8 @@
 
 #include "../Include/UiSoundManagerFMod.h"
 
+#if !defined(LEPRA_WITHOUT_FMOD)
+
 
 
 // TODO: refactor and remove unthinkable crap. Move resource ownership into resource manager where it belongs.
@@ -578,3 +580,7 @@ LOG_CLASS_DEFINE(UI_SOUND, SoundManagerFMod);
 
 
 }
+
+
+
+#endif // !WITHOUT_FMOD

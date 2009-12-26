@@ -6,8 +6,8 @@
 
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../../Lepra/Include/Network.h"
-#include "../../UiTbc/Include/GUI/UiCaption.h"
-#include "../../UiTbc/Include/GUI/UiTextField.h"
+#include "../../UiTBC/Include/GUI/UiCaption.h"
+#include "../../UiTBC/Include/GUI/UiTextField.h"
 #include "PlayerCountView.h"
 
 

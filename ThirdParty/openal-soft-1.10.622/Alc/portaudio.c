@@ -20,6 +20,8 @@
 
 #include "config.h"
 
+#ifdef HAVE_PORTAUDIO
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -296,3 +298,5 @@ void alc_pa_probe(int type)
 
     pa_unload();
 }
+
+#endif // HAVE_PORTAUDIO

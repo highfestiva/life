@@ -1,21 +1,22 @@
-/*
-	Class:  ProgressiveTriangleGeometry
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2009, Righteous Games
-*/
 
-#ifndef UIPROGRESSIVETRIANGLEGEOMETRY_H
-#define UIPROGRESSIVETRIANGLEGEOMETRY_H
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2009, Righteous Games
+
+
+
+#pragma once
 
 #include "UiTBC.h"
 #include "UiTriangleBasedGeometry.h"
 #include "../../TBC/Include/GeometryBase.h"
 #include <list>
 
-#include <crtdbg.h>
+
 
 namespace UiTbc
 {
+
+
 
 class ProgressiveTriangleGeometry : public TBC::GeometryBase
 {
@@ -483,6 +484,6 @@ bool ProgressiveTriangleGeometry::HaveVertexNormalData()
 	return (mCurrentNormalData != 0);
 }
 
-} // End namespace.
 
-#endif
+
+}

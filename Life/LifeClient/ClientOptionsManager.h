@@ -6,9 +6,10 @@
 
 #pragma once
 
+#include "ClientOptions.h"
 #include "../../Lepra/Include/Log.h"
 #include "../../UiLepra/Include/UiInput.h"
-#include "ClientOptions.h"
+#include "../Life.h"
 
 
 

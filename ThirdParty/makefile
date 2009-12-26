@@ -1,7 +1,7 @@
-# 'Twas generated from ../../ThirdParty/ThirdPartyLib_800.vcproj, 2009-12-22, type='lib_nowarn'.
+# 'Twas generated from ../../ThirdParty/ThirdPartyLib_800.vcproj, 2009-12-26, type='lib_nowarn'.
 # Don't edit manually. See 'generate_makefile.py' for info.
 
-CFLAGS = -O0 -ggdb -fPIC -D_POSIX_PTHREAD_SEMANTICS -Istlport/stlport -Iutf8cpp -Iode-0.11.1/include -Iode-0.11.1/ode/src -Iode-0.11.1/ode/src/joints -Iode-0.11.1/OPCODE -Iode-0.11.1/GIMPACT/include -Iode-0.11.1/ou/include -DPOSIX -D_DEBUG -D_CONSOLE -DPNG_NO_ASSEMBLER_CODE -DdCYLINDER_ENABLED -DCURE_TEST_WITHOUT_UI -Wno-unknown-pragmas
+CFLAGS = -O0 -ggdb -fPIC -D_POSIX_PTHREAD_SEMANTICS -Istlport/stlport -Iutf8cpp -Iopenal-soft-1.10.622/OpenAL32/Include -Iopenal-soft-1.10.622/include -Ifreealut-1.1.0/include -Iode-0.11.1/include -Iode-0.11.1/ode/src -Iode-0.11.1/ode/src/joints -Iode-0.11.1/OPCODE -Iode-0.11.1/GIMPACT/include -Iode-0.11.1/ou/include -DPOSIX -D_XOPEN_SOURCE=600 -D_DEBUG -D_CONSOLE -DPNG_NO_ASSEMBLER_CODE -DdSingle -DHAVE_CONFIG_H=1 -DLEPRA_WITHOUT_FMOD -Wno-unknown-pragmas
 
 SRCS=	\
 jpeg-6b/jcapimin.cpp	\

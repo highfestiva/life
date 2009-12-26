@@ -46,8 +46,8 @@ void PortalManager::Portal::Traverse(Renderer* pRenderer, const PixelRect& pRect
 	bool lFront = pRenderer->IsFacingFront(mVertex, mNumVertices);
 
 	// Stop the recursion if we try to traverse this portal from the "wrong" direction.
-	if (lFront == true  && pFrom == mCell1 ||
-	   lFront == false && pFrom == mCell2)
+	if ((lFront == true  && pFrom == mCell1) ||
+		(lFront == false && pFrom == mCell2))
 	{
 		lRect = lRect.GetOverlap(pRect);
 

@@ -69,7 +69,7 @@ public:
 
 	int GetChannel(SoundInstanceID pSoundIID);
 
-	void SetChorus(int pChannelIndex, 
+	void SetChorus(SoundInstanceID pSoundIID,
 				   int pFXIndex,
 				   float pDelay,
 				   float pFeedback,
@@ -77,7 +77,7 @@ public:
 				   float pDepth,		// Mod amount...
 				   float pWetness);
 
-	void SetFlanger(int pChannelIndex, 
+	void SetFlanger(SoundInstanceID pSoundIID,
 					int pFXIndex,
 					float pDelay,
 					float pFeedback,
@@ -85,20 +85,20 @@ public:
 					float pDepth,		// Mod amount...
 					float pWetness);
 
-	void SetCompressor(int pChannelIndex, 
+	void SetCompressor(SoundInstanceID pSoundIID,
 					   int pFXIndex,
 					   float pRatio,
 					   float pThreshold,
 					   float pAttack,
 					   float pRelease);
 
-	void SetEcho(int pChannelIndex, 
+	void SetEcho(SoundInstanceID pSoundIID,
 				 int pFXIndex,
 				 float pFeedback,
 				 float pDelay,
 				 float pWetness);
 
-	void SetParamEQ(int pChannelIndex, 
+	void SetParamEQ(SoundInstanceID pSoundIID,
 					int pFXIndex,
 					float pCenter,
 					float pBandwidth,

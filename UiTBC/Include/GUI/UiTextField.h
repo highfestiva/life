@@ -35,6 +35,10 @@ namespace UiTbc
 
 
 
+class DesktopWindow;
+
+
+
 class TextField: public Window, public PopupList::Listener, public TextComponent
 {
 	typedef Window Parent;

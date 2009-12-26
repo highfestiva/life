@@ -1,21 +1,28 @@
-/*
-	Class:  -
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2009, Righteous Games
-*/
 
-#ifndef UIOPENGLMATERIALS_H
-#define UIOPENGLMATERIALS_H
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2009, Righteous Games
+
+
+
+#pragma once
+
+
 
 #include "../../Lepra/Include/Lepra.h"
 #include "UiMaterial.h"
 #include "UiOpenGLRenderer.h"
 #include <list>
 
+
+
 namespace UiTbc
 {
 
+
+
 class OpenGLRenderer;
+
+
 
 //
 //	OpenGLMaterial
@@ -421,7 +428,7 @@ protected:
 		MAX_SHADER_LIGHTS = 3
 	};
 
-	OpenGLMatPXS(char* pVP, char* pFP[NUM_FP]);
+	OpenGLMatPXS(const char* pVP, const char* pFP[NUM_FP]);
 
 	void PrepareShaderPrograms(OpenGLRenderer* pRenderer);
 	void CleanupShaderPrograms();
@@ -479,8 +486,8 @@ public:
 protected:
 	virtual void RenderGeometry(TBC::GeometryBase* pGeometry);
 
-	static char* smVP;
-	static char* smFP[NUM_FP];
+	static const char* smVP;
+	static const char* smFP[NUM_FP];
 
 private:
 	LOG_CLASS_DECLARE();
@@ -504,8 +511,8 @@ public:
 protected:
 	virtual void RenderGeometry(TBC::GeometryBase* pGeometry);
 
-	static char* smVP;
-	static char* smFP[NUM_FP];
+	static const char* smVP;
+	static const char* smFP[NUM_FP];
 
 private:
 	LOG_CLASS_DECLARE();
@@ -530,8 +537,8 @@ public:
 protected:
 	virtual void RenderGeometry(TBC::GeometryBase* pGeometry);
 
-	static char* smVP;
-	static char* smFP[NUM_FP];
+	static const char* smVP;
+	static const char* smFP[NUM_FP];
 
 private:
 	LOG_CLASS_DECLARE();
@@ -549,8 +556,8 @@ public:
 				 Material* pFallBackMaterial);
 	OpenGLMatTextureSBMapPXS(OpenGLRenderer* pRenderer,
 				 Material* pFallBackMaterial,
-				 char* pVP,
-				 char** pFP);
+				 const char* pVP,
+				 const char** pFP);
 
 	virtual ~OpenGLMatTextureSBMapPXS();
 
@@ -560,8 +567,8 @@ public:
 protected:
 	virtual void RenderGeometry(TBC::GeometryBase* pGeometry);
 
-	static char* smVP;
-	static char* smFP[NUM_FP];
+	static const char* smVP;
+	static const char* smFP[NUM_FP];
 
 private:
 	LOG_CLASS_DECLARE();
@@ -577,12 +584,10 @@ public:
 
 protected:
 
-	static char* smVP;
-	static char* smFP[NUM_FP];
+	static const char* smVP;
+	static const char* smFP[NUM_FP];
 };
 
 
-} // End namespace.
 
-#endif
-
+}

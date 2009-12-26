@@ -6,7 +6,8 @@
 
 #pragma once
 
-#include "../../UiTbc/Include/GUI/UiWindow.h"
+#include "../../UiTBC/Include/GUI/UiWindow.h"
+#include "../Life.h"
 
 
 

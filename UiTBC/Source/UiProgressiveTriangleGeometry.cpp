@@ -1,27 +1,29 @@
-/*
-	Class:  ProgressiveTriangleGeometry
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2009, Righteous Games
-*/
+
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2009, Righteous Games
+
+
 
 #include "../Include/UiProgressiveTriangleGeometry.h"
+#include <assert.h>
 #include "../../Lepra/Include/ListUtil.h"
 
-#include <crtdbg.h>
-#include <assert.h>
+
 
 namespace UiTbc
 {
 
-ProgressiveTriangleGeometry::ProgressiveTriangleGeometry() :
-	mMaxVertexCount(0),
-	mMaxTriangleCount(0),
 
+
+ProgressiveTriangleGeometry::ProgressiveTriangleGeometry():
 	mBaseVertexCount(0),
 	mBaseTriangleCount(0),
 
 	mCurrentVertexCount(0),
 	mCurrentTriangleCount(0),
+
+	mMaxVertexCount(0),
+	mMaxTriangleCount(0),
 
 	mCurrentVertexData(0),
 	mCurrentUVData(0),
@@ -36,23 +38,23 @@ ProgressiveTriangleGeometry::ProgressiveTriangleGeometry() :
 	mBaseNormalData(0),
 	mBaseIndices(0),
 
-	mVertexSplit(0),
 	mCurrentVSplit(0),
 	mNumVertexSplits(0),
+	mVertexSplit(0),
 
 	mColorFormat(TBC::GeometryBase::COLOR_RGBA)
 {
 }
 
-ProgressiveTriangleGeometry::ProgressiveTriangleGeometry(const ProgressiveTriangleGeometry& pProgressiveGeometry) :
-	mMaxVertexCount(0),
-	mMaxTriangleCount(0),
-
+ProgressiveTriangleGeometry::ProgressiveTriangleGeometry(const ProgressiveTriangleGeometry& pProgressiveGeometry):
 	mBaseVertexCount(0),
 	mBaseTriangleCount(0),
 
 	mCurrentVertexCount(0),
 	mCurrentTriangleCount(0),
+
+	mMaxVertexCount(0),
+	mMaxTriangleCount(0),
 
 	mCurrentVertexData(0),
 	mCurrentUVData(0),
@@ -67,24 +69,24 @@ ProgressiveTriangleGeometry::ProgressiveTriangleGeometry(const ProgressiveTriang
 	mBaseNormalData(0),
 	mBaseIndices(0),
 
-	mVertexSplit(0),
 	mCurrentVSplit(0),
 	mNumVertexSplits(0),
+	mVertexSplit(0),
 
 	mColorFormat(TBC::GeometryBase::COLOR_RGBA)
 {
 	Copy(pProgressiveGeometry);
 }
 
-ProgressiveTriangleGeometry::ProgressiveTriangleGeometry(TriangleBasedGeometry& pGeometry) :
-	mMaxVertexCount(0),
-	mMaxTriangleCount(0),
-
+ProgressiveTriangleGeometry::ProgressiveTriangleGeometry(TriangleBasedGeometry& pGeometry):
 	mBaseVertexCount(0),
 	mBaseTriangleCount(0),
 
 	mCurrentVertexCount(0),
 	mCurrentTriangleCount(0),
+
+	mMaxVertexCount(0),
+	mMaxTriangleCount(0),
 
 	mCurrentVertexData(0),
 	mCurrentUVData(0),
@@ -99,9 +101,9 @@ ProgressiveTriangleGeometry::ProgressiveTriangleGeometry(TriangleBasedGeometry& 
 	mBaseNormalData(0),
 	mBaseIndices(0),
 
-	mVertexSplit(0),
 	mCurrentVSplit(0),
 	mNumVertexSplits(0),
+	mVertexSplit(0),
 
 	mColorFormat(TBC::GeometryBase::COLOR_RGBA)
 {
@@ -1066,4 +1068,6 @@ void ProgressiveTriangleGeometry::GetCurrentState(TriangleBasedGeometry& pGeomet
 	              TBC::GeometryBase::GEOM_DYNAMIC);
 }
 
-} // End namespace.
+
+
+}

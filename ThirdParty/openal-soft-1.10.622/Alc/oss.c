@@ -20,6 +20,8 @@
 
 #include "config.h"
 
+#ifdef HAVE_OSS
+
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -491,3 +493,5 @@ void alc_oss_probe(int type)
     else if(type == CAPTURE_DEVICE_PROBE)
         AppendCaptureDeviceList(oss_device_capture);
 }
+
+#endif // HAVE_OSS

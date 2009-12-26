@@ -11,10 +11,10 @@
 #include "../../Lepra/Include/SystemManager.h"
 #include "../../UiCure/Include/UiGameUiManager.h"
 #include "../../UiCure/Include/UiCppContextObject.h"
-#include "../../UiTbc/Include/GUI/UiCenterLayout.h"
-#include "../../UiTbc/Include/GUI/UiDesktopWindow.h"
-#include "../../UiTbc/Include/GUI/UiFloatingLayout.h"
-#include "../../UiTbc/Include/UiRenderer.h"
+#include "../../UiTBC/Include/GUI/UiCenterLayout.h"
+#include "../../UiTBC/Include/GUI/UiDesktopWindow.h"
+#include "../../UiTBC/Include/GUI/UiFloatingLayout.h"
+#include "../../UiTBC/Include/UiRenderer.h"
 #include "../LifeApplication.h"
 #include "../RtVar.h"
 #include "GameClientMasterTicker.h"
@@ -106,7 +106,7 @@ bool GameClientMasterTicker::CreateSlave()
 			lFirstFreeSlaveMask |= (1<<x.GetObject()->GetSlaveIndex());
 		}
 		int lFirstFreeSlaveIndex = 0;
-		for (lFirstFreeSlaveIndex = 0; lFirstFreeSlaveIndex < sizeof(lFirstFreeSlaveMask)*8; ++lFirstFreeSlaveIndex)
+		for (lFirstFreeSlaveIndex = 0; lFirstFreeSlaveIndex < (int)sizeof(lFirstFreeSlaveMask)*8; ++lFirstFreeSlaveIndex)
 		{
 			if (!(lFirstFreeSlaveMask&(1<<lFirstFreeSlaveIndex)))
 			{

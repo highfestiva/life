@@ -6,7 +6,7 @@
 
 #include "../Include/UiGeometry2D.h"
 #include <assert.h>
-#include "../Include/UiTbc.h"
+#include "../Include/UiTBC.h"
 
 
 
@@ -31,7 +31,7 @@ Geometry2D::Geometry2D(uint16 pVertexFormat, int pVertexCapacity, int pTriangleC
 
 Geometry2D::~Geometry2D()
 {
-	delete[] mVertexData;
+	delete[] (float*)mVertexData;	// Cast to dumb type; we don't want any destructor anyways.
 	delete[] mColorData;
 	delete[] mUVData;
 	delete[] mTriangleData;
@@ -294,7 +294,7 @@ void Geometry2D::Realloc(void** pData, size_t pNewSize, size_t pBytesToCopy)
 {
 	uint8* lNewData = new uint8[pNewSize];
 	::memcpy(lNewData, *pData, std::min(pNewSize, pBytesToCopy));
-	delete[] *pData;
+	delete[] (float*)(*pData);	// Cast to dumb type, we don't want any destructor anyways.
 	*pData = lNewData;
 }
 

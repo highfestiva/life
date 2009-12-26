@@ -54,7 +54,7 @@ class TEXLoader
 public:
 	friend class TEXFriend;
 	
-	enum Status
+	enum IoStatus
 	{
 		STATUS_OPEN_ERROR = 0, 
 		STATUS_SUCCESS,
@@ -68,17 +68,17 @@ public:
 		STATUS_COMPRESSION_ERROR,
 	};
 
-	Status Load(const str& pFileName, Texture& pTexture, bool pMergeColorAndAlpha);
-	Status Save(const str& pFileName, const Texture& pTexture, bool pCompressed);
+	IoStatus Load(const str& pFileName, Texture& pTexture, bool pMergeColorAndAlpha);
+	IoStatus Save(const str& pFileName, const Texture& pTexture, bool pCompressed);
 
-	Status Load(const str& pArchiveName, const str& pFileName, Texture& pTexture, bool pMergeColorAndAlpha);
-	Status Save(const str& pArchiveName, const str& pFileName, const Texture& pTexture, bool pCompressed);
+	IoStatus Load(const str& pArchiveName, const str& pFileName, Texture& pTexture, bool pMergeColorAndAlpha);
+	IoStatus Save(const str& pArchiveName, const str& pFileName, const Texture& pTexture, bool pCompressed);
 
 protected:
 private:
 
-	Status Load(Texture& pTexture, bool pMergeColorAndAlpha);
-	Status Save(const Texture& pTexture, bool pCompressed);
+	IoStatus Load(Texture& pTexture, bool pMergeColorAndAlpha);
+	IoStatus Save(const Texture& pTexture, bool pCompressed);
 
 	enum // Map flags
 	{
@@ -161,8 +161,8 @@ private:
 		}
 	};
 
-	Status ReadJpeg(Canvas& pCanvas);
-	Status WriteJpeg(const Canvas& pCanvas);
+	IoStatus ReadJpeg(Canvas& pCanvas);
+	IoStatus WriteJpeg(const Canvas& pCanvas);
 
 	void InitSourceManager(jpeg_decompress_struct* pCInfo);
 	void InitDestinationManager(jpeg_compress_struct* pCInfo);

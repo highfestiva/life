@@ -112,6 +112,41 @@ public:
 	// make sounds attenuate 2 times quicker.
 	virtual void SetRollOffFactor(float pFactor) = 0;
 
+	virtual void SetChorus(SoundInstanceID pSoundIID, 
+				   int pFXIndex,
+				   float pDelay,
+				   float pFeedback,
+				   float pRate,
+				   float pDepth,		// Mod amount...
+				   float pWetness) = 0;
+
+	virtual void SetFlanger(SoundInstanceID pSoundIID, 
+					int pFXIndex,
+					float pDelay,
+					float pFeedback,
+					float pRate,
+					float pDepth,		// Mod amount...
+					float pWetness) = 0;
+
+	virtual void SetCompressor(SoundInstanceID pSoundIID, 
+					   int pFXIndex,
+					   float pRatio,
+					   float pThreshold,
+					   float pAttack,
+					   float pRelease) = 0;
+
+	virtual void SetEcho(SoundInstanceID pSoundIID, 
+				 int pFXIndex,
+				 float pFeedback,
+				 float pDelay,
+				 float pWetness) = 0;
+
+	virtual void SetParamEQ(SoundInstanceID pSoundIID, 
+					int pFXIndex,
+					float pCenter,
+					float pBandwidth,
+					float pGain) = 0;
+
 protected:
 private:
 };

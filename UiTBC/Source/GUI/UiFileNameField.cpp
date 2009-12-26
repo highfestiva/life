@@ -127,6 +127,7 @@ bool FileNameField::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 			FinalizeSelection();
 		}
 		break;
+		default: break;
 	}
 	return (false);
 }

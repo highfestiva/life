@@ -20,6 +20,8 @@
 
 #include "config.h"
 
+#ifdef HAVE_DSOUND
+
 #define _WIN32_WINNT 0x0500
 #define INITGUID
 #include <stdlib.h>
@@ -570,3 +572,5 @@ void alcDSoundProbe(int type)
 
     DSoundUnload();
 }
+
+#endif // HAVE_DSOUND

@@ -250,14 +250,14 @@ void Texture::Set(const Canvas& pColorMap,
 	int lNumHeightBits = 0;
 	int lNearestPow2Width = 1;
 	int lNearestPow2Height = 1;
-	for (i = 0; i < sizeof(int) * 8; i++)
+	for (i = 0; i < (int)sizeof(int) * 8; i++)
 	{
 		if (lNearestPow2Width * 2 > lWidth)
 			break;
 		lNearestPow2Width <<= 1;
 		lNumWidthBits++;
 	}
-	for (i = 0; i < sizeof(int) * 8; i++)
+	for (i = 0; i < (int)sizeof(int) * 8; i++)
 	{
 		if (lNearestPow2Height * 2 > lHeight)
 			break;
@@ -353,14 +353,14 @@ void Texture::Set(const Canvas& pCubeMapPosX,
 	int lNumHeightBits = 0;
 	int lNearestPow2Width = 1;
 	int lNearestPow2Height = 1;
-	for (i = 0; i < sizeof(int) * 8; i++)
+	for (i = 0; i < (int)sizeof(int) * 8; i++)
 	{
 		if (lNearestPow2Width * 2 > lWidth)
 			break;
 		lNearestPow2Width <<= 1;
 		lNumWidthBits++;
 	}
-	for (i = 0; i < sizeof(int) * 8; i++)
+	for (i = 0; i < (int)sizeof(int) * 8; i++)
 	{
 		if (lNearestPow2Height * 2 > lHeight)
 			break;
