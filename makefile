@@ -11,15 +11,17 @@ Cure	\
 UiLepra	\
 UiTBC	\
 UiCure	\
-Life	\
+Life
+
+OBJS=	\
+Life/LifeServer	\
 Life/LifeClient	\
 UiCure/CureTestApp
 
-OBJS=	\
-Life/LifeServer
-
 BINS=	\
-Life/LifeServer/LifeServer
+Life/LifeServer/LifeServer	\
+Life/LifeClient/LifeClient	\
+UiCure/CureTestApp/CureTestApp
 
 
 .PHONY:	$(BINS) $(OBJS) $(SRCS) all clean depend

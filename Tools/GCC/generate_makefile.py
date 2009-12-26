@@ -155,21 +155,14 @@ def generate_base_make(makename, binlist, liblist):
     libdirlist = [os.path.dirname(lib) for lib in liblist]
     write_contents(f, libdirlist, bindirlist, binlist)
     f.write(eval("foot_base"))
-#    for bin in binlist:
-#    	f.write(makedict["foot_clean_bin_base"] % {"bindir":os.path.dirname(bin)})
-#    for bin in binlist:
-#	stllib = "ThirdParty/stlport/build/lib/obj/gcc/so/libstlport.so.5.2"
-#    	f.write(makedict["foot_bin_base"] % {"bin":bin, "bindir":os.path.dirname(bin), "stllib":stllib})
-#    f.write("\n")
-#    f.write(makedict["foot_lib_base"])
     f.close()
 
 
 def generate_makefiles(basedir, vcfileinfolist):
-    files = {"bin":[], "lib":[]}
+    files = {"bin":[], "gfx_bin":[], "lib":[]}
 
     for type, vcfile in vcfileinfolist:
-	basetype = type if type == "bin" else "lib"
+	basetype = "lib" if type.startswith("lib") else type
 	files[basetype] += [linux_bin_name(basetype, vcfile)]
 
         vcfile = os.path.join(basedir, vcfile)
@@ -203,7 +196,7 @@ def generate_makefiles(basedir, vcfileinfolist):
 
     makename = os.path.join(basedir, "makefile")
     printstart(makename)
-    generate_base_make(makename, files["bin"], files["lib"])
+    generate_base_make(makename, files["bin"]+files["gfx_bin"], files["lib"])
     printend("base")
 
 
