@@ -4,10 +4,10 @@
 
 
 
+#include "../../Include/Win32/UiWin32Core.h"
 #include "../../../Lepra/Include/Log.h"
 #include "../../../Lepra/Include/SystemManager.h"
 #include "../../../Lepra/Include/Thread.h"
-#include "../../Include/Win32/UiWin32Core.h"
 #include "../../Include/Win32/UiWin32DisplayManager.h"
 
 

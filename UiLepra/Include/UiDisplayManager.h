@@ -161,10 +161,6 @@ public:
 	virtual bool FindDisplayMode(DisplayMode& pDisplayMode, int pWidth, int pHeight, int pBitDepth) = 0;
 	virtual bool FindDisplayMode(DisplayMode& pDisplayMode, int pWidth, int pHeight, int pBitDepth, int pRefreshRate) = 0;
 
-
-
-	// Returns the display memory pointer if available, NULL otherwise.
-	virtual void* GetScreenPtr() = 0;
 	virtual unsigned GetWidth() = 0;
 	virtual unsigned GetHeight() = 0;
 	virtual unsigned GetBitDepth() = 0;
@@ -178,16 +174,6 @@ public:
 	// for the current frame.
 	void GetScreenCanvas(Canvas& pCanvas);
 	inline void GetScreenCanvas(Canvas* pCanvas);
-
-	// Returns true if the 16 bit mode (565) really is 15 bit (555).
-	virtual bool Is15Bit() = 0;
-
-	// Returns the color that is closest to the desired color (pRed, pGreen, pBlue).
-	// Do not use this in time critical loops!
-	virtual uint8 GetPaletteColor(int pRed, int pGreen, int pBlue) = 0;
-	virtual const Color* GetPaletteColor(unsigned pIndex) = 0;
-
-	virtual void SetPalette(const Color* pPalette) = 0;
 
 	// Functions implemented for conveniency.
 	static uint8 GetPaletteColor(int pRed, int pGreen, int pBlue, const Color* pPalette);

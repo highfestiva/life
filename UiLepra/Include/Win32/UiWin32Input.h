@@ -1,15 +1,15 @@
 
-// Author: Jonas Byström, Alexander Hugestrand
+// Author: Jonas Byström
 // Copyright (c) 2002-2009, Righteous Games
 
 
 
 #pragma once
 
+#include "../UiInput.h"
 #define	DIRECTINPUT_VERSION	0x0800
 #include <dinput.h>
 #include "../Win32/UiWin32DisplayManager.h"
-#include "../UiInput.h"
 #include "../UiLepra.h"
 
 
@@ -23,11 +23,10 @@ class Win32InputDevice;
 
 
 
-
-class Win32InputElement: public UiLepra::InputElement
+class Win32InputElement: public InputElement
 {
 public:
-	Win32InputElement(UiLepra::InputElement::Type pType, Interpretation pInterpretation, int pTypeIndex,
+	Win32InputElement(InputElement::Type pType, Interpretation pInterpretation, int pTypeIndex,
 		Win32InputDevice* pParentDevice, LPCDIDEVICEOBJECTINSTANCE pElement, unsigned pFieldOffset);
 	virtual ~Win32InputElement();
 
@@ -72,7 +71,7 @@ const LPDIOBJECTDATAFORMAT Win32InputElement::GetDataFormat() const
 
 
 
-class Win32InputDevice: public UiLepra::InputDevice
+class Win32InputDevice: public InputDevice
 {
 public:
 	Win32InputDevice(LPDIRECTINPUTDEVICE8 pDIDevice, LPCDIDEVICEINSTANCE pInfo, InputManager* pManager);
@@ -120,12 +119,12 @@ public:
 
 	Win32DisplayManager* GetDisplayManager() const;
 
-	virtual const UiLepra::InputDevice* GetKeyboard() const;
-	virtual UiLepra::InputDevice* GetKeyboard();
+	virtual const InputDevice* GetKeyboard() const;
+	virtual InputDevice* GetKeyboard();
 
 	// Returns the mouse device, if there is one... NULL otherwise.
-	virtual const UiLepra::InputDevice* GetMouse() const;
-	virtual UiLepra::InputDevice* GetMouse();
+	virtual const InputDevice* GetMouse() const;
+	virtual InputDevice* GetMouse();
 
 	virtual void ShowCursor();
 	virtual void HideCursor();
@@ -166,8 +165,8 @@ private:
 	double mCursorY;
 
 	// Default devices.
-	UiLepra::InputDevice* mKeyboard;
-	UiLepra::InputDevice* mMouse;
+	InputDevice* mKeyboard;
+	InputDevice* mMouse;
 	int mTypeCount[InputDevice::TYPE_COUNT];
 };
 

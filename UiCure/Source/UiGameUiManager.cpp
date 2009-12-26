@@ -176,7 +176,7 @@ bool GameUiManager::Open()
 	}
 	if (lOk)
 	{
-		mCanvas->SetBuffer(mDisplay->GetScreenPtr());
+		mCanvas->SetBuffer(0);
 		mPainter->SetDestCanvas(mCanvas);
 	}
 	if (lOk)
@@ -291,7 +291,7 @@ void GameUiManager::Paint()
 {
 	if (mDisplay->IsVisible())
 	{
-		mCanvas->SetBuffer(mDisplay->GetScreenPtr());
+		mCanvas->SetBuffer(0);
 		mPainter->SetDestCanvas(mCanvas);
 		mPainter->ResetClippingRect();
 		mPainter->PrePaint();

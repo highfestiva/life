@@ -68,35 +68,17 @@ public:
 	virtual bool FindDisplayMode(DisplayMode& pDisplayMode, int pWidth, int pHeight, int pBitDepth);
 	virtual bool FindDisplayMode(DisplayMode& pDisplayMode, int pWidth, int pHeight, int pBitDepth, int pRefreshRate);
 
-	// Returns the pointer if available, NULL otherwise.
-	virtual void* GetScreenPtr();
 	virtual unsigned GetWidth();
 	virtual unsigned GetHeight();
 	virtual unsigned GetBitDepth();
 	virtual unsigned GetRefreshRate();
 	virtual bool IsFullScreen();
 
-	// Returns true if the 16 bit mode (565) really is 15 bit (555).
-	virtual bool Is15Bit();
-
-	// Returns the color that is closest to the desired color (pRed, pGreen, pBlue).
-	// OBS! This is slow! Do not use in time critical loops!
-	virtual uint8 GetPaletteColor(int pRed, int pGreen, int pBlue);
-	virtual const Color* GetPaletteColor(unsigned pIndex);
-
-	virtual void SetPalette(const Color* pPalette);
-
-	/*
-		Win32 implementation specific stuff...
-	*/
-
 	HWND GetHWND();
 
 	static LRESULT CALLBACK WndProc(HWND pWnd, unsigned int pMessage, unsigned int pwParam, LONG plParam);
 	bool InternalDispatchMessage(int pMessage, int pwParam, long plParam);
 	void ProcessMessages();
-	// Post message to self (to window used by this display manager).
-	void PostMessage(int pMsg, int pwParam, long plParam);
 	void AddObserver(unsigned int pMessage, Win32Observer* pObserver);
 	void RemoveObserver(unsigned int pMessage, Win32Observer* pObserver);
 	void RemoveObserver(Win32Observer* pObserver);
@@ -144,10 +126,6 @@ protected:
 
 	DisplayMode mDisplayMode;
 	ScreenMode mScreenMode;	// Fullscreen or windowed.
-
-	void* mScreen;
-
-	Color mPalette[256];
 
 	static int msWindowCount;
 	static int msRegisterCount;

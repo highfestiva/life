@@ -1,12 +1,12 @@
 
-// Author: Jonas Byström, Alexander Hugestrand
+// Author: Jonas Byström
 // Copyright (c) 2002-2009, Righteous Games
 
 
 
 
-#include "../../../Lepra/Include/Log.h"
 #include "../../Include/Win32/UiWin32Input.h"
+#include "../../../Lepra/Include/Log.h"
 #include "../../Include/Win32/UiWin32Core.h"
 #include "../../Include/Win32/UiWin32DisplayManager.h"
 

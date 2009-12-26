@@ -103,7 +103,7 @@ bool TestGraphics(const Lepra::LogDecorator& pLog)
 		{
 			UiLepra::Core::ProcessMessages();
 			Lepra::Thread::YieldCpu();
-			lScreen.SetBuffer(lDisplay->GetScreenPtr());
+			lScreen.SetBuffer(0);
 			lDisplay->UpdateScreen();
 			lTimer.UpdateTimer();
 		}

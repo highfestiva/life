@@ -20,10 +20,7 @@ Win32DirectXDisplay::Win32DirectXDisplay() :
 
 Win32DirectXDisplay::~Win32DirectXDisplay()
 {
-	if (mScreenOpened == true) 
-	{
-		CloseScreen();
-	}
+	CloseScreen();
 }
 
 void Win32DirectXDisplay::CloseScreen()
@@ -62,12 +59,6 @@ bool Win32DirectXDisplay::UpdateScreen()
 		return (false);
 	}
 
-	if (mScreen != 0)
-	{
-		// TODO: Release back buffer.
-		mScreen = 0;
-	}
-
 	// Disable scissor test to make sure that the entire screen will
 	// be updated.
 	DWORD lValue;
@@ -95,19 +86,6 @@ bool Win32DirectXDisplay::SetVSyncEnabled(bool pEnabled)
 	return (true);
 }
 
-
-void* Win32DirectXDisplay::GetScreenPtr()
-{
-	if (mScreen != 0)
-	{
-		return mScreen;
-	}
-	else
-	{
-		// TODO: Lock backbuffer and retrieve a pointer to it.
-		return 0;
-	}
-}
 
 unsigned Win32DirectXDisplay::GetPitch()
 {

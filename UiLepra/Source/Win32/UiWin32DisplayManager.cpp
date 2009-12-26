@@ -41,7 +41,6 @@ void DisplayManager::EnableScreensaver(bool pEnable)
 
 Win32DisplayManager::Win32DisplayManager() :
 	mScreenMode(DisplayManager::WINDOWED),
-	mScreen(0),
 	mWnd(0),
 	mInitialized(false),
 	mScreenOpened(false),
@@ -125,7 +124,6 @@ bool Win32DisplayManager::Register()
 		mDisplayMode.mWidth		= 0;
 		mDisplayMode.mHeight		= 0;
 		mDisplayMode.mBitDepth	= 0;
-		mScreen = 0;
 		mInitialized = true;
 	}
 	else
@@ -142,17 +140,6 @@ void Win32DisplayManager::Unregister()
 	{
 		::UnregisterClass(_T("LepraWin32Class"), (HINSTANCE)mshThisInstance);
 	}
-}
-
-void* Win32DisplayManager::GetScreenPtr() 
-{
-	void* lScreen = 0;
-	if (mInitialized == true)
-	{
-		lScreen = mScreen;
-	}
-
-	return lScreen;
 }
 
 unsigned Win32DisplayManager::GetWidth() 
@@ -199,49 +186,6 @@ void Win32DisplayManager::SetCaption(const str& pCaption, bool pInternalCall)
 			::SetWindowText(mWnd, pCaption.c_str());
 		}
 	}
-}
-
-const Color* Win32DisplayManager::GetPaletteColor(unsigned pIndex)
-{
-	return &mPalette[pIndex];
-}
-
-uint8 Win32DisplayManager::GetPaletteColor(int pRed, int pGreen, int pBlue) 
-{
-	int	lBestColorIndex = 0;
-	int	i;
-
-	float lBestDist = 10000;
-	float lDist;
-	float lDeltaRed; 
-	float lDeltaGreen; 
-	float lDeltaBlue;
-
-	if (mInitialized)
-	{
-		for (i = 0; i < 256; i++) 
-		{
-			lDeltaRed   = (float)(pRed   - (int)mPalette[i].mRed);
-			lDeltaGreen = (float)(pGreen - (int)mPalette[i].mGreen);
-			lDeltaBlue  = (float)(pBlue  - (int)mPalette[i].mBlue);
-
-			lDist = lDeltaRed * lDeltaRed + 
-					  lDeltaGreen * lDeltaGreen + 
-					  lDeltaBlue * lDeltaBlue;
-
-			if (i == 0 || lDist < lBestDist) 
-			{
-				lBestColorIndex = i;
-				lBestDist = lDist;
-			}
-		}
-	}
-	else
-	{
-		mLog.AWarning("GetPaletteColor() - DisplayManager not initialized.");
-	}
-
-	return (uint8)lBestColorIndex;
 }
 
 bool Win32DisplayManager::OpenScreen(const DisplayMode& pDisplayMode, ScreenMode pScreenMode)
@@ -325,7 +269,6 @@ bool Win32DisplayManager::OpenScreen(const DisplayMode& pDisplayMode, ScreenMode
 
 		if (mScreenOpened == true)
 		{
-			AddObserver(WM_SETCURSOR, this);
 			AddObserver(WM_SIZE, this);
 			AddObserver(WM_SIZING, this);
 		}
@@ -692,23 +635,6 @@ bool Win32DisplayManager::FindDisplayMode(DisplayMode& pDisplayMode, int pWidth,
 	return lOk;
 }
 
-void Win32DisplayManager::SetPalette(const Color* pPalette)
-{
-	// This method is meant to be overridden...
-	for (int i = 0; i < 256; i++)
-	{
-		mPalette[i].mRed   = pPalette[i].mRed;
-		mPalette[i].mGreen = pPalette[i].mGreen;
-		mPalette[i].mBlue  = pPalette[i].mBlue;
-	}
-}
-
-bool Win32DisplayManager::Is15Bit()
-{
-	// This method is meant to be overridden...
-	return false;
-}
-
 void Win32DisplayManager::GetBorderSize(int& pSizeX, int& pSizeY)
 {
 	if (mScreenMode == FULLSCREEN ||
@@ -822,7 +748,7 @@ LRESULT CALLBACK Win32DisplayManager::WndProc(HWND pWnd, unsigned int pMessage, 
 
 bool Win32DisplayManager::InternalDispatchMessage(int pMessage, int pwParam, long plParam) 
 {
-	if (pMessage == WM_CHAR && mConsumeChar)
+	if (pMessage == WM_CHAR && mConsumeChar)	// Consume all follow-up WM_CHAR's when we already dispatched the WM_KEYDOWN.
 	{
 		return (true);
 	}
@@ -855,14 +781,6 @@ void Win32DisplayManager::ProcessMessages()
 			::TranslateMessage(&lMsg);
 			::DispatchMessage(&lMsg);
 		}
-	}
-}
-
-void Win32DisplayManager::PostMessage(int pMsg, int pwParam, long plParam)
-{
-	if (mWnd != 0)
-	{
-		::PostMessage(mWnd, pMsg, pwParam, plParam);
 	}
 }
 
@@ -941,18 +859,6 @@ bool Win32DisplayManager::OnMessage(int pMsg, int pwParam, long plParam)
 {
 	switch(pMsg)
 	{
-		case WM_SETCURSOR:
-		{
-/*			if (mScreenMode == FULLSCREEN)
-			{
-				::SetCursor(NULL);
-			}
-			else
-			{
-				::SetCursor(::LoadCursor(NULL, IDC_ARROW));
-			}
-*/
-		} break;
 		case WM_SIZING:
 		{
 			LPRECT lRect = (LPRECT)(uint64)plParam;
@@ -963,7 +869,8 @@ bool Win32DisplayManager::OnMessage(int pMsg, int pwParam, long plParam)
 			DispatchResize(lClientWidth, lClientHeight);
 			mMinimized = false;
 			mMaximized = false;
-		} break;
+		}
+		break;
 		case WM_SIZE:
 		{
 			switch(pwParam)
@@ -972,40 +879,26 @@ bool Win32DisplayManager::OnMessage(int pMsg, int pwParam, long plParam)
 				{
 					DispatchMinimize();
 					mMinimized = true;
-				} break;
+				}
+				break;
 				case SIZE_MAXIMIZED:
 				{
 					mNormalWidth  = mDisplayMode.mWidth;
 					mNormalHeight = mDisplayMode.mHeight;
 					DispatchMaximize((int)LOWORD(plParam), (int)HIWORD(plParam));
 					mMaximized = true;
-				} break;
+				}
+				break;
 				case SIZE_RESTORED:
 				{
-					int lWindowWidth;
-					int lWindowHeight;
-
-					if (mMaximized == true)
-					{
-						lWindowWidth  = GetWindowWidth(mNormalWidth);
-						lWindowHeight = GetWindowHeight(mNormalHeight);
-					}
-					else
-					{
-						lWindowWidth  = GetWindowWidth(mDisplayMode.mWidth);
-						lWindowHeight = GetWindowHeight(mDisplayMode.mHeight);
-					}
-
 					DispatchResize((int)LOWORD(plParam), (int)HIWORD(plParam));
-
 					mMinimized = false;
 					mMaximized = false;
-				} break;
-			} // End switch(pwParam)
-
-			// Don't set lProcessed... Return false.
-		} // End case WM_SIZE:
-	} // End switch(pMsg)
+				}
+				break;
+			}
+		}
+	}
 
 	return (false);
 }

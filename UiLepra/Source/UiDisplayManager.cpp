@@ -66,54 +66,16 @@ void DisplayManager::DispatchMaximize(int pWidth, int pHeight)
 
 
 
-uint8 DisplayManager::GetPaletteColor(int pRed, int pGreen, int pBlue, const Color* pPalette)
-{
-	int	lBestMatch = 0;
-	int	i;
-
-	float lMinDist = 10000;
-	float lDist;
-	float lDeltaRed;
-	float lDeltaGreen;
-	float lDeltaBlue;
-
-	for (i = 0; i < 256; i++) 
-	{
-		lDeltaRed   = (float)(pRed   - (int)pPalette[i].mRed);
-		lDeltaGreen = (float)(pGreen - (int)pPalette[i].mGreen);
-		lDeltaBlue  = (float)(pBlue  - (int)pPalette[i].mBlue);
-
-		lDist = lDeltaRed   * lDeltaRed   + 
-				  lDeltaGreen * lDeltaGreen + 
-				  lDeltaBlue  * lDeltaBlue;
-
-		if (i == 0 || lDist < lMinDist) 
-		{
-			lBestMatch = i;
-			lMinDist = lDist;
-		}
-	}
-
-	return (uint8)lBestMatch;
-}
-
 void DisplayManager::GetScreenCanvas(Canvas& pCanvas)
 {
 	pCanvas.Reset(GetWidth(), GetHeight(), Canvas::IntToBitDepth(GetBitDepth()));
 	pCanvas.SetPitch(GetPitch());
-	pCanvas.SetBuffer(GetScreenPtr());
-
-	if (pCanvas.GetBitDepth() == Canvas::BITDEPTH_8_BIT)
-	{
-		Color lPalette[256];
-		for (unsigned i = 0; i < 256; i++)
-		{
-			lPalette[i] = *GetPaletteColor(i);
-		}
-		pCanvas.SetPalette(lPalette);
-	}
 }
+
+
 
 LOG_CLASS_DEFINE(UI_GFX, DisplayManager);
 
-} // End namespace.
+
+
+}

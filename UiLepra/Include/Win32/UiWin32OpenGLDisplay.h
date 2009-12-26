@@ -1,21 +1,23 @@
-/*
-	Class:  Win32OpenGLDisplay
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2009, Righteous Games
-*/
 
-#ifndef UIWIN32OPENGLDISPLAY_H
-#define UIWIN32OPENGLDISPLAY_H
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2009, Righteous Games
+
+
+
+#pragma once
 
 #include "UiWin32DisplayManager.h"
+
+
 
 namespace UiLepra
 {
 
-class Win32OpenGLDisplay : public Win32DisplayManager
+
+
+class Win32OpenGLDisplay: public Win32DisplayManager
 {
-public:
-	
+public:	
 	Win32OpenGLDisplay();
 	virtual ~Win32OpenGLDisplay();
 
@@ -26,7 +28,7 @@ public:
 	bool IsVSyncEnabled() const;
 	bool SetVSyncEnabled(bool pEnabled);
 
-	inline ContextType GetContextType();
+	ContextType GetContextType();
 
 	unsigned GetPitch();
 
@@ -53,11 +55,6 @@ private:
 	static int msContextUserCount;
 };
 
-DisplayManager::ContextType Win32OpenGLDisplay::GetContextType()
-{
-	return DisplayManager::OPENGL_CONTEXT;
+
+
 }
-
-} // End namespace.
-
-#endif

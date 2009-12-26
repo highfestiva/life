@@ -33,8 +33,6 @@ public:
 
 	inline IDirect3DDevice9* GetD3DDevice();
 
-	void* GetScreenPtr();
-
 protected:
 	void OnResize(int pWidth, int pHeight);
 	void OnMinimize();

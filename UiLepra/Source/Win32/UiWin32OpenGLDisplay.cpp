@@ -1,21 +1,22 @@
-/*
-	Class:  Win32OpenGLDisplay
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2009, Righteous Games
-*/
 
+// Copyright (c) 2002-2009, Righteous Games
+
+
+
+#include "../../Include/Win32/UiWin32OpenGLDisplay.h"
 #include <stdio.h>
 #include "../../../Lepra/Include/String.h"
 #include "../../Include/UiLepra.h"
-#include "../../Include/Win32/UiWin32OpenGLDisplay.h"
-
-// OpenGL headers included in OpenGLExtensions.h.
 #include "../../Include/UiOpenGLExtensions.h"
 
 #pragma comment(lib, "opengl32.lib")
 
+
+
 namespace UiLepra
 {
+
+
 
 Win32OpenGLDisplay::Win32OpenGLDisplay():
 	mDC(0)
@@ -24,10 +25,7 @@ Win32OpenGLDisplay::Win32OpenGLDisplay():
 
 Win32OpenGLDisplay::~Win32OpenGLDisplay()
 {
-	if (mScreenOpened == true) 
-	{
-		CloseScreen();
-	}
+	CloseScreen();
 }
 
 void Win32OpenGLDisplay::CloseScreen()
@@ -88,6 +86,11 @@ bool Win32OpenGLDisplay::IsVSyncEnabled() const
 bool Win32OpenGLDisplay::SetVSyncEnabled(bool pEnabled)
 {
 	return (mDC? OpenGLExtensions::SetVSyncEnabled(pEnabled) : false);
+}
+
+DisplayManager::ContextType Win32OpenGLDisplay::GetContextType()
+{
+	return DisplayManager::OPENGL_CONTEXT;
 }
 
 unsigned Win32OpenGLDisplay::GetPitch()

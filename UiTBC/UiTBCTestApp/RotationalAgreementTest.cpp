@@ -319,7 +319,7 @@ void RunRotationalAgreementTest()
 
 			lDeltaTimer.ClearTimeDiff();
 
-			lScreen.SetBuffer(lDisp->GetScreenPtr());
+			lScreen.SetBuffer(0);
 			lRenderer.ResetClippingRect();
 			lRenderer.Clear();
 			lRenderer.RenderScene();

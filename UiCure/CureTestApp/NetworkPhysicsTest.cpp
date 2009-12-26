@@ -871,7 +871,7 @@ bool OpenWindow(AgentData& pAgentData, const str& pCaption)
 	if (lTestOk)
 	{
 		pAgentData.mScreen = new Lepra::Canvas(pAgentData.mDisplay->GetWidth(), pAgentData.mDisplay->GetHeight(), Lepra::Canvas::IntToBitDepth(pAgentData.mDisplay->GetBitDepth()));
-		pAgentData.mScreen->SetBuffer(pAgentData.mDisplay->GetScreenPtr());
+		pAgentData.mScreen->SetBuffer(0);
 		pAgentData.mRenderer = UiTbc::RendererFactory::Create(UiLepra::DisplayManager::OPENGL_CONTEXT, pAgentData.mScreen);
 		pAgentData.mRenderer->SetClearColor(Lepra::Color(128, 128, 128));
 		pAgentData.mDisplay->SetCaption(pCaption);

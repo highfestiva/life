@@ -277,7 +277,7 @@ bool SceneTest::Run(double pTime)
 			}
 
 			gInput->PollEvents();
-			gScreen->SetBuffer(gDisplay->GetScreenPtr());
+			gScreen->SetBuffer(0);
 
 			Lepra::TransformationF lCam = gRenderer->GetCameraTransformation();
 			if (gInput->ReadKey(UiLepra::InputManager::IN_KBD_UP))
@@ -509,7 +509,7 @@ bool OpenRenderer(const Lepra::LogDecorator& pLog, UiLepra::DisplayManager::Cont
 	{
 		lContext = _T("create renderer");
 		gScreen = new Lepra::Canvas(gDisplay->GetWidth(), gDisplay->GetHeight(), Lepra::Canvas::IntToBitDepth(gDisplay->GetBitDepth()));
-		gScreen->SetBuffer(gDisplay->GetScreenPtr());
+		gScreen->SetBuffer(0);
 		if (pContext == UiLepra::DisplayManager::OPENGL_CONTEXT)
 		{
 			gRenderer = new UiTbc::OpenGLRenderer(gScreen);
@@ -2229,7 +2229,7 @@ bool TestGUI(const Lepra::LogDecorator& /*pLog*/, double pShowTime)
 
 		gInput->PollEvents();
 
-		gScreen->SetBuffer(gDisplay->GetScreenPtr());
+		gScreen->SetBuffer(0);
 		//gPainter->SetColor(Lepra::OFF_BLACK);
 		gPainter->FillRect(0, 0, gScreen->GetWidth(), gScreen->GetHeight());
 		//gFontManager->SetColor(Lepra::OFF_BLACK);
