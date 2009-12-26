@@ -1,7 +1,7 @@
 # 'Twas generated from ../../ThirdParty/ThirdPartyLib_800.vcproj, 2009-12-26, type='lib_nowarn'.
 # Don't edit manually. See 'generate_makefile.py' for info.
 
-CFLAGS = -O0 -ggdb -fPIC -D_POSIX_PTHREAD_SEMANTICS -Istlport/stlport -Iutf8cpp -Iopenal-soft-1.10.622/OpenAL32/Include -Iopenal-soft-1.10.622/include -Ifreealut-1.1.0/include -Iode-0.11.1/include -Iode-0.11.1/ode/src -Iode-0.11.1/ode/src/joints -Iode-0.11.1/OPCODE -Iode-0.11.1/GIMPACT/include -Iode-0.11.1/ou/include -DPOSIX -D_XOPEN_SOURCE=600 -D_DEBUG -D_CONSOLE -DPNG_NO_ASSEMBLER_CODE -DdSingle -DHAVE_CONFIG_H=1 -DLEPRA_WITHOUT_FMOD -Wno-unknown-pragmas
+CFLAGS = -O0 -ggdb -fPIC -D_POSIX_PTHREAD_SEMANTICS -Istlport/stlport -Iutf8cpp -Iopenal-soft-1.10.622/OpenAL32/Include -Iopenal-soft-1.10.622/include -Ifreealut-1.1.0/include -Iode-0.11.1/include -Iode-0.11.1/ode/src -Iode-0.11.1/ode/src/joints -Iode-0.11.1/OPCODE -Iode-0.11.1/GIMPACT/include -Iode-0.11.1/ou/include -DPOSIX -D_XOPEN_SOURCE=600 -D_DEBUG -D_CONSOLE -DPNG_NO_ASSEMBLER_CODE -DdSingle -DdTLS_ENABLED=1 -DHAVE_CONFIG_H=1 -DLEPRA_WITHOUT_FMOD -Wno-unknown-pragmas
 
 SRCS=	\
 jpeg-6b/jcapimin.cpp	\
@@ -186,7 +186,11 @@ ode-0.11.1/OPCODE/Ice/IceRay.cpp	\
 ode-0.11.1/OPCODE/Ice/IceRevisitedRadix.cpp	\
 ode-0.11.1/OPCODE/Ice/IceSegment.cpp	\
 ode-0.11.1/OPCODE/Ice/IceTriangle.cpp	\
-ode-0.11.1/OPCODE/Ice/IceUtils.cpp
+ode-0.11.1/OPCODE/Ice/IceUtils.cpp	\
+ode-0.11.1/ou/src/ou/atomic.cpp	\
+ode-0.11.1/ou/src/ou/customization.cpp	\
+ode-0.11.1/ou/src/ou/malloc.cpp	\
+ode-0.11.1/ou/src/ou/threadlocalstorage.cpp
 
 OBJS=	\
 jpeg-6b/jcapimin.o	\
@@ -371,7 +375,11 @@ ode-0.11.1/OPCODE/Ice/IceRay.o	\
 ode-0.11.1/OPCODE/Ice/IceRevisitedRadix.o	\
 ode-0.11.1/OPCODE/Ice/IceSegment.o	\
 ode-0.11.1/OPCODE/Ice/IceTriangle.o	\
-ode-0.11.1/OPCODE/Ice/IceUtils.o
+ode-0.11.1/OPCODE/Ice/IceUtils.o	\
+ode-0.11.1/ou/src/ou/atomic.o	\
+ode-0.11.1/ou/src/ou/customization.o	\
+ode-0.11.1/ou/src/ou/malloc.o	\
+ode-0.11.1/ou/src/ou/threadlocalstorage.o
 
 all:	libThirdParty.so $(OBJS)
 clean:
