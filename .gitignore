@@ -19,6 +19,19 @@
 *.lsh
 *.dll
 *.pyc
+*.zip
 mt.dep
 stlport.res
 makefile
+.mayaSwatches
+tmp
+*.mel
+Unicode Debug
+Unicode Release Candidate
+Unicode Final
+Debug
+Release Candidate
+Final
+/Life/LifeClient/LifeClient
+/ThirdParty/stlport/build
+/bin/
