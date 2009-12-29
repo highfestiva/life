@@ -108,7 +108,10 @@ void X11OpenGLDisplay::SetFocus(bool pFocus)
 
 void X11OpenGLDisplay::Deactivate()
 {
-	::glXMakeCurrent(GetDisplay(), 0, 0);
+	if (GetDisplay())
+	{
+		::glXMakeCurrent(GetDisplay(), 0, 0);
+	}
 }
 
 void X11OpenGLDisplay::OnResize(int pWidth, int pHeight)

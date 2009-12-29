@@ -102,7 +102,7 @@ def _incremental_copy(filelist, targetdir):
         import shutil
         for filename in filelist:
                 if filename.lower().find("test") >= 0:
-                        print("Skipping test binary named '%s'.", filename)
+                        print("Skipping test binary named '%s'." % filename)
                         continue
                 if os.path.isdir(filename):
                         continue
@@ -110,7 +110,10 @@ def _incremental_copy(filelist, targetdir):
                         os.makedirs(targetdir)
                 targetfile = os.path.join(targetdir, os.path.split(filename)[1])
                 if not os.path.exists(targetfile) or filetime(filename) > filetime(targetfile):
-                        shutil.copyfile(filename, targetfile)
+                        if os.name == "nt":
+                                shutil.copyfile(filename, targetfile)
+                        else:
+                                run(["cp", filename, targetfile], "copying of file")
                         updates += 1
 
 
@@ -192,6 +195,16 @@ def _createmakes(force=False):
         os.chdir("/".join([".."]*cnt))
 
 
+def _posix_no_lib_exes(targetdir):
+        if os.name == "nt":
+                return
+        # Only executables are executable... Hurm...
+        import glob
+        libs = glob.glob(os.path.join(targetdir, "lib*.so*"))
+        for lib in libs:
+                run(["chmod", "-x", lib], "changing .so +x status to -x")
+
+
 #-------------------- High-level build stuff below. --------------------
 
 
@@ -252,10 +265,18 @@ def buildzip():
                 targetdir = "NO_RELEASE."+targetdir
         os.mkdir(targetdir)
         rebuildall(targetdir, buildtype)
-        targetfile = targetdir+".zip"
-        if buildtype != "final":
-                targetfile = targetdir+".iszip"
-        zipdir(targetdir, targetfile)
+        _posix_no_lib_exes(targetdir)
+        print("Building compressed archive.")
+        if os.name == "nt":
+                targetfile = targetdir+".zip"
+                if buildtype != "final":
+                        targetfile = targetdir+".iszip"
+                zipdir(targetdir, targetfile)
+        else:
+                targetfile = targetdir+".tar.gz"
+                if buildtype != "final":
+                        targetfile = targetdir+".tar.isgz"
+                targzdir(targetdir, targetfile)
         _cleandir(targetdir)
         os.rmdir(targetdir)
         print("Built and zipped into %s." % targetfile)

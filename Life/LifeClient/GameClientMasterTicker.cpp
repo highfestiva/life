@@ -73,8 +73,11 @@ GameClientMasterTicker::~GameClientMasterTicker()
 		lConsole.ExecuteCommand(_T("save-system-config-file 0 " + Application::GetIoFile(_T("Base"), _T("lsh"))));
 	}
 
-	mUiManager->GetInputManager()->ReleaseAll();
-	mUiManager->GetInputManager()->RemoveKeyCodeInputObserver(this);
+	if (mUiManager->GetInputManager())
+	{
+		mUiManager->GetInputManager()->ReleaseAll();
+		mUiManager->GetInputManager()->RemoveKeyCodeInputObserver(this);
+	}
 
 	SlaveMap::Iterator x;
 	for (x = mSlaveSet.First(); x != mSlaveSet.End(); ++x)
@@ -703,6 +706,11 @@ bool GameClientMasterTicker::ApplyCalibration()
 
 void GameClientMasterTicker::StashCalibration()
 {
+	if (!mUiManager->GetInputManager())
+	{
+		return;
+	}
+
 	const UiLepra::InputManager::DeviceList& lDevices = mUiManager->GetInputManager()->GetDeviceList();
 	UiLepra::InputManager::DeviceList::const_iterator x = lDevices.begin();
 	for (; x != lDevices.end(); ++x)

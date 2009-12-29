@@ -67,7 +67,7 @@ str SystemManager::GetUserDirectory()
 
 str SystemManager::GetIoDirectory(const str& pAppName)
 {
-	const str lIoDir = Path::JoinPath(GetUserDirectory(), pAppName, _T(""));
+	const str lIoDir = Path::JoinPath(GetUserDirectory(), _T(".")+pAppName, _T(""));
 	if (!DiskFile::PathExists(lIoDir))
 	{
 		DiskFile::CreateDir(lIoDir);

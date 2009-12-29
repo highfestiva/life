@@ -103,7 +103,7 @@ def run(cmdlist, when):
                 winpath = path.replace(":/c/", ";C:\\").replace("/", "\\")
                 os.environ["PATH"] = winpath
         import subprocess
-        print("Running %s..." % str(cmdlist))
+        #print("Running %s..." % str(cmdlist))
         rc = subprocess.call(cmdlist)
         if path:
                 os.environ["PATH"] = path
@@ -129,3 +129,7 @@ def zipdir(dirname, arcname):
         fs = glob.glob(os.path.join(dirname, "*"))
         _zipfiles(zf, fs)
         zf.close()
+
+
+def targzdir(dirname, arcname):
+	run(["tar","-czf",arcname,dirname], "taring archive")
