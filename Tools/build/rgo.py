@@ -22,7 +22,7 @@ updates = 0
 removes = 0
 
 
-def buildstl():
+def _buildstl():
         if os.path.exists("ThirdParty/stlport/lib") or os.path.exists("ThirdParty/stlport/build/lib/obj/gcc/so"):
                 return
         print("Building STLport...")
@@ -42,15 +42,15 @@ def buildstl():
         os.chdir("../../../..")
 
 
-def buildcode(command, buildtype):
+def _buildcode(command, buildtype):
         make = getmake(VCBUILD)
         if command == "build":
-                buildstl()
+                _buildstl()
                 if osname == "Windows": args = [make, "/M2", "UiCure.sln", own_tt[buildtype]+"|Win32"]
                 else:                   args = [make]
-                what = "incremental building code"
+                what = "_incremental building code"
         elif command == "rebuild":
-                buildstl()
+                _buildstl()
                 if osname == "Windows": args = [make, "/M2", "/rebuild", "UiCure.sln", own_tt[buildtype]+"|Win32"]
                 else:                   args = [make, "clean", "all"]
                 what = "rebuilding code"
@@ -65,12 +65,12 @@ def buildcode(command, buildtype):
                 os.chdir("..")
 
 
-def convertdata(filename):
+def _convertdata(filename):
         python_exe = sys.executable
         run([python_exe, importscript, filename], "importing "+filename)
 
 
-def incremental_build_data():
+def _incremental_build_data():
         import glob
         mas = glob.glob("Data/*.ma")
         for ma in mas:
@@ -85,22 +85,24 @@ def incremental_build_data():
                 fs.remove(ini)
                 if not fs:
                         print("Converting %s as no converted files exist!" % (basename,))
-                        convertdata(ma)
+                        _convertdata(ma)
                 for f in fs:
                         if filetime(f) < ft:
                                 print("Converting %s since %s has an older timestamp!" % (basename, f))
                                 for f in fs:
                                      os.remove(f)
-                                convertdata(ma)
+                                _convertdata(ma)
                                 break
 
 
-def incremental_copy(filelist, targetdir):
+def _incremental_copy(filelist, targetdir):
         global updates
         import shutil
         for filename in filelist:
                 if filename.lower().find("test") >= 0:
                         print("Skipping test binary named '%s'.", filename)
+                        continue
+                if os.path.isdir(filename):
                         continue
                 if not os.path.exists(targetdir):
                         os.makedirs(targetdir)
@@ -110,36 +112,43 @@ def incremental_copy(filelist, targetdir):
                         updates += 1
 
 
-def incremental_copy_code(target, buildtype):
+def _incremental_copy_code(target, buildtype):
         import glob
         if osname != "Windows":
                 if target == bindir:
-                        # This is all handled by make, don't do jack.
-                        fl = []
+                        fl = [] # bin/ is all handled by make, don't do jack.
                 else:
                         fl = glob.glob("bin/*")
         else:
                 lgpl_tt = {"debug":"Debug", "rc":"Release", "final":"Release"}
                 # Gather binaries from makefile.
                 fl = []
-                with open(makefile, "rt") as rm:
+                with open("makefile", "rt") as rm:
                         for line in rm:
-                                obj = line.strip().split()[0]
+                                obj = line.strip()
+                                if obj:
+                                        obj = obj.split()[0]
                                 if obj.startswith("ThirdParty/"):
                                         fl += glob.glob(os.path.join(obj, lgpl_tt[buildtype], "*.dll"))
                                 elif obj.startswith(appname+"/"):
                                         fl += glob.glob(os.path.join(obj, own_tt[buildtype], "*.exe"))
-        incremental_copy(fl, target)
+                if hwname.find("64") >= 0:
+                        fl += ["ThirdParty/fmod/api/fmod64.dll"]
+                else:
+                        fl += ["ThirdParty/fmod/api/fmod.dll"]
+        _incremental_copy(fl, target)
 
 
-def incremental_copy_data(target):
+def _incremental_copy_data(target):
         import glob
-        fl = glob.glob("Data/*.class") + glob.glob("Data/*.mesh") + glob.glob("Data/*.phys")
+        fl = glob.glob("Data/*.class") + glob.glob("Data/*.mesh") + glob.glob("Data/*.phys") + \
+                 glob.glob("Data/*.jpg") + glob.glob("Data/*.png") + glob.glob("Data/*.tga") + glob.glob("Data/*.bmp") + \
+                 glob.glob("Data/*.wav") + glob.glob("Data/*.ogg") + glob.glob("Data/*.mp3")
         targetdata = os.path.join(target, "Data")
-        incremental_copy(fl, targetdata)
+        _incremental_copy(fl, targetdata)
 
 
-def cleandata(da_dir):
+def _cleandata(da_dir):
         removes = 0
         import glob
         fl = glob.glob(da_dir+"/*.class") + glob.glob(da_dir+"/*.mesh") + glob.glob(da_dir+"/*.phys")
@@ -149,13 +158,13 @@ def cleandata(da_dir):
         return removes
 
 
-def cleandir(da_dir):
+def _cleandir(da_dir):
         removes = 0
         import glob
         fl = glob.glob(da_dir + "/*")
         for filename in fl:
                 if os.path.isdir(filename):
-                        removes += cleandir(filename)
+                        removes += _cleandir(filename)
                         os.rmdir(filename)
                         removes += 1
                 else:
@@ -167,32 +176,45 @@ def cleandir(da_dir):
         return removes
 
 
+def printresult():
+        if updates+removes:
+                print("Operation successful, %i resulting files updated(/removed)." % (updates+removes))
+        else:
+                print("Already up-to-date.")
+
+
 #-------------------- High-level build stuff below. --------------------
 
 
+def cleandata(target=bindir):
+        global removes
+        removes += _cleandata("Data")
+        removes += _cleandir(os.path.join(target, "Data"))
+
+
 def builddata(target=bindir):
-        incremental_build_data()
-        incremental_copy_data(target)
+        _incremental_build_data()
+        _incremental_copy_data(target)
 
 
 
 def buildall(target=bindir, buildtype=defaulttype):
         verify_base_dir()
         if hasdevenv(True):
-                buildcode("build", buildtype)
-                incremental_copy_code(target, buildtype)
+                _buildcode("build", buildtype)
+                _incremental_copy_code(target, buildtype)
         builddata(target)
 
 
 def rebuildall(target=bindir, buildtype=defaulttype):
         verify_base_dir()
         if hasdevenv(True):
-                cleandir(target)
-                buildcode("rebuild", buildtype)
-                incremental_copy_code(target, buildtype)
+                _cleandir(target)
+                _buildcode("rebuild", buildtype)
+                _incremental_copy_code(target, buildtype)
         else:
-                cleandir(target+"/Data")
-        cleandata("Data")
+                _cleandir(target+"/Data")
+        _cleandata("Data")
         builddata(target)
 
 
@@ -200,11 +222,11 @@ def cleanall(target=bindir, buildtype=defaulttype):
         verify_base_dir()
         global removes
         if hasdevenv(True):
-                removes += cleandir(target)
-                buildcode("clean", buildtype)
+                removes += _cleandir(target)
+                _buildcode("clean", buildtype)
         else:
-                removes += cleandir(target+"/Data")
-        cleandata("Data")
+                removes += _cleandir(target+"/Data")
+        _cleandata("Data")
 
 
 def buildzip():
@@ -214,7 +236,7 @@ def buildzip():
         if buildtype != "final":
                 target = "NO_RELEASE."+target
         mkdir(target)
-        cleandir(target)
+        _cleandir(target)
         rebuildall(target, buildtype)
         targetfile = target+".zip"
         if buildtype != "final":
@@ -225,14 +247,20 @@ def buildzip():
 
 def start():
         buildall()
+        printresult()
         os.chdir(bindir)
-        if not os.path.exists("LifeClient") or not os.path.exists("LifeServer"):
+        pre = "./"
+        post = ""
+        if os.name == "nt":
+                pre = ""
+                post = ".exe"
+        if not os.path.exists("LifeClient"+post) or not os.path.exists("LifeServer"+post):
                 reason = "internal error" if hasdevenv() else "missing C++ build environment"
                 print("Could not build %s due to %s." % (appname, reason))
                 sys.exit(2)
         import subprocess
-        subprocess.Popen("./LifeClient", shell=True)
-        os.execl("./LifeServer")
+        subprocess.Popen(pre+"LifeClient"+post, shell=True)
+        os.execl(pre+"LifeServer"+post, pre+"LifeServer"+post)
 
 
 if __name__ == "__main__":
@@ -240,7 +268,4 @@ if __name__ == "__main__":
                 print("Need arg!")
                 sys.exit(1)
         exec(sys.argv[1]+"()")
-        if updates+removes:
-                print("Operation successful, %i resulting files updated(/removed)." % (updates+removes))
-        else:
-                print("Already up-to-date.")
+        printresult()

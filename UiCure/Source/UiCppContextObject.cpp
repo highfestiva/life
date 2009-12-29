@@ -48,7 +48,7 @@ CppContextObject::~CppContextObject()
 	if (mSoundResource)
 	{
 		mSoundResource = 0;
-		DeleteSharedSound(_T("Bark.wav"));
+		DeleteSharedSound(_T("Data/Bark.wav"));
 	}
 	delete (mUiClassResource);
 	mUiClassResource = 0;
@@ -62,13 +62,13 @@ void CppContextObject::StartLoading()
 {
 	assert(mUiClassResource == 0);
 	mUiClassResource = new UserClassResource(mUiManager);
-	const str lClassName = GetClassId()+_T(".class");	// TODO: move to central source file.
+	const str lClassName = _T("Data/")+GetClassId()+_T(".class");	// TODO: move to central source file.
 	mUiClassResource->Load(GetManager()->GetGameManager()->GetResourceManager(), lClassName,
 		UserClassResource::TypeLoadCallback(this, &CppContextObject::OnLoadClass));
 
 	if (strutil::StartsWith(GetClassId(), _T("helicopter")))
 	{
-		const str lSoundName = _T("Bark.wav");
+		const str lSoundName = _T("Data/Bark.wav");
 		mSoundResource = CreateSharedSound(lSoundName);
 		mSoundResource->Load(GetManager()->GetGameManager()->GetResourceManager(), lSoundName,
 			UserSound3dResource::TypeLoadCallback(this, &CppContextObject::OnLoadSound3d));
@@ -387,7 +387,7 @@ void CppContextObject::OnLoadClass(UserClassResource* pClassResource)
 			UiCure::UserGeometryReferenceResource::TypeLoadCallback(this,&CppContextObject::OnLoadMesh));
 	}
 	// TODO: not everybody should load the texture, not everybody should load *A* texture. Load from group file definition.
-	mTextureResource.Load(lResourceManager, _T("Checker.tga"),
+	mTextureResource.Load(lResourceManager, _T("Data/Checker.tga"),
 		UiCure::UserRendererImageResource::TypeLoadCallback(this, &CppContextObject::OnLoadTexture));
 }
 

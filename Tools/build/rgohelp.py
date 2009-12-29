@@ -90,9 +90,16 @@ def hasdevenv(verbose=False):
 
 
 def run(cmdlist, when):
+        path = None
+        if os.name == "nt":
+                path = os.getenv("PATH")
+                winpath = path.replace(":/c/", ";C:\\").replace("/", "\\")
+                os.environ["PATH"] = winpath
         import subprocess
         print("Running %s..." % str(cmdlist))
         rc = subprocess.call(cmdlist)
+        if path:
+                os.environ["PATH"] = path
         if rc != 0:
                 print("Error %i when %s!" % (rc, when))
                 sys.exit(1)
