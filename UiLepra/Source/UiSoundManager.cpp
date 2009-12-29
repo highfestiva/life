@@ -16,14 +16,17 @@ namespace UiLepra
 
 SoundManager* SoundManager::CreateSoundManager(ContextType pType)
 {
-	((void*)pType);
-#if !defined(LEPRA_WITHOUT_FMOD)
-	if (pType == CONTEXT_FMOD)
+	switch (pType)
 	{
-		return (new SoundManagerFMod(44100));
-	}
+		case CONTEXT_FMOD:
+#if !defined(LEPRA_WITHOUT_FMOD)
+			return (new SoundManagerFMod(44100));
 #endif // !WITHOUT_FMOD
-	return (new SoundManagerOpenAL(44100));
+		case CONTEXT_OPENAL:
+			return (new SoundManagerOpenAL(44100));
+	}
+	assert(false);
+	return (0);
 }
 
 
