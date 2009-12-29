@@ -67,8 +67,10 @@ def getmake(builder):
                 else:
                         print("Unknown MSVC version!")
                         sys.exit(1)
-        else:
+        elif os.path.exists("/bin/make"):
                 make_exe = "/bin/make"
+        elif os.path.exists("/usr/bin/make"):
+                make_exe = "/usr/bin/make"
         if not os.path.exists(make_exe):
                 make_exe = None
         #if not make_exe:
@@ -80,8 +82,11 @@ def getvcver():
         return vcver
 
 
-def hasdevenv():
-        return getmake(NMAKE) and getmake(VCBUILD)
+def hasdevenv(verbose=False):
+        hasit = getmake(NMAKE) and getmake(VCBUILD)
+        if verbose and not hasit:
+                print("Warning: no C++ development environment detected.")
+        return hasit
 
 
 def run(cmdlist, when):

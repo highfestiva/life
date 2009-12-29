@@ -23,7 +23,7 @@ removes = 0
 
 
 def buildstl():
-        if os.path.exists("ThirdParty/stlport/lib"):
+        if os.path.exists("ThirdParty/stlport/lib") or os.path.exists("ThirdParty/stlport/build/lib/obj/gcc/so"):
                 return
         print("Building STLport...")
         os.chdir("ThirdParty/stlport/")
@@ -178,7 +178,7 @@ def builddata(target=bindir):
 
 def buildall(target=bindir, buildtype=defaulttype):
         verify_base_dir()
-        if hasdevenv():
+        if hasdevenv(True):
                 buildcode("build", buildtype)
                 incremental_copy_code(target, buildtype)
         builddata(target)
@@ -186,7 +186,7 @@ def buildall(target=bindir, buildtype=defaulttype):
 
 def rebuildall(target=bindir, buildtype=defaulttype):
         verify_base_dir()
-        if hasdevenv():
+        if hasdevenv(True):
                 cleandir(target)
                 buildcode("rebuild", buildtype)
                 incremental_copy_code(target, buildtype)
@@ -199,7 +199,7 @@ def rebuildall(target=bindir, buildtype=defaulttype):
 def cleanall(target=bindir, buildtype=defaulttype):
         verify_base_dir()
         global removes
-        if hasdevenv():
+        if hasdevenv(True):
                 removes += cleandir(target)
                 buildcode("clean", buildtype)
         else:
