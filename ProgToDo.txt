@@ -1,3 +1,13 @@
+Business
+---------
+- Make a web site, following Seth's guidelines.
+- Check out what online payment systems there are and pick a good one.
+- Hand out to friends and family. Gather feedback. FIX!
+- Make X demo CDs. Burn, lightscribe, print and package.
+- Talk to Bolibompa.se.
+- Talk to toy store owners, game shop managers, etc.
+
+
 Game
 ---------
 + Better friction on tires.
@@ -152,6 +162,7 @@ Engine
   - Use for start/end screen.
 . Make replay functionality for start/end screen.
 . Clear top of log files when too big. Preferrably copy to .log.old and start a new one.
+. Add GCC build targets for debug, rc, final. Update build script.
 
  
 Quality

@@ -78,7 +78,7 @@ def working_makedirs(newdir):
 def main():
     dryrun = (len(sys.argv) > 1)
     if dryrun:
-        print "Argument given = making a dry run (not backup up and files)."
+        print "Argument given = making a dry run (not backing up any files)."
 
     basedir = "../../"
     fl = GlobDirectoryWalker(basedir, "*",
