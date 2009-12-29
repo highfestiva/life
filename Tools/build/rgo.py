@@ -1,3 +1,4 @@
+
 # Author: Jonas Byström
 # Copyright (c) 2002-2009, Righteous Games
 
@@ -113,10 +114,10 @@ def _incremental_copy(filelist, targetdir):
                         updates += 1
 
 
-def _incremental_copy_code(target, buildtype):
+def _incremental_copy_code(targetdir, buildtype):
         import glob
         if osname != "Windows":
-                if target == bindir:
+                if targetdir == bindir:
                         fl = [] # bin/ is all handled by make, don't do jack.
                 else:
                         fl = glob.glob("bin/*")
@@ -137,15 +138,15 @@ def _incremental_copy_code(target, buildtype):
                         fl += ["ThirdParty/fmod/api/fmod64.dll"]
                 else:
                         fl += ["ThirdParty/fmod/api/fmod.dll"]
-        _incremental_copy(fl, target)
+        _incremental_copy(fl, targetdir)
 
 
-def _incremental_copy_data(target):
+def _incremental_copy_data(targetdir):
         import glob
         fl = glob.glob("Data/*.class") + glob.glob("Data/*.mesh") + glob.glob("Data/*.phys") + \
                  glob.glob("Data/*.jpg") + glob.glob("Data/*.png") + glob.glob("Data/*.tga") + glob.glob("Data/*.bmp") + \
                  glob.glob("Data/*.wav") + glob.glob("Data/*.ogg") + glob.glob("Data/*.mp3")
-        targetdata = os.path.join(target, "Data")
+        targetdata = os.path.join(targetdir, "Data")
         _incremental_copy(fl, targetdata)
 
 
@@ -194,67 +195,67 @@ def _createmakes(force=False):
 #-------------------- High-level build stuff below. --------------------
 
 
-def cleandata(target=bindir):
+def cleandata(targetdir=bindir):
         global removes
         removes += _cleandata("Data")
-        removes += _cleandir(os.path.join(target, "Data"))
+        removes += _cleandir(os.path.join(targetdir, "Data"))
 
 
-def builddata(target=bindir):
+def builddata(targetdir=bindir):
         _incremental_build_data()
-        _incremental_copy_data(target)
+        _incremental_copy_data(targetdir)
 
 
 
-def buildall(target=bindir, buildtype=defaulttype):
+def buildall(targetdir=bindir, buildtype=defaulttype):
         verify_base_dir()
         if hasdevenv(verbose=True):
                 _createmakes()
                 _buildcode("build", buildtype)
-                _incremental_copy_code(target, buildtype)
-        builddata(target)
+                _incremental_copy_code(targetdir, buildtype)
+        builddata(targetdir)
 
 
-def rebuildall(target=bindir, buildtype=defaulttype):
+def rebuildall(targetdir=bindir, buildtype=defaulttype):
         verify_base_dir()
         if hasdevenv(verbose=True):
                 _createmakes(force=True)
-                _cleandir(target)
+                _cleandir(targetdir)
                 _buildcode("rebuild", buildtype)
-                _incremental_copy_code(target, buildtype)
+                _incremental_copy_code(targetdir, buildtype)
         else:
-                _cleandir(target+"/Data")
+                _cleandir(targetdir+"/Data")
         _cleandata("Data")
-        builddata(target)
+        builddata(targetdir)
 
 
-def cleanall(target=bindir, buildtype=defaulttype):
+def cleanall(targetdir=bindir, buildtype=defaulttype):
         verify_base_dir()
         global removes
         if hasdevenv(verbose=True):
-                removes += _cleandir(target)
+                removes += _cleandir(targetdir)
                 _buildcode("clean", buildtype)
         else:
-                removes += _cleandir(target+"/Data")
+                removes += _cleandir(targetdir+"/Data")
         _cleandata("Data")
 
 
 def buildzip():
         verify_base_dir()
         buildtype = ziptype
-        target=appname+"."+osname+"."+hwname+"."+buildtype+"."+datename
+        targetdir=appname+"."+osname+"."+hwname+"."+buildtype+"."+datename
         if buildtype == "rc":
-                target = "PRE_RELEASE."+target
+                targetdir = "PRE_RELEASE."+targetdir
         elif buildtype != "final":
-                target = "NO_RELEASE."+target
-        os.mkdir(target)
-        rebuildall(target, buildtype)
-        targetfile = target+".zip"
+                targetdir = "NO_RELEASE."+targetdir
+        os.mkdir(targetdir)
+        rebuildall(targetdir, buildtype)
+        targetfile = targetdir+".zip"
         if buildtype != "final":
-                targetfile = target+".iszip"
-        zipdir(target, targetfile)
-        _cleandir(target)
-        os.rmdir(target)
+                targetfile = targetdir+".iszip"
+        zipdir(targetdir, targetfile)
+        _cleandir(targetdir)
+        os.rmdir(targetdir)
         print("Built and zipped into %s." % targetfile)
 
 

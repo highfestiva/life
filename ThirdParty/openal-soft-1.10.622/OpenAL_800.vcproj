@@ -69,7 +69,7 @@
 				AdditionalDependencies="winmm.lib"
 				OutputFile="$(OutDir)\$(ProjectName)D.dll"
 				GenerateDebugInformation="true"
-				ImportLibrary="$(TargetDir)$(TargetName)D.lib"
+				ImportLibrary="$(TargetDir)$(TargetName).lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
