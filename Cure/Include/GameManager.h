@@ -58,7 +58,7 @@ public:
 	ResourceManager* GetResourceManager() const;
 	ContextManager* GetContext() const;
 	const TimeManager* GetConstTimeManager() const;
-	TBC::PhysicsManager* GetPhysicsManager() const;
+	LEPRA_DEBUG_CODE(virtual) TBC::PhysicsManager* GetPhysicsManager() const;
 	ConsoleManager* GetConsoleManager() const;
 
 	ContextObject* CreateContextObject(const str& pClassId, NetworkObjectType pNetworkType,

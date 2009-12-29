@@ -81,6 +81,7 @@ GameServerManager::~GameServerManager()
 
 bool GameServerManager::Tick()
 {
+	assert(!GetNetworkAgent()->GetLock()->IsOwner());
 	// Don't do this here! Done explicitly in parent.
 	//          ==>  ScopeLock lTickLock(GetTickLock());
 	bool lOk = Parent::BeginTick();
@@ -107,6 +108,7 @@ wstrutil::strvec GameServerManager::ListUsers()
 {
 	wstrutil::strvec lVector;
 	{
+		assert(!GetNetworkAgent()->GetLock()->IsOwner());
 		ScopeLock lTickLock(GetTickLock());
 		ScopeLock lNetLock(GetNetworkAgent()->GetLock());
 
@@ -137,6 +139,7 @@ bool GameServerManager::BroadcastChatMessage(const wstr& pMessage)
 
 	Cure::Packet* lPacket = GetNetworkAgent()->GetPacketFactory()->Allocate();
 	{
+		assert(!GetNetworkAgent()->GetLock()->IsOwner());
 		ScopeLock lTickLock(GetTickLock());
 		ScopeLock lNetLock(GetNetworkAgent()->GetLock());
 		AccountClientTable::Iterator x = mAccountClientTable.First();
@@ -152,6 +155,7 @@ bool GameServerManager::BroadcastChatMessage(const wstr& pMessage)
 
 bool GameServerManager::SendChatMessage(const wstr& pClientUserName, const wstr& pMessage)
 {
+	assert(!GetNetworkAgent()->GetLock()->IsOwner());
 	ScopeLock lTickLock(GetTickLock());
 	ScopeLock lNetLock(GetNetworkAgent()->GetLock());
 
@@ -176,6 +180,7 @@ bool GameServerManager::SendChatMessage(const wstr& pClientUserName, const wstr&
 
 int GameServerManager::GetLoggedInClientCount() const
 {
+	assert(!GetNetworkAgent()->GetLock()->IsOwner());
 	ScopeLock lTickLock(GetTickLock());
 	ScopeLock lNetLock(GetNetworkAgent()->GetLock());
 	return (mAccountClientTable.GetCount());
@@ -586,6 +591,7 @@ void GameServerManager::OnLogin(Cure::UserConnection* pUserConnection)
 
 void GameServerManager::OnLogout(Cure::UserConnection* pUserConnection)
 {
+	assert(!GetNetworkAgent()->GetLock()->IsOwner());
 	ScopeLock lTickLock(GetTickLock());
 	ScopeLock lNetLock(GetNetworkAgent()->GetLock());
 
@@ -944,6 +950,7 @@ void GameServerManager::BroadcastObjectPosition(Cure::GameObjectId pInstanceId,
 	lPacket->AddMessage(lPosition);
 	lPosition->Store(lPacket, pInstanceId, GetTimeManager()->GetCurrentPhysicsFrame(), pPosition);
 
+	assert(!GetNetworkAgent()->GetLock()->IsOwner());
 	ScopeLock lTickLock(GetTickLock());
 	BroadcastPacket(pExcludeClient, lPacket, pSafe);
 
@@ -964,6 +971,15 @@ void GameServerManager::BroadcastPacket(const Client* pExcludeClient, Cure::Pack
 }
 
 
+
+#ifdef LEPRA_DEBUG
+TBC::PhysicsManager* GameServerManager::GetPhysicsManager() const
+{
+	assert(GetTickLock()->IsOwner());
+	assert(!GetNetworkAgent()->GetLock()->IsOwner());
+	return Parent::GetPhysicsManager();
+}
+#endif // Debug mode
 
 Cure::NetworkServer* GameServerManager::GetNetworkServer() const
 {

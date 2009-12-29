@@ -80,6 +80,7 @@ private:
 		Client* pExcludeClient, bool pSafe);
 	void BroadcastPacket(const Client* pExcludeClient, Cure::Packet* pPacket, bool pSafe);
 
+	LEPRA_DEBUG_CODE(virtual TBC::PhysicsManager* GetPhysicsManager() const);
 	Cure::NetworkServer* GetNetworkServer() const;
 
 	typedef std::list<Cure::MessageObjectMovement*> MovementList;

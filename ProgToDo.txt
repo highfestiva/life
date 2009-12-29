@@ -110,10 +110,8 @@ Engine
 + Exchange SoundManager basics to a portable one.
 + Make physics manager (ODE) work with >1 simultaneous thread.
 + Update server port in Linux.
-. Port client to Linux.
-. Port Posix' SystemManager (mostly placeholders at the moment).
-. Port font rendering.
-. Port client to Mac OS X.
++ Port client to Linux.
+. Port client to Mac OS X / Cocoa.
 
 . Remove game source code from engine source code: camera, hard-coded object placements, input handling, etc.
 . Spawn points. Matching against vehicle types...
@@ -163,6 +161,10 @@ Engine
 . Make replay functionality for start/end screen.
 . Clear top of log files when too big. Preferrably copy to .log.old and start a new one.
 . Add GCC build targets for debug, rc, final. Update build script.
+. Install X11 on my computer... Yarrrghhh... Mongooooolllll!!!!..........
+. Port client to X11.
+. Port Posix' SystemManager (mostly placeholders at the moment).
+. Port font rendering to X11.
 
  
 Quality
@@ -185,7 +187,7 @@ Quality
 + Add unit test for making sure that loading more than one instance of same resource results in a single instance.
 + Replace copyright notice to Righteous Games.
 + Shorten code by typedeffing the Lepra::String, Lepra::StringUtility, Lepra::uint8 and so forth in all namespaces.
-. Make build in one step: server, client, **DATA**, stlport, Linux, Windows...
++ Make build in one step: server, client, **DATA**, stlport, Linux, Windows...
 . Assertions on getting access to wrong parts of the system with the wrong thread. (Such as dropping users in NetworkServer.cpp from the TCP thread.)
 . Stresstest (use .lsh).
 . Run test app in Windows and Linux.
