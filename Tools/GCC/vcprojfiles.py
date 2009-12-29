@@ -6,19 +6,19 @@ import sys, xml.dom.minidom, os
 
 def relpath(target, base=os.curdir):
     if not os.path.exists(target):
-        raise OSError, 'Target does not exist: '+target
+        raise OSError('Target does not exist: '+target)
 
     if not os.path.isdir(base):
-        raise OSError, 'Base is not a directory or does not exist: '+base
+        raise OSError('Base is not a directory or does not exist: '+base)
 
     base_list = (os.path.abspath(base)).split(os.sep)
     target_list = (os.path.abspath(target)).split(os.sep)
 
-    if os.name in ['nt','dos','os2'] and base_list[0] <> target_list[0]:
-        raise OSError, 'Target is on a different drive to base. Target: '+target_list[0].upper()+', base: '+base_list[0].upper()
+    if os.name in ['nt','dos','os2'] and base_list[0] != target_list[0]:
+        raise OSError('Target is on a different drive to base. Target: '+target_list[0].upper()+', base: '+base_list[0].upper())
 
     for i in range(min(len(base_list), len(target_list))):
-        if base_list[i] <> target_list[i]: break
+        if base_list[i] != target_list[i]: break
     else:
         i+=1
 
@@ -49,8 +49,8 @@ def main():
     projDir = os.path.dirname(options.input)
     try:
         mdp = xml.dom.minidom.parse(options.input)
-    except IOError, e:
-        print e.args[1] + ":", e.filename
+    except IOError as e:
+        print(e.args[1] + ":", e.filename)
         sys.exit(2)
     files = mdp.getElementsByTagName("File")
     for f in files:
@@ -60,25 +60,25 @@ def main():
             doPrint = False
             if options.suffix == relp.split(".")[-1]:
                 doPrint = True               
-	if options.filter:
+        if options.filter:
             for fe in options.filter.split(';'):
-		if fe in relp:
+                if fe in relp:
                     doPrint = False
         if doPrint:
             if options.qouted: q = "\""
             else: q = ""
             filepath = os.path.abspath(os.path.join(projDir, relp))
             if options.basename:
-                print q + os.path.basename(filepath)  + q
+                print(q + os.path.basename(filepath)  + q)
             elif options.absPath:
-                print q + filepath + q
+                print(q + filepath + q)
             else:
                 if options.base: base = options.base
                 else: base = os.curdir
                 try:
-                    print q + relpath(filepath, base) + q
-                except OSError, e:
-                    print >> sys.stderr, 'OSError: %s' % e.message
+                    print(q + relpath(filepath, base) + q)
+                except OSError as e:
+                    print('OSError: %s' % e.message, file=sys.stderr)
 
 if __name__ == '__main__':
     main()

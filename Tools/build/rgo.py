@@ -15,11 +15,13 @@ datename = getdatename()
 bindir = "bin"
 buildtypes = ["debug", "rc", "final"]
 defaulttype = buildtypes[0]
-ziptype = "rc"
-importscript = "Tools/Maya/import_chunky.py"
-own_tt = {"debug":"Unicode Debug", "rc":"Unicode Release Client", "final":"Unicode Final"}
+ziptype = buildtypes[1]
+own_tt = {"debug":"Unicode Debug", "rc":"Unicode Release Candidate", "final":"Unicode Final"}
 updates = 0
 removes = 0
+importscript = "Tools/Maya/import_chunky.py"
+makefilescriptdir = "Tools/GCC"
+makefilescript = "generate_makefile.py"
 
 
 def _buildstl():
@@ -66,8 +68,7 @@ def _buildcode(command, buildtype):
 
 
 def _convertdata(filename):
-        python_exe = sys.executable
-        run([python_exe, importscript, filename], "importing "+filename)
+        run([sys.executable, importscript, filename], "importing "+filename)
 
 
 def _incremental_build_data():
@@ -176,11 +177,18 @@ def _cleandir(da_dir):
         return removes
 
 
-def printresult():
-        if updates+removes:
-                print("Operation successful, %i resulting files updated(/removed)." % (updates+removes))
-        else:
-                print("Already up-to-date.")
+def _printresult():
+        if updates+removes:     print("Operation successful, %i resulting files updated(/removed)." % (updates+removes))
+        else:                   print("Already up-to-date.")
+
+
+def _createmakes(force=False):
+        if os.path.exists("makefile") and not force:
+                return
+        os.chdir(makefilescriptdir)
+        run([sys.executable, makefilescript], "generating makefiles")
+        cnt = len(makefilescriptdir.split("/"))
+        os.chdir("/".join([".."]*cnt))
 
 
 #-------------------- High-level build stuff below. --------------------
@@ -200,7 +208,8 @@ def builddata(target=bindir):
 
 def buildall(target=bindir, buildtype=defaulttype):
         verify_base_dir()
-        if hasdevenv(True):
+        if hasdevenv(verbose=True):
+                _createmakes()
                 _buildcode("build", buildtype)
                 _incremental_copy_code(target, buildtype)
         builddata(target)
@@ -208,7 +217,8 @@ def buildall(target=bindir, buildtype=defaulttype):
 
 def rebuildall(target=bindir, buildtype=defaulttype):
         verify_base_dir()
-        if hasdevenv(True):
+        if hasdevenv(verbose=True):
+                _createmakes(force=True)
                 _cleandir(target)
                 _buildcode("rebuild", buildtype)
                 _incremental_copy_code(target, buildtype)
@@ -221,7 +231,7 @@ def rebuildall(target=bindir, buildtype=defaulttype):
 def cleanall(target=bindir, buildtype=defaulttype):
         verify_base_dir()
         global removes
-        if hasdevenv(True):
+        if hasdevenv(verbose=True):
                 removes += _cleandir(target)
                 _buildcode("clean", buildtype)
         else:
@@ -233,21 +243,24 @@ def buildzip():
         verify_base_dir()
         buildtype = ziptype
         target=appname+"."+osname+"."+hwname+"."+buildtype+"."+datename
-        if buildtype != "final":
+        if buildtype == "rc":
+                target = "PRE_RELEASE."+target
+        elif buildtype != "final":
                 target = "NO_RELEASE."+target
-        mkdir(target)
-        _cleandir(target)
+        os.mkdir(target)
         rebuildall(target, buildtype)
         targetfile = target+".zip"
         if buildtype != "final":
                 targetfile = target+".iszip"
         zipdir(target, targetfile)
-        rmdir(target)
+        _cleandir(target)
+        os.rmdir(target)
+        print("Built and zipped into %s." % targetfile)
 
 
 def start():
         buildall()
-        printresult()
+        _printresult()
         os.chdir(bindir)
         pre = "./"
         post = ""
@@ -260,7 +273,7 @@ def start():
                 sys.exit(2)
         import subprocess
         subprocess.Popen(pre+"LifeClient"+post, shell=True)
-        os.execl(pre+"LifeServer"+post, pre+"LifeServer"+post)
+        os.system(pre+"LifeServer"+post)
 
 
 if __name__ == "__main__":
@@ -268,4 +281,4 @@ if __name__ == "__main__":
                 print("Need arg!")
                 sys.exit(1)
         exec(sys.argv[1]+"()")
-        printresult()
+        _printresult()

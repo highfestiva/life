@@ -104,7 +104,7 @@ def issrc(fname):
 def create_makefile(makename, srcname, type):
     f = open(makename, "wt")
     if srcname:
-	srcname = "from "+srcname+", "
+        srcname = "from "+srcname+", "
     f.write("# 'Twas generated %s%s, type='%s'.\n" % (srcname, datetime.now().isoformat()[:10], type))
     f.write("# Don't edit manually. See 'generate_makefile.py' for info.\n")
     return f
@@ -115,8 +115,8 @@ def write_contents(f, srcs, objs, bins=None):
     f.write("\n\nOBJS=\t\\\n")
     f.write("\t\\\n".join(objs))
     if bins:
-	f.write("\n\nBINS=\t\\\n")
-	f.write("\t\\\n".join(bins))
+        f.write("\n\nBINS=\t\\\n")
+        f.write("\t\\\n".join(bins))
     f.write("\n")
 
 def convert_out_name(vcfile):
@@ -129,7 +129,7 @@ def convert_out_name(vcfile):
 def linux_bin_name(type, vcfile):
     rawname = convert_out_name(vcfile)
     if type == "lib":
-    	rawname = "lib"+rawname+".so"
+        rawname = "lib"+rawname+".so"
     pathname = os.path.join(os.path.dirname(vcfile), rawname)
     #print pathname
     return pathname
@@ -137,10 +137,15 @@ def linux_bin_name(type, vcfile):
 def generate_makefile(vcfile, makename, includedirs, libdirs, header, footer, type):
     libname = convert_out_name(vcfile)
     projbasedir = os.path.dirname(vcfile)
-    cpps = os.popen("./vcprojfiles.py -i "+vcfile+" -f Win32\\;win32 --rel-path --base-path="+projbasedir).read()
+    extrafilter = ""
+    if os.name == "mac":
+        extrafilter = "-f X11\\;x11"
+    else:
+        extraFilter = "-f X11\\;mac"
+    cpps = os.popen(sys.executable+" vcprojfiles.py -i "+vcfile+" -f Win32\\;win32 "+extrafilter+" --rel-path --base-path="+projbasedir).read()
     cpps = cpps.split()
-    cpps = filter(lambda x: issrc(x), cpps)
-    objs = map(lambda x: os.path.splitext(x)[0]+".o", cpps)
+    cpps = [x for x in cpps if issrc(x)]
+    objs = [os.path.splitext(x)[0]+".o" for x in cpps]
     f = create_makefile(makename, vcfile, type)
     includes = " ".join(["-I%s" % i for i in includedirs])
     libs = " ".join(["-L%s" % i for i in libdirs])
@@ -162,37 +167,37 @@ def generate_makefiles(basedir, vcfileinfolist):
     files = {"bin":[], "gfx_bin":[], "lib":[]}
 
     for type, vcfile in vcfileinfolist:
-	basetype = "lib" if type.startswith("lib") else type
-	files[basetype] += [linux_bin_name(basetype, vcfile)]
+        basetype = "lib" if type.startswith("lib") else type
+        files[basetype] += [linux_bin_name(basetype, vcfile)]
 
         vcfile = os.path.join(basedir, vcfile)
         projdir = os.path.dirname(vcfile)
         includedirs = [os.path.relpath(basedir+"ThirdParty/stlport/stlport/", projdir),
-		os.path.relpath(basedir+"ThirdParty/utf8cpp", projdir),
-		os.path.relpath(basedir+"ThirdParty/openal-soft-1.10.622/OpenAL32/Include/", projdir),
-		os.path.relpath(basedir+"ThirdParty/openal-soft-1.10.622/include/", projdir),
-		os.path.relpath(basedir+"ThirdParty/freealut-1.1.0/include/", projdir),
-		os.path.relpath(basedir+"ThirdParty/ode-0.11.1/include", projdir),
-		os.path.relpath(basedir+"ThirdParty/ode-0.11.1/ode/src", projdir),
-		os.path.relpath(basedir+"ThirdParty/ode-0.11.1/ode/src/joints", projdir),
-		os.path.relpath(basedir+"ThirdParty/ode-0.11.1/OPCODE", projdir),
-		os.path.relpath(basedir+"ThirdParty/ode-0.11.1/GIMPACT/include", projdir),
-		os.path.relpath(basedir+"ThirdParty/ode-0.11.1/ou/include", projdir)]
-	libdirs = [os.path.relpath(basedir+"ThirdParty/stlport/build/lib/obj/gcc/so", projdir),
-		os.path.relpath(basedir+"ThirdParty", projdir),
-		os.path.relpath(basedir+"ThirdParty/openal-soft-1.10.622", projdir),
-		os.path.relpath(basedir+"ThirdParty/freealut-1.1.0/admin/VisualStudioDotNET/alut", projdir),
-		os.path.relpath(basedir+"Lepra", projdir),
-		os.path.relpath(basedir+"TBC", projdir),
-		os.path.relpath(basedir+"Cure", projdir),
-		os.path.relpath(basedir+"UiLepra", projdir),
-		os.path.relpath(basedir+"UiTBC", projdir),
-		os.path.relpath(basedir+"UiCure", projdir),
-		os.path.relpath(basedir+"Life", projdir)]
+        os.path.relpath(basedir+"ThirdParty/utf8cpp", projdir),
+        os.path.relpath(basedir+"ThirdParty/openal-soft-1.10.622/OpenAL32/Include/", projdir),
+        os.path.relpath(basedir+"ThirdParty/openal-soft-1.10.622/include/", projdir),
+        os.path.relpath(basedir+"ThirdParty/freealut-1.1.0/include/", projdir),
+        os.path.relpath(basedir+"ThirdParty/ode-0.11.1/include", projdir),
+        os.path.relpath(basedir+"ThirdParty/ode-0.11.1/ode/src", projdir),
+        os.path.relpath(basedir+"ThirdParty/ode-0.11.1/ode/src/joints", projdir),
+        os.path.relpath(basedir+"ThirdParty/ode-0.11.1/OPCODE", projdir),
+        os.path.relpath(basedir+"ThirdParty/ode-0.11.1/GIMPACT/include", projdir),
+        os.path.relpath(basedir+"ThirdParty/ode-0.11.1/ou/include", projdir)]
+        libdirs = [os.path.relpath(basedir+"ThirdParty/stlport/build/lib/obj/gcc/so", projdir),
+        os.path.relpath(basedir+"ThirdParty", projdir),
+        os.path.relpath(basedir+"ThirdParty/openal-soft-1.10.622", projdir),
+        os.path.relpath(basedir+"ThirdParty/freealut-1.1.0/admin/VisualStudioDotNET/alut", projdir),
+        os.path.relpath(basedir+"Lepra", projdir),
+        os.path.relpath(basedir+"TBC", projdir),
+        os.path.relpath(basedir+"Cure", projdir),
+        os.path.relpath(basedir+"UiLepra", projdir),
+        os.path.relpath(basedir+"UiTBC", projdir),
+        os.path.relpath(basedir+"UiCure", projdir),
+        os.path.relpath(basedir+"Life", projdir)]
         makename = os.path.join(os.path.dirname(vcfile), "makefile")
-	printstart(makename)
+        printstart(makename)
         generate_makefile(vcfile, makename, includedirs, libdirs, eval("head_"+type), eval("foot_"+type), type)
-	printend(type)
+        printend(type)
 
     makename = os.path.join(basedir, "makefile")
     printstart(makename)
@@ -203,18 +208,18 @@ def generate_makefiles(basedir, vcfileinfolist):
 def main():
     basedir = "../../"
     projects = [["lib_nowarn", "ThirdParty/ThirdPartyLib_800.vcproj"],
-		["lib_nowarn", "ThirdParty/openal-soft-1.10.622/OpenAL_800.vcproj"],
-		["lib_nowarn", "ThirdParty/freealut-1.1.0/admin/VisualStudioDotNET/alut/alut.vcproj"],
-                ["lib",        "Lepra/Lepra.vcproj"],
-                ["lib",        "TBC/TBC.vcproj"],
-                ["lib",        "Cure/Cure.vcproj"],
-                ["lib",        "UiLepra/UiLepra.vcproj"],
-                ["lib",        "UiTBC/UiTBC.vcproj"],
-                ["lib",        "UiCure/UiCure.vcproj"],
-                ["lib",        "Life/Life.vcproj"],
-                ["bin",        "Life/LifeServer/LifeServer.vcproj"],
-                ["gfx_bin",    "Life/LifeClient/LifeClient.vcproj"],
-                ["gfx_bin",    "UiCure/CureTestApp/CureTestApp.vcproj"]]
+        ["lib_nowarn", "ThirdParty/openal-soft-1.10.622/OpenAL_800.vcproj"],
+        ["lib_nowarn", "ThirdParty/freealut-1.1.0/admin/VisualStudioDotNET/alut/alut.vcproj"],
+        ["lib",        "Lepra/Lepra.vcproj"],
+        ["lib",        "TBC/TBC.vcproj"],
+        ["lib",        "Cure/Cure.vcproj"],
+        ["lib",        "UiLepra/UiLepra.vcproj"],
+        ["lib",        "UiTBC/UiTBC.vcproj"],
+        ["lib",        "UiCure/UiCure.vcproj"],
+        ["lib",        "Life/Life.vcproj"],
+        ["bin",        "Life/LifeServer/LifeServer.vcproj"],
+        ["gfx_bin",    "Life/LifeClient/LifeClient.vcproj"],
+        ["gfx_bin",    "UiCure/CureTestApp/CureTestApp.vcproj"]]
     generate_makefiles(basedir, projects)
 
 if __name__ == '__main__':

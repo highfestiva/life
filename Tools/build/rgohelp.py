@@ -24,11 +24,15 @@ def getosname():
 
 
 def gethwname():
-        ccver = sys.version.split("[")[1][:-1]
-        if ccver.find("MSC 32 bit") >= 0:       return "x86"
-        if ccver.find("MSC 64 bit") >= 0:       return "x64"
-        ccnames = ccver.replace("(", "").replace(")", "").split(" ")
-        return ccnames[-1] + "".join(ccnames[1:-1])
+        if os.name == "nt":
+                ccver = sys.version.split("[")[1][:-1]
+                if ccver.find("32 bit") >= 0:
+                        return "x86"
+                if ccver.find("64 bit") >= 0:
+                        return "x64"
+        machine = subprocess.Popen(["uname", "-m"], stdout=subprocess.PIPE).communicate()[0]
+        machine = machine.strip()
+        return machine
 
 
 def getdatename():
@@ -42,7 +46,7 @@ def filetime(filename):
 
 
 def verify_base_dir():
-        if not os.path.exists(".git") or not os.path.exists("Data") or not os.path.exists("makefile"):
+        if not os.path.exists(".git") or not os.path.exists("Data"):
                 print("Must be in base dir to build!")
                 sys.exit(1)
 
@@ -103,3 +107,22 @@ def run(cmdlist, when):
         if rc != 0:
                 print("Error %i when %s!" % (rc, when))
                 sys.exit(1)
+
+
+def _zipfiles(zf, filenames):
+        import glob
+        for filename in filenames:
+                if os.path.isdir(filename):
+                        fs = glob.glob(os.path.join(filename, "*"))
+                        _zipfiles(zf, fs)
+                else:
+                        zf.write(filename)
+
+
+def zipdir(dirname, arcname):
+        import glob
+        import zipfile
+        zf = zipfile.ZipFile(arcname, "w", zipfile.ZIP_DEFLATED)
+        fs = glob.glob(os.path.join(dirname, "*"))
+        _zipfiles(zf, fs)
+        zf.close()

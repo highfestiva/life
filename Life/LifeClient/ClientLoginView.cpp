@@ -33,7 +33,7 @@ ClientLoginView::ClientLoginView(ClientLoginObserver* pLoginObserver, const str&
 
 	AddLabel(_T("Username"), WHITE);
 
-	str lUserName = CURE_RTVAR_GETSET(mLoginObserver->GetVariableScope(), RTVAR_LOGIN_USERNAME, _T("Car0"));
+	str lUserName = CURE_RTVAR_GETSET(mLoginObserver->GetVariableScope(), RTVAR_LOGIN_USERNAME, _T("Loader0"));
 	AddTextField(lUserName, _T("User"));
 
 	AddLabel(_T("Password"), WHITE);
@@ -42,7 +42,7 @@ ClientLoginView::ClientLoginView(ClientLoginObserver* pLoginObserver, const str&
 
 	AddLabel(_T("Server"), WHITE);
 
-	str lServerName = _T("rg.servegame.org:16650");
+	str lServerName = _T(":16650");
 	lServerName = CURE_RTVAR_GETSET(mLoginObserver->GetVariableScope(), RTVAR_LOGIN_SERVER, lServerName);
 	AddTextField(lServerName, _T("Server"));
 
