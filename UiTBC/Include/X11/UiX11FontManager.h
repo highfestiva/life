@@ -4,10 +4,6 @@
 
 
 
-TODO: port!
-
-
-
 #pragma once
 
 #include "../../../Lepra/Include/LepraTarget.h"
@@ -40,7 +36,7 @@ public:
 	virtual int GetCharWidth(const tchar pChar) const;
 
 private:
-	struct X11BitmapInfo
+	/*struct X11BitmapInfo
 	{
 		BITMAPINFOHEADER bmiHeader;
 		RGBQUAD bmiColors[256];
@@ -49,11 +45,11 @@ private:
 	struct X11Font: Font
 	{
 		HFONT mX11FontHandle;
-	};
+	};*/
 
 	UiLepra::X11DisplayManager* mDisplayManager;
-	HDC mDC;
-	COLORREF mColorRef[4];
+	/*HDC mDC;
+	COLORREF mColorRef[4];*/
 };
 
 

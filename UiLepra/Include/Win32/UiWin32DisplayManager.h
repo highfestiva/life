@@ -44,30 +44,6 @@ public:
 
 	virtual bool IsVisible() const;
 
-	/*
-		Display mode enumeration (fullscreen modes).
-		Narrow the search by specifying width and height and/or bitrate.
-	*/
-
-	// Returns the number of supported display modes on this computer.
-	virtual int GetNumDisplayModes();
-	virtual int GetNumDisplayModes(int pBitDepth);
-	virtual int GetNumDisplayModes(int pWidth, int pHeight);
-	virtual int GetNumDisplayModes(int pWidth, int pHeight, int pBitDepth);
-
-	// Fills pDisplayMode with the mode number pMode.
-	// pMode must be a number greater or equal to 0, and less than the number returned from
-	// the corresponding GetNumDisplayModes().
-	virtual bool GetDisplayMode(DisplayMode& pDisplayMode, int pMode);
-	virtual bool GetDisplayMode(DisplayMode& pDisplayMode, int pMode, int pBitDepth);
-	virtual bool GetDisplayMode(DisplayMode& pDisplayMode, int pMode, int pWidth, int pHeight);
-	virtual bool GetDisplayMode(DisplayMode& pDisplayMode, int pMode, int pWidth, int pHeight, int pBitDepth);
-
-	// Display mode search. Returns true if a display mode was found, and fills the DisplayMode struct.
-	virtual bool FindDisplayMode(DisplayMode& pDisplayMode, int pWidth, int pHeight);
-	virtual bool FindDisplayMode(DisplayMode& pDisplayMode, int pWidth, int pHeight, int pBitDepth);
-	virtual bool FindDisplayMode(DisplayMode& pDisplayMode, int pWidth, int pHeight, int pBitDepth, int pRefreshRate);
-
 	virtual unsigned GetWidth();
 	virtual unsigned GetHeight();
 	virtual unsigned GetBitDepth();
@@ -142,9 +118,6 @@ protected:
 	int mNormalHeight;
 
 private:
-	DisplayMode* mEnumeratedDisplayMode;
-	int mEnumeratedDisplayModeCount;
-
 	bool mCaptionSet;
 
 	bool mConsumeChar;

@@ -7,6 +7,8 @@
 #pragma once
 
 #include "UiX11DisplayManager.h"
+#include <GL/glx.h>
+#include <X11/Xutil.h>
 
 
 
@@ -48,7 +50,7 @@ private:
 
 	bool CreateGLContext();
 	void DeleteGLContext();
-	static XVisualInfo* GetVisualInfo();
+	XVisualInfo* GetVisualInfo() const;
 
 	static GLXContext mGlContext;	// The same one used for all displays (must have same VisualInfo).
 	static int mContextUserCount;

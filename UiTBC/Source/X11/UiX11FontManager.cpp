@@ -4,10 +4,6 @@
 
 
 
-TODO: port!
-
-
-
 #include "../../Include/X11/UiX11FontManager.h"
 #include "../../../UiLepra/Include/X11/UiX11DisplayManager.h"
 
@@ -28,7 +24,7 @@ FontManager* FontManager::Create(UiLepra::DisplayManager* pDisplayManager)
 X11FontManager::X11FontManager(UiLepra::X11DisplayManager* pDisplayManager):
 	mDisplayManager(pDisplayManager)
 {
-	HWND lWnd = mDisplayManager->GetHWND();
+	/*HWND lWnd = mDisplayManager->GetHWND();
 	mDC = ::GetDC(lWnd);
 
 	COLORREF lColor = RGB(255, 255, 255);
@@ -36,7 +32,7 @@ X11FontManager::X11FontManager(UiLepra::X11DisplayManager* pDisplayManager):
 	lColor = RGB(0, 0, 0);
 	mColorRef[1] = lColor;
 	mColorRef[2] = lColor;
-	mColorRef[3] = lColor;
+	mColorRef[3] = lColor;*/
 }
 
 X11FontManager::~X11FontManager()
@@ -44,13 +40,13 @@ X11FontManager::~X11FontManager()
 	FontTable::iterator x = mFontTable.begin();
 	if (x != mFontTable.end())
 	{
-		X11Font* lFont = (X11Font*)x->second;
+		/*X11Font* lFont = (X11Font*)x->second;
 		::DeleteObject(lFont->mX11FontHandle);
-		delete (lFont);
+		delete (lFont);*/
 	}
 	mFontTable.clear();
 
-	::ReleaseDC(mDisplayManager->GetHWND(), mDC);
+	//::ReleaseDC(mDisplayManager->GetHWND(), mDC);
 	mDisplayManager = 0;
 }
 
@@ -60,13 +56,13 @@ void X11FontManager::SetColor(const Color& pColor, unsigned pColorIndex)
 {
 	assert(pColorIndex <= 1);
 
-	COLORREF lColor = RGB(pColor.mRed, pColor.mGreen, pColor.mBlue);
-	mColorRef[pColorIndex] = lColor;
+	/*COLORREF lColor = RGB(pColor.mRed, pColor.mGreen, pColor.mBlue);
+	mColorRef[pColorIndex] = lColor;*/
 }
 
 X11FontManager::FontId X11FontManager::AddFont(const str& pFontName, double pSize, uint32 pFlags, CharacterSet pCharSet)
 {
-	int lWeight  = ((pFlags & BOLD) != 0) ? FW_BOLD : FW_NORMAL;
+	/*int lWeight  = ((pFlags & BOLD) != 0) ? FW_BOLD : FW_NORMAL;
 	DWORD lItalic = ((pFlags & ITALIC) != 0) ? TRUE : FALSE;
 	DWORD lUnderline = ((pFlags & UNDERLINE) != 0) ? TRUE : FALSE;
 	DWORD lStrikeOut = ((pFlags & STRIKEOUT) != 0) ? TRUE : FALSE;
@@ -102,12 +98,13 @@ X11FontManager::FontId X11FontManager::AddFont(const str& pFontName, double pSiz
 		}
 	}
 
-	return (FontId)lId;
+	return (FontId)lId;*/
+	return (INVALID_FONTID);
 }
 
 bool X11FontManager::RenderGlyph(tchar pChar, Canvas& pImage, const PixelRect& pRect)
 {
-	bool lOk = (mCurrentFont != 0);
+	/*bool lOk = (mCurrentFont != 0);
 	if (lOk)
 	{
 		lOk = (pRect.mTop >= 0 && pRect.mLeft >= 0 &&
@@ -196,14 +193,15 @@ bool X11FontManager::RenderGlyph(tchar pChar, Canvas& pImage, const PixelRect& p
 		::DeleteDC(lRamDc);
 		lRamDc = 0;
 	}
-	return (lOk);
+	return (lOk);*/
+	return (true);
 }
 
 
 
 int X11FontManager::GetCharWidth(const tchar pChar) const
 {
-	X11Font* lFont = (X11Font*)mCurrentFont;
+	/*X11Font* lFont = (X11Font*)mCurrentFont;
 	HGDIOBJ lDefaultObject = ::SelectObject(mDC, lFont->mX11FontHandle);
 	ABC lABC;
 	INT lWidth;
@@ -217,7 +215,8 @@ int X11FontManager::GetCharWidth(const tchar pChar) const
 		lCharWidth = (int)lWidth;
 	}
 	::SelectObject(mDC, lDefaultObject);
-	return (lCharWidth);
+	return (lCharWidth);*/
+	return (10);
 }
 
 

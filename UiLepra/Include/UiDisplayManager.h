@@ -142,24 +142,24 @@ public:
 	*/
 
 	// Returns the number of supported display modes on this computer.
-	virtual int GetNumDisplayModes() = 0;
-	virtual int GetNumDisplayModes(int pBitDepth) = 0;
-	virtual int GetNumDisplayModes(int pWidth, int pHeight) = 0;
-	virtual int GetNumDisplayModes(int pWidth, int pHeight, int pBitDepth) = 0;
+	virtual int GetNumDisplayModes();
+	virtual int GetNumDisplayModes(int pBitDepth);
+	virtual int GetNumDisplayModes(int pWidth, int pHeight);
+	virtual int GetNumDisplayModes(int pWidth, int pHeight, int pBitDepth);
 
 	// Fills pDisplayMode with the mode number pMode.
 	// pMode must be a number greater or equal to 0, and less than the number returned from
 	// the corresponding GetNumDisplayModes().
-	virtual bool GetDisplayMode(DisplayMode& pDisplayMode, int pMode) = 0;
-	virtual bool GetDisplayMode(DisplayMode& pDisplayMode, int pMode, int pBitDepth) = 0;
-	virtual bool GetDisplayMode(DisplayMode& pDisplayMode, int pMode, int pWidth, int pHeight) = 0;
-	virtual bool GetDisplayMode(DisplayMode& pDisplayMode, int pMode, int pWidth, int pHeight, int pBitDepth) = 0;
+	virtual bool GetDisplayMode(DisplayMode& pDisplayMode, int pMode);
+	virtual bool GetDisplayMode(DisplayMode& pDisplayMode, int pMode, int pBitDepth);
+	virtual bool GetDisplayMode(DisplayMode& pDisplayMode, int pMode, int pWidth, int pHeight);
+	virtual bool GetDisplayMode(DisplayMode& pDisplayMode, int pMode, int pWidth, int pHeight, int pBitDepth);
 
 	// Display mode search. Returns true if a matching display mode was found, 
 	// and fills the DisplayMode struct.
-	virtual bool FindDisplayMode(DisplayMode& pDisplayMode, int pWidth, int pHeight) = 0;
-	virtual bool FindDisplayMode(DisplayMode& pDisplayMode, int pWidth, int pHeight, int pBitDepth) = 0;
-	virtual bool FindDisplayMode(DisplayMode& pDisplayMode, int pWidth, int pHeight, int pBitDepth, int pRefreshRate) = 0;
+	virtual bool FindDisplayMode(DisplayMode& pDisplayMode, int pWidth, int pHeight);
+	virtual bool FindDisplayMode(DisplayMode& pDisplayMode, int pWidth, int pHeight, int pBitDepth);
+	virtual bool FindDisplayMode(DisplayMode& pDisplayMode, int pWidth, int pHeight, int pBitDepth, int pRefreshRate);
 
 	virtual unsigned GetWidth() = 0;
 	virtual unsigned GetHeight() = 0;
@@ -173,7 +173,7 @@ public:
 	// to the display memory. If there is a valid pointer, it's only valid
 	// for the current frame.
 	void GetScreenCanvas(Canvas& pCanvas);
-	inline void GetScreenCanvas(Canvas* pCanvas);
+	void GetScreenCanvas(Canvas* pCanvas);
 
 	// Functions implemented for conveniency.
 	static uint8 GetPaletteColor(int pRed, int pGreen, int pBlue, const Color* pPalette);
@@ -182,14 +182,12 @@ protected:
 	typedef std::set<DisplayResizeObserver*> ResizeObserverSet;
 	ResizeObserverSet mResizeObserverSet;
 
+	DisplayMode* mEnumeratedDisplayMode;
+	int mEnumeratedDisplayModeCount;
+
 private:
 	LOG_CLASS_DECLARE();
 };
-
-void DisplayManager::GetScreenCanvas(Canvas* pCanvas)
-{
-	GetScreenCanvas(*pCanvas);
-}
 
 
 

@@ -9,7 +9,6 @@
 #include "../../../Lepra/Include/String.h"
 #include "../../../Lepra/Include/SystemManager.h"
 #include "../../Include/UiLepra.h"
-#include "../../Include/X11/UiX11DirectXDisplay.h"
 #include "../../Include/X11/UiX11OpenGLDisplay.h"
 
 
@@ -46,8 +45,6 @@ X11DisplayManager::X11DisplayManager() :
 	mMaximized(false),
 	mNormalWidth(0),
 	mNormalHeight(0),
-	mEnumeratedDisplayMode(0),
-	mEnumeratedDisplayModeCount(0),
 	mCaptionSet(false),
 	mConsumeChar(true)
 {
@@ -79,8 +76,6 @@ X11DisplayManager::~X11DisplayManager()
 	CloseScreen();
 
 	delete[] mEnumeratedDisplayMode;
-
-	Unregister();
 
 	ObserverSetTable::Iterator lTIter;
 	for (lTIter = mObserverSetTable.First();
@@ -133,7 +128,7 @@ void X11DisplayManager::SetCaption(const str& pCaption, bool pInternalCall)
 
 		if (pInternalCall == false || mCaptionSet == false)
 		{
-			::XStoreName(GetDisplay(), GetWindowHandle(), astrutil::ToOwnCode(pCaption));
+			::XStoreName(GetDisplay(), GetWindow(), astrutil::ToOwnCode(pCaption).c_str());
 		}
 	}
 }
@@ -213,8 +208,9 @@ bool X11DisplayManager::OpenScreen(const DisplayMode& pDisplayMode, ScreenMode p
 		lOk = mIsOpen = InitScreen();
 		if (mIsOpen)
 		{
-			AddObserver(WM_SIZE, this);
-			AddObserver(WM_SIZING, this);
+			// TODO: fix.
+			/*AddObserver(WM_SIZE, this);
+			AddObserver(WM_SIZING, this);*/
 		}
 	}
 
@@ -229,18 +225,10 @@ void X11DisplayManager::CloseScreen()
 		X11Core::RemoveDisplayManager(this);
 		RemoveObserver(this);
 
-		::DestroyWindow(mWnd);
+		::XUnmapWindow(GetDisplay(), GetWindow());
+		::XDestroyWindow(GetDisplay(), GetWindow());
 		mWnd = 0;
-
-		// Repaint the desktop to restore background.
-		RECT lRect;
-		::GetWindowRect(GetDesktopWindow(), &lRect);
-		::MoveWindow(GetDesktopWindow(), 
-			lRect.left, 
-			lRect.top, 
-			lRect.right - lRect.left, 
-			lRect.bottom - lRect.top, 
-			TRUE);
+		mDisplay = 0;
 	}
 }
 
@@ -253,7 +241,7 @@ bool X11DisplayManager::InitWindow()
 {
 	bool lOk = mIsOpen;
 
-	if (lOk)
+	/*if (lOk)
 	{
 		if (mDisplayMode.mWidth == 0 || mDisplayMode.mHeight == 0) 
 		{
@@ -322,254 +310,11 @@ bool X11DisplayManager::InitWindow()
 		{
 			mLog.AError("InitWindow() - Failed to create window.");
 		}
-	}
+	}*/
 
 	if (lOk)
 	{
 		X11Core::AddDisplayManager(this);
-	}
-
-	return lOk;
-}
-
-int X11DisplayManager::GetNumDisplayModes()
-{
-	return mEnumeratedDisplayModeCount;
-}
-
-int X11DisplayManager::GetNumDisplayModes(int pBitDepth)
-{
-	int lCount = 0;
-
-	for (int i = 0; i < mEnumeratedDisplayModeCount; i++)
-	{
-		if (mEnumeratedDisplayMode[i].mBitDepth == pBitDepth)
-		{
-			lCount++;
-		}
-	}
-
-	return lCount;
-}
-
-int X11DisplayManager::GetNumDisplayModes(int pWidth, int pHeight)
-{
-	int lCount = 0;
-
-	for (int i = 0; i < mEnumeratedDisplayModeCount; i++)
-	{
-		if (mEnumeratedDisplayMode[i].mWidth == pWidth &&
-		   mEnumeratedDisplayMode[i].mHeight == pHeight)
-		{
-			lCount++;
-		}
-	}
-
-	return lCount;
-}
-
-int X11DisplayManager::GetNumDisplayModes(int pWidth, int pHeight, int pBitDepth)
-{
-	int lCount = 0;
-
-	for (int i = 0; i < mEnumeratedDisplayModeCount; i++)
-	{
-		if (mEnumeratedDisplayMode[i].mWidth == pWidth &&
-		   mEnumeratedDisplayMode[i].mHeight == pHeight &&
-		   mEnumeratedDisplayMode[i].mBitDepth == pBitDepth)
-		{
-			lCount++;
-		}
-	}
-
-	return lCount;
-}
-
-bool X11DisplayManager::GetDisplayMode(DisplayMode& pDisplayMode, int pMode)
-{
-	bool lOk = false;
-	if (pMode >= 0 && pMode < mEnumeratedDisplayModeCount)
-	{
-		pDisplayMode.mWidth = mEnumeratedDisplayMode[pMode].mWidth;
-		pDisplayMode.mHeight = mEnumeratedDisplayMode[pMode].mHeight;
-		pDisplayMode.mBitDepth = mEnumeratedDisplayMode[pMode].mBitDepth;
-		pDisplayMode.mRefreshRate = mEnumeratedDisplayMode[pMode].mRefreshRate;
-
-		lOk = true;
-	}
-	return lOk;
-}
-
-bool X11DisplayManager::GetDisplayMode(DisplayMode& pDisplayMode, int pMode, int pBitDepth)
-{
-	int lCount = 0;
-	bool lOk = false;
-	for (int i = 0; i < mEnumeratedDisplayModeCount; i++)
-	{
-		if (mEnumeratedDisplayMode[i].mBitDepth == pBitDepth)
-		{
-			if (lCount == pMode)
-			{
-				pDisplayMode.mWidth = mEnumeratedDisplayMode[i].mWidth;
-				pDisplayMode.mHeight = mEnumeratedDisplayMode[i].mHeight;
-				pDisplayMode.mBitDepth = mEnumeratedDisplayMode[i].mBitDepth;
-				pDisplayMode.mRefreshRate = mEnumeratedDisplayMode[i].mRefreshRate;
-
-				lOk = true;
-				break;
-			}
-
-			lCount++;
-		}
-	}
-	return lOk;
-}
-
-bool X11DisplayManager::GetDisplayMode(DisplayMode& pDisplayMode, int pMode, int pWidth, int pHeight)
-{
-	int lCount = 0;
-	bool lOk = false;
-	for (int i = 0; i < mEnumeratedDisplayModeCount; i++)
-	{
-		if (mEnumeratedDisplayMode[i].mWidth == pWidth &&
-		   mEnumeratedDisplayMode[i].mHeight == pHeight)
-		{
-			if (lCount == pMode)
-			{
-				pDisplayMode.mWidth = mEnumeratedDisplayMode[i].mWidth;
-				pDisplayMode.mHeight = mEnumeratedDisplayMode[i].mHeight;
-				pDisplayMode.mBitDepth = mEnumeratedDisplayMode[i].mBitDepth;
-				pDisplayMode.mRefreshRate = mEnumeratedDisplayMode[i].mRefreshRate;
-
-				lOk = true;
-				break;
-			}
-
-			lCount++;
-		}
-	}
-	return lOk;
-}
-
-bool X11DisplayManager::GetDisplayMode(DisplayMode& pDisplayMode, int pMode, int pWidth, int pHeight, int pBitDepth)
-{
-	int lCount = 0;
-	bool lOk = false;
-	for (int i = 0; i < mEnumeratedDisplayModeCount; i++)
-	{
-		if (mEnumeratedDisplayMode[i].mWidth == pWidth &&
-		   mEnumeratedDisplayMode[i].mHeight == pHeight &&
-		   mEnumeratedDisplayMode[i].mBitDepth == pBitDepth)
-		{
-			if (lCount == pMode)
-			{
-				pDisplayMode.mWidth = mEnumeratedDisplayMode[i].mWidth;
-				pDisplayMode.mHeight = mEnumeratedDisplayMode[i].mHeight;
-				pDisplayMode.mBitDepth = mEnumeratedDisplayMode[i].mBitDepth;
-				pDisplayMode.mRefreshRate = mEnumeratedDisplayMode[i].mRefreshRate;
-
-				lOk = true;
-				break;
-			}
-
-			lCount++;
-		}
-	}
-	return lOk;
-}
-
-bool X11DisplayManager::FindDisplayMode(DisplayMode& pDisplayMode, int pWidth, int pHeight)
-{
-	bool lModeFound = false;
-
-	pDisplayMode.mWidth = 0;
-	pDisplayMode.mHeight = 0;
-	pDisplayMode.mBitDepth = 0;
-	pDisplayMode.mRefreshRate = 0;
-
-	for (int i = 0; i < mEnumeratedDisplayModeCount; i++)
-	{
-		if (mEnumeratedDisplayMode[i].mWidth == pWidth &&
-		   mEnumeratedDisplayMode[i].mHeight == pHeight)
-		{
-			if (mEnumeratedDisplayMode[i].mBitDepth == pDisplayMode.mBitDepth &&
-			   mEnumeratedDisplayMode[i].mRefreshRate > pDisplayMode.mRefreshRate)
-			{
-				pDisplayMode.mWidth = mEnumeratedDisplayMode[i].mWidth;
-				pDisplayMode.mHeight = mEnumeratedDisplayMode[i].mHeight;
-				pDisplayMode.mBitDepth = mEnumeratedDisplayMode[i].mBitDepth;
-				pDisplayMode.mRefreshRate = mEnumeratedDisplayMode[i].mRefreshRate;
-
-				lModeFound = true;
-			}
-			else if(mEnumeratedDisplayMode[i].mBitDepth > pDisplayMode.mBitDepth)
-			{
-				pDisplayMode.mWidth = mEnumeratedDisplayMode[i].mWidth;
-				pDisplayMode.mHeight = mEnumeratedDisplayMode[i].mHeight;
-				pDisplayMode.mBitDepth = mEnumeratedDisplayMode[i].mBitDepth;
-				pDisplayMode.mRefreshRate = mEnumeratedDisplayMode[i].mRefreshRate;
-
-				lModeFound = true;
-			}
-		}
-	}
-
-	return lModeFound;
-}
-
-bool X11DisplayManager::FindDisplayMode(DisplayMode& pDisplayMode, int pWidth, int pHeight, int pBitDepth)
-{
-	bool lModeFound = false;
-
-	pDisplayMode.mWidth = 0;
-	pDisplayMode.mHeight = 0;
-	pDisplayMode.mBitDepth = 0;
-	pDisplayMode.mRefreshRate = 0;
-
-	for (int i = 0; i < mEnumeratedDisplayModeCount; i++)
-	{
-		if (mEnumeratedDisplayMode[i].mWidth == pWidth &&
-		   mEnumeratedDisplayMode[i].mHeight == pHeight &&
-		   mEnumeratedDisplayMode[i].mBitDepth == pBitDepth)
-		{
-			if (mEnumeratedDisplayMode[i].mRefreshRate > pDisplayMode.mRefreshRate)
-			{
-				pDisplayMode.mWidth = mEnumeratedDisplayMode[i].mWidth;
-				pDisplayMode.mHeight = mEnumeratedDisplayMode[i].mHeight;
-				pDisplayMode.mBitDepth = mEnumeratedDisplayMode[i].mBitDepth;
-				pDisplayMode.mRefreshRate = mEnumeratedDisplayMode[i].mRefreshRate;
-
-				lModeFound = true;
-			}
-		}
-	}
-
-	return lModeFound;
-}
-
-bool X11DisplayManager::FindDisplayMode(DisplayMode& pDisplayMode, int pWidth, int pHeight, int pBitDepth, int pRefreshRate)
-{
-	pDisplayMode.mWidth = 0;
-	pDisplayMode.mHeight = 0;
-	pDisplayMode.mBitDepth = 0;
-	pDisplayMode.mRefreshRate = 0;
-
-	bool lOk = false;
-	for (int i = 0; i < mEnumeratedDisplayModeCount; i++)
-	{
-		if (mEnumeratedDisplayMode[i].mWidth == pWidth &&
-		   mEnumeratedDisplayMode[i].mHeight == pHeight &&
-		   mEnumeratedDisplayMode[i].mBitDepth == pBitDepth &&
-		   mEnumeratedDisplayMode[i].mRefreshRate == pRefreshRate)
-		{
-			pDisplayMode.mWidth = mEnumeratedDisplayMode[i].mWidth;
-			pDisplayMode.mHeight = mEnumeratedDisplayMode[i].mHeight;
-			pDisplayMode.mBitDepth = mEnumeratedDisplayMode[i].mBitDepth;
-			pDisplayMode.mRefreshRate = mEnumeratedDisplayMode[i].mRefreshRate;
-
-			lOk = true;
-			break;
-		}
 	}
 
 	return lOk;
@@ -583,7 +328,8 @@ void X11DisplayManager::GetBorderSize(int& pSizeX, int& pSizeY)
 		pSizeX = 0;
 		pSizeY = 0;
 	}
-	else if(mWnd != 0)
+	// TODO: implement!
+	/*else if(mWnd != 0)
 	{
 		// Use the safest way there is... Taking the difference between
 		// the size of the window and the size of the client area.
@@ -616,7 +362,7 @@ void X11DisplayManager::GetBorderSize(int& pSizeX, int& pSizeY)
 			pSizeY = ::GetSystemMetrics(SM_CYFIXEDFRAME) * 2 +
 					   ::GetSystemMetrics(SM_CYCAPTION);
 		}
-	}
+	}*/
 }
 
 int X11DisplayManager::GetWindowWidth(int pClientWidth)
@@ -665,9 +411,9 @@ Window X11DisplayManager::GetWindow() const
 	return mWnd;
 }
 
-LRESULT CALLBACK X11DisplayManager::WaitForNotify(Display* d, XEvent* e, char* arg)
+Bool X11DisplayManager::WaitForNotify(Display* d, XEvent* e, char* arg)
 {
-	if (pMessage  == WM_QUIT ||
+	/*if (pMessage  == WM_QUIT ||
 		pMessage == WM_DESTROY)
 	{
 		--msWindowCount;
@@ -688,12 +434,13 @@ LRESULT CALLBACK X11DisplayManager::WaitForNotify(Display* d, XEvent* e, char* a
 	{
 		lResult = DefWindowProc(pWnd, pMessage, pwParam, plParam);
 	}
-	return (lResult);
+	return (lResult);*/
+	return((e->type == MapNotify) && (e->xmap.window == (::Window)arg));
 }
 
-bool X11DisplayManager::InternalDispatchMessage(int pMessage, int pwParam, long plParam) 
+Bool X11DisplayManager::InternalDispatchMessage(XEvent* e)
 {
-	if (pMessage == WM_CHAR && mConsumeChar)
+	/*if (pMessage == WM_CHAR && mConsumeChar)
 	{
 		return (true);
 	}
@@ -713,31 +460,24 @@ bool X11DisplayManager::InternalDispatchMessage(int pMessage, int pwParam, long 
 	{
 		mConsumeChar = lConsumed;
 	}
-	return (lConsumed);
+	return (lConsumed);*/
+	return (0);
 }
 
 void X11DisplayManager::ProcessMessages()
 {
 	if (mWnd != 0)
 	{
-		MSG lMsg;
+		/*MSG lMsg;
 		while (::PeekMessage(&lMsg, mWnd, 0, 0, PM_REMOVE) == TRUE)
 		{
 			::TranslateMessage(&lMsg);
 			::DispatchMessage(&lMsg);
-		}
+		}*/
 	}
 }
 
-void X11DisplayManager::PostMessage(int pMsg, int pwParam, long plParam)
-{
-	if (mWnd != 0)
-	{
-		::PostMessage(mWnd, pMsg, pwParam, plParam);
-	}
-}
-
-void X11DisplayManager::AddObserver(unsigned int pMessage, X11Observer* pObserver)
+void X11DisplayManager::AddObserver(Window pMessage, X11Observer* pObserver)
 {
 	ObserverSetTable::Iterator lTIter = mObserverSetTable.Find(pMessage);
 	ObserverSet* lSet = 0;
@@ -759,7 +499,7 @@ void X11DisplayManager::AddObserver(unsigned int pMessage, X11Observer* pObserve
 	}
 }
 
-void X11DisplayManager::RemoveObserver(unsigned int pMessage, X11Observer* pObserver)
+void X11DisplayManager::RemoveObserver(Window pMessage, X11Observer* pObserver)
 {
 	ObserverSetTable::Iterator lTIter = mObserverSetTable.Find(pMessage);
 
@@ -805,25 +545,13 @@ void X11DisplayManager::RemoveObserver(X11Observer* pObserver)
 
 void X11DisplayManager::ShowMessageBox(const str& pMsg, const str& pCaption)
 {
-	::MessageBox(mWnd, pMsg.c_str(), pCaption.c_str(), MB_OK);
+	//::MessageBox(mWnd, pMsg.c_str(), pCaption.c_str(), MB_OK);
 }
 
-bool X11DisplayManager::OnMessage(int pMsg, int pwParam, long plParam)
+Bool X11DisplayManager::OnMessage(XEvent* e)
 {
-	switch(pMsg)
+	/*switch(pMsg)
 	{
-		case WM_SETCURSOR:
-		{
-/*			if (mScreenMode == FULLSCREEN)
-			{
-				::SetCursor(NULL);
-			}
-			else
-			{
-				::SetCursor(::LoadCursor(NULL, IDC_ARROW));
-			}
-*/
-		} break;
 		case WM_SIZING:
 		{
 			LPRECT lRect = (LPRECT)(uint64)plParam;
@@ -834,7 +562,8 @@ bool X11DisplayManager::OnMessage(int pMsg, int pwParam, long plParam)
 			DispatchResize(lClientWidth, lClientHeight);
 			mMinimized = false;
 			mMaximized = false;
-		} break;
+		}
+		break;
 		case WM_SIZE:
 		{
 			switch(pwParam)
@@ -872,21 +601,16 @@ bool X11DisplayManager::OnMessage(int pMsg, int pwParam, long plParam)
 					mMinimized = false;
 					mMaximized = false;
 				} break;
-			} // End switch(pwParam)
-
-			// Don't set lProcessed... Return false.
-		} // End case WM_SIZE:
-	} // End switch(pMsg)
-
-	return (false);
+			}
+		}
+		break;
+	}*/
+	return (0);
 }
 
 
 
 int X11DisplayManager::msWindowCount = 0;
-int X11DisplayManager::msRegisterCount = 0;
-HANDLE X11DisplayManager::mshThisInstance = 0;
-WNDCLASSEX X11DisplayManager::msWindowClass;
 LOG_CLASS_DEFINE(UI_GFX, X11DisplayManager);
 
 

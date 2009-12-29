@@ -243,6 +243,8 @@ def cleanall(targetdir=bindir, buildtype=defaulttype):
 def buildzip():
         verify_base_dir()
         buildtype = ziptype
+        #print(appname, osname, hwname, buildtype, datename)
+        #print(type(appname), type(osname), type(hwname), type(buildtype), type(datename))
         targetdir=appname+"."+osname+"."+hwname+"."+buildtype+"."+datename
         if buildtype == "rc":
                 targetdir = "PRE_RELEASE."+targetdir

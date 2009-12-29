@@ -4,10 +4,6 @@
 
 
 
-TODO: implement!
-
-
-
 #include "../../Include/X11/UiX11Input.h"
 #include "../../../Lepra/Include/Log.h"
 #include "../../Include/X11/UiX11Core.h"
@@ -22,8 +18,15 @@ namespace UiLepra
 
 InputManager* InputManager::CreateInputManager(DisplayManager* pDisplayManager)
 {
-	return (new X11InputManager((X11DisplayManager*)pDisplayManager));
+	//return (new X11InputManager((X11DisplayManager*)pDisplayManager));
+	return (0);
 }
+
+
+
+#if 0
+
+
 
 X11InputElement::X11InputElement(Type pType, Interpretation pInterpretation, int pTypeIndex,
 	X11InputDevice* pParentDevice, LPCDIDEVICEOBJECTINSTANCE pElement, unsigned pFieldOffset):
@@ -710,6 +713,10 @@ bool X11InputManager::IsInitialized()
 {
 	return mInitialized;
 }
+
+
+
+#endif // 0
 
 
 

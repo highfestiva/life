@@ -40,7 +40,7 @@ public:
 
 private:
 	static Lock* mLock;
-	typedef HashTable<Window, X11DisplayManager*, std::hash<void*> > WindowTable;
+	typedef HashTable<Window, X11DisplayManager*, std::hash<Window> > WindowTable;
 	static WindowTable mWindowTable;
 };
 

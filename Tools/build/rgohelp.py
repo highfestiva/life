@@ -30,8 +30,11 @@ def gethwname():
                         return "x86"
                 if ccver.find("64 bit") >= 0:
                         return "x64"
+        import subprocess
         machine = subprocess.Popen(["uname", "-m"], stdout=subprocess.PIPE).communicate()[0]
-        machine = machine.strip()
+        machine = str(machine.strip())
+        if machine.startswith("b'") and machine.endswith("'"):
+                machine = machine[2:-1]
         return machine
 
 

@@ -11,10 +11,6 @@
 
 
 
-TODO: implement!
-
-
-
 namespace UiLepra
 {
 
@@ -23,6 +19,9 @@ namespace UiLepra
 class X11DisplayManager;
 class X11InputDevice;
 
+
+
+#if 0
 
 
 
@@ -172,6 +171,10 @@ private:
 	InputDevice* mMouse;
 	int mTypeCount[InputDevice::TYPE_COUNT];
 };
+
+
+
+#endif // 0
 
 
 

@@ -35,11 +35,11 @@ void X11OpenGLDisplay::CloseScreen()
 		return;
 	}
 
-	if (IsFullScreen() == true)
+	/*if (IsFullScreen() == true)
 	{
 		TODO: port!
-		//::ChangeDisplaySettings(NULL, 0);
-	}
+		::ChangeDisplaySettings(NULL, 0);
+	}*/
 
 	DeleteGLContext();
 
@@ -48,7 +48,7 @@ void X11OpenGLDisplay::CloseScreen()
 
 bool X11OpenGLDisplay::Activate()
 {
-	bool lOk = ::glXMakeCurrent(GetDisplay(), GetWindowHandle(), mGlContext)
+	bool lOk = ::glXMakeCurrent(GetDisplay(), GetWindow(), mGlContext);
 	return (lOk);
 }
 
@@ -63,7 +63,7 @@ bool X11OpenGLDisplay::UpdateScreen()
 	// be updated.
 	GLboolean lScissorsEnabled = ::glIsEnabled(GL_SCISSOR_TEST);
 	::glDisable(GL_SCISSOR_TEST);
-	::glXSwapBuffers(GetDisplay(), GetWindowHandle());
+	::glXSwapBuffers(GetDisplay(), GetWindow());
 	if (lScissorsEnabled)
 	{
 		::glEnable(GL_SCISSOR_TEST);
@@ -114,7 +114,7 @@ void X11OpenGLDisplay::Deactivate()
 void X11OpenGLDisplay::OnResize(int pWidth, int pHeight)
 {
 	Resize(pWidth, pHeight);
-	TODO: X11 resize!
+	//TODO: X11 resize!
 	//::ShowWindow(mWnd, SW_SHOWNORMAL);
 	Activate();
 }
@@ -127,7 +127,7 @@ void X11OpenGLDisplay::Resize(int pWidth, int pHeight)
 		// given as parameters.
 		if (IsMinimized() == true)
 		{
-			TODO: something!
+			//TODO: something!
 			//::ChangeDisplaySettings(&lNewMode, CDS_FULLSCREEN);
 		}
 	}
@@ -147,18 +147,19 @@ void X11OpenGLDisplay::OnMinimize()
 
 	if (IsFullScreen() == true)
 	{
-		TODO: something!
+		//TODO: something!
 		//::ChangeDisplaySettings(NULL, 0);
 	}
 
-	::ShowWindow(mWnd, SW_MINIMIZE);
+	// TODO:
+	//::ShowWindow(mWnd, SW_MINIMIZE);
 }
 
 void X11OpenGLDisplay::OnMaximize(int pWidth, int pHeight)
 {
 	Resize(pWidth, pHeight);
-	TODO: port!
-	::ShowWindow(mWnd, SW_SHOWMAXIMIZED);
+	//TODO: port!
+	//::ShowWindow(mWnd, SW_SHOWMAXIMIZED);
 	Activate();
 }
 
@@ -166,7 +167,7 @@ bool X11OpenGLDisplay::InitScreen()
 {
 	UpdateCaption();
 
-TODO: port!
+/*TODO: port!
 
 	if (mScreenMode == FULLSCREEN)
 	{
@@ -231,10 +232,10 @@ TODO: port!
 	}
 
 	glEnable(GL_SCISSOR_TEST);
-	if (msContextUserCount == 1)
+	if (mContextUserCount == 1)
 	{
 		OpenGLExtensions::InitExtensions();
-	}
+	}*/
 
 	return true;
 }
@@ -250,15 +251,15 @@ void X11OpenGLDisplay::UpdateCaption()
 
 bool X11OpenGLDisplay::CreateGLContext()
 {
-	if (msGlContext == 0)
+	if (mGlContext == 0)
 	{
-		msGlContext = ::glXCreateContext(GetDisplay(), GetVisualInfo(), 0, GL_TRUE);
+		mGlContext = ::glXCreateContext(GetDisplay(), GetVisualInfo(), 0, GL_TRUE);
 	}
 
-	bool lOk = (msGlContext != 0);
+	bool lOk = (mGlContext != 0);
 	if (lOk)
 	{
-		++msContextUserCount;
+		++mContextUserCount;
 		lOk = Activate();
 	}
 	return (lOk);
@@ -266,21 +267,21 @@ bool X11OpenGLDisplay::CreateGLContext()
 
 void X11OpenGLDisplay::DeleteGLContext()
 {
-	if (msContextUserCount >= 1)
+	if (mContextUserCount >= 1)
 	{
-		--msContextUserCount;
+		--mContextUserCount;
 	}
-	if (msContextUserCount == 0)
+	if (mContextUserCount == 0)
 	{
 		::glXMakeCurrent(GetDisplay(), 0, 0);
-		::glXDestroyContext(GetDisplay(), msGlContext);
-		msGlContext = 0;
+		::glXDestroyContext(GetDisplay(), mGlContext);
+		mGlContext = 0;
 	}
 }
 
-XVisualInfo* X11OpenGLDisplay::GetVisualInfo()
+XVisualInfo* X11OpenGLDisplay::GetVisualInfo() const
 {
-	const int lX11AttributeList[] =
+	int lX11AttributeList[] =
 	{
 			GLX_RGBA, GLX_DOUBLEBUFFER,
 			GLX_RED_SIZE, 1,
@@ -288,7 +289,7 @@ XVisualInfo* X11OpenGLDisplay::GetVisualInfo()
 			GLX_BLUE_SIZE, 1,
 			None
 	};
-	return(::glXChooseVisual(GetDisplay(), ::DefaultScreen(GetDisplay()), lX11AttributeList));
+	return(::glXChooseVisual(GetDisplay(), DefaultScreen(GetDisplay()), lX11AttributeList));
 }
 
 
