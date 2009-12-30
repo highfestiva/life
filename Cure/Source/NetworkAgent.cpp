@@ -41,10 +41,10 @@ void NetworkAgent::SetPacketFactory(PacketFactory* pPacketFactory)
 	ScopeLock lLock(&mLock);
 	delete (mPacketFactory);
 	mPacketFactory = pPacketFactory;
-	if (mMuxSocket)
+	/*if (mMuxSocket)
 	{
 		mMuxSocket->SetDatagramReceiver(mPacketFactory);
-	}
+	}*/
 }
 
 PacketFactory* NetworkAgent::GetPacketFactory() const
@@ -66,24 +66,14 @@ bool NetworkAgent::IsOpen() const
 	return (mMuxSocket && mMuxSocket->IsOpen());
 }
 
-uint64 NetworkAgent::GetSentByteCount(bool pSafe) const
+uint64 NetworkAgent::GetSentByteCount() const
 {
-	return (mMuxSocket->GetSentByteCount(pSafe));
+	return (mMuxSocket->GetSentByteCount());
 }
 
-uint64 NetworkAgent::GetReceivedByteCount(bool pSafe) const
+uint64 NetworkAgent::GetReceivedByteCount() const
 {
-	return (mMuxSocket->GetReceivedByteCount(pSafe));
-}
-
-uint64 NetworkAgent::GetTotalSentByteCount() const
-{
-	return (mMuxSocket->GetSentByteCount(true)+mMuxSocket->GetSentByteCount(false));
-}
-
-uint64 NetworkAgent::GetTotalReceivedByteCount() const
-{
-	return (mMuxSocket->GetReceivedByteCount(true)+mMuxSocket->GetReceivedByteCount(false));
+	return (mMuxSocket->GetReceivedByteCount());
 }
 
 unsigned NetworkAgent::GetConnectionCount() const
@@ -92,7 +82,7 @@ unsigned NetworkAgent::GetConnectionCount() const
 }
 
 
-bool NetworkAgent::SendStatusMessage(GameSocket* pSocket, int32 pInteger, RemoteStatus pStatus, wstr pMessage, Packet* pPacket)
+bool NetworkAgent::SendStatusMessage(UdpVSocket* pSocket, int32 pInteger, RemoteStatus pStatus, wstr pMessage, Packet* pPacket)
 {
 	pPacket->Release();
 	MessageStatus* lStatus = (MessageStatus*)mPacketFactory->GetMessageFactory()->Allocate(MESSAGE_TYPE_STATUS);
@@ -102,7 +92,7 @@ bool NetworkAgent::SendStatusMessage(GameSocket* pSocket, int32 pInteger, Remote
 	return (lOk);
 }
 
-bool NetworkAgent::SendNumberMessage(bool pSafe, GameSocket* pSocket, Cure::MessageNumber::InfoType pInfo, int32 pInteger, float32 pFloat)
+bool NetworkAgent::SendNumberMessage(bool pSafe, UdpVSocket* pSocket, Cure::MessageNumber::InfoType pInfo, int32 pInteger, float32 pFloat)
 {
 	Packet* lPacket = mPacketFactory->Allocate();
 	MessageNumber* lNumber = (MessageNumber*)mPacketFactory->GetMessageFactory()->Allocate(MESSAGE_TYPE_NUMBER);
@@ -113,7 +103,7 @@ bool NetworkAgent::SendNumberMessage(bool pSafe, GameSocket* pSocket, Cure::Mess
 	return (lOk);
 }
 
-bool NetworkAgent::SendObjectFullPosition(GameSocket* pSocket, GameObjectId pInstanceId, int32 pFrameIndex, const ObjectPositionalData& pData)
+bool NetworkAgent::SendObjectFullPosition(UdpVSocket* pSocket, GameObjectId pInstanceId, int32 pFrameIndex, const ObjectPositionalData& pData)
 {
 	Packet* lPacket = mPacketFactory->Allocate();
 	MessageObjectPosition* lPosition = (MessageObjectPosition*)mPacketFactory->GetMessageFactory()->Allocate(MESSAGE_TYPE_OBJECT_POSITION);
@@ -124,7 +114,7 @@ bool NetworkAgent::SendObjectFullPosition(GameSocket* pSocket, GameObjectId pIns
 	return (lOk);
 }
 
-bool NetworkAgent::PlaceInSendBuffer(bool pSafe, GameSocket* pSocket, Packet* pPacket)
+bool NetworkAgent::PlaceInSendBuffer(bool /*pSafe*/, UdpVSocket* pSocket, Packet* pPacket)
 {
 	bool lOk = (pSocket != 0);
 
@@ -136,13 +126,13 @@ bool NetworkAgent::PlaceInSendBuffer(bool pSafe, GameSocket* pSocket, Packet* pP
 	// Try to append this packet to the existing packet buffer.
 	if (lOk)
 	{
-		lOk = pPacket->AppendToPacketBuffer(pSocket->GetSendBuffer(pSafe));
+		lOk = pPacket->AppendToPacketBuffer(pSocket->GetSendBuffer());
 	}
 	if (!lOk)
 	{
 		pPacket->StoreHeader();
 		// Buffer was full. We go for the socket way (send existing buffer, then copy this one for next send).
-		lOk = (pSocket->AppendSendBuffer(pSafe, pPacket->GetReadBuffer(), pPacket->GetPacketSize()) == IO_OK);
+		lOk = (pSocket->AppendSendBuffer(pPacket->GetReadBuffer(), pPacket->GetPacketSize()) == IO_OK);
 	}
 	if (!lOk)
 	{
@@ -151,14 +141,14 @@ bool NetworkAgent::PlaceInSendBuffer(bool pSafe, GameSocket* pSocket, Packet* pP
 	return (lOk);
 }
 
-void NetworkAgent::SetMuxSocket(GameMuxSocket* pSocket)
+void NetworkAgent::SetMuxSocket(UdpMuxSocket* pSocket)
 {
 	delete (mMuxSocket);
 	mMuxSocket = pSocket;
-	if (mMuxSocket)
+	/*if (mMuxSocket)
 	{
 		mMuxSocket->SetDatagramReceiver(mPacketFactory);
-	}
+	}*/
 }
 
 

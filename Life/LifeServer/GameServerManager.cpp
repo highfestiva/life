@@ -39,7 +39,7 @@ const int NETWORK_POSITIONAL_AHEAD_BUFFER_SIZE = PHYSICS_FPS/2;
 
 GameServerManager::GameServerManager(Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
 	InteractiveConsoleLogListener* pConsoleLogger):
-	Cure::GameManager(pVariableScope, pResourceManager, false),
+	Cure::GameManager(pVariableScope, pResourceManager),
 	mUserAccountManager(new Cure::MemoryUserAccountManager()),
 	mTerrainObject(0),
 	mBoxObject(0),
@@ -88,16 +88,17 @@ bool GameServerManager::Tick()
 	lOk = (lOk && Parent::EndTick());
 	GetResourceManager()->Tick();
 
-#ifdef LEPRA_DEBUG
-	static size_t lMaxLoginCount = 0;
-	size_t lUserCount = ListUsers().size();
-	lMaxLoginCount = (lUserCount > lMaxLoginCount)? lUserCount : lMaxLoginCount;
-	if (lMaxLoginCount > 0 && lUserCount == 0)
+	if (CURE_RTVAR_GETSET(GetVariableScope(), RTVAR_ALLLOGGEDOUT_AUTOSHUTDOWN, false))
 	{
-		mLog.AWarning("Server automatically shuts down in debug when all users have logged off.");
-		SystemManager::AddQuitRequest(+1);
+		static size_t lMaxLoginCount = 0;
+		size_t lUserCount = ListUsers().size();
+		lMaxLoginCount = (lUserCount > lMaxLoginCount)? lUserCount : lMaxLoginCount;
+		if (lMaxLoginCount > 0 && lUserCount == 0)
+		{
+			mLog.AWarning("Server automatically shuts down since rtvar active and all users now logged off.");
+			SystemManager::AddQuitRequest(+1);
+		}
 	}
-#endif // Debug.
 
 	return (lOk);
 }
@@ -592,19 +593,22 @@ void GameServerManager::OnLogin(Cure::UserConnection* pUserConnection)
 void GameServerManager::OnLogout(Cure::UserConnection* pUserConnection)
 {
 	assert(!GetNetworkAgent()->GetLock()->IsOwner());
+	Cure::GameObjectId lAvatarId = 0;
 	ScopeLock lTickLock(GetTickLock());
-	ScopeLock lNetLock(GetNetworkAgent()->GetLock());
+	{
+		ScopeLock lNetLock(GetNetworkAgent()->GetLock());
 
-	// TODO: logout with some timer, and also be able to reconnect the
-	// client with his/her avatar again if logged in within the time frame.
-	Client* lClient = GetClientByAccount(pUserConnection->GetAccountId());
-	assert(lClient);
-	Cure::GameObjectId lAvatarId = lClient->GetAvatarId();
-	assert(IsThreadSafe());
-	mAccountClientTable.Remove(pUserConnection->GetAccountId());
-	delete (lClient);
+		// TODO: logout with some timer, and also be able to reconnect the
+		// client with his/her avatar again if logged in within the time frame.
+		Client* lClient = GetClientByAccount(pUserConnection->GetAccountId());
+		assert(lClient);
+		lAvatarId = lClient->GetAvatarId();
+		assert(IsThreadSafe());
+		mAccountClientTable.Remove(pUserConnection->GetAccountId());
+		delete (lClient);
+		BroadcastDeleteObject(lAvatarId);
+	}
 	GetContext()->DeleteObject(lAvatarId);
-	BroadcastDeleteObject(lAvatarId);
 
 	mLog.Info(_T("User ") + wstrutil::ToCurrentCode(pUserConnection->GetLoginName()) + _T(" logged out."));
 }
@@ -888,7 +892,7 @@ void GameServerManager::BroadcastDeleteObject(Cure::GameObjectId pInstanceId)
 	for (; x != mAccountClientTable.End(); ++x)
 	{
 		const Client* lClient = x.GetObject();
-		GameSocket* lSocket = lClient->GetUserConnection()->GetSocket();
+		UdpVSocket* lSocket = lClient->GetUserConnection()->GetSocket();
 		if (lSocket)
 		{
 			GetNetworkAgent()->PlaceInSendBuffer(true, lSocket, lPacket);
@@ -975,8 +979,8 @@ void GameServerManager::BroadcastPacket(const Client* pExcludeClient, Cure::Pack
 #ifdef LEPRA_DEBUG
 TBC::PhysicsManager* GameServerManager::GetPhysicsManager() const
 {
-	assert(GetTickLock()->IsOwner());
-	assert(!GetNetworkAgent()->GetLock()->IsOwner());
+	assert(!GetNetworkAgent()->GetLock()->IsOwner() ||
+		(GetNetworkAgent()->GetLock()->IsOwner() && GetTickLock()->IsOwner()));
 	return Parent::GetPhysicsManager();
 }
 #endif // Debug mode

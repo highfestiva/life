@@ -917,7 +917,7 @@ void TcpMuxSocket::PushReceiverSockets(const FdSet& pSocketSet)
 		if (FD_ISSET(lSysSocket, LEPRA_FDS(&pSocketSet)))
 		{
 			TcpVSocket* lSocket = y->second;
-			log_adebug("Adding receiver socket. Does this mean disconnected client?");
+			log_adebug("Adding receiver socket.");
 			AddReceiverNoLock(lSocket);
 			lAdded = true;
 		}
@@ -1602,9 +1602,22 @@ int UdpVSocket::DirectSend(const void* pData, int pLength)
 	return (((UdpMuxSocket*)mMuxIo)->SendTo((const uint8*)pData, pLength, mTargetAddress));
 }
 
+const SocketAddress& UdpVSocket::GetLocalAddress() const
+{
+	return (((UdpMuxSocket*)mMuxIo)->GetLocalAddress());
+}
+
 const SocketAddress& UdpVSocket::GetTargetAddress() const
 {
 	return (mTargetAddress);
+}
+
+void UdpVSocket::TryAddReceiverSocket()
+{
+	if (NeedInputPeek())
+	{
+		((UdpMuxSocket*)mMuxIo)->AddReceiver(this);
+	}
 }
 
 void UdpVSocket::AddInputBuffer(Datagram* pBuffer)
@@ -1731,19 +1744,19 @@ LOG_CLASS_DEFINE(NETWORK, UdpVSocket);
 
 
 
-GameMuxSocket::GameMuxSocket(const str& pName, const SocketAddress& pLocalAddress, bool pIsServer,
+DualMuxSocket::DualMuxSocket(const str& pName, const SocketAddress& pLocalAddress, bool pIsServer,
 	unsigned pMaxPendingConnectionCount, unsigned pMaxConnectionCount):
 	mTcpMuxSocket(new TcpMuxSocket(pName, pLocalAddress, pIsServer, pMaxConnectionCount)),
 	mUdpMuxSocket(new UdpMuxSocket(pName, pLocalAddress, pMaxPendingConnectionCount, pMaxConnectionCount)),
 	mConnectDualTimeout(DEFAULT_CONNECT_DUAL_TIMEOUT)
 {
-	mTcpMuxSocket->SetCloseCallback(this, &GameMuxSocket::OnCloseTcpSocket);
-	log_atrace("GameMuxSocket()");
+	mTcpMuxSocket->SetCloseCallback(this, &DualMuxSocket::OnCloseTcpSocket);
+	log_atrace("DualMuxSocket()");
 }
 
-GameMuxSocket::~GameMuxSocket()
+DualMuxSocket::~DualMuxSocket()
 {
-	log_atrace("~GameMuxSocket()");
+	log_atrace("~DualMuxSocket()");
 
 	ScopeLock lLock(&mLock);
 	while (!mIdSocketMap.empty())
@@ -1757,13 +1770,13 @@ GameMuxSocket::~GameMuxSocket()
 	mUdpMuxSocket = 0;
 }
 
-bool GameMuxSocket::IsOpen() const
+bool DualMuxSocket::IsOpen() const
 {
 	ScopeLock lLock(&mLock);
 	return (mTcpMuxSocket && mUdpMuxSocket && mTcpMuxSocket->IsOpen() && mUdpMuxSocket->IsOpen());
 }
 
-GameSocket* GameMuxSocket::Connect(const SocketAddress& pTargetAddress, double pTimeout)
+DualSocket* DualMuxSocket::Connect(const SocketAddress& pTargetAddress, double pTimeout)
 {
 	// Simulatanously connect TCP and UDP.
 	ScopeLock lLock(&mLock);
@@ -1780,10 +1793,10 @@ GameSocket* GameMuxSocket::Connect(const SocketAddress& pTargetAddress, double p
 		lUdpConnector.Join();
 		lTcpConnector.Join();	// Join TCP last, in hope that it'll have made it through.
 	}
-	GameSocket* lSocket = 0;
+	DualSocket* lSocket = 0;
 	if (lTcpConnector.mSocket && lUdpConnector.mSocket)
 	{
-		lSocket = new GameSocket(this, lConnectionId);
+		lSocket = new DualSocket(this, lConnectionId);
 		AddSocket(lSocket, lTcpConnector.mSocket, lUdpConnector.mSocket);
 	}
 	else
@@ -1800,7 +1813,7 @@ GameSocket* GameMuxSocket::Connect(const SocketAddress& pTargetAddress, double p
 	return (lSocket);
 }
 
-void GameMuxSocket::Close()
+void DualMuxSocket::Close()
 {
 	ScopeLock lLock(&mLock);
 	if (mTcpMuxSocket)
@@ -1813,16 +1826,16 @@ void GameMuxSocket::Close()
 	}
 }
 
-GameSocket* GameMuxSocket::PollAccept()
+DualSocket* DualMuxSocket::PollAccept()
 {
 	ScopeLock lLock(&mLock);
 
 	// Slaughter old single-sided-connector (ONLY TCP or ONLY UDP).
 	KillNonDualConnected();
 
-	GameSocket* lSocket = 0;
+	DualSocket* lSocket = 0;
 
-	// Try to connect TCP to an existing GameSocket, or create a new one.
+	// Try to connect TCP to an existing DualSocket, or create a new one.
 	TcpVSocket* lTcpSocket = mTcpMuxSocket->PollAccept();
 	if (lTcpSocket)
 	{
@@ -1836,14 +1849,14 @@ GameSocket* GameMuxSocket::PollAccept()
 		else
 		{
 			// TCP is first.
-			lSocket = new GameSocket(this, lTcpSocket->GetConnectionId());
+			lSocket = new DualSocket(this, lTcpSocket->GetConnectionId());
 			AddSocket(lSocket, lTcpSocket, 0);
 		}
 	}
 
 	if (!lTcpSocket)
 	{
-		// Try to connect UDP to an existing GameSocket, or create a new one.
+		// Try to connect UDP to an existing DualSocket, or create a new one.
 		UdpVSocket* lUdpSocket = mUdpMuxSocket->PollAccept();
 		if (lUdpSocket)
 		{
@@ -1857,7 +1870,7 @@ GameSocket* GameMuxSocket::PollAccept()
 			else
 			{
 				// UDP is first.
-				lSocket = new GameSocket(this, lUdpSocket->GetConnectionId());
+				lSocket = new DualSocket(this, lUdpSocket->GetConnectionId());
 				AddSocket(lSocket, 0, lUdpSocket);
 			}
 		}
@@ -1871,11 +1884,11 @@ GameSocket* GameMuxSocket::PollAccept()
 	return (lSocket);
 }
 
-GameSocket* GameMuxSocket::PopReceiverSocket(bool pSafe)
+DualSocket* DualMuxSocket::PopReceiverSocket(bool pSafe)
 {
 	ScopeLock lLock(&mLock);
 
-	GameSocket* lSocket = 0;
+	DualSocket* lSocket = 0;
 
 	if (pSafe)
 	{
@@ -1903,11 +1916,11 @@ GameSocket* GameMuxSocket::PopReceiverSocket(bool pSafe)
 	return (lSocket);
 }
 
-GameSocket* GameMuxSocket::PopSenderSocket()
+DualSocket* DualMuxSocket::PopSenderSocket()
 {
 	ScopeLock lLock(&mLock);
 
-	GameSocket* lSocket = 0;
+	DualSocket* lSocket = 0;
 
 	//if (!lSocket)
 	{
@@ -1930,7 +1943,7 @@ GameSocket* GameMuxSocket::PopSenderSocket()
 	return (lSocket);
 }
 
-uint64 GameMuxSocket::GetSentByteCount(bool pSafe) const
+uint64 DualMuxSocket::GetSentByteCount(bool pSafe) const
 {
 	ScopeLock lLock(&mLock);
 
@@ -1946,7 +1959,7 @@ uint64 GameMuxSocket::GetSentByteCount(bool pSafe) const
 	return (lCount);
 }
 
-uint64 GameMuxSocket::GetReceivedByteCount(bool pSafe) const
+uint64 DualMuxSocket::GetReceivedByteCount(bool pSafe) const
 {
 	ScopeLock lLock(&mLock);
 
@@ -1962,7 +1975,7 @@ uint64 GameMuxSocket::GetReceivedByteCount(bool pSafe) const
 	return (lCount);
 }
 
-SocketAddress GameMuxSocket::GetLocalAddress() const
+SocketAddress DualMuxSocket::GetLocalAddress() const
 {
 	if (mTcpMuxSocket)
 	{
@@ -1977,28 +1990,28 @@ SocketAddress GameMuxSocket::GetLocalAddress() const
 	return (SocketAddress());
 }
 
-unsigned GameMuxSocket::GetConnectionCount() const
+unsigned DualMuxSocket::GetConnectionCount() const
 {
 	ScopeLock lLock(&mLock);
 	return ((unsigned)mIdSocketMap.size());
 }
 
-void GameMuxSocket::SetSafeConnectIdTimeout(double pTimeout)
+void DualMuxSocket::SetSafeConnectIdTimeout(double pTimeout)
 {
 	mTcpMuxSocket->SetConnectIdTimeout(pTimeout);
 }
 
-void GameMuxSocket::SetConnectDualTimeout(double pTimeout)
+void DualMuxSocket::SetConnectDualTimeout(double pTimeout)
 {
 	mConnectDualTimeout = pTimeout;
 }
 
-void GameMuxSocket::SetDatagramReceiver(DatagramReceiver* pReceiver)
+void DualMuxSocket::SetDatagramReceiver(DatagramReceiver* pReceiver)
 {
 	mTcpMuxSocket->SetDatagramReceiver(pReceiver);
 }
 
-void GameMuxSocket::CloseSocket(GameSocket* pSocket)
+void DualMuxSocket::CloseSocket(DualSocket* pSocket)
 {
 	ScopeLock lLock(&mLock);
 	if (HashUtil::FindMapObject(mIdSocketMap, pSocket->GetConnectionId()) == pSocket)
@@ -2021,7 +2034,7 @@ void GameMuxSocket::CloseSocket(GameSocket* pSocket)
 	}
 }
 
-void GameMuxSocket::DispatchCloseSocket(GameSocket* pSocket)
+void DualMuxSocket::DispatchCloseSocket(DualSocket* pSocket)
 {
 	if (!mCloseDispatcher.empty())
 	{
@@ -2030,14 +2043,14 @@ void GameMuxSocket::DispatchCloseSocket(GameSocket* pSocket)
 	CloseSocket(pSocket);
 }
 
-void GameMuxSocket::AddUdpReceiverSocket(UdpVSocket* pUdpSocket)
+void DualMuxSocket::AddUdpReceiverSocket(UdpVSocket* pUdpSocket)
 {
 	ScopeLock lLock(&mLock);
 	assert(HashUtil::FindMapObject(mUdpSocketMap, pUdpSocket));
 	mUdpMuxSocket->AddReceiver(pUdpSocket);
 }
 
-void GameMuxSocket::AddSocket(GameSocket* pSocket, TcpVSocket* pTcpSocket, UdpVSocket* pUdpSocket)
+void DualMuxSocket::AddSocket(DualSocket* pSocket, TcpVSocket* pTcpSocket, UdpVSocket* pUdpSocket)
 {
 	if (pTcpSocket && pUdpSocket)
 	{
@@ -2047,42 +2060,42 @@ void GameMuxSocket::AddSocket(GameSocket* pSocket, TcpVSocket* pTcpSocket, UdpVS
 	{
 		assert(!HashUtil::FindMapObject(mTcpSocketMap, pTcpSocket));
 		pSocket->SetSocket(pTcpSocket);
-		mTcpSocketMap.insert(std::pair<TcpVSocket*, GameSocket*>(pTcpSocket, pSocket));
+		mTcpSocketMap.insert(std::pair<TcpVSocket*, DualSocket*>(pTcpSocket, pSocket));
 	}
 	if (pUdpSocket)
 	{
 		assert(!HashUtil::FindMapObject(mUdpSocketMap, pUdpSocket));
 		pSocket->SetSocket(pUdpSocket);
-		mUdpSocketMap.insert(std::pair<UdpVSocket*, GameSocket*>(pUdpSocket, pSocket));
+		mUdpSocketMap.insert(std::pair<UdpVSocket*, DualSocket*>(pUdpSocket, pSocket));
 	}
 	if (!HashUtil::FindMapObject(mIdSocketMap, pSocket->GetConnectionId()))
 	{
-		log_trace(_T("Adding GameSocket with ID ")+
+		log_trace(_T("Adding DualSocket with ID ")+
 			astrutil::ToCurrentCode(astrutil::ReplaceCtrlChars(pSocket->GetConnectionId(), '.'))+
 			(pSocket->GetTcpSocket()?_T(" TCP set,"):_T(" no TCP,"))+str()+
 			(pSocket->GetUdpSocket()?_T(" UDP set."):_T(" no UDP.")));
-		mIdSocketMap.insert(std::pair<std::string, GameSocket*>(pSocket->GetConnectionId(), pSocket));
+		mIdSocketMap.insert(std::pair<std::string, DualSocket*>(pSocket->GetConnectionId(), pSocket));
 	}
 	else
 	{
-		log_debug(_T("Appending info to GameSocket with ID ")+
+		log_debug(_T("Appending info to DualSocket with ID ")+
 			astrutil::ToCurrentCode(astrutil::ReplaceCtrlChars(pSocket->GetConnectionId(), '.')) +
 			(pSocket->GetTcpSocket()?_T(" TCP set,"):_T(" no TCP,"))+str()+
 			(pSocket->GetUdpSocket()?_T(" UDP set."):_T(" no UDP.")));
 	}
 	if (!pSocket->GetTcpSocket() || !pSocket->GetUdpSocket())
 	{
-		log_atrace("Adding a not-yet-fully-connected GameSocket to 'pending dual' list.");
+		log_atrace("Adding a not-yet-fully-connected DualSocket to 'pending dual' list.");
 		mPendingDualConnectMap.PushBack(pSocket, Timer());
 	}
 	else
 	{
-		log_atrace("Dropping a fully connected GameSocket from 'pending dual' list.");
+		log_atrace("Dropping a fully connected DualSocket from 'pending dual' list.");
 		mPendingDualConnectMap.Remove(pSocket);
 	}
 }
 
-void GameMuxSocket::KillNonDualConnected()
+void DualMuxSocket::KillNonDualConnected()
 {
 	for (SocketTimeMap::Iterator x = mPendingDualConnectMap.First(); x != mPendingDualConnectMap.End();)
 	{
@@ -2091,7 +2104,7 @@ void GameMuxSocket::KillNonDualConnected()
 		if (lTime.GetTimeDiffF() >= mConnectDualTimeout)
 		{
 			log_adebug("Connected socket dual-timed out => dropped.");
-			GameSocket* lSocket = x.GetKey();
+			DualSocket* lSocket = x.GetKey();
 			++x;	// Must be increased before we close the socket (implicitly removes it from the table).
 			CloseSocket(lSocket);
 		}
@@ -2102,9 +2115,9 @@ void GameMuxSocket::KillNonDualConnected()
 	}
 }
 
-void GameMuxSocket::OnCloseTcpSocket(TcpVSocket* pTcpSocket)
+void DualMuxSocket::OnCloseTcpSocket(TcpVSocket* pTcpSocket)
 {
-	GameSocket* lSocket;
+	DualSocket* lSocket;
 	{
 		ScopeLock lLock(&mLock);
 		lSocket = HashUtil::FindMapObject(mTcpSocketMap, pTcpSocket);
@@ -2115,23 +2128,23 @@ void GameMuxSocket::OnCloseTcpSocket(TcpVSocket* pTcpSocket)
 	}
 }
 
-const double GameMuxSocket::DEFAULT_CONNECT_DUAL_TIMEOUT = 5.0;
+const double DualMuxSocket::DEFAULT_CONNECT_DUAL_TIMEOUT = 5.0;
 
-LOG_CLASS_DEFINE(NETWORK, GameMuxSocket);
+LOG_CLASS_DEFINE(NETWORK, DualMuxSocket);
 
 
 
-GameSocket::GameSocket(GameMuxSocket* pMuxSocket, const std::string& pConnectionId):
+DualSocket::DualSocket(DualMuxSocket* pMuxSocket, const std::string& pConnectionId):
 	ConnectionWithId(),
 	mMuxSocket(pMuxSocket),
 	mTcpSocket(0),
 	mUdpSocket(0)
 {
-	log_atrace("GameSocket()");
+	log_atrace("DualSocket()");
 	SetConnectionId(pConnectionId);
 }
 
-bool GameSocket::SetSocket(TcpVSocket* pSocket)
+bool DualSocket::SetSocket(TcpVSocket* pSocket)
 {
 	bool lOk = (!mTcpSocket);
 	assert(lOk);
@@ -2142,7 +2155,7 @@ bool GameSocket::SetSocket(TcpVSocket* pSocket)
 	return (lOk);
 }
 
-bool GameSocket::SetSocket(UdpVSocket* pSocket)
+bool DualSocket::SetSocket(UdpVSocket* pSocket)
 {
 	bool lOk = (!mUdpSocket);
 	assert(lOk);
@@ -2153,19 +2166,19 @@ bool GameSocket::SetSocket(UdpVSocket* pSocket)
 	return (lOk);
 }
 
-bool GameSocket::IsOpen() const
+bool DualSocket::IsOpen() const
 {
 	return (mTcpSocket && mUdpSocket && mTcpSocket->IsOpen() && mMuxSocket->IsOpen());
 }
 
-void GameSocket::ClearAll()
+void DualSocket::ClearAll()
 {
 	mTcpSocket = 0;
 	mUdpSocket = 0;
 	ClearConnectionId();
 }
 
-SocketAddress GameSocket::GetLocalAddress() const
+SocketAddress DualSocket::GetLocalAddress() const
 {
 	if (mMuxSocket)
 	{
@@ -2175,7 +2188,7 @@ SocketAddress GameSocket::GetLocalAddress() const
 	return (SocketAddress());
 }
 
-SocketAddress GameSocket::GetTargetAddress() const
+SocketAddress DualSocket::GetTargetAddress() const
 {
 	if (mTcpSocket)
 	{
@@ -2190,7 +2203,7 @@ SocketAddress GameSocket::GetTargetAddress() const
 	return (SocketAddress());
 }
 
-void GameSocket::ClearOutputData()
+void DualSocket::ClearOutputData()
 {
 	if (mTcpSocket)
 	{
@@ -2202,7 +2215,7 @@ void GameSocket::ClearOutputData()
 	}
 }
 
-Datagram& GameSocket::GetSendBuffer(bool pSafe) const
+Datagram& DualSocket::GetSendBuffer(bool pSafe) const
 {
 	if (pSafe)
 	{
@@ -2214,7 +2227,7 @@ Datagram& GameSocket::GetSendBuffer(bool pSafe) const
 	}
 }
 
-IOError GameSocket::AppendSendBuffer(bool pSafe, const void* pData, int pLength)
+IOError DualSocket::AppendSendBuffer(bool pSafe, const void* pData, int pLength)
 {
 	IOError lSendResult = IO_OK;
 	if (pSafe)
@@ -2228,7 +2241,7 @@ IOError GameSocket::AppendSendBuffer(bool pSafe, const void* pData, int pLength)
 	return (lSendResult);
 }
 
-int GameSocket::SendBuffer()
+int DualSocket::SendBuffer()
 {
 	int lTcpSentCount = 0;
 	if (mTcpSocket && !mTcpSocket->GetInSenderList())	// If it is in the sender list, it will be served later.
@@ -2250,12 +2263,12 @@ int GameSocket::SendBuffer()
 	return (lSentCount);
 }
 
-bool GameSocket::HasSendData() const
+bool DualSocket::HasSendData() const
 {
 	return (mTcpSocket->HasSendData() || mUdpSocket->HasSendData());
 }
 
-int GameSocket::Receive(bool pSafe, void* pData, int pLength)
+int DualSocket::Receive(bool pSafe, void* pData, int pLength)
 {
 	int lReceiveCount;
 	if (pSafe)
@@ -2271,7 +2284,7 @@ int GameSocket::Receive(bool pSafe, void* pData, int pLength)
 	return (lReceiveCount);
 }
 
-void GameSocket::TryAddReceiverSocket()
+void DualSocket::TryAddReceiverSocket()
 {
 	// TODO: add TCP receiver socket...
 	if (mUdpSocket->NeedInputPeek())
@@ -2280,24 +2293,24 @@ void GameSocket::TryAddReceiverSocket()
 	}
 }
 
-GameSocket::~GameSocket()
+DualSocket::~DualSocket()
 {
-	log_atrace("~GameSocket()");
+	log_atrace("~DualSocket()");
 	ClearAll();
 	mMuxSocket = 0;
 }
 
-TcpVSocket* GameSocket::GetTcpSocket() const
+TcpVSocket* DualSocket::GetTcpSocket() const
 {
 	return (mTcpSocket);
 }
 
-UdpVSocket* GameSocket::GetUdpSocket() const
+UdpVSocket* DualSocket::GetUdpSocket() const
 {
 	return (mUdpSocket);
 }
 
-LOG_CLASS_DEFINE(NETWORK, GameSocket);
+LOG_CLASS_DEFINE(NETWORK, DualSocket);
 
 
 

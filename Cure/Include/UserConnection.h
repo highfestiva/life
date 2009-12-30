@@ -27,13 +27,13 @@ public:
 	void SetLoginName(const wstr& pName);
 	UserAccount::AccountId GetAccountId() const;
 	void SetAccountId(UserAccount::AccountId pId);
-	GameSocket* GetSocket() const;
-	void SetSocket(GameSocket* pSocket);
+	UdpVSocket* GetSocket() const;
+	void SetSocket(UdpVSocket* pSocket);
 
 private:
 	wstr mName;
 	UserAccount::AccountId mAccountId;
-	GameSocket* mSocket;
+	UdpVSocket* mSocket;
 };
 
 

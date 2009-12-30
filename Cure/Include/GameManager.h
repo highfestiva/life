@@ -45,8 +45,7 @@ public:
 class GameManager
 {
 public:
-	GameManager(RuntimeVariableScope* pVariableScope, ResourceManager* pResourceManager,
-		bool pForceSynchronous);
+	GameManager(RuntimeVariableScope* pVariableScope, ResourceManager* pResourceManager);
 	virtual ~GameManager();
 
 	void ResetPhysicsTime(int pStartPhysicsFrame);

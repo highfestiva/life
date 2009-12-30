@@ -35,7 +35,7 @@ void GameTicker::Profile()
 
 
 
-GameManager::GameManager(RuntimeVariableScope* pVariableScope, ResourceManager* pResourceManager, bool pForceSynchronous):
+GameManager::GameManager(RuntimeVariableScope* pVariableScope, ResourceManager* pResourceManager):
 	mIsThreadSafe(true),
 	mVariableScope(pVariableScope),
 	mResource(pResourceManager),
@@ -50,11 +50,6 @@ GameManager::GameManager(RuntimeVariableScope* pVariableScope, ResourceManager* 
 	mPhysicsTickDoneSemaphore(0)
 {
 	mContext = new ContextManager(this);
-
-	if (!pForceSynchronous)
-	{
-		CreatePhysicsThread();
-	}
 }
 
 GameManager::~GameManager()
@@ -93,6 +88,15 @@ bool GameManager::BeginTick()
 	{
 		const double lReportInterval = CURE_RTVAR_GET(GetVariableScope(), RTVAR_PERFORMANCE_TEXT_INTERVAL, 10.0);
 		TryReportPerformance(lReportInterval);
+	}
+
+	if (CURE_RTVAR_GET(GetVariableScope(), RTVAR_PHYSICS_PARALLEL, true))
+	{
+		CreatePhysicsThread();
+	}
+	else
+	{
+		DeletePhysicsThread();
 	}
 
 	GetTickLock()->Acquire();
@@ -253,8 +257,8 @@ void GameManager::TryReportPerformance(double pReportInterval)
 
 		if (mNetwork->IsOpen())
 		{
-			mSendBandwidth.Append(lTimeDiff, 0, mNetwork->GetTotalSentByteCount());
-			mReceiveBandwidth.Append(lTimeDiff, 0, mNetwork->GetTotalReceivedByteCount());
+			mSendBandwidth.Append(lTimeDiff, 0, mNetwork->GetSentByteCount());
+			mReceiveBandwidth.Append(lTimeDiff, 0, mNetwork->GetReceivedByteCount());
 			mLog.Performancef(_T("Network bandwith. Up: %sB/s (peak %sB/s). Down: %sB/s (peak %sB/s)."), 
 				Number::ConvertToPostfixNumber(mSendBandwidth.GetLast(), 2).c_str(),
 				Number::ConvertToPostfixNumber(mSendBandwidth.GetMaximum(), 2).c_str(),
@@ -343,7 +347,6 @@ void GameManager::StartPhysicsTick()
 	}
 	else
 	{
-		mPhysics->InitCurrentThread();
 		PhysicsTick();
 	}
 }
@@ -366,6 +369,8 @@ void GameManager::WaitPhysicsTick()
 void GameManager::PhysicsTick()
 {
 	LEPRA_MEASURE_SCOPE(Physics);
+
+	mPhysics->InitCurrentThread();
 
 	const int lMicroSteps = CURE_RTVAR_GET(GetVariableScope(), RTVAR_PHYSICS_MICROSTEPS, 3);
 	const int lAffordedStepCount = mTime->GetAffordedPhysicsStepCount() * lMicroSteps;
@@ -453,10 +458,8 @@ void GameManager::PhysicsThreadEntry()
 void GameManager::CreatePhysicsThread()
 {
 	// If we have more than one CPU, we run a separate physics thread.
-	if (SystemManager::GetLogicalCpuCount() > 1)	// TODO: check performance to see if we should check for logical or physical CPUs.
+	if (!mPhysicsWorkerThread && SystemManager::GetLogicalCpuCount() > 1)	// TODO: check performance to see if we should check for logical or physical CPUs.
 	{
-		assert(!mPhysicsWorkerThread);
-
 		mPhysicsTickStartSemaphore = new Semaphore();
 		mPhysicsTickDoneSemaphore = new Semaphore();
 

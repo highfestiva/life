@@ -110,7 +110,13 @@ Packet::ParseResult Packet::Parse(unsigned pOffset)
 	}
 	if (!lOk)
 	{
-		mLog.Errorf(_T("Received a bad network packet (length=%u)!"), mPacketSize);
+		mLog.Errorf(_T("Received a bad network packet (length=%u, offset=%u)!"), mPacketSize, pOffset);
+		if (mPacketSize < 100)
+		{
+			mLog.Errorf(_T("  DATA: %s\n  STR:  %s"),
+				strutil::DumpData(lData, mPacketSize).c_str(),
+				astrutil::ToCurrentCode(astrutil::ReplaceCtrlChars(astr((const char*)lData, mPacketSize), '.')).c_str());
+		}
 	}
 	return (lOk? PARSE_OK : PARSE_ERROR);
 }

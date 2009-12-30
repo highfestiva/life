@@ -125,8 +125,8 @@ private:
 
 	// Network transmission and keepalive info.
 	Cure::GameObjectId mAvatarId;
-	uint64 mLastUnsafeSentByteCount;
-	Timer mLastUnsafeSendTime;
+	uint64 mLastSentByteCount;
+	Timer mLastSendTime;
 	int mPingAttemptCount;
 	Timer mLastUnsafeReceiveTime;
 	Alarm mCollisionExpireAlarm;

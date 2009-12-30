@@ -44,3 +44,4 @@
 
 #define RTVAR_PHYSICS_FPS			"Physics.FPS"
 #define RTVAR_PHYSICS_MICROSTEPS		"Physics.MicroSteps"
+#define RTVAR_PHYSICS_PARALLEL			"Physics.Parallel"

@@ -29,6 +29,8 @@
 
 #define RTVAR_NETWORK_LISTEN_ADDRESS	"Network.Listen.Address"
 
+#define RTVAR_ALLLOGGEDOUT_AUTOSHUTDOWN	"AllLoggedOut.AutoShutdown"
+
 // Internal use only.
 #define RTVAR_DEBUG_ENABLE		"Debug.Enable"
 #define RTVAR_DEBUG_3D_ENABLEAXES	"Debug.3D.EnableAxes"

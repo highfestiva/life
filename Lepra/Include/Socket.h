@@ -468,8 +468,10 @@ public:
 	int SendBuffer();	// ::send() return value.
 	int DirectSend(const void* pData, int pLength);	// Writes buffer, flushes.
 
+	const SocketAddress& GetLocalAddress() const;
 	const SocketAddress& GetTargetAddress() const;
 
+	void TryAddReceiverSocket();
 	void AddInputBuffer(Datagram* pBuffer);
 	bool NeedInputPeek() const;
 	void SetReceiverFollowupActive(bool pActive);
@@ -502,35 +504,35 @@ private:
 
 
 
-class GameSocket;
+class DualSocket;
 
 //
 // The dream of all game programmers! =)
 // A multiplexing socket that works over both UDP and TCP at the same time, over only
 // one socket address!
-class GameMuxSocket
+class DualMuxSocket
 {
 public:
-	GameMuxSocket(const str& pName, const SocketAddress& pLocalAddress, bool pIsServer,
+	DualMuxSocket(const str& pName, const SocketAddress& pLocalAddress, bool pIsServer,
 		unsigned pMaxPendingConnectionCount = 16, unsigned pMaxConnectionCount = 256);
-	virtual ~GameMuxSocket();
+	virtual ~DualMuxSocket();
 
 	bool IsOpen() const;
 
-	GameSocket* Connect(const SocketAddress& pTargetAddress, double pTimeout);
+	DualSocket* Connect(const SocketAddress& pTargetAddress, double pTimeout);
 
 	void Close();
-	void CloseSocket(GameSocket* pSocket);
+	void CloseSocket(DualSocket* pSocket);
 
-	template<class _Base> void SetCloseCallback(_Base* pCallee, void (_Base::*pMethod)(GameSocket*))
+	template<class _Base> void SetCloseCallback(_Base* pCallee, void (_Base::*pMethod)(DualSocket*))
 	{
 		mCloseDispatcher = SocketDispatcher(pCallee, pMethod);
 	};
-	void DispatchCloseSocket(GameSocket* pSocket);
+	void DispatchCloseSocket(DualSocket* pSocket);
 
-	GameSocket* PollAccept();
-	GameSocket* PopReceiverSocket(bool pSafe);
-	GameSocket* PopSenderSocket();
+	DualSocket* PollAccept();
+	DualSocket* PopReceiverSocket(bool pSafe);
+	DualSocket* PopSenderSocket();
 
 	uint64 GetSentByteCount(bool pSafe) const;
 	uint64 GetReceivedByteCount(bool pSafe) const;
@@ -543,20 +545,20 @@ public:
 	void SetDatagramReceiver(DatagramReceiver* pReceiver);
 
 protected:
-	friend class GameSocket;
+	friend class DualSocket;
 
 	void AddUdpReceiverSocket(UdpVSocket* pSocket);
 
 private:
-	void AddSocket(GameSocket* pSocket, TcpVSocket* pTcpSocket, UdpVSocket* pUdpSocket);
+	void AddSocket(DualSocket* pSocket, TcpVSocket* pTcpSocket, UdpVSocket* pUdpSocket);
 	void KillNonDualConnected();
 
 	void OnCloseTcpSocket(TcpVSocket* pTcpSocket);
 
-	typedef std::hash_map<TcpVSocket*, GameSocket*, std::hash<void*> > TcpSocketMap;
-	typedef std::hash_map<UdpVSocket*, GameSocket*, std::hash<void*> > UdpSocketMap;
-	typedef std::hash_map<std::string, GameSocket*> IdSocketMap;
-	typedef OrderedMap<GameSocket*, Timer, std::hash<void*> > SocketTimeMap;
+	typedef std::hash_map<TcpVSocket*, DualSocket*, std::hash<void*> > TcpSocketMap;
+	typedef std::hash_map<UdpVSocket*, DualSocket*, std::hash<void*> > UdpSocketMap;
+	typedef std::hash_map<std::string, DualSocket*> IdSocketMap;
+	typedef OrderedMap<DualSocket*, Timer, std::hash<void*> > SocketTimeMap;
 
 	mutable Lock mLock;
 	TcpMuxSocket* mTcpMuxSocket;
@@ -568,7 +570,7 @@ private:
 	double mConnectDualTimeout;
 	SocketTimeMap mPendingDualConnectMap;
 
-	typedef fastdelegate::FastDelegate1<GameSocket*, void> SocketDispatcher;
+	typedef fastdelegate::FastDelegate1<DualSocket*, void> SocketDispatcher;
 	SocketDispatcher mCloseDispatcher;
 
 	template<class _MuxSocket, class _VSocket> class Connector: public Thread
@@ -607,10 +609,10 @@ private:
 
 // Sends all "safe" data through a TCP connection (guarantees ordered arrivals,
 // also of large data chunks), everything else (positional info) over UDP.
-class GameSocket: public ConnectionWithId
+class DualSocket: public ConnectionWithId
 {
 public:
-	GameSocket(GameMuxSocket* pMuxSocket, const std::string& lConnectionId);
+	DualSocket(DualMuxSocket* pMuxSocket, const std::string& lConnectionId);
 
 	bool SetSocket(TcpVSocket* pSocket);
 	bool SetSocket(UdpVSocket* pSocket);
@@ -631,16 +633,16 @@ public:
 	void TryAddReceiverSocket();
 
 protected:
-	friend class GameMuxSocket;
+	friend class DualMuxSocket;
 
-	virtual ~GameSocket();
+	virtual ~DualSocket();
 
 	TcpVSocket* GetTcpSocket() const;
 	UdpVSocket* GetUdpSocket() const;
 
 
 private:
-	GameMuxSocket* mMuxSocket;
+	DualMuxSocket* mMuxSocket;
 	TcpVSocket* mTcpSocket;
 	UdpVSocket* mUdpSocket;
 

@@ -44,7 +44,7 @@ public:
 	uint32 GetLoginAccountId() const;
 	void SetLoginAccountId(uint32 pLoginAccountId);
 
-	GameSocket* GetSocket() const;
+	UdpVSocket* GetSocket() const;
 
 	virtual bool SendAll();
 	virtual ReceiveStatus ReceiveNonBlocking(Packet* pPacket);
@@ -55,13 +55,12 @@ private:
 	void LoginEntry();
 	void StopLoginThread();
 
-	void OnCloseSocket(GameSocket*);
+	void OnCloseSocket(UdpVSocket*);
 
-	GameSocket* mSocket;
+	UdpVSocket* mSocket;
 	uint32 mLoginAccountId;
 	bool mIsConnecting;
 	bool mIsLoggingIn;
-	bool mPollSafeSource;
 	str mServerHost;
 	double mConnectTimeout;
 	Cure::LoginId mLoginToken;

@@ -34,7 +34,7 @@ namespace Life
 GameClientSlaveManager::GameClientSlaveManager(GameClientMasterTicker* pMaster, Cure::RuntimeVariableScope* pVariableScope,
 	Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager, int pSlaveIndex,
 	const PixelRect& pRenderArea):
-	Cure::GameManager(pVariableScope, pResourceManager, false),
+	Cure::GameManager(pVariableScope, pResourceManager),
 	mMaster(pMaster),
 	mUiManager(pUiManager),
 	mSlaveIndex(pSlaveIndex),
@@ -44,7 +44,7 @@ GameClientSlaveManager::GameClientSlaveManager(GameClientMasterTicker* pMaster, 
 	mIsResetComplete(false),
 	mQuit(false),
 	mAvatarId(0),
-	mLastUnsafeSentByteCount(0),
+	mLastSentByteCount(0),
 	mPingAttemptCount(0),
 	mAllowMovementInput(true),
 	mOptions(pVariableScope, pSlaveIndex),
@@ -502,13 +502,13 @@ bool GameClientSlaveManager::TickNetworkOutput()
 	{
 		// Check if we should send client keepalive (keepalive is simply a position update).
 		bool lForceSendUnsafeClientKeepalive = false;
-		mLastUnsafeSendTime.UpdateTimer();
-		if (mLastUnsafeSentByteCount != GetNetworkAgent()->GetSentByteCount(false))
+		mLastSendTime.UpdateTimer();
+		if (mLastSentByteCount != GetNetworkAgent()->GetSentByteCount())
 		{
-			mLastUnsafeSentByteCount = GetNetworkAgent()->GetSentByteCount(false);
-			mLastUnsafeSendTime.ClearTimeDiff();
+			mLastSentByteCount = GetNetworkAgent()->GetSentByteCount();
+			mLastSendTime.ClearTimeDiff();
 		}
-		else if (mLastUnsafeSendTime.GetTimeDiffF() >= CURE_RTVAR_GET(GetVariableScope(), RTVAR_NETWORK_KEEPALIVE_SENDINTERVAL, 5.0))
+		else if (mLastSendTime.GetTimeDiffF() >= CURE_RTVAR_GET(GetVariableScope(), RTVAR_NETWORK_KEEPALIVE_SENDINTERVAL, 5.0))
 		{
 			lForceSendUnsafeClientKeepalive = true;
 		}

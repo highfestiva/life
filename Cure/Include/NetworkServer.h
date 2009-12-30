@@ -56,28 +56,28 @@ public:
 
 private:
 	void PollAccept();
-	void TryLogin(GameSocket* pSocket, Packet* pPacket, int pDataLength);
+	void TryLogin(UdpVSocket* pSocket, Packet* pPacket, int pDataLength);
 	RemoteStatus QueryLogin(const wstr& pLoginName, MessageLoginRequest* pLoginRequest, UserAccount::AccountId& pAccountId);
-	void Login(const wstr& pUserName, UserAccount::AccountId pAccountId, GameSocket* pSocket, Packet* pPacket);
-	RemoteStatus ManageLogin(GameSocket* pSocket, Packet* pPacket);
+	void Login(const wstr& pUserName, UserAccount::AccountId pAccountId, UdpVSocket* pSocket, Packet* pPacket);
+	RemoteStatus ManageLogin(UdpVSocket* pSocket, Packet* pPacket);
 	void AddUser(UserConnection* pUserConnection, UserAccount::AccountId& pAccountId);
 	bool RemoveUser(UserAccount::AccountId pAccountId, bool pDestroy);
 	void KillDeadSockets();
-	void DropSocket(GameSocket* pSocket);
+	void DropSocket(UdpVSocket* pSocket);
 	UserConnection* GetUser(UserAccount::AccountId pAccountId);
 
 	bool SendStatusMessage(UserAccount::AccountId pAccountId, int32 pInteger, RemoteStatus pStatus, wstr pMessage, Packet* pPacket);
 
-	void OnCloseSocket(GameSocket* pSocket);
+	void OnCloseSocket(UdpVSocket* pSocket);
 
-	typedef std::hash_set<GameSocket*, std::hash<void*> > SocketSet;
+	typedef std::hash_set<UdpVSocket*, std::hash<void*> > SocketSet;
 	typedef SocketSet PendingSocketTable;
 	typedef std::hash_map<UserAccount::AccountId, UserConnection*> LoggedInIdUserTable;
 	typedef std::pair<UserAccount::AccountId, UserConnection*> LoggedInIdUserPair;
 	typedef std::hash_map<wstr, UserConnection*> LoggedInNameUserTable;
 	typedef std::pair<wstr, UserConnection*> LoggedInNameUserPair;
-	typedef std::hash_map<GameSocket*, UserConnection*, std::hash<void*> > SocketUserTable;
-	typedef std::pair<GameSocket*, UserConnection*> SocketUserPair;
+	typedef std::hash_map<UdpVSocket*, UserConnection*, std::hash<void*> > SocketUserTable;
+	typedef std::pair<UdpVSocket*, UserConnection*> SocketUserPair;
 	typedef SocketSet SocketTimeoutTable;
 	typedef std::hash_set<UserAccount::AccountId> AccountIdSet;
 

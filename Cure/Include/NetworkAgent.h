@@ -40,23 +40,21 @@ public:
 
 	virtual bool SendAll() = 0;
 	bool IsOpen() const;
-	uint64 GetSentByteCount(bool pSafe) const;
-	uint64 GetReceivedByteCount(bool pSafe) const;
-	uint64 GetTotalSentByteCount() const;
-	uint64 GetTotalReceivedByteCount() const;
+	uint64 GetSentByteCount() const;
+	uint64 GetReceivedByteCount() const;
 	unsigned GetConnectionCount() const;
 
-	bool SendStatusMessage(GameSocket* pSocket, int32 pInteger, RemoteStatus pStatus, wstr pMessage, Packet* pPacket);
-	bool SendNumberMessage(bool pSafe, GameSocket* pSocket, Cure::MessageNumber::InfoType pInfo, int32 pInteger, float32 pFloat);
-	bool SendObjectFullPosition(GameSocket* pSocket, GameObjectId pInstanceId, int32 pFrameIndex, const ObjectPositionalData& pData);
-	bool PlaceInSendBuffer(bool pSafe, GameSocket* pSocket, Packet* pPacket);
+	bool SendStatusMessage(UdpVSocket* pSocket, int32 pInteger, RemoteStatus pStatus, wstr pMessage, Packet* pPacket);
+	bool SendNumberMessage(bool pSafe, UdpVSocket* pSocket, Cure::MessageNumber::InfoType pInfo, int32 pInteger, float32 pFloat);
+	bool SendObjectFullPosition(UdpVSocket* pSocket, GameObjectId pInstanceId, int32 pFrameIndex, const ObjectPositionalData& pData);
+	bool PlaceInSendBuffer(bool pSafe, UdpVSocket* pSocket, Packet* pPacket);
 
 protected:
-	void SetMuxSocket(GameMuxSocket* pSocket);
+	void SetMuxSocket(UdpMuxSocket* pSocket);
 
 	mutable Lock mLock;
 	RuntimeVariableScope* mVariableScope;
-	GameMuxSocket* mMuxSocket;
+	UdpMuxSocket* mMuxSocket;
 	PacketFactory* mPacketFactory;
 
 private:

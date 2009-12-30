@@ -26,7 +26,6 @@ NetworkClient::NetworkClient(RuntimeVariableScope* pVariableScope):
 	mLoginAccountId(0),
 	mIsConnecting(false),
 	mIsLoggingIn(false),
-	mPollSafeSource(true),
 	mServerHost(),
 	mConnectTimeout(0),
 	mLoginToken(),
@@ -81,10 +80,10 @@ bool NetworkClient::Connect(const str& pLocalAddress, const str& pServerAddress,
 		ScopeLock lLock(&mLock);
 		for (; lLocalAddress.GetPort() <= lEndPort; lLocalAddress.SetPort(lLocalAddress.GetPort()+1))
 		{
-			SetMuxSocket(new GameMuxSocket(_T("Client "), lLocalAddress, false));
+			SetMuxSocket(new UdpMuxSocket(_T("Client "), lLocalAddress));
 			if (mMuxSocket->IsOpen())
 			{
-				mMuxSocket->SetCloseCallback(this, &NetworkClient::OnCloseSocket);
+				//mMuxSocket->SetCloseCallback(this, &NetworkClient::OnCloseSocket);
 				break;
 			}
 			delete (mMuxSocket);
@@ -94,7 +93,8 @@ bool NetworkClient::Connect(const str& pLocalAddress, const str& pServerAddress,
 	}
 	if (lOk)
 	{
-		mSocket = mMuxSocket->Connect(lTargetAddress, pTimeout);
+		const std::string lConnectionId = SystemManager::GetRandomId();
+		mSocket = mMuxSocket->Connect(lTargetAddress, lConnectionId, pTimeout);
 		lOk = (mSocket != 0);
 	}
 	return (lOk);
@@ -113,7 +113,7 @@ void NetworkClient::Disconnect(bool pSendDisconnect)
 	}
 	SendAll();
 	SetLoginAccountId(0);
-	Thread::Sleep(0.01);	// Try to wait until data sent. SO_LINGER doesn't seem trustworthy.
+	Thread::Sleep(0.1);	// Try to wait until data sent. SO_LINGER doesn't seem trustworthy.
 	Stop();
 }
 
@@ -232,7 +232,7 @@ void NetworkClient::SetLoginAccountId(uint32 pLoginAccountId)
 
 
 
-GameSocket* NetworkClient::GetSocket() const
+UdpVSocket* NetworkClient::GetSocket() const
 {
 	return (mSocket);
 }
@@ -260,8 +260,7 @@ NetworkAgent::ReceiveStatus NetworkClient::ReceiveNonBlocking(Packet* pPacket)
 	if (mSocket)
 	{
 		pPacket->Release();
-		mPollSafeSource = !mPollSafeSource;
-		const int lDataLength = mSocket->Receive(mPollSafeSource, pPacket->GetWriteBuffer(), pPacket->GetBufferSize());
+		const int lDataLength = mSocket->Receive(pPacket->GetWriteBuffer(), pPacket->GetBufferSize());
 		if (lDataLength == 0)
 		{
 			lResult = RECEIVE_NO_DATA;
@@ -397,7 +396,7 @@ void NetworkClient::StopLoginThread()
 
 
 
-void NetworkClient::OnCloseSocket(GameSocket*)
+void NetworkClient::OnCloseSocket(UdpVSocket*)
 {
 	Disconnect(false);
 }
