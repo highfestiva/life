@@ -4,6 +4,7 @@
 
 
 
+#include <assert.h>
 #include "../Include/UiSoundManagerFMod.h"
 #include "../Include/UiSoundManagerOpenAL.h"
 

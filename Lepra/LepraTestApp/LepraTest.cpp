@@ -1425,14 +1425,14 @@ bool TestTcpMuxSocket(const LogDecorator& pAccount)
 	return (lTestOk);
 }
 
-class GameSocketClientTest
+class DualSocketClientTest
 {
 public:
 	bool Test();
 
 private:
 	template<class _Server> bool TestClientServerTransmit(str& pContext, _Server& pServer,
-		GameMuxSocket& pClientMuxSocket, GameSocket* pClientSocket, bool pSafe);
+		DualMuxSocket& pClientMuxSocket, DualSocket* pClientSocket, bool pSafe);
 
 	LOG_CLASS_DECLARE();
 };
@@ -1491,7 +1491,7 @@ private:
 	void operator=(const ServerSocketHandler&) {};
 };
 
-bool GameSocketClientTest::Test()
+bool DualSocketClientTest::Test()
 {
 	str lContext;
 	bool lTestOk = true;
@@ -1514,7 +1514,7 @@ bool GameSocketClientTest::Test()
 	// Create client.
 	SocketAddress lClientAddress(lLocalAddress);
 	lClientAddress.SetPort(55113);
-	GameMuxSocket lClientMuxSocket(_T("Client "), lClientAddress, false);
+	DualMuxSocket lClientMuxSocket(_T("Client "), lClientAddress, false);
 	if (lTestOk)
 	{
 		lContext = _T("client socket open");
@@ -1525,7 +1525,7 @@ bool GameSocketClientTest::Test()
 	// Make sure server connect fails (server not up yet).
 	SocketAddress lServerAddress(lLocalAddress);
 	lServerAddress.SetPort(55112);
-	GameSocket* lClientSocket = 0;
+	DualSocket* lClientSocket = 0;
 	if (lTestOk)
 	{
 		mLog.AHeadline("Connect without TCP+UDP.");
@@ -1639,8 +1639,8 @@ bool GameSocketClientTest::Test()
 	return (lTestOk);
 }
 
-template<class _Server> bool GameSocketClientTest::TestClientServerTransmit(str& pContext, _Server& pServer,
-		GameMuxSocket& pClientMuxSocket, GameSocket* pClientSocket, bool pSafe)
+template<class _Server> bool DualSocketClientTest::TestClientServerTransmit(str& pContext, _Server& pServer,
+		DualMuxSocket& pClientMuxSocket, DualSocket* pClientSocket, bool pSafe)
 {
 	bool lTestOk = true;
 	if (lTestOk)
@@ -1667,7 +1667,7 @@ template<class _Server> bool GameSocketClientTest::TestClientServerTransmit(str&
 	if (lTestOk)
 	{
 		pContext = _T("client pop receiver");
-		GameSocket* lSocket = 0;
+		DualSocket* lSocket = 0;
 		for (int x = 0; lSocket == 0 && x < 500; ++x)
 		{
 			lSocket = pClientMuxSocket.PopReceiverSocket(pSafe);
@@ -1694,7 +1694,7 @@ template<class _Server> bool GameSocketClientTest::TestClientServerTransmit(str&
 	if (lTestOk)
 	{
 		pContext = _T("client pop sender");
-		GameSocket* lSocket = pClientMuxSocket.PopSenderSocket();
+		DualSocket* lSocket = pClientMuxSocket.PopSenderSocket();
 		lTestOk = (lSocket == pClientSocket);
 		assert(lTestOk);
 	}
@@ -1730,7 +1730,7 @@ template<class _Server> bool GameSocketClientTest::TestClientServerTransmit(str&
 
 
 
-class GameSocketServerTest
+class DualSocketServerTest
 {
 public:
 	bool Test();
@@ -1738,7 +1738,7 @@ public:
 	LOG_CLASS_DECLARE();
 };
 
-bool GameSocketServerTest::Test()
+bool DualSocketServerTest::Test()
 {
 	str lContext;
 	bool lTestOk = true;
@@ -1761,7 +1761,7 @@ bool GameSocketServerTest::Test()
 	// Create server.
 	SocketAddress lServerAddress(lLocalAddress);
 	lServerAddress.SetPort(55113);
-	GameMuxSocket lServerMuxSocket(_T("Server "), lServerAddress, true);
+	DualMuxSocket lServerMuxSocket(_T("Server "), lServerAddress, true);
 	lServerMuxSocket.SetConnectDualTimeout(0.5f);
 	if (lTestOk)
 	{
@@ -1772,7 +1772,7 @@ bool GameSocketServerTest::Test()
 	class ServerSocketHandler: public Thread
 	{
 	public:
-		ServerSocketHandler(GameMuxSocket& pServerSocket):
+		ServerSocketHandler(DualMuxSocket& pServerSocket):
 			Thread(_T("GameServerSocket")),
 			mServerMuxSocket(pServerSocket)
 		{
@@ -1791,7 +1791,7 @@ bool GameSocketServerTest::Test()
 			}
 		}
 		void operator=(const ServerSocketHandler&) {};
-		GameMuxSocket& mServerMuxSocket;
+		DualMuxSocket& mServerMuxSocket;
 	};
 
 	// Check one-sided client connect.
@@ -1839,8 +1839,8 @@ bool GameSocketServerTest::Test()
 	return (lTestOk);
 }
 
-LOG_CLASS_DEFINE(TEST, GameSocketClientTest);
-LOG_CLASS_DEFINE(TEST, GameSocketServerTest);
+LOG_CLASS_DEFINE(TEST, DualSocketClientTest);
+LOG_CLASS_DEFINE(TEST, DualSocketServerTest);
 
 
 
@@ -2771,13 +2771,13 @@ bool TestLepra()
 	}
 	if (lTestOk)
 	{
-		GameSocketClientTest lGameSocketClientTest;
-		lTestOk = lGameSocketClientTest.Test();
+		DualSocketClientTest lDualSocketClientTest;
+		lTestOk = lDualSocketClientTest.Test();
 	}
 	if (lTestOk)
 	{
-		GameSocketServerTest lGameSocketServerTest;
-		lTestOk = lGameSocketServerTest.Test();
+		DualSocketServerTest lDualSocketServerTest;
+		lTestOk = lDualSocketServerTest.Test();
 	}
 	if (lTestOk)
 	{

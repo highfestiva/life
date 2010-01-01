@@ -574,11 +574,11 @@ void MaybeSendClientStriveTimes(int pAgentIndex)
 			str s = Lepra::strutil::Format(_T("Client %i: data arrives %i frames early on average with a drop of %.1f %% (late) and %.1f %% (early)."), pAgentIndex, -lNetworkFrameDiffCount, lLateDropPercent, lEarlyDropPercent);
 			gNptLog.Debug(_T("Server find client in range ")+s);
 			s = Lepra::strutil::Format(_T("Client %i: up %.1f kB/s, down %.1f kB/s (%.2f FPS)."), pAgentIndex,
-				(lClient.mNetworkAgent->GetTotalSentByteCount()-lClient.mBandwidthLastSent)/1000.0/(gAbsoluteTime-lClient.mBandwidthStartMeasureTime),
-				(lClient.mNetworkAgent->GetTotalReceivedByteCount()-lClient.mBandwidthLastReceived)/1000.0/(gAbsoluteTime-lClient.mBandwidthStartMeasureTime), gFPS);
+				(lClient.mNetworkAgent->GetSentByteCount()-lClient.mBandwidthLastSent)/1000.0/(gAbsoluteTime-lClient.mBandwidthStartMeasureTime),
+				(lClient.mNetworkAgent->GetReceivedByteCount()-lClient.mBandwidthLastReceived)/1000.0/(gAbsoluteTime-lClient.mBandwidthStartMeasureTime), gFPS);
 			gNptLog.Debug(_T("Client bandwidth ")+s);
-			lClient.mBandwidthLastSent = lClient.mNetworkAgent->GetTotalSentByteCount();
-			lClient.mBandwidthLastReceived = lClient.mNetworkAgent->GetTotalReceivedByteCount();
+			lClient.mBandwidthLastSent = lClient.mNetworkAgent->GetSentByteCount();
+			lClient.mBandwidthLastReceived = lClient.mNetworkAgent->GetReceivedByteCount();
 			lClient.mBandwidthStartMeasureTime = gAbsoluteTime;
 			/*for (int x = 0; x < NETWORK_LATENCY_CALCULATION_ARRAY_SIZE; ++x)
 			{
