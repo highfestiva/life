@@ -366,6 +366,8 @@ int64 DiskFile::Tell() const
 {
 #ifdef LEPRA_MSVC
 	return (int64)::_ftelli64(mFile);
+#elif defined(LEPRA_MAC)
+	return (int64)::ftell(mFile);
 #else
 	return (int64)::ftello64(mFile);
 #endif
@@ -402,8 +404,10 @@ int64 DiskFile::Seek(int64 pOffset, FileOrigin pFrom)
 
 	int64 lPos = -1;
 
-#ifdef LEPRA_MSVC
+#if defined(LEPRA_MSVC)
 	if (::_fseeki64(mFile, pOffset, lOrigin) == 0)
+#elif defined(LEPRA_MAC)
+	if (::fseek(mFile, pOffset, lOrigin) == 0)
 #else
 	if (::fseeko64(mFile, pOffset, lOrigin) == 0)
 #endif

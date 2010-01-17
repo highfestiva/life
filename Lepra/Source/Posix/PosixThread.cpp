@@ -25,16 +25,22 @@ static ThreadPointerStorage gThreadStorage;
 static ThreadPointerStorage gExtraDataStorage;
 
 
-
 void GetAbsTime(float64 pDeltaTime, timespec& pTimeSpec)
 {
 	float64 lSeconds = floor(pDeltaTime);
 	float64 lNanoSeconds = (pDeltaTime - lSeconds) * 1000000000.0;
+
+#if defined(LEPRA_MAC)
+	timeval lTimeSpecNow;
+	gettimeofday(&lTimeSpecNow, NULL);
+	pTimeSpec.tv_sec = lTimeSpecNow.tv_sec;
+	pTimeSpec.tv_nsec = lTimeSpecNow.tv_usec * 1000;
+#else
 	::clock_gettime(CLOCK_REALTIME, &pTimeSpec);
+#endif
 	pTimeSpec.tv_sec += (time_t)lSeconds;
 	pTimeSpec.tv_nsec += (long)lNanoSeconds;
 }
-
 
 	
 ThreadPointerStorage::ThreadPointerStorage()
@@ -65,10 +71,12 @@ StaticThread gMainThread(_T("MainThread"));
 
 static void InitializeSignalMask()
 {
+#if !defined(LEPRA_MAC)
 	sigset_t lMask;
 	::sigemptyset(&lMask);
 	::sigaddset(&lMask, SIGHUP);
 	::pthread_sigmask(SIG_BLOCK, &lMask, 0);
+#endif
 }
 
 
@@ -179,9 +187,20 @@ void PosixSemaphore::Wait()
 
 bool PosixSemaphore::Wait(float64 pMaxWaitTime)
 {
+#if defined(LEPRA_MAC)
+	do
+	{
+		if (sem_trywait(&mSemaphore) == 0) return true;
+		Thread::Sleep(0.001);
+		pMaxWaitTime -= 0.001;
+	} while (pMaxWaitTime > 0);
+
+	return false;
+#else
 	timespec lTimeSpec;
 	GetAbsTime(pMaxWaitTime, lTimeSpec);
 	return (::sem_timedwait(&mSemaphore, &lTimeSpec) == 0);
+#endif
 }
 
 void PosixSemaphore::Signal()
@@ -245,10 +264,15 @@ void Thread::InitializeMainThread(const str& pThreadName)
 
 size_t Thread::GetCurrentThreadId()
 {
+	return (size_t)pthread_self();
+/*#if defined(LEPRA_MAC)
+#else
 #ifndef gettid
 #define gettid()	::syscall(SYS_gettid)
 #endif
 	return (gettid());
+#endif
+*/
 }
 
 Thread* Thread::GetCurrentThread()
@@ -288,10 +312,13 @@ bool Thread::Start()
 
 	if (!IsRunning())
 	{
+		pthread_t	lThreadHandle;
 		SetStopRequest(false);
 
-		if(::pthread_create(&mThreadHandle, 0, ThreadEntry, this) == 0)
+		if(::pthread_create(&lThreadHandle, 0, ThreadEntry, this) == 0)
 		{
+			mThreadHandle = (size_t)lThreadHandle;
+
 			// Wait for newly created thread to kickstart.
 			mSemaphore.Wait(5.0);
 		}
@@ -311,7 +338,7 @@ bool Thread::Join()
 	if (GetThreadHandle() != 0)
 	{
 		assert(GetThreadId() != GetCurrentThreadId());
-		::pthread_join(mThreadHandle, 0);
+		::pthread_join((pthread_t)mThreadHandle, 0);
 		assert(!IsRunning());
 		mThreadHandle = 0;
 		mThreadId = 0;
@@ -340,7 +367,7 @@ bool Thread::Join(float64 pTimeOut)
 
 void Thread::Signal(int) // Ignore signal for now.
 {
-	::pthread_kill(mThreadHandle, SIGHUP);
+	::pthread_kill((pthread_t)mThreadHandle, SIGHUP);
 }
 
 void Thread::Kill()
@@ -349,7 +376,7 @@ void Thread::Kill()
 	{
 		assert(GetThreadId() != GetCurrentThreadId());
 		mLog.Warningf(_T("Forcing kill of thread %s."), GetThreadName().c_str());
-		::pthread_kill(mThreadHandle, SIGHUP);
+		::pthread_kill((pthread_t)mThreadHandle, SIGHUP);
 		Join();
 		SetRunning(false);
 	}

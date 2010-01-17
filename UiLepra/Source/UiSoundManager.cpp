@@ -3,7 +3,7 @@
 //Copyright (c) 2002-2009, Righteous Games
 
 
-
+#include <assert.h>
 #include "../Include/UiSoundManagerFMod.h"
 #include "../Include/UiSoundManagerOpenAL.h"
 

@@ -7,8 +7,17 @@ import sys
 
 
 cflags_1 = """
-CFLAGS = -O0 -ggdb -fPIC -D_POSIX_PTHREAD_SEMANTICS %(includes)s -DPOSIX -D_XOPEN_SOURCE=600 -D_DEBUG -D_CONSOLE -DPNG_NO_ASSEMBLER_CODE -DdSingle -DdTLS_ENABLED=1 -DHAVE_CONFIG_H=1 -DLEPRA_WITHOUT_FMOD"""
+CFLAGS = -D_STLP_THREADS -O0 -ggdb -fPIC -D_POSIX_PTHREAD_SEMANTICS %(includes)s -DPOSIX -D_XOPEN_SOURCE=600 -D_DEBUG -D_CONSOLE -DPNG_NO_ASSEMBLER_CODE -DdSingle -DdTLS_ENABLED=1 -DHAVE_CONFIG_H=1 -DLEPRA_WITHOUT_FMOD"""
 cflags_2 = "-Wno-unknown-pragmas"
+
+ldflags = ""
+
+openal = '-lOpenAL'
+
+if sys.platform == 'darwin':
+    openal = '-framework OpenAL'
+    cflags_1 += ' -framework CoreServices -framework OpenAL -DMAC_OS_X_VERSION=1050'
+    ldflags += ' -lstlport -framework OpenGL -framework CoreServices %(libs)s %(deplibs)s '
 
 head_lib = cflags_1+" -Wall "+cflags_2+"\n"
 
@@ -31,7 +40,7 @@ all:\tlib%(lib)s.so $(OBJS)
 clean:
 \t@rm -f lib%(lib)s.so $(OBJS)
 lib%(lib)s.so:\t$(OBJS)
-\tg++ -shared -o $@ $(OBJS)
+\tg++ -shared """ + ldflags + ' ' + openal + """ -o $@ $(OBJS)
 """+foot_rules
 
 foot_lib_nowarn = foot_lib
@@ -41,15 +50,17 @@ LIBS = -lLife -lCure -lTBC -lLepra -lThirdParty -lstlport -lpthread -ldl -lrt %(
 """
 
 head_gfx_bin = head_bin+"""
-LIBS = -lLife -lUiCure -lUiTBC -lUiLepra -lOpenAL -lalut -lCure -lTBC -lLepra -lThirdParty -lstlport -lpthread -ldl -lrt -lGL %(libs)s
+LIBS = -lLife -lUiCure -lUiTBC -lUiLepra """ + openal + """ -lalut -lCure -lTBC -lLepra -lThirdParty -lstlport -lpthread -ldl -lrt -lGL %(libs)s
 """
+
+    
 
 foot_bin = """
 all:\t%(lib)s $(OBJS)
 clean:
 \t@rm -f %(lib)s $(OBJS)
 %(lib)s:\t$(OBJS)
-\tg++ $(LIBS) -o $@ $(OBJS)
+\tg++ $(LIBS) """ + ldflags + """ -o $@ $(OBJS)
 """+foot_rules
 
 foot_gfx_bin = foot_bin
@@ -134,15 +145,15 @@ def linux_bin_name(type, vcfile):
     #print pathname
     return pathname
 
-def generate_makefile(vcfile, makename, includedirs, libdirs, header, footer, type):
+def generate_makefile(vcfile, makename, includedirs, libdirs, deplibs, header, footer, type):
     libname = convert_out_name(vcfile)
     projbasedir = os.path.dirname(vcfile)
     extrafilter = ""
-    if os.name == "mac":
-        extrafilter = "-f X11\\;x11"
+    if sys.platform == "darwin":
+        extrafilter = "\\;X11\\;x11"
     else:
-        extraFilter = "-f X11\\;mac"
-    cpps = os.popen(sys.executable+" vcprojfiles.py -i "+vcfile+" -f Win32\\;win32 "+extrafilter+" --rel-path --base-path="+projbasedir).read()
+        extraFilter = "\\;Mac\\;mac"
+    cpps = os.popen(sys.executable+" vcprojfiles.py -i "+vcfile+" -f Win32\\;win32"+extrafilter+" --rel-path --base-path="+projbasedir).read()
     cpps = cpps.split()
     cpps = [x for x in cpps if issrc(x)]
     objs = [os.path.splitext(x)[0]+".o" for x in cpps]
@@ -151,7 +162,7 @@ def generate_makefile(vcfile, makename, includedirs, libdirs, header, footer, ty
     libs = " ".join(["-L%s" % i for i in libdirs])
     f.write(header % {"includes":includes, "libs":libs})
     write_contents(f, cpps, objs)
-    f.write(footer % {"lib":libname})
+    f.write(footer % {"lib":libname, "libs":libs, "deplibs":' '.join(deplibs)})
     f.close()
 
 def generate_base_make(makename, binlist, liblist):
@@ -163,10 +174,21 @@ def generate_base_make(makename, binlist, liblist):
     f.close()
 
 
+def get_dep_libs(vcfileinfolist, depnames):
+    deps = []
+    depnames = depnames.split()
+    for depname in depnames:
+        for name, type, vcfile, vcdeps in vcfileinfolist:
+            if name == depname:
+                deps += ["-l"+name]
+                deps += get_dep_libs(vcfileinfolist, vcdeps)
+    deps = list(set(deps))
+    return deps
+
 def generate_makefiles(basedir, vcfileinfolist):
     files = {"bin":[], "gfx_bin":[], "lib":[]}
 
-    for type, vcfile in vcfileinfolist:
+    for name, type, vcfile, deps in vcfileinfolist:
         basetype = "lib" if type.startswith("lib") else type
         files[basetype] += [linux_bin_name(basetype, vcfile)]
 
@@ -174,8 +196,6 @@ def generate_makefiles(basedir, vcfileinfolist):
         projdir = os.path.dirname(vcfile)
         includedirs = [os.path.relpath(basedir+"ThirdParty/stlport/stlport/", projdir),
         os.path.relpath(basedir+"ThirdParty/utf8cpp", projdir),
-        os.path.relpath(basedir+"ThirdParty/openal-soft-1.10.622/OpenAL32/Include/", projdir),
-        os.path.relpath(basedir+"ThirdParty/openal-soft-1.10.622/include/", projdir),
         os.path.relpath(basedir+"ThirdParty/freealut-1.1.0/include/", projdir),
         os.path.relpath(basedir+"ThirdParty/ode-0.11.1/include", projdir),
         os.path.relpath(basedir+"ThirdParty/ode-0.11.1/ode/src", projdir),
@@ -194,9 +214,15 @@ def generate_makefiles(basedir, vcfileinfolist):
         os.path.relpath(basedir+"UiTBC", projdir),
         os.path.relpath(basedir+"UiCure", projdir),
         os.path.relpath(basedir+"Life", projdir)]
+
+        if sys.platform != 'darwin':
+            includedirs += [os.path.relpath(basedir+"ThirdParty/openal-soft-1.10.622/OpenAL32/Include/", projdir),
+            os.path.relpath(basedir+"ThirdParty/openal-soft-1.10.622/include/", projdir)]
+
         makename = os.path.join(os.path.dirname(vcfile), "makefile")
         printstart(makename)
-        generate_makefile(vcfile, makename, includedirs, libdirs, eval("head_"+type), eval("foot_"+type), type)
+        deplibs = get_dep_libs(vcfileinfolist, deps)
+        generate_makefile(vcfile, makename, includedirs, libdirs, deplibs, eval("head_"+type), eval("foot_"+type), type)
         printend(type)
 
     makename = os.path.join(basedir, "makefile")
@@ -207,19 +233,22 @@ def generate_makefiles(basedir, vcfileinfolist):
 
 def main():
     basedir = "../../"
-    projects = [["lib_nowarn", "ThirdParty/ThirdPartyLib_800.vcproj"],
-        ["lib_nowarn", "ThirdParty/openal-soft-1.10.622/OpenAL_800.vcproj"],
-        ["lib_nowarn", "ThirdParty/freealut-1.1.0/admin/VisualStudioDotNET/alut/alut.vcproj"],
-        ["lib",        "Lepra/Lepra.vcproj"],
-        ["lib",        "TBC/TBC.vcproj"],
-        ["lib",        "Cure/Cure.vcproj"],
-        ["lib",        "UiLepra/UiLepra.vcproj"],
-        ["lib",        "UiTBC/UiTBC.vcproj"],
-        ["lib",        "UiCure/UiCure.vcproj"],
-        ["lib",        "Life/Life.vcproj"],
-        ["bin",        "Life/LifeServer/LifeServer.vcproj"],
-        ["gfx_bin",    "Life/LifeClient/LifeClient.vcproj"],
-        ["gfx_bin",    "UiCure/CureTestApp/CureTestApp.vcproj"]]
+    projects = [
+        ["ThirdParty",        "lib_nowarn", "ThirdParty/ThirdPartyLib_800.vcproj", ""],
+        ["alut",    "lib_nowarn", "ThirdParty/freealut-1.1.0/admin/VisualStudioDotNET/alut/alut.vcproj", ""],
+        ["Lepra",    "lib",        "Lepra/Lepra.vcproj", "ThirdParty"],
+        ["TBC",        "lib",        "TBC/TBC.vcproj", "Lepra"],
+        ["Cure",    "lib",        "Cure/Cure.vcproj", "TBC"],
+        ["UiLepra",    "lib",        "UiLepra/UiLepra.vcproj", "Lepra alut"],
+        ["UiTBC",    "lib",        "UiTBC/UiTBC.vcproj", "UiLepra"],
+        ["UiCure",    "lib",        "UiCure/UiCure.vcproj", "UiTBC"],
+        ["Life",    "lib",        "Life/Life.vcproj", "Cure"],
+        ["LifeServer",    "bin",        "Life/LifeServer/LifeServer.vcproj", "Life"],
+        ["LifeClient",    "gfx_bin",    "Life/LifeClient/LifeClient.vcproj", "Life UiCure"],
+        ["CureTest",    "gfx_bin",    "UiCure/CureTestApp/CureTestApp.vcproj", "UiCure"]]
+
+    if sys.platform != 'darwin':
+        projects += [["lib_nowarn", "ThirdParty/openal-soft-1.10.622/OpenAL_800.vcproj"]]
     generate_makefiles(basedir, projects)
 
 if __name__ == '__main__':

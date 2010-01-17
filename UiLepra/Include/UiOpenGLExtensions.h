@@ -28,13 +28,14 @@
 #include "Win32/WGLEXT.h"
 #include "GLEXT.H"
 
-#elif defined(LEPRA_MACOSX)
+#elif defined(LEPRA_MAC)
 
 #include <Carbon/Carbon.h>
 #include <OpenGL/gl.h>
 #include <OpenGL/glu.h>
 #include <OpenGL/glext.h>
 #include <sys/time.h>
+#include "macglext.h"
 
 #elif defined(LEPRA_POSIX)
 

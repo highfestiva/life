@@ -1043,7 +1043,7 @@ void TcpMuxSocket::SelectThreadEntry()
 				int e = SOCKET_LAST_ERROR();
 				mLog.Warningf(_T("Could not ::select() properly. Error=%i, sockets=%u, exception set=%u."), e, lSocketCount, LEPRA_FD_GET_COUNT(&lExceptionSet));
 
-				for (u_int x = 0; x < LEPRA_FD_GET_COUNT(&lExceptionSet); ++x)
+				for (unsigned x = 0; x < LEPRA_FD_GET_COUNT(&lExceptionSet); ++x)
 				{
 					const sys_socket lSysSocket = LEPRA_FD_GET(&lExceptionSet, x);
 					int lErrorCode = 0;
