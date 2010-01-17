@@ -488,7 +488,12 @@ class GroupReader(DefaultMAReader):
                                 shaderName   = ""
 
                                 mesh = self._listchildnodes(node.getFullName(), node, "m_", group, False, \
-                                        lambda n: n.get_fixed_attribute("rgvtx", optional=True))[0]
+                                        lambda n: n.get_fixed_attribute("rgvtx", optional=True))
+                                if not mesh:
+                                        print("Error: mesh transform %s has no good meshes." % node.getFullName())
+                                        ok = False;
+                                        continue
+                                mesh = mesh[0]
                                 outs = mesh.getOutNodes("iog", "iog")
                                 shaders = []
                                 for o, _, attr in outs:
