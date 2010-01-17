@@ -256,7 +256,7 @@ def main():
         ["CureTest",    "gfx_bin",    "UiCure/CureTestApp/CureTestApp.vcproj", "UiCure"]]
 
     if sys.platform != 'darwin':
-        projects += [["lib_nowarn", "ThirdParty/openal-soft-1.10.622/OpenAL_800.vcproj"]]
+        projects += [["OpenAL", "lib_nowarn", "ThirdParty/openal-soft-1.10.622/OpenAL_800.vcproj", ""]]
     generate_makefiles(basedir, projects)
 
 if __name__ == '__main__':
