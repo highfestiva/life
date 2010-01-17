@@ -643,6 +643,12 @@ void OpenGLMatSingleTextureEnvMapSolid::RenderAllGeometry(unsigned int pCurrentF
 	glEnable(GL_TEXTURE_2D);
 	OpenGLMatSingleTextureSolid::RenderAllGeometry(pCurrentFrame);
 
+	// Early bail out if no multitexturing support. TODO: fix in cards that don't support!
+	if (!UiLepra::OpenGLExtensions::CheckMultiTextureFunctions())
+	{
+		return;
+	}
+
 	// Pass 2, Render the enviroment map.
 	mSingleTexturePass = false;
 
@@ -870,6 +876,12 @@ bool OpenGLMatTextureAndLightmap::AddGeometry(TBC::GeometryBase* pGeometry)
 
 void OpenGLMatTextureAndLightmap::RenderAllGeometry(unsigned int pCurrentFrame)
 {
+	// Early bail out if no multitexturing support. TODO: fix in cards that don't support!
+	if (!UiLepra::OpenGLExtensions::CheckMultiTextureFunctions())
+	{
+		return;
+	}
+
 	// The problem here is to render a surface with dynamic lights in the scene
 	// combined with a light map. The formula we want is cout = c(L + lm), where
 	// cout is the output color, c is the color map's color combined with the
@@ -1594,8 +1606,11 @@ bool OpenGLMatSingleTextureSolidPXS::AddGeometry(TBC::GeometryBase* pGeometry)
 
 void OpenGLMatSingleTextureSolidPXS::RenderAllGeometry(unsigned int pCurrentFrame)
 {
-	if (Material::IsEmpty() == true)
+	// Early bail out if no multitexturing support. TODO: fix in cards that don't support!
+	if (Material::IsEmpty() || !UiLepra::OpenGLExtensions::CheckMultiTextureFunctions())
+	{
 		return;
+	}
 
 	OpenGLMatPXS::PrepareShaderPrograms((OpenGLRenderer*)GetRenderer());
 	OpenGLMatSingleTextureSolid::RenderAllGeometry(pCurrentFrame);
@@ -1701,8 +1716,11 @@ bool OpenGLMatTextureAndLightmapPXS::AddGeometry(TBC::GeometryBase* pGeometry)
 
 void OpenGLMatTextureAndLightmapPXS::RenderAllGeometry(unsigned int pCurrentFrame)
 {
-	if (Material::IsEmpty() == true)
+	// Early bail out if no multitexturing support. TODO: fix in cards that don't support!
+	if (Material::IsEmpty() || !UiLepra::OpenGLExtensions::CheckMultiTextureFunctions())
+	{
 		return;
+	}
 
 	UiLepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE0);
 	UiLepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE0);
@@ -1855,8 +1873,11 @@ bool OpenGLMatTextureSBMapPXS::AddGeometry(TBC::GeometryBase* pGeometry)
 
 void OpenGLMatTextureSBMapPXS::RenderAllGeometry(unsigned int pCurrentFrame)
 {
-	if (Material::IsEmpty() == true)
+	// Early bail out if no multitexturing support. TODO: fix in cards that don't support!
+	if (Material::IsEmpty() || !UiLepra::OpenGLExtensions::CheckMultiTextureFunctions())
+	{
 		return;
+	}
 
 	UiLepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE0);
 	UiLepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE0);
