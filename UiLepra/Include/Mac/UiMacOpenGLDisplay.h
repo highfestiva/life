@@ -7,10 +7,7 @@
 #pragma once
 
 #include "UiMacDisplayManager.h"
-#include <GL/glx.h>
-#include <Mac/Xutil.h>
-
-
+#include <OpenGL/gl.h>
 
 namespace UiLepra
 {
@@ -50,10 +47,9 @@ private:
 
 	bool CreateGLContext();
 	void DeleteGLContext();
-	XVisualInfo* GetVisualInfo() const;
 
-	static GLXContext mGlContext;	// The same one used for all displays (must have same VisualInfo).
-	static int mContextUserCount;
+	NSOpenGLContext*	mGlContext;
+	NSOpenGLView*		mGlView;
 };
 
 

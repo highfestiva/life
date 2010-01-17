@@ -313,9 +313,14 @@ bool Thread::Start()
 	if (!IsRunning())
 	{
 		pthread_t	lThreadHandle;
+		pthread_attr_t	lThreadAttributes;
+
 		SetStopRequest(false);
 
-		if(::pthread_create(&lThreadHandle, 0, ThreadEntry, this) == 0)
+		pthread_attr_init(&lThreadAttributes);
+		pthread_attr_setdetachstate(&lThreadAttributes, PTHREAD_CREATE_JOINABLE);
+
+		if(::pthread_create(&lThreadHandle, &lThreadAttributes, ThreadEntry, this) == 0)
 		{
 			mThreadHandle = (size_t)lThreadHandle;
 

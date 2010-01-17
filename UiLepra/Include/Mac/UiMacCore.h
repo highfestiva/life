@@ -6,14 +6,24 @@
 
 #pragma once
 
-#include <Mac/X.h>
-#include <Mac/Xlib.h>
+#import <Cocoa/Cocoa.h>
+#import <AppKit/AppKit.h>
+
 #include "../../../Lepra/Include/HashTable.h"
 #include "../../../Lepra/Include/Thread.h"
 #include "../UiCore.h"
 #include "../UiLepra.h"
 
 
+@interface UiMacApplication : NSApplication
+{
+
+}
+
+- (void)run;
+- (void)terminate:(id)sender;
+
+@end
 
 namespace UiLepra
 {
@@ -36,12 +46,15 @@ public:
 
 	static void AddDisplayManager(MacDisplayManager* pDisplayManager);
 	static void RemoveDisplayManager(MacDisplayManager* pDisplayManager);
-	static MacDisplayManager* GetDisplayManager(Window pWindowHandle);
+	static MacDisplayManager* GetDisplayManager(NSWindow* pWindowHandle);
 
 private:
 	static Lock* mLock;
-	typedef HashTable<Window, MacDisplayManager*, std::hash<Window> > WindowTable;
+	typedef HashTable<NSWindow*, MacDisplayManager*, std::hash<void*> > WindowTable;
 	static WindowTable mWindowTable;
+
+	static UiMacApplication* mApplication;
+
 };
 
 

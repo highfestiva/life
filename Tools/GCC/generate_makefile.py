@@ -9,21 +9,27 @@ import sys
 cflags_1 = """
 CFLAGS = -D_STLP_THREADS -O0 -ggdb -fPIC -D_POSIX_PTHREAD_SEMANTICS %(includes)s -DPOSIX -D_XOPEN_SOURCE=600 -D_DEBUG -D_CONSOLE -DPNG_NO_ASSEMBLER_CODE -DdSingle -DdTLS_ENABLED=1 -DHAVE_CONFIG_H=1 -DLEPRA_WITHOUT_FMOD"""
 cflags_2 = "-Wno-unknown-pragmas"
-
 ldflags = ""
 
+librt = '-lrt'
+libgl = '-lGL'
 openal = '-lOpenAL'
+stllibfile = '.so.5.2.1'
 
 if sys.platform == 'darwin':
+    librt = ''
     openal = '-framework OpenAL'
-    cflags_1 += ' -framework CoreServices -framework OpenAL -DMAC_OS_X_VERSION=1050'
-    ldflags += ' -lstlport -framework OpenGL -framework CoreServices %(libs)s %(deplibs)s '
+    libgl = '-framework OpenGL'
+    stllibfile = '.5.2.1.dylib'
+    cflags_1 += ' -framework OpenGL -framework CoreServices -framework OpenAL -DMAC_OS_X_VERSION=1050'
+    ldflags += ' -framework OpenGL -framework AppKit -framework Cocoa -lobjc -lstlport -framework CoreServices %(libs)s %(deplibs)s '
 
 head_lib = cflags_1+" -Wall "+cflags_2+"\n"
 
 head_lib_nowarn = cflags_1+" "+cflags_2+"\n"
 
 foot_rules = """
+.SUFFIXES: .o .mm
 depend:
 \tmakedepend -- $(CFLAGS) -- $(SRCS)
 \t#@grep -Ev "\\.o: .*([T]hirdParty|/[u]sr)/" makefile >.tmpmake
@@ -31,6 +37,8 @@ depend:
 .c.o:
 \tgcc $(CFLAGS) -o $@ -c $<
 .cpp.o:
+\tg++ $(CFLAGS) -o $@ -c $<
+.mm.o:
 \tg++ $(CFLAGS) -o $@ -c $<
 
 """
@@ -46,11 +54,11 @@ lib%(lib)s.so:\t$(OBJS)
 foot_lib_nowarn = foot_lib
 
 head_bin = head_lib+"""
-LIBS = -lLife -lCure -lTBC -lLepra -lThirdParty -lstlport -lpthread -ldl -lrt %(libs)s
+LIBS = -lLife -lCure -lTBC -lLepra -lThirdParty -lstlport -lpthread -ldl """ + librt + """ %(libs)s
 """
 
 head_gfx_bin = head_bin+"""
-LIBS = -lLife -lUiCure -lUiTBC -lUiLepra """ + openal + """ -lalut -lCure -lTBC -lLepra -lThirdParty -lstlport -lpthread -ldl -lrt -lGL %(libs)s
+LIBS = -lLife -lUiCure -lUiTBC -lUiLepra """ + openal + """ -lalut -lCure -lTBC -lLepra -lThirdParty -lstlport -lpthread -ldl """ + librt + " " + libgl + """ %(libs)s
 """
 
     
@@ -89,7 +97,7 @@ depend:
 \tdone
 
 $(BINS):\t$(OBJS)
-\t@cp ThirdParty/stlport/build/lib/obj/gcc/so/libstlport.so.5.2 bin/
+\t@cp ThirdParty/stlport/build/lib/obj/gcc/so/libstlport""" + stllibfile + """ bin/
 \t@cp $@ bin/
 
 $(OBJS):\t$(SRCS)
@@ -110,7 +118,7 @@ def printend(type):
 
 def issrc(fname):
     ext = os.path.splitext(fname)[1]
-    return (ext == ".cpp" or ext == ".c")
+    return (ext == ".cpp" or ext == ".c" or ext == ".mm")
 
 def create_makefile(makename, srcname, type):
     f = open(makename, "wt")
@@ -240,8 +248,8 @@ def main():
         ["TBC",        "lib",        "TBC/TBC.vcproj", "Lepra"],
         ["Cure",    "lib",        "Cure/Cure.vcproj", "TBC"],
         ["UiLepra",    "lib",        "UiLepra/UiLepra.vcproj", "Lepra alut"],
-        ["UiTBC",    "lib",        "UiTBC/UiTBC.vcproj", "UiLepra"],
-        ["UiCure",    "lib",        "UiCure/UiCure.vcproj", "UiTBC"],
+        ["UiTBC",    "lib",        "UiTBC/UiTBC.vcproj", "UiLepra TBC"],
+        ["UiCure",    "lib",        "UiCure/UiCure.vcproj", "UiTBC Cure"],
         ["Life",    "lib",        "Life/Life.vcproj", "Cure"],
         ["LifeServer",    "bin",        "Life/LifeServer/LifeServer.vcproj", "Life"],
         ["LifeClient",    "gfx_bin",    "Life/LifeClient/LifeClient.vcproj", "Life UiCure"],

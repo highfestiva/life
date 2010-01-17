@@ -23,7 +23,7 @@ public:
 	// Returns true if the message was processed. Returns false otherwise.
 	// If there are many observers listening to the same message,
 	// returning true will stop propagation.
-	virtual Bool OnMessage(XEvent* e) = 0;
+	virtual bool OnMessage(NSEvent* e) = 0;
 };
 
 class MacDisplayManager: public DisplayManager, public MacObserver
@@ -50,19 +50,18 @@ public:
 	virtual unsigned GetRefreshRate();
 	virtual bool IsFullScreen();
 
-	Display* GetDisplay() const;
-	Window GetWindow() const;
+	NSWindow* GetWindow() const;
 
-	static Bool WaitForNotify(Display* d, XEvent* e, char* arg);
-	Bool InternalDispatchMessage(XEvent* e);
+	bool DispatchMessage(NSEvent* e);
+
 	void ProcessMessages();
-	void AddObserver(Window pMessage, MacObserver* pObserver);
-	void RemoveObserver(Window pMessage, MacObserver* pObserver);
+	void AddObserver(int pMessage, MacObserver* pObserver);
+	void RemoveObserver(int pMessage, MacObserver* pObserver);
 	void RemoveObserver(MacObserver* pObserver);
 	// Show a popup dialog with a message.
 	void ShowMessageBox(const str& pMsg, const str& pCaption);
 
-	virtual Bool OnMessage(XEvent* e);
+	virtual bool OnMessage(NSEvent* e);
 
 protected:
 
@@ -102,8 +101,8 @@ protected:
 	ScreenMode mScreenMode;	// Fullscreen or windowed.
 
 	static int msWindowCount;
-	Display* mDisplay;
-	Window mWnd;
+
+	NSWindow* mWnd;
 	bool mIsOpen;
 
 	bool mMinimized;

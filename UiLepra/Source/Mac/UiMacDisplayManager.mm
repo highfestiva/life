@@ -38,7 +38,6 @@ void DisplayManager::EnableScreensaver(bool /*pEnable*/)
 
 MacDisplayManager::MacDisplayManager() :
 	mScreenMode(DisplayManager::WINDOWED),
-	mDisplay(0),
 	mWnd(0),
 	mIsOpen(false),
 	mMinimized(false),
@@ -128,7 +127,7 @@ void MacDisplayManager::SetCaption(const str& pCaption, bool pInternalCall)
 
 		if (pInternalCall == false || mCaptionSet == false)
 		{
-			::XStoreName(GetDisplay(), GetWindow(), astrutil::ToOwnCode(pCaption).c_str());
+			[mWnd setTitle: [NSString stringWithCString: astrutil::ToOwnCode(pCaption).c_str()]];
 		}
 	}
 }
@@ -225,10 +224,11 @@ void MacDisplayManager::CloseScreen()
 		MacCore::RemoveDisplayManager(this);
 		RemoveObserver(this);
 
-		::XUnmapWindow(GetDisplay(), GetWindow());
-		::XDestroyWindow(GetDisplay(), GetWindow());
+//		::XUnmapWindow(GetDisplay(), GetWindow());
+//		::XDestroyWindow(GetDisplay(), GetWindow());
+		[mWnd close];
 		mWnd = 0;
-		mDisplay = 0;
+//		mDisplay = 0;
 	}
 }
 
@@ -239,7 +239,9 @@ bool MacDisplayManager::IsVisible() const
 
 bool MacDisplayManager::InitWindow()
 {
-	bool lOk = mIsOpen;
+	bool lOk = mIsOpen = true;
+
+	mWnd = [[NSWindow alloc] initWithContentRect: NSMakeRect(0, 0, 640, 480) styleMask: NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask backing: NSBackingStoreBuffered defer: NO];
 
 	/*if (lOk)
 	{
@@ -401,44 +403,12 @@ int MacDisplayManager::GetClientHeight(int pWindowHeight)
 	return pWindowHeight - lBorderSizeY;
 }
 
-Display* MacDisplayManager::GetDisplay() const
-{
-	return mDisplay;
-}
-
-Window MacDisplayManager::GetWindow() const
+NSWindow* MacDisplayManager::GetWindow() const
 {
 	return mWnd;
 }
 
-Bool MacDisplayManager::WaitForNotify(Display* d, XEvent* e, char* arg)
-{
-	/*if (pMessage  == WM_QUIT ||
-		pMessage == WM_DESTROY)
-	{
-		--msWindowCount;
-		if (msWindowCount == 0)
-		{
-			SystemManager::AddQuitRequest(+1);
-		}
-	}
-
-	bool lMessageWasConsumed = false;
-	MacDisplayManager* lDisplayManager = MacCore::GetDisplayManager(pWnd);
-	if (lDisplayManager)
-	{
-		lMessageWasConsumed = lDisplayManager->InternalDispatchMessage(pMessage, pwParam, plParam);
-	}
-	LRESULT lResult = 0;
-	if (!lMessageWasConsumed)
-	{
-		lResult = DefWindowProc(pWnd, pMessage, pwParam, plParam);
-	}
-	return (lResult);*/
-	return((e->type == MapNotify) && (e->xmap.window == (::Window)arg));
-}
-
-Bool MacDisplayManager::InternalDispatchMessage(XEvent* e)
+bool MacDisplayManager::DispatchMessage(NSEvent* e)
 {
 	/*if (pMessage == WM_CHAR && mConsumeChar)
 	{
@@ -477,7 +447,7 @@ void MacDisplayManager::ProcessMessages()
 	}
 }
 
-void MacDisplayManager::AddObserver(Window pMessage, MacObserver* pObserver)
+void MacDisplayManager::AddObserver(int pMessage, MacObserver* pObserver)
 {
 	ObserverSetTable::Iterator lTIter = mObserverSetTable.Find(pMessage);
 	ObserverSet* lSet = 0;
@@ -499,7 +469,7 @@ void MacDisplayManager::AddObserver(Window pMessage, MacObserver* pObserver)
 	}
 }
 
-void MacDisplayManager::RemoveObserver(Window pMessage, MacObserver* pObserver)
+void MacDisplayManager::RemoveObserver(int pMessage, MacObserver* pObserver)
 {
 	ObserverSetTable::Iterator lTIter = mObserverSetTable.Find(pMessage);
 
@@ -548,7 +518,7 @@ void MacDisplayManager::ShowMessageBox(const str& pMsg, const str& pCaption)
 	//::MessageBox(mWnd, pMsg.c_str(), pCaption.c_str(), MB_OK);
 }
 
-Bool MacDisplayManager::OnMessage(XEvent* e)
+bool MacDisplayManager::OnMessage(NSEvent* e)
 {
 	/*switch(pMsg)
 	{

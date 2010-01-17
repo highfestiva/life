@@ -48,8 +48,8 @@ void MacOpenGLDisplay::CloseScreen()
 
 bool MacOpenGLDisplay::Activate()
 {
-	bool lOk = ::glXMakeCurrent(GetDisplay(), GetWindow(), mGlContext);
-	return (lOk);
+	[mGlContext makeCurrentContext];
+	return true;
 }
 
 bool MacOpenGLDisplay::UpdateScreen()
@@ -63,22 +63,26 @@ bool MacOpenGLDisplay::UpdateScreen()
 	// be updated.
 	GLboolean lScissorsEnabled = ::glIsEnabled(GL_SCISSOR_TEST);
 	::glDisable(GL_SCISSOR_TEST);
-	::glXSwapBuffers(GetDisplay(), GetWindow());
+
+	[mGlContext flushBuffer];
+
 	if (lScissorsEnabled)
 	{
 		::glEnable(GL_SCISSOR_TEST);
 	}
+
 	return (true);
 }
 
 bool MacOpenGLDisplay::IsVSyncEnabled() const
 {
-	return OpenGLExtensions::IsVSyncEnabled();
+	return true; //OpenGLExtensions::IsVSyncEnabled();
 }
 
 bool MacOpenGLDisplay::SetVSyncEnabled(bool pEnabled)
 {
-	return (mIsOpen? OpenGLExtensions::SetVSyncEnabled(pEnabled) : false);
+	return true;
+//	return (mIsOpen? OpenGLExtensions::SetVSyncEnabled(pEnabled) : false);
 }
 
 DisplayManager::ContextType MacOpenGLDisplay::GetContextType()
@@ -108,10 +112,7 @@ void MacOpenGLDisplay::SetFocus(bool pFocus)
 
 void MacOpenGLDisplay::Deactivate()
 {
-	if (GetDisplay())
-	{
-		::glXMakeCurrent(GetDisplay(), 0, 0);
-	}
+	[NSOpenGLContext clearCurrentContext];
 }
 
 void MacOpenGLDisplay::OnResize(int pWidth, int pHeight)
@@ -169,6 +170,8 @@ void MacOpenGLDisplay::OnMaximize(int pWidth, int pHeight)
 bool MacOpenGLDisplay::InitScreen()
 {
 	UpdateCaption();
+
+	
 
 /*TODO: port!
 
@@ -256,13 +259,13 @@ bool MacOpenGLDisplay::CreateGLContext()
 {
 	if (mGlContext == 0)
 	{
-		mGlContext = ::glXCreateContext(GetDisplay(), GetVisualInfo(), 0, GL_TRUE);
+//		mGlContext = ::glXCreateContext(GetDisplay(), GetVisualInfo(), 0, GL_TRUE);
 	}
 
 	bool lOk = (mGlContext != 0);
 	if (lOk)
 	{
-		++mContextUserCount;
+//		++mContextUserCount;
 		lOk = Activate();
 	}
 	return (lOk);
@@ -270,36 +273,17 @@ bool MacOpenGLDisplay::CreateGLContext()
 
 void MacOpenGLDisplay::DeleteGLContext()
 {
-	if (mContextUserCount >= 1)
+//	if (mContextUserCount >= 1)
 	{
-		--mContextUserCount;
+//		--mContextUserCount;
 	}
-	if (mContextUserCount == 0)
+//	if (mContextUserCount == 0)
 	{
-		::glXMakeCurrent(GetDisplay(), 0, 0);
-		::glXDestroyContext(GetDisplay(), mGlContext);
+		[NSOpenGLContext clearCurrentContext];
+//		::glXMakeCurrent(GetDisplay(), 0, 0);
+//		::glXDestroyContext(GetDisplay(), mGlContext);
 		mGlContext = 0;
 	}
 }
-
-XVisualInfo* MacOpenGLDisplay::GetVisualInfo() const
-{
-	int lMacAttributeList[] =
-	{
-			GLX_RGBA, GLX_DOUBLEBUFFER,
-			GLX_RED_SIZE, 1,
-			GLX_GREEN_SIZE, 1,
-			GLX_BLUE_SIZE, 1,
-			None
-	};
-	return(::glXChooseVisual(GetDisplay(), DefaultScreen(GetDisplay()), lMacAttributeList));
-}
-
-
-
-GLXContext MacOpenGLDisplay::mGlContext = 0;
-int MacOpenGLDisplay::mContextUserCount = 0;
-
-
 
 }

@@ -824,7 +824,7 @@
 				Name="Mac"
 				>
 				<File
-					RelativePath=".\Source\Mac\UiMacCore.cpp"
+					RelativePath=".\Source\Mac\UiMacCore.mm"
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
@@ -876,7 +876,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath=".\Source\Mac\UiMacDisplayManager.cpp"
+					RelativePath=".\Source\Mac\UiMacDisplayManager.mm"
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
@@ -928,7 +928,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath=".\Source\Mac\UiMacInput.cpp"
+					RelativePath=".\Source\Mac\UiMacInput.mm"
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
@@ -980,7 +980,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath=".\Source\Mac\UiMacOpenGLDisplay.cpp"
+					RelativePath=".\Source\Mac\UiMacOpenGLDisplay.mm"
 					>
 					<FileConfiguration
 						Name="Debug|Win32"

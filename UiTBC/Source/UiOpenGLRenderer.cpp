@@ -1308,8 +1308,8 @@ void OpenGLRenderer::RenderShadowVolumes()
 	glEnable(GL_STENCIL_TEST);
 
 	glDepthFunc(GL_LESS);
-	glEnable(GL_POLYGON_OFFSET_EXT);
-	glPolygonOffset(0.5f, 0);
+//	glEnable(GL_POLYGON_OFFSET_EXT);
+//	glPolygonOffset(0.5f, 0);
 
 
 	glMatrixMode(GL_MODELVIEW);
@@ -1396,8 +1396,8 @@ void OpenGLRenderer::RenderShadowVolumes()
 	glShadeModel(GL_SMOOTH);
 	glColorMask(1, 1, 1, 1);
 	glDepthFunc(GL_LEQUAL);
-	glPolygonOffset(0, 0);
-	glDisable(GL_POLYGON_OFFSET_EXT);
+//	glPolygonOffset(0, 0);
+//	glDisable(GL_POLYGON_OFFSET_EXT);
 }
 
 int OpenGLRenderer::RenderShadowMaps()
