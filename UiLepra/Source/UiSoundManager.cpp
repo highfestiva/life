@@ -1,7 +1,6 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 //Copyright (c) 2002-2009, Righteous Games
-
 
 
 #include <assert.h>

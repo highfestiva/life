@@ -74,7 +74,7 @@ bool Network::ResolveHostname(const str& pHostname, IPAddress& pIPAddress)
 
 	if (lHostent != 0)
 	{
-		pIPAddress.Set((const uint8*)lHostent->h_addr, lHostent->h_length);
+		pIPAddress.Set((const uint8*)lHostent->h_addr_list[0], lHostent->h_length);
 		return true;
 	}
 	return false;

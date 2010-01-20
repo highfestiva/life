@@ -1,5 +1,5 @@
 
-// Author: Alexander Hugestrand, Jonas Byström
+// Author: Jonas Byström
 // Copyright (c) 2002-2009, Righteous Games
 
 
@@ -30,7 +30,14 @@ void GetAbsTime(float64 pDeltaTime, timespec& pTimeSpec)
 {
 	float64 lSeconds = floor(pDeltaTime);
 	float64 lNanoSeconds = (pDeltaTime - lSeconds) * 1000000000.0;
+#if defined(LEPRA_MAC)
+	timeval lTimeSpecNow;
+	gettimeofday(&lTimeSpecNow, NULL);
+	pTimeSpec.tv_sec = lTimeSpecNow.tv_sec;
+	pTimeSpec.tv_nsec = lTimeSpecNow.tv_usec * 1000;
+#else
 	::clock_gettime(CLOCK_REALTIME, &pTimeSpec);
+#endif
 	pTimeSpec.tv_sec += (time_t)lSeconds;
 	pTimeSpec.tv_nsec += (long)lNanoSeconds;
 }
@@ -65,10 +72,12 @@ StaticThread gMainThread(_T("MainThread"));
 
 static void InitializeSignalMask()
 {
+#if !defined(LEPRA_MAC)
 	sigset_t lMask;
 	::sigemptyset(&lMask);
 	::sigaddset(&lMask, SIGHUP);
 	::pthread_sigmask(SIG_BLOCK, &lMask, 0);
+#endif
 }
 
 
@@ -156,39 +165,79 @@ void PosixCondition::SignalAll()
 
 
 PosixSemaphore::PosixSemaphore():
-	mMaxPermitCount(0)
+	mMaxPermitCount(100000),
+	mPermitCount(0)
 {
-	::sem_init(&mSemaphore, 0, 0);
+	if (::pthread_mutex_init(&mMutex, 0) != 0)
+	{
+		mLog.Errorf(_T("Problem initializing Posix semaphore (mutex). errno=%i."), errno);
+	}
+	if (::pthread_cond_init(&mCondition, 0) != 0)
+	{
+		mLog.Errorf(_T("Problem initializing Posix semaphore (condition). errno=%i."), errno);
+	}
 }
 
 PosixSemaphore::PosixSemaphore(unsigned pMaxCount):
-	mMaxPermitCount(pMaxCount)
+	mMaxPermitCount(pMaxCount),
+	mPermitCount(0)
 {
-	::sem_init(&mSemaphore, 0, 0);
+	if (::pthread_mutex_init(&mMutex, 0) != 0)
+	{
+		mLog.Errorf(_T("Problem #2 initializing Posix semaphore (mutex). errno=%i."), errno);
+	}
+	if (::pthread_cond_init(&mCondition, 0) != 0)
+	{
+		mLog.Errorf(_T("Problem #2 initializing Posix semaphore (condition). errno=%i."), errno);
+	}
 }
 
 PosixSemaphore::~PosixSemaphore()
 {
-	::sem_destroy(&mSemaphore);
+	::pthread_cond_destroy(&mCondition);
+	::pthread_mutex_destroy(&mMutex);
 }
 
 void PosixSemaphore::Wait()
 {
-	::sem_wait(&mSemaphore);
+	pthread_mutex_lock(&mMutex);
+	while (mPermitCount == 0)
+	{
+		pthread_cond_wait(&mCondition, &mMutex);
+	}
+	--mPermitCount;
+	pthread_mutex_unlock(&mMutex);
 }
 
 bool PosixSemaphore::Wait(float64 pMaxWaitTime)
 {
 	timespec lTimeSpec;
 	GetAbsTime(pMaxWaitTime, lTimeSpec);
-	return (::sem_timedwait(&mSemaphore, &lTimeSpec) == 0);
+
+	pthread_mutex_lock(&mMutex);
+	if (mPermitCount == 0)
+	{
+		pthread_cond_timedwait(&mCondition, &mMutex, &lTimeSpec);
+	}
+	bool lTimeout = (mPermitCount == 0);
+	if (!lTimeout)
+	{
+		--mPermitCount;
+	}
+	pthread_mutex_unlock(&mMutex);
+	return (!lTimeout);
 }
 
 void PosixSemaphore::Signal()
 {
-	::sem_post(&mSemaphore);
+	pthread_mutex_lock(&mMutex);
+	if (mPermitCount < mMaxPermitCount)
+	{
+		++mPermitCount;
+		pthread_cond_signal(&mCondition);	// Fairness may be compromized when outside lock, but glibc hang bug found inside! :(
+	}
+	pthread_mutex_unlock(&mMutex);
 }
-
 
 
 
@@ -245,10 +294,15 @@ void Thread::InitializeMainThread(const str& pThreadName)
 
 size_t Thread::GetCurrentThreadId()
 {
+	return (size_t)pthread_self();
+/*#if defined(LEPRA_MAC)
+#else
 #ifndef gettid
 #define gettid()	::syscall(SYS_gettid)
 #endif
 	return (gettid());
+#endif
+*/
 }
 
 Thread* Thread::GetCurrentThread()
@@ -288,10 +342,18 @@ bool Thread::Start()
 
 	if (!IsRunning())
 	{
+		pthread_t	lThreadHandle;
+		pthread_attr_t	lThreadAttributes;
+
 		SetStopRequest(false);
 
-		if(::pthread_create(&mThreadHandle, 0, ThreadEntry, this) == 0)
+		pthread_attr_init(&lThreadAttributes);
+		pthread_attr_setdetachstate(&lThreadAttributes, PTHREAD_CREATE_JOINABLE);
+
+		if(::pthread_create(&lThreadHandle, &lThreadAttributes, ThreadEntry, this) == 0)
 		{
+			mThreadHandle = (size_t)lThreadHandle;
+
 			// Wait for newly created thread to kickstart.
 			mSemaphore.Wait(5.0);
 		}
@@ -311,7 +373,7 @@ bool Thread::Join()
 	if (GetThreadHandle() != 0)
 	{
 		assert(GetThreadId() != GetCurrentThreadId());
-		::pthread_join(mThreadHandle, 0);
+		::pthread_join((pthread_t)mThreadHandle, 0);
 		assert(!IsRunning());
 		mThreadHandle = 0;
 		mThreadId = 0;
@@ -340,7 +402,7 @@ bool Thread::Join(float64 pTimeOut)
 
 void Thread::Signal(int) // Ignore signal for now.
 {
-	::pthread_kill(mThreadHandle, SIGHUP);
+	::pthread_kill((pthread_t)mThreadHandle, SIGHUP);
 }
 
 void Thread::Kill()
@@ -349,7 +411,7 @@ void Thread::Kill()
 	{
 		assert(GetThreadId() != GetCurrentThreadId());
 		mLog.Warningf(_T("Forcing kill of thread %s."), GetThreadName().c_str());
-		::pthread_kill(mThreadHandle, SIGHUP);
+		::pthread_kill((pthread_t)mThreadHandle, SIGHUP);
 		Join();
 		SetRunning(false);
 	}
@@ -365,6 +427,10 @@ void Thread::PostRun()
 {
 	mSemaphore.Signal();
 }
+
+
+
+LOG_CLASS_DEFINE(GENERAL, PosixSemaphore);
 
 
 

@@ -2237,7 +2237,7 @@ bool TestPerformance(const LogDecorator& pAccount)
 				sa.sin_family = AF_INET;
 				char lHostname[256] = "";
 				::gethostname(lHostname, sizeof(lHostname));
-				sa.sin_addr.s_addr = *(u_long*)(gethostbyname(lHostname)->h_addr);
+				sa.sin_addr.s_addr = *(unsigned int*)(gethostbyname(lHostname)->h_addr_list[0]);
 				sa.sin_port = Endian::HostToBig((uint16)46666);
 				lTestOk = (::bind(fd, (sockaddr*)&sa, sizeof(sa)) >= 0);
 				assert(lTestOk);

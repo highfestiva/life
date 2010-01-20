@@ -83,7 +83,11 @@ public:
 
 protected:
 	unsigned mMaxPermitCount;
-	sem_t mSemaphore;
+	volatile unsigned mPermitCount;
+	pthread_mutex_t mMutex;
+	pthread_cond_t mCondition;
+
+	LOG_CLASS_DECLARE();
 };
 
 

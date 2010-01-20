@@ -208,11 +208,11 @@ void* OpenGLExtensions::GetExtensionPointer(const char* pFunctionName)
 {
 #if defined(LEPRA_WINDOWS)
     return (void*)wglGetProcAddress(pFunctionName);
-#elif defined(LEPRA_MACOSX)
+#elif defined(LEPRA_MAC)
     // Mac is a bit more tricky.
     // First we need the bundle
     CFBundleRef openGL = 0;
-    SInt16      fwVersion = 0;
+/*    SInt16      fwVersion = 0;
     SInt32      fwDir = 0;
     
     if(FindFolder(kSystemDomain, kFrameworksFolderType, kDontCreateFolder, &fwVersion, &fwDir) != noErr)
@@ -222,9 +222,12 @@ void* OpenGLExtensions::GetExtensionPointer(const char* pFunctionName)
     FSRef  fRef;
     if(FSMakeFSSpec(fwVersion, fwDir, "\pOpenGL.framework", &fSpec) != noErr)
         return NULL;
-        
+ 
     FSpMakeFSRef(&fSpec, &fRef);
-    CFURLRef url = CFURLCreateFromFSRef(kCFAllocatorDefault, &fRef);
+*/  
+
+    CFStringRef urlString = CFSTR("/System/Library/OpenGL.framework");
+    CFURLRef url = CFURLCreateWithString(NULL, urlString, NULL);
     if(!url)
         return NULL;
         

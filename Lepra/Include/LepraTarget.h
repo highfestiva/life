@@ -69,6 +69,10 @@
 #error "Hardware platform not supported!"
 #endif // _X86_/ARM
 
+#if defined(__APPLE__)
+#define LEPRA_MAC
+#endif
+
 #if defined(DEBUG) || defined(_DEBUG)
 #define LEPRA_DEBUG
 #endif // DEBUG

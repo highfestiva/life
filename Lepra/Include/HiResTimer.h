@@ -202,6 +202,8 @@ void HiResTimer::InitFrequency()
 	LARGE_INTEGER lFrequency;
 	::QueryPerformanceFrequency(&lFrequency);
 	mFrequency = (int64)lFrequency.QuadPart;
+#elif defined(LEPRA_MAC)
+	mFrequency = 1000000;
 #elif defined(LEPRA_POSIX)
 	mFrequency = 1000000000;
 #else // <Unknown target>
@@ -226,6 +228,10 @@ uint64 HiResTimer::GetSystemCounter()
 	LARGE_INTEGER lTimeCounter;
 	::QueryPerformanceCounter(&lTimeCounter);
 	return ((uint64)lTimeCounter.QuadPart);
+#elif defined(LEPRA_MAC)
+        timeval lTimeValue;
+        ::gettimeofday(&lTimeValue, 0);
+	return ((uint64)lTimeValue.tv_sec*1000000 + lTimeValue.tv_usec);
 #elif defined(LEPRA_POSIX)
 	timespec lTimeValue;
 	::clock_gettime(CLOCK_REALTIME, &lTimeValue);
