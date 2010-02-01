@@ -1,6 +1,9 @@
 Business
 ---------
-- Make a web site, following Seth's guidelines.
+- Estimate market.
+- Calculate number of copies you'd like to sell to make some $$$. How much is this title worth?
+- Make a game web site, following Seth's guidelines.
+- Make a company web site, following Seth's guidelines.
 - Check out what online payment systems there are and pick a good one.
 - Hand out to friends and family. Gather feedback. FIX!
 - Make X demo CDs. Burn, lightscribe, print and package.
@@ -47,10 +50,10 @@ Game
 . Add login progress bar.
 . Adjust the camera view according to the vehicle: huge crane, small ball...
 . Show logo when starting game.
-. Add "what you're missing out on when not running Pro" in the end of the demo (=release client?).
+. Make a "what you're missing out on when not running Pro" end screen in demo version. (=release client?)
+. Add link to home page in demo end screen.
 . Update and adjust what messages are shown on screen when starting up.
 . Make a start screen with all settings. Start screen heavily fogged.
-. Make a "what you're missing out on" end screen in demo version. Add link to home page.
 . Implement the following settings in the heavily fogged start screen:
   - Nationality (switched real time).
   - Full screen / windowed.
@@ -111,6 +114,11 @@ Engine
 + Make physics manager (ODE) work with >1 simultaneous thread.
 + Update server port in Linux.
 + Port client to Linux.
++ Add phys_capsule as allowed shape in the import tool and load part in engine.
++ Add support for moving stuff in static world (elevator, wind mill, etc).
++ Add loading of all formats, especially world format.
++ Try to fixate hardware devices, so that Device0 doesn't mean game pad one day and joystick the next.
++ Fix cursor in GUI (used to cause XOR problems).
 . Port client to Mac OS X / Cocoa.
 
 . Move over to MSVC9.
@@ -121,40 +129,30 @@ Engine
 . Remove game source code from engine source code: camera, hard-coded object placements, input handling, etc.
 . Spawn points. Matching against vehicle types...
 . Add UV-maps to the import tool.
-. Add phys_capsule as allowed shape in the import tool and load part in engine.
-. Add support for moving stuff in static world (elevator, wind mill, etc).
+. Make importer capable of getting texturing.
 . Make export script (Maya) auto-run before save.
-. Make engine and import tool externally available to Pelle!
 . Logging on in two steps: a) normal login, server returns avatars, and b) enter world by selecting avatar. (After (a) the sync goes.)
+. Creating a less jittery experience: a) sync lag/jitter immediately after logging in, b) sorting out old msgs on client, c) keeping track of jitter on client side.
 . Moving out platform specifics from (Ui)CppContextObject.cpp to LifeXxx.cpp.
 . Spawn engine and load world. Must be able to manage both.
-. Make importer capable of getting texturing.
-. Use a zipped archive for data.
-. Add loading of all formats, especially world format.
 . Add some type of spawn engine for player vehicles.
-. Restrict flying/bouncing to a certain volume. Going outside means destroyed avatar = pick new one.
+. Use a zipped archive for data.
+. Restrict flying to a certain height. Going above = all engines off.
 . Add "switch to splitscreen" by buttonpress ingame.
-. Creating a less jittery experience: a) sync lag/jitter immediately after logging in, b) sorting out old msgs on client, c) keeping track of jitter on client side.
 . Use animated texture instead of wheels for excavator/bandwagon.
 . Sounds. Music.
 . Endianify all Chunky saves/loads.
-. Creating group/world objects as resources.
-. Loading group/world objects from disk.
 . Disabling keyboard steering when any splitscreen console window is down.
 . Chat - client side UI.
 . Text/console clients, plural. Run in same process.
 . Include server in same binary.
 . Include (optional) object position when creating an object over the network.
 . Add context-sensitive and more degrees of freedom for control mechanisms: ball+ufo needs analogue fwd-bkg, cranes, excavators, etc.
-. Make camera always keep a free line of sight to the controlled object.
 . Wrap physics frame counter (game could go on forever).
-. Try to fixate hardware devices, so that Device0 doesn't mean game pad one day and joystick the next.
+. Port input handling, calibration and names.
 . Design GUI. Menus as well as toolbars during play. Also icons for picking vehicle.
-. Create a master server, which at first only receives user feedback.
-. Add questionaire to end of demo game (=release client?). Send answers to master server.
 . Make sure memfile log always gets everything (including trace+debug+performance). Tail contents to con and file upon crash.
 . Improve vehicle wheel friction.
-. Fix cursor in GUI (used to cause XOR problems).
 . Do not resend positional info frequently when pushed/collided similarly (i.e. excavator holding down monster truck).
 . Make sure that analogue input devices are thresholded, so they don't cause constant socket transmits when moved.
 . Add support for a demo version, which among other things has an end screen, and some disabled features.
@@ -170,6 +168,12 @@ Engine
 . Port client to X11.
 . Port Posix' SystemManager (mostly placeholders at the moment).
 . Port font rendering to X11.
+
+- Make camera always keep a free line of sight to the controlled object.
+- Creating group/world objects as resources.
+- Loading group/world objects from disk.
+- Create a master server, which at first only receives user feedback.
+- Add questionaire to end of demo game (=release client?). Send answers to master server.
 
  
 Quality
@@ -198,6 +202,7 @@ Quality
 + Stresstest (use .lsh).
 + Check optimizations quickly.
 + Run Simian Analyzer, remove duplicate code.
++ Exchange "varning: flerteckens teckenkonstant" (ChunkyLoader.h) to something portable and beautiful.
 
 . Make sure default settings are good on a no-good computer. Like 60 FPS.
 . Make sure shutting down client with two simultaneously logged-in users gets logged out from the server.
@@ -205,45 +210,43 @@ Quality
 . Add better camera control, such as for the truck (just looking at the trailer looks like shit).
 . Being able to log in/out on one splitscreen while running normally on the other (no freeze).
 . Don't allow program to become unresponsive when starting up (alt-tab away and back). Related to some other issue in this list.
-. Print Git (or some other) revision to log when starting.
+. Print game version number to log when starting.
 . Add support for checking if loaded controller configuration contains devices no longer present in the system when starting, and if so reset 'em.
 . Add support for auto-configuring best controller configuration.
 . Produce autostarting autotest after commit. Run in Linux at least.
 . Give feedback while logging in. Especially after a few seconds of nothingness.
 . Check heap regularly (using _heapchk() in Win32).
 . Add relevant thread safety to classes here and there (NetworkServer, for instance). Add interfaces to isolate functionality. Use Sigges design pattern.
-. When input is hindered (such as when pulling joystick back, then taking down the console) the excavator behaves jerkily.
-. Assertions on high and stable frame rate. Includes the network sliding average frame rate (should be filtered?).
 . Add crash control.
 . Add handling of ODE crashes (numerical overflow, etc).
-. Create and use "lag socket" (sys_socket through factory?).
 . Start alpha-testing with human users.
 . Go through all TODOs.
 . Fix all source file header comments (Righteous games, 2010).
 . If clicking "slowly" the game starts with the mouse state shown as "down". Perhaps the same applies when clicking in another app? This makes it inpossible to click a button on the first attempt after going back to the game.
 . Rename PhysicsEngine and ChunkyXxx classes to sensible names.
 . Verify that destruction of ContextObject during load does not cause an invalid resource to float around the resource manager.
+. Fix engine mode "half_lock" (or make it synchronized or otherwise improved).
+. Add click sounds to buttons.
+. Go over demo version and release version, making sure that all functionality is in place.
+. Automatically downsize rendering (shadows) and physics micro steps if FPS are low. Runtime optimize by turning off pixel shaders, shadow volumes, etc.
+. Check that all log destinations write strings, not raw data, to disk. LogFileXxx (single one) was checked and corrected from WriteData() to WriteString().
+. Get licences in order. Both C++ and Python. Both mine and third party.
+. Separate input and output data in the data folder. Create a proper directory structure for external release.
+. Descide how to accomodate several split-screen sound "listeners" on OpenAL. Implement.
+. Remove unused rtvars (such as Ui.2D.PaintMode).
 . Remove all memory leaks.
 . Test thoroughly!
 . Polish.
 . Refactor.
 . Go through all RG e-mail to ensure all is in place.
-. Add homepage for both Righteous Games as well as The Game.
-. Exchange "varning: flerteckens teckenkonstant" (ChunkyLoader.h) to something portable and beautiful.
-. Create a small master server which receives crash reports and feedback.
-. Create feedback form which can be entered and transmitted by any user at any time. Received by master server.
-. Remove engine mode "half_lock" (or make it synchronized or otherwise improved).
-. Go over demo version and release version, making sure that all functionality is in place.
-. Add click sounds to buttons.
-. Remove unused rtvars (such as Ui.2D.PaintMode).
-. Port to D3D rendering + painter. Painter only needs working fonts?
-. Automatically downsize rendering (shadows) and physics micro steps if FPS are low.
-. Check that all log destinations write strings, not raw data, to disk. LogFileXxx (single one) was checked and corrected from WriteData() to WriteString().
-. Get licences in order. Both C++ and Python. Both mine and third party.
-. Separate input and output data in the data folder. Create a proper directory structure for external release.
-. Runtime optimize by turning off pixel shaders, shadow volumes, etc.
-. Descide how to accomodate several split-screen sound "listeners" on OpenAL. Implement.
-. Perhaps (?) add ogg/vorbis support if music is wanted.
 | Test with "simulating" single CPU system. (Don't put me out, place me at bottom of checklist.)
 | Test with corrupt/missing resources. (Don't put me out, place me at bottom of checklist.)
 | Test run server on Linux, client on Windows.
+
+- When input is hindered (such as when pulling joystick back, then taking down the console) the excavator behaves jerkily.
+- Assertions on high and stable frame rate. Includes the network sliding average frame rate (should be filtered?).
+- Create and use "lag socket" (sys_socket through factory?).
+- Port to D3D rendering + painter. Painter only needs working fonts?
+- Create a small master server which receives crash reports and feedback.
+- Create feedback form which can be entered and transmitted by any user at any time. Received by master server.
+- Perhaps (?) add ogg/vorbis support if music is wanted.
