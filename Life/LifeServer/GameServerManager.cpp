@@ -355,6 +355,28 @@ bool GameServerManager::Initialize()
 				lOk = mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("frontloader")));
 			}
 		}
+		for (x = 0; lOk && x < 100; ++x)
+		{
+			const wstr lUserName = wstrutil::Format(L"TowTruck%i", x);
+			wstr lReadablePassword(L"CarPassword");
+			Cure::MangledPassword lPassword(lReadablePassword);
+			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
+			if (lOk)
+			{
+				lOk = mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("towtruck_01")));
+			}
+		}
+		for (x = 0; lOk && x < 100; ++x)
+		{
+			const wstr lUserName = wstrutil::Format(L"M%i", x);
+			wstr lReadablePassword(L"CarPassword");
+			Cure::MangledPassword lPassword(lReadablePassword);
+			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
+			if (lOk)
+			{
+				lOk = mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("monster_02")));
+			}
+		}
 	}
 
 	/*if (lOk)

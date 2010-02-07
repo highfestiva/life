@@ -79,6 +79,9 @@ def _incremental_build_data():
                 ft = filetime(ma)
                 basename = os.path.splitext(ma)[0]
                 ini = basename+".ini"
+                if not os.path.exists(ini):
+                        print("Warning: file %s missing..." % ini)
+                        continue
                 ftini = filetime(ini)
                 if ftini > ft:
                         ft = ftini
@@ -220,12 +223,16 @@ def builddata(targetdir=bindir):
 
 
 
-def buildall(targetdir=bindir, buildtype=defaulttype):
-        verify_base_dir()
+def buildcode(targetdir=bindir, buildtype=defaulttype):
         if hasdevenv(verbose=True):
                 _createmakes()
                 _buildcode("build", buildtype)
                 _incremental_copy_code(targetdir, buildtype)
+
+
+def buildall(targetdir=bindir, buildtype=defaulttype):
+        verify_base_dir()
+        buildcode(bindir, defaulttype)
         builddata(targetdir)
 
 
@@ -282,9 +289,7 @@ def buildzip():
         print("Built and zipped into %s." % targetfile)
 
 
-def start():
-        buildall()
-        _printresult()
+def startnobuild():
         os.chdir(bindir)
         pre = "./"
         post = ""
@@ -298,6 +303,12 @@ def start():
         import subprocess
         subprocess.Popen(pre+"LifeClient"+post, shell=True)
         os.system(pre+"LifeServer"+post)
+
+
+def start():
+        buildall()
+        _printresult()
+        startnobuild()
 
 
 if __name__ == "__main__":

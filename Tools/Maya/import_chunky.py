@@ -51,14 +51,16 @@ class GroupReader(DefaultMAReader):
 
         def __init__(self, basename):
                 DefaultMAReader.__init__(self)
-                self.bad_types = ["camera", "lightLinker", "displayLayerManager", "displayLayer", \
-                                  "renderLayerManager", "renderLayer", "script", \
-                                  "materialInfo", "groupId", "groupParts", \
-                                  "deleteComponent", "softModHandle", "softMod", \
-                                  "objectSet", "tweak", "imagePlane", "place2dTexture", \
-                                  "polyBridgeEdge"]
-                self.mat_types = ["lambert", "blinn", "phong", "shadingEngine", "layeredShader", \
-                                  "file"]
+                self.bad_types    = ["camera", "lightLinker", "displayLayerManager", "displayLayer", \
+                                     "renderLayerManager", "renderLayer", "script", \
+                                     "materialInfo", "groupId", "groupParts", \
+                                     "deleteComponent", "softModHandle", "softMod", \
+                                     "objectSet", "tweak", "imagePlane", "place2dTexture", \
+                                     "polyBridgeEdge", "polySeparate", "polyChipOff", \
+                                     "polyTweak"]
+                self.silent_types = ["polyExtrudeFace"]
+                self.mat_types    = ["lambert", "blinn", "phong", "shadingEngine", "layeredShader", \
+                                     "file"]
                 self.basename = basename
 
 
@@ -77,6 +79,9 @@ class GroupReader(DefaultMAReader):
                 if not islands:
                         print("Bad file! Terminating due to error.")
                         sys.exit(1)
+                #for i in islands:
+                #        print("  "+str(list(map(lambda x: x.getFullName(), i))))
+                #        print("")
                 self.check_mesh_export(islands)
                 islands, mat_islands = self.filterIslands(islands)
                 if len(islands) != 1:
@@ -161,6 +166,8 @@ class GroupReader(DefaultMAReader):
         def _recursiveremove(self, node, nodes):
                 try:
                         nodes.remove(node)
+                        #print("Dropped node %s." % node.getName())
+                        node.ignore = True
                 except ValueError:
                         pass
                 children = tuple(filter(lambda n: n.getParent() == node, nodes))
@@ -169,9 +176,12 @@ class GroupReader(DefaultMAReader):
 
 
         def gatherIslands(self, nodes):
+                for node in nodes:
+                        node.ignore = False
                 for node in tuple(nodes):
                         if node.getName().startswith("i_"):
                                 self._recursiveremove(node, nodes)
+                #print("\n".join([n.getName() for n in nodes]))
                 islands = []
                 allow_no_association = True
                 prevnodecnt = len(nodes)
@@ -190,7 +200,13 @@ class GroupReader(DefaultMAReader):
                                         nodes.remove(node)
                                 outnodes = node.getOutNodes("out", "out")
                                 if len(outnodes) == 1:
-                                        if self._insert_in_same_island_as(islands, outnodes[0][0], node, allow_no_association):
+                                        ref = outnodes[0][0]
+                                        if ref.ignore:
+                                                nodes.remove(node)
+                                                node.ignore = True
+                                        elif ref in nodes:
+                                                pass    # Skip until our ref inserted.
+                                        elif self._insert_in_same_island_as(islands, ref, node, allow_no_association):
                                                 nodes.remove(node)
                                 elif len(outnodes) > 1:
                                         print("Error: more than one output node not yet supported!")
@@ -239,7 +255,7 @@ class GroupReader(DefaultMAReader):
                 for_islands = islands[:]
                 for island in for_islands:
                         for n in island:
-                                if n.nodetype in self.bad_types or n.getName().startswith("ignore_"):
+                                if n.nodetype in self.bad_types or n.getName().startswith("i_"):
                                         #print("Removing bad %s (%s)." % (n.nodetype, n.getFullName()))
                                         islands.remove(island)
                                         break
@@ -249,6 +265,8 @@ class GroupReader(DefaultMAReader):
                                 if n.nodetype in self.mat_types:
                                         islands.remove(island)
                                         mat_islands.append(island)
+                                if n.nodetype in self.silent_types:
+                                        island.remove(n)
                 return islands, mat_islands
 
 
