@@ -43,8 +43,8 @@ public:
 
 	float*         GetVertexData() const;
 	float*         GetUVData(unsigned int pUVSet) const;
-	uint32* GetIndexData() const;
-	uint8*  GetColorData() const;
+	Lepra::uint32* GetIndexData() const;
+	Lepra::uint8*  GetColorData() const;
 	float*         GetNormalData() const;
 
 	ColorFormat GetColorFormat() const;
@@ -79,7 +79,7 @@ private:
 	void InitTO();
 
 	float* mVertexData;
-	uint32* mIndexData;
+	Lepra::uint32* mIndexData;
 
 	// Array with mNumParentTriangles elements.
 	TriangleOrientation* mTriangleOrientation;

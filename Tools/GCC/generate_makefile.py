@@ -112,6 +112,7 @@ $(OBJS):\t$(SRCS)
 $(SRCS):
 \t$(MAKE) -C $@
 \t@rm -f $(BINS)
+\t@mkdir -p bin
 \t@cp $@/*.so bin/
 """
 

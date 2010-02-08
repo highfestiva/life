@@ -180,8 +180,8 @@ public:
 
 	virtual float*         GetVertexData() const                   = 0;
 	virtual float*         GetUVData(unsigned int pUVSet) const   = 0;
-	virtual uint32* GetIndexData() const                    = 0;
-	virtual uint8*  GetColorData() const                    = 0;
+	virtual Lepra::uint32* GetIndexData() const                    = 0;
+	virtual Lepra::uint8*  GetColorData() const                    = 0;
 
 	virtual float* GetNormalData() const;
 	float*         GetSurfaceNormalData() const;
@@ -192,7 +192,7 @@ public:
 	// 0 <= pTriangle < GetNumTriangles().
 	// Given the triangle index (pTriangle), the function returns the three
 	// indices by setting the values in pIndices.
-	void GetTriangleIndices(int pTriangle, uint32 pIndices[3]);
+	void GetTriangleIndices(int pTriangle, Lepra::uint32 pIndices[3]);
 
 	// Deletes the corresponding arrays and cleans stuff up.
 	virtual void ClearVertexNormalData();
@@ -326,12 +326,12 @@ private:
 		TRANSFORMATION_CHANGED       = (1 << 16),
 	};
 
-	void SetFlag(uint32 pFlag, bool pValue) { if(pValue) SetFlag(pFlag); else ClearFlag(pFlag); }
-	void SetFlag(uint32 pFlag) { mFlags |= pFlag; }
-	void ClearFlag(uint32 pFlag) { mFlags &= (~pFlag); }
-	bool CheckFlag(uint32 pFlag) const { return (mFlags & pFlag) != 0; }
+	void SetFlag(Lepra::uint32 pFlag, bool pValue) { if(pValue) SetFlag(pFlag); else ClearFlag(pFlag); }
+	void SetFlag(Lepra::uint32 pFlag) { mFlags |= pFlag; }
+	void ClearFlag(Lepra::uint32 pFlag) { mFlags &= (~pFlag); }
+	bool CheckFlag(Lepra::uint32 pFlag) const { return (mFlags & pFlag) != 0; }
 
-	uint32 mFlags;
+	Lepra::uint32 mFlags;
 
 	BasicMaterialSettings mMaterialSettings;
 

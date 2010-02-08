@@ -44,7 +44,7 @@ void OpenGLPainter::SetDestCanvas(Canvas* pCanvas)
 	ResetClippingRect();
 }
 
-void OpenGLPainter::SetAlphaValue(uint8 pAlpha)
+void OpenGLPainter::SetAlphaValue(Lepra::uint8 pAlpha)
 {
 	Painter::SetAlphaValue(pAlpha);
 	float lAlpha = (float)GetAlphaValue() / 255.0f;
@@ -668,9 +668,9 @@ Painter::ImageID OpenGLPainter::AddImage(const Canvas* pImage, const Canvas* pAl
 			Color lPalette[256];
 			for (int i = 0; i < 256; i++)
 			{
-				lPalette[i].mRed   = (uint8)i;
-				lPalette[i].mGreen = (uint8)i;
-				lPalette[i].mBlue  = (uint8)i;
+				lPalette[i].mRed   = (Lepra::uint8)i;
+				lPalette[i].mGreen = (Lepra::uint8)i;
+				lPalette[i].mBlue  = (Lepra::uint8)i;
 			}
 
 			lImage.SetPalette(lPalette);
@@ -1166,10 +1166,10 @@ int OpenGLPainter::PrintText(const str& pString, int x, int y)
 	assert(lColor != BLACK);	// Does not show.
 	GetFontManager()->SetColor(lColor);
 	::glColor4f(lColor.GetRf(), lColor.GetGf(), lColor.GetBf(), lColor.GetAf());
-	uint32 lColorHash = lColor.To32();
+	Lepra::uint32 lColorHash = lColor.To32();
 	lColorHash = (lColorHash&0xC0000000) + ((lColorHash&0x00C00000)<<6) + ((lColorHash&0x0000C000)<<12);
-	const uint32 lFontId = GetFontManager()->GetActiveFont() << 16;
-	const uint64 lFontHash = ((uint64)(lColorHash+lFontId+lFontHeight)) << 32;
+	const Lepra::uint32 lFontId = GetFontManager()->GetActiveFont() << 16;
+	const Lepra::uint64 lFontHash = ((Lepra::uint64)(lColorHash+lFontId+lFontHeight)) << 32;
 
 	for (size_t i = 0; i < pString.length(); i++)
 	{
@@ -1414,7 +1414,7 @@ void OpenGLPainter::DoRenderDisplayList(std::vector<DisplayEntity*>* pDisplayLis
 		}
 
 		const int lTriangleEntryCount = lGeneratedGeometry->GetGeometry().GetTriangleCount() * 3;
-		const uint32* lTriangleData = lGeneratedGeometry->GetGeometry().GetTriangleData();
+		const Lepra::uint32* lTriangleData = lGeneratedGeometry->GetGeometry().GetTriangleData();
 		::glDrawElements(GL_TRIANGLES, lTriangleEntryCount, GL_UNSIGNED_INT, lTriangleData);
 
 		::glPopAttrib();

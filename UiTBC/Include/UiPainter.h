@@ -142,8 +142,8 @@ public:
 	
 	// Set the current alpha value. Overrides alpha buffer...
 	// In 8-bit color mode, this is a specific color that will "be" transparent.
-	virtual void SetAlphaValue(uint8 pAlpha);
-	uint8 GetAlphaValue() const;
+	virtual void SetAlphaValue(Lepra::uint8 pAlpha);
+	Lepra::uint8 GetAlphaValue() const;
 
 	virtual void ResetClippingRect() = 0;
 	virtual void SetClippingRect(int pLeft, int pTop, int pRight, int pBottom);
@@ -153,7 +153,7 @@ public:
 	void GetClippingRect(PixelRect& pClippingRect) const;
 
 	virtual void SetColor(const Color& pColor, unsigned pColorIndex = 0);
-	void SetColor(uint8 pRed, uint8 pGreen, uint8 pBlue, uint8 pPaletteIndex, unsigned pColorIndex = 0);
+	void SetColor(Lepra::uint8 pRed, Lepra::uint8 pGreen, Lepra::uint8 pBlue, Lepra::uint8 pPaletteIndex, unsigned pColorIndex = 0);
 	Color GetColor(unsigned pColorIndex) const;
 
 	void DrawPixel(int x, int y);
@@ -236,7 +236,7 @@ public:
 	int GetLineHeight() const;
 	virtual int PrintText(const str& pString, int x, int y) = 0;
 
-	uint8 FindMatchingColor(const Color& pColor);
+	Lepra::uint8 FindMatchingColor(const Color& pColor);
 	virtual void ReadPixels(Canvas& pDestCanvas, const PixelRect& pRect) = 0;
 
 	// Returns the internal RGB order.
@@ -259,16 +259,16 @@ protected:
 	public:
 		friend class Painter;
 		RenderMode GetRenderMode() const;
-		uint8 GetAlpha() const;
+		Lepra::uint8 GetAlpha() const;
 		ImageID GetImageID() const;
 		const PixelRect& GetClippingRect() const;
 		Geometry2D& GetGeometry();
 	private:
 		DisplayEntity(RenderMode pRM,
-		              uint8 pAlpha,
+		              Lepra::uint8 pAlpha,
 		              ImageID pImageID,
 		              const PixelRect& pClippingRect,
-			      uint16 pVertexFormat) :
+			      Lepra::uint16 pVertexFormat) :
 			mRM(pRM),
 			mAlpha(pAlpha),
 			mImageID(pImageID),
@@ -278,10 +278,10 @@ protected:
 		}
 
 		void Init(RenderMode pRM,
-		          uint8 pAlpha,
+		          Lepra::uint8 pAlpha,
 		          ImageID pImageID,
 		          const PixelRect& pClippingRect,
-			  uint16 pVertexFormat)
+			  Lepra::uint16 pVertexFormat)
 		{
 			mRM = pRM;
 			mAlpha = pAlpha;
@@ -291,7 +291,7 @@ protected:
 		}
 
 		RenderMode mRM;
-		uint8 mAlpha;
+		Lepra::uint8 mAlpha;
 		ImageID mImageID;
 		PixelRect mClippingRect;
 		Geometry2D mGeometry;
@@ -299,7 +299,7 @@ protected:
 
 	typedef std::list<unsigned> AttribList;
 	typedef std::list<RenderMode> RMList;
-	typedef std::list<uint8> UCharList;
+	typedef std::list<Lepra::uint8> UCharList;
 	typedef std::list<Color> ColorList;
 	typedef std::list<PixelRect> RectList;
 
@@ -331,13 +331,13 @@ protected:
 
 	// Returns pVertexFormat | whatever-flags-the-painter-needs. The flags
 	// are defined in Geometry2D, and the default behaviour is to do nothing.
-	virtual void AdjustVertexFormat(uint16& pVertexFormat);
+	virtual void AdjustVertexFormat(Lepra::uint16& pVertexFormat);
 
 	// This function will return the geometry of either a newly create DisplayEntity 
 	// or the current (last) one in the current display list, depending on wether the 
 	// last entity matches the given parameters. The newly created DisplayEntity will 
 	// be  appended at the end of the display list.
-	Geometry2D* FetchDisplayEntity(uint16 pVertexFormat = 0, ImageID pImageID = INVALID_IMAGEID);
+	Geometry2D* FetchDisplayEntity(Lepra::uint16 pVertexFormat = 0, ImageID pImageID = INVALID_IMAGEID);
 
 	void CreateLine(int pX1, int pY1, int pX2, int pY2);
 	void CreateRectFrame(int pLeft, int pTop, int pRight, int pBottom, int pWidth);
@@ -420,7 +420,7 @@ private:
 	PixelRect mClippingRect;
 
 	Color mColor[4];
-	uint8 mAlphaValue;
+	Lepra::uint8 mAlphaValue;
 };
 
 

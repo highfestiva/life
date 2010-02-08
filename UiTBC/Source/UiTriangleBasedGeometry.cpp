@@ -26,8 +26,8 @@ TriangleBasedGeometry::TriangleBasedGeometry() :
 
 	mColorFormat(COLOR_RGB),
 
-	mPrimitiveType(TBC::GeometryBase::TRIANGLES),
-	mGeometryVolatility(TBC::GeometryBase::GEOM_STATIC)
+	mGeometryVolatility(TBC::GeometryBase::GEOM_STATIC),
+	mPrimitiveType(TBC::GeometryBase::TRIANGLES)
 {
 }
 
@@ -43,8 +43,8 @@ TriangleBasedGeometry::TriangleBasedGeometry(const TriangleBasedGeometry& pGeome
 
 	mColorFormat(COLOR_RGB),
 
-	mPrimitiveType(TBC::GeometryBase::TRIANGLES),
-	mGeometryVolatility(TBC::GeometryBase::GEOM_STATIC)
+	mGeometryVolatility(TBC::GeometryBase::GEOM_STATIC),
+	mPrimitiveType(TBC::GeometryBase::TRIANGLES)
 {
 	Copy(pGeometry);
 }
@@ -70,8 +70,8 @@ TriangleBasedGeometry::TriangleBasedGeometry(Vector3DF* pVertices,
 
 	mColorFormat(COLOR_RGB),
 
-	mPrimitiveType(TBC::GeometryBase::TRIANGLES),
-	mGeometryVolatility(TBC::GeometryBase::GEOM_STATIC)
+	mGeometryVolatility(TBC::GeometryBase::GEOM_STATIC),
+	mPrimitiveType(TBC::GeometryBase::TRIANGLES)
 {
 	Set(pVertices,
 		pVertexNormals,
@@ -106,8 +106,8 @@ TriangleBasedGeometry::TriangleBasedGeometry(float* pVertexData,
 
 	mColorFormat(COLOR_RGB),
 
-	mPrimitiveType(TBC::GeometryBase::TRIANGLES),
-	mGeometryVolatility(TBC::GeometryBase::GEOM_STATIC)
+	mGeometryVolatility(TBC::GeometryBase::GEOM_STATIC),
+	mPrimitiveType(TBC::GeometryBase::TRIANGLES)
 {
 	Set(pVertexData,
 		pVertexNormals,
