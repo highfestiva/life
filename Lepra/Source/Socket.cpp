@@ -914,7 +914,7 @@ void TcpMuxSocket::PushReceiverSockets(const FdSet& pSocketSet)
 	for (SocketVMap::iterator y = mConnectedSocketMap.begin(); y != mConnectedSocketMap.end(); ++y)
 	{
 		sys_socket lSysSocket = y->first;
-		if (FD_ISSET(lSysSocket, LEPRA_FDS(&pSocketSet)))
+		if (FD_ISSET(lSysSocket, (fd_set*)LEPRA_FDS(&pSocketSet)))
 		{
 			TcpVSocket* lSocket = y->second;
 			log_adebug("Adding receiver socket.");

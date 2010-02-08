@@ -80,6 +80,18 @@ inline uint64 SystemManager::GetCpuTick()
 	unsigned hi, lo;
 	__asm__ __volatile__ ("rdtsc" : "=a"(lo), "=d"(hi));
 	return ((uint64)lo) | (((uint64)hi)<<32);
+#elif defined(LEPRA_GCC_POWERPC)
+	unsigned long upper, lower, tmp;
+	__asm__ volatile(
+		"0:                     \n"
+		"\tmftbu   %0           \n"
+		"\tmftb    %1           \n"
+		"\tmftbu   %2           \n"
+		"\tcmpw    %2, %0       \n"
+		"\tbne     0b           \n"
+		: "=r"(upper),"=r"(lower),"=r"(tmp)
+	);
+	return ((uint64)upper)<<32 | lower;
 #else
 #error "GetCpuTick() not yet implemented on this platform."
 #endif // Platform.
