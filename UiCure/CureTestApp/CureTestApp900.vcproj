@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="9.00"
 	Name="CureTestApp"
 	ProjectGUID="{3C46C2E1-41EF-49C2-9D3C-1C69B8CFCD8C}"
 	RootNamespace="PlagueTestApp"
 	Keyword="ManagedCProj"
-	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
 		<Platform
@@ -43,7 +42,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;..\..\ThirdParty\ode-060223\include&quot;;&quot;..\..\ThirdParty\stlport\stlport&quot;"
+				AdditionalIncludeDirectories="&quot;..\..\ThirdParty\ode-0.11.1\include&quot;;&quot;..\..\ThirdParty\stlport\stlport&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="false"
 				BasicRuntimeChecks="0"
@@ -52,6 +51,7 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
+				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -73,8 +73,6 @@
 				GenerateDebugInformation="true"
 				AssemblyDebug="1"
 				SubSystem="1"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="0"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -93,6 +91,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -124,14 +125,15 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="&quot;..\..\ThirdParty\ode-060223\include&quot;;&quot;..\..\ThirdParty\stlport\stlport&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;NO_LOG_DEBUG_INFO;_STLP_NO_OWN_NAMESPACE"
+				AdditionalIncludeDirectories="&quot;..\..\ThirdParty\ode-0.11.1\include&quot;;&quot;..\..\ThirdParty\stlport\stlport&quot;"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
 				TreatWChar_tAsBuiltInType="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
+				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="0"
 			/>
 			<Tool
@@ -147,13 +149,10 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="fmodvc.lib Netapi32.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
-				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\ThirdParty\stlport\lib;..\..\ThirdParty\fmod\api\lib"
 				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="true"
 				SubSystem="1"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="0"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -172,6 +171,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -204,7 +206,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="&quot;..\..\ThirdParty\ode-060223\include&quot;;&quot;..\..\ThirdParty\stlport\stlport&quot;"
+				AdditionalIncludeDirectories="&quot;..\..\ThirdParty\ode-0.11.1\include&quot;;&quot;..\..\ThirdParty\stlport\stlport&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
@@ -212,6 +214,7 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
+				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -227,13 +230,10 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="fmodvc.lib Netapi32.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
-				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\ThirdParty\stlport\lib;..\..\ThirdParty\fmod\api\lib"
 				IgnoreDefaultLibraryNames="msvcrt.lib"
 				GenerateDebugInformation="true"
 				SubSystem="1"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="0"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -252,6 +252,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -284,7 +287,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;..\..\ThirdParty\ode-060223\include&quot;;&quot;..\..\ThirdParty\stlport\stlport&quot;"
+				AdditionalIncludeDirectories="&quot;..\..\ThirdParty\ode-0.11.1\include&quot;;&quot;..\..\ThirdParty\stlport\stlport&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="false"
 				BasicRuntimeChecks="0"
@@ -293,6 +296,7 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
+				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -314,8 +318,6 @@
 				GenerateDebugInformation="true"
 				AssemblyDebug="1"
 				SubSystem="1"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="0"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -334,6 +336,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -365,14 +370,15 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="&quot;..\..\ThirdParty\ode-060223\include&quot;;&quot;..\..\ThirdParty\stlport\stlport&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_STLP_NO_OWN_NAMESPACE"
+				AdditionalIncludeDirectories="&quot;..\..\ThirdParty\ode-0.11.1\include&quot;;&quot;..\..\ThirdParty\stlport\stlport&quot;"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
 				TreatWChar_tAsBuiltInType="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
+				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="0"
 			/>
 			<Tool
@@ -388,13 +394,10 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="fmodvc.lib Netapi32.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
-				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\ThirdParty\stlport\lib;..\..\ThirdParty\fmod\api\lib"
 				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="true"
 				SubSystem="1"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="0"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -413,6 +416,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -444,7 +450,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="&quot;..\..\ThirdParty\ode-060223\include&quot;;&quot;..\..\ThirdParty\stlport\stlport&quot;"
+				AdditionalIncludeDirectories="&quot;..\..\ThirdParty\ode-0.11.1\include&quot;;&quot;..\..\ThirdParty\stlport\stlport&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
@@ -452,6 +458,7 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				WarnAsError="true"
+				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -467,13 +474,10 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="fmodvc.lib Netapi32.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
-				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\ThirdParty\stlport\lib;..\..\ThirdParty\fmod\api\lib"
 				IgnoreDefaultLibraryNames="msvcrt.lib"
 				GenerateDebugInformation="true"
 				SubSystem="1"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="0"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -494,6 +498,9 @@
 				Name="VCAppVerifierTool"
 			/>
 			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -502,17 +509,14 @@
 		<AssemblyReference
 			RelativePath="mscorlib.dll"
 			AssemblyName="mscorlib, Version=2.0.0.0, PublicKeyToken=b77a5c561934e089, processorArchitecture=IA64"
-			MinFrameworkVersion="131072"
 		/>
 		<AssemblyReference
 			RelativePath="System.dll"
 			AssemblyName="System, Version=2.0.0.0, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL"
-			MinFrameworkVersion="131072"
 		/>
 		<AssemblyReference
 			RelativePath="System.Data.dll"
 			AssemblyName="System.Data, Version=2.0.0.0, PublicKeyToken=b77a5c561934e089, processorArchitecture=x86"
-			MinFrameworkVersion="131072"
 		/>
 	</References>
 	<Files>
@@ -526,10 +530,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\CureTestApp.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\Lepra\LepraTestApp\LepraTest.cpp"
 				>
 			</File>
@@ -539,10 +539,6 @@
 			</File>
 			<File
 				RelativePath="..\..\UiTBC\UiTBCTestApp\RotationalAgreementTest.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\UiTBC\UiTBCTestApp\stdafx.cpp"
 				>
 			</File>
 			<File
@@ -592,14 +588,14 @@
 				>
 			</File>
 		</Filter>
-		<File
-			RelativePath="..\..\UiTBC\UiTBCTestApp\UiTBCTestApp.vcproj"
+		<Filter
+			Name="App"
 			>
-		</File>
-		<File
-			RelativePath="..\..\UiTBC\UiTBCTestApp\UiTBCTestApp710.vcproj"
-			>
-		</File>
+			<File
+				RelativePath=".\CureTestApp.cpp"
+				>
+			</File>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>

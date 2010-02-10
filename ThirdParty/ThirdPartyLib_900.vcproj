@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="9.00"
 	Name="ThirdPartyLib"
 	ProjectGUID="{00F89E9D-7870-4921-9022-9AD4951BC224}"
 	RootNamespace="ThirdPartyLib_800"
 	Keyword="ManagedCProj"
-	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
 		<Platform
@@ -46,7 +45,7 @@
 				Optimization="0"
 				WholeProgramOptimization="false"
 				AdditionalIncludeDirectories="../ThirdParty/stlport/stlport;../ThirdParty/ode-0.11.1/include;../ThirdParty/ode-0.11.1/ode/src;../ThirdParty/ode-0.11.1/ode/src/joints;../ThirdParty/ode-0.11.1/OPCODE;../ThirdParty/ode-0.11.1/GIMPACT/include;../ThirdParty/ode-0.11.1/ou/include"
-				PreprocessorDefinitions="WIN32;_DEBUG;dSINGLE;ODE_LIB"
+				PreprocessorDefinitions="WIN32;_DEBUG;dSINGLE;ODE_LIB;dTLS_ENABLED=1"
 				ExceptionHandling="1"
 				RuntimeLibrary="1"
 				BufferSecurityCheck="false"
@@ -114,7 +113,7 @@
 				Name="VCCLCompilerTool"
 				FavorSizeOrSpeed="1"
 				AdditionalIncludeDirectories="../ThirdParty/stlport/stlport;../ThirdParty/ode-0.11.1/include;../ThirdParty/ode-0.11.1/ode/src;../ThirdParty/ode-0.11.1/ode/src/joints;../ThirdParty/ode-0.11.1/OPCODE;../ThirdParty/ode-0.11.1/GIMPACT/include;../ThirdParty/ode-0.11.1/ou/include"
-				PreprocessorDefinitions="WIN32;NDEBUG;dSINGLE;ODE_LIB"
+				PreprocessorDefinitions="WIN32;NDEBUG;dSINGLE;ODE_LIB;dTLS_ENABLED=1"
 				ExceptionHandling="1"
 				RuntimeLibrary="0"
 				BufferSecurityCheck="false"
@@ -157,17 +156,14 @@
 		<AssemblyReference
 			RelativePath="System.dll"
 			AssemblyName="System, Version=2.0.0.0, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL"
-			MinFrameworkVersion="131072"
 		/>
 		<AssemblyReference
 			RelativePath="System.Data.dll"
 			AssemblyName="System.Data, Version=2.0.0.0, PublicKeyToken=b77a5c561934e089, processorArchitecture=x86"
-			MinFrameworkVersion="131072"
 		/>
 		<AssemblyReference
 			RelativePath="System.XML.dll"
 			AssemblyName="System.Xml, Version=2.0.0.0, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL"
-			MinFrameworkVersion="131072"
 		/>
 	</References>
 	<Files>
@@ -1568,6 +1564,90 @@
 						>
 					</File>
 				</Filter>
+			</Filter>
+			<Filter
+				Name="OU"
+				>
+				<File
+					RelativePath=".\ode-0.11.1\ou\include\ou\assert.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ode-0.11.1\ou\src\ou\atomic.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ode-0.11.1\ou\include\ou\atomic.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ode-0.11.1\ou\include\ou\atomicflags.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ode-0.11.1\ou\src\ou\customization.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ode-0.11.1\ou\include\ou\customization.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ode-0.11.1\ou\include\ou\enumarrays.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ode-0.11.1\ou\include\ou\flags.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ode-0.11.1\ou\include\ou\flagsdefines.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ode-0.11.1\ou\include\ou\inttypes.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ode-0.11.1\ou\include\ou\macros.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ode-0.11.1\ou\src\ou\malloc.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ode-0.11.1\ou\include\ou\malloc.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ode-0.11.1\ou\include\ou\namespace.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ode-0.11.1\ou\include\ou\platform.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ode-0.11.1\ou\include\ou\simpleflags.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ode-0.11.1\ou\include\ou\templates.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ode-0.11.1\ou\src\ou\threadlocalstorage.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ode-0.11.1\ou\include\ou\threadlocalstorage.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ode-0.11.1\ou\include\ou\typewrapper.h"
+					>
+				</File>
 			</Filter>
 		</Filter>
 		<Filter
