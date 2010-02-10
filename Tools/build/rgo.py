@@ -1,4 +1,4 @@
-
+﻿
 # Author: Jonas Byström
 # Copyright (c) 2002-2009, Righteous Games
 
@@ -47,22 +47,24 @@ def _buildstl():
 
 def _buildcode(command, buildtype):
         make = getmake(VCBUILD)
+        ver = getvcver()
+        projext = "900" if ver == 9 else "";
         if command == "build":
                 _buildstl()
-                if osname == "Windows": args = [make, "/M2", "UiCure.sln", own_tt[buildtype]+"|Win32"]
+                if osname == "Windows": args = [make, "/useenv", "/M2", "Life"+projext+".sln", own_tt[buildtype]+"|Win32"]
                 else:                   args = [make]
                 what = "incremental building code"
         elif command == "rebuild":
                 _buildstl()
-                if osname == "Windows": args = [make, "/M2", "/rebuild", "UiCure.sln", own_tt[buildtype]+"|Win32"]
+                if osname == "Windows": args = [make, "/useenv", "/M2", "/rebuild", "Life"+projext+".sln", own_tt[buildtype]+"|Win32"]
                 else:                   args = [make, "clean", "all"]
                 what = "rebuilding code"
         elif command == "clean":
-                if osname == "Windows": args = [make, "/clean", "UiCure.sln", own_tt[buildtype]+"|Win32"]
+                if osname == "Windows": args = [make, "/useenv", "/clean", "Life"+projext+".sln", own_tt[buildtype]+"|Win32"]
                 else:                   args = [make, "clean"]
                 what = "cleaning code"
         if osname == "Windows":
-                os.chdir("UiCure")
+                os.chdir("Life")
         run(args, what)
         if osname == "Windows":
                 os.chdir("..")
