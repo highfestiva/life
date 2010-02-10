@@ -54,7 +54,7 @@ public:
 
 	virtual void SetColor(const Color& pColor, unsigned pColorIndex = 0) = 0;
 
-	virtual FontId AddFont(const str& pFontName, double pSize, uint32 pFlags = NORMAL, CharacterSet pCharSet = NATIVE) = 0;
+	virtual FontId AddFont(const str& pFontName, double pSize, Lepra::uint32 pFlags = NORMAL, CharacterSet pCharSet = NATIVE) = 0;
 	void SetActiveFont(FontId pFontId);
 	FontId GetActiveFont() const;
 

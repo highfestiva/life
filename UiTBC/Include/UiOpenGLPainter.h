@@ -42,7 +42,7 @@ public:
 
 	// Set the current alpha value. Overrides alpha buffer...
 	// In 8-bit color mode, this is a specific color that will "be" transparent.
-	void SetAlphaValue(uint8 pAlpha);
+	void SetAlphaValue(Lepra::uint8 pAlpha);
 
 	void SetClippingRect(int pLeft, int pTop, int pRight, int pBottom);
 	void ResetClippingRect();
@@ -110,7 +110,7 @@ private:
 	};
 
 	typedef HashTable<int, Texture*> TextureTable;
-	typedef std::hash_map<uint64, GLuint> GlyphTable;
+	typedef std::hash_map<Lepra::uint64, GLuint> GlyphTable;
 
 	IdManager<int> mTextureIDManager;
 	TextureTable mTextureTable;

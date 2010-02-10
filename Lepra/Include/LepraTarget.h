@@ -65,6 +65,8 @@
 #elif defined(__i386__)
 #define LEPRA_GCC_X86
 #define LEPRA_GCC_X86_32
+#elif defined(__POWERPC__)
+#define LEPRA_GCC_POWERPC
 #else	// Unknown hardware.
 #error "Hardware platform not supported!"
 #endif // _X86_/ARM
@@ -129,3 +131,4 @@
 #else
 #error "No recognized target platform specified!"
 #endif // LEPRA_WINDOWS/LEPRA_POSIX/?
+	

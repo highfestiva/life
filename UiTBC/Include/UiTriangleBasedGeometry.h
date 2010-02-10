@@ -33,7 +33,7 @@ public:
 			      Vector2D<float>* pUV,      // NULL or must contain pVertexCount elements.
 			      Color* pColor,             // NULL or must contain pVertexCount elements.
 			      ColorFormat pColorFormat,
-			      uint32* pIndices,
+			      Lepra::uint32* pIndices,
 			      unsigned int pVertexCount,
 			      unsigned int pIndexCount,
 			      TBC::GeometryBase::PrimitiveType pPrimitiveType,
@@ -42,9 +42,9 @@ public:
 	TriangleBasedGeometry(float* pVertexData,
 			      float* pVertexNormals,
 			      float* pUVData,
-			      uint8* pColorData,
+			      Lepra::uint8* pColorData,
 			      ColorFormat pColorFormat,
-			      uint32* pIndices,
+			      Lepra::uint32* pIndices,
 			      unsigned int pVertexCount,
 			      unsigned int pIndexCount,
 			      TBC::GeometryBase::PrimitiveType pPrimitiveType,
@@ -58,7 +58,7 @@ public:
 		 Vector2D<float>* pUV,
 		 Color* pColor,
 		 ColorFormat pColorFormat,
-		 uint32* pIndices,
+		 Lepra::uint32* pIndices,
 		 unsigned int pVertexCount,
 		 unsigned int pIndexCount,
 		 TBC::GeometryBase::PrimitiveType pPrimitiveType,
@@ -67,9 +67,9 @@ public:
 	void Set(float* pVertexData,
 		 float* pVertexNormals,
 		 float* pUVData,
-		 uint8* pColorData,
+		 Lepra::uint8* pColorData,
 		 ColorFormat pColorFormat,
-		 uint32* pIndices,
+		 Lepra::uint32* pIndices,
 		 unsigned int pVertexCount,
 		 unsigned int pIndexCount,
 		 TBC::GeometryBase::PrimitiveType pPrimitiveType,
@@ -93,8 +93,8 @@ public:
 
 	virtual float* GetVertexData() const;
 	virtual float* GetUVData(unsigned int pUVSet = 0) const;
-	virtual uint32* GetIndexData() const;
-	virtual uint8* GetColorData() const;
+	virtual Lepra::uint32* GetIndexData() const;
+	virtual Lepra::uint8* GetColorData() const;
 
 	void SetColorData(unsigned char* pColorData, ColorFormat pColorFormat);
 	void ConvertColorData(ColorFormat pColorFormat, unsigned char pAlpha);
@@ -145,7 +145,7 @@ private:
 	float* mVertexData;			// Triplets of (x, y, z).
 	float** mUVData;			// Doublets of (u, v).
 	unsigned char* mColorData;
-	uint32* mIndexData;	// Triplets of vertex indices.
+	Lepra::uint32* mIndexData;	// Triplets of vertex indices.
 
 	ColorFormat mColorFormat;
 

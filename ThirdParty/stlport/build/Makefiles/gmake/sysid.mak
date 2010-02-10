@@ -36,7 +36,8 @@ OSREL  := $(shell sw_vers -productVersion | tr '[A-Z]' '[a-z]' | tr ', /\\()"' '
 endif
 M_ARCH := $(shell uname -m | tr '[A-Z]' '[a-z]' | tr ', /\\()"' ',//////' | tr ',/' ',-')
 ifeq ($(M_ARCH),power-macintosh)
-M_ARCH := ppc
+#M_ARCH := ppc
+M_ARCH := ppc7400	# high_festiva was here!
 endif
 ifeq ($(OSNAME),hp-ux)
 P_ARCH := unknown

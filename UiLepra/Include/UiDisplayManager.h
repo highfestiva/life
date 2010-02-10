@@ -176,7 +176,7 @@ public:
 	void GetScreenCanvas(Canvas* pCanvas);
 
 	// Functions implemented for conveniency.
-	static uint8 GetPaletteColor(int pRed, int pGreen, int pBlue, const Color* pPalette);
+	static Lepra::uint8 GetPaletteColor(int pRed, int pGreen, int pBlue, const Color* pPalette);
 
 protected:
 	typedef std::set<DisplayResizeObserver*> ResizeObserverSet;

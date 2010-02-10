@@ -51,7 +51,7 @@ def _buildcode(command, buildtype):
                 _buildstl()
                 if osname == "Windows": args = [make, "/M2", "UiCure.sln", own_tt[buildtype]+"|Win32"]
                 else:                   args = [make]
-                what = "_incremental building code"
+                what = "incremental building code"
         elif command == "rebuild":
                 _buildstl()
                 if osname == "Windows": args = [make, "/M2", "/rebuild", "UiCure.sln", own_tt[buildtype]+"|Win32"]

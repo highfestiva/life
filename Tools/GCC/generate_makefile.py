@@ -6,12 +6,12 @@ import os
 import sys
 
 
-stlpcflags = ""
+cextraflags = ""
 if sys.platform == 'darwin':
-    stlpcflags = "-D_STLP_THREADS"
+    cextraflags = "-D_DARWIN_C_SOURCE -D_STLP_THREADS"
 
 cflags_1 = """
-CFLAGS = -O0 -ggdb -fPIC """+stlpcflags+""" -D_POSIX_PTHREAD_SEMANTICS %(includes)s -DPOSIX -D_XOPEN_SOURCE=600 -D_DEBUG -D_CONSOLE -DPNG_NO_ASSEMBLER_CODE -DdSingle -DdTLS_ENABLED=1 -DHAVE_CONFIG_H=1 -DLEPRA_WITHOUT_FMOD"""
+CFLAGS = -O0 -ggdb -fPIC """+cextraflags+""" -D_POSIX_PTHREAD_SEMANTICS %(includes)s -DPOSIX -D_XOPEN_SOURCE=600 -D_DEBUG -D_CONSOLE -DPNG_NO_ASSEMBLER_CODE -DdSingle -DdTLS_ENABLED=1 -DHAVE_CONFIG_H=1 -DLEPRA_WITHOUT_FMOD"""
 cflags_2 = "-Wno-unknown-pragmas"
 ldflags = ""
 
@@ -112,6 +112,7 @@ $(OBJS):\t$(SRCS)
 $(SRCS):
 \t$(MAKE) -C $@
 \t@rm -f $(BINS)
+\t@mkdir -p bin
 \t@cp $@/*.so bin/
 """
 

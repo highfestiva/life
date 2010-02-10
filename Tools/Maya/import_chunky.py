@@ -56,9 +56,8 @@ class GroupReader(DefaultMAReader):
                                      "materialInfo", "groupId", "groupParts", \
                                      "deleteComponent", "softModHandle", "softMod", \
                                      "objectSet", "tweak", "imagePlane", "place2dTexture", \
-                                     "polyBridgeEdge", "polySeparate", "polyChipOff", \
-                                     "polyTweak"]
-                self.silent_types = ["polyExtrudeFace"]
+                                     "polyBridgeEdge", "polySeparate", "polyChipOff"]
+                self.silent_types = ["polyExtrudeFace", "polyTweak"]
                 self.mat_types    = ["lambert", "blinn", "phong", "shadingEngine", "layeredShader", \
                                      "file"]
                 self.basename = basename
@@ -257,6 +256,8 @@ class GroupReader(DefaultMAReader):
                         for n in island:
                                 if n.nodetype in self.bad_types or n.getName().startswith("i_"):
                                         #print("Removing bad %s (%s)." % (n.nodetype, n.getFullName()))
+                                        if list(filter(lambda n: n.getName().startswith("m_") or n.getName().startswith("phys_"), island)):
+                                                print("Culprit %s (type %s) kills main island?" % (n.getFullName(), n.nodetype))
                                         islands.remove(island)
                                         break
                                 if n.nodetype == "<unknown>" and n.getParent() == None:
