@@ -377,6 +377,17 @@ bool GameServerManager::Initialize()
 				lOk = mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("monster_02")));
 			}
 		}
+		for (x = 0; lOk && x < 100; ++x)
+		{
+			const wstr lUserName = wstrutil::Format(L"Hovercraft%i", x);
+			wstr lReadablePassword(L"CarPassword");
+			Cure::MangledPassword lPassword(lReadablePassword);
+			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
+			if (lOk)
+			{
+				lOk = mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("hovercraft_01")));
+			}
+		}
 	}
 
 	/*if (lOk)

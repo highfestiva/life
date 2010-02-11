@@ -102,6 +102,15 @@ bool PhysicsEngine::SetValue(unsigned pAspect, float pValue, float pZAngle)
 			}
 		}
 		break;
+		case ENGINE_LIFTER:
+		{
+			if (pAspect >= mControllerIndex+0 && pAspect <= mControllerIndex+1)
+			{
+				mValue[pAspect] = pValue;
+				return (true);
+			}
+		}
+		break;
 		case ENGINE_HINGE_ROLL:
 		case ENGINE_HINGE_GYRO:
 		case ENGINE_HINGE_BREAK:
@@ -174,6 +183,14 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics*
 						}
 					}
 					mIntensity += lVelocityVector.GetLength() / mMaxSpeed;
+				}
+				break;
+				case ENGINE_LIFTER:
+				{
+					if (mValue[0] != 0 || mValue[1] != 0)
+					{
+						pPhysicsManager->AddForce(lGeometry->GetBodyId(), Vector3DF(0,0,1)*mStrength*lScale);
+					}
 				}
 				break;
 				case ENGINE_HINGE_GYRO:

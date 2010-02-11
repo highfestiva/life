@@ -3122,12 +3122,15 @@ void PhysicsManagerODE::AdjustOrientation(dGeomID pGeom, QuaternionF& pQ, bool p
 	{
 		// Capsules have different orientations in editor (along Y-axis) and ODE (along Z).
 		QuaternionF lQ;
-		lQ.RotateAroundOwnX(-PIF/2);
-		if (!pSetter)
+		if (pSetter)
 		{
-			lQ.MakeInverse();
+			//lQ.RotateAroundWorldX(PIF/2);
 		}
-		pQ = lQ * pQ;
+		else
+		{
+			//lQ.RotateAroundWorldZ(PIF/2);
+		}
+		pQ = pQ * lQ;
 	}
 }
 

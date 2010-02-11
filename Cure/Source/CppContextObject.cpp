@@ -186,7 +186,7 @@ void CppContextObject::OnLoadPhysics(UserPhysicsResource* pPhysicsResource)
 {
 	if (pPhysicsResource->GetLoadState() != RESOURCE_LOAD_COMPLETE)
 	{
-		mLog.Errorf(_T("Could not physics class '%s'."), pPhysicsResource->GetName().c_str());
+		mLog.Errorf(_T("Could not load physics class '%s'."), pPhysicsResource->GetName().c_str());
 		assert(false);
 		return;
 	}
