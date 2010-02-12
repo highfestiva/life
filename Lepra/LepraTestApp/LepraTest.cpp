@@ -1545,7 +1545,9 @@ bool DualSocketClientTest::Test()
 			lTestOk = lServerTcpMuxSocket.IsOpen();
 			assert(lTestOk);
 		}
-		ServerSocketHandler<TcpMuxSocket, TcpVSocket> lServer(_T("TcpDummyServerSocket"), lServerTcpMuxSocket, &TcpMuxSocket::Accept, false);
+		ServerSocketHandler<TcpMuxSocket, TcpVSocket>* lServer =
+			new ServerSocketHandler<TcpMuxSocket, TcpVSocket>(
+				_T("TcpDummyServerSocket"), lServerTcpMuxSocket, &TcpMuxSocket::Accept, false);
 		if (lTestOk)
 		{
 			lContext = _T("client connected without UDP");
@@ -1565,6 +1567,7 @@ bool DualSocketClientTest::Test()
 				assert(lTestOk);
 			}
 		}
+		delete (lServer);	// Must delete manually, due to dependency on scope MUX socket.
 	}
 
 	// Create and start UDP server (connect should fail if not TCP is up).
@@ -1576,7 +1579,9 @@ bool DualSocketClientTest::Test()
 		lTestOk = lServerUdpMuxSocket.IsOpen();
 		assert(lTestOk);
 	}
-	ServerSocketHandler<UdpMuxSocket, UdpVSocket> lUdpServer(_T("UDP Server"), lServerUdpMuxSocket, &UdpMuxSocket::Accept, true);
+	ServerSocketHandler<UdpMuxSocket, UdpVSocket>* lUdpServer =
+		new ServerSocketHandler<UdpMuxSocket, UdpVSocket>(
+			_T("UDP Server"), lServerUdpMuxSocket, &UdpMuxSocket::Accept, true);
 	if (lTestOk)
 	{
 		lContext = _T("client connected without TCP");
@@ -1589,7 +1594,7 @@ bool DualSocketClientTest::Test()
 		lContext = _T("UDP server did not accept MUX connection");
 		lTestOk = (lServerUdpMuxSocket.GetConnectionCount() == 1);
 		assert(lTestOk);
-		lUdpServer.CloseSocket();
+		lUdpServer->CloseSocket();
 	}
 	if (lTestOk)
 	{
@@ -1607,7 +1612,9 @@ bool DualSocketClientTest::Test()
 		lTestOk = lServerTcpMuxSocket.IsOpen();
 		assert(lTestOk);
 	}
-	ServerSocketHandler<TcpMuxSocket, TcpVSocket> lTcpServer(_T("TCP Server"), lServerTcpMuxSocket, &TcpMuxSocket::Accept, true);
+	ServerSocketHandler<TcpMuxSocket, TcpVSocket>* lTcpServer =
+		new ServerSocketHandler<TcpMuxSocket, TcpVSocket>(
+			_T("TCP Server"), lServerTcpMuxSocket, &TcpMuxSocket::Accept, true);
 	if (lTestOk)
 	{
 		lContext = _T("client TCP+UDP connect");
@@ -1620,13 +1627,16 @@ bool DualSocketClientTest::Test()
 
 	if (lTestOk)
 	{
-		lTestOk = TestClientServerTransmit(lContext, lUdpServer, lClientMuxSocket, lClientSocket, false);
+		lTestOk = TestClientServerTransmit(lContext, *lUdpServer, lClientMuxSocket, lClientSocket, false);
 	}
 
 	if (lTestOk)
 	{
-		lTestOk = TestClientServerTransmit(lContext, lTcpServer, lClientMuxSocket, lClientSocket, true);
+		lTestOk = TestClientServerTransmit(lContext, *lTcpServer, lClientMuxSocket, lClientSocket, true);
 	}
+
+	delete (lUdpServer);	// Must delete manually, due to dependency on scope MUX socket.
+	delete (lTcpServer);	// Must delete manually, due to dependency on scope MUX socket.
 
 	if (lTestOk)
 	{
