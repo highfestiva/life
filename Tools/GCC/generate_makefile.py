@@ -150,6 +150,8 @@ def convert_out_name(vcfile):
     libname = libname.split("_")[0]
     if libname.endswith("Lib"):
         libname = libname[:-3]
+    import re
+    libname = re.sub("[0-9]*$", "", libname);
     return libname
 
 def linux_bin_name(type, vcfile):
