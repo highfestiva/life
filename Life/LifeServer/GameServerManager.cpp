@@ -231,7 +231,7 @@ bool GameServerManager::Initialize()
 			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
 			if (lOk)
 			{
-				lOk = mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("sphere_002")));
+				lOk = mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("sphere_01")));
 			}
 		}
 		for (x = 0; lOk && x < 100; ++x)

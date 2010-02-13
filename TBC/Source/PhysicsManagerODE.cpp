@@ -3124,11 +3124,11 @@ void PhysicsManagerODE::AdjustOrientation(dGeomID pGeom, QuaternionF& pQ, bool p
 		QuaternionF lQ;
 		if (pSetter)
 		{
-			//lQ.RotateAroundWorldX(PIF/2);
+			lQ.RotateAroundOwnX(PIF/2);
 		}
 		else
 		{
-			//lQ.RotateAroundWorldZ(PIF/2);
+			lQ.RotateAroundOwnX(-PIF/2);
 		}
 		pQ = pQ * lQ;
 	}

@@ -189,7 +189,11 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics*
 				{
 					if (mValue[0] != 0 || mValue[1] != 0)
 					{
-						pPhysicsManager->AddForce(lGeometry->GetBodyId(), Vector3DF(0,0,1)*mStrength*lScale);
+						// Arcade stabilization for lifter (typically hovercraft, elevator or similar vehicle).
+						Vector3DF lLiftPivot = pPhysicsManager->GetBodyPosition(lGeometry->GetBodyId()) + Vector3DF(0,0,1)*mFriction*lScale;
+
+						const Vector3DF lLiftForce = Vector3DF(0,0,1)*mStrength*lScale;
+						pPhysicsManager->AddForceAtPos(lGeometry->GetBodyId(), lLiftForce, lLiftPivot);
 					}
 				}
 				break;
@@ -284,7 +288,6 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics*
 					{
 						const Vector3DF lRotorForce = GetRotorLiftForce(pPhysicsManager, lGeometry, lEngineNode);
 						Vector3DF lLiftForce = lRotorForce * mValue[0];
-						//const float lLerpValue = (mValue[0]+1)*0.5f * (mMaxSpeed-mMaxSpeed2) + mMaxSpeed2;
 						const int lParentBone = pStructure->GetIndex(lGeometry->GetParent());
 						const QuaternionF lOrientation =
 							pPhysicsManager->GetBodyOrientation(lGeometry->GetParent()->GetBodyId()) *
@@ -292,6 +295,10 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics*
 
 						Vector3DF lRotorPivot;
 						pPhysicsManager->GetAnchorPos(lGeometry->GetJointId(), lRotorPivot);
+						const Vector3DF lOffset =
+							pPhysicsManager->GetBodyOrientation(lGeometry->GetParent()->GetBodyId()) *
+							Vector3DF(0, 0, mMaxSpeed*lScale);
+						lRotorPivot += lOffset;
 
 						const float lAbsFriction = ::fabs(mFriction);
 						if (mFriction < 0)

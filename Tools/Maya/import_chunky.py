@@ -1,4 +1,4 @@
-# License: LGPL 2.1 (utilizes Python Computer Graphics Kit (cgkit), see other .py files for more info).
+﻿# License: LGPL 2.1 (utilizes Python Computer Graphics Kit (cgkit), see other .py files for more info).
 # Created by Jonas Byström, 2009-07-17 for Righteous Engine tool chain.
 
 
@@ -245,7 +245,7 @@ class GroupReader(DefaultMAReader):
                                 else:
                                         #print(islands.index(island), n.getName(), "-", n.nodetype)
                                         pass
-                print("Error: you need to manually do an internal export of meshes.")
+                print("Error: you need to manually do an internal export of meshes in Maya (using a mel/python script located in Tools/Maya/).")
                 sys.exit(19)
 
 

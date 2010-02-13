@@ -259,10 +259,6 @@ void CppContextObject::__GetFuckedUpMeshesRemoveMe(UiTbc::ChunkyClass* pClass) c
 	{
 		pClass->AddMesh(0, _T("box_002_mesh"), TransformationF());
 	}
-	else if (GetClassId().find(_T("sphere_002")) != str::npos)
-	{
-		pClass->AddMesh(0, _T("sphere_002_mesh"), TransformationF());
-	}
 	else if (GetClassId().find(_T("car_001")) != str::npos)
 	{
 		pClass->AddMesh(0, _T("car_001_body_mesh"), TransformationF());
