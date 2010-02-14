@@ -314,8 +314,9 @@ def start():
 
 
 if __name__ == "__main__":
-        if len(sys.argv) != 2:
+        if len(sys.argv) < 2:
                 print("Need arg!")
                 sys.exit(1)
-        exec(sys.argv[1]+"()")
+        for arg in sys.argv[1:]:
+                exec(arg+"()")
         _printresult()

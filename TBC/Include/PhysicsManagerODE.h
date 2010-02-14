@@ -212,8 +212,6 @@ private:
 
 	void NormalizeRotation(BodyID pObject);
 
-	void AdjustOrientation(dGeomID pGeom, QuaternionF& pQ, bool pSetter) const;
-
 	enum JointType
 	{
 		JOINT_INVALID = 0,

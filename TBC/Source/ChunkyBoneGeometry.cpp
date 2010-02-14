@@ -329,7 +329,7 @@ void ChunkyBoneCapsule::SaveChunkyData(const ChunkyPhysics* pStructure, void* pD
 
 Vector3DF ChunkyBoneCapsule::GetShapeSize() const
 {
-	return (Vector3DF(mRadius*2, mLength+mRadius*2, mRadius*2));
+	return (Vector3DF(mRadius*2, mRadius*2, mLength+mRadius*2));
 }
 
 void ChunkyBoneCapsule::LoadChunkyData(ChunkyPhysics* pStructure, const void* pData)

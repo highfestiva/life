@@ -114,9 +114,6 @@ class GroupReader(DefaultMAReader):
                 if not self.validatehierarchy(group):
                         print("Invalid hierarchy! Terminating due to error.")
                         sys.exit(3)
-                #if not self.validate_orthogonality(group):
-                #        print("Error: the group is not completely orthogonal!")
-                #        sys.exit(3)
                 group = self.sortgroup(group)
                 if not self.validate_mesh_group(group, checknorms=False):
                         print("Invalid mesh group! Terminating due to error.")
@@ -133,6 +130,7 @@ class GroupReader(DefaultMAReader):
                 if not self.validategroup(group):
                         print("Invalid group! Terminating due to error.")
                         sys.exit(3)
+                self.adjustorientation(group)
                 if not self.makephysrelative(group):
                         print("Internal vector math failed! Terminating due to error.")
                         sys.exit(3)
@@ -562,16 +560,6 @@ class GroupReader(DefaultMAReader):
                 return ok
 
 
-        def validate_orthogonality(self, group):
-                isGroupValid = True
-                for node in group:
-                        if node.getName().startswith("phys_") and node.nodetype == "transform":
-                                if not node.isortho():
-                                        isGroupValid = False
-                                        print("Warning: phys node '%s' should be orthogonal." % node.getFullName())
-                return isGroupValid
-
-
         def validatehierarchy(self, group):
                 isGroupValid = self._validate_non_recursive(group[0], group)
                 isGroupValid &= self._validatenaming(group[0], group)
@@ -907,6 +895,20 @@ class GroupReader(DefaultMAReader):
                                                 ok = False
                                                 print("Error: mesh %s has invalid connections to phys nodes." % mesh.getName())
                 return ok
+
+
+        def adjustorientation(self, group):
+                for node in group:
+                        if node.getName().startswith("phys_") and node.nodetype == "transform":
+                                shape.Shape(node, node.shape)
+                                # Some primitives have different orientation in the editor compared to
+                                # the runtime environment (Maya along Y-axis, RGE along Z-axis).
+                                if node.pointup:
+                                        #print("%s before:\n%s." % (node.getName(), node.gettransformto(None)))
+                                        del(node.localmat4)
+                                        node.gettransformto(None)
+                                        #print("%s after:\n%s." % (node.getName(), node.gettransformto(None)))
+                shape.disable_ortho_check = True
 
 
         def makephysrelative(self, group):

@@ -380,8 +380,6 @@ QuaternionF PhysicsManagerODE::GetBodyOrientation(BodyID pBodyId) const
 	dQuaternion q;
 	::dGeomGetQuaternion(lObject->mGeomID, q);
 	QuaternionF lQuat(q[0], q[1], q[2], q[3]);
-	AdjustOrientation(lObject->mGeomID, lQuat, false);
-
 	return (lQuat);
 }
 
@@ -401,7 +399,6 @@ void PhysicsManagerODE::GetBodyTransform(BodyID pBodyId, TransformationF& pTrans
 	const Vector3DF lPos(p[0], p[1], p[2]);
 	pTransform.SetPosition(lPos);
 	QuaternionF lQuat(q[0], q[1], q[2], q[3]);
-	AdjustOrientation(lObject->mGeomID, lQuat, false);
 	pTransform.SetOrientation(lQuat);
 }
 
@@ -418,7 +415,6 @@ void PhysicsManagerODE::SetBodyTransform(BodyID pBodyId, const TransformationF& 
 	TransformationF lTransform(pTransform);
 	const Vector3DF lPos(pTransform.GetPosition());
 	QuaternionF lQuat = lTransform.GetOrientation();
-	AdjustOrientation(lObject->mGeomID, lQuat, true);
 	dReal lQ[4];
 	lQ[0] = lQuat.GetA();
 	lQ[1] = lQuat.GetB();
@@ -3111,26 +3107,6 @@ void PhysicsManagerODE::NormalizeRotation(BodyID pObject)
 			SetBodyAngularVelocity(lObject, lVelocity);
 			SetBodyAngularAcceleration(lObject, Vector3DF());
 		}
-	}
-}
-
-
-
-void PhysicsManagerODE::AdjustOrientation(dGeomID pGeom, QuaternionF& pQ, bool pSetter) const
-{
-	if (pGeom->type == dCapsuleClass)
-	{
-		// Capsules have different orientations in editor (along Y-axis) and ODE (along Z).
-		QuaternionF lQ;
-		if (pSetter)
-		{
-			lQ.RotateAroundOwnX(PIF/2);
-		}
-		else
-		{
-			lQ.RotateAroundOwnX(-PIF/2);
-		}
-		pQ = pQ * lQ;
 	}
 }
 

@@ -388,6 +388,28 @@ bool GameServerManager::Initialize()
 				lOk = mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("hovercraft_01")));
 			}
 		}
+		for (x = 0; lOk && x < 100; ++x)
+		{
+			const wstr lUserName = wstrutil::Format(L"Dumper%i", x);
+			wstr lReadablePassword(L"CarPassword");
+			Cure::MangledPassword lPassword(lReadablePassword);
+			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
+			if (lOk)
+			{
+				lOk = mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("dumper_01")));
+			}
+		}
+		for (x = 0; lOk && x < 100; ++x)
+		{
+			const wstr lUserName = wstrutil::Format(L"Robot%i", x);
+			wstr lReadablePassword(L"CarPassword");
+			Cure::MangledPassword lPassword(lReadablePassword);
+			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
+			if (lOk)
+			{
+				lOk = mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("robot_01")));
+			}
+		}
 	}
 
 	/*if (lOk)

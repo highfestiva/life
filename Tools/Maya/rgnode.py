@@ -75,7 +75,12 @@ def adjustnode(node):
                 # See http://download.autodesk.com/us/maya/2010help/CommandsPython/xform.html for more info.
                 # My multiplications are reversed order, since matrices already transposed.
                 #m = t * rt * rpi * r * ar * rp * st * spi * sh * s * sp
-                m = wt * (rp * st * spi * sh * s * sp).inverse()
+                mup = mat4.identity()
+                if hasattr(self, "pointup") and self.pointup:
+                        # Some primitives have different orientation in the editor compared to
+                        # the runtime environment (Maya along Y-axis, RGE along Z-axis).
+                        mup = mat4.rotation(-math.pi/2, vec3(1,0,0))
+                m = wt * (rp * st * spi * sh * s * sp * mup).inverse()
                 return m
                 #lp = self._get_local_pivot()
                 #return m * vec4(0, 0, 0, 1)
@@ -138,6 +143,11 @@ def adjustnode(node):
                 # See http://download.autodesk.com/us/maya/2010help/CommandsPython/xform.html for more info.
                 # My multiplications are reversed order, since matrices already transposed.
                 m = t * rt * rpi * r * ar * rp * st * spi * sh * s * sp
+                if hasattr(self, "pointup") and self.pointup:
+                        # Some primitives have different orientation in the editor compared to
+                        # the runtime environment (Maya along Y-axis, RGE along Z-axis).
+                        r = mat4.rotation(-math.pi/2, vec3(1,0,0))
+                        m = m * r
                 #print("Matrix for", self.getName())
                 #print(m)
                 setattr(self, matname, m)

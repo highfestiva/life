@@ -9,6 +9,9 @@ from vec3 import vec3
 from vec4 import vec4
 
 
+disable_ortho_check = False;
+
+
 class Shape:
         @staticmethod
         def inrange(vals, deviation):
@@ -28,6 +31,8 @@ class Shape:
                 self._scalenode = scalenode
                 self._shapenode = shapenode
 
+                scalenode.pointup = False
+
                 wt = scalenode.get_world_transform()
                 v0 = wt*vec4(1,0,0,0)
                 v1 = wt*vec4(0,1,0,0)
@@ -36,7 +41,8 @@ class Shape:
                 nv1 = v1.normalize()
                 nv2 = v2.normalize()
                 d0, d1, d2 = map(lambda x,y: math.fabs(x*y), [nv0, nv0, nv1], [nv1, nv2, nv2])
-                if d0 > 0.1 or d1 > 0.1 or d2 > 0.1:
+                global disable_ortho_check
+                if not disable_ortho_check and (d0 > 0.1 or d1 > 0.1 or d2 > 0.1):
                         print("Error: scale for physical shape '%s' is not orthogonal!" % scalenode.getFullName())
                         print(nv0, nv1, nv2)
                         print(d0, d1, d2)
@@ -57,6 +63,7 @@ class Shape:
                         d.append(shapenode.getAttrValue("r", "r", None, default=1.0)*v0.length())
                 elif shapenode.nodetype == "polyCylinder":
                         self.type = "capsule"
+                        scalenode.pointup = True
                         r = shapenode.getAttrValue("r", "r", None, default=1.0)*v0.length()
                         # Reduce height the radius in each end, so it won't bulge out.
                         h = shapenode.getAttrValue("h", "h", None, default=1.0)*v0.length() - 2*r
@@ -76,9 +83,11 @@ class Shape:
                         print("Error: primitive physics shape type '%s' on node '%s' is unknown." % (shapenode.nodetype, shapenode.getName()))
                         sys.exit(22)
 
-                if check_orthonormal:
+                if not disable_ortho_check and check_orthonormal:
                         if math.fabs(v0.length()-v1.length()) > 0.1 or math.fabs(v0.length()-v2.length()) > 0.1 or math.fabs(v1.length()-v2.length()) > 0.1:
                                 print("Error: scale for physical shape '%s' is not orthonormal!" % scalenode.getFullName())
+                                print(disable_ortho_check)
+                                raise Error("tjaba!")
                                 sys.exit(21)
 
 

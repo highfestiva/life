@@ -60,7 +60,7 @@ public:
 	void AddControlledGeometry(ChunkyBoneGeometry* pGeometry, float pScale, EngineMode pMode = MODE_NORMAL);
 	bool SetValue(unsigned pAspect, float pValue, float pZAngle);
 
-	void OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics* pStructure, float pFrameTime);
+	void OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics* pStructure, float pFrameTime) const;
 
 	unsigned GetControllerIndex() const;
 	float GetValue() const;
@@ -85,10 +85,11 @@ private:
 		ChunkyBoneGeometry* mGeometry;
 		float mScale;
 		EngineMode mMode;
+		mutable float mLock;
 	};
 
 	Vector3DF GetRotorLiftForce(TBC::PhysicsManager* pPhysicsManager, ChunkyBoneGeometry* pGeometry, const EngineNode& pEngineNode) const;
-	void ApplyTorque(TBC::PhysicsManager* pPhysicsManager, float pFrameTime, ChunkyBoneGeometry* pGeometry, const EngineNode& pEngineNode);
+	void ApplyTorque(TBC::PhysicsManager* pPhysicsManager, float pFrameTime, ChunkyBoneGeometry* pGeometry, const EngineNode& pEngineNode) const;
 
 	typedef std::vector<EngineNode> EngineNodeArray;
 
@@ -100,7 +101,8 @@ private:
 	unsigned mControllerIndex;
 	EngineNodeArray mEngineNodeArray;
 	float mValue[4];
-	float mIntensity;
+	mutable float mIntensity;
+	mutable float mSmoothValue[4];
 
 	LOG_CLASS_DECLARE();
 };
