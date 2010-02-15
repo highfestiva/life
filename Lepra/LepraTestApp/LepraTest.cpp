@@ -1097,7 +1097,7 @@ bool TestSystemManager(const LogDecorator& pAccount)
 	{
 		lContext = _T("Cpu MIPS");
 		unsigned lCpuMips = SystemManager::QueryCpuMips();
-		lTestOk = (lCpuMips >= 200 && lCpuMips <= 3500);
+		lTestOk = (lCpuMips >= 50 && lCpuMips <= 3500);
 		assert(lTestOk);
 	}
 
@@ -1179,7 +1179,9 @@ bool TestNetwork(const LogDecorator& pAccount)
 		SocketAddress lSendAddress;
 		lSendAddress.Resolve(_T(":47347"));
 		UdpSocket lReceiver(lReceiveAddress);
+                assert(lReceiver.IsOpen());
 		UdpSocket lSender(lSendAddress);
+                assert(lSender.IsOpen());
 		lTestOk = (lSender.SendTo((const uint8*)"Hello World", 12, lReceiveAddress) == 12);
 		assert(lTestOk);
 		if (lTestOk)

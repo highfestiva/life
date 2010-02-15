@@ -1,8 +1,7 @@
 Mac PowerPC G5:
     Edit build/Makefiles/gmake/sysid.mak and change the M_ARCH := line to ppc7400.
     Run
-        ./configure --with-extra-ldflags="-L/usr/lib -lgcc /usr/lib/bundle1.o -undefined dynamic_lookup"
-
+	./configure --with-extra-ldflags="-undefined dynamic_lookup /usr/lib/dylib1.o"
 
 Mac x86_64:
     Edit build/Makefiles/gmake/sysid.mak and change the M_ARCH := line to x86_64.

@@ -91,7 +91,7 @@ inline uint64 SystemManager::GetCpuTick()
 		"\tbne     0b           \n"
 		: "=r"(upper),"=r"(lower),"=r"(tmp)
 	);
-	return ((uint64)upper)<<32 | lower;
+	return (((uint64)upper)<<32 | lower)*75;
 #else
 #error "GetCpuTick() not yet implemented on this platform."
 #endif // Platform.

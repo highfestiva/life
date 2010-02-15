@@ -1178,7 +1178,7 @@ UdpSocket::UdpSocket(const SocketAddress& pLocalAddress) :
 	{
 		if (::bind(mSocket, (const sockaddr*)&mLocalAddress.GetAddr(), sizeof(mLocalAddress.GetAddr())) != 0)
 		{
-			mLog.Warning(_T("Failed to bind UDP socket to ")+pLocalAddress.GetAsString()+_T("."));
+			mLog.Warningf(_T("Failed to bind UDP socket to %s: %i."), pLocalAddress.GetAsString().c_str(), SOCKET_LAST_ERROR());
 			Close();
 		}
 	}
