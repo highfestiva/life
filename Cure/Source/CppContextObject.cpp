@@ -24,10 +24,6 @@ static str RemoveMeTranslateToHardcodedShit(CppContextObject* pObject)
 	{
 		return (_T("box_01"));
 	}
-	else if (pObject->GetClassId().find(_T("sphere_002")) != str::npos)
-	{
-		return (_T("sphere_01"));
-	}
 	else if (pObject->GetClassId().find(_T("car_001")) != str::npos)
 	{
 		return (_T("car_01"));
@@ -186,7 +182,7 @@ void CppContextObject::OnLoadPhysics(UserPhysicsResource* pPhysicsResource)
 {
 	if (pPhysicsResource->GetLoadState() != RESOURCE_LOAD_COMPLETE)
 	{
-		mLog.Errorf(_T("Could not physics class '%s'."), pPhysicsResource->GetName().c_str());
+		mLog.Errorf(_T("Could not load physics class '%s'."), pPhysicsResource->GetName().c_str());
 		assert(false);
 		return;
 	}

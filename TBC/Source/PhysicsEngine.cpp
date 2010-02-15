@@ -28,6 +28,7 @@ PhysicsEngine::PhysicsEngine(EngineType pEngineType, float pStrength, float pMax
 	mIntensity(0)
 {
 	::memset(mValue, 0, sizeof(mValue));
+	::memset(mSmoothValue, 0, sizeof(mSmoothValue));
 }
 
 PhysicsEngine::~PhysicsEngine()
@@ -102,6 +103,15 @@ bool PhysicsEngine::SetValue(unsigned pAspect, float pValue, float pZAngle)
 			}
 		}
 		break;
+		case ENGINE_LIFTER:
+		{
+			if (pAspect >= mControllerIndex+0 && pAspect <= mControllerIndex+1)
+			{
+				mValue[pAspect] = pValue;
+				return (true);
+			}
+		}
+		break;
 		case ENGINE_HINGE_ROLL:
 		case ENGINE_HINGE_GYRO:
 		case ENGINE_HINGE_BREAK:
@@ -134,7 +144,7 @@ bool PhysicsEngine::SetValue(unsigned pAspect, float pValue, float pZAngle)
 
 
 
-void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics* pStructure, float pFrameTime)
+void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics* pStructure, float pFrameTime) const
 {
 	mIntensity = 0;
 	EngineNodeArray::const_iterator i = mEngineNodeArray.begin();
@@ -176,6 +186,18 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics*
 					mIntensity += lVelocityVector.GetLength() / mMaxSpeed;
 				}
 				break;
+				case ENGINE_LIFTER:
+				{
+					if (mValue[0] != 0 || mValue[1] != 0)
+					{
+						// Arcade stabilization for lifter (typically hovercraft, elevator or similar vehicle).
+						Vector3DF lLiftPivot = pPhysicsManager->GetBodyPosition(lGeometry->GetBodyId()) + Vector3DF(0,0,1)*mFriction*lScale;
+
+						const Vector3DF lLiftForce = Vector3DF(0,0,1)*mStrength*lScale;
+						pPhysicsManager->AddForceAtPos(lGeometry->GetBodyId(), lLiftForce, lLiftPivot);
+					}
+				}
+				break;
 				case ENGINE_HINGE_GYRO:
 				{
 					// Apply a fake gyro torque to parent in order to emulate a heavier gyro than
@@ -215,8 +237,8 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics*
 						float lPreviousStrength = 0;
 						float lPreviousTargetSpeed = 0;
 						pPhysicsManager->GetAngularMotorRoll(lGeometry->GetJointId(), lPreviousStrength, lPreviousTargetSpeed);
-						const float lTargetSpeed = Math::Lerp(lPreviousTargetSpeed, lDirectionalMaxSpeed, 0.5f);
-						const float lTargetStrength = Math::Lerp(lPreviousStrength, lUsedStrength*lScale, 0.5f);
+						const float lTargetSpeed = Math::Lerp(lPreviousTargetSpeed, lDirectionalMaxSpeed*lScale, 0.5f);
+						const float lTargetStrength = Math::Lerp(lPreviousStrength, lUsedStrength, 0.5f);
 						pPhysicsManager->SetAngularMotorRoll(lGeometry->GetJointId(), lTargetStrength, lTargetSpeed);
 						pPhysicsManager->GetAngleRate1(lGeometry->GetJointId(), lPreviousTargetSpeed);
 						mIntensity += lPreviousTargetSpeed / mMaxSpeed;
@@ -267,7 +289,6 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics*
 					{
 						const Vector3DF lRotorForce = GetRotorLiftForce(pPhysicsManager, lGeometry, lEngineNode);
 						Vector3DF lLiftForce = lRotorForce * mValue[0];
-						//const float lLerpValue = (mValue[0]+1)*0.5f * (mMaxSpeed-mMaxSpeed2) + mMaxSpeed2;
 						const int lParentBone = pStructure->GetIndex(lGeometry->GetParent());
 						const QuaternionF lOrientation =
 							pPhysicsManager->GetBodyOrientation(lGeometry->GetParent()->GetBodyId()) *
@@ -275,6 +296,10 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics*
 
 						Vector3DF lRotorPivot;
 						pPhysicsManager->GetAnchorPos(lGeometry->GetJointId(), lRotorPivot);
+						const Vector3DF lOffset =
+							pPhysicsManager->GetBodyOrientation(lGeometry->GetParent()->GetBodyId()) *
+							Vector3DF(0, 0, mMaxSpeed*lScale);
+						lRotorPivot += lOffset;
 
 						const float lAbsFriction = ::fabs(mFriction);
 						if (mFriction < 0)
@@ -291,9 +316,9 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics*
 
 						// Smooth rotor force - for digital controls and to make acceleration seem more realistic.
 						const float lSmooth = 0.05f * lEngineNode.mScale;
-						lLiftForce.x = mValue[1] = Math::Lerp(mValue[1], lLiftForce.x, lSmooth);
-						lLiftForce.y = mValue[2] = Math::Lerp(mValue[2], lLiftForce.y, lSmooth);
-						lLiftForce.z = mValue[3] = Math::Lerp(mValue[3], lLiftForce.z, lSmooth);
+						lLiftForce.x = mSmoothValue[0] = Math::Lerp(mSmoothValue[0], lLiftForce.x, lSmooth);
+						lLiftForce.y = mSmoothValue[1] = Math::Lerp(mSmoothValue[1], lLiftForce.y, lSmooth);
+						lLiftForce.z = mSmoothValue[2] = Math::Lerp(mSmoothValue[2], lLiftForce.z, lSmooth);
 
 						// Counteract rotor's movement through perpendicular air.
 						Vector3DF lDragForce;
@@ -461,7 +486,7 @@ Vector3DF PhysicsEngine::GetRotorLiftForce(PhysicsManager* pPhysicsManager, Chun
 	return (lAxis*lLiftForce);
 }
 
-void PhysicsEngine::ApplyTorque(PhysicsManager* pPhysicsManager, float pFrameTime, ChunkyBoneGeometry* pGeometry, const EngineNode& pEngineNode)
+void PhysicsEngine::ApplyTorque(PhysicsManager* pPhysicsManager, float pFrameTime, ChunkyBoneGeometry* pGeometry, const EngineNode& pEngineNode) const
 {
 	pFrameTime;
 
@@ -500,18 +525,18 @@ void PhysicsEngine::ApplyTorque(PhysicsManager* pPhysicsManager, float pFrameTim
 			if ((lForce < 0.02f && lIrlAngle < lTarget) ||
 				(lForce > -0.02f && lIrlAngle > lTarget))
 			{
-				if (::fabs(mValue[1]) < ::fabs(lForce))
+				if (::fabs(pEngineNode.mLock) < ::fabs(lForce))
 				{
-					mValue[1] = lForce;
+					pEngineNode.mLock = lForce;
 				}
 				else
 				{
-					lForce = mValue[1];
+					lForce = pEngineNode.mLock;
 				}
 			}
 			else
 			{
-				mValue[1] = 0;
+				pEngineNode.mLock = 0;
 			}
 		}
 		const float lAngleSpan = (lHiStop-lLoStop)*0.9f;

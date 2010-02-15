@@ -497,7 +497,8 @@ class PhysWriter(ChunkyWriter):
                 for connection in connected_to:
                         body, scale, connectiontype = connection
                         idx = self.bodies.index(body)
-                        #print("Engine '%s's body index is %i."% (node.getName(), idx))
+                        if options.options.verbose:
+                                print("Engine '%s' connected to body index is %i (scale %f)."% (node.getName(), idx, scale))
                         self._writeint(idx)
                         self._writefloat(float(scale))
                         connectiontypes = {"normal":1, "half_lock":2}

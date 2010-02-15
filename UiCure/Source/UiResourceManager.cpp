@@ -285,12 +285,6 @@ bool GeometryResource::Load()
 		lMaterial.SetColor(0, 1, 0);
 		lCubeMappingScale = lGeometry->GetBoundingRadius();
 	}
-	else if (lFilename.find(_T("sphere_002_mesh")) != str::npos)
-	{
-		float lRadius = 1.0f;
-		lGeometry = UiTbc::BasicMeshCreator::CreateEllipsoid(lRadius, lRadius, lRadius, 10, 10);
-		lMaterial.SetColor(1, 0, 1);
-	}
 	else if (lFilename.find(_T("car_001_body_mesh")) != str::npos)
 	{
 		Vector3DF lBodyDimensions(1.9f, 4.9f, 0.6f);

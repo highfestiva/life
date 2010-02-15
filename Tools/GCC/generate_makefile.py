@@ -150,6 +150,8 @@ def convert_out_name(vcfile):
     libname = libname.split("_")[0]
     if libname.endswith("Lib"):
         libname = libname[:-3]
+    import re
+    libname = re.sub("[0-9]*$", "", libname);
     return libname
 
 def linux_bin_name(type, vcfile):
@@ -250,21 +252,21 @@ def generate_makefiles(basedir, vcfileinfolist):
 def main():
     basedir = "../../"
     projects = [
-        ["ThirdParty",        "lib_nowarn", "ThirdParty/ThirdPartyLib_800.vcproj", ""],
-        ["alut",    "lib_nowarn", "ThirdParty/freealut-1.1.0/admin/VisualStudioDotNET/alut/alut.vcproj", ""],
-        ["Lepra",    "lib",        "Lepra/Lepra.vcproj", "ThirdParty"],
-        ["TBC",        "lib",        "TBC/TBC.vcproj", "Lepra"],
-        ["Cure",    "lib",        "Cure/Cure.vcproj", "TBC"],
-        ["UiLepra",    "lib",        "UiLepra/UiLepra.vcproj", "Lepra alut"],
-        ["UiTBC",    "lib",        "UiTBC/UiTBC.vcproj", "UiLepra TBC"],
-        ["UiCure",    "lib",        "UiCure/UiCure.vcproj", "UiTBC Cure"],
-        ["Life",    "lib",        "Life/Life.vcproj", "Cure"],
-        ["LifeServer",    "bin",        "Life/LifeServer/LifeServer.vcproj", "Life"],
-        ["LifeClient",    "gfx_bin",    "Life/LifeClient/LifeClient.vcproj", "Life UiCure"],
-        ["CureTest",    "gfx_bin",    "UiCure/CureTestApp/CureTestApp.vcproj", "UiCure"]]
+        ["ThirdParty", "lib_nowarn", "ThirdParty/ThirdPartyLib_900.vcproj", ""],
+        ["alut",       "lib_nowarn", "ThirdParty/freealut-1.1.0/admin/VisualStudioDotNET/alut/alut900.vcproj", ""],
+        ["Lepra",      "lib",        "Lepra/Lepra900.vcproj", "ThirdParty"],
+        ["TBC",        "lib",        "TBC/TBC900.vcproj", "Lepra"],
+        ["Cure",       "lib",        "Cure/Cure900.vcproj", "TBC"],
+        ["UiLepra",    "lib",        "UiLepra/UiLepra900.vcproj", "Lepra alut"],
+        ["UiTBC",      "lib",        "UiTBC/UiTBC900.vcproj", "UiLepra TBC"],
+        ["UiCure",     "lib",        "UiCure/UiCure900.vcproj", "UiTBC Cure"],
+        ["Life",       "lib",        "Life/Life900.vcproj", "Cure"],
+        ["LifeServer", "bin",        "Life/LifeServer/LifeServer900.vcproj", "Life"],
+        ["LifeClient", "gfx_bin",    "Life/LifeClient/LifeClient900.vcproj", "Life UiCure"],
+        ["CureTest",   "gfx_bin",    "UiCure/CureTestApp/CureTestApp900.vcproj", "UiCure"]]
 
     if sys.platform != 'darwin':
-        projects += [["OpenAL", "lib_nowarn", "ThirdParty/openal-soft-1.10.622/OpenAL_800.vcproj", ""]]
+        projects += [["OpenAL", "lib_nowarn", "ThirdParty/openal-soft-1.10.622/OpenAL_900.vcproj", ""]]
     generate_makefiles(basedir, projects)
 
 if __name__ == '__main__':

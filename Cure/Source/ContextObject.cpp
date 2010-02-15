@@ -418,6 +418,7 @@ bool ContextObject::UpdateFullPosition(const ObjectPositionalData*& pPositionalD
 				::memcpy(lData->mValue, lEngine->GetValues(), sizeof(float)*4);
 			}
 			break;
+			case TBC::PhysicsEngine::ENGINE_LIFTER:
 			case TBC::PhysicsEngine::ENGINE_HINGE_ROLL:
 			case TBC::PhysicsEngine::ENGINE_HINGE_GYRO:
 			case TBC::PhysicsEngine::ENGINE_HINGE_BREAK:
@@ -651,6 +652,7 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData)
 				SetEnginePower(3, lData->mValue[2], lData->mValue[3]);	// TRICKY: specialcasing.
 			}
 			break;
+			case TBC::PhysicsEngine::ENGINE_LIFTER:
 			case TBC::PhysicsEngine::ENGINE_HINGE_ROLL:
 			case TBC::PhysicsEngine::ENGINE_HINGE_GYRO:
 			case TBC::PhysicsEngine::ENGINE_HINGE_BREAK:
