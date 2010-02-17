@@ -540,20 +540,21 @@ bool OpenRenderer(const Lepra::LogDecorator& pLog, UiLepra::DisplayManager::Cont
 	{
 		lContext = _T("load texturemap (TEX)");
 		UiTbc::TEXLoader lTEXLoader;
-		lOk = (lTEXLoader.Load(_T("../CureTestApp/Texturemap.tex"), lTextureMap, true) == UiTbc::TEXLoader::STATUS_SUCCESS);
+		lOk = (lTEXLoader.Load(_T("Data/texturemap.tex"), lTextureMap, true) == UiTbc::TEXLoader::STATUS_SUCCESS);
 		if (!lOk)
 		{
 			lContext = _T("load texturemap");
 			Lepra::Canvas lCanvas;
 			Lepra::TgaLoader lLoader;
-			lOk = (lLoader.Load(_T("Texturemap.tga"), lCanvas) == Lepra::TgaLoader::STATUS_SUCCESS);
+			lOk = (lLoader.Load(_T("Data/texturemap.tga"), lCanvas) == Lepra::TgaLoader::STATUS_SUCCESS);
 
 			lTextureMap.Set(lCanvas);
 			if (lOk)
 			{
 				UiTbc::TEXLoader lTEXLoader;
-				lTEXLoader.Save(_T("Texturemap.tex"), lTextureMap, false);
+				lTEXLoader.Save(_T("Data/texturemap.tex"), lTextureMap, false);
 			}
+			assert(lOk);
 		}
 	}
 
@@ -562,21 +563,22 @@ bool OpenRenderer(const Lepra::LogDecorator& pLog, UiLepra::DisplayManager::Cont
 	{
 		lContext = _T("load lightmap (TEX)");
 		UiTbc::TEXLoader lTEXLoader;
-		lOk = (lTEXLoader.Load(_T("../CureTestApp/Lightmap.tex"), lLightMap, false) == UiTbc::TEXLoader::STATUS_SUCCESS);
+		lOk = (lTEXLoader.Load(_T("Data/lightmap.tex"), lLightMap, false) == UiTbc::TEXLoader::STATUS_SUCCESS);
 		if (!lOk)
 		{
 			lContext = _T("load lightmap");
 			Lepra::Canvas lCanvas;
 			Lepra::TgaLoader lLoader;
-			lOk = (lLoader.Load(_T("Lightmap.tga"), lCanvas) == Lepra::TgaLoader::STATUS_SUCCESS);
+			lOk = (lLoader.Load(_T("Data/lightmap.tga"), lCanvas) == Lepra::TgaLoader::STATUS_SUCCESS);
 
 			lLightMap.Set(lCanvas);
 
 			if (lOk)
 			{
 				UiTbc::TEXLoader lTEXLoader;
-				lTEXLoader.Save(_T("Lightmap.tex"), lLightMap, false);
+				lTEXLoader.Save(_T("Data/lightmap.tex"), lLightMap, false);
 			}
+			assert(lOk);
 		}
 	}
 
@@ -585,21 +587,22 @@ bool OpenRenderer(const Lepra::LogDecorator& pLog, UiLepra::DisplayManager::Cont
 	{
 		lContext = _T("load envmap (TEX)");
 		UiTbc::TEXLoader lTEXLoader;
-		lOk = (lTEXLoader.Load(_T("../CureTestApp/Envmap.tex"), lEnvMap, false) == UiTbc::TEXLoader::STATUS_SUCCESS);
+		lOk = (lTEXLoader.Load(_T("Data/envmap.tex"), lEnvMap, false) == UiTbc::TEXLoader::STATUS_SUCCESS);
 		if (!lOk)
 		{
 			lContext = _T("load envmap");
 			Lepra::Canvas lCanvas;
 			Lepra::TgaLoader lLoader;
-			lOk = (lLoader.Load(_T("Envmap.tga"), lCanvas) == Lepra::TgaLoader::STATUS_SUCCESS);
+			lOk = (lLoader.Load(_T("Data/envmap.tga"), lCanvas) == Lepra::TgaLoader::STATUS_SUCCESS);
 
 			lEnvMap.Set(lCanvas);
 
 			if (lOk)
 			{
 				UiTbc::TEXLoader lTEXLoader;
-				lTEXLoader.Save(_T("Envmap.tex"), lEnvMap, false);
+				lTEXLoader.Save(_T("Data/envmap.tex"), lEnvMap, false);
 			}
+			assert(lOk);
 		}
 	}
 
@@ -608,21 +611,22 @@ bool OpenRenderer(const Lepra::LogDecorator& pLog, UiLepra::DisplayManager::Cont
 	{
 		lContext = _T("load specmap (TEX)");
 		UiTbc::TEXLoader lTEXLoader;
-		lOk = (lTEXLoader.Load(_T("../CureTestApp/Specmap.tex"), lSpecMap, false) == UiTbc::TEXLoader::STATUS_SUCCESS);
+		lOk = (lTEXLoader.Load(_T("Data/specmap.tex"), lSpecMap, false) == UiTbc::TEXLoader::STATUS_SUCCESS);
 		if (!lOk)
 		{
 			lContext = _T("load specmap");
 			Lepra::Canvas lCanvas;
 			Lepra::TgaLoader lLoader;
-			lOk = (lLoader.Load(_T("Specmap.tga"), lCanvas) == Lepra::TgaLoader::STATUS_SUCCESS);
+			lOk = (lLoader.Load(_T("Data/specmap.tga"), lCanvas) == Lepra::TgaLoader::STATUS_SUCCESS);
 
 			lSpecMap.Set(lCanvas);
 
 			if (lOk)
 			{
 				UiTbc::TEXLoader lTEXLoader;
-				lTEXLoader.Save(_T("Specmap.tex"), lSpecMap, false);
+				lTEXLoader.Save(_T("Data/specmap.tex"), lSpecMap, false);
 			}
+			assert(lOk);
 		}
 	}
 
@@ -631,21 +635,22 @@ bool OpenRenderer(const Lepra::LogDecorator& pLog, UiLepra::DisplayManager::Cont
 	{
 		lContext = _T("load normalmap (TEX)");
 		UiTbc::TEXLoader lTEXLoader;
-		lOk = (lTEXLoader.Load(_T("../CureTestApp/Normalmap.tex"), lNormalMap, false) == UiTbc::TEXLoader::STATUS_SUCCESS);
+		lOk = (lTEXLoader.Load(_T("Data/normalmap.tex"), lNormalMap, false) == UiTbc::TEXLoader::STATUS_SUCCESS);
 		if (!lOk)
 		{
 			lContext = _T("load normalmap");
 			Lepra::Canvas lCanvas;
 			Lepra::TgaLoader lLoader;
-			lOk = (lLoader.Load(_T("Normalmap.tga"), lCanvas) == Lepra::TgaLoader::STATUS_SUCCESS);
+			lOk = (lLoader.Load(_T("Data/normalmap.tga"), lCanvas) == Lepra::TgaLoader::STATUS_SUCCESS);
 
 			lNormalMap.Set(lCanvas);
 
 			if (lOk)
 			{
 				UiTbc::TEXLoader lTEXLoader;
-				lTEXLoader.Save(_T("Normalmap.tex"), lNormalMap, false);
+				lTEXLoader.Save(_T("Data/normalmap.tex"), lNormalMap, false);
 			}
+			assert(lOk);
 		}
 	}
 
@@ -654,14 +659,15 @@ bool OpenRenderer(const Lepra::LogDecorator& pLog, UiLepra::DisplayManager::Cont
 	{
 		lContext = _T("load multimap (TEX)");
 		UiTbc::TEXLoader lTEXLoader;
-		lOk = lTEXLoader.Load(_T("../CureTestApp/MultiMap.tex"), lMultiMap, false) == UiTbc::TEXLoader::STATUS_SUCCESS;
+		lOk = lTEXLoader.Load(_T("Data/multiMap.tex"), lMultiMap, false) == UiTbc::TEXLoader::STATUS_SUCCESS;
 		if (!lOk)
 		{
 			lMultiMap.Set(*lTextureMap.GetColorMap(0), 0, lNormalMap.GetColorMap(0), lSpecMap.GetColorMap(0));
 			UiTbc::TEXLoader lTEXLoader;
-			lTEXLoader.Save(_T("MultiMap.tex"), lMultiMap, false);
+			lTEXLoader.Save(_T("Data/multiMap.tex"), lMultiMap, false);
 			lOk = true;
 		}
+		assert(lOk);
 	}
 
 	if (lOk)
@@ -672,12 +678,14 @@ bool OpenRenderer(const Lepra::LogDecorator& pLog, UiLepra::DisplayManager::Cont
 
 		gTextureId[TEXTUREMAP] = gRenderer->AddTexture(&lTextureMap);
 		lOk = (gTextureId[TEXTUREMAP] != 0);
+		assert(lOk);
 	}
 	if (lOk)
 	{
 		lContext = _T("add texturemap to painter");
 		gImageId[TEXTUREMAP] = gPainter->AddImage(lTextureMap.GetColorMap(0), lTextureMap.GetAlphaMap(0));
 		lOk = (gImageId[TEXTUREMAP] != 0);
+		assert(lOk);
 	}
 	if (lOk)
 	{
@@ -687,6 +695,7 @@ bool OpenRenderer(const Lepra::LogDecorator& pLog, UiLepra::DisplayManager::Cont
 
 		gTextureId[LIGHTMAP] = gRenderer->AddTexture(&lLightMap);
 		lOk = (gTextureId[LIGHTMAP] != 0);
+		assert(lOk);
 	}
 	if (lOk)
 	{
@@ -700,6 +709,7 @@ bool OpenRenderer(const Lepra::LogDecorator& pLog, UiLepra::DisplayManager::Cont
 		{
 			gRenderer->SetEnvironmentMap(gTextureId[ENVMAP]);
 		}
+		assert(lOk);
 	}
 	if (lOk)
 	{
@@ -709,6 +719,7 @@ bool OpenRenderer(const Lepra::LogDecorator& pLog, UiLepra::DisplayManager::Cont
 
 		gTextureId[SPECMAP] = gRenderer->AddTexture(&lSpecMap);
 		lOk = (gTextureId[SPECMAP] != 0);
+		assert(lOk);
 	}
 	if (lOk)
 	{
@@ -718,6 +729,7 @@ bool OpenRenderer(const Lepra::LogDecorator& pLog, UiLepra::DisplayManager::Cont
 
 		gTextureId[NORMALMAP] = gRenderer->AddTexture(&lNormalMap);
 		lOk = (gTextureId[NORMALMAP] != 0);
+		assert(lOk);
 	}
 	if (lOk)
 	{
@@ -727,6 +739,7 @@ bool OpenRenderer(const Lepra::LogDecorator& pLog, UiLepra::DisplayManager::Cont
 
 		gTextureId[MULTIMAP] = gRenderer->AddTexture(&lMultiMap);
 		lOk = (gTextureId[MULTIMAP] != 0);
+		assert(lOk);
 	}
 
 	if (lOk)
@@ -745,7 +758,7 @@ bool OpenRenderer(const Lepra::LogDecorator& pLog, UiLepra::DisplayManager::Cont
 	str lRendererType = _T("OpenGL");
 	if (pContext != UiLepra::DisplayManager::OPENGL_CONTEXT)
 	{
-		lRendererType = _T("Software");
+		lRendererType = _T("D3D");
 	}
 	ReportTestResult(pLog, lRendererType+_T("Renderer"), lContext, lOk);
 
@@ -1305,7 +1318,7 @@ bool TestMeshImport(const Lepra::LogDecorator& pLog, double pShowTime)
 	if (lTestOk)
 	{
 		lContext = _T("load imported mesh");
-		const str lMeshName = _T("tractor_01_rear_wheel0.mesh");
+		const str lMeshName = _T("Data/tractor_01_rear_wheel0.mesh");
 		Lepra::DiskFile lFile;
 		lTestOk = lFile.Open(lMeshName, Lepra::DiskFile::MODE_READ);
 		assert(lTestOk);
@@ -1368,7 +1381,7 @@ bool TestLoadClass(const Lepra::LogDecorator& pLog)
 	if (lTestOk)
 	{
 		lContext = _T("open file");
-		const str lClassName = _T("tractor_01.class");
+		const str lClassName = _T("Data/tractor_01.class");
 		lTestOk = lFile.Open(lClassName, Lepra::DiskFile::MODE_READ);
 		assert(lTestOk);
 	}
