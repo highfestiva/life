@@ -889,6 +889,7 @@ class GroupReader(DefaultMAReader):
                                 elif mesh.nodetype == "transform":
                                         p = mesh.getParent()
                                         if p and p.phys_ref:
+                                                print("Warning: placing mesh %s on phys %s." % (mesh.getName(), p.phys_ref[0].getName()))
                                                 p.phys_ref[0].mesh_ref += [mesh]
                                                 mesh.phys_ref += [p.phys_ref[0]]
                                         else:
@@ -1136,7 +1137,7 @@ class GroupReader(DefaultMAReader):
 ##                                      (mesh.getFullName(), phys.getFullName()))
                         if not loose and phys.phys_root and not phys.get_fixed_attribute("joint", optional=True):
                                 valid_ref = False
-                                print("Error: mesh '%s' referenced by non-jointed phys node '%s' (root %s)." %
+                                print("Warning: mesh '%s' referenced by non-jointed phys node '%s' (root %s)." %
                                       (mesh.getFullName(), phys.getFullName(), phys.phys_root.getName()))
                         if loose and (not phys.phys_root or phys.get_fixed_attribute("joint", optional=True)):
                                 valid_ref = False
