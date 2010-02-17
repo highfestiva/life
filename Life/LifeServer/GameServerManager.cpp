@@ -421,6 +421,17 @@ bool GameServerManager::Initialize()
 				lOk = mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("mobile_crane_01")));
 			}
 		}
+		for (x = 0; lOk && x < 100; ++x)
+		{
+			const wstr lUserName = wstrutil::Format(L"Forklift%i", x);
+			wstr lReadablePassword(L"CarPassword");
+			Cure::MangledPassword lPassword(lReadablePassword);
+			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
+			if (lOk)
+			{
+				lOk = mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("forklift_01")));
+			}
+		}
 	}
 
 	/*if (lOk)

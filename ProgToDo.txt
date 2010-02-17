@@ -73,6 +73,7 @@ Game
   - When abandoning a vehicle, the vehicle remains in the world.
   - If there IS a vehicle and it is NOT OCCUPIED of the type that is requested, use it, otherwise create a new one.
 . Server regularly checks vehicles that don't seem ok (flipped, i.e. "up not pointing up", etc). If the "un-ok" vehicle is unused for x consecutive checks, remove it.
+. Create icon for the game.
 
 
 Engine
@@ -168,6 +169,7 @@ Engine
 . Port client to X11.
 . Port Posix' SystemManager (mostly placeholders at the moment).
 . Port font rendering to X11.
+. Use game icon and make it happen on Windows, Mac, iPhone, X11...
 
 - Make camera always keep a free line of sight to the controlled object.
 - Creating group/world objects as resources.
