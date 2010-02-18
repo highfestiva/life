@@ -1,6 +1,6 @@
 //Maya ASCII 2009 scene
 //Name: forklift_01.ma
-//Last modified: Thu, Jan 28, 2010 10:54:21 PM
+//Last modified: Wed, Feb 17, 2010 09:58:01 PM
 //Codeset: 1252
 requires maya "2009";
 currentUnit -l centimeter -a degree -t film;
@@ -11,12 +11,12 @@ fileInfo "cutIdentifier" "200904080023-749524";
 fileInfo "osv" "Microsoft Windows XP Service Pack 3 (Build 2600)\n";
 createNode transform -s -n "persp";
 	setAttr ".v" no;
-	setAttr ".t" -type "double3" 4.3226964336596296 3.0895608809549353 2.1128344516671396 ;
-	setAttr ".r" -type "double3" -24.338352729828266 1132.5999999991175 2.6182755992142149e-015 ;
+	setAttr ".t" -type "double3" 2.8760812290110342 1.4066138614876063 2.6093894073628459 ;
+	setAttr ".r" -type "double3" -14.738352729827062 1134.5999999989854 0 ;
 createNode camera -s -n "perspShape" -p "persp";
 	setAttr -k off ".v" no;
 	setAttr ".fl" 34.999999999999993;
-	setAttr ".coi" 5.82550871242172;
+	setAttr ".coi" 3.9886039800744335;
 	setAttr ".imn" -type "string" "persp";
 	setAttr ".den" -type "string" "persp_depth";
 	setAttr ".man" -type "string" "persp_mask";
@@ -63,8 +63,11 @@ createNode camera -s -n "sideShape" -p "side";
 	setAttr ".hc" -type "string" "viewSet -s %camera";
 	setAttr ".o" yes;
 createNode transform -n "m_body";
-	setAttr ".t" -type "double3" 0 0.26397859395021911 -1.2811424202506778 ;
 createNode mesh -n "m_bodyShape" -p "m_body";
+	addAttr -ci true -sn "mso" -ln "miShadingSamplesOverride" -min 0 -max 1 -at "bool";
+	addAttr -ci true -sn "msh" -ln "miShadingSamples" -min 0 -smx 8 -at "float";
+	addAttr -ci true -sn "mdo" -ln "miMaxDisplaceOverride" -min 0 -max 1 -at "bool";
+	addAttr -ci true -sn "mmd" -ln "miMaxDisplace" -min 0 -smx 1 -at "float";
 	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "vectorArray";
 	addAttr -ci true -sn "rgf" -ln "rgf" -dt "string";
 	addAttr -ci true -sn "rgn" -ln "rgn" -dt "vectorArray";
@@ -259,9 +262,9 @@ createNode mesh -n "m_sit_boxShape" -p "m_sit_box";
 createNode transform -n "m_steering_wheel" -p "m_body";
 	setAttr ".t" -type "double3" 0 1.0105807358152481 0.66548559781019456 ;
 	setAttr ".r" -type "double3" -29.999999999999996 0 0 ;
-	setAttr ".rp" -type "double3" 0 -0.54244579088607825 -1.0816178014639262 ;
-	setAttr ".rpt" -type "double3" 0 -0.46813494492916985 0.41613220365373171 ;
-	setAttr ".sp" -type "double3" 0 -0.54244579088607825 -1.0816178014639262 ;
+	setAttr ".rp" -type "double3" 0 -0.54244579088607825 -1.0816178014639264 ;
+	setAttr ".rpt" -type "double3" 0 -0.46813494492916996 0.41613220365373177 ;
+	setAttr ".sp" -type "double3" 0 -0.54244579088607825 -1.0816178014639264 ;
 createNode mesh -n "m_steering_wheelShape" -p "m_steering_wheel";
 	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "vectorArray";
 	addAttr -ci true -sn "rgf" -ln "rgf" -dt "string";
@@ -692,9 +695,9 @@ createNode mesh -n "m_steering_wheelShape" -p "m_steering_wheel";
 createNode transform -n "m_steering_rod" -p "m_body";
 	setAttr ".t" -type "double3" 0 0.75354649365669513 0.81236750589880025 ;
 	setAttr ".r" -type "double3" -29.999999999999996 0 0 ;
-	setAttr ".rp" -type "double3" 0 -0.24640665348998714 -1.0803041441457133 ;
-	setAttr ".rpt" -type "double3" 0 -0.50713984016670777 0.26793663824691305 ;
-	setAttr ".sp" -type "double3" 0 -0.24640665348998714 -1.0803041441457133 ;
+	setAttr ".rp" -type "double3" 0 -0.2464066534899873 -1.0803041441457133 ;
+	setAttr ".rpt" -type "double3" 0 -0.50713984016670777 0.26793663824691311 ;
+	setAttr ".sp" -type "double3" 0 -0.2464066534899873 -1.0803041441457133 ;
 createNode mesh -n "m_steering_rodShape" -p "m_steering_rod";
 	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "vectorArray";
 	addAttr -ci true -sn "rgf" -ln "rgf" -dt "string";
@@ -743,9 +746,9 @@ createNode mesh -n "m_steering_rodShape" -p "m_steering_rod";
 createNode transform -n "m_roof" -p "m_body";
 	setAttr ".t" -type "double3" 0 1.7583332007424621 0.042437733504214759 ;
 	setAttr ".r" -type "double3" 0.80000000000000016 0 0 ;
-	setAttr ".rp" -type "double3" 0 -1.7587543287601168 -0.017883431599025723 ;
-	setAttr ".rpt" -type "double3" 0 0.00042112801765491502 -0.02455430190518899 ;
-	setAttr ".sp" -type "double3" 0 -1.7587543287601168 -0.017883431599025723 ;
+	setAttr ".rp" -type "double3" 0 -1.7587543287601171 -0.017883431599025761 ;
+	setAttr ".rpt" -type "double3" 0 0.00042112801765522618 -0.024554301905188994 ;
+	setAttr ".sp" -type "double3" 0 -1.7587543287601171 -0.017883431599025761 ;
 createNode mesh -n "m_roofShape" -p "m_roof";
 	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "vectorArray";
 	addAttr -ci true -sn "rgf" -ln "rgf" -dt "string";
@@ -772,9 +775,9 @@ createNode mesh -n "m_roofShape" -p "m_roof";
 createNode transform -n "m_seat1" -p "m_body";
 	setAttr ".t" -type "double3" 0 0.65666148965678461 -0.10935995489045292 ;
 	setAttr ".r" -type "double3" -2.4127969621196099 0 0 ;
-	setAttr ".rp" -type "double3" 0 -0.66068325142865403 0.081618337483504222 ;
-	setAttr ".rpt" -type "double3" 0 0.0040217617718694681 0.027741617406948759 ;
-	setAttr ".sp" -type "double3" 0 -0.66068325142865403 0.081618337483504222 ;
+	setAttr ".rp" -type "double3" 0 -0.66068325142865392 0.081618337483504153 ;
+	setAttr ".rpt" -type "double3" 0 0.0040217617718693779 0.027741617406948759 ;
+	setAttr ".sp" -type "double3" 0 -0.66068325142865392 0.081618337483504153 ;
 createNode mesh -n "m_seatShape1" -p "m_seat1";
 	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "vectorArray";
 	addAttr -ci true -sn "rgf" -ln "rgf" -dt "string";
@@ -788,7 +791,7 @@ createNode mesh -n "m_seatShape1" -p "m_seat1";
 	setAttr ".dcc" -type "string" "Ambient+Diffuse";
 	setAttr ".covm[0]"  0 1 1;
 	setAttr ".cdvm[0]"  0 1 1;
-	setAttr -s 5 ".pt";
+	setAttr -s 4 ".pt";
 	setAttr ".pt[9]" -type "float3" -5.5879354e-009 0 5.5879354e-009 ;
 	setAttr ".pt[11]" -type "float3" 5.5879354e-009 0 5.5879354e-009 ;
 	setAttr ".pt[16]" -type "float3" -5.5879354e-009 0.049424212 -5.5879354e-009 ;
@@ -862,9 +865,9 @@ createNode mesh -n "m_seatShape1" -p "m_seat1";
 createNode transform -n "m_seat2" -p "m_body";
 	setAttr ".t" -type "double3" 0 1.0009289307922571 -0.53729482972388132 ;
 	setAttr ".r" -type "double3" 100.00000000000001 7.016709298534876e-015 180 ;
-	setAttr ".rp" -type "double3" -1.2257844112687202e-016 0.35532262915926771 -1.0790228393098502 ;
-	setAttr ".rpt" -type "double3" 1.2257844112687207e-016 -1.3562515599515248 1.6163176690337315 ;
-	setAttr ".sp" -type "double3" -1.2257844112687202e-016 0.35532262915926771 -1.0790228393098502 ;
+	setAttr ".rp" -type "double3" -1.2257844112687197e-016 0.35532262915926771 -1.0790228393098502 ;
+	setAttr ".rpt" -type "double3" 1.2257844112687202e-016 -1.3562515599515248 1.6163176690337318 ;
+	setAttr ".sp" -type "double3" -1.2257844112687197e-016 0.35532262915926771 -1.0790228393098502 ;
 createNode transform -n "m_seat_adjuster" -p "m_body";
 	setAttr ".t" -type "double3" 0 0.66545464515029407 -0.4578051481125065 ;
 	setAttr ".r" -type "double3" 0 0 89.999999999999986 ;
@@ -982,11 +985,11 @@ createNode mesh -n "m_barShape1" -p "m_bar1";
 		 0 0 1 0 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0.99999994039535522
 		 0 0 0.99999994039535522 0 0 0.99999994039535522 0 0 0.99999994039535522 0 0 -0.99999994039535522
 		 0 0 -0.99999994039535522 0 0 -0.99999994039535522 0 0 -0.99999994039535522 0 0 ;
-createNode transform -n "phys_body1" -p "m_body";
-	setAttr ".t" -type "double3" -0.028828918382722057 0.78863896312639525 0.14167220441255202 ;
-	setAttr ".rp" -type "double3" 0.028828918382722057 -0.78863896312639525 -0.14167220441255202 ;
-	setAttr ".sp" -type "double3" 0.028828918382722057 -0.78863896312639525 -0.14167220441255202 ;
-createNode mesh -n "phys_bodyShape1" -p "phys_body1";
+createNode transform -n "phys_body" -p "m_body";
+	setAttr ".t" -type "double3" 0 0.78863896312639525 0.14167220441255202 ;
+	setAttr ".rp" -type "double3" 0 -0.78863896312639525 -0.14167220441255202 ;
+	setAttr ".sp" -type "double3" 0 -0.78863896312639525 -0.14167220441255202 ;
+createNode mesh -n "phys_bodyShape" -p "phys_body";
 	setAttr -k off ".v";
 	setAttr ".vir" yes;
 	setAttr ".vif" yes;
@@ -995,100 +998,10 @@ createNode mesh -n "phys_bodyShape1" -p "phys_body1";
 	setAttr ".dcc" -type "string" "Ambient+Diffuse";
 	setAttr ".covm[0]"  0 1 1;
 	setAttr ".cdvm[0]"  0 1 1;
-createNode transform -n "m_fork1" -p "m_body";
-	setAttr ".t" -type "double3" 0.5 0.73602140604978095 1.2811424202506778 ;
-createNode mesh -n "m_forkShape1" -p "m_fork1";
-	addAttr -ci true -sn "mso" -ln "miShadingSamplesOverride" -min 0 -max 1 -at "bool";
-	addAttr -ci true -sn "msh" -ln "miShadingSamples" -min 0 -smx 8 -at "float";
-	addAttr -ci true -sn "mdo" -ln "miMaxDisplaceOverride" -min 0 -max 1 -at "bool";
-	addAttr -ci true -sn "mmd" -ln "miMaxDisplace" -min 0 -smx 1 -at "float";
-	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "vectorArray";
-	addAttr -ci true -sn "rgf" -ln "rgf" -dt "string";
-	addAttr -ci true -sn "rgn" -ln "rgn" -dt "vectorArray";
-	setAttr -k off ".v";
-	setAttr -s 2 ".iog";
-	setAttr ".vir" yes;
-	setAttr ".vif" yes;
-	setAttr ".uvst[0].uvsn" -type "string" "map1";
-	setAttr ".cuvs" -type "string" "map1";
-	setAttr ".dcc" -type "string" "Ambient+Diffuse";
-	setAttr ".covm[0]"  0 1 1;
-	setAttr ".cdvm[0]"  0 1 1;
-	setAttr -s 6 ".pt[12:17]" -type "float3"  0 -0.022176081 0 0 -0.022176081 
-		0 0 0 0.051274579 0 -0.022176081 0.051274579 0.0077933264 0 0.051274579 0.0077933264 
-		-0.022176081 0.051274579;
-	setAttr ".rgvtx" -type "vectorArray" 18 -0.10000000149011612 -1 0.02500000037252903 0.10000000149011612
-		 -1 0.02500000037252903 -0.10000000149011612 1 0.02500000037252903 0.10000000149011612
-		 1 0.02500000037252903 -0.10000000149011612 1 -0.02500000037252903 0.10000000149011612
-		 1 -0.02500000037252903 -0.10000000149011612 -1 -0.02500000037252903 0.10000000149011612
-		 -1 -0.02500000037252903 -0.10000000149011612 -0.9605293869972229 0.02500000037252903 0.10000000149011612
-		 -0.9605293869972229 0.02500000037252903 -0.10000000149011612 -1 0.82566893100738525 0.10000000149011612
-		 -1 0.82566893100738525 0.10000000149011612 -0.98270547389984131 0.82566893100738525 -0.10000000149011612
-		 -0.98270547389984131 0.82566893100738525 0.04844280332326889 -1 0.87694352865219116 0.04844280332326889
-		 -0.98270547389984131 0.87694352865219116 -0.050507687032222748 -1 0.87694352865219116 -0.050507687032222748
-		 -0.98270547389984131 0.87694352865219116 ;
-	setAttr ".rgf" -type "string" "[[10,16,17,13],[2,3,5,4],[4,5,7,6],[6,7,1,0],[1,7,5,3,9],[6,0,8,2,4],[8,9,3,2],[0,1,11,14,16,10],[1,9,12,11],[9,8,13,17,15,12],[8,0,10,13],[15,14,11,12],[17,16,14,15]]";
-	setAttr ".rgn" -type "vectorArray" 58 -0.71950143575668335 0 0.69449090957641602 -0.39083826541900635
-		 0 0.92045938968658447 -0.39083826541900635 0 0.92045938968658447 -0.71950143575668335
-		 0 0.69449090957641602 0 1 0 0 1 0 0 1 0 0 1 0 0 0 -0.99999994039535522 0 0 -0.99999994039535522 0
-		 0 -0.99999994039535522 0 0 -0.99999994039535522 0 -1 0 0 -1 0 0 -1 0 0 -1 0 1 0 0 0.99999994039535522
-		 0 0 0.99999994039535522 0 0 0.99999994039535522 0 0 1 0 0 -0.99999994039535522 0
-		 0 -1 0 0 -1 0 0 -0.99999994039535522 0 0 -0.99999994039535522 0 0 0 0 1 0 0 1 0 0
-		 1 0 0 1 0 -1 0 0 -1 0 0 -0.99999994039535522 0 0 -0.99999994039535522 0 0 -0.99999994039535522
-		 0 0 -0.99999994039535522 0 1 0 0 1 0 0 1 0 0 1 0 0 0 0.99965089559555054 0.026422655209898949 0
-		 0.99965089559555054 0.026422655209898949 0 0.99965089559555054 0.026422655209898949 0
-		 0.99965089559555054 0.026422655209898949 0 0.99965089559555054 0.026422655209898949 0
-		 0.99965089559555054 0.026422655209898949 -1 0 0 -1 0 0 -1 0 0 -1 0 0 0.38141405582427979
-		 0 0.9244043231010437 0.38141405582427979 0 0.9244043231010437 0.70516157150268555
-		 0 0.70904666185379028 0.70516157150268555 0 0.70904666185379028 -0.39083826541900635
-		 0 0.92045938968658447 -0.39083826541900635 0 0.92045938968658447 0.38141405582427979
-		 0 0.9244043231010437 0.38141405582427979 0 0.9244043231010437 ;
-createNode transform -n "m_fork2" -p "m_fork1";
-	setAttr ".t" -type "double3" -1 0 0 ;
-	setAttr ".rp" -type "double3" 1 0 0 ;
-	setAttr ".sp" -type "double3" 1 0 0 ;
-createNode transform -n "m_bar2" -p "m_fork1";
-	setAttr ".t" -type "double3" -0.5 -0.79457501497782723 0.034267669486830216 ;
-	setAttr ".r" -type "double3" 89.999999999999986 0 0 ;
-	setAttr ".rp" -type "double3" 0.5 -0.034267669486830042 -0.79457501497782723 ;
-	setAttr ".rpt" -type "double3" 0 0.82884268446465725 0.76030734549099699 ;
-	setAttr ".sp" -type "double3" 0.5 -0.034267669486830042 -0.79457501497782723 ;
-createNode transform -n "m_bar3" -p "m_fork1";
-	setAttr ".t" -type "double3" -0.5 -0.29601224981282415 0.034267669486830216 ;
-	setAttr ".r" -type "double3" 89.999999999999986 0 0 ;
-	setAttr ".rp" -type "double3" 0.5 -0.034267669486830153 -0.29601224981282415 ;
-	setAttr ".rpt" -type "double3" 0 0.33027991929965428 0.26174458032599396 ;
-	setAttr ".sp" -type "double3" 0.5 -0.034267669486830153 -0.29601224981282415 ;
-createNode transform -n "phys_fork1" -p "m_fork1";
-	setAttr ".t" -type "double3" -0.48804569966203548 -0.98859128523743567 0.47691280053871854 ;
-	setAttr ".rp" -type "double3" 0.48804569966203548 0.98859128523743567 -0.47691280053871854 ;
-	setAttr ".sp" -type "double3" 0.48804569966203548 0.98859128523743567 -0.47691280053871854 ;
-createNode mesh -n "phys_forkShape1" -p "phys_fork1";
-	setAttr -k off ".v";
-	setAttr ".vir" yes;
-	setAttr ".vif" yes;
-	setAttr ".uvst[0].uvsn" -type "string" "map1";
-	setAttr ".cuvs" -type "string" "map1";
-	setAttr ".dcc" -type "string" "Ambient+Diffuse";
-	setAttr ".covm[0]"  0 1 1;
-	setAttr ".cdvm[0]"  0 1 1;
-createNode transform -n "phys_fork2" -p "m_fork1";
-	setAttr ".t" -type "double3" -0.5 0 -0.001581762949623991 ;
-	setAttr ".rp" -type "double3" 0.5 0 0.001581762949623991 ;
-	setAttr ".sp" -type "double3" 0.5 0 0.001581762949623991 ;
-createNode mesh -n "phys_forkShape2" -p "phys_fork2";
-	setAttr -k off ".v";
-	setAttr ".vir" yes;
-	setAttr ".vif" yes;
-	setAttr ".uvst[0].uvsn" -type "string" "map1";
-	setAttr ".cuvs" -type "string" "map1";
-	setAttr ".dcc" -type "string" "Ambient+Diffuse";
-	setAttr ".covm[0]"  0 1 1;
-	setAttr ".cdvm[0]"  0 1 1;
-createNode transform -n "m_wheel1" -p "m_body";
+createNode transform -n "m_wheel_f1" -p "m_body";
 	setAttr ".t" -type "double3" 0.72 0.014024863324319292 0.89583775960125955 ;
 	setAttr ".r" -type "double3" 0 0 89.999999999999986 ;
-createNode mesh -n "m_wheelShape1" -p "m_wheel1";
+createNode mesh -n "m_wheel_fShape" -p "m_wheel_f1";
 	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "vectorArray";
 	addAttr -ci true -sn "rgf" -ln "rgf" -dt "string";
 	addAttr -ci true -sn "rgn" -ln "rgn" -dt "vectorArray";
@@ -1197,9 +1110,9 @@ createNode mesh -n "m_wheelShape1" -p "m_wheel1";
 		 1 0 0 1 5.2157531627017306e-009 0 1 0 0 1 4.9205265639784557e-008 0 1 5.2157531627017306e-009 0
 		 1 4.9205265639784557e-008 0 1 4.9205265639784557e-008 0 1 5.2157531627017306e-009 0
 		 1 4.9205265639784557e-008 0 1 0 0 1 5.2157531627017306e-009 0 1 0 0 1 0 0 1 5.2157531627017306e-009 ;
-createNode transform -n "phys_wheel1" -p "m_wheel1";
+createNode transform -n "phys_wheel_f1" -p "m_wheel_f1";
 	setAttr ".r" -type "double3" 0 0 -89.999999999999986 ;
-createNode mesh -n "phys_wheelShape1" -p "phys_wheel1";
+createNode mesh -n "phys_wheel_fShape" -p "phys_wheel_f1";
 	setAttr -k off ".v";
 	setAttr -s 2 ".iog";
 	setAttr ".vir" yes;
@@ -1209,15 +1122,15 @@ createNode mesh -n "phys_wheelShape1" -p "phys_wheel1";
 	setAttr ".dcc" -type "string" "Ambient+Diffuse";
 	setAttr ".covm[0]"  0 1 1;
 	setAttr ".cdvm[0]"  0 1 1;
-createNode transform -n "m_wheel2" -p "m_body";
+createNode transform -n "m_wheel_f2" -p "m_body";
 	setAttr ".t" -type "double3" -0.72 0.014024863324319292 0.89583775960125955 ;
 	setAttr ".r" -type "double3" 0 0 89.999999999999986 ;
-createNode transform -n "phys_wheel2" -p "m_wheel2";
+createNode transform -n "phys_wheel_f2" -p "m_wheel_f2";
 	setAttr ".r" -type "double3" 0 0 -89.999999999999986 ;
-createNode transform -n "m_wheel3" -p "m_body";
+createNode transform -n "m_wheel_r3" -p "m_body";
 	setAttr ".t" -type "double3" 0.5 -0.084374784972954309 -0.77904931969679669 ;
 	setAttr ".r" -type "double3" 0 0 89.999999999999986 ;
-createNode mesh -n "m_wheelShape3" -p "m_wheel3";
+createNode mesh -n "m_wheel_rShape" -p "m_wheel_r3";
 	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "vectorArray";
 	addAttr -ci true -sn "rgf" -ln "rgf" -dt "string";
 	addAttr -ci true -sn "rgn" -ln "rgn" -dt "vectorArray";
@@ -1325,9 +1238,9 @@ createNode mesh -n "m_wheelShape3" -p "m_wheel3";
 		 1 -9.6441998831409137e-010 0 1 4.8221171056184176e-008 0 0.99999994039535522 0 0
 		 1 -9.6441998831409137e-010 0 0.99999994039535522 0 0 1 0 0 1 -9.6441998831409137e-010 0
 		 1 0 0 1 0 0 1 -9.6441998831409137e-010 ;
-createNode transform -n "phys_wheel3" -p "m_wheel3";
+createNode transform -n "phys_wheel_r3" -p "m_wheel_r3";
 	setAttr ".r" -type "double3" 0 0 -89.999999999999986 ;
-createNode mesh -n "phys_wheelShape3" -p "phys_wheel3";
+createNode mesh -n "phys_wheel_rShape" -p "phys_wheel_r3";
 	setAttr -k off ".v";
 	setAttr -s 2 ".iog";
 	setAttr ".vir" yes;
@@ -1337,25 +1250,115 @@ createNode mesh -n "phys_wheelShape3" -p "phys_wheel3";
 	setAttr ".dcc" -type "string" "Ambient+Diffuse";
 	setAttr ".covm[0]"  0 1 1;
 	setAttr ".cdvm[0]"  0 1 1;
-createNode transform -n "m_wheel4" -p "m_body";
+createNode transform -n "m_wheel_r4" -p "m_body";
 	setAttr ".t" -type "double3" -0.5 -0.084374784972954309 -0.77904931969679669 ;
 	setAttr ".r" -type "double3" 0 0 89.999999999999986 ;
-createNode transform -n "phys_wheel4" -p "m_wheel4";
+createNode transform -n "phys_wheel_r4" -p "m_wheel_r4";
 	setAttr ".t" -type "double3" 2.2204460492503131e-016 0 0 ;
 	setAttr ".r" -type "double3" 0 0 -89.999999999999986 ;
 	setAttr ".rp" -type "double3" 0 -2.2204460492503131e-016 0 ;
 	setAttr ".rpt" -type "double3" -2.2204460492503131e-016 2.2204460492503126e-016 
 		0 ;
 	setAttr ".sp" -type "double3" 0 -2.2204460492503131e-016 0 ;
+createNode transform -n "m_fork1" -p "m_body";
+	setAttr ".t" -type "double3" 0.5 0.73602140604978095 1.2811424202506778 ;
+createNode mesh -n "m_forkShape1" -p "m_fork1";
+	addAttr -ci true -sn "mso" -ln "miShadingSamplesOverride" -min 0 -max 1 -at "bool";
+	addAttr -ci true -sn "msh" -ln "miShadingSamples" -min 0 -smx 8 -at "float";
+	addAttr -ci true -sn "mdo" -ln "miMaxDisplaceOverride" -min 0 -max 1 -at "bool";
+	addAttr -ci true -sn "mmd" -ln "miMaxDisplace" -min 0 -smx 1 -at "float";
+	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "vectorArray";
+	addAttr -ci true -sn "rgf" -ln "rgf" -dt "string";
+	addAttr -ci true -sn "rgn" -ln "rgn" -dt "vectorArray";
+	setAttr -k off ".v";
+	setAttr -s 2 ".iog";
+	setAttr ".vir" yes;
+	setAttr ".vif" yes;
+	setAttr ".uvst[0].uvsn" -type "string" "map1";
+	setAttr ".cuvs" -type "string" "map1";
+	setAttr ".dcc" -type "string" "Ambient+Diffuse";
+	setAttr ".covm[0]"  0 1 1;
+	setAttr ".cdvm[0]"  0 1 1;
+	setAttr -s 6 ".pt[12:17]" -type "float3"  0 -0.022176081 0 0 -0.022176081 
+		0 0 0 0.051274579 0 -0.022176081 0.051274579 0.0077933264 0 0.051274579 0.0077933264 
+		-0.022176081 0.051274579;
+	setAttr ".rgvtx" -type "vectorArray" 18 -0.10000000149011612 -1 0.02500000037252903 0.10000000149011612
+		 -1 0.02500000037252903 -0.10000000149011612 1 0.02500000037252903 0.10000000149011612
+		 1 0.02500000037252903 -0.10000000149011612 1 -0.02500000037252903 0.10000000149011612
+		 1 -0.02500000037252903 -0.10000000149011612 -1 -0.02500000037252903 0.10000000149011612
+		 -1 -0.02500000037252903 -0.10000000149011612 -0.9605293869972229 0.02500000037252903 0.10000000149011612
+		 -0.9605293869972229 0.02500000037252903 -0.10000000149011612 -1 0.82566893100738525 0.10000000149011612
+		 -1 0.82566893100738525 0.10000000149011612 -0.98270547389984131 0.82566893100738525 -0.10000000149011612
+		 -0.98270547389984131 0.82566893100738525 0.04844280332326889 -1 0.87694352865219116 0.04844280332326889
+		 -0.98270547389984131 0.87694352865219116 -0.050507687032222748 -1 0.87694352865219116 -0.050507687032222748
+		 -0.98270547389984131 0.87694352865219116 ;
+	setAttr ".rgf" -type "string" "[[10,16,17,13],[2,3,5,4],[4,5,7,6],[6,7,1,0],[1,7,5,3,9],[6,0,8,2,4],[8,9,3,2],[0,1,11,14,16,10],[1,9,12,11],[9,8,13,17,15,12],[8,0,10,13],[15,14,11,12],[17,16,14,15]]";
+	setAttr ".rgn" -type "vectorArray" 58 -0.71950143575668335 0 0.69449090957641602 -0.39083826541900635
+		 0 0.92045938968658447 -0.39083826541900635 0 0.92045938968658447 -0.71950143575668335
+		 0 0.69449090957641602 0 1 0 0 1 0 0 1 0 0 1 0 0 0 -0.99999994039535522 0 0 -0.99999994039535522 0
+		 0 -0.99999994039535522 0 0 -0.99999994039535522 0 -1 0 0 -1 0 0 -1 0 0 -1 0 1 0 0 0.99999994039535522
+		 0 0 0.99999994039535522 0 0 0.99999994039535522 0 0 1 0 0 -0.99999994039535522 0
+		 0 -1 0 0 -1 0 0 -0.99999994039535522 0 0 -0.99999994039535522 0 0 0 0 1 0 0 1 0 0
+		 1 0 0 1 0 -1 0 0 -1 0 0 -0.99999994039535522 0 0 -0.99999994039535522 0 0 -0.99999994039535522
+		 0 0 -0.99999994039535522 0 1 0 0 1 0 0 1 0 0 1 0 0 0 0.99965089559555054 0.026422655209898949 0
+		 0.99965089559555054 0.026422655209898949 0 0.99965089559555054 0.026422655209898949 0
+		 0.99965089559555054 0.026422655209898949 0 0.99965089559555054 0.026422655209898949 0
+		 0.99965089559555054 0.026422655209898949 -1 0 0 -1 0 0 -1 0 0 -1 0 0 0.38141405582427979
+		 0 0.9244043231010437 0.38141405582427979 0 0.9244043231010437 0.70516157150268555
+		 0 0.70904666185379028 0.70516157150268555 0 0.70904666185379028 -0.39083826541900635
+		 0 0.92045938968658447 -0.39083826541900635 0 0.92045938968658447 0.38141405582427979
+		 0 0.9244043231010437 0.38141405582427979 0 0.9244043231010437 ;
+createNode transform -n "m_fork2" -p "m_fork1";
+	setAttr ".t" -type "double3" -1 0 0 ;
+	setAttr ".rp" -type "double3" 1 0 0 ;
+	setAttr ".sp" -type "double3" 1 0 0 ;
+createNode transform -n "m_bar2" -p "m_fork1";
+	setAttr ".t" -type "double3" -0.5 -0.79457501497782723 0.034267669486830216 ;
+	setAttr ".r" -type "double3" 89.999999999999986 0 0 ;
+	setAttr ".rp" -type "double3" 0.5 -0.034267669486830042 -0.79457501497782723 ;
+	setAttr ".rpt" -type "double3" 0 0.82884268446465725 0.76030734549099699 ;
+	setAttr ".sp" -type "double3" 0.5 -0.034267669486830042 -0.79457501497782723 ;
+createNode transform -n "m_bar3" -p "m_fork1";
+	setAttr ".t" -type "double3" -0.5 -0.29601224981282415 0.034267669486830216 ;
+	setAttr ".r" -type "double3" 89.999999999999986 0 0 ;
+	setAttr ".rp" -type "double3" 0.5 -0.034267669486830153 -0.29601224981282415 ;
+	setAttr ".rpt" -type "double3" 0 0.33027991929965428 0.26174458032599396 ;
+	setAttr ".sp" -type "double3" 0.5 -0.034267669486830153 -0.29601224981282415 ;
+createNode transform -n "phys_fork1" -p "m_fork1";
+	setAttr ".t" -type "double3" -0.48804569966203548 -0.98859128523743567 0.47691280053871854 ;
+	setAttr ".rp" -type "double3" 0.48804569966203548 0.98859128523743567 -0.47691280053871854 ;
+	setAttr ".sp" -type "double3" 0.48804569966203548 0.98859128523743567 -0.47691280053871854 ;
+createNode mesh -n "phys_forkShape1" -p "phys_fork1";
+	setAttr -k off ".v";
+	setAttr ".vir" yes;
+	setAttr ".vif" yes;
+	setAttr ".uvst[0].uvsn" -type "string" "map1";
+	setAttr ".cuvs" -type "string" "map1";
+	setAttr ".dcc" -type "string" "Ambient+Diffuse";
+	setAttr ".covm[0]"  0 1 1;
+	setAttr ".cdvm[0]"  0 1 1;
+createNode transform -n "phys_fork2" -p "m_fork1";
+	setAttr ".t" -type "double3" -0.5 0 -0.001581762949623991 ;
+	setAttr ".rp" -type "double3" 0.5 0 0.001581762949623991 ;
+	setAttr ".sp" -type "double3" 0.5 0 0.001581762949623991 ;
+createNode mesh -n "phys_forkShape2" -p "phys_fork2";
+	setAttr -k off ".v";
+	setAttr ".vir" yes;
+	setAttr ".vif" yes;
+	setAttr ".uvst[0].uvsn" -type "string" "map1";
+	setAttr ".cuvs" -type "string" "map1";
+	setAttr ".dcc" -type "string" "Ambient+Diffuse";
+	setAttr ".covm[0]"  0 1 1;
+	setAttr ".cdvm[0]"  0 1 1;
 parent -s -nc -r -add "|m_body|m_boulder1|m_boulderShape1" "m_boulder2";
 parent -s -nc -r -add "|m_body|m_seat1|m_seatShape1" "m_seat2";
 parent -s -nc -r -add "|m_body|m_bar1|m_barShape1" "m_bar2";
 parent -s -nc -r -add "|m_body|m_bar1|m_barShape1" "m_bar3";
+parent -s -nc -r -add "|m_body|m_wheel_f1|m_wheel_fShape" "m_wheel_f2";
+parent -s -nc -r -add "|m_body|m_wheel_f1|phys_wheel_f1|phys_wheel_fShape" "phys_wheel_f2";
+parent -s -nc -r -add "|m_body|m_wheel_r3|m_wheel_rShape" "m_wheel_r4";
+parent -s -nc -r -add "|m_body|m_wheel_r3|phys_wheel_r3|phys_wheel_rShape" "phys_wheel_r4";
 parent -s -nc -r -add "|m_body|m_fork1|m_forkShape1" "m_fork2";
-parent -s -nc -r -add "|m_body|m_wheel1|m_wheelShape1" "m_wheel2";
-parent -s -nc -r -add "|m_body|m_wheel1|phys_wheel1|phys_wheelShape1" "phys_wheel2";
-parent -s -nc -r -add "|m_body|m_wheel3|m_wheelShape3" "m_wheel4";
-parent -s -nc -r -add "|m_body|m_wheel3|phys_wheel3|phys_wheelShape3" "phys_wheel4";
 createNode lightLinker -n "lightLinker1";
 	setAttr -s 7 ".lnk";
 	setAttr -s 7 ".slnk";
@@ -1392,9 +1395,8 @@ createNode polyCut -n "polyCut2";
 	setAttr ".ro" -type "double3" -90 0 90 ;
 createNode polyTweak -n "polyTweak1";
 	setAttr ".uopa" yes;
-	setAttr -s 5 ".tk";
-	setAttr ".tk[10:13]" -type "float3" 0 0 0.33612651  0 0 0.33612651  0 0 
-		0.33612651  0 0 0.33612651 ;
+	setAttr -s 4 ".tk[10:13]" -type "float3"  0 0 0.33612651 0 0 0.33612651 
+		0 0 0.33612651 0 0 0.33612651;
 createNode polyCut -n "polyCut3";
 	setAttr ".uopa" yes;
 	setAttr ".ics" -type "componentList" 2 "f[0]" "f[11]";
@@ -1446,9 +1448,8 @@ createNode polyCut -n "polyCut6";
 	setAttr ".ps" -type "double2" 1.6000000238418579 1 ;
 createNode polyTweak -n "polyTweak2";
 	setAttr ".uopa" yes;
-	setAttr -s 5 ".tk";
-	setAttr ".tk[10:13]" -type "float3" 0 -0.028270364 0.56259978  0 -0.028270364 
-		0.56259978  0 -0.028270364 0.56259978  0 -0.028270364 0.56259978 ;
+	setAttr -s 4 ".tk[10:13]" -type "float3"  0 -0.028270364 0.56259978 
+		0 -0.028270364 0.56259978 0 -0.028270364 0.56259978 0 -0.028270364 0.56259978;
 createNode polyCut -n "polyCut7";
 	setAttr ".uopa" yes;
 	setAttr ".ics" -type "componentList" 2 "f[1]" "f[11]";
@@ -1526,9 +1527,8 @@ createNode polyExtrudeFace -n "polyExtrudeFace7";
 	setAttr ".c[0]"  0 1 1;
 createNode polyTweak -n "polyTweak5";
 	setAttr ".uopa" yes;
-	setAttr -s 5 ".tk";
-	setAttr ".tk[10:13]" -type "float3" 0 0 0.0095054517  0 0 0.0095054517  
-		0 0 -0.0095054517  0 0 -0.0095054517 ;
+	setAttr -s 4 ".tk[10:13]" -type "float3"  0 0 0.0095054517 0 0 0.0095054517 
+		0 0 -0.0095054517 0 0 -0.0095054517;
 createNode polyTorus -n "polyTorus1";
 	setAttr ".r" 0.2;
 	setAttr ".sr" 0.03;
@@ -1593,8 +1593,8 @@ createNode script -n "uiConfigurationScriptNode";
 		+ "                -transmitFilters 0\n                -setFilter \"0\" \n                -showSetMembers 0\n                -allowMultiSelection 1\n                -alwaysToggleSelect 0\n                -directSelect 0\n                -displayMode \"DAG\" \n                -expandObjects 0\n                -setsIgnoreFilters 1\n                -containersIgnoreFilters 0\n                -editAttrName 0\n                -showAttrValues 0\n                -highlightSecondary 0\n                -showUVAttrsOnly 0\n                -showTextureNodesOnly 0\n                -attrAlphaOrder \"default\" \n                -animLayerFilterOptions \"allAffecting\" \n                -sortOrder \"none\" \n                -longNames 0\n                -niceNames 1\n                -showNamespace 1\n                $editorName;\n\n\t\t\t$editorName = ($panelName+\"DopeSheetEd\");\n            dopeSheetEditor -e \n                -displayKeys 1\n                -displayTangents 0\n                -displayActiveKeys 0\n                -displayActiveKeyTangents 0\n                -displayInfinities 0\n"
 		+ "                -autoFit 0\n                -snapTime \"integer\" \n                -snapValue \"none\" \n                -outliner \"dopeSheetPanel1OutlineEd\" \n                -showSummary 1\n                -showScene 0\n                -hierarchyBelow 0\n                -showTicks 1\n                -selectionWindow 0 0 0 0 \n                $editorName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"clipEditorPanel\" (localizedPanelLabel(\"Trax Editor\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"clipEditorPanel\" -l (localizedPanelLabel(\"Trax Editor\")) -mbv $menusOkayInPanels `;\n\n\t\t\t$editorName = clipEditorNameFromPanel($panelName);\n            clipEditor -e \n                -displayKeys 0\n                -displayTangents 0\n                -displayActiveKeys 0\n                -displayActiveKeyTangents 0\n                -displayInfinities 0\n                -autoFit 0\n                -snapTime \"none\" \n"
 		+ "                -snapValue \"none\" \n                $editorName;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Trax Editor\")) -mbv $menusOkayInPanels  $panelName;\n\n\t\t\t$editorName = clipEditorNameFromPanel($panelName);\n            clipEditor -e \n                -displayKeys 0\n                -displayTangents 0\n                -displayActiveKeys 0\n                -displayActiveKeyTangents 0\n                -displayInfinities 0\n                -autoFit 0\n                -snapTime \"none\" \n                -snapValue \"none\" \n                $editorName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"hyperGraphPanel\" (localizedPanelLabel(\"Hypergraph Hierarchy\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"hyperGraphPanel\" -l (localizedPanelLabel(\"Hypergraph Hierarchy\")) -mbv $menusOkayInPanels `;\n\n\t\t\t$editorName = ($panelName+\"HyperGraphEd\");\n"
-		+ "            hyperGraph -e \n                -graphLayoutStyle \"hierarchicalLayout\" \n                -orientation \"horiz\" \n                -mergeConnections 1\n                -zoom 0.44278\n                -animateTransition 0\n                -showRelationships 1\n                -showShapes 0\n                -showDeformers 0\n                -showExpressions 0\n                -showConstraints 0\n                -showUnderworld 0\n                -showInvisible 0\n                -transitionFrames 5\n                -currentNode \"m_wheel1\" \n                -opaqueContainers 0\n                -dropTargetNode \"m_body\" \n                -dropNode \"m_wheel4\" \n                -freeform 0\n                -imagePosition 0 0 \n                -imageScale 1\n                -imageEnabled 0\n                -graphType \"DAG\" \n                -heatMapDisplay 0\n                -updateSelection 1\n                -updateNodeAdded 1\n                -useDrawOverrideColor 0\n                -limitGraphTraversal -1\n                -range 0 0 \n"
-		+ "                -iconSize \"largeIcons\" \n                -showCachedConnections 0\n                $editorName;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Hypergraph Hierarchy\")) -mbv $menusOkayInPanels  $panelName;\n\n\t\t\t$editorName = ($panelName+\"HyperGraphEd\");\n            hyperGraph -e \n                -graphLayoutStyle \"hierarchicalLayout\" \n                -orientation \"horiz\" \n                -mergeConnections 1\n                -zoom 0.44278\n                -animateTransition 0\n                -showRelationships 1\n                -showShapes 0\n                -showDeformers 0\n                -showExpressions 0\n                -showConstraints 0\n                -showUnderworld 0\n                -showInvisible 0\n                -transitionFrames 5\n                -currentNode \"m_wheel1\" \n                -opaqueContainers 0\n                -dropTargetNode \"m_body\" \n                -dropNode \"m_wheel4\" \n                -freeform 0\n                -imagePosition 0 0 \n"
+		+ "            hyperGraph -e \n                -graphLayoutStyle \"hierarchicalLayout\" \n                -orientation \"horiz\" \n                -mergeConnections 1\n                -zoom 0.52081\n                -animateTransition 0\n                -showRelationships 1\n                -showShapes 0\n                -showDeformers 0\n                -showExpressions 0\n                -showConstraints 0\n                -showUnderworld 0\n                -showInvisible 0\n                -transitionFrames 5\n                -currentNode \"phys_body\" \n                -opaqueContainers 0\n                -dropTargetNode \"m_body\" \n                -dropNode \"m_fork1\" \n                -freeform 0\n                -imagePosition 0 0 \n                -imageScale 1\n                -imageEnabled 0\n                -graphType \"DAG\" \n                -heatMapDisplay 0\n                -updateSelection 1\n                -updateNodeAdded 1\n                -useDrawOverrideColor 0\n                -limitGraphTraversal -1\n                -range 0 0 \n"
+		+ "                -iconSize \"largeIcons\" \n                -showCachedConnections 0\n                $editorName;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Hypergraph Hierarchy\")) -mbv $menusOkayInPanels  $panelName;\n\n\t\t\t$editorName = ($panelName+\"HyperGraphEd\");\n            hyperGraph -e \n                -graphLayoutStyle \"hierarchicalLayout\" \n                -orientation \"horiz\" \n                -mergeConnections 1\n                -zoom 0.52081\n                -animateTransition 0\n                -showRelationships 1\n                -showShapes 0\n                -showDeformers 0\n                -showExpressions 0\n                -showConstraints 0\n                -showUnderworld 0\n                -showInvisible 0\n                -transitionFrames 5\n                -currentNode \"phys_body\" \n                -opaqueContainers 0\n                -dropTargetNode \"m_body\" \n                -dropNode \"m_fork1\" \n                -freeform 0\n                -imagePosition 0 0 \n"
 		+ "                -imageScale 1\n                -imageEnabled 0\n                -graphType \"DAG\" \n                -heatMapDisplay 0\n                -updateSelection 1\n                -updateNodeAdded 1\n                -useDrawOverrideColor 0\n                -limitGraphTraversal -1\n                -range 0 0 \n                -iconSize \"largeIcons\" \n                -showCachedConnections 0\n                $editorName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"hyperShadePanel\" (localizedPanelLabel(\"Hypershade\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"hyperShadePanel\" -l (localizedPanelLabel(\"Hypershade\")) -mbv $menusOkayInPanels `;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Hypershade\")) -mbv $menusOkayInPanels  $panelName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"visorPanel\" (localizedPanelLabel(\"Visor\")) `;\n"
 		+ "\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"visorPanel\" -l (localizedPanelLabel(\"Visor\")) -mbv $menusOkayInPanels `;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Visor\")) -mbv $menusOkayInPanels  $panelName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"polyTexturePlacementPanel\" (localizedPanelLabel(\"UV Texture Editor\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"polyTexturePlacementPanel\" -l (localizedPanelLabel(\"UV Texture Editor\")) -mbv $menusOkayInPanels `;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"UV Texture Editor\")) -mbv $menusOkayInPanels  $panelName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"multiListerPanel\" (localizedPanelLabel(\"Multilister\")) `;\n"
 		+ "\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"multiListerPanel\" -l (localizedPanelLabel(\"Multilister\")) -mbv $menusOkayInPanels `;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Multilister\")) -mbv $menusOkayInPanels  $panelName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextScriptedPanel \"renderWindowPanel\" (localizedPanelLabel(\"Render View\")) `;\n\tif (\"\" == $panelName) {\n\t\tif ($useSceneConfig) {\n\t\t\t$panelName = `scriptedPanel -unParent  -type \"renderWindowPanel\" -l (localizedPanelLabel(\"Render View\")) -mbv $menusOkayInPanels `;\n\t\t}\n\t} else {\n\t\t$label = `panel -q -label $panelName`;\n\t\tscriptedPanel -edit -l (localizedPanelLabel(\"Render View\")) -mbv $menusOkayInPanels  $panelName;\n\t\tif (!$useSceneConfig) {\n\t\t\tpanel -e -l $label $panelName;\n\t\t}\n\t}\n\n\n\t$panelName = `sceneUIReplacement -getNextPanel \"blendShapePanel\" (localizedPanelLabel(\"Blend Shape\")) `;\n"
@@ -1672,8 +1672,8 @@ createNode polyCube -n "polyCube9";
 	setAttr ".h" 2;
 	setAttr ".d" 0.05;
 	setAttr ".cuv" 4;
-createNode polyCube -n "phys_body";
-	setAttr ".w" 1.6878114915812583;
+createNode polyCube -n "physCube";
+	setAttr ".w" 1.6;
 	setAttr ".h" 1.97;
 	setAttr ".d" 2.2;
 	setAttr ".cuv" 4;
@@ -1683,7 +1683,7 @@ createNode polySphere -n "polySphere2";
 	setAttr ".r" 0.25;
 createNode script -n "rg_export";
 	addAttr -ci true -sn "time" -ln "time" -dt "string";
-	setAttr ".time" -type "string" "2010-01-28T22:54:21.156000";
+	setAttr ".time" -type "string" "2010-02-17T21:58:00.656000";
 select -ne :time1;
 	setAttr ".o" 1;
 select -ne :renderPartition;
@@ -1713,14 +1713,16 @@ connectAttr "polyCube5.out" "m_roofShape.i";
 connectAttr "deleteComponent1.og" "|m_body|m_seat1|m_seatShape1.i";
 connectAttr "polyCylinder4.out" "m_seat_adjusterShape.i";
 connectAttr "polyCube7.out" "|m_body|m_bar1|m_barShape1.i";
-connectAttr "phys_body.out" "phys_bodyShape1.i";
+connectAttr "physCube.out" "phys_bodyShape.i";
+connectAttr "polyCylinder1.out" "|m_body|m_wheel_f1|m_wheel_fShape.i";
+connectAttr "polySphere1.out" "|m_body|m_wheel_f1|phys_wheel_f1|phys_wheel_fShape.i"
+		;
+connectAttr "polyCylinder2.out" "|m_body|m_wheel_r3|m_wheel_rShape.i";
+connectAttr "polySphere2.out" "|m_body|m_wheel_r3|phys_wheel_r3|phys_wheel_rShape.i"
+		;
 connectAttr "polyCut4.out" "|m_body|m_fork1|m_forkShape1.i";
 connectAttr "polyCube8.out" "phys_forkShape1.i";
 connectAttr "polyCube9.out" "phys_forkShape2.i";
-connectAttr "polyCylinder1.out" "|m_body|m_wheel1|m_wheelShape1.i";
-connectAttr "polySphere1.out" "|m_body|m_wheel1|phys_wheel1|phys_wheelShape1.i";
-connectAttr "polyCylinder2.out" "|m_body|m_wheel3|m_wheelShape3.i";
-connectAttr "polySphere2.out" "|m_body|m_wheel3|phys_wheel3|phys_wheelShape3.i";
 connectAttr ":defaultLightSet.msg" "lightLinker1.lnk[0].llnk";
 connectAttr ":initialShadingGroup.msg" "lightLinker1.lnk[0].olnk";
 connectAttr ":defaultLightSet.msg" "lightLinker1.lnk[1].llnk";
@@ -1809,10 +1811,10 @@ connectAttr "m_steering_wheelShape.iog" "phong3SG.dsm" -na;
 connectAttr "m_seat_adjusterShape.iog" "phong3SG.dsm" -na;
 connectAttr "|m_body|m_seat1|m_seatShape1.iog" "phong3SG.dsm" -na;
 connectAttr "|m_body|m_bar1|m_barShape1.iog" "phong3SG.dsm" -na;
-connectAttr "|m_body|m_wheel1|m_wheelShape1.iog" "phong3SG.dsm" -na;
-connectAttr "|m_body|m_wheel2|m_wheelShape1.iog" "phong3SG.dsm" -na;
-connectAttr "|m_body|m_wheel4|m_wheelShape3.iog" "phong3SG.dsm" -na;
-connectAttr "|m_body|m_wheel3|m_wheelShape3.iog" "phong3SG.dsm" -na;
+connectAttr "|m_body|m_wheel_f1|m_wheel_fShape.iog" "phong3SG.dsm" -na;
+connectAttr "|m_body|m_wheel_f2|m_wheel_fShape.iog" "phong3SG.dsm" -na;
+connectAttr "|m_body|m_wheel_r4|m_wheel_rShape.iog" "phong3SG.dsm" -na;
+connectAttr "|m_body|m_wheel_r3|m_wheel_rShape.iog" "phong3SG.dsm" -na;
 connectAttr "phong3SG.msg" "materialInfo3.sg";
 connectAttr "black.msg" "materialInfo3.m";
 connectAttr "grey.oc" "phong4SG.ss";
@@ -1823,15 +1825,15 @@ connectAttr "grey.msg" "materialInfo4.m";
 connectAttr "phys.oc" "phong5SG.ss";
 connectAttr "phys_forkShape1.iog" "phong5SG.dsm" -na;
 connectAttr "phys_forkShape2.iog" "phong5SG.dsm" -na;
-connectAttr "phys_bodyShape1.iog" "phong5SG.dsm" -na;
-connectAttr "|m_body|m_wheel1|phys_wheel1|phys_wheelShape1.iog" "phong5SG.dsm" -na
-		;
-connectAttr "|m_body|m_wheel2|phys_wheel2|phys_wheelShape1.iog" "phong5SG.dsm" -na
-		;
-connectAttr "|m_body|m_wheel4|phys_wheel4|phys_wheelShape3.iog" "phong5SG.dsm" -na
-		;
-connectAttr "|m_body|m_wheel3|phys_wheel3|phys_wheelShape3.iog" "phong5SG.dsm" -na
-		;
+connectAttr "phys_bodyShape.iog" "phong5SG.dsm" -na;
+connectAttr "|m_body|m_wheel_f1|phys_wheel_f1|phys_wheel_fShape.iog" "phong5SG.dsm"
+		 -na;
+connectAttr "|m_body|m_wheel_f2|phys_wheel_f2|phys_wheel_fShape.iog" "phong5SG.dsm"
+		 -na;
+connectAttr "|m_body|m_wheel_r4|phys_wheel_r4|phys_wheel_rShape.iog" "phong5SG.dsm"
+		 -na;
+connectAttr "|m_body|m_wheel_r3|phys_wheel_r3|phys_wheel_rShape.iog" "phong5SG.dsm"
+		 -na;
 connectAttr "phong5SG.msg" "materialInfo5.sg";
 connectAttr "phys.msg" "materialInfo5.m";
 connectAttr "phong1SG.pa" ":renderPartition.st" -na;
