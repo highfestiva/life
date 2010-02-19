@@ -50,16 +50,16 @@ public:
 	struct Joint1Diff
 	{
 		Joint1Diff() {};
-		Joint1Diff(float pAngle, float pAngleVelocity, float pAngleAcceleration):
-			mAngle(pAngle),
-			mAngleVelocity(pAngleVelocity),
-			mAngleAcceleration(pAngleAcceleration)
+		Joint1Diff(float pValue, float pVelocity, float pAcceleration):
+			mValue(pValue),
+			mVelocity(pVelocity),
+			mAcceleration(pAcceleration)
 		{
 		}
 
-		float mAngle;
-		float mAngleVelocity;
-		float mAngleAcceleration;
+		float mValue;		// Could be angle or distance.
+		float mVelocity;	// Angular or linear.
+		float mAcceleration;	// Angular or linear.
 	};
 
 	struct Joint2Diff
@@ -258,13 +258,14 @@ public:
 
 	virtual bool SetAngularMotorAngle(JointID pJointId, float32 pAngle) = 0;
 	virtual bool SetAngularMotorSpeed(JointID pJointId, float32 pSpeed) = 0;
-	virtual bool SetAngularMotorMaxForce(JointID pJointId, float32 pMaxForce) = 0;
+	virtual bool SetMotorMaxForce(JointID pJointId, float32 pMaxForce) = 0;
 	virtual bool SetAngularMotorRoll(JointID pJointId, float32 pMaxForce, float32 pTargetVelocity) = 0;
 	virtual bool GetAngularMotorRoll(JointID pJointId, float32& pMaxForce, float32& pTargetVelocity) = 0;
 	virtual bool SetAngularMotorTurn(JointID pJointId, float32 pMaxForce, float32 pTargetVelocity) = 0;
 	virtual bool GetAngularMotorAngle(JointID pJointId, float32& pAngle) const = 0;
 	virtual bool GetAngularMotorSpeed(JointID pJointId, float32& pSpeed) const = 0;
 	virtual bool GetAngularMotorMaxForce(JointID pJointId, float32& pMaxForce) const = 0;
+	virtual bool SetMotorTarget(JointID pJointId, float32 pMaxForce, float32 pTargetVelocity) = 0;
 
 	virtual bool SetJointParams(JointID pJointId, float32 pLowStop, float32 pHighStop, float32 pBounce) = 0;
 	virtual bool GetJointParams(JointID pJointId, float32& pLowStop, float32& pHighStop, float32& pBounce) const = 0;

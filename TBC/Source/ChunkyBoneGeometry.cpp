@@ -15,6 +15,18 @@ namespace TBC
 
 
 
+const int PARAM_SPRING_CONSTANT	= 0;
+const int PARAM_SPRING_DAMPING	= 1;
+const int PARAM_EULER_THETA	= 2;
+const int PARAM_EULER_PHI	= 3;
+const int PARAM_LOW_STOP	= 4;
+const int PARAM_HIGH_STOP	= 5;
+const int PARAM_OFFSET_X	= 6;
+const int PARAM_OFFSET_Y	= 7;
+const int PARAM_OFFSET_Z	= 8;
+
+
+
 ChunkyBoneGeometry::ChunkyBoneGeometry(const BodyData& pBodyData):
 	mBodyData(pBodyData),
 	mJointId(INVALID_JOINT),
@@ -83,16 +95,16 @@ bool ChunkyBoneGeometry::CreateJoint(ChunkyPhysics* pStructure, PhysicsManager* 
 			Vector3DF lSuspensionAxis(-1, 0, 0);
 			Vector3DF lHingeAxis(0, 0, 1);
 			QuaternionF lRotator;
-			lRotator.SetEulerAngles(mBodyData.mParameter[2], 0, mBodyData.mParameter[3]);
+			lRotator.SetEulerAngles(mBodyData.mParameter[PARAM_EULER_THETA], 0, mBodyData.mParameter[PARAM_EULER_PHI]);
 			lSuspensionAxis = lRotator*lSuspensionAxis;
 			lHingeAxis = lRotator*lHingeAxis;
 
 			mJointId = pPhysics->CreateHinge2Joint(mBodyData.mParent->GetBodyId(),
 				GetBodyId(), pStructure->GetTransformation(this).GetPosition(),
 				lSuspensionAxis, lHingeAxis);
-			pPhysics->SetJointParams(mJointId, mBodyData.mParameter[4], mBodyData.mParameter[5], 0);
-			pPhysics->SetSuspension(mJointId, 1/(float)pPhysicsFps, mBodyData.mParameter[0],
-				mBodyData.mParameter[1]);
+			pPhysics->SetJointParams(mJointId, mBodyData.mParameter[PARAM_LOW_STOP], mBodyData.mParameter[PARAM_HIGH_STOP], 0);
+			pPhysics->SetSuspension(mJointId, 1/(float)pPhysicsFps, mBodyData.mParameter[PARAM_SPRING_CONSTANT],
+				mBodyData.mParameter[PARAM_SPRING_DAMPING]);
 			pPhysics->SetAngularMotorRoll(mJointId, 0, 0);
 			pPhysics->SetAngularMotorTurn(mJointId, 0, 0);
 			lOk = true;
@@ -102,17 +114,31 @@ bool ChunkyBoneGeometry::CreateJoint(ChunkyPhysics* pStructure, PhysicsManager* 
 			// Calculate axis from given euler angles.
 			Vector3DF lHingeAxis(0, 0, 1);
 			QuaternionF lHingeRotator;
-			lHingeRotator.SetEulerAngles(mBodyData.mParameter[2], 0, mBodyData.mParameter[3]);
+			lHingeRotator.SetEulerAngles(mBodyData.mParameter[PARAM_EULER_THETA], 0, mBodyData.mParameter[PARAM_EULER_PHI]);
 			lHingeAxis = lHingeRotator*lHingeAxis;
 
 			const TransformationF& lBodyTransform = pStructure->GetTransformation(this);
 			const Vector3DF lAnchor = lBodyTransform.GetPosition() +
-				Vector3DF(mBodyData.mParameter[6], mBodyData.mParameter[7], mBodyData.mParameter[8]);
+				Vector3DF(mBodyData.mParameter[PARAM_OFFSET_X], mBodyData.mParameter[PARAM_OFFSET_Y], mBodyData.mParameter[PARAM_OFFSET_Z]);
 			mJointId = pPhysics->CreateHingeJoint(mBodyData.mParent->GetBodyId(),
 				GetBodyId(), lAnchor, lHingeAxis);
-			pPhysics->SetJointParams(mJointId, mBodyData.mParameter[4], mBodyData.mParameter[5], 0);
+			pPhysics->SetJointParams(mJointId, mBodyData.mParameter[PARAM_LOW_STOP], mBodyData.mParameter[PARAM_HIGH_STOP], 0);
 			pPhysics->SetAngularMotorTurn(mJointId, 0, 0);
 			//pPhysics->GetAxis1(mJointId, lHingeAxis);
+			lOk = true;
+		}
+		else if (mBodyData.mJointType == JOINT_SLIDER)
+		{
+			// Calculate axis from given euler angles.
+			Vector3DF lAxis(0, 0, 1);
+			QuaternionF lRotator;
+			lRotator.SetEulerAngles(mBodyData.mParameter[PARAM_EULER_THETA], 0, mBodyData.mParameter[PARAM_EULER_PHI]);
+			lAxis = lRotator*lAxis;
+
+			mJointId = pPhysics->CreateSliderJoint(mBodyData.mParent->GetBodyId(),
+				GetBodyId(), lAxis);
+			pPhysics->SetJointParams(mJointId, mBodyData.mParameter[PARAM_LOW_STOP], mBodyData.mParameter[PARAM_HIGH_STOP], 0);
+			pPhysics->SetMotorTarget(mJointId, 0, 0);
 			lOk = true;
 		}
 		else if (mBodyData.mJointType == JOINT_UNIVERSAL)
@@ -121,17 +147,18 @@ bool ChunkyBoneGeometry::CreateJoint(ChunkyPhysics* pStructure, PhysicsManager* 
 			Vector3DF lAxis1(0, 0, 1);
 			Vector3DF lAxis2(0, 1, 0);
 			QuaternionF lRotator;
-			lRotator.SetEulerAngles(mBodyData.mParameter[2], 0, mBodyData.mParameter[3]);
+			lRotator.SetEulerAngles(mBodyData.mParameter[PARAM_EULER_THETA], 0, mBodyData.mParameter[PARAM_EULER_PHI]);
 			lAxis1 = lRotator*lAxis1;
 			lAxis2 = lRotator*lAxis2;
 
 			const TransformationF& lBodyTransform = pStructure->GetTransformation(this);
 			const Vector3DF lAnchor = lBodyTransform.GetPosition() +
 				(lBodyTransform.GetOrientation() * 
-				Vector3DF(mBodyData.mParameter[6], mBodyData.mParameter[7], mBodyData.mParameter[8]));
+				Vector3DF(mBodyData.mParameter[PARAM_OFFSET_X], mBodyData.mParameter[PARAM_OFFSET_Y], mBodyData.mParameter[PARAM_OFFSET_Z]));
 			mJointId = pPhysics->CreateUniversalJoint(mBodyData.mParent->GetBodyId(),
 				GetBodyId(), lAnchor, lAxis1, lAxis2);
-			/*pPhysics->SetJointParams(mJointId, mBodyData.mParameter[4], mBodyData.mParameter[5], 0);
+			pPhysics->SetJointParams(mJointId, mBodyData.mParameter[PARAM_LOW_STOP], mBodyData.mParameter[PARAM_HIGH_STOP], 0);
+			/*pPhysics->SetJointParams(mJointId, mBodyData.mParameter[PARAM_LOW_STOP], mBodyData.mParameter[PARAM_HIGH_STOP], 0);
 			pPhysics->SetSuspension(mJointId, 1/(float)pPhysicsFps, mBodyData.mParameter[0],
 				mBodyData.mParameter[1]);
 			pPhysics->SetAngularMotorRoll(mJointId, 0, 0);

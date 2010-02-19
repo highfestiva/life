@@ -103,7 +103,7 @@ bool PhysicsEngine::SetValue(unsigned pAspect, float pValue, float pZAngle)
 			}
 		}
 		break;
-		case ENGINE_LIFTER:
+		case ENGINE_HOVER:
 		{
 			if (pAspect >= mControllerIndex+0 && pAspect <= mControllerIndex+1)
 			{
@@ -119,6 +119,7 @@ bool PhysicsEngine::SetValue(unsigned pAspect, float pValue, float pZAngle)
 		case ENGINE_HINGE2_TURN:
 		case ENGINE_ROTOR:
 		case ENGINE_TILTER:
+		case ENGINE_SLIDER_FORCE:
 		{
 			if (pAspect == mControllerIndex)
 			{
@@ -127,7 +128,6 @@ bool PhysicsEngine::SetValue(unsigned pAspect, float pValue, float pZAngle)
 			}
 		}
 		break;
-		case ENGINE_ROLL_STRAIGHT:
 		case ENGINE_GLUE:
 		{
 			// Fixed mode "engine".
@@ -186,7 +186,7 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics*
 					mIntensity += lVelocityVector.GetLength() / mMaxSpeed;
 				}
 				break;
-				case ENGINE_LIFTER:
+				case ENGINE_HOVER:
 				{
 					if (mValue[0] != 0 || mValue[1] != 0)
 					{
@@ -365,12 +365,27 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics*
 					}
 				}
 				break;
-				case ENGINE_ROLL_STRAIGHT:
+				case ENGINE_SLIDER_FORCE:
 				{
 					assert(lGeometry->GetJointId() != INVALID_JOINT);
 					if (lGeometry->GetJointId() != INVALID_JOINT)
 					{
-						pPhysicsManager->SetAngle1(lGeometry->GetBodyId(), lGeometry->GetJointId(), 0);
+						if (mValue[0])
+						{
+							const float lValue = (mValue[0] > 0)? mValue[0]*mMaxSpeed : mValue[0]*mMaxSpeed2;
+							pPhysicsManager->SetMotorTarget(lGeometry->GetJointId(), mStrength, lValue*lScale);
+						}
+						else if (lEngineNode.mMode != MODE_HALF_LOCK)
+						{
+							float lPosition;
+							pPhysicsManager->GetSliderPos(lGeometry->GetJointId(), lPosition);
+							if (!Math::IsEpsEqual(lPosition, 0.0f, 0.1f))
+							{
+								float lValue = -lPosition*::fabs(lScale);
+								lValue = lValue? lValue*mMaxSpeed : lValue*mMaxSpeed2;
+								pPhysicsManager->SetMotorTarget(lGeometry->GetJointId(), mStrength, lValue);
+							}
+						}
 					}
 				}
 				break;

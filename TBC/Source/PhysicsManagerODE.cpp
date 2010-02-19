@@ -9,6 +9,7 @@
 #pragma warning(disable: 4100)	// Warning: unreferenced formal parameter (in ODE).
 #include <../ode/src/collision_kernel.h>
 #include <../ode/src/joints/hinge.h>
+#include <../ode/src/joints/slider.h>
 #include <../ode/src/joints/universal.h>
 #pragma warning(pop)
 #include "../../Lepra/Include/Log.h"
@@ -1078,6 +1079,11 @@ bool PhysicsManagerODE::GetJoint1Diff(BodyID pBodyId, JointID pJointId, Joint1Di
 			lOk = GetHingeDiff(pBodyId, pJointId, pDiff);
 		}
 		break;
+		case JOINT_SLIDER:
+		{
+			lOk = GetSliderDiff(pBodyId, pJointId, pDiff);
+		}
+		break;
 		default:
 		{
 			mLog.Errorf(_T("Joint type %i of non-1-type!"), lJointInfo->mType);
@@ -1103,6 +1109,11 @@ bool PhysicsManagerODE::SetJoint1Diff(BodyID pBodyId, JointID pJointId, const Jo
 		case JOINT_HINGE:
 		{
 			lOk = SetHingeDiff(pBodyId, pJointId, pDiff);
+		}
+		break;
+		case JOINT_SLIDER:
+		{
+			lOk = SetSliderDiff(pBodyId, pJointId, pDiff);
 		}
 		break;
 		default:
@@ -1244,7 +1255,7 @@ bool PhysicsManagerODE::GetHingeDiff(BodyID pBodyId, JointID pJointId, Joint1Dif
 	}
 
 	Vector3DF lAxis;
-	if (!GetAxis1(pJointId, lAxis) || !GetAngle1(pJointId, pDiff.mAngle))
+	if (!GetAxis1(pJointId, lAxis) || !GetAngle1(pJointId, pDiff.mValue))
 	{
 		return (false);
 	}
@@ -1252,13 +1263,13 @@ bool PhysicsManagerODE::GetHingeDiff(BodyID pBodyId, JointID pJointId, Joint1Dif
 	{
 		Vector3DF lVelocity;
 		GetBodyAngularVelocity(pBodyId, lVelocity);
-		pDiff.mAngleVelocity = lAxis * lVelocity;
+		pDiff.mVelocity = lAxis * lVelocity;
 	}
 
 	{
 		Vector3DF lAcceleration;
 		GetBodyAngularAcceleration(pBodyId, lAcceleration);
-		pDiff.mAngleAcceleration = lAxis * lAcceleration;
+		pDiff.mAcceleration = lAxis * lAcceleration;
 	}
 
 	return (true);
@@ -1293,7 +1304,7 @@ bool PhysicsManagerODE::SetHingeDiff(BodyID pBodyId, JointID pJointId, const Joi
 		QuaternionF lQ(lHinge->qrel[0], lHinge->qrel[1], lHinge->qrel[2], lHinge->qrel[3]);
 		lQ = lParentQ * lQ;
 		// Rotate to input angle.
-		lQ = QuaternionF(-pDiff.mAngle, lAxis) * lQ;
+		lQ = QuaternionF(-pDiff.mValue, lAxis) * lQ;
 		// Set orientation.
 		TransformationF lTransform;
 		GetBodyTransform(pBodyId, lTransform);
@@ -1309,11 +1320,11 @@ bool PhysicsManagerODE::SetHingeDiff(BodyID pBodyId, JointID pJointId, const Joi
 		Vector3DF lVelocity;
 		GetBodyAngularVelocity(pBodyId, lVelocity);
 		// Drop angular velocity along axis 1 & 2, then add the specified amount.
-		if (pDiff.mAngleVelocity < PIF*1000)
+		if (pDiff.mVelocity < PIF*1000)
 		{
 			Vector3DF lAxisVelocity = lAxis*(lAxis*lVelocity);
 			lVelocity -= lAxisVelocity;
-			lVelocity += lAxis * pDiff.mAngleVelocity;
+			lVelocity += lAxis * pDiff.mVelocity;
 			SetBodyAngularVelocity(pBodyId, lVelocity);
 		}
 	}
@@ -1322,13 +1333,102 @@ bool PhysicsManagerODE::SetHingeDiff(BodyID pBodyId, JointID pJointId, const Joi
 		Vector3DF lAcceleration;
 		GetBodyAngularAcceleration(pBodyId, lAcceleration);
 		// Drop angular acceleration along axis, then add the specified amount.
-		if (pDiff.mAngleAcceleration < PIF*1000)
+		if (pDiff.mAcceleration < PIF*1000)
 		{
 			Vector3DF lAxisAcceleration = lAxis*(lAxis*lAcceleration);
 			lAcceleration -= lAxisAcceleration;
-			lAcceleration += lAxis * pDiff.mAngleAcceleration;
+			lAcceleration += lAxis * pDiff.mAcceleration;
 			SetBodyAngularAcceleration(pBodyId, lAcceleration);
 		}
+	}
+
+	return (true);
+}
+
+bool PhysicsManagerODE::GetSliderDiff(BodyID pBodyId, JointID pJointId, Joint1Diff& pDiff) const
+{
+	JointInfo* lJointInfo = (JointInfo*)pJointId;
+	assert(lJointInfo->mType == JOINT_SLIDER);
+	if (lJointInfo->mType != JOINT_SLIDER)
+	{
+		mLog.Errorf(_T("Joint type %i of non-slider-type!"), lJointInfo->mType);
+		return (false);
+	}
+
+	Vector3DF lAxis;
+	if (!GetAxis1(pJointId, lAxis))
+	{
+		return (false);
+	}
+	assert(lAxis.GetLengthSquared() > 0.99f && lAxis.GetLengthSquared() < 1.01f);
+
+	GetSliderPos(pJointId, pDiff.mValue);
+	GetSliderSpeed(pJointId, pDiff.mVelocity);
+
+	{
+		Vector3DF lAcceleration;
+		GetBodyAcceleration(pBodyId, lAcceleration);
+		dxBody* lParentBody = lJointInfo->mJointID->node[0].body;
+		const dReal* lParentForce = ::dBodyGetForce(lParentBody);
+		lAcceleration -= Vector3DF(lParentForce[0], lParentForce[1], lParentForce[2]);
+		pDiff.mAcceleration = lAxis * lAcceleration;
+	}
+
+	return (true);
+}
+
+bool PhysicsManagerODE::SetSliderDiff(BodyID pBodyId, JointID pJointId, const Joint1Diff& pDiff)
+{
+	JointInfo* lJointInfo = (JointInfo*)pJointId;
+	assert(lJointInfo->mType == JOINT_SLIDER);
+	if (lJointInfo->mType != JOINT_SLIDER)
+	{
+		mLog.Errorf(_T("Joint type %i of non-hinge-type!"), lJointInfo->mType);
+		return (false);
+	}
+
+	Vector3DF lAxis;
+	if (!GetAxis1(pJointId, lAxis))
+	{
+		return (false);
+	}
+	assert(lAxis.GetLengthSquared() > 0.99f && lAxis.GetLengthSquared() < 1.01f);
+
+	dxBody* lParentBody = lJointInfo->mJointID->node[0].body;
+	{
+		// Fetch parent orientation.
+		assert(lJointInfo->mJointID->node[1].body == ((Object*)pBodyId)->mBodyID);
+		const dReal* lPos = ::dBodyGetPosition(lParentBody);
+		const dReal* lPQ = ::dBodyGetQuaternion(lParentBody);
+		const QuaternionF lParentQ(lPQ[0], lPQ[1], lPQ[2], lPQ[3]);
+		// Rotate to original child (us) orientation.
+		dxJointSlider* lSlider = (dxJointSlider*)lJointInfo->mJointID;
+		QuaternionF lQ(lSlider->qrel[0], lSlider->qrel[1], lSlider->qrel[2], lSlider->qrel[3]);
+		// Relative translation.
+		Vector3DF lOffset(lSlider->offset[0], lSlider->offset[1], lSlider->offset[2]);
+		lQ = lParentQ * lQ;
+		lOffset = lQ * lOffset;
+		// Set orientation.
+		TransformationF lTransform(lQ,
+			Vector3DF(lPos[0], lPos[1], lPos[2]) - lOffset - lAxis*pDiff.mValue);
+		SetBodyTransform(pBodyId, lTransform);
+	}
+
+	{
+		const dReal* lParentVelocity = ::dBodyGetLinearVel(lParentBody);
+		Vector3DF lVelocity(lParentVelocity[0], lParentVelocity[1], lParentVelocity[2]);
+		lVelocity += lAxis*pDiff.mVelocity;
+		SetBodyVelocity(pBodyId, lVelocity);
+	}
+
+	{
+		// TODO: something?
+		const dReal* lParentForce = ::dBodyGetForce(lParentBody);
+		Vector3DF lAcceleration(lParentForce[0], lParentForce[1], lParentForce[2]);
+		// Downscale acceleration with mass.
+		lAcceleration *= lJointInfo->mJointID->node[1].body->mass.mass / lParentBody->mass.mass;
+		lAcceleration += lAxis*pDiff.mAcceleration;
+		SetBodyAcceleration(pBodyId, lAcceleration);
 	}
 
 	return (true);
@@ -2196,12 +2296,12 @@ bool PhysicsManagerODE::SetAngularMotorSpeed(JointID pJointId, float32 pSpeed)
 	return (true);
 }
 
-bool PhysicsManagerODE::SetAngularMotorMaxForce(JointID pJointId, float32 pMaxForce)
+bool PhysicsManagerODE::SetMotorMaxForce(JointID pJointId, float32 pMaxForce)
 {
 	JointTable::iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
 	{
-		mLog.Errorf(_T("SetAngularMotorMaxForce() - Couldn't find joint %i!"), pJointId);
+		mLog.Errorf(_T("SetMotorMaxForce() - Couldn't find joint %i!"), pJointId);
 		return (false);
 	}
 
@@ -2224,7 +2324,13 @@ bool PhysicsManagerODE::SetAngularMotorMaxForce(JointID pJointId, float32 pMaxFo
 		dJointSetHingeParam(lJoint->mJointID, dParamFMax2, pMaxForce);
 		return (true);
 	}
-	mLog.AError("SetAngularMotorMaxForce() - Joint is not an angular motor!");
+	else if (lJoint->mType == JOINT_SLIDER)
+	{
+		dJointSetSliderParam(lJoint->mJointID, dParamFMax, pMaxForce);
+		dJointSetSliderParam(lJoint->mJointID, dParamFMax2, pMaxForce);
+		return (true);
+	}
+	mLog.AError("SetMotorMaxForce() - Joint is not an angular motor!");
 	return (false);
 }
 
@@ -2373,6 +2479,26 @@ bool PhysicsManagerODE::GetAngularMotorMaxForce(JointID pJointId, float32& pMaxF
 	}
 
 	pMaxForce = dJointGetAMotorParam((*x)->mJointID, dParamFMax);
+	return (true);
+}
+
+bool PhysicsManagerODE::SetMotorTarget(JointID pJointId, float32 pMaxForce, float32 pTargetVelocity)
+{
+	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
+	if (x == mJointTable.end())
+	{
+		mLog.Errorf(_T("SetMotorTarget() - Couldn't find joint %i!"), pJointId);
+		return (false);
+	}
+
+	if ((*x)->mType != JOINT_SLIDER)
+	{
+		mLog.AError("SetMotorTarget() - Joint is not an angular motor!");
+		return (false);
+	}
+
+	dJointSetSliderParam((*x)->mJointID, dParamFMax, pMaxForce);
+	dJointSetSliderParam((*x)->mJointID, dParamVel, pTargetVelocity);
 	return (true);
 }
 
@@ -2560,13 +2686,13 @@ bool PhysicsManagerODE::GetSliderSpeed(JointID pJointId, float32& pSpeed) const
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
 	{
-		mLog.Errorf(_T("GetSliderSleep() - Couldn't find joint %i!"), pJointId);
+		mLog.Errorf(_T("GetSliderSpeed() - Couldn't find joint %i!"), pJointId);
 		return (false);
 	}
 
 	if ((*x)->mType != JOINT_SLIDER)
 	{
-		mLog.AError("GetSliderSleep() - Joint is not a slider!");
+		mLog.AError("GetSliderSpeed() - Joint is not a slider!");
 		return (false);
 	}
 

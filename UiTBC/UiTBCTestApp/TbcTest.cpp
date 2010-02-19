@@ -447,11 +447,6 @@ bool ExportStructure()
 		lBreak->AddControlledGeometry(lStructure.GetBoneGeometry(4), 0);
 		lBreak->AddControlledGeometry(lStructure.GetBoneGeometry(5), 0);
 		lStructure.AddEngine(lBreak);
-		// Just a "dummy engine" to keep rear wheel straight at all times.
-		lEngine = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_ROLL_STRAIGHT, 0, 0, 0, 0.01f, 0);
-		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(2), -1);
-		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(3), 1);
-		lStructure.AddEngine(lEngine);
 
 		lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, 0, 0, 0);
 		if (lOk)
@@ -693,15 +688,6 @@ bool ExportStructure()
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(8), 5);
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(10), 2, TBC::PhysicsEngine::MODE_HALF_LOCK);	// MODE_HALF_LOCK = has neutral/freeze position outside mid value.
 		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(11), 1, TBC::PhysicsEngine::MODE_HALF_LOCK);	// MODE_HALF_LOCK = has neutral/freeze position outside mid value.
-		lStructure.AddEngine(lEngine);
-		// Just a "dummy engine" to keep wheels straight at all times.
-		lEngine = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_ROLL_STRAIGHT, 0, 0, 0, 0.01f, 0);
-		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(2), -1);
-		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(3), 1);
-		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(4), -1);
-		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(5), 1);
-		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(6), -1);
-		lEngine->AddControlledGeometry(lStructure.GetBoneGeometry(7), 1);
 		lStructure.AddEngine(lEngine);
 
 		lOk = lStructure.FinalizeInit(lPhysics, lPhysicsFps, 0, 0, 0);

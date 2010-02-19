@@ -339,6 +339,7 @@ bool ContextObject::UpdateFullPosition(const ObjectPositionalData*& pPositionalD
 			}
 			break;
 			case TBC::ChunkyBoneGeometry::JOINT_HINGE:
+			case TBC::ChunkyBoneGeometry::JOINT_SLIDER:
 			{
 				GETSET_OBJECT_POSITIONAL_AT(mPosition, y, PositionalData1, lData, PositionalData::TYPE_POSITION_1, 1);
 				++y;
@@ -348,9 +349,9 @@ bool ContextObject::UpdateFullPosition(const ObjectPositionalData*& pPositionalD
 					mLog.AError("Could not get hinge!");
 					return (false);
 				}
-				lData->mTransformation = lDiff.mAngle;
-				lData->mVelocity = lDiff.mAngleVelocity;
-				lData->mAcceleration = lDiff.mAngleAcceleration;
+				lData->mTransformation = lDiff.mValue;
+				lData->mVelocity = lDiff.mVelocity;
+				lData->mAcceleration = lDiff.mAcceleration;
 			}
 			break;
 			case TBC::ChunkyBoneGeometry::JOINT_BALL:
@@ -418,7 +419,7 @@ bool ContextObject::UpdateFullPosition(const ObjectPositionalData*& pPositionalD
 				::memcpy(lData->mValue, lEngine->GetValues(), sizeof(float)*4);
 			}
 			break;
-			case TBC::PhysicsEngine::ENGINE_LIFTER:
+			case TBC::PhysicsEngine::ENGINE_HOVER:
 			case TBC::PhysicsEngine::ENGINE_HINGE_ROLL:
 			case TBC::PhysicsEngine::ENGINE_HINGE_GYRO:
 			case TBC::PhysicsEngine::ENGINE_HINGE_BREAK:
@@ -426,13 +427,13 @@ bool ContextObject::UpdateFullPosition(const ObjectPositionalData*& pPositionalD
 			case TBC::PhysicsEngine::ENGINE_HINGE2_TURN:
 			case TBC::PhysicsEngine::ENGINE_ROTOR:
 			case TBC::PhysicsEngine::ENGINE_TILTER:
+			case TBC::PhysicsEngine::ENGINE_SLIDER_FORCE:
 			{
 				GETSET_OBJECT_POSITIONAL_AT(mPosition, y, RealData1, lData, PositionalData::TYPE_REAL_1, 1);
 				++y;
 				lData->mValue = lEngine->GetValue();
 			}
 			break;
-			case TBC::PhysicsEngine::ENGINE_ROLL_STRAIGHT:
 			case TBC::PhysicsEngine::ENGINE_GLUE:
 			{
 				// Unsynchronized "engine".
@@ -555,6 +556,7 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData)
 			}
 			break;
 			case TBC::ChunkyBoneGeometry::JOINT_HINGE:
+			case TBC::ChunkyBoneGeometry::JOINT_SLIDER:
 			{
 				assert(mPosition.mBodyPositionArray[y]->GetType() == PositionalData::TYPE_POSITION_1);
 				GET_OBJECT_POSITIONAL_AT(mPosition, y, const PositionalData1, lData, PositionalData::TYPE_POSITION_1);
@@ -652,7 +654,7 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData)
 				SetEnginePower(3, lData->mValue[2], lData->mValue[3]);	// TRICKY: specialcasing.
 			}
 			break;
-			case TBC::PhysicsEngine::ENGINE_LIFTER:
+			case TBC::PhysicsEngine::ENGINE_HOVER:
 			case TBC::PhysicsEngine::ENGINE_HINGE_ROLL:
 			case TBC::PhysicsEngine::ENGINE_HINGE_GYRO:
 			case TBC::PhysicsEngine::ENGINE_HINGE_BREAK:
@@ -660,6 +662,7 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData)
 			case TBC::PhysicsEngine::ENGINE_HINGE2_TURN:
 			case TBC::PhysicsEngine::ENGINE_ROTOR:
 			case TBC::PhysicsEngine::ENGINE_TILTER:
+			case TBC::PhysicsEngine::ENGINE_SLIDER_FORCE:
 			{
 				assert(mPosition.mBodyPositionArray.size() > y);
 				assert(mPosition.mBodyPositionArray[y]->GetType() == PositionalData::TYPE_REAL_1);
@@ -675,7 +678,6 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData)
 				SetEnginePower(lEngine->GetControllerIndex(), lData->mValue, 0);
 			}
 			break;
-			case TBC::PhysicsEngine::ENGINE_ROLL_STRAIGHT:
 			case TBC::PhysicsEngine::ENGINE_GLUE:
 			{
 				// Unsynchronized "engine".

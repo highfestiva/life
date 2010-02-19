@@ -409,7 +409,7 @@ class GroupReader(DefaultMAReader):
                                         c = normal(normal_indices[ts[x]][0])
                                         split = []
                                         for s in normal_indices[ts[x]][1:]:
-                                                if angle(c, normal(s)) > 80:
+                                                if angle(c, normal(s)) > 60:
                                                         split += [s]
                                         # Push all the once that we don't join together at the end.
                                         if split:
@@ -661,8 +661,9 @@ class GroupReader(DefaultMAReader):
                 for section in config.sections():
                         if section.startswith("engine:"):
                                 enginetype = stripQuotes(config.get(section, "type"))
-                                pushengines = ["cam_flat_push", "lifter"]
-                                engineOk = enginetype in pushengines+["hinge_roll", "hinge_gyro", "hinge_break", "hinge_torque", "hinge2_turn", "rotor", "tilter"]
+                                pushengines = ["cam_flat_push", "hover"]
+                                jointengines = ["hinge_roll", "hinge_gyro", "hinge_break", "hinge_torque", "hinge2_turn", "rotor", "tilter", "slider_force"]
+                                engineOk = enginetype in pushengines+jointengines
                                 allApplied &= engineOk
                                 if not engineOk:
                                         print("Error: invalid engine type '%s'." % enginetype)
@@ -731,7 +732,8 @@ class GroupReader(DefaultMAReader):
                                 node.phys_root = node.phys_parent
                                 # Check attributes.
                                 def jointCheck(t):
-                                        return (t == "suspend_hinge") or (t == "hinge2") or (t == "hinge")
+                                        ts = ["exclude", "suspend_hinge", "hinge2", "hinge", "ball", "slider", "universal"]
+                                        return t in ts
                                 isValid, hasJoint = self._query_attribute(node, "joint", jointCheck, False)
                                 isGroupValid &= isValid
                                 if not node.phys_root and isValid and hasJoint:
