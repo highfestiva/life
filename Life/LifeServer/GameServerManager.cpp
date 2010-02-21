@@ -147,7 +147,8 @@ bool GameServerManager::BroadcastChatMessage(const wstr& pMessage)
 		for (; x != mAccountClientTable.End(); ++x)
 		{
 			const Client* lClient = x.GetObject();
-			lOk |= GetNetworkAgent()->SendStatusMessage(lClient->GetUserConnection()->GetSocket(), 0, Cure::REMOTE_OK, pMessage, lPacket);
+			lOk |= GetNetworkAgent()->SendStatusMessage(lClient->GetUserConnection()->GetSocket(), 0,
+				Cure::REMOTE_OK, Cure::MessageStatus::INFO_CHAT, pMessage, lPacket);
 		}
 	}
 	GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
@@ -171,7 +172,8 @@ bool GameServerManager::SendChatMessage(const wstr& pClientUserName, const wstr&
 	if (lOk)
 	{
 		Cure::Packet* lPacket = GetNetworkAgent()->GetPacketFactory()->Allocate();
-		lOk = GetNetworkAgent()->SendStatusMessage(lClient->GetUserConnection()->GetSocket(), 0, Cure::REMOTE_OK, pMessage, lPacket);
+		lOk = GetNetworkAgent()->SendStatusMessage(lClient->GetUserConnection()->GetSocket(), 0, Cure::REMOTE_OK,
+			Cure::MessageStatus::INFO_CHAT, pMessage, lPacket);
 		GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
 	}
 	return (lOk);
@@ -225,223 +227,30 @@ bool GameServerManager::Initialize()
 		int x;
 		for (x = 0; lOk && x < 100; ++x)
 		{
-			const wstr lUserName = wstrutil::Format(L"Ball%i", x);
+			const wstr lUserName = wstrutil::Format(L"User%i", x);
 			wstr lReadablePassword(L"CarPassword");
 			Cure::MangledPassword lPassword(lReadablePassword);
 			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
-			if (lOk)
-			{
-				lOk = mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("sphere_01")));
-			}
-		}
-		for (x = 0; lOk && x < 100; ++x)
-		{
-			const wstr lUserName = wstrutil::Format(L"Car%i", x);
-			wstr lReadablePassword(L"CarPassword");
-			Cure::MangledPassword lPassword(lReadablePassword);
-			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
-			if (lOk)
-			{
-				lOk = mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("car_001")));
-			}
-		}
-		for (x = 0; lOk && x < 100; ++x)
-		{
-			const wstr lUserName = wstrutil::Format(L"Monster%i", x);
-			wstr lReadablePassword(L"CarPassword");
-			Cure::MangledPassword lPassword(lReadablePassword);
-			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
-			if (lOk)
-			{
-				lOk = mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("monster_001")));
-			}
-		}
-		for (x = 0; lOk && x < 100; ++x)
-		{
-			const wstr lUserName = wstrutil::Format(L"Excavator%i", x);
-			wstr lReadablePassword(L"CarPassword");
-			Cure::MangledPassword lPassword(lReadablePassword);
-			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
-			if (lOk)
-			{
-				lOk = mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("excavator_703")));
-			}
-		}
-		for (x = 0; lOk && x < 100; ++x)
-		{
-			const wstr lUserName = wstrutil::Format(L"Crane%i", x);
-			wstr lReadablePassword(L"CarPassword");
-			Cure::MangledPassword lPassword(lReadablePassword);
-			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
-			if (lOk)
-			{
-				lOk = mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("crane_whatever")));
-			}
-		}
-		for (x = 0; lOk && x < 100; ++x)
-		{
-			const wstr lUserName = wstrutil::Format(L"Tractor%i", x);
-			wstr lReadablePassword(L"CarPassword");
-			Cure::MangledPassword lPassword(lReadablePassword);
-			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
-			if (lOk)
-			{
-				lOk = mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("tractor_02")));
-			}
-		}
-		for (x = 0; lOk && x < 100; ++x)
-		{
-			const wstr lUserName = wstrutil::Format(L"OriginalTractor%i", x);
-			wstr lReadablePassword(L"CarPassword");
-			Cure::MangledPassword lPassword(lReadablePassword);
-			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
-			if (lOk)
-			{
-				lOk = mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("tractor_01")));
-			}
-		}
-		for (x = 0; lOk && x < 100; ++x)
-		{
-			const wstr lUserName = wstrutil::Format(L"Fjask%i", x);
-			wstr lReadablePassword(L"CarPassword");
-			Cure::MangledPassword lPassword(lReadablePassword);
-			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
-			if (lOk)
-			{
-				lOk = mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("fjask")));
-			}
-		}
-		for (x = 0; lOk && x < 100; ++x)
-		{
-			const wstr lUserName = wstrutil::Format(L"RoadRoller%i", x);
-			wstr lReadablePassword(L"CarPassword");
-			Cure::MangledPassword lPassword(lReadablePassword);
-			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
-			if (lOk)
-			{
-				lOk = mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("road_roller_01")));
-			}
-		}
-		for (x = 0; lOk && x < 100; ++x)
-		{
-			const wstr lUserName = wstrutil::Format(L"Truck%i", x);
-			wstr lReadablePassword(L"CarPassword");
-			Cure::MangledPassword lPassword(lReadablePassword);
-			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
-			if (lOk)
-			{
-				lOk = mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("truck_01")));
-			}
-		}
-		for (x = 0; lOk && x < 100; ++x)
-		{
-			const wstr lUserName = wstrutil::Format(L"Heli%i", x);
-			wstr lReadablePassword(L"CarPassword");
-			Cure::MangledPassword lPassword(lReadablePassword);
-			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
-			if (lOk)
-			{
-				lOk = mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("helicopter_01")));
-			}
-		}
-		for (x = 0; lOk && x < 100; ++x)
-		{
-			const wstr lUserName = wstrutil::Format(L"Loader%i", x);
-			wstr lReadablePassword(L"CarPassword");
-			Cure::MangledPassword lPassword(lReadablePassword);
-			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
-			if (lOk)
-			{
-				lOk = mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("frontloader")));
-			}
-		}
-		for (x = 0; lOk && x < 100; ++x)
-		{
-			const wstr lUserName = wstrutil::Format(L"TowTruck%i", x);
-			wstr lReadablePassword(L"CarPassword");
-			Cure::MangledPassword lPassword(lReadablePassword);
-			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
-			if (lOk)
-			{
-				lOk = mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("towtruck_01")));
-			}
-		}
-		for (x = 0; lOk && x < 100; ++x)
-		{
-			const wstr lUserName = wstrutil::Format(L"M%i", x);
-			wstr lReadablePassword(L"CarPassword");
-			Cure::MangledPassword lPassword(lReadablePassword);
-			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
-			if (lOk)
-			{
-				lOk = mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("monster_02")));
-			}
-		}
-		for (x = 0; lOk && x < 100; ++x)
-		{
-			const wstr lUserName = wstrutil::Format(L"Hovercraft%i", x);
-			wstr lReadablePassword(L"CarPassword");
-			Cure::MangledPassword lPassword(lReadablePassword);
-			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
-			if (lOk)
-			{
-				lOk = mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("hovercraft_01")));
-			}
-		}
-		for (x = 0; lOk && x < 100; ++x)
-		{
-			const wstr lUserName = wstrutil::Format(L"Dumper%i", x);
-			wstr lReadablePassword(L"CarPassword");
-			Cure::MangledPassword lPassword(lReadablePassword);
-			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
-			if (lOk)
-			{
-				lOk = mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("dumper_01")));
-			}
-		}
-		for (x = 0; lOk && x < 100; ++x)
-		{
-			const wstr lUserName = wstrutil::Format(L"Robot%i", x);
-			wstr lReadablePassword(L"CarPassword");
-			Cure::MangledPassword lPassword(lReadablePassword);
-			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
-			if (lOk)
-			{
-				lOk = mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("robot_01")));
-			}
-		}
-		for (x = 0; lOk && x < 100; ++x)
-		{
-			const wstr lUserName = wstrutil::Format(L"Mobile%i", x);
-			wstr lReadablePassword(L"CarPassword");
-			Cure::MangledPassword lPassword(lReadablePassword);
-			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
-			if (lOk)
-			{
-				lOk = mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("mobile_crane_01")));
-			}
-		}
-		for (x = 0; lOk && x < 100; ++x)
-		{
-			const wstr lUserName = wstrutil::Format(L"Forklift%i", x);
-			wstr lReadablePassword(L"CarPassword");
-			Cure::MangledPassword lPassword(lReadablePassword);
-			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
-			if (lOk)
-			{
-				lOk = mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("forklift_01")));
-			}
-		}
-		for (x = 0; lOk && x < 100; ++x)
-		{
-			const wstr lUserName = wstrutil::Format(L"Saucer%i", x);
-			wstr lReadablePassword(L"CarPassword");
-			Cure::MangledPassword lPassword(lReadablePassword);
-			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
-			if (lOk)
-			{
-				lOk = mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("saucer_01")));
-			}
+			lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("sphere_01")));
+			lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("car_001")));
+			lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("monster_001")));
+			lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("excavator_703")));
+			lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("crane_whatever")));
+			lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("tractor_02")));
+			lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("tractor_01")));
+			lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("fjask")));
+			lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("road_roller_01")));
+			lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("truck_01")));
+			lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("helicopter_01")));
+			lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("frontloader")));
+			lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("towtruck_01")));
+			lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("monster_02")));
+			lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("hovercraft_01")));
+			lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("dumper_01")));
+			lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("robot_01")));
+			lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("mobile_crane_01")));
+			lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("forklift_01")));
+			lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("saucer_01")));
 		}
 	}
 
@@ -585,7 +394,23 @@ void GameServerManager::ProcessNetworkInputMessage(Client* pClient, Cure::Messag
 		case Cure::MESSAGE_TYPE_STATUS:
 		{
 			Cure::MessageStatus* lStatus = (Cure::MessageStatus*)pMessage;
-			if (lStatus->GetRemoteStatus() == Cure::REMOTE_NO_CONNECTION)
+			if (lStatus->GetRemoteStatus() == Cure::REMOTE_OK)
+			{
+				switch (lStatus->GetInteger())
+				{
+					case Cure::MessageStatus::INFO_CHAT:
+					{
+						log_atrace("Chat...");
+					}
+					break;
+					case Cure::MessageStatus::INFO_AVATAR:
+					{
+						log_atrace("Avatar...");
+					}
+					break;
+				}
+			}
+			else //if (lStatus->GetRemoteStatus() == Cure::REMOTE_NO_CONNECTION)
 			{
 				log_atrace("User disconnects.");
 				GetNetworkServer()->Disconnect(pClient->GetUserConnection()->GetAccountId(), _T(""), false);
@@ -656,25 +481,29 @@ void GameServerManager::OnLogin(Cure::UserConnection* pUserConnection)
 
 	Client* lClient = GetClientByAccount(pUserConnection->GetAccountId());
 	assert(!lClient);
+	if (lClient)
+	{
+		mLog.Errorf(_T("user %s already has an account!"), pUserConnection->GetLoginName().c_str());
+		return;
+	}
 
-	const Cure::UserAccount::AvatarIdSet* lAvatarIdSet = mUserAccountManager->GetUserAvatarIdSet(pUserConnection->GetLoginName());
-	if (lAvatarIdSet && !lAvatarIdSet->empty())
+	typedef Cure::UserAccount::AvatarIdSet AvatarIdSet;
+	const AvatarIdSet* lAvatarIdSet = mUserAccountManager->GetUserAvatarIdSet(pUserConnection->GetLoginName());
+	if (lAvatarIdSet)
 	{
 		lClient = new Client(GetTimeManager(), GetNetworkAgent(), pUserConnection);
 		mAccountClientTable.Insert(pUserConnection->GetAccountId(), lClient);
 		lClient->SendPhysicsFrame(GetTimeManager()->GetCurrentPhysicsFrame());
 
-		const Cure::UserAccount::AvatarId& lAvatarId = *lAvatarIdSet->begin();
-		mLog.Info(_T("Loading avatar '")+lAvatarId+_T("' for user ")+wstrutil::ToCurrentCode(lClient->GetUserConnection()->GetLoginName())+_T("."));
-		Cure::ContextObject* lObject = Parent::CreateContextObject(lAvatarId,
-			Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
-		lClient->SetAvatarId(lObject->GetInstanceId());
-		lObject->SetExtraData((void*)(size_t)lClient->GetUserConnection()->GetAccountId());
-		lObject->StartLoading();
+		for (AvatarIdSet::const_iterator x = lAvatarIdSet->begin(); x != lAvatarIdSet->end(); ++x)
+		{
+			const Cure::UserAccount::AvatarId& lAvatarId = *x;
+			lClient->SendAvatar(lAvatarId);
+		}
 	}
 	else
 	{
-		mLog.Error(_T("User ") + wstrutil::ToCurrentCode(pUserConnection->GetLoginName()) + _T(" does not exist or has no avatar!"));
+		mLog.Error(_T("User ") + wstrutil::ToCurrentCode(pUserConnection->GetLoginName()) + _T(" does not exist or is not allowed avatars!"));
 	}
 }
 
@@ -699,6 +528,16 @@ void GameServerManager::OnLogout(Cure::UserConnection* pUserConnection)
 	GetContext()->DeleteObject(lAvatarId);
 
 	mLog.Info(_T("User ") + wstrutil::ToCurrentCode(pUserConnection->GetLoginName()) + _T(" logged out."));
+}
+
+void GameServerManager::OnSelectAvatar(Client* pClient, const Cure::UserAccount::AvatarId& pAvatarId)
+{
+	mLog.Info(_T("Loading avatar '")+pAvatarId+_T("' for user ")+wstrutil::ToCurrentCode(pClient->GetUserConnection()->GetLoginName())+_T("."));
+	Cure::ContextObject* lObject = Parent::CreateContextObject(pAvatarId,
+		Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
+	pClient->SetAvatarId(lObject->GetInstanceId());
+	lObject->SetExtraData((void*)(size_t)pClient->GetUserConnection()->GetAccountId());
+	lObject->StartLoading();
 }
 
 

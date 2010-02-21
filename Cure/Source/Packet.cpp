@@ -383,9 +383,9 @@ int MessageStatus::Parse(const uint8* pData, int pSize)
 	{
 		mData = pData;
 
-		lTotalSize = 1+sizeof(uint32)*2;
+		lTotalSize = 1+sizeof(uint32)*3;
 		int lSize = -1;
-		if (pSize >= (int)(1+sizeof(uint32)*2+4))
+		if (pSize >= (int)(1+sizeof(uint32)*3+4))
 		{
 			lSize = PackerUnicodeString::Unpack(0, &mData[lTotalSize], pSize-lTotalSize);
 			lTotalSize += lSize;
@@ -398,12 +398,14 @@ int MessageStatus::Parse(const uint8* pData, int pSize)
 	return (lTotalSize);
 }
 
-int MessageStatus::Store(Packet* pPacket, RemoteStatus pStatus, int32 pInteger, const wstr& pMessage)
+int MessageStatus::Store(Packet* pPacket, RemoteStatus pStatus, InfoType pInfoType, int32 pInteger, const wstr& pMessage)
 {
 	int32 lStatus = (int32)pStatus;
+	int32 lInfoType = (int32)pInfoType;
 	mWritableData[0] = (uint8)GetType();
 	unsigned lSize = 1;
 	lSize += PackerInt32::Pack(&mWritableData[lSize], lStatus);
+	lSize += PackerInt32::Pack(&mWritableData[lSize], lInfoType);
 	lSize += PackerInt32::Pack(&mWritableData[lSize], pInteger);
 	lSize += PackerUnicodeString::Pack(&mWritableData[lSize], pMessage);
 	pPacket->AddPacketSize(lSize);
@@ -417,16 +419,23 @@ RemoteStatus MessageStatus::GetRemoteStatus() const
 	return ((RemoteStatus)lStatus);
 }
 
+MessageStatus::InfoType MessageStatus::GetInfo() const
+{
+	int32 lInfoType = -1;
+	PackerInt32::Unpack(lInfoType, mData+1+sizeof(int32), 4);
+	return ((InfoType)lInfoType);
+}
+
 int32 MessageStatus::GetInteger() const
 {
 	int32 lInteger = -1;
-	PackerInt32::Unpack(lInteger, mData+1+sizeof(uint32), 4);
+	PackerInt32::Unpack(lInteger, mData+1+sizeof(int32)*2, 4);
 	return (lInteger);
 }
 
 void MessageStatus::GetMessageString(wstr& pMessage) const
 {
-	PackerUnicodeString::Unpack(&pMessage, &mData[1+sizeof(uint32)*2], 1024);
+	PackerUnicodeString::Unpack(&pMessage, &mData[1+sizeof(int32)*3], 1024);
 }
 
 

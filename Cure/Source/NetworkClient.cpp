@@ -108,7 +108,7 @@ void NetworkClient::Disconnect(bool pSendDisconnect)
 	if (mSocket && pSendDisconnect)
 	{
 		Cure::Packet* lPacket = GetPacketFactory()->Allocate();
-		SendStatusMessage(mSocket, 0, Cure::REMOTE_NO_CONNECTION, L"", lPacket);
+		SendStatusMessage(mSocket, 0, Cure::REMOTE_NO_CONNECTION, Cure::MessageStatus::INFO_LOGIN, L"", lPacket);
 		GetPacketFactory()->Release(lPacket);
 	}
 	SendAll();

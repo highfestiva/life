@@ -56,6 +56,7 @@ private:
 	Cure::UserAccount::Availability QueryLogin(const Cure::LoginId& pLoginId, Cure::UserAccount::AccountId& pAccountId);
 	void OnLogin(Cure::UserConnection* pUserConnection);
 	void OnLogout(Cure::UserConnection* pUserConnection);
+	void OnSelectAvatar(Client* pClient, const Cure::UserAccount::AvatarId& pAvatarId);
 
 	void AdjustClientSimulationSpeed(Client* pClient, int pClientFrameIndex);
 	void StoreMovement(int pClientFrameIndex, Cure::MessageObjectMovement* pMovement);

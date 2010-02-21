@@ -7,6 +7,7 @@
 #pragma once
 
 #include "../../Cure/Include/Cure.h"
+#include "../../Cure/Include/UserAccount.h"
 #include "../Life.h"
 
 
@@ -37,6 +38,7 @@ public:
 
 	Cure::GameObjectId GetAvatarId() const;
 	void SetAvatarId(Cure::GameObjectId pAvatarId);
+	void SendAvatar(const Cure::UserAccount::AvatarId& pAvatarId);
 
 	void StoreFrameDiff(int pFrameDiff);
 	void QuerySendStriveTimes();

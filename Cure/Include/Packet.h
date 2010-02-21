@@ -125,12 +125,20 @@ private:
 class MessageStatus: public Message
 {
 public:
+	enum InfoType
+	{
+		INFO_LOGIN = 1,
+		INFO_CHAT,
+		INFO_AVATAR,
+	};
+
 	MessageStatus();
 	MessageType GetType() const;
 	int Parse(const uint8* pData, int pSize);
-	int Store(Packet* pPacket, RemoteStatus pStatus, int32 pInteger, const wstr& pMessage);
+	int Store(Packet* pPacket, RemoteStatus pStatus, InfoType pInfoType, int32 pInteger, const wstr& pMessage);
 
 	RemoteStatus GetRemoteStatus() const;
+	InfoType GetInfo() const;
 	int32 GetInteger() const;
 	void GetMessageString(wstr& pMessage) const;
 };

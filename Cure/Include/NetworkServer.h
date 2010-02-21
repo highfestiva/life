@@ -66,7 +66,8 @@ private:
 	void DropSocket(UdpVSocket* pSocket);
 	UserConnection* GetUser(UserAccount::AccountId pAccountId);
 
-	bool SendStatusMessage(UserAccount::AccountId pAccountId, int32 pInteger, RemoteStatus pStatus, wstr pMessage, Packet* pPacket);
+	bool SendStatusMessage(UserAccount::AccountId pAccountId, int32 pInteger, RemoteStatus pStatus,
+		MessageStatus::InfoType pInfoType, wstr pMessage, Packet* pPacket);
 
 	void OnCloseSocket(UdpVSocket* pSocket);
 

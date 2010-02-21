@@ -98,6 +98,7 @@ private:
 	void DetachObjects(Cure::GameObjectId pObject1Id, Cure::GameObjectId pObject2Id);
 
 	void CancelLogin();
+	void OnAvatarSelect(UiTbc::Button* pButton, int);
 	Cure::RuntimeVariableScope* GetVariableScope() const;
 
 	Cure::NetworkClient* GetNetworkClient() const;

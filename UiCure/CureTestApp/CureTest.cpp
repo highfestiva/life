@@ -352,7 +352,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 		lPacket->Release();
 		Cure::MessageStatus* lStatus = (Cure::MessageStatus*)lClient2->GetPacketFactory()->GetMessageFactory()->Allocate(Cure::MESSAGE_TYPE_STATUS);
 		lPacket->AddMessage(lStatus);
-		lStatus->Store(lPacket, Cure::REMOTE_OK, 0, L"Client2ToServer");
+		lStatus->Store(lPacket, Cure::REMOTE_OK, Cure::MessageStatus::INFO_CHAT, 0, L"Client2ToServer");
 		lPacket->StoreHeader();
 		for (int x = 0; lTestOk && x < lPacketCount; ++x)
 		{
@@ -431,7 +431,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 		lPacket->Release();
 		Cure::MessageStatus* lStatus = (Cure::MessageStatus*)lServer->GetPacketFactory()->GetMessageFactory()->Allocate(Cure::MESSAGE_TYPE_STATUS);
 		lPacket->AddMessage(lStatus);
-		lStatus->Store(lPacket, Cure::REMOTE_OK, 0, L"BajsOxe");
+		lStatus->Store(lPacket, Cure::REMOTE_OK, Cure::MessageStatus::INFO_CHAT, 0, L"BajsOxe");
 		lPacket->StoreHeader();
 		lTestOk = lServer->PlaceInSendBuffer(pSafe, lPacket, lClient2Id);
 		lServer->GetPacketFactory()->Release(lPacket);
@@ -465,7 +465,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 		lPacket->Release();
 		Cure::MessageStatus* lStatus = (Cure::MessageStatus*)lClient->GetPacketFactory()->GetMessageFactory()->Allocate(Cure::MESSAGE_TYPE_STATUS);
 		lPacket->AddMessage(lStatus);
-		lStatus->Store(lPacket, Cure::REMOTE_OK, 0, L"?");
+		lStatus->Store(lPacket, Cure::REMOTE_OK, Cure::MessageStatus::INFO_CHAT, 0, L"?");
 		lPacket->StoreHeader();
 		lTestOk = lClient->PlaceInSendBuffer(pSafe, lClient->GetSocket(), lPacket);
 		if (lTestOk)
@@ -496,7 +496,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 		lPacket->Release();
 		Cure::MessageStatus* lStatus = (Cure::MessageStatus*)lServer->GetPacketFactory()->GetMessageFactory()->Allocate(Cure::MESSAGE_TYPE_STATUS);
 		lPacket->AddMessage(lStatus);
-		lStatus->Store(lPacket, Cure::REMOTE_OK, 0, L"?");
+		lStatus->Store(lPacket, Cure::REMOTE_OK, Cure::MessageStatus::INFO_CHAT, 0, L"?");
 		lPacket->StoreHeader();
 		lTestOk = lServer->PlaceInSendBuffer(pSafe, lPacket, lClientId);
 		lServer->GetPacketFactory()->Release(lPacket);

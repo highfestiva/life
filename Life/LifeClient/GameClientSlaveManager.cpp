@@ -628,17 +628,38 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 			}
 			else
 			{
-				wstr lChatMessage;
-				lMessageStatus->GetMessageString(lChatMessage);
-				if (lMessageStatus->GetInteger() == 0)
+				switch (lMessageStatus->GetInfo())
 				{
-					lChatMessage = L"ServerAdmin: "+lChatMessage;
+					case Cure::MessageStatus::INFO_CHAT:
+					{
+						wstr lChatMessage;
+						lMessageStatus->GetMessageString(lChatMessage);
+						if (lMessageStatus->GetInteger() == 0)
+						{
+							lChatMessage = L"ServerAdmin: "+lChatMessage;
+						}
+						else
+						{
+							lChatMessage = L"<Player?>: "+lChatMessage;
+						}
+						mLog.Headline(wstrutil::ToCurrentCode(lChatMessage));
+					}
+					break;
+					case Cure::MessageStatus::INFO_AVATAR:
+					{
+						wstr lAvatarId;
+						lMessageStatus->GetMessageString(lAvatarId);
+						log_adebug("Status: INFO_AVATAR...");
+						UiTbc::Button* lButton = new UiTbc::Button(UiTbc::BorderComponent::ZIGZAG,
+							3, DARK_GREEN, lAvatarId);
+						lButton->SetText(lAvatarId, WHITE, WHITE);
+						lButton->SetPreferredSize(100, 24);
+						lButton->SetMinSize(20, 20);
+						mUiManager->GetDesktopWindow()->AddChild(lButton);
+						lButton->SetOnUnclickedFuncIndex(GameClientSlaveManager, OnAvatarSelect, 0);
+					}
+					break;
 				}
-				else
-				{
-					lChatMessage = L"<Player?>: "+lChatMessage;
-				}
-				mLog.Headline(wstrutil::ToCurrentCode(lChatMessage));
 			}
 		}
 		break;
@@ -899,6 +920,11 @@ void GameClientSlaveManager::CancelLogin()
 {
 	CloseLoginGui();
 	SetIsQuitting();
+}
+
+void GameClientSlaveManager::OnAvatarSelect(UiTbc::Button* pButton, int)
+{
+	mLog.Infof(_T("Clicked avatar %s."), pButton->GetText().c_str());
 }
 
 Cure::RuntimeVariableScope* GameClientSlaveManager::GetVariableScope() const
