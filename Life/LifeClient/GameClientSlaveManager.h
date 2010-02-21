@@ -83,7 +83,8 @@ private:
 
 	void ProcessNetworkInputMessage(Cure::Message* pMessage);
 	void ProcessNumber(Cure::MessageNumber::InfoType pType, int32 pInteger, float32 pFloat);
-	bool CreateObject(Cure::GameObjectId pInstanceId, const str& pClassId, Cure::NetworkObjectType pNetworkType);
+	bool CreateObject(Cure::GameObjectId pInstanceId, const str& pClassId, Cure::NetworkObjectType pNetworkType,
+		TransformationF* pTransform = 0);
 	Cure::ContextObject* CreateContextObject(const str& pClassId) const;
 	void OnLoadCompleted(Cure::ContextObject* pObject, bool pOk);
 	void SetMovement(Cure::GameObjectId pInstanceId, int32 pFrameIndex, Cure::ObjectPositionalData& pData);

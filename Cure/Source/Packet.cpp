@@ -551,6 +551,7 @@ int MessageCreateObject::Parse(const uint8* pData, int pSize)
 		lTotalSize = Parent::Parse(pData, pSize);
 		if (lTotalSize > 0)
 		{
+			lTotalSize += 7*sizeof(float);
 			int lSize = -1;
 			if (pSize >= lTotalSize+4)
 			{
@@ -566,18 +567,24 @@ int MessageCreateObject::Parse(const uint8* pData, int pSize)
 	return (lTotalSize);
 }
 
-int MessageCreateObject::Store(Packet* pPacket, GameObjectId pInstanceId, const wstr& pClassId)
+int MessageCreateObject::Store(Packet* pPacket, GameObjectId pInstanceId, const TransformationF& pTransformation, const wstr& pClassId)
 {
 	int32 lInstanceId = (int32)pInstanceId;
 	unsigned lSize = Parent::Store(pPacket, lInstanceId);
+	lSize += PackerTransformation::Pack(&mWritableData[lSize], pTransformation);
 	lSize += PackerUnicodeString::Pack(&mWritableData[lSize], pClassId);
 	pPacket->AddPacketSize(lSize);
 	return (lSize);
 }
 
+void MessageCreateObject::GetTransformation(TransformationF& pTransformation) const
+{
+	PackerTransformation::Unpack(pTransformation, &mData[1+sizeof(int32)], 1024);
+}
+
 void MessageCreateObject::GetClassId(wstr& pClassId) const
 {
-	PackerUnicodeString::Unpack(&pClassId, &mData[1+sizeof(int32)], 1024);
+	PackerUnicodeString::Unpack(&pClassId, &mData[1+sizeof(int32)+7*sizeof(float)], 1024);
 }
 
 

@@ -233,9 +233,9 @@ bool GameServerManager::Initialize()
 			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
 			lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("sphere_01")));
 			lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("car_001")));
-			lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("monster_001")));
-			lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("excavator_703")));
-			lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("crane_whatever")));
+			//lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("monster_001")));
+			//lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("excavator_703")));
+			//lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("crane_whatever")));
 			lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("tractor_02")));
 			lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("tractor_01")));
 			lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("fjask")));
@@ -396,16 +396,25 @@ void GameServerManager::ProcessNetworkInputMessage(Client* pClient, Cure::Messag
 			Cure::MessageStatus* lStatus = (Cure::MessageStatus*)pMessage;
 			if (lStatus->GetRemoteStatus() == Cure::REMOTE_OK)
 			{
-				switch (lStatus->GetInteger())
+				switch (lStatus->GetInfo())
 				{
 					case Cure::MessageStatus::INFO_CHAT:
 					{
-						log_atrace("Chat...");
+						log_adebug("Chat...");
 					}
 					break;
 					case Cure::MessageStatus::INFO_AVATAR:
 					{
-						log_atrace("Avatar...");
+						log_adebug("Avatar selected...");
+						wstr lAvatarName;
+						lStatus->GetMessageString(lAvatarName);
+						const Cure::UserAccount::AvatarId lAvatarId = wstrutil::ToCurrentCode(lAvatarName);
+						OnSelectAvatar(pClient, lAvatarId);
+					}
+					break;
+					default:
+					{
+						assert(false);
 					}
 					break;
 				}
@@ -422,24 +431,21 @@ void GameServerManager::ProcessNetworkInputMessage(Client* pClient, Cure::Messag
 			Cure::MessageObjectPosition* lMovement = (Cure::MessageObjectPosition*)pMessage;
 			// TODO: make sure client is authorized to control object with given ID.
 			Cure::GameObjectId lInstanceId = lMovement->GetObjectId();
-			int32 lClientFrameIndex = lMovement->GetFrameIndex();
-			AdjustClientSimulationSpeed(pClient, lClientFrameIndex);
-
-			// TODO:
-			//if (pClient->IsInControlOf(lInstanceId))
+			if (pClient->GetAvatarId() == lInstanceId)
 			{
+				int32 lClientFrameIndex = lMovement->GetFrameIndex();
+				AdjustClientSimulationSpeed(pClient, lClientFrameIndex);
 				// Pass on to other clients.
 				const Cure::ObjectPositionalData& lPosition = lMovement->GetPositionalData();
 				BroadcastObjectPosition(lInstanceId, lPosition, pClient, false);
 				StoreMovement(lClientFrameIndex, lMovement);
 			}
-			/* TODO:
 			else
 			{
 				mLog.Warningf(_T("Client %i tried to control instance ID %i."),
 					strutil::ToCurrentCode(pClient->GetUserConnection()->GetLoginName()).c_str(),
 					lInstanceId);
-			}*/
+			}
 		}
 		break;
 		case Cure::MESSAGE_TYPE_NUMBER:
@@ -491,15 +497,19 @@ void GameServerManager::OnLogin(Cure::UserConnection* pUserConnection)
 	const AvatarIdSet* lAvatarIdSet = mUserAccountManager->GetUserAvatarIdSet(pUserConnection->GetLoginName());
 	if (lAvatarIdSet)
 	{
+		Cure::Packet* lPacket = GetNetworkAgent()->GetPacketFactory()->Allocate();
+
 		lClient = new Client(GetTimeManager(), GetNetworkAgent(), pUserConnection);
 		mAccountClientTable.Insert(pUserConnection->GetAccountId(), lClient);
-		lClient->SendPhysicsFrame(GetTimeManager()->GetCurrentPhysicsFrame());
+		lClient->SendPhysicsFrame(GetTimeManager()->GetCurrentPhysicsFrame(), lPacket);
 
 		for (AvatarIdSet::const_iterator x = lAvatarIdSet->begin(); x != lAvatarIdSet->end(); ++x)
 		{
 			const Cure::UserAccount::AvatarId& lAvatarId = *x;
-			lClient->SendAvatar(lAvatarId);
+			lClient->SendAvatar(lAvatarId, lPacket);
 		}
+
+		GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
 	}
 	else
 	{
@@ -525,21 +535,40 @@ void GameServerManager::OnLogout(Cure::UserConnection* pUserConnection)
 		delete (lClient);
 		BroadcastDeleteObject(lAvatarId);
 	}
-	GetContext()->DeleteObject(lAvatarId);
+	DropAvatar(lAvatarId);
 
 	mLog.Info(_T("User ") + wstrutil::ToCurrentCode(pUserConnection->GetLoginName()) + _T(" logged out."));
 }
 
 void GameServerManager::OnSelectAvatar(Client* pClient, const Cure::UserAccount::AvatarId& pAvatarId)
 {
+	ScopeLock lTickLock(GetTickLock());
+
+	TransformationF lTransform;
+	const Cure::GameObjectId lPreviousAvatarId = pClient->GetAvatarId();
+	if (lPreviousAvatarId)
+	{
+		mLog.Info(_T("User ")+wstrutil::ToCurrentCode(pClient->GetUserConnection()->GetLoginName())+_T(" had an avatar, replacing it."));
+		pClient->SetAvatarId(0);
+		BroadcastDeleteObject(lPreviousAvatarId);
+		lTransform.SetPosition(GetContext()->GetObject(lPreviousAvatarId)->GetPosition());
+		DropAvatar(lPreviousAvatarId);
+	}
+
 	mLog.Info(_T("Loading avatar '")+pAvatarId+_T("' for user ")+wstrutil::ToCurrentCode(pClient->GetUserConnection()->GetLoginName())+_T("."));
 	Cure::ContextObject* lObject = Parent::CreateContextObject(pAvatarId,
 		Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
+	lObject->SetInitialTransform(lTransform);
 	pClient->SetAvatarId(lObject->GetInstanceId());
 	lObject->SetExtraData((void*)(size_t)pClient->GetUserConnection()->GetAccountId());
 	lObject->StartLoading();
 }
 
+void GameServerManager::DropAvatar(Cure::GameObjectId pAvatarId)
+{
+	DeleteMovements(pAvatarId);
+	GetContext()->DeleteObject(pAvatarId);
+}
 
 
 void GameServerManager::AdjustClientSimulationSpeed(Client* pClient, int pClientFrameIndex)
@@ -567,6 +596,24 @@ void GameServerManager::StoreMovement(int pClientFrameIndex, Cure::MessageObject
 	{
 		// This input data is already old or too much ahead! Skip it.
 		mLog.Warningf(_T("Skipping store of movement (%i frames ahead)."), lFrameOffset);
+	}
+}
+
+void GameServerManager::DeleteMovements(Cure::GameObjectId pInstanceId)
+{
+	for (size_t x = 0; x < NETWORK_POSITIONAL_AHEAD_BUFFER_SIZE; ++x)
+	{
+		MovementList& lList = mMovementArrayList[x];
+		MovementList::iterator y = lList.begin();
+		for (; y != lList.end(); ++y)
+		{
+			if ((*y)->GetObjectId() == pInstanceId)
+			{
+				delete (*y);
+				lList.erase(y);
+				break;
+			}
+		}
 	}
 }
 
@@ -628,10 +675,8 @@ void GameServerManager::BroadcastAvatar(Client* pClient)
 	mLog.Info(_T("User ")+wstrutil::ToCurrentCode(pClient->GetUserConnection()->GetLoginName())+_T(" login complete (avatar loaded)."));
 
 	// TODO: this is hard-coded. Use a general replication-mechanism instead (where visible and added/updated objects gets replicated automatically).
-	Cure::Packet* lPacket = GetNetworkAgent()->GetPacketFactory()->Allocate();
 	GetNetworkAgent()->SendNumberMessage(true, pClient->GetUserConnection()->GetSocket(),
 		Cure::MessageNumber::INFO_AVATAR, lInstanceId, 0);
-	GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
 
 	BroadcastCreateObject(lObject);
 	SendCreateAllObjects(pClient);
@@ -663,9 +708,10 @@ void GameServerManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 	}
 	if (pOk)
 	{
+		DeleteMovements(pObject->GetInstanceId());
 		if (lClient)
 		{
-			mLog.Infof(_T("Yeeha! Loaded avatar for %s."),
+			mLog.Infof(_T("Loaded avatar for %s."),
 				wstrutil::ToCurrentCode(lClient->GetUserConnection()->GetLoginName()).c_str());
 			BroadcastAvatar(lClient);
 		}
@@ -797,15 +843,10 @@ void GameServerManager::BroadcastCreateObject(Cure::ContextObject* pObject)
 	Cure::MessageCreateObject* lCreate = (Cure::MessageCreateObject*)GetNetworkAgent()->
 		GetPacketFactory()->GetMessageFactory()->Allocate(Cure::MESSAGE_TYPE_CREATE_OBJECT);
 	lPacket->AddMessage(lCreate);
-	lCreate->Store(lPacket, pObject->GetInstanceId(), wstrutil::ToOwnCode(pObject->GetClassId()));
+	Lepra::TransformationF lTransformation(pObject->GetOrientation(), pObject->GetPosition());
+	lCreate->Store(lPacket, pObject->GetInstanceId(), lTransformation, wstrutil::ToOwnCode(pObject->GetClassId()));
 	BroadcastPacket(0, lPacket, true);
 	GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
-
-	const Cure::ObjectPositionalData* lPosition = 0;
-	if (pObject->UpdateFullPosition(lPosition))
-	{
-		BroadcastObjectPosition(pObject->GetInstanceId(), *lPosition, 0, true);
-	}
 }
 
 void GameServerManager::BroadcastDeleteObject(Cure::GameObjectId pInstanceId)
@@ -835,8 +876,6 @@ void GameServerManager::SendCreateAllObjects(Client* pClient)
 	Cure::Packet* lPacket = GetNetworkAgent()->GetPacketFactory()->Allocate();
 	Cure::MessageCreateObject* lCreateMessage = (Cure::MessageCreateObject*)GetNetworkAgent()->
 		GetPacketFactory()->GetMessageFactory()->Allocate(Cure::MESSAGE_TYPE_CREATE_OBJECT);
-	Cure::MessageObjectPosition* lPositionMessage = (Cure::MessageObjectPosition*)GetNetworkAgent()->
-		GetPacketFactory()->GetMessageFactory()->Allocate(Cure::MESSAGE_TYPE_OBJECT_POSITION);
 
 	const Cure::ContextManager::ContextObjectTable& lObjectTable = GetContext()->GetObjectTable();
 	Cure::ContextManager::ContextObjectTable::const_iterator x = lObjectTable.begin();
@@ -850,22 +889,12 @@ void GameServerManager::SendCreateAllObjects(Client* pClient)
 
 			// Store creation info.
 			lPacket->AddMessage(lCreateMessage);
+			Lepra::TransformationF lTransformation(lObject->GetOrientation(), lObject->GetPosition());
 			lCreateMessage->Store(lPacket, lObject->GetInstanceId(),
-				wstrutil::ToOwnCode(lObject->GetClassId()));
+				 lTransformation, wstrutil::ToOwnCode(lObject->GetClassId()));
 
-			// Store positional info.
-			lPacket->AddMessage(lPositionMessage);
-			const Cure::ObjectPositionalData* lPosition = 0;
-			if (lObject->UpdateFullPosition(lPosition))
-			{
-				lPositionMessage->Store(lPacket, lObject->GetInstanceId(),
-					GetTimeManager()->GetCurrentPhysicsFrame(), *lPosition);
-				// Send.
-				GetNetworkAgent()->PlaceInSendBuffer(true, pClient->GetUserConnection()->GetSocket(), lPacket);
-			}
-			else
-			{
-			}
+			// Send.
+			GetNetworkAgent()->PlaceInSendBuffer(true, pClient->GetUserConnection()->GetSocket(), lPacket);
 		}
 	}
 

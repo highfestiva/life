@@ -93,14 +93,21 @@ bool NetworkAgent::SendStatusMessage(UdpVSocket* pSocket, int32 pInteger, Remote
 	return (lOk);
 }
 
-bool NetworkAgent::SendNumberMessage(bool pSafe, UdpVSocket* pSocket, MessageNumber::InfoType pInfo, int32 pInteger, float32 pFloat)
+bool NetworkAgent::SendNumberMessage(bool pSafe, UdpVSocket* pSocket, MessageNumber::InfoType pInfo, int32 pInteger, float32 pFloat, Packet* pPacket)
 {
-	Packet* lPacket = mPacketFactory->Allocate();
+	Packet* lPacket = pPacket;
+	if (!pPacket)
+	{
+		lPacket = mPacketFactory->Allocate();
+	}
 	MessageNumber* lNumber = (MessageNumber*)mPacketFactory->GetMessageFactory()->Allocate(MESSAGE_TYPE_NUMBER);
 	lPacket->AddMessage(lNumber);
 	lNumber->Store(lPacket, pInfo, pInteger, pFloat);
 	bool lOk = PlaceInSendBuffer(pSafe, pSocket, lPacket);
-	GetPacketFactory()->Release(lPacket);
+	if (!pPacket)
+	{
+		GetPacketFactory()->Release(lPacket);
+	}
 	return (lOk);
 }
 

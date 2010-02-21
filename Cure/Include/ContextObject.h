@@ -64,6 +64,7 @@ public:
 
 	bool UpdateFullPosition(const ObjectPositionalData*& pPositionalData);
 	void SetFullPosition(const ObjectPositionalData& pPositionalData);
+	void SetInitialTransform(const TransformationF& pTransformation);
 	Vector3DF GetPosition() const;
 	QuaternionF GetOrientation() const;
 	Vector3DF GetVelocity() const;

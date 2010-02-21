@@ -294,8 +294,8 @@ bool GameClientSlaveManager::Reset()	// Run when disconnected. Removes all objec
 		mLoginWindow->GetChild(_T("User"), 0)->SetKeyboardFocus();
 	}
 
-	mCameraPosition.Set(0, -200, 5);
-	mCameraOrientation.Set(PIF/2.0f, PIF/2.0f, 0);
+	mCameraPosition.Set(0, -500, 300);
+	mCameraOrientation.Set(PIF/2, acos(mCameraPosition.z/mCameraPosition.y), 0);
 
 	mObjectFrameIndexMap.clear();
 
@@ -401,14 +401,36 @@ void GameClientSlaveManager::TickUiUpdate()
 		lTargetCameraPosition = s;*/
 
 		// Camera moves in a "moving average" kinda curve (halfs the distance in x seconds).
-		const float lHalfDistanceTime = 0.1f;	// Time it takes to half the distance from where it is now to where it should be.
-		float lMovingAveragePart = 0.5f*GetTimeManager()->GetAffordedPhysicsTotalTime()/lHalfDistanceTime;
+		const float lPhysicsTime = GetTimeManager()->GetAffordedPhysicsTotalTime();
+		if (!lPhysicsTime)
+		{
+			return;
+		}
+
+		const float lHalfDistanceTime = 0.2f;	// Time it takes to half the distance from where it is now to where it should be.
+		float lMovingAveragePart = 0.5f*lPhysicsTime/lHalfDistanceTime;
 		if (lMovingAveragePart > 0.8f)
 		{
 			lMovingAveragePart = 0.8f;
 		}
 		//lMovingAveragePart = 1;
-		mCameraPosition = Math::Lerp<Vector3DF, float>(mCameraPosition, lTargetCameraPosition, lMovingAveragePart);
+		const Vector3DF lNewPosition = Math::Lerp<Vector3DF, float>(mCameraPosition,
+			lTargetCameraPosition, lMovingAveragePart);
+		const Vector3DF lDirection = lNewPosition-mCameraPosition;
+		const float lDistance = lDirection.GetLength();
+		const float lMaxCamSpeed = 40;
+		if (lDistance > lMaxCamSpeed*lPhysicsTime)
+		{
+			mCameraPosition += lDirection*(lMaxCamSpeed*lPhysicsTime/lDistance);
+		}
+		else
+		{
+			mCameraPosition = lNewPosition;
+		}
+		if (lNewPosition.z > mCameraPosition.z)	// Dolly cam up pretty quick to avoid looking "through the ground."
+		{
+			mCameraPosition.z = Math::Lerp(mCameraPosition.z, lNewPosition.z, lHalfDistanceTime);
+		}
 
 		// "Roll" camera towards avatar.
 		const float lNewTargetCameraXyDistance = mCameraPosition.GetDistance(lAvatarXyPosition);
@@ -420,7 +442,9 @@ void GameClientSlaveManager::TickUiUpdate()
 		{
 			lTargetCameraOrientation.x = -lTargetCameraOrientation.x;
 		}
-		float lYawChange = lTargetCameraOrientation.x-mCameraOrientation.x;
+		float lYawChange = (lTargetCameraOrientation.x-mCameraOrientation.x) * 1.5f;
+		lYawChange = (lYawChange < -PIF*3/7)? -PIF*3/7 : lYawChange;
+		lYawChange = (lYawChange > PIF*3/7)? PIF*3/7 : lYawChange;
 		lTargetCameraOrientation.z = -lYawChange;
 		Math::RangeAngles(mCameraOrientation.x, lTargetCameraOrientation.x);
 		Math::RangeAngles(mCameraOrientation.y, lTargetCameraOrientation.y);
@@ -647,8 +671,9 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 					break;
 					case Cure::MessageStatus::INFO_AVATAR:
 					{
-						wstr lAvatarId;
-						lMessageStatus->GetMessageString(lAvatarId);
+						wstr lAvatarName;
+						lMessageStatus->GetMessageString(lAvatarName);
+						Cure::UserAccount::AvatarId lAvatarId = wstrutil::ToCurrentCode(lAvatarName);
 						log_adebug("Status: INFO_AVATAR...");
 						UiTbc::Button* lButton = new UiTbc::Button(UiTbc::BorderComponent::ZIGZAG,
 							3, DARK_GREEN, lAvatarId);
@@ -673,10 +698,12 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 		{
 			Cure::MessageCreateObject* lMessageCreateObject = (Cure::MessageCreateObject*)pMessage;
 			wstr lClassId;
+			Lepra::TransformationF lTransformation;
+			lMessageCreateObject->GetTransformation(lTransformation);
 			lMessageCreateObject->GetClassId(lClassId);
 			CreateObject(lMessageCreateObject->GetObjectId(),
 				wstrutil::ToCurrentCode(lClassId),
-				Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
+				Cure::NETWORK_OBJECT_REMOTE_CONTROLLED, &lTransformation);
 		}
 		break;
 		case Cure::MESSAGE_TYPE_DELETE_OBJECT:
@@ -766,7 +793,8 @@ void GameClientSlaveManager::ProcessNumber(Cure::MessageNumber::InfoType pType, 
 	}
 }
 
-bool GameClientSlaveManager::CreateObject(Cure::GameObjectId pInstanceId, const str& pClassId, Cure::NetworkObjectType pNetworkType)
+bool GameClientSlaveManager::CreateObject(Cure::GameObjectId pInstanceId, const str& pClassId,
+	Cure::NetworkObjectType pNetworkType, TransformationF* pTransform)
 {
 	Cure::ContextObject* lPreviousObject = GetContext()->GetObject(pInstanceId, true);
 	//assert(!lPreviousObject);
@@ -774,6 +802,10 @@ bool GameClientSlaveManager::CreateObject(Cure::GameObjectId pInstanceId, const 
 	{
 		mLog.Infof(_T("Slave %i creating context object %s."), mSlaveIndex, pClassId.c_str());
 		Cure::ContextObject* lObject = Parent::CreateContextObject(pClassId, pNetworkType, pInstanceId);
+		if (pTransform)
+		{
+			lObject->SetInitialTransform(*pTransform);
+		}
 		lObject->StartLoading();
 	}
 	else
@@ -924,7 +956,12 @@ void GameClientSlaveManager::CancelLogin()
 
 void GameClientSlaveManager::OnAvatarSelect(UiTbc::Button* pButton, int)
 {
-	mLog.Infof(_T("Clicked avatar %s."), pButton->GetText().c_str());
+	Cure::UserAccount::AvatarId lAvatarId = pButton->GetText();
+	log_volatile(mLog.Debugf(_T("Clicked avatar %s."), lAvatarId.c_str()));
+	Cure::Packet* lPacket = GetNetworkAgent()->GetPacketFactory()->Allocate();
+	GetNetworkAgent()->SendStatusMessage(GetNetworkClient()->GetSocket(), 0, Cure::REMOTE_OK,
+		Cure::MessageStatus::INFO_AVATAR, wstrutil::ToOwnCode(lAvatarId), lPacket);
+	GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
 }
 
 Cure::RuntimeVariableScope* GameClientSlaveManager::GetVariableScope() const

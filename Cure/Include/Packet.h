@@ -185,8 +185,9 @@ public:
 	MessageCreateObject();
 	MessageType GetType() const;
 	int Parse(const uint8* pData, int pSize);
-	int Store(Packet* pPacket, GameObjectId pInstanceId, const wstr& pClassId);
+	int Store(Packet* pPacket, GameObjectId pInstanceId, const TransformationF& pTransformation, const wstr& pClassId);
 
+	void GetTransformation(TransformationF& pTransformation) const;
 	void GetClassId(wstr& pClassId) const;
 };
 

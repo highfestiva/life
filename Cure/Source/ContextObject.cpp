@@ -692,6 +692,11 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData)
 	}
 }
 
+void ContextObject::SetInitialTransform(const TransformationF& pTransformation)
+{
+	mPosition.mPosition.mTransformation = pTransformation;
+}
+
 Vector3DF ContextObject::GetPosition() const
 {
 	const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
@@ -788,9 +793,16 @@ bool ContextObject::SetPhysics(TBC::ChunkyPhysics* pStructure)
 	TransformationF lTransformation;
 	if (GetNetworkObjectType() != NETWORK_OBJECT_LOCAL_ONLY)
 	{
-		const float lX = (float)Random::Uniform(-63, 27);
-		const float lY = (float)Random::Uniform(-23, 67);
-		lTransformation.SetPosition(Vector3DF(lX, lY, 43.5));
+		if (mPosition.mPosition.mTransformation.GetPosition().GetLengthSquared() == 0)
+		{
+			const float lX = (float)Random::Uniform(-63, 27);
+			const float lY = (float)Random::Uniform(-23, 67);
+			lTransformation.SetPosition(Vector3DF(lX, lY, 43.5));
+		}
+		else
+		{
+			lTransformation.SetPosition(mPosition.mPosition.mTransformation.GetPosition());
+		}
 	}
 
 	bool lOk = (mPhysics == 0 && pStructure->FinalizeInit(lPhysics, lPhysicsFps, &lTransformation, 0, this));

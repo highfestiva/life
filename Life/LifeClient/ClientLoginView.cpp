@@ -33,7 +33,7 @@ ClientLoginView::ClientLoginView(ClientLoginObserver* pLoginObserver, const str&
 
 	AddLabel(_T("Username"), WHITE);
 
-	str lUserName = CURE_RTVAR_GETSET(mLoginObserver->GetVariableScope(), RTVAR_LOGIN_USERNAME, _T("Loader0"));
+	str lUserName = CURE_RTVAR_GETSET(mLoginObserver->GetVariableScope(), RTVAR_LOGIN_USERNAME, _T("User0"));
 	AddTextField(lUserName, _T("User"));
 
 	AddLabel(_T("Password"), WHITE);
