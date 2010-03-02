@@ -858,7 +858,7 @@ void Painter::DrawPixel(int x, int y)
 		CreateRect(x, y, x, y);
 }
 
-void Painter::DrawPixel(const PixelCoords& pCoords)
+void Painter::DrawPixel(const PixelCoord& pCoords)
 {
 	DrawPixel(pCoords.x, pCoords.y);
 }
@@ -871,7 +871,7 @@ void Painter::DrawLine(int pX1, int pY1, int pX2, int pY2)
 		CreateLine(pX1, pY1, pX2, pY2);
 }
 
-void Painter::DrawLine(const PixelCoords& pPoint1, const PixelCoords& pPoint2)
+void Painter::DrawLine(const PixelCoord& pPoint1, const PixelCoord& pPoint2)
 {
 	DrawLine(pPoint1.x, pPoint1.y, pPoint2.x, pPoint2.y);
 }
@@ -884,7 +884,7 @@ void Painter::DrawRect(int pLeft, int pTop, int pRight, int pBottom, int pWidth)
 		CreateRectFrame(pLeft, pTop, pRight, pBottom, pWidth);
 }
 
-void Painter::DrawRect(const PixelCoords& pTopLeft, const PixelCoords& pBottomRight, int pWidth)
+void Painter::DrawRect(const PixelCoord& pTopLeft, const PixelCoord& pBottomRight, int pWidth)
 {
 	DrawRect(pTopLeft.x, pTopLeft.y, pBottomRight.x, pBottomRight.y, pWidth);
 }
@@ -902,7 +902,7 @@ void Painter::FillRect(int pLeft, int pTop, int pRight, int pBottom)
 		CreateRect(pLeft, pTop, pRight, pBottom);
 }
 
-void Painter::FillRect(const PixelCoords& pTopLeft, const PixelCoords& pBottomRight)
+void Painter::FillRect(const PixelCoord& pTopLeft, const PixelCoord& pBottomRight)
 {
 	FillRect(pTopLeft.x, pTopLeft.y, pBottomRight.x, pBottomRight.y);
 }
@@ -920,7 +920,7 @@ void Painter::Draw3DRect(int pLeft, int pTop, int pRight, int pBottom, int pWidt
 	//	Create3DRectFrame(pLeft, pTop, pRight, pBottom, pWidth, pSunken);
 }
 
-void Painter::Draw3DRect(const PixelCoords& pTopLeft, const PixelCoords& pBottomRight, int pWidth, bool pSunken)
+void Painter::Draw3DRect(const PixelCoord& pTopLeft, const PixelCoord& pBottomRight, int pWidth, bool pSunken)
 {
 	Draw3DRect(pTopLeft.x, pTopLeft.y, pBottomRight.x, pBottomRight.y, pWidth, pSunken);
 }
@@ -938,7 +938,7 @@ void Painter::FillShadedRect(int pLeft, int pTop, int pRight, int pBottom)
 		CreateShadedRect(pLeft, pTop, pRight, pBottom);
 }
 
-void Painter::FillShadedRect(const PixelCoords& pTopLeft, const PixelCoords& pBottomRight)
+void Painter::FillShadedRect(const PixelCoord& pTopLeft, const PixelCoord& pBottomRight)
 {
 	FillShadedRect(pTopLeft.x, pTopLeft.y, pBottomRight.x, pBottomRight.y);
 }
@@ -958,9 +958,9 @@ void Painter::FillTriangle(float pX1, float pY1,
 		CreateTriangle(pX1, pY1, pX2, pY2, pX3, pY3);
 }
 
-void Painter::FillTriangle(const PixelCoords& pPoint1,
-			   const PixelCoords& pPoint2,
-			   const PixelCoords& pPoint3)
+void Painter::FillTriangle(const PixelCoord& pPoint1,
+			   const PixelCoord& pPoint2,
+			   const PixelCoord& pPoint3)
 {
 	FillTriangle((float)pPoint1.x, (float)pPoint1.y,
 	             (float)pPoint2.x, (float)pPoint2.y,
@@ -977,9 +977,9 @@ void Painter::FillShadedTriangle(float pX1, float pY1,
 		CreateShadedTriangle(pX1, pY1, pX2, pY2, pX3, pY3);
 }
 
-void Painter::FillShadedTriangle(const PixelCoords& pPoint1,
-			         const PixelCoords& pPoint2,
-			         const PixelCoords& pPoint3)
+void Painter::FillShadedTriangle(const PixelCoord& pPoint1,
+			         const PixelCoord& pPoint2,
+			         const PixelCoord& pPoint3)
 {
 	FillShadedTriangle((float)pPoint1.x, (float)pPoint1.y, 
 	                   (float)pPoint2.x, (float)pPoint2.y, 
@@ -997,9 +997,9 @@ void Painter::FillTriangle(float pX1, float pY1, float pU1, float pV1,
 		CreateTriangle(pX1, pY1, pU1, pV1, pX2, pY2, pU2, pV2, pX3, pY3, pU3, pV3, pImageID);
 }
 
-void Painter::FillTriangle(const PixelCoords& pPoint1, float pU1, float pV1,
-			   const PixelCoords& pPoint2, float pU2, float pV2,
-			   const PixelCoords& pPoint3, float pU3, float pV3,
+void Painter::FillTriangle(const PixelCoord& pPoint1, float pU1, float pV1,
+			   const PixelCoord& pPoint2, float pU2, float pV2,
+			   const PixelCoord& pPoint3, float pU3, float pV3,
 			   ImageID pImageID)
 {
 	FillTriangle((float)pPoint1.x, (float)pPoint1.y, pU1, pV1, 
@@ -1015,7 +1015,7 @@ void Painter::DrawImage(ImageID pImageID, int x, int y)
 		CreateImage(pImageID, x, y);
 }
 
-void Painter::DrawImage(ImageID pImageID, const PixelCoords& pTopLeft)
+void Painter::DrawImage(ImageID pImageID, const PixelCoord& pTopLeft)
 {
 	DrawImage(pImageID, pTopLeft.x, pTopLeft.y);
 }
@@ -1028,7 +1028,7 @@ void Painter::DrawImage(ImageID pImageID, int x, int y, const PixelRect& pSubpat
 		CreateImage(pImageID, x, y, pSubpatchRect);
 }
 
-void Painter::DrawImage(ImageID pImageID, const PixelCoords& pTopLeft, const PixelRect& pSubpatchRect)
+void Painter::DrawImage(ImageID pImageID, const PixelCoord& pTopLeft, const PixelRect& pSubpatchRect)
 {
 	DrawImage(pImageID, pTopLeft.x, pTopLeft.y, pSubpatchRect);
 }
@@ -1057,7 +1057,7 @@ void Painter::DrawAlphaImage(ImageID pImageID, int x, int y)
 		CreateImage(pImageID, x, y);
 }
 
-void Painter::DrawAlphaImage(ImageID pImageID, const PixelCoords& pTopLeft)
+void Painter::DrawAlphaImage(ImageID pImageID, const PixelCoord& pTopLeft)
 {
 	DrawAlphaImage(pImageID, pTopLeft.x, pTopLeft.y);
 }

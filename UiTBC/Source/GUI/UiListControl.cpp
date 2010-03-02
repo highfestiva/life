@@ -80,10 +80,10 @@ void ListControl::Init(ListLayout::ListType pListType)
 	mHScrollBar->SetOwner(mListRect);
 	mVScrollBar->SetOwner(mListRect);
 
-	PixelCoords lVSBMinSize(mVScrollBar->GetMinSize());
-	PixelCoords lHSBMinSize(mHScrollBar->GetMinSize());
-	PixelCoords lCMinSize(mCornerRect->GetMinSize());
-	PixelCoords lMinSize(lCMinSize.x + lHSBMinSize.x + GetTotalBorderWidth(),
+	PixelCoord lVSBMinSize(mVScrollBar->GetMinSize());
+	PixelCoord lHSBMinSize(mHScrollBar->GetMinSize());
+	PixelCoord lCMinSize(mCornerRect->GetMinSize());
+	PixelCoord lMinSize(lCMinSize.x + lHSBMinSize.x + GetTotalBorderWidth(),
 				     lCMinSize.y + lVSBMinSize.y + GetTotalBorderWidth());
 	SetMinSize(lMinSize);
 
@@ -129,10 +129,10 @@ void ListControl::SetScrollBars(ScrollBar* pHScrollBar,
 		mCornerRect->SetMinSize(mCornerRect->GetPreferredSize());
 	}
 
-	PixelCoords lVSBMinSize(mVScrollBar->GetMinSize());
-	PixelCoords lHSBMinSize(mHScrollBar->GetMinSize());
-	PixelCoords lCMinSize(mCornerRect->GetMinSize());
-	PixelCoords lMinSize(lCMinSize.x + lVSBMinSize.x, 
+	PixelCoord lVSBMinSize(mVScrollBar->GetMinSize());
+	PixelCoord lHSBMinSize(mHScrollBar->GetMinSize());
+	PixelCoord lCMinSize(mCornerRect->GetMinSize());
+	PixelCoord lMinSize(lCMinSize.x + lVSBMinSize.x, 
 				     lCMinSize.y + lHSBMinSize.y);
 	SetMinSize(lMinSize);
 
@@ -440,7 +440,7 @@ void ListControl::UpdateScrollPos()
 void ListControl::GetScrollOffsets(int& pHorizontalOffset, int& pVerticalOffset) const
 {
 	ListLayout* lLayout = (ListLayout*)mListRect->GetLayout();
-	PixelCoords lSizeDiff = mListRect->GetSize() - lLayout->GetContentSize();
+	PixelCoord lSizeDiff = mListRect->GetSize() - lLayout->GetContentSize();
 
 	pHorizontalOffset = (int)(mHScrollBar->GetScrollPos() * lSizeDiff.x);
 	pVerticalOffset = (int)(mVScrollBar->GetScrollPos() * lSizeDiff.y);
@@ -459,7 +459,7 @@ void ListControl::GetScrollOffsets(int& pHorizontalOffset, int& pVerticalOffset)
 void ListControl::SetScrollOffsets(int pHorizontalOffset, int pVerticalOffset)
 {
 	ListLayout* lLayout = (ListLayout*)mListRect->GetLayout();
-	PixelCoords lSizeDiff = mListRect->GetSize() - lLayout->GetContentSize();
+	PixelCoord lSizeDiff = mListRect->GetSize() - lLayout->GetContentSize();
 
 	mHScrollBar->SetScrollPos((float64)pHorizontalOffset / (float64)lSizeDiff.x);
 	mVScrollBar->SetScrollPos((float64)pVerticalOffset / (float64)lSizeDiff.y);
@@ -475,8 +475,8 @@ void ListControl::ScrollToChild(Component* pChild)
 
 		PixelRect lRect(pChild->GetScreenRect());
 		PixelRect lClientRect(mListRect->GetScreenRect());
-		PixelCoords lSizeDiff = lLayout->GetContentSize() - 
-			PixelCoords(lClientRect.GetWidth(), lClientRect.GetHeight());
+		PixelCoord lSizeDiff = lLayout->GetContentSize() - 
+			PixelCoord(lClientRect.GetWidth(), lClientRect.GetHeight());
 
 		if (lLayout->GetListType() == ListLayout::COLUMN)
 		{
@@ -530,8 +530,8 @@ void ListControl::UpdateLayout()
 	{
 		lChanged = false;
 
-		PixelCoords lContentSize(mListRect->GetLayout()->GetContentSize());
-		PixelCoords lSize(mListRect->GetSize());
+		PixelCoord lContentSize(mListRect->GetLayout()->GetContentSize());
+		PixelCoord lSize(mListRect->GetSize());
 		
 		mHScrollBar->SetScrollRatio((float64)lSize.x / lAverage, (float64)lContentSize.x / lAverage);
 		mVScrollBar->SetScrollRatio((float64)lSize.y / lAverage, (float64)lContentSize.y / lAverage);

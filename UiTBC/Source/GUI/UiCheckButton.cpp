@@ -75,7 +75,7 @@ void CheckButton::Repaint(Painter* pPainter)
 
 	if (mUpdateSize == true)
 	{
-		PixelCoords lSize(0, 0);
+		PixelCoord lSize(0, 0);
 
 		if (mUserDefinedGfx == true)
 		{
@@ -156,7 +156,7 @@ void CheckButton::Repaint(Painter* pPainter)
 
 		if (lImageID != Painter::INVALID_IMAGEID)
 		{
-			PixelCoords lImageSize(lIMan->GetImageSize(lImageID));
+			PixelCoord lImageSize(lIMan->GetImageSize(lImageID));
 			lIMan->DrawImage(lImageID, 
 					   lRect.mLeft, 
 					   lRect.mTop + (lRect.GetHeight() - lImageSize.y) / 2);
@@ -233,9 +233,9 @@ bool CheckButton::OnLButtonUp(int pMouseX, int pMouseY)
 		default:
 			break;
 		}
-		if (Button::GetOnUnclickedFunctor() != 0)
+		if (mOnClick != 0)
 		{
-			Button::GetOnUnclickedFunctor()->Call(this);
+			(*mOnClick)(this);
 		}
 	}
 	else

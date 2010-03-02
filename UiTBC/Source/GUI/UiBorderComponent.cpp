@@ -37,7 +37,7 @@ BorderComponent::BorderComponent(BorderPart pPart, Painter::ImageID pImageID, co
 	mShading(LINEAR)
 {
 	GUIImageManager* lIMan = GetImageManager();
-	PixelCoords lImageSize(lIMan->GetImageSize(pImageID));
+	PixelCoord lImageSize(lIMan->GetImageSize(pImageID));
 
 	switch(mPart)
 	{
@@ -117,10 +117,10 @@ void BorderComponent::Repaint(Painter* pPainter)
 		{
 			case TOPLEFT_CORNER:
 			{
-				PixelCoords lTopLeft(lRect.mLeft, lRect.mTop);
-				PixelCoords lTopRight(lRect.mRight, lRect.mTop);
-				PixelCoords lBottomLeft(lRect.mLeft, lRect.mBottom);
-				PixelCoords lBottomRight(lRect.mRight, lRect.mBottom);
+				PixelCoord lTopLeft(lRect.mLeft, lRect.mTop);
+				PixelCoord lTopRight(lRect.mRight, lRect.mTop);
+				PixelCoord lBottomLeft(lRect.mLeft, lRect.mBottom);
+				PixelCoord lBottomRight(lRect.mRight, lRect.mBottom);
 
 				if (mShading == LINEAR)
 				{
@@ -132,9 +132,9 @@ void BorderComponent::Repaint(Painter* pPainter)
 				}
 				else
 				{
-					PixelCoords lMiddle(lRect.GetCenterX(), lRect.GetCenterY());
-					PixelCoords lMiddleBottom(lRect.GetCenterX(), lRect.mBottom);
-					PixelCoords lMiddleRight(lRect.mRight, lRect.GetCenterY());
+					PixelCoord lMiddle(lRect.GetCenterX(), lRect.GetCenterY());
+					PixelCoord lMiddleBottom(lRect.GetCenterX(), lRect.mBottom);
+					PixelCoord lMiddleRight(lRect.mRight, lRect.GetCenterY());
 
 					pPainter->SetColor(mBodyColor, 0);
 					pPainter->SetColor(mBodyColor, 1);
@@ -154,10 +154,10 @@ void BorderComponent::Repaint(Painter* pPainter)
 			break;
 			case TOPRIGHT_CORNER:
 			{
-				PixelCoords lTopLeft(lRect.mLeft, lRect.mTop);
-				PixelCoords lTopRight(lRect.mRight, lRect.mTop);
-				PixelCoords lBottomLeft(lRect.mLeft, lRect.mBottom);
-				PixelCoords lBottomRight(lRect.mRight, lRect.mBottom);
+				PixelCoord lTopLeft(lRect.mLeft, lRect.mTop);
+				PixelCoord lTopRight(lRect.mRight, lRect.mTop);
+				PixelCoord lBottomLeft(lRect.mLeft, lRect.mBottom);
+				PixelCoord lBottomRight(lRect.mRight, lRect.mBottom);
 
 				if (mShading == LINEAR)
 				{
@@ -172,9 +172,9 @@ void BorderComponent::Repaint(Painter* pPainter)
 				}
 				else
 				{
-					PixelCoords lMiddle(lRect.GetCenterX(), lRect.GetCenterY());
-					PixelCoords lMiddleBottom(lRect.GetCenterX(), lRect.mBottom);
-					PixelCoords lMiddleLeft(lRect.mLeft, lRect.GetCenterY());
+					PixelCoord lMiddle(lRect.GetCenterX(), lRect.GetCenterY());
+					PixelCoord lMiddleBottom(lRect.GetCenterX(), lRect.mBottom);
+					PixelCoord lMiddleLeft(lRect.mLeft, lRect.GetCenterY());
 
 					pPainter->SetColor(mBodyColor, 0);
 					pPainter->SetColor(mBodyColor, 1);
@@ -199,10 +199,10 @@ void BorderComponent::Repaint(Painter* pPainter)
 			break;
 			case BOTTOMRIGHT_CORNER:
 			{
-				PixelCoords lTopLeft(lRect.mLeft, lRect.mTop);
-				PixelCoords lTopRight(lRect.mRight, lRect.mTop);
-				PixelCoords lBottomLeft(lRect.mLeft, lRect.mBottom);
-				PixelCoords lBottomRight(lRect.mRight, lRect.mBottom);
+				PixelCoord lTopLeft(lRect.mLeft, lRect.mTop);
+				PixelCoord lTopRight(lRect.mRight, lRect.mTop);
+				PixelCoord lBottomLeft(lRect.mLeft, lRect.mBottom);
+				PixelCoord lBottomRight(lRect.mRight, lRect.mBottom);
 
 				if (mShading == LINEAR)
 				{
@@ -214,9 +214,9 @@ void BorderComponent::Repaint(Painter* pPainter)
 				}
 				else
 				{
-					PixelCoords lMiddle(lRect.GetCenterX(), lRect.GetCenterY());
-					PixelCoords lMiddleTop(lRect.GetCenterX(), lRect.mTop);
-					PixelCoords lMiddleLeft(lRect.mLeft, lRect.GetCenterY());
+					PixelCoord lMiddle(lRect.GetCenterX(), lRect.GetCenterY());
+					PixelCoord lMiddleTop(lRect.GetCenterX(), lRect.mTop);
+					PixelCoord lMiddleLeft(lRect.mLeft, lRect.GetCenterY());
 
 					pPainter->SetColor(mBodyColor, 0);
 					pPainter->SetColor(mBodyColor, 1);
@@ -236,10 +236,10 @@ void BorderComponent::Repaint(Painter* pPainter)
 			break;
 			case BOTTOMLEFT_CORNER:
 			{
-				PixelCoords lTopLeft(lRect.mLeft, lRect.mTop);
-				PixelCoords lTopRight(lRect.mRight, lRect.mTop);
-				PixelCoords lBottomLeft(lRect.mLeft, lRect.mBottom);
-				PixelCoords lBottomRight(lRect.mRight, lRect.mBottom);
+				PixelCoord lTopLeft(lRect.mLeft, lRect.mTop);
+				PixelCoord lTopRight(lRect.mRight, lRect.mTop);
+				PixelCoord lBottomLeft(lRect.mLeft, lRect.mBottom);
+				PixelCoord lBottomRight(lRect.mRight, lRect.mBottom);
 
 				if (mShading == LINEAR)
 				{
@@ -254,9 +254,9 @@ void BorderComponent::Repaint(Painter* pPainter)
 				}
 				else
 				{
-					PixelCoords lMiddle(lRect.GetCenterX(), lRect.GetCenterY());
-					PixelCoords lMiddleTop(lRect.GetCenterX(), lRect.mTop);
-					PixelCoords lMiddleRight(lRect.mRight, lRect.GetCenterY());
+					PixelCoord lMiddle(lRect.GetCenterX(), lRect.GetCenterY());
+					PixelCoord lMiddleTop(lRect.GetCenterX(), lRect.mTop);
+					PixelCoord lMiddleRight(lRect.mRight, lRect.GetCenterY());
 
 					pPainter->SetColor(mBodyColor, 0);
 					pPainter->SetColor(mBodyColor, 1);
@@ -444,44 +444,44 @@ bool BorderComponent::OnMouseMove(int /*pMouseX*/, int /*pMouseY*/, int pMouseDX
 	if (mResizing == true)
 	{
 		Component* lWin = GetParentOfType(WINDOW);
-		PixelCoords lSize(lWin->GetSize());
-		PixelCoords lMinSize(lWin->GetMinSize());
-		PixelCoords lNewSize(lSize);
-		PixelCoords lMove(0, 0);
+		PixelCoord lSize(lWin->GetSize());
+		PixelCoord lMinSize(lWin->GetMinSize());
+		PixelCoord lNewSize(lSize);
+		PixelCoord lMove(0, 0);
 
 		if (lWin != 0)
 		{
 			switch(mPart)
 			{
 			case TOPLEFT_CORNER:
-				lNewSize += PixelCoords(-pMouseDX, -pMouseDY);
+				lNewSize += PixelCoord(-pMouseDX, -pMouseDY);
 				lMove.x = pMouseDX;
 				lMove.y = pMouseDY;
 				break;
 			case BOTTOMRIGHT_CORNER:
-				lNewSize += PixelCoords(pMouseDX, pMouseDY);
+				lNewSize += PixelCoord(pMouseDX, pMouseDY);
 				break;
 			case BOTTOMLEFT_CORNER:
-				lNewSize += PixelCoords(-pMouseDX, pMouseDY);
+				lNewSize += PixelCoord(-pMouseDX, pMouseDY);
 				lMove.x = pMouseDX;
 				break;
 			case TOPRIGHT_CORNER:
-				lNewSize += PixelCoords(pMouseDX, -pMouseDY);
+				lNewSize += PixelCoord(pMouseDX, -pMouseDY);
 				lMove.y = pMouseDY;
 				break;
 			case TOP_BORDER:
-				lNewSize += PixelCoords(0, -pMouseDY);
+				lNewSize += PixelCoord(0, -pMouseDY);
 				lMove.y = pMouseDY;
 				break;
 			case BOTTOM_BORDER:
-				lNewSize += PixelCoords(0, pMouseDY);
+				lNewSize += PixelCoord(0, pMouseDY);
 				break;
 			case LEFT_BORDER:
-				lNewSize += PixelCoords(-pMouseDX, 0);
+				lNewSize += PixelCoord(-pMouseDX, 0);
 				lMove.x = pMouseDX;
 				break;
 			case RIGHT_BORDER:
-				lNewSize += PixelCoords(pMouseDX, 0);
+				lNewSize += PixelCoord(pMouseDX, 0);
 				break;
 			default:
 				break;

@@ -23,10 +23,10 @@ PlayerCountView::PlayerCountView(PlayerCountObserver* pPlayerCountObserver):
 {
 	SetPreferredSize(200, 300);
 
-	AddButton(_T("Single player"))->SetOnUnclickedFuncIndex(PlayerCountView, OnClick, 1);
-	AddButton(_T("Two players"))->SetOnUnclickedFuncIndex(PlayerCountView, OnClick, 2);
-	AddButton(_T("Three players"))->SetOnUnclickedFuncIndex(PlayerCountView, OnClick, 3);
-	AddButton(_T("Four players"))->SetOnUnclickedFuncIndex(PlayerCountView, OnClick, 4);
+	AddButton(_T("Single player"))->SetOnClick(PlayerCountView, OnClick);
+	AddButton(_T("Two players"))->SetOnClick(PlayerCountView, OnClick);
+	AddButton(_T("Three players"))->SetOnClick(PlayerCountView, OnClick);
+	AddButton(_T("Four players"))->SetOnClick(PlayerCountView, OnClick);
 
 	UpdateLayout();
 }
@@ -38,9 +38,9 @@ void PlayerCountView::OnExit()
 	mPlayerCountObserver->OnExit();
 }
 
-void PlayerCountView::OnClick(UiTbc::Button*, int pIndex)
+void PlayerCountView::OnClick(UiTbc::Button*)
 {
-	mPlayerCountObserver->OnSetPlayerCount(pIndex);
+	mPlayerCountObserver->OnSetPlayerCount(1);	// TODO: fix!
 }
 
 

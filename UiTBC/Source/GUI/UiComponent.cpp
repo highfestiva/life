@@ -137,14 +137,14 @@ void Component::ReplaceLayer(int pLayer, Layout* pLayout)
 	}
 }
 
-PixelCoords Component::GetPreferredSize(bool pForceAdaptive)
+PixelCoord Component::GetPreferredSize(bool pForceAdaptive)
 {
-	PixelCoords lSize(mPreferredSize);
+	PixelCoord lSize(mPreferredSize);
 	
 	if ((pForceAdaptive == true || mAdaptivePreferredSize == true) && mLayout[0] != 0 && 
 	   (lSize.x == 0 || lSize.y == 0))
 	{
-		PixelCoords lTemp(mLayout[0]->GetPreferredSize(pForceAdaptive));
+		PixelCoord lTemp(mLayout[0]->GetPreferredSize(pForceAdaptive));
 
 		if (lSize.x == 0)
 		{
@@ -159,13 +159,13 @@ PixelCoords Component::GetPreferredSize(bool pForceAdaptive)
 	return lSize;
 }
 
-PixelCoords Component::GetMinSize()
+PixelCoord Component::GetMinSize()
 {
-	PixelCoords lSize(mMinSize);
+	PixelCoord lSize(mMinSize);
 	
 	if (mLayout[0] != 0 && (lSize.x == 0 || lSize.y == 0))
 	{
-		PixelCoords lTemp(mLayout[0]->GetMinSize());
+		PixelCoord lTemp(mLayout[0]->GetMinSize());
 
 		if (lSize.x == 0)
 		{
@@ -625,12 +625,12 @@ bool Component::IsChildOf(Component* pParent)
 
 bool Component::IsOver(int pScreenX, int pScreenY)
 {
-	PixelCoords lPos(GetScreenPos());
+	PixelCoord lPos(GetScreenPos());
 	PixelRect lRect(lPos, lPos + GetSize());
 	return lRect.IsInside(pScreenX, pScreenY);
 }
 
-Component::StateComponentList Component::GetStateList(ComponentState pState) const
+Component::StateComponentList Component::GetStateList(ComponentState pState)
 {
 	StateComponentList lList;
 	for (int i = 0; i < mLayerCount; i++)
@@ -714,7 +714,7 @@ void Component::DoSetMinSize(int pWidth, int pHeight)
 	mMinSize.y = pHeight < 0 ? 0 : pHeight;
 }
 
-void Component::SetPreferredSize(const PixelCoords& pSize, bool pAdaptive)
+void Component::SetPreferredSize(const PixelCoord& pSize, bool pAdaptive)
 {
 	if (mPreferredSize != pSize)
 	{
@@ -744,7 +744,7 @@ void Component::SetPreferredSize(const PixelCoords& pSize, bool pAdaptive)
 
 void Component::SetPreferredSize(int pWidth, int pHeight, bool pAdaptive)
 {
-	PixelCoords lSize(pWidth, pHeight);
+	PixelCoord lSize(pWidth, pHeight);
 	SetPreferredSize(lSize, pAdaptive);
 }
 
@@ -878,14 +878,14 @@ void Component::SetParent(Component* pParent)
 	// OnNewTopParentConnected();
 }
 
-const PixelCoords& Component::GetPos()
+const PixelCoord& Component::GetPos()
 {
 	return mPos;
 }
 
-PixelCoords Component::GetScreenPos()
+PixelCoord Component::GetScreenPos()
 {
-	PixelCoords lPos(mPos);
+	PixelCoord lPos(mPos);
 
 	if (mParent != 0)
 	{
@@ -895,29 +895,29 @@ PixelCoords Component::GetScreenPos()
 	return lPos;
 }
 
-void Component::SetPos(const PixelCoords& pPos)
+void Component::SetPos(const PixelCoord& pPos)
 {
 	SetPos(pPos.x, pPos.y);
 }
 
-void Component::SetSize(const PixelCoords& pSize)
+void Component::SetSize(const PixelCoord& pSize)
 {
 	SetSize(pSize.x, pSize.y);
 }
 
-void Component::SetMinSize(const PixelCoords& pSize)
+void Component::SetMinSize(const PixelCoord& pSize)
 {
 	SetMinSize(pSize.x, pSize.y);
 }
 
-const PixelCoords& Component::GetSize()
+const PixelCoord& Component::GetSize()
 {
 	return mSize;
 }
 
 PixelRect Component::GetScreenRect()
 {
-	PixelCoords lPos(GetScreenPos());
+	PixelCoord lPos(GetScreenPos());
 	return PixelRect(lPos, lPos + GetSize());
 }
 
@@ -972,32 +972,32 @@ bool Component::IsVisible()
 	return (lParentVisible);
 }
 
-PixelCoords Component::ClientToWindow(const PixelCoords& pCoords)
+PixelCoord Component::ClientToWindow(const PixelCoord& pCoords)
 {
 	return pCoords + mPos;
 }
 
-PixelCoords Component::WindowToClient(const PixelCoords& pCoords)
+PixelCoord Component::WindowToClient(const PixelCoord& pCoords)
 {
 	return pCoords - mPos;
 }
 
-PixelCoords Component::WindowToScreen(const PixelCoords& pCoords)
+PixelCoord Component::WindowToScreen(const PixelCoord& pCoords)
 {
 	return pCoords + GetScreenPos();
 }
 
-PixelCoords Component::ScreenToWindow(const PixelCoords& pCoords)
+PixelCoord Component::ScreenToWindow(const PixelCoord& pCoords)
 {
 	return pCoords - GetScreenPos();
 }
 
-PixelCoords Component::ClientToScreen(const PixelCoords& pCoords)
+PixelCoord Component::ClientToScreen(const PixelCoord& pCoords)
 {
 	return WindowToScreen(ClientToWindow(pCoords));
 }
 
-PixelCoords Component::ScreenToClient(const PixelCoords& pCoords)
+PixelCoord Component::ScreenToClient(const PixelCoord& pCoords)
 {
 	return WindowToClient(ScreenToWindow(pCoords));
 }
@@ -1019,7 +1019,7 @@ PixelRect Component::WindowToClient(const PixelRect& pRect)
 PixelRect Component::WindowToScreen(const PixelRect& pRect)
 {
 	PixelRect lRect(pRect);
-	PixelCoords lPos(GetScreenPos());
+	PixelCoord lPos(GetScreenPos());
 	lRect.Offset(lPos.x, lPos.y);
 	return lRect;
 }
@@ -1027,7 +1027,7 @@ PixelRect Component::WindowToScreen(const PixelRect& pRect)
 PixelRect Component::ScreenToWindow(const PixelRect& pRect)
 {
 	PixelRect lRect(pRect);
-	PixelCoords lPos(GetScreenPos());
+	PixelCoord lPos(GetScreenPos());
 	lRect.Offset(-lPos.x, -lPos.y);
 	return lRect;
 }

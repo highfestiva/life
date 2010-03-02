@@ -15,36 +15,34 @@ namespace UiTbc
 
 Button::Button(const str& pName) :
 	Window(pName),
+	mOnPress(0),
+	mOnRelease(0),
+	mOnClick(0),
+	mOnDrag(0),
 	mIconID(Painter::INVALID_IMAGEID),
 	mIconAlignment(ICON_CENTER),
 	mText(_T("")),
 	mTextColor(OFF_BLACK),
 	mTextBackgColor(255, 255, 255),
 	mPressed(false),
-	mState(RELEASED),
-	mOnPressedFunctor(0),
-	mOnReleasedFunctor(0),
-	mOnClickedFunctor(0),
-	mOnUnclickedFunctor(0),
-	mOnButtonDraggedFunctor(0)
+	mState(RELEASED)
 {
 	InitializeHoover();
 }
 
 Button::Button(const Color& pColor, const str& pName):
 	Window(pColor, pName),
+	mOnPress(0),
+	mOnRelease(0),
+	mOnClick(0),
+	mOnDrag(0),
 	mIconID(Painter::INVALID_IMAGEID),
 	mIconAlignment(ICON_CENTER),
 	mText(_T("")),
 	mTextColor(OFF_BLACK),
 	mTextBackgColor(255, 255, 255),
 	mPressed(false),
-	mState(RELEASED),
-	mOnPressedFunctor(0),
-	mOnReleasedFunctor(0),
-	mOnClickedFunctor(0),
-	mOnUnclickedFunctor(0),
-	mOnButtonDraggedFunctor(0)
+	mState(RELEASED)
 {
 	InitializeHoover();
 }
@@ -52,18 +50,17 @@ Button::Button(const Color& pColor, const str& pName):
 Button::Button(BorderComponent::BorderShadeFunc pShadeFunc, int pBorderWidth, const Color& pColor,
 	const str& pName):
 	Window((pShadeFunc == BorderComponent::LINEAR ? Parent::BORDER_LINEARSHADING : 0), pBorderWidth, pColor, pName),
+	mOnPress(0),
+	mOnRelease(0),
+	mOnClick(0),
+	mOnDrag(0),
 	mIconID(Painter::INVALID_IMAGEID),
 	mIconAlignment(ICON_CENTER),
 	mText(_T("")),
 	mTextColor(OFF_BLACK),
 	mTextBackgColor(255, 255, 255),
 	mPressed(false),
-	mState(RELEASED),
-	mOnPressedFunctor(0),
-	mOnReleasedFunctor(0),
-	mOnClickedFunctor(0),
-	mOnUnclickedFunctor(0),
-	mOnButtonDraggedFunctor(0)
+	mState(RELEASED)
 {
 	InitializeHoover();
 }
@@ -71,8 +68,12 @@ Button::Button(BorderComponent::BorderShadeFunc pShadeFunc, int pBorderWidth, co
 Button::Button(Painter::ImageID pReleasedImageID, Painter::ImageID pPressedImageID,
 	Painter::ImageID pReleasedActiveImageID,	// Mouse over.
 	Painter::ImageID pPressedActiveImageID, Painter::ImageID pReleasingImageID,
-	Painter::ImageID pPressingImageID, const str& pName) :
+	Painter::ImageID pPressingImageID, const str& pName):
 	Window(pReleasedImageID, pName),
+	mOnPress(0),
+	mOnRelease(0),
+	mOnClick(0),
+	mOnDrag(0),
 	mReleasedImageID(pReleasedImageID),
 	mPressedImageID(pPressedImageID),
 	mReleasedActiveImageID(pReleasedActiveImageID),
@@ -85,48 +86,24 @@ Button::Button(Painter::ImageID pReleasedImageID, Painter::ImageID pPressedImage
 	mTextColor(OFF_BLACK),
 	mTextBackgColor(255, 255, 255),
 	mPressed(false),
-	mState(RELEASED),
-	mOnPressedFunctor(0),
-	mOnReleasedFunctor(0),
-	mOnClickedFunctor(0),
-	mOnUnclickedFunctor(0),
-	mOnButtonDraggedFunctor(0)
+	mState(RELEASED)
 {
 	InitializeHoover();
 }
 
 Button::~Button()
 {
-	if (mOnPressedFunctor != 0)
-	{
-		delete mOnPressedFunctor;
-	}
-
-	if (mOnReleasedFunctor != 0)
-	{
-		delete mOnReleasedFunctor;
-	}
-
-	if (mOnClickedFunctor != 0)
-	{
-		delete mOnClickedFunctor;
-	}
-
-	if (mOnUnclickedFunctor != 0)
-	{
-		delete mOnUnclickedFunctor;
-	}
-
-	if (mOnButtonDraggedFunctor != 0)
-	{
-		delete mOnButtonDraggedFunctor;
-	}
+	delete mOnPress;
+	delete mOnRelease;
+	delete mOnClick;
+	delete mOnDrag;
 }
 
 void Button::InitializeHoover()
 {
 	mHooverColor = GetColor() * 1.2f;
 	mPressColor = GetColor() * 0.95f;
+	GetClientRectComponent()->SetIsHollow(false);
 }
 
 void Button::SetPressed(bool pPressed)
@@ -196,9 +173,9 @@ void Button::SetState(State pState)
 		{
 		case RELEASED:
 		case RELEASED_HOOVER:
-			if (mOnReleasedFunctor != 0)
+			if (mOnRelease != 0)
 			{
-				mOnReleasedFunctor->Call(this);
+				(*mOnRelease)(this);
 			}
 			break;
 		case RELEASING:
@@ -207,21 +184,21 @@ void Button::SetState(State pState)
 		case PRESSED_HOOVER:
 			break;
 		case PRESSING:
-			if (mOnPressedFunctor != 0)
+			if (mOnPress != 0)
 			{
-				mOnPressedFunctor->Call(this);
+				(*mOnPress)(this);
 			}
 			break;
 		}
 	}
 }
 
-Component::StateComponentList Button::GetStateList(ComponentState pState) const
+Button::StateComponentList Button::GetStateList(ComponentState pState)
 {
 	StateComponentList lList;
 	if (pState == STATE_CLICKABLE)
 	{
-		lList.push_back(StateComponent(0, (Component*)this));
+		lList.push_back(StateComponent(0, this));
 	}
 	return (lList);
 }
@@ -233,7 +210,7 @@ void Button::Repaint(Painter* pPainter)
 	GUIImageManager* lIMan = GetImageManager();
 
 	pPainter->PushAttrib(Painter::ATTR_ALL);
-	PixelRect lRect(Parent::GetClientRect());
+	PixelRect lRect(GetClientRect());
 	pPainter->ReduceClippingRect(lRect);
 
 	int lOffset = GetPressed() ? 1 : 0;
@@ -241,7 +218,7 @@ void Button::Repaint(Painter* pPainter)
 
 	if (mIconID != Painter::INVALID_IMAGEID)
 	{
-		PixelCoords lImageSize(lIMan->GetImageSize(mIconID));
+		PixelCoord lImageSize(lIMan->GetImageSize(mIconID));
 
 		switch(mIconAlignment)
 		{
@@ -319,9 +296,9 @@ bool Button::OnLButtonUp(int pMouseX, int pMouseY)
 	ReleaseMouseFocus();
 
 	if (IsOver(pMouseX, pMouseY) == true &&
-		lCallFunctor == true && mOnUnclickedFunctor != 0)
+		lCallFunctor == true && mOnClick != 0)
 	{
-		mOnUnclickedFunctor->Call(this);
+		(*mOnClick)(this);
 	}
 
 	return true;
@@ -357,9 +334,9 @@ bool Button::OnMouseMove(int pMouseX, int pMouseY, int pDeltaX, int pDeltaY)
 			break;
 		}
 
-		if (mOnButtonDraggedFunctor != 0)
+		if (mOnDrag != 0)
 		{
-			mOnButtonDraggedFunctor->Call(this, pDeltaX, pDeltaY);
+			(*mOnDrag)(this, pDeltaX, pDeltaY);
 		}
 	}
 	else
@@ -384,20 +361,16 @@ bool Button::OnMouseMove(int pMouseX, int pMouseY, int pDeltaX, int pDeltaY)
 			break;
 		}
 	}
-	return Component::OnMouseMove(pMouseX, pMouseY, pDeltaX, pDeltaY);
+	return Parent::OnMouseMove(pMouseX, pMouseY, pDeltaX, pDeltaY);
 }
 
 bool Button::Click(bool pDepress)
 {
 	bool lClicked = false;
-	if (mOnClickedFunctor)
+	if (pDepress && mOnClick)
 	{
-		mOnClickedFunctor->Call(this);
+		(*mOnClick)(this);
 		lClicked = true;
-	}
-	if (pDepress && mOnUnclickedFunctor)
-	{
-		mOnUnclickedFunctor->Call(this);
 	}
 	return (lClicked);
 }
@@ -437,88 +410,37 @@ const str& Button::GetText()
 	return mText;
 }
 
-Component::Type Button::GetType()
+Button::Type Button::GetType()
 {
-	return Component::BUTTON;
+	return BUTTON;
 }
 
 void Button::OnTextChanged()
 {
 }
 
-void Button::SetOnPressedFunctor(const ButtonFunctor& pOnPressedFunctor)
+void Button::SetOnPressDelegate(const Delegate& pOnPress)
 {
-	if (mOnPressedFunctor != 0)
-	{
-		delete mOnPressedFunctor;
-	}
-
-	mOnPressedFunctor = pOnPressedFunctor.CreateCopy();
+	delete mOnPress;
+	mOnPress = new Delegate(pOnPress);
 }
 
-void Button::SetOnReleasedFunctor(const ButtonFunctor& pOnReleasedFunctor)
+void Button::SetOnReleaseDelegate(const Delegate& pOnRelease)
 {
-	if (mOnReleasedFunctor != 0)
-	{
-		delete mOnReleasedFunctor;
-	}
-
-	mOnReleasedFunctor = pOnReleasedFunctor.CreateCopy();
+	delete mOnRelease;
+	mOnRelease = new Delegate(pOnRelease);
 }
 
-void Button::SetOnClickedFunctor(const ButtonFunctor& pOnClickedFunctor)
+void Button::SetOnClickDelegate(const Delegate& pOnClick)
 {
-	if (mOnClickedFunctor != 0)
-	{
-		delete mOnClickedFunctor;
-	}
-
-	mOnClickedFunctor = pOnClickedFunctor.CreateCopy();
+	delete mOnClick;
+	mOnClick = new Delegate(pOnClick);
 }
 
-void Button::SetOnUnclickedFunctor(const ButtonFunctor& pOnUnclickedFunctor)
+void Button::SetOnDragDelegate(const DelegateXY& pOnDrag)
 {
-	if (mOnUnclickedFunctor != 0)
-	{
-		delete mOnUnclickedFunctor;
-	}
-
-	mOnUnclickedFunctor = pOnUnclickedFunctor.CreateCopy();
-}
-
-void Button::SetOnButtonDraggedFunctor(const ButtonDraggedFunctor& pOnButtonDraggedFunctor)
-{
-	if (mOnButtonDraggedFunctor != 0)
-	{
-		delete mOnButtonDraggedFunctor;
-	}
-
-	mOnButtonDraggedFunctor = pOnButtonDraggedFunctor.CreateCopy();
-}
-
-ButtonFunctor* Button::GetOnPressedFunctor()
-{
-	return mOnPressedFunctor;
-}
-
-ButtonFunctor* Button::GetOnReleasedFunctor()
-{
-	return mOnReleasedFunctor;
-}
-
-ButtonFunctor* Button::GetOnClickedFunctor()
-{
-	return mOnClickedFunctor;
-}
-
-ButtonFunctor* Button::GetOnUnclickedFunctor()
-{
-	return mOnUnclickedFunctor;
-}
-
-ButtonDraggedFunctor* Button::GetOnButtonDraggedFunctor()
-{
-	return mOnButtonDraggedFunctor;
+	delete mOnDrag;
+	mOnDrag = new DelegateXY(pOnDrag);
 }
 
 

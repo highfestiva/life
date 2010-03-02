@@ -619,7 +619,7 @@ void TextField::Repaint(Painter* pPainter)
 	pPainter->PopAttrib();
 }
 
-Component::StateComponentList TextField::GetStateList(ComponentState pState) const
+Component::StateComponentList TextField::GetStateList(ComponentState pState)
 {
 	StateComponentList lList;
 	if (pState == STATE_FOCUSABLE)

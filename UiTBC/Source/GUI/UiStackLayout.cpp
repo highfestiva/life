@@ -147,7 +147,7 @@ Component* StackLayout::GetPrev()
 
 void StackLayout::UpdateLayout()
 {
-	PixelCoords lOwnerSize(GetOwner()->GetSize());
+	PixelCoord lOwnerSize(GetOwner()->GetSize());
 
 	for (int i = 0; i < mNumLevels; i++)
 	{
@@ -159,14 +159,14 @@ void StackLayout::UpdateLayout()
 	}
 }
 
-PixelCoords StackLayout::GetPreferredSize(bool pForceAdaptive)
+PixelCoord StackLayout::GetPreferredSize(bool pForceAdaptive)
 {
-	PixelCoords lSize(0, 0);
+	PixelCoord lSize(0, 0);
 	for (int i = 0; i < mNumLevels; i++)
 	{
 		if (mChild[i] != 0)
 		{
-			PixelCoords lTemp(mChild[i]->GetPreferredSize(pForceAdaptive));
+			PixelCoord lTemp(mChild[i]->GetPreferredSize(pForceAdaptive));
 			if (lTemp.x > lSize.x)
 			{
 				lSize.x = lTemp.x;
@@ -181,14 +181,14 @@ PixelCoords StackLayout::GetPreferredSize(bool pForceAdaptive)
 	return lSize;
 }
 
-PixelCoords StackLayout::GetMinSize()
+PixelCoord StackLayout::GetMinSize()
 {
-	PixelCoords lSize(0, 0);
+	PixelCoord lSize(0, 0);
 	for (int i = 0; i < mNumLevels; i++)
 	{
 		if (mChild[i] != 0)
 		{
-			PixelCoords lTemp(mChild[i]->GetMinSize());
+			PixelCoord lTemp(mChild[i]->GetMinSize());
 			if (lTemp.x > lSize.x)
 			{
 				lSize.x = lTemp.x;
@@ -203,14 +203,14 @@ PixelCoords StackLayout::GetMinSize()
 	return lSize;
 }
 
-PixelCoords StackLayout::GetContentSize()
+PixelCoord StackLayout::GetContentSize()
 {
-	PixelCoords lSize(0, 0);
+	PixelCoord lSize(0, 0);
 	for (int i = 0; i < mNumLevels; i++)
 	{
 		if (mChild[i] != 0)
 		{
-			PixelCoords lTemp(mChild[i]->GetPreferredSize());
+			PixelCoord lTemp(mChild[i]->GetPreferredSize());
 			if (lTemp.x > lSize.x)
 			{
 				lSize.x = lTemp.x;

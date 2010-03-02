@@ -8,9 +8,11 @@
 #include "../../Lepra/Include/Number.h"
 #include "../../Lepra/Include/SystemManager.h"
 #include "../../UiCure/Include/UiGameUiManager.h"
+#include "../../UiTBC/Include/GUI/UiConsoleLogListener.h"
 #include "../../UiTBC/Include/GUI/UiConsolePrompt.h"
 #include "../../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../../UiTBC/Include/GUI/UiFileNameField.h"
+#include "../../UiTBC/Include/GUI/UiTextArea.h"
 #include "../RtVar.h"
 #include "GameClientSlaveManager.h"
 #include "GameClientMasterTicker.h"
@@ -101,7 +103,7 @@ void ClientConsoleManager::SetRenderArea(const PixelRect& pRenderArea)
 
 	if (mConsoleComponent)
 	{
-		PixelCoords lSize = mArea.GetSize();
+		PixelCoord lSize = mArea.GetSize();
 		lSize.y = (int)(lSize.y*0.6);	// TODO: use setting for how high console should be.
 		mConsoleComponent->SetPreferredSize(lSize);
 		int lInputHeight = mUiManager->GetPainter()->GetFontHeight()+4;

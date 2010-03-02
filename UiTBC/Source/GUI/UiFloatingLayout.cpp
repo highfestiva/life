@@ -160,19 +160,19 @@ void FloatingLayout::UpdateLayout()
 	}
 }
 
-PixelCoords FloatingLayout::GetPreferredSize(bool /*pForceAdaptive*/)
+PixelCoord FloatingLayout::GetPreferredSize(bool /*pForceAdaptive*/)
 {
-	return PixelCoords(0, 0);
+	return PixelCoord(0, 0);
 }
 
-PixelCoords FloatingLayout::GetMinSize()
+PixelCoord FloatingLayout::GetMinSize()
 {
-	return PixelCoords(0, 0);
+	return PixelCoord(0, 0);
 }
 
-PixelCoords FloatingLayout::GetContentSize()
+PixelCoord FloatingLayout::GetContentSize()
 {
-	return PixelCoords(0, 0);
+	return PixelCoord(0, 0);
 }
 
 void FloatingLayout::MoveToTop(Component* pComponent)

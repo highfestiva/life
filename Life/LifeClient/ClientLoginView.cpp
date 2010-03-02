@@ -46,7 +46,7 @@ ClientLoginView::ClientLoginView(ClientLoginObserver* pLoginObserver, const str&
 	lServerName = CURE_RTVAR_GETSET(mLoginObserver->GetVariableScope(), RTVAR_LOGIN_SERVER, lServerName);
 	AddTextField(lServerName, _T("Server"));
 
-	AddButton(_T("Login"))->SetOnUnclickedFunc(ClientLoginView, OnLogin);
+	AddButton(_T("Login"))->SetOnClick(ClientLoginView, OnLogin);
 
 	UpdateLayout();
 }

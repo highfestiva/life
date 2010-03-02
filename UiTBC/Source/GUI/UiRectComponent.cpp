@@ -73,8 +73,8 @@ void RectComponent::Repaint(Painter* pPainter)
 
 	GUIImageManager* lIMan = GetImageManager();
 
-	PixelCoords lPos(GetScreenPos());
-	PixelCoords lSize(GetSize());
+	PixelCoord lPos(GetScreenPos());
+	PixelCoord lSize(GetSize());
 	PixelRect lRect(lPos, lPos + lSize);
 
 	PixelRect lClippingRect(lRect);
@@ -141,8 +141,8 @@ bool RectComponent::IsOver(int pScreenX, int pScreenY)
 	}
 	else
 	{
-		PixelCoords lPos(GetScreenPos());
-		PixelCoords lSize(GetSize());
+		PixelCoord lPos(GetScreenPos());
+		PixelCoord lSize(GetSize());
 		PixelRect lRect(lPos, lPos + lSize);
 
 		GUIImageManager* lIMan = GetImageManager();

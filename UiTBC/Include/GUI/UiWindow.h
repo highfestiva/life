@@ -83,10 +83,10 @@ public:
 	virtual bool OnRButtonDown(int pMouseX, int pMouseY);
 	virtual bool OnMButtonDown(int pMouseX, int pMouseY);
 
-protected:
 	// Returns the client rect in screen coordinates.
 	virtual PixelRect GetClientRect();
 
+protected:
 	// A convenience function.
 	RectComponent* GetClientRectComponent();
 

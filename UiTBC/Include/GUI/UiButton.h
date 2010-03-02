@@ -10,28 +10,28 @@
 //1. Pressed
 //2. Released
 //3. Clicked
-//4. Unclicked
-//5. Dragged
+//4. Dragged
 //
 //As soon as the user presses the left mouse button over a button
-//the button is considered "Clicked" and "Pressed". Keeping the
+//the button is considered "Pressed". Keeping the
 //mouse button down, moving the mouse cursor "Drags" the button.
 //This can be used to create scroll bars and slide bars etc.
 //
 //Still keeping the mouse button down, moving the cursor outside
-//the button triggers a "Released"-event (but not "Unclicked").
+//the button triggers a "Released"-event (but not "Clicked").
 //Releasing the mouse button outside the button will not result
 //in any other events. 
 //
 //Moving the cursor back over the button (still keeping the mouse 
 //button down) will generate a new "Pressed"-event (but not "Clicked").
-//Finally, releaseing the	mouse button over the button will generate 
-//the "Unclicked"- and the "Released"-event.
+//Finally, releaseing the mouse button over the button will generate 
+//the "Clicked"- and the "Released"-event.
 
 
 
 #pragma once
 
+#include "../../../ThirdParty/FastDelegate/FastDelegate.h"
 #include "UiWindow.h"
 
 
@@ -43,139 +43,32 @@ namespace UiTbc
 
 class Button;
 
-
-
-class ButtonFunctor
+template <class _TButton> class ButtonType
 {
 public:
-	virtual void Call(Button* pButton) = 0;
-	virtual ButtonFunctor* CreateCopy() const = 0;
+	typedef fastdelegate::FastDelegate1<_TButton*, void> Delegate;
+	typedef fastdelegate::FastDelegate3<_TButton*, int, int, bool> DelegateXY;
 };
 
-class ButtonDraggedFunctor
-{
-public:
-	virtual void Call(Button* pButton, int pDeltaX, int pDeltaY) = 0;
-	virtual ButtonDraggedFunctor* CreateCopy() const = 0;
-};
+#define SetOnPress(_class, _func) \
+	SetOnPressDelegate(UiTbc::ButtonType<UiTbc::Button>::Delegate(this, &_class::_func))
 
-template<class _TClass> class TButtonTypeBase
-{
-public:
-	typedef void (_TClass::*_TButtonFunc)(Button*);
-	typedef void (_TClass::*_TButtonIndexFunc)(Button*, int);
+#define SetOnRelease(_class, _func) \
+	SetOnReleaseDelegate(UiTbc::ButtonType<UiTbc::Button>::Delegate(this, &_class::_func))
 
-	TButtonTypeBase(_TClass* pObject):
-		mObject(pObject)
-	{
-	}
-protected:
-	_TClass* mObject;
-};
+#define SetOnClick(_class, _func) \
+	SetOnClickDelegate(UiTbc::ButtonType<UiTbc::Button>::Delegate(this, &_class::_func))
 
-template<class _TClass, class _TFunc> class TButtonFunctorBase: public TButtonTypeBase<_TClass>
-{
-public:
-	typedef _TFunc FuncType;
-
-	TButtonFunctorBase(_TClass* pObject, _TFunc pFunc):
-		TButtonTypeBase<_TClass>(pObject),
-		mFunc(pFunc)
-	{
-	}
-protected:
-	_TFunc mFunc;
-};
-
-template<class _TClass> class TButtonFunctor: public ButtonFunctor,
-	public TButtonFunctorBase<_TClass, typename TButtonTypeBase<_TClass>::_TButtonFunc>
-{
-	typedef TButtonFunctorBase<_TClass, typename TButtonTypeBase<_TClass>::_TButtonFunc> FuncParent;
-public:
-	TButtonFunctor(_TClass* pObject, typename FuncParent::FuncType pFunc):
-		FuncParent(pObject, pFunc)
-	{
-	}
-	virtual void Call(Button* pButton)
-	{
-		((TButtonTypeBase<_TClass>::mObject)->*(FuncParent::mFunc))(pButton);
-	}
-	ButtonFunctor* CreateCopy() const
-	{
-		return new TButtonFunctor(TButtonTypeBase<_TClass>::mObject, FuncParent::mFunc);
-	}
-};
-
-template<class _TClass> class TButtonIndexFunctor: public ButtonFunctor,
-	public TButtonFunctorBase<_TClass, typename TButtonTypeBase<_TClass>::_TButtonIndexFunc>
-{
-	typedef TButtonFunctorBase<_TClass, typename TButtonTypeBase<_TClass>::_TButtonIndexFunc> FuncParent;
-public:
-	TButtonIndexFunctor(_TClass* pObject, typename FuncParent::FuncType pFunc, int pIndex):
-		FuncParent(pObject, pFunc),
-		mIndex(pIndex)
-	{
-	}
-	virtual void Call(Button* pButton)
-	{
-		(TButtonTypeBase<_TClass>::mObject->*(FuncParent::mFunc))(pButton, mIndex);
-	}
-	ButtonFunctor* CreateCopy() const
-	{
-		return new TButtonIndexFunctor(TButtonTypeBase<_TClass>::mObject, FuncParent::mFunc, mIndex);
-	}
-protected:
-	int mIndex;
-};
-
-template<class _TClass> class TButtonDraggedFunctor: public ButtonDraggedFunctor
-{
-public:
-	TButtonDraggedFunctor(_TClass* pObject, void (_TClass::*pFunc)(Button*, int, int)) :
-		mObject(pObject),
-		mFunc(pFunc)
-	{
-	}
-	
-	virtual void Call(Button* pButton, int pDeltaX, int pDeltaY)
-	{
-		(mObject->*mFunc)(pButton, pDeltaX, pDeltaY);
-	}
-
-	ButtonDraggedFunctor* CreateCopy() const
-	{
-		return new TButtonDraggedFunctor(mObject, mFunc);
-	}
-
-private:
-	_TClass* mObject;
-	void (_TClass::*mFunc)(Button* pButton, int pDeltaX, int pDeltaY);
-};
-
-#define SetOnPressedFunc(_class, _func) \
-	SetOnPressedFunctor(UiTbc::TButtonFunctor<_class>(this, &_class::_func));
-
-#define SetOnReleasedFunc(_class, _func) \
-	SetOnReleasedFunctor(UiTbc::TButtonFunctor<_class>(this, &_class::_func));
-
-#define SetOnDraggedFunc(_class, _func) \
-	SetOnButtonDraggedFunctor(UiTbc::TButtonDraggedFunctor<_class>(this, &_class::_func));
-
-#define SetOnClickedFunc(_class, _func) \
-	SetOnClickedFunctor(UiTbc::TButtonFunctor<_class>(this, &_class::_func));
-
-#define SetOnUnclickedFunc(_class, _func) \
-	SetOnUnclickedFunctor(UiTbc::TButtonFunctor<_class>(this, &_class::_func));
-
-#define SetOnUnclickedFuncIndex(_class, _func, _index) \
-	SetOnUnclickedFunctor(UiTbc::TButtonIndexFunctor<_class>(this, &_class::_func, _index));
-
+#define SetOnDrag(_class, _func) \
+	SetOnDragDelegate(UiTbc::ButtonType<UiTbc::Button>::DelegateXY(this, &_class::_func))
 
 
 class Button: public Window
 {
 	typedef Window Parent;
 public:
+	typedef ButtonType<Button>::Delegate Delegate;
+	typedef ButtonType<Button>::DelegateXY DelegateXY;
 
 	enum IconAlignment
 	{
@@ -208,22 +101,16 @@ public:
 
 	// These functors will be called every time the button is pressed and released
 	// GRAPHICALLY.
-	void SetOnPressedFunctor(const ButtonFunctor& pOnPressedFunctor);
-	void SetOnReleasedFunctor(const ButtonFunctor& pOnReleasedFunctor);
-
-	// These functors will be called every time the user actually clicks/releases
-	// the mouse button.
-	void SetOnClickedFunctor(const ButtonFunctor& pOnClickedFunctor);
-	void SetOnUnclickedFunctor(const ButtonFunctor& pOnUnclickFunctor);
-
-	void SetOnButtonDraggedFunctor(const ButtonDraggedFunctor& pOnButtonDraggedFunctor);
+	void SetOnPressDelegate(const Delegate& pOnPress);
+	void SetOnReleaseDelegate(const Delegate& pOnRelease);
+	// Actual click.
+	void SetOnClickDelegate(const Delegate& pOnClick);
+	void SetOnDragDelegate(const DelegateXY& pOnDrag);
 
 	void SetIcon(Painter::ImageID pIconID,
 			    IconAlignment pAlignment);
 
-	void SetText(const str& pText,
-			    const Color& pTextColor,
-			    const Color& pBackgColor);
+	void SetText(const str& pText, const Color& pTextColor = Lepra::WHITE, const Color& pBackgColor = Lepra::BLACK);
 	const str& GetText();
 
 	virtual void Repaint(Painter* pPainter);
@@ -235,8 +122,9 @@ public:
 	virtual bool OnMouseMove(int pMouseX, int pMouseY, int pDeltaX, int pDeltaY);
 	virtual bool Click(bool pDepress);
 
-protected:
+	void PrintText(Painter* pPainter, int x, int y);
 
+protected:
 	enum State
 	{
 		RELEASED = 0,
@@ -247,23 +135,19 @@ protected:
 		PRESSING,
 	};
 
-	void PrintText(Painter* pPainter, int x, int y);
-
 	virtual void OnTextChanged();
 	State GetState();
 	void SetState(State pState);
 
-	virtual StateComponentList GetStateList(ComponentState pState) const;
+	virtual StateComponentList GetStateList(ComponentState pState);
 
-	ButtonFunctor* GetOnPressedFunctor();
-	ButtonFunctor* GetOnReleasedFunctor();
-	ButtonFunctor* GetOnClickedFunctor();
-	ButtonFunctor* GetOnUnclickedFunctor();
-	ButtonDraggedFunctor* GetOnButtonDraggedFunctor();
-
+protected:
+	Delegate* mOnPress;
+	Delegate* mOnRelease;
+	Delegate* mOnClick;
+	DelegateXY* mOnDrag;
 
 private:
-
 	Painter::ImageID mReleasedImageID;
 	Painter::ImageID mPressedImageID;
 	Painter::ImageID mReleasedActiveImageID;
@@ -285,12 +169,6 @@ private:
 	bool mImageButton;
 
 	State mState;
-
-	ButtonFunctor* mOnPressedFunctor;
-	ButtonFunctor* mOnReleasedFunctor;
-	ButtonFunctor* mOnClickedFunctor;
-	ButtonFunctor* mOnUnclickedFunctor;
-	ButtonDraggedFunctor* mOnButtonDraggedFunctor;
 };
 
 

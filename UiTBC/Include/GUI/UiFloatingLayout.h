@@ -35,9 +35,9 @@ public:
 
 	virtual void UpdateLayout();
 
-	virtual PixelCoords GetPreferredSize(bool pForceAdaptive);
-	virtual PixelCoords GetMinSize();
-	virtual PixelCoords GetContentSize();
+	virtual PixelCoord GetPreferredSize(bool pForceAdaptive);
+	virtual PixelCoord GetMinSize();
+	virtual PixelCoord GetContentSize();
 
 	// Functions that are unique to the floating layout.
 	void MoveToTop(Component* pComponent);

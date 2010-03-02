@@ -55,9 +55,9 @@ public:
 
 	virtual void UpdateLayout() = 0;
 
-	virtual PixelCoords GetPreferredSize(bool pForceAdaptive) = 0;
-	virtual PixelCoords GetMinSize() = 0;
-	virtual PixelCoords GetContentSize() = 0;
+	virtual PixelCoord GetPreferredSize(bool pForceAdaptive) = 0;
+	virtual PixelCoord GetMinSize() = 0;
+	virtual PixelCoord GetContentSize() = 0;
 
 protected:
 	inline Component* GetOwner();

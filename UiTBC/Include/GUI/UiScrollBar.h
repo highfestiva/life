@@ -83,7 +83,7 @@ protected:
 	void OnScrollBR(Button* pButton);
 	void OnStopScroll(Button* pButton);
 	void OnScrollerDown(Button* pButton);
-	void OnScrollerDragged(Button* pButton, int pDeltaX, int pDeltaY);
+	bool OnScrollerDragged(Button* pButton, int pDeltaX, int pDeltaY);
 
 private:
 

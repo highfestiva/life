@@ -47,7 +47,7 @@ Caption::Caption(const Color& pActiveColor, const Color& pInactiveColor, int pHe
 	SetFontColor(OFF_BLACK);
 
 	SetMinSize(0, pHeight);
-	SetPreferredSize(PixelCoords(0, pHeight));
+	SetPreferredSize(PixelCoord(0, pHeight));
 
 	mLabel = new Label(false, _T("Label"));
 
@@ -108,7 +108,7 @@ Caption::Caption(const Color& pActiveTopLeftColor, const Color& pActiveTopRightC
 	SetFontColor(OFF_BLACK);
 
 	SetMinSize(0, pHeight);
-	SetPreferredSize(PixelCoords(0, pHeight));
+	SetPreferredSize(PixelCoord(0, pHeight));
 
 	mLabel = new Label(false, _T("Label"));
 
@@ -168,9 +168,9 @@ Caption::Caption(Painter::ImageID pActiveLeftImageID, Painter::ImageID pActiveRi
 
 	GUIImageManager* lIMan = GetImageManager();
 
-	PixelCoords lLeftImageSize(lIMan->GetImageSize(pActiveLeftImageID));
-	PixelCoords lRightImageSize(lIMan->GetImageSize(pActiveRightImageID));
-	PixelCoords lCenterImageSize(lIMan->GetImageSize(pActiveCenterImageID));
+	PixelCoord lLeftImageSize(lIMan->GetImageSize(pActiveLeftImageID));
+	PixelCoord lRightImageSize(lIMan->GetImageSize(pActiveRightImageID));
+	PixelCoord lCenterImageSize(lIMan->GetImageSize(pActiveCenterImageID));
 
 	SetMinSize(lLeftImageSize.x + lRightImageSize.x, pHeight);
 	SetPreferredSize(0, pHeight);
@@ -310,9 +310,9 @@ void Caption::SetActive(bool pActive)
 			mRightImageRect->SetImage(mInactiveRightImageID);
 		}
 
-		PixelCoords lLeftImageSize(lIMan->GetImageSize(mActiveLeftImageID));
-		PixelCoords lRightImageSize(lIMan->GetImageSize(mActiveRightImageID));
-		PixelCoords lCenterImageSize(lIMan->GetImageSize(mActiveCenterImageID));
+		PixelCoord lLeftImageSize(lIMan->GetImageSize(mActiveLeftImageID));
+		PixelCoord lRightImageSize(lIMan->GetImageSize(mActiveRightImageID));
+		PixelCoord lCenterImageSize(lIMan->GetImageSize(mActiveCenterImageID));
 
 		mLeftImageRect->SetPreferredSize(lLeftImageSize);
 		mCenterImageRect->SetPreferredSize(0, lCenterImageSize.y);
@@ -376,7 +376,7 @@ bool Caption::OnMouseMove(int pMouseX, int pMouseY, int pDeltaX, int pDeltaY)
 
 		if (lParentWindow != 0)
 		{
-			lParentWindow->SetPos(lParentWindow->GetPos() + PixelCoords(pDeltaX, pDeltaY));
+			lParentWindow->SetPos(lParentWindow->GetPos() + PixelCoord(pDeltaX, pDeltaY));
 		}
 
 		return true;

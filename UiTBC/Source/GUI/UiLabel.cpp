@@ -167,7 +167,7 @@ void Label::Repaint(Painter* pPainter)
 
 	pPainter->PushAttrib(Painter::ATTR_ALL);
 
-	PixelCoords lPos(GetScreenPos());
+	PixelCoord lPos(GetScreenPos());
 	PixelRect lRect(lPos, lPos + GetSize());
 	pPainter->ReduceClippingRect(lRect);
 
@@ -177,7 +177,7 @@ void Label::Repaint(Painter* pPainter)
 
 	if (mIconID != Painter::INVALID_IMAGEID)
 	{
-		PixelCoords lIconSize(lIMan->GetImageSize(mIconID));
+		PixelCoord lIconSize(lIMan->GetImageSize(mIconID));
 
 		int lIconY = lTextY + lFontHeight - lIconSize.y + 1;
 			//lRect.mTop + (lRect.GetHeight() - lIconSize.y) / 2;
@@ -242,17 +242,17 @@ void Label::Repaint(Painter* pPainter)
 	pPainter->PopAttrib();
 }
 
-PixelCoords Label::GetPreferredSize(bool pForceAdaptive)
+PixelCoord Label::GetPreferredSize(bool pForceAdaptive)
 {
 	GUIImageManager* lIMan = GetImageManager();
 
-	PixelCoords lIconSize(0, 0);
+	PixelCoord lIconSize(0, 0);
 	if (mIconID != Painter::INVALID_IMAGEID)
 	{
 		lIconSize = lIMan->GetImageSize(mIconID);
 	}
 
-	PixelCoords lSize(RectComponent::GetPreferredSize());
+	PixelCoord lSize(RectComponent::GetPreferredSize());
 
 	if (pForceAdaptive == true || IsAdaptive() == true)
 	{

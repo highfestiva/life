@@ -18,6 +18,7 @@
 #include "../../UiCure/Include/UiCppContextObject.h"
 #include "../../UiCure/Include/UiGameUiManager.h"
 #include "../../UiCure/Include/UiRuntimeVariableName.h"
+#include "../../UiTBC/Include/GUI/UiCustomButton.h"
 #include "../../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../../UiTBC/Include/GUI/UiFloatingLayout.h"
 #include "../LifeApplication.h"
@@ -46,6 +47,7 @@ GameClientSlaveManager::GameClientSlaveManager(GameClientMasterTicker* pMaster, 
 	mAvatarId(0),
 	mLastSentByteCount(0),
 	mPingAttemptCount(0),
+	mSignMesh(pUiManager),
 	mAllowMovementInput(true),
 	mOptions(pVariableScope, pSlaveIndex),
 	mLoginWindow(0)
@@ -302,6 +304,9 @@ bool GameClientSlaveManager::Reset()	// Run when disconnected. Removes all objec
 	GetContext()->ClearObjects();
 	bool lOk = InitializeTerrain();
 
+	mSignMesh.Load(GetResourceManager(), _T("Data/monster_02_wheel_.mesh;0"),
+		UiCure::UserGeometryReferenceResource::TypeLoadCallback(this, &GameClientSlaveManager::OnLoadMesh));
+
 	mIsResetComplete = true;
 
 	return (lOk);
@@ -442,7 +447,8 @@ void GameClientSlaveManager::TickUiUpdate()
 		{
 			lTargetCameraOrientation.x = -lTargetCameraOrientation.x;
 		}
-		float lYawChange = (lTargetCameraOrientation.x-mCameraOrientation.x) * 1.5f;
+		Math::RangeAngles(mCameraOrientation.x, lTargetCameraOrientation.x);
+		float lYawChange = (lTargetCameraOrientation.x-mCameraOrientation.x)*3;
 		lYawChange = (lYawChange < -PIF*3/7)? -PIF*3/7 : lYawChange;
 		lYawChange = (lYawChange > PIF*3/7)? PIF*3/7 : lYawChange;
 		lTargetCameraOrientation.z = -lYawChange;
@@ -675,13 +681,14 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 						lMessageStatus->GetMessageString(lAvatarName);
 						Cure::UserAccount::AvatarId lAvatarId = wstrutil::ToCurrentCode(lAvatarName);
 						log_adebug("Status: INFO_AVATAR...");
-						UiTbc::Button* lButton = new UiTbc::Button(UiTbc::BorderComponent::ZIGZAG,
-							3, DARK_GREEN, lAvatarId);
-						lButton->SetText(lAvatarId, WHITE, WHITE);
-						lButton->SetPreferredSize(100, 24);
+						UiTbc::CustomButton* lButton = new UiTbc::CustomButton(lAvatarId);
+						lButton->SetText(lAvatarId);
+						lButton->SetPreferredSize(120, 20);
 						lButton->SetMinSize(20, 20);
 						mUiManager->GetDesktopWindow()->AddChild(lButton);
-						lButton->SetOnUnclickedFuncIndex(GameClientSlaveManager, OnAvatarSelect, 0);
+						lButton->SetOnClick(GameClientSlaveManager, OnAvatarSelect);
+						lButton->SetOnRender(GameClientSlaveManager, AvatarButtonRender);
+						lButton->SetOnIsOver(GameClientSlaveManager, AvatarButtonIsOver);
 					}
 					break;
 				}
@@ -954,14 +961,59 @@ void GameClientSlaveManager::CancelLogin()
 	SetIsQuitting();
 }
 
-void GameClientSlaveManager::OnAvatarSelect(UiTbc::Button* pButton, int)
+void GameClientSlaveManager::OnAvatarSelect(UiTbc::Button* pButton)
 {
-	Cure::UserAccount::AvatarId lAvatarId = pButton->GetText();
+	Cure::UserAccount::AvatarId lAvatarId = pButton->GetName();
 	log_volatile(mLog.Debugf(_T("Clicked avatar %s."), lAvatarId.c_str()));
 	Cure::Packet* lPacket = GetNetworkAgent()->GetPacketFactory()->Allocate();
 	GetNetworkAgent()->SendStatusMessage(GetNetworkClient()->GetSocket(), 0, Cure::REMOTE_OK,
 		Cure::MessageStatus::INFO_AVATAR, wstrutil::ToOwnCode(lAvatarId), lPacket);
 	GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
+}
+
+void GameClientSlaveManager::AvatarButtonRender(UiTbc::CustomButton* pButton)
+{
+	mUiManager->GetPainter()->PushAttrib(UiTbc::Painter::ATTR_ALL);
+	PixelRect lRect(pButton->GetClientRect());
+	mUiManager->GetPainter()->ReduceClippingRect(lRect);
+	pButton->PrintText(mUiManager->GetPainter(),
+		lRect.mLeft + (lRect.GetWidth() - mUiManager->GetPainter()->GetStringWidth(pButton->GetText().c_str())) / 2,
+		lRect.mTop + (lRect.GetHeight() - mUiManager->GetPainter()->GetFontHeight()) / 2);
+
+	if (mSignMesh.GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
+	{
+		TBC::GeometryBase* lGfxGeometry = mSignMesh.GetRamData();
+		TransformationF lTransform;
+		lTransform.SetPosition(Vector3DF(0, 10, 0));
+		lGfxGeometry->SetTransformation(lTransform);
+		mUiManager->GetRenderer()->RenderRelative(mSignMesh.GetRamData());
+	}
+
+	mUiManager->GetPainter()->PopAttrib();
+}
+
+bool GameClientSlaveManager::AvatarButtonIsOver(UiTbc::CustomButton* pButton, int x, int y)
+{
+	PixelCoord lMiddle(pButton->GetPos() + pButton->GetSize()/2);
+	return (lMiddle.GetDistance(PixelCoord(x, y)) < 20);
+}
+
+void GameClientSlaveManager::OnLoadMesh(UiCure::UserGeometryReferenceResource* pMeshResource)
+{
+	if (pMeshResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
+	{
+		pMeshResource->GetRamData()->SetAlwaysVisible(false);
+		TBC::GeometryBase::BasicMaterialSettings lMaterial(Vector3DF(1,0,0), Vector3DF(0,1,0),
+			Vector3DF(0,0,1), 0.5, 1, true);
+		pMeshResource->GetRamData()->SetBasicMaterialSettings(lMaterial);
+		UiTbc::Renderer::MaterialType lMaterialType = UiTbc::Renderer::MAT_SINGLE_COLOR_SOLID;
+		mUiManager->GetRenderer()->ChangeMaterial(pMeshResource->GetData(), lMaterialType);
+	}
+	else
+	{
+		mLog.AError("Could not load mesh! Shit.");
+		assert(false);
+	}
 }
 
 Cure::RuntimeVariableScope* GameClientSlaveManager::GetVariableScope() const

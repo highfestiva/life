@@ -208,7 +208,7 @@ class UserGeometryReferenceResource: public Cure::UserTypeResourceBase<
 {
 	typedef Cure::UserTypeResourceBase<UserGeometryReferenceResource, GeometryReferenceResource> Parent;
 public:
-	UserGeometryReferenceResource(GameUiManager* pUiManager, const GeometryOffset& pOffset);
+	UserGeometryReferenceResource(GameUiManager* pUiManager, const GeometryOffset& pOffset = GeometryOffset(0));
 	virtual ~UserGeometryReferenceResource();
 
 	//virtual void PostProcess();

@@ -183,7 +183,7 @@ int ListLayout::GetNumComponents() const
 
 Component* ListLayout::Find(int pScreenXY)
 {
-	PixelCoords lOwnerPos(GetOwner()->GetScreenPos());
+	PixelCoord lOwnerPos(GetOwner()->GetScreenPos());
 	float64 lPos = 0;
 	
 	if (mListType == COLUMN)
@@ -228,7 +228,7 @@ Component* ListLayout::Find(int pScreenXY)
 
 void ListLayout::Find(ComponentList& pComponents, int pScreenXY1, int pScreenXY2)
 {
-	PixelCoords lOwnerPos(GetOwner()->GetScreenPos());
+	PixelCoord lOwnerPos(GetOwner()->GetScreenPos());
 
 	if (pScreenXY1 > pScreenXY2)
 	{
@@ -353,7 +353,7 @@ void ListLayout::UpdateLayout()
 	mContentSize.x = 0;
 	mContentSize.y = 0;
 
-	PixelCoords lOwnerSize(GetOwner()->GetSize());
+	PixelCoord lOwnerSize(GetOwner()->GetSize());
 	NodeList::iterator lIter;
 
 	if (mListType == COLUMN)
@@ -361,7 +361,7 @@ void ListLayout::UpdateLayout()
 		for (lIter = mNodeList.begin(); lIter != mNodeList.end(); ++lIter)
 		{
 			Node& lNode = *lIter;
-			PixelCoords lSize(lNode.mComponent->GetPreferredWidth(true), lNode.mComponent->GetPreferredHeight());
+			PixelCoord lSize(lNode.mComponent->GetPreferredWidth(true), lNode.mComponent->GetPreferredHeight());
 
 			lSize.x += lNode.mIndentationLevel * mIndentationSize;
 
@@ -383,7 +383,7 @@ void ListLayout::UpdateLayout()
 		{
 			Node& lNode = *lIter;
 			lNode.mComponent->SetPos(mPosDX + lNode.mIndentationLevel * mIndentationSize, y);
-			PixelCoords lSize(lNode.mComponent->GetPreferredSize());
+			PixelCoord lSize(lNode.mComponent->GetPreferredSize());
 
 			lSize.x = mContentSize.x;
 			lNode.mComponent->SetSize(lSize);
@@ -396,7 +396,7 @@ void ListLayout::UpdateLayout()
 		for (lIter = mNodeList.begin(); lIter != mNodeList.end(); ++lIter)
 		{
 			Node& lNode = *lIter;
-			PixelCoords lSize(lNode.mComponent->GetPreferredWidth(), lNode.mComponent->GetPreferredHeight(true));
+			PixelCoord lSize(lNode.mComponent->GetPreferredWidth(), lNode.mComponent->GetPreferredHeight(true));
 
 			lSize.y += lNode.mIndentationLevel * mIndentationSize;
 
@@ -418,7 +418,7 @@ void ListLayout::UpdateLayout()
 		{
 			Node& lNode = *lIter;
 			lNode.mComponent->SetPos(x, mPosDY + lNode.mIndentationLevel * mIndentationSize);
-			PixelCoords lSize(lNode.mComponent->GetPreferredSize());
+			PixelCoord lSize(lNode.mComponent->GetPreferredSize());
 
 			lSize.y = mContentSize.y;
 			lNode.mComponent->SetSize(lSize);
@@ -428,17 +428,17 @@ void ListLayout::UpdateLayout()
 	}
 }
 
-PixelCoords ListLayout::GetPreferredSize(bool /*pForceAdaptive*/)
+PixelCoord ListLayout::GetPreferredSize(bool /*pForceAdaptive*/)
 {
-	return PixelCoords(0, 0);
+	return PixelCoord(0, 0);
 }
 
-PixelCoords ListLayout::GetMinSize()
+PixelCoord ListLayout::GetMinSize()
 {
-	return PixelCoords(0, 0);
+	return PixelCoord(0, 0);
 }
 
-PixelCoords ListLayout::GetContentSize()
+PixelCoord ListLayout::GetContentSize()
 {
 	return mContentSize;
 }

@@ -79,8 +79,8 @@ void CenterLayout::UpdateLayout()
 {
 	if (mChild != 0)
 	{
-		PixelCoords lOwnerSize(GetOwner()->GetSize());
-		PixelCoords lChildSize(mChild->GetPreferredSize());
+		PixelCoord lOwnerSize(GetOwner()->GetSize());
+		PixelCoord lChildSize(mChild->GetPreferredSize());
 
 		if (lChildSize.x > lOwnerSize.x)
 		{
@@ -97,7 +97,7 @@ void CenterLayout::UpdateLayout()
 	}
 }
 
-PixelCoords CenterLayout::GetPreferredSize(bool pForceAdaptive)
+PixelCoord CenterLayout::GetPreferredSize(bool pForceAdaptive)
 {
 	if (mChild != 0)
 	{
@@ -105,11 +105,11 @@ PixelCoords CenterLayout::GetPreferredSize(bool pForceAdaptive)
 	}
 	else
 	{
-		return PixelCoords(0, 0);
+		return PixelCoord(0, 0);
 	}
 }
 
-PixelCoords CenterLayout::GetMinSize()
+PixelCoord CenterLayout::GetMinSize()
 {
 	if (mChild != 0)
 	{
@@ -117,11 +117,11 @@ PixelCoords CenterLayout::GetMinSize()
 	}
 	else
 	{
-		return PixelCoords(0, 0);
+		return PixelCoord(0, 0);
 	}
 }
 
-PixelCoords CenterLayout::GetContentSize()
+PixelCoord CenterLayout::GetContentSize()
 {
 	if (mChild != 0)
 	{
@@ -129,7 +129,7 @@ PixelCoords CenterLayout::GetContentSize()
 	}
 	else
 	{
-		return PixelCoords(0, 0);
+		return PixelCoord(0, 0);
 	}
 }
 

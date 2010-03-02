@@ -232,13 +232,13 @@ def buildcode(targetdir=bindir, buildtype=defaulttype):
                 _incremental_copy_code(targetdir, buildtype)
 
 
-def buildall(targetdir=bindir, buildtype=defaulttype):
+def build(targetdir=bindir, buildtype=defaulttype):
         verify_base_dir()
         buildcode(bindir, defaulttype)
         builddata(targetdir)
 
 
-def rebuildall(targetdir=bindir, buildtype=defaulttype):
+def rebuild(targetdir=bindir, buildtype=defaulttype):
         verify_base_dir()
         if hasdevenv(verbose=True):
                 _createmakes(force=True)
@@ -251,7 +251,7 @@ def rebuildall(targetdir=bindir, buildtype=defaulttype):
         builddata(targetdir)
 
 
-def cleanall(targetdir=bindir, buildtype=defaulttype):
+def clean(targetdir=bindir, buildtype=defaulttype):
         verify_base_dir()
         global removes
         if hasdevenv(verbose=True):
@@ -273,7 +273,7 @@ def buildzip():
         elif buildtype != "final":
                 targetdir = "NO_RELEASE."+targetdir
         os.mkdir(targetdir)
-        rebuildall(targetdir, buildtype)
+        rebuild(targetdir, buildtype)
         _posix_no_lib_exes(targetdir)
         print("Building compressed archive.")
         if os.name == "nt":
@@ -291,7 +291,7 @@ def buildzip():
         print("Built and zipped into %s." % targetfile)
 
 
-def startnobuild():
+def _prepare_run():
         os.chdir(bindir)
         pre = "./"
         post = ""
@@ -300,17 +300,23 @@ def startnobuild():
                 post = ".exe"
         if not os.path.exists("LifeClient"+post) or not os.path.exists("LifeServer"+post):
                 reason = "internal error" if hasdevenv() else "missing C++ build environment"
-                print("Could not build %s due to %s." % (appname, reason))
+                print("Could not run %s due to %s." % (appname, reason))
                 sys.exit(2)
+        return pre, post
+
+
+def startclient():
+        pre, post = _prepare_run()
         import subprocess
         subprocess.Popen(pre+"LifeClient"+post, shell=True)
+        os.chdir("..")
+def startserver():
+        pre, post = _prepare_run()
         os.system(pre+"LifeServer"+post)
-
-
+        os.chdir("..")
 def start():
-        buildall()
-        _printresult()
-        startnobuild()
+        startclient()
+        startserver()
 
 
 if __name__ == "__main__":

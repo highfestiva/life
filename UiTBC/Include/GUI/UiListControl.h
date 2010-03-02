@@ -100,7 +100,7 @@ public:
 
 	inline virtual Type GetType();
 
-	inline PixelCoords GetContentSize();
+	inline PixelCoord GetContentSize();
 
 protected:
 	void Init(ListLayout::ListType pListType);
@@ -145,7 +145,7 @@ Component::Type ListControl::GetType()
 	return Component::LISTCONTROL;
 }
 
-PixelCoords ListControl::GetContentSize()
+PixelCoord ListControl::GetContentSize()
 {
 	return ((ListLayout*)mListRect->GetLayout())->GetContentSize();
 }

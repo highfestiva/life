@@ -7,17 +7,26 @@
 #pragma once
 
 #include "../../Cure/Include/GameManager.h"
-#include "../../Cure/Include/NetworkClient.h"
 #include "../../Cure/Include/Packet.h"
 #include "../../Cure/Include/PositionalData.h"
 #include "../../Lepra/Include/Alarm.h"
 #include "../../Lepra/Include/Timer.h"
-#include "../../UiTBC/Include/GUI/UiTextArea.h"
-#include "../../UiTBC/Include/GUI/UiConsoleLogListener.h"
+#include "../../UiCure/Include/UiResourceManager.h"
 #include "ClientConsoleManager.h"
 #include "ClientLoginView.h"
 #include "ClientOptionsManager.h"
 #include "InputObserver.h"
+
+
+
+namespace UiTbc
+{
+class CustomButton;
+}
+namespace Cure
+{
+class NetworkClient;
+}
 
 
 
@@ -99,7 +108,10 @@ private:
 	void DetachObjects(Cure::GameObjectId pObject1Id, Cure::GameObjectId pObject2Id);
 
 	void CancelLogin();
-	void OnAvatarSelect(UiTbc::Button* pButton, int);
+	void OnAvatarSelect(UiTbc::Button* pButton);
+	void AvatarButtonRender(UiTbc::CustomButton* pButton);
+	bool AvatarButtonIsOver(UiTbc::CustomButton*, int x, int y);
+	void OnLoadMesh(UiCure::UserGeometryReferenceResource* pMeshResource);
 	Cure::RuntimeVariableScope* GetVariableScope() const;
 
 	Cure::NetworkClient* GetNetworkClient() const;
@@ -138,6 +150,7 @@ private:
 	Vector3DF mCameraPreviousPosition;	// TODO: remove hack (should context object controlled)!
 	Vector3DF mCameraOrientation;		// TODO: remove hack (should context object controlled)!
 	Cure::ObjectPositionalData mNetworkOutputGhost;	// TODO: remove hack (should be one per controllable object)!
+	UiCure::UserGeometryReferenceResource mSignMesh;
 	bool mAllowMovementInput;
 	Options::ClientOptionsManager mOptions;
 	UiTbc::Window* mLoginWindow;

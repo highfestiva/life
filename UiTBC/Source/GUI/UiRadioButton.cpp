@@ -177,7 +177,7 @@ void RadioButton::Repaint(Painter* pPainter)
 
 	if (mUpdateSize == true)
 	{
-		PixelCoords lRect(0, 0);
+		PixelCoord lRect(0, 0);
 
 		if (mUserDefinedGfx == true)
 		{
@@ -258,7 +258,7 @@ void RadioButton::Repaint(Painter* pPainter)
 
 		if (lImageID != Painter::INVALID_IMAGEID)
 		{
-			PixelCoords lImageSize(lIMan->GetImageSize(lImageID));
+			PixelCoord lImageSize(lIMan->GetImageSize(lImageID));
 			lIMan->DrawImage(lImageID, 
 					   lRect.mLeft, 
 					   lRect.mTop + (lRect.GetHeight() - lImageSize.y) / 2);
@@ -284,7 +284,7 @@ void RadioButton::Repaint(Painter* pPainter)
 			lBody = mBodyColor;
 		}
 
-		PixelCoords lButtonPos(lRect.mLeft, lRect.mTop + (lRect.GetHeight() - lButtonWidth) / 2);
+		PixelCoord lButtonPos(lRect.mLeft, lRect.mTop + (lRect.GetHeight() - lButtonWidth) / 2);
 
 		pPainter->SetColor(lBody);
 		pPainter->DrawAlphaImage(smRadioButtonInnerID, lButtonPos);

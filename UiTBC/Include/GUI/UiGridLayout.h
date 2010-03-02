@@ -36,9 +36,9 @@ public:
 
 	virtual void UpdateLayout();
 
-	virtual PixelCoords GetPreferredSize(bool pForceAdaptive);
-	virtual PixelCoords GetMinSize();
-	virtual PixelCoords GetContentSize();
+	virtual PixelCoord GetPreferredSize(bool pForceAdaptive);
+	virtual PixelCoord GetMinSize();
+	virtual PixelCoord GetContentSize();
 
 	inline int GetNumRows() const;
 	inline int GetNumCols() const;

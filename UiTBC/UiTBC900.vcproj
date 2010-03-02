@@ -606,6 +606,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\Source\GUI\UiCustomButton.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\Source\GUI\UiDesktopWindow.cpp"
 					>
 				</File>
@@ -945,6 +949,10 @@
 				</File>
 				<File
 					RelativePath=".\Include\GUI\UiConsolePrompt.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Include\GUI\UiCustomButton.h"
 					>
 				</File>
 				<File

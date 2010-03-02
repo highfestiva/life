@@ -66,9 +66,9 @@ public:
 
 	virtual void UpdateLayout();
 
-	virtual PixelCoords GetPreferredSize(bool pForceAdaptive);
-	virtual PixelCoords GetMinSize();
-	virtual PixelCoords GetContentSize();
+	virtual PixelCoord GetPreferredSize(bool pForceAdaptive);
+	virtual PixelCoord GetMinSize();
+	virtual PixelCoord GetContentSize();
 
 	inline void SetPosOffset(int pDX, int pDY);
 	inline int GetPosDX() const;
@@ -124,7 +124,7 @@ private:
 	ComponentTree mComponentTree;
 	ComponentTable mComponentTable;
 
-	PixelCoords mContentSize;
+	PixelCoord mContentSize;
 
 	int mPosDX;
 	int mPosDY;

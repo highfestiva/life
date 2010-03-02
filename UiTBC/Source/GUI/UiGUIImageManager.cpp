@@ -144,7 +144,7 @@ void GUIImageManager::DrawImage(Painter::ImageID pImageID, const PixelRect& pRec
 
 			PixelRect lRect(pRect);
 			lRect.Offset(lImage->mXOffset, lImage->mYOffset);
-			PixelCoords lPos(lRect.mLeft, lRect.mTop);
+			PixelCoord lPos(lRect.mLeft, lRect.mTop);
 
 			switch(lImage->mStyle)
 			{
@@ -166,9 +166,9 @@ void GUIImageManager::DrawImage(Painter::ImageID pImageID, const PixelRect& pRec
 	}
 }
 
-PixelCoords GUIImageManager::GetImageSize(Painter::ImageID pImageID)
+PixelCoord GUIImageManager::GetImageSize(Painter::ImageID pImageID)
 {
-	PixelCoords lSize(0, 0);
+	PixelCoord lSize(0, 0);
 
 	if (pImageID != Painter::INVALID_IMAGEID)
 	{
@@ -211,9 +211,9 @@ bool GUIImageManager::IsOverImage(Painter::ImageID pImageID, int pScreenX, int p
 				break;
 			case CENTERED:
 			{
-				PixelCoords lTopLeft(pScreenRect.mLeft + (pScreenRect.GetWidth()  - lCanvas->GetWidth()) / 2,
+				PixelCoord lTopLeft(pScreenRect.mLeft + (pScreenRect.GetWidth()  - lCanvas->GetWidth()) / 2,
 									  pScreenRect.mTop  + (pScreenRect.GetHeight() - lCanvas->GetHeight()) / 2);
-				PixelRect lImageRect(lTopLeft, lTopLeft + PixelCoords(lCanvas->GetWidth(), lCanvas->GetHeight()));
+				PixelRect lImageRect(lTopLeft, lTopLeft + PixelCoord(lCanvas->GetWidth(), lCanvas->GetHeight()));
 				if (lImageRect.IsInside(pScreenX, pScreenY) == false)
 				{
 					return false;

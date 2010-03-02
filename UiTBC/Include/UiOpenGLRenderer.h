@@ -30,11 +30,12 @@ namespace UiTbc
 
 
 
-class OpenGLRenderer : public Renderer
+class OpenGLRenderer: public Renderer
 {
+	typedef Renderer Parent;
 public:
 
-	class OGLGeometryData : public Renderer::GeometryData
+	class OGLGeometryData: public GeometryData
 	{
 	public:
 		OGLGeometryData() :
@@ -48,9 +49,9 @@ public:
 		{
 		}
 
-		void CopyReferenceData(Renderer::GeometryData* pGeom)
+		void CopyReferenceData(GeometryData* pGeom)
 		{
-			Renderer::GeometryData::CopyReferenceData(pGeom);
+			GeometryData::CopyReferenceData(pGeom);
 			OGLGeometryData* lGeom = (OGLGeometryData*)pGeom;
 			mVertexBufferID = lGeom->mVertexBufferID;
 			mIndexBufferID  = lGeom->mIndexBufferID;
@@ -119,7 +120,8 @@ public:
 	void UpdateGeometry(GeometryID pGeometryID);
 	bool ChangeMaterial(GeometryID pGeometryID, MaterialType pMaterialType);
 
-	unsigned int RenderScene();
+	virtual unsigned int RenderScene();
+	virtual void RenderRelative(TBC::GeometryBase* pGeometry);
 
 	// Only used by the OpenGL material classes.
 	int GetEnvMapID();
@@ -136,30 +138,25 @@ protected:
 	// Overloads from HardwareRenderer
 	int ReleaseShadowMap(int pShadowMapID);
 
-	Renderer::TextureData* CreateTextureData(Renderer::TextureID pTextureID);
-	Renderer::GeometryData* CreateGeometryData();
+	TextureData* CreateTextureData(TextureID pTextureID);
+	GeometryData* CreateGeometryData();
 
-	void BindMap(int pMapType, 
-		     Renderer::TextureData* pTextureData,
-		     Texture* pTexture);
-	void BindCubeMap(Renderer::TextureData* pTextureData,
-			 Texture* pTexture);
-	void ReleaseMap(Renderer::TextureData* pTextureData);
+	void BindMap(int pMapType, TextureData* pTextureData, Texture* pTexture);
+	void BindCubeMap(TextureData* pTextureData, Texture* pTexture);
+	void ReleaseMap(TextureData* pTextureData);
 
 	const Canvas* GetMap(int pMapType, int pMipMapLevel, Texture* pUserTexture);
 
-	void BindGeometry(TBC::GeometryBase* pUserGeometry,
-			  Renderer::GeometryID pID,
-			  MaterialType pMaterialType);
+	void BindGeometry(TBC::GeometryBase* pUserGeometry, GeometryID pID, MaterialType pMaterialType);
 	bool BindShadowGeometry(UiTbc::ShadowVolume* pShadowGeometry, LightHint pLightHint);
 	void ReleaseGeometry(TBC::GeometryBase* pUserGeometry, GeomReleaseOption pOption);
 
 private:
 
-	Material* CreateMaterial(Renderer::MaterialType pMaterialType);
+	Material* CreateMaterial(MaterialType pMaterialType);
 
 	void ProcessLights();
-	void SetupGLLight(int pLightIndex, const Renderer::LightData& pLight);
+	void SetupGLLight(int pLightIndex, const LightData& pLight);
 
 	// Shadow volumes are used with directional lights and point lights.
 	void RenderShadowVolumes();
@@ -168,7 +165,7 @@ private:
 	// RenderShadowMaps() returns the number of spotlights currently in the
 	// scene.
 	int RenderShadowMaps();
-	void RegenerateShadowMap(Renderer::LightData* pLight);
+	void RegenerateShadowMap(LightData* pLight);
 
 	// Doing about the same thing as gluPerspective()...
 	// gluPerspective() want's the vertical FOV-angle - between the top and

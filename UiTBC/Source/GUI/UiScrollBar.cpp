@@ -339,13 +339,13 @@ void ScrollBar::LoadButtons()
 		SetMinSize(mSize, 2 * mButtonSize + mBorderWidth * 2);
 	}
 
-	mTLButton->SetOnPressedFunc(ScrollBar, OnScrollTL);
-	mBRButton->SetOnPressedFunc(ScrollBar, OnScrollBR);
-	mTLButton->SetOnReleasedFunc(ScrollBar, OnStopScroll);
-	mBRButton->SetOnReleasedFunc(ScrollBar, OnStopScroll);
+	mTLButton->SetOnPress(ScrollBar, OnScrollTL);
+	mBRButton->SetOnPress(ScrollBar, OnScrollBR);
+	mTLButton->SetOnRelease(ScrollBar, OnStopScroll);
+	mBRButton->SetOnRelease(ScrollBar, OnStopScroll);
 
-	mScrollerButton->SetOnPressedFunc(ScrollBar, OnScrollerDown);
-	mScrollerButton->SetOnDraggedFunc(ScrollBar, OnScrollerDragged);
+	mScrollerButton->SetOnPress(ScrollBar, OnScrollerDown);
+	mScrollerButton->SetOnDrag(ScrollBar, OnScrollerDragged);
 }
 
 void ScrollBar::CheckButtonSize(Button* pButton)
@@ -465,7 +465,7 @@ void ScrollBar::DoLayout()
 	PixelRect lRect(Parent::GetScreenRect());
 	float64 lRatio = mVisible / mMax;
 
-	PixelCoords lMinSize(GetMinSize());
+	PixelCoord lMinSize(GetMinSize());
 
 	if (mStyle == HORIZONTAL)
 	{
@@ -572,12 +572,12 @@ void ScrollBar::OnScrollerDown(Button* pButton)
 	}
 }
 
-void ScrollBar::OnScrollerDragged(Button* pButton, int pDeltaX, int pDeltaY)
+bool ScrollBar::OnScrollerDragged(Button* pButton, int pDeltaX, int pDeltaY)
 {
 	float64 lDeltaPos = 0;
 
 	PixelRect lRect(GetScreenRect());
-	PixelCoords lScrollerSize(mScrollerButton->GetSize());
+	PixelCoord lScrollerSize(mScrollerButton->GetSize());
 
 	if (mStyle == HORIZONTAL)
 	{
@@ -595,6 +595,7 @@ void ScrollBar::OnScrollerDragged(Button* pButton, int pDeltaX, int pDeltaY)
 		lStyle &= ~Window::BORDER_SUNKEN;
 		pButton->SetBorder(lStyle, pButton->GetBorderWidth());
 	}
+	return (false);
 }
 
 void ScrollBar::OnConnectedToDesktopWindow()
