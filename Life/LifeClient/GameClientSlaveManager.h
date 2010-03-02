@@ -109,9 +109,6 @@ private:
 
 	void CancelLogin();
 	void OnAvatarSelect(UiTbc::Button* pButton);
-	void AvatarButtonRender(UiTbc::CustomButton* pButton);
-	bool AvatarButtonIsOver(UiTbc::CustomButton*, int x, int y);
-	void OnLoadMesh(UiCure::UserGeometryReferenceResource* pMeshResource);
 	Cure::RuntimeVariableScope* GetVariableScope() const;
 
 	Cure::NetworkClient* GetNetworkClient() const;

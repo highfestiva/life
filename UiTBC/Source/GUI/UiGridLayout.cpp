@@ -56,7 +56,7 @@ Component** GridLayout::AllocComponentGrid(int pRows, int pCols)
 	return lComponent;
 }
 
-Layout::Type GridLayout::GetType()
+Layout::Type GridLayout::GetType() const
 {
 	return Layout::GRIDLAYOUT;
 }
@@ -484,12 +484,12 @@ PixelCoord GridLayout::GetPreferredSize(bool pForceAdaptive)
 	return lSize;
 }
 
-PixelCoord GridLayout::GetContentSize()
+PixelCoord GridLayout::GetContentSize() const
 {
 	return GetOwner()->GetSize();
 }
 
-PixelCoord GridLayout::GetMinSize()
+PixelCoord GridLayout::GetMinSize() const
 {
 	PixelCoord lSize(0, 0);
 
@@ -701,7 +701,7 @@ void GridLayout::DeleteColumn(int pColumn)
 	}
 }
 
-bool GridLayout::HaveDoubles()
+bool GridLayout::HaveDoubles() const
 {
 	for (int i = 0; i < mNumRows * mNumCols; i++)
 	{

@@ -45,6 +45,15 @@ void ContextManager::SetIsObjectOwner(bool pIsObjectOwner)
 	mIsObjectOwner = pIsObjectOwner;
 }
 
+void ContextManager::AddLocalObject(ContextObject* pObject)
+{
+	assert(pObject->GetInstanceId() == 0);
+	pObject->SetInstanceId(AllocateGameObjectId(NETWORK_OBJECT_LOCAL_ONLY));
+	assert(pObject->GetManager() == 0);
+	pObject->SetManager(this);
+	AddObject(pObject);
+}
+
 void ContextManager::AddObject(ContextObject* pObject)
 {
 	assert(pObject->GetInstanceId() != 0);

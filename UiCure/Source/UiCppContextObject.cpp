@@ -253,6 +253,13 @@ void CppContextObject::DebugDrawPrimitive(DebugPrimitive pPrimitive)
 
 
 
+GameUiManager* CppContextObject::GetUiManager() const
+{
+	return (mUiManager);
+}
+
+
+
 void CppContextObject::__GetFuckedUpMeshesRemoveMe(UiTbc::ChunkyClass* pClass) const
 {
 	if (GetClassId().find(_T("box_002")) != str::npos)

@@ -32,7 +32,7 @@ public:
 
 	virtual bool OnLButtonUp(int pMouseX, int pMouseY);
 
-	inline virtual Type GetType();
+	inline virtual Type GetType() const;
 
 protected:
 
@@ -74,7 +74,7 @@ private:
 	Painter::ImageID mPressingID;
 };
 
-Component::Type RadioButton::GetType()
+Component::Type RadioButton::GetType() const
 {
 	return Component::RADIOBUTTON;
 }

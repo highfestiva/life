@@ -379,7 +379,7 @@ void Window::SetCaption(Caption* pCaption)
 	}
 }
 
-PixelRect Window::GetClientRect()
+PixelRect Window::GetClientRect() const
 {
 	return mCenterComponent->GetScreenRect();
 }

@@ -45,6 +45,9 @@ public:
 
 	void DebugDrawPrimitive(DebugPrimitive pPrimitive);
 
+protected:
+	GameUiManager* GetUiManager() const;
+
 private:
 	void __GetFuckedUpMeshesRemoveMe(UiTbc::ChunkyClass* pClass) const;
 

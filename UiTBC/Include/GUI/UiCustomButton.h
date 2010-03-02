@@ -32,7 +32,7 @@ public:
 	typedef ButtonType<CustomButton>::Delegate Delegate;
 	typedef ButtonType<CustomButton>::DelegateXY DelegateXY;
 
-	CustomButton(const str& pText);
+	CustomButton(const str& pName);
 	virtual ~CustomButton();
 
 	void SetOnRenderDelegate(const Delegate& pOnRenderer);

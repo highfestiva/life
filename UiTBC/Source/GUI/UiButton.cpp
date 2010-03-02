@@ -424,7 +424,7 @@ const str& Button::GetText()
 	return mText;
 }
 
-Button::Type Button::GetType()
+Button::Type Button::GetType() const
 {
 	return BUTTON;
 }

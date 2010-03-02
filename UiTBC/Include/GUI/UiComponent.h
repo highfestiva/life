@@ -75,12 +75,12 @@ public:
 	void DeleteLayer(int pLayer);
 	void ReplaceLayer(int pLayer, Layout* pLayout);
 
-	const PixelCoord& GetPos();
-	PixelCoord GetScreenPos();
+	const PixelCoord& GetPos() const;
+	PixelCoord GetScreenPos() const;
 	
-	const PixelCoord& GetSize();
-	virtual PixelCoord GetMinSize();
-	PixelRect GetScreenRect();
+	const PixelCoord& GetSize() const;
+	virtual PixelCoord GetMinSize() const;
+	PixelRect GetScreenRect() const;
 	
 	void SetPreferredSize(const PixelCoord& pSize, bool pAdaptive = true);
 	virtual void SetPreferredSize(int pWidth, int pHeight, bool pAdaptive = true);
@@ -137,7 +137,6 @@ public:
 	virtual void Repaint(Painter* pPainter);
 	virtual void RepaintChild(Component* pChild, Painter* pPainter);
 	virtual bool IsOver(int pScreenX, int pScreenY);
-	virtual int GetArea(int pScreenX, int pScreenY);
 
 	virtual bool OnDoubleClick(int pMouseX, int pMouseY);
 
@@ -178,7 +177,7 @@ public:
 	void SetMinSize(const PixelCoord& pSize);
 	virtual void SetMinSize(int pWidth, int pHeight);
 
-	virtual Type GetType();
+	virtual Type GetType() const;
 
 	Component* GetChild(int pScreenX, int pScreenY, int pLevelsDown = 0);
 

@@ -410,7 +410,7 @@ void Label::SetIcon(Painter::ImageID pIconID)
 	mIconID = pIconID;
 }
 
-Component::Type Label::GetType()
+Component::Type Label::GetType() const
 {
 	return Component::LABEL;
 }

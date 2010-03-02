@@ -76,7 +76,7 @@ public:
 	virtual Component* GetChild(const str& pName, int pLayer);
 	virtual int GetNumChildren() const;
 
-	inline virtual Component::Type GetType();
+	inline virtual Type GetType() const;
 
 	virtual bool OnChar(tchar pChar);
 	virtual bool OnLButtonDown(int pMouseX, int pMouseY);
@@ -84,7 +84,7 @@ public:
 	virtual bool OnMButtonDown(int pMouseX, int pMouseY);
 
 	// Returns the client rect in screen coordinates.
-	virtual PixelRect GetClientRect();
+	virtual PixelRect GetClientRect() const;
 
 protected:
 	// A convenience function.
@@ -168,7 +168,7 @@ int Window::GetTotalBorderWidth()
 		return mBorderWidth * 2;
 }
 
-Component::Type Window::GetType()
+Component::Type Window::GetType() const
 {
 	return Component::WINDOW;
 }

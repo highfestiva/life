@@ -412,7 +412,7 @@ bool Caption::Check(unsigned pFlags, unsigned pFlag)
 	return ((pFlags & pFlag) != 0);
 }
 
-Component::Type Caption::GetType()
+Component::Type Caption::GetType() const
 {
 	return Component::CAPTION;
 }

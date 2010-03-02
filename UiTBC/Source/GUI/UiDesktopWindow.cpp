@@ -404,7 +404,7 @@ void DesktopWindow::AddCleaner(Cleaner* pCleaner)
 	mCleanerList.unique();
 }
 
-Component::Type DesktopWindow::GetType()
+Component::Type DesktopWindow::GetType() const
 {
 	return Component::DESKTOPWINDOW;
 }

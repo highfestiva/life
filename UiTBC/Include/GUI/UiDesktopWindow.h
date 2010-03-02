@@ -88,7 +88,7 @@ public:
 
 	virtual void DoSetSize(int pWidth, int pHeight);
 
-	virtual Component::Type GetType();
+	virtual Type GetType() const;
 
 	// This function will put the component in the delete queue
 	// which is processed once for every call to Repaint().

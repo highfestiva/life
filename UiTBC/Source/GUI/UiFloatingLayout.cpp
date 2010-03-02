@@ -22,7 +22,7 @@ FloatingLayout::~FloatingLayout()
 {
 }
 
-Layout::Type FloatingLayout::GetType()
+Layout::Type FloatingLayout::GetType() const
 {
 	return Layout::FLOATINGLAYOUT;
 }
@@ -82,7 +82,7 @@ void FloatingLayout::Remove(Component* pComponent)
 
 Component* FloatingLayout::Find(const str& pComponentName)
 {
-	ComponentList::iterator lIter;
+	ComponentList::const_iterator lIter;
 
 	for (lIter = mChildList.begin(); lIter != mChildList.end(); ++lIter)
 	{
@@ -165,12 +165,12 @@ PixelCoord FloatingLayout::GetPreferredSize(bool /*pForceAdaptive*/)
 	return PixelCoord(0, 0);
 }
 
-PixelCoord FloatingLayout::GetMinSize()
+PixelCoord FloatingLayout::GetMinSize() const
 {
 	return PixelCoord(0, 0);
 }
 
-PixelCoord FloatingLayout::GetContentSize()
+PixelCoord FloatingLayout::GetContentSize() const
 {
 	return PixelCoord(0, 0);
 }

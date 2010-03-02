@@ -595,6 +595,18 @@
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="Content"
+			>
+			<File
+				RelativePath=".\RoadSignButton.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\RoadSignButton.h"
+				>
+			</File>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>

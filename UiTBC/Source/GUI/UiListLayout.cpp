@@ -4,14 +4,20 @@
 	Copyright (c) 2002-2009, Righteous Games
 */
 
+
+
 #include "../../Include/GUI/UiListLayout.h"
 #include "../../Include/GUI/UiComponent.h"
 #include "../../../Lepra/Include/ListUtil.h"
 
+
+
 namespace UiTbc
 {
 
-ListLayout::ListLayout(ListType pListType) :
+
+
+ListLayout::ListLayout(ListType pListType):
 	mComponentTree(0, (float64)(1 << 30), 1.0),
 	mContentSize(0,0),
 	mPosDX(0),
@@ -27,7 +33,7 @@ ListLayout::~ListLayout()
 {
 }
 
-Layout::Type ListLayout::GetType()
+Layout::Type ListLayout::GetType() const
 {
 	return Layout::LISTLAYOUT;
 }
@@ -163,10 +169,10 @@ void ListLayout::Remove(Component* pComponent)
 
 Component* ListLayout::Find(const str& pComponentName)
 {
-	NodeList::iterator lIter;
+	NodeList::const_iterator lIter;
 	for (lIter = mNodeList.begin(); lIter != mNodeList.end(); ++lIter)
 	{
-		Node& lNode = *lIter;
+		const Node& lNode = *lIter;
 		if (lNode.mComponent->GetName() == pComponentName)
 		{
 			return lNode.mComponent;
@@ -433,12 +439,12 @@ PixelCoord ListLayout::GetPreferredSize(bool /*pForceAdaptive*/)
 	return PixelCoord(0, 0);
 }
 
-PixelCoord ListLayout::GetMinSize()
+PixelCoord ListLayout::GetMinSize() const
 {
 	return PixelCoord(0, 0);
 }
 
-PixelCoord ListLayout::GetContentSize()
+PixelCoord ListLayout::GetContentSize() const
 {
 	return mContentSize;
 }
@@ -448,4 +454,57 @@ int ListLayout::GetPreferredHW(Component* pComponent)
 	return mListType == COLUMN ? pComponent->GetPreferredHeight() : pComponent->GetPreferredWidth();
 }
 
-} // End namespace.
+ListLayout::ListType ListLayout::GetListType() const
+{
+	return mListType;
+}
+
+void ListLayout::SetPosOffset(int pDX, int pDY)
+{
+	mPosDX = pDX;
+	mPosDY = pDY;
+}
+
+int ListLayout::GetPosDX() const
+{
+	return mPosDX;
+}
+
+int ListLayout::GetPosDY() const
+{
+	return mPosDY;
+}
+
+float64 ListLayout::GetAverageComponentHW() const
+{
+	float64 lHW = 0;
+	if (mListType == COLUMN)
+	{
+		lHW = (float64)mContentSize.y / (float64)mNodeList.size();
+	}
+	else // if (mListType == ROW)
+	{
+		lHW = (float64)mContentSize.x / (float64)mNodeList.size();
+	}
+
+	return lHW;
+}
+
+bool ListLayout::IsEmpty() const
+{
+	return mNodeList.empty();
+}
+
+void ListLayout::SetIndentationSize(int pIndentationSize)
+{
+	mIndentationSize = pIndentationSize;
+}
+
+int ListLayout::GetIndentationSize() const
+{
+	return mIndentationSize;
+}
+
+
+
+}

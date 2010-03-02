@@ -33,7 +33,7 @@ StackLayout::~StackLayout()
 	}
 }
 
-Layout::Type StackLayout::GetType()
+Layout::Type StackLayout::GetType() const
 {
 	return Layout::STACKLAYOUT;
 }
@@ -181,7 +181,7 @@ PixelCoord StackLayout::GetPreferredSize(bool pForceAdaptive)
 	return lSize;
 }
 
-PixelCoord StackLayout::GetMinSize()
+PixelCoord StackLayout::GetMinSize() const
 {
 	PixelCoord lSize(0, 0);
 	for (int i = 0; i < mNumLevels; i++)
@@ -203,7 +203,7 @@ PixelCoord StackLayout::GetMinSize()
 	return lSize;
 }
 
-PixelCoord StackLayout::GetContentSize()
+PixelCoord StackLayout::GetContentSize() const
 {
 	PixelCoord lSize(0, 0);
 	for (int i = 0; i < mNumLevels; i++)

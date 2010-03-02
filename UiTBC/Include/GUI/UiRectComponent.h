@@ -57,7 +57,7 @@ public:
 			     Color& pBottomRightColor,
 			     Color& pBottomLeftColor);
 
-	inline virtual Component::Type GetType();
+	inline virtual Type GetType() const;
 
 	void SetIsHollow(bool pIsHollow);
 	inline void SetBehaveSolid(bool pBehaveSolid);
@@ -126,7 +126,7 @@ void RectComponent::GetColor(Color& pTopLeftColor,
 	pBottomLeftColor  = mColor[3];
 }
 
-Component::Type RectComponent::GetType()
+Component::Type RectComponent::GetType() const
 {
 	return Component::RECTCOMPONENT;
 }

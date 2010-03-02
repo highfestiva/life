@@ -159,7 +159,7 @@ PixelCoord Component::GetPreferredSize(bool pForceAdaptive)
 	return lSize;
 }
 
-PixelCoord Component::GetMinSize()
+PixelCoord Component::GetMinSize() const
 {
 	PixelCoord lSize(mMinSize);
 	
@@ -654,11 +654,6 @@ void Component::RepaintChild(Component* pChild, Painter* pPainter)
 	pChild->Repaint(pPainter);
 }
 
-int Component::GetArea(int pScreenX, int pScreenY)
-{
-	return IsOver(pScreenX, pScreenY) ? AREA_INSIDE : AREA_OUTSIDE;
-}
-
 void Component::SetPos(int x, int y)
 {
 	if (x != mPos.x || y != mPos.y)
@@ -878,12 +873,12 @@ void Component::SetParent(Component* pParent)
 	// OnNewTopParentConnected();
 }
 
-const PixelCoord& Component::GetPos()
+const PixelCoord& Component::GetPos() const
 {
 	return mPos;
 }
 
-PixelCoord Component::GetScreenPos()
+PixelCoord Component::GetScreenPos() const
 {
 	PixelCoord lPos(mPos);
 
@@ -910,12 +905,12 @@ void Component::SetMinSize(const PixelCoord& pSize)
 	SetMinSize(pSize.x, pSize.y);
 }
 
-const PixelCoord& Component::GetSize()
+const PixelCoord& Component::GetSize() const
 {
 	return mSize;
 }
 
-PixelRect Component::GetScreenRect()
+PixelRect Component::GetScreenRect() const
 {
 	PixelCoord lPos(GetScreenPos());
 	return PixelRect(lPos, lPos + GetSize());
@@ -1097,7 +1092,7 @@ Layout* Component::GetLayout(int pLayer) const
 	return lLayout;
 }
 
-Component::Type Component::GetType()
+Component::Type Component::GetType() const
 {
 	return COMPONENT;
 }

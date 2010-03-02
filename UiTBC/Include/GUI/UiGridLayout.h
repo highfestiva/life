@@ -19,7 +19,7 @@ public:
 	GridLayout(int pRows, int pCols);
 	virtual ~GridLayout();
 	
-	virtual Type GetType();
+	virtual Type GetType() const;
 
 	virtual void Add(Component* pComponent, int pParam1, int pParam2);
 	virtual void Remove(Component* pComponent);
@@ -30,15 +30,14 @@ public:
 
 	virtual Component* GetFirst();
 	virtual Component* GetNext();
-
 	virtual Component* GetLast();
 	virtual Component* GetPrev();
 
 	virtual void UpdateLayout();
 
 	virtual PixelCoord GetPreferredSize(bool pForceAdaptive);
-	virtual PixelCoord GetMinSize();
-	virtual PixelCoord GetContentSize();
+	virtual PixelCoord GetMinSize() const;
+	virtual PixelCoord GetContentSize() const;
 
 	inline int GetNumRows() const;
 	inline int GetNumCols() const;
@@ -49,7 +48,7 @@ public:
 	void DeleteColumn(int pColumn);
 
 	// Debug function...
-	bool HaveDoubles();
+	bool HaveDoubles() const;
 protected:
 private:
 

@@ -19,7 +19,7 @@ CenterLayout::~CenterLayout()
 {
 }
 
-Layout::Type CenterLayout::GetType()
+Layout::Type CenterLayout::GetType() const
 {
 	return Layout::CENTERLAYOUT;
 }
@@ -109,7 +109,7 @@ PixelCoord CenterLayout::GetPreferredSize(bool pForceAdaptive)
 	}
 }
 
-PixelCoord CenterLayout::GetMinSize()
+PixelCoord CenterLayout::GetMinSize() const
 {
 	if (mChild != 0)
 	{
@@ -121,7 +121,7 @@ PixelCoord CenterLayout::GetMinSize()
 	}
 }
 
-PixelCoord CenterLayout::GetContentSize()
+PixelCoord CenterLayout::GetContentSize() const
 {
 	if (mChild != 0)
 	{

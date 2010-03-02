@@ -24,6 +24,7 @@
 #include "../LifeApplication.h"
 #include "../RtVar.h"
 #include "GameClientMasterTicker.h"
+#include "RoadSignButton.h"
 
 
 
@@ -677,20 +678,11 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 						lMessageStatus->GetMessageString(lAvatarName);
 						Cure::UserAccount::AvatarId lAvatarId = wstrutil::ToCurrentCode(lAvatarName);
 						log_adebug("Status: INFO_AVATAR...");
-						UiTbc::CustomButton* lButton = new UiTbc::CustomButton(lAvatarId);
-						lButton->SetText(lAvatarId);
-						lButton->SetPreferredSize(40, 40);
-						lButton->SetMinSize(20, 20);
-						mUiManager->GetDesktopWindow()->AddChild(lButton);
-						lButton->SetPos(-100, -100);
-						UiCure::UserGeometryReferenceResource* lSignMesh = new UiCure::UserGeometryReferenceResource(mUiManager);
 						str lResourceId = strutil::Format(_T("Data/monster_02_wheel_.mesh;%i_%s"), mSlaveIndex, lAvatarId.c_str());
-						lSignMesh->Load(GetResourceManager(), lResourceId,
-							UiCure::UserGeometryReferenceResource::TypeLoadCallback(this, &GameClientSlaveManager::OnLoadMesh));
-						lButton->SetExtraData(lSignMesh);
-						lButton->SetOnClick(GameClientSlaveManager, OnAvatarSelect);
-						lButton->SetOnRender(GameClientSlaveManager, AvatarButtonRender);
-						lButton->SetOnIsOver(GameClientSlaveManager, AvatarButtonIsOver);
+						RoadSignButton* lButton = new RoadSignButton(GetResourceManager(), mUiManager,
+							lAvatarId, lResourceId, RoadSignButton::SHAPE_ROUND);
+						GetContext()->AddLocalObject(lButton);
+						lButton->GetButton().SetOnClick(GameClientSlaveManager, OnAvatarSelect);
 					}
 					break;
 				}
@@ -971,54 +963,6 @@ void GameClientSlaveManager::OnAvatarSelect(UiTbc::Button* pButton)
 	GetNetworkAgent()->SendStatusMessage(GetNetworkClient()->GetSocket(), 0, Cure::REMOTE_OK,
 		Cure::MessageStatus::INFO_AVATAR, wstrutil::ToOwnCode(lAvatarId), lPacket);
 	GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
-}
-
-void GameClientSlaveManager::AvatarButtonRender(UiTbc::CustomButton* pButton)
-{
-	UiCure::UserGeometryReferenceResource* lSignMesh = (UiCure::UserGeometryReferenceResource*)pButton->GetExtraData();
-	if (lSignMesh->GetLoadState() != Cure::RESOURCE_LOAD_COMPLETE)
-	{
-		return;
-	}
-
-	mUiManager->GetPainter()->PushAttrib(UiTbc::Painter::ATTR_ALL);
-	PixelRect lRect(pButton->GetClientRect());
-	mUiManager->GetPainter()->ReduceClippingRect(lRect);
-	pButton->PrintText(mUiManager->GetPainter(),
-		lRect.mLeft + (lRect.GetWidth() - mUiManager->GetPainter()->GetStringWidth(pButton->GetText().c_str())) / 2,
-		lRect.mTop + (lRect.GetHeight() - mUiManager->GetPainter()->GetFontHeight()) / 2);
-
-	TBC::GeometryBase* lGfxGeometry = lSignMesh->GetRamData();
-	TransformationF lTransform;
-	lTransform.SetPosition(Vector3DF(0, 10, 0));
-	lGfxGeometry->SetTransformation(lTransform);
-	mUiManager->GetRenderer()->RenderRelative(lGfxGeometry);
-
-	mUiManager->GetPainter()->PopAttrib();
-}
-
-bool GameClientSlaveManager::AvatarButtonIsOver(UiTbc::CustomButton* pButton, int x, int y)
-{
-	PixelCoord lMiddle(pButton->GetPos() + pButton->GetSize()/2);
-	return (lMiddle.GetDistance(PixelCoord(x, y)) < 20);
-}
-
-void GameClientSlaveManager::OnLoadMesh(UiCure::UserGeometryReferenceResource* pMeshResource)
-{
-	if (pMeshResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
-	{
-		pMeshResource->GetRamData()->SetAlwaysVisible(false);
-		TBC::GeometryBase::BasicMaterialSettings lMaterial(Vector3DF(1,0,0), Vector3DF(0,1,0),
-			Vector3DF(0,0,1), 0.5, 1, true);
-		pMeshResource->GetRamData()->SetBasicMaterialSettings(lMaterial);
-		UiTbc::Renderer::MaterialType lMaterialType = UiTbc::Renderer::MAT_SINGLE_COLOR_SOLID;
-		mUiManager->GetRenderer()->ChangeMaterial(pMeshResource->GetData(), lMaterialType);
-	}
-	else
-	{
-		mLog.AError("Could not load mesh! Shit.");
-		assert(false);
-	}
 }
 
 Cure::RuntimeVariableScope* GameClientSlaveManager::GetVariableScope() const

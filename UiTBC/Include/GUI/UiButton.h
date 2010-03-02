@@ -115,7 +115,7 @@ public:
 
 	virtual void Repaint(Painter* pPainter);
 
-	virtual Component::Type GetType();
+	virtual Type GetType() const;
 
 	virtual bool OnLButtonDown(int pMouseX, int pMouseY);
 	virtual bool OnLButtonUp(int pMouseX, int pMouseY);

@@ -98,7 +98,7 @@ public:
 
 	virtual void UpdateLayout();
 
-	inline virtual Type GetType();
+	inline virtual Type GetType() const;
 
 	inline PixelCoord GetContentSize();
 
@@ -140,7 +140,7 @@ void ListControl::SetStyle(Style pStyle)
 	mStyle = pStyle;
 }
 
-Component::Type ListControl::GetType()
+Component::Type ListControl::GetType() const
 {
 	return Component::LISTCONTROL;
 }

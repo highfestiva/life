@@ -56,7 +56,7 @@ public:
 
 	virtual bool OnMouseMove(int pMouseX, int pMouseY, int pMouseDX, int pMouseDY);
 
-	inline virtual Component::Type GetType();
+	inline virtual Type GetType() const;
 
 protected:
 private:
@@ -75,7 +75,7 @@ private:
 	Color mDarkColor;
 };
 
-Component::Type BorderComponent::GetType()
+Component::Type BorderComponent::GetType() const
 {
 	return Component::BORDER;
 }
