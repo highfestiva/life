@@ -25,7 +25,8 @@ Button::Button(const str& pName) :
 	mTextColor(OFF_BLACK),
 	mTextBackgColor(255, 255, 255),
 	mPressed(false),
-	mState(RELEASED)
+	mState(RELEASED),
+	mExtraData(0)
 {
 	InitializeHoover();
 }
@@ -42,7 +43,8 @@ Button::Button(const Color& pColor, const str& pName):
 	mTextColor(OFF_BLACK),
 	mTextBackgColor(255, 255, 255),
 	mPressed(false),
-	mState(RELEASED)
+	mState(RELEASED),
+	mExtraData(0)
 {
 	InitializeHoover();
 }
@@ -60,7 +62,8 @@ Button::Button(BorderComponent::BorderShadeFunc pShadeFunc, int pBorderWidth, co
 	mTextColor(OFF_BLACK),
 	mTextBackgColor(255, 255, 255),
 	mPressed(false),
-	mState(RELEASED)
+	mState(RELEASED),
+	mExtraData(0)
 {
 	InitializeHoover();
 }
@@ -86,7 +89,8 @@ Button::Button(Painter::ImageID pReleasedImageID, Painter::ImageID pPressedImage
 	mTextColor(OFF_BLACK),
 	mTextBackgColor(255, 255, 255),
 	mPressed(false),
-	mState(RELEASED)
+	mState(RELEASED),
+	mExtraData(0)
 {
 	InitializeHoover();
 }
@@ -261,6 +265,16 @@ void Button::PrintText(Painter* pPainter, int x, int y)
 	pPainter->SetColor(mTextColor, 0);
 	pPainter->SetColor(mTextBackgColor, 1);
 	pPainter->PrintText(mText.c_str(), x, y);
+}
+
+void Button::SetExtraData(void* pData)
+{
+	mExtraData = pData;
+}
+
+void* Button::GetExtraData() const
+{
+	return (mExtraData);
 }
 
 bool Button::OnLButtonDown(int pMouseX, int pMouseY)

@@ -150,7 +150,6 @@ private:
 	Vector3DF mCameraPreviousPosition;	// TODO: remove hack (should context object controlled)!
 	Vector3DF mCameraOrientation;		// TODO: remove hack (should context object controlled)!
 	Cure::ObjectPositionalData mNetworkOutputGhost;	// TODO: remove hack (should be one per controllable object)!
-	UiCure::UserGeometryReferenceResource mSignMesh;
 	bool mAllowMovementInput;
 	Options::ClientOptionsManager mOptions;
 	UiTbc::Window* mLoginWindow;

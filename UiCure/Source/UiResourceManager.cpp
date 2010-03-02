@@ -504,6 +504,11 @@ const str GeometryReferenceResource::GetType() const
 	return (_T("GeometryRef"));
 }
 
+bool GeometryReferenceResource::IsReferenceType() const
+{
+	return (true);
+}
+
 bool GeometryReferenceResource::Load()
 {
 	//assert(IsUnique());

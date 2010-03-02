@@ -124,6 +124,9 @@ public:
 
 	void PrintText(Painter* pPainter, int x, int y);
 
+	void SetExtraData(void* pData);
+	void* GetExtraData() const;
+
 protected:
 	enum State
 	{
@@ -169,6 +172,8 @@ private:
 	bool mImageButton;
 
 	State mState;
+
+	void* mExtraData;
 };
 
 

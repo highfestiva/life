@@ -203,6 +203,11 @@ void Resource::SetIsUnique(bool pIsUnique)
 	mIsUnique = pIsUnique;
 }
 
+bool Resource::IsReferenceType() const
+{
+	return (false);
+}
+
 ResourceLoadState Resource::GetLoadState() const
 {
 	return (mState);
@@ -508,21 +513,53 @@ void ResourceManager::StopClear()
 
 	ScopeLock lLock(&mThreadLock);	// Just here for mutex lock verification.
 
-	// Free memory.
-	ForceFreeCache();	// Must be before and after active resources' are deleted (caused by hierarchical resource structures).
+	// Iteratively free memory. First free all resources that ARE of reference type,
+	// then all cure resources. Inside that top-level order, we first kill resources,
+	// without any references, then those with only 1 ref, etc. This should yield
+	// correct hierarchical destruction.
+	bool lKillReferencesOnly = true;	// Kill all references first.
+	int lRefCountThreshold = 0;
 	while (!mActiveResourceTable.IsEmpty())
 	{
+		ForceFreeCache();	// Must be before and after active resources' are deleted (caused by hierarchical resource structures).
+		bool lKilled = false;
+		bool lAreReferencesLeft = false;
 		ResourceTable::Iterator x = mActiveResourceTable.First();
-		Resource* lResource = *x;
-		assert(mRequestLoadList.Find(lResource) == mRequestLoadList.End());
-		mActiveResourceTable.Remove(x);
-		// Check that no-one else has deleted our resource.
-		if (mResourceSafeLookup.find(lResource) != mResourceSafeLookup.end())
+		while (x != mActiveResourceTable.End())
 		{
-			DeleteResource(lResource);
+			Resource* lResource = *x;
+			assert(mRequestLoadList.Find(lResource) == mRequestLoadList.End());
+			if ((!lKillReferencesOnly || lResource->IsReferenceType()) &&
+				lResource->GetReferenceCount() <= lRefCountThreshold)
+			{
+				mActiveResourceTable.Remove(x++);
+				// Check that no-one else has deleted our resource.
+				if (mResourceSafeLookup.find(lResource) != mResourceSafeLookup.end())
+				{
+					if (lResource->IsReferenceType())
+					{
+						--lRefCountThreshold;
+					}
+					DeleteResource(lResource);
+					lKilled = true;
+				}
+			}
+			else
+			{
+				lAreReferencesLeft |= lResource->IsReferenceType();
+				++x;
+			}
+		}
+		if (lKillReferencesOnly && !lAreReferencesLeft)
+		{
+			lKillReferencesOnly = false;
+			lRefCountThreshold = 0;
+		}
+		else if (!lKilled)
+		{
+			++lRefCountThreshold;
 		}
 	}
-	ForceFreeCache();	// Must be before and after active resources' are deleted (caused by hierarchical resource structures).
 
 	while (!mResourceSafeLookup.empty())
 	{
@@ -685,7 +722,7 @@ void ResourceManager::Tick()
 	FreeCache();
 }
 
-void ResourceManager::ForceFreeCache()
+unsigned ResourceManager::ForceFreeCache()
 {
 	ScopeLock lLock(&mThreadLock);
 	// TODO: optimize by keeping objects in cache for a while!
@@ -697,6 +734,7 @@ void ResourceManager::ForceFreeCache()
 		mLog.Headlinef(_T("  - %s @ %p."), (*x)->GetName().c_str(), *x);
 	}
 	mLog.AHeadline("---------------");*/
+	const unsigned lDroppedResourceCount = mCachedResourceTable.GetCount();
 	while (!mCachedResourceTable.IsEmpty())
 	{
 		ResourceTable::Iterator x = mCachedResourceTable.First();
@@ -707,6 +745,7 @@ void ResourceManager::ForceFreeCache()
 		mCachedResourceTable.Remove(x);
 		DeleteResource(lResource);
 	}
+	return (lDroppedResourceCount);
 }
 
 

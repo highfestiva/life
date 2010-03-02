@@ -166,6 +166,8 @@ public:
 	void ReleaseGeometry();
 	const str GetType() const;
 
+	bool IsReferenceType() const;
+
 	bool Load();
 	Cure::ResourceLoadState PostProcess();
 	Cure::ResourceLoadState CreateInstance();
