@@ -215,9 +215,12 @@ bool PosixSemaphore::Wait(float64 pMaxWaitTime)
 	GetAbsTime(pMaxWaitTime, lTimeSpec);
 
 	pthread_mutex_lock(&mMutex);
-	if (mPermitCount == 0)
+	while (mPermitCount == 0)
 	{
-		pthread_cond_timedwait(&mCondition, &mMutex, &lTimeSpec);
+		if (pthread_cond_timedwait(&mCondition, &mMutex, &lTimeSpec) == ETIMEDOUT)
+		{
+			break;
+		}
 	}
 	bool lTimeout = (mPermitCount == 0);
 	if (!lTimeout)
