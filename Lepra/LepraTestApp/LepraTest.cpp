@@ -1165,6 +1165,18 @@ bool TestNetwork(const LogDecorator& pAccount)
 	}
 	if (lTestOk)
 	{
+		lContext = _T("local resolve");
+		SocketAddress lAddress;
+		lTestOk = lAddress.Resolve(":1024");
+		assert(lTestOk);
+		if (lTestOk)
+		{
+			lTestOk = (lAddress.GetAsString() == _T("127.0.0.1:1024"));
+			assert(lTestOk);
+		}
+	}
+	if (lTestOk)
+	{
 		lContext = _T("DNS resolve");
 		IPAddress lAddress;
 		lTestOk = Network::ResolveHostname(_T("ftp.sunet.se"), lAddress);

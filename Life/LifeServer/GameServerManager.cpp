@@ -443,7 +443,7 @@ void GameServerManager::ProcessNetworkInputMessage(Client* pClient, Cure::Messag
 			else
 			{
 				mLog.Warningf(_T("Client %i tried to control instance ID %i."),
-					strutil::ToCurrentCode(pClient->GetUserConnection()->GetLoginName()).c_str(),
+					wstrutil::ToCurrentCode(pClient->GetUserConnection()->GetLoginName()).c_str(),
 					lInstanceId);
 			}
 		}
