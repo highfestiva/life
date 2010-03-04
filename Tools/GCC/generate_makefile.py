@@ -26,7 +26,7 @@ if sys.platform == 'darwin':
     openal_noui = '-framework OpenAL'
     openal_ui = '-framework OpenAL'
     libgl = '-framework OpenGL'
-    stllibfile = '.5.2.1.dylib'
+    stllibfile = '.5.2.dylib'
     cflags_1 += ' -framework OpenGL -framework CoreServices -framework OpenAL -DMAC_OS_X_VERSION=1050'
     ldflags += ' -framework OpenGL -framework AppKit -framework Cocoa -lobjc -lstlport -framework CoreServices %(libs)s %(deplibs)s '
 
@@ -86,7 +86,8 @@ foot_base = """
 all:\t$(OBJS) $(SRCS) $(BINS)
 
 clean:
-\t@rm -f bin/*
+\t@rm -Rf bin/*
+\t@mkdir bin/Data
 \t@for SUBDIR in $(SRCS); do \\
 \t\t$(MAKE) -C $$SUBDIR clean; \\
 \tdone

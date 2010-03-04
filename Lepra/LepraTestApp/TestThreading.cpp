@@ -4,6 +4,7 @@
 */
 
 #include <assert.h>
+#include "../Include/HiResTimer.h"
 #include "../Include/Log.h"
 #include "../Include/MemberThread.h"
 #include "../Include/Socket.h"
@@ -29,6 +30,11 @@ void LockThread(void*)
 	++gThreadTestCounter;
 	gThreadTestLock.Release();
 	++gThreadTestCounter;
+	gThreadTestSemaphore.Wait();
+	++gThreadTestCounter;
+	gThreadTestSemaphore.Signal();
+	++gThreadTestCounter;
+	gThreadTestSemaphore.Wait();
 	gThreadTestSemaphore.Wait();
 	++gThreadTestCounter;
 	gThreadTestSemaphore.Signal();
@@ -76,7 +82,7 @@ bool TestThreading(const LogDecorator& pAccount)
 			if (lTestOk)
 			{
 				lContext = _T("thread run and self termination");
-				Thread::Sleep(0.001);	// Make sure we sleep at least once.
+				//Thread::Sleep(0.001);	// Make sure we sleep at least once.
 				for (unsigned y = 0; y < 200 && lThread.IsRunning(); ++y)
 				{
 					Thread::Sleep(0.001);
@@ -116,6 +122,11 @@ bool TestThreading(const LogDecorator& pAccount)
 		gThreadTestCounter = -1;
 		gThreadTestLock.Acquire();
 		lTestOk = lThread.Start(LockThread, 0);
+		if (lTestOk)
+		{
+			lTestOk = lThread.IsRunning();
+			assert(lTestOk);
+		}
 		Thread::Sleep(0.1);
 		lTestOk = (gThreadTestCounter == 0 && lThread.IsRunning());
 		assert(lTestOk);
@@ -139,10 +150,45 @@ bool TestThreading(const LogDecorator& pAccount)
 	}
 	if (lTestOk)
 	{
+		lContext = _T("semaphore wait timeout - 1");
+		HiResTimer lTimer;
+		lTestOk = !gThreadTestSemaphore.Wait(0.5);
+		assert(lTestOk);
+		lTimer.UpdateTimer();
+		if (lTestOk)
+		{
+			lTestOk = Math::IsInRange(lTimer.GetTimeDiff(), 0.4, 0.9);
+			assert(lTestOk);
+		}
+		if (lTestOk)
+		{
+			lTestOk = (gThreadTestCounter == 2 && lThread.IsRunning());
+			assert(lTestOk);
+		}
+		if (lTestOk)
+		{
+			lTestOk = !gThreadTestSemaphore.Wait(0.1);
+			assert(lTestOk);
+		}
+		if (lTestOk)
+		{
+			gThreadTestSemaphore.Signal();
+			Thread::Sleep(0.1);
+			lTestOk = !gThreadTestSemaphore.Wait(0.1);
+			assert(lTestOk);
+		}
+		if (lTestOk)
+		{
+			lTestOk = (gThreadTestCounter == 4 && lThread.IsRunning());
+			assert(lTestOk);
+		}
+	}
+	if (lTestOk)
+	{
 		lContext = _T("thread operation");
 		gThreadTestSemaphore.Signal();
 		Thread::Sleep(0.1);
-		lTestOk = (gThreadTestCounter == 4 && lThread.IsRunning());
+		lTestOk = (gThreadTestCounter == 6 && lThread.IsRunning());
 		assert(lTestOk);
 	}
 	if (lTestOk)
@@ -150,7 +196,7 @@ bool TestThreading(const LogDecorator& pAccount)
 		lContext = _T("thread grace termination");
 		lThread.RequestStop();
 		Thread::Sleep(0.1);
-		lTestOk = (gThreadTestCounter == 5 && !lThread.IsRunning());
+		lTestOk = (gThreadTestCounter == 7 && !lThread.IsRunning());
 		assert(lTestOk);
 	}
 	if (lTestOk)

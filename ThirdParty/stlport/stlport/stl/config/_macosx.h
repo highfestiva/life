@@ -7,3 +7,11 @@
 #endif
 
 #define _STLP_USE_UNIX_IO
+
+#if !defined(_STLP_NO_THREADS) && !defined(_REENTRANT)
+#  define _REENTRANT
+#endif
+#if defined(_REENTRANT) && !defined(_STLP_THREADS)
+#  define _STLP_THREADS
+#  define _STLP_PTHREADS
+#endif

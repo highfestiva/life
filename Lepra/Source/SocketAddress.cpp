@@ -12,7 +12,11 @@ namespace Lepra
 
 SocketAddress::SocketAddress()
 {
+	memset(&mSockAddr, 0, sizeof(mSockAddr));
 	mSockAddr.sin_family = AF_INET;
+#ifdef LEPRA_MAC
+	mSockAddr.sin_len = sizeof(sockaddr_in);
+#endif // Macintosh
 }
 
 #ifdef LEPRA_NETWORK_IPV6
@@ -90,6 +94,9 @@ SocketAddress::SocketAddress(sockaddr_in pSockAddr) :
 SocketAddress::SocketAddress(const IPAddress& pIP, uint16 pPort)
 {
 	memset(&mSockAddr, 0, sizeof(mSockAddr));
+#ifdef LEPRA_MAC
+	mSockAddr.sin_len = sizeof(sockaddr_in);
+#endif // Macintosh
 	mSockAddr.sin_family = AF_INET;
 	mSockAddr.sin_port = Endian::HostToBig(pPort);
 	pIP.Get((uint8*)&mSockAddr.sin_addr);
