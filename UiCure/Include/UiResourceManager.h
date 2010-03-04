@@ -166,6 +166,8 @@ public:
 	void ReleaseGeometry();
 	const str GetType() const;
 
+	bool IsReferenceType() const;
+
 	bool Load();
 	Cure::ResourceLoadState PostProcess();
 	Cure::ResourceLoadState CreateInstance();
@@ -208,7 +210,7 @@ class UserGeometryReferenceResource: public Cure::UserTypeResourceBase<
 {
 	typedef Cure::UserTypeResourceBase<UserGeometryReferenceResource, GeometryReferenceResource> Parent;
 public:
-	UserGeometryReferenceResource(GameUiManager* pUiManager, const GeometryOffset& pOffset);
+	UserGeometryReferenceResource(GameUiManager* pUiManager, const GeometryOffset& pOffset = GeometryOffset(0));
 	virtual ~UserGeometryReferenceResource();
 
 	//virtual void PostProcess();

@@ -75,18 +75,18 @@ public:
 	void DeleteLayer(int pLayer);
 	void ReplaceLayer(int pLayer, Layout* pLayout);
 
-	const PixelCoords& GetPos();
-	PixelCoords GetScreenPos();
+	const PixelCoord& GetPos() const;
+	PixelCoord GetScreenPos() const;
 	
-	const PixelCoords& GetSize();
-	virtual PixelCoords GetMinSize();
-	PixelRect GetScreenRect();
+	const PixelCoord& GetSize() const;
+	virtual PixelCoord GetMinSize() const;
+	PixelRect GetScreenRect() const;
 	
-	void SetPreferredSize(const PixelCoords& pSize, bool pAdaptive = true);
+	void SetPreferredSize(const PixelCoord& pSize, bool pAdaptive = true);
 	virtual void SetPreferredSize(int pWidth, int pHeight, bool pAdaptive = true);
 	void SetPreferredWidth(int pWidth);
 	void SetPreferredHeight(int pHeight);
-	virtual PixelCoords GetPreferredSize(bool pForceAdaptive = false);
+	virtual PixelCoord GetPreferredSize(bool pForceAdaptive = false);
 	int GetPreferredWidth(bool pForceAdaptive = false);
 	int GetPreferredHeight(bool pForceAdaptive = false);
 	void SetAdaptive(bool pAdaptive);
@@ -116,12 +116,12 @@ public:
 		Coordinate convertions.
 	*/
 
-	PixelCoords ClientToWindow(const PixelCoords& pCoords);
-	PixelCoords WindowToClient(const PixelCoords& pCoords);
-	PixelCoords WindowToScreen(const PixelCoords& pCoords);
-	PixelCoords ScreenToWindow(const PixelCoords& pCoords);
-	PixelCoords ClientToScreen(const PixelCoords& pCoords);
-	PixelCoords ScreenToClient(const PixelCoords& pCoords);
+	PixelCoord ClientToWindow(const PixelCoord& pCoords);
+	PixelCoord WindowToClient(const PixelCoord& pCoords);
+	PixelCoord WindowToScreen(const PixelCoord& pCoords);
+	PixelCoord ScreenToWindow(const PixelCoord& pCoords);
+	PixelCoord ClientToScreen(const PixelCoord& pCoords);
+	PixelCoord ScreenToClient(const PixelCoord& pCoords);
 
 	PixelRect ClientToWindow(const PixelRect& pRect);
 	PixelRect WindowToClient(const PixelRect& pRect);
@@ -137,7 +137,6 @@ public:
 	virtual void Repaint(Painter* pPainter);
 	virtual void RepaintChild(Component* pChild, Painter* pPainter);
 	virtual bool IsOver(int pScreenX, int pScreenY);
-	virtual int GetArea(int pScreenX, int pScreenY);
 
 	virtual bool OnDoubleClick(int pMouseX, int pMouseY);
 
@@ -171,14 +170,14 @@ public:
 	// what you are doing). For instance: Don't set the size by calling SetSize()... Call 
 	// SetPreferredSize() instead. SetSize() is used by the various layout classes in order
 	// to set the definite size of the window, just before it's rendered.
-	void SetPos(const PixelCoords& pPos);
+	void SetPos(const PixelCoord& pPos);
 	virtual void SetPos(int x, int y);
-	void SetSize(const PixelCoords& pSize);
+	void SetSize(const PixelCoord& pSize);
 	virtual void SetSize(int pWidth, int pHeight);
-	void SetMinSize(const PixelCoords& pSize);
+	void SetMinSize(const PixelCoord& pSize);
 	virtual void SetMinSize(int pWidth, int pHeight);
 
-	virtual Type GetType();
+	virtual Type GetType() const;
 
 	Component* GetChild(int pScreenX, int pScreenY, int pLevelsDown = 0);
 
@@ -196,7 +195,7 @@ public:
 	};
 	typedef std::pair<int, Component*> StateComponent;
 	typedef std::list<StateComponent> StateComponentList;
-	virtual StateComponentList GetStateList(ComponentState pState) const;
+	virtual StateComponentList GetStateList(ComponentState pState);
 
 	virtual void SetMouseFocus();
 	virtual void ReleaseMouseFocus(RecurseDir pDir = RECURSE_UP, Component* pFocusedComponent = 0);
@@ -242,10 +241,10 @@ private:
 	Component* mKeyboardFocusChild;
 	Layout** mLayout;
 
-	PixelCoords mPos;
-	PixelCoords mPreferredSize;
-	PixelCoords mSize;
-	PixelCoords mMinSize;
+	PixelCoord mPos;
+	PixelCoord mPreferredSize;
+	PixelCoord mSize;
+	PixelCoord mMinSize;
 
 	bool mNeedsRepaint;
 	bool mVisible;

@@ -7,6 +7,7 @@
 #pragma once
 
 #include "../../Cure/Include/Cure.h"
+#include "../../Cure/Include/UserAccount.h"
 #include "../Life.h"
 
 
@@ -15,6 +16,7 @@ namespace Cure
 {
 class ContextObject;
 class NetworkAgent;
+class Packet;
 class TimeManager;
 class UserConnection;
 }
@@ -37,10 +39,11 @@ public:
 
 	Cure::GameObjectId GetAvatarId() const;
 	void SetAvatarId(Cure::GameObjectId pAvatarId);
+	void SendAvatar(const Cure::UserAccount::AvatarId& pAvatarId, Cure::Packet* pPacket);
 
 	void StoreFrameDiff(int pFrameDiff);
 	void QuerySendStriveTimes();
-	void SendPhysicsFrame(int pPhysicsFrameIndex);
+	void SendPhysicsFrame(int pPhysicsFrameIndex, Cure::Packet* pPacket = 0);
 	float GetPhysicsFrameAheadCount() const;
 
 private:

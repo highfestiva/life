@@ -167,7 +167,7 @@ void DesktopWindow::PurgeDeleted()
 void DesktopWindow::DoSetSize(int pWidth, int pHeight)
 {
 	Parent::DoSetSize(pWidth, pHeight);
-	PixelCoords lPos(GetScreenPos());
+	PixelCoord lPos(GetScreenPos());
 	mMouseArea.Set(lPos.x, lPos.y, lPos.x + pWidth, lPos.y + pHeight);
 }
 
@@ -404,7 +404,7 @@ void DesktopWindow::AddCleaner(Cleaner* pCleaner)
 	mCleanerList.unique();
 }
 
-Component::Type DesktopWindow::GetType()
+Component::Type DesktopWindow::GetType() const
 {
 	return Component::DESKTOPWINDOW;
 }

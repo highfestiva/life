@@ -70,7 +70,7 @@ public:
 
 	virtual bool OnMouseMove(int pMouseX, int pMouseY, int pDeltaX, int pDeltaY);
 
-	virtual Component::Type GetType();
+	virtual Type GetType() const;
 
 protected:
 	Button* SetButton(Button*& pMemberButton, Button* pNewButton);

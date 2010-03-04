@@ -160,13 +160,14 @@ public:
 
 	virtual bool SetAngularMotorAngle(JointID pJointId, float32 pAngle);
 	virtual bool SetAngularMotorSpeed(JointID pJointId, float32 pSpeed);
-	virtual bool SetAngularMotorMaxForce(JointID pJointId, float32 pMaxForce);
+	virtual bool SetMotorMaxForce(JointID pJointId, float32 pMaxForce);
 	virtual bool SetAngularMotorRoll(JointID pJointId, float32 pMaxForce, float32 pTargetVelocity);
 	virtual bool GetAngularMotorRoll(JointID pJointId, float32& pMaxForce, float32& pTargetVelocity);
 	virtual bool SetAngularMotorTurn(JointID pJointId, float32 pMaxForce, float32 pTargetVelocity);
 	virtual bool GetAngularMotorAngle(JointID pJointId, float32& pAngle) const;
 	virtual bool GetAngularMotorSpeed(JointID pJointId, float32& pSpeed) const;
 	virtual bool GetAngularMotorMaxForce(JointID pJointId, float32& pMaxForce) const;
+	virtual bool SetMotorTarget(JointID pJointId, float32 pMaxForce, float32 pTargetVelocity);
 
 	virtual bool SetJointParams(JointID pJointId, float32 pLowStop, float32 pHighStop, float32 pBounce);
 	virtual bool GetJointParams(JointID pJointId, float32& pLowStop, float32& pHighStop, float32& pBounce) const;
@@ -284,6 +285,8 @@ private:
 
 	bool GetHingeDiff(BodyID pBodyId, JointID pJointId, Joint1Diff& pDiff) const;
 	bool SetHingeDiff(BodyID pBodyId, JointID pJointId, const Joint1Diff& pDiff);
+	bool GetSliderDiff(BodyID pBodyId, JointID pJointId, Joint1Diff& pDiff) const;
+	bool SetSliderDiff(BodyID pBodyId, JointID pJointId, const Joint1Diff& pDiff);
 	bool GetUniversalDiff(BodyID pBodyId, JointID pJointId, Joint2Diff& pDiff) const;
 	bool SetUniversalDiff(BodyID pBodyId, JointID pJointId, const Joint2Diff& pDiff);
 	bool GetHinge2Diff(BodyID pBodyId, JointID pJointId, Joint3Diff& pDiff) const;

@@ -44,8 +44,9 @@ public:
 	uint64 GetReceivedByteCount() const;
 	unsigned GetConnectionCount() const;
 
-	bool SendStatusMessage(UdpVSocket* pSocket, int32 pInteger, RemoteStatus pStatus, wstr pMessage, Packet* pPacket);
-	bool SendNumberMessage(bool pSafe, UdpVSocket* pSocket, Cure::MessageNumber::InfoType pInfo, int32 pInteger, float32 pFloat);
+	bool SendStatusMessage(UdpVSocket* pSocket, int32 pInteger, RemoteStatus pStatus,
+		MessageStatus::InfoType pInfoType, wstr pMessage, Packet* pPacket);
+	bool SendNumberMessage(bool pSafe, UdpVSocket* pSocket, Cure::MessageNumber::InfoType pInfo, int32 pInteger, float32 pFloat, Packet* pPacket = 0);
 	bool SendObjectFullPosition(UdpVSocket* pSocket, GameObjectId pInstanceId, int32 pFrameIndex, const ObjectPositionalData& pData);
 	bool PlaceInSendBuffer(bool pSafe, UdpVSocket* pSocket, Packet* pPacket);
 

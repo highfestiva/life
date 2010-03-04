@@ -82,24 +82,32 @@ unsigned NetworkAgent::GetConnectionCount() const
 }
 
 
-bool NetworkAgent::SendStatusMessage(UdpVSocket* pSocket, int32 pInteger, RemoteStatus pStatus, wstr pMessage, Packet* pPacket)
+bool NetworkAgent::SendStatusMessage(UdpVSocket* pSocket, int32 pInteger, RemoteStatus pStatus,
+	MessageStatus::InfoType pInfoType, wstr pMessage, Packet* pPacket)
 {
 	pPacket->Release();
 	MessageStatus* lStatus = (MessageStatus*)mPacketFactory->GetMessageFactory()->Allocate(MESSAGE_TYPE_STATUS);
 	pPacket->AddMessage(lStatus);
-	lStatus->Store(pPacket, pStatus, pInteger, pMessage);
+	lStatus->Store(pPacket, pStatus, pInfoType, pInteger, pMessage);
 	bool lOk = PlaceInSendBuffer(true, pSocket, pPacket);
 	return (lOk);
 }
 
-bool NetworkAgent::SendNumberMessage(bool pSafe, UdpVSocket* pSocket, Cure::MessageNumber::InfoType pInfo, int32 pInteger, float32 pFloat)
+bool NetworkAgent::SendNumberMessage(bool pSafe, UdpVSocket* pSocket, MessageNumber::InfoType pInfo, int32 pInteger, float32 pFloat, Packet* pPacket)
 {
-	Packet* lPacket = mPacketFactory->Allocate();
+	Packet* lPacket = pPacket;
+	if (!pPacket)
+	{
+		lPacket = mPacketFactory->Allocate();
+	}
 	MessageNumber* lNumber = (MessageNumber*)mPacketFactory->GetMessageFactory()->Allocate(MESSAGE_TYPE_NUMBER);
 	lPacket->AddMessage(lNumber);
 	lNumber->Store(lPacket, pInfo, pInteger, pFloat);
 	bool lOk = PlaceInSendBuffer(pSafe, pSocket, lPacket);
-	GetPacketFactory()->Release(lPacket);
+	if (!pPacket)
+	{
+		GetPacketFactory()->Release(lPacket);
+	}
 	return (lOk);
 }
 

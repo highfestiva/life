@@ -1270,6 +1270,7 @@ Renderer::LightID Renderer::AddSpotLight(LightHint pHint, const Vector3DF& pPos,
 
 Material* Renderer::GetMaterial(MaterialType pMaterialType) const
 {
+	assert(pMaterialType >= MAT_NULL && pMaterialType <= NUM_MATERIALTYPES);
 	return mMaterial[pMaterialType];
 }
 
@@ -1320,11 +1321,8 @@ void Renderer::PrepareProjectionData()
 	float32 lFar;
 	GetViewFrustum(lFOVAngle, lNear, lFar);
 
-	PixelRect lViewPort(GetViewport());
-
 	const Canvas* lScreen = GetScreen();
 	float64 lAspect = (float64)lScreen->GetWidth() / (float64)lScreen->GetHeight();
-
 
 	// Convert to radians.
 	float64 lFOVAngleRad = (double)lFOVAngle * PI / 180.0;

@@ -116,7 +116,7 @@ public:
 		lCloseButton->SetPreferredSize(16, 16);
 		lCloseButton->SetMinSize(16, 16);
 
-		lCloseButton->SetOnUnclickedFunc(GUITestWindow, OnClose);
+		lCloseButton->SetOnClick(GUITestWindow, OnClose);
 
 		lCaption->SetRightButton(lCloseButton);
 
@@ -181,7 +181,7 @@ public:
 		lButton->SetText(_T("New Window"), Lepra::OFF_BLACK, Lepra::BLACK);
 		lButton->SetPreferredSize(0, 40);
 		lButton->SetMinSize(20, 20);
-		lButton->SetOnUnclickedFunc(GUITestWindow, OnNewWindow);
+		lButton->SetOnClick(GUITestWindow, OnNewWindow);
 		AddChild(lButton);
 	}
 

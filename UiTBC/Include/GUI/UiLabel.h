@@ -95,11 +95,11 @@ public:
 
 	virtual void Repaint(Painter* pPainter);
 
-	virtual PixelCoords GetPreferredSize(bool pForceAdaptive);
+	virtual PixelCoord GetPreferredSize(bool pForceAdaptive);
 
 	virtual void OnConnectedToDesktopWindow();
 
-	virtual Component::Type GetType();
+	virtual Type GetType() const;
 
 	virtual void SetSelected(bool pSelected);
 	virtual void SetKeyboardFocus();

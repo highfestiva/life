@@ -401,7 +401,7 @@ class PhysWriter(ChunkyWriter):
                 self._writefloat(float(node.get_fixed_attribute("bounce")))
                 rootindex = -1 if not node.phys_root else self.bodies.index(node.phys_root)
                 self._writeint(rootindex)
-                joints = {None:1, "exclude":1, "suspend_hinge":2, "hinge2":3, "hinge":4, "ball":5, "universal":6}
+                joints = {None:1, "exclude":1, "suspend_hinge":2, "hinge2":3, "hinge":4, "ball":5, "slider":6, "universal":7}
                 jointtype = node.get_fixed_attribute("joint", True)
                 jointvalue = joints[jointtype]
                 #print(node.getName(), "is jointed by type", jointvalue)
@@ -419,34 +419,15 @@ class PhysWriter(ChunkyWriter):
 
                 yaw = node.get_fixed_attribute("joint_yaw", True, 0.0)*math.pi/180
                 pitch = node.get_fixed_attribute("joint_pitch", True, 0.0)*math.pi/180
-##                m = mat4.identity()
-##                m.setMat3(mat3.fromEulerXZY(0, pitch, yaw))
-##                v = ir * m * vec4(0,0,1,0)
-##                # Project onto XY plane.
-##                xyv = vec3(v[:3])
-##                xyv[2] = 0
-##                if xyv.length() < 1e-12:
-##                        yaw = 0
-##                        if v[2] < 0:
-##                                pitch = math.pi
-##                        else:
-##                                pitch = 0
-##                else:
-##                        xyv = xyv.normalize()
-##                        # Yaw is angle of projection on the XY plane.
-##                        if xyv.length():
-##                                yaw = math.asin(xyv.y/xyv.length())
-##                        else:
-##                                yaw = 0
-##                        v = v.normalize()
-##                        v = vec3(v[:3])
-##                        pitch = math.asin(v*xyv)
                 if options.options.verbose and jointvalue >= 2:
                         print("Joint %s euler angles are: %s." % (node.getName(), (yaw, pitch)))
                 parameters[2:4] = yaw, pitch
 
-                joint_min, joint_max = node.get_fixed_attribute("joint_angles", True, [0.0,0.0])
-                parameters[4:6] = math.radians(joint_min), math.radians(joint_max)
+                joint_min, joint_max = node.get_fixed_attribute("joint_stops", True, [0.0,0.0])
+                if jointtype == "slider":
+                        parameters[4:6] = joint_min, joint_max
+                else:
+                        parameters[4:6] = math.radians(joint_min), math.radians(joint_max)
 
                 mp = node.get_world_pivot_transform()
                 mt = node.get_world_transform()
@@ -480,7 +461,7 @@ class PhysWriter(ChunkyWriter):
 
         def _writeengine(self, node):
                 # Write all general parameters first.
-                types = {"walk":1, "cam_flat_push":2, "lifter":3, "hinge_roll":4, "hinge_gyro":5, "hinge_break":6, "hinge_torque":7, "hinge2_turn":8, "rotor":9, "tilter":10, "glue":11}
+                types = {"walk":1, "cam_flat_push":2, "hover":3, "hinge_roll":4, "hinge_gyro":5, "hinge_break":6, "hinge_torque":7, "hinge2_turn":8, "rotor":9, "tilter":10, "slider_force":11, "glue":12}
                 self._writeint(types[node.get_fixed_attribute("type")])
                 totalmass = self._gettotalmass()
                 self._writefloat(node.get_fixed_attribute("strength")*totalmass)

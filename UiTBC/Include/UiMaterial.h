@@ -132,6 +132,7 @@ public:
 	bool IsEmpty() { return mGeometryGroupList.empty(); }
 
 	virtual void RenderAllGeometry(unsigned int pCurrentFrame);
+	virtual void RenderGeometry(TBC::GeometryBase* pGeometry) = 0;
 
 	TBC::GeometryBase* GetFirstGeometry();
 	TBC::GeometryBase* GetNextGeometry();
@@ -144,7 +145,6 @@ protected:
 	typedef std::list<GeometryGroup*> GeometryGroupList;
 
 	Renderer::TextureID GetGroupTextureID(TBC::GeometryBase* pGeometry);
-	virtual void RenderGeometry(TBC::GeometryBase* pGeometry) = 0;
 	inline GeometryGroupList* GetGeometryGroupList();
 
 private:

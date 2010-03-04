@@ -65,7 +65,7 @@ public:
 	virtual void OnConnectedToDesktopWindow();
 	virtual void OnIdle();
 
-	inline virtual Component::Type GetType();
+	inline virtual Type GetType() const;
 
 	inline void SetOwner(Component* pOwner);
 
@@ -83,7 +83,7 @@ protected:
 	void OnScrollBR(Button* pButton);
 	void OnStopScroll(Button* pButton);
 	void OnScrollerDown(Button* pButton);
-	void OnScrollerDragged(Button* pButton, int pDeltaX, int pDeltaY);
+	bool OnScrollerDragged(Button* pButton, int pDeltaX, int pDeltaY);
 
 private:
 
@@ -166,7 +166,7 @@ void ScrollBar::SetStaticScrollerSize(int pScrollerSize)
 	SetNeedsRepaint(true);
 }
 
-Component::Type ScrollBar::GetType()
+Component::Type ScrollBar::GetType() const
 {
 	return Component::SCROLLBAR;
 }

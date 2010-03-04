@@ -40,6 +40,7 @@ Window::Window(const str& pName,
 	mCenterComponent = new RectComponent(_T("CenterComponent"), new GridLayout(2, 1));
 	mCenterComponent->AddChild(mClientRect, 1, 0);
 	Parent::AddChild(mCenterComponent);
+	Init();
 }
 
 Window::Window(unsigned pBorderStyle,
@@ -125,6 +126,7 @@ Window::Window(const Color& pColor,
 	mCenterComponent = new RectComponent(_T("CenterComponent"), new GridLayout(2, 1));
 	mCenterComponent->AddChild(mClientRect, 1, 0);
 	Parent::AddChild(mCenterComponent);
+	Init();
 }
 
 Window::Window(Painter::ImageID pImageID,
@@ -152,6 +154,7 @@ Window::Window(Painter::ImageID pImageID,
 	mCenterComponent = new RectComponent(_T("CenterComponent"), new GridLayout(2, 1));
 	mCenterComponent->AddChild(mClientRect, 1, 0);
 	Parent::AddChild(mCenterComponent);
+	Init();
 }
 
 Window::~Window()
@@ -376,7 +379,7 @@ void Window::SetCaption(Caption* pCaption)
 	}
 }
 
-PixelRect Window::GetClientRect()
+PixelRect Window::GetClientRect() const
 {
 	return mCenterComponent->GetScreenRect();
 }

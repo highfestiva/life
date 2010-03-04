@@ -306,7 +306,7 @@ bool TreeNode::ValidateExpandButton()
 		mExpandButton->SetPreferredSize(lIMan->GetImageSize(mExpandIconID));
 		mExpandButton->SetMinSize(mExpandButton->GetPreferredSize());
 
-		mExpandButton->SetOnUnclickedFunc(TreeNode, OnExpandButtonUnclicked);
+		mExpandButton->SetOnClick(TreeNode, OnExpandButtonUnclicked);
 
 		// Create a rect with a CenterLayout in order to keep the button centered.
 		RectComponent* lRect = new RectComponent(_T("ExpandButtonRect"), new CenterLayout());

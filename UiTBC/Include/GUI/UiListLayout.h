@@ -4,18 +4,23 @@
 	Copyright (c) 2002-2009, Righteous Games
 */
 
-#ifndef UILISTLAYOUT_H
-#define UILISTLAYOUT_H
+
+
+#pragma once
 
 #include "UiLayout.h"
 #include <list>
 #include "../../../Lepra/Include/HashTable.h"
 #include "../../../Lepra/Include/LooseBinTree.h"
 
+
+
 namespace UiTbc
 {
 
-class ListLayout : public Layout
+
+
+class ListLayout: public Layout
 {
 public:
 	enum ListType
@@ -27,9 +32,9 @@ public:
 	ListLayout(ListType pListType = COLUMN);
 	virtual ~ListLayout();
 
-	virtual Type GetType();
+	virtual Type GetType() const;
 	
-	inline ListType GetListType() const;
+	ListType GetListType() const;
 
 	typedef std::list<Component*> ComponentList;
 
@@ -57,7 +62,6 @@ public:
 
 	virtual Component* GetFirst();
 	virtual Component* GetNext();
-
 	virtual Component* GetLast();
 	virtual Component* GetPrev();
 
@@ -66,25 +70,25 @@ public:
 
 	virtual void UpdateLayout();
 
-	virtual PixelCoords GetPreferredSize(bool pForceAdaptive);
-	virtual PixelCoords GetMinSize();
-	virtual PixelCoords GetContentSize();
+	virtual PixelCoord GetPreferredSize(bool pForceAdaptive);
+	virtual PixelCoord GetMinSize() const;
+	virtual PixelCoord GetContentSize() const;
 
-	inline void SetPosOffset(int pDX, int pDY);
-	inline int GetPosDX() const;
-	inline int GetPosDY() const;
+	void SetPosOffset(int pDX, int pDY);
+	int GetPosDX() const;
+	int GetPosDY() const;
 
 	// Indentation is given in pixels. This is the indentation per "level".
 	// See Add(Component* , ...) for more details.
-	inline void SetIndentationSize(int pIndentationSize);
-	inline int GetIndentationSize() const;
+	void SetIndentationSize(int pIndentationSize);
+	int GetIndentationSize() const;
 
 	// HW = Height or Width. Depends on ListType:
 	// COLUMN -> Height
 	// ROW -> Width
-	inline float64 GetAverageComponentHW();
+	float64 GetAverageComponentHW() const;
 
-	inline bool IsEmpty();
+	bool IsEmpty() const;
 
 protected:
 private:
@@ -124,7 +128,7 @@ private:
 	ComponentTree mComponentTree;
 	ComponentTable mComponentTable;
 
-	PixelCoords mContentSize;
+	PixelCoord mContentSize;
 
 	int mPosDX;
 	int mPosDY;
@@ -135,57 +139,6 @@ private:
 	ListType mListType;
 };
 
-ListLayout::ListType ListLayout::GetListType() const
-{
-	return mListType;
+
+
 }
-
-void ListLayout::SetPosOffset(int pDX, int pDY)
-{
-	mPosDX = pDX;
-	mPosDY = pDY;
-}
-
-int ListLayout::GetPosDX() const
-{
-	return mPosDX;
-}
-
-int ListLayout::GetPosDY() const
-{
-	return mPosDY;
-}
-
-float64 ListLayout::GetAverageComponentHW()
-{
-	float64 lHW = 0;
-	if (mListType == COLUMN)
-	{
-		lHW = (float64)mContentSize.y / (float64)mNodeList.size();
-	}
-	else // if (mListType == ROW)
-	{
-		lHW = (float64)mContentSize.x / (float64)mNodeList.size();
-	}
-
-	return lHW;
-}
-
-bool ListLayout::IsEmpty()
-{
-	return mNodeList.empty();
-}
-
-void ListLayout::SetIndentationSize(int pIndentationSize)
-{
-	mIndentationSize = pIndentationSize;
-}
-
-int ListLayout::GetIndentationSize() const
-{
-	return mIndentationSize;
-}
-
-} // End namespace.
-
-#endif

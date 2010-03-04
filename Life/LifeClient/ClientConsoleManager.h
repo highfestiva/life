@@ -6,12 +6,16 @@
 
 #pragma once
 
-#include "../../Lepra/Include/Graphics2D.h"
-#include "../../UiTBC/Include/GUI/UiTextField.h"
 #include "../ConsoleManager.h"
 
 
 
+namespace UiTbc
+{
+class Component;
+class TextArea;
+class TextField;
+}
 namespace UiCure
 {
 class GameUiManager;

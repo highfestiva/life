@@ -16,7 +16,7 @@
 namespace UiTbc
 {
 
-Material* OpenGLRenderer::CreateMaterial(Renderer::MaterialType pMaterialType)
+Material* OpenGLRenderer::CreateMaterial(MaterialType pMaterialType)
 {
 	switch(pMaterialType)
 	{
@@ -69,10 +69,10 @@ OpenGLRenderer::OpenGLRenderer(Canvas* pScreen) :
 	mTMapIDManager(10001, 1000000, INVALID_TEXTURE),	// 1-10000 is reserved by Painter.
 	mGLClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 {
-	Renderer::InitRenderer();
+	InitRenderer();
 
 	float r, g, b;
-	Renderer::GetAmbientLight(r, g, b);
+	GetAmbientLight(r, g, b);
 	SetAmbientLight(r, g, b);
 
 	glGetIntegerv(GL_MAX_TEXTURE_UNITS, &mNumTextureUnits);
@@ -84,26 +84,26 @@ OpenGLRenderer::OpenGLRenderer(Canvas* pScreen) :
 
 OpenGLRenderer::~OpenGLRenderer()
 {
-	Renderer::CloseRenderer();
+	CloseRenderer();
 }
 
 void OpenGLRenderer::Clear(unsigned int pClearFlags)
 {
 	mGLClearMask = 0;
 
-	if (Renderer::CheckFlag(pClearFlags, CLEAR_COLORBUFFER))
+	if (CheckFlag(pClearFlags, CLEAR_COLORBUFFER))
 	{
 		mGLClearMask |= GL_COLOR_BUFFER_BIT;
 	}
-	if (Renderer::CheckFlag(pClearFlags, CLEAR_DEPTHBUFFER))
+	if (CheckFlag(pClearFlags, CLEAR_DEPTHBUFFER))
 	{
 		mGLClearMask |= GL_DEPTH_BUFFER_BIT;
 	}
-	if (Renderer::CheckFlag(pClearFlags, CLEAR_STENCILBUFFER))
+	if (CheckFlag(pClearFlags, CLEAR_STENCILBUFFER))
 	{
 		mGLClearMask |= GL_STENCIL_BUFFER_BIT;
 	}
-	if (Renderer::CheckFlag(pClearFlags, CLEAR_ACCUMULATIONBUFFER))
+	if (CheckFlag(pClearFlags, CLEAR_ACCUMULATIONBUFFER))
 	{
 		mGLClearMask |= GL_ACCUM_BUFFER_BIT;
 	}
@@ -127,23 +127,23 @@ void OpenGLRenderer::SetClearColor(const Color& pColor)
 
 void OpenGLRenderer::SetViewport(const PixelRect& pViewport)
 {
-	Renderer::SetViewport(pViewport);
+	Parent::SetViewport(pViewport);
 	glViewport(pViewport.mLeft, GetScreen()->GetHeight() - pViewport.mBottom, 
 		pViewport.GetWidth(), pViewport.GetHeight());
 }
 
 void OpenGLRenderer::SetViewFrustum(float pFOVAngle, float pNear, float pFar)
 {
-	Renderer::SetViewFrustum(pFOVAngle, pNear, pFar);
+	Parent::SetViewFrustum(pFOVAngle, pNear, pFar);
 	glMatrixMode(GL_PROJECTION);
-	Perspective(pFOVAngle, Renderer::GetAspectRatio(), pNear, pFar);
+	Perspective(pFOVAngle, GetAspectRatio(), pNear, pFar);
 
 	glMatrixMode(GL_MODELVIEW);
 }
 
 void OpenGLRenderer::SetClippingRect(const PixelRect& pRect)
 {
-	Renderer::SetClippingRect(pRect);
+	Parent::SetClippingRect(pRect);
 	glScissor(pRect.mLeft, 
 		  GetScreen()->GetHeight() - pRect.mBottom, 
 		  pRect.GetWidth(), pRect.GetHeight());
@@ -151,8 +151,8 @@ void OpenGLRenderer::SetClippingRect(const PixelRect& pRect)
 
 void OpenGLRenderer::ResetClippingRect()
 {
-	Renderer::ResetClippingRect();
-	const PixelRect& lClippingRect = Renderer::GetClippingRect();
+	Parent::ResetClippingRect();
+	const PixelRect& lClippingRect = GetClippingRect();
 	glScissor(lClippingRect.mLeft, 
 		  GetScreen()->GetHeight() - lClippingRect.mBottom, 
 		  lClippingRect.GetWidth(), lClippingRect.GetHeight());
@@ -162,11 +162,11 @@ void OpenGLRenderer::SetShadowsEnabled(bool pEnabled, ShadowHint pHint)
 {
 	if (UiLepra::OpenGLExtensions::ShadowMapsSupported() == true)
 	{
-		Renderer::SetShadowsEnabled(pEnabled, pHint);
+		Parent::SetShadowsEnabled(pEnabled, pHint);
 	}
 	else
 	{
-		Renderer::SetShadowsEnabled(pEnabled, Renderer::SH_VOLUMES_ONLY);
+		Parent::SetShadowsEnabled(pEnabled, SH_VOLUMES_ONLY);
 	}
 }
 
@@ -188,7 +188,7 @@ void OpenGLRenderer::SetDepthTestEnabled(bool pEnabled)
 
 void OpenGLRenderer::SetAmbientLight(float pRed, float pGreen, float pBlue)
 {
-	Renderer::SetAmbientLight(pRed, pGreen, pBlue);
+	Parent::SetAmbientLight(pRed, pGreen, pBlue);
 
 	float lAmbientLight[] = {pRed, pGreen, pBlue, 1.0f};
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lAmbientLight);
@@ -198,9 +198,9 @@ void OpenGLRenderer::AddAmbience(float pRed, float pGreen, float pBlue)
 {
 	if (pRed != 0 || pGreen != 0 || pBlue != 0)
 	{
-		Renderer::AddAmbience(pRed, pGreen, pBlue);
+		Parent::AddAmbience(pRed, pGreen, pBlue);
 		float lAmbientLight[4];
-		Renderer::GetAmbientLight(lAmbientLight[0], lAmbientLight[1], lAmbientLight[2]);
+		GetAmbientLight(lAmbientLight[0], lAmbientLight[1], lAmbientLight[2]);
 		lAmbientLight[3] = 1.0f;
 		glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lAmbientLight);
 	}
@@ -225,7 +225,7 @@ Renderer::LightID OpenGLRenderer::AddDirectionalLight(LightHint pHint,
 						      float pRed, float pGreen, float pBlue,
 						      float pShadowRange)
 {
-	Renderer::LightID lLightID = Renderer::AddDirectionalLight(pHint, pDirX, pDirY, pDirZ, pRed, pGreen, pBlue, pShadowRange);
+	LightID lLightID = Parent::AddDirectionalLight(pHint, pDirX, pDirY, pDirZ, pRed, pGreen, pBlue, pShadowRange);
 	SetupGLLight((int)lLightID, GetLightData((int)lLightID));
 	return lLightID;
 }
@@ -236,7 +236,7 @@ Renderer::LightID OpenGLRenderer::AddPointLight(LightHint pHint,
 						float pLightRadius,
 						float pShadowRange)
 {
-	Renderer::LightID lLightID = Renderer::AddPointLight(pHint, pPosX, pPosY, pPosZ, pRed, pGreen, pBlue, pLightRadius, pShadowRange);
+	LightID lLightID = Parent::AddPointLight(pHint, pPosX, pPosY, pPosZ, pRed, pGreen, pBlue, pLightRadius, pShadowRange);
 	SetupGLLight((int)lLightID, GetLightData((int)lLightID));
 	return lLightID;
 }
@@ -250,7 +250,7 @@ Renderer::LightID OpenGLRenderer::AddSpotLight(LightHint pHint,
 					       float pLightRadius,
 					       float pShadowRange)
 {
-	Renderer::LightID lLightID = Renderer::AddSpotLight(pHint, 
+	LightID lLightID = Parent::AddSpotLight(pHint, 
 		pPosX, pPosY, pPosZ, 
 		pDirX, pDirY, pDirZ, 
 		pRed, pGreen, pBlue, 
@@ -262,12 +262,12 @@ Renderer::LightID OpenGLRenderer::AddSpotLight(LightHint pHint,
 	return lLightID;
 }
 
-void OpenGLRenderer::SetupGLLight(int pLightIndex, const Renderer::LightData& pLight)
+void OpenGLRenderer::SetupGLLight(int pLightIndex, const LightData& pLight)
 {
 	GLenum lLight = GL_LIGHT0 + pLightIndex;
 	glEnable(lLight);
 
-	if (pLight.mType != Renderer::LIGHT_SPOT)
+	if (pLight.mType != LIGHT_SPOT)
 	{
 		int l180 = 180;
 		glLighti(lLight, GL_SPOT_CUTOFF, l180);
@@ -277,8 +277,8 @@ void OpenGLRenderer::SetupGLLight(int pLightIndex, const Renderer::LightData& pL
 	}
 
 	float lPos[4];
-	if (pLight.mType == Renderer::LIGHT_POINT ||
-	   pLight.mType == Renderer::LIGHT_SPOT)
+	if (pLight.mType == LIGHT_POINT ||
+	   pLight.mType == LIGHT_SPOT)
 	{
 		Vector3DF lLightPos = GetCameraTransformation().InverseTransform(pLight.mPosition);
 		lPos[0] = (float)lLightPos.x;
@@ -286,7 +286,7 @@ void OpenGLRenderer::SetupGLLight(int pLightIndex, const Renderer::LightData& pL
 		lPos[2] = (float)lLightPos.z;
 		lPos[3] = 1.0f;
 
-		if (pLight.mType == Renderer::LIGHT_SPOT)
+		if (pLight.mType == LIGHT_SPOT)
 		{
 			Vector3DF lLightDir = GetCameraTransformation().GetOrientation().GetInverseRotatedVector(pLight.mDirection);
 
@@ -306,7 +306,7 @@ void OpenGLRenderer::SetupGLLight(int pLightIndex, const Renderer::LightData& pL
 		glLightfv(lLight, GL_LINEAR_ATTENUATION, &lLinear);
 		glLightfv(lLight, GL_QUADRATIC_ATTENUATION, &lQuad);
 	}
-	else if(pLight.mType == Renderer::LIGHT_DIRECTIONAL)
+	else if(pLight.mType == LIGHT_DIRECTIONAL)
 	{
 		lPos[0] = -(float)pLight.mDirection.x;
 		lPos[1] = -(float)pLight.mDirection.y;
@@ -331,7 +331,7 @@ void OpenGLRenderer::SetupGLLight(int pLightIndex, const Renderer::LightData& pL
 
 void OpenGLRenderer::RemoveLight(LightID pLightID)
 {
-	Renderer::RemoveLight(pLightID);
+	Parent::RemoveLight(pLightID);
 	GLenum lLight = (int)pLightID;
 	glDisable(lLight);
 }
@@ -340,15 +340,15 @@ void OpenGLRenderer::RemoveLight(LightID pLightID)
 
 void OpenGLRenderer::SetLightPosition(LightID pLightID, float pX, float pY, float pZ)
 {
-	Renderer::SetLightPosition(pLightID, pX, pY, pZ);
+	Parent::SetLightPosition(pLightID, pX, pY, pZ);
 	int lLightIndex = (int)pLightID;
 
 	if (lLightIndex == INVALID_LIGHT)
 		return;
 
 	LightData& lLightData = GetLightData(lLightIndex);
-	if (lLightData.mType == Renderer::LIGHT_POINT ||
-	   lLightData.mType == Renderer::LIGHT_SPOT)
+	if (lLightData.mType == LIGHT_POINT ||
+	   lLightData.mType == LIGHT_SPOT)
 	{
 		float lVector[4];
 		lVector[0] = pX;
@@ -365,7 +365,7 @@ void OpenGLRenderer::SetLightPosition(LightID pLightID, float pX, float pY, floa
 
 void OpenGLRenderer::SetLightDirection(LightID pLightID, float pX, float pY, float pZ)
 {
-	Renderer::SetLightDirection(pLightID, pX, pY, pZ);
+	Parent::SetLightDirection(pLightID, pX, pY, pZ);
 
 	int lLightIndex = (int)pLightID;
 
@@ -373,12 +373,12 @@ void OpenGLRenderer::SetLightDirection(LightID pLightID, float pX, float pY, flo
 		return;
 
 	LightData& lLightData = GetLightData(lLightIndex);
-	if (lLightData.mType == Renderer::LIGHT_DIRECTIONAL ||
-	   lLightData.mType == Renderer::LIGHT_SPOT)
+	if (lLightData.mType == LIGHT_DIRECTIONAL ||
+	   lLightData.mType == LIGHT_SPOT)
 	{
 		GLenum lLight = GL_LIGHT0 + lLightIndex;
 
-		if (lLightData.mType == Renderer::LIGHT_DIRECTIONAL)
+		if (lLightData.mType == LIGHT_DIRECTIONAL)
 		{
 			float lVector[4];
 			lVector[0] = -pX;
@@ -443,9 +443,9 @@ void OpenGLRenderer::SetGlobalMaterialReflectance(float pRed, float pGreen, floa
 	}
 }
 
-Renderer::TextureData* OpenGLRenderer::CreateTextureData(Renderer::TextureID pTextureID)
+Renderer::TextureData* OpenGLRenderer::CreateTextureData(TextureID pTextureID)
 {
-	return new Renderer::TextureData(pTextureID, mTMapIDManager.GetInvalidId());
+	return new Parent::TextureData(pTextureID, mTMapIDManager.GetInvalidId());
 }
 
 Renderer::GeometryData* OpenGLRenderer::CreateGeometryData()
@@ -471,9 +471,7 @@ const Canvas* OpenGLRenderer::GetMap(int pMapType, int pMipMapLevel, Texture* pU
 	};
 }
 
-void OpenGLRenderer::BindMap(int pMapType,
-			     Renderer::TextureData* pTextureData,
-			     Texture* pTexture)
+void OpenGLRenderer::BindMap(int pMapType, TextureData* pTextureData, Texture* pTexture)
 {
 	assert(pMapType >= 0 && pMapType < Texture::NUM_MAPS);
 
@@ -509,8 +507,7 @@ void OpenGLRenderer::BindMap(int pMapType,
 	}
 }
 
-void OpenGLRenderer::BindCubeMap(Renderer::TextureData* pTextureData,
-				 Texture* pTexture)
+void OpenGLRenderer::BindCubeMap(TextureData* pTextureData, Texture* pTexture)
 {
 	// Compress textures if possible.
 	bool lCompress = UiLepra::OpenGLExtensions::CompressedTexturesSupported() &&
@@ -593,7 +590,7 @@ void OpenGLRenderer::BindCubeMap(Renderer::TextureData* pTextureData,
 	}
 }
 
-void OpenGLRenderer::ReleaseMap(Renderer::TextureData* pTextureData)
+void OpenGLRenderer::ReleaseMap(TextureData* pTextureData)
 {
 	for (int i = 0; i < Texture::NUM_MAPS; i++)
 	{
@@ -612,7 +609,7 @@ void OpenGLRenderer::ReleaseMap(Renderer::TextureData* pTextureData)
 }
 
 void OpenGLRenderer::BindGeometry(TBC::GeometryBase* pGeometry,
-				  Renderer::GeometryID /*pID*/,
+				  GeometryID /*pID*/,
 				  MaterialType pMaterialType)
 {
 	// A hard coded check to make life easier for the user.
@@ -795,13 +792,13 @@ bool OpenGLRenderer::BindShadowGeometry(UiTbc::ShadowVolume* pShadowVolume, Ligh
 		switch(pShadowVolume->GetGeometryVolatility())
 		{
 		case TBC::GeometryBase::GEOM_STATIC:
-			if (pLightHint == Renderer::LIGHT_MOVABLE)
+			if (pLightHint == LIGHT_MOVABLE)
 				lGLHint = GL_STREAM_DRAW;
 			else
 				lGLHint = GL_STATIC_DRAW;
 			break;
 		case TBC::GeometryBase::GEOM_DYNAMIC:
-			if (pLightHint == Renderer::LIGHT_MOVABLE)
+			if (pLightHint == LIGHT_MOVABLE)
 				lGLHint = GL_STREAM_DRAW;
 			else
 				lGLHint = GL_DYNAMIC_DRAW;
@@ -876,7 +873,7 @@ void OpenGLRenderer::UpdateGeometry(GeometryID pGeometryID)
 
 				// Only reset the flag if there are no shadows to update.
 				// The flag will be reset when the shadows are updated.
-				if (lGeomData->mShadow == Renderer::NO_SHADOWS)
+				if (lGeomData->mShadow == NO_SHADOWS)
 				{
 					lGeometry->SetVertexDataChanged(false);
 				}
@@ -956,7 +953,7 @@ void OpenGLRenderer::ReleaseGeometry(TBC::GeometryBase* pUserGeometry, GeomRelea
 		mBufferIDManager.RecycleId(lGeometry->mIndexBufferID);
 	}
 
-	if (pOption == Renderer::GRO_REMOVE_FROM_MATERIAL)
+	if (pOption == GRO_REMOVE_FROM_MATERIAL)
 	{
 		OpenGLMaterial* lMat = (OpenGLMaterial*)GetMaterial(lGeometry->mMaterialType);
 		if (lMat->RemoveGeometry(pUserGeometry) == Material::NOT_REMOVED)
@@ -972,7 +969,7 @@ void OpenGLRenderer::ReleaseGeometry(TBC::GeometryBase* pUserGeometry, GeomRelea
 
 bool OpenGLRenderer::ChangeMaterial(GeometryID pGeometryID, MaterialType pMaterialType)
 {
-	if ((int)pMaterialType < 0 || (int)pMaterialType >= Renderer::NUM_MATERIALTYPES)
+	if ((int)pMaterialType < 0 || (int)pMaterialType >= NUM_MATERIALTYPES)
 	{
 		mLog.Errorf(_T("ChangeMaterial() - Material %i is not a valid material ID!"), (int)pMaterialType);
 		return (false);
@@ -1012,7 +1009,7 @@ bool OpenGLRenderer::PreRender(TBC::GeometryBase* pGeometry)
 	glMatrixMode(GL_MODELVIEW);
 	glLoadMatrixf(lModelViewMatrix);
 
-	return Renderer::CheckCulling(lCamSpaceTransformation, pGeometry->GetBoundingRadius());
+	return CheckCulling(lCamSpaceTransformation, pGeometry->GetBoundingRadius());
 }
 
 void OpenGLRenderer::PostRender(TBC::GeometryBase* pGeometry)
@@ -1050,7 +1047,7 @@ unsigned int OpenGLRenderer::RenderScene()
 
 	{
 		// Prepare projection data in order to be able to call CheckCulling().
-		Renderer::PrepareProjectionData();
+		PrepareProjectionData();
 
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
@@ -1061,7 +1058,7 @@ unsigned int OpenGLRenderer::RenderScene()
 		//Reset viewport and frustum every frame. This may look silly,
 		//but the Get-functions will return the values stored in Renderer,
 		//while the Set-functions are virtual and will call the OpenGLRenderer-ditto.
-		Renderer::SetViewport(GetViewport());
+		SetViewport(GetViewport());
 		float lFOVAngle;
 		float lNear;
 		float lFar;
@@ -1079,7 +1076,7 @@ unsigned int OpenGLRenderer::RenderScene()
 		glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, 1);
 	}
 	{
-		Renderer::UpdateShadowMaps();
+		UpdateShadowMaps();
 	}
 
 	// Now it's time to render the scene...
@@ -1129,7 +1126,7 @@ unsigned int OpenGLRenderer::RenderScene()
 
 			// Render all shadow maps. In this step, we only render the shadows
 			// using alpha testing to the stencil buffer (no output to the color buffer).
-			if (GetNumSpotLights() > 0 && GetShadowHint() == Renderer::SH_VOLUMES_AND_MAPS)
+			if (GetNumSpotLights() > 0 && GetShadowHint() == SH_VOLUMES_AND_MAPS)
 				RenderShadowMaps();
 
 			// Render scene with stencil shadows.
@@ -1167,7 +1164,7 @@ unsigned int OpenGLRenderer::RenderScene()
 	{
 		for (int i = 0; i < GetLightCount(); i++)
 		{
-			Renderer::LightData& lLight = GetLightData(GetLightIndex(i));
+			LightData& lLight = GetLightData(GetLightIndex(i));
 			lLight.mTransformationChanged = false;
 		}
 
@@ -1177,6 +1174,43 @@ unsigned int OpenGLRenderer::RenderScene()
 	}
 
 	return GetCurrentFrame();
+}
+
+void OpenGLRenderer::RenderRelative(TBC::GeometryBase* pGeometry)
+{
+	::glMatrixMode(GL_PROJECTION);
+	::glPushMatrix();
+	::glMatrixMode(GL_MODELVIEW);
+	::glPushMatrix();
+
+	ResetClippingRect();
+	// Reset viewport and frustum every frame. This may look silly,
+	// but the Get-functions will return the values stored in Renderer,
+	// while the Set-functions are virtual and will call the OpenGLRenderer-ditto.
+	SetViewport(GetViewport());
+	float lFOVAngle;
+	float lNear;
+	float lFar;
+	GetViewFrustum(lFOVAngle, lNear, lFar);
+	SetViewFrustum(lFOVAngle, lNear, lFar);
+
+	float lModelViewMatrix[16];
+	pGeometry->GetTransformation().GetAs4x4TransposeMatrix(lModelViewMatrix);
+	::glMatrixMode(GL_MODELVIEW);
+	::glLoadMatrixf(lModelViewMatrix);
+
+	GeometryData* lGeometryData = (GeometryData*)pGeometry->GetRendererData();
+	if (lGeometryData)
+	{
+		GetMaterial(lGeometryData->mMaterialType)->RenderGeometry(pGeometry);
+	}
+
+	PostRender(pGeometry);
+
+	::glMatrixMode(GL_PROJECTION);
+	::glPopMatrix();
+	::glMatrixMode(GL_MODELVIEW);
+	::glPopMatrix();
 }
 
 int OpenGLRenderer::GetEnvMapID()
@@ -1218,9 +1252,9 @@ void OpenGLRenderer::ProcessLights()
 	// Transform all light positions.
 	for (i = 0; i < GetLightCount(); i++)
 	{
-		Renderer::LightData& lLight = GetLightData(GetLightIndex(i));
+		LightData& lLight = GetLightData(GetLightIndex(i));
 
-		if (lLight.mType == Renderer::LIGHT_DIRECTIONAL)
+		if (lLight.mType == LIGHT_DIRECTIONAL)
 		{
 			Vector3DF lLightDir = GetCameraTransformation().GetOrientation().GetInverseRotatedVector(lLight.mDirection);
 			float lPos[4] =
@@ -1233,7 +1267,7 @@ void OpenGLRenderer::ProcessLights()
 
 			glLightfv(GL_LIGHT0 + GetLightIndex(i), GL_POSITION, lPos);
 		}
-		else if(lLight.mType == Renderer::LIGHT_POINT)
+		else if(lLight.mType == LIGHT_POINT)
 		{
 			Vector3DF lLightPos = GetCameraTransformation().InverseTransform(lLight.mPosition);
 			float lPos[4] =
@@ -1246,7 +1280,7 @@ void OpenGLRenderer::ProcessLights()
 
 			glLightfv(GL_LIGHT0 + GetLightIndex(i), GL_POSITION, lPos);
 		}
-		else if(lLight.mType == Renderer::LIGHT_SPOT)
+		else if(lLight.mType == LIGHT_SPOT)
 		{
 			Vector3DF lLightPos = GetCameraTransformation().InverseTransform(lLight.mPosition);
 			Vector3DF lLightDir = GetCameraTransformation().GetOrientation().GetInverseRotatedVector(lLight.mDirection);
@@ -1268,7 +1302,7 @@ void OpenGLRenderer::ProcessLights()
 			glLightfv(GL_LIGHT0 + GetLightIndex(i), GL_POSITION, lPos);
 			glLightfv(GL_LIGHT0 + GetLightIndex(i), GL_SPOT_DIRECTION, lDir);
 
-			if (GetShadowHint() == Renderer::SH_VOLUMES_AND_MAPS)
+			if (GetShadowHint() == SH_VOLUMES_AND_MAPS)
 			{
 				/*
 					Update shadow map.
@@ -1455,9 +1489,9 @@ int OpenGLRenderer::RenderShadowMaps()
 	int lCount = 0;
 	for (i = 0; i < GetLightCount(); i++)
 	{
-		Renderer::LightData& lLight = GetLightData(GetLightIndex(i));
+		LightData& lLight = GetLightData(GetLightIndex(i));
 
-		if (lLight.mType == Renderer::LIGHT_SPOT && lLight.mShadowMapID != 0)
+		if (lLight.mType == LIGHT_SPOT && lLight.mShadowMapID != 0)
 		{
 			glBindTexture(GL_TEXTURE_2D, lLight.mShadowMapID);
 
@@ -1470,7 +1504,7 @@ int OpenGLRenderer::RenderShadowMaps()
 			glMultMatrixf(lLight.mLightProjectionMatrix);
 			glGetFloatv(GL_TEXTURE_MATRIX, slTextureMatrix);
 
-			Renderer::LightData::GeometrySet::Iterator lGeoIter;
+			LightData::GeometrySet::Iterator lGeoIter;
 			for (lGeoIter = lLight.mShadowMapGeometrySet.First();
 				lGeoIter != lLight.mShadowMapGeometrySet.End();
 				++lGeoIter)
@@ -1551,7 +1585,7 @@ int OpenGLRenderer::RenderShadowMaps()
 	return lCount;
 }
 
-void OpenGLRenderer::RegenerateShadowMap(Renderer::LightData* pLight)
+void OpenGLRenderer::RegenerateShadowMap(LightData* pLight)
 {
 	glPushAttrib(GL_ENABLE_BIT | GL_LIGHTING_BIT | GL_DEPTH_BUFFER_BIT | GL_VIEWPORT_BIT);
 	glDisable(GL_TEXTURE_2D);
@@ -1596,14 +1630,14 @@ void OpenGLRenderer::RegenerateShadowMap(Renderer::LightData* pLight)
 //	glPolygonOffset(1.1f, 4.0f);
 	glPolygonOffset(1.1f, 2.0f);
 
-	Renderer::LightData::GeometrySet::Iterator lIter;
+	LightData::GeometrySet::Iterator lIter;
 	for (lIter = pLight->mShadowMapGeometrySet.First(); 
 		lIter != pLight->mShadowMapGeometrySet.End(); 
 		++lIter)
 	{
 		OGLGeometryData* lGeometry = (OGLGeometryData*)*lIter;
 
-		if (lGeometry->mShadow == Renderer::CAST_SHADOWS)
+		if (lGeometry->mShadow == CAST_SHADOWS)
 		{
 			float lModelViewMatrix[16];
 			(lLightTransformation.InverseTransform(lGeometry->mGeometry->GetTransformation())).GetAs4x4TransposeMatrix(lModelViewMatrix);

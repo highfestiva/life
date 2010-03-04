@@ -71,6 +71,12 @@ void Client::SetAvatarId(Cure::GameObjectId pAvatarId)
 	mAvatarId = pAvatarId;
 }
 
+void Client::SendAvatar(const Cure::UserAccount::AvatarId& pAvatarId, Cure::Packet* pPacket)
+{
+	mNetworkAgent->SendStatusMessage(mUserConnection->GetSocket(), 0, Cure::REMOTE_OK,
+		Cure::MessageStatus::INFO_AVATAR, wstrutil::ToOwnCode(pAvatarId), pPacket);
+}
+
 
 
 void Client::StoreFrameDiff(int pFrameDiff)
@@ -139,9 +145,9 @@ void Client::QuerySendStriveTimes()
 	}
 }
 
-void Client::SendPhysicsFrame(int pPhysicsFrameIndex)
+void Client::SendPhysicsFrame(int pPhysicsFrameIndex, Cure::Packet* pPacket)
 {
-	mNetworkAgent->SendNumberMessage(true, mUserConnection->GetSocket(), Cure::MessageNumber::INFO_SET_TIME, pPhysicsFrameIndex, 0);
+	mNetworkAgent->SendNumberMessage(true, mUserConnection->GetSocket(), Cure::MessageNumber::INFO_SET_TIME, pPhysicsFrameIndex, 0, pPacket);
 }
 
 float Client::GetPhysicsFrameAheadCount() const

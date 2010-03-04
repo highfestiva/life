@@ -7,17 +7,26 @@
 #pragma once
 
 #include "../../Cure/Include/GameManager.h"
-#include "../../Cure/Include/NetworkClient.h"
 #include "../../Cure/Include/Packet.h"
 #include "../../Cure/Include/PositionalData.h"
 #include "../../Lepra/Include/Alarm.h"
 #include "../../Lepra/Include/Timer.h"
-#include "../../UiTBC/Include/GUI/UiTextArea.h"
-#include "../../UiTBC/Include/GUI/UiConsoleLogListener.h"
+#include "../../UiCure/Include/UiResourceManager.h"
 #include "ClientConsoleManager.h"
 #include "ClientLoginView.h"
 #include "ClientOptionsManager.h"
 #include "InputObserver.h"
+
+
+
+namespace UiTbc
+{
+class CustomButton;
+}
+namespace Cure
+{
+class NetworkClient;
+}
 
 
 
@@ -83,7 +92,8 @@ private:
 
 	void ProcessNetworkInputMessage(Cure::Message* pMessage);
 	void ProcessNumber(Cure::MessageNumber::InfoType pType, int32 pInteger, float32 pFloat);
-	bool CreateObject(Cure::GameObjectId pInstanceId, const str& pClassId, Cure::NetworkObjectType pNetworkType);
+	bool CreateObject(Cure::GameObjectId pInstanceId, const str& pClassId, Cure::NetworkObjectType pNetworkType,
+		TransformationF* pTransform = 0);
 	Cure::ContextObject* CreateContextObject(const str& pClassId) const;
 	void OnLoadCompleted(Cure::ContextObject* pObject, bool pOk);
 	void SetMovement(Cure::GameObjectId pInstanceId, int32 pFrameIndex, Cure::ObjectPositionalData& pData);
@@ -98,6 +108,7 @@ private:
 	void DetachObjects(Cure::GameObjectId pObject1Id, Cure::GameObjectId pObject2Id);
 
 	void CancelLogin();
+	void OnAvatarSelect(UiTbc::Button* pButton);
 	Cure::RuntimeVariableScope* GetVariableScope() const;
 
 	Cure::NetworkClient* GetNetworkClient() const;

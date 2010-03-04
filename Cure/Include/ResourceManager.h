@@ -155,6 +155,7 @@ public:
 	virtual void Suspend();	// Resource enters cache.
 	bool IsUnique() const;
 	void SetIsUnique(bool pIsUnique);
+	virtual bool IsReferenceType() const;
 
 	ResourceLoadState GetLoadState() const;
 	void SetLoadState(ResourceLoadState pState);
@@ -386,7 +387,7 @@ public:
 	void Release(Resource* pResource);
 
 	void Tick();	// Call often, preferably every frame.
-	void ForceFreeCache();	// Called to force immediate freeing of all resources.
+	unsigned ForceFreeCache();	// Called to force immediate freeing of all resources.
 
 	size_t QueryResourceCount() const;
 	size_t QueryCachedResourceCount() const;

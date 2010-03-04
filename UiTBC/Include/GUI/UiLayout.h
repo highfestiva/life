@@ -9,17 +9,24 @@
 	moving and resizing a bunch of components that share the same screen area.
 */
 
-#ifndef UILAYOUT_H
-#define UILAYOUT_H
+
+
+#pragma once
 
 #include "../UiTBC.h"
 #include "../../../Lepra/Include/String.h"
 #include "../../../Lepra/Include/Graphics2D.h"
 
+
+
 namespace UiTbc
 {
 
+
+
 class Component;
+
+
 
 class Layout
 {
@@ -40,7 +47,7 @@ public:
 	inline Layout();
 	inline virtual ~Layout();
 
-	virtual Type GetType() = 0;
+	virtual Type GetType() const = 0;
 
 	virtual void Add(Component* pComponent, int pParam1, int pParam2) = 0;
 	virtual void Remove(Component* pComponent) = 0;
@@ -49,25 +56,27 @@ public:
 
 	virtual Component* GetFirst() = 0;
 	virtual Component* GetNext() = 0;
-
 	virtual Component* GetLast() = 0;
 	virtual Component* GetPrev() = 0;
 
 	virtual void UpdateLayout() = 0;
 
-	virtual PixelCoords GetPreferredSize(bool pForceAdaptive) = 0;
-	virtual PixelCoords GetMinSize() = 0;
-	virtual PixelCoords GetContentSize() = 0;
+	virtual PixelCoord GetPreferredSize(bool pForceAdaptive) = 0;
+	virtual PixelCoord GetMinSize() const = 0;
+	virtual PixelCoord GetContentSize() const = 0;
 
 protected:
-	inline Component* GetOwner();
+	inline Component* GetOwner() const;
+
 private:
 	inline void SetOwner(Component* pOwner);
 
 	Component* mOwner;
 };
 
-Layout::Layout() :
+
+
+Layout::Layout():
 	mOwner(0)
 {
 }
@@ -76,7 +85,7 @@ Layout::~Layout()
 {
 }
 
-Component* Layout::GetOwner()
+Component* Layout::GetOwner() const
 {
 	return mOwner;
 }
@@ -86,6 +95,6 @@ void Layout::SetOwner(Component* pOwner)
 	mOwner = pOwner;
 }
 
-} // End namespace.
 
-#endif
+
+}

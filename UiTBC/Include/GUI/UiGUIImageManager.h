@@ -74,7 +74,7 @@ public:
 	void DrawImage(Painter::ImageID pImageID, int x, int y);
 	void DrawImage(Painter::ImageID pImageID, const PixelRect& pRect);
 
-	PixelCoords GetImageSize(Painter::ImageID pImageID);
+	PixelCoord GetImageSize(Painter::ImageID pImageID);
 	bool IsOverImage(Painter::ImageID pImageID, 
 			 int pScreenX, int pScreenY, 
 			 const PixelRect& pScreenRect);

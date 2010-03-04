@@ -157,46 +157,46 @@ public:
 	Color GetColor(unsigned pColorIndex) const;
 
 	void DrawPixel(int x, int y);
-	void DrawPixel(const PixelCoords& pCoords);
+	void DrawPixel(const PixelCoord& pCoords);
 
 	void DrawLine(int pX1, int pY1, int pX2, int pY2);
-	void DrawLine(const PixelCoords& pPoint1, const PixelCoords& pPoint2);
+	void DrawLine(const PixelCoord& pPoint1, const PixelCoord& pPoint2);
 
 	// Renders a rectangular frame. The given coordinates defines the outer edges of the frame,
 	// expanding inwards 'pWidth' pixels.
 	// Color 0 defines the outer color.
 	// Color 1 defines the inner color.
 	void DrawRect(int pLeft, int pTop, int pRight, int pBottom, int pWidth);
-	void DrawRect(const PixelCoords& pTopLeft, const PixelCoords& pBottomRight, int pWidth);
+	void DrawRect(const PixelCoord& pTopLeft, const PixelCoord& pBottomRight, int pWidth);
 	void DrawRect(const PixelRect& pRect, int pWidth);
 
 	void FillRect(int pLeft, int pTop, int pRight, int pBottom);
-	void FillRect(const PixelCoords& pTopLeft, const PixelCoords& pBottomRight);
+	void FillRect(const PixelCoord& pTopLeft, const PixelCoord& pBottomRight);
 	void FillRect(const PixelRect& pRect);
 
 	// Same as DrawRect(), but with two different color gradients. Good for GUI rendering.
 	// Color 0 and 1 are the outer top left and bottom right colors, respectively.
 	// Color 2 and 3 are the inner ditos.
 	void Draw3DRect(int pLeft, int pTop, int pRight, int pBottom, int pWidth, bool pSunken);
-	void Draw3DRect(const PixelCoords& pTopLeft, const PixelCoords& pBottomRight, int pWidth, bool pSunken);
+	void Draw3DRect(const PixelCoord& pTopLeft, const PixelCoord& pBottomRight, int pWidth, bool pSunken);
 	void Draw3DRect(const PixelRect& pRect, int pWidth, bool pSunken);
 
 	// FillShadeRect uses all colors...
 	void FillShadedRect(int pLeft, int pTop, int pRight, int pBottom);
-	void FillShadedRect(const PixelCoords& pTopLeft, const PixelCoords& pBottomRight);
+	void FillShadedRect(const PixelCoord& pTopLeft, const PixelCoord& pBottomRight);
 	void FillShadedRect(const PixelRect& pRect);
 
 	void FillTriangle(float pX1, float pY1, float pX2, float pY2, float pX3, float pY3);
-	void FillTriangle(const PixelCoords& pPoint1, const PixelCoords& pPoint2, const PixelCoords& pPoint3);
+	void FillTriangle(const PixelCoord& pPoint1, const PixelCoord& pPoint2, const PixelCoord& pPoint3);
 
 	void FillShadedTriangle(float pX1, float pY1, float pX2, float pY2, float pX3, float pY3);
-	void FillShadedTriangle(const PixelCoords& pPoint1, const PixelCoords& pPoint2, const PixelCoords& pPoint3);
+	void FillShadedTriangle(const PixelCoord& pPoint1, const PixelCoord& pPoint2, const PixelCoord& pPoint3);
 
 	void FillTriangle(float pX1, float pY1, float pU1, float pV1, float pX2, float pY2, float pU2, float pV2,
 		float pX3, float pY3, float pU3, float pV3, ImageID pImageID);
-	void FillTriangle(const PixelCoords& pPoint1, float pU1, float pV1,
-		const PixelCoords& pPoint2, float pU2, float pV2,
-		const PixelCoords& pPoint3, float pU3, float pV3, ImageID pImageID);
+	void FillTriangle(const PixelCoord& pPoint1, float pU1, float pV1,
+		const PixelCoord& pPoint2, float pU2, float pV2,
+		const PixelCoord& pPoint3, float pU3, float pV3, ImageID pImageID);
 
 
 	// Returns an ID to the added bitmap. Returns 0 if error. 
@@ -216,17 +216,17 @@ public:
 
 	// Renders a bitmap.
 	void DrawImage(ImageID pImageID, int x, int y);
-	void DrawImage(ImageID pImageID, const PixelCoords& pTopLeft);
+	void DrawImage(ImageID pImageID, const PixelCoord& pTopLeft);
 	// Renders a subsquare of a bitmap.
 	void DrawImage(ImageID pImageID, int x, int y, const PixelRect& pSubpatchRect);
-	void DrawImage(ImageID pImageID, const PixelCoords& pTopLeft, const PixelRect& pSubpatchRect);
+	void DrawImage(ImageID pImageID, const PixelCoord& pTopLeft, const PixelRect& pSubpatchRect);
 	// Renders and stretches a bitmap.
 	void DrawImage(ImageID pImageID, const PixelRect& pRect);
 	void DrawImage(ImageID pImageID, const PixelRect& pRect, const PixelRect& pSubpatchRect);
 
 	// Renders the associated alpha buffer, if there is one.
 	void DrawAlphaImage(ImageID pImageID, int x, int y);
-	void DrawAlphaImage(ImageID pImageID, const PixelCoords& pTopLeft);
+	void DrawAlphaImage(ImageID pImageID, const PixelCoord& pTopLeft);
 
 	void SetFontManager(FontManager* pFontManager);
 	FontManager* GetFontManager() const;

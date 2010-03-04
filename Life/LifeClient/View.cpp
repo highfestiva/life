@@ -29,7 +29,7 @@ View::View(const str& pTitle, UiTbc::Layout* pLayout):
 	lCloseButton->SetText(_T("x"), WHITE, BLACK);
 	lCloseButton->SetPreferredSize(16, 16);
 	lCloseButton->SetMinSize(16, 16);
-	lCloseButton->SetOnUnclickedFunc(View, OnExit);
+	lCloseButton->SetOnClick(View, OnExit);
 	lCaption->SetRightButton(lCloseButton);
 }
 

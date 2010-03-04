@@ -36,6 +36,7 @@ public:
 	GameManager* GetGameManager() const;
 
 	void SetIsObjectOwner(bool pIsObjectOwner);
+	void AddLocalObject(ContextObject* pObject);
 	void AddObject(ContextObject* pObject);
 	virtual void RemoveObject(ContextObject* pObject);
 	bool DeleteObject(GameObjectId pInstanceId);

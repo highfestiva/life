@@ -17,85 +17,110 @@ namespace Lepra
 
 
 
-class PixelCoords
+class PixelCoord
 {
 public:
-	PixelCoords() :
+	PixelCoord() :
 		x(0),
 		y(0)
 	{
 	}
 
-	PixelCoords(int pX, int pY) :
+	PixelCoord(int pX, int pY) :
 		x(pX),
 		y(pY)
 	{
 	}
 
-	PixelCoords(const PixelCoords& pCoords) :
+	PixelCoord(const PixelCoord& pCoords) :
 		x(pCoords.x),
 		y(pCoords.y)
 	{
 	}
 
-	inline PixelCoords operator = (const PixelCoords& pCoords);
-	inline PixelCoords operator += (const PixelCoords& pCoords);
-	inline PixelCoords operator -= (const PixelCoords& pCoords);
-	inline PixelCoords operator + (const PixelCoords& pCoords) const;
-	inline PixelCoords operator - (const PixelCoords& pCoords) const;
+	inline PixelCoord operator = (const PixelCoord& pCoords);
+	inline PixelCoord operator += (const PixelCoord& pCoords);
+	inline PixelCoord operator -= (const PixelCoord& pCoords);
+	inline PixelCoord operator + (const PixelCoord& pCoords) const;
+	inline PixelCoord operator - (const PixelCoord& pCoords) const;
+	inline PixelCoord operator * (int pFactor) const;
+	inline PixelCoord operator / (int pDividend) const;
 
-	inline bool operator == (const PixelCoords& pCoords) const;
-	inline bool operator != (const PixelCoords& pCoords) const;
+	inline bool operator == (const PixelCoord& pCoords) const;
+	inline bool operator != (const PixelCoord& pCoords) const;
+
+	inline float GetDistance(const PixelCoord& pCoords) const;
 
 	int x, y;
 };
 
-PixelCoords PixelCoords::operator = (const PixelCoords& pCoords)
+PixelCoord PixelCoord::operator = (const PixelCoord& pCoords)
 {
 	x = pCoords.x;
 	y = pCoords.y;
 	return *this;
 }
 
-PixelCoords PixelCoords::operator += (const PixelCoords& pCoords)
+PixelCoord PixelCoord::operator += (const PixelCoord& pCoords)
 {
 	x += pCoords.x;
 	y += pCoords.y;
 	return *this;
 }
 
-PixelCoords PixelCoords::operator -= (const PixelCoords& pCoords)
+PixelCoord PixelCoord::operator -= (const PixelCoord& pCoords)
 {
 	x -= pCoords.x;
 	y -= pCoords.y;
 	return *this;
 }
 
-PixelCoords PixelCoords::operator + (const PixelCoords& pCoords) const
+PixelCoord PixelCoord::operator + (const PixelCoord& pCoords) const
 {
-	PixelCoords lTemp(*this);
+	PixelCoord lTemp(*this);
 	lTemp += pCoords;
 	return lTemp;
 }
 
-PixelCoords PixelCoords::operator - (const PixelCoords& pCoords) const
+PixelCoord PixelCoord::operator - (const PixelCoord& pCoords) const
 {
-	PixelCoords lTemp(*this);
+	PixelCoord lTemp(*this);
 	lTemp -= pCoords;
 	return lTemp;
 }
 
-bool PixelCoords::operator == (const PixelCoords& pCoords) const
+PixelCoord PixelCoord::operator*(int pFactor) const
+{
+	PixelCoord lTemp(*this);
+	lTemp.x *= pFactor;
+	lTemp.y *= pFactor;
+	return lTemp;
+}
+
+PixelCoord PixelCoord::operator/(int pDividend) const
+{
+	PixelCoord lTemp(*this);
+	lTemp.x /= pDividend;
+	lTemp.y /= pDividend;
+	return lTemp;
+}
+
+bool PixelCoord::operator == (const PixelCoord& pCoords) const
 {
 	return (x == pCoords.x && y == pCoords.y);
 }
 
-bool PixelCoords::operator != (const PixelCoords& pCoords) const
+bool PixelCoord::operator != (const PixelCoord& pCoords) const
 {
 	return (x != pCoords.x || y != pCoords.y);
 }
 
-
+float PixelCoord::GetDistance(const PixelCoord& pCoords) const
+{
+	int lDX = x-pCoords.x;
+	int lDY = y-pCoords.y;
+	return (::sqrt((float)(lDX*lDX + lDY*lDY)));
+}
 
 
 
@@ -104,12 +129,12 @@ class PixelRect
 public:
 	inline PixelRect();
 	inline PixelRect(const PixelRect& pRect);
-	inline PixelRect(const PixelCoords& pTopLeft, const PixelCoords& pBottomRight);
+	inline PixelRect(const PixelCoord& pTopLeft, const PixelCoord& pBottomRight);
 	inline PixelRect(int pLeft, int pTop, int pRight, int pBottom);
 
 	inline int GetWidth() const;
 	inline int GetHeight() const;
-	inline PixelCoords GetSize() const;
+	inline PixelCoord GetSize() const;
 
 	inline int GetCenterX() const;
 	inline int GetCenterY() const;
@@ -148,7 +173,7 @@ PixelRect::PixelRect(const PixelRect& pRect) :
 {
 }
 
-PixelRect::PixelRect(const PixelCoords& pTopLeft, const PixelCoords& pBottomRight) :
+PixelRect::PixelRect(const PixelCoord& pTopLeft, const PixelCoord& pBottomRight) :
 	mTop(pTopLeft.y),
 	mBottom(pBottomRight.y),
 	mLeft(pTopLeft.x),
@@ -174,9 +199,9 @@ int PixelRect::GetHeight() const
 	return (mBottom - mTop);
 }
 
-PixelCoords PixelRect::GetSize() const
+PixelCoord PixelRect::GetSize() const
 {
-	return (PixelCoords(GetWidth(), GetHeight()));
+	return (PixelCoord(GetWidth(), GetHeight()));
 }
 
 int PixelRect::GetCenterX() const

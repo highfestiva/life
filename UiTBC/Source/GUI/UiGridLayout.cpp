@@ -56,7 +56,7 @@ Component** GridLayout::AllocComponentGrid(int pRows, int pCols)
 	return lComponent;
 }
 
-Layout::Type GridLayout::GetType()
+Layout::Type GridLayout::GetType() const
 {
 	return Layout::GRIDLAYOUT;
 }
@@ -211,7 +211,7 @@ void GridLayout::UpdateLayout()
 		return;
 	}
 
-	PixelCoords lOwnerSize(GetOwner()->GetSize());
+	PixelCoord lOwnerSize(GetOwner()->GetSize());
 
 	std::list<int> lWidthList;
 	std::list<int> lHeightList;
@@ -238,7 +238,7 @@ void GridLayout::UpdateLayout()
 			{
 				lEmptyRow = false;
 
-				PixelCoords lSize(mComponent[lIndex]->GetPreferredSize());
+				PixelCoord lSize(mComponent[lIndex]->GetPreferredSize());
 
 				if (lSize.y > lMaxHeight)
 				{
@@ -279,7 +279,7 @@ void GridLayout::UpdateLayout()
 			{
 				lEmptyCol = false;
 
-				PixelCoords lSize(mComponent[lIndex]->GetPreferredSize());
+				PixelCoord lSize(mComponent[lIndex]->GetPreferredSize());
 
 				if (lSize.x > lMaxWidth)
 				{
@@ -377,8 +377,8 @@ void GridLayout::UpdateLayout()
 					
 				if (mComponent[lIndex] != 0 && mComponent[lIndex]->IsVisible() == true)
 				{
-					PixelCoords lPos(mComponent[lIndex]->GetPos());
-					PixelCoords lSize(mComponent[lIndex]->GetSize());
+					PixelCoord lPos(mComponent[lIndex]->GetPos());
+					PixelCoord lSize(mComponent[lIndex]->GetSize());
 					lPos.y  = lPosYInt;
 					lSize.y = lSizeY;
 					mComponent[lIndex]->SetPos(lPos);
@@ -421,8 +421,8 @@ void GridLayout::UpdateLayout()
 					
 				if (mComponent[lIndex] != 0 && mComponent[lIndex]->IsVisible() == true)
 				{
-					PixelCoords lPos(mComponent[lIndex]->GetPos());
-					PixelCoords lSize(mComponent[lIndex]->GetSize());
+					PixelCoord lPos(mComponent[lIndex]->GetPos());
+					PixelCoord lSize(mComponent[lIndex]->GetSize());
 					lPos.x  = lPosXInt;
 					lSize.x = lSizeX;
 					mComponent[lIndex]->SetPos(lPos);
@@ -435,9 +435,9 @@ void GridLayout::UpdateLayout()
 	}
 }
 
-PixelCoords GridLayout::GetPreferredSize(bool pForceAdaptive)
+PixelCoord GridLayout::GetPreferredSize(bool pForceAdaptive)
 {
-	PixelCoords lSize(0, 0);
+	PixelCoord lSize(0, 0);
 
 	int x, y;
 
@@ -484,14 +484,14 @@ PixelCoords GridLayout::GetPreferredSize(bool pForceAdaptive)
 	return lSize;
 }
 
-PixelCoords GridLayout::GetContentSize()
+PixelCoord GridLayout::GetContentSize() const
 {
 	return GetOwner()->GetSize();
 }
 
-PixelCoords GridLayout::GetMinSize()
+PixelCoord GridLayout::GetMinSize() const
 {
-	PixelCoords lSize(0, 0);
+	PixelCoord lSize(0, 0);
 
 	int x, y;
 
@@ -701,7 +701,7 @@ void GridLayout::DeleteColumn(int pColumn)
 	}
 }
 
-bool GridLayout::HaveDoubles()
+bool GridLayout::HaveDoubles() const
 {
 	for (int i = 0; i < mNumRows * mNumCols; i++)
 	{

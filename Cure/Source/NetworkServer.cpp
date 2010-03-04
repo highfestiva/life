@@ -86,7 +86,8 @@ void NetworkServer::Disconnect(UserAccount::AccountId pAccountId, const str& pRe
 		if (pSendDisconnect)
 		{
 			Cure::Packet* lPacket = GetPacketFactory()->Allocate();
-			Parent::SendStatusMessage(lUser->GetSocket(), 0, Cure::REMOTE_NO_CONNECTION, wstrutil::ToOwnCode(pReason), lPacket);
+			Parent::SendStatusMessage(lUser->GetSocket(), 0, Cure::REMOTE_NO_CONNECTION,
+				Cure::MessageStatus::INFO_LOGIN, wstrutil::ToOwnCode(pReason), lPacket);
 			GetPacketFactory()->Release(lPacket);
 		}
 		else if (lUser->GetSocket())
@@ -308,21 +309,24 @@ RemoteStatus NetworkServer::ManageLogin(UdpVSocket* pSocket, Packet* pPacket)
 		case REMOTE_LOGIN_ALREADY:
 		{
 			mLog.Warning(_T("User ")+wstrutil::ToCurrentCode(lLoginName)+_T(" already logged in."));
-			Parent::SendStatusMessage(pSocket, 0, lStatus, L"You have already been logged in.", pPacket);
+			Parent::SendStatusMessage(pSocket, 0, lStatus, Cure::MessageStatus::INFO_LOGIN,
+				L"You have already been logged in.", pPacket);
 			DropSocket(pSocket);
 		}
 		break;
 		case REMOTE_LOGIN_ERRONOUS_DATA:
 		{
 			mLog.Warning(_T("User ")+wstrutil::ToCurrentCode(lLoginName)+_T(" attempted with wrong username or password."));
-			Parent::SendStatusMessage(pSocket, 0, lStatus, L"Wrong username or password. Try again.", pPacket);
+			Parent::SendStatusMessage(pSocket, 0, lStatus, Cure::MessageStatus::INFO_LOGIN,
+				L"Wrong username or password. Try again.", pPacket);
 			DropSocket(pSocket);
 		}
 		break;
 		case REMOTE_LOGIN_BAN:
 		{
 			mLog.Warning(_T("User ")+wstrutil::ToCurrentCode(lLoginName)+_T(" tried logging in, but was banned."));
-			Parent::SendStatusMessage(pSocket, 0, lStatus, L"Sorry, you are banned. Try again later.", pPacket);
+			Parent::SendStatusMessage(pSocket, 0, lStatus, Cure::MessageStatus::INFO_LOGIN,
+				L"Sorry, you are banned. Try again later.", pPacket);
 			DropSocket(pSocket);
 		}
 		break;
@@ -330,7 +334,8 @@ RemoteStatus NetworkServer::ManageLogin(UdpVSocket* pSocket, Packet* pPacket)
 		case REMOTE_UNKNOWN:
 		{
 			mLog.Error(_T("An unknown error occurred when user ")+wstrutil::ToCurrentCode(lLoginName)+_T(" tried logging in."));
-			Parent::SendStatusMessage(pSocket, 0, lStatus, L"Unknown login error, please contact support.", pPacket);
+			Parent::SendStatusMessage(pSocket, 0, lStatus, Cure::MessageStatus::INFO_LOGIN,
+				L"Unknown login error, please contact support.", pPacket);
 			DropSocket(pSocket);
 		}
 		break;
@@ -389,7 +394,7 @@ void NetworkServer::Login(const wstr& pLoginName, UserAccount::AccountId pAccoun
 	AddUser(lUser, pAccountId);
 
 	mLog.Infof(_T("Sending login OK with account ID %i"), pAccountId);
-	SendStatusMessage(pAccountId, pAccountId, REMOTE_OK, L"Welcome.", pPacket);
+	SendStatusMessage(pAccountId, pAccountId, REMOTE_OK, Cure::MessageStatus::INFO_LOGIN, L"Welcome.", pPacket);
 
 	mLoginListener->OnLogin(lUser);
 }
@@ -506,12 +511,13 @@ UserConnection* NetworkServer::GetUser(UserAccount::AccountId pAccountId)
 
 
 
-bool NetworkServer::SendStatusMessage(UserAccount::AccountId pAccountId, int32 pInteger, RemoteStatus pStatus, wstr pMessage, Packet* pPacket)
+bool NetworkServer::SendStatusMessage(UserAccount::AccountId pAccountId, int32 pInteger, RemoteStatus pStatus,
+	MessageStatus::InfoType pInfoType, wstr pMessage, Packet* pPacket)
 {
 	pPacket->Release();
 	MessageStatus* lStatus = (MessageStatus*)mPacketFactory->GetMessageFactory()->Allocate(MESSAGE_TYPE_STATUS);
 	pPacket->AddMessage(lStatus);
-	lStatus->Store(pPacket, pStatus, pInteger, pMessage);
+	lStatus->Store(pPacket, pStatus, pInfoType, pInteger, pMessage);
 	bool lOk = PlaceInSendBuffer(true, pPacket, pAccountId);
 	return (lOk);
 }
