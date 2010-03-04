@@ -34,7 +34,11 @@ OSREL  := $(shell uname -r | tr '[A-Z]' '[a-z]' | tr ', /\\()"' ',//////' | tr '
 ifeq ($(OSNAME),darwin)
 OSREL  := $(shell sw_vers -productVersion | tr '[A-Z]' '[a-z]' | tr ', /\\()"' ',//////' | tr ',/' ',-')
 endif
-M_ARCH := $(shell uname -m | tr '[A-Z]' '[a-z]' | tr ', /\\()"' ',//////' | tr ',/' ',-')
+#M_ARCH := $(shell uname -m | tr '[A-Z]' '[a-z]' | tr ', /\\()"' ',//////' | tr ',/' ',-')
+M_ARCH := $(shell g++ -dumpmachine | awk '{split($$1,a,"-");print a[1]}')
+ifeq (i686,$(findstring i686,$(M_ARCH)))
+M_ARCH := x86_64
+endif
 ifeq ($(M_ARCH),power-macintosh)
 #M_ARCH := ppc
 M_ARCH := ppc7400	# high_festiva was here!

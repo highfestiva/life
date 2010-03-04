@@ -5,4 +5,5 @@ Mac PowerPC G5:
 
 
 Mac x86_64:
-    Edit build/Makefiles/gmake/sysid.mak and change the M_ARCH := line to x86_64.
+    (DON'T Edit build/Makefiles/gmake/sysid.mak and change the M_ARCH := line to x86_64.)
+    Instead keep fingers crossed.
