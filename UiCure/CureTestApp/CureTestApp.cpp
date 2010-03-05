@@ -19,22 +19,24 @@
 #include "../../UiCure/Include/UiCure.h"
 #endif // !CURE_TEST_WITHOUT_UI
 
+static bool TestRunDummy() { return (true); }
+#define TEST_RUN_LEPRA_CON	TestLepra
+#define TEST_RUN_TBC_CON	TestRunDummy
+#define TEST_RUN_CURE_CON	TestCure
+#define TEST_RUN_NETPHYS_CON	TestRunDummy
 #ifndef CURE_TEST_WITHOUT_UI
 #define TEST_RUN_LEPRA		TestUiLepra
 #define TEST_RUN_TBC		TestUiTbc
 #define TEST_RUN_CURE		TestUiCure
 #define TEST_RUN_NETPHYS	TestPrototypeNetworkPhysics
-#define EXPORT_MESH		ExportMesh
 #define LEPRA_NS		UiLepra
 #define TBC_NS			UiTbc
 #define CURE_NS			UiCure
 #else // CURE_TEST_WITHOUT_UI
-#define TEST_RUN_LEPRA		TestLepra
-#define TEST_RUN_TBC		TestRunDummy
-#define TEST_RUN_CURE		TestCure
-#define TEST_RUN_NETPHYS	TestRunDummy
-#define EXPORT_MESH		TestRunDummy
-static bool TestRunDummy() { return (true); }
+#define TEST_RUN_LEPRA		TEST_RUN_LEPRA_CON
+#define TEST_RUN_TBC		TEST_RUN_TBC_CON
+#define TEST_RUN_CURE		TEST_RUN_CURE_CON
+#define TEST_RUN_NETPHYS	TEST_RUN_NETPHYS_CON
 #define LEPRA_NS		Lepra
 #define TBC_NS			TBC
 #define CURE_NS			Cure
@@ -42,12 +44,14 @@ static bool TestRunDummy() { return (true); }
 
 using namespace Lepra;
 
+bool TEST_RUN_LEPRA_CON();
+bool TEST_RUN_TBC_CON();
+bool TEST_RUN_CURE_CON();
+bool TEST_RUN_NETPHYS_CON();
 bool TEST_RUN_LEPRA();
 bool TEST_RUN_TBC();
 bool TEST_RUN_CURE();
 bool TEST_RUN_NETPHYS();
-//bool ExportStructure();
-bool EXPORT_MESH();
 void ShowTestResult(const LogDecorator& pAccount, bool pbTestOk);
 
 
@@ -65,6 +69,8 @@ private:
 		TBC_BIT = (1<<1),
 		CURE_BIT = (1<<2),
 		NETWORK_PHYSICS_BIT = (1<<3),
+		CONSOLE_BIT = (1<<30),
+		MASTER_BITS = CONSOLE_BIT
 	};
 	unsigned mTestBits;
 	LOG_CLASS_DECLARE();
@@ -74,7 +80,7 @@ LEPRA_RUN_APPLICATION(CureTestApplication);
 
 CureTestApplication::CureTestApplication(const strutil::strvec& pArgumentList):
 	Application(pArgumentList),
-	mTestBits((unsigned)~0)
+	mTestBits(~(unsigned)MASTER_BITS)
 {
 	for (size_t x = 1; x < pArgumentList.size(); ++x)
 	{
@@ -97,11 +103,15 @@ CureTestApplication::CureTestApplication(const strutil::strvec& pArgumentList):
 		{
 			lMask |= NETWORK_PHYSICS_BIT;
 		}
+		else if (lArgument == _T("CONSOLE"))
+		{
+			lMask |= CONSOLE_BIT;
+		}
 		else
 		{
 			assert(false);	// Unknown command line argument.
 		}
-		if (x == 1)
+		if (x == 1 && (lMask&(~MASTER_BITS)))
 		{
 			mTestBits = 0;
 		}
@@ -140,19 +150,19 @@ int CureTestApplication::Run()
 	bool lTestOk = true;
 	if (lTestOk && mTestBits&LEPRA_BIT)
 	{
-		lTestOk = TEST_RUN_LEPRA();
+		lTestOk = (mTestBits&CONSOLE_BIT)? TEST_RUN_LEPRA_CON() : TEST_RUN_LEPRA();
 	}
 	if (lTestOk && mTestBits&TBC_BIT)
 	{
-		lTestOk = TEST_RUN_TBC();
+		lTestOk = (mTestBits&CONSOLE_BIT)? TEST_RUN_TBC_CON() : TEST_RUN_TBC();
 	}
 	if (lTestOk && mTestBits&CURE_BIT)
 	{
-		lTestOk = TEST_RUN_CURE();
+		lTestOk = (mTestBits&CONSOLE_BIT)? TEST_RUN_CURE_CON() : TEST_RUN_CURE();
 	}
 	if (lTestOk && mTestBits&NETWORK_PHYSICS_BIT)
 	{
-		lTestOk = TEST_RUN_NETPHYS();
+		lTestOk = (mTestBits&CONSOLE_BIT)? TEST_RUN_NETPHYS_CON() : TEST_RUN_NETPHYS();
 	}
 #ifdef LEPRA_CONSOLE
 	if (!lTestOk)
