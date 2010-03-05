@@ -12,6 +12,7 @@
 #include <pthread.h>
 #include <signal.h>
 #include <time.h>
+#include "../../Include/HiResTimer.h"
 #include "../../Include/Thread.h"
 
 
@@ -28,7 +29,7 @@ static ThreadPointerStorage gExtraDataStorage;
 
 void GetAbsTime(float64 pDeltaTime, timespec& pTimeSpec)
 {
-	float64 lSeconds = floor(pDeltaTime);
+	float64 lSeconds = ::floor(pDeltaTime);
 	float64 lNanoSeconds = (pDeltaTime - lSeconds) * 1000000000.0;
 #if defined(LEPRA_MAC)
 	timeval lTimeSpecNow;
@@ -40,6 +41,11 @@ void GetAbsTime(float64 pDeltaTime, timespec& pTimeSpec)
 #endif
 	pTimeSpec.tv_sec += (time_t)lSeconds;
 	pTimeSpec.tv_nsec += (long)lNanoSeconds;
+	if (pTimeSpec.tv_nsec > 1000000000)
+	{
+		pTimeSpec.tv_nsec -= 1000000000;
+		pTimeSpec.tv_sec += 1;
+	}
 }
 
 
@@ -211,16 +217,19 @@ void PosixSemaphore::Wait()
 
 bool PosixSemaphore::Wait(float64 pMaxWaitTime)
 {
-	timespec lTimeSpec;
-	GetAbsTime(pMaxWaitTime, lTimeSpec);
-
+	HiResTimer lTimer;
 	pthread_mutex_lock(&mMutex);
-	while (mPermitCount == 0)
+	while (mPermitCount == 0 && lTimer.GetTimeDiff() < pMaxWaitTime)
 	{
-		if (pthread_cond_timedwait(&mCondition, &mMutex, &lTimeSpec) == ETIMEDOUT)
+		timespec lTimeSpec;
+		GetAbsTime(pMaxWaitTime-lTimer.GetTimeDiff(), lTimeSpec);
+		int lResult = pthread_cond_timedwait(&mCondition, &mMutex, &lTimeSpec);
+		assert(lResult != EINVAL);
+		if (lResult == ETIMEDOUT)
 		{
 			break;
 		}
+		lTimer.UpdateTimer();
 	}
 	bool lTimeout = (mPermitCount == 0);
 	if (!lTimeout)

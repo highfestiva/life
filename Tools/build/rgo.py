@@ -317,6 +317,10 @@ def startserver():
 def start():
         startclient()
         startserver()
+def gdbtest():
+        pre, post = _prepare_run()
+        os.system("gdb "+pre+"CureTestApp"+post)
+        os.chdir("..")
 
 
 if __name__ == "__main__":

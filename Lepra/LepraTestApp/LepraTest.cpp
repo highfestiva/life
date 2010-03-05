@@ -1171,7 +1171,8 @@ bool TestNetwork(const LogDecorator& pAccount)
 		assert(lTestOk);
 		if (lTestOk)
 		{
-			lTestOk = (lAddress.GetAsString() == _T("127.0.0.1:1024") ||
+			lTestOk = ((strutil::StartsWith(lAddress.GetAsString(), _T("127.0.")) &&
+				strutil::EndsWith(lAddress.GetAsString(), _T(".1"))) ||
 				strutil::StartsWith(lAddress.GetAsString(), _T("192.168.")));
 			assert(lTestOk);
 		}
