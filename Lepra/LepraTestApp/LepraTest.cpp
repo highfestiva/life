@@ -1189,15 +1189,26 @@ bool TestNetwork(const LogDecorator& pAccount)
 
 	if (lTestOk)
 	{
+		lContext = _T("UDP exclusive bind");
+		SocketAddress lAddress;
+		lAddress.Resolve(_T(":1025"));
+		UdpSocket lSocket1(lAddress);
+		UdpSocket lSocket2(lAddress);
+		lTestOk = (lSocket1.IsOpen() && !lSocket2.IsOpen());
+		assert(lTestOk);
+	}
+
+	if (lTestOk)
+	{
 		lContext = _T("UDP send");
 		SocketAddress lReceiveAddress;
 		lReceiveAddress.Resolve(_T(":47346"));
 		SocketAddress lSendAddress;
 		lSendAddress.Resolve(_T(":47347"));
 		UdpSocket lReceiver(lReceiveAddress);
-                assert(lReceiver.IsOpen());
+		assert(lReceiver.IsOpen());
 		UdpSocket lSender(lSendAddress);
-                assert(lSender.IsOpen());
+		assert(lSender.IsOpen());
 		lTestOk = (lSender.SendTo((const uint8*)"Hello World", 12, lReceiveAddress) == 12);
 		assert(lTestOk);
 		if (lTestOk)
@@ -1945,7 +1956,7 @@ bool TestFFT(const LogDecorator& pAccount)
 		lFFT.Transform(lSignal, NUM_POINTS);
 
 		// Check if near...
-		float32 lAmp   = (float32)(lFFT.GetAmp(1) + lFFT.GetAmp(-1));
+		float32 lAmp = (float32)(lFFT.GetAmp(1) + lFFT.GetAmp(-1));
 		lTestOk = abs(lAmp - 1.234f) < 1e-5f;
 
 		if (lTestOk)
