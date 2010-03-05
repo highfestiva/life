@@ -69,10 +69,11 @@ private:
 		TBC_BIT = (1<<1),
 		CURE_BIT = (1<<2),
 		NETWORK_PHYSICS_BIT = (1<<3),
-		CONSOLE_BIT = (1<<30),
-		MASTER_BITS = CONSOLE_BIT
+		CONSOLE_BIT = (1<<29),
+		TRACE_BIT = (1<<30),
+		MASTER_BITS = (CONSOLE_BIT | TRACE_BIT)
 	};
-	unsigned mTestBits;
+	int mTestBits;
 	LOG_CLASS_DECLARE();
 };
 
@@ -80,7 +81,7 @@ LEPRA_RUN_APPLICATION(CureTestApplication);
 
 CureTestApplication::CureTestApplication(const strutil::strvec& pArgumentList):
 	Application(pArgumentList),
-	mTestBits(~(unsigned)MASTER_BITS)
+	mTestBits(~(unsigned)(CONSOLE_BIT|TRACE_BIT))
 {
 	for (size_t x = 1; x < pArgumentList.size(); ++x)
 	{
@@ -107,13 +108,17 @@ CureTestApplication::CureTestApplication(const strutil::strvec& pArgumentList):
 		{
 			lMask |= CONSOLE_BIT;
 		}
+		else if (lArgument == _T("TRACE"))
+		{
+			lMask |= TRACE_BIT;
+		}
 		else
 		{
 			assert(false);	// Unknown command line argument.
 		}
-		if (x == 1 && (lMask&(~MASTER_BITS)))
+		if ((lMask&(~MASTER_BITS)) && ((mTestBits&(~MASTER_BITS)) == ~MASTER_BITS))
 		{
-			mTestBits = 0;
+			mTestBits &= MASTER_BITS;
 		}
 		mTestBits &= ~lMask;
 		mTestBits |= lMask;
@@ -134,7 +139,7 @@ int CureTestApplication::Run()
 	StdioConsoleLogListener* lConsoleLogPointer = 0;
 #ifdef LEPRA_CONSOLE
 	StdioConsoleLogListener lConsoleLogger;
-	lConsoleLogger.SetLevelThreashold(Log::LEVEL_HEADLINE);
+	lConsoleLogger.SetLevelThreashold((mTestBits&TRACE_BIT)? Log::LEVEL_TRACE : Log::LEVEL_HEADLINE);
 	lConsoleLogPointer = &lConsoleLogger;
 #endif // LEPRA_CONSOLE
 	DebuggerLogListener lDebugLogger;

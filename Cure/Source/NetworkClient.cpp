@@ -61,7 +61,7 @@ bool NetworkClient::Connect(const str& pLocalAddress, const str& pServerAddress,
 {
 	ScopeLock lLock(&mLock);
 
-	Stop();
+	Disconnect(true);
 
 	bool lOk = true;
 	SocketAddress lLocalAddress;

@@ -146,6 +146,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 	if (lTestOk)
 	{
 		lContext = pPrefix+_T(" client1 invalid force connect");
+		log_volatile(mLog.Debug(_T("---> Testing: ")+lContext));
 		lTestOk = !lClient->Connect(_T("localhost:11332"), _T("localhost:25344"), 0.5);
 		assert(lTestOk);
 	}
@@ -173,6 +174,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 	if (lTestOk)
 	{
 		lContext = pPrefix+_T(" start server");
+		log_volatile(mLog.Debug(_T("---> Testing: ")+lContext));
 		lTestOk = lServer->Start(_T("localhost:25344"));	// Server picks up ID.
 		assert(lTestOk);
 	}
@@ -180,6 +182,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 	if (lTestOk)
 	{
 		lContext = pPrefix+_T(" invalid client1 port connect");
+		log_volatile(mLog.Debug(_T("---> Testing: ")+lContext));
 		lTestOk = !lClient->Connect(_T("localhost:11332"), _T("localhost:25343"), 0.5);
 		assert(lTestOk);
 	}
@@ -214,6 +217,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 	if (lTestOk)
 	{
 		lContext = pPrefix+_T(" invalid client1 unconnected login");
+		log_volatile(mLog.Debug(_T("---> Testing: ")+lContext));
 		wstr lBadPassword(L"feddo");
 		Cure::MangledPassword lPassword(lBadPassword);
 		Cure::LoginId lUser(wstr(L"client1"), lPassword);
@@ -226,6 +230,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 	if (lTestOk)
 	{
 		lContext = pPrefix+_T(" connect client1");
+		log_volatile(mLog.Debug(_T("---> Testing: ")+lContext));
 		lTestOk = lClient->Connect(_T("localhost:11332"), _T("localhost:25344"), 0.5);
 		assert(lTestOk);
 	}
@@ -233,6 +238,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 	if (lTestOk)
 	{
 		lContext = pPrefix+_T(" invalid client1 username");
+		log_volatile(mLog.Debug(_T("---> Testing: ")+lContext));
 		wstr lBadPassword(L"feddo");
 		Cure::MangledPassword lPassword(lBadPassword);
 		Cure::LoginId lUser(wstr(L"client2"), lPassword);
@@ -245,6 +251,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 	if (lTestOk)
 	{
 		lContext = pPrefix+_T(" connect client1 second time");
+		log_volatile(mLog.Debug(_T("---> Testing: ")+lContext));
 		lTestOk = lClient->Connect(_T("localhost:11332"), _T("localhost:25344"), 0.5);
 		assert(lTestOk);
 	}
@@ -252,6 +259,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 	if (lTestOk)
 	{
 		lContext = pPrefix+_T(" invalid client1 password");
+		log_volatile(mLog.Debug(_T("---> Testing: ")+lContext));
 		wstr lBadPassword(L"feddn");
 		Cure::MangledPassword lPassword(lBadPassword);
 		Cure::LoginId lUser(wstr(L"client1"), lPassword);
@@ -264,6 +272,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 	if (lTestOk)
 	{
 		lContext = pPrefix+_T(" create user");
+		log_volatile(mLog.Debug(_T("---> Testing: ")+lContext));
 		wstr lBadPassword(L"feddo");
 		Cure::MangledPassword lPassword(lBadPassword);
 		Cure::LoginId lUser(wstr(L"client1"), lPassword);
@@ -274,6 +283,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 	if (lTestOk)
 	{
 		lContext = pPrefix+_T(" connect+login client");
+		log_volatile(mLog.Debug(_T("---> Testing: ")+lContext));
 		wstr lBadPassword(L"feddo");
 		Cure::MangledPassword lPassword(lBadPassword);
 		Cure::LoginId lUser(wstr(L"client1"), lPassword);
@@ -288,6 +298,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 	if (lTestOk)
 	{
 		lContext = pPrefix+_T(" connect client2");
+		log_volatile(mLog.Debug(_T("---> Testing: ")+lContext));
 		lTestOk = lClient2->Connect(_T("localhost:11333"), _T("localhost:25344"), 0.5);
 		assert(lTestOk);
 	}
@@ -295,6 +306,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 	if (lTestOk)
 	{
 		lContext = pPrefix+_T(" invalid double login client");
+		log_volatile(mLog.Debug(_T("---> Testing: ")+lContext));
 		wstr lBadPassword(L"feddo");
 		Cure::MangledPassword lPassword(lBadPassword);
 		Cure::LoginId lUser(wstr(L"client1"), lPassword);
@@ -307,6 +319,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 	if (lTestOk)
 	{
 		lContext = pPrefix+_T(" create user #2");
+		log_volatile(mLog.Debug(_T("---> Testing: ")+lContext));
 		wstr lBadPassword(L"feddo");
 		Cure::MangledPassword lPassword(lBadPassword);
 		Cure::LoginId lUser(wstr(L"client2"), lPassword);
@@ -317,6 +330,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 	if (lTestOk)
 	{
 		lContext = pPrefix+_T(" connect+login 2, client2");
+		log_volatile(mLog.Debug(_T("---> Testing: ")+lContext));
 		wstr lBadPassword(L"feddo");
 		Cure::MangledPassword lPassword(lBadPassword);
 		Cure::LoginId lUser(wstr(L"client2"), lPassword);
@@ -329,6 +343,8 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 	uint32 lClient2Id = 0;
 	if (lTestOk)
 	{
+		lContext = pPrefix+_T(" second client's ID");
+		log_volatile(mLog.Debug(_T("---> Testing: ")+lContext));
 		lClient2Id = lClient2->GetLoginAccountId();
 		lTestOk = (lClient2Id >= 1000 && lClient2Id < 0x7FFFFFFF);
 		assert(lTestOk);
@@ -336,6 +352,8 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 	uint32 lClientId = 0;
 	if (lTestOk)
 	{
+		lContext = pPrefix+_T(" first client's ID");
+		log_volatile(mLog.Debug(_T("---> Testing: ")+lContext));
 		lClientId = lClient->GetLoginAccountId();
 		lTestOk = (lClientId >= 1000 && lClientId < 0x7FFFFFFF);
 		assert(lTestOk);
@@ -348,6 +366,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 	if (lTestOk)
 	{
 		lContext = pPrefix+_T(" client2 send");
+		log_volatile(mLog.Debug(_T("---> Testing: ")+lContext));
 		Cure::Packet* lPacket = lClient2->GetPacketFactory()->Allocate();
 		lPacket->Release();
 		Cure::MessageStatus* lStatus = (Cure::MessageStatus*)lClient2->GetPacketFactory()->GetMessageFactory()->Allocate(Cure::MESSAGE_TYPE_STATUS);
@@ -370,6 +389,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 	if (lTestOk)
 	{
 		lContext = pPrefix+_T(" server receive from client2");
+		log_volatile(mLog.Debug(_T("---> Testing: ")+lContext));
 		Thread::Sleep(0.2);
 		Cure::Packet* lPacket = lServer->GetPacketFactory()->Allocate();
 		uint32 lId = 0xFFFFFFFF;
@@ -427,6 +447,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 	if (lTestOk)
 	{
 		lContext = pPrefix+_T(" server send to client2");
+		log_volatile(mLog.Debug(_T("---> Testing: ")+lContext));
 		Cure::Packet* lPacket = lServer->GetPacketFactory()->Allocate();
 		lPacket->Release();
 		Cure::MessageStatus* lStatus = (Cure::MessageStatus*)lServer->GetPacketFactory()->GetMessageFactory()->Allocate(Cure::MESSAGE_TYPE_STATUS);
@@ -441,6 +462,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 	if (lTestOk)
 	{
 		lContext = pPrefix+_T(" client2 receive");
+		log_volatile(mLog.Debug(_T("---> Testing: ")+lContext));
 		Thread::Sleep(0.2);
 		Cure::Packet* lPacket = lClient2->GetPacketFactory()->Allocate();
 		lTestOk = (lClient2->ReceiveTimeout(lPacket, 0.3)  == Cure::NetworkAgent::RECEIVE_OK);
@@ -461,6 +483,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 	if (lTestOk)
 	{
 		lContext = pPrefix+_T(" client1 send");
+		log_volatile(mLog.Debug(_T("---> Testing: ")+lContext));
 		Cure::Packet* lPacket = lClient->GetPacketFactory()->Allocate();
 		lPacket->Release();
 		Cure::MessageStatus* lStatus = (Cure::MessageStatus*)lClient->GetPacketFactory()->GetMessageFactory()->Allocate(Cure::MESSAGE_TYPE_STATUS);
@@ -478,6 +501,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 	if (lTestOk)
 	{
 		lContext = pPrefix+_T(" server receive from client1");
+		log_volatile(mLog.Debug(_T("---> Testing: ")+lContext));
 		Thread::Sleep(0.2);
 		Cure::Packet* lPacket = lServer->GetPacketFactory()->Allocate();
 		uint32 lId;
@@ -492,6 +516,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 	if (lTestOk)
 	{
 		lContext = pPrefix+_T(" server send to client1");
+		log_volatile(mLog.Debug(_T("---> Testing: ")+lContext));
 		Cure::Packet* lPacket = lServer->GetPacketFactory()->Allocate();
 		lPacket->Release();
 		Cure::MessageStatus* lStatus = (Cure::MessageStatus*)lServer->GetPacketFactory()->GetMessageFactory()->Allocate(Cure::MESSAGE_TYPE_STATUS);
@@ -506,6 +531,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 	if (lTestOk)
 	{
 		lContext = pPrefix+_T(" client1 receive");
+		log_volatile(mLog.Debug(_T("---> Testing: ")+lContext));
 		Thread::Sleep(0.2);
 		Cure::Packet* lPacket = lClient->GetPacketFactory()->Allocate();
 		lTestOk = (lClient->ReceiveTimeout(lPacket, 0.3) == Cure::NetworkAgent::RECEIVE_OK);

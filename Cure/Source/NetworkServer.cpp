@@ -194,6 +194,10 @@ NetworkServer::ReceiveStatus NetworkServer::ReceiveFirstPacket(Packet* pPacket, 
 			else
 			{
 				lStatus = RECEIVE_PARSE_ERROR;
+				mLog.Warningf(_T("Got bad data from %s on %s."),
+					lUser? (_T("logged in user ")+wstrutil::ToCurrentCode(lUser->GetLoginName())).c_str() :
+						_T("not logged in user"),
+					lSocket->GetTargetAddress().GetAsString().c_str());
 				// TODO: take action on bad network data?
 			}
 			lSocket->TryAddReceiverSocket();

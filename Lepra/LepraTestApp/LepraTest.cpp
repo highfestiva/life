@@ -1638,7 +1638,6 @@ bool DualSocketClientTest::Test()
 	{
 		lContext = _T("client TCP+UDP connect");
 		Thread::Sleep(0.2);
-		LogType::GetLog(LogType::SUB_ROOT)->SetLevelThreashold(Log::LEVEL_TRACE);
 		lClientSocket = lClientMuxSocket.Connect(lServerAddress, 2.0);
 		lTestOk = (lClientSocket != 0);
 		assert(lTestOk);
