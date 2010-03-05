@@ -475,7 +475,7 @@ void Win32Semaphore::Wait()
 
 bool Win32Semaphore::Wait(float64 pMaxWaitTime)
 {
-	bool lSignalled = true;
+	bool lSignalled = false;
 	if (pMaxWaitTime > 0)
 	{
 		lSignalled = (::WaitForSingleObject(mSemaphore, (DWORD)(pMaxWaitTime*1000.0)) == WAIT_OBJECT_0);

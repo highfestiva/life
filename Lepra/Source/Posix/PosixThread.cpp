@@ -340,6 +340,10 @@ void Thread::SetCpuAffinityMask(uint64 /*pAffinityMask*/)
 
 void Thread::Sleep(unsigned int pMilliSeconds)
 {
+	if (pMilliSeconds <= 0)
+	{
+		return;
+	}
 	time_t lSeconds = pMilliSeconds/1000;
 	long lNanoSeconds = (pMilliSeconds - lSeconds*1000) * 1000000.0;
 	timespec lTimeSpec;

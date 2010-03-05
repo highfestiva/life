@@ -217,7 +217,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 		wstr lBadPassword(L"feddo");
 		Cure::MangledPassword lPassword(lBadPassword);
 		Cure::LoginId lUser(wstr(L"client1"), lPassword);
-		lClient->StartConnectLogin(_T(""), 1, lUser);
+		lClient->StartConnectLogin(_T("localhost:25344"), 0, lUser);	// No connect time = skip connect, just try to login.
 		Cure::RemoteStatus lStatus = lClient->WaitLogin();
 		lTestOk = (lStatus == Cure::REMOTE_NO_CONNECTION);
 		assert(lTestOk);
@@ -236,7 +236,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 		wstr lBadPassword(L"feddo");
 		Cure::MangledPassword lPassword(lBadPassword);
 		Cure::LoginId lUser(wstr(L"client2"), lPassword);
-		lClient->StartConnectLogin(_T(""), 1, lUser);
+		lClient->StartConnectLogin(_T(""), 0, lUser);	// No connect time = skip connect, just try to login.
 		Cure::RemoteStatus lStatus = lClient->WaitLogin();
 		lTestOk = (lStatus == Cure::REMOTE_LOGIN_ERRONOUS_DATA);
 		assert(lTestOk);
@@ -255,7 +255,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 		wstr lBadPassword(L"feddn");
 		Cure::MangledPassword lPassword(lBadPassword);
 		Cure::LoginId lUser(wstr(L"client1"), lPassword);
-		lClient->StartConnectLogin(_T(""), 1, lUser);
+		lClient->StartConnectLogin(_T(""), 0, lUser);	// No connect time = skip connect, just try to login.
 		Cure::RemoteStatus lStatus = lClient->WaitLogin();
 		lTestOk = (lStatus == Cure::REMOTE_LOGIN_ERRONOUS_DATA);
 		assert(lTestOk);
@@ -298,7 +298,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 		wstr lBadPassword(L"feddo");
 		Cure::MangledPassword lPassword(lBadPassword);
 		Cure::LoginId lUser(wstr(L"client1"), lPassword);
-		lClient2->StartConnectLogin(_T(""), 1, lUser);
+		lClient2->StartConnectLogin(_T(""), 0, lUser);
 		Cure::RemoteStatus lStatus = lClient2->WaitLogin();
 		lTestOk = (lStatus == Cure::REMOTE_LOGIN_ALREADY);
 		assert(lTestOk);

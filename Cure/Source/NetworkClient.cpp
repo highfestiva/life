@@ -69,11 +69,16 @@ bool NetworkClient::Connect(const str& pLocalAddress, const str& pServerAddress,
 	if (lOk)
 	{
 		lOk = lLocalAddress.ResolveRange(pLocalAddress, lEndPort);
+		assert(lOk);
 	}
 	SocketAddress lTargetAddress;
 	if (lOk)
 	{
 		lOk = lTargetAddress.Resolve(pServerAddress);
+		if (!lOk)
+		{
+			mLog.Warningf(_T("Could not resolve server address '%s'."), pServerAddress.c_str());
+		}
 	}
 	if (lOk)
 	{
@@ -128,9 +133,11 @@ void NetworkClient::StartConnectLogin(const str& pServerHost, double pConnectTim
 	mIsLoggingIn = true;
 
 	mServerHost = pServerHost;
+	assert(pConnectTimeout >= 0);
 	mConnectTimeout = pConnectTimeout;
 	mLoginToken = pLoginToken;
 	mLoginTimeout = CURE_RTVAR_GET(mVariableScope, RTVAR_NETWORK_LOGIN_TIMEOUT, 3.0);
+	assert(mLoginTimeout > 0);
 	StopLoginThread();
 	mLoginThread.Start(this, &NetworkClient::LoginEntry);
 }
@@ -327,7 +334,7 @@ bool NetworkClient::SendLoginRequest(const LoginId& pLoginId)
 void NetworkClient::LoginEntry()
 {
 	bool lOk = true;
-	if (lOk && mConnectTimeout >= 0)
+	if (lOk && mConnectTimeout > 0)
 	{
 		mLog.Info(_T("Connecting to ") + mServerHost + _T("."));
 		int x = 0;
