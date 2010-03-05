@@ -59,9 +59,12 @@ void NetworkClient::Stop()
 
 bool NetworkClient::Connect(const str& pLocalAddress, const str& pServerAddress, double pTimeout)
 {
+	//assert(pLocalAddress.find(_T(":1025")) == str::npos);
+
 	ScopeLock lLock(&mLock);
 
-	Disconnect(true);
+	SendDisconnect();
+	Stop();
 
 	bool lOk = true;
 	SocketAddress lLocalAddress;
@@ -110,13 +113,10 @@ void NetworkClient::Disconnect(bool pSendDisconnect)
 	StopLoginThread();
 
 	ScopeLock lLock(&mLock);
-	if (mSocket && pSendDisconnect)
+	if (pSendDisconnect)
 	{
-		Cure::Packet* lPacket = GetPacketFactory()->Allocate();
-		SendStatusMessage(mSocket, 0, Cure::REMOTE_NO_CONNECTION, Cure::MessageStatus::INFO_LOGIN, L"", lPacket);
-		GetPacketFactory()->Release(lPacket);
+		SendDisconnect();
 	}
-	SendAll();
 	SetLoginAccountId(0);
 	Thread::Sleep(0.1);	// Try to wait until data sent. SO_LINGER doesn't seem trustworthy.
 	Stop();
@@ -132,7 +132,10 @@ void NetworkClient::StartConnectLogin(const str& pServerHost, double pConnectTim
 	mIsConnecting = true;
 	mIsLoggingIn = true;
 
-	mServerHost = pServerHost;
+	if (pConnectTimeout != 0)
+	{
+		mServerHost = pServerHost;
+	}
 	assert(pConnectTimeout >= 0);
 	mConnectTimeout = pConnectTimeout;
 	mLoginToken = pLoginToken;
@@ -145,9 +148,10 @@ void NetworkClient::StartConnectLogin(const str& pServerHost, double pConnectTim
 RemoteStatus NetworkClient::WaitLogin()
 {
 	const int lCheckCount = 50;
+	const double lSleepTime = mConnectTimeout/lCheckCount;
 	for (int x = 0; IsConnecting() && x < lCheckCount; ++x)
 	{
-		Thread::Sleep(mConnectTimeout/lCheckCount);
+		Thread::Sleep(lSleepTime);
 	}
 
 	RemoteStatus lStatus = REMOTE_UNKNOWN;
@@ -329,6 +333,17 @@ bool NetworkClient::SendLoginRequest(const LoginId& pLoginId)
 		mPacketFactory->Release(lPacket);
 	}
 	return (lOk);
+}
+
+void NetworkClient::SendDisconnect()
+{
+	if (mSocket)
+	{
+		Cure::Packet* lPacket = GetPacketFactory()->Allocate();
+		SendStatusMessage(mSocket, 0, Cure::REMOTE_NO_CONNECTION, Cure::MessageStatus::INFO_LOGIN, L"", lPacket);
+		GetPacketFactory()->Release(lPacket);
+	}
+	SendAll();
 }
 
 void NetworkClient::LoginEntry()

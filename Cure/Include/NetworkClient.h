@@ -52,6 +52,7 @@ public:
 
 private:
 	bool SendLoginRequest(const LoginId& pLoginId);
+	void SendDisconnect();
 	void LoginEntry();
 	void StopLoginThread();
 
