@@ -174,7 +174,11 @@ bool SocketAddress::Resolve(const str& pAddress)
 		lVector = strutil::Split(pAddress, _T(":"));
 		lOk = (lVector.size() == 2 &&
 			lVector[1].length() > 0 &&
-			strutil::StringToInt(lVector[1], lPort) && lPort > 1024);
+			strutil::StringToInt(lVector[1], lPort));
+	}
+	if (lOk)
+	{
+		lOk = (lPort >= 0 && lPort <= 65535);
 	}
 	if (lOk)
 	{

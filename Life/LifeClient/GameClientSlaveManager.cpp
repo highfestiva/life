@@ -636,7 +636,7 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 		{
 			Cure::MessageStatus* lMessageStatus = (Cure::MessageStatus*)pMessage;
 			Cure::RemoteStatus lRemoteStatus = lMessageStatus->GetRemoteStatus();
-			mLog.Infof(_T("Got remote status %i with ID %u."), lRemoteStatus, lMessageStatus->GetInteger());
+			//mLog.Infof(_T("Got remote status %i with ID %u."), lRemoteStatus, lMessageStatus->GetInteger());
 			if (lRemoteStatus != Cure::REMOTE_OK)
 			{
 				wstr lErrorMessage;

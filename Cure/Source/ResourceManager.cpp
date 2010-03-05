@@ -560,6 +560,7 @@ void ResourceManager::StopClear()
 			++lRefCountThreshold;
 		}
 	}
+	ForceFreeCache();
 
 	while (!mResourceSafeLookup.empty())
 	{

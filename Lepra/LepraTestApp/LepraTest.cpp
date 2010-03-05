@@ -1167,11 +1167,12 @@ bool TestNetwork(const LogDecorator& pAccount)
 	{
 		lContext = _T("local resolve");
 		SocketAddress lAddress;
-		lTestOk = lAddress.Resolve(":1024");
+		lTestOk = lAddress.Resolve(_T(":1024"));
 		assert(lTestOk);
 		if (lTestOk)
 		{
-			lTestOk = (lAddress.GetAsString() == _T("127.0.0.1:1024"));
+			lTestOk = (lAddress.GetAsString() == _T("127.0.0.1:1024") ||
+				strutil::StartsWith(lAddress.GetAsString(), _T("192.168.")));
 			assert(lTestOk);
 		}
 	}

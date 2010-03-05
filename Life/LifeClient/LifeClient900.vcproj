@@ -596,7 +596,7 @@
 			</File>
 		</Filter>
 		<Filter
-			Name="Content"
+			Name="Game"
 			>
 			<File
 				RelativePath=".\RoadSignButton.cpp"
