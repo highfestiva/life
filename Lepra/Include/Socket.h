@@ -54,7 +54,7 @@ public:
 		SHUTDOWN_BOTH  = (SHUTDOWN_RECV|SHUTDOWN_SEND)
 	};
 
-	static sys_socket InitSocket(sys_socket pSocket, int pSize);
+	static sys_socket InitSocket(sys_socket pSocket, int pSize, bool pReuse);
 	static sys_socket CreateTcpSocket();
 	static sys_socket CreateUdpSocket();
 	static void CloseSysSocket(sys_socket pSocket);

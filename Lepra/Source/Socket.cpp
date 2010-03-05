@@ -25,7 +25,7 @@ namespace Lepra
 
 
 
-sys_socket SocketBase::InitSocket(sys_socket pSocket, int pSize)
+sys_socket SocketBase::InitSocket(sys_socket pSocket, int pSize, bool pReuse)
 {
 	// Set the underlying socket buffer sizes.
 	int lBufferSize = pSize;
@@ -36,23 +36,26 @@ sys_socket SocketBase::InitSocket(sys_socket pSocket, int pSize)
 	lLinger.l_onoff = 0;	// Graceful shutdown.
 	lLinger.l_linger = 1;	// Wait this many seconds.
 	::setsockopt(pSocket, SOL_SOCKET, SO_LINGER, (const char*)&lLinger, sizeof(lLinger));
+	if (pReuse)
+	{
 #ifndef LEPRA_WINDOWS
-	int lFlag = 1;
-	::setsockopt(pSocket, SOL_SOCKET, SO_REUSEADDR, (const char*)&lFlag, sizeof(lFlag));
+		int lFlag = 1;
+		::setsockopt(pSocket, SOL_SOCKET, SO_REUSEADDR, (const char*)&lFlag, sizeof(lFlag));
 #endif // !Windows
+	}
 	return (pSocket);
 }
 
 sys_socket SocketBase::CreateTcpSocket()
 {
 	sys_socket s = ::socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
-	return (InitSocket(s, 32*1024));
+	return (InitSocket(s, 32*1024, true));
 }
 
 sys_socket SocketBase::CreateUdpSocket()
 {
 	sys_socket s = ::socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
-	return (InitSocket(s, 8*1024));
+	return (InitSocket(s, 8*1024, false));
 }
 
 void SocketBase::CloseSysSocket(sys_socket pSocket)

@@ -78,12 +78,12 @@ StaticThread gMainThread(_T("MainThread"));
 
 static void InitializeSignalMask()
 {
-/*#if !defined(LEPRA_MAC)
+#if !defined(LEPRA_MAC)
 	sigset_t lMask;
 	::sigemptyset(&lMask);
 	::sigaddset(&lMask, SIGHUP);
 	::pthread_sigmask(SIG_BLOCK, &lMask, 0);
-#endif*/
+#endif
 }
 
 
@@ -418,7 +418,10 @@ bool Thread::Join(float64 pTimeOut)
 
 void Thread::Signal(int) // Ignore signal for now.
 {
-	::pthread_kill((pthread_t)mThreadHandle, SIGHUP);
+	if (mThreadHandle != 0)
+	{
+		::pthread_kill((pthread_t)mThreadHandle, SIGHUP);
+	}
 }
 
 void Thread::Kill()

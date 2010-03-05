@@ -86,29 +86,28 @@ CureTestApplication::CureTestApplication(const strutil::strvec& pArgumentList):
 	for (size_t x = 1; x < pArgumentList.size(); ++x)
 	{
 		str lArgument = pArgumentList[x];
-		strutil::ToUpper(lArgument);
 		int lMask = 0;
-		if (lArgument == _T("LEPRA"))
+		if (lArgument == _T("lepra"))
 		{
 			lMask |= LEPRA_BIT;
 		}
-		else if (lArgument == _T("TBC"))
+		else if (lArgument == _T("tbc"))
 		{
 			lMask |= TBC_BIT;
 		}
-		else if (lArgument == _T("CURE"))
+		else if (lArgument == _T("cure"))
 		{
 			lMask |= CURE_BIT;
 		}
-		else if (lArgument == _T("NETPHYS"))
+		else if (lArgument == _T("netphys"))
 		{
 			lMask |= NETWORK_PHYSICS_BIT;
 		}
-		else if (lArgument == _T("CONSOLE"))
+		else if (lArgument == _T("console"))
 		{
 			lMask |= CONSOLE_BIT;
 		}
-		else if (lArgument == _T("TRACE"))
+		else if (lArgument == _T("trace"))
 		{
 			lMask |= TRACE_BIT;
 		}
