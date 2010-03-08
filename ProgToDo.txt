@@ -25,16 +25,15 @@ Game
 + Create arcade-style helicopter.
 + Add help text when dropping down console.
 + Create base world. Use mesh, not primitives, for collision. (Modelling, import, load and engine.)
-
-. Load objects dynamically, without having to hard-code an account and class/phys/meshes name.
-. Create UI for picking new vehicle. Don't auto-pick when logging in!
-  - Use road signs as buttons.
-  - Have a road sign for each vehicle.
++ Load objects dynamically, without having to hard-code an account and class/phys/meshes name.
++ Create fork-lift.
++ Create UI for picking new vehicle. Don't auto-pick when logging in!
+  + Use road signs as buttons.
+  + Have a road sign for each vehicle.
   - Use road signs (think high way green) for other settings as well: nationality, number of splitscreen users, fullscreen, online play...
   - Show big title text (translated) for all buttons.
   - Hilight current selection where applicable. Hilight using red/blue signs instead of red/yellow.
 . Make it possible to be logged in without vehicle. Make it possible to drop vehicle.
-. Create fork-lift.
 . Create material that can easily can be picked-up, loaded and moved around.
 . Create crane that can pull wire up.
 . Bug fix attachments (i.e. crane picks up car) so that they work properly (without crashing).
@@ -120,9 +119,10 @@ Engine
 + Add loading of all formats, especially world format.
 + Try to fixate hardware devices, so that Device0 doesn't mean game pad one day and joystick the next.
 + Fix cursor in GUI (used to cause XOR problems).
++ Move over to MSVC9.
++ Logging on in two steps: a) normal login, server returns avatars, and b) enter world by selecting avatar. (After (a) the sync goes.)
 . Port client to Mac OS X / Cocoa.
 
-. Move over to MSVC9.
 . Create ability for lossless UDP transfers.
 . When having several control units, the "input threshold" does not work. Make a threshold for each input entity.
 . Sound is not deleted when logging out/in!
@@ -132,7 +132,6 @@ Engine
 . Add UV-maps to the import tool.
 . Make importer capable of getting texturing.
 . Make export script (Maya) auto-run before save.
-. Logging on in two steps: a) normal login, server returns avatars, and b) enter world by selecting avatar. (After (a) the sync goes.)
 . Creating a less jittery experience: a) sync lag/jitter immediately after logging in, b) sorting out old msgs on client, c) keeping track of jitter on client side.
 . Moving out platform specifics from (Ui)CppContextObject.cpp to LifeXxx.cpp.
 . Spawn engine and load world. Must be able to manage both.
@@ -170,6 +169,7 @@ Engine
 . Port Posix' SystemManager (mostly placeholders at the moment).
 . Port font rendering to X11.
 . Use game icon and make it happen on Windows, Mac, iPhone, X11...
+. Make sure camera never flies under ground.
 
 - Make camera always keep a free line of sight to the controlled object.
 - Creating group/world objects as resources.

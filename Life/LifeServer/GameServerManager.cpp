@@ -14,6 +14,7 @@
 #include "../../Cure/Include/TimeManager.h"
 #include "../../Lepra/Include/AntiCrack.h"
 #include "../../Lepra/Include/Network.h"
+#include "../../Lepra/Include/Path.h"
 #include "../../Lepra/Include/SystemManager.h"
 #include "../Life.h"
 #include "../LifeApplication.h"
@@ -219,9 +220,6 @@ bool GameServerManager::Initialize()
 {
 	bool lOk = InitializeTerrain();
 
-	// TODO: remove entirely! The accounts should be created elsewhere:
-	//    Online game)     typically in a database via a webservice.
-	//    Anonymous game)  in RAM by the implementing server-side class.
 	if (lOk)
 	{
 		int x;
@@ -231,39 +229,26 @@ bool GameServerManager::Initialize()
 			wstr lReadablePassword(L"CarPassword");
 			Cure::MangledPassword lPassword(lReadablePassword);
 			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
-			lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("sphere_01")));
-			//lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("car_001")));
-			//lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("monster_001")));
-			//lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("excavator_703")));
-			//lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("crane_whatever")));
-			lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("tractor_02")));
-			lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("tractor_01")));
-			lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("fjask")));
-			lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("road_roller_01")));
-			lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("truck_01")));
-			lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("helicopter_01")));
-			lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("frontloader")));
-			lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("towtruck_01")));
-			lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("monster_02")));
-			lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("hovercraft_01")));
-			lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("dumper_01")));
-			lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("robot_01")));
-			lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("mobile_crane_01")));
-			lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("forklift_01")));
-			lOk = lOk && mUserAccountManager->AddUserAvatarId(lUserName, Cure::UserAccount::AvatarId(_T("saucer_01")));
+			if (lOk)
+			{
+				DiskFile::FindData lFindData;
+				if (DiskFile::FindFirst(_T("Data/*.class"), lFindData))
+				{
+					do
+					{
+						if (strutil::StartsWith(lFindData.GetName(), _T("level_")) ||
+							strutil::StartsWith(lFindData.GetName(), _T("road_sign")))
+						{
+							continue;
+						}
+						Cure::UserAccount::AvatarId lId(Path::GetFileBase(lFindData.GetName()));
+						lOk = mUserAccountManager->AddUserAvatarId(lUserName, lId);
+					}
+					while (lOk && DiskFile::FindNext(lFindData));
+				}
+			}
 		}
 	}
-
-	/*if (lOk)
-	{
-		assert(mBoxObject == 0);
-		mBoxObject = Parent::CreateContextObject(_T("box_002"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
-		mBoxObject->StartLoading();
-	}*/
-
-	// TODO: remove!!!
-	//Cure::ContextObject* lTractor = Parent::CreateContextObject(_T("tractor_01"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
-	//lTractor->StartLoading();
 
 	str lAcceptAddress = CURE_RTVAR_GETSET(GetVariableScope(), RTVAR_NETWORK_LISTEN_ADDRESS, _T("0.0.0.0:16650"));
 	if (lOk)

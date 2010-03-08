@@ -2406,6 +2406,8 @@ bool TestPath(const LogDecorator& pAccount)
 	bool lTestOk = true;
 	const tchar* lTestPath1 = _T("/usr/bin/.hid");
 	const tchar* lTestPath2 = _T("C:\\Documents and settings\\Sverker\\Mina dokument\\.skit...apansson");
+	const tchar* lTestPath3 = _T("apa_bepa0.cepa");
+	const tchar* lTestPath4 = _T("d1/f3");
 
 	if (lTestOk)
 	{
@@ -2419,6 +2421,24 @@ bool TestPath(const LogDecorator& pAccount)
 		lContext = _T("file 1");
 		str lFile = Path::GetFileBase(lTestPath1);
 		lTestOk = (lFile == _T(".hid"));
+		assert(lTestOk);
+	}
+	if (lTestOk)
+	{
+		lContext = _T("file 2");
+		str lDir = Path::GetDirectory(lTestPath3);
+		str lFile = Path::GetFileBase(lTestPath3);
+		str lExt = Path::GetExtension(lTestPath3);
+		lTestOk = (lDir == _T("") && lFile == _T("apa_bepa0") && lExt == _T("cepa"));
+		assert(lTestOk);
+	}
+	if (lTestOk)
+	{
+		lContext = _T("file 3");
+		str lDir = Path::GetDirectory(lTestPath4);
+		str lFile = Path::GetFileBase(lTestPath4);
+		str lExt = Path::GetExtension(lTestPath4);
+		lTestOk = (lDir == _T("d1/") && lFile == _T("f3") && lExt == _T(""));
 		assert(lTestOk);
 	}
 	if (lTestOk)

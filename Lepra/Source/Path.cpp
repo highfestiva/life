@@ -56,6 +56,7 @@ strutil::strvec Path::SplitPath(const str& pPath)
 		else if (IsPathSeparator(pPath[x]))
 		{
 			// No extension found; extension = "".
+			x = (int)pPath.length()-1;
 			break;
 		}
 	}
@@ -78,7 +79,7 @@ strutil::strvec Path::SplitPath(const str& pPath)
 	{
 		if (lPathParts[0].empty() && lPathParts[1].empty() && !lPathParts[2].empty())
 		{
-			lPathParts[1] = pPath.substr(0, lFileEnd);
+			lPathParts[1] = pPath.substr(0, lFileEnd+1);
 		}
 		else if (lPathParts[1].empty() && !lPathParts[2].empty())
 		{

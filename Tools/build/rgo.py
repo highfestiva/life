@@ -9,6 +9,7 @@ from rgohelp import *
 
 
 appname = "Life"
+testappname = "UiCure/CureTestApp"
 osname = getosname()
 hwname = gethwname()
 datename = getdatename()
@@ -102,11 +103,12 @@ def _incremental_build_data():
                                 break
 
 
-def _incremental_copy(filelist, targetdir):
+def _incremental_copy(filelist, targetdir, buildtype):
         global updates
         import shutil
         for filename in filelist:
-                if filename.lower().find("test") >= 0:
+                global defaulttype
+                if buildtype != defaulttype and filename.lower().find("test") >= 0:
                         print("Skipping test binary named '%s'." % filename)
                         continue
                 if os.path.isdir(filename):
@@ -140,22 +142,22 @@ def _incremental_copy_code(targetdir, buildtype):
                                         obj = obj.split()[0]
                                 if obj.startswith("ThirdParty/"):
                                         fl += glob.glob(os.path.join(obj, lgpl_tt[buildtype], "*.dll"))
-                                elif obj.startswith(appname+"/"):
+                                elif obj.startswith(appname+"/") or obj.startswith(testappname):
                                         fl += glob.glob(os.path.join(obj, own_tt[buildtype], "*.exe"))
                 if hwname.find("64") >= 0:
                         fl += ["ThirdParty/fmod/api/fmod64.dll"]
                 else:
                         fl += ["ThirdParty/fmod/api/fmod.dll"]
-        _incremental_copy(fl, targetdir)
+        _incremental_copy(fl, targetdir, buildtype)
 
 
-def _incremental_copy_data(targetdir):
+def _incremental_copy_data(targetdir, buildtype):
         import glob
         fl = glob.glob("Data/*.class") + glob.glob("Data/*.mesh") + glob.glob("Data/*.phys") + \
                  glob.glob("Data/*.jpg") + glob.glob("Data/*.png") + glob.glob("Data/*.tga") + glob.glob("Data/*.bmp") + \
                  glob.glob("Data/*.wav") + glob.glob("Data/*.ogg") + glob.glob("Data/*.mp3")
         targetdata = os.path.join(targetdir, "Data")
-        _incremental_copy(fl, targetdata)
+        _incremental_copy(fl, targetdata, buildtype)
 
 
 def _cleandata(da_dir):
@@ -219,9 +221,9 @@ def cleandata(targetdir=bindir):
         removes += _cleandir(os.path.join(targetdir, "Data"))
 
 
-def builddata(targetdir=bindir):
+def builddata(targetdir=bindir, buildtype=defaulttype):
         _incremental_build_data()
-        _incremental_copy_data(targetdir)
+        _incremental_copy_data(targetdir, buildtype)
 
 
 
@@ -264,6 +266,7 @@ def clean(targetdir=bindir, buildtype=defaulttype):
 
 def buildzip():
         verify_base_dir()
+        global buildtype
         buildtype = ziptype
         #print(appname, osname, hwname, buildtype, datename)
         #print(type(appname), type(osname), type(hwname), type(buildtype), type(datename))
@@ -299,7 +302,7 @@ def _prepare_run():
                 pre = ""
                 post = ".exe"
         if not os.path.exists("LifeClient"+post) or not os.path.exists("LifeServer"+post):
-                reason = "internal error" if hasdevenv() else "missing C++ build environment"
+                reason = "binaries not compiled" if hasdevenv() else "missing C++ build environment"
                 print("Could not run %s due to %s." % (appname, reason))
                 sys.exit(2)
         return pre, post
