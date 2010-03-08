@@ -136,10 +136,10 @@
  * with _STLP_SHRED_BYTE (see below).
  * Note : _STLP_DEBUG and _STLP_DEBUG_ALLOC don't set this option automatically.
  */
-/*
+// high_festiva was here /*
 #define _STLP_DEBUG_UNINITIALIZED 1
 #define _STLP_DEBUG_ALLOC 1
-*/
+// high_festiva was here */
 
 /*
  * Uncomment and provide a definition for the byte with which raw memory
@@ -147,9 +147,9 @@
  * Choose a value which is likely to cause a noticeable problem if dereferenced
  * or otherwise abused. A good value may already be defined for your platform.
  */
-/*
+// high_festiva was here /*
 #define _STLP_SHRED_BYTE 0xA3
-*/
+// high_festiva was here */
 
 /*
  *  This option is for gcc users only and only affects systems where native linker

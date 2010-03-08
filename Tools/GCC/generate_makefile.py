@@ -11,7 +11,7 @@ if sys.platform == 'darwin':
     cextraflags = "-D_DARWIN_C_SOURCE -D_STLP_THREADS"
 
 cflags_1 = """
-CFLAGS = -O0 -ggdb -fPIC """+cextraflags+""" -D_POSIX_PTHREAD_SEMANTICS %(includes)s -DPOSIX -D_XOPEN_SOURCE=600 -D_DEBUG -D_CONSOLE -DPNG_NO_ASSEMBLER_CODE -DdSingle -DdTLS_ENABLED=1 -DHAVE_CONFIG_H=1 -DLEPRA_WITHOUT_FMOD"""
+CFLAGS = -O0 -ggdb -fPIC """+cextraflags+""" -D_STLP_DEBUG -D_POSIX_PTHREAD_SEMANTICS %(includes)s -DPOSIX -D_XOPEN_SOURCE=600 -D_DEBUG -D_CONSOLE -DPNG_NO_ASSEMBLER_CODE -DdSingle -DdTLS_ENABLED=1 -DHAVE_CONFIG_H=1 -DLEPRA_WITHOUT_FMOD"""
 cflags_2 = "-Wno-unknown-pragmas"
 ldflags = ""
 
@@ -28,7 +28,7 @@ if sys.platform == 'darwin':
     libgl = '-framework OpenGL'
     stllibfile = '.5.2.dylib'
     cflags_1 += ' -framework OpenGL -framework CoreServices -framework OpenAL -DMAC_OS_X_VERSION=1050'
-    ldflags += ' -framework OpenGL -framework AppKit -framework Cocoa -lobjc -lstlport -framework CoreServices %(libs)s %(deplibs)s '
+    ldflags += ' -framework OpenGL -framework AppKit -framework Cocoa -lobjc -lstlportstlg -framework CoreServices %(libs)s %(deplibs)s '
 
 head_lib = cflags_1+" -Wall "+cflags_2+"\n"
 
@@ -60,11 +60,11 @@ lib%(lib)s.so:\t$(OBJS)
 foot_lib_nowarn = foot_lib
 
 head_bin = head_lib+"""
-LIBS = -lLife -lCure -lTBC -lLepra -lThirdParty -lstlport -lpthread -ldl """ + librt + """ %(libs)s
+LIBS = -lLife -lCure -lTBC -lLepra -lThirdParty -lstlportstlg -lpthread -ldl """ + librt + """ %(libs)s
 """
 
 head_gfx_bin = head_bin+"""
-LIBS = -lLife -lUiCure -lUiTBC -lUiLepra """ + openal_ui + """ -lalut -lCure -lTBC -lLepra -lThirdParty -lstlport -lpthread -ldl """ + librt + " " + libgl + """ %(libs)s
+LIBS = -lLife -lUiCure -lUiTBC -lUiLepra """ + openal_ui + """ -lalut -lCure -lTBC -lLepra -lThirdParty -lstlportstlg -lpthread -ldl """ + librt + " " + libgl + """ %(libs)s
 """
 
     
@@ -104,7 +104,7 @@ depend:
 \tdone
 
 $(BINS):\t$(OBJS)
-\t@cp ThirdParty/stlport/build/lib/obj/gcc/so/libstlport""" + stllibfile + """ bin/
+\t@cp ThirdParty/stlport/build/lib/obj/gcc/so_stlg/libstlport""" + stllibfile + """ bin/
 \t@cp $@ bin/
 
 $(OBJS):\t$(SRCS)
@@ -222,7 +222,7 @@ def generate_makefiles(basedir, vcfileinfolist):
         os.path.relpath(basedir+"ThirdParty/ode-0.11.1/OPCODE", projdir),
         os.path.relpath(basedir+"ThirdParty/ode-0.11.1/GIMPACT/include", projdir),
         os.path.relpath(basedir+"ThirdParty/ode-0.11.1/ou/include", projdir)]
-        libdirs = [os.path.relpath(basedir+"ThirdParty/stlport/build/lib/obj/gcc/so", projdir),
+        libdirs = [os.path.relpath(basedir+"ThirdParty/stlport/build/lib/obj/gcc/so_stlg", projdir),
         os.path.relpath(basedir+"ThirdParty", projdir),
         os.path.relpath(basedir+"ThirdParty/openal-soft-1.10.622", projdir),
         os.path.relpath(basedir+"ThirdParty/freealut-1.1.0/admin/VisualStudioDotNET/alut", projdir),

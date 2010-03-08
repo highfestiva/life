@@ -144,7 +144,7 @@ _LSUPCPP := $(shell mkdir -p $(PRE_OUTPUT_DIR) && lipo ${_LSUPCPP} -thin ${M_ARC
 endif
 endif
 ifneq (${_LSUPCPP},libsupc++.a)
-_LSUPCPP_OBJ     := $(shell $(AR) t ${_LSUPCPP})
+_LSUPCPP_OBJ     := $(shell $(AR) t ${_LSUPCPP} | grep -v "SYMDEF SORTED")
 _LSUPCPP_AUX_OBJ := $(addprefix $(AUX_DIR)/,${_LSUPCPP_OBJ})
 _LSUPCPP_TSMP    := .supc++
 _LSUPCPP_AUX_TSMP:= $(AUX_DIR)/$(_LSUPCPP_TSMP)

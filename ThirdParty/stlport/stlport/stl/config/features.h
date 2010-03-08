@@ -239,7 +239,9 @@
 
 #  if defined (_PTHREADS)
 #    define _STLP_PTHREADS
-#    define _STLP_THREADS
+#    if !defined(_STLP_THREADS)
+#      define _STLP_THREADS
+#    endif
 #  endif
 #  if defined (_UITHREADS)
 #    define _STLP_UITHREADS

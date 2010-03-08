@@ -39,7 +39,7 @@ M_ARCH := $(shell g++ -dumpmachine | awk '{split($$1,a,"-");print a[1]}')
 ifeq (i686,$(findstring i686,$(M_ARCH)))
 M_ARCH := x86_64
 endif
-ifeq ($(M_ARCH),power-macintosh)
+ifeq ($(M_ARCH),powerpc)
 #M_ARCH := ppc
 M_ARCH := ppc7400	# high_festiva was here!
 endif

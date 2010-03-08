@@ -340,7 +340,7 @@ STR_UTIL_TEMPLATE int STR_UTIL_QUAL::FindFirstWhiteSpace(const _String& pString,
 STR_UTIL_TEMPLATE void STR_UTIL_QUAL::StripWhiteSpaces(_String& pString)
 {
 	int lDestIndex = 0;
-	for (int i = 0; pString[i] != 0; i++)
+	for (size_t i = 0; i < pString.length(); i++)
 	{
 		if (!IsWhiteSpace(pString[i]))
 		{

@@ -169,7 +169,8 @@ bool Path::NormalizePath(const str& pInputPath, str& pOutputPath)
 			if (x == 1 && lDirectoryArray[0] == _T("."))
 			{
 				lDirectoryArray.erase(lDirectoryArray.begin());	// "./../" -> "../".
-				--x;
+				y = lDirectoryArray.begin();
+				x = -1;
 			}
 			else
 			{
@@ -182,7 +183,8 @@ bool Path::NormalizePath(const str& pInputPath, str& pOutputPath)
 				}
 				if (*z != _T(".."))	// "../../" should remain the same.
 				{
-					y = lDirectoryArray.erase(z, ++y);	// Drop this and parent directory ("a/../" -> "").
+					++y;
+					y = lDirectoryArray.erase(z, y);	// Drop this and parent directory ("a/../" -> "").
 					x -= 2;
 				}
 				else

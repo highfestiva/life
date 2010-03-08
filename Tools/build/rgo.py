@@ -26,7 +26,7 @@ makefilescript = "generate_makefile.py"
 
 
 def _buildstl():
-        if os.path.exists("ThirdParty/stlport/lib") or os.path.exists("ThirdParty/stlport/build/lib/obj/gcc/so"):
+        if os.path.exists("ThirdParty/stlport/lib") or os.path.exists("ThirdParty/stlport/build/lib/obj/gcc/so_stlg"):
                 return
         print("Building STLport...")
         os.chdir("ThirdParty/stlport/")
