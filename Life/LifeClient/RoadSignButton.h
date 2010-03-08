@@ -18,6 +18,10 @@ namespace Life
 
 
 
+class GameClientSlaveManager;
+
+
+
 class RoadSignButton: public UiCure::CppContextObject
 {
 	typedef UiCure::CppContextObject Parent;
@@ -28,21 +32,36 @@ public:
 		SHAPE_ROUND,
 	};
 
-	RoadSignButton(Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager,
-		const str& pName, const str& pMeshResourceName, Shape pShape);
+	RoadSignButton(GameClientSlaveManager* pClient, const str& pName, const str& pMeshResourceName, Shape pShape);
 	virtual ~RoadSignButton();
 
 	UiTbc::CustomButton& GetButton();
-	void SetTrajectory(float pAngle, const PixelCoord& pEndPoint, float pEndZ, float pTime);
+	void SetTrajectory(float pAngle, const PixelCoord& pEndPoint, float pEndDistance, float pTime);
+	void SetIsMovingIn(bool pIsMovingIn, float pTime);
 
-private:
+protected:
+	void OnTick(float pFrameTime);
 	void RenderButton(UiTbc::CustomButton* pButton);
 	bool IsOverButton(UiTbc::CustomButton* pButton, int x, int y);
 	void OnLoadMesh(UiCure::UserGeometryReferenceResource* pMeshResource);
 
+private:
+	float GetTargetAngle() const;
+
+	GameClientSlaveManager* mClient;
 	UiTbc::CustomButton mButton;
 	UiCure::UserGeometryReferenceResource mSignMesh;
 	Shape mShape;
+	bool mIsMeshMoved;
+	float mMeshRadius;
+	float mAnglePart;
+	float mAngleTime;
+	float mAngle;
+	bool mIsMovingIn;
+	Vector3DF mEndPosition;
+	Vector3DF mCurrentPosition;
+	Vector3DF mAnchor;
+	Vector3DF mAxis;
 
 	LOG_CLASS_DECLARE();
 };

@@ -12,6 +12,7 @@
 #include "../../Cure/Include/TimeManager.h"
 #include "../../Lepra/Include/Network.h"
 #include "../../Lepra/Include/Number.h"
+#include "../../Lepra/Include/Random.h"
 #include "../../Lepra/Include/StringUtility.h"
 #include "../../Lepra/Include/SystemManager.h"
 #include "../../Lepra/Include/Timer.h"
@@ -48,6 +49,7 @@ GameClientSlaveManager::GameClientSlaveManager(GameClientMasterTicker* pMaster, 
 	mAvatarId(0),
 	mLastSentByteCount(0),
 	mPingAttemptCount(0),
+	mJustLookingAtAvatars(false),
 	mAllowMovementInput(true),
 	mOptions(pVariableScope, pSlaveIndex),
 	mLoginWindow(0)
@@ -252,6 +254,29 @@ bool GameClientSlaveManager::OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode)
 
 void GameClientSlaveManager::OnInput(UiLepra::InputElement* pElement)
 {
+	if (mAvatarSelectTime.GetTimeDiffF() > 0.5)
+	{
+		if (pElement->GetParentDevice()->GetManager()->GetMouse() == pElement->GetParentDevice() &&
+			pElement->GetType() == UiLepra::InputElement::ANALOGUE)
+		{
+			RoadSignMap::iterator x = mRoadSignMap.begin();
+			for (; x != mRoadSignMap.end(); ++x)
+			{
+				x->second->SetIsMovingIn(true, (float)Random::Uniform(0.3, 1.3));
+			}
+			mJustLookingAtAvatars = true;
+			mAvatarMightSelectTime.PopTimeDiffF();
+		}
+	}
+	if (mJustLookingAtAvatars && mAvatarMightSelectTime.GetTimeDiffF() > 3.0)
+	{
+		RoadSignMap::iterator x = mRoadSignMap.begin();
+		for (; x != mRoadSignMap.end(); ++x)
+		{
+			x->second->SetIsMovingIn(false, (float)Random::Uniform(0.3, 1.3));
+		}
+	}
+
 	if (mOptions.UpdateInput(pElement))
 	{
 		mInputExpireAlarm.Push(0.1);
@@ -263,6 +288,18 @@ void GameClientSlaveManager::OnInput(UiLepra::InputElement* pElement)
 int GameClientSlaveManager::GetSlaveIndex() const
 {
 	return (mSlaveIndex);
+}
+
+
+
+UiCure::GameUiManager* GameClientSlaveManager::GetUiManager() const
+{
+	return (mUiManager);
+}
+
+const PixelRect& GameClientSlaveManager::GetRenderArea() const
+{
+	return (mRenderArea);
 }
 
 
@@ -346,6 +383,9 @@ void GameClientSlaveManager::TickUiInput()
 		Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
 		if (lObject)
 		{
+			mAvatarSelectTime.UpdateTimer();
+			mAvatarMightSelectTime.UpdateTimer();
+
 			const Options::ClientOptions::Control::Vehicle& v = mOptions.GetOptions().mControl.mVehicle;
 			float lPower;
 			const bool lIsMovingForward = lObject->GetForwardSpeed() > 0.5f;
@@ -678,11 +718,20 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 						lMessageStatus->GetMessageString(lAvatarName);
 						Cure::UserAccount::AvatarId lAvatarId = wstrutil::ToCurrentCode(lAvatarName);
 						log_adebug("Status: INFO_AVATAR...");
-						str lResourceId = strutil::Format(_T("Data/monster_02_wheel_.mesh;%i_%s"), mSlaveIndex, lAvatarId.c_str());
-						RoadSignButton* lButton = new RoadSignButton(GetResourceManager(), mUiManager,
-							lAvatarId, lResourceId, RoadSignButton::SHAPE_ROUND);
+						str lResourceId = strutil::Format(_T("Data/road_sign_sign.mesh;%i_%s"), mSlaveIndex, lAvatarId.c_str());
+						RoadSignButton* lButton = new RoadSignButton(this, lAvatarId, lResourceId, RoadSignButton::SHAPE_ROUND);
 						GetContext()->AddLocalObject(lButton);
+						const int NUM_VEHICLES = 17;
+						const int NUM_SIGN_SPACES = 20;
+						static float a = PIF/2 - PIF * NUM_VEHICLES/NUM_SIGN_SPACES;
+						a += 1/(float)NUM_SIGN_SPACES*2*PIF;
+						const int lTargetX = (int)(::cos(a) * (mRenderArea.GetWidth()/2-50) + mRenderArea.GetCenterX());
+						const int lTargetY = (int)(::sin(a) * (mRenderArea.GetHeight()/2-50) + mRenderArea.GetCenterY());
+						lButton->SetTrajectory(a, PixelCoord(lTargetX, lTargetY),
+							8, (float)Random::Uniform(0.3, 0.8));
 						lButton->GetButton().SetOnClick(GameClientSlaveManager, OnAvatarSelect);
+						mRoadSignMap.insert(RoadSignMap::value_type(lButton->GetInstanceId(), lButton));
+						mJustLookingAtAvatars = false;
 					}
 					break;
 				}
@@ -963,6 +1012,13 @@ void GameClientSlaveManager::OnAvatarSelect(UiTbc::Button* pButton)
 	GetNetworkAgent()->SendStatusMessage(GetNetworkClient()->GetSocket(), 0, Cure::REMOTE_OK,
 		Cure::MessageStatus::INFO_AVATAR, wstrutil::ToOwnCode(lAvatarId), lPacket);
 	GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
+
+	RoadSignMap::iterator x = mRoadSignMap.begin();
+	for (; x != mRoadSignMap.end(); ++x)
+	{
+		x->second->SetIsMovingIn(false, (float)Random::Uniform(0.3, 0.8));
+	}
+	mAvatarSelectTime.PopTimeDiffF();
 }
 
 Cure::RuntimeVariableScope* GameClientSlaveManager::GetVariableScope() const

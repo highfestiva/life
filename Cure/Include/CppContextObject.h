@@ -29,7 +29,6 @@ protected:
 
 	TBC::ChunkyPhysics* GetPhysics() const;
 
-private:
 	void OnTick(float pFrameTime);
 	void OnAlarm(int pAlarmId);
 	void OnTrigger(TBC::PhysicsManager::BodyID pBody1, TBC::PhysicsManager::BodyID pBody2);
@@ -39,6 +38,7 @@ private:
 	void OnLoadClass(UserClassResource* pClassResource);
 	void OnLoadPhysics(UserPhysicsResource* pPhysicsResource);
 
+private:
 	UserClassResource* mClassResource;
 	UserPhysicsResource* mPhysicsResource;
 

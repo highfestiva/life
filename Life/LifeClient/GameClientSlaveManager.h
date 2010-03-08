@@ -36,6 +36,7 @@ namespace Life
 
 
 class GameClientMasterTicker;
+class RoadSignButton;
 
 
 
@@ -72,6 +73,9 @@ public:
 	void OnInput(UiLepra::InputElement* pElement);
 
 	int GetSlaveIndex() const;
+
+	UiCure::GameUiManager* GetUiManager() const;
+	const PixelRect& GetRenderArea() const;
 
 private:
 	str GetApplicationCommandFilename() const;
@@ -121,6 +125,7 @@ private:
 
 	typedef std::hash_map<Cure::GameObjectId, int> ObjectFrameIndexMap;
 	typedef std::pair<Cure::GameObjectId, int> ObjectFrameIndexPair;
+	typedef std::hash_map<Cure::GameObjectId, RoadSignButton*> RoadSignMap;
 
 	GameClientMasterTicker* mMaster;
 	UiCure::GameUiManager* mUiManager;
@@ -142,6 +147,11 @@ private:
 	Timer mLastUnsafeReceiveTime;
 	Alarm mCollisionExpireAlarm;
 	Alarm mInputExpireAlarm;
+
+	Timer mAvatarSelectTime;
+	Timer mAvatarMightSelectTime;
+	bool mJustLookingAtAvatars;
+	RoadSignMap mRoadSignMap;
 
 	Vector3DF mCameraPosition;		// TODO: remove hack (should context object controlled)!
 	Vector3DF mCameraPreviousPosition;	// TODO: remove hack (should context object controlled)!

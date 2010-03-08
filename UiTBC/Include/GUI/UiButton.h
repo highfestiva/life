@@ -76,6 +76,15 @@ public:
 		ICON_CENTER,
 		ICON_RIGHT,
 	};
+	enum State
+	{
+		RELEASED = 0,
+		RELEASED_HOOVER,
+		RELEASING,
+		PRESSED,
+		PRESSED_HOOVER,
+		PRESSING,
+	};
 
 	Button(const str& pName);
 	Button(const Color& pColor,
@@ -127,21 +136,11 @@ public:
 	void SetExtraData(void* pData);
 	void* GetExtraData() const;
 
-protected:
-	enum State
-	{
-		RELEASED = 0,
-		RELEASED_HOOVER,
-		RELEASING,
-		PRESSED,
-		PRESSED_HOOVER,
-		PRESSING,
-	};
-
-	virtual void OnTextChanged();
 	State GetState();
 	void SetState(State pState);
 
+protected:
+	virtual void OnTextChanged();
 	virtual StateComponentList GetStateList(ComponentState pState);
 
 protected:

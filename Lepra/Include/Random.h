@@ -11,10 +11,7 @@
 
 
 
-#ifndef LEPRA_RANDOM_H
-#define LEPRA_RANDOM_H
-
-
+#pragma once
 
 #include "LepraTypes.h"
 
@@ -40,7 +37,3 @@ private:
 
 
 }
-
-
-
-#endif // !LEPRA_RANDOM_H
