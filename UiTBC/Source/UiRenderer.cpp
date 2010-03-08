@@ -999,11 +999,12 @@ void Renderer::RemoveGeometry(GeometryID pGeometryID)
 		}
 		ReleaseGeometry(lGeometryData->mGeometry, GRO_REMOVE_FROM_MATERIAL);
 
-		GeometryData::GeometryIDSet::iterator x;
-		for (x = lGeometryData->mReferenceSet.begin(); x != lGeometryData->mReferenceSet.end(); ++x)
+		while (!lGeometryData->mReferenceSet.empty())
 		{
 			// Remove references recursively.
-			RemoveGeometry(*x);
+			LEPRA_DEBUG_CODE(const size_t lReferenceCount = lGeometryData->mReferenceSet.size());
+			RemoveGeometry(*lGeometryData->mReferenceSet.begin());
+			assert(lReferenceCount == lGeometryData->mReferenceSet.size()+1);
 		}
 
 		delete lGeometryData;

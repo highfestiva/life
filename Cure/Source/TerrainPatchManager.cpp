@@ -87,12 +87,10 @@ void TerrainPatchManager::Delete(bool pDirtyOnly)
 		PatchDirtyInfo& lResourcePatchInfo = x.GetObject();
 		if (!pDirtyOnly || lResourcePatchInfo.mIsDirty)
 		{
-			PatchTable::Iterator y = x;
-			++y;
-			mPatchTable->Remove(x);
-			delete (lResourcePatchInfo.mResourcePatch);
+			UserPhysicalTerrainResource* lResourcePatch = lResourcePatchInfo.mResourcePatch;
+			mPatchTable->Remove(x++);
+			delete (lResourcePatch);
 			lResourcePatchInfo.mResourcePatch = 0;
-			x = y;
 		}
 		else
 		{

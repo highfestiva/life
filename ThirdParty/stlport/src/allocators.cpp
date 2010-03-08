@@ -58,10 +58,10 @@ extern "C" {
 #if defined (_STLP_MSVC) && (_STLP_MSVC >= 1020 && defined (_STLP_DEBUG_ALLOC)) && !defined (_STLP_WCE)
 #  include <crtdbg.h>
 inline char* __stlp_new_chunk(size_t __bytes) {
-  void *__chunk = _STLP_CHECK_NULL_ALLOC(::operator new(__bytes, __FILE__, __LINE__));
+  void *__chunk = ::operator new(__bytes, _NORMAL_BLOCK, __FILE__, __LINE__);
   return __STATIC_CAST(char*, __chunk);
 }
-inline void __stlp_delete_chunck(void* __p) { ::operator delete(__p, __FILE__, __LINE__); }
+inline void __stlp_delete_chunck(void* __p) { ::operator delete(__p, _NORMAL_BLOCK, __FILE__, __LINE__); }
 #else
 #  ifdef _STLP_NODE_ALLOC_USE_MALLOC
 #    include <cstdlib>
