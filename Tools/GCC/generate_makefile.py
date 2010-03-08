@@ -19,7 +19,7 @@ librt = '-lrt'
 libgl = '-lGL'
 openal_noui = ''
 openal_ui = '-lOpenAL'
-stllibfile = '.so.5.2.1'
+stllibfile = '.so.5.2'
 
 if sys.platform == 'darwin':
     librt = ''
@@ -104,7 +104,7 @@ depend:
 \tdone
 
 $(BINS):\t$(OBJS)
-\t@cp ThirdParty/stlport/build/lib/obj/gcc/so_stlg/libstlport""" + stllibfile + """ bin/
+\t@cp ThirdParty/stlport/build/lib/obj/gcc/so_stlg/libstlportstlg""" + stllibfile + """ bin/
 \t@cp $@ bin/
 
 $(OBJS):\t$(SRCS)
@@ -235,8 +235,8 @@ def generate_makefiles(basedir, vcfileinfolist):
         os.path.relpath(basedir+"Life", projdir)]
 
         if sys.platform != 'darwin':
-            includedirs += [os.path.relpath(basedir+"ThirdParty/openal-soft-1.10.622/OpenAL32/Include/", projdir),
-            os.path.relpath(basedir+"ThirdParty/openal-soft-1.10.622/include/", projdir)]
+            includedirs = [os.path.relpath(basedir+"ThirdParty/openal-soft-1.10.622/OpenAL32/Include/", projdir),
+                os.path.relpath(basedir+"ThirdParty/openal-soft-1.10.622/include/", projdir)]+includedirs
 
         makename = os.path.join(os.path.dirname(vcfile), "makefile")
         printstart(makename)
