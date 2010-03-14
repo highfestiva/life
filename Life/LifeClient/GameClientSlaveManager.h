@@ -83,6 +83,7 @@ private:
 	bool Reset();
 	bool InitializeTerrain();
 	void CloseLoginGui();
+	void ClearRoadSigns();
 
 	void TickInput();
 
@@ -151,6 +152,7 @@ private:
 	Timer mAvatarSelectTime;
 	Timer mAvatarMightSelectTime;
 	bool mJustLookingAtAvatars;
+	int mRoadSignIndex;
 	RoadSignMap mRoadSignMap;
 
 	Vector3DF mCameraPosition;		// TODO: remove hack (should context object controlled)!

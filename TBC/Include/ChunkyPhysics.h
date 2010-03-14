@@ -59,7 +59,7 @@ public:
 	// Overrides.
 	void ClearAll(PhysicsManager* pPhysics);
 	void SetBoneCount(int pBoneCount);
-	bool FinalizeInit(PhysicsManager* pPhysics, unsigned pPhysicsFps, TransformationF* pTransform,
+	bool FinalizeInit(PhysicsManager* pPhysics, unsigned pPhysicsFps, Vector3DF* pPosition,
 		PhysicsManager::TriggerListener* pTrigListener, PhysicsManager::ForceFeedbackListener* pForceListener);
 
 	unsigned GetNextGeometryIndex();

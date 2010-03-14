@@ -536,7 +536,15 @@ void GameServerManager::OnSelectAvatar(Client* pClient, const Cure::UserAccount:
 		mLog.Info(_T("User ")+wstrutil::ToCurrentCode(pClient->GetUserConnection()->GetLoginName())+_T(" had an avatar, replacing it."));
 		pClient->SetAvatarId(0);
 		BroadcastDeleteObject(lPreviousAvatarId);
-		lTransform.SetPosition(GetContext()->GetObject(lPreviousAvatarId)->GetPosition());
+		Cure::ContextObject* lObject = GetContext()->GetObject(lPreviousAvatarId);
+		if (lObject)
+		{
+			lTransform.SetPosition(lObject->GetPosition());
+			lTransform.GetPosition() += Vector3DF(0, 0, 2);
+			Vector3DF lEulerAngles;
+			lObject->GetOrientation().GetEulerAngles(lEulerAngles);
+			lTransform.GetOrientation().SetEulerAngles(lEulerAngles.x, 0, 0);
+		}
 		DropAvatar(lPreviousAvatarId);
 	}
 
@@ -828,8 +836,8 @@ void GameServerManager::BroadcastCreateObject(Cure::ContextObject* pObject)
 	Cure::MessageCreateObject* lCreate = (Cure::MessageCreateObject*)GetNetworkAgent()->
 		GetPacketFactory()->GetMessageFactory()->Allocate(Cure::MESSAGE_TYPE_CREATE_OBJECT);
 	lPacket->AddMessage(lCreate);
-	Lepra::TransformationF lTransformation(pObject->GetOrientation(), pObject->GetPosition());
-	lCreate->Store(lPacket, pObject->GetInstanceId(), lTransformation, wstrutil::ToOwnCode(pObject->GetClassId()));
+	lCreate->Store(lPacket, pObject->GetInstanceId(), pObject->GetInitialTransform(),
+		wstrutil::ToOwnCode(pObject->GetClassId()));
 	BroadcastPacket(0, lPacket, true);
 	GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
 }
@@ -874,7 +882,7 @@ void GameServerManager::SendCreateAllObjects(Client* pClient)
 
 			// Store creation info.
 			lPacket->AddMessage(lCreateMessage);
-			Lepra::TransformationF lTransformation(lObject->GetOrientation(), lObject->GetPosition());
+			TransformationF lTransformation(lObject->GetOrientation(), lObject->GetPosition());
 			lCreateMessage->Store(lPacket, lObject->GetInstanceId(),
 				 lTransformation, wstrutil::ToOwnCode(lObject->GetClassId()));
 

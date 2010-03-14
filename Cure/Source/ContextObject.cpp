@@ -478,13 +478,215 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData)
 		}
 	}
 
+	ForceSetFullPosition(pPositionalData, lGeometry);
+}
+
+void ContextObject::SetInitialTransform(const TransformationF& pTransformation)
+{
+	mPosition.mPosition.mTransformation = pTransformation;
+}
+
+TransformationF ContextObject::GetInitialTransform() const
+{
+	return TransformationF(GetOrientation(), GetPosition());
+}
+
+Vector3DF ContextObject::GetPosition() const
+{
+	const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
+	if (lGeometry && lGeometry->GetBodyId() != TBC::INVALID_BODY)
+	{
+		return (mManager->GetGameManager()->GetPhysicsManager()->GetBodyPosition(lGeometry->GetBodyId()));
+	}
+	assert(false);
+	return (mPosition.mPosition.mTransformation.GetPosition());
+}
+
+QuaternionF ContextObject::GetOrientation() const
+{
+	const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
+	if (lGeometry && lGeometry->GetBodyId() != TBC::INVALID_BODY)
+	{
+		const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
+		return (mManager->GetGameManager()->GetPhysicsManager()->GetBodyOrientation(lGeometry->GetBodyId()) *
+			mPhysics->GetOriginalBoneTransformation(0).GetOrientation());
+	}
+	assert(false);
+	return (mPosition.mPosition.mTransformation.GetOrientation());
+}
+
+Vector3DF ContextObject::GetVelocity() const
+{
+	Vector3DF lVelocity;
+	const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
+	if (lGeometry && lGeometry->GetBodyId() != TBC::INVALID_BODY)
+	{
+		mManager->GetGameManager()->GetPhysicsManager()->GetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
+	}
+	else
+	{
+		assert(false);
+		// TODO: throw something here...
+	}
+	return (lVelocity);
+}
+
+float ContextObject::GetForwardSpeed() const
+{
+	float lSpeed = 0;
+	const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
+	if (lGeometry && lGeometry->GetBodyId() != TBC::INVALID_BODY)
+	{
+		const TransformationF& lOriginalTransform =
+			mPhysics->GetOriginalBoneTransformation(0);
+		const Vector3DF lForwardAxis = lOriginalTransform.GetOrientation().GetInverse() * Vector3DF(0, 1, 0);
+		TransformationF lTransform;
+		mManager->GetGameManager()->GetPhysicsManager()->GetBodyTransform(lGeometry->GetBodyId(), lTransform);
+		Vector3DF lVelocity;
+		mManager->GetGameManager()->GetPhysicsManager()->GetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
+		Vector3DF lAxis = lTransform.GetOrientation() * lForwardAxis;
+		lAxis.Normalize();
+		lSpeed = lVelocity*lAxis;
+	}
+	else
+	{
+		assert(false);
+	}
+	return (lSpeed);
+}
+
+float ContextObject::GetMass() const
+{
+	float lTotalMass = 0;
+	TBC::PhysicsManager* lPhysicsManager = mManager->GetGameManager()->GetPhysicsManager();
+	const int lBoneCount = mPhysics->GetBoneCount();
+	for (int x = 0; x < lBoneCount; ++x)
+	{
+		const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(x);
+		lTotalMass += lPhysicsManager->GetBodyMass(lGeometry->GetBodyId());
+	}
+	return (lTotalMass);
+}
+
+
+
+bool ContextObject::SetPhysics(TBC::ChunkyPhysics* pStructure)
+{
+	TBC::PhysicsManager* lPhysics = mManager->GetGameManager()->GetPhysicsManager();
+	const int lPhysicsFps = mManager->GetGameManager()->GetConstTimeManager()->GetDesiredMicroSteps();
+
+	TransformationF lTransformation;
+	if (GetNetworkObjectType() != NETWORK_OBJECT_LOCAL_ONLY)
+	{
+		if (mPosition.mPosition.mTransformation.GetPosition().GetLengthSquared() == 0)
+		{
+			// TODO: drop hard-coding, this should come from world loader or spawn engine?
+			const float lX = (float)Random::Uniform(-63, 27);
+			const float lY = (float)Random::Uniform(-23, 67);
+			lTransformation.SetPosition(Vector3DF(lX, lY, 43.5));
+		}
+		else
+		{
+			lTransformation = mPosition.mPosition.mTransformation;
+		}
+	}
+
+	bool lOk = (mPhysics == 0 && pStructure->FinalizeInit(lPhysics, lPhysicsFps, &lTransformation.GetPosition(), 0, this));
+	assert(lOk);
+	if (lOk)
+	{
+		mPhysics = pStructure;
+		const int lBoneCount = mPhysics->GetBoneCount();
+		for (int x = 0; x < lBoneCount; ++x)
+		{
+			const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(x);
+			mManager->AddPhysicsBody(this, lGeometry->GetBodyId());
+		}
+	}
+
+	// Set orienation (as given in initial transform). The orientation in initial transform
+	// is relative to the initial root bone orientation.
+	if (lOk)
+	{
+		if (mPhysics->GetPhysicsType() != TBC::ChunkyPhysics::STATIC)
+		{
+			const QuaternionF lPhysOrientation(lPhysics->GetBodyOrientation(mPhysics->GetBoneGeometry(0)->GetBodyId()));
+			const Cure::ObjectPositionalData* lPlacement;
+			lOk = UpdateFullPosition(lPlacement);
+			assert(lOk);
+			if (lOk)
+			{
+				Cure::ObjectPositionalData* lNewPlacement = (Cure::ObjectPositionalData*)lPlacement->Clone();
+				lNewPlacement->mPosition.mTransformation =
+					TransformationF(lPhysOrientation * lTransformation.GetOrientation(),
+						lTransformation.GetPosition());
+				ForceSetFullPosition(*lNewPlacement, mPhysics->GetBoneGeometry(mPhysics->GetRootBone()));
+			}
+		}
+	}
+	return (lOk);
+}
+
+TBC::ChunkyBoneGeometry* ContextObject::GetStructureGeometry(unsigned pIndex) const
+{
+	return (mPhysics->GetBoneGeometry(pIndex));
+}
+
+TBC::ChunkyBoneGeometry* ContextObject::GetStructureGeometry(TBC::PhysicsManager::BodyID pBodyId) const
+{
+	return (mPhysics->GetBoneGeometry(pBodyId));
+}
+
+void ContextObject::SetEnginePower(unsigned pAspect, float pPower, float pAngle)
+{
+	mPhysics->SetEnginePower(pAspect, pPower, pAngle);
+}
+
+
+
+bool ContextObject::QueryResendTime(float pDeltaTime, bool pUnblockDelta)
+{
+	bool lOkToSend = false;
+	const float lAbsoluteTime = GetManager()->GetGameManager()->GetConstTimeManager()->GetAbsoluteTime();
+	if (mLastSendTime+pDeltaTime <= lAbsoluteTime)
+	{
+		lOkToSend = true;
+		mLastSendTime = lAbsoluteTime - (pUnblockDelta? pDeltaTime+MathTraits<float>::FullEps() : 0);
+	}
+	return (lOkToSend);
+}
+
+int ContextObject::PopSendCount()
+{
+	if (mSendCount > 0)
+	{
+		--mSendCount;
+	}
+	return (mSendCount);
+}
+
+void ContextObject::SetSendCount(int pCount)
+{
+	mSendCount = pCount;
+}
+
+
+
+void ContextObject::OnPhysicsTick()
+{
+}
+
+
+
+void ContextObject::ForceSetFullPosition(const ObjectPositionalData& pPositionalData, const TBC::ChunkyBoneGeometry* pGeometry)
+{
 	mPosition.CopyData(&pPositionalData);
 
 	TBC::PhysicsManager* lPhysicsManager = mManager->GetGameManager()->GetPhysicsManager();
 	TBC::PhysicsManager::BodyID lBody;
 	if (mAllowMoveSelf)
 	{
-		lBody = lGeometry->GetBodyId();
+		lBody = pGeometry->GetBodyId();
 		lPhysicsManager->SetBodyTransform(lBody, pPositionalData.mPosition.mTransformation);
 		lPhysicsManager->SetBodyVelocity(lBody, pPositionalData.mPosition.mVelocity);
 		lPhysicsManager->SetBodyAcceleration(lBody, pPositionalData.mPosition.mAcceleration);
@@ -691,185 +893,6 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData)
 		}
 	}
 }
-
-void ContextObject::SetInitialTransform(const TransformationF& pTransformation)
-{
-	mPosition.mPosition.mTransformation = pTransformation;
-}
-
-Vector3DF ContextObject::GetPosition() const
-{
-	const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
-	if (lGeometry && lGeometry->GetBodyId() != TBC::INVALID_BODY)
-	{
-		return (mManager->GetGameManager()->GetPhysicsManager()->GetBodyPosition(lGeometry->GetBodyId()));
-	}
-	else
-	{
-		assert(false);
-		// TODO: throw something here...
-	}
-	return (Vector3DF());
-}
-
-QuaternionF ContextObject::GetOrientation() const
-{
-	const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
-	if (lGeometry && lGeometry->GetBodyId() != TBC::INVALID_BODY)
-	{
-		const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
-		return (mManager->GetGameManager()->GetPhysicsManager()->GetBodyOrientation(lGeometry->GetBodyId()) *
-			mPhysics->GetOriginalBoneTransformation(0).GetOrientation());
-	}
-	else
-	{
-		assert(false);
-		// TODO: throw something here...
-	}
-	return (QuaternionF());
-}
-
-Vector3DF ContextObject::GetVelocity() const
-{
-	Vector3DF lVelocity;
-	const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
-	if (lGeometry && lGeometry->GetBodyId() != TBC::INVALID_BODY)
-	{
-		mManager->GetGameManager()->GetPhysicsManager()->GetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
-	}
-	else
-	{
-		assert(false);
-		// TODO: throw something here...
-	}
-	return (lVelocity);
-}
-
-float ContextObject::GetForwardSpeed() const
-{
-	float lSpeed = 0;
-	const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
-	if (lGeometry && lGeometry->GetBodyId() != TBC::INVALID_BODY)
-	{
-		const TransformationF& lOriginalTransform =
-			mPhysics->GetOriginalBoneTransformation(0);
-		const Vector3DF lForwardAxis = lOriginalTransform.GetOrientation().GetInverse() * Vector3DF(0, 1, 0);
-		TransformationF lTransform;
-		mManager->GetGameManager()->GetPhysicsManager()->GetBodyTransform(lGeometry->GetBodyId(), lTransform);
-		Vector3DF lVelocity;
-		mManager->GetGameManager()->GetPhysicsManager()->GetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
-		Vector3DF lAxis = lTransform.GetOrientation() * lForwardAxis;
-		lAxis.Normalize();
-		lSpeed = lVelocity*lAxis;
-	}
-	else
-	{
-		assert(false);
-	}
-	return (lSpeed);
-}
-
-float ContextObject::GetMass() const
-{
-	float lTotalMass = 0;
-	TBC::PhysicsManager* lPhysicsManager = mManager->GetGameManager()->GetPhysicsManager();
-	const int lBoneCount = mPhysics->GetBoneCount();
-	for (int x = 0; x < lBoneCount; ++x)
-	{
-		const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(x);
-		lTotalMass += lPhysicsManager->GetBodyMass(lGeometry->GetBodyId());
-	}
-	return (lTotalMass);
-}
-
-
-
-bool ContextObject::SetPhysics(TBC::ChunkyPhysics* pStructure)
-{
-	TBC::PhysicsManager* lPhysics = mManager->GetGameManager()->GetPhysicsManager();
-	const int lPhysicsFps = mManager->GetGameManager()->GetConstTimeManager()->GetDesiredMicroSteps();
-
-	// TODO: drop hard-coding, this should come from world loader or spawn engine?
-	TransformationF lTransformation;
-	if (GetNetworkObjectType() != NETWORK_OBJECT_LOCAL_ONLY)
-	{
-		if (mPosition.mPosition.mTransformation.GetPosition().GetLengthSquared() == 0)
-		{
-			const float lX = (float)Random::Uniform(-63, 27);
-			const float lY = (float)Random::Uniform(-23, 67);
-			lTransformation.SetPosition(Vector3DF(lX, lY, 43.5));
-		}
-		else
-		{
-			lTransformation.SetPosition(mPosition.mPosition.mTransformation.GetPosition());
-		}
-	}
-
-	bool lOk = (mPhysics == 0 && pStructure->FinalizeInit(lPhysics, lPhysicsFps, &lTransformation, 0, this));
-	assert(lOk);
-	if (lOk)
-	{
-		mPhysics = pStructure;
-		const int lBoneCount = mPhysics->GetBoneCount();
-		for (int x = 0; x < lBoneCount; ++x)
-		{
-			const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(x);
-			mManager->AddPhysicsBody(this, lGeometry->GetBodyId());
-		}
-	}
-	return (lOk);
-}
-
-TBC::ChunkyBoneGeometry* ContextObject::GetStructureGeometry(unsigned pIndex) const
-{
-	return (mPhysics->GetBoneGeometry(pIndex));
-}
-
-TBC::ChunkyBoneGeometry* ContextObject::GetStructureGeometry(TBC::PhysicsManager::BodyID pBodyId) const
-{
-	return (mPhysics->GetBoneGeometry(pBodyId));
-}
-
-void ContextObject::SetEnginePower(unsigned pAspect, float pPower, float pAngle)
-{
-	mPhysics->SetEnginePower(pAspect, pPower, pAngle);
-}
-
-
-
-bool ContextObject::QueryResendTime(float pDeltaTime, bool pUnblockDelta)
-{
-	bool lOkToSend = false;
-	const float lAbsoluteTime = GetManager()->GetGameManager()->GetConstTimeManager()->GetAbsoluteTime();
-	if (mLastSendTime+pDeltaTime <= lAbsoluteTime)
-	{
-		lOkToSend = true;
-		mLastSendTime = lAbsoluteTime - (pUnblockDelta? pDeltaTime+MathTraits<float>::FullEps() : 0);
-	}
-	return (lOkToSend);
-}
-
-int ContextObject::PopSendCount()
-{
-	if (mSendCount > 0)
-	{
-		--mSendCount;
-	}
-	return (mSendCount);
-}
-
-void ContextObject::SetSendCount(int pCount)
-{
-	mSendCount = pCount;
-}
-
-
-
-void ContextObject::OnPhysicsTick()
-{
-}
-
-
 
 void ContextObject::AttachToObject(TBC::ChunkyBoneGeometry* pBoneGeometry1, ContextObject* pObject2, TBC::ChunkyBoneGeometry* pBoneGeometry2, bool pSend)
 {

@@ -65,6 +65,7 @@ public:
 	bool UpdateFullPosition(const ObjectPositionalData*& pPositionalData);
 	void SetFullPosition(const ObjectPositionalData& pPositionalData);
 	void SetInitialTransform(const TransformationF& pTransformation);
+	TransformationF GetInitialTransform() const;
 	Vector3DF GetPosition() const;
 	QuaternionF GetOrientation() const;
 	Vector3DF GetVelocity() const;
@@ -86,6 +87,7 @@ public:
 	virtual void OnPhysicsTick();
 
 protected:
+	void ForceSetFullPosition(const ObjectPositionalData& pPositionalData, const TBC::ChunkyBoneGeometry* pGeometry);
 	void AttachToObject(TBC::ChunkyBoneGeometry* pBoneGeometry1, ContextObject* pObject2, TBC::ChunkyBoneGeometry* pBoneGeometry2, bool pSend);
 	bool IsAttachedTo(ContextObject* pObject) const;
 	void AddAttachment(ContextObject* pObject, TBC::PhysicsManager::JointID pJoint, TBC::PhysicsEngine* pEngine);

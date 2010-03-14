@@ -183,17 +183,19 @@ void ChunkyPhysics::SetBoneCount(int pBoneCount)
 	mUniqeGeometryIndex = GetBoneCount();
 }
 
-bool ChunkyPhysics::FinalizeInit(PhysicsManager* pPhysics, unsigned pPhysicsFps, TransformationF* pTransform,
+bool ChunkyPhysics::FinalizeInit(PhysicsManager* pPhysics, unsigned pPhysicsFps, Vector3DF* pPosition,
 	PhysicsManager::TriggerListener* pTrigListener, PhysicsManager::ForceFeedbackListener* pForceListener)
 {
 	bool lOk = ((int)mGeometryArray.size() == GetBoneCount());
 	assert(lOk);
 	if (lOk)
 	{
-		if (pTransform)
+		if (pPosition)
 		{
 			const int lRoot = 0;
-			SetOriginalBoneTransformation(lRoot, (*pTransform)*GetOriginalBoneTransformation(lRoot));
+			TransformationF lTransformation = GetOriginalBoneTransformation(lRoot);
+			lTransformation.GetPosition() += *pPosition;
+			SetOriginalBoneTransformation(lRoot, lTransformation);
 		}
 		lOk = Parent::FinalizeInit(mTransformOperation);
 	}

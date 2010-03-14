@@ -50,6 +50,7 @@ GameClientSlaveManager::GameClientSlaveManager(GameClientMasterTicker* pMaster, 
 	mLastSentByteCount(0),
 	mPingAttemptCount(0),
 	mJustLookingAtAvatars(false),
+	mRoadSignIndex(0),
 	mAllowMovementInput(true),
 	mOptions(pVariableScope, pSlaveIndex),
 	mLoginWindow(0)
@@ -109,6 +110,7 @@ void GameClientSlaveManager::Close()
 	ScopeLock lLock(GetTickLock());
 
 	// Drop all physics and renderer objects.
+	ClearRoadSigns();
 	GetContext()->ClearObjects();
 
 	// Close GUI.
@@ -268,7 +270,7 @@ void GameClientSlaveManager::OnInput(UiLepra::InputElement* pElement)
 			mAvatarMightSelectTime.PopTimeDiffF();
 		}
 	}
-	if (mJustLookingAtAvatars && mAvatarMightSelectTime.GetTimeDiffF() > 3.0)
+	if (mJustLookingAtAvatars && mAvatarMightSelectTime.GetTimeDiffF() > 2.0)
 	{
 		RoadSignMap::iterator x = mRoadSignMap.begin();
 		for (; x != mRoadSignMap.end(); ++x)
@@ -338,6 +340,7 @@ bool GameClientSlaveManager::Reset()	// Run when disconnected. Removes all objec
 
 	mObjectFrameIndexMap.clear();
 
+	ClearRoadSigns();
 	GetContext()->ClearObjects();
 	bool lOk = InitializeTerrain();
 
@@ -363,6 +366,19 @@ void GameClientSlaveManager::CloseLoginGui()
 		delete (mLoginWindow);
 		mLoginWindow = 0;
 	}
+}
+
+void GameClientSlaveManager::ClearRoadSigns()
+{
+	ScopeLock lLock(GetTickLock());
+
+	mRoadSignIndex = 0;
+	RoadSignMap::iterator x = mRoadSignMap.begin();
+	for (; x != mRoadSignMap.end(); ++x)
+	{
+		GetContext()->DeleteObject(x->second->GetInstanceId());
+	}
+	mRoadSignMap.clear();
 }
 
 
@@ -689,6 +705,7 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 			{
 				GetNetworkClient()->SetLoginAccountId(lMessageStatus->GetInteger());
 				mDisconnectReason.clear();
+				ClearRoadSigns();
 				// A successful login: lets store these parameters for next time!
 				CURE_RTVAR_OVERRIDE(GetVariableScope(), RTVAR_LOGIN_USERNAME, mConnectUserName);
 				CURE_RTVAR_OVERRIDE(GetVariableScope(), RTVAR_LOGIN_SERVER, mConnectServerAddress);
@@ -721,13 +738,15 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 						str lResourceId = strutil::Format(_T("Data/road_sign_sign.mesh;%i_%s"), mSlaveIndex, lAvatarId.c_str());
 						RoadSignButton* lButton = new RoadSignButton(this, lAvatarId, lResourceId, RoadSignButton::SHAPE_ROUND);
 						GetContext()->AddLocalObject(lButton);
-						const int NUM_VEHICLES = 17;
-						const int NUM_SIGN_SPACES = 20;
-						static float a = PIF/2 - PIF * NUM_VEHICLES/NUM_SIGN_SPACES;
-						a += 1/(float)NUM_SIGN_SPACES*2*PIF;
-						const int lTargetX = (int)(::cos(a) * (mRenderArea.GetWidth()/2-50) + mRenderArea.GetCenterX());
-						const int lTargetY = (int)(::sin(a) * (mRenderArea.GetHeight()/2-50) + mRenderArea.GetCenterY());
-						lButton->SetTrajectory(a, PixelCoord(lTargetX, lTargetY),
+						const int SIGN_COUNT_X = 4;
+						const int SIGN_COUNT_Y = 4;
+						const float lDeltaX = mRenderArea.GetWidth() / (float)SIGN_COUNT_X;
+						const float lDeltaY = mRenderArea.GetHeight() / (float)SIGN_COUNT_Y;
+						const float x = (mRoadSignIndex % SIGN_COUNT_X) * lDeltaX + lDeltaX*0.5f;
+						const float y = (mRoadSignIndex / SIGN_COUNT_X) * lDeltaY + lDeltaY*0.5f;
+						++mRoadSignIndex;
+						float lAngle = (x < mRenderArea.GetWidth()/2)? PIF : 0;
+						lButton->SetTrajectory(lAngle, PixelCoord((int)x, (int)y),
 							8, (float)Random::Uniform(0.3, 0.8));
 						lButton->GetButton().SetOnClick(GameClientSlaveManager, OnAvatarSelect);
 						mRoadSignMap.insert(RoadSignMap::value_type(lButton->GetInstanceId(), lButton));
@@ -1006,6 +1025,8 @@ void GameClientSlaveManager::CancelLogin()
 
 void GameClientSlaveManager::OnAvatarSelect(UiTbc::Button* pButton)
 {
+	mAvatarId = 0;
+
 	Cure::UserAccount::AvatarId lAvatarId = pButton->GetName();
 	log_volatile(mLog.Debugf(_T("Clicked avatar %s."), lAvatarId.c_str()));
 	Cure::Packet* lPacket = GetNetworkAgent()->GetPacketFactory()->Allocate();
