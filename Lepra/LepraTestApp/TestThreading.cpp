@@ -4,6 +4,8 @@
 */
 
 #include <assert.h>
+#include <../src/stlport_prefix.h>
+#include <stl/_threads.h>
 #include "../Include/HiResTimer.h"
 #include "../Include/Log.h"
 #include "../Include/MemberThread.h"
@@ -22,6 +24,7 @@ void IncreaseThread(void*)
 
 Lock gThreadTestLock;
 Semaphore gThreadTestSemaphore;
+std::_STLP_mutex gStlLock;
 
 void LockThread(void*)
 {
@@ -43,6 +46,15 @@ void LockThread(void*)
 	{
 		Thread::Sleep(0.001);
 	}
+	++gThreadTestCounter;
+}
+
+void StlThreadEntry(void*)
+{
+	++gThreadTestCounter;
+	gStlLock._M_acquire_lock();
+	++gThreadTestCounter;
+	gStlLock._M_release_lock();
 	++gThreadTestCounter;
 }
 
@@ -296,6 +308,26 @@ bool TestThreading(const LogDecorator& pAccount)
 	{
 		lContext = _T("semaphore permit reset");
 		lTestOk = !lSemaphore.Wait(0.0001);
+		assert(lTestOk);
+	}
+
+	StaticThread lStlLockerThread(_T("STL locker"));
+	if (lTestOk)
+	{
+		lContext = _T("STL lock exclusive");
+		gThreadTestCounter = 0;
+		gStlLock._M_acquire_lock();
+		lStlLockerThread.Start(StlThreadEntry, 0);
+		Thread::Sleep(0.01);
+		lTestOk = (gThreadTestCounter == 1 && lStlLockerThread.IsRunning());
+		assert(lTestOk);
+	}
+	if (lTestOk)
+	{
+		lContext = _T("STL lock release");
+		gStlLock._M_release_lock();
+		Thread::Sleep(0.01);
+		lTestOk = (gThreadTestCounter == 3 && !lStlLockerThread.IsRunning());
 		assert(lTestOk);
 	}
 
