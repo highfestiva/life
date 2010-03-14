@@ -132,8 +132,8 @@ void RoadSignButton::RenderButton(UiTbc::CustomButton* pButton)
 
 	// Set button size and position according to 3D-geometry location on screen.
 	const Vector3DF& lPosition = lGfxGeometry->GetTransformation().GetPosition();
-	const float lRatioX = 1.05f;
-	const float lRatioY = 1.45f;
+	const float lRatioX = 1.05f;	// TODO: fix!
+	const float lRatioY = 1.45f;	// TODO: fix!
 	const PixelRect& lTopViewport = mClient->GetRenderArea();
 	const int lScreenX = (int)(lPosition.x/lPosition.y * lRatioX * lTopViewport.GetWidth() + lTopViewport.GetCenterX());
 	const int lScreenY = (int)(-lPosition.z/lPosition.y * lRatioY * lTopViewport.GetHeight() + lTopViewport.GetCenterY());
@@ -141,7 +141,12 @@ void RoadSignButton::RenderButton(UiTbc::CustomButton* pButton)
 	pButton->SetPos(lScreenX-lScreenRadius, lScreenY-lScreenRadius);
 	pButton->SetPreferredSize(lScreenRadius*2, lScreenRadius*2);
 
+	mClient->UpdateFrustum();
+	GetUiManager()->GetRenderer()->ResetClippingRect();
+	GetUiManager()->GetRenderer()->SetClippingRect(lTopViewport);
+	GetUiManager()->GetRenderer()->SetViewport(lTopViewport);
 	GetUiManager()->GetRenderer()->RenderRelative(mSignMesh.GetRamData());
+	GetUiManager()->PreparePaint();
 }
 
 bool RoadSignButton::IsOverButton(UiTbc::CustomButton* pButton, int x, int y)

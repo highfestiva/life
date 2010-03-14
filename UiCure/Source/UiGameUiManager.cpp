@@ -293,10 +293,15 @@ void GameUiManager::Paint()
 	{
 		mCanvas->SetBuffer(0);
 		mPainter->SetDestCanvas(mCanvas);
-		mPainter->ResetClippingRect();
-		mPainter->PrePaint();
+		PreparePaint();
 		mDesktopWindow->Repaint(mPainter);
 	}
+}
+
+void GameUiManager::PreparePaint()
+{
+	mPainter->ResetClippingRect();
+	mPainter->PrePaint();
 }
 
 void GameUiManager::EndRender()
@@ -386,6 +391,14 @@ void GameUiManager::PrintText(int pX, int pY, const str& pText)
 	mPainter->SetColor(Color(255, 255, 255, 255), 0);
 	mPainter->SetColor(Color(0, 0, 0, 0), 1);
 	mPainter->PrintText(pText, pX, pY);
+}
+
+
+
+PixelCoord GameUiManager::GetMouseDisplayPosition() const
+{
+	return (PixelCoord((int)((GetInputManager()->GetCursorX() + 1) * 0.5 * GetDisplayManager()->GetWidth()),
+		(int)((GetInputManager()->GetCursorY() + 1) * 0.5 * GetDisplayManager()->GetHeight())));
 }
 
 

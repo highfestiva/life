@@ -145,10 +145,7 @@ bool GameClientSlaveManager::Render()
 
 	UpdateCameraPosition();
 
-	double lFOV = CURE_RTVAR_GET(GetVariableScope(), RTVAR_UI_3D_FOV, 90.0);
-	double lClipNear = CURE_RTVAR_GET(GetVariableScope(), RTVAR_UI_3D_CLIPNEAR, 0.1);
-	double lClipFar = CURE_RTVAR_GET(GetVariableScope(), RTVAR_UI_3D_CLIPFAR, 1000.0);
-	mUiManager->GetRenderer()->SetViewFrustum((float)lFOV, (float)lClipNear, (float)lClipFar);
+	UpdateFrustum();
 
 	LEPRA_MEASURE_SCOPE(SlaveRender);
 	mUiManager->Render(mRenderArea);
@@ -258,16 +255,19 @@ void GameClientSlaveManager::OnInput(UiLepra::InputElement* pElement)
 {
 	if (mAvatarSelectTime.GetTimeDiffF() > 0.5)
 	{
-		if (pElement->GetParentDevice()->GetManager()->GetMouse() == pElement->GetParentDevice() &&
-			pElement->GetType() == UiLepra::InputElement::ANALOGUE)
+		if (pElement->GetParentDevice() == mUiManager->GetInputManager()->GetMouse())
 		{
-			RoadSignMap::iterator x = mRoadSignMap.begin();
-			for (; x != mRoadSignMap.end(); ++x)
+			PixelCoord lPosition = mUiManager->GetMouseDisplayPosition();
+			if (mRenderArea.IsInside(lPosition.x, lPosition.y))
 			{
-				x->second->SetIsMovingIn(true, (float)Random::Uniform(0.3, 1.3));
+				RoadSignMap::iterator x = mRoadSignMap.begin();
+				for (; x != mRoadSignMap.end(); ++x)
+				{
+					x->second->SetIsMovingIn(true, (float)Random::Uniform(0.3, 1.3));
+				}
+				mJustLookingAtAvatars = true;
+				mAvatarMightSelectTime.PopTimeDiffF();
 			}
-			mJustLookingAtAvatars = true;
-			mAvatarMightSelectTime.PopTimeDiffF();
 		}
 	}
 	if (mJustLookingAtAvatars && mAvatarMightSelectTime.GetTimeDiffF() > 2.0)
@@ -302,6 +302,14 @@ UiCure::GameUiManager* GameClientSlaveManager::GetUiManager() const
 const PixelRect& GameClientSlaveManager::GetRenderArea() const
 {
 	return (mRenderArea);
+}
+
+void GameClientSlaveManager::UpdateFrustum()
+{
+	double lFOV = CURE_RTVAR_GET(GetVariableScope(), RTVAR_UI_3D_FOV, 90.0);
+	double lClipNear = CURE_RTVAR_GET(GetVariableScope(), RTVAR_UI_3D_CLIPNEAR, 0.1);
+	double lClipFar = CURE_RTVAR_GET(GetVariableScope(), RTVAR_UI_3D_CLIPFAR, 1000.0);
+	mUiManager->GetRenderer()->SetViewFrustum((float)lFOV, (float)lClipNear, (float)lClipFar);
 }
 
 
@@ -742,10 +750,10 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 						const int SIGN_COUNT_Y = 4;
 						const float lDeltaX = mRenderArea.GetWidth() / (float)SIGN_COUNT_X;
 						const float lDeltaY = mRenderArea.GetHeight() / (float)SIGN_COUNT_Y;
-						const float x = (mRoadSignIndex % SIGN_COUNT_X) * lDeltaX + lDeltaX*0.5f;
-						const float y = (mRoadSignIndex / SIGN_COUNT_X) * lDeltaY + lDeltaY*0.5f;
+						const float x = (mRoadSignIndex % SIGN_COUNT_X) * lDeltaX + lDeltaX*0.5f + mRenderArea.mLeft;
+						const float y = (mRoadSignIndex / SIGN_COUNT_X) * lDeltaY + lDeltaY*0.5f + mRenderArea.mTop;
 						++mRoadSignIndex;
-						float lAngle = (x < mRenderArea.GetWidth()/2)? PIF : 0;
+						float lAngle = (x-mRenderArea.mLeft < mRenderArea.GetWidth()/2)? PIF : 0;
 						lButton->SetTrajectory(lAngle, PixelCoord((int)x, (int)y),
 							8, (float)Random::Uniform(0.3, 0.8));
 						lButton->GetButton().SetOnClick(GameClientSlaveManager, OnAvatarSelect);

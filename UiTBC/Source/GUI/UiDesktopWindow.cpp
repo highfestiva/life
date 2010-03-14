@@ -242,20 +242,12 @@ void DesktopWindow::Repaint(Painter* /*pPainter*/)
 		mMousePrevY = mMouseY;
 	}
 
-	// Some components (like TreeNode) needs one extra
-	// repainting initially - hence the loop!
-	int lLoopCount = 0;
-	do
+	if (NeedsRepaint() == true || mUpdateLayout)
 	{
-		if (NeedsRepaint() == true || mUpdateLayout)
-		{
-			UpdateLayout();
-			mUpdateLayout = false;
-		}
-
-		Parent::Repaint(mPainter);
-		lLoopCount++;
-	} while (NeedsRepaint() == true && lLoopCount < 4);
+		UpdateLayout();
+		mUpdateLayout = false;
+	}
+	Parent::Repaint(mPainter);
 }
 
 void DesktopWindow::RepaintChild(Component* pChild, Painter* pPainter)

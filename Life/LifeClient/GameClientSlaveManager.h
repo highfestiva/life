@@ -76,6 +76,7 @@ public:
 
 	UiCure::GameUiManager* GetUiManager() const;
 	const PixelRect& GetRenderArea() const;
+	void UpdateFrustum();
 
 private:
 	str GetApplicationCommandFilename() const;

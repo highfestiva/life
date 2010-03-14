@@ -52,6 +52,7 @@ public:
 	void BeginRender();
 	void Render(const PixelRect& pArea);
 	void Paint();
+	void PreparePaint();
 	void EndRender();
 
 	UiLepra::DisplayManager* GetDisplayManager() const;
@@ -67,6 +68,8 @@ public:
 	void Clear(float pRed, float pGreen, float pBlue, bool pClearDepth = true);
 	void ClearDepth();
 	void PrintText(int pX, int pY, const str& pText);
+
+	PixelCoord GetMouseDisplayPosition() const;
 
 	void AssertDesktopLayout(UiTbc::Layout* pLayout);
 

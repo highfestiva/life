@@ -1178,25 +1178,11 @@ unsigned int OpenGLRenderer::RenderScene()
 
 void OpenGLRenderer::RenderRelative(TBC::GeometryBase* pGeometry)
 {
-	::glMatrixMode(GL_PROJECTION);
-	::glPushMatrix();
 	::glMatrixMode(GL_MODELVIEW);
 	::glPushMatrix();
-
-	ResetClippingRect();
-	// Reset viewport and frustum every frame. This may look silly,
-	// but the Get-functions will return the values stored in Renderer,
-	// while the Set-functions are virtual and will call the OpenGLRenderer-ditto.
-	SetViewport(GetViewport());
-	float lFOVAngle;
-	float lNear;
-	float lFar;
-	GetViewFrustum(lFOVAngle, lNear, lFar);
-	SetViewFrustum(lFOVAngle, lNear, lFar);
 
 	float lModelViewMatrix[16];
 	pGeometry->GetTransformation().GetAs4x4TransposeMatrix(lModelViewMatrix);
-	::glMatrixMode(GL_MODELVIEW);
 	::glLoadMatrixf(lModelViewMatrix);
 
 	GeometryData* lGeometryData = (GeometryData*)pGeometry->GetRendererData();
@@ -1207,8 +1193,6 @@ void OpenGLRenderer::RenderRelative(TBC::GeometryBase* pGeometry)
 
 	PostRender(pGeometry);
 
-	::glMatrixMode(GL_PROJECTION);
-	::glPopMatrix();
 	::glMatrixMode(GL_MODELVIEW);
 	::glPopMatrix();
 }

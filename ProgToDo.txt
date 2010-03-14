@@ -30,24 +30,25 @@ Game
 + Create UI for picking new vehicle. Don't auto-pick when logging in!
   + Use road signs as buttons.
   + Have a road sign for each vehicle.
+  - Texture map road signs with corresponding pic.
   - Use road signs (think high way green) for other settings as well: nationality, number of splitscreen users, fullscreen, online play...
   - Show big title text (translated) for all buttons.
-  - Hilight current selection where applicable. Hilight using red/blue signs instead of red/yellow.
-. Make it possible to be logged in without vehicle. Make it possible to drop vehicle.
+  + Hilight current selection where applicable. Hilight using red/blue signs instead of red/yellow. (Different solution picked.)
++ Make it possible to be logged in without vehicle. Make it possible to drop vehicle.
+. Fix bug: road sign for first vehicle is "squashed" when having 3 split-screen players.
 . Create material that can easily can be picked-up, loaded and moved around.
 . Create crane that can pull wire up.
 . Bug fix attachments (i.e. crane picks up car) so that they work properly (without crashing).
-. Add wind mill to world.
++ Add wind mill to world.
 . Add server-triggered garage door to world. Make sure trigger coding is easy!!!
 . Add elevator to world. Trigger five seconds when after the vehicle enters zone.
-. Add possibility to easily change vehicle during play.
-. Add different physical worlds on all sides of the box, and add gravity change! Cewlness x 0x1000000!!!
-. Take some action when falling over the edge of the "World Box".
++ Add possibility to easily change vehicle during play.
+. Take some action when falling over the "edge of the World".
 . Make vehicle flip over to correct rotation whenever it accidentally flipped to its side/front/back.
 . Add options menu.
 . Picking best possible default control options.
-. Add login progress bar.
 . Adjust the camera view according to the vehicle: huge crane, small ball...
+. Make login adjusted to this type of game (automatic somehow).
 . Show logo when starting game.
 . Make a "what you're missing out on when not running Pro" end screen in demo version. (=release client?)
 . Add link to home page in demo end screen.
@@ -73,6 +74,9 @@ Game
   - If there IS a vehicle and it is NOT OCCUPIED of the type that is requested, use it, otherwise create a new one.
 . Server regularly checks vehicles that don't seem ok (flipped, i.e. "up not pointing up", etc). If the "un-ok" vehicle is unused for x consecutive checks, remove it.
 . Create icon for the game.
+
+- Add different physical worlds on all sides of the box, and add gravity change! Cewlness x 0x1000000!!!
+- Add login progress bar.
 
 
 Engine
