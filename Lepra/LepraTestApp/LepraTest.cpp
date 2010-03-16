@@ -1263,8 +1263,12 @@ bool TestNetwork(const LogDecorator& pAccount)
 		if (lTestOk)
 		{
 			lContext = _T("TCP connect");
-			Thread::Sleep(0.01);
-			lTestOk = lSender.Connect(lReceiveAddress);
+			lTestOk = false;
+			for (int x = 0; x < 3 && !lTestOk; ++x)
+			{
+				Thread::Sleep(0.01);
+				lTestOk	= lSender.Connect(lReceiveAddress);
+			}
 			assert(lTestOk);
 		}
 		TcpSocket* lReceiver = 0;
@@ -1427,12 +1431,15 @@ bool TestTcpMuxSocket(const LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = _T("dropping non-V TCP connect");
-		unsigned lConnectionCount = 1;
 		lAcceptSocket->SetConnectIdTimeout(0.01);
-		Thread::Sleep(0.02);
-		lAcceptSocket->PollAccept();
-		lConnectionCount = lAcceptSocket->GetConnectionCount();
-		lTestOk = (lConnectionCount == 0);
+		lTestOk = false;
+		for (int x = 0; x < 3 && !lTestOk; ++x)
+		{
+			Thread::Sleep(0.02);
+			lAcceptSocket->PollAccept();
+			unsigned lConnectionCount = lAcceptSocket->GetConnectionCount();
+			lTestOk = (lConnectionCount == 0);
+		}
 		assert(lTestOk);
 	}
 

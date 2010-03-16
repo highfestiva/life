@@ -29,7 +29,7 @@ template<> astr astrutil::VFormat(const char* pFormat, va_list pArguments)
 	::vsprintf(lBuffer, pFormat, pArguments);
 #endif // <VS 2005+> / <VS 2003 .NET->
 #else // !LEPRA_WINDOWS
-	::vsprintf(lBuffer, pFormat, pArguments);
+	::vsnprintf(lBuffer, sizeof(lBuffer), pFormat, pArguments);
 #endif // LEPRA_WINDOWS/!LEPRA_WINDOWS
 	return (astr(lBuffer));
 }

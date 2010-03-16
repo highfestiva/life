@@ -113,12 +113,14 @@ ScopePerformanceData::ScopePerformanceData(ScopePerformanceData* pParent, const 
 {
 	if (mParent)
 	{
+		ScopeLock lLock(&mRootLock);
 		mParent->mChildArray.push_back(this);
 	}
 }
 
 void ScopePerformanceData::ClearAll(const NodeArray& pNodes)
 {
+	ScopeLock lLock(&mRootLock);
 	NodeArray::const_iterator x = pNodes.begin();
 	for (; x != pNodes.end(); ++x)
 	{

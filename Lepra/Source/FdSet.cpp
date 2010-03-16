@@ -21,7 +21,7 @@ int FdSetHelper::Copy(FdSet& pDestination, const FdSet& pSource)
 	return (pSource.fd_count);
 #elif defined(LEPRA_POSIX)
 	LEPRA_FD_ZERO(&pDestination);
-	::memcpy(&pDestination.mFdSet, &pSource.mFdSet, pSource.mMaxHandle/8+8);	// Copy an int64 extra (copes big endian).
+	::memcpy(&pDestination.mFdSet, &pSource.mFdSet, pSource.mMaxHandle/8+1);	// Copy exact amount of data (!).
 	pDestination.mSocketArray = pSource.mSocketArray;
 	pDestination.mMaxHandle = pSource.mMaxHandle;
 	return ((int)pSource.mSocketArray.size());

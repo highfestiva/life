@@ -15,16 +15,20 @@ using namespace Lepra;
 
 void ReportTestResult(const Lepra::LogDecorator& pLog, const str& pTestName, const str& pContext, bool pResult);
 
+const int STATE_ALLOC_INIT = 0x70010210;
+const int STATE_ALLOC_FOUND = 0x70111091;
+
 volatile int gThreadTestCounter;
+
+Lock gThreadTestLock;
+Semaphore gThreadTestSemaphore;
+std::_STLP_mutex gStlLock;
+int* gAllocMem = 0;
 
 void IncreaseThread(void*)
 {
 	++gThreadTestCounter;
 }
-
-Lock gThreadTestLock;
-Semaphore gThreadTestSemaphore;
-std::_STLP_mutex gStlLock;
 
 void LockThread(void*)
 {
@@ -56,6 +60,23 @@ void StlThreadEntry(void*)
 	++gThreadTestCounter;
 	gStlLock._M_release_lock();
 	++gThreadTestCounter;
+}
+
+void MemAllocThreadEntry(void*)
+{
+	assert(gAllocMem == 0);
+	gAllocMem = new int[3];
+	gAllocMem[1] = STATE_ALLOC_INIT;
+}
+
+void MemUseThreadEntry(void*)
+{
+	while (gAllocMem == 0)
+		;
+	while (gAllocMem[1] != STATE_ALLOC_FOUND)
+		;
+	delete[] (gAllocMem);
+	gAllocMem = 0;
 }
 
 class MemberThreadTestClass
@@ -328,6 +349,26 @@ bool TestThreading(const LogDecorator& pAccount)
 		gStlLock._M_release_lock();
 		Thread::Sleep(0.01);
 		lTestOk = (gThreadTestCounter == 3 && !lStlLockerThread.IsRunning());
+		assert(lTestOk);
+	}
+
+	StaticThread lMemAllocThread(_T("MemAllocator"));
+	StaticThread lMemUseThread(_T("MemUser"));
+	if (lTestOk)
+	{
+		lContext = _T("Memory allocator");
+		lMemUseThread.Start(MemUseThreadEntry, 0);
+		lMemAllocThread.Start(MemAllocThreadEntry, 0);
+		Thread::Sleep(0.01);
+		lTestOk = (gAllocMem != 0 && gAllocMem[1] == STATE_ALLOC_INIT && !lMemAllocThread.IsRunning() && lMemUseThread.IsRunning());
+		assert(lTestOk);
+	}
+	if (lTestOk)
+	{
+		lContext = _T("Memory freer");
+		gAllocMem[1] = STATE_ALLOC_FOUND;
+		Thread::Sleep(0.01);
+		lTestOk = (gAllocMem == 0 && !lMemUseThread.IsRunning());
 		assert(lTestOk);
 	}
 
