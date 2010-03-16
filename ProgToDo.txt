@@ -210,6 +210,7 @@ Quality
 + Run Simian Analyzer, remove duplicate code.
 + Exchange "varning: flerteckens teckenkonstant" (ChunkyLoader.h) to something portable and beautiful.
 
+. Make splitscreens "slide up" instead of just popping up!
 . Make sure default settings are good on a no-good computer. Like 60 FPS.
 . Make sure shutting down client with two simultaneously logged-in users gets logged out from the server.
 . Make font rendering look good instead of ugly.

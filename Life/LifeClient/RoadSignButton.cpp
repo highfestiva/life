@@ -17,6 +17,11 @@ namespace Life
 
 
 
+static const float MIN_TIME = 0.2f;
+static const float MAX_TIME = 0.9f;
+
+
+
 RoadSignButton::RoadSignButton(GameClientSlaveManager* pClient, const str& pName, const str& pMeshResourceName, Shape pShape):
 	Parent(_T("RoadSignButton"), pClient->GetUiManager()),
 	mClient(pClient),
@@ -27,7 +32,9 @@ RoadSignButton::RoadSignButton(GameClientSlaveManager* pClient, const str& pName
 	mAnglePart(0),
 	mAngleTime(0),
 	mAngle(0),
-	mIsMovingIn(true)
+	mIsMovingIn(true),
+	mTrajectoryEndDistance(0),
+	mFov(90)
 {
 	mButton.SetPreferredSize(5, 5);
 	mButton.SetMinSize(5, 5);
@@ -53,31 +60,23 @@ UiTbc::CustomButton& RoadSignButton::GetButton()
 	return (mButton);
 }
 
-void RoadSignButton::SetTrajectory(float pAngle, const PixelCoord& pEndPoint, float pEndDistance, float pTime)
+void RoadSignButton::SetTrajectory(const Vector2DF& pEndPoint, float pEndDistance)
 {
-	const float lRatioX = 1.05f;
-	const float lRatioY = 1.45f;
-	const PixelRect& lTopViewport = mClient->GetRenderArea();
-	float x = (pEndPoint.x-lTopViewport.GetCenterX()) * pEndDistance / (lRatioX * lTopViewport.GetWidth());
-	float z = (pEndPoint.y-lTopViewport.GetCenterY()) * pEndDistance / (lRatioY * lTopViewport.GetHeight());
-	mEndPosition = Vector3DF(x, pEndDistance, z);
-
-	float lAnchorX = 0.9f*pEndDistance*cos(pAngle);
-	float lAnchorZ = 0.9f*pEndDistance*sin(pAngle);
-	mAnchor = Vector3DF(lAnchorX, 2*pEndDistance, lAnchorZ) - mEndPosition;
-	mAxis = Vector3DF(-lAnchorZ, 0, lAnchorX);
+	mTrajectoryEndDistance = pEndDistance;
+	mTrajectoryEndPoint = pEndPoint;
 
 	mAnglePart = 1;
-	mAngleTime = pTime;
+	SetIsMovingIn(true);
 	mAngle = -PIF;
 
 	GetManager()->EnableTickCallback(this);
 }
 
-void RoadSignButton::SetIsMovingIn(bool pIsMovingIn, float pTime)
+void RoadSignButton::SetIsMovingIn(bool pIsMovingIn)
 {
 	mIsMovingIn = pIsMovingIn;
-	mAngleTime = pTime;
+	//const float lTime = mIsMovingIn? mTrajectoryEndPoint.GetLength() : 1 - mTrajectoryEndPoint.GetLength();
+	mAngleTime = Math::Lerp(MIN_TIME, MAX_TIME, mTrajectoryEndPoint.GetLength());
 }
 
 
@@ -90,9 +89,14 @@ void RoadSignButton::OnTick(float pFrameTime)
 		return;
 	}
 
+	const Vector2DF lRatio = GetAspectRatio(false);
+	const float x = mTrajectoryEndPoint.x * pow(lRatio.x, 0.7f) * 0.9f * mTrajectoryEndDistance;
+	const float z = mTrajectoryEndPoint.y * pow(lRatio.y, 0.7f) * 0.9f * mTrajectoryEndDistance;
+	const Vector3DF lEndPosition(x, mTrajectoryEndDistance, z);
+
 	// Rotate "inward" until end pos reached, or outward until invisible.
 	TransformationF lTransform;
-	lTransform.SetPosition(mEndPosition);
+	lTransform.SetPosition(lEndPosition);
 	if (mIsMovingIn && mAnglePart > 0)
 	{
 		mAnglePart -= pFrameTime/mAngleTime;
@@ -101,21 +105,33 @@ void RoadSignButton::OnTick(float pFrameTime)
 	{
 		mAnglePart += pFrameTime/mAngleTime;
 	}
-	mAngle = Math::Lerp(mAngle, GetTargetAngle(), 0.07f);
-	lTransform.RotateAroundAnchor(mAnchor, mAxis, mAngle);
+	mAnglePart = Math::Clamp(mAnglePart, 0.0f, 1.0f);
+	mAngle = Math::Lerp(mAngle, GetTargetAngle(), 0.2f);
+
+	const TBC::GeometryBase* lGfxGeometry = mSignMesh.GetRamData();
+	float lScreenRadius = 0;
+	const Vector2DF lScreenPosition = Get2dProjectionPosition(lGfxGeometry->GetTransformation().GetPosition(), lScreenRadius);
+	const float lTrajectoryAngle = (lScreenPosition.x <= mClient->GetUiManager()->GetDisplayManager()->GetWidth()/2)? PIF : 0;
+	const float lAnchorX = 0.8f*mTrajectoryEndDistance*1/lRatio.y*cos(lTrajectoryAngle);
+	const float lAnchorZ = 0.8f*mTrajectoryEndDistance*1/lRatio.x*sin(lTrajectoryAngle);
+	const Vector3DF lAnchor = Vector3DF(lAnchorX, 2*mTrajectoryEndDistance, lAnchorZ) - lEndPosition;
+	const Vector3DF lAxis(-lAnchorZ, 0, lAnchorX);
+
+	lTransform.RotateAroundAnchor(lAnchor, lAxis, mAngle);
+
 	// Button hoover yields hot road sign.
 	Vector3DF lTarget;
 	if (mButton.GetState() == UiTbc::Button::RELEASED_HOOVER ||
 		mButton.GetState() == UiTbc::Button::PRESSING)
 	{
-		lTarget = mEndPosition*0.4f;
-		mCurrentPosition = Math::Lerp(mCurrentPosition, lTarget, 0.2f);
+		lTarget = lEndPosition*0.4f;
+		mCurrentOffset = Math::Lerp(mCurrentOffset, lTarget, 0.2f);
 	}
 	else
 	{
-		mCurrentPosition = Math::Lerp(mCurrentPosition, lTarget, 0.02f);
+		mCurrentOffset = Math::Lerp(mCurrentOffset, lTarget, 0.02f);
 	}
-	lTransform.GetPosition() -= mCurrentPosition;
+	lTransform.GetPosition() -= mCurrentOffset;
 
 	mSignMesh.GetRamData()->SetTransformation(lTransform);
 }
@@ -128,23 +144,20 @@ void RoadSignButton::RenderButton(UiTbc::CustomButton* pButton)
 		return;
 	}
 
-	TBC::GeometryBase* lGfxGeometry = mSignMesh.GetRamData();
+	const TBC::GeometryBase* lGfxGeometry = mSignMesh.GetRamData();
 
 	// Set button size and position according to 3D-geometry location on screen.
-	const Vector3DF& lPosition = lGfxGeometry->GetTransformation().GetPosition();
-	const float lRatioX = 1.05f;	// TODO: fix!
-	const float lRatioY = 1.45f;	// TODO: fix!
-	const PixelRect& lTopViewport = mClient->GetRenderArea();
-	const int lScreenX = (int)(lPosition.x/lPosition.y * lRatioX * lTopViewport.GetWidth() + lTopViewport.GetCenterX());
-	const int lScreenY = (int)(-lPosition.z/lPosition.y * lRatioY * lTopViewport.GetHeight() + lTopViewport.GetCenterY());
-	const int lScreenRadius = (int)(mMeshRadius/lPosition.y * lRatioX * lTopViewport.GetWidth());
-	pButton->SetPos(lScreenX-lScreenRadius, lScreenY-lScreenRadius);
-	pButton->SetPreferredSize(lScreenRadius*2, lScreenRadius*2);
+	float lScreenRadius = 0;
+	const Vector2DF lScreenPosition = Get2dProjectionPosition(lGfxGeometry->GetTransformation().GetPosition(), lScreenRadius);
+	pButton->SetPos((int)(lScreenPosition.x-lScreenRadius), (int)(lScreenPosition.y-lScreenRadius));
+	pButton->SetPreferredSize((int)(lScreenRadius*2), (int)(lScreenRadius*2));
+	//pButton->Button::Repaint(mClient->GetUiManager()->GetPainter());
 
-	mClient->UpdateFrustum();
+	const PixelRect& lTopViewport = mClient->GetRenderArea();
 	GetUiManager()->GetRenderer()->ResetClippingRect();
 	GetUiManager()->GetRenderer()->SetClippingRect(lTopViewport);
 	GetUiManager()->GetRenderer()->SetViewport(lTopViewport);
+	mFov = mClient->UpdateFrustum();
 	GetUiManager()->GetRenderer()->RenderRelative(mSignMesh.GetRamData());
 	GetUiManager()->PreparePaint();
 }
@@ -165,6 +178,11 @@ void RoadSignButton::OnLoadMesh(UiCure::UserGeometryReferenceResource* pMeshReso
 	if (pMeshResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
 		TBC::GeometryBase* lGeometry = pMeshResource->GetRamData();
+
+		const float lXFactor = (mTrajectoryEndPoint.x <= 0)? -2.0f : 2.0f;
+		lGeometry->SetTransformation(TransformationF(QuaternionF(),
+			Vector3DF(mTrajectoryEndDistance*lXFactor, mTrajectoryEndDistance, 0)));
+
 		lGeometry->SetAlwaysVisible(false);
 		TBC::GeometryBase::BasicMaterialSettings lMaterial(Vector3DF(1,0,0), Vector3DF(0,1,0),
 			Vector3DF(0,0,1), 0.5, 1, true);
@@ -195,10 +213,33 @@ void RoadSignButton::OnLoadMesh(UiCure::UserGeometryReferenceResource* pMeshReso
 
 
 
+Vector2DF RoadSignButton::Get2dProjectionPosition(const Vector3DF& p3dPosition, float& p2dRadius) const
+{
+	const PixelRect& lTopViewport = mClient->GetRenderArea();
+	const float lAspectRatio = lTopViewport.GetWidth() / (float)lTopViewport.GetHeight();
+	const float lDistance = p3dPosition.y + 0.3f;
+	const float lProjectionLengthInverse = 1 / asin(mFov * PIF / 180 / 2);
+	p2dRadius = mMeshRadius/lDistance * lProjectionLengthInverse * 0.5f * lTopViewport.GetWidth();
+	const float lScreenX = +p3dPosition.x/lDistance * lProjectionLengthInverse * 0.5f * lTopViewport.GetWidth() + lTopViewport.GetCenterX();
+	const float lScreenY = -p3dPosition.z/lDistance * lProjectionLengthInverse * lAspectRatio * 0.5f * lTopViewport.GetHeight() + lTopViewport.GetCenterY();
+	return (Vector2DF(lScreenX, lScreenY));
+}
+
+Vector2DF RoadSignButton::GetAspectRatio(bool pInverse) const
+{
+	const PixelRect& lTopViewport = mClient->GetRenderArea();
+	const float lAspectRatio = lTopViewport.GetWidth() / (float)lTopViewport.GetHeight();
+	const float x = (pInverse^(lAspectRatio < 1))? lAspectRatio : 1;
+	const float y = (pInverse^(lAspectRatio < 1))? 1 : 1/lAspectRatio;
+	return (Vector2DF(x, y));
+}
+
+
+
 float RoadSignButton::GetTargetAngle() const
 {
-	const float lAngleFactor = 0.7f;
-	return (-PIF*lAngleFactor*mAnglePart);
+	const float lHingeAngleFactor = 0.7f;	// How much the sign should "hinge" *(1.0 is half a revolution).
+	return (-PIF*lHingeAngleFactor*mAnglePart);
 }
 
 

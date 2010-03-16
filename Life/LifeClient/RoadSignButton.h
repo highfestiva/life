@@ -6,7 +6,6 @@
 
 #pragma once
 
-#include "../../Lepra/Include/Graphics2D.h"
 #include "../../UiCure/Include/UiCppContextObject.h"
 #include "../../UiTBC/Include/GUI/UiCustomButton.h"
 #include "../Life.h"
@@ -36,14 +35,17 @@ public:
 	virtual ~RoadSignButton();
 
 	UiTbc::CustomButton& GetButton();
-	void SetTrajectory(float pAngle, const PixelCoord& pEndPoint, float pEndDistance, float pTime);
-	void SetIsMovingIn(bool pIsMovingIn, float pTime);
+	void SetTrajectory(const Vector2DF& pEndPoint, float pEndDistance);
+	void SetIsMovingIn(bool pIsMovingIn);
 
 protected:
 	void OnTick(float pFrameTime);
 	void RenderButton(UiTbc::CustomButton* pButton);
 	bool IsOverButton(UiTbc::CustomButton* pButton, int x, int y);
 	void OnLoadMesh(UiCure::UserGeometryReferenceResource* pMeshResource);
+
+	Vector2DF Get2dProjectionPosition(const Vector3DF& p3dPosition, float& p2dRadius) const;
+	Vector2DF GetAspectRatio(bool pInverse) const;
 
 private:
 	float GetTargetAngle() const;
@@ -52,16 +54,15 @@ private:
 	UiTbc::CustomButton mButton;
 	UiCure::UserGeometryReferenceResource mSignMesh;
 	Shape mShape;
-	bool mIsMeshMoved;
 	float mMeshRadius;
 	float mAnglePart;
 	float mAngleTime;
 	float mAngle;
 	bool mIsMovingIn;
-	Vector3DF mEndPosition;
-	Vector3DF mCurrentPosition;
-	Vector3DF mAnchor;
-	Vector3DF mAxis;
+	Vector3DF mCurrentOffset;
+	float mTrajectoryEndDistance;
+	Vector2DF mTrajectoryEndPoint;
+	float mFov;
 
 	LOG_CLASS_DECLARE();
 };
