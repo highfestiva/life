@@ -151,6 +151,8 @@ public:
 	inline void Offset(int x, int y);
 	inline void Set(int pLeft, int pTop, int pRight, int pBottom);
 
+	inline bool operator==(const PixelRect& pRect) const;
+
 	int mTop;
 	int mBottom;
 	int mLeft;
@@ -287,6 +289,12 @@ void PixelRect::Set(int pLeft, int pTop, int pRight, int pBottom)
 	mBottom = pBottom;
 	mLeft = pLeft;
 	mRight = pRight;
+}
+
+bool PixelRect::operator==(const PixelRect& pRect) const
+{
+	return (mTop == pRect.mTop && mBottom == pRect.mBottom &&
+		mLeft == pRect.mLeft && mRight == pRect.mRight);
 }
 
 void PixelRect::Shrink(int pNumPixels)

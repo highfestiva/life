@@ -28,6 +28,8 @@ public:
 
 	// Updates time, returns current time diff and resets time diff.
 	inline double PopTimeDiff();
+	// Updates time, returns current time diff (does NOT reset time diff).
+	inline double QueryTimeDiff();
 
 	// Returns the time in seconds.
 	inline double GetTime() const;
@@ -102,10 +104,15 @@ HiResTimer::~HiResTimer()
 
 double HiResTimer::PopTimeDiff()
 {
-	UpdateTimer();
-	double lTime = GetTimeDiff();
+	double lTime = QueryTimeDiff();
 	ClearTimeDiff();
 	return (lTime);
+}
+
+double HiResTimer::QueryTimeDiff()
+{
+	UpdateTimer();
+	return (GetTimeDiff());
 }
 
 double HiResTimer::GetTime() const

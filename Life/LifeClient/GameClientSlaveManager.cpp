@@ -253,7 +253,7 @@ bool GameClientSlaveManager::OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode)
 
 void GameClientSlaveManager::OnInput(UiLepra::InputElement* pElement)
 {
-	if (mAvatarSelectTime.GetTimeDiffF() > 0.5)
+	if (mAvatarSelectTime.GetTimeDiffF() > 0.7)
 	{
 		if (pElement->GetParentDevice() == mUiManager->GetInputManager()->GetMouse())
 		{
@@ -263,7 +263,7 @@ void GameClientSlaveManager::OnInput(UiLepra::InputElement* pElement)
 				RoadSignMap::iterator x = mRoadSignMap.begin();
 				for (; x != mRoadSignMap.end(); ++x)
 				{
-					x->second->SetIsMovingIn(true, (float)Random::Uniform(0.3, 1.3));
+					x->second->SetIsMovingIn(true);
 				}
 				mJustLookingAtAvatars = true;
 				mAvatarMightSelectTime.PopTimeDiffF();
@@ -275,7 +275,7 @@ void GameClientSlaveManager::OnInput(UiLepra::InputElement* pElement)
 		RoadSignMap::iterator x = mRoadSignMap.begin();
 		for (; x != mRoadSignMap.end(); ++x)
 		{
-			x->second->SetIsMovingIn(false, (float)Random::Uniform(0.3, 1.3));
+			x->second->SetIsMovingIn(false);
 		}
 	}
 
@@ -304,12 +304,13 @@ const PixelRect& GameClientSlaveManager::GetRenderArea() const
 	return (mRenderArea);
 }
 
-void GameClientSlaveManager::UpdateFrustum()
+float GameClientSlaveManager::UpdateFrustum()
 {
-	double lFOV = CURE_RTVAR_GET(GetVariableScope(), RTVAR_UI_3D_FOV, 90.0);
-	double lClipNear = CURE_RTVAR_GET(GetVariableScope(), RTVAR_UI_3D_CLIPNEAR, 0.1);
-	double lClipFar = CURE_RTVAR_GET(GetVariableScope(), RTVAR_UI_3D_CLIPFAR, 1000.0);
-	mUiManager->GetRenderer()->SetViewFrustum((float)lFOV, (float)lClipNear, (float)lClipFar);
+	float lFov = (float)CURE_RTVAR_GET(GetVariableScope(), RTVAR_UI_3D_FOV, 90.0);
+	float lClipNear = (float)CURE_RTVAR_GET(GetVariableScope(), RTVAR_UI_3D_CLIPNEAR, 0.1);
+	float lClipFar = (float)CURE_RTVAR_GET(GetVariableScope(), RTVAR_UI_3D_CLIPFAR, 1000.0);
+	mUiManager->GetRenderer()->SetViewFrustum(lFov, lClipNear, lClipFar);
+	return (lFov);
 }
 
 
@@ -589,6 +590,7 @@ bool GameClientSlaveManager::TickNetworkOutput()
 	CURE_RTVAR_INTERNAL_ARITHMETIC(GetVariableScope(), RTVAR_DEBUG_NET_SENDPOSCNT, int, -, 1, 0);
 
 	bool lSendOk = true;
+	bool lIsSent = false;
 	if (GetNetworkClient()->GetSocket())
 	{
 		// Check if we should send client keepalive (keepalive is simply a position update).
@@ -632,6 +634,7 @@ bool GameClientSlaveManager::TickNetworkOutput()
 					mNetworkOutputGhost.CopyData(lPositionalData);
 					lSendOk = GetNetworkAgent()->SendObjectFullPosition(GetNetworkClient()->GetSocket(),
 						lObject->GetInstanceId(), GetTimeManager()->GetCurrentPhysicsFrame(), mNetworkOutputGhost);
+					lIsSent = true;
 
 					CURE_RTVAR_INTERNAL_ARITHMETIC(GetVariableScope(), RTVAR_DEBUG_NET_SENDPOSCNT, int, +, 1, 0);
 				}
@@ -642,7 +645,8 @@ bool GameClientSlaveManager::TickNetworkOutput()
 		if (lSendOk && !GetNetworkClient()->IsLoggingIn())
 		{
 			mLastUnsafeReceiveTime.UpdateTimer();
-			if (mLastUnsafeReceiveTime.GetTimeDiffF() >= CURE_RTVAR_GET(GetVariableScope(), RTVAR_NETWORK_KEEPALIVE_PINGINTERVAL, 7.0))
+			if ((!lIsSent && lForceSendUnsafeClientKeepalive) ||
+				mLastUnsafeReceiveTime.GetTimeDiffF() >= CURE_RTVAR_GET(GetVariableScope(), RTVAR_NETWORK_KEEPALIVE_PINGINTERVAL, 7.0))
 			{
 				if (++mPingAttemptCount <= CURE_RTVAR_GET(GetVariableScope(), RTVAR_NETWORK_KEEPALIVE_PINGRETRYCOUNT, 4))
 				{
@@ -748,14 +752,12 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 						GetContext()->AddLocalObject(lButton);
 						const int SIGN_COUNT_X = 4;
 						const int SIGN_COUNT_Y = 4;
-						const float lDeltaX = mRenderArea.GetWidth() / (float)SIGN_COUNT_X;
-						const float lDeltaY = mRenderArea.GetHeight() / (float)SIGN_COUNT_Y;
-						const float x = (mRoadSignIndex % SIGN_COUNT_X) * lDeltaX + lDeltaX*0.5f + mRenderArea.mLeft;
-						const float y = (mRoadSignIndex / SIGN_COUNT_X) * lDeltaY + lDeltaY*0.5f + mRenderArea.mTop;
+						const float lDeltaX = 1 / (float)SIGN_COUNT_X;
+						const float lDeltaY = 1 / (float)SIGN_COUNT_Y;
+						const float x = (mRoadSignIndex % SIGN_COUNT_X) * lDeltaX - 0.5f + 0.5f*lDeltaX;
+						const float y = (mRoadSignIndex / SIGN_COUNT_X) * lDeltaY - 0.5f + 0.5f*lDeltaY;
 						++mRoadSignIndex;
-						float lAngle = (x-mRenderArea.mLeft < mRenderArea.GetWidth()/2)? PIF : 0;
-						lButton->SetTrajectory(lAngle, PixelCoord((int)x, (int)y),
-							8, (float)Random::Uniform(0.3, 0.8));
+						lButton->SetTrajectory(Vector2DF(x, y), 8);
 						lButton->GetButton().SetOnClick(GameClientSlaveManager, OnAvatarSelect);
 						mRoadSignMap.insert(RoadSignMap::value_type(lButton->GetInstanceId(), lButton));
 						mJustLookingAtAvatars = false;
@@ -1045,7 +1047,7 @@ void GameClientSlaveManager::OnAvatarSelect(UiTbc::Button* pButton)
 	RoadSignMap::iterator x = mRoadSignMap.begin();
 	for (; x != mRoadSignMap.end(); ++x)
 	{
-		x->second->SetIsMovingIn(false, (float)Random::Uniform(0.3, 0.8));
+		x->second->SetIsMovingIn(false);
 	}
 	mAvatarSelectTime.PopTimeDiffF();
 }

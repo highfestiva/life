@@ -6,6 +6,7 @@
 
 #include "../Include/ResourceManager.h"
 #include <assert.h>
+#include "../../Lepra/Include/HiResTimer.h"
 #include "../../Lepra/Include/SystemManager.h"
 #include "../../TBC/Include/ChunkyPhysics.h"
 #include "../Include/ContextObject.h"
@@ -845,9 +846,7 @@ void ResourceManager::StartLoad(Resource* pResource)
 
 void ResourceManager::InjectResourceLoop()
 {
-	// Perhaps-TODO: measure time. This method should exit when time is up.
-	// Such a functionality would give a more stable frame rate, without horrible
-	// dips from the resource system.
+	HiResTimer lTimer;
 	ResourceMapList lInjectList;
 	{
 		ScopeLock lLock(&mThreadLock);
@@ -870,6 +869,10 @@ void ResourceManager::InjectResourceLoop()
 		else
 		{
 			++x;
+		}
+		if (lTimer.QueryTimeDiff() > 0.01)	// Time's up, have a go later.
+		{
+			break;
 		}
 	}
 	if (lInjectList.GetCount() > 0)
