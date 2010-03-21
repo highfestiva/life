@@ -35,6 +35,8 @@ CHUNK_PHYSICS_BONE_TRANSFORM       = "PHBT"
 CHUNK_PHYSICS_BONE_SHAPE           = "PHSH"
 CHUNK_PHYSICS_ENGINE_CONTAINER     = "PHEO"
 CHUNK_PHYSICS_ENGINE               = "PHEN"
+CHUNK_PHYSICS_TRIGGER_CONTAINER    = "PHTO"
+CHUNK_PHYSICS_TRIGGER              = "PHTR"
 
 CHUNK_MESH                         = "MESH"
 CHUNK_MESH_VERTICES                = "MEVX"
@@ -66,7 +68,7 @@ class ChunkyWriter:
 
 
         def write(self):
-                self.bodies, self.meshes = self._sortgroup(self.group)
+                self.bodies, self.meshes, self.engines = self._sortgroup(self.group)
                 self.dowrite()
 
 
@@ -112,12 +114,15 @@ class ChunkyWriter:
         def _sortgroup(self, group):
                 bodies = []
                 meshes = []
+                engines = []
                 for node in self.group:
                         node.writecount = 0
                         if node.getName().startswith("phys_") and node.nodetype == "transform":
                                 bodies += [node]
                         if node.getName().startswith("m_") and node.nodetype == "transform":
                                 meshes += [node]
+                        if node.getName().startswith("engine:") and node.nodetype.startswith("engine:"):
+                                engines += [node]
                 def childlevel(node):
                         c = 0;
                         while node.getParent():
@@ -126,7 +131,7 @@ class ChunkyWriter:
                         return c
                 bodies.sort(key=childlevel)
                 meshes.sort(key=childlevel)
-                return bodies, meshes
+                return bodies, meshes, engines
 
 
         def _addfeat(self, k, v):
@@ -190,6 +195,8 @@ class ChunkyWriter:
                                 self._writebone(node)
                         elif node.nodetype.startswith("engine:"):
                                 self._writeengine(node)
+                        elif node.nodetype.startswith("trigger:"):
+                                self._writetrigger(node)
                         else:
                                 print("Error: can not write node '%s' of type '%s'" % (node.getFullName(), node.nodetype))
                                 sys.exit(17)
@@ -343,6 +350,7 @@ class PhysWriter(ChunkyWriter):
                         self.f = f
                         bones = []
                         engines = []
+                        triggers = []
                         data =  (
                                         CHUNK_PHYSICS,
                                         (
@@ -350,7 +358,8 @@ class PhysWriter(ChunkyWriter):
                                                 (CHUNK_PHYSICS_PHYSICS_TYPE, physics_type[self.config["type"]]),
                                                 (CHUNK_PHYSICS_ENGINE_COUNT, self._count_engines()),
                                                 (CHUNK_PHYSICS_BONE_CONTAINER, bones),
-                                                (CHUNK_PHYSICS_ENGINE_CONTAINER, engines)
+                                                (CHUNK_PHYSICS_ENGINE_CONTAINER, engines),
+                                                (CHUNK_PHYSICS_TRIGGER_CONTAINER, triggers)
                                         )
                                 )
                         for node in self.bodies:
@@ -363,6 +372,8 @@ class PhysWriter(ChunkyWriter):
                         for node in self.group:
                                 if node.nodetype.startswith("engine:"):
                                         engines.append((CHUNK_PHYSICS_ENGINE, node))
+                                elif node.nodetype.startswith("trigger:"):
+                                        triggers.append((CHUNK_PHYSICS_TRIGGER, node))
                         #pprint.pprint(data)
                         self._writechunk(data)
                 self._verifywritten("physics", self.bodies)
@@ -470,9 +481,9 @@ class PhysWriter(ChunkyWriter):
                 self._writefloat(float(node.get_fixed_attribute("friction")))
                 self._writeint(node.get_fixed_attribute("controller_index"))
                 connected_to = node.get_fixed_attribute("connected_to")
-                connected_to = self._expand_connected_list(connected_to)
+                connected_to = self._expand_connected_list(connected_to, self.bodies)
                 if len(connected_to) < 1:
-                        print("Error: could not find any matching nodes to connected engine '%s' to." % node.getFullName())
+                        print("Error: could not find any matching nodes to connect engine '%s' to." % node.getFullName())
                         sys.exit(19)
                 self._writeint(len(connected_to))
                 for connection in connected_to:
@@ -489,13 +500,43 @@ class PhysWriter(ChunkyWriter):
                 self._addfeat("physical engine:physical engines", 1)
 
 
-        def _expand_connected_list(self, unexpanded):
+        def _writetrigger(self, node):
+                types = {"move":1}
+                self._writeint(types[node.get_fixed_attribute("type")])
+                connected_to = node.get_fixed_attribute("connected_to")
+                connected_to = self._expand_connected_list(connected_to, self.engines)
+                if len(connected_to) < 1:
+                        print("Error: could not find any matching nodes to connect trigger '%s' to." % node.getFullName())
+                        sys.exit(19)
+                self._writeint(len(connected_to))
+                for connection in connected_to:
+                        engine, delay, function = connection
+                        idx = self.engines.index(engine)
+                        if options.options.verbose:
+                                print("Trigger '%s' connected to engine index %i."% (node.getName(), idx))
+                        self._writeint(idx)
+                        self._writefloat(float(delay))
+                        functiontypes = {"toggle":1, "minimum":2, "maximum":3}
+                        self._writeint(functiontypes[function])
+                triggered_by_name = node.get_fixed_attribute("triggered_by")
+                triggered_by = self._findglobalnode(triggered_by_name)
+                if not triggered_by:
+                        print("Error: could not find trigger node by name '%s' in '%s'." % (triggered_by_name, node.getFullName()))
+                        sys.exit(19)
+
+                TODO: write trigger shape, transform...
+
+                node.writecount += 1
+                self._addfeat("physical trigger:physical triggers", 1)
+
+
+        def _expand_connected_list(self, unexpanded, group):
                 expanded = []
                 for e in unexpanded:
-                        noderegexp, scale, ctype = e
-                        for body in self.bodies:
+                        noderegexp, rest = e[0], e[1:]
+                        for body in group:
                                 if re.search("^"+noderegexp+"$", body.getFullName()[1:]):
-                                        expanded += [(body, scale, ctype)]
+                                        expanded += [(body,)+rest]
                 return expanded
 
 

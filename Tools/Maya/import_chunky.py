@@ -646,6 +646,8 @@ class GroupReader(DefaultMAReader):
                 used_sections = {}
                 # Apply config to bodies.
                 for node in group:
+                        if node.nodetype != "transform":
+                                continue
                         for section in config.sections():
                                 if section.startswith("body:") and re.search("^"+section[5:]+"$", node.getFullName()[1:]):
                                         if not node.getName().startswith("phys_"):
@@ -701,9 +703,45 @@ class GroupReader(DefaultMAReader):
                                 group.append(node)
                                 used_sections[section] = True
 
+                        elif section.startswith("trigger:"):
+                                triggertype = stripQuotes(config.get(section, "type"))
+                                triggerOk = triggertype in ["move"]
+                                allApplied &= triggerOk
+                                if not triggerOk:
+                                        print("Error: invalid trigger type '%s'." % triggertype)
+                                node = self.onCreateNode("trigger:"+triggertype, {"name":[section]})
+                                trigger_attribute = {}
+                                params = config.items(section)
+                                for name, value in params:
+                                        node.fix_attribute(name, value)
+                                def check_connected_to(l):
+                                        ok = (len(l) >= 1)
+                                        for e in l:
+                                                ok &= (len(e) == 3)
+                                                ok &= (type(e[0]) == str)
+                                                ok &= (e[1] >= 0 and e[1] <= 300)
+                                                ok &= (e[2] in ["toggle", "minimum", "maximum"])
+                                                connected_to = self._regexpnodes(e[0], group)
+                                                ok &= (len(connected_to) > 0)
+                                                for cn in connected_to:
+                                                        ok &= cn.getName().startswith("engine:")
+                                        return ok
+                                def check_triggered_by(l):
+                                        ok = (type(l) == str)
+                                        triggered_by = self.findNode(l)
+                                        ok &= (triggered_by != None)
+                                        return ok
+                                required = [("type", lambda x: type(x) == str),
+                                            ("connected_to", check_connected_to),
+                                            ("triggered_by", check_triggered_by)]
+                                for name, trigger_check in required:
+                                        allApplied &= self._query_attribute(node, name, trigger_check)[0]
+                                group.append(node)
+                                used_sections[section] = True
+
                 # General settings always used.
                 for section in config.sections():
-                        if section.startswith("config:"):
+                        if section.startswith("config:") or section.startswith("trigger:"):
                                 used_sections[section] = True
                 required = [("type", lambda x: chunkywriter.physics_type.get(x) != None)]
                 for name, config_check in required:
@@ -996,6 +1034,8 @@ class GroupReader(DefaultMAReader):
                                 node.kill_empty = False
                                 if node.getName().startswith("phys_"):
                                         pass
+                                elif node.getName().startswith("trig_"):
+                                        pass
                                 elif node.getName().startswith("m_"):
                                         if node.getParent() != None and node.getParent().getName().startswith("phys_"):
                                                 ok = False
@@ -1003,7 +1043,7 @@ class GroupReader(DefaultMAReader):
                                                       (node.getFullName(), node.getParent().getName()))
                                 else:
                                         ok = False
-                                        print("Error: node '%s' must be either prefixed 'phys_' or 'm_'" % node.getFullName());
+                                        print("Error: node '%s' must be either prefixed 'phys_', 'm_' or 'trig_'" % node.getFullName());
                                 ok &= self._validatenaming(node, group)
                 return ok
 
