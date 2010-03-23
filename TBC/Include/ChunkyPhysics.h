@@ -19,6 +19,7 @@ namespace TBC
 
 class ChunkyBoneGeometry;
 class PhysicsEngine;
+class PhysicsTrigger;
 
 
 
@@ -28,9 +29,8 @@ class ChunkyPhysics: public BoneHierarchy
 public:
 	enum PhysicsType
 	{
-		STATIC = 1,		// Static world object.
-		DYNAMIC,		// Dynamic object within the world.
-		COLLISION_DETECT_ONLY,	// Only collision detection. (Used when ray-testing NPCs/avatars.) Change type to dynamic for ragdoll (when falling or dead).
+		STATIC = 1,	// Static world object.
+		DYNAMIC		// Dynamic object within the world.
 	};
 
 	ChunkyPhysics(TransformOperation pTransformOperation = TRANSFORM_NONE, PhysicsType pPhysicsType = STATIC);
@@ -52,9 +52,15 @@ public:
 
 	int GetEngineCount() const;
 	PhysicsEngine* GetEngine(int pEngineIndex) const;
+	int GetEngineIndex(const PhysicsEngine* pEngine) const;
 	void AddEngine(PhysicsEngine* pEngine);	// Takes ownership of the given engine.
 	void SetEnginePower(unsigned pAspect, float pPower, float pAngle);
 	void ClearEngines();
+
+	int GetTriggerCount() const;
+	PhysicsTrigger* GetTrigger(int pTriggerIndex) const;
+	void AddTrigger(PhysicsTrigger* pEngine);	// Takes ownership of the given trigger.
+	void ClearTriggers();
 
 	// Overrides.
 	void ClearAll(PhysicsManager* pPhysics);
@@ -68,8 +74,10 @@ protected:
 private:
 	typedef std::vector<ChunkyBoneGeometry*> GeometryArray;
 	typedef std::vector<PhysicsEngine*> EngineArray;
+	typedef std::vector<PhysicsTrigger*> TriggerArray;
 	GeometryArray mGeometryArray;
 	EngineArray mEngineArray;
+	TriggerArray mTriggerArray;
 	TransformOperation mTransformOperation;
 	PhysicsType mPhysicsType;
 	unsigned mUniqeGeometryIndex;

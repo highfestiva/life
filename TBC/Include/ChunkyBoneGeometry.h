@@ -49,13 +49,14 @@ public:
 	struct BodyDataBase
 	{
 		BodyDataBase(float pMass, float pFriction, float pBounce, ChunkyBoneGeometry* pParent,
-			JointType pJointType, bool pIsAffectedByGravity):
+			JointType pJointType, bool pIsAffectedByGravity, bool pIsTrigger):
 			mMass(pMass),
 			mFriction(pFriction),
 			mBounce(pBounce),
 			mParent(pParent),
 			mJointType(pJointType),
-			mIsAffectedByGravity(pIsAffectedByGravity)
+			mIsAffectedByGravity(pIsAffectedByGravity),
+			mIsTrigger(pIsTrigger)
 		{
 			::memset(mParameter, 0, sizeof(mParameter));
 		}
@@ -65,14 +66,15 @@ public:
 		ChunkyBoneGeometry* mParent;
 		JointType mJointType;
 		bool mIsAffectedByGravity;
+		bool mIsTrigger;
 		float mParameter[16];
 	};
 	struct BodyData: public BodyDataBase
 	{
 		BodyData(float pMass, float pFriction, float pBounce, ChunkyBoneGeometry* pParent = 0,
 			JointType pJointType = JOINT_EXCLUDE, ConnectorType pConnectorType = CONNECT_NONE,
-			bool pIsAffectedByGravity = true):
-			BodyDataBase(pMass, pFriction, pBounce, pParent, pJointType, pIsAffectedByGravity),
+			bool pIsAffectedByGravity = true, bool pIsTrigger = false):
+			BodyDataBase(pMass, pFriction, pBounce, pParent, pJointType, pIsAffectedByGravity, pIsTrigger),
 			mConnectorType(pConnectorType)
 		{
 		}
@@ -87,7 +89,7 @@ public:
 	virtual GeometryType GetGeometryType() const = 0;
 
 	bool CreateJoint(ChunkyPhysics* pStructure, PhysicsManager* pPhysics, unsigned pPhysicsFps);
-	virtual bool CreateBody(PhysicsManager* pPhysics, bool pIsRoot, PhysicsManager::TriggerListener* pTrigListener,
+	virtual bool CreateBody(PhysicsManager* pPhysics, bool pIsRoot,
 		PhysicsManager::ForceFeedbackListener* pForceListener, PhysicsManager::BodyType pType,
 		const TransformationF& pTransform) = 0;
 	virtual bool CreateTrigger(PhysicsManager* pPhysics, PhysicsManager::TriggerListener* pTrigListener,
@@ -96,6 +98,7 @@ public:
 
 	ChunkyBoneGeometry* GetParent() const;
 	JointType GetJointType() const;
+	bool IsTrigger() const;
 	PhysicsManager::JointID GetJointId() const;
 	PhysicsManager::BodyID GetBodyId() const;
 	PhysicsManager::TriggerID GetTriggerId() const;
@@ -132,9 +135,8 @@ class ChunkyBoneCapsule: public ChunkyBoneGeometry
 	typedef ChunkyBoneGeometry Parent;
 public:
 	ChunkyBoneCapsule(const BodyData& pBodyData);
-	bool CreateBody(PhysicsManager* pPhysics, bool pIsRoot, PhysicsManager::TriggerListener* pTrigListener,
-		PhysicsManager::ForceFeedbackListener* pForceListener, PhysicsManager::BodyType pType,
-		const TransformationF& pTransform);
+	bool CreateBody(PhysicsManager* pPhysics, bool pIsRoot, PhysicsManager::ForceFeedbackListener* pForceListener,
+		PhysicsManager::BodyType pType, const TransformationF& pTransform);
 	bool CreateTrigger(PhysicsManager* pPhysics, PhysicsManager::TriggerListener* pTrigListener,
 		const TransformationF& pTransform);
 
@@ -157,9 +159,8 @@ class ChunkyBoneSphere: public ChunkyBoneGeometry
 	typedef ChunkyBoneGeometry Parent;
 public:
 	ChunkyBoneSphere(const BodyData& pBodyData);
-	bool CreateBody(PhysicsManager* pPhysics, bool pIsRoot, PhysicsManager::TriggerListener* pTrigListener,
-		PhysicsManager::ForceFeedbackListener* pForceListener, PhysicsManager::BodyType pType,
-		const TransformationF& pTransform);
+	bool CreateBody(PhysicsManager* pPhysics, bool pIsRoot, PhysicsManager::ForceFeedbackListener* pForceListener,
+		PhysicsManager::BodyType pType, const TransformationF& pTransform);
 	bool CreateTrigger(PhysicsManager* pPhysics, PhysicsManager::TriggerListener* pTrigListener,
 		const TransformationF& pTransform);
 
@@ -181,9 +182,8 @@ class ChunkyBoneBox: public ChunkyBoneGeometry
 	typedef ChunkyBoneGeometry Parent;
 public:
 	ChunkyBoneBox(const BodyData& pBodyData);
-	bool CreateBody(PhysicsManager* pPhysics, bool pIsRoot, PhysicsManager::TriggerListener* pTrigListener,
-		PhysicsManager::ForceFeedbackListener* pForceListener, PhysicsManager::BodyType pType,
-		const TransformationF& pTransform);
+	bool CreateBody(PhysicsManager* pPhysics, bool pIsRoot, PhysicsManager::ForceFeedbackListener* pForceListener,
+		PhysicsManager::BodyType pType, const TransformationF& pTransform);
 	bool CreateTrigger(PhysicsManager* pPhysics, PhysicsManager::TriggerListener* pTrigListener,
 		const TransformationF& pTransform);
 
@@ -206,9 +206,8 @@ class ChunkyBoneMesh: public ChunkyBoneGeometry
 public:
 	ChunkyBoneMesh(const BodyData& pBodyData);
 	virtual ~ChunkyBoneMesh();
-	bool CreateBody(PhysicsManager* pPhysics, bool pIsRoot, PhysicsManager::TriggerListener* pTrigListener,
-		PhysicsManager::ForceFeedbackListener* pForceListener, PhysicsManager::BodyType pType,
-		const TransformationF& pTransform);
+	bool CreateBody(PhysicsManager* pPhysics, bool pIsRoot, PhysicsManager::ForceFeedbackListener* pForceListener,
+		PhysicsManager::BodyType pType, const TransformationF& pTransform);
 	bool CreateTrigger(PhysicsManager* pPhysics, PhysicsManager::TriggerListener* pTrigListener,
 		const TransformationF& pTransform);
 

@@ -147,13 +147,20 @@ void CppContextObject::OnAlarm(int)// pAlarmId)
 {
 }
 
-void CppContextObject::OnTrigger(TBC::PhysicsManager::BodyID pBody1, TBC::PhysicsManager::BodyID pBody2)
+void CppContextObject::OnTrigger(TBC::PhysicsManager::TriggerID pTrigger, TBC::PhysicsManager::BodyID pBody)
 {
+	ContextObject* lObject1 = (ContextObject*)mManager->GetGameManager()->GetPhysicsManager()->GetTriggerListener(pTrigger);
+	lObject1;
+	//lObject1->Trig(pTrigger);
+
+	pBody;
+	/*
+	TODO: put this back when attaching objects to each other is working.
 	ContextObject* lObject2 = (ContextObject*)mManager->GetGameManager()->GetPhysicsManager()->GetForceFeedbackListener(pBody2);
 	if (mManager->GetGameManager()->IsConnectAuthorized() && lObject2)
 	{
 		AttachToObject(pBody1, lObject2, pBody2);
-	}
+	}*/
 }
 
 

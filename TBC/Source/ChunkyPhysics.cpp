@@ -7,6 +7,7 @@
 #include "../Include/ChunkyBoneGeometry.h"
 #include "../Include/ChunkyPhysics.h"
 #include "../Include/PhysicsEngine.h"
+#include "../Include/PhysicsTrigger.h"
 
 
 
@@ -142,6 +143,18 @@ PhysicsEngine* ChunkyPhysics::GetEngine(int pEngineIndex) const
 	return (mEngineArray[pEngineIndex]);
 }
 
+int ChunkyPhysics::GetEngineIndex(const PhysicsEngine* pEngine) const
+{
+	for (size_t x = 0; x < mEngineArray.size(); ++x)
+	{
+		if (mEngineArray[x] == pEngine)
+		{
+			return x;
+		}
+	}
+	return -1;
+}
+
 void ChunkyPhysics::AddEngine(PhysicsEngine* pEngine)
 {
 	mEngineArray.push_back(pEngine);
@@ -165,6 +178,36 @@ void ChunkyPhysics::ClearEngines()
 	}
 	mEngineArray.clear();
 }
+
+
+
+int ChunkyPhysics::GetTriggerCount() const
+{
+	return ((int)mTriggerArray.size());
+}
+
+PhysicsTrigger* ChunkyPhysics::GetTrigger(int pTriggerIndex) const
+{
+	assert((size_t)pTriggerIndex < mTriggerArray.size());
+	return (mTriggerArray[pTriggerIndex]);
+}
+
+void ChunkyPhysics::AddTrigger(PhysicsTrigger* pTrigger)
+{
+	mTriggerArray.push_back(pTrigger);
+}
+
+void ChunkyPhysics::ClearTriggers()
+{
+	TriggerArray::iterator x = mTriggerArray.begin();
+	for (; x != mTriggerArray.end(); ++x)
+	{
+		delete (*x);
+	}
+	mTriggerArray.clear();
+}
+
+
 
 void ChunkyPhysics::ClearAll(PhysicsManager* pPhysics)
 {
@@ -205,7 +248,11 @@ bool ChunkyPhysics::FinalizeInit(PhysicsManager* pPhysics, unsigned pPhysicsFps,
 		for (int x = 0; lOk && x < lBoneCount; ++x)
 		{
 			ChunkyBoneGeometry* lGeometry = GetBoneGeometry(x);
-			if (mPhysicsType == DYNAMIC || mPhysicsType == STATIC)
+			if (lGeometry->IsTrigger())
+			{
+				lOk = lGeometry->CreateTrigger(pPhysics, pTrigListener, GetBoneTransformation(x));
+			}
+			else
 			{
 				PhysicsManager::BodyType lBodyType = (mPhysicsType == DYNAMIC)? PhysicsManager::DYNAMIC : PhysicsManager::STATIC;
 				if (lGeometry->GetParent())
@@ -249,22 +296,16 @@ bool ChunkyPhysics::FinalizeInit(PhysicsManager* pPhysics, unsigned pPhysicsFps,
 				//		x, lXAngle,
 				//		q.GetA(), q.GetB(), q.GetC(), q.GetD());
 				//}
-				lOk = lGeometry->CreateBody(pPhysics, x == 0, pTrigListener, pForceListener,
-					lBodyType, lBone);
-			}
-			else if (mPhysicsType == COLLISION_DETECT_ONLY)
-			{
-				lOk = lGeometry->CreateTrigger(pPhysics, pTrigListener, GetBoneTransformation(x));
-			}
-			else
-			{
-				assert(false);
+				lOk = lGeometry->CreateBody(pPhysics, x == 0, pForceListener, lBodyType, lBone);
 			}
 		}
 		for (int x = 0; lOk && x < lBoneCount; ++x)
 		{
 			ChunkyBoneGeometry* lGeometry = GetBoneGeometry(x);
-			lOk = lGeometry->CreateJoint(this, pPhysics, pPhysicsFps);
+			if (!lGeometry->IsTrigger())
+			{
+				lOk = lGeometry->CreateJoint(this, pPhysics, pPhysicsFps);
+			}
 		}
 	}
 	assert(lOk);

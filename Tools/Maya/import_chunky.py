@@ -1034,8 +1034,6 @@ class GroupReader(DefaultMAReader):
                                 node.kill_empty = False
                                 if node.getName().startswith("phys_"):
                                         pass
-                                elif node.getName().startswith("trig_"):
-                                        pass
                                 elif node.getName().startswith("m_"):
                                         if node.getParent() != None and node.getParent().getName().startswith("phys_"):
                                                 ok = False
@@ -1043,7 +1041,7 @@ class GroupReader(DefaultMAReader):
                                                       (node.getFullName(), node.getParent().getName()))
                                 else:
                                         ok = False
-                                        print("Error: node '%s' must be either prefixed 'phys_', 'm_' or 'trig_'" % node.getFullName());
+                                        print("Error: node '%s' must be either prefixed 'phys_' or 'm_'" % node.getFullName());
                                 ok &= self._validatenaming(node, group)
                 return ok
 

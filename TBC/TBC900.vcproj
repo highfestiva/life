@@ -499,6 +499,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Source\PhysicsTrigger.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Source\PortalManager.cpp"
 				>
 			</File>
@@ -566,6 +570,10 @@
 			</File>
 			<File
 				RelativePath=".\Include\PhysicsManagerODE.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Include\PhysicsTrigger.h"
 				>
 			</File>
 			<File

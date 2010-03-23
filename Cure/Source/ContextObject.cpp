@@ -591,7 +591,7 @@ bool ContextObject::SetPhysics(TBC::ChunkyPhysics* pStructure)
 		}
 	}
 
-	bool lOk = (mPhysics == 0 && pStructure->FinalizeInit(lPhysics, lPhysicsFps, &lTransformation.GetPosition(), 0, this));
+	bool lOk = (mPhysics == 0 && pStructure->FinalizeInit(lPhysics, lPhysicsFps, &lTransformation.GetPosition(), this, this));
 	assert(lOk);
 	if (lOk)
 	{

@@ -210,6 +210,11 @@ ChunkyBoneGeometry::JointType ChunkyBoneGeometry::GetJointType() const
 	return (mBodyData.mJointType);
 }
 
+bool ChunkyBoneGeometry::IsTrigger() const
+{
+	return (mBodyData.mIsTrigger);
+}
+
 PhysicsManager::JointID ChunkyBoneGeometry::GetJointId() const
 {
 	return (mJointId);
@@ -254,14 +259,14 @@ void ChunkyBoneGeometry::SetExtraData(float pExtraData)
 
 unsigned ChunkyBoneGeometry::GetChunkySize(const void* pData) const
 {
-	unsigned lSize = (unsigned)(sizeof(int32)*7 + sizeof(mBodyData.mParameter) +
+	unsigned lSize = (unsigned)(sizeof(int32)*8 + sizeof(mBodyData.mParameter) +
 		sizeof(int32) + sizeof(int32)*mConnectorArray.size());
 
 	if (pData && mConnectorArray.empty())	// Shouldn't go here if we have something in RAM already.
 	{
 		const uint32* lData = (const uint32*)pData;
-		const int x = sizeof(mBodyData.mParameter)/sizeof(mBodyData.mParameter[0]);
-		lSize += Endian::BigToHost(lData[7+x]) * sizeof(ConnectorType);
+		const int x = 8 + sizeof(mBodyData.mParameter)/sizeof(mBodyData.mParameter[0]);
+		lSize += Endian::BigToHost(lData[x]) * sizeof(ConnectorType);
 	}
 	return (lSize);
 }
@@ -276,16 +281,17 @@ void ChunkyBoneGeometry::SaveChunkyData(const ChunkyPhysics* pStructure, void* p
 	lData[4] = mBodyData.mParent? Endian::HostToBig(pStructure->GetIndex(mBodyData.mParent)) : (unsigned)-1;
 	lData[5] = Endian::HostToBig(mBodyData.mJointType);
 	lData[6] = Endian::HostToBig(mBodyData.mIsAffectedByGravity? 1 : 0);
-	int x;
-	for (x = 0; (size_t)x < sizeof(mBodyData.mParameter)/sizeof(mBodyData.mParameter[0]); ++x)
+	lData[7] = Endian::HostToBig(mBodyData.mIsTrigger? 1 : 0);
+	int y = 8;
+	for (int x = 0; (size_t)x < sizeof(mBodyData.mParameter)/sizeof(mBodyData.mParameter[0]); ++x)
 	{
-		lData[7+x] = Endian::HostToBigF(mBodyData.mParameter[x]);
+		lData[y++] = Endian::HostToBigF(mBodyData.mParameter[x]);
 	}
 	const int lConnectorTypes = (int)mConnectorArray.size();
-	lData[7+x] = Endian::HostToBig(lConnectorTypes);
-	for (int y = 0; y < lConnectorTypes; ++y)
+	lData[y++] = Endian::HostToBig(lConnectorTypes);
+	for (int x = 0; x < lConnectorTypes; ++x)
 	{
-		lData[8+x+y] = Endian::HostToBig(mConnectorArray[y]);
+		lData[y++] = Endian::HostToBig(mConnectorArray[x]);
 	}
 }
 
@@ -301,15 +307,16 @@ void ChunkyBoneGeometry::LoadChunkyData(ChunkyPhysics* pStructure, const void* p
 	mBodyData.mParent = (lParentIndex < 0)? 0 : pStructure->GetBoneGeometry(lParentIndex);
 	mBodyData.mJointType = (JointType)Endian::BigToHost(lData[5]);
 	mBodyData.mIsAffectedByGravity = Endian::BigToHost(lData[6])? true : false;
-	int x;
-	for (x = 0; (size_t)x < sizeof(mBodyData.mParameter)/sizeof(mBodyData.mParameter[0]); ++x)
+	mBodyData.mIsTrigger = Endian::BigToHost(lData[7])? true : false;
+	int y = 8;
+	for (int x = 0; (size_t)x < sizeof(mBodyData.mParameter)/sizeof(mBodyData.mParameter[0]); ++x)
 	{
-		mBodyData.mParameter[x] = Endian::BigToHostF(lData[7+x]);
+		mBodyData.mParameter[x] = Endian::BigToHostF(lData[y++]);
 	}
-	const int lConnectorTypes = Endian::BigToHost(lData[7+x]);
-	for (int y = 0; y < lConnectorTypes; ++y)
+	const int lConnectorTypes = Endian::BigToHost(lData[y++]);
+	for (int x = 0; x < lConnectorTypes; ++x)
 	{
-		mConnectorArray.push_back((ConnectorType)Endian::BigToHost(lData[8+x+y]));
+		mConnectorArray.push_back((ConnectorType)Endian::BigToHost(lData[y++]));
 	}
 }
 
@@ -322,13 +329,13 @@ ChunkyBoneCapsule::ChunkyBoneCapsule(const BodyData& pBodyData):
 {
 }
 
-bool ChunkyBoneCapsule::CreateBody(PhysicsManager* pPhysics, bool pIsRoot, PhysicsManager::TriggerListener* pTrigListener,
+bool ChunkyBoneCapsule::CreateBody(PhysicsManager* pPhysics, bool pIsRoot,
 	PhysicsManager::ForceFeedbackListener* pForceListener, PhysicsManager::BodyType pType,
 	const TransformationF& pTransform)
 {
 	RemovePhysics(pPhysics);
 	mBodyId = pPhysics->CreateCapsule(pIsRoot, pTransform, mBodyData.mMass, mRadius, mLength, pType,
-		mBodyData.mFriction, mBodyData.mBounce, pTrigListener, pForceListener);
+		mBodyData.mFriction, mBodyData.mBounce, pForceListener);
 	return (mBodyId != INVALID_BODY);
 }
 
@@ -381,13 +388,13 @@ ChunkyBoneSphere::ChunkyBoneSphere(const BodyData& pBodyData):
 {
 }
 
-bool ChunkyBoneSphere::CreateBody(PhysicsManager* pPhysics, bool pIsRoot, PhysicsManager::TriggerListener* pTrigListener,
+bool ChunkyBoneSphere::CreateBody(PhysicsManager* pPhysics, bool pIsRoot,
 	PhysicsManager::ForceFeedbackListener* pForceListener, PhysicsManager::BodyType pType,
 	const TransformationF& pTransform)
 {
 	RemovePhysics(pPhysics);
 	mBodyId = pPhysics->CreateSphere(pIsRoot, pTransform, mBodyData.mMass, mRadius, pType, mBodyData.mFriction,
-		mBodyData.mBounce, pTrigListener, pForceListener);
+		mBodyData.mBounce, pForceListener);
 	return (mBodyId != INVALID_BODY);
 }
 
@@ -437,13 +444,13 @@ ChunkyBoneBox::ChunkyBoneBox(const BodyData& pBodyData):
 {
 }
 
-bool ChunkyBoneBox::CreateBody(PhysicsManager* pPhysics, bool pIsRoot, PhysicsManager::TriggerListener* pTrigListener,
+bool ChunkyBoneBox::CreateBody(PhysicsManager* pPhysics, bool pIsRoot,
 	PhysicsManager::ForceFeedbackListener* pForceListener, PhysicsManager::BodyType pType,
 	const TransformationF& pTransform)
 {
 	RemovePhysics(pPhysics);
 	mBodyId = pPhysics->CreateBox(pIsRoot, pTransform, mBodyData.mMass, mSize, pType, mBodyData.mFriction,
-		mBodyData.mBounce, pTrigListener, pForceListener);
+		mBodyData.mBounce, pForceListener);
 	return (mBodyId != INVALID_BODY);
 }
 
@@ -506,13 +513,13 @@ ChunkyBoneMesh::~ChunkyBoneMesh()
 	Clear();
 }
 
-bool ChunkyBoneMesh::CreateBody(PhysicsManager* pPhysics, bool pIsRoot, PhysicsManager::TriggerListener* pTrigListener,
+bool ChunkyBoneMesh::CreateBody(PhysicsManager* pPhysics, bool pIsRoot,
 	PhysicsManager::ForceFeedbackListener* pForceListener, PhysicsManager::BodyType,
 	const TransformationF& pTransform)
 {
 	RemovePhysics(pPhysics);
 	mBodyId = pPhysics->CreateTriMesh(pIsRoot, mVertexCount, mVertices, mTriangleCount, mIndices,
-		pTransform, mBodyData.mFriction, mBodyData.mBounce, pTrigListener, pForceListener);
+		pTransform, mBodyData.mFriction, mBodyData.mBounce, pForceListener);
 	return (mBodyId != INVALID_BODY);
 }
 

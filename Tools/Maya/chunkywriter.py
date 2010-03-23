@@ -28,13 +28,14 @@ CHUNK_CLASS_PHYS_MESH              = "CLPM"
 CHUNK_PHYSICS                      = "PHYS"
 CHUNK_PHYSICS_BONE_COUNT           = "PHBC"
 CHUNK_PHYSICS_PHYSICS_TYPE         = "PHPT"
-CHUNK_PHYSICS_ENGINE_COUNT         = "PHEC"
 CHUNK_PHYSICS_BONE_CONTAINER       = "PHBO"
 CHUNK_PHYSICS_BONE_CHILD_LIST      = "PHCL"
 CHUNK_PHYSICS_BONE_TRANSFORM       = "PHBT"
 CHUNK_PHYSICS_BONE_SHAPE           = "PHSH"
+CHUNK_PHYSICS_ENGINE_COUNT         = "PHEC"
 CHUNK_PHYSICS_ENGINE_CONTAINER     = "PHEO"
 CHUNK_PHYSICS_ENGINE               = "PHEN"
+CHUNK_PHYSICS_TRIGGER_COUNT        = "PHTC"
 CHUNK_PHYSICS_TRIGGER_CONTAINER    = "PHTO"
 CHUNK_PHYSICS_TRIGGER              = "PHTR"
 
@@ -68,7 +69,7 @@ class ChunkyWriter:
 
 
         def write(self):
-                self.bodies, self.meshes, self.engines = self._sortgroup(self.group)
+                self.bodies, self.meshes, self.engines, self.triggers = self._sortgroup(self.group)
                 self.dowrite()
 
 
@@ -115,13 +116,16 @@ class ChunkyWriter:
                 bodies = []
                 meshes = []
                 engines = []
+                triggers = []
                 for node in self.group:
                         node.writecount = 0
-                        if node.getName().startswith("phys_") and node.nodetype == "transform":
+                        if node.getName().startswith("phys_trig_") and node.nodetype == "transform":
+                                triggers += [node]
+                        elif node.getName().startswith("phys_") and node.nodetype == "transform":
                                 bodies += [node]
-                        if node.getName().startswith("m_") and node.nodetype == "transform":
+                        elif node.getName().startswith("m_") and node.nodetype == "transform":
                                 meshes += [node]
-                        if node.getName().startswith("engine:") and node.nodetype.startswith("engine:"):
+                        elif node.getName().startswith("engine:") and node.nodetype.startswith("engine:"):
                                 engines += [node]
                 def childlevel(node):
                         c = 0;
@@ -131,7 +135,7 @@ class ChunkyWriter:
                         return c
                 bodies.sort(key=childlevel)
                 meshes.sort(key=childlevel)
-                return bodies, meshes, engines
+                return bodies, meshes, engines, triggers
 
 
         def _addfeat(self, k, v):
@@ -354,9 +358,10 @@ class PhysWriter(ChunkyWriter):
                         data =  (
                                         CHUNK_PHYSICS,
                                         (
-                                                (CHUNK_PHYSICS_BONE_COUNT, self._count_transforms()),
+                                                (CHUNK_PHYSICS_BONE_COUNT, len(self.bodies)),
                                                 (CHUNK_PHYSICS_PHYSICS_TYPE, physics_type[self.config["type"]]),
-                                                (CHUNK_PHYSICS_ENGINE_COUNT, self._count_engines()),
+                                                (CHUNK_PHYSICS_ENGINE_COUNT, len(self.engines)),
+                                                (CHUNK_PHYSICS_TRIGGER_COUNT, len(self.triggers)),
                                                 (CHUNK_PHYSICS_BONE_CONTAINER, bones),
                                                 (CHUNK_PHYSICS_ENGINE_CONTAINER, engines),
                                                 (CHUNK_PHYSICS_TRIGGER_CONTAINER, triggers)
@@ -365,7 +370,8 @@ class PhysWriter(ChunkyWriter):
                         for node in self.bodies:
                                 #print("Children of %s: %s." % (node.getFullName(), repr(node.phys_children)))
                                 #[print("  - "+n.getName()) for n in node.phys_children]
-                                childlist = [self.bodies.index(n) for n in node.phys_children]
+                                childlist = filter(lambda n: n in self.bodies, node.phys_children)
+                                childlist = [self.bodies.index(n) for n in childlist]
                                 bones.append((CHUNK_PHYSICS_BONE_CHILD_LIST, childlist))
                                 bones.append((CHUNK_PHYSICS_BONE_TRANSFORM, node))
                                 bones.append((CHUNK_PHYSICS_BONE_SHAPE, self._getshape(node)))
@@ -420,6 +426,7 @@ class PhysWriter(ChunkyWriter):
                         self._addfeat("joint:joints", 1)
                 self._writeint(jointvalue)
                 self._writeint(1 if node.get_fixed_attribute("affected_by_gravity") else 0)
+                self._writeint(1 if node.getName().startswith("phys_trig_") else 0)
                 # Write joint parameters.
                 parameters = [0.0]*16
                 #print("Total mass:", totalmass)
@@ -523,9 +530,10 @@ class PhysWriter(ChunkyWriter):
                 if not triggered_by:
                         print("Error: could not find trigger node by name '%s' in '%s'." % (triggered_by_name, node.getFullName()))
                         sys.exit(19)
-
-                TODO: write trigger shape, transform...
-
+                idx = self.triggers.index(triggered_by)
+                if options.options.verbose:
+                        print("Trigger '%s' connected to bone index %i."% (node.getName(), idx))
+                self._writeint(idx)
                 node.writecount += 1
                 self._addfeat("physical trigger:physical triggers", 1)
 
@@ -567,22 +575,6 @@ class PhysWriter(ChunkyWriter):
 ##                                return node
 ##                print("Warning: certain node not found!")
 ##                return None
-
-
-        def _count_transforms(self):
-                count = 0
-                for node in self.group:
-                        if node.getName().startswith("phys_") and node.nodetype == "transform":
-                                 count += 1
-                return count
-
-        def _count_engines(self):
-                count = 0
-                for node in self.group:
-                        if node.nodetype.startswith("engine:"):
-                                 count += 1
-                return count
-
 
 
 class MeshWriter(ChunkyWriter):

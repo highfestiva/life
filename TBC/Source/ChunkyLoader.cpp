@@ -11,6 +11,7 @@
 #include "../Include/ChunkyClass.h"
 #include "../Include/ChunkyPhysics.h"
 #include "../Include/PhysicsEngine.h"
+#include "../Include/PhysicsTrigger.h"
 
 
 
@@ -132,6 +133,7 @@ bool ChunkyLoader::AllocLoadChunkyList(FileElementList& pLoadList, int64 pChunkE
 		{
 			lHeadPosition = mFile->Tell();
 			lOk = LoadHead(lType, lSize, lChunkEndPosition);
+			assert(lOk);
 		}
 
 		// Load element contents, or skip it if the supplied list does not want it.
@@ -176,10 +178,12 @@ bool ChunkyLoader::AllocLoadChunkyList(FileElementList& pLoadList, int64 pChunkE
 						if (lElement.mLoadCallback)
 						{
 							lOk = LoadElementCallback(lType, lSize, lChunkEndPosition, lElement.mPointer);
+							assert(lOk);
 						}
 						else if (lElement.mIntPointer)
 						{
 							lOk = (mFile->Read(lElement.mIntPointer[y]) == IO_OK);
+							assert(lOk);
 							if (lElement.mFieldSize)
 							{
 								*lElement.mFieldSize += sizeof(int32);
@@ -188,6 +192,7 @@ bool ChunkyLoader::AllocLoadChunkyList(FileElementList& pLoadList, int64 pChunkE
 						else if (lElement.mPointer)
 						{
 							lOk = (mFile->AllocReadData(&lElement.mPointer[y], lSize) == IO_OK);
+							assert(lOk);
 							if (lOk)
 							{
 								lElement.mFieldSize[y] = lSize;
@@ -197,15 +202,18 @@ bool ChunkyLoader::AllocLoadChunkyList(FileElementList& pLoadList, int64 pChunkE
 						{
 							uint8* lString = 0;
 							lOk = (lSize >= 4 && (lSize&1) == 0);
+							assert(lOk);
 							if (lOk)
 							{
 								lOk = (mFile->AllocReadData((void**)&lString, lSize) == IO_OK);
+								assert(lOk);
 							}
 							if (lOk)
 							{
 								wstr lUnicodeString;
 								int lStringLength = PackerUnicodeString::Unpack(&lUnicodeString, lString, lSize);
 								lOk = (lStringLength == (int)lSize || lStringLength == (int)lSize-2);
+								assert(lOk);
 								if (lOk)
 								{
 									lElement.mString[y] = wstrutil::ToCurrentCode(lUnicodeString);
@@ -221,6 +229,7 @@ bool ChunkyLoader::AllocLoadChunkyList(FileElementList& pLoadList, int64 pChunkE
 						if (mFile->Tell() >= lChunkEndPosition)
 						{
 							lOk = (y == lElement.mElementCount-1 || lElement.mElementCount <= 0);
+							assert(lOk);
 							if (!lOk)
 							{
 								mLog.Errorf(_T("Trying to load %i elements,")
@@ -237,11 +246,13 @@ bool ChunkyLoader::AllocLoadChunkyList(FileElementList& pLoadList, int64 pChunkE
 				if (lElementFound)
 				{
 					lOk = (mFile->Tell() == lChunkEndPosition);
+					assert(lOk);
 				}
 				else
 				{
 					// Unknown element, try to load it separately.
 					lOk = (mFile->Skip(lSize) == IO_OK);
+					assert(lOk);
 				}
 			}
 		}
@@ -706,12 +717,14 @@ bool ChunkyPhysicsLoader::Load(ChunkyPhysics* pPhysics)
 	int32 lBoneCount = -1;
 	int32 lPhysicsType = -1;
 	int32 lEngineCount = -1;
+	int32 lTriggerCount = -1;
 	if (lOk)
 	{
 		FileElementList lLoadList;
 		lLoadList.push_back(ChunkyFileElement(CHUNK_PHYSICS_BONE_COUNT, &lBoneCount));
 		lLoadList.push_back(ChunkyFileElement(CHUNK_PHYSICS_PHYSICS_TYPE, &lPhysicsType));
 		lLoadList.push_back(ChunkyFileElement(CHUNK_PHYSICS_ENGINE_COUNT, &lEngineCount));
+		lLoadList.push_back(ChunkyFileElement(CHUNK_PHYSICS_TRIGGER_COUNT, &lTriggerCount));
 		lOk = AllocLoadChunkyList(lLoadList, mFile->GetSize());
 	}
 	if (lOk)
@@ -719,8 +732,7 @@ bool ChunkyPhysicsLoader::Load(ChunkyPhysics* pPhysics)
 		// Check that all mandatories have been found.
 		lOk = (lBoneCount >= 1 && lBoneCount < 10000 &&
 			(lPhysicsType == ChunkyPhysics::STATIC ||
-			lPhysicsType == ChunkyPhysics::DYNAMIC ||
-			lPhysicsType == ChunkyPhysics::COLLISION_DETECT_ONLY) &&
+			lPhysicsType == ChunkyPhysics::DYNAMIC) &&
 			lEngineCount >= 0 && lEngineCount < 1000);
 	}
 	if (lOk)
@@ -732,6 +744,7 @@ bool ChunkyPhysicsLoader::Load(ChunkyPhysics* pPhysics)
 		mCurrentBoneIndex = 0;
 		lLoadList.push_back(ChunkyFileElement(CHUNK_PHYSICS_BONE_CONTAINER, (void*)pPhysics, lBoneCount));
 		lLoadList.push_back(ChunkyFileElement(CHUNK_PHYSICS_ENGINE_CONTAINER, (void*)pPhysics, lEngineCount));
+		lLoadList.push_back(ChunkyFileElement(CHUNK_PHYSICS_TRIGGER_CONTAINER, (void*)pPhysics, lTriggerCount));
 		lOk = AllocLoadChunkyList(lLoadList, mFile->GetSize());
 	}
 	if (lOk)
@@ -971,6 +984,27 @@ bool ChunkyPhysicsLoader::LoadElementCallback(ChunkyType pType, uint32 pSize, in
 		}
 
 		delete[] (lEngineArray);
+	}
+	else if (pType == CHUNK_PHYSICS_TRIGGER_CONTAINER)
+	{
+		uint32* lTriggerArray = 0;
+		unsigned lTriggerByteSize = 0;
+		FileElementList lLoadList;
+		lLoadList.push_back(ChunkyFileElement(CHUNK_PHYSICS_TRIGGER, (void**)&lTriggerArray, (unsigned*)&lTriggerByteSize));
+		lOk = AllocLoadChunkyList(lLoadList, pChunkEndPosition);
+
+		PhysicsTrigger* lTrigger = 0;
+		if (lOk)
+		{
+			lTrigger = PhysicsTrigger::Load(lPhysics, lTriggerArray, lTriggerByteSize);
+			lOk = (lTrigger != 0);
+		}
+		if (lOk)
+		{
+			lPhysics->AddTrigger(lTrigger);
+		}
+
+		delete[] (lTriggerArray);
 	}
 	else
 	{

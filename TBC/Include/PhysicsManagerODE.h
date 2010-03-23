@@ -33,24 +33,23 @@ public:
 
 	virtual BodyID CreateSphere(bool pIsRoot, const TransformationF& pTransform, float32 pMass,
 		float32 pRadius, BodyType pType, float32 pFriction = 1, float32 pBounce = 0,
-		TriggerListener* pTriggerListener = 0, ForceFeedbackListener* pListener = 0);
+		ForceFeedbackListener* pListener = 0);
 	virtual BodyID CreateCylinder(bool pIsRoot, const TransformationF& pTransform, float32 pMass,
 		float32 pRadius, float32 pLength, BodyType pType, float32 pFriction = 1,
-		float32 pBounce = 0, TriggerListener* pTriggerListener = 0, ForceFeedbackListener* pListener = 0);
+		float32 pBounce = 0, ForceFeedbackListener* pListener = 0);
 	virtual BodyID CreateCapsule(bool pIsRoot, const TransformationF& pTransform, float32 pMass,
 		float32 pRadius, float32 pLength, BodyType pType, float32 pFriction = 1,
-		float32 pBounce = 0, TriggerListener* pTriggerListener = 0, ForceFeedbackListener* pListener = 0);
+		float32 pBounce = 0, ForceFeedbackListener* pListener = 0);
 	virtual BodyID CreateBox(bool pIsRoot, const TransformationF& pTransform, float32 pMass,
 		const Vector3D<float32>& pSize, BodyType pType, float32 pFriction = 1,
-		float32 pBounce = 0, TriggerListener* pTriggerListener = 0, ForceFeedbackListener* pListener = 0);
+		float32 pBounce = 0, ForceFeedbackListener* pListener = 0);
 	virtual bool Attach(BodyID pStaticBody, BodyID pMainBody);
 
 	// Tri meshes are always static.
 	virtual BodyID CreateTriMesh(bool pIsRoot, unsigned pVertexCount, const float* pVertices,
 		unsigned pTriangleCount, const Lepra::uint32* pIndices,
 		const TransformationF& pTransform, float32 pFriction = 1,
-		float32 pBounce = 0, TriggerListener* pTriggerListener = 0,
-		ForceFeedbackListener* pListener = 0);
+		float32 pBounce = 0, ForceFeedbackListener* pListener = 0);
 
 	virtual bool IsStaticBody(BodyID pBodyId) const;
 
@@ -81,27 +80,19 @@ public:
 	// affect the simulation. It's only purpose is to tell the listener
 	// when an object intersects the trigger volume.
 	//
-	virtual TriggerID CreateSphereTrigger(const TransformationF& pTransform,
-										  float32 pRadius,
-										  TriggerListener* pListener);
-	virtual TriggerID CreateCylinderTrigger(const TransformationF& pTransform,
-											float32 pRadius,
-											float32 pLength,
-											TriggerListener* pListener);
-	virtual TriggerID CreateCapsuleTrigger(const TransformationF& pTransform,
-											float32 pRadius,
-											float32 pLength,
-											TriggerListener* pListener);
+	virtual TriggerID CreateSphereTrigger(const TransformationF& pTransform, float32 pRadius, TriggerListener* pListener);
+	virtual TriggerID CreateCylinderTrigger(const TransformationF& pTransform, float32 pRadius,
+		float32 pLength, TriggerListener* pListener);
+	virtual TriggerID CreateCapsuleTrigger(const TransformationF& pTransform, float32 pRadius,
+		float32 pLength, TriggerListener* pListener);
 	virtual TriggerID CreateBoxTrigger(const TransformationF& pTransform,
-										const Vector3D<float32>& pSize,
-										TriggerListener* pListener);
-	virtual TriggerID CreateRayTrigger(const TransformationF& pTransform,
-										const Vector3D<float32>& pFromPos,
-										const Vector3D<float32>& pToPos,
-										TriggerListener* pListener);
+		const Vector3D<float32>& pSize, TriggerListener* pListener);
+	virtual TriggerID CreateRayTrigger(const TransformationF& pTransform, const Vector3D<float32>& pFromPos,
+		const Vector3D<float32>& pToPos, TriggerListener* pListener);
 
 	virtual void DeleteTrigger(TriggerID pTriggerID);
 
+	virtual TriggerListener* GetTriggerListener(TriggerID pTrigger);
 	virtual ForceFeedbackListener* GetForceFeedbackListener(BodyID pBody);
 
 	virtual void GetTriggerTransform(TriggerID pTriggerID, TransformationF& pTransform);

@@ -36,7 +36,7 @@ public:
 	class TriggerListener
 	{
 	public:
-		virtual void OnTrigger(BodyID pBody1, BodyID pBody2) = 0;
+		virtual void OnTrigger(TriggerID pTrigger, BodyID pBody) = 0;
 	};
 
 	class ForceFeedbackListener
@@ -126,28 +126,23 @@ public:
 	// The cylinder and capsule are both created along the local Z-axis.
 	virtual BodyID CreateSphere(bool pIsRoot, const Transformation<float32>& pTransform,
 		float32 pMass, float32 pRadius, BodyType pType, float32 pFriction = 1,
-		float32 pBounce = 0, TriggerListener* pTriggerListener = 0,
-		ForceFeedbackListener* pForceListener = 0) = 0;
+		float32 pBounce = 0, ForceFeedbackListener* pForceListener = 0) = 0;
 	virtual BodyID CreateCylinder(bool pIsRoot, const Transformation<float32>& pTransform,
 		float32 pMass, float32 pRadius, float32 pLength, BodyType pType,
-		float32 pFriction = 1, float32 pBounce = 0, TriggerListener* pTriggerListener = 0,
-		ForceFeedbackListener* pForceListener = 0) = 0;
+		float32 pFriction = 1, float32 pBounce = 0, ForceFeedbackListener* pForceListener = 0) = 0;
 	virtual BodyID CreateCapsule(bool pIsRoot, const Transformation<float32>& pTransform,
 		float32 pMass, float32 pRadius, float32 pLength, BodyType pType,
-		float32 pFriction = 1, float32 pBounce = 0, TriggerListener* pTriggerListener = 0,
-		ForceFeedbackListener* pForceListener = 0) = 0;
+		float32 pFriction = 1, float32 pBounce = 0, ForceFeedbackListener* pForceListener = 0) = 0;
 	virtual BodyID CreateBox(bool pIsRoot, const Transformation<float32>& pTransform,
 		float32 pMass, const Vector3D<float32>& pSize, BodyType pType,
-		float32 pFriction = 1, float32 pBounce = 0, TriggerListener* pTriggerListener = 0,
-		ForceFeedbackListener* pForceListener = 0) = 0;
+		float32 pFriction = 1, float32 pBounce = 0, ForceFeedbackListener* pForceListener = 0) = 0;
 	virtual bool Attach(BodyID pStaticBody, BodyID pMainBody) = 0;
 
 	// Tri meshes are always static.
 	virtual BodyID CreateTriMesh(bool pIsRoot, unsigned pVertexCount, const float* pVertices,
 		unsigned pTriangleCount, const Lepra::uint32* pIndices,
 		const TransformationF& pTransform, float32 pFriction = 1,
-		float32 pBounce = 0, TriggerListener* pTriggerListener = 0,
-		ForceFeedbackListener* pForceListener = 0) = 0;
+		float32 pBounce = 0, ForceFeedbackListener* pForceListener = 0) = 0;
 
 	virtual bool IsStaticBody(BodyID pBodyId) const = 0;
 
@@ -199,6 +194,7 @@ public:
 
 	virtual void DeleteTrigger(TriggerID pTriggerID) = 0;
 
+	virtual TriggerListener* GetTriggerListener(TriggerID pTrigger) = 0;
 	virtual ForceFeedbackListener* GetForceFeedbackListener(BodyID pBody) = 0;
 
 	virtual void GetTriggerTransform(TriggerID pTriggerID, Transformation<float32>& pTransform) = 0;

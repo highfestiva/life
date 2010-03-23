@@ -54,7 +54,7 @@ void File::SetEndian(Endian::EndianType pEndian)
 IOError File::Skip(size_t pSize)
 {
 	IOError lStatus = IO_OK;
-	int64 lTargetPos = Tell() + (int64)GetSize();
+	int64 lTargetPos = Tell() + pSize;
 	if (SeekCur(pSize) != lTargetPos)
 	{
 		lStatus = IO_ERROR_READING_FROM_STREAM;
