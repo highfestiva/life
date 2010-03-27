@@ -523,8 +523,7 @@ class PhysWriter(ChunkyWriter):
                                 print("Trigger '%s' connected to engine index %i."% (node.getName(), idx))
                         self._writeint(idx)
                         self._writefloat(float(delay))
-                        functiontypes = {"toggle":1, "minimum":2, "maximum":3}
-                        self._writeint(functiontypes[function])
+                        self._writestr(function)
                 triggered_by_name = node.get_fixed_attribute("triggered_by")
                 triggered_by = self._findglobalnode(triggered_by_name)
                 if not triggered_by:

@@ -751,7 +751,7 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 						RoadSignButton* lButton = new RoadSignButton(this, lAvatarId, lResourceId, RoadSignButton::SHAPE_ROUND);
 						GetContext()->AddLocalObject(lButton);
 						const int SIGN_COUNT_X = 4;
-						const int SIGN_COUNT_Y = 4;
+						const int SIGN_COUNT_Y = 5;
 						const float lDeltaX = 1 / (float)SIGN_COUNT_X;
 						const float lDeltaY = 1 / (float)SIGN_COUNT_Y;
 						const float x = (mRoadSignIndex % SIGN_COUNT_X) * lDeltaX - 0.5f + 0.5f*lDeltaX;

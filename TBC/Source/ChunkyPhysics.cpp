@@ -302,10 +302,7 @@ bool ChunkyPhysics::FinalizeInit(PhysicsManager* pPhysics, unsigned pPhysicsFps,
 		for (int x = 0; lOk && x < lBoneCount; ++x)
 		{
 			ChunkyBoneGeometry* lGeometry = GetBoneGeometry(x);
-			if (!lGeometry->IsTrigger())
-			{
-				lOk = lGeometry->CreateJoint(this, pPhysics, pPhysicsFps);
-			}
+			lOk = lGeometry->CreateJoint(this, pPhysics, pPhysicsFps);
 		}
 	}
 	assert(lOk);

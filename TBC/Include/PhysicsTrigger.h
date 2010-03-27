@@ -43,7 +43,7 @@ public:
 	TriggerType GetTriggerType() const;
 
 	void SetTriggerGeometry(ChunkyBoneGeometry* pGeometry);
-	void AddControlledEngine(PhysicsEngine* pEngine);
+	void AddControlledEngine(PhysicsEngine* pEngine, float pDelay, str pFunction);
 
 	unsigned GetChunkySize() const;
 	void SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const;
@@ -51,11 +51,17 @@ public:
 private:
 	void LoadChunkyData(ChunkyPhysics* pStructure, const void* pData);
 
-	typedef std::vector<PhysicsEngine*> EngineArray;
+	struct Connection
+	{
+		PhysicsEngine* mEngine;
+		float mDelay;
+		str mFunction;
+	};
+	typedef std::vector<Connection> ConnectionArray;
 
 	TriggerType mTriggerType;
 	ChunkyBoneGeometry* mTriggerNode;
-	EngineArray mEngineArray;
+	ConnectionArray mConnectionArray;
 
 	LOG_CLASS_DECLARE();
 };
