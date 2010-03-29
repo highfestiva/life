@@ -41,7 +41,7 @@ public:
 	static _String ReplaceAll(const _String& pString, const _String& pFrom, const _String& pTo);
 
 	static _String Format(const typename _String::value_type* ppFormat, ...);
-	static _String VFormat(const typename _String::value_type* ppFormat, va_list pArguments);
+	static _String VFormat(const typename _String::value_type* ppFormat, va_list& pArguments);
 
 	static bool StringToInt(const _String& pString, int& pValue, int pRadix = 10);
 	static _String IntToString(int64 pValue, int pRadix);

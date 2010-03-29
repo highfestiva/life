@@ -1,5 +1,7 @@
 #define _STLP_PLATFORM "Mac OS X"
 
+#include <stl/config/features.h>
+
 #ifndef _STLP_USE_STDIO_IO
 #  define _STLP_USE_UNIX_IO
 #endif
@@ -76,13 +78,12 @@
 #  define _STLP_NO_NATIVE_WIDE_FUNCTIONS 1
 #endif
 
+// high_festiva: node_alloc is overwritten, only god knows how. Malloc seems to work though...
+#if !defined(_STLP_USE_MALLOC) && !defined(_STLP_USE_NEWALLOC) && !defined(_STLP_USE_PERTHREAD_ALLOC) && !defined(_STLP_USE_NODE_ALLOC)
+#  define _STLP_USE_MALLOC 1
+#endif
+
 #ifdef __GLIBC__
-#  if (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 3) || (__GLIBC__ > 2)
-/* From glibc 2.3.x default allocator is malloc_alloc, if was not defined other */
-#    if !defined(_STLP_USE_MALLOC) && !defined(_STLP_USE_NEWALLOC) && !defined(_STLP_USE_PERTHREAD_ALLOC) && !defined(_STLP_USE_NODE_ALLOC)
-#      define _STLP_USE_MALLOC 1
-#    endif
-#  endif
 /* Following platforms has no long double:
  *   - Alpha
  *   - PowerPC

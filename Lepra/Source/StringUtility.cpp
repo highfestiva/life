@@ -19,7 +19,7 @@ namespace Lepra
 
 
 
-template<> astr astrutil::VFormat(const char* pFormat, va_list pArguments)
+template<> astr astrutil::VFormat(const char* pFormat, va_list& pArguments)
 {
 	char lBuffer[1024];
 #ifdef LEPRA_WINDOWS
@@ -34,7 +34,7 @@ template<> astr astrutil::VFormat(const char* pFormat, va_list pArguments)
 	return (astr(lBuffer));
 }
 
-template<> wstr wstrutil::VFormat(const wchar_t* pFormat, va_list pArguments)
+template<> wstr wstrutil::VFormat(const wchar_t* pFormat, va_list& pArguments)
 {
 	wchar_t lBuffer[1024];
 	WIDE_SPRINTF(lBuffer, sizeof(lBuffer)/sizeof(wchar_t), pFormat, pArguments);

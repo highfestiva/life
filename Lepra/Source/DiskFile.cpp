@@ -541,9 +541,9 @@ bool DiskFile::FindFirst(const str& pFileSpec, FindData& pFindData)
 	if (lGlobList.gl_pathc >= 1)
 	{
 		pFindData.mFileSpec = pFileSpec;
-		pFindData.mName = astrutil::ToCurrentCode(lGlobList.gl_pathv[0]);
+		pFindData.mName = astrutil::ToCurrentCode(lGlobList.gl_pathv[1]);
 		struct stat lFileInfo;
-		::stat(lGlobList.gl_pathv[0], &lFileInfo);	// TODO: error check.
+		::stat(lGlobList.gl_pathv[1], &lFileInfo);	// TODO: error check.
 		pFindData.mSize = lFileInfo.st_size;
 		pFindData.mSubDir = (S_ISDIR(lFileInfo.st_mode) != 0);
 		pFindData.mTime = lFileInfo.st_mtime;
@@ -586,26 +586,23 @@ bool DiskFile::FindNext(FindData& pFindData)
 #elif defined LEPRA_POSIX
 	lOk = false;
 	glob_t lGlobList;
-	lGlobList.gl_offs = 1000;
+	lGlobList.gl_offs = 1;
 	::glob(astrutil::ToOwnCode(pFindData.mFileSpec).c_str(), GLOB_DOOFFS|GLOB_MARK, 0, &lGlobList);
-	if (lGlobList.gl_pathc >= 1)
+	for (size_t x = 1; x <= lGlobList.gl_pathc; ++x)
 	{
-		for (size_t x = 0; x < lGlobList.gl_pathc; ++x)
+		if (astrutil::ToCurrentCode(lGlobList.gl_pathv[x]) == pFindData.mName)
 		{
-			if (astrutil::ToCurrentCode(lGlobList.gl_pathv[x]) == pFindData.mName)
+			++x;
+			if (x <= lGlobList.gl_pathc)
 			{
-				++x;
-			  	if (x < lGlobList.gl_pathc)
-				{
-					lOk = true;
-					pFindData.mName = astrutil::ToCurrentCode(lGlobList.gl_pathv[0]);
-					struct stat lFileInfo;
-					::stat(lGlobList.gl_pathv[0], &lFileInfo);	// TODO: error check.
-					pFindData.mSize = lFileInfo.st_size;
-					pFindData.mSubDir = (S_ISDIR(lFileInfo.st_mode) != 0);
-					pFindData.mTime = lFileInfo.st_mtime;
-					break;
-				}
+				lOk = true;
+				pFindData.mName = astrutil::ToCurrentCode(lGlobList.gl_pathv[x]);
+				struct stat lFileInfo;
+				::stat(lGlobList.gl_pathv[x], &lFileInfo);	// TODO: error check.
+				pFindData.mSize = lFileInfo.st_size;
+				pFindData.mSubDir = (S_ISDIR(lFileInfo.st_mode) != 0);
+				pFindData.mTime = lFileInfo.st_mtime;
+				break;
 			}
 		}
 	}
