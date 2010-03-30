@@ -26,6 +26,27 @@ static termios gInitialTermios;
 
 
 
+static str ExecGetStdout(const char* pExecutable)
+{
+	FILE* lFile = ::popen(pExecutable, "r");
+	if (!lFile)
+	{
+		return str();
+	}
+	char lRaw[1024];
+	::memset(lRaw, 0, sizeof(lRaw));
+	::fread(lRaw, sizeof(lRaw), 1, lFile);
+	::fclose(lFile);
+	str lStdout(astrutil::ToCurrentCode(lRaw));
+	if (lStdout.length() > 1)
+	{
+		lStdout.resize(lStdout.length()-1);
+	}
+	return (lStdout);
+}
+
+
+
 void SystemManager::Init()
 {
 	::tcgetattr(STDIN_FILENO, &gInitialTermios);
@@ -95,7 +116,15 @@ void SystemManager::WebBrowseTo(const str& pUrl)
 {
 	if (::fork() == 0)
 	{
-		::system(("sensible-browser "+astrutil::ToOwnCode(pUrl)).c_str());
+		astr lUrl = astrutil::ToOwnCode(pUrl);
+		bool lFound = false;
+#ifdef LEPRA_MAC
+		lFound = lFound || (::system(("open "+lUrl).c_str()) == 0);
+		lFound = lFound || (::system(("/Applications/Firefox.app/Contents/MacOS/firefox "+lUrl).c_str()) == 0);
+#else // Other Posix
+		lFound = lFound || (::system(("sensible-browser "+lUrl).c_str()) == 0);
+		lFound = lFound || (::system(("firefox "+lUrl).c_str()) == 0);
+#endif // OS X / Other Posix
 		::exit(0);
 	}
 }
@@ -118,14 +147,25 @@ unsigned SystemManager::GetCoreCount()
 
 str SystemManager::GetCpuName()
 {
-	// TODO: search /proc/cpuinfo by brute force.
-	return (_T("GenuineIntel"));
+#if defined(LEPRA_GCC_X86_32)
+	return (_T("x86"));
+#elif defined(LEPRA_GCC_X86_64)
+	return (_T("x64"));
+#elif defined(LEPRA_GCC_POWERPC)
+	return (_T("PowerPC"));
+#else // Unkonwn CPU type.
+	return (_T("Unknown"));
+#endif // CPU check.
 }
 
 str SystemManager::GetOsName()
 {
-	// TODO: probably something like popen("uname -o").read()...
-	return (_T("Posix"));
+	str lOsName = ExecGetStdout("uname");
+	if (lOsName.empty())
+	{
+		return (_T("Posix"));
+	}
+	return (lOsName);
 }
 
 uint64 SystemManager::GetAmountRam()

@@ -1033,13 +1033,11 @@ bool TestSystemManager(const LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = _T("Os name");
-		lTestOk = (SystemManager::GetOsName() ==
+		str lOs = SystemManager::GetOsName();
 #if defined(LEPRA_WINDOWS)
-			_T("Windows NT"));
+		lTestOk = (lOs == _T("Windows NT"));
 #elif defined(LEPRA_POSIX)
-			_T("Posix"));
-#elif defined(LEPRA_MACOSX)
-			_T("MacOS X"));
+		lTestOk = (lOs == _T("Darwin") || lOs == _T("Linux"));
 #else // <Unknown target>
 #error "Not implemented for this platform!"
 #endif // LEPRA_WINDOWS/LEPRA_LINUX/LEPRA_MACOSX/<Unknown target>
@@ -1081,8 +1079,8 @@ bool TestSystemManager(const LogDecorator& pAccount)
 	{
 		lContext = _T("Cpu type");
 		str lCpuName = SystemManager::GetCpuName();
-		lTestOk = (lCpuName == _T("GenuineIntel") ||
-			lCpuName == _T("AuthenticAMD"));
+		lTestOk = (lCpuName == _T("GenuineIntel") || lCpuName == _T("AuthenticAMD") ||
+			lCpuName == _T("x64") || lCpuName == _T("x86") || lCpuName == _T("PowerPC"));
 		assert(lTestOk);
 	}
 	if (lTestOk)
@@ -1145,7 +1143,7 @@ bool TestSystemManager(const LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		// Just make sure we don't crash. Need manual verification that it works anyhoo.
-		//SystemManager::WebBrowseTo(_T("http://trialepicfail.blogspot.com/"));
+		SystemManager::WebBrowseTo(_T("http://trialepicfail.blogspot.com/"));
 	}
 
 	ReportTestResult(pAccount, _T("System"), lContext, lTestOk);
