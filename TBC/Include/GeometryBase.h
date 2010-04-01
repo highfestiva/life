@@ -99,6 +99,8 @@ public:
 	{
 		TRIANGLES = 1,
 		TRIANGLE_STRIP,
+		LINES,
+		LINE_LOOP,
 	};
 
 	class BasicMaterialSettings

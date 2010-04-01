@@ -1208,7 +1208,7 @@ uint32* TriangleBasedGeometry::GetIndexData() const
 
 TBC::GeometryBase::PrimitiveType TriangleBasedGeometry::GetPrimitiveType() const
 {
-	assert(mPrimitiveType == TRIANGLES);
+	//assert(mPrimitiveType == TRIANGLES);
 	return mPrimitiveType;
 }
 

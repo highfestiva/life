@@ -329,9 +329,12 @@ unsigned int GeometryBase::GetMaxTriangleCount() const
 	switch (GetPrimitiveType())
 	{
 		case TRIANGLES:
+		case LINE_LOOP:
 			return GetMaxIndexCount() / 3;
 		case TRIANGLE_STRIP:
 			return GetMaxIndexCount() - 2;
+		case LINES:
+			return GetMaxIndexCount() / 2;
 		default:
 			assert(false);
 			return (0);
@@ -343,9 +346,12 @@ unsigned int GeometryBase::GetTriangleCount() const
 	switch (GetPrimitiveType())
 	{
 		case TRIANGLES:
+		case LINE_LOOP:
 			return GetIndexCount() / 3;
 		case TRIANGLE_STRIP:
 			return GetIndexCount() - 2;
+		case LINES:
+			return GetIndexCount() / 2;
 		default:
 			assert(false);
 			return (0);
@@ -358,12 +364,14 @@ void GeometryBase::GetTriangleIndices(int pTriangle, uint32 pIndices[3])
 	switch (GetPrimitiveType())
 	{
 		case TRIANGLES:
+		case LINE_LOOP:
 		{
-			int lOffset = pTriangle * 3;
+			const int lOffset = pTriangle * 3;
 			pIndices[0] = lIndices[lOffset + 0];
 			pIndices[1] = lIndices[lOffset + 1];
 			pIndices[2] = lIndices[lOffset + 2];
-		} break;
+		}
+		break;
 		case TRIANGLE_STRIP:
 		{
 			if ((pTriangle & 1) == 0)
@@ -379,7 +387,15 @@ void GeometryBase::GetTriangleIndices(int pTriangle, uint32 pIndices[3])
 				pIndices[1] = lIndices[pTriangle + 2];
 				pIndices[2] = lIndices[pTriangle + 1];
 			}
-		} break;
+		}
+		break;
+		case LINES:
+		{
+			const int lOffset = pTriangle * 2;
+			pIndices[0] = lIndices[lOffset + 0];
+			pIndices[1] = lIndices[lOffset + 1];
+		}
+		break;
 		default:
 		{
 			assert(false);
@@ -387,7 +403,8 @@ void GeometryBase::GetTriangleIndices(int pTriangle, uint32 pIndices[3])
 			pIndices[0] = (uint32)-100000;
 			pIndices[1] = (uint32)-100000;
 			pIndices[2] = (uint32)-100000;
-		} break;
+		}
+		break;
 	}
 }
 

@@ -1044,6 +1044,15 @@ unsigned int OpenGLRenderer::RenderScene()
 	::glDisable(GL_COLOR_LOGIC_OP);
 	::glDisable(GL_ALPHA_TEST);
 	::glDisable(GL_BLEND);
+	::glPolygonMode(GL_BACK, GL_FILL);
+	::glDepthFunc(GL_LESS);
+	::glCullFace(GL_BACK);
+
+	/*// --- Testing outline stuff:
+	::glLineWidth(3.0f);
+	::glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+	::glEnable(GL_LINE_SMOOTH);
+	// --- End testing.*/
 
 	{
 		// Prepare projection data in order to be able to call CheckCulling().
@@ -1160,6 +1169,32 @@ unsigned int OpenGLRenderer::RenderScene()
 			glDisable(GL_STENCIL_TEST);
 		}
 	}
+
+	/*// Render outline.
+	{
+		::glCullFace(GL_FRONT);
+		::glPolygonMode(GL_BACK, GL_LINE);
+		::glDepthFunc(GL_LEQUAL);
+		::glDisable(GL_LIGHTING);
+
+		// Disable all lights.
+		for (int i = 0; i < GetLightCount(); i++)
+		{
+			glDisable(GL_LIGHT0 + GetLightIndex(i));
+		}
+
+		// Prepare the pixel shader materials.
+		OpenGLMatPXS::PrepareLights(this);
+
+		// Render the scene darkened.
+		for (int i = 0; i < (int)NUM_MATERIALTYPES; i++)
+		{
+			if (GetMaterial((MaterialType)i) != 0)
+			{
+				GetMaterial((MaterialType)i)->RenderAllGeometry(GetCurrentFrame());
+			}
+		}
+	}*/
 
 	{
 		for (int i = 0; i < GetLightCount(); i++)
