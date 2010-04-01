@@ -17,7 +17,8 @@ namespace UiLepra
 
 
 
-MacOpenGLDisplay::MacOpenGLDisplay()
+MacOpenGLDisplay::MacOpenGLDisplay():
+	mGlView(0)
 {
 }
 
@@ -171,21 +172,21 @@ bool MacOpenGLDisplay::InitScreen()
 {
 	UpdateCaption();
 
-	
+
 
 /*TODO: port!
 
 	if (mScreenMode == FULLSCREEN)
 	{
 		DEVMODE lNewMode;
-		lNewMode.dmSize             = sizeof(lNewMode);
+		lNewMode.dmSize	     = sizeof(lNewMode);
 		lNewMode.dmBitsPerPel       = mDisplayMode.mBitDepth;
-		lNewMode.dmPelsWidth        = mDisplayMode.mWidth;
+		lNewMode.dmPelsWidth	= mDisplayMode.mWidth;
 		lNewMode.dmPelsHeight       = mDisplayMode.mHeight;
 		lNewMode.dmDisplayFrequency = mDisplayMode.mRefreshRate;
-		lNewMode.dmFields = DM_BITSPERPEL | 
-							 DM_PELSWIDTH  | 
-							 DM_PELSHEIGHT | 
+		lNewMode.dmFields = DM_BITSPERPEL |
+							 DM_PELSWIDTH  |
+							 DM_PELSHEIGHT |
 							 DM_DISPLAYFREQUENCY;
 
 		if (::ChangeDisplaySettings(&lNewMode, CDS_FULLSCREEN) !=
@@ -235,13 +236,28 @@ bool MacOpenGLDisplay::InitScreen()
 			   _T("or try closing other running applications..."),
 			   _T("OpenGL Error"),MB_OK | MB_ICONWARNING );
 		return false;
+	}*/
+
+	if (!SetGLPixelFormat())
+	{
+		printf("OpenGL error: unable to setup pixel format. Please try installing a new OpenGL driver, " \
+			"or try closing other running applications.");
+		return false;
+	}
+
+	if (!CreateGLContext())
+	{
+		printf("OpenGL error: unable to create context. Please try installing a new OpenGL driver, " \
+			"or try closing other running applications.");
+		return false;
 	}
 
 	glEnable(GL_SCISSOR_TEST);
 	if (mContextUserCount == 1)
 	{
-		OpenGLExtensions::InitExtensions();
-	}*/
+		// TODO: ?
+		//OpenGLExtensions::InitExtensions();
+	}
 
 	return true;
 }
@@ -259,13 +275,13 @@ bool MacOpenGLDisplay::CreateGLContext()
 {
 	if (mGlContext == 0)
 	{
-//		mGlContext = ::glXCreateContext(GetDisplay(), GetVisualInfo(), 0, GL_TRUE);
+		mGlContext = [mGlView openGLContext];
 	}
 
 	bool lOk = (mGlContext != 0);
 	if (lOk)
 	{
-//		++mContextUserCount;
+		++mContextUserCount;
 		lOk = Activate();
 	}
 	return (lOk);
@@ -273,11 +289,11 @@ bool MacOpenGLDisplay::CreateGLContext()
 
 void MacOpenGLDisplay::DeleteGLContext()
 {
-//	if (mContextUserCount >= 1)
+	if (mContextUserCount >= 1)
 	{
-//		--mContextUserCount;
+		--mContextUserCount;
 	}
-//	if (mContextUserCount == 0)
+	if (mContextUserCount == 0)
 	{
 		[NSOpenGLContext clearCurrentContext];
 //		::glXMakeCurrent(GetDisplay(), 0, 0);
@@ -285,5 +301,52 @@ void MacOpenGLDisplay::DeleteGLContext()
 		mGlContext = 0;
 	}
 }
+
+
+
+bool MacOpenGLDisplay::SetGLPixelFormat()
+{
+	NSOpenGLPixelFormatAttribute lPixelFormatAttribs[32];
+	NSOpenGLPixelFormatAttribute* lAttrib = lPixelFormatAttribs;
+
+	*lAttrib++ = NSOpenGLPFANoRecovery;
+	*lAttrib++ = NSOpenGLPFADoubleBuffer;
+	*lAttrib++ = NSOpenGLPFAAccelerated;
+	//      *lAttrib++ = kCGLPFAFullScreen;
+	*lAttrib++ = NSOpenGLPFAAccumSize;
+	*lAttrib++ = (NSOpenGLPixelFormatAttribute)mDisplayMode.mBitDepth;
+	*lAttrib++ = NSOpenGLPFAColorSize;
+	*lAttrib++ = (NSOpenGLPixelFormatAttribute)mDisplayMode.mBitDepth;
+	/* TODO: should this not be included? BS code looks like it shouldn't.
+	if (mDisplayMode.mBitDepth > 0)
+	{
+		*lAttrib++ = NSOpenGLPFADepthSize;
+		*lAttrib++ = (NSOpenGLPixelFormatAttribute)0;
+	 }*/
+	/* TODO: deal with stencil; what is currently in use on Windows? BS code says it shouldn't be included?
+	if (lScreenRes.GetStencilBufferDepth() > 0)
+	{
+		*lAttrib++ = NSOpenGLPFAStencilSize;
+		*lAttrib++ = (NSOpenGLPixelFormatAttribute)lScreenRes.GetStencilBufferDepth();
+	}*/
+	*lAttrib++ = (NSOpenGLPixelFormatAttribute) 0;
+	NSOpenGLPixelFormat* lPixelFormat = [NSOpenGLPixelFormat alloc];
+	[lPixelFormat initWithAttributes:lPixelFormatAttribs];
+
+	mGlView = [NSOpenGLView alloc];
+	[mGlView initWithFrame:[mWnd frame] pixelFormat:lPixelFormat];
+	[mWnd setContentView:mGlView];
+	//[mWnd setFrame: NSMakeRect(0, 0, mScreen->GetActiveResolution().GetWidth(), mScreen->GetActiveResolution().GetHeight()) display: YES];
+
+	[mGlView reshape];
+	return (true);	// TODO: add error checking!
+}
+
+
+
+NSOpenGLContext* MacOpenGLDisplay::mGlContext = 0;
+int MacOpenGLDisplay::mContextUserCount = 0;
+
+
 
 }

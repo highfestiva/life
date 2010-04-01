@@ -5,6 +5,7 @@
 
 
 #include "../../Include/Mac/UiMacDisplayManager.h"
+#include <stdexcept>
 #include "../../../Lepra/Include/Log.h"
 #include "../../../Lepra/Include/String.h"
 #include "../../../Lepra/Include/SystemManager.h"
@@ -47,27 +48,43 @@ MacDisplayManager::MacDisplayManager() :
 	mCaptionSet(false),
 	mConsumeChar(true)
 {
-
-	/* TODO: implement!
-
-	// Count display modes.
-	DEVMODE lDevMode;
-	while (EnumDisplaySettings(NULL, mEnumeratedDisplayModeCount, &lDevMode) != 0)
+	// Obtain number of available displays.
+	CGDisplayCount lDisplayCount = 0;
+	CGDisplayErr lError = CGGetActiveDisplayList(0, 0, &lDisplayCount);
+	assert(lError == CGDisplayNoErr);
+	assert(lDisplayCount >= 1);
+	if (lError != CGDisplayNoErr || lDisplayCount < 1)
 	{
-		mEnumeratedDisplayModeCount++;
+		throw std::runtime_error("CoreGraphics error: fetch of number of screens failed.");
 	}
-	mEnumeratedDisplayMode = new DisplayMode[mEnumeratedDisplayModeCount];
 
-	int lCount = 0;
-	while (EnumDisplaySettings(NULL, lCount, &lDevMode) != 0)
+	// Allocate and convert.
+	CGDirectDisplayID* lDisplays = (CGDirectDisplayID*)new char[sizeof(CGDirectDisplayID) * lDisplayCount];
+	lError = CGGetActiveDisplayList(lDisplayCount, lDisplays, &lDisplayCount);
+	assert(lError == CGDisplayNoErr);
+	assert(lDisplayCount >= 1);
+	if (lError != CGDisplayNoErr || lDisplayCount < 1)
 	{
-		mEnumeratedDisplayMode[lCount].mWidth = lDevMode.dmPelsWidth;
-		mEnumeratedDisplayMode[lCount].mHeight = lDevMode.dmPelsHeight;
-		mEnumeratedDisplayMode[lCount].mBitDepth = lDevMode.dmBitsPerPel;
-		mEnumeratedDisplayMode[lCount].mRefreshRate = lDevMode.dmDisplayFrequency;
-
-		lCount++;
-	}*/
+		throw std::runtime_error("CoreGraphics error: fetch of number of screens failed 2.");
+	}
+	if(lDisplayCount >= 1)
+	{
+		CFArrayRef lModeList = CGDisplayAvailableModes(lDisplays[0]);
+		if (!lModeList)
+		{
+			throw std::runtime_error("CoreGraphics error: fetch of display modes failed.");
+		}
+		CFIndex lModeCount = CFArrayGetCount(lModeList);
+		mEnumeratedDisplayModeCount = lModeCount;
+		mEnumeratedDisplayMode = new DisplayMode[mEnumeratedDisplayModeCount];
+		for (CFIndex x = 0; x < lModeCount; ++x)
+		{
+			CFDictionaryRef lMode = (CFDictionaryRef)CFArrayGetValueAtIndex(lModeList, x);
+			mEnumeratedDisplayMode[x] = ConvertNativeDisplayMode(lMode);
+		}
+	}
+	
+	delete[] (lDisplays);
 }
 
 MacDisplayManager::~MacDisplayManager()
@@ -242,6 +259,7 @@ bool MacDisplayManager::InitWindow()
 	bool lOk = mIsOpen = true;
 
 	mWnd = [[NSWindow alloc] initWithContentRect: NSMakeRect(0, 0, 640, 480) styleMask: NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask backing: NSBackingStoreBuffered defer: NO];
+	++mWindowCount;
 
 	/*if (lOk)
 	{
@@ -324,8 +342,8 @@ bool MacDisplayManager::InitWindow()
 
 void MacDisplayManager::GetBorderSize(int& pSizeX, int& pSizeY)
 {
-	if (mScreenMode == FULLSCREEN ||
-	   mScreenMode == SPLASH_WINDOW)
+	//if (mScreenMode == FULLSCREEN ||
+	//   mScreenMode == SPLASH_WINDOW)
 	{
 		pSizeX = 0;
 		pSizeY = 0;
@@ -431,7 +449,7 @@ bool MacDisplayManager::DispatchMessage(NSEvent* e)
 		mConsumeChar = lConsumed;
 	}
 	return (lConsumed);*/
-	return (0);
+	return (false);
 }
 
 void MacDisplayManager::ProcessMessages()
@@ -515,7 +533,7 @@ void MacDisplayManager::RemoveObserver(MacObserver* pObserver)
 
 void MacDisplayManager::ShowMessageBox(const str& pMsg, const str& pCaption)
 {
-	//::MessageBox(mWnd, pMsg.c_str(), pCaption.c_str(), MB_OK);
+	// StandardAlert() I googled, whatever that might be.
 }
 
 bool MacDisplayManager::OnMessage(NSEvent* e)
@@ -580,7 +598,38 @@ bool MacDisplayManager::OnMessage(NSEvent* e)
 
 
 
-int MacDisplayManager::msWindowCount = 0;
+DisplayMode MacDisplayManager::ConvertNativeDisplayMode(CFDictionaryRef pMode)
+{
+	CFNumberRef lResWidth = (CFNumberRef)CFDictionaryGetValue(pMode, kCGDisplayWidth);
+	CFNumberRef lResHeight = (CFNumberRef)CFDictionaryGetValue(pMode, kCGDisplayHeight);
+	CFNumberRef lResRefreshRate = (CFNumberRef)CFDictionaryGetValue(pMode, kCGDisplayRefreshRate);
+	CFNumberRef lResBitsPerPixel = (CFNumberRef)CFDictionaryGetValue(pMode, kCGDisplayBitsPerPixel);
+
+	if (!lResWidth || !lResHeight || !lResRefreshRate || !lResBitsPerPixel)
+	{
+		throw std::runtime_error("Unknown error while inspecting display mode.");
+	}
+
+	int lWidth;
+	CFNumberGetValue(lResWidth, kCFNumberSInt32Type, &lWidth);
+	int lHeight;
+	CFNumberGetValue(lResHeight, kCFNumberSInt32Type, &lHeight);
+	int lBpp;
+	CFNumberGetValue(lResBitsPerPixel, kCFNumberSInt32Type, &lBpp);
+	int lRefreshRate;
+	CFNumberGetValue(lResRefreshRate, kCFNumberFloat32Type, &lRefreshRate);
+
+	DisplayMode lDisplayMode;
+	lDisplayMode.mWidth = lWidth;
+	lDisplayMode.mHeight = lHeight;
+	lDisplayMode.mBitDepth = lBpp;
+	lDisplayMode.mRefreshRate = lRefreshRate;
+	return (lDisplayMode);
+}
+
+
+
+int MacDisplayManager::mWindowCount = 0;
 LOG_CLASS_DEFINE(UI_GFX, MacDisplayManager);
 
 

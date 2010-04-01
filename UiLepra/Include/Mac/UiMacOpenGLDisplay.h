@@ -47,9 +47,11 @@ private:
 
 	bool CreateGLContext();
 	void DeleteGLContext();
+	bool SetGLPixelFormat();
 
-	NSOpenGLContext*	mGlContext;
-	NSOpenGLView*		mGlView;
+	NSOpenGLView* mGlView;
+	static NSOpenGLContext* mGlContext;
+	static int mContextUserCount;
 };
 
 
