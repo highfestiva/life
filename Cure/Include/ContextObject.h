@@ -92,6 +92,8 @@ protected:
 	bool IsAttachedTo(ContextObject* pObject) const;
 	void AddAttachment(ContextObject* pObject, TBC::PhysicsManager::JointID pJoint, TBC::PhysicsEngine* pEngine);
 
+	virtual bool IsSameInstance(TBC::PhysicsManager::ForceFeedbackListener* pOther);
+
 	typedef std::vector<ContextObjectAttribute*> AttributeArray;
 	struct Connection
 	{

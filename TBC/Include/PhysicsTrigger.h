@@ -9,6 +9,7 @@
 #include <vector>
 #include "../../Lepra/Include/Log.h"
 #include "../../Lepra/Include/Vector3D.h"
+#include "../Include/PhysicsManager.h"
 #include "../Include/TBC.h"
 
 
@@ -21,7 +22,6 @@ namespace TBC
 class ChunkyBoneGeometry;
 class ChunkyPhysics;
 class PhysicsEngine;
-class PhysicsManager;
 
 
 
@@ -41,9 +41,13 @@ public:
 	static PhysicsTrigger* Load(ChunkyPhysics* pStructure, const void* pData, unsigned pByteCount);
 
 	TriggerType GetTriggerType() const;
+	PhysicsManager::TriggerID GetTriggerId() const;
 
 	void SetTriggerGeometry(ChunkyBoneGeometry* pGeometry);
 	void AddControlledEngine(PhysicsEngine* pEngine, float pDelay, str pFunction);
+	int GetControlledEngineCount() const;
+	PhysicsEngine* GetControlledEngine(int pIndex) const;
+	str GetControlledFunction(int pIndex) const;
 
 	unsigned GetChunkySize() const;
 	void SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const;

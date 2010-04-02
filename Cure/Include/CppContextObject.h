@@ -31,7 +31,7 @@ protected:
 
 	void OnTick(float pFrameTime);
 	void OnAlarm(int pAlarmId);
-	void OnTrigger(TBC::PhysicsManager::TriggerID pTrigger, TBC::PhysicsManager::BodyID pBody);
+	void OnTrigger(TBC::PhysicsManager::TriggerID pTrigger, TBC::PhysicsManager::ForceFeedbackListener* pBody);
 	void OnForceApplied(TBC::PhysicsManager::ForceFeedbackListener* pOtherObject,
 		const Vector3DF& pForce, const Vector3DF& pTorque);
 

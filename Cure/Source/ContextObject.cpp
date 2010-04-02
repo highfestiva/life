@@ -563,7 +563,10 @@ float ContextObject::GetMass() const
 	for (int x = 0; x < lBoneCount; ++x)
 	{
 		const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(x);
-		lTotalMass += lPhysicsManager->GetBodyMass(lGeometry->GetBodyId());
+		if (lGeometry->GetBodyId())
+		{
+			lTotalMass += lPhysicsManager->GetBodyMass(lGeometry->GetBodyId());
+		}
 	}
 	return (lTotalMass);
 }
@@ -965,6 +968,13 @@ void ContextObject::AddAttachment(ContextObject* pObject, TBC::PhysicsManager::J
 	{
 		mPhysics->AddEngine(pEngine);
 	}
+}
+
+
+
+bool ContextObject::IsSameInstance(TBC::PhysicsManager::ForceFeedbackListener* pOther)
+{
+	return (((ContextObject*)pOther)->GetInstanceId() == GetInstanceId());
 }
 
 

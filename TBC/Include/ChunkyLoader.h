@@ -126,7 +126,7 @@ enum ChunkyType
 	CHUNK_PHYSICS_ENGINE_CONTAINER     = ENUMIFY('P','H','E','O'),	// Engine array. Mandatory.
 	CHUNK_PHYSICS_ENGINE               = ENUMIFY('P','H','E','N'),	// An engine and its parameters, type. Mandatory.
 	// Physics sub element: trigger.
-	CHUNK_PHYSICS_TRIGGER_CONTAINER    = ENUMIFY('P','H','T','0'),	// Engine array. Mandatory.
+	CHUNK_PHYSICS_TRIGGER_CONTAINER    = ENUMIFY('P','H','T','O'),	// Engine array. Mandatory.
 	CHUNK_PHYSICS_TRIGGER              = ENUMIFY('P','H','T','R'),	// An engine and its parameters, type. Mandatory.
 
 	// File type: class. Used by both graphics and text applications.

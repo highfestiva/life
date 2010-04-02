@@ -134,6 +134,19 @@ bool ChunkyLoader::AllocLoadChunkyList(FileElementList& pLoadList, int64 pChunkE
 			lHeadPosition = mFile->Tell();
 			lOk = LoadHead(lType, lSize, lChunkEndPosition);
 			assert(lOk);
+#define C(t)	lType == t
+			assert(C(CHUNK_MESH) || C(CHUNK_MESH_VERTICES) || C(CHUNK_MESH_NORMALS) || C(CHUNK_MESH_UV) ||
+				C(CHUNK_MESH_COLOR) || C(CHUNK_MESH_COLOR_FORMAT) || C(CHUNK_MESH_TRIANGLES) || C(CHUNK_MESH_STRIPS) ||
+				C(CHUNK_MESH_VOLATILITY) || C(CHUNK_SKIN) || C(CHUNK_SKIN_BONE_WEIGHT_GROUP) || C(CHUNK_SKIN_BWG_BONES) ||
+				C(CHUNK_SKIN_BWG_VERTICES) || C(CHUNK_SKIN_BWG_WEIGHTS) || C(CHUNK_ANIMATION) || C(CHUNK_ANIMATION_MODE) ||
+				C(CHUNK_ANIMATION_FRAME_COUNT) || C(CHUNK_ANIMATION_BONE_COUNT) || C(CHUNK_ANIMATION_USE_SPLINES) || C(CHUNK_ANIMATION_TIME) ||
+				C(CHUNK_ANIMATION_ROOT_NODE) || C(CHUNK_ANIMATION_KEYFRAME) || C(CHUNK_ANIMATION_KEYFRAME_TIME) || C(CHUNK_ANIMATION_KEYFRAME_TRANSFORM) ||
+				C(CHUNK_PHYSICS) || C(CHUNK_PHYSICS_BONE_COUNT) || C(CHUNK_PHYSICS_PHYSICS_TYPE) || C(CHUNK_PHYSICS_ENGINE_COUNT) ||
+				C(CHUNK_PHYSICS_TRIGGER_COUNT) || C(CHUNK_PHYSICS_BONE_CONTAINER) || C(CHUNK_PHYSICS_BONE_CHILD_LIST) || C(CHUNK_PHYSICS_BONE_TRANSFORM) ||
+				C(CHUNK_PHYSICS_BONE_SHAPE) || C(CHUNK_PHYSICS_ENGINE_CONTAINER) || C(CHUNK_PHYSICS_ENGINE) || C(CHUNK_PHYSICS_TRIGGER_CONTAINER) ||
+				C(CHUNK_PHYSICS_TRIGGER) || C(CHUNK_CLASS) || C(CHUNK_CLASS_INHERITANCE_LIST) || C(CHUNK_CLASS_PHYSICS) ||
+				C(CHUNK_CLASS_SETTINGS) || C(CHUNK_CLASS_MESH_LIST) || C(CHUNK_CLASS_PHYS_MESH) || C(CHUNK_GROUP_CLASS_LIST) ||
+				C(CHUNK_GROUP_SETTINGS) || C(CHUNK_WORLD_INFO) || C(CHUNK_WORLD_QUAD_LIST) || C(CHUNK_WORLD_GROUP_LIST));
 		}
 
 		// Load element contents, or skip it if the supplied list does not want it.
@@ -733,7 +746,8 @@ bool ChunkyPhysicsLoader::Load(ChunkyPhysics* pPhysics)
 		lOk = (lBoneCount >= 1 && lBoneCount < 10000 &&
 			(lPhysicsType == ChunkyPhysics::STATIC ||
 			lPhysicsType == ChunkyPhysics::DYNAMIC) &&
-			lEngineCount >= 0 && lEngineCount < 1000);
+			lEngineCount >= 0 && lEngineCount < 1000 &&
+			lTriggerCount >= 0 && lTriggerCount < 1000);
 	}
 	if (lOk)
 	{
@@ -750,6 +764,11 @@ bool ChunkyPhysicsLoader::Load(ChunkyPhysics* pPhysics)
 	if (lOk)
 	{
 		lOk = (lEngineCount == pPhysics->GetEngineCount());
+		assert(lOk);
+	}
+	if (lOk)
+	{
+		lOk = (lTriggerCount == pPhysics->GetTriggerCount());
 		assert(lOk);
 	}
 

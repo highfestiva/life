@@ -58,6 +58,11 @@ PhysicsTrigger::TriggerType PhysicsTrigger::GetTriggerType() const
 	return (mTriggerType);
 }
 
+PhysicsManager::TriggerID PhysicsTrigger::GetTriggerId() const
+{
+	assert(mTriggerNode->GetTriggerId() != 0);
+	return (mTriggerNode->GetTriggerId());
+}
 
 
 void PhysicsTrigger::SetTriggerGeometry(ChunkyBoneGeometry* pGeometry)
@@ -72,6 +77,23 @@ void PhysicsTrigger::AddControlledEngine(PhysicsEngine* pEngine, float pDelay, s
 	lConnection.mDelay = pDelay;
 	lConnection.mFunction = pFunction;
 	mConnectionArray.push_back(lConnection);
+}
+
+int PhysicsTrigger::GetControlledEngineCount() const
+{
+	return (mConnectionArray.size());
+}
+
+PhysicsEngine* PhysicsTrigger::GetControlledEngine(int pIndex) const
+{
+	assert((size_t)pIndex < mConnectionArray.size());
+	return (mConnectionArray[pIndex].mEngine);
+}
+
+str PhysicsTrigger::GetControlledFunction(int pIndex) const
+{
+	assert((size_t)pIndex < mConnectionArray.size());
+	return (mConnectionArray[pIndex].mFunction);
 }
 
 
@@ -112,7 +134,7 @@ void PhysicsTrigger::LoadChunkyData(ChunkyPhysics* pStructure, const void* pData
 	const uint32* lData = (const uint32*)pData;
 
 	mTriggerType = (TriggerType)Endian::BigToHost(lData[0]);
-	mTriggerNode = pStructure->GetBoneGeometry(Endian::BigToHost(lData[1]));
+	SetTriggerGeometry(pStructure->GetBoneGeometry(Endian::BigToHost(lData[1])));
 	assert(mTriggerNode);
 	const int lEngineCount = Endian::BigToHost(lData[2]);
 	int y = 3;

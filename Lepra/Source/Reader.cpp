@@ -135,7 +135,6 @@ IOError Reader::ReadData(void* pBuffer, size_t pSize)
 
 IOError Reader::AllocReadData(void** pBuffer, size_t pSize)
 {
-	mReadCount += (uint64)pSize;
 	char* lData = new char[pSize];
 	IOError lStatus = ReadData(lData, pSize);
 	if (lStatus == IO_OK)

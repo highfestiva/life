@@ -225,6 +225,7 @@ private:
 			mBodyID(0),
 			mGeomID(0),
 			mTriMeshID(0),
+			mMass(0),
 			mFriction(0),
 			mBounce(0),
 			mUserData(0),

@@ -33,18 +33,19 @@ public:
 		DYNAMIC,	// Dynamic object within the world.
 	};
 
-	class TriggerListener
-	{
-	public:
-		virtual void OnTrigger(TriggerID pTrigger, BodyID pBody) = 0;
-	};
-
 	class ForceFeedbackListener
 	{
 	public:
 		virtual void OnForceApplied(ForceFeedbackListener* pOtherObject,
 			const Vector3D<float32>& pForce,
 			const Vector3D<float32>& pTorque) = 0;
+	};
+
+	class TriggerListener
+	{
+	public:
+		virtual void OnTrigger(TriggerID pTrigger, ForceFeedbackListener* pBody) = 0;
+		virtual bool IsSameInstance(ForceFeedbackListener* pOther) = 0;
 	};
 
 	struct Joint1Diff

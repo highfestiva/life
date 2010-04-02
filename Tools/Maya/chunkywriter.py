@@ -17,7 +17,6 @@ import re
 import struct
 import sys
 
-
 physics_type = {"static":1, "dynamic":2, "collision_detect_only":3}
 
 CHUNK_CLASS                        = "CLAS"
@@ -121,6 +120,7 @@ class ChunkyWriter:
                         node.writecount = 0
                         if node.getName().startswith("phys_trig_") and node.nodetype == "transform":
                                 triggers += [node]
+                                bodies += [node]        # A trigger is both trigger and body...
                         elif node.getName().startswith("phys_") and node.nodetype == "transform":
                                 bodies += [node]
                         elif node.getName().startswith("m_") and node.nodetype == "transform":
@@ -380,7 +380,8 @@ class PhysWriter(ChunkyWriter):
                                         engines.append((CHUNK_PHYSICS_ENGINE, node))
                                 elif node.nodetype.startswith("trigger:"):
                                         triggers.append((CHUNK_PHYSICS_TRIGGER, node))
-                        #pprint.pprint(data)
+                        if options.options.verbose:
+                                pprint.pprint(data)
                         self._writechunk(data)
                 self._verifywritten("physics", self.bodies)
                 self._addfeat("file:files", 1)
@@ -425,8 +426,14 @@ class PhysWriter(ChunkyWriter):
                 if jointtype:
                         self._addfeat("joint:joints", 1)
                 self._writeint(jointvalue)
-                self._writeint(1 if node.get_fixed_attribute("affected_by_gravity") else 0)
-                self._writeint(1 if node.getName().startswith("phys_trig_") else 0)
+                is_affected_by_gravity = 1 if node.get_fixed_attribute("affected_by_gravity") else 0
+                if options.options.verbose and is_affected_by_gravity:
+                        print("Writing shape %s as affected by gravity." % node.getName())
+                self._writeint(is_affected_by_gravity)
+                istrigger = 1 if node.getName().startswith("phys_trig_") else 0
+                if options.options.verbose and istrigger:
+                        print("Writing shape %s as trigger (%s)." % (node.getName(), str(istrigger)))
+                self._writeint(istrigger)
                 # Write joint parameters.
                 parameters = [0.0]*16
                 #print("Total mass:", totalmass)
@@ -510,6 +517,17 @@ class PhysWriter(ChunkyWriter):
         def _writetrigger(self, node):
                 types = {"move":1}
                 self._writeint(types[node.get_fixed_attribute("type")])
+
+                triggered_by_name = node.get_fixed_attribute("triggered_by")
+                triggered_by = self._findglobalnode(triggered_by_name)
+                if not triggered_by:
+                        print("Error: could not find trigger node by name '%s' in '%s'." % (triggered_by_name, node.getFullName()))
+                        sys.exit(19)
+                idx = self.bodies.index(triggered_by)
+                if options.options.verbose:
+                        print("Trigger '%s' connected to bone index %i."% (node.getName(), idx))
+                self._writeint(idx)
+
                 connected_to = node.get_fixed_attribute("connected_to")
                 connected_to = self._expand_connected_list(connected_to, self.engines)
                 if len(connected_to) < 1:
@@ -524,15 +542,6 @@ class PhysWriter(ChunkyWriter):
                         self._writeint(idx)
                         self._writefloat(float(delay))
                         self._writestr(function)
-                triggered_by_name = node.get_fixed_attribute("triggered_by")
-                triggered_by = self._findglobalnode(triggered_by_name)
-                if not triggered_by:
-                        print("Error: could not find trigger node by name '%s' in '%s'." % (triggered_by_name, node.getFullName()))
-                        sys.exit(19)
-                idx = self.triggers.index(triggered_by)
-                if options.options.verbose:
-                        print("Trigger '%s' connected to bone index %i."% (node.getName(), idx))
-                self._writeint(idx)
                 node.writecount += 1
                 self._addfeat("physical trigger:physical triggers", 1)
 

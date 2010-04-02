@@ -85,7 +85,11 @@ bool ChunkyBoneGeometry::CreateJoint(ChunkyPhysics* pStructure, PhysicsManager* 
 	bool lOk = false;
 	if (mBodyData.mParent)
 	{
-		if (mBodyData.mJointType == JOINT_EXCLUDE)
+		if (GetTriggerId())
+		{
+			lOk = pPhysics->Attach(GetTriggerId(), mBodyData.mParent->GetBodyId());
+		}
+		else if (mBodyData.mJointType == JOINT_EXCLUDE)
 		{
 			lOk = pPhysics->Attach(GetBodyId(), mBodyData.mParent->GetBodyId());
 		}

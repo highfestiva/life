@@ -237,7 +237,7 @@ bool PhysicsManagerODE::Attach(BodyID pStaticBody, BodyID pMainBody)
 	::dGeomGetQuaternion(lStaticObject->mGeomID, o);
 
 	dBodyID lBodyId = lMainObject->mBodyID;
-	if (lBodyId)
+	if (lBodyId && lStaticObject->mMass)
 	{
 		::dGeomSetBody(lStaticObject->mGeomID, lBodyId);
 		::dGeomSetOffsetWorldPosition(lStaticObject->mGeomID, lPos[0], lPos[1], lPos[2]);
@@ -604,6 +604,8 @@ PhysicsManager::TriggerID PhysicsManagerODE::CreateSphereTrigger(const Transform
 
 	dGeomSetData(lObject->mGeomID, lObject);
 
+	lObject->mGeometryData[0] = pRadius;
+
 	lObject->mTriggerListener = pListener;
 
 	mObjectTable.insert(lObject);
@@ -624,6 +626,9 @@ PhysicsManager::TriggerID PhysicsManagerODE::CreateCylinderTrigger(const Transfo
 
 	dGeomSetData(lObject->mGeomID, lObject);
 
+	lObject->mGeometryData[0] = pRadius;
+	lObject->mGeometryData[1] = pLength;
+
 	lObject->mTriggerListener = pListener;
 
 	mObjectTable.insert(lObject);
@@ -642,6 +647,9 @@ PhysicsManager::TriggerID PhysicsManagerODE::CreateCapsuleTrigger(const Transfor
 
 	dGeomSetData(lObject->mGeomID, lObject);
 
+	lObject->mGeometryData[0] = pRadius;
+	lObject->mGeometryData[1] = pLength;
+
 	lObject->mTriggerListener = pListener;
 
 	mObjectTable.insert(lObject);
@@ -659,6 +667,10 @@ PhysicsManager::TriggerID PhysicsManagerODE::CreateBoxTrigger(const Transformati
 	lObject->mGeomID = dCreateBox(mSpaceID, (dReal)pSize.x, (dReal)pSize.y, (dReal)pSize.z);
 
 	dGeomSetData(lObject->mGeomID, lObject);
+
+	lObject->mGeometryData[0] = pSize.x;
+	lObject->mGeometryData[1] = pSize.y;
+	lObject->mGeometryData[2] = pSize.z;
 
 	lObject->mTriggerListener = pListener;
 
@@ -2502,8 +2514,9 @@ bool PhysicsManagerODE::SetMotorTarget(JointID pJointId, float32 pMaxForce, floa
 		return (false);
 	}
 
-	dJointSetSliderParam((*x)->mJointID, dParamFMax, pMaxForce);
-	dJointSetSliderParam((*x)->mJointID, dParamVel, pTargetVelocity);
+	::dJointSetSliderParam((*x)->mJointID, dParamFMax, pMaxForce);
+	::dJointSetSliderParam((*x)->mJointID, dParamVel, pTargetVelocity);
+	::dBodyEnable(::dJointGetBody((*x)->mJointID, 1));
 	return (true);
 }
 
@@ -2721,7 +2734,8 @@ bool PhysicsManagerODE::AddJointForce(JointID pJointId, float32 pForce)
 		return (false);
 	}
 
-	dJointAddSliderForce((*x)->mJointID, pForce);
+	::dJointAddSliderForce((*x)->mJointID, pForce);
+	::dBodyEnable(::dJointGetBody((*x)->mJointID, 1));
 
 	return (true);
 }
@@ -2757,6 +2771,7 @@ bool PhysicsManagerODE::AddJointTorque(JointID pJointId, float32 pTorque)
 		mLog.AError("AddJointTorque() - Unknown joint type!");
 		return (false);
 	}
+	::dBodyEnable(::dJointGetBody((*x)->mJointID, 1));
 
 	return (true);
 }
@@ -2788,6 +2803,7 @@ bool PhysicsManagerODE::AddJointTorque(JointID pJointId, float32 pTorque1, float
 		mLog.AError("AddJointTorque() - Unknown joint type!");
 		return (false);
 	}
+	::dBodyEnable(::dJointGetBody((*x)->mJointID, 1));
 
 	return (true);
 }
@@ -3043,43 +3059,48 @@ void PhysicsManagerODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID p
 	// Check if all bodies are static or disabled.
 	if ((!lBody1 || !::dBodyIsEnabled(lBody1)) && (!lBody2 || !::dBodyIsEnabled(lBody2)))
 	{
-		// We don't want to act on static and disabled bodies.
+		// We don't want to act on static and disabled bodies or only triggers.
 		return;
 	}
-	if (lObject1->mTriggerListener == 0 && lObject2->mTriggerListener == 0)
+	// Exit without doing anything if the two bodies are connected by a joint.
+	if (lBody1 && lBody2 && ::dAreConnectedExcluding(lBody1, lBody2, dJointTypeContact) != 0)
 	{
-		// Exit without doing anything if the two bodies are connected by a joint.
-		if (lBody1 && lBody2 && ::dAreConnectedExcluding(lBody1, lBody2, dJointTypeContact) != 0)
-		{
-			return;
-		}
+		return;
 	}
 
 	PhysicsManagerODE* lThis = (PhysicsManagerODE*)pData;
 	dContact lContact[8];
-	int lContactPointCount = -1;
 	if (lObject1->mTriggerListener != 0)
 	{
-		lContactPointCount = (lContactPointCount < 0)? ::dCollide(pGeom1, pGeom2, 8, &lContact[0].geom, sizeof(dContact)) : lContactPointCount;
-		if (lContactPointCount > 0)
+		if (lObject1->mTriggerListener->IsSameInstance(lObject2->mForceFeedbackListener))
 		{
-			lObject1->mTriggerListener->OnTrigger((TriggerID)(size_t)lObject1, (BodyID)(size_t)lObject2);
+			return;
+		}
+		int lTriggerContactPointCount = ::dCollide(pGeom1, pGeom2, 8, &lContact[0].geom, sizeof(dContact));
+		if (lTriggerContactPointCount > 0)
+		{
+			lObject1->mTriggerListener->OnTrigger((TriggerID)(size_t)lObject1, lObject2->mForceFeedbackListener);
+			return;
 		}
 	}
 	if(lObject2->mTriggerListener != 0)
 	{
-		lContactPointCount = (lContactPointCount < 0)? ::dCollide(pGeom1, pGeom2, 8, &lContact[0].geom, sizeof(dContact)) : lContactPointCount;
-		if (lContactPointCount > 0)
+		if (lObject2->mTriggerListener->IsSameInstance(lObject1->mForceFeedbackListener))
 		{
-			lObject2->mTriggerListener->OnTrigger((TriggerID)(size_t)lObject2, (BodyID)(size_t)lObject1);
+			return;
+		}
+		int lTriggerContactPointCount = ::dCollide(pGeom1, pGeom2, 8, &lContact[0].geom, sizeof(dContact));
+		if (lTriggerContactPointCount > 0)
+		{
+			lObject2->mTriggerListener->OnTrigger((TriggerID)(size_t)lObject2, lObject1->mForceFeedbackListener);
+			return;
 		}
 	}
 
 	// Bounce/slide (if we haven't tried colliding OR we ARE colliding) AND NOT BOTH objects are triggers.
-	if ((lContactPointCount < 0 || lContactPointCount > 0) &&
-		(lObject1->mTriggerListener == 0 || lObject2->mTriggerListener == 0))
+	if (lObject1->mTriggerListener == 0 || lObject2->mTriggerListener == 0)
 	{
-		lContactPointCount = (lContactPointCount < 0)? ::dCollide(pGeom1, pGeom2, 8, &lContact[0].geom, sizeof(dContact)) : lContactPointCount;
+		int lTriggerContactPointCount = ::dCollide(pGeom1, pGeom2, 8, &lContact[0].geom, sizeof(dContact));
 
 		// Fetch force, will be used to scale friction (projected against surface normal).
 		Vector3DF lPosition1 = lThis->GetBodyPosition((BodyID)lObject1);
@@ -3108,7 +3129,7 @@ void PhysicsManagerODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID p
 		}
 
 		// Perform normal collision detection.
-		for (int i = 0; i < lContactPointCount; i++)
+		for (int i = 0; i < lTriggerContactPointCount; i++)
 		{
 			dContact& lC = lContact[i];
 
