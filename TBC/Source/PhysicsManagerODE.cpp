@@ -3050,20 +3050,18 @@ void PhysicsManagerODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID p
 	Object* lObject1 = (Object*)dGeomGetData(pGeom1);
 	Object* lObject2 = (Object*)dGeomGetData(pGeom2);
 
-	if (lObject1->mForceFeedbackListener == lObject2->mForceFeedbackListener)
+	if ((lObject1->mForceFeedbackListener && lObject1->mForceFeedbackListener == lObject2->mForceFeedbackListener) ||	// Same body.
+		(lObject1->mTriggerListener && lObject2->mTriggerListener))	// Elevator platform trigger moves into down trigger.
 	{
-		// The same force feedback recipient means same object, or that both objects are
-		// statics/triggers. We won't collide those.
 		return;
 	}
 
 	dBodyID lBody1 = ::dGeomGetBody(pGeom1);
 	dBodyID lBody2 = ::dGeomGetBody(pGeom2);
 
-	// Check if all bodies are static or disabled.
+	// Check if both bodies are static or disabled.
 	if ((!lBody1 || !::dBodyIsEnabled(lBody1)) && (!lBody2 || !::dBodyIsEnabled(lBody2)))
 	{
-		// We don't want to act on static and disabled bodies or only triggers.
 		return;
 	}
 	// Exit without doing anything if the two bodies are connected by a joint.
@@ -3074,37 +3072,28 @@ void PhysicsManagerODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID p
 
 	PhysicsManagerODE* lThis = (PhysicsManagerODE*)pData;
 	dContact lContact[8];
-	if (lObject1->mTriggerListener != 0)
+	if (lObject1->mTriggerListener != 0)	// Only trig, no force application.
 	{
 		if (lObject1->mTriggerListener->IsSameInstance(lObject2->mForceFeedbackListener))
 		{
 			return;
 		}
-		int lTriggerContactPointCount = ::dCollide(pGeom1, pGeom2, 8, &lContact[0].geom, sizeof(dContact));
-		if (lTriggerContactPointCount > 0)
-		{
-			lObject1->mTriggerListener->OnTrigger((TriggerID)(size_t)lObject1, lObject2->mForceFeedbackListener);
-			return;
-		}
+		lObject1->mTriggerListener->OnTrigger((TriggerID)(size_t)lObject1, lObject2->mForceFeedbackListener);
+		return;
 	}
-	if(lObject2->mTriggerListener != 0)
+	if(lObject2->mTriggerListener != 0)	// Only trig, no force application.
 	{
 		if (lObject2->mTriggerListener->IsSameInstance(lObject1->mForceFeedbackListener))
 		{
 			return;
 		}
-		int lTriggerContactPointCount = ::dCollide(pGeom1, pGeom2, 8, &lContact[0].geom, sizeof(dContact));
-		if (lTriggerContactPointCount > 0)
-		{
-			lObject2->mTriggerListener->OnTrigger((TriggerID)(size_t)lObject2, lObject1->mForceFeedbackListener);
-			return;
-		}
+		lObject2->mTriggerListener->OnTrigger((TriggerID)(size_t)lObject2, lObject1->mForceFeedbackListener);
+		return;
 	}
 
-	// Bounce/slide (if we haven't tried colliding OR we ARE colliding) AND NOT BOTH objects are triggers.
-	if (lObject1->mTriggerListener == 0 || lObject2->mTriggerListener == 0)
+	// Bounce/slide when both objects are dynamic, non-trigger objects.
 	{
-		int lTriggerContactPointCount = ::dCollide(pGeom1, pGeom2, 8, &lContact[0].geom, sizeof(dContact));
+		const int lTriggerContactPointCount = ::dCollide(pGeom1, pGeom2, 8, &lContact[0].geom, sizeof(dContact));
 
 		// Fetch force, will be used to scale friction (projected against surface normal).
 		Vector3DF lPosition1 = lThis->GetBodyPosition((BodyID)lObject1);

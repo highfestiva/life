@@ -21,6 +21,7 @@ Renderer::Renderer(Canvas* pScreen) :
 	mFOVAngle(90.0f),
 	mNear(0.1f),
 	mFar(10000.0f),
+	mIsOutlineRenderEnabled(false),
 	mViewport(0, 0, pScreen->GetWidth(), pScreen->GetHeight()),
 	mGeometryIDManager(1, 1000000, INVALID_GEOMETRY),
 	mTextureIDManager(1, 1000000, INVALID_TEXTURE),
@@ -89,6 +90,16 @@ void Renderer::DeletingGeometry(TBC::GeometryBase* pGeometry)
 const Canvas* Renderer::GetScreen() const
 {
 	return mScreen;
+}
+
+void Renderer::EnableOutlineRendering(bool pEnable)
+{
+	mIsOutlineRenderEnabled = pEnable;
+}
+
+bool Renderer::IsOutlineRenderingEnabled() const
+{
+	return (mIsOutlineRenderEnabled);
 }
 
 void Renderer::SetViewport(const PixelRect& pViewport)
@@ -243,9 +254,9 @@ bool Renderer::GetFallbackMaterialEnabled()
 	return mFallbackMaterialEnabled;
 }
 
-void Renderer::SetDepthSortingEnabled(bool pEnabled)
+void Renderer::SetEnableDepthSorting(bool pEnabled)
 {
-	Material::SetDepthSortingEnabled(pEnabled);
+	Material::SetEnableDepthSorting(pEnabled);
 }
 
 void Renderer::SetAmbientLight(float pRed, float pGreen, float pBlue)
@@ -1227,21 +1238,6 @@ void Renderer::UpdateShadowMaps(TBC::GeometryBase* pGeometry)
 	{
 		lGeometry->mLastFrameShadowsUpdated = mCurrentFrame;
 	}
-}
-
-unsigned int Renderer::RenderScene()
-{
-	// Prepare projection data in order to be able to call CheckCulling().
-	PrepareProjectionData();
-
-	for (int i = 0; i < (int)NUM_MATERIALTYPES; i++)
-	{
-		mMaterial[i]->RenderAllGeometry(mCurrentFrame);
-	}
-
-	mCurrentFrame++;
-
-	return mCurrentFrame;
 }
 
 unsigned int Renderer::GetCurrentFrame() const

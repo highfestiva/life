@@ -284,41 +284,6 @@ void GameUiManager::Render(const PixelRect& pArea)
 		mRenderer->SetClippingRect(pArea);
 		mRenderer->SetViewport(pArea);
 		mRenderer->RenderScene();
-
-		/*glDisable(GL_TEXTURE_2D);
-		glDisable(GL_LIGHTING);
-		glDisable(GL_COLOR_MATERIAL);
-		glDisable(GL_NORMALIZE);
-		glDisable(GL_ALPHA_TEST);
-		glDisable(GL_BLEND);
-		glDisableClientState(GL_VERTEX_ARRAY);
-		glDisableClientState(GL_NORMAL_ARRAY);
-		glDisableClientState(GL_COLOR_ARRAY);
-		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-		glShadeModel(GL_FLAT);
-		glDisable(GL_ALPHA_TEST);
-		glDisable(GL_COLOR_LOGIC_OP);
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-		::glDisable(GL_BLEND);
-		::glEnable(GL_LINE_SMOOTH);
-		::glLineWidth(1.0f);
-		::glColor4f(1,0,0,1.0f);
-		::glBegin(GL_LINES);
-		::glVertex3f(0, 0, 0);
-		::glVertex3f(25, 0, 0);
-		::glEnd();
-
-		::glEnable(GL_BLEND);
-		::glLineWidth(3.0f);
-		::glColor4f(1,0,0,0.2f);
-		::glBegin(GL_LINES);
-		::glVertex3f(0, 0, 0);
-		::glVertex3f(25, 0, 0);
-		::glEnd();
-
-		::glDisable(GL_BLEND);*/
 	}
 }
 

@@ -1,15 +1,18 @@
-/*
-	Class:  Material
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2009, Righteous Games
-*/
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2010, Righteous Games
+
+
 
 #include "../Include/UiMaterial.h"
 #include "../../TBC/Include/GeometryBase.h"
 #include "../../Lepra/Include/Math.h"
 
+
+
 namespace UiTbc
 {
+
+
 
 GeometryGroup::GeometryGroup(Material* pMaterial, int pAllocSize) :
 	mParentMaterial(pMaterial),
@@ -193,9 +196,37 @@ int GeometryGroup::B2FCompare(const void* pPair1, const void* pPair2)
 	}
 }
 
-void Material::SetDepthSortingEnabled(bool pEnabled)
+
+
+Material::Material(Renderer* pRenderer, DepthSortHint pSortHint) :
+	mRenderer(pRenderer),
+	mSortHint(pSortHint)
 {
-	smDepthSortEnabled = pEnabled;
+}
+
+Material::~Material()
+{
+	RemoveAllGeometry();
+}
+
+void Material::SetEnableDepthSorting(bool pEnabled)
+{
+	mEnableDepthSort = pEnabled;
+}
+
+void Material::SetEnableMaterials(bool pEnabled)
+{
+	mEnableMaterials = pEnabled;
+}
+
+Material::GeometryGroupList* Material::GetGeometryGroupList()
+{
+	return &mGeometryGroupList;
+}
+
+Renderer* Material::GetRenderer()
+{
+	return mRenderer;
 }
 
 bool Material::AddGeometry(TBC::GeometryBase* pGeometry)
@@ -256,12 +287,24 @@ void Material::RemoveAllGeometry()
 
 void Material::RenderAllGeometry(unsigned int pCurrentFrame)
 {
+	if (mEnableMaterials)
+	{
+		DoRenderAllGeometry(pCurrentFrame);
+	}
+	else
+	{
+		Material::DoRenderAllGeometry(pCurrentFrame);
+	}
+}
+
+void Material::DoRenderAllGeometry(unsigned int pCurrentFrame)
+{
 	GeometryGroupList::iterator lIter;
 	for (lIter = mGeometryGroupList.begin(); lIter != mGeometryGroupList.end(); ++lIter)
 	{
 		GeometryGroup* lGroup = *lIter;
 
-		if (smDepthSortEnabled == true)
+		if (mEnableDepthSort == true)
 		{
 			if (mSortHint == DEPTHSORT_F2B)
 			{
@@ -281,7 +324,15 @@ void Material::RenderAllGeometry(unsigned int pCurrentFrame)
 			{
 				if (mRenderer->PreRender(lGeometry))
 				{
-					RenderGeometry(lGeometry);
+					if (mEnableMaterials)
+					{
+						RenderGeometry(lGeometry);
+					}
+					else
+					{
+						RenderBaseGeometry(lGeometry);
+					}
+					
 				}
 				mRenderer->PostRender(lGeometry);
 			}
@@ -355,6 +406,11 @@ Renderer::TextureID Material::GetGroupTextureID(TBC::GeometryBase* pGeometry)
 	return lTextureID;
 }
 
-bool Material::smDepthSortEnabled = false;
 
-} // End namespace.
+
+bool Material::mEnableDepthSort = false;
+bool Material::mEnableMaterials = true;
+
+
+
+}

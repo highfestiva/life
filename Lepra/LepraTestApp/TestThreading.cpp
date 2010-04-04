@@ -339,7 +339,10 @@ bool TestThreading(const LogDecorator& pAccount)
 		gThreadTestCounter = 0;
 		gStlLock._M_acquire_lock();
 		lStlLockerThread.Start(StlThreadEntry, 0);
-		Thread::Sleep(0.01);
+		for (int x = 0; x < 10 && gThreadTestCounter != 1; ++x)
+		{
+			Thread::Sleep(0.001);
+		}
 		lTestOk = (gThreadTestCounter == 1 && lStlLockerThread.IsRunning());
 		assert(lTestOk);
 	}

@@ -71,7 +71,8 @@ void ConsoleManager::Init()
 	Parent::Init();
 	GetConsoleCommandManager()->SetComment(_T("//"));
 	GetConsoleCommandManager()->AddCompleter(new Cure::RuntimeVariableCompleter(GetVariableScope(), _T("#")));
-	GetConsoleCommandManager()->AddCompleter(new Cure::RuntimeVariableCompleter(Cure::GetSettings(), _T("##")));
+	GetConsoleCommandManager()->AddCompleter(new Cure::RuntimeVariableCompleter(Cure::GetSettings(), _T("#/")));
+	GetConsoleCommandManager()->AddCompleter(new Cure::RuntimeVariableCompleter(Cure::GetSettings(), _T("#.")));
 
 	ExecuteCommand(_T("alias trace-log-level \"set-stdout-log-level 0; set-subsystem-log-level Root 0\""));
 	ExecuteCommand(_T("alias debug-log-level \"set-stdout-log-level 1; set-subsystem-log-level Root 1\""));
@@ -533,14 +534,16 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 		{
 			if (!pCommand.empty() && pCommand[0] == '#')
 			{
-				const int lVariableNameIndex = (pCommand[1] == '#')? 2 : 1;
-				Cure::RuntimeVariableScope* lScope = (lVariableNameIndex == 2)? Cure::GetSettings() : GetVariableScope();
+				tchar lLevel = pCommand[1];
+				const int lVariableNameIndex = (lLevel == '/' || lLevel == '.')? 2 : 1;
+				typedef Cure::RuntimeVariableScope RtScope;
+				RtScope* lScope = (lLevel == '/')? Cure::GetSettings() : GetVariableScope();
 				const str lVariable = pCommand.substr(lVariableNameIndex);
 				if (pParameterVector.size() == 0)
 				{
 					if (lScope->IsDefined(lVariable))
 					{
-						str lValue = lScope->GetDefaultValue(Cure::RuntimeVariableScope::READ_ONLY, lVariable);
+						str lValue = lScope->GetDefaultValue(RtScope::READ_ONLY, lVariable);
 						lValue = strutil::StringToCString(lValue);
 						mLog.Infof(_T("%s"), lValue.c_str());
 					}
@@ -554,9 +557,10 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 				{
 					str lValue;
 					strutil::CStringToString(pParameterVector[0], lValue);
-					if (lScope->SetValue(Cure::RuntimeVariableScope::SET_OVERWRITE, lVariable, lValue))
+					RtScope::SetMode lMode = (lLevel == '.')? RtScope::SET_OVERRIDE : RtScope::SET_OVERWRITE;
+					if (lScope->SetValue(lMode, lVariable, lValue))
 					{
-						str lValue = lScope->GetDefaultValue(Cure::RuntimeVariableScope::READ_ONLY, lVariable);
+						str lValue = lScope->GetDefaultValue(RtScope::READ_ONLY, lVariable);
 						lValue = strutil::StringToCString(lValue);
 						mLog.Infof(_T("%s <- %s"), lVariable.c_str(), lValue.c_str());
 					}

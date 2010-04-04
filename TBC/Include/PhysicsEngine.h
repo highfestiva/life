@@ -92,6 +92,11 @@ private:
 
 	typedef std::vector<EngineNode> EngineNodeArray;
 
+	enum
+	{
+		MAX_CONTROLLER_COUNT = 8,
+	};
+
 	EngineType mEngineType;
 	float mStrength;
 	float mMaxSpeed;
@@ -99,9 +104,9 @@ private:
 	float mFriction;
 	unsigned mControllerIndex;
 	EngineNodeArray mEngineNodeArray;
-	float mValue[4];
+	float mValue[MAX_CONTROLLER_COUNT];
 	mutable float mIntensity;
-	mutable float mSmoothValue[4];
+	mutable float mSmoothValue[MAX_CONTROLLER_COUNT];
 
 	LOG_CLASS_DECLARE();
 };

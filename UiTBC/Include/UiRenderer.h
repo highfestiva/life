@@ -321,6 +321,9 @@ public:
 	virtual void Clear(unsigned int pClearFlags = CLEAR_COLORBUFFER | CLEAR_DEPTHBUFFER) = 0;
 	virtual void SetClearColor(const Color& pColor) = 0;
 
+	void EnableOutlineRendering(bool pEnable);
+	bool IsOutlineRenderingEnabled() const;
+
 	// A viewport is a portion of the screen where the graphics will be rendered.
 	// The center of the viewport is also the center of perspective. The viewport may
 	// be partially outside the actual screen. Note that pBottom > pTop.
@@ -384,7 +387,7 @@ public:
 	virtual void SetDepthTestEnabled(bool pEnabled) = 0;
 
 	// These simply forwards the call to Material::SetDepthSortEnabled().
-	void SetDepthSortingEnabled(bool pEnabled);
+	void SetEnableDepthSorting(bool pEnabled);
 
 	virtual void SetAmbientLight(float pRed, float pGreen, float pBlue);
 	void GetAmbientLight(float& pRed, float& pGreen, float& pBlue);
@@ -475,8 +478,7 @@ public:
 	void UpdateShadowMaps();
 	void UpdateShadowMaps(TBC::GeometryBase* pGeometry);
 
-	// Renders all geometry.
-	virtual unsigned int RenderScene();
+	virtual unsigned int RenderScene() = 0;
 
 	// Used for rendering stuff that are NOT in the world, such as
 	// 3D-objects in the GUI. The position of the geometry is considered
@@ -591,6 +593,8 @@ private:
 	float mNear;
 	float mFar;
 	Vector3DF mFrustumPlanes[4];
+
+	bool mIsOutlineRenderEnabled;
 
 	// Viewport.
 	PixelRect mViewport;

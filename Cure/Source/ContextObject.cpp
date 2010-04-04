@@ -452,6 +452,7 @@ bool ContextObject::UpdateFullPosition(const ObjectPositionalData*& pPositionalD
 				GETSET_OBJECT_POSITIONAL_AT(mPosition, y, RealData1, lData, PositionalData::TYPE_REAL_1, 1);
 				++y;
 				lData->mValue = lEngine->GetValue();
+				assert(lData->mValue >= -1 && lData->mValue <= 1);
 			}
 			break;
 			case TBC::PhysicsEngine::ENGINE_GLUE:

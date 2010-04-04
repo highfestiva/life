@@ -75,6 +75,8 @@ void PhysicsEngine::AddControlledGeometry(ChunkyBoneGeometry* pGeometry, float p
 
 bool PhysicsEngine::SetValue(unsigned pAspect, float pValue, float pZAngle)
 {
+	assert(mControllerIndex >= 0 && mControllerIndex < MAX_CONTROLLER_COUNT);
+
 	pValue = (pValue > 1)? 1 : pValue;
 	pValue = (pValue < -1)? -1 : pValue;
 
@@ -107,6 +109,7 @@ bool PhysicsEngine::SetValue(unsigned pAspect, float pValue, float pZAngle)
 		{
 			if (pAspect >= mControllerIndex+0 && pAspect <= mControllerIndex+1)
 			{
+				assert(pAspect < MAX_CONTROLLER_COUNT);
 				mValue[pAspect] = pValue;
 				return (true);
 			}
@@ -422,6 +425,7 @@ unsigned PhysicsEngine::GetControllerIndex() const
 
 float PhysicsEngine::GetValue() const
 {
+	assert(mControllerIndex >= 0 && mControllerIndex < MAX_CONTROLLER_COUNT);
 	return (mValue[mControllerIndex]);
 }
 
@@ -477,6 +481,7 @@ void PhysicsEngine::LoadChunkyData(ChunkyPhysics* pStructure, const void* pData)
 	mMaxSpeed2 = Endian::BigToHostF(lData[3]);
 	mFriction = Endian::BigToHostF(lData[4]);
 	mControllerIndex = Endian::BigToHost(lData[5]);
+	assert(mControllerIndex >= 0 && mControllerIndex < MAX_CONTROLLER_COUNT);
 	const int lControlledNodeCount = Endian::BigToHost(lData[6]);
 	int x;
 	for (x = 0; x < lControlledNodeCount; ++x)

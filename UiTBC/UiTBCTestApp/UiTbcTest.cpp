@@ -313,6 +313,7 @@ bool SceneTest::Run(double pTime)
 				//gRenderer->ResetClippingRect();
 				gRenderer->RenderScene();
 				gPainter->ResetClippingRect();
+				gPainter->PrePaint();
 
 				gPainter->SetColor(Lepra::WHITE);
 				const Lepra::Vector3DF& lPos = lCam.GetPosition();
@@ -1102,7 +1103,7 @@ bool TestSkinningSaveLoad(const Lepra::LogDecorator& pLog, double pShowTime)
 
 	str lContext;
 	bool lTestOk = true;
-	const str lFileName(_T("chain"));
+	const str lFileName(_T("Data/chain"));
 
 	const float lCuboidLength = 40.0f;
 	UiTbc::TriangleBasedGeometry lGeometry[2];
@@ -1122,9 +1123,11 @@ bool TestSkinningSaveLoad(const Lepra::LogDecorator& pLog, double pShowTime)
 			lGeometry->Translate(Lepra::Vector3DF(0, lDisplacement, 0));
 			Lepra::DiskFile lFile;
 			lTestOk = lFile.Open(lThisMeshName, Lepra::DiskFile::MODE_WRITE);
+			assert(lTestOk);
 			if (lTestOk)
 			{
 				lTestOk = InitializeGeometry(lGeometry);
+				assert(lTestOk);
 			}
 			if (lTestOk)
 			{
@@ -1134,6 +1137,7 @@ bool TestSkinningSaveLoad(const Lepra::LogDecorator& pLog, double pShowTime)
 			{
 				UiTbc::ChunkyMeshLoader lMeshLoader(&lFile, false);
 				lTestOk = lMeshLoader.Save(lGeometry);
+				assert(lTestOk);
 			}
 			delete (lGeometry);
 		}
@@ -1142,10 +1146,12 @@ bool TestSkinningSaveLoad(const Lepra::LogDecorator& pLog, double pShowTime)
 			lContext = _T("load chain mesh");
 			Lepra::DiskFile lFile;
 			lTestOk = lFile.Open(lThisMeshName, Lepra::DiskFile::MODE_READ);
+			assert(lTestOk);
 			if (lTestOk)
 			{
 				UiTbc::ChunkyMeshLoader lMeshLoader(&lFile, false);
 				lTestOk = lMeshLoader.Load(&lGeometry[lMeshIndex]);
+				assert(lTestOk);
 			}
 		}
 		Lepra::DiskFile::Delete(lThisMeshName);
@@ -1161,10 +1167,12 @@ bool TestSkinningSaveLoad(const Lepra::LogDecorator& pLog, double pShowTime)
 			UiTbc::BasicMeshCreator::CreateYBonedSkin(-lCuboidLength/2.0f, +lCuboidLength/2.0f, &lGeometry[lSkinIndex], &lSkin[lSkinIndex], 2);
 			Lepra::DiskFile lFile;
 			lTestOk = lFile.Open(lThisSkinName, Lepra::DiskFile::MODE_WRITE);
+			assert(lTestOk);
 			if (lTestOk)
 			{
 				UiTbc::ChunkySkinLoader lSkinLoader(&lFile, false);
 				lTestOk = lSkinLoader.Save(&lSkin[lSkinIndex]);
+				assert(lTestOk);
 			}
 		}
 		if (lTestOk)
@@ -1172,10 +1180,12 @@ bool TestSkinningSaveLoad(const Lepra::LogDecorator& pLog, double pShowTime)
 			lContext = _T("load chain skin");
 			Lepra::DiskFile lFile;
 			lTestOk = lFile.Open(lThisSkinName, Lepra::DiskFile::MODE_READ);
+			assert(lTestOk);
 			if (lTestOk)
 			{
 				UiTbc::ChunkySkinLoader lSkinLoader(&lFile, false);
 				lTestOk = lSkinLoader.Load(&lSkin[lSkinIndex]);
+				assert(lTestOk);
 			}
 		}
 		Lepra::DiskFile::Delete(lThisSkinName);
@@ -1204,10 +1214,12 @@ bool TestSkinningSaveLoad(const Lepra::LogDecorator& pLog, double pShowTime)
 		lAnimation.SetBoneTransformation(1, 1, lTransform1);
 		Lepra::DiskFile lFile;
 		lTestOk = lFile.Open(lAnimationName, Lepra::DiskFile::MODE_WRITE);
+		assert(lTestOk);
 		if (lTestOk)
 		{
 			TBC::ChunkyAnimationLoader lAnimationLoader(&lFile, false);
 			lTestOk = lAnimationLoader.Save(&lAnimation);
+			assert(lTestOk);
 		}
 	}
 	TBC::BoneAnimation lAnimation;
@@ -1216,10 +1228,12 @@ bool TestSkinningSaveLoad(const Lepra::LogDecorator& pLog, double pShowTime)
 		lContext = _T("load chain animation");
 		Lepra::DiskFile lFile;
 		lTestOk = lFile.Open(lAnimationName, Lepra::DiskFile::MODE_READ);
+		assert(lTestOk);
 		if (lTestOk)
 		{
 			TBC::ChunkyAnimationLoader lAnimationLoader(&lFile, false);
 			lTestOk = lAnimationLoader.Load(&lAnimation);
+			assert(lTestOk);
 		}
 	}
 	Lepra::DiskFile::Delete(lAnimationName);
@@ -1239,10 +1253,12 @@ bool TestSkinningSaveLoad(const Lepra::LogDecorator& pLog, double pShowTime)
 		lStructure.BoneHierarchy::FinalizeInit(TBC::BoneHierarchy::TRANSFORM_NONE);
 		Lepra::DiskFile lFile;
 		lTestOk = lFile.Open(lStructureName, Lepra::DiskFile::MODE_WRITE);
+		assert(lTestOk);
 		if (lTestOk)
 		{
 			TBC::ChunkyPhysicsLoader lStructureLoader(&lFile, false);
 			lTestOk = lStructureLoader.Save(&lStructure);
+			assert(lTestOk);
 		}
 	}
 	TBC::ChunkyPhysics lStructure(TBC::BoneHierarchy::TRANSFORM_NONE, TBC::ChunkyPhysics::DYNAMIC);
@@ -1251,14 +1267,17 @@ bool TestSkinningSaveLoad(const Lepra::LogDecorator& pLog, double pShowTime)
 		lContext = _T("load chain structure");
 		Lepra::DiskFile lFile;
 		lTestOk = lFile.Open(lStructureName, Lepra::DiskFile::MODE_READ);
+		assert(lTestOk);
 		if (lTestOk)
 		{
 			TBC::ChunkyPhysicsLoader lStructureLoader(&lFile, false);
 			lTestOk = lStructureLoader.Load(&lStructure);
+			assert(lTestOk);
 		}
 		if (lTestOk)
 		{
 			lTestOk = lStructure.BoneHierarchy::FinalizeInit(TBC::BoneHierarchy::TRANSFORM_NONE);
+			assert(lTestOk);
 		}
 	}
 	Lepra::DiskFile::Delete(lStructureName);
@@ -1267,6 +1286,7 @@ bool TestSkinningSaveLoad(const Lepra::LogDecorator& pLog, double pShowTime)
 	{
 		lContext = _T("clear screen");
 		lTestOk = ResetAndClearFrame();
+		assert(lTestOk);
 	}
 	TBC::BoneAnimator lAnimator(&lStructure);
 	if (lTestOk)
@@ -1287,10 +1307,12 @@ bool TestSkinningSaveLoad(const Lepra::LogDecorator& pLog, double pShowTime)
 		if (lTestOk)
 		{
 			lTestOk = QuickRender(&lSkin[0], UiTbc::Renderer::MAT_SINGLE_COLOR_SOLID, false, &lObjectTransform, -1.0, 0, true);
+			assert(lTestOk);
 		}
 		if (lTestOk)
 		{
 			lTestOk = QuickRender(&lSkin[1], UiTbc::Renderer::MAT_VERTEX_COLOR_SOLID, true, &lObjectTransform, -1.0, _T("Loaded from disk!"), false);
+			assert(lTestOk);
 		}
 		if (lTestOk)
 		{
@@ -2213,6 +2235,7 @@ bool TestGUI(const Lepra::LogDecorator& /*pLog*/, double pShowTime)
 {
 	gPainter->ResetClippingRect();
 	gPainter->SetRenderMode(UiTbc::Painter::RM_NORMAL);
+	gPainter->PrePaint();
 
 	UiTbc::DesktopWindow* lDesktopWindow = new UiTbc::DesktopWindow(gInput, gPainter, Lepra::DARK_GREEN, new UiTbc::FloatingLayout(), 0, 0);
 	lDesktopWindow->SetPreferredSize(gScreen->GetWidth(), gScreen->GetHeight());

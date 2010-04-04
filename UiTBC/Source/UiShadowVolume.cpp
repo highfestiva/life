@@ -25,7 +25,6 @@ ShadowVolume::ShadowVolume() :
 	mRed(0),
 	mGreen(0),
 	mBlue(0),
-	mLastFrameVisible(0),
 	mTransformationChanged(false),
 	mParentGeometry(0)
 {
@@ -42,7 +41,6 @@ ShadowVolume::ShadowVolume(TBC::GeometryBase* pParentGeometry) :
 	mRed(0),
 	mGreen(0),
 	mBlue(0),
-	mLastFrameVisible(0),
 	mTransformationChanged(false),
 	mParentGeometry(pParentGeometry)
 {
@@ -140,16 +138,6 @@ TBC::GeometryBase::ColorFormat ShadowVolume::GetColorFormat() const
 	return TBC::GeometryBase::COLOR_RGB;
 }
 
-
-void ShadowVolume::SetLastFrameVisible(unsigned int pLastFrameVisible)
-{
-	mLastFrameVisible = pLastFrameVisible;
-}
-
-unsigned int ShadowVolume::GetLastFrameVisible() const
-{
-	return mLastFrameVisible;
-}
 
 void ShadowVolume::GetReplacementColor(float& pRed, float& pGreen, float& pBlue) const
 {
@@ -289,8 +277,6 @@ void ShadowVolume::InitTO()
 
 void ShadowVolume::UpdateShadowVolume(const Vector3DF& pLightPos, float pShadowRange, bool pDirectional)
 {
-	TBC::GeometryBase::SetLastFrameVisible(mParentGeometry->GetLastFrameVisible());
-
 	SetTransformation(mParentGeometry->GetTransformation());
 
 	InitVertices();

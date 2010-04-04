@@ -785,11 +785,13 @@ bool ChunkyPhysicsLoader::Save(const ChunkyPhysics* pPhysics)
 	int32 lBoneCount = pPhysics->GetBoneCount();
 	int32 lPhysicsType = pPhysics->GetPhysicsType();
 	int32 lEngineCount = pPhysics->GetEngineCount();
+	int32 lTriggerCount = pPhysics->GetEngineCount();
 	if (lOk)
 	{
 		lOk = (lBoneCount > 0 && lBoneCount < 10000 &&
 			lPhysicsType >= ChunkyPhysics::STATIC &&
-			lEngineCount >= 0 && lEngineCount < 1000);
+			lEngineCount >= 0 && lEngineCount < 1000 &&
+			lTriggerCount >= 0 && lTriggerCount < 1000);
 	}
 	if (lOk)
 	{
@@ -797,6 +799,7 @@ bool ChunkyPhysicsLoader::Save(const ChunkyPhysics* pPhysics)
 		lSaveList.push_back(ChunkyFileElement(CHUNK_PHYSICS_BONE_COUNT, &lBoneCount));
 		lSaveList.push_back(ChunkyFileElement(CHUNK_PHYSICS_PHYSICS_TYPE, &lPhysicsType));
 		lSaveList.push_back(ChunkyFileElement(CHUNK_PHYSICS_ENGINE_COUNT, &lEngineCount));
+		lSaveList.push_back(ChunkyFileElement(CHUNK_PHYSICS_TRIGGER_COUNT, &lTriggerCount));
 		lOk = SaveChunkyList(lSaveList);
 	}
 
@@ -892,6 +895,35 @@ bool ChunkyPhysicsLoader::Save(const ChunkyPhysics* pPhysics)
 	if (lOk)
 	{
 		lOk = RewriteChunkSize(lEngineChunkStart);
+	}
+
+	// Write trigger header.
+	if (lOk)
+	{
+		// Write all bone stuff into a single chunk (multiple element chunk).
+		int64 lChunkEndPosition = 0;
+		lOk = SaveHead(CHUNK_PHYSICS_TRIGGER_CONTAINER, 0, lChunkEndPosition);
+	}
+	const int64 lTriggerChunkStart = mFile->Tell();
+	// Write triggers.
+	for (int t = 0; lOk && t < lTriggerCount; ++t)
+	{
+		PhysicsTrigger* lTrigger = pPhysics->GetTrigger(t);
+		assert(lTrigger);
+		int64 lChunkEndPosition = 0;
+		unsigned lSize = lTrigger->GetChunkySize();
+		lOk = SaveHead(CHUNK_PHYSICS_TRIGGER, lSize, lChunkEndPosition);
+		if (lOk)
+		{
+			char* lData = new char[lSize];
+			lTrigger->SaveChunkyData(pPhysics, lData);
+			lOk = (mFile->WriteData(lData, lSize) == IO_OK);
+			delete (lData);
+		}
+	}
+	if (lOk)
+	{
+		lOk = RewriteChunkSize(lTriggerChunkStart);
 	}
 
 	// Re-write file header size.

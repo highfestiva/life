@@ -1041,27 +1041,14 @@ unsigned int OpenGLRenderer::RenderScene()
 {
 	LEPRA_MEASURE_SCOPE(RenderScene);
 
-	::glDisable(GL_COLOR_LOGIC_OP);
-	::glDisable(GL_ALPHA_TEST);
-	::glDisable(GL_BLEND);
-	::glPolygonMode(GL_BACK, GL_FILL);
-	::glDepthFunc(GL_LESS);
-	::glCullFace(GL_BACK);
-
-	/*// --- Testing outline stuff:
-	::glLineWidth(3.0f);
-	::glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-	::glEnable(GL_LINE_SMOOTH);
-	// --- End testing.*/
-
 	{
 		// Prepare projection data in order to be able to call CheckCulling().
 		PrepareProjectionData();
 
-		glMatrixMode(GL_MODELVIEW);
-		glLoadIdentity();
+		::glMatrixMode(GL_MODELVIEW);
+		::glLoadIdentity();
 
-		// Transform lights (among other things).
+		// Transform lights (among other things); must also run when lighting is disabled.
 		ProcessLights();
 
 		//Reset viewport and frustum every frame. This may look silly,
@@ -1074,113 +1061,34 @@ unsigned int OpenGLRenderer::RenderScene()
 		GetViewFrustum(lFOVAngle, lNear, lFar);
 		SetViewFrustum(lFOVAngle, lNear, lFar);
 
-		glPushAttrib(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_ENABLE_BIT | GL_VIEWPORT_BIT);
+		::glPushAttrib(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_ENABLE_BIT | GL_VIEWPORT_BIT);
 
-		glEnable(GL_CULL_FACE);
-		glEnable(GL_DEPTH_TEST);
-		glDepthMask(GL_TRUE);
-		glFrontFace(GL_CCW);
-		glShadeModel(GL_SMOOTH);
+		::glDisable(GL_COLOR_LOGIC_OP);
+		::glDisable(GL_ALPHA_TEST);
+		::glDisable(GL_BLEND);
+		::glEnable(GL_CULL_FACE);
+		::glEnable(GL_DEPTH_TEST);
+		::glDepthMask(GL_TRUE);
+		::glFrontFace(GL_CCW);
+		::glShadeModel(GL_SMOOTH);
+		::glPolygonMode(GL_BACK, GL_FILL);
+		::glDepthFunc(GL_LESS);
+		::glCullFace(GL_BACK);
+		::glLineWidth(3.0f);
+		::glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+		::glEnable(GL_LINE_SMOOTH);
 
-		glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, 1);
+		::glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, 1);
 	}
+
+	if (GetShadowsEnabled() && GetLightsEnabled())
 	{
 		UpdateShadowMaps();
-	}
 
-	// Now it's time to render the scene...
-	if (GetShadowsEnabled() == false || 
-	   glIsEnabled(GL_LIGHTING) == false ||
-	   (GetNumSpotLights() == 0 && GetShadowVolumeTable().IsEmpty()))
-	{
+		// Disable all lights (for shadow rendering).
+		for (int i = 0; i < GetLightCount(); ++i)
 		{
-			// Prepare the pixel shader materials.
-			OpenGLMatPXS::PrepareLights(this);
-		}
-		{
-			// Single pass rendering (no shadows).
-			for (int i = 0; i < (int)NUM_MATERIALTYPES; i++)
-			{
-				if (GetMaterial((MaterialType)i) != 0)
-				{
-					GetMaterial((MaterialType)i)->RenderAllGeometry(GetCurrentFrame());
-				}
-			}
-		}
-	}
-	else
-	{
-		{
-			// Disable all lights.
-			for (int i = 0; i < GetLightCount(); i++)
-			{
-				glDisable(GL_LIGHT0 + GetLightIndex(i));
-			}
-
-			// Prepare the pixel shader materials.
-			OpenGLMatPXS::PrepareLights(this);
-
-			// Render the scene darkened.
-			for (int i = 0; i < (int)NUM_MATERIALTYPES; i++)
-			{
-				if (GetMaterial((MaterialType)i) != 0)
-				{
-					GetMaterial((MaterialType)i)->RenderAllGeometry(GetCurrentFrame());
-				}
-			}
-
-			glEnable(GL_STENCIL_TEST);
-			glStencilFunc(GL_ALWAYS, 128, 0xFF);
-			glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
-
-			// Render all shadow maps. In this step, we only render the shadows
-			// using alpha testing to the stencil buffer (no output to the color buffer).
-			if (GetNumSpotLights() > 0 && GetShadowHint() == SH_VOLUMES_AND_MAPS)
-				RenderShadowMaps();
-
-			// Render scene with stencil shadows.
-			if (GetShadowVolumeTable().IsEmpty() == false)
-				RenderShadowVolumes();
-
-			// Enable all lights again.
-			for (int i = 0; i < GetLightCount(); i++)
-			{
-				glEnable(GL_LIGHT0 + GetLightIndex(i));
-			}
-		}
-		{
-			// Setup the correct stencil buffer operations.
-			glEnable(GL_STENCIL_TEST);
-			glStencilFunc(GL_GEQUAL, 128, 0xFF);
-			glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-
-			// Prepare the pixel shader materials.
-			OpenGLMatPXS::PrepareLights(this);
-		}
-		{
-			// Render the scene with full light.
-			for (int i = 0; i < (int)NUM_MATERIALTYPES; i++)
-			{
-				if (GetMaterial((MaterialType)i) != 0)
-				{
-					GetMaterial((MaterialType)i)->RenderAllGeometry(GetCurrentFrame());
-				}
-			}
-			glDisable(GL_STENCIL_TEST);
-		}
-	}
-
-	/*// Render outline.
-	{
-		::glCullFace(GL_FRONT);
-		::glPolygonMode(GL_BACK, GL_LINE);
-		::glDepthFunc(GL_LEQUAL);
-		::glDisable(GL_LIGHTING);
-
-		// Disable all lights.
-		for (int i = 0; i < GetLightCount(); i++)
-		{
-			glDisable(GL_LIGHT0 + GetLightIndex(i));
+			::glDisable(GL_LIGHT0 + GetLightIndex(i));
 		}
 
 		// Prepare the pixel shader materials.
@@ -1194,7 +1102,78 @@ unsigned int OpenGLRenderer::RenderScene()
 				GetMaterial((MaterialType)i)->RenderAllGeometry(GetCurrentFrame());
 			}
 		}
-	}*/
+
+		// Shadow stencil buffer operations.
+		::glEnable(GL_STENCIL_TEST);
+		::glStencilFunc(GL_ALWAYS, 128, 0xFF);
+		::glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
+
+		// Render all shadow maps. In this step, we only render the shadows
+		// using alpha testing to the stencil buffer (no output to the color buffer).
+		if (GetNumSpotLights() > 0 && GetShadowHint() == SH_VOLUMES_AND_MAPS)
+		{
+			RenderShadowMaps();
+		}
+
+		// Render scene with stencil shadows.
+		RenderShadowVolumes();
+
+		// Go back to normal stencil buffer operations.
+		::glEnable(GL_STENCIL_TEST);
+		::glStencilFunc(GL_GEQUAL, 128, 0xFF);
+		::glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+
+		// Enable all lights again.
+		for (int i = 0; i < GetLightCount(); ++i)
+		{
+			::glEnable(GL_LIGHT0 + GetLightIndex(i));
+		}
+	}
+
+	if (IsOutlineRenderingEnabled())
+	{
+		Material::SetEnableMaterials(false);
+		Vector3DF lWhite(1, 1, 1);
+		TBC::GeometryBase::BasicMaterialSettings lMaterial(lWhite, lWhite, lWhite, 1, 1, false);
+		OpenGLMaterial::SetMaterial(lMaterial, this);
+	}
+
+	{
+		// Prepare the pixel shader materials.
+		OpenGLMatPXS::PrepareLights(this);
+	}
+	{
+		// This renders the scene.
+		for (int i = 0; i < (int)NUM_MATERIALTYPES; ++i)
+		{
+			Material* lMaterial = GetMaterial((MaterialType)i);
+			if (lMaterial != 0)
+			{
+				lMaterial->RenderAllGeometry(GetCurrentFrame());
+			}
+		}
+		::glDisable(GL_STENCIL_TEST);
+	}
+
+	Material::SetEnableMaterials(true);
+
+	if (IsOutlineRenderingEnabled())
+	{
+		::glCullFace(GL_FRONT);
+		::glPolygonMode(GL_BACK, GL_LINE);
+		::glDepthFunc(GL_LEQUAL);
+		::glDisable(GL_LIGHTING);
+		for (int i = 0; i < (int)NUM_MATERIALTYPES; i++)
+		{
+			if (GetMaterial((MaterialType)i) != 0)
+			{
+				GetMaterial((MaterialType)i)->RenderAllGeometry(GetCurrentFrame());
+			}
+		}
+		::glCullFace(GL_BACK);
+		::glPolygonMode(GL_BACK, GL_FILL);
+		::glDepthFunc(GL_LESS);
+	}
 
 	{
 		for (int i = 0; i < GetLightCount(); i++)
@@ -1205,10 +1184,10 @@ unsigned int OpenGLRenderer::RenderScene()
 
 		StepCurrentFrame();
 
-		glPopAttrib();
+		::glPopAttrib();
 	}
 
-	return GetCurrentFrame();
+	return (GetCurrentFrame());
 }
 
 void OpenGLRenderer::RenderRelative(TBC::GeometryBase* pGeometry)

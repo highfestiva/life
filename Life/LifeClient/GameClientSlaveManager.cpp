@@ -148,6 +148,7 @@ bool GameClientSlaveManager::Render()
 	UpdateFrustum();
 
 	LEPRA_MEASURE_SCOPE(SlaveRender);
+	mUiManager->GetRenderer()->EnableOutlineRendering(CURE_RTVAR_GET(GetVariableScope(), RTVAR_UI_3D_OUTLINEMODE, false));
 	mUiManager->Render(mRenderArea);
 	return (true);
 }

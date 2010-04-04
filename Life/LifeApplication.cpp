@@ -103,7 +103,7 @@ int Application::Run()
 
 		LEPRA_MEASURE_SCOPE(AppTick);
 		{
-			ScopeTimer lTimer(&lTimeInfo);
+			ScopeTimer lSleepTimer(&lTimeInfo);
 			lOk = mGameTicker->Tick();
 			const float lExtraSleep = (float)CURE_RTVAR_TRYGET(Cure::GetSettings(), RTVAR_DEBUG_EXTRASLEEPTIME, 0.0);
 			if (lExtraSleep > 0)
@@ -201,18 +201,19 @@ void Application::TickSleep(double pMeasuredFrameTime) const
 		const int lFps = CURE_RTVAR_GET(Cure::GetSettings(), RTVAR_PHYSICS_FPS, 2);
 		double lWantedFrameTime = lFps? 1.0/lFps : 1;
 		double lSleepTime = lWantedFrameTime - pMeasuredFrameTime;
-		if (lSleepTime > 0)
+		const double MINIMUM_SLEEP_TIME = 0.001;
+		if (lSleepTime >= MINIMUM_SLEEP_TIME)
 		{
-			HiResTimer lTimer;
-			while (lSleepTime >= 0.001)
+			HiResTimer lSleepTimer;
+			while (lSleepTime >= MINIMUM_SLEEP_TIME)
 			{
 				Thread::Sleep(lSleepTime);
-				lSleepTime -= lTimer.PopTimeDiff();
+				lSleepTime -= lSleepTimer.PopTimeDiff();
 			}
 		}
 		else
 		{
-			Thread::YieldCpu();	// Play nice.
+			Thread::YieldCpu();	// Play nice!
 		}
 	}
 }

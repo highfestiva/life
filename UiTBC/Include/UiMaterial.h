@@ -118,12 +118,13 @@ public:
 		DEPTHSORT_B2F,     // Back-to-front
 	};
 
-	static void SetDepthSortingEnabled(bool pEnabled);
+	Material(Renderer* pRenderer, DepthSortHint pSortHint);
+	virtual ~Material();
 
-	inline Material(Renderer* pRenderer, DepthSortHint pSortHint);
-	inline virtual ~Material();
+	static void SetEnableDepthSorting(bool pEnabled);
+	static void SetEnableMaterials(bool pEnabled);
 
-	inline Renderer* GetRenderer();
+	Renderer* GetRenderer();
 
 	virtual bool AddGeometry(TBC::GeometryBase* pGeometry);
 	virtual RemoveStatus RemoveGeometry(TBC::GeometryBase* pGeometry);
@@ -131,8 +132,10 @@ public:
 
 	bool IsEmpty() { return mGeometryGroupList.empty(); }
 
-	virtual void RenderAllGeometry(unsigned int pCurrentFrame);
+	void RenderAllGeometry(unsigned int pCurrentFrame);
+	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame);
 	virtual void RenderGeometry(TBC::GeometryBase* pGeometry) = 0;
+	virtual void RenderBaseGeometry(TBC::GeometryBase* pGeometry) = 0;
 
 	TBC::GeometryBase* GetFirstGeometry();
 	TBC::GeometryBase* GetNextGeometry();
@@ -145,7 +148,7 @@ protected:
 	typedef std::list<GeometryGroup*> GeometryGroupList;
 
 	Renderer::TextureID GetGroupTextureID(TBC::GeometryBase* pGeometry);
-	inline GeometryGroupList* GetGeometryGroupList();
+	GeometryGroupList* GetGeometryGroupList();
 
 private:
 	GeometryGroupList mGeometryGroupList;
@@ -156,29 +159,9 @@ private:
 	GeometryGroupList::const_iterator mGroupIter;
 	int mIndex;
 
-	static bool smDepthSortEnabled;
+	static bool mEnableDepthSort;
+	static bool mEnableMaterials;
 };
-
-Material::Material(Renderer* pRenderer, DepthSortHint pSortHint) :
-	mRenderer(pRenderer),
-	mSortHint(pSortHint)
-{
-}
-
-Material::~Material()
-{
-	RemoveAllGeometry();
-}
-
-Material::GeometryGroupList* Material::GetGeometryGroupList()
-{
-	return &mGeometryGroupList;
-}
-
-Renderer* Material::GetRenderer()
-{
-	return mRenderer;
-}
 
 class NullMaterial : public Material
 {
@@ -193,6 +176,9 @@ public:
 	}
 
 	void RenderGeometry(TBC::GeometryBase* /*pGeometry*/)
+	{
+	}
+	void RenderBaseGeometry(TBC::GeometryBase* /*pGeometry*/)
 	{
 	}
 };

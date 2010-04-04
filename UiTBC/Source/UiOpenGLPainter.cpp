@@ -121,6 +121,10 @@ void OpenGLPainter::SetColor(const Color& pColor, unsigned pColorIndex)
 
 void OpenGLPainter::DoSetRenderMode() const
 {
+	::glLineWidth(1);
+	::glHint(GL_LINE_SMOOTH_HINT, GL_FASTEST);
+	::glDisable(GL_LINE_SMOOTH);
+
 	switch(GetRenderMode())
 	{
 		case Painter::RM_ALPHATEST:

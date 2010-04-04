@@ -49,9 +49,6 @@ public:
 
 	ColorFormat GetColorFormat() const;
 
-	void SetLastFrameVisible(unsigned int pLastFrameVisible);
-	unsigned int GetLastFrameVisible() const;
-
 	void GetReplacementColor(float& pRed, float& pGreen, float& pBlue) const;
 	void SetReplacementColor(float pRed, float pGreen, float pBlue);
 
@@ -95,7 +92,6 @@ private:
 	float mBlue;
 
 	TransformationF mTransformation;
-	unsigned int mLastFrameVisible;
 
 	bool mTransformationChanged;
 

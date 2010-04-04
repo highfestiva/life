@@ -738,7 +738,7 @@ void Thread::SetCpuAffinityMask(uint64 pAffinityMask)
 	DWORD_PTR lMask = (DWORD_PTR)pAffinityMask;
 	::SetThreadAffinityMask((HANDLE)GetThreadHandle(), lMask);
 	// Cut timeslice short and allow OS to reschedule us to the given CPU immediately.
-	::Sleep(1);
+	YieldCpu();
 }
 
 void Thread::Sleep(unsigned int pMilliSeconds)
