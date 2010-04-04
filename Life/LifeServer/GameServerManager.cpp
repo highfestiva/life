@@ -40,7 +40,7 @@ const int NETWORK_POSITIONAL_AHEAD_BUFFER_SIZE = PHYSICS_FPS/2;
 
 GameServerManager::GameServerManager(Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
 	InteractiveConsoleLogListener* pConsoleLogger):
-	Cure::GameManager(pVariableScope, pResourceManager),
+	GameManager(pVariableScope, pResourceManager),
 	mUserAccountManager(new Cure::MemoryUserAccountManager()),
 	mTerrainObject(0),
 	mBoxObject(0),
@@ -393,7 +393,7 @@ void GameServerManager::ProcessNetworkInputMessage(Client* pClient, Cure::Messag
 						log_adebug("Avatar selected...");
 						wstr lAvatarName;
 						lStatus->GetMessageString(lAvatarName);
-						const Cure::UserAccount::AvatarId lAvatarId = wstrutil::ToCurrentCode(lAvatarName);
+						const Cure::UserAccount::AvatarId lAvatarId = strutil::Encode(lAvatarName);
 						OnSelectAvatar(pClient, lAvatarId);
 					}
 					break;
@@ -428,7 +428,7 @@ void GameServerManager::ProcessNetworkInputMessage(Client* pClient, Cure::Messag
 			else
 			{
 				mLog.Warningf(_T("Client %i tried to control instance ID %i."),
-					wstrutil::ToCurrentCode(pClient->GetUserConnection()->GetLoginName()).c_str(),
+					strutil::Encode(pClient->GetUserConnection()->GetLoginName()).c_str(),
 					lInstanceId);
 			}
 		}
@@ -498,7 +498,7 @@ void GameServerManager::OnLogin(Cure::UserConnection* pUserConnection)
 	}
 	else
 	{
-		mLog.Error(_T("User ") + wstrutil::ToCurrentCode(pUserConnection->GetLoginName()) + _T(" does not exist or is not allowed avatars!"));
+		mLog.Error(_T("User ") + strutil::Encode(pUserConnection->GetLoginName()) + _T(" does not exist or is not allowed avatars!"));
 	}
 }
 
@@ -522,7 +522,7 @@ void GameServerManager::OnLogout(Cure::UserConnection* pUserConnection)
 	}
 	DropAvatar(lAvatarId);
 
-	mLog.Info(_T("User ") + wstrutil::ToCurrentCode(pUserConnection->GetLoginName()) + _T(" logged out."));
+	mLog.Info(_T("User ") + strutil::Encode(pUserConnection->GetLoginName()) + _T(" logged out."));
 }
 
 void GameServerManager::OnSelectAvatar(Client* pClient, const Cure::UserAccount::AvatarId& pAvatarId)
@@ -533,7 +533,7 @@ void GameServerManager::OnSelectAvatar(Client* pClient, const Cure::UserAccount:
 	const Cure::GameObjectId lPreviousAvatarId = pClient->GetAvatarId();
 	if (lPreviousAvatarId)
 	{
-		mLog.Info(_T("User ")+wstrutil::ToCurrentCode(pClient->GetUserConnection()->GetLoginName())+_T(" had an avatar, replacing it."));
+		mLog.Info(_T("User ")+strutil::Encode(pClient->GetUserConnection()->GetLoginName())+_T(" had an avatar, replacing it."));
 		pClient->SetAvatarId(0);
 		BroadcastDeleteObject(lPreviousAvatarId);
 		Cure::ContextObject* lObject = GetContext()->GetObject(lPreviousAvatarId);
@@ -548,7 +548,7 @@ void GameServerManager::OnSelectAvatar(Client* pClient, const Cure::UserAccount:
 		DropAvatar(lPreviousAvatarId);
 	}
 
-	mLog.Info(_T("Loading avatar '")+pAvatarId+_T("' for user ")+wstrutil::ToCurrentCode(pClient->GetUserConnection()->GetLoginName())+_T("."));
+	mLog.Info(_T("Loading avatar '")+pAvatarId+_T("' for user ")+strutil::Encode(pClient->GetUserConnection()->GetLoginName())+_T("."));
 	Cure::ContextObject* lObject = Parent::CreateContextObject(pAvatarId,
 		Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
 	lObject->SetInitialTransform(lTransform);
@@ -665,7 +665,7 @@ void GameServerManager::BroadcastAvatar(Client* pClient)
 {
 	Cure::ContextObject* lObject = GetContext()->GetObject(pClient->GetAvatarId());
 	Cure::GameObjectId lInstanceId = lObject->GetInstanceId();
-	mLog.Info(_T("User ")+wstrutil::ToCurrentCode(pClient->GetUserConnection()->GetLoginName())+_T(" login complete (avatar loaded)."));
+	mLog.Info(_T("User ")+strutil::Encode(pClient->GetUserConnection()->GetLoginName())+_T(" login complete (avatar loaded)."));
 
 	// TODO: this is hard-coded. Use a general replication-mechanism instead (where visible and added/updated objects gets replicated automatically).
 	GetNetworkAgent()->SendNumberMessage(true, pClient->GetUserConnection()->GetSocket(),
@@ -705,7 +705,7 @@ void GameServerManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 		if (lClient)
 		{
 			mLog.Infof(_T("Loaded avatar for %s."),
-				wstrutil::ToCurrentCode(lClient->GetUserConnection()->GetLoginName()).c_str());
+				strutil::Encode(lClient->GetUserConnection()->GetLoginName()).c_str());
 			BroadcastAvatar(lClient);
 		}
 		else
@@ -837,7 +837,7 @@ void GameServerManager::BroadcastCreateObject(Cure::ContextObject* pObject)
 		GetPacketFactory()->GetMessageFactory()->Allocate(Cure::MESSAGE_TYPE_CREATE_OBJECT);
 	lPacket->AddMessage(lCreate);
 	lCreate->Store(lPacket, pObject->GetInstanceId(), pObject->GetInitialTransform(),
-		wstrutil::ToOwnCode(pObject->GetClassId()));
+		wstrutil::Encode(pObject->GetClassId()));
 	BroadcastPacket(0, lPacket, true);
 	GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
 }
@@ -884,7 +884,7 @@ void GameServerManager::SendCreateAllObjects(Client* pClient)
 			lPacket->AddMessage(lCreateMessage);
 			TransformationF lTransformation(lObject->GetOrientation(), lObject->GetPosition());
 			lCreateMessage->Store(lPacket, lObject->GetInstanceId(),
-				 lTransformation, wstrutil::ToOwnCode(lObject->GetClassId()));
+				 lTransformation, wstrutil::Encode(lObject->GetClassId()));
 
 			// Send.
 			GetNetworkAgent()->PlaceInSendBuffer(true, pClient->GetUserConnection()->GetSocket(), lPacket);

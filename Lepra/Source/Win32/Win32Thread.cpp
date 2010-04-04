@@ -79,7 +79,7 @@ DWORD __stdcall ThreadEntry(void* pThread)
 	gExtraDataStorage.SetPointer(0);
 	assert(gThreadStorage.GetPointer() == lThread);
 	assert(Thread::GetCurrentThread() == lThread);
-	SetVisualStudioThreadName(astrutil::ToOwnCode(lThread->GetThreadName()).c_str(), (DWORD)-1);
+	SetVisualStudioThreadName(astrutil::Encode(lThread->GetThreadName()).c_str(), (DWORD)-1);
 	RunThread(lThread);
 	return 0;
 }
@@ -710,7 +710,7 @@ void Thread::InitializeMainThread(const str& pThreadName)
 	gMainThread.SetThreadId(GetCurrentThreadId());
 	assert(gThreadStorage.GetPointer() == &gMainThread);
 	assert(Thread::GetCurrentThread() == &gMainThread);
-	SetVisualStudioThreadName(astrutil::ToOwnCode(pThreadName).c_str(), (DWORD)-1);
+	SetVisualStudioThreadName(astrutil::Encode(pThreadName).c_str(), (DWORD)-1);
 }
 
 size_t Thread::GetCurrentThreadId()

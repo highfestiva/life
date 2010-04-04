@@ -131,7 +131,7 @@ FILE* DiskFile::FileOpen(const str& pFileName, const str& pMode)
 		lFile = 0;
 	}
 #else // _MSC_VER <= 1310
-	lFile = fopen(astrutil::ToOwnCode(pFileName).c_str(), astrutil::ToOwnCode(pMode).c_str());
+	lFile = fopen(astrutil::Encode(pFileName).c_str(), astrutil::Encode(pMode).c_str());
 #endif // _MSC_VER > 1310 / _MSC_VER <= 1310
 
 	return (lFile);
@@ -444,11 +444,11 @@ bool DiskFile::PathExists(const str& pPathName)
 
 #ifdef LEPRA_WINDOWS // Hugge/TRICKY: Should we check for Visual Studio instead?
 	::_getcwd(lCurrentDir, 299);
-	bool lSuccess = _chdir(astrutil::ToOwnCode(pPathName).c_str()) == 0;
+	bool lSuccess = _chdir(astrutil::Encode(pPathName).c_str()) == 0;
 	::_chdir(lCurrentDir);
 #else
 	::getcwd(lCurrentDir, 299);
-	bool lSuccess = ::chdir(astrutil::ToOwnCode(pPathName).c_str()) == 0;
+	bool lSuccess = ::chdir(astrutil::Encode(pPathName).c_str()) == 0;
 	::chdir(lCurrentDir);
 #endif
 
@@ -457,29 +457,29 @@ bool DiskFile::PathExists(const str& pPathName)
 
 bool DiskFile::Delete(const str& pFileName)
 {
-	return (::remove(astrutil::ToOwnCode(pFileName).c_str()) == 0);
+	return (::remove(astrutil::Encode(pFileName).c_str()) == 0);
 }
 
 bool DiskFile::Rename(const str& pOldFileName, const str& pNewFileName)
 {
-	return (::rename(astrutil::ToOwnCode(pOldFileName).c_str(), astrutil::ToOwnCode(pNewFileName).c_str()) == 0);
+	return (::rename(astrutil::Encode(pOldFileName).c_str(), astrutil::Encode(pNewFileName).c_str()) == 0);
 }
 
 bool DiskFile::CreateDir(const str& pPathName)
 {
 #ifdef LEPRA_POSIX 
-	return ::mkdir(astrutil::ToOwnCode(pPathName).c_str(), 0775) != -1;
+	return ::mkdir(astrutil::Encode(pPathName).c_str(), 0775) != -1;
 #else
-	return ::_mkdir(astrutil::ToOwnCode(pPathName).c_str()) != -1;
+	return ::_mkdir(astrutil::Encode(pPathName).c_str()) != -1;
 #endif
 }
 
 bool DiskFile::RemoveDir(const str& pPathName)
 {
 #ifdef LEPRA_WINDOWS // Hugge/TRICKY: Should we check for Visual Studio instead?
-	return ::_rmdir(astrutil::ToOwnCode(pPathName).c_str()) == 0;
+	return ::_rmdir(astrutil::Encode(pPathName).c_str()) == 0;
 #else
-	return ::rmdir(astrutil::ToOwnCode(pPathName).c_str()) == 0;
+	return ::rmdir(astrutil::Encode(pPathName).c_str()) == 0;
 #endif
 }
 
@@ -515,7 +515,7 @@ bool DiskFile::FindFirst(const str& pFileSpec, FindData& pFindData)
 
 #if defined LEPRA_WINDOWS
 	_finddata_t lData;
-	pFindData.mFindHandle = _findfirst(astrutil::ToOwnCode(pFileSpec).c_str(), &lData);
+	pFindData.mFindHandle = _findfirst(astrutil::Encode(pFileSpec).c_str(), &lData);
 
 	if (pFindData.mFindHandle == -1)
 	{
@@ -524,7 +524,7 @@ bool DiskFile::FindFirst(const str& pFileSpec, FindData& pFindData)
 
 	if (lOk == true)
 	{
-		pFindData.mName = astrutil::ToCurrentCode(astr(lData.name));	// TODO: needs real Unicode findxxx().
+		pFindData.mName = strutil::Encode(astr(lData.name));	// TODO: needs real Unicode findxxx().
 		pFindData.mSize = lData.size;
 
 		if ((lData.attrib & _A_SUBDIR) != 0)
@@ -537,11 +537,11 @@ bool DiskFile::FindFirst(const str& pFileSpec, FindData& pFindData)
 #elif defined LEPRA_POSIX
 	glob_t lGlobList;
 	lGlobList.gl_offs = 1;
-	::glob(astrutil::ToOwnCode(pFileSpec).c_str(), GLOB_DOOFFS|GLOB_MARK, 0, &lGlobList);
+	::glob(astrutil::Encode(pFileSpec).c_str(), GLOB_DOOFFS|GLOB_MARK, 0, &lGlobList);
 	if (lGlobList.gl_pathc >= 1)
 	{
 		pFindData.mFileSpec = pFileSpec;
-		pFindData.mName = astrutil::ToCurrentCode(lGlobList.gl_pathv[0]);
+		pFindData.mName = strutil::Encode(lGlobList.gl_pathv[0]);
 		struct stat lFileInfo;
 		::stat(lGlobList.gl_pathv[0], &lFileInfo);	// TODO: error check.
 		pFindData.mSize = lFileInfo.st_size;
@@ -573,7 +573,7 @@ bool DiskFile::FindNext(FindData& pFindData)
 	}
 	if (lOk == true)
 	{
-		pFindData.mName = astrutil::ToCurrentCode(astr(lData.name));	// TODO: needs real Unicode findxxx()!
+		pFindData.mName = strutil::Encode(astr(lData.name));	// TODO: needs real Unicode findxxx()!
 		pFindData.mSize = lData.size;
 
 		if ((lData.attrib & _A_SUBDIR) != 0)
@@ -587,18 +587,18 @@ bool DiskFile::FindNext(FindData& pFindData)
 	lOk = false;
 	glob_t lGlobList;
 	lGlobList.gl_offs = 1000;
-	::glob(astrutil::ToOwnCode(pFindData.mFileSpec).c_str(), GLOB_DOOFFS|GLOB_MARK, 0, &lGlobList);
+	::glob(astrutil::Encode(pFindData.mFileSpec).c_str(), GLOB_DOOFFS|GLOB_MARK, 0, &lGlobList);
 	if (lGlobList.gl_pathc >= 1)
 	{
 		for (size_t x = 0; x < lGlobList.gl_pathc; ++x)
 		{
-			if (astrutil::ToCurrentCode(lGlobList.gl_pathv[x]) == pFindData.mName)
+			if (strutil::Encode(lGlobList.gl_pathv[x]) == pFindData.mName)
 			{
 				++x;
 			  	if (x < lGlobList.gl_pathc)
 				{
 					lOk = true;
-					pFindData.mName = astrutil::ToCurrentCode(lGlobList.gl_pathv[0]);
+					pFindData.mName = strutil::Encode(lGlobList.gl_pathv[0]);
 					struct stat lFileInfo;
 					::stat(lGlobList.gl_pathv[0], &lFileInfo);	// TODO: error check.
 					pFindData.mSize = lFileInfo.st_size;

@@ -459,7 +459,7 @@ SoundManagerOpenAL::Sample::~Sample()
 bool SoundManagerOpenAL::Sample::Load(const str& pFileName)
 {
 	assert(mBuffer == AL_NONE);
-	mBuffer = ::alutCreateBufferFromFile(astrutil::ToOwnCode(pFileName).c_str());
+	mBuffer = ::alutCreateBufferFromFile(astrutil::Encode(pFileName).c_str());
 	return (mBuffer != AL_NONE);
 }
 

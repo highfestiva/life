@@ -8,13 +8,15 @@
 #include <algorithm>
 #include <assert.h>
 #include <math.h>
+#include "../../Lepra/Include/HashUtil.h"
 #include "../../Lepra/Include/Math.h"
 #include "../../Lepra/Include/Random.h"
 #include "../../Lepra/Include/RotationMatrix.h"
 #include "../../TBC/Include/ChunkyBoneGeometry.h"
 #include "../../TBC/Include/ChunkyPhysics.h"
-#include "../../TBC/Include/PhysicsManager.h"
 #include "../../TBC/Include/PhysicsEngine.h"
+#include "../../TBC/Include/PhysicsManager.h"
+#include "../../TBC/Include/PhysicsTrigger.h"
 #include "../Include/ContextManager.h"
 #include "../Include/ContextObjectAttribute.h"
 #include "../Include/Cure.h"
@@ -63,6 +65,12 @@ ContextObject::ContextObject(const str& pClassId):
 ContextObject::~ContextObject()
 {
 	log_volatile(mLog.Debugf(_T("Destructing context object %s."), mClassId.c_str()));
+
+	for (ChildList::iterator x = mChildList.begin(); x != mChildList.end(); ++x)
+	{
+		delete (*x);
+	}
+	mChildList.clear();
 
 	if (mManager)
 	{
@@ -256,6 +264,18 @@ void ContextObject::AddAttribute(ContextObjectAttribute* pAttribute)
 void ContextObject::RemoveAttribute(ContextObjectAttribute* pAttribute)
 {
 	std::remove(mAttributeArray.begin(), mAttributeArray.end(), pAttribute);
+}
+
+
+
+void ContextObject::AddTrigger(TBC::PhysicsManager::TriggerID pTriggerId, const void* pTrigger)
+{
+	mTriggerMap.insert(TriggerMap::value_type(pTriggerId, pTrigger));
+}
+
+const void* ContextObject::GetTrigger(TBC::PhysicsManager::TriggerID pTriggerId) const
+{
+	return HashUtil::FindMapObject(mTriggerMap, pTriggerId);
 }
 
 
@@ -967,6 +987,34 @@ void ContextObject::AddAttachment(ContextObject* pObject, TBC::PhysicsManager::J
 	if (pEngine)
 	{
 		mPhysics->AddEngine(pEngine);
+	}
+}
+
+
+
+void ContextObject::AddChild(ContextObject* pChild)
+{
+	mChildList.push_back(pChild);
+	GetManager()->AddLocalObject(pChild);
+}
+
+void ContextObject::SetupChildTriggerHandlers()
+{
+	int lLastGroupIndex = -1;
+	ContextObject* lTriggerChild = 0;
+	const int lTriggerCount = mPhysics->GetTriggerCount();
+	for (int x = 0; x < lTriggerCount; ++x)
+	{
+		const TBC::PhysicsTrigger* lTrigger = mPhysics->GetTrigger(x);
+		if (lLastGroupIndex != lTrigger->GetGroupIndex())
+		{
+			lLastGroupIndex = lTrigger->GetGroupIndex();
+			lTriggerChild = GetManager()->GetGameManager()->CreateTriggerHandler(lTrigger->GetTypeName());
+			AddChild(lTriggerChild);
+			GetManager()->EnableTickCallback(lTriggerChild);
+		}
+		AddTrigger(lTrigger->GetPhysicsTriggerId(), lTriggerChild);
+		lTriggerChild->AddTrigger(lTrigger->GetPhysicsTriggerId(), lTrigger);
 	}
 }
 

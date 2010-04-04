@@ -64,9 +64,9 @@ void ClientLoginView::OnLogin(UiTbc::Button*)
 	str lServer = ((UiTbc::TextField*)GetChild(_T("Server"), 0))->GetText();
 
 	// Pick strings from UI.
-	wstr lUsername = wstrutil::ToOwnCode(((UiTbc::TextField*)GetChild(_T("User"), 0))->GetText());
+	wstr lUsername = wstrutil::Encode(((UiTbc::TextField*)GetChild(_T("User"), 0))->GetText());
 	UiTbc::TextField* lPasswordComponent = (UiTbc::TextField*)GetChild(_T("Pass"), 0);
-	wstr lReadablePassword = wstrutil::ToOwnCode(lPasswordComponent->GetText());
+	wstr lReadablePassword = wstrutil::Encode(lPasswordComponent->GetText());
 	lPasswordComponent->SetText(_T("?"));	// Clear out password traces in component.
 
 	// Convert into login format.

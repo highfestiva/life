@@ -128,7 +128,7 @@ void X11DisplayManager::SetCaption(const str& pCaption, bool pInternalCall)
 
 		if (pInternalCall == false || mCaptionSet == false)
 		{
-			::XStoreName(GetDisplay(), GetWindow(), astrutil::ToOwnCode(pCaption).c_str());
+			::XStoreName(GetDisplay(), GetWindow(), astrutil::Encode(pCaption).c_str());
 		}
 	}
 }

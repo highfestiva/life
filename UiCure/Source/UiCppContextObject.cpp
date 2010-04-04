@@ -166,11 +166,12 @@ void CppContextObject::DebugDrawPrimitive(DebugPrimitive pPrimitive)
 	for (int x = 0; x < lBoneCount; ++x)
 	{
 		const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(x);
-		if (lGeometry->GetBodyId() != TBC::INVALID_BODY)
+		TBC::PhysicsManager::BodyID lBodyId = lGeometry->GetBodyId()? lGeometry->GetBodyId() : lGeometry->GetTriggerId();
+		if (lBodyId != TBC::INVALID_BODY)
 		{
 			TransformationF lPhysicsTransform;
 			mManager->GetGameManager()->GetPhysicsManager()->GetBodyTransform(
-				lGeometry->GetBodyId(), lPhysicsTransform);
+				lBodyId, lPhysicsTransform);
 			Vector3DF lPos = lPhysicsTransform.GetPosition();
 			switch (pPrimitive)
 			{

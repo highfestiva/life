@@ -43,7 +43,7 @@ IPAddress::IPAddress(const uint8* pIPAddress, int pNumBytes)
 
 IPAddress::IPAddress(const str& pIPv4Address)
 {
-	unsigned lIpInt = inet_addr(astrutil::ToOwnCode(pIPv4Address).c_str());
+	unsigned lIpInt = inet_addr(astrutil::Encode(pIPv4Address).c_str());
 	uint8* lIp = (uint8*)&lIpInt;
 	mAddress[0] = lIp[0];
 	mAddress[1] = lIp[1];

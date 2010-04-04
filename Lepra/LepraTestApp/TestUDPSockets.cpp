@@ -63,7 +63,7 @@ void ServerThread::Run()
 	str lString;
 	lReader.ReadLine(lString);
 
-//	printf("\nServer received \"%s\".", astrutil::ToOwnCode(lString).c_str());
+//	printf("\nServer received \"%s\".", astrutil::Encode(lString).c_str());
 	
 	mTestOK = (lString == _T("Hi Server! I am Client!"));
 
@@ -127,7 +127,7 @@ void ClientThread::Run()
 		str lString;
 		lReader.ReadLine(lString);
 
-	//	printf("Client received \"%s\".", astrutil::ToOwnCode(lString).c_str());
+	//	printf("Client received \"%s\".", astrutil::Encode(lString).c_str());
 		
 		mTestOK = (lString == _T("Hi Client! I am Server!"));
 

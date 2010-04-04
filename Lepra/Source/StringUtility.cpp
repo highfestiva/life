@@ -200,12 +200,12 @@ template<> bool wstrutil::IsWhiteSpace(wchar_t pChar)
 
 
 
-template<> const astr astrutil::ToOwnCode(const astr& pString)
+template<> const astr astrutil::Encode(const astr& pString)
 {
 	return (pString);
 }
 
-template<> const astr astrutil::ToOwnCode(const wstr& pString)
+template<> const astr astrutil::Encode(const wstr& pString)
 {
 	// Convert to UTF-8.
 	astr lAnsi;
@@ -221,7 +221,7 @@ template<> const astr astrutil::ToOwnCode(const wstr& pString)
 	return (lAnsi);
 }
 
-template<> const wstr wstrutil::ToOwnCode(const astr& pString)
+template<> const wstr wstrutil::Encode(const astr& pString)
 {
 	// Convert to UTF-16 or UTF-32.
 	wstr lUnicode;
@@ -237,7 +237,7 @@ template<> const wstr wstrutil::ToOwnCode(const astr& pString)
 	return (lUnicode);
 }
 
-template<> const wstr wstrutil::ToOwnCode(const wstr& pString)
+template<> const wstr wstrutil::Encode(const wstr& pString)
 {
 	return (pString);
 }

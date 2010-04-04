@@ -187,7 +187,7 @@ int PackerOctetString::Unpack(uint8* pDestination, const uint8* pSource, int pSi
 
 int PackerUnicodeString::Pack(uint8* pDestination, const wstr& pSource)
 {
-	const astr lUtf8 = astrutil::ToOwnCode(pSource);
+	const astr lUtf8 = astrutil::Encode(pSource);
 	const size_t lCharCount = lUtf8.length()+1;
 	if (pDestination)
 	{
@@ -199,7 +199,7 @@ int PackerUnicodeString::Pack(uint8* pDestination, const wstr& pSource)
 	return ((2+(int)lCharCount+3) & (~3));
 }
 
-int PackerUnicodeString::Unpack(wstr* pDestination, const uint8* pSource, int pSize)
+int PackerUnicodeString::UnpackRaw(wstr* pDestination, const uint8* pSource, int pSize)
 {
 	int lSize = -1;
 	if (pSize >= 3)
@@ -209,14 +209,28 @@ int PackerUnicodeString::Unpack(wstr* pDestination, const uint8* pSource, int pS
 		{
 			lSize = (2+lCharCount+3) & (~3);
 			// TODO: catch UTF-8 encoding errors (might be DoS attempts).
-			const wstr lConversion = wstrutil::ToOwnCode((const char*)pSource+2);
+			const wstr lConversion = wstrutil::Encode((const char*)pSource+2);
 			if (pDestination)
 			{
 				*pDestination = lConversion;
 			}
 		}
 	}
+	assert(lSize > 0);
 	return (lSize);
+}
+
+int PackerUnicodeString::Unpack(wstr& pDestination, const uint8* pSource, int pSize)
+{
+	return (UnpackRaw(&pDestination, pSource, pSize));
+}
+
+int PackerUnicodeString::Unpack(astr& pDestination, const uint8* pSource, int pSize)
+{
+	wstr lTemp;
+	const int lByteCount = UnpackRaw(&lTemp, pSource, pSize);
+	pDestination = astrutil::Encode(lTemp);
+	return (lByteCount);
 }
 
 

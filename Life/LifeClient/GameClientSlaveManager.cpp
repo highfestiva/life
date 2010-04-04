@@ -37,7 +37,7 @@ namespace Life
 GameClientSlaveManager::GameClientSlaveManager(GameClientMasterTicker* pMaster, Cure::RuntimeVariableScope* pVariableScope,
 	Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager, int pSlaveIndex,
 	const PixelRect& pRenderArea):
-	Cure::GameManager(pVariableScope, pResourceManager),
+	GameManager(pVariableScope, pResourceManager),
 	mMaster(pMaster),
 	mUiManager(pUiManager),
 	mSlaveIndex(pSlaveIndex),
@@ -189,7 +189,7 @@ void GameClientSlaveManager::RequestLogin(const str& pServerAddress, const Cure:
 
 	CloseLoginGui();
 
-	mConnectUserName = wstrutil::ToCurrentCode(pLoginToken.GetName());
+	mConnectUserName = strutil::Encode(pLoginToken.GetName());
 	mConnectServerAddress = pServerAddress;
 	mDisconnectReason = _T("Connect failed.");
 	mIsReset = false;
@@ -451,11 +451,8 @@ void GameClientSlaveManager::TickUiUpdate()
 		const float lTargetCameraXyDistance = 20.0f;
 		const float lCurrentCameraXyDistance = lTargetCameraPosition.GetDistance(lAvatarXyPosition);
 		lTargetCameraPosition = lAvatarXyPosition + (lTargetCameraPosition-lAvatarXyPosition)*(lTargetCameraXyDistance/lCurrentCameraXyDistance);
-		if (lAvatarPosition.z > -20)
-		{
-			lTargetCameraPosition.z = lAvatarPosition.z;
-		}
-		else
+		lTargetCameraPosition.z = lAvatarPosition.z+3;
+		if (lTargetCameraPosition.z < -20)
 		{
 			lTargetCameraPosition.z = -20.0f;
 		}
@@ -624,7 +621,7 @@ bool GameClientSlaveManager::TickNetworkOutput()
 				const bool lIsPositionExpired = (lIsCollisionExpired || lIsInputExpired);
 				if (lIsPositionExpired)
 				{
-					log_adebug("Position expires.");
+					log_atrace("Position expires.");
 				}
 
 				if (lForceSendUnsafeClientKeepalive ||
@@ -709,7 +706,7 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 			{
 				wstr lErrorMessage;
 				lMessageStatus->GetMessageString(lErrorMessage);
-				mDisconnectReason = wstrutil::ToCurrentCode(lErrorMessage);
+				mDisconnectReason = strutil::Encode(lErrorMessage);
 				mLog.Warning(mDisconnectReason);
 				GetNetworkClient()->Disconnect(false);
 			}
@@ -738,14 +735,14 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 						{
 							lChatMessage = L"<Player?>: "+lChatMessage;
 						}
-						mLog.Headline(wstrutil::ToCurrentCode(lChatMessage));
+						mLog.Headline(strutil::Encode(lChatMessage));
 					}
 					break;
 					case Cure::MessageStatus::INFO_AVATAR:
 					{
 						wstr lAvatarName;
 						lMessageStatus->GetMessageString(lAvatarName);
-						Cure::UserAccount::AvatarId lAvatarId = wstrutil::ToCurrentCode(lAvatarName);
+						Cure::UserAccount::AvatarId lAvatarId = strutil::Encode(lAvatarName);
 						log_adebug("Status: INFO_AVATAR...");
 						str lResourceId = strutil::Format(_T("Data/road_sign_sign.mesh;%i_%s"), mSlaveIndex, lAvatarId.c_str());
 						RoadSignButton* lButton = new RoadSignButton(this, lAvatarId, lResourceId, RoadSignButton::SHAPE_ROUND);
@@ -781,7 +778,7 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 			lMessageCreateObject->GetTransformation(lTransformation);
 			lMessageCreateObject->GetClassId(lClassId);
 			CreateObject(lMessageCreateObject->GetObjectId(),
-				wstrutil::ToCurrentCode(lClassId),
+				strutil::Encode(lClassId),
 				Cure::NETWORK_OBJECT_REMOTE_CONTROLLED, &lTransformation);
 		}
 		break;
@@ -1041,7 +1038,7 @@ void GameClientSlaveManager::OnAvatarSelect(UiTbc::Button* pButton)
 	log_volatile(mLog.Debugf(_T("Clicked avatar %s."), lAvatarId.c_str()));
 	Cure::Packet* lPacket = GetNetworkAgent()->GetPacketFactory()->Allocate();
 	GetNetworkAgent()->SendStatusMessage(GetNetworkClient()->GetSocket(), 0, Cure::REMOTE_OK,
-		Cure::MessageStatus::INFO_AVATAR, wstrutil::ToOwnCode(lAvatarId), lPacket);
+		Cure::MessageStatus::INFO_AVATAR, wstrutil::Encode(lAvatarId), lPacket);
 	GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
 
 	RoadSignMap::iterator x = mRoadSignMap.begin();
@@ -1137,7 +1134,11 @@ void GameClientSlaveManager::DrawSyncDebugInfo()
 		Cure::ContextManager::ContextObjectTable::const_iterator x = lObjectTable.begin();
 		for (; x != lObjectTable.end(); ++x)
 		{
-			UiCure::CppContextObject* lObject = (UiCure::CppContextObject*)x->second;	// Not very good to cast to a Cpp...
+			UiCure::CppContextObject* lObject = dynamic_cast<UiCure::CppContextObject*>(x->second);
+			if (!lObject)
+			{
+				continue;
+			}
 			if (lDebugAxes)
 			{
 				lObject->DebugDrawPrimitive(UiCure::CppContextObject::DEBUG_AXES);

@@ -64,13 +64,8 @@ public:
 	static _String ReplaceCtrlChars(const _String& pString, typename _String::value_type pReplacement);
 	static _String DumpData(const uint8* pData, size_t pLength);
 
-	static const _String ToOwnCode(const astr& pString);
-	static const _String ToOwnCode(const wstr& pString);
-#ifdef LEPRA_UNICODE
-	static const wstr ToCurrentCode(const _String& pString);
-#else // !LEPRA_UNICODE
-	static const astr ToCurrentCode(const _String& pString);
-#endif // LEPRA_UNICODE/!LEPRA_UNICODE
+	static const _String Encode(const astr& pString);
+	static const _String Encode(const wstr& pString);
 
 	static void ToLower(_String& pString);
 	static void ToUpper(_String& pString);

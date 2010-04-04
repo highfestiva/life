@@ -54,7 +54,8 @@ public:
 	void DisablePhysicsUpdateCallback(ContextObject* pObject);
 	void EnableTickCallback(ContextObject* pObject);
 	void DisableTickCallback(ContextObject* pObject);
-	void SetAlarmCallback(ContextObject* pObject, int pAlarmId, float pSeconds);
+	void AddAlarmCallback(ContextObject* pObject, int pAlarmId, float pSeconds, void* pExtraData);
+	void CancelPendingAlarmCallbacksById(ContextObject* pObject, int pAlarmId);
 	void CancelPendingAlarmCallbacks(ContextObject* pObject);
 
 	void Tick(float pTimeDelta);
@@ -69,17 +70,46 @@ private:
 
 	typedef IdManager<GameObjectId> ObjectIdManager;
 	typedef std::pair<GameObjectId, ContextObject*> ContextObjectPair;
-	struct AlarmInfo
+	struct Alarm
 	{
-		AlarmInfo();
-		AlarmInfo(ContextObject* pObject, int pAlarmId);
 		ContextObject* mObject;
+		int mFrameTime;
 		int mAlarmId;
+		void* mExtraData;
+		inline Alarm() {}
+		inline Alarm(ContextObject* pObject, int pFrameTime, int pAlarmId, void* pExtraData):
+			mObject(pObject),
+			mFrameTime(pFrameTime),
+			mAlarmId(pAlarmId),
+			mExtraData(pExtraData)
+		{
+		}
+		inline bool operator<(const Alarm& pOther) const
+		{
+			return (mObject < pOther.mObject &&
+				mFrameTime < pOther.mFrameTime &&
+				mAlarmId < pOther.mAlarmId &&
+				mExtraData < pOther.mExtraData);
+		}
+		inline bool operator==(const Alarm& pOther) const
+		{
+			return (mObject == pOther.mObject &&
+				mFrameTime == pOther.mFrameTime &&
+				mAlarmId == pOther.mAlarmId &&
+				mExtraData == pOther.mExtraData);
+		}
 	};
-	typedef std::map<int, AlarmInfo> AlarmMap;
-	typedef std::pair<int, AlarmInfo> AlarmPair;
+	struct AlarmHasher
+	{
+		inline size_t operator()(const Alarm& pAlarm) const
+		{
+			return (pAlarm.mFrameTime + pAlarm.mAlarmId +
+				(size_t)pAlarm.mObject);
+		}
+	};
+	typedef std::hash_set<Alarm, AlarmHasher> AlarmSet;
 	typedef std::hash_map<TBC::PhysicsManager::BodyID, ContextObject*> BodyTable;
-	typedef std::pair<TBC::PhysicsManager::BodyID, ContextObject*> BodyPair;
+	typedef BodyTable::value_type BodyPair;
 
 	GameManager* mGameManager;
 
@@ -91,7 +121,7 @@ private:
 	BodyTable mBodyTable;
 	ContextObjectTable mPhysicsUpdateCallbackObjectTable;
 	ContextObjectTable mTickCallbackObjectTable;
-	AlarmMap mAlarmCallbackObjectMap;
+	AlarmSet mAlarmCallbackObjectSet;
 
 	LOG_CLASS_DECLARE();
 };

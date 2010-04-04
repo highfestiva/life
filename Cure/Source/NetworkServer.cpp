@@ -87,7 +87,7 @@ void NetworkServer::Disconnect(UserAccount::AccountId pAccountId, const str& pRe
 		{
 			Cure::Packet* lPacket = GetPacketFactory()->Allocate();
 			Parent::SendStatusMessage(lUser->GetSocket(), 0, Cure::REMOTE_NO_CONNECTION,
-				Cure::MessageStatus::INFO_LOGIN, wstrutil::ToOwnCode(pReason), lPacket);
+				Cure::MessageStatus::INFO_LOGIN, wstrutil::Encode(pReason), lPacket);
 			GetPacketFactory()->Release(lPacket);
 		}
 		else if (lUser->GetSocket())
@@ -195,7 +195,7 @@ NetworkServer::ReceiveStatus NetworkServer::ReceiveFirstPacket(Packet* pPacket, 
 			{
 				lStatus = RECEIVE_PARSE_ERROR;
 				mLog.Warningf(_T("Got bad data from %s on %s."),
-					lUser? (_T("logged in user ")+wstrutil::ToCurrentCode(lUser->GetLoginName())).c_str() :
+					lUser? (_T("logged in user ")+strutil::Encode(lUser->GetLoginName())).c_str() :
 						_T("not logged in user"),
 					lSocket->GetTargetAddress().GetAsString().c_str());
 				// TODO: take action on bad network data?
@@ -306,13 +306,13 @@ RemoteStatus NetworkServer::ManageLogin(UdpVSocket* pSocket, Packet* pPacket)
 	{
 		case REMOTE_OK:
 		{
-			mLog.Info(_T("Logging in user ")+wstrutil::ToCurrentCode(lLoginName)+_T("."));
+			mLog.Info(_T("Logging in user ")+strutil::Encode(lLoginName)+_T("."));
 			Login(lLoginName, lAccountId, pSocket, pPacket);
 		}
 		break;
 		case REMOTE_LOGIN_ALREADY:
 		{
-			mLog.Warning(_T("User ")+wstrutil::ToCurrentCode(lLoginName)+_T(" already logged in."));
+			mLog.Warning(_T("User ")+strutil::Encode(lLoginName)+_T(" already logged in."));
 			Parent::SendStatusMessage(pSocket, 0, lStatus, Cure::MessageStatus::INFO_LOGIN,
 				L"You have already been logged in.", pPacket);
 			DropSocket(pSocket);
@@ -320,7 +320,7 @@ RemoteStatus NetworkServer::ManageLogin(UdpVSocket* pSocket, Packet* pPacket)
 		break;
 		case REMOTE_LOGIN_ERRONOUS_DATA:
 		{
-			mLog.Warning(_T("User ")+wstrutil::ToCurrentCode(lLoginName)+_T(" attempted with wrong username or password."));
+			mLog.Warning(_T("User ")+strutil::Encode(lLoginName)+_T(" attempted with wrong username or password."));
 			Parent::SendStatusMessage(pSocket, 0, lStatus, Cure::MessageStatus::INFO_LOGIN,
 				L"Wrong username or password. Try again.", pPacket);
 			DropSocket(pSocket);
@@ -328,7 +328,7 @@ RemoteStatus NetworkServer::ManageLogin(UdpVSocket* pSocket, Packet* pPacket)
 		break;
 		case REMOTE_LOGIN_BAN:
 		{
-			mLog.Warning(_T("User ")+wstrutil::ToCurrentCode(lLoginName)+_T(" tried logging in, but was banned."));
+			mLog.Warning(_T("User ")+strutil::Encode(lLoginName)+_T(" tried logging in, but was banned."));
 			Parent::SendStatusMessage(pSocket, 0, lStatus, Cure::MessageStatus::INFO_LOGIN,
 				L"Sorry, you are banned. Try again later.", pPacket);
 			DropSocket(pSocket);
@@ -337,7 +337,7 @@ RemoteStatus NetworkServer::ManageLogin(UdpVSocket* pSocket, Packet* pPacket)
 		case REMOTE_NO_CONNECTION:	// TODO: check me out!
 		case REMOTE_UNKNOWN:
 		{
-			mLog.Error(_T("An unknown error occurred when user ")+wstrutil::ToCurrentCode(lLoginName)+_T(" tried logging in."));
+			mLog.Error(_T("An unknown error occurred when user ")+strutil::Encode(lLoginName)+_T(" tried logging in."));
 			Parent::SendStatusMessage(pSocket, 0, lStatus, Cure::MessageStatus::INFO_LOGIN,
 				L"Unknown login error, please contact support.", pPacket);
 			DropSocket(pSocket);
@@ -474,7 +474,7 @@ void NetworkServer::KillDeadSockets()
 				UserConnection* lUser = y->second;
 				UserAccount::AccountId lUserAccountId = lUser->GetAccountId();
 				mLog.Infof(_T("Dropping user %s (ID %i) due to network keepalive timeout."),
-					wstrutil::ToCurrentCode(lUser->GetLoginName()).c_str(), lUserAccountId);
+					strutil::Encode(lUser->GetLoginName()).c_str(), lUserAccountId);
 				Disconnect(lUserAccountId, _T("Network timeout"), true);
 			}
 			else
@@ -537,7 +537,7 @@ void NetworkServer::OnCloseSocket(UdpVSocket* pSocket)
 		UserConnection* lUser = x->second;
 		UserAccount::AccountId lUserAccountId = lUser->GetAccountId();
 		mLog.Infof(_T("Placing user %s (ID %i) in drop zone (due to OOB? kill). Will drop next frame."),
-			wstrutil::ToCurrentCode(lUser->GetLoginName()).c_str(), lUserAccountId);
+			strutil::Encode(lUser->GetLoginName()).c_str(), lUserAccountId);
 		RemoveUser(lUserAccountId, false);
 		mDropUserList.insert(lUserAccountId);
 	}

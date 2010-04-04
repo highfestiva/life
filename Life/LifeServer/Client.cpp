@@ -74,7 +74,7 @@ void Client::SetAvatarId(Cure::GameObjectId pAvatarId)
 void Client::SendAvatar(const Cure::UserAccount::AvatarId& pAvatarId, Cure::Packet* pPacket)
 {
 	mNetworkAgent->SendStatusMessage(mUserConnection->GetSocket(), 0, Cure::REMOTE_OK,
-		Cure::MessageStatus::INFO_AVATAR, wstrutil::ToOwnCode(pAvatarId), pPacket);
+		Cure::MessageStatus::INFO_AVATAR, wstrutil::Encode(pAvatarId), pPacket);
 }
 
 

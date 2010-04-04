@@ -440,13 +440,11 @@ bool ChunkyClassLoader::LoadElementCallback(TBC::ChunkyType pType, uint32 pSize,
 		{
 			lPhysicsIndex = Endian::BigToHost(*(int32*)&lBuffer[lIndex]);
 			lIndex += sizeof(lPhysicsIndex);
-			wstr lUnicodeMeshName;
 			const size_t lExcludeByteCount = (1+7+11)*4;	// Index+transform+colors.
-			int lStrSize = PackerUnicodeString::Unpack(&lUnicodeMeshName, &lBuffer[lIndex], pSize-lExcludeByteCount);
+			int lStrSize = PackerUnicodeString::Unpack(lMeshBaseName, &lBuffer[lIndex], pSize-lExcludeByteCount);
 			lStrSize = (lStrSize+3)&(~3);
 			lOk = (lStrSize < (int)(pSize-lExcludeByteCount));
 			lIndex += lStrSize;
-			lMeshBaseName = wstrutil::ToCurrentCode(lUnicodeMeshName);
 		}
 		if (lOk)
 		{
@@ -484,8 +482,8 @@ bool ChunkyClassLoader::LoadElementCallback(TBC::ChunkyType pType, uint32 pSize,
 			lOk = (lIndex <= (int)(pSize-2*lTextureCount-2));
 			for (int x = 0; lOk && x < lTextureCount; ++x)
 			{
-				wstr lTextureName;
-				int lStrSize = PackerUnicodeString::Unpack(&lTextureName, &lBuffer[lIndex], pSize-lIndex);
+				str lTextureName;
+				int lStrSize = PackerUnicodeString::Unpack(lTextureName, &lBuffer[lIndex], pSize-lIndex);
 				lStrSize = (lStrSize+3)&(~3);
 				lOk = (lStrSize <= (int)(pSize-2));
 				lIndex += lStrSize;
@@ -494,7 +492,7 @@ bool ChunkyClassLoader::LoadElementCallback(TBC::ChunkyType pType, uint32 pSize,
 		}
 		if (lOk)
 		{
-			int lStrSize = PackerUnicodeString::Unpack(&lMaterial.mShaderName, &lBuffer[lIndex], pSize-lIndex);
+			int lStrSize = PackerUnicodeString::Unpack(lMaterial.mShaderName, &lBuffer[lIndex], pSize-lIndex);
 			lStrSize = (lStrSize+3)&(~3);
 			lOk = (lStrSize == (int)(pSize-lIndex));
 			lIndex += lStrSize;

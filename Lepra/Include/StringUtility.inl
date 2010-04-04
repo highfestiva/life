@@ -372,24 +372,8 @@ STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::DumpData(const uint8* pData, size_t pLe
 		lDataString[x*2+0] = lHexTable[pData[x]>>4];
 		lDataString[x*2+1] = lHexTable[pData[x]&0xF];
 	}
-	return (ToOwnCode(lDataString));
+	return (Encode(lDataString));
 }
-
-#ifdef LEPRA_UNICODE
-
-STR_UTIL_TEMPLATE const wstr STR_UTIL_QUAL::ToCurrentCode(const _String& pString)
-{
-	return (wstrutil::ToOwnCode(pString));
-}
-
-#else // !LEPRA_UNICODE
-
-STR_UTIL_TEMPLATE const astr STR_UTIL_QUAL::ToCurrentCode(const _String& pString)
-{
-	return (astrutil::ToOwnCode(pString));
-}
-
-#endif // LEPRA_UNICODE/!LEPRA_UNICODE
 
 
 

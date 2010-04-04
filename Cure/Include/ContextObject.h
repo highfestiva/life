@@ -6,9 +6,10 @@
 
 #pragma once
 
+#include "../../TBC/Include/PhysicsManager.h"
+#include <hash_map>
 #include <list>
 #include "../../Lepra/Include/String.h"
-#include "../../TBC/Include/PhysicsManager.h"
 #include "Cure.h"
 #include "PositionalData.h"
 
@@ -19,6 +20,7 @@ namespace TBC
 class ChunkyPhysics;
 class ChunkyBoneGeometry;
 class PhysicsEngine;
+class PhysicsTrigger;
 }
 
 
@@ -62,6 +64,9 @@ public:
 	void AddAttribute(ContextObjectAttribute* pAttribute);
 	void RemoveAttribute(ContextObjectAttribute* pAttribute);
 
+	void AddTrigger(TBC::PhysicsManager::TriggerID pTriggerId, const void*);
+	const void* GetTrigger(TBC::PhysicsManager::TriggerID pTriggerId) const;
+
 	bool UpdateFullPosition(const ObjectPositionalData*& pPositionalData);
 	void SetFullPosition(const ObjectPositionalData& pPositionalData);
 	void SetInitialTransform(const TransformationF& pTransformation);
@@ -83,7 +88,7 @@ public:
 
 	virtual void StartLoading() = 0;
 	virtual void OnTick(float pFrameTime) = 0;
-	virtual void OnAlarm(int pAlarmId) = 0;
+	virtual void OnAlarm(int pAlarmId, void* pExtraData) = 0;
 	virtual void OnPhysicsTick();
 
 protected:
@@ -91,6 +96,9 @@ protected:
 	void AttachToObject(TBC::ChunkyBoneGeometry* pBoneGeometry1, ContextObject* pObject2, TBC::ChunkyBoneGeometry* pBoneGeometry2, bool pSend);
 	bool IsAttachedTo(ContextObject* pObject) const;
 	void AddAttachment(ContextObject* pObject, TBC::PhysicsManager::JointID pJoint, TBC::PhysicsEngine* pEngine);
+
+	void AddChild(ContextObject* pObject);
+	void SetupChildTriggerHandlers();
 
 	virtual bool IsSameInstance(TBC::PhysicsManager::ForceFeedbackListener* pOther);
 
@@ -108,12 +116,16 @@ protected:
 		TBC::PhysicsEngine* mEngine;
 	};
 	typedef std::list<Connection> ConnectionList;
+	typedef std::hash_map<TBC::PhysicsManager::TriggerID, const void*> TriggerMap;
+	typedef std::list<ContextObject*> ChildList;
 
 	ContextManager* mManager;
 	GameObjectId mInstanceId;
 	str mClassId;
 	NetworkObjectType mNetworkObjectType;
 	void* mExtraData;
+	ChildList mChildList;
+	TriggerMap mTriggerMap;
 	bool mIsLoaded;
 	AttributeArray mAttributeArray;
 	TBC::ChunkyPhysics* mPhysics;

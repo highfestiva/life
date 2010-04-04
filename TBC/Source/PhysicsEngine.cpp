@@ -422,7 +422,7 @@ unsigned PhysicsEngine::GetControllerIndex() const
 
 float PhysicsEngine::GetValue() const
 {
-	return (mValue[0]);
+	return (mValue[mControllerIndex]);
 }
 
 const float* PhysicsEngine::GetValues() const

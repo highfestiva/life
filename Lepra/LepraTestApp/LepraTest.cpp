@@ -125,8 +125,8 @@ bool TestString(const LogDecorator& pAccount)
 		lContext = _T("Ansi/Unicode conversion");
 		const char* lTestData1	=  "Knastest !\"#%&/()=?'-_+\\}][{$@'*.:,;~^<>|";
 		const wchar_t* lTestData2	= L"Knastest !\"#%&/()=?'-_+\\}][{$@'*.:,;~^<>|";
-		wstr lUnicode = wstrutil::ToOwnCode(astr(lTestData1));
-		astr lAnsi = astrutil::ToOwnCode(wstr(lTestData2));
+		wstr lUnicode = wstrutil::Encode(astr(lTestData1));
+		astr lAnsi = astrutil::Encode(wstr(lTestData2));
 		lTestOk = (lAnsi == lTestData1 && lUnicode == lTestData2);
 		assert(lTestOk);
 	}

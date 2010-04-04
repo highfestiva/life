@@ -362,7 +362,7 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 					int lLineNumber = 1;
 					for (; lResult == 0 && lFile.ReadLine(lLine) == IO_OK; ++lLineNumber)
 					{
-						const str lConvertedLine = wstrutil::ToCurrentCode(lLine);
+						const str lConvertedLine = strutil::Encode(lLine);
 						lResult = ExecuteCommand(lConvertedLine);
 					}
 					if (lResult == 0)
@@ -591,7 +591,7 @@ bool ConsoleManager::SaveApplicationConfigFile(File* pFile, const wstr& pUserCon
 	bool lSaved = SaveConfigFile(pFile, lVariableList, pUserConfig);
 	if (pUserConfig.empty())
 	{
-		pFile->WriteString(wstrutil::ToOwnCode(_T("\npush \"echo 4 Welcome ")+SystemManager::QueryFullUserName()+_T("!\"\n")));
+		pFile->WriteString(wstrutil::Encode(_T("\npush \"echo 4 Welcome ")+SystemManager::QueryFullUserName()+_T("!\"\n")));
 	}
 	return (lSaved);
 }
@@ -652,7 +652,7 @@ bool ConsoleManager::SaveConfigFile(File* pFile, std::list<str>& pVariableList, 
 			lDefaultValue = _T('"')+lDefaultValue+_T('"');
 		}
 		lDefaultValue = (lValue != lDefaultValue)? _T("\t// Default is ")+lDefaultValue+_T(".\n") : _T("\n");
-		pFile->WriteString(wstrutil::ToOwnCode(_T("#")+lVariable+_T(" ")+lValue+lDefaultValue));
+		pFile->WriteString(wstrutil::Encode(_T("#")+lVariable+_T(" ")+lValue+lDefaultValue));
 	}
 	pFile->WriteString<wchar_t>(L"\nset-stdout-log-level 1\n");
 	pFile->WriteString<wchar_t>(L"\n" USER_SECTION_MARK L" -- User config. Everything but variable values will be overwritten above this section!\n");

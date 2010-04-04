@@ -515,8 +515,11 @@ class PhysWriter(ChunkyWriter):
 
 
         def _writetrigger(self, node):
-                types = {"move":1}
+                types = {"movement":1}
                 self._writeint(types[node.get_fixed_attribute("type")])
+                self._writestr(node.get_fixed_attribute("function"))
+                self._writeint(node.get_fixed_attribute("trigger_group_index"))
+                self._writeint(node.get_fixed_attribute("priority"))
 
                 triggered_by_name = node.get_fixed_attribute("triggered_by")
                 triggered_by = self._findglobalnode(triggered_by_name)

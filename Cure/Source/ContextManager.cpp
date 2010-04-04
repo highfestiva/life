@@ -197,23 +197,37 @@ void ContextManager::DisableTickCallback(ContextObject* pObject)
 	mTickCallbackObjectTable.erase(pObject->GetInstanceId());
 }
 
-void ContextManager::SetAlarmCallback(ContextObject* pObject, int pAlarmId, float pSeconds)
+void ContextManager::AddAlarmCallback(ContextObject* pObject, int pAlarmId, float pSeconds, void* pExtraData)
 {
 	const TimeManager* lTime = ((const GameManager*)mGameManager)->GetConstTimeManager();
 	int lFrame = lTime->GetCurrentPhysicsFrame()+lTime->ConvertSecondsToPhysicsFrames(pSeconds);
-	mAlarmCallbackObjectMap.insert(AlarmPair(lFrame, AlarmInfo(pObject, pAlarmId)));
+	mAlarmCallbackObjectSet.insert(Alarm(pObject, lFrame, pAlarmId, pExtraData));
+}
+
+void ContextManager::CancelPendingAlarmCallbacksById(ContextObject* pObject, int pAlarmId)
+{
+	AlarmSet::iterator x = mAlarmCallbackObjectSet.begin();
+	while (x != mAlarmCallbackObjectSet.end())
+	{
+		if (x->mObject == pObject && x->mAlarmId == pAlarmId)
+		{
+			mAlarmCallbackObjectSet.erase(x++);
+		}
+		else
+		{
+			++x;
+		}
+	}
 }
 
 void ContextManager::CancelPendingAlarmCallbacks(ContextObject* pObject)
 {
-	AlarmMap::iterator x = mAlarmCallbackObjectMap.begin();
-	while (x != mAlarmCallbackObjectMap.end())
+	AlarmSet::iterator x = mAlarmCallbackObjectSet.begin();
+	while (x != mAlarmCallbackObjectSet.end())
 	{
-		if ((*x).second.mObject == pObject)
+		if (x->mObject == pObject)
 		{
-			AlarmMap::iterator y = x;
-			++x;
-			mAlarmCallbackObjectMap.erase(y);
+			mAlarmCallbackObjectSet.erase(x++);
 		}
 		else
 		{
@@ -301,17 +315,14 @@ void ContextManager::DispatchAlarmCallbacks()
 
 	int lCurrentPhysicsFrame = mGameManager->GetConstTimeManager()->GetCurrentPhysicsFrame();
 
-	// Extract overdue alarms.
-	std::list<AlarmInfo> lCallbackList;
-	AlarmMap::iterator x = mAlarmCallbackObjectMap.begin();
-	while (x != mAlarmCallbackObjectMap.end())
+	std::list<Alarm> lCallbackList;
+	AlarmSet::iterator x = mAlarmCallbackObjectSet.begin();
+	while (x != mAlarmCallbackObjectSet.end())
 	{
-		if (lCurrentPhysicsFrame-(*x).first <= 0)
+		if (x->mFrameTime - lCurrentPhysicsFrame <= 0)
 		{
-			lCallbackList.push_back((*x).second);
-			AlarmMap::iterator y = x;
-			++x;
-			mAlarmCallbackObjectMap.erase(y);
+			lCallbackList.push_back(*x);
+			mAlarmCallbackObjectSet.erase(x++);
 		}
 		else
 		{
@@ -320,26 +331,11 @@ void ContextManager::DispatchAlarmCallbacks()
 	}
 
 	// Callback alarms.
-	while (!lCallbackList.empty())
+	for (std::list<Alarm>::iterator x = lCallbackList.begin(); x != lCallbackList.end(); ++x)
 	{
-		const AlarmInfo& lAlarm = lCallbackList.front();
-		lAlarm.mObject->OnAlarm(lAlarm.mAlarmId);
-		lCallbackList.erase(lCallbackList.begin());
+		const Alarm& lAlarm = *x;
+		lAlarm.mObject->OnAlarm(lAlarm.mAlarmId, lAlarm.mExtraData);
 	}
-}
-
-
-
-ContextManager::AlarmInfo::AlarmInfo():
-	mObject(0),
-	mAlarmId(0)
-{
-}
-
-ContextManager::AlarmInfo::AlarmInfo(ContextObject* pObject, int pAlarmId):
-	mObject(pObject),
-	mAlarmId(pAlarmId)
-{
 }
 
 

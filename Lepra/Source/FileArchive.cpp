@@ -129,8 +129,8 @@ void FileArchive::CloseArchive()
 			if (mIOType == WRITE_ONLY)
 			{
 				// Replace the original file with the temp file.
-				remove(astrutil::ToOwnCode(mArchiveFileName).c_str());
-				rename(astrutil::ToOwnCode(mTempFileName).c_str(), astrutil::ToOwnCode(mArchiveFileName).c_str());
+				remove(astrutil::Encode(mArchiveFileName).c_str());
+				rename(astrutil::Encode(mTempFileName).c_str(), astrutil::Encode(mArchiveFileName).c_str());
 			}
 		}
 	}
@@ -174,17 +174,17 @@ void FileArchive::CloseAndRemoveArchive()
 	if (mIOType == READ_ONLY)
 	{
 #ifdef LEPRA_POSIX
-		::remove(astrutil::ToOwnCode(mArchiveFileName).c_str()); // TODO: Find a unicode-version of this.
+		::remove(astrutil::Encode(mArchiveFileName).c_str()); // TODO: Find a unicode-version of this.
 #else
-		::_wremove(wstrutil::ToOwnCode(mArchiveFileName).c_str());
+		::_wremove(wstrutil::Encode(mArchiveFileName).c_str());
 #endif
 	}
 	else
 	{
 #ifdef LEPRA_POSIX
-		::remove(astrutil::ToOwnCode(mTempFileName).c_str()); // TODO: Find a unicode-version of this.
+		::remove(astrutil::Encode(mTempFileName).c_str()); // TODO: Find a unicode-version of this.
 #else
-		::_wremove(wstrutil::ToOwnCode(mTempFileName).c_str());
+		::_wremove(wstrutil::Encode(mTempFileName).c_str());
 #endif
 	}
 

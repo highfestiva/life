@@ -175,7 +175,7 @@ void StdioConsoleLogListener::WriteLog(const str& pFullMessage, Log::LogLevel pL
 	lAttributes = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE;
 	::SetConsoleTextAttribute(lStdOut, lAttributes);
 #else // !LEPRA_WINDOWS
-	::printf("%s", astrutil::ToOwnCode(pFullMessage).c_str());
+	::printf("%s", astrutil::Encode(pFullMessage).c_str());
 #endif // LEPRA_WINDOWS/!LEPRA_WINDOWS
 }
 
@@ -218,7 +218,7 @@ void InteractiveStdioConsoleLogListener::WriteLog(const str& pFullMessage, Log::
 	::printf("\r");
 	mStdioLogListener.WriteLog(pFullMessage, pLevel);
 
-	::printf("%s", astrutil::ToOwnCode(mAutoPrompt).c_str());
+	::printf("%s", astrutil::Encode(mAutoPrompt).c_str());
 
 #ifdef LEPRA_WINDOWS
 	SHORT x = lConsoleInfo.dwCursorPosition.X;
@@ -242,7 +242,7 @@ void InteractiveStdioConsoleLogListener::WriteLog(const str& pFullMessage, Log::
 
 void InteractiveStdioConsoleLogListener::OnLogRawMessage(const str& pText)
 {
-	::printf("%s", astrutil::ToOwnCode(pText).c_str());
+	::printf("%s", astrutil::Encode(pText).c_str());
 }
 
 

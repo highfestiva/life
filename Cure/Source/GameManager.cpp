@@ -403,7 +403,7 @@ bool GameManager::IsHighImpact(float pScaleFactor, const ContextObject* pObject,
 	bool lIsHighImpact = (lNormalizedForceFactor < -16*pScaleFactor || lNormalizedForceFactor >= 2*pScaleFactor || lNormalizedTorqueFactor > 3*pScaleFactor);
 	if (lIsHighImpact)
 	{
-		log_volatile(mLog.Debugf(_T("Collided hard with something dynamic. F=%f, T=%f"),
+		log_volatile(mLog.Tracef(_T("Collided hard with something dynamic. F=%f, T=%f"),
 			lNormalizedForceFactor, lNormalizedTorqueFactor));
 	}
 	return (lIsHighImpact);

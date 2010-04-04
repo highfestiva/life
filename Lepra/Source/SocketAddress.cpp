@@ -233,9 +233,9 @@ bool SocketAddress::ResolveHost(const str& pHostname)
 	}
 #ifdef LEPRA_NETWORK_IPV6
 	// TODO: fixme!
-	else if ((lIp = inet_addr(astrutil::ToOwnCode(pHostname).c_str())) != 0xFFFFFFFF)
+	else if ((lIp = inet_addr(astrutil::Encode(pHostname).c_str())) != 0xFFFFFFFF)
 #else // IPV4
-	else if ((lIp = inet_addr(astrutil::ToOwnCode(pHostname).c_str())) != 0xFFFFFFFF)
+	else if ((lIp = inet_addr(astrutil::Encode(pHostname).c_str())) != 0xFFFFFFFF)
 #endif // IPv6/IPV4
 	{
 		lOk = true;

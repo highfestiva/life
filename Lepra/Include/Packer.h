@@ -75,7 +75,9 @@ class PackerUnicodeString
 {
 public:
 	static int Pack(uint8* pDestination, const wstr& pSource);
-	static int Unpack(wstr* pDestination, const uint8* pSource, int pSize);	// Destination may be NULL.
+	static int UnpackRaw(wstr* pDestination, const uint8* pSource, int pSize);	// Destination may be NULL.
+	static int Unpack(wstr& pDestination, const uint8* pSource, int pSize);
+	static int Unpack(astr& pDestination, const uint8* pSource, int pSize);
 };
 
 

@@ -115,7 +115,7 @@ Packet::ParseResult Packet::Parse(unsigned pOffset)
 		{
 			mLog.Errorf(_T("  DATA: %s\n  STR:  %s"),
 				strutil::DumpData(lData, mPacketSize).c_str(),
-				astrutil::ToCurrentCode(astrutil::ReplaceCtrlChars(astr((const char*)lData, mPacketSize), '.')).c_str());
+				strutil::Encode(astrutil::ReplaceCtrlChars(astr((const char*)lData, mPacketSize), '.')).c_str());
 		}
 	}
 	return (lOk? PARSE_OK : PARSE_ERROR);
@@ -322,7 +322,7 @@ int MessageLoginRequest::Parse(const uint8* pData, int pSize)
 		int lSize = -1;
 		if (pSize >= 1+4+22)
 		{
-			lSize = PackerUnicodeString::Unpack(0, &mData[lTotalSize], pSize-1-22);
+			lSize = PackerUnicodeString::UnpackRaw(0, &mData[lTotalSize], pSize-1-22);
 			lTotalSize += lSize;
 		}
 		if (lSize > 0)
@@ -354,7 +354,7 @@ int MessageLoginRequest::Store(Packet* pPacket, const wstr& pLoginName, const Ma
 
 void MessageLoginRequest::GetLoginName(wstr& pLoginName)
 {
-	PackerUnicodeString::Unpack(&pLoginName, &mData[1], 1024);
+	PackerUnicodeString::Unpack(pLoginName, &mData[1], 1024);
 }
 
 MangledPassword MessageLoginRequest::GetPassword()
@@ -387,7 +387,7 @@ int MessageStatus::Parse(const uint8* pData, int pSize)
 		int lSize = -1;
 		if (pSize >= (int)(1+sizeof(uint32)*3+4))
 		{
-			lSize = PackerUnicodeString::Unpack(0, &mData[lTotalSize], pSize-lTotalSize);
+			lSize = PackerUnicodeString::UnpackRaw(0, &mData[lTotalSize], pSize-lTotalSize);
 			lTotalSize += lSize;
 		}
 		if (lSize <= 0)
@@ -435,7 +435,7 @@ int32 MessageStatus::GetInteger() const
 
 void MessageStatus::GetMessageString(wstr& pMessage) const
 {
-	PackerUnicodeString::Unpack(&pMessage, &mData[1+sizeof(int32)*3], 1024);
+	PackerUnicodeString::Unpack(pMessage, &mData[1+sizeof(int32)*3], 1024);
 }
 
 
@@ -555,7 +555,7 @@ int MessageCreateObject::Parse(const uint8* pData, int pSize)
 			int lSize = -1;
 			if (pSize >= lTotalSize+4)
 			{
-				lSize = PackerUnicodeString::Unpack(0, &mData[lTotalSize], pSize-lTotalSize);
+				lSize = PackerUnicodeString::UnpackRaw(0, &mData[lTotalSize], pSize-lTotalSize);
 				lTotalSize += lSize;
 			}
 			if (lSize <= 0)
@@ -584,7 +584,7 @@ void MessageCreateObject::GetTransformation(TransformationF& pTransformation) co
 
 void MessageCreateObject::GetClassId(wstr& pClassId) const
 {
-	PackerUnicodeString::Unpack(&pClassId, &mData[1+sizeof(int32)+7*sizeof(float)], 1024);
+	PackerUnicodeString::Unpack(pClassId, &mData[1+sizeof(int32)+7*sizeof(float)], 1024);
 }
 
 

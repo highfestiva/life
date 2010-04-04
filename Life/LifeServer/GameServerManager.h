@@ -13,6 +13,7 @@
 #include "../../Cure/Include/Packet.h"
 #include "../../Cure/Include/UserAccountManager.h"
 #include "../../Lepra/Include/LogListener.h"
+#include "../GameManager.h"
 #include "Client.h"
 
 
@@ -22,10 +23,10 @@ namespace Life
 
 
 
-class GameServerManager: public Cure::GameTicker, public Cure::GameManager, public Cure::NetworkServer::LoginListener
+class GameServerManager: public Cure::GameTicker, public GameManager, public Cure::NetworkServer::LoginListener
 {
 public:
-	typedef Cure::GameManager Parent;
+	typedef GameManager Parent;
 
 	GameServerManager(Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
 		InteractiveConsoleLogListener* pConsoleLogger);

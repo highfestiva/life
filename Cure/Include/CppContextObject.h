@@ -30,8 +30,8 @@ protected:
 	TBC::ChunkyPhysics* GetPhysics() const;
 
 	void OnTick(float pFrameTime);
-	void OnAlarm(int pAlarmId);
-	void OnTrigger(TBC::PhysicsManager::TriggerID pTrigger, TBC::PhysicsManager::ForceFeedbackListener* pBody);
+	void OnAlarm(int pAlarmId, void* pExtraData);
+	void OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, TBC::PhysicsManager::ForceFeedbackListener* pBody);
 	void OnForceApplied(TBC::PhysicsManager::ForceFeedbackListener* pOtherObject,
 		const Vector3DF& pForce, const Vector3DF& pTorque);
 
@@ -39,8 +39,11 @@ protected:
 	void OnLoadPhysics(UserPhysicsResource* pPhysicsResource);
 
 private:
+	typedef std::hash_map<int, const TBC::PhysicsTrigger*> ActiveTriggerGroupMap;
+
 	UserClassResource* mClassResource;
 	UserPhysicsResource* mPhysicsResource;
+	ActiveTriggerGroupMap mActiveTriggerGroupMap;
 
 	LOG_CLASS_DECLARE();
 };

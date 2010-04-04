@@ -223,15 +223,10 @@ bool ChunkyLoader::AllocLoadChunkyList(FileElementList& pLoadList, int64 pChunkE
 							}
 							if (lOk)
 							{
-								wstr lUnicodeString;
-								int lStringLength = PackerUnicodeString::Unpack(&lUnicodeString, lString, lSize);
+								int lStringLength = PackerUnicodeString::Unpack(lElement.mString[y], lString, lSize);
 								lOk = (lStringLength == (int)lSize || lStringLength == (int)lSize-2);
 								assert(lOk);
-								if (lOk)
-								{
-									lElement.mString[y] = wstrutil::ToCurrentCode(lUnicodeString);
-								}
-								else
+								if (!lOk)
 								{
 									mLog.AError("Could not unpack string!");
 								}
@@ -301,7 +296,7 @@ bool ChunkyLoader::AllocLoadChunkyList(FileElementList& pLoadList, int64 pChunkE
 
 bool ChunkyLoader::SaveSingleString(ChunkyType pType, const str& pString)
 {
-	const uint32 lSize = PackerUnicodeString::Pack(0, wstrutil::ToOwnCode(pString));	// Padding added.
+	const uint32 lSize = PackerUnicodeString::Pack(0, wstrutil::Encode(pString));	// Padding added.
 	int64 lChunkEndPosition = 0;
 	bool lOk = true;
 	if (lOk)
@@ -312,7 +307,7 @@ bool ChunkyLoader::SaveSingleString(ChunkyType pType, const str& pString)
 	{
 		uint8* lData = new uint8[lSize];
 		::memset(lData, 0, lSize);
-		PackerUnicodeString::Pack(lData, wstrutil::ToOwnCode(pString));
+		PackerUnicodeString::Pack(lData, wstrutil::Encode(pString));
 		lOk = (mFile->WriteData(lData, lSize) == IO_OK);
 		delete[] (lData);
 	}

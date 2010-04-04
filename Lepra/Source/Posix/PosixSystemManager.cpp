@@ -56,13 +56,13 @@ str SystemManager::GetCurrentDirectory()
 	{
 		mLog.AError("Failed in GetCurrentDirectory()");
 	}
-	str lString(astrutil::ToCurrentCode(astr(lBuffer)));
+	str lString(strutil::Encode(astr(lBuffer)));
 	return (lString);
 }
 
 str SystemManager::GetUserDirectory()
 {
-	return (astrutil::ToCurrentCode(astr(::getenv("HOME"))));
+	return (strutil::Encode(astr(::getenv("HOME"))));
 }
 
 str SystemManager::GetIoDirectory(const str& pAppName)
@@ -82,7 +82,7 @@ str SystemManager::GetLoginName()
 	{
 		lLoginName = "<Unknown>";
 	}
-	return (astrutil::ToCurrentCode(astr(lLoginName)));
+	return (strutil::Encode(astr(lLoginName)));
 }
 
 str SystemManager::QueryFullUserName()
@@ -95,7 +95,7 @@ void SystemManager::WebBrowseTo(const str& pUrl)
 {
 	if (::fork() == 0)
 	{
-		::system(("sensible-browser "+astrutil::ToOwnCode(pUrl)).c_str());
+		::system(("sensible-browser "+astrutil::Encode(pUrl)).c_str());
 		::exit(0);
 	}
 }

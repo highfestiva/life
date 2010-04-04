@@ -2074,7 +2074,7 @@ void DualMuxSocket::AddSocket(DualSocket* pSocket, TcpVSocket* pTcpSocket, UdpVS
 	if (!HashUtil::FindMapObject(mIdSocketMap, pSocket->GetConnectionId()))
 	{
 		log_trace(_T("Adding DualSocket with ID ")+
-			astrutil::ToCurrentCode(astrutil::ReplaceCtrlChars(pSocket->GetConnectionId(), '.'))+
+			strutil::Encode(astrutil::ReplaceCtrlChars(pSocket->GetConnectionId(), '.'))+
 			(pSocket->GetTcpSocket()?_T(" TCP set,"):_T(" no TCP,"))+str()+
 			(pSocket->GetUdpSocket()?_T(" UDP set."):_T(" no UDP.")));
 		mIdSocketMap.insert(std::pair<std::string, DualSocket*>(pSocket->GetConnectionId(), pSocket));
@@ -2082,7 +2082,7 @@ void DualMuxSocket::AddSocket(DualSocket* pSocket, TcpVSocket* pTcpSocket, UdpVS
 	else
 	{
 		log_debug(_T("Appending info to DualSocket with ID ")+
-			astrutil::ToCurrentCode(astrutil::ReplaceCtrlChars(pSocket->GetConnectionId(), '.')) +
+			strutil::Encode(astrutil::ReplaceCtrlChars(pSocket->GetConnectionId(), '.')) +
 			(pSocket->GetTcpSocket()?_T(" TCP set,"):_T(" no TCP,"))+str()+
 			(pSocket->GetUdpSocket()?_T(" UDP set."):_T(" no UDP.")));
 	}

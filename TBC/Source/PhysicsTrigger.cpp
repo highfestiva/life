@@ -18,8 +18,24 @@ namespace TBC
 
 
 
-PhysicsTrigger::PhysicsTrigger(TriggerType pTriggerType):
-	mTriggerType(pTriggerType)
+bool PhysicsTrigger::EngineTrigger::operator==(const EngineTrigger& pOther) const
+{
+	return (mEngine == pOther.mEngine &&
+		mDelay == pOther.mDelay &&
+		mFunction == pOther.mFunction);
+}
+
+size_t PhysicsTrigger::EngineTrigger::Hash() const
+{
+	return ((size_t)mEngine + *(int*)&mDelay + HashString(mFunction.c_str()));
+}
+
+
+
+PhysicsTrigger::PhysicsTrigger(Type pTriggerType):
+	mTriggerType(pTriggerType),
+	mGroupIndex(-1),
+	mPriority(-1)
 {
 }
 
@@ -31,15 +47,14 @@ PhysicsTrigger::~PhysicsTrigger()
 
 PhysicsTrigger* PhysicsTrigger::Load(ChunkyPhysics* pStructure, const void* pData, unsigned pByteCount)
 {
-	const uint32* lData = (const uint32*)pData;
-	if (pByteCount < sizeof(uint32)*3 + Endian::BigToHost(lData[2])*sizeof(uint32))
+	if (pByteCount < sizeof(uint32)*6 /*+ ...*/)
 	{
 		mLog.AError("Could not load; wrong data size.");
 		assert(false);
 		return (0);
 	}
 
-	PhysicsTrigger* lTrigger = new PhysicsTrigger(TRIGGER_TOGGLE);
+	PhysicsTrigger* lTrigger = new PhysicsTrigger(PhysicsTrigger::TRIGGER_MOVEMENT);
 	lTrigger->LoadChunkyData(pStructure, pData);
 	if (lTrigger->GetChunkySize() != pByteCount)
 	{
@@ -53,16 +68,27 @@ PhysicsTrigger* PhysicsTrigger::Load(ChunkyPhysics* pStructure, const void* pDat
 
 
 
-PhysicsTrigger::TriggerType PhysicsTrigger::GetTriggerType() const
-{
-	return (mTriggerType);
-}
-
-PhysicsManager::TriggerID PhysicsTrigger::GetTriggerId() const
+PhysicsManager::TriggerID PhysicsTrigger::GetPhysicsTriggerId() const
 {
 	assert(mTriggerNode->GetTriggerId() != 0);
 	return (mTriggerNode->GetTriggerId());
 }
+
+int PhysicsTrigger::GetGroupIndex() const
+{
+	return (mGroupIndex);
+}
+
+int PhysicsTrigger::GetPriority() const
+{
+	return (mPriority);
+}
+
+const str& PhysicsTrigger::GetTypeName() const
+{
+	return (mTypeName);
+}
+
 
 
 void PhysicsTrigger::SetTriggerGeometry(ChunkyBoneGeometry* pGeometry)
@@ -72,7 +98,7 @@ void PhysicsTrigger::SetTriggerGeometry(ChunkyBoneGeometry* pGeometry)
 
 void PhysicsTrigger::AddControlledEngine(PhysicsEngine* pEngine, float pDelay, str pFunction)
 {
-	Connection lConnection;
+	EngineTrigger lConnection;
 	lConnection.mEngine = pEngine;
 	lConnection.mDelay = pDelay;
 	lConnection.mFunction = pFunction;
@@ -84,29 +110,23 @@ int PhysicsTrigger::GetControlledEngineCount() const
 	return (mConnectionArray.size());
 }
 
-PhysicsEngine* PhysicsTrigger::GetControlledEngine(int pIndex) const
+const PhysicsTrigger::EngineTrigger& PhysicsTrigger::GetControlledEngine(int pIndex) const
 {
 	assert((size_t)pIndex < mConnectionArray.size());
-	return (mConnectionArray[pIndex].mEngine);
-}
-
-str PhysicsTrigger::GetControlledFunction(int pIndex) const
-{
-	assert((size_t)pIndex < mConnectionArray.size());
-	return (mConnectionArray[pIndex].mFunction);
+	return (mConnectionArray[pIndex]);
 }
 
 
 
 unsigned PhysicsTrigger::GetChunkySize() const
 {
-	size_t lStringSize = 0;
+	size_t lStringSize = PackerUnicodeString::Pack(0, wstrutil::Encode(mTypeName));
 	ConnectionArray::const_iterator x = mConnectionArray.begin();
 	for (; x != mConnectionArray.end(); ++x)
 	{
-		lStringSize += PackerUnicodeString::Pack(0, wstrutil::ToOwnCode(x->mFunction));
+		lStringSize += PackerUnicodeString::Pack(0, wstrutil::Encode(x->mFunction));
 	}
-	return ((unsigned)(sizeof(uint32) * 3 +
+	return ((unsigned)(sizeof(uint32) * 5 +
 		(sizeof(uint32)+sizeof(float)) * mConnectionArray.size() +
 		lStringSize));
 }
@@ -114,18 +134,21 @@ unsigned PhysicsTrigger::GetChunkySize() const
 void PhysicsTrigger::SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const
 {
 	uint32* lData = (uint32*)pData;
-	lData[0] = Endian::HostToBig(GetTriggerType());
-	lData[1] = Endian::HostToBig(pStructure->GetIndex(mTriggerNode));
-	lData[2] = Endian::HostToBig((uint32)mConnectionArray.size());
-	int y = 3;
+	int i = 0;
+	lData[i++] = Endian::HostToBig(mTriggerType);
+	i += PackerUnicodeString::Pack((uint8*)&lData[i], strutil::Encode(mTypeName));
+	lData[i++] = Endian::HostToBig(mGroupIndex);
+	lData[i++] = Endian::HostToBig(mPriority);
+	lData[i++] = Endian::HostToBig(pStructure->GetIndex(mTriggerNode));
+	lData[i++] = Endian::HostToBig((uint32)mConnectionArray.size());
 	for (int x = 0; x < (int)mConnectionArray.size(); ++x)
 	{
-		const Connection& lConnection = mConnectionArray[x];
-		lData[y++] = Endian::HostToBig(pStructure->GetEngineIndex(lConnection.mEngine));
-		lData[y++] = Endian::HostToBigF(lConnection.mDelay);
-		int lStringRawLength = PackerUnicodeString::Pack((uint8*)&lData[y], wstrutil::ToOwnCode(lConnection.mFunction));
+		const EngineTrigger& lConnection = mConnectionArray[x];
+		lData[i++] = Endian::HostToBig(pStructure->GetEngineIndex(lConnection.mEngine));
+		lData[i++] = Endian::HostToBigF(lConnection.mDelay);
+		int lStringRawLength = PackerUnicodeString::Pack((uint8*)&lData[i], wstrutil::Encode(lConnection.mFunction));
 		assert(lStringRawLength % sizeof(lData[0]) == 0);
-		y += lStringRawLength / sizeof(lData[0]);
+		i += lStringRawLength / sizeof(lData[0]);
 	}
 }
 
@@ -133,21 +156,24 @@ void PhysicsTrigger::LoadChunkyData(ChunkyPhysics* pStructure, const void* pData
 {
 	const uint32* lData = (const uint32*)pData;
 
-	mTriggerType = (TriggerType)Endian::BigToHost(lData[0]);
-	SetTriggerGeometry(pStructure->GetBoneGeometry(Endian::BigToHost(lData[1])));
+	int i = 0;
+	mTriggerType = (Type)Endian::BigToHost(lData[i++]);
+	i += PackerUnicodeString::Unpack(mTypeName, (uint8*)&lData[i], 1024) / sizeof(lData[0]);
+	mGroupIndex = Endian::BigToHost(lData[i++]);
+	mPriority = Endian::BigToHost(lData[i++]);
+	SetTriggerGeometry(pStructure->GetBoneGeometry(Endian::BigToHost(lData[i++])));
 	assert(mTriggerNode);
-	const int lEngineCount = Endian::BigToHost(lData[2]);
-	int y = 3;
+	const int lEngineCount = Endian::BigToHost(lData[i++]);
 	for (int x = 0; x < lEngineCount; ++x)
 	{
-		PhysicsEngine* lEngine = pStructure->GetEngine(Endian::BigToHost(lData[y++]));
+		PhysicsEngine* lEngine = pStructure->GetEngine(Endian::BigToHost(lData[i++]));
 		assert(lEngine);
-		float lDelay = Endian::BigToHostF(lData[y++]);
-		wstr lFunction;
-		int lStringRawLength = PackerUnicodeString::Unpack(&lFunction, (uint8*)&lData[y], 1024);
+		float lDelay = Endian::BigToHostF(lData[i++]);
+		str lFunction;
+		int lStringRawLength = PackerUnicodeString::Unpack(lFunction, (uint8*)&lData[i], 1024);
 		assert(lStringRawLength % sizeof(lData[0]) == 0);
-		y += lStringRawLength / sizeof(lData[0]);
-		AddControlledEngine(lEngine, lDelay, wstrutil::ToCurrentCode(lFunction));
+		i += lStringRawLength / sizeof(lData[0]);
+		AddControlledEngine(lEngine, lDelay, strutil::Encode(lFunction));
 	}
 }
 

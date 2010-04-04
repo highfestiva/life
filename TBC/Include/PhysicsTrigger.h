@@ -28,26 +28,34 @@ class PhysicsEngine;
 class PhysicsTrigger
 {
 public:
-	enum TriggerType
+	enum Type
 	{
-		TRIGGER_TOGGLE = 1,
-		TRIGGER_MINIMUM,
-		TRIGGER_MAXIMUM,
+		TRIGGER_MOVEMENT = 1,
 	};
 
-	PhysicsTrigger(TriggerType pTriggerType);
+	struct EngineTrigger
+	{
+		PhysicsEngine* mEngine;
+		float mDelay;
+		str mFunction;
+		bool operator==(const EngineTrigger& pOther) const;
+		size_t Hash() const;
+	};
+
+	PhysicsTrigger(Type pTriggerType);
 	virtual ~PhysicsTrigger();
 
 	static PhysicsTrigger* Load(ChunkyPhysics* pStructure, const void* pData, unsigned pByteCount);
 
-	TriggerType GetTriggerType() const;
-	PhysicsManager::TriggerID GetTriggerId() const;
+	PhysicsManager::TriggerID GetPhysicsTriggerId() const;
+	int GetGroupIndex() const;
+	int GetPriority() const;
+	const str& GetTypeName() const;
 
 	void SetTriggerGeometry(ChunkyBoneGeometry* pGeometry);
 	void AddControlledEngine(PhysicsEngine* pEngine, float pDelay, str pFunction);
 	int GetControlledEngineCount() const;
-	PhysicsEngine* GetControlledEngine(int pIndex) const;
-	str GetControlledFunction(int pIndex) const;
+	const EngineTrigger& GetControlledEngine(int pIndex) const;
 
 	unsigned GetChunkySize() const;
 	void SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const;
@@ -55,15 +63,12 @@ public:
 private:
 	void LoadChunkyData(ChunkyPhysics* pStructure, const void* pData);
 
-	struct Connection
-	{
-		PhysicsEngine* mEngine;
-		float mDelay;
-		str mFunction;
-	};
-	typedef std::vector<Connection> ConnectionArray;
+	typedef std::vector<EngineTrigger> ConnectionArray;
 
-	TriggerType mTriggerType;
+	Type mTriggerType;
+	int mGroupIndex;
+	int mPriority;
+	str mTypeName;
 	ChunkyBoneGeometry* mTriggerNode;
 	ConnectionArray mConnectionArray;
 

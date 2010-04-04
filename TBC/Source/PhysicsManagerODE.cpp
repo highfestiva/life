@@ -237,40 +237,43 @@ bool PhysicsManagerODE::Attach(BodyID pStaticBody, BodyID pMainBody)
 	::dGeomGetQuaternion(lStaticObject->mGeomID, o);
 
 	dBodyID lBodyId = lMainObject->mBodyID;
-	if (lBodyId && lStaticObject->mMass)
+	if (lBodyId)
 	{
 		::dGeomSetBody(lStaticObject->mGeomID, lBodyId);
 		::dGeomSetOffsetWorldPosition(lStaticObject->mGeomID, lPos[0], lPos[1], lPos[2]);
 		::dGeomSetOffsetWorldQuaternion(lStaticObject->mGeomID, o);
 
-		dMass lMass;
-		const dReal lMassScalar = (dReal)lStaticObject->mMass;
-		assert(lMassScalar > 0);
-		float* lSize = lStaticObject->mGeometryData;
-		// Adding mass to the dynamic object.
-		switch (lStaticObject->mGeomID->type)
+		if (lStaticObject->mMass)
 		{
-			case dTriMeshClass:	// TRICKY: fall through (act as sphere).
-			case dSphereClass:	::dMassSetSphereTotal(&lMass, lMassScalar, (dReal)lSize[0]);					break;
-			case dBoxClass:		::dMassSetBoxTotal(&lMass, lMassScalar, (dReal)lSize[0], (dReal)lSize[1], (dReal)lSize[2]);	break;
-			case dCapsuleClass:	::dMassSetCylinderTotal(&lMass, lMassScalar, 3, (dReal)lSize[0], (dReal)lSize[1]);		break;
-			case dCylinderClass:	::dMassSetCylinderTotal(&lMass, lMassScalar, 3, (dReal)lSize[0], (dReal)lSize[1]);	break;
-			default:
+			dMass lMass;
+			const dReal lMassScalar = (dReal)lStaticObject->mMass;
+			assert(lMassScalar > 0);
+			float* lSize = lStaticObject->mGeometryData;
+			// Adding mass to the dynamic object.
+			switch (lStaticObject->mGeomID->type)
 			{
-				mLog.AError("Trying to attach object of unknown type!");
-				assert(false);
-				return (false);
+				case dTriMeshClass:	// TRICKY: fall through (act as sphere).
+				case dSphereClass:	::dMassSetSphereTotal(&lMass, lMassScalar, (dReal)lSize[0]);					break;
+				case dBoxClass:		::dMassSetBoxTotal(&lMass, lMassScalar, (dReal)lSize[0], (dReal)lSize[1], (dReal)lSize[2]);	break;
+				case dCapsuleClass:	::dMassSetCylinderTotal(&lMass, lMassScalar, 3, (dReal)lSize[0], (dReal)lSize[1]);		break;
+				case dCylinderClass:	::dMassSetCylinderTotal(&lMass, lMassScalar, 3, (dReal)lSize[0], (dReal)lSize[1]);	break;
+				default:
+				{
+					mLog.AError("Trying to attach object of unknown type!");
+					assert(false);
+					return (false);
+				}
 			}
-		}
-		const dReal* lRelRot = ::dGeomGetOffsetRotation(lStaticObject->mGeomID);
-		const dReal* lRelPos = ::dGeomGetOffsetPosition(lStaticObject->mGeomID);
-		::dMassTranslate(&lMass, lRelPos[0], lRelPos[1], lRelPos[2]);
-		::dMassRotate(&lMass, lRelRot);
+			const dReal* lRelRot = ::dGeomGetOffsetRotation(lStaticObject->mGeomID);
+			const dReal* lRelPos = ::dGeomGetOffsetPosition(lStaticObject->mGeomID);
+			::dMassTranslate(&lMass, lRelPos[0], lRelPos[1], lRelPos[2]);
+			::dMassRotate(&lMass, lRelRot);
 
-		dMass lDynamicMass;
-		::dBodyGetMass(lBodyId, &lDynamicMass);
-		::dMassAdd(&lMass, &lDynamicMass);
-		::dBodySetMass(lBodyId, &lMass);
+			dMass lDynamicMass;
+			::dBodyGetMass(lBodyId, &lDynamicMass);
+			::dMassAdd(&lMass, &lDynamicMass);
+			::dBodySetMass(lBodyId, &lMass);
+		}
 	}
 
 	return (true);
@@ -3047,9 +3050,10 @@ void PhysicsManagerODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID p
 	Object* lObject1 = (Object*)dGeomGetData(pGeom1);
 	Object* lObject2 = (Object*)dGeomGetData(pGeom2);
 
-	if (lObject1->mForceFeedbackListener != 0 && lObject1->mForceFeedbackListener == lObject2->mForceFeedbackListener)
+	if (lObject1->mForceFeedbackListener == lObject2->mForceFeedbackListener)
 	{
-		// The same force feedback recipient means same object. We don't collide here.
+		// The same force feedback recipient means same object, or that both objects are
+		// statics/triggers. We won't collide those.
 		return;
 	}
 

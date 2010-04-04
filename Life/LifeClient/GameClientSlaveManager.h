@@ -6,12 +6,12 @@
 
 #pragma once
 
-#include "../../Cure/Include/GameManager.h"
 #include "../../Cure/Include/Packet.h"
 #include "../../Cure/Include/PositionalData.h"
 #include "../../Lepra/Include/Alarm.h"
 #include "../../Lepra/Include/Timer.h"
 #include "../../UiCure/Include/UiResourceManager.h"
+#include "../GameManager.h"
 #include "ClientConsoleManager.h"
 #include "ClientLoginView.h"
 #include "ClientOptionsManager.h"
@@ -40,7 +40,7 @@ class RoadSignButton;
 
 
 
-class GameClientSlaveManager: public Cure::GameManager, public InputObserver, private ClientLoginObserver
+class GameClientSlaveManager: public GameManager, public InputObserver, private ClientLoginObserver
 {
 	typedef Cure::GameManager Parent;
 public:

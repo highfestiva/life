@@ -55,7 +55,7 @@ str Network::GetHostname()
 {
 	char lName[256];
 	const int lNameLength = ::gethostname(lName, sizeof(lName));
-	return (astrutil::ToCurrentCode(astr(lName, lNameLength)));
+	return (strutil::Encode(astr(lName, lNameLength)));
 }
 
 bool Network::ResolveHostname(const str& pHostname, IPAddress& pIPAddress)
@@ -69,7 +69,7 @@ bool Network::ResolveHostname(const str& pHostname, IPAddress& pIPAddress)
 	}
 	else
 	{
-		lHostent = ::gethostbyname(astrutil::ToOwnCode(pHostname).c_str());
+		lHostent = ::gethostbyname(astrutil::Encode(pHostname).c_str());
 	}
 
 	if (lHostent != 0)

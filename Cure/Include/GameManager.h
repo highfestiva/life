@@ -62,6 +62,7 @@ public:
 
 	ContextObject* CreateContextObject(const str& pClassId, NetworkObjectType pNetworkType,
 		GameObjectId pInstanceId = 0);
+	virtual ContextObject* CreateTriggerHandler(const str& pType) const = 0;
 	virtual bool IsUiMoveForbidden(GameObjectId pObjectId) const;
 	virtual void OnLoadCompleted(ContextObject* pObject, bool pOk) = 0;
 	virtual void OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque,

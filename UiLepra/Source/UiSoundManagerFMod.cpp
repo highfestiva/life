@@ -74,7 +74,7 @@ SoundManager::SoundID SoundManagerFMod::LoadSound2D(const str& pFileName, LoopMo
 		lSample->mFileName = pFileName;
 		lSample->mID = mSampleIDManager.GetFreeId();
 		lSample->mSample = FSOUND_Sample_Load((int)lSample->mID,
-			astrutil::ToOwnCode(pFileName).c_str(), lFlags, 0, 0);
+			astrutil::Encode(pFileName).c_str(), lFlags, 0, 0);
 
 		if (lSample->mSample == 0)
 		{
@@ -124,7 +124,7 @@ SoundManager::SoundID SoundManagerFMod::LoadSound3D(const str& pFileName, LoopMo
 		lSample->mFileName = pFileName;
 		lSample->mID = mSampleIDManager.GetFreeId();
 		lSample->mSample = FSOUND_Sample_Load((int)lSample->mID,
-			astrutil::ToOwnCode(pFileName).c_str(), lFlags, 0, 0);
+			astrutil::Encode(pFileName).c_str(), lFlags, 0, 0);
 
 		if (lSample->mSample == 0)
 		{
@@ -173,7 +173,7 @@ SoundManager::SoundID SoundManagerFMod::LoadStream(const str& pFileName, LoopMod
 		Sample* lSample = new Sample();
 		lSample->mFileName = pFileName;
 		lSample->mID = mStreamIDManager.GetFreeId();
-		lSample->mStream = FSOUND_Stream_Open(astrutil::ToOwnCode(pFileName).c_str(),
+		lSample->mStream = FSOUND_Stream_Open(astrutil::Encode(pFileName).c_str(),
 			lFlags, 0, 0);
 
 		if (lSample->mStream == 0)

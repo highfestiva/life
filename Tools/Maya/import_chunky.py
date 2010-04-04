@@ -659,7 +659,8 @@ class GroupReader(DefaultMAReader):
                                         for name, value in params:
                                                 node.fix_attribute(name, value)
 
-                # Create engines.
+                # Create engines and triggers.
+                self.triggergroups = []
                 for section in config.sections():
                         if section.startswith("engine:"):
                                 enginetype = stripQuotes(config.get(section, "type"))
@@ -668,7 +669,7 @@ class GroupReader(DefaultMAReader):
                                 engineOk = enginetype in pushengines+jointengines
                                 allApplied &= engineOk
                                 if not engineOk:
-                                        print("Error: invalid engine type '%s'." % enginetype)
+                                        print("Error: invalid engine typetrigger_engine_groups '%s'." % enginetype)
                                 node = self.onCreateNode("engine:"+enginetype, {"name":[section]})
                                 engine_attribute = {}
                                 params = config.items(section)
@@ -705,7 +706,7 @@ class GroupReader(DefaultMAReader):
 
                         elif section.startswith("trigger:"):
                                 triggertype = stripQuotes(config.get(section, "type"))
-                                triggerOk = triggertype in ["move"]
+                                triggerOk = triggertype in ["movement"]
                                 allApplied &= triggerOk
                                 if not triggerOk:
                                         print("Error: invalid trigger type '%s'." % triggertype)
@@ -716,6 +717,7 @@ class GroupReader(DefaultMAReader):
                                         node.fix_attribute(name, value)
                                 def check_connected_to(l):
                                         ok = (len(l) >= 1)
+                                        all_engine_names = []
                                         for e in l:
                                                 ok &= (len(e) == 3)
                                                 ok &= (type(e[0]) == str)
@@ -724,7 +726,13 @@ class GroupReader(DefaultMAReader):
                                                 connected_to = self._regexpnodes(e[0], group)
                                                 ok &= (len(connected_to) > 0)
                                                 for cn in connected_to:
+                                                        all_engine_names += [cn.getName()]
                                                         ok &= cn.getName().startswith("engine:")
+                                        engines = "+".join(all_engine_names)
+                                        if not engines in self.triggergroups:
+                                                self.triggergroups += [engines]
+                                        groupindex = self.triggergroups.index(engines)
+                                        node.fix_attribute("trigger_group_index", groupindex)
                                         return ok
                                 def check_triggered_by(l):
                                         ok = (type(l) == str)
@@ -732,6 +740,8 @@ class GroupReader(DefaultMAReader):
                                         ok &= (triggered_by != None)
                                         return ok
                                 required = [("type", lambda x: type(x) == str),
+                                            ("function", lambda x: type(x) == str),
+                                            ("priority", lambda x: type(x) == int),
                                             ("connected_to", check_connected_to),
                                             ("triggered_by", check_triggered_by)]
                                 for name, trigger_check in required:

@@ -1153,7 +1153,7 @@ OpenGLMatPXS::OpenGLMatPXS(const char* pVP, const char* pFP[NUM_FP]):
 		if (lErrorPos != -1)
 		{
 			astr lGlError((const char*)glGetString(GL_PROGRAM_ERROR_STRING_ARB));
-			mLog.Errorf(_T("Error in vertex shader at pos %i!\r\n%s\r\n"), lErrorPos, astrutil::ToCurrentCode(lGlError).c_str());
+			mLog.Errorf(_T("Error in vertex shader at pos %i!\r\n%s\r\n"), lErrorPos, strutil::Encode(lGlError).c_str());
 		}
 		glDisable(GL_VERTEX_PROGRAM_ARB);
 
@@ -1178,7 +1178,7 @@ OpenGLMatPXS::OpenGLMatPXS(const char* pVP, const char* pFP[NUM_FP]):
 			if (lErrorPos != -1)
 			{
 				astr lGlError((const char*)glGetString(GL_PROGRAM_ERROR_STRING_ARB));
-				mLog.Errorf(_T("Error in fragment shader %i at pos %i!\r\n%s\r\n"), i, lErrorPos, astrutil::ToCurrentCode(lGlError).c_str());
+				mLog.Errorf(_T("Error in fragment shader %i at pos %i!\r\n%s\r\n"), i, lErrorPos, strutil::Encode(lGlError).c_str());
 				mLog.AInfo("Setting fragment shader to fallback shader.");
 
 				SetToFallbackFP(i);

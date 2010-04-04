@@ -26,7 +26,7 @@ int main(int argc, const char* argv[])	\
 	Lepra::strutil::strvec lArguments;	\
 	for (int x = 0; x < argc; ++x)	\
 	{	\
-		lArguments.push_back(Lepra::astrutil::ToCurrentCode(Lepra::astr(argv[x])));	\
+		lArguments.push_back(Lepra::strutil::Encode(Lepra::astr(argv[x])));	\
 	}	\
 	ClassName lApplication(lArguments);	\
 	return (lApplication.Run());	\

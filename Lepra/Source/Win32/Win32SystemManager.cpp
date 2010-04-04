@@ -115,7 +115,7 @@ str SystemManager::GetCurrentDirectory()
 		mLog.AError("Failed in GetCurrentDirectory()");
 	}
 
-	str lString(astrutil::ToCurrentCode(astr(lBuffer)));
+	str lString(strutil::Encode(astr(lBuffer)));
 	lString = strutil::ReplaceAll(lString, _T('\\'), _T('/'));
 
 	return (lString);
@@ -155,7 +155,7 @@ str SystemManager::GetLoginName()
 	wchar_t lLoginName[128];
 	DWORD lLength = sizeof(lLoginName);
 	::GetUserNameW(lLoginName, &lLength);
-	return (wstrutil::ToCurrentCode(wstr(lLoginName)));
+	return (strutil::Encode(wstr(lLoginName)));
 }
 
 str SystemManager::QueryFullUserName()
@@ -166,13 +166,13 @@ str SystemManager::QueryFullUserName()
 	struct _USER_INFO_2* lUserInfo;
 	//if (lOk)
 	{
-		wstr lUnicodeLoginName = wstrutil::ToOwnCode(lFullName).c_str();
+		wstr lUnicodeLoginName = wstrutil::Encode(lFullName).c_str();
 		lOk = (::NetUserGetInfo((LPWSTR)lDomainControllerName, lUnicodeLoginName.c_str(), 2, (LPBYTE*)&lUserInfo) == NERR_Success);
 		if (lOk)
 		{
 			if (lUserInfo->usri2_full_name[0])
 			{
-				lFullName = wstrutil::ToCurrentCode(lUserInfo->usri2_full_name);
+				lFullName = strutil::Encode(lUserInfo->usri2_full_name);
 			}
 			::NetApiBufferFree(lUserInfo);
 		}
@@ -247,7 +247,7 @@ str SystemManager::GetCpuName()
 		popa
 	}
 	lCpuName[12] = 0;
-	return (astrutil::ToCurrentCode(astr(lCpuName)));
+	return (strutil::Encode(astr(lCpuName)));
 }
 
 str SystemManager::GetOsName()

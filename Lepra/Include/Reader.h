@@ -103,7 +103,7 @@ IOError Reader::ReadLine(std::basic_string<_T>& pString)
 		}
 	}
 
-	pString = StringUtilityTemplate<std::basic_string<_T> >::ToOwnCode(lUtf8Line);
+	pString = StringUtilityTemplate<std::basic_string<_T> >::Encode(lUtf8Line);
 
 	return (IO_OK);
 }

@@ -71,7 +71,7 @@ private:
 template<class _T>
 IOError Writer::WriteString(const std::basic_string<_T>& pString)
 {
-	astr lUtf8 = astrutil::ToOwnCode(pString);
+	astr lUtf8 = astrutil::Encode(pString);
 	return (WriteData(lUtf8.c_str(), (unsigned)lUtf8.length()));
 }
 

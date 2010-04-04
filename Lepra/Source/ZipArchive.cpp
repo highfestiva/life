@@ -39,7 +39,7 @@ IOError ZipArchive::OpenArchive(const str& pArchiveFileName, IOType pIOType)
 	{
 		case READ_ONLY:
 		{
-			mUnzipFile = ::unzOpen(astrutil::ToOwnCode(pArchiveFileName).c_str());
+			mUnzipFile = ::unzOpen(astrutil::Encode(pArchiveFileName).c_str());
 			if (mUnzipFile != 0)
 			{
 				lIOError = IO_OK;
@@ -48,14 +48,14 @@ IOError ZipArchive::OpenArchive(const str& pArchiveFileName, IOType pIOType)
 		break;
 		case WRITE_ONLY:
 		{
-			mZipFile = ::zipOpen(astrutil::ToOwnCode(pArchiveFileName).c_str(), APPEND_STATUS_CREATE);
+			mZipFile = ::zipOpen(astrutil::Encode(pArchiveFileName).c_str(), APPEND_STATUS_CREATE);
 			lCheckZipFile = true;
 		}
 		break;
 		case WRITE_APPEND:
 		{
 			if (DiskFile::Exists(pArchiveFileName) == true)
-				mZipFile = ::zipOpen(astrutil::ToOwnCode(pArchiveFileName).c_str(), APPEND_STATUS_ADDINZIP);
+				mZipFile = ::zipOpen(astrutil::Encode(pArchiveFileName).c_str(), APPEND_STATUS_ADDINZIP);
 			lCheckZipFile = true;
 		}
 		break;
@@ -114,10 +114,10 @@ void ZipArchive::CloseAndRemoveArchive()
 {
 	CloseArchive();
 #ifdef LEPRA_MSVC
-	::_wremove(wstrutil::ToOwnCode(mArchiveName).c_str());
+	::_wremove(wstrutil::Encode(mArchiveName).c_str());
 #else
 #ifdef LEPRA_POSIX
-	::remove(astrutil::ToOwnCode(mArchiveName).c_str());
+	::remove(astrutil::Encode(mArchiveName).c_str());
 #else
 #error "ZipArchive::CloseAndRemoveArchive() is not implemented on this platform!"
 #endif
@@ -151,7 +151,7 @@ str ZipArchive::FileFindFirst()
 	{
 		char lCStrFileName[1024];
 		::unzGetCurrentFileInfo(mUnzipFile, 0, lCStrFileName, 1024, 0, 0, 0, 0);
-		lFileName = astrutil::ToCurrentCode(astr(lCStrFileName));
+		lFileName = strutil::Encode(astr(lCStrFileName));
 	}
 
 	return lFileName;
@@ -165,7 +165,7 @@ str ZipArchive::FileFindNext()
 	{
 		char lCStrFileName[1024];
 		::unzGetCurrentFileInfo(mUnzipFile, 0, lCStrFileName, 1024, 0, 0, 0, 0);
-		lFileName = astrutil::ToCurrentCode(astr(lCStrFileName));
+		lFileName = strutil::Encode(astr(lCStrFileName));
 	}
 
 	return lFileName;
@@ -181,7 +181,7 @@ bool ZipArchive::FileOpen(const str& pFileName)
 		{
 			if (mUnzipFile != 0)
 			{
-				if (::unzLocateFile(mUnzipFile, astrutil::ToOwnCode(pFileName).c_str(), 0) == UNZ_OK)
+				if (::unzLocateFile(mUnzipFile, astrutil::Encode(pFileName).c_str(), 0) == UNZ_OK)
 				{
 					lOK = (::unzOpenCurrentFile(mUnzipFile) == UNZ_OK);
 					if (lOK)
@@ -197,7 +197,7 @@ bool ZipArchive::FileOpen(const str& pFileName)
 		{
 			if (mZipFile != 0)
 			{
-				lOK = (::zipOpenNewFileInZip(mZipFile, astrutil::ToOwnCode(pFileName).c_str(), 0, 0, 0, 0, 0, 0, Z_DEFLATED, Z_DEFAULT_COMPRESSION) == ZIP_OK);
+				lOK = (::zipOpenNewFileInZip(mZipFile, astrutil::Encode(pFileName).c_str(), 0, 0, 0, 0, 0, 0, Z_DEFLATED, Z_DEFAULT_COMPRESSION) == ZIP_OK);
 
 				str lTempName;
 				str lDirectory;
@@ -294,7 +294,7 @@ bool ZipArchive::FileExist(const str& pFileName)
 
 	if (mIOType == READ_ONLY && mUnzipFile != 0)
 	{
-		lExist = (::unzLocateFile(mUnzipFile, astrutil::ToOwnCode(pFileName).c_str(), 0) == UNZ_OK);
+		lExist = (::unzLocateFile(mUnzipFile, astrutil::Encode(pFileName).c_str(), 0) == UNZ_OK);
 	}
 
 	return lExist;

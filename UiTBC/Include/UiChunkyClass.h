@@ -28,8 +28,8 @@ public:
 		Vector3DF mSpecular;
 		float mShininess;
 		float mAlpha;
-		std::vector<wstr> mTextureList;
-		wstr mShaderName;
+		std::vector<str> mTextureList;
+		str mShaderName;
 
 		Material();
 	};

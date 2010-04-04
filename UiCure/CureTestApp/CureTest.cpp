@@ -47,7 +47,7 @@ bool TestPacker(const LogDecorator& pAccount)
 	{
 		lContext = _T("unpack unicode");
 		wstr lUnpacked;
-		lTestOk = (PackerUnicodeString::Unpack(&lUnpacked, lRawData, 8) == 8);
+		lTestOk = (PackerUnicodeString::Unpack(lUnpacked, lRawData, 8) == 8);
 		assert(lTestOk);
 		if (lTestOk)
 		{

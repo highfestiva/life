@@ -7,6 +7,7 @@
 #include "../Include/CppContextObject.h"
 #include <assert.h>
 #include "../../Lepra/Include/DiskFile.h"
+#include "../../Lepra/Include/HashUtil.h"
 #include "../../TBC/Include/ChunkyPhysics.h"
 #include "../../TBC/Include/PhysicsEngine.h"
 #include "../../TBC/Include/PhysicsTrigger.h"
@@ -145,29 +146,16 @@ void CppContextObject::OnTick(float pFrameTime)
 	}
 }
 
-void CppContextObject::OnAlarm(int)// pAlarmId)
+void CppContextObject::OnAlarm(int /*pAlarmId*/, void* /*pExtraData*/)
 {
 }
 
-void CppContextObject::OnTrigger(TBC::PhysicsManager::TriggerID pTrigger, TBC::PhysicsManager::ForceFeedbackListener* /*pBody*/)
+void CppContextObject::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, TBC::PhysicsManager::ForceFeedbackListener* pBody)
 {
-	const int lTriggerCount = mPhysics->GetTriggerCount();
-	for (int x = 0; x < lTriggerCount; ++x)
-	{
-		const TBC::PhysicsTrigger* lTrigger = mPhysics->GetTrigger(x);
-		if (lTrigger->GetTriggerId() == pTrigger)
-		{
-			const int lEngineCount = lTrigger->GetControlledEngineCount();
-			for (int y = 0; y < lEngineCount; ++y)
-			{
-				TBC::PhysicsEngine* lEngine = lTrigger->GetControlledEngine(y);
-				const str& lFunction = lTrigger->GetControlledFunction(y);
-				float lWhereTo = (lFunction == _T("minimum"))? -1.0f : 1.0f;
-				lEngine->SetValue(0, lWhereTo, 0);
-			}
-			break;
-		}
-	}
+	ContextObject* lChild = (ContextObject*)GetTrigger(pTriggerId);
+	assert(lChild);
+	lChild->OnTrigger(pTriggerId, pBody);
+
 	/*
 	TODO: put this back when attaching objects to each other is working.
 	ContextObject* lObject2 = (ContextObject*)mManager->GetGameManager()->GetPhysicsManager()->GetForceFeedbackListener(pBody2);
@@ -209,6 +197,7 @@ void CppContextObject::OnLoadPhysics(UserPhysicsResource* pPhysicsResource)
 	}
 
 	SetPhysics(pPhysicsResource->GetData());
+	SetupChildTriggerHandlers();
 	TryComplete();
 }
 

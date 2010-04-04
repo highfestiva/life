@@ -322,8 +322,8 @@ int ClientConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& 
 
 				if (pParameterVector.size() == 3)
 				{
-					wstr lUsername = wstrutil::ToOwnCode(pParameterVector[1]);
-					wstr lReadablePassword = wstrutil::ToOwnCode(pParameterVector[2]);
+					wstr lUsername = wstrutil::Encode(pParameterVector[1]);
+					wstr lReadablePassword = wstrutil::Encode(pParameterVector[2]);
 					//pParameterVector[2] = _T("        ");
 					// Convert into login format.
 					Cure::MangledPassword lPassword(lReadablePassword);

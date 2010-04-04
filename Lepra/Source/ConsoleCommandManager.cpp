@@ -451,7 +451,7 @@ void StdioConsolePrompt::EraseText(size_t pCount)
 
 void StdioConsolePrompt::PrintPrompt(const str& pPrompt, const str& pInputText, size_t pEditIndex)
 {
-	::printf("\r%s%s", astrutil::ToOwnCode(pPrompt).c_str(), astrutil::ToOwnCode(pInputText).c_str());
+	::printf("\r%s%s", astrutil::Encode(pPrompt).c_str(), astrutil::Encode(pInputText).c_str());
 	// Back up to edit index.
 	for (size_t x = pInputText.length(); x > pEditIndex; --x)
 	{

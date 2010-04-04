@@ -199,7 +199,7 @@ LogDecorator::LogDecorator(Log* pLog, const std::type_info& pTypeId):
 	mLog(pLog)
 #ifdef LEPRA_MSVC
 	// Skip "class " in beginning of name.
-	, mClassName(astrutil::ToCurrentCode(astr(pTypeId.name()+6)))
+	, mClassName(strutil::Encode(astr(pTypeId.name()+6)))
 {
 #elif defined(LEPRA_POSIX)
 {
@@ -231,11 +231,11 @@ LogDecorator::LogDecorator(Log* pLog, const std::type_info& pTypeId):
 	if (x <= lLength)
 	{
 		astr lCrop(&s[lStartOfWord], x-lStartOfWord);
-		mClassName = astrutil::ToCurrentCode(lCrop);
+		mClassName = strutil::Encode(lCrop);
 	}
 	else
 	{
-		mClassName = astrutil::ToCurrentCode(s);
+		mClassName = strutil::Encode(s);
 	}
 #else // !MSVC
 #error typeid parsing not implemented.
