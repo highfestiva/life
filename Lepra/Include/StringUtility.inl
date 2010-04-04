@@ -281,7 +281,9 @@ STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::Format(const typename _String::value_ty
 {
 	va_list	lArguments;
 	va_start(lArguments, pFormat);
-	return (VFormat(pFormat, lArguments));
+	_String lResult = VFormat(pFormat, lArguments);
+	va_end(lArguments);
+	return (lResult);
 }
 
 
@@ -366,7 +368,7 @@ STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::ReplaceCtrlChars(const _String& pString
 STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::DumpData(const uint8* pData, size_t pLength)
 {
 	const char lHexTable[] = "0123456789ABCDEF";
-	astr lDataString((const char*)pData, pLength*2);
+	astr lDataString(pLength*2, '?');
 	for (size_t x = 0; x < pLength; ++x)
 	{
 		lDataString[x*2+0] = lHexTable[pData[x]>>4];

@@ -296,7 +296,7 @@ IOError BufferedIo::AppendSendBuffer(const void* pData, int pLength)
 {
 	IOError lError = IO_OK;
 
-	if (mSendBuffer.mDataSize + pLength <= SocketBase::BUFFER_SIZE)
+	if (mSendBuffer.mDataSize + pLength < SocketBase::BUFFER_SIZE)
 	{
 		if (!mInSendBuffer)
 		{
@@ -1215,10 +1215,10 @@ int UdpSocket::SendTo(const uint8* pData, unsigned pSize, const SocketAddress& p
 		}
 		else
 		{
-			log_volatile(str lData = strutil::DumpData((uint8*)pData, std::min(pSize, (unsigned)20)));
+			/*log_volatile(str lData = strutil::DumpData((uint8*)pData, std::min(pSize, (unsigned)20)));
 			log_volatile(mLog.Tracef(_T("UDP -> %u bytes (%s -> %s): %s."), pSize,
 				mLocalAddress.GetAsString().c_str(), pTargetAddress.GetAsString().c_str(),
-				lData.c_str()));
+				lData.c_str()));*/
 			mSentByteCount += lSentByteCount;
 		}
 	}

@@ -255,7 +255,8 @@ void LogDecorator::RawPrint(Log::LogLevel pLogLevel, const str& pText) const
 #define StrV()	\
 	va_list	lArguments;	\
 	va_start(lArguments, pText);	\
-	str lText = strutil::VFormat(pText, lArguments)
+	str lText = strutil::VFormat(pText, lArguments);	\
+	va_end(lArguments)
 
 #define StrVLog(level)	\
 	StrV();	\

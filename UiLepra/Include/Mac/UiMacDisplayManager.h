@@ -95,12 +95,14 @@ protected:
 		return mMaximized;
 	}
 
+	static DisplayMode ConvertNativeDisplayMode(CFDictionaryRef pMode);
+	
 	//Screen Stuff
 
 	DisplayMode mDisplayMode;
 	ScreenMode mScreenMode;	// Fullscreen or windowed.
 
-	static int msWindowCount;
+	static int mWindowCount;
 
 	NSWindow* mWnd;
 	bool mIsOpen;

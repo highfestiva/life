@@ -19,7 +19,7 @@ namespace Lepra
 
 
 
-template<> astr astrutil::VFormat(const char* pFormat, va_list pArguments)
+template<> astr astrutil::VFormat(const char* pFormat, va_list& pArguments)
 {
 	char lBuffer[1024];
 #ifdef LEPRA_WINDOWS
@@ -29,12 +29,12 @@ template<> astr astrutil::VFormat(const char* pFormat, va_list pArguments)
 	::vsprintf(lBuffer, pFormat, pArguments);
 #endif // <VS 2005+> / <VS 2003 .NET->
 #else // !LEPRA_WINDOWS
-	::vsprintf(lBuffer, pFormat, pArguments);
+	::vsnprintf(lBuffer, sizeof(lBuffer), pFormat, pArguments);
 #endif // LEPRA_WINDOWS/!LEPRA_WINDOWS
 	return (astr(lBuffer));
 }
 
-template<> wstr wstrutil::VFormat(const wchar_t* pFormat, va_list pArguments)
+template<> wstr wstrutil::VFormat(const wchar_t* pFormat, va_list& pArguments)
 {
 	wchar_t lBuffer[1024];
 	WIDE_SPRINTF(lBuffer, sizeof(lBuffer)/sizeof(wchar_t), pFormat, pArguments);

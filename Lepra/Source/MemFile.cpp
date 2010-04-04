@@ -1,10 +1,11 @@
 
-// Author: Alexander Hugestrand
-// Copyright (c) 2002-2009, Righteous Games
+// Author: Jonas Byström
+// Copyright (c) 2002-2010, Righteous Games
 
 
 
 #include "../Include/MemFile.h"
+#include <assert.h>
 #include "../Include/String.h"
 
 
@@ -155,20 +156,23 @@ int64 MemFile::GetSize() const
 void MemFile::CropHead(size_t pFinalSize)
 {
 	ScopeLock lLock(&mLock);
-	size_t lCropByteCount = mSize-pFinalSize;
-	if (lCropByteCount > 0)
+	assert(pFinalSize <= mSize);
+	if (pFinalSize <= mSize)
 	{
-		::memcpy(mBuffer, mBuffer+lCropByteCount, pFinalSize);
-		mSize = pFinalSize;
-		if (mCurrentPos > (size_t)lCropByteCount)
-		{
-			mCurrentPos -= lCropByteCount;
-		}
-		else
-		{
-			mCurrentPos = 0;
-		}
+		return;
 	}
+	size_t lCropByteCount = mSize-pFinalSize;
+	::memmove(mBuffer, mBuffer+lCropByteCount, pFinalSize);
+	mSize = pFinalSize;
+	if (mCurrentPos > lCropByteCount)
+	{
+		mCurrentPos -= lCropByteCount;
+	}
+	else
+	{
+		mCurrentPos = 0;
+	}
+	assert(mCurrentPos <= mSize);
 }
 
 int64 MemFile::GetAvailable() const
@@ -211,7 +215,7 @@ IOError MemFile::WriteRaw(const void* pBuffer, size_t pSize)
 	size_t lEndPos = mCurrentPos + pSize;
 
 	// Check if we need to allocate more memory.
-	if (lEndPos > mBufferSize)
+	if (lEndPos >= mBufferSize)
 	{
 		size_t lNewBufferSize = (lEndPos * 3) / 2;
 		uint8* lBuffer = new uint8[lNewBufferSize];

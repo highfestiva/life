@@ -104,7 +104,7 @@ depend:
 \tdone
 
 $(BINS):\t$(OBJS)
-\t@cp ThirdParty/stlport/build/lib/obj/gcc/so_stlg/libstlportstlg""" + stllibfile + """ bin/
+\t@if test -f ThirdParty/stlport/build/lib/obj/gcc/so_stlg/libstlportstlg""" + stllibfile + """; then cp ThirdParty/stlport/build/lib/obj/gcc/so_stlg/libstlportstlg""" + stllibfile + """ bin/; fi
 \t@cp $@ bin/
 
 $(OBJS):\t$(SRCS)

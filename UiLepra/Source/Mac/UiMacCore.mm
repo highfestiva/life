@@ -101,6 +101,10 @@ void MacCore::Shutdown()
 void MacCore::ProcessMessages()
 {
 	ScopeLock lLock(mLock);
+	if (mWindowTable.IsEmpty())
+	{
+		return;
+	}
 
 	NSEvent *event = [mApplication nextEventMatchingMask:NSAnyEventMask untilDate:[NSDate distantFuture] inMode:NSDefaultRunLoopMode dequeue:YES];
 
