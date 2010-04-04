@@ -31,7 +31,7 @@ public:
 	// Splits directory path into subdirectories: "C:\\a\\b" -> ["C:","a","b"].
 	static strutil::strvec SplitNodes(const str& pDirectory, bool pExcludeLeadingDirectory = true, bool pExcludeTrailingDirectory = true);
 	// Joins a directory, filename and extension to full/filename.ext (if ext != "").
-	static str JoinPath(const str& pDirectory, const str& pFileBase, const str& pExtension);
+	static str JoinPath(const str& pDirectory, const str& pFileBase, const str& pExtension = str());
 	static bool NormalizePath(const str& pInputPath, str& pOutputPath);
 	static bool IsPathSeparator(const tchar pCharacter);
 };

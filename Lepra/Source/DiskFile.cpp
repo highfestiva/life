@@ -513,6 +513,7 @@ bool DiskFile::FindFirst(const str& pFileSpec, FindData& pFindData)
 	pFindData.Clear();
 	bool lOk = true;
 
+	pFindData.mFileSpec = pFileSpec;
 #if defined LEPRA_WINDOWS
 	_finddata_t lData;
 	pFindData.mFindHandle = _findfirst(astrutil::Encode(pFileSpec).c_str(), &lData);
@@ -524,7 +525,8 @@ bool DiskFile::FindFirst(const str& pFileSpec, FindData& pFindData)
 
 	if (lOk == true)
 	{
-		pFindData.mName = strutil::Encode(astr(lData.name));	// TODO: needs real Unicode findxxx().
+		str lPath = Path::SplitPath(pFileSpec)[0];
+		pFindData.mName = Path::JoinPath(lPath, strutil::Encode(astr(lData.name)));	// TODO: needs real Unicode findxxx().
 		pFindData.mSize = lData.size;
 
 		if ((lData.attrib & _A_SUBDIR) != 0)
@@ -540,7 +542,6 @@ bool DiskFile::FindFirst(const str& pFileSpec, FindData& pFindData)
 	::glob(astrutil::Encode(pFileSpec).c_str(), GLOB_DOOFFS|GLOB_MARK, 0, &lGlobList);
 	if (lGlobList.gl_pathc >= 1)
 	{
-		pFindData.mFileSpec = pFileSpec;
 		pFindData.mName = strutil::Encode(lGlobList.gl_pathv[1]);
 		struct stat lFileInfo;
 		::stat(lGlobList.gl_pathv[1], &lFileInfo);	// TODO: error check.
@@ -572,7 +573,8 @@ bool DiskFile::FindNext(FindData& pFindData)
 	}
 	if (lOk == true)
 	{
-		pFindData.mName = strutil::Encode(astr(lData.name));	// TODO: needs real Unicode findxxx()!
+		str lPath = Path::SplitPath(pFindData.mFileSpec)[0];
+		pFindData.mName = Path::JoinPath(lPath, strutil::Encode(astr(lData.name)));	// TODO: needs real Unicode findxxx()!
 		pFindData.mSize = lData.size;
 
 		if ((lData.attrib & _A_SUBDIR) != 0)

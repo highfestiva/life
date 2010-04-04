@@ -69,8 +69,8 @@ public:
 #if defined LEPRA_WINDOWS
 			mFindHandle(-1),
 #elif defined LEPRA_POSIX
-			mFileSpec(),
 #endif
+			mFileSpec(),
 			mName(),
 			mSubDir(false),
 			mSize(0),
@@ -109,8 +109,9 @@ public:
 
 		inline void Clear()
 		{
+			mFileSpec.clear();
+			mName.clear();
 			mSize = 0;
-			mName = _T("");
 			mSubDir = false;
 			mTime = -1;
 		}
@@ -119,13 +120,13 @@ public:
 #if defined LEPRA_WINDOWS
 		intptr_t mFindHandle;
 #elif defined LEPRA_POSIX
-		str mFileSpec;
 #else
 #error DiskFile::FindData is not properly implemented on this platform!
 #endif // LEPRA_POSIX
 
+		str mFileSpec;
 		str mName;
-		bool   mSubDir;
+		bool mSubDir;
 		uint64 mSize;
 		int64 mTime;
 	};
