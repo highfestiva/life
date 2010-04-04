@@ -37,7 +37,7 @@ static str ExecGetStdout(const char* pExecutable)
 	::memset(lRaw, 0, sizeof(lRaw));
 	::fread(lRaw, sizeof(lRaw), 1, lFile);
 	::fclose(lFile);
-	str lStdout(astrutil::ToCurrentCode(lRaw));
+	str lStdout(strutil::Encode(lRaw));
 	if (lStdout.length() > 1)
 	{
 		lStdout.resize(lStdout.length()-1);

@@ -334,7 +334,7 @@ bool NetworkLoginClients()
 
 void NetworkShutdown()
 {
-	assert(gServer.mNetworkAgent->GetConnectionCount() == CLIENT_COUNT);
+	assert(gServer.mNetworkAgent->GetConnectionCount() == (size_t)CLIENT_COUNT);
 	for (int x = 0; x < CLIENT_COUNT; ++x)
 	{
 		assert(gClient[x].mNetworkAgent->GetConnectionCount() == 1);

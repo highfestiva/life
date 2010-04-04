@@ -594,7 +594,7 @@ void GameServerManager::StoreMovement(int pClientFrameIndex, Cure::MessageObject
 
 void GameServerManager::DeleteMovements(Cure::GameObjectId pInstanceId)
 {
-	for (size_t x = 0; x < NETWORK_POSITIONAL_AHEAD_BUFFER_SIZE; ++x)
+	for (size_t x = 0; x < (size_t)NETWORK_POSITIONAL_AHEAD_BUFFER_SIZE; ++x)
 	{
 		MovementList& lList = mMovementArrayList[x];
 		MovementList::iterator y = lList.begin();

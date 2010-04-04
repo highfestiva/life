@@ -541,7 +541,7 @@ bool DiskFile::FindFirst(const str& pFileSpec, FindData& pFindData)
 	if (lGlobList.gl_pathc >= 1)
 	{
 		pFindData.mFileSpec = pFileSpec;
-		pFindData.mName = astrutil::Encode(lGlobList.gl_pathv[1]);
+		pFindData.mName = strutil::Encode(lGlobList.gl_pathv[1]);
 		struct stat lFileInfo;
 		::stat(lGlobList.gl_pathv[1], &lFileInfo);	// TODO: error check.
 		pFindData.mSize = lFileInfo.st_size;
@@ -562,7 +562,6 @@ bool DiskFile::FindFirst(const str& pFileSpec, FindData& pFindData)
 
 bool DiskFile::FindNext(FindData& pFindData)
 {
-	pFindData.Clear();
 	bool lOk = true;
 
 #ifdef LEPRA_WINDOWS
@@ -590,7 +589,7 @@ bool DiskFile::FindNext(FindData& pFindData)
 	::glob(astrutil::Encode(pFindData.mFileSpec).c_str(), GLOB_DOOFFS|GLOB_MARK, 0, &lGlobList);
 	for (size_t x = 1; x <= lGlobList.gl_pathc; ++x)
 	{
-		if (astrutil::ToCurrentCode(lGlobList.gl_pathv[x]) == pFindData.mName)
+		if (strutil::Encode(lGlobList.gl_pathv[x]) == pFindData.mName)
 		{
 			++x;
 			if (x <= lGlobList.gl_pathc)
@@ -610,6 +609,11 @@ bool DiskFile::FindNext(FindData& pFindData)
 #else
 #error DiskFile::FindFirst() not implemented on this platform!
 #endif
+
+	if (!lOk)
+	{
+		pFindData.Clear();
+	}
 
 	return lOk;
 }

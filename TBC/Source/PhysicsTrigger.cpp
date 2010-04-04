@@ -136,7 +136,7 @@ void PhysicsTrigger::SaveChunkyData(const ChunkyPhysics* pStructure, void* pData
 	uint32* lData = (uint32*)pData;
 	int i = 0;
 	lData[i++] = Endian::HostToBig(mTriggerType);
-	i += PackerUnicodeString::Pack((uint8*)&lData[i], strutil::Encode(mTypeName));
+	i += PackerUnicodeString::Pack((uint8*)&lData[i], wstrutil::Encode(mTypeName));
 	lData[i++] = Endian::HostToBig(mGroupIndex);
 	lData[i++] = Endian::HostToBig(mPriority);
 	lData[i++] = Endian::HostToBig(pStructure->GetIndex(mTriggerNode));

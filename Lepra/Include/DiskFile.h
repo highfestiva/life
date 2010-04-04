@@ -80,13 +80,6 @@ public:
 
 		~FindData()
 		{
-#ifdef LEPRA_POSIX
-			if (mDIR != 0)
-			{
-				::closedir(mDIR);
-				mDIR = 0;
-			}
-#endif
 		}
 
 		inline str& GetName()
@@ -126,7 +119,6 @@ public:
 #if defined LEPRA_WINDOWS
 		intptr_t mFindHandle;
 #elif defined LEPRA_POSIX
-		DIR* mDIR;	// Used with FindFirst() and FindNext().
 		str mFileSpec;
 #else
 #error DiskFile::FindData is not properly implemented on this platform!

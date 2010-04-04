@@ -566,6 +566,7 @@ void GameClientSlaveManager::TickNetworkInput()
 		}
 		break;
 		case Cure::NetworkAgent::RECEIVE_PARSE_ERROR:
+		case Cure::NetworkAgent::RECEIVE_NO_DATA:
 		{
 			mLog.AError("Problem with receiving crap data!");
 		}
@@ -758,6 +759,11 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 						lButton->GetButton().SetOnClick(GameClientSlaveManager, OnAvatarSelect);
 						mRoadSignMap.insert(RoadSignMap::value_type(lButton->GetInstanceId(), lButton));
 						mJustLookingAtAvatars = false;
+					}
+					break;
+					case Cure::MessageStatus::INFO_LOGIN:
+					{
+						assert(false);
 					}
 					break;
 				}
@@ -965,7 +971,7 @@ void GameClientSlaveManager::OnCollision(const Vector3DF& pForce, const Vector3D
 
 void GameClientSlaveManager::OnStopped(Cure::ContextObject* pObject, TBC::PhysicsManager::BodyID)
 {
-	pObject;
+	(void)pObject;
 	log_volatile(mLog.Debugf(_T("Object %u/%s stopped."), pObject->GetInstanceId(), pObject->GetClassId().c_str()));
 }
 
