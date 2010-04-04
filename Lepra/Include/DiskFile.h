@@ -127,11 +127,11 @@ public:
 		intptr_t mFindHandle;
 #elif defined LEPRA_POSIX
 		DIR* mDIR;	// Used with FindFirst() and FindNext().
-		str mFileSpec;
 #else
 #error DiskFile::FindData is not properly implemented on this platform!
 #endif // LEPRA_POSIX
 
+		str mFileSpec;
 		str mName;
 		bool   mSubDir;
 		uint64 mSize;

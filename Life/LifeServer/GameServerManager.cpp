@@ -236,8 +236,8 @@ bool GameServerManager::Initialize()
 				{
 					do
 					{
-						if (strutil::StartsWith(lFindData.GetName(), _T("level_")) ||
-							strutil::StartsWith(lFindData.GetName(), _T("road_sign")))
+						if (lFindData.GetName().find(_T("level_")) != str::npos ||
+							lFindData.GetName().find(_T("road_sign")) != str::npos)
 						{
 							continue;
 						}
