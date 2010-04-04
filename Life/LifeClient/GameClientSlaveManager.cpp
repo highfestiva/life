@@ -566,7 +566,6 @@ void GameClientSlaveManager::TickNetworkInput()
 		}
 		break;
 		case Cure::NetworkAgent::RECEIVE_PARSE_ERROR:
-		case Cure::NetworkAgent::RECEIVE_NO_DATA:
 		{
 			mLog.AError("Problem with receiving crap data!");
 		}
@@ -577,6 +576,11 @@ void GameClientSlaveManager::TickNetworkInput()
 			mLog.AError("Disconnected from server!");
 			mIsReset = false;
 			GetNetworkClient()->Disconnect(false);
+		}
+		break;
+		case Cure::NetworkAgent::RECEIVE_NO_DATA:
+		{
+			// Nothing, really.
 		}
 		break;
 	}
