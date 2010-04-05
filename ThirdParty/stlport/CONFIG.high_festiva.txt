@@ -6,3 +6,9 @@ Mac PowerPC G5:
 Mac x86_64:
     (DON'T Edit build/Makefiles/gmake/sysid.mak and change the M_ARCH := line to x86_64.)
     Instead keep fingers crossed.
+
+Windows:
+    <cmd.exe> (can't run in msys)
+    configure.bat msvc9
+    cd build/lib
+    nmake install

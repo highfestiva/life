@@ -6,27 +6,16 @@
 
 #pragma once
 
-#include <hash_set>
-#include <list>
 #include "../../ThirdParty/FastDelegate/FastDelegate.h"
 #include "CyclicArray.h"
-#include "FastAllocator.h"
 #include "FdSet.h"
-#include "Hasher.h"
 #include "HashSet.h"
-#include "HashTable.h"
 #include "InputStream.h"
-#include "IPAddress.h"
-#include "Lepra.h"
-#include "LepraTarget.h"
 #include "MemberThread.h"
-#include "SocketAddress.h"
 #include "OutputStream.h"
 #include "OrderedMap.h"
 #include "SocketAddress.h"
-#include "SpinLock.h"
-#include "Thread.h"
-#include "Timer.h"
+#include "HiResTimer.h"
 
 
 
@@ -149,7 +138,7 @@ protected:
 	static const uint8 mAcceptionString[15];
 
 private:
-	typedef std::hash_set<BufferedIo*, std::hash<void*> > IoSet;
+	typedef std::hash_set<BufferedIo*, LEPRA_VOIDP_HASHER> IoSet;
 
 	IoSet mSenderSet;
 	IoSet mReceiverSet;
@@ -336,7 +325,7 @@ private:
 	void AcceptThreadEntry();
 	void SelectThreadEntry();
 
-	typedef OrderedMap<TcpVSocket*, Timer, std::hash<void*> > SocketTimeMap;
+	typedef OrderedMap<TcpVSocket*, HiResTimer, LEPRA_VOIDP_HASHER> SocketTimeMap;
 	typedef std::hash_map<sys_socket, TcpVSocket*> SocketVMap;
 
 	MemberThread<TcpMuxSocket> mAcceptThread;
@@ -555,10 +544,10 @@ private:
 
 	void OnCloseTcpSocket(TcpVSocket* pTcpSocket);
 
-	typedef std::hash_map<TcpVSocket*, DualSocket*, std::hash<void*> > TcpSocketMap;
-	typedef std::hash_map<UdpVSocket*, DualSocket*, std::hash<void*> > UdpSocketMap;
+	typedef std::hash_map<TcpVSocket*, DualSocket*, LEPRA_VOIDP_HASHER> TcpSocketMap;
+	typedef std::hash_map<UdpVSocket*, DualSocket*, LEPRA_VOIDP_HASHER> UdpSocketMap;
 	typedef std::hash_map<std::string, DualSocket*> IdSocketMap;
-	typedef OrderedMap<DualSocket*, Timer, std::hash<void*> > SocketTimeMap;
+	typedef OrderedMap<DualSocket*, HiResTimer, LEPRA_VOIDP_HASHER> SocketTimeMap;
 
 	mutable Lock mLock;
 	TcpMuxSocket* mTcpMuxSocket;

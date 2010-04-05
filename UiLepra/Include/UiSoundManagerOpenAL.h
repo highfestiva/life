@@ -14,7 +14,7 @@
 #include <AL/al.h>
 #include <AL/alc.h>
 #endif
-#include <set>
+#include <hash_set>
 #include "../../Lepra/Include/String.h"
 
 
@@ -127,7 +127,7 @@ private:
 		bool mIsLooping;
 		int mPriority;
 		bool mIsAmbient;
-		std::set<Source*> mSourceList;
+		std::hash_set<Source*, LEPRA_VOIDP_HASHER> mSourceList;
 	};
 
 	struct Source
@@ -141,8 +141,8 @@ private:
 		bool mIsPaused;
 	};
 
-	typedef std::set<Sample*> SampleSet;
-	typedef std::set<Source*> SourceSet;
+	typedef std::hash_set<Sample*, LEPRA_VOIDP_HASHER> SampleSet;
+	typedef std::hash_set<Source*, LEPRA_VOIDP_HASHER> SourceSet;
 
 	ALCdevice* mDevice;
 	ALCcontext* mContext;

@@ -31,5 +31,8 @@ template<> struct LEPRA_STD_HASHER<const void *>
 
 }
 
+typedef std::LEPRA_STD_HASHER<const void*> LEPRA_VOIDP_HASHER;
+typedef std::hash<int> LEPRA_ENUM_HASHER;
+
 #endif
 

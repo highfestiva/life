@@ -230,6 +230,8 @@ public:
 
 #  else
 
+#error "high_festiva: unlocked implementation will certainly crash, don't use it!"
+
 class _Node_Alloc_Lock {
 public:
   _Node_Alloc_Lock() { }

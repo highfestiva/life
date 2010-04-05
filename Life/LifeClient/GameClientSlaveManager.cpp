@@ -223,7 +223,7 @@ bool GameClientSlaveManager::IsUiMoveForbidden(Cure::GameObjectId pObjectId) con
 	return (pObjectId != mAvatarId && GetMaster()->IsLocalObject(pObjectId));
 }
 
-void GameClientSlaveManager::AddLocalObjects(std::set<Cure::GameObjectId>& pLocalObjectSet) const
+void GameClientSlaveManager::AddLocalObjects(std::hash_set<Cure::GameObjectId>& pLocalObjectSet) const
 {
 	pLocalObjectSet.insert(mAvatarId);
 }

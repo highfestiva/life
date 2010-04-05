@@ -502,9 +502,9 @@ protected:
 
 private:
 
-	typedef std::hash_set<TextInputObserver*, std::hash<void*> > TextObserverList;
-	typedef std::hash_set<KeyCodeInputObserver*, std::hash<void*> > KeyCodeObserverList;
-	typedef std::hash_set<MouseInputObserver*, std::hash<void*> > MouseObserverList;
+	typedef std::hash_set<TextInputObserver*, LEPRA_VOIDP_HASHER> TextObserverList;
+	typedef std::hash_set<KeyCodeInputObserver*, LEPRA_VOIDP_HASHER> KeyCodeObserverList;
+	typedef std::hash_set<MouseInputObserver*, LEPRA_VOIDP_HASHER> MouseObserverList;
 	TextObserverList mTextObserverList;
 	KeyCodeObserverList mKeyCodeObserverList;
 	MouseObserverList mMouseObserverList;

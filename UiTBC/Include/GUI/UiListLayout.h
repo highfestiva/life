@@ -120,8 +120,8 @@ private:
 	int GetPreferredHW(Component* pComponent);
 
 	typedef std::list<Node> NodeList;
-	typedef LooseBinTree<Component*, Component*, float64, std::hash<void*> > ComponentTree;
-	typedef HashTable<Component*, NodeList::iterator, std::hash<void*> > ComponentTable;
+	typedef LooseBinTree<Component*, Component*, float64, LEPRA_VOIDP_HASHER> ComponentTree;
+	typedef HashTable<Component*, NodeList::iterator, LEPRA_VOIDP_HASHER> ComponentTable;
 
 	NodeList::iterator mIter;
 	NodeList mNodeList;

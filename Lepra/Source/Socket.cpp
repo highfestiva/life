@@ -4,19 +4,12 @@
 
 
 
-//#define FD_SETSIZE	256	// Used for desciding how many sockets that can be listened to using ::select().
+#include "../Include/Socket.h"
 #include <assert.h>
 #include <algorithm>
 #include <fcntl.h>
-#include "../Include/Lepra.h"
 #include "../Include/HashUtil.h"
-#include "../Include/HiResTimer.h"
-#include "../Include/Log.h"
-#include "../Include/Network.h"
-#include "../Include/Socket.h"
-#include "../Include/SocketAddress.h"
 #include "../Include/SystemManager.h"
-#include "../Include/Thread.h"
 
 
 
@@ -741,7 +734,7 @@ TcpVSocket* TcpMuxSocket::Accept()
 
 TcpVSocket* TcpMuxSocket::PollAccept()
 {
-	Timer lTime;
+	HiResTimer lTime;
 	TcpVSocket* lTcpSocket = 0;
 	size_t lPendingSocketCount = mPendingConnectIdMap.GetCountSafe();
 	for (size_t x = 0; !lTcpSocket && x < lPendingSocketCount; ++x)
@@ -764,8 +757,7 @@ TcpVSocket* TcpMuxSocket::PollAccept()
 			}
 			else if (lAcceptStatus == ACCEPT_QUERY_WAIT)
 			{
-				lTime.UpdateTimer();
-				if (lTime.GetTimeDiffF() >= mConnectIdTimeout)
+				if (lTime.QueryTimeDiff() >= mConnectIdTimeout)
 				{
 					log_adebug("Connected socket ID-timed out => dropped.");
 					CloseSocket(lTcpSocket, true);
@@ -1009,7 +1001,7 @@ void TcpMuxSocket::AcceptThreadEntry()
 		if (lSocket)
 		{
 			log_atrace("Received a connect.");
-			Timer lTime;
+			HiResTimer lTime;
 			ScopeLock lLock(&mIoLock);
 			mPendingConnectIdMap.PushBack(lSocket, lTime);
 			mAcceptSemaphore.Signal();
@@ -2089,7 +2081,7 @@ void DualMuxSocket::AddSocket(DualSocket* pSocket, TcpVSocket* pTcpSocket, UdpVS
 	if (!pSocket->GetTcpSocket() || !pSocket->GetUdpSocket())
 	{
 		log_atrace("Adding a not-yet-fully-connected DualSocket to 'pending dual' list.");
-		mPendingDualConnectMap.PushBack(pSocket, Timer());
+		mPendingDualConnectMap.PushBack(pSocket, HiResTimer());
 	}
 	else
 	{
@@ -2102,9 +2094,8 @@ void DualMuxSocket::KillNonDualConnected()
 {
 	for (SocketTimeMap::Iterator x = mPendingDualConnectMap.First(); x != mPendingDualConnectMap.End();)
 	{
-		Timer& lTime = x.GetObject();
-		lTime.UpdateTimer();
-		if (lTime.GetTimeDiffF() >= mConnectDualTimeout)
+		HiResTimer& lTime = x.GetObject();
+		if (lTime.QueryTimeDiff() >= mConnectDualTimeout)
 		{
 			log_adebug("Connected socket dual-timed out => dropped.");
 			DualSocket* lSocket = x.GetKey();

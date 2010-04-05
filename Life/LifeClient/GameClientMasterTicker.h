@@ -84,7 +84,7 @@ private:
 		GameClientMasterTicker* mManager;
 	};
 
-	typedef OrderedMap<GameClientSlaveManager*, GameClientSlaveManager*, std::hash<void*> > SlaveMap;
+	typedef OrderedMap<GameClientSlaveManager*, GameClientSlaveManager*, LEPRA_VOIDP_HASHER> SlaveMap;
 
 	Lock mLock;
 	UiCure::GameUiManager* mUiManager;
@@ -97,7 +97,7 @@ private:
 	unsigned mActiveHeight;
 	SlaveMap mSlaveSet;
 	std::vector<UiCure::LineGraph2d> mPerformanceGraphList;
-	std::set<Cure::GameObjectId> mLocalObjectSet;
+	std::hash_set<Cure::GameObjectId> mLocalObjectSet;
 
 	LOG_CLASS_DECLARE();
 };

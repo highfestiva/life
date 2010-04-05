@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <set>
+#include <hash_set>
 #include "../../Lepra/Include/Canvas.h"
 #include "../../Lepra/Include/Log.h"
 #include "../Include/UiLepra.h"
@@ -179,7 +179,7 @@ public:
 	static Lepra::uint8 GetPaletteColor(int pRed, int pGreen, int pBlue, const Color* pPalette);
 
 protected:
-	typedef std::set<DisplayResizeObserver*> ResizeObserverSet;
+	typedef std::hash_set<DisplayResizeObserver*, LEPRA_VOIDP_HASHER> ResizeObserverSet;
 	ResizeObserverSet mResizeObserverSet;
 
 	DisplayMode* mEnumeratedDisplayMode;

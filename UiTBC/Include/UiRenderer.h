@@ -20,7 +20,8 @@
 
 #pragma once
 
-#include <set>
+#include "../../TBC/Include/GeometryBase.h"
+#include <hash_set>
 #include "../../Lepra/Include/Canvas.h"
 #include "../../Lepra/Include/Graphics2D.h"
 #include "../../Lepra/Include/IdManager.h"
@@ -28,11 +29,12 @@
 #include "../../Lepra/Include/HashTable.h"
 #include "../../Lepra/Include/RotationMatrix.h"
 #include "../../Lepra/Include/Transformation.h"
-#include "../../TBC/Include/GeometryBase.h"
 #include "UiTBC.h"
 #include "UiTexture.h"
 #include "UiShadowVolume.h"
 #include "UiPortalManager.h"
+
+
 
 namespace TBC
 {
@@ -43,8 +45,13 @@ class GeometryReference;
 
 namespace UiTbc
 {
+
+
+
 class Material;
 class GeometryGroup;
+
+
 
 class Renderer : public TBC::GeometryBase::Listener
 {
@@ -195,7 +202,7 @@ public:
 			// JMB: mTA = pGeom->mTA;
 		}
 
-		typedef std::set<GeometryID> GeometryIDSet;
+		typedef std::hash_set<GeometryID, LEPRA_ENUM_HASHER> GeometryIDSet;
 
 		// List of geometries that refer to this geometry.
 		GeometryIDSet mReferenceSet;
@@ -279,7 +286,7 @@ public:
 			mColor[3] = 1.0f;
 		}
 
-		typedef HashSet<GeometryData*, std::hash<void*> > GeometrySet;
+		typedef HashSet<GeometryData*, LEPRA_VOIDP_HASHER> GeometrySet;
 
 		Vector3DF mPosition;
 		Vector3DF mDirection;
@@ -643,4 +650,6 @@ private:
 	LOG_CLASS_DECLARE();
 };
 
-} // End namespace.
+
+
+}

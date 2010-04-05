@@ -117,7 +117,7 @@ private:
 
 	bool mConsumeChar;
 
-	typedef std::hash_set<X11Observer*, std::hash<void*> > ObserverSet;
+	typedef std::hash_set<X11Observer*, LEPRA_VOIDP_HASHER> ObserverSet;
 	typedef HashTable<int, ObserverSet*> ObserverSetTable;
 	// A table of lists of observers.
 	ObserverSetTable mObserverSetTable;

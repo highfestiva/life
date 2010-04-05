@@ -1,24 +1,14 @@
-/*
-	Class:  SpinLock
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2009, Righteous Games
 
-	NOTES:
+// Author: Jonas Byström
+// Copyright (c) 2002-2010, Righteous Games
 
-	A spin lock is the most primitive type of lock that ensures mutex.
-	It is also the fastest lock there is, if used on a multi-CPU machine.
 
-	Be careful though! It's not a reentrant lock! Thus, you can't call Acquire()
-	more than once at a time.
-
-	It's implemented here instead of in Thread.h because we need some sort
-	of primitive lock which can be used at a very basic level without including
-	anything else.
-*/
 
 #pragma once
 
+#include "Thread.h"
 #include "BusLock.h"
+#include <stdexcept>
 
 
 
@@ -27,7 +17,7 @@ namespace Lepra
 
 
 
-class SpinLock
+class SpinLock: public OwnedLock
 {
 public:
 	inline SpinLock();
@@ -59,20 +49,60 @@ inline SpinLock::~SpinLock()
 
 inline void SpinLock::Acquire()
 {
-	while (BusLock::CompareAndSwap(&mLocked, LOCKED, UNLOCKED) == false){}
+	while (BusLock::CompareAndSwap(&mLocked, LOCKED, UNLOCKED) == false)
+		;
+	Reference();
 }
 
 inline bool SpinLock::TryAcquire()
 {
-	return BusLock::CompareAndSwap(&mLocked, LOCKED, UNLOCKED);
+	bool lAcquired = BusLock::CompareAndSwap(&mLocked, LOCKED, UNLOCKED);
+	if (lAcquired)
+	{
+		Reference();
+	}
+	return (lAcquired);
 }
 
 inline void SpinLock::Release()
 {
+	Dereference();
 	BusLock::CompareAndSwap(&mLocked, UNLOCKED, LOCKED);
 }
 
 
 
-}
+class VerifySoleAccessor
+{
+public:
+	inline VerifySoleAccessor(SpinLock* pLock):
+		mLock(pLock)
+	{
+		bool lLock = mLock->TryAcquire();
+		if (!lLock)
+		{
+			const Thread* lOwner = mLock->GetOwner();
+			str lOwnerName = lOwner? lOwner->GetThreadName() : _T("<Unknown>");
+			mLog.Errorf(_T("Someone else is accessing our resource, namely thread %s at %p!"),
+				lOwnerName.c_str(), lOwner);
+			assert(false);
+			throw std::runtime_error("Resource collision failure!");
+		}
+	}
+	inline ~VerifySoleAccessor()
+	{
+		mLock->Release();
+	}
 
+protected:
+	SpinLock* mLock;
+	LOG_CLASS_DECLARE();
+};
+
+LOG_CLASS_DEFINE(TEST, VerifySoleAccessor);
+
+#define ASSERT_ALONE(lock)	VerifySoleAccessor __lVerifier(lock)
+
+
+
+}

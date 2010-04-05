@@ -100,6 +100,7 @@ class OwnedLock
 {
 public:
 	bool IsOwner() const;
+	Thread* GetOwner() const;
 
 protected:
 	OwnedLock();
@@ -340,9 +341,9 @@ public:
 
 	static void InitializeMainThread(const str& pThreadName);
 
-	const str& GetThreadName();
-	size_t GetThreadId();
-	size_t GetThreadHandle();
+	const str& GetThreadName() const;
+	size_t GetThreadId() const;
+	size_t GetThreadHandle() const;
 
 	bool IsRunning() const;
 	bool GetStopRequest() const;

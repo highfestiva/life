@@ -118,7 +118,7 @@ private:
 
 	bool mConsumeChar;
 
-	typedef std::hash_set<MacObserver*, std::hash<void*> > ObserverSet;
+	typedef std::hash_set<MacObserver*, LEPRA_VOIDP_HASHER> ObserverSet;
 	typedef HashTable<int, ObserverSet*> ObserverSetTable;
 	// A table of lists of observers.
 	ObserverSetTable mObserverSetTable;

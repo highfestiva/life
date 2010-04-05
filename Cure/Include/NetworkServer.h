@@ -71,13 +71,13 @@ private:
 
 	void OnCloseSocket(UdpVSocket* pSocket);
 
-	typedef std::hash_set<UdpVSocket*, std::hash<void*> > SocketSet;
+	typedef std::hash_set<UdpVSocket*, LEPRA_VOIDP_HASHER> SocketSet;
 	typedef SocketSet PendingSocketTable;
 	typedef std::hash_map<UserAccount::AccountId, UserConnection*> LoggedInIdUserTable;
 	typedef std::pair<UserAccount::AccountId, UserConnection*> LoggedInIdUserPair;
 	typedef std::hash_map<wstr, UserConnection*> LoggedInNameUserTable;
 	typedef std::pair<wstr, UserConnection*> LoggedInNameUserPair;
-	typedef std::hash_map<UdpVSocket*, UserConnection*, std::hash<void*> > SocketUserTable;
+	typedef std::hash_map<UdpVSocket*, UserConnection*, LEPRA_VOIDP_HASHER> SocketUserTable;
 	typedef std::pair<UdpVSocket*, UserConnection*> SocketUserPair;
 	typedef SocketSet SocketTimeoutTable;
 	typedef std::hash_set<UserAccount::AccountId> AccountIdSet;

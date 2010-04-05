@@ -254,8 +254,8 @@ private:
 	};
 
 	class JointInfo;
-	typedef std::hash_set<Object*, std::hash<void*> > ObjectTable;
-	typedef std::hash_set<JointInfo*, std::hash<void*> > JointTable;
+	typedef std::hash_set<Object*, LEPRA_VOIDP_HASHER> ObjectTable;
+	typedef std::hash_set<JointInfo*, LEPRA_VOIDP_HASHER> JointTable;
 	typedef std::list<JointInfo*> JointList;
 
 	class JointInfo

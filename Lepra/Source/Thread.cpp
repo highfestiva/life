@@ -24,6 +24,11 @@ bool OwnedLock::IsOwner() const
 	return (mOwner == Thread::GetCurrentThread());
 }
 
+Thread* OwnedLock::GetOwner() const
+{
+	return (mOwner);
+}
+
 OwnedLock::OwnedLock():
 	mOwner(0),
 	mAcquireCount(0)
@@ -232,17 +237,17 @@ void Thread::RequestSelfDestruct()
 	mSelfDestruct = true;
 }
 
-const str& Thread::GetThreadName()
+const str& Thread::GetThreadName() const
 {
 	return (mThreadName);
 }
 
-size_t Thread::GetThreadId()
+size_t Thread::GetThreadId() const
 {
 	return (mThreadId);
 }
 
-size_t Thread::GetThreadHandle()
+size_t Thread::GetThreadHandle() const
 {
 	return (mThreadHandle);
 }

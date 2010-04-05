@@ -6,8 +6,7 @@
 
 #pragma once
 
-#include <map>
-#include "../../Lepra/Include/HashTable.h"
+#include <hash_map>
 #include "../../Lepra/Include/IdManager.h"
 #include "../../TBC/Include/PhysicsManager.h"
 #include "Cure.h"

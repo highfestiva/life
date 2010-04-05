@@ -6,10 +6,12 @@
 #include <assert.h>
 #include <../src/stlport_prefix.h>
 #include <stl/_threads.h>
+#include "../Include/Timer.h"
 #include "../Include/HiResTimer.h"
 #include "../Include/Log.h"
 #include "../Include/MemberThread.h"
 #include "../Include/Socket.h"
+#include "../Include/SpinLock.h"
 
 using namespace Lepra;
 

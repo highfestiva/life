@@ -140,7 +140,7 @@ protected:
 					  float& pTimeToCollision);
 	protected:
 
-		typedef HashSet<GeometryBase*, std::hash<void*> > GeomSet;
+		typedef HashSet<GeometryBase*, LEPRA_VOIDP_HASHER> GeomSet;
 		typedef std::list<Portal*> PortalList;
 
 		GeomSet mGeomSet;
@@ -150,7 +150,7 @@ protected:
 		PortalManager* mPortalManager;
 	};
 
-	typedef HashSet<GeometryBase*, std::hash<void*> > GeomSet;
+	typedef HashSet<GeometryBase*, LEPRA_VOIDP_HASHER> GeomSet;
 	typedef HashTable<str, Cell*> CellTable;
 	typedef std::list<Portal*> PortalList;
 

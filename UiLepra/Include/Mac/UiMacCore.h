@@ -50,7 +50,7 @@ public:
 
 private:
 	static Lock* mLock;
-	typedef HashTable<NSWindow*, MacDisplayManager*, std::hash<void*> > WindowTable;
+	typedef HashTable<NSWindow*, MacDisplayManager*, LEPRA_VOIDP_HASHER> WindowTable;
 	static WindowTable mWindowTable;
 
 	static UiMacApplication* mApplication;

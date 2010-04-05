@@ -35,6 +35,7 @@
 #include "../Include/Random.h"
 #include "../Include/RotationMatrix.h"
 #include "../Include/SHA1.h"
+#include "../Include/SpinLock.h"
 #include "../Include/String.h"
 #include "../Include/SystemManager.h"
 #include "../Include/Transformation.h"

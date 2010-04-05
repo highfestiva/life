@@ -51,7 +51,7 @@ public:
 
 private:
 	static Lock* mLock;
-	typedef HashTable<HWND, Win32DisplayManager*, std::hash<void*> > WindowTable;
+	typedef HashTable<HWND, Win32DisplayManager*, LEPRA_VOIDP_HASHER> WindowTable;
 	static WindowTable mWindowTable;
 };
 

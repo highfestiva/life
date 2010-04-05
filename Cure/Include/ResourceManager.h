@@ -8,7 +8,7 @@
 #pragma warning(disable: 4505)	// Crappy warning from STL/MSVC.
 
 #include <list>
-#include <set>
+#include <hash_set>
 #include "../../Lepra/Include/DiskFile.h"
 #include "../../Lepra/Include/HashTable.h"
 #include "../../Lepra/Include/MemberThread.h"
@@ -254,7 +254,7 @@ protected:
 	virtual DiversifiedData CreateDiversifiedData() const = 0;
 	virtual void ReleaseDiversifiedData(DiversifiedData pData) const = 0;
 
-	typedef HashTable<const UserResource*, DiversifiedData, std::hash<const void*> > UserDataTable;
+	typedef HashTable<const UserResource*, DiversifiedData, LEPRA_VOIDP_HASHER> UserDataTable;
 	UserDataTable mUserDiversifiedTable;
 };
 
@@ -419,8 +419,8 @@ private:
 
 	typedef HashTable<str, Resource*> ResourceTable;
 	typedef OrderedMap<str, Resource*> ResourceMap;
-	typedef OrderedMap<Resource*, Resource*, std::hash<void*> > ResourceMapList;
-	typedef std::set<Resource*> ResourceSet;
+	typedef OrderedMap<Resource*, Resource*, LEPRA_VOIDP_HASHER> ResourceMapList;
+	typedef std::hash_set<Resource*, LEPRA_VOIDP_HASHER> ResourceSet;
 
 	TerrainFunctionManager* mTerrainFunctionManager;
 

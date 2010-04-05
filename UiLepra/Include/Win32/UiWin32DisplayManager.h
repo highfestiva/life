@@ -122,7 +122,7 @@ private:
 
 	bool mConsumeChar;
 
-	typedef std::hash_set<Win32Observer*, std::hash<void*> > ObserverSet;
+	typedef std::hash_set<Win32Observer*, LEPRA_VOIDP_HASHER> ObserverSet;
 	typedef HashTable<unsigned int, ObserverSet*> ObserverSetTable;
 	// A table of lists of observers.
 	ObserverSetTable mObserverSetTable;
