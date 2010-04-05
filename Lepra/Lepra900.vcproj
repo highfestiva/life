@@ -1188,6 +1188,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Source\SpinLock.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Source\StringUtility.cpp"
 				>
 			</File>

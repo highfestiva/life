@@ -8,7 +8,6 @@
 
 #include "Thread.h"
 #include "BusLock.h"
-#include <stdexcept>
 
 
 
@@ -81,12 +80,7 @@ public:
 		bool lLock = mLock->TryAcquire();
 		if (!lLock)
 		{
-			const Thread* lOwner = mLock->GetOwner();
-			str lOwnerName = lOwner? lOwner->GetThreadName() : _T("<Unknown>");
-			mLog.Errorf(_T("Someone else is accessing our resource, namely thread %s at %p!"),
-				lOwnerName.c_str(), lOwner);
-			assert(false);
-			throw std::runtime_error("Resource collision failure!");
+			OnError(mLock->GetOwner());
 		}
 	}
 	inline ~VerifySoleAccessor()
@@ -95,13 +89,19 @@ public:
 	}
 
 protected:
+	void OnError(const Thread* pOwner);
+
 	SpinLock* mLock;
 	LOG_CLASS_DECLARE();
 };
 
-LOG_CLASS_DEFINE(TEST, VerifySoleAccessor);
-
-#define ASSERT_ALONE(lock)	VerifySoleAccessor __lVerifier(lock)
+#define VERIFY_ALONE(lock)	VerifySoleAccessor __lVerifier(lock)
+#define DO_ASSERT_ALONE
+#ifdef DO_ASSERT_ALONE
+#define ASSERT_ALONE(lock)	VERIFY_ALONE(lock)
+#else
+#define ASSERT_ALONE(lock)
+#endif
 
 
 
