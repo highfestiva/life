@@ -30,6 +30,7 @@ class OpenGLRenderer;
 
 class OpenGLMaterial: public Material
 {
+	typedef Material Parent;
 public:
 	OpenGLMaterial(OpenGLRenderer* pRenderer, Material::DepthSortHint pSortHint, Material* pFallBackMaterial);
 	virtual ~OpenGLMaterial();
@@ -38,11 +39,12 @@ public:
 
 	GLenum GetGLElementType(TBC::GeometryBase* pGeometry);
 
-	void SetMaterial(const TBC::GeometryBase::BasicMaterialSettings& pMaterial);
-	static void SetMaterial(const TBC::GeometryBase::BasicMaterialSettings& pMaterial, OpenGLRenderer* pRenderer);
+	virtual void SetBasicMaterial(const TBC::GeometryBase::BasicMaterialSettings& pMaterial);
+	static void SetBasicMaterial(const TBC::GeometryBase::BasicMaterialSettings& pMaterial, OpenGLRenderer* pRenderer, bool pStore);
+
+	virtual void RenderAllBlendedGeometry(unsigned pCurrentFrame);
 
 protected:
-
 	void UpdateTextureMatrix(TBC::GeometryBase* pGeometry);
 
 	Material* mFallBackMaterial;	// If geometry doesn't contain all data needed.
@@ -83,6 +85,7 @@ protected:
 
 class OpenGLMatSingleColorBlended: public OpenGLMatSingleColorSolid
 {
+	typedef OpenGLMatSingleColorSolid Parent;
 public:
 	inline OpenGLMatSingleColorBlended(OpenGLRenderer* pRenderer,
 					   Material* pFallBackMaterial) :
@@ -92,6 +95,7 @@ public:
 
 	inline virtual ~OpenGLMatSingleColorBlended(){}
 
+	virtual void RenderAllGeometry(unsigned int pCurrentFrame);
 	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame);
 
 protected:
@@ -137,6 +141,7 @@ private:
 
 class OpenGLMatVertexColorBlended: public OpenGLMatVertexColorSolid
 {
+	typedef OpenGLMatVertexColorSolid Parent;
 public:
 	inline OpenGLMatVertexColorBlended(OpenGLRenderer* pRenderer,
 					   Material* pFallBackMaterial) :
@@ -146,6 +151,7 @@ public:
 
 	inline virtual ~OpenGLMatVertexColorBlended(){}
 
+	virtual void RenderAllGeometry(unsigned int pCurrentFrame);
 	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame);
 protected:
 };
@@ -194,6 +200,7 @@ private:
 
 class OpenGLMatSingleTextureBlended: public OpenGLMatSingleTextureSolid
 {
+	typedef OpenGLMatSingleTextureSolid Parent;
 public:
 	inline OpenGLMatSingleTextureBlended(OpenGLRenderer* pRenderer,
 					     Material* pFallBackMaterial) :
@@ -209,6 +216,7 @@ public:
 
 	inline virtual ~OpenGLMatSingleTextureBlended(){}
 
+	virtual void RenderAllGeometry(unsigned int pCurrentFrame);
 	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame);
 
 protected:
@@ -278,6 +286,7 @@ private:
 
 class OpenGLMatSingleColorEnvMapBlended: public OpenGLMatSingleColorEnvMapSolid
 {
+	typedef OpenGLMatSingleColorEnvMapSolid Parent;
 public:
 	inline OpenGLMatSingleColorEnvMapBlended(OpenGLRenderer* pRenderer,
 						 Material* pFallBackMaterial) :
@@ -287,6 +296,7 @@ public:
 
 	inline virtual ~OpenGLMatSingleColorEnvMapBlended(){}
 
+	virtual void RenderAllGeometry(unsigned int pCurrentFrame);
 //	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame);
 
 protected:
@@ -332,6 +342,7 @@ private:
 //
 class OpenGLMatSingleTextureEnvMapBlended: public OpenGLMatSingleTextureEnvMapSolid
 {
+	typedef OpenGLMatSingleTextureEnvMapSolid Parent;
 public:
 	inline OpenGLMatSingleTextureEnvMapBlended(OpenGLRenderer* pRenderer,
 						   Material* pFallBackMaterial) :
@@ -341,6 +352,7 @@ public:
 
 	inline virtual ~OpenGLMatSingleTextureEnvMapBlended(){}
 
+	virtual void RenderAllGeometry(unsigned int pCurrentFrame);
 //	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame);
 
 protected:

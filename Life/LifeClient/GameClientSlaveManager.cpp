@@ -483,7 +483,7 @@ void GameClientSlaveManager::TickUiUpdate()
 			lTargetCameraPosition, lMovingAveragePart);
 		const Vector3DF lDirection = lNewPosition-mCameraPosition;
 		const float lDistance = lDirection.GetLength();
-		const float lMaxCamSpeed = 40;
+		const float lMaxCamSpeed = 200;
 		if (lDistance > lMaxCamSpeed*lPhysicsTime)
 		{
 			mCameraPosition += lDirection*(lMaxCamSpeed*lPhysicsTime/lDistance);

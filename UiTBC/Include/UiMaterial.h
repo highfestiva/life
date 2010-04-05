@@ -122,7 +122,8 @@ public:
 	virtual ~Material();
 
 	static void SetEnableDepthSorting(bool pEnabled);
-	static void SetEnableMaterials(bool pEnabled);
+	static void EnableDrawMaterial(bool pEnabled);
+	static bool IsDrawMaterialEnabled();
 
 	Renderer* GetRenderer();
 
@@ -130,10 +131,13 @@ public:
 	virtual RemoveStatus RemoveGeometry(TBC::GeometryBase* pGeometry);
 	virtual void RemoveAllGeometry();
 
+	virtual void SetBasicMaterial(const TBC::GeometryBase::BasicMaterialSettings& pMaterial) = 0;
+
 	bool IsEmpty() { return mGeometryGroupList.empty(); }
 
-	void RenderAllGeometry(unsigned int pCurrentFrame);
+	virtual void RenderAllGeometry(unsigned int pCurrentFrame);
 	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame);
+	virtual void RenderAllBlendedGeometry(unsigned pCurrentFrame);
 	virtual void RenderGeometry(TBC::GeometryBase* pGeometry) = 0;
 	virtual void RenderBaseGeometry(TBC::GeometryBase* pGeometry) = 0;
 
@@ -150,6 +154,8 @@ protected:
 	Renderer::TextureID GetGroupTextureID(TBC::GeometryBase* pGeometry);
 	GeometryGroupList* GetGeometryGroupList();
 
+	static TBC::GeometryBase::BasicMaterialSettings mCurrentMaterial;
+
 private:
 	GeometryGroupList mGeometryGroupList;
 	Renderer* mRenderer;
@@ -160,7 +166,7 @@ private:
 	int mIndex;
 
 	static bool mEnableDepthSort;
-	static bool mEnableMaterials;
+	static bool mEnableDrawMaterial;
 };
 
 class NullMaterial : public Material
@@ -172,6 +178,10 @@ public:
 	}
 
 	virtual ~NullMaterial()
+	{
+	}
+
+	void SetBasicMaterial(const TBC::GeometryBase::BasicMaterialSettings&)
 	{
 	}
 

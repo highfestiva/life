@@ -1132,10 +1132,10 @@ unsigned int OpenGLRenderer::RenderScene()
 
 	if (IsOutlineRenderingEnabled())
 	{
-		Material::SetEnableMaterials(false);
+		Material::EnableDrawMaterial(false);
 		Vector3DF lWhite(1, 1, 1);
 		TBC::GeometryBase::BasicMaterialSettings lMaterial(lWhite, lWhite, lWhite, 1, 1, false);
-		OpenGLMaterial::SetMaterial(lMaterial, this);
+		OpenGLMaterial::SetBasicMaterial(lMaterial, this, true);
 	}
 
 	{
@@ -1155,7 +1155,7 @@ unsigned int OpenGLRenderer::RenderScene()
 		::glDisable(GL_STENCIL_TEST);
 	}
 
-	Material::SetEnableMaterials(true);
+	Material::EnableDrawMaterial(true);
 
 	if (IsOutlineRenderingEnabled())
 	{

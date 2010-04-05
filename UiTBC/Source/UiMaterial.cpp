@@ -209,15 +209,24 @@ Material::~Material()
 	RemoveAllGeometry();
 }
 
+
+
 void Material::SetEnableDepthSorting(bool pEnabled)
 {
 	mEnableDepthSort = pEnabled;
 }
 
-void Material::SetEnableMaterials(bool pEnabled)
+void Material::EnableDrawMaterial(bool pEnabled)
 {
-	mEnableMaterials = pEnabled;
+	mEnableDrawMaterial = pEnabled;
 }
+
+bool Material::IsDrawMaterialEnabled()
+{
+	return (mEnableDrawMaterial);
+}
+
+
 
 Material::GeometryGroupList* Material::GetGeometryGroupList()
 {
@@ -287,7 +296,7 @@ void Material::RemoveAllGeometry()
 
 void Material::RenderAllGeometry(unsigned int pCurrentFrame)
 {
-	if (mEnableMaterials)
+	if (mEnableDrawMaterial)
 	{
 		DoRenderAllGeometry(pCurrentFrame);
 	}
@@ -324,7 +333,7 @@ void Material::DoRenderAllGeometry(unsigned int pCurrentFrame)
 			{
 				if (mRenderer->PreRender(lGeometry))
 				{
-					if (mEnableMaterials)
+					if (mEnableDrawMaterial)
 					{
 						RenderGeometry(lGeometry);
 					}
@@ -338,6 +347,19 @@ void Material::DoRenderAllGeometry(unsigned int pCurrentFrame)
 			}
 		}
 	}
+}
+
+void Material::RenderAllBlendedGeometry(unsigned pCurrentFrame)
+{
+	bool lOldEnableDrawMaterial = mEnableDrawMaterial;
+	mEnableDrawMaterial = true;
+	mEnableDepthSort = true;
+
+	DoRenderAllGeometry(pCurrentFrame);
+
+	SetBasicMaterial(mCurrentMaterial);
+	mEnableDrawMaterial = lOldEnableDrawMaterial;
+	mEnableDepthSort = false;
 }
 
 TBC::GeometryBase* Material::GetFirstGeometry()
@@ -408,8 +430,9 @@ Renderer::TextureID Material::GetGroupTextureID(TBC::GeometryBase* pGeometry)
 
 
 
+TBC::GeometryBase::BasicMaterialSettings Material::mCurrentMaterial;
 bool Material::mEnableDepthSort = false;
-bool Material::mEnableMaterials = true;
+bool Material::mEnableDrawMaterial = true;
 
 
 

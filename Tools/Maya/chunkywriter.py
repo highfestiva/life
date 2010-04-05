@@ -47,6 +47,7 @@ CHUNK_MESH_COLOR_FORMAT            = "MECF"
 CHUNK_MESH_TRIANGLES               = "METR"
 CHUNK_MESH_STRIPS                  = "MEST"
 CHUNK_MESH_VOLATILITY              = "MEVO"
+CHUNK_MESH_CASTS_SHADOWS           = "MECS"
 
 
 
@@ -619,6 +620,8 @@ class MeshWriter(ChunkyWriter):
                                 (CHUNK_MESH_TRIANGLES, node.get_fixed_attribute("rgtri")),
                                 (CHUNK_MESH_VOLATILITY, default_mesh_type["static"]),
                         ]
+                        if self.config.get("casts_shadows"):
+                               inner_data.append((CHUNK_MESH_CASTS_SHADOWS, 1))
                         ns = node.get_fixed_attribute("rgn", optional=True)
                         if ns:
                                 #inner_data.append((CHUNK_MESH_NORMALS, ns))

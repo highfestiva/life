@@ -221,7 +221,8 @@ bool TextureResource::Load()
 
 GeometryResource::GeometryResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const str& pName):
 	Parent(pManager, pName),
-	UiResource(pUiManager)
+	UiResource(pUiManager),
+	mCastsShadows(0)
 {
 }
 
@@ -270,7 +271,7 @@ bool GeometryResource::Load()
 	{
 		UiTbc::ChunkyMeshLoader lLoader(&lFile, false);
 		lGeometry = new UiTbc::TriangleBasedGeometry();
-		bool lOk = lLoader.Load(lGeometry);
+		bool lOk = lLoader.Load(lGeometry, mCastsShadows);
 		if (!lOk)
 		{
 			assert(false);
@@ -454,12 +455,13 @@ bool GeometryResource::Load()
 
 Cure::ResourceLoadState GeometryResource::PostProcess()
 {
-	assert(mOptimizedData == UiTbc::Renderer::INVALID_GEOMETRY);
-	mOptimizedData = GetUiManager()->GetRenderer()->AddGeometry(
-		GetRamData(), UiTbc::Renderer::MAT_NULL, UiTbc::Renderer::CAST_SHADOWS);
-	assert(mOptimizedData != UiTbc::Renderer::INVALID_GEOMETRY);
+	typedef UiTbc::Renderer R;
+	assert(mOptimizedData == R::INVALID_GEOMETRY);
+	mOptimizedData = GetUiManager()->GetRenderer()->AddGeometry(GetRamData(), R::MAT_NULL,
+		mCastsShadows? R::CAST_SHADOWS : R::NO_SHADOWS);
+	assert(mOptimizedData != R::INVALID_GEOMETRY);
 	Cure::ResourceLoadState lLoadState;
-	if (mOptimizedData == UiTbc::Renderer::INVALID_GEOMETRY)
+	if (mOptimizedData == R::INVALID_GEOMETRY)
 	{
 		lLoadState = Cure::RESOURCE_LOAD_ERROR;
 	}
@@ -471,6 +473,11 @@ Cure::ResourceLoadState GeometryResource::PostProcess()
 	Parent::PostProcess();
 
 	return (lLoadState);
+}
+
+bool GeometryResource::GetCastsShadows() const
+{
+	return (mCastsShadows);
 }
 
 LOG_CLASS_DEFINE(UI_GFX_3D, GeometryResource);
@@ -555,8 +562,9 @@ void GeometryReferenceResource::Suspend()
 	ReleaseGeometry();
 }
 
-void GeometryReferenceResource::OnLoadClass(ClassResource*)
+void GeometryReferenceResource::OnLoadClass(ClassResource* pResource)
 {
+	mCastsShadows = ((GeometryResource*)pResource->GetConstResource())->GetCastsShadows();
 }
 
 LOG_CLASS_DEFINE(UI_GFX_3D, GeometryReferenceResource);

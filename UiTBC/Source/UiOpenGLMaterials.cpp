@@ -56,13 +56,18 @@ GLenum OpenGLMaterial::GetGLElementType(TBC::GeometryBase* pGeometry)
 	return (GL_TRIANGLES);
 }
 
-void OpenGLMaterial::SetMaterial(const TBC::GeometryBase::BasicMaterialSettings& pMaterial)
+void OpenGLMaterial::SetBasicMaterial(const TBC::GeometryBase::BasicMaterialSettings& pMaterial)
 {
-	SetMaterial(pMaterial, (OpenGLRenderer*)GetRenderer());
+	SetBasicMaterial(pMaterial, (OpenGLRenderer*)GetRenderer(), false);
 }
 
-void OpenGLMaterial::SetMaterial(const TBC::GeometryBase::BasicMaterialSettings& pMaterial, OpenGLRenderer* pRenderer)
+void OpenGLMaterial::SetBasicMaterial(const TBC::GeometryBase::BasicMaterialSettings& pMaterial, OpenGLRenderer* pRenderer, bool pStore)
 {
+	if (pStore)
+	{
+		mCurrentMaterial = pMaterial;
+	}
+
 	const float lAmbient[]  = { pMaterial.mAmbient.x,  pMaterial.mAmbient.y,  pMaterial.mAmbient.z,  pMaterial.mAlpha };
 	const float lDiffuse[]  = { pMaterial.mDiffuse.x,  pMaterial.mDiffuse.y,  pMaterial.mDiffuse.z,  pMaterial.mAlpha };
 	const float lSpecular[] = { pMaterial.mSpecular.x, pMaterial.mSpecular.y, pMaterial.mSpecular.z, pMaterial.mAlpha };
@@ -79,6 +84,21 @@ void OpenGLMaterial::SetMaterial(const TBC::GeometryBase::BasicMaterialSettings&
 
 	pRenderer->AddAmbience(pMaterial.mAmbient.x,
 		pMaterial.mAmbient.y, pMaterial.mAmbient.z);
+}
+
+
+
+void OpenGLMaterial::RenderAllBlendedGeometry(unsigned pCurrentFrame)
+{
+	::glDepthMask(GL_FALSE);
+	::glDisable(GL_CULL_FACE);
+	GLint lOldFill[2];
+	::glGetIntegerv(GL_POLYGON_MODE, lOldFill);
+	::glPolygonMode(GL_BACK, GL_FILL);
+	Parent::RenderAllBlendedGeometry(pCurrentFrame);
+	::glEnable(GL_CULL_FACE);
+	::glDepthMask(GL_TRUE);
+	::glPolygonMode(GL_BACK, lOldFill[1]);
 }
 
 
@@ -172,12 +192,17 @@ void OpenGLMatSingleColorSolid::RenderBaseGeometry(TBC::GeometryBase* pGeometry)
 
 void OpenGLMatSingleColorSolid::PrepareBasicMaterialSettings(TBC::GeometryBase* pGeometry)
 {
-	SetMaterial(pGeometry->GetBasicMaterialSettings());
+	SetBasicMaterial(pGeometry->GetBasicMaterialSettings());
 }
 
 /*
 	OpenGLMatSingleColorBlended
 */
+
+void OpenGLMatSingleColorBlended::RenderAllGeometry(unsigned int pCurrentFrame)
+{
+	RenderAllBlendedGeometry(pCurrentFrame);
+}
 
 void OpenGLMatSingleColorBlended::DoRenderAllGeometry(unsigned int pCurrentFrame)
 {
@@ -279,6 +304,11 @@ void OpenGLMatVertexColorSolid::RenderGeometry(TBC::GeometryBase* pGeometry)
 /*
 	OpenGLMatVertexColorBlended
 */
+
+void OpenGLMatVertexColorBlended::RenderAllGeometry(unsigned int pCurrentFrame)
+{
+	RenderAllBlendedGeometry(pCurrentFrame);
+}
 
 void OpenGLMatVertexColorBlended::DoRenderAllGeometry(unsigned int pCurrentFrame)
 {
@@ -411,6 +441,11 @@ void OpenGLMatSingleTextureSolid::BindTexture(int pTextureID)
 /*
 	OpenGLMatSingleTextureBlended
 */
+
+void OpenGLMatSingleTextureBlended::RenderAllGeometry(unsigned int pCurrentFrame)
+{
+	RenderAllBlendedGeometry(pCurrentFrame);
+}
 
 void OpenGLMatSingleTextureBlended::DoRenderAllGeometry(unsigned int pCurrentFrame)
 {
@@ -585,11 +620,16 @@ void OpenGLMatSingleColorEnvMapSolid::PrepareBasicMaterialSettings(TBC::Geometry
 	}
 	else
 	{
-		SetMaterial(pGeometry->GetBasicMaterialSettings());
+		SetBasicMaterial(pGeometry->GetBasicMaterialSettings());
 	}
 }
 
 
+
+void OpenGLMatSingleColorEnvMapBlended::RenderAllGeometry(unsigned int pCurrentFrame)
+{
+	RenderAllBlendedGeometry(pCurrentFrame);
+}
 
 /*
 void OpenGLMatSingleColorEnvMapBlended::DoRenderAllGeometry(unsigned int pCurrentFrame)
@@ -607,7 +647,7 @@ void OpenGLMatSingleColorEnvMapBlended::PrepareBasicMaterialSettings(TBC::Geomet
 	}
 	else
 	{
-		SetMaterial(pGeometry->GetBasicMaterialSettings());
+		SetBasicMaterial(pGeometry->GetBasicMaterialSettings());
 	}
 }
 
@@ -827,7 +867,7 @@ void OpenGLMatSingleTextureEnvMapSolid::PrepareBasicMaterialSettings(TBC::Geomet
 	}
 	else
 	{
-		SetMaterial(pGeometry->GetBasicMaterialSettings());
+		SetBasicMaterial(pGeometry->GetBasicMaterialSettings());
 	}
 }
 
@@ -835,6 +875,10 @@ void OpenGLMatSingleTextureEnvMapSolid::PrepareBasicMaterialSettings(TBC::Geomet
 /*
 	OpenGLMatSingleTextureEnvMapBlended
 */
+void OpenGLMatSingleTextureEnvMapBlended::RenderAllGeometry(unsigned int pCurrentFrame)
+{
+	RenderAllBlendedGeometry(pCurrentFrame);
+}
 /*
 void OpenGLMatSingleTextureEnvMapBlended::DoRenderAllGeometry(unsigned int pCurrentFrame)
 {
@@ -851,7 +895,7 @@ void OpenGLMatSingleTextureEnvMapBlended::PrepareBasicMaterialSettings(TBC::Geom
 	}
 	else
 	{
-		SetMaterial(pGeometry->GetBasicMaterialSettings());
+		SetBasicMaterial(pGeometry->GetBasicMaterialSettings());
 	}
 }
 

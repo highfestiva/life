@@ -26,7 +26,7 @@ ChunkyMeshLoader::~ChunkyMeshLoader()
 {
 }
 
-bool ChunkyMeshLoader::Load(TriangleBasedGeometry* pMeshData)
+bool ChunkyMeshLoader::Load(TriangleBasedGeometry* pMeshData, bool& pCastsShadows)
 {
 	bool lOk = true;
 	if (lOk)
@@ -49,6 +49,7 @@ bool ChunkyMeshLoader::Load(TriangleBasedGeometry* pMeshData)
 	unsigned lColorsSize = 0;
 	int32 lColorFormat = 0x7FFFFFFD;
 	int32 lGeometryVolatility = 0x7FFFFFFD;
+	int32 lCastsShadows = 0;
 	if (lOk)
 	{
 		TBC::ChunkyLoader::FileElementList lLoadList;
@@ -60,6 +61,7 @@ bool ChunkyMeshLoader::Load(TriangleBasedGeometry* pMeshData)
 		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_COLOR, (void**)&lColors, &lColorsSize));
 		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_COLOR_FORMAT, &lColorFormat));
 		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_VOLATILITY, &lGeometryVolatility));
+		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_CASTS_SHADOWS, &lCastsShadows));
 		lOk = AllocLoadChunkyList(lLoadList, mFile->GetSize());
 	}
 	if (lOk)
@@ -143,6 +145,8 @@ bool ChunkyMeshLoader::Load(TriangleBasedGeometry* pMeshData)
 		{
 			pMeshData->AddUVSet(lUvs[x]);
 		}
+
+		pCastsShadows = (lCastsShadows != 0);
 	}
 	// TODO: reuse memory, don't new/delete constantly!
 	delete[] (lLoadVertices);
@@ -157,7 +161,7 @@ bool ChunkyMeshLoader::Load(TriangleBasedGeometry* pMeshData)
 	return (lOk);
 }
 
-bool ChunkyMeshLoader::Save(const TriangleBasedGeometry* pMeshData)
+bool ChunkyMeshLoader::Save(const TriangleBasedGeometry* pMeshData, bool pCastsShadows)
 {
 	// Write file header. We will come back to it later to re-write the actual size.
 	bool lOk = true;
@@ -201,6 +205,7 @@ bool ChunkyMeshLoader::Save(const TriangleBasedGeometry* pMeshData)
 	}
 	int32 lColorFormat = pMeshData->GetColorFormat();
 	int32 lGeometryVolatility = pMeshData->GetGeometryVolatility();
+	int32 lCastsShadows = pCastsShadows? 1 : 0;
 	if (lOk)
 	{
 		TBC::ChunkyLoader::FileElementList lSaveList;
@@ -227,6 +232,7 @@ bool ChunkyMeshLoader::Save(const TriangleBasedGeometry* pMeshData)
 			lSaveList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_COLOR_FORMAT, &lColorFormat));
 		}
 		lSaveList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_VOLATILITY, &lGeometryVolatility));
+		lSaveList.push_back(ChunkyFileElement(TBC::CHUNK_MESH_CASTS_SHADOWS, &lCastsShadows));
 		lOk = SaveChunkyList(lSaveList);
 	}
 

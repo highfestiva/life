@@ -89,6 +89,7 @@ enum ChunkyType
 	CHUNK_MESH_TRIANGLES               = ENUMIFY('M','E','T','R'),	// A mesh can contain EITHER this type OR the strips type.
 	CHUNK_MESH_STRIPS                  = ENUMIFY('M','E','S','T'),	// A mesh can contain EITHER this type OR the triangles type.
 	CHUNK_MESH_VOLATILITY              = ENUMIFY('M','E','V','O'),	// Optional.
+	CHUNK_MESH_CASTS_SHADOWS           = ENUMIFY('M','E','C','S'),	// Optional.
 
 	// File type: skin. Unly used by graphics applications.
 	CHUNK_SKIN                         = ENUMIFY('S','K','I','N'),	// Skin file type.

@@ -149,6 +149,11 @@ public:
 	bool Load();
 	Cure::ResourceLoadState PostProcess();
 
+	bool GetCastsShadows() const;
+
+protected:
+	bool mCastsShadows;
+
 private:
 	LOG_CLASS_DECLARE();
 };

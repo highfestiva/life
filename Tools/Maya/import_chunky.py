@@ -637,7 +637,11 @@ class GroupReader(DefaultMAReader):
                         if section.startswith("config:"):
                                 params = config.items(section)
                                 for name, value in params:
-                                        self.config[name] = stripQuotes(value)
+                                        val = stripQuotes(value)
+                                        if val == "True" or val == "False":
+                                                self.config[name] = eval(val)
+                                        else:
+                                                self.config[name] = val
 
 
         def apply_phys_config(self, config, group):
@@ -754,7 +758,8 @@ class GroupReader(DefaultMAReader):
                         if section.startswith("config:") or section.startswith("trigger:"):
                                 used_sections[section] = True
                 required = [("type", lambda x: chunkywriter.physics_type.get(x) != None)]
-                for name, config_check in required:
+                optional = [("casts_shadows", lambda x: x == None or type(x) == bool)]
+                for name, config_check in required+optional:
                         ok = config_check(self.config.get(name))
                         allApplied &= ok
                         if not ok:

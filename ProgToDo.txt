@@ -62,7 +62,7 @@ Game
 . Implement the following in the end screen as "what you're missing out on":
   - Robot on wheels.
   - Towing truck.
-  - Huge UFO (which can have vehicles parked inside).
+  - Huge UFO which can have vehicles parked inside while flying!
   - Football.
   - Big world.
   - Play online - and make sure that you add tag line "you can play with your kids even if you travel".

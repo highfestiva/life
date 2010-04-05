@@ -465,6 +465,10 @@ void CppContextObject::TryAddTexture()
 			else
 			{
 				UiTbc::Renderer::MaterialType lMaterialType = UiTbc::Renderer::MAT_SINGLE_COLOR_SOLID;
+				if (lMesh->GetRamData()->GetBasicMaterialSettings().mAlpha != 1)
+				{
+					lMaterialType = UiTbc::Renderer::MAT_SINGLE_COLOR_BLENDED;
+				}
 				mUiManager->GetRenderer()->ChangeMaterial(lMesh->GetData(), lMaterialType);
 				//UiTbc::Renderer::Shadows lShadows = UiTbc::Renderer::CAST_SHADOWS;
 				//lMesh->SetShadows(lShadows);
