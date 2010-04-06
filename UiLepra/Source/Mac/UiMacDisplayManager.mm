@@ -144,7 +144,7 @@ void MacDisplayManager::SetCaption(const str& pCaption, bool pInternalCall)
 
 		if (pInternalCall == false || mCaptionSet == false)
 		{
-			[mWnd setTitle: [NSString stringWithCString: astrutil::ToOwnCode(pCaption).c_str()]];
+			[mWnd setTitle: [NSString stringWithCString: astrutil::Encode(pCaption).c_str()]];
 		}
 	}
 }

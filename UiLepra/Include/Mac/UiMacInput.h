@@ -8,6 +8,7 @@
 
 #include "../UiInput.h"
 #include "../UiLepra.h"
+#include "UiMacDisplayManager.h"
 
 
 
@@ -107,6 +108,10 @@ private:
 
 
 
+#endif // 0
+
+
+
 class MacInputManager: public InputManager, public MacObserver
 {
 	typedef InputManager Parent;
@@ -138,12 +143,12 @@ public:
 
 
 protected:
-	bool OnMessage(int pMsg, int pwParam, long plParam);
+	bool OnMessage(NSEvent* pEvent);
 	void SetKey(KeyCode pWParam, long pLParam, bool pIsDown);
 
 private:
 	// The DirectInput device enumeration callback.
-	static BOOL CALLBACK EnumDeviceCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvRef);
+	//static BOOL CALLBACK EnumDeviceCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvRef);
 
 	void AddObserver();
 	void RemoveObserver();
@@ -153,7 +158,7 @@ private:
 	MacDisplayManager* mDisplayManager;
 
 	// The DirectInput object.
-	LPDIRECTINPUT8 mDirectInput;
+	//LPDIRECTINPUT8 mDirectInput;
 
 	bool mEnumError;
 	bool mInitialized;
@@ -171,10 +176,6 @@ private:
 	InputDevice* mMouse;
 	int mTypeCount[InputDevice::TYPE_COUNT];
 };
-
-
-
-#endif // 0
 
 
 

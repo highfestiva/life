@@ -172,6 +172,7 @@ bool TestThreading(const LogDecorator& pAccount)
 		SpinLock lLock;
 		lTestOk = lLock.TryAcquire();
 		assert(lTestOk);
+		lLock.Release();
 	}
 	if (lTestOk)
 	{

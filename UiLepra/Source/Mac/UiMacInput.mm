@@ -18,8 +18,7 @@ namespace UiLepra
 
 InputManager* InputManager::CreateInputManager(DisplayManager* pDisplayManager)
 {
-	//return (new MacInputManager((MacDisplayManager*)pDisplayManager));
-	return (0);
+	return (new MacInputManager((MacDisplayManager*)pDisplayManager));
 }
 
 
@@ -387,19 +386,23 @@ LOG_CLASS_DEFINE(UI_INPUT, MacInputDevice);
 
 
 
+#endif // 0
+
+
+
 MacInputManager::MacInputManager(MacDisplayManager* pDisplayManager):
 	mDisplayManager(pDisplayManager),
-	mDirectInput(0),
+	//mDirectInput(0),
 	mEnumError(false),
 	mInitialized(false),
 	mScreenWidth(0),
 	mScreenHeight(0),
 	mCursorX(0),
 	mCursorY(0),
-	mMouse(0),
-	mKeyboard(0)
+	mKeyboard(0),
+	mMouse(0)
 {
-	POINT lPoint;
+	/*POINT lPoint;
 	::GetCursorPos(&lPoint);
 	SetMousePosition(WM_NCMOUSEMOVE, lPoint.x, lPoint.y);
 
@@ -425,7 +428,7 @@ MacInputManager::MacInputManager(MacDisplayManager* pDisplayManager):
 	{
 		mDisplayManager->ShowMessageBox(_T("DirectInput failed enumerating your devices!"), _T("DirectInput error!"));
 		return;
-	}
+	}*/
 
 	Refresh();
 
@@ -438,24 +441,24 @@ MacInputManager::~MacInputManager()
 {
 	if (mInitialized == true)
 	{
-		mDirectInput->Release();
+		//mDirectInput->Release();
 	}
 
 	RemoveObserver();
 
-	DeviceList::iterator lDIter;
+	/*DeviceList::iterator lDIter;
 	for (lDIter = mDeviceList.begin(); lDIter != mDeviceList.end(); ++lDIter)
 	{
 		InputDevice* lDevice = *lDIter;
 		delete lDevice;
-	}
+	}*/
 
 	mDisplayManager = 0;
 }
 
 void MacInputManager::Refresh()
 {
-	if (mDisplayManager != 0 && mDisplayManager->GetHWND() != 0)
+	/*if (mDisplayManager != 0 && mDisplayManager->GetHWND() != 0)
 	{
 		RECT lRect;
 		::GetClientRect(mDisplayManager->GetHWND(), &lRect);
@@ -475,7 +478,7 @@ void MacInputManager::Refresh()
 			mScreenWidth  = ::GetSystemMetrics(SM_CXSCREEN);
 			mScreenHeight = ::GetSystemMetrics(SM_CYSCREEN);
 		}
-	}
+	}*/
 }
 
 MacDisplayManager* MacInputManager::GetDisplayManager() const
@@ -483,10 +486,10 @@ MacDisplayManager* MacInputManager::GetDisplayManager() const
 	return (mDisplayManager);
 }
 
-bool MacInputManager::OnMessage(int pMsg, int pwParam, long plParam)
+bool MacInputManager::OnMessage(NSEvent* pEvent)
 {
 	bool lConsumed = false;
-	switch (pMsg)
+	/*switch (pMsg)
 	{
 		case WM_CHAR:
 		{
@@ -530,13 +533,13 @@ bool MacInputManager::OnMessage(int pMsg, int pwParam, long plParam)
 			lConsumed = NotifyOnKeyDown((KeyCode)pwParam);
 		}
 		break;
-	}
+	}*/
 	return (lConsumed);
 }
 
 void MacInputManager::SetKey(KeyCode pWParam, long pLParam, bool pIsDown)
 {
-	if (pLParam&0x1000000)	// Extended key = right Alt, Ctrl...
+	/*if (pLParam&0x1000000)	// Extended key = right Alt, Ctrl...
 	{
 		switch (pWParam)
 		{
@@ -547,11 +550,11 @@ void MacInputManager::SetKey(KeyCode pWParam, long pLParam, bool pIsDown)
 	else if (pWParam == IN_KBD_LSHIFT && (pLParam&0xFF0000) == 0x360000)
 	{
 		pWParam = IN_KBD_RSHIFT;
-	}
+	}*/
 	Parent::SetKey(pWParam, pIsDown);
 }
 
-BOOL CALLBACK MacInputManager::EnumDeviceCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvRef)
+/*BOOL CALLBACK MacInputManager::EnumDeviceCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvRef)
 {
 	MacInputManager* lInputManager = (MacInputManager*)pvRef;
 
@@ -621,16 +624,16 @@ BOOL CALLBACK MacInputManager::EnumDeviceCallback(LPCDIDEVICEINSTANCE lpddi, LPV
 	lInputManager->mDeviceList.push_back(lDevice);
 
 	return (DIENUM_CONTINUE);
-}
+}*/
 
 void MacInputManager::ShowCursor()
 {
-	::ShowCursor(TRUE);
+	//::ShowCursor(TRUE);
 }
 
 void MacInputManager::HideCursor()
 {
-	::ShowCursor(FALSE);
+	//::ShowCursor(FALSE);
 }
 
 double MacInputManager::GetCursorX()
@@ -668,7 +671,7 @@ void MacInputManager::AddObserver()
 	if (mDisplayManager)
 	{
 		// Listen to text input and standard mouse events.
-		mDisplayManager->AddObserver(WM_CHAR, this);
+		/*mDisplayManager->AddObserver(WM_CHAR, this);
 		mDisplayManager->AddObserver(WM_SYSKEYDOWN, this);
 		mDisplayManager->AddObserver(WM_SYSKEYUP, this);
 		mDisplayManager->AddObserver(WM_KEYDOWN, this);
@@ -681,7 +684,7 @@ void MacInputManager::AddObserver()
 		mDisplayManager->AddObserver(WM_MBUTTONDOWN, this);
 		mDisplayManager->AddObserver(WM_LBUTTONUP, this);
 		mDisplayManager->AddObserver(WM_RBUTTONUP, this);
-		mDisplayManager->AddObserver(WM_MBUTTONUP, this);
+		mDisplayManager->AddObserver(WM_MBUTTONUP, this);*/
 	}
 }
 
@@ -695,7 +698,7 @@ void MacInputManager::RemoveObserver()
 
 void MacInputManager::SetMousePosition(int pMsg, int x, int y)
 {
-	if (pMsg == WM_NCMOUSEMOVE && mDisplayManager)
+	/*if (pMsg == WM_NCMOUSEMOVE && mDisplayManager)
 	{
 		POINT lPoint;
 		lPoint.x = x;
@@ -703,7 +706,7 @@ void MacInputManager::SetMousePosition(int pMsg, int x, int y)
 		::ScreenToClient(mDisplayManager->GetHWND(), &lPoint);
 		x = lPoint.x;
 		y = lPoint.y;
-	}
+	}*/
 
 	mCursorX = 2.0 * (double)x / (double)mScreenWidth  - 1.0;
 	mCursorY = 2.0 * (double)y / (double)mScreenHeight - 1.0;
@@ -713,10 +716,6 @@ bool MacInputManager::IsInitialized()
 {
 	return mInitialized;
 }
-
-
-
-#endif // 0
 
 
 
