@@ -106,9 +106,12 @@ void MacCore::ProcessMessages()
 		return;
 	}
 
-	NSEvent *event = [mApplication nextEventMatchingMask:NSAnyEventMask untilDate:[NSDate distantFuture] inMode:NSDefaultRunLoopMode dequeue:YES];
+	NSEvent* event = [mApplication	nextEventMatchingMask:	NSAnyEventMask
+					untilDate:		[NSDate distantFuture]
+					inMode:			NSDefaultRunLoopMode
+					dequeue:		YES];
 
-	[mApplication sendEvent:event];
+	[mApplication sendEvent: event];
 	[mApplication updateWindows];
 
 	for (WindowTable::Iterator x = mWindowTable.First(); x != mWindowTable.End(); ++x)

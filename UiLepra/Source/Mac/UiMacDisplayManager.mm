@@ -241,11 +241,11 @@ void MacDisplayManager::CloseScreen()
 		MacCore::RemoveDisplayManager(this);
 		RemoveObserver(this);
 
-//		::XUnmapWindow(GetDisplay(), GetWindow());
-//		::XDestroyWindow(GetDisplay(), GetWindow());
-		[mWnd close];
-		mWnd = 0;
-//		mDisplay = 0;
+		if (mWnd)
+		{
+			[mWnd close];
+			mWnd = 0;
+		}
 	}
 }
 
@@ -256,9 +256,21 @@ bool MacDisplayManager::IsVisible() const
 
 bool MacDisplayManager::InitWindow()
 {
+	CloseScreen();
+
 	bool lOk = mIsOpen = true;
 
-	mWnd = [[NSWindow alloc] initWithContentRect: NSMakeRect(0, 0, 640, 480) styleMask: NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask backing: NSBackingStoreBuffered defer: NO];
+	mWnd = [NSWindow alloc];
+	[mWnd	initWithContentRect:	NSMakeRect(0, 0, mDisplayMode.mWidth, mDisplayMode.mHeight)
+		styleMask:		NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask
+		backing:		NSBackingStoreBuffered
+		defer:			NO];
+	[mWnd setAcceptsMouseMovedEvents: TRUE];
+        [mWnd setReleasedWhenClosed: TRUE];
+	[mWnd makeKeyAndOrderFront: nil];
+	[mWnd	setFrame:	NSMakeRect(0, 0, mDisplayMode.mWidth, mDisplayMode.mHeight)
+		display:	YES];
+
 	++mWindowCount;
 
 	/*if (lOk)
@@ -390,7 +402,6 @@ int MacDisplayManager::GetWindowWidth(int pClientWidth)
 	int lBorderSizeX;
 	int lBorderSizeY;
 	GetBorderSize(lBorderSizeX, lBorderSizeY);
-
 	return pClientWidth + lBorderSizeX;
 }
 
@@ -399,7 +410,6 @@ int MacDisplayManager::GetWindowHeight(int pClientHeight)
 	int lBorderSizeX;
 	int lBorderSizeY;
 	GetBorderSize(lBorderSizeX, lBorderSizeY);
-
 	return pClientHeight + lBorderSizeY;
 }
 
@@ -408,7 +418,6 @@ int MacDisplayManager::GetClientWidth(int pWindowWidth)
 	int lBorderSizeX;
 	int lBorderSizeY;
 	GetBorderSize(lBorderSizeX, lBorderSizeY);
-
 	return pWindowWidth - lBorderSizeX;
 }
 
@@ -417,7 +426,6 @@ int MacDisplayManager::GetClientHeight(int pWindowHeight)
 	int lBorderSizeX;
 	int lBorderSizeY;
 	GetBorderSize(lBorderSizeX, lBorderSizeY);
-
 	return pWindowHeight - lBorderSizeY;
 }
 

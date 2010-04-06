@@ -252,7 +252,7 @@ bool MacOpenGLDisplay::InitScreen()
 		return false;
 	}
 
-	glEnable(GL_SCISSOR_TEST);
+	::glEnable(GL_SCISSOR_TEST);
 	if (mContextUserCount == 1)
 	{
 		// TODO: ?

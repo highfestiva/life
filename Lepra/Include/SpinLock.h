@@ -7,6 +7,7 @@
 #pragma once
 
 #include "Thread.h"
+#include <assert.h>
 #include "BusLock.h"
 
 
@@ -37,7 +38,7 @@ private:
 	long mLocked;
 };
 
-inline SpinLock::SpinLock() :
+inline SpinLock::SpinLock():
 	mLocked(UNLOCKED)
 {
 }
@@ -48,8 +49,18 @@ inline SpinLock::~SpinLock()
 
 inline void SpinLock::Acquire()
 {
-	while (BusLock::CompareAndSwap(&mLocked, LOCKED, UNLOCKED) == false)
-		;
+	bool lAcquired = BusLock::CompareAndSwap(&mLocked, LOCKED, UNLOCKED);
+	while (!lAcquired)
+	{
+		for (int x = 0; x < 4000 && !lAcquired; ++x)
+		{
+			lAcquired = BusLock::CompareAndSwap(&mLocked, LOCKED, UNLOCKED);
+		}
+		if (!lAcquired)
+		{
+			Thread::YieldCpu();
+		}
+	}
 	Reference();
 }
 
@@ -66,6 +77,7 @@ inline bool SpinLock::TryAcquire()
 inline void SpinLock::Release()
 {
 	Dereference();
+	assert(mLocked == LOCKED);
 	BusLock::CompareAndSwap(&mLocked, UNLOCKED, LOCKED);
 }
 

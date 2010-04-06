@@ -250,11 +250,11 @@ void GameUiManager::Close()
 
 void GameUiManager::InputTick()
 {
+	UiLepra::Core::ProcessMessages();
 	if (mDisplay->IsVisible())
 	{
 		mInput->PollEvents();
 	}
-	UiLepra::Core::ProcessMessages();
 }
 
 void GameUiManager::BeginRender()
