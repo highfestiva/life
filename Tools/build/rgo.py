@@ -324,6 +324,10 @@ def gdbtest():
         pre, post = _prepare_run()
         os.system("gdb "+pre+"CureTestApp"+post)
         os.chdir("..")
+def gdbclient():
+        pre, post = _prepare_run()
+        os.system("gdb "+pre+"LifeClient"+post)
+        os.chdir("..")
 
 
 if __name__ == "__main__":

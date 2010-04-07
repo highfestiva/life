@@ -535,7 +535,7 @@ bool MetaFile::SplitPath(const str& pFilename, str& pLeft, str& pRight, size_t p
 	pLeft = pFilename.substr(0, lSplitIndex);
 	pRight = pFilename.substr(lSplitIndex);
 
-	if (pRight[0] == '/' || pRight[0] == '\\')
+	if (!pRight.empty() && (pRight[0] == '/' || pRight[0] == '\\'))
 	{
 		pRight.erase(0, 1);
 	}

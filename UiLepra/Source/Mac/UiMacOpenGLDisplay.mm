@@ -113,7 +113,10 @@ void MacOpenGLDisplay::SetFocus(bool pFocus)
 
 void MacOpenGLDisplay::Deactivate()
 {
-	[NSOpenGLContext clearCurrentContext];
+	if (mIsOpen)
+	{
+		[NSOpenGLContext clearCurrentContext];
+	}
 }
 
 void MacOpenGLDisplay::OnResize(int pWidth, int pHeight)

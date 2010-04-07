@@ -58,7 +58,7 @@ void Component::DeleteLayout(int pLayer)
 			Component* lChild = mLayout[pLayer]->GetFirst();
 			while (lChild != 0)
 			{
-				delete[] lChild;
+				delete lChild;
 				lChild = mLayout[pLayer]->GetNext();
 			}
 

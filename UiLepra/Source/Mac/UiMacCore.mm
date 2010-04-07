@@ -10,6 +10,12 @@
 #include "../../../Lepra/Include/Thread.h"
 #include "../../Include/Mac/UiMacDisplayManager.h"
 
+
+
+NSAutoreleasePool* gPool = [[NSAutoreleasePool alloc] init];
+
+
+
 /*int MyApplicationMain(int argc, const char **argv)
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
@@ -107,7 +113,7 @@ void MacCore::ProcessMessages()
 	}
 
 	NSEvent* event = [mApplication	nextEventMatchingMask:	NSAnyEventMask
-					untilDate:		[NSDate distantFuture]
+					untilDate:		nil
 					inMode:			NSDefaultRunLoopMode
 					dequeue:		YES];
 
