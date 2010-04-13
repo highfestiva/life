@@ -136,7 +136,9 @@ enum ChunkyType
 	CHUNK_CLASS_PHYSICS                = ENUMIFY('C','L','P','H'),	// An physics filename of the physics that forms the shapes of this class. Optional - absent when physics inherited or for abstract nouns ("clan" and "weather").
 	CHUNK_CLASS_SETTINGS               = ENUMIFY('C','L','S','E'),	// str keys and their corresponding default string values. Example "stand_animation":"heavy_walk". Optional.
 	CHUNK_CLASS_MESH_LIST              = ENUMIFY('C','L','M','L'),	// A list of mesh filenames that forms the looks of this class. Only used by graphics applications, and completly ignored by text applications. Optional - absent when using inherited or for abstract nouns.
-	CHUNK_CLASS_PHYS_MESH              = ENUMIFY('C','L','P','M'),	// Connection between a bone and a mesh. Mandatory in sub-chunk array.
+	CHUNK_CLASS_PHYS_MESH              = ENUMIFY('C','L','P','M'),	// Physical connection between a bone and a mesh. Mandatory in sub-chunk array.
+	CHUNK_CLASS_TAG_LIST               = ENUMIFY('C','L','T','L'),	// A list of tags (usually for connecting arbitrary engines, bones or mesh nodes). Optional - absent when using inherited or for abstract nouns.
+	CHUNK_CLASS_TAG                    = ENUMIFY('C','L','T','A'),	// Connection between bones, engines and meshes. Mainly used for graphical scripting behavior.
 
 	// File type: Group. Used by both graphics and text applications.
 	CHUNK_GROUP_CLASS_LIST             = ENUMIFY('G','C','L','I'),	// A list of class filenames (each with a group-unique NAME) that forms the nouns of this group. Mandatory.

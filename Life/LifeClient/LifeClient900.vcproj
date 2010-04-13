@@ -606,6 +606,14 @@
 				RelativePath=".\RoadSignButton.h"
 				>
 			</File>
+			<File
+				RelativePath=".\Vehicle.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Vehicle.h"
+				>
+			</File>
 		</Filter>
 	</Files>
 	<Globals>

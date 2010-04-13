@@ -753,6 +753,36 @@ class GroupReader(DefaultMAReader):
                                 group.append(node)
                                 used_sections[section] = True
 
+                        elif section.startswith("tag:"):
+                                triggertype = stripQuotes(config.get(section, "type"))
+                                triggerOk = triggertype in ["eye", "brake_light", "reverse_light"]
+                                allApplied &= triggerOk
+                                if not triggerOk:
+                                        print("Error: invalid trigger type '%s'." % triggertype)
+                                node = self.onCreateNode("tag:"+triggertype, {"name":[section]})
+                                trigger_attribute = {}
+                                params = config.items(section)
+                                for name, value in params:
+                                        node.fix_attribute(name, value)
+                                def check_connected_to(l):
+                                        ok = (len(l) >= 0)
+                                        for e in l:
+                                                ok &= (type(e) == str)
+                                                connected_to = self._regexpnodes(e, group)
+                                                ok &= (len(connected_to) > 0)
+                                                for cn in connected_to:
+                                                        ok &= (cn.nodetype == "transform")
+                                        return ok
+                                required = [("type", lambda x: type(x) == str),
+                                            ("float_values", lambda x: type(x) == list and len(x) == len(list(filter(lambda i: isinstance(i, (int, float)), x)))),
+                                            ("phys_list", check_connected_to),
+                                            ("engine_list", check_connected_to),
+                                            ("mesh_list", check_connected_to)]
+                                for name, check in required:
+                                        allApplied &= self._query_attribute(node, name, check)[0]
+                                group.append(node)
+                                used_sections[section] = True
+
                 # General settings always used.
                 for section in config.sections():
                         if section.startswith("config:") or section.startswith("trigger:"):

@@ -23,6 +23,8 @@ CHUNK_CLASS                        = "CLAS"
 CHUNK_CLASS_PHYSICS                = "CLPH"
 CHUNK_CLASS_MESH_LIST              = "CLML"
 CHUNK_CLASS_PHYS_MESH              = "CLPM"
+CHUNK_CLASS_TAG_LIST               = "CLTL"
+CHUNK_CLASS_TAG                    = "CLTA"
 
 CHUNK_PHYSICS                      = "PHYS"
 CHUNK_PHYSICS_BONE_COUNT           = "PHBC"
@@ -202,6 +204,8 @@ class ChunkyWriter:
                                 self._writeengine(node)
                         elif node.nodetype.startswith("trigger:"):
                                 self._writetrigger(node)
+                        elif node.nodetype.startswith("tag:"):
+                                self._writetag(node)
                         else:
                                 print("Error: can not write node '%s' of type '%s'" % (node.getFullName(), node.nodetype))
                                 sys.exit(17)
@@ -338,6 +342,28 @@ class ChunkyWriter:
                                 return node
                 print("Warning: node '%s' not found!" % name)
                 return None
+
+
+        def _expand_connected_list(self, unexpanded, group):
+                expanded = []
+                for e in unexpanded:
+                        if type(e) == str:
+                                noderegexp = e
+                        else:
+                                noderegexp, rest = e[0], e[1:]
+                        for body in group:
+                                if re.search("^"+noderegexp+"$", body.getFullName()[1:]):
+                                        if type(e) == str:
+                                                expanded += [body]
+                                        else:
+                                                expanded += [(body,)+rest]
+                                else:
+                                        #print("%s != %s..." % (noderegexp, body.getFullName()))
+                                        pass
+                if len(expanded) < len(unexpanded):
+                        print("Error: could not expand %s into more than %i nodes!" % (str(unexpanded), len(expanded)))
+                        sys.exit(100)
+                return expanded
 
 
 
@@ -550,16 +576,6 @@ class PhysWriter(ChunkyWriter):
                 self._addfeat("physical trigger:physical triggers", 1)
 
 
-        def _expand_connected_list(self, unexpanded, group):
-                expanded = []
-                for e in unexpanded:
-                        noderegexp, rest = e[0], e[1:]
-                        for body in group:
-                                if re.search("^"+noderegexp+"$", body.getFullName()[1:]):
-                                        expanded += [(body,)+rest]
-                return expanded
-
-
         def _getshape(self, node):
 ##                shapenode = self._findphyschildnode(parent=node, nodetype="mesh")
 ##                if not shapenode:
@@ -689,11 +705,17 @@ class ClassWriter(ChunkyWriter):
                                 t = self._normalizexform(q[:]+p[:])
                                 physidx = self.bodies.index(phys)
                                 meshptrs += [(CHUNK_CLASS_PHYS_MESH, PhysMeshPtr(physidx, m.meshbasename, t, m.mat))]
+                        tags = []
+                        for node in self.group:
+                                if node.getName().startswith("tag:"):
+                                        #print("Adding tag %s." % node.getFullName())
+                                        tags += [(CHUNK_CLASS_TAG, node)]
                         data =  (
                                         CHUNK_CLASS,
                                         (
                                                 (CHUNK_CLASS_PHYSICS, self.basename),
                                                 (CHUNK_CLASS_MESH_LIST, meshptrs),
+                                                (CHUNK_CLASS_TAG_LIST, tags),
                                         )
                                 )
                         #pprint.pprint(data)
@@ -725,6 +747,27 @@ class ClassWriter(ChunkyWriter):
                 #self._writematerial(col, col, col, ["da_texture"], "da_shader")
                 self._writematerial(physmeshptr.mat)
                 self._addfeat("phys->mesh ptr:phys->mesh ptrs", 1)
+
+
+        def _writetag(self, node):
+                tagtype = node.get_fixed_attribute("type")
+                self._writestr(tagtype)
+                if options.options.verbose:
+                        print("Writing mesh tag %s." % tagtype)
+                float_values = node.get_fixed_attribute("float_values")
+                self._writeint(len(float_values))
+                for fv in float_values:
+                        self._writefloat(fv)
+                names = ["phys_list", "engine_list", "mesh_list"]
+                objectlists = [self.bodies, self.engines, self.meshes]
+                for x in range(len(names)):
+                        connected_to_names = node.get_fixed_attribute(names[x])
+                        connected_to = self._expand_connected_list(connected_to_names, objectlists[x])
+                        self._writeint(len(connected_to))
+                        for cn in connected_to:
+                                self._writeint(objectlists[x].index(cn))
+                node.writecount += 1
+                self._addfeat("mesh tag:mesh tags", 1)
 
 
         def _listchildmeshes(self):

@@ -16,7 +16,6 @@
 #include "../../Lepra/Include/StringUtility.h"
 #include "../../Lepra/Include/SystemManager.h"
 #include "../../Lepra/Include/Timer.h"
-#include "../../UiCure/Include/UiCppContextObject.h"
 #include "../../UiCure/Include/UiGameUiManager.h"
 #include "../../UiCure/Include/UiRuntimeVariableName.h"
 #include "../../UiTBC/Include/GUI/UiCustomButton.h"
@@ -26,6 +25,7 @@
 #include "../RtVar.h"
 #include "GameClientMasterTicker.h"
 #include "RoadSignButton.h"
+#include "Vehicle.h"
 
 
 
@@ -904,7 +904,7 @@ bool GameClientSlaveManager::CreateObject(Cure::GameObjectId pInstanceId, const 
 
 Cure::ContextObject* GameClientSlaveManager::CreateContextObject(const str& pClassId) const
 {
-	return (new UiCure::CppContextObject(pClassId, mUiManager));
+	return (new Vehicle(pClassId, mUiManager));
 }
 
 void GameClientSlaveManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)

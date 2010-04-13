@@ -34,6 +34,15 @@ public:
 		Material();
 	};
 
+	struct Tag
+	{
+		str mTagName;
+		std::vector<float> mFloatValueList;
+		std::vector<int> mBodyIndexList;
+		std::vector<int> mEngineIndexList;
+		std::vector<int> mMeshIndexList;
+	};
+
 	ChunkyClass();
 	virtual ~ChunkyClass();
 
@@ -42,6 +51,11 @@ public:
 	void GetMesh(size_t pIndex, int& pPhysIndex, str& pMeshBaseName, TransformationF& pTransform) const;
 	void SetLastMeshMaterial(const Material& pMaterial);
 	const Material& GetMaterial(size_t pMeshIndex) const;
+
+	bool UnpackTag(uint8* pBuffer, unsigned pSize);
+	void AddTag(const Tag& pTag);
+	size_t GetTagCount() const;
+	const Tag& GetTag(size_t pTagIndex) const;
 
 private:
 	struct PhysMeshEntry
@@ -59,6 +73,7 @@ private:
 		Material mMaterial;
 	};
 	std::vector<PhysMeshEntry> mMeshArray;
+	std::vector<Tag> mTagArray;
 
 	LOG_CLASS_DECLARE();
 };

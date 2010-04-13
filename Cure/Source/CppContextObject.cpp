@@ -133,7 +133,11 @@ bool CppContextObject::TryComplete()
 
 TBC::ChunkyPhysics* CppContextObject::GetPhysics() const
 {
-	return (mPhysicsResource->GetData());
+	if (mPhysicsResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
+	{
+		return (mPhysicsResource->GetData());
+	}
+	return (0);
 }
 
 

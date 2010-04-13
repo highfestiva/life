@@ -47,6 +47,8 @@ public:
 
 protected:
 	GameUiManager* GetUiManager() const;
+	const UiTbc::ChunkyClass* GetClass() const;
+	TBC::GeometryBase* GetMesh(int pIndex) const;
 
 private:
 	void __GetFuckedUpMeshesRemoveMe(UiTbc::ChunkyClass* pClass) const;

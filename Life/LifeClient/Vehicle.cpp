@@ -1,0 +1,98 @@
+
+// Author: Jonas Byström
+// Copyright (c) 2002-2010, Righteous Games
+
+
+
+#include "Vehicle.h"
+#include "../../Cure/Include/ContextManager.h"
+#include "../../Cure/Include/GameManager.h"
+#include "../../TBC/Include/ChunkyBoneGeometry.h"
+#include "../../TBC/Include/ChunkyPhysics.h"
+
+
+
+namespace Life
+{
+
+
+
+Vehicle::Vehicle(const str& pClassId, UiCure::GameUiManager* pUiManager):
+	Parent(pClassId, pUiManager)
+{
+}
+
+Vehicle::~Vehicle()
+{
+}
+
+
+
+void Vehicle::OnPhysicsTick()
+{
+	Parent::OnPhysicsTick();
+
+	const TBC::ChunkyPhysics* lPhysics = GetPhysics();
+	const UiTbc::ChunkyClass* lClass = GetClass();
+	if (!lPhysics || !lClass)
+	{
+		return;
+	}
+	const TBC::PhysicsManager* lPhysicsManager = mManager->GetGameManager()->GetPhysicsManager();
+	for (size_t x = 0; x < lClass->GetTagCount(); ++x)
+	{
+		const UiTbc::ChunkyClass::Tag& lTag = lClass->GetTag(x);
+		if (lTag.mTagName == _T("eye") &&
+			lTag.mFloatValueList.size() == 1 &&
+			lTag.mBodyIndexList.size() == 1 &&
+			lTag.mMeshIndexList.size() >= 1)
+		{
+			float lJointValue = 0;
+			int lBodyIndex = lTag.mBodyIndexList[0];
+			TBC::ChunkyBoneGeometry* lBone = lPhysics->GetBoneGeometry(lBodyIndex);
+			TBC::PhysicsManager::JointID lJoint = lBone->GetJointId();
+			switch (lBone->GetJointType())
+			{
+				case TBC::ChunkyBoneGeometry::JOINT_HINGE2:
+				{
+					TBC::PhysicsManager::Joint3Diff lDiff;
+					lPhysicsManager->GetJoint3Diff(lBone->GetBodyId(), lJoint, lDiff);
+					float lLowStop = 0;
+					float lHighStop = 0;
+					float lBounce = 0;
+					lPhysicsManager->GetJointParams(lJoint, lLowStop, lHighStop, lBounce);
+					lJointValue = lDiff.mAngle1 * 2 / (lHighStop-lLowStop);
+				}
+				break;
+				default:
+				{
+					assert(false);
+					mLog.Errorf(_T("Joint type %i not implemented for tag type %s."), lBone->GetJointType(), lTag.mTagName.c_str());
+				}
+				break;
+			}
+			const float lScale = lTag.mFloatValueList[0];
+			const float lJointRightValue = lJointValue * lScale;
+			const float lJointDownValue = (::cos(lJointValue)-1) * lScale * 0.5f;
+			for (size_t y = 0; y < lTag.mMeshIndexList.size(); ++y)
+			{
+				TBC::GeometryBase* lMesh = GetMesh(lTag.mMeshIndexList[y]);
+				if (lMesh)
+				{
+					TransformationF lTransform = lMesh->GetBaseTransformation();
+					lTransform.MoveRight(lJointRightValue);
+					lTransform.MoveBackward(lJointDownValue);
+					lMesh->SetTransformation(lTransform);
+				}
+			}
+		}
+	}
+}
+
+
+
+LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, Vehicle);
+
+
+
+}

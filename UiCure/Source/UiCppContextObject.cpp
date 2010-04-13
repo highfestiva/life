@@ -259,6 +259,31 @@ GameUiManager* CppContextObject::GetUiManager() const
 	return (mUiManager);
 }
 
+const UiTbc::ChunkyClass* CppContextObject::GetClass() const
+{
+	if (mUiClassResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
+	{
+		return (mUiClassResource->GetRamData());
+	}
+	return (0);
+}
+
+TBC::GeometryBase* CppContextObject::GetMesh(int pIndex) const
+{
+	if (pIndex < (int)mMeshResourceArray.size())
+	{
+		UserGeometryReferenceResource* lResource = mMeshResourceArray[pIndex];
+		if (lResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
+		{
+			return (lResource->GetRamData());
+		}
+	}
+	else
+	{
+		assert(false);
+	}
+	return (0);
+}
 
 
 void CppContextObject::__GetFuckedUpMeshesRemoveMe(UiTbc::ChunkyClass* pClass) const
