@@ -6,6 +6,8 @@
 
 #pragma once
 
+#define RTVAR_GAME_ISCHILD		"Game.IsChild"
+
 #define RTVAR_CTRL_UI_CONTOGGLE		"Control.Ui.ConsoleToggle"
 
 #define RTVAR_CTRL_STEER_FWD		"Control.Steer.Forward"

@@ -7,8 +7,10 @@
 #include "Vehicle.h"
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/GameManager.h"
+#include "../../Cure/Include/RuntimeVariable.h"
 #include "../../TBC/Include/ChunkyBoneGeometry.h"
 #include "../../TBC/Include/ChunkyPhysics.h"
+#include "../RtVar.h"
 
 
 
@@ -38,6 +40,7 @@ void Vehicle::OnPhysicsTick()
 	{
 		return;
 	}
+	bool lIsChild = CURE_RTVAR_GETSET(mManager->GetGameManager()->GetVariableScope(), RTVAR_GAME_ISCHILD, true);
 	const TBC::PhysicsManager* lPhysicsManager = mManager->GetGameManager()->GetPhysicsManager();
 	for (size_t x = 0; x < lClass->GetTagCount(); ++x)
 	{
@@ -83,6 +86,7 @@ void Vehicle::OnPhysicsTick()
 					lTransform.MoveRight(lJointRightValue);
 					lTransform.MoveBackward(lJointDownValue);
 					lMesh->SetTransformation(lTransform);
+					lMesh->SetAlwaysVisible(lIsChild);
 				}
 			}
 		}
