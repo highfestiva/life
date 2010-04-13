@@ -957,7 +957,7 @@ bool ResourceManager::PrepareRemoveInLoadProgress(Resource* pResource)
 		assert(mRequestLoadList.GetCount() > 0 || mLoadedList.GetCount() > 0);
 
 		// Only the first object in the 'request load' list may be currently loading.
-		if (pResource == mRequestLoadList.First().GetObject())
+		if (mRequestLoadList.GetCount() > 0 && pResource == mRequestLoadList.First().GetObject())
 		{
 			lAllowDelete = false;
 		}

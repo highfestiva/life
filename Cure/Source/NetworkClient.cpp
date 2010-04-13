@@ -237,8 +237,8 @@ uint32 NetworkClient::GetLoginAccountId() const
 
 void NetworkClient::SetLoginAccountId(uint32 pLoginAccountId)
 {
-	mIsLoggingIn = false;
 	mLoginAccountId = pLoginAccountId;
+	mIsLoggingIn = false;
 }
 
 

@@ -185,6 +185,7 @@ Win32InputDevice::~Win32InputDevice()
 		InputElement* lElement = *lEIter;
 		delete lElement;
 	}
+	mElementArray.clear();
 
 	delete[] mDeviceObjectData;
 	delete[] mDataFormat.rgodf;

@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas Bystršm
 // Copyright (c) 2002-2009, Righteous Games
 
 
@@ -20,6 +20,10 @@ InputManager* InputManager::CreateInputManager(DisplayManager* pDisplayManager)
 {
 	return (new MacInputManager((MacDisplayManager*)pDisplayManager));
 }
+
+
+
+class MacInputElement;	// TODO: REMOVEME!
 
 
 
@@ -116,187 +120,55 @@ LOG_CLASS_DEFINE(UI_INPUT, MacInputElement);
 
 
 
+#endif // 0
+
+
+
 /*
 	class MacInputDevice
 */
 
-MacInputDevice::MacInputDevice(LPDIRECTINPUTDEVICE8 pDIDevice, LPCDIDEVICEINSTANCE pInfo, InputManager* pManager):
+MacInputDevice::MacInputDevice(pRecDevice pNativeDevice, InputManager* pManager):
 	InputDevice(pManager),
-	mDIDevice(pDIDevice),
+	mNativeDevice(pNativeDevice),
 	mRelAxisCount(0),
 	mAbsAxisCount(0),
 	mAnalogueCount(0),
 	mButtonCount(0)
 {
-	SetIdentifier(pInfo->tszInstanceName);
-
-	mDIDevice->EnumObjects(EnumElementsCallback, this, DIDFT_ALL);
-
-	int lNumElements = (int)mElementArray.size();
-
-	// Input data to use in buffered mode.
-	mDeviceObjectData = new DIDEVICEOBJECTDATA[lNumElements];
-	memset(mDeviceObjectData, 0, lNumElements * sizeof(DIDEVICEOBJECTDATA));
-
-	// Create the DirectInput data format description.
-	memset(&mDataFormat, 0, sizeof(mDataFormat));
-	mDataFormat.dwSize     = sizeof(mDataFormat);
-	mDataFormat.dwObjSize  = sizeof(DIOBJECTDATAFORMAT);
-	mDataFormat.dwDataSize = lNumElements * sizeof(unsigned);
-	mDataFormat.dwNumObjs  = lNumElements;
-	mDataFormat.rgodf      = new DIOBJECTDATAFORMAT[lNumElements];
-
-	mDataFormat.dwFlags = 0;
-	if (mAbsAxisCount > 0)
-	{
-		mDataFormat.dwFlags |= DIDF_ABSAXIS;
-	}
-	if (mRelAxisCount > 0)
-	{
-		mDataFormat.dwFlags |= DIDF_RELAXIS;
-	}
-
-	memset(mDataFormat.rgodf, 0, mDataFormat.dwObjSize * lNumElements);
-
-	// Fill the data format description with the correct data.
-	ElementArray::iterator lIter;
-	int i;
-	for (i = 0, lIter = mElementArray.begin(); 
-		lIter != mElementArray.end(); 
-		++i, ++lIter)
-	{
-		mDeviceObjectData[i].dwOfs = i * sizeof(unsigned);
-
-		MacInputElement* lElement = (MacInputElement*)(*lIter);
-
-		memcpy(&mDataFormat.rgodf[i], lElement->GetDataFormat(), sizeof(DIOBJECTDATAFORMAT));
-	}
+	SetIdentifier(strutil::Encode((const char*)pNativeDevice->manufacturer) + _T(":") + strutil::Encode((const char*)pNativeDevice->product));
+	EnumElements();
 }
 
 MacInputDevice::~MacInputDevice()
 {
 	if (IsActive() == true)
 	{
-		mDIDevice->Unacquire();
+		Release();
 	}
-	mDIDevice->Release();
+	//mNativeDevice->Release();
 
-	ElementArray::iterator lEIter;
-	for (lEIter = mElementArray.begin(); lEIter != mElementArray.end(); ++lEIter)
+	ElementArray::iterator x;
+	for (x = mElementArray.begin(); x != mElementArray.end(); ++x)
 	{
-		InputElement* lElement = *lEIter;
+		InputElement* lElement = *x;
 		delete lElement;
 	}
-
-	delete[] mDeviceObjectData;
-	delete[] mDataFormat.rgodf;
-}
-
-BOOL CALLBACK MacInputDevice::EnumElementsCallback(LPCDIDEVICEOBJECTINSTANCE lpddoi, LPVOID pvRef)
-{
-	MacInputDevice* lDevice = (MacInputDevice*)pvRef;
-
-	MacInputElement* lElement = 0;
-	// Is this an analogue or digital element?
-	if ((lpddoi->dwType & DIDFT_ABSAXIS) != 0 ||
-		(lpddoi->dwType & DIDFT_AXIS)    != 0 ||
-		(lpddoi->dwType & DIDFT_POV)     != 0 ||
-		(lpddoi->dwType & DIDFT_RELAXIS) != 0)
-	{
-		InputElement::Interpretation lInterpretation = InputElement::ABSOLUTE_AXIS;
-		// Count number of relative and absolute axes.
-		// These values are used later on in the constructor to determine
-		// the data format.
-		if ((lpddoi->dwType & DIDFT_RELAXIS) != 0)
-		{
-			++lDevice->mRelAxisCount;
-			lInterpretation = InputElement::RELATIVE_AXIS;
-		}
-		else if ((lpddoi->dwType & DIDFT_ABSAXIS) != 0)
-		{
-			lDevice->mAbsAxisCount++;
-		}
-
-		lElement = new MacInputElement(InputElement::ANALOGUE, lInterpretation, lDevice->mAnalogueCount,
-			lDevice, lpddoi, (unsigned)lDevice->mElementArray.size() * sizeof(unsigned));
-		++lDevice->mAnalogueCount;
-
-		// Set absolute axis range.
-		if ((lpddoi->dwType & DIDFT_ABSAXIS) != 0)
-		{
-			log_volatile(mLog.Infof(_T("Found absolute axis element '%s' = '%s'."),
-				lElement->GetFullName().c_str(),
-				lElement->GetIdentifier().c_str()));
-
-			DIPROPRANGE lRange;
-			lRange.diph.dwSize = sizeof(DIPROPRANGE);
-			lRange.diph.dwHeaderSize = sizeof(DIPROPHEADER);
-			lRange.diph.dwHow = DIPH_BYID;
-			lRange.diph.dwObj = lpddoi->dwType;
-			if (lDevice->mDIDevice->GetProperty(DIPROP_RANGE, &lRange.diph) == DI_OK)
-			{
-				const int lIntervalRange = lRange.lMax-lRange.lMin;
-				const int lMid = lIntervalRange / 2 + lRange.lMin;
-				const int lMin = lMid - lIntervalRange/2/8;	// Don't use full range, might not be physically accessible.
-				const int lMax = lMid + lIntervalRange/2/8;	// Don't use full range, might not be physically accessible.
-				lElement->SetValue(lMin);
-				lElement->SetValue(lMax);
-				lElement->SetValue(lMid);
-			}
-		}
-	}
-	else if((lpddoi->dwType&DIDFT_BUTTON)    != 0 ||
-			(lpddoi->dwType&DIDFT_PSHBUTTON) != 0 ||
-			(lpddoi->dwType&DIDFT_TGLBUTTON) != 0)
-	{
-		InputElement::Interpretation lInterpretation = (InputElement::Interpretation)((int)InputElement::BUTTON1 + lDevice->mButtonCount);
-		lElement = new MacInputElement(InputElement::DIGITAL, lInterpretation,
-			lDevice->mButtonCount, lDevice, lpddoi, (unsigned)lDevice->mElementArray.size() * sizeof(unsigned));
-		++lDevice->mButtonCount;
-	}
-	else if(lpddoi->dwType&DIDFT_FFACTUATOR)
-	{
-		// TODO: handle force feedback elements!
-	}
-
-	if (lElement)
-	{
-		lElement->SetIdentifier(lpddoi->tszName);
-		lDevice->mElementArray.push_back(lElement);
-	}
-
-	return (DIENUM_CONTINUE);
+	mElementArray.clear();
 }
 
 void MacInputDevice::Activate()
 {
 	if (IsActive() == false)
 	{
-		HRESULT lHR;
-		DWORD lCooperativeFlags = 0;
-		if (this == GetManager()->GetKeyboard())
-		{
-			lCooperativeFlags |= DISCL_NOWINKEY;
-		}
-		lHR = mDIDevice->SetCooperativeLevel(((MacInputManager*)GetManager())->GetDisplayManager()->GetHWND(), DISCL_NONEXCLUSIVE|DISCL_FOREGROUND|lCooperativeFlags);
-		lHR = mDIDevice->SetDataFormat(&mDataFormat);
-
-		DIPROPDWORD lProp;
-		lProp.diph.dwSize = sizeof(DIPROPDWORD);
-		lProp.diph.dwHeaderSize = sizeof(DIPROPHEADER);
-		lProp.diph.dwHow = DIPH_DEVICE;
-		lProp.diph.dwObj = 0;
-		lProp.dwData = 1024;
-		mDIDevice->SetProperty(DIPROP_BUFFERSIZE, &lProp.diph);
-
-		mReacquire = true;
+		//mNativeDevice->Acquire();
 		SetActive(true);
 	}
 }
 
 void MacInputDevice::Release()
 {
-	mDIDevice->Unacquire();
+	//mNativeDevice->Unacquire();
 	SetActive(false);
 }
 
@@ -304,73 +176,11 @@ void MacInputDevice::PollEvents()
 {
 	if (IsActive() == true)
 	{
-		if (mReacquire)
+		ElementArray::iterator x;
+		for (x = mElementArray.begin(); x != mElementArray.end(); ++x)
 		{
-			if (mDIDevice->Acquire() != DI_OK)
-			{
-				// System won't let us in yet. Keep trying.
-				return;
-			}
-			mReacquire = false;
-			log_debug(GetIdentifier()+_T(": acquired input device."));
-		}
-
-
-		HRESULT lHR = mDIDevice->Poll();
-		if (lHR == DIERR_INPUTLOST)
-		{
-			mReacquire = true;
-			log_debug(GetIdentifier()+_T(": lost input device."));
-			return;
-		}
-		else if (lHR != DI_OK && lHR != DI_NOEFFECT)
-		{
-			mReacquire = true;
-			mLog.Warningf((GetIdentifier() + _T(": Failed reaquiring device. Error=0x%8.8X.")).c_str(), lHR);
-			return;
-		}
-
-		bool lMore = true;
-		while (lMore)
-		{
-			DWORD lInOut = (DWORD)mElementArray.size();
-			lHR = mDIDevice->GetDeviceData(sizeof(mDeviceObjectData[0]), mDeviceObjectData, &lInOut, 0);
-			lMore = (lHR == DI_OK);
-
-			for (unsigned i = 0; lMore && i < lInOut; i++)
-			{
-				// The following is a hack. I don't know if it works as 
-				// intended on non-Swedish keyboards. The issue is 
-				// that when pressing the right Alt key (Alt Gr), we will 
-				// receive one Ctrl-event, and then one "Right Alt"-event
-				// at the same time (on Swedish keyboards at least).
-				if (i + 1 < lInOut && 
-					mDeviceObjectData[i].dwTimeStamp == 
-					mDeviceObjectData[i + 1].dwTimeStamp &&
-					mDeviceObjectData[i + 1].dwOfs == 400)	// Right Alt at offset 400.
-				{
-					i++;
-				}
-
-				int lElementIndex = mDeviceObjectData[i].dwOfs / sizeof(unsigned);
-				MacInputElement* lElement = (MacInputElement*)mElementArray[lElementIndex];
-
-				if (lElement->GetType() == InputElement::ANALOGUE)
-				{
-					int lValue = mDeviceObjectData[i].dwData;
-					lElement->SetValue(lValue);
-				}
-				else
-				{
-					int lValue = mDeviceObjectData[i].dwData;
-					SetElementValue(lElement, (lValue&0x80)? 1.0 : 0.0);
-				}
-			}
-
-			if (lInOut == 0)
-			{
-				lMore = false;
-			}
+			MacInputElement* lElement = (MacInputElement*)*x;
+			//lElement->PollEvents();
 		}
 	}
 }
@@ -380,13 +190,83 @@ bool MacInputDevice::HaveRelativeAxes()
 	return (mRelAxisCount > mAbsAxisCount);
 }
 
+void MacInputDevice::EnumElements()
+{
+	pRecElement lCurrentElement = HIDGetFirstDeviceElement(mNativeDevice, kHIDElementTypeInput);
+	while (lCurrentElement)
+	{
+		switch (lCurrentElement->type)
+		{
+			case kIOHIDElementTypeInput_Button:
+			{
+				//CreateButtonElement(lCurrentElement);
+			}
+			break;
+			case kIOHIDElementTypeInput_Axis:
+			{
+				//CreateAxisElement(lCurrentElement);
+			}
+			break;
+			case kIOHIDElementTypeInput_Misc:
+			{
+				char name[256];
+				HIDGetUsageName(lCurrentElement->usagePage, lCurrentElement->usage, name);
+				if (lCurrentElement->usagePage == kHIDPage_GenericDesktop)
+				{
+					switch(lCurrentElement->usage)
+					{
+						case kHIDUsage_GD_DPadUp:
+						case kHIDUsage_GD_DPadDown:
+						case kHIDUsage_GD_DPadRight:
+						case kHIDUsage_GD_DPadLeft:
+						{
+							//CreateButtonElement(lCurrentElement);
+						}
+						break;
+						case kHIDUsage_GD_X:
+						case kHIDUsage_GD_Y:
+						case kHIDUsage_GD_Z:
+						case kHIDUsage_GD_Rx:
+						case kHIDUsage_GD_Ry:
+						case kHIDUsage_GD_Rz:
+						case kHIDUsage_GD_Slider:
+						case kHIDUsage_GD_Wheel:
+						{
+							//CreateAxisElement(lCurrentElement);
+						}
+						break;
+						default:
+						{
+							printf("Misc element:\n");
+							printf("-------------\n");
+							printf("name: %s\n", lCurrentElement->name);
+							printf("usagePage: %i\nusage: %i\n", lCurrentElement->usagePage, lCurrentElement->usage);
+							printf("usagename: %s\n", name);
+						}
+						break;
+					}
+				}
+			}
+			break;
+			case kIOHIDElementTypeInput_ScanCodes:
+			{
+				printf("warning: kIOHIDElementTypeInput_ScanCodes support not implemented yet!\n");
+				printf("min: %i\nmax: %i\nsize: %i\n", lCurrentElement->min, lCurrentElement->max, lCurrentElement->size);
+			}
+			break;
+			default:
+			{
+				printf("unknown element type: %d\n", lCurrentElement->type);
+			}
+			break;
+		}
+		lCurrentElement = HIDGetNextDeviceElement(lCurrentElement, kHIDElementTypeInput);
+	}
+}
+
 
 
 LOG_CLASS_DEFINE(UI_INPUT, MacInputDevice);
-
-
-
-#endif // 0
 
 
 
@@ -402,33 +282,16 @@ MacInputManager::MacInputManager(MacDisplayManager* pDisplayManager):
 	mKeyboard(0),
 	mMouse(0)
 {
-	/*POINT lPoint;
-	::GetCursorPos(&lPoint);
-	SetMousePosition(WM_NCMOUSEMOVE, lPoint.x, lPoint.y);
-
-	::memset(&mTypeCount, 0, sizeof(mTypeCount));
-
-	HRESULT lHR;
-	
-	// Create the DirectInput object.
-	lHR = DirectInput8Create(MacCore::GetAppInstance(), DIRECTINPUT_VERSION, IID_IDirectInput8,
-		(LPVOID*)&mDirectInput, 0);
-
-	if (lHR != DI_OK)
+	HIDBuildDeviceList(0, 0);
+	if (HIDHaveDeviceList())
 	{
-		mDisplayManager->ShowMessageBox(_T("DirectX 8 not supported (dinput creation failure)!"), _T("DirectInput error!"));
-		return;
+		pRecDevice lHIDDevice = HIDGetFirstDevice();
+		while (lHIDDevice)
+		{
+			mDeviceList.push_back(new MacInputDevice(lHIDDevice, this));
+			lHIDDevice = HIDGetNextDevice(lHIDDevice);
+		}
 	}
-
-	// Enumerate all devices.
-	lHR = mDirectInput->EnumDevices(DI8DEVCLASS_ALL, EnumDeviceCallback, this, DIEDFL_ALLDEVICES);
-
-	// mEnumError will be set if an error has occured.
-	if (lHR != DI_OK || mEnumError == true)
-	{
-		mDisplayManager->ShowMessageBox(_T("DirectInput failed enumerating your devices!"), _T("DirectInput error!"));
-		return;
-	}*/
 
 	Refresh();
 
@@ -441,19 +304,24 @@ MacInputManager::~MacInputManager()
 {
 	if (mInitialized == true)
 	{
-		//mDirectInput->Release();
+		HIDReleaseDeviceList();
 	}
 
 	RemoveObserver();
 
-	/*DeviceList::iterator lDIter;
+	DeviceList::iterator lDIter;
 	for (lDIter = mDeviceList.begin(); lDIter != mDeviceList.end(); ++lDIter)
 	{
 		InputDevice* lDevice = *lDIter;
 		delete lDevice;
-	}*/
+	}
 
 	mDisplayManager = 0;
+}
+
+bool MacInputManager::IsInitialized()
+{
+	return (mInitialized);
 }
 
 void MacInputManager::Refresh()
@@ -646,6 +514,12 @@ double MacInputManager::GetCursorY()
 	return mCursorY;
 }
 
+void MacInputManager::SetMousePosition(int x, int y)
+{
+	mCursorX = 2.0 * (double)x / (double)mScreenWidth  - 1.0;
+	mCursorY = 2.0 * (double)y / (double)mScreenHeight - 1.0;
+}
+
 const InputDevice* MacInputManager::GetKeyboard() const
 {
 	return mKeyboard;
@@ -692,29 +566,8 @@ void MacInputManager::RemoveObserver()
 {
 	if (mDisplayManager)
 	{
-		mDisplayManager->RemoveObserver(this);
+		mDisplayManager->RemoveObserver((MacInputManager*)this);
 	}
-}
-
-void MacInputManager::SetMousePosition(int pMsg, int x, int y)
-{
-	/*if (pMsg == WM_NCMOUSEMOVE && mDisplayManager)
-	{
-		POINT lPoint;
-		lPoint.x = x;
-		lPoint.y = y;
-		::ScreenToClient(mDisplayManager->GetHWND(), &lPoint);
-		x = lPoint.x;
-		y = lPoint.y;
-	}*/
-
-	mCursorX = 2.0 * (double)x / (double)mScreenWidth  - 1.0;
-	mCursorY = 2.0 * (double)y / (double)mScreenHeight - 1.0;
-}
-
-bool MacInputManager::IsInitialized()
-{
-	return mInitialized;
 }
 
 

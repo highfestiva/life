@@ -20,6 +20,8 @@ libgl = '-lGL'
 openal_noui = ''
 openal_ui = '-lOpenAL'
 stllibfile = '.so.5.2'
+mac_hid = ''
+space_mac_hid = ''
 
 if sys.platform == 'darwin':
     librt = ''
@@ -27,8 +29,10 @@ if sys.platform == 'darwin':
     openal_ui = '-framework OpenAL'
     libgl = '-framework OpenGL'
     stllibfile = '.5.2.dylib'
+    mac_hid = 'HID'
+    space_mac_hid = ' '+mac_hid
     cflags_1 += ' -framework OpenGL -framework CoreServices -framework OpenAL -DMAC_OS_X_VERSION=1050'
-    ldflags += ' -framework OpenGL -framework AppKit -framework Cocoa -lobjc -lstlportstlg -framework CoreServices %(libs)s %(deplibs)s '
+    ldflags += ' -framework OpenGL -framework AppKit -framework Cocoa -lobjc -lstlportstlg -framework CoreServices %(libs)s %(deplibs)s -lIOKit '
 
 head_lib = cflags_1+" -Wall "+cflags_2+"\n"
 
@@ -164,6 +168,8 @@ def linux_bin_name(type, vcfile):
     return pathname
 
 def generate_makefile(vcfile, makename, includedirs, libdirs, deplibs, header, footer, type):
+    if type.endswith('nobuild'):
+            return
     libname = convert_out_name(vcfile)
     projbasedir = os.path.dirname(vcfile)
     extrafilter = ""
@@ -197,6 +203,9 @@ def get_dep_libs(vcfileinfolist, depnames):
     deps = []
     depnames = depnames.split()
     for depname in depnames:
+        #if depname == mac_hid:
+        #    deps += ["-lHIDUtilities"]
+        #    continue
         for name, type, vcfile, vcdeps in vcfileinfolist:
             if name == depname:
                 deps += ["-l"+name]
@@ -237,6 +246,9 @@ def generate_makefiles(basedir, vcfileinfolist):
         if sys.platform != 'darwin':
             includedirs = [os.path.relpath(basedir+"ThirdParty/openal-soft-1.10.622/OpenAL32/Include/", projdir),
                 os.path.relpath(basedir+"ThirdParty/openal-soft-1.10.622/include/", projdir)]+includedirs
+        else:
+            includedirs = [os.path.relpath(basedir+"ThirdParty/HID_Utilities/", projdir)] + includedirs
+            libdirs = [os.path.relpath(basedir+"ThirdParty/HID_Utilities/", projdir)] + libdirs
 
         makename = os.path.join(os.path.dirname(vcfile), "makefile")
         printstart(makename)
@@ -258,7 +270,7 @@ def main():
         ["Lepra",      "lib",        "Lepra/Lepra900.vcproj", "ThirdParty"],
         ["TBC",        "lib",        "TBC/TBC900.vcproj", "Lepra"],
         ["Cure",       "lib",        "Cure/Cure900.vcproj", "TBC"],
-        ["UiLepra",    "lib",        "UiLepra/UiLepra900.vcproj", "Lepra alut"],
+        ["UiLepra",    "lib",        "UiLepra/UiLepra900.vcproj", "Lepra alut"+space_mac_hid],
         ["UiTBC",      "lib",        "UiTBC/UiTBC900.vcproj", "UiLepra TBC"],
         ["UiCure",     "lib",        "UiCure/UiCure900.vcproj", "UiTBC Cure"],
         ["Life",       "lib",        "Life/Life900.vcproj", "Cure"],
@@ -268,6 +280,8 @@ def main():
 
     if sys.platform != 'darwin':
         projects += [["OpenAL", "lib_nowarn", "ThirdParty/openal-soft-1.10.622/OpenAL_900.vcproj", ""]]
+    else:
+        projects += [[mac_hid, "lib_nowarn", "ThirdParty/HID_Utilities/HID_Utilities.vcproj", ""]]
     generate_makefiles(basedir, projects)
 
 if __name__ == '__main__':

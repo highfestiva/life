@@ -37,7 +37,65 @@ void DisplayManager::EnableScreensaver(bool /*pEnable*/)
 
 
 
-MacDisplayManager::MacDisplayManager() :
+/*@interface NativeMacWindow: NSWindow
+{
+}
+- (void)scrollWheel: (NSEvent*)theEvent;
+- (void)mouseMoved: (NSEvent*)theEvent;
+- (void)keyDown: (NSEvent*)theEvent;
+- (void)keyUp: (NSEvent*)theEvent;
+- (void)mouseDown: (NSEvent*)theEvent;
+- (void)rightMouseDown: (NSEvent*)theEvent;
+- (void)otherMouseDown: (NSEvent*)theEvent;
+- (void)mouseUp: (NSEvent*)theEvent;
+- (void)rightMouseUp: (NSEvent*)theEvent;
+- (void)otherMouseUp: (NSEvent*)theEvent;
+@end
+
+@implementation NativeMacWindow
+- (void)keyDown: (NSEvent*)theEvent
+{
+}
+- (void)keyUp: (NSEvent*)theEvent
+{
+}
+- (void)mouseDown: (NSEvent*)theEvent
+{
+	((MacInputManager*)InputManager::GetInputManager())->OSXMouseDownEvent(0);
+}
+- (void)rightMouseDown: (NSEvent*)theEvent
+{
+	((MacInputManager*)InputManager::GetInputManager())->OSXMouseDownEvent(1);
+}
+- (void)otherMouseDown: (NSEvent*)theEvent
+{
+	((MacInputManager*)InputManager::GetInputManager())->OSXMouseDownEvent(2);
+}
+- (void)mouseUp: (NSEvent*)theEvent
+{
+	((MacInputManager*)InputManager::GetInputManager())->OSXMouseUpEvent(0);
+}
+- (void)rightMouseUp: (NSEvent*)theEvent
+{
+	((MacInputManager*)InputManager::GetInputManager())->OSXMouseUpEvent(1);
+}
+- (void)otherMouseUp: (NSEvent*)theEvent
+{
+	((MacInputManager*)InputManager::GetInputManager())->OSXMouseUpEvent(2);
+}
+- (void)mouseMoved: (NSEvent*)theEvent
+{
+	((MacInputManager*)InputManager::GetInputManager())->SetMousePosition([theEvent deltaX], [theEvent deltaY]);
+}
+- (void)scrollWheel: (NSEvent*)theEvent
+{
+	//((MacInputManager*)InputManager::GetInputManager())->OSXScrollWheelEvent([theEvent deltaY]/10.0f);
+}
+@end*/
+
+
+
+MacDisplayManager::MacDisplayManager():
 	mScreenMode(DisplayManager::WINDOWED),
 	mWnd(0),
 	mIsOpen(false),
