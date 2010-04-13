@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas Bystršm
 // Copyright (c) 2002-2009, Righteous Games
 
 
@@ -8,7 +8,10 @@
 
 #include "../UiInput.h"
 #include "../UiLepra.h"
-#include "UiMacDisplayManager.h"
+#import <AppKit/AppKit.h>
+#include <HID_Utilities.h>
+#include <HID_Queue_Utilities.h>
+#import "UiMacDisplayManager.h"
 
 
 
@@ -17,7 +20,6 @@ namespace UiLepra
 
 
 
-class MacDisplayManager;
 class MacInputDevice;
 
 
@@ -74,10 +76,14 @@ const LPDIOBJECTDATAFORMAT MacInputElement::GetDataFormat() const
 
 
 
+#endif // 0
+
+
+
 class MacInputDevice: public InputDevice
 {
 public:
-	MacInputDevice(LPDIRECTINPUTDEVICE8 pDIDevice, LPCDIDEVICEINSTANCE pInfo, InputManager* pManager);
+	MacInputDevice(pRecDevice pNativeDevice, InputManager* pManager);
 	virtual ~MacInputDevice();
 
 	virtual void Activate();
@@ -89,26 +95,17 @@ public:
 
 protected:
 private:
-	static BOOL CALLBACK EnumElementsCallback(LPCDIDEVICEOBJECTINSTANCE lpddoi, LPVOID pvRef);
+	void EnumElements();
 
-	LPDIRECTINPUTDEVICE8 mDIDevice;
-	bool mReacquire;
+	pRecDevice mNativeDevice;
 
 	int mRelAxisCount;
 	int mAbsAxisCount;
 	int mAnalogueCount;
 	int mButtonCount;
 
-	// The DirectInput data format description of mInputData.
-	DIDATAFORMAT mDataFormat;
-	LPDIDEVICEOBJECTDATA mDeviceObjectData;
-
 	LOG_CLASS_DECLARE();
 };
-
-
-
-#endif // 0
 
 
 
@@ -122,6 +119,7 @@ public:
 	MacInputManager(MacDisplayManager* pDisplayManager);
 	virtual ~MacInputManager();
 
+	bool IsInitialized();
 	virtual void Refresh();
 
 	MacDisplayManager* GetDisplayManager() const;
@@ -138,9 +136,7 @@ public:
 
 	virtual double GetCursorX();
 	virtual double GetCursorY();
-
-	bool IsInitialized();
-
+	void SetMousePosition(int x, int y);
 
 protected:
 	bool OnMessage(NSEvent* pEvent);
@@ -152,8 +148,6 @@ private:
 
 	void AddObserver();
 	void RemoveObserver();
-
-	void SetMousePosition(int pMsg, int x, int y);
 
 	MacDisplayManager* mDisplayManager;
 
