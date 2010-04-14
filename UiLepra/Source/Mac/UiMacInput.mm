@@ -297,6 +297,8 @@ MacInputManager::MacInputManager(MacDisplayManager* pDisplayManager):
 
 	AddObserver();
 
+	mInputManagerSingleton = this;
+
 	mInitialized = true;
 }
 
@@ -317,6 +319,11 @@ MacInputManager::~MacInputManager()
 	}
 
 	mDisplayManager = 0;
+}
+
+MacInputManager* MacInputManager::GetSingleton()
+{
+	return (mInputManagerSingleton);
 }
 
 bool MacInputManager::IsInitialized()
@@ -569,6 +576,10 @@ void MacInputManager::RemoveObserver()
 		mDisplayManager->RemoveObserver((MacInputManager*)this);
 	}
 }
+
+
+
+MacInputManager* MacInputManager::mInputManagerSingleton = 0;
 
 
 

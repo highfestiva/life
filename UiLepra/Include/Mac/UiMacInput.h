@@ -119,6 +119,8 @@ public:
 	MacInputManager(MacDisplayManager* pDisplayManager);
 	virtual ~MacInputManager();
 
+	static MacInputManager* GetSingleton();	// TODO: remove this abomination!
+
 	bool IsInitialized();
 	virtual void Refresh();
 
@@ -148,6 +150,8 @@ private:
 
 	void AddObserver();
 	void RemoveObserver();
+
+	static MacInputManager* mInputManagerSingleton;	// TODO: remove this abomination!
 
 	MacDisplayManager* mDisplayManager;
 

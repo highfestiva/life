@@ -10,7 +10,71 @@
 #include "../../../Lepra/Include/String.h"
 #include "../../../Lepra/Include/SystemManager.h"
 #include "../../Include/UiLepra.h"
+#include "../../Include/Mac/UiMacInput.h"
 #include "../../Include/Mac/UiMacOpenGLDisplay.h"
+
+
+
+@interface NativeMacWindow: NSWindow
+{
+}
+- (void)mouseMoved: (NSEvent*)theEvent;
+/*- (void)scrollWheel: (NSEvent*)theEvent;
+- (void)keyDown: (NSEvent*)theEvent;
+- (void)keyUp: (NSEvent*)theEvent;
+- (void)mouseDown: (NSEvent*)theEvent;
+- (void)rightMouseDown: (NSEvent*)theEvent;
+- (void)otherMouseDown: (NSEvent*)theEvent;
+- (void)mouseUp: (NSEvent*)theEvent;
+- (void)rightMouseUp: (NSEvent*)theEvent;
+- (void)otherMouseUp: (NSEvent*)theEvent;*/
+@end
+
+@implementation NativeMacWindow
+- (void)mouseMoved: (NSEvent*)theEvent
+{
+	UiLepra::MacInputManager* lInput = UiLepra::MacInputManager::GetSingleton();
+	if (lInput)
+	{
+		NSPoint lPoint = [theEvent locationInWindow];
+		lInput->SetMousePosition(lPoint.x, lPoint.y);
+	}
+}
+/*- (void)keyDown: (NSEvent*)theEvent
+{
+}
+- (void)keyUp: (NSEvent*)theEvent
+{
+}
+- (void)mouseDown: (NSEvent*)theEvent
+{
+	//((UiLepra::MacInputManager*)InputManager::GetInputManager())->OSXMouseDownEvent(0);
+}
+- (void)rightMouseDown: (NSEvent*)theEvent
+{
+	//((UiLepra::MacInputManager*)InputManager::GetInputManager())->OSXMouseDownEvent(1);
+}
+- (void)otherMouseDown: (NSEvent*)theEvent
+{
+	//((UiLepra::MacInputManager*)InputManager::GetInputManager())->OSXMouseDownEvent(2);
+}
+- (void)mouseUp: (NSEvent*)theEvent
+{
+	//((UiLepra::MacInputManager*)InputManager::GetInputManager())->OSXMouseUpEvent(0);
+}
+- (void)rightMouseUp: (NSEvent*)theEvent
+{
+	//((UiLepra::MacInputManager*)InputManager::GetInputManager())->OSXMouseUpEvent(1);
+}
+- (void)otherMouseUp: (NSEvent*)theEvent
+{
+	//((UiLepra::MacInputManager*)InputManager::GetInputManager())->OSXMouseUpEvent(2);
+}
+- (void)scrollWheel: (NSEvent*)theEvent
+{
+	//((MacInputManager*)InputManager::GetInputManager())->OSXScrollWheelEvent([theEvent deltaY]/10.0f);
+}*/
+@end
 
 
 
@@ -34,64 +98,6 @@ void DisplayManager::EnableScreensaver(bool /*pEnable*/)
 {
 	// TODO: implement!
 }
-
-
-
-/*@interface NativeMacWindow: NSWindow
-{
-}
-- (void)scrollWheel: (NSEvent*)theEvent;
-- (void)mouseMoved: (NSEvent*)theEvent;
-- (void)keyDown: (NSEvent*)theEvent;
-- (void)keyUp: (NSEvent*)theEvent;
-- (void)mouseDown: (NSEvent*)theEvent;
-- (void)rightMouseDown: (NSEvent*)theEvent;
-- (void)otherMouseDown: (NSEvent*)theEvent;
-- (void)mouseUp: (NSEvent*)theEvent;
-- (void)rightMouseUp: (NSEvent*)theEvent;
-- (void)otherMouseUp: (NSEvent*)theEvent;
-@end
-
-@implementation NativeMacWindow
-- (void)keyDown: (NSEvent*)theEvent
-{
-}
-- (void)keyUp: (NSEvent*)theEvent
-{
-}
-- (void)mouseDown: (NSEvent*)theEvent
-{
-	((MacInputManager*)InputManager::GetInputManager())->OSXMouseDownEvent(0);
-}
-- (void)rightMouseDown: (NSEvent*)theEvent
-{
-	((MacInputManager*)InputManager::GetInputManager())->OSXMouseDownEvent(1);
-}
-- (void)otherMouseDown: (NSEvent*)theEvent
-{
-	((MacInputManager*)InputManager::GetInputManager())->OSXMouseDownEvent(2);
-}
-- (void)mouseUp: (NSEvent*)theEvent
-{
-	((MacInputManager*)InputManager::GetInputManager())->OSXMouseUpEvent(0);
-}
-- (void)rightMouseUp: (NSEvent*)theEvent
-{
-	((MacInputManager*)InputManager::GetInputManager())->OSXMouseUpEvent(1);
-}
-- (void)otherMouseUp: (NSEvent*)theEvent
-{
-	((MacInputManager*)InputManager::GetInputManager())->OSXMouseUpEvent(2);
-}
-- (void)mouseMoved: (NSEvent*)theEvent
-{
-	((MacInputManager*)InputManager::GetInputManager())->SetMousePosition([theEvent deltaX], [theEvent deltaY]);
-}
-- (void)scrollWheel: (NSEvent*)theEvent
-{
-	//((MacInputManager*)InputManager::GetInputManager())->OSXScrollWheelEvent([theEvent deltaY]/10.0f);
-}
-@end*/
 
 
 
@@ -318,7 +324,7 @@ bool MacDisplayManager::InitWindow()
 
 	bool lOk = mIsOpen = true;
 
-	mWnd = [NSWindow alloc];
+	mWnd = [NativeMacWindow alloc];
 	[mWnd	initWithContentRect:	NSMakeRect(0, 0, mDisplayMode.mWidth, mDisplayMode.mHeight)
 		styleMask:		NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask
 		backing:		NSBackingStoreBuffered
