@@ -203,9 +203,6 @@ def get_dep_libs(vcfileinfolist, depnames):
     deps = []
     depnames = depnames.split()
     for depname in depnames:
-        #if depname == mac_hid:
-        #    deps += ["-lHIDUtilities"]
-        #    continue
         for name, type, vcfile, vcdeps in vcfileinfolist:
             if name == depname:
                 deps += ["-l"+name]
@@ -279,9 +276,9 @@ def main():
         ["CureTest",   "gfx_bin",    "UiCure/CureTestApp/CureTestApp900.vcproj", "UiCure"]]
 
     if sys.platform != 'darwin':
-        projects += [["OpenAL", "lib_nowarn", "ThirdParty/openal-soft-1.10.622/OpenAL_900.vcproj", ""]]
+        projects = [["OpenAL", "lib_nowarn", "ThirdParty/openal-soft-1.10.622/OpenAL_900.vcproj", ""]] + projects
     else:
-        projects += [[mac_hid, "lib_nowarn", "ThirdParty/HID_Utilities/HID_Utilities.vcproj", ""]]
+        projects = [[mac_hid, "lib_nowarn", "ThirdParty/HID_Utilities/HID_Utilities.vcproj", ""]] + projects
     generate_makefiles(basedir, projects)
 
 if __name__ == '__main__':
