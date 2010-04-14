@@ -66,6 +66,11 @@ bool ClientOptionsManager::UpdateInput(UiLepra::InputElement* pElement)
 	return (lValueSet);
 }
 
+void ClientOptionsManager::ResetToggles()
+{
+	mOptions.mControl.mUi.mConsoleToggle = 0;
+}
+
 
 
 const ClientOptions& ClientOptionsManager::GetOptions() const

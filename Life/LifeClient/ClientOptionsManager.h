@@ -33,6 +33,7 @@ struct ClientOptionsManager
 
 	bool UpdateInput(UiLepra::InputManager::KeyCode pKeyCode, bool pActive);
 	bool UpdateInput(UiLepra::InputElement* pElement);
+	void ResetToggles();
 
 	const ClientOptions& GetOptions() const;
 

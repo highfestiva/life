@@ -15,10 +15,12 @@
 
 
 
-@interface NativeMacWindow: NSWindow
+@interface NativeWindow: NSWindow
 {
 }
 - (void)mouseMoved: (NSEvent*)theEvent;
+- (void)keyDown: (NSEvent*)theEvent;
+- (void)keyUp: (NSEvent*)theEvent;
 /*- (void)scrollWheel: (NSEvent*)theEvent;
 - (void)keyDown: (NSEvent*)theEvent;
 - (void)keyUp: (NSEvent*)theEvent;
@@ -28,11 +30,15 @@
 - (void)mouseUp: (NSEvent*)theEvent;
 - (void)rightMouseUp: (NSEvent*)theEvent;
 - (void)otherMouseUp: (NSEvent*)theEvent;*/
+- (BOOL)acceptsFirstResponder;
 @end
 
-@implementation NativeMacWindow
+@implementation NativeWindow
 - (void)mouseMoved: (NSEvent*)theEvent
 {
+	printf("Window mouseMoved!\n");
+	//[super mouseMoved:theEvent];
+
 	UiLepra::MacInputManager* lInput = UiLepra::MacInputManager::GetSingleton();
 	if (lInput)
 	{
@@ -40,13 +46,29 @@
 		lInput->SetMousePosition(lPoint.x, lPoint.y);
 	}
 }
-/*- (void)keyDown: (NSEvent*)theEvent
+- (void) mouseDown: (NSEvent*)theEvent
 {
+	printf("Mouse down i min favoritvy\n");
+	[self setAcceptsMouseMovedEvents: YES];
+	[self setIgnoresMouseEvents: NO];
+}
+
+- (void) mouseDragged: (NSEvent*)theEvent
+{
+	printf("Mouse dragged i min favoritvy\n");
+	[self setAcceptsMouseMovedEvents: YES];
+	[self setIgnoresMouseEvents: NO];
+	[self mouseMoved: theEvent];
+}
+- (void)keyDown: (NSEvent*)theEvent
+{
+	printf("window keydown!\n");
 }
 - (void)keyUp: (NSEvent*)theEvent
 {
+	printf("window keyup!\n");
 }
-- (void)mouseDown: (NSEvent*)theEvent
+/*- (void)mouseDown: (NSEvent*)theEvent
 {
 	//((UiLepra::MacInputManager*)InputManager::GetInputManager())->OSXMouseDownEvent(0);
 }
@@ -74,6 +96,14 @@
 {
 	//((MacInputManager*)InputManager::GetInputManager())->OSXScrollWheelEvent([theEvent deltaY]/10.0f);
 }*/
+- (BOOL)acceptsFirstResponder
+{
+	return YES;
+}
+- (BOOL)resignFirstResponder
+{
+	return YES;
+}
 @end
 
 
@@ -324,13 +354,14 @@ bool MacDisplayManager::InitWindow()
 
 	bool lOk = mIsOpen = true;
 
-	mWnd = [NativeMacWindow alloc];
+	mWnd = [NativeWindow alloc];
 	[mWnd	initWithContentRect:	NSMakeRect(0, 0, mDisplayMode.mWidth, mDisplayMode.mHeight)
 		styleMask:		NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask
 		backing:		NSBackingStoreBuffered
 		defer:			NO];
-	[mWnd setAcceptsMouseMovedEvents: TRUE];
-        [mWnd setReleasedWhenClosed: TRUE];
+	[mWnd setAcceptsMouseMovedEvents: YES];
+	[mWnd setIgnoresMouseEvents: NO];
+        [mWnd setReleasedWhenClosed: YES];
 	[mWnd makeKeyAndOrderFront: nil];
 	[mWnd	setFrame:	NSMakeRect(0, 0, mDisplayMode.mWidth, mDisplayMode.mHeight)
 		display:	YES];

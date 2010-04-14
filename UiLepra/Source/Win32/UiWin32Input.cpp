@@ -59,7 +59,11 @@ void Win32InputElement::SetValue(int pValue)
 	Win32InputDevice* lDevice = (Win32InputDevice*)GetParentDevice();
 	Win32InputManager* lManager = (Win32InputManager*)lDevice->GetManager();
 
-	if (GetInterpretation() == RELATIVE_AXIS)
+	if (GetType() == DIGITAL)
+	{
+		Parent::SetValue(pValue);
+	}
+	else if (GetInterpretation() == RELATIVE_AXIS)
 	{
 		// Treat this as a relative axis. Since we don't know the maximum value
 		// of this axis (can probably be infinitly large), we need to scale it down

@@ -237,6 +237,7 @@ bool GameClientSlaveManager::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 	}
 	if (mOptions.GetOptions().mControl.mUi.mConsoleToggle >= 0.5f)
 	{
+		mOptions.ResetToggles();
 		ToggleConsole();
 		return (true);	// This key ends here.
 	}
@@ -283,6 +284,11 @@ void GameClientSlaveManager::OnInput(UiLepra::InputElement* pElement)
 	if (mOptions.UpdateInput(pElement))
 	{
 		mInputExpireAlarm.Push(0.1);
+	}
+	if (mOptions.GetOptions().mControl.mUi.mConsoleToggle >= 0.5f)
+	{
+		mOptions.ResetToggles();
+		ToggleConsole();
 	}
 }
 

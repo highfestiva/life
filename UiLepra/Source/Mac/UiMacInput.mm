@@ -23,31 +23,23 @@ InputManager* InputManager::CreateInputManager(DisplayManager* pDisplayManager)
 
 
 
-class MacInputElement;	// TODO: REMOVEME!
-
-
-
-#if 0
-
-
-
 MacInputElement::MacInputElement(Type pType, Interpretation pInterpretation, int pTypeIndex,
-	MacInputDevice* pParentDevice, LPCDIDEVICEOBJECTINSTANCE pElement, unsigned pFieldOffset):
+	MacInputDevice* pParentDevice, pRecElement pElement):
 	InputElement(pType, pInterpretation, pTypeIndex, pParentDevice),
 	mElement(pElement),
 	mMin(MAX_INT),
 	mMax(MIN_INT)
 {
-	SetIdentifier(mElement->tszName);
-
-	mDataFormat.dwType  = mElement->dwType;
-	mDataFormat.pguid   = 0;
-	mDataFormat.dwOfs   = (DWORD)pFieldOffset;
-	mDataFormat.dwFlags = 0;
+	SetIdentifier(strutil::Encode((const char*)mElement->name));
 }
 
 MacInputElement::~MacInputElement()
 {
+}
+
+pRecElement MacInputElement::GetNativeElement() const
+{
+	return (mElement);
 }
 
 void MacInputElement::SetValue(int pValue)
@@ -65,7 +57,11 @@ void MacInputElement::SetValue(int pValue)
 	MacInputDevice* lDevice = (MacInputDevice*)GetParentDevice();
 	MacInputManager* lManager = (MacInputManager*)lDevice->GetManager();
 
-	if (GetInterpretation() == RELATIVE_AXIS)
+	if (GetType() == DIGITAL)
+	{
+		Parent::SetValue(pValue);
+	}
+	else if (GetInterpretation() == RELATIVE_AXIS)
 	{
 		// Treat this as a relative axis. Since we don't know the maximum value
 		// of this axis (can probably be infinitly large), we need to scale it down
@@ -117,10 +113,6 @@ bool MacInputElement::SetCalibration(const str& pData)
 
 
 LOG_CLASS_DEFINE(UI_INPUT, MacInputElement);
-
-
-
-#endif // 0
 
 
 
@@ -180,7 +172,19 @@ void MacInputDevice::PollEvents()
 		for (x = mElementArray.begin(); x != mElementArray.end(); ++x)
 		{
 			MacInputElement* lElement = (MacInputElement*)*x;
-			//lElement->PollEvents();
+			pRecElement lNativeElement = lElement->GetNativeElement();
+			if (lElement->GetType() == InputElement::ANALOGUE)
+			{
+				const int32 lValue = HIDGetElementValue(mNativeDevice, lNativeElement);
+				const int32 lValueCal = HIDCalibrateValue(lValue, lNativeElement);
+				const int32 lValueScale = HIDScaleValue(lValueCal, lNativeElement);
+				lElement->SetValue(lValueScale / 127.5f - 1);
+			}
+			else if (lElement->GetType() == InputElement::DIGITAL)
+			{
+				const int32 lValue = HIDGetElementValue(mNativeDevice, lNativeElement);
+				lElement->SetValue((lValue > 0)? 1 : 0);
+			}
 		}
 	}
 }
@@ -195,16 +199,21 @@ void MacInputDevice::EnumElements()
 	pRecElement lCurrentElement = HIDGetFirstDeviceElement(mNativeDevice, kHIDElementTypeInput);
 	while (lCurrentElement)
 	{
+		MacInputElement* lElement = 0;
 		switch (lCurrentElement->type)
 		{
 			case kIOHIDElementTypeInput_Button:
 			{
-				//CreateButtonElement(lCurrentElement);
+				InputElement::Interpretation lInterpretation = (InputElement::Interpretation)((int)InputElement::BUTTON1 + mButtonCount);
+				lElement = new MacInputElement(InputElement::DIGITAL, lInterpretation, mButtonCount, this, lCurrentElement);
+				++mButtonCount;
 			}
 			break;
 			case kIOHIDElementTypeInput_Axis:
 			{
-				//CreateAxisElement(lCurrentElement);
+				InputElement::Interpretation lInterpretation = InputElement::ABSOLUTE_AXIS;	// TODO: ...
+				lElement = new MacInputElement(InputElement::ANALOGUE, lInterpretation, mAnalogueCount, this, lCurrentElement);
+				++mAnalogueCount;
 			}
 			break;
 			case kIOHIDElementTypeInput_Misc:
@@ -220,7 +229,9 @@ void MacInputDevice::EnumElements()
 						case kHIDUsage_GD_DPadRight:
 						case kHIDUsage_GD_DPadLeft:
 						{
-							//CreateButtonElement(lCurrentElement);
+							InputElement::Interpretation lInterpretation = (InputElement::Interpretation)((int)InputElement::BUTTON1 + mButtonCount);
+							lElement = new MacInputElement(InputElement::DIGITAL, lInterpretation, mButtonCount, this, lCurrentElement);
+							++mButtonCount;
 						}
 						break;
 						case kHIDUsage_GD_X:
@@ -232,7 +243,9 @@ void MacInputDevice::EnumElements()
 						case kHIDUsage_GD_Slider:
 						case kHIDUsage_GD_Wheel:
 						{
-							//CreateAxisElement(lCurrentElement);
+							InputElement::Interpretation lInterpretation = InputElement::ABSOLUTE_AXIS;	// TODO: ...
+							lElement = new MacInputElement(InputElement::ANALOGUE, lInterpretation, mAnalogueCount, this, lCurrentElement);
+							++mAnalogueCount;
 						}
 						break;
 						default:
@@ -260,6 +273,10 @@ void MacInputDevice::EnumElements()
 			}
 			break;
 		}
+		if (lElement)
+		{
+			mElementArray.push_back(lElement);
+		}
 		lCurrentElement = HIDGetNextDeviceElement(lCurrentElement, kHIDElementTypeInput);
 	}
 }
@@ -285,12 +302,7 @@ MacInputManager::MacInputManager(MacDisplayManager* pDisplayManager):
 	HIDBuildDeviceList(0, 0);
 	if (HIDHaveDeviceList())
 	{
-		pRecDevice lHIDDevice = HIDGetFirstDevice();
-		while (lHIDDevice)
-		{
-			mDeviceList.push_back(new MacInputDevice(lHIDDevice, this));
-			lHIDDevice = HIDGetNextDevice(lHIDDevice);
-		}
+		EnumDevices();
 	}
 
 	Refresh();
@@ -333,6 +345,8 @@ bool MacInputManager::IsInitialized()
 
 void MacInputManager::Refresh()
 {
+	mScreenWidth  = 640;
+	mScreenHeight = 480;
 	/*if (mDisplayManager != 0 && mDisplayManager->GetHWND() != 0)
 	{
 		RECT lRect;
@@ -523,8 +537,8 @@ double MacInputManager::GetCursorY()
 
 void MacInputManager::SetMousePosition(int x, int y)
 {
-	mCursorX = 2.0 * (double)x / (double)mScreenWidth  - 1.0;
-	mCursorY = 2.0 * (double)y / (double)mScreenHeight - 1.0;
+	mCursorX = 2.0 * x / mScreenWidth  - 1.0;
+	mCursorY = 2.0 * (mScreenHeight-y) / mScreenHeight - 1.0;
 }
 
 const InputDevice* MacInputManager::GetKeyboard() const
@@ -547,6 +561,41 @@ InputDevice* MacInputManager::GetMouse()
 	return mMouse;
 }
 
+void MacInputManager::EnumDevices()
+{
+	pRecDevice lHIDDevice = HIDGetFirstDevice();
+	while (lHIDDevice)
+	{
+		MacInputDevice* lDevice = new MacInputDevice(lHIDDevice, this);
+		mDeviceList.push_back(lDevice);
+		
+		InputDevice::Interpretation lInterpretation = InputDevice::TYPE_OTHER;
+		if (lDevice->GetNumDigitalElements() < 15 && lDevice->GetNumAnalogueElements() >= 2)
+		{
+			lInterpretation = InputDevice::TYPE_MOUSE;
+		}
+		else if (lDevice->GetNumDigitalElements() >= 40)
+		{
+			lInterpretation = InputDevice::TYPE_KEYBOARD;
+		}
+		lDevice->SetInterpretation(lInterpretation, mTypeCount[lInterpretation]);
+		++mTypeCount[lInterpretation];
+		
+		if (lInterpretation == InputDevice::TYPE_MOUSE)
+		{
+			mMouse = lDevice;
+			//printf("GOT MOUSE!!!\n");
+		}
+		else if (lInterpretation == InputDevice::TYPE_KEYBOARD)
+		{
+			mKeyboard = lDevice;
+			//printf("GOT KEYBOARD!!!\n");
+		}
+		
+		lHIDDevice = HIDGetNextDevice(lHIDDevice);
+	}
+}
+	
 void MacInputManager::AddObserver()
 {
 	if (mDisplayManager)

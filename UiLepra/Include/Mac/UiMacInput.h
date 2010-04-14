@@ -24,19 +24,15 @@ class MacInputDevice;
 
 
 
-#if 0
-
-
-
 class MacInputElement: public InputElement
 {
+	typedef InputElement Parent;
 public:
 	MacInputElement(InputElement::Type pType, Interpretation pInterpretation, int pTypeIndex,
-		MacInputDevice* pParentDevice, LPCDIDEVICEOBJECTINSTANCE pElement, unsigned pFieldOffset);
+		MacInputDevice* pParentDevice, pRecElement pElement);
 	virtual ~MacInputElement();
 
-	const LPCDIDEVICEOBJECTINSTANCE GetDirectInputElement() const;
-	const LPDIOBJECTDATAFORMAT GetDataFormat() const;
+	pRecElement GetNativeElement() const;
 
 	// Sets the uncalibrated value of this device.
 	// (Only useful with analogue elements).
@@ -54,29 +50,13 @@ private:
 		MIN_INT  = 0x80000000,
 	};
 
-	LPCDIDEVICEOBJECTINSTANCE mElement;
-	DIOBJECTDATAFORMAT mDataFormat;
+	pRecElement mElement;
 
 	int32 mMin;
 	int32 mMax;
 
 	LOG_CLASS_DECLARE();
 };
-
-const LPCDIDEVICEOBJECTINSTANCE MacInputElement::GetDirectInputElement() const
-{
-	return mElement;
-}
-
-const LPDIOBJECTDATAFORMAT MacInputElement::GetDataFormat() const
-{
-	return (LPDIOBJECTDATAFORMAT)&mDataFormat;
-}
-
-
-
-
-#endif // 0
 
 
 
@@ -147,6 +127,8 @@ protected:
 private:
 	// The DirectInput device enumeration callback.
 	//static BOOL CALLBACK EnumDeviceCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvRef);
+
+	void EnumDevices();
 
 	void AddObserver();
 	void RemoveObserver();
