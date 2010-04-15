@@ -25,6 +25,7 @@ class Win32InputDevice;
 
 class Win32InputElement: public InputElement
 {
+	typedef InputElement Parent;
 public:
 	Win32InputElement(InputElement::Type pType, Interpretation pInterpretation, int pTypeIndex,
 		Win32InputDevice* pParentDevice, LPCDIDEVICEOBJECTINSTANCE pElement, unsigned pFieldOffset);

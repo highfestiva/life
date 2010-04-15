@@ -384,12 +384,11 @@ bool MacOpenGLDisplay::SetGLPixelFormat()
 		*lAttrib++ = NSOpenGLPFADepthSize;
 		*lAttrib++ = (NSOpenGLPixelFormatAttribute)mDisplayMode.mBitDepth;
 	 }
-	/* TODO: deal with stencil; what is currently in use on Windows? BS code says it shouldn't be included?
-	if (lScreenRes.GetStencilBufferDepth() > 0)
+	if (true)	// TODO: stencil depth somehow?
 	{
 		*lAttrib++ = NSOpenGLPFAStencilSize;
-		*lAttrib++ = (NSOpenGLPixelFormatAttribute)lScreenRes.GetStencilBufferDepth();
-	}*/
+		*lAttrib++ = (NSOpenGLPixelFormatAttribute)8;
+	}
 	*lAttrib++ = (NSOpenGLPixelFormatAttribute) 0;
 	NSOpenGLPixelFormat* lPixelFormat = [NSOpenGLPixelFormat alloc];
 	[lPixelFormat initWithAttributes:lPixelFormatAttribs];
