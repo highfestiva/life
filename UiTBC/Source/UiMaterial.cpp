@@ -221,11 +221,6 @@ void Material::EnableDrawMaterial(bool pEnabled)
 	mEnableDrawMaterial = pEnabled;
 }
 
-bool Material::IsDrawMaterialEnabled()
-{
-	return (mEnableDrawMaterial);
-}
-
 
 
 Material::GeometryGroupList* Material::GetGeometryGroupList()

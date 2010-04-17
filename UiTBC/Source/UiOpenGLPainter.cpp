@@ -121,6 +121,7 @@ void OpenGLPainter::SetColor(const Color& pColor, unsigned pColorIndex)
 
 void OpenGLPainter::DoSetRenderMode() const
 {
+	::glDisable(GL_CULL_FACE);
 	::glLineWidth(1);
 	::glHint(GL_LINE_SMOOTH_HINT, GL_FASTEST);
 	::glDisable(GL_LINE_SMOOTH);
@@ -1209,7 +1210,7 @@ int OpenGLPainter::PrintText(const str& pString, int x, int y)
 			}
 			else
 			{
-				GLuint lGlGlyph = glGenLists(1);
+				GLuint lGlGlyph = ::glGenLists(1);
 				mGlyphTable.insert(GlyphTable::value_type(lFontHash+lChar, lGlGlyph));
 				const int lWidth = lCharWidth;
 				const int lHeight = lFontHeight;

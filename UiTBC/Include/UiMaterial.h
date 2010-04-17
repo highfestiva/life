@@ -123,7 +123,6 @@ public:
 
 	static void SetEnableDepthSorting(bool pEnabled);
 	static void EnableDrawMaterial(bool pEnabled);
-	static bool IsDrawMaterialEnabled();
 
 	Renderer* GetRenderer();
 

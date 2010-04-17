@@ -1071,7 +1071,7 @@ unsigned int OpenGLRenderer::RenderScene()
 		::glDepthMask(GL_TRUE);
 		::glFrontFace(GL_CCW);
 		::glShadeModel(GL_SMOOTH);
-		::glPolygonMode(GL_BACK, GL_FILL);
+		::glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		::glDepthFunc(GL_LESS);
 		::glCullFace(GL_BACK);
 		::glLineWidth(3.0f);
@@ -1130,12 +1130,35 @@ unsigned int OpenGLRenderer::RenderScene()
 		}
 	}
 
+	{
+		Vector3DF lColor(0, 0, 0);
+		if (IsOutlineRenderingEnabled())
+		{
+			lColor = Vector3DF(1, 1, 1);
+			Material::EnableDrawMaterial(false);
+		}
+		TBC::GeometryBase::BasicMaterialSettings lMaterial(lColor, lColor, lColor, 1, 1, false);
+		OpenGLMaterial::SetBasicMaterial(lMaterial, this, true);
+	}
+
+	int lStartMaterial;
 	if (IsOutlineRenderingEnabled())
 	{
-		Material::EnableDrawMaterial(false);
-		Vector3DF lWhite(1, 1, 1);
-		TBC::GeometryBase::BasicMaterialSettings lMaterial(lWhite, lWhite, lWhite, 1, 1, false);
-		OpenGLMaterial::SetBasicMaterial(lMaterial, this, true);
+		GetMaterial(MAT_SINGLE_COLOR_SOLID)->RenderAllGeometry(GetCurrentFrame());
+		::glCullFace(GL_FRONT);
+		::glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		::glDepthFunc(GL_LEQUAL);
+		::glDisable(GL_LIGHTING);
+		Material::EnableDrawMaterial(true);
+		GetMaterial(MAT_SINGLE_COLOR_SOLID)->RenderAllGeometry(GetCurrentFrame());
+		::glCullFace(GL_BACK);
+		::glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		::glDepthFunc(GL_LESS);
+		lStartMaterial = MAT_SINGLE_COLOR_SOLID + 1;
+	}
+	else
+	{
+		lStartMaterial = MAT_SINGLE_COLOR_SOLID;
 	}
 
 	{
@@ -1144,7 +1167,7 @@ unsigned int OpenGLRenderer::RenderScene()
 	}
 	{
 		// This renders the scene.
-		for (int i = 0; i < (int)NUM_MATERIALTYPES; ++i)
+		for (int i = lStartMaterial; i < (int)NUM_MATERIALTYPES; ++i)
 		{
 			Material* lMaterial = GetMaterial((MaterialType)i);
 			if (lMaterial != 0)
@@ -1153,26 +1176,6 @@ unsigned int OpenGLRenderer::RenderScene()
 			}
 		}
 		::glDisable(GL_STENCIL_TEST);
-	}
-
-	Material::EnableDrawMaterial(true);
-
-	if (IsOutlineRenderingEnabled())
-	{
-		::glCullFace(GL_FRONT);
-		::glPolygonMode(GL_BACK, GL_LINE);
-		::glDepthFunc(GL_LEQUAL);
-		::glDisable(GL_LIGHTING);
-		for (int i = 0; i < (int)NUM_MATERIALTYPES; i++)
-		{
-			if (GetMaterial((MaterialType)i) != 0)
-			{
-				GetMaterial((MaterialType)i)->RenderAllGeometry(GetCurrentFrame());
-			}
-		}
-		::glCullFace(GL_BACK);
-		::glPolygonMode(GL_BACK, GL_FILL);
-		::glDepthFunc(GL_LESS);
 	}
 
 	{
