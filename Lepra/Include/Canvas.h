@@ -28,14 +28,17 @@
 	map images. Store them on disc for later use.
 */
 
-#ifndef CANVAS_H
-#define CANVAS_H
+#pragma once
 
 #include "LepraTypes.h"
 #include "Graphics2D.h"
 
+
+
 namespace Lepra
 {
+
+
 
 class ColorOctreeNode;	// Declared further down...
 class ColorOctreeNodeListNode;
@@ -109,35 +112,36 @@ public:
 	void Reset(const Canvas& pCanvas);
 
 	void Copy(const Canvas& pCanvas);
-	inline void operator= (const Canvas& pCanvas);
+	void PartialCopy(int pX, int pY, const Canvas& pCanvas);
+	void operator= (const Canvas& pCanvas);
 
 	void SetBuffer(void* pBuffer, bool pCopy = false);
 	void CreateBuffer();
-	inline void* GetBuffer() const;
+	void* GetBuffer() const;
 
-	static inline BitDepth IntToBitDepth(unsigned pBitDepth);
-	static inline unsigned BitDepthToInt(BitDepth pBitDepth);
+	static BitDepth IntToBitDepth(unsigned pBitDepth);
+	static unsigned BitDepthToInt(BitDepth pBitDepth);
 
-	inline BitDepth GetBitDepth() const;
-	inline unsigned GetWidth() const;
-	inline unsigned GetHeight() const;
-	inline unsigned GetPixelByteSize() const;	// Returns the pixel size in bytes.
-	inline unsigned GetBufferByteSize() const;
+	BitDepth GetBitDepth() const;
+	unsigned GetWidth() const;
+	unsigned GetHeight() const;
+	unsigned GetPixelByteSize() const;	// Returns the pixel size in bytes.
+	unsigned GetBufferByteSize() const;
 
 	// Returns the closest higher power of two of the width and height respectively.
 	// Use these to resize the canvas to dimensions compatible with graphics hardware.
-	inline unsigned GetPow2Width();
-	inline unsigned GetPow2Height();
+	unsigned GetPow2Width();
+	unsigned GetPow2Height();
 
 	// Sometimes you have to have some fun naming your functions... :)
 	// Returns the closest higher power of 2 of pValue. Returns pValue
 	// if it's already a power of 2.
 	static unsigned PowerUp(unsigned pValue);
 
-	inline void SetPitch(unsigned pPitch);	// Set the actual width of the memorybuffer, in pixels.
-	inline unsigned GetPitch() const;
+	void SetPitch(unsigned pPitch);	// Set the actual width of the memorybuffer, in pixels.
+	unsigned GetPitch() const;
 
-	inline const Color* GetPalette() const;
+	const Color* GetPalette() const;
 	void SetPalette(const Color* pPalette);
 	void SetGrayscalePalette();
 
@@ -165,7 +169,7 @@ public:
 
 	void GetPixelColor(unsigned x, unsigned y, Color& pColor) const;
 	void SetPixelColor(unsigned x, unsigned y, Color& pColor);
-	inline Color GetPixelColor(unsigned x, unsigned y) const;
+	Color GetPixelColor(unsigned x, unsigned y) const;
 
 	// Set all bytes to zero.
 	void Clear();
@@ -276,129 +280,7 @@ private:
 	static float32 smSamplingGridCoordLookUp[];
 };
 
-void* Canvas::GetBuffer() const
-{
-	return mBuffer;
-}
 
-Canvas::BitDepth Canvas::IntToBitDepth(unsigned pBitDepth)
-{
-	if (pBitDepth <= 8)
-	{
-		return BITDEPTH_8_BIT;
-	}
-	else if(pBitDepth <= 15)
-	{
-		return BITDEPTH_15_BIT;
-	}
-	else if(pBitDepth == 16)
-	{
-		return BITDEPTH_16_BIT;
-	}
-	else if(pBitDepth <= 24)
-	{
-		return BITDEPTH_24_BIT;
-	}
-	else if(pBitDepth <= 32)
-	{
-		return BITDEPTH_32_BIT;
-	}
-	else if(pBitDepth <= 48)
-	{
-		return BITDEPTH_16_BIT_PER_CHANNEL;
-	}
-	else if(pBitDepth <= 96)
-	{
-		return BITDEPTH_32_BIT_PER_CHANNEL;
-	}
-
-	return BITDEPTH_8_BIT;
-}
-
-unsigned Canvas::BitDepthToInt(BitDepth pBitDepth)
-{
-	switch(pBitDepth)
-	{
-	case BITDEPTH_8_BIT:
-		return 8;
-	case BITDEPTH_15_BIT:
-		return 15;
-	case BITDEPTH_16_BIT:
-		return 16;
-	case BITDEPTH_24_BIT:
-		return 24;
-	case BITDEPTH_32_BIT:
-		return 32;
-	case BITDEPTH_16_BIT_PER_CHANNEL:
-		return 48;
-	case BITDEPTH_32_BIT_PER_CHANNEL:
-		return 96;
-	}
-
-	return 8;
-}
-
-Canvas::BitDepth Canvas::GetBitDepth() const
-{
-	return mBitDepth;
-}
-
-unsigned Canvas::GetWidth() const
-{
-	return mWidth;
-}
-
-unsigned Canvas::GetHeight() const
-{
-	return mHeight;
-}
-
-unsigned Canvas::GetPixelByteSize() const
-{
-	return mPixelSize;
-}
-
-unsigned Canvas::GetBufferByteSize() const
-{
-	return mPitch * mHeight * mPixelSize;
-}
-
-void Canvas::SetPitch(unsigned pPitch)
-{
-	mPitch = pPitch;
-}
-
-unsigned Canvas::GetPitch() const
-{
-	return mPitch;
-}
-
-const Color* Canvas::GetPalette() const
-{
-	return mPalette;
-}
-
-unsigned Canvas::GetPow2Width()
-{
-	return PowerUp(GetWidth());
-}
-
-unsigned Canvas::GetPow2Height()
-{
-	return PowerUp(GetHeight());
-}
-
-void Canvas::operator= (const Canvas& pCanvas)
-{
-	Copy(pCanvas);
-}
-
-Color Canvas::GetPixelColor(unsigned x, unsigned y) const
-{
-	Color lColor;
-	GetPixelColor(x, y, lColor);
-	return lColor;
-}
 
 class ColorOctreeNode
 {
@@ -459,6 +341,6 @@ public:
 	ColorOctreeNodeListNode* mNext;
 };
 
-} // End namespace.
 
-#endif
+
+}

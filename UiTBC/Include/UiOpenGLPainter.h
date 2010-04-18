@@ -29,6 +29,10 @@ namespace UiTbc
 
 
 
+class FontTexture;
+
+
+
 class OpenGLPainter: public Painter
 {
 public:
@@ -92,6 +96,7 @@ protected:
 	void DoRenderDisplayList(std::vector<DisplayEntity*>* pDisplayList);
 
 	void ClearFontBuffers();
+	FontTexture* CacheGlyphs(uint32 pFontHash, int pFontHeight, const str& pString);
 
 private:
 	Vector3DF mRCol[4];
@@ -110,11 +115,11 @@ private:
 	};
 
 	typedef HashTable<int, Texture*> TextureTable;
-	typedef std::hash_map<Lepra::uint64, GLuint> GlyphTable;
+	typedef std::hash_map<uint32, FontTexture*> FontTextureTable;
 
 	IdManager<int> mTextureIDManager;
 	TextureTable mTextureTable;
-	GlyphTable mGlyphTable;
+	FontTextureTable mFontTextureTable;
 
 	bool mSmoothFont;
 };

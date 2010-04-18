@@ -475,6 +475,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Source\UiFontTexture.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Source\UiGeometry2D.cpp"
 				>
 			</File>
@@ -834,6 +838,10 @@
 			</File>
 			<File
 				RelativePath=".\Include\UiFontManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Include\UiFontTexture.h"
 				>
 			</File>
 			<File

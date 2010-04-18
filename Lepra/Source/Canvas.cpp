@@ -159,11 +159,24 @@ void Canvas::Copy(const Canvas& pCanvas)
 	SetPalette(pCanvas.GetPalette());
 }
 
+void Canvas::PartialCopy(int pX, int pY, const Canvas& pCanvas)
+{
+	for (unsigned y = 0; y < pCanvas.GetHeight(); ++y)
+	{
+		for (unsigned x = 0; x < pCanvas.GetWidth(); ++x)
+		{
+			Lepra::Color lColor = pCanvas.GetPixelColor(x, y);
+			SetPixelColor(pX+x, pY+y, lColor);
+		}
+	}
+}
+
 void Canvas::Reset(unsigned pWidth, unsigned pHeight, BitDepth pBitDepth)
 {
 	if (mBufferResponsibility == true)
 	{
 		delete[] (char*)mBuffer;
+		mBuffer = 0;
 	}
 	mBufferResponsibility = false;
 	mBuffer = 0;
@@ -4173,6 +4186,129 @@ bool Canvas::Compare(CmpFunc pCmpFunc, uint8 pValue1, uint8 pValue2)
 	}
 }
 
+void* Canvas::GetBuffer() const
+{
+	return mBuffer;
+}
+
+Canvas::BitDepth Canvas::IntToBitDepth(unsigned pBitDepth)
+{
+	if (pBitDepth <= 8)
+	{
+		return BITDEPTH_8_BIT;
+	}
+	else if(pBitDepth <= 15)
+	{
+		return BITDEPTH_15_BIT;
+	}
+	else if(pBitDepth == 16)
+	{
+		return BITDEPTH_16_BIT;
+	}
+	else if(pBitDepth <= 24)
+	{
+		return BITDEPTH_24_BIT;
+	}
+	else if(pBitDepth <= 32)
+	{
+		return BITDEPTH_32_BIT;
+	}
+	else if(pBitDepth <= 48)
+	{
+		return BITDEPTH_16_BIT_PER_CHANNEL;
+	}
+	else if(pBitDepth <= 96)
+	{
+		return BITDEPTH_32_BIT_PER_CHANNEL;
+	}
+
+	return BITDEPTH_8_BIT;
+}
+
+unsigned Canvas::BitDepthToInt(BitDepth pBitDepth)
+{
+	switch(pBitDepth)
+	{
+	case BITDEPTH_8_BIT:
+		return 8;
+	case BITDEPTH_15_BIT:
+		return 15;
+	case BITDEPTH_16_BIT:
+		return 16;
+	case BITDEPTH_24_BIT:
+		return 24;
+	case BITDEPTH_32_BIT:
+		return 32;
+	case BITDEPTH_16_BIT_PER_CHANNEL:
+		return 48;
+	case BITDEPTH_32_BIT_PER_CHANNEL:
+		return 96;
+	}
+
+	return 8;
+}
+
+Canvas::BitDepth Canvas::GetBitDepth() const
+{
+	return mBitDepth;
+}
+
+unsigned Canvas::GetWidth() const
+{
+	return mWidth;
+}
+
+unsigned Canvas::GetHeight() const
+{
+	return mHeight;
+}
+
+unsigned Canvas::GetPixelByteSize() const
+{
+	return mPixelSize;
+}
+
+unsigned Canvas::GetBufferByteSize() const
+{
+	return mPitch * mHeight * mPixelSize;
+}
+
+void Canvas::SetPitch(unsigned pPitch)
+{
+	mPitch = pPitch;
+}
+
+unsigned Canvas::GetPitch() const
+{
+	return mPitch;
+}
+
+const Color* Canvas::GetPalette() const
+{
+	return mPalette;
+}
+
+unsigned Canvas::GetPow2Width()
+{
+	return PowerUp(GetWidth());
+}
+
+unsigned Canvas::GetPow2Height()
+{
+	return PowerUp(GetHeight());
+}
+
+void Canvas::operator= (const Canvas& pCanvas)
+{
+	Copy(pCanvas);
+}
+
+Color Canvas::GetPixelColor(unsigned x, unsigned y) const
+{
+	Color lColor;
+	GetPixelColor(x, y, lColor);
+	return lColor;
+}
 
 
 
