@@ -95,12 +95,16 @@ ScopePerformanceData* ScopePerformanceData::Insert(const str& pName, size_t pHas
 		return (lParent);
 	}
 
-	// Find self.
-	ScopePerformanceData* lNode = lParent->FindChild(/*pName,*/ pHash);
-	if (!lNode)
+	ScopePerformanceData* lNode;
 	{
-		// Not listed, so beam us up Scotty.
-		lNode = new ScopePerformanceData(lParent, pName, pHash);
+		ScopeSpinLock lLock(&mRootLock);
+		// Find self.
+		lNode = lParent->FindChild(/*pName,*/ pHash);
+		if (!lNode)
+		{
+			// Not listed, so beam us up Scotty.
+			lNode = new ScopePerformanceData(lParent, pName, pHash);
+		}
 	}
 	SetActive(lNode);
 	return (lNode);
@@ -113,14 +117,12 @@ ScopePerformanceData::ScopePerformanceData(ScopePerformanceData* pParent, const 
 {
 	if (mParent)
 	{
-		ScopeLock lLock(&mRootLock);
 		mParent->mChildArray.push_back(this);
 	}
 }
 
 void ScopePerformanceData::ClearAll(const NodeArray& pNodes)
 {
-	ScopeLock lLock(&mRootLock);
 	NodeArray::const_iterator x = pNodes.begin();
 	for (; x != pNodes.end(); ++x)
 	{
@@ -140,7 +142,7 @@ void ScopePerformanceData::Append(double pPeriodValue, double pTimeOfLastMeasure
 
 ScopePerformanceData::NodeArray ScopePerformanceData::GetRoots()
 {
-	ScopeLock lLock(&mRootLock);
+	ScopeSpinLock lLock(&mRootLock);
 	NodeArray lRootsCopy(mRoots);
 	return (lRootsCopy);
 }
@@ -150,9 +152,11 @@ const str& ScopePerformanceData::GetName() const
 	return (mName);
 }
 
-const ScopePerformanceData::NodeArray& ScopePerformanceData::GetChildren() const
+ScopePerformanceData::NodeArray ScopePerformanceData::GetChildren() const
 {
-	return (mChildArray);
+	ScopeSpinLock lLock(&mRootLock);
+	NodeArray lChildrenCopy(mChildArray);
+	return (lChildrenCopy);
 }
 
 ScopePerformanceData* ScopePerformanceData::FindChild(/*const str& pName,*/ size_t pHash) const
@@ -170,7 +174,7 @@ ScopePerformanceData* ScopePerformanceData::FindChild(/*const str& pName,*/ size
 
 void ScopePerformanceData::AddRoot(ScopePerformanceData* pNode)
 {
-	ScopeLock lLock(&mRootLock);
+	ScopeSpinLock lLock(&mRootLock);
 	mRoots.push_back(pNode);
 }
 
@@ -185,7 +189,7 @@ ScopePerformanceData* ScopePerformanceData::GetActive()
 }
 
 ScopePerformanceData::NodeArray ScopePerformanceData::mRoots;
-Lock ScopePerformanceData::mRootLock;
+SpinLock ScopePerformanceData::mRootLock;
 
 
 

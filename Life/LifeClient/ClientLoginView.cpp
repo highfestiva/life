@@ -33,7 +33,7 @@ ClientLoginView::ClientLoginView(ClientLoginObserver* pLoginObserver, const str&
 
 	AddLabel(_T("Username"), WHITE);
 
-	str lUserName = CURE_RTVAR_GETSET(mLoginObserver->GetVariableScope(), RTVAR_LOGIN_USERNAME, _T("User0"));
+	str lUserName = CURE_RTVAR_TRYGET(mLoginObserver->GetVariableScope(), RTVAR_LOGIN_USERNAME, _T("User0"));
 	AddTextField(lUserName, _T("User"));
 
 	AddLabel(_T("Password"), WHITE);
@@ -43,10 +43,10 @@ ClientLoginView::ClientLoginView(ClientLoginObserver* pLoginObserver, const str&
 	AddLabel(_T("Server"), WHITE);
 
 	str lServerName = _T(":16650");
-	lServerName = CURE_RTVAR_GETSET(mLoginObserver->GetVariableScope(), RTVAR_LOGIN_SERVER, lServerName);
+	lServerName = CURE_RTVAR_TRYGET(mLoginObserver->GetVariableScope(), RTVAR_LOGIN_SERVER, lServerName);
 	AddTextField(lServerName, _T("Server"));
 
-	AddButton(_T("Login"))->SetOnClick(ClientLoginView, OnLogin);
+	AddButton(_T("Login"), 0)->SetOnClick(ClientLoginView, OnLogin);
 
 	UpdateLayout();
 }

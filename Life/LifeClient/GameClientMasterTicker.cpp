@@ -682,7 +682,7 @@ bool GameClientMasterTicker::ApplyCalibration()
 		lDeviceId = strutil::ReplaceAll(lDeviceId, '.', '_');
 		UiLepra::InputDevice::CalibrationData lCalibration;
 
-		const std::list<str> lVariableNames = UiCure::GetSettings()->GetVariableNameList(true);
+		const std::list<str> lVariableNames = UiCure::GetSettings()->GetVariableNameList(Cure::RuntimeVariableScope::SEARCH_ALL);
 		std::list<str>::const_iterator y = lVariableNames.begin();
 		for (; y != lVariableNames.end(); ++y)
 		{
@@ -724,7 +724,7 @@ void GameClientMasterTicker::StashCalibration()
 		for (; y != lCalibration.end(); ++y)
 		{
 			const UiLepra::InputDevice::CalibrationElement& lElement = *y;
-			UiCure::GetSettings()->SetValue(Cure::RuntimeVariableScope::SET_OVERWRITE,
+			UiCure::GetSettings()->SetValue(Cure::RuntimeVariable::TYPE_NORMAL,
 				_T("Calibration.")+lDeviceId+_T(".")+lElement.first, lElement.second);
 		}
 	}

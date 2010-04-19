@@ -346,13 +346,14 @@ void Material::DoRenderAllGeometry(unsigned int pCurrentFrame)
 
 void Material::RenderAllBlendedGeometry(unsigned pCurrentFrame)
 {
+	TBC::GeometryBase::BasicMaterialSettings lPreviousMaterial = mCurrentMaterial;
 	bool lOldEnableDrawMaterial = mEnableDrawMaterial;
 	mEnableDrawMaterial = true;
 	mEnableDepthSort = true;
 
 	DoRenderAllGeometry(pCurrentFrame);
 
-	SetBasicMaterial(mCurrentMaterial);
+	SetBasicMaterial(lPreviousMaterial);
 	mEnableDrawMaterial = lOldEnableDrawMaterial;
 	mEnableDepthSort = false;
 }

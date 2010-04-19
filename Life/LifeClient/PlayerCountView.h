@@ -26,7 +26,7 @@ public:
 
 private:
 	void OnExit();
-	void OnClick(UiTbc::Button*);
+	void OnClick(UiTbc::Button* pButton);
 
 	PlayerCountObserver* mPlayerCountObserver;
 };

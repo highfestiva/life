@@ -85,7 +85,7 @@ void OpenGLPainter::PrePaint()
 
 void OpenGLPainter::SetClippingRect(int pLeft, int pTop, int pRight, int pBottom)
 {
-	if (pBottom <= pTop || pLeft <= pRight)
+	if (pBottom <= pTop || pRight <= pLeft)
 	{
 		return;
 	}

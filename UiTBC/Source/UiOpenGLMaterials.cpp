@@ -58,15 +58,12 @@ GLenum OpenGLMaterial::GetGLElementType(TBC::GeometryBase* pGeometry)
 
 void OpenGLMaterial::SetBasicMaterial(const TBC::GeometryBase::BasicMaterialSettings& pMaterial)
 {
-	SetBasicMaterial(pMaterial, (OpenGLRenderer*)GetRenderer(), false);
+	SetBasicMaterial(pMaterial, (OpenGLRenderer*)GetRenderer());
 }
 
-void OpenGLMaterial::SetBasicMaterial(const TBC::GeometryBase::BasicMaterialSettings& pMaterial, OpenGLRenderer* pRenderer, bool pStore)
+void OpenGLMaterial::SetBasicMaterial(const TBC::GeometryBase::BasicMaterialSettings& pMaterial, OpenGLRenderer* pRenderer)
 {
-	if (pStore)
-	{
-		mCurrentMaterial = pMaterial;
-	}
+	mCurrentMaterial = pMaterial;
 
 	const float lAmbient[]  = { pMaterial.mAmbient.x,  pMaterial.mAmbient.y,  pMaterial.mAmbient.z,  pMaterial.mAlpha };
 	const float lDiffuse[]  = { pMaterial.mDiffuse.x,  pMaterial.mDiffuse.y,  pMaterial.mDiffuse.z,  pMaterial.mAlpha };

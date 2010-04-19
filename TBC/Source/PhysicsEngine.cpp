@@ -149,6 +149,8 @@ bool PhysicsEngine::SetValue(unsigned pAspect, float pValue, float pZAngle)
 
 void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics* pStructure, float pFrameTime) const
 {
+	const float lLimitedFrameTime = std::min(pFrameTime, 0.1f);
+	const float lNormalizedFrameTime = lLimitedFrameTime * 90;
 	mIntensity = 0;
 	EngineNodeArray::const_iterator i = mEngineNodeArray.begin();
 	for (; i != mEngineNodeArray.end(); ++i)
@@ -282,7 +284,7 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics*
 				case ENGINE_HINGE_TORQUE:
 				case ENGINE_HINGE2_TURN:
 				{
-					ApplyTorque(pPhysicsManager, pFrameTime, lGeometry, lEngineNode);
+					ApplyTorque(pPhysicsManager, lLimitedFrameTime, lGeometry, lEngineNode);
 				}
 				break;
 				case ENGINE_ROTOR:
@@ -318,7 +320,7 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics*
 						}
 
 						// Smooth rotor force - for digital controls and to make acceleration seem more realistic.
-						const float lSmooth = 0.05f * lEngineNode.mScale;
+						const float lSmooth = lNormalizedFrameTime * 0.05f * lEngineNode.mScale;
 						lLiftForce.x = mSmoothValue[0] = Math::Lerp(mSmoothValue[0], lLiftForce.x, lSmooth);
 						lLiftForce.y = mSmoothValue[1] = Math::Lerp(mSmoothValue[1], lLiftForce.y, lSmooth);
 						lLiftForce.z = mSmoothValue[2] = Math::Lerp(mSmoothValue[2], lLiftForce.z, lSmooth);
@@ -326,7 +328,7 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics*
 						// Counteract rotor's movement through perpendicular air.
 						Vector3DF lDragForce;
 						pPhysicsManager->GetBodyVelocity(lGeometry->GetBodyId(), lDragForce);
-						lDragForce = (-lDragForce*lRotorForce.GetNormalized()) * lAbsFriction * lRotorForce;
+						lDragForce = ((-lDragForce*lRotorForce.GetNormalized()) * lAbsFriction * lNormalizedFrameTime) * lRotorForce;
 
 						pPhysicsManager->AddForceAtPos(lGeometry->GetParent()->GetBodyId(), lLiftForce + lDragForce, lRotorPivot);
 					}

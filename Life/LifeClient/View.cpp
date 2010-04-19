@@ -55,12 +55,13 @@ UiTbc::TextField* View::AddTextField(const str& pDefaultText, const str& pName)
 	return (lTextField);
 }
 
-UiTbc::Button* View::AddButton(const str& pText)
+UiTbc::Button* View::AddButton(const str& pText, void* pExtraData)
 {
 	UiTbc::Button* lButton = new UiTbc::Button(UiTbc::BorderComponent::ZIGZAG, 3, DARK_GREEN, pText);
 	lButton->SetText(pText, WHITE, WHITE);
 	lButton->SetPreferredSize(0, 24);
 	lButton->SetMinSize(20, 20);
+	lButton->SetExtraData(pExtraData);
 	AddChild(lButton);
 	return (lButton);
 }

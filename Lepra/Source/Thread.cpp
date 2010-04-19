@@ -52,7 +52,7 @@ void OwnedLock::Reference()
 
 void OwnedLock::Dereference()
 {
-	assert(mOwner == Thread::GetCurrentThread());
+	assert(IsOwner());
 	--mAcquireCount;
 	if (mAcquireCount == 0)
 	{

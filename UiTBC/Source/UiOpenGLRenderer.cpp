@@ -1079,6 +1079,8 @@ unsigned int OpenGLRenderer::RenderScene()
 		::glEnable(GL_LINE_SMOOTH);
 
 		::glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, 1);
+
+		Material::EnableDrawMaterial(true);
 	}
 
 	if (GetShadowsEnabled() && GetLightsEnabled())
@@ -1138,7 +1140,7 @@ unsigned int OpenGLRenderer::RenderScene()
 			Material::EnableDrawMaterial(false);
 		}
 		TBC::GeometryBase::BasicMaterialSettings lMaterial(lColor, lColor, lColor, 1, 1, false);
-		OpenGLMaterial::SetBasicMaterial(lMaterial, this, true);
+		OpenGLMaterial::SetBasicMaterial(lMaterial, this);
 	}
 
 	int lStartMaterial;

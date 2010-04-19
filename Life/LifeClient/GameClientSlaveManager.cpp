@@ -420,7 +420,7 @@ void GameClientSlaveManager::TickUiInput()
 
 			const Options::ClientOptions::Control::Vehicle& v = mOptions.GetOptions().mControl.mVehicle;
 			float lPower;
-			const bool lIsMovingForward = lObject->GetForwardSpeed() > 0.5f;
+			const bool lIsMovingForward = lObject->GetForwardSpeed() > 8.0f;
 			lPower = v.mForward - std::max(v.mBackward, lIsMovingForward? 0.0f : v.mBreakAndBack);
 			lObject->SetEnginePower(0, lPower, mCameraOrientation.x);
 			lPower = v.mRight-v.mLeft;

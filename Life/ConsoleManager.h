@@ -76,7 +76,7 @@ protected:
 private:
 	wstr LoadUserConfig(File* pFile);
 	bool SaveSystemConfigFile(int pScopeSkipCount, File* pFile, const wstr& pUserConfig);
-	bool SaveConfigFile(File* pFile, std::list<str>& pVariableList, const wstr& pUserConfig);
+	bool SaveConfigFile(File* pFile, const str& pPrefix, std::list<str>& pVariableList, const wstr& pUserConfig);
 
 	static const CommandPair mCommandIdList[];
 	typedef std::hash_map<str, str> AliasMap;

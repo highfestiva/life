@@ -24,15 +24,22 @@ namespace Cure
 class RuntimeVariable
 {
 public:
-	RuntimeVariable(const str& pName, const str& pValue, bool pExport);
+	enum Type
+	{
+		TYPE_NORMAL	= 1,
+		TYPE_OVERRIDE,
+		TYPE_INTERNAL,
+	};
+
+	RuntimeVariable(const str& pName, const str& pValue, Type pType);
 	~RuntimeVariable();
 	const str& GetName() const;
 	bool operator==(const str& pValue);
 	const str& GetValue() const;
-	void SetValue(const str& pValue, bool pOverwriteDefault, bool pExport);
+	void SetValue(const str& pValue, Type pType);
 	const str& GetDefaultValue() const;
 	void SetDefaultValue(const str& pDefaultValue);
-	bool IsExportable() const;
+	Type GetType() const;
 
 private:
 	void operator=(const RuntimeVariable&);
@@ -40,7 +47,7 @@ private:
 	str mName;
 	str mValue;
 	str mDefaultValue;
-	bool mIsExportable;
+	Type mType;
 };
 
 
@@ -55,12 +62,12 @@ public:
 		READ_DEFAULT,
 		READ_IGNORE,
 	};
-	enum SetMode
+	enum SearchType
 	{
-		SET_OVERWRITE	= 1,
-		SET_OVERRIDE,
-		SET_INTERNAL,
+		SEARCH_EXPORTABLE	= 1,
+		SEARCH_ALL,
 	};
+	typedef RuntimeVariable::Type SetMode;
 
 	RuntimeVariableScope(RuntimeVariableScope* pParentScope);
 	virtual ~RuntimeVariableScope();
@@ -84,10 +91,10 @@ public:
 
 	RuntimeVariableScope* LockParentScope(RuntimeVariableScope* pParentScope);
 
-	std::list<str> GetVariableNameList(bool pSkipInternal = true, int pStartScopeIndex = 0, int pEndScopeIndex = 1000);
+	std::list<str> GetVariableNameList(SearchType pSearchType, int pStartScopeIndex = 0, int pEndScopeIndex = 1000);
 
 private:
-	void CreateLocalVariable(const str& pName, const str& pValue, bool pExport);
+	void CreateLocalVariable(const str& pName, const str& pValue, SetMode pSetMode);
 	bool DeleteLocalVariable(const str& pName);
 
 	RuntimeVariable* GetVariable(const str& pName, bool pRecursive = true) const;
@@ -123,9 +130,9 @@ private:
 #define CURE_RTVAR_GET(scope, name, def)		(scope)->GetDefaultValue(Cure::RuntimeVariableScope::READ_ONLY, _T(name), def)
 #define CURE_RTVAR_TRYGET(scope, name, def)		(scope)->GetDefaultValue(Cure::RuntimeVariableScope::READ_IGNORE, _T(name), def)
 #define CURE_RTVAR_GET_DEFAULT(scope, name, def)	(scope)->GetDefaultValue(Cure::RuntimeVariableScope::READ_DEFAULT, _T(name), def)
-#define CURE_RTVAR_SET(scope, name, value)		(scope)->SetValue(Cure::RuntimeVariableScope::SET_OVERWRITE, _T(name), value)
-#define CURE_RTVAR_OVERRIDE(scope, name, value)		(scope)->SetValue(Cure::RuntimeVariableScope::SET_OVERRIDE, _T(name), value)
-#define CURE_RTVAR_INTERNAL(scope, name, value)		(scope)->SetValue(Cure::RuntimeVariableScope::SET_INTERNAL, _T(name), value)
+#define CURE_RTVAR_SET(scope, name, value)		(scope)->SetValue(Cure::RuntimeVariable::TYPE_NORMAL, _T(name), value)
+#define CURE_RTVAR_OVERRIDE(scope, name, value)		(scope)->SetValue(Cure::RuntimeVariable::TYPE_OVERRIDE, _T(name), value)
+#define CURE_RTVAR_INTERNAL(scope, name, value)		(scope)->SetValue(Cure::RuntimeVariable::TYPE_INTERNAL, _T(name), value)
 #define CURE_RTVAR_INTERNAL_ARITHMETIC(scope, name, type, arith, value, min)	\
 {										\
 	type _new_val = CURE_RTVAR_TRYGET(scope, name, min) arith value;	\

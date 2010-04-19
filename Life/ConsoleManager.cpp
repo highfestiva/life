@@ -536,6 +536,7 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 			{
 				tchar lLevel = pCommand[1];
 				const int lVariableNameIndex = (lLevel == '/' || lLevel == '.')? 2 : 1;
+				typedef Cure::RuntimeVariable RtVar;
 				typedef Cure::RuntimeVariableScope RtScope;
 				RtScope* lScope = (lLevel == '/')? Cure::GetSettings() : GetVariableScope();
 				const str lVariable = pCommand.substr(lVariableNameIndex);
@@ -557,7 +558,7 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 				{
 					str lValue;
 					strutil::CStringToString(pParameterVector[0], lValue);
-					RtScope::SetMode lMode = (lLevel == '.')? RtScope::SET_OVERRIDE : RtScope::SET_OVERWRITE;
+					RtScope::SetMode lMode = (lLevel == '.')? RtVar::TYPE_OVERRIDE : RtVar::TYPE_NORMAL;
 					if (lScope->SetValue(lMode, lVariable, lValue))
 					{
 						str lValue = lScope->GetDefaultValue(RtScope::READ_ONLY, lVariable);
@@ -591,8 +592,8 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 bool ConsoleManager::SaveApplicationConfigFile(File* pFile, const wstr& pUserConfig)
 {
 	pFile->WriteString(wstr(L"// Generated application shell script section.\n"));
-	std::list<str> lVariableList = GetVariableScope()->GetVariableNameList(true, 0, 0);
-	bool lSaved = SaveConfigFile(pFile, lVariableList, pUserConfig);
+	std::list<str> lVariableList = GetVariableScope()->GetVariableNameList(Cure::RuntimeVariableScope::SEARCH_EXPORTABLE, 0, 0);
+	bool lSaved = SaveConfigFile(pFile, str(_T(".")), lVariableList, pUserConfig);
 	if (pUserConfig.empty())
 	{
 		pFile->WriteString(wstrutil::Encode(_T("\npush \"echo 4 Welcome ")+SystemManager::QueryFullUserName()+_T("!\"\n")));
@@ -621,11 +622,11 @@ wstr ConsoleManager::LoadUserConfig(File* pFile)
 bool ConsoleManager::SaveSystemConfigFile(int pScopeSkipCount, File* pFile, const wstr& pUserConfig)
 {
 	pFile->WriteString<wchar_t>(L"// Generated system shell script section.\n");
-	std::list<str> lVariableList = GetVariableScope()->GetVariableNameList(true, pScopeSkipCount);
-	return (SaveConfigFile(pFile, lVariableList, pUserConfig));
+	std::list<str> lVariableList = GetVariableScope()->GetVariableNameList(Cure::RuntimeVariableScope::SEARCH_EXPORTABLE, pScopeSkipCount);
+	return (SaveConfigFile(pFile, str(), lVariableList, pUserConfig));
 }
 
-bool ConsoleManager::SaveConfigFile(File* pFile, std::list<str>& pVariableList, const wstr& pUserConfig)
+bool ConsoleManager::SaveConfigFile(File* pFile, const str& pPrefix, std::list<str>& pVariableList, const wstr& pUserConfig)
 {
 	pFile->WriteString<wchar_t>(L"// Only change variable values below - use user section for all else.\n");
 	pFile->WriteString<wchar_t>(L"set-stdout-log-level 4\n");
@@ -656,7 +657,7 @@ bool ConsoleManager::SaveConfigFile(File* pFile, std::list<str>& pVariableList, 
 			lDefaultValue = _T('"')+lDefaultValue+_T('"');
 		}
 		lDefaultValue = (lValue != lDefaultValue)? _T("\t// Default is ")+lDefaultValue+_T(".\n") : _T("\n");
-		pFile->WriteString(wstrutil::Encode(_T("#")+lVariable+_T(" ")+lValue+lDefaultValue));
+		pFile->WriteString(wstrutil::Encode(_T("#")+pPrefix+lVariable+_T(" ")+lValue+lDefaultValue));
 	}
 	pFile->WriteString<wchar_t>(L"\nset-stdout-log-level 1\n");
 	pFile->WriteString<wchar_t>(L"\n" USER_SECTION_MARK L" -- User config. Everything but variable values will be overwritten above this section!\n");

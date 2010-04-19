@@ -23,10 +23,10 @@ PlayerCountView::PlayerCountView(PlayerCountObserver* pPlayerCountObserver):
 {
 	SetPreferredSize(200, 300);
 
-	AddButton(_T("Single player"))->SetOnClick(PlayerCountView, OnClick);
-	AddButton(_T("Two players"))->SetOnClick(PlayerCountView, OnClick);
-	AddButton(_T("Three players"))->SetOnClick(PlayerCountView, OnClick);
-	AddButton(_T("Four players"))->SetOnClick(PlayerCountView, OnClick);
+	AddButton(_T("Single player"), (void*)1)->SetOnClick(PlayerCountView, OnClick);
+	AddButton(_T("Two players"), (void*)2)->SetOnClick(PlayerCountView, OnClick);
+	AddButton(_T("Three players"), (void*)3)->SetOnClick(PlayerCountView, OnClick);
+	AddButton(_T("Four players"), (void*)4)->SetOnClick(PlayerCountView, OnClick);
 
 	UpdateLayout();
 }
@@ -38,9 +38,9 @@ void PlayerCountView::OnExit()
 	mPlayerCountObserver->OnExit();
 }
 
-void PlayerCountView::OnClick(UiTbc::Button*)
+void PlayerCountView::OnClick(UiTbc::Button* pButton)
 {
-	mPlayerCountObserver->OnSetPlayerCount(1);	// TODO: fix!
+	mPlayerCountObserver->OnSetPlayerCount((int)pButton->GetExtraData());
 }
 
 

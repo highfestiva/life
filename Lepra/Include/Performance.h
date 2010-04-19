@@ -9,7 +9,7 @@
 #include <assert.h>
 #include <list>
 #include "HiResTimer.h"
-#include "Thread.h"
+#include "SpinLock.h"
 
 
 
@@ -83,7 +83,7 @@ public:
 
 	static NodeArray GetRoots();
 	const str& GetName() const;
-	const NodeArray& GetChildren() const;
+	NodeArray GetChildren() const;
 
 protected:
 	ScopePerformanceData* FindChild(/*const str& pName,*/ size_t pHash) const;
@@ -99,7 +99,7 @@ private:
 	NodeArray mChildArray;
 
 	static NodeArray mRoots;
-	static Lock mRootLock;
+	static SpinLock mRootLock;
 };
 
 
@@ -126,10 +126,22 @@ typedef BasicScopeTimer<ScopePerformanceData> CallScopeTimer;
 // is that we want the performance data container CREATION time listed in THIS scope, not in the
 // parent scope.
 #define LEPRA_MEASURE_SCOPE(name)	\
-CallScopeTimer __lMeasureTimer;	\
-static const str __lMeasureName(strutil::Format(_T(#name) _T(";") _T(__FILE__) _T(";%i"), __LINE__));	\
-static const size_t __lMeasureHash = HashString(__lMeasureName.c_str());	\
-__lMeasureTimer.Attach(ScopePerformanceData::Insert(__lMeasureName, __lMeasureHash))
+	CallScopeTimer __lMeasureTimer;	\
+	static volatile bool __lMeasureNameInitialized = false;	\
+	static str __lMeasureName;	\
+	static size_t __lMeasureHash;	\
+	if (!__lMeasureNameInitialized)	\
+	{	\
+		static SpinLock __lInitLock;	\
+		ScopeSpinLock __lLock(&__lInitLock);	\
+		if (!__lMeasureNameInitialized)	\
+		{	\
+			__lMeasureName = strutil::Format(_T(#name) _T(";") _T(__FILE__) _T(";%i"), __LINE__);	\
+			__lMeasureHash = HashString(__lMeasureName.c_str());	\
+			__lMeasureNameInitialized = true;	\
+		}	\
+	}	\
+	__lMeasureTimer.Attach(ScopePerformanceData::Insert(__lMeasureName, __lMeasureHash))
 
 
 

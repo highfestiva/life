@@ -50,6 +50,8 @@ void Vehicle::OnPhysicsTick()
 			lTag.mBodyIndexList.size() == 1 &&
 			lTag.mMeshIndexList.size() >= 1)
 		{
+			// Eyes follow steered wheels. Get wheel corresponding to eye and
+			// move eye accordingly á là Lightning McQueen.
 			float lJointValue = 0;
 			int lBodyIndex = lTag.mBodyIndexList[0];
 			TBC::ChunkyBoneGeometry* lBone = lPhysics->GetBoneGeometry(lBodyIndex);

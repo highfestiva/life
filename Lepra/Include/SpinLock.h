@@ -49,6 +49,7 @@ inline SpinLock::~SpinLock()
 
 inline void SpinLock::Acquire()
 {
+	assert(!IsOwner());
 	bool lAcquired = BusLock::CompareAndSwap(&mLocked, LOCKED, UNLOCKED);
 	while (!lAcquired)
 	{
@@ -66,6 +67,7 @@ inline void SpinLock::Acquire()
 
 inline bool SpinLock::TryAcquire()
 {
+	assert(!IsOwner());
 	bool lAcquired = BusLock::CompareAndSwap(&mLocked, LOCKED, UNLOCKED);
 	if (lAcquired)
 	{
@@ -83,11 +85,33 @@ inline void SpinLock::Release()
 
 
 
-class VerifySoleAccessor
+class ScopeSpinLock
+{
+public:
+	inline ScopeSpinLock(SpinLock* pLock, bool pAcquire = true):
+		mLock(pLock)
+	{
+		if (pAcquire)
+		{
+			mLock->Acquire();
+		}
+	}
+	inline ~ScopeSpinLock()
+	{
+		mLock->Release();
+	}
+
+protected:
+	SpinLock* mLock;
+};
+
+
+
+class VerifySoleAccessor: public ScopeSpinLock
 {
 public:
 	inline VerifySoleAccessor(SpinLock* pLock):
-		mLock(pLock)
+		ScopeSpinLock(pLock, false)
 	{
 		bool lLock = mLock->TryAcquire();
 		if (!lLock)
@@ -103,7 +127,6 @@ public:
 protected:
 	void OnError(const Thread* pOwner);
 
-	SpinLock* mLock;
 	LOG_CLASS_DECLARE();
 };
 

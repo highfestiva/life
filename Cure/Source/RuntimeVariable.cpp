@@ -15,11 +15,11 @@ namespace Cure
 
 
 
-RuntimeVariable::RuntimeVariable(const str& pName, const str& pValue, bool pExport):
+RuntimeVariable::RuntimeVariable(const str& pName, const str& pValue, Type pType):
 	mName(pName),
 	mValue(pValue),
 	mDefaultValue(pValue),
-	mIsExportable(pExport)
+	mType(pType)
 {
 }
 
@@ -42,14 +42,14 @@ const str& RuntimeVariable::GetValue() const
 	return (mValue);
 }
 
-void RuntimeVariable::SetValue(const str& pValue, bool pOverwriteDefault, bool pExport)
+void RuntimeVariable::SetValue(const str& pValue, Type pType)
 {
 	mValue = pValue;
-	if (pOverwriteDefault)
+	if (pType != TYPE_NORMAL)
 	{
 		mDefaultValue = pValue;
 	}
-	mIsExportable &= pExport;
+	mType = pType;
 }
 
 const str& RuntimeVariable::GetDefaultValue() const
@@ -62,9 +62,9 @@ void RuntimeVariable::SetDefaultValue(const str& pDefaultValue)
 	mDefaultValue = pDefaultValue;
 }
 
-bool RuntimeVariable::IsExportable() const
+RuntimeVariable::Type RuntimeVariable::GetType() const
 {
-	return (mIsExportable);
+	return (mType);
 }
 
 
@@ -220,13 +220,13 @@ bool RuntimeVariableScope::SetValue(SetMode pSetMode, const str& pName, const st
 {
 	bool lTypeOk = true;
 
-	RuntimeVariable* lVariable = GetVariable(pName, pSetMode == SET_OVERWRITE);
+	RuntimeVariable* lVariable = GetVariable(pName, pSetMode == RuntimeVariable::TYPE_NORMAL);
 	str lValue = Cast(pValue);
 	if (lVariable)
 	{
 		if (GetType(lValue) == GetType(lVariable->GetValue()))
 		{
-			lVariable->SetValue(lValue, pSetMode != SET_OVERWRITE, pSetMode != SET_INTERNAL);
+			lVariable->SetValue(lValue, pSetMode);
 		}
 		else
 		{
@@ -237,7 +237,7 @@ bool RuntimeVariableScope::SetValue(SetMode pSetMode, const str& pName, const st
 	}
 	else
 	{
-		CreateLocalVariable(pName, lValue, pSetMode != SET_INTERNAL);
+		CreateLocalVariable(pName, lValue, pSetMode);
 	}
 	return (lTypeOk);
 }
@@ -286,7 +286,7 @@ const str& RuntimeVariableScope::GetDefaultValue(GetMode pMode, const str& pName
 	}
 	else if (pMode == READ_WRITE)
 	{
-		SetValue(SET_OVERRIDE, pName, pDefaultValue);
+		SetValue(RuntimeVariable::TYPE_NORMAL, pName, pDefaultValue);
 	}
 	else if (pMode != READ_IGNORE)
 	{
@@ -369,20 +369,21 @@ RuntimeVariableScope* RuntimeVariableScope::LockParentScope(RuntimeVariableScope
 
 
 
-std::list<str> RuntimeVariableScope::GetVariableNameList(bool pSkipInternal, int pStartScopeIndex, int pEndScopeIndex)
+std::list<str> RuntimeVariableScope::GetVariableNameList(SearchType pSearchType, int pStartScopeIndex, int pEndScopeIndex)
 {
 	std::list<str> lVariableNameList;
 	ScopeLock lLock(&mLock);
 	if (pEndScopeIndex > 0 && pStartScopeIndex < pEndScopeIndex && mParentScope)
 	{
-		lVariableNameList = mParentScope->GetVariableNameList(pSkipInternal, pStartScopeIndex-1, pEndScopeIndex-1);
+		lVariableNameList = mParentScope->GetVariableNameList(pSearchType, pStartScopeIndex-1, pEndScopeIndex-1);
 	}
 	if (pStartScopeIndex <= 0)
 	{
 		VariableTable::iterator x = mVariableTable.begin();
 		for (; x != mVariableTable.end(); ++x)
 		{
-			if (!pSkipInternal || x->second->IsExportable())
+			if (pSearchType == SEARCH_ALL ||
+				x->second->GetType() != RuntimeVariable::TYPE_INTERNAL)
 			{
 				lVariableNameList.push_back(x->first);
 			}
@@ -393,9 +394,9 @@ std::list<str> RuntimeVariableScope::GetVariableNameList(bool pSkipInternal, int
 
 
 
-void RuntimeVariableScope::CreateLocalVariable(const str& pName, const str& pValue, bool pExport)
+void RuntimeVariableScope::CreateLocalVariable(const str& pName, const str& pValue, SetMode pSetMode)
 {
-	RuntimeVariable* lVariable = new RuntimeVariable(pName, pValue, pExport);
+	RuntimeVariable* lVariable = new RuntimeVariable(pName, pValue, pSetMode);
 	ScopeLock lLock(&mLock);
 	mVariableTable.insert(VariablePair(pName, lVariable));
 }
@@ -449,7 +450,7 @@ std::list<str> RuntimeVariableCompleter::CompleteCommand(const str& pPartialComm
 	if (pPartialCommand.compare(0, mPrefix.length(), mPrefix) == 0)
 	{
 		const str lPartialVariableName = pPartialCommand.substr(mPrefix.length());
-		std::list<str> lVariableList = mVariableScope->GetVariableNameList(false);
+		std::list<str> lVariableList = mVariableScope->GetVariableNameList(RuntimeVariableScope::SEARCH_EXPORTABLE);
 		std::list<str>::const_iterator x = lVariableList.begin();
 		for (; x != lVariableList.end(); ++x)
 		{

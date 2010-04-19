@@ -40,7 +40,7 @@ public:
 	GLenum GetGLElementType(TBC::GeometryBase* pGeometry);
 
 	virtual void SetBasicMaterial(const TBC::GeometryBase::BasicMaterialSettings& pMaterial);
-	static void SetBasicMaterial(const TBC::GeometryBase::BasicMaterialSettings& pMaterial, OpenGLRenderer* pRenderer, bool pStore);
+	static void SetBasicMaterial(const TBC::GeometryBase::BasicMaterialSettings& pMaterial, OpenGLRenderer* pRenderer);
 
 	virtual void RenderAllBlendedGeometry(unsigned pCurrentFrame);
 

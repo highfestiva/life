@@ -33,7 +33,7 @@ public:
 protected:
 	UiTbc::Label* AddLabel(const str& pText, const Color& pColor);
 	UiTbc::TextField* AddTextField(const str& pDefaultText, const str& pName);
-	UiTbc::Button* AddButton(const str& pText);
+	UiTbc::Button* AddButton(const str& pText, void* pExtraData);
 
 private:
 	void OnExit(UiTbc::Button*);
