@@ -104,7 +104,7 @@ private:
 	typedef HashTable<int, Texture*> TextureTable;
 
 	void GetImageSize(ImageID pImageID, int& pWidth, int& pHeight) const;
-	int PrintText(const str& pString, int x, int y);
+	void PrintText(const str& pString, int x, int y);
 	void SetFontSmoothness(bool pSmooth);
 
 	void AdjustVertexFormat(uint16& pVertexFormat);

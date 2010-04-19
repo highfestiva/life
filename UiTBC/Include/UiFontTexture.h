@@ -21,6 +21,7 @@ class FontManager;
 
 
 
+// Stores glyphs in a texture along side each other. All glyphs appear at y=0.
 class FontTexture
 {
 public:
@@ -30,22 +31,23 @@ public:
 	uint32 GetFontHash() const;
 
 	void StoreGlyph(tchar pChar, FontManager* pFontManager);
-	int GetGlyphXOffset(tchar pChar);
+	bool GetGlyphX(tchar pChar, int& pX, int& pWidth) const;
 
-	bool IsResized() const;
-	void ResetIsResized();
+	bool IsUpdated() const;
+	void ResetIsUpdated();
 
 	int GetWidth() const;
 	void* GetBuffer() const;
 
 private:
-	typedef std::hash_map<int32, int> GlyphXOffsetMap;
-	GlyphXOffsetMap mGlyphXOffsetMap;
+	typedef std::pair<int, int> GlyphX;
+	typedef std::hash_map<int32, GlyphX> GlyphXMap;
+	GlyphXMap mGlyphXOffsetMap;
 
 	Canvas mCanvas;
 	uint32 mFontHash;
 	int mFreeXOffset;
-	bool mIsResized;
+	bool mIsUpdated;
 };
 
 

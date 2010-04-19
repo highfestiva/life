@@ -144,6 +144,7 @@ bool GameUiManager::Open()
 			mPainter = new TBC::DirectXPainter;
 		}*/
 	}
+
 	if (lOk)
 	{
 		mFontManager = UiTbc::FontManager::Create(mDisplay);

@@ -117,7 +117,7 @@ LineGraph2d::ColorPicker::ColorPicker(int pIndex, UiTbc::Painter* mPainter)
 	};
 	int lColor = lColorTable[pIndex%(sizeof(lColorTable)/sizeof(lColorTable[0]))];
 	typedef uint8 u8;
-	mPainter->SetColor((u8)(lColor>>16), (u8)(lColor>>8), (u8)lColor, 0);
+	mPainter->SetColor((u8)(lColor>>16), (u8)(lColor>>8), (u8)lColor, 255);
 }
 
 

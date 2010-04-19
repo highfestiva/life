@@ -18,7 +18,7 @@ FontTexture::FontTexture(uint32 pFontHash, int pFontHeight):
 	mCanvas(64, Canvas::PowerUp(pFontHeight), Canvas::BITDEPTH_32_BIT),
 	mFontHash(pFontHash),
 	mFreeXOffset(0),
-	mIsResized(false)
+	mIsUpdated(false)
 {
 	mCanvas.CreateBuffer();
 }
@@ -34,45 +34,51 @@ uint32 FontTexture::GetFontHash() const
 
 void FontTexture::StoreGlyph(tchar pChar, FontManager* pFontManager)
 {
-	if (pChar == ' ' || pChar == '\r' || pChar == '\n' || pChar == '\t')
+	if (pChar == ' ' || pChar == '\r' || pChar == '\n' || pChar == '\t' || pChar == '\b')
 	{
 		return;
 	}
 
-	GlyphXOffsetMap::const_iterator x = mGlyphXOffsetMap.find(pChar);
+	GlyphXMap::const_iterator x = mGlyphXOffsetMap.find(pChar);
 	if (x == mGlyphXOffsetMap.end())
 	{
-		mGlyphXOffsetMap.insert(GlyphXOffsetMap::value_type(pChar, mFreeXOffset));
 		const int lCharStartX = mFreeXOffset;
 		const int lWidth = pFontManager->GetCharWidth(pChar);
+		mGlyphXOffsetMap.insert(GlyphXMap::value_type(pChar, GlyphX(lCharStartX, lWidth)));
 		mFreeXOffset += lWidth;
 		if (mFreeXOffset > (int)mCanvas.GetWidth())
 		{
-			mCanvas.Crop(0, 0, mCanvas.GetWidth()*2, mCanvas.GetHeight()*2);
-			mIsResized = true;
+			mCanvas.Crop(0, 0, mCanvas.GetWidth()*2, mCanvas.GetHeight());
 		}
-		Canvas lCharCanvas;
+		Canvas lCharCanvas(0, mCanvas.GetHeight(), mCanvas.GetBitDepth());
 		PixelRect lCanvasRect(0, 0, lWidth, mCanvas.GetHeight());
 		pFontManager->RenderGlyph(pChar, lCharCanvas, lCanvasRect);
 		mCanvas.PartialCopy(lCharStartX, 0, lCharCanvas);
+		mIsUpdated = true;
 	}
 }
 
-int FontTexture::GetGlyphXOffset(tchar pChar)
+bool FontTexture::GetGlyphX(tchar pChar, int& pX, int& pWidth) const
 {
-	GlyphXOffsetMap::const_iterator x = mGlyphXOffsetMap.find(pChar);
+	GlyphXMap::const_iterator x = mGlyphXOffsetMap.find(pChar);
 	assert(x != mGlyphXOffsetMap.end());
-	return (x->second);
+	if (x != mGlyphXOffsetMap.end())
+	{
+		pX = x->second.first;
+		pWidth = x->second.second;
+		return (true);
+	}
+	return (false);
 }
 
-bool FontTexture::IsResized() const
+bool FontTexture::IsUpdated() const
 {
-	return (mIsResized);
+	return (mIsUpdated);
 }
 
-void FontTexture::ResetIsResized()
+void FontTexture::ResetIsUpdated()
 {
-	mIsResized = false;
+	mIsUpdated = false;
 }
 
 int FontTexture::GetWidth() const

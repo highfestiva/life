@@ -234,7 +234,7 @@ public:
 	int GetStringWidth(const str& pString) const;
 	int GetFontHeight() const;
 	int GetLineHeight() const;
-	virtual int PrintText(const str& pString, int x, int y) = 0;
+	virtual void PrintText(const str& pString, int x, int y) = 0;
 
 	Lepra::uint8 FindMatchingColor(const Color& pColor);
 	virtual void ReadPixels(Canvas& pDestCanvas, const PixelRect& pRect) = 0;

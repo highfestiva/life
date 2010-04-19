@@ -19,7 +19,7 @@ TextArea::TextArea(const Color& pColor, const str& pName):
 	Parent(0, 1, pColor, pName),
 	mFirstVisibleLine(0),
 	mVisibleLineCount(0),
-	mFontHeight(0),
+	mLineHeight(0),
 	mFocusAnchor(ANCHOR_TOP_LINE),
 	mScrollLock(false),
 	mMaxLineCount(5000)
@@ -30,7 +30,7 @@ TextArea::TextArea(Painter::ImageID pImageId, const str& pName):
 	Parent(0, 1, pImageId, pName),
 	mFirstVisibleLine(0),
 	mVisibleLineCount(0),
-	mFontHeight(0),
+	mLineHeight(0),
 	mFocusAnchor(ANCHOR_TOP_LINE),
 	mScrollLock(false),
 	mMaxLineCount(5000)
@@ -48,7 +48,7 @@ void TextArea::Clear()
 	ScopeLock lLock(&mLock);
 	mFirstVisibleLine = 0;
 	mVisibleLineCount = 0;
-	mFontHeight = 0;
+	mLineHeight = 0;
 	mLineList.clear();
 	SetNeedsRepaint(true);
 }
@@ -197,7 +197,7 @@ void TextArea::Repaint(Painter* pPainter)
 {
 	Parent::Repaint(pPainter);
 
-	mFontHeight = pPainter->GetLineHeight();
+	mLineHeight = pPainter->GetLineHeight();
 	UpdateVisibleSize();
 
 	pPainter->PushAttrib(Painter::ATTR_ALL);
@@ -226,7 +226,7 @@ void TextArea::Repaint(Painter* pPainter)
 	for (int y = lBeginY; s != mLineList.end() && y < lEndY; ++y, ++s)
 	{
 		pPainter->SetColor(s->mColor);
-		pPainter->PrintText(s->mText, lRect.mLeft, lRect.mTop+y*mFontHeight+lPixelOffsetY);
+		pPainter->PrintText(s->mText, lRect.mLeft, lRect.mTop+y*mLineHeight+lPixelOffsetY);
 	}
 
 	pPainter->PopAttrib();
@@ -258,9 +258,9 @@ void TextArea::DoSetSize(int pWidth, int pHeight)
 void TextArea::UpdateVisibleSize()
 {
 	mVisibleLineCount = 0;
-	if (mFontHeight)
+	if (mLineHeight)
 	{
-		mVisibleLineCount = GetSize().y/mFontHeight;
+		mVisibleLineCount = GetSize().y/mLineHeight;
 		if (!mScrollLock)
 		{
 			ScrollToLastLine();

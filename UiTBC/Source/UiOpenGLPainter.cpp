@@ -1,6 +1,6 @@
 
-// Author: Alexander Hugestrand
-// Copyright (c) 2002-2009, Jonas Byström
+// Author: Jonas Byström
+// Copyright (c) 2002-2009, Righteous Games
 
 
 
@@ -17,6 +17,14 @@ namespace UiTbc
 
 
 
+#ifdef LEPRA_DEBUG
+#define OGL_ASSERT()	{ GLenum lGlError = glGetError(); assert(lGlError == GL_NO_ERROR); }
+#else // !Debug
+#define OGL_ASSERT()
+#endif // Debug / !Debug
+
+
+
 OpenGLPainter::OpenGLPainter() :
 	mTextureIDManager(3, 10000, 0),
 	mSmoothFont(false)
@@ -25,6 +33,8 @@ OpenGLPainter::OpenGLPainter() :
 
 OpenGLPainter::~OpenGLPainter()
 {
+	OGL_ASSERT();
+
 	ClearFontBuffers();
 
 	TextureTable::Iterator lIter = mTextureTable.First();
@@ -38,6 +48,8 @@ OpenGLPainter::~OpenGLPainter()
 		mTextureTable.Remove(lIter++);
 		delete lTexture;
 	}
+
+	OGL_ASSERT();
 }
 
 void OpenGLPainter::SetDestCanvas(Canvas* pCanvas)
@@ -48,9 +60,13 @@ void OpenGLPainter::SetDestCanvas(Canvas* pCanvas)
 
 void OpenGLPainter::SetAlphaValue(uint8 pAlpha)
 {
+	OGL_ASSERT();
+
 	Painter::SetAlphaValue(pAlpha);
 	float lAlpha = (float)GetAlphaValue() / 255.0f;
-	glAlphaFunc(GL_GEQUAL, (GLclampf)lAlpha);
+	::glAlphaFunc(GL_GEQUAL, (GLclampf)lAlpha);
+
+	OGL_ASSERT();
 }
 
 void OpenGLPainter::SetRenderMode(RenderMode pRM)
@@ -69,14 +85,25 @@ void OpenGLPainter::PrePaint()
 
 void OpenGLPainter::SetClippingRect(int pLeft, int pTop, int pRight, int pBottom)
 {
+	if (pBottom <= pTop || pLeft <= pRight)
+	{
+		return;
+	}
+
+	OGL_ASSERT();
+
 	Painter::SetClippingRect(pLeft, pTop, pRight, pBottom);
 	ToScreenCoords(pLeft, pTop);
 	ToScreenCoords(pRight, pBottom);
-	glScissor(pLeft, GetCanvas()->GetHeight() - pBottom, pRight - pLeft, pBottom - pTop);
+	::glScissor(pLeft, GetCanvas()->GetHeight() - pBottom, pRight - pLeft, pBottom - pTop);
+
+	OGL_ASSERT();
 }
 
 void OpenGLPainter::ResetClippingRect()
 {
+	OGL_ASSERT();
+
 	// A call to this function should reset OpenGL's projection matrix to orthogonal
 	// in order to work together with OpenGL3DAPI.
 	glViewport(0, 0, GetCanvas()->GetWidth(), GetCanvas()->GetHeight());
@@ -111,6 +138,8 @@ void OpenGLPainter::ResetClippingRect()
 
 	glEnableClientState(GL_VERTEX_ARRAY);
 	//glDisableClientState(GL_VERTEX_ARRAY);
+
+	OGL_ASSERT();
 }
 
 void OpenGLPainter::SetColor(const Color& pColor, unsigned pColorIndex)
@@ -123,6 +152,9 @@ void OpenGLPainter::SetColor(const Color& pColor, unsigned pColorIndex)
 
 void OpenGLPainter::DoSetRenderMode() const
 {
+	OGL_ASSERT();
+
+	::glDisableClientState(GL_NORMAL_ARRAY);
 	::glDisable(GL_CULL_FACE);
 	::glLineWidth(1);
 	::glHint(GL_LINE_SMOOTH_HINT, GL_FASTEST);
@@ -172,10 +204,14 @@ void OpenGLPainter::DoSetRenderMode() const
 			break;
 		}
 	}
+
+	OGL_ASSERT();
 }
 
 void OpenGLPainter::DoDrawPixel(int x, int y)
 {
+	OGL_ASSERT();
+
 	ToScreenCoords(x, y);
 
 	GLfloat lX = (GLfloat)x;
@@ -187,10 +223,14 @@ void OpenGLPainter::DoDrawPixel(int x, int y)
 	glBegin(GL_POINTS);
 	glVertex2f(lX, lY);
 	glEnd();
+
+	OGL_ASSERT();
 }
 
 void OpenGLPainter::DoDrawLine(int pX1, int pY1, int pX2, int pY2)
 {
+	OGL_ASSERT();
+
 	ToScreenCoords(pX1, pY1);
 	ToScreenCoords(pX2, pY2);
 
@@ -202,12 +242,16 @@ void OpenGLPainter::DoDrawLine(int pX1, int pY1, int pX2, int pY2)
 	glVertex2i(pX1, pY1);
 	glVertex2i(pX2, pY2);
 	glEnd();
+
+	OGL_ASSERT();
 }
 
 void OpenGLPainter::DoFillTriangle(float pX1, float pY1,
 				 float pX2, float pY2,
 				 float pX3, float pY3)
 {
+	OGL_ASSERT();
+
 	ToScreenCoords(pX1, pY1);
 	ToScreenCoords(pX2, pY2);
 	ToScreenCoords(pX3, pY3);
@@ -229,12 +273,16 @@ void OpenGLPainter::DoFillTriangle(float pX1, float pY1,
 	glVertex2f(pX3, pY3);
 
 	glEnd();
+
+	OGL_ASSERT();
 }
 
 void OpenGLPainter::DoFillShadedTriangle(float pX1, float pY1,
 				       float pX2, float pY2,
 				       float pX3, float pY3)
 {
+	OGL_ASSERT();
+
 	ToScreenCoords(pX1, pY1);
 	ToScreenCoords(pX2, pY2);
 	ToScreenCoords(pX3, pY3);
@@ -257,6 +305,8 @@ void OpenGLPainter::DoFillShadedTriangle(float pX1, float pY1,
 	glVertex2f(pX3, pY3);
 
 	glEnd();
+
+	OGL_ASSERT();
 }
 
 void OpenGLPainter::DoFillTriangle(float pX1, float pY1, float pU1, float pV1,
@@ -264,6 +314,8 @@ void OpenGLPainter::DoFillTriangle(float pX1, float pY1, float pU1, float pV1,
 				 float pX3, float pY3, float pU3, float pV3,
 				 ImageID pImageID)
 {
+	OGL_ASSERT();
+
 	ToScreenCoords(pX1, pY1);
 	ToScreenCoords(pX2, pY2);
 	ToScreenCoords(pX3, pY3);
@@ -317,10 +369,14 @@ void OpenGLPainter::DoFillTriangle(float pX1, float pY1, float pU1, float pV1,
 
 	glEnd();
 	glDisable(GL_TEXTURE_2D);
+
+	OGL_ASSERT();
 }
 
 void OpenGLPainter::DoDrawRect(int pLeft, int pTop, int pRight, int pBottom, int pWidth)
 {
+	OGL_ASSERT();
+
 	ToScreenCoords(pLeft, pTop);
 	ToScreenCoords(pRight, pBottom);
 
@@ -390,10 +446,14 @@ void OpenGLPainter::DoDrawRect(int pLeft, int pTop, int pRight, int pBottom, int
 			GL_UNSIGNED_INT,
 			lIndices);
 	glDisableClientState(GL_COLOR_ARRAY);
+
+	OGL_ASSERT();
 }
 
 void OpenGLPainter::DoFillRect(int pLeft, int pTop, int pRight, int pBottom)
 {
+	OGL_ASSERT();
+
 	ToScreenCoords(pLeft, pTop);
 	ToScreenCoords(pRight, pBottom);
 
@@ -413,10 +473,14 @@ void OpenGLPainter::DoFillRect(int pLeft, int pTop, int pRight, int pBottom)
 	glVertex2f(lLeft, lBottom);
 
 	glEnd();
+
+	OGL_ASSERT();
 }
 
 void OpenGLPainter::DoDraw3DRect(int pLeft, int pTop, int pRight, int pBottom, int pWidth, bool pSunken)
 {
+	OGL_ASSERT();
+
 	ToScreenCoords(pLeft, pTop);
 	ToScreenCoords(pRight, pBottom);
 
@@ -517,10 +581,14 @@ void OpenGLPainter::DoDraw3DRect(int pLeft, int pTop, int pRight, int pBottom, i
 	glColorPointer(3, GL_FLOAT, 0, lColor);
 	//glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, lsIndices);
 	glDisableClientState(GL_COLOR_ARRAY);
+
+	OGL_ASSERT();
 }
 
 void OpenGLPainter::DoFillShadedRect(int pLeft, int pTop, int pRight, int pBottom)
 {
+	OGL_ASSERT();
+
 	ToScreenCoords(pLeft, pTop);
 	ToScreenCoords(pRight, pBottom);
 
@@ -560,10 +628,14 @@ void OpenGLPainter::DoFillShadedRect(int pLeft, int pTop, int pRight, int pBotto
 	glVertex2f(lLeft, lTop);
 
 	glEnd();
+
+	OGL_ASSERT();
 }
 
 Painter::ImageID OpenGLPainter::AddImage(const Canvas* pImage, const Canvas* pAlphaBuffer)
 {
+	OGL_ASSERT();
+
 	int lID = 0;
 
 	bool lAlpha = false;
@@ -704,6 +776,8 @@ Painter::ImageID OpenGLPainter::AddImage(const Canvas* pImage, const Canvas* pAl
 		}
 	}
 
+	OGL_ASSERT();
+
 	return (ImageID)lID;
 }
 
@@ -712,6 +786,8 @@ void OpenGLPainter::UpdateImage(ImageID pImageID,
 				const Canvas* pAlphaBuffer,
 				UpdateHint pHint)
 {
+	OGL_ASSERT();
+
 	TextureTable::Iterator lIter = mTextureTable.Find(pImageID);
 
 	if (lIter == mTextureTable.End())
@@ -880,10 +956,14 @@ void OpenGLPainter::UpdateImage(ImageID pImageID,
 	{
 		RemoveImage(pImageID);
 	}
+
+	OGL_ASSERT();
 }
 
 void OpenGLPainter::RemoveImage(ImageID pImageID)
 {
+	OGL_ASSERT();
+
 	TextureTable::Iterator lIter = mTextureTable.Find(pImageID);
 
 	if (lIter == mTextureTable.End())
@@ -901,6 +981,8 @@ void OpenGLPainter::RemoveImage(ImageID pImageID)
 	glDeleteTextures(1, &lTextureName);
 
 	mTextureIDManager.RecycleId(pImageID);
+
+	OGL_ASSERT();
 }
 
 void OpenGLPainter::DoDrawImage(ImageID pImageID, int x, int y)
@@ -923,6 +1005,8 @@ void OpenGLPainter::DoDrawImage(ImageID pImageID, int x, int y)
 
 void OpenGLPainter::DoDrawAlphaImage(ImageID pImageID, int x, int y)
 {
+	OGL_ASSERT();
+
 	ToScreenCoords(x, y);
 
 	TextureTable::Iterator lIter = mTextureTable.Find(pImageID);
@@ -984,10 +1068,14 @@ void OpenGLPainter::DoDrawAlphaImage(ImageID pImageID, int x, int y)
 
 	glPopAttrib();
 	glPopAttrib();
+
+	OGL_ASSERT();
 }
 
 void OpenGLPainter::DoDrawImage(ImageID pImageID, const PixelRect& pRect)
 {
+	OGL_ASSERT();
+
 	TextureTable::Iterator lIter = mTextureTable.Find(pImageID);
 
 	if (lIter == mTextureTable.End())
@@ -1045,6 +1133,8 @@ void OpenGLPainter::DoDrawImage(ImageID pImageID, const PixelRect& pRect)
 	glEnd();
 
 	glPopAttrib();
+
+	OGL_ASSERT();
 }
 
 void OpenGLPainter::DoDrawImage(ImageID pImageID, int x, int y, const PixelRect& pSubpatchRect)
@@ -1058,6 +1148,8 @@ void OpenGLPainter::DoDrawImage(ImageID pImageID, int x, int y, const PixelRect&
 
 void OpenGLPainter::DoDrawImage(ImageID pImageID, const PixelRect& pRect, const PixelRect& pSubpatchRect)
 {
+	OGL_ASSERT();
+
 	TextureTable::Iterator lIter = mTextureTable.Find(pImageID);
 
 	if (lIter == mTextureTable.End())
@@ -1124,6 +1216,8 @@ void OpenGLPainter::DoDrawImage(ImageID pImageID, const PixelRect& pRect, const 
 	glEnd();
 
 	glPopAttrib();
+
+	OGL_ASSERT();
 }
 
 void OpenGLPainter::GetImageSize(ImageID pImageID, int& pWidth, int& pHeight) const
@@ -1140,38 +1234,45 @@ void OpenGLPainter::GetImageSize(ImageID pImageID, int& pWidth, int& pHeight) co
 	}
 }
 
-int OpenGLPainter::PrintText(const str& pString, int x, int y)
+void OpenGLPainter::PrintText(const str& pString, int x, int y)
 {
+	if (pString.empty())
+	{
+		return;
+	}
+
+	// Algo goes something like this. It's a texture-mapping font rendering algo.
+	//  1. Loop over each char in the string
+	//     - cache each char as necessary in a texture (which doubles in size when required)
+	//     - append indices, vertices and texels for each char in an array.
+	//  2. After loop done: render appended geometries.
+
 	ToScreenCoords(x, y);
 
 	int lCurrentX = x;
 	int lCurrentY = y+2;	// GL fonts are offset by a little bit.
 
-	::glPushAttrib(GL_TEXTURE_BIT);
-	::glPushAttrib(GL_COLOR_BUFFER_BIT);
+	::glPushAttrib(GL_TEXTURE_BIT | GL_COLOR_BUFFER_BIT);
 
-	::glDisable(GL_ALPHA_TEST);
-	::glEnable(GL_BLEND);
-	::glDisable(GL_LOGIC_OP);
-	::glEnable(GL_TEXTURE_2D);
-	::glEnableClientState(GL_VERTEX_ARRAY);
-	::glDisableClientState(GL_NORMAL_ARRAY);
+	if (UiLepra::OpenGLExtensions::BufferObjectsSupported() == true)
+	{
+		UiLepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, 0);
+		UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	}
 	::glDisableClientState(GL_COLOR_ARRAY);
+	::glEnableClientState(GL_VERTEX_ARRAY);
 	::glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
-	/*if (mSmoothFont)
+	PushAttrib(ATTR_RENDERMODE);
+	if (mSmoothFont)
 	{
-		::glEnable(GL_BLEND);
+		SetRenderMode(RM_ALPHABLEND);
 	}
 	else
 	{
-		::glDisable(GL_BLEND);
+		SetRenderMode(RM_ALPHATEST);
 	}
-
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-	glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-	glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
-	glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);*/
+	::glEnable(GL_TEXTURE_2D);
 
 	const int lFontHeight = GetFontManager()->GetFontHeight();
 	const int lLineHeight = GetFontManager()->GetLineHeight();
@@ -1180,20 +1281,34 @@ int OpenGLPainter::PrintText(const str& pString, int x, int y)
 
 	const Color lColor = GetColorInternal(0);
 	assert(lColor != BLACK);	// Does not show.
-	GetFontManager()->SetColor(lColor);
+	GetFontManager()->SetColor(Color(255, 255, 255, 255));
 	::glColor4f(lColor.GetRf(), lColor.GetGf(), lColor.GetBf(), lColor.GetAf());
-	uint32 lColorHash = lColor.To32();
-	lColorHash = (lColorHash&0xC0000000) + ((lColorHash&0x00C00000)<<6) + ((lColorHash&0x0000C000)<<12);
-	const uint32 lFontId = GetFontManager()->GetActiveFont() << 16;
-	const uint32 lFontHash = lColorHash+lFontId+lFontHeight;
-	FontTexture* lFontTexture = CacheGlyphs(lFontHash, lFontHeight, pString);
+	const uint32 lFontHash = (GetFontManager()->GetActiveFont() << 16) + lFontHeight;
+	FontTexture* lFontTexture = SelectGlyphs(lFontHash, lFontHeight, pString);
 
-	static const GLubyte lGlyphIndices[4] =
+	static const GLuint lTemplateGlyphIndices[4] =
 	{
 		0, 1, 3, 2,
 	};
 
-	for (size_t i = 0; i < pString.length(); i++)
+	const size_t lStringLength = pString.length();
+	int lGlyphIndex = 0;
+	const int STACK_GLYPH_CAPACITY = 256;
+	GLuint lArrayGlyphIndices[4*STACK_GLYPH_CAPACITY];
+	GLint lArrayVertices[2*4*STACK_GLYPH_CAPACITY];
+	GLfloat lArrayUv[2*4*STACK_GLYPH_CAPACITY];
+	GLuint* lGlyphIndices = lArrayGlyphIndices;
+	GLint* lVertices = lArrayVertices;
+	GLfloat* lUv = lArrayUv;
+	bool lAllocPrimitives = (lStringLength > STACK_GLYPH_CAPACITY);
+	if (lAllocPrimitives)
+	{
+		lGlyphIndices = new GLuint[4*lStringLength];
+		lVertices = new GLint[2*4*lStringLength];
+		lUv = new GLfloat[2*4*lStringLength];
+	}
+
+	for (size_t i = 0; i < lStringLength; i++)
 	{
 		const tchar lChar = pString[i];
 		if (lChar == _T('\n'))
@@ -1212,39 +1327,59 @@ int OpenGLPainter::PrintText(const str& pString, int x, int y)
 		else if(lChar != _T('\r') && 
 			lChar != _T('\b'))
 		{
-			const int lCharWidth = GetFontManager()->GetCharWidth(lChar);
-			const int lTextureX = lFontTexture->GetGlyphXOffset(lChar);
-			const GLint lVertices[2*4] =
+			int lTextureX = 0;
+			int lCharWidth = 5;
+			lFontTexture->GetGlyphX(lChar, lTextureX, lCharWidth);
+			const float lTextureWidth = (float)lFontTexture->GetWidth();
+			const GLint lTemplateVertices[2*4] =
 			{
 				lCurrentX,		lCurrentY,
 				lCurrentX + lCharWidth,	lCurrentY,
 				lCurrentX,		lCurrentY + lFontHeight,
-				lCurrentX + lCharWidth, lCurrentY + lFontHeight,
+				lCurrentX + lCharWidth,	lCurrentY + lFontHeight,
 			};
-			const GLint lUv[2*4] =
+			const GLfloat lTemplateUv[2*4] =
 			{
-				lTextureX,		0,
-				lTextureX + lCharWidth,	0,
-				lTextureX,		lFontHeight,
-				lTextureX + lCharWidth, lFontHeight,
+				(lTextureX + 0.5f)/lTextureWidth,		1,
+				(lTextureX + lCharWidth + 0.5f)/lTextureWidth,	1,
+				(lTextureX + 0.5f)/lTextureWidth,		0,
+				(lTextureX + lCharWidth + 0.5f)/lTextureWidth,	0,
 			};
-			::glVertexPointer(2, GL_INT, 0, lVertices);
-			::glTexCoordPointer(2, GL_INT, 0, lUv);
-			//::glDrawElements(GL_QUADS, 4, GL_UNSIGNED_BYTE, lGlyphIndices);
+
+			for (int i = 0; i < 4; ++i)
+			{
+				lGlyphIndices[lGlyphIndex*4+i] = lTemplateGlyphIndices[i]+lGlyphIndex*4;
+				lVertices[(lGlyphIndex*4+i)*2+0] = lTemplateVertices[i*2+0];
+				lVertices[(lGlyphIndex*4+i)*2+1] = lTemplateVertices[i*2+1];
+				lUv[(lGlyphIndex*4+i)*2+0] = lTemplateUv[i*2+0];
+				lUv[(lGlyphIndex*4+i)*2+1] = lTemplateUv[i*2+1];
+			}
+			++lGlyphIndex;
+
 			lCurrentX += lCharWidth;
 		}
 	}
 
-	::glPopAttrib();
-	::glPopAttrib();
+	::glVertexPointer(2, GL_INT, 0, lVertices);
+	::glTexCoordPointer(2, GL_FLOAT, 0, lUv);
+	::glDrawElements(GL_QUADS, 4*lGlyphIndex, GL_UNSIGNED_INT, lGlyphIndices);
 
-	ToUserCoords(lCurrentX, lCurrentY);
+	if (lAllocPrimitives)
+	{
+		delete[] (lGlyphIndices);
+		delete[] (lVertices);
+		delete[] (lUv);
+	}
 
-	return lCurrentX;
+	PopAttrib();
+
+	::glPopAttrib();
 }
 
 void OpenGLPainter::ReadPixels(Canvas& pDestCanvas, const PixelRect& pRect)
 {
+	OGL_ASSERT();
+
 	if (GetCanvas() == 0 || GetCanvas()->GetBitDepth() == Canvas::BITDEPTH_8_BIT)
 	{
 		pDestCanvas.Reset(0, 0, Canvas::BITDEPTH_32_BIT);
@@ -1319,6 +1454,8 @@ void OpenGLPainter::ReadPixels(Canvas& pDestCanvas, const PixelRect& pRect)
 
 	pDestCanvas.SwapRGBOrder();
 	pDestCanvas.FlipVertical();
+
+	OGL_ASSERT();
 }
 
 Painter::RGBOrder OpenGLPainter::GetRGBOrder() const
@@ -1339,6 +1476,8 @@ void OpenGLPainter::SetFontSmoothness(bool pSmooth)
 
 void OpenGLPainter::DoRenderDisplayList(std::vector<DisplayEntity*>* pDisplayList)
 {
+	OGL_ASSERT();
+
 	PushAttrib(ATTR_ALL);
 
 	::glDisableClientState(GL_NORMAL_ARRAY);
@@ -1413,6 +1552,8 @@ void OpenGLPainter::DoRenderDisplayList(std::vector<DisplayEntity*>* pDisplayLis
 	glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	PopAttrib();
+
+	OGL_ASSERT();
 }
 
 
@@ -1420,6 +1561,8 @@ void OpenGLPainter::DoRenderDisplayList(std::vector<DisplayEntity*>* pDisplayLis
 
 void OpenGLPainter::ClearFontBuffers()
 {
+	OGL_ASSERT();
+
 	FontTextureTable::iterator x = mFontTextureTable.begin();
 	for (; x != mFontTextureTable.end(); ++x)
 	{
@@ -1428,9 +1571,11 @@ void OpenGLPainter::ClearFontBuffers()
 		delete x->second;
 	}
 	mFontTextureTable.clear();
+
+	OGL_ASSERT();
 }
 
-FontTexture* OpenGLPainter::CacheGlyphs(uint32 pFontHash, int pFontHeight, const str& pString)
+FontTexture* OpenGLPainter::SelectGlyphs(uint32 pFontHash, int pFontHeight, const str& pString)
 {
 	FontTexture* lFontTexture = HashUtil::FindMapObject(mFontTextureTable, pFontHash);
 	if (!lFontTexture)
@@ -1444,19 +1589,22 @@ FontTexture* OpenGLPainter::CacheGlyphs(uint32 pFontHash, int pFontHeight, const
 		lFontTexture->StoreGlyph(pString[x], GetFontManager());
 	}
 	::glBindTexture(GL_TEXTURE_2D, pFontHash);
-	if (lFontTexture->IsResized())
+	if (lFontTexture->IsUpdated())
 	{
-		lFontTexture->ResetIsResized();
-		::glTexImage2D(GL_TEXTURE_2D, 
+		lFontTexture->ResetIsUpdated();
+		::glTexImage2D(GL_TEXTURE_2D,
 			0,
-			GL_RGBA,
+			4,
 			lFontTexture->GetWidth(),
 			pFontHeight,
 			0,
 			GL_RGBA,
 			GL_UNSIGNED_BYTE,
 			lFontTexture->GetBuffer());
+		::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	}
+
 	return (lFontTexture);
 }
 

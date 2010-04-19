@@ -1323,12 +1323,11 @@ void DirectX9Painter::DoDrawAlphaImage(ImageID pImageID, int x, int y)
 	mD3DDevice->SetTexture(0, 0);
 }
 
-int DirectX9Painter::PrintText(const str& pString, int x, int y)
+void DirectX9Painter::PrintText(const str& pString, int x, int y)
 {
 	pString;
 	x;
 	y;
-	return (0);
 
 	// TODO: there's probably some smart and fast way to render fonts already in DX.
 }

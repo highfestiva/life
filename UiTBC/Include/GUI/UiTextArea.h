@@ -72,7 +72,7 @@ private:
 	TextLineList mLineList;
 	unsigned mFirstVisibleLine;
 	unsigned mVisibleLineCount;
-	unsigned mFontHeight;
+	unsigned mLineHeight;
 	FocusAnchor mFocusAnchor;
 	bool mScrollLock;
 	unsigned mMaxLineCount;

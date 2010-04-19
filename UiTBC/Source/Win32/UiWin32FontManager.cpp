@@ -108,7 +108,7 @@ bool Win32FontManager::RenderGlyph(tchar pChar, Canvas& pImage, const PixelRect&
 	{
 		lOk = (pRect.mTop >= 0 && pRect.mLeft >= 0 &&
 			pRect.GetWidth() >= 1 && pRect.GetHeight() >= 1 &&
-			pRect.mRight <= (int)pImage.GetWidth() && pRect.mBottom <= (int)pImage.GetHeight());
+			pImage.GetBitDepth() > 0);
 	}
 	HDC lRamDc = 0;
 	if (lOk)
@@ -171,11 +171,7 @@ bool Win32FontManager::RenderGlyph(tchar pChar, Canvas& pImage, const PixelRect&
 			{
 				Color lColor;
 				pImage.GetPixelColor(x, y, lColor);
-				int lIntensity = lColor.SumRgb();
-				//// Sum controls biggest part of light intensity, average controls a minor part.
-				lIntensity = (lIntensity*70 + lIntensity/3*30) / 100;
-				lIntensity = (lIntensity > 255)? 255 : lIntensity;
-				lColor.mAlpha = (uint8)(lIntensity);
+				lColor.mAlpha = (uint8)(lColor.SumRgb()/3);
 				pImage.SetPixelColor(x, y, lColor);
 			}
 		}

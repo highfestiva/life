@@ -90,13 +90,13 @@ protected:
 	void DoDrawAlphaImage(ImageID pImageID, int x, int y);
 
 	void GetImageSize(ImageID pImageID, int& pWidth, int& pHeight) const;
-	int PrintText(const str& pString, int x, int y);
+	void PrintText(const str& pString, int x, int y);
 	void SetFontSmoothness(bool pSmooth);
 
 	void DoRenderDisplayList(std::vector<DisplayEntity*>* pDisplayList);
 
 	void ClearFontBuffers();
-	FontTexture* CacheGlyphs(uint32 pFontHash, int pFontHeight, const str& pString);
+	FontTexture* SelectGlyphs(uint32 pFontHash, int pFontHeight, const str& pString);
 
 private:
 	Vector3DF mRCol[4];

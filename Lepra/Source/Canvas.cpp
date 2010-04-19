@@ -340,7 +340,7 @@ void Canvas::Crop(int pTopLeftX,
 	unsigned lOldHeight = mHeight;
 
 	unsigned lPixelSize;
-	char* lBuffer = (char*)CreateBuffer(lNewWidth, lNewHeight, mBitDepth, lPixelSize);
+	uint8* lBuffer = (uint8*)CreateBuffer(lNewWidth, lNewHeight, mBitDepth, lPixelSize);
 
 	if (lBuffer == 0)
 	{
@@ -404,7 +404,6 @@ void Canvas::Crop(int pTopLeftX,
 	Reset(lNewWidth, lNewHeight, mBitDepth);
 	mBuffer = lBuffer;
 	mBufferResponsibility = true;
-	mPixelSize = lPixelSize;
 }
 
 void Canvas::FlipHorizontal()
