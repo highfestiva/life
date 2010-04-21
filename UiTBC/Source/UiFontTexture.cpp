@@ -50,7 +50,7 @@ void FontTexture::StoreGlyph(tchar pChar, FontManager* pFontManager)
 		{
 			mCanvas.Crop(0, 0, mCanvas.GetWidth()*2, mCanvas.GetHeight());
 		}
-		Canvas lCharCanvas(0, mCanvas.GetHeight(), mCanvas.GetBitDepth());
+		Canvas lCharCanvas(lWidth, mCanvas.GetHeight(), mCanvas.GetBitDepth());
 		PixelRect lCanvasRect(0, 0, lWidth, mCanvas.GetHeight());
 		pFontManager->RenderGlyph(pChar, lCharCanvas, lCanvasRect);
 		mCanvas.PartialCopy(lCharStartX, 0, lCharCanvas);

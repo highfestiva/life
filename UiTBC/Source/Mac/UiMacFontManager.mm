@@ -40,9 +40,9 @@ MacFontManager::~MacFontManager()
 	FontTable::iterator x = mFontTable.begin();
 	if (x != mFontTable.end())
 	{
-		/*MacFont* lFont = (MacFont*)x->second;
-		::DeleteObject(lFont->mMacFontHandle);
-		delete (lFont);*/
+		MacFont* lFont = (MacFont*)x->second;
+		//::DeleteObject(lFont->mMacFontHandle);
+		delete (lFont);
 	}
 	mFontTable.clear();
 
@@ -79,18 +79,18 @@ MacFontManager::FontId MacFontManager::AddFont(const str& pFontName, double pSiz
 					  CLIP_DEFAULT_PRECIS,
 					  DEFAULT_QUALITY,
 					  DEFAULT_PITCH | FF_DONTCARE,
-					  pFontName.c_str());
+					  pFontName.c_str());*/
 
 	FontId lId = INVALID_FONTID;
-	if (lFontHandle != NULL)
+	//if (lFontHandle != NULL)
 	{
 		MacFont* lFont = new MacFont();
-		lFont->mMacFontHandle = lFontHandle;
+		//lFont->mMacFontHandle = lFontHandle;
 		lFont->mSize = pSize;
 		if (!InternalAddFont(lFont))
 		{
 			delete (lFont);
-			::DeleteObject(lFontHandle);
+			//::DeleteObject(lFontHandle);
 		}
 		else
 		{
@@ -98,12 +98,42 @@ MacFontManager::FontId MacFontManager::AddFont(const str& pFontName, double pSiz
 		}
 	}
 
-	return (FontId)lId;*/
-	return (INVALID_FONTID);
+	return ((FontId)lId);
 }
 
 bool MacFontManager::RenderGlyph(tchar pChar, Canvas& pImage, const PixelRect& pRect)
 {
+	pImage.Reset(pRect.GetWidth(), pRect.GetHeight(), Canvas::BITDEPTH_32_BIT);
+	pImage.CreateBuffer();
+
+	CGContextRef textcontext; // this is our rendering context
+	CGColorSpaceRef colorspace = CGColorSpaceCreateDeviceRGB(); // we need some colorspace
+	// we create a bitmap context
+	textcontext = CGBitmapContextCreate(pImage.GetBuffer(), pImage.GetWidth(), pImage.GetHeight(), 8,
+		pImage.GetWidth()*pImage.GetPixelByteSize(), colorspace, kCGImageAlphaPremultipliedLast);
+	float rect[4] = { pRect.mLeft, pRect.mTop, pRect.mRight+1, pRect.mBottom+1 };
+	float transparent[4] = { 0, 0, 0, 0 };
+	float text_color[4] = { 0.2f, 0, 1, 1 };
+	// if you do this a lot store the color somewhere and release it when you are done with it
+	CGContextSetFillColorWithColor(textcontext, CGColorCreate(colorspace, transparent)); 
+	CGContextFillRect(textcontext, *(CGRect*)rect);
+	CGContextSetFillColorWithColor(textcontext, CGColorCreate(colorspace, text_color));
+	CGContextSelectFont(textcontext, "Zapfino", 14.0f, kCGEncodingMacRoman);
+	CGContextShowTextAtPoint(textcontext, 1, 1, &pChar, 1);
+	CGContextFlush(textcontext);
+
+	printf("Rendering glyph '%c' (height=%i):\n", pChar, pImage.GetHeight());
+	for (int y = 0; y < (int)pImage.GetHeight(); ++y)
+	{
+		for (int x = 0; x < (int)pImage.GetWidth(); ++x)
+		{
+			printf("%c", (pImage.GetPixelColor(x, y).To32() == 0)? ' ' : '*');
+		}
+		printf("\n");
+	}
+
+	return (true);
+
 	/*bool lOk = (mCurrentFont != 0);
 	if (lOk)
 	{
@@ -216,7 +246,7 @@ int MacFontManager::GetCharWidth(const tchar pChar) const
 	}
 	::SelectObject(mDC, lDefaultObject);
 	return (lCharWidth);*/
-	return (10);
+	return (5);
 }
 
 

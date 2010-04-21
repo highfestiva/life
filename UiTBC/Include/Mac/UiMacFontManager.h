@@ -40,12 +40,11 @@ private:
 	{
 		BITMAPINFOHEADER bmiHeader;
 		RGBQUAD bmiColors[256];
-	};
+	};*/
 
 	struct MacFont: Font
 	{
-		HFONT mMacFontHandle;
-	};*/
+	};
 
 	UiLepra::MacDisplayManager* mDisplayManager;
 	/*HDC mDC;
