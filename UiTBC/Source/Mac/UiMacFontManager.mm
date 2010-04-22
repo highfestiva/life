@@ -105,32 +105,40 @@ bool MacFontManager::RenderGlyph(tchar pChar, Canvas& pImage, const PixelRect& p
 {
 	pImage.Reset(pRect.GetWidth(), pRect.GetHeight(), Canvas::BITDEPTH_32_BIT);
 	pImage.CreateBuffer();
+	::memset(pImage.GetBuffer(), 0, pImage.GetWidth()*pImage.GetPixelByteSize()*pImage.GetHeight());
 
 	CGContextRef textcontext; // this is our rendering context
 	CGColorSpaceRef colorspace = CGColorSpaceCreateDeviceRGB(); // we need some colorspace
 	// we create a bitmap context
 	textcontext = CGBitmapContextCreate(pImage.GetBuffer(), pImage.GetWidth(), pImage.GetHeight(), 8,
 		pImage.GetWidth()*pImage.GetPixelByteSize(), colorspace, kCGImageAlphaPremultipliedLast);
-	float rect[4] = { pRect.mLeft, pRect.mTop, pRect.mRight+1, pRect.mBottom+1 };
+	float rect[4] = { pRect.mLeft, pRect.mTop, pRect.mRight, pRect.mBottom };
 	float transparent[4] = { 0, 0, 0, 0 };
-	float text_color[4] = { 0.2f, 0, 1, 1 };
+	float text_color[4] = { 1, 1, 1, 1 };
 	// if you do this a lot store the color somewhere and release it when you are done with it
 	CGContextSetFillColorWithColor(textcontext, CGColorCreate(colorspace, transparent)); 
 	CGContextFillRect(textcontext, *(CGRect*)rect);
 	CGContextSetFillColorWithColor(textcontext, CGColorCreate(colorspace, text_color));
-	CGContextSelectFont(textcontext, "Zapfino", 14.0f, kCGEncodingMacRoman);
-	CGContextShowTextAtPoint(textcontext, 1, 1, &pChar, 1);
+	CGContextSelectFont(textcontext, "Arial", 14.0f, kCGEncodingMacRoman);
+	CGContextShowTextAtPoint(textcontext, 0, 0, &pChar, 1);
 	CGContextFlush(textcontext);
 
-	printf("Rendering glyph '%c' (height=%i):\n", pChar, pImage.GetHeight());
+	/*printf("Rendering glyph '%c' (height=%i):\n", pChar, pImage.GetHeight());
 	for (int y = 0; y < (int)pImage.GetHeight(); ++y)
 	{
 		for (int x = 0; x < (int)pImage.GetWidth(); ++x)
 		{
-			printf("%c", (pImage.GetPixelColor(x, y).To32() == 0)? ' ' : '*');
+			if (pImage.GetPixelColor(x, y).To32() == 0)
+			{
+				printf("         ");
+			}
+			else
+			{
+				printf("%8.8X ", pImage.GetPixelColor(x, y).To32());
+			}
 		}
 		printf("\n");
-	}
+	}*/
 
 	return (true);
 
@@ -246,7 +254,7 @@ int MacFontManager::GetCharWidth(const tchar pChar) const
 	}
 	::SelectObject(mDC, lDefaultObject);
 	return (lCharWidth);*/
-	return (5);
+	return (7);
 }
 
 

@@ -571,7 +571,7 @@ void OpenGLPainter::DoDraw3DRect(int pLeft, int pTop, int pRight, int pBottom, i
 	lColor[34] = mRCol[lThree].y;
 	lColor[35] = mRCol[lThree].z;
 
-	const static GLuint lsIndices[] = {0,1,7, 0,7,6, 0,6,10, 0,10,4, 8,2,3, 8,3,9, 11,9,3, 11,3,5};
+	//const static GLuint lsIndices[] = {0,1,7, 0,7,6, 0,6,10, 0,10,4, 8,2,3, 8,3,9, 11,9,3, 11,3,5};
 
 	::glDisableClientState(GL_NORMAL_ARRAY);
 	::glDisableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -1262,6 +1262,7 @@ void OpenGLPainter::PrintText(const str& pString, int x, int y)
 	::glDisableClientState(GL_COLOR_ARRAY);
 	::glEnableClientState(GL_VERTEX_ARRAY);
 	::glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	//::glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
 	PushAttrib(ATTR_RENDERMODE);
 	if (mSmoothFont)
@@ -1273,6 +1274,9 @@ void OpenGLPainter::PrintText(const str& pString, int x, int y)
 		SetRenderMode(RM_ALPHATEST);
 	}
 	::glEnable(GL_TEXTURE_2D);
+	//::glMatrixMode(GL_TEXTURE);
+	//::glLoadIdentity();
+	//::glMatrixMode(GL_MODELVIEW);
 
 	const int lFontHeight = GetFontManager()->GetFontHeight();
 	const int lLineHeight = GetFontManager()->GetLineHeight();
@@ -1293,7 +1297,7 @@ void OpenGLPainter::PrintText(const str& pString, int x, int y)
 
 	const size_t lStringLength = pString.length();
 	int lGlyphIndex = 0;
-	const int STACK_GLYPH_CAPACITY = 256;
+	const size_t STACK_GLYPH_CAPACITY = 256;
 	GLuint lArrayGlyphIndices[4*STACK_GLYPH_CAPACITY];
 	GLint lArrayVertices[2*4*STACK_GLYPH_CAPACITY];
 	GLfloat lArrayUv[2*4*STACK_GLYPH_CAPACITY];
@@ -1329,7 +1333,11 @@ void OpenGLPainter::PrintText(const str& pString, int x, int y)
 		{
 			int lTextureX = 0;
 			int lCharWidth = 5;
-			lFontTexture->GetGlyphX(lChar, lTextureX, lCharWidth);
+			if (!lFontTexture->GetGlyphX(lChar, lTextureX, lCharWidth))
+			{
+				assert(false);
+				continue;
+			}
 			const float lTextureWidth = (float)lFontTexture->GetWidth();
 			const GLint lTemplateVertices[2*4] =
 			{
@@ -1346,13 +1354,14 @@ void OpenGLPainter::PrintText(const str& pString, int x, int y)
 				(lTextureX + lCharWidth + 0.5f)/lTextureWidth,	0,
 			};
 
+			const int lVertexBase = lGlyphIndex*4;
 			for (int i = 0; i < 4; ++i)
 			{
-				lGlyphIndices[lGlyphIndex*4+i] = lTemplateGlyphIndices[i]+lGlyphIndex*4;
-				lVertices[(lGlyphIndex*4+i)*2+0] = lTemplateVertices[i*2+0];
-				lVertices[(lGlyphIndex*4+i)*2+1] = lTemplateVertices[i*2+1];
-				lUv[(lGlyphIndex*4+i)*2+0] = lTemplateUv[i*2+0];
-				lUv[(lGlyphIndex*4+i)*2+1] = lTemplateUv[i*2+1];
+				lGlyphIndices[lVertexBase+i] = lTemplateGlyphIndices[i]+lVertexBase;
+				lVertices[(lVertexBase+i)*2+0] = lTemplateVertices[i*2+0];
+				lVertices[(lVertexBase+i)*2+1] = lTemplateVertices[i*2+1];
+				lUv[(lVertexBase+i)*2+0] = lTemplateUv[i*2+0];
+				lUv[(lVertexBase+i)*2+1] = lTemplateUv[i*2+1];
 			}
 			++lGlyphIndex;
 

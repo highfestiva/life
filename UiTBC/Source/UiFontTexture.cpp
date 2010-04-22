@@ -54,6 +54,25 @@ void FontTexture::StoreGlyph(tchar pChar, FontManager* pFontManager)
 		PixelRect lCanvasRect(0, 0, lWidth, mCanvas.GetHeight());
 		pFontManager->RenderGlyph(pChar, lCharCanvas, lCanvasRect);
 		mCanvas.PartialCopy(lCharStartX, 0, lCharCanvas);
+
+		/*printf("Updated texture with glyph '%c' (height=%i):\n", pChar, mCanvas.GetHeight());
+		const int lMaxWidth = (mCanvas.GetWidth() > 80)? 80 : mCanvas.GetWidth();
+		for (int y = 0; y < (int)mCanvas.GetHeight(); ++y)
+		{
+			for (int x = 0; x < lMaxWidth; ++x)
+			{
+				if (mCanvas.GetPixelColor(x, y).To32() == 0)
+				{
+					printf(" ");
+				}
+				else
+				{
+					printf("*");
+				}
+			}
+			printf("\n");
+		}*/
+		
 		mIsUpdated = true;
 	}
 }
