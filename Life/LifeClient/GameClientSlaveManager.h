@@ -119,7 +119,7 @@ private:
 
 	Cure::NetworkClient* GetNetworkClient() const;
 
-	void UpdateCameraPosition();
+	void UpdateCameraPosition(bool pUpdateMicPosition);
 
 	void DrawAsyncDebugInfo();
 	void DrawDebugStaple(int pIndex, int pHeight, const Color& pColor);

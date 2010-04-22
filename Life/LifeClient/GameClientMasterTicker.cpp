@@ -185,8 +185,10 @@ bool GameClientMasterTicker::Tick()
 			lOk = x.GetObject()->BeginTick();
 		}
 		// Start rendering machine directly afterwards.
-		for (x = mSlaveSet.First(); lOk && x != mSlaveSet.End(); ++x)
+		int lSlaveIndex = 0;
+		for (x = mSlaveSet.First(); lOk && x != mSlaveSet.End(); ++x, ++lSlaveIndex)
 		{
+			mUiManager->GetSoundManager()->SetCurrentListener(lSlaveIndex, (int)mSlaveSet.GetCount());
 			lOk = x.GetObject()->Render();
 		}
 	}
@@ -203,10 +205,8 @@ bool GameClientMasterTicker::Tick()
 	}
 
 	{
-		int lSlaveIndex = 0;
-		for (x = mSlaveSet.First(); lOk && x != mSlaveSet.End(); ++x, ++lSlaveIndex)
+		for (x = mSlaveSet.First(); lOk && x != mSlaveSet.End(); ++x)
 		{
-			mUiManager->GetSoundManager()->SetCurrentListener(lSlaveIndex, (int)mSlaveSet.GetCount());
 			lOk = x.GetObject()->EndTick();
 		}
 	}

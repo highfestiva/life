@@ -143,7 +143,7 @@ bool GameClientSlaveManager::Render()
 {
 	ScopeLock lLock(GetTickLock());
 
-	UpdateCameraPosition();
+	UpdateCameraPosition(true);
 
 	UpdateFrustum();
 
@@ -1080,7 +1080,7 @@ Cure::NetworkClient* GameClientSlaveManager::GetNetworkClient() const
 
 
 
-void GameClientSlaveManager::UpdateCameraPosition()
+void GameClientSlaveManager::UpdateCameraPosition(bool pUpdateMicPosition)
 {
 	TransformationF lCameraTransform;
 	lCameraTransform.SetPosition(mCameraPosition);
@@ -1098,9 +1098,10 @@ void GameClientSlaveManager::UpdateCameraPosition()
 	const float lFrameTime = GetTimeManager()->GetNormalFrameTime();
 	Vector3DF lVelocity = (mCameraPosition-mCameraPreviousPosition) / lFrameTime;
 	mUiManager->SetCameraPosition(lCameraTransform);
-	if (mSlaveIndex == 1)	// TODO: replace with something thought-through.
+	if (pUpdateMicPosition)
 	{
-		mUiManager->SetMicrophonePosition(lCameraTransform, lVelocity);
+		// TODO: fix support for >1 mic pos!
+		//mUiManager->SetMicrophonePosition(lCameraTransform, lVelocity);
 	}
 }
 
@@ -1141,7 +1142,7 @@ void GameClientSlaveManager::DrawSyncDebugInfo()
 		mUiManager->GetRenderer()->ResetClippingRect();
 		mUiManager->GetRenderer()->SetClippingRect(mRenderArea);
 		mUiManager->GetRenderer()->SetViewport(mRenderArea);
-		UpdateCameraPosition();
+		UpdateCameraPosition(false);
 		double lFOV = CURE_RTVAR_GET(GetVariableScope(), RTVAR_UI_3D_FOV, 90.0);
 		double lClipNear = CURE_RTVAR_GET(GetVariableScope(), RTVAR_UI_3D_CLIPNEAR, 0.1);
 		double lClipFar = CURE_RTVAR_GET(GetVariableScope(), RTVAR_UI_3D_CLIPFAR, 1000.0);

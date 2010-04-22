@@ -605,15 +605,18 @@ void TextField::Repaint(Painter* pPainter)
 
 	if (mMarkerVisible == true)
 	{
+		pPainter->PushAttrib(Painter::ATTR_RENDERMODE);
+		pPainter->SetRenderMode(Painter::RM_XOR);
 		if (mMarkerID != Painter::INVALID_IMAGEID)
 		{
 			GetImageManager()->DrawImage(mMarkerID, lRect.mLeft + lMarkerX, lRect.mTop);
 		}
 		else
 		{
-			int lMarkerY = lRect.mTop + (lRect.GetHeight() - lTextHeight) / 2;
+			const int lMarkerY = lRect.mTop + (lRect.GetHeight() - lTextHeight) / 2;
 			pPainter->DrawLine(lRect.mLeft + lMarkerX, lMarkerY, lRect.mLeft + lMarkerX, lMarkerY + lTextHeight);
 		}
+		pPainter->PopAttrib();
 	}
 
 	pPainter->PopAttrib();
