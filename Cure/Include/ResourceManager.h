@@ -254,7 +254,7 @@ protected:
 	virtual DiversifiedData CreateDiversifiedData() const = 0;
 	virtual void ReleaseDiversifiedData(DiversifiedData pData) const = 0;
 
-	typedef HashTable<const UserResource*, DiversifiedData, LEPRA_VOIDP_HASHER> UserDataTable;
+	typedef std::hash_map<const UserResource*, DiversifiedData, LEPRA_VOIDP_HASHER> UserDataTable;
 	UserDataTable mUserDiversifiedTable;
 };
 

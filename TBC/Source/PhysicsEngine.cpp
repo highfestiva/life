@@ -245,7 +245,7 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics*
 						const float lTargetSpeed = Math::Lerp(lPreviousTargetSpeed, lDirectionalMaxSpeed*lScale, 0.5f);
 						const float lTargetStrength = Math::Lerp(lPreviousStrength, lUsedStrength, 0.5f);
 						pPhysicsManager->SetAngularMotorRoll(lGeometry->GetJointId(), lTargetStrength, lTargetSpeed);
-						pPhysicsManager->GetAngleRate1(lGeometry->GetJointId(), lPreviousTargetSpeed);
+						pPhysicsManager->GetAngleRate2(lGeometry->GetJointId(), lPreviousTargetSpeed);
 						mIntensity += lPreviousTargetSpeed / mMaxSpeed;
 					}
 					else

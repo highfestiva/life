@@ -223,6 +223,20 @@ bool GameClientSlaveManager::IsUiMoveForbidden(Cure::GameObjectId pObjectId) con
 	return (pObjectId != mAvatarId && GetMaster()->IsLocalObject(pObjectId));
 }
 
+void GameClientSlaveManager::GetSiblings(Cure::GameObjectId pObjectId, Cure::ContextObject::Array& pSiblingArray) const
+{
+	mMaster->GetSiblings(pObjectId, pSiblingArray);
+}
+
+void GameClientSlaveManager::DoGetSiblings(Cure::GameObjectId pObjectId, Cure::ContextObject::Array& pSiblingArray) const
+{
+	Cure::ContextObject* lSibling = GetContext()->GetObject(pObjectId);
+	if (lSibling)
+	{
+		pSiblingArray.push_back(lSibling);
+	}
+}
+
 void GameClientSlaveManager::AddLocalObjects(std::hash_set<Cure::GameObjectId>& pLocalObjectSet) const
 {
 	pLocalObjectSet.insert(mAvatarId);
@@ -1100,8 +1114,7 @@ void GameClientSlaveManager::UpdateCameraPosition(bool pUpdateMicPosition)
 	mUiManager->SetCameraPosition(lCameraTransform);
 	if (pUpdateMicPosition)
 	{
-		// TODO: fix support for >1 mic pos!
-		//mUiManager->SetMicrophonePosition(lCameraTransform, lVelocity);
+		mUiManager->SetMicrophonePosition(lCameraTransform, lVelocity);
 	}
 }
 

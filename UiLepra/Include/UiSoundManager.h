@@ -7,7 +7,7 @@
 #pragma once
 
 #include "../../Lepra/Include/String.h"
-#include "../../Lepra/Include/String.h"
+#include "../../Lepra/Include/Transformation.h"
 #include "../../Lepra/Include/Vector3D.h"
 #include "UiLepra.h"
 
@@ -90,14 +90,10 @@ public:
 		Orientation in world space.
 	*/
 
-	virtual void SetSoundPosition(SoundInstanceID pSoundIID, const Vector3DF& pPos, const Vector3DF& pVel) = 0;
-	virtual void GetSoundPosition(SoundInstanceID pSoundIID, Vector3DF& pPos, Vector3DF& pVel) = 0;
-
-	virtual void SetCurrentListener(int pListenerIndex, int pListenerCount) = 0;
-	virtual void SetListenerPosition(const Vector3DF& pPos, const Vector3DF& pVel,
-		const Vector3DF& pUp, const Vector3DF& pForward) = 0;
-	virtual void GetListenerPosition(Vector3DF& pPos, Vector3DF& pVel,
-		Vector3DF& pUp, Vector3DF& pForward) = 0;
+	void SetSoundPosition(SoundInstanceID pSoundIID, const Vector3DF& pPos, const Vector3DF& pVel);
+	void SetCurrentListener(int pListenerIndex, int pListenerCount);
+	void SetListenerPosition(const Vector3DF& pPos, const Vector3DF& pVel,
+		const Vector3DF& pUp, const Vector3DF& pForward);
 
 	// 0 removes the doppler effect, values greater than 1 exaggerates the effect.
 	// The speed of sound using a doppler factor of 1 is 340 m/s.
@@ -148,6 +144,17 @@ public:
 					float pGain) = 0;
 
 protected:
+	virtual void DoSetSoundPosition(SoundInstanceID pSoundIID, const Vector3DF& pPos, const Vector3DF& pVel) = 0;
+
+	struct MicrophoneLocation
+	{
+		TransformationF mTransform;
+		TransformationF mVelocityTransform;
+	};
+	typedef std::vector<MicrophoneLocation> MicrophoneLocationArray;
+	MicrophoneLocationArray mMicrophoneArray;
+	size_t mCurrentMicrophone;
+
 private:
 };
 

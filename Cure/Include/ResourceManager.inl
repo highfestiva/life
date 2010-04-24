@@ -196,22 +196,22 @@ template<class RamData, class DiversifiedData>
 DiversifiedResource<RamData, DiversifiedData>::~DiversifiedResource()
 {
 	// Diviersified table must be entirely free'd and cleared out by child class.
-	assert(mUserDiversifiedTable.IsEmpty());
+	assert(mUserDiversifiedTable.empty());
 }
 
 template<class RamData, class DiversifiedData>
 DiversifiedData DiversifiedResource<RamData, DiversifiedData>::GetUserData(const UserResource* pUserResource)
 {
 	DiversifiedData lInstanceId = (DiversifiedData)0;
-	typename UserDataTable::Iterator x = mUserDiversifiedTable.Find(pUserResource);
-	if (x != mUserDiversifiedTable.End())
+	typename UserDataTable::iterator x = mUserDiversifiedTable.find(pUserResource);
+	if (x != mUserDiversifiedTable.end())
 	{
-		lInstanceId = *x;
+		lInstanceId = x->second;
 	}
 	else
 	{
 		lInstanceId = CreateDiversifiedData();
-		mUserDiversifiedTable.Insert(pUserResource, lInstanceId);
+		mUserDiversifiedTable.insert(UserDataTable::value_type(pUserResource, lInstanceId));
 	}
 	assert(lInstanceId != 0);
 	return (lInstanceId);
@@ -220,11 +220,11 @@ DiversifiedData DiversifiedResource<RamData, DiversifiedData>::GetUserData(const
 template<class RamData, class DiversifiedData>
 void DiversifiedResource<RamData, DiversifiedData>::FreeDiversified(UserResource* pUserResource)
 {
-	typename UserDataTable::Iterator x = mUserDiversifiedTable.Find(pUserResource);
-	if (x != mUserDiversifiedTable.End())
+	typename UserDataTable::iterator x = mUserDiversifiedTable.find(pUserResource);
+	if (x != mUserDiversifiedTable.end())
 	{
-		DiversifiedData lInstanceId = *x;
-		mUserDiversifiedTable.Remove(x);
+		DiversifiedData lInstanceId = x->second;
+		mUserDiversifiedTable.erase(x);
 		ReleaseDiversifiedData(lInstanceId);
 	}
 }

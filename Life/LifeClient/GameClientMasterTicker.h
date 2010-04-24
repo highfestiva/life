@@ -45,6 +45,7 @@ public:
 	bool WaitResetUi();
 
 	bool IsLocalObject(Cure::GameObjectId pInstanceId) const;
+	void GetSiblings(Cure::GameObjectId pObjectId, Cure::ContextObject::Array& pSiblingArray) const;
 
 private:
 	void AddSlave(GameClientSlaveManager* pSlave);
@@ -84,7 +85,7 @@ private:
 		GameClientMasterTicker* mManager;
 	};
 
-	typedef OrderedMap<GameClientSlaveManager*, GameClientSlaveManager*, LEPRA_VOIDP_HASHER> SlaveMap;
+	typedef std::vector<GameClientSlaveManager*> SlaveArray;
 
 	Lock mLock;
 	UiCure::GameUiManager* mUiManager;
@@ -95,7 +96,7 @@ private:
 	bool mInitialized;
 	unsigned mActiveWidth;
 	unsigned mActiveHeight;
-	SlaveMap mSlaveSet;
+	SlaveArray mSlaveArray;
 	std::vector<UiCure::LineGraph2d> mPerformanceGraphList;
 	std::hash_set<Cure::GameObjectId> mLocalObjectSet;
 

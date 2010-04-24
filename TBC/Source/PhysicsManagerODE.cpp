@@ -2183,8 +2183,10 @@ bool PhysicsManagerODE::GetAngleRate2(JointID pJointId, float32& pAngleRate) con
 	case JOINT_UNIVERSAL:
 		pAngleRate = dJointGetUniversalAngle2Rate((*x)->mJointID);
 		break;
-	case JOINT_BALL:
 	case JOINT_HINGE:
+		pAngleRate = dJointGetHingeAngleRate((*x)->mJointID);
+		break;
+	case JOINT_BALL:
 	case JOINT_SLIDER:
 	case JOINT_FIXED:
 	case JOINT_ANGULARMOTOR:

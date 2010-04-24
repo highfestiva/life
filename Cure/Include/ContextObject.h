@@ -9,6 +9,7 @@
 #include "../../TBC/Include/PhysicsManager.h"
 #include <hash_map>
 #include <list>
+#include <vector>
 #include "../../Lepra/Include/String.h"
 #include "Cure.h"
 #include "PositionalData.h"
@@ -37,6 +38,8 @@ class ContextObjectAttribute;
 class ContextObject: public TBC::PhysicsManager::TriggerListener, public TBC::PhysicsManager::ForceFeedbackListener
 {
 public:
+	typedef std::vector<ContextObject*> Array;
+
 	ContextObject(const str& pClassId);
 	virtual ~ContextObject();
 
