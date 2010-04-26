@@ -40,7 +40,7 @@ void PlayerCountView::OnExit()
 
 void PlayerCountView::OnClick(UiTbc::Button* pButton)
 {
-	mPlayerCountObserver->OnSetPlayerCount((int)pButton->GetExtraData());
+	mPlayerCountObserver->OnSetPlayerCount((int)(intptr_t)pButton->GetExtraData());
 }
 
 

@@ -645,7 +645,7 @@ bool MacDisplayManager::OnMessage(NSEvent* e)
 	{
 		case WM_SIZING:
 		{
-			LPRECT lRect = (LPRECT)(uint64)plParam;
+			LPRECT lRect = (LPRECT)(intptr_t)plParam;
 
 			int lClientWidth  = GetClientWidth(lRect->right - lRect->left);
 			int lClientHeight = GetClientHeight(lRect->bottom - lRect->top);

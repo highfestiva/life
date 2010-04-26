@@ -109,8 +109,11 @@ void LogListener::OnLog(const Log* pOriginator, const str& pMessage, Log::LogLev
 	if (mFormat & FORMAT_THREAD)
 	{
 		Thread* lThread = Thread::GetCurrentThread();
-		const str& lThreadName = lThread->GetThreadName();
-		lOutputString += strutil::Format(_T("%10s: "), lThreadName.c_str());
+		if (lThread)
+		{
+			const str& lThreadName = lThread->GetThreadName();
+			lOutputString += strutil::Format(_T("%10s: "), lThreadName.c_str());
+		}
 	}
 
 	lOutputString += pMessage;

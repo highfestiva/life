@@ -172,11 +172,12 @@ bool Win32FontManager::RenderGlyph(tchar pChar, Canvas& pImage, const PixelRect&
 				Color lColor;
 				pImage.GetPixelColor(x, y, lColor);
 				lColor.mAlpha = (uint8)(lColor.SumRgb()/3);
+				lColor.mRed = lColor.mGreen = lColor.mBlue = 255;
 				pImage.SetPixelColor(x, y, lColor);
 			}
 		}
 	}
-	delete (lBitmap);
+	delete[] (lBitmap);
 	lBitmap = 0;
 	if (lRamBitmap)
 	{
@@ -188,6 +189,26 @@ bool Win32FontManager::RenderGlyph(tchar pChar, Canvas& pImage, const PixelRect&
 		::DeleteDC(lRamDc);
 		lRamDc = 0;
 	}
+
+	/*printf("Rendering glyph '%c' (height=%i):\n", pChar, pImage.GetHeight());
+	for (int y = 0; y < (int)pImage.GetHeight(); ++y)
+	{
+		for (int x = 0; x < (int)pImage.GetWidth(); ++x)
+		{
+			if (pImage.GetPixelColor(x, y).To32() == 0)
+			{
+				//printf("         ");
+				printf(" ");
+			}
+			else
+			{
+				//printf("%8.8X ", pImage.GetPixelColor(x, y).To32());
+				printf("*");
+			}
+		}
+		printf("\n");
+	}*/
+
 	return (lOk);
 }
 

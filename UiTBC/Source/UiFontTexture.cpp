@@ -72,7 +72,7 @@ void FontTexture::StoreGlyph(tchar pChar, FontManager* pFontManager)
 			}
 			printf("\n");
 		}*/
-		
+
 		mIsUpdated = true;
 	}
 }
@@ -103,6 +103,11 @@ void FontTexture::ResetIsUpdated()
 int FontTexture::GetWidth() const
 {
 	return (mCanvas.GetWidth());
+}
+
+int FontTexture::GetHeight() const
+{
+	return (mCanvas.GetHeight());
 }
 
 void* FontTexture::GetBuffer() const

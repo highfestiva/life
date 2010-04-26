@@ -3078,7 +3078,7 @@ void PhysicsManagerODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID p
 		{
 			return;
 		}
-		lObject1->mTriggerListener->OnTrigger((TriggerID)(size_t)lObject1, lObject2->mForceFeedbackListener);
+		lObject1->mTriggerListener->OnTrigger((TriggerID)lObject1, lObject2->mForceFeedbackListener);
 		return;
 	}
 	if(lObject2->mTriggerListener != 0)	// Only trig, no force application.
@@ -3087,7 +3087,7 @@ void PhysicsManagerODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID p
 		{
 			return;
 		}
-		lObject2->mTriggerListener->OnTrigger((TriggerID)(size_t)lObject2, lObject1->mForceFeedbackListener);
+		lObject2->mTriggerListener->OnTrigger((TriggerID)lObject2, lObject1->mForceFeedbackListener);
 		return;
 	}
 

@@ -94,7 +94,7 @@ private:
 			// Doing some magic to find the correct Node address.
 			uint8* lRawNode = (uint8*)pObject;
 			Node* lNode = (Node*)0;
-			lRawNode -= (int64)(&lNode->mObject);
+			lRawNode -= (intptr_t)(&lNode->mObject);
 			//lRawNode -= offsetof(Node, mObject);
 			return (Node*)lRawNode;
 		}

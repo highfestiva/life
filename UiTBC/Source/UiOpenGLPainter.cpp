@@ -1289,6 +1289,7 @@ void OpenGLPainter::PrintText(const str& pString, int x, int y)
 	::glColor4f(lColor.GetRf(), lColor.GetGf(), lColor.GetBf(), lColor.GetAf());
 	const uint32 lFontHash = (GetFontManager()->GetActiveFont() << 16) + lFontHeight;
 	FontTexture* lFontTexture = SelectGlyphs(lFontHash, lFontHeight, pString);
+	const int lFontTextureHeight = lFontTexture->GetHeight();
 
 	static const GLuint lTemplateGlyphIndices[4] =
 	{
@@ -1343,15 +1344,15 @@ void OpenGLPainter::PrintText(const str& pString, int x, int y)
 			{
 				lCurrentX,		lCurrentY,
 				lCurrentX + lCharWidth,	lCurrentY,
-				lCurrentX,		lCurrentY + lFontHeight,
-				lCurrentX + lCharWidth,	lCurrentY + lFontHeight,
+				lCurrentX,		lCurrentY + lFontTextureHeight,
+				lCurrentX + lCharWidth,	lCurrentY + lFontTextureHeight,
 			};
 			const GLfloat lTemplateUv[2*4] =
 			{
-				(lTextureX + 0.5f)/lTextureWidth,		1,
-				(lTextureX + lCharWidth + 0.5f)/lTextureWidth,	1,
-				(lTextureX + 0.5f)/lTextureWidth,		0,
-				(lTextureX + lCharWidth + 0.5f)/lTextureWidth,	0,
+				(lTextureX)/lTextureWidth,		1,
+				(lTextureX + lCharWidth)/lTextureWidth,	1,
+				(lTextureX)/lTextureWidth,		0,
+				(lTextureX + lCharWidth)/lTextureWidth,	0,
 			};
 
 			const int lVertexBase = lGlyphIndex*4;
@@ -1605,11 +1606,12 @@ FontTexture* OpenGLPainter::SelectGlyphs(uint32 pFontHash, int pFontHeight, cons
 			0,
 			4,
 			lFontTexture->GetWidth(),
-			pFontHeight,
+			lFontTexture->GetHeight(),
 			0,
 			GL_RGBA,
 			GL_UNSIGNED_BYTE,
 			lFontTexture->GetBuffer());
+		OGL_ASSERT();
 		::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	}

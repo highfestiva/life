@@ -149,7 +149,7 @@ int ChunkyPhysics::GetEngineIndex(const PhysicsEngine* pEngine) const
 	{
 		if (mEngineArray[x] == pEngine)
 		{
-			return x;
+			return (int)x;
 		}
 	}
 	return -1;

@@ -37,6 +37,7 @@ public:
 	void ResetIsUpdated();
 
 	int GetWidth() const;
+	int GetHeight() const;
 	void* GetBuffer() const;
 
 private:

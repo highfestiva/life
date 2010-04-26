@@ -174,7 +174,7 @@ public:
 		TYPE_WHEEL,
 		TYPE_FLIGHT,
 		TYPE_OTHER,
-		TYPE_COUNT = TYPE_OTHER
+		TYPE_COUNT = TYPE_OTHER+1
 	};
 
 	typedef std::pair<str, str> CalibrationElement;

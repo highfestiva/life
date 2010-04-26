@@ -59,6 +59,8 @@ def getmake(builder):
 
         winprogs = os.getenv("PROGRAMFILES")
         if winprogs:
+                if os.path.exists(winprogs+" (x86)"):
+                    winprogs += " (x86)"
                 dirname = os.getenv("VCINSTALLDIR")
                 if not dirname:
                         import glob
@@ -67,6 +69,7 @@ def getmake(builder):
                                 return None     # No Visual Studio installed.
                         dirname = os.path.join(names[-1], "VC")
                         if not os.path.exists(dirname):
+                                print("GOT HERE!", dirname)
                                 return None     # Visual Studio might be installed, but not VC++.
                 make_exe = os.path.join(dirname, builder)
                 if dirname.find("8") > 0:     vcver = 8
@@ -102,8 +105,9 @@ def run(cmdlist, when):
                 path = os.getenv("PATH")
                 winpath = path.replace(":/c/", ";C:\\").replace("/", "\\")
                 os.environ["PATH"] = winpath
+                cmdlist[0] = cmdlist[0].replace("c:\\", "C:\\")
         import subprocess
-        #print("Running %s..." % str(cmdlist))
+        print("Running %s..." % str(cmdlist))
         rc = subprocess.call(cmdlist)
         if path:
                 os.environ["PATH"] = path

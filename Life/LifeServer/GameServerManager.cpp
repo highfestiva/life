@@ -553,7 +553,7 @@ void GameServerManager::OnSelectAvatar(Client* pClient, const Cure::UserAccount:
 		Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
 	lObject->SetInitialTransform(lTransform);
 	pClient->SetAvatarId(lObject->GetInstanceId());
-	lObject->SetExtraData((void*)(size_t)pClient->GetUserConnection()->GetAccountId());
+	lObject->SetExtraData((void*)(intptr_t)pClient->GetUserConnection()->GetAccountId());
 	lObject->StartLoading();
 }
 
@@ -686,7 +686,7 @@ void GameServerManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 {
 	Client* lClient = 0;
 	{
-		Cure::UserAccount::AccountId lAccountId = (Cure::UserAccount::AccountId)(size_t)pObject->GetExtraData();
+		Cure::UserAccount::AccountId lAccountId = (Cure::UserAccount::AccountId)(intptr_t)pObject->GetExtraData();
 		if (lAccountId)
 		{
 			lClient = GetClientByAccount(lAccountId);
