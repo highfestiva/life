@@ -12,6 +12,7 @@
 #include "../../Lepra/Include/Timer.h"
 #include "../../TBC/Include/ChunkyBoneGeometry.h"
 #include "../../TBC/Include/PhysicsManager.h"
+#include "../Include/ContextObject.h"
 #include "../Include/ResourceManager.h"
 
 
@@ -23,7 +24,6 @@ namespace Cure
 
 class ConsoleManager;
 class ContextManager;
-class ContextObject;
 class NetworkAgent;
 class TerrainManager;
 class TimeManager;
@@ -64,6 +64,7 @@ public:
 		GameObjectId pInstanceId = 0);
 	virtual ContextObject* CreateTriggerHandler(const str& pType) const = 0;
 	virtual bool IsUiMoveForbidden(GameObjectId pObjectId) const;
+	virtual void GetSiblings(GameObjectId pObjectId, ContextObject::Array& pSiblingArray) const;
 	virtual void OnLoadCompleted(ContextObject* pObject, bool pOk) = 0;
 	virtual void OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque,
 		ContextObject* pObject1, ContextObject* pObject2) = 0;

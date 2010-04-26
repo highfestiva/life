@@ -66,6 +66,8 @@ public:
 	void Logout();
 	bool IsLoggingIn() const;
 	bool IsUiMoveForbidden(Cure::GameObjectId pObjectId) const;
+	virtual void GetSiblings(Cure::GameObjectId pObjectId, Cure::ContextObject::Array& pSiblingArray) const;
+	void DoGetSiblings(Cure::GameObjectId pObjectId, Cure::ContextObject::Array& pSiblingArray) const;
 	void AddLocalObjects(std::hash_set<Cure::GameObjectId>& pLocalObjectSet) const;
 
 	bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
@@ -119,7 +121,7 @@ private:
 
 	Cure::NetworkClient* GetNetworkClient() const;
 
-	void UpdateCameraPosition();
+	void UpdateCameraPosition(bool pUpdateMicPosition);
 
 	void DrawAsyncDebugInfo();
 	void DrawDebugStaple(int pIndex, int pHeight, const Color& pColor);

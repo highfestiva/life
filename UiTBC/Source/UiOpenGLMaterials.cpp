@@ -79,7 +79,7 @@ void OpenGLMaterial::SetBasicMaterial(const TBC::GeometryBase::BasicMaterialSett
 	pRenderer->SetGlobalMaterialReflectance(pMaterial.mDiffuse.x,
 		pMaterial.mDiffuse.y, pMaterial.mDiffuse.z, pMaterial.mShininess);
 
-	pRenderer->AddAmbience(pMaterial.mAmbient.x,
+	pRenderer->SetAmbientLight(pMaterial.mAmbient.x,
 		pMaterial.mAmbient.y, pMaterial.mAmbient.z);
 }
 

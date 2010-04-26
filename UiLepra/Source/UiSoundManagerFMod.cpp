@@ -29,6 +29,9 @@ SoundManagerFMod::SoundManagerFMod(int pMixRate):
 	{
 		mNumChannels = FSOUND_GetMaxChannels();
 		mChannel = new Channel[mNumChannels];
+		const float lPos[3] = {0, 0, 0};
+		const float lVel[3] = {0, 0, 0};
+		FSOUND_3D_Listener_SetAttributes(lPos, lVel, 0, 1, 0, 0, 0, 1);	// Forward along Y, up along Z.
 	}
 	else
 	{
@@ -434,89 +437,6 @@ int SoundManagerFMod::GetFrequency(SoundInstanceID pSoundIID)
 	return FSOUND_GetFrequency((*lSIIter).mChannel);
 }
 
-void SoundManagerFMod::SetSoundPosition(SoundInstanceID pSoundIID, const Vector3DF& pPos, const Vector3DF& pVel)
-{
-	SoundInstanceTable::Iterator lSIIter = mSoundInstanceTable.Find(pSoundIID);
-	if (lSIIter == mSoundInstanceTable.End())
-	{
-		return;
-	}
-
-	float lPos[3];
-	float lVel[3];
-
-	lPos[0] = pPos.x;
-	lPos[1] = pPos.y;
-	lPos[2] = pPos.z;
-
-	lVel[0] = pVel.x;
-	lVel[1] = pVel.y;
-	lVel[2] = pVel.z;
-
-	FSOUND_3D_SetAttributes((*lSIIter).mChannel, lPos, lVel);
-}
-
-void SoundManagerFMod::GetSoundPosition(SoundInstanceID pSoundIID, Vector3DF& pPos, Vector3DF& pVel)
-{
-	SoundInstanceTable::Iterator lSIIter = mSoundInstanceTable.Find(pSoundIID);
-	if (lSIIter == mSoundInstanceTable.End())
-	{
-		return;
-	}
-
-	float lPos[3];
-	float lVel[3];
-
-	FSOUND_3D_GetAttributes((*lSIIter).mChannel, lPos, lVel);
-
-	pPos.x = lPos[0];
-	pPos.y = lPos[1];
-	pPos.z = lPos[2];
-
-	pVel.x = lVel[0];
-	pVel.y = lVel[1];
-	pVel.z = lVel[2];
-}
-
-void SoundManagerFMod::SetCurrentListener(int pListenerIndex, int pListenerCount)
-{
-	FSOUND_3D_Listener_SetCurrent(pListenerIndex, pListenerCount);
-}
-
-void SoundManagerFMod::SetListenerPosition(const Vector3DF& pPos, const Vector3DF& pVel,
-	const Vector3DF& pUp, const Vector3DF& pForward)
-{
-	float lPos[3];
-	float lVel[3];
-
-	lPos[0] = pPos.x;
-	lPos[1] = pPos.y;
-	lPos[2] = pPos.z;
-
-	lVel[0] = pVel.x;
-	lVel[1] = pVel.y;
-	lVel[2] = pVel.z;
-
-	FSOUND_3D_Listener_SetAttributes(lPos, lVel, pForward.x, pForward.y, pForward.z, pUp.x, pUp.y, pUp.z);
-}
-
-void SoundManagerFMod::GetListenerPosition(Vector3DF& pPos, Vector3DF& pVel,
-	Vector3DF& pUp, Vector3DF& pForward)
-{
-	float lPos[3];
-	float lVel[3];
-
-	FSOUND_3D_Listener_GetAttributes(lPos, lVel, &pForward.x, &pForward.y, &pForward.z, &pUp.x, &pUp.y, &pUp.z);
-
-	pPos.x = lPos[0];
-	pPos.y = lPos[1];
-	pPos.z = lPos[2];
-
-	pVel.x = lVel[0];
-	pVel.y = lVel[1];
-	pVel.z = lVel[2];
-}
-
 void SoundManagerFMod::SetDopplerFactor(float pFactor)
 {
 	FSOUND_3D_SetDopplerFactor(pFactor);
@@ -567,10 +487,34 @@ int SoundManagerFMod::GetChannel(SoundInstanceID pSoundIID)
 	SoundInstanceTable::Iterator lSIIter = mSoundInstanceTable.Find(pSoundIID);
 	if (lSIIter == mSoundInstanceTable.End())
 	{
+		assert(false);
 		return -1;
 	}
 
 	return (*lSIIter).mChannel;
+}
+
+void SoundManagerFMod::DoSetSoundPosition(SoundInstanceID pSoundIID, const Vector3DF& pPos, const Vector3DF& pVel)
+{
+	SoundInstanceTable::Iterator lSIIter = mSoundInstanceTable.Find(pSoundIID);
+	if (lSIIter == mSoundInstanceTable.End())
+	{
+		assert(false);
+		return;
+	}
+
+	float lPos[3];
+	float lVel[3];
+
+	lPos[0] = pPos.x;
+	lPos[1] = pPos.y;
+	lPos[2] = pPos.z;
+
+	lVel[0] = pVel.x;
+	lVel[1] = pVel.y;
+	lVel[2] = pVel.z;
+
+	FSOUND_3D_SetAttributes((*lSIIter).mChannel, lPos, lVel);
 }
 
 

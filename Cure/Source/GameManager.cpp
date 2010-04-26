@@ -242,7 +242,13 @@ ContextObject* GameManager::CreateContextObject(const str& pClassId, NetworkObje
 
 bool GameManager::IsUiMoveForbidden(GameObjectId) const
 {
-	return (false);	// Non-UI implementors need to bother.
+	return (false);	// Non-UI implementors need not bother.
+}
+
+void GameManager::GetSiblings(GameObjectId pInstanceId, ContextObject::Array& pSiblingArray) const
+{
+	// Only self if no override/no more than one game manager instance.
+	pSiblingArray.push_back(GetContext()->GetObject(pInstanceId));
 }
 
 

@@ -648,13 +648,13 @@ SoundResource::SoundResource(GameUiManager* pUiManager, Cure::ResourceManager* p
 
 SoundResource::~SoundResource()
 {
-	UserDataTable::Iterator x = mUserDiversifiedTable.First();
-	for (; x != mUserDiversifiedTable.End(); ++x)
+	UserDataTable::iterator x = mUserDiversifiedTable.begin();
+	for (; x != mUserDiversifiedTable.end(); ++x)
 	{
-		UserData lInstanceId = *x;
+		UserData lInstanceId = x->second;
 		GetUiManager()->GetSoundManager()->DeleteSoundInstance(lInstanceId);
 	}
-	mUserDiversifiedTable.RemoveAll();
+	mUserDiversifiedTable.clear();
 	if (GetRamData() != UiLepra::INVALID_SOUNDID)
 	{
 		GetUiManager()->GetSoundManager()->Release(GetRamData());

@@ -42,6 +42,8 @@ public:
 	virtual void StartLoading();
 
 	void OnPhysicsTick();
+	void UiMove();
+	void OnSoundMoved(const Vector3DF& pPosition, const Vector3DF& pVelocity, float pVolume, float pPitch);
 
 	void DebugDrawPrimitive(DebugPrimitive pPrimitive);
 
@@ -59,20 +61,25 @@ private:
 	void TryAddTexture();
 	virtual bool TryComplete();
 	void OnLoadSound3d(UserSound3dResource* pSoundResource);
-	UserSound3dResource* CreateSharedSound(const str& pId);
-	void DeleteSharedSound(const str& pId);
+	/*UserSound3dResource* CreateSharedSound(const str& pId);
+	void DeleteSharedSound(const str& pId);*/
 
 	typedef std::vector<UserGeometryReferenceResource*> MeshArray;
-	typedef std::hash_map<str, UserSound3dResource*> SoundTable;
+	//typedef std::hash_map<str, UserSound3dResource*> SoundTable;
 
 	GameUiManager* mUiManager;
 	UserClassResource* mUiClassResource;
 	MeshArray mMeshResourceArray;
 	size_t mMeshLoadCount;
-	UserRendererImageResource mTextureResource;
-	UserSound3dResource* mSoundResource;
+	Vector3DF mSoundPosition;
+	Vector3DF mSoundVelocity;
+	float mSoundVolume;
+	float mSoundPitch;
 
-	static SoundTable mSoundTable;	// Sound resources are shared between split-screen players.
+	UserRendererImageResource mTextureResource;
+	UserSound3dResource mEngineSoundResource;
+
+	//static SoundTable mSoundTable;	// Sound resources are shared between split-screen players.
 
 	LOG_CLASS_DECLARE();
 };

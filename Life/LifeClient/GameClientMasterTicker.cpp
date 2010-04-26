@@ -4,6 +4,8 @@
 
 
 
+#include "GameClientMasterTicker.h"
+#include <algorithm>
 #include "../../Cure/Include/ResourceManager.h"
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../../Lepra/Include/AntiCrack.h"
@@ -17,7 +19,6 @@
 #include "../../UiTBC/Include/UiRenderer.h"
 #include "../LifeApplication.h"
 #include "../RtVar.h"
-#include "GameClientMasterTicker.h"
 #include "GameClientSlaveManager.h"
 
 
@@ -79,13 +80,13 @@ GameClientMasterTicker::~GameClientMasterTicker()
 		mUiManager->GetInputManager()->RemoveKeyCodeInputObserver(this);
 	}
 
-	SlaveMap::Iterator x;
-	for (x = mSlaveSet.First(); x != mSlaveSet.End(); ++x)
+	SlaveArray::iterator x;
+	for (x = mSlaveArray.begin(); x != mSlaveArray.end(); ++x)
 	{
-		GameClientSlaveManager* lSlave = x.GetObject();
+		GameClientSlaveManager* lSlave = *x;
 		delete (lSlave);
 	}
-	mSlaveSet.RemoveAll();
+	mSlaveArray.clear();
 
 	ClosePlayerCountGui();
 
@@ -99,14 +100,14 @@ bool GameClientMasterTicker::CreateSlave()
 {
 	const PixelRect lRenderArea(0, 0, mUiManager->GetDisplayManager()->GetWidth(), mUiManager->GetDisplayManager()->GetHeight());
 	ScopeLock lLock(&mLock);
-	bool lOk = (mSlaveSet.GetCount() < 4);
+	bool lOk = (mSlaveArray.size() < 4);
 	if (lOk)
 	{
 		int lFirstFreeSlaveMask = 0;
-		SlaveMap::Iterator x;
-		for (x = mSlaveSet.First(); x != mSlaveSet.End(); ++x)
+		SlaveArray::iterator x;
+		for (x = mSlaveArray.begin(); x != mSlaveArray.end(); ++x)
 		{
-			lFirstFreeSlaveMask |= (1<<x.GetObject()->GetSlaveIndex());
+			lFirstFreeSlaveMask |= (1<<(*x)->GetSlaveIndex());
 		}
 		int lFirstFreeSlaveIndex = 0;
 		for (lFirstFreeSlaveIndex = 0; lFirstFreeSlaveIndex < (int)sizeof(lFirstFreeSlaveMask)*8; ++lFirstFreeSlaveIndex)
@@ -143,29 +144,29 @@ bool GameClientMasterTicker::Tick()
 
 	ScopeLock lLock(&mLock);
 
-	SlaveMap::Iterator x;
+	SlaveArray::iterator x;
 
 	{
 		mLocalObjectSet.clear();
-		for (x = mSlaveSet.First(); x != mSlaveSet.End(); ++x)
+		for (x = mSlaveArray.begin(); x != mSlaveArray.end(); ++x)
 		{
-			x.GetObject()->AddLocalObjects(mLocalObjectSet);
+			(*x)->AddLocalObjects(mLocalObjectSet);
 		}
 
 		mUiManager->BeginRender();
 		mUiManager->InputTick();
 	}
 
-	for (x = mSlaveSet.First(); x != mSlaveSet.End();)
+	for (x = mSlaveArray.begin(); x != mSlaveArray.end();)
 	{
-		bool lDropSlave = x.GetObject()->IsQuitting();
+		bool lDropSlave = (*x)->IsQuitting();
 		if (lDropSlave)
 		{
-			GameClientSlaveManager* lSlave = x.GetObject();
+			GameClientSlaveManager* lSlave = *x;
 			++x;
 			RemoveSlave(lSlave);
 			delete (lSlave);
-			if (mSlaveSet.IsEmpty())
+			if (mSlaveArray.empty())
 			{
 				CreatePlayerCountWindow();
 			}
@@ -179,15 +180,20 @@ bool GameClientMasterTicker::Tick()
 	{
 		LEPRA_MEASURE_SCOPE(RenderSlaves);
 
+		int lSlaveIndex;
 		// Kickstart physics so no slaves have to wait too long for completion.
-		for (x = mSlaveSet.First(); lOk && x != mSlaveSet.End(); ++x)
+		lSlaveIndex = 0;
+		for (x = mSlaveArray.begin(); lOk && x != mSlaveArray.end(); ++x, ++lSlaveIndex)
 		{
-			lOk = x.GetObject()->BeginTick();
+			mUiManager->GetSoundManager()->SetCurrentListener(lSlaveIndex, (int)mSlaveArray.size());
+			lOk = (*x)->BeginTick();
 		}
 		// Start rendering machine directly afterwards.
-		for (x = mSlaveSet.First(); lOk && x != mSlaveSet.End(); ++x)
+		lSlaveIndex = 0;
+		for (x = mSlaveArray.begin(); lOk && x != mSlaveArray.end(); ++x, ++lSlaveIndex)
 		{
-			lOk = x.GetObject()->Render();
+			mUiManager->GetSoundManager()->SetCurrentListener(lSlaveIndex, (int)mSlaveArray.size());
+			lOk = (*x)->Render();
 		}
 	}
 
@@ -203,11 +209,9 @@ bool GameClientMasterTicker::Tick()
 	}
 
 	{
-		int lSlaveIndex = 0;
-		for (x = mSlaveSet.First(); lOk && x != mSlaveSet.End(); ++x, ++lSlaveIndex)
+		for (x = mSlaveArray.begin(); lOk && x != mSlaveArray.end(); ++x)
 		{
-			mUiManager->GetSoundManager()->SetCurrentListener(lSlaveIndex, (int)mSlaveSet.GetCount());
-			lOk = x.GetObject()->EndTick();
+			lOk = (*x)->EndTick();
 		}
 	}
 
@@ -272,6 +276,15 @@ bool GameClientMasterTicker::IsLocalObject(Cure::GameObjectId pInstanceId) const
 	return (mLocalObjectSet.find(pInstanceId) != mLocalObjectSet.end());
 }
 
+void GameClientMasterTicker::GetSiblings(Cure::GameObjectId pObjectId, Cure::ContextObject::Array& pSiblingArray) const
+{
+	SlaveArray::const_iterator x;
+	for (x = mSlaveArray.begin(); x != mSlaveArray.end(); ++x)
+	{
+		(*x)->DoGetSiblings(pObjectId, pSiblingArray);
+	}
+}
+
 
 
 void GameClientMasterTicker::AddSlave(GameClientSlaveManager* pSlave)
@@ -279,7 +292,7 @@ void GameClientMasterTicker::AddSlave(GameClientSlaveManager* pSlave)
 	{
 		ScopeLock lLock(&mLock);
 		pSlave->LoadSettings();
-		mSlaveSet.PushBack(pSlave, pSlave);
+		mSlaveArray.push_back(pSlave);
 	}
 }
 
@@ -287,7 +300,7 @@ void GameClientMasterTicker::RemoveSlave(GameClientSlaveManager* pSlave)
 {
 	{
 		ScopeLock lLock(&mLock);
-		mSlaveSet.Remove(pSlave);
+		std::remove(mSlaveArray.begin(), mSlaveArray.end(), pSlave);
 		UpdateSlaveLayout();
 	}
 }
@@ -326,10 +339,10 @@ bool GameClientMasterTicker::Reinitialize()
 	{
 		mUiManager->GetInputManager()->RemoveKeyCodeInputObserver(this);
 	}
-	SlaveMap::Iterator x;
-	for (x = mSlaveSet.First(); x != mSlaveSet.End(); ++x)
+	SlaveArray::iterator x;
+	for (x = mSlaveArray.begin(); x != mSlaveArray.end(); ++x)
 	{
-		x.GetObject()->Close();
+		(*x)->Close();
 	}
 	mResourceManager->StopClear();
 	mUiManager->Close();
@@ -386,10 +399,10 @@ bool GameClientMasterTicker::Reinitialize()
 		}*/
 		mUiManager->GetInputManager()->AddFunctor(new MasterInputFunctor(this));
 
-		SlaveMap::Iterator x;
-		for (x = mSlaveSet.First(); lOk && x != mSlaveSet.End(); ++x)
+		SlaveArray::iterator x;
+		for (x = mSlaveArray.begin(); lOk && x != mSlaveArray.end(); ++x)
 		{
-			lOk = x.GetObject()->Open();
+			lOk = (*x)->Open();
 		}
 	}
 	mInitialized = lOk;
@@ -408,7 +421,7 @@ void GameClientMasterTicker::UpdateSlaveLayout()
 	}
 
 	const PixelRect lRenderArea(0, 0, mUiManager->GetDisplayManager()->GetWidth(), mUiManager->GetDisplayManager()->GetHeight());
-	switch (mSlaveSet.GetCount())
+	switch (mSlaveArray.size())
 	{
 		case 0:
 		{
@@ -417,16 +430,16 @@ void GameClientMasterTicker::UpdateSlaveLayout()
 		break;
 		case 1:
 		{
-			mSlaveSet.First().GetObject()->SetRenderArea(lRenderArea);
+			mSlaveArray[0]->SetRenderArea(lRenderArea);
 		}
 		break;
 		case 2:
 		{
 			PixelRect lSideRenderArea(lRenderArea);
 			lSideRenderArea.mRight /= 2;
-			mSlaveSet.First().GetObject()->SetRenderArea(lSideRenderArea);
+			mSlaveArray[0]->SetRenderArea(lSideRenderArea);
 			lSideRenderArea.Offset(lSideRenderArea.GetWidth(), 0);
-			(++mSlaveSet.First()).GetObject()->SetRenderArea(lSideRenderArea);
+			mSlaveArray[1]->SetRenderArea(lSideRenderArea);
 		}
 		break;
 		case 3:
@@ -434,12 +447,12 @@ void GameClientMasterTicker::UpdateSlaveLayout()
 			PixelRect lTopRenderArea(lRenderArea);
 			lTopRenderArea.mRight /= 2;
 			lTopRenderArea.mBottom = (int)(lTopRenderArea.mBottom*0.6);
-			mSlaveSet.First().GetObject()->SetRenderArea(lTopRenderArea);
+			mSlaveArray[0]->SetRenderArea(lTopRenderArea);
 			lTopRenderArea.Offset(lTopRenderArea.GetWidth(), 0);
-			(++mSlaveSet.First()).GetObject()->SetRenderArea(lTopRenderArea);
+			mSlaveArray[1]->SetRenderArea(lTopRenderArea);
 			PixelRect lBottomRenderArea(lRenderArea);
 			lBottomRenderArea.mTop = lTopRenderArea.mBottom;
-			(++(++mSlaveSet.First())).GetObject()->SetRenderArea(lBottomRenderArea);
+			mSlaveArray[2]->SetRenderArea(lBottomRenderArea);
 		}
 		break;
 		case 4:
@@ -447,13 +460,13 @@ void GameClientMasterTicker::UpdateSlaveLayout()
 			PixelRect lPartRenderArea(lRenderArea);
 			lPartRenderArea.mRight /= 2;
 			lPartRenderArea.mBottom /= 2;
-			mSlaveSet.First().GetObject()->SetRenderArea(lPartRenderArea);
+			mSlaveArray[0]->SetRenderArea(lPartRenderArea);
 			lPartRenderArea.Offset(lPartRenderArea.GetWidth(), 0);
-			(++mSlaveSet.First()).GetObject()->SetRenderArea(lPartRenderArea);
+			mSlaveArray[0]->SetRenderArea(lPartRenderArea);
 			lPartRenderArea.Offset(-lPartRenderArea.GetWidth(), lPartRenderArea.GetHeight());
-			(++(++mSlaveSet.First())).GetObject()->SetRenderArea(lPartRenderArea);
+			mSlaveArray[0]->SetRenderArea(lPartRenderArea);
 			lPartRenderArea.Offset(lPartRenderArea.GetWidth(), 0);
-			(++(++(++mSlaveSet.First()))).GetObject()->SetRenderArea(lPartRenderArea);
+			mSlaveArray[0]->SetRenderArea(lPartRenderArea);
 		}
 		break;
 		default:
@@ -606,10 +619,10 @@ void GameClientMasterTicker::OnCommandError(const str&, const strutil::strvec&, 
 bool GameClientMasterTicker::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 {
 	bool lConsumed = false;
-	SlaveMap::Iterator x = mSlaveSet.First();
-	for (; !lConsumed && x != mSlaveSet.End(); ++x)
+	SlaveArray::iterator x = mSlaveArray.begin();
+	for (; !lConsumed && x != mSlaveArray.end(); ++x)
 	{
-		lConsumed = x.GetObject()->OnKeyDown(pKeyCode);
+		lConsumed = (*x)->OnKeyDown(pKeyCode);
 	}
 	return (lConsumed);
 }
@@ -617,10 +630,10 @@ bool GameClientMasterTicker::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 bool GameClientMasterTicker::OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode)
 {
 	bool lConsumed = false;
-	SlaveMap::Iterator x = mSlaveSet.First();
-	for (; !lConsumed && x != mSlaveSet.End(); ++x)
+	SlaveArray::iterator x = mSlaveArray.begin();
+	for (; !lConsumed && x != mSlaveArray.end(); ++x)
 	{
-		lConsumed = x.GetObject()->OnKeyUp(pKeyCode);
+		lConsumed = (*x)->OnKeyUp(pKeyCode);
 	}
 	return (lConsumed);
 }
@@ -632,10 +645,10 @@ void GameClientMasterTicker::OnInput(UiLepra::InputElement* pElement)
 		pElement->GetIdentifier().c_str(),
 		pElement->GetValue()));
 
-	SlaveMap::Iterator x = mSlaveSet.First();
-	for (; x != mSlaveSet.End(); ++x)
+	SlaveArray::iterator x = mSlaveArray.begin();
+	for (; x != mSlaveArray.end(); ++x)
 	{
-		x.GetObject()->OnInput(pElement);
+		(*x)->OnInput(pElement);
 	}
 }
 

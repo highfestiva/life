@@ -60,14 +60,8 @@ public:
 	void SetFrequency(SoundInstanceID pSoundIID, int pFrequency);
 	int GetFrequency(SoundInstanceID pSoundIID);
 
-	void SetSoundPosition(SoundInstanceID pSoundIID, const Vector3DF& pPos, const Vector3DF& pVel);
-	void GetSoundPosition(SoundInstanceID pSoundIID, Vector3DF& pPos, Vector3DF& pVel);
-
-	void SetCurrentListener(int pListenerIndex, int pListenerCount);
 	void SetListenerPosition(const Vector3DF& pPos, const Vector3DF& pVel,
 		const Vector3DF& pUp, const Vector3DF& pForward);
-	void GetListenerPosition(Vector3DF& pPos, Vector3DF& pVel,
-		Vector3DF& pUp, Vector3DF& pForward);
 
 	void SetDopplerFactor(float pFactor);
 	void SetRollOffFactor(float pFactor);
@@ -110,6 +104,8 @@ public:
 					float pGain);
 
 protected:
+	virtual void DoSetSoundPosition(SoundInstanceID pSoundIID, const Vector3DF& pPos, const Vector3DF& pVel);
+
 private:
 	struct Sample;
 	struct Source;

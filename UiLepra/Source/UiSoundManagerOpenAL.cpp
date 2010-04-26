@@ -41,6 +41,13 @@ SoundManagerOpenAL::SoundManagerOpenAL(int pMixRate):
 	::alcMakeContextCurrent(mContext);
 
 	::alutInitWithoutContext(0, 0);
+
+	const float lPos[3] = {0, 0, 0};
+	const float lVel[3] = {0, 0, 0};
+	const float lDirection[3+3] = {0, 1, 0, 0, 0, 1};	// Forward along Y, up along Z.
+	::alListenerfv(AL_POSITION, lPos);
+	::alListenerfv(AL_VELOCITY, lVel);
+	::alListenerfv(AL_ORIENTATION, lDirection);
 }
 
 SoundManagerOpenAL::~SoundManagerOpenAL()
@@ -274,108 +281,6 @@ int SoundManagerOpenAL::GetFrequency(SoundInstanceID)
 	return (0);
 }
 
-void SoundManagerOpenAL::SetSoundPosition(SoundInstanceID pSoundIID, const Vector3DF& pPos, const Vector3DF& pVel)
-{
-	Source* lSource = GetSource(pSoundIID);
-	if (!lSource)
-	{
-		return;
-	}
-
-	float lPos[3];
-	float lVel[3];
-	lPos[0] = pPos.x;
-	lPos[1] = pPos.y;
-	lPos[2] = pPos.z;
-	lVel[0] = pVel.x;
-	lVel[1] = pVel.y;
-	lVel[2] = pVel.z;
-	::alSourcefv(lSource->mSid, AL_POSITION, lPos);
-	::alSourcefv(lSource->mSid, AL_VELOCITY, lVel);
-}
-
-void SoundManagerOpenAL::GetSoundPosition(SoundInstanceID pSoundIID, Vector3DF& pPos, Vector3DF& pVel)
-{
-	Source* lSource = GetSource(pSoundIID);
-	if (!lSource)
-	{
-		return;
-	}
-
-	float lPos[3];
-	float lVel[3];
-	::alGetSourcefv(lSource->mSid, AL_POSITION, lPos);
-	::alGetSourcefv(lSource->mSid, AL_VELOCITY, lVel);
-	pPos.x = lPos[0];
-	pPos.y = lPos[1];
-	pPos.z = lPos[2];
-	pVel.x = lVel[0];
-	pVel.y = lVel[1];
-	pVel.z = lVel[2];
-}
-
-void SoundManagerOpenAL::SetCurrentListener(int /*pListenerIndex*/, int /*pListenerCount*/)
-{
-	//mListener = GetListener(pListenerIndex);
-}
-
-void SoundManagerOpenAL::SetListenerPosition(const Vector3DF& pPos, const Vector3DF& pVel,
-	const Vector3DF& pUp, const Vector3DF& pForward)
-{
-	/*if (!mListener)
-	{
-		assert(false);
-		return;
-	}*/
-
-	float lPos[3];
-	float lVel[3];
-	float lDirection[3+3];
-	lPos[0] = pPos.x;
-	lPos[1] = pPos.y;
-	lPos[2] = pPos.z;
-	lVel[0] = pVel.x;
-	lVel[1] = pVel.y;
-	lVel[2] = pVel.z;
-	lDirection[0] = pForward.x;
-	lDirection[1] = pForward.y;
-	lDirection[2] = pForward.z;
-	lDirection[3] = pUp.x;
-	lDirection[4] = pUp.y;
-	lDirection[5] = pUp.z;
-	::alListenerfv(AL_POSITION, lPos);
-	::alListenerfv(AL_VELOCITY, lVel);
-	::alListenerfv(AL_ORIENTATION, lDirection);
-}
-
-void SoundManagerOpenAL::GetListenerPosition(Vector3DF& pPos, Vector3DF& pVel,
-	Vector3DF& pUp, Vector3DF& pForward)
-{
-	/*if (!mListener)
-	{
-		return;
-	}*/
-
-	float lPos[3];
-	float lVel[3];
-	float lDirection[3+3];
-	::alGetListenerfv(AL_POSITION, lPos);
-	::alGetListenerfv(AL_VELOCITY, lVel);
-	::alGetListenerfv(AL_ORIENTATION, lDirection);
-	pPos.x = lPos[0];
-	pPos.y = lPos[1];
-	pPos.z = lPos[2];
-	pVel.x = lVel[0];
-	pVel.y = lVel[1];
-	pVel.z = lVel[2];
-	pForward.x = lDirection[0];
-	pForward.y = lDirection[1];
-	pForward.z = lDirection[2];
-	pUp.x = lDirection[3];
-	pUp.y = lDirection[4];
-	pUp.z = lDirection[5];
-}
-
 void SoundManagerOpenAL::SetDopplerFactor(float pFactor)
 {
 	::alDopplerFactor(pFactor);
@@ -409,6 +314,29 @@ void SoundManagerOpenAL::SetEcho(SoundInstanceID, int, float, float, float)
 
 void SoundManagerOpenAL::SetParamEQ(SoundInstanceID, int, float, float, float)
 {
+}
+
+
+
+void SoundManagerOpenAL::DoSetSoundPosition(SoundInstanceID pSoundIID, const Vector3DF& pPos, const Vector3DF& pVel)
+{
+	Source* lSource = GetSource(pSoundIID);
+	if (!lSource)
+	{
+		assert(false);
+		return;
+	}
+
+	float lPos[3];
+	float lVel[3];
+	lPos[0] = pPos.x;
+	lPos[1] = pPos.y;
+	lPos[2] = pPos.z;
+	lVel[0] = pVel.x;
+	lVel[1] = pVel.y;
+	lVel[2] = pVel.z;
+	::alSourcefv(lSource->mSid, AL_POSITION, lPos);
+	::alSourcefv(lSource->mSid, AL_VELOCITY, lVel);
 }
 
 
