@@ -123,6 +123,8 @@ bool MacFontManager::RenderGlyph(tchar pChar, Canvas& pImage, const PixelRect& p
 	CGContextShowTextAtPoint(textcontext, 0, 0, &pChar, 1);
 	CGContextFlush(textcontext);
 
+	pImage.FlipVertical();	// Upside down. TODO: verify... We currently do this on both Win and Mac...
+
 	/*printf("Rendering glyph '%c' (height=%i):\n", pChar, pImage.GetHeight());
 	for (int y = 0; y < (int)pImage.GetHeight(); ++y)
 	{

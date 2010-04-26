@@ -211,7 +211,7 @@ DiversifiedData DiversifiedResource<RamData, DiversifiedData>::GetUserData(const
 	else
 	{
 		lInstanceId = CreateDiversifiedData();
-		mUserDiversifiedTable.insert(UserDataTable::value_type(pUserResource, lInstanceId));
+		mUserDiversifiedTable.insert(typename UserDataTable::value_type(pUserResource, lInstanceId));
 	}
 	assert(lInstanceId != 0);
 	return (lInstanceId);
