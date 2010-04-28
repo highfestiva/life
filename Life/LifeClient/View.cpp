@@ -25,10 +25,10 @@ View::View(const str& pTitle, UiTbc::Layout* pLayout):
 	lCaption->SetText(pTitle, WHITE, BLACK, GRAY, BLACK);
 	SetCaption(lCaption);
 
-	UiTbc::Button* lCloseButton = new UiTbc::Button(UiTbc::BorderComponent::ZIGZAG, 2, LIGHT_GRAY, pTitle);
-	lCloseButton->SetText(_T("x"), WHITE, BLACK);
-	lCloseButton->SetPreferredSize(16, 16);
-	lCloseButton->SetMinSize(16, 16);
+	UiTbc::Button* lCloseButton = new UiTbc::Button(UiTbc::BorderComponent::ZIGZAG, 1, LIGHT_RED, pTitle);
+	//lCloseButton->SetText(_T("x"), RED, BLACK);
+	lCloseButton->SetPreferredSize(10, 10);
+	lCloseButton->SetMinSize(10, 10);
 	lCloseButton->SetOnClick(View, OnExit);
 	lCaption->SetRightButton(lCloseButton);
 }
