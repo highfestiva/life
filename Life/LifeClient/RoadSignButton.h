@@ -31,7 +31,7 @@ public:
 		SHAPE_ROUND,
 	};
 
-	RoadSignButton(GameClientSlaveManager* pClient, const str& pName, const str& pMeshResourceName, Shape pShape);
+	RoadSignButton(GameClientSlaveManager* pClient, const str& pName, const str& pTextureResourceName, Shape pShape);
 	virtual ~RoadSignButton();
 
 	UiTbc::CustomButton& GetButton();
@@ -39,10 +39,12 @@ public:
 	void SetIsMovingIn(bool pIsMovingIn);
 
 protected:
-	void OnTick(float pFrameTime);
+	void OnPhysicsTick();
 	void RenderButton(UiTbc::CustomButton* pButton);
 	bool IsOverButton(UiTbc::CustomButton* pButton, int x, int y);
-	void OnLoadMesh(UiCure::UserGeometryReferenceResource* pMeshResource);
+	virtual void DispatchOnLoadMesh(UiCure::UserGeometryReferenceResource* pMeshResource);
+	void OnLoadTexture(UiCure::UserRendererImageResource* pTextureResource);
+	virtual str GetMeshInstanceId() const;
 
 	Vector2DF Get2dProjectionPosition(const Vector3DF& p3dPosition, float& p2dRadius) const;
 	Vector2DF GetAspectRatio(bool pInverse) const;
@@ -52,7 +54,8 @@ private:
 
 	GameClientSlaveManager* mClient;
 	UiTbc::CustomButton mButton;
-	UiCure::UserGeometryReferenceResource mSignMesh;
+	//UiCure::UserGeometryReferenceResource mSignMesh;
+	UiCure::UserRendererImageResource mSignTexture;
 	Shape mShape;
 	float mMeshRadius;
 	float mAnglePart;
@@ -63,6 +66,8 @@ private:
 	float mTrajectoryEndDistance;
 	Vector2DF mTrajectoryEndPoint;
 	float mFov;
+	QuaternionF mOriginalOrientation;
+	bool mIsOriginalOrientationSet;
 
 	LOG_CLASS_DECLARE();
 };

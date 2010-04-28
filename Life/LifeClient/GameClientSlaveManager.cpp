@@ -51,6 +51,8 @@ GameClientSlaveManager::GameClientSlaveManager(GameClientMasterTicker* pMaster, 
 	mPingAttemptCount(0),
 	mJustLookingAtAvatars(false),
 	mRoadSignIndex(0),
+	mCameraPosition(0, -500, 300),
+	mCameraOrientation(PIF/2, acos(mCameraPosition.z/mCameraPosition.y), 0),
 	mAllowMovementInput(true),
 	mOptions(pVariableScope, pSlaveIndex),
 	mLoginWindow(0)
@@ -365,9 +367,6 @@ bool GameClientSlaveManager::Reset()	// Run when disconnected. Removes all objec
 		mLoginWindow->GetChild(_T("User"), 0)->SetKeyboardFocus();
 	}
 
-	mCameraPosition.Set(0, -500, 300);
-	mCameraOrientation.Set(PIF/2, acos(mCameraPosition.z/mCameraPosition.y), 0);
-
 	mObjectFrameIndexMap.clear();
 
 	ClearRoadSigns();
@@ -472,7 +471,7 @@ void GameClientSlaveManager::TickUiUpdate()
 		const float lTargetCameraXyDistance = 20.0f;
 		const float lCurrentCameraXyDistance = lTargetCameraPosition.GetDistance(lAvatarXyPosition);
 		lTargetCameraPosition = lAvatarXyPosition + (lTargetCameraPosition-lAvatarXyPosition)*(lTargetCameraXyDistance/lCurrentCameraXyDistance);
-		lTargetCameraPosition.z = lAvatarPosition.z+3;
+		lTargetCameraPosition.z = lAvatarPosition.z+6;
 		if (lTargetCameraPosition.z < -20)
 		{
 			lTargetCameraPosition.z = -20.0f;
@@ -770,8 +769,8 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 						lMessageStatus->GetMessageString(lAvatarName);
 						Cure::UserAccount::AvatarId lAvatarId = strutil::Encode(lAvatarName);
 						log_adebug("Status: INFO_AVATAR...");
-						str lResourceId = strutil::Format(_T("Data/road_sign_sign.mesh;%i_%s"), mSlaveIndex, lAvatarId.c_str());
-						RoadSignButton* lButton = new RoadSignButton(this, lAvatarId, lResourceId, RoadSignButton::SHAPE_ROUND);
+						str lTextureId = strutil::Format(_T("Data/%s.png;%i"), lAvatarId.c_str(), mSlaveIndex);
+						RoadSignButton* lButton = new RoadSignButton(this, lAvatarId, lTextureId, RoadSignButton::SHAPE_ROUND);
 						GetContext()->AddLocalObject(lButton);
 						const int SIGN_COUNT_X = 4;
 						const int SIGN_COUNT_Y = 5;
@@ -783,6 +782,7 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 						lButton->SetTrajectory(Vector2DF(x, y), 8);
 						lButton->GetButton().SetOnClick(GameClientSlaveManager, OnAvatarSelect);
 						mRoadSignMap.insert(RoadSignMap::value_type(lButton->GetInstanceId(), lButton));
+						lButton->StartLoading();
 						mJustLookingAtAvatars = false;
 					}
 					break;

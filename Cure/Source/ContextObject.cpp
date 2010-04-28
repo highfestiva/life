@@ -56,6 +56,7 @@ ContextObject::ContextObject(const str& pClassId):
 	mExtraData(0),
 	mIsLoaded(false),
 	mPhysics(0),
+	mUsePhysics(true),
 	mLastSendTime(0),
 	mSendCount(0),
 	mAllowMoveSelf(true)
@@ -263,7 +264,7 @@ void ContextObject::AddAttribute(ContextObjectAttribute* pAttribute)
 
 void ContextObject::RemoveAttribute(ContextObjectAttribute* pAttribute)
 {
-	std::remove(mAttributeArray.begin(), mAttributeArray.end(), pAttribute);
+	mAttributeArray.erase(std::remove(mAttributeArray.begin(), mAttributeArray.end(), pAttribute), mAttributeArray.end());
 }
 
 
@@ -613,6 +614,16 @@ bool ContextObject::SetPhysics(TBC::ChunkyPhysics* pStructure)
 		{
 			lTransformation = mPosition.mPosition.mTransformation;
 		}
+	}
+
+	if (!mUsePhysics)
+	{
+		bool lOk = pStructure->BoneHierarchy::FinalizeInit(TBC::ChunkyPhysics::TRANSFORM_NONE);
+		if (lOk)
+		{
+			mPhysics = pStructure;
+		}
+		return (lOk);
 	}
 
 	bool lOk = (mPhysics == 0 && pStructure->FinalizeInit(lPhysics, lPhysicsFps, &lTransformation.GetPosition(), this, this));
@@ -992,6 +1003,11 @@ void ContextObject::AddAttachment(ContextObject* pObject, TBC::PhysicsManager::J
 }
 
 
+
+void ContextObject::SetUsePhysics(bool pUsePhysics)
+{
+	mUsePhysics = pUsePhysics;
+}
 
 void ContextObject::AddChild(ContextObject* pChild)
 {

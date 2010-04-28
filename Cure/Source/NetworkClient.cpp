@@ -102,7 +102,9 @@ bool NetworkClient::Connect(const str& pLocalAddress, const str& pServerAddress,
 	if (lOk)
 	{
 		const std::string lConnectionId = SystemManager::GetRandomId();
+		lLock.Release();
 		mSocket = mMuxSocket->Connect(lTargetAddress, lConnectionId, pTimeout);
+		lLock.Acquire();
 		lOk = (mSocket != 0);
 	}
 	return (lOk);

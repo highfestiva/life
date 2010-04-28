@@ -69,29 +69,6 @@ CppContextObject::~CppContextObject()
 
 
 
-void CppContextObject::__StartLoadingFuckedUpPhysicsRemoveMe(Cure::UserResource* pClassResource, const TBC::ChunkyClass* pClass)
-{
-	str lPhysics;
-	if (pClassResource->GetLoadState() != RESOURCE_LOAD_COMPLETE)
-	{
-		lPhysics = RemoveMeTranslateToHardcodedShit(this);
-		if (lPhysics.empty())
-		{
-			mLog.Errorf(_T("Could not load class '%s'."), pClassResource->GetName().c_str());
-			assert(false);
-			return;
-		}
-	}
-	else
-	{
-		lPhysics = pClass->GetPhysicsBaseName();
-	}
-
-	StartLoadingPhysics(lPhysics);
-}
-
-
-
 void CppContextObject::StartLoading()
 {
 	assert(mClassResource == 0);
@@ -188,7 +165,17 @@ void CppContextObject::OnForceApplied(TBC::PhysicsManager::ForceFeedbackListener
 
 void CppContextObject::OnLoadClass(UserClassResource* pClassResource)
 {
-	__StartLoadingFuckedUpPhysicsRemoveMe(pClassResource, pClassResource->GetData());
+	TBC::ChunkyClass* lClass = pClassResource->GetData();
+	if (pClassResource->GetLoadState() != Cure::RESOURCE_LOAD_COMPLETE)
+	{
+		mLog.Errorf(_T("Could not load class '%s'."), pClassResource->GetName().c_str());
+		assert(false);
+		return;
+	}
+	else
+	{
+		StartLoadingPhysics(lClass->GetPhysicsBaseName());
+	}
 }
 
 void CppContextObject::OnLoadPhysics(UserPhysicsResource* pPhysicsResource)

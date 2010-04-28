@@ -52,20 +52,18 @@ protected:
 	const UiTbc::ChunkyClass* GetClass() const;
 	TBC::GeometryBase* GetMesh(int pIndex) const;
 
-private:
 	void __GetFuckedUpMeshesRemoveMe(UiTbc::ChunkyClass* pClass) const;
 
 	void OnLoadClass(UserClassResource* pClassResource);
 	void OnLoadMesh(UserGeometryReferenceResource* pMeshResource);
+	virtual void DispatchOnLoadMesh(UserGeometryReferenceResource* pMeshResource);
 	void OnLoadTexture(UserRendererImageResource* pTextureResource);
 	void TryAddTexture();
 	virtual bool TryComplete();
 	void OnLoadSound3d(UserSound3dResource* pSoundResource);
-	/*UserSound3dResource* CreateSharedSound(const str& pId);
-	void DeleteSharedSound(const str& pId);*/
+	virtual str GetMeshInstanceId() const;
 
 	typedef std::vector<UserGeometryReferenceResource*> MeshArray;
-	//typedef std::hash_map<str, UserSound3dResource*> SoundTable;
 
 	GameUiManager* mUiManager;
 	UserClassResource* mUiClassResource;
@@ -78,8 +76,6 @@ private:
 
 	UserRendererImageResource mTextureResource;
 	UserSound3dResource mEngineSoundResource;
-
-	//static SoundTable mSoundTable;	// Sound resources are shared between split-screen players.
 
 	LOG_CLASS_DECLARE();
 };

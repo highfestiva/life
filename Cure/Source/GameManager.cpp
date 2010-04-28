@@ -220,6 +220,11 @@ ConsoleManager* GameManager::GetConsoleManager() const
 	return (mConsole);
 }
 
+TimeManager* GameManager::GetTimeManager()
+{
+	return (mTime);
+}
+
 
 
 ContextObject* GameManager::CreateContextObject(const str& pClassId, NetworkObjectType pNetworkType,
@@ -310,10 +315,6 @@ void GameManager::SetNetworkAgent(NetworkAgent* pNetwork)
 	mNetwork = pNetwork;
 }
 
-TimeManager* GameManager::GetTimeManager()
-{
-	return (mTime);
-}
 
 
 

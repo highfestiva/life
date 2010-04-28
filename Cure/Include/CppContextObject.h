@@ -21,8 +21,6 @@ public:
 	virtual ~CppContextObject();
 
 protected:
-	void __StartLoadingFuckedUpPhysicsRemoveMe(Cure::UserResource* pClassResource, const TBC::ChunkyClass* pClass);
-
 	virtual void StartLoading();
 	void StartLoadingPhysics(const str& pPhysicsName);
 	virtual bool TryComplete();

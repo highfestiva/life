@@ -100,6 +100,7 @@ protected:
 	bool IsAttachedTo(ContextObject* pObject) const;
 	void AddAttachment(ContextObject* pObject, TBC::PhysicsManager::JointID pJoint, TBC::PhysicsEngine* pEngine);
 
+	void SetUsePhysics(bool pUsePhysics);
 	void AddChild(ContextObject* pObject);
 	void SetupChildTriggerHandlers();
 
@@ -132,6 +133,7 @@ protected:
 	bool mIsLoaded;
 	AttributeArray mAttributeArray;
 	TBC::ChunkyPhysics* mPhysics;
+	bool mUsePhysics;
 	float mLastSendTime;
 	ObjectPositionalData mPosition;
 	int mSendCount;

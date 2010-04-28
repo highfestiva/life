@@ -163,13 +163,15 @@ bool GameClientMasterTicker::Tick()
 		if (lDropSlave)
 		{
 			GameClientSlaveManager* lSlave = *x;
-			++x;
 			RemoveSlave(lSlave);
+			LEPRA_DEBUG_CODE(SlaveArray::iterator y;);
+			LEPRA_DEBUG_CODE(for (y = mSlaveArray.begin(); y != x; ++y));
 			delete (lSlave);
 			if (mSlaveArray.empty())
 			{
 				CreatePlayerCountWindow();
 			}
+			x = mSlaveArray.begin();
 		}
 		else
 		{
@@ -300,7 +302,9 @@ void GameClientMasterTicker::RemoveSlave(GameClientSlaveManager* pSlave)
 {
 	{
 		ScopeLock lLock(&mLock);
-		std::remove(mSlaveArray.begin(), mSlaveArray.end(), pSlave);
+		LEPRA_DEBUG_CODE(const size_t lPreRemoveCount = mSlaveArray.size());
+		mSlaveArray.erase(std::remove(mSlaveArray.begin(), mSlaveArray.end(), pSlave), mSlaveArray.end());
+		assert(lPreRemoveCount-1 == mSlaveArray.size());
 		UpdateSlaveLayout();
 	}
 }

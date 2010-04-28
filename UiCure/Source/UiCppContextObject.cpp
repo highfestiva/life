@@ -63,7 +63,8 @@ void CppContextObject::StartLoading()
 	mUiClassResource->Load(GetManager()->GetGameManager()->GetResourceManager(), lClassName,
 		UserClassResource::TypeLoadCallback(this, &CppContextObject::OnLoadClass));
 
-	//if (strutil::StartsWith(GetClassId(), _T("helicopter")))
+	if (strutil::StartsWith(GetClassId(), _T("helicopter")) ||
+		strutil::StartsWith(GetClassId(), _T("monster")))
 	{
 		const str lSoundName = _T("Data/Bark.wav");
 		mEngineSoundResource.Load(GetManager()->GetGameManager()->GetResourceManager(), lSoundName,
@@ -104,14 +105,20 @@ void CppContextObject::UiMove()
 		{
 			continue;
 		}
-		TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(lResource->GetOffset().mGeometryIndex);
-		if (lGeometry == 0 || lGeometry->GetBodyId() == TBC::INVALID_BODY)
+		if (mUsePhysics)
 		{
-			mLog.Warningf(_T("Physical body for %s not loaded!"), lResource->GetName().c_str());
-			continue;
+			TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(lResource->GetOffset().mGeometryIndex);
+			if (lGeometry == 0 || lGeometry->GetBodyId() == TBC::INVALID_BODY)
+			{
+				mLog.Warningf(_T("Physical body for %s not loaded!"), lResource->GetName().c_str());
+				continue;
+			}
+			mManager->GetGameManager()->GetPhysicsManager()->GetBodyTransform(lGeometry->GetBodyId(), lPhysicsTransform);
 		}
-
-		mManager->GetGameManager()->GetPhysicsManager()->GetBodyTransform(lGeometry->GetBodyId(), lPhysicsTransform);
+		else
+		{
+			lPhysicsTransform = mPhysics->GetBoneTransformation(lResource->GetOffset().mGeometryIndex);
+		}
 
 		TBC::GeometryBase* lGfxGeometry = lResource->GetRamData();
 		//if (GetNetworkObjectType() == Cure::NETWORK_OBJECT_REMOTE_CONTROLLED)
@@ -134,8 +141,13 @@ void CppContextObject::UiMove()
 
 	if (mEngineSoundResource.GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
+		if (!mUsePhysics)
+		{
+			return;	// TODO: play sounds for graphical objects without physics too.
+		}
+
 		TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());	// TODO: add sound->engine index in class info!
-		if (lGeometry == 0 || lGeometry->GetBodyId() == TBC::INVALID_BODY)
+		if (lGeometry == 0 || (mUsePhysics && lGeometry->GetBodyId() == TBC::INVALID_BODY))
 		{
 			mLog.Warningf(_T("Physical body for %s not loaded!"), mEngineSoundResource.GetName().c_str());
 		}
@@ -394,15 +406,11 @@ void CppContextObject::__GetFuckedUpMeshesRemoveMe(UiTbc::ChunkyClass* pClass) c
 void CppContextObject::OnLoadClass(UserClassResource* pClassResource)
 {
 	UiTbc::ChunkyClass* lClass = pClassResource->GetData();
-
 	if (pClassResource->GetLoadState() != Cure::RESOURCE_LOAD_COMPLETE)
 	{
-		Parent::__StartLoadingFuckedUpPhysicsRemoveMe(pClassResource, lClass);
-		__GetFuckedUpMeshesRemoveMe((UiTbc::ChunkyClass*)lClass);
-		/* TODO: put me back!
 		mLog.Errorf(_T("Could not load class '%s'."), pClassResource->GetName().c_str());
 		assert(false);
-		return;*/
+		return;
 	}
 	else
 	{
@@ -424,11 +432,11 @@ void CppContextObject::OnLoadClass(UserClassResource* pClassResource)
 		lMeshName = lMeshNameList[0];
 		if (lMeshNameList.size() == 1)
 		{
-			lMeshInstance = strutil::Format(_T("%u"), GetInstanceId());
+			lMeshInstance = strutil::Format(_T("%s"), GetMeshInstanceId().c_str());
 		}
 		else
 		{
-			lMeshInstance = strutil::Format(_T("%s_%u"), lMeshNameList[1].c_str(), GetInstanceId());
+			lMeshInstance = strutil::Format(_T("%s_%s"), lMeshNameList[1].c_str(), GetMeshInstanceId().c_str());
 		}
 		UiCure::UserGeometryReferenceResource* lMesh = new UiCure::UserGeometryReferenceResource(
 			mUiManager, UiCure::GeometryOffset(lPhysIndex, lTransform));
@@ -443,6 +451,11 @@ void CppContextObject::OnLoadClass(UserClassResource* pClassResource)
 }
 
 void CppContextObject::OnLoadMesh(UserGeometryReferenceResource* pMeshResource)
+{
+	DispatchOnLoadMesh(pMeshResource);
+}
+
+void CppContextObject::DispatchOnLoadMesh(UserGeometryReferenceResource* pMeshResource)
 {
 	++mMeshLoadCount;
 	if (pMeshResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
@@ -572,6 +585,11 @@ void CppContextObject::OnLoadSound3d(UserSound3dResource* pSoundResource)
 	{
 		mUiManager->GetSoundManager()->Play(pSoundResource->GetData(), 0, 1.0);
 	}
+}
+
+str CppContextObject::GetMeshInstanceId() const
+{
+	return (strutil::IntToString(GetInstanceId(), 10));
 }
 
 

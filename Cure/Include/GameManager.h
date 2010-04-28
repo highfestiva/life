@@ -59,6 +59,7 @@ public:
 	const TimeManager* GetConstTimeManager() const;
 	LEPRA_DEBUG_CODE(virtual) TBC::PhysicsManager* GetPhysicsManager() const;
 	ConsoleManager* GetConsoleManager() const;
+	TimeManager* GetTimeManager();
 
 	ContextObject* CreateContextObject(const str& pClassId, NetworkObjectType pNetworkType,
 		GameObjectId pInstanceId = 0);
@@ -82,7 +83,6 @@ protected:
 
 	NetworkAgent* GetNetworkAgent() const;
 	void SetNetworkAgent(NetworkAgent* pNetwork);
-	TimeManager* GetTimeManager();
 
 	virtual void TickInput() = 0;
 	virtual bool TickNetworkOutput();
