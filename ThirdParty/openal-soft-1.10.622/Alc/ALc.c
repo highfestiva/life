@@ -214,7 +214,7 @@ static ALCenum g_eLastContextError = ALC_NO_ERROR;
 ///////////////////////////////////////////////////////
 // ALC Related helper functions
 #ifdef _WIN32
-static void alc_init(void);
+ALC_API void ALC_APIENTRY alc_init(void);
 static void alc_deinit(void);
 
 BOOL APIENTRY DllMain(HANDLE hModule,DWORD ul_reason_for_call,LPVOID lpReserved)
@@ -226,7 +226,7 @@ BOOL APIENTRY DllMain(HANDLE hModule,DWORD ul_reason_for_call,LPVOID lpReserved)
     {
         case DLL_PROCESS_ATTACH:
             DisableThreadLibraryCalls(hModule);
-            alc_init();
+            //alc_init();
             break;
 
         case DLL_PROCESS_DETACH:
@@ -237,12 +237,12 @@ BOOL APIENTRY DllMain(HANDLE hModule,DWORD ul_reason_for_call,LPVOID lpReserved)
 }
 #else
 #ifdef HAVE_GCC_DESTRUCTOR
-static void alc_init(void) __attribute__((constructor));
+ALC_API void ALC_APIENTRY alc_init(void) __attribute__((constructor));
 static void alc_deinit(void) __attribute__((destructor));
 #endif
 #endif
 
-static void alc_init(void)
+ALC_API void ALC_APIENTRY alc_init(void)
 {
     int i;
     const char *devs, *str;

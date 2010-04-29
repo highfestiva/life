@@ -10,6 +10,10 @@
 
 
 
+extern "C" ALC_API void ALC_APIENTRY alc_init(void);	// Not intended for this type of use, but LGPL OpenAL can't load dsound.dll from DllMain.
+
+
+
 namespace UiLepra
 {
 
@@ -21,6 +25,7 @@ SoundManagerOpenAL::SoundManagerOpenAL(int pMixRate):
 	mRollOffFactor(1)
 {
 #ifdef LEPRA_WINDOWS
+	alc_init();
 	mDevice = ::alcOpenDevice(0);
 #else // !Windows
 	mDevice = ::alcOpenDevice("'((direction \"write\")) '((devices '(alsa sdl native null)))");
