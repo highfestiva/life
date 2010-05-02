@@ -8,11 +8,13 @@
 #include <algorithm>
 #include "../../Cure/Include/ResourceManager.h"
 #include "../../Cure/Include/RuntimeVariable.h"
+#include "../../Cure/Include/TimeManager.h"
 #include "../../Lepra/Include/AntiCrack.h"
 #include "../../Lepra/Include/Performance.h"
 #include "../../Lepra/Include/SystemManager.h"
 #include "../../UiCure/Include/UiGameUiManager.h"
 #include "../../UiCure/Include/UiCppContextObject.h"
+#include "../../UiCure/Include/UiRuntimeVariableName.h"
 #include "../../UiTBC/Include/GUI/UiCenterLayout.h"
 #include "../../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../../UiTBC/Include/GUI/UiFloatingLayout.h"
@@ -20,6 +22,7 @@
 #include "../LifeApplication.h"
 #include "../RtVar.h"
 #include "GameClientSlaveManager.h"
+#include "RoadSignButton.h"
 
 
 
@@ -41,11 +44,19 @@ GameClientMasterTicker::GameClientMasterTicker(UiCure::GameUiManager* pUiManager
 	mUiManager(pUiManager),
 	mResourceManager(pResourceManager),
 	mPlayerCountView(0),
+	mButton(0),
 	mRestartUi(false),
 	mInitialized(false),
 	mActiveWidth(0),
-	mActiveHeight(0)
+	mActiveHeight(0),
+	mActiveSlaveCount(0),
+	mSlaveTopSplit(1),
+	mSlaveBottomSplit(1),
+	mSlaveVSplit(1),
+	mSlaveFade(0)
 {
+	mSlaveArray.resize(4, 0);
+
 	UiLepra::DisplayManager::EnableScreensaver(false);
 
 	mConsole = new ConsoleManager(0, UiCure::GetSettings(), 0, 0);
@@ -100,32 +111,26 @@ bool GameClientMasterTicker::CreateSlave()
 {
 	const PixelRect lRenderArea(0, 0, mUiManager->GetDisplayManager()->GetWidth(), mUiManager->GetDisplayManager()->GetHeight());
 	ScopeLock lLock(&mLock);
-	bool lOk = (mSlaveArray.size() < 4);
+	bool lOk = (mActiveSlaveCount < 4);
 	if (lOk)
 	{
-		int lFirstFreeSlaveMask = 0;
-		SlaveArray::iterator x;
-		for (x = mSlaveArray.begin(); x != mSlaveArray.end(); ++x)
+		int lFreeSlaveIndex = 0;
+		for (; lFreeSlaveIndex < 4; ++lFreeSlaveIndex)
 		{
-			lFirstFreeSlaveMask |= (1<<(*x)->GetSlaveIndex());
-		}
-		int lFirstFreeSlaveIndex = 0;
-		for (lFirstFreeSlaveIndex = 0; lFirstFreeSlaveIndex < (int)sizeof(lFirstFreeSlaveMask)*8; ++lFirstFreeSlaveIndex)
-		{
-			if (!(lFirstFreeSlaveMask&(1<<lFirstFreeSlaveIndex)))
+			if (!mSlaveArray[lFreeSlaveIndex])
 			{
 				break;
 			}
 		}
+		assert(lFreeSlaveIndex < 4);
 		Cure::RuntimeVariableScope* lVariables = new Cure::RuntimeVariableScope(UiCure::GetSettings());
 		GameClientSlaveManager* lSlave = new GameClientSlaveManager(this, lVariables, mResourceManager,
-			mUiManager, lFirstFreeSlaveIndex, lRenderArea);
+			mUiManager, lFreeSlaveIndex, lRenderArea);
 		AddSlave(lSlave);
 		if (mInitialized)
 		{
 			lOk = lSlave->Open();
 		}
-		UpdateSlaveLayout();
 	}
 	else
 	{
@@ -150,33 +155,15 @@ bool GameClientMasterTicker::Tick()
 		mLocalObjectSet.clear();
 		for (x = mSlaveArray.begin(); x != mSlaveArray.end(); ++x)
 		{
-			(*x)->AddLocalObjects(mLocalObjectSet);
+			GameClientSlaveManager* lSlave = *x;
+			if (lSlave)
+			{
+				lSlave->AddLocalObjects(mLocalObjectSet);
+			}
 		}
 
 		mUiManager->BeginRender();
 		mUiManager->InputTick();
-	}
-
-	for (x = mSlaveArray.begin(); x != mSlaveArray.end();)
-	{
-		bool lDropSlave = (*x)->IsQuitting();
-		if (lDropSlave)
-		{
-			GameClientSlaveManager* lSlave = *x;
-			RemoveSlave(lSlave);
-			LEPRA_DEBUG_CODE(SlaveArray::iterator y;);
-			LEPRA_DEBUG_CODE(for (y = mSlaveArray.begin(); y != x; ++y));
-			delete (lSlave);
-			if (mSlaveArray.empty())
-			{
-				CreatePlayerCountWindow();
-			}
-			x = mSlaveArray.begin();
-		}
-		else
-		{
-			++x;
-		}
 	}
 
 	{
@@ -185,18 +172,33 @@ bool GameClientMasterTicker::Tick()
 		int lSlaveIndex;
 		// Kickstart physics so no slaves have to wait too long for completion.
 		lSlaveIndex = 0;
-		for (x = mSlaveArray.begin(); lOk && x != mSlaveArray.end(); ++x, ++lSlaveIndex)
+		for (x = mSlaveArray.begin(); lOk && x != mSlaveArray.end(); ++x)
 		{
-			mUiManager->GetSoundManager()->SetCurrentListener(lSlaveIndex, (int)mSlaveArray.size());
-			lOk = (*x)->BeginTick();
+			GameClientSlaveManager* lSlave = *x;
+			if (lSlave)
+			{
+				mUiManager->GetSoundManager()->SetCurrentListener(lSlaveIndex, mActiveSlaveCount);
+				lOk = lSlave->BeginTick();
+				++lSlaveIndex;
+			}
 		}
 		// Start rendering machine directly afterwards.
 		lSlaveIndex = 0;
-		for (x = mSlaveArray.begin(); lOk && x != mSlaveArray.end(); ++x, ++lSlaveIndex)
+		for (x = mSlaveArray.begin(); lOk && x != mSlaveArray.end(); ++x)
 		{
-			mUiManager->GetSoundManager()->SetCurrentListener(lSlaveIndex, (int)mSlaveArray.size());
-			lOk = (*x)->Render();
+			GameClientSlaveManager* lSlave = *x;
+			if (lSlave)
+			{
+				mUiManager->GetSoundManager()->SetCurrentListener(lSlaveIndex, mActiveSlaveCount);
+				lOk = lSlave->Render();
+			}
 		}
+	}
+
+	if (mButton)
+	{
+		const float lFrameTime = 1/(float)CURE_RTVAR_GET(Cure::GetSettings(), RTVAR_PHYSICS_FPS, 30.0);
+		mButton->MoveSign(lFrameTime);
 	}
 
 	{
@@ -213,7 +215,11 @@ bool GameClientMasterTicker::Tick()
 	{
 		for (x = mSlaveArray.begin(); lOk && x != mSlaveArray.end(); ++x)
 		{
-			lOk = (*x)->EndTick();
+			GameClientSlaveManager* lSlave = *x;
+			if (lSlave)
+			{
+				lOk = lSlave->EndTick();
+			}
 		}
 	}
 
@@ -235,8 +241,8 @@ bool GameClientMasterTicker::Tick()
 	{
 		mActiveWidth = mUiManager->GetDisplayManager()->GetWidth();
 		mActiveHeight = mUiManager->GetDisplayManager()->GetHeight();
-		UpdateSlaveLayout();
 	}
+	UpdateSlaveLayout();
 
 	if (mRestartUi)
 	{
@@ -283,8 +289,29 @@ void GameClientMasterTicker::GetSiblings(Cure::GameObjectId pObjectId, Cure::Con
 	SlaveArray::const_iterator x;
 	for (x = mSlaveArray.begin(); x != mSlaveArray.end(); ++x)
 	{
-		(*x)->DoGetSiblings(pObjectId, pSiblingArray);
+		GameClientSlaveManager* lSlave = *x;
+		if (lSlave)
+		{
+			lSlave->DoGetSiblings(pObjectId, pSiblingArray);
+		}
 	}
+}
+
+
+
+PixelRect GameClientMasterTicker::GetRenderArea() const
+{
+	return (PixelRect(0, 0, mUiManager->GetDisplayManager()->GetWidth()-1,
+		mUiManager->GetDisplayManager()->GetHeight()-1));
+}
+
+float GameClientMasterTicker::UpdateFrustum()
+{
+	float lFov = (float)CURE_RTVAR_GET(UiCure::GetSettings(), RTVAR_UI_3D_FOV, 90.0);
+	float lClipNear = (float)CURE_RTVAR_GET(UiCure::GetSettings(), RTVAR_UI_3D_CLIPNEAR, 0.1);
+	float lClipFar = (float)CURE_RTVAR_GET(UiCure::GetSettings(), RTVAR_UI_3D_CLIPFAR, 1000.0);
+	mUiManager->GetRenderer()->SetViewFrustum(lFov, lClipNear, lClipFar);
+	return (lFov);
 }
 
 
@@ -294,18 +321,23 @@ void GameClientMasterTicker::AddSlave(GameClientSlaveManager* pSlave)
 	{
 		ScopeLock lLock(&mLock);
 		pSlave->LoadSettings();
-		mSlaveArray.push_back(pSlave);
+		assert(mSlaveArray[pSlave->GetSlaveIndex()] == 0);
+		mSlaveArray[pSlave->GetSlaveIndex()] = pSlave;
+		++mActiveSlaveCount;
 	}
 }
 
-void GameClientMasterTicker::RemoveSlave(GameClientSlaveManager* pSlave)
+void GameClientMasterTicker::DeleteSlave(GameClientSlaveManager* pSlave)
 {
 	{
 		ScopeLock lLock(&mLock);
-		LEPRA_DEBUG_CODE(const size_t lPreRemoveCount = mSlaveArray.size());
-		mSlaveArray.erase(std::remove(mSlaveArray.begin(), mSlaveArray.end(), pSlave), mSlaveArray.end());
-		assert(lPreRemoveCount-1 == mSlaveArray.size());
-		UpdateSlaveLayout();
+		assert(mSlaveArray[pSlave->GetSlaveIndex()]);
+		mSlaveArray[pSlave->GetSlaveIndex()] = 0;
+		delete (pSlave);
+		if (--mActiveSlaveCount == 0)
+		{
+			CreatePlayerCountWindow();
+		}
 	}
 }
 
@@ -329,9 +361,19 @@ void GameClientMasterTicker::CreatePlayerCountWindow()
 {
 	assert(!mPlayerCountView);
 	mPlayerCountView = new PlayerCountView(this);
-	mUiManager->AssertDesktopLayout(new UiTbc::CenterLayout());
+	mUiManager->AssertDesktopLayout(new UiTbc::FloatingLayout());
 	mUiManager->GetDesktopWindow()->AddChild(mPlayerCountView);
 	mUiManager->GetDesktopWindow()->UpdateLayout();
+
+	assert(!mButton);
+	mButton = new RoadSignButton(this, mResourceManager, mUiManager, _T("?"), _T("road_sign"), _T("?.png;-1"), RoadSignButton::SHAPE_BOX);
+	mButton->SetInstanceId((uint32)-1);
+	const float x = 0.3f;
+	const float y = 0.3f;
+	mButton->SetTrajectory(Vector2DF(x, y), 4);
+	//mButton->GetButton().SetOnClick(GameClientSlaveManager, OnAvatarSelect);
+	//mRoadSignMap.insert(RoadSignMap::value_type(mButton->GetInstanceId(), mButton));
+	mButton->StartLoading();
 }
 
 bool GameClientMasterTicker::Reinitialize()
@@ -346,7 +388,11 @@ bool GameClientMasterTicker::Reinitialize()
 	SlaveArray::iterator x;
 	for (x = mSlaveArray.begin(); x != mSlaveArray.end(); ++x)
 	{
-		(*x)->Close();
+		GameClientSlaveManager* lSlave = *x;
+		if (lSlave)
+		{
+			lSlave->Close();
+		}
 	}
 	mResourceManager->StopClear();
 	mUiManager->Close();
@@ -406,7 +452,11 @@ bool GameClientMasterTicker::Reinitialize()
 		SlaveArray::iterator x;
 		for (x = mSlaveArray.begin(); lOk && x != mSlaveArray.end(); ++x)
 		{
-			lOk = (*x)->Open();
+			GameClientSlaveManager* lSlave = *x;
+			if (lSlave)
+			{
+				lOk = lSlave->Open();
+			}
 		}
 	}
 	mInitialized = lOk;
@@ -424,61 +474,143 @@ void GameClientMasterTicker::UpdateSlaveLayout()
 		return;
 	}
 
-	const PixelRect lRenderArea(0, 0, mUiManager->GetDisplayManager()->GetWidth(), mUiManager->GetDisplayManager()->GetHeight());
-	switch (mSlaveArray.size())
+	int lAveragedSlaves = 1;
+	float lFrameTime = 1/(float)CURE_RTVAR_GET(Cure::GetSettings(), RTVAR_PHYSICS_FPS, 30.0);
+	for (int x = 0; x < 4; ++x)
 	{
-		case 0:
+		if (mSlaveArray[x])
 		{
-			// Do nothing; no client to move.
+			lFrameTime += mSlaveArray[x]->GetTimeManager()->GetNormalFrameTime();
+			++lAveragedSlaves;
 		}
-		break;
-		case 1:
-		{
-			mSlaveArray[0]->SetRenderArea(lRenderArea);
-		}
-		break;
-		case 2:
-		{
-			PixelRect lSideRenderArea(lRenderArea);
-			lSideRenderArea.mRight /= 2;
-			mSlaveArray[0]->SetRenderArea(lSideRenderArea);
-			lSideRenderArea.Offset(lSideRenderArea.GetWidth(), 0);
-			mSlaveArray[1]->SetRenderArea(lSideRenderArea);
-		}
-		break;
-		case 3:
-		{
-			PixelRect lTopRenderArea(lRenderArea);
-			lTopRenderArea.mRight /= 2;
-			lTopRenderArea.mBottom = (int)(lTopRenderArea.mBottom*0.6);
-			mSlaveArray[0]->SetRenderArea(lTopRenderArea);
-			lTopRenderArea.Offset(lTopRenderArea.GetWidth(), 0);
-			mSlaveArray[1]->SetRenderArea(lTopRenderArea);
-			PixelRect lBottomRenderArea(lRenderArea);
-			lBottomRenderArea.mTop = lTopRenderArea.mBottom;
-			mSlaveArray[2]->SetRenderArea(lBottomRenderArea);
-		}
-		break;
-		case 4:
-		{
-			PixelRect lPartRenderArea(lRenderArea);
-			lPartRenderArea.mRight /= 2;
-			lPartRenderArea.mBottom /= 2;
-			mSlaveArray[0]->SetRenderArea(lPartRenderArea);
-			lPartRenderArea.Offset(lPartRenderArea.GetWidth(), 0);
-			mSlaveArray[0]->SetRenderArea(lPartRenderArea);
-			lPartRenderArea.Offset(-lPartRenderArea.GetWidth(), lPartRenderArea.GetHeight());
-			mSlaveArray[0]->SetRenderArea(lPartRenderArea);
-			lPartRenderArea.Offset(lPartRenderArea.GetWidth(), 0);
-			mSlaveArray[0]->SetRenderArea(lPartRenderArea);
-		}
-		break;
-		default:
-		{
-			mLog.AError("Too many clients, unable to layout.");
-		}
-		break;
 	}
+	lFrameTime /= lAveragedSlaves;
+	const float lLayoutSpeed = Math::GetIterateLerpTime(0.98f, lFrameTime);
+
+	GameClientSlaveManager* lLastSlave = 0;
+	if (mActiveSlaveCount == 1)
+	{
+		for (int x = 0; x < 4; ++x)
+		{
+			if (mSlaveArray[x] && mSlaveArray[x]->IsQuitting())
+			{
+				lLastSlave = mSlaveArray[x];
+				break;
+			}
+		}
+	}
+	if (!lLastSlave)
+	{
+		mSlaveTopSplit = Math::Lerp(mSlaveTopSplit, (GetSlaveAnimationTarget(0)-GetSlaveAnimationTarget(1)) * 0.5f + 0.5f, lLayoutSpeed);
+		mSlaveBottomSplit = Math::Lerp(mSlaveBottomSplit, (GetSlaveAnimationTarget(2)-GetSlaveAnimationTarget(3)) * 0.5f + 0.5f, lLayoutSpeed);
+		mSlaveVSplit = Math::Lerp(mSlaveVSplit, GetSlavesVerticalAnimationTarget(), lLayoutSpeed);
+		mSlaveFade = 0;
+		SlideSlaveLayout();
+	}
+	else
+	{
+		mSlaveFade = Math::Lerp(mSlaveFade, 1.0f, lLayoutSpeed);
+		if (mSlaveFade < 1 - 1e-5f)
+		{
+			lLastSlave->SetFade(mSlaveFade);
+		}
+		else
+		{
+			DeleteSlave(lLastSlave);
+		}
+	}
+}
+
+void GameClientMasterTicker::SlideSlaveLayout()
+{
+	const PixelRect lRenderArea(0, 0, mUiManager->GetDisplayManager()->GetWidth(), mUiManager->GetDisplayManager()->GetHeight());
+	const float lRenderAreas[][4] =
+	{
+		{ 0, 0, mSlaveTopSplit, mSlaveVSplit, },
+		{ mSlaveTopSplit, 0, 1, mSlaveVSplit, },
+		{ 0, mSlaveVSplit, mSlaveBottomSplit, 1, },
+		{ mSlaveBottomSplit, mSlaveVSplit, 1, 1, },
+	};
+	for (int x = 0; x < 4; ++x)
+	{
+		if (mSlaveArray[x] == 0)
+		{
+			continue;
+		}
+
+		PixelRect lPartRenderArea(
+			(int)(lRenderArea.GetWidth()  * lRenderAreas[x][0]),
+			(int)(lRenderArea.GetHeight() * lRenderAreas[x][1]),
+			(int)(lRenderArea.GetWidth()  * lRenderAreas[x][2]),
+			(int)(lRenderArea.GetHeight() * lRenderAreas[x][3])
+			);
+		const int REQUIRED_PIXELS = 4;
+		if (lPartRenderArea.mLeft <= REQUIRED_PIXELS)
+		{
+			lPartRenderArea.mLeft = 0;
+		}
+		if (lPartRenderArea.GetWidth() >= lRenderArea.GetWidth()-REQUIRED_PIXELS)
+		{
+			lPartRenderArea.mRight = lRenderArea.mRight;
+		}
+		if (lPartRenderArea.mTop <= REQUIRED_PIXELS)
+		{
+			lPartRenderArea.mTop = 0;
+		}
+		if (lPartRenderArea.GetHeight() >= lRenderArea.GetHeight()-REQUIRED_PIXELS)
+		{
+			lPartRenderArea.mBottom = lRenderArea.mBottom;
+		}
+
+		if (lPartRenderArea.GetWidth() < REQUIRED_PIXELS || lPartRenderArea.GetHeight() < REQUIRED_PIXELS)
+		{
+			if (mSlaveArray[x]->IsQuitting())
+			{
+				DeleteSlave(mSlaveArray[x]);
+			}
+		}
+		else
+		{
+			mSlaveArray[x]->SetRenderArea(lPartRenderArea);
+		}
+	}
+}
+
+int GameClientMasterTicker::GetSlaveAnimationTarget(int pSlaveIndex) const
+{
+	assert(pSlaveIndex >= 0 && pSlaveIndex < 4);
+	GameClientSlaveManager* lSlave = mSlaveArray[pSlaveIndex];
+	return (lSlave && !lSlave->IsQuitting())? 1 : 0;
+}
+
+float GameClientMasterTicker::GetSlavesVerticalAnimationTarget() const
+{
+	const int lTop = GetSlaveAnimationTarget(0) + GetSlaveAnimationTarget(1);
+	const int lBottom = GetSlaveAnimationTarget(2) + GetSlaveAnimationTarget(3);
+	if (lTop == 0 && lBottom == 0)
+	{
+		return (1.0f);
+	}
+
+	float lTopScale = 0;
+	if (lTop == 1)
+	{
+		lTopScale = 0.6f;
+	}
+	else if (lTop == 2)
+	{
+		lTopScale = 1.0f;
+	}
+	float lBottomScale = 0;
+	if (lBottom == 1)
+	{
+		lBottomScale = 0.6f;
+	}
+	else if (lBottom == 2)
+	{
+		lBottomScale = 1.0f;
+	}
+	return (lTopScale / (lTopScale+lBottomScale));
 }
 
 void GameClientMasterTicker::Profile()
@@ -626,7 +758,11 @@ bool GameClientMasterTicker::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 	SlaveArray::iterator x = mSlaveArray.begin();
 	for (; !lConsumed && x != mSlaveArray.end(); ++x)
 	{
-		lConsumed = (*x)->OnKeyDown(pKeyCode);
+		GameClientSlaveManager* lSlave = *x;
+		if (lSlave)
+		{
+			lConsumed = lSlave->OnKeyDown(pKeyCode);
+		}
 	}
 	return (lConsumed);
 }
@@ -637,7 +773,11 @@ bool GameClientMasterTicker::OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode)
 	SlaveArray::iterator x = mSlaveArray.begin();
 	for (; !lConsumed && x != mSlaveArray.end(); ++x)
 	{
-		lConsumed = (*x)->OnKeyUp(pKeyCode);
+		GameClientSlaveManager* lSlave = *x;
+		if (lSlave)
+		{
+			lConsumed = lSlave->OnKeyUp(pKeyCode);
+		}
 	}
 	return (lConsumed);
 }
@@ -652,7 +792,11 @@ void GameClientMasterTicker::OnInput(UiLepra::InputElement* pElement)
 	SlaveArray::iterator x = mSlaveArray.begin();
 	for (; x != mSlaveArray.end(); ++x)
 	{
-		(*x)->OnInput(pElement);
+		GameClientSlaveManager* lSlave = *x;
+		if (lSlave)
+		{
+			lSlave->OnInput(pElement);
+		}
 	}
 }
 
@@ -665,6 +809,10 @@ void GameClientMasterTicker::ClosePlayerCountGui()
 		mUiManager->GetDesktopWindow()->RemoveChild(mPlayerCountView, 0);
 		delete (mPlayerCountView);
 		mPlayerCountView = 0;
+
+		assert(mButton);
+		delete (mButton);
+		mButton = 0;
 	}
 }
 

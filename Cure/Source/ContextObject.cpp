@@ -48,8 +48,9 @@ namespace Cure
 
 
 
-ContextObject::ContextObject(const str& pClassId):
+ContextObject::ContextObject(Cure::ResourceManager* pResourceManager, const str& pClassId):
 	mManager(0),
+	mResourceManager(pResourceManager),
 	mInstanceId(0),
 	mClassId(pClassId),
 	mNetworkObjectType(NETWORK_OBJECT_LOCAL_ONLY),
@@ -184,7 +185,10 @@ void ContextObject::SetLoadResult(bool pOk)
 {
 	assert(!mIsLoaded);
 	mIsLoaded = true;
-	GetManager()->GetGameManager()->OnLoadCompleted(this, pOk);
+	if (GetManager())
+	{
+		GetManager()->GetGameManager()->OnLoadCompleted(this, pOk);
+	}
 }
 
 
@@ -597,9 +601,6 @@ float ContextObject::GetMass() const
 
 bool ContextObject::SetPhysics(TBC::ChunkyPhysics* pStructure)
 {
-	TBC::PhysicsManager* lPhysics = mManager->GetGameManager()->GetPhysicsManager();
-	const int lPhysicsFps = mManager->GetGameManager()->GetConstTimeManager()->GetDesiredMicroSteps();
-
 	TransformationF lTransformation;
 	if (GetNetworkObjectType() != NETWORK_OBJECT_LOCAL_ONLY)
 	{
@@ -626,6 +627,8 @@ bool ContextObject::SetPhysics(TBC::ChunkyPhysics* pStructure)
 		return (lOk);
 	}
 
+	TBC::PhysicsManager* lPhysics = mManager->GetGameManager()->GetPhysicsManager();
+	const int lPhysicsFps = mManager->GetGameManager()->GetConstTimeManager()->GetDesiredMicroSteps();
 	bool lOk = (mPhysics == 0 && pStructure->FinalizeInit(lPhysics, lPhysicsFps, &lTransformation.GetPosition(), this, this));
 	assert(lOk);
 	if (lOk)
@@ -1040,6 +1043,13 @@ void ContextObject::SetupChildTriggerHandlers()
 bool ContextObject::IsSameInstance(TBC::PhysicsManager::ForceFeedbackListener* pOther)
 {
 	return (((ContextObject*)pOther)->GetInstanceId() == GetInstanceId());
+}
+
+
+
+ResourceManager* ContextObject::GetResourceManager() const
+{
+	return (mResourceManager);
 }
 
 

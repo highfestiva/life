@@ -80,7 +80,12 @@ public:
 	{
 		return (a + t*(b-a));
 	}
-	
+
+	template<class _Type> static inline _Type GetIterateLerpTime(_Type pTarget, _Type pIterateTime)
+	{
+		return ::pow(pTarget, 1/pIterateTime);
+	}
+
 	template<class _Type> static _Type Clamp(_Type value, _Type min, _Type max)
 	{
 		if (value < min)

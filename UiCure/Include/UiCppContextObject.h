@@ -36,7 +36,7 @@ public:
 		DEBUG_SHAPES,
 	};
 
-	CppContextObject(const str& pClassId, GameUiManager* pUiManager);
+	CppContextObject(Cure::ResourceManager* pResourceManager, const str& pClassId, GameUiManager* pUiManager);
 	virtual ~CppContextObject();
 
 	virtual void StartLoading();

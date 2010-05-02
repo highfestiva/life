@@ -5,6 +5,7 @@
 
 
 #include "../../Cure/Include/RuntimeVariable.h"
+#include "../../Cure/Include/TimeManager.h"
 #include "../../Lepra/Include/Number.h"
 #include "../../Lepra/Include/SystemManager.h"
 #include "../../UiCure/Include/UiGameUiManager.h"
@@ -48,7 +49,7 @@ ClientConsoleManager::ClientConsoleManager(Cure::GameManager* pGameManager, UiCu
 	mConsoleComponent(0),
 	mConsoleOutput(0),
 	mConsoleInput(0),
-	mIsConsoleActive(false),
+	mIsConsoleVisible(false),
 	mIsFirstConsoleUse(true),
 	mConsoleTargetPosition(0)
 {
@@ -114,26 +115,32 @@ void ClientConsoleManager::SetRenderArea(const PixelRect& pRenderArea)
 	}
 }
 
-bool ClientConsoleManager::Toggle()
+bool ClientConsoleManager::ToggleVisible()
 {
-	mIsConsoleActive = !mIsConsoleActive;
+	SetVisible(!mIsConsoleVisible);
+	return (mIsConsoleVisible);
+}
+
+void ClientConsoleManager::SetVisible(bool pVisible)
+{
+	mIsConsoleVisible = pVisible;
 	OnConsoleChange();
-	return (mIsConsoleActive);
 }
 
 void ClientConsoleManager::Tick()
 {
-	const double CONSOLE_SPEED = 0.3;
-	if (mIsConsoleActive)
+	const float lFrameTime = mGameManager->GetTimeManager()->GetNormalFrameTime();
+	const float lConsoleSpeed = Math::GetIterateLerpTime(0.97f, lFrameTime);
+	if (mIsConsoleVisible)
 	{
 		if (mArea.mTop == 0)	// Slide down.
 		{
-			mConsoleTargetPosition = Math::Lerp(mConsoleTargetPosition, (double)mArea.mTop, CONSOLE_SPEED);
+			mConsoleTargetPosition = Math::Lerp(mConsoleTargetPosition, (float)mArea.mTop, lConsoleSpeed);
 			mConsoleComponent->SetPos(mArea.mLeft, (int)mConsoleTargetPosition);
 		}
 		else	// Slide sideways.
 		{
-			mConsoleTargetPosition = Math::Lerp(mConsoleTargetPosition, (double)mArea.mLeft, CONSOLE_SPEED);
+			mConsoleTargetPosition = Math::Lerp(mConsoleTargetPosition, (float)mArea.mLeft, lConsoleSpeed);
 			mConsoleComponent->SetPos((int)mConsoleTargetPosition, mArea.mTop);
 		}
 	}
@@ -143,7 +150,7 @@ void ClientConsoleManager::Tick()
 		if (mArea.mTop == 0)	// Slide out top.
 		{
 			const int lTarget = -mConsoleComponent->GetSize().y-lMargin;
-			mConsoleTargetPosition = Math::Lerp(mConsoleTargetPosition, (double)lTarget, CONSOLE_SPEED);
+			mConsoleTargetPosition = Math::Lerp(mConsoleTargetPosition, (float)lTarget, lConsoleSpeed);
 			mConsoleComponent->SetPos(mArea.mLeft, (int)mConsoleTargetPosition);
 			if (mConsoleComponent->GetPos().y <= lTarget+lMargin)
 			{
@@ -153,7 +160,7 @@ void ClientConsoleManager::Tick()
 		else if (mArea.mLeft == 0)	// Slide out left.
 		{
 			const int lTarget = -mConsoleComponent->GetSize().x-lMargin;
-			mConsoleTargetPosition = Math::Lerp(mConsoleTargetPosition, (double)lTarget, CONSOLE_SPEED);
+			mConsoleTargetPosition = Math::Lerp(mConsoleTargetPosition, (float)lTarget, lConsoleSpeed);
 			mConsoleComponent->SetPos((int)mConsoleTargetPosition, mArea.mTop);
 			if (mConsoleComponent->GetPos().x <= lTarget+lMargin)
 			{
@@ -163,7 +170,7 @@ void ClientConsoleManager::Tick()
 		else	// Slide out right.
 		{
 			const int lTarget = mUiManager->GetDisplayManager()->GetWidth()+lMargin;
-			mConsoleTargetPosition = Math::Lerp(mConsoleTargetPosition, (double)lTarget, CONSOLE_SPEED);
+			mConsoleTargetPosition = Math::Lerp(mConsoleTargetPosition, (float)lTarget, lConsoleSpeed);
 			mConsoleComponent->SetPos((int)mConsoleTargetPosition, mArea.mTop);
 			if (mConsoleComponent->GetPos().x >= lTarget+lMargin)
 			{
@@ -193,8 +200,8 @@ void ClientConsoleManager::InitGraphics()
 	CloseGraphics();
 
 	mConsoleComponent = new UiTbc::Component(_T("CON:"), new UiTbc::ListLayout());
-	mConsoleOutput = new UiTbc::TextArea(Color(20, 20, 30, 150));
-	mConsoleInput = new UiTbc::TextField(mConsoleComponent, Color(20, 20, 30, 150), _T("CONI:"));
+	mConsoleOutput = new UiTbc::TextArea(Color(10, 30, 20, 160));
+	mConsoleInput = new UiTbc::TextField(mConsoleComponent, Color(10, 30, 20, 160), _T("CONI:"));
 
 	SetRenderArea(mArea);
 
@@ -233,7 +240,7 @@ void ClientConsoleManager::CloseGraphics()
 
 void ClientConsoleManager::OnConsoleChange()
 {
-	if (mIsConsoleActive)
+	if (mIsConsoleVisible)
 	{
 		mConsoleComponent->SetVisible(true);
 		mUiManager->GetDesktopWindow()->UpdateLayout();

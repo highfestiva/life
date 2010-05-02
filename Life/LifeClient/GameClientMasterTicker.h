@@ -11,6 +11,7 @@
 #include "../../UiCure/Include/UiLineGraph2d.h"
 #include "InputObserver.h"
 #include "PlayerCountView.h"
+#include "ScreenPart.h"
 
 
 
@@ -28,10 +29,11 @@ namespace Life
 
 class ConsoleManager;
 class GameClientSlaveManager;
+class RoadSignButton;
 
 
 
-class GameClientMasterTicker: public Cure::GameTicker, public InputObserver, public PlayerCountObserver
+class GameClientMasterTicker: public Cure::GameTicker, public InputObserver, public PlayerCountObserver, public ScreenPart
 {
 public:
 	GameClientMasterTicker(UiCure::GameUiManager* pUiManager, Cure::ResourceManager* mResourceManager);
@@ -47,14 +49,20 @@ public:
 	bool IsLocalObject(Cure::GameObjectId pInstanceId) const;
 	void GetSiblings(Cure::GameObjectId pObjectId, Cure::ContextObject::Array& pSiblingArray) const;
 
+	virtual PixelRect GetRenderArea() const;
+	virtual float UpdateFrustum();
+
 private:
 	void AddSlave(GameClientSlaveManager* pSlave);
-	void RemoveSlave(GameClientSlaveManager* pSlave);
+	void DeleteSlave(GameClientSlaveManager* pSlave);
 
 	bool Initialize();
 	void CreatePlayerCountWindow();
 	bool Reinitialize();
 	void UpdateSlaveLayout();
+	void SlideSlaveLayout();
+	int GetSlaveAnimationTarget(int pSlaveIndex) const;
+	float GetSlavesVerticalAnimationTarget() const;
 	void Profile();
 	void DrawFps() const;
 	void DrawPerformanceLineGraph2d() const;
@@ -91,12 +99,18 @@ private:
 	UiCure::GameUiManager* mUiManager;
 	Cure::ResourceManager* mResourceManager;
 	View* mPlayerCountView;
+	RoadSignButton* mButton;
 	ConsoleManager* mConsole;
 	bool mRestartUi;
 	bool mInitialized;
 	unsigned mActiveWidth;
 	unsigned mActiveHeight;
 	SlaveArray mSlaveArray;
+	int mActiveSlaveCount;
+	float mSlaveTopSplit;
+	float mSlaveBottomSplit;
+	float mSlaveVSplit;
+	float mSlaveFade;
 	std::vector<UiCure::LineGraph2d> mPerformanceGraphList;
 	std::hash_set<Cure::GameObjectId> mLocalObjectSet;
 

@@ -22,7 +22,7 @@ TextArea::TextArea(const Color& pColor, const str& pName):
 	mLineHeight(0),
 	mFocusAnchor(ANCHOR_TOP_LINE),
 	mScrollLock(false),
-	mMaxLineCount(5000)
+	mMaxLineCount(50)
 {
 }
 
@@ -33,7 +33,7 @@ TextArea::TextArea(Painter::ImageID pImageId, const str& pName):
 	mLineHeight(0),
 	mFocusAnchor(ANCHOR_TOP_LINE),
 	mScrollLock(false),
-	mMaxLineCount(5000)
+	mMaxLineCount(50)
 {
 }
 
@@ -260,7 +260,7 @@ void TextArea::UpdateVisibleSize()
 	mVisibleLineCount = 0;
 	if (mLineHeight)
 	{
-		mVisibleLineCount = GetSize().y/mLineHeight;
+		mVisibleLineCount = (GetSize().y+mLineHeight-1)/mLineHeight;
 		if (!mScrollLock)
 		{
 			ScrollToLastLine();

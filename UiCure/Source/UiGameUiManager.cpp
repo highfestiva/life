@@ -281,10 +281,13 @@ void GameUiManager::Render(const PixelRect& pArea)
 {
 	if (mDisplay->IsVisible())
 	{
-		mRenderer->ResetClippingRect();
-		mRenderer->SetClippingRect(pArea);
-		mRenderer->SetViewport(pArea);
-		mRenderer->RenderScene();
+		if (pArea.GetWidth() > 0 && pArea.GetHeight() > 0)
+		{
+			mRenderer->ResetClippingRect();
+			mRenderer->SetClippingRect(pArea);
+			mRenderer->SetViewport(pArea);
+			mRenderer->RenderScene();
+		}
 	}
 }
 
@@ -362,6 +365,10 @@ void GameUiManager::SetMicrophonePosition(const TransformationF& pTransform, con
 
 void GameUiManager::SetViewport(int pLeft, int pTop, int lDisplayWidth, int lDisplayHeight)
 {
+	if(lDisplayWidth < 0 || lDisplayHeight < 0)
+	{
+		return;
+	}
 	mRenderer->SetViewport(PixelRect(pLeft, pTop, pLeft+lDisplayWidth, pTop+lDisplayHeight));
 	mRenderer->SetClippingRect(PixelRect(pLeft, pTop, pLeft+lDisplayWidth, pTop+lDisplayHeight));
 }

@@ -17,8 +17,8 @@ namespace Life
 
 
 
-Elevator::Elevator():
-	Cure::CppContextObject(_T("Elevator")),
+Elevator::Elevator(Cure::ResourceManager* pResourceManager):
+	Cure::CppContextObject(pResourceManager, _T("Elevator")),
 	mActiveTrigger(0),
 	mExitDelay(2.0)
 {

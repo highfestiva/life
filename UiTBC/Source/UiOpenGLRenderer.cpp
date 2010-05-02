@@ -1199,10 +1199,11 @@ void OpenGLRenderer::RenderRelative(TBC::GeometryBase* pGeometry)
 {
 	::glMatrixMode(GL_MODELVIEW);
 	::glPushMatrix();
-
 	float lModelViewMatrix[16];
 	pGeometry->GetTransformation().GetAs4x4TransposeMatrix(lModelViewMatrix);
 	::glLoadMatrixf(lModelViewMatrix);
+
+	::glEnable(GL_DEPTH_TEST);
 
 	GeometryData* lGeometryData = (GeometryData*)pGeometry->GetRendererData();
 	if (lGeometryData)
@@ -1211,6 +1212,8 @@ void OpenGLRenderer::RenderRelative(TBC::GeometryBase* pGeometry)
 	}
 
 	PostRender(pGeometry);
+
+	::glDisable(GL_DEPTH_TEST);
 
 	::glMatrixMode(GL_MODELVIEW);
 	::glPopMatrix();

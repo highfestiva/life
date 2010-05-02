@@ -40,7 +40,8 @@ public:
 	void Join();
 
 	void SetRenderArea(const PixelRect& pRenderArea);
-	bool Toggle();
+	bool ToggleVisible();
+	void SetVisible(bool pVisible);
 	void Tick();
 
 protected:
@@ -73,9 +74,9 @@ private:
 	UiTbc::Component* mConsoleComponent;
 	UiTbc::TextArea* mConsoleOutput;
 	UiTbc::TextField* mConsoleInput;
-	bool mIsConsoleActive;
+	bool mIsConsoleVisible;
 	bool mIsFirstConsoleUse;
-	double mConsoleTargetPosition;
+	float mConsoleTargetPosition;
 
 	static const CommandPair mCommandIdList[];
 	LOG_CLASS_DECLARE();

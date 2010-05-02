@@ -17,7 +17,7 @@ namespace Life
 
 
 
-class GameClientSlaveManager;
+class ScreenPart;
 
 
 
@@ -31,12 +31,16 @@ public:
 		SHAPE_ROUND,
 	};
 
-	RoadSignButton(GameClientSlaveManager* pClient, const str& pName, const str& pTextureResourceName, Shape pShape);
+	RoadSignButton(ScreenPart* pScreenPart, Cure::ResourceManager* pResourceManager,
+		UiCure::GameUiManager* pUiManager, const str& pName, const str& pClassResourceName,
+		const str& pTextureResourceName, Shape pShape);
 	virtual ~RoadSignButton();
 
 	UiTbc::CustomButton& GetButton();
 	void SetTrajectory(const Vector2DF& pEndPoint, float pEndDistance);
 	void SetIsMovingIn(bool pIsMovingIn);
+
+	void MoveSign(const float pFrameTime);
 
 protected:
 	void OnPhysicsTick();
@@ -51,12 +55,14 @@ protected:
 
 private:
 	float GetTargetAngle() const;
+	PixelRect GetRenderArea() const;
 
-	GameClientSlaveManager* mClient;
+	ScreenPart* mScreenPart;
 	UiTbc::CustomButton mButton;
 	//UiCure::UserGeometryReferenceResource mSignMesh;
 	UiCure::UserRendererImageResource mSignTexture;
 	Shape mShape;
+	bool mActive;
 	float mMeshRadius;
 	float mAnglePart;
 	float mAngleTime;

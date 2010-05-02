@@ -52,8 +52,8 @@ static str RemoveMeTranslateToHardcodedShit(CppContextObject* pObject)
 
 
 
-CppContextObject::CppContextObject(const str& pClassId):
-	ContextObject(pClassId),
+CppContextObject::CppContextObject(ResourceManager* pResourceManager, const str& pClassId):
+	ContextObject(pResourceManager, pClassId),
 	mClassResource(0),
 	mPhysicsResource(0)
 {
@@ -74,7 +74,7 @@ void CppContextObject::StartLoading()
 	assert(mClassResource == 0);
 	mClassResource = new UserClassResource();
 	const str lAssetName = _T("Data/")+GetClassId()+_T(".class");	// TODO: move to central source file.
-	mClassResource->Load(GetManager()->GetGameManager()->GetResourceManager(), lAssetName,
+	mClassResource->Load(GetResourceManager(), lAssetName,
 		UserClassResource::TypeLoadCallback(this, &CppContextObject::OnLoadClass));
 }
 
@@ -83,7 +83,7 @@ void CppContextObject::StartLoadingPhysics(const str& pPhysicsName)
 	assert(mPhysicsResource == 0);
 	mPhysicsResource = new UserPhysicsResource();
 	const str lAssetName = pPhysicsName+_T(".phys");	// TODO: move to central source file.
-	mPhysicsResource->LoadUnique(GetManager()->GetGameManager()->GetResourceManager(), lAssetName,
+	mPhysicsResource->LoadUnique(GetResourceManager(), lAssetName,
 		UserPhysicsResource::TypeLoadCallback(this, &CppContextObject::OnLoadPhysics));
 }
 
@@ -91,7 +91,7 @@ bool CppContextObject::TryComplete()
 {
 	if (mPhysicsResource->GetLoadState() == RESOURCE_LOAD_COMPLETE)
 	{
-		if (GetPhysics())
+		if (GetPhysics() && GetManager())
 		{
 			GetManager()->EnableTickCallback(this);	// TODO: clear out this mess. How to use these two callback types?
 		}
@@ -121,7 +121,7 @@ TBC::ChunkyPhysics* CppContextObject::GetPhysics() const
 
 void CppContextObject::OnTick(float pFrameTime)
 {
-	if (mPhysics)
+	if (mPhysics && GetManager())
 	{
 		mPhysics->OnTick(GetManager()->GetGameManager()->GetPhysicsManager(), pFrameTime);
 	}

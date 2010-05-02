@@ -20,7 +20,7 @@ class Vehicle: public UiCure::CppContextObject
 {
 	typedef UiCure::CppContextObject Parent;
 public:
-	Vehicle(const str& pClassId, UiCure::GameUiManager* pUiManager);
+	Vehicle(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager);
 	virtual ~Vehicle();
 
 protected:

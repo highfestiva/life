@@ -21,7 +21,7 @@ class Elevator: public Cure::CppContextObject
 {
 	typedef Cure::CppContextObject Parent;
 public:
-	Elevator();
+	Elevator(Cure::ResourceManager* pResourceManager);
 	virtual ~Elevator();
 
 protected:

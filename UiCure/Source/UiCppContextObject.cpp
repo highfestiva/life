@@ -24,8 +24,8 @@ namespace UiCure
 
 
 
-CppContextObject::CppContextObject(const str& pClassId, GameUiManager* pUiManager):
-	Cure::CppContextObject(pClassId),
+CppContextObject::CppContextObject(Cure::ResourceManager* pResourceManager, const str& pClassId, GameUiManager* pUiManager):
+	Cure::CppContextObject(pResourceManager, pClassId),
 	mUiManager(pUiManager),
 	mUiClassResource(0),
 	mMeshLoadCount(0),
@@ -60,14 +60,14 @@ void CppContextObject::StartLoading()
 	assert(mUiClassResource == 0);
 	mUiClassResource = new UserClassResource(mUiManager);
 	const str lClassName = _T("Data/")+GetClassId()+_T(".class");	// TODO: move to central source file.
-	mUiClassResource->Load(GetManager()->GetGameManager()->GetResourceManager(), lClassName,
+	mUiClassResource->Load(GetResourceManager(), lClassName,
 		UserClassResource::TypeLoadCallback(this, &CppContextObject::OnLoadClass));
 
 	if (strutil::StartsWith(GetClassId(), _T("helicopter")) ||
 		strutil::StartsWith(GetClassId(), _T("monster")))
 	{
 		const str lSoundName = _T("Data/Bark.wav");
-		mEngineSoundResource.Load(GetManager()->GetGameManager()->GetResourceManager(), lSoundName,
+		mEngineSoundResource.Load(GetResourceManager(), lSoundName,
 			UserSound3dResource::TypeLoadCallback(this, &CppContextObject::OnLoadSound3d));
 	}
 }
@@ -418,7 +418,6 @@ void CppContextObject::OnLoadClass(UserClassResource* pClassResource)
 	}
 
 	assert(mMeshLoadCount == 0);
-	Cure::ResourceManager* lResourceManager = GetManager()->GetGameManager()->GetResourceManager();
 	const size_t lMeshCount = lClass->GetMeshCount();
 	assert(lMeshCount > 0);
 	for (size_t x = 0; x < lMeshCount; ++x)
@@ -441,12 +440,12 @@ void CppContextObject::OnLoadClass(UserClassResource* pClassResource)
 		UiCure::UserGeometryReferenceResource* lMesh = new UiCure::UserGeometryReferenceResource(
 			mUiManager, UiCure::GeometryOffset(lPhysIndex, lTransform));
 		mMeshResourceArray.push_back(lMesh);
-		lMesh->Load(lResourceManager,
+		lMesh->Load(GetResourceManager(),
 			strutil::Format(_T("%s.mesh;%s"), lMeshName.c_str(), lMeshInstance.c_str()),
 			UiCure::UserGeometryReferenceResource::TypeLoadCallback(this,&CppContextObject::OnLoadMesh));
 	}
 	// TODO: not everybody should load the texture, not everybody should load *A* texture. Load from group file definition.
-	mTextureResource.Load(lResourceManager, _T("Data/Checker.tga"),
+	mTextureResource.Load(GetResourceManager(), _T("Data/Checker.tga"),
 		UiCure::UserRendererImageResource::TypeLoadCallback(this, &CppContextObject::OnLoadTexture));
 }
 
@@ -571,7 +570,7 @@ bool CppContextObject::TryComplete()
 	}
 
 	OnPhysicsTick();
-	if (GetPhysics())
+	if (GetPhysics() && GetManager())
 	{
 		GetManager()->EnablePhysicsUpdateCallback(this);	// TODO: clear out this mess. How to use these two callback types?
 	}

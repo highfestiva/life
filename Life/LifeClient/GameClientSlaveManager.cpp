@@ -51,12 +51,16 @@ GameClientSlaveManager::GameClientSlaveManager(GameClientMasterTicker* pMaster, 
 	mPingAttemptCount(0),
 	mJustLookingAtAvatars(false),
 	mRoadSignIndex(0),
-	mCameraPosition(0, -500, 300),
+	mCameraPosition(0, -200, 100),
 	mCameraOrientation(PIF/2, acos(mCameraPosition.z/mCameraPosition.y), 0),
+	mCameraTargetXyDistance(20),
+	mCameraMaxSpeed(200),
 	mAllowMovementInput(true),
 	mOptions(pVariableScope, pSlaveIndex),
 	mLoginWindow(0)
 {
+	mCameraPivotPosition = mCameraPosition + GetCameraQuaternion() * Vector3DF(0, mCameraTargetXyDistance*3, 0);
+
 	SetNetworkAgent(new Cure::NetworkClient(GetVariableScope()));
 
 	SetConsoleManager(new ClientConsoleManager(this, mUiManager, GetVariableScope(), mRenderArea));
@@ -128,8 +132,16 @@ bool GameClientSlaveManager::IsQuitting() const
 void GameClientSlaveManager::SetIsQuitting()
 {
 	mLog.Headlinef(_T("Slave %i will quit."), GetSlaveIndex());
+	CloseLoginGui();
+	((ClientConsoleManager*)GetConsoleManager())->SetVisible(false);
 	GetResourceManager()->Tick();
 	mQuit = true;
+}
+
+void GameClientSlaveManager::SetFade(float pFadeAmount)
+{
+	mCameraMaxSpeed = 100000.0f;
+	mCameraTargetXyDistance = 20 + pFadeAmount*400.0f;
 }
 
 
@@ -179,15 +191,13 @@ bool GameClientSlaveManager::EndTick()
 
 void GameClientSlaveManager::ToggleConsole()
 {
-	mAllowMovementInput = !((ClientConsoleManager*)GetConsoleManager())->Toggle();
+	mAllowMovementInput = !((ClientConsoleManager*)GetConsoleManager())->ToggleVisible();
 }
 
 
 
 void GameClientSlaveManager::RequestLogin(const str& pServerAddress, const Cure::LoginId& pLoginToken)
 {
-	//mMaster->RemoveSlave(this);
-
 	ScopeLock lLock(GetTickLock());
 
 	CloseLoginGui();
@@ -317,12 +327,7 @@ int GameClientSlaveManager::GetSlaveIndex() const
 
 
 
-UiCure::GameUiManager* GameClientSlaveManager::GetUiManager() const
-{
-	return (mUiManager);
-}
-
-const PixelRect& GameClientSlaveManager::GetRenderArea() const
+PixelRect GameClientSlaveManager::GetRenderArea() const
 {
 	return (mRenderArea);
 }
@@ -465,77 +470,75 @@ void GameClientSlaveManager::TickUiUpdate()
 	{
 		// Target position is <cam> distance from the avatar along a straight line
 		// (in the XY plane) to where the camera currently is.
-		const Vector3DF lAvatarPosition(lObject->GetPosition());
-		const Vector3DF lAvatarXyPosition(lObject->GetPosition().x, lObject->GetPosition().y, mCameraPosition.z);
-		Vector3DF lTargetCameraPosition(mCameraPosition);
-		const float lTargetCameraXyDistance = 20.0f;
-		const float lCurrentCameraXyDistance = lTargetCameraPosition.GetDistance(lAvatarXyPosition);
-		lTargetCameraPosition = lAvatarXyPosition + (lTargetCameraPosition-lAvatarXyPosition)*(lTargetCameraXyDistance/lCurrentCameraXyDistance);
-		lTargetCameraPosition.z = lAvatarPosition.z+6;
-		if (lTargetCameraPosition.z < -20)
-		{
-			lTargetCameraPosition.z = -20.0f;
-		}
-
-		/*// Temporary: changed to "cam stay behind" mode.
-		lTargetCameraPosition = lObject->GetOrientation() *
-			Vector3DF(0, -lTargetCameraXyDistance, lTargetCameraXyDistance/4) +
-			lAvatarPosition;
-		static Vector3DF s = lTargetCameraPosition;
-		lTargetCameraPosition = s;*/
-
-		// Camera moves in a "moving average" kinda curve (halfs the distance in x seconds).
-		const float lPhysicsTime = GetTimeManager()->GetAffordedPhysicsTotalTime();
-		if (!lPhysicsTime)
-		{
-			return;
-		}
-
-		const float lHalfDistanceTime = 0.2f;	// Time it takes to half the distance from where it is now to where it should be.
-		float lMovingAveragePart = 0.5f*lPhysicsTime/lHalfDistanceTime;
-		if (lMovingAveragePart > 0.8f)
-		{
-			lMovingAveragePart = 0.8f;
-		}
-		//lMovingAveragePart = 1;
-		const Vector3DF lNewPosition = Math::Lerp<Vector3DF, float>(mCameraPosition,
-			lTargetCameraPosition, lMovingAveragePart);
-		const Vector3DF lDirection = lNewPosition-mCameraPosition;
-		const float lDistance = lDirection.GetLength();
-		const float lMaxCamSpeed = 200;
-		if (lDistance > lMaxCamSpeed*lPhysicsTime)
-		{
-			mCameraPosition += lDirection*(lMaxCamSpeed*lPhysicsTime/lDistance);
-		}
-		else
-		{
-			mCameraPosition = lNewPosition;
-		}
-		if (lNewPosition.z > mCameraPosition.z)	// Dolly cam up pretty quick to avoid looking "through the ground."
-		{
-			mCameraPosition.z = Math::Lerp(mCameraPosition.z, lNewPosition.z, lHalfDistanceTime);
-		}
-
-		// "Roll" camera towards avatar.
-		const float lNewTargetCameraXyDistance = mCameraPosition.GetDistance(lAvatarXyPosition);
-		const float lNewTargetCameraDistance = mCameraPosition.GetDistance(lAvatarPosition);
-		Vector3DF lTargetCameraOrientation;
-		lTargetCameraOrientation.Set(::asin((mCameraPosition.x-lAvatarXyPosition.x)/lNewTargetCameraXyDistance) + PIF/2,
-			::acos((lAvatarPosition.z-mCameraPosition.z)/lNewTargetCameraDistance), 0);
-		if (lAvatarXyPosition.y-mCameraPosition.y < 0)
-		{
-			lTargetCameraOrientation.x = -lTargetCameraOrientation.x;
-		}
-		Math::RangeAngles(mCameraOrientation.x, lTargetCameraOrientation.x);
-		float lYawChange = (lTargetCameraOrientation.x-mCameraOrientation.x)*3;
-		lYawChange = (lYawChange < -PIF*3/7)? -PIF*3/7 : lYawChange;
-		lYawChange = (lYawChange > PIF*3/7)? PIF*3/7 : lYawChange;
-		lTargetCameraOrientation.z = -lYawChange;
-		Math::RangeAngles(mCameraOrientation.x, lTargetCameraOrientation.x);
-		Math::RangeAngles(mCameraOrientation.y, lTargetCameraOrientation.y);
-		Math::RangeAngles(mCameraOrientation.z, lTargetCameraOrientation.z);
-		mCameraOrientation = Math::Lerp<Vector3DF, float>(mCameraOrientation, lTargetCameraOrientation, lMovingAveragePart);
+		mCameraPivotPosition = lObject->GetPosition();
 	}
+	const Vector3DF lPivotXyPosition(mCameraPivotPosition.x, mCameraPivotPosition.y, mCameraPosition.z);
+	Vector3DF lTargetCameraPosition(mCameraPosition);
+	const float lCurrentCameraXyDistance = lTargetCameraPosition.GetDistance(lPivotXyPosition);
+	lTargetCameraPosition = lPivotXyPosition + (lTargetCameraPosition-lPivotXyPosition)*(mCameraTargetXyDistance/lCurrentCameraXyDistance);
+	lTargetCameraPosition.z = mCameraPivotPosition.z + mCameraTargetXyDistance/2;
+	if (lTargetCameraPosition.z < -20)
+	{
+		lTargetCameraPosition.z = -20.0f;
+	}
+
+	/*// Temporary: changed to "cam stay behind" mode.
+	lTargetCameraPosition = lObject->GetOrientation() *
+		Vector3DF(0, -mCameraTargetXyDistance, mCameraTargetXyDistance/4) +
+		mCameraPivotPosition;
+	static Vector3DF s = lTargetCameraPosition;
+	lTargetCameraPosition = s;*/
+
+	// Camera moves in a "moving average" kinda curve (halfs the distance in x seconds).
+	const float lPhysicsTime = GetTimeManager()->GetAffordedPhysicsTotalTime();
+	if (!lPhysicsTime)
+	{
+		return;
+	}
+
+	const float lHalfDistanceTime = 0.1f;	// Time it takes to half the distance from where it is now to where it should be.
+	float lMovingAveragePart = 0.5f*lPhysicsTime/lHalfDistanceTime;
+	if (lMovingAveragePart > 0.8f)
+	{
+		lMovingAveragePart = 0.8f;
+	}
+	//lMovingAveragePart = 1;
+	const Vector3DF lNewPosition = Math::Lerp<Vector3DF, float>(mCameraPosition,
+		lTargetCameraPosition, lMovingAveragePart);
+	const Vector3DF lDirection = lNewPosition-mCameraPosition;
+	const float lDistance = lDirection.GetLength();
+	if (lDistance > mCameraMaxSpeed*lPhysicsTime)
+	{
+		mCameraPosition += lDirection*(mCameraMaxSpeed*lPhysicsTime/lDistance);
+	}
+	else
+	{
+		mCameraPosition = lNewPosition;
+	}
+	if (lNewPosition.z > mCameraPosition.z)	// Dolly cam up pretty quick to avoid looking "through the ground."
+	{
+		mCameraPosition.z = Math::Lerp(mCameraPosition.z, lNewPosition.z, lHalfDistanceTime);
+	}
+
+	// "Roll" camera towards avatar.
+	const float lNewTargetCameraXyDistance = mCameraPosition.GetDistance(lPivotXyPosition);
+	const float lNewTargetCameraDistance = mCameraPosition.GetDistance(mCameraPivotPosition);
+	Vector3DF lTargetCameraOrientation;
+	lTargetCameraOrientation.Set(::asin((mCameraPosition.x-lPivotXyPosition.x)/lNewTargetCameraXyDistance) + PIF/2,
+		::acos((mCameraPivotPosition.z-mCameraPosition.z)/lNewTargetCameraDistance), 0);
+	if (lPivotXyPosition.y-mCameraPosition.y < 0)
+	{
+		lTargetCameraOrientation.x = -lTargetCameraOrientation.x;
+	}
+	Math::RangeAngles(mCameraOrientation.x, lTargetCameraOrientation.x);
+	float lYawChange = (lTargetCameraOrientation.x-mCameraOrientation.x)*3;
+	lYawChange = (lYawChange < -PIF*3/7)? -PIF*3/7 : lYawChange;
+	lYawChange = (lYawChange > PIF*3/7)? PIF*3/7 : lYawChange;
+	lTargetCameraOrientation.z = -lYawChange;
+	Math::RangeAngles(mCameraOrientation.x, lTargetCameraOrientation.x);
+	Math::RangeAngles(mCameraOrientation.y, lTargetCameraOrientation.y);
+	Math::RangeAngles(mCameraOrientation.z, lTargetCameraOrientation.z);
+	mCameraOrientation = Math::Lerp<Vector3DF, float>(mCameraOrientation, lTargetCameraOrientation, lMovingAveragePart);
 }
 
 
@@ -770,7 +773,8 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 						Cure::UserAccount::AvatarId lAvatarId = strutil::Encode(lAvatarName);
 						log_adebug("Status: INFO_AVATAR...");
 						str lTextureId = strutil::Format(_T("Data/%s.png;%i"), lAvatarId.c_str(), mSlaveIndex);
-						RoadSignButton* lButton = new RoadSignButton(this, lAvatarId, lTextureId, RoadSignButton::SHAPE_ROUND);
+						RoadSignButton* lButton = new RoadSignButton(this, GetResourceManager(),
+							mUiManager, lAvatarId, _T("road_sign"), lTextureId, RoadSignButton::SHAPE_ROUND);
 						GetContext()->AddLocalObject(lButton);
 						const int SIGN_COUNT_X = 4;
 						const int SIGN_COUNT_Y = 5;
@@ -924,7 +928,7 @@ bool GameClientSlaveManager::CreateObject(Cure::GameObjectId pInstanceId, const 
 
 Cure::ContextObject* GameClientSlaveManager::CreateContextObject(const str& pClassId) const
 {
-	return (new Vehicle(pClassId, mUiManager));
+	return (new Vehicle(GetResourceManager(), pClassId, mUiManager));
 }
 
 void GameClientSlaveManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
@@ -1096,26 +1100,29 @@ Cure::NetworkClient* GameClientSlaveManager::GetNetworkClient() const
 
 void GameClientSlaveManager::UpdateCameraPosition(bool pUpdateMicPosition)
 {
-	TransformationF lCameraTransform;
-	lCameraTransform.SetPosition(mCameraPosition);
-
-	const float lTheta = mCameraOrientation.x;
-	const float lPhi = mCameraOrientation.y;
-	const float lGimbal = mCameraOrientation.z;
-	RotationMatrixF lRotation;
-	lRotation.MakeIdentity();
-	lRotation.RotateAroundWorldX(PIF/2-lPhi);
-	lRotation.RotateAroundWorldZ(lTheta-PIF/2);
-	lRotation.RotateAroundOwnY(lGimbal);
-	lCameraTransform.SetOrientation(lRotation);
-
-	const float lFrameTime = GetTimeManager()->GetNormalFrameTime();
-	Vector3DF lVelocity = (mCameraPosition-mCameraPreviousPosition) / lFrameTime;
+	TransformationF lCameraTransform(GetCameraQuaternion(), mCameraPosition);
 	mUiManager->SetCameraPosition(lCameraTransform);
 	if (pUpdateMicPosition)
 	{
+		const float lFrameTime = GetTimeManager()->GetNormalFrameTime();
+		Vector3DF lVelocity = (mCameraPosition-mCameraPreviousPosition) / lFrameTime;
+		const float lMicrophoneMaxVelocity = 100.0f;
+		if (lVelocity.GetLength() > lMicrophoneMaxVelocity)
+		{
+			lVelocity.Normalize(lMicrophoneMaxVelocity);
+		}
 		mUiManager->SetMicrophonePosition(lCameraTransform, lVelocity);
 	}
+}
+
+QuaternionF GameClientSlaveManager::GetCameraQuaternion() const
+{
+	const float lTheta = mCameraOrientation.x;
+	const float lPhi = mCameraOrientation.y;
+	const float lGimbal = mCameraOrientation.z;
+	QuaternionF lOrientation;
+	lOrientation.SetEulerAngles(lTheta-PIF/2, PIF/2-lPhi, lGimbal);
+	return (lOrientation);
 }
 
 

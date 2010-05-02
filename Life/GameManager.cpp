@@ -29,7 +29,7 @@ Cure::ContextObject* GameManager::CreateTriggerHandler(const str& pType) const
 {
 	if (pType == _T("elevator"))
 	{
-		return (new Elevator);
+		return (new Elevator(GetResourceManager()));
 	}
 	assert(false);
 	return (0);

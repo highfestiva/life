@@ -33,6 +33,7 @@ namespace Cure
 
 class ContextManager;
 class ContextObjectAttribute;
+class ResourceManager;
 
 
 class ContextObject: public TBC::PhysicsManager::TriggerListener, public TBC::PhysicsManager::ForceFeedbackListener
@@ -40,7 +41,7 @@ class ContextObject: public TBC::PhysicsManager::TriggerListener, public TBC::Ph
 public:
 	typedef std::vector<ContextObject*> Array;
 
-	ContextObject(const str& pClassId);
+	ContextObject(ResourceManager* pResourceManager, const str& pClassId);
 	virtual ~ContextObject();
 
 	ContextManager* GetManager() const;
@@ -106,6 +107,8 @@ protected:
 
 	virtual bool IsSameInstance(TBC::PhysicsManager::ForceFeedbackListener* pOther);
 
+	ResourceManager* GetResourceManager() const;
+
 	typedef std::vector<ContextObjectAttribute*> AttributeArray;
 	struct Connection
 	{
@@ -124,6 +127,7 @@ protected:
 	typedef std::list<ContextObject*> ChildList;
 
 	ContextManager* mManager;
+	ResourceManager* mResourceManager;
 	GameObjectId mInstanceId;
 	str mClassId;
 	NetworkObjectType mNetworkObjectType;

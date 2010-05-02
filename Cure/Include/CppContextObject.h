@@ -17,7 +17,7 @@ namespace Cure
 class CppContextObject: public ContextObject
 {
 public:
-	CppContextObject(const str& pClassId);
+	CppContextObject(ResourceManager* pResourceManager, const str& pClassId);
 	virtual ~CppContextObject();
 
 protected:

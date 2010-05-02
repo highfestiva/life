@@ -117,7 +117,10 @@ const PixelRect& Renderer::GetViewport() const
 
 void Renderer::SetViewFrustum(float pFOVAngle, float pNear, float pFar)
 {
-	assert(pFOVAngle > 0 && pFOVAngle < 180 && pNear > 0 && pNear < pFar);
+	if (pFOVAngle < 0 || pFOVAngle >= 180 || pNear >= pFar)
+	{
+		return;
+	}
 	mFOVAngle = pFOVAngle;
 	mNear = pNear;
 	mFar = pFar;

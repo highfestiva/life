@@ -19,8 +19,8 @@ namespace Life
 
 
 
-Vehicle::Vehicle(const str& pClassId, UiCure::GameUiManager* pUiManager):
-	Parent(pClassId, pUiManager)
+Vehicle::Vehicle(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager):
+	Parent(pResourceManager, pClassId, pUiManager)
 {
 }
 

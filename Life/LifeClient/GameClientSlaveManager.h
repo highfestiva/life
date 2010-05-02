@@ -16,6 +16,7 @@
 #include "ClientLoginView.h"
 #include "ClientOptionsManager.h"
 #include "InputObserver.h"
+#include "ScreenPArt.h"
 
 
 
@@ -40,7 +41,7 @@ class RoadSignButton;
 
 
 
-class GameClientSlaveManager: public GameManager, public InputObserver, private ClientLoginObserver
+class GameClientSlaveManager: public GameManager, public InputObserver, private ClientLoginObserver, public ScreenPart
 {
 	typedef Cure::GameManager Parent;
 public:
@@ -54,6 +55,7 @@ public:
 	void Close();
 	bool IsQuitting() const;
 	void SetIsQuitting();
+	void SetFade(float pFadeAmount);
 
 	GameClientMasterTicker* GetMaster() const;
 
@@ -76,9 +78,8 @@ public:
 
 	int GetSlaveIndex() const;
 
-	UiCure::GameUiManager* GetUiManager() const;
-	const PixelRect& GetRenderArea() const;
-	float UpdateFrustum();
+	virtual PixelRect GetRenderArea() const;
+	virtual float UpdateFrustum();
 
 private:
 	str GetApplicationCommandFilename() const;
@@ -122,6 +123,7 @@ private:
 	Cure::NetworkClient* GetNetworkClient() const;
 
 	void UpdateCameraPosition(bool pUpdateMicPosition);
+	QuaternionF GetCameraQuaternion() const;
 
 	void DrawAsyncDebugInfo();
 	void DrawDebugStaple(int pIndex, int pHeight, const Color& pColor);
@@ -161,6 +163,9 @@ private:
 	Vector3DF mCameraPosition;		// TODO: remove hack (should context object controlled)!
 	Vector3DF mCameraPreviousPosition;	// TODO: remove hack (should context object controlled)!
 	Vector3DF mCameraOrientation;		// TODO: remove hack (should context object controlled)!
+	Vector3DF mCameraPivotPosition;		// TODO: remove hack (should context object controlled)!
+	float mCameraTargetXyDistance;		// TODO: remove hack (should context object controlled)!
+	float mCameraMaxSpeed;			// TODO: remove hack (should context object controlled)!
 	Cure::ObjectPositionalData mNetworkOutputGhost;	// TODO: remove hack (should be one per controllable object)!
 	bool mAllowMovementInput;
 	Options::ClientOptionsManager mOptions;

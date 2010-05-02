@@ -30,6 +30,10 @@ void CenterLayout::Add(Component* pComponent, int /*pParam1*/, int /*pParam2*/)
 	{
 		mChild = pComponent;
 	}
+	else
+	{
+		assert(false);
+	}
 }
 
 void CenterLayout::Remove(Component* pComponent)
