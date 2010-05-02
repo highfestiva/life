@@ -679,7 +679,7 @@ void GameServerManager::BroadcastAvatar(Client* pClient)
 
 Cure::ContextObject* GameServerManager::CreateContextObject(const str& pClassId) const
 {
-	return (new Cure::CppContextObject(pClassId));
+	return (new Cure::CppContextObject(GetResourceManager(), pClassId));
 }
 
 void GameServerManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
