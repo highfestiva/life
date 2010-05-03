@@ -134,6 +134,7 @@ void GameClientSlaveManager::SetIsQuitting()
 	mLog.Headlinef(_T("Slave %i will quit."), GetSlaveIndex());
 	CloseLoginGui();
 	((ClientConsoleManager*)GetConsoleManager())->SetVisible(false);
+	SetRoadSignsVisible(false);
 	GetResourceManager()->Tick();
 	mQuit = true;
 }
@@ -288,11 +289,7 @@ void GameClientSlaveManager::OnInput(UiLepra::InputElement* pElement)
 			PixelCoord lPosition = mUiManager->GetMouseDisplayPosition();
 			if (mRenderArea.IsInside(lPosition.x, lPosition.y))
 			{
-				RoadSignMap::iterator x = mRoadSignMap.begin();
-				for (; x != mRoadSignMap.end(); ++x)
-				{
-					x->second->SetIsMovingIn(true);
-				}
+				SetRoadSignsVisible(true);
 				mJustLookingAtAvatars = true;
 				mAvatarMightSelectTime.PopTimeDiffF();
 			}
@@ -300,11 +297,7 @@ void GameClientSlaveManager::OnInput(UiLepra::InputElement* pElement)
 	}
 	if (mJustLookingAtAvatars && mAvatarMightSelectTime.GetTimeDiffF() > 2.0)
 	{
-		RoadSignMap::iterator x = mRoadSignMap.begin();
-		for (; x != mRoadSignMap.end(); ++x)
-		{
-			x->second->SetIsMovingIn(false);
-		}
+		SetRoadSignsVisible(false);
 	}
 
 	if (mOptions.UpdateInput(pElement))
@@ -413,6 +406,15 @@ void GameClientSlaveManager::ClearRoadSigns()
 		GetContext()->DeleteObject(x->second->GetInstanceId());
 	}
 	mRoadSignMap.clear();
+}
+
+void GameClientSlaveManager::SetRoadSignsVisible(bool pVisible)
+{
+	RoadSignMap::iterator x = mRoadSignMap.begin();
+	for (; x != mRoadSignMap.end(); ++x)
+	{
+		x->second->SetIsMovingIn(pVisible);
+	}
 }
 
 
@@ -1076,11 +1078,7 @@ void GameClientSlaveManager::OnAvatarSelect(UiTbc::Button* pButton)
 		Cure::MessageStatus::INFO_AVATAR, wstrutil::Encode(lAvatarId), lPacket);
 	GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
 
-	RoadSignMap::iterator x = mRoadSignMap.begin();
-	for (; x != mRoadSignMap.end(); ++x)
-	{
-		x->second->SetIsMovingIn(false);
-	}
+	SetRoadSignsVisible(false);
 	mAvatarSelectTime.PopTimeDiffF();
 }
 

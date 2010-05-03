@@ -272,7 +272,7 @@ void RoadSignButton::DispatchOnLoadMesh(UiCure::UserGeometryReferenceResource* p
 
 void RoadSignButton::OnLoadTexture(UiCure::UserRendererImageResource*)
 {
-	TryComplete();
+	//TryComplete();
 }
 
 str RoadSignButton::GetMeshInstanceId() const

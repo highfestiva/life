@@ -88,6 +88,7 @@ private:
 	bool InitializeTerrain();
 	void CloseLoginGui();
 	void ClearRoadSigns();
+	void SetRoadSignsVisible(bool pVisible);
 
 	void TickInput();
 

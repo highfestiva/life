@@ -1270,8 +1270,8 @@ UdpMuxSocket::~UdpMuxSocket()
 	const SocketAddress& lAddress = GetLocalAddress();
 	const int lReleaseByteCount = 8;
 	::sendto(lKiller, "Release!", lReleaseByteCount, 0, (const sockaddr*)&lAddress.GetAddr(), sizeof(lAddress.GetAddr()));
-	Thread::Sleep(0.01);
-	CloseSysSocket(lKiller);
+	//Thread::Sleep(0.01);
+	//CloseSysSocket(lKiller);
 
 	Close();
 	ReleaseSocketThreads();
