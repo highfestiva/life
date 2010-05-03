@@ -355,6 +355,24 @@ bool GameClientSlaveManager::Reset()	// Run when disconnected. Removes all objec
 	mPingAttemptCount = 0;
 	GetTimeManager()->Clear(0);
 
+	mObjectFrameIndexMap.clear();
+
+	ClearRoadSigns();
+	GetContext()->ClearObjects();
+	bool lOk = InitializeTerrain();
+
+	if (lOk)
+	{
+		CreateLoginView();
+	}
+
+	mIsResetComplete = true;
+
+	return (lOk);
+}
+
+void GameClientSlaveManager::CreateLoginView()
+{
 	if (!mLoginWindow && !GetNetworkClient()->IsActive())
 	{
 		mLoginWindow = new ClientLoginView(this, mDisconnectReason);
@@ -364,16 +382,6 @@ bool GameClientSlaveManager::Reset()	// Run when disconnected. Removes all objec
 			mRenderArea.GetCenterY()-mLoginWindow->GetSize().y/2);
 		mLoginWindow->GetChild(_T("User"), 0)->SetKeyboardFocus();
 	}
-
-	mObjectFrameIndexMap.clear();
-
-	ClearRoadSigns();
-	GetContext()->ClearObjects();
-	bool lOk = InitializeTerrain();
-
-	mIsResetComplete = true;
-
-	return (lOk);
 }
 
 bool GameClientSlaveManager::InitializeTerrain()

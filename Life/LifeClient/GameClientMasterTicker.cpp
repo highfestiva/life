@@ -22,6 +22,7 @@
 #include "../LifeApplication.h"
 #include "../RtVar.h"
 #include "GameClientSlaveManager.h"
+#include "GameClientViewer.h"
 #include "RoadSignButton.h"
 
 
@@ -44,7 +45,6 @@ GameClientMasterTicker::GameClientMasterTicker(UiCure::GameUiManager* pUiManager
 	mUiManager(pUiManager),
 	mResourceManager(pResourceManager),
 	mPlayerCountView(0),
-	mButton(0),
 	mRestartUi(false),
 	mInitialized(false),
 	mActiveWidth(0),
@@ -109,34 +109,7 @@ GameClientMasterTicker::~GameClientMasterTicker()
 
 bool GameClientMasterTicker::CreateSlave()
 {
-	const PixelRect lRenderArea(0, 0, mUiManager->GetDisplayManager()->GetWidth(), mUiManager->GetDisplayManager()->GetHeight());
-	ScopeLock lLock(&mLock);
-	bool lOk = (mActiveSlaveCount < 4);
-	if (lOk)
-	{
-		int lFreeSlaveIndex = 0;
-		for (; lFreeSlaveIndex < 4; ++lFreeSlaveIndex)
-		{
-			if (!mSlaveArray[lFreeSlaveIndex])
-			{
-				break;
-			}
-		}
-		assert(lFreeSlaveIndex < 4);
-		Cure::RuntimeVariableScope* lVariables = new Cure::RuntimeVariableScope(UiCure::GetSettings());
-		GameClientSlaveManager* lSlave = new GameClientSlaveManager(this, lVariables, mResourceManager,
-			mUiManager, lFreeSlaveIndex, lRenderArea);
-		AddSlave(lSlave);
-		if (mInitialized)
-		{
-			lOk = lSlave->Open();
-		}
-	}
-	else
-	{
-		mLog.AError("Could not create another split screen player - not supported.");
-	}
-	return (lOk);
+	return (CreateSlave(&GameClientMasterTicker::CreateSlaveManager));
 }
 
 
@@ -193,12 +166,6 @@ bool GameClientMasterTicker::Tick()
 				lOk = lSlave->Render();
 			}
 		}
-	}
-
-	if (mButton)
-	{
-		const float lFrameTime = 1/(float)CURE_RTVAR_GET(Cure::GetSettings(), RTVAR_PHYSICS_FPS, 30.0);
-		mButton->MoveSign(lFrameTime);
 	}
 
 	{
@@ -316,6 +283,52 @@ float GameClientMasterTicker::UpdateFrustum()
 
 
 
+GameClientSlaveManager* GameClientMasterTicker::CreateSlaveManager(GameClientMasterTicker* pMaster,
+	Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
+	UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea)
+{
+	return new GameClientSlaveManager(pMaster, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea);
+}
+
+GameClientSlaveManager* GameClientMasterTicker::CreateViewer(GameClientMasterTicker* pMaster,
+	Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
+	UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea)
+{
+	return new GameClientViewer(pMaster, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea);
+}
+
+bool GameClientMasterTicker::CreateSlave(SlaveFactoryMethod pCreate)
+{
+	const PixelRect lRenderArea(0, 0, mUiManager->GetDisplayManager()->GetWidth(), mUiManager->GetDisplayManager()->GetHeight());
+	ScopeLock lLock(&mLock);
+	bool lOk = (mActiveSlaveCount < 4);
+	if (lOk)
+	{
+		int lFreeSlaveIndex = 0;
+		for (; lFreeSlaveIndex < 4; ++lFreeSlaveIndex)
+		{
+			if (!mSlaveArray[lFreeSlaveIndex])
+			{
+				break;
+			}
+		}
+		assert(lFreeSlaveIndex < 4);
+		Cure::RuntimeVariableScope* lVariables = new Cure::RuntimeVariableScope(UiCure::GetSettings());
+		GameClientSlaveManager* lSlave = pCreate(this, lVariables, mResourceManager,
+			mUiManager, lFreeSlaveIndex, lRenderArea);
+		AddSlave(lSlave);
+		if (mInitialized)
+		{
+			lOk = lSlave->Open();
+		}
+	}
+	else
+	{
+		mLog.AError("Could not create another split screen player - not supported.");
+	}
+	return (lOk);
+}
+
 void GameClientMasterTicker::AddSlave(GameClientSlaveManager* pSlave)
 {
 	{
@@ -365,15 +378,7 @@ void GameClientMasterTicker::CreatePlayerCountWindow()
 	mUiManager->GetDesktopWindow()->AddChild(mPlayerCountView);
 	mUiManager->GetDesktopWindow()->UpdateLayout();
 
-	assert(!mButton);
-	mButton = new RoadSignButton(this, mResourceManager, mUiManager, _T("?"), _T("road_sign"), _T("?.png;-1"), RoadSignButton::SHAPE_BOX);
-	mButton->SetInstanceId((uint32)-1);
-	const float x = 0.3f;
-	const float y = 0.3f;
-	mButton->SetTrajectory(Vector2DF(x, y), 4);
-	//mButton->GetButton().SetOnClick(GameClientSlaveManager, OnAvatarSelect);
-	//mRoadSignMap.insert(RoadSignMap::value_type(mButton->GetInstanceId(), mButton));
-	mButton->StartLoading();
+	CreateSlave(&GameClientMasterTicker::CreateViewer);
 }
 
 bool GameClientMasterTicker::Reinitialize()
@@ -809,10 +814,6 @@ void GameClientMasterTicker::ClosePlayerCountGui()
 		mUiManager->GetDesktopWindow()->RemoveChild(mPlayerCountView, 0);
 		delete (mPlayerCountView);
 		mPlayerCountView = 0;
-
-		assert(mButton);
-		delete (mButton);
-		mButton = 0;
 	}
 }
 

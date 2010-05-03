@@ -53,6 +53,16 @@ public:
 	virtual float UpdateFrustum();
 
 private:
+	typedef GameClientSlaveManager* (*SlaveFactoryMethod)(GameClientMasterTicker* pMaster,
+		Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
+		UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea);
+	static GameClientSlaveManager* CreateSlaveManager(GameClientMasterTicker* pMaster,
+		Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
+		UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea);
+	static GameClientSlaveManager* CreateViewer(GameClientMasterTicker* pMaster,
+		Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
+		UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea);
+	bool CreateSlave(SlaveFactoryMethod pCreate);
 	void AddSlave(GameClientSlaveManager* pSlave);
 	void DeleteSlave(GameClientSlaveManager* pSlave);
 
@@ -99,7 +109,7 @@ private:
 	UiCure::GameUiManager* mUiManager;
 	Cure::ResourceManager* mResourceManager;
 	View* mPlayerCountView;
-	RoadSignButton* mButton;
+
 	ConsoleManager* mConsole;
 	bool mRestartUi;
 	bool mInitialized;

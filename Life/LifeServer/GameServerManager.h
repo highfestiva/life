@@ -47,7 +47,7 @@ private:
 	Client* GetClientByAccount(Cure::UserAccount::AccountId pAccountId) const;
 
 	bool Initialize();
-	bool InitializeTerrain();
+	virtual bool InitializeTerrain();
 
 	float GetPowerSaveAmount() const;
 
@@ -68,7 +68,7 @@ private:
 	void BroadcastAvatar(Client* pClient);
 
 	Cure::ContextObject* CreateContextObject(const str& pClassId) const;
-	void OnLoadCompleted(Cure::ContextObject* pObject, bool pOk);
+	virtual void OnLoadCompleted(Cure::ContextObject* pObject, bool pOk);
 	void OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque,
 		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2);
 	void OnStopped(Cure::ContextObject* pObject, TBC::PhysicsManager::BodyID pBodyId);

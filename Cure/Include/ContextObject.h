@@ -82,6 +82,7 @@ public:
 	float GetMass() const;
 
 	bool SetPhysics(TBC::ChunkyPhysics* pStructure);
+	TBC::ChunkyPhysics* GetPhysics() const;
 	TBC::ChunkyBoneGeometry* GetStructureGeometry(unsigned pIndex) const;
 	TBC::ChunkyBoneGeometry* GetStructureGeometry(TBC::PhysicsManager::BodyID pBodyId) const;
 	void SetEnginePower(unsigned pAspect, float pPower, float pAngle);

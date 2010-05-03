@@ -42,13 +42,15 @@ public:
 	PhysicsType GetPhysicsType() const;
 
 	ChunkyBoneGeometry* GetBoneGeometry(int pBoneIndex) const;
-	ChunkyBoneGeometry* GetBoneGeometry(TBC::PhysicsManager::BodyID pBodyId) const;
+	ChunkyBoneGeometry* GetBoneGeometry(PhysicsManager::BodyID pBodyId) const;
 	void AddBoneGeometry(ChunkyBoneGeometry* pGeometry);	// Takes ownership of the added geometry.
 	void AddBoneGeometry(const TransformationF& pTransformation, ChunkyBoneGeometry* pGeometry,
 		const ChunkyBoneGeometry* pParent = 0);	// Takes ownership of the added geometry.
+	PhysicsManager::BodyType GetBodyType(const ChunkyBoneGeometry* pGeometry) const;
 	int GetIndex(const ChunkyBoneGeometry* pGeometry) const;
 	const TransformationF& GetTransformation(const ChunkyBoneGeometry* pGeometry) const;
 	void ClearBoneGeometries(PhysicsManager* pPhysics);
+	void EnableGravity(PhysicsManager* pPhysicsManager, bool pEnable);
 
 	int GetEngineCount() const;
 	PhysicsEngine* GetEngine(int pEngineIndex) const;

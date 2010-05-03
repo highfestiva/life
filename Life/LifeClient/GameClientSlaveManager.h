@@ -81,11 +81,12 @@ public:
 	virtual PixelRect GetRenderArea() const;
 	virtual float UpdateFrustum();
 
-private:
+protected:
 	str GetApplicationCommandFilename() const;
 
 	bool Reset();
-	bool InitializeTerrain();
+	virtual void CreateLoginView();
+	virtual bool InitializeTerrain();
 	void CloseLoginGui();
 	void ClearRoadSigns();
 	void SetRoadSignsVisible(bool pVisible);
@@ -93,7 +94,7 @@ private:
 	void TickInput();
 
 	void TickUiInput();
-	void TickUiUpdate();
+	virtual void TickUiUpdate();
 
 	void TickNetworkInput();
 	bool TickNetworkOutput();
@@ -105,7 +106,7 @@ private:
 	bool CreateObject(Cure::GameObjectId pInstanceId, const str& pClassId, Cure::NetworkObjectType pNetworkType,
 		TransformationF* pTransform = 0);
 	Cure::ContextObject* CreateContextObject(const str& pClassId) const;
-	void OnLoadCompleted(Cure::ContextObject* pObject, bool pOk);
+	virtual void OnLoadCompleted(Cure::ContextObject* pObject, bool pOk);
 	void SetMovement(Cure::GameObjectId pInstanceId, int32 pFrameIndex, Cure::ObjectPositionalData& pData);
 	void OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque,
 		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2);

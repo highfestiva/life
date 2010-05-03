@@ -545,6 +545,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GameClientViewer.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\PlayerCountView.cpp"
 				>
 			</File>
@@ -580,6 +584,10 @@
 			</File>
 			<File
 				RelativePath=".\GameClientSlaveManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\GameClientViewer.h"
 				>
 			</File>
 			<File

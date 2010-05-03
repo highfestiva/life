@@ -94,6 +94,23 @@ void ChunkyPhysics::AddBoneGeometry(const TransformationF& pTransformation,
 	}
 }
 
+PhysicsManager::BodyType ChunkyPhysics::GetBodyType(const ChunkyBoneGeometry* pGeometry) const
+{
+	PhysicsManager::BodyType lBodyType = (mPhysicsType == DYNAMIC)? PhysicsManager::DYNAMIC : PhysicsManager::STATIC;
+	if (pGeometry->GetParent())
+	{
+		if (pGeometry->GetJointType() == ChunkyBoneGeometry::JOINT_EXCLUDE)
+		{
+			lBodyType = PhysicsManager::STATIC;
+		}
+		else
+		{
+			lBodyType = PhysicsManager::DYNAMIC;
+		}
+	}
+	return (lBodyType);
+}
+
 int ChunkyPhysics::GetIndex(const ChunkyBoneGeometry* pGeometry) const
 {
 	const int lBoneCount = GetBoneCount();
@@ -130,6 +147,26 @@ void ChunkyPhysics::ClearBoneGeometries(PhysicsManager* pPhysics)
 	mUniqeGeometryIndex = 0;
 }
 
+void ChunkyPhysics::EnableGravity(PhysicsManager* pPhysicsManager, bool pEnable)
+{
+	for (size_t x = 0; x < mGeometryArray.size(); ++x)
+	{
+		ChunkyBoneGeometry* lGeometry = mGeometryArray[x];
+		if (!lGeometry || GetBodyType(lGeometry) == PhysicsManager::STATIC)
+		{
+			continue;
+		}
+		PhysicsManager::BodyID lBodyId = lGeometry->GetBodyId();
+		if (pEnable)
+		{
+			pPhysicsManager->ActivateGravity(lBodyId);
+		}
+		else
+		{
+			pPhysicsManager->DeactivateGravity(lBodyId);
+		}
+	}
+}
 
 
 int ChunkyPhysics::GetEngineCount() const
@@ -254,18 +291,7 @@ bool ChunkyPhysics::FinalizeInit(PhysicsManager* pPhysics, unsigned pPhysicsFps,
 			}
 			else
 			{
-				PhysicsManager::BodyType lBodyType = (mPhysicsType == DYNAMIC)? PhysicsManager::DYNAMIC : PhysicsManager::STATIC;
-				if (lGeometry->GetParent())
-				{
-					if (lGeometry->GetJointType() == ChunkyBoneGeometry::JOINT_EXCLUDE)
-					{
-						lBodyType = PhysicsManager::STATIC;
-					}
-					else
-					{
-						lBodyType = PhysicsManager::DYNAMIC;
-					}
-				}
+				const PhysicsManager::BodyType lBodyType = GetBodyType(lGeometry);
 				const TransformationF& lBone = GetBoneTransformation(x);
 				//QuaternionF q = lBone.GetOrientation();
 				////q.Normalize();

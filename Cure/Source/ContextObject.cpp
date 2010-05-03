@@ -665,6 +665,11 @@ bool ContextObject::SetPhysics(TBC::ChunkyPhysics* pStructure)
 	return (lOk);
 }
 
+TBC::ChunkyPhysics* ContextObject::GetPhysics() const
+{
+	return (mPhysics);
+}
+
 TBC::ChunkyBoneGeometry* ContextObject::GetStructureGeometry(unsigned pIndex) const
 {
 	return (mPhysics->GetBoneGeometry(pIndex));
