@@ -44,7 +44,7 @@ namespace Life
 GameClientMasterTicker::GameClientMasterTicker(UiCure::GameUiManager* pUiManager, Cure::ResourceManager* pResourceManager):
 	mUiManager(pUiManager),
 	mResourceManager(pResourceManager),
-	mPlayerCountView(0),
+	mIsPlayerCountViewActive(false),
 	mRestartUi(false),
 	mInitialized(false),
 	mActiveWidth(0),
@@ -91,6 +91,8 @@ GameClientMasterTicker::~GameClientMasterTicker()
 		mUiManager->GetInputManager()->RemoveKeyCodeInputObserver(this);
 	}
 
+	ClosePlayerCountGui();
+
 	SlaveArray::iterator x;
 	for (x = mSlaveArray.begin(); x != mSlaveArray.end(); ++x)
 	{
@@ -98,8 +100,6 @@ GameClientMasterTicker::~GameClientMasterTicker()
 		delete (lSlave);
 	}
 	mSlaveArray.clear();
-
-	ClosePlayerCountGui();
 
 	mResourceManager = 0;
 	mUiManager = 0;
@@ -283,6 +283,25 @@ float GameClientMasterTicker::UpdateFrustum()
 
 
 
+void GameClientMasterTicker::OnExit()
+{
+	mLog.Headline(_T("Number of players not picked, quitting."));
+	SystemManager::AddQuitRequest(+1);
+	ClosePlayerCountGui();
+}
+
+void GameClientMasterTicker::OnSetPlayerCount(int pPlayerCount)
+{
+	ClosePlayerCountGui();
+
+	for (int x = 0; x < pPlayerCount; ++x)
+	{
+		CreateSlave();
+	}
+}
+
+
+
 GameClientSlaveManager* GameClientMasterTicker::CreateSlaveManager(GameClientMasterTicker* pMaster,
 	Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
 	UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea)
@@ -342,15 +361,13 @@ void GameClientMasterTicker::AddSlave(GameClientSlaveManager* pSlave)
 
 void GameClientMasterTicker::DeleteSlave(GameClientSlaveManager* pSlave, bool pAllowMainMenu)
 {
+	ScopeLock lLock(&mLock);
+	assert(mSlaveArray[pSlave->GetSlaveIndex()]);
+	mSlaveArray[pSlave->GetSlaveIndex()] = 0;
+	delete (pSlave);
+	if (--mActiveSlaveCount == 0 && pAllowMainMenu)
 	{
-		ScopeLock lLock(&mLock);
-		assert(mSlaveArray[pSlave->GetSlaveIndex()]);
-		mSlaveArray[pSlave->GetSlaveIndex()] = 0;
-		delete (pSlave);
-		if (--mActiveSlaveCount == 0 && pAllowMainMenu)
-		{
-			CreatePlayerCountWindow();
-		}
+		CreatePlayerCountWindow();
 	}
 }
 
@@ -372,12 +389,8 @@ bool GameClientMasterTicker::Initialize()
 
 void GameClientMasterTicker::CreatePlayerCountWindow()
 {
-	assert(!mPlayerCountView);
-	mPlayerCountView = new PlayerCountView(this);
-	mUiManager->AssertDesktopLayout(new UiTbc::FloatingLayout());
-	mUiManager->GetDesktopWindow()->AddChild(mPlayerCountView);
-	mUiManager->GetDesktopWindow()->UpdateLayout();
-
+	assert(!mIsPlayerCountViewActive);
+	mIsPlayerCountViewActive = true;
 	CreateSlave(&GameClientMasterTicker::CreateViewer);
 }
 
@@ -809,30 +822,10 @@ void GameClientMasterTicker::OnInput(UiLepra::InputElement* pElement)
 
 void GameClientMasterTicker::ClosePlayerCountGui()
 {
-	if (mPlayerCountView)
+	if (mIsPlayerCountViewActive)
 	{
-		mUiManager->GetDesktopWindow()->RemoveChild(mPlayerCountView, 0);
-		delete (mPlayerCountView);
-		mPlayerCountView = 0;
-
 		DeleteSlave(mSlaveArray[0], false);
-	}
-}
-
-void GameClientMasterTicker::OnExit()
-{
-	mLog.Headline(_T("Number of players not picked, quitting."));
-	SystemManager::AddQuitRequest(+1);
-	ClosePlayerCountGui();
-}
-
-void GameClientMasterTicker::OnSetPlayerCount(int pPlayerCount)
-{
-	ClosePlayerCountGui();
-
-	for (int x = 0; x < pPlayerCount; ++x)
-	{
-		CreateSlave();
+		mIsPlayerCountViewActive = false;
 	}
 }
 

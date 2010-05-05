@@ -10,7 +10,6 @@
 #include "../../Lepra/Include/Thread.h"
 #include "../../UiCure/Include/UiLineGraph2d.h"
 #include "InputObserver.h"
-#include "PlayerCountView.h"
 #include "ScreenPart.h"
 
 
@@ -33,7 +32,7 @@ class RoadSignButton;
 
 
 
-class GameClientMasterTicker: public Cure::GameTicker, public InputObserver, public PlayerCountObserver, public ScreenPart
+class GameClientMasterTicker: public Cure::GameTicker, public InputObserver, public ScreenPart
 {
 public:
 	GameClientMasterTicker(UiCure::GameUiManager* pUiManager, Cure::ResourceManager* mResourceManager);
@@ -51,6 +50,9 @@ public:
 
 	virtual PixelRect GetRenderArea() const;
 	virtual float UpdateFrustum();
+
+	void OnExit();
+	void OnSetPlayerCount(int pPlayerCount);
 
 private:
 	typedef GameClientSlaveManager* (*SlaveFactoryMethod)(GameClientMasterTicker* pMaster,
@@ -87,8 +89,6 @@ private:
 	void OnInput(UiLepra::InputElement* pElement);
 
 	void ClosePlayerCountGui();
-	void OnExit();
-	void OnSetPlayerCount(int pPlayerCount);
 
 	bool ApplyCalibration();
 	void StashCalibration();
@@ -108,7 +108,7 @@ private:
 	Lock mLock;
 	UiCure::GameUiManager* mUiManager;
 	Cure::ResourceManager* mResourceManager;
-	View* mPlayerCountView;
+	bool mIsPlayerCountViewActive;
 
 	ConsoleManager* mConsole;
 	bool mRestartUi;

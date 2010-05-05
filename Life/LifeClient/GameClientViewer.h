@@ -7,6 +7,7 @@
 #pragma once
 
 #include "GameClientSlaveManager.h"
+#include "RoadSignButton.h"
 
 
 
@@ -30,6 +31,8 @@ private:
 	virtual void CreateLoginView();
 	virtual bool InitializeTerrain();
 	virtual void OnLoadCompleted(Cure::ContextObject* pObject, bool pOk);
+	void CreateButton(float x, float y, float z, const str& pName, const str& pClass, const str& pTexture, RoadSignButton::Shape pShape);
+	void OnButtonClick(UiTbc::Button* pButton);
 
 	Cure::GameObjectId mBackdropVehicleId;
 };
