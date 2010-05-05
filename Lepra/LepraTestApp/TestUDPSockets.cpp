@@ -27,7 +27,7 @@ public:
 		mTestOK = false;
 
 		SocketAddress lLocalAddress;
-		if (lLocalAddress.Resolve(_T("localhost:10000")))
+		if (lLocalAddress.Resolve(_T(":10000")))
 		{
 			mUdpMuxSocket = new UdpMuxSocket(_T("Srv "), lLocalAddress);
 		}
@@ -86,7 +86,7 @@ public:
 		mTestOK = false;
 
 		SocketAddress lLocalAddress;
-		if (lLocalAddress.Resolve(_T("localhost:10001")))
+		if (lLocalAddress.Resolve(_T(":10001")))
 		{
 			mUdpMuxSocket = new UdpMuxSocket(_T("Client "), lLocalAddress);
 		}
@@ -113,7 +113,7 @@ private:
 void ClientThread::Run()
 {
 	SocketAddress lLocalAddress;
-	if (lLocalAddress.Resolve(_T("localhost:10000")))
+	if (lLocalAddress.Resolve(_T(":10000")))
 	{
 		UdpVSocket* lSocket = mUdpMuxSocket->Connect(lLocalAddress, "", 0.5);
 		assert(lSocket);

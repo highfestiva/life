@@ -13,8 +13,20 @@
 #include "../Include/UiOpenGLMaterials.h"
 #include "../Include/UiTexture.h"
 
+
+
 namespace UiTbc
 {
+
+
+
+#ifdef LEPRA_DEBUG
+#define OGL_ASSERT()	{ GLenum lGlError = glGetError(); assert(lGlError == GL_NO_ERROR); }
+#else // !Debug
+#define OGL_ASSERT()
+#endif // Debug / !Debug
+
+
 
 Material* OpenGLRenderer::CreateMaterial(MaterialType pMaterialType)
 {
@@ -115,6 +127,8 @@ void OpenGLRenderer::Clear(unsigned int pClearFlags)
 	}
 
 	glClear(mGLClearMask);
+
+	OGL_ASSERT();
 }
 
 void OpenGLRenderer::SetClearColor(const Color& pColor)
@@ -123,13 +137,16 @@ void OpenGLRenderer::SetClearColor(const Color& pColor)
 		     (float)pColor.mGreen / 255.0f,
 		     (float)pColor.mBlue  / 255.0f,
 		     1.0f);
+	OGL_ASSERT();
 }
 
 void OpenGLRenderer::SetViewport(const PixelRect& pViewport)
 {
+	OGL_ASSERT();
 	Parent::SetViewport(pViewport);
 	glViewport(pViewport.mLeft, GetScreen()->GetHeight() - pViewport.mBottom, 
 		pViewport.GetWidth(), pViewport.GetHeight());
+	OGL_ASSERT();
 }
 
 void OpenGLRenderer::SetViewFrustum(float pFOVAngle, float pNear, float pFar)
@@ -139,6 +156,7 @@ void OpenGLRenderer::SetViewFrustum(float pFOVAngle, float pNear, float pFar)
 	Perspective(pFOVAngle, GetAspectRatio(), pNear, pFar);
 
 	glMatrixMode(GL_MODELVIEW);
+	OGL_ASSERT();
 }
 
 void OpenGLRenderer::SetClippingRect(const PixelRect& pRect)
@@ -147,6 +165,7 @@ void OpenGLRenderer::SetClippingRect(const PixelRect& pRect)
 	glScissor(pRect.mLeft, 
 		  GetScreen()->GetHeight() - pRect.mBottom, 
 		  pRect.GetWidth(), pRect.GetHeight());
+	OGL_ASSERT();
 }
 
 void OpenGLRenderer::ResetClippingRect()
@@ -156,6 +175,7 @@ void OpenGLRenderer::ResetClippingRect()
 	glScissor(lClippingRect.mLeft, 
 		  GetScreen()->GetHeight() - lClippingRect.mBottom, 
 		  lClippingRect.GetWidth(), lClippingRect.GetHeight());
+	OGL_ASSERT();
 }
 
 void OpenGLRenderer::SetShadowsEnabled(bool pEnabled, ShadowHint pHint)
@@ -176,6 +196,7 @@ void OpenGLRenderer::SetDepthWriteEnabled(bool pEnabled)
 		glDepthMask(GL_TRUE);
 	else
 		glDepthMask(GL_FALSE);
+	OGL_ASSERT();
 }
 
 void OpenGLRenderer::SetDepthTestEnabled(bool pEnabled)
@@ -184,6 +205,7 @@ void OpenGLRenderer::SetDepthTestEnabled(bool pEnabled)
 		glEnable(GL_DEPTH_TEST);
 	else
 		glDisable(GL_DEPTH_TEST);
+	OGL_ASSERT();
 }
 
 void OpenGLRenderer::SetAmbientLight(float pRed, float pGreen, float pBlue)
@@ -192,6 +214,7 @@ void OpenGLRenderer::SetAmbientLight(float pRed, float pGreen, float pBlue)
 
 	float lAmbientLight[] = {pRed, pGreen, pBlue, 1.0f};
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lAmbientLight);
+	OGL_ASSERT();
 }
 
 void OpenGLRenderer::AddAmbience(float pRed, float pGreen, float pBlue)
@@ -204,6 +227,7 @@ void OpenGLRenderer::AddAmbience(float pRed, float pGreen, float pBlue)
 		lAmbientLight[3] = 1.0f;
 		glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lAmbientLight);
 	}
+	OGL_ASSERT();
 }
 
 int OpenGLRenderer::ReleaseShadowMap(int pShadowMapID)
@@ -214,6 +238,7 @@ int OpenGLRenderer::ReleaseShadowMap(int pShadowMapID)
 		GLuint lShadowMapID = (GLuint)pShadowMapID;
 		glDeleteTextures(1, &lShadowMapID);
 	}
+	OGL_ASSERT();
 	return mTMapIDManager.GetInvalidId();
 }
 
@@ -227,6 +252,7 @@ Renderer::LightID OpenGLRenderer::AddDirectionalLight(LightHint pHint,
 {
 	LightID lLightID = Parent::AddDirectionalLight(pHint, pDirX, pDirY, pDirZ, pRed, pGreen, pBlue, pShadowRange);
 	SetupGLLight((int)lLightID, GetLightData((int)lLightID));
+	OGL_ASSERT();
 	return lLightID;
 }
 
@@ -238,6 +264,7 @@ Renderer::LightID OpenGLRenderer::AddPointLight(LightHint pHint,
 {
 	LightID lLightID = Parent::AddPointLight(pHint, pPosX, pPosY, pPosZ, pRed, pGreen, pBlue, pLightRadius, pShadowRange);
 	SetupGLLight((int)lLightID, GetLightData((int)lLightID));
+	OGL_ASSERT();
 	return lLightID;
 }
 
@@ -259,6 +286,7 @@ Renderer::LightID OpenGLRenderer::AddSpotLight(LightHint pHint,
 		pLightRadius, 
 		pShadowRange);
 	SetupGLLight((int)lLightID, GetLightData((int)lLightID));
+	OGL_ASSERT();
 	return lLightID;
 }
 
@@ -327,13 +355,15 @@ void OpenGLRenderer::SetupGLLight(int pLightIndex, const LightData& pLight)
 	glLightfv(lLight, GL_AMBIENT, lAmbient);
 	glLightfv(lLight, GL_DIFFUSE, pLight.mColor);
 	glLightfv(lLight, GL_SPECULAR, pLight.mColor);
+	OGL_ASSERT();
 }
 
 void OpenGLRenderer::RemoveLight(LightID pLightID)
 {
 	Parent::RemoveLight(pLightID);
 	GLenum lLight = (int)pLightID;
-	glDisable(lLight);
+	glDisable(GL_LIGHT0+lLight);
+	OGL_ASSERT();
 }
 
 
@@ -359,6 +389,7 @@ void OpenGLRenderer::SetLightPosition(LightID pLightID, float pX, float pY, floa
 		GLenum lLight = GL_LIGHT0 + lLightIndex;
 		glLightfv(lLight, GL_POSITION, lVector);
 	}
+	OGL_ASSERT();
 }
 
 
@@ -396,6 +427,7 @@ void OpenGLRenderer::SetLightDirection(LightID pLightID, float pX, float pY, flo
 			glLightfv(lLight, GL_SPOT_DIRECTION, lVector);
 		}
 	}
+	OGL_ASSERT();
 }
 
 void OpenGLRenderer::SetGlobalMaterialReflectance(float pRed, float pGreen, float pBlue, float pSpecularity)
@@ -441,6 +473,7 @@ void OpenGLRenderer::SetGlobalMaterialReflectance(float pRed, float pGreen, floa
 			glLightfv(lLight, GL_AMBIENT, lAmbient);
 		}
 	}
+	OGL_ASSERT();
 }
 
 Renderer::TextureData* OpenGLRenderer::CreateTextureData(TextureID pTextureID)
@@ -505,6 +538,7 @@ void OpenGLRenderer::BindMap(int pMapType, TextureData* pTextureData, Texture* p
 			     GL_UNSIGNED_BYTE,
 			     lMap->GetBuffer());
 	}
+	OGL_ASSERT();
 }
 
 void OpenGLRenderer::BindCubeMap(TextureData* pTextureData, Texture* pTexture)
@@ -588,6 +622,7 @@ void OpenGLRenderer::BindCubeMap(TextureData* pTextureData, Texture* pTexture)
 			     GL_UNSIGNED_BYTE,
 			     pTexture->GetCubeMapNegZ(i)->GetBuffer());
 	}
+	OGL_ASSERT();
 }
 
 void OpenGLRenderer::ReleaseMap(TextureData* pTextureData)
@@ -606,12 +641,15 @@ void OpenGLRenderer::ReleaseMap(TextureData* pTextureData)
 	{
 		SetEnvironmentMap(INVALID_TEXTURE);
 	}
+	OGL_ASSERT();
 }
 
 void OpenGLRenderer::BindGeometry(TBC::GeometryBase* pGeometry,
 				  GeometryID /*pID*/,
 				  MaterialType pMaterialType)
 {
+	OGL_ASSERT();
+
 	// A hard coded check to make life easier for the user.
 	if (pMaterialType == MAT_TEXTURE_SBMAP_PXS ||
 	    pMaterialType == MAT_TEXTURE_AND_DIFFUSE_BUMPMAP_PXS)
@@ -767,6 +805,8 @@ void OpenGLRenderer::BindGeometry(TBC::GeometryBase* pGeometry,
 								 (void*)pGeometry->GetIndexData());
 		}
 	}
+
+	OGL_ASSERT();
 }
 
 bool OpenGLRenderer::BindShadowGeometry(UiTbc::ShadowVolume* pShadowVolume, LightHint pLightHint)
@@ -832,6 +872,7 @@ bool OpenGLRenderer::BindShadowGeometry(UiTbc::ShadowVolume* pShadowVolume, Ligh
 		lOK = true;
 	}
 
+	OGL_ASSERT();
 	return lOK;
 }
 
@@ -932,6 +973,7 @@ void OpenGLRenderer::UpdateGeometry(GeometryID pGeometryID)
 			}
 		}
 	}
+	OGL_ASSERT();
 }
 
 void OpenGLRenderer::ReleaseGeometry(TBC::GeometryBase* pUserGeometry, GeomReleaseOption pOption)
@@ -964,6 +1006,7 @@ void OpenGLRenderer::ReleaseGeometry(TBC::GeometryBase* pUserGeometry, GeomRelea
 			assert(false);
 		}
 	}
+	OGL_ASSERT();
 }
 
 
@@ -994,6 +1037,7 @@ bool OpenGLRenderer::ChangeMaterial(GeometryID pGeometryID, MaterialType pMateri
 		lMat = (OpenGLMaterial*)GetMaterial(lGeometry->mMaterialType);
 		lOk = lMat->AddGeometry(lGeometry->mGeometry);
 	}
+	OGL_ASSERT();
 	return (lOk);
 }
 
@@ -1008,6 +1052,8 @@ bool OpenGLRenderer::PreRender(TBC::GeometryBase* pGeometry)
 	lCamSpaceTransformation.GetAs4x4TransposeMatrix(lModelViewMatrix);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadMatrixf(lModelViewMatrix);
+
+	OGL_ASSERT();
 
 	return CheckCulling(lCamSpaceTransformation, pGeometry->GetBoundingRadius());
 }
@@ -1033,6 +1079,8 @@ void OpenGLRenderer::DrawLine(const Vector3DF& pPosition, const Vector3DF& pVect
 	glVertex3f(pPosition.x, pPosition.y, pPosition.z);
 	glVertex3f(pPosition.x+pVector.x, pPosition.y+pVector.y, pPosition.z+pVector.z);
 	glEnd();
+
+	OGL_ASSERT();
 }
 
 
@@ -1040,6 +1088,8 @@ void OpenGLRenderer::DrawLine(const Vector3DF& pPosition, const Vector3DF& pVect
 unsigned int OpenGLRenderer::RenderScene()
 {
 	LEPRA_MEASURE_SCOPE(RenderScene);
+
+	OGL_ASSERT();
 
 	{
 		// Prepare projection data in order to be able to call CheckCulling().
@@ -1192,11 +1242,15 @@ unsigned int OpenGLRenderer::RenderScene()
 		::glPopAttrib();
 	}
 
+	OGL_ASSERT();
+
 	return (GetCurrentFrame());
 }
 
 void OpenGLRenderer::RenderRelative(TBC::GeometryBase* pGeometry)
 {
+	OGL_ASSERT();
+
 	::glMatrixMode(GL_MODELVIEW);
 	::glPushMatrix();
 	float lModelViewMatrix[16];
@@ -1217,6 +1271,8 @@ void OpenGLRenderer::RenderRelative(TBC::GeometryBase* pGeometry)
 
 	::glMatrixMode(GL_MODELVIEW);
 	::glPopMatrix();
+
+	OGL_ASSERT();
 }
 
 int OpenGLRenderer::GetEnvMapID()
@@ -1324,10 +1380,13 @@ void OpenGLRenderer::ProcessLights()
 			}
 		}
 	}
+	OGL_ASSERT();
 }
 
 void OpenGLRenderer::RenderShadowVolumes()
 {
+	OGL_ASSERT();
+
 	// Disable all fancy gfx.
 	glPushAttrib(GL_ENABLE_BIT | GL_LIGHTING_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	glDisable(GL_TEXTURE_2D);
@@ -1438,10 +1497,14 @@ void OpenGLRenderer::RenderShadowVolumes()
 	glDepthFunc(GL_LEQUAL);
 //	glPolygonOffset(0, 0);
 //	glDisable(GL_POLYGON_OFFSET_EXT);
+
+	OGL_ASSERT();
 }
 
 int OpenGLRenderer::RenderShadowMaps()
 {
+	OGL_ASSERT();
+
 	glPushAttrib(GL_ENABLE_BIT | GL_LIGHTING_BIT | GL_DEPTH_BUFFER_BIT | GL_VIEWPORT_BIT);
 	glDisable(GL_LIGHTING);
 	glDisable(GL_COLOR_MATERIAL);
@@ -1588,6 +1651,8 @@ int OpenGLRenderer::RenderShadowMaps()
 
 	glDisable(GL_TEXTURE_2D);
 
+	OGL_ASSERT();
+
 	return lCount;
 }
 
@@ -1699,6 +1764,8 @@ void OpenGLRenderer::RegenerateShadowMap(LightData* pLight)
 	glLoadIdentity();
 
 	pLight->mShadowMapNeedUpdate = false;
+
+	OGL_ASSERT();
 }
 
 void OpenGLRenderer::Perspective(float pFOVAngle, float pAspectRatio, float pNear, float pFar)
@@ -1770,6 +1837,8 @@ void OpenGLRenderer::Perspective(float pFOVAngle, float pAspectRatio, float pNea
 	glLoadMatrixf(lProjectionMatrix);
 
 	glMatrixMode(GL_MODELVIEW);
+
+	OGL_ASSERT();
 }
 
 void OpenGLRenderer::SetPixelFormat(int& pSize, GLenum& pPixelFormat, bool pCompress, const str& pErrorMessage)
@@ -1802,4 +1871,4 @@ LOG_CLASS_DEFINE(UI_GFX_3D, OpenGLRenderer);
 
 
 
-} // End namespace.
+}

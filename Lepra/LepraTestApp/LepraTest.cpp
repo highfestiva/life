@@ -1375,7 +1375,7 @@ bool TestTcpMuxSocket(const LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = _T("resolving acceptor");
-		lTestOk = lAcceptAddress.Resolve(_T("localhost:46767"));
+		lTestOk = lAcceptAddress.Resolve(_T(":46767"));
 		//lAcceptAddress.SetPort(lAcceptPort);
 		assert(lTestOk);
 	}
@@ -1393,7 +1393,7 @@ bool TestTcpMuxSocket(const LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = _T("resolving connector");
-		lTestOk = lConnectorAddress.Resolve(_T("localhost:47676"));
+		lTestOk = lConnectorAddress.Resolve(_T(":47676"));
 		//lConnectorAddress.SetPort(lConnectPort);
 		assert(lTestOk);
 	}
@@ -1542,7 +1542,7 @@ bool DualSocketClientTest::Test()
 	if (lTestOk)
 	{
 		lContext = _T("address resolve");
-		lTestOk = lLocalAddress.Resolve(_T("localhost:1025"));
+		lTestOk = lLocalAddress.Resolve(_T(":1025"));
 		assert(lTestOk);
 	}
 
@@ -1799,7 +1799,7 @@ bool DualSocketServerTest::Test()
 	if (lTestOk)
 	{
 		lContext = _T("address resolve");
-		lTestOk = lLocalAddress.Resolve(_T("localhost:1025"));
+		lTestOk = lLocalAddress.Resolve(_T(":1025"));
 		assert(lTestOk);
 	}
 
@@ -2308,7 +2308,7 @@ bool TestPerformance(const LogDecorator& pAccount)
 				Thread::YieldCpu();	// Yield to not get a starved Cpu time slice.
 				LEPRA_MEASURE_SCOPE(UdpSocket);
 				SocketAddress lAddress;
-				lAddress.Resolve(_T("localhost:46666"));
+				lAddress.Resolve(_T(":46666"));
 				UdpSocket lSocket(lAddress);
 				{
 					LEPRA_MEASURE_SCOPE(SendTo);
@@ -2326,9 +2326,9 @@ bool TestPerformance(const LogDecorator& pAccount)
 				Thread::YieldCpu();	// Yield to not get a starved Cpu time slice.
 				LEPRA_MEASURE_SCOPE(UdpMuxSocket);
 				SocketAddress lAddress1;
-				lAddress1.Resolve(_T("localhost:46666"));
+				lAddress1.Resolve(_T(":46666"));
 				SocketAddress lAddress2;
-				lAddress2.Resolve(_T("localhost:46667"));
+				lAddress2.Resolve(_T(":46667"));
 				UdpVSocket* lSocket = 0;
 				UdpMuxSocket lMuxSocket1(_T("#1 "), lAddress1);
 				UdpMuxSocket lMuxSocket2(_T("#2 "), lAddress2);

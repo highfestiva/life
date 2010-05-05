@@ -27,7 +27,7 @@ namespace UiTbc
 
 OpenGLPainter::OpenGLPainter() :
 	mTextureIDManager(3, 10000, 0),
-	mSmoothFont(false)
+	mSmoothFont(true)
 {
 }
 
@@ -1260,6 +1260,8 @@ void OpenGLPainter::PrintText(const str& pString, int x, int y)
 		UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
 	::glDisableClientState(GL_COLOR_ARRAY);
+	::glDisableClientState(GL_INDEX_ARRAY);
+	::glDisableClientState(GL_NORMAL_ARRAY);
 	::glEnableClientState(GL_VERTEX_ARRAY);
 	::glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	//::glDisableClientState(GL_TEXTURE_COORD_ARRAY);

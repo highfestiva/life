@@ -147,7 +147,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 	{
 		lContext = pPrefix+_T(" client1 invalid force connect");
 		log_volatile(mLog.Debug(_T("---> Testing: ")+lContext));
-		lTestOk = !lClient->Connect(_T("localhost:11332"), _T("localhost:25344"), 0.5);
+		lTestOk = !lClient->Connect(_T(":11332"), _T(":25344"), 0.5);
 		assert(lTestOk);
 	}
 
@@ -175,7 +175,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 	{
 		lContext = pPrefix+_T(" start server");
 		log_volatile(mLog.Debug(_T("---> Testing: ")+lContext));
-		lTestOk = lServer->Start(_T("localhost:25344"));	// Server picks up ID.
+		lTestOk = lServer->Start(_T(":25344"));	// Server picks up ID.
 		assert(lTestOk);
 	}
 	// Make sure that client1 can't connect to wrong port.
@@ -183,7 +183,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 	{
 		lContext = pPrefix+_T(" invalid client1 port connect");
 		log_volatile(mLog.Debug(_T("---> Testing: ")+lContext));
-		lTestOk = !lClient->Connect(_T("localhost:11332"), _T("localhost:25343"), 0.5);
+		lTestOk = !lClient->Connect(_T(":11332"), _T(":25343"), 0.5);
 		assert(lTestOk);
 	}
 
@@ -204,7 +204,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 				uint32 lClientId;
 				mServer->ReceiveFirstPacket(lPacket, lClientId);
 				mServer->SendAll();
-				Thread::Sleep(0.05);
+				Thread::Sleep(0.001);
 			}
 			mServer->GetPacketFactory()->Release(lPacket);
 		};
@@ -221,7 +221,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 		wstr lBadPassword(L"feddo");
 		Cure::MangledPassword lPassword(lBadPassword);
 		Cure::LoginId lUser(wstr(L"client1"), lPassword);
-		lClient->StartConnectLogin(_T("localhost:25344"), 0, lUser);	// No connect time = skip connect, just try to login.
+		lClient->StartConnectLogin(_T(":25344"), 0, lUser);	// No connect time = skip connect, just try to login.
 		Cure::RemoteStatus lStatus = lClient->WaitLogin();
 		lTestOk = (lStatus == Cure::REMOTE_NO_CONNECTION);
 		assert(lTestOk);
@@ -231,7 +231,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 	{
 		lContext = pPrefix+_T(" connect client1");
 		log_volatile(mLog.Debug(_T("---> Testing: ")+lContext));
-		lTestOk = lClient->Connect(_T("localhost:11332"), _T("localhost:25344"), 0.5);
+		lTestOk = lClient->Connect(_T(":11332"), _T(":25344"), 0.5);
 		assert(lTestOk);
 	}
 	// Make sure that bad username login is denied.
@@ -252,7 +252,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 	{
 		lContext = pPrefix+_T(" connect client1 second time");
 		log_volatile(mLog.Debug(_T("---> Testing: ")+lContext));
-		lTestOk = lClient->Connect(_T("localhost:11332"), _T("localhost:25344"), 0.5);
+		lTestOk = lClient->Connect(_T(":11332"), _T(":25344"), 0.5);
 		assert(lTestOk);
 	}
 	// Make sure that bad password login is denied.
@@ -287,7 +287,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 		wstr lBadPassword(L"feddo");
 		Cure::MangledPassword lPassword(lBadPassword);
 		Cure::LoginId lUser(wstr(L"client1"), lPassword);
-		lClient->StartConnectLogin(_T("localhost:25344"), 2.0, lUser);
+		lClient->StartConnectLogin(_T(":25344"), 2.0, lUser);
 		Cure::RemoteStatus lStatus = lClient->WaitLogin();
 		lTestOk = (lStatus == Cure::REMOTE_OK);
 		assert(lTestOk);
@@ -299,7 +299,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 	{
 		lContext = pPrefix+_T(" connect client2");
 		log_volatile(mLog.Debug(_T("---> Testing: ")+lContext));
-		lTestOk = lClient2->Connect(_T("localhost:11333"), _T("localhost:25344"), 0.5);
+		lTestOk = lClient2->Connect(_T(":11333"), _T(":25344"), 0.5);
 		assert(lTestOk);
 	}
 	// Make sure double login fails.
@@ -334,7 +334,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 		wstr lBadPassword(L"feddo");
 		Cure::MangledPassword lPassword(lBadPassword);
 		Cure::LoginId lUser(wstr(L"client2"), lPassword);
-		lClient2->StartConnectLogin(_T("localhost:25344"), 2.0, lUser);
+		lClient2->StartConnectLogin(_T(":25344"), 2.0, lUser);
 		Cure::RemoteStatus lStatus = lClient2->WaitLogin();
 		lTestOk = (lStatus == Cure::REMOTE_OK);
 		assert(lTestOk);

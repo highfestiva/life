@@ -310,7 +310,7 @@ bool ResourceTest::TestStress()
 			if ((x&7) == 0)
 			{
 				lTestOk = false;
-				for (int i = 0; i < 5 && !lTestOk; ++i)
+				for (int i = 0; i < 250 && !lTestOk; ++i)
 				{
 					TickRM lTick(mResourceManager);
 					const size_t lCount = mResourceManager->QueryResourceCount();
@@ -330,9 +330,13 @@ bool ResourceTest::TestStress()
 	if (lTestOk)
 	{
 		lContext = _T("clearing cache 1");
-		mResourceManager->ForceFreeCache();
-		lTestOk = (mResourceManager->QueryResourceCount() == 0);
+		lTestOk = (mResourceManager->ForceFreeCache() == 1);
 		assert(lTestOk);
+		if (lTestOk)
+		{
+			lTestOk = (mResourceManager->QueryResourceCount() == 0);
+			assert(lTestOk);
+		}
 	}
 
 	if (lTestOk)
@@ -352,7 +356,7 @@ bool ResourceTest::TestStress()
 			if ((x&7) == 0)
 			{
 				lTestOk = false;
-				for (int i = 0; i < 5 && !lTestOk; ++i)
+				for (int i = 0; i < 250 && !lTestOk; ++i)
 				{
 					TickRM lTick(mResourceManager);
 					const size_t lCount = mResourceManager->QueryResourceCount();
@@ -407,7 +411,7 @@ bool ResourceTest::TestStress()
 				lResources.erase(--u.base());
 			}
 			lTestOk = false;
-			for (int i = 0; i < 5 && !lTestOk; ++i)
+			for (int i = 0; i < 250 && !lTestOk; ++i)
 			{
 				TickRM lTick(mResourceManager);
 				c = mResourceManager->QueryResourceCount();
@@ -486,7 +490,7 @@ bool ResourceTest::TestStress()
 				lResources.erase(--u.base());
 			}
 			lTestOk = false;
-			for (int i = 0; i < 5 && !lTestOk; ++i)
+			for (int i = 0; i < 250 && !lTestOk; ++i)
 			{
 				TickRM lTick(mResourceManager);
 				c = mResourceManager->QueryResourceCount();
