@@ -105,7 +105,7 @@ void CppContextObject::UiMove()
 		{
 			continue;
 		}
-		if (mUsePhysics)
+		if (mPhysicsOverride != PHYSICS_OVERRIDE_BONES)
 		{
 			TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(lResource->GetOffset().mGeometryIndex);
 			if (lGeometry == 0 || lGeometry->GetBodyId() == TBC::INVALID_BODY)
@@ -141,13 +141,13 @@ void CppContextObject::UiMove()
 
 	if (mEngineSoundResource.GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
-		if (!mUsePhysics)
+		if (mPhysicsOverride == PHYSICS_OVERRIDE_BONES)
 		{
 			return;	// TODO: play sounds for graphical objects without physics too.
 		}
 
 		TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());	// TODO: add sound->engine index in class info!
-		if (lGeometry == 0 || (mUsePhysics && lGeometry->GetBodyId() == TBC::INVALID_BODY))
+		if (lGeometry == 0 || lGeometry->GetBodyId() == TBC::INVALID_BODY)
 		{
 			mLog.Warningf(_T("Physical body for %s not loaded!"), mEngineSoundResource.GetName().c_str());
 		}

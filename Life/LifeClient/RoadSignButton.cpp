@@ -50,7 +50,7 @@ RoadSignButton::RoadSignButton(ScreenPart* pScreenPart, Cure::ResourceManager* p
 	mButton.SetOnRender(RoadSignButton, RenderButton);
 	mButton.SetOnIsOver(RoadSignButton, IsOverButton);
 
-	SetUsePhysics(false);
+	SetPhysicsTypeOverride(PHYSICS_OVERRIDE_BONES);
 	mSignTexture.Load(GetResourceManager(), pTextureResourceName,
 		UiCure::UserRendererImageResource::TypeLoadCallback(this, &RoadSignButton::OnLoadTexture));
 }

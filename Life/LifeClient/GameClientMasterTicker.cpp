@@ -340,14 +340,14 @@ void GameClientMasterTicker::AddSlave(GameClientSlaveManager* pSlave)
 	}
 }
 
-void GameClientMasterTicker::DeleteSlave(GameClientSlaveManager* pSlave)
+void GameClientMasterTicker::DeleteSlave(GameClientSlaveManager* pSlave, bool pAllowMainMenu)
 {
 	{
 		ScopeLock lLock(&mLock);
 		assert(mSlaveArray[pSlave->GetSlaveIndex()]);
 		mSlaveArray[pSlave->GetSlaveIndex()] = 0;
 		delete (pSlave);
-		if (--mActiveSlaveCount == 0)
+		if (--mActiveSlaveCount == 0 && pAllowMainMenu)
 		{
 			CreatePlayerCountWindow();
 		}
@@ -521,7 +521,7 @@ void GameClientMasterTicker::UpdateSlaveLayout()
 		}
 		else
 		{
-			DeleteSlave(lLastSlave);
+			DeleteSlave(lLastSlave, true);
 		}
 	}
 }
@@ -571,7 +571,7 @@ void GameClientMasterTicker::SlideSlaveLayout()
 		{
 			if (mSlaveArray[x]->IsQuitting())
 			{
-				DeleteSlave(mSlaveArray[x]);
+				DeleteSlave(mSlaveArray[x], true);
 			}
 		}
 		else
@@ -814,6 +814,8 @@ void GameClientMasterTicker::ClosePlayerCountGui()
 		mUiManager->GetDesktopWindow()->RemoveChild(mPlayerCountView, 0);
 		delete (mPlayerCountView);
 		mPlayerCountView = 0;
+
+		DeleteSlave(mSlaveArray[0], false);
 	}
 }
 

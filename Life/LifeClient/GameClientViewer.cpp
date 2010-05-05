@@ -63,6 +63,7 @@ bool GameClientViewer::InitializeTerrain()
 {
 	Cure::ContextObject* lVehicle = new Vehicle(GetResourceManager(), _T("monster_02"), mUiManager);
 	GetContext()->AddLocalObject(lVehicle);
+	lVehicle->SetPhysicsTypeOverride(Cure::ContextObject::PHYSICS_OVERRIDE_STATIC);
 	lVehicle->StartLoading();
 	return (true);
 }

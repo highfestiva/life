@@ -64,7 +64,7 @@ private:
 		UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea);
 	bool CreateSlave(SlaveFactoryMethod pCreate);
 	void AddSlave(GameClientSlaveManager* pSlave);
-	void DeleteSlave(GameClientSlaveManager* pSlave);
+	void DeleteSlave(GameClientSlaveManager* pSlave, bool pAllowMainMenu);
 
 	bool Initialize();
 	void CreatePlayerCountWindow();
