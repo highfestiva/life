@@ -549,10 +549,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\PlayerCountView.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\View.cpp"
 				>
 			</File>
@@ -592,10 +588,6 @@
 			</File>
 			<File
 				RelativePath=".\InputObserver.h"
-				>
-			</File>
-			<File
-				RelativePath=".\PlayerCountView.h"
 				>
 			</File>
 			<File

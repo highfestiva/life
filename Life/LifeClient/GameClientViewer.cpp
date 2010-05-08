@@ -7,7 +7,7 @@
 #include "GameClientViewer.h"
 #include "../../Cure/Include/ContextManager.h"
 #include "../../TBC/Include/ChunkyPhysics.h"
-#include "RoadSignButton.h"
+#include "GameClientMasterTicker.h"
 #include "Vehicle.h"
 
 
@@ -49,20 +49,18 @@ void GameClientViewer::TickUiUpdate()
 
 void GameClientViewer::CreateLoginView()
 {
-	RoadSignButton* lButton = new RoadSignButton(this, GetResourceManager(), mUiManager, _T("?"), _T("road_sign"), _T("?.png;-1"), RoadSignButton::SHAPE_BOX);
-	GetContext()->AddLocalObject(lButton);
-	const float x = 0.3f;
-	const float y = 0.3f;
-	lButton->SetTrajectory(Vector2DF(x, y), 4);
-	//lButton->GetButton().SetOnClick(GameClientSlaveManager, OnAvatarSelect);
-	mRoadSignMap.insert(RoadSignMap::value_type(lButton->GetInstanceId(), lButton));
-	lButton->StartLoading();
+	CreateButton(-0.2f, +0.2f,  6.0f, _T("1"),	_T("road_sign"), _T("?.png;-1"), RoadSignButton::SHAPE_BOX);
+	CreateButton(+0.2f, +0.2f,  6.0f, _T("2"),	_T("road_sign"), _T("?.png;-1"), RoadSignButton::SHAPE_BOX);
+	CreateButton(-0.2f, -0.2f,  6.0f, _T("3"),	_T("road_sign"), _T("?.png;-1"), RoadSignButton::SHAPE_BOX);
+	CreateButton(+0.2f, -0.2f,  6.0f, _T("4"),	_T("road_sign"), _T("?.png;-1"), RoadSignButton::SHAPE_BOX);
+	CreateButton(+0.4f, +0.4f, 18.0f, _T("quit"),	_T("road_sign"), _T("?.png;-1"), RoadSignButton::SHAPE_ROUND);
 }
 
 bool GameClientViewer::InitializeTerrain()
 {
 	Cure::ContextObject* lVehicle = new Vehicle(GetResourceManager(), _T("monster_02"), mUiManager);
 	GetContext()->AddLocalObject(lVehicle);
+	lVehicle->SetPhysicsTypeOverride(Cure::ContextObject::PHYSICS_OVERRIDE_STATIC);
 	lVehicle->StartLoading();
 	return (true);
 }
@@ -80,6 +78,34 @@ void GameClientViewer::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 	else
 	{
 		Parent::OnLoadCompleted(pObject, pOk);
+	}
+}
+
+void GameClientViewer::CreateButton(float x, float y, float z, const str& pName, const str& pClass, const str& pTexture, RoadSignButton::Shape pShape)
+{
+	RoadSignButton* lButton = new RoadSignButton(this, GetResourceManager(), mUiManager, pName, pClass, pTexture, pShape);
+	GetContext()->AddLocalObject(lButton);
+	lButton->SetTrajectory(Vector2DF(x, y), z);
+	lButton->GetButton().SetOnClick(GameClientViewer, OnButtonClick);
+	mRoadSignMap.insert(RoadSignMap::value_type(lButton->GetInstanceId(), lButton));
+	lButton->StartLoading();
+}
+
+void GameClientViewer::OnButtonClick(UiTbc::Button* pButton)
+{
+	if (pButton->GetName() == _T("quit"))
+	{
+		GetMaster()->OnExit();
+		return;
+	}
+	int lValue = 0;
+	if (strutil::StringToInt(pButton->GetName(), lValue))
+	{
+		GetMaster()->OnSetPlayerCount(lValue);
+	}
+	else
+	{
+		assert(false);
 	}
 }
 

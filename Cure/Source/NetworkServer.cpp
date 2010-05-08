@@ -405,6 +405,7 @@ void NetworkServer::Login(const wstr& pLoginName, UserAccount::AccountId pAccoun
 
 void NetworkServer::AddUser(UserConnection* pUser, UserAccount::AccountId& pAccountId)
 {
+	ScopeLock lLock(&mLock);
 	mLoggedInIdUserTable.insert(LoggedInIdUserPair(pAccountId, pUser));
 	mLoggedInNameUserTable.insert(LoggedInNameUserPair(pUser->GetLoginName(), pUser));
 	mSocketUserTable.insert(SocketUserPair(pUser->GetSocket(), pUser));
@@ -414,6 +415,7 @@ bool NetworkServer::RemoveUser(UserAccount::AccountId pAccountId, bool pDestroy)
 {
 	UserConnection* lUser = 0;
 	{
+		ScopeLock lLock(&mLock);
 		LoggedInIdUserTable::iterator x = mLoggedInIdUserTable.find(pAccountId);
 		if (x != mLoggedInIdUserTable.end())
 		{
@@ -501,6 +503,7 @@ void NetworkServer::KillDeadSockets()
 
 void NetworkServer::DropSocket(UdpVSocket* pSocket)
 {
+	ScopeLock lLock(&mLock);
 	pSocket->SendBuffer();
 	mSocketTimeoutTable.erase(pSocket);
 	mPendingLoginTable.erase(pSocket);
@@ -509,6 +512,7 @@ void NetworkServer::DropSocket(UdpVSocket* pSocket)
 
 UserConnection* NetworkServer::GetUser(UserAccount::AccountId pAccountId)
 {
+	ScopeLock lLock(&mLock);
 	UserConnection* lUser = HashUtil::FindMapObject(mLoggedInIdUserTable, pAccountId);
 	return (lUser);
 }

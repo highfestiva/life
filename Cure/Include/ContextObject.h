@@ -39,6 +39,13 @@ class ResourceManager;
 class ContextObject: public TBC::PhysicsManager::TriggerListener, public TBC::PhysicsManager::ForceFeedbackListener
 {
 public:
+	enum PhysicsOverride
+	{
+		PHYSICS_OVERRIDE_NORMAL = 1,
+		PHYSICS_OVERRIDE_STATIC,
+		PHYSICS_OVERRIDE_BONES,
+	};
+
 	typedef std::vector<ContextObject*> Array;
 
 	ContextObject(ResourceManager* pResourceManager, const str& pClassId);
@@ -83,6 +90,7 @@ public:
 
 	bool SetPhysics(TBC::ChunkyPhysics* pStructure);
 	TBC::ChunkyPhysics* GetPhysics() const;
+	void SetPhysicsTypeOverride(PhysicsOverride pPhysicsOverride);
 	TBC::ChunkyBoneGeometry* GetStructureGeometry(unsigned pIndex) const;
 	TBC::ChunkyBoneGeometry* GetStructureGeometry(TBC::PhysicsManager::BodyID pBodyId) const;
 	void SetEnginePower(unsigned pAspect, float pPower, float pAngle);
@@ -102,7 +110,6 @@ protected:
 	bool IsAttachedTo(ContextObject* pObject) const;
 	void AddAttachment(ContextObject* pObject, TBC::PhysicsManager::JointID pJoint, TBC::PhysicsEngine* pEngine);
 
-	void SetUsePhysics(bool pUsePhysics);
 	void AddChild(ContextObject* pObject);
 	void SetupChildTriggerHandlers();
 
@@ -138,7 +145,7 @@ protected:
 	bool mIsLoaded;
 	AttributeArray mAttributeArray;
 	TBC::ChunkyPhysics* mPhysics;
-	bool mUsePhysics;
+	PhysicsOverride mPhysicsOverride;
 	float mLastSendTime;
 	ObjectPositionalData mPosition;
 	int mSendCount;

@@ -263,7 +263,7 @@ bool NetworkLoginClients()
 		lServer = new Cure::NetworkServer(Cure::GetSettings(), &gLoginListener);
 		gServer.mNetworkAgent = lServer;
 		//lServer->GetPacketFactory()->SetMessageFactory(new PositionalMessageFactory());
-		lTestOk = lServer->Start(_T("localhost:12345"));
+		lTestOk = lServer->Start(_T(":12345"));
 	}
 
 	// Create user accounts.
@@ -311,7 +311,7 @@ bool NetworkLoginClients()
 		wstr lBadPassword(L"feddo");
 		Cure::MangledPassword lPassword(lBadPassword);
 		Cure::LoginId lUser(Lepra::wstrutil::Format(L"user%i", x), lPassword);
-		lClient->StartConnectLogin(_T("localhost:12345"), 2.0, lUser);
+		lClient->StartConnectLogin(_T(":12345"), 2.0, lUser);
 		Cure::RemoteStatus lStatus = lClient->WaitLogin();
 		gClient[x].mClientId = lClient->GetLoginAccountId();
 		bool lTestOk = (lStatus == Cure::REMOTE_OK);
@@ -618,7 +618,7 @@ void ClientReceive(int pAgentIndex)
 {
 	AgentData& lClientData = gClient[pAgentIndex];
 	Cure::Packet* lPacket = lClientData.mNetworkAgent->GetPacketFactory()->Allocate();
-	Cure::NetworkAgent::ReceiveStatus lReceived = ((Cure::NetworkClient*)lClientData.mNetworkAgent)->ReceiveNonBlocking(lPacket);
+	Cure::NetworkAgent::ReceiveStatus lReceived = dynamic_cast<Cure::NetworkClient*>(lClientData.mNetworkAgent)->ReceiveNonBlocking(lPacket);
 	if (lReceived == Cure::NetworkAgent::RECEIVE_OK)
 	{
 		Cure::Packet::ParseResult lParseResult;
@@ -745,7 +745,7 @@ void ServerReceive()
 	while (lReceived != Cure::NetworkAgent::RECEIVE_NO_DATA)
 	{
 		Lepra::uint32 lId;
-		lReceived = ((Cure::NetworkServer*)gServer.mNetworkAgent)->ReceiveFirstPacket(lPacket, lId);
+		lReceived = dynamic_cast<Cure::NetworkServer*>(gServer.mNetworkAgent)->ReceiveFirstPacket(lPacket, lId);
 		int x = GetClientIndexFromNetworkId(lId);
 		if (lReceived == Cure::NetworkAgent::RECEIVE_OK)
 		{
@@ -813,11 +813,14 @@ bool TickEmulatedLatencyNetwork()
 			if (lTransmit.mFrom->mClientId == 0)
 			{
 				lServerFlush = true;
-				Cure::NetworkServer* lNetworkServer = (Cure::NetworkServer*)(lTransmit.mFrom->mNetworkAgent);
-				lOk = lNetworkServer->PlaceInSendBuffer(false, lTransmit.mPacket, lTransmit.mTo->mClientId);
-				if (!lOk)
+				Cure::NetworkServer* lNetworkServer = dynamic_cast<Cure::NetworkServer*>(lTransmit.mTo->mNetworkAgent);
+				if (lNetworkServer)
 				{
-					gNptLog.AError("Could not send to remote client!");
+					lOk = lNetworkServer->PlaceInSendBuffer(false, lTransmit.mPacket, lTransmit.mTo->mClientId);
+					if (!lOk)
+					{
+						gNptLog.AError("Could not send to remote client!");
+					}
 				}
 			}
 			else
@@ -826,7 +829,7 @@ bool TickEmulatedLatencyNetwork()
 				{
 					logdebug(_T("Client send"), Lepra::strutil::Format(_T("Frame %i when server on %i, waited for time %f, current time %f."), gClient[CLIENT_COUNT-1].mCurrentPhysicsFrameIndex, gServer.mCurrentPhysicsFrameIndex, lTransmit.mAbsoluteSendTime, gAbsoluteTime));
 				}*/
-				Cure::NetworkClient* lNetworkClient = (Cure::NetworkClient*)(lTransmit.mFrom->mNetworkAgent);
+				Cure::NetworkClient* lNetworkClient = dynamic_cast<Cure::NetworkClient*>(lTransmit.mFrom->mNetworkAgent);
 				lOk = lNetworkClient->PlaceInSendBuffer(false, lNetworkClient->GetSocket(), lTransmit.mPacket);
 				if (!lOk)
 				{
@@ -841,12 +844,11 @@ bool TickEmulatedLatencyNetwork()
 	}
 	if (lOk && lServerFlush)
 	{
-		lOk = ((Cure::NetworkServer*)gServer.mNetworkAgent)->SendAll();
+		lOk = gServer.mNetworkAgent->SendAll();
 	}
 	for (int x = 0; lOk && x < CLIENT_COUNT; ++x)
 	{
-		Cure::NetworkClient* lNetworkClient = (Cure::NetworkClient*)(gClient[x].mNetworkAgent);
-		lOk = lNetworkClient->SendAll();
+		lOk = gClient[x].mNetworkAgent->SendAll();
 	}
 	return (lOk);
 }

@@ -57,7 +57,7 @@ ContextObject::ContextObject(Cure::ResourceManager* pResourceManager, const str&
 	mExtraData(0),
 	mIsLoaded(false),
 	mPhysics(0),
-	mUsePhysics(true),
+	mPhysicsOverride(PHYSICS_OVERRIDE_NORMAL),
 	mLastSendTime(0),
 	mSendCount(0),
 	mAllowMoveSelf(true)
@@ -617,7 +617,7 @@ bool ContextObject::SetPhysics(TBC::ChunkyPhysics* pStructure)
 		}
 	}
 
-	if (!mUsePhysics)
+	if (mPhysicsOverride == PHYSICS_OVERRIDE_BONES)
 	{
 		bool lOk = pStructure->BoneHierarchy::FinalizeInit(TBC::ChunkyPhysics::TRANSFORM_NONE);
 		if (lOk)
@@ -625,6 +625,10 @@ bool ContextObject::SetPhysics(TBC::ChunkyPhysics* pStructure)
 			mPhysics = pStructure;
 		}
 		return (lOk);
+	}
+	else if (mPhysicsOverride == PHYSICS_OVERRIDE_STATIC)
+	{
+		pStructure->SetPhysicsType(TBC::ChunkyPhysics::STATIC);
 	}
 
 	TBC::PhysicsManager* lPhysics = mManager->GetGameManager()->GetPhysicsManager();
@@ -668,6 +672,11 @@ bool ContextObject::SetPhysics(TBC::ChunkyPhysics* pStructure)
 TBC::ChunkyPhysics* ContextObject::GetPhysics() const
 {
 	return (mPhysics);
+}
+
+void ContextObject::SetPhysicsTypeOverride(PhysicsOverride pPhysicsOverride)
+{
+	mPhysicsOverride = pPhysicsOverride;
 }
 
 TBC::ChunkyBoneGeometry* ContextObject::GetStructureGeometry(unsigned pIndex) const
@@ -1011,11 +1020,6 @@ void ContextObject::AddAttachment(ContextObject* pObject, TBC::PhysicsManager::J
 }
 
 
-
-void ContextObject::SetUsePhysics(bool pUsePhysics)
-{
-	mUsePhysics = pUsePhysics;
-}
 
 void ContextObject::AddChild(ContextObject* pChild)
 {

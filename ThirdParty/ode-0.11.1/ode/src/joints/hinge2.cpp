@@ -34,7 +34,10 @@ dReal
 dxJointHinge2::measureAngle() const
 {
     dVector3 a1, a2;
-    dMULTIPLY0_331( a1, node[1].body->posr.R, axis2 );
+    if (node[1].body)	// high_festiva was here
+        dMULTIPLY0_331(a1, node[1].body->posr.R, axis2);
+    else	// high_festiva was here
+        dOPE(a1,=,axis2);	// high_festiva was here
     dMULTIPLY1_331( a2, node[0].body->posr.R, a1 );
     dReal x = dDOT( v1, a2 );
     dReal y = dDOT( v2, a2 );
@@ -109,7 +112,10 @@ dxJointHinge2::getAxisInfo(dVector3 ax1, dVector3 ax2, dVector3 axCross,
                            dReal &sin_angle, dReal &cos_angle) const
 {
     dMULTIPLY0_331 (ax1, node[0].body->posr.R, axis1);
-    dMULTIPLY0_331 (ax2, node[1].body->posr.R, axis2);
+    if (node[1].body)	// high_festiva was here
+        dMULTIPLY0_331 (ax2, node[1].body->posr.R, axis2);
+    else	// high_festiva was here
+        dOPE(ax2,=,axis2);	// high_festiva was here
     dCROSS (axCross,=,ax1,ax2);
     sin_angle = dSqrt (axCross[0]*axCross[0] + axCross[1]*axCross[1] + axCross[2]*axCross[2]);
     cos_angle = dDOT (ax1,ax2);
@@ -183,7 +189,10 @@ dxJointHinge2::makeV1andV2()
         // get axis 1 and 2 in global coords
         dVector3 ax1, ax2, v;
         dMULTIPLY0_331( ax1, node[0].body->posr.R, axis1 );
-        dMULTIPLY0_331( ax2, node[1].body->posr.R, axis2 );
+        if (node[1].body)	// high_festiva was here
+            dMULTIPLY0_331 (ax2, node[1].body->posr.R, axis2);
+        else	// high_festiva was here
+            dOPE(ax2,=,axis2);	// high_festiva was here
 
         // don't do anything if the axis1 or axis2 vectors are zero or the same
         if (( ax1[0] == 0 && ax1[1] == 0 && ax1[2] == 0 ) ||
