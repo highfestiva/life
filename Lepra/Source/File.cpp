@@ -40,11 +40,6 @@ void File::ClearMode(unsigned pMode)
 	mModeFlags &= ~pMode;
 }
 
-bool File::GetMode(unsigned pMode)
-{
-	return (mModeFlags & pMode) != 0;
-}
-
 void File::SetEndian(Endian::EndianType pEndian)
 {
 	Reader::SetReaderEndian(pEndian);
@@ -75,6 +70,11 @@ int64 File::SeekCur(int64 pOffset)
 int64 File::SeekEnd(int64 pOffset)
 {
 	return (Seek(pOffset, FSEEK_END));
+}
+
+bool File::IsInMode(unsigned pMode) const
+{
+	return (mModeFlags & pMode) != 0;
 }
 
 bool File::HasSameContent(File& pOtherFile, int64 pLength)

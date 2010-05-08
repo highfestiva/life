@@ -97,6 +97,13 @@ ConsoleCommandManager* ConsoleManager::GetConsoleCommandManager() const
 
 
 
+LogDecorator& ConsoleManager::GetLog() const
+{
+	return (mLog);
+}
+
+
+
 bool ConsoleManager::ForkExecuteCommand(const str& pCommand)
 {
 	class ForkThread: public Thread
@@ -111,10 +118,12 @@ bool ConsoleManager::ForkExecuteCommand(const str& pCommand)
 	private:
 		void Run()
 		{
+			mConsole->GetLog().AInfo("ForkThread: started.");
 			if (mConsole->GetConsoleCommandManager()->Execute(mCommand, false) != 0)
 			{
-				LogType::GetLog(LogType::SUB_CONSOLE)->Print(_T("ForkThread"), _T("Fork execution resulted in an error."), Log::LEVEL_ERROR);
+				mConsole->GetLog().AError("ForkThread: execution resulted in an error.");
 			}
+			mConsole->GetLog().AInfo("ForkThread: ended.");
 		}
 		ConsoleManager* mConsole;
 		str mCommand;

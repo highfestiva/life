@@ -25,6 +25,11 @@ public:
 		FSEEK_CUR,
 		FSEEK_END,
 	};
+	enum //Mode flags.
+	{
+		READ_MODE = 1,
+		WRITE_MODE = 2,
+	};
 
 	File(Endian::EndianType pReaderEndian = Endian::TYPE_BIG_ENDIAN,
 		    Endian::EndianType pWriterEndian = Endian::TYPE_BIG_ENDIAN,
@@ -48,20 +53,15 @@ public:
 	int64 SeekCur(int64 pOffset);
 	int64 SeekEnd(int64 pOffset);
 
+	bool IsInMode(unsigned pMode) const;
+
 	virtual void Flush() = 0;
 
 	bool HasSameContent(File& pOtherFile, int64 pLength);	// Compares content by reading the both files byte by byte.
 
 protected:
-	enum //Mode flags.
-	{
-		READ_MODE = 1,
-		WRITE_MODE = 2,
-	};
-
 	void SetMode(unsigned pMode);
 	void ClearMode(unsigned pMode);
-	bool GetMode(unsigned pMode);
 
 private:
 	unsigned mModeFlags;

@@ -77,6 +77,8 @@ public:
 	virtual bool OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode);
 	virtual void OnInput(UiLepra::InputElement* pElement);
 
+	bool SetAvatarEnginePower(unsigned pAspect, float pPower, float pAngle);
+
 	int GetSlaveIndex() const;
 
 	virtual PixelRect GetRenderArea() const;

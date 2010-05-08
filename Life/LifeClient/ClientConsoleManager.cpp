@@ -37,6 +37,7 @@ const ClientConsoleManager::CommandPair ClientConsoleManager::mCommandIdList[] =
 	{_T("start-reset-ui"), COMMAND_START_RESET_UI},
 	{_T("wait-reset-ui"), COMMAND_WAIT_RESET_UI},
 	{_T("add-player"), COMMAND_ADD_PLAYER},
+	{_T("set-avatar-engine-power"), COMMAND_SET_AVATAR_ENGINE_POWER},
 };
 
 
@@ -398,6 +399,29 @@ int ClientConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& 
 				{
 					mLog.AError("Could not add another player!");
 					lResult = 1;
+				}
+			}
+			break;
+			case COMMAND_SET_AVATAR_ENGINE_POWER:
+			{
+				if (pParameterVector.size() == 3)
+				{
+					log_adebug("Setting avatar engine power.");
+					int lAspect = 0;
+					strutil::StringToInt(pParameterVector[0], lAspect);
+					double lPower;
+					strutil::StringToDouble(pParameterVector[1], lPower);
+					double lAngle;
+					strutil::StringToDouble(pParameterVector[2], lAngle);
+					if (!((GameClientSlaveManager*)mGameManager)->SetAvatarEnginePower(lAspect, (float)lPower, (float)lAngle))
+					{
+						mLog.AError("Could not set avatar engine power!");
+						lResult = 1;
+					}
+				}
+				else
+				{
+					mLog.Warningf(_T("usage: %s <aspect> <power> <angle>"), pCommand.c_str());
 				}
 			}
 			break;

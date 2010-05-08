@@ -42,6 +42,8 @@ public:
 
 	ConsoleCommandManager* GetConsoleCommandManager() const;
 
+	virtual LogDecorator& GetLog() const;
+
 protected:
 	bool ForkExecuteCommand(const str& pCommand);
 

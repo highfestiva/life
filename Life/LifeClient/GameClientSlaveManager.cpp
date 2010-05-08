@@ -84,6 +84,7 @@ GameClientSlaveManager::~GameClientSlaveManager()
 void GameClientSlaveManager::LoadSettings()
 {
 	GetConsoleManager()->ExecuteCommand(_T("execute-file -i ")+GetApplicationCommandFilename());
+	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_STEERING_PLAYBACKMODE, PLAYBACK_NONE);
 }
 
 void GameClientSlaveManager::SetRenderArea(const PixelRect& pRenderArea)
@@ -317,6 +318,25 @@ void GameClientSlaveManager::OnInput(UiLepra::InputElement* pElement)
 
 
 
+bool GameClientSlaveManager::SetAvatarEnginePower(unsigned pAspect, float pPower, float pAngle)
+{
+	assert(pAspect >= 0 && pAspect < TBC::PhysicsEngine::MAX_CONTROLLER_COUNT);
+	if (pAspect < 0 && pAspect >= TBC::PhysicsEngine::MAX_CONTROLLER_COUNT)
+	{
+		return false;
+	}
+
+	Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
+	if (lObject)
+	{
+		SetAvatarEnginePower(lObject, pAspect, pPower, pAngle);
+		return true;
+	}
+	return false;
+}
+
+
+
 int GameClientSlaveManager::GetSlaveIndex() const
 {
 	return (mSlaveIndex);
@@ -441,8 +461,9 @@ void GameClientSlaveManager::TickInput()
 
 void GameClientSlaveManager::TickUiInput()
 {
-	int lPhysicsStepCount = GetTimeManager()->GetAffordedPhysicsStepCount();
-	if (lPhysicsStepCount > 0 && mAllowMovementInput)
+	const SteeringPlaybackMode lPlaybackMode = (SteeringPlaybackMode)CURE_RTVAR_TRYGET(GetVariableScope(), RTVAR_STEERING_PLAYBACKMODE, PLAYBACK_NONE);
+	const int lPhysicsStepCount = GetTimeManager()->GetAffordedPhysicsStepCount();
+	if (lPlaybackMode != PLAYBACK_PLAY && lPhysicsStepCount > 0 && mAllowMovementInput)
 	{
 		Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
 		if (lObject)
@@ -478,8 +499,9 @@ void GameClientSlaveManager::SetAvatarEnginePower(Cure::ContextObject* pAvatar, 
 	const SteeringPlaybackMode lPlaybackMode = (SteeringPlaybackMode)CURE_RTVAR_TRYGET(GetVariableScope(), RTVAR_STEERING_PLAYBACKMODE, PLAYBACK_NONE);
 	if (lPlaybackMode == PLAYBACK_RECORD)
 	{
-		if (!Math::IsEpsEqual(mEnginePowerShadow[pAspect].mPower, pPower) ||
-			!Math::IsEpsEqual(mEnginePowerShadow[pAspect].mAngle, pAngle, 0.3f))
+		if (!Math::IsEpsEqual(mEnginePowerShadow[pAspect].mPower, pPower)
+			//|| !Math::IsEpsEqual(mEnginePowerShadow[pAspect].mAngle, pAngle, 0.3f)
+			)
 		{
 			mEnginePowerShadow[pAspect].mPower = pPower;
 			mEnginePowerShadow[pAspect].mAngle = pAngle;
@@ -488,6 +510,7 @@ void GameClientSlaveManager::SetAvatarEnginePower(Cure::ContextObject* pAvatar, 
 				mEnginePlaybackFile.Open(_T("Data/Steering.rec"), DiskFile::MODE_TEXT_WRITE);
 				wstr lComment = wstrutil::Format(L"// Recording %s at %s.\n", pAvatar->GetClassId().c_str(), Time().GetDateTimeAsString().c_str());
 				mEnginePlaybackFile.WriteString(lComment);
+				mEnginePlaybackFile.WriteString(wstr(L"#Control.Steering.PlaybackMode 2\n"));
 			}
 			const double lTime = GetTimeManager()->GetAbsoluteTime();
 			if (lTime != mEnginePlaybackTime)
@@ -502,7 +525,14 @@ void GameClientSlaveManager::SetAvatarEnginePower(Cure::ContextObject* pAvatar, 
 	}
 	else if (lPlaybackMode == PLAYBACK_NONE)
 	{
-		mEnginePlaybackFile.Close();
+		if (mEnginePlaybackFile.IsOpen())
+		{
+			if (mEnginePlaybackFile.IsInMode(File::WRITE_MODE))
+			{
+				mEnginePlaybackFile.WriteString(wstr(L"#Control.Steering.PlaybackMode 0\n"));
+			}
+			mEnginePlaybackFile.Close();
+		}
 		mEnginePlaybackTime = GetTimeManager()->GetAbsoluteTime();
 		mEnginePowerShadow[pAspect].mPower = 0;
 		mEnginePowerShadow[pAspect].mAngle = 0;

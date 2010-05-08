@@ -305,11 +305,7 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 		{
 			if (pParameterVector.size() >= 1)
 			{
-				if (ForkExecuteCommand(strutil::Join(pParameterVector, _T(" "))))
-				{
-					mLog.AInfo("Fork started.");
-				}
-				else
+				if (!ForkExecuteCommand(strutil::Join(pParameterVector, _T(" "))))
 				{
 					mLog.AError("Could not start fork!");
 				}

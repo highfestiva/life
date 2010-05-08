@@ -63,6 +63,7 @@ private:
 		COMMAND_START_RESET_UI,
 		COMMAND_WAIT_RESET_UI,
 		COMMAND_ADD_PLAYER,
+		COMMAND_SET_AVATAR_ENGINE_POWER,
 	};
 
 	unsigned GetCommandCount() const;
