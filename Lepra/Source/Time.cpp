@@ -1,17 +1,20 @@
-/*
-	Class:  Time
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2009, Righteous Games
-*/
+
+
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2009, Righteous Games
+
+
 
 #include "../Include/Time.h"
-
 #include <time.h>
-
 #pragma warning(disable: 4996)	// Deprecated functions are not to be used, as they may be removed in future versions. Circumvent problem instead.
+
+
 
 namespace Lepra
 {
+
+
 
 Time::Time()
 {
@@ -30,7 +33,7 @@ Time::Time(const Time& pTime)
 	mDaylightSavingTime = pTime.mDaylightSavingTime;
 }
 
-int Time::GetDaysInMonth()
+int Time::GetDaysInMonth() const
 {
 	switch(mMonth)
 	{
@@ -180,7 +183,12 @@ Time& Time::operator -= (const Time& pTime)
 	return *this;
 }
 
-bool Time::operator <  (const Time& pTime) const
+str Time::GetDateTimeAsString() const
+{
+	return strutil::Format(_T("%i-%.2i-%.2i, %.2i:%.2i:%.2i"), GetYear(), GetMonth(), GetDay(), GetHour(), GetMinute(), GetSecond());
+}
+
+bool Time::operator < (const Time& pTime) const
 {
 	if (mYear != pTime.mYear)
 	{
@@ -254,4 +262,101 @@ const Time& Time::operator = (const Time& pTime)
 	return *this;
 }
 
-} // End namespace.
+
+int Time::GetYear() const
+{
+	return mYear;
+}
+
+int Time::GetMonth() const
+{
+	return mMonth;
+}
+
+int Time::GetDay() const
+{
+	return mDay;
+}
+
+int Time::GetWeekDay() const
+{
+	return mWeekDay;
+}
+
+int Time::GetHour() const
+{
+	return mHour;
+}
+
+int Time::GetMinute() const
+{
+	return mMinute;
+}
+
+int Time::GetSecond() const
+{
+	return mSecond;
+}
+
+bool Time::IsLeapYear() const
+{
+	return (mYear % 4 == 0 && (mYear % 100 != 0 || mYear % 400 == 0));
+}
+
+bool Time::operator == (const Time& pTime) const
+{
+	if (mYear        == pTime.mYear   &&
+	   mMonth       == pTime.mMonth  &&
+	   mDay         == pTime.mDay    &&
+	   mHour        == pTime.mHour   &&
+	   mMinute      == pTime.mMinute &&
+	   mSecond      == pTime.mSecond)
+	{
+		return true;
+	}
+
+	return false;
+}
+
+bool Time::operator != (const Time& pTime) const
+{
+	return !((*this) == pTime);
+}
+
+bool Time::operator <= (const Time& pTime) const
+{
+	if ((*this) == pTime)
+	{
+		return true;
+	}
+
+	return (*this) < pTime;
+}
+
+bool Time::operator >= (const Time& pTime) const
+{
+	if ((*this) == pTime)
+	{
+		return true;
+	}
+
+	return (*this) > pTime;
+}
+
+Time operator + (const Time& pLeft, const Time& pRight)
+{
+	Time lTime(pLeft);
+	lTime += pRight;
+	return lTime;
+}
+
+Time operator - (const Time& pLeft, const Time& pRight)
+{
+	Time lTime(pLeft);
+	lTime -= pRight;
+	return lTime;
+}
+
+
+
+}

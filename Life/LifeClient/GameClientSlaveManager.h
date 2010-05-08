@@ -10,6 +10,7 @@
 #include "../../Cure/Include/PositionalData.h"
 #include "../../Lepra/Include/Alarm.h"
 #include "../../Lepra/Include/Timer.h"
+#include "../../TBC/Include/PhysicsEngine.h"
 #include "../../UiCure/Include/UiResourceManager.h"
 #include "../GameManager.h"
 #include "ClientConsoleManager.h"
@@ -72,9 +73,9 @@ public:
 	void DoGetSiblings(Cure::GameObjectId pObjectId, Cure::ContextObject::Array& pSiblingArray) const;
 	void AddLocalObjects(std::hash_set<Cure::GameObjectId>& pLocalObjectSet) const;
 
-	bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
-	bool OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode);
-	void OnInput(UiLepra::InputElement* pElement);
+	virtual bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
+	virtual bool OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode);
+	virtual void OnInput(UiLepra::InputElement* pElement);
 
 	int GetSlaveIndex() const;
 
@@ -82,6 +83,13 @@ public:
 	virtual float UpdateFrustum();
 
 protected:
+	enum SteeringPlaybackMode
+	{
+		PLAYBACK_NONE = 0,
+		PLAYBACK_RECORD,
+		PLAYBACK_PLAY,
+	};
+
 	str GetApplicationCommandFilename() const;
 
 	bool Reset();
@@ -94,6 +102,7 @@ protected:
 	void TickInput();
 
 	void TickUiInput();
+	void SetAvatarEnginePower(Cure::ContextObject* pAvatar, unsigned pAspect, float pPower, float pAngle);
 	virtual void TickUiUpdate();
 
 	void TickNetworkInput();
@@ -175,6 +184,15 @@ protected:
 	str mConnectUserName;
 	str mConnectServerAddress;
 	str mDisconnectReason;
+
+	struct EnginePower	// Used for recording vechile steering playback.
+	{
+		float mPower;
+		float mAngle;
+	};
+	DiskFile mEnginePlaybackFile;	// Used for recording vechile steering playback.
+	double mEnginePlaybackTime;	// Used for recording vechile steering playback.
+	EnginePower mEnginePowerShadow[TBC::PhysicsEngine::MAX_CONTROLLER_COUNT];	// Used for recording vechile steering playback.
 
 	LOG_CLASS_DECLARE();
 };

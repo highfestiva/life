@@ -102,8 +102,9 @@ void LogListener::OnLog(const Log* pOriginator, const str& pMessage, Log::LogLev
 
 	if (mFormat & FORMAT_TIME)
 	{
-		Time lTime;
-		lOutputString += strutil::Format(_T("(%i-%.2i-%.2i, %.2i:%.2i:%.2i) "), lTime.GetYear(), lTime.GetMonth(), lTime.GetDay(), lTime.GetHour(), lTime.GetMinute(), lTime.GetSecond());
+		static const str lPre(_T("("));
+		static const str lPost(_T(") "));
+		lOutputString += lPre + Time().GetDateTimeAsString() + lPost;
 	}
 
 	if (mFormat & FORMAT_THREAD)

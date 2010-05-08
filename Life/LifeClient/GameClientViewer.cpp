@@ -85,4 +85,20 @@ void GameClientViewer::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 
 
 
+bool GameClientViewer::OnKeyDown(UiLepra::InputManager::KeyCode)
+{
+	return (false);
+}
+
+bool GameClientViewer::OnKeyUp(UiLepra::InputManager::KeyCode)
+{
+	return (false);
+}
+
+void GameClientViewer::OnInput(UiLepra::InputElement*)
+{
+}
+
+
+
 }

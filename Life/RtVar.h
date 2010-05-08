@@ -26,6 +26,8 @@
 #define RTVAR_CTRL_STEER_HANDBRK	"Control.Steer.HandBreak"
 #define RTVAR_CTRL_STEER_BRK		"Control.Steer.Break"
 
+#define RTVAR_STEERING_PLAYBACKMODE	"Control.Steering.PlaybackMode"
+
 #define RTVAR_LOGIN_SERVER		"Login.Server"
 #define RTVAR_LOGIN_USERNAME		"Login.UserName"
 

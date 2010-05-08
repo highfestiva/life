@@ -15,6 +15,7 @@
 #include "../../Lepra/Include/Random.h"
 #include "../../Lepra/Include/StringUtility.h"
 #include "../../Lepra/Include/SystemManager.h"
+#include "../../Lepra/Include/Time.h"
 #include "../../Lepra/Include/Timer.h"
 #include "../../UiCure/Include/UiGameUiManager.h"
 #include "../../UiCure/Include/UiRuntimeVariableName.h"
@@ -57,8 +58,11 @@ GameClientSlaveManager::GameClientSlaveManager(GameClientMasterTicker* pMaster, 
 	mCameraMaxSpeed(200),
 	mAllowMovementInput(true),
 	mOptions(pVariableScope, pSlaveIndex),
-	mLoginWindow(0)
+	mLoginWindow(0),
+	mEnginePlaybackTime(0)
 {
+	::memset(mEnginePowerShadow, 0, sizeof(mEnginePowerShadow));
+
 	mCameraPivotPosition = mCameraPosition + GetCameraQuaternion() * Vector3DF(0, mCameraTargetXyDistance*3, 0);
 
 	SetNetworkAgent(new Cure::NetworkClient(GetVariableScope()));
@@ -450,20 +454,58 @@ void GameClientSlaveManager::TickUiInput()
 			float lPower;
 			const bool lIsMovingForward = lObject->GetForwardSpeed() > 8.0f;
 			lPower = v.mForward - std::max(v.mBackward, lIsMovingForward? 0.0f : v.mBreakAndBack);
-			lObject->SetEnginePower(0, lPower, mCameraOrientation.x);
+			SetAvatarEnginePower(lObject, 0, lPower, mCameraOrientation.x);
 			lPower = v.mRight-v.mLeft;
-			lObject->SetEnginePower(1, lPower, mCameraOrientation.x);
+			SetAvatarEnginePower(lObject, 1, lPower, mCameraOrientation.x);
 			lPower = v.mHandBreak - std::max(v.mBreak, lIsMovingForward? v.mBreakAndBack : 0.0f);
-			lObject->SetEnginePower(2, lPower, mCameraOrientation.x);
+			SetAvatarEnginePower(lObject, 2, lPower, mCameraOrientation.x);
 			lPower = v.mUp-v.mDown;
-			lObject->SetEnginePower(3, lPower, mCameraOrientation.x);
+			SetAvatarEnginePower(lObject, 3, lPower, mCameraOrientation.x);
 			lPower = v.mForward3d - v.mBackward3d;
-			lObject->SetEnginePower(4, lPower, mCameraOrientation.x);
+			SetAvatarEnginePower(lObject, 4, lPower, mCameraOrientation.x);
 			lPower = v.mLeft3d - v.mRight3d;
-			lObject->SetEnginePower(5, lPower, mCameraOrientation.x);
+			SetAvatarEnginePower(lObject, 5, lPower, mCameraOrientation.x);
 			lPower = v.mUp3d-v.mDown3d;
-			lObject->SetEnginePower(6, lPower, mCameraOrientation.x);
+			SetAvatarEnginePower(lObject, 6, lPower, mCameraOrientation.x);
 		}
+	}
+}
+
+void GameClientSlaveManager::SetAvatarEnginePower(Cure::ContextObject* pAvatar, unsigned pAspect, float pPower, float pAngle)
+{
+	pAvatar->SetEnginePower(pAspect, pPower, pAngle);
+
+	const SteeringPlaybackMode lPlaybackMode = (SteeringPlaybackMode)CURE_RTVAR_TRYGET(GetVariableScope(), RTVAR_STEERING_PLAYBACKMODE, PLAYBACK_NONE);
+	if (lPlaybackMode == PLAYBACK_RECORD)
+	{
+		if (!Math::IsEpsEqual(mEnginePowerShadow[pAspect].mPower, pPower) ||
+			!Math::IsEpsEqual(mEnginePowerShadow[pAspect].mAngle, pAngle, 0.3f))
+		{
+			mEnginePowerShadow[pAspect].mPower = pPower;
+			mEnginePowerShadow[pAspect].mAngle = pAngle;
+			if (!mEnginePlaybackFile.IsOpen())
+			{
+				mEnginePlaybackFile.Open(_T("Data/Steering.rec"), DiskFile::MODE_TEXT_WRITE);
+				wstr lComment = wstrutil::Format(L"// Recording %s at %s.\n", pAvatar->GetClassId().c_str(), Time().GetDateTimeAsString().c_str());
+				mEnginePlaybackFile.WriteString(lComment);
+			}
+			const double lTime = GetTimeManager()->GetAbsoluteTime();
+			if (lTime != mEnginePlaybackTime)
+			{
+				wstr lCommand = wstrutil::Format(L"sleep %g\n", lTime-mEnginePlaybackTime);
+				mEnginePlaybackFile.WriteString(lCommand);
+				mEnginePlaybackTime = lTime;
+			}
+			wstr lCommand = wstrutil::Format(L"set-avatar-engine-power %u %g %g\n", pAspect, pPower, pAngle);
+			mEnginePlaybackFile.WriteString(lCommand);
+		}
+	}
+	else if (lPlaybackMode == PLAYBACK_NONE)
+	{
+		mEnginePlaybackFile.Close();
+		mEnginePlaybackTime = GetTimeManager()->GetAbsoluteTime();
+		mEnginePowerShadow[pAspect].mPower = 0;
+		mEnginePowerShadow[pAspect].mAngle = 0;
 	}
 }
 

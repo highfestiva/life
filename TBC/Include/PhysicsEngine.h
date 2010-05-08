@@ -47,6 +47,10 @@ public:
 		MODE_NORMAL = 1,
 		MODE_HALF_LOCK,
 	};
+	enum
+	{
+		MAX_CONTROLLER_COUNT = 8,
+	};
 
 	PhysicsEngine(EngineType pEngineType, float pStrength,
 		float pMaxSpeed, float pMaxSpeed2, float pFriction, unsigned pControllerIndex);
@@ -91,11 +95,6 @@ private:
 	void ApplyTorque(TBC::PhysicsManager* pPhysicsManager, float pFrameTime, ChunkyBoneGeometry* pGeometry, const EngineNode& pEngineNode) const;
 
 	typedef std::vector<EngineNode> EngineNodeArray;
-
-	enum
-	{
-		MAX_CONTROLLER_COUNT = 8,
-	};
 
 	EngineType mEngineType;
 	float mStrength;

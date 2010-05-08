@@ -31,6 +31,10 @@ private:
 	virtual bool InitializeTerrain();
 	virtual void OnLoadCompleted(Cure::ContextObject* pObject, bool pOk);
 
+	virtual bool OnKeyDown(UiLepra::InputManager::KeyCode);
+	virtual bool OnKeyUp(UiLepra::InputManager::KeyCode);
+	virtual void OnInput(UiLepra::InputElement*);
+
 	Cure::GameObjectId mBackdropVehicleId;
 };
 
