@@ -55,7 +55,7 @@ void TimeManager::TickTime()
 
 	mTickTimeModulo += lCurrentFrameTime;
 
-	mAverageFrameTime = Math::Lerp(mAverageFrameTime, lCurrentFrameTime, 0.01f);
+	mAverageFrameTime = Math::Lerp(mAverageFrameTime, lCurrentFrameTime, 0.001f);
 
 	mPhysicsFrameTime = 1/(float)mTargetFrameRate;
 	while (mPhysicsFrameTime*2 < mAverageFrameTime)

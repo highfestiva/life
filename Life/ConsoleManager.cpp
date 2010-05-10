@@ -327,7 +327,7 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 				{
 					mLog.Infof(_T("Variable %s executed OK."), pParameterVector[0].c_str());
 				}
-				else
+				else if (!Thread::GetCurrentThread()->GetStopRequest())
 				{
 					mLog.Errorf(_T("Variable %s was NOT sucessfully executed."), pParameterVector[0].c_str());
 					lResult = 1;
@@ -357,7 +357,8 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 				{
 					wstr lLine;
 					int lLineNumber = 1;
-					for (; lResult == 0 && lFile.ReadLine(lLine) == IO_OK; ++lLineNumber)
+					Thread* lSelf = Thread::GetCurrentThread();
+					for (; lResult == 0 && lFile.ReadLine(lLine) == IO_OK && !lSelf->GetStopRequest(); ++lLineNumber)
 					{
 						const str lConvertedLine = strutil::Encode(lLine);
 						lResult = ExecuteCommand(lConvertedLine);
@@ -368,8 +369,15 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 					}
 					else
 					{
-						mLog.Errorf(_T("File %s was NOT sucessfully executed; error in line %i."), pParameterVector[0].c_str(), lLineNumber);
-						lResult += 100;
+						if (!lSelf->GetStopRequest())
+						{
+							mLog.Errorf(_T("File %s was NOT sucessfully executed; error in line %i."), pParameterVector[0].c_str(), lLineNumber);
+							lResult += 100;
+						}
+						else
+						{
+							lResult = 0;	// Problem probably caused by termination. Ignore it.
+						}
 					}
 				}
 				else if (!lIgnoreIfMissing)
@@ -404,7 +412,15 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 			double lTime = -1;
 			if (pParameterVector.size() == 1 && strutil::StringToDouble(pParameterVector[0], lTime))
 			{
-				Thread::Sleep(lTime);
+				while (lTime > 0.5f && !Thread::GetCurrentThread()->GetStopRequest())
+				{
+					Thread::Sleep(0.5f);
+					lTime -= 0.5f;
+				}
+				if (lTime > 0 && !Thread::GetCurrentThread()->GetStopRequest())
+				{
+					Thread::Sleep(lTime);
+				}
 			}
 			else
 			{

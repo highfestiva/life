@@ -475,12 +475,21 @@ HWND Win32DisplayManager::GetHWND()
 LRESULT CALLBACK Win32DisplayManager::WndProc(HWND pWnd, unsigned int pMessage, unsigned int pwParam, LONG plParam) 
 {
 	if (pMessage  == WM_QUIT ||
-		pMessage == WM_DESTROY)
+		pMessage == WM_DESTROY ||
+		pMessage == WM_CLOSE)
 	{
-		--msWindowCount;
+		if (msWindowCount > 0)
+		{
+			--msWindowCount;
+		}
 		if (msWindowCount == 0)
 		{
 			SystemManager::AddQuitRequest(+1);
+			// First close attempt.
+			if (pMessage == WM_CLOSE && SystemManager::GetQuitRequest() == 1)
+			{
+				return (TRUE);
+			}
 		}
 	}
 

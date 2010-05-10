@@ -110,7 +110,9 @@ protected:
 	bool IsAttachedTo(ContextObject* pObject) const;
 	void AddAttachment(ContextObject* pObject, TBC::PhysicsManager::JointID pJoint, TBC::PhysicsEngine* pEngine);
 
-	void AddChild(ContextObject* pObject);
+	void AddChild(ContextObject* pChild);
+	void RemoveChild(ContextObject* pChild);
+	void SetParent(ContextObject* pParent);
 	void SetupChildTriggerHandlers();
 
 	virtual bool IsSameInstance(TBC::PhysicsManager::ForceFeedbackListener* pOther);
@@ -140,6 +142,7 @@ protected:
 	str mClassId;
 	NetworkObjectType mNetworkObjectType;
 	void* mExtraData;
+	ContextObject* mParent;
 	ChildList mChildList;
 	TriggerMap mTriggerMap;
 	bool mIsLoaded;

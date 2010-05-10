@@ -116,7 +116,7 @@ int Application::Run()
 			LEPRA_MEASURE_SCOPE(AppSleep);
 			TickSleep(lTimeInfo.GetSlidingAverage());
 		}
-		lQuit = (SystemManager::GetQuitRequest() != 0);
+		lQuit = mGameTicker->QueryQuit();
 	}
 
 	if (lQuit)

@@ -17,14 +17,14 @@ namespace Life
 
 
 // This is just a simple viewer that shows a background for menus and shows off in demo mode.
-class GameClientViewer: public GameClientSlaveManager
+class GameClientDemo: public GameClientSlaveManager
 {
 	typedef GameClientSlaveManager Parent;
 public:
-	GameClientViewer(GameClientMasterTicker* pMaster, Cure::RuntimeVariableScope* pVariableScope,
+	GameClientDemo(GameClientMasterTicker* pMaster, Cure::RuntimeVariableScope* pVariableScope,
 		Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager, int pSlaveIndex,
 		const PixelRect& pRenderArea);
-	virtual ~GameClientViewer();
+	virtual ~GameClientDemo();
 
 private:
 	virtual void TickUiInput();
@@ -32,8 +32,10 @@ private:
 	virtual void CreateLoginView();
 	virtual bool InitializeTerrain();
 	virtual void OnLoadCompleted(Cure::ContextObject* pObject, bool pOk);
-	RoadSignButton* CreateButton(float x, float y, float z, const str& pName, const str& pClass, const str& pTexture, RoadSignButton::Shape pShape);
-	void OnButtonClick(UiTbc::Button* pButton);
+
+	virtual bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
+	virtual bool OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode);
+	virtual void OnInput(UiLepra::InputElement* pElement);
 };
 
 

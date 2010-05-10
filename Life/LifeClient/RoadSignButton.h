@@ -38,13 +38,14 @@ public:
 
 	UiTbc::CustomButton& GetButton();
 	void SetTrajectory(const Vector2DF& pEndPoint, float pEndDistance);
+	void SetOrientation(const QuaternionF& pOrientation);
 	void SetIsMovingIn(bool pIsMovingIn);
 
 	void MoveSign(const float pFrameTime);
 
 protected:
 	void OnPhysicsTick();
-	void RenderButton(UiTbc::CustomButton* pButton);
+	void RenderButton(UiTbc::CustomButton*);
 	bool IsOverButton(UiTbc::CustomButton* pButton, int x, int y);
 	virtual void DispatchOnLoadMesh(UiCure::UserGeometryReferenceResource* pMeshResource);
 	void OnLoadTexture(UiCure::UserRendererImageResource* pTextureResource);
@@ -54,12 +55,11 @@ protected:
 	Vector2DF GetAspectRatio(bool pInverse) const;
 
 private:
+	void SetInitialPosition(TBC::GeometryBase* pGeometry) const;
 	float GetTargetAngle() const;
-	PixelRect GetRenderArea() const;
 
 	ScreenPart* mScreenPart;
 	UiTbc::CustomButton mButton;
-	//UiCure::UserGeometryReferenceResource mSignMesh;
 	UiCure::UserRendererImageResource mSignTexture;
 	Shape mShape;
 	bool mActive;
@@ -73,6 +73,7 @@ private:
 	Vector2DF mTrajectoryEndPoint;
 	float mFov;
 	QuaternionF mOriginalOrientation;
+	QuaternionF mOrientation;
 	bool mIsOriginalOrientationSet;
 
 	LOG_CLASS_DECLARE();

@@ -54,6 +54,7 @@ ContextObject::ContextObject(Cure::ResourceManager* pResourceManager, const str&
 	mInstanceId(0),
 	mClassId(pClassId),
 	mNetworkObjectType(NETWORK_OBJECT_LOCAL_ONLY),
+	mParent(0),
 	mExtraData(0),
 	mIsLoaded(false),
 	mPhysics(0),
@@ -68,8 +69,15 @@ ContextObject::~ContextObject()
 {
 	log_volatile(mLog.Debugf(_T("Destructing context object %s."), mClassId.c_str()));
 
+	if (mParent)
+	{
+		mParent->RemoveChild(this);
+		mParent = 0;
+	}
+
 	for (ChildList::iterator x = mChildList.begin(); x != mChildList.end(); ++x)
 	{
+		(*x)->SetParent(0);
 		delete (*x);
 	}
 	mChildList.clear();
@@ -602,14 +610,14 @@ float ContextObject::GetMass() const
 bool ContextObject::SetPhysics(TBC::ChunkyPhysics* pStructure)
 {
 	TransformationF lTransformation;
-	if (GetNetworkObjectType() != NETWORK_OBJECT_LOCAL_ONLY)
+	if (pStructure->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC)
 	{
 		if (mPosition.mPosition.mTransformation.GetPosition().GetLengthSquared() == 0)
 		{
 			// TODO: drop hard-coding, this should come from world loader or spawn engine?
 			const float lX = (float)Random::Uniform(-63, 27);
 			const float lY = (float)Random::Uniform(-23, 67);
-			lTransformation.SetPosition(Vector3DF(lX, lY, 43.5));
+			lTransformation.SetPosition(Vector3DF(lX, lY, 45.5));
 		}
 		else
 		{
@@ -1024,7 +1032,18 @@ void ContextObject::AddAttachment(ContextObject* pObject, TBC::PhysicsManager::J
 void ContextObject::AddChild(ContextObject* pChild)
 {
 	mChildList.push_back(pChild);
+	pChild->SetParent(this);
 	GetManager()->AddLocalObject(pChild);
+}
+
+void ContextObject::RemoveChild(ContextObject* pChild)
+{
+	mChildList.remove(pChild);
+}
+
+void ContextObject::SetParent(ContextObject* pParent)
+{
+	mParent = pParent;
 }
 
 void ContextObject::SetupChildTriggerHandlers()

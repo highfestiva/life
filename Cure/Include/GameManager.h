@@ -38,6 +38,7 @@ public:
 	virtual bool Tick() = 0;
 	virtual float GetPowerSaveAmount() const = 0;
 	virtual void Profile();	// Make sure it's quick, since it runs outside all profiling timers.
+	virtual bool QueryQuit();
 };
 
 

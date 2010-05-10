@@ -6,6 +6,7 @@
 
 #include "RoadSignButton.h"
 #include "../../Cure/Include/ContextManager.h"
+#include "../../Cure/Include/RuntimeVariable.h"
 #include "../../Cure/Include/TimeManager.h"
 #include "../../TBC/Include/ChunkyPhysics.h"
 #include "../../UiCure/Include/UiGameUiManager.h"
@@ -20,7 +21,7 @@ namespace Life
 
 
 static const float MIN_TIME = 0.2f;
-static const float MAX_TIME = 0.9f;
+static const float MAX_TIME = 1.0f;
 
 
 
@@ -71,10 +72,19 @@ void RoadSignButton::SetTrajectory(const Vector2DF& pEndPoint, float pEndDistanc
 {
 	mTrajectoryEndDistance = pEndDistance;
 	mTrajectoryEndPoint = pEndPoint;
+	if (!mMeshResourceArray.empty() && mMeshResourceArray[0] && mMeshResourceArray[0]->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
+	{
+		SetInitialPosition(mMeshResourceArray[0]->GetRamData());
+	}
 
 	mAnglePart = 1;
 	SetIsMovingIn(true);
 	mAngle = -PIF;
+}
+
+void RoadSignButton::SetOrientation(const QuaternionF& pOrientation)
+{
+	mOrientation = pOrientation;
 }
 
 void RoadSignButton::SetIsMovingIn(bool pIsMovingIn)
@@ -102,6 +112,7 @@ void RoadSignButton::MoveSign(const float pFrameTime)
 	{
 		mIsOriginalOrientationSet = true;
 		mOriginalOrientation = mPhysics->GetBoneTransformation(mPhysics->GetRootBone()).GetOrientation();
+		mOriginalOrientation *= mOrientation;
 	}
 
 	const Vector2DF lRatio = GetAspectRatio(false);
@@ -137,6 +148,15 @@ void RoadSignButton::MoveSign(const float pFrameTime)
 	const float lAnchorZ = 0.8f*mTrajectoryEndDistance*1/lRatio.x*sin(lTrajectoryAngle);
 	const Vector3DF lAnchor = Vector3DF(lAnchorX, 2*mTrajectoryEndDistance, lAnchorZ) - lEndPosition;
 	const Vector3DF lAxis(-lAnchorZ, 0, lAnchorX);
+
+	// Set button size and position according to 3D-geometry location on screen.
+	if (mShape == SHAPE_BOX)
+	{
+		lScreenRadius = lScreenRadius / 1.35f;
+	}
+	mButton.SetPos((int)(lScreenPosition.x-lScreenRadius), (int)(lScreenPosition.y-lScreenRadius));
+	mButton.SetSize((int)(lScreenRadius*2), (int)(lScreenRadius*2));
+	mButton.SetPreferredSize((int)(lScreenRadius*2), (int)(lScreenRadius*2));
 
 	lTransform.RotateAroundAnchor(lAnchor, lAxis, mAngle);
 	lTransform.GetOrientation() *= mOriginalOrientation;
@@ -185,8 +205,10 @@ void RoadSignButton::OnPhysicsTick()
 
 
 
-void RoadSignButton::RenderButton(UiTbc::CustomButton* pButton)
+void RoadSignButton::RenderButton(UiTbc::CustomButton*)
 {
+	//pButton->Button::Repaint(GetUiManager()->GetPainter());
+
 	if (mAnglePart >= 1 && ::fabs(mAngle-GetTargetAngle()) < 0.1f)
 	{
 		mActive = false;
@@ -206,13 +228,6 @@ void RoadSignButton::RenderButton(UiTbc::CustomButton* pButton)
 
 		if (x == 0)
 		{
-			// Set button size and position according to 3D-geometry location on screen.
-			float lScreenRadius = 0;
-			const Vector2DF lScreenPosition = Get2dProjectionPosition(lGfxGeometry->GetTransformation().GetPosition(), lScreenRadius);
-			pButton->SetPos((int)(lScreenPosition.x-lScreenRadius), (int)(lScreenPosition.y-lScreenRadius));
-			pButton->SetPreferredSize((int)(lScreenRadius*2), (int)(lScreenRadius*2));
-			//pButton->Button::Repaint(GetUiManager()->GetPainter());
-
 			const PixelRect lTopViewport = mScreenPart->GetRenderArea();
 			GetUiManager()->GetRenderer()->ResetClippingRect();
 			GetUiManager()->GetRenderer()->SetClippingRect(lTopViewport);
@@ -243,18 +258,13 @@ void RoadSignButton::DispatchOnLoadMesh(UiCure::UserGeometryReferenceResource* p
 	if (pMeshResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
 		TBC::GeometryBase* lGeometry = pMeshResource->GetRamData();
-
-		/*const float lXFactor = (mTrajectoryEndPoint.x <= 0)? -2.0f : 2.0f;
-		lGeometry->SetTransformation(TransformationF(QuaternionF(),
-			Vector3DF(mTrajectoryEndDistance*lXFactor, mTrajectoryEndDistance, 0)));*/
-
 		lGeometry->SetAlwaysVisible(false);
-		/*TBC::GeometryBase::BasicMaterialSettings lMaterial(Vector3DF(1,0,0), Vector3DF(0,1,0),
-			Vector3DF(0,0,1), 0.5, 1, true);
-		lGeometry->SetBasicMaterialSettings(lMaterial);
-		UiTbc::Renderer::MaterialType lMaterialType = UiTbc::Renderer::MAT_SINGLE_COLOR_SOLID;
-		GetUiManager()->GetRenderer()->ChangeMaterial(pMeshResource->GetData(), lMaterialType);*/
+		SetInitialPosition(lGeometry);
 
+		if (pMeshResource != mMeshResourceArray[0])
+		{
+			return;
+		}
 		Vector3DF lFar;
 		const float* vtx = lGeometry->GetVertexData();
 		const unsigned c = lGeometry->GetVertexCount();
@@ -288,8 +298,9 @@ Vector2DF RoadSignButton::Get2dProjectionPosition(const Vector3DF& p3dPosition, 
 {
 	const PixelRect lTopViewport = mScreenPart->GetRenderArea();
 	const float lAspectRatio = lTopViewport.GetWidth() / (float)lTopViewport.GetHeight();
-	const float lDistance = p3dPosition.y + 0.3f;
-	const float lProjectionLengthInverse = 1 / asin(mFov * PIF / 180 / 2);
+	const float lStrangeCorrectionConstant = 1.011f;
+	const float lDistance = ::pow(p3dPosition.y, lStrangeCorrectionConstant);
+	const float lProjectionLengthInverse = 1 / (lStrangeCorrectionConstant * asin(mFov * PIF / 180 / 2));
 	p2dRadius = mMeshRadius/lDistance * lProjectionLengthInverse * 0.5f * lTopViewport.GetWidth();
 	const float lScreenX = +p3dPosition.x/lDistance * lProjectionLengthInverse * 0.5f * lTopViewport.GetWidth() + lTopViewport.GetCenterX();
 	const float lScreenY = -p3dPosition.z/lDistance * lProjectionLengthInverse * lAspectRatio * 0.5f * lTopViewport.GetHeight() + lTopViewport.GetCenterY();
@@ -306,6 +317,20 @@ Vector2DF RoadSignButton::GetAspectRatio(bool pInverse) const
 }
 
 
+
+void RoadSignButton::SetInitialPosition(TBC::GeometryBase* pGeometry) const
+{
+	TransformationF lTransformation;
+	if (mTrajectoryEndPoint.x > 0)
+	{
+		lTransformation.SetPosition(Vector3DF(mTrajectoryEndDistance*3, 0, mTrajectoryEndDistance));
+	}
+	else
+	{
+		lTransformation.SetPosition(Vector3DF(-mTrajectoryEndDistance*3, 0, mTrajectoryEndDistance));
+	}
+	pGeometry->SetTransformation(lTransformation);
+}
 
 float RoadSignButton::GetTargetAngle() const
 {

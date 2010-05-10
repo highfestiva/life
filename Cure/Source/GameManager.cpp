@@ -33,6 +33,11 @@ void GameTicker::Profile()
 {
 }
 
+bool GameTicker::QueryQuit()
+{
+	return (SystemManager::GetQuitRequest() != 0);
+}
+
 
 
 GameManager::GameManager(RuntimeVariableScope* pVariableScope, ResourceManager* pResourceManager):

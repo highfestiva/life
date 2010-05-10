@@ -230,7 +230,8 @@ private:
 			mBounce(0),
 			mUserData(0),
 			mTriggerListener(0),
-			mForceFeedbackListener(0)
+			mForceFeedbackListener(0),
+			mHasMassChildren(false)
 		{
 		}
 
@@ -251,6 +252,8 @@ private:
 		TriggerListener* mTriggerListener;
 
 		ForceFeedbackListener* mForceFeedbackListener;
+
+		bool mHasMassChildren;
 	};
 
 	class JointInfo;

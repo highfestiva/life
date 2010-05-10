@@ -1,4 +1,4 @@
-
+﻿
 # Author: Jonas Byström
 # Copyright (c) 2002-2009, Righteous Games
 
@@ -107,7 +107,7 @@ def run(cmdlist, when):
                 os.environ["PATH"] = winpath
                 cmdlist[0] = cmdlist[0].replace("c:\\", "C:\\")
         import subprocess
-        print("Running %s..." % str(cmdlist))
+        #print("Running %s..." % str(cmdlist))
         rc = subprocess.call(cmdlist)
         if path:
                 os.environ["PATH"] = path

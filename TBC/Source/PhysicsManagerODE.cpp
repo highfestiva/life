@@ -245,6 +245,8 @@ bool PhysicsManagerODE::Attach(BodyID pStaticBody, BodyID pMainBody)
 
 		if (lStaticObject->mMass)
 		{
+			lMainObject->mHasMassChildren = true;
+
 			dMass lMass;
 			const dReal lMassScalar = (dReal)lStaticObject->mMass;
 			assert(lMassScalar > 0);
@@ -772,8 +774,10 @@ PhysicsManager::JointID PhysicsManagerODE::CreateBallJoint(BodyID pBody1, BodyID
 	lJointInfo->mListener1 = lObject1->mForceFeedbackListener;
 	lJointInfo->mListener2 = lObject2->mForceFeedbackListener;
 
+	lObject1->mHasMassChildren = true;
 	if (lObject2 != 0)
 	{
+		lObject2->mHasMassChildren = true;
 		dJointAttach(lJointInfo->mJointID, lObject1->mBodyID, lObject2->mBodyID);
 	}
 	else
@@ -810,8 +814,10 @@ PhysicsManager::JointID PhysicsManagerODE::CreateHingeJoint(BodyID pBody1, BodyI
 	lJointInfo->mListener1 = lObject1->mForceFeedbackListener;
 	lJointInfo->mListener2 = lObject2->mForceFeedbackListener;
 
+	lObject1->mHasMassChildren = true;
 	if (lObject2 != 0)
 	{
+		lObject2->mHasMassChildren = true;
 		dJointAttach(lJointInfo->mJointID, lObject1->mGeomID->body, lObject2->mGeomID->body);
 	}
 	else
@@ -852,6 +858,8 @@ PhysicsManager::JointID PhysicsManagerODE::CreateHinge2Joint(BodyID pBody1, Body
 
 	dJointAttach(lJointInfo->mJointID, lObject1->mBodyID, lObject2->mBodyID);
 
+	lObject1->mHasMassChildren = true;
+	lObject2->mHasMassChildren = true;
 	if (lObject1->mForceFeedbackListener != 0 || 
 	   lObject2->mForceFeedbackListener != 0)
 	{
@@ -884,8 +892,10 @@ PhysicsManager::JointID PhysicsManagerODE::CreateUniversalJoint(BodyID pBody1, B
 	lJointInfo->mListener1 = lObject1->mForceFeedbackListener;
 	lJointInfo->mListener2 = lObject2->mForceFeedbackListener;
 
+	lObject1->mHasMassChildren = true;
 	if (lObject2 != 0)
 	{
+		lObject2->mHasMassChildren = true;
 		dJointAttach(lJointInfo->mJointID, lObject1->mBodyID, lObject2->mBodyID);
 	}
 	else
@@ -924,8 +934,10 @@ PhysicsManager::JointID PhysicsManagerODE::CreateSliderJoint(BodyID pBody1, Body
 	lJointInfo->mListener1 = lObject1->mForceFeedbackListener;
 	lJointInfo->mListener2 = lObject2->mForceFeedbackListener;
 
+	lObject1->mHasMassChildren = true;
 	if (lObject2 != 0)
 	{
+		lObject2->mHasMassChildren = true;
 		dJointAttach(lJointInfo->mJointID, lObject1->mBodyID, lObject2->mBodyID);
 	}
 	else
@@ -961,8 +973,10 @@ PhysicsManager::JointID PhysicsManagerODE::CreateFixedJoint(BodyID pBody1, BodyI
 	lJointInfo->mListener1 = lObject1->mForceFeedbackListener;
 	lJointInfo->mListener2 = lObject2->mForceFeedbackListener;
 
+	lObject1->mHasMassChildren = true;
 	if (lObject2 != 0)
 	{
+		lObject2->mHasMassChildren = true;
 		dJointAttach(lJointInfo->mJointID, lObject1->mBodyID, lObject2->mBodyID);
 	}
 	else
@@ -997,8 +1011,10 @@ PhysicsManager::JointID PhysicsManagerODE::CreateAngularMotorJoint(BodyID pBody1
 	lJointInfo->mListener1 = lObject1->mForceFeedbackListener;
 	lJointInfo->mListener2 = lObject2->mForceFeedbackListener;
 
+	lObject1->mHasMassChildren = true;
 	if (lObject2 != 0)
 	{
+		lObject2->mHasMassChildren = true;
 		dJointAttach(lJointInfo->mJointID, lObject1->mBodyID, lObject2->mBodyID);
 	}
 	else
@@ -2821,8 +2837,11 @@ void PhysicsManagerODE::AddForce(BodyID pBodyId, const Vector3D<float32>& pForce
 		return;
 	}
 
-	dBodyEnable(((Object*)pBodyId)->mBodyID);
-	dBodyAddForce(((Object*)pBodyId)->mBodyID, pForce.x, pForce.y, pForce.z);
+	if (((Object*)pBodyId)->mBodyID)
+	{
+		dBodyEnable(((Object*)pBodyId)->mBodyID);
+		dBodyAddForce(((Object*)pBodyId)->mBodyID, pForce.x, pForce.y, pForce.z);
+	}
 }
 
 void PhysicsManagerODE::AddTorque(BodyID pBodyId, const Vector3D<float32>& pTorque)
@@ -3226,10 +3245,7 @@ void PhysicsManagerODE::HandleMovableObjects()
 		Object* lObject = (Object*)(*x);
 		if (lObject->mBodyID && ::dBodyIsEnabled(lObject->mBodyID))
 		{
-			BodySet::iterator y = x;
-			++x;
-			mAutoDisabledObjectSet.erase(y);
-
+			mAutoDisabledObjectSet.erase(x++);
 			NormalizeRotation(lObject);
 		}
 		else
@@ -3242,7 +3258,7 @@ void PhysicsManagerODE::HandleMovableObjects()
 void PhysicsManagerODE::NormalizeRotation(BodyID pObject)
 {
 	Object* lObject = (Object*)pObject;
-	if (lObject->mBodyID->geom->type == dBoxClass)
+	if (lObject->mHasMassChildren || lObject->mBodyID->geom->type == dBoxClass)
 	{
 		Vector3DF lVelocity;
 		GetBodyAngularVelocity(lObject, lVelocity);

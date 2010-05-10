@@ -21,6 +21,7 @@
 #include "../../UiTBC/Include/UiRenderer.h"
 #include "../LifeApplication.h"
 #include "../RtVar.h"
+#include "GameClientDemo.h"
 #include "GameClientSlaveManager.h"
 #include "GameClientViewer.h"
 #include "RoadSignButton.h"
@@ -53,7 +54,8 @@ GameClientMasterTicker::GameClientMasterTicker(UiCure::GameUiManager* pUiManager
 	mSlaveTopSplit(1),
 	mSlaveBottomSplit(1),
 	mSlaveVSplit(1),
-	mSlaveFade(0)
+	mSlaveFade(0),
+	mDemoTime(0)
 {
 	mSlaveArray.resize(4, 0);
 
@@ -316,6 +318,13 @@ GameClientSlaveManager* GameClientMasterTicker::CreateViewer(GameClientMasterTic
 	return new GameClientViewer(pMaster, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea);
 }
 
+GameClientSlaveManager* GameClientMasterTicker::CreateDemo(GameClientMasterTicker* pMaster,
+	Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
+	UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea)
+{
+	return new GameClientDemo(pMaster, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea);
+}
+
 bool GameClientMasterTicker::CreateSlave(SlaveFactoryMethod pCreate)
 {
 	const PixelRect lRenderArea(0, 0, mUiManager->GetDisplayManager()->GetWidth(), mUiManager->GetDisplayManager()->GetHeight());
@@ -361,6 +370,11 @@ void GameClientMasterTicker::AddSlave(GameClientSlaveManager* pSlave)
 
 void GameClientMasterTicker::DeleteSlave(GameClientSlaveManager* pSlave, bool pAllowMainMenu)
 {
+	if (!pSlave)
+	{
+		return;
+	}
+
 	ScopeLock lLock(&mLock);
 	assert(mSlaveArray[pSlave->GetSlaveIndex()]);
 	mSlaveArray[pSlave->GetSlaveIndex()] = 0;
@@ -389,7 +403,7 @@ bool GameClientMasterTicker::Initialize()
 
 void GameClientMasterTicker::CreatePlayerCountWindow()
 {
-	assert(!mIsPlayerCountViewActive);
+	//assert(!mIsPlayerCountViewActive);
 	mIsPlayerCountViewActive = true;
 	CreateSlave(&GameClientMasterTicker::CreateViewer);
 }
@@ -665,6 +679,26 @@ void GameClientMasterTicker::Profile()
 			mPerformanceGraphList[lRootIndex].AddSegment(lNode->GetName(), lStart, lStart + lNode->GetLast());
 		}
 	}
+}
+
+bool GameClientMasterTicker::QueryQuit()
+{
+	if (mDemoTime)
+	{
+		// Someone tried quitting once, or demo is over.
+		return (SystemManager::GetQuitRequest() >= 2 || mDemoTime->QueryTimeDiff() > 2.0f);
+	}
+
+	if (Parent::QueryQuit())
+	{
+		for (int x = 0; x < 4; ++x)
+		{
+			DeleteSlave(mSlaveArray[x], false);
+		}
+		CreateSlave(&GameClientMasterTicker::CreateDemo);
+		mDemoTime = new HiResTimer;
+	}
+	return (false);
 }
 
 void GameClientMasterTicker::DrawFps() const

@@ -1,4 +1,4 @@
-
+﻿
 # Author: Jonas Byström
 # Copyright (c) 2002-2009, Righteous Games
 
@@ -24,6 +24,8 @@ removes = 0
 importscript = "Tools/Maya/import_chunky.py"
 makefilescriptdir = "Tools/GCC"
 makefilescript = "generate_makefile.py"
+
+showed_result = False
 
 
 def _buildstl():
@@ -96,7 +98,7 @@ def _incremental_build_data():
                         _convertdata(ma)
                 for f in fs:
                         if filetime(f) < ft:
-                                print("Converting %s since %s has an older timestamp!" % (basename, f))
+                                #print("Converting %s since %s has an older timestamp!" % (basename, f))
                                 for f in fs:
                                      os.remove(f)
                                 _convertdata(ma)
@@ -189,6 +191,10 @@ def _cleandir(da_dir):
 
 
 def _printresult():
+        global showed_result
+        if showed_result:
+                return
+        showed_result = True
         if updates+removes:     print("Operation successful, %i resulting files updated(/removed)." % (updates+removes))
         else:                   print("Already up-to-date.")
 
@@ -309,11 +315,13 @@ def _prepare_run():
 
 
 def startclient():
+        _printresult()
         pre, post = _prepare_run()
         import subprocess
         subprocess.Popen(pre+"LifeClient"+post, shell=True)
         os.chdir("..")
 def startserver():
+        _printresult()
         pre, post = _prepare_run()
         os.system(pre+"LifeServer"+post)
         os.chdir("..")
@@ -321,10 +329,12 @@ def start():
         startclient()
         startserver()
 def gdbtest():
+        _printresult()
         pre, post = _prepare_run()
         os.system("gdb "+pre+"CureTestApp"+post)
         os.chdir("..")
 def gdbclient():
+        _printresult()
         pre, post = _prepare_run()
         os.system("gdb "+pre+"LifeClient"+post)
         os.chdir("..")

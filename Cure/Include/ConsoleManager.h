@@ -44,6 +44,9 @@ public:
 
 	virtual LogDecorator& GetLog() const;
 
+	void AddFork(Thread* pThread);
+	void RemoveFork(Thread* pThread);
+
 protected:
 	bool ForkExecuteCommand(const str& pCommand);
 
@@ -79,6 +82,8 @@ private:
 	MemberThread<ConsoleManager> mConsoleThread;
 	Lock mLock;
 	std::list<str> mYieldCommandList;
+	typedef std::list<Thread*> ForkList;
+	ForkList mForkList;
 
 	LOG_CLASS_DECLARE();
 };

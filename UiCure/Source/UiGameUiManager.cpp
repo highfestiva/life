@@ -68,9 +68,6 @@ bool GameUiManager::Open()
 	}
 
 	str lSoundTypeString = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_SOUND_ENGINE, _T("OpenAL"));
-	double lSoundRollOff = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_SOUND_ROLLOFF, 0.1);
-	double lSoundDoppler = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_SOUND_DOPPLER, 1.3);
-
 	UiLepra::SoundManager::ContextType lSoundContext = UiLepra::SoundManager::CONTEXT_OPENAL;
 	if (lSoundTypeString == _T("OpenAL"))
 	{
@@ -153,22 +150,28 @@ bool GameUiManager::Open()
 		mPainter->SetFontManager(mFontManager);
 
 		UiTbc::FontManager::FontId lFontId;
-		lFontId = mFontManager->AddFont(_T("Times New Roman"), 14.0);
+		const str lFont = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_2D_FONT, _T("Times New Roman"));
+		const double lFontSize = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_2D_FONTHEIGHT, 14.0);
+		lFontId = mFontManager->AddFont(lFont, lFontSize);
 		if (lFontId == UiTbc::FontManager::INVALID_FONTID)
 		{
-			lFontId = mFontManager->AddFont(_T("Arial"), 14.0);
+			lFontId = mFontManager->AddFont(_T("Times New Roman"), lFontSize);
 		}
 		if (lFontId == UiTbc::FontManager::INVALID_FONTID)
 		{
-			lFontId = mFontManager->AddFont(_T("Courier New"), 14.0);
+			lFontId = mFontManager->AddFont(_T("Arial"), lFontSize);
 		}
 		if (lFontId == UiTbc::FontManager::INVALID_FONTID)
 		{
-			lFontId = mFontManager->AddFont(_T("Verdana"), 14.0);
+			lFontId = mFontManager->AddFont(_T("Courier New"), lFontSize);
 		}
 		if (lFontId == UiTbc::FontManager::INVALID_FONTID)
 		{
-			lFontId = mFontManager->AddFont(_T("Helvetica"), 14.0);
+			lFontId = mFontManager->AddFont(_T("Verdana"), lFontSize);
+		}
+		if (lFontId == UiTbc::FontManager::INVALID_FONTID)
+		{
+			lFontId = mFontManager->AddFont(_T("Helvetica"), lFontSize);
 		}
 		if (lFontId != UiTbc::FontManager::INVALID_FONTID)
 		{
@@ -194,11 +197,6 @@ bool GameUiManager::Open()
 	if (lOk)
 	{
 		mSound = UiLepra::SoundManager::CreateSoundManager(lSoundContext);
-		if (mSound)
-		{
-			mSound->SetRollOffFactor((float)lSoundRollOff);
-			mSound->SetDopplerFactor((float)lSoundDoppler);
-		}
 	}
 	if (lOk)
 	{
@@ -517,6 +515,14 @@ void GameUiManager::UpdateSettings()
 
 	bool lSmoothFonts = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_2D_SMOOTHFONTS, true);
 	mPainter->SetFontSmoothness(lSmoothFonts);
+
+	if (mSound)
+	{
+		const double lSoundRollOff = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_SOUND_ROLLOFF, 0.1);
+		const double lSoundDoppler = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_SOUND_DOPPLER, 1.3);
+		mSound->SetRollOffFactor((float)lSoundRollOff);
+		mSound->SetDopplerFactor((float)lSoundDoppler);
+	}
 }
 
 

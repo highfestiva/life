@@ -537,6 +537,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GameClientDemo.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\GameClientMasterTicker.cpp"
 				>
 			</File>
@@ -572,6 +576,10 @@
 			</File>
 			<File
 				RelativePath=".\ClientOptionsManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\GameClientDemo.h"
 				>
 			</File>
 			<File

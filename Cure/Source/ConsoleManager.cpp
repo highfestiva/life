@@ -48,6 +48,16 @@ bool ConsoleManager::Start()
 void ConsoleManager::Join()
 {
 	mConsoleThread.RequestStop();
+
+	{
+		// Join forks.
+		ScopeLock lLock(&mLock);
+		ForkList::iterator x = mForkList.begin();
+		for (; x != mForkList.end(); ++x)
+		{
+			(*x)->RequestStop();
+		}
+	}
 	if (mConsolePrompt)
 	{
 		mConsolePrompt->ReleaseWaitCharThread();
@@ -56,6 +66,17 @@ void ConsoleManager::Join()
 	{
 		mConsoleThread.Join(0.5);
 		mConsoleThread.Kill();
+	}
+
+	// Wait for forks.
+	for (int x = 0; x < 1000; ++x)
+	{
+		ScopeLock lLock(&mLock);
+		if (mForkList.empty())
+		{
+			break;
+		}
+		Thread::Sleep(0.01f);
 	}
 }
 
@@ -104,6 +125,20 @@ LogDecorator& ConsoleManager::GetLog() const
 
 
 
+void ConsoleManager::AddFork(Thread* pThread)
+{
+	ScopeLock lLock(&mLock);
+	mForkList.push_back(pThread);
+}
+
+void ConsoleManager::RemoveFork(Thread* pThread)
+{
+	ScopeLock lLock(&mLock);
+	mForkList.remove(pThread);
+}
+
+
+
 bool ConsoleManager::ForkExecuteCommand(const str& pCommand)
 {
 	class ForkThread: public Thread
@@ -119,11 +154,13 @@ bool ConsoleManager::ForkExecuteCommand(const str& pCommand)
 		void Run()
 		{
 			mConsole->GetLog().AInfo("ForkThread: started.");
+			mConsole->AddFork(this);
 			if (mConsole->GetConsoleCommandManager()->Execute(mCommand, false) != 0)
 			{
 				mConsole->GetLog().AError("ForkThread: execution resulted in an error.");
 			}
 			mConsole->GetLog().AInfo("ForkThread: ended.");
+			mConsole->RemoveFork(this);
 		}
 		ConsoleManager* mConsole;
 		str mCommand;

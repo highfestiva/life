@@ -34,6 +34,7 @@ class RoadSignButton;
 
 class GameClientMasterTicker: public Cure::GameTicker, public InputObserver, public ScreenPart
 {
+	typedef Cure::GameTicker Parent;
 public:
 	GameClientMasterTicker(UiCure::GameUiManager* pUiManager, Cure::ResourceManager* mResourceManager);
 	virtual ~GameClientMasterTicker();
@@ -64,6 +65,9 @@ private:
 	static GameClientSlaveManager* CreateViewer(GameClientMasterTicker* pMaster,
 		Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
 		UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea);
+	static GameClientSlaveManager* GameClientMasterTicker::CreateDemo(GameClientMasterTicker* pMaster,
+		Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
+		UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea);
 	bool CreateSlave(SlaveFactoryMethod pCreate);
 	void AddSlave(GameClientSlaveManager* pSlave);
 	void DeleteSlave(GameClientSlaveManager* pSlave, bool pAllowMainMenu);
@@ -76,6 +80,7 @@ private:
 	int GetSlaveAnimationTarget(int pSlaveIndex) const;
 	float GetSlavesVerticalAnimationTarget() const;
 	void Profile();
+	bool QueryQuit();
 	void DrawFps() const;
 	void DrawPerformanceLineGraph2d() const;
 
@@ -121,6 +126,7 @@ private:
 	float mSlaveBottomSplit;
 	float mSlaveVSplit;
 	float mSlaveFade;
+	HiResTimer* mDemoTime;
 	std::vector<UiCure::LineGraph2d> mPerformanceGraphList;
 	std::hash_set<Cure::GameObjectId> mLocalObjectSet;
 

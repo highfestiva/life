@@ -103,7 +103,7 @@ protected:
 
 	void TickInput();
 
-	void TickUiInput();
+	virtual void TickUiInput();
 	void SetAvatarEnginePower(Cure::ContextObject* pAvatar, unsigned pAspect, float pPower, float pAngle);
 	virtual void TickUiUpdate();
 
