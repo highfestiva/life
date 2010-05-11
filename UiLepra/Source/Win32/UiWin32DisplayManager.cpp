@@ -486,7 +486,7 @@ LRESULT CALLBACK Win32DisplayManager::WndProc(HWND pWnd, unsigned int pMessage, 
 		{
 			SystemManager::AddQuitRequest(+1);
 			// First close attempt.
-			if (pMessage == WM_CLOSE && SystemManager::GetQuitRequest() == 1)
+			if (pMessage == WM_CLOSE && SystemManager::GetQuitRequest() <= 1)
 			{
 				return (TRUE);
 			}

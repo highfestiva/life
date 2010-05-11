@@ -31,7 +31,7 @@ public:
 	virtual ~MacFontManager();
 
 	virtual void SetColor(const Color& pColor, unsigned pColorIndex = 0);
-	virtual FontId AddFont(const str& pFontName, double pSize, uint32 pFlags = NORMAL, CharacterSet pCharSet = NATIVE);
+	virtual FontId AddFont(const str& pFontName, double pSize, int pFlags = NORMAL, CharacterSet pCharSet = NATIVE);
 	virtual bool RenderGlyph(tchar pChar, Canvas& pImage, const PixelRect& pRect);
 	virtual int GetCharWidth(const tchar pChar) const;
 

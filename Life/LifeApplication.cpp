@@ -10,6 +10,7 @@
 #include "../Lepra/Include/LogListener.h"
 #include "../Lepra/Include/Network.h"
 #include "../Lepra/Include/Path.h"
+#include "../Lepra/Include/Random.h"
 #include "../Lepra/Include/SystemManager.h"
 #include "Life.h"
 #include "LifeApplication.h"
@@ -104,6 +105,7 @@ int Application::Run()
 		LEPRA_MEASURE_SCOPE(AppTick);
 		{
 			ScopeTimer lSleepTimer(&lTimeInfo);
+			Random::GetRandomNumber();	// To move seed ahead.
 			lOk = mGameTicker->Tick();
 			const float lExtraSleep = (float)CURE_RTVAR_TRYGET(Cure::GetSettings(), RTVAR_DEBUG_EXTRASLEEPTIME, 0.0);
 			if (lExtraSleep > 0)

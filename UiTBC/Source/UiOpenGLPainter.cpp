@@ -1250,7 +1250,7 @@ void OpenGLPainter::PrintText(const str& pString, int x, int y)
 	ToScreenCoords(x, y);
 
 	int lCurrentX = x;
-	int lCurrentY = y;
+	int lCurrentY = y-1;
 
 	::glPushAttrib(GL_TEXTURE_BIT | GL_COLOR_BUFFER_BIT);
 
@@ -1289,7 +1289,7 @@ void OpenGLPainter::PrintText(const str& pString, int x, int y)
 	assert(lColor != BLACK);	// Does not show.
 	GetFontManager()->SetColor(Color(255, 255, 255, 255));
 	::glColor4f(lColor.GetRf(), lColor.GetGf(), lColor.GetBf(), lColor.GetAf());
-	const uint32 lFontHash = (GetFontManager()->GetActiveFont() << 16) + lFontHeight;
+	const uint32 lFontHash = (GetFontManager()->GetActiveFontId() << 16) + lFontHeight;
 	FontTexture* lFontTexture = SelectGlyphs(lFontHash, lFontHeight, pString);
 	const int lFontTextureHeight = lFontTexture->GetHeight();
 

@@ -173,6 +173,11 @@ bool GameClientSlaveManager::Render()
 	return (true);
 }
 
+bool GameClientSlaveManager::Paint()
+{
+	return (true);
+}
+
 bool GameClientSlaveManager::EndTick()
 {
 	bool lIsDebugging = CURE_RTVAR_TRYGET(GetVariableScope(), RTVAR_DEBUG_ENABLE, false);

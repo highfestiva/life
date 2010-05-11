@@ -165,6 +165,7 @@ bool GameClientMasterTicker::Tick()
 			if (lSlave)
 			{
 				mUiManager->GetSoundManager()->SetCurrentListener(lSlaveIndex, mActiveSlaveCount);
+				++lSlaveIndex;
 				lOk = lSlave->Render();
 			}
 		}
@@ -173,6 +174,14 @@ bool GameClientMasterTicker::Tick()
 	{
 		LEPRA_MEASURE_SCOPE(UiPaint);
 		mUiManager->Paint();
+		for (x = mSlaveArray.begin(); lOk && x != mSlaveArray.end(); ++x)
+		{
+			GameClientSlaveManager* lSlave = *x;
+			if (lSlave)
+			{
+				lOk = lSlave->Paint();
+			}
+		}
 	}
 
 	{
@@ -685,8 +694,8 @@ bool GameClientMasterTicker::QueryQuit()
 {
 	if (mDemoTime)
 	{
-		// Someone tried quitting once, or demo is over.
-		return (SystemManager::GetQuitRequest() >= 2 || mDemoTime->QueryTimeDiff() > 2.0f);
+		// We quit if user tried quitting twice or more, or demo time is over.
+		return (SystemManager::GetQuitRequest() >= 2 || mDemoTime->QueryTimeDiff() > 30.0f);
 	}
 
 	if (Parent::QueryQuit())
@@ -695,8 +704,12 @@ bool GameClientMasterTicker::QueryQuit()
 		{
 			DeleteSlave(mSlaveArray[x], false);
 		}
+#ifdef LIFE_DEMO
 		CreateSlave(&GameClientMasterTicker::CreateDemo);
 		mDemoTime = new HiResTimer;
+#else // !Demo
+		return (true);
+#endif // Demo / !Demo
 	}
 	return (false);
 }

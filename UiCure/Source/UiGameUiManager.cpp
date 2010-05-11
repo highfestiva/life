@@ -149,33 +149,21 @@ bool GameUiManager::Open()
 		//mFontManager->SetColor(Color(0, 0, 0, 0), 1);
 		mPainter->SetFontManager(mFontManager);
 
-		UiTbc::FontManager::FontId lFontId;
 		const str lFont = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_2D_FONT, _T("Times New Roman"));
-		const double lFontSize = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_2D_FONTHEIGHT, 14.0);
-		lFontId = mFontManager->AddFont(lFont, lFontSize);
-		if (lFontId == UiTbc::FontManager::INVALID_FONTID)
+		const double lFontHeight = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_2D_FONTHEIGHT, 14.0);
+		UiTbc::FontManager::FontId lFontId = mFontManager->QueryAddFont(lFont, lFontHeight);
+		const tchar* lFontNames[] =
 		{
-			lFontId = mFontManager->AddFont(_T("Times New Roman"), lFontSize);
-		}
-		if (lFontId == UiTbc::FontManager::INVALID_FONTID)
+			_T("Times New Roman"),
+			_T("Arial"),
+			_T("Courier New"),
+			_T("Verdana"),
+			_T("Helvetica"),
+			0
+		};
+		for (int x = 0; lFontNames[x] && lFontId == UiTbc::FontManager::INVALID_FONTID; ++x)
 		{
-			lFontId = mFontManager->AddFont(_T("Arial"), lFontSize);
-		}
-		if (lFontId == UiTbc::FontManager::INVALID_FONTID)
-		{
-			lFontId = mFontManager->AddFont(_T("Courier New"), lFontSize);
-		}
-		if (lFontId == UiTbc::FontManager::INVALID_FONTID)
-		{
-			lFontId = mFontManager->AddFont(_T("Verdana"), lFontSize);
-		}
-		if (lFontId == UiTbc::FontManager::INVALID_FONTID)
-		{
-			lFontId = mFontManager->AddFont(_T("Helvetica"), lFontSize);
-		}
-		if (lFontId != UiTbc::FontManager::INVALID_FONTID)
-		{
-			mFontManager->SetActiveFont(lFontId);
+			lFontId = mFontManager->QueryAddFont(lFontNames[x], lFontHeight);
 		}
 	}
 	if (lOk)
@@ -330,6 +318,11 @@ UiTbc::Renderer* GameUiManager::GetRenderer() const
 UiTbc::Painter* GameUiManager::GetPainter() const
 {
 	return (mPainter);
+}
+
+UiTbc::FontManager* GameUiManager::GetFontManager() const
+{
+	return (mFontManager);
 }
 
 UiLepra::InputManager* GameUiManager::GetInputManager() const

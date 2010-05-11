@@ -17,7 +17,7 @@
 #include "ClientLoginView.h"
 #include "ClientOptionsManager.h"
 #include "InputObserver.h"
-#include "ScreenPArt.h"
+#include "ScreenPart.h"
 
 
 
@@ -61,6 +61,7 @@ public:
 	GameClientMasterTicker* GetMaster() const;
 
 	bool Render();
+	virtual bool Paint();
 	bool EndTick();
 
 	void ToggleConsole();

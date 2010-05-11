@@ -60,7 +60,7 @@ void Win32FontManager::SetColor(const Color& pColor, unsigned pColorIndex)
 	mColorRef[pColorIndex] = lColor;
 }
 
-Win32FontManager::FontId Win32FontManager::AddFont(const str& pFontName, double pSize, uint32 pFlags, CharacterSet pCharSet)
+Win32FontManager::FontId Win32FontManager::AddFont(const str& pFontName, double pSize, int pFlags, CharacterSet pCharSet)
 {
 	int lWeight  = ((pFlags & BOLD) != 0) ? FW_BOLD : FW_NORMAL;
 	DWORD lItalic = ((pFlags & ITALIC) != 0) ? TRUE : FALSE;
@@ -86,7 +86,9 @@ Win32FontManager::FontId Win32FontManager::AddFont(const str& pFontName, double 
 	{
 		Win32Font* lFont = new Win32Font();
 		lFont->mWin32FontHandle = lFontHandle;
+		lFont->mName = pFontName;
 		lFont->mSize = pSize;
+		lFont->mFlags = pFlags;
 		if (!InternalAddFont(lFont))
 		{
 			delete (lFont);

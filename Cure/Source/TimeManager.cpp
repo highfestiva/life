@@ -36,7 +36,8 @@ void TimeManager::Clear(int pPhysicsFrameCounter)
 	mPhysicsSpeedAdjustmentFrameCount = 0;
 	mAbsoluteTime = 0;
 	mPhysicsFrameCounter = pPhysicsFrameCounter;
-	mAverageFrameTime = 1/(float)mTargetFrameRate;
+	mCurrentFrameTime = 1/(float)mTargetFrameRate;
+	mAverageFrameTime = mCurrentFrameTime;
 	mReportFrame = pPhysicsFrameCounter;
 	mPhysicsFrameTime = mAverageFrameTime;
 	mPhysicsStepCount = 1;
@@ -46,16 +47,16 @@ void TimeManager::TickTime()
 {
 	mTargetFrameRate = CURE_RTVAR_GET(Cure::GetSettings(), RTVAR_PHYSICS_FPS, 2);
 
-	float lCurrentFrameTime = (float)mTime.PopTimeDiff();
-	if (lCurrentFrameTime > 1.0)	// Never take longer steps than one second.
+	mCurrentFrameTime = (float)mTime.PopTimeDiff();
+	if (mCurrentFrameTime > 1.0)	// Never take longer steps than one second.
 	{
-		lCurrentFrameTime = 1.0;
+		mCurrentFrameTime = 1.0;
 	}
-	mAbsoluteTime += lCurrentFrameTime;
+	mAbsoluteTime += mCurrentFrameTime;
 
-	mTickTimeModulo += lCurrentFrameTime;
+	mTickTimeModulo += mCurrentFrameTime;
 
-	mAverageFrameTime = Math::Lerp(mAverageFrameTime, lCurrentFrameTime, 0.001f);
+	mAverageFrameTime = Math::Lerp(mAverageFrameTime, mCurrentFrameTime, 0.001f);
 
 	mPhysicsFrameTime = 1/(float)mTargetFrameRate;
 	while (mPhysicsFrameTime*2 < mAverageFrameTime)
@@ -103,6 +104,11 @@ void TimeManager::TickPhysics()
 float TimeManager::GetAbsoluteTime() const
 {
 	return (mAbsoluteTime);
+}
+
+float TimeManager::GetCurrentFrameTime() const
+{
+	return (mCurrentFrameTime);
 }
 
 int TimeManager::GetCurrentPhysicsFrame() const

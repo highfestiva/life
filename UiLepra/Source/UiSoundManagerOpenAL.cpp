@@ -11,6 +11,7 @@
 
 
 extern "C" ALC_API void ALC_APIENTRY alc_init(void);	// Not intended for this type of use, but LGPL OpenAL can't load dsound.dll from DllMain.
+extern "C" ALC_API void ALC_APIENTRY alc_deinit(void);	// Not intended for this type of use, but LGPL OpenAL can't load dsound.dll from DllMain.
 
 
 
@@ -80,6 +81,9 @@ SoundManagerOpenAL::~SoundManagerOpenAL()
 		::alcCloseDevice(mDevice);
 		mDevice = 0;
 	}
+#ifdef LEPRA_WINDOWS
+	alc_deinit();
+#endif // Windows
 }
 
 SoundManager::SoundID SoundManagerOpenAL::LoadSound2D(const str& pFileName, LoopMode pLoopMode, int pPriority)

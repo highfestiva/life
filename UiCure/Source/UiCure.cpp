@@ -66,6 +66,7 @@ void SetDefault(Cure::RuntimeVariableScope* pSettings)
 	CURE_RTVAR_SET(pSettings, RTVAR_UI_2D_SMOOTHFONTS, true);
 	CURE_RTVAR_SET(pSettings, RTVAR_UI_2D_FONT, _T("Times New Roman"));
 	CURE_RTVAR_SET(pSettings, RTVAR_UI_2D_FONTHEIGHT, 14.0);
+	CURE_RTVAR_SET(pSettings, RTVAR_UI_2D_BIGFONTHEIGHT, 36.0);
 	CURE_RTVAR_SET(pSettings, RTVAR_UI_SOUND_ENGINE, _T("OpenAL"));
 	CURE_RTVAR_SET(pSettings, RTVAR_UI_SOUND_ROLLOFF, 0.1);
 	CURE_RTVAR_SET(pSettings, RTVAR_UI_SOUND_DOPPLER, 1.3);

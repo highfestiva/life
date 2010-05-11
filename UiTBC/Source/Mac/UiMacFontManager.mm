@@ -86,7 +86,9 @@ MacFontManager::FontId MacFontManager::AddFont(const str& pFontName, double pSiz
 	{
 		MacFont* lFont = new MacFont();
 		//lFont->mMacFontHandle = lFontHandle;
+		lFont->mName = pFontName;
 		lFont->mSize = pSize;
+		lFont->mFlags = pFlags;
 		if (!InternalAddFont(lFont))
 		{
 			delete (lFont);

@@ -60,7 +60,7 @@ void X11FontManager::SetColor(const Color& pColor, unsigned pColorIndex)
 	mColorRef[pColorIndex] = lColor;*/
 }
 
-X11FontManager::FontId X11FontManager::AddFont(const str& pFontName, double pSize, uint32 pFlags, CharacterSet pCharSet)
+X11FontManager::FontId X11FontManager::AddFont(const str& pFontName, double pSize, int pFlags, CharacterSet pCharSet)
 {
 	/*int lWeight  = ((pFlags & BOLD) != 0) ? FW_BOLD : FW_NORMAL;
 	DWORD lItalic = ((pFlags & ITALIC) != 0) ? TRUE : FALSE;
@@ -86,7 +86,9 @@ X11FontManager::FontId X11FontManager::AddFont(const str& pFontName, double pSiz
 	{
 		X11Font* lFont = new X11Font();
 		lFont->mX11FontHandle = lFontHandle;
+		lFont->mName = pFontName;
 		lFont->mSize = pSize;
+		lFont->mFlags = pFlags;
 		if (!InternalAddFont(lFont))
 		{
 			delete (lFont);

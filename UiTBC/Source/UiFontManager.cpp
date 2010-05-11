@@ -24,6 +24,23 @@ FontManager::~FontManager()
 }
 
 
+FontManager::FontId FontManager::QueryAddFont(const str& pFontName, double pSize, int pFlags, CharacterSet pCharSet)
+{
+	FontTable::iterator x = mFontTable.begin();
+	for (; x != mFontTable.end(); ++x)
+	{
+		const Font* lFont = x->second;
+		if (lFont->mName == pFontName && Math::IsEpsEqual(lFont->mSize, pSize, 0.1) && lFont->mFlags == pFlags)
+		{
+			SetActiveFont(lFont->mFontId);
+			return (lFont->mFontId);
+		}
+	}
+	const FontId lFontId = AddFont(pFontName, pSize, pFlags, pCharSet);
+	SetActiveFont(lFontId);
+	return (lFontId);
+}
+
 void FontManager::SetActiveFont(FontId pFontId)
 {
 	if (mCurrentFont && mCurrentFont->mFontId == pFontId)
@@ -38,13 +55,22 @@ void FontManager::SetActiveFont(FontId pFontId)
 	}
 }
 
-FontManager::FontId FontManager::GetActiveFont() const
+FontManager::FontId FontManager::GetActiveFontId() const
 {
 	if (mCurrentFont)
 	{
 		return (mCurrentFont->mFontId);
 	}
 	return (INVALID_FONTID);
+}
+
+str FontManager::GetActiveFontName() const
+{
+	if (mCurrentFont)
+	{
+		return (mCurrentFont->mName);
+	}
+	return (str());
 }
 
 

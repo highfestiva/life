@@ -54,9 +54,11 @@ public:
 
 	virtual void SetColor(const Color& pColor, unsigned pColorIndex = 0) = 0;
 
-	virtual FontId AddFont(const str& pFontName, double pSize, Lepra::uint32 pFlags = NORMAL, CharacterSet pCharSet = NATIVE) = 0;
+	FontId QueryAddFont(const str& pFontName, double pSize, int pFlags = NORMAL, CharacterSet pCharSet = NATIVE);
+	virtual FontId AddFont(const str& pFontName, double pSize, int pFlags = NORMAL, CharacterSet pCharSet = NATIVE) = 0;
 	void SetActiveFont(FontId pFontId);
-	FontId GetActiveFont() const;
+	FontId GetActiveFontId() const;
+	str GetActiveFontName() const;
 
 	virtual bool RenderGlyph(tchar pChar, Canvas& pImage, const PixelRect& pRect) = 0;
 
@@ -68,7 +70,9 @@ public:
 protected:
 	struct Font
 	{
+		str mName;
 		double mSize;
+		int mFlags;
 		FontId mFontId;
 	};
 	typedef std::hash_map<int, Font*> FontTable;

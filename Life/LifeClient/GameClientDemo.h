@@ -11,6 +11,7 @@
 
 
 
+#ifdef LIFE_DEMO
 namespace Life
 {
 
@@ -27,17 +28,28 @@ public:
 	virtual ~GameClientDemo();
 
 private:
+	virtual bool Paint();
 	virtual void TickUiInput();
 	virtual void TickUiUpdate();
 	virtual void CreateLoginView();
 	virtual bool InitializeTerrain();
 	virtual void OnLoadCompleted(Cure::ContextObject* pObject, bool pOk);
+	void BrowseFullInfo(UiTbc::Button*);
 
 	virtual bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
 	virtual bool OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode);
 	virtual void OnInput(UiLepra::InputElement* pElement);
+
+	float mCameraAngle;
+
+	float mInfoTextX;
+	float mInfoTextY;
+	str mInfoText;
+	int mCurrentInfoTextIndex;
+	static const tchar* mInfoTextArray[6];
 };
 
 
 
 }
+#endif // Demo

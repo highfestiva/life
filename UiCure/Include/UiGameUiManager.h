@@ -58,6 +58,7 @@ public:
 	UiLepra::DisplayManager* GetDisplayManager() const;
 	UiTbc::Renderer* GetRenderer() const;
 	UiTbc::Painter* GetPainter() const;
+	UiTbc::FontManager* GetFontManager() const;
 	UiLepra::InputManager* GetInputManager() const;
 	UiTbc::DesktopWindow* GetDesktopWindow() const;
 	UiLepra::SoundManager* GetSoundManager() const;
