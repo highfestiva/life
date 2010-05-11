@@ -1351,9 +1351,9 @@ void OpenGLPainter::PrintText(const str& pString, int x, int y)
 			};
 			const GLfloat lTemplateUv[2*4] =
 			{
-				(lTextureX)/lTextureWidth,		1,
+				(lTextureX + 0.5f)/lTextureWidth,		1,
 				(lTextureX + lCharWidth)/lTextureWidth,	1,
-				(lTextureX)/lTextureWidth,		0,
+				(lTextureX + 0.5f)/lTextureWidth,		0,
 				(lTextureX + lCharWidth)/lTextureWidth,	0,
 			};
 

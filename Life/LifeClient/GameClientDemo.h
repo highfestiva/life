@@ -43,7 +43,8 @@ private:
 	float mCameraAngle;
 
 	float mInfoTextX;
-	float mInfoTextY;
+	float mInfoTextTargetY;
+	float mInfoTextSlideY;
 	str mInfoText;
 	int mCurrentInfoTextIndex;
 	static const tchar* mInfoTextArray[6];

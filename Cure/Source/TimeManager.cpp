@@ -56,14 +56,17 @@ void TimeManager::TickTime()
 
 	mTickTimeModulo += mCurrentFrameTime;
 
-	mAverageFrameTime = Math::Lerp(mAverageFrameTime, mCurrentFrameTime, 0.001f);
-
 	mPhysicsFrameTime = 1/(float)mTargetFrameRate;
 	while (mPhysicsFrameTime*2 < mAverageFrameTime)
 	{
 		mPhysicsFrameTime *= 2;
 	}
 	mPhysicsStepCount = (int)::floor(mTickTimeModulo/mPhysicsFrameTime);
+
+	if (mPhysicsStepCount > 0)
+	{
+		mAverageFrameTime = Math::Lerp(mAverageFrameTime, mCurrentFrameTime, 0.001f);
+	}
 
 	const int lReportInterval = 5;	// Printout ever x seconds.
 	if (mPhysicsFrameCounter > mReportFrame || mPhysicsFrameCounter < mReportFrame-mTargetFrameRate*lReportInterval)

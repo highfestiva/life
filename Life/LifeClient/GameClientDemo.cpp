@@ -29,7 +29,8 @@ GameClientDemo::GameClientDemo(GameClientMasterTicker* pMaster, Cure::RuntimeVar
 	Parent(pMaster, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea),
 	mCameraAngle(0),
 	mInfoTextX(-10000),
-	mInfoTextY(0),
+	mInfoTextTargetY(-100),
+	mInfoTextSlideY(-100),
 	mCurrentInfoTextIndex(0)
 {
 }
@@ -50,7 +51,7 @@ bool GameClientDemo::Paint()
 	if (mUiManager->GetFontManager()->GetStringWidth(mInfoText)+mInfoTextX < 0)
 	{
 		mInfoTextX = mUiManager->GetDisplayManager()->GetWidth() * 1.5f;
-		mInfoTextY = (float)Random::Uniform(20, mUiManager->GetDisplayManager()->GetHeight()-lFontHeight-50);
+		mInfoTextTargetY = (float)Random::Uniform(20, mUiManager->GetDisplayManager()->GetHeight()-lFontHeight-60);
 		const int lTextCount = sizeof(mInfoTextArray)/sizeof(void*);
 		if (mInfoText.empty())
 		{
@@ -62,16 +63,21 @@ bool GameClientDemo::Paint()
 		}
 		mInfoText = mInfoTextArray[mCurrentInfoTextIndex];
 	}
+	const float lFrameTime = GetConstTimeManager()->GetNormalFrameTime();
+	mInfoTextSlideY = Math::Lerp(mInfoTextSlideY, mInfoTextTargetY, Math::GetIterateLerpTime(0.98f, lFrameTime));
+
 	const int lWidth = mUiManager->GetDisplayManager()->GetWidth();
+	const int lBarMargin = 5;
 	mUiManager->GetPainter()->PushAttrib(UiTbc::Painter::ATTR_RENDERMODE);
 	mUiManager->GetPainter()->SetRenderMode(UiTbc::Painter::RM_ADD);
-	mUiManager->GetPainter()->SetColor(Color(180, 180, 180, 180), 0);
-	mUiManager->GetPainter()->FillRect(0, (int)mInfoTextY, lWidth-1, (int)(mInfoTextY+mUiManager->GetFontManager()->GetFontHeight()));
+	mUiManager->GetPainter()->SetColor(Color(160, 160, 160, 180), 0);
+	mUiManager->GetPainter()->FillRect(0, (int)mInfoTextSlideY-lBarMargin, lWidth-1, (int)(mInfoTextSlideY+mUiManager->GetFontManager()->GetFontHeight()+lBarMargin*2));
 	mUiManager->GetPainter()->PopAttrib();
-	mInfoTextX -= GetConstTimeManager()->GetNormalFrameTime() * lWidth;
+	//mInfoTextX -= lFrameTime * lWidth;
+	mInfoTextX -= 12;
 	mUiManager->GetPainter()->SetColor(Color(30, 10, 20, 220), 0);
 	mUiManager->GetPainter()->SetColor(Color(0, 0, 0, 0), 1);
-	mUiManager->GetPainter()->PrintText(mInfoText, (int)mInfoTextX, (int)mInfoTextY);
+	mUiManager->GetPainter()->PrintText(mInfoText, (int)mInfoTextX, (int)mInfoTextTargetY);
 
 	mUiManager->GetFontManager()->SetActiveFont(lOldFontId);
 
@@ -102,8 +108,8 @@ void GameClientDemo::TickUiUpdate()
 void GameClientDemo::CreateLoginView()
 {
 	UiTbc::Button* lButton = new UiTbc::Button(UiTbc::BorderComponent::LINEAR, 3, GRAY, _T("FullInfo"));
-	lButton->SetText(_T("Click for more information on the full version"), BLUE, BROWN);
-	const int lButtonWidth = 350;
+	lButton->SetText(_T("Click here for more information on the full version"), BLUE, BLUE);
+	const int lButtonWidth = 370;
 	const int lButtonHeight = 30;
 	const int lMargin = 20;
 	lButton->SetPreferredSize(lButtonWidth, lButtonHeight);
