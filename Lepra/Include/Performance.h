@@ -31,6 +31,7 @@ public:
 	double GetLast() const;
 	double GetSlidingAverage() const;
 	double GetMaximum() const;
+	double GetRangeFactor() const;
 
 private:
 	bool mFirstTime;

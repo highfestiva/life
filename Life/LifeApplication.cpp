@@ -100,9 +100,10 @@ int Application::Run()
 	lTimeInfo.Set(1/60.0, 1/60.0, 1/60.0);
 	while (lOk && !lQuit)
 	{
+		LEPRA_MEASURE_SCOPE(AppTick);
+
 		mGameTicker->Profile();
 
-		LEPRA_MEASURE_SCOPE(AppTick);
 		{
 			ScopeTimer lSleepTimer(&lTimeInfo);
 			Random::GetRandomNumber();	// To move seed ahead.

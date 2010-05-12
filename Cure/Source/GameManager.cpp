@@ -124,8 +124,6 @@ bool GameManager::BeginTick()
 
 	if (mTime->GetAffordedPhysicsStepCount() > 0)
 	{
-		LEPRA_MEASURE_SCOPE(StartPhysics);
-
 		// Physics thread
 		// 1. does *NOT* add/delete objects,
 		// 2. processes context objects ("scripts"),
@@ -351,6 +349,7 @@ void GameManager::ReportPerformance(const ScopePerformanceData::NodeArray& pNode
 
 void GameManager::StartPhysicsTick()
 {
+	LEPRA_MEASURE_SCOPE(StartPhysics);
 	mIsThreadSafe = false;
 	if (mPhysicsTickStartSemaphore)
 	{

@@ -72,8 +72,9 @@ def getmake(builder):
                                 print("GOT HERE!", dirname)
                                 return None     # Visual Studio might be installed, but not VC++.
                 make_exe = os.path.join(dirname, builder)
-                if dirname.find("8") > 0:     vcver = 8
-                elif dirname.find("9") > 0:   vcver = 9
+                if dirname.find("Studio 10") > 0:   vcver = 10
+                elif dirname.find("Studio 9") > 0:   vcver = 9
+                elif dirname.find("Studio 8") > 0:     vcver = 8
                 else:
                         print("Unknown MSVC version!")
                         sys.exit(1)

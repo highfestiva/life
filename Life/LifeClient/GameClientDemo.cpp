@@ -73,8 +73,8 @@ bool GameClientDemo::Paint()
 	mUiManager->GetPainter()->SetColor(Color(160, 160, 160, 180), 0);
 	mUiManager->GetPainter()->FillRect(0, (int)mInfoTextSlideY-lBarMargin, lWidth-1, (int)(mInfoTextSlideY+mUiManager->GetFontManager()->GetFontHeight()+lBarMargin*2));
 	mUiManager->GetPainter()->PopAttrib();
-	//mInfoTextX -= lFrameTime * lWidth;
-	mInfoTextX -= 12;
+	mInfoTextX -= lFrameTime * 640;
+	//mInfoTextX -= 12;
 	mUiManager->GetPainter()->SetColor(Color(30, 10, 20, 220), 0);
 	mUiManager->GetPainter()->SetColor(Color(0, 0, 0, 0), 1);
 	mUiManager->GetPainter()->PrintText(mInfoText, (int)mInfoTextX, (int)mInfoTextTargetY);

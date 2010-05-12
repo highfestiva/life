@@ -71,10 +71,12 @@ void ConsoleManager::Join()
 	// Wait for forks.
 	for (int x = 0; x < 1000; ++x)
 	{
-		ScopeLock lLock(&mLock);
-		if (mForkList.empty())
 		{
-			break;
+			ScopeLock lLock(&mLock);
+			if (mForkList.empty())
+			{
+				break;
+			}
 		}
 		Thread::Sleep(0.01f);
 	}

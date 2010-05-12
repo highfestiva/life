@@ -127,6 +127,8 @@ bool GameClientMasterTicker::Tick()
 	SlaveArray::iterator x;
 
 	{
+		LEPRA_MEASURE_SCOPE(BeginRenderAndInput);
+
 		mLocalObjectSet.clear();
 		for (x = mSlaveArray.begin(); x != mSlaveArray.end(); ++x)
 		{
@@ -172,7 +174,7 @@ bool GameClientMasterTicker::Tick()
 	}
 
 	{
-		LEPRA_MEASURE_SCOPE(UiPaint);
+		LEPRA_MEASURE_SCOPE(Paint);
 		mUiManager->Paint();
 		for (x = mSlaveArray.begin(); lOk && x != mSlaveArray.end(); ++x)
 		{
@@ -191,6 +193,7 @@ bool GameClientMasterTicker::Tick()
 	}
 
 	{
+		LEPRA_MEASURE_SCOPE(SlavesEndTick);
 		for (x = mSlaveArray.begin(); lOk && x != mSlaveArray.end(); ++x)
 		{
 			GameClientSlaveManager* lSlave = *x;
@@ -214,13 +217,16 @@ bool GameClientMasterTicker::Tick()
 		mUiManager->EndRender();
 	}
 
-	if (mActiveWidth != mUiManager->GetDisplayManager()->GetWidth() ||
-		mActiveHeight != mUiManager->GetDisplayManager()->GetHeight())
 	{
-		mActiveWidth = mUiManager->GetDisplayManager()->GetWidth();
-		mActiveHeight = mUiManager->GetDisplayManager()->GetHeight();
+		LEPRA_MEASURE_SCOPE(UpdateSlaveLayout);
+		if (mActiveWidth != mUiManager->GetDisplayManager()->GetWidth() ||
+			mActiveHeight != mUiManager->GetDisplayManager()->GetHeight())
+		{
+			mActiveWidth = mUiManager->GetDisplayManager()->GetWidth();
+			mActiveHeight = mUiManager->GetDisplayManager()->GetHeight();
+		}
+		UpdateSlaveLayout();
 	}
-	UpdateSlaveLayout();
 
 	if (mRestartUi)
 	{
@@ -685,7 +691,7 @@ void GameClientMasterTicker::Profile()
 			lNodes.insert(lNodes.end(), lChildren.begin(), lChildren.end());
 
 			const double lStart = lNode->GetTimeOfLastMeasure() - lRootStart;
-			mPerformanceGraphList[lRootIndex].AddSegment(lNode->GetName(), lStart, lStart + lNode->GetLast());
+			mPerformanceGraphList[lRootIndex].AddSegment(lNode->GetName() + _T(" (") + strutil::DoubleToString(lNode->GetRangeFactor()*100, 1) + _T(" % fluctuation)"), lStart, lStart + lNode->GetLast());
 		}
 	}
 }

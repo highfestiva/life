@@ -76,6 +76,15 @@ double PerformanceData::GetMaximum() const
 	return (mMaximum);
 }
 
+double PerformanceData::GetRangeFactor() const
+{
+	if (mMinimum)
+	{
+		return ((mMaximum-mMinimum)/mMinimum);
+	}
+	return (0);
+}
+
 
 
 ScopePerformanceData* ScopePerformanceData::Insert(const str& pName, size_t pHash)
@@ -104,6 +113,10 @@ ScopePerformanceData* ScopePerformanceData::Insert(const str& pName, size_t pHas
 		{
 			// Not listed, so beam us up Scotty.
 			lNode = new ScopePerformanceData(lParent, pName, pHash);
+		}
+		else
+		{
+			assert(lNode->GetName() == pName);
 		}
 	}
 	SetActive(lNode);
