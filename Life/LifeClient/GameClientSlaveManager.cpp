@@ -175,6 +175,34 @@ bool GameClientSlaveManager::Render()
 
 bool GameClientSlaveManager::Paint()
 {
+#ifdef LIFE_DEMO
+	const float lTime = GetTimeManager()->GetAbsoluteTime();
+	if ((mSlaveIndex >= 2 || (mSlaveIndex == 1 && lTime > 15*60))
+		&& !IsQuitting())
+	{
+		const UiTbc::FontManager::FontId lOldFontId = SetFontHeight(36.0);
+		str lDemoText = strutil::Format(
+			_T(" This is a free demo.\n")
+			_T(" Buy the full version\n")
+			_T("to loose this annoying\n")
+			_T("  text for player %i."), mSlaveIndex+1);
+		if ((int)lTime % 3*60 >= 3*60-2)
+		{
+			lDemoText =
+				_T("     ])0n7 b3 B1FF\n")
+				_T("g!t pwn4ge & teh kekeke\n")
+				_T("     !3UYZORZ n0vv\n");
+		}
+		const int lTextWidth = mUiManager->GetFontManager()->GetStringWidth(lDemoText);
+		const int lTextHeight = mUiManager->GetFontManager()->GetLineHeight()*4;
+		const int lOffsetX = (int)(cos(lTime*4.3)*15);
+		const int lOffsetY = (int)(sin(lTime*4.1)*15);
+		mUiManager->GetPainter()->SetColor(Color(255, (uint8)(50*sin(lTime)+50), (uint8)(127*sin(lTime*0.9)+127), 200), 0);
+		mUiManager->GetPainter()->SetColor(Color(0, 0, 0, 0), 1);
+		mUiManager->GetPainter()->PrintText(lDemoText, mRenderArea.GetCenterX()-lTextWidth/2+lOffsetX, mRenderArea.GetCenterY()-lTextHeight/2+lOffsetY);
+		mUiManager->GetFontManager()->SetActiveFont(lOldFontId);
+	}
+#endif // Demo
 	return (true);
 }
 
@@ -1206,6 +1234,16 @@ QuaternionF GameClientSlaveManager::GetCameraQuaternion() const
 	QuaternionF lOrientation;
 	lOrientation.SetEulerAngles(lTheta-PIF/2, PIF/2-lPhi, lGimbal);
 	return (lOrientation);
+}
+
+
+
+UiTbc::FontManager::FontId GameClientSlaveManager::SetFontHeight(double pHeight)
+{
+	const UiTbc::FontManager::FontId lPreviousFontId = mUiManager->GetFontManager()->GetActiveFontId();
+	const str lFontName = mUiManager->GetFontManager()->GetActiveFontName();
+	mUiManager->GetFontManager()->QueryAddFont(lFontName, pHeight, UiTbc::FontManager::BOLD);
+	return (lPreviousFontId);
 }
 
 

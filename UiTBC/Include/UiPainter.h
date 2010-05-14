@@ -253,6 +253,8 @@ public:
 
 	void RenderDisplayList(DisplayListID pDisplayListID);
 
+	virtual void ClearFontBuffers();
+
 protected:
 	class DisplayEntity
 	{

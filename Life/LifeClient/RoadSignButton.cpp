@@ -167,11 +167,11 @@ void RoadSignButton::MoveSign(const float pFrameTime)
 		mButton.GetState() == UiTbc::Button::PRESSING)
 	{
 		lTargetOffset = lEndPosition*0.4f;
-		mCurrentOffset = Math::Lerp(mCurrentOffset, lTargetOffset, Math::GetIterateLerpTime(0.99f, pFrameTime));
+		mCurrentOffset = Math::Lerp(mCurrentOffset, lTargetOffset, Math::GetIterateLerpTime(1.2f, pFrameTime));
 	}
 	else
 	{
-		mCurrentOffset = Math::Lerp(mCurrentOffset, lTargetOffset, Math::GetIterateLerpTime(0.95f, pFrameTime));
+		mCurrentOffset = Math::Lerp(mCurrentOffset, lTargetOffset, Math::GetIterateLerpTime(0.8f, pFrameTime));
 	}
 	lTransform.GetPosition() -= mCurrentOffset;
 

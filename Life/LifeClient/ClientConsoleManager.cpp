@@ -131,7 +131,7 @@ void ClientConsoleManager::SetVisible(bool pVisible)
 void ClientConsoleManager::Tick()
 {
 	const float lFrameTime = mGameManager->GetTimeManager()->GetNormalFrameTime();
-	const float lConsoleSpeed = Math::GetIterateLerpTime(0.97f, lFrameTime);
+	const float lConsoleSpeed = Math::GetIterateLerpTime(0.8f, lFrameTime);
 	if (mIsConsoleVisible)
 	{
 		if (mArea.mTop == 0)	// Slide down.

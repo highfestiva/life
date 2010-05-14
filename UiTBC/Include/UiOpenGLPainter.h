@@ -95,7 +95,7 @@ protected:
 
 	void DoRenderDisplayList(std::vector<DisplayEntity*>* pDisplayList);
 
-	void ClearFontBuffers();
+	virtual void ClearFontBuffers();
 	FontTexture* SelectGlyphs(uint32 pFontHash, int pFontHeight, const str& pString);
 
 private:

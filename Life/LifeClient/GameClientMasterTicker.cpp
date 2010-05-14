@@ -532,7 +532,7 @@ void GameClientMasterTicker::UpdateSlaveLayout()
 		}
 	}
 	lFrameTime /= lAveragedSlaves;
-	const float lLayoutSpeed = Math::GetIterateLerpTime(0.98f, lFrameTime);
+	const float lLayoutSpeed = Math::GetIterateLerpTime(0.7f, lFrameTime);
 
 	GameClientSlaveManager* lLastSlave = 0;
 	if (mActiveSlaveCount == 1)

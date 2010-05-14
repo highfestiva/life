@@ -8,10 +8,12 @@
 //#ifdef LIFE_DEMO
 #include "../../UiTbc/Include/GUI/UiDesktopWindow.h"
 #include "../../Cure/Include/ContextManager.h"
+#include "../../Cure/Include/RuntimeVariable.h"
 #include "../../Cure/Include/TimeManager.h"
 #include "../../Lepra/Include/Random.h"
 #include "../../Lepra/Include/SystemManager.h"
 #include "../../TBC/Include/ChunkyPhysics.h"
+#include "../../UiCure/Include/UiRuntimeVariableName.h"
 #include "../../UiTbc/Include/UiFontManager.h"
 #include "GameClientMasterTicker.h"
 #include "Vehicle.h"
@@ -33,6 +35,7 @@ GameClientDemo::GameClientDemo(GameClientMasterTicker* pMaster, Cure::RuntimeVar
 	mInfoTextSlideY(-100),
 	mCurrentInfoTextIndex(0)
 {
+	pUiManager->GetPainter()->ClearFontBuffers();
 }
 
 GameClientDemo::~GameClientDemo()
@@ -43,10 +46,8 @@ GameClientDemo::~GameClientDemo()
 
 bool GameClientDemo::Paint()
 {
-	const UiTbc::FontManager::FontId lOldFontId = mUiManager->GetFontManager()->GetActiveFontId();
-	const str lFontName = mUiManager->GetFontManager()->GetActiveFontName();
-	const int lFontHeight = 70;
-	mUiManager->GetFontManager()->QueryAddFont(lFontName, lFontHeight, UiTbc::FontManager::BOLD);
+	const double lFontHeight = 70.0;
+	const UiTbc::FontManager::FontId lOldFontId = SetFontHeight(lFontHeight);
 
 	if (mUiManager->GetFontManager()->GetStringWidth(mInfoText)+mInfoTextX < 0)
 	{
@@ -64,7 +65,7 @@ bool GameClientDemo::Paint()
 		mInfoText = mInfoTextArray[mCurrentInfoTextIndex];
 	}
 	const float lFrameTime = GetConstTimeManager()->GetNormalFrameTime();
-	mInfoTextSlideY = Math::Lerp(mInfoTextSlideY, mInfoTextTargetY, Math::GetIterateLerpTime(0.98f, lFrameTime));
+	mInfoTextSlideY = Math::Lerp(mInfoTextSlideY, mInfoTextTargetY, Math::GetIterateLerpTime(0.8f, lFrameTime));
 
 	const int lWidth = mUiManager->GetDisplayManager()->GetWidth();
 	const int lBarMargin = 5;
@@ -152,12 +153,12 @@ void GameClientDemo::BrowseFullInfo(UiTbc::Button*)
 
 bool GameClientDemo::OnKeyDown(UiLepra::InputManager::KeyCode)
 {
-	return (true);
+	return (false);
 }
 
 bool GameClientDemo::OnKeyUp(UiLepra::InputManager::KeyCode)
 {
-	return (true);
+	return (false);
 }
 
 void GameClientDemo::OnInput(UiLepra::InputElement*)
@@ -170,7 +171,7 @@ const tchar* GameClientDemo::mInfoTextArray[6] =
 {
 	_T("The vehicle on display is only playable in the full version."),
 	_T("In the full version you can play online. Playing with your kids from the other side of the planet has never been easier."),
-	_T("Play with up to four simultanous players ON ONE SCREEN in the full version - this free demo version only permits two split-screen players."),
+	_T("Play with up to four simultanous players ON ONE SCREEN in the full version - this free demo version adds annoying texts for 3/4 players."),
 	_T("Ten more groovy vehicles are available in the full version."),
 	_T("Host a dedicated game server for family and friends. Only in the full version."),
 	_T("The development of this game was a huge undertaking by a single individual. Hope you enjoyed it!"),

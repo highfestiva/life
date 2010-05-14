@@ -65,7 +65,7 @@ void TimeManager::TickTime()
 
 	if (mPhysicsStepCount > 0)
 	{
-		mAverageFrameTime = Math::Lerp(mAverageFrameTime, mCurrentFrameTime, 0.001f);
+		mAverageFrameTime = Math::Lerp(mAverageFrameTime, mCurrentFrameTime, 0.01f);
 	}
 
 	const int lReportInterval = 5;	// Printout ever x seconds.

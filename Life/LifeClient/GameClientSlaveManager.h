@@ -12,6 +12,7 @@
 #include "../../Lepra/Include/Timer.h"
 #include "../../TBC/Include/PhysicsEngine.h"
 #include "../../UiCure/Include/UiResourceManager.h"
+#include "../../UiTbc/Include/UiFontManager.h"
 #include "../GameManager.h"
 #include "ClientConsoleManager.h"
 #include "ClientLoginView.h"
@@ -138,6 +139,8 @@ protected:
 
 	void UpdateCameraPosition(bool pUpdateMicPosition);
 	QuaternionF GetCameraQuaternion() const;
+
+	UiTbc::FontManager::FontId SetFontHeight(double pHeight);
 
 	void DrawAsyncDebugInfo();
 	void DrawDebugStaple(int pIndex, int pHeight, const Color& pColor);

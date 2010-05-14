@@ -385,6 +385,10 @@ void Painter::RenderDisplayList(DisplayListID pDisplayListID)
 	}
 }
 
+void Painter::ClearFontBuffers()
+{
+}
+
 Geometry2D* Painter::FetchDisplayEntity(uint16 pVertexFormat, ImageID pImageID)
 {
 	AdjustVertexFormat(pVertexFormat);
