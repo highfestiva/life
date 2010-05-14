@@ -102,10 +102,9 @@ int Application::Run()
 	{
 		LEPRA_MEASURE_SCOPE(AppTick);
 
-		mGameTicker->Profile();
-
 		{
 			ScopeTimer lSleepTimer(&lTimeInfo);
+			mGameTicker->Profile();
 			Random::GetRandomNumber();	// To move seed ahead.
 			lOk = mGameTicker->Tick();
 			const float lExtraSleep = (float)CURE_RTVAR_TRYGET(Cure::GetSettings(), RTVAR_DEBUG_EXTRASLEEPTIME, 0.0);
