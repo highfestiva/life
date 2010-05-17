@@ -861,7 +861,7 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 				ClearRoadSigns();
 				// A successful login: lets store these parameters for next time!
 				CURE_RTVAR_OVERRIDE(GetVariableScope(), RTVAR_LOGIN_USERNAME, mConnectUserName);
-				CURE_RTVAR_OVERRIDE(GetVariableScope(), RTVAR_LOGIN_SERVER, mConnectServerAddress);
+				CURE_RTVAR_SET(GetVariableScope(), RTVAR_NETWORK_SERVERADDRESS, mConnectServerAddress);
 			}
 			else
 			{

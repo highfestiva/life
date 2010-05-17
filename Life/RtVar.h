@@ -28,10 +28,7 @@
 
 #define RTVAR_STEERING_PLAYBACKMODE	"Control.Steering.PlaybackMode"
 
-#define RTVAR_LOGIN_SERVER		"Login.Server"
 #define RTVAR_LOGIN_USERNAME		"Login.UserName"
-
-#define RTVAR_NETWORK_LISTEN_ADDRESS	"Network.Listen.Address"
 
 #define RTVAR_ALLLOGGEDOUT_AUTOSHUTDOWN	"AllLoggedOut.AutoShutdown"
 
