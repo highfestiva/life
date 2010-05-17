@@ -103,7 +103,7 @@ protected:
 	void ClearRoadSigns();
 	void SetRoadSignsVisible(bool pVisible);
 
-	void TickInput();
+	virtual void TickInput();
 
 	virtual void TickUiInput();
 	void SetAvatarEnginePower(Cure::ContextObject* pAvatar, unsigned pAspect, float pPower, float pAngle);

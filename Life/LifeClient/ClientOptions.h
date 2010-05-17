@@ -19,10 +19,6 @@ struct ClientOptions
 {
 	struct Control
 	{
-		struct Ui
-		{
-			float mConsoleToggle;
-		};
 		struct Vehicle
 		{
 			float mForward;
@@ -42,7 +38,6 @@ struct ClientOptions
 			float mBreak;
 		};
 
-		Ui mUi;
 		Vehicle mVehicle;
 	};
 

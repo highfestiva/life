@@ -10,21 +10,12 @@
 
 
 
-namespace UiTbc
-{
-class Component;
-class TextArea;
-class TextField;
-}
-namespace UiCure
-{
-class GameUiManager;
-}
-
-
-
 namespace Life
 {
+
+
+
+class UiConsole;
 
 
 
@@ -36,23 +27,15 @@ public:
 		Cure::RuntimeVariableScope* pVariableScope, const PixelRect& pArea);
 	virtual ~ClientConsoleManager();
 
-	bool Start();
-	void Join();
+	virtual bool Start();
+	virtual void Join();
 
-	void SetRenderArea(const PixelRect& pRenderArea);
-	bool ToggleVisible();
-	void SetVisible(bool pVisible);
-	void Tick();
+	UiConsole* GetUiConsole() const;
 
 protected:
 	bool SaveApplicationConfigFile(File* pFile, const wstr& pUserConfig);
 
 private:
-	void InitGraphics();
-	void CloseGraphics();
-	void OnConsoleChange();
-	void PrintHelp();
-
 	enum CommandClient
 	{
 		COMMAND_QUIT = COMMAND_COUNT_COMMON,
@@ -66,20 +49,12 @@ private:
 		COMMAND_SET_AVATAR_ENGINE_POWER,
 	};
 
-	unsigned GetCommandCount() const;
-	const CommandPair& GetCommand(unsigned pIndex) const;
-	int OnCommand(const str& pCommand, const strutil::strvec& pParameterVector);
-
-	UiCure::GameUiManager* mUiManager;
-	PixelRect mArea;
-	UiTbc::Component* mConsoleComponent;
-	UiTbc::TextArea* mConsoleOutput;
-	UiTbc::TextField* mConsoleInput;
-	bool mIsConsoleVisible;
-	bool mIsFirstConsoleUse;
-	float mConsoleTargetPosition;
+	virtual unsigned GetCommandCount() const;
+	virtual const CommandPair& GetCommand(unsigned pIndex) const;
+	virtual int OnCommand(const str& pCommand, const strutil::strvec& pParameterVector);
 
 	static const CommandPair mCommandIdList[];
+	UiConsole* mUiConsole;
 	LOG_CLASS_DECLARE();
 };
 

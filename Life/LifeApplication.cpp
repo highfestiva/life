@@ -7,6 +7,7 @@
 #include "../Cure/Include/ConsoleManager.h"
 #include "../Cure/Include/GameManager.h"
 #include "../Cure/Include/RuntimeVariable.h"
+#include "../Lepra/Include/AntiCrack.h"
 #include "../Lepra/Include/LogListener.h"
 #include "../Lepra/Include/Network.h"
 #include "../Lepra/Include/Path.h"
@@ -15,6 +16,11 @@
 #include "Life.h"
 #include "LifeApplication.h"
 #include "RtVar.h"
+
+
+
+// Run before main() is started.
+AntiCrack _r__;
 
 
 
@@ -34,7 +40,6 @@ Application::Application(const strutil::strvec& pArgumentList):
 	mPerformanceLogger(0),
 	mMemLogger(0)
 {
-	mApplication = this;
 }
 
 Application::~Application()
@@ -62,10 +67,10 @@ void Application::Init()
 #ifndef NO_LOG_DEBUG_INFO
 	mDebugLogger = new DebuggerLogListener();
 #endif // Showing debug information.
-	mFileLogger = new FileLogListener(GetIoFile(_T(""), _T("log"), false));
+	mFileLogger = new FileLogListener(GetIoFile(GetName(), _T("log"), false));
 	//mFileLogger->SetLevelThreashold(Log::LEVEL_INFO);
 	mFileLogger->WriteLog(_T("\n\n"), Log::LEVEL_INFO);
-	mPerformanceLogger = new FileLogListener(GetIoFile(_T("Performance"), _T("log"), false));
+	mPerformanceLogger = new FileLogListener(GetIoFile(GetName()+_T("Performance"), _T("log"), false));
 	mMemLogger = new MemFileLogListener(100*1024);
 	LogType::GetLog(LogType::SUB_ROOT)->SetupBasicListeners(mConsoleLogger, mDebugLogger, mFileLogger, mPerformanceLogger, mMemLogger);
 
@@ -158,11 +163,11 @@ void Application::Destroy()
 
 
 
-str Application::GetIoFile(const str& pEnd, const str& pExt, bool pAddQuotes)
+str Application::GetIoFile(const str& pName, const str& pExt, bool pAddQuotes)
 {
 	str lIoName = Path::JoinPath(
 		SystemManager::GetIoDirectory(CURE_RTVAR_GET(Cure::GetSettings(), RTVAR_APPLICATION_NAME, _T("?"))),
-		mApplication->GetName()+pEnd, pExt);
+		pName, pExt);
 	if (pAddQuotes)
 	{
 		lIoName = _T("\"") + lIoName + _T("\"");
@@ -219,10 +224,6 @@ void Application::TickSleep(double pMeasuredFrameTime) const
 		}
 	}
 }
-
-
-
-Application* Application::mApplication;
 
 
 

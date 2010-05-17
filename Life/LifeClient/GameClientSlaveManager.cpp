@@ -26,6 +26,7 @@
 #include "../RtVar.h"
 #include "GameClientMasterTicker.h"
 #include "RoadSignButton.h"
+#include "UiConsole.h"
 #include "Vehicle.h"
 
 
@@ -95,7 +96,7 @@ void GameClientSlaveManager::SetRenderArea(const PixelRect& pRenderArea)
 		mLoginWindow->SetPos(mRenderArea.GetCenterX()-mLoginWindow->GetSize().x/2,
 			mRenderArea.GetCenterY()-mLoginWindow->GetSize().y/2);
 	}
-	((ClientConsoleManager*)GetConsoleManager())->SetRenderArea(pRenderArea);
+	((ClientConsoleManager*)GetConsoleManager())->GetUiConsole()->SetRenderArea(pRenderArea);
 
 	// Register a local FOV variable.
 	Cure::RuntimeVariableScope* lParent = GetVariableScope()->LockParentScope(0);
@@ -138,7 +139,7 @@ void GameClientSlaveManager::SetIsQuitting()
 {
 	mLog.Headlinef(_T("Slave %i will quit."), GetSlaveIndex());
 	CloseLoginGui();
-	((ClientConsoleManager*)GetConsoleManager())->SetVisible(false);
+	((ClientConsoleManager*)GetConsoleManager())->GetUiConsole()->SetVisible(false);
 	SetRoadSignsVisible(false);
 	GetResourceManager()->Tick();
 	mQuit = true;
@@ -230,7 +231,7 @@ bool GameClientSlaveManager::EndTick()
 
 void GameClientSlaveManager::ToggleConsole()
 {
-	mAllowMovementInput = !((ClientConsoleManager*)GetConsoleManager())->ToggleVisible();
+	mAllowMovementInput = !((ClientConsoleManager*)GetConsoleManager())->GetUiConsole()->ToggleVisible();
 }
 
 
@@ -300,7 +301,7 @@ bool GameClientSlaveManager::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 	{
 		mInputExpireAlarm.Set();
 	}
-	if (mOptions.GetOptions().mControl.mUi.mConsoleToggle >= 0.5f)
+	if (mOptions.GetConsoleToggle() >= 0.5f)
 	{
 		mOptions.ResetToggles();
 		ToggleConsole();
@@ -342,7 +343,7 @@ void GameClientSlaveManager::OnInput(UiLepra::InputElement* pElement)
 	{
 		mInputExpireAlarm.Push(0.1);
 	}
-	if (mOptions.GetOptions().mControl.mUi.mConsoleToggle >= 0.5f)
+	if (mOptions.GetConsoleToggle() >= 0.5f)
 	{
 		mOptions.ResetToggles();
 		ToggleConsole();
@@ -396,7 +397,7 @@ float GameClientSlaveManager::UpdateFrustum()
 str GameClientSlaveManager::GetApplicationCommandFilename() const
 {
 	return (Application::GetIoFile(
-		_T("Application")+strutil::IntToString(mSlaveIndex, 10),
+		_T("ClientApplication")+strutil::IntToString(mSlaveIndex, 10),
 		_T("lsh")));
 }
 
@@ -543,7 +544,7 @@ void GameClientSlaveManager::SetAvatarEnginePower(Cure::ContextObject* pAvatar, 
 				mEnginePlaybackFile.Open(_T("Data/Steering.rec"), DiskFile::MODE_TEXT_WRITE);
 				wstr lComment = wstrutil::Format(L"// Recording %s at %s.\n", pAvatar->GetClassId().c_str(), Time().GetDateTimeAsString().c_str());
 				mEnginePlaybackFile.WriteString(lComment);
-				mEnginePlaybackFile.WriteString(wstr(L"#Control.Steering.PlaybackMode 2\n"));
+				mEnginePlaybackFile.WriteString(wstrutil::Encode("#" RTVAR_STEERING_PLAYBACKMODE " 2\n"));
 			}
 			const double lTime = GetTimeManager()->GetAbsoluteTime();
 			if (lTime != mEnginePlaybackTime)
@@ -562,7 +563,7 @@ void GameClientSlaveManager::SetAvatarEnginePower(Cure::ContextObject* pAvatar, 
 		{
 			if (mEnginePlaybackFile.IsInMode(File::WRITE_MODE))
 			{
-				mEnginePlaybackFile.WriteString(wstr(L"#Control.Steering.PlaybackMode 0\n"));
+				mEnginePlaybackFile.WriteString(wstrutil::Encode("#" RTVAR_STEERING_PLAYBACKMODE " 0\n"));
 			}
 			mEnginePlaybackFile.Close();
 		}
@@ -574,7 +575,7 @@ void GameClientSlaveManager::SetAvatarEnginePower(Cure::ContextObject* pAvatar, 
 
 void GameClientSlaveManager::TickUiUpdate()
 {
-	((ClientConsoleManager*)GetConsoleManager())->Tick();
+	((ClientConsoleManager*)GetConsoleManager())->GetUiConsole()->Tick();
 
 	// TODO: update sound position and velocity.
 

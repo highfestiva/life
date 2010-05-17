@@ -141,6 +141,23 @@ void ConsoleManager::RemoveFork(Thread* pThread)
 
 
 
+InteractiveConsoleLogListener* ConsoleManager::GetConsoleLogger() const
+{
+	return (mConsoleLogger);
+}
+
+ConsolePrompt* ConsoleManager::GetConsolePrompt() const
+{
+	return (mConsolePrompt);
+}
+
+RuntimeVariableScope* ConsoleManager::GetVariableScope() const
+{
+	return (mVariableScope);
+}
+
+
+
 bool ConsoleManager::ForkExecuteCommand(const str& pCommand)
 {
 	class ForkThread: public Thread
@@ -175,7 +192,7 @@ bool ConsoleManager::ForkExecuteCommand(const str& pCommand)
 
 
 
-void ConsoleManager::Init()
+void ConsoleManager::InitCommands()
 {
 	mConsoleCommandManager = new ConsoleCommandManager();
 	mConsoleCommandManager->AddExecutor(new ConsoleExecutor<ConsoleManager>(this, &ConsoleManager::OnCommandLocal, &ConsoleManager::OnCommandError));
@@ -232,23 +249,6 @@ void ConsoleManager::PrintCommandList(const std::list<str>& pCommandList)
 	{
 		mConsoleLogger->OnLogRawMessage(_T("\n"));
 	}
-}
-
-InteractiveConsoleLogListener* ConsoleManager::GetConsoleLogger() const
-{
-	return (mConsoleLogger);
-}
-
-ConsolePrompt* ConsoleManager::GetConsolePrompt() const
-{
-	return (mConsolePrompt);
-}
-
-
-
-RuntimeVariableScope* ConsoleManager::GetVariableScope() const
-{
-	return (mVariableScope);
 }
 
 

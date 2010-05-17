@@ -28,6 +28,7 @@ namespace Life
 
 class ConsoleManager;
 class GameClientSlaveManager;
+class UiGameServerManager;
 class RoadSignButton;
 
 
@@ -114,6 +115,8 @@ private:
 	UiCure::GameUiManager* mUiManager;
 	Cure::ResourceManager* mResourceManager;
 	bool mIsPlayerCountViewActive;
+
+	UiGameServerManager* mServer;
 
 	ConsoleManager* mConsole;
 	bool mRestartUi;

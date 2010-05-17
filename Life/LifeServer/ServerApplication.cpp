@@ -6,7 +6,7 @@
 
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../LifeApplication.h"
-#include "GameServerManager.h"
+#include "GameServerTicker.h"
 
 
 
@@ -70,18 +70,12 @@ str ServerApplication::GetName() const
 
 Cure::GameTicker* ServerApplication::CreateGameTicker() const
 {
-	Cure::RuntimeVariableScope* lVariables = new Cure::RuntimeVariableScope(Cure::GetSettings());
-	return (new GameServerManager(lVariables, mResourceManager,
-		(InteractiveStdioConsoleLogListener*)mConsoleLogger));
+	return (new GameServerTicker(mResourceManager, (InteractiveStdioConsoleLogListener*)mConsoleLogger));
 }
 
 LogListener* ServerApplication::CreateConsoleLogListener() const
 {
-#ifdef LEPRA_CONSOLE
 	return (new InteractiveStdioConsoleLogListener());
-#else // !LEPRA_CONSOLE
-	return (Parent::CreateConsoleLogListener());
-#endif // LEPRA_CONSOLE / !LEPRA_CONSOLE
 }
 
 

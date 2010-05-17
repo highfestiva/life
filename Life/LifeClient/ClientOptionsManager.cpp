@@ -21,54 +21,10 @@ namespace Options
 
 
 ClientOptionsManager::ClientOptionsManager(Cure::RuntimeVariableScope* pVariableScope, int pPriority):
-	mVariableScope(pVariableScope)
+	OptionsManager(pVariableScope, pPriority)
 {
 	::memset(&mOptions, 0, sizeof(mOptions));
 	SetDefault(pPriority);
-}
-
-
-	
-bool ClientOptionsManager::UpdateInput(UiLepra::InputManager::KeyCode pKeyCode, bool pActive)
-{
-	const str lInputElementName = ConvertToString(pKeyCode);
-	return (SetValue(lInputElementName, pActive? 1.0f : 0.0f));
-}
-
-bool ClientOptionsManager::UpdateInput(UiLepra::InputElement* pElement)
-{
-	bool lValueSet;
-	float lValue = (float)pElement->GetValue();
-	const str lInputElementName = pElement->GetFullName();
-	if (pElement->GetType() == UiLepra::InputElement::ANALOGUE)
-	{
-		// Clamp analogue to neutral when close enough.
-		if (Math::IsEpsEqual(lValue, 0.0f, 0.1f))
-		{
-			lValue = 0;
-		}
-		// Update both sides for analogue input.
-		if (lValue >= 0)
-		{
-			lValueSet = SetValue(lInputElementName+_T("+"), lValue);
-			SetValue(lInputElementName+_T("-"), 0);
-		}
-		else
-		{
-			lValueSet = SetValue(lInputElementName+_T("-"), -lValue);
-			SetValue(lInputElementName+_T("+"), 0);
-		}
-	}
-	else
-	{
-		lValueSet = SetValue(lInputElementName, lValue);
-	}
-	return (lValueSet);
-}
-
-void ClientOptionsManager::ResetToggles()
-{
-	mOptions.mControl.mUi.mConsoleToggle = 0;
 }
 
 
@@ -174,37 +130,12 @@ bool ClientOptionsManager::SetDefault(int pPriority)
 	return (lOk);
 }
 
-const str ClientOptionsManager::ConvertToString(UiLepra::InputManager::KeyCode pKeyCode) const
-{
-	return (_T("Key.")+UiLepra::InputManager::GetKeyName(pKeyCode));
-}
-
-bool ClientOptionsManager::SetValue(const str& pKey, float pValue)
-{
-	bool lIsAnySteeringValue;
-	bool lInputChanged = false;
-	std::vector<float*> lValuePointers = GetValuePointers(pKey, lIsAnySteeringValue);
-	for (std::vector<float*>::iterator x = lValuePointers.begin(); x != lValuePointers.end(); ++x)
-	{
-		if (!Math::IsEpsEqual(*(*x), pValue, 0.06f))
-		{
-			lInputChanged = true;
-			*(*x) = pValue;
-		}
-	}
-	return (lIsAnySteeringValue && lInputChanged);
-}
-
 std::vector<float*> ClientOptionsManager::GetValuePointers(const str& pKey, bool& pIsAnySteeringValue)
 {
-	std::vector<float*> lPointers;
-
-	pIsAnySteeringValue = false;
-
 	typedef std::pair<const str, float*> KeyValue;
 	const KeyValue lEntries[] =
 	{
-		KeyValue(_T(RTVAR_CTRL_UI_CONTOGGLE), &mOptions.mControl.mUi.mConsoleToggle),
+		KeyValue(_T(RTVAR_CTRL_UI_CONTOGGLE), &mConsoleToggle),
 		KeyValue(_T(RTVAR_CTRL_STEER_FWD), &mOptions.mControl.mVehicle.mForward),
 		KeyValue(_T(RTVAR_CTRL_STEER_BACK), &mOptions.mControl.mVehicle.mBackward),
 		KeyValue(_T(RTVAR_CTRL_STEER_FWD3D), &mOptions.mControl.mVehicle.mForward3d),
@@ -221,25 +152,7 @@ std::vector<float*> ClientOptionsManager::GetValuePointers(const str& pKey, bool
 		KeyValue(_T(RTVAR_CTRL_STEER_HANDBRK), &mOptions.mControl.mVehicle.mHandBreak),
 		KeyValue(_T(RTVAR_CTRL_STEER_BRK), &mOptions.mControl.mVehicle.mBreak),
 	};
-	for (int x = 0; x < (int)(sizeof(lEntries)/sizeof(lEntries[0])); ++x)
-	{
-		const str lKeys = mVariableScope->GetDefaultValue(Cure::RuntimeVariableScope::READ_ONLY,
-			lEntries[x].first);
-		typedef strutil::strvec SV;
-		SV lKeyArray = strutil::Split(lKeys, _T(", \t"));
-		for (SV::iterator y = lKeyArray.begin(); y != lKeyArray.end(); ++y)
-		{
-			if ((*y) == pKey)
-			{
-				if (lEntries[x].first.find(_T("Steer")) != str::npos)
-				{
-					pIsAnySteeringValue = true;
-				}
-				lPointers.push_back(lEntries[x].second);
-			}
-		}
-	}
-	return (lPointers);
+	return (DoGetValuePointers(pKey, pIsAnySteeringValue, lEntries, sizeof(lEntries)/sizeof(lEntries[0])));
 }
 
 

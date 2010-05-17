@@ -35,7 +35,7 @@ ServerConsoleManager::ServerConsoleManager(Cure::GameManager* pGameManager, Cure
 	InteractiveConsoleLogListener* pConsoleLogger, ConsolePrompt* pConsolePrompt):
 	ConsoleManager(pGameManager, pVariableScope, pConsoleLogger, pConsolePrompt)
 {
-	Init();
+	InitCommands();
 }
 
 ServerConsoleManager::~ServerConsoleManager()
@@ -70,7 +70,7 @@ int ServerConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& 
 		{
 			case COMMAND_QUIT:
 			{
-				int lClientCount = ((GameServerManager*)mGameManager)->GetLoggedInClientCount();
+				int lClientCount = ((GameServerManager*)GetGameManager())->GetLoggedInClientCount();
 				if (lClientCount > 0)
 				{
 					if (pParameterVector.size() == 1 && pParameterVector[0] == _T("!"))
@@ -95,7 +95,7 @@ int ServerConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& 
 				if (pParameterVector.size() == 1)
 				{
 					wstr lMessage = wstrutil::Encode(pParameterVector[0]);
-					if (((GameServerManager*)mGameManager)->BroadcastChatMessage(lMessage))
+					if (((GameServerManager*)GetGameManager())->BroadcastChatMessage(lMessage))
 					{
 						mLog.Infof(_T("BROADCAST CHAT: %s"), pParameterVector[0].c_str());
 					}
@@ -118,7 +118,7 @@ int ServerConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& 
 				{
 					wstr lClientUserName = wstrutil::Encode(pParameterVector[0]);
 					wstr lMessage = wstrutil::Encode(pParameterVector[1]);
-					if (((GameServerManager*)mGameManager)->SendChatMessage(lClientUserName, lMessage))
+					if (((GameServerManager*)GetGameManager())->SendChatMessage(lClientUserName, lMessage))
 					{
 						mLog.Infof(_T("PRIVATE CHAT ServerAdmin->%s: %s"), pParameterVector[0].c_str(), pParameterVector[1].c_str());
 					}
@@ -138,7 +138,7 @@ int ServerConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& 
 			case COMMAND_LIST_USERS:
 			{
 				wstrutil::strvec lUserNameList;
-				lUserNameList = ((GameServerManager*)mGameManager)->ListUsers();
+				lUserNameList = ((GameServerManager*)GetGameManager())->ListUsers();
 				mLog.AInfo("Listing logged on users:");
 				for (size_t x = 0; x < lUserNameList.size(); ++x)
 				{

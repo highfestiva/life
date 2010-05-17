@@ -8,13 +8,21 @@
 
 
 
-#include "../../Cure/Include/GameManager.h"
-#include "../../Cure/Include/NetworkServer.h"
-#include "../../Cure/Include/Packet.h"
-#include "../../Cure/Include/UserAccountManager.h"
-#include "../../Lepra/Include/LogListener.h"
 #include "../GameManager.h"
+#include "../../Cure/Include/NetworkServer.h"
+/*#include "../../Cure/Include/Packet.h"
+#include "../../Cure/Include/UserAccountManager.h"
+#include "../../Lepra/Include/LogListener.h"*/
+//#include "../../Lepra/Include/ConsoleCommandManager.h"
 #include "Client.h"
+
+
+
+namespace Lepra
+{
+class InteractiveConsoleLogListener;
+class ConsolePrompt;
+}
 
 
 
@@ -23,16 +31,17 @@ namespace Life
 
 
 
-class GameServerManager: public Cure::GameTicker, public GameManager, public Cure::NetworkServer::LoginListener
+class GameServerManager: public GameManager, public Cure::NetworkServer::LoginListener
 {
 public:
 	typedef GameManager Parent;
 
-	GameServerManager(Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
-		InteractiveConsoleLogListener* pConsoleLogger);
+	GameServerManager(Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager);
 	virtual ~GameServerManager();
 
-	bool Tick();
+	virtual void StartConsole(InteractiveConsoleLogListener* pConsoleLogger, ConsolePrompt* pConsolePrompt);
+	bool Initialize();
+	float GetPowerSaveAmount() const;
 
 	wstrutil::strvec ListUsers();
 	bool BroadcastChatMessage(const wstr& pMessage);
@@ -40,18 +49,17 @@ public:
 
 	int GetLoggedInClientCount() const;
 
+protected:
+	void TickInput();
+
 private:
 	void Logout(Cure::UserAccount::AccountId pAccountId, const str& pReason);
 	void DeleteAllClients();
 
 	Client* GetClientByAccount(Cure::UserAccount::AccountId pAccountId) const;
 
-	bool Initialize();
 	virtual bool InitializeTerrain();
 
-	float GetPowerSaveAmount() const;
-
-	void TickInput();
 	void ProcessNetworkInputMessage(Client* pClient, Cure::Message* pMessage);
 
 	Cure::UserAccount::Availability QueryLogin(const Cure::LoginId& pLoginId, Cure::UserAccount::AccountId& pAccountId);
@@ -67,7 +75,7 @@ private:
 
 	void BroadcastAvatar(Client* pClient);
 
-	Cure::ContextObject* CreateContextObject(const str& pClassId) const;
+	virtual Cure::ContextObject* CreateContextObject(const str& pClassId) const;
 	virtual void OnLoadCompleted(Cure::ContextObject* pObject, bool pOk);
 	void OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque,
 		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2);
@@ -95,7 +103,6 @@ private:
 	Cure::UserAccountManager* mUserAccountManager;
 	AccountClientTable mAccountClientTable;
 	Cure::ContextObject* mTerrainObject;	// TODO: remove when applicable.
-	Cure::ContextObject* mBoxObject;	// TODO: remove when applicable.
 	MovementArrayList mMovementArrayList;
 	mutable Timer mPowerSaveTimer;
 

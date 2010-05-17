@@ -292,10 +292,12 @@ void GameManager::TryReportPerformance(double pReportInterval)
 
 void GameManager::ClearPerformanceData()
 {
+	ScopeLock lLock(&mLock);
+
 	mSendBandwidth.Clear();
 	mReceiveBandwidth.Clear();
 
-	ScopePerformanceData::ClearAll(ScopePerformanceData::GetRoots());
+	ScopePerformanceData::ClearAll();
 }
 
 

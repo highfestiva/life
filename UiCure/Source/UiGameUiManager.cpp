@@ -511,7 +511,7 @@ void GameUiManager::UpdateSettings()
 
 	if (mSound)
 	{
-		const double lSoundRollOff = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_SOUND_ROLLOFF, 0.1);
+		const double lSoundRollOff = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_SOUND_ROLLOFF, 0.3);
 		const double lSoundDoppler = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_SOUND_DOPPLER, 1.3);
 		mSound->SetRollOffFactor((float)lSoundRollOff);
 		mSound->SetDopplerFactor((float)lSoundDoppler);

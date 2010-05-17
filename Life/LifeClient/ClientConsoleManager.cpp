@@ -18,6 +18,7 @@
 #include "GameClientSlaveManager.h"
 #include "GameClientMasterTicker.h"
 #include "ClientConsoleManager.h"
+#include "UiConsole.h"
 
 
 
@@ -44,141 +45,38 @@ const ClientConsoleManager::CommandPair ClientConsoleManager::mCommandIdList[] =
 
 ClientConsoleManager::ClientConsoleManager(Cure::GameManager* pGameManager, UiCure::GameUiManager* pUiManager,
 	Cure::RuntimeVariableScope* pVariableScope, const PixelRect& pArea):
-	ConsoleManager(pGameManager, pVariableScope, new UiTbc::ConsoleLogListener(), new UiTbc::ConsolePrompt()),
-	mUiManager(pUiManager),
-	mArea(pArea),
-	mConsoleComponent(0),
-	mConsoleOutput(0),
-	mConsoleInput(0),
-	mIsConsoleVisible(false),
-	mIsFirstConsoleUse(true),
-	mConsoleTargetPosition(0)
+	ConsoleManager(pGameManager, pVariableScope, new UiTbc::ConsoleLogListener, new UiTbc::ConsolePrompt)
 {
-	Init();
-
-#ifdef NO_LOG_DEBUG_INFO
-	const Log::LogLevel lAllowedLevel = Log::LEVEL_INFO;
-#else // Allow debug logging.
-	const Log::LogLevel lAllowedLevel = Log::LEVEL_LOWEST_TYPE;
-#endif // Disallow/allow debug logging.
-	for (int x = lAllowedLevel; x < Log::LEVEL_TYPE_COUNT; ++x)
-	{
-		LogType::GetLog(LogType::SUB_ROOT)->AddListener(GetConsoleLogger(), (Log::LogLevel)x);
-	}
+	InitCommands();
+	mUiConsole = new UiConsole(this, pUiManager, pArea);
 }
 
 ClientConsoleManager::~ClientConsoleManager()
 {
-	Join();
-	delete (GetConsoleLogger());
-	mUiManager = 0;
+	delete (mUiConsole);
+	mUiConsole = 0;
 }
 
 
 
 bool ClientConsoleManager::Start()
 {
-	InitGraphics();
-
-	((UiTbc::ConsoleLogListener*)GetConsoleLogger())->SetOutputComponent(mConsoleOutput);
-	((UiTbc::ConsolePrompt*)GetConsolePrompt())->SetInputComponent(mConsoleInput);
-
-	OnConsoleChange();
-
-	return (Parent::Start());
+	bool lOk = Parent::Start();
+	mUiConsole->Open();
+	return (lOk);
 }
 
 void ClientConsoleManager::Join()
 {
+	mUiConsole->Close();
 	Parent::Join();
-
-	((UiTbc::ConsoleLogListener*)GetConsoleLogger())->SetOutputComponent(0);
-	((UiTbc::ConsolePrompt*)GetConsolePrompt())->SetInputComponent(0);
-	CloseGraphics();
 }
 
 
 
-void ClientConsoleManager::SetRenderArea(const PixelRect& pRenderArea)
+UiConsole* ClientConsoleManager::GetUiConsole() const
 {
-	mArea = pRenderArea;
-
-	if (mConsoleComponent)
-	{
-		PixelCoord lSize = mArea.GetSize();
-		lSize.y = (int)(lSize.y*0.6);	// TODO: use setting for how high console should be.
-		mConsoleComponent->SetPreferredSize(lSize);
-		int lInputHeight = mUiManager->GetPainter()->GetFontHeight()+4;
-		lSize.y -= lInputHeight;
-		mConsoleOutput->SetPreferredSize(lSize);
-		lSize.y = lInputHeight;
-		mConsoleInput->SetPreferredSize(lSize);
-	}
-}
-
-bool ClientConsoleManager::ToggleVisible()
-{
-	SetVisible(!mIsConsoleVisible);
-	return (mIsConsoleVisible);
-}
-
-void ClientConsoleManager::SetVisible(bool pVisible)
-{
-	mIsConsoleVisible = pVisible;
-	OnConsoleChange();
-}
-
-void ClientConsoleManager::Tick()
-{
-	const float lFrameTime = mGameManager->GetTimeManager()->GetNormalFrameTime();
-	const float lConsoleSpeed = Math::GetIterateLerpTime(0.8f, lFrameTime);
-	if (mIsConsoleVisible)
-	{
-		if (mArea.mTop == 0)	// Slide down.
-		{
-			mConsoleTargetPosition = Math::Lerp(mConsoleTargetPosition, (float)mArea.mTop, lConsoleSpeed);
-			mConsoleComponent->SetPos(mArea.mLeft, (int)mConsoleTargetPosition);
-		}
-		else	// Slide sideways.
-		{
-			mConsoleTargetPosition = Math::Lerp(mConsoleTargetPosition, (float)mArea.mLeft, lConsoleSpeed);
-			mConsoleComponent->SetPos((int)mConsoleTargetPosition, mArea.mTop);
-		}
-	}
-	else
-	{
-		const int lMargin = 3;
-		if (mArea.mTop == 0)	// Slide out top.
-		{
-			const int lTarget = -mConsoleComponent->GetSize().y-lMargin;
-			mConsoleTargetPosition = Math::Lerp(mConsoleTargetPosition, (float)lTarget, lConsoleSpeed);
-			mConsoleComponent->SetPos(mArea.mLeft, (int)mConsoleTargetPosition);
-			if (mConsoleComponent->GetPos().y <= lTarget+lMargin)
-			{
-				mConsoleComponent->SetVisible(false);
-			}
-		}
-		else if (mArea.mLeft == 0)	// Slide out left.
-		{
-			const int lTarget = -mConsoleComponent->GetSize().x-lMargin;
-			mConsoleTargetPosition = Math::Lerp(mConsoleTargetPosition, (float)lTarget, lConsoleSpeed);
-			mConsoleComponent->SetPos((int)mConsoleTargetPosition, mArea.mTop);
-			if (mConsoleComponent->GetPos().x <= lTarget+lMargin)
-			{
-				mConsoleComponent->SetVisible(false);
-			}
-		}
-		else	// Slide out right.
-		{
-			const int lTarget = mUiManager->GetDisplayManager()->GetWidth()+lMargin;
-			mConsoleTargetPosition = Math::Lerp(mConsoleTargetPosition, (float)lTarget, lConsoleSpeed);
-			mConsoleComponent->SetPos((int)mConsoleTargetPosition, mArea.mTop);
-			if (mConsoleComponent->GetPos().x >= lTarget+lMargin)
-			{
-				mConsoleComponent->SetVisible(false);
-			}
-		}
-	}
+	return (mUiConsole);
 }
 
 
@@ -192,94 +90,6 @@ bool ClientConsoleManager::SaveApplicationConfigFile(File* pFile, const wstr& pU
 		lOk = true;	// TODO: check if all writes went well.
 	}
 	return (lOk);
-}
-
-
-
-void ClientConsoleManager::InitGraphics()
-{
-	CloseGraphics();
-
-	mConsoleComponent = new UiTbc::Component(_T("CON:"), new UiTbc::ListLayout());
-	mConsoleOutput = new UiTbc::TextArea(Color(10, 30, 20, 160));
-	mConsoleInput = new UiTbc::TextField(mConsoleComponent, Color(10, 30, 20, 160), _T("CONI:"));
-
-	SetRenderArea(mArea);
-
-	mConsoleOutput->SetFocusAnchor(UiTbc::TextArea::ANCHOR_BOTTOM_LINE);
-	mConsoleOutput->SetFontColor(WHITE);
-	mConsoleInput->SetFontColor(WHITE);
-
-	mConsoleComponent->AddChild(mConsoleOutput);
-	mConsoleComponent->AddChild(mConsoleInput);
-
-	mUiManager->GetDesktopWindow()->AddChild(mConsoleComponent, 0, 0, 1);
-	mConsoleComponent->SetPos(mArea.mLeft, mArea.mTop);
-	mConsoleComponent->SetVisible(false);
-
-	// This is just for getting some basic metrics (such as font height).
-	mConsoleComponent->Repaint(mUiManager->GetPainter());
-}
-
-void ClientConsoleManager::CloseGraphics()
-{
-	if (mUiManager && mConsoleComponent)
-	{
-		mUiManager->GetDesktopWindow()->RemoveChild(mConsoleComponent, 1);
-		mConsoleComponent->RemoveChild(mConsoleOutput, 0);
-		mConsoleComponent->RemoveChild(mConsoleInput, 0);
-		mConsoleComponent->SetVisible(false);
-	}
-
-	delete (mConsoleComponent);
-	mConsoleComponent = 0;
-	delete (mConsoleOutput);
-	mConsoleOutput = 0;
-	delete (mConsoleInput);
-	mConsoleInput = 0;
-}
-
-void ClientConsoleManager::OnConsoleChange()
-{
-	if (mIsConsoleVisible)
-	{
-		mConsoleComponent->SetVisible(true);
-		mUiManager->GetDesktopWindow()->UpdateLayout();
-		GetConsolePrompt()->SetFocus(true);
-		if (mIsFirstConsoleUse)
-		{
-			mIsFirstConsoleUse = false;
-			PrintHelp();
-		}
-	}
-	else
-	{
-		GetConsolePrompt()->SetFocus(false);
-	}
-}
-
-void ClientConsoleManager::PrintHelp()
-{
-	str lKeys = CURE_RTVAR_GET(GetVariableScope(), RTVAR_CTRL_UI_CONTOGGLE, _T("???"));
-	typedef strutil::strvec SV;
-	SV lKeyArray = strutil::Split(lKeys, _T(", \t"));
-	SV lNiceKeys;
-	for (SV::iterator x = lKeyArray.begin(); x != lKeyArray.end(); ++x)
-	{
-		const str lKey = strutil::ReplaceAll(*x, _T("Key."), _T(""));
-		lNiceKeys.push_back(lKey);
-	}
-	str lKeyInfo;
-	if (lKeyArray.size() == 1)
-	{
-		lKeyInfo = _T("key ");
-	}
-	else
-	{
-		lKeyInfo = _T("any of the following keys: ");
-	}
-	lKeyInfo += strutil::Join(lNiceKeys, _T(", "));
-	mLog.Infof(_T("To bring this console up again press %s."), lKeyInfo.c_str());
 }
 
 
@@ -321,12 +131,12 @@ int ClientConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& 
 			break;
 			case COMMAND_BYE:
 			{
-				((GameClientSlaveManager*)mGameManager)->SetIsQuitting();
+				((GameClientSlaveManager*)GetGameManager())->SetIsQuitting();
 			}
 			break;
 			case COMMAND_START_LOGIN:
 			{
-				((GameClientSlaveManager*)mGameManager)->Logout();
+				((GameClientSlaveManager*)GetGameManager())->Logout();
 
 				if (pParameterVector.size() == 3)
 				{
@@ -337,7 +147,7 @@ int ClientConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& 
 					Cure::MangledPassword lPassword(lReadablePassword);
 					lReadablePassword.clear();	// Clear out password traces in string.
 					Cure::LoginId lLoginToken(lUsername, lPassword);
-					((GameClientSlaveManager*)mGameManager)->RequestLogin(pParameterVector[0], lLoginToken);
+					((GameClientSlaveManager*)GetGameManager())->RequestLogin(pParameterVector[0], lLoginToken);
 				}
 				else
 				{
@@ -348,7 +158,7 @@ int ClientConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& 
 			case COMMAND_WAIT_LOGIN:
 			{
 				mLog.AInfo("Waiting for login to finish...");
-				while (((GameClientSlaveManager*)mGameManager)->IsLoggingIn())
+				while (((GameClientSlaveManager*)GetGameManager())->IsLoggingIn())
 				{
 					Thread::Sleep(0.01);
 				}
@@ -357,13 +167,13 @@ int ClientConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& 
 			case COMMAND_LOGOUT:
 			{
 				mLog.AInfo("Logging off due to user command.");
-				((GameClientSlaveManager*)mGameManager)->Logout();
+				((GameClientSlaveManager*)GetGameManager())->Logout();
 			}
 			break;
 			case COMMAND_START_RESET_UI:
 			{
 				mLog.AInfo("Running UI restart...");
-				if (((GameClientSlaveManager*)mGameManager)->GetMaster()->StartResetUi())
+				if (((GameClientSlaveManager*)GetGameManager())->GetMaster()->StartResetUi())
 				{
 					mLog.AInfo("UI is restarting.");
 				}
@@ -377,7 +187,7 @@ int ClientConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& 
 			case COMMAND_WAIT_RESET_UI:
 			{
 				mLog.AInfo("Waiting for UI to be restarted...");
-				if (((GameClientSlaveManager*)mGameManager)->GetMaster()->WaitResetUi())
+				if (((GameClientSlaveManager*)GetGameManager())->GetMaster()->WaitResetUi())
 				{
 					mLog.AInfo("UI is up and running.");
 				}
@@ -391,7 +201,7 @@ int ClientConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& 
 			case COMMAND_ADD_PLAYER:
 			{
 				mLog.AInfo("Adding another player.");
-				if (((GameClientSlaveManager*)mGameManager)->GetMaster()->CreateSlave())
+				if (((GameClientSlaveManager*)GetGameManager())->GetMaster()->CreateSlave())
 				{
 					mLog.AInfo("Another player added.");
 				}
@@ -413,7 +223,7 @@ int ClientConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& 
 					strutil::StringToDouble(pParameterVector[1], lPower);
 					double lAngle;
 					strutil::StringToDouble(pParameterVector[2], lAngle);
-					if (!((GameClientSlaveManager*)mGameManager)->SetAvatarEnginePower(lAspect, (float)lPower, (float)lAngle))
+					if (!((GameClientSlaveManager*)GetGameManager())->SetAvatarEnginePower(lAspect, (float)lPower, (float)lAngle))
 					{
 						mLog.AError("Could not set avatar engine power!");
 						lResult = 1;

@@ -8,6 +8,7 @@
 #include "../../Cure/Include/ContextManager.h"
 #include "../../TBC/Include/ChunkyPhysics.h"
 #include "GameClientMasterTicker.h"
+#include "UiConsole.h"
 #include "Vehicle.h"
 
 
@@ -38,7 +39,7 @@ void GameClientViewer::TickUiInput()
 
 void GameClientViewer::TickUiUpdate()
 {
-	((ClientConsoleManager*)GetConsoleManager())->Tick();
+	((ClientConsoleManager*)GetConsoleManager())->GetUiConsole()->Tick();
 
 	/*mCameraPreviousPosition = mCameraPosition;
 	Cure::ContextObject* lObject = GetContext()->GetObject(mBackdropVehicleId);

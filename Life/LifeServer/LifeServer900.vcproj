@@ -528,6 +528,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GameServerTicker.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ServerApplication.cpp"
 				>
 			</File>
@@ -547,6 +551,10 @@
 			</File>
 			<File
 				RelativePath=".\GameServerManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\GameServerTicker.h"
 				>
 			</File>
 			<File

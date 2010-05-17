@@ -6,17 +6,8 @@
 
 #pragma once
 
+#include "OptionsManager.h"
 #include "ClientOptions.h"
-#include "../../Lepra/Include/Log.h"
-#include "../../UiLepra/Include/UiInput.h"
-#include "../Life.h"
-
-
-
-namespace Cure
-{
-class RuntimeVariableScope;
-}
 
 
 
@@ -27,24 +18,17 @@ namespace Options
 
 
 
-struct ClientOptionsManager
+struct ClientOptionsManager: OptionsManager
 {
 	ClientOptionsManager(Cure::RuntimeVariableScope* pVariableScope, int pPriority);
-
-	bool UpdateInput(UiLepra::InputManager::KeyCode pKeyCode, bool pActive);
-	bool UpdateInput(UiLepra::InputElement* pElement);
-	void ResetToggles();
 
 	const ClientOptions& GetOptions() const;
 
 private:
-	bool SetDefault(int pPriority);
+	virtual bool SetDefault(int pPriority);
 
-	const str ConvertToString(UiLepra::InputManager::KeyCode pKeyCode) const;
-	bool SetValue(const str& pKey, float pValue);
-	std::vector<float*> GetValuePointers(const str& pKey, bool& pIsAnySteeringValue);
+	virtual std::vector<float*> GetValuePointers(const str& pKey, bool& pIsAnySteeringValue);
 
-	Cure::RuntimeVariableScope* mVariableScope;
 	ClientOptions mOptions;
 
 	void operator=(const ClientOptionsManager&);

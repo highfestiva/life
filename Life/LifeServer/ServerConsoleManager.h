@@ -39,9 +39,9 @@ private:
 		COMMAND_SEND_PRIVATE_CHAT_MESSAGE,
 	};
 
-	unsigned GetCommandCount() const;
-	const CommandPair& GetCommand(unsigned pIndex) const;
-	int OnCommand(const str& pCommand, const strutil::strvec& pParameterVector);
+	virtual unsigned GetCommandCount() const;
+	virtual const CommandPair& GetCommand(unsigned pIndex) const;
+	virtual int OnCommand(const str& pCommand, const strutil::strvec& pParameterVector);
 
 	static const CommandPair mCommandIdList[];
 	LOG_CLASS_DECLARE();

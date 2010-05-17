@@ -66,9 +66,9 @@ ConsoleManager::~ConsoleManager()
 
 
 
-void ConsoleManager::Init()
+void ConsoleManager::InitCommands()
 {
-	Parent::Init();
+	Parent::InitCommands();
 	GetConsoleCommandManager()->SetComment(_T("//"));
 	GetConsoleCommandManager()->AddCompleter(new Cure::RuntimeVariableCompleter(GetVariableScope(), _T("#")));
 	GetConsoleCommandManager()->AddCompleter(new Cure::RuntimeVariableCompleter(Cure::GetSettings(), _T("#/")));
@@ -81,6 +81,11 @@ void ConsoleManager::Init()
 	ExecuteCommand(_T("alias headline-log-level \"set-stdout-log-level 4; set-subsystem-log-level Root 4\""));
 	ExecuteCommand(_T("alias warning-log-level \"set-stdout-log-level 5; set-subsystem-log-level Root 5\""));
 	ExecuteCommand(_T("alias error-log-level \"set-stdout-log-level 6; set-subsystem-log-level Root 6\""));
+}
+
+Cure::GameManager* ConsoleManager::GetGameManager() const
+{
+	return (mGameManager);
 }
 
 unsigned ConsoleManager::GetCommandCount() const

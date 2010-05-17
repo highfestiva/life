@@ -9,13 +9,15 @@
 #include "../../Cure/Include/ResourceManager.h"
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../../Cure/Include/TimeManager.h"
-#include "../../Lepra/Include/AntiCrack.h"
 #include "../../Lepra/Include/Performance.h"
 #include "../../Lepra/Include/SystemManager.h"
 #include "../../UiCure/Include/UiGameUiManager.h"
 #include "../../UiCure/Include/UiCppContextObject.h"
 #include "../../UiCure/Include/UiRuntimeVariableName.h"
 #include "../../UiTBC/Include/GUI/UiCenterLayout.h"
+#include "../../UiTBC/Include/GUI/UiCenterLayout.h"
+#include "../../UiTBC/Include/GUI/UiConsoleLogListener.h"
+#include "../../UiTBC/Include/GUI/UiConsolePrompt.h"
 #include "../../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../../UiTBC/Include/GUI/UiFloatingLayout.h"
 #include "../../UiTBC/Include/UiRenderer.h"
@@ -25,11 +27,11 @@
 #include "GameClientSlaveManager.h"
 #include "GameClientViewer.h"
 #include "RoadSignButton.h"
+#include "UiGameServerManager.h"
 
-
-
-// Run before main() is started.
-AntiCrack _r__;
+// TODO: remove!
+#include "UiConsole.h"
+#include "UiServerConsoleManager.h"
 
 
 
@@ -46,6 +48,7 @@ GameClientMasterTicker::GameClientMasterTicker(UiCure::GameUiManager* pUiManager
 	mUiManager(pUiManager),
 	mResourceManager(pResourceManager),
 	mIsPlayerCountViewActive(false),
+	mServer(0),
 	mRestartUi(false),
 	mInitialized(false),
 	mActiveWidth(0),
@@ -62,29 +65,26 @@ GameClientMasterTicker::GameClientMasterTicker(UiCure::GameUiManager* pUiManager
 	UiLepra::DisplayManager::EnableScreensaver(false);
 
 	mConsole = new ConsoleManager(0, UiCure::GetSettings(), 0, 0);
-	mConsole->Init();
+	mConsole->InitCommands();
 	mConsole->GetConsoleCommandManager()->AddExecutor(
 		new ConsoleExecutor<GameClientMasterTicker>(
 			this, &GameClientMasterTicker::OnCommandLocal, &GameClientMasterTicker::OnCommandError));
 	mConsole->GetConsoleCommandManager()->AddCommand(SET_PLAYER_COUNT);
 
-	mConsole->ExecuteCommand(_T("execute-file -i ClientDefault.lsh"));
-	mConsole->ExecuteCommand(_T("execute-file -i ") + Application::GetIoFile(_T("Base"), _T("lsh")));
+	mConsole->ExecuteCommand(_T("execute-file -i Default.lsh"));
+	mConsole->ExecuteCommand(_T("execute-file -i ") + Application::GetIoFile(_T("ClientBase"), _T("lsh")));
 }
 
 GameClientMasterTicker::~GameClientMasterTicker()
 {
-	delete (mConsole);
-	mConsole = 0;
-
 	UiLepra::DisplayManager::EnableScreensaver(true);
 
 	{
 		StashCalibration();
 
-		ConsoleManager lConsole(0, UiCure::GetSettings(), 0, 0);
-		lConsole.Init();
-		lConsole.ExecuteCommand(_T("save-system-config-file 0 " + Application::GetIoFile(_T("Base"), _T("lsh"))));
+		mConsole->ExecuteCommand(_T("save-system-config-file 0 " + Application::GetIoFile(_T("ClientBase"), _T("lsh"))));
+		delete (mConsole);
+		mConsole = 0;
 	}
 
 	if (mUiManager->GetInputManager())
@@ -103,6 +103,9 @@ GameClientMasterTicker::~GameClientMasterTicker()
 	}
 	mSlaveArray.clear();
 
+	delete (mServer);
+	mServer = 0;
+
 	mResourceManager = 0;
 	mUiManager = 0;
 }
@@ -111,6 +114,13 @@ GameClientMasterTicker::~GameClientMasterTicker()
 
 bool GameClientMasterTicker::CreateSlave()
 {
+	if (!mServer)
+	{
+		Cure::RuntimeVariableScope* lVariableScope = new Cure::RuntimeVariableScope(Cure::GetSettings());
+		mServer = new UiGameServerManager(lVariableScope, mResourceManager, mUiManager, PixelRect(0, 0, 100, 100));
+		mServer->StartConsole(new UiTbc::ConsoleLogListener, new UiTbc::ConsolePrompt);
+		mServer->Initialize();
+	}
 	return (CreateSlave(&GameClientMasterTicker::CreateSlaveManager));
 }
 
@@ -141,6 +151,12 @@ bool GameClientMasterTicker::Tick()
 
 		mUiManager->BeginRender();
 		mUiManager->InputTick();
+	}
+
+	if (mServer)
+	{
+		LEPRA_MEASURE_SCOPE(ServerBeginTick);
+		mServer->BeginTick();
 	}
 
 	{
@@ -190,6 +206,12 @@ bool GameClientMasterTicker::Tick()
 		LEPRA_MEASURE_SCOPE(DrawGraph);
 		DrawFps();
 		DrawPerformanceLineGraph2d();
+	}
+
+	if (mServer)
+	{
+		LEPRA_MEASURE_SCOPE(ServerEndTick);
+		mServer->EndTick();
 	}
 
 	{
@@ -418,6 +440,8 @@ bool GameClientMasterTicker::Initialize()
 
 void GameClientMasterTicker::CreatePlayerCountWindow()
 {
+	delete (mServer);
+	mServer = 0;
 	//assert(!mIsPlayerCountViewActive);
 	mIsPlayerCountViewActive = true;
 	CreateSlave(&GameClientMasterTicker::CreateViewer);
@@ -445,7 +469,7 @@ bool GameClientMasterTicker::Reinitialize()
 	mUiManager->Close();
 	SystemManager::AddQuitRequest(-1);
 
-	// Reopen.
+	// (Re)open.
 	bool lOk = mResourceManager->InitDefault();
 	if (lOk)
 	{
@@ -460,6 +484,11 @@ bool GameClientMasterTicker::Reinitialize()
 			UiTbc::Renderer::LIGHT_STATIC, Vector3DF(0, 0.5f, -1),
 			Color::Color(255, 255, 255), 1, 20);
 		mUiManager->GetInputManager()->AddKeyCodeInputObserver(this);
+	}
+	if (lOk)
+	{
+		delete (mServer);
+		mServer = 0;
 	}
 	if (lOk)
 	{
@@ -571,6 +600,10 @@ void GameClientMasterTicker::UpdateSlaveLayout()
 void GameClientMasterTicker::SlideSlaveLayout()
 {
 	const PixelRect lRenderArea(0, 0, mUiManager->GetDisplayManager()->GetWidth(), mUiManager->GetDisplayManager()->GetHeight());
+	if (mServer)
+	{
+		mServer->SetRenderArea(lRenderArea);
+	}
 	const float lRenderAreas[][4] =
 	{
 		{ 0, 0, mSlaveTopSplit, mSlaveVSplit, },
@@ -670,9 +703,13 @@ void GameClientMasterTicker::Profile()
 
 	const int lHeight = 100;
 	typedef ScopePerformanceData::NodeArray ScopeArray;
+	typedef std::pair<ScopePerformanceData*, int> ScopeLevel;
+	typedef std::vector<ScopeLevel> ScopeLevelArray;
 	ScopeArray lRoots = ScopePerformanceData::GetRoots();
-	ScopeArray lNodes;
+	ScopeLevelArray lNodes;
 	lNodes.reserve(100);
+	ScopeLevelArray lStackedNodes;
+	lStackedNodes.reserve(100);
 	for (size_t lRootIndex = 0; lRootIndex < lRoots.size(); ++lRootIndex)
 	{
 		if (mPerformanceGraphList.size() <= lRootIndex)
@@ -682,16 +719,30 @@ void GameClientMasterTicker::Profile()
 		mPerformanceGraphList[lRootIndex].TickLine(lHeight);
 
 		lNodes.clear();
-		lNodes.push_back(lRoots[lRootIndex]);
-		const double lRootStart = lNodes[0]->GetTimeOfLastMeasure();
+		lNodes.push_back(ScopeLevel(lRoots[lRootIndex], 0));
+		const double lRootStart = lNodes[0].first->GetTimeOfLastMeasure();
 		for (size_t x = 0; x < lNodes.size(); ++x)
 		{
-			const ScopePerformanceData* lNode = lNodes[x];
+			const ScopeLevel& lNodeLevel = lNodes[x];
+			const ScopePerformanceData* lNode = lNodeLevel.first;
 			const ScopeArray& lChildren = lNode->GetChildren();
-			lNodes.insert(lNodes.end(), lChildren.begin(), lChildren.end());
+			for (size_t y = 0; y < lChildren.size(); ++y)
+			{
+				lStackedNodes.push_back(ScopeLevel(lChildren[y], lNodeLevel.second+1));
+			}
 
 			const double lStart = lNode->GetTimeOfLastMeasure() - lRootStart;
-			mPerformanceGraphList[lRootIndex].AddSegment(lNode->GetName() + _T(" (") + strutil::DoubleToString(lNode->GetRangeFactor()*100, 1) + _T(" % fluctuation)"), lStart, lStart + lNode->GetLast());
+			const str lName = str(lNodeLevel.second, ' ') + lNode->GetName() + _T(" (") + strutil::DoubleToString(lNode->GetRangeFactor()*100, 1) + _T(" % fluctuation)");
+			mPerformanceGraphList[lRootIndex].AddSegment(lName, lStart, lStart + lNode->GetLast());
+
+			if (x+1 == lNodes.size())
+			{
+				if (!lStackedNodes.empty())
+				{
+					lNodes.push_back(lStackedNodes.back());
+					lStackedNodes.pop_back();
+				}
+			}
 		}
 	}
 }
@@ -710,6 +761,8 @@ bool GameClientMasterTicker::QueryQuit()
 		{
 			DeleteSlave(mSlaveArray[x], false);
 		}
+		delete (mServer);
+		mServer = 0;
 #ifdef LIFE_DEMO
 		CreateSlave(&GameClientMasterTicker::CreateDemo);
 		mDemoTime = new HiResTimer;
@@ -826,6 +879,12 @@ void GameClientMasterTicker::OnCommandError(const str&, const strutil::strvec&, 
 bool GameClientMasterTicker::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 {
 	bool lConsumed = false;
+
+	if (mServer)
+	{
+		lConsumed = mServer->OnKeyDown(pKeyCode);
+	}
+
 	SlaveArray::iterator x = mSlaveArray.begin();
 	for (; !lConsumed && x != mSlaveArray.end(); ++x)
 	{
@@ -841,6 +900,10 @@ bool GameClientMasterTicker::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 bool GameClientMasterTicker::OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode)
 {
 	bool lConsumed = false;
+	if (mServer)
+	{
+		lConsumed = mServer->OnKeyUp(pKeyCode);
+	}
 	SlaveArray::iterator x = mSlaveArray.begin();
 	for (; !lConsumed && x != mSlaveArray.end(); ++x)
 	{
@@ -860,6 +923,10 @@ void GameClientMasterTicker::OnInput(UiLepra::InputElement* pElement)
 		pElement->GetIdentifier().c_str(),
 		pElement->GetValue()));
 
+	if (mServer)
+	{
+		mServer->OnInput(pElement);
+	}
 	SlaveArray::iterator x = mSlaveArray.begin();
 	for (; x != mSlaveArray.end(); ++x)
 	{

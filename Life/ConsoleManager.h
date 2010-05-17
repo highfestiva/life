@@ -7,6 +7,7 @@
 #pragma once
 
 #include "../Cure/Include/ConsoleManager.h"
+#include <hash_map>
 #include "Life.h"
 
 
@@ -33,7 +34,9 @@ public:
 		ConsolePrompt* pConsolePrompt);
 	virtual ~ConsoleManager();
 
-	void Init();
+	virtual void InitCommands();
+
+	Cure::GameManager* GetGameManager() const;
 
 protected:
 	enum CommandCommon
@@ -64,14 +67,12 @@ protected:
 		COMMAND_COUNT_COMMON
 	};
 
-	unsigned GetCommandCount() const;
-	const CommandPair& GetCommand(unsigned pIndex) const;
+	virtual unsigned GetCommandCount() const;
+	virtual const CommandPair& GetCommand(unsigned pIndex) const;
 	int TranslateCommand(const str& pCommand) const;
-	int OnCommand(const str& pCommand, const strutil::strvec& pParameterVector);
+	virtual int OnCommand(const str& pCommand, const strutil::strvec& pParameterVector);
 
 	virtual bool SaveApplicationConfigFile(File* pFile, const wstr& pUserConfig);
-
-	Cure::GameManager* mGameManager;
 
 private:
 	wstr LoadUserConfig(File* pFile);
@@ -80,6 +81,8 @@ private:
 
 	static const CommandPair mCommandIdList[];
 	typedef std::hash_map<str, str> AliasMap;
+
+	Cure::GameManager* mGameManager;
 	AliasMap mAliasMap;
 	LogListener* mLogger;
 	LOG_CLASS_DECLARE();

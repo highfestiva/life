@@ -220,7 +220,7 @@ bool RuntimeVariableScope::SetValue(SetMode pSetMode, const str& pName, const st
 {
 	bool lTypeOk = true;
 
-	RuntimeVariable* lVariable = GetVariable(pName, pSetMode == RuntimeVariable::TYPE_NORMAL);
+	RuntimeVariable* lVariable = GetVariable(pName, pSetMode != RuntimeVariable::TYPE_OVERRIDE);
 	str lValue = Cast(pValue);
 	if (lVariable)
 	{
@@ -422,7 +422,7 @@ RuntimeVariable* RuntimeVariableScope::GetVariable(const str& pName, bool pRecur
 	RuntimeVariable* lVariable = HashUtil::FindMapObject(mVariableTable, pName);
 	if (pRecursive && !lVariable && mParentScope)
 	{
-		lVariable = mParentScope->GetVariable(pName);
+		lVariable = mParentScope->GetVariable(pName, pRecursive);
 	}
 	return (lVariable);
 }

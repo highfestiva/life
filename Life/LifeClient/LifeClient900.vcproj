@@ -553,6 +553,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\OptionsManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\UiConsole.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\View.cpp"
 				>
 			</File>
@@ -599,6 +607,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\OptionsManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\UiConsole.h"
+				>
+			</File>
+			<File
 				RelativePath=".\View.h"
 				>
 			</File>
@@ -620,6 +636,50 @@
 			</File>
 			<File
 				RelativePath=".\Vehicle.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Server"
+			>
+			<File
+				RelativePath="..\LifeServer\Client.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\LifeServer\Client.h"
+				>
+			</File>
+			<File
+				RelativePath="..\LifeServer\GameServerManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\LifeServer\GameServerManager.h"
+				>
+			</File>
+			<File
+				RelativePath="..\LifeServer\ServerConsoleManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\LifeServer\ServerConsoleManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\UiGameServerManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\UiGameServerManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\UiServerConsoleManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\UiServerConsoleManager.h"
 				>
 			</File>
 		</Filter>

@@ -35,6 +35,8 @@ Game
   - Show big title text (translated) for all buttons.
   + Hilight current selection where applicable. Hilight using red/blue signs instead of red/yellow. (Different solution picked.)
 + Make it possible to be logged in without vehicle. Make it possible to drop vehicle.
+. Server: make console capable of being logless and promptless. Required since no console implemented in non-dedicated server.
+. Server: don't use CPU when running remote game.
 . Fix bug: road sign for first vehicle is "squashed" when having 3 split-screen players.
 . Create material that can easily can be picked-up, loaded and moved around.
 . Create crane that can pull wire up.

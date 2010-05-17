@@ -38,7 +38,7 @@ public:
 	virtual str GetName() const = 0;
 	virtual Cure::GameTicker* CreateGameTicker() const = 0;
 
-	static str GetIoFile(const str& pEnd, const str& pExt, bool pAddQuotes = true);
+	static str GetIoFile(const str& pName, const str& pExt, bool pAddQuotes = true);
 
 protected:
 	virtual LogListener* CreateConsoleLogListener() const;
@@ -56,8 +56,6 @@ private:
 	FileLogListener* mFileLogger;
 	LogListener* mPerformanceLogger;
 	MemFileLogListener* mMemLogger;
-
-	static Application* mApplication;
 
 	LOG_CLASS_DECLARE();
 };

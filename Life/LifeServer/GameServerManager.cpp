@@ -7,25 +7,12 @@
 #include "GameServerManager.h"
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/CppContextObject.h"
-#include "../../Cure/Include/NetworkServer.h"
-#include "../../Cure/Include/Packet.h"
-#include "../../Cure/Include/PositionalData.h"
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../../Cure/Include/TimeManager.h"
-#include "../../Lepra/Include/AntiCrack.h"
-#include "../../Lepra/Include/Network.h"
 #include "../../Lepra/Include/Path.h"
-#include "../../Lepra/Include/SystemManager.h"
-#include "../Life.h"
 #include "../LifeApplication.h"
 #include "../RtVar.h"
-#include "Client.h"
 #include "ServerConsoleManager.h"
-
-
-
-// Run before main() is started.
-AntiCrack _r__;
 
 
 
@@ -38,70 +25,123 @@ const int NETWORK_POSITIONAL_AHEAD_BUFFER_SIZE = PHYSICS_FPS/2;
 
 
 
-GameServerManager::GameServerManager(Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
-	InteractiveConsoleLogListener* pConsoleLogger):
+GameServerManager::GameServerManager(Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager):
 	GameManager(pVariableScope, pResourceManager),
 	mUserAccountManager(new Cure::MemoryUserAccountManager()),
 	mTerrainObject(0),
-	mBoxObject(0),
 	mMovementArrayList(NETWORK_POSITIONAL_AHEAD_BUFFER_SIZE)
 {
-	ConsoleManager lConsole(0, Cure::GetSettings(), 0, 0);
-	lConsole.Init();
-	lConsole.ExecuteCommand(_T("execute-file -i ServerDefault.lsh"));
-	lConsole.ExecuteCommand(_T("execute-file -i ") + Application::GetIoFile(_T("Base"), _T("lsh")));
-
-	GetResourceManager()->InitDefault();
-
-	//GetContext()->SetIsObjectOwner(false);
-
 	SetNetworkAgent(new Cure::NetworkServer(pVariableScope, this));
-
-	SetConsoleManager(new ServerConsoleManager(this, GetVariableScope(), pConsoleLogger, new StdioConsolePrompt()));
-	GetConsoleManager()->PushYieldCommand(_T("execute-file -i ") + Application::GetIoFile(_T("Application"), _T("lsh")));
-	GetConsoleManager()->Start();
 }
 
 GameServerManager::~GameServerManager()
 {
-	{
-		ConsoleManager lConsole(0, Cure::GetSettings(), 0, 0);
-		lConsole.Init();
-		lConsole.ExecuteCommand(_T("save-system-config-file 0 ") + Application::GetIoFile(_T("Base"), _T("lsh")));
-	}
-
 	DeleteAllClients();
 
 	delete (mUserAccountManager);
 	mUserAccountManager = 0;
 
-	GetConsoleManager()->ExecuteCommand(_T("save-application-config-file ") + Application::GetIoFile(_T("Application"), _T("lsh")));
+	if (GetConsoleManager())
+	{
+		GetConsoleManager()->ExecuteCommand(_T("save-application-config-file ") + Application::GetIoFile(_T("ServerApplication"), _T("lsh")));
+	}
 }
 
 
 
-bool GameServerManager::Tick()
+void GameServerManager::StartConsole(InteractiveConsoleLogListener* pConsoleLogger, ConsolePrompt* pConsolePrompt)
 {
-	assert(!GetNetworkAgent()->GetLock()->IsOwner());
-	// Don't do this here! Done explicitly in parent.
-	//          ==>  ScopeLock lTickLock(GetTickLock());
-	bool lOk = Parent::BeginTick();
-	lOk = (lOk && Parent::EndTick());
-	GetResourceManager()->Tick();
-
-	if (CURE_RTVAR_GETSET(GetVariableScope(), RTVAR_ALLLOGGEDOUT_AUTOSHUTDOWN, false))
+	if (!GetConsoleManager())
 	{
-		static size_t lMaxLoginCount = 0;
-		size_t lUserCount = ListUsers().size();
-		lMaxLoginCount = (lUserCount > lMaxLoginCount)? lUserCount : lMaxLoginCount;
-		if (lMaxLoginCount > 0 && lUserCount == 0)
+		SetConsoleManager(new ServerConsoleManager(this, GetVariableScope(), pConsoleLogger, pConsolePrompt));
+	}
+	GetConsoleManager()->PushYieldCommand(_T("execute-file -i ") + Application::GetIoFile(_T("ServerApplication"), _T("lsh")));
+	GetConsoleManager()->Start();
+}
+
+bool GameServerManager::Initialize()
+{
+	bool lOk = InitializeTerrain();
+
+	if (lOk)
+	{
+		int x;
+		for (x = 0; lOk && x < 100; ++x)
 		{
-			mLog.AWarning("Server automatically shuts down since rtvar active and all users now logged off.");
-			SystemManager::AddQuitRequest(+1);
+			const wstr lUserName = wstrutil::Format(L"User%i", x);
+			wstr lReadablePassword(L"CarPassword");
+			Cure::MangledPassword lPassword(lReadablePassword);
+			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
+			if (lOk)
+			{
+				DiskFile::FindData lFindData;
+				if (DiskFile::FindFirst(_T("Data/*.class"), lFindData))
+				{
+					do
+					{
+						if (lFindData.GetName().find(_T("level_")) != str::npos ||
+							lFindData.GetName().find(_T("road_sign")) != str::npos)
+						{
+							continue;
+						}
+						Cure::UserAccount::AvatarId lId(Path::GetFileBase(lFindData.GetName()));
+						lOk = mUserAccountManager->AddUserAvatarId(lUserName, lId);
+					}
+					while (lOk && DiskFile::FindNext(lFindData));
+				}
+			}
 		}
 	}
 
+	str lAcceptAddress = CURE_RTVAR_GETSET(GetVariableScope(), RTVAR_NETWORK_LISTEN_ADDRESS, _T("0.0.0.0:16650"));
+	if (lOk)
+	{
+		SocketAddress lAddress;
+		if (!lAddress.Resolve(lAcceptAddress))
+		{
+			mLog.Warningf(_T("Could not resolve address '%s'."), lAcceptAddress.c_str());
+			lAcceptAddress = _T(":16650");
+			if (!lAddress.Resolve(lAcceptAddress))
+			{
+				mLog.Errorf(_T("Could not resolve address '%s', defaulting to 'localhost'."), lAcceptAddress.c_str());
+				lAcceptAddress = _T("localhost:16650");
+			}
+		}
+	}
+	if (lOk)
+	{
+		lOk = GetNetworkServer()->Start(lAcceptAddress);
+		if (!lOk)
+		{
+			mLog.Fatalf(_T("Is a server already running on '%s'?"), lAcceptAddress.c_str());
+		}
+	}
 	return (lOk);
+}
+
+float GameServerManager::GetPowerSaveAmount() const
+{
+	mPowerSaveTimer.UpdateTimer();
+	float lPowerSave;
+	// TODO: if there are logged-in clients, check if all have been idle lately.
+	if (GetLoggedInClientCount() > 0)
+	{
+		lPowerSave = 0;	// Users are currently playing = no power save.
+		mPowerSaveTimer.ClearTimeDiff();
+	}
+	else if (mPowerSaveTimer.GetTimeDiffF() < 10.0)
+	{
+		lPowerSave = 0;	// Users played until very recently = no power save yet.
+	}
+	else if (GetNetworkAgent()->GetConnectionCount() > 0)
+	{
+		lPowerSave = 0.1f;	// Someone is currently logging in, but not logged in yet.
+	}
+	else
+	{
+		lPowerSave = 1.0f;	// None logged in, none connected.
+	}
+	return (lPowerSave);
 }
 
 
@@ -192,127 +232,6 @@ int GameServerManager::GetLoggedInClientCount() const
 
 
 
-void GameServerManager::Logout(Cure::UserAccount::AccountId pAccountId, const str& pReason)
-{
-	GetNetworkServer()->Disconnect(pAccountId, pReason, true);
-}
-
-void GameServerManager::DeleteAllClients()
-{
-	while (!mAccountClientTable.IsEmpty())
-	{
-		Cure::UserAccount::AccountId lAccountId = mAccountClientTable.First().GetKey();
-		Logout(lAccountId, _T("Server shutdown"));
-	}
-}
-
-
-
-Client* GameServerManager::GetClientByAccount(Cure::UserAccount::AccountId pAccountId) const
-{
-	Client* lClient = mAccountClientTable.FindObject(pAccountId);
-	return (lClient);
-}
-
-
-
-bool GameServerManager::Initialize()
-{
-	bool lOk = InitializeTerrain();
-
-	if (lOk)
-	{
-		int x;
-		for (x = 0; lOk && x < 100; ++x)
-		{
-			const wstr lUserName = wstrutil::Format(L"User%i", x);
-			wstr lReadablePassword(L"CarPassword");
-			Cure::MangledPassword lPassword(lReadablePassword);
-			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
-			if (lOk)
-			{
-				DiskFile::FindData lFindData;
-				if (DiskFile::FindFirst(_T("Data/*.class"), lFindData))
-				{
-					do
-					{
-						if (lFindData.GetName().find(_T("level_")) != str::npos ||
-							lFindData.GetName().find(_T("road_sign")) != str::npos)
-						{
-							continue;
-						}
-						Cure::UserAccount::AvatarId lId(Path::GetFileBase(lFindData.GetName()));
-						lOk = mUserAccountManager->AddUserAvatarId(lUserName, lId);
-					}
-					while (lOk && DiskFile::FindNext(lFindData));
-				}
-			}
-		}
-	}
-
-	str lAcceptAddress = CURE_RTVAR_GETSET(GetVariableScope(), RTVAR_NETWORK_LISTEN_ADDRESS, _T("0.0.0.0:16650"));
-	if (lOk)
-	{
-		SocketAddress lAddress;
-		if (!lAddress.Resolve(lAcceptAddress))
-		{
-			mLog.Warningf(_T("Could not resolve address '%s'."), lAcceptAddress.c_str());
-			lAcceptAddress = _T(":16650");
-			if (!lAddress.Resolve(lAcceptAddress))
-			{
-				mLog.Errorf(_T("Could not resolve address '%s', defaulting to 'localhost'."), lAcceptAddress.c_str());
-				lAcceptAddress = _T("localhost:16650");
-			}
-		}
-	}
-	if (lOk)
-	{
-		lOk = GetNetworkServer()->Start(lAcceptAddress);
-		if (!lOk)
-		{
-			mLog.Fatalf(_T("Is a server already running on '%s'?"), lAcceptAddress.c_str());
-		}
-	}
-	return (lOk);
-}
-
-bool GameServerManager::InitializeTerrain()
-{
-	assert(mTerrainObject == 0);
-	mTerrainObject = Parent::CreateContextObject(_T("level_01"), Cure::NETWORK_OBJECT_LOCAL_ONLY);
-	mTerrainObject->StartLoading();
-	return (true);
-}
-
-
-
-float GameServerManager::GetPowerSaveAmount() const
-{
-	mPowerSaveTimer.UpdateTimer();
-	float lPowerSave;
-	// TODO: if there are logged-in clients, check if all have been idle lately.
-	if (GetLoggedInClientCount() > 0)
-	{
-		lPowerSave = 0;	// Users are currently playing = no power save.
-		mPowerSaveTimer.ClearTimeDiff();
-	}
-	else if (mPowerSaveTimer.GetTimeDiffF() < 10.0)
-	{
-		lPowerSave = 0;	// Users played until very recently = no power save yet.
-	}
-	else if (GetNetworkAgent()->GetConnectionCount() > 0)
-	{
-		lPowerSave = 0.1f;	// Someone is currently logging in, but not logged in yet.
-	}
-	else
-	{
-		lPowerSave = 1.0f;	// None logged in, none connected.
-	}
-	return (lPowerSave);
-}
-
-
-
 void GameServerManager::TickInput()
 {
 	Cure::Packet* lPacket = GetNetworkAgent()->GetPacketFactory()->Allocate();
@@ -370,6 +289,42 @@ void GameServerManager::TickInput()
 	// Apply buffered prediction movement.
 	ApplyStoredMovement();
 }
+
+
+
+void GameServerManager::Logout(Cure::UserAccount::AccountId pAccountId, const str& pReason)
+{
+	GetNetworkServer()->Disconnect(pAccountId, pReason, true);
+}
+
+void GameServerManager::DeleteAllClients()
+{
+	while (!mAccountClientTable.IsEmpty())
+	{
+		Cure::UserAccount::AccountId lAccountId = mAccountClientTable.First().GetKey();
+		Logout(lAccountId, _T("Server shutdown"));
+	}
+}
+
+
+
+Client* GameServerManager::GetClientByAccount(Cure::UserAccount::AccountId pAccountId) const
+{
+	Client* lClient = mAccountClientTable.FindObject(pAccountId);
+	return (lClient);
+}
+
+
+
+bool GameServerManager::InitializeTerrain()
+{
+	assert(mTerrainObject == 0);
+	mTerrainObject = Parent::CreateContextObject(_T("level_01"), Cure::NETWORK_OBJECT_LOCAL_ONLY);
+	mTerrainObject->StartLoading();
+	return (true);
+}
+
+
 
 void GameServerManager::ProcessNetworkInputMessage(Client* pClient, Cure::Message* pMessage)
 {

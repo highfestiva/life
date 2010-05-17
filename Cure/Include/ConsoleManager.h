@@ -47,6 +47,10 @@ public:
 	void AddFork(Thread* pThread);
 	void RemoveFork(Thread* pThread);
 
+	InteractiveConsoleLogListener* GetConsoleLogger() const;
+	ConsolePrompt* GetConsolePrompt() const;
+	RuntimeVariableScope* GetVariableScope() const;
+
 protected:
 	bool ForkExecuteCommand(const str& pCommand);
 
@@ -56,14 +60,10 @@ protected:
 		int mCommandId;
 	};
 
-	virtual void Init();
+	virtual void InitCommands();
 	std::list<str> GetCommandList() const;
 	virtual int TranslateCommand(const str& pCommand) const;
 	void PrintCommandList(const std::list<str>& pCommandList);
-	InteractiveConsoleLogListener* GetConsoleLogger() const;
-	ConsolePrompt* GetConsolePrompt() const;
-
-	RuntimeVariableScope* GetVariableScope() const;
 
 private:
 	void AddCommands();
