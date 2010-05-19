@@ -31,7 +31,7 @@ struct OptionsManager
 	OptionsManager(Cure::RuntimeVariableScope* pVariableScope, int pPriority);
 
 	bool UpdateInput(UiLepra::InputManager::KeyCode pKeyCode, bool pActive);
-	bool UpdateInput(UiLepra::InputElement* pElement);
+	float UpdateInput(UiLepra::InputElement* pElement);
 	void ResetToggles();
 	float GetConsoleToggle() const;
 

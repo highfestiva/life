@@ -17,7 +17,7 @@ namespace Cure
 
 
 TimeManager::TimeManager():
-	mTargetFrameRate(60)
+	mTargetFrameRate(CURE_RTVAR_GET(Cure::GetSettings(), RTVAR_PHYSICS_FPS, 60))
 {
 	Clear(0);
 }

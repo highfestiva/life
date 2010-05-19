@@ -209,12 +209,21 @@ void Application::TickSleep(double pMeasuredFrameTime) const
 		double lWantedFrameTime = lFps? 1.0/lFps : 1;
 		double lSleepTime = lWantedFrameTime - pMeasuredFrameTime;
 		const double MINIMUM_SLEEP_TIME = 0.001;
+		const double MAXIMUM_SLEEP_TIME = 0.01;
 		if (lSleepTime >= MINIMUM_SLEEP_TIME)
 		{
 			HiResTimer lSleepTimer;
 			while (lSleepTime >= MINIMUM_SLEEP_TIME)
 			{
-				Thread::Sleep(lSleepTime);
+				if (lSleepTime > MAXIMUM_SLEEP_TIME*1.5)
+				{
+					mGameTicker->PollRoundTrip();
+					Thread::Sleep(MAXIMUM_SLEEP_TIME);
+				}
+				else
+				{
+					Thread::Sleep(lSleepTime);
+				}
 				lSleepTime -= lSleepTimer.PopTimeDiff();
 			}
 		}

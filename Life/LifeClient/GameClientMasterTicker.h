@@ -43,6 +43,7 @@ public:
 	bool CreateSlave();
 
 	bool Tick();
+	void PollRoundTrip();
 
 	bool StartResetUi();
 	bool WaitResetUi();

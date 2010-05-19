@@ -64,6 +64,8 @@ public:
 	bool Render();
 	virtual bool Paint();
 	bool EndTick();
+	void TickNetworkInput();
+	bool TickNetworkOutput();
 
 	void ToggleConsole();
 
@@ -108,9 +110,6 @@ protected:
 	virtual void TickUiInput();
 	void SetAvatarEnginePower(Cure::ContextObject* pAvatar, unsigned pAspect, float pPower, float pAngle);
 	virtual void TickUiUpdate();
-
-	void TickNetworkInput();
-	bool TickNetworkOutput();
 
 	void PhysicsTick();
 
@@ -170,6 +169,7 @@ protected:
 	Timer mLastUnsafeReceiveTime;
 	Alarm mCollisionExpireAlarm;
 	Alarm mInputExpireAlarm;
+	Options::Vehicle mLastSteering;
 
 	Timer mAvatarSelectTime;
 	Timer mAvatarMightSelectTime;

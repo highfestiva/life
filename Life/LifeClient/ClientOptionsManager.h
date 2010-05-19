@@ -22,14 +22,14 @@ struct ClientOptionsManager: OptionsManager
 {
 	ClientOptionsManager(Cure::RuntimeVariableScope* pVariableScope, int pPriority);
 
-	const ClientOptions& GetOptions() const;
+	const Vehicle& GetControl() const;
 
 private:
 	virtual bool SetDefault(int pPriority);
 
 	virtual std::vector<float*> GetValuePointers(const str& pKey, bool& pIsAnySteeringValue);
 
-	ClientOptions mOptions;
+	Vehicle mControl;
 
 	void operator=(const ClientOptionsManager&);
 

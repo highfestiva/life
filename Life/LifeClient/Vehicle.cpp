@@ -34,6 +34,11 @@ void Vehicle::OnPhysicsTick()
 {
 	Parent::OnPhysicsTick();
 
+	if (GetManager()->GetGameManager()->IsUiMoveForbidden(GetInstanceId()))
+	{
+		return;
+	}
+
 	const TBC::ChunkyPhysics* lPhysics = GetPhysics();
 	const UiTbc::ChunkyClass* lClass = GetClass();
 	if (!lPhysics || !lClass)
@@ -87,7 +92,7 @@ void Vehicle::OnPhysicsTick()
 					TransformationF lTransform = lMesh->GetBaseTransformation();
 					lTransform.MoveRight(lJointRightValue);
 					lTransform.MoveBackward(lJointDownValue);
-					lMesh->SetTransformation(lTransform);
+					//lMesh->SetTransformation(lTransform);
 					lMesh->SetAlwaysVisible(lIsChild);
 				}
 			}

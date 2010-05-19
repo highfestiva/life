@@ -49,7 +49,6 @@ public:
 
 	int GetLoggedInClientCount() const;
 
-protected:
 	void TickInput();
 
 private:

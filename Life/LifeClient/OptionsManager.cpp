@@ -34,7 +34,7 @@ bool OptionsManager::UpdateInput(UiLepra::InputManager::KeyCode pKeyCode, bool p
 	return (SetValue(lInputElementName, pActive? 1.0f : 0.0f));
 }
 
-bool OptionsManager::UpdateInput(UiLepra::InputElement* pElement)
+float OptionsManager::UpdateInput(UiLepra::InputElement* pElement)
 {
 	bool lValueSet;
 	float lValue = (float)pElement->GetValue();

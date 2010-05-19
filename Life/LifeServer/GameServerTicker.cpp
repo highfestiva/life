@@ -68,6 +68,11 @@ GameServerTicker::~GameServerTicker()
 
 
 
+bool GameServerTicker::Initialize()
+{
+	return (mGameManager->Initialize());
+}
+
 bool GameServerTicker::Tick()
 {
 	bool lOk = mGameManager->BeginTick();
@@ -93,9 +98,9 @@ bool GameServerTicker::Tick()
 	return (lOk);
 }
 
-bool GameServerTicker::Initialize()
+void GameServerTicker::PollRoundTrip()
 {
-	return (mGameManager->Initialize());
+	mGameManager->TickInput();
 }
 
 float GameServerTicker::GetPowerSaveAmount() const

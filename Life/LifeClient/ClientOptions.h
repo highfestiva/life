@@ -15,33 +15,48 @@ namespace Options
 
 
 
-struct ClientOptions
+struct Vehicle
 {
-	struct Control
+	enum Control
 	{
-		struct Vehicle
-		{
-			float mForward;
-			float mBackward;
-			float mForward3d;
-			float mBackward3d;
-			float mBreakAndBack;
-			float mLeft;
-			float mRight;
-			float mLeft3d;
-			float mRight3d;
-			float mUp;
-			float mDown;
-			float mUp3d;
-			float mDown3d;
-			float mHandBreak;
-			float mBreak;
-		};
-
-		Vehicle mVehicle;
+		CONTROL_FORWARD = 0,
+		CONTROL_BACKWARD,
+		CONTROL_FORWARD3D,
+		CONTROL_BACKWARD3D,
+		CONTROL_BREAKANDBACK,
+		CONTROL_LEFT,
+		CONTROL_RIGHT,
+		CONTROL_LEFT3D,
+		CONTROL_RIGHT3D,
+		CONTROL_UP,
+		CONTROL_DOWN,
+		CONTROL_UP3D,
+		CONTROL_DOWN3D,
+		CONTROL_HANDBREAK,
+		CONTROL_BREAK,
+		CONTROL_COUNT
 	};
+	float mControl[CONTROL_COUNT];
 
-	Control mControl;
+	inline Vehicle()
+	{
+		::memset(mControl, 0, sizeof(mControl));
+	}
+
+	inline void operator=(const Vehicle& pVehicle)
+	{
+		::memcpy(mControl, pVehicle.mControl, sizeof(mControl));
+	}
+
+	inline float operator-(const Vehicle& pVehicle) const
+	{
+		float lSum = 0;
+		for (int x = 0; x < CONTROL_COUNT; ++x)
+		{
+			lSum += fabs(mControl[x]-pVehicle.mControl[x]);
+		}
+		return (lSum);
+	}
 };
 
 

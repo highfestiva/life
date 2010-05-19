@@ -32,7 +32,8 @@ CppContextObject::CppContextObject(Cure::ResourceManager* pResourceManager, cons
 	mSoundVolume(0),
 	mSoundPitch(0),
 	mTextureResource(pUiManager),
-	mEngineSoundResource(mUiManager, UiLepra::SoundManager::LOOP_FORWARD)
+	mEngineSoundResource(mUiManager, UiLepra::SoundManager::LOOP_FORWARD),
+	mMeshLerp(1)
 {
 	log_volatile(mLog.Tracef(_T("Construct CppCO %s."), pClassId.c_str()));
 }
@@ -105,6 +106,8 @@ void CppContextObject::UiMove()
 		{
 			continue;
 		}
+		TBC::GeometryBase* lGfxGeometry = lResource->GetRamData();
+
 		if (mPhysicsOverride != PHYSICS_OVERRIDE_BONES)
 		{
 			TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(lResource->GetOffset().mGeometryIndex);
@@ -114,30 +117,34 @@ void CppContextObject::UiMove()
 				continue;
 			}
 			mManager->GetGameManager()->GetPhysicsManager()->GetBodyTransform(lGeometry->GetBodyId(), lPhysicsTransform);
+
+			if (mMeshLerp < 0.999f)
+			{
+				// Smooth (sliding average) to the physics position if we're close enough. Otherwise warp.
+				Vector3DF lPhysicsVelocity;
+				mManager->GetGameManager()->GetPhysicsManager()->GetBodyVelocity(lGeometry->GetBodyId(), lPhysicsVelocity);
+				const Vector3DF& lPosition = lGfxGeometry->GetBaseTransformation().GetPosition();
+				const QuaternionF& lOrientation = lGfxGeometry->GetBaseTransformation().GetOrientation();
+				const float lCloseTime = 0.5f;
+				const float lCloseStandStillDistance = 1.5f;
+				float lClose = lPhysicsVelocity.GetLength()*lCloseTime;
+				lClose = std::max(lCloseStandStillDistance, lClose);
+				if (lPosition.GetDistanceSquared(lPhysicsTransform.GetPosition()) < lClose*lClose)
+				{
+					lPhysicsTransform.SetPosition(Math::Lerp(lPosition, lPhysicsTransform.GetPosition(), mMeshLerp));
+					lPhysicsTransform.GetOrientation().Slerp(lOrientation, lPhysicsTransform.GetOrientation(), mMeshLerp);
+					//mLog.Infof(_T("Lerping pos with %f on %i. Close=%f."), mMeshLerp, GetInstanceId(), lClose);
+				}
+			}
 		}
 		else
 		{
 			lPhysicsTransform = mPhysics->GetBoneTransformation(lResource->GetOffset().mGeometryIndex);
 		}
 
-		TBC::GeometryBase* lGfxGeometry = lResource->GetRamData();
-		//if (GetNetworkObjectType() == Cure::NETWORK_OBJECT_REMOTE_CONTROLLED)
-		/*{
-			// Smooth (sliding average) to the physics position if we're close enough. Otherwise warp.
-			Vector3DF lPhysicsVelocity;
-			mManager->GetGameManager()->GetPhysicsManager()->GetBodyVelocity(lNode->GetBodyId(), lPhysicsVelocity);
-			const Vector3DF& lPosition = lGfxGeometry->GetBaseTransformation().GetPosition();
-			const float lCloseTime = 0.5f;
-			const float lCloseStandStillDistance = 1.5f;
-			float lClose = lPhysicsVelocity.GetLength()*lCloseTime;
-			lClose = std::max(lCloseStandStillDistance, lClose);
-			if (lPosition.GetDistanceSquared(lPhysicsTransform.GetPosition()) < lClose*lClose)
-			{
-				lPhysicsTransform.SetPosition(Math::Lerp(lPosition, lPhysicsTransform.GetPosition(), 0.1f));
-			}
-		}*/
 		lGfxGeometry->SetTransformation(lPhysicsTransform);
 	}
+	mMeshLerp = Math::Lerp(mMeshLerp, 1.0f, 0.001f);
 
 	if (mEngineSoundResource.GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
@@ -177,6 +184,11 @@ void CppContextObject::UiMove()
 			}
 		}
 	}
+}
+
+void CppContextObject::ActivateLerp()
+{
+	mMeshLerp = 0.00001f;
 }
 
 void CppContextObject::OnSoundMoved(const Vector3DF& pPosition, const Vector3DF& pVelocity, float pVolume, float pPitch)

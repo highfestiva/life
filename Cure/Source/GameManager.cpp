@@ -167,6 +167,11 @@ bool GameManager::EndTick()
 	return (true);
 }
 
+bool GameManager::TickNetworkOutput()
+{
+	return (mNetwork->SendAll());
+}
+
 Lock* GameManager::GetTickLock() const
 {
 	return (&mLock);
@@ -320,13 +325,6 @@ void GameManager::SetNetworkAgent(NetworkAgent* pNetwork)
 	mNetwork = pNetwork;
 }
 
-
-
-
-bool GameManager::TickNetworkOutput()
-{
-	return (mNetwork->SendAll());
-}
 
 
 

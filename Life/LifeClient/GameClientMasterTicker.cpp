@@ -268,6 +268,36 @@ bool GameClientMasterTicker::Tick()
 	return (lOk);
 }
 
+void GameClientMasterTicker::PollRoundTrip()
+{
+	// 1. Client push on network.
+	// 2. Server pull on network.
+	// 3. Server push on network.
+	// 4. Client pull on network.
+	SlaveArray::iterator x;
+	for (x = mSlaveArray.begin(); x != mSlaveArray.end(); ++x)
+	{
+		GameClientSlaveManager* lSlave = *x;
+		if (lSlave)
+		{
+			lSlave->TickNetworkOutput();
+		}
+	}
+	if (mServer)
+	{
+		mServer->GameServerManager::TickInput();
+		mServer->TickNetworkOutput();
+	}
+	for (x = mSlaveArray.begin(); x != mSlaveArray.end(); ++x)
+	{
+		GameClientSlaveManager* lSlave = *x;
+		if (lSlave)
+		{
+			lSlave->TickNetworkInput();
+		}
+	}
+}
+
 
 
 bool GameClientMasterTicker::StartResetUi()

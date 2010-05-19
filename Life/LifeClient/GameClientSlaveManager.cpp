@@ -227,6 +227,162 @@ bool GameClientSlaveManager::EndTick()
 	return (lOk);
 }
 
+void GameClientSlaveManager::TickNetworkInput()
+{
+	if (GetNetworkClient()->GetSocket() == 0)
+	{
+		if (!GetNetworkClient()->IsConnecting() && !mIsReset)
+		{
+			Reset();
+		}
+		return;	// TRICKY: easy way out.
+	}
+
+	Cure::Packet* lPacket = GetNetworkAgent()->GetPacketFactory()->Allocate();
+	Cure::NetworkAgent::ReceiveStatus lReceived = GetNetworkClient()->ReceiveNonBlocking(lPacket);
+	switch (lReceived)
+	{
+		case Cure::NetworkAgent::RECEIVE_OK:
+		{
+			//log_volatile(mLog.Debugf(_T("%s received data from server."), GetName().c_str()));
+			Cure::Packet::ParseResult lParseResult;
+			// Walk packets.
+			do
+			{
+				// Walk messages.
+				const int lMessageCount = lPacket->GetMessageCount();
+				for (int x = 0; x < lMessageCount; ++x)
+				{
+					Cure::Message* lMessage = lPacket->GetMessageAt(x);
+					//log_volatile(mLog.Tracef(_T("Received message of type %i."), lMessage->GetType()));
+					ProcessNetworkInputMessage(lMessage);
+				}
+				lParseResult = lPacket->ParseMore();
+			}
+			while (lParseResult == Cure::Packet::PARSE_OK);
+			if (lParseResult == Cure::Packet::PARSE_NO_DATA)
+			{
+				mLastUnsafeReceiveTime.ClearTimeDiff();
+			}
+			else
+			{
+				mLog.AError("Problem with receiving crap extra packet!");
+			}
+		}
+		break;
+		case Cure::NetworkAgent::RECEIVE_PARSE_ERROR:
+		{
+			mLog.AError("Problem with receiving crap data!");
+		}
+		break;
+		case Cure::NetworkAgent::RECEIVE_CONNECTION_BROKEN:
+		{
+			mDisconnectReason = _T("Server abrubtly disconnected!");
+			mLog.AError("Disconnected from server!");
+			mIsReset = false;
+			GetNetworkClient()->Disconnect(false);
+		}
+		break;
+		case Cure::NetworkAgent::RECEIVE_NO_DATA:
+		{
+			// Nothing, really.
+		}
+		break;
+	}
+	GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
+}
+
+bool GameClientSlaveManager::TickNetworkOutput()
+{
+	bool lSendOk = true;
+	bool lIsSent = false;
+	if (GetNetworkClient()->GetSocket())
+	{
+		// Check if we should send client keepalive (keepalive is simply a position update).
+		bool lForceSendUnsafeClientKeepalive = false;
+		mLastSendTime.UpdateTimer();
+		if (mLastSentByteCount != GetNetworkAgent()->GetSentByteCount())
+		{
+			mLastSentByteCount = GetNetworkAgent()->GetSentByteCount();
+			mLastSendTime.ClearTimeDiff();
+		}
+		else if (mLastSendTime.GetTimeDiffF() >= CURE_RTVAR_GET(GetVariableScope(), RTVAR_NETWORK_KEEPALIVE_SENDINTERVAL, 1.0))
+		{
+			lForceSendUnsafeClientKeepalive = true;
+		}
+
+		// Check if we should send updates.
+		Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
+		if (lObject)
+		{
+			lObject->SetNetworkObjectType(Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
+			const Cure::ObjectPositionalData* lPositionalData = 0;
+			lObject->UpdateFullPosition(lPositionalData);
+			if (lPositionalData && lObject->QueryResendTime(0.1f, true))
+			{
+				if (!lPositionalData->IsSameStructure(mNetworkOutputGhost))
+				{
+					mNetworkOutputGhost.CopyData(lPositionalData);
+				}
+				const bool lIsCollisionExpired = mCollisionExpireAlarm.PopExpired(0.6);
+				const bool lIsInputExpired = mInputExpireAlarm.PopExpired(0.0);
+				const bool lIsPositionExpired = (lIsCollisionExpired || lIsInputExpired);
+				if (lIsPositionExpired)
+				{
+					log_atrace("Position expires.");
+				}
+
+				if (lForceSendUnsafeClientKeepalive ||
+					lIsPositionExpired ||
+					lPositionalData->GetScaledDifference(&mNetworkOutputGhost) > CURE_RTVAR_GET(GetVariableScope(), RTVAR_NETPHYS_RESYNCONDIFFGT, 100.0))
+				{
+					mNetworkOutputGhost.CopyData(lPositionalData);
+					lSendOk = GetNetworkAgent()->SendObjectFullPosition(GetNetworkClient()->GetSocket(),
+						lObject->GetInstanceId(), GetTimeManager()->GetCurrentPhysicsFrame(), mNetworkOutputGhost);
+					lIsSent = true;
+
+					CURE_RTVAR_INTERNAL_ARITHMETIC(GetVariableScope(), RTVAR_DEBUG_NET_SENDPOSCNT, int, +, 1, 0);
+				}
+			}
+		}
+
+		// Check if we should send server check-up (uses message similar to ping).
+		if (lSendOk && !GetNetworkClient()->IsLoggingIn())
+		{
+			mLastUnsafeReceiveTime.UpdateTimer();
+			if ((!lIsSent && lForceSendUnsafeClientKeepalive) ||
+				mLastUnsafeReceiveTime.GetTimeDiffF() >= CURE_RTVAR_GET(GetVariableScope(), RTVAR_NETWORK_KEEPALIVE_PINGINTERVAL, 7.0))
+			{
+				if (++mPingAttemptCount <= CURE_RTVAR_GET(GetVariableScope(), RTVAR_NETWORK_KEEPALIVE_PINGRETRYCOUNT, 4))
+				{
+					mLastUnsafeReceiveTime.ReduceTimeDiff(CURE_RTVAR_GET(GetVariableScope(), RTVAR_NETWORK_KEEPALIVE_PINGINTERVAL, 7.0));
+					log_volatile(mLog.Debugf(_T("Slave %i sending ping."), mSlaveIndex));
+					lSendOk = GetNetworkAgent()->SendNumberMessage(false, GetNetworkClient()->GetSocket(),
+						Cure::MessageNumber::INFO_PING, GetTimeManager()->GetCurrentPhysicsFrame(), 0);
+				}
+				else
+				{
+					mDisconnectReason = _T("Server not responding!");
+					mLog.AError("Server is not responding to ping! Disconnecting now!");
+					GetNetworkClient()->Disconnect(true);
+				}
+			}
+		}
+	}
+	if (lSendOk)
+	{
+		lSendOk = Parent::TickNetworkOutput();
+	}
+	// If we were unable to send to server, we conclude that it has silently died.
+	if (!lSendOk)
+	{
+		mDisconnectReason = _T("Connection to server died!");
+		mLog.AError("Server seems dead! Disconnecting silently.");
+		GetNetworkClient()->Disconnect(false);
+	}
+	return (lSendOk);
+}
+
 
 
 void GameClientSlaveManager::ToggleConsole()
@@ -297,10 +453,7 @@ void GameClientSlaveManager::AddLocalObjects(std::hash_set<Cure::GameObjectId>& 
 
 bool GameClientSlaveManager::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 {
-	if (mOptions.UpdateInput(pKeyCode, true))
-	{
-		mInputExpireAlarm.Set();
-	}
+	mOptions.UpdateInput(pKeyCode, true);
 	if (mOptions.GetConsoleToggle() >= 0.5f)
 	{
 		mOptions.ResetToggles();
@@ -312,10 +465,7 @@ bool GameClientSlaveManager::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 
 bool GameClientSlaveManager::OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode)
 {
-	if (mOptions.UpdateInput(pKeyCode, false))
-	{
-		mInputExpireAlarm.Set();
-	}
+	mOptions.UpdateInput(pKeyCode, false);
 	return (false);
 }
 
@@ -339,10 +489,7 @@ void GameClientSlaveManager::OnInput(UiLepra::InputElement* pElement)
 		SetRoadSignsVisible(false);
 	}
 
-	if (mOptions.UpdateInput(pElement))
-	{
-		mInputExpireAlarm.Push(0.1);
-	}
+	mOptions.UpdateInput(pElement);
 	if (mOptions.GetConsoleToggle() >= 0.5f)
 	{
 		mOptions.ResetToggles();
@@ -505,23 +652,34 @@ void GameClientSlaveManager::TickUiInput()
 			mAvatarSelectTime.UpdateTimer();
 			mAvatarMightSelectTime.UpdateTimer();
 
-			const Options::ClientOptions::Control::Vehicle& v = mOptions.GetOptions().mControl.mVehicle;
+			const Options::Vehicle& v = mOptions.GetControl();
 			float lPower;
 			const bool lIsMovingForward = lObject->GetForwardSpeed() > 8.0f;
-			lPower = v.mForward - std::max(v.mBackward, lIsMovingForward? 0.0f : v.mBreakAndBack);
+#define V(dir) v.mControl[Options::Vehicle::CONTROL_##dir]
+			lPower = V(FORWARD) - std::max(V(BACKWARD), lIsMovingForward? 0.0f : V(BREAKANDBACK));
 			SetAvatarEnginePower(lObject, 0, lPower, mCameraOrientation.x);
-			lPower = v.mRight-v.mLeft;
+			lPower = V(RIGHT)-V(LEFT);
 			SetAvatarEnginePower(lObject, 1, lPower, mCameraOrientation.x);
-			lPower = v.mHandBreak - std::max(v.mBreak, lIsMovingForward? v.mBreakAndBack : 0.0f);
+			lPower = V(HANDBREAK) - std::max(V(BREAK), lIsMovingForward? V(BREAKANDBACK) : 0.0f);
 			SetAvatarEnginePower(lObject, 2, lPower, mCameraOrientation.x);
-			lPower = v.mUp-v.mDown;
+			lPower = V(UP)-V(DOWN);
 			SetAvatarEnginePower(lObject, 3, lPower, mCameraOrientation.x);
-			lPower = v.mForward3d - v.mBackward3d;
+			lPower = V(FORWARD3D) - V(BACKWARD3D);
 			SetAvatarEnginePower(lObject, 4, lPower, mCameraOrientation.x);
-			lPower = v.mLeft3d - v.mRight3d;
+			lPower = V(LEFT3D) - V(RIGHT3D);
 			SetAvatarEnginePower(lObject, 5, lPower, mCameraOrientation.x);
-			lPower = v.mUp3d-v.mDown3d;
+			lPower = V(UP3D) - V(DOWN3D);
 			SetAvatarEnginePower(lObject, 6, lPower, mCameraOrientation.x);
+			const float lSteeringChange = mLastSteering-v;
+			if (lSteeringChange > 0.5f)
+			{
+				mInputExpireAlarm.Set();
+			}
+			else if (!Math::IsEpsEqual(lSteeringChange, 0.0f, 0.01f))
+			{
+				mInputExpireAlarm.Push(0.1f);
+			}
+			mLastSteering = v;
 		}
 	}
 }
@@ -655,168 +813,6 @@ void GameClientSlaveManager::TickUiUpdate()
 	Math::RangeAngles(mCameraOrientation.y, lTargetCameraOrientation.y);
 	Math::RangeAngles(mCameraOrientation.z, lTargetCameraOrientation.z);
 	mCameraOrientation = Math::Lerp<Vector3DF, float>(mCameraOrientation, lTargetCameraOrientation, lMovingAveragePart);
-}
-
-
-
-void GameClientSlaveManager::TickNetworkInput()
-{
-	CURE_RTVAR_INTERNAL_ARITHMETIC(GetVariableScope(), RTVAR_DEBUG_NET_RECVPOSCNT, int, -, 1, 0);
-
-	if (GetNetworkClient()->GetSocket() == 0)
-	{
-		if (!GetNetworkClient()->IsConnecting() && !mIsReset)
-		{
-			Reset();
-		}
-		return;	// TRICKY: easy way out.
-	}
-
-	Cure::Packet* lPacket = GetNetworkAgent()->GetPacketFactory()->Allocate();
-	Cure::NetworkAgent::ReceiveStatus lReceived = GetNetworkClient()->ReceiveNonBlocking(lPacket);
-	switch (lReceived)
-	{
-		case Cure::NetworkAgent::RECEIVE_OK:
-		{
-			//log_volatile(mLog.Debugf(_T("%s received data from server."), GetName().c_str()));
-			Cure::Packet::ParseResult lParseResult;
-			// Walk packets.
-			do
-			{
-				// Walk messages.
-				const int lMessageCount = lPacket->GetMessageCount();
-				for (int x = 0; x < lMessageCount; ++x)
-				{
-					Cure::Message* lMessage = lPacket->GetMessageAt(x);
-					//log_volatile(mLog.Tracef(_T("Received message of type %i."), lMessage->GetType()));
-					ProcessNetworkInputMessage(lMessage);
-				}
-				lParseResult = lPacket->ParseMore();
-			}
-			while (lParseResult == Cure::Packet::PARSE_OK);
-			if (lParseResult == Cure::Packet::PARSE_NO_DATA)
-			{
-				mLastUnsafeReceiveTime.ClearTimeDiff();
-			}
-			else
-			{
-				mLog.AError("Problem with receiving crap extra packet!");
-			}
-		}
-		break;
-		case Cure::NetworkAgent::RECEIVE_PARSE_ERROR:
-		{
-			mLog.AError("Problem with receiving crap data!");
-		}
-		break;
-		case Cure::NetworkAgent::RECEIVE_CONNECTION_BROKEN:
-		{
-			mDisconnectReason = _T("Server abrubtly disconnected!");
-			mLog.AError("Disconnected from server!");
-			mIsReset = false;
-			GetNetworkClient()->Disconnect(false);
-		}
-		break;
-		case Cure::NetworkAgent::RECEIVE_NO_DATA:
-		{
-			// Nothing, really.
-		}
-		break;
-	}
-	GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
-}
-
-bool GameClientSlaveManager::TickNetworkOutput()
-{
-	CURE_RTVAR_INTERNAL_ARITHMETIC(GetVariableScope(), RTVAR_DEBUG_NET_SENDPOSCNT, int, -, 1, 0);
-
-	bool lSendOk = true;
-	bool lIsSent = false;
-	if (GetNetworkClient()->GetSocket())
-	{
-		// Check if we should send client keepalive (keepalive is simply a position update).
-		bool lForceSendUnsafeClientKeepalive = false;
-		mLastSendTime.UpdateTimer();
-		if (mLastSentByteCount != GetNetworkAgent()->GetSentByteCount())
-		{
-			mLastSentByteCount = GetNetworkAgent()->GetSentByteCount();
-			mLastSendTime.ClearTimeDiff();
-		}
-		else if (mLastSendTime.GetTimeDiffF() >= CURE_RTVAR_GET(GetVariableScope(), RTVAR_NETWORK_KEEPALIVE_SENDINTERVAL, 5.0))
-		{
-			lForceSendUnsafeClientKeepalive = true;
-		}
-
-		// Check if we should send updates.
-		Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
-		if (lObject)
-		{
-			lObject->SetNetworkObjectType(Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
-			const Cure::ObjectPositionalData* lPositionalData = 0;
-			lObject->UpdateFullPosition(lPositionalData);
-			if (lPositionalData && lObject->QueryResendTime(0.1f, true))
-			{
-				if (!lPositionalData->IsSameStructure(mNetworkOutputGhost))
-				{
-					mNetworkOutputGhost.CopyData(lPositionalData);
-				}
-				const bool lIsCollisionExpired = mCollisionExpireAlarm.PopExpired(0.6);
-				const bool lIsInputExpired = mInputExpireAlarm.PopExpired(0.0);
-				const bool lIsPositionExpired = (lIsCollisionExpired || lIsInputExpired);
-				if (lIsPositionExpired)
-				{
-					log_atrace("Position expires.");
-				}
-
-				if (lForceSendUnsafeClientKeepalive ||
-					lIsPositionExpired ||
-					lPositionalData->GetScaledDifference(&mNetworkOutputGhost) > CURE_RTVAR_GET(GetVariableScope(), RTVAR_NETPHYS_RESYNCONDIFFGT, 100.0))
-				{
-					mNetworkOutputGhost.CopyData(lPositionalData);
-					lSendOk = GetNetworkAgent()->SendObjectFullPosition(GetNetworkClient()->GetSocket(),
-						lObject->GetInstanceId(), GetTimeManager()->GetCurrentPhysicsFrame(), mNetworkOutputGhost);
-					lIsSent = true;
-
-					CURE_RTVAR_INTERNAL_ARITHMETIC(GetVariableScope(), RTVAR_DEBUG_NET_SENDPOSCNT, int, +, 1, 0);
-				}
-			}
-		}
-
-		// Check if we should send server check-up (uses message similar to ping).
-		if (lSendOk && !GetNetworkClient()->IsLoggingIn())
-		{
-			mLastUnsafeReceiveTime.UpdateTimer();
-			if ((!lIsSent && lForceSendUnsafeClientKeepalive) ||
-				mLastUnsafeReceiveTime.GetTimeDiffF() >= CURE_RTVAR_GET(GetVariableScope(), RTVAR_NETWORK_KEEPALIVE_PINGINTERVAL, 7.0))
-			{
-				if (++mPingAttemptCount <= CURE_RTVAR_GET(GetVariableScope(), RTVAR_NETWORK_KEEPALIVE_PINGRETRYCOUNT, 4))
-				{
-					mLastUnsafeReceiveTime.ReduceTimeDiff(CURE_RTVAR_GET(GetVariableScope(), RTVAR_NETWORK_KEEPALIVE_PINGINTERVAL, 7.0));
-					log_volatile(mLog.Debugf(_T("Slave %i sending ping."), mSlaveIndex));
-					lSendOk = GetNetworkAgent()->SendNumberMessage(false, GetNetworkClient()->GetSocket(),
-						Cure::MessageNumber::INFO_PING, GetTimeManager()->GetCurrentPhysicsFrame(), 0);
-				}
-				else
-				{
-					mDisconnectReason = _T("Server not responding!");
-					mLog.AError("Server is not responding to ping! Disconnecting now!");
-					GetNetworkClient()->Disconnect(true);
-				}
-			}
-		}
-	}
-	if (lSendOk)
-	{
-		lSendOk = Parent::TickNetworkOutput();
-	}
-	// If we were unable to send to server, we conclude that it has silently died.
-	if (!lSendOk)
-	{
-		mDisconnectReason = _T("Connection to server died!");
-		mLog.AError("Server seems dead! Disconnecting silently.");
-		GetNetworkClient()->Disconnect(false);
-	}
-	return (lSendOk);
 }
 
 
@@ -1083,10 +1079,14 @@ void GameClientSlaveManager::SetMovement(Cure::GameObjectId pInstanceId, int32 p
 
 		//str s = strutil::Format(_T("client %i at frame %i"), pClientIndex, pFrameIndex);
 		//log_debug(_T("Client set pos of other client"), s);
-		Cure::ContextObject* lObject = GetContext()->GetObject(pInstanceId, true);
+		UiCure::CppContextObject* lObject = (UiCure::CppContextObject*)GetContext()->GetObject(pInstanceId, true);
 		if (lObject)
 		{
 			lObject->SetFullPosition(pData);
+			if (pInstanceId == mAvatarId)
+			{
+				lObject->ActivateLerp();
+			}
 		}
 		else
 		{
@@ -1256,8 +1256,16 @@ void GameClientSlaveManager::DrawAsyncDebugInfo()
 
 	// Draw send and receive staples.
 	int lCount = CURE_RTVAR_TRYGET(GetVariableScope(), RTVAR_DEBUG_NET_SENDPOSCNT, 0);
+	if (lCount > 0)
+	{
+		CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_DEBUG_NET_SENDPOSCNT, 0);
+	}
 	DrawDebugStaple(0, lCount*10, Color(255, 0, 0));
 	lCount = CURE_RTVAR_TRYGET(GetVariableScope(), RTVAR_DEBUG_NET_RECVPOSCNT, 0);
+	if (lCount > 0)
+	{
+		CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_DEBUG_NET_RECVPOSCNT, 0);
+	}
 	DrawDebugStaple(1, lCount*10, Color(0, 255, 0));
 }
 

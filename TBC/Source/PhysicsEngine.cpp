@@ -106,15 +106,6 @@ bool PhysicsEngine::SetValue(unsigned pAspect, float pValue, float pZAngle)
 		}
 		break;
 		case ENGINE_HOVER:
-		{
-			if (pAspect >= mControllerIndex+0 && pAspect <= mControllerIndex+1)
-			{
-				assert(pAspect < MAX_CONTROLLER_COUNT);
-				mValue[pAspect] = pValue;
-				return (true);
-			}
-		}
-		break;
 		case ENGINE_HINGE_ROLL:
 		case ENGINE_HINGE_GYRO:
 		case ENGINE_HINGE_BREAK:
@@ -428,7 +419,7 @@ unsigned PhysicsEngine::GetControllerIndex() const
 float PhysicsEngine::GetValue() const
 {
 	assert(mControllerIndex >= 0 && mControllerIndex < MAX_CONTROLLER_COUNT);
-	return (mValue[mControllerIndex]);
+	return (mValue[0]);
 }
 
 const float* PhysicsEngine::GetValues() const

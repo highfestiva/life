@@ -23,15 +23,15 @@ namespace Options
 ClientOptionsManager::ClientOptionsManager(Cure::RuntimeVariableScope* pVariableScope, int pPriority):
 	OptionsManager(pVariableScope, pPriority)
 {
-	::memset(&mOptions, 0, sizeof(mOptions));
+	::memset(&mControl, 0, sizeof(mControl));
 	SetDefault(pPriority);
 }
 
 
 
-const ClientOptions& ClientOptionsManager::GetOptions() const
+const Vehicle& ClientOptionsManager::GetControl() const
 {
-	return (mOptions);
+	return (mControl);
 }
 
 
@@ -136,21 +136,21 @@ std::vector<float*> ClientOptionsManager::GetValuePointers(const str& pKey, bool
 	const KeyValue lEntries[] =
 	{
 		KeyValue(_T(RTVAR_CTRL_UI_CONTOGGLE), &mConsoleToggle),
-		KeyValue(_T(RTVAR_CTRL_STEER_FWD), &mOptions.mControl.mVehicle.mForward),
-		KeyValue(_T(RTVAR_CTRL_STEER_BACK), &mOptions.mControl.mVehicle.mBackward),
-		KeyValue(_T(RTVAR_CTRL_STEER_FWD3D), &mOptions.mControl.mVehicle.mForward3d),
-		KeyValue(_T(RTVAR_CTRL_STEER_BACK3D), &mOptions.mControl.mVehicle.mBackward3d),
-		KeyValue(_T(RTVAR_CTRL_STEER_BRKBACK), &mOptions.mControl.mVehicle.mBreakAndBack),
-		KeyValue(_T(RTVAR_CTRL_STEER_LEFT), &mOptions.mControl.mVehicle.mLeft),
-		KeyValue(_T(RTVAR_CTRL_STEER_RIGHT), &mOptions.mControl.mVehicle.mRight),
-		KeyValue(_T(RTVAR_CTRL_STEER_LEFT3D), &mOptions.mControl.mVehicle.mLeft3d),
-		KeyValue(_T(RTVAR_CTRL_STEER_RIGHT3D), &mOptions.mControl.mVehicle.mRight3d),
-		KeyValue(_T(RTVAR_CTRL_STEER_UP), &mOptions.mControl.mVehicle.mUp),
-		KeyValue(_T(RTVAR_CTRL_STEER_DOWN), &mOptions.mControl.mVehicle.mDown),
-		KeyValue(_T(RTVAR_CTRL_STEER_UP3D), &mOptions.mControl.mVehicle.mUp3d),
-		KeyValue(_T(RTVAR_CTRL_STEER_DOWN3D), &mOptions.mControl.mVehicle.mDown3d),
-		KeyValue(_T(RTVAR_CTRL_STEER_HANDBRK), &mOptions.mControl.mVehicle.mHandBreak),
-		KeyValue(_T(RTVAR_CTRL_STEER_BRK), &mOptions.mControl.mVehicle.mBreak),
+		KeyValue(_T(RTVAR_CTRL_STEER_FWD), &mControl.mControl[Vehicle::CONTROL_FORWARD]),
+		KeyValue(_T(RTVAR_CTRL_STEER_BACK), &mControl.mControl[Vehicle::CONTROL_BACKWARD]),
+		KeyValue(_T(RTVAR_CTRL_STEER_FWD3D), &mControl.mControl[Vehicle::CONTROL_FORWARD3D]),
+		KeyValue(_T(RTVAR_CTRL_STEER_BACK3D), &mControl.mControl[Vehicle::CONTROL_BACKWARD3D]),
+		KeyValue(_T(RTVAR_CTRL_STEER_BRKBACK), &mControl.mControl[Vehicle::CONTROL_BREAKANDBACK]),
+		KeyValue(_T(RTVAR_CTRL_STEER_LEFT), &mControl.mControl[Vehicle::CONTROL_LEFT]),
+		KeyValue(_T(RTVAR_CTRL_STEER_RIGHT), &mControl.mControl[Vehicle::CONTROL_RIGHT]),
+		KeyValue(_T(RTVAR_CTRL_STEER_LEFT3D), &mControl.mControl[Vehicle::CONTROL_LEFT3D]),
+		KeyValue(_T(RTVAR_CTRL_STEER_RIGHT3D), &mControl.mControl[Vehicle::CONTROL_RIGHT3D]),
+		KeyValue(_T(RTVAR_CTRL_STEER_UP), &mControl.mControl[Vehicle::CONTROL_UP]),
+		KeyValue(_T(RTVAR_CTRL_STEER_DOWN), &mControl.mControl[Vehicle::CONTROL_DOWN]),
+		KeyValue(_T(RTVAR_CTRL_STEER_UP3D), &mControl.mControl[Vehicle::CONTROL_UP3D]),
+		KeyValue(_T(RTVAR_CTRL_STEER_DOWN3D), &mControl.mControl[Vehicle::CONTROL_DOWN3D]),
+		KeyValue(_T(RTVAR_CTRL_STEER_HANDBRK), &mControl.mControl[Vehicle::CONTROL_HANDBREAK]),
+		KeyValue(_T(RTVAR_CTRL_STEER_BRK), &mControl.mControl[Vehicle::CONTROL_BREAK]),
 	};
 	return (DoGetValuePointers(pKey, pIsAnySteeringValue, lEntries, sizeof(lEntries)/sizeof(lEntries[0])));
 }

@@ -43,6 +43,7 @@ public:
 
 	void OnPhysicsTick();
 	void UiMove();
+	void ActivateLerp();
 	void OnSoundMoved(const Vector3DF& pPosition, const Vector3DF& pVelocity, float pVolume, float pPitch);
 
 	void DebugDrawPrimitive(DebugPrimitive pPrimitive);
@@ -73,6 +74,7 @@ protected:
 	Vector3DF mSoundVelocity;
 	float mSoundVolume;
 	float mSoundPitch;
+	float mMeshLerp;
 
 	UserRendererImageResource mTextureResource;
 	UserSound3dResource mEngineSoundResource;

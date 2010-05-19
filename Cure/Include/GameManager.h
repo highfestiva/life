@@ -36,6 +36,7 @@ public:
 	virtual ~GameTicker();
 	virtual bool Initialize() = 0;
 	virtual bool Tick() = 0;
+	virtual void PollRoundTrip() = 0;	// Polls network for any incoming to yield lower latency.
 	virtual float GetPowerSaveAmount() const = 0;
 	virtual void Profile();	// Make sure it's quick, since it runs outside all profiling timers.
 	virtual bool QueryQuit();
@@ -52,6 +53,7 @@ public:
 	void ResetPhysicsTime(int pStartPhysicsFrame);
 	virtual bool BeginTick();
 	virtual bool EndTick();
+	virtual bool TickNetworkOutput();
 	Lock* GetTickLock() const;
 
 	RuntimeVariableScope* GetVariableScope() const;
@@ -86,7 +88,6 @@ protected:
 	void SetNetworkAgent(NetworkAgent* pNetwork);
 
 	virtual void TickInput() = 0;
-	virtual bool TickNetworkOutput();
 
 	virtual ContextObject* CreateContextObject(const str& pClassId) const = 0;
 

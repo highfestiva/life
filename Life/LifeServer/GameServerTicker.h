@@ -36,9 +36,10 @@ public:
 	virtual ~GameServerTicker();
 
 private:
-	bool Tick();
-	bool Initialize();
-	float GetPowerSaveAmount() const;
+	virtual bool Initialize();
+	virtual bool Tick();
+	virtual void PollRoundTrip();
+	virtual float GetPowerSaveAmount() const;
 
 	Cure::ResourceManager* mResourceManager;
 	GameServerManager* mGameManager;
