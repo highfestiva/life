@@ -9,6 +9,7 @@
 #include "../../Cure/Include/ResourceManager.h"
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../../Cure/Include/TimeManager.h"
+#include "../../Lepra/Include/Network.h"
 #include "../../Lepra/Include/Performance.h"
 #include "../../Lepra/Include/SystemManager.h"
 #include "../../UiCure/Include/UiGameUiManager.h"
@@ -116,10 +117,27 @@ bool GameClientMasterTicker::CreateSlave()
 {
 	if (!mServer)
 	{
-		Cure::RuntimeVariableScope* lVariableScope = new Cure::RuntimeVariableScope(Cure::GetSettings());
-		mServer = new UiGameServerManager(lVariableScope, mResourceManager, mUiManager, PixelRect(0, 0, 100, 100));
-		mServer->StartConsole(new UiTbc::ConsoleLogListener, new UiTbc::ConsolePrompt);
-		mServer->Initialize();
+		bool lIsLocalServer = false;
+		const str lServerUrl = strutil::Split(CURE_RTVAR_GETSET(UiCure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("0.0.0.0:16650")), _T(":"), 1)[0];
+		IPAddress lServerIpAddress;
+		IPAddress lExternalIpAddress;
+		if (Network::ResolveHostname(lServerUrl, lServerIpAddress) && Network::ResolveHostname(_T(""), lExternalIpAddress))
+		{
+			const str lServerIp = lServerIpAddress.GetAsString();
+			if (lServerIp == _T("127.0.0.1") ||
+				lServerIp == _T("0.0.0.0") ||
+				lServerIpAddress == lExternalIpAddress)
+			{
+				lIsLocalServer = true;
+			}
+		}
+		if (lIsLocalServer)
+		{
+			Cure::RuntimeVariableScope* lVariableScope = new Cure::RuntimeVariableScope(Cure::GetSettings());
+			mServer = new UiGameServerManager(lVariableScope, mResourceManager, mUiManager, PixelRect(0, 0, 100, 100));
+			mServer->StartConsole(new UiTbc::ConsoleLogListener, new UiTbc::ConsolePrompt);
+			mServer->Initialize();
+		}
 	}
 	return (CreateSlave(&GameClientMasterTicker::CreateSlaveManager));
 }

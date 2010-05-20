@@ -93,7 +93,7 @@ bool GameServerManager::Initialize()
 		}
 	}
 
-	str lAcceptAddress = CURE_RTVAR_GETSET(GetVariableScope(), RTVAR_NETWORK_LISTEN_ADDRESS, _T("0.0.0.0:16650"));
+	str lAcceptAddress = CURE_RTVAR_GETSET(GetVariableScope(), RTVAR_NETWORK_SERVERADDRESS, _T("0.0.0.0:16650"));
 	if (lOk)
 	{
 		SocketAddress lAddress;

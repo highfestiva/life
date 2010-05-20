@@ -5,9 +5,9 @@
 
 
 #include "UiGameServerManager.h"
+#include "../../UiCure/Include/UiCppContextObject.h"
 #include "UiServerConsoleManager.h"
 #include "UiConsole.h"
-#include "Vehicle.h"
 
 
 
@@ -93,7 +93,9 @@ void UiGameServerManager::TickInput()
 
 Cure::ContextObject* UiGameServerManager::CreateContextObject(const str& pClassId) const
 {
-	return (new Vehicle(GetResourceManager(), pClassId, mUiManager));
+	UiCure::CppContextObject* lObject = new UiCure::CppContextObject(GetResourceManager(), pClassId, mUiManager);
+	lObject->EnableUi(false);
+	return (lObject);
 }
 
 

@@ -54,8 +54,11 @@ bool Network::Stop()
 str Network::GetHostname()
 {
 	char lName[256];
-	const int lNameLength = ::gethostname(lName, sizeof(lName));
-	return (strutil::Encode(astr(lName, lNameLength)));
+	if (::gethostname(lName, sizeof(lName)) == 0)
+	{
+		return (strutil::Encode(astr(lName)));
+	}
+	return (str());
 }
 
 bool Network::ResolveHostname(const str& pHostname, IPAddress& pIPAddress)

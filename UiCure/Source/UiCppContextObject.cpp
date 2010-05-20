@@ -28,6 +28,7 @@ CppContextObject::CppContextObject(Cure::ResourceManager* pResourceManager, cons
 	Cure::CppContextObject(pResourceManager, pClassId),
 	mUiManager(pUiManager),
 	mUiClassResource(0),
+	mEnableUi(true),
 	mMeshLoadCount(0),
 	mSoundVolume(0),
 	mSoundPitch(0),
@@ -56,6 +57,13 @@ CppContextObject::~CppContextObject()
 
 
 
+void CppContextObject::EnableUi(bool pEnable)
+{
+	mEnableUi = pEnable;
+}
+
+
+
 void CppContextObject::StartLoading()
 {
 	assert(mUiClassResource == 0);
@@ -64,8 +72,9 @@ void CppContextObject::StartLoading()
 	mUiClassResource->Load(GetResourceManager(), lClassName,
 		UserClassResource::TypeLoadCallback(this, &CppContextObject::OnLoadClass));
 
-	if (strutil::StartsWith(GetClassId(), _T("helicopter")) ||
-		strutil::StartsWith(GetClassId(), _T("monster")))
+	if (mEnableUi &&
+		(strutil::StartsWith(GetClassId(), _T("helicopter")) ||
+		strutil::StartsWith(GetClassId(), _T("monster"))))
 	{
 		const str lSoundName = _T("Data/Bark.wav");
 		mEngineSoundResource.Load(GetResourceManager(), lSoundName,
@@ -77,6 +86,10 @@ void CppContextObject::StartLoading()
 
 void CppContextObject::OnPhysicsTick()
 {
+	if (!mEnableUi)
+	{
+		return;
+	}
 	if (!mPhysics)
 	{
 		mLog.Warningf(_T("Physical body for %s not loaded!"), GetClassId().c_str());
@@ -429,6 +442,11 @@ void CppContextObject::OnLoadClass(UserClassResource* pClassResource)
 		StartLoadingPhysics(lClass->GetPhysicsBaseName());
 	}
 
+	if (!mEnableUi)
+	{
+		return;
+	}
+
 	assert(mMeshLoadCount == 0);
 	const size_t lMeshCount = lClass->GetMeshCount();
 	assert(lMeshCount > 0);
@@ -558,7 +576,7 @@ bool CppContextObject::TryComplete()
 	{
 		return (false);
 	}
-	if (mTextureResource.GetLoadState() != Cure::RESOURCE_LOAD_COMPLETE)
+	if (mEnableUi && mTextureResource.GetLoadState() != Cure::RESOURCE_LOAD_COMPLETE)
 	{
 		return (false);
 	}

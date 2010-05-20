@@ -42,8 +42,8 @@ ClientLoginView::ClientLoginView(ClientLoginObserver* pLoginObserver, const str&
 
 	AddLabel(_T("Server"), WHITE);
 
-	str lServerName = _T(":16650");
-	lServerName = CURE_RTVAR_TRYGET(mLoginObserver->GetVariableScope(), RTVAR_LOGIN_SERVER, lServerName);
+	str lServerName = _T("0.0.0.0:16650");
+	lServerName = CURE_RTVAR_TRYGET(mLoginObserver->GetVariableScope(), RTVAR_NETWORK_SERVERADDRESS, lServerName);
 	AddTextField(lServerName, _T("Server"));
 
 	AddButton(_T("Login"), 0)->SetOnClick(ClientLoginView, OnLogin);

@@ -30,6 +30,7 @@
 #define RTVAR_NETPHYS_RESYNCONDIFFGT		"NetPhys.ResyncOnDiffGt"
 #define RTVAR_NETPHYS_SLOWFRAMECOUNT		"NetPhys.SlowFrameCount"
 
+#define RTVAR_NETWORK_SERVERADDRESS		"Network.ServerAddress"
 #define RTVAR_NETWORK_CONNECT_RETRYCOUNT	"Network.Connect.RetryCount"
 #define RTVAR_NETWORK_CONNECT_LOCALPORTRANGE	"Network.Connect.LocalPortRange"
 #define RTVAR_NETWORK_CONNECT_TIMEOUT		"Network.Connect.Timeout"
