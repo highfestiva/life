@@ -39,6 +39,8 @@ public:
 	CppContextObject(Cure::ResourceManager* pResourceManager, const str& pClassId, GameUiManager* pUiManager);
 	virtual ~CppContextObject();
 
+	void EnableUi(bool pEnable);
+
 	virtual void StartLoading();
 
 	void OnPhysicsTick();
@@ -67,6 +69,7 @@ protected:
 
 	GameUiManager* mUiManager;
 	UserClassResource* mUiClassResource;
+	bool mEnableUi;
 	MeshArray mMeshResourceArray;
 	size_t mMeshLoadCount;
 	Vector3DF mSoundPosition;
