@@ -754,10 +754,10 @@ void GameClientMasterTicker::Profile()
 	typedef std::pair<ScopePerformanceData*, int> ScopeLevel;
 	typedef std::vector<ScopeLevel> ScopeLevelArray;
 	ScopeArray lRoots = ScopePerformanceData::GetRoots();
-	ScopeLevelArray lNodes;
-	lNodes.reserve(100);
 	ScopeLevelArray lStackedNodes;
-	lStackedNodes.reserve(100);
+	lStackedNodes.reserve(100);	// Optimization.
+	str lName;
+	lName.reserve(200);	// Optimization;
 	for (size_t lRootIndex = 0; lRootIndex < lRoots.size(); ++lRootIndex)
 	{
 		if (mPerformanceGraphList.size() <= lRootIndex)
@@ -766,30 +766,33 @@ void GameClientMasterTicker::Profile()
 		}
 		mPerformanceGraphList[lRootIndex].TickLine(lHeight);
 
-		lNodes.clear();
-		lNodes.push_back(ScopeLevel(lRoots[lRootIndex], 0));
-		const double lRootStart = lNodes[0].first->GetTimeOfLastMeasure();
-		for (size_t x = 0; x < lNodes.size(); ++x)
+		ScopeLevel lCurrentNode(lRoots[lRootIndex], 0);
+		const double lRootStart = lCurrentNode.first->GetTimeOfLastMeasure();
+		for (;;)
 		{
-			const ScopeLevel& lNodeLevel = lNodes[x];
-			const ScopePerformanceData* lNode = lNodeLevel.first;
+			const ScopePerformanceData* lNode = lCurrentNode.first;
 			const ScopeArray& lChildren = lNode->GetChildren();
 			for (size_t y = 0; y < lChildren.size(); ++y)
 			{
-				lStackedNodes.push_back(ScopeLevel(lChildren[y], lNodeLevel.second+1));
+				lStackedNodes.push_back(ScopeLevel(lChildren[y], lCurrentNode.second+1));
 			}
 
 			const double lStart = lNode->GetTimeOfLastMeasure() - lRootStart;
-			const str lName = str(lNodeLevel.second, ' ') + lNode->GetName() + _T(" (") + strutil::DoubleToString(lNode->GetRangeFactor()*100, 1) + _T(" % fluctuation)");
+			lName  = str(lCurrentNode.second, ' ');
+			lName += lNode->GetName();
+			lName += _T(" (");
+			lName += strutil::DoubleToString(lNode->GetRangeFactor()*100, 1);
+			lName += _T(" % fluctuation)");
 			mPerformanceGraphList[lRootIndex].AddSegment(lName, lStart, lStart + lNode->GetLast());
 
-			if (x+1 == lNodes.size())
+			if (!lStackedNodes.empty())
 			{
-				if (!lStackedNodes.empty())
-				{
-					lNodes.push_back(lStackedNodes.back());
-					lStackedNodes.pop_back();
-				}
+				lCurrentNode = lStackedNodes.back();
+				lStackedNodes.pop_back();
+			}
+			else
+			{
+				break;
 			}
 		}
 	}

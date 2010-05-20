@@ -38,10 +38,10 @@ PhysicsManagerODE::PhysicsManagerODE()
 	//::dWorldSetAutoDisableSteps(mWorldID, 10);
 	//::dWorldSetAutoDisableTime(mWorldID, 0);
 
-	// Collision space center and extents (10 km).
-	dReal lCenter[4] = {0, 0, 0, 0};
-	dReal lExtents[4] = {10000, 10000, 10000, 0};
-	mSpaceID = ::dQuadTreeSpaceCreate(0, lCenter, lExtents, 10);
+	// Collision space center and extents.
+	dVector3 lCenter = {0, 0, 0};
+	dVector3 lExtents = {2000, 2000, 2000};
+	mSpaceID = ::dQuadTreeSpaceCreate(0, lCenter, lExtents, 8);
 
 	::dWorldSetGravity(mWorldID, 0, 0, -9.82f);
 

@@ -113,7 +113,10 @@ int Application::Run()
 
 		{
 			ScopeTimer lSleepTimer(&lTimeInfo);
-			mGameTicker->Profile();
+			if (CURE_RTVAR_TRYGET(Cure::GetSettings(), RTVAR_DEBUG_ENABLE, false))
+			{
+				mGameTicker->Profile();
+			}
 			Random::GetRandomNumber();	// To move seed ahead.
 			lOk = mGameTicker->Tick();
 			const float lExtraSleep = (float)CURE_RTVAR_TRYGET(Cure::GetSettings(), RTVAR_DEBUG_EXTRASLEEPTIME, 0.0);

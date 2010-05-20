@@ -48,7 +48,7 @@ GameManager::GameManager(RuntimeVariableScope* pVariableScope, ResourceManager* 
 	mTime(new TimeManager),
 	mPhysics(TBC::PhysicsManagerFactory::Create(TBC::PhysicsManagerFactory::ENGINE_ODE)),
 	mContext(0),
-	mTerrain(new TerrainManager(pResourceManager)),
+	mTerrain(0),//new TerrainManager(pResourceManager)),
 	mConsole(0),
 	mPhysicsWorkerThread(0),
 	mPhysicsTickStartSemaphore(0),

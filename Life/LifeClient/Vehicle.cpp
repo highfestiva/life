@@ -92,7 +92,7 @@ void Vehicle::OnPhysicsTick()
 					TransformationF lTransform = lMesh->GetBaseTransformation();
 					lTransform.MoveRight(lJointRightValue);
 					lTransform.MoveBackward(lJointDownValue);
-					//lMesh->SetTransformation(lTransform);
+					lMesh->SetTransformation(lTransform);
 					lMesh->SetAlwaysVisible(lIsChild);
 				}
 			}

@@ -131,7 +131,7 @@ void CppContextObject::UiMove()
 			}
 			mManager->GetGameManager()->GetPhysicsManager()->GetBodyTransform(lGeometry->GetBodyId(), lPhysicsTransform);
 
-			if (mMeshLerp < 0.999f)
+			if (mMeshLerp < 0.95f)
 			{
 				// Smooth (sliding average) to the physics position if we're close enough. Otherwise warp.
 				Vector3DF lPhysicsVelocity;
@@ -157,7 +157,7 @@ void CppContextObject::UiMove()
 
 		lGfxGeometry->SetTransformation(lPhysicsTransform);
 	}
-	mMeshLerp = Math::Lerp(mMeshLerp, 1.0f, 0.001f);
+	mMeshLerp = Math::Lerp(mMeshLerp, 1.0f, 0.2f);
 
 	if (mEngineSoundResource.GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
@@ -201,7 +201,7 @@ void CppContextObject::UiMove()
 
 void CppContextObject::ActivateLerp()
 {
-	mMeshLerp = 0.00001f;
+	mMeshLerp = 0.3f;
 }
 
 void CppContextObject::OnSoundMoved(const Vector3DF& pPosition, const Vector3DF& pVelocity, float pVolume, float pPitch)
