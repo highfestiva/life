@@ -30,11 +30,11 @@ CppContextObject::CppContextObject(Cure::ResourceManager* pResourceManager, cons
 	mUiClassResource(0),
 	mEnableUi(true),
 	mMeshLoadCount(0),
+	mStartMeshSlide(false),
 	mSoundVolume(0),
 	mSoundPitch(0),
 	mTextureResource(pUiManager),
-	mEngineSoundResource(mUiManager, UiLepra::SoundManager::LOOP_FORWARD),
-	mMeshLerp(1)
+	mEngineSoundResource(mUiManager, UiLepra::SoundManager::LOOP_FORWARD)
 {
 	log_volatile(mLog.Tracef(_T("Construct CppCO %s."), pClassId.c_str()));
 }
@@ -112,6 +112,8 @@ void CppContextObject::OnPhysicsTick()
 void CppContextObject::UiMove()
 {
 	TransformationF lPhysicsTransform;
+	Vector3DF lGfxPhysMeshOffset;
+	int lGfxPhysMeshOffsetCount = 0;
 	for (size_t x = 0; x < mMeshResourceArray.size(); ++x)
 	{
 		UserGeometryReferenceResource* lResource = mMeshResourceArray[x];
@@ -131,23 +133,18 @@ void CppContextObject::UiMove()
 			}
 			mManager->GetGameManager()->GetPhysicsManager()->GetBodyTransform(lGeometry->GetBodyId(), lPhysicsTransform);
 
-			if (mMeshLerp < 0.95f)
+			if (mStartMeshSlide)
+			{
+				// Start out by fetching offset.
+				const Vector3DF& lPosition = lGfxGeometry->GetBaseTransformation().GetPosition();
+				lGfxPhysMeshOffset += lPosition - lPhysicsTransform.GetPosition();
+				lPhysicsTransform.SetPosition(lPosition);
+				++lGfxPhysMeshOffsetCount;
+			}
+			else
 			{
 				// Smooth (sliding average) to the physics position if we're close enough. Otherwise warp.
-				Vector3DF lPhysicsVelocity;
-				mManager->GetGameManager()->GetPhysicsManager()->GetBodyVelocity(lGeometry->GetBodyId(), lPhysicsVelocity);
-				const Vector3DF& lPosition = lGfxGeometry->GetBaseTransformation().GetPosition();
-				const QuaternionF& lOrientation = lGfxGeometry->GetBaseTransformation().GetOrientation();
-				const float lCloseTime = 0.5f;
-				const float lCloseStandStillDistance = 1.5f;
-				float lClose = lPhysicsVelocity.GetLength()*lCloseTime;
-				lClose = std::max(lCloseStandStillDistance, lClose);
-				if (lPosition.GetDistanceSquared(lPhysicsTransform.GetPosition()) < lClose*lClose)
-				{
-					lPhysicsTransform.SetPosition(Math::Lerp(lPosition, lPhysicsTransform.GetPosition(), mMeshLerp));
-					lPhysicsTransform.GetOrientation().Slerp(lOrientation, lPhysicsTransform.GetOrientation(), mMeshLerp);
-					//mLog.Infof(_T("Lerping pos with %f on %i. Close=%f."), mMeshLerp, GetInstanceId(), lClose);
-				}
+				lPhysicsTransform.GetPosition() += mMeshOffset;
 			}
 		}
 		else
@@ -157,7 +154,12 @@ void CppContextObject::UiMove()
 
 		lGfxGeometry->SetTransformation(lPhysicsTransform);
 	}
-	mMeshLerp = Math::Lerp(mMeshLerp, 1.0f, 0.2f);
+	if (lGfxPhysMeshOffsetCount)
+	{
+		mStartMeshSlide = false;
+		mMeshOffset = lGfxPhysMeshOffset / (float)lGfxPhysMeshOffsetCount;
+	}
+	mMeshOffset *= 0.99f;
 
 	if (mEngineSoundResource.GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
@@ -201,7 +203,7 @@ void CppContextObject::UiMove()
 
 void CppContextObject::ActivateLerp()
 {
-	mMeshLerp = 0.3f;
+	mStartMeshSlide = true;
 }
 
 void CppContextObject::OnSoundMoved(const Vector3DF& pPosition, const Vector3DF& pVelocity, float pVolume, float pPitch)

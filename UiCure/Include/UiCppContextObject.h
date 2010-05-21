@@ -73,11 +73,12 @@ protected:
 	bool mEnableUi;
 	MeshArray mMeshResourceArray;
 	size_t mMeshLoadCount;
+	Vector3DF mMeshOffset;
+	bool mStartMeshSlide;
 	Vector3DF mSoundPosition;
 	Vector3DF mSoundVelocity;
 	float mSoundVolume;
 	float mSoundPitch;
-	float mMeshLerp;
 
 	UserRendererImageResource mTextureResource;
 	UserSound3dResource mEngineSoundResource;
