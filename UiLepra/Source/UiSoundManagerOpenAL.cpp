@@ -10,8 +10,10 @@
 
 
 
+#ifdef LEPRA_WINDOWS
 extern "C" ALC_API void ALC_APIENTRY alc_init(void);	// Not intended for this type of use, but LGPL OpenAL can't load dsound.dll from DllMain.
 extern "C" ALC_API void ALC_APIENTRY alc_deinit(void);	// Not intended for this type of use, but LGPL OpenAL can't load dsound.dll from DllMain.
+#endif // Windows
 
 
 
