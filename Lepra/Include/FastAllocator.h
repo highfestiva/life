@@ -33,17 +33,21 @@
 
 
 
-#ifndef FASTALLOCATOR_H
-#define FASTALLOCATOR_H
+#pragma once
 
 #include "LepraTypes.h"
 #include <stddef.h>
+#include <stdint.h>
 
 #define FA_TEMPLATE template<class _Obj, class _LockType>
 #define FA_QUAL FastAllocator<_Obj, _LockType>
 
+
+
 namespace Lepra
 {
+
+
 
 class DummyLock
 {
@@ -266,9 +270,11 @@ FA_TEMPLATE void FA_QUAL::ResetChunk(int pChunk)
 	}
 }
 
-} // End namespace.
+
+
+}
+
+
 
 #undef FA_TEMPLATE
 #undef FA_QUAL
-
-#endif

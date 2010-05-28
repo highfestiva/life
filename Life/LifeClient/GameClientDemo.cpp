@@ -6,7 +6,7 @@
 
 #include "GameClientDemo.h"
 //#ifdef LIFE_DEMO
-#include "../../UiTbc/Include/GUI/UiDesktopWindow.h"
+#include "../../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../../Cure/Include/TimeManager.h"
@@ -14,7 +14,7 @@
 #include "../../Lepra/Include/SystemManager.h"
 #include "../../TBC/Include/ChunkyPhysics.h"
 #include "../../UiCure/Include/UiRuntimeVariableName.h"
-#include "../../UiTbc/Include/UiFontManager.h"
+#include "../../UiTBC/Include/UiFontManager.h"
 #include "GameClientMasterTicker.h"
 #include "Vehicle.h"
 

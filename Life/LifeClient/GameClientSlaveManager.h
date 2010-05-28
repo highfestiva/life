@@ -12,7 +12,7 @@
 #include "../../Lepra/Include/Timer.h"
 #include "../../TBC/Include/PhysicsEngine.h"
 #include "../../UiCure/Include/UiResourceManager.h"
-#include "../../UiTbc/Include/UiFontManager.h"
+#include "../../UiTBC/Include/UiFontManager.h"
 #include "../GameManager.h"
 #include "ClientConsoleManager.h"
 #include "ClientLoginView.h"
