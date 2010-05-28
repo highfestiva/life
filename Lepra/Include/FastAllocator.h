@@ -37,7 +37,9 @@
 
 #include "LepraTypes.h"
 #include <stddef.h>
+#ifndef LEPRA_WINDOWS
 #include <stdint.h>
+#endif // Windows
 
 #define FA_TEMPLATE template<class _Obj, class _LockType>
 #define FA_QUAL FastAllocator<_Obj, _LockType>
