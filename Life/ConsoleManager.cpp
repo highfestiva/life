@@ -640,7 +640,7 @@ bool ConsoleManager::SaveSystemConfigFile(int pScopeSkipCount, File* pFile, cons
 {
 	pFile->WriteString<wchar_t>(L"// Generated system shell script section.\n");
 	std::list<str> lVariableList = GetVariableScope()->GetVariableNameList(Cure::RuntimeVariableScope::SEARCH_EXPORTABLE, pScopeSkipCount);
-	return (SaveConfigFile(pFile, str(), lVariableList, pUserConfig));
+	return (SaveConfigFile(pFile, str(_T("/")), lVariableList, pUserConfig));
 }
 
 bool ConsoleManager::SaveConfigFile(File* pFile, const str& pPrefix, std::list<str>& pVariableList, const wstr& pUserConfig)

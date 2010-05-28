@@ -582,10 +582,11 @@ class GroupReader(DefaultMAReader):
                                                 curdir = os.path.splitdrive(os.path.abspath(os.curdir))[0]
                                                 texturename = os.path.relpath(os.path.normpath(texturename), curdir)
                                                 texturename = texturename.replace("\\", "/")
-                                                if texturename.startswith("."):
-                                                        print("Error: this relative path will become a problem for you:")
-                                                        print(texturename)
-                                                        sys.exit(1)
+                                                while not texturename.startswith("Data/"):
+                                                        texturename = "/".join(texturename.split("/")[1:])
+                                                        if texturename.find("Data/") < 0:
+                                                                print("Error: this path will become a problem for you:", texturename)
+                                                                sys.exit(1)
                                                 textureNames += [texturename]
 
                                         ambc = material.get_fixed_attribute("ambc", optional=True, default=[0.0]*3)
