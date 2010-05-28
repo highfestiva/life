@@ -1253,7 +1253,7 @@ unsigned int OpenGLRenderer::RenderScene()
 	return (GetCurrentFrame());
 }
 
-void OpenGLRenderer::RenderRelative(TBC::GeometryBase* pGeometry)
+void OpenGLRenderer::RenderRelative(TBC::GeometryBase* pGeometry, const QuaternionF* pLightOrientation)
 {
 	OGL_ASSERT();
 
@@ -1265,6 +1265,19 @@ void OpenGLRenderer::RenderRelative(TBC::GeometryBase* pGeometry)
 
 	::glEnable(GL_DEPTH_TEST);
 
+	if (pLightOrientation)
+	{
+		::glEnable(GL_LIGHTING);
+		const int lLightIndex = GetLightIndex(0);
+		LightData& lData = GetLightData(lLightIndex);
+		const Vector3DF lPreviousDirection = lData.mDirection;
+		QuaternionF lOrientation = pGeometry->GetTransformation().GetOrientation().GetInverse();
+		lOrientation *= *pLightOrientation;
+		lData.mDirection = lOrientation * lData.mDirection;
+		SetupGLLight(lLightIndex, lData);
+		lData.mDirection = lPreviousDirection;
+	}
+
 	GeometryData* lGeometryData = (GeometryData*)pGeometry->GetRendererData();
 	if (lGeometryData)
 	{
@@ -1275,6 +1288,7 @@ void OpenGLRenderer::RenderRelative(TBC::GeometryBase* pGeometry)
 
 	PostRender(pGeometry);
 
+	::glDisable(GL_LIGHTING);
 	::glDisable(GL_DEPTH_TEST);
 
 	::glMatrixMode(GL_MODELVIEW);

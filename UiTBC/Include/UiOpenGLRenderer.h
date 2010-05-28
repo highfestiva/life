@@ -123,7 +123,7 @@ public:
 	bool ChangeMaterial(GeometryID pGeometryID, MaterialType pMaterialType);
 
 	virtual unsigned int RenderScene();
-	virtual void RenderRelative(TBC::GeometryBase* pGeometry);
+	virtual void RenderRelative(TBC::GeometryBase* pGeometry, const QuaternionF* pLightOrientation);
 
 	// Only used by the OpenGL material classes.
 	int GetEnvMapID();

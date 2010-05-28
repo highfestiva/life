@@ -129,6 +129,7 @@ Engine
 + Logging on in two steps: a) normal login, server returns avatars, and b) enter world by selecting avatar. (After (a) the sync goes.)
 . Port client to Mac OS X / Cocoa.
 
+. Make all materials use PreRender and PostRender. Clean code up around there.
 . Fix dynamic physical object <--> dynamic physical object friction. Currently looks like it's hardcoded + BIG. (Hovercraft on elevator, for instance.)
 . Create ability for lossless UDP transfers.
 . When having several control units, the "input threshold" does not work. Make a threshold for each input entity.

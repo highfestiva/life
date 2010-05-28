@@ -492,6 +492,7 @@ void GameClientMasterTicker::CreatePlayerCountWindow()
 	mServer = 0;
 	//assert(!mIsPlayerCountViewActive);
 	mIsPlayerCountViewActive = true;
+	mSlaveTopSplit = 1.0f;
 	CreateSlave(&GameClientMasterTicker::CreateViewer);
 }
 
@@ -530,7 +531,7 @@ bool GameClientMasterTicker::Reinitialize()
 		// TODO: replace with world-load.
 		mUiManager->GetRenderer()->AddDirectionalLight(
 			UiTbc::Renderer::LIGHT_STATIC, Vector3DF(0, 0.5f, -1),
-			Color::Color(255, 255, 255), 1, 20);
+			Color::Color(255, 255, 255), 1.5f, 20);
 		mUiManager->GetInputManager()->AddKeyCodeInputObserver(this);
 	}
 	if (lOk)

@@ -490,7 +490,7 @@ public:
 	// Used for rendering stuff that are NOT in the world, such as
 	// 3D-objects in the GUI. The position of the geometry is considered
 	// relative to the camera.
-	virtual void RenderRelative(TBC::GeometryBase* pGeometry) = 0;
+	virtual void RenderRelative(TBC::GeometryBase* pGeometry, const QuaternionF* pLightOrientation) = 0;
 
 	unsigned int GetCurrentFrame() const;
 

@@ -70,6 +70,8 @@ public:
 	inline virtual ~OpenGLMatSingleColorSolid(){}
 
 	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame);
+	virtual void PreRender();
+	virtual void PostRender();
 
 protected:
 	virtual void RenderGeometry(TBC::GeometryBase* pGeometry);
@@ -96,6 +98,8 @@ public:
 	inline virtual ~OpenGLMatSingleColorBlended(){}
 
 	virtual void RenderAllGeometry(unsigned int pCurrentFrame);
+	virtual void PreRender();
+	virtual void PostRender();
 	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame);
 
 protected:

@@ -237,7 +237,9 @@ void RoadSignButton::RenderButton(UiTbc::CustomButton*)
 			mFov = mScreenPart->UpdateFrustum();
 		}
 
-		GetUiManager()->GetRenderer()->RenderRelative(lGfxGeometry);
+		QuaternionF lLightOrientation;
+		lLightOrientation.RotateAroundOwnX(PIF/8);
+		GetUiManager()->GetRenderer()->RenderRelative(lGfxGeometry, &lLightOrientation);
 	}
 	GetUiManager()->PreparePaint();	// Back to painting again afterwards.
 }

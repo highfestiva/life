@@ -95,10 +95,6 @@ int Application::Run()
 	if (lOk)
 	{
 		lOk = Network::Start();
-		if (lOk && strutil::StartsWith(CURE_RTVAR_GET(Cure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("")), _T("0.0.0.0:")))
-		{
-			CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, Network::GetHostname()+_T(":16650"));
-		}
 	}
 	if (lOk)
 	{

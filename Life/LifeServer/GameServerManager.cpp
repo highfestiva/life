@@ -665,7 +665,7 @@ void GameServerManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 		}
 		else
 		{
-			mLog.Infof(_T("Loaded object %s."), pObject->GetClassId().c_str());
+			log_volatile(mLog.Debugf(_T("Loaded object %s."), pObject->GetClassId().c_str()));
 			OnPhysicsSend(pObject);
 		}
 	}

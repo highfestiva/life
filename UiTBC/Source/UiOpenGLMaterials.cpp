@@ -124,20 +124,9 @@ void OpenGLMaterial::UpdateTextureMatrix(TBC::GeometryBase* pGeometry)
 
 void OpenGLMatSingleColorSolid::DoRenderAllGeometry(unsigned int pCurrentFrame)
 {
-	glDisable(GL_ALPHA_TEST);
-	glDisable(GL_BLEND);
-	glDisable(GL_LOGIC_OP);
-	glDisable(GL_TEXTURE_2D);
-
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_NORMAL_ARRAY);
-	glDisableClientState(GL_COLOR_ARRAY);
-	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	glEnable(GL_COLOR_MATERIAL);
-
-	glColorMaterial(GL_FRONT, GL_AMBIENT);
-
+	PreRender();
 	Material::DoRenderAllGeometry(pCurrentFrame);
+	PostRender();
 }
 
 void OpenGLMatSingleColorSolid::RenderGeometry(TBC::GeometryBase* pGeometry)
@@ -145,6 +134,28 @@ void OpenGLMatSingleColorSolid::RenderGeometry(TBC::GeometryBase* pGeometry)
 	PrepareBasicMaterialSettings(pGeometry);
 	RenderBaseGeometry(pGeometry);
 	((OpenGLRenderer*)GetRenderer())->ResetAmbientLight();
+}
+
+void OpenGLMatSingleColorSolid::PreRender()
+{
+	::glDisable(GL_ALPHA_TEST);
+	::glDisable(GL_BLEND);
+	::glDisable(GL_LOGIC_OP);
+	::glDisable(GL_TEXTURE_2D);
+
+	::glEnableClientState(GL_VERTEX_ARRAY);
+	::glEnableClientState(GL_NORMAL_ARRAY);
+	::glDisableClientState(GL_COLOR_ARRAY);
+	::glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	::glEnable(GL_COLOR_MATERIAL);
+
+	::glColorMaterial(GL_FRONT, GL_AMBIENT);
+}
+
+void OpenGLMatSingleColorSolid::PostRender()
+{
+	::glDisableClientState(GL_NORMAL_ARRAY);
+	::glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 void OpenGLMatSingleColorSolid::RenderBaseGeometry(TBC::GeometryBase* pGeometry)
@@ -202,19 +213,30 @@ void OpenGLMatSingleColorBlended::RenderAllGeometry(unsigned int pCurrentFrame)
 	RenderAllBlendedGeometry(pCurrentFrame);
 }
 
+void OpenGLMatSingleColorBlended::PreRender()
+{
+	::glDisable(GL_ALPHA_TEST);
+	::glEnable(GL_BLEND);
+	::glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	::glEnableClientState(GL_VERTEX_ARRAY);
+	::glEnableClientState(GL_NORMAL_ARRAY);
+	::glEnable(GL_COLOR_MATERIAL);
+
+	::glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+}
+
+void OpenGLMatSingleColorBlended::PostRender()
+{
+	::glDisableClientState(GL_NORMAL_ARRAY);
+	::glDisableClientState(GL_VERTEX_ARRAY);
+}
+
 void OpenGLMatSingleColorBlended::DoRenderAllGeometry(unsigned int pCurrentFrame)
 {
-	glDisable(GL_ALPHA_TEST);
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_NORMAL_ARRAY);
-	glEnable(GL_COLOR_MATERIAL);
-	glEnable(GL_BLEND);
 
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-
+	PreRender();
 	Material::DoRenderAllGeometry(pCurrentFrame);
+	PostRender();
 }
 
 
@@ -391,20 +413,28 @@ void OpenGLMatSingleTextureSolid::RenderGeometry(TBC::GeometryBase* pGeometry)
 
 void OpenGLMatSingleTextureSolid::PreRender()
 {
-	glEnable(GL_TEXTURE_2D);
-	glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR);
+	::glDisable(GL_ALPHA_TEST);
+	::glDisable(GL_BLEND);
+	::glDisable(GL_LOGIC_OP);
+	::glEnable(GL_TEXTURE_2D);
 
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	::glEnableClientState(GL_VERTEX_ARRAY);
+	::glEnableClientState(GL_NORMAL_ARRAY);
+	::glDisableClientState(GL_COLOR_ARRAY);
+	::glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	::glEnable(GL_COLOR_MATERIAL);
 
-	//glTexEnvf(GL_TEXTURE_FILTER_CONTROL, GL_TEXTURE_LOD_BIAS, 0.0f);
+	::glColorMaterial(GL_FRONT, GL_AMBIENT);
+
+	::glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR);
 }
 
 void OpenGLMatSingleTextureSolid::PostRender()
 {
-	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	glDisable(GL_TEXTURE_2D);
-
-//	glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_COLOR_SINGLE);
+	::glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	::glDisableClientState(GL_NORMAL_ARRAY);
+	::glDisableClientState(GL_VERTEX_ARRAY);
+	::glDisable(GL_TEXTURE_2D);
 }
 
 void OpenGLMatSingleTextureSolid::BindTexture(int pTextureID)

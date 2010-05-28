@@ -440,7 +440,7 @@ class GroupReader(DefaultMAReader):
                                         d = textureuv(shared_indices[ts[x]][0])
                                         split = []
                                         for s in shared_indices[ts[x]][1:]:
-                                                if angle(c, normal(s)) > 60 or uvdiff(d, textureuv(s)) > 0.01:
+                                                if angle(c, normal(s)) > 40 or uvdiff(d, textureuv(s)) > 0.01:
                                                         split += [s]
                                         # Push all the once that we don't join together at the end.
                                         if split:

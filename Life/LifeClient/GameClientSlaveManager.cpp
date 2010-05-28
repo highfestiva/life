@@ -580,12 +580,26 @@ void GameClientSlaveManager::CreateLoginView()
 {
 	if (!mLoginWindow && !GetNetworkClient()->IsActive())
 	{
-		mLoginWindow = new ClientLoginView(this, mDisconnectReason);
-		mUiManager->AssertDesktopLayout(new UiTbc::FloatingLayout());
-		mUiManager->GetDesktopWindow()->AddChild(mLoginWindow);
-		mLoginWindow->SetPos(mRenderArea.GetCenterX()-mLoginWindow->GetSize().x/2,
-			mRenderArea.GetCenterY()-mLoginWindow->GetSize().y/2);
-		mLoginWindow->GetChild(_T("User"), 0)->SetKeyboardFocus();
+		// If first attempt (i.e. no connection problems) just skip interactivity.
+		if (mDisconnectReason.empty())
+		{
+			str lServerName = _T("0.0.0.0:16650");
+			lServerName = CURE_RTVAR_TRYGET(Cure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, lServerName);
+			const wstr lUsername = wstrutil::Format(L"User%u", mSlaveIndex);
+			wstr lReadablePassword = L"CarPassword";
+			const Cure::MangledPassword lPassword(lReadablePassword);
+			const Cure::LoginId lLoginToken(lUsername, lPassword);
+			RequestLogin(lServerName, lLoginToken);
+		}
+		else
+		{
+			mLoginWindow = new ClientLoginView(this, mDisconnectReason);
+			mUiManager->AssertDesktopLayout(new UiTbc::FloatingLayout());
+			mUiManager->GetDesktopWindow()->AddChild(mLoginWindow);
+			mLoginWindow->SetPos(mRenderArea.GetCenterX()-mLoginWindow->GetSize().x/2,
+				mRenderArea.GetCenterY()-mLoginWindow->GetSize().y/2);
+			mLoginWindow->GetChild(_T("User"), 0)->SetKeyboardFocus();
+		}
 	}
 }
 
@@ -884,8 +898,11 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 						lMessageStatus->GetMessageString(lAvatarName);
 						Cure::UserAccount::AvatarId lAvatarId = strutil::Encode(lAvatarName);
 						log_adebug("Status: INFO_AVATAR...");
-						str lTextureId = strutil::Format(_T("Data/%s.png"), lAvatarId.c_str());
-						lTextureId = _T("Data/road_sign_car.png");
+						str lTextureId = strutil::Format(_T("Data/road_sign_%s.png"), lAvatarId.c_str());
+						if (!DiskFile::Exists(lTextureId))
+						{
+							lTextureId = _T("Data/road_sign_car.png");
+						}
 						RoadSignButton* lButton = new RoadSignButton(this, GetResourceManager(),
 							mUiManager, lAvatarId, _T("road_sign_01"), lTextureId, RoadSignButton::SHAPE_ROUND);
 						GetContext()->AddLocalObject(lButton);
@@ -996,10 +1013,10 @@ void GameClientSlaveManager::ProcessNumber(Cure::MessageNumber::InfoType pType, 
 				mPingAttemptCount = 0;
 				const float lPingTime = GetTimeManager()->ConvertPhysicsFramesToSeconds(GetTimeManager()->GetCurrentPhysicsFrame()-pInteger);
 				const float lServerStriveTime = GetTimeManager()->ConvertPhysicsFramesToSeconds((int)pFloat)*2;
-				mLog.Infof(_T("Pong: this=%ss, server sim strives to be x2=%ss ahead, (self=%s)."),
+				log_volatile(mLog.Debugf(_T("Pong: this=%ss, server sim strives to be x2=%ss ahead, (self=%s)."),
 					Number::ConvertToPostfixNumber(lPingTime, 2).c_str(),
 					Number::ConvertToPostfixNumber(lServerStriveTime, 2).c_str(),
-					GetNetworkClient()->GetSocket()->GetLocalAddress().GetAsString().c_str());
+					GetNetworkClient()->GetSocket()->GetLocalAddress().GetAsString().c_str()));
 			}
 		}
 		break;
@@ -1054,7 +1071,7 @@ void GameClientSlaveManager::OnLoadCompleted(Cure::ContextObject* pObject, bool 
 		}
 		else
 		{
-			mLog.Infof(_T("Loaded object %s."), pObject->GetClassId().c_str());
+			log_volatile(mLog.Debugf(_T("Loaded object %s."), pObject->GetClassId().c_str()));
 		}
 	}
 	else
