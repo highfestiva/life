@@ -67,7 +67,7 @@ private:
 	static GameClientSlaveManager* CreateViewer(GameClientMasterTicker* pMaster,
 		Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
 		UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea);
-	static GameClientSlaveManager* GameClientMasterTicker::CreateDemo(GameClientMasterTicker* pMaster,
+	static GameClientSlaveManager* CreateDemo(GameClientMasterTicker* pMaster,
 		Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
 		UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea);
 	bool CreateSlave(SlaveFactoryMethod pCreate);

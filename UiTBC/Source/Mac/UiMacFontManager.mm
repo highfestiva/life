@@ -60,7 +60,7 @@ void MacFontManager::SetColor(const Color& pColor, unsigned pColorIndex)
 	mColorRef[pColorIndex] = lColor;*/
 }
 
-MacFontManager::FontId MacFontManager::AddFont(const str& pFontName, double pSize, Lepra::uint32 pFlags, CharacterSet pCharSet)
+MacFontManager::FontId MacFontManager::AddFont(const str& pFontName, double pSize, int pFlags, CharacterSet pCharSet)
 {
 	/*int lWeight  = ((pFlags & BOLD) != 0) ? FW_BOLD : FW_NORMAL;
 	DWORD lItalic = ((pFlags & ITALIC) != 0) ? TRUE : FALSE;

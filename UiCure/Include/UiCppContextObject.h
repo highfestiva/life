@@ -75,11 +75,12 @@ protected:
 	size_t mMeshLoadCount;
 	TextureArray mTextureResourceArray;
 	size_t mTextureLoadCount;
+	Vector3DF mMeshOffset;
+	bool mStartMeshSlide;
 	Vector3DF mSoundPosition;
 	Vector3DF mSoundVelocity;
 	float mSoundVolume;
 	float mSoundPitch;
-	float mMeshLerp;
 
 	UserSound3dResource mEngineSoundResource;
 
