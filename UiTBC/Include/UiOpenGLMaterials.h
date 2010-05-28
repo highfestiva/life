@@ -181,6 +181,8 @@ public:
 
 	virtual bool AddGeometry(TBC::GeometryBase* pGeometry);
 	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame);
+	virtual void PreRender();
+	virtual void PostRender();
 
 protected:
 	

@@ -55,9 +55,8 @@ protected:
 	const UiTbc::ChunkyClass* GetClass() const;
 	TBC::GeometryBase* GetMesh(int pIndex) const;
 
-	void __GetFuckedUpMeshesRemoveMe(UiTbc::ChunkyClass* pClass) const;
-
 	void OnLoadClass(UserClassResource* pClassResource);
+	virtual void LoadTextures();
 	void OnLoadMesh(UserGeometryReferenceResource* pMeshResource);
 	virtual void DispatchOnLoadMesh(UserGeometryReferenceResource* pMeshResource);
 	void OnLoadTexture(UserRendererImageResource* pTextureResource);
@@ -67,19 +66,21 @@ protected:
 	virtual str GetMeshInstanceId() const;
 
 	typedef std::vector<UserGeometryReferenceResource*> MeshArray;
+	typedef std::vector<UserRendererImageResource*> TextureArray;
 
 	GameUiManager* mUiManager;
 	UserClassResource* mUiClassResource;
 	bool mEnableUi;
 	MeshArray mMeshResourceArray;
 	size_t mMeshLoadCount;
+	TextureArray mTextureResourceArray;
+	size_t mTextureLoadCount;
 	Vector3DF mSoundPosition;
 	Vector3DF mSoundVelocity;
 	float mSoundVolume;
 	float mSoundPitch;
 	float mMeshLerp;
 
-	UserRendererImageResource mTextureResource;
 	UserSound3dResource mEngineSoundResource;
 
 	LOG_CLASS_DECLARE();

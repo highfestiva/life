@@ -117,6 +117,8 @@ public:
 	void SetLightPosition(LightID pLightID, float pX, float pY, float pZ);
 	void SetLightDirection(LightID pLightID, float pX, float pY, float pZ);
 
+	virtual TextureID AddTexture(Texture* pTexture);
+
 	void UpdateGeometry(GeometryID pGeometryID);
 	bool ChangeMaterial(GeometryID pGeometryID, MaterialType pMaterialType);
 

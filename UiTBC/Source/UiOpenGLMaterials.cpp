@@ -350,19 +350,7 @@ bool OpenGLMatSingleTextureSolid::AddGeometry(TBC::GeometryBase* pGeometry)
 
 void OpenGLMatSingleTextureSolid::DoRenderAllGeometry(unsigned int pCurrentFrame)
 {
-	glEnable(GL_TEXTURE_2D);
-	glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR);
-
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-
-	//glTexEnvf(GL_TEXTURE_FILTER_CONTROL, GL_TEXTURE_LOD_BIAS, 0.0f);
-
 	OpenGLMaterial::DoRenderAllGeometry(pCurrentFrame);
-
-	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	glDisable(GL_TEXTURE_2D);
-
-//	glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_COLOR_SINGLE);
 }
 
 void OpenGLMatSingleTextureSolid::RenderGeometry(TBC::GeometryBase* pGeometry)
@@ -399,8 +387,24 @@ void OpenGLMatSingleTextureSolid::RenderGeometry(TBC::GeometryBase* pGeometry)
 		glTexCoordPointer(2, GL_FLOAT, 0, pGeometry->GetUVData(0));
 		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry), pGeometry->GetIndexCount(), GL_UNSIGNED_INT, pGeometry->GetIndexData());
 	}
+}
 
-	((OpenGLRenderer*)GetRenderer())->ResetAmbientLight();
+void OpenGLMatSingleTextureSolid::PreRender()
+{
+	glEnable(GL_TEXTURE_2D);
+	glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR);
+
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+	//glTexEnvf(GL_TEXTURE_FILTER_CONTROL, GL_TEXTURE_LOD_BIAS, 0.0f);
+}
+
+void OpenGLMatSingleTextureSolid::PostRender()
+{
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	glDisable(GL_TEXTURE_2D);
+
+//	glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_COLOR_SINGLE);
 }
 
 void OpenGLMatSingleTextureSolid::BindTexture(int pTextureID)

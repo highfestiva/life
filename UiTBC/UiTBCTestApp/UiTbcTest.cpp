@@ -2453,7 +2453,27 @@ bool TestUiTbc()
 
 		{
 			LEPRA_MEASURE_SCOPE(CloseRenderer);
-			CloseRenderer()? 1: lTestOk = false;
+			lTestOk = CloseRenderer();
+		}
+
+		if (lTestOk)
+		{
+			UiTbc::TriangleBasedGeometry lMesh;
+			bool lCastShadows = false;
+			DiskFile lFile;
+			lTestOk = lFile.Open(_T("Data/road_sign_01_sign.mesh"), DiskFile::MODE_READ);
+			assert(lTestOk);
+			if (lTestOk)
+			{
+				UiTbc::ChunkyMeshLoader lLoader(&lFile, false);
+				lTestOk = lLoader.Load(&lMesh, lCastShadows);
+				assert(lTestOk);
+				if (lTestOk)
+				{
+					lTestOk = (lMesh.GetUVSetCount() == 1);
+					assert(lTestOk);
+				}
+			}
 		}
 	}
 	return (lTestOk);

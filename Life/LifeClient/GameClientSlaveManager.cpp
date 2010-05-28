@@ -884,7 +884,8 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 						lMessageStatus->GetMessageString(lAvatarName);
 						Cure::UserAccount::AvatarId lAvatarId = strutil::Encode(lAvatarName);
 						log_adebug("Status: INFO_AVATAR...");
-						str lTextureId = strutil::Format(_T("Data/%s.png;%i"), lAvatarId.c_str(), mSlaveIndex);
+						str lTextureId = strutil::Format(_T("Data/%s.png"), lAvatarId.c_str());
+						lTextureId = _T("Data/road_sign_car.png");
 						RoadSignButton* lButton = new RoadSignButton(this, GetResourceManager(),
 							mUiManager, lAvatarId, _T("road_sign_01"), lTextureId, RoadSignButton::SHAPE_ROUND);
 						GetContext()->AddLocalObject(lButton);

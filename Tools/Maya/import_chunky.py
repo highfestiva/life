@@ -294,6 +294,11 @@ class GroupReader(DefaultMAReader):
                         n = node.getAttrValue("rgn", "rgn", None, n=None)
                         if n:
                                 node.fix_attribute("rgn", n)
+                        uv = node.getAttrValue("rguv0", "rguv0", None, n=None)
+                        if uv:
+                                for x in range(1, len(uv), 3):
+                                        uv[x] = -uv[x]
+                                node.fix_attribute("rguv", uv)
 
 
         def fixroottrans(self, group):
@@ -325,11 +330,18 @@ class GroupReader(DefaultMAReader):
                 for node in group:
                         faces = node.get_fixed_attribute("rgf", optional=True)
                         norms = node.get_fixed_attribute("rgn", optional=True)
+                        uvs = node.get_fixed_attribute("rguv", optional=True)
                         if norms:
                                 if type(norms) == str:
                                         norms = norms[1]        # From ("(", "...", ")") to "..."
                                         norms = eval(norms[1:-1])
                                 newnorms = []
+                        if uvs:
+                                x = len(uvs)//3 - 1
+                                while x >= 0:
+                                        uvs = uvs[:x*3+2] + uvs[x*3+3:]
+                                        x -= 1
+                                newuvs = []
                         if faces:
                                 triangles = []
                                 if not type(faces) == str:
@@ -343,13 +355,19 @@ class GroupReader(DefaultMAReader):
                                                         newnorms += [norms[(facec+0)*3+0], norms[(facec+0)*3+1], norms[(facec+0)*3+2]]
                                                         newnorms += [norms[(facec+x)*3+0], norms[(facec+x)*3+1], norms[(facec+x)*3+2]]
                                                         newnorms += [norms[(facec+x+1)*3+0], norms[(facec+x+1)*3+1], norms[(facec+x+1)*3+2]]
+                                                if uvs:
+                                                        newuvs += [uvs[(facec+0)*2+0], uvs[(facec+0)*2+1]]
+                                                        newuvs += [uvs[(facec+x)*2+0], uvs[(facec+x)*2+1]]
+                                                        newuvs += [uvs[(facec+x+1)*2+0], uvs[(facec+x+1)*2+1]]
                                         facec += len(face)
-                                                
+
                                 node.fix_attribute("rgtri", triangles)
                                 if norms:
 ##                                        print("Before: normal count=%i, face count*3=%i." % (len(norms), facec*3))
 ##                                        print("After:  normal count=%i,  tri count*3=%i." % (len(newnorms), len(triangles)*3))
                                         node.fix_attribute("rgn", newnorms)
+                                if uvs:
+                                        node.fix_attribute("rguv", newuvs)
 
 
         def makevertsrelative(self, group):
@@ -374,15 +392,23 @@ class GroupReader(DefaultMAReader):
 
 
         def splitverts(self, group):
-                """Split mesh vertices that have normals (=hard edges). But to complicate things,
-                   I keep vertices together that share a similar normal."""
+                """Split mesh vertices that have different normals or UVs (=hard edges).
+                   But to complicate things, Ikeep vertices together that share a similar normal/UV."""
                 for node in group:
                         vs = node.get_fixed_attribute("rgvtx", optional=True)
                         ts = node.get_fixed_attribute("rgtri", optional=True)
                         ns = node.get_fixed_attribute("rgn", optional=True)
+                        uvs = node.get_fixed_attribute("rguv", optional=True)
+                        #if uvs:
+                        #        print("UVs before split:")
+                        #        print(uvs)
                         if ns:
                                 def vertex(idx):
                                         return vec3(vs[idx*3+0], vs[idx*3+1], vs[idx*3+2])
+                                def textureuv(idx):
+                                        if uvs:
+                                                return (uvs[idx*2+0], uvs[idx*2+1])
+                                        return (0.0, 0.0)
                                 def normal(idx):
                                         return vec3(ns[idx*3+0], ns[idx*3+1], ns[idx*3+2])
                                 def angle(n1, n2):
@@ -391,55 +417,77 @@ class GroupReader(DefaultMAReader):
                                                         return 0
                                                 return 180
                                         return math.degrees(math.fabs(n1.angle(n2)))
+                                def uvdiff(t1, t2):
+                                        dx = t1[0]-t2[0]
+                                        dy = t1[1]-t2[1]
+                                        return math.sqrt(dx*dx+dy*dy)
 
                                 original_vsc = len(vs)
 
                                 # Create a number of UNIQUE empty lists. Hence the for loop.
-                                normal_indices = []
+                                shared_indices = []
                                 for u in range(len(vs)//3):
-                                        normal_indices += [[]]
+                                        shared_indices += [[]]
 
                                 end = len(ts)
                                 x = 0
                                 while x < end:
-                                        normal_indices[ts[x]] += [x]
+                                        shared_indices[ts[x]] += [x]
                                         x += 1
                                 x = 0
                                 while x < end:
-                                        c = normal(normal_indices[ts[x]][0])
+                                        c = normal(shared_indices[ts[x]][0])
+                                        d = textureuv(shared_indices[ts[x]][0])
                                         split = []
-                                        for s in normal_indices[ts[x]][1:]:
-                                                if angle(c, normal(s)) > 60:
+                                        for s in shared_indices[ts[x]][1:]:
+                                                if angle(c, normal(s)) > 60 or uvdiff(d, textureuv(s)) > 0.01:
                                                         split += [s]
                                         # Push all the once that we don't join together at the end.
                                         if split:
                                                 new_index = len(vs)//3
                                                 v = vertex(ts[x])
                                                 vs += v[:]
-                                                normal_indices += [[]]
+                                                shared_indices += [[]]
                                                 for s in split:
-                                                        normal_indices[ts[s]].remove(s)
+                                                        shared_indices[ts[s]].remove(s)
                                                         ts[s] = new_index
-                                                        normal_indices[ts[s]] += [s]
-                                                if len(normal_indices) != len(vs)/3:
-                                                        print("Internal error: normals no longer corresponds to vertices!")
-                                                # We don't need to restart after we split a vertex, since the lower indexed siamese of this vertex
-                                                # already approved of all contained herein, otherwise they would not still lie in the same bucket.
-                                                #x = -1 
+                                                        shared_indices[ts[s]] += [s]
+                                                if len(shared_indices) != len(vs)/3:
+                                                        print("Internal error: normals/UVs no longer corresponds to vertices!")
+                                                        sys.exit(4)
                                         x += 1
+
                                 normals = [0.0]*len(vs)
-                                for join_indices in normal_indices:
+                                textureuvs = [0.0]*(len(vs)*2//3)
+                                for join_indices in shared_indices:
                                         # Join 'em by simply adding normals together and normalizing.
                                         n = vec3(0,0,0)
+                                        uv = [0.0, 0.0]
+                                        cnt = 0;
                                         for j in join_indices:
                                                 n += normal(j)
+                                                uv2 = textureuv(j)
+                                                uv[0] += uv2[0]
+                                                uv[1] += uv2[1]
+                                                cnt += 1
                                         idx = ts[join_indices[0]]
-                                        idx = idx*3+0
+                                        n_idx = idx*3+0
+                                        uv_idx = idx*2+0
                                         try:
-                                                normals[idx:idx+3] = n.normalize()[:]
+                                                normals[n_idx:n_idx+3] = n.normalize()[:]
                                         except ZeroDivisionError:
                                                 pass
+                                        try:
+                                                textureuvs[uv_idx:uv_idx+2] = [uv[0]/cnt, uv[1]/cnt]
+                                        except ZeroDivisionError:
+                                                pass
+                                node.fix_attribute("rgvtx", vs)
+                                node.fix_attribute("rgtri", ts)
                                 node.fix_attribute("rgn", normals)
+                                if uvs:
+                                        node.fix_attribute("rguv", textureuvs)
+                                        #print("UVs after split:")
+                                        #print(textureuvs)
                                 if options.options.verbose:
                                         print("Mesh %s was made %.1f times larger due to (hard?) edges, and %.1f %% of worst-case size." %
                                               (node.getName(), len(normals)/original_vsc-1, len(normals)*100/len(ns)))
@@ -526,13 +574,26 @@ class GroupReader(DefaultMAReader):
                                         shader = shaders[0]
                                         material = shader.getInNode("ss", "ss")
                                         material = self._getnode(material[0], mat_group)
+                                        texture = ""
+                                        textureNode = material.getInNode("c", "c")
+                                        textureNode = self._getnode(textureNode[0], mat_group)
+                                        if textureNode:
+                                                texturename = os.path.splitdrive(stripQuotes(textureNode.get_fixed_attribute("ftn")))[1]
+                                                curdir = os.path.splitdrive(os.path.abspath(os.curdir))[0]
+                                                texturename = os.path.relpath(os.path.normpath(texturename), curdir)
+                                                texturename = texturename.replace("\\", "/")
+                                                if texturename.startswith("."):
+                                                        print("Error: this relative path will become a problem for you:")
+                                                        print(texturename)
+                                                        sys.exit(1)
+                                                textureNames += [texturename]
 
                                         ambc = material.get_fixed_attribute("ambc", optional=True, default=[0.0]*3)
                                         incandescence = material.get_fixed_attribute("ic", optional=True, default=[0.0]*3)
                                         ambient = map(lambda x,y: x+y, ambc, incandescence)
 
                                         dc = material.get_fixed_attribute("dc", optional=True, default=1.0)
-                                        c = material.get_fixed_attribute("c", optional=True, default=[0.5]*3)
+                                        c = material.get_fixed_attribute("c", optional=True, default=[0.9]*3)
                                         diffuse = map(lambda i: i*dc, c)
 
                                         sro = material.get_fixed_attribute("sro", optional=True, default=1.0)
@@ -589,6 +650,7 @@ class GroupReader(DefaultMAReader):
                         vtx = node.get_fixed_attribute("rgvtx", optional=True)
                         polys = node.get_fixed_attribute("rgtri", optional=True)
                         norms = node.get_fixed_attribute("rgn", optional=True)
+                        uvs = node.get_fixed_attribute("rguv", optional=True)
                         if vtx and not polys:
                                 isGroupValid = False
                                 print("Error: mesh '%s' contains vertices, but no triangle definition." % node.getFullName())
@@ -622,6 +684,15 @@ class GroupReader(DefaultMAReader):
                                                 isGroupValid = False
                                                 print("Error: not the same amount of vertices and normals in '%s' (%i verts, %i normals)." %
                                                       (node.getFullName(), len(vtx), len(norms)))
+                                if checknorms and uvs:
+                                        if len(uvs)*3 != len(vtx)*2:
+                                                isGroupValid = False
+                                                print("Error: not the same amount of vertices and UVs in '%s' (%i verts, %i UVs)." %
+                                                      (node.getFullName(), len(vtx), len(uvs)))
+                                                print("Vertices:");
+                                                print(vtx)
+                                                print("UVs:");
+                                                print(uvs)
 ##                        elif node.nodetype == "mesh" and not node.getName().startswith("phys_") and not node.getName().startswith("m_"):
 ##                                isGroupValid = False
 ##                                print("Error: mesh '%s' must be prefixed 'phys_' or 'm_'." % node.getFullName())

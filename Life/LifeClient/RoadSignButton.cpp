@@ -52,7 +52,9 @@ RoadSignButton::RoadSignButton(ScreenPart* pScreenPart, Cure::ResourceManager* p
 	mButton.SetOnIsOver(RoadSignButton, IsOverButton);
 
 	SetPhysicsTypeOverride(PHYSICS_OVERRIDE_BONES);
-	mSignTexture.Load(GetResourceManager(), pTextureResourceName,
+	UiCure::UserRendererImageResource* lTexture = new UiCure::UserRendererImageResource(mUiManager);
+	mTextureResourceArray.push_back(lTexture);
+	lTexture->Load(GetResourceManager(), pTextureResourceName,
 		UiCure::UserRendererImageResource::TypeLoadCallback(this, &RoadSignButton::OnLoadTexture));
 }
 
@@ -251,6 +253,11 @@ bool RoadSignButton::IsOverButton(UiTbc::CustomButton* pButton, int x, int y)
 	return (pButton->Button::IsOver(x, y));
 }
 
+void RoadSignButton::LoadTextures()
+{
+	// We don't want any more textures than we already started loading.
+}
+
 void RoadSignButton::DispatchOnLoadMesh(UiCure::UserGeometryReferenceResource* pMeshResource)
 {
 	Parent::DispatchOnLoadMesh(pMeshResource);
@@ -280,9 +287,9 @@ void RoadSignButton::DispatchOnLoadMesh(UiCure::UserGeometryReferenceResource* p
 	}
 }
 
-void RoadSignButton::OnLoadTexture(UiCure::UserRendererImageResource*)
+void RoadSignButton::OnLoadTexture(UiCure::UserRendererImageResource* pTextureResource)
 {
-	//TryComplete();
+	Parent::OnLoadTexture(pTextureResource);
 }
 
 str RoadSignButton::GetMeshInstanceId() const

@@ -134,6 +134,9 @@ public:
 
 	bool IsEmpty() { return mGeometryGroupList.empty(); }
 
+	virtual void PreRender();
+	virtual void PostRender();
+
 	virtual void RenderAllGeometry(unsigned int pCurrentFrame);
 	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame);
 	virtual void RenderAllBlendedGeometry(unsigned pCurrentFrame);

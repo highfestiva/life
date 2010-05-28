@@ -21,37 +21,6 @@ namespace Cure
 
 
 
-static str RemoveMeTranslateToHardcodedShit(CppContextObject* pObject)
-{
-	if (pObject->GetClassId().find(_T("box_002")) != str::npos)
-	{
-		return (_T("box_01"));
-	}
-	else if (pObject->GetClassId().find(_T("car_001")) != str::npos)
-	{
-		return (_T("car_01"));
-	}
-	else if (pObject->GetClassId().find(_T("monster_001")) != str::npos)
-	{
-		return (_T("monster_01"));
-	}
-	else if (pObject->GetClassId().find(_T("excavator_703")) != str::npos)
-	{
-		return (_T("excavator_01"));
-	}
-	else if (pObject->GetClassId().find(_T("crane_whatever")) != str::npos)
-	{
-		return (_T("crane_01"));
-	}
-	else if (pObject->GetClassId().find(_T("ground_002")) != str::npos)
-	{
-		return (_T("world_01"));
-	}
-	return (EmptyString);
-}
-
-
-
 CppContextObject::CppContextObject(ResourceManager* pResourceManager, const str& pClassId):
 	ContextObject(pResourceManager, pClassId),
 	mClassResource(0),
@@ -89,6 +58,11 @@ void CppContextObject::StartLoadingPhysics(const str& pPhysicsName)
 
 bool CppContextObject::TryComplete()
 {
+	if (!mPhysicsResource)
+	{
+		return (false);
+	}
+
 	if (mPhysicsResource->GetLoadState() == RESOURCE_LOAD_COMPLETE)
 	{
 		if (GetPhysics() && GetManager())

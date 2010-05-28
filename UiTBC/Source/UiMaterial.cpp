@@ -289,6 +289,14 @@ void Material::RemoveAllGeometry()
 	}
 }
 
+void Material::PreRender()
+{
+}
+
+void Material::PostRender()
+{
+}
+
 void Material::RenderAllGeometry(unsigned int pCurrentFrame)
 {
 	if (mEnableDrawMaterial)
@@ -303,6 +311,8 @@ void Material::RenderAllGeometry(unsigned int pCurrentFrame)
 
 void Material::DoRenderAllGeometry(unsigned int pCurrentFrame)
 {
+	PreRender();
+
 	GeometryGroupList::iterator lIter;
 	for (lIter = mGeometryGroupList.begin(); lIter != mGeometryGroupList.end(); ++lIter)
 	{
@@ -342,6 +352,8 @@ void Material::DoRenderAllGeometry(unsigned int pCurrentFrame)
 			}
 		}
 	}
+
+	PostRender();
 }
 
 void Material::RenderAllBlendedGeometry(unsigned pCurrentFrame)

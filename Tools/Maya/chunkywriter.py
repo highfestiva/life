@@ -631,17 +631,14 @@ class MeshWriter(ChunkyWriter):
                 with self._fileopenwrite(filename) as f:
                         self.f = f
                         default_mesh_type = {"static":1, "dynamic":2, "volatile":3}
-                        inner_data = [
-                                (CHUNK_MESH_VERTICES, node.get_fixed_attribute("rgvtx")),
-                                (CHUNK_MESH_TRIANGLES, node.get_fixed_attribute("rgtri")),
-                                (CHUNK_MESH_VOLATILITY, default_mesh_type["static"]),
-                        ]
-                        if self.config.get("casts_shadows"):
-                               inner_data.append((CHUNK_MESH_CASTS_SHADOWS, 1))
-                        ns = node.get_fixed_attribute("rgn", optional=True)
-                        if ns:
-                                #inner_data.append((CHUNK_MESH_NORMALS, ns))
-                                pass
+                        volatility = [(CHUNK_MESH_VOLATILITY, default_mesh_type["static"])]
+                        shadows = [(CHUNK_MESH_CASTS_SHADOWS, 1)] if self.config.get("casts_shadows") else []
+                        verts = [(CHUNK_MESH_VERTICES, node.get_fixed_attribute("rgvtx"))]
+                        polys = [(CHUNK_MESH_TRIANGLES, node.get_fixed_attribute("rgtri"))]
+                        normals = [] # node.get_fixed_attribute("rgn", optional=True)
+                        uvs = node.get_fixed_attribute("rguv", optional=True)
+                        textureuvs = [(CHUNK_MESH_UV, uvs)] if uvs else []
+                        inner_data = volatility+shadows+verts+polys+normals+textureuvs
                         data = (
                                         CHUNK_MESH,
                                         inner_data

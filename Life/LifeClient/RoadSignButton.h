@@ -47,6 +47,7 @@ protected:
 	void OnPhysicsTick();
 	void RenderButton(UiTbc::CustomButton*);
 	bool IsOverButton(UiTbc::CustomButton* pButton, int x, int y);
+	virtual void LoadTextures();
 	virtual void DispatchOnLoadMesh(UiCure::UserGeometryReferenceResource* pMeshResource);
 	void OnLoadTexture(UiCure::UserRendererImageResource* pTextureResource);
 	virtual str GetMeshInstanceId() const;

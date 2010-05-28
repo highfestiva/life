@@ -430,6 +430,12 @@ void OpenGLRenderer::SetLightDirection(LightID pLightID, float pX, float pY, flo
 	OGL_ASSERT();
 }
 
+Renderer::TextureID OpenGLRenderer::AddTexture(Texture* pTexture)
+{
+	pTexture->SwapRGBOrder();
+	return (Parent::AddTexture(pTexture));
+}
+
 void OpenGLRenderer::SetGlobalMaterialReflectance(float pRed, float pGreen, float pBlue, float pSpecularity)
 {
 	// This function is the evidence of the total stupidity behind 
@@ -1262,7 +1268,9 @@ void OpenGLRenderer::RenderRelative(TBC::GeometryBase* pGeometry)
 	GeometryData* lGeometryData = (GeometryData*)pGeometry->GetRendererData();
 	if (lGeometryData)
 	{
+		GetMaterial(lGeometryData->mMaterialType)->PreRender();
 		GetMaterial(lGeometryData->mMaterialType)->RenderGeometry(pGeometry);
+		GetMaterial(lGeometryData->mMaterialType)->PostRender();
 	}
 
 	PostRender(pGeometry);

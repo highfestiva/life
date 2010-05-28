@@ -2,8 +2,9 @@
 // Author: Alexander Hugestrand
 // Copyright (c) 2002-2009, Righteous Games
 
-#include "../Include/BmpLoader.h"
 #include "../Include/ImageLoader.h"
+#include <assert.h>
+#include "../Include/BmpLoader.h"
 #include "../Include/JpegLoader.h"
 #include "../Include/Path.h"
 #include "../Include/PngLoader.h"
@@ -48,7 +49,7 @@ bool ImageLoader::Load(const str& pFileName, Canvas& pCanvas)
 			JpegLoader lJpegLoader;
 			lOk = (lJpegLoader.Load(pFileName, pCanvas) == JpegLoader::STATUS_SUCCESS);
 		}
-		else if(strutil::CompareIgnoreCase(lFileExtension, _T("png")) == 0 || strutil::CompareIgnoreCase(lFileExtension, _T("pngf")) == 0)
+		else if(strutil::CompareIgnoreCase(lFileExtension, _T("png")) == 0)
 		{
 			PngLoader lPngLoader;
 			lOk = (lPngLoader.Load(pFileName, pCanvas) == PngLoader::STATUS_SUCCESS);
@@ -58,6 +59,7 @@ bool ImageLoader::Load(const str& pFileName, Canvas& pCanvas)
 			lOk = false;
 		}
 	}
+	assert(lOk);
 	return (lOk);
 }
 
