@@ -20,31 +20,33 @@ namespace Lepra
 
 int PackerTransformation::Pack(uint8* pDestination, const TransformationF& pSource)
 {
-	// TODO: improve packer.
-	typedef TransformationF::BaseType _T;
+	typedef uint32 _T;
 	int lOffset = 0;
-	*(_T*)&pDestination[lOffset] = pSource.GetOrientation().GetA();	lOffset += sizeof(_T);
-	*(_T*)&pDestination[lOffset] = pSource.GetOrientation().GetB();	lOffset += sizeof(_T);
-	*(_T*)&pDestination[lOffset] = pSource.GetOrientation().GetC();	lOffset += sizeof(_T);
-	*(_T*)&pDestination[lOffset] = pSource.GetOrientation().GetD();	lOffset += sizeof(_T);
-	*(_T*)&pDestination[lOffset] = pSource.GetPosition().x;	lOffset += sizeof(_T);
-	*(_T*)&pDestination[lOffset] = pSource.GetPosition().y;	lOffset += sizeof(_T);
-	*(_T*)&pDestination[lOffset] = pSource.GetPosition().z;	lOffset += sizeof(_T);
+	*(_T*)&pDestination[lOffset] = Endian::HostToBigF(pSource.GetOrientation().GetA());	lOffset += sizeof(_T);
+	*(_T*)&pDestination[lOffset] = Endian::HostToBigF(pSource.GetOrientation().GetB());	lOffset += sizeof(_T);
+	*(_T*)&pDestination[lOffset] = Endian::HostToBigF(pSource.GetOrientation().GetC());	lOffset += sizeof(_T);
+	*(_T*)&pDestination[lOffset] = Endian::HostToBigF(pSource.GetOrientation().GetD());	lOffset += sizeof(_T);
+	*(_T*)&pDestination[lOffset] = Endian::HostToBigF(pSource.GetPosition().x);		lOffset += sizeof(_T);
+	*(_T*)&pDestination[lOffset] = Endian::HostToBigF(pSource.GetPosition().y);		lOffset += sizeof(_T);
+	*(_T*)&pDestination[lOffset] = Endian::HostToBigF(pSource.GetPosition().z);		lOffset += sizeof(_T);
 	return (lOffset);
 }
 
 int PackerTransformation::Unpack(TransformationF& pDestination, const uint8* pSource, int pSize)
 {
-	typedef TransformationF::BaseType _T;
+	typedef uint32 _T;
 	int lOffset = 0;
 	if (pSize >= (int)sizeof(_T)*7)
 	{
-		pDestination.GetOrientation().Set(*(_T*)&pSource[lOffset+0*sizeof(_T)], *(_T*)&pSource[lOffset+1*sizeof(_T)],
-			*(_T*)&pSource[lOffset+2*sizeof(_T)], *(_T*)&pSource[lOffset+3*sizeof(_T)]);
-		lOffset += sizeof(_T)*4;
-		pDestination.GetPosition().x = *(_T*)&pSource[lOffset];	lOffset += sizeof(_T);
-		pDestination.GetPosition().y = *(_T*)&pSource[lOffset];	lOffset += sizeof(_T);
-		pDestination.GetPosition().z = *(_T*)&pSource[lOffset];	lOffset += sizeof(_T);
+		float lData[4];
+		lData[0] = Endian::BigToHostF(*(_T*)&pSource[lOffset]);				lOffset += sizeof(_T);
+		lData[1] = Endian::BigToHostF(*(_T*)&pSource[lOffset]);				lOffset += sizeof(_T);
+		lData[2] = Endian::BigToHostF(*(_T*)&pSource[lOffset]);				lOffset += sizeof(_T);
+		lData[3] = Endian::BigToHostF(*(_T*)&pSource[lOffset]);				lOffset += sizeof(_T);
+		pDestination.GetOrientation().Set(lData[0], lData[1], lData[2], lData[3]);
+		pDestination.GetPosition().x = Endian::BigToHostF(*(_T*)&pSource[lOffset]);	lOffset += sizeof(_T);
+		pDestination.GetPosition().y = Endian::BigToHostF(*(_T*)&pSource[lOffset]);	lOffset += sizeof(_T);
+		pDestination.GetPosition().z = Endian::BigToHostF(*(_T*)&pSource[lOffset]);	lOffset += sizeof(_T);
 	}
 	else
 	{
