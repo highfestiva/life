@@ -118,7 +118,7 @@ class GroupReader(DefaultMAReader):
                 if not self.validate_mesh_group(group, checknorms=False):
                         print("Invalid mesh group! Terminating due to error.")
                         sys.exit(3)
-                if not self.apply_phys_config(config, group):
+                if not self.apply_ini_config(config, group):
                         print("Error: could not apply configuration.")
                         sys.exit(4)
                 if not self.validate_phys_group(group):
@@ -550,7 +550,7 @@ class GroupReader(DefaultMAReader):
                                 shininess = 0.0
                                 alpha = 1.0
                                 textureNames = []
-                                shaderName   = ""
+                                shaderName = node.get_fixed_attribute("shader", optional=True, default="plain")
 
                                 mesh = self._listchildnodes(node.getFullName(), node, "m_", group, False, \
                                         lambda n: n.get_fixed_attribute("rgvtx", optional=True))
@@ -619,6 +619,8 @@ class GroupReader(DefaultMAReader):
                                 node.mat.alpha     = alpha
                                 node.mat.textures  = textureNames
                                 node.mat.shader    = shaderName
+                                if textureNames and options.options.verbose:
+                                        print("%s gets textures %s with shader %s." % (node.getFullName(), ", ".join(textureNames), shaderName))
                 return ok
 
 
@@ -716,11 +718,11 @@ class GroupReader(DefaultMAReader):
                                                 self.config[name] = val
 
 
-        def apply_phys_config(self, config, group):
+        def apply_ini_config(self, config, group):
                 allApplied = True
 
                 used_sections = {}
-                # Apply config to bodies.
+                # Apply config to bodies/meshes.
                 for node in group:
                         if node.nodetype != "transform":
                                 continue
@@ -734,6 +736,18 @@ class GroupReader(DefaultMAReader):
                                         params = config.items(section)
                                         for name, value in params:
                                                 node.fix_attribute(name, value)
+                                # Graphics sections (such as adding shader settings on top of Maya's).
+                                elif section.startswith("material:") and re.search("^"+section[9:]+"$", node.getFullName()[1:]):
+                                        if not node.getName().startswith("m_"):
+                                                allApplied = False
+                                                print("Error: node '%s' matched with config rule '%s' must be prefixed with 'm_'" %
+                                                        (node.getFullName(), section))
+                                        used_sections[section] = True
+                                        params = config.items(section)
+                                        for name, value in params:
+                                                node.fix_attribute(name, value)
+                                                if options.options.verbose:
+                                                        print("Added option %s=%s to node %s." % (name, value, node.getFullName()))
 
                 # Create engines and triggers.
                 self.triggergroups = []

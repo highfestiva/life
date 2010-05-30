@@ -224,6 +224,8 @@ public:
 
 	virtual void RenderAllGeometry(unsigned int pCurrentFrame);
 	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame);
+	virtual void PreRender();
+	virtual void PostRender();
 
 protected:
 };

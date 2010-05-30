@@ -485,6 +485,18 @@ void OpenGLMatSingleTextureBlended::DoRenderAllGeometry(unsigned int pCurrentFra
 //	glDisable(GL_BLEND);
 }
 
+void OpenGLMatSingleTextureBlended::PreRender()
+{
+	Parent::PreRender();
+	::glEnable(GL_BLEND);
+}
+
+void OpenGLMatSingleTextureBlended::PostRender()
+{
+	::glDisable(GL_BLEND);
+	Parent::PostRender();
+}
+
 
 
 void OpenGLMatSingleTextureAlphaTested::DoRenderAllGeometry(unsigned int pCurrentFrame)

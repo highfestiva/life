@@ -131,6 +131,7 @@ Engine
 
 . Make all materials use PreRender and PostRender. Clean code up around there.
 . Fix dynamic physical object <--> dynamic physical object friction. Currently looks like it's hardcoded + BIG. (Hovercraft on elevator, for instance.)
+. Add support for break and reverse lights.
 . Create ability for lossless UDP transfers.
 . When having several control units, the "input threshold" does not work. Make a threshold for each input entity.
 . Sound is not deleted when logging out/in!
