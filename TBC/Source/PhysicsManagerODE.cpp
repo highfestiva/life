@@ -3135,11 +3135,11 @@ void PhysicsManagerODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID p
 			::dBodyGetMass(lBody1, &lMass);
 			lMass1 = lMass.mass;
 		}
-		float lMass2 = 1;
+		float lMass2Propotions = 1;
 		if (lBody2)
 		{
 			::dBodyGetMass(lBody2, &lMass);
-			lMass2 = lMass.mass;
+			lMass2Propotions = lMass.mass / lMass1;
 		}
 
 		// Perform normal collision detection.
@@ -3147,7 +3147,7 @@ void PhysicsManagerODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID p
 		{
 			dContact& lC = lContact[i];
 
-			const float lTotalFriction = ::fabs(lObject1->mFriction*lObject2->mFriction)+0.01f;
+			const float lTotalFriction = ::fabs(lObject1->mFriction*lObject2->mFriction)+0.0001f;
 			// Negative friction factor means simple friction model.
 			if (lObject1->mFriction > 0 || lObject2->mFriction > 0)
 			{
@@ -3184,7 +3184,7 @@ void PhysicsManagerODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID p
 			else
 			{
 				lC.surface.mode = dContactBounce;
-				lC.surface.mu = lTotalFriction * 3 * lMass1 * lMass2;
+				lC.surface.mu = lTotalFriction * 3 * lMass1 * lMass2Propotions;
 			}
 			lC.surface.bounce = (dReal)(lObject1->mBounce * lObject2->mBounce);
 			lC.surface.bounce_vel = (dReal)0.000001;
