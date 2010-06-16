@@ -30,13 +30,14 @@ Game
 + Create UI for picking new vehicle. Don't auto-pick when logging in!
   + Use road signs as buttons.
   + Have a road sign for each vehicle.
-  - Texture map road signs with corresponding pic.
+  + Texture map road signs with corresponding pic.
   - Use road signs (think high way green) for other settings as well: nationality, number of splitscreen users, fullscreen, online play...
   - Show big title text (translated) for all buttons.
   + Hilight current selection where applicable. Hilight using red/blue signs instead of red/yellow. (Different solution picked.)
 + Make it possible to be logged in without vehicle. Make it possible to drop vehicle.
-. Server: make console capable of being logless and promptless. Required since no console implemented in non-dedicated server.
-. Server: don't use CPU when running remote game.
++ Server: make console capable of being logless and promptless. Required since no console implemented in non-dedicated server.
++ Server: don't use CPU when running remote game.
+. Server: start/stop in mainloop as necessary (depending on network server address).
 . Fix bug: road sign for first vehicle is "squashed" when having 3 split-screen players.
 . Create material that can easily can be picked-up, loaded and moved around.
 . Create crane that can pull wire up.
