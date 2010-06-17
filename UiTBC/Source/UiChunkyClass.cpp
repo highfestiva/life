@@ -99,6 +99,25 @@ bool ChunkyClass::UnpackTag(uint8* pBuffer, unsigned pSize)
 	}
 	if (lOk)
 	{
+		const int32 lStringValueCount = Endian::BigToHost(*(int32*)&pBuffer[lIndex]);
+		lIndex += sizeof(lStringValueCount);
+		for (int x = 0; lOk && x < lStringValueCount; ++x)
+		{
+			wstr lValue;
+			int lStrSize = PackerUnicodeString::Unpack(lValue, &pBuffer[lIndex], pSize-lIndex);
+			lStrSize = (lStrSize+3)&(~3);
+			lOk = (lIndex+lStrSize < (int)pSize);
+			assert(lOk);
+			if (!lOk)
+			{
+				mLog.Errorf(_T("String index %i had wrong length (%i)."), x, lStrSize);
+			}
+			lIndex += lStrSize;
+			lTag.mStringValueList.push_back(lValue);
+		}
+	}
+	if (lOk)
+	{
 		const int32 lBodyIndexCount = Endian::BigToHost(*(int32*)&pBuffer[lIndex]);
 		lIndex += sizeof(lBodyIndexCount);
 		for (int x = 0; x < lBodyIndexCount; ++x)

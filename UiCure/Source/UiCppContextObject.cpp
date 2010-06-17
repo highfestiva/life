@@ -11,7 +11,6 @@
 #include "../../Lepra/Include/Math.h"
 #include "../../Lepra/Include/Random.h"
 #include "../../TBC/Include/ChunkyPhysics.h"
-#include "../../TBC/Include/PhysicsEngine.h"
 #include "../../TBC/Include/PhysicsManager.h"
 #include "../Include/UiCppContextObject.h"
 #include "../Include/UiCure.h"
@@ -31,10 +30,7 @@ CppContextObject::CppContextObject(Cure::ResourceManager* pResourceManager, cons
 	mEnableUi(true),
 	mMeshLoadCount(0),
 	mTextureLoadCount(0),
-	mStartMeshSlide(false),
-	mSoundVolume(0),
-	mSoundPitch(0),
-	mEngineSoundResource(mUiManager, UiLepra::SoundManager::LOOP_FORWARD)
+	mStartMeshSlide(false)
 {
 	log_volatile(mLog.Tracef(_T("Construct CppCO %s."), pClassId.c_str()));
 }
@@ -77,15 +73,6 @@ void CppContextObject::StartLoading()
 	const str lClassName = _T("Data/")+GetClassId()+_T(".class");	// TODO: move to central source file.
 	mUiClassResource->Load(GetResourceManager(), lClassName,
 		UserClassResource::TypeLoadCallback(this, &CppContextObject::OnLoadClass));
-
-	if (mEnableUi &&
-		(strutil::StartsWith(GetClassId(), _T("helicopter")) ||
-		strutil::StartsWith(GetClassId(), _T("monster"))))
-	{
-		const str lSoundName = _T("Data/Bark.wav");
-		mEngineSoundResource.Load(GetResourceManager(), lSoundName,
-			UserSound3dResource::TypeLoadCallback(this, &CppContextObject::OnLoadSound3d));
-	}
 }
 
 
@@ -106,12 +93,6 @@ void CppContextObject::OnPhysicsTick()
 	{
 		// Only move UI representation of objects that are not owned by other split screen players.
 		UiMove();
-	}
-	if (mEngineSoundResource.GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
-	{
-		mUiManager->GetSoundManager()->SetSoundPosition(mEngineSoundResource.GetData(), mSoundPosition, mSoundVelocity);
-		mUiManager->GetSoundManager()->SetVolume(mEngineSoundResource.GetData(), mSoundVolume);
-		mUiManager->GetSoundManager()->SetPitch(mEngineSoundResource.GetData(), mSoundPitch);
 	}
 }
 
@@ -166,58 +147,11 @@ void CppContextObject::UiMove()
 		mMeshOffset = lGfxPhysMeshOffset / (float)lGfxPhysMeshOffsetCount;
 	}
 	mMeshOffset *= 0.99f;
-
-	if (mEngineSoundResource.GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
-	{
-		if (mPhysicsOverride == PHYSICS_OVERRIDE_BONES)
-		{
-			return;	// TODO: play sounds for graphical objects without physics too.
-		}
-
-		TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());	// TODO: add sound->engine index in class info!
-		if (lGeometry == 0 || lGeometry->GetBodyId() == TBC::INVALID_BODY)
-		{
-			mLog.Warningf(_T("Physical body for %s not loaded!"), mEngineSoundResource.GetName().c_str());
-		}
-		else
-		{
-			Vector3DF lPosition = mManager->GetGameManager()->GetPhysicsManager()->GetBodyPosition(lGeometry->GetBodyId());
-			Vector3DF lVelocity;
-			mManager->GetGameManager()->GetPhysicsManager()->GetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
-			float lVolume = 1;
-			float lPitch = 1;
-			if (mPhysics->GetEngineCount() > 0)
-			{
-				const TBC::PhysicsEngine* lEngine = mPhysics->GetEngine(0);	// TODO: add sound->engine index in class info!
-				const float lIntensity = ::fabs(lEngine->GetIntensity());
-				const float lLowPitch = 3;
-				const float lHighPitch = 8;
-				lPitch = Math::Lerp(lLowPitch, lHighPitch, lIntensity);
-				lVolume = (lIntensity < 1/5.0f)? lIntensity*5 : 1;
-				lVolume = Math::Lerp(0.3f, 1.0f, lVolume);
-			}
-			Cure::ContextObject::Array lSiblings;
-			mManager->GetGameManager()->GetSiblings(GetInstanceId(), lSiblings);
-			Cure::ContextObject::Array::iterator x;
-			for (x = lSiblings.begin(); x != lSiblings.end(); ++x)
-			{
-				((CppContextObject*)(*x))->OnSoundMoved(lPosition, lVelocity, lVolume, lPitch);
-			}
-		}
-	}
 }
 
 void CppContextObject::ActivateLerp()
 {
 	mStartMeshSlide = true;
-}
-
-void CppContextObject::OnSoundMoved(const Vector3DF& pPosition, const Vector3DF& pVelocity, float pVolume, float pPitch)
-{
-	mSoundPosition = pPosition;
-	mSoundVelocity = pVelocity;
-	mSoundVolume = pVolume;
-	mSoundPitch = pPitch;
 }
 
 
@@ -393,12 +327,12 @@ void CppContextObject::OnLoadClass(UserClassResource* pClassResource)
 		{
 			lMeshInstance = strutil::Format(_T("%s_%s"), lMeshNameList[1].c_str(), GetMeshInstanceId().c_str());
 		}
-		UiCure::UserGeometryReferenceResource* lMesh = new UiCure::UserGeometryReferenceResource(
-			mUiManager, UiCure::GeometryOffset(lPhysIndex, lTransform));
+		UserGeometryReferenceResource* lMesh = new UserGeometryReferenceResource(
+			mUiManager, GeometryOffset(lPhysIndex, lTransform));
 		mMeshResourceArray.push_back(lMesh);
 		lMesh->Load(GetResourceManager(),
 			strutil::Format(_T("%s.mesh;%s"), lMeshName.c_str(), lMeshInstance.c_str()),
-			UiCure::UserGeometryReferenceResource::TypeLoadCallback(this,&CppContextObject::OnLoadMesh));
+			UserGeometryReferenceResource::TypeLoadCallback(this,&CppContextObject::OnLoadMesh));
 	}
 	LoadTextures();
 }
@@ -412,10 +346,10 @@ void CppContextObject::LoadTextures()
 		const std::vector<str>& lTextureList = lClass->GetMaterial(x).mTextureList;
 		for (std::vector<str>::const_iterator y = lTextureList.begin(); y != lTextureList.end(); ++y)
 		{
-			UiCure::UserRendererImageResource* lTexture = new UiCure::UserRendererImageResource(mUiManager);
+			UserRendererImageResource* lTexture = new UserRendererImageResource(mUiManager);
 			mTextureResourceArray.push_back(lTexture);
 			lTexture->Load(GetResourceManager(), *y,
-				UiCure::UserRendererImageResource::TypeLoadCallback(this, &CppContextObject::OnLoadTexture));
+				UserRendererImageResource::TypeLoadCallback(this, &CppContextObject::OnLoadTexture));
 		}
 	}
 }
@@ -560,15 +494,6 @@ bool CppContextObject::TryComplete()
 		GetManager()->EnablePhysicsUpdateCallback(this);	// TODO: clear out this mess. How to use these two callback types?
 	}
 	return (true);
-}
-
-void CppContextObject::OnLoadSound3d(UserSound3dResource* pSoundResource)
-{
-	assert(pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE);
-	if (pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
-	{
-		mUiManager->GetSoundManager()->Play(pSoundResource->GetData(), 0, 1.0);
-	}
 }
 
 str CppContextObject::GetMeshInstanceId() const

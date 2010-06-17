@@ -57,6 +57,15 @@ void Elevator::OnAlarm(int pAlarmId, void* pExtraData)
 	else
 	{
 		log_adebug("TRIGGER - no longer triggered.");
+		if (mActiveTrigger)
+		{
+			const int lEngineCount = mActiveTrigger->GetControlledEngineCount();
+			for (int y = 0; y < lEngineCount; ++y)
+			{
+				const EngineTrigger& lEngineTrigger = mActiveTrigger->GetControlledEngine(y);
+				lEngineTrigger.mEngine->SetValue(0, 0, 0);
+			}
+		}
 		mActiveTrigger = 0;
 	}
 }

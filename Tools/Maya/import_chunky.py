@@ -841,7 +841,7 @@ class GroupReader(DefaultMAReader):
 
                         elif section.startswith("tag:"):
                                 triggertype = stripQuotes(config.get(section, "type"))
-                                triggerOk = triggertype in ["eye", "brake_light", "reverse_light"]
+                                triggerOk = triggertype in ["eye", "brake_light", "reverse_light", "engine_sound"]
                                 allApplied &= triggerOk
                                 if not triggerOk:
                                         print("Error: invalid trigger type '%s'." % triggertype)
@@ -850,20 +850,27 @@ class GroupReader(DefaultMAReader):
                                 params = config.items(section)
                                 for name, value in params:
                                         node.fix_attribute(name, value)
-                                def check_connected_to(l):
+                                def check_connected_to(l, cntype):
                                         ok = (len(l) >= 0)
                                         for e in l:
                                                 ok &= (type(e) == str)
                                                 connected_to = self._regexpnodes(e, group)
                                                 ok &= (len(connected_to) > 0)
                                                 for cn in connected_to:
-                                                        ok &= (cn.nodetype == "transform")
+                                                        ok &= (cn.nodetype.startswith(cntype))
+                                                        if not ok:
+                                                                print("Error: node %s not of %s type, but %s." % (cn.getName(), cntype, cn.nodetype))
                                         return ok
+                                def check_connected_transform(l):
+                                        return check_connected_to(l, "transform")
+                                def check_connected_engine(l):
+                                        return check_connected_to(l, "engine:")
                                 required = [("type", lambda x: type(x) == str),
                                             ("float_values", lambda x: type(x) == list and len(x) == len(list(filter(lambda i: isinstance(i, (int, float)), x)))),
-                                            ("phys_list", check_connected_to),
-                                            ("engine_list", check_connected_to),
-                                            ("mesh_list", check_connected_to)]
+                                            ("string_values", lambda x: type(x) == list and len(x) == len(list(filter(lambda i: type(i) == str, x)))),
+                                            ("phys_list", check_connected_transform),
+                                            ("engine_list", check_connected_engine),
+                                            ("mesh_list", check_connected_transform)]
                                 for name, check in required:
                                         allApplied &= self._query_attribute(node, name, check)[0]
                                 group.append(node)

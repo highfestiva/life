@@ -754,7 +754,11 @@ class ClassWriter(ChunkyWriter):
                 float_values = node.get_fixed_attribute("float_values")
                 self._writeint(len(float_values))
                 for fv in float_values:
-                        self._writefloat(fv)
+                        self._writefloat(float(fv))
+                string_values = node.get_fixed_attribute("string_values")
+                self._writeint(len(string_values))
+                for sv in string_values:
+                        self._writestr(sv)
                 names = ["phys_list", "engine_list", "mesh_list"]
                 objectlists = [self.bodies, self.engines, self.meshes]
                 for x in range(len(names)):

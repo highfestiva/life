@@ -10,6 +10,7 @@
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../../TBC/Include/ChunkyBoneGeometry.h"
 #include "../../TBC/Include/ChunkyPhysics.h"
+#include "../../TBC/Include/PhysicsEngine.h"
 #include "../RtVar.h"
 
 
@@ -20,12 +21,15 @@ namespace Life
 
 
 Vehicle::Vehicle(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager):
-	Parent(pResourceManager, pClassId, pUiManager)
+	Parent(pResourceManager, pClassId, pUiManager),
+	mEngineSound(0)
 {
 }
 
 Vehicle::~Vehicle()
 {
+	delete (mEngineSound);
+	mEngineSound = 0;
 }
 
 
@@ -33,11 +37,6 @@ Vehicle::~Vehicle()
 void Vehicle::OnPhysicsTick()
 {
 	Parent::OnPhysicsTick();
-
-	if (GetManager()->GetGameManager()->IsUiMoveForbidden(GetInstanceId()))
-	{
-		return;
-	}
 
 	const TBC::ChunkyPhysics* lPhysics = GetPhysics();
 	const UiTbc::ChunkyClass* lClass = GetClass();
@@ -47,16 +46,30 @@ void Vehicle::OnPhysicsTick()
 	}
 	bool lIsChild = CURE_RTVAR_GETSET(mManager->GetGameManager()->GetVariableScope(), RTVAR_GAME_ISCHILD, true);
 	const TBC::PhysicsManager* lPhysicsManager = mManager->GetGameManager()->GetPhysicsManager();
+	Vector3DF lVelocity;
+	lPhysicsManager->GetBodyVelocity(lPhysics->GetBoneGeometry(lPhysics->GetRootBone())->GetBodyId(), lVelocity);
 	for (size_t x = 0; x < lClass->GetTagCount(); ++x)
 	{
 		const UiTbc::ChunkyClass::Tag& lTag = lClass->GetTag(x);
-		if (lTag.mTagName == _T("eye") &&
-			lTag.mFloatValueList.size() == 1 &&
-			lTag.mBodyIndexList.size() == 1 &&
-			lTag.mMeshIndexList.size() >= 1)
+		if (lTag.mTagName == _T("eye"))
 		{
 			// Eyes follow steered wheels. Get wheel corresponding to eye and
 			// move eye accordingly á là Lightning McQueen.
+
+			if (GetManager()->GetGameManager()->IsUiMoveForbidden(GetInstanceId()))
+			{
+				continue;
+			}
+			if (lTag.mFloatValueList.size() != 1 ||
+				lTag.mStringValueList.size() != 0 ||
+				lTag.mBodyIndexList.size() != 1 ||
+				lTag.mMeshIndexList.size() < 1)
+			{
+				mLog.Errorf(_T("The eye tag '%s' has the wrong # of parameters."), lTag.mTagName.c_str());
+				assert(false);
+				continue;
+			}
+
 			float lJointValue = 0;
 			int lBodyIndex = lTag.mBodyIndexList[0];
 			TBC::ChunkyBoneGeometry* lBone = lPhysics->GetBoneGeometry(lBodyIndex);
@@ -76,8 +89,8 @@ void Vehicle::OnPhysicsTick()
 				break;
 				default:
 				{
-					assert(false);
 					mLog.Errorf(_T("Joint type %i not implemented for tag type %s."), lBone->GetJointType(), lTag.mTagName.c_str());
+					assert(false);
 				}
 				break;
 			}
@@ -97,6 +110,66 @@ void Vehicle::OnPhysicsTick()
 				}
 			}
 		}
+		else if (lTag.mTagName == _T("engine_sound"))
+		{
+			// Sound controlled by engine.
+
+			if (lTag.mFloatValueList.size() != 9 ||
+				lTag.mStringValueList.size() != 1 ||
+				lTag.mBodyIndexList.size() != 1 ||
+				lTag.mMeshIndexList.size() != 0)
+			{
+				mLog.Errorf(_T("The engine_sound tag '%s' has the wrong # of parameters."), lTag.mTagName.c_str());
+				assert(false);
+				continue;
+			}
+			if (!mEngineSound)
+			{
+				const str lSoundName = _T("Data/")+lTag.mStringValueList[0];
+				mEngineSound = new UiCure::UserSound3dResource(GetUiManager(), UiLepra::SoundManager::LOOP_FORWARD);
+				mEngineSound->Load(GetResourceManager(), lSoundName,
+					UiCure::UserSound3dResource::TypeLoadCallback(this, &Vehicle::LoadPlaySound3d));
+			}
+			if (mEngineSound->GetLoadState() != Cure::RESOURCE_LOAD_COMPLETE)
+			{
+				continue;
+			}
+
+			int lBodyIndex = lTag.mBodyIndexList[0];
+			TBC::ChunkyBoneGeometry* lBone = lPhysics->GetBoneGeometry(lBodyIndex);
+			const Vector3DF lPosition = lPhysicsManager->GetBodyPosition(lBone->GetBodyId());
+			const TBC::PhysicsEngine* lEngine = mPhysics->GetEngine(lTag.mEngineIndexList[0]);
+			const float lIntensity = ::fabs(lEngine->GetIntensity());
+			enum FloatValue
+			{
+				FV_PITCH_LOW = 0,
+				FV_PITCH_HIGH,
+				FV_PITCH_EXPONENT,
+				FV_VOLUME_LOW,
+				FV_VOLUME_HIGH,
+				FV_VOLUME_EXPONENT,
+				FV_INTENSITY_LOW,
+				FV_INTENSITY_HIGH,
+				FV_INTENSITY_EXPONENT,
+			};
+			float lVolume = ::pow(lIntensity, lTag.mFloatValueList[FV_VOLUME_EXPONENT]);
+			lVolume = Math::Lerp(lTag.mFloatValueList[FV_VOLUME_LOW], lTag.mFloatValueList[FV_VOLUME_HIGH], lVolume);
+			const float lPitch = Math::Lerp(lTag.mFloatValueList[FV_PITCH_LOW], lTag.mFloatValueList[FV_PITCH_HIGH], lIntensity);
+			mUiManager->GetSoundManager()->SetSoundPosition(mEngineSound->GetData(), lPosition, lVelocity);
+			mUiManager->GetSoundManager()->SetVolume(mEngineSound->GetData(), lVolume);
+			mUiManager->GetSoundManager()->SetPitch(mEngineSound->GetData(), lPitch);
+		}
+	}
+}
+
+
+
+void Vehicle::LoadPlaySound3d(UiCure::UserSound3dResource* pSoundResource)
+{
+	assert(pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE);
+	if (pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
+	{
+		mUiManager->GetSoundManager()->Play(pSoundResource->GetData(), 0, 1.0);
 	}
 }
 

@@ -366,22 +366,25 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics*
 					assert(lGeometry->GetJointId() != INVALID_JOINT);
 					if (lGeometry->GetJointId() != INVALID_JOINT)
 					{
-						if (mValue[0])
-						{
-							const float lValue = (mValue[0] > 0)? mValue[0]*mMaxSpeed : mValue[0]*mMaxSpeed2;
-							pPhysicsManager->SetMotorTarget(lGeometry->GetJointId(), mStrength, lValue*lScale);
-						}
-						else if (lEngineNode.mMode != MODE_HALF_LOCK)
+						if (!mValue[0] && lEngineNode.mMode != MODE_HALF_LOCK)	// Normal slider behavior is to pull back to origin while half-lock keep last motor target.
 						{
 							float lPosition;
 							pPhysicsManager->GetSliderPos(lGeometry->GetJointId(), lPosition);
 							if (!Math::IsEpsEqual(lPosition, 0.0f, 0.1f))
 							{
 								float lValue = -lPosition*::fabs(lScale);
-								lValue = lValue? lValue*mMaxSpeed : lValue*mMaxSpeed2;
+								lValue = (lValue > 0)? lValue*mMaxSpeed : lValue*mMaxSpeed2;
 								pPhysicsManager->SetMotorTarget(lGeometry->GetJointId(), mStrength, lValue);
 							}
 						}
+						else
+						{
+							const float lValue = (mValue[0] > 0)? mValue[0]*mMaxSpeed : mValue[0]*mMaxSpeed2;
+							pPhysicsManager->SetMotorTarget(lGeometry->GetJointId(), mStrength, lValue*lScale);
+						}
+						Vector3DF lVelocity;
+						pPhysicsManager->GetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
+						mIntensity += lVelocity.GetLength() / mMaxSpeed;
 					}
 				}
 				break;

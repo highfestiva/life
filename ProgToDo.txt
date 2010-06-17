@@ -130,6 +130,7 @@ Engine
 + Logging on in two steps: a) normal login, server returns avatars, and b) enter world by selecting avatar. (After (a) the sync goes.)
 . Port client to Mac OS X / Cocoa.
 
+. Organize data in directories for sounds, meshes, physics, classes, etc.
 . Make all materials use PreRender and PostRender. Clean code up around there.
 . Fix dynamic physical object <--> dynamic physical object friction. Currently looks like it's hardcoded + BIG. (Hovercraft on elevator, for instance.)
 . Add support for break and reverse lights.

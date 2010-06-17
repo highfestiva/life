@@ -27,6 +27,10 @@ protected:
 	void OnPhysicsTick();
 
 private:
+	void LoadPlaySound3d(UiCure::UserSound3dResource* pSoundResource);
+
+	UiCure::UserSound3dResource* mEngineSound;
+
 	LOG_CLASS_DECLARE();
 };
 

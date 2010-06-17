@@ -38,6 +38,7 @@ public:
 	{
 		str mTagName;
 		std::vector<float> mFloatValueList;
+		std::vector<str> mStringValueList;
 		std::vector<int> mBodyIndexList;
 		std::vector<int> mEngineIndexList;
 		std::vector<int> mMeshIndexList;

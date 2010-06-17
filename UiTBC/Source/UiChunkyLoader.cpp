@@ -446,12 +446,14 @@ bool ChunkyClassLoader::LoadElementCallback(TBC::ChunkyType pType, uint32 pSize,
 		FileElementList lLoadList;
 		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_CLASS_PHYS_MESH, (void*)lClass));
 		lOk = AllocLoadChunkyList(lLoadList, pChunkEndPosition);
+		assert(lOk);
 	}
 	else if (pType == TBC::CHUNK_CLASS_TAG_LIST)
 	{
 		FileElementList lLoadList;
 		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_CLASS_TAG, (void*)lClass));
 		lOk = AllocLoadChunkyList(lLoadList, pChunkEndPosition);
+		assert(lOk);
 	}
 	else if (pType == TBC::CHUNK_CLASS_PHYS_MESH)
 	{
@@ -543,6 +545,7 @@ bool ChunkyClassLoader::LoadElementCallback(TBC::ChunkyType pType, uint32 pSize,
 	else
 	{
 		lOk = Parent::LoadElementCallback(pType, pSize, pChunkEndPosition, pStorage);
+		assert(lOk);
 	}
 	return (lOk);
 }
