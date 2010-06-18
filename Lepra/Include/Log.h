@@ -22,6 +22,7 @@ namespace Lepra
 
 
 class LogListener;
+class SpinLock;
 
 
 
@@ -61,6 +62,7 @@ private:
 	str mName;
 	Log* mParent;
 	std::vector<LogListener*> mLoggerList[LEVEL_TYPE_COUNT];
+	SpinLock* mLoggerListLock;
 	LogLevel mLevel;
 };
 

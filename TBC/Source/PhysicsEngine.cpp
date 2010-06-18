@@ -136,6 +136,11 @@ bool PhysicsEngine::SetValue(unsigned pAspect, float pValue, float pZAngle)
 	return (false);
 }
 
+void PhysicsEngine::ForceSetValue(unsigned pAspect, float pValue)
+{
+	mValue[pAspect] = pValue;
+}
+
 
 
 void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics* pStructure, float pFrameTime) const
@@ -410,6 +415,22 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics*
 		}
 	}
 	mIntensity /= mEngineNodeArray.size();
+}
+
+float PhysicsEngine::GetCurrentMaxSpeedSquare(const PhysicsManager* pPhysicsManager) const
+{
+	float lMaxSpeed = 0;
+	EngineNodeArray::const_iterator i = mEngineNodeArray.begin();
+	for (; i != mEngineNodeArray.end(); ++i)
+	{
+		const EngineNode& lEngineNode = *i;
+		ChunkyBoneGeometry* lGeometry = lEngineNode.mGeometry;
+		Vector3DF lVelocity;
+		pPhysicsManager->GetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
+		const float lSpeed = lVelocity.GetLengthSquared();
+		lMaxSpeed = (lSpeed > lMaxSpeed)? lSpeed : lMaxSpeed;
+	}
+	return (lMaxSpeed);
 }
 
 

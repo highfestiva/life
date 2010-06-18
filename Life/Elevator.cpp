@@ -6,6 +6,7 @@
 
 #include "Elevator.h"
 #include "../Cure/Include/ContextManager.h"
+#include "../Cure/Include/GameManager.h"
 #include "../Lepra/Include/HashUtil.h"
 #include "../TBC/Include/PhysicsEngine.h"
 #include "../TBC/Include/PhysicsTrigger.h"
@@ -20,7 +21,8 @@ namespace Life
 Elevator::Elevator(Cure::ResourceManager* pResourceManager):
 	Cure::CppContextObject(pResourceManager, _T("Elevator")),
 	mActiveTrigger(0),
-	mExitDelay(2.0)
+	mExitDelay(2.0),
+	mEngineActivity(1)
 {
 }
 
@@ -40,6 +42,13 @@ void Elevator::OnTick(float pFrameTime)
 		log_adebug("TRIGGER - exited trigger volume.");
 		OnAlarm(0, 0);
 	}
+
+	mEngineActivity = Math::Lerp(mEngineActivity, GetActiveMaxSpeedSquare(), 0.1f);
+	if (Math::IsEpsEqual(mEngineActivity, 0.0f, 0.1f))
+	{
+		mEngineActivity = 100;
+		HaltActiveEngines();
+	}
 }
 
 void Elevator::OnAlarm(int pAlarmId, void* pExtraData)
@@ -57,15 +66,7 @@ void Elevator::OnAlarm(int pAlarmId, void* pExtraData)
 	else
 	{
 		log_adebug("TRIGGER - no longer triggered.");
-		if (mActiveTrigger)
-		{
-			const int lEngineCount = mActiveTrigger->GetControlledEngineCount();
-			for (int y = 0; y < lEngineCount; ++y)
-			{
-				const EngineTrigger& lEngineTrigger = mActiveTrigger->GetControlledEngine(y);
-				lEngineTrigger.mEngine->SetValue(0, 0, 0);
-			}
-		}
+		HaltActiveEngines();
 		mActiveTrigger = 0;
 	}
 }
@@ -97,6 +98,37 @@ void Elevator::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, TBC::Physics
 
 
 
+float Elevator::GetActiveMaxSpeedSquare() const
+{
+	float lMaxSpeed = 0;
+	if (mActiveTrigger)
+	{
+		const TBC::PhysicsManager* lPhysicsManager = GetManager()->GetGameManager()->GetPhysicsManager();
+		const int lEngineCount = mActiveTrigger->GetControlledEngineCount();
+		for (int y = 0; y < lEngineCount; ++y)
+		{
+			const TBC::PhysicsTrigger::EngineTrigger& lEngineTrigger = mActiveTrigger->GetControlledEngine(y);
+			lMaxSpeed = lEngineTrigger.mEngine->GetCurrentMaxSpeedSquare(lPhysicsManager);
+		}
+	}
+	return (lMaxSpeed);
+}
+
+void Elevator::HaltActiveEngines()
+{
+	if (mActiveTrigger)
+	{
+		const int lEngineCount = mActiveTrigger->GetControlledEngineCount();
+		for (int y = 0; y < lEngineCount; ++y)
+		{
+			const TBC::PhysicsTrigger::EngineTrigger& lEngineTrigger = mActiveTrigger->GetControlledEngine(y);
+			lEngineTrigger.mEngine->SetValue(0, 0, 0);
+		}
+	}
+}
+
+
+
 void Elevator::SetFunctionTarget(const str& pFunction, TBC::PhysicsEngine* pEngine)
 {
 	float lTargetValue = 0;	// Default it to stop.
@@ -113,7 +145,11 @@ void Elevator::SetFunctionTarget(const str& pFunction, TBC::PhysicsEngine* pEngi
 		lTargetValue = -pEngine->GetValue();
 		if (Math::IsEpsEqual(lTargetValue, 0.0f))
 		{
-			lTargetValue = -1;
+			lTargetValue = -pEngine->GetValues()[4];	// Invert shadow if stopped.
+			if (Math::IsEpsEqual(lTargetValue, 0.0f))
+			{
+				lTargetValue = -1;
+			}
 		}
 	}
 	else if (pFunction == _T("stop"))
@@ -124,6 +160,7 @@ void Elevator::SetFunctionTarget(const str& pFunction, TBC::PhysicsEngine* pEngi
 		assert(false);
 	}
 	log_volatile(mLog.Debugf(_T("TRIGGER - activating engine for function %s."), pFunction.c_str()));
+	pEngine->ForceSetValue(4, lTargetValue);	// Store shadow.
 	pEngine->SetValue(0, lTargetValue, 0);	// Aspect is always 0 for triggered engines.
 }
 

@@ -62,8 +62,10 @@ public:
 
 	void AddControlledGeometry(ChunkyBoneGeometry* pGeometry, float pScale, EngineMode pMode = MODE_NORMAL);
 	bool SetValue(unsigned pAspect, float pValue, float pZAngle);
+	void ForceSetValue(unsigned pAspect, float pValue);
 
 	void OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics* pStructure, float pFrameTime) const;
+	float GetCurrentMaxSpeedSquare(const PhysicsManager* pPhysicsManager) const;
 
 	unsigned GetControllerIndex() const;
 	float GetValue() const;

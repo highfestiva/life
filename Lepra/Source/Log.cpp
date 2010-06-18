@@ -10,6 +10,7 @@
 #include <strstream>
 #include "../Include/Log.h"
 #include "../Include/LogListener.h"
+#include "../Include/SpinLock.h"
 
 
 
@@ -21,6 +22,7 @@ namespace Lepra
 Log::Log(const str& pName, Log* pParent, LogLevel pLevel):
 	mName(pName),
 	mParent(pParent),
+	mLoggerListLock(new SpinLock),
 	mLevel(pLevel)
 {
 }
@@ -84,7 +86,7 @@ void Log::AddListener(LogListener* pLogger, LogLevel pLevel)
 		assert (pLevel >= LEVEL_LOWEST_TYPE && pLevel < LEVEL_TYPE_COUNT);
 		if (pLevel >= LEVEL_LOWEST_TYPE && pLevel < LEVEL_TYPE_COUNT)
 		{
-			//ScopeLock lScopeLock(&mLock);
+			ScopeSpinLock lScopeLock(mLoggerListLock);
 			mLoggerList[pLevel].push_back(pLogger);
 			pLogger->AddLog(this);
 		}
@@ -94,6 +96,7 @@ void Log::AddListener(LogListener* pLogger, LogLevel pLevel)
 void Log::RemoveListener(LogListener* pLogger)
 {
 	assert(pLogger);
+	ScopeSpinLock lScopeLock(mLoggerListLock);
 	for (int x = LEVEL_LOWEST_TYPE; x < LEVEL_TYPE_COUNT; ++x)
 	{
 		std::vector<LogListener*>::iterator y = mLoggerList[x].begin();
@@ -112,6 +115,7 @@ void Log::RemoveListener(LogListener* pLogger)
 LogListener* Log::GetListener(const str& pName) const
 {
 	LogListener* lListener = 0;
+	ScopeSpinLock lScopeLock(mLoggerListLock);
 	for (int x = LEVEL_LOWEST_TYPE; !lListener && x < LEVEL_TYPE_COUNT; ++x)
 	{
 		std::vector<LogListener*>::const_iterator y = mLoggerList[x].begin();
@@ -168,6 +172,7 @@ void Log::DoPrint(const Log* pOriginator, const str& pAccount, const str& pMessa
 			mParent->DoPrint(this, pAccount, pMessage, pLevel);
 		}
 
+		ScopeSpinLock lScopeLock(mLoggerListLock);
 		std::vector<LogListener*>::iterator x = mLoggerList[pLevel].begin();
 		for (; x != mLoggerList[pLevel].end(); ++x)
 		{
@@ -185,6 +190,7 @@ void Log::DoRawPrint(const str& pMessage, LogLevel pLevel)
 			mParent->DoRawPrint(pMessage, pLevel);
 		}
 
+		ScopeSpinLock lScopeLock(mLoggerListLock);
 		std::vector<LogListener*>::iterator x = mLoggerList[pLevel].begin();
 		for (; x != mLoggerList[pLevel].end(); ++x)
 		{

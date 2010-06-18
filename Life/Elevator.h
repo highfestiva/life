@@ -29,12 +29,16 @@ protected:
 	virtual void OnAlarm(int pAlarmId, void* pExtraData);
 	void OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, TBC::PhysicsManager::ForceFeedbackListener* pBody);
 
+	float GetActiveMaxSpeedSquare() const;
+	void HaltActiveEngines();
+
 	static void SetFunctionTarget(const str& pFunction, TBC::PhysicsEngine* pEngine);
 
 private:
 	const TBC::PhysicsTrigger* mActiveTrigger;
 	HiResTimer mTrigTime;
 	const double mExitDelay;
+	float mEngineActivity;
 
 	LOG_CLASS_DECLARE();
 };
