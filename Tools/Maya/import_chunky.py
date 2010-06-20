@@ -56,7 +56,8 @@ class GroupReader(DefaultMAReader):
                                      "materialInfo", "groupId", "groupParts", \
                                      "deleteComponent", "softModHandle", "softMod", \
                                      "objectSet", "tweak", "imagePlane", "place2dTexture", \
-                                     "polyBridgeEdge", "polySeparate", "polyChipOff"]
+                                     "polyBridgeEdge", "polySeparate", "polyChipOff", \
+                                     "deleteUVSet", "polyAutoProj", "polyBoolOp"]
                 self.silent_types = ["polyExtrudeFace", "polyTweak"]
                 self.mat_types    = ["lambert", "blinn", "phong", "shadingEngine", "layeredShader", \
                                      "file"]
@@ -990,6 +991,12 @@ class GroupReader(DefaultMAReader):
                                                                 if not parent.shape:
                                                                         print("Error: %s's input node %s does not exist!" % (node.getFullName(), in_nodename))
                                                                         isGroupValid = False
+                                                                elif parent.shape.nodetype == "deleteComponent":
+                                                                        in_nodename = parent.shape.getInNode("ig", "ig")[0]
+                                                                        parent.shape = self.findNode(in_nodename)
+                                                                        if not parent.shape:
+                                                                                print("Error: %s's deleteComponent's input node %s does not exist!" % (node.getFullName(), in_nodename))
+                                                                                isGroupValid = False
                                                         elif node.getName().startswith("phys_"):
                                                                 print("Error: %s does not have an input node. Create node by instancing instead." % (node.getFullName()))
                                                                 isGroupValid = False
@@ -1251,7 +1258,7 @@ class GroupReader(DefaultMAReader):
                 for phys in physlist:
                         if phys.getName()[5:] == mesh.getName()[2:]:
                                 if r:
-                                        print("Error: mesh %s holds more than one phys root!" % node.getFullName())
+                                        print("Error: mesh %s holds more than one phys root!" % mesh.getFullName())
                                         sys.exit(3)
                                 r = phys
 ##                if not r and physlist:

@@ -1127,7 +1127,7 @@ unsigned int OpenGLRenderer::RenderScene()
 		::glDepthMask(GL_TRUE);
 		::glFrontFace(GL_CCW);
 		::glShadeModel(GL_SMOOTH);
-		::glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		::glPolygonMode(GL_FRONT_AND_BACK, IsWireframeEnabled()? GL_LINE : GL_FILL);
 		::glDepthFunc(GL_LESS);
 		::glCullFace(GL_BACK);
 		::glLineWidth(3.0f);
@@ -1188,20 +1188,13 @@ unsigned int OpenGLRenderer::RenderScene()
 		}
 	}
 
+	int lStartMaterial;
+	if (IsOutlineRenderingEnabled() && !IsWireframeEnabled())
 	{
-		Vector3DF lColor(0, 0, 0);
-		if (IsOutlineRenderingEnabled())
-		{
-			lColor = Vector3DF(1, 1, 1);
-			Material::EnableDrawMaterial(false);
-		}
+		Material::EnableDrawMaterial(false);
+		Vector3DF lColor(1, 1, 1);
 		TBC::GeometryBase::BasicMaterialSettings lMaterial(lColor, lColor, lColor, 1, 1, false);
 		OpenGLMaterial::SetBasicMaterial(lMaterial, this);
-	}
-
-	int lStartMaterial;
-	if (IsOutlineRenderingEnabled())
-	{
 		GetMaterial(MAT_SINGLE_COLOR_SOLID)->RenderAllGeometry(GetCurrentFrame());
 		::glCullFace(GL_FRONT);
 		::glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -1211,7 +1204,7 @@ unsigned int OpenGLRenderer::RenderScene()
 		GetMaterial(MAT_SINGLE_COLOR_SOLID)->RenderAllGeometry(GetCurrentFrame());
 		::glCullFace(GL_BACK);
 		::glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		::glDepthFunc(GL_LESS);
+		//::glDepthFunc(GL_LESS);
 		lStartMaterial = MAT_SINGLE_COLOR_SOLID + 1;
 	}
 	else

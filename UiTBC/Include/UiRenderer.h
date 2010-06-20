@@ -330,6 +330,8 @@ public:
 
 	void EnableOutlineRendering(bool pEnable);
 	bool IsOutlineRenderingEnabled() const;
+	void EnableWireframe(bool pEnable);
+	bool IsWireframeEnabled() const;
 
 	// A viewport is a portion of the screen where the graphics will be rendered.
 	// The center of the viewport is also the center of perspective. The viewport may
@@ -602,6 +604,7 @@ private:
 	Vector3DF mFrustumPlanes[4];
 
 	bool mIsOutlineRenderEnabled;
+	bool mIsWireframeEnabled;
 
 	// Viewport.
 	PixelRect mViewport;

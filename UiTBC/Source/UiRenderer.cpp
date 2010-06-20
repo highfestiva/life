@@ -22,6 +22,7 @@ Renderer::Renderer(Canvas* pScreen) :
 	mNear(0.1f),
 	mFar(10000.0f),
 	mIsOutlineRenderEnabled(false),
+	mIsWireframeEnabled(false),
 	mViewport(0, 0, pScreen->GetWidth(), pScreen->GetHeight()),
 	mGeometryIDManager(1, 1000000, INVALID_GEOMETRY),
 	mTextureIDManager(1, 1000000, INVALID_TEXTURE),
@@ -100,6 +101,16 @@ void Renderer::EnableOutlineRendering(bool pEnable)
 bool Renderer::IsOutlineRenderingEnabled() const
 {
 	return (mIsOutlineRenderEnabled);
+}
+
+void Renderer::EnableWireframe(bool pEnable)
+{
+	mIsWireframeEnabled = pEnable;
+}
+
+bool Renderer::IsWireframeEnabled() const
+{
+	return (mIsWireframeEnabled);
 }
 
 void Renderer::SetViewport(const PixelRect& pViewport)

@@ -17,28 +17,19 @@ namespace UiCure
 
 
 
-Cure::RuntimeVariableScope* mUiCureScope;
-
-
-
 void Init()
 {
 	Cure::Init();
-	mUiCureScope = new Cure::RuntimeVariableScope(Cure::GetSettings());
-	UiCure::SetDefault(mUiCureScope);
+	UiCure::SetDefault(GetSettings());
 }
 
 void Shutdown()
 {
-	delete (mUiCureScope);
-	mUiCureScope = 0;
 	Cure::Shutdown();
 }
 
 void SetDefault(Cure::RuntimeVariableScope* pSettings)
 {
-	Cure::SetDefault(pSettings);
-
 	CURE_RTVAR_SET(pSettings, RTVAR_UI_DISPLAY_WIDTH, 640);
 	CURE_RTVAR_SET(pSettings, RTVAR_UI_DISPLAY_HEIGHT, 480);
 	CURE_RTVAR_SET(pSettings, RTVAR_UI_DISPLAY_BITSPERPIXEL, 0);
@@ -49,6 +40,7 @@ void SetDefault(Cure::RuntimeVariableScope* pSettings)
 	CURE_RTVAR_SET(pSettings, RTVAR_UI_3D_ENABLELIGHTS, true);
 	CURE_RTVAR_SET(pSettings, RTVAR_UI_3D_ENABLECLEAR, true);
 	CURE_RTVAR_SET(pSettings, RTVAR_UI_3D_OUTLINEMODE, true);
+	CURE_RTVAR_SET(pSettings, RTVAR_UI_3D_WIREFRAMEMODE, false);
 	CURE_RTVAR_SET(pSettings, RTVAR_UI_3D_CLEARRED, 0.75);
 	CURE_RTVAR_SET(pSettings, RTVAR_UI_3D_CLEARGREEN, 0.80);
 	CURE_RTVAR_SET(pSettings, RTVAR_UI_3D_CLEARBLUE, 0.85);
@@ -73,7 +65,7 @@ void SetDefault(Cure::RuntimeVariableScope* pSettings)
 
 Cure::RuntimeVariableScope* GetSettings()
 {
-	return (mUiCureScope);
+	return (Cure::GetSettings());
 }
 
 

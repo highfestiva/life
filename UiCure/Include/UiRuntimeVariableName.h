@@ -17,6 +17,7 @@
 #define RTVAR_UI_3D_ENABLELIGHTS		"Ui.3D.EnableLights"
 #define RTVAR_UI_3D_ENABLECLEAR			"Ui.3D.EnableClear"
 #define RTVAR_UI_3D_OUTLINEMODE			"Ui.3D.OutlineMode"
+#define RTVAR_UI_3D_WIREFRAMEMODE		"Ui.3D.WireframeMode"
 #define RTVAR_UI_3D_CLEARRED			"Ui.3D.ClearRed"
 #define RTVAR_UI_3D_CLEARGREEN			"Ui.3D.ClearGreen"
 #define RTVAR_UI_3D_CLEARBLUE			"Ui.3D.ClearBlue"

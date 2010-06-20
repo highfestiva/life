@@ -170,6 +170,7 @@ bool GameClientSlaveManager::Render()
 
 	LEPRA_MEASURE_SCOPE(SlaveRender);
 	mUiManager->GetRenderer()->EnableOutlineRendering(CURE_RTVAR_GET(GetVariableScope(), RTVAR_UI_3D_OUTLINEMODE, false));
+	mUiManager->GetRenderer()->EnableWireframe(CURE_RTVAR_GET(GetVariableScope(), RTVAR_UI_3D_WIREFRAMEMODE, false));
 	mUiManager->Render(mRenderArea);
 	return (true);
 }

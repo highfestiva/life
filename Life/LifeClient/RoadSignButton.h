@@ -61,7 +61,6 @@ private:
 
 	ScreenPart* mScreenPart;
 	UiTbc::CustomButton mButton;
-	UiCure::UserRendererImageResource mSignTexture;
 	Shape mShape;
 	bool mActive;
 	float mMeshRadius;

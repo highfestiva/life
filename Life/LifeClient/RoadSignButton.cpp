@@ -31,7 +31,6 @@ RoadSignButton::RoadSignButton(ScreenPart* pScreenPart, Cure::ResourceManager* p
 	Parent(pResourceManager, pClassResourceName, pUiManager),
 	mScreenPart(pScreenPart),
 	mButton(pName),
-	mSignTexture(pUiManager),
 	mShape(pShape),
 	mActive(false),
 	mMeshRadius(0),

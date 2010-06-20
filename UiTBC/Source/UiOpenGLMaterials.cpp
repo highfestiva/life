@@ -91,7 +91,7 @@ void OpenGLMaterial::RenderAllBlendedGeometry(unsigned pCurrentFrame)
 	::glDisable(GL_CULL_FACE);
 	GLint lOldFill[2];
 	::glGetIntegerv(GL_POLYGON_MODE, lOldFill);
-	::glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	::glPolygonMode(GL_FRONT_AND_BACK, GetRenderer()->IsWireframeEnabled()? GL_LINE : GL_FILL);
 	Parent::RenderAllBlendedGeometry(pCurrentFrame);
 	::glEnable(GL_CULL_FACE);
 	::glDepthMask(GL_TRUE);

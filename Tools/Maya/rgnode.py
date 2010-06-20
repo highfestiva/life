@@ -191,7 +191,7 @@ def adjustnode(node):
                 qx = quat().fromAngleAxis(rot[0], (1, 0, 0))
                 qy = quat().fromAngleAxis(rot[1], (0, 1, 0))
                 qz = quat().fromAngleAxis(rot[2], (0, 0, 1))
-                q = qy*qz*qx
+                q = qz*qy*qx
                 return q
         def _get_local_ar(self):
                 ra = vec3(self.get_fixed_attribute("ra", default=vec3(0,0,0)))

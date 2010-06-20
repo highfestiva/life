@@ -80,6 +80,7 @@ void OpenGLPainter::SetRenderMode(RenderMode pRM)
 
 void OpenGLPainter::PrePaint()
 {
+	::glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	DoSetRenderMode();
 }
 

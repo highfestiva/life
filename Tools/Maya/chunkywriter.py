@@ -623,7 +623,8 @@ class MeshWriter(ChunkyWriter):
                         if options.options.verbose:
                                 print("Skipping write of instance %s." % filename)
                         self._addfeat("mesh instance:mesh instances", 1)
-                        node.getParent().writecount += 1
+                        for p in node.getparents():
+                                p.writecount += 1
                         return
                 #print("Writing mesh %s with %i triangles..." % (filename, len(node.get_fixed_attribute("rgtri"))/3))
                 self._addfeat("mesh:meshes", 1)
