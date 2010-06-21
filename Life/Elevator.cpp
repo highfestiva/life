@@ -37,7 +37,8 @@ void Elevator::OnTick(float pFrameTime)
 	Parent::OnTick(pFrameTime);
 
 	mTrigTime.UpdateTimer();
-	if (mActiveTrigger && mTrigTime.GetTimeDiff() > mExitDelay)
+	if (mActiveTrigger && mActiveTrigger->GetType() != TBC::PhysicsTrigger::TRIGGER_ALWAYS
+		&& mTrigTime.GetTimeDiff() > mExitDelay)
 	{
 		log_adebug("TRIGGER - exited trigger volume.");
 		OnAlarm(0, 0);
@@ -48,6 +49,15 @@ void Elevator::OnTick(float pFrameTime)
 	{
 		mEngineActivity = 100;
 		HaltActiveEngines();
+
+		const TBC::PhysicsTrigger* lTrigger = 0;
+		if (!mActiveTrigger && GetTriggerCount((const void*&)lTrigger) == 1)
+		{
+			if (lTrigger->GetType() == TBC::PhysicsTrigger::TRIGGER_ALWAYS)
+			{
+				Trig(lTrigger);
+			}
+		}
 	}
 }
 
@@ -84,13 +94,18 @@ void Elevator::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, TBC::Physics
 	{
 		return;
 	}
+	Trig(lTrigger);
+}
+
+void Elevator::Trig(const TBC::PhysicsTrigger* pTrigger)
+{
 	GetManager()->CancelPendingAlarmCallbacksById(this, 0);
-	mActiveTrigger = lTrigger;
+	mActiveTrigger = pTrigger;
 	mTrigTime.PopTimeDiff();
-	const int lEngineCount = lTrigger->GetControlledEngineCount();
+	const int lEngineCount = pTrigger->GetControlledEngineCount();
 	for (int y = 0; y < lEngineCount; ++y)
 	{
-		const TBC::PhysicsTrigger::EngineTrigger& lEngineTrigger = lTrigger->GetControlledEngine(y);
+		const TBC::PhysicsTrigger::EngineTrigger& lEngineTrigger = pTrigger->GetControlledEngine(y);
 		log_volatile(mLog.Debugf(_T("TRIGGER - trigging function %s."), lEngineTrigger.mFunction.c_str()));
 		GetManager()->AddAlarmCallback(this, 0, lEngineTrigger.mDelay, (void*)&lEngineTrigger);
 	}

@@ -291,6 +291,16 @@ const void* ContextObject::GetTrigger(TBC::PhysicsManager::TriggerID pTriggerId)
 	return HashUtil::FindMapObject(mTriggerMap, pTriggerId);
 }
 
+size_t ContextObject::GetTriggerCount(const void*& pTrigger) const
+{
+	if (mTriggerMap.empty())
+	{
+		return (0);
+	}
+	pTrigger = mTriggerMap.begin()->second;
+	return (mTriggerMap.size());
+}
+
 
 
 bool ContextObject::UpdateFullPosition(const ObjectPositionalData*& pPositionalData)

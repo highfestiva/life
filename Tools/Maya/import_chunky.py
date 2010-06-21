@@ -57,8 +57,8 @@ class GroupReader(DefaultMAReader):
                                      "deleteComponent", "softModHandle", "softMod", \
                                      "objectSet", "tweak", "imagePlane", "place2dTexture", \
                                      "polyBridgeEdge", "polySeparate", "polyChipOff", \
-                                     "deleteUVSet", "polyAutoProj", "polyBoolOp"]
-                self.silent_types = ["polyExtrudeFace", "polyTweak"]
+                                     "deleteUVSet", "polyAutoProj"]
+                self.silent_types = ["polyExtrudeFace", "polyTweak", "polyBoolOp"]
                 self.mat_types    = ["lambert", "blinn", "phong", "shadingEngine", "layeredShader", \
                                      "file"]
                 self.basename = basename
@@ -797,7 +797,7 @@ class GroupReader(DefaultMAReader):
 
                         elif section.startswith("trigger:"):
                                 triggertype = stripQuotes(config.get(section, "type"))
-                                triggerOk = triggertype in ["movement"]
+                                triggerOk = triggertype in ["movement", "always"]
                                 allApplied &= triggerOk
                                 if not triggerOk:
                                         print("Error: invalid trigger type '%s'." % triggertype)
@@ -828,7 +828,7 @@ class GroupReader(DefaultMAReader):
                                 def check_triggered_by(l):
                                         ok = (type(l) == str)
                                         triggered_by = self.findNode(l)
-                                        ok &= (triggered_by != None)
+                                        ok &= (triggered_by != None or triggertype == "always")
                                         return ok
                                 required = [("type", lambda x: type(x) == str),
                                             ("function", lambda x: type(x) == str),

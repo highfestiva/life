@@ -71,7 +71,7 @@ class ChunkyWriter:
 
 
         def write(self):
-                self.bodies, self.meshes, self.engines, self.triggers = self._sortgroup(self.group)
+                self.bodies, self.meshes, self.engines, self.phys_triggers = self._sortgroup(self.group)
                 self.dowrite()
 
 
@@ -118,11 +118,11 @@ class ChunkyWriter:
                 bodies = []
                 meshes = []
                 engines = []
-                triggers = []
+                phys_triggers = []
                 for node in self.group:
                         node.writecount = 0
                         if node.getName().startswith("phys_trig_") and node.nodetype == "transform":
-                                triggers += [node]
+                                phys_triggers += [node]
                                 bodies += [node]        # A trigger is both trigger and body...
                         elif node.getName().startswith("phys_") and node.nodetype == "transform":
                                 bodies += [node]
@@ -138,7 +138,7 @@ class ChunkyWriter:
                         return c
                 bodies.sort(key=childlevel)
                 meshes.sort(key=childlevel)
-                return bodies, meshes, engines, triggers
+                return bodies, meshes, engines, phys_triggers
 
 
         def _addfeat(self, k, v):
@@ -340,7 +340,7 @@ class ChunkyWriter:
                 for node in self.group:
                         if node.getName() == simplename:
                                 return node
-                print("Warning: node '%s' not found!" % name)
+                #print("Warning: node '%s' not found!" % simplename)
                 return None
 
 
@@ -382,18 +382,6 @@ class PhysWriter(ChunkyWriter):
                         bones = []
                         engines = []
                         triggers = []
-                        data =  (
-                                        CHUNK_PHYSICS,
-                                        (
-                                                (CHUNK_PHYSICS_BONE_COUNT, len(self.bodies)),
-                                                (CHUNK_PHYSICS_PHYSICS_TYPE, physics_type[self.config["type"]]),
-                                                (CHUNK_PHYSICS_ENGINE_COUNT, len(self.engines)),
-                                                (CHUNK_PHYSICS_TRIGGER_COUNT, len(self.triggers)),
-                                                (CHUNK_PHYSICS_BONE_CONTAINER, bones),
-                                                (CHUNK_PHYSICS_ENGINE_CONTAINER, engines),
-                                                (CHUNK_PHYSICS_TRIGGER_CONTAINER, triggers)
-                                        )
-                                )
                         for node in self.bodies:
                                 #print("Children of %s: %s." % (node.getFullName(), repr(node.phys_children)))
                                 #[print("  - "+n.getName()) for n in node.phys_children]
@@ -407,8 +395,22 @@ class PhysWriter(ChunkyWriter):
                                         engines.append((CHUNK_PHYSICS_ENGINE, node))
                                 elif node.nodetype.startswith("trigger:"):
                                         triggers.append((CHUNK_PHYSICS_TRIGGER, node))
+                        data =  (
+                                        CHUNK_PHYSICS,
+                                        (
+                                                (CHUNK_PHYSICS_BONE_COUNT, len(self.bodies)),
+                                                (CHUNK_PHYSICS_PHYSICS_TYPE, physics_type[self.config["type"]]),
+                                                (CHUNK_PHYSICS_ENGINE_COUNT, len(engines)),
+                                                (CHUNK_PHYSICS_TRIGGER_COUNT, len(triggers)),
+                                                (CHUNK_PHYSICS_BONE_CONTAINER, bones),
+                                                (CHUNK_PHYSICS_ENGINE_CONTAINER, engines),
+                                                (CHUNK_PHYSICS_TRIGGER_CONTAINER, triggers)
+                                        )
+                                )
                         if options.options.verbose:
                                 pprint.pprint(data)
+                                print("Number of physical triggers:", len(self.phys_triggers))
+                                print("Number of logic triggers:", len(triggers))
                         self._writechunk(data)
                 self._verifywritten("physics", self.bodies)
                 self._addfeat("file:files", 1)
@@ -542,7 +544,7 @@ class PhysWriter(ChunkyWriter):
 
 
         def _writetrigger(self, node):
-                types = {"movement":1}
+                types = {"always":1, "movement":2}
                 self._writeint(types[node.get_fixed_attribute("type")])
                 self._writestr(node.get_fixed_attribute("function"))
                 self._writeint(node.get_fixed_attribute("trigger_group_index"))
@@ -550,10 +552,7 @@ class PhysWriter(ChunkyWriter):
 
                 triggered_by_name = node.get_fixed_attribute("triggered_by")
                 triggered_by = self._findglobalnode(triggered_by_name)
-                if not triggered_by:
-                        print("Error: could not find trigger node by name '%s' in '%s'." % (triggered_by_name, node.getFullName()))
-                        sys.exit(19)
-                idx = self.bodies.index(triggered_by)
+                idx = self.bodies.index(triggered_by) if triggered_by else -1
                 if options.options.verbose:
                         print("Trigger '%s' connected to bone index %i."% (node.getName(), idx))
                 self._writeint(idx)
@@ -573,7 +572,7 @@ class PhysWriter(ChunkyWriter):
                         self._writefloat(float(delay))
                         self._writestr(function)
                 node.writecount += 1
-                self._addfeat("physical trigger:physical triggers", 1)
+                self._addfeat("trigger:triggers", 1)
 
 
         def _getshape(self, node):

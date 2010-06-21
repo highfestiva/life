@@ -77,6 +77,7 @@ public:
 
 	void AddTrigger(TBC::PhysicsManager::TriggerID pTriggerId, const void*);
 	const void* GetTrigger(TBC::PhysicsManager::TriggerID pTriggerId) const;
+	size_t GetTriggerCount(const void*& pTrigger) const;
 
 	bool UpdateFullPosition(const ObjectPositionalData*& pPositionalData);
 	void SetFullPosition(const ObjectPositionalData& pPositionalData);

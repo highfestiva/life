@@ -32,10 +32,11 @@ size_t PhysicsTrigger::EngineTrigger::Hash() const
 
 
 
-PhysicsTrigger::PhysicsTrigger(Type pTriggerType):
-	mTriggerType(pTriggerType),
+PhysicsTrigger::PhysicsTrigger():
+	mTriggerType(TRIGGER_INVALID),
 	mGroupIndex(-1),
-	mPriority(-1)
+	mPriority(-1),
+	mTriggerNode(0)
 {
 }
 
@@ -54,12 +55,12 @@ PhysicsTrigger* PhysicsTrigger::Load(ChunkyPhysics* pStructure, const void* pDat
 		return (0);
 	}
 
-	PhysicsTrigger* lTrigger = new PhysicsTrigger(PhysicsTrigger::TRIGGER_MOVEMENT);
+	PhysicsTrigger* lTrigger = new PhysicsTrigger;
 	lTrigger->LoadChunkyData(pStructure, pData);
 	if (lTrigger->GetChunkySize() != pByteCount)
 	{
-		assert(false);
 		mLog.AError("Corrupt data or error in loading algo.");
+		assert(false);
 		delete (lTrigger);
 		lTrigger = 0;
 	}
@@ -68,8 +69,17 @@ PhysicsTrigger* PhysicsTrigger::Load(ChunkyPhysics* pStructure, const void* pDat
 
 
 
+PhysicsTrigger::Type PhysicsTrigger::GetType() const
+{
+	return (mTriggerType);
+}
+
 PhysicsManager::TriggerID PhysicsTrigger::GetPhysicsTriggerId() const
 {
+	if (!mTriggerNode)
+	{
+		return (TBC::INVALID_TRIGGER);
+	}
 	assert(mTriggerNode->GetTriggerId() != 0);
 	return (mTriggerNode->GetTriggerId());
 }
@@ -161,8 +171,12 @@ void PhysicsTrigger::LoadChunkyData(ChunkyPhysics* pStructure, const void* pData
 	i += PackerUnicodeString::Unpack(mTypeName, (uint8*)&lData[i], 1024) / sizeof(lData[0]);
 	mGroupIndex = Endian::BigToHost(lData[i++]);
 	mPriority = Endian::BigToHost(lData[i++]);
-	SetTriggerGeometry(pStructure->GetBoneGeometry(Endian::BigToHost(lData[i++])));
-	assert(mTriggerNode);
+	int lPhysTriggerIndex = Endian::BigToHost(lData[i++]);
+	if (lPhysTriggerIndex >= 0)
+	{
+		SetTriggerGeometry(pStructure->GetBoneGeometry(lPhysTriggerIndex));
+		assert(mTriggerNode);
+	}
 	const int lEngineCount = Endian::BigToHost(lData[i++]);
 	for (int x = 0; x < lEngineCount; ++x)
 	{

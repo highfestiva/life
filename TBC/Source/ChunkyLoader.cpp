@@ -256,7 +256,7 @@ bool ChunkyLoader::AllocLoadChunkyList(FileElementList& pLoadList, int64 pChunkE
 				if (lElementFound)
 				{
 					lOk = (mFile->Tell() == lChunkEndPosition);
-					assert(lOk);
+					assert(lOk);	// This probably means we put in too few elements in our load array when calling.
 				}
 				else
 				{
@@ -736,6 +736,7 @@ bool ChunkyPhysicsLoader::Load(ChunkyPhysics* pPhysics)
 		lLoadList.push_back(ChunkyFileElement(CHUNK_PHYSICS_ENGINE_COUNT, &lEngineCount));
 		lLoadList.push_back(ChunkyFileElement(CHUNK_PHYSICS_TRIGGER_COUNT, &lTriggerCount));
 		lOk = AllocLoadChunkyList(lLoadList, mFile->GetSize());
+		assert(lOk);
 	}
 	if (lOk)
 	{
@@ -757,6 +758,7 @@ bool ChunkyPhysicsLoader::Load(ChunkyPhysics* pPhysics)
 		lLoadList.push_back(ChunkyFileElement(CHUNK_PHYSICS_ENGINE_CONTAINER, (void*)pPhysics, lEngineCount));
 		lLoadList.push_back(ChunkyFileElement(CHUNK_PHYSICS_TRIGGER_CONTAINER, (void*)pPhysics, lTriggerCount));
 		lOk = AllocLoadChunkyList(lLoadList, mFile->GetSize());
+		assert(lOk);
 	}
 	if (lOk)
 	{
@@ -944,7 +946,7 @@ bool ChunkyPhysicsLoader::LoadElementCallback(ChunkyType pType, uint32 pSize, in
 	if (pType == CHUNK_PHYSICS_BONE_CONTAINER)
 	{
 		// Setup pointers and counters for list loading.
-		const int MAXIMUM_CHILD_BONES = 64;
+		const int MAXIMUM_CHILD_BONES = 256;
 		int32 lChildArray[MAXIMUM_CHILD_BONES];
 		::memset(lChildArray, -1, sizeof(lChildArray));
 		unsigned lChildByteSize = 0;
@@ -1046,6 +1048,7 @@ bool ChunkyPhysicsLoader::LoadElementCallback(ChunkyType pType, uint32 pSize, in
 		{
 			lTrigger = PhysicsTrigger::Load(lPhysics, lTriggerArray, lTriggerByteSize);
 			lOk = (lTrigger != 0);
+			assert(lOk);
 		}
 		if (lOk)
 		{
@@ -1058,6 +1061,7 @@ bool ChunkyPhysicsLoader::LoadElementCallback(ChunkyType pType, uint32 pSize, in
 	{
 		lOk = Parent::LoadElementCallback(pType, pSize, pChunkEndPosition, pStorage);
 	}
+	assert(lOk);
 	return (lOk);
 }
 

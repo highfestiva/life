@@ -30,7 +30,9 @@ class PhysicsTrigger
 public:
 	enum Type
 	{
-		TRIGGER_MOVEMENT = 1,
+		TRIGGER_INVALID = 0,
+		TRIGGER_ALWAYS,
+		TRIGGER_MOVEMENT,
 	};
 
 	struct EngineTrigger
@@ -42,11 +44,12 @@ public:
 		size_t Hash() const;
 	};
 
-	PhysicsTrigger(Type pTriggerType);
+	PhysicsTrigger();
 	virtual ~PhysicsTrigger();
 
 	static PhysicsTrigger* Load(ChunkyPhysics* pStructure, const void* pData, unsigned pByteCount);
 
+	Type GetType() const;
 	PhysicsManager::TriggerID GetPhysicsTriggerId() const;
 	int GetGroupIndex() const;
 	int GetPriority() const;
