@@ -179,6 +179,8 @@ protected:
 
 	Vector3DF mCameraPosition;		// TODO: remove hack (should context object controlled)!
 	Vector3DF mCameraPreviousPosition;	// TODO: remove hack (should context object controlled)!
+	Vector3DF mCameraFollowVelocity;	// TODO: remove hack (should context object controlled)!
+	Vector3DF mCameraUp;			// TODO: remove hack (should context object controlled)!
 	Vector3DF mCameraOrientation;		// TODO: remove hack (should context object controlled)!
 	Vector3DF mCameraPivotPosition;		// TODO: remove hack (should context object controlled)!
 	float mCameraTargetXyDistance;		// TODO: remove hack (should context object controlled)!

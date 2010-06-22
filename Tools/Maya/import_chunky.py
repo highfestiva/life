@@ -1094,7 +1094,7 @@ class GroupReader(DefaultMAReader):
                                         del(node.localmat4)
                                         node.gettransformto(None)
                                         #print("%s after:\n%s." % (node.getName(), node.gettransformto(None)))
-                shape.disable_ortho_check = True
+                #shape.disable_ortho_check = True
 
 
         def makephysrelative(self, group):

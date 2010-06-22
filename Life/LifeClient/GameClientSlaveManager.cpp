@@ -54,6 +54,8 @@ GameClientSlaveManager::GameClientSlaveManager(GameClientMasterTicker* pMaster, 
 	mJustLookingAtAvatars(false),
 	mRoadSignIndex(0),
 	mCameraPosition(0, -200, 100),
+	mCameraFollowVelocity(0, 1, 0),
+	mCameraUp(0, 0, 1),
 	mCameraOrientation(PIF/2, acos(mCameraPosition.z/mCameraPosition.y), 0),
 	mCameraTargetXyDistance(20),
 	mCameraMaxSpeed(200),
@@ -766,17 +768,41 @@ void GameClientSlaveManager::TickUiUpdate()
 	const float lCurrentCameraXyDistance = lTargetCameraPosition.GetDistance(lPivotXyPosition);
 	lTargetCameraPosition = lPivotXyPosition + (lTargetCameraPosition-lPivotXyPosition)*(mCameraTargetXyDistance/lCurrentCameraXyDistance);
 	lTargetCameraPosition.z = mCameraPivotPosition.z + mCameraTargetXyDistance/2;
+
+	if (lObject)
+	{
+		/* Almost tried out "stay behind velocity". Was too jerky, since velocity varies too much.
+		Vector3DF lVelocity = lObject->GetVelocity();
+		mCameraFollowVelocity = lVelocity;
+		float lSpeed = lVelocity.GetLength();
+		if (lSpeed > 0.1f)
+		{
+			lVelocity.Normalize();
+			mCameraFollowVelocity = Math::Lerp(mCameraFollowVelocity, lVelocity, 0.1f).GetNormalized();
+		}
+		// Project previous "camera up" onto plane orthogonal to the velocity to get new "up".
+		Vector3DF lCameraUp = mCameraUp.ProjectOntoPlane(mCameraFollowVelocity) + Vector3DF(0, 0, 0.01f);
+		if (lCameraUp.GetLengthSquared() > 0.1f)
+		{
+			mCameraUp = lCameraUp;
+		}
+		lSpeed *= 0.05f;
+		lSpeed = (lSpeed > 0.4f)? 0.4f : lSpeed;
+		mCameraUp.Normalize();
+		lTargetCameraPosition = Math::Lerp(lTargetCameraPosition, mCameraPivotPosition - 
+			mCameraFollowVelocity * mCameraTargetXyDistance +
+			mCameraUp * mCameraTargetXyDistance * 0.3f, 0.0f);*/
+
+		/*// Temporary: changed to "cam stay behind" mode.
+		lTargetCameraPosition = lObject->GetOrientation() *
+			Vector3DF(0, -mCameraTargetXyDistance, mCameraTargetXyDistance/4) +
+			mCameraPivotPosition;*/
+	}
+
 	if (lTargetCameraPosition.z < -20)
 	{
 		lTargetCameraPosition.z = -20.0f;
 	}
-
-	/*// Temporary: changed to "cam stay behind" mode.
-	lTargetCameraPosition = lObject->GetOrientation() *
-		Vector3DF(0, -mCameraTargetXyDistance, mCameraTargetXyDistance/4) +
-		mCameraPivotPosition;
-	static Vector3DF s = lTargetCameraPosition;
-	lTargetCameraPosition = s;*/
 
 	// Camera moves in a "moving average" kinda curve (halfs the distance in x seconds).
 	const float lPhysicsTime = GetTimeManager()->GetAffordedPhysicsTotalTime();
