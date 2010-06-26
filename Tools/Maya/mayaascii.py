@@ -1645,7 +1645,7 @@ class DefaultMAReader(MAReader):
                 b = dstattr.split(".")
                 dnode = b[0]
                 dattr = b[1]
-                
+
                 sn = self.findNode(snode, create=True)
                 dn = self.findNode(dnode, create=True)
                 if sn!=None:
@@ -1680,7 +1680,14 @@ class DefaultMAReader(MAReader):
                                 node = None
                         else:
                                 if node==None:
-                                        node = self.nodes.get(name)
+                                        if namespace:
+                                                ns = namespace
+                                                if (namespace[0] == "|"):
+                                                        ns = namespace[1:]
+                                                fullname = ns+":"+name
+                                                node = self.nodes.get(fullname)
+                                        if node==None:
+                                                node = self.nodes.get(name)
                                         if node==None:
                                                 node = self.nodes.get(path)
                                         if node==None:

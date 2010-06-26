@@ -285,44 +285,21 @@ bool ChunkyPhysics::FinalizeInit(PhysicsManager* pPhysics, unsigned pPhysicsFps,
 		for (int x = 0; lOk && x < lBoneCount; ++x)
 		{
 			ChunkyBoneGeometry* lGeometry = GetBoneGeometry(x);
-			if (lGeometry->IsTrigger())
+			switch (lGeometry->GetBoneType())
 			{
-				lOk = lGeometry->CreateTrigger(pPhysics, pTrigListener, GetBoneTransformation(x));
-			}
-			else
-			{
-				const PhysicsManager::BodyType lBodyType = GetBodyType(lGeometry);
-				const TransformationF& lBone = GetBoneTransformation(x);
-				//QuaternionF q = lBone.GetOrientation();
-				////q.Normalize();
-				//RotationMatrixF rm = q.GetAsRotationMatrix();
-				////rm.Reorthogonalize();
-				//const Vector3DF lArrow0(0, 1, 0);
-				//Vector3DF lArrow1 = rm*lArrow0;
-				//lArrow1.x = 0;	// Project onto YZ.
-				//mLog.Tracef(_T("Creating bone %i that has v1=(%f; %f; %f) from q=(%f; %f; %f; %f)."),
-				//	x, lArrow1.x, lArrow1.y, lArrow1.z,
-				//	q.GetA(), q.GetB(), q.GetC(), q.GetD());
-				//const float lXAngle = ::acos(lArrow0*lArrow1) * 180/PIF;
-				//const int lParentIndex = lGeometry->GetParent()? GetIndex(lGeometry->GetParent()) : -1;
-				//mLog.Headlinef(_T("Creating bone %i (with parent %i) at (%f; %f; %f) with world x angle %f."),
-				//	x, lParentIndex,
-				//	lBone.GetPosition().x, lBone.GetPosition().y, lBone.GetPosition().z,
-				//	lXAngle);
-				//{	// TODO: remove entire scope!
-				//	const TransformationF& lBone = GetOriginalBoneTransformation(x);
-				//	QuaternionF q = lBone.GetOrientation();
-				//	//q.Normalize();
-				//	RotationMatrixF rm = q.GetAsRotationMatrix();
-				//	const Vector3DF lArrow0(0, 1, 0);
-				//	Vector3DF lArrow1 = rm*lArrow0;
-				//	lArrow1.x = 0;	// Project onto YZ.
-				//	const float lXAngle = ::acos(lArrow0*lArrow1) * 180/PIF;
-				//	mLog.Headlinef(_T("Creating bone %i with local x angle %f from q=(%f; %f; %f; %f)."),
-				//		x, lXAngle,
-				//		q.GetA(), q.GetB(), q.GetC(), q.GetD());
-				//}
-				lOk = lGeometry->CreateBody(pPhysics, x == 0, pForceListener, lBodyType, lBone);
+				case ChunkyBoneGeometry::BONE_BODY:
+				{
+					const PhysicsManager::BodyType lBodyType = GetBodyType(lGeometry);
+					const TransformationF& lBone = GetBoneTransformation(x);
+					lOk = lGeometry->CreateBody(pPhysics, x == 0, pForceListener, lBodyType, lBone);
+				}
+				break;
+				case ChunkyBoneGeometry::BONE_TRIGGER:
+				{
+					lOk = lGeometry->CreateTrigger(pPhysics, pTrigListener, GetBoneTransformation(x));
+				}
+				break;
+
 			}
 		}
 		for (int x = 0; lOk && x < lBoneCount; ++x)

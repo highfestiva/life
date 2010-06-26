@@ -352,23 +352,6 @@ bool RuntimeVariableScope::EraseVariable(const str& pName)
 
 
 
-RuntimeVariableScope* RuntimeVariableScope::LockParentScope(RuntimeVariableScope* pParentScope)
-{
-	if (!pParentScope)
-	{
-		mLock.Acquire();
-	}
-	RuntimeVariableScope* lParentScope = mParentScope;
-	mParentScope = pParentScope;
-	if (pParentScope)
-	{
-		mLock.Release();
-	}
-	return (lParentScope);
-}
-
-
-
 std::list<str> RuntimeVariableScope::GetVariableNameList(SearchType pSearchType, int pStartScopeIndex, int pEndScopeIndex)
 {
 	std::list<str> lVariableNameList;

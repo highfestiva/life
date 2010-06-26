@@ -43,8 +43,6 @@ void* ThreadPointerStorage::GetPointer()
 
 
 
-StaticThread gMainThread(_T("MainThread"));
-
 // This gives the thread a name when debugging in VS.
 void SetVisualStudioThreadName(const char* szThreadName, DWORD dwThreadId)
 {
@@ -703,14 +701,14 @@ void Win32RWLock::Release()
 
 
 
-void Thread::InitializeMainThread(const str& pThreadName)
+void Thread::InitializeThread(Thread* pThread)
 {
-	gThreadStorage.SetPointer(&gMainThread);
+	gThreadStorage.SetPointer(pThread);
 	gExtraDataStorage.SetPointer(0);
-	gMainThread.SetThreadId(GetCurrentThreadId());
-	assert(gThreadStorage.GetPointer() == &gMainThread);
-	assert(Thread::GetCurrentThread() == &gMainThread);
-	SetVisualStudioThreadName(astrutil::Encode(pThreadName).c_str(), (DWORD)-1);
+	pThread->SetThreadId(GetCurrentThreadId());
+	assert(gThreadStorage.GetPointer() == pThread);
+	assert(Thread::GetCurrentThread() == pThread);
+	SetVisualStudioThreadName(astrutil::Encode(pThread->GetThreadName()).c_str(), (DWORD)-1);
 }
 
 size_t Thread::GetCurrentThreadId()

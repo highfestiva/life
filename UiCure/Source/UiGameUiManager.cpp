@@ -441,23 +441,23 @@ void GameUiManager::OnMaximize(int pWidth, int pHeight)
 void GameUiManager::UpdateSettings()
 {
 	// Display.
-	bool lEnableVSync = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_DISPLAY_ENABLEVSYNC, true);
+	const bool lEnableVSync = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_DISPLAY_ENABLEVSYNC, true);
 	mDisplay->SetVSyncEnabled(lEnableVSync);
 
 	// ----------------------------------------
 
 	// 3D rendering settings.
-	bool lEnableLights = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_ENABLELIGHTS, true);
-	double lAmbientRed = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_AMBIENTRED, 0.1);
-	double lAmbientGreen = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_AMBIENTGREEN, 0.1);
-	double lAmbientBlue = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_AMBIENTBLUE, 0.1);
-	bool lEnableTrilinearFiltering = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_ENABLETRILINEARFILTERING, false);
-	bool lEnableBilinearFiltering = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_ENABLEBILINEARFILTERING, false);
-	bool lEnableMipMapping = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_ENABLEMIPMAPPING, true);
-	double lFOV = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_FOV, 90.0);
-	double lClipNear = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_CLIPNEAR, 0.1);
-	double lClipFar = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_CLIPFAR, 1000.0);
-	str lShadowsString = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_SHADOWS, _T("VolumesOnly"));
+	const bool lEnableLights = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_ENABLELIGHTS, true);
+	const double lAmbientRed = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_AMBIENTRED, 0.1);
+	const double lAmbientGreen = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_AMBIENTGREEN, 0.1);
+	const double lAmbientBlue = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_AMBIENTBLUE, 0.1);
+	const bool lEnableTrilinearFiltering = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_ENABLETRILINEARFILTERING, false);
+	const bool lEnableBilinearFiltering = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_ENABLEBILINEARFILTERING, false);
+	const bool lEnableMipMapping = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_ENABLEMIPMAPPING, true);
+	const double lFOV = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_FOV, 90.0);
+	const double lClipNear = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_CLIPNEAR, 0.1);
+	const double lClipFar = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_CLIPFAR, 1000.0);
+	const str lShadowsString = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_SHADOWS, _T("VolumesOnly"));
 
 	mRenderer->SetLightsEnabled(lEnableLights);
 	mRenderer->SetAmbientLight((float)lAmbientRed, (float)lAmbientGreen, (float)lAmbientBlue);
@@ -482,7 +482,7 @@ void GameUiManager::UpdateSettings()
 
 	// ----------------------------------------
 	// 2D rendering settings.
-	str lPaintModeString = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_2D_PAINTMODE, _T("AlphaBlend"));
+	const str lPaintModeString = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_2D_PAINTMODE, _T("AlphaBlend"));
 	UiTbc::Painter::RenderMode lPainterRenderMode = UiTbc::Painter::RM_ALPHABLEND;
 	if (lPaintModeString == _T("Add"))
 	{

@@ -177,7 +177,7 @@ class GroupReader(DefaultMAReader):
                 for node in nodes:
                         node.ignore = False
                 for node in tuple(nodes):
-                        if node.getName().startswith("i_"):
+                        if node.getName().startswith("i_") or node.getName().find(":i_") >= 0:
                                 self._recursiveremove(node, nodes)
                 #print("\n".join([n.getName() for n in nodes]))
                 islands = []
@@ -207,7 +207,7 @@ class GroupReader(DefaultMAReader):
                                         elif self._insert_in_same_island_as(islands, ref, node, allow_no_association):
                                                 nodes.remove(node)
                                 elif len(outnodes) > 1:
-                                        print("Error: more than one output node not yet supported!")
+                                        print("Error: more than one output node not yet supported (%s)!" % node.getFullName())
                                         return None
                                 elif not parentName:
                                         islands.append([node])
@@ -253,7 +253,7 @@ class GroupReader(DefaultMAReader):
                 for_islands = islands[:]
                 for island in for_islands:
                         for n in island:
-                                if n.nodetype in self.bad_types or n.getName().startswith("i_"):
+                                if n.nodetype in self.bad_types or n.getName().startswith("i_") or n.getName().find(":i_") >= 0:
                                         #print("Removing bad %s (%s)." % (n.nodetype, n.getFullName()))
                                         if list(filter(lambda n: n.getName().startswith("m_") or n.getName().startswith("phys_"), island)):
                                                 print("Culprit %s (type %s) kills main island?" % (n.getFullName(), n.nodetype))

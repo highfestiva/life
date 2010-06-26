@@ -89,8 +89,6 @@ public:
 
 	bool EraseVariable(const str& pName);
 
-	RuntimeVariableScope* LockParentScope(RuntimeVariableScope* pParentScope);
-
 	std::list<str> GetVariableNameList(SearchType pSearchType, int pStartScopeIndex = 0, int pEndScopeIndex = 1000);
 
 private:

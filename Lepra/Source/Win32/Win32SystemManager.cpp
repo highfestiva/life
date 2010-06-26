@@ -60,6 +60,7 @@ static bool IsHyperThreadingSupported()
 
 BOOL CtrlCallback(DWORD fdwCtrlType)
 {
+	const bool lNewThread = Thread::QueryInitializeThread();
 	BOOL lHandled = FALSE;
 	switch (fdwCtrlType)
 	{
@@ -81,6 +82,10 @@ BOOL CtrlCallback(DWORD fdwCtrlType)
 		}
 		break;
 	}
+	if (lNewThread)
+	{
+		delete Thread::GetCurrentThread();
+	}
 	return (lHandled);
 }
 
@@ -90,7 +95,7 @@ void SystemManager::Init()
 {
 	::SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlCallback, TRUE);
 
-	Thread::InitializeMainThread(_T("MainThread"));
+	Thread::InitializeMainThread();
 
 	// Increase resolution on Win32's ::Sleep() to 1 ms.
 	::timeBeginPeriod(1);

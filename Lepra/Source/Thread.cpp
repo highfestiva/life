@@ -19,6 +19,10 @@ namespace Lepra
 
 
 
+StaticThread gMainThread(_T("MainThread"));
+
+
+
 bool OwnedLock::IsOwner() const
 {
 	return (mOwner == Thread::GetCurrentThread());
@@ -191,6 +195,24 @@ Thread::~Thread()
 	{
 		Join();
 	}
+}
+
+void Thread::InitializeMainThread()
+{
+	InitializeThread(&gMainThread);
+}
+
+bool Thread::QueryInitializeThread()
+{
+	Thread* lSelf = GetCurrentThread();
+	if (!lSelf)
+	{
+		lSelf = new StaticThread(_T("OnTheFly"));
+		lSelf->RequestSelfDestruct();
+		InitializeThread(lSelf);
+		return true;
+	}
+	return false;
 }
 
 bool Thread::IsRunning() const

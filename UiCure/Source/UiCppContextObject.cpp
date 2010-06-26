@@ -423,6 +423,7 @@ void CppContextObject::TryAddTexture()
 			return;
 		}
 	}
+	const UiTbc::ChunkyClass* lClass = ((UiTbc::ChunkyClass*)mUiClassResource->GetRamData());
 	for (size_t x = 0; x < mMeshResourceArray.size(); ++x)
 	{
 		UserGeometryReferenceResource* lMesh = mMeshResourceArray[x];
@@ -430,12 +431,30 @@ void CppContextObject::TryAddTexture()
 		{
 			if (lMesh->GetRamData()->GetUVData(0) && mTextureResourceArray.size() > 0)
 			{
+				UserRendererImageResource* lTexture = 0;
+				TextureArray::iterator tx = mTextureResourceArray.begin();
+				for (; !lTexture && tx != mTextureResourceArray.end(); ++tx)
+				{
+					const std::vector<str>& lTextureList = lClass->GetMaterial(x).mTextureList;
+					std::vector<str>::const_iterator y = lTextureList.begin();
+					for (; !lTexture && y != lTextureList.end(); ++y)
+					{
+						if ((*tx)->GetName() == *y)
+						{
+							lTexture = *tx;
+						}
+					}
+				}
+				if (!lTexture)
+				{
+					lTexture = mTextureResourceArray[0];
+				}
 				const bool lIsBlended = (lMesh->GetRamData()->GetBasicMaterialSettings().mAlpha < 1 ||
 					((UiTbc::ChunkyClass*)mUiClassResource->GetRamData())->GetMaterial(x).mShaderName == _T("blend"));
 				UiTbc::Renderer::MaterialType lMaterialType = lIsBlended?
 					UiTbc::Renderer::MAT_SINGLE_TEXTURE_BLENDED : UiTbc::Renderer::MAT_SINGLE_TEXTURE_SOLID;
 				mUiManager->GetRenderer()->ChangeMaterial(lMesh->GetData(), lMaterialType);
-				mUiManager->GetRenderer()->TryAddGeometryTexture(lMesh->GetData(), mTextureResourceArray[0]->GetData());
+				mUiManager->GetRenderer()->TryAddGeometryTexture(lMesh->GetData(), lTexture->GetData());
 			}
 			else
 			{

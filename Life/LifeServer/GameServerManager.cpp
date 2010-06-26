@@ -667,6 +667,11 @@ void GameServerManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 		{
 			log_volatile(mLog.Debugf(_T("Loaded object %s."), pObject->GetClassId().c_str()));
 			OnPhysicsSend(pObject);
+
+			if (strutil::StartsWith(pObject->GetClassId(), _T("level_")))
+			{
+				Parent::CreateContextObject(_T("stone"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED)->StartLoading();
+			}
 		}
 	}
 	else

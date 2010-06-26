@@ -71,7 +71,7 @@ class ChunkyWriter:
 
 
         def write(self):
-                self.bodies, self.meshes, self.engines, self.phys_triggers = self._sortgroup(self.group)
+                self.bodies, self.meshes, self.engines, self.phys_triggers, self.phys_spawners = self._sortgroup(self.group)
                 self.dowrite()
 
 
@@ -119,11 +119,15 @@ class ChunkyWriter:
                 meshes = []
                 engines = []
                 phys_triggers = []
+                phys_spawners = []
                 for node in self.group:
                         node.writecount = 0
                         if node.getName().startswith("phys_trig_") and node.nodetype == "transform":
                                 phys_triggers += [node]
                                 bodies += [node]        # A trigger is both trigger and body...
+                        elif node.getName().startswith("phys_spawn_") and node.nodetype == "transform":
+                                phys_spawners += [node]
+                                bodies += [node]        # A spawner is both trigger and body...
                         elif node.getName().startswith("phys_") and node.nodetype == "transform":
                                 bodies += [node]
                         elif node.getName().startswith("m_") and node.nodetype == "transform":
@@ -138,7 +142,7 @@ class ChunkyWriter:
                         return c
                 bodies.sort(key=childlevel)
                 meshes.sort(key=childlevel)
-                return bodies, meshes, engines, phys_triggers
+                return bodies, meshes, engines, phys_triggers, phys_spawners
 
 
         def _addfeat(self, k, v):
@@ -459,10 +463,18 @@ class PhysWriter(ChunkyWriter):
                 if options.options.verbose and is_affected_by_gravity:
                         print("Writing shape %s as affected by gravity." % node.getName())
                 self._writeint(is_affected_by_gravity)
-                istrigger = 1 if node.getName().startswith("phys_trig_") else 0
-                if options.options.verbose and istrigger:
-                        print("Writing shape %s as trigger (%s)." % (node.getName(), str(istrigger)))
-                self._writeint(istrigger)
+                type_body, type_trigger, type_spawner = 1, 2, 3
+                if node.getName().startswith("phys_trig_"):
+                        phys_type = type_trigger
+                        if options.options.verbose:
+                                print("Writing shape %s as trigger." % node.getName())
+                elif node.getName().startswith("phys_spawn_"):
+                        phys_type = type_spawner
+                        if options.options.verbose:
+                                print("Writing shape %s as spawner." % node.getName())
+                else:
+                        phys_type = type_body
+                self._writeint(phys_type)
                 # Write joint parameters.
                 parameters = [0.0]*16
                 #print("Total mass:", totalmass)

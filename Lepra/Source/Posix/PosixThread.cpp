@@ -294,13 +294,13 @@ void* ThreadEntry(void* pThread)
 	return (0);
 }
 
-void Thread::InitializeMainThread(const str& pThreadName)
+void Thread::InitializeThread(Thread* pThread)
 {
-	gMainThread.SetThreadId(GetCurrentThreadId());
-	gThreadStorage.SetPointer(&gMainThread);
+	gThreadStorage.SetPointer(pThread);
 	gExtraDataStorage.SetPointer(0);
-	assert(gThreadStorage.GetPointer() == &gMainThread);
-	assert(Thread::GetCurrentThread() == &gMainThread);
+	pThread->SetThreadId(GetCurrentThreadId());
+	assert(gThreadStorage.GetPointer() == pThread);
+	assert(Thread::GetCurrentThread() == pThread);
 	InitializeSignalMask();
 }
 

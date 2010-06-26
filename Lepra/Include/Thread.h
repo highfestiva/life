@@ -339,7 +339,9 @@ public:
 	Thread(const str& pThreadName);
 	virtual ~Thread();
 
-	static void InitializeMainThread(const str& pThreadName);
+	static void InitializeMainThread();
+	static bool QueryInitializeThread();
+	static void InitializeThread(Thread* pThread);
 
 	const str& GetThreadName() const;
 	size_t GetThreadId() const;

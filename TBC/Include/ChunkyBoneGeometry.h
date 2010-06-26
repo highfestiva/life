@@ -20,6 +20,13 @@ namespace TBC
 class ChunkyBoneGeometry
 {
 public:
+	enum BoneType
+	{
+		BONE_BODY = 1,
+		BONE_TRIGGER,
+		BONE_SPAWNER,
+	};
+
 	enum GeometryType
 	{
 		GEOMETRY_CAPSULE = 1,
@@ -49,14 +56,14 @@ public:
 	struct BodyDataBase
 	{
 		BodyDataBase(float pMass, float pFriction, float pBounce, ChunkyBoneGeometry* pParent,
-			JointType pJointType, bool pIsAffectedByGravity, bool pIsTrigger):
+			JointType pJointType, bool pIsAffectedByGravity, BoneType pBoneType):
 			mMass(pMass),
 			mFriction(pFriction),
 			mBounce(pBounce),
 			mParent(pParent),
 			mJointType(pJointType),
 			mIsAffectedByGravity(pIsAffectedByGravity),
-			mIsTrigger(pIsTrigger)
+			mBoneType(pBoneType)
 		{
 			::memset(mParameter, 0, sizeof(mParameter));
 		}
@@ -66,15 +73,15 @@ public:
 		ChunkyBoneGeometry* mParent;
 		JointType mJointType;
 		bool mIsAffectedByGravity;
-		bool mIsTrigger;
+		BoneType mBoneType;
 		float mParameter[16];
 	};
 	struct BodyData: public BodyDataBase
 	{
 		BodyData(float pMass, float pFriction, float pBounce, ChunkyBoneGeometry* pParent = 0,
 			JointType pJointType = JOINT_EXCLUDE, ConnectorType pConnectorType = CONNECT_NONE,
-			bool pIsAffectedByGravity = true, bool pIsTrigger = false):
-			BodyDataBase(pMass, pFriction, pBounce, pParent, pJointType, pIsAffectedByGravity, pIsTrigger),
+			bool pIsAffectedByGravity = true, BoneType pBoneType = BONE_BODY):
+			BodyDataBase(pMass, pFriction, pBounce, pParent, pJointType, pIsAffectedByGravity, pBoneType),
 			mConnectorType(pConnectorType)
 		{
 		}
@@ -98,7 +105,7 @@ public:
 
 	ChunkyBoneGeometry* GetParent() const;
 	JointType GetJointType() const;
-	bool IsTrigger() const;
+	BoneType GetBoneType() const;
 	PhysicsManager::JointID GetJointId() const;
 	PhysicsManager::BodyID GetBodyId() const;
 	PhysicsManager::TriggerID GetTriggerId() const;

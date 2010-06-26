@@ -361,9 +361,9 @@ PixelRect GameClientMasterTicker::GetRenderArea() const
 
 float GameClientMasterTicker::UpdateFrustum()
 {
-	float lFov = (float)CURE_RTVAR_GET(UiCure::GetSettings(), RTVAR_UI_3D_FOV, 90.0);
-	float lClipNear = (float)CURE_RTVAR_GET(UiCure::GetSettings(), RTVAR_UI_3D_CLIPNEAR, 0.1);
-	float lClipFar = (float)CURE_RTVAR_GET(UiCure::GetSettings(), RTVAR_UI_3D_CLIPFAR, 1000.0);
+	const float lFov = (float)CURE_RTVAR_GET(UiCure::GetSettings(), RTVAR_UI_3D_FOV, 90.0);
+	const float lClipNear = (float)CURE_RTVAR_GET(UiCure::GetSettings(), RTVAR_UI_3D_CLIPNEAR, 0.1);
+	const float lClipFar = (float)CURE_RTVAR_GET(UiCure::GetSettings(), RTVAR_UI_3D_CLIPFAR, 1000.0);
 	mUiManager->GetRenderer()->SetViewFrustum(lFov, lClipNear, lClipFar);
 	return (lFov);
 }

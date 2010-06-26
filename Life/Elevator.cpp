@@ -22,6 +22,7 @@ Elevator::Elevator(Cure::ResourceManager* pResourceManager):
 	Cure::CppContextObject(pResourceManager, _T("Elevator")),
 	mActiveTrigger(0),
 	mExitDelay(2.0),
+	mAreEnginesActive(false),
 	mEngineActivity(1)
 {
 }
@@ -45,9 +46,9 @@ void Elevator::OnTick(float pFrameTime)
 	}
 
 	mEngineActivity = Math::Lerp(mEngineActivity, GetActiveMaxSpeedSquare(), 0.1f);
-	if (Math::IsEpsEqual(mEngineActivity, 0.0f, 0.1f))
+	if (mAreEnginesActive && Math::IsEpsEqual(mEngineActivity, 0.0f, 0.1f))
 	{
-		mEngineActivity = 100;
+		log_adebug("TRIGGER - elevator has stopped.");
 		HaltActiveEngines();
 
 		const TBC::PhysicsTrigger* lTrigger = 0;
@@ -70,6 +71,8 @@ void Elevator::OnAlarm(int pAlarmId, void* pExtraData)
 	if (lEngineTrigger)
 	{
 		SetFunctionTarget(lEngineTrigger->mFunction, lEngineTrigger->mEngine);
+		mAreEnginesActive = true;
+		mEngineActivity = 100;
 		// Run engine for some time before *forcing* deactivation.
 		GetManager()->AddAlarmCallback(this, pAlarmId, 30, 0);
 	}
@@ -123,7 +126,7 @@ float Elevator::GetActiveMaxSpeedSquare() const
 		for (int y = 0; y < lEngineCount; ++y)
 		{
 			const TBC::PhysicsTrigger::EngineTrigger& lEngineTrigger = mActiveTrigger->GetControlledEngine(y);
-			lMaxSpeed = lEngineTrigger.mEngine->GetCurrentMaxSpeedSquare(lPhysicsManager);
+			lMaxSpeed = std::max(lMaxSpeed, lEngineTrigger.mEngine->GetCurrentMaxSpeedSquare(lPhysicsManager));
 		}
 	}
 	return (lMaxSpeed);
@@ -131,6 +134,7 @@ float Elevator::GetActiveMaxSpeedSquare() const
 
 void Elevator::HaltActiveEngines()
 {
+	mAreEnginesActive = false;
 	if (mActiveTrigger)
 	{
 		const int lEngineCount = mActiveTrigger->GetControlledEngineCount();
@@ -166,9 +170,6 @@ void Elevator::SetFunctionTarget(const str& pFunction, TBC::PhysicsEngine* pEngi
 				lTargetValue = -1;
 			}
 		}
-	}
-	else if (pFunction == _T("stop"))
-	{
 	}
 	else
 	{

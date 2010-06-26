@@ -56,7 +56,7 @@ void SystemManager::Init()
 	lTermios.c_cc[VTIME] = 5;
 	::tcsetattr(STDIN_FILENO, TCSANOW, &lTermios);
 
-	Thread::InitializeMainThread(_T("MainThread"));
+	Thread::InitializeMainThread();
 }
 
 void SystemManager::Shutdown()

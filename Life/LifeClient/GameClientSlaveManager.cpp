@@ -101,10 +101,11 @@ void GameClientSlaveManager::SetRenderArea(const PixelRect& pRenderArea)
 	((ClientConsoleManager*)GetConsoleManager())->GetUiConsole()->SetRenderArea(pRenderArea);
 
 	// Register a local FOV variable.
-	Cure::RuntimeVariableScope* lParent = GetVariableScope()->LockParentScope(0);
-	double lFov = 30+15*pRenderArea.GetWidth()/pRenderArea.GetHeight();
-	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_UI_3D_FOV, lFov);
-	GetVariableScope()->LockParentScope(lParent);
+	const double lBaseFov = CURE_RTVAR_GET(GetVariableScope(), RTVAR_UI_3D_FOV, 90.0) / 3;
+	const double lFov = lBaseFov*2 + lBaseFov*pRenderArea.GetWidth()/pRenderArea.GetHeight();
+	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_UI_3D_INTERNALFOV, lFov);
+
+	mCameraTargetXyDistance = (float)CURE_RTVAR_GETSET(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
 }
 
 bool GameClientSlaveManager::Open()
@@ -150,7 +151,8 @@ void GameClientSlaveManager::SetIsQuitting()
 void GameClientSlaveManager::SetFade(float pFadeAmount)
 {
 	mCameraMaxSpeed = 100000.0f;
-	mCameraTargetXyDistance = 20 + pFadeAmount*400.0f;
+	const float lBaseDistance = (float)CURE_RTVAR_GETSET(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
+	mCameraTargetXyDistance = lBaseDistance + pFadeAmount*400.0f;
 }
 
 
@@ -535,9 +537,9 @@ PixelRect GameClientSlaveManager::GetRenderArea() const
 
 float GameClientSlaveManager::UpdateFrustum()
 {
-	float lFov = (float)CURE_RTVAR_GET(GetVariableScope(), RTVAR_UI_3D_FOV, 90.0);
-	float lClipNear = (float)CURE_RTVAR_GET(GetVariableScope(), RTVAR_UI_3D_CLIPNEAR, 0.1);
-	float lClipFar = (float)CURE_RTVAR_GET(GetVariableScope(), RTVAR_UI_3D_CLIPFAR, 1000.0);
+	const float lFov = (float)CURE_RTVAR_TRYGET(GetVariableScope(), RTVAR_UI_3D_INTERNALFOV, 90.0);
+	const float lClipNear = (float)CURE_RTVAR_GET(GetVariableScope(), RTVAR_UI_3D_CLIPNEAR, 0.1);
+	const float lClipFar = (float)CURE_RTVAR_GET(GetVariableScope(), RTVAR_UI_3D_CLIPFAR, 1000.0);
 	mUiManager->GetRenderer()->SetViewFrustum(lFov, lClipNear, lClipFar);
 	return (lFov);
 }
@@ -767,7 +769,8 @@ void GameClientSlaveManager::TickUiUpdate()
 	Vector3DF lTargetCameraPosition(mCameraPosition);
 	const float lCurrentCameraXyDistance = lTargetCameraPosition.GetDistance(lPivotXyPosition);
 	lTargetCameraPosition = lPivotXyPosition + (lTargetCameraPosition-lPivotXyPosition)*(mCameraTargetXyDistance/lCurrentCameraXyDistance);
-	lTargetCameraPosition.z = mCameraPivotPosition.z + mCameraTargetXyDistance/2;
+	const float lCamHeight = (float)CURE_RTVAR_GETSET(GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, 10.0);
+	lTargetCameraPosition.z = mCameraPivotPosition.z + lCamHeight;
 
 	if (lObject)
 	{
@@ -1338,9 +1341,9 @@ void GameClientSlaveManager::DrawSyncDebugInfo()
 		mUiManager->GetRenderer()->SetClippingRect(mRenderArea);
 		mUiManager->GetRenderer()->SetViewport(mRenderArea);
 		UpdateCameraPosition(false);
-		double lFOV = CURE_RTVAR_GET(GetVariableScope(), RTVAR_UI_3D_FOV, 90.0);
-		double lClipNear = CURE_RTVAR_GET(GetVariableScope(), RTVAR_UI_3D_CLIPNEAR, 0.1);
-		double lClipFar = CURE_RTVAR_GET(GetVariableScope(), RTVAR_UI_3D_CLIPFAR, 1000.0);
+		const double lFOV = CURE_RTVAR_GET(GetVariableScope(), RTVAR_UI_3D_INTERNALFOV, 90.0);
+		const double lClipNear = CURE_RTVAR_GET(GetVariableScope(), RTVAR_UI_3D_CLIPNEAR, 0.1);
+		const double lClipFar = CURE_RTVAR_GET(GetVariableScope(), RTVAR_UI_3D_CLIPFAR, 1000.0);
 		mUiManager->GetRenderer()->SetViewFrustum((float)lFOV, (float)lClipNear, (float)lClipFar);
 
 		const Cure::ContextManager::ContextObjectTable& lObjectTable = GetContext()->GetObjectTable();

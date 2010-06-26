@@ -85,7 +85,12 @@ bool ChunkyBoneGeometry::CreateJoint(ChunkyPhysics* pStructure, PhysicsManager* 
 	bool lOk = false;
 	if (mBodyData.mParent)
 	{
-		if (GetTriggerId())
+		if (GetBoneType() == BONE_SPAWNER)
+		{
+			// Need not do jack. It's not a physical object.
+			lOk = true;
+		}
+		else if (GetTriggerId())
 		{
 			lOk = pPhysics->Attach(GetTriggerId(), mBodyData.mParent->GetBodyId());
 		}
@@ -214,9 +219,10 @@ ChunkyBoneGeometry::JointType ChunkyBoneGeometry::GetJointType() const
 	return (mBodyData.mJointType);
 }
 
-bool ChunkyBoneGeometry::IsTrigger() const
+ChunkyBoneGeometry::BoneType ChunkyBoneGeometry::GetBoneType() const
 {
-	return (mBodyData.mIsTrigger);
+	assert(mBodyData.mBoneType >= BONE_BODY && mBodyData.mBoneType <= BONE_SPAWNER);
+	return (mBodyData.mBoneType);
 }
 
 PhysicsManager::JointID ChunkyBoneGeometry::GetJointId() const
@@ -285,7 +291,7 @@ void ChunkyBoneGeometry::SaveChunkyData(const ChunkyPhysics* pStructure, void* p
 	lData[4] = mBodyData.mParent? Endian::HostToBig(pStructure->GetIndex(mBodyData.mParent)) : (unsigned)-1;
 	lData[5] = Endian::HostToBig(mBodyData.mJointType);
 	lData[6] = Endian::HostToBig(mBodyData.mIsAffectedByGravity? 1 : 0);
-	lData[7] = Endian::HostToBig(mBodyData.mIsTrigger? 1 : 0);
+	lData[7] = Endian::HostToBig(mBodyData.mBoneType);
 	int y = 8;
 	for (int x = 0; (size_t)x < sizeof(mBodyData.mParameter)/sizeof(mBodyData.mParameter[0]); ++x)
 	{
@@ -311,7 +317,7 @@ void ChunkyBoneGeometry::LoadChunkyData(ChunkyPhysics* pStructure, const void* p
 	mBodyData.mParent = (lParentIndex < 0)? 0 : pStructure->GetBoneGeometry(lParentIndex);
 	mBodyData.mJointType = (JointType)Endian::BigToHost(lData[5]);
 	mBodyData.mIsAffectedByGravity = Endian::BigToHost(lData[6])? true : false;
-	mBodyData.mIsTrigger = Endian::BigToHost(lData[7])? true : false;
+	mBodyData.mBoneType = (BoneType)Endian::BigToHost(lData[7]);
 	int y = 8;
 	for (int x = 0; (size_t)x < sizeof(mBodyData.mParameter)/sizeof(mBodyData.mParameter[0]); ++x)
 	{

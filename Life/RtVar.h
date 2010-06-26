@@ -32,6 +32,10 @@
 
 #define RTVAR_ALLLOGGEDOUT_AUTOSHUTDOWN	"AllLoggedOut.AutoShutdown"
 
+#define RTVAR_UI_3D_INTERNALFOV		"Ui.3D.InternalFOV"
+#define RTVAR_UI_3D_CAMDISTANCE		"Ui.3D.CamDistance"
+#define RTVAR_UI_3D_CAMHEIGHT		"Ui.3D.CamHeight"
+
 // Internal use only.
 #define RTVAR_DEBUG_ENABLE		"Debug.Enable"
 #define RTVAR_DEBUG_3D_ENABLEAXES	"Debug.3D.EnableAxes"
