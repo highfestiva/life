@@ -33,7 +33,7 @@ OpenGLPainter::OpenGLPainter() :
 
 OpenGLPainter::~OpenGLPainter()
 {
-	OGL_ASSERT();
+	//OGL_ASSERT();
 
 	ClearFontBuffers();
 
@@ -49,7 +49,7 @@ OpenGLPainter::~OpenGLPainter()
 		delete lTexture;
 	}
 
-	OGL_ASSERT();
+	//OGL_ASSERT();
 }
 
 void OpenGLPainter::SetDestCanvas(Canvas* pCanvas)
@@ -1574,7 +1574,7 @@ void OpenGLPainter::DoRenderDisplayList(std::vector<DisplayEntity*>* pDisplayLis
 
 void OpenGLPainter::ClearFontBuffers()
 {
-	OGL_ASSERT();
+	//OGL_ASSERT();
 
 	FontTextureTable::iterator x = mFontTextureTable.begin();
 	for (; x != mFontTextureTable.end(); ++x)
@@ -1585,7 +1585,7 @@ void OpenGLPainter::ClearFontBuffers()
 	}
 	mFontTextureTable.clear();
 
-	OGL_ASSERT();
+	//OGL_ASSERT();
 }
 
 FontTexture* OpenGLPainter::SelectGlyphs(uint32 pFontHash, int pFontHeight, const str& pString)

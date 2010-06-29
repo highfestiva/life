@@ -46,6 +46,11 @@ GameClientDemo::~GameClientDemo()
 
 bool GameClientDemo::Paint()
 {
+	if (!mUiManager->GetDisplayManager()->IsVisible())
+	{
+		return true;
+	}
+
 	const double lFontHeight = 70.0;
 	const UiTbc::FontManager::FontId lOldFontId = SetFontHeight(lFontHeight);
 

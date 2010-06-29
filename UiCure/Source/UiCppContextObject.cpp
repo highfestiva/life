@@ -407,6 +407,10 @@ void CppContextObject::OnLoadTexture(UserRendererImageResource* pTextureResource
 
 void CppContextObject::TryAddTexture()
 {
+	if (!mUiClassResource)
+	{
+		return;
+	}
 	for (size_t x = 0; x < mTextureResourceArray.size(); ++x)
 	{
 		UserRendererImageResource* lTexture = mTextureResourceArray[x];
