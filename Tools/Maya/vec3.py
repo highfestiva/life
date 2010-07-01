@@ -575,6 +575,14 @@ class vec3:
         else:
             return vec3(-self.y, self.x, 0.0)
 
+    def project_on_vector(self, plane_normal):
+        "high_festiva: added helper."
+        return (self*plane_normal)*plane_normal
+
+    def project_on_plane(self, plane_normal):
+        "high_festiva: added helper."
+        return self-self.project_on_vector(plane_normal)
+
     def min(self):
         """Return the minimum value of the components.
         """

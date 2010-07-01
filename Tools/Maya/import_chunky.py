@@ -326,12 +326,12 @@ class GroupReader(DefaultMAReader):
                         sys.exit(3)
 
 
-
         def faces2triangles(self, group):
                 for node in group:
                         faces = node.get_fixed_attribute("rgf", optional=True)
                         norms = node.get_fixed_attribute("rgn", optional=True)
                         uvs = node.get_fixed_attribute("rguv", optional=True)
+                        vs = node.get_fixed_attribute("rgvtx", optional=True)
                         if norms:
                                 if type(norms) == str:
                                         norms = norms[1]        # From ("(", "...", ")") to "..."
@@ -350,22 +350,38 @@ class GroupReader(DefaultMAReader):
                                 faces = eval(faces[1:-1])
                                 facec = 0
                                 for face in faces:
-                                        for x in range(1, len(face)-1):
-                                                triangles += [face[0], face[x], face[x+1]]
+                                        x0 = 0
+                                        xs = [(x, x+1) for x in range(1, len(face)-1)]
+                                        if len(face) == 4:      # Tried my best to imitate Maya quad triangulation, but didn't work out.
+                                                def a(p0, p1, p2):
+                                                        return (p1-p0)*(p2-p0)
+                                                def thinness(p0, p1, p2):
+                                                        return min(a(p0, p1, p2), a(p1, p0, p2), a(p2, p0, p1))
+                                                def is_best_split(i0, i1, i2, i3):      # Based on poly thinness.
+                                                        v0 = __class__.getvertex(vs, face[i0])
+                                                        v1 = __class__.getvertex(vs, face[i1])
+                                                        v2 = __class__.getvertex(vs, face[i2])
+                                                        v3 = __class__.getvertex(vs, face[i3])
+                                                        a = min(thinness(v0, v1, v3), thinness(v2, v1, v3))
+                                                        b = min(thinness(v1, v0, v2), thinness(v3, v0, v2))
+                                                        return a*0.99 <= b
+                                                if not is_best_split(0, 1, 2, 3):
+                                                        x0 = 1
+                                                        xs = ((2, 3), (3, 0))
+                                        for x,x1 in xs:
+                                                triangles += [face[x0], face[x], face[x1]]
                                                 if norms:
-                                                        newnorms += [norms[(facec+0)*3+0], norms[(facec+0)*3+1], norms[(facec+0)*3+2]]
+                                                        newnorms += [norms[(facec+x0)*3+0], norms[(facec+x0)*3+1], norms[(facec+x0)*3+2]]
                                                         newnorms += [norms[(facec+x)*3+0], norms[(facec+x)*3+1], norms[(facec+x)*3+2]]
-                                                        newnorms += [norms[(facec+x+1)*3+0], norms[(facec+x+1)*3+1], norms[(facec+x+1)*3+2]]
+                                                        newnorms += [norms[(facec+x1)*3+0], norms[(facec+x1)*3+1], norms[(facec+x1)*3+2]]
                                                 if uvs:
-                                                        newuvs += [uvs[(facec+0)*2+0], uvs[(facec+0)*2+1]]
+                                                        newuvs += [uvs[(facec+x0)*2+0], uvs[(facec+x0)*2+1]]
                                                         newuvs += [uvs[(facec+x)*2+0], uvs[(facec+x)*2+1]]
-                                                        newuvs += [uvs[(facec+x+1)*2+0], uvs[(facec+x+1)*2+1]]
+                                                        newuvs += [uvs[(facec+x1)*2+0], uvs[(facec+x1)*2+1]]
                                         facec += len(face)
 
                                 node.fix_attribute("rgtri", triangles)
                                 if norms:
-##                                        print("Before: normal count=%i, face count*3=%i." % (len(norms), facec*3))
-##                                        print("After:  normal count=%i,  tri count*3=%i." % (len(newnorms), len(triangles)*3))
                                         node.fix_attribute("rgn", newnorms)
                                 if uvs:
                                         node.fix_attribute("rguv", newuvs)
@@ -392,6 +408,11 @@ class GroupReader(DefaultMAReader):
                                         vtx[idx:idx+3] = vp[:3]
 
 
+        @staticmethod
+        def getvertex(vs, idx):
+                return vec3(vs[idx*3+0], vs[idx*3+1], vs[idx*3+2])
+
+
         def splitverts(self, group):
                 """Split mesh vertices that have different normals or UVs (=hard edges).
                    But to complicate things, Ikeep vertices together that share a similar normal/UV."""
@@ -404,8 +425,6 @@ class GroupReader(DefaultMAReader):
                         #        print("UVs before split:")
                         #        print(uvs)
                         if ns:
-                                def vertex(idx):
-                                        return vec3(vs[idx*3+0], vs[idx*3+1], vs[idx*3+2])
                                 def textureuv(idx):
                                         if uvs:
                                                 return (uvs[idx*2+0], uvs[idx*2+1])
@@ -446,7 +465,7 @@ class GroupReader(DefaultMAReader):
                                         # Push all the once that we don't join together at the end.
                                         if split:
                                                 new_index = len(vs)//3
-                                                v = vertex(ts[x])
+                                                v = __class__.getvertex(vs, ts[x])
                                                 vs += v[:]
                                                 shared_indices += [[]]
                                                 for s in split:
