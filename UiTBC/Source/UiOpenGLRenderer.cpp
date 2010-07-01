@@ -238,7 +238,7 @@ int OpenGLRenderer::ReleaseShadowMap(int pShadowMapID)
 		GLuint lShadowMapID = (GLuint)pShadowMapID;
 		glDeleteTextures(1, &lShadowMapID);
 	}
-	OGL_ASSERT();
+	//OGL_ASSERT();
 	return mTMapIDManager.GetInvalidId();
 }
 
@@ -647,7 +647,7 @@ void OpenGLRenderer::ReleaseMap(TextureData* pTextureData)
 	{
 		SetEnvironmentMap(INVALID_TEXTURE);
 	}
-	OGL_ASSERT();
+	//OGL_ASSERT();
 }
 
 void OpenGLRenderer::BindGeometry(TBC::GeometryBase* pGeometry,
@@ -1012,7 +1012,7 @@ void OpenGLRenderer::ReleaseGeometry(TBC::GeometryBase* pUserGeometry, GeomRelea
 			assert(false);
 		}
 	}
-	OGL_ASSERT();
+	//OGL_ASSERT();
 }
 
 

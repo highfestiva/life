@@ -454,7 +454,7 @@ void GameUiManager::UpdateSettings()
 	const bool lEnableTrilinearFiltering = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_ENABLETRILINEARFILTERING, false);
 	const bool lEnableBilinearFiltering = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_ENABLEBILINEARFILTERING, false);
 	const bool lEnableMipMapping = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_ENABLEMIPMAPPING, true);
-	const double lFOV = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_FOV, 90.0);
+	const double lFOV = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_FOV, 45.0);
 	const double lClipNear = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_CLIPNEAR, 0.1);
 	const double lClipFar = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_CLIPFAR, 1000.0);
 	const str lShadowsString = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_SHADOWS, _T("VolumesOnly"));
