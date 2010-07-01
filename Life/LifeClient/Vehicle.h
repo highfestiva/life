@@ -7,6 +7,7 @@
 #pragma once
 
 #include "../../UiCure/Include/UiCppContextObject.h"
+#include "../../UiTbc/Include/UiChunkyClass.h"
 #include "../Life.h"
 
 
@@ -29,7 +30,9 @@ protected:
 private:
 	void LoadPlaySound3d(UiCure::UserSound3dResource* pSoundResource);
 
-	UiCure::UserSound3dResource* mEngineSound;
+	typedef std::hash_map<const UiTbc::ChunkyClass::Tag*, UiCure::UserSound3dResource*, LEPRA_VOIDP_HASHER> TagSoundTable;
+
+	TagSoundTable mEngineSoundTable;
 
 	LOG_CLASS_DECLARE();
 };

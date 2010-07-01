@@ -43,13 +43,13 @@ public:
 		LEVEL_TYPE_COUNT
 	};
 
-	Log(const str& pName, Log* pParent, LogLevel pLevel = LEVEL_LOWEST_TYPE);
+	Log(const str& pName, Log* pParent, LogLevel pLevel = LEVEL_INFO);
 	void SetupBasicListeners(LogListener* pConsole = 0, LogListener* pDebug = 0,
 		LogListener* pFile = 0, LogListener* pPerformance = 0, LogListener* pMem = 0);
 	void AddListener(LogListener* pLogger, LogLevel pLevel);
 	void RemoveListener(LogListener* pLogger);
 	LogListener* GetListener(const str& pName) const;
-	str GetName() const;
+	const str& GetName() const;
 	LogLevel GetLevelThreashold() const;
 	void SetLevelThreashold(LogLevel pLevel);
 	void Print(const str& pAccount, const str& pMessage, LogLevel pLevel = LEVEL_INFO);

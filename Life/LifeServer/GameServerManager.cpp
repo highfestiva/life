@@ -10,6 +10,7 @@
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../../Cure/Include/TimeManager.h"
 #include "../../Lepra/Include/Path.h"
+#include "../Elevator.h"
 #include "../LifeApplication.h"
 #include "../RtVar.h"
 #include "ServerConsoleManager.h"
@@ -26,7 +27,7 @@ const int NETWORK_POSITIONAL_AHEAD_BUFFER_SIZE = PHYSICS_FPS/2;
 
 
 GameServerManager::GameServerManager(Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager):
-	GameManager(pVariableScope, pResourceManager),
+	Cure::GameManager(pVariableScope, pResourceManager),
 	mUserAccountManager(new Cure::MemoryUserAccountManager()),
 	mTerrainObject(0),
 	mMovementArrayList(NETWORK_POSITIONAL_AHEAD_BUFFER_SIZE)
@@ -319,7 +320,7 @@ Client* GameServerManager::GetClientByAccount(Cure::UserAccount::AccountId pAcco
 bool GameServerManager::InitializeTerrain()
 {
 	assert(mTerrainObject == 0);
-	mTerrainObject = Parent::CreateContextObject(_T("level_01"), Cure::NETWORK_OBJECT_LOCAL_ONLY);
+	mTerrainObject = Parent::CreateContextObject(_T("level_01"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
 	mTerrainObject->StartLoading();
 	return (true);
 }
@@ -786,6 +787,18 @@ void GameServerManager::SendDetach(Cure::ContextObject* pObject1, Cure::ContextO
 	BroadcastPacket(0, lPacket, true);
 
 	GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
+}
+
+
+
+Cure::ContextObject* GameServerManager::CreateTriggerHandler(const str& pType) const
+{
+	if (pType == _T("elevator"))
+	{
+		return new Elevator(GetResourceManager());
+	}
+	assert(false);
+	return (0);
 }
 
 

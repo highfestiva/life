@@ -130,7 +130,7 @@ LogListener* Log::GetListener(const str& pName) const
 	return (lListener);
 }
 
-str Log::GetName() const
+const str& Log::GetName() const
 {
 	return (mName);
 }
@@ -155,47 +155,47 @@ void Log::SetLevelThreashold(LogLevel pLevel)
 
 void Log::Print(const str& pAccount, const str& pMessage, LogLevel pLevel)
 {
-	DoPrint(this, pAccount, pMessage, pLevel);
+	if (pLevel >= mLevel && pLevel < LEVEL_TYPE_COUNT)
+	{
+		DoPrint(this, pAccount, pMessage, pLevel);
+	}
 }
 
 void Log::RawPrint(const str& pMessage, LogLevel pLevel)
 {
-	DoRawPrint(pMessage, pLevel);
+	if (pLevel >= mLevel && pLevel < LEVEL_TYPE_COUNT)
+	{
+		DoRawPrint(pMessage, pLevel);
+	}
 }
 
 void Log::DoPrint(const Log* pOriginator, const str& pAccount, const str& pMessage, LogLevel pLevel)
 {
-	if (pLevel >= mLevel && pLevel < LEVEL_TYPE_COUNT)
+	if (mParent)
 	{
-		if (mParent)
-		{
-			mParent->DoPrint(this, pAccount, pMessage, pLevel);
-		}
+		mParent->DoPrint(this, pAccount, pMessage, pLevel);
+	}
 
-		ScopeSpinLock lScopeLock(mLoggerListLock);
-		std::vector<LogListener*>::iterator x = mLoggerList[pLevel].begin();
-		for (; x != mLoggerList[pLevel].end(); ++x)
-		{
-			(*x)->OnLog(pOriginator, pAccount, pMessage, pLevel);
-		}
+	ScopeSpinLock lScopeLock(mLoggerListLock);
+	std::vector<LogListener*>::iterator x = mLoggerList[pLevel].begin();
+	for (; x != mLoggerList[pLevel].end(); ++x)
+	{
+		(*x)->OnLog(pOriginator, pAccount, pMessage, pLevel);
 	}
 }
 
 void Log::DoRawPrint(const str& pMessage, LogLevel pLevel)
 {
-	if (pLevel >= mLevel && pLevel < LEVEL_TYPE_COUNT)
+	if (mParent)
 	{
-		if (mParent)
-		{
-			mParent->DoRawPrint(pMessage, pLevel);
-		}
+		mParent->DoRawPrint(pMessage, pLevel);
+	}
 
-		ScopeSpinLock lScopeLock(mLoggerListLock);
-		std::vector<LogListener*>::iterator x = mLoggerList[pLevel].begin();
-		for (; x != mLoggerList[pLevel].end(); ++x)
-		{
-			(*x)->WriteLog(pMessage, pLevel);
-		}
+	ScopeSpinLock lScopeLock(mLoggerListLock);
+	std::vector<LogListener*>::iterator x = mLoggerList[pLevel].begin();
+	for (; x != mLoggerList[pLevel].end(); ++x)
+	{
+		(*x)->WriteLog(pMessage, pLevel);
 	}
 }
 

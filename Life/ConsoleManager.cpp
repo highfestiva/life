@@ -74,13 +74,14 @@ void ConsoleManager::InitCommands()
 	GetConsoleCommandManager()->AddCompleter(new Cure::RuntimeVariableCompleter(Cure::GetSettings(), _T("#/")));
 	GetConsoleCommandManager()->AddCompleter(new Cure::RuntimeVariableCompleter(Cure::GetSettings(), _T("#.")));
 
-	ExecuteCommand(_T("alias trace-log-level \"set-stdout-log-level 0; set-subsystem-log-level Root 0\""));
-	ExecuteCommand(_T("alias debug-log-level \"set-stdout-log-level 1; set-subsystem-log-level Root 1\""));
-	ExecuteCommand(_T("alias performance-log-level \"set-stdout-log-level 2; set-subsystem-log-level Root 2\""));
-	ExecuteCommand(_T("alias info-log-level \"set-stdout-log-level 3; set-subsystem-log-level Root 3\""));
-	ExecuteCommand(_T("alias headline-log-level \"set-stdout-log-level 4; set-subsystem-log-level Root 4\""));
-	ExecuteCommand(_T("alias warning-log-level \"set-stdout-log-level 5; set-subsystem-log-level Root 5\""));
-	ExecuteCommand(_T("alias error-log-level \"set-stdout-log-level 6; set-subsystem-log-level Root 6\""));
+	ExecuteCommand(_T("alias trace-log-level \"set-stdout-log-level 0; set-subsystem-log-level 0\""));
+	ExecuteCommand(_T("alias debug-log-level \"set-stdout-log-level 1; set-subsystem-log-level 1\""));
+	ExecuteCommand(_T("alias performance-log-level \"set-stdout-log-level 2; set-subsystem-log-level 2\""));
+	ExecuteCommand(_T("alias info-log-level \"set-stdout-log-level 3; set-subsystem-log-level 3\""));
+	ExecuteCommand(_T("alias headline-log-level \"set-stdout-log-level 4; set-subsystem-log-level 4\""));
+	ExecuteCommand(_T("alias warning-log-level \"set-stdout-log-level 5; set-subsystem-log-level 5\""));
+	ExecuteCommand(_T("alias error-log-level \"set-stdout-log-level 6; set-subsystem-log-level 6\""));
+	ExecuteCommand(_T("alias debug-focus \"set-subsystem-log-level 4; set-stdout-log-level 0; set-subsystem-log-level\""));
 }
 
 Cure::GameManager* ConsoleManager::GetGameManager() const
@@ -151,7 +152,7 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 			AliasMap::iterator x = mAliasMap.find(pCommand);
 			if (x != mAliasMap.end())
 			{
-				lResult = ExecuteCommand(x->second);
+				lResult = ExecuteCommand(x->second + _T(" ") + strutil::Join(pParameterVector, _T(" ")));
 			}
 			else
 			{
@@ -220,32 +221,6 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 			}
 		}
 		break;
-		case COMMAND_SET_SUBSYSTEM_LOG_LEVEL:
-		{
-			int lLogLevel = 0;
-			if (pParameterVector.size() == 2 && strutil::StringToInt(pParameterVector[1], lLogLevel))
-			{
-				Log* lLog = LogType::GetLog(pParameterVector[0]);
-				if (lLog)
-				{
-					lLog->SetLevelThreashold((Log::LogLevel)lLogLevel);
-					Log::LogLevel lNewLogLevel = lLog->GetLevelThreashold();
-					mLog.Infof(_T("Log level for subsystem '%s' set to %i."), pParameterVector[0].c_str(), lNewLogLevel);
-				}
-				else
-				{
-					mLog.Infof(_T("Unknown log \"%s\"."), pParameterVector[0].c_str());
-				}
-			}
-			else
-			{
-				mLog.Warningf(_T("usage: %s <subsystem> <log level>"), pCommand.c_str());
-				mLog.Warningf(_T("where subsystem is Root, Network, Game, UI..."));
-				mLog.Warningf(_T("where log level is 0=trace, 1=debug... %i=only fatal errors"), Log::LEVEL_TYPE_COUNT-1);
-				lResult = 1;
-			}
-		}
-		break;
 		case COMMAND_SET_STDOUT_LOG_LEVEL:
 		{
 			int lLogLevel = 0;
@@ -279,6 +254,44 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 			else
 			{
 				mLog.Warningf(_T("usage: %s <log level>"), pCommand.c_str());
+				mLog.Warningf(_T("where log level is 0=trace, 1=debug... %i=only fatal errors"), Log::LEVEL_TYPE_COUNT-1);
+				lResult = 1;
+			}
+		}
+		break;
+		case COMMAND_SET_SUBSYSTEM_LOG_LEVEL:
+		{
+			int lLogLevel = 0;
+			if (pParameterVector.size() == 2 && strutil::StringToInt(pParameterVector[1], lLogLevel))
+			{
+				Log* lLog = LogType::GetLog(pParameterVector[0]);
+				if (lLog)
+				{
+					lLog->SetLevelThreashold((Log::LogLevel)lLogLevel);
+					Log::LogLevel lNewLogLevel = lLog->GetLevelThreashold();
+					mLog.Infof(_T("Log level for subsystem '%s' set to %i."), pParameterVector[0].c_str(), lNewLogLevel);
+				}
+				else
+				{
+					mLog.Infof(_T("Unknown log \"%s\"."), pParameterVector[0].c_str());
+				}
+			}
+			else if (pParameterVector.size() == 1 && strutil::StringToInt(pParameterVector[0], lLogLevel))
+			{
+				const std::vector<Log*> lLogArray = LogType::GetLogs();
+				std::vector<Log*>::const_iterator x = lLogArray.begin();
+				Log::LogLevel lNewLogLevel = Log::LEVEL_LOWEST_TYPE;
+				for (; x != lLogArray.end(); ++x)
+				{
+					(*x)->SetLevelThreashold((Log::LogLevel)lLogLevel);
+					lNewLogLevel = (*x)->GetLevelThreashold();
+				}
+				mLog.Infof(_T("All logs levels' set to %i."), lLogLevel);
+			}
+			else
+			{
+				mLog.Warningf(_T("usage: %s [<subsystem>] <log level>"), pCommand.c_str());
+				mLog.Warningf(_T("where subsystem is Root, Network, Game, UI..."));
 				mLog.Warningf(_T("where log level is 0=trace, 1=debug... %i=only fatal errors"), Log::LEVEL_TYPE_COUNT-1);
 				lResult = 1;
 			}

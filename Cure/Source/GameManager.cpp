@@ -253,6 +253,12 @@ ContextObject* GameManager::CreateContextObject(const str& pClassId, NetworkObje
 	return (lObject);
 }
 
+ContextObject* GameManager::CreateTriggerHandler(const str&) const
+{
+	assert(false);
+	return 0;
+}
+
 bool GameManager::IsUiMoveForbidden(GameObjectId) const
 {
 	return (false);	// Non-UI implementors need not bother.

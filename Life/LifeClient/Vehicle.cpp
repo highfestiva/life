@@ -8,6 +8,7 @@
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/GameManager.h"
 #include "../../Cure/Include/RuntimeVariable.h"
+#include "../../Lepra/Include/HashUtil.h"
 #include "../../TBC/Include/ChunkyBoneGeometry.h"
 #include "../../TBC/Include/ChunkyPhysics.h"
 #include "../../TBC/Include/PhysicsEngine.h"
@@ -21,15 +22,18 @@ namespace Life
 
 
 Vehicle::Vehicle(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager):
-	Parent(pResourceManager, pClassId, pUiManager),
-	mEngineSound(0)
+	Parent(pResourceManager, pClassId, pUiManager)
 {
 }
 
 Vehicle::~Vehicle()
 {
-	delete (mEngineSound);
-	mEngineSound = 0;
+	TagSoundTable::iterator x = mEngineSoundTable.begin();
+	for (; x != mEngineSoundTable.end(); ++x)
+	{
+		delete (x->second);
+	}
+	mEngineSoundTable.clear();
 }
 
 
@@ -123,14 +127,16 @@ void Vehicle::OnPhysicsTick()
 				assert(false);
 				continue;
 			}
-			if (!mEngineSound)
+			UiCure::UserSound3dResource* lEngineSound = HashUtil::FindMapObject(mEngineSoundTable, &lTag);
+			if (lEngineSound == 0)
 			{
 				const str lSoundName = _T("Data/")+lTag.mStringValueList[0];
-				mEngineSound = new UiCure::UserSound3dResource(GetUiManager(), UiLepra::SoundManager::LOOP_FORWARD);
-				mEngineSound->Load(GetResourceManager(), lSoundName,
+				lEngineSound = new UiCure::UserSound3dResource(GetUiManager(), UiLepra::SoundManager::LOOP_FORWARD);
+				mEngineSoundTable.insert(TagSoundTable::value_type(&lTag, lEngineSound));
+				lEngineSound->Load(GetResourceManager(), lSoundName,
 					UiCure::UserSound3dResource::TypeLoadCallback(this, &Vehicle::LoadPlaySound3d));
 			}
-			if (mEngineSound->GetLoadState() != Cure::RESOURCE_LOAD_COMPLETE)
+			if (lEngineSound->GetLoadState() != Cure::RESOURCE_LOAD_COMPLETE)
 			{
 				continue;
 			}
@@ -155,9 +161,9 @@ void Vehicle::OnPhysicsTick()
 			float lVolume = ::pow(lIntensity, lTag.mFloatValueList[FV_VOLUME_EXPONENT]);
 			lVolume = Math::Lerp(lTag.mFloatValueList[FV_VOLUME_LOW], lTag.mFloatValueList[FV_VOLUME_HIGH], lVolume);
 			const float lPitch = Math::Lerp(lTag.mFloatValueList[FV_PITCH_LOW], lTag.mFloatValueList[FV_PITCH_HIGH], lIntensity);
-			mUiManager->GetSoundManager()->SetSoundPosition(mEngineSound->GetData(), lPosition, lVelocity);
-			mUiManager->GetSoundManager()->SetVolume(mEngineSound->GetData(), lVolume);
-			mUiManager->GetSoundManager()->SetPitch(mEngineSound->GetData(), lPitch);
+			mUiManager->GetSoundManager()->SetSoundPosition(lEngineSound->GetData(), lPosition, lVelocity);
+			mUiManager->GetSoundManager()->SetVolume(lEngineSound->GetData(), lVolume);
+			mUiManager->GetSoundManager()->SetPitch(lEngineSound->GetData(), lPitch);
 		}
 	}
 }

@@ -20,6 +20,8 @@ public:
 	CppContextObject(ResourceManager* pResourceManager, const str& pClassId);
 	virtual ~CppContextObject();
 
+	void SetAllowNetworkLogic(bool pAllow);
+
 protected:
 	virtual void StartLoading();
 	void StartLoadingPhysics(const str& pPhysicsName);
@@ -36,12 +38,15 @@ protected:
 	void OnLoadClass(UserClassResource* pClassResource);
 	void OnLoadPhysics(UserPhysicsResource* pPhysicsResource);
 
+	bool GetAllowNetworkLogic() const;
+
 private:
 	typedef std::hash_map<int, const TBC::PhysicsTrigger*> ActiveTriggerGroupMap;
 
 	UserClassResource* mClassResource;
 	UserPhysicsResource* mPhysicsResource;
 	ActiveTriggerGroupMap mActiveTriggerGroupMap;
+	bool mAllowNetworkLogic;
 
 	LOG_CLASS_DECLARE();
 };

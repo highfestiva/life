@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <vector>
 #include "String.h"
 
 
@@ -52,6 +53,7 @@ public:
 
 	static Log* GetLog(Subsystem pSubsystem);
 	static Log* GetLog(const str& pName);
+	static const std::vector<Log*> GetLogs();
 
 private:
 	static bool mInitialized;

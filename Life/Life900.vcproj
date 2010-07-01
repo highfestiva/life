@@ -442,10 +442,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\GameManager.cpp"
-				>
-			</File>
-			<File
 				RelativePath="LifeApplication.cpp"
 				>
 			</File>
@@ -457,10 +453,6 @@
 			>
 			<File
 				RelativePath=".\ConsoleManager.h"
-				>
-			</File>
-			<File
-				RelativePath=".\GameManager.h"
 				>
 			</File>
 			<File

@@ -1059,8 +1059,8 @@ void ContextObject::SetParent(ContextObject* pParent)
 void ContextObject::SetupChildTriggerHandlers()
 {
 	int lLastGroupIndex = -1;
-	ContextObject* lTriggerChild = 0;
 	const int lTriggerCount = mPhysics->GetTriggerCount();
+	ContextObject* lTriggerChild = 0;
 	for (int x = 0; x < lTriggerCount; ++x)
 	{
 		const TBC::PhysicsTrigger* lTrigger = mPhysics->GetTrigger(x);
@@ -1071,8 +1071,11 @@ void ContextObject::SetupChildTriggerHandlers()
 			AddChild(lTriggerChild);
 			GetManager()->EnableTickCallback(lTriggerChild);
 		}
-		AddTrigger(lTrigger->GetPhysicsTriggerId(), lTriggerChild);
-		lTriggerChild->AddTrigger(lTrigger->GetPhysicsTriggerId(), lTrigger);
+		if (lTriggerChild)
+		{
+			AddTrigger(lTrigger->GetPhysicsTriggerId(), lTriggerChild);
+			lTriggerChild->AddTrigger(lTrigger->GetPhysicsTriggerId(), lTrigger);
+		}
 	}
 }
 

@@ -39,7 +39,7 @@ namespace Life
 GameClientSlaveManager::GameClientSlaveManager(GameClientMasterTicker* pMaster, Cure::RuntimeVariableScope* pVariableScope,
 	Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager, int pSlaveIndex,
 	const PixelRect& pRenderArea):
-	GameManager(pVariableScope, pResourceManager),
+	Cure::GameManager(pVariableScope, pResourceManager),
 	mMaster(pMaster),
 	mUiManager(pUiManager),
 	mSlaveIndex(pSlaveIndex),
@@ -616,7 +616,7 @@ void GameClientSlaveManager::CreateLoginView()
 
 bool GameClientSlaveManager::InitializeTerrain()
 {
-	Cure::GameObjectId lGameObjectId = GetContext()->AllocateGameObjectId(Cure::NETWORK_OBJECT_LOCAL_ONLY);
+	Cure::GameObjectId lGameObjectId = GetContext()->AllocateGameObjectId(Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
 	bool lOk = CreateObject(lGameObjectId, _T("level_01"),
 		Cure::NETWORK_OBJECT_LOCAL_ONLY);
 	return (lOk);
@@ -1096,7 +1096,9 @@ bool GameClientSlaveManager::CreateObject(Cure::GameObjectId pInstanceId, const 
 
 Cure::ContextObject* GameClientSlaveManager::CreateContextObject(const str& pClassId) const
 {
-	return (new Vehicle(GetResourceManager(), pClassId, mUiManager));
+	Cure::CppContextObject* lObject = new Vehicle(GetResourceManager(), pClassId, mUiManager);
+	lObject->SetAllowNetworkLogic(false);	// Only server gets to control logic.
+	return (lObject);
 }
 
 void GameClientSlaveManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)

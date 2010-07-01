@@ -23,7 +23,7 @@ void LogType::Init()
 	mInitialized = true;
 
 	::memset(mLogArray, 0, sizeof(mLogArray));
-	mLogArray[SUB_ROOT] = new Log(_T("Root"), 0, Log::LEVEL_INFO);
+	mLogArray[SUB_ROOT] = new Log(_T("Root"), 0);
 	mLogArray[SUB_GENERAL] = new Log(_T("Data"), GetLog(SUB_ROOT));
 	mLogArray[SUB_GENERAL_RESOURCES] = new Log(_T("Resources"), GetLog(SUB_GENERAL));
 	mLogArray[SUB_NETWORK] = new Log(_T("Network"), GetLog(SUB_ROOT));
@@ -39,7 +39,7 @@ void LogType::Init()
 	mLogArray[SUB_UI_GFX_3D] = new Log(_T("Gfx3D"), GetLog(SUB_UI_GFX));
 	mLogArray[SUB_GAME] = new Log(_T("Game"), GetLog(SUB_ROOT));
 	mLogArray[SUB_GAME_CONTEXT] = new Log(_T("Context"), GetLog(SUB_GAME));
-	mLogArray[SUB_GAME_CONTEXT_CPP] = new Log(_T("C++ Obj"), GetLog(SUB_GAME_CONTEXT));
+	mLogArray[SUB_GAME_CONTEXT_CPP] = new Log(_T("C++Obj"), GetLog(SUB_GAME_CONTEXT));
 	mLogArray[SUB_TEST] = new Log(_T("Test"), GetLog(SUB_ROOT));
 }
 
@@ -81,6 +81,16 @@ Log* LogType::GetLog(const str& pName)
 		}
 	}
 	return (lFoundLog);
+}
+
+const std::vector<Log*> LogType::GetLogs()
+{
+	std::vector<Log*> lLogArray;
+	for (int x = SUB_LOWEST_TYPE; x < SUB_TYPE_COUNT; ++x)
+	{
+		lLogArray.push_back(mLogArray[x]);
+	}
+	return lLogArray;
 }
 
 

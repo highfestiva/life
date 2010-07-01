@@ -413,9 +413,8 @@ void PhysicsManagerODE::SetBodyTransform(BodyID pBodyId, const TransformationF& 
 		return;
 	}
 
-	TransformationF lTransform(pTransform);
 	const Vector3DF lPos(pTransform.GetPosition());
-	QuaternionF lQuat = lTransform.GetOrientation();
+	QuaternionF lQuat = pTransform.GetOrientation();
 	dReal lQ[4];
 	lQ[0] = lQuat.GetA();
 	lQ[1] = lQuat.GetB();
@@ -1331,7 +1330,7 @@ bool PhysicsManagerODE::SetHingeDiff(BodyID pBodyId, JointID pJointId, const Joi
 
 	{
 		// Fetch parent orientation.
-		assert(lJointInfo->mJointID->node[1].body == ((Object*)pBodyId)->mBodyID);
+		assert(!lJointInfo->mJointID->node[1].body || lJointInfo->mJointID->node[1].body == ((Object*)pBodyId)->mBodyID);
 		dxBody* lParentBody = lJointInfo->mJointID->node[0].body;
 		const dReal* lPQ = ::dBodyGetQuaternion(lParentBody);
 		const QuaternionF lParentQ(lPQ[0], lPQ[1], lPQ[2], lPQ[3]);
@@ -1431,40 +1430,60 @@ bool PhysicsManagerODE::SetSliderDiff(BodyID pBodyId, JointID pJointId, const Jo
 	assert(lAxis.GetLengthSquared() > 0.99f && lAxis.GetLengthSquared() < 1.01f);
 
 	dxBody* lParentBody = lJointInfo->mJointID->node[0].body;
+
+	// Fetch parent data orientation.
+	Vector3DF lParentPosition;
+	QuaternionF lParentQ(-1, 0, 0, 0);
+	Vector3DF lParentVelocity;
+	Vector3DF lParentAcceleration;
+	const dReal* lPos = ::dBodyGetPosition(lParentBody);
+	lParentPosition.Set(lPos[0], lPos[1], lPos[2]);
+	if (!lJointInfo->mJointID->node[1].body)
 	{
-		// Fetch parent orientation.
+	}
+	else
+	{
 		assert(lJointInfo->mJointID->node[1].body == ((Object*)pBodyId)->mBodyID);
-		const dReal* lPos = ::dBodyGetPosition(lParentBody);
 		const dReal* lPQ = ::dBodyGetQuaternion(lParentBody);
-		const QuaternionF lParentQ(lPQ[0], lPQ[1], lPQ[2], lPQ[3]);
+		lParentQ.Set(lPQ[0], lPQ[1], lPQ[2], lPQ[3]);
+		const dReal* lParentV = ::dBodyGetLinearVel(lParentBody);
+		lParentVelocity.Set(lParentV[0], lParentV[1], lParentV[2]);
+		const dReal* lParentForce = ::dBodyGetForce(lParentBody);
+		lParentAcceleration.Set(lParentForce[0], lParentForce[1], lParentForce[2]);
+		// Downscale acceleration with mass.
+		lParentAcceleration *= lJointInfo->mJointID->node[1].body->mass.mass / lParentBody->mass.mass;
+	}
+
+	{
 		// Rotate to original child (us) orientation.
 		dxJointSlider* lSlider = (dxJointSlider*)lJointInfo->mJointID;
 		QuaternionF lQ(lSlider->qrel[0], lSlider->qrel[1], lSlider->qrel[2], lSlider->qrel[3]);
 		// Relative translation.
 		Vector3DF lOffset(lSlider->offset[0], lSlider->offset[1], lSlider->offset[2]);
-		lQ = lParentQ * lQ;
-		lOffset = lQ * lOffset;
+		if (lJointInfo->mJointID->node[1].body)
+		{
+			lQ = lParentQ * lQ;
+			lOffset = lQ * lOffset;
+		}
+		else
+		{
+			lQ.MakeInverse();
+			lOffset = lParentPosition - lOffset;
+		}
 		// Set orientation.
 		TransformationF lTransform(lQ,
-			Vector3DF(lPos[0], lPos[1], lPos[2]) - lOffset - lAxis*pDiff.mValue);
+			lParentPosition - lOffset - lAxis*pDiff.mValue);
 		SetBodyTransform(pBodyId, lTransform);
 	}
 
 	{
-		const dReal* lParentVelocity = ::dBodyGetLinearVel(lParentBody);
-		Vector3DF lVelocity(lParentVelocity[0], lParentVelocity[1], lParentVelocity[2]);
-		lVelocity += lAxis*pDiff.mVelocity;
-		SetBodyVelocity(pBodyId, lVelocity);
+		lParentVelocity += lAxis*pDiff.mVelocity;
+		SetBodyVelocity(pBodyId, lParentVelocity);
 	}
 
 	{
-		// TODO: something?
-		const dReal* lParentForce = ::dBodyGetForce(lParentBody);
-		Vector3DF lAcceleration(lParentForce[0], lParentForce[1], lParentForce[2]);
-		// Downscale acceleration with mass.
-		lAcceleration *= lJointInfo->mJointID->node[1].body->mass.mass / lParentBody->mass.mass;
-		lAcceleration += lAxis*pDiff.mAcceleration;
-		SetBodyAcceleration(pBodyId, lAcceleration);
+		lParentAcceleration += lAxis*pDiff.mAcceleration;
+		SetBodyAcceleration(pBodyId, lParentAcceleration);
 	}
 
 	return (true);
@@ -1520,7 +1539,7 @@ bool PhysicsManagerODE::SetUniversalDiff(BodyID pBodyId, JointID pJointId, const
 
 	{
 		// Fetch parent orientation.
-		assert(lJointInfo->mJointID->node[1].body == ((Object*)pBodyId)->mBodyID);
+		assert(!lJointInfo->mJointID->node[1].body || lJointInfo->mJointID->node[1].body == ((Object*)pBodyId)->mBodyID);
 		dxBody* lParentBody = lJointInfo->mJointID->node[0].body;
 		const dReal* lPQ = ::dBodyGetQuaternion(lParentBody);
 		const QuaternionF lParentQ(lPQ[0], lPQ[1], lPQ[2], lPQ[3]);
@@ -1782,7 +1801,7 @@ bool PhysicsManagerODE::SetBallDiff(BodyID pBodyId, JointID pJointId, const Join
 	assert(lJointInfo->mType == JOINT_BALL);
 
 	{
-		assert(lJointInfo->mJointID->node[1].body == ((Object*)pBodyId)->mBodyID);
+		assert(!lJointInfo->mJointID->node[1].body || lJointInfo->mJointID->node[1].body == ((Object*)pBodyId)->mBodyID);
 		dxBody* lParentBody = lJointInfo->mJointID->node[0].body;
 		const dReal* lPQ = ::dBodyGetQuaternion(lParentBody);
 		QuaternionF lParentQ(lPQ[0], lPQ[1], lPQ[2], lPQ[3]);

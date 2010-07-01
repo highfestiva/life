@@ -9,13 +9,8 @@
 
 
 #include "../../Cure/Include/GameManager.h"
-/*#include "../../Cure/Include/NetworkServer.h"
-#include "../../Cure/Include/Packet.h"
-#include "../../Cure/Include/UserAccountManager.h"*/
 #include "../../Lepra/Include/LogListener.h"
 #include "../Life.h"
-//#include "../GameManager.h"
-//#include "Client.h"
 
 
 

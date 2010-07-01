@@ -24,7 +24,8 @@ namespace Cure
 CppContextObject::CppContextObject(ResourceManager* pResourceManager, const str& pClassId):
 	ContextObject(pResourceManager, pClassId),
 	mClassResource(0),
-	mPhysicsResource(0)
+	mPhysicsResource(0),
+	mAllowNetworkLogic(true)
 {
 }
 
@@ -34,6 +35,13 @@ CppContextObject::~CppContextObject()
 	mPhysicsResource = 0;
 	delete (mClassResource);
 	mClassResource = 0;
+}
+
+
+
+void CppContextObject::SetAllowNetworkLogic(bool pAllow)
+{
+	mAllowNetworkLogic = pAllow;
 }
 
 
@@ -107,9 +115,20 @@ void CppContextObject::OnAlarm(int /*pAlarmId*/, void* /*pExtraData*/)
 
 void CppContextObject::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, TBC::PhysicsManager::ForceFeedbackListener* pBody)
 {
+	if (!GetAllowNetworkLogic())
+	{
+		return;
+	}
+
 	ContextObject* lChild = (ContextObject*)GetTrigger(pTriggerId);
-	assert(lChild);
-	lChild->OnTrigger(pTriggerId, pBody);
+	if (lChild)
+	{
+		lChild->OnTrigger(pTriggerId, pBody);
+	}
+	else
+	{
+		mLog.Errorf(_T("Physical trigger not configured for logical trigging on %s."), GetClassId().c_str());
+	}
 
 	/*
 	TODO: put this back when attaching objects to each other is working.
@@ -162,8 +181,18 @@ void CppContextObject::OnLoadPhysics(UserPhysicsResource* pPhysicsResource)
 	}
 
 	SetPhysics(pPhysicsResource->GetData());
-	SetupChildTriggerHandlers();
+	if (GetAllowNetworkLogic())
+	{
+		SetupChildTriggerHandlers();
+	}
 	TryComplete();
+}
+
+
+
+bool CppContextObject::GetAllowNetworkLogic() const
+{
+	return mAllowNetworkLogic;
 }
 
 

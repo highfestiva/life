@@ -8,12 +8,8 @@
 
 
 
-#include "../GameManager.h"
+#include "../../Cure/Include/GameManager.h"
 #include "../../Cure/Include/NetworkServer.h"
-/*#include "../../Cure/Include/Packet.h"
-#include "../../Cure/Include/UserAccountManager.h"
-#include "../../Lepra/Include/LogListener.h"*/
-//#include "../../Lepra/Include/ConsoleCommandManager.h"
 #include "Client.h"
 
 
@@ -31,10 +27,10 @@ namespace Life
 
 
 
-class GameServerManager: public GameManager, public Cure::NetworkServer::LoginListener
+class GameServerManager: public Cure::GameManager, public Cure::NetworkServer::LoginListener
 {
 public:
-	typedef GameManager Parent;
+	typedef Cure::GameManager Parent;
 
 	GameServerManager(Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager);
 	virtual ~GameServerManager();
@@ -83,6 +79,8 @@ private:
 	bool IsConnectAuthorized();
 	void SendAttach(Cure::ContextObject* pObject1, unsigned pId1, Cure::ContextObject* pObject2, unsigned pId2);
 	void SendDetach(Cure::ContextObject* pObject1, Cure::ContextObject* pObject2);
+
+	virtual Cure::ContextObject* CreateTriggerHandler(const str& pType) const;
 
 	void BroadcastCreateObject(Cure::ContextObject* pObject);
 	void BroadcastDeleteObject(Cure::GameObjectId pInstanceId);
