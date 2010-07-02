@@ -1328,35 +1328,58 @@ bool PhysicsManagerODE::SetHingeDiff(BodyID pBodyId, JointID pJointId, const Joi
 	}
 	assert(lAxis.GetLengthSquared() > 0.99f && lAxis.GetLengthSquared() < 1.01f);
 
+	dxBody* lParentBody = lJointInfo->mJointID->node[0].body;
+
+	// Fetch parent data (or identity if parent is World).
+	const dReal* lPos = ::dBodyGetPosition(lParentBody);
+	const Vector3DF lParentPosition(lPos[0], lPos[1], lPos[2]);
+	QuaternionF lParentQ(-1, 0, 0, 0);
+	Vector3DF lParentVelocity;
+	Vector3DF lParentAcceleration;
+	if (!lJointInfo->mJointID->node[1].body)
 	{
-		// Fetch parent orientation.
-		assert(!lJointInfo->mJointID->node[1].body || lJointInfo->mJointID->node[1].body == ((Object*)pBodyId)->mBodyID);
-		dxBody* lParentBody = lJointInfo->mJointID->node[0].body;
+	}
+	else
+	{
+		assert(lJointInfo->mJointID->node[1].body == ((Object*)pBodyId)->mBodyID);
 		const dReal* lPQ = ::dBodyGetQuaternion(lParentBody);
-		const QuaternionF lParentQ(lPQ[0], lPQ[1], lPQ[2], lPQ[3]);
+		lParentQ.Set(lPQ[0], lPQ[1], lPQ[2], lPQ[3]);
+	}
+
+	{
 		// Rotate to original child (us) orientation.
 		dxJointHinge* lHinge = (dxJointHinge*)lJointInfo->mJointID;
 		QuaternionF lQ(lHinge->qrel[0], lHinge->qrel[1], lHinge->qrel[2], lHinge->qrel[3]);
-		lQ = lParentQ * lQ;
-		// Rotate to input angle.
-		lQ = QuaternionF(-pDiff.mValue, lAxis) * lQ;
 		// Set orientation.
 		TransformationF lTransform;
 		GetBodyTransform(pBodyId, lTransform);
+		if (lJointInfo->mJointID->node[1].body)
+		{
+			lQ = lParentQ * lQ;
+		}
+		else
+		{
+			lQ.MakeInverse();
+		}
+		// Rotate to input angle.
+		lQ = QuaternionF(-pDiff.mValue, lAxis) * lQ;
 		lTransform.SetOrientation(lQ);
-		// Align anchors (happen after rotation) and store.
-		Vector3DF lAnchor2(lHinge->anchor2[0], lHinge->anchor2[1], lHinge->anchor2[2]);
-		lAnchor2 = lQ*lAnchor2 + lTransform.GetPosition();
-		lTransform.GetPosition() += lAnchor-lAnchor2;
+		if (lJointInfo->mJointID->node[1].body)
+		{
+			// Align anchors (happen after rotation) and store.
+			Vector3DF lAnchor2(lHinge->anchor2[0], lHinge->anchor2[1], lHinge->anchor2[2]);
+			lAnchor2 = lQ*lAnchor2 + lTransform.GetPosition();
+			lTransform.GetPosition() += lAnchor-lAnchor2;
+		}
 		SetBodyTransform(pBodyId, lTransform);
 	}
 
 	{
-		Vector3DF lVelocity;
-		GetBodyAngularVelocity(pBodyId, lVelocity);
-		// Drop angular velocity along axis 1 & 2, then add the specified amount.
 		if (pDiff.mVelocity < PIF*1000)
 		{
+			Vector3DF lVelocity;
+			GetBodyAngularVelocity(pBodyId, lVelocity);
+			// Drop angular velocity along axis 1 & 2, then add the specified amount.
 			Vector3DF lAxisVelocity = lAxis*(lAxis*lVelocity);
 			lVelocity -= lAxisVelocity;
 			lVelocity += lAxis * pDiff.mVelocity;
@@ -1365,11 +1388,11 @@ bool PhysicsManagerODE::SetHingeDiff(BodyID pBodyId, JointID pJointId, const Joi
 	}
 
 	{
-		Vector3DF lAcceleration;
-		GetBodyAngularAcceleration(pBodyId, lAcceleration);
-		// Drop angular acceleration along axis, then add the specified amount.
 		if (pDiff.mAcceleration < PIF*1000)
 		{
+			Vector3DF lAcceleration;
+			GetBodyAngularAcceleration(pBodyId, lAcceleration);
+			// Drop angular acceleration along axis, then add the specified amount.
 			Vector3DF lAxisAcceleration = lAxis*(lAxis*lAcceleration);
 			lAcceleration -= lAxisAcceleration;
 			lAcceleration += lAxis * pDiff.mAcceleration;
@@ -1431,13 +1454,12 @@ bool PhysicsManagerODE::SetSliderDiff(BodyID pBodyId, JointID pJointId, const Jo
 
 	dxBody* lParentBody = lJointInfo->mJointID->node[0].body;
 
-	// Fetch parent data orientation.
-	Vector3DF lParentPosition;
+	// Fetch parent data (or identity if parent is World).
+	const dReal* lPos = ::dBodyGetPosition(lParentBody);
+	const Vector3DF lParentPosition(lPos[0], lPos[1], lPos[2]);
 	QuaternionF lParentQ(-1, 0, 0, 0);
 	Vector3DF lParentVelocity;
 	Vector3DF lParentAcceleration;
-	const dReal* lPos = ::dBodyGetPosition(lParentBody);
-	lParentPosition.Set(lPos[0], lPos[1], lPos[2]);
 	if (!lJointInfo->mJointID->node[1].body)
 	{
 	}
@@ -1470,19 +1492,26 @@ bool PhysicsManagerODE::SetSliderDiff(BodyID pBodyId, JointID pJointId, const Jo
 			lQ.MakeInverse();
 			lOffset = lParentPosition - lOffset;
 		}
-		// Set orientation.
-		TransformationF lTransform(lQ,
-			lParentPosition - lOffset - lAxis*pDiff.mValue);
-		SetBodyTransform(pBodyId, lTransform);
+		lOffset += lAxis*pDiff.mValue;
+		// Small translational diff, no orientational diff (world parent is stiff) means we get a
+		// better experiance by not forcing this tiny jerk into the game. Instead let the local
+		// (most probably client) physics engine be chief.
+		if (lJointInfo->mJointID->node[1].body || lOffset.GetLengthSquared() > 0.5f)
+		{
+			// Set orientation.
+			TransformationF lTransform(lQ,
+				lParentPosition - lOffset);
+			SetBodyTransform(pBodyId, lTransform);
+		}
 	}
 
 	{
-		lParentVelocity += lAxis*pDiff.mVelocity;
+		lParentVelocity -= lAxis*pDiff.mVelocity;
 		SetBodyVelocity(pBodyId, lParentVelocity);
 	}
 
 	{
-		lParentAcceleration += lAxis*pDiff.mAcceleration;
+		lParentAcceleration -= lAxis*pDiff.mAcceleration;
 		SetBodyAcceleration(pBodyId, lParentAcceleration);
 	}
 
@@ -3049,9 +3078,10 @@ void PhysicsManagerODE::DoForceFeedback()
 	{
 		JointInfo* lJointInfo = *x;
 
-		if (lJointInfo->mListener1 != lJointInfo->mListener2)
+		const bool lTwoDynamic = (!lJointInfo->mBody1Static && !lJointInfo->mBody2Static);
+		if (lJointInfo->mListener1 != lJointInfo->mListener2 && lTwoDynamic)
 		{
-			if (lJointInfo->mListener1 != 0)
+			if (lJointInfo->mListener1 != 0 && !lJointInfo->mBody1Static)
 			{
 				dJointFeedback* lFeedback = &lJointInfo->mFeedback;
 				lJointInfo->mListener1->OnForceApplied(
@@ -3059,15 +3089,23 @@ void PhysicsManagerODE::DoForceFeedback()
 					Vector3D<float32>(lFeedback->f1[0], lFeedback->f1[1], lFeedback->f1[2]),
 					Vector3D<float32>(lFeedback->t1[0], lFeedback->t1[1], lFeedback->t1[2]));
 			}
-			if (lJointInfo->mListener2 != 0)
+			if (lJointInfo->mListener2 != 0 && !lJointInfo->mBody2Static)
 			{
 				dJointFeedback* lFeedback = &lJointInfo->mFeedback;
-				lJointInfo->mListener2->OnForceApplied(
-					lJointInfo->mListener1,
-					Vector3D<float32>(-lFeedback->f1[0], -lFeedback->f1[1], -lFeedback->f1[2]),
-					// TODO: check out how the torque should be. The force2 is always -force1
-					// (actually f2[] just contains crap), but where does the torque2 go, if not in torque1?
-					Vector3D<float32>(-lFeedback->t1[0], -lFeedback->t1[1], -lFeedback->t1[2]));
+				if (lJointInfo->mBody1Static)	// Only a single force/torque pair set?
+				{
+					lJointInfo->mListener2->OnForceApplied(
+						lJointInfo->mListener1,
+						Vector3D<float32>(-lFeedback->f1[0], -lFeedback->f1[1], -lFeedback->f1[2]),
+						Vector3D<float32>(-lFeedback->t1[0], -lFeedback->t1[1], -lFeedback->t1[2]));
+				}
+				else
+				{
+					lJointInfo->mListener2->OnForceApplied(
+						lJointInfo->mListener1,
+						Vector3D<float32>(lFeedback->f2[0], lFeedback->f2[1], lFeedback->f2[2]),
+						Vector3D<float32>(lFeedback->t2[0], lFeedback->t2[1], lFeedback->t2[2]));
+				}
 			}
 		}
 
@@ -3222,6 +3260,8 @@ void PhysicsManagerODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID p
 
 				dJointAttach(lJointInfo->mJointID, lBody1, lBody2);
 				dJointSetFeedback(lJointInfo->mJointID, &lJointInfo->mFeedback);
+				lJointInfo->mBody1Static = !lBody1;
+				lJointInfo->mBody2Static = !lBody2;
 			}
 			else
 			{

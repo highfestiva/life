@@ -158,6 +158,11 @@ bool NetworkServer::SendAll()
 
 NetworkServer::ReceiveStatus NetworkServer::ReceiveFirstPacket(Packet* pPacket, UserAccount::AccountId& pAccountId)
 {
+	if (!mMuxSocket)
+	{
+		return RECEIVE_CONNECTION_BROKEN;
+	}
+
 	PollAccept();
 	KillDeadSockets();
 

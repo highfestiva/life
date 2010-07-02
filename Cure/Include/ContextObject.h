@@ -96,6 +96,7 @@ public:
 	TBC::ChunkyBoneGeometry* GetStructureGeometry(TBC::PhysicsManager::BodyID pBodyId) const;
 	void SetEnginePower(unsigned pAspect, float pPower, float pAngle);
 
+	void ForceSend();
 	bool QueryResendTime(float pDeltaTime, bool pUnblockDelta);
 	int PopSendCount();
 	void SetSendCount(int pCount);

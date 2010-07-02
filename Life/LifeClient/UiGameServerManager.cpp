@@ -34,7 +34,10 @@ UiGameServerManager::~UiGameServerManager()
 void UiGameServerManager::SetRenderArea(const PixelRect& pRenderArea)
 {
 	mRenderArea = pRenderArea;
-	((UiServerConsoleManager*)GetConsoleManager())->GetUiConsole()->SetRenderArea(pRenderArea);
+	if (GetConsoleManager())
+	{
+		((UiServerConsoleManager*)GetConsoleManager())->GetUiConsole()->SetRenderArea(pRenderArea);
+	}
 }
 
 

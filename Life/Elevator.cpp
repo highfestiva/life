@@ -18,8 +18,9 @@ namespace Life
 
 
 
-Elevator::Elevator(Cure::ResourceManager* pResourceManager):
+Elevator::Elevator(Cure::ResourceManager* pResourceManager, Cure::ContextObject* pParent):
 	Cure::CppContextObject(pResourceManager, _T("Elevator")),
+	mParent(pParent),
 	mActiveTrigger(0),
 	mExitDelay(2.0),
 	mAreEnginesActive(true),	// Set to get this party started in some cases.
@@ -29,6 +30,7 @@ Elevator::Elevator(Cure::ResourceManager* pResourceManager):
 
 Elevator::~Elevator()
 {
+	mParent = 0;
 }
 
 
@@ -183,6 +185,7 @@ void Elevator::SetFunctionTarget(const str& pFunction, TBC::PhysicsEngine* pEngi
 	log_volatile(mLog.Debugf(_T("TRIGGER - activating engine for function %s."), pFunction.c_str()));
 	pEngine->ForceSetValue(4, lTargetValue);	// Store shadow.
 	pEngine->SetValue(pEngine->GetControllerIndex(), lTargetValue, 0);
+	mParent->ForceSend();	// Transmit our updated engine values.
 }
 
 

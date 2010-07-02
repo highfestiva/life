@@ -104,8 +104,7 @@ GameClientMasterTicker::~GameClientMasterTicker()
 	}
 	mSlaveArray.clear();
 
-	delete (mServer);
-	mServer = 0;
+	DeleteServer();
 
 	mResourceManager = 0;
 	mUiManager = 0;
@@ -134,9 +133,25 @@ bool GameClientMasterTicker::CreateSlave()
 		if (lIsLocalServer)
 		{
 			Cure::RuntimeVariableScope* lVariableScope = new Cure::RuntimeVariableScope(Cure::GetSettings());
-			mServer = new UiGameServerManager(lVariableScope, mResourceManager, mUiManager, PixelRect(0, 0, 100, 100));
-			mServer->StartConsole(new UiTbc::ConsoleLogListener, new UiTbc::ConsolePrompt);
-			mServer->Initialize();
+			UiGameServerManager* lServer = new UiGameServerManager(lVariableScope, mResourceManager, mUiManager, PixelRect(0, 0, 100, 100));
+			lServer->StartConsole(new UiTbc::ConsoleLogListener, new UiTbc::ConsolePrompt);
+			if (!lServer->Initialize())
+			{
+				delete lServer;
+				lServer = 0;
+			}
+			if (lServer)
+			{
+				ScopeLock lLock(&mLock);
+				if (!mServer)
+				{
+					mServer = lServer;
+				}
+				else
+				{
+					delete lServer;
+				}
+			}
 		}
 	}
 	return (CreateSlave(&GameClientMasterTicker::CreateSlaveManager));
@@ -470,6 +485,15 @@ void GameClientMasterTicker::DeleteSlave(GameClientSlaveManager* pSlave, bool pA
 	}
 }
 
+void GameClientMasterTicker::DeleteServer()
+{
+	if (mServer)
+	{
+		GameServerManager* lServer = mServer;
+		mServer = 0;
+		delete lServer;
+	}
+}
 
 
 bool GameClientMasterTicker::Initialize()
@@ -488,8 +512,7 @@ bool GameClientMasterTicker::Initialize()
 
 void GameClientMasterTicker::CreatePlayerCountWindow()
 {
-	delete (mServer);
-	mServer = 0;
+	DeleteServer();
 	//assert(!mIsPlayerCountViewActive);
 	mIsPlayerCountViewActive = true;
 	mSlaveTopSplit = 1.0f;
@@ -536,8 +559,7 @@ bool GameClientMasterTicker::Reinitialize()
 	}
 	if (lOk)
 	{
-		delete (mServer);
-		mServer = 0;
+		DeleteServer();
 	}
 	if (lOk)
 	{
@@ -813,8 +835,7 @@ bool GameClientMasterTicker::QueryQuit()
 		{
 			DeleteSlave(mSlaveArray[x], false);
 		}
-		delete (mServer);
-		mServer = 0;
+		DeleteServer();
 #ifdef LIFE_DEMO
 		if (!mUiManager->GetDisplayManager()->IsVisible())
 		{

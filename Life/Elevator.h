@@ -21,7 +21,7 @@ class Elevator: public Cure::CppContextObject
 {
 	typedef Cure::CppContextObject Parent;
 public:
-	Elevator(Cure::ResourceManager* pResourceManager);
+	Elevator(Cure::ResourceManager* pResourceManager, Cure::ContextObject* pParent);
 	virtual ~Elevator();
 
 protected:
@@ -33,9 +33,10 @@ protected:
 	float GetActiveMaxSpeedSquare() const;
 	void HaltActiveEngines();
 
-	static void SetFunctionTarget(const str& pFunction, TBC::PhysicsEngine* pEngine);
+	void SetFunctionTarget(const str& pFunction, TBC::PhysicsEngine* pEngine);
 
 private:
+	Cure::ContextObject* mParent;
 	const TBC::PhysicsTrigger* mActiveTrigger;
 	HiResTimer mTrigTime;
 	const double mExitDelay;

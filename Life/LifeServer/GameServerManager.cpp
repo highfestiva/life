@@ -451,6 +451,8 @@ void GameServerManager::OnLogin(Cure::UserConnection* pUserConnection)
 		}
 
 		GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
+
+		SendAllObjects(lClient, true);
 	}
 	else
 	{
@@ -628,7 +630,7 @@ void GameServerManager::BroadcastAvatar(Client* pClient)
 		Cure::MessageNumber::INFO_AVATAR, lInstanceId, 0);
 
 	BroadcastCreateObject(lObject);
-	SendCreateAllObjects(pClient);
+	SendAllObjects(pClient, false);	// Send positions once more.
 }
 
 
@@ -703,12 +705,12 @@ void GameServerManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pT
 		if (lIsServerControlled)
 		{
 			lSendCollision = IsHighImpact(12.0f, pObject1, pForce, pTorque);
-			if (!lSendCollision && lAreBothDynamic)
+			/*if (!lSendCollision && lAreBothDynamic)
 			{
 				// If the other object thinks it's a high impact, we go. This is to not
 				// replicate when another - heavier - object is standing on top of us.
 				lSendCollision = IsHighImpact(7.0f, pObject2, pForce, pTorque);
-			}
+			}*/
 		}
 		else if (lAreBothDynamic)
 		{
@@ -741,13 +743,13 @@ void GameServerManager::OnStopped(Cure::ContextObject* pObject, TBC::PhysicsMana
 
 bool GameServerManager::OnPhysicsSend(Cure::ContextObject* pObject)
 {
-	bool lResend = false;
+	bool lResend = true;
 	if (pObject->QueryResendTime(0.3f, false))
 	{
-		log_adebug("Sending collision.");
+		lResend = false;
+		log_volatile(mLog.Debugf(_T("Sending pos for %s."), pObject->GetClassId().c_str()));
 		const Cure::ObjectPositionalData* lPosition = 0;
-		lResend = pObject->UpdateFullPosition(lPosition);
-		if (lResend)
+		if (pObject->UpdateFullPosition(lPosition))
 		{
 			BroadcastObjectPosition(pObject->GetInstanceId(), *lPosition, 0, false);
 			lResend = (pObject->PopSendCount() > 0);
@@ -791,11 +793,11 @@ void GameServerManager::SendDetach(Cure::ContextObject* pObject1, Cure::ContextO
 
 
 
-Cure::ContextObject* GameServerManager::CreateTriggerHandler(const str& pType) const
+Cure::ContextObject* GameServerManager::CreateTriggerHandler(Cure::ContextObject* pParent, const str& pType) const
 {
 	if (pType == _T("elevator"))
 	{
-		return new Elevator(GetResourceManager());
+		return new Elevator(GetResourceManager(), pParent);
 	}
 	assert(false);
 	return (0);
@@ -835,29 +837,45 @@ void GameServerManager::BroadcastDeleteObject(Cure::GameObjectId pInstanceId)
 	GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
 }
 
-void GameServerManager::SendCreateAllObjects(Client* pClient)
+void GameServerManager::SendAllObjects(Client* pClient, bool pCreate)
 {
 	// TODO: restrict to visible, concrete objects.
 
 	Cure::Packet* lPacket = GetNetworkAgent()->GetPacketFactory()->Allocate();
-	Cure::MessageCreateObject* lCreateMessage = (Cure::MessageCreateObject*)GetNetworkAgent()->
-		GetPacketFactory()->GetMessageFactory()->Allocate(Cure::MESSAGE_TYPE_CREATE_OBJECT);
+	Cure::MessageCreateObject* lCreateMessage = 0;
+	if (pCreate)
+	{
+		lCreateMessage = (Cure::MessageCreateObject*)GetNetworkAgent()->
+			GetPacketFactory()->GetMessageFactory()->Allocate(Cure::MESSAGE_TYPE_CREATE_OBJECT);
+	}
+	Cure::MessageObjectPosition* lPositionMessage = (Cure::MessageObjectPosition*)GetNetworkAgent()->
+		GetPacketFactory()->GetMessageFactory()->Allocate(Cure::MESSAGE_TYPE_OBJECT_POSITION);
 
 	const Cure::ContextManager::ContextObjectTable& lObjectTable = GetContext()->GetObjectTable();
 	Cure::ContextManager::ContextObjectTable::const_iterator x = lObjectTable.begin();
 	for (; x != lObjectTable.end(); ++x)
 	{
 		Cure::ContextObject* lObject = x->second;
-		// Don't send local objects, such as terrain.
+		// Don't send local objects.
 		if (lObject->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY)
 		{
 			lPacket->Clear();
 
-			// Store creation info.
-			lPacket->AddMessage(lCreateMessage);
-			TransformationF lTransformation(lObject->GetOrientation(), lObject->GetPosition());
-			lCreateMessage->Store(lPacket, lObject->GetInstanceId(),
-				 lTransformation, wstrutil::Encode(lObject->GetClassId()));
+			if (lCreateMessage)	// Store creation info?
+			{
+				lPacket->AddMessage(lCreateMessage);
+				TransformationF lTransformation(lObject->GetOrientation(), lObject->GetPosition());
+				lCreateMessage->Store(lPacket, lObject->GetInstanceId(),
+					 lTransformation, wstrutil::Encode(lObject->GetClassId()));
+			}
+
+			const Cure::ObjectPositionalData* lPosition;
+			if (lObject->UpdateFullPosition(lPosition))
+			{
+				lPacket->AddMessage(lPositionMessage);
+				lPositionMessage->Store(lPacket, lObject->GetInstanceId(),
+					GetTimeManager()->GetCurrentPhysicsFrame(), *lPosition);
+			}
 
 			// Send.
 			GetNetworkAgent()->PlaceInSendBuffer(true, pClient->GetUserConnection()->GetSocket(), lPacket);

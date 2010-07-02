@@ -29,6 +29,7 @@
 
 #define RTVAR_NETPHYS_RESYNCONDIFFGT		"NetPhys.ResyncOnDiffGt"
 #define RTVAR_NETPHYS_SLOWFRAMECOUNT		"NetPhys.SlowFrameCount"
+#define RTVAR_NETPHYS_ENABLESMOOTHING		"NetPhys.EnableSmoothing"
 
 #define RTVAR_NETWORK_SERVERADDRESS		"Network.ServerAddress"
 #define RTVAR_NETWORK_CONNECT_RETRYCOUNT	"Network.Connect.RetryCount"

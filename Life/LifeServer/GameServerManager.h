@@ -80,11 +80,11 @@ private:
 	void SendAttach(Cure::ContextObject* pObject1, unsigned pId1, Cure::ContextObject* pObject2, unsigned pId2);
 	void SendDetach(Cure::ContextObject* pObject1, Cure::ContextObject* pObject2);
 
-	virtual Cure::ContextObject* CreateTriggerHandler(const str& pType) const;
+	virtual Cure::ContextObject* CreateTriggerHandler(Cure::ContextObject* pParent, const str& pType) const;
 
 	void BroadcastCreateObject(Cure::ContextObject* pObject);
 	void BroadcastDeleteObject(Cure::GameObjectId pInstanceId);
-	void SendCreateAllObjects(Client* pClient);
+	void SendAllObjects(Client* pClient, bool pCreate);
 	void BroadcastObjectPosition(Cure::GameObjectId pInstanceId, const Cure::ObjectPositionalData& pPosition,
 		Client* pExcludeClient, bool pSafe);
 	void BroadcastPacket(const Client* pExcludeClient, Cure::Packet* pPacket, bool pSafe);

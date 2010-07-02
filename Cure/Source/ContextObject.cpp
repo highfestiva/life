@@ -494,8 +494,6 @@ bool ContextObject::UpdateFullPosition(const ObjectPositionalData*& pPositionalD
 	mPosition.Trunkate(y);
 	pPositionalData = &mPosition;
 
-	++mSendCount;
-
 	return (true);
 }
 
@@ -714,6 +712,12 @@ void ContextObject::SetEnginePower(unsigned pAspect, float pPower, float pAngle)
 
 
 
+void ContextObject::ForceSend()
+{
+	GetManager()->AddPhysicsSenderObject(this);	// Put us in send list.
+	mLastSendTime -= 10;	// Make sure we send immediately.
+}
+
 bool ContextObject::QueryResendTime(float pDeltaTime, bool pUnblockDelta)
 {
 	bool lOkToSend = false;
@@ -753,15 +757,17 @@ void ContextObject::ForceSetFullPosition(const ObjectPositionalData& pPositional
 	mPosition.CopyData(&pPositionalData);
 
 	TBC::PhysicsManager* lPhysicsManager = mManager->GetGameManager()->GetPhysicsManager();
-	TBC::PhysicsManager::BodyID lBody;
 	if (mAllowMoveSelf)
 	{
-		lBody = pGeometry->GetBodyId();
-		lPhysicsManager->SetBodyTransform(lBody, pPositionalData.mPosition.mTransformation);
-		lPhysicsManager->SetBodyVelocity(lBody, pPositionalData.mPosition.mVelocity);
-		lPhysicsManager->SetBodyAcceleration(lBody, pPositionalData.mPosition.mAcceleration);
-		lPhysicsManager->SetBodyAngularVelocity(lBody, pPositionalData.mPosition.mAngularVelocity);
-		lPhysicsManager->SetBodyAngularAcceleration(lBody, pPositionalData.mPosition.mAngularAcceleration);
+		if (mPhysics->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC)
+		{
+			TBC::PhysicsManager::BodyID lBody = pGeometry->GetBodyId();
+			lPhysicsManager->SetBodyTransform(lBody, pPositionalData.mPosition.mTransformation);
+			lPhysicsManager->SetBodyVelocity(lBody, pPositionalData.mPosition.mVelocity);
+			lPhysicsManager->SetBodyAcceleration(lBody, pPositionalData.mPosition.mAcceleration);
+			lPhysicsManager->SetBodyAngularVelocity(lBody, pPositionalData.mPosition.mAngularVelocity);
+			lPhysicsManager->SetBodyAngularAcceleration(lBody, pPositionalData.mPosition.mAngularAcceleration);
+		}
 	}
 	else
 	{
@@ -781,7 +787,7 @@ void ContextObject::ForceSetFullPosition(const ObjectPositionalData& pPositional
 	{
 		// TODO: add support for parent ID.
 		const TBC::ChunkyBoneGeometry* lStructureGeometry = mPhysics->GetBoneGeometry(x);
-		lBody = lStructureGeometry->GetBodyId();
+		TBC::PhysicsManager::BodyID lBody = lStructureGeometry->GetBodyId();
 		TBC::PhysicsManager::JointID lJoint = lStructureGeometry->GetJointId();
 		switch (lStructureGeometry->GetJointType())
 		{
@@ -1067,7 +1073,7 @@ void ContextObject::SetupChildTriggerHandlers()
 		if (lLastGroupIndex != lTrigger->GetGroupIndex())
 		{
 			lLastGroupIndex = lTrigger->GetGroupIndex();
-			lTriggerChild = GetManager()->GetGameManager()->CreateTriggerHandler(lTrigger->GetTypeName());
+			lTriggerChild = GetManager()->GetGameManager()->CreateTriggerHandler(this, lTrigger->GetTypeName());
 			AddChild(lTriggerChild);
 			GetManager()->EnableTickCallback(lTriggerChild);
 		}

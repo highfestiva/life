@@ -73,6 +73,7 @@ private:
 	bool CreateSlave(SlaveFactoryMethod pCreate);
 	void AddSlave(GameClientSlaveManager* pSlave);
 	void DeleteSlave(GameClientSlaveManager* pSlave, bool pAllowMainMenu);
+	void DeleteServer();
 
 	bool Initialize();
 	void CreatePlayerCountWindow();

@@ -272,6 +272,8 @@ private:
 
 		dJointID mJointID;
 		JointType mType;
+		bool mBody1Static;
+		bool mBody2Static;
 		dJointFeedback mFeedback;
 		JointList::iterator mListIter;
 		ForceFeedbackListener* mListener1;

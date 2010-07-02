@@ -617,8 +617,7 @@ void GameClientSlaveManager::CreateLoginView()
 bool GameClientSlaveManager::InitializeTerrain()
 {
 	Cure::GameObjectId lGameObjectId = GetContext()->AllocateGameObjectId(Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
-	bool lOk = CreateObject(lGameObjectId, _T("level_01"),
-		Cure::NETWORK_OBJECT_LOCAL_ONLY);
+	bool lOk = CreateObject(lGameObjectId, _T("level_01"), Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
 	return (lOk);
 }
 
@@ -1141,7 +1140,7 @@ void GameClientSlaveManager::SetMovement(Cure::GameObjectId pInstanceId, int32 p
 		if (lObject)
 		{
 			lObject->SetFullPosition(pData);
-			if (pInstanceId == mAvatarId)
+			if (pInstanceId == mAvatarId && CURE_RTVAR_GET(GetVariableScope(), RTVAR_NETPHYS_ENABLESMOOTHING, true))
 			{
 				lObject->ActivateLerp();
 			}

@@ -253,7 +253,7 @@ ContextObject* GameManager::CreateContextObject(const str& pClassId, NetworkObje
 	return (lObject);
 }
 
-ContextObject* GameManager::CreateTriggerHandler(const str&) const
+ContextObject* GameManager::CreateTriggerHandler(ContextObject*, const str&) const
 {
 	assert(false);
 	return 0;
