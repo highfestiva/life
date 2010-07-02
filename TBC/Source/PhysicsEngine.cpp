@@ -461,6 +461,12 @@ float PhysicsEngine::GetMaxSpeed() const
 	return (mMaxSpeed);
 }
 
+float PhysicsEngine::GetLerpThrottle(float pUp, float pDown) const
+{
+	float& lLerpShadow = mSmoothValue[MAX_CONTROLLER_COUNT-1];
+	lLerpShadow = Math::Lerp(lLerpShadow, GetValue(), (GetValue() > lLerpShadow)? pUp : pDown);
+	return lLerpShadow;
+}
 
 unsigned PhysicsEngine::GetChunkySize() const
 {

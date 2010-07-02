@@ -196,11 +196,7 @@ void RoadSignButton::OnPhysicsTick()
 		return;
 	}
 
-	float lFrameTime = GetManager()->GetGameManager()->GetTimeManager()->GetNormalFrameTime();
-	if (lFrameTime > 0.1f)
-	{
-		lFrameTime = 0.1f;
-	}
+	const float lFrameTime = std::min(0.1f, GetManager()->GetGameManager()->GetTimeManager()->GetNormalFrameTime());
 	MoveSign(lFrameTime);
 }
 

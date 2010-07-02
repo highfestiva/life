@@ -72,6 +72,7 @@ public:
 	const float* GetValues() const;
 	float GetIntensity() const;
 	float GetMaxSpeed() const;
+	float GetLerpThrottle(float pUp, float pDown) const;
 
 	unsigned GetChunkySize() const;
 	void SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const;

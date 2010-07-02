@@ -8,6 +8,7 @@
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/GameManager.h"
 #include "../../Cure/Include/RuntimeVariable.h"
+#include "../../Cure/Include/TimeManager.h"
 #include "../../Lepra/Include/HashUtil.h"
 #include "../../TBC/Include/ChunkyBoneGeometry.h"
 #include "../../TBC/Include/ChunkyPhysics.h"
@@ -48,6 +49,7 @@ void Vehicle::OnPhysicsTick()
 	{
 		return;
 	}
+	const float lFrameTime = std::min(0.1f, GetManager()->GetGameManager()->GetTimeManager()->GetNormalFrameTime());
 	bool lIsChild = CURE_RTVAR_GETSET(mManager->GetGameManager()->GetVariableScope(), RTVAR_GAME_ISCHILD, true);
 	const TBC::PhysicsManager* lPhysicsManager = mManager->GetGameManager()->GetPhysicsManager();
 	Vector3DF lVelocity;
@@ -145,7 +147,14 @@ void Vehicle::OnPhysicsTick()
 			TBC::ChunkyBoneGeometry* lBone = lPhysics->GetBoneGeometry(lBodyIndex);
 			const Vector3DF lPosition = lPhysicsManager->GetBodyPosition(lBone->GetBodyId());
 			const TBC::PhysicsEngine* lEngine = mPhysics->GetEngine(lTag.mEngineIndexList[0]);
-			const float lIntensity = ::fabs(lEngine->GetIntensity());
+			float lIntensity = ::fabs(lEngine->GetIntensity());
+			const float lThrottleUpSpeed = Math::GetIterateLerpTime(0.2f, lFrameTime);
+			const float lThrottleDownSpeed = Math::GetIterateLerpTime(0.1f, lFrameTime);
+			const float lThrottle = ::fabs(lEngine->GetLerpThrottle(lThrottleUpSpeed, lThrottleDownSpeed));
+			if (lEngine->GetEngineType() != TBC::PhysicsEngine::ENGINE_HINGE_GYRO)
+			{
+				lIntensity *= lThrottle;
+			}
 			enum FloatValue
 			{
 				FV_PITCH_LOW = 0,
