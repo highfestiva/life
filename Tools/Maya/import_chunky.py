@@ -821,7 +821,6 @@ class GroupReader(DefaultMAReader):
                                 if not triggerOk:
                                         print("Error: invalid trigger type '%s'." % triggertype)
                                 node = self.onCreateNode("trigger:"+triggertype, {"name":[section]})
-                                trigger_attribute = {}
                                 params = config.items(section)
                                 for name, value in params:
                                         node.fix_attribute(name, value)
@@ -859,14 +858,47 @@ class GroupReader(DefaultMAReader):
                                 group.append(node)
                                 used_sections[section] = True
 
+                        elif section.startswith("spawner:"):
+                                spawnertype = stripQuotes(config.get(section, "type"))
+                                spawnerOk = spawnertype in ["immediate", "teleport"]
+                                allApplied &= spawnerOk
+                                if not spawnerOk:
+                                        print("Error: invalid spawner type '%s'." % spawnertype)
+                                node = self.onCreateNode("spawner:"+spawnertype, {"name":[section]})
+                                params = config.items(section)
+                                for name, value in params:
+                                        node.fix_attribute(name, value)
+                                def check_connected_to(l):
+                                        ok = (type(l) == str)
+                                        connected_to = self.findNode(l)
+                                        ok &= (connected_to != None)
+                                        return ok
+                                def check_spawn_objects(l):
+                                        ok = (len(l) >= 1)
+                                        all_engine_names = []
+                                        for e in l:
+                                                ok &= (len(e) == 2)
+                                                ok &= (type(e[0]) == str)
+                                                ok &= (e[1] > 0 and e[1] <= 1)
+                                        return ok
+                                required = [("type", lambda x: type(x) == str),
+                                            ("function", lambda x: type(x) == str),
+                                            ("connected_to", check_connected_to),
+                                            ("number", lambda x: x >= -1),
+                                            ("interval", lambda x: x >= 0),
+                                            ("spawn_objects", check_spawn_objects)]
+                                for name, spawner_check in required:
+                                        allApplied &= self._query_attribute(node, name, spawner_check)[0]
+                                group.append(node)
+                                used_sections[section] = True
+
                         elif section.startswith("tag:"):
-                                triggertype = stripQuotes(config.get(section, "type"))
-                                triggerOk = triggertype in ["eye", "brake_light", "reverse_light", "engine_sound"]
-                                allApplied &= triggerOk
-                                if not triggerOk:
-                                        print("Error: invalid trigger type '%s'." % triggertype)
-                                node = self.onCreateNode("tag:"+triggertype, {"name":[section]})
-                                trigger_attribute = {}
+                                tagtype = stripQuotes(config.get(section, "type"))
+                                tagOk = tagtype in ["eye", "brake_light", "reverse_light", "engine_sound"]
+                                allApplied &= tagOk
+                                if not tagOk:
+                                        print("Error: invalid tag type '%s'." % tagtype)
+                                node = self.onCreateNode("tag:"+tagtype, {"name":[section]})
                                 params = config.items(section)
                                 for name, value in params:
                                         node.fix_attribute(name, value)

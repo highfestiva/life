@@ -468,18 +468,6 @@
 				>
 			</File>
 		</Filter>
-		<Filter
-			Name="Game"
-			>
-			<File
-				RelativePath=".\Elevator.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Elevator.h"
-				>
-			</File>
-		</Filter>
 	</Files>
 	<Globals>
 	</Globals>

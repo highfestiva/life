@@ -21,6 +21,7 @@ namespace TBC
 class ChunkyPhysics;
 class ChunkyBoneGeometry;
 class PhysicsEngine;
+class PhysicsSpawner;
 class PhysicsTrigger;
 }
 
@@ -79,6 +80,9 @@ public:
 	const void* GetTrigger(TBC::PhysicsManager::TriggerID pTriggerId) const;
 	size_t GetTriggerCount(const void*& pTrigger) const;
 
+	void SetSpawner(const TBC::PhysicsSpawner* pSpawner);
+	const TBC::PhysicsSpawner* GetSpawner() const;
+
 	bool UpdateFullPosition(const ObjectPositionalData*& pPositionalData);
 	void SetFullPosition(const ObjectPositionalData& pPositionalData);
 	void SetInitialTransform(const TransformationF& pTransformation);
@@ -115,7 +119,7 @@ protected:
 	void AddChild(ContextObject* pChild);
 	void RemoveChild(ContextObject* pChild);
 	void SetParent(ContextObject* pParent);
-	void SetupChildTriggerHandlers();
+	void SetupChildHandlers();
 
 	virtual bool IsSameInstance(TBC::PhysicsManager::ForceFeedbackListener* pOther);
 
@@ -147,6 +151,7 @@ protected:
 	ContextObject* mParent;
 	ChildList mChildList;
 	TriggerMap mTriggerMap;
+	const TBC::PhysicsSpawner* mSpawner;
 	bool mIsLoaded;
 	AttributeArray mAttributeArray;
 	TBC::ChunkyPhysics* mPhysics;

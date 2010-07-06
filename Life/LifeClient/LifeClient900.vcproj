@@ -651,6 +651,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\LifeServer\Elevator.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\LifeServer\Elevator.h"
+				>
+			</File>
+			<File
 				RelativePath="..\LifeServer\GameServerManager.cpp"
 				>
 			</File>
@@ -664,6 +672,14 @@
 			</File>
 			<File
 				RelativePath="..\LifeServer\ServerConsoleManager.h"
+				>
+			</File>
+			<File
+				RelativePath="..\LifeServer\Spawner.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\LifeServer\Spawner.h"
 				>
 			</File>
 			<File

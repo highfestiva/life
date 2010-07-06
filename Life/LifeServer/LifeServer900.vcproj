@@ -524,6 +524,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Elevator.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\GameServerManager.cpp"
 				>
 			</File>
@@ -539,6 +543,10 @@
 				RelativePath=".\ServerConsoleManager.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\Spawner.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -547,6 +555,10 @@
 			>
 			<File
 				RelativePath=".\Client.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Elevator.h"
 				>
 			</File>
 			<File
@@ -559,6 +571,10 @@
 			</File>
 			<File
 				RelativePath=".\ServerConsoleManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Spawner.h"
 				>
 			</File>
 		</Filter>

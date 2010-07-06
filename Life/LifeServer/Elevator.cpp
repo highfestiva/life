@@ -5,11 +5,11 @@
 
 
 #include "Elevator.h"
-#include "../Cure/Include/ContextManager.h"
-#include "../Cure/Include/GameManager.h"
-#include "../Lepra/Include/HashUtil.h"
-#include "../TBC/Include/PhysicsEngine.h"
-#include "../TBC/Include/PhysicsTrigger.h"
+#include "../../Cure/Include/ContextManager.h"
+#include "../../Cure/Include/GameManager.h"
+#include "../../Lepra/Include/HashUtil.h"
+#include "../../TBC/Include/PhysicsEngine.h"
+#include "../../TBC/Include/PhysicsTrigger.h"
 
 
 
@@ -18,19 +18,19 @@ namespace Life
 
 
 
-Elevator::Elevator(Cure::ResourceManager* pResourceManager, Cure::ContextObject* pParent):
-	Cure::CppContextObject(pResourceManager, _T("Elevator")),
-	mParent(pParent),
+Elevator::Elevator(Cure::ContextManager* pManager):
+	Cure::CppContextObject(pManager->GetGameManager()->GetResourceManager(), _T("Elevator")),
 	mActiveTrigger(0),
 	mExitDelay(2.0),
 	mAreEnginesActive(true),	// Set to get this party started in some cases.
 	mEngineActivity(1)
 {
+	pManager->AddLocalObject(this);
+	GetManager()->EnableTickCallback(this);
 }
 
 Elevator::~Elevator()
 {
-	mParent = 0;
 }
 
 

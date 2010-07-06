@@ -193,8 +193,10 @@ public:
 	virtual void SetGravity(const Vector3D<float32>& pGravity);
 	virtual Vector3DF GetGravity() const;
 
+	virtual void PreSteps();
 	virtual void StepAccurate(float32 pStepSize);
 	virtual void StepFast(float32 pStepSize);
+	virtual void PostSteps();
 
 	virtual const BodySet& GetIdledBodies() const;
 

@@ -53,7 +53,7 @@ public:
 	PhysicsManager::TriggerID GetPhysicsTriggerId() const;
 	int GetGroupIndex() const;
 	int GetPriority() const;
-	const str& GetTypeName() const;
+	const str& GetFunction() const;
 
 	void SetTriggerGeometry(ChunkyBoneGeometry* pGeometry);
 	void AddControlledEngine(PhysicsEngine* pEngine, float pDelay, str pFunction);
@@ -71,7 +71,7 @@ private:
 	Type mTriggerType;
 	int mGroupIndex;
 	int mPriority;
-	str mTypeName;
+	str mFunction;
 	ChunkyBoneGeometry* mTriggerNode;
 	ConnectionArray mConnectionArray;
 

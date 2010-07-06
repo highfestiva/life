@@ -499,6 +499,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Source\PhysicsSpawner.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Source\PhysicsTrigger.cpp"
 				>
 			</File>
@@ -570,6 +574,10 @@
 			</File>
 			<File
 				RelativePath=".\Include\PhysicsManagerODE.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Include\PhysicsSpawner.h"
 				>
 			</File>
 			<File

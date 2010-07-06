@@ -153,6 +153,7 @@ public:
 		INFO_PING,
 		INFO_PONG,
 		INFO_AVATAR,
+		INFO_RECREATE_OBJECT,
 	};
 
 	MessageNumber();

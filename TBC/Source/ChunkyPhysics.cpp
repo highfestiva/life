@@ -56,7 +56,7 @@ ChunkyPhysics::PhysicsType ChunkyPhysics::GetPhysicsType() const
 
 ChunkyBoneGeometry* ChunkyPhysics::GetBoneGeometry(int pBoneIndex) const
 {
-	assert(pBoneIndex < GetBoneCount());
+	assert(pBoneIndex >= 0 && pBoneIndex < GetBoneCount());
 	return ((pBoneIndex < (int)mGeometryArray.size())? mGeometryArray[pBoneIndex] : 0);
 }
 
@@ -223,7 +223,7 @@ int ChunkyPhysics::GetTriggerCount() const
 	return ((int)mTriggerArray.size());
 }
 
-PhysicsTrigger* ChunkyPhysics::GetTrigger(int pTriggerIndex) const
+const PhysicsTrigger* ChunkyPhysics::GetTrigger(int pTriggerIndex) const
 {
 	assert((size_t)pTriggerIndex < mTriggerArray.size());
 	return (mTriggerArray[pTriggerIndex]);
@@ -242,6 +242,24 @@ void ChunkyPhysics::ClearTriggers()
 		delete (*x);
 	}
 	mTriggerArray.clear();
+}
+
+
+
+int ChunkyPhysics::GetSpawnerCount() const
+{
+	return (int)mSpawnerArray.size();
+}
+
+const PhysicsSpawner* ChunkyPhysics::GetSpawner(int pSpawnerIndex) const
+{
+	assert((size_t)pSpawnerIndex < mSpawnerArray.size());
+	return mSpawnerArray[pSpawnerIndex];
+}
+
+void ChunkyPhysics::AddSpawner(PhysicsSpawner* pSpawner)
+{
+	mSpawnerArray.push_back(pSpawner);
 }
 
 

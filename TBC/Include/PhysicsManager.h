@@ -297,8 +297,10 @@ public:
 	virtual void SetGravity(const Vector3D<float32>& pGravity) = 0;
 	virtual Vector3DF GetGravity() const = 0;
 
+	virtual void PreSteps() = 0;
 	virtual void StepAccurate(float32 pStepSize) = 0;
-	virtual void StepFast(float32 pStepSize)     = 0;
+	virtual void StepFast(float32 pStepSize) = 0;
+	virtual void PostSteps() = 0;
 
 	// Returns the bodies that were "idled" last step.
 	virtual const BodySet& GetIdledBodies() const = 0;

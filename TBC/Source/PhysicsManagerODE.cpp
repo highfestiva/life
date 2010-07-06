@@ -3041,16 +3041,18 @@ Vector3DF PhysicsManagerODE::GetGravity() const
 	return (Vector3DF(lGravity[0], lGravity[1], lGravity[2]));
 }
 
+void PhysicsManagerODE::PreSteps()
+{
+	FlagMovingObjects();
+}
+
 void PhysicsManagerODE::StepAccurate(float32 pStepSize)
 {
 	if (pStepSize > 0)
 	{
-		FlagMovingObjects();
-
 		dSpaceCollide(mSpaceID, this, CollisionCallback);
 		dWorldStep(mWorldID, pStepSize);
 
-		HandleMovableObjects();
 		DoForceFeedback();
 		dJointGroupEmpty(mContactJointGroupID);
 	}
@@ -3060,15 +3062,17 @@ void PhysicsManagerODE::StepFast(float32 pStepSize)
 {
 	if (pStepSize > 0)
 	{
-		FlagMovingObjects();
-
 		dSpaceCollide(mSpaceID, this, CollisionCallback);
 		dWorldQuickStep(mWorldID, pStepSize);
 		
-		HandleMovableObjects();
 		DoForceFeedback();
 		dJointGroupEmpty(mContactJointGroupID);
 	}
+}
+
+void PhysicsManagerODE::PostSteps()
+{
+	HandleMovableObjects();
 }
 
 void PhysicsManagerODE::DoForceFeedback()

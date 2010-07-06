@@ -66,7 +66,7 @@ public:
 
 	ContextObject* CreateContextObject(const str& pClassId, NetworkObjectType pNetworkType,
 		GameObjectId pInstanceId = 0);
-	virtual ContextObject* CreateTriggerHandler(ContextObject* pParent, const str& pType) const;
+	virtual ContextObject* CreateLogicHandler(const str& pType) const;
 	virtual bool IsUiMoveForbidden(GameObjectId pObjectId) const;
 	virtual void GetSiblings(GameObjectId pObjectId, ContextObject::Array& pSiblingArray) const;
 	virtual void OnLoadCompleted(ContextObject* pObject, bool pOk) = 0;
@@ -105,6 +105,7 @@ protected:
 private:
 	void ScriptTick(float pTimeDelta);
 	void ScriptPhysicsTick();
+	virtual void HandleWorldBoundaries();
 
 	virtual bool InitializeTerrain() = 0;
 

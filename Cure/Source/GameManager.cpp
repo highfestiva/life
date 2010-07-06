@@ -253,7 +253,7 @@ ContextObject* GameManager::CreateContextObject(const str& pClassId, NetworkObje
 	return (lObject);
 }
 
-ContextObject* GameManager::CreateTriggerHandler(ContextObject*, const str&) const
+ContextObject* GameManager::CreateLogicHandler(const str&) const
 {
 	assert(false);
 	return 0;
@@ -397,12 +397,15 @@ void GameManager::PhysicsTick()
 		mLog.Warningf(_T("Game time allows for %i physics steps in increments of %f."),
 			lAffordedStepCount, lStepIncrement);
 	}*/
+	mPhysics->PreSteps();
 	for (int x = 0; x < lAffordedStepCount; ++x)
 	{
 		ScriptTick(lStepIncrement);
 		mPhysics->StepFast(lStepIncrement);
 	}
+	mPhysics->PostSteps();
 
+	HandleWorldBoundaries();
 	mContext->HandleIdledBodies();
 	mContext->HandlePhysicsSend();
 }
@@ -445,6 +448,11 @@ void GameManager::ScriptPhysicsTick()
 		mContext->TickPhysics();
 	}
 }
+
+void GameManager::HandleWorldBoundaries()
+{
+}
+
 
 
 void GameManager::PhysicsThreadEntry()

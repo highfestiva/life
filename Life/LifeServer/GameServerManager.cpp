@@ -10,10 +10,12 @@
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../../Cure/Include/TimeManager.h"
 #include "../../Lepra/Include/Path.h"
-#include "../Elevator.h"
+#include "../../TBC/Include/ChunkyPhysics.h"
 #include "../LifeApplication.h"
 #include "../RtVar.h"
+#include "Elevator.h"
 #include "ServerConsoleManager.h"
+#include "Spawner.h"
 
 
 
@@ -400,6 +402,25 @@ void GameServerManager::ProcessNetworkInputMessage(Client* pClient, Cure::Messag
 					pClient->GetUserConnection()->GetSocket()->GetTargetAddress().GetAsString().c_str(),
 					pClient->GetUserConnection()->GetSocket()));
 			}
+			else if (lNumber->GetInfo() == Cure::MessageNumber::INFO_RECREATE_OBJECT)
+			{
+				const Cure::GameObjectId lInstanceId = lNumber->GetInteger();
+				Cure::ContextObject* lObject = GetContext()->GetObject(lInstanceId);
+				if (lObject)
+				{
+					
+					ContextTable lTable;
+					lTable.insert(ContextTable::value_type(lInstanceId, lObject));
+					SendObjects(pClient, true, lTable);
+					log_volatile(mLog.Debugf(_T("Recreating %s (%i) on client."),
+						lObject->GetClassId().c_str(),
+						lInstanceId));
+				}
+				else
+				{
+					mLog.Warningf(_T("User %s tried to fetch unknown object with ID %i."), lInstanceId);
+				}
+			}
 			else
 			{
 				mLog.AError("Received an invalid MessageNumber from client.");
@@ -452,7 +473,7 @@ void GameServerManager::OnLogin(Cure::UserConnection* pUserConnection)
 
 		GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
 
-		SendAllObjects(lClient, true);
+		SendObjects(lClient, true, GetContext()->GetObjectTable());
 	}
 	else
 	{
@@ -476,9 +497,8 @@ void GameServerManager::OnLogout(Cure::UserConnection* pUserConnection)
 		assert(IsThreadSafe());
 		mAccountClientTable.Remove(pUserConnection->GetAccountId());
 		delete (lClient);
-		BroadcastDeleteObject(lAvatarId);
 	}
-	DropAvatar(lAvatarId);
+	DeleteObject(lAvatarId);
 
 	mLog.Info(_T("User ") + strutil::Encode(pUserConnection->GetLoginName()) + _T(" logged out."));
 }
@@ -493,7 +513,6 @@ void GameServerManager::OnSelectAvatar(Client* pClient, const Cure::UserAccount:
 	{
 		mLog.Info(_T("User ")+strutil::Encode(pClient->GetUserConnection()->GetLoginName())+_T(" had an avatar, replacing it."));
 		pClient->SetAvatarId(0);
-		BroadcastDeleteObject(lPreviousAvatarId);
 		Cure::ContextObject* lObject = GetContext()->GetObject(lPreviousAvatarId);
 		if (lObject)
 		{
@@ -503,7 +522,7 @@ void GameServerManager::OnSelectAvatar(Client* pClient, const Cure::UserAccount:
 			lObject->GetOrientation().GetEulerAngles(lEulerAngles);
 			lTransform.GetOrientation().SetEulerAngles(lEulerAngles.x, 0, 0);
 		}
-		DropAvatar(lPreviousAvatarId);
+		DeleteObject(lPreviousAvatarId);
 	}
 
 	mLog.Info(_T("Loading avatar '")+pAvatarId+_T("' for user ")+strutil::Encode(pClient->GetUserConnection()->GetLoginName())+_T("."));
@@ -515,10 +534,11 @@ void GameServerManager::OnSelectAvatar(Client* pClient, const Cure::UserAccount:
 	lObject->StartLoading();
 }
 
-void GameServerManager::DropAvatar(Cure::GameObjectId pAvatarId)
+void GameServerManager::DeleteObject(Cure::GameObjectId pInstanceId)
 {
-	DeleteMovements(pAvatarId);
-	GetContext()->DeleteObject(pAvatarId);
+	DeleteMovements(pInstanceId);
+	GetContext()->DeleteObject(pInstanceId);
+	BroadcastDeleteObject(pInstanceId);
 }
 
 
@@ -630,7 +650,6 @@ void GameServerManager::BroadcastAvatar(Client* pClient)
 		Cure::MessageNumber::INFO_AVATAR, lInstanceId, 0);
 
 	BroadcastCreateObject(lObject);
-	SendAllObjects(pClient, false);	// Send positions once more.
 }
 
 
@@ -662,19 +681,15 @@ void GameServerManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 		DeleteMovements(pObject->GetInstanceId());
 		if (lClient)
 		{
-			mLog.Infof(_T("Loaded avatar for %s."),
-				strutil::Encode(lClient->GetUserConnection()->GetLoginName()).c_str());
+			mLog.Infof(_T("Loaded avatar for %s with instance id %i."),
+				strutil::Encode(lClient->GetUserConnection()->GetLoginName()).c_str(),
+				pObject->GetInstanceId());
 			BroadcastAvatar(lClient);
 		}
 		else
 		{
 			log_volatile(mLog.Debugf(_T("Loaded object %s."), pObject->GetClassId().c_str()));
-			OnPhysicsSend(pObject);
-
-			if (strutil::StartsWith(pObject->GetClassId(), _T("level_")))
-			{
-				Parent::CreateContextObject(_T("stone"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED)->StartLoading();
-			}
+			BroadcastCreateObject(pObject);
 		}
 	}
 	else
@@ -729,34 +744,30 @@ void GameServerManager::OnStopped(Cure::ContextObject* pObject, TBC::PhysicsMana
 {
 	const unsigned lRootIndex = 0;
 	assert(pObject->GetStructureGeometry(lRootIndex));
-	if (pObject->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY &&
-		pObject->GetStructureGeometry(lRootIndex)->GetBodyId() == pBodyId)
+	assert(pObject->GetStructureGeometry(lRootIndex)->GetBodyId() == pBodyId);
+	if (pObject->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY)
 	{
 		log_volatile(mLog.Debugf(_T("Object %u/%s stopped, sending position."), pObject->GetInstanceId(), pObject->GetClassId().c_str()));
-		const Cure::ObjectPositionalData* lPosition = 0;
-		if (pObject->UpdateFullPosition(lPosition))
-		{
-			BroadcastObjectPosition(pObject->GetInstanceId(), *lPosition, 0, false);
-		}
+		GetContext()->AddPhysicsSenderObject(pObject);
 	}
 }
 
 bool GameServerManager::OnPhysicsSend(Cure::ContextObject* pObject)
 {
-	bool lResend = true;
+	bool lLastSend = false;
 	if (pObject->QueryResendTime(0.3f, false))
 	{
-		lResend = false;
+		lLastSend = true;
 		log_volatile(mLog.Debugf(_T("Sending pos for %s."), pObject->GetClassId().c_str()));
 		const Cure::ObjectPositionalData* lPosition = 0;
 		if (pObject->UpdateFullPosition(lPosition))
 		{
 			BroadcastObjectPosition(pObject->GetInstanceId(), *lPosition, 0, false);
-			lResend = (pObject->PopSendCount() > 0);
+			lLastSend = (pObject->PopSendCount() == 0);
 		}
 
 	}
-	return (lResend);
+	return (lLastSend);
 }
 
 bool GameServerManager::IsConnectAuthorized()
@@ -791,13 +802,42 @@ void GameServerManager::SendDetach(Cure::ContextObject* pObject1, Cure::ContextO
 	GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
 }
 
-
-
-Cure::ContextObject* GameServerManager::CreateTriggerHandler(Cure::ContextObject* pParent, const str& pType) const
+void GameServerManager::HandleWorldBoundaries()
 {
-	if (pType == _T("elevator"))
+	std::vector<Cure::GameObjectId> lLostObjectArray;
+	const ContextTable& lObjectTable = GetContext()->GetObjectTable();
+	ContextTable::const_iterator x = lObjectTable.begin();
+	for (; x != lObjectTable.end(); ++x)
 	{
-		return new Elevator(GetResourceManager(), pParent);
+		Cure::ContextObject* lObject = x->second;
+		const TBC::ChunkyPhysics* lPhysics = lObject->GetPhysics();
+		if (lObject->IsLoaded() && lPhysics && lPhysics->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC)
+		{
+			const Vector3DF lPosition = lObject->GetPosition();
+			if (lPosition.z < -100 || lPosition.z > +300)
+			{
+				lLostObjectArray.push_back(lObject->GetInstanceId());
+			}
+		}
+	}
+	std::vector<Cure::GameObjectId>::const_iterator y = lLostObjectArray.begin();
+	for (; y != lLostObjectArray.end(); ++y)
+	{
+		DeleteObject(*y);
+	}
+}
+
+
+
+Cure::ContextObject* GameServerManager::CreateLogicHandler(const str& pType) const
+{
+	if (pType == _T("trig_elevator"))
+	{
+		return new Elevator(GetContext());
+	}
+	else if (pType == _T("spawner"))
+	{
+		return new Spawner(GetContext());
 	}
 	assert(false);
 	return (0);
@@ -837,7 +877,7 @@ void GameServerManager::BroadcastDeleteObject(Cure::GameObjectId pInstanceId)
 	GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
 }
 
-void GameServerManager::SendAllObjects(Client* pClient, bool pCreate)
+void GameServerManager::SendObjects(Client* pClient, bool pCreate, const ContextTable& pObjectTable)
 {
 	// TODO: restrict to visible, concrete objects.
 
@@ -851,9 +891,8 @@ void GameServerManager::SendAllObjects(Client* pClient, bool pCreate)
 	Cure::MessageObjectPosition* lPositionMessage = (Cure::MessageObjectPosition*)GetNetworkAgent()->
 		GetPacketFactory()->GetMessageFactory()->Allocate(Cure::MESSAGE_TYPE_OBJECT_POSITION);
 
-	const Cure::ContextManager::ContextObjectTable& lObjectTable = GetContext()->GetObjectTable();
-	Cure::ContextManager::ContextObjectTable::const_iterator x = lObjectTable.begin();
-	for (; x != lObjectTable.end(); ++x)
+	ContextTable::const_iterator x = pObjectTable.begin();
+	for (; x != pObjectTable.end(); ++x)
 	{
 		Cure::ContextObject* lObject = x->second;
 		// Don't send local objects.

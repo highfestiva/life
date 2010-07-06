@@ -16,6 +16,7 @@
 #include "../../TBC/Include/ChunkyPhysics.h"
 #include "../../TBC/Include/PhysicsEngine.h"
 #include "../../TBC/Include/PhysicsManager.h"
+#include "../../TBC/Include/PhysicsSpawner.h"
 #include "../../TBC/Include/PhysicsTrigger.h"
 #include "../Include/ContextManager.h"
 #include "../Include/ContextObjectAttribute.h"
@@ -56,6 +57,7 @@ ContextObject::ContextObject(Cure::ResourceManager* pResourceManager, const str&
 	mNetworkObjectType(NETWORK_OBJECT_LOCAL_ONLY),
 	mParent(0),
 	mExtraData(0),
+	mSpawner(0),
 	mIsLoaded(false),
 	mPhysics(0),
 	mPhysicsOverride(PHYSICS_OVERRIDE_NORMAL),
@@ -81,6 +83,9 @@ ContextObject::~ContextObject()
 		delete (*x);
 	}
 	mChildList.clear();
+
+	mTriggerMap.clear();
+	mSpawner = 0;
 
 	if (mManager)
 	{
@@ -299,6 +304,18 @@ size_t ContextObject::GetTriggerCount(const void*& pTrigger) const
 	}
 	pTrigger = mTriggerMap.begin()->second;
 	return (mTriggerMap.size());
+}
+
+
+
+void ContextObject::SetSpawner(const TBC::PhysicsSpawner* pSpawner)
+{
+	mSpawner = pSpawner;
+}
+
+const TBC::PhysicsSpawner* ContextObject::GetSpawner() const
+{
+	return mSpawner;
 }
 
 
@@ -535,25 +552,31 @@ TransformationF ContextObject::GetInitialTransform() const
 
 Vector3DF ContextObject::GetPosition() const
 {
-	const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
-	if (lGeometry && lGeometry->GetBodyId() != TBC::INVALID_BODY)
+	if (mPhysics)
 	{
-		return (mManager->GetGameManager()->GetPhysicsManager()->GetBodyPosition(lGeometry->GetBodyId()));
+		const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
+		if (lGeometry && lGeometry->GetBodyId() != TBC::INVALID_BODY)
+		{
+			return (mManager->GetGameManager()->GetPhysicsManager()->GetBodyPosition(lGeometry->GetBodyId()));
+		}
+		assert(false);
 	}
-	assert(false);
 	return (mPosition.mPosition.mTransformation.GetPosition());
 }
 
 QuaternionF ContextObject::GetOrientation() const
 {
-	const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
-	if (lGeometry && lGeometry->GetBodyId() != TBC::INVALID_BODY)
+	if (mPhysics)
 	{
 		const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
-		return (mManager->GetGameManager()->GetPhysicsManager()->GetBodyOrientation(lGeometry->GetBodyId()) *
-			mPhysics->GetOriginalBoneTransformation(0).GetOrientation());
+		if (lGeometry && lGeometry->GetBodyId() != TBC::INVALID_BODY)
+		{
+			const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
+			return (mManager->GetGameManager()->GetPhysicsManager()->GetBodyOrientation(lGeometry->GetBodyId()) *
+				mPhysics->GetOriginalBoneTransformation(0).GetOrientation());
+		}
+		assert(false);
 	}
-	assert(false);
 	return (mPosition.mPosition.mTransformation.GetOrientation());
 }
 
@@ -1047,9 +1070,10 @@ void ContextObject::AddAttachment(ContextObject* pObject, TBC::PhysicsManager::J
 
 void ContextObject::AddChild(ContextObject* pChild)
 {
+	assert(pChild->GetInstanceId() != 0);
+	assert(std::find(mChildList.begin(), mChildList.end(), pChild) == mChildList.end());
 	mChildList.push_back(pChild);
 	pChild->SetParent(this);
-	GetManager()->AddLocalObject(pChild);
 }
 
 void ContextObject::RemoveChild(ContextObject* pChild)
@@ -1062,26 +1086,35 @@ void ContextObject::SetParent(ContextObject* pParent)
 	mParent = pParent;
 }
 
-void ContextObject::SetupChildTriggerHandlers()
+void ContextObject::SetupChildHandlers()
 {
 	int lLastGroupIndex = -1;
+	ContextObject* lHandlerChild = 0;
+
 	const int lTriggerCount = mPhysics->GetTriggerCount();
-	ContextObject* lTriggerChild = 0;
 	for (int x = 0; x < lTriggerCount; ++x)
 	{
 		const TBC::PhysicsTrigger* lTrigger = mPhysics->GetTrigger(x);
 		if (lLastGroupIndex != lTrigger->GetGroupIndex())
 		{
 			lLastGroupIndex = lTrigger->GetGroupIndex();
-			lTriggerChild = GetManager()->GetGameManager()->CreateTriggerHandler(this, lTrigger->GetTypeName());
-			AddChild(lTriggerChild);
-			GetManager()->EnableTickCallback(lTriggerChild);
+			lHandlerChild = GetManager()->GetGameManager()->CreateLogicHandler(lTrigger->GetFunction());
+			AddChild(lHandlerChild);
 		}
-		if (lTriggerChild)
+		if (lHandlerChild)
 		{
-			AddTrigger(lTrigger->GetPhysicsTriggerId(), lTriggerChild);
-			lTriggerChild->AddTrigger(lTrigger->GetPhysicsTriggerId(), lTrigger);
+			AddTrigger(lTrigger->GetPhysicsTriggerId(), lHandlerChild);
+			lHandlerChild->AddTrigger(lTrigger->GetPhysicsTriggerId(), lTrigger);
 		}
+	}
+
+	const int lSpawnerCount = mPhysics->GetSpawnerCount();
+	for (int x = 0; x < lSpawnerCount; ++x)
+	{
+		const TBC::PhysicsSpawner* lSpawner = mPhysics->GetSpawner(x);
+		lHandlerChild = GetManager()->GetGameManager()->CreateLogicHandler(lSpawner->GetFunction());
+		AddChild(lHandlerChild);
+		lHandlerChild->SetSpawner(lSpawner);
 	}
 }
 

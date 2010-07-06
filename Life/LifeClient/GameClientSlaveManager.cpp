@@ -464,6 +464,8 @@ void GameClientSlaveManager::AddLocalObjects(std::hash_set<Cure::GameObjectId>& 
 
 bool GameClientSlaveManager::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 {
+	mOptions.RefreshConfiguration();
+
 	mOptions.UpdateInput(pKeyCode, true);
 	if (mOptions.GetConsoleToggle() >= 0.5f)
 	{
@@ -482,6 +484,8 @@ bool GameClientSlaveManager::OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode)
 
 void GameClientSlaveManager::OnInput(UiLepra::InputElement* pElement)
 {
+	mOptions.RefreshConfiguration();
+
 	if (mAvatarSelectTime.GetTimeDiffF() > 0.7)
 	{
 		if (pElement->GetParentDevice() == mUiManager->GetInputManager()->GetMouse())
@@ -996,8 +1000,15 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 			Cure::GameObjectId lInstanceId = lMessageMovement->GetObjectId();
 			int32 lFrameIndex = lMessageMovement->GetFrameIndex();
 			Cure::ObjectPositionalData& lData = lMessageMovement->GetPositionalData();
-			SetMovement(lInstanceId, lFrameIndex, lData);
-
+			if (GetContext()->GetObject(lInstanceId, true) == 0)
+			{
+				GetNetworkAgent()->SendNumberMessage(true, GetNetworkClient()->GetSocket(),
+					Cure::MessageNumber::INFO_RECREATE_OBJECT, lInstanceId, 0);
+			}
+			else
+			{
+				SetMovement(lInstanceId, lFrameIndex, lData);
+			}
 			CURE_RTVAR_INTERNAL_ARITHMETIC(GetVariableScope(), RTVAR_DEBUG_NET_RECVPOSCNT, int, +, 1, 0);
 		}
 		break;
@@ -1078,7 +1089,7 @@ bool GameClientSlaveManager::CreateObject(Cure::GameObjectId pInstanceId, const 
 	//assert(!lPreviousObject);
 	if (!lPreviousObject)
 	{
-		mLog.Infof(_T("Slave %i creating context object %s."), mSlaveIndex, pClassId.c_str());
+		log_volatile(mLog.Debugf(_T("Slave %i creating context object %s."), mSlaveIndex, pClassId.c_str()));
 		Cure::ContextObject* lObject = Parent::CreateContextObject(pClassId, pNetworkType, pInstanceId);
 		if (pTransform)
 		{

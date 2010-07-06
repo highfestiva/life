@@ -183,7 +183,7 @@ void CppContextObject::OnLoadPhysics(UserPhysicsResource* pPhysicsResource)
 	SetPhysics(pPhysicsResource->GetData());
 	if (GetAllowNetworkLogic())
 	{
-		SetupChildTriggerHandlers();
+		SetupChildHandlers();
 	}
 	TryComplete();
 }

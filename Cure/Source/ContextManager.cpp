@@ -199,6 +199,7 @@ void ContextManager::DisableTickCallback(ContextObject* pObject)
 
 void ContextManager::AddAlarmCallback(ContextObject* pObject, int pAlarmId, float pSeconds, void* pExtraData)
 {
+	assert(pObject->GetInstanceId() != 0);
 	const TimeManager* lTime = ((const GameManager*)mGameManager)->GetConstTimeManager();
 	int lFrame = lTime->GetCurrentPhysicsFrame()+lTime->ConvertSecondsToPhysicsFrames(pSeconds);
 	mAlarmCallbackObjectSet.insert(Alarm(pObject, lFrame, pAlarmId, pExtraData));
@@ -275,9 +276,7 @@ void ContextManager::HandlePhysicsSend()
 	{
 		if (mGameManager->OnPhysicsSend(x->second))
 		{
-			ContextObjectTable::iterator y = x;
-			++x;
-			mPhysicsSenderObjectTable.erase(y);
+			mPhysicsSenderObjectTable.erase(x++);
 		}
 		else
 		{

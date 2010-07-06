@@ -94,9 +94,9 @@ int PhysicsTrigger::GetPriority() const
 	return (mPriority);
 }
 
-const str& PhysicsTrigger::GetTypeName() const
+const str& PhysicsTrigger::GetFunction() const
 {
-	return (mTypeName);
+	return (mFunction);
 }
 
 
@@ -130,7 +130,7 @@ const PhysicsTrigger::EngineTrigger& PhysicsTrigger::GetControlledEngine(int pIn
 
 unsigned PhysicsTrigger::GetChunkySize() const
 {
-	size_t lStringSize = PackerUnicodeString::Pack(0, wstrutil::Encode(mTypeName));
+	size_t lStringSize = PackerUnicodeString::Pack(0, wstrutil::Encode(mFunction));
 	ConnectionArray::const_iterator x = mConnectionArray.begin();
 	for (; x != mConnectionArray.end(); ++x)
 	{
@@ -146,7 +146,7 @@ void PhysicsTrigger::SaveChunkyData(const ChunkyPhysics* pStructure, void* pData
 	uint32* lData = (uint32*)pData;
 	int i = 0;
 	lData[i++] = Endian::HostToBig(mTriggerType);
-	i += PackerUnicodeString::Pack((uint8*)&lData[i], wstrutil::Encode(mTypeName));
+	i += PackerUnicodeString::Pack((uint8*)&lData[i], wstrutil::Encode(mFunction));
 	lData[i++] = Endian::HostToBig(mGroupIndex);
 	lData[i++] = Endian::HostToBig(mPriority);
 	lData[i++] = Endian::HostToBig(pStructure->GetIndex(mTriggerNode));
@@ -168,7 +168,7 @@ void PhysicsTrigger::LoadChunkyData(ChunkyPhysics* pStructure, const void* pData
 
 	int i = 0;
 	mTriggerType = (Type)Endian::BigToHost(lData[i++]);
-	i += PackerUnicodeString::Unpack(mTypeName, (uint8*)&lData[i], 1024) / sizeof(lData[0]);
+	i += PackerUnicodeString::Unpack(mFunction, (uint8*)&lData[i], 1024) / sizeof(lData[0]);
 	mGroupIndex = Endian::BigToHost(lData[i++]);
 	mPriority = Endian::BigToHost(lData[i++]);
 	int lPhysTriggerIndex = Endian::BigToHost(lData[i++]);

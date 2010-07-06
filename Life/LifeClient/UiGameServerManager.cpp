@@ -58,6 +58,8 @@ void UiGameServerManager::ToggleConsole()
 
 bool UiGameServerManager::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 {
+	mOptions.RefreshConfiguration();
+
 	mOptions.UpdateInput(pKeyCode, true);
 	if (mOptions.GetConsoleToggle() >= 0.5f)
 	{
@@ -76,6 +78,8 @@ bool UiGameServerManager::OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode)
 
 void UiGameServerManager::OnInput(UiLepra::InputElement* pElement)
 {
+	mOptions.RefreshConfiguration();
+
 	mOptions.UpdateInput(pElement);
 	if (mOptions.GetConsoleToggle() >= 0.5f)
 	{

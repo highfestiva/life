@@ -11,6 +11,7 @@
 #include "../Include/ChunkyClass.h"
 #include "../Include/ChunkyPhysics.h"
 #include "../Include/PhysicsEngine.h"
+#include "../Include/PhysicsSpawner.h"
 #include "../Include/PhysicsTrigger.h"
 
 
@@ -143,9 +144,11 @@ bool ChunkyLoader::AllocLoadChunkyList(FileElementList& pLoadList, int64 pChunkE
 				C(CHUNK_ANIMATION_FRAME_COUNT) || C(CHUNK_ANIMATION_BONE_COUNT) || C(CHUNK_ANIMATION_USE_SPLINES) || C(CHUNK_ANIMATION_TIME) ||
 				C(CHUNK_ANIMATION_ROOT_NODE) || C(CHUNK_ANIMATION_KEYFRAME) || C(CHUNK_ANIMATION_KEYFRAME_TIME) || C(CHUNK_ANIMATION_KEYFRAME_TRANSFORM) ||
 				C(CHUNK_PHYSICS) || C(CHUNK_PHYSICS_BONE_COUNT) || C(CHUNK_PHYSICS_PHYSICS_TYPE) || C(CHUNK_PHYSICS_ENGINE_COUNT) ||
-				C(CHUNK_PHYSICS_TRIGGER_COUNT) || C(CHUNK_PHYSICS_BONE_CONTAINER) || C(CHUNK_PHYSICS_BONE_CHILD_LIST) || C(CHUNK_PHYSICS_BONE_TRANSFORM) ||
+				C(CHUNK_PHYSICS_TRIGGER_COUNT) || C(CHUNK_PHYSICS_SPAWNER_COUNT) ||
+				C(CHUNK_PHYSICS_BONE_CONTAINER) || C(CHUNK_PHYSICS_BONE_CHILD_LIST) || C(CHUNK_PHYSICS_BONE_TRANSFORM) ||
 				C(CHUNK_PHYSICS_BONE_SHAPE) || C(CHUNK_PHYSICS_ENGINE_CONTAINER) || C(CHUNK_PHYSICS_ENGINE) || C(CHUNK_PHYSICS_TRIGGER_CONTAINER) ||
-				C(CHUNK_PHYSICS_TRIGGER) || C(CHUNK_CLASS) || C(CHUNK_CLASS_INHERITANCE_LIST) || C(CHUNK_CLASS_PHYSICS) ||
+				C(CHUNK_PHYSICS_TRIGGER) || C(CHUNK_PHYSICS_SPAWNER_CONTAINER) || C(CHUNK_PHYSICS_SPAWNER) || 
+				C(CHUNK_CLASS) || C(CHUNK_CLASS_INHERITANCE_LIST) || C(CHUNK_CLASS_PHYSICS) ||
 				C(CHUNK_CLASS_SETTINGS) || C(CHUNK_CLASS_MESH_LIST) || C(CHUNK_CLASS_PHYS_MESH) ||
 				C(CHUNK_CLASS_TAG_LIST) || C(CHUNK_CLASS_TAG) || C(CHUNK_GROUP_CLASS_LIST) ||
 				C(CHUNK_GROUP_SETTINGS) || C(CHUNK_WORLD_INFO) || C(CHUNK_WORLD_QUAD_LIST) || C(CHUNK_WORLD_GROUP_LIST));
@@ -728,6 +731,7 @@ bool ChunkyPhysicsLoader::Load(ChunkyPhysics* pPhysics)
 	int32 lPhysicsType = -1;
 	int32 lEngineCount = -1;
 	int32 lTriggerCount = -1;
+	int32 lSpawnerCount = -1;
 	if (lOk)
 	{
 		FileElementList lLoadList;
@@ -735,6 +739,7 @@ bool ChunkyPhysicsLoader::Load(ChunkyPhysics* pPhysics)
 		lLoadList.push_back(ChunkyFileElement(CHUNK_PHYSICS_PHYSICS_TYPE, &lPhysicsType));
 		lLoadList.push_back(ChunkyFileElement(CHUNK_PHYSICS_ENGINE_COUNT, &lEngineCount));
 		lLoadList.push_back(ChunkyFileElement(CHUNK_PHYSICS_TRIGGER_COUNT, &lTriggerCount));
+		lLoadList.push_back(ChunkyFileElement(CHUNK_PHYSICS_SPAWNER_COUNT, &lSpawnerCount));
 		lOk = AllocLoadChunkyList(lLoadList, mFile->GetSize());
 		assert(lOk);
 	}
@@ -757,6 +762,7 @@ bool ChunkyPhysicsLoader::Load(ChunkyPhysics* pPhysics)
 		lLoadList.push_back(ChunkyFileElement(CHUNK_PHYSICS_BONE_CONTAINER, (void*)pPhysics, lBoneCount));
 		lLoadList.push_back(ChunkyFileElement(CHUNK_PHYSICS_ENGINE_CONTAINER, (void*)pPhysics, lEngineCount));
 		lLoadList.push_back(ChunkyFileElement(CHUNK_PHYSICS_TRIGGER_CONTAINER, (void*)pPhysics, lTriggerCount));
+		lLoadList.push_back(ChunkyFileElement(CHUNK_PHYSICS_SPAWNER_CONTAINER, (void*)pPhysics, lSpawnerCount));
 		lOk = AllocLoadChunkyList(lLoadList, mFile->GetSize());
 		assert(lOk);
 	}
@@ -912,7 +918,7 @@ bool ChunkyPhysicsLoader::Save(const ChunkyPhysics* pPhysics)
 	// Write triggers.
 	for (int t = 0; lOk && t < lTriggerCount; ++t)
 	{
-		PhysicsTrigger* lTrigger = pPhysics->GetTrigger(t);
+		const PhysicsTrigger* lTrigger = pPhysics->GetTrigger(t);
 		assert(lTrigger);
 		int64 lChunkEndPosition = 0;
 		unsigned lSize = lTrigger->GetChunkySize();
@@ -1056,6 +1062,28 @@ bool ChunkyPhysicsLoader::LoadElementCallback(ChunkyType pType, uint32 pSize, in
 		}
 
 		delete[] (lTriggerArray);
+	}
+	else if (pType == CHUNK_PHYSICS_SPAWNER_CONTAINER)
+	{
+		uint32* lSpawnerArray = 0;
+		unsigned lSpawnerByteSize = 0;
+		FileElementList lLoadList;
+		lLoadList.push_back(ChunkyFileElement(CHUNK_PHYSICS_SPAWNER, (void**)&lSpawnerArray, (unsigned*)&lSpawnerByteSize));
+		lOk = AllocLoadChunkyList(lLoadList, pChunkEndPosition);
+
+		PhysicsSpawner* lSpawner = 0;
+		if (lOk)
+		{
+			lSpawner = PhysicsSpawner::Load(lPhysics, lSpawnerArray, lSpawnerByteSize);
+			lOk = (lSpawner != 0);
+			assert(lOk);
+		}
+		if (lOk)
+		{
+			lPhysics->AddSpawner(lSpawner);
+		}
+
+		delete[] (lSpawnerArray);
 	}
 	else
 	{

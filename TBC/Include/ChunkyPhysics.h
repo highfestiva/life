@@ -19,6 +19,7 @@ namespace TBC
 
 class ChunkyBoneGeometry;
 class PhysicsEngine;
+class PhysicsSpawner;
 class PhysicsTrigger;
 
 
@@ -60,9 +61,13 @@ public:
 	void ClearEngines();
 
 	int GetTriggerCount() const;
-	PhysicsTrigger* GetTrigger(int pTriggerIndex) const;
-	void AddTrigger(PhysicsTrigger* pEngine);	// Takes ownership of the given trigger.
+	const PhysicsTrigger* GetTrigger(int pTriggerIndex) const;
+	void AddTrigger(PhysicsTrigger* pTrigger);	// Takes ownership of the given trigger.
 	void ClearTriggers();
+
+	int GetSpawnerCount() const;
+	const PhysicsSpawner* GetSpawner(int pSpawnerIndex) const;
+	void AddSpawner(PhysicsSpawner* pSpawner);	// Takes ownership of the given spawner.
 
 	// Overrides.
 	void ClearAll(PhysicsManager* pPhysics);
@@ -76,10 +81,12 @@ protected:
 private:
 	typedef std::vector<ChunkyBoneGeometry*> GeometryArray;
 	typedef std::vector<PhysicsEngine*> EngineArray;
+	typedef std::vector<PhysicsSpawner*> SpawnerArray;
 	typedef std::vector<PhysicsTrigger*> TriggerArray;
 	GeometryArray mGeometryArray;
 	EngineArray mEngineArray;
 	TriggerArray mTriggerArray;
+	SpawnerArray mSpawnerArray;
 	TransformOperation mTransformOperation;
 	PhysicsType mPhysicsType;
 	unsigned mUniqeGeometryIndex;

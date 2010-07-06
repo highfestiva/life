@@ -26,8 +26,7 @@ struct ClientOptionsManager: OptionsManager
 
 private:
 	virtual bool SetDefault(int pPriority);
-
-	virtual std::vector<float*> GetValuePointers(const str& pKey, bool& pIsAnySteeringValue);
+	virtual void DoRefreshConfiguration();
 
 	Vehicle mControl;
 

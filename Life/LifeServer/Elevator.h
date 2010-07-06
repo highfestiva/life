@@ -6,9 +6,9 @@
 
 #pragma once
 
-#include "../Cure/Include/CppContextObject.h"
-#include "../Lepra/Include/HiResTimer.h"
-#include "Life.h"
+#include "../../Cure/Include/CppContextObject.h"
+#include "../../Lepra/Include/HiResTimer.h"
+#include "../Life.h"
 
 
 
@@ -21,7 +21,7 @@ class Elevator: public Cure::CppContextObject
 {
 	typedef Cure::CppContextObject Parent;
 public:
-	Elevator(Cure::ResourceManager* pResourceManager, Cure::ContextObject* pParent);
+	Elevator(Cure::ContextManager* pManager);
 	virtual ~Elevator();
 
 protected:
@@ -36,7 +36,6 @@ protected:
 	void SetFunctionTarget(const str& pFunction, TBC::PhysicsEngine* pEngine);
 
 private:
-	Cure::ContextObject* mParent;
 	const TBC::PhysicsTrigger* mActiveTrigger;
 	HiResTimer mTrigTime;
 	const double mExitDelay;

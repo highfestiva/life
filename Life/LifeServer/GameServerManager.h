@@ -8,6 +8,7 @@
 
 
 
+#include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/GameManager.h"
 #include "../../Cure/Include/NetworkServer.h"
 #include "Client.h"
@@ -48,6 +49,8 @@ public:
 	void TickInput();
 
 private:
+	typedef Cure::ContextManager::ContextObjectTable ContextTable;
+
 	void Logout(Cure::UserAccount::AccountId pAccountId, const str& pReason);
 	void DeleteAllClients();
 
@@ -61,7 +64,7 @@ private:
 	void OnLogin(Cure::UserConnection* pUserConnection);
 	void OnLogout(Cure::UserConnection* pUserConnection);
 	void OnSelectAvatar(Client* pClient, const Cure::UserAccount::AvatarId& pAvatarId);
-	void DropAvatar(Cure::GameObjectId pAvatarId);
+	void DeleteObject(Cure::GameObjectId pInstanceId);
 
 	void AdjustClientSimulationSpeed(Client* pClient, int pClientFrameIndex);
 	void StoreMovement(int pClientFrameIndex, Cure::MessageObjectMovement* pMovement);
@@ -79,12 +82,13 @@ private:
 	bool IsConnectAuthorized();
 	void SendAttach(Cure::ContextObject* pObject1, unsigned pId1, Cure::ContextObject* pObject2, unsigned pId2);
 	void SendDetach(Cure::ContextObject* pObject1, Cure::ContextObject* pObject2);
+	virtual void HandleWorldBoundaries();
 
-	virtual Cure::ContextObject* CreateTriggerHandler(Cure::ContextObject* pParent, const str& pType) const;
+	virtual Cure::ContextObject* CreateLogicHandler(const str& pType) const;
 
 	void BroadcastCreateObject(Cure::ContextObject* pObject);
 	void BroadcastDeleteObject(Cure::GameObjectId pInstanceId);
-	void SendAllObjects(Client* pClient, bool pCreate);
+	void SendObjects(Client* pClient, bool pCreate, const ContextTable& pObjectTable);
 	void BroadcastObjectPosition(Cure::GameObjectId pInstanceId, const Cure::ObjectPositionalData& pPosition,
 		Client* pExcludeClient, bool pSafe);
 	void BroadcastPacket(const Client* pExcludeClient, Cure::Packet* pPacket, bool pSafe);

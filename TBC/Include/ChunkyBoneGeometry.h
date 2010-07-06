@@ -197,8 +197,9 @@ public:
 	unsigned GetChunkySize(const void* pData = 0) const;
 	void SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const;
 
-private:
 	Vector3DF GetShapeSize() const;
+
+private:
 	void LoadChunkyData(ChunkyPhysics* pStructure, const void* pData);
 	GeometryType GetGeometryType() const;
 

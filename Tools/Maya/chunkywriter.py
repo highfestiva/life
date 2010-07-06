@@ -39,6 +39,9 @@ CHUNK_PHYSICS_ENGINE               = "PHEN"
 CHUNK_PHYSICS_TRIGGER_COUNT        = "PHTC"
 CHUNK_PHYSICS_TRIGGER_CONTAINER    = "PHTO"
 CHUNK_PHYSICS_TRIGGER              = "PHTR"
+CHUNK_PHYSICS_SPAWNER_COUNT        = "PHSC"
+CHUNK_PHYSICS_SPAWNER_CONTAINER    = "PHSO"
+CHUNK_PHYSICS_SPAWNER              = "PHSR"
 
 CHUNK_MESH                         = "MESH"
 CHUNK_MESH_VERTICES                = "MEVX"
@@ -208,6 +211,8 @@ class ChunkyWriter:
                                 self._writeengine(node)
                         elif node.nodetype.startswith("trigger:"):
                                 self._writetrigger(node)
+                        elif node.nodetype.startswith("spawner:"):
+                                self._writespawner(node)
                         elif node.nodetype.startswith("tag:"):
                                 self._writetag(node)
                         else:
@@ -386,6 +391,7 @@ class PhysWriter(ChunkyWriter):
                         bones = []
                         engines = []
                         triggers = []
+                        spawners = []
                         for node in self.bodies:
                                 #print("Children of %s: %s." % (node.getFullName(), repr(node.phys_children)))
                                 #[print("  - "+n.getName()) for n in node.phys_children]
@@ -399,6 +405,8 @@ class PhysWriter(ChunkyWriter):
                                         engines.append((CHUNK_PHYSICS_ENGINE, node))
                                 elif node.nodetype.startswith("trigger:"):
                                         triggers.append((CHUNK_PHYSICS_TRIGGER, node))
+                                elif node.nodetype.startswith("spawner:"):
+                                        spawners.append((CHUNK_PHYSICS_SPAWNER, node))
                         data =  (
                                         CHUNK_PHYSICS,
                                         (
@@ -406,9 +414,11 @@ class PhysWriter(ChunkyWriter):
                                                 (CHUNK_PHYSICS_PHYSICS_TYPE, physics_type[self.config["type"]]),
                                                 (CHUNK_PHYSICS_ENGINE_COUNT, len(engines)),
                                                 (CHUNK_PHYSICS_TRIGGER_COUNT, len(triggers)),
+                                                (CHUNK_PHYSICS_SPAWNER_COUNT, len(spawners)),
                                                 (CHUNK_PHYSICS_BONE_CONTAINER, bones),
                                                 (CHUNK_PHYSICS_ENGINE_CONTAINER, engines),
-                                                (CHUNK_PHYSICS_TRIGGER_CONTAINER, triggers)
+                                                (CHUNK_PHYSICS_TRIGGER_CONTAINER, triggers),
+                                                (CHUNK_PHYSICS_SPAWNER_CONTAINER, spawners),
                                         )
                                 )
                         if options.options.verbose:
@@ -585,6 +595,31 @@ class PhysWriter(ChunkyWriter):
                         self._writestr(function)
                 node.writecount += 1
                 self._addfeat("trigger:triggers", 1)
+
+
+        def _writespawner(self, node):
+                types = {"teleport":1, "immediate":2}
+                self._writeint(types[node.get_fixed_attribute("type")])
+                self._writestr(node.get_fixed_attribute("function"))
+
+                connected_to_name = node.get_fixed_attribute("connected_to")
+                connected_to = self._findglobalnode(connected_to_name)
+                idx = self.bodies.index(connected_to)
+                if options.options.verbose:
+                        print("Spawner '%s' connected to body index %i."% (node.getName(), idx))
+                self._writeint(idx)
+                self._writefloat(float(node.get_fixed_attribute("number")))
+                self._writefloat(float(node.get_fixed_attribute("interval")))
+
+                spawn_objects = node.get_fixed_attribute("spawn_objects")
+                self._writeint(len(spawn_objects))
+                for spawn_class_distribution in spawn_objects:
+                        spawn_class, percent = spawn_class_distribution
+                        self._writestr(spawn_class)
+                        self._writefloat(float(percent))
+
+                node.writecount += 1
+                self._addfeat("spawner:spawners", 1)
 
 
         def _getshape(self, node):

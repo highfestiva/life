@@ -24,10 +24,21 @@ OptionsManager::OptionsManager(Cure::RuntimeVariableScope* pVariableScope, int p
 	mConsoleToggle(0)
 {
 	SetDefault(pPriority);
+	DoRefreshConfiguration();
 }
 
 
-	
+
+void OptionsManager::RefreshConfiguration()
+{
+	if (mLastConfigRefresh.QueryTimeDiff() > 5.0)
+	{
+		mLastConfigRefresh.ClearTimeDiff();
+		mInputMap.clear();
+		DoRefreshConfiguration();
+	}
+}
+
 bool OptionsManager::UpdateInput(UiLepra::InputManager::KeyCode pKeyCode, bool pActive)
 {
 	const str lInputElementName = ConvertToString(pKeyCode);
@@ -83,6 +94,15 @@ bool OptionsManager::SetDefault(int)
 	return (true);
 }
 
+void OptionsManager::DoRefreshConfiguration()
+{
+	const KeyValue lEntries[] =
+	{
+		KeyValue(_T(RTVAR_CTRL_UI_CONTOGGLE), &mConsoleToggle),
+	};
+	SetValuePointers(lEntries, sizeof(lEntries)/sizeof(lEntries[0]));
+}
+
 const str OptionsManager::ConvertToString(UiLepra::InputManager::KeyCode pKeyCode)
 {
 	return (_T("Key.")+UiLepra::InputManager::GetKeyName(pKeyCode));
@@ -91,9 +111,14 @@ const str OptionsManager::ConvertToString(UiLepra::InputManager::KeyCode pKeyCod
 bool OptionsManager::SetValue(const str& pKey, float pValue)
 {
 	bool lIsAnySteeringValue;
+	std::vector<float*>* lValuePointers = GetValuePointers(pKey, lIsAnySteeringValue);
+	if (!lValuePointers)
+	{
+		return false;
+	}
+
 	bool lInputChanged = false;
-	std::vector<float*> lValuePointers = GetValuePointers(pKey, lIsAnySteeringValue);
-	for (std::vector<float*>::iterator x = lValuePointers.begin(); x != lValuePointers.end(); ++x)
+	for (std::vector<float*>::const_iterator x = lValuePointers->begin(); x != lValuePointers->end(); ++x)
 	{
 		if (!Math::IsEpsEqual(*(*x), pValue, 0.06f))
 		{
@@ -104,39 +129,45 @@ bool OptionsManager::SetValue(const str& pKey, float pValue)
 	return (lIsAnySteeringValue && lInputChanged);
 }
 
-std::vector<float*> OptionsManager::GetValuePointers(const str& pKey, bool& pIsAnySteeringValue)
+std::vector<float*>* OptionsManager::GetValuePointers(const str& pKey, bool& pIsAnySteeringValue)
 {
-	const KeyValue lEntries[] =
+	InputMap::iterator x = mInputMap.find(pKey);
+	if (x == mInputMap.end())
 	{
-		KeyValue(_T(RTVAR_CTRL_UI_CONTOGGLE), &mConsoleToggle),
-	};
-	return (DoGetValuePointers(pKey, pIsAnySteeringValue, lEntries, sizeof(lEntries)/sizeof(lEntries[0])));
+		return 0;
+	}
+	InputEntry& lEntry = x->second;
+	pIsAnySteeringValue = lEntry.mIsAnySteeringValue;
+	return &lEntry.mValuePointerArray;
 }
 
-std::vector<float*> OptionsManager::DoGetValuePointers(const str& pKey, bool& pIsAnySteeringValue,
-	const KeyValue pEntries[], size_t pEntryCount)
+void OptionsManager::SetValuePointers(const KeyValue pEntries[], size_t pEntryCount)
 {
-	std::vector<float*> lPointers;
-	pIsAnySteeringValue = false;
 	for (size_t x = 0; x < pEntryCount; ++x)
 	{
-		const str lKeys = mVariableScope->GetDefaultValue(Cure::RuntimeVariableScope::READ_ONLY,
-			pEntries[x].first);
+		const str lKeys = mVariableScope->GetDefaultValue(Cure::RuntimeVariableScope::READ_ONLY, pEntries[x].first);
 		typedef strutil::strvec SV;
 		SV lKeyArray = strutil::Split(lKeys, _T(", \t"));
 		for (SV::iterator y = lKeyArray.begin(); y != lKeyArray.end(); ++y)
 		{
-			if ((*y) == pKey)
+			const bool lIsSteeringValue = (pEntries[x].first.find(_T("Steer")) != str::npos);
+			const str& lKey = *y;
+			InputMap::iterator z = mInputMap.find(lKey);
+			if (z == mInputMap.end())
 			{
-				if (pEntries[x].first.find(_T("Steer")) != str::npos)
-				{
-					pIsAnySteeringValue = true;
-				}
-				lPointers.push_back(pEntries[x].second);
+				InputEntry lEntry;
+				lEntry.mIsAnySteeringValue = lIsSteeringValue;
+				lEntry.mValuePointerArray.push_back(pEntries[x].second);
+				mInputMap.insert(InputMap::value_type(lKey, lEntry));
+			}
+			else
+			{
+				InputEntry& lEntry = z->second;
+				lEntry.mIsAnySteeringValue |= lIsSteeringValue;
+				lEntry.mValuePointerArray.push_back(pEntries[x].second);
 			}
 		}
 	}
-	return (lPointers);
 }
 
 

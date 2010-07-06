@@ -118,6 +118,7 @@ enum ChunkyType
 	CHUNK_PHYSICS_PHYSICS_TYPE         = ENUMIFY('P','H','P','T'),	// Physics type: dynamic, static, etc. Mandatory.
 	CHUNK_PHYSICS_ENGINE_COUNT         = ENUMIFY('P','H','E','C'),	// Number of engines. Mandatory.
 	CHUNK_PHYSICS_TRIGGER_COUNT        = ENUMIFY('P','H','T','C'),	// Number of triggers. Mandatory.
+	CHUNK_PHYSICS_SPAWNER_COUNT        = ENUMIFY('P','H','S','C'),	// Number of triggers. Mandatory.
 	// Physics sub element: bone.
 	CHUNK_PHYSICS_BONE_CONTAINER       = ENUMIFY('P','H','B','O'),	// A bone and its transformation, type. Mandatory.
 	CHUNK_PHYSICS_BONE_CHILD_LIST      = ENUMIFY('P','H','C','L'),	// The indices of this bone's children. Optional for bones without children, mandatory otherwise.
@@ -127,8 +128,11 @@ enum ChunkyType
 	CHUNK_PHYSICS_ENGINE_CONTAINER     = ENUMIFY('P','H','E','O'),	// Engine array. Mandatory.
 	CHUNK_PHYSICS_ENGINE               = ENUMIFY('P','H','E','N'),	// An engine and its parameters, type. Mandatory.
 	// Physics sub element: trigger.
-	CHUNK_PHYSICS_TRIGGER_CONTAINER    = ENUMIFY('P','H','T','O'),	// Engine array. Mandatory.
-	CHUNK_PHYSICS_TRIGGER              = ENUMIFY('P','H','T','R'),	// An engine and its parameters, type. Mandatory.
+	CHUNK_PHYSICS_TRIGGER_CONTAINER    = ENUMIFY('P','H','T','O'),	// Trigger array. Mandatory.
+	CHUNK_PHYSICS_TRIGGER              = ENUMIFY('P','H','T','R'),	// A trigger and its parameters, type. Mandatory.
+	// Physics sub element: spawner.
+	CHUNK_PHYSICS_SPAWNER_CONTAINER    = ENUMIFY('P','H','S','O'),	// Spawner array. Mandatory.
+	CHUNK_PHYSICS_SPAWNER              = ENUMIFY('P','H','S','R'),	// A spawner and its parameters, type. Mandatory.
 
 	// File type: class. Used by both graphics and text applications.
 	CHUNK_CLASS                        = ENUMIFY('C','L','A','S'),	// Class file type.

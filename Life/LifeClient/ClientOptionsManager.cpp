@@ -25,6 +25,7 @@ ClientOptionsManager::ClientOptionsManager(Cure::RuntimeVariableScope* pVariable
 {
 	::memset(&mControl, 0, sizeof(mControl));
 	SetDefault(pPriority);
+	DoRefreshConfiguration();
 }
 
 
@@ -130,7 +131,7 @@ bool ClientOptionsManager::SetDefault(int pPriority)
 	return (lOk);
 }
 
-std::vector<float*> ClientOptionsManager::GetValuePointers(const str& pKey, bool& pIsAnySteeringValue)
+void ClientOptionsManager::DoRefreshConfiguration()
 {
 	typedef std::pair<const str, float*> KeyValue;
 	const KeyValue lEntries[] =
@@ -152,7 +153,7 @@ std::vector<float*> ClientOptionsManager::GetValuePointers(const str& pKey, bool
 		KeyValue(_T(RTVAR_CTRL_STEER_HANDBRK), &mControl.mControl[Vehicle::CONTROL_HANDBREAK]),
 		KeyValue(_T(RTVAR_CTRL_STEER_BRK), &mControl.mControl[Vehicle::CONTROL_BREAK]),
 	};
-	return (DoGetValuePointers(pKey, pIsAnySteeringValue, lEntries, sizeof(lEntries)/sizeof(lEntries[0])));
+	SetValuePointers(lEntries, sizeof(lEntries)/sizeof(lEntries[0]));
 }
 
 
