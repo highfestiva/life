@@ -4,12 +4,14 @@
 
 
 
+#include "../../Cure/Include/RuntimeVariable.h"
 #include "../../UiCure/Include/UiCure.h"
 #include "../../UiCure/Include/UiGameUiManager.h"
 #include "../../UiLepra/Include/UiLepra.h"
 #include "../../UiTBC/Include/UiTBC.h"
 #include "../LifeApplication.h"
 #include "GameClientMasterTicker.h"
+#include "RtVar.h"
 
 
 
@@ -55,6 +57,10 @@ ClientApplication::ClientApplication(const strutil::strvec& pArgumentList):
 	UiLepra::Init();
 	UiTbc::Init();
 	UiCure::Init();
+
+	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_GAME_ISCHILD, true);
+	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
+	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_UI_3D_CAMHEIGHT, 10.0);
 
 	mUiManager = new UiCure::GameUiManager(UiCure::GetSettings());
 

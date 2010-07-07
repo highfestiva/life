@@ -72,7 +72,7 @@ protected:
 	size_t mMeshLoadCount;
 	TextureArray mTextureResourceArray;
 	size_t mTextureLoadCount;
-	Vector3DF mMeshOffset;
+	TransformationF mMeshOffset;
 	bool mStartMeshSlide;
 
 	LOG_CLASS_DECLARE();

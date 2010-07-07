@@ -4,6 +4,7 @@
 
 
 
+#include "../../Lepra/Include/CyclicArray.h"
 #include "../../Lepra/Include/Number.h"
 #include "../../Lepra/Include/SystemManager.h"
 #include "GameServerManager.h"
@@ -46,7 +47,7 @@ ServerConsoleManager::~ServerConsoleManager()
 
 unsigned ServerConsoleManager::GetCommandCount() const
 {
-	return (Parent::GetCommandCount() + sizeof(mCommandIdList)/sizeof(mCommandIdList[0]));
+	return Parent::GetCommandCount() + LEPRA_ARRAY_SIZE(mCommandIdList);
 }
 
 const ServerConsoleManager::CommandPair& ServerConsoleManager::GetCommand(unsigned pIndex) const

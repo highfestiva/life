@@ -5,26 +5,11 @@
 
 
 #include "GameServerTicker.h"
-/*#include "../../Cure/Include/ContextManager.h"
-#include "../../Cure/Include/CppContextObject.h"
-#include "../../Cure/Include/NetworkServer.h"
-#include "../../Cure/Include/Packet.h"
-#include "../../Cure/Include/PositionalData.h"
-#include "../../Cure/Include/RuntimeVariable.h"
-#include "../../Cure/Include/TimeManager.h"
-#include "../../Lepra/Include/Network.h"
-#include "../../Lepra/Include/Path.h"
-#include "../../Lepra/Include/SystemManager.h"
-#include "../Life.h"
-#include "../LifeApplication.h"
-#include "../RtVar.h"
-#include "Client.h"
-#include "ServerConsoleManager.h"*/
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../../Lepra/Include/SystemManager.h"
 #include "../ConsoleManager.h"
 #include "../LifeApplication.h"
-#include "../RtVar.h"
+#include "RtVar.h"
 #include "GameServerManager.h"
 #include "ServerConsoleManager.h"
 
@@ -83,7 +68,7 @@ bool GameServerTicker::Tick()
 
 	mResourceManager->Tick();
 
-	if (CURE_RTVAR_GETSET(Cure::GetSettings(), RTVAR_ALLLOGGEDOUT_AUTOSHUTDOWN, false))
+	if (CURE_RTVAR_GET(Cure::GetSettings(), RTVAR_ALLLOGGEDOUT_AUTOSHUTDOWN, false))
 	{
 		static size_t lMaxLoginCount = 0;
 		size_t lUserCount = mGameManager->ListUsers().size();

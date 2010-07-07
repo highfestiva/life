@@ -179,7 +179,7 @@ void StdioConsoleLogListener::WriteLog(const str& pFullMessage, Log::LogLevel pL
 
 
 InteractiveConsoleLogListener::InteractiveConsoleLogListener(OutputFormat pFormat):
-	LogListener(_T("console"), pFormat)
+	LogListener(_T("i-console"), pFormat)
 {
 }
 

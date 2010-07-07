@@ -1,20 +1,16 @@
-/*
-	Class:  CyclicArray
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2009, Righteous Games
 
-	NOTES:
-
-	This is a very simple cyclic array implementation.
-*/
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2009, Righteous Games
 
 
+
+#pragma once
 
 #include "Math.h"
 
 
 
-#pragma once
+#define LEPRA_ARRAY_SIZE(a)	(sizeof(a)/sizeof(a[0]))
 
 
 

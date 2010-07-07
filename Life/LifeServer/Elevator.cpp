@@ -22,7 +22,7 @@ Elevator::Elevator(Cure::ContextManager* pManager):
 	Cure::CppContextObject(pManager->GetGameManager()->GetResourceManager(), _T("Elevator")),
 	mActiveTrigger(0),
 	mExitDelay(2.0),
-	mAreEnginesActive(true),	// Set to get this party started in some cases.
+	mElevatorRunning(true),	// Set to get this party started in some cases.
 	mEngineActivity(1)
 {
 	pManager->AddLocalObject(this);
@@ -39,10 +39,17 @@ void Elevator::OnTick(float pFrameTime)
 {
 	Parent::OnTick(pFrameTime);
 
-	mEngineActivity = Math::Lerp(mEngineActivity, GetActiveMaxSpeedSquare(), 0.1f);
-	if (mEngineActivity < 0.2f)
+	const float lSpeedStillSquare = 0.1f;
+	const float lMaxSpeedSquare = GetActiveMaxSpeedSquare();
+	if (lMaxSpeedSquare >= lSpeedStillSquare)
 	{
-		if (mAreEnginesActive)
+		mElevatorRunning = true;
+	}
+
+	mEngineActivity = Math::Lerp(mEngineActivity, lMaxSpeedSquare, Math::GetIterateLerpTime(0.4f, pFrameTime));
+	if (mEngineActivity < lSpeedStillSquare)
+	{
+		if (mElevatorRunning)
 		{
 			log_adebug("TRIGGER - elevator has stopped.");
 			HaltActiveEngines();
@@ -78,10 +85,12 @@ void Elevator::OnAlarm(int pAlarmId, void* pExtraData)
 	if (lEngineTrigger)
 	{
 		SetFunctionTarget(lEngineTrigger->mFunction, lEngineTrigger->mEngine);
-		mAreEnginesActive = true;
 		mEngineActivity = 100;
-		// Run engine for some time before *forcing* deactivation.
-		GetManager()->AddAlarmCallback(this, pAlarmId, 30, 0);
+		if (mActiveTrigger && mActiveTrigger->GetType() != TBC::PhysicsTrigger::TRIGGER_ALWAYS)
+		{
+			// Run engine for some time before *forcing* deactivation.
+			GetManager()->AddAlarmCallback(this, pAlarmId, 60, 0);
+		}
 	}
 	else
 	{
@@ -141,7 +150,7 @@ float Elevator::GetActiveMaxSpeedSquare() const
 
 void Elevator::HaltActiveEngines()
 {
-	mAreEnginesActive = false;
+	mElevatorRunning = false;
 	if (mActiveTrigger)
 	{
 		const int lEngineCount = mActiveTrigger->GetControlledEngineCount();

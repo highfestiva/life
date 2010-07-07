@@ -35,7 +35,7 @@ PhysicsManagerODE::PhysicsManagerODE()
 	
 	::dWorldSetAutoDisableLinearThreshold(mWorldID, 0.02f);
 	::dWorldSetAutoDisableAngularThreshold(mWorldID, 0.02f);
-	//::dWorldSetAutoDisableSteps(mWorldID, 10);
+	::dWorldSetAutoDisableSteps(mWorldID, 2);
 	//::dWorldSetAutoDisableTime(mWorldID, 0);
 
 	// Collision space center and extents.

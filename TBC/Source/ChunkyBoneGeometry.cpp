@@ -5,6 +5,7 @@
 
 
 #include "../Include/ChunkyBoneGeometry.h"
+#include "../../Lepra/Include/CyclicArray.h"
 #include "../Include/ChunkyPhysics.h"
 #include "../Include/GeometryBase.h"
 
@@ -275,7 +276,7 @@ unsigned ChunkyBoneGeometry::GetChunkySize(const void* pData) const
 	if (pData && mConnectorArray.empty())	// Shouldn't go here if we have something in RAM already.
 	{
 		const uint32* lData = (const uint32*)pData;
-		const int x = 8 + sizeof(mBodyData.mParameter)/sizeof(mBodyData.mParameter[0]);
+		const int x = 8 + LEPRA_ARRAY_SIZE(mBodyData.mParameter);
 		lSize += Endian::BigToHost(lData[x]) * sizeof(ConnectorType);
 	}
 	return (lSize);
@@ -293,7 +294,7 @@ void ChunkyBoneGeometry::SaveChunkyData(const ChunkyPhysics* pStructure, void* p
 	lData[6] = Endian::HostToBig(mBodyData.mIsAffectedByGravity? 1 : 0);
 	lData[7] = Endian::HostToBig(mBodyData.mBoneType);
 	int y = 8;
-	for (int x = 0; (size_t)x < sizeof(mBodyData.mParameter)/sizeof(mBodyData.mParameter[0]); ++x)
+	for (int x = 0; (size_t)x < LEPRA_ARRAY_SIZE(mBodyData.mParameter); ++x)
 	{
 		lData[y++] = Endian::HostToBigF(mBodyData.mParameter[x]);
 	}
@@ -319,7 +320,7 @@ void ChunkyBoneGeometry::LoadChunkyData(ChunkyPhysics* pStructure, const void* p
 	mBodyData.mIsAffectedByGravity = Endian::BigToHost(lData[6])? true : false;
 	mBodyData.mBoneType = (BoneType)Endian::BigToHost(lData[7]);
 	int y = 8;
-	for (int x = 0; (size_t)x < sizeof(mBodyData.mParameter)/sizeof(mBodyData.mParameter[0]); ++x)
+	for (int x = 0; (size_t)x < LEPRA_ARRAY_SIZE(mBodyData.mParameter); ++x)
 	{
 		mBodyData.mParameter[x] = Endian::BigToHostF(lData[y++]);
 	}

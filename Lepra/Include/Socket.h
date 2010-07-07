@@ -476,7 +476,7 @@ public:
 	void Flush();
 
 private:
-	static const int MAX_INPUT_BUFFERS = 4;
+	static const int MAX_INPUT_BUFFERS = 32;
 
 	typedef CyclicArray<Datagram*, MAX_INPUT_BUFFERS> BufferList;
 

@@ -172,13 +172,13 @@ bool ConsoleManager::ForkExecuteCommand(const str& pCommand)
 	private:
 		void Run()
 		{
-			mConsole->GetLog().AInfo("ForkThread: started.");
+			log_volatile(mConsole->GetLog().Debug(_T("ForkThread: started.")));
 			mConsole->AddFork(this);
 			if (mConsole->GetConsoleCommandManager()->Execute(mCommand, false) != 0)
 			{
 				mConsole->GetLog().AError("ForkThread: execution resulted in an error.");
 			}
-			mConsole->GetLog().AInfo("ForkThread: ended.");
+			log_volatile(mConsole->GetLog().Debug(_T("ForkThread: ended.")));
 			mConsole->RemoveFork(this);
 		}
 		ConsoleManager* mConsole;

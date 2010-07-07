@@ -7,9 +7,10 @@
 #include "ClientOptionsManager.h"
 #include <assert.h>
 #include "../../Cure/Include/RuntimeVariable.h"
+#include "../../Lepra/Include/CyclicArray.h"
 #include "../../Lepra/Include/Math.h"
-#include "../RtVar.h"
 #include "ClientOptions.h"
+#include "RtVar.h"
 
 
 
@@ -153,7 +154,7 @@ void ClientOptionsManager::DoRefreshConfiguration()
 		KeyValue(_T(RTVAR_CTRL_STEER_HANDBRK), &mControl.mControl[Vehicle::CONTROL_HANDBREAK]),
 		KeyValue(_T(RTVAR_CTRL_STEER_BRK), &mControl.mControl[Vehicle::CONTROL_BREAK]),
 	};
-	SetValuePointers(lEntries, sizeof(lEntries)/sizeof(lEntries[0]));
+	SetValuePointers(lEntries, LEPRA_ARRAY_SIZE(lEntries));
 }
 
 

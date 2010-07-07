@@ -1632,6 +1632,7 @@ void UdpVSocket::AddInputBuffer(Datagram* pBuffer)
 			// up processing the data anyway.
 
 			// Throw old data away.
+			mLog.AError("Throwing away network data, since receive buffer is full!");
 			Datagram* lReceiveBuffer = mReceiveBufferList[0];
 			mReceiveBufferList.PopFront();
 			mLock.Release();

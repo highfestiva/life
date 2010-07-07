@@ -12,8 +12,8 @@
 #include "../../Lepra/Include/Path.h"
 #include "../../TBC/Include/ChunkyPhysics.h"
 #include "../LifeApplication.h"
-#include "../RtVar.h"
 #include "Elevator.h"
+#include "RtVar.h"
 #include "ServerConsoleManager.h"
 #include "Spawner.h"
 
@@ -96,7 +96,7 @@ bool GameServerManager::Initialize()
 		}
 	}
 
-	str lAcceptAddress = CURE_RTVAR_GETSET(GetVariableScope(), RTVAR_NETWORK_SERVERADDRESS, _T("0.0.0.0:16650"));
+	str lAcceptAddress = CURE_RTVAR_GET(GetVariableScope(), RTVAR_NETWORK_SERVERADDRESS, _T("0.0.0.0:16650"));
 	if (lOk)
 	{
 		SocketAddress lAddress;
@@ -418,7 +418,7 @@ void GameServerManager::ProcessNetworkInputMessage(Client* pClient, Cure::Messag
 				}
 				else
 				{
-					mLog.Warningf(_T("User %s tried to fetch unknown object with ID %i."), lInstanceId);
+					mLog.Warningf(_T("User %s tried to fetch unknown object with ID %i."), pClient->GetUserConnection()->GetLoginName().c_str(), lInstanceId);
 				}
 			}
 			else
@@ -734,7 +734,7 @@ void GameServerManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pT
 		if (lSendCollision)
 		{
 			// We have found a collision. Asynchronously inform all viewers, including the colliding client.
-			pObject1->SetSendCount(2);
+			pObject1->SetSendCount(3);
 			GetContext()->AddPhysicsSenderObject(pObject1);
 		}
 	}
@@ -755,7 +755,7 @@ void GameServerManager::OnStopped(Cure::ContextObject* pObject, TBC::PhysicsMana
 bool GameServerManager::OnPhysicsSend(Cure::ContextObject* pObject)
 {
 	bool lLastSend = false;
-	if (pObject->QueryResendTime(0.3f, false))
+	if (pObject->QueryResendTime(0.6f, false))
 	{
 		lLastSend = true;
 		log_volatile(mLog.Debugf(_T("Sending pos for %s."), pObject->GetClassId().c_str()));

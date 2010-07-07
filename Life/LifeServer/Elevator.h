@@ -39,7 +39,7 @@ private:
 	const TBC::PhysicsTrigger* mActiveTrigger;
 	HiResTimer mTrigTime;
 	const double mExitDelay;
-	bool mAreEnginesActive;
+	bool mElevatorRunning;
 	float mEngineActivity;
 
 	LOG_CLASS_DECLARE();

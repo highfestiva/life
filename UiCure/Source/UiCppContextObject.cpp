@@ -8,6 +8,7 @@
 #include <math.h>
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/GameManager.h"
+#include "../../Cure/Include/TimeManager.h"
 #include "../../Lepra/Include/Math.h"
 #include "../../Lepra/Include/Random.h"
 #include "../../TBC/Include/ChunkyPhysics.h"
@@ -99,7 +100,7 @@ void CppContextObject::OnPhysicsTick()
 void CppContextObject::UiMove()
 {
 	TransformationF lPhysicsTransform;
-	Vector3DF lGfxPhysMeshOffset;
+	TransformationF lGfxPhysMeshOffset;
 	int lGfxPhysMeshOffsetCount = 0;
 	for (size_t x = 0; x < mMeshResourceArray.size(); ++x)
 	{
@@ -123,15 +124,20 @@ void CppContextObject::UiMove()
 			if (mStartMeshSlide)
 			{
 				// Start out by fetching offset.
-				const Vector3DF& lPosition = lGfxGeometry->GetBaseTransformation().GetPosition();
-				lGfxPhysMeshOffset += lPosition - lPhysicsTransform.GetPosition();
-				lPhysicsTransform.SetPosition(lPosition);
+				const TransformationF& lTransform = lGfxGeometry->GetBaseTransformation();
+				lGfxPhysMeshOffset.GetPosition() += lTransform.GetPosition() - lPhysicsTransform.GetPosition();
+				if (x == 0)
+				{
+					lGfxPhysMeshOffset.SetOrientation(lPhysicsTransform.GetOrientation().GetInverse() * lTransform.GetOrientation());
+				}
+				lPhysicsTransform = lTransform;
 				++lGfxPhysMeshOffsetCount;
 			}
 			else
 			{
 				// Smooth (sliding average) to the physics position if we're close enough. Otherwise warp.
-				lPhysicsTransform.GetPosition() += mMeshOffset;
+				lPhysicsTransform.GetPosition() += mMeshOffset.GetPosition();
+				lPhysicsTransform.SetOrientation(lPhysicsTransform.GetOrientation() * mMeshOffset.GetOrientation());
 			}
 		}
 		else
@@ -144,9 +150,16 @@ void CppContextObject::UiMove()
 	if (lGfxPhysMeshOffsetCount)
 	{
 		mStartMeshSlide = false;
-		mMeshOffset = lGfxPhysMeshOffset / (float)lGfxPhysMeshOffsetCount;
+		mMeshOffset = lGfxPhysMeshOffset;
+		mMeshOffset.GetPosition() /= (float)lGfxPhysMeshOffsetCount;
+		if (mMeshOffset.GetPosition().GetLengthSquared() >= 20*20)
+		{
+			mMeshOffset.SetIdentity();
+		}
 	}
-	mMeshOffset *= 0.99f;
+	const float lFrameTime = GetManager()->GetGameManager()->GetTimeManager()->GetNormalFrameTime();
+	mMeshOffset.GetPosition() = Math::Lerp(mMeshOffset.GetPosition(), Vector3DF(), Math::GetIterateLerpTime(0.12f, lFrameTime));
+	mMeshOffset.GetOrientation().Slerp(mMeshOffset.GetOrientation(), QuaternionF(), Math::GetIterateLerpTime(0.12f, lFrameTime));
 }
 
 void CppContextObject::ActivateLerp()

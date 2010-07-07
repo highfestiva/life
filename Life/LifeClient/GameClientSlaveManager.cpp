@@ -23,9 +23,9 @@
 #include "../../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../../UiTBC/Include/GUI/UiFloatingLayout.h"
 #include "../LifeApplication.h"
-#include "../RtVar.h"
 #include "GameClientMasterTicker.h"
 #include "RoadSignButton.h"
+#include "RtVar.h"
 #include "UiConsole.h"
 #include "Vehicle.h"
 
@@ -106,7 +106,7 @@ void GameClientSlaveManager::SetRenderArea(const PixelRect& pRenderArea)
 	const double lFov = lBaseFov*2 + lBaseFov*pRenderArea.GetWidth()/pRenderArea.GetHeight();
 	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_UI_3D_INTERNALFOV, lFov);
 
-	mCameraTargetXyDistance = (float)CURE_RTVAR_GETSET(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
+	mCameraTargetXyDistance = (float)CURE_RTVAR_GET(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
 }
 
 bool GameClientSlaveManager::Open()
@@ -152,7 +152,7 @@ void GameClientSlaveManager::SetIsQuitting()
 void GameClientSlaveManager::SetFade(float pFadeAmount)
 {
 	mCameraMaxSpeed = 100000.0f;
-	const float lBaseDistance = (float)CURE_RTVAR_GETSET(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
+	const float lBaseDistance = (float)CURE_RTVAR_GET(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
 	mCameraTargetXyDistance = lBaseDistance + pFadeAmount*400.0f;
 }
 
@@ -220,7 +220,7 @@ bool GameClientSlaveManager::Paint()
 
 bool GameClientSlaveManager::EndTick()
 {
-	bool lIsDebugging = CURE_RTVAR_TRYGET(GetVariableScope(), RTVAR_DEBUG_ENABLE, false);
+	bool lIsDebugging = CURE_RTVAR_GET(GetVariableScope(), RTVAR_DEBUG_ENABLE, false);
 	if (lIsDebugging)
 	{
 		DrawAsyncDebugInfo();
@@ -780,7 +780,7 @@ void GameClientSlaveManager::TickUiUpdate()
 	const float lCurrentCameraXyDistance = lTargetCameraPosition.GetDistance(lPivotXyPosition);
 	const float lSpeedDependantCameraXyDistance = mCameraTargetXyDistance + mCameraTargetXyDistance*mCameraPivotSpeed*0.03f;
 	lTargetCameraPosition = lPivotXyPosition + (lTargetCameraPosition-lPivotXyPosition)*(lSpeedDependantCameraXyDistance/lCurrentCameraXyDistance);
-	const float lCamHeight = (float)CURE_RTVAR_GETSET(GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, 10.0);
+	const float lCamHeight = (float)CURE_RTVAR_GET(GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, 10.0);
 	lTargetCameraPosition.z = mCameraPivotPosition.z + lCamHeight;
 
 	if (lObject)
@@ -1117,7 +1117,7 @@ void GameClientSlaveManager::OnLoadCompleted(Cure::ContextObject* pObject, bool 
 	{
 		if (pObject->GetInstanceId() == mAvatarId)
 		{
-			mLog.AInfo("Yeeha! Loaded avatar!");
+			log_volatile(mLog.Debug(_T("Yeeha! Loaded avatar!")));
 		}
 		else
 		{
@@ -1150,8 +1150,18 @@ void GameClientSlaveManager::SetMovement(Cure::GameObjectId pInstanceId, int32 p
 		UiCure::CppContextObject* lObject = (UiCure::CppContextObject*)GetContext()->GetObject(pInstanceId, true);
 		if (lObject)
 		{
+			// Client has moved forward in time since the server sent us this positional info
+			// some frames ago. Extrapolate forward the number of micro-frames that diff.
+			const float lExtrapolationFactor = (float)CURE_RTVAR_GET(GetVariableScope(), RTVAR_NETPHYS_EXTRAPOLATIONFACTOR, 0.0);
+			if (lExtrapolationFactor)
+			{
+				const int lMicroSteps = CURE_RTVAR_GET(GetVariableScope(), RTVAR_PHYSICS_MICROSTEPS, 3);
+				const int lFutureStepCount = (GetTimeManager()->GetCurrentPhysicsFrame()-pFrameIndex) * lMicroSteps;
+				const float lStepIncrement = GetTimeManager()->GetAffordedPhysicsStepTime() / lMicroSteps;
+				pData.GhostStep(lFutureStepCount, lStepIncrement*lExtrapolationFactor);
+			}
 			lObject->SetFullPosition(pData);
-			if (pInstanceId == mAvatarId && CURE_RTVAR_GET(GetVariableScope(), RTVAR_NETPHYS_ENABLESMOOTHING, true))
+			if (CURE_RTVAR_GET(GetVariableScope(), RTVAR_NETPHYS_ENABLESMOOTHING, true))
 			{
 				lObject->ActivateLerp();
 			}
@@ -1190,7 +1200,7 @@ void GameClientSlaveManager::OnStopped(Cure::ContextObject* pObject, TBC::Physic
 
 bool GameClientSlaveManager::OnPhysicsSend(Cure::ContextObject*)
 {
-	return (false);
+	return (true);	// Say true to drop us from sender list.
 }
 
 bool GameClientSlaveManager::IsConnectAuthorized()
@@ -1351,9 +1361,9 @@ void GameClientSlaveManager::DrawDebugStaple(int pIndex, int pHeight, const Colo
 
 void GameClientSlaveManager::DrawSyncDebugInfo()
 {
-	const bool lDebugAxes = CURE_RTVAR_TRYGET(GetVariableScope(), RTVAR_DEBUG_3D_ENABLEAXES, false);
-	const bool lDebugJoints = CURE_RTVAR_TRYGET(GetVariableScope(), RTVAR_DEBUG_3D_ENABLEJOINTS, false);
-	const bool lDebugShapes = CURE_RTVAR_TRYGET(GetVariableScope(), RTVAR_DEBUG_3D_ENABLESHAPES, false);
+	const bool lDebugAxes = CURE_RTVAR_GET(GetVariableScope(), RTVAR_DEBUG_3D_ENABLEAXES, false);
+	const bool lDebugJoints = CURE_RTVAR_GET(GetVariableScope(), RTVAR_DEBUG_3D_ENABLEJOINTS, false);
+	const bool lDebugShapes = CURE_RTVAR_GET(GetVariableScope(), RTVAR_DEBUG_3D_ENABLESHAPES, false);
 	if (lDebugAxes || lDebugJoints || lDebugShapes)
 	{
 		ScopeLock lLock(GetTickLock());

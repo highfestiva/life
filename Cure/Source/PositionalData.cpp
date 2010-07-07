@@ -355,6 +355,13 @@ void ObjectPositionalData::GhostStep(int pFrameCount, float pDeltaTime)
 		// here might save us a few bytes of network data.
 		mPosition.mTransformation.GetPosition().Add(mPosition.mVelocity*pDeltaTime);
 		mPosition.mVelocity.Add(mPosition.mAcceleration*pDeltaTime);
+
+		/*QuaternionF lQ;
+		lQ.RotateAroundWorldX(mPosition.mAngularVelocity.x*pDeltaTime);
+		lQ.RotateAroundWorldY(mPosition.mAngularVelocity.y*pDeltaTime);
+		lQ.RotateAroundWorldZ(mPosition.mAngularVelocity.z*pDeltaTime);
+		mPosition.mTransformation.GetOrientation() *= lQ;
+		mPosition.mAngularVelocity.Add(mPosition.mAngularAcceleration*pDeltaTime);*/
 	}
 }
 

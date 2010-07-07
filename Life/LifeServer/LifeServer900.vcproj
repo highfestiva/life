@@ -570,6 +570,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\RtVar.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ServerConsoleManager.h"
 				>
 			</File>

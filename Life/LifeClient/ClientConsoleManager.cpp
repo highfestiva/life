@@ -6,6 +6,7 @@
 
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../../Cure/Include/TimeManager.h"
+#include "../../Lepra/Include/CyclicArray.h"
 #include "../../Lepra/Include/Number.h"
 #include "../../Lepra/Include/SystemManager.h"
 #include "../../UiCure/Include/UiGameUiManager.h"
@@ -14,10 +15,10 @@
 #include "../../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../../UiTBC/Include/GUI/UiFileNameField.h"
 #include "../../UiTBC/Include/GUI/UiTextArea.h"
-#include "../RtVar.h"
 #include "GameClientSlaveManager.h"
 #include "GameClientMasterTicker.h"
 #include "ClientConsoleManager.h"
+#include "RtVar.h"
 #include "UiConsole.h"
 
 
@@ -96,7 +97,7 @@ bool ClientConsoleManager::SaveApplicationConfigFile(File* pFile, const wstr& pU
 
 unsigned ClientConsoleManager::GetCommandCount() const
 {
-	return (Parent::GetCommandCount() + sizeof(mCommandIdList)/sizeof(mCommandIdList[0]));
+	return Parent::GetCommandCount() + LEPRA_ARRAY_SIZE(mCommandIdList);
 }
 
 const ClientConsoleManager::CommandPair& ClientConsoleManager::GetCommand(unsigned pIndex) const

@@ -23,11 +23,11 @@
 #include "../../UiTBC/Include/GUI/UiFloatingLayout.h"
 #include "../../UiTBC/Include/UiRenderer.h"
 #include "../LifeApplication.h"
-#include "../RtVar.h"
 #include "GameClientDemo.h"
 #include "GameClientSlaveManager.h"
 #include "GameClientViewer.h"
 #include "RoadSignButton.h"
+#include "RtVar.h"
 #include "UiGameServerManager.h"
 
 // TODO: remove!
@@ -117,7 +117,7 @@ bool GameClientMasterTicker::CreateSlave()
 	if (!mServer)
 	{
 		bool lIsLocalServer = false;
-		const str lServerUrl = strutil::Split(CURE_RTVAR_GETSET(UiCure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("0.0.0.0:16650")), _T(":"), 1)[0];
+		const str lServerUrl = strutil::Split(CURE_RTVAR_GET(UiCure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("0.0.0.0:16650")), _T(":"), 1)[0];
 		IPAddress lServerIpAddress;
 		IPAddress lExternalIpAddress;
 		if (Network::ResolveHostname(lServerUrl, lServerIpAddress) && Network::ResolveHostname(_T(""), lExternalIpAddress))
@@ -766,7 +766,7 @@ float GameClientMasterTicker::GetSlavesVerticalAnimationTarget() const
 
 void GameClientMasterTicker::Profile()
 {
-	const bool lDebugGraph = CURE_RTVAR_TRYGET(UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_GRAPH, false);
+	const bool lDebugGraph = CURE_RTVAR_GET(UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_GRAPH, false);
 	if (!lDebugGraph)
 	{
 		return;
@@ -852,7 +852,7 @@ bool GameClientMasterTicker::QueryQuit()
 
 void GameClientMasterTicker::DrawFps() const
 {
-	const bool lDebugging = CURE_RTVAR_TRYGET(UiCure::GetSettings(), RTVAR_DEBUG_ENABLE, false);
+	const bool lDebugging = CURE_RTVAR_GET(UiCure::GetSettings(), RTVAR_DEBUG_ENABLE, false);
 	if (!lDebugging)
 	{
 		return;
@@ -869,8 +869,8 @@ void GameClientMasterTicker::DrawFps() const
 
 void GameClientMasterTicker::DrawPerformanceLineGraph2d() const
 {
-	const bool lDebugGraph = CURE_RTVAR_TRYGET(UiCure::GetSettings(), RTVAR_DEBUG_ENABLE, false) &&
-		CURE_RTVAR_TRYGET(UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_GRAPH, false);
+	const bool lDebugGraph = CURE_RTVAR_GET(UiCure::GetSettings(), RTVAR_DEBUG_ENABLE, false) &&
+		CURE_RTVAR_GET(UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_GRAPH, false);
 	if (!lDebugGraph)
 	{
 		return;
@@ -902,7 +902,7 @@ void GameClientMasterTicker::DrawPerformanceLineGraph2d() const
 
 		mPerformanceGraphList[lRootIndex].Render(lMargin, lScale, lY);
 
-		const bool lDebugNames = CURE_RTVAR_TRYGET(UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_NAMES, false);
+		const bool lDebugNames = CURE_RTVAR_GET(UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_NAMES, false);
 		if (lDebugNames)
 		{
 			mPerformanceGraphList[lRootIndex].RenderNames(lMargin, lY);

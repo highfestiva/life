@@ -7,8 +7,9 @@
 #include "OptionsManager.h"
 #include <assert.h>
 #include "../../Cure/Include/RuntimeVariable.h"
+#include "../../Lepra/Include/CyclicArray.h"
 #include "../../Lepra/Include/Math.h"
-#include "../RtVar.h"
+#include "RtVar.h"
 
 
 
@@ -100,7 +101,7 @@ void OptionsManager::DoRefreshConfiguration()
 	{
 		KeyValue(_T(RTVAR_CTRL_UI_CONTOGGLE), &mConsoleToggle),
 	};
-	SetValuePointers(lEntries, sizeof(lEntries)/sizeof(lEntries[0]));
+	SetValuePointers(lEntries, LEPRA_ARRAY_SIZE(lEntries));
 }
 
 const str OptionsManager::ConvertToString(UiLepra::InputManager::KeyCode pKeyCode)

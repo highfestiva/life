@@ -611,6 +611,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\RtVar.h"
+				>
+			</File>
+			<File
 				RelativePath=".\UiConsole.h"
 				>
 			</File>

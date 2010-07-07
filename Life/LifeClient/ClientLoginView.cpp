@@ -10,7 +10,7 @@
 #include "../../Lepra/Include/Network.h"
 #include "../../UiTBC/Include/GUI/UiCaption.h"
 #include "../../UiTBC/Include/GUI/UiTextField.h"
-#include "../RtVar.h"
+#include "RtVar.h"
 
 
 

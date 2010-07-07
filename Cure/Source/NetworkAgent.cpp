@@ -124,7 +124,12 @@ bool NetworkAgent::SendObjectFullPosition(UdpVSocket* pSocket, GameObjectId pIns
 
 bool NetworkAgent::PlaceInSendBuffer(bool /*pSafe*/, UdpVSocket* pSocket, Packet* pPacket)
 {
-	bool lOk = (pSocket != 0);
+	if (!pSocket)
+	{
+		mLog.AError("PlaceInSendBuffer(): unable send data via uninitialized socket.");
+		assert(false);
+		return false;
+	}
 
 	/*for (size_t x = 0; x < pPacket->GetMessageCount(); ++x)
 	{
@@ -132,10 +137,7 @@ bool NetworkAgent::PlaceInSendBuffer(bool /*pSafe*/, UdpVSocket* pSocket, Packet
 	}*/
 
 	// Try to append this packet to the existing packet buffer.
-	if (lOk)
-	{
-		lOk = pPacket->AppendToPacketBuffer(pSocket->GetSendBuffer());
-	}
+	bool lOk = pPacket->AppendToPacketBuffer(pSocket->GetSendBuffer());
 	if (!lOk)
 	{
 		pPacket->StoreHeader();

@@ -15,7 +15,7 @@
 #include "../../UiTBC/Include/GUI/UiFileNameField.h"
 #include "../../UiTBC/Include/GUI/UiTextArea.h"
 #include "../ConsoleManager.h"
-#include "../RtVar.h"
+#include "RtVar.h"
 
 
 

@@ -711,10 +711,12 @@ void Component::DoSetMinSize(int pWidth, int pHeight)
 
 void Component::SetPreferredSize(const PixelCoord& pSize, bool pAdaptive)
 {
-	if (mPreferredSize != pSize)
+	if (mPreferredSize == pSize)
 	{
-		SetNeedsRepaint(true);
+		return;
 	}
+
+	SetNeedsRepaint(true);
 
 	mPreferredSize = pSize;
 

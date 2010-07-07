@@ -6,6 +6,7 @@
 
 #include "../Cure/Include/GameManager.h"
 #include "../Cure/Include/RuntimeVariable.h"
+#include "../Lepra/Include/CyclicArray.h"
 #include "../Lepra/Include/LogListener.h"
 #include "../Lepra/Include/Number.h"
 #include "../Lepra/Include/SystemManager.h"
@@ -91,7 +92,7 @@ Cure::GameManager* ConsoleManager::GetGameManager() const
 
 unsigned ConsoleManager::GetCommandCount() const
 {
-	return (sizeof(mCommandIdList)/sizeof(mCommandIdList[0]));
+	return LEPRA_ARRAY_SIZE(mCommandIdList);
 }
 
 const ConsoleManager::CommandPair& ConsoleManager::GetCommand(unsigned pIndex) const
@@ -226,28 +227,18 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 			int lLogLevel = 0;
 			if (pParameterVector.size() == 1 && strutil::StringToInt(pParameterVector[0], lLogLevel))
 			{
-				LogListener* lConsoleLogger = GetConsoleLogger();
-				if (!lConsoleLogger)
+				const tchar* lListenerNameArray[] = { _T("console"), _T("i-console"), _T("file"), };
+				for (size_t x = 0; x < LEPRA_ARRAY_SIZE(lListenerNameArray); ++x)
 				{
-					lConsoleLogger = LogType::GetLog(LogType::SUB_ROOT)->GetListener(_T("console"));
-				}
-				if (lConsoleLogger)
-				{
-					lConsoleLogger->SetLevelThreashold((Log::LogLevel)lLogLevel);
-					Log::LogLevel lNewLogLevel = lConsoleLogger->GetLevelThreashold();
-					if (lNewLogLevel != lLogLevel)
+					LogListener* lLogger = LogType::GetLog(LogType::SUB_ROOT)->GetListener(lListenerNameArray[x]);
+					if (lLogger)
 					{
-						mLog.Infof(_T("Console log level clamped to %i."), lNewLogLevel);
-					}
-				}
-				LogListener* lFileLogger = LogType::GetLog(LogType::SUB_ROOT)->GetListener(_T("file"));
-				if (lFileLogger)
-				{
-					lFileLogger->SetLevelThreashold((Log::LogLevel)lLogLevel);
-					Log::LogLevel lNewLogLevel = lFileLogger->GetLevelThreashold();
-					if (lNewLogLevel != lLogLevel)
-					{
-						mLog.Infof(_T("File log level clamped to %i."), lNewLogLevel);
+						lLogger->SetLevelThreashold((Log::LogLevel)lLogLevel);
+						Log::LogLevel lNewLogLevel = lLogger->GetLevelThreashold();
+						if (lNewLogLevel != lLogLevel)
+						{
+							mLog.Infof(_T("Listener '%s' log level clamped to %i."), lListenerNameArray[x], lNewLogLevel);
+						}
 					}
 				}
 			}

@@ -7,6 +7,7 @@
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../LifeApplication.h"
 #include "GameServerTicker.h"
+#include "RtVar.h"
 
 
 
@@ -50,6 +51,8 @@ ServerApplication::ServerApplication(const strutil::strvec& pArgumentList):
 	Lepra::Init();
 	TBC::Init();
 	Cure::Init();
+
+	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_ALLLOGGEDOUT_AUTOSHUTDOWN, false);
 
 	Init();
 }

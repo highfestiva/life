@@ -60,6 +60,14 @@ Application::~Application()
 void Application::Init()
 {
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_PHYSICS_FPS, PHYSICS_FPS);
+	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_POWERSAVE_FACTOR, 2.0);
+	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_DEBUG_ENABLE, false);
+	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_DEBUG_3D_ENABLEAXES, false);
+	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_DEBUG_3D_ENABLEJOINTS, false);
+	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_DEBUG_3D_ENABLESHAPES, false);
+	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_GRAPH, false);
+	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_NAMES, false);
+	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_DEBUG_EXTRASLEEPTIME, 0.0);
 	CURE_RTVAR_INTERNAL(Cure::GetSettings(), RTVAR_APPLICATION_NAME, _T("Life"));
 
 	mConsoleLogger = CreateConsoleLogListener();
@@ -109,13 +117,13 @@ int Application::Run()
 
 		{
 			ScopeTimer lSleepTimer(&lTimeInfo);
-			if (CURE_RTVAR_TRYGET(Cure::GetSettings(), RTVAR_DEBUG_ENABLE, false))
+			if (CURE_RTVAR_GET(Cure::GetSettings(), RTVAR_DEBUG_ENABLE, false))
 			{
 				mGameTicker->Profile();
 			}
 			Random::GetRandomNumber();	// To move seed ahead.
 			lOk = mGameTicker->Tick();
-			const float lExtraSleep = (float)CURE_RTVAR_TRYGET(Cure::GetSettings(), RTVAR_DEBUG_EXTRASLEEPTIME, 0.0);
+			const float lExtraSleep = (float)CURE_RTVAR_GET(Cure::GetSettings(), RTVAR_DEBUG_EXTRASLEEPTIME, 0.0);
 			if (lExtraSleep > 0)
 			{
 				Thread::Sleep(lExtraSleep);
@@ -189,7 +197,7 @@ LogListener* Application::CreateConsoleLogListener() const
 
 void Application::TickSleep(double pMeasuredFrameTime) const
 {
-	const float lPowerSaveFactor = (float)CURE_RTVAR_TRYGET(Cure::GetSettings(), RTVAR_DEBUG_POWERSAVEFACTOR, 1.0);
+	const float lPowerSaveFactor = (float)CURE_RTVAR_GET(Cure::GetSettings(), RTVAR_POWERSAVE_FACTOR, 2.0);
 	const float lPowerSaveAmount = mGameTicker->GetPowerSaveAmount() * lPowerSaveFactor;
 	if (lPowerSaveAmount > 0)
 	{

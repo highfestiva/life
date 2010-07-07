@@ -506,7 +506,7 @@ void GameUiManager::UpdateSettings()
 	}
 	mPainter->SetRenderMode(lPainterRenderMode);
 
-	bool lSmoothFonts = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_2D_SMOOTHFONTS, true);
+	const bool lSmoothFonts = true;//CURE_RTVAR_GET(mVariableScope, RTVAR_UI_2D_SMOOTHFONTS, true);
 	mPainter->SetFontSmoothness(lSmoothFonts);
 
 	if (mSound)
