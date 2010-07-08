@@ -19,7 +19,7 @@ using namespace Lepra;
 
 const int PHYSICS_FPS = 60;
 
-#define LIFE_DEMO
+//#define LIFE_DEMO
 
 
 

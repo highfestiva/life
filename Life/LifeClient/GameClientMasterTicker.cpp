@@ -193,11 +193,10 @@ bool GameClientMasterTicker::Tick()
 	}
 
 	{
-		LEPRA_MEASURE_SCOPE(RenderSlaves);
+		LEPRA_MEASURE_SCOPE(BeginTickSlaves);
 
-		int lSlaveIndex;
 		// Kickstart physics so no slaves have to wait too long for completion.
-		lSlaveIndex = 0;
+		int lSlaveIndex = 0;
 		for (x = mSlaveArray.begin(); lOk && x != mSlaveArray.end(); ++x)
 		{
 			GameClientSlaveManager* lSlave = *x;
@@ -208,8 +207,13 @@ bool GameClientMasterTicker::Tick()
 				++lSlaveIndex;
 			}
 		}
+	}
+
+	{
+		LEPRA_MEASURE_SCOPE(RenderSlaves);
+
 		// Start rendering machine directly afterwards.
-		lSlaveIndex = 0;
+		int lSlaveIndex = 0;
 		for (x = mSlaveArray.begin(); lOk && x != mSlaveArray.end(); ++x)
 		{
 			GameClientSlaveManager* lSlave = *x;
@@ -422,7 +426,11 @@ GameClientSlaveManager* GameClientMasterTicker::CreateDemo(GameClientMasterTicke
 	Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
 	UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea)
 {
+#ifdef LIFE_DEMO
 	return new GameClientDemo(pMaster, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea);
+#else // !Demo
+	return new GameClientViewer(pMaster, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea);
+#endif // Demo / !Demo
 }
 
 bool GameClientMasterTicker::CreateSlave(SlaveFactoryMethod pCreate)
@@ -789,24 +797,32 @@ void GameClientMasterTicker::Profile()
 		}
 		mPerformanceGraphList[lRootIndex].TickLine(lHeight);
 
+		const double lTotalPercentFactor = 100/lRoots[lRootIndex]->GetSlidingAverage();
 		ScopeLevel lCurrentNode(lRoots[lRootIndex], 0);
 		const double lRootStart = lCurrentNode.first->GetTimeOfLastMeasure();
 		for (;;)
 		{
-			const ScopePerformanceData* lNode = lCurrentNode.first;
+			ScopePerformanceData* lNode = lCurrentNode.first;
 			const ScopeArray& lChildren = lNode->GetChildren();
 			for (size_t y = 0; y < lChildren.size(); ++y)
 			{
 				lStackedNodes.push_back(ScopeLevel(lChildren[y], lCurrentNode.second+1));
 			}
 
-			const double lStart = lNode->GetTimeOfLastMeasure() - lRootStart;
+			// Just multiply by number of times hit. Not perfect. Good enough but best?
+			const double lTotalEstimatedDuration = lNode->GetLast() * lNode->GetHitCount();
+			const double lPreviousEstimatedDuration = lNode->GetLast() * (lNode->GetHitCount() - 1);
+			double lStart = lNode->GetTimeOfLastMeasure() - lRootStart - lPreviousEstimatedDuration;
+			lStart = (lStart < 0)? 0 : lStart;
 			lName  = str(lCurrentNode.second, ' ');
 			lName += lNode->GetName();
 			lName += _T(" (");
 			lName += strutil::DoubleToString(lNode->GetRangeFactor()*100, 1);
-			lName += _T(" % fluctuation)");
-			mPerformanceGraphList[lRootIndex].AddSegment(lName, lStart, lStart + lNode->GetLast());
+			lName += _T(" % fluctuation, ");
+			lName += strutil::DoubleToString(lNode->GetSlidingAverage()*lNode->GetHitCount()*lTotalPercentFactor, 1);
+			lName += _T(" % total time)");
+			mPerformanceGraphList[lRootIndex].AddSegment(lName, lStart, lStart + lTotalEstimatedDuration);
+			lNode->ResetHitCount();
 
 			if (!lStackedNodes.empty())
 			{
@@ -892,7 +908,7 @@ void GameClientMasterTicker::DrawPerformanceLineGraph2d() const
 
 	const int lMargin = 10;
 	const float lScale = (mUiManager->GetDisplayManager()->GetWidth() - lMargin*2)/lLongestRootTime;
-	int lY = lMargin;
+	int lY = lMargin + CURE_RTVAR_GET(UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_YOFFSET, 0);
 	for (size_t lRootIndex = 0; lRootIndex < lRoots.size(); ++lRootIndex)
 	{
 		if (mPerformanceGraphList.size() <= lRootIndex)

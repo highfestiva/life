@@ -5,7 +5,7 @@
 
 
 #include "GameClientDemo.h"
-//#ifdef LIFE_DEMO
+#ifdef LIFE_DEMO
 #include "../../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/RuntimeVariable.h"
@@ -185,4 +185,4 @@ const tchar* GameClientDemo::mInfoTextArray[6] =
 
 
 }
-//#endif //Demo
+#endif //Demo

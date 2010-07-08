@@ -742,9 +742,13 @@ void GameServerManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pT
 
 void GameServerManager::OnStopped(Cure::ContextObject* pObject, TBC::PhysicsManager::BodyID pBodyId)
 {
+#ifdef LEPRA_DEBUG
 	const unsigned lRootIndex = 0;
 	assert(pObject->GetStructureGeometry(lRootIndex));
 	assert(pObject->GetStructureGeometry(lRootIndex)->GetBodyId() == pBodyId);
+#else // !Debug
+	pBodyId;
+#endif // Debug / !Debug
 	if (pObject->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY)
 	{
 		log_volatile(mLog.Debugf(_T("Object %u/%s stopped, sending position."), pObject->GetInstanceId(), pObject->GetClassId().c_str()));

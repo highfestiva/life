@@ -104,7 +104,10 @@ bool GameManager::BeginTick()
 		DeletePhysicsThread();
 	}
 
-	GetTickLock()->Acquire();
+	{
+		LEPRA_MEASURE_SCOPE(AcquireTickLock);
+		GetTickLock()->Acquire();
+	}
 
 	{
 		LEPRA_MEASURE_SCOPE(NetworkAndInput);
@@ -124,6 +127,7 @@ bool GameManager::BeginTick()
 
 	if (mTime->GetAffordedPhysicsStepCount() > 0)
 	{
+		LEPRA_MEASURE_SCOPE(StartPhysics);
 		// Physics thread
 		// 1. does *NOT* add/delete objects,
 		// 2. processes context objects ("scripts"),
@@ -355,7 +359,6 @@ void GameManager::ReportPerformance(const ScopePerformanceData::NodeArray& pNode
 
 void GameManager::StartPhysicsTick()
 {
-	LEPRA_MEASURE_SCOPE(StartPhysics);
 	mIsThreadSafe = false;
 	if (mPhysicsTickStartSemaphore)
 	{
@@ -397,17 +400,26 @@ void GameManager::PhysicsTick()
 		mLog.Warningf(_T("Game time allows for %i physics steps in increments of %f."),
 			lAffordedStepCount, lStepIncrement);
 	}*/
-	mPhysics->PreSteps();
+	{
+		LEPRA_MEASURE_SCOPE(PreSteps);
+		mPhysics->PreSteps();
+	}
 	for (int x = 0; x < lAffordedStepCount; ++x)
 	{
 		ScriptTick(lStepIncrement);
 		mPhysics->StepFast(lStepIncrement);
 	}
-	mPhysics->PostSteps();
+	{
+		LEPRA_MEASURE_SCOPE(PostSteps);
+		mPhysics->PostSteps();
+	}
 
-	HandleWorldBoundaries();
-	mContext->HandleIdledBodies();
-	mContext->HandlePhysicsSend();
+	{
+		LEPRA_MEASURE_SCOPE(Handles);
+		HandleWorldBoundaries();
+		mContext->HandleIdledBodies();
+		mContext->HandlePhysicsSend();
+	}
 }
 
 bool GameManager::IsHighImpact(float pScaleFactor, const ContextObject* pObject, const Vector3DF& pForce,

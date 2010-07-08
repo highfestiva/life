@@ -130,6 +130,7 @@ Engine
 + Logging on in two steps: a) normal login, server returns avatars, and b) enter world by selecting avatar. (After (a) the sync goes.)
 . Port client to Mac OS X / Cocoa.
 
+. 3D paint buttons (= road signs) are sometimes painted behind objects in the scene. Fix!
 . I18N.
 . Collision sounds.
 . Organize data in directories for sounds, meshes, physics, classes, etc.
@@ -219,6 +220,9 @@ Quality
 + Run Simian Analyzer, remove duplicate code.
 + Exchange "varning: flerteckens teckenkonstant" (ChunkyLoader.h) to something portable and beautiful.
 
+. If FPS is low (like 15 FPS, 3 microsteps), object (e.g. hovercraft) moves jerkily, since it gets stuck on stuff (e.g. elevator/floor/ground).
+. When using 4 splitscreen players, RenderSlaves is the slow part (won't yield 60 FPS on my machine). Check out why. Seems like they're using their CPU time slices (doesn't look as if physics threads are stealing 'em).
+. Serialize physics threads, so that one ends up on each free CPU?
 . Make splitscreens "slide up" instead of just popping up!
 . Make sure default settings are good on a no-good computer. Like 60 FPS.
 . Make sure shutting down client with two simultaneously logged-in users gets logged out from the server.

@@ -26,6 +26,8 @@ public:
 	void Clear();
 	void Set(double pMinimum, double pThis, double pMaximum);
 	void Append(double pPeriodValue, double pTimeOfLastMeasure);
+	void ResetHitCount();
+	int GetHitCount() const;
 	double GetTimeOfLastMeasure() const;
 	double GetMinimum() const;
 	double GetLast() const;
@@ -35,6 +37,7 @@ public:
 
 private:
 	bool mFirstTime;
+	int mHitCount;
 	double mTimeOfLastMeasure;
 	double mMinimum;
 	double mLast;

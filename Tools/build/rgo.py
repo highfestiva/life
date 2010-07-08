@@ -3,6 +3,7 @@
 # Copyright (c) 2002-2009, Righteous Games
 
 from __future__ import with_statement
+import optparse
 import os
 import sys
 from rgohelp import *
@@ -341,9 +342,21 @@ def gdbclient():
 
 
 if __name__ == "__main__":
-        if len(sys.argv) < 2:
+        usage = "usage: %prog [options] <filespec>\n" + \
+                "Runs some type of build command. Try build, rebuild, clean, builddata, or something like that."
+        parser = optparse.OptionParser(usage=usage, version="%prog 0.1")
+        parser.add_option("-m", "--buildmode", dest="buildmode", default="debug", help="Pick one of the build modes: "+", ".join(buildtypes))
+        options, args = parser.parse_args()
+
+        if len(args) < 1:
                 print("Need arg!")
                 sys.exit(1)
-        for arg in sys.argv[1:]:
+        if not options.buildmode in buildtypes:
+                print("Unknown build mode!")
+                sys.exit(1)
+        global defaulttype
+        defaulttype = options.buildmode
+
+        for arg in args:
                 exec(arg+"()")
         _printresult()

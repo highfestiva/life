@@ -14,6 +14,7 @@
 #define RTVAR_DEBUG_3D_ENABLESHAPES	"Debug.3D.EnableShapes"
 #define RTVAR_DEBUG_NET_SENDPOSCNT	"Debug.Net.SendPositionCount"		// Internal.
 #define RTVAR_DEBUG_NET_RECVPOSCNT	"Debug.Net.ReceivePositionCount"	// Internal.
+#define RTVAR_DEBUG_PERFORMANCE_YOFFSET	"Debug.Performance.YOffset"
 #define RTVAR_DEBUG_PERFORMANCE_GRAPH	"Debug.Performance.Graph"
 #define RTVAR_DEBUG_PERFORMANCE_NAMES	"Debug.Performance.Names"
 #define RTVAR_DEBUG_EXTRASLEEPTIME	"Debug.ExtraSleepTime"

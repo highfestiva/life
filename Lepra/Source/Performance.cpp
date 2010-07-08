@@ -28,6 +28,7 @@ void PerformanceData::Clear()
 
 void PerformanceData::Set(double pMinimum, double pThis, double pMaximum)
 {
+	ResetHitCount();
 	mMinimum = pMinimum;
 	mLast = pThis;
 	mSlidingAverage = pThis;
@@ -36,6 +37,7 @@ void PerformanceData::Set(double pMinimum, double pThis, double pMaximum)
 
 void PerformanceData::Append(double pPeriodValue, double pTimeOfLastMeasure)
 {
+	++mHitCount;
 	mTimeOfLastMeasure = pTimeOfLastMeasure;
 	if (mFirstTime)
 	{
@@ -49,6 +51,16 @@ void PerformanceData::Append(double pPeriodValue, double pTimeOfLastMeasure)
 		mSlidingAverage = Math::Lerp(mSlidingAverage, mLast, 0.05);
 		mMaximum = (pPeriodValue > mMaximum)? pPeriodValue : mMaximum;
 	}
+}
+
+void PerformanceData::ResetHitCount()
+{
+	mHitCount = 0;
+}
+
+int PerformanceData::GetHitCount() const
+{
+	return mHitCount;
 }
 
 double PerformanceData::GetTimeOfLastMeasure() const

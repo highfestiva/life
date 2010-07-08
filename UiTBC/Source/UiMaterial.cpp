@@ -330,11 +330,11 @@ void Material::DoRenderAllGeometry(unsigned int pCurrentFrame)
 			}
 		}
 
-		for (int i = 0; i < lGroup->GetGeometryCount(); i++)
+		const int lGeometryCount = lGroup->GetGeometryCount();
+		for (int i = 0; i < lGeometryCount; i++)
 		{
 			TBC::GeometryBase* lGeometry = lGroup->GetGeometry(i);
-			if (lGeometry->GetAlwaysVisible() == true ||
-			   lGeometry->GetLastFrameVisible() == pCurrentFrame)
+			if (lGeometry->GetAlwaysVisible() || lGeometry->GetLastFrameVisible() == pCurrentFrame)
 			{
 				if (mRenderer->PreRender(lGeometry))
 				{
