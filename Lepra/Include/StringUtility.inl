@@ -501,6 +501,62 @@ STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::DoubleToString(double pValue, int pNumD
 	return (lValue);
 }
 
+STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::FastDoubleToString(double pValue)
+{
+	if (pValue > -1000 && pValue < 1000)
+	{
+		int lValue = (int)(pValue*1000000);
+		bool lPositive;
+		if (lValue >= 0)
+		{
+			lPositive = true;
+		}
+		else
+		{
+			lPositive = false;
+			lValue = -lValue;
+		}
+		const size_t lBufferSize = 11;
+		_String::value_type lString[lBufferSize];
+		size_t lIndex = lBufferSize-1;
+		int x;
+		for (x = 0; x < 5; ++x, lValue /= 10)
+		{
+			int lDigit;
+			if ((lDigit = lValue%10) != 0)
+			{
+				lString[lIndex--] = '0' + _String::value_type(lDigit);
+			}
+			;
+		}
+		for (; x < 6; ++x, lValue /= 10)
+		{
+			lString[lIndex--] = '0' + _String::value_type(lValue%10);
+		}
+		lString[lIndex--] = '.';
+		lString[lIndex--] = '0' + _String::value_type(lValue%10);
+		lValue /= 10;
+		for (x = 0; lValue && x < 2; ++x, lValue /= 10)
+		{
+			lString[lIndex--] = '0' + _String::value_type(lValue%10);
+		}
+		if (lPositive)
+		{
+			++lIndex;
+		}
+		else
+		{
+			lString[lIndex] = '-';
+		}
+		const size_t lCount = lBufferSize-lIndex;
+		return _String(&lString[lIndex], lCount);
+	}
+	else
+	{
+		return DoubleToString(pValue, 6);
+	}
+}
+
 STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::BoolToString(bool pValue)
 {
 	if (pValue)

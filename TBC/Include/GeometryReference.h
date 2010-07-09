@@ -29,7 +29,7 @@ public:
 	void SetOffsetTransformation(const TransformationF& pOffset);
 
 	// Overloads from GeometryBase.
-	const TransformationF& GetTransformation() const;
+	const TransformationF& GetTransformation();
 	GeometryVolatility GetGeometryVolatility() const;
 	void SetGeometryVolatility(GeometryVolatility pVolatility);
 

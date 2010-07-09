@@ -46,7 +46,7 @@ ProgressiveTriangleGeometry::ProgressiveTriangleGeometry():
 {
 }
 
-ProgressiveTriangleGeometry::ProgressiveTriangleGeometry(const ProgressiveTriangleGeometry& pProgressiveGeometry):
+ProgressiveTriangleGeometry::ProgressiveTriangleGeometry(ProgressiveTriangleGeometry& pProgressiveGeometry):
 	mBaseVertexCount(0),
 	mBaseTriangleCount(0),
 
@@ -153,7 +153,7 @@ void ProgressiveTriangleGeometry::ClearAll()
 	TBC::GeometryBase::SetBoundingRadius(0.0f);
 }
 
-void ProgressiveTriangleGeometry::Copy(const ProgressiveTriangleGeometry& pProgressiveGeometry)
+void ProgressiveTriangleGeometry::Copy(ProgressiveTriangleGeometry& pProgressiveGeometry)
 {
 	mMaxVertexCount	      = pProgressiveGeometry.mMaxVertexCount;
 	mMaxTriangleCount	  = pProgressiveGeometry.mMaxTriangleCount;

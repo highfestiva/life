@@ -164,6 +164,29 @@ bool TestString(const LogDecorator& pAccount)
 		assert(lTestOk);
 	}
 
+	// Test fast floating point conversion.
+	if (lTestOk)
+	{
+		lContext = _T("fast float conversion");
+		lTestOk = (strutil::FastDoubleToString(0.0) == _T("0.0"));
+		assert(lTestOk);
+		if (lTestOk)
+		{
+			lTestOk = (strutil::FastDoubleToString(10.0) == _T("10.0"));
+			assert(lTestOk);
+		}
+		if (lTestOk)
+		{
+			lTestOk = (strutil::FastDoubleToString(-287.75) == _T("-287.75"));
+			assert(lTestOk);
+		}
+		if (lTestOk)
+		{
+			lTestOk = (strutil::FastDoubleToString(-2.625) == _T("-2.625"));
+			assert(lTestOk);
+		}
+	}
+
 	if (lTestOk)
 	{
 		lContext = _T("string -> C string");

@@ -248,7 +248,7 @@ public:
 
 	void SetTransformation(const TransformationF& pTransformation);
 	const TransformationF& GetBaseTransformation() const;
-	virtual const TransformationF& GetTransformation() const;
+	virtual const TransformationF& GetTransformation();
 	bool GetTransformationChanged() const { return CheckFlag(TRANSFORMATION_CHANGED); }
 	void SetTransformationChanged(bool pTransformationChanged) { SetFlag(TRANSFORMATION_CHANGED, pTransformationChanged); }
 
@@ -304,9 +304,6 @@ protected:
 	void SetParentCell(PortalManager::Cell* pCell);
 	PortalManager::Cell* GetParentCell();
 
-private:
-	typedef std::list<Listener*> ListenerList;
-
 	enum //Flags
 	{
 		VERTEX_DATA_CHANGED          = (1 << 0),
@@ -332,6 +329,9 @@ private:
 	void SetFlag(Lepra::uint32 pFlag) { mFlags |= pFlag; }
 	void ClearFlag(Lepra::uint32 pFlag) { mFlags &= (~pFlag); }
 	bool CheckFlag(Lepra::uint32 pFlag) const { return (mFlags & pFlag) != 0; }
+
+private:
+	typedef std::list<Listener*> ListenerList;
 
 	Lepra::uint32 mFlags;
 

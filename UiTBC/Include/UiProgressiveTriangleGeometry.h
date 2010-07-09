@@ -22,11 +22,11 @@ class ProgressiveTriangleGeometry : public TBC::GeometryBase
 {
 public:
 	ProgressiveTriangleGeometry();
-	ProgressiveTriangleGeometry(const ProgressiveTriangleGeometry& pProgressiveGeometry);
+	ProgressiveTriangleGeometry(ProgressiveTriangleGeometry& pProgressiveGeometry);
 	ProgressiveTriangleGeometry(TriangleBasedGeometry& pGeometry);
 	virtual ~ProgressiveTriangleGeometry();
 
-	void Copy(const ProgressiveTriangleGeometry& pProgressiveGeometry);
+	void Copy(ProgressiveTriangleGeometry& pProgressiveGeometry);
 	void Set(TriangleBasedGeometry& pGeometry);
 
 	// SetDetailLevel() will collapse or expand edges to the given level of detail.

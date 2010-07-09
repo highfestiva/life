@@ -33,11 +33,17 @@ void GeometryReference::SetOffsetTransformation(const TransformationF& pOffset)
 	mOffset = pOffset;
 }
 
-const TransformationF& GeometryReference::GetTransformation() const
+const TransformationF& GeometryReference::GetTransformation()
 {
+	if (!CheckFlag(TRANSFORMATION_CHANGED))
+	{
+		return (mReturnTransformation);
+	}
+
 	mReturnTransformation = GetBaseTransformation();
 	mReturnTransformation.GetPosition() += mReturnTransformation.GetOrientation() * mOffset.GetPosition();
 	mReturnTransformation.GetOrientation() *= mOffset.GetOrientation();
+	SetFlag(TRANSFORMATION_CHANGED, false);
 	return (mReturnTransformation);
 }
 

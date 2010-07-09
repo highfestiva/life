@@ -302,7 +302,7 @@ const str RuntimeVariableScope::GetDefaultValue(GetMode pMode, const str& pName,
 
 double RuntimeVariableScope::GetDefaultValue(GetMode pMode, const str& pName, double pDefaultValue)
 {
-	str lDefaultValue = strutil::DoubleToString(pDefaultValue, 6);
+	str lDefaultValue = strutil::FastDoubleToString(pDefaultValue);
 	str lValueString = GetDefaultValue(pMode, pName, lDefaultValue);
 	double lValue = pDefaultValue;
 	if (!strutil::StringToDouble(lValueString, lValue))

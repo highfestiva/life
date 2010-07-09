@@ -48,6 +48,7 @@ public:
 	static bool StringToDouble(const _String& pString, double& pValue);
 	static void DoubleToString(double pValue, int pNumDecimals, _String& pString);
 	static _String DoubleToString(double pValue, int pNumDecimals);
+	static _String FastDoubleToString(double pValue);
 	static bool StringToBool(const _String& pString, bool& pValue);
 	static _String BoolToString(bool pValue);
 

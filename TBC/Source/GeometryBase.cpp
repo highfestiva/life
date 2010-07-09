@@ -656,7 +656,7 @@ const TransformationF& GeometryBase::GetBaseTransformation() const
 	return (mTransformation);
 }
 
-const TransformationF& GeometryBase::GetTransformation() const
+const TransformationF& GeometryBase::GetTransformation()
 {
 	return (GetBaseTransformation());
 }
