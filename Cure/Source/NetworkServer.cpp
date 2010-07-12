@@ -466,7 +466,7 @@ void NetworkServer::KillDeadSockets()
 	}
 
 	mKeepaliveTimer.UpdateTimer();
-	if (mKeepaliveTimer.GetTimeDiffF() > CURE_RTVAR_GET(mVariableScope, RTVAR_NETWORK_KEEPALIVE_KILLINTERVAL, 20.0))
+	if (mKeepaliveTimer.GetTimeDiffF() > CURE_RTVAR_SLOW_GET(mVariableScope, RTVAR_NETWORK_KEEPALIVE_KILLINTERVAL, 20.0))
 	{
 		// Reset the keepalive timer.
 		mKeepaliveTimer.ClearTimeDiff();

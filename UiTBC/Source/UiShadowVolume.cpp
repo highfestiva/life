@@ -356,11 +356,25 @@ void ShadowVolume::UpdateShadowVolume(const Vector3DF& pLightPos, float pShadowR
 	}
 	else // if light is a point light (pDirectional == false).
 	{
+		const uint32* lIndices = mParentGeometry->GetIndexData();
 		// Calculate triangle orientations relative to light source.
 		for (i = 0; i < lTriangleCount; i++)
 		{
-			uint32 lVertexIndex[3];
-			mParentGeometry->GetTriangleIndices(i, lVertexIndex);
+			if (mParentGeometry->GetPrimitiveType() == TBC::GeometryBase::TRIANGLES)
+			{
+				const int lOffset = i * 3;
+				mTriangleOrientation[i].mV0 = lIndices[lOffset + 0];
+				mTriangleOrientation[i].mV1 = lIndices[lOffset + 1];
+				mTriangleOrientation[i].mV2 = lIndices[lOffset + 2];
+			}
+			else
+			{
+				uint32 lVertexIndex[3];
+				mParentGeometry->GetTriangleIndices(i, lVertexIndex);
+				mTriangleOrientation[i].mV0 = lVertexIndex[0];
+				mTriangleOrientation[i].mV1 = lVertexIndex[1];
+				mTriangleOrientation[i].mV2 = lVertexIndex[2];
+			}
 			
 			unsigned int lTriIndex = i * 3;
 			Vector3DF lSurfaceNormal(lSurfaceNormalData[lTriIndex + 0],
@@ -368,14 +382,11 @@ void ShadowVolume::UpdateShadowVolume(const Vector3DF& pLightPos, float pShadowR
 							 lSurfaceNormalData[lTriIndex + 2]);
 
 			// Get the vector between one corner of the triangle and the light source.
-			unsigned int lIndex = lVertexIndex[0] * 3;
+			unsigned int lIndex = mTriangleOrientation[i].mV0 * 3;
 			Vector3DF lVector(lVertexData[lIndex + 0] - lLightPos.x,
 						  lVertexData[lIndex + 1] - lLightPos.y,
 						  lVertexData[lIndex + 2] - lLightPos.z);
 
-			mTriangleOrientation[i].mV0 = lVertexIndex[0];
-			mTriangleOrientation[i].mV1 = lVertexIndex[1];
-			mTriangleOrientation[i].mV2 = lVertexIndex[2];
 			mTriangleOrientation[i].mChecked = false;
 
 			if (lVector.Dot(lSurfaceNormal) <= 0.0f)

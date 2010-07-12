@@ -68,6 +68,7 @@ void Application::Init()
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_YOFFSET, 10);
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_GRAPH, false);
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_NAMES, false);
+	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_COUNT, false);
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_DEBUG_EXTRASLEEPTIME, 0.0);
 	CURE_RTVAR_INTERNAL(Cure::GetSettings(), RTVAR_APPLICATION_NAME, _T("Life"));
 
@@ -118,13 +119,16 @@ int Application::Run()
 
 		{
 			ScopeTimer lSleepTimer(&lTimeInfo);
-			if (CURE_RTVAR_GET(Cure::GetSettings(), RTVAR_DEBUG_ENABLE, false))
+			bool lDebug;
+			CURE_RTVAR_GET(lDebug, =, Cure::GetSettings(), RTVAR_DEBUG_ENABLE, false);
+			if (lDebug)
 			{
 				mGameTicker->Profile();
 			}
 			Random::GetRandomNumber();	// To move seed ahead.
 			lOk = mGameTicker->Tick();
-			const float lExtraSleep = (float)CURE_RTVAR_GET(Cure::GetSettings(), RTVAR_DEBUG_EXTRASLEEPTIME, 0.0);
+			float lExtraSleep;
+			CURE_RTVAR_GET(lExtraSleep, =(float), Cure::GetSettings(), RTVAR_DEBUG_EXTRASLEEPTIME, 0.0);
 			if (lExtraSleep > 0)
 			{
 				Thread::Sleep(lExtraSleep);
@@ -177,8 +181,10 @@ void Application::Destroy()
 
 str Application::GetIoFile(const str& pName, const str& pExt, bool pAddQuotes)
 {
+	str lAppName;
+	CURE_RTVAR_GET(lAppName, =, Cure::GetSettings(), RTVAR_APPLICATION_NAME, _T("?"));
 	str lIoName = Path::JoinPath(
-		SystemManager::GetIoDirectory(CURE_RTVAR_GET(Cure::GetSettings(), RTVAR_APPLICATION_NAME, _T("?"))),
+		SystemManager::GetIoDirectory(lAppName),
 		pName, pExt);
 	if (pAddQuotes)
 	{
@@ -198,7 +204,8 @@ LogListener* Application::CreateConsoleLogListener() const
 
 void Application::TickSleep(double pMeasuredFrameTime) const
 {
-	const float lPowerSaveFactor = (float)CURE_RTVAR_GET(Cure::GetSettings(), RTVAR_POWERSAVE_FACTOR, 2.0);
+	float lPowerSaveFactor;
+	CURE_RTVAR_GET(lPowerSaveFactor, =(float), Cure::GetSettings(), RTVAR_POWERSAVE_FACTOR, 2.0);
 	const float lPowerSaveAmount = mGameTicker->GetPowerSaveAmount() * lPowerSaveFactor;
 	if (lPowerSaveAmount > 0)
 	{
@@ -217,7 +224,8 @@ void Application::TickSleep(double pMeasuredFrameTime) const
 			mIsPowerSaving = false;
 		}
 
-		const int lFps = CURE_RTVAR_GET(Cure::GetSettings(), RTVAR_PHYSICS_FPS, 2);
+		int lFps;
+		CURE_RTVAR_GET(lFps, =, Cure::GetSettings(), RTVAR_PHYSICS_FPS, 2);
 		double lWantedFrameTime = lFps? 1.0/lFps : 1;
 		double lSleepTime = lWantedFrameTime - pMeasuredFrameTime;
 		const double MINIMUM_SLEEP_TIME = 0.001;

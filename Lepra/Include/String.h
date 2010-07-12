@@ -25,6 +25,35 @@ typedef wstr		str;
 #else // !LEPRA_UNICODE
 typedef astr		str;
 #endif // LEPRA_UNICODE/!LEPRA_UNICODE
+
+inline size_t HashString(const char* __s);
+inline size_t HashString(const wchar_t* __w);
+
+class HashedString: public str
+{
+public:
+	HashedString(const str& pData):
+		str(pData),
+		mIsHashed(false)
+	{
+	}
+	HashedString(const str::value_type* pData):
+		str(pData),
+		mIsHashed(false)
+	{
+	}
+	size_t hash() const
+	{
+		if (!mIsHashed)
+		{
+			mHash = HashString(c_str());
+			mIsHashed = true;
+		}
+		return mHash;
+	}
+	mutable bool mIsHashed;
+	mutable size_t mHash;
+};
 }
 
 
@@ -67,6 +96,13 @@ public:
 	size_t operator() (const Lepra::wstr& __w) const
 	{
 		return (__stl_hash_wstring(__w.c_str()));
+	}
+};
+template<> struct LEPRA_STD_HASHER<Lepra::HashedString>
+{
+	size_t operator()(const Lepra::HashedString& __s) const
+	{
+		return __s.hash();
 	}
 };
 }

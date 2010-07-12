@@ -31,7 +31,7 @@ CppContextObject::CppContextObject(Cure::ResourceManager* pResourceManager, cons
 	mEnableUi(true),
 	mMeshLoadCount(0),
 	mTextureLoadCount(0),
-	mStartMeshSlide(false)
+	mMeshSlideMode(MESH_SLIDE_STOP)
 {
 	log_volatile(mLog.Tracef(_T("Construct CppCO %s."), pClassId.c_str()));
 }
@@ -121,11 +121,12 @@ void CppContextObject::UiMove()
 			}
 			mManager->GetGameManager()->GetPhysicsManager()->GetBodyTransform(lGeometry->GetBodyId(), lPhysicsTransform);
 
-			if (mStartMeshSlide)
+			if (mMeshSlideMode == MESH_SLIDE_START)
 			{
 				// Start out by fetching offset.
 				const TransformationF& lTransform = lGfxGeometry->GetBaseTransformation();
-				lGfxPhysMeshOffset.GetPosition() += lTransform.GetPosition() - lPhysicsTransform.GetPosition();
+				lGfxPhysMeshOffset.GetPosition().Add(lTransform.GetPosition());
+				lGfxPhysMeshOffset.GetPosition().Sub(lPhysicsTransform.GetPosition());
 				if (x == 0)
 				{
 					lGfxPhysMeshOffset.SetOrientation(lPhysicsTransform.GetOrientation().GetInverse() * lTransform.GetOrientation());
@@ -133,11 +134,11 @@ void CppContextObject::UiMove()
 				lPhysicsTransform = lTransform;
 				++lGfxPhysMeshOffsetCount;
 			}
-			else
+			else if (mMeshSlideMode == MESH_SLIDE_RUN)
 			{
 				// Smooth (sliding average) to the physics position if we're close enough. Otherwise warp.
 				lPhysicsTransform.GetPosition() += mMeshOffset.GetPosition();
-				lPhysicsTransform.SetOrientation(lPhysicsTransform.GetOrientation() * mMeshOffset.GetOrientation());
+				lPhysicsTransform.GetOrientation() *= mMeshOffset.GetOrientation();
 			}
 		}
 		else
@@ -149,12 +150,21 @@ void CppContextObject::UiMove()
 	}
 	if (lGfxPhysMeshOffsetCount)
 	{
-		mStartMeshSlide = false;
+		mMeshSlideMode = MESH_SLIDE_RUN;
 		mMeshOffset = lGfxPhysMeshOffset;
 		mMeshOffset.GetPosition() /= (float)lGfxPhysMeshOffsetCount;
 		if (mMeshOffset.GetPosition().GetLengthSquared() >= 20*20)
 		{
 			mMeshOffset.SetIdentity();
+		}
+	}
+	else if (mMeshSlideMode == MESH_SLIDE_RUN && mMeshOffset.GetPosition().GetLengthSquared() < 0.1f)
+	{
+		QuaternionF lDiff;
+		lDiff.Sub(mMeshOffset.GetOrientation());
+		if (lDiff.GetNorm() < 0.01f)
+		{
+			mMeshSlideMode = MESH_SLIDE_STOP;
 		}
 	}
 	const float lFrameTime = GetManager()->GetGameManager()->GetTimeManager()->GetNormalFrameTime();
@@ -164,7 +174,7 @@ void CppContextObject::UiMove()
 
 void CppContextObject::ActivateLerp()
 {
-	mStartMeshSlide = true;
+	mMeshSlideMode = MESH_SLIDE_START;
 }
 
 

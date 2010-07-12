@@ -15,12 +15,10 @@ namespace Cure
 
 
 
-RuntimeVariable::RuntimeVariable(const str& pName, const str& pValue, Type pType):
-	mName(pName),
-	mValue(pValue),
-	mDefaultValue(pValue),
-	mType(pType)
+RuntimeVariable::RuntimeVariable(const str& pName, const str& pValue, Usage pUsage):
+	mName(pName)
 {
+	SetValue(pValue, pUsage);
 }
 
 RuntimeVariable::~RuntimeVariable()
@@ -42,14 +40,64 @@ const str& RuntimeVariable::GetValue() const
 	return (mValue);
 }
 
-void RuntimeVariable::SetValue(const str& pValue, Type pType)
+bool RuntimeVariable::GetBoolValue() const
+{
+	if (mDataType == DATATYPE_BOOL)
+	{
+		return mBoolValue;
+	}
+	mLog.Errorf(_T("RT variable %s is not of type int (value is %s)."), mName.c_str(), mValue.c_str());
+	assert(false);
+	return 0;
+}
+
+int RuntimeVariable::GetIntValue() const
+{
+	if (mDataType == DATATYPE_INT)
+	{
+		return mIntValue;
+	}
+	mLog.Errorf(_T("RT variable %s is not of type int (value is %s)."), mName.c_str(), mValue.c_str());
+	assert(false);
+	return 0;
+}
+
+double RuntimeVariable::GetRealValue() const
+{
+	if (mDataType == DATATYPE_REAL)
+	{
+		return mRealValue;
+	}
+	mLog.Errorf(_T("RT variable %s is not of type double (value is %s)."), mName.c_str(), mValue.c_str());
+	assert(false);
+	return 0;
+}
+
+void RuntimeVariable::SetValue(const str& pValue, Usage pUsage)
 {
 	mValue = pValue;
-	if (pType != TYPE_NORMAL)
+	if (pUsage != USAGE_NORMAL)
 	{
 		mDefaultValue = pValue;
 	}
-	mType = pType;
+	mUsage = pUsage;
+
+	if (strutil::StringToBool(pValue, mBoolValue))
+	{
+		mDataType = DATATYPE_BOOL;
+	}
+	else if (strutil::StringToInt(pValue, mIntValue))
+	{
+		mDataType = DATATYPE_INT;
+	}
+	else if (strutil::StringToDouble(pValue, mRealValue))
+	{
+		mDataType = DATATYPE_REAL;
+	}
+	else
+	{
+		mDataType = DATATYPE_STRING;
+	}
 }
 
 const str& RuntimeVariable::GetDefaultValue() const
@@ -62,9 +110,9 @@ void RuntimeVariable::SetDefaultValue(const str& pDefaultValue)
 	mDefaultValue = pDefaultValue;
 }
 
-RuntimeVariable::Type RuntimeVariable::GetType() const
+RuntimeVariable::Usage RuntimeVariable::GetUsage() const
 {
-	return (mType);
+	return (mUsage);
 }
 
 
@@ -220,7 +268,7 @@ bool RuntimeVariableScope::SetValue(SetMode pSetMode, const str& pName, const st
 {
 	bool lTypeOk = true;
 
-	RuntimeVariable* lVariable = GetVariable(pName, pSetMode != RuntimeVariable::TYPE_OVERRIDE);
+	RuntimeVariable* lVariable = GetVariable(pName, pSetMode != RuntimeVariable::USAGE_OVERRIDE);
 	str lValue = Cast(pValue);
 	if (lVariable)
 	{
@@ -269,74 +317,29 @@ bool RuntimeVariableScope::SetValue(SetMode pSetMode, const str& pName, bool pVa
 	return (SetValue(pSetMode, pName, strutil::BoolToString(pValue)));
 }
 
-const str& RuntimeVariableScope::GetDefaultValue(GetMode pMode, const str& pName, const str& pDefaultValue)
+const str& RuntimeVariableScope::GetDefaultValue(GetMode pMode, const HashedString& pName, const str& pDefaultValue)
 {
-	RuntimeVariable* lVariable = GetVariable(pName);
-	if (lVariable)
-	{
-		if (pMode == READ_DEFAULT)
-		{
-			return (lVariable->GetDefaultValue());
-		}
-		else if (pMode == READ_WRITE)
-		{
-			lVariable->SetDefaultValue(pDefaultValue);
-		}
-		return (lVariable->GetValue());
-	}
-	else if (pMode == READ_WRITE)
-	{
-		SetValue(RuntimeVariable::TYPE_NORMAL, pName, pDefaultValue);
-	}
-	else if (pMode != READ_IGNORE)
-	{
-		mLog.Warningf(_T("Variable %s not found."), pName.c_str());
-	}
-	return (pDefaultValue);
+	return GetDefaultValue(pMode, pName, GetVariable(pName), pDefaultValue);
 }
 
-const str RuntimeVariableScope::GetDefaultValue(GetMode pMode, const str& pName, const tchar* pDefaultValue)
+const str RuntimeVariableScope::GetDefaultValue(GetMode pMode, const HashedString& pName, const tchar* pDefaultValue)
 {
-	return (GetDefaultValue(pMode, pName, str(pDefaultValue)));
+	return GetDefaultValue(pMode, pName, GetVariable(pName), str(pDefaultValue));
 }
 
-double RuntimeVariableScope::GetDefaultValue(GetMode pMode, const str& pName, double pDefaultValue)
+double RuntimeVariableScope::GetDefaultValue(GetMode pMode, const HashedString& pName, double pDefaultValue)
 {
-	str lDefaultValue = strutil::FastDoubleToString(pDefaultValue);
-	str lValueString = GetDefaultValue(pMode, pName, lDefaultValue);
-	double lValue = pDefaultValue;
-	if (!strutil::StringToDouble(lValueString, lValue))
-	{
-		mLog.Errorf(_T("RT variable %s is not of type double (value is %s)."), pName.c_str(), lValueString.c_str());
-		assert(false);
-	}
-	return (lValue);
+	return GetDefaultValue(pMode, pName, GetVariable(pName), pDefaultValue);
 }
 
-int RuntimeVariableScope::GetDefaultValue(GetMode pMode, const str& pName, int pDefaultValue)
+int RuntimeVariableScope::GetDefaultValue(GetMode pMode, const HashedString& pName, int pDefaultValue)
 {
-	str lDefaultValue = strutil::IntToString(pDefaultValue, 10);
-	str lValueString = GetDefaultValue(pMode, pName, lDefaultValue);
-	int lValue = pDefaultValue;
-	if (!strutil::StringToInt(lValueString, lValue))
-	{
-		mLog.Errorf(_T("RT variable %s is not of type int (value is %s)."), pName.c_str(), lValueString.c_str());
-		assert(false);
-	}
-	return (lValue);
+	return GetDefaultValue(pMode, pName, GetVariable(pName), pDefaultValue);
 }
 
-bool RuntimeVariableScope::GetDefaultValue(GetMode pMode, const str& pName, bool pDefaultValue)
+bool RuntimeVariableScope::GetDefaultValue(GetMode pMode, const HashedString& pName, bool pDefaultValue)
 {
-	str lDefaultValue = strutil::BoolToString(pDefaultValue);
-	str lValueString = GetDefaultValue(pMode, pName, lDefaultValue);
-	bool lValue = pDefaultValue;
-	if (!strutil::StringToBool(lValueString, lValue))
-	{
-		mLog.Errorf(_T("RT variable %s is not of type bool (value is %s)."), pName.c_str(), lValueString.c_str());
-		assert(false);
-	}
-	return (lValue);
+	return GetDefaultValue(pMode, pName, GetVariable(pName), pDefaultValue);
 }
 
 bool RuntimeVariableScope::EraseVariable(const str& pName)
@@ -366,13 +369,91 @@ std::list<str> RuntimeVariableScope::GetVariableNameList(SearchType pSearchType,
 		for (; x != mVariableTable.end(); ++x)
 		{
 			if (pSearchType == SEARCH_ALL ||
-				x->second->GetType() != RuntimeVariable::TYPE_INTERNAL)
+				x->second->GetUsage() != RuntimeVariable::USAGE_INTERNAL)
 			{
 				lVariableNameList.push_back(x->first);
 			}
 		}
 	}
 	return (lVariableNameList);
+}
+
+
+
+const str& RuntimeVariableScope::GetDefaultValue(GetMode pMode, const str& pName, RuntimeVariable* pVariable, const str& pDefaultValue)
+{
+	if (pVariable)
+	{
+		if (pMode == READ_DEFAULT)
+		{
+			return (pVariable->GetDefaultValue());
+		}
+		else if (pMode == READ_WRITE)
+		{
+			pVariable->SetDefaultValue(pDefaultValue);
+		}
+		return (pVariable->GetValue());
+	}
+	else if (pMode == READ_WRITE)
+	{
+		SetValue(RuntimeVariable::USAGE_NORMAL, pName, pDefaultValue);
+	}
+	else if (pMode != READ_IGNORE)
+	{
+		mLog.Warningf(_T("Variable %s not found."), pName.c_str());
+	}
+	return (pDefaultValue);
+}
+
+double RuntimeVariableScope::GetDefaultValue(GetMode pMode, const str& pName, RuntimeVariable* pVariable, double pDefaultValue)
+{
+	if (pVariable && (pMode == READ_ONLY || pMode == READ_IGNORE))	// Optimization.
+	{
+		return pVariable->GetRealValue();
+	}
+	str lDefaultValue = strutil::FastDoubleToString(pDefaultValue);
+	str lValueString = GetDefaultValue(pMode, pName, lDefaultValue);
+	double lValue = pDefaultValue;
+	if (!strutil::StringToDouble(lValueString, lValue))
+	{
+		mLog.Errorf(_T("RT variable %s is not of type double (value is %s)."), pName.c_str(), lValueString.c_str());
+		assert(false);
+	}
+	return (lValue);
+}
+
+int RuntimeVariableScope::GetDefaultValue(GetMode pMode, const str& pName, RuntimeVariable* pVariable, int pDefaultValue)
+{
+	if (pVariable && (pMode == READ_ONLY || pMode == READ_IGNORE))	// Optimization.
+	{
+		return pVariable->GetIntValue();
+	}
+	str lDefaultValue = strutil::IntToString(pDefaultValue, 10);
+	str lValueString = GetDefaultValue(pMode, pName, lDefaultValue);
+	int lValue = pDefaultValue;
+	if (!strutil::StringToInt(lValueString, lValue))
+	{
+		mLog.Errorf(_T("RT variable %s is not of type int (value is %s)."), pName.c_str(), lValueString.c_str());
+		assert(false);
+	}
+	return (lValue);
+}
+
+bool RuntimeVariableScope::GetDefaultValue(GetMode pMode, const str& pName, RuntimeVariable* pVariable, bool pDefaultValue)
+{
+	if (pVariable && (pMode == READ_ONLY || pMode == READ_IGNORE))	// Optimization.
+	{
+		return pVariable->GetBoolValue();
+	}
+	str lDefaultValue = strutil::BoolToString(pDefaultValue);
+	str lValueString = GetDefaultValue(pMode, pName, lDefaultValue);
+	bool lValue = pDefaultValue;
+	if (!strutil::StringToBool(lValueString, lValue))
+	{
+		mLog.Errorf(_T("RT variable %s is not of type bool (value is %s)."), pName.c_str(), lValueString.c_str());
+		assert(false);
+	}
+	return (lValue);
 }
 
 
@@ -399,20 +480,25 @@ bool RuntimeVariableScope::DeleteLocalVariable(const str& pName)
 	return (lDeleted);
 }
 
-RuntimeVariable* RuntimeVariableScope::GetVariable(const str& pName, bool pRecursive) const
+RuntimeVariable* RuntimeVariableScope::GetVariable(const HashedString& pName, bool pRecursive) const
 {
 	ScopeLock lLock(&mLock);
-	RuntimeVariable* lVariable = HashUtil::FindMapObject(mVariableTable, pName);
-	if (pRecursive && !lVariable && mParentScope)
+	RuntimeVariable* lVariable;
+	VariableTable::const_iterator x = mVariableTable.find(pName);
+	if (x != mVariableTable.end())
+	{
+		lVariable = x->second;
+	}
+	else if (pRecursive && mParentScope)
 	{
 		lVariable = mParentScope->GetVariable(pName, pRecursive);
 	}
+	else
+	{
+		lVariable = 0;
+	}
 	return (lVariable);
 }
-
-
-
-LOG_CLASS_DEFINE(GENERAL, RuntimeVariableScope);
 
 
 
@@ -447,6 +533,11 @@ std::list<str> RuntimeVariableCompleter::CompleteCommand(const str& pPartialComm
 	}
 	return (lCompletionList);
 }
+
+
+
+LOG_CLASS_DEFINE(GENERAL, RuntimeVariable);
+LOG_CLASS_DEFINE(GENERAL, RuntimeVariableScope);
 
 
 

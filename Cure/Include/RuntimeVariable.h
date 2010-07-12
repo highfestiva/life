@@ -24,30 +24,47 @@ namespace Cure
 class RuntimeVariable
 {
 public:
-	enum Type
+	enum Usage
 	{
-		TYPE_NORMAL	= 1,
-		TYPE_OVERRIDE,
-		TYPE_INTERNAL,
+		USAGE_NORMAL	= 1,
+		USAGE_OVERRIDE,
+		USAGE_INTERNAL,
 	};
 
-	RuntimeVariable(const str& pName, const str& pValue, Type pType);
+	RuntimeVariable(const str& pName, const str& pValue, Usage pUsage);
 	~RuntimeVariable();
 	const str& GetName() const;
 	bool operator==(const str& pValue);
 	const str& GetValue() const;
-	void SetValue(const str& pValue, Type pType);
+	bool GetBoolValue() const;
+	int GetIntValue() const;
+	double GetRealValue() const;
+	void SetValue(const str& pValue, Usage pUsage);
 	const str& GetDefaultValue() const;
 	void SetDefaultValue(const str& pDefaultValue);
-	Type GetType() const;
+	Usage GetUsage() const;
 
 private:
 	void operator=(const RuntimeVariable&);
 
+	enum DataType
+	{
+		DATATYPE_STRING,
+		DATATYPE_BOOL,
+		DATATYPE_INT,
+		DATATYPE_REAL,
+	};
+
 	str mName;
+	Usage mUsage;
+	DataType mDataType;
 	str mValue;
+	bool mBoolValue;
+	int mIntValue;
+	double mRealValue;
 	str mDefaultValue;
-	Type mType;
+
+	LOG_CLASS_DECLARE();
 };
 
 
@@ -67,7 +84,7 @@ public:
 		SEARCH_EXPORTABLE	= 1,
 		SEARCH_ALL,
 	};
-	typedef RuntimeVariable::Type SetMode;
+	typedef RuntimeVariable::Usage SetMode;
 
 	RuntimeVariableScope(RuntimeVariableScope* pParentScope);
 	virtual ~RuntimeVariableScope();
@@ -81,24 +98,29 @@ public:
 	bool SetValue(SetMode pSetMode, const str& pName, int pValue);
 	bool SetValue(SetMode pSetMode, const str& pName, bool pValue);
 	// Returns the parameter default value if the runtime variable is not found.
-	const str& GetDefaultValue(GetMode pMode, const str& pName, const str& pDefaultValue = EmptyString);
-	const str GetDefaultValue(GetMode pMode, const str& pName, const tchar* pDefaultValue);	// TRICKY: required for _T("") parameter to work.
-	double GetDefaultValue(GetMode pMode, const str& pName, double pDefaultValue);
-	int GetDefaultValue(GetMode pMode, const str& pName, int pDefaultValue);
-	bool GetDefaultValue(GetMode pMode, const str& pName, bool pDefaultValue);
+	const str& GetDefaultValue(GetMode pMode, const HashedString& pName, const str& pDefaultValue = EmptyString);
+	const str GetDefaultValue(GetMode pMode, const HashedString& pName, const tchar* pDefaultValue);	// TRICKY: required for _T("") parameter to work.
+	double GetDefaultValue(GetMode pMode, const HashedString& pName, double pDefaultValue);
+	int GetDefaultValue(GetMode pMode, const HashedString& pName, int pDefaultValue);
+	bool GetDefaultValue(GetMode pMode, const HashedString& pName, bool pDefaultValue);
 
 	bool EraseVariable(const str& pName);
 
 	std::list<str> GetVariableNameList(SearchType pSearchType, int pStartScopeIndex = 0, int pEndScopeIndex = 1000);
 
 private:
+	const str& GetDefaultValue(GetMode pMode, const str& pName, RuntimeVariable* pVariable, const str& pDefaultValue);
+	double GetDefaultValue(GetMode pMode, const str& pName, RuntimeVariable* pVariable, double pDefaultValue);
+	int GetDefaultValue(GetMode pMode, const str& pName, RuntimeVariable* pVariable, int pDefaultValue);
+	bool GetDefaultValue(GetMode pMode, const str& pName, RuntimeVariable* pVariable, bool pDefaultValue);
+
 	void CreateLocalVariable(const str& pName, const str& pValue, SetMode pSetMode);
 	bool DeleteLocalVariable(const str& pName);
 
-	RuntimeVariable* GetVariable(const str& pName, bool pRecursive = true) const;
+	RuntimeVariable* GetVariable(const HashedString& pName, bool pRecursive = true) const;
 
-	typedef std::hash_map<str, RuntimeVariable*> VariableTable;
-	typedef std::pair<str, RuntimeVariable*> VariablePair;
+	typedef std::hash_map<HashedString, RuntimeVariable*> VariableTable;
+	typedef std::pair<HashedString, RuntimeVariable*> VariablePair;
 	RuntimeVariableScope* mParentScope;
 	mutable Lock mLock;
 	VariableTable mVariableTable;
@@ -124,16 +146,18 @@ private:
 
 
 
-#define CURE_RTVAR_GETSET(scope, name, def)		(scope)->GetDefaultValue(Cure::RuntimeVariableScope::READ_WRITE, _T(name), def)
-#define CURE_RTVAR_GET(scope, name, def)		(scope)->GetDefaultValue(Cure::RuntimeVariableScope::READ_ONLY, _T(name), def)
-#define CURE_RTVAR_TRYGET(scope, name, def)		(scope)->GetDefaultValue(Cure::RuntimeVariableScope::READ_IGNORE, _T(name), def)
-#define CURE_RTVAR_GET_DEFAULT(scope, name, def)	(scope)->GetDefaultValue(Cure::RuntimeVariableScope::READ_DEFAULT, _T(name), def)
-#define CURE_RTVAR_SET(scope, name, value)		(scope)->SetValue(Cure::RuntimeVariable::TYPE_NORMAL, _T(name), value)
-#define CURE_RTVAR_OVERRIDE(scope, name, value)		(scope)->SetValue(Cure::RuntimeVariable::TYPE_OVERRIDE, _T(name), value)
-#define CURE_RTVAR_INTERNAL(scope, name, value)		(scope)->SetValue(Cure::RuntimeVariable::TYPE_INTERNAL, _T(name), value)
+#define CURE_RTVAR_TOKEN(var, name)				static const HashedString __HashedString_##var(_T(name));
+#define CURE_RTVAR_SLOW_GET(scope, name, def)			(scope)->GetDefaultValue(Cure::RuntimeVariableScope::READ_ONLY, _T(name), def)
+#define CURE_RTVAR_SLOW_TRYGET(scope, name, def)		(scope)->GetDefaultValue(Cure::RuntimeVariableScope::READ_IGNORE, _T(name), def)
+#define CURE_RTVAR_GET(var, op, scope, name, def)		CURE_RTVAR_TOKEN(var, name); var op (scope)->GetDefaultValue(Cure::RuntimeVariableScope::READ_ONLY, _T(name), def)
+#define CURE_RTVAR_TRYGET(var, op, scope, name, def)		CURE_RTVAR_TOKEN(var, name); var op (scope)->GetDefaultValue(Cure::RuntimeVariableScope::READ_IGNORE, _T(name), def)
+#define CURE_RTVAR_SET(scope, name, value)			(scope)->SetValue(Cure::RuntimeVariable::USAGE_NORMAL, _T(name), value)
+#define CURE_RTVAR_OVERRIDE(scope, name, value)			(scope)->SetValue(Cure::RuntimeVariable::USAGE_OVERRIDE, _T(name), value)
+#define CURE_RTVAR_INTERNAL(scope, name, value)			(scope)->SetValue(Cure::RuntimeVariable::USAGE_INTERNAL, _T(name), value)
 #define CURE_RTVAR_INTERNAL_ARITHMETIC(scope, name, type, arith, value, min)	\
 {										\
-	type _new_val = CURE_RTVAR_TRYGET(scope, name, min) arith value;	\
+	type _new_val;								\
+	CURE_RTVAR_TRYGET(_new_val, =, scope, name, min) arith value;		\
 	_new_val = (_new_val >= min)? _new_val : min;				\
 	CURE_RTVAR_INTERNAL(scope, name, _new_val);				\
 }

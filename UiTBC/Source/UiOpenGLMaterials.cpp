@@ -133,7 +133,7 @@ void OpenGLMatSingleColorSolid::RenderGeometry(TBC::GeometryBase* pGeometry)
 {
 	PrepareBasicMaterialSettings(pGeometry);
 	RenderBaseGeometry(pGeometry);
-	((OpenGLRenderer*)GetRenderer())->ResetAmbientLight();
+	//((OpenGLRenderer*)GetRenderer())->ResetAmbientLight();
 }
 
 void OpenGLMatSingleColorSolid::PreRender()
@@ -316,7 +316,7 @@ void OpenGLMatVertexColorSolid::RenderGeometry(TBC::GeometryBase* pGeometry)
 			       pGeometry->GetIndexData());
 	}
 
-	((OpenGLRenderer*)GetRenderer())->ResetAmbientLight();
+	//((OpenGLRenderer*)GetRenderer())->ResetAmbientLight();
 }
 
 
@@ -900,7 +900,7 @@ void OpenGLMatSingleTextureEnvMapSolid::RenderGeometry(TBC::GeometryBase* pGeome
 			       GL_UNSIGNED_INT,
 			       pGeometry->GetIndexData());
 	}
-	((OpenGLRenderer*)GetRenderer())->ResetAmbientLight();
+	//((OpenGLRenderer*)GetRenderer())->ResetAmbientLight();
 }
 
 void OpenGLMatSingleTextureEnvMapSolid::PrepareBasicMaterialSettings(TBC::GeometryBase* pGeometry)
@@ -1128,7 +1128,7 @@ void OpenGLMatTextureAndLightmap::RenderGeometry(TBC::GeometryBase* pGeometry)
 			       GL_UNSIGNED_INT,
 			       pGeometry->GetIndexData());
 	}
-	((OpenGLRenderer*)GetRenderer())->ResetAmbientLight();
+	//((OpenGLRenderer*)GetRenderer())->ResetAmbientLight();
 }
 
 
@@ -1649,7 +1649,7 @@ void OpenGLMatSingleColorSolidPXS::RenderGeometry(TBC::GeometryBase* pGeometry)
 			       GL_UNSIGNED_INT,
 			       pGeometry->GetIndexData());
 	}
-	((OpenGLRenderer*)GetRenderer())->ResetAmbientLight();
+	//((OpenGLRenderer*)GetRenderer())->ResetAmbientLight();
 }
 
 
@@ -1760,7 +1760,7 @@ void OpenGLMatSingleTextureSolidPXS::RenderGeometry(TBC::GeometryBase* pGeometry
 			       GL_UNSIGNED_INT,
 			       pGeometry->GetIndexData());
 	}
-	((OpenGLRenderer*)GetRenderer())->ResetAmbientLight();
+	//((OpenGLRenderer*)GetRenderer())->ResetAmbientLight();
 }
 
 
@@ -1905,7 +1905,7 @@ void OpenGLMatTextureAndLightmapPXS::RenderGeometry(TBC::GeometryBase* pGeometry
 			       GL_UNSIGNED_INT,
 			       pGeometry->GetIndexData());
 	}
-	((OpenGLRenderer*)GetRenderer())->ResetAmbientLight();
+	//((OpenGLRenderer*)GetRenderer())->ResetAmbientLight();
 }
 
 
@@ -2093,7 +2093,7 @@ void OpenGLMatTextureSBMapPXS::RenderGeometry(TBC::GeometryBase* pGeometry)
 			       GL_UNSIGNED_INT,
 			       pGeometry->GetIndexData());
 	}
-	((OpenGLRenderer*)GetRenderer())->ResetAmbientLight();
+	//((OpenGLRenderer*)GetRenderer())->ResetAmbientLight();
 }
 
 

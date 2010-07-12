@@ -90,6 +90,8 @@ private:
 	UiTbc::DesktopWindow* mDesktopWindow;
 	UiLepra::InputManager* mInput;
 	UiLepra::SoundManager* mSound;
+	double mSoundRollOffShadow;	// Optimization.
+	double mSoundDopplerShadow;	// Optimization.
 
 	LOG_CLASS_DECLARE();
 };

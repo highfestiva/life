@@ -233,7 +233,8 @@ void UiConsole::OnConsoleChange()
 
 void UiConsole::PrintHelp()
 {
-	str lKeys = CURE_RTVAR_GET(mManager->GetVariableScope(), RTVAR_CTRL_UI_CONTOGGLE, _T("???"));
+	str lKeys;
+	CURE_RTVAR_GET(lKeys, =, mManager->GetVariableScope(), RTVAR_CTRL_UI_CONTOGGLE, _T("???"));
 	typedef strutil::strvec SV;
 	SV lKeyArray = strutil::Split(lKeys, _T(", \t"));
 	SV lNiceKeys;

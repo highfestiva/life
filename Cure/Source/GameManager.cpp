@@ -89,13 +89,18 @@ bool GameManager::BeginTick()
 {
 	LEPRA_MEASURE_SCOPE(BeginTick);
 
-	if (CURE_RTVAR_GET(GetVariableScope(), RTVAR_PERFORMANCE_TEXT_ENABLE, false))
+	bool lPerformanceText;
+	CURE_RTVAR_GET(lPerformanceText, =, GetVariableScope(), RTVAR_PERFORMANCE_TEXT_ENABLE, false);
+	if (lPerformanceText)
 	{
-		const double lReportInterval = CURE_RTVAR_GET(GetVariableScope(), RTVAR_PERFORMANCE_TEXT_INTERVAL, 10.0);
+		double lReportInterval;
+		CURE_RTVAR_GET(lReportInterval, =, GetVariableScope(), RTVAR_PERFORMANCE_TEXT_INTERVAL, 10.0);
 		TryReportPerformance(lReportInterval);
 	}
 
-	if (CURE_RTVAR_GET(GetVariableScope(), RTVAR_PHYSICS_PARALLEL, true))
+	bool lParallelPhysics;
+	CURE_RTVAR_GET(lParallelPhysics, =, GetVariableScope(), RTVAR_PHYSICS_PARALLEL, true);
+	if (lParallelPhysics)
 	{
 		CreatePhysicsThread();
 	}
@@ -392,7 +397,8 @@ void GameManager::PhysicsTick()
 
 	mPhysics->InitCurrentThread();
 
-	const int lMicroSteps = CURE_RTVAR_GET(GetVariableScope(), RTVAR_PHYSICS_MICROSTEPS, 3);
+	int lMicroSteps;
+	CURE_RTVAR_GET(lMicroSteps, =, GetVariableScope(), RTVAR_PHYSICS_MICROSTEPS, 3);
 	const int lAffordedStepCount = mTime->GetAffordedPhysicsStepCount() * lMicroSteps;
 	const float lStepIncrement = mTime->GetAffordedPhysicsStepTime() / lMicroSteps;
 	/*if (lAffordedStepCount != 1 && !Math::IsEpsEqual(lStepIncrement, 1/60.0f))

@@ -50,7 +50,8 @@ void Vehicle::OnPhysicsTick()
 		return;
 	}
 	const float lFrameTime = std::min(0.1f, GetManager()->GetGameManager()->GetTimeManager()->GetNormalFrameTime());
-	bool lIsChild = CURE_RTVAR_GET(mManager->GetGameManager()->GetVariableScope(), RTVAR_GAME_ISCHILD, true);
+	bool lIsChild;
+	CURE_RTVAR_GET(lIsChild, =, mManager->GetGameManager()->GetVariableScope(), RTVAR_GAME_ISCHILD, true);
 	const TBC::PhysicsManager* lPhysicsManager = mManager->GetGameManager()->GetPhysicsManager();
 	Vector3DF lVelocity;
 	lPhysicsManager->GetBodyVelocity(lPhysics->GetBoneGeometry(lPhysics->GetRootBone())->GetBodyId(), lVelocity);

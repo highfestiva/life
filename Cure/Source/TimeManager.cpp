@@ -17,7 +17,7 @@ namespace Cure
 
 
 TimeManager::TimeManager():
-	mTargetFrameRate(CURE_RTVAR_GET(Cure::GetSettings(), RTVAR_PHYSICS_FPS, 60))
+	mTargetFrameRate(CURE_RTVAR_SLOW_GET(Cure::GetSettings(), RTVAR_PHYSICS_FPS, 60))
 {
 	Clear(0);
 }
@@ -45,7 +45,7 @@ void TimeManager::Clear(int pPhysicsFrameCounter)
 
 void TimeManager::TickTime()
 {
-	mTargetFrameRate = CURE_RTVAR_GET(Cure::GetSettings(), RTVAR_PHYSICS_FPS, 2);
+	CURE_RTVAR_GET(mTargetFrameRate, =, Cure::GetSettings(), RTVAR_PHYSICS_FPS, 2);
 
 	mCurrentFrameTime = (float)mTime.PopTimeDiff();
 	if (mCurrentFrameTime > 1.0)	// Never take longer steps than one second.
@@ -146,7 +146,9 @@ float TimeManager::GetAffordedPhysicsTotalTime() const
 
 int TimeManager::GetDesiredMicroSteps() const
 {
-	return (mTargetFrameRate * CURE_RTVAR_GET(Cure::GetSettings(), RTVAR_PHYSICS_MICROSTEPS, 1));
+	int lMicroSteps;
+	CURE_RTVAR_GET(lMicroSteps, =, Cure::GetSettings(), RTVAR_PHYSICS_MICROSTEPS, 1);
+	return (mTargetFrameRate * lMicroSteps);
 }
 
 

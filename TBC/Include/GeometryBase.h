@@ -323,6 +323,7 @@ protected:
 		CONVEX_VOLUME_VALID          = (1 << 14),
 		ALWAYS_VISIBLE               = (1 << 15),
 		TRANSFORMATION_CHANGED       = (1 << 16),
+		REF_TRANSFORMATION_CHANGED   = (1 << 17),
 	};
 
 	void SetFlag(Lepra::uint32 pFlag, bool pValue) { if(pValue) SetFlag(pFlag); else ClearFlag(pFlag); }

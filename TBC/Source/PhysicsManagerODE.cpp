@@ -393,14 +393,12 @@ void PhysicsManagerODE::GetBodyTransform(BodyID pBodyId, TransformationF& pTrans
 		return;
 	}
 
-	const dReal* p = dGeomGetPosition(lObject->mGeomID);
+	const dReal* p = ::dGeomGetPosition(lObject->mGeomID);
 	dQuaternion q;
-	dGeomGetQuaternion(lObject->mGeomID, q);
+	::dGeomGetQuaternion(lObject->mGeomID, q);
 
-	const Vector3DF lPos(p[0], p[1], p[2]);
-	pTransform.SetPosition(lPos);
-	QuaternionF lQuat(q[0], q[1], q[2], q[3]);
-	pTransform.SetOrientation(lQuat);
+	pTransform.GetPosition().Set(p[0], p[1], p[2]);
+	pTransform.GetOrientation().Set(q[0], q[1], q[2], q[3]);
 }
 
 void PhysicsManagerODE::SetBodyTransform(BodyID pBodyId, const TransformationF& pTransform)

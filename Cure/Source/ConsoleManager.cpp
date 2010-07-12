@@ -223,7 +223,7 @@ int ConsoleManager::TranslateCommand(const str& pCommand) const
 void ConsoleManager::PrintCommandList(const std::list<str>& pCommandList)
 {
 	std::list<str>::const_iterator x = pCommandList.begin();
-	const int lSpacing = CURE_RTVAR_GET(mVariableScope, RTVAR_CONSOLE_COLUMNSPACING, 2);
+	const int lSpacing = CURE_RTVAR_SLOW_GET(mVariableScope, RTVAR_CONSOLE_COLUMNSPACING, 2);
 	size_t lLongestCommand = 10;
 	for (; x != pCommandList.end(); ++x)
 	{
@@ -238,7 +238,7 @@ void ConsoleManager::PrintCommandList(const std::list<str>& pCommandList)
 		str lCommand = strutil::Format(lFormat.c_str(), x->c_str());
 		mConsoleLogger->OnLogRawMessage(lCommand);
 		lIndent += lCommand.length();
-		const size_t lConsoleWidth = CURE_RTVAR_GET(GetVariableScope(), RTVAR_CONSOLE_CHARACTERWIDTH, 80);
+		const size_t lConsoleWidth = CURE_RTVAR_SLOW_GET(GetVariableScope(), RTVAR_CONSOLE_CHARACTERWIDTH, 80);
 		if (lIndent+lLongestCommand >= lConsoleWidth)
 		{
 			mConsoleLogger->OnLogRawMessage(_T("\n"));
@@ -284,9 +284,9 @@ void ConsoleManager::ConsoleThreadEntry()
 		int c = mConsolePrompt->WaitChar();
 		mConsoleLogger->SetAutoPrompt(_T(""));
 
-		const str lWordDelimitors(CURE_RTVAR_GET(GetVariableScope(), RTVAR_CONSOLE_CHARACTERDELIMITORS, _T(" ")));
+		const str lWordDelimitors(CURE_RTVAR_SLOW_GET(GetVariableScope(), RTVAR_CONSOLE_CHARACTERDELIMITORS, _T(" ")));
 
-		if (c == CURE_RTVAR_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_COMPLETION, (int)'\t'))
+		if (c == CURE_RTVAR_SLOW_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_COMPLETION, (int)'\t'))
 		{
 			str lBestCompletionString;
 			std::list<str> lCompletions =
@@ -305,14 +305,14 @@ void ConsoleManager::ConsoleThreadEntry()
 				++lEditIndex;
 			}
 		}
-		else if (c == CURE_RTVAR_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_ENTER, (int)'\r'))
+		else if (c == CURE_RTVAR_SLOW_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_ENTER, (int)'\r'))
 		{
 			mConsoleLogger->OnLogRawMessage(_T("\r")+lPrompt+lInputText+_T("\n"));
 			mConsoleCommandManager->Execute(lInputText, true);
 			lInputText = _T("");
 			lEditIndex = 0;
 		}
-		else if (c == CURE_RTVAR_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_BACKSPACE, (int)'\b'))
+		else if (c == CURE_RTVAR_SLOW_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_BACKSPACE, (int)'\b'))
 		{
 			if (lEditIndex > 0)
 			{
@@ -326,7 +326,7 @@ void ConsoleManager::ConsoleThreadEntry()
 				lInputText = lNewInputText;
 			}
 		}
-		else if (c == CURE_RTVAR_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_DELETE, ConsolePrompt::CON_KEY_DELETE))
+		else if (c == CURE_RTVAR_SLOW_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_DELETE, ConsolePrompt::CON_KEY_DELETE))
 		{
 			if (lEditIndex < lInputText.length())
 			{
@@ -338,24 +338,24 @@ void ConsoleManager::ConsoleThreadEntry()
 				lInputText = lNewInputText;
 			}
 		}
-		else if (c == CURE_RTVAR_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_CTRLLEFT, ConsolePrompt::CON_KEY_CTRL_LEFT))
+		else if (c == CURE_RTVAR_SLOW_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_CTRLLEFT, ConsolePrompt::CON_KEY_CTRL_LEFT))
 		{
 			lEditIndex = strutil::FindPreviousWord(lInputText, lWordDelimitors, lEditIndex);
 		}
-		else if (c == CURE_RTVAR_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_CTRLRIGHT, ConsolePrompt::CON_KEY_CTRL_RIGHT))
+		else if (c == CURE_RTVAR_SLOW_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_CTRLRIGHT, ConsolePrompt::CON_KEY_CTRL_RIGHT))
 		{
 			lEditIndex = strutil::FindNextWord(lInputText, lWordDelimitors, lEditIndex);
 		}
-		else if (c == CURE_RTVAR_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_HOME, ConsolePrompt::CON_KEY_HOME))
+		else if (c == CURE_RTVAR_SLOW_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_HOME, ConsolePrompt::CON_KEY_HOME))
 		{
 			lEditIndex = 0;
 		}
-		else if (c == CURE_RTVAR_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_END, ConsolePrompt::CON_KEY_END))
+		else if (c == CURE_RTVAR_SLOW_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_END, ConsolePrompt::CON_KEY_END))
 		{
 			lEditIndex = lInputText.length();
 		}
-		else if (c == CURE_RTVAR_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_UP, ConsolePrompt::CON_KEY_UP) ||
-			c == CURE_RTVAR_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_DOWN, ConsolePrompt::CON_KEY_DOWN))
+		else if (c == CURE_RTVAR_SLOW_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_UP, ConsolePrompt::CON_KEY_UP) ||
+			c == CURE_RTVAR_SLOW_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_DOWN, ConsolePrompt::CON_KEY_DOWN))
 		{
 			// Erase current text.
 			mConsolePrompt->Backspace(lEditIndex);
@@ -376,32 +376,32 @@ void ConsoleManager::ConsoleThreadEntry()
 			lInputText = mConsoleCommandManager->GetHistory(lDesiredHistoryIndex);
 			lEditIndex = lInputText.length();
 		}
-		else if (c == CURE_RTVAR_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_LEFT, ConsolePrompt::CON_KEY_LEFT))
+		else if (c == CURE_RTVAR_SLOW_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_LEFT, ConsolePrompt::CON_KEY_LEFT))
 		{
 			if (lEditIndex > 0)
 			{
 				--lEditIndex;
 			}
 		}
-		else if (c == CURE_RTVAR_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_RIGHT, ConsolePrompt::CON_KEY_RIGHT))
+		else if (c == CURE_RTVAR_SLOW_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_RIGHT, ConsolePrompt::CON_KEY_RIGHT))
 		{
 			if (lEditIndex < lInputText.length())
 			{
 				++lEditIndex;
 			}
 		}
-		else if (c == CURE_RTVAR_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_ESC, ConsolePrompt::CON_KEY_ESCAPE))
+		else if (c == CURE_RTVAR_SLOW_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_ESC, ConsolePrompt::CON_KEY_ESCAPE))
 		{
 			mConsolePrompt->Backspace(lEditIndex);
 			mConsolePrompt->EraseText(lInputText.length());
 			lInputText = _T("");
 			lEditIndex = 0;
 		}
-		else if (c == CURE_RTVAR_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_PAGEUP, ConsolePrompt::CON_KEY_PAGE_UP))
+		else if (c == CURE_RTVAR_SLOW_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_PAGEUP, ConsolePrompt::CON_KEY_PAGE_UP))
 		{
 			mConsoleLogger->StepPage(-1);
 		}
-		else if (c == CURE_RTVAR_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_PAGEDOWN, ConsolePrompt::CON_KEY_PAGE_DOWN))
+		else if (c == CURE_RTVAR_SLOW_GET(GetVariableScope(), RTVAR_CONSOLE_KEY_PAGEDOWN, ConsolePrompt::CON_KEY_PAGE_DOWN))
 		{
 			mConsoleLogger->StepPage(+1);
 		}

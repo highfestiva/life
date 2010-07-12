@@ -84,7 +84,7 @@ private:
 	float GetSlavesVerticalAnimationTarget() const;
 	void Profile();
 	bool QueryQuit();
-	void DrawFps() const;
+	void DrawDebugData() const;
 	void DrawPerformanceLineGraph2d() const;
 
 	float GetPowerSaveAmount() const;

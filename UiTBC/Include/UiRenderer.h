@@ -227,7 +227,7 @@ public:
 		// Tells wether the geometry is subject to shadow casting.
 		Shadows mShadow;
 
-		unsigned int mLastFrameShadowsUpdated;
+		unsigned mLastFrameShadowsUpdated;
 	};
 
 	class TextureData
@@ -320,12 +320,14 @@ public:
 	Renderer(Canvas* pScreen);
 	virtual ~Renderer();
 
+	void ClearDebugInfo();
+
 	// Implementing the GeometryBase::Listener interface.
 	void DeletingGeometry(TBC::GeometryBase* pGeometry);
 
 	const Canvas* GetScreen() const;
 
-	virtual void Clear(unsigned int pClearFlags = CLEAR_COLORBUFFER | CLEAR_DEPTHBUFFER) = 0;
+	virtual void Clear(unsigned pClearFlags = CLEAR_COLORBUFFER | CLEAR_DEPTHBUFFER) = 0;
 	virtual void SetClearColor(const Color& pColor) = 0;
 
 	void EnableOutlineRendering(bool pEnable);
@@ -387,7 +389,7 @@ public:
 
 	virtual void SetShadowsEnabled(bool pEnabled, ShadowHint pHint);
 	bool GetShadowsEnabled();
-	void SetShadowUpdateFrameDelay(unsigned int pFrameDelay);
+	void SetShadowUpdateFrameDelay(unsigned pFrameDelay);
 
 	virtual void SetFallbackMaterialEnabled(bool pEnabled);
 	bool GetFallbackMaterialEnabled();
@@ -487,14 +489,14 @@ public:
 	void UpdateShadowMaps();
 	void UpdateShadowMaps(TBC::GeometryBase* pGeometry);
 
-	virtual unsigned int RenderScene() = 0;
+	virtual unsigned RenderScene() = 0;
 
 	// Used for rendering stuff that are NOT in the world, such as
 	// 3D-objects in the GUI. The position of the geometry is considered
 	// relative to the camera.
 	virtual void RenderRelative(TBC::GeometryBase* pGeometry, const QuaternionF* pLightOrientation) = 0;
 
-	unsigned int GetCurrentFrame() const;
+	unsigned GetCurrentFrame() const;
 
 	//
 	// Special functions implemented to support portal rendering.
@@ -511,10 +513,13 @@ public:
 	bool IsFacingFront(const Vector3DF* pVertex, int pNumVertices);
 
 	// Returns the triangle count in the scene. 
-	// If pVisibleOnly == true, only counting visible objects.
-	int QueryTriangleCount(bool pVisibleOnly);
+	// Parameter controls counting visible OR culled triangles.
+	int GetTriangleCount(bool pVisible);
 
 	virtual void DrawLine(const Vector3DF& pPosition, const Vector3DF& pVector, const Color& pColor) = 0;
+
+	void CalcCamCulling();
+	bool CheckCamCulling(const Vector3DF& pPosition, float pBoundingRadius);
 
 protected:
 	enum GeomReleaseOption
@@ -550,7 +555,7 @@ protected:
 	virtual GeometryData* CreateGeometryData() = 0;
 	virtual TextureData* CreateTextureData(TextureID pTextureID) = 0;
 
-	static bool CheckFlag(unsigned int pFlags, unsigned int pFlag);
+	static bool CheckFlag(unsigned pFlags, unsigned pFlag);
 	float GetAspectRatio() const;
 
 	bool CheckCulling(const TransformationF& pTransform, double pBoundingRadius);
@@ -570,8 +575,7 @@ protected:
 	virtual bool BindShadowGeometry(UiTbc::ShadowVolume* pShadowGeometry, LightHint pLightHint) = 0;
 	virtual void ReleaseGeometry(TBC::GeometryBase* pUserGeometry, GeomReleaseOption pOption) = 0;
 
-private:
-
+protected:
 	int AllocLight();
 
 	void ReleaseShadowVolumes();
@@ -586,9 +590,10 @@ private:
 	static float GetLightInfluence(const LightData& pLightData);
 
 	Material* mMaterial[NUM_MATERIALTYPES];
-	unsigned int mCurrentFrame;
+	unsigned mCurrentFrame;
 
-	unsigned int mTriangleCount;
+	unsigned mVisibleTriangleCount;
+	unsigned mCulledTriangleCount;
 
 	Canvas* mScreen;
 
@@ -602,6 +607,7 @@ private:
 	float mNear;
 	float mFar;
 	Vector3DF mFrustumPlanes[4];
+	Vector3DF mCamFrustumPlanes[4];
 
 	bool mIsOutlineRenderEnabled;
 	bool mIsWireframeEnabled;
@@ -640,7 +646,7 @@ private:
 	bool mFallbackMaterialEnabled;
 
 	ShadowHint mShadowHint;
-	unsigned int mShadowUpdateFrameDelay;
+	unsigned mShadowUpdateFrameDelay;
 
 	PixelRect mClippingRect;
 	TransformationF mCameraTransformation;

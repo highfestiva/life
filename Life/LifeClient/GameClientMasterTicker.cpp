@@ -117,7 +117,7 @@ bool GameClientMasterTicker::CreateSlave()
 	if (!mServer)
 	{
 		bool lIsLocalServer = false;
-		const str lServerUrl = strutil::Split(CURE_RTVAR_GET(UiCure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("0.0.0.0:16650")), _T(":"), 1)[0];
+		const str lServerUrl = strutil::Split(CURE_RTVAR_SLOW_GET(UiCure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("0.0.0.0:16650")), _T(":"), 1)[0];
 		IPAddress lServerIpAddress;
 		IPAddress lExternalIpAddress;
 		if (Network::ResolveHostname(lServerUrl, lServerIpAddress) && Network::ResolveHostname(_T(""), lExternalIpAddress))
@@ -212,6 +212,8 @@ bool GameClientMasterTicker::Tick()
 	{
 		LEPRA_MEASURE_SCOPE(RenderSlaves);
 
+		mUiManager->GetRenderer()->ClearDebugInfo();
+
 		// Start rendering machine directly afterwards.
 		int lSlaveIndex = 0;
 		for (x = mSlaveArray.begin(); lOk && x != mSlaveArray.end(); ++x)
@@ -241,7 +243,7 @@ bool GameClientMasterTicker::Tick()
 
 	{
 		LEPRA_MEASURE_SCOPE(DrawGraph);
-		DrawFps();
+		DrawDebugData();
 		DrawPerformanceLineGraph2d();
 	}
 
@@ -378,11 +380,16 @@ PixelRect GameClientMasterTicker::GetRenderArea() const
 		mUiManager->GetDisplayManager()->GetHeight()-1));
 }
 
+
+
 float GameClientMasterTicker::UpdateFrustum()
 {
-	const float lFov = (float)CURE_RTVAR_GET(UiCure::GetSettings(), RTVAR_UI_3D_FOV, 45.0);
-	const float lClipNear = (float)CURE_RTVAR_GET(UiCure::GetSettings(), RTVAR_UI_3D_CLIPNEAR, 0.1);
-	const float lClipFar = (float)CURE_RTVAR_GET(UiCure::GetSettings(), RTVAR_UI_3D_CLIPFAR, 1000.0);
+	float lFov;
+	float lClipNear;
+	float lClipFar;
+	CURE_RTVAR_GET(lFov, =(float), UiCure::GetSettings(), RTVAR_UI_3D_FOV, 45.0);
+	CURE_RTVAR_GET(lClipNear, =(float), UiCure::GetSettings(), RTVAR_UI_3D_CLIPNEAR, 0.1);
+	CURE_RTVAR_GET(lClipFar, =(float), UiCure::GetSettings(), RTVAR_UI_3D_CLIPFAR, 1000.0);
 	mUiManager->GetRenderer()->SetViewFrustum(lFov, lClipNear, lClipFar);
 	return (lFov);
 }
@@ -630,7 +637,9 @@ void GameClientMasterTicker::UpdateSlaveLayout()
 	}
 
 	int lAveragedSlaves = 1;
-	float lFrameTime = 1/(float)CURE_RTVAR_GET(Cure::GetSettings(), RTVAR_PHYSICS_FPS, 30.0);
+	float lFps;
+	CURE_RTVAR_GET(lFps, =(float), Cure::GetSettings(), RTVAR_PHYSICS_FPS, 30);
+	float lFrameTime = 1/lFps;
 	for (int x = 0; x < 4; ++x)
 	{
 		if (mSlaveArray[x])
@@ -774,7 +783,8 @@ float GameClientMasterTicker::GetSlavesVerticalAnimationTarget() const
 
 void GameClientMasterTicker::Profile()
 {
-	const bool lDebugGraph = CURE_RTVAR_GET(UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_GRAPH, false);
+	bool lDebugGraph;
+	CURE_RTVAR_GET(lDebugGraph, =, UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_GRAPH, false);
 	if (!lDebugGraph)
 	{
 		return;
@@ -866,28 +876,41 @@ bool GameClientMasterTicker::QueryQuit()
 	return (false);
 }
 
-void GameClientMasterTicker::DrawFps() const
+void GameClientMasterTicker::DrawDebugData() const
 {
-	const bool lDebugging = CURE_RTVAR_GET(UiCure::GetSettings(), RTVAR_DEBUG_ENABLE, false);
+	bool lDebugging;
+	CURE_RTVAR_GET(lDebugging, =, UiCure::GetSettings(), RTVAR_DEBUG_ENABLE, false);
 	if (!lDebugging)
 	{
 		return;
 	}
 
 	ScopePerformanceData* lMainLoop = ScopePerformanceData::GetRoots()[0];
-	str lFps = strutil::Format(_T("%.1f"), 1/lMainLoop->GetSlidingAverage());
+	str lFps = strutil::Format(_T("FPS %.1f"), 1/lMainLoop->GetSlidingAverage());
+	int h = 20;
+	bool lShowPerformanceCounters;
+	CURE_RTVAR_GET(lShowPerformanceCounters, =, UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_COUNT, false);
+	if (lShowPerformanceCounters)
+	{
+		lFps += strutil::Format(_T("\nvTRI %i\ncTRI %i"),
+			mUiManager->GetRenderer()->GetTriangleCount(true),
+			mUiManager->GetRenderer()->GetTriangleCount(false));
+		h += 16*2;
+	}
 	mUiManager->GetPainter()->SetColor(Color(0, 0, 0));
 	const int lRight = mUiManager->GetDisplayManager()->GetWidth();
-	mUiManager->GetPainter()->FillRect(lRight-45, 3, lRight-5, 20);
+	mUiManager->GetPainter()->FillRect(lRight-80, 3, lRight-5, h);
 	mUiManager->GetPainter()->SetColor(Color(200, 200, 0));
-	mUiManager->GetPainter()->PrintText(lFps, lRight-40, 5);
+	mUiManager->GetPainter()->PrintText(lFps, lRight-75, 5);
 }
 
 void GameClientMasterTicker::DrawPerformanceLineGraph2d() const
 {
-	const bool lDebugGraph = CURE_RTVAR_GET(UiCure::GetSettings(), RTVAR_DEBUG_ENABLE, false) &&
-		CURE_RTVAR_GET(UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_GRAPH, false);
-	if (!lDebugGraph)
+	bool lDebug;
+	bool lDebugGraph;
+	CURE_RTVAR_GET(lDebug, =, UiCure::GetSettings(), RTVAR_DEBUG_ENABLE, false);
+	CURE_RTVAR_GET(lDebugGraph, =, UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_GRAPH, false);
+	if (!lDebug || !lDebugGraph)
 	{
 		return;
 	}
@@ -908,7 +931,9 @@ void GameClientMasterTicker::DrawPerformanceLineGraph2d() const
 
 	const int lMargin = 10;
 	const float lScale = (mUiManager->GetDisplayManager()->GetWidth() - lMargin*2)/lLongestRootTime;
-	int lY = lMargin + CURE_RTVAR_GET(UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_YOFFSET, 0);
+	int lYOffset;
+	CURE_RTVAR_GET(lYOffset, =, UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_YOFFSET, 0);
+	int lY = lMargin + lYOffset;
 	for (size_t lRootIndex = 0; lRootIndex < lRoots.size(); ++lRootIndex)
 	{
 		if (mPerformanceGraphList.size() <= lRootIndex)
@@ -918,7 +943,8 @@ void GameClientMasterTicker::DrawPerformanceLineGraph2d() const
 
 		mPerformanceGraphList[lRootIndex].Render(lMargin, lScale, lY);
 
-		const bool lDebugNames = CURE_RTVAR_GET(UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_NAMES, false);
+		bool lDebugNames;
+		CURE_RTVAR_GET(lDebugNames, =, UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_NAMES, false);
 		if (lDebugNames)
 		{
 			mPerformanceGraphList[lRootIndex].RenderNames(lMargin, lY);
@@ -1098,7 +1124,7 @@ void GameClientMasterTicker::StashCalibration()
 		for (; y != lCalibration.end(); ++y)
 		{
 			const UiLepra::InputDevice::CalibrationElement& lElement = *y;
-			UiCure::GetSettings()->SetValue(Cure::RuntimeVariable::TYPE_NORMAL,
+			UiCure::GetSettings()->SetValue(Cure::RuntimeVariable::USAGE_NORMAL,
 				_T("Calibration.")+lDeviceId+_T(".")+lElement.first, lElement.second);
 		}
 	}

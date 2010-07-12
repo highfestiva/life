@@ -1252,6 +1252,8 @@ bool TestSkinningSaveLoad(const Lepra::LogDecorator& pLog, double pShowTime)
 		lStructure.SetOriginalBoneTransformation(1, lTransform);
 		lStructure.SetPhysicsType(TBC::ChunkyPhysics::DYNAMIC);
 		lStructure.BoneHierarchy::FinalizeInit(TBC::BoneHierarchy::TRANSFORM_NONE);
+		lTestOk = (lStructure.GetBoneChildCount(lStructure.GetRootBone()) == 1);
+		assert(lTestOk);
 		Lepra::DiskFile lFile;
 		lTestOk = lFile.Open(lStructureName, Lepra::DiskFile::MODE_WRITE);
 		assert(lTestOk);
@@ -1278,6 +1280,11 @@ bool TestSkinningSaveLoad(const Lepra::LogDecorator& pLog, double pShowTime)
 		if (lTestOk)
 		{
 			lTestOk = lStructure.BoneHierarchy::FinalizeInit(TBC::BoneHierarchy::TRANSFORM_NONE);
+			assert(lTestOk);
+		}
+		if (lTestOk)
+		{
+			lTestOk = (lStructure.GetBoneChildCount(lStructure.GetRootBone()) == 1);
 			assert(lTestOk);
 		}
 	}

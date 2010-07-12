@@ -49,6 +49,13 @@ public:
 	void DebugDrawPrimitive(DebugPrimitive pPrimitive);
 
 protected:
+	enum MeshSlideMode
+	{
+		MESH_SLIDE_STOP,
+		MESH_SLIDE_START,
+		MESH_SLIDE_RUN,
+	};
+
 	GameUiManager* GetUiManager() const;
 	const UiTbc::ChunkyClass* GetClass() const;
 	TBC::GeometryBase* GetMesh(int pIndex) const;
@@ -73,7 +80,7 @@ protected:
 	TextureArray mTextureResourceArray;
 	size_t mTextureLoadCount;
 	TransformationF mMeshOffset;
-	bool mStartMeshSlide;
+	MeshSlideMode mMeshSlideMode;
 
 	LOG_CLASS_DECLARE();
 };

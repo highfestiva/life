@@ -83,7 +83,7 @@ class Vector3D
 		void GetSphericalAngles(_TVarType& pTheta, _TVarType& pPhi) const;
 		Vector3D ProjectOntoPlane(const Vector3D<_TVarType>& pPlaneNormal) const;
 
-		inline Vector3D operator= (const Vector3D<_TVarType>& pV);
+		inline const Vector3D& operator= (const Vector3D<_TVarType>& pV);
 		inline bool operator== (const Vector3D<_TVarType>& pV) const;
 		inline bool operator!= (const Vector3D<_TVarType>& pV) const;
 		

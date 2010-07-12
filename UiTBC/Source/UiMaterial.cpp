@@ -74,16 +74,21 @@ int GeometryGroup::CalculateDepths(bool pF2B)
 	mMeanDepth = 0.0f;
 
 	const TransformationF& lCam = mParentMaterial->GetRenderer()->GetCameraTransformation();
+	const QuaternionF& lCamOrientation = lCam.GetOrientation();
+	const Vector3DF& lCamPosition = lCam.GetPosition();
 	int lInversionCount = 0;
 
 	// The first depth goes outside the loop...
-	mGeomArray[0].mDepth = lCam.InverseTransform(mGeomArray[0].mGeometry->GetTransformation()).GetPosition().y;
+	Vector3DF lTemp;
+	lCamOrientation.FastInverseRotatedVector(lTemp, mGeomArray[0].mGeometry->GetTransformation().GetPosition() - lCamPosition);
+	mGeomArray[0].mDepth = lTemp.y;
 	mMeanDepth += mGeomArray[0].mDepth;
 
 	int i;
 	for (i = 1; i < mGeometryCount; i++)
 	{
-		mGeomArray[i].mDepth = lCam.InverseTransform(mGeomArray[i].mGeometry->GetTransformation()).GetPosition().y;
+		lCamOrientation.FastInverseRotatedVector(lTemp, mGeomArray[i].mGeometry->GetTransformation().GetPosition() - lCamPosition);
+		mGeomArray[i].mDepth = lTemp.y;
 		mMeanDepth += mGeomArray[i].mDepth;
 
 		if(pF2B)
@@ -404,7 +409,7 @@ TBC::GeometryBase* Material::GetFirstVisibleGeometry()
 {
 	unsigned int lCurrentFrame = mRenderer->GetCurrentFrame();
 	TBC::GeometryBase* lGeometry = GetFirstGeometry();
-	while(lGeometry != 0 && (lGeometry->GetAlwaysVisible() == false || lGeometry->GetLastFrameVisible() != lCurrentFrame))
+	while(lGeometry && !lGeometry->GetAlwaysVisible() && lGeometry->GetLastFrameVisible() != lCurrentFrame)
 	{
 		lGeometry = GetNextGeometry();
 	}

@@ -76,7 +76,7 @@ public:
 	virtual ~OpenGLRenderer();
 	
 	// Overloads from Renderer.
-	void Clear(unsigned int pClearFlags = CLEAR_COLORBUFFER | CLEAR_DEPTHBUFFER);
+	void Clear(unsigned pClearFlags = CLEAR_COLORBUFFER | CLEAR_DEPTHBUFFER);
 
 	void SetClearColor(const Color& pColor);
 
@@ -122,7 +122,7 @@ public:
 	void UpdateGeometry(GeometryID pGeometryID);
 	bool ChangeMaterial(GeometryID pGeometryID, MaterialType pMaterialType);
 
-	virtual unsigned int RenderScene();
+	virtual unsigned RenderScene();
 	virtual void RenderRelative(TBC::GeometryBase* pGeometry, const QuaternionF* pLightOrientation);
 
 	// Only used by the OpenGL material classes.
@@ -186,8 +186,9 @@ private:
 
 	GLbitfield mGLClearMask;
 
-	// Number of OpenGL texture units available.
-	int mNumTextureUnits;
+	int mNumTextureUnits;	// Number of OpenGL texture units available.
+
+	TransformationF mCamSpaceTransformation;	// Optimization to not have to run constructor.
 
 	LOG_CLASS_DECLARE();
 };

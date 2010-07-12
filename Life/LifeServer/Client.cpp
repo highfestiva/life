@@ -100,8 +100,9 @@ void Client::QuerySendStriveTimes()
 	// Latency+jitter is where we're looking to hit.
 	int lNetworkFrameDiffCount = CalculateNetworkLatencyFrameDiffCount();
 	// Check if we should send or not.
-	if (lNetworkFrameDiffCount < -CURE_RTVAR_GET(Cure::GetSettings(), RTVAR_NETPHYS_SLOWFRAMECOUNT, 2) ||
-		lNetworkFrameDiffCount > 0)
+	int lSlowFrameCount;
+	CURE_RTVAR_GET(lSlowFrameCount, =, Cure::GetSettings(), RTVAR_NETPHYS_SLOWFRAMECOUNT, 2);
+	if (lNetworkFrameDiffCount < -lSlowFrameCount || lNetworkFrameDiffCount > 0)
 	{
 		++mStriveSendErrorTimeCounter;
 		mIgnoreStriveErrorTimeCounter = 0;

@@ -14,7 +14,9 @@ namespace UiTbc
 {
 
 Renderer::Renderer(Canvas* pScreen) :
-	mTriangleCount(0),
+	mCurrentFrame(0),
+	mVisibleTriangleCount(0),
+	mCulledTriangleCount(0),
 	mScreen(pScreen),
 	mDX(1),
 	mDY(1),
@@ -47,11 +49,16 @@ Renderer::Renderer(Canvas* pScreen) :
 	mShadowUpdateFrameDelay(0),
 	mClippingRect(0, 0, pScreen->GetWidth(), pScreen->GetHeight())
 {
-	mCurrentFrame = 0;
 }
 
 Renderer::~Renderer()
 {
+}
+
+void Renderer::ClearDebugInfo()
+{
+	mVisibleTriangleCount = 0;
+	mCulledTriangleCount = 0;
 }
 
 void Renderer::InitRenderer()
@@ -253,7 +260,7 @@ bool Renderer::GetShadowsEnabled()
 	return mShadowsEnabled;
 }
 
-void Renderer::SetShadowUpdateFrameDelay(unsigned int pFrameDelay)
+void Renderer::SetShadowUpdateFrameDelay(unsigned pFrameDelay)
 {
 	mShadowUpdateFrameDelay = pFrameDelay;
 }
@@ -1080,7 +1087,7 @@ void Renderer::UpdateShadowMaps()
 {
 	for (int i = 0; i < (int)NUM_MATERIALTYPES; i++)
 	{
-		TBC::GeometryBase* lGeometry = mMaterial[i]->GetFirstGeometry();
+		TBC::GeometryBase* lGeometry = mMaterial[i]->GetFirstVisibleGeometry();
 		while(lGeometry != 0)
 		{
 			UpdateShadowMaps(lGeometry);
@@ -1092,7 +1099,12 @@ void Renderer::UpdateShadowMaps()
 void Renderer::UpdateShadowMaps(TBC::GeometryBase* pGeometry)
 {
 	GeometryData* lGeometry = (GeometryData*)pGeometry->GetRendererData();
-	SortLights(lGeometry->mGeometry->GetTransformation().GetPosition());
+	if (!mShadowsEnabled || lGeometry->mShadow != CAST_SHADOWS)
+	{
+		return;
+	}
+
+	SortLights(pGeometry->GetTransformation().GetPosition());
 
 	/*
 		Make sure shadow maps are up to date.
@@ -1129,53 +1141,86 @@ void Renderer::UpdateShadowMaps(TBC::GeometryBase* pGeometry)
 	bool lShadowsUpdated = false;
 
 	// Update shadow volumes.
-	if (mShadowsEnabled == true && 
-	   lGeometry->mShadow == Renderer::CAST_SHADOWS)
+	bool lGeomTransformationChanged = pGeometry->GetTransformationChanged();
+
+	// Iterate over all the closest light sources and update shadow volumes.
+	int lLoopMax = MAX_SHADOW_VOLUMES < mLightCount ? MAX_SHADOW_VOLUMES : mLightCount;
+	int i;
+	for (i = 0; i < lLoopMax; i++)
 	{
-		bool lGeomTransformationChanged = pGeometry->GetTransformationChanged();
+		bool lProcessLight = false;
+		LightData& lLight = mLightData[mLightIndex[i]];
 
-		// Iterate over all the closest light sources and update shadow volumes.
-		int lLoopMax = MAX_SHADOW_VOLUMES < mLightCount ? MAX_SHADOW_VOLUMES : mLightCount;
-		int i;
-		for (i = 0; i < lLoopMax; i++)
+		if (lLight.mEnabled == true)
 		{
-			bool lProcessLight = false;
-			LightData& lLight = mLightData[mLightIndex[i]];
-
-			if (lLight.mEnabled == true)
+			if (lLight.mType == Renderer::LIGHT_POINT ||
+			   (lLight.mType == Renderer::LIGHT_SPOT && mShadowHint == Renderer::SH_VOLUMES_ONLY))
 			{
-				if (lLight.mType == Renderer::LIGHT_POINT ||
-				   (lLight.mType == Renderer::LIGHT_SPOT && mShadowHint == Renderer::SH_VOLUMES_ONLY))
-				{
-					float lDist = lLight.mPosition.GetDistanceSquared(pGeometry->GetTransformation().GetPosition());
-					float lMinDist = lLight.mRadius + pGeometry->GetBoundingRadius();
-					lMinDist *= lMinDist;
+				float lDist = lLight.mPosition.GetDistanceSquared(pGeometry->GetTransformation().GetPosition());
+				float lMinDist = lLight.mRadius + pGeometry->GetBoundingRadius();
+				lMinDist *= lMinDist;
 
-					if (lDist < lMinDist)
-					{
-						lProcessLight = true;
-					}
-				}
-				else if(lLight.mType == Renderer::LIGHT_DIRECTIONAL)
+				if (lDist < lMinDist)
 				{
 					lProcessLight = true;
 				}
 			}
-
-			if (lProcessLight == true)
+			else if(lLight.mType == Renderer::LIGHT_DIRECTIONAL)
 			{
-				if (lGeometry->mShadowVolume[i] == 0)
+				lProcessLight = true;
+			}
+		}
+
+		if (lProcessLight == true)
+		{
+			if (lGeometry->mShadowVolume[i] == 0)
+			{
+				// Light has been enabled. Create shadow volume.
+				int lId = mGeometryIDManager.GetFreeId();
+
+				if (lId != mGeometryIDManager.GetInvalidId())
 				{
-					// Light has been enabled. Create shadow volume.
-					int lId = mGeometryIDManager.GetFreeId();
+					ShadowVolume* lShadowVolume = new ShadowVolume(pGeometry);
+					GeometryData* lShadowGeom = CreateGeometryData();
+					lShadowGeom->mGeometry = lShadowVolume;
+					lShadowVolume->SetRendererData(lShadowGeom);
 
-					if (lId != mGeometryIDManager.GetInvalidId())
+					if (lLight.mType == Renderer::LIGHT_DIRECTIONAL)
 					{
-						ShadowVolume* lShadowVolume = new ShadowVolume(pGeometry);
-						GeometryData* lShadowGeom = CreateGeometryData();
-						lShadowGeom->mGeometry = lShadowVolume;
-						lShadowVolume->SetRendererData(lShadowGeom);
+						lShadowVolume->UpdateShadowVolume(lLight.mDirection,
+										    lLight.mShadowRange, 
+										    true);
+					}
+					else
+					{
+						lShadowVolume->UpdateShadowVolume(lLight.mPosition,
+										    lLight.mShadowRange, 
+										    false);
+					}
 
+					mShadowVolumeTable.Insert(lId, lShadowGeom);
+					lGeometry->mShadowVolume[i] = (GeometryID)lId;
+
+					lShadowsUpdated = BindShadowGeometry(lShadowVolume, lLight.mHint);
+				}
+
+				lGeometry->mLightID[i] = mLightIndex[i];
+			}
+			else if(pGeometry->GetAlwaysVisible() == true ||
+				pGeometry->GetLastFrameVisible() == GetCurrentFrame())
+			{
+				if (	(lLight.mTransformationChanged    == true || 
+					 lGeomTransformationChanged        == true ||
+ 					 pGeometry->GetVertexDataChanged() == true ||
+					 lGeometry->mLightID[i]         != mLightIndex[i]) &&
+					(mCurrentFrame - lGeometry->mLastFrameShadowsUpdated) >= mShadowUpdateFrameDelay)
+				{
+					ShadowVolumeTable::Iterator x = mShadowVolumeTable.Find(lGeometry->mShadowVolume[i]);
+					
+					if (x != mShadowVolumeTable.End())
+					{
+						GeometryData* lShadowGeom = *x;
+						ShadowVolume* lShadowVolume = (ShadowVolume*)lShadowGeom->mGeometry;
 						if (lLight.mType == Renderer::LIGHT_DIRECTIONAL)
 						{
 							lShadowVolume->UpdateShadowVolume(lLight.mDirection,
@@ -1189,64 +1234,27 @@ void Renderer::UpdateShadowMaps(TBC::GeometryBase* pGeometry)
 											    false);
 						}
 
-						mShadowVolumeTable.Insert(lId, lShadowGeom);
-						lGeometry->mShadowVolume[i] = (GeometryID)lId;
-
-						lShadowsUpdated = BindShadowGeometry(lShadowVolume, lLight.mHint);
+						lShadowsUpdated = true;
+						lGeometry->mLightID[i] = mLightIndex[i];
 					}
-
-					lGeometry->mLightID[i] = mLightIndex[i];
-				}
-				else if(pGeometry->GetAlwaysVisible() == true ||
-					pGeometry->GetLastFrameVisible() == GetCurrentFrame())
-				{
-					if (	(lLight.mTransformationChanged    == true || 
-						 lGeomTransformationChanged        == true ||
-	 					 pGeometry->GetVertexDataChanged() == true ||
-						 lGeometry->mLightID[i]         != mLightIndex[i]) &&
-						(mCurrentFrame - lGeometry->mLastFrameShadowsUpdated) >= mShadowUpdateFrameDelay)
+					else
 					{
-						ShadowVolumeTable::Iterator x = mShadowVolumeTable.Find(lGeometry->mShadowVolume[i]);
-						
-						if (x != mShadowVolumeTable.End())
-						{
-							GeometryData* lShadowGeom = *x;
-							ShadowVolume* lShadowVolume = (ShadowVolume*)lShadowGeom->mGeometry;
-							if (lLight.mType == Renderer::LIGHT_DIRECTIONAL)
-							{
-								lShadowVolume->UpdateShadowVolume(lLight.mDirection,
-												    lLight.mShadowRange, 
-												    true);
-							}
-							else
-							{
-								lShadowVolume->UpdateShadowVolume(lLight.mPosition,
-												    lLight.mShadowRange, 
-												    false);
-							}
-
-							lShadowsUpdated = true;
-							lGeometry->mLightID[i] = mLightIndex[i];
-						}
-						else
-						{
-							lGeometry->mShadowVolume[i] = (GeometryID)0;
-							lGeometry->mLightID[i] = -1;
-						}
+						lGeometry->mShadowVolume[i] = (GeometryID)0;
+						lGeometry->mLightID[i] = -1;
 					}
 				}
 			}
-			else if(lGeometry->mShadowVolume[i] != 0)
-			{
-				// Light is too far away or has been disabled. Remove shadow volume.
-				RemoveShadowVolume(lGeometry->mShadowVolume[i]);
-				lGeometry->mLightID[i] = -1;
-			}
-		}// End for(i < Renderer::MAX_SHADOW_VOLUMES)
+		}
+		else if(lGeometry->mShadowVolume[i] != 0)
+		{
+			// Light is too far away or has been disabled. Remove shadow volume.
+			RemoveShadowVolume(lGeometry->mShadowVolume[i]);
+			lGeometry->mLightID[i] = -1;
+		}
+	}// End for(i < Renderer::MAX_SHADOW_VOLUMES)
 
-		pGeometry->SetTransformationChanged(false);
-		pGeometry->SetVertexDataChanged(false);
-	}
+	pGeometry->SetTransformationChanged(false);
+	pGeometry->SetVertexDataChanged(false);
 
 	if (lShadowsUpdated == true)
 	{
@@ -1254,12 +1262,12 @@ void Renderer::UpdateShadowMaps(TBC::GeometryBase* pGeometry)
 	}
 }
 
-unsigned int Renderer::GetCurrentFrame() const
+unsigned Renderer::GetCurrentFrame() const
 {
 	return mCurrentFrame;
 }
 
-bool Renderer::CheckFlag(unsigned int pFlags, unsigned int pFlag)
+bool Renderer::CheckFlag(unsigned pFlags, unsigned pFlag)
 {
 	return (pFlags & pFlag) != 0;
 }
@@ -1579,23 +1587,32 @@ void Renderer::RemoveShadowVolume(GeometryID& pShadowVolume)
 	}
 }
 
-int Renderer::QueryTriangleCount(bool pVisibleOnly)
+int Renderer::GetTriangleCount(bool pVisible)
 {
-	int lTriangleCount = 0;
-	for (int i = 0; i < (int)NUM_MATERIALTYPES; ++i)
+	return pVisible? mVisibleTriangleCount : mCulledTriangleCount;
+}
+
+void Renderer::CalcCamCulling()
+{
+	for (int x = 0; x < 4; ++x)
 	{
-		TBC::GeometryBase* lGeometry = mMaterial[i]->GetFirstVisibleGeometry();
-		while(lGeometry != 0)
-		{
-			// PreRender performs the frustum culling.
-			if(!pVisibleOnly || PreRender(lGeometry) == true)
-			{
-				lTriangleCount += lGeometry->GetTriangleCount();
-			}
-			lGeometry = mMaterial[i]->GetNextVisibleGeometry();
-		}
+		mCamFrustumPlanes[x] = mCameraTransformation.GetOrientation() * mFrustumPlanes[x];
 	}
-	return lTriangleCount;
+}
+
+bool Renderer::CheckCamCulling(const Vector3DF& pPosition, float pBoundingRadius)
+{
+	// We only check the frustum planes on the side, and totally ignore the near and far (they currently don't add much).
+	const Vector3DF& lCamPosition = mCameraTransformation.GetPosition();
+	Vector3DF lTemp;
+	bool lVisible = true;
+	for (int x = 0; lVisible && x < 4; ++x)
+	{
+		lTemp = pPosition;
+		lTemp.Sub(lCamPosition);
+		lVisible = (mCamFrustumPlanes[x].Dot(lTemp) > -pBoundingRadius);
+	}
+	return lVisible;
 }
 
 Renderer* Renderer::smRenderer = 0;

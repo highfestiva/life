@@ -102,11 +102,12 @@ void GameClientSlaveManager::SetRenderArea(const PixelRect& pRenderArea)
 	((ClientConsoleManager*)GetConsoleManager())->GetUiConsole()->SetRenderArea(pRenderArea);
 
 	// Register a local FOV variable.
-	const double lBaseFov = CURE_RTVAR_GET(GetVariableScope(), RTVAR_UI_3D_FOV, 45.0) / 3;
+	double lBaseFov;
+	CURE_RTVAR_GET(lBaseFov, =, GetVariableScope(), RTVAR_UI_3D_FOV, 45.0) / 3;
 	const double lFov = lBaseFov*2 + lBaseFov*pRenderArea.GetWidth()/pRenderArea.GetHeight();
 	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_UI_3D_INTERNALFOV, lFov);
 
-	mCameraTargetXyDistance = (float)CURE_RTVAR_GET(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
+	CURE_RTVAR_GET(mCameraTargetXyDistance, =(float), GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
 }
 
 bool GameClientSlaveManager::Open()
@@ -152,7 +153,8 @@ void GameClientSlaveManager::SetIsQuitting()
 void GameClientSlaveManager::SetFade(float pFadeAmount)
 {
 	mCameraMaxSpeed = 100000.0f;
-	const float lBaseDistance = (float)CURE_RTVAR_GET(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
+	float lBaseDistance;
+	CURE_RTVAR_GET(lBaseDistance, =(float), GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
 	mCameraTargetXyDistance = lBaseDistance + pFadeAmount*400.0f;
 }
 
@@ -179,8 +181,12 @@ bool GameClientSlaveManager::Render()
 	UpdateFrustum();
 
 	LEPRA_MEASURE_SCOPE(SlaveRender);
-	mUiManager->GetRenderer()->EnableOutlineRendering(CURE_RTVAR_GET(GetVariableScope(), RTVAR_UI_3D_OUTLINEMODE, false));
-	mUiManager->GetRenderer()->EnableWireframe(CURE_RTVAR_GET(GetVariableScope(), RTVAR_UI_3D_WIREFRAMEMODE, false));
+	bool lOutline;
+	bool lWireFrame;
+	CURE_RTVAR_GET(lOutline, =, GetVariableScope(), RTVAR_UI_3D_OUTLINEMODE, false);
+	CURE_RTVAR_GET(lWireFrame, =, GetVariableScope(), RTVAR_UI_3D_WIREFRAMEMODE, false);
+	mUiManager->GetRenderer()->EnableOutlineRendering(lOutline);
+	mUiManager->GetRenderer()->EnableWireframe(lWireFrame);
 	mUiManager->Render(mRenderArea);
 	return (true);
 }
@@ -220,7 +226,8 @@ bool GameClientSlaveManager::Paint()
 
 bool GameClientSlaveManager::EndTick()
 {
-	bool lIsDebugging = CURE_RTVAR_GET(GetVariableScope(), RTVAR_DEBUG_ENABLE, false);
+	bool lIsDebugging;
+	CURE_RTVAR_GET(lIsDebugging, =, GetVariableScope(), RTVAR_DEBUG_ENABLE, false);
 	if (lIsDebugging)
 	{
 		DrawAsyncDebugInfo();
@@ -312,12 +319,14 @@ bool GameClientSlaveManager::TickNetworkOutput()
 		// Check if we should send client keepalive (keepalive is simply a position update).
 		bool lForceSendUnsafeClientKeepalive = false;
 		mLastSendTime.UpdateTimer();
+		double lKeepaliveInterval;
+		CURE_RTVAR_GET(lKeepaliveInterval, =, GetVariableScope(), RTVAR_NETWORK_KEEPALIVE_SENDINTERVAL, 1.0);
 		if (mLastSentByteCount != GetNetworkAgent()->GetSentByteCount())
 		{
 			mLastSentByteCount = GetNetworkAgent()->GetSentByteCount();
 			mLastSendTime.ClearTimeDiff();
 		}
-		else if (mLastSendTime.GetTimeDiffF() >= CURE_RTVAR_GET(GetVariableScope(), RTVAR_NETWORK_KEEPALIVE_SENDINTERVAL, 1.0))
+		else if (mLastSendTime.GetTimeDiffF() >= lKeepaliveInterval)
 		{
 			lForceSendUnsafeClientKeepalive = true;
 		}
@@ -343,9 +352,11 @@ bool GameClientSlaveManager::TickNetworkOutput()
 					log_atrace("Position expires.");
 				}
 
+				double lResyncOnDiff;
+				CURE_RTVAR_GET(lResyncOnDiff, =, GetVariableScope(), RTVAR_NETPHYS_RESYNCONDIFFGT, 100.0);
 				if (lForceSendUnsafeClientKeepalive ||
 					lIsPositionExpired ||
-					lPositionalData->GetScaledDifference(&mNetworkOutputGhost) > CURE_RTVAR_GET(GetVariableScope(), RTVAR_NETPHYS_RESYNCONDIFFGT, 100.0))
+					lPositionalData->GetScaledDifference(&mNetworkOutputGhost) > lResyncOnDiff)
 				{
 					mNetworkOutputGhost.CopyData(lPositionalData);
 					lSendOk = GetNetworkAgent()->SendObjectFullPosition(GetNetworkClient()->GetSocket(),
@@ -361,12 +372,16 @@ bool GameClientSlaveManager::TickNetworkOutput()
 		if (lSendOk && !GetNetworkClient()->IsLoggingIn())
 		{
 			mLastUnsafeReceiveTime.UpdateTimer();
+			double lPingInterval;
+			CURE_RTVAR_GET(lPingInterval, =, GetVariableScope(), RTVAR_NETWORK_KEEPALIVE_PINGINTERVAL, 7.0);
 			if ((!lIsSent && lForceSendUnsafeClientKeepalive) ||
-				mLastUnsafeReceiveTime.GetTimeDiffF() >= CURE_RTVAR_GET(GetVariableScope(), RTVAR_NETWORK_KEEPALIVE_PINGINTERVAL, 7.0))
+				mLastUnsafeReceiveTime.GetTimeDiffF() >= lPingInterval)
 			{
-				if (++mPingAttemptCount <= CURE_RTVAR_GET(GetVariableScope(), RTVAR_NETWORK_KEEPALIVE_PINGRETRYCOUNT, 4))
+				int lPingRetryCount;
+				CURE_RTVAR_GET(lPingRetryCount, =, GetVariableScope(), RTVAR_NETWORK_KEEPALIVE_PINGRETRYCOUNT, 4);
+				if (++mPingAttemptCount <= lPingRetryCount)
 				{
-					mLastUnsafeReceiveTime.ReduceTimeDiff(CURE_RTVAR_GET(GetVariableScope(), RTVAR_NETWORK_KEEPALIVE_PINGINTERVAL, 7.0));
+					mLastUnsafeReceiveTime.ReduceTimeDiff(lPingInterval);
 					log_volatile(mLog.Debugf(_T("Slave %i sending ping."), mSlaveIndex));
 					lSendOk = GetNetworkAgent()->SendNumberMessage(false, GetNetworkClient()->GetSocket(),
 						Cure::MessageNumber::INFO_PING, GetTimeManager()->GetCurrentPhysicsFrame(), 0);
@@ -413,7 +428,7 @@ void GameClientSlaveManager::RequestLogin(const str& pServerAddress, const Cure:
 	mConnectServerAddress = pServerAddress;
 	mDisconnectReason = _T("Connect failed.");
 	mIsReset = false;
-	GetNetworkClient()->StartConnectLogin(pServerAddress, CURE_RTVAR_GET(GetVariableScope(), RTVAR_NETWORK_CONNECT_TIMEOUT, 3.0), pLoginToken);
+	GetNetworkClient()->StartConnectLogin(pServerAddress, CURE_RTVAR_SLOW_GET(GetVariableScope(), RTVAR_NETWORK_CONNECT_TIMEOUT, 3.0), pLoginToken);
 }
 
 void GameClientSlaveManager::Logout()
@@ -547,9 +562,12 @@ PixelRect GameClientSlaveManager::GetRenderArea() const
 
 float GameClientSlaveManager::UpdateFrustum()
 {
-	const float lFov = (float)CURE_RTVAR_TRYGET(GetVariableScope(), RTVAR_UI_3D_INTERNALFOV, 45.0);
-	const float lClipNear = (float)CURE_RTVAR_GET(GetVariableScope(), RTVAR_UI_3D_CLIPNEAR, 0.1);
-	const float lClipFar = (float)CURE_RTVAR_GET(GetVariableScope(), RTVAR_UI_3D_CLIPFAR, 1000.0);
+	float lFov;
+	float lClipNear;
+	float lClipFar;
+	CURE_RTVAR_TRYGET(lFov, =(float), GetVariableScope(), RTVAR_UI_3D_INTERNALFOV, 45.0);
+	CURE_RTVAR_GET(lClipNear, =(float), GetVariableScope(), RTVAR_UI_3D_CLIPNEAR, 0.1);
+	CURE_RTVAR_GET(lClipFar, =(float), GetVariableScope(), RTVAR_UI_3D_CLIPFAR, 1000.0);
 	mUiManager->GetRenderer()->SetViewFrustum(lFov, lClipNear, lClipFar);
 	return (lFov);
 }
@@ -599,7 +617,7 @@ void GameClientSlaveManager::CreateLoginView()
 		if (mDisconnectReason.empty())
 		{
 			str lServerName = _T("0.0.0.0:16650");
-			lServerName = CURE_RTVAR_TRYGET(Cure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, lServerName);
+			CURE_RTVAR_TRYGET(lServerName, =, Cure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, lServerName);
 			const wstr lUsername = wstrutil::Format(L"User%u", mSlaveIndex);
 			wstr lReadablePassword = L"CarPassword";
 			const Cure::MangledPassword lPassword(lReadablePassword);
@@ -670,7 +688,8 @@ void GameClientSlaveManager::TickInput()
 
 void GameClientSlaveManager::TickUiInput()
 {
-	const SteeringPlaybackMode lPlaybackMode = (SteeringPlaybackMode)CURE_RTVAR_TRYGET(GetVariableScope(), RTVAR_STEERING_PLAYBACKMODE, PLAYBACK_NONE);
+	SteeringPlaybackMode lPlaybackMode;
+	CURE_RTVAR_TRYGET(lPlaybackMode, =(SteeringPlaybackMode), GetVariableScope(), RTVAR_STEERING_PLAYBACKMODE, PLAYBACK_NONE);
 	const int lPhysicsStepCount = GetTimeManager()->GetAffordedPhysicsStepCount();
 	if (lPlaybackMode != PLAYBACK_PLAY && lPhysicsStepCount > 0 && mAllowMovementInput)
 	{
@@ -716,7 +735,8 @@ void GameClientSlaveManager::SetAvatarEnginePower(Cure::ContextObject* pAvatar, 
 {
 	pAvatar->SetEnginePower(pAspect, pPower, pAngle);
 
-	const SteeringPlaybackMode lPlaybackMode = (SteeringPlaybackMode)CURE_RTVAR_TRYGET(GetVariableScope(), RTVAR_STEERING_PLAYBACKMODE, PLAYBACK_NONE);
+	SteeringPlaybackMode lPlaybackMode;
+	CURE_RTVAR_TRYGET(lPlaybackMode, =(SteeringPlaybackMode), GetVariableScope(), RTVAR_STEERING_PLAYBACKMODE, PLAYBACK_NONE);
 	if (lPlaybackMode == PLAYBACK_RECORD)
 	{
 		if (!Math::IsEpsEqual(mEnginePowerShadow[pAspect].mPower, pPower)
@@ -780,7 +800,8 @@ void GameClientSlaveManager::TickUiUpdate()
 	const float lCurrentCameraXyDistance = lTargetCameraPosition.GetDistance(lPivotXyPosition);
 	const float lSpeedDependantCameraXyDistance = mCameraTargetXyDistance + mCameraTargetXyDistance*mCameraPivotSpeed*0.03f;
 	lTargetCameraPosition = lPivotXyPosition + (lTargetCameraPosition-lPivotXyPosition)*(lSpeedDependantCameraXyDistance/lCurrentCameraXyDistance);
-	const float lCamHeight = (float)CURE_RTVAR_GET(GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, 10.0);
+	float lCamHeight;
+	CURE_RTVAR_GET(lCamHeight, =(float), GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, 10.0);
 	lTargetCameraPosition.z = mCameraPivotPosition.z + lCamHeight;
 
 	if (lObject)
@@ -1152,16 +1173,20 @@ void GameClientSlaveManager::SetMovement(Cure::GameObjectId pInstanceId, int32 p
 		{
 			// Client has moved forward in time since the server sent us this positional info
 			// some frames ago. Extrapolate forward the number of micro-frames that diff.
-			const float lExtrapolationFactor = (float)CURE_RTVAR_GET(GetVariableScope(), RTVAR_NETPHYS_EXTRAPOLATIONFACTOR, 0.0);
+			float lExtrapolationFactor;
+			CURE_RTVAR_GET(lExtrapolationFactor, =(float), GetVariableScope(), RTVAR_NETPHYS_EXTRAPOLATIONFACTOR, 0.0);
 			if (lExtrapolationFactor)
 			{
-				const int lMicroSteps = CURE_RTVAR_GET(GetVariableScope(), RTVAR_PHYSICS_MICROSTEPS, 3);
+				int lMicroSteps;
+				CURE_RTVAR_GET(lMicroSteps, =, GetVariableScope(), RTVAR_PHYSICS_MICROSTEPS, 3);
 				const int lFutureStepCount = (GetTimeManager()->GetCurrentPhysicsFrame()-pFrameIndex) * lMicroSteps;
 				const float lStepIncrement = GetTimeManager()->GetAffordedPhysicsStepTime() / lMicroSteps;
 				pData.GhostStep(lFutureStepCount, lStepIncrement*lExtrapolationFactor);
 			}
 			lObject->SetFullPosition(pData);
-			if (CURE_RTVAR_GET(GetVariableScope(), RTVAR_NETPHYS_ENABLESMOOTHING, true))
+			bool lEnableSmoothing;
+			CURE_RTVAR_GET(lEnableSmoothing, =, GetVariableScope(), RTVAR_NETPHYS_ENABLESMOOTHING, true);
+			if (lEnableSmoothing)
 			{
 				lObject->ActivateLerp();
 			}
@@ -1333,18 +1358,20 @@ void GameClientSlaveManager::DrawAsyncDebugInfo()
 	mUiManager->GetPainter()->SetClippingRect(mRenderArea);
 
 	// Draw send and receive staples.
-	int lCount = CURE_RTVAR_TRYGET(GetVariableScope(), RTVAR_DEBUG_NET_SENDPOSCNT, 0);
-	if (lCount > 0)
+	int lSendCount;
+	CURE_RTVAR_TRYGET(lSendCount, =, GetVariableScope(), RTVAR_DEBUG_NET_SENDPOSCNT, 0);
+	if (lSendCount > 0)
 	{
 		CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_DEBUG_NET_SENDPOSCNT, 0);
 	}
-	DrawDebugStaple(0, lCount*10, Color(255, 0, 0));
-	lCount = CURE_RTVAR_TRYGET(GetVariableScope(), RTVAR_DEBUG_NET_RECVPOSCNT, 0);
-	if (lCount > 0)
+	DrawDebugStaple(0, lSendCount*10, Color(255, 0, 0));
+	int lRecvCount;
+	CURE_RTVAR_TRYGET(lRecvCount, =, GetVariableScope(), RTVAR_DEBUG_NET_RECVPOSCNT, 0);
+	if (lRecvCount > 0)
 	{
 		CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_DEBUG_NET_RECVPOSCNT, 0);
 	}
-	DrawDebugStaple(1, lCount*10, Color(0, 255, 0));
+	DrawDebugStaple(1, lRecvCount*10, Color(0, 255, 0));
 }
 
 void GameClientSlaveManager::DrawDebugStaple(int pIndex, int pHeight, const Color& pColor)
@@ -1361,9 +1388,12 @@ void GameClientSlaveManager::DrawDebugStaple(int pIndex, int pHeight, const Colo
 
 void GameClientSlaveManager::DrawSyncDebugInfo()
 {
-	const bool lDebugAxes = CURE_RTVAR_GET(GetVariableScope(), RTVAR_DEBUG_3D_ENABLEAXES, false);
-	const bool lDebugJoints = CURE_RTVAR_GET(GetVariableScope(), RTVAR_DEBUG_3D_ENABLEJOINTS, false);
-	const bool lDebugShapes = CURE_RTVAR_GET(GetVariableScope(), RTVAR_DEBUG_3D_ENABLESHAPES, false);
+	bool lDebugAxes;
+	bool lDebugJoints;
+	bool lDebugShapes;
+	CURE_RTVAR_GET(lDebugAxes, =, GetVariableScope(), RTVAR_DEBUG_3D_ENABLEAXES, false);
+	CURE_RTVAR_GET(lDebugJoints, =, GetVariableScope(), RTVAR_DEBUG_3D_ENABLEJOINTS, false);
+	CURE_RTVAR_GET(lDebugShapes, =, GetVariableScope(), RTVAR_DEBUG_3D_ENABLESHAPES, false);
 	if (lDebugAxes || lDebugJoints || lDebugShapes)
 	{
 		ScopeLock lLock(GetTickLock());
@@ -1371,10 +1401,13 @@ void GameClientSlaveManager::DrawSyncDebugInfo()
 		mUiManager->GetRenderer()->SetClippingRect(mRenderArea);
 		mUiManager->GetRenderer()->SetViewport(mRenderArea);
 		UpdateCameraPosition(false);
-		const double lFOV = CURE_RTVAR_GET(GetVariableScope(), RTVAR_UI_3D_INTERNALFOV, 45.0);
-		const double lClipNear = CURE_RTVAR_GET(GetVariableScope(), RTVAR_UI_3D_CLIPNEAR, 0.1);
-		const double lClipFar = CURE_RTVAR_GET(GetVariableScope(), RTVAR_UI_3D_CLIPFAR, 1000.0);
-		mUiManager->GetRenderer()->SetViewFrustum((float)lFOV, (float)lClipNear, (float)lClipFar);
+		float lFov;
+		float lClipNear;
+		float lClipFar;
+		CURE_RTVAR_TRYGET(lFov, =(float), GetVariableScope(), RTVAR_UI_3D_INTERNALFOV, 45.0);
+		CURE_RTVAR_GET(lClipNear, =(float), GetVariableScope(), RTVAR_UI_3D_CLIPNEAR, 0.1);
+		CURE_RTVAR_GET(lClipFar, =(float), GetVariableScope(), RTVAR_UI_3D_CLIPFAR, 1000.0);
+		mUiManager->GetRenderer()->SetViewFrustum(lFov, lClipNear, lClipFar);
 
 		const Cure::ContextManager::ContextObjectTable& lObjectTable = GetContext()->GetObjectTable();
 		Cure::ContextManager::ContextObjectTable::const_iterator x = lObjectTable.begin();

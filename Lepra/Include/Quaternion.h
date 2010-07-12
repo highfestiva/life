@@ -121,6 +121,7 @@ public:
 
 	inline Vector3D<_TVarType> GetRotatedVector(const Vector3D<_TVarType>& pVector) const;
 	inline Vector3D<_TVarType> GetInverseRotatedVector(const Vector3D<_TVarType>& pVector) const;
+	inline void FastInverseRotatedVector(Vector3D<_TVarType>& pTarget, const Vector3D<_TVarType>& pSource) const;
 
 	inline void MakeConjugate();
 	inline Quaternion GetConjugate() const;
@@ -204,8 +205,6 @@ public:
 
 	Quaternion<float> ToFloat() const;
 	Quaternion<double> ToDouble() const;
-
-protected:
 
 	_TVarType mA; // Real part.
 	_TVarType mB; // Imaginary i

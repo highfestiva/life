@@ -795,7 +795,8 @@ bool ChunkyPhysicsLoader::Save(const ChunkyPhysics* pPhysics)
 	int32 lBoneCount = pPhysics->GetBoneCount();
 	int32 lPhysicsType = pPhysics->GetPhysicsType();
 	int32 lEngineCount = pPhysics->GetEngineCount();
-	int32 lTriggerCount = pPhysics->GetEngineCount();
+	int32 lTriggerCount = pPhysics->GetTriggerCount();
+	int32 lSpawnerCount = pPhysics->GetSpawnerCount();
 	if (lOk)
 	{
 		lOk = (lBoneCount > 0 && lBoneCount < 10000 &&
@@ -810,6 +811,7 @@ bool ChunkyPhysicsLoader::Save(const ChunkyPhysics* pPhysics)
 		lSaveList.push_back(ChunkyFileElement(CHUNK_PHYSICS_PHYSICS_TYPE, &lPhysicsType));
 		lSaveList.push_back(ChunkyFileElement(CHUNK_PHYSICS_ENGINE_COUNT, &lEngineCount));
 		lSaveList.push_back(ChunkyFileElement(CHUNK_PHYSICS_TRIGGER_COUNT, &lTriggerCount));
+		lSaveList.push_back(ChunkyFileElement(CHUNK_PHYSICS_SPAWNER_COUNT, &lSpawnerCount));
 		lOk = SaveChunkyList(lSaveList);
 	}
 

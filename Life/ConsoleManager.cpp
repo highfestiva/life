@@ -579,7 +579,7 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 				{
 					str lValue;
 					strutil::CStringToString(pParameterVector[0], lValue);
-					RtScope::SetMode lMode = (lLevel == '.')? RtVar::TYPE_OVERRIDE : RtVar::TYPE_NORMAL;
+					RtScope::SetMode lMode = (lLevel == '.')? RtVar::USAGE_OVERRIDE : RtVar::USAGE_NORMAL;
 					if (lScope->SetValue(lMode, lVariable, lValue))
 					{
 						str lValue = lScope->GetDefaultValue(RtScope::READ_ONLY, lVariable);
@@ -654,7 +654,8 @@ bool ConsoleManager::SaveConfigFile(File* pFile, const str& pPrefix, std::list<s
 
 	pVariableList.sort();
 	str lLastGroup;
-	const str lGroupDelimitors(CURE_RTVAR_GET(GetVariableScope(), RTVAR_CONSOLE_CHARACTERDELIMITORS, _T(" ")));
+	str lGroupDelimitors;
+	CURE_RTVAR_GET(lGroupDelimitors, =, GetVariableScope(), RTVAR_CONSOLE_CHARACTERDELIMITORS, _T(" "));
 	std::list<str>::const_iterator x = pVariableList.begin();
 	for (; x != pVariableList.end(); ++x)
 	{

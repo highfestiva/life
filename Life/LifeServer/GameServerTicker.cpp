@@ -68,7 +68,9 @@ bool GameServerTicker::Tick()
 
 	mResourceManager->Tick();
 
-	if (CURE_RTVAR_GET(Cure::GetSettings(), RTVAR_ALLLOGGEDOUT_AUTOSHUTDOWN, false))
+	bool lAutoShutdown;
+	CURE_RTVAR_GET(lAutoShutdown, =, Cure::GetSettings(), RTVAR_ALLLOGGEDOUT_AUTOSHUTDOWN, false);
+	if (lAutoShutdown)
 	{
 		static size_t lMaxLoginCount = 0;
 		size_t lUserCount = mGameManager->ListUsers().size();

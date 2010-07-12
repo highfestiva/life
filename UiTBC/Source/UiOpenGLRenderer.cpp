@@ -2,6 +2,7 @@
 // Author: Alexander Hugestrand
 // Copyright (c) 2002-2009, Righteous Games
 
+#include "../Include/UiOpenGLRenderer.h"
 #include "../../Lepra/Include/Canvas.h"
 #include "../../Lepra/Include/Log.h"
 #include "../../Lepra/Include/Math.h"
@@ -9,7 +10,6 @@
 #include "../../Lepra/Include/Transformation.h"
 #include "../../TBC/Include/GeometryBase.h"
 #include "../../UiLepra/Include/UiOpenGLExtensions.h"
-#include "../Include/UiOpenGLRenderer.h"
 #include "../Include/UiOpenGLMaterials.h"
 #include "../Include/UiTexture.h"
 
@@ -99,7 +99,7 @@ OpenGLRenderer::~OpenGLRenderer()
 	CloseRenderer();
 }
 
-void OpenGLRenderer::Clear(unsigned int pClearFlags)
+void OpenGLRenderer::Clear(unsigned pClearFlags)
 {
 	mGLClearMask = 0;
 
@@ -759,7 +759,7 @@ void OpenGLRenderer::BindGeometry(TBC::GeometryBase* pGeometry,
 			lGeometryData->mUVOffset = lOffset;
 			if (pGeometry->GetUVSetCount() > 0)
 			{
-				for (unsigned int i = 0; i < pGeometry->GetUVSetCount(); i++)
+				for (unsigned i = 0; i < pGeometry->GetUVSetCount(); i++)
 				{
 					UiLepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER, 
 										 lOffset,
@@ -941,7 +941,7 @@ void OpenGLRenderer::UpdateGeometry(GeometryID pGeometryID)
 			if (lGeometry->GetUVDataChanged() == true)
 			{
 				size_t lOffset = lGeomData->mUVOffset;
-				for (unsigned int i = 0; i < lGeometry->GetUVSetCount(); i++)
+				for (unsigned i = 0; i < lGeometry->GetUVSetCount(); i++)
 				{
 					UiLepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER, lOffset,
 						lVertexCount * sizeof(float) * 2, (void*)lGeometry->GetUVData(i));
@@ -1051,17 +1051,23 @@ bool OpenGLRenderer::ChangeMaterial(GeometryID pGeometryID, MaterialType pMateri
 
 bool OpenGLRenderer::PreRender(TBC::GeometryBase* pGeometry)
 {
-	TransformationF lCamSpaceTransformation(GetCameraTransformation().InverseTransform(pGeometry->GetTransformation()));
-
-	// Transform the geometry.
-	float lModelViewMatrix[16];
-	lCamSpaceTransformation.GetAs4x4TransposeMatrix(lModelViewMatrix);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixf(lModelViewMatrix);
-
-	OGL_ASSERT();
-
-	return CheckCulling(lCamSpaceTransformation, pGeometry->GetBoundingRadius());
+	if (CheckCamCulling(pGeometry->GetTransformation().GetPosition(), pGeometry->GetBoundingRadius()))
+	{
+		mVisibleTriangleCount += pGeometry->GetTriangleCount();
+		// Transform the geometry.
+		mCamSpaceTransformation.FastInverseTransform(GetCameraTransformation(), pGeometry->GetTransformation());
+		float lModelViewMatrix[16];
+		mCamSpaceTransformation.GetAs4x4TransposeMatrix(lModelViewMatrix);
+		glMatrixMode(GL_MODELVIEW);
+		glLoadMatrixf(lModelViewMatrix);
+		OGL_ASSERT();
+		return true;
+	}
+	else
+	{
+		mCulledTriangleCount += pGeometry->GetTriangleCount();
+	}
+	return false;
 }
 
 void OpenGLRenderer::PostRender(TBC::GeometryBase* pGeometry)
@@ -1091,7 +1097,7 @@ void OpenGLRenderer::DrawLine(const Vector3DF& pPosition, const Vector3DF& pVect
 
 
 
-unsigned int OpenGLRenderer::RenderScene()
+unsigned OpenGLRenderer::RenderScene()
 {
 	LEPRA_MEASURE_SCOPE(RenderScene);
 
@@ -1116,6 +1122,8 @@ unsigned int OpenGLRenderer::RenderScene()
 		float lFar;
 		GetViewFrustum(lFOVAngle, lNear, lFar);
 		SetViewFrustum(lFOVAngle, lNear, lFar);
+
+		CalcCamCulling();
 
 		::glPushAttrib(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_ENABLE_BIT | GL_VIEWPORT_BIT);
 
@@ -1258,17 +1266,16 @@ void OpenGLRenderer::RenderRelative(TBC::GeometryBase* pGeometry, const Quaterni
 
 	::glEnable(GL_DEPTH_TEST);
 
+	const int lLightIndex = GetLightIndex(0);
+	const LightData& lLightData = GetLightData(lLightIndex);
 	if (pLightOrientation)
 	{
 		::glEnable(GL_LIGHTING);
-		const int lLightIndex = GetLightIndex(0);
-		LightData& lData = GetLightData(lLightIndex);
-		const Vector3DF lPreviousDirection = lData.mDirection;
 		QuaternionF lOrientation = pGeometry->GetTransformation().GetOrientation().GetInverse();
+		LightData lDataCopy = lLightData;
 		lOrientation *= *pLightOrientation;
-		lData.mDirection = lOrientation * lData.mDirection;
-		SetupGLLight(lLightIndex, lData);
-		lData.mDirection = lPreviousDirection;
+		lDataCopy.mDirection = lOrientation * lLightData.mDirection;
+		SetupGLLight(lLightIndex, lDataCopy);
 	}
 
 	GeometryData* lGeometryData = (GeometryData*)pGeometry->GetRendererData();
@@ -1277,6 +1284,11 @@ void OpenGLRenderer::RenderRelative(TBC::GeometryBase* pGeometry, const Quaterni
 		GetMaterial(lGeometryData->mMaterialType)->PreRender();
 		GetMaterial(lGeometryData->mMaterialType)->RenderGeometry(pGeometry);
 		GetMaterial(lGeometryData->mMaterialType)->PostRender();
+	}
+
+	if (pLightOrientation)
+	{
+		SetupGLLight(lLightIndex, lLightData);
 	}
 
 	PostRender(pGeometry);

@@ -141,7 +141,7 @@ void NetworkClient::StartConnectLogin(const str& pServerHost, double pConnectTim
 	assert(pConnectTimeout >= 0);
 	mConnectTimeout = pConnectTimeout;
 	mLoginToken = pLoginToken;
-	mLoginTimeout = CURE_RTVAR_GET(mVariableScope, RTVAR_NETWORK_LOGIN_TIMEOUT, 3.0);
+	CURE_RTVAR_GET(mLoginTimeout, =, mVariableScope, RTVAR_NETWORK_LOGIN_TIMEOUT, 3.0);
 	assert(mLoginTimeout > 0);
 	StopLoginThread();
 	mLoginThread.Start(this, &NetworkClient::LoginEntry);
@@ -361,10 +361,10 @@ void NetworkClient::LoginEntry()
 			{
 				mLog.AInfo("Retrying connect...");
 			}
-			str lPortRange = CURE_RTVAR_GET(mVariableScope, RTVAR_NETWORK_CONNECT_LOCALPORTRANGE, _T("1025-65535"));
+			str lPortRange = CURE_RTVAR_SLOW_GET(mVariableScope, RTVAR_NETWORK_CONNECT_LOCALPORTRANGE, _T("1025-65535"));
 			lOk = Connect(_T(":")+lPortRange, mServerHost, mConnectTimeout);
 		}
-		while (++x <= CURE_RTVAR_GET(mVariableScope, RTVAR_NETWORK_CONNECT_RETRYCOUNT, 1) && !lOk &&
+		while (++x <= CURE_RTVAR_SLOW_GET(mVariableScope, RTVAR_NETWORK_CONNECT_RETRYCOUNT, 1) && !lOk &&
 			!SystemManager::GetQuitRequest() && !mLoginThread.GetStopRequest());
 	}
 	mIsConnecting = false;

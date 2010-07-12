@@ -36,7 +36,9 @@ GameUiManager::GameUiManager(Cure::RuntimeVariableScope* pVariableScope):
 	mFontManager(0),
 	mDesktopWindow(0),
 	mInput(0),
-	mSound(0)
+	mSound(0),
+	mSoundRollOffShadow(0),
+	mSoundDopplerShadow(0)
 {
 }
 
@@ -50,12 +52,18 @@ GameUiManager::~GameUiManager()
 
 bool GameUiManager::Open()
 {
-	str lRenderTypeString = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_RENDERENGINE, _T("OpenGL"));
-	int lDisplayWidth = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_DISPLAY_WIDTH, 640);
-	int lDisplayHeight = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_DISPLAY_HEIGHT, 480);
-	int lDisplayBpp = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_DISPLAY_BITSPERPIXEL, 0);
-	int lDisplayFrequency = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_DISPLAY_FREQUENCY, 0);
-	bool lDisplayFullScreen = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_DISPLAY_FULLSCREEN, false);
+	str lRenderTypeString;
+	int lDisplayWidth;
+	int lDisplayHeight;
+	int lDisplayBpp;
+	int lDisplayFrequency;
+	bool lDisplayFullScreen;
+	CURE_RTVAR_GET(lRenderTypeString, =, mVariableScope, RTVAR_UI_3D_RENDERENGINE, _T("OpenGL"));
+	CURE_RTVAR_GET(lDisplayWidth, =, mVariableScope, RTVAR_UI_DISPLAY_WIDTH, 640);
+	CURE_RTVAR_GET(lDisplayHeight, =, mVariableScope, RTVAR_UI_DISPLAY_HEIGHT, 480);
+	CURE_RTVAR_GET(lDisplayBpp, =, mVariableScope, RTVAR_UI_DISPLAY_BITSPERPIXEL, 0);
+	CURE_RTVAR_GET(lDisplayFrequency, =, mVariableScope, RTVAR_UI_DISPLAY_FREQUENCY, 0);
+	CURE_RTVAR_GET(lDisplayFullScreen, =, mVariableScope, RTVAR_UI_DISPLAY_FULLSCREEN, false);
 
 	UiLepra::DisplayManager::ContextType lRenderingContext = UiLepra::DisplayManager::OPENGL_CONTEXT;
 	if (lRenderTypeString == _T("OpenGL"))
@@ -67,7 +75,8 @@ bool GameUiManager::Open()
 		lRenderingContext = UiLepra::DisplayManager::DIRECTX_CONTEXT;
 	}
 
-	str lSoundTypeString = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_SOUND_ENGINE, _T("OpenAL"));
+	str lSoundTypeString;
+	CURE_RTVAR_GET(lSoundTypeString, =, mVariableScope, RTVAR_UI_SOUND_ENGINE, _T("OpenAL"));
 	UiLepra::SoundManager::ContextType lSoundContext = UiLepra::SoundManager::CONTEXT_OPENAL;
 	if (lSoundTypeString == _T("OpenAL"))
 	{
@@ -149,8 +158,10 @@ bool GameUiManager::Open()
 		//mFontManager->SetColor(Color(0, 0, 0, 0), 1);
 		mPainter->SetFontManager(mFontManager);
 
-		const str lFont = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_2D_FONT, _T("Times New Roman"));
-		const double lFontHeight = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_2D_FONTHEIGHT, 14.0);
+		str lFont;
+		CURE_RTVAR_GET(lFont, =, mVariableScope, RTVAR_UI_2D_FONT, _T("Times New Roman"));
+		double lFontHeight;
+		CURE_RTVAR_GET(lFontHeight, =, mVariableScope, RTVAR_UI_2D_FONTHEIGHT, 14.0);
 		UiTbc::FontManager::FontId lFontId = mFontManager->QueryAddFont(lFont, lFontHeight);
 		const tchar* lFontNames[] =
 		{
@@ -249,12 +260,17 @@ void GameUiManager::BeginRender()
 	if (mDisplay->IsVisible())
 	{
 		mRenderer->ResetClippingRect();
-		if (CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_ENABLECLEAR, true))
+		bool lEnableClear;
+		CURE_RTVAR_GET(lEnableClear, =, mVariableScope, RTVAR_UI_3D_ENABLECLEAR, true);
+		if (lEnableClear)
 		{
-			float r = (float)CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_CLEARRED, 0.75);
-			float g = (float)CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_CLEARGREEN, 0.80);
-			float b = (float)CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_CLEARBLUE, 0.85);
-			Clear(r, g, b);
+			double r;
+			double g;
+			double b;
+			CURE_RTVAR_GET(r, =, mVariableScope, RTVAR_UI_3D_CLEARRED, 0.75);
+			CURE_RTVAR_GET(g, =, mVariableScope, RTVAR_UI_3D_CLEARGREEN, 0.80);
+			CURE_RTVAR_GET(b, =, mVariableScope, RTVAR_UI_3D_CLEARBLUE, 0.85);
+			Clear((float)r, (float)g, (float)b);
 		}
 		else
 		{
@@ -441,23 +457,35 @@ void GameUiManager::OnMaximize(int pWidth, int pHeight)
 void GameUiManager::UpdateSettings()
 {
 	// Display.
-	const bool lEnableVSync = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_DISPLAY_ENABLEVSYNC, true);
+	bool lEnableVSync;
+	CURE_RTVAR_GET(lEnableVSync, =, mVariableScope, RTVAR_UI_DISPLAY_ENABLEVSYNC, true);
 	mDisplay->SetVSyncEnabled(lEnableVSync);
 
 	// ----------------------------------------
 
 	// 3D rendering settings.
-	const bool lEnableLights = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_ENABLELIGHTS, true);
-	const double lAmbientRed = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_AMBIENTRED, 0.1);
-	const double lAmbientGreen = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_AMBIENTGREEN, 0.1);
-	const double lAmbientBlue = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_AMBIENTBLUE, 0.1);
-	const bool lEnableTrilinearFiltering = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_ENABLETRILINEARFILTERING, false);
-	const bool lEnableBilinearFiltering = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_ENABLEBILINEARFILTERING, false);
-	const bool lEnableMipMapping = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_ENABLEMIPMAPPING, true);
-	const double lFOV = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_FOV, 45.0);
-	const double lClipNear = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_CLIPNEAR, 0.1);
-	const double lClipFar = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_CLIPFAR, 1000.0);
-	const str lShadowsString = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_3D_SHADOWS, _T("VolumesOnly"));
+	bool lEnableLights;
+	double lAmbientRed;
+	double lAmbientGreen;
+	double lAmbientBlue;
+	bool lEnableTrilinearFiltering;
+	bool lEnableBilinearFiltering;
+	bool lEnableMipMapping;
+	double lFOV;
+	double lClipNear;
+	double lClipFar;
+	str lShadowsString;
+	CURE_RTVAR_GET(lEnableLights, =, mVariableScope, RTVAR_UI_3D_ENABLELIGHTS, true);
+	CURE_RTVAR_GET(lAmbientRed, =, mVariableScope, RTVAR_UI_3D_AMBIENTRED, 0.1);
+	CURE_RTVAR_GET(lAmbientGreen, =, mVariableScope, RTVAR_UI_3D_AMBIENTGREEN, 0.1);
+	CURE_RTVAR_GET(lAmbientBlue, =, mVariableScope, RTVAR_UI_3D_AMBIENTBLUE, 0.1);
+	CURE_RTVAR_GET(lEnableTrilinearFiltering, =, mVariableScope, RTVAR_UI_3D_ENABLETRILINEARFILTERING, false);
+	CURE_RTVAR_GET(lEnableBilinearFiltering, =, mVariableScope, RTVAR_UI_3D_ENABLEBILINEARFILTERING, false);
+	CURE_RTVAR_GET(lEnableMipMapping, =, mVariableScope, RTVAR_UI_3D_ENABLEMIPMAPPING, true);
+	CURE_RTVAR_GET(lFOV, =, mVariableScope, RTVAR_UI_3D_FOV, 45.0);
+	CURE_RTVAR_GET(lClipNear, =, mVariableScope, RTVAR_UI_3D_CLIPNEAR, 0.1);
+	CURE_RTVAR_GET(lClipFar, =, mVariableScope, RTVAR_UI_3D_CLIPFAR, 1000.0);
+	CURE_RTVAR_GET(lShadowsString, =, mVariableScope, RTVAR_UI_3D_SHADOWS, _T("VolumesOnly"));
 
 	mRenderer->SetLightsEnabled(lEnableLights);
 	mRenderer->SetAmbientLight((float)lAmbientRed, (float)lAmbientGreen, (float)lAmbientBlue);
@@ -482,7 +510,8 @@ void GameUiManager::UpdateSettings()
 
 	// ----------------------------------------
 	// 2D rendering settings.
-	const str lPaintModeString = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_2D_PAINTMODE, _T("AlphaBlend"));
+	str lPaintModeString;
+	CURE_RTVAR_GET(lPaintModeString, =, mVariableScope, RTVAR_UI_2D_PAINTMODE, _T("AlphaBlend"));
 	UiTbc::Painter::RenderMode lPainterRenderMode = UiTbc::Painter::RM_ALPHABLEND;
 	if (lPaintModeString == _T("Add"))
 	{
@@ -506,15 +535,25 @@ void GameUiManager::UpdateSettings()
 	}
 	mPainter->SetRenderMode(lPainterRenderMode);
 
-	const bool lSmoothFonts = true;//CURE_RTVAR_GET(mVariableScope, RTVAR_UI_2D_SMOOTHFONTS, true);
+	const bool lSmoothFonts = true;
 	mPainter->SetFontSmoothness(lSmoothFonts);
 
 	if (mSound)
 	{
-		const double lSoundRollOff = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_SOUND_ROLLOFF, 0.3);
-		const double lSoundDoppler = CURE_RTVAR_GET(mVariableScope, RTVAR_UI_SOUND_DOPPLER, 1.3);
-		mSound->SetRollOffFactor((float)lSoundRollOff);
-		mSound->SetDopplerFactor((float)lSoundDoppler);
+		double lSoundRollOff;
+		CURE_RTVAR_GET(lSoundRollOff, =, mVariableScope, RTVAR_UI_SOUND_ROLLOFF, 0.3);
+		if (lSoundRollOff != mSoundRollOffShadow)
+		{
+			mSoundRollOffShadow = lSoundRollOff;
+			mSound->SetRollOffFactor((float)lSoundRollOff);
+		}
+		double lSoundDoppler;
+		CURE_RTVAR_GET(lSoundDoppler, =, mVariableScope, RTVAR_UI_SOUND_DOPPLER, 1.3);
+		if (lSoundDoppler != mSoundDopplerShadow)
+		{
+			mSoundDopplerShadow = lSoundDoppler;
+			mSound->SetDopplerFactor((float)lSoundDoppler);
+		}
 	}
 }
 

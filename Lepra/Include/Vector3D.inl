@@ -361,7 +361,7 @@ V3D_TEMPLATE _TVarType V3D_QUAL::GetPolarCoordAngleY() const
 	}
 }
 
-V3D_TEMPLATE Vector3D<_TVarType> V3D_QUAL::operator= (const Vector3D<_TVarType>& pV)
+V3D_TEMPLATE const Vector3D<_TVarType>& V3D_QUAL::operator= (const Vector3D<_TVarType>& pV)
 {
 	x = pV.x;
 	y = pV.y;
