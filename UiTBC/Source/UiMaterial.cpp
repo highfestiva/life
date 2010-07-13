@@ -75,19 +75,20 @@ int GeometryGroup::CalculateDepths(bool pF2B)
 
 	const TransformationF& lCam = mParentMaterial->GetRenderer()->GetCameraTransformation();
 	const QuaternionF& lCamOrientation = lCam.GetOrientation();
+	const QuaternionF& lCamOrientationInverse = mParentMaterial->GetRenderer()->GetCameraOrientationInverse();
 	const Vector3DF& lCamPosition = lCam.GetPosition();
 	int lInversionCount = 0;
 
 	// The first depth goes outside the loop...
 	Vector3DF lTemp;
-	lCamOrientation.FastInverseRotatedVector(lTemp, mGeomArray[0].mGeometry->GetTransformation().GetPosition() - lCamPosition);
+	lCamOrientation.FastInverseRotatedVector(lCamOrientationInverse, lTemp, mGeomArray[0].mGeometry->GetTransformation().GetPosition() - lCamPosition);
 	mGeomArray[0].mDepth = lTemp.y;
 	mMeanDepth += mGeomArray[0].mDepth;
 
 	int i;
 	for (i = 1; i < mGeometryCount; i++)
 	{
-		lCamOrientation.FastInverseRotatedVector(lTemp, mGeomArray[i].mGeometry->GetTransformation().GetPosition() - lCamPosition);
+		lCamOrientation.FastInverseRotatedVector(lCamOrientationInverse, lTemp, mGeomArray[i].mGeometry->GetTransformation().GetPosition() - lCamPosition);
 		mGeomArray[i].mDepth = lTemp.y;
 		mMeanDepth += mGeomArray[i].mDepth;
 

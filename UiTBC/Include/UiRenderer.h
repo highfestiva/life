@@ -369,6 +369,7 @@ public:
 
 	virtual void SetCameraTransformation(const TransformationF& pTransformation);
 	const TransformationF& GetCameraTransformation();
+	const QuaternionF& GetCameraOrientationInverse();
 
 	virtual void SetLightsEnabled(bool pEnabled);
 	bool GetLightsEnabled();
@@ -650,6 +651,7 @@ protected:
 
 	PixelRect mClippingRect;
 	TransformationF mCameraTransformation;
+	QuaternionF mCameraOrientationInverse;
 
 	// Since distance sorting lights is implemented using ::qsort(),
 	// we need to store the following variables "globally".

@@ -90,7 +90,7 @@ public:
 
 	Transformation Transform(const Transformation& pTransformation) const;
 	Transformation InverseTransform(const Transformation& pTransformation) const;
-	void FastInverseTransform(const Transformation& pFrom, const Transformation& pTo);
+	void FastInverseTransform(const Transformation& pFrom, const QuaternionF pInverse, const Transformation& pTo);
 
 	Transformation Inverse() const;
 

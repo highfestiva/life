@@ -24,6 +24,7 @@
 #include "../../UiTBC/Include/GUI/UiFloatingLayout.h"
 #include "../LifeApplication.h"
 #include "GameClientMasterTicker.h"
+#include "MassObject.h"
 #include "RoadSignButton.h"
 #include "RtVar.h"
 #include "UiConsole.h"
@@ -640,6 +641,14 @@ bool GameClientSlaveManager::InitializeTerrain()
 {
 	Cure::GameObjectId lGameObjectId = GetContext()->AllocateGameObjectId(Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
 	bool lOk = CreateObject(lGameObjectId, _T("level_01"), Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
+	assert(lOk);
+	if (lOk)
+	{
+		TransformationF lPlacement;
+		lPlacement.SetPosition(Vector3DF(50, 200, 200));
+		lOk = CreateObject(0, _T("flower"), Cure::NETWORK_OBJECT_LOCAL_ONLY, &lPlacement);
+		assert(lOk);
+	}
 	return (lOk);
 }
 
@@ -1127,6 +1136,10 @@ bool GameClientSlaveManager::CreateObject(Cure::GameObjectId pInstanceId, const 
 
 Cure::ContextObject* GameClientSlaveManager::CreateContextObject(const str& pClassId) const
 {
+	if (pClassId.find(_T("flower")) != str::npos)
+	{
+		return new MassObject(GetResourceManager(), pClassId, mUiManager, 100);
+	}
 	Cure::CppContextObject* lObject = new Vehicle(GetResourceManager(), pClassId, mUiManager);
 	lObject->SetAllowNetworkLogic(false);	// Only server gets to control logic.
 	return (lObject);

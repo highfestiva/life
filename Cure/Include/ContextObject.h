@@ -106,6 +106,7 @@ public:
 	void SetSendCount(int pCount);
 
 	virtual void StartLoading() = 0;
+	virtual void OnLoaded();
 	virtual void OnTick(float pFrameTime) = 0;
 	virtual void OnAlarm(int pAlarmId, void* pExtraData) = 0;
 	virtual void OnPhysicsTick();

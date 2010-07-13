@@ -627,6 +627,14 @@
 			Name="Game"
 			>
 			<File
+				RelativePath=".\MassObject.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\MassObject.h"
+				>
+			</File>
+			<File
 				RelativePath=".\RoadSignButton.cpp"
 				>
 			</File>

@@ -26,6 +26,7 @@ public:
 
 	bool IsGeometryReference();
 
+	const TransformationF& GetOffsetTransformation() const;
 	void SetOffsetTransformation(const TransformationF& pOffset);
 
 	// Overloads from GeometryBase.

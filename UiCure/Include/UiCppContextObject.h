@@ -43,7 +43,7 @@ public:
 	virtual void StartLoading();
 
 	void OnPhysicsTick();
-	void UiMove();
+	virtual void UiMove();
 	void ActivateLerp();
 
 	void DebugDrawPrimitive(DebugPrimitive pPrimitive);

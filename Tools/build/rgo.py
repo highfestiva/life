@@ -17,7 +17,7 @@ datename = getdatename()
 
 bindir = "bin"
 buildtypes = ["debug", "rc", "final"]
-defaulttype = buildtypes[0]
+default_build_mode = buildtypes[0]
 ziptype = buildtypes[1]
 own_tt = {"debug":"Unicode Debug", "rc":"Unicode Release Candidate", "final":"Unicode Final"}
 updates = 0
@@ -110,8 +110,8 @@ def _incremental_copy(filelist, targetdir, buildtype):
         global updates
         import shutil
         for filename in filelist:
-                global defaulttype
-                if buildtype != defaulttype and filename.lower().find("test") >= 0:
+                global default_build_mode
+                if buildtype != default_build_mode and filename.lower().find("test") >= 0:
                         print("Skipping test binary named '%s'." % filename)
                         continue
                 if os.path.isdir(filename):
@@ -228,26 +228,26 @@ def cleandata(targetdir=bindir):
         removes += _cleandir(os.path.join(targetdir, "Data"))
 
 
-def builddata(targetdir=bindir, buildtype=defaulttype):
+def builddata(targetdir=bindir, buildtype=default_build_mode):
         _incremental_build_data()
         _incremental_copy_data(targetdir, buildtype)
 
 
 
-def buildcode(targetdir=bindir, buildtype=defaulttype):
+def buildcode(targetdir=bindir, buildtype=default_build_mode):
         if hasdevenv(verbose=True):
                 _createmakes()
                 _buildcode("build", buildtype)
                 _incremental_copy_code(targetdir, buildtype)
 
 
-def build(targetdir=bindir, buildtype=defaulttype):
+def build(targetdir=bindir, buildtype=default_build_mode):
         verify_base_dir()
-        buildcode(bindir, defaulttype)
+        buildcode(bindir, default_build_mode)
         builddata(targetdir)
 
 
-def rebuild(targetdir=bindir, buildtype=defaulttype):
+def rebuild(targetdir=bindir, buildtype=default_build_mode):
         verify_base_dir()
         if hasdevenv(verbose=True):
                 _createmakes(force=True)
@@ -260,7 +260,7 @@ def rebuild(targetdir=bindir, buildtype=defaulttype):
         builddata(targetdir)
 
 
-def clean(targetdir=bindir, buildtype=defaulttype):
+def clean(targetdir=bindir, buildtype=default_build_mode):
         verify_base_dir()
         global removes
         if hasdevenv(verbose=True):
@@ -354,8 +354,7 @@ if __name__ == "__main__":
         if not options.buildmode in buildtypes:
                 print("Unknown build mode!")
                 sys.exit(1)
-        global defaulttype
-        defaulttype = options.buildmode
+        default_build_mode = options.buildmode
 
         for arg in args:
                 exec(arg+"()")

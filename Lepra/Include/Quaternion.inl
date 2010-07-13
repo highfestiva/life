@@ -541,9 +541,9 @@ TEMPLATE Vector3D<_TVarType> QUAL::GetInverseRotatedVector(const Vector3D<_TVarT
 	return Vector3D<_TVarType>(lQ.mB, lQ.mC, lQ.mD);
 }
 
-TEMPLATE void QUAL::FastInverseRotatedVector(Vector3D<_TVarType>& pTarget, const Vector3D<_TVarType>& pSource) const
+TEMPLATE void QUAL::FastInverseRotatedVector(const Quaternion& pInverse, Vector3D<_TVarType>& pTarget, const Vector3D<_TVarType>& pSource) const
 {
-	Quaternion<_TVarType> lQ(mA, -mB, -mC, -mD);	// Conjugate.
+	Quaternion<_TVarType> lQ(pInverse);
 	lQ.Mul(0, pSource.x, pSource.y, pSource.z);
 	lQ.Mul(mA, mB, mC, mD);
 	pTarget.x = lQ.mB;

@@ -38,16 +38,11 @@ public:
 	virtual ~GeometryBatch();
 
 	// Creates new instances.
-	void SetInstances(const Vector3DF* pDisplacement, 
-			  int pNumInstances,
-			  float pXScaleMin = 1.0f, float pXScaleMax = 1.0f,
-			  float pYScaleMin = 1.0f, float pYScaleMax = 1.0f,
-			  float pZScaleMin = 1.0f, float pZScaleMax = 1.0f);
-	void SetInstances(const Vector3DD* pDisplacement, 
-			  int pNumInstances,
-			  float pXScaleMin = 1.0f, float pXScaleMax = 1.0f,
-			  float pYScaleMin = 1.0f, float pYScaleMax = 1.0f,
-			  float pZScaleMin = 1.0f, float pZScaleMax = 1.0f);
+	void SetInstances(const TransformationF* pDisplacement, const Vector3DF& pRootOffset,
+		int pNumInstances, uint32 pRandomSeed,
+		float pXScaleMin = 1.0f, float pXScaleMax = 1.0f,
+		float pYScaleMin = 1.0f, float pYScaleMax = 1.0f,
+		float pZScaleMin = 1.0f, float pZScaleMax = 1.0f);
 	void ClearAllInstances();
 
 	virtual void SetGeometryVolatility(GeometryVolatility pVolatility);

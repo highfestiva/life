@@ -1055,7 +1055,29 @@ bool OpenGLRenderer::PreRender(TBC::GeometryBase* pGeometry)
 	{
 		mVisibleTriangleCount += pGeometry->GetTriangleCount();
 		// Transform the geometry.
-		mCamSpaceTransformation.FastInverseTransform(GetCameraTransformation(), pGeometry->GetTransformation());
+		/*TransformationF t = GetCameraTransformation();
+		t.GetOrientation().Div(t.GetOrientation().GetMagnitude());
+		SetCameraTransformation(t);*/
+		mCamSpaceTransformation.FastInverseTransform(mCameraTransformation, mCameraOrientationInverse, pGeometry->GetTransformation());
+#if 0
+		mCamSpaceTransformation.GetOrientation() = GetCameraTransformation().GetOrientation();
+		//mCamSpaceTransformation.GetOrientation().Div(mCamSpaceTransformation.GetOrientation().GetNorm());
+		//mCamSpaceTransformation.GetOrientation().FastInverseRotatedVector(mCamSpaceTransformation.GetPosition(), pGeometry->GetTransformation().GetPosition() - GetCameraTransformation().GetPosition());
+		//mCamSpaceTransformation.GetPosition() = mCamSpaceTransformation.GetOrientation().GetInverseRotatedVector(pGeometry->GetTransformation().GetPosition() - GetCameraTransformation().GetPosition());
+		Vector3DF lVector(pGeometry->GetTransformation().GetPosition() - GetCameraTransformation().GetPosition());
+		QuaternionF lQ(0, lVector.x, lVector.y, lVector.z);
+		QuaternionF lConjugate = mCamSpaceTransformation.GetOrientation();
+		lConjugate = lConjugate.GetConjugate();
+		/*float lNorm = lConjugate.GetNorm();
+		lConjugate.Div(lNorm);*/
+		lQ = lConjugate * lQ * mCamSpaceTransformation.GetOrientation();	// TODO: assume unit, and use conjugate instead of inverse.
+		mCamSpaceTransformation.GetPosition() = Vector3DF(lQ.mB, lQ.mC, lQ.mD);
+		mCamSpaceTransformation.GetOrientation().InvAMulB(pGeometry->GetTransformation().GetOrientation().mA, pGeometry->GetTransformation().GetOrientation().mB, pGeometry->GetTransformation().GetOrientation().mC, pGeometry->GetTransformation().GetOrientation().mD);
+#endif
+
+		TransformationF lCamSpaceTransformation = GetCameraTransformation().InverseTransform(pGeometry->GetTransformation());
+		assert(mCamSpaceTransformation.GetPosition().GetDistanceSquared(lCamSpaceTransformation.GetPosition()) < 1e-8);
+		assert((mCamSpaceTransformation.GetOrientation() - lCamSpaceTransformation.GetOrientation()).GetNorm() < 1e-8);
 		float lModelViewMatrix[16];
 		mCamSpaceTransformation.GetAs4x4TransposeMatrix(lModelViewMatrix);
 		glMatrixMode(GL_MODELVIEW);

@@ -32,11 +32,11 @@ GeometryBatch::~GeometryBatch()
 	ClearAllInstances();
 }
 
-void GeometryBatch::SetInstances(const Vector3DF* pDisplacement, 
-				 int pNumInstances,
-				 float pXScaleMin, float pXScaleMax,
-				 float pYScaleMin, float pYScaleMax,
-				 float pZScaleMin, float pZScaleMax)
+void GeometryBatch::SetInstances(const TransformationF* pDisplacement, const Vector3DF& pRootOffset,
+	int pNumInstances, uint32 pRandomSeed,
+	float pXScaleMin, float pXScaleMax,
+	float pYScaleMin, float pYScaleMax,
+	float pZScaleMin, float pZScaleMax)
 {
 	ClearAllInstances();
 
@@ -94,18 +94,23 @@ void GeometryBatch::SetInstances(const Vector3DF* pDisplacement,
 		int lUVIndex = 0;
 		for (i = 0; i < (unsigned int)pNumInstances; i++)
 		{
-			float lXScale = (float)Random::Uniform(pXScaleMin, pXScaleMax);
-			float lYScale = (float)Random::Uniform(pYScaleMin, pYScaleMax);
-			float lZScale = (float)Random::Uniform(pZScaleMin, pZScaleMax);
+			float lXScale = (float)Random::Uniform(pRandomSeed, pXScaleMin, pXScaleMax);
+			float lYScale = (float)Random::Uniform(pRandomSeed, pYScaleMin, pYScaleMax);
+			float lZScale = (float)Random::Uniform(pRandomSeed, pZScaleMin, pZScaleMax);
 
-			const Vector3DF& lPos = pDisplacement[i];
+			const TransformationF& lTransform = pDisplacement[i];
 			int lIndex = 0;
 			int lUVIndex2 = 0;
 			for (j = 0; j < lVertexCount; j++)
 			{
-				mVertex[lVIndex + 0] = lVertex[lIndex + 0] * lXScale + lPos.x;
-				mVertex[lVIndex + 1] = lVertex[lIndex + 1] * lYScale + lPos.y;
-				mVertex[lVIndex + 2] = lVertex[lIndex + 2] * lZScale + lPos.z;
+				Vector3DF lPos(
+					(lVertex[lIndex + 0] + pRootOffset.x) * lXScale,
+					(lVertex[lIndex + 1] + pRootOffset.y) * lYScale,
+					(lVertex[lIndex + 2] + pRootOffset.z) * lZScale);
+				lPos = lTransform.GetOrientation()*lPos + lTransform.GetPosition();
+				mVertex[lVIndex + 0] = lPos.x;
+				mVertex[lVIndex + 1] = lPos.y;
+				mVertex[lVIndex + 2] = lPos.z;
 
 				if (lColor != 0)
 				{
@@ -141,36 +146,6 @@ void GeometryBatch::SetInstances(const Vector3DF* pDisplacement,
 			}
 		}
 	}
-}
-
-void GeometryBatch::SetInstances(const Vector3DD* pDisplacement, 
-				 int pNumInstances,
-				 float pXScaleMin, float pXScaleMax,
-				 float pYScaleMin, float pYScaleMax,
-				 float pZScaleMin, float pZScaleMax)
-{
-	ClearAllInstances();
-
-	if (pNumInstances <= 0)
-	{
-		return;
-	}
-
-	Vector3DF* lVTemp = new Vector3DF[pNumInstances];
-
-	for (int i = 0; i < pNumInstances; i++)
-	{
-		lVTemp[i].x = (float)pDisplacement[i].x;
-		lVTemp[i].y = (float)pDisplacement[i].y;
-		lVTemp[i].z = (float)pDisplacement[i].z;
-	}
-
-	SetInstances(lVTemp, pNumInstances,
-		     pXScaleMin, pXScaleMax,
-		     pYScaleMin, pYScaleMax,
-		     pZScaleMin, pZScaleMax);
-
-	delete[] lVTemp;
 }
 
 void GeometryBatch::ClearAllInstances()

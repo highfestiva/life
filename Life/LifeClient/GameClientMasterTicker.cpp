@@ -319,11 +319,13 @@ void GameClientMasterTicker::PollRoundTrip()
 		GameClientSlaveManager* lSlave = *x;
 		if (lSlave)
 		{
+			ScopeLock lLock(lSlave->GetTickLock());
 			lSlave->TickNetworkOutput();
 		}
 	}
 	if (mServer)
 	{
+		ScopeLock lLock(mServer->GetTickLock());
 		mServer->GameServerManager::TickInput();
 		mServer->TickNetworkOutput();
 	}
@@ -332,6 +334,7 @@ void GameClientMasterTicker::PollRoundTrip()
 		GameClientSlaveManager* lSlave = *x;
 		if (lSlave)
 		{
+			ScopeLock lLock(lSlave->GetTickLock());
 			lSlave->TickNetworkInput();
 		}
 	}

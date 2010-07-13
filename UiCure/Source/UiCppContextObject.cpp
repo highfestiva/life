@@ -534,11 +534,7 @@ bool CppContextObject::TryComplete()
 		return (false);
 	}
 
-	OnPhysicsTick();
-	if (GetPhysics() && GetManager())
-	{
-		GetManager()->EnablePhysicsUpdateCallback(this);	// TODO: clear out this mess. How to use these two callback types?
-	}
+	OnLoaded();
 	return (true);
 }
 

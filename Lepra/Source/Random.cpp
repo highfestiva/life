@@ -20,8 +20,13 @@ void Random::SetSeed(uint32 pSeed)
 
 uint32 Random::GetRandomNumber()
 {
-	mSeed = mSeed * 214013L + 2531011L;
-        return (mSeed);
+	return GetRandomNumber(mSeed);
+}
+
+uint32 Random::GetRandomNumber(uint32& pSeed)
+{
+	pSeed = pSeed * 214013L + 2531011L;
+        return (pSeed);
 }
 
 uint64 Random::GetRandomNumber64()
@@ -33,9 +38,13 @@ uint64 Random::GetRandomNumber64()
 
 double Random::Uniform(double pLower, double pUpper)
 {
-	return (GetRandomNumber()/(double)0xFFFFFFFF * (pUpper-pLower) + pLower);
+	return Uniform(mSeed, pLower, pUpper);
 }
 
+double Random::Uniform(uint32& pSeed, double pLower, double pUpper)
+{
+	return (GetRandomNumber(pSeed)/(double)0xFFFFFFFF * (pUpper-pLower) + pLower);
+}
 
 
 uint32 Random::mSeed = 0;

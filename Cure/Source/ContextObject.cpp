@@ -769,6 +769,15 @@ void ContextObject::SetSendCount(int pCount)
 
 
 
+void ContextObject::OnLoaded()
+{
+	OnPhysicsTick();
+	if (GetPhysics() && GetManager())
+	{
+		GetManager()->EnablePhysicsUpdateCallback(this);
+	}
+}
+
 void ContextObject::OnPhysicsTick()
 {
 }

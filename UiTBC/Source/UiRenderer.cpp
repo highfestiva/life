@@ -192,11 +192,17 @@ const PixelRect& Renderer::GetClippingRect() const
 void Renderer::SetCameraTransformation(const TransformationF& pTransformation)
 {
 	mCameraTransformation = pTransformation;
+	mCameraOrientationInverse = mCameraTransformation.GetOrientation().GetInverse();
 }
 
 const TransformationF& Renderer::GetCameraTransformation()
 {
 	return mCameraTransformation;
+}
+
+const QuaternionF& Renderer::GetCameraOrientationInverse()
+{
+	return mCameraOrientationInverse;
 }
 
 void Renderer::SetLightsEnabled(bool pEnabled)

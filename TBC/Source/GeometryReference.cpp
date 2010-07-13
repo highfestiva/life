@@ -16,6 +16,7 @@ namespace TBC
 GeometryReference::GeometryReference(GeometryBase* pGeometry) :
 	mGeometry(pGeometry)
 {
+	SetFlag(REF_TRANSFORMATION_CHANGED, true);
 }
 
 GeometryReference::~GeometryReference()
@@ -26,6 +27,11 @@ GeometryReference::~GeometryReference()
 bool GeometryReference::IsGeometryReference()
 {
 	return true;
+}
+
+const TransformationF& GeometryReference::GetOffsetTransformation() const
+{
+	return mOffset;
 }
 
 void GeometryReference::SetOffsetTransformation(const TransformationF& pOffset)

@@ -27,8 +27,10 @@ class Random
 public:
 	static void SetSeed(uint32 pSeed);
 	static uint32 GetRandomNumber();
+	static uint32 GetRandomNumber(uint32& pSeed);
 	static uint64 GetRandomNumber64();
 	static float64 Uniform(float64 pLower = 0.0, float64 pUpper = 1.0);
+	static float64 Uniform(uint32& pSeed, float64 pLower = 0.0, float64 pUpper = 1.0);
 
 private:
 	static uint32 mSeed;
