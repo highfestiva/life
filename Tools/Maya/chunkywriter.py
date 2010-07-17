@@ -796,9 +796,9 @@ class ClassWriter(ChunkyWriter):
         def _writetag(self, node):
                 tagtype = node.get_fixed_attribute("type")
                 self._writestr(tagtype)
-                if options.options.verbose:
-                        print("Writing mesh tag %s." % tagtype)
                 float_values = node.get_fixed_attribute("float_values")
+                if options.options.verbose:
+                        print("Writing mesh tag %s: %s." % (tagtype, str(float_values)))
                 self._writeint(len(float_values))
                 for fv in float_values:
                         self._writefloat(float(fv))

@@ -77,15 +77,18 @@ public:
 		MAT_TEXTURE_AND_DIFFUSE_BUMPMAP_PXS,	// Texture + normal map. Faster.
 		MAT_TEXTURE_SBMAP_PXS,			// Texture + specular map + normal map.
 
+		MAT_SOLID_COUNT = MAT_TEXTURE_SBMAP_PXS,
+
 		MAT_SINGLE_TEXTURE_ALPHATESTED,
 
 		MAT_SINGLE_COLOR_BLENDED,
+		MAT_SINGLE_COLOR_OUTLINE_BLENDED,
 		MAT_VERTEX_COLOR_BLENDED,
 		MAT_SINGLE_TEXTURE_BLENDED,
 		MAT_SINGLE_COLOR_ENVMAP_BLENDED,
 		MAT_SINGLE_TEXTURE_ENVMAP_BLENDED,
 
-		NUM_MATERIALTYPES,
+		MAT_COUNT,
 	};
 
 	enum LightType
@@ -590,7 +593,7 @@ protected:
 	static int LightCompare(const void* pLight1, const void* pLight2);
 	static float GetLightInfluence(const LightData& pLightData);
 
-	Material* mMaterial[NUM_MATERIALTYPES];
+	Material* mMaterial[MAT_COUNT];
 	unsigned mCurrentFrame;
 
 	unsigned mVisibleTriangleCount;

@@ -16,6 +16,7 @@
 #define RTVAR_UI_3D_RENDERENGINE		"Ui.3D.RenderEngine"
 #define RTVAR_UI_3D_ENABLELIGHTS		"Ui.3D.EnableLights"
 #define RTVAR_UI_3D_ENABLECLEAR			"Ui.3D.EnableClear"
+#define RTVAR_UI_3D_ENABLEMASSOBJECTS		"Ui.3D.EnableMassObjects"
 #define RTVAR_UI_3D_OUTLINEMODE			"Ui.3D.OutlineMode"
 #define RTVAR_UI_3D_WIREFRAMEMODE		"Ui.3D.WireframeMode"
 #define RTVAR_UI_3D_CLEARRED			"Ui.3D.ClearRed"

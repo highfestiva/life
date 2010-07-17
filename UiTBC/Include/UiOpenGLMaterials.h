@@ -69,7 +69,6 @@ public:
 
 	inline virtual ~OpenGLMatSingleColorSolid(){}
 
-	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame);
 	virtual void PreRender();
 	virtual void PostRender();
 
@@ -89,9 +88,9 @@ class OpenGLMatSingleColorBlended: public OpenGLMatSingleColorSolid
 {
 	typedef OpenGLMatSingleColorSolid Parent;
 public:
-	inline OpenGLMatSingleColorBlended(OpenGLRenderer* pRenderer,
-					   Material* pFallBackMaterial) :
-		OpenGLMatSingleColorSolid(pRenderer, Material::DEPTHSORT_B2F, pFallBackMaterial)
+	inline OpenGLMatSingleColorBlended(OpenGLRenderer* pRenderer, Material* pFallBackMaterial, bool pOutline):
+		OpenGLMatSingleColorSolid(pRenderer, Material::DEPTHSORT_B2F, pFallBackMaterial),
+		mOutline(pOutline)
 	{
 	}
 
@@ -100,9 +99,9 @@ public:
 	virtual void RenderAllGeometry(unsigned int pCurrentFrame);
 	virtual void PreRender();
 	virtual void PostRender();
-	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame);
 
 protected:
+	bool mOutline;
 };
 
 
@@ -184,7 +183,6 @@ public:
 	inline virtual ~OpenGLMatSingleTextureSolid(){}
 
 	virtual bool AddGeometry(TBC::GeometryBase* pGeometry);
-	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame);
 	virtual void PreRender();
 	virtual void PostRender();
 

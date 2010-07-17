@@ -89,6 +89,7 @@ public:
 	virtual float UpdateFrustum();
 
 protected:
+	typedef std::vector<Cure::GameObjectId> ObjectArray;
 	enum SteeringPlaybackMode
 	{
 		PLAYBACK_NONE = 0,
@@ -110,6 +111,8 @@ protected:
 	virtual void TickUiInput();
 	void SetAvatarEnginePower(Cure::ContextObject* pAvatar, unsigned pAspect, float pPower, float pAngle);
 	virtual void TickUiUpdate();
+	bool UpdateMassObjects(const Vector3DF& pPosition);
+	void SetMassRender(bool pRender);
 
 	void PhysicsTick();
 
@@ -176,6 +179,9 @@ protected:
 	bool mJustLookingAtAvatars;
 	int mRoadSignIndex;
 	RoadSignMap mRoadSignMap;
+
+	Cure::GameObjectId mLevelId;
+	ObjectArray mMassObjectArray;
 
 	Vector3DF mCameraPosition;		// TODO: remove hack (should context object controlled)!
 	Vector3DF mCameraPreviousPosition;	// TODO: remove hack (should context object controlled)!

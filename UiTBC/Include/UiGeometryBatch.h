@@ -40,9 +40,9 @@ public:
 	// Creates new instances.
 	void SetInstances(const TransformationF* pDisplacement, const Vector3DF& pRootOffset,
 		int pNumInstances, uint32 pRandomSeed,
-		float pXScaleMin = 1.0f, float pXScaleMax = 1.0f,
-		float pYScaleMin = 1.0f, float pYScaleMax = 1.0f,
-		float pZScaleMin = 1.0f, float pZScaleMax = 1.0f);
+		float pXScaleMin, float pXScaleMax,
+		float pYScaleMin, float pYScaleMax,
+		float pZScaleMin, float pZScaleMax);
 	void ClearAllInstances();
 
 	virtual void SetGeometryVolatility(GeometryVolatility pVolatility);

@@ -10,7 +10,7 @@
 
 
 
-#define LEPRA_ARRAY_SIZE(a)	(sizeof(a)/sizeof(a[0]))
+#define LEPRA_ARRAY_COUNT(a)	(sizeof(a)/sizeof(a[0]))
 
 
 

@@ -6,6 +6,8 @@
 
 #include "MassObject.h"
 #include "../../Cure/Include/ContextManager.h"
+#include "../../Cure/Include/GameManager.h"
+#include "../../Lepra/Include/CyclicArray.h"
 #include "../../Lepra/Include/Random.h"
 #include "../../UiTbc/Include/UiGeometryBatch.h"
 
@@ -17,81 +19,238 @@ namespace Life
 
 
 MassObject::MassObject(Cure::ResourceManager* pResourceManager, const str& pClassResourceName,
-	UiCure::GameUiManager* pUiManager, size_t pCopyCount):
+	UiCure::GameUiManager* pUiManager, TBC::PhysicsManager::BodyID pTerrainBodyId, size_t pInstanceCount,
+	float pSideLength):
 	Parent(pResourceManager, pClassResourceName, pUiManager),
-	mCopyCount(pCopyCount)
+	mTerrainBodyId(pTerrainBodyId),
+	mSquareInstanceCount(pInstanceCount/SQUARE_COUNT),
+	mVisibleAddTerm(0.1f),
+	mSquareSideLength((int)(pSideLength/SQUARE_SIDE)),
+	mMiddleSquareX(0x80000000),
+	mMiddleSquareY(0x80000000)
 {
+	assert(mSquareInstanceCount > 0);
+	::memset(mSquareArray, 0, sizeof(mSquareArray));
+	mFullyVisibleDistance = mSquareSideLength * (SQUARE_MID_TO_CORNER - 1.0f);
+	mVisibleDistanceFactor = (1+mVisibleAddTerm)/mSquareSideLength;
+
 	SetPhysicsTypeOverride(PHYSICS_OVERRIDE_BONES);
 }
 
 MassObject::~MassObject()
 {
-	for (MassMeshArray::iterator x = mMassMeshArray.begin(); x != mMassMeshArray.end(); ++x)
-	{
-		GetUiManager()->GetRenderer()->RemoveGeometry(x->second);
-		delete (x->first);
-	}
-	mMassMeshArray.clear();
 }
 
 
 
-void MassObject::OnLoaded()
+void MassObject::SetRender(bool pRender)
 {
-	std::vector<TransformationF> lDisplacementArray;
-	for (size_t x = 0; x < mCopyCount; ++x)
+	const Vector3DF& lCenterPosition = GetPosition();
+	for (int y = 0; y < SQUARE_SIDE; ++y)
 	{
-		const float lDistance = 20.0f;
-		QuaternionF lRotation;
-		lRotation.RotateAroundOwnY((float)Random::Uniform(0, PI*2));
-		lRotation.RotateAroundOwnX((float)Random::Uniform(0, PI/8));
-		lRotation.RotateAroundOwnZ((float)Random::Uniform(0, PI/8));
-		lDisplacementArray.push_back(TransformationF(lRotation,
-			Vector3DF((float)Random::Uniform(-lDistance, lDistance), 0,
-				(float)Random::Uniform(-lDistance, lDistance))));
+		for (int x = 0; x < SQUARE_SIDE; ++x)
+		{
+			const size_t lOffset = y*SQUARE_SIDE+x;
+			if (mSquareArray[lOffset])
+			{
+				Vector3DF lSquarePosition;
+				GridToPosition(x, y, lSquarePosition);
+				const float lDistance = lSquarePosition.GetDistance(lCenterPosition);
+				const float lAlpha = (1.0f + mVisibleAddTerm) - Math::Lerp(0.0f, 1.0f, (lDistance-mFullyVisibleDistance)*mVisibleDistanceFactor);
+				mSquareArray[lOffset]->SetRender(pRender, lAlpha);
+			}
+		}
 	}
+}
+
+void MassObject::UiMove()
+{
+	int x = mMiddleSquareX;
+	int y = mMiddleSquareY;
+
+	PositionToGrid(GetPosition(), x, y);
+	if (x != mMiddleSquareX || y != mMiddleSquareY)
+	{
+		MoveToSquare(x, y);
+	}
+	for (size_t v = 0; v < SQUARE_SIDE; ++v)
+	{
+		for (size_t u = 0; u < SQUARE_SIDE; ++u)
+		{
+			const size_t lOffset = v*SQUARE_SIDE+u;
+			if (!mSquareArray[lOffset])
+			{
+				//if (u == SQUARE_MID_TO_CORNER && v == 6)
+				{
+				CreateSquare(u, v);
+				return;	// TRICKY: only create a single square every loop to avoid heavy burdon on single loop.
+				}
+			}
+			/*if (u != SQUARE_MID_TO_CORNER || v != 6)
+			{
+			delete mSquareArray[lOffset];
+			mSquareArray[lOffset] = 0;
+			}*/
+		}
+	}
+}
+
+
+
+void MassObject::PositionToGrid(const Vector3DF& pPosition, int& pX, int& pY) const
+{
+	// 2's complement...
+	pX = (pPosition.x < 0)? (int)(pPosition.x/mSquareSideLength)-1 : (int)(pPosition.x/mSquareSideLength);
+	pY = (pPosition.y < 0)? (int)(pPosition.y/mSquareSideLength)-1 : (int)(pPosition.y/mSquareSideLength);
+}
+
+void MassObject::GridToPosition(int pX, int pY, Vector3DF& pPosition) const
+{
+	// 2's complement...
+	pPosition.x = (float)((pX-SQUARE_MID_TO_CORNER+mMiddleSquareX) * mSquareSideLength);
+	pPosition.y = (float)((pY-SQUARE_MID_TO_CORNER+mMiddleSquareY) * mSquareSideLength);
+}
+
+void MassObject::MoveToSquare(int pX, int pY)
+{
+	const int dy = pY - mMiddleSquareY;
+	const int dx = pX - mMiddleSquareX;
+
+	// Move all existing once that are in reach.
+	Square* lSquareArray[SQUARE_COUNT];
+	::memcpy(lSquareArray, mSquareArray, sizeof(lSquareArray));
+	for (int v = 0; v < SQUARE_SIDE; ++v)
+	{
+		const size_t y = v + dy;
+		for (int u = 0; u < SQUARE_SIDE; ++u)
+		{
+			const size_t x = u + dx;
+			Square* lSquare = 0;
+			if (x < SQUARE_SIDE && y < SQUARE_SIDE)
+			{
+				const size_t lReadOffset = y*SQUARE_SIDE+x;
+				lSquare = lSquareArray[lReadOffset];
+				lSquareArray[lReadOffset] = 0;
+			}
+			const size_t lWriteOffset = v*SQUARE_SIDE+u;
+			mSquareArray[lWriteOffset] = lSquare;
+		}
+	}
+	// Destroy all that are no longer in use.
+	for (int x = 0; x < SQUARE_SIDE; ++x)
+	{
+		delete lSquareArray[x];
+	}
+
+	mMiddleSquareX = pX;
+	mMiddleSquareY = pY;
+}
+
+void MassObject::CreateSquare(size_t pX, size_t pY)
+{
+	assert(pX < SQUARE_SIDE && pY < SQUARE_SIDE);
+	assert(!mSquareArray[pY*SQUARE_SIDE+pX]);
+
+	uint32 lSeed = (uint32)((pY<<16)+pX);
+	std::vector<TransformationF> lDisplacementArray;
+	for (size_t x = 0; x < mSquareInstanceCount; ++x)
+	{
+		QuaternionF lRotation;
+		lRotation.RotateAroundOwnY((float)Random::Uniform(lSeed, 0, PI*2));
+		lRotation.RotateAroundOwnX((float)Random::Uniform(lSeed, 0, PI/8));
+		lRotation.RotateAroundOwnZ((float)Random::Uniform(lSeed, 0, PI/8));
+		Vector3DF lPosition;
+		GridToPosition(pX, pY, lPosition);
+		lPosition.x += (float)Random::Uniform(lSeed, mSquareSideLength);
+		lPosition.y += (float)Random::Uniform(lSeed, mSquareSideLength);
+		if (GetObjectPlacement(lPosition))
+		{
+			std::swap(lPosition.y, lPosition.z);	// TRICKY: transform from RG coords to Maya coords.
+			lPosition.z = -lPosition.z;	// TRICKY: transform from RG coords to Maya coords.
+			lDisplacementArray.push_back(TransformationF(lRotation, lPosition));
+		}
+	}
+	mSquareArray[pY*SQUARE_SIDE+pX] = new Square(lSeed, mMeshResourceArray, lDisplacementArray, GetUiManager()->GetRenderer());
+}
+
+bool MassObject::GetObjectPlacement(Vector3DF& pPosition) const
+{
+	const float lRayLength = 500;
+	pPosition.z += lRayLength * 0.5f;
+	QuaternionF lOrientation;
+	lOrientation.RotateAroundOwnX(PIF);
+	TransformationF lTransform(lOrientation, pPosition);
+	Vector3DF lCollisionPosition;
+	const int lCollisions = GetManager()->GetGameManager()->GetPhysicsManager()->QueryRayCollisionAgainst(
+		lTransform, lRayLength, mTerrainBodyId, &lCollisionPosition, 1);
+	if (lCollisions == 1)
+	{
+		pPosition.z = lCollisionPosition.z;
+		return true;
+	}
+	return false;
+}
+
+
+
+MassObject::Square::Square(uint32 pSeed, const MeshArray& pResourceArray,
+	const std::vector<TransformationF>& pDisplacementArray, UiTbc::Renderer* pRenderer):
+	mRenderer(pRenderer)
+{
+	if (pDisplacementArray.empty())
+	{
+		return;	// No mesh batches if not inside terrain.
+	}
+
 	QuaternionF lRotation;
 	lRotation.RotateAroundWorldX(PIF*0.5f);
-	for (MeshArray::iterator y = mMeshResourceArray.begin(); y != mMeshResourceArray.end(); ++y)
+	for (MeshArray::const_iterator y = pResourceArray.begin(); y != pResourceArray.end(); ++y)
 	{
 		TBC::GeometryReference* lMesh = (TBC::GeometryReference*)(*y)->GetRamData();
 		lMesh->SetAlwaysVisible(false);
 
 		UiTbc::GeometryBatch* lBatch = new UiTbc::GeometryBatch(lMesh);
-		lBatch->SetAlwaysVisible(true);
 		lBatch->SetBasicMaterialSettings(lMesh->GetBasicMaterialSettings());
-		lBatch->SetTransformation(TransformationF(lRotation, Vector3DF(0, 30, 43)));
-		lBatch->SetInstances(&lDisplacementArray[0], lMesh->GetTransformation().GetPosition(), mCopyCount,
-			123456, 0.5, 2, 0.5, 3, 0.5, 2);
+		//lBatch->SetAlwaysVisible(true);
+		lBatch->SetTransformation(TransformationF(lRotation, Vector3DF(0, 0, 0)));
+		lBatch->SetInstances(&pDisplacementArray[0], lMesh->GetTransformation().GetPosition(),
+			pDisplacementArray.size(), pSeed, 0.8f, 1.3f, 0.6f, 2.0f, 0.7f, 1.2f);
 		typedef UiTbc::Renderer R;
-		R::GeometryID lGeometryId = GetUiManager()->GetRenderer()->
-			AddGeometry(lBatch, R::MAT_SINGLE_COLOR_SOLID, R::NO_SHADOWS);
+		R::GeometryID lGeometryId = mRenderer->AddGeometry(lBatch, R::MAT_SINGLE_COLOR_SOLID, R::NO_SHADOWS);
 		mMassMeshArray.push_back(MassMeshPair(lBatch, lGeometryId));
 	}
-
-	Parent::OnLoaded();
 }
 
-void MassObject::UiMove()
+MassObject::Square::~Square()
 {
-	/*const Vector3DF lPosition(0, 50, 150);
-	QuaternionF lRotation(PIF*0.5f, Vector3DF(1, 0, 0));
-	const float lDistance = 20;
-	const float lDistanceSquare = lDistance*lDistance;
-	const size_t lMeshesPerObject = mMeshResourceArray.size();
-	for (size_t x = 0; x < mMassMeshArray.size(); x += lMeshesPerObject)
+	for (MassMeshArray::iterator x = mMassMeshArray.begin(); x != mMassMeshArray.end(); ++x)
 	{
-		if (mMassMeshArray[x].first->GetTransformation().GetPosition().GetDistanceSquared(lPosition) > lDistanceSquare)
+		mRenderer->RemoveGeometry(x->second);
+		delete x->first;
+	}
+	//mMassMeshArray.clear();
+	//mRenderer = 0;
+}
+
+void MassObject::Square::SetRender(bool pRender, float pAlpha)
+{
+	for (MassMeshArray::iterator x = mMassMeshArray.begin(); x != mMassMeshArray.end(); ++x)
+	{
+		x->first->SetAlwaysVisible(pRender);
+		x->first->GetBasicMaterialSettings().mAlpha = pAlpha;
+		if (pAlpha <= 0.001f)
 		{
-			const float lAngle = (float)Random::Uniform(0, PI*2);
-			const Vector3DF lOffset(lDistance*cos(lAngle), lDistance*sin(lAngle), 0);
-			for (size_t y = 0; y < lMeshesPerObject; ++y)
-			{
-				TBC::GeometryReference* lMesh = mMassMeshArray[x+y].first;
-				lMesh->SetTransformation(TransformationF(lRotation, lOffset+lPosition));
-			}
+			x->first->SetAlwaysVisible(false);
 		}
-	}*/
+		else if (pAlpha >= 0.999f)
+		{
+			mRenderer->ChangeMaterial(x->second, UiTbc::Renderer::MAT_SINGLE_COLOR_SOLID);
+		}
+		else
+		{
+			mRenderer->ChangeMaterial(x->second, UiTbc::Renderer::MAT_SINGLE_COLOR_OUTLINE_BLENDED);
+		}
+	}
 }
 
 

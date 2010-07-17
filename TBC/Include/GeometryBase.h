@@ -258,6 +258,7 @@ public:
 	bool GetAlwaysVisible() { return CheckFlag(ALWAYS_VISIBLE); }
 
 	const BasicMaterialSettings& GetBasicMaterialSettings() const;
+	BasicMaterialSettings& GetBasicMaterialSettings();
 	void SetBasicMaterialSettings(const BasicMaterialSettings& pMatSettings);
 
 	// Calling GetBoundingRadius() will recalculate the bounding radius if necessary.

@@ -541,7 +541,7 @@ void GameUiManager::UpdateSettings()
 	if (mSound)
 	{
 		double lSoundRollOff;
-		CURE_RTVAR_GET(lSoundRollOff, =, mVariableScope, RTVAR_UI_SOUND_ROLLOFF, 0.3);
+		CURE_RTVAR_GET(lSoundRollOff, =, mVariableScope, RTVAR_UI_SOUND_ROLLOFF, 0.2);
 		if (lSoundRollOff != mSoundRollOffShadow)
 		{
 			mSoundRollOffShadow = lSoundRollOff;

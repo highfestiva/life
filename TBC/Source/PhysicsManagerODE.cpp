@@ -12,6 +12,7 @@
 #include <../ode/src/joints/slider.h>
 #include <../ode/src/joints/universal.h>
 #pragma warning(pop)
+#include "../../Lepra/Include/CyclicArray.h"
 #include "../../Lepra/Include/Log.h"
 #include "../../Lepra/Include/Math.h"
 #include "../Include/PhysicsManagerODE.h"
@@ -65,6 +66,42 @@ PhysicsManagerODE::~PhysicsManagerODE()
 bool PhysicsManagerODE::InitCurrentThread()
 {
 	return ::dAllocateODEDataForThread((unsigned)dAllocateMaskAll) != 0;
+}
+
+int PhysicsManagerODE::QueryRayCollisionAgainst(const TransformationF& pRayTransform, float pLength, BodyID pBody,
+	Vector3DF* pCollisionPoints, int pMaxCollisionCount)
+{
+	if (pMaxCollisionCount <= 0)
+	{
+		assert(false);
+		return 0;
+	}
+
+	dGeomID lRayGeometryId = ::dCreateRay(0, pLength);
+	const Vector3DF& lFrom = pRayTransform.GetPosition();
+	Vector3DF lDir = pRayTransform.GetOrientation() * Vector3DF(0, 0, 1);
+	::dGeomRaySet(lRayGeometryId, lFrom.x, lFrom.y, lFrom.z, lDir.x, lDir.y, lDir.z);
+
+	ObjectTable::iterator x = mObjectTable.find((Object*)pBody);
+	if (x == mObjectTable.end())
+	{
+		assert(false);
+		return 0;
+	}
+	const Object* lObject = *x;
+
+	dContactGeom lContact[8];
+	const int lMaxCount = std::min((int)LEPRA_ARRAY_COUNT(lContact), pMaxCollisionCount);
+	const int lCollisionCount = ::dCollide(lObject->mGeomID, lRayGeometryId, lMaxCount, &lContact[0], sizeof(lContact[0]));
+
+	::dGeomDestroy(lRayGeometryId);
+
+	for (int x = 0; x < lCollisionCount; ++x)
+	{
+		pCollisionPoints[x].Set(lContact[x].pos[0], lContact[x].pos[1], lContact[x].pos[2]);
+	}
+
+	return lCollisionCount;
 }
 
 PhysicsManager::BodyID PhysicsManagerODE::CreateSphere(bool pIsRoot, const TransformationF& pTransform,

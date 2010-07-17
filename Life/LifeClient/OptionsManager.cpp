@@ -101,7 +101,7 @@ void OptionsManager::DoRefreshConfiguration()
 	{
 		KeyValue(_T(RTVAR_CTRL_UI_CONTOGGLE), &mConsoleToggle),
 	};
-	SetValuePointers(lEntries, LEPRA_ARRAY_SIZE(lEntries));
+	SetValuePointers(lEntries, LEPRA_ARRAY_COUNT(lEntries));
 }
 
 const str OptionsManager::ConvertToString(UiLepra::InputManager::KeyCode pKeyCode)

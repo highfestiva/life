@@ -426,6 +426,11 @@ const GeometryBase::BasicMaterialSettings& GeometryBase::GetBasicMaterialSetting
 	return (mMaterialSettings);
 }
 
+GeometryBase::BasicMaterialSettings& GeometryBase::GetBasicMaterialSettings()
+{
+	return mMaterialSettings;
+}
+
 void GeometryBase::SetBasicMaterialSettings(const BasicMaterialSettings& pMatSettings)
 {
 	mMaterialSettings = pMatSettings;

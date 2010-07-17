@@ -122,13 +122,6 @@ void OpenGLMaterial::UpdateTextureMatrix(TBC::GeometryBase* pGeometry)
 	OpenGLMatSingleColorSolid
 */
 
-void OpenGLMatSingleColorSolid::DoRenderAllGeometry(unsigned int pCurrentFrame)
-{
-	PreRender();
-	Material::DoRenderAllGeometry(pCurrentFrame);
-	PostRender();
-}
-
 void OpenGLMatSingleColorSolid::RenderGeometry(TBC::GeometryBase* pGeometry)
 {
 	PrepareBasicMaterialSettings(pGeometry);
@@ -210,7 +203,14 @@ void OpenGLMatSingleColorSolid::PrepareBasicMaterialSettings(TBC::GeometryBase* 
 
 void OpenGLMatSingleColorBlended::RenderAllGeometry(unsigned int pCurrentFrame)
 {
-	RenderAllBlendedGeometry(pCurrentFrame);
+	if (mOutline)
+	{
+		DoRenderAllGeometry(pCurrentFrame);
+	}
+	else
+	{
+		RenderAllBlendedGeometry(pCurrentFrame);
+	}
 }
 
 void OpenGLMatSingleColorBlended::PreRender()
@@ -229,14 +229,6 @@ void OpenGLMatSingleColorBlended::PostRender()
 {
 	::glDisableClientState(GL_NORMAL_ARRAY);
 	::glDisableClientState(GL_VERTEX_ARRAY);
-}
-
-void OpenGLMatSingleColorBlended::DoRenderAllGeometry(unsigned int pCurrentFrame)
-{
-
-	PreRender();
-	Material::DoRenderAllGeometry(pCurrentFrame);
-	PostRender();
 }
 
 
@@ -368,11 +360,6 @@ bool OpenGLMatSingleTextureSolid::AddGeometry(TBC::GeometryBase* pGeometry)
 	}
 
 	return (lAdded);
-}
-
-void OpenGLMatSingleTextureSolid::DoRenderAllGeometry(unsigned int pCurrentFrame)
-{
-	OpenGLMaterial::DoRenderAllGeometry(pCurrentFrame);
 }
 
 void OpenGLMatSingleTextureSolid::RenderGeometry(TBC::GeometryBase* pGeometry)

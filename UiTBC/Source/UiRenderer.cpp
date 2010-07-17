@@ -63,7 +63,7 @@ void Renderer::ClearDebugInfo()
 
 void Renderer::InitRenderer()
 {
-	for (int i = 0; i < NUM_MATERIALTYPES; i++)
+	for (int i = 0; i < MAT_COUNT; i++)
 	{
 		mMaterial[i] = CreateMaterial((MaterialType)i);
 	}
@@ -76,7 +76,7 @@ void Renderer::CloseRenderer()
 	ReleaseTextureMaps();
 	ReleaseShadowMaps();
 
-	for (int i = 0; i < (int)NUM_MATERIALTYPES; i++)
+	for (int i = 0; i < (int)MAT_COUNT; i++)
 	{
 		if (mMaterial[i] != 0)
 		{
@@ -863,7 +863,7 @@ bool Renderer::IsEnvMapCubeMap()
 
 Renderer::GeometryID Renderer::AddGeometry(TBC::GeometryBase* pGeometry, MaterialType pMaterialType, Shadows pShadows)
 {
-	if ((int)pMaterialType < 0 || (int)pMaterialType >= Renderer::NUM_MATERIALTYPES)
+	if ((int)pMaterialType < 0 || (int)pMaterialType >= Renderer::MAT_COUNT)
 	{
 		mLog.Errorf(_T("AddGeometry() - Material %i is not a valid material ID!"), (int)pMaterialType);
 		return (GeometryID)mGeometryIDManager.GetInvalidId();
@@ -1091,7 +1091,7 @@ Renderer::Shadows Renderer::GetShadows(GeometryID pGeometryID)
 
 void Renderer::UpdateShadowMaps()
 {
-	for (int i = 0; i < (int)NUM_MATERIALTYPES; i++)
+	for (int i = 0; i < (int)MAT_COUNT; i++)
 	{
 		TBC::GeometryBase* lGeometry = mMaterial[i]->GetFirstVisibleGeometry();
 		while(lGeometry != 0)
@@ -1295,7 +1295,7 @@ Renderer::LightID Renderer::AddSpotLight(LightHint pHint, const Vector3DF& pPos,
 
 Material* Renderer::GetMaterial(MaterialType pMaterialType) const
 {
-	assert(pMaterialType >= MAT_NULL && pMaterialType <= NUM_MATERIALTYPES);
+	assert(pMaterialType >= MAT_NULL && pMaterialType <= MAT_COUNT);
 	return mMaterial[pMaterialType];
 }
 

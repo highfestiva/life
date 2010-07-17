@@ -17,6 +17,7 @@
 #include "../../Lepra/Include/SystemManager.h"
 #include "../../Lepra/Include/Time.h"
 #include "../../Lepra/Include/Timer.h"
+#include "../../TBC/Include/ChunkyPhysics.h"
 #include "../../UiCure/Include/UiGameUiManager.h"
 #include "../../UiCure/Include/UiRuntimeVariableName.h"
 #include "../../UiTBC/Include/GUI/UiCustomButton.h"
@@ -54,6 +55,7 @@ GameClientSlaveManager::GameClientSlaveManager(GameClientMasterTicker* pMaster, 
 	mPingAttemptCount(0),
 	mJustLookingAtAvatars(false),
 	mRoadSignIndex(0),
+	mLevelId(0),
 	mCameraPosition(0, -200, 100),
 	//mCameraFollowVelocity(0, 1, 0),
 	mCameraUp(0, 0, 1),
@@ -182,13 +184,19 @@ bool GameClientSlaveManager::Render()
 	UpdateFrustum();
 
 	LEPRA_MEASURE_SCOPE(SlaveRender);
+	bool lMass;
 	bool lOutline;
 	bool lWireFrame;
+	CURE_RTVAR_GET(lMass, =, GetVariableScope(), RTVAR_UI_3D_ENABLEMASSOBJECTS, false);
 	CURE_RTVAR_GET(lOutline, =, GetVariableScope(), RTVAR_UI_3D_OUTLINEMODE, false);
 	CURE_RTVAR_GET(lWireFrame, =, GetVariableScope(), RTVAR_UI_3D_WIREFRAMEMODE, false);
+	SetMassRender(lMass);
 	mUiManager->GetRenderer()->EnableOutlineRendering(lOutline);
 	mUiManager->GetRenderer()->EnableWireframe(lWireFrame);
 	mUiManager->Render(mRenderArea);
+
+	SetMassRender(false);	// Hide mass objects from other cameras.
+
 	return (true);
 }
 
@@ -639,16 +647,9 @@ void GameClientSlaveManager::CreateLoginView()
 
 bool GameClientSlaveManager::InitializeTerrain()
 {
-	Cure::GameObjectId lGameObjectId = GetContext()->AllocateGameObjectId(Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
-	bool lOk = CreateObject(lGameObjectId, _T("level_01"), Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
+	mLevelId = GetContext()->AllocateGameObjectId(Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
+	bool lOk = CreateObject(mLevelId, _T("level_01"), Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
 	assert(lOk);
-	if (lOk)
-	{
-		TransformationF lPlacement;
-		lPlacement.SetPosition(Vector3DF(50, 200, 200));
-		lOk = CreateObject(0, _T("flower"), Cure::NETWORK_OBJECT_LOCAL_ONLY, &lPlacement);
-		assert(lOk);
-	}
 	return (lOk);
 }
 
@@ -792,8 +793,6 @@ void GameClientSlaveManager::TickUiUpdate()
 {
 	((ClientConsoleManager*)GetConsoleManager())->GetUiConsole()->Tick();
 
-	// TODO: update sound position and velocity.
-
 	// TODO: remove camera hack (camera position should be context object controlled).
 	mCameraPreviousPosition = mCameraPosition;
 	Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
@@ -803,6 +802,8 @@ void GameClientSlaveManager::TickUiUpdate()
 		// (in the XY plane) to where the camera currently is.
 		mCameraPivotPosition = lObject->GetPosition();
 		mCameraPivotSpeed = Math::Lerp(mCameraPivotSpeed, lObject->GetVelocity().GetLength(), 0.1f);
+
+		UpdateMassObjects(mCameraPivotPosition);
 	}
 	const Vector3DF lPivotXyPosition(mCameraPivotPosition.x, mCameraPivotPosition.y, mCameraPosition.z);
 	Vector3DF lTargetCameraPosition(mCameraPosition);
@@ -900,7 +901,48 @@ void GameClientSlaveManager::TickUiUpdate()
 	mCameraOrientation = Math::Lerp<Vector3DF, float>(mCameraOrientation, lTargetCameraOrientation, lMovingAveragePart);
 }
 
+bool GameClientSlaveManager::UpdateMassObjects(const Vector3DF& pPosition)
+{
+	bool lOk = true;
 
+	if (mMassObjectArray.empty())
+	{
+		if (lOk)
+		{
+			Cure::GameObjectId lMassObjectId = GetContext()->AllocateGameObjectId(Cure::NETWORK_OBJECT_LOCAL_ONLY);
+			mMassObjectArray.push_back(lMassObjectId);
+			lOk = CreateObject(lMassObjectId, _T("flower"), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+		}
+		if (lOk)
+		{
+			Cure::GameObjectId lMassObjectId = GetContext()->AllocateGameObjectId(Cure::NETWORK_OBJECT_LOCAL_ONLY);
+			mMassObjectArray.push_back(lMassObjectId);
+			lOk = CreateObject(lMassObjectId, _T("bush_01"), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+		}
+	}
+
+	ObjectArray::const_iterator x = mMassObjectArray.begin();
+	for (; x != mMassObjectArray.end(); ++x)
+	{
+		MassObject* lObject = (MassObject*)GetContext()->GetObject(*x, true);
+		assert(lObject);
+		lObject->SetRootPosition(pPosition);
+	}
+	return lOk;
+}
+
+void GameClientSlaveManager::SetMassRender(bool pRender)
+{
+	ObjectArray::const_iterator x = mMassObjectArray.begin();
+	for (; x != mMassObjectArray.end(); ++x)
+	{
+		MassObject* lObject = (MassObject*)GetContext()->GetObject(*x);
+		if (lObject)
+		{
+			lObject->SetRender(pRender);
+		}
+	}
+}
 
 void GameClientSlaveManager::PhysicsTick()
 {
@@ -1136,9 +1178,28 @@ bool GameClientSlaveManager::CreateObject(Cure::GameObjectId pInstanceId, const 
 
 Cure::ContextObject* GameClientSlaveManager::CreateContextObject(const str& pClassId) const
 {
-	if (pClassId.find(_T("flower")) != str::npos)
+	bool lMassObject = false;
+	int lInstanceCount = 600;
+	float lSide = 170;
+	if (pClassId.find(_T("flower")) != str::npos || pClassId.find(_T("bush_01")) != str::npos)
 	{
-		return new MassObject(GetResourceManager(), pClassId, mUiManager, 100);
+		lMassObject = true;
+		if (pClassId.find(_T("bush_01")) != str::npos)
+		{
+			lInstanceCount = 150;
+			lSide = 290;
+		}
+	}
+	if (lMassObject)
+	{
+		Cure::ContextObject* lLevel = GetContext()->GetObject(mLevelId);
+		assert(lLevel);
+		if (lLevel)
+		{
+			const TBC::PhysicsManager::BodyID lTerrainBodyId = lLevel->GetPhysics()->GetBoneGeometry(0)->GetBodyId();
+			return new MassObject(GetResourceManager(), pClassId, mUiManager, lTerrainBodyId, lInstanceCount, lSide);
+		}
+		return 0;
 	}
 	Cure::CppContextObject* lObject = new Vehicle(GetResourceManager(), pClassId, mUiManager);
 	lObject->SetAllowNetworkLogic(false);	// Only server gets to control logic.

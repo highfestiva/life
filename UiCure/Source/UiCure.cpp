@@ -39,6 +39,7 @@ void SetDefault(Cure::RuntimeVariableScope* pSettings)
 	CURE_RTVAR_SET(pSettings, RTVAR_UI_3D_RENDERENGINE, _T("OpenGL"));
 	CURE_RTVAR_SET(pSettings, RTVAR_UI_3D_ENABLELIGHTS, true);
 	CURE_RTVAR_SET(pSettings, RTVAR_UI_3D_ENABLECLEAR, true);
+	CURE_RTVAR_SET(pSettings, RTVAR_UI_3D_ENABLEMASSOBJECTS, true);
 	CURE_RTVAR_SET(pSettings, RTVAR_UI_3D_OUTLINEMODE, true);
 	CURE_RTVAR_SET(pSettings, RTVAR_UI_3D_WIREFRAMEMODE, false);
 	CURE_RTVAR_SET(pSettings, RTVAR_UI_3D_CLEARRED, 0.75);
@@ -58,7 +59,7 @@ void SetDefault(Cure::RuntimeVariableScope* pSettings)
 	CURE_RTVAR_SET(pSettings, RTVAR_UI_2D_FONT, _T("Times New Roman"));
 	CURE_RTVAR_SET(pSettings, RTVAR_UI_2D_FONTHEIGHT, 14.0);
 	CURE_RTVAR_SET(pSettings, RTVAR_UI_SOUND_ENGINE, _T("OpenAL"));
-	CURE_RTVAR_SET(pSettings, RTVAR_UI_SOUND_ROLLOFF, 0.1);
+	CURE_RTVAR_SET(pSettings, RTVAR_UI_SOUND_ROLLOFF, 0.2);
 	CURE_RTVAR_SET(pSettings, RTVAR_UI_SOUND_DOPPLER, 1.3);
 }
 

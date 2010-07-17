@@ -92,7 +92,7 @@ Cure::GameManager* ConsoleManager::GetGameManager() const
 
 unsigned ConsoleManager::GetCommandCount() const
 {
-	return LEPRA_ARRAY_SIZE(mCommandIdList);
+	return LEPRA_ARRAY_COUNT(mCommandIdList);
 }
 
 const ConsoleManager::CommandPair& ConsoleManager::GetCommand(unsigned pIndex) const
@@ -228,7 +228,7 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 			if (pParameterVector.size() == 1 && strutil::StringToInt(pParameterVector[0], lLogLevel))
 			{
 				const tchar* lListenerNameArray[] = { _T("console"), _T("i-console"), _T("file"), };
-				for (size_t x = 0; x < LEPRA_ARRAY_SIZE(lListenerNameArray); ++x)
+				for (size_t x = 0; x < LEPRA_ARRAY_COUNT(lListenerNameArray); ++x)
 				{
 					LogListener* lLogger = LogType::GetLog(LogType::SUB_ROOT)->GetListener(lListenerNameArray[x]);
 					if (lLogger)

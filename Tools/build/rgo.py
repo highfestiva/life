@@ -92,8 +92,12 @@ def _incremental_build_data():
                 if ftini > ft:
                         ft = ftini
                 fs = glob.glob(basename+"*")
-                fs.remove(ma)
-                fs.remove(ini)
+                real_fs = []
+                for f in fs:
+                        fn = f.lower()
+                        if fn.endswith(".class") or fn.endswith(".mesh") or fn.endswith(".phys"):
+                                real_fs += [f]
+                fs = real_fs
                 if not fs:
                         print("Converting %s as no converted files exist!" % (basename,))
                         _convertdata(ma)
@@ -121,6 +125,7 @@ def _incremental_copy(filelist, targetdir, buildtype):
                 targetfile = os.path.join(targetdir, os.path.split(filename)[1])
                 if not os.path.exists(targetfile) or filetime(filename) > filetime(targetfile):
                         if os.name == "nt":
+                                #print("Copying %s." % filename)
                                 shutil.copyfile(filename, targetfile)
                         else:
                                 run(["cp", filename, targetfile], "copying of file")

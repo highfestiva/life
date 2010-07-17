@@ -154,7 +154,7 @@ void ClientOptionsManager::DoRefreshConfiguration()
 		KeyValue(_T(RTVAR_CTRL_STEER_HANDBRK), &mControl.mControl[Vehicle::CONTROL_HANDBREAK]),
 		KeyValue(_T(RTVAR_CTRL_STEER_BRK), &mControl.mControl[Vehicle::CONTROL_BREAK]),
 	};
-	SetValuePointers(lEntries, LEPRA_ARRAY_SIZE(lEntries));
+	SetValuePointers(lEntries, LEPRA_ARRAY_COUNT(lEntries));
 }
 
 

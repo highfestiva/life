@@ -88,6 +88,7 @@ public:
 	void SetInitialTransform(const TransformationF& pTransformation);
 	TransformationF GetInitialTransform() const;
 	Vector3DF GetPosition() const;
+	void SetRootPosition(const Vector3DF& pPosition);
 	QuaternionF GetOrientation() const;
 	Vector3DF GetVelocity() const;
 	float GetForwardSpeed() const;

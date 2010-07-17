@@ -120,6 +120,9 @@ public:
 
 	virtual bool InitCurrentThread() = 0;
 
+	virtual int QueryRayCollisionAgainst(const TransformationF& pRayTransform, float pLength, BodyID pBody,
+		Vector3DF* pCollisionPoints, int pMaxCollisionCount) = 0;
+
 	// The "friction" parameter is a factor such that the friction coefficient
 	// between two bodies is calculated as mu = body1.friction * body2.friction.
 	// This is indeed a "hack", but it's there to make life easier writing games.

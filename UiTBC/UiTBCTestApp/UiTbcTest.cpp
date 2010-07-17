@@ -1955,18 +1955,18 @@ BumpMapSceneTest::BumpMapSceneTest(const Lepra::LogDecorator& pLog) :
 	lMaterial.mDiffuse = Lepra::Vector3DF(0.2f,1,0.2f);
 	mCone->SetBasicMaterialSettings(lMaterial);
 	UiTbc::GeometryBatch* lConeBatch = new UiTbc::GeometryBatch(mCone);
-	Lepra::Vector3DF lPositions[100];
+	Lepra::TransformationF lPositions[100];
 	for (int i = 0; i < 100; i++)
 	{
-		lPositions[i].x = (float)Lepra::Random::Uniform(0, 50);
-		lPositions[i].y = (float)Lepra::Random::Uniform(0, 50);
-		lPositions[i].z = 0;
+		lPositions[i].GetPosition().x = (float)Lepra::Random::Uniform(0, 50);
+		lPositions[i].GetPosition().y = (float)Lepra::Random::Uniform(0, 50);
+		lPositions[i].GetPosition().z = 0;
 	}
 
 	Lepra::TransformationF lTransf;
 	lTransf.SetPosition(Lepra::Vector3DF(0, 0, -1));
 
-	lConeBatch->SetInstances(lPositions, 100, 0.8f, 1.2f, 0.8f, 1.2f, 0.8f, 1.2f);
+	lConeBatch->SetInstances(lPositions, Vector3DF(), 100, 0, 0.8f, 1.2f, 0.8f, 1.2f, 0.8f, 1.2f);
 	lConeBatch->SetAlwaysVisible(true);
 	lConeBatch->SetTransformation(lTransf);
 	lConeBatch->CalculateBoundingRadius();

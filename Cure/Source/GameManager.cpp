@@ -55,6 +55,7 @@ GameManager::GameManager(RuntimeVariableScope* pVariableScope, ResourceManager* 
 	mPhysicsTickDoneSemaphore(0)
 {
 	mContext = new ContextManager(this);
+	mPhysics->InitCurrentThread();
 }
 
 GameManager::~GameManager()

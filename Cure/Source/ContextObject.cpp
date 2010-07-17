@@ -552,7 +552,7 @@ TransformationF ContextObject::GetInitialTransform() const
 
 Vector3DF ContextObject::GetPosition() const
 {
-	if (mPhysics)
+	if (mPhysics && mPhysicsOverride != PHYSICS_OVERRIDE_BONES)
 	{
 		const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
 		if (lGeometry && lGeometry->GetBodyId() != TBC::INVALID_BODY)
@@ -561,7 +561,13 @@ Vector3DF ContextObject::GetPosition() const
 		}
 		assert(false);
 	}
-	return (mPosition.mPosition.mTransformation.GetPosition());
+	return mPosition.mPosition.mTransformation.GetPosition();
+}
+
+void ContextObject::SetRootPosition(const Vector3DF& pPosition)
+{
+	assert(mPhysicsOverride == PHYSICS_OVERRIDE_BONES);
+	mPosition.mPosition.mTransformation.SetPosition(pPosition);
 }
 
 QuaternionF ContextObject::GetOrientation() const

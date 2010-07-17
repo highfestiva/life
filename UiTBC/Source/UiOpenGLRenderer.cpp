@@ -57,7 +57,9 @@ Material* OpenGLRenderer::CreateMaterial(MaterialType pMaterialType)
 	case MAT_TEXTURE_SBMAP_PXS:
 		return new OpenGLMatTextureSBMapPXS(this, GetMaterial(MAT_TEXTURE_AND_DIFFUSE_BUMPMAP_PXS));
 	case MAT_SINGLE_COLOR_BLENDED:
-		return new OpenGLMatSingleColorBlended(this, 0);
+		return new OpenGLMatSingleColorBlended(this, 0, false);
+	case MAT_SINGLE_COLOR_OUTLINE_BLENDED:
+		return new OpenGLMatSingleColorBlended(this, 0, true);
 	case MAT_VERTEX_COLOR_BLENDED:
 		return new OpenGLMatVertexColorBlended(this, GetMaterial(MAT_SINGLE_COLOR_BLENDED));
 	case MAT_SINGLE_TEXTURE_BLENDED:
@@ -1018,7 +1020,7 @@ void OpenGLRenderer::ReleaseGeometry(TBC::GeometryBase* pUserGeometry, GeomRelea
 
 bool OpenGLRenderer::ChangeMaterial(GeometryID pGeometryID, MaterialType pMaterialType)
 {
-	if ((int)pMaterialType < 0 || (int)pMaterialType >= NUM_MATERIALTYPES)
+	if ((int)pMaterialType < 0 || (int)pMaterialType >= MAT_COUNT)
 	{
 		mLog.Errorf(_T("ChangeMaterial() - Material %i is not a valid material ID!"), (int)pMaterialType);
 		return (false);
@@ -1037,11 +1039,14 @@ bool OpenGLRenderer::ChangeMaterial(GeometryID pGeometryID, MaterialType pMateri
 	if (lOk)
 	{
 		OGLGeometryData* lGeometry = (OGLGeometryData*)*lIter;
-		OpenGLMaterial* lMat = (OpenGLMaterial*)GetMaterial(lGeometry->mMaterialType);
-		lMat->RemoveGeometry(lGeometry->mGeometry);
-		lGeometry->mMaterialType = pMaterialType;
-		lMat = (OpenGLMaterial*)GetMaterial(lGeometry->mMaterialType);
-		lOk = lMat->AddGeometry(lGeometry->mGeometry);
+		if (lGeometry->mMaterialType != pMaterialType)
+		{
+			OpenGLMaterial* lMat = (OpenGLMaterial*)GetMaterial(lGeometry->mMaterialType);
+			lMat->RemoveGeometry(lGeometry->mGeometry);
+			lGeometry->mMaterialType = pMaterialType;
+			lMat = (OpenGLMaterial*)GetMaterial(lGeometry->mMaterialType);
+			lOk = lMat->AddGeometry(lGeometry->mGeometry);
+		}
 	}
 	OGL_ASSERT();
 	return (lOk);
@@ -1059,25 +1064,9 @@ bool OpenGLRenderer::PreRender(TBC::GeometryBase* pGeometry)
 		t.GetOrientation().Div(t.GetOrientation().GetMagnitude());
 		SetCameraTransformation(t);*/
 		mCamSpaceTransformation.FastInverseTransform(mCameraTransformation, mCameraOrientationInverse, pGeometry->GetTransformation());
-#if 0
-		mCamSpaceTransformation.GetOrientation() = GetCameraTransformation().GetOrientation();
-		//mCamSpaceTransformation.GetOrientation().Div(mCamSpaceTransformation.GetOrientation().GetNorm());
-		//mCamSpaceTransformation.GetOrientation().FastInverseRotatedVector(mCamSpaceTransformation.GetPosition(), pGeometry->GetTransformation().GetPosition() - GetCameraTransformation().GetPosition());
-		//mCamSpaceTransformation.GetPosition() = mCamSpaceTransformation.GetOrientation().GetInverseRotatedVector(pGeometry->GetTransformation().GetPosition() - GetCameraTransformation().GetPosition());
-		Vector3DF lVector(pGeometry->GetTransformation().GetPosition() - GetCameraTransformation().GetPosition());
-		QuaternionF lQ(0, lVector.x, lVector.y, lVector.z);
-		QuaternionF lConjugate = mCamSpaceTransformation.GetOrientation();
-		lConjugate = lConjugate.GetConjugate();
-		/*float lNorm = lConjugate.GetNorm();
-		lConjugate.Div(lNorm);*/
-		lQ = lConjugate * lQ * mCamSpaceTransformation.GetOrientation();	// TODO: assume unit, and use conjugate instead of inverse.
-		mCamSpaceTransformation.GetPosition() = Vector3DF(lQ.mB, lQ.mC, lQ.mD);
-		mCamSpaceTransformation.GetOrientation().InvAMulB(pGeometry->GetTransformation().GetOrientation().mA, pGeometry->GetTransformation().GetOrientation().mB, pGeometry->GetTransformation().GetOrientation().mC, pGeometry->GetTransformation().GetOrientation().mD);
-#endif
-
-		TransformationF lCamSpaceTransformation = GetCameraTransformation().InverseTransform(pGeometry->GetTransformation());
+		/*TransformationF lCamSpaceTransformation = GetCameraTransformation().InverseTransform(pGeometry->GetTransformation());
 		assert(mCamSpaceTransformation.GetPosition().GetDistanceSquared(lCamSpaceTransformation.GetPosition()) < 1e-8);
-		assert((mCamSpaceTransformation.GetOrientation() - lCamSpaceTransformation.GetOrientation()).GetNorm() < 1e-8);
+		assert((mCamSpaceTransformation.GetOrientation() - lCamSpaceTransformation.GetOrientation()).GetNorm() < 1e-8);*/
 		float lModelViewMatrix[16];
 		mCamSpaceTransformation.GetAs4x4TransposeMatrix(lModelViewMatrix);
 		glMatrixMode(GL_MODELVIEW);
@@ -1183,7 +1172,7 @@ unsigned OpenGLRenderer::RenderScene()
 		OpenGLMatPXS::PrepareLights(this);
 
 		// Render the scene darkened.
-		for (int i = 0; i < (int)NUM_MATERIALTYPES; i++)
+		for (int i = 0; i < (int)MAT_SOLID_COUNT; i++)
 		{
 			if (GetMaterial((MaterialType)i) != 0)
 			{
@@ -1218,7 +1207,7 @@ unsigned OpenGLRenderer::RenderScene()
 		}
 	}
 
-	int lStartMaterial;
+	bool lSkipOutlined = false;
 	if (IsOutlineRenderingEnabled() && !IsWireframeEnabled())
 	{
 		Material::EnableDrawMaterial(false);
@@ -1226,20 +1215,18 @@ unsigned OpenGLRenderer::RenderScene()
 		TBC::GeometryBase::BasicMaterialSettings lMaterial(lColor, lColor, lColor, 1, 1, false);
 		OpenGLMaterial::SetBasicMaterial(lMaterial, this);
 		GetMaterial(MAT_SINGLE_COLOR_SOLID)->RenderAllGeometry(GetCurrentFrame());
+		GetMaterial(MAT_SINGLE_COLOR_OUTLINE_BLENDED)->RenderAllGeometry(GetCurrentFrame());
 		::glCullFace(GL_FRONT);
 		::glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		::glDepthFunc(GL_LEQUAL);
 		::glDisable(GL_LIGHTING);
 		Material::EnableDrawMaterial(true);
 		GetMaterial(MAT_SINGLE_COLOR_SOLID)->RenderAllGeometry(GetCurrentFrame());
+		GetMaterial(MAT_SINGLE_COLOR_OUTLINE_BLENDED)->RenderAllGeometry(GetCurrentFrame());
 		::glCullFace(GL_BACK);
 		::glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		//::glDepthFunc(GL_LESS);
-		lStartMaterial = MAT_SINGLE_COLOR_SOLID + 1;
-	}
-	else
-	{
-		lStartMaterial = MAT_SINGLE_COLOR_SOLID;
+		lSkipOutlined = true;
 	}
 
 	{
@@ -1248,8 +1235,12 @@ unsigned OpenGLRenderer::RenderScene()
 	}
 	{
 		// This renders the scene.
-		for (int i = lStartMaterial; i < (int)NUM_MATERIALTYPES; ++i)
+		for (int i = 0; i < (int)MAT_COUNT; ++i)
 		{
+			if (lSkipOutlined && (i == MAT_SINGLE_COLOR_SOLID || i == MAT_SINGLE_COLOR_OUTLINE_BLENDED))
+			{
+				continue;
+			}
 			Material* lMaterial = GetMaterial((MaterialType)i);
 			if (lMaterial != 0)
 			{

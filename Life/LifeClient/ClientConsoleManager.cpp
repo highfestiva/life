@@ -97,7 +97,7 @@ bool ClientConsoleManager::SaveApplicationConfigFile(File* pFile, const wstr& pU
 
 unsigned ClientConsoleManager::GetCommandCount() const
 {
-	return Parent::GetCommandCount() + LEPRA_ARRAY_SIZE(mCommandIdList);
+	return Parent::GetCommandCount() + LEPRA_ARRAY_COUNT(mCommandIdList);
 }
 
 const ClientConsoleManager::CommandPair& ClientConsoleManager::GetCommand(unsigned pIndex) const

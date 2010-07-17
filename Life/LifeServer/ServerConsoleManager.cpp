@@ -47,7 +47,7 @@ ServerConsoleManager::~ServerConsoleManager()
 
 unsigned ServerConsoleManager::GetCommandCount() const
 {
-	return Parent::GetCommandCount() + LEPRA_ARRAY_SIZE(mCommandIdList);
+	return Parent::GetCommandCount() + LEPRA_ARRAY_COUNT(mCommandIdList);
 }
 
 const ServerConsoleManager::CommandPair& ServerConsoleManager::GetCommand(unsigned pIndex) const
