@@ -16,7 +16,8 @@ namespace Cure
 
 
 RuntimeVariable::RuntimeVariable(const str& pName, const str& pValue, Usage pUsage):
-	mName(pName)
+	mName(pName),
+	mDefaultValue(pValue)
 {
 	SetValue(pValue, pUsage);
 }

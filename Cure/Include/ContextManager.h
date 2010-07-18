@@ -48,6 +48,7 @@ public:
 
 	GameObjectId AllocateGameObjectId(NetworkObjectType pNetworkType);
 	void FreeGameObjectId(NetworkObjectType pNetworkType, GameObjectId pInstanceId);
+	bool IsLocalGameObjectId(GameObjectId pInstanceId) const;
 
 	void EnablePhysicsUpdateCallback(ContextObject* pObject);
 	void DisablePhysicsUpdateCallback(ContextObject* pObject);

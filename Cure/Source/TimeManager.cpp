@@ -46,6 +46,8 @@ void TimeManager::Clear(int pPhysicsFrameCounter)
 void TimeManager::TickTime()
 {
 	CURE_RTVAR_GET(mTargetFrameRate, =, Cure::GetSettings(), RTVAR_PHYSICS_FPS, 2);
+	CURE_RTVAR_GET(mRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
+	mRealTimeRatio = Math::Clamp(mRealTimeRatio, 0.1f, 350.0f);
 
 	mCurrentFrameTime = (float)mTime.PopTimeDiff();
 	if (mCurrentFrameTime > 1.0)	// Never take longer steps than one second.
@@ -61,7 +63,8 @@ void TimeManager::TickTime()
 	{
 		mPhysicsFrameTime *= 2;
 	}
-	mPhysicsStepCount = (int)::floor(mTickTimeModulo/mPhysicsFrameTime);
+	mPhysicsStepCount = (int)::floor(mTickTimeModulo / mPhysicsFrameTime);
+	mPhysicsFrameTime *= mRealTimeRatio;
 
 	if (mPhysicsStepCount > 0)
 	{
@@ -82,7 +85,7 @@ void TimeManager::TickPhysics()
 {
 	if (GetAffordedPhysicsStepCount() >= 1)
 	{
-		const float lThisStepTime = GetAffordedPhysicsTotalTime();
+		const float lThisStepTime = GetAffordedPhysicsTotalTime() / mRealTimeRatio;
 		int lTargetStepCount = (int)::floorf(lThisStepTime * mTargetFrameRate);
 
 		mPhysicsFrameCounter += lTargetStepCount;
@@ -116,12 +119,22 @@ float TimeManager::GetCurrentFrameTime() const
 
 int TimeManager::GetCurrentPhysicsFrame() const
 {
-	return (mPhysicsFrameCounter);
+	return mPhysicsFrameCounter;
 }
 
 float TimeManager::GetNormalFrameTime() const
 {
-	return (mAverageFrameTime);
+	return mAverageFrameTime * mRealTimeRatio;
+}
+
+float TimeManager::GetRealNormalFrameTime() const
+{
+	return mAverageFrameTime;
+}
+
+float TimeManager::GetRealTimeRatio() const
+{
+	return mRealTimeRatio;
 }
 
 void TimeManager::SetCurrentPhysicsFrame(int pPhysicsFrame)

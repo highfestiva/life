@@ -157,7 +157,7 @@ extern "C" void dDebug (int num, const char *msg, ...)
     s[sizeof(s)-1] = 0;
     MessageBox(0,s,title,MB_OK | MB_ICONSTOP);
   }
-  abort();
+  //abort();	high_festiva was here!!!
 }
 
 

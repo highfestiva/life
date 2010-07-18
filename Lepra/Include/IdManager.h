@@ -39,9 +39,9 @@ public:
 	// must be true.
 	IdManager(_TInt pMinId, _TInt pMaxId, _TInt pInvalidId);
 
-	inline _TInt GetMinId();
-	inline _TInt GetMaxId();
-	inline _TInt GetInvalidId();
+	inline _TInt GetMinId() const;
+	inline _TInt GetMaxId() const;
+	inline _TInt GetInvalidId() const;
 
 	bool IsIdFree(_TInt pId) const;
 	_TInt GetFreeId();

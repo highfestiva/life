@@ -114,46 +114,6 @@ GameClientMasterTicker::~GameClientMasterTicker()
 
 bool GameClientMasterTicker::CreateSlave()
 {
-	if (!mServer)
-	{
-		bool lIsLocalServer = false;
-		const str lServerUrl = strutil::Split(CURE_RTVAR_SLOW_GET(UiCure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("0.0.0.0:16650")), _T(":"), 1)[0];
-		IPAddress lServerIpAddress;
-		IPAddress lExternalIpAddress;
-		if (Network::ResolveHostname(lServerUrl, lServerIpAddress) && Network::ResolveHostname(_T(""), lExternalIpAddress))
-		{
-			const str lServerIp = lServerIpAddress.GetAsString();
-			if (lServerIp == _T("127.0.0.1") ||
-				lServerIp == _T("0.0.0.0") ||
-				lServerIpAddress == lExternalIpAddress)
-			{
-				lIsLocalServer = true;
-			}
-		}
-		if (lIsLocalServer)
-		{
-			Cure::RuntimeVariableScope* lVariableScope = new Cure::RuntimeVariableScope(Cure::GetSettings());
-			UiGameServerManager* lServer = new UiGameServerManager(lVariableScope, mResourceManager, mUiManager, PixelRect(0, 0, 100, 100));
-			lServer->StartConsole(new UiTbc::ConsoleLogListener, new UiTbc::ConsolePrompt);
-			if (!lServer->Initialize())
-			{
-				delete lServer;
-				lServer = 0;
-			}
-			if (lServer)
-			{
-				ScopeLock lLock(&mLock);
-				if (!mServer)
-				{
-					mServer = lServer;
-				}
-				else
-				{
-					delete lServer;
-				}
-			}
-		}
-	}
 	return (CreateSlave(&GameClientMasterTicker::CreateSlaveManager));
 }
 
@@ -357,6 +317,11 @@ bool GameClientMasterTicker::WaitResetUi()
 	return (!mRestartUi);
 }
 
+bool GameClientMasterTicker::IsFirstSlave(const GameClientSlaveManager* pSlave) const
+{
+	return !mSlaveArray.empty() && mSlaveArray[0] == pSlave;
+}
+
 bool GameClientMasterTicker::IsLocalObject(Cure::GameObjectId pInstanceId) const
 {
 	return (mLocalObjectSet.find(pInstanceId) != mLocalObjectSet.end());
@@ -383,21 +348,71 @@ PixelRect GameClientMasterTicker::GetRenderArea() const
 		mUiManager->GetDisplayManager()->GetHeight()-1));
 }
 
-
-
-float GameClientMasterTicker::UpdateFrustum()
+float GameClientMasterTicker::UpdateFrustum(float pFov)
 {
-	float lFov;
+	const PixelRect lRenderArea(0, 0, mUiManager->GetDisplayManager()->GetWidth(), mUiManager->GetDisplayManager()->GetHeight());
+	return UpdateFrustum(pFov, lRenderArea);
+}
+
+float GameClientMasterTicker::UpdateFrustum(float pFov, const PixelRect& pRenderArea)
+{
+	pFov *= 1/3.0f;
+	pFov = pFov*2 + pFov*pRenderArea.GetWidth()/pRenderArea.GetHeight();
+
 	float lClipNear;
 	float lClipFar;
-	CURE_RTVAR_GET(lFov, =(float), UiCure::GetSettings(), RTVAR_UI_3D_FOV, 45.0);
 	CURE_RTVAR_GET(lClipNear, =(float), UiCure::GetSettings(), RTVAR_UI_3D_CLIPNEAR, 0.1);
 	CURE_RTVAR_GET(lClipFar, =(float), UiCure::GetSettings(), RTVAR_UI_3D_CLIPFAR, 1000.0);
-	mUiManager->GetRenderer()->SetViewFrustum(lFov, lClipNear, lClipFar);
-	return (lFov);
+	mUiManager->GetRenderer()->SetViewFrustum(pFov, lClipNear, lClipFar);
+	return (pFov);
 }
 
 
+
+void GameClientMasterTicker::PreLogin(const str& pServerAddress)
+{
+	bool lIsLocalServer = false;
+	const str lServerUrl = strutil::Split(pServerAddress, _T(":"), 1)[0];
+	IPAddress lServerIpAddress;
+	IPAddress lExternalIpAddress;
+	if (Network::ResolveHostname(lServerUrl, lServerIpAddress) && Network::ResolveHostname(_T(""), lExternalIpAddress))
+	{
+		const str lServerIp = lServerIpAddress.GetAsString();
+		if (lServerIp == _T("127.0.0.1") ||
+			lServerIp == _T("0.0.0.0") ||
+			lServerIpAddress == lExternalIpAddress)
+		{
+			lIsLocalServer = true;
+		}
+	}
+	if (lIsLocalServer && !mServer)
+	{
+		Cure::RuntimeVariableScope* lVariableScope = new Cure::RuntimeVariableScope(Cure::GetSettings());
+		UiGameServerManager* lServer = new UiGameServerManager(lVariableScope, mResourceManager, mUiManager, PixelRect(0, 0, 100, 100));
+		lServer->StartConsole(new UiTbc::ConsoleLogListener, new UiTbc::ConsolePrompt);
+		if (!lServer->Initialize())
+		{
+			delete lServer;
+			lServer = 0;
+		}
+		if (lServer)
+		{
+			ScopeLock lLock(&mLock);
+			if (!mServer)
+			{
+				mServer = lServer;
+			}
+			else
+			{
+				delete lServer;
+			}
+		}
+	}
+	else if (!lIsLocalServer && mServer)
+	{
+		DeleteServer();
+	}
+}
 
 void GameClientMasterTicker::OnExit()
 {

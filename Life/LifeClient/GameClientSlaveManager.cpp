@@ -104,12 +104,6 @@ void GameClientSlaveManager::SetRenderArea(const PixelRect& pRenderArea)
 	}
 	((ClientConsoleManager*)GetConsoleManager())->GetUiConsole()->SetRenderArea(pRenderArea);
 
-	// Register a local FOV variable.
-	double lBaseFov;
-	CURE_RTVAR_GET(lBaseFov, =, GetVariableScope(), RTVAR_UI_3D_FOV, 45.0) / 3;
-	const double lFov = lBaseFov*2 + lBaseFov*pRenderArea.GetWidth()/pRenderArea.GetHeight();
-	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_UI_3D_INTERNALFOV, lFov);
-
 	CURE_RTVAR_GET(mCameraTargetXyDistance, =(float), GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
 }
 
@@ -181,7 +175,9 @@ bool GameClientSlaveManager::Render()
 
 	UpdateCameraPosition(true);
 
-	UpdateFrustum();
+	float lFov;
+	CURE_RTVAR_GET(lFov, =(float), GetVariableScope(), RTVAR_UI_3D_FOV, 45.0);
+	UpdateFrustum(lFov);
 
 	LEPRA_MEASURE_SCOPE(SlaveRender);
 	bool lMass;
@@ -429,6 +425,8 @@ void GameClientSlaveManager::ToggleConsole()
 
 void GameClientSlaveManager::RequestLogin(const str& pServerAddress, const Cure::LoginId& pLoginToken)
 {
+	mMaster->PreLogin(pServerAddress);
+
 	ScopeLock lLock(GetTickLock());
 
 	CloseLoginGui();
@@ -463,7 +461,11 @@ bool GameClientSlaveManager::IsLoggingIn() const
 
 bool GameClientSlaveManager::IsUiMoveForbidden(Cure::GameObjectId pObjectId) const
 {
-	return (pObjectId != mAvatarId && GetMaster()->IsLocalObject(pObjectId));
+	//const bool lMoveAllowed = (pObjectId == mAvatarId || GetContext()->IsLocalGameObjectId(pObjectId) ||
+	//	(!GetMaster()->IsLocalObject(pObjectId) && GetMaster()->IsFirstSlave(this)));
+	const bool lMoveAllowed = true;//(pObjectId == mAvatarId || !GetMaster()->IsLocalObject(pObjectId));
+	pObjectId;
+	return !lMoveAllowed;
 }
 
 void GameClientSlaveManager::GetSiblings(Cure::GameObjectId pObjectId, Cure::ContextObject::Array& pSiblingArray) const
@@ -510,7 +512,7 @@ void GameClientSlaveManager::OnInput(UiLepra::InputElement* pElement)
 {
 	mOptions.RefreshConfiguration();
 
-	if (mAvatarSelectTime.GetTimeDiffF() > 0.7)
+	if (mAvatarSelectTime.QueryTimeDiff() > 1.0)
 	{
 		if (pElement->GetParentDevice() == mUiManager->GetInputManager()->GetMouse())
 		{
@@ -519,11 +521,11 @@ void GameClientSlaveManager::OnInput(UiLepra::InputElement* pElement)
 			{
 				SetRoadSignsVisible(true);
 				mJustLookingAtAvatars = true;
-				mAvatarMightSelectTime.PopTimeDiffF();
+				mAvatarMightSelectTime.PopTimeDiff();
 			}
 		}
 	}
-	if (mJustLookingAtAvatars && mAvatarMightSelectTime.GetTimeDiffF() > 2.0)
+	if (mJustLookingAtAvatars && mAvatarMightSelectTime.GetTimeDiff() > 2.0)
 	{
 		SetRoadSignsVisible(false);
 	}
@@ -549,8 +551,7 @@ bool GameClientSlaveManager::SetAvatarEnginePower(unsigned pAspect, float pPower
 	Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
 	if (lObject)
 	{
-		SetAvatarEnginePower(lObject, pAspect, pPower, pAngle);
-		return true;
+		return SetAvatarEnginePower(lObject, pAspect, pPower, pAngle);
 	}
 	return false;
 }
@@ -569,16 +570,9 @@ PixelRect GameClientSlaveManager::GetRenderArea() const
 	return (mRenderArea);
 }
 
-float GameClientSlaveManager::UpdateFrustum()
+float GameClientSlaveManager::UpdateFrustum(float pFov)
 {
-	float lFov;
-	float lClipNear;
-	float lClipFar;
-	CURE_RTVAR_TRYGET(lFov, =(float), GetVariableScope(), RTVAR_UI_3D_INTERNALFOV, 45.0);
-	CURE_RTVAR_GET(lClipNear, =(float), GetVariableScope(), RTVAR_UI_3D_CLIPNEAR, 0.1);
-	CURE_RTVAR_GET(lClipFar, =(float), GetVariableScope(), RTVAR_UI_3D_CLIPFAR, 1000.0);
-	mUiManager->GetRenderer()->SetViewFrustum(lFov, lClipNear, lClipFar);
-	return (lFov);
+	return mMaster->UpdateFrustum(pFov, mRenderArea);
 }
 
 
@@ -650,6 +644,7 @@ bool GameClientSlaveManager::InitializeTerrain()
 	mLevelId = GetContext()->AllocateGameObjectId(Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
 	bool lOk = CreateObject(mLevelId, _T("level_01"), Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
 	assert(lOk);
+	mMassObjectArray.clear();
 	return (lOk);
 }
 
@@ -706,19 +701,28 @@ void GameClientSlaveManager::TickUiInput()
 		Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
 		if (lObject)
 		{
-			mAvatarSelectTime.UpdateTimer();
 			mAvatarMightSelectTime.UpdateTimer();
 
 			const Options::Vehicle& v = mOptions.GetControl();
 			float lPower;
 			const bool lIsMovingForward = lObject->GetForwardSpeed() > 8.0f;
 #define V(dir) v.mControl[Options::Vehicle::CONTROL_##dir]
-			lPower = V(FORWARD) - std::max(V(BACKWARD), lIsMovingForward? 0.0f : V(BREAKANDBACK));
+			const float lForward = V(FORWARD);
+			const float lBack = V(BACKWARD);
+			const float lBreakAndBack = V(BREAKANDBACK);
+			lPower = lForward - std::max(lBack, lIsMovingForward? 0.0f : lBreakAndBack);
 			SetAvatarEnginePower(lObject, 0, lPower, mCameraOrientation.x);
 			lPower = V(RIGHT)-V(LEFT);
 			SetAvatarEnginePower(lObject, 1, lPower, mCameraOrientation.x);
-			lPower = V(HANDBREAK) - std::max(V(BREAK), lIsMovingForward? V(BREAKANDBACK) : 0.0f);
-			SetAvatarEnginePower(lObject, 2, lPower, mCameraOrientation.x);
+			lPower = V(HANDBREAK) - std::max(V(BREAK), lIsMovingForward? lBreakAndBack : 0.0f);
+			if (!SetAvatarEnginePower(lObject, 2, lPower, mCameraOrientation.x) &&
+				lBreakAndBack > 0 && Math::IsEpsEqual(lBack, 0.0f, 0.01f))
+			{
+				// Someone is apparently trying to stop/break, but no engine configured for breaking.
+				// Just apply it as a reverse motion.
+				lPower = lForward - lBreakAndBack;
+				SetAvatarEnginePower(lObject, 0, lPower, mCameraOrientation.x);
+			}
 			lPower = V(UP)-V(DOWN);
 			SetAvatarEnginePower(lObject, 3, lPower, mCameraOrientation.x);
 			lPower = V(FORWARD3D) - V(BACKWARD3D);
@@ -741,9 +745,9 @@ void GameClientSlaveManager::TickUiInput()
 	}
 }
 
-void GameClientSlaveManager::SetAvatarEnginePower(Cure::ContextObject* pAvatar, unsigned pAspect, float pPower, float pAngle)
+bool GameClientSlaveManager::SetAvatarEnginePower(Cure::ContextObject* pAvatar, unsigned pAspect, float pPower, float pAngle)
 {
-	pAvatar->SetEnginePower(pAspect, pPower, pAngle);
+	bool lSet = pAvatar->SetEnginePower(pAspect, pPower, pAngle);
 
 	SteeringPlaybackMode lPlaybackMode;
 	CURE_RTVAR_TRYGET(lPlaybackMode, =(SteeringPlaybackMode), GetVariableScope(), RTVAR_STEERING_PLAYBACKMODE, PLAYBACK_NONE);
@@ -787,6 +791,8 @@ void GameClientSlaveManager::SetAvatarEnginePower(Cure::ContextObject* pAvatar, 
 		mEnginePowerShadow[pAspect].mPower = 0;
 		mEnginePowerShadow[pAspect].mAngle = 0;
 	}
+
+	return lSet;
 }
 
 void GameClientSlaveManager::TickUiUpdate()
@@ -848,10 +854,14 @@ void GameClientSlaveManager::TickUiUpdate()
 	{
 		lTargetCameraPosition.z = -20.0f;
 	}
+	else if (lTargetCameraPosition.z > 200)
+	{
+		lTargetCameraPosition.z = 200.0f;
+	}
 
 	// Camera moves in a "moving average" kinda curve (halfs the distance in x seconds).
 	const float lPhysicsTime = GetTimeManager()->GetAffordedPhysicsTotalTime();
-	if (!lPhysicsTime)
+	if (lPhysicsTime < 1e-5)
 	{
 		return;
 	}
@@ -1370,7 +1380,7 @@ void GameClientSlaveManager::OnAvatarSelect(UiTbc::Button* pButton)
 	GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
 
 	SetRoadSignsVisible(false);
-	mAvatarSelectTime.PopTimeDiffF();
+	mAvatarSelectTime.ClearTimeDiff();
 }
 
 Cure::RuntimeVariableScope* GameClientSlaveManager::GetVariableScope() const
@@ -1394,13 +1404,16 @@ void GameClientSlaveManager::UpdateCameraPosition(bool pUpdateMicPosition)
 	if (pUpdateMicPosition)
 	{
 		const float lFrameTime = GetTimeManager()->GetNormalFrameTime();
-		Vector3DF lVelocity = (mCameraPosition-mCameraPreviousPosition) / lFrameTime;
-		const float lMicrophoneMaxVelocity = 100.0f;
-		if (lVelocity.GetLength() > lMicrophoneMaxVelocity)
+		if (lFrameTime > 1e-4)
 		{
-			lVelocity.Normalize(lMicrophoneMaxVelocity);
+			Vector3DF lVelocity = (mCameraPosition-mCameraPreviousPosition) / lFrameTime;
+			const float lMicrophoneMaxVelocity = 100.0f;
+			if (lVelocity.GetLength() > lMicrophoneMaxVelocity)
+			{
+				lVelocity.Normalize(lMicrophoneMaxVelocity);
+			}
+			mUiManager->SetMicrophonePosition(lCameraTransform, lVelocity);
 		}
-		mUiManager->SetMicrophonePosition(lCameraTransform, lVelocity);
 	}
 }
 
@@ -1476,12 +1489,8 @@ void GameClientSlaveManager::DrawSyncDebugInfo()
 		mUiManager->GetRenderer()->SetViewport(mRenderArea);
 		UpdateCameraPosition(false);
 		float lFov;
-		float lClipNear;
-		float lClipFar;
-		CURE_RTVAR_TRYGET(lFov, =(float), GetVariableScope(), RTVAR_UI_3D_INTERNALFOV, 45.0);
-		CURE_RTVAR_GET(lClipNear, =(float), GetVariableScope(), RTVAR_UI_3D_CLIPNEAR, 0.1);
-		CURE_RTVAR_GET(lClipFar, =(float), GetVariableScope(), RTVAR_UI_3D_CLIPFAR, 1000.0);
-		mUiManager->GetRenderer()->SetViewFrustum(lFov, lClipNear, lClipFar);
+		CURE_RTVAR_GET(lFov, =(float), GetVariableScope(), RTVAR_UI_3D_FOV, 45.0);
+		UpdateFrustum(lFov);
 
 		const Cure::ContextManager::ContextObjectTable& lObjectTable = GetContext()->GetObjectTable();
 		Cure::ContextManager::ContextObjectTable::const_iterator x = lObjectTable.begin();

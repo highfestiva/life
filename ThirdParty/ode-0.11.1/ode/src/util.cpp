@@ -281,7 +281,9 @@ void dxStepBody (dxBody *b, dReal h)
         const dReal lin_threshold = b->dampingp.linear_threshold;
         const dReal lin_speed = dDOT( b->lvel, b->lvel );
         if ( lin_speed > lin_threshold) {
-                const dReal k = 1 - b->dampingp.linear_scale;
+		// high_festiva was here!
+                //const dReal k = 1 - b->dampingp.linear_scale;
+		const dReal k = b->dampingp.linear_scale * dSqrt(lin_threshold / lin_speed);
                 dOPEC(b->lvel, *=, k);
         }
   }
@@ -289,7 +291,9 @@ void dxStepBody (dxBody *b, dReal h)
         const dReal ang_threshold = b->dampingp.angular_threshold;
         const dReal ang_speed = dDOT( b->avel, b->avel );
         if ( ang_speed > ang_threshold) {
-                const dReal k = 1 - b->dampingp.angular_scale;
+		// high_festiva was here!
+                //const dReal k = 1 - b->dampingp.angular_scale;
+		const dReal k = b->dampingp.angular_scale * dSqrt(ang_threshold / ang_speed);
                 dOPEC(b->avel, *=, k);
         }
   }

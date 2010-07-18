@@ -69,7 +69,7 @@ bool GameClientDemo::Paint()
 		}
 		mInfoText = mInfoTextArray[mCurrentInfoTextIndex];
 	}
-	const float lFrameTime = GetConstTimeManager()->GetNormalFrameTime();
+	const float lFrameTime = GetConstTimeManager()->GetRealNormalFrameTime();
 	mInfoTextSlideY = Math::Lerp(mInfoTextSlideY, mInfoTextTargetY, Math::GetIterateLerpTime(0.8f, lFrameTime));
 
 	const int lWidth = mUiManager->GetDisplayManager()->GetWidth();

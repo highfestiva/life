@@ -37,25 +37,26 @@ Game
 + Make it possible to be logged in without vehicle. Make it possible to drop vehicle.
 + Server: make console capable of being logless and promptless. Required since no console implemented in non-dedicated server.
 + Server: don't use CPU when running remote game.
-. Server: start/stop in mainloop as necessary (depending on network server address).
++ Server: start/stop in mainloop as necessary (depending on network server address).
++ Add wind mill to world.
++ Add possibility to easily change vehicle during play.
++ Take some action when falling over the "edge of the World".
++ Add elevator to world. Trigger five seconds when after the vehicle enters zone.
++ Add link to home page in demo end screen.
++ Update and adjust what messages are shown on screen when starting up.
 . Fix bug: road sign for first vehicle is "squashed" when having 3 split-screen players.
 . Create material that can easily can be picked-up, loaded and moved around.
 . Create crane that can pull wire up.
 . Bug fix attachments (i.e. crane picks up car) so that they work properly (without crashing).
-+ Add wind mill to world.
 . Add server-triggered garage door to world. Make sure trigger coding is easy!!!
-. Add elevator to world. Trigger five seconds when after the vehicle enters zone.
-+ Add possibility to easily change vehicle during play.
-. Take some action when falling over the "edge of the World".
+. Put some clouds and the sun in the sky, put something below the platform that makes it obvious that the object that fell over is gone.
 . Make vehicle flip over to correct rotation whenever it accidentally flipped to its side/front/back.
 . Add options menu.
-. Picking best possible default control options.
+. Picking best possible default input control options.
 . Adjust the camera view according to the vehicle: huge crane, small ball...
 . Make login adjusted to this type of game (automatic somehow).
 . Show logo when starting game.
 . Make a "what you're missing out on when not running Pro" end screen in demo version. (=release client?)
-. Add link to home page in demo end screen.
-. Update and adjust what messages are shown on screen when starting up.
 . Make a start screen with all settings. Start screen heavily fogged.
 . Implement the following settings in the heavily fogged start screen:
   - Nationality (switched real time).
@@ -71,15 +72,15 @@ Game
   - Play online - and make sure that you add tag line "you can play with your kids even if you travel".
 . Implement the following settings ingame:
   - Controls (joysticks, control pads, wheels, keyboards...)
-  - Change vehicle.
-. Make a "change avatar" functionality.
-  - When abandoning a vehicle, the vehicle remains in the world.
-  - If there IS a vehicle and it is NOT OCCUPIED of the type that is requested, use it, otherwise create a new one.
+  + Change vehicle.
 . Server regularly checks vehicles that don't seem ok (flipped, i.e. "up not pointing up", etc). If the "un-ok" vehicle is unused for x consecutive checks, remove it.
 . Create icon for the game.
 
 - Add different physical worlds on all sides of the box, and add gravity change! Cewlness x 0x1000000!!!
 - Add login progress bar.
+- Make a "change avatar" functionality.)
+  - When abandoning a vehicle, the vehicle remains in the world.)
+  - If there IS a vehicle and it is NOT OCCUPIED of the type that is requested, use it, otherwise create a new one.)
 
 
 Engine
@@ -128,39 +129,46 @@ Engine
 + Fix cursor in GUI (used to cause XOR problems).
 + Move over to MSVC9.
 + Logging on in two steps: a) normal login, server returns avatars, and b) enter world by selecting avatar. (After (a) the sync goes.)
++ 3D paint buttons (= road signs) are sometimes painted behind objects in the scene. Fix!
++ Fix dynamic physical object <--> dynamic physical object friction. Currently looks like it's hardcoded + BIG. (Hovercraft on elevator, for instance.)
++ Sound is not deleted when logging out/in!
++ Make proper sounds, so that all vehicles are heared. Even if they have the exact same .wav file. (Or not.)
++ Add UV-maps to the import tool.
++ Make importer capable of getting texturing.
++ Restrict flying to a certain height. Going above = all engines off.
++ Endianify all Chunky saves/loads.
++ Include server in same binary.
++ Include (optional) object position when creating an object over the network.
++ Make sure that analogue input devices are thresholded, so they don't cause constant socket transmits when moved.
++ Add support for a demo version, which among other things has an end screen, and some disabled features.
++ In demo version, add "termination attempt goes to end screen".
++ Fix bug which causes objects to get another orientation when changed. Could it be that the server stores our old positions and re-transmits them?
++ Fix bug: wind mill rotation staggers when > 1 player logged in and Physics.RealTimeRatio = 2.5.
++ Make scene recording functionality that:
+  + Stores all key presses and time stamps.
+  + Every n seconds stores all object states at time stamps (so that randomized replay can start from any of those time stamps).
+  + Use for start/end screen.
+. Fix bug: occationally some meshes (such as the ground) end up rotated. The physics seems OK though. Race condition for the mesh offset transform?
 . Port client to Mac OS X / Cocoa.
-
-. 3D paint buttons (= road signs) are sometimes painted behind objects in the scene. Fix!
 . I18N.
+. Make sure camera never flies under ground or collides with physical objects. Make camera always keep a free line of sight to the controlled object.
 . Collision sounds.
 . Organize data in directories for sounds, meshes, physics, classes, etc.
 . Make all materials use PreRender and PostRender. Clean code up around there.
-. Fix dynamic physical object <--> dynamic physical object friction. Currently looks like it's hardcoded + BIG. (Hovercraft on elevator, for instance.)
 . Add support for break and reverse lights.
 . Create ability for lossless UDP transfers.
 . When having several control units, the "input threshold" does not work. Make a threshold for each input entity.
-. Sound is not deleted when logging out/in!
-. Make proper sounds, so that all vehicles are heared. Even if they have the exact same .wav file. (Or not.)
 . Remove game source code from engine source code: camera, hard-coded object placements, input handling, etc.
 . Spawn points. Matching against vehicle types...
-. Add UV-maps to the import tool.
-. Make importer capable of getting texturing.
-. Make export script (Maya) auto-run before save.
 . Creating a less jittery experience: a) sync lag/jitter immediately after logging in, b) sorting out old msgs on client, c) keeping track of jitter on client side.
 . Moving out platform specifics from (Ui)CppContextObject.cpp to LifeXxx.cpp.
 . Spawn engine and load world. Must be able to manage both.
 . Add some type of spawn engine for player vehicles.
 . Use a zipped archive for data.
-. Restrict flying to a certain height. Going above = all engines off.
 . Add "switch to splitscreen" by buttonpress ingame.
-. Use animated texture instead of wheels for excavator/bandwagon.
-. Sounds. Music.
-. Endianify all Chunky saves/loads.
-. Disabling keyboard steering when any splitscreen console window is down.
+. Music.
 . Chat - client side UI.
 . Text/console clients, plural. Run in same process.
-. Include server in same binary.
-. Include (optional) object position when creating an object over the network.
 . Add context-sensitive and more degrees of freedom for control mechanisms: ball+ufo needs analogue fwd-bkg, cranes, excavators, etc.
 . Wrap physics frame counter (game could go on forever).
 . Port input handling, calibration and names.
@@ -168,13 +176,6 @@ Engine
 . Make sure memfile log always gets everything (including trace+debug+performance). Tail contents to con and file upon crash.
 . Improve vehicle wheel friction.
 . Do not resend positional info frequently when pushed/collided similarly (i.e. excavator holding down monster truck).
-. Make sure that analogue input devices are thresholded, so they don't cause constant socket transmits when moved.
-. Add support for a demo version, which among other things has an end screen, and some disabled features.
-. In demo version, add "termination attempt goes to end screen".
-. Make scene recording functionality that:
-  - Stores all key presses and time stamps.
-  - Every n seconds stores all object states at time stamps (so that randomized replay can start from any of those time stamps).
-  - Use for start/end screen.
 . Make replay functionality for start/end screen.
 . Clear top of log files when too big. Preferrably copy to .log.old and start a new one.
 . Add GCC build targets for debug, rc, final. Update build script.
@@ -183,13 +184,14 @@ Engine
 . Port Posix' SystemManager (mostly placeholders at the moment).
 . Port font rendering to X11.
 . Use game icon and make it happen on Windows, Mac, iPhone, X11...
-. Make sure camera never flies under ground.
 
-- Make camera always keep a free line of sight to the controlled object.
 - Creating group/world objects as resources.
 - Loading group/world objects from disk.
 - Create a master server, which at first only receives user feedback.
 - Add questionaire to end of demo game (=release client?). Send answers to master server.
+- Make export script (Maya) auto-run before save.
+- Use animated texture instead of wheels for excavator/bandwagon.
+- Fix bug: orientation merge. When the server sends a new orientation that differs from the local ditto, the merging only works for objects aligned with the root. All others are rotated in some other direction (according to their local axes).
 
  
 Quality
@@ -219,22 +221,23 @@ Quality
 + Check optimizations quickly.
 + Run Simian Analyzer, remove duplicate code.
 + Exchange "varning: flerteckens teckenkonstant" (ChunkyLoader.h) to something portable and beautiful.
-
-. If FPS is low (like 15 FPS, 3 microsteps), object (e.g. hovercraft) moves jerkily, since it gets stuck on stuff (e.g. elevator/floor/ground).
++ If FPS is low (like 15 FPS, 3 microsteps), object (e.g. hovercraft) moves jerkily, since it gets stuck on stuff (e.g. elevator/floor/ground). [Fixed by dropping the lifter engine.]
++ Make splitscreens "slide up" instead of just popping up!
++ Make font rendering look good instead of ugly.
++ Being able to log in/out on one splitscreen while running normally on the other (no freeze).
++ Don't allow program to become unresponsive when starting up (alt-tab away and back). Related to some other issue in this list.
++ If clicking "slowly" the game starts with the mouse state shown as "down". Perhaps the same applies when clicking in another app? This makes it inpossible to click a button on the first attempt after going back to the game.
++ Rename PhysicsEngine and ChunkyXxx classes to sensible names.
++ Descide how to accomodate several split-screen sound "listeners" on OpenAL. Implement.
 . When using 4 splitscreen players, RenderSlaves is the slow part (won't yield 60 FPS on my machine). Check out why. Seems like they're using their CPU time slices (doesn't look as if physics threads are stealing 'em).
 . Serialize physics threads, so that one ends up on each free CPU?
-. Make splitscreens "slide up" instead of just popping up!
 . Make sure default settings are good on a no-good computer. Like 60 FPS.
 . Make sure shutting down client with two simultaneously logged-in users gets logged out from the server.
-. Make font rendering look good instead of ugly.
 . Add better camera control, such as for the truck (just looking at the trailer looks like shit).
-. Being able to log in/out on one splitscreen while running normally on the other (no freeze).
-. Don't allow program to become unresponsive when starting up (alt-tab away and back). Related to some other issue in this list.
 . Print game version number to log when starting.
 . Add support for checking if loaded controller configuration contains devices no longer present in the system when starting, and if so reset 'em.
 . Add support for auto-configuring best controller configuration.
 . Produce autostarting autotest after commit. Run in Linux at least.
-. Give feedback while logging in. Especially after a few seconds of nothingness.
 . Check heap regularly (using _heapchk() in Win32).
 . Add relevant thread safety to classes here and there (NetworkServer, for instance). Add interfaces to isolate functionality. Use Sigges design pattern.
 . Add crash control.
@@ -242,8 +245,6 @@ Quality
 . Start alpha-testing with human users.
 . Go through all TODOs.
 . Fix all source file header comments (Righteous games, 2010).
-. If clicking "slowly" the game starts with the mouse state shown as "down". Perhaps the same applies when clicking in another app? This makes it inpossible to click a button on the first attempt after going back to the game.
-. Rename PhysicsEngine and ChunkyXxx classes to sensible names.
 . Verify that destruction of ContextObject during load does not cause an invalid resource to float around the resource manager.
 . Fix engine mode "half_lock" (or make it synchronized or otherwise improved).
 . Add click sounds to buttons.
@@ -252,7 +253,6 @@ Quality
 . Check that all log destinations write strings, not raw data, to disk. LogFileXxx (single one) was checked and corrected from WriteData() to WriteString().
 . Get licences in order. Both C++ and Python. Both mine and third party.
 . Separate input and output data in the data folder. Create a proper directory structure for external release.
-. Descide how to accomodate several split-screen sound "listeners" on OpenAL. Implement.
 . Remove unused rtvars (such as Ui.2D.PaintMode).
 . Remove all memory leaks.
 . Test thoroughly!
@@ -262,6 +262,7 @@ Quality
 | Test with "simulating" single CPU system. (Don't put me out, place me at bottom of checklist.)
 | Test with corrupt/missing resources. (Don't put me out, place me at bottom of checklist.)
 | Test run server on Linux, client on Windows.
+| Make sure minimizing the window works. Noticed a problem when moving over a mass object grid border, since the system then tries to upload a mesh via OGL. Make sure all remove gfx objects are created later if minimized.
 
 - When input is hindered (such as when pulling joystick back, then taking down the console) the excavator behaves jerkily.
 - Assertions on high and stable frame rate. Includes the network sliding average frame rate (should be filtered?).
@@ -270,3 +271,5 @@ Quality
 - Create a small master server which receives crash reports and feedback.
 - Create feedback form which can be entered and transmitted by any user at any time. Received by master server.
 - Perhaps (?) add ogg/vorbis support if music is wanted.
+- Give feedback while logging in. Especially after a few seconds of nothingness.
+- Disabling keyboard steering when any splitscreen console window is down.

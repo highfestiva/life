@@ -46,5 +46,6 @@
 #define RTVAR_PERFORMANCE_TEXT_ENABLE		"Performance.Text.Enable"
 
 #define RTVAR_PHYSICS_FPS			"Physics.FPS"
+#define RTVAR_PHYSICS_RTR			"Physics.RealTimeRatio"
 #define RTVAR_PHYSICS_MICROSTEPS		"Physics.MicroSteps"
 #define RTVAR_PHYSICS_PARALLEL			"Physics.Parallel"

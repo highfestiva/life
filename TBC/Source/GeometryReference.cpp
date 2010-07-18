@@ -5,6 +5,7 @@
 
 
 #include "../Include/GeometryReference.h"
+#include <assert.h>
 
 
 
@@ -16,7 +17,7 @@ namespace TBC
 GeometryReference::GeometryReference(GeometryBase* pGeometry) :
 	mGeometry(pGeometry)
 {
-	SetFlag(REF_TRANSFORMATION_CHANGED, true);
+	SetFlag(TRANSFORMATION_CHANGED | REF_TRANSFORMATION_CHANGED);
 }
 
 GeometryReference::~GeometryReference()
@@ -36,6 +37,7 @@ const TransformationF& GeometryReference::GetOffsetTransformation() const
 
 void GeometryReference::SetOffsetTransformation(const TransformationF& pOffset)
 {
+	SetFlag(TRANSFORMATION_CHANGED | REF_TRANSFORMATION_CHANGED);
 	mOffset = pOffset;
 }
 
@@ -43,6 +45,12 @@ const TransformationF& GeometryReference::GetTransformation()
 {
 	if (!CheckFlag(TRANSFORMATION_CHANGED | REF_TRANSFORMATION_CHANGED))
 	{
+/*#ifdef LEPRA_DEBUG
+		TransformationF lReturnTransformation = GetBaseTransformation();
+		lReturnTransformation.GetPosition() += lReturnTransformation.GetOrientation() * mOffset.GetPosition();
+		lReturnTransformation.GetOrientation() *= mOffset.GetOrientation();
+		assert(lReturnTransformation == mReturnTransformation);
+#endif // Debug.*/
 		return (mReturnTransformation);
 	}
 

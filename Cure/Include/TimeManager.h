@@ -40,8 +40,12 @@ public:
 	float GetCurrentFrameTime() const;
 	// Returns the current physics frame (counter). This is increased by ticking physics.
 	int GetCurrentPhysicsFrame() const;
-	// Returns the frame time we normally reach on this system (filtered, sliding average frame time).
+	// Returns the frame time we normally reach on this system (filtered, sliding average frame time, includes real time ratio).
 	float GetNormalFrameTime() const;
+	// Returns the frame time we normally reach on this system IRL, i.e. not counting real time ratio.
+	float GetRealNormalFrameTime() const;
+	// Returns the physics:real time ratio.
+	float GetRealTimeRatio() const;
 	// Setting the current physics frame is only done on the client during login, all other times
 	// are set using adjustment rather than direct setting.
 	void SetCurrentPhysicsFrame(int pPhysicsFrame);
@@ -69,6 +73,7 @@ private:
 	float mAbsoluteTime;	// Cache of absolute time.
 	float mCurrentFrameTime;	// Time diff between current frame and previous.
 	float mTickTimeModulo;	// Contains the time that was "left over" since last physics step.
+	float mRealTimeRatio;
 	float mPhysicsSpeedAdjustmentTime;	// Total number of seconds that our our physics time needs adjusting.
 	int mPhysicsSpeedAdjustmentFrameCount;	// The number of physics steps to adjust our physics time over.
 	int mPhysicsFrameCounter;	// Holds the index of the current physics frame.

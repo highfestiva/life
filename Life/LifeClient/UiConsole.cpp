@@ -114,8 +114,8 @@ void UiConsole::SetVisible(bool pVisible)
 
 void UiConsole::Tick()
 {
-	const float lFrameTime = mManager->GetGameManager()->GetTimeManager()->GetNormalFrameTime();
-	const float lConsoleSpeed = Math::GetIterateLerpTime(0.8f, lFrameTime);
+	const float lFrameTime = mManager->GetGameManager()->GetTimeManager()->GetRealNormalFrameTime();
+	const float lConsoleSpeed = Math::GetIterateLerpTime(0.9f, lFrameTime);
 	if (mIsConsoleVisible)
 	{
 		if (mArea.mTop == 0)	// Slide down.

@@ -34,6 +34,5 @@
 
 #define RTVAR_LOGIN_USERNAME		"Login.UserName"
 
-#define RTVAR_UI_3D_INTERNALFOV		"Ui.3D.InternalFOV"	// Internal.
 #define RTVAR_UI_3D_CAMDISTANCE		"Ui.3D.CamDistance"
 #define RTVAR_UI_3D_CAMHEIGHT		"Ui.3D.CamHeight"

@@ -559,7 +559,7 @@ Vector3DF ContextObject::GetPosition() const
 		{
 			return (mManager->GetGameManager()->GetPhysicsManager()->GetBodyPosition(lGeometry->GetBodyId()));
 		}
-		assert(false);
+		//assert(false);
 	}
 	return mPosition.mPosition.mTransformation.GetPosition();
 }
@@ -577,11 +577,10 @@ QuaternionF ContextObject::GetOrientation() const
 		const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
 		if (lGeometry && lGeometry->GetBodyId() != TBC::INVALID_BODY)
 		{
-			const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
-			return (mManager->GetGameManager()->GetPhysicsManager()->GetBodyOrientation(lGeometry->GetBodyId()) *
-				mPhysics->GetOriginalBoneTransformation(0).GetOrientation());
+			return mManager->GetGameManager()->GetPhysicsManager()->GetBodyOrientation(lGeometry->GetBodyId()) *
+				mPhysics->GetOriginalBoneTransformation(0).GetOrientation();
 		}
-		assert(false);
+		//assert(false);
 	}
 	return (mPosition.mPosition.mTransformation.GetOrientation());
 }
@@ -594,11 +593,11 @@ Vector3DF ContextObject::GetVelocity() const
 	{
 		mManager->GetGameManager()->GetPhysicsManager()->GetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
 	}
-	else
+	/*else
 	{
 		assert(false);
 		// TODO: throw something here...
-	}
+	}*/
 	return (lVelocity);
 }
 
@@ -619,10 +618,10 @@ float ContextObject::GetForwardSpeed() const
 		lAxis.Normalize();
 		lSpeed = lVelocity*lAxis;
 	}
-	else
+	/*else
 	{
 		assert(false);
-	}
+	}*/
 	return (lSpeed);
 }
 
@@ -705,7 +704,7 @@ bool ContextObject::SetPhysics(TBC::ChunkyPhysics* pStructure)
 			{
 				Cure::ObjectPositionalData* lNewPlacement = (Cure::ObjectPositionalData*)lPlacement->Clone();
 				lNewPlacement->mPosition.mTransformation =
-					TransformationF(lPhysOrientation * lTransformation.GetOrientation(),
+					TransformationF(lTransformation.GetOrientation() * lPhysOrientation,
 						lTransformation.GetPosition());
 				ForceSetFullPosition(*lNewPlacement, mPhysics->GetBoneGeometry(mPhysics->GetRootBone()));
 			}
@@ -734,9 +733,9 @@ TBC::ChunkyBoneGeometry* ContextObject::GetStructureGeometry(TBC::PhysicsManager
 	return (mPhysics->GetBoneGeometry(pBodyId));
 }
 
-void ContextObject::SetEnginePower(unsigned pAspect, float pPower, float pAngle)
+bool ContextObject::SetEnginePower(unsigned pAspect, float pPower, float pAngle)
 {
-	mPhysics->SetEnginePower(pAspect, pPower, pAngle);
+	return mPhysics->SetEnginePower(pAspect, pPower, pAngle);
 }
 
 

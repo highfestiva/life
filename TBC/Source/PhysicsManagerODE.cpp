@@ -38,6 +38,10 @@ PhysicsManagerODE::PhysicsManagerODE()
 	::dWorldSetAutoDisableAngularThreshold(mWorldID, 0.02f);
 	::dWorldSetAutoDisableSteps(mWorldID, 2);
 	//::dWorldSetAutoDisableTime(mWorldID, 0);
+	//::dWorldSetLinearDampingThreshold(mWorldID, 100.0f);
+	//::dWorldSetLinearDamping(mWorldID, 0.9f);
+	::dWorldSetAngularDampingThreshold(mWorldID, 40.0f);
+	::dWorldSetAngularDamping(mWorldID, 0.5f);
 
 	// Collision space center and extents.
 	dVector3 lCenter = {0, 0, 0};
@@ -3344,7 +3348,7 @@ void PhysicsManagerODE::HandleMovableObjects()
 		if (lObject->mBodyID && ::dBodyIsEnabled(lObject->mBodyID))
 		{
 			mAutoDisabledObjectSet.erase(x++);
-			NormalizeRotation(lObject);
+			//NormalizeRotation(lObject);
 		}
 		else
 		{

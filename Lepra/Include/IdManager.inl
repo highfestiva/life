@@ -22,19 +22,19 @@ ID_QUAL::IdManager(_TInt pMinId, _TInt pMaxId, _TInt pInvalidId):
 }
 
 ID_TEMPLATE
-_TInt ID_QUAL::GetMinId()
+_TInt ID_QUAL::GetMinId() const
 {
 	return (mIdSegmentList.front().mFirstAllocId);
 }
 
 ID_TEMPLATE
-_TInt ID_QUAL::GetMaxId()
+_TInt ID_QUAL::GetMaxId() const
 {
 	return (mIdSegmentList.back().mLastFreeId);
 }
 
 ID_TEMPLATE
-_TInt ID_QUAL::GetInvalidId()
+_TInt ID_QUAL::GetInvalidId() const
 {
 	return (mInvalidId);
 }

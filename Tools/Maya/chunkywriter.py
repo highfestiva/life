@@ -496,7 +496,7 @@ class PhysWriter(ChunkyWriter):
                 yaw = node.get_fixed_attribute("joint_yaw", True, 0.0)*math.pi/180
                 pitch = node.get_fixed_attribute("joint_pitch", True, 0.0)*math.pi/180
                 if options.options.verbose and jointvalue >= 2:
-                        print("Joint %s euler angles are: %s." % (node.getName(), (yaw, pitch)))
+                        print("Joint %s euler angles are %s, damping is %f." % (node.getName(), (yaw, pitch), parameters[1]))
                 parameters[2:4] = yaw, pitch
 
                 joint_min, joint_max = node.get_fixed_attribute("joint_stops", True, [0.0,0.0])

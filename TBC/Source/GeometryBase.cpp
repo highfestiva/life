@@ -652,18 +652,21 @@ unsigned int GeometryBase::GetLastFrameVisible() const
 
 void GeometryBase::SetTransformation(const TransformationF& pTransformation)
 {
-	SetFlag(TRANSFORMATION_CHANGED, mTransformation != pTransformation);
+	if (mTransformation != pTransformation)
+	{
+		SetFlag(TRANSFORMATION_CHANGED);
+	}
 	mTransformation = pTransformation;
 }
 
 const TransformationF& GeometryBase::GetBaseTransformation() const
 {
-	return (mTransformation);
+	return mTransformation;
 }
 
 const TransformationF& GeometryBase::GetTransformation()
 {
-	return (GetBaseTransformation());
+	return mTransformation;
 }
 
 void GeometryBase::SetParentCell(PortalManager::Cell* pCell)

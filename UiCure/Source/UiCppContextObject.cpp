@@ -100,7 +100,11 @@ void CppContextObject::OnPhysicsTick()
 void CppContextObject::UiMove()
 {
 	TransformationF lPhysicsTransform;
-	TransformationF lGfxPhysMeshOffset;
+	if (mMeshSlideMode == MESH_SLIDE_START)
+	{
+		mMeshOffset.Set(0, 0, 0);
+	}
+	//QuaternionF lGfxPhysMeshAngularOffset;
 	int lGfxPhysMeshOffsetCount = 0;
 	for (size_t x = 0; x < mMeshResourceArray.size(); ++x)
 	{
@@ -125,20 +129,20 @@ void CppContextObject::UiMove()
 			{
 				// Start out by fetching offset.
 				const TransformationF& lTransform = lGfxGeometry->GetBaseTransformation();
-				lGfxPhysMeshOffset.GetPosition().Add(lTransform.GetPosition());
-				lGfxPhysMeshOffset.GetPosition().Sub(lPhysicsTransform.GetPosition());
-				if (x == 0)
+				mMeshOffset.Add(lTransform.GetPosition());
+				mMeshOffset.Sub(lPhysicsTransform.GetPosition());
+				/*if (x == 0)
 				{
-					lGfxPhysMeshOffset.SetOrientation(lPhysicsTransform.GetOrientation().GetInverse() * lTransform.GetOrientation());
-				}
+					lGfxPhysMeshAngularOffset = lPhysicsTransform.GetOrientation().GetInverse() * lTransform.GetOrientation();
+				}*/
 				lPhysicsTransform = lTransform;
 				++lGfxPhysMeshOffsetCount;
 			}
 			else if (mMeshSlideMode == MESH_SLIDE_RUN)
 			{
 				// Smooth (sliding average) to the physics position if we're close enough. Otherwise warp.
-				lPhysicsTransform.GetPosition() += mMeshOffset.GetPosition();
-				lPhysicsTransform.GetOrientation() *= mMeshOffset.GetOrientation();
+				lPhysicsTransform.GetPosition() += mMeshOffset;
+				//lPhysicsTransform.GetOrientation() *= mMeshAngularOffset;
 			}
 		}
 		else
@@ -151,25 +155,27 @@ void CppContextObject::UiMove()
 	if (lGfxPhysMeshOffsetCount)
 	{
 		mMeshSlideMode = MESH_SLIDE_RUN;
-		mMeshOffset = lGfxPhysMeshOffset;
-		mMeshOffset.GetPosition() /= (float)lGfxPhysMeshOffsetCount;
-		if (mMeshOffset.GetPosition().GetLengthSquared() >= 20*20)
+		//mMeshOffset = lGfxPhysMeshOffset;
+		mMeshOffset /= (float)lGfxPhysMeshOffsetCount;
+		if (mMeshOffset.GetLengthSquared() >= 20*20)
 		{
-			mMeshOffset.SetIdentity();
+			mMeshOffset.Set(0, 0, 0);
+			//mMeshAngularOffset.SetIdentity();
 		}
 	}
-	else if (mMeshSlideMode == MESH_SLIDE_RUN && mMeshOffset.GetPosition().GetLengthSquared() < 0.1f)
+	else if (mMeshSlideMode == MESH_SLIDE_RUN && mMeshOffset.GetLengthSquared() < 0.1f)
 	{
-		QuaternionF lDiff;
-		lDiff.Sub(mMeshOffset.GetOrientation());
-		if (lDiff.GetNorm() < 0.01f)
+		/*QuaternionF lDiff;
+		lDiff.Sub(mMeshAngularOffset);
+		if (lDiff.GetNorm() < 0.01f)*/
 		{
 			mMeshSlideMode = MESH_SLIDE_STOP;
 		}
 	}
-	const float lFrameTime = GetManager()->GetGameManager()->GetTimeManager()->GetNormalFrameTime();
-	mMeshOffset.GetPosition() = Math::Lerp(mMeshOffset.GetPosition(), Vector3DF(), Math::GetIterateLerpTime(0.12f, lFrameTime));
-	mMeshOffset.GetOrientation().Slerp(mMeshOffset.GetOrientation(), QuaternionF(), Math::GetIterateLerpTime(0.12f, lFrameTime));
+	const float lFrameTime = GetManager()->GetGameManager()->GetTimeManager()->GetRealNormalFrameTime();
+	mMeshOffset = Math::Lerp(mMeshOffset, Vector3DF(), Math::GetIterateLerpTime(0.12f, lFrameTime));
+	//mMeshAngularOffset.Normalize();
+	//mMeshAngularOffset.Slerp(mMeshAngularOffset, QuaternionF(), Math::GetIterateLerpTime(0.12f, lFrameTime));
 }
 
 void CppContextObject::ActivateLerp()
@@ -355,7 +361,7 @@ void CppContextObject::OnLoadClass(UserClassResource* pClassResource)
 		mMeshResourceArray.push_back(lMesh);
 		lMesh->Load(GetResourceManager(),
 			strutil::Format(_T("%s.mesh;%s"), lMeshName.c_str(), lMeshInstance.c_str()),
-			UserGeometryReferenceResource::TypeLoadCallback(this,&CppContextObject::OnLoadMesh));
+			UserGeometryReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh));
 	}
 	LoadTextures();
 }

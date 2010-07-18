@@ -224,6 +224,47 @@ def _posix_no_lib_exes(targetdir):
                 run(["chmod", "-x", lib], "changing .so +x status to -x")
 
 
+def _create_zip(targetdir, buildtype):
+        _posix_no_lib_exes(targetdir)
+        print("Building compressed archive.")
+        if os.name == "nt":
+                targetfile = targetdir+".zip"
+                if buildtype != "final":
+                        targetfile = targetdir+".iszip"
+                zipdir(targetdir, targetfile)
+        else:
+                targetfile = targetdir+".tar.gz"
+                if buildtype != "final":
+                        targetfile = targetdir+".tar.isgz"
+                targzdir(targetdir, targetfile)
+        return targetfile
+
+
+def _buildzip(builder, buildtype=ziptype):
+        verify_base_dir()
+        #print(appname, osname, hwname, buildtype, datename)
+        #print(type(appname), type(osname), type(hwname), type(buildtype), type(datename))
+        targetdir=appname+"."+osname+"."+hwname+"."+buildtype+"."+datename
+        if buildtype == "rc":
+                targetdir = "PRE_RELEASE."+targetdir
+        elif buildtype != "final":
+                targetdir = "NO_RELEASE."+targetdir
+        os.mkdir(targetdir)
+        builder(targetdir, buildtype)
+        targetfile = _create_zip(targetdir, buildtype)
+        _cleandir(targetdir)
+        os.rmdir(targetdir)
+        print("Built and zipped into %s." % targetfile)
+
+
+def _copybin(targetdir, buildtype):
+        import glob
+        fl = glob.glob("bin/*")
+        _incremental_copy(fl, targetdir, buildtype)
+        fl = glob.glob("bin/Data/*")
+        _incremental_copy(fl, os.path.join(targetdir, "Data"), buildtype)
+
+
 #-------------------- High-level build stuff below. --------------------
 
 
@@ -277,33 +318,12 @@ def clean(targetdir=bindir, buildtype=default_build_mode):
 
 
 def buildzip():
-        verify_base_dir()
-        global buildtype
-        buildtype = ziptype
-        #print(appname, osname, hwname, buildtype, datename)
-        #print(type(appname), type(osname), type(hwname), type(buildtype), type(datename))
-        targetdir=appname+"."+osname+"."+hwname+"."+buildtype+"."+datename
-        if buildtype == "rc":
-                targetdir = "PRE_RELEASE."+targetdir
-        elif buildtype != "final":
-                targetdir = "NO_RELEASE."+targetdir
-        os.mkdir(targetdir)
-        rebuild(targetdir, buildtype)
-        _posix_no_lib_exes(targetdir)
-        print("Building compressed archive.")
-        if os.name == "nt":
-                targetfile = targetdir+".zip"
-                if buildtype != "final":
-                        targetfile = targetdir+".iszip"
-                zipdir(targetdir, targetfile)
-        else:
-                targetfile = targetdir+".tar.gz"
-                if buildtype != "final":
-                        targetfile = targetdir+".tar.isgz"
-                targzdir(targetdir, targetfile)
-        _cleandir(targetdir)
-        os.rmdir(targetdir)
-        print("Built and zipped into %s." % targetfile)
+        _buildzip(rebuild)
+
+
+def builddirtyzip():
+        build()
+        _buildzip(_copybin, default_build_mode)
 
 
 def _prepare_run():
@@ -360,6 +380,8 @@ if __name__ == "__main__":
                 print("Unknown build mode!")
                 sys.exit(1)
         default_build_mode = options.buildmode
+        if buildtypes.index(options.buildmode) > 0:
+                ziptype = options.buildmode
 
         for arg in args:
                 exec(arg+"()")

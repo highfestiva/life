@@ -99,7 +99,7 @@ public:
 	void SetPhysicsTypeOverride(PhysicsOverride pPhysicsOverride);
 	TBC::ChunkyBoneGeometry* GetStructureGeometry(unsigned pIndex) const;
 	TBC::ChunkyBoneGeometry* GetStructureGeometry(TBC::PhysicsManager::BodyID pBodyId) const;
-	void SetEnginePower(unsigned pAspect, float pPower, float pAngle);
+	bool SetEnginePower(unsigned pAspect, float pPower, float pAngle);
 
 	void ForceSend();
 	bool QueryResendTime(float pDeltaTime, bool pUnblockDelta);

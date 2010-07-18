@@ -57,7 +57,7 @@ public:
 	PhysicsEngine* GetEngine(int pEngineIndex) const;
 	int GetEngineIndex(const PhysicsEngine* pEngine) const;
 	void AddEngine(PhysicsEngine* pEngine);	// Takes ownership of the given engine.
-	void SetEnginePower(unsigned pAspect, float pPower, float pAngle);
+	bool SetEnginePower(unsigned pAspect, float pPower, float pAngle);
 	void ClearEngines();
 
 	int GetTriggerCount() const;

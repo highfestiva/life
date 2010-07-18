@@ -175,6 +175,11 @@ void ContextManager::FreeGameObjectId(NetworkObjectType pNetworkType, GameObject
 	}
 }
 
+bool ContextManager::IsLocalGameObjectId(GameObjectId pInstanceId) const
+{
+	return pInstanceId >= mLocalObjectIdManager.GetMinId();
+}
+
 
 
 void ContextManager::EnablePhysicsUpdateCallback(ContextObject* pObject)

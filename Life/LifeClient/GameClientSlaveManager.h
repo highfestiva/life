@@ -10,7 +10,7 @@
 #include "../../Cure/Include/Packet.h"
 #include "../../Cure/Include/PositionalData.h"
 #include "../../Lepra/Include/Alarm.h"
-#include "../../Lepra/Include/Timer.h"
+#include "../../Lepra/Include/HiResTimer.h"
 #include "../../TBC/Include/PhysicsEngine.h"
 #include "../../UiCure/Include/UiResourceManager.h"
 #include "../../UiTBC/Include/UiFontManager.h"
@@ -86,7 +86,7 @@ public:
 	int GetSlaveIndex() const;
 
 	virtual PixelRect GetRenderArea() const;
-	virtual float UpdateFrustum();
+	virtual float UpdateFrustum(float pFov);
 
 protected:
 	typedef std::vector<Cure::GameObjectId> ObjectArray;
@@ -109,7 +109,7 @@ protected:
 	virtual void TickInput();
 
 	virtual void TickUiInput();
-	void SetAvatarEnginePower(Cure::ContextObject* pAvatar, unsigned pAspect, float pPower, float pAngle);
+	bool SetAvatarEnginePower(Cure::ContextObject* pAvatar, unsigned pAspect, float pPower, float pAngle);
 	virtual void TickUiUpdate();
 	bool UpdateMassObjects(const Vector3DF& pPosition);
 	void SetMassRender(bool pRender);
@@ -174,8 +174,8 @@ protected:
 	Alarm mInputExpireAlarm;
 	Options::Vehicle mLastSteering;
 
-	Timer mAvatarSelectTime;
-	Timer mAvatarMightSelectTime;
+	HiResTimer mAvatarSelectTime;
+	HiResTimer mAvatarMightSelectTime;
 	bool mJustLookingAtAvatars;
 	int mRoadSignIndex;
 	RoadSignMap mRoadSignMap;

@@ -56,7 +56,7 @@ private:
 	GeometryBase* mGeometry;
 
 	TransformationF mOffset;
-	mutable TransformationF mReturnTransformation;
+	TransformationF mReturnTransformation;
 };
 
 

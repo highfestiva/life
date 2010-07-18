@@ -196,7 +196,7 @@ void RoadSignButton::OnPhysicsTick()
 		return;
 	}
 
-	const float lFrameTime = std::min(0.1f, GetManager()->GetGameManager()->GetTimeManager()->GetNormalFrameTime());
+	const float lFrameTime = std::min(0.1f, GetManager()->GetGameManager()->GetTimeManager()->GetRealNormalFrameTime());
 	MoveSign(lFrameTime);
 }
 
@@ -229,7 +229,7 @@ void RoadSignButton::RenderButton(UiTbc::CustomButton*)
 			GetUiManager()->GetRenderer()->ResetClippingRect();
 			GetUiManager()->GetRenderer()->SetClippingRect(lTopViewport);
 			GetUiManager()->GetRenderer()->SetViewport(lTopViewport);
-			mFov = mScreenPart->UpdateFrustum();
+			mFov = mScreenPart->UpdateFrustum(45.0f);
 		}
 
 		QuaternionF lLightOrientation;

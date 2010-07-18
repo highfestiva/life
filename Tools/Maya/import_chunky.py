@@ -969,8 +969,12 @@ class GroupReader(DefaultMAReader):
                                         isGroupValid = False
                                 isGroupValid &= self._query_attribute(node, "mass", lambda x: (x > 0 and x < 1000000))[0]
                                 isGroupValid &= self._query_attribute(node, "bounce", lambda x: (x >= 0 and x <= 1))[0]
-                                isGroupValid &= self._query_attribute(node, "friction", lambda x: (x >= 0 and x <= 100))[0]
+                                isGroupValid &= self._query_attribute(node, "friction", lambda x: (x >= -100 and x <= 100))[0]
                                 isGroupValid &= self._query_attribute(node, "affected_by_gravity", lambda x: x==True or x==False)[0]
+                                jointtype = node.get_fixed_attribute("joint", True, "")
+                                if hasJoint and (jointtype == "suspend_hinge" or jointtype == "hinge2"):
+                                        isGroupValid &= self._query_attribute(node, "joint_spring_constant", lambda x: x > 0 and x < 1e12)[0]
+                                        isGroupValid &= self._query_attribute(node, "joint_spring_damping", lambda x: x > 0 and x < 1e12)[0]
                 # Check move all physics nodes to their respective physics root.
                 for node in group:
                         if node.getName().startswith("phys_") and node.nodetype == "transform":

@@ -464,7 +464,7 @@ void GameServerManager::OnLogin(Cure::UserConnection* pUserConnection)
 
 		lClient = new Client(GetTimeManager(), GetNetworkAgent(), pUserConnection);
 		mAccountClientTable.Insert(pUserConnection->GetAccountId(), lClient);
-		lClient->SendPhysicsFrame(GetTimeManager()->GetCurrentPhysicsFrame(), lPacket);
+		lClient->SendPhysicsFrame(GetTimeManager()->GetCurrentPhysicsFrame()+2, lPacket);	// TODO: adjust physics frame diff by ping-ponging some.
 
 		for (AvatarIdSet::const_iterator x = lAvatarIdSet->begin(); x != lAvatarIdSet->end(); ++x)
 		{
@@ -602,6 +602,10 @@ void GameServerManager::ApplyStoredMovement()
 		lCurrentPhysicsSteps = NETWORK_POSITIONAL_AHEAD_BUFFER_SIZE-1;
 	}
 	int lCurrentPhysicsFrame = GetTimeManager()->GetCurrentPhysicsFrame() - lCurrentPhysicsSteps;
+	if (lCurrentPhysicsFrame < 0)
+	{
+		return;
+	}
 	//mLog.Debugf(_T("[frame %i to %i]"), lCurrentPhysicsFrame, GetTimeManager()->GetCurrentPhysicsFrame());
 	for (; lCurrentPhysicsFrame <= GetTimeManager()->GetCurrentPhysicsFrame(); ++lCurrentPhysicsFrame)
 	{
@@ -819,7 +823,7 @@ void GameServerManager::HandleWorldBoundaries()
 		if (lObject->IsLoaded() && lPhysics && lPhysics->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC)
 		{
 			const Vector3DF lPosition = lObject->GetPosition();
-			if (lPosition.z < -100 || lPosition.z > +300)
+			if (lPosition.z < -1000 || lPosition.z > +800)
 			{
 				lLostObjectArray.push_back(lObject->GetInstanceId());
 			}

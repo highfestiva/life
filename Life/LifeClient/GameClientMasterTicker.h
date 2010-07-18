@@ -48,12 +48,15 @@ public:
 	bool StartResetUi();
 	bool WaitResetUi();
 
+	bool IsFirstSlave(const GameClientSlaveManager* pSlave) const;
 	bool IsLocalObject(Cure::GameObjectId pInstanceId) const;
 	void GetSiblings(Cure::GameObjectId pObjectId, Cure::ContextObject::Array& pSiblingArray) const;
 
 	virtual PixelRect GetRenderArea() const;
-	virtual float UpdateFrustum();
+	virtual float UpdateFrustum(float pFov);
+	float UpdateFrustum(float pFov, const PixelRect& pRenderArea);
 
+	void PreLogin(const str& pServerAddress);
 	void OnExit();
 	void OnSetPlayerCount(int pPlayerCount);
 

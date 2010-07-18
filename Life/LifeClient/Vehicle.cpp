@@ -51,7 +51,9 @@ void Vehicle::OnPhysicsTick()
 	}
 	const float lFrameTime = std::min(0.1f, GetManager()->GetGameManager()->GetTimeManager()->GetNormalFrameTime());
 	bool lIsChild;
+	float lRealTimeRatio;
 	CURE_RTVAR_GET(lIsChild, =, mManager->GetGameManager()->GetVariableScope(), RTVAR_GAME_ISCHILD, true);
+	CURE_RTVAR_GET(lRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
 	const TBC::PhysicsManager* lPhysicsManager = mManager->GetGameManager()->GetPhysicsManager();
 	Vector3DF lVelocity;
 	lPhysicsManager->GetBodyVelocity(lPhysics->GetBoneGeometry(lPhysics->GetRootBone())->GetBodyId(), lVelocity);
@@ -169,12 +171,15 @@ void Vehicle::OnPhysicsTick()
 				FV_INTENSITY_HIGH,
 				FV_INTENSITY_EXPONENT,
 			};
-			float lVolume = ::pow(lIntensity, lTag.mFloatValueList[FV_VOLUME_EXPONENT]);
-			lVolume = Math::Lerp(lTag.mFloatValueList[FV_VOLUME_LOW], lTag.mFloatValueList[FV_VOLUME_HIGH], lVolume);
-			const float lPitch = Math::Lerp(lTag.mFloatValueList[FV_PITCH_LOW], lTag.mFloatValueList[FV_PITCH_HIGH], lIntensity);
+			const float lVolumeLerp = ::pow(lIntensity, lTag.mFloatValueList[FV_VOLUME_EXPONENT]);
+			const float lVolume = Math::Lerp(lTag.mFloatValueList[FV_VOLUME_LOW], lTag.mFloatValueList[FV_VOLUME_HIGH], lVolumeLerp);
+			const float lPitchExp = lTag.mFloatValueList[FV_PITCH_EXPONENT];
+			const float lPitchLerp = ::pow(lIntensity, lPitchExp);
+			const float lPitch = Math::Lerp(lTag.mFloatValueList[FV_PITCH_LOW], lTag.mFloatValueList[FV_PITCH_HIGH], lPitchLerp);
+			const float lRtrPitch = (lRealTimeRatio > 1)? ::pow(lRealTimeRatio, lPitchExp * lPitchExp) : lRealTimeRatio;
 			mUiManager->GetSoundManager()->SetSoundPosition(lEngineSound->GetData(), lPosition, lVelocity);
 			mUiManager->GetSoundManager()->SetVolume(lEngineSound->GetData(), lVolume);
-			mUiManager->GetSoundManager()->SetPitch(lEngineSound->GetData(), lPitch);
+			mUiManager->GetSoundManager()->SetPitch(lEngineSound->GetData(), lPitch * lRtrPitch);
 		}
 	}
 }
