@@ -78,14 +78,14 @@ def working_makedirs(newdir):
 def main():
     dryrun = (len(sys.argv) > 1)
     if dryrun:
-        print "Argument given = making a dry run (not backing up any files)."
+        print("Argument given = making a dry run (not backing up any files).")
 
     basedir = "../../"
     fl = GlobDirectoryWalker(basedir, "*",
         ("fmod*.lib", "fmod*.dll", "DspFx.dll"),
-        ("*.o", "*.obj", "*.log", ".cvsignore", "*.vcproj.*.user", "*.suo", "*.lib", "*.exp", "*.dll", "*.pdb", "*.ncb"),
+        ("*.o", "*.obj", "*.log", ".cvsignore", "*.vcproj.*.user", "*.suo", "*.lib", "*.exp", "*.dll", "*.pdb", "*.ncb", "*.class", "*.mesh", "*.phys"),
         ("*.svn", "*.git", "Unicode Release*", "Unicode Final", "Unicode Debug*", "Release Candidate", "Debug", "Release", "CVS"))
-    print "Copying..."
+    print("Copying...")
     targetdir = os.path.join(basedir, "../bak")
     cnt = 0
     import shutil
@@ -94,18 +94,18 @@ def main():
             basefile = f.replace("\\", "/")
             basefile = basefile[len(basedir):]
             targetfile = os.path.join(targetdir, basefile)
-            print f, " -> ", targetfile
+            print(f, " -> ", targetfile)
             if not dryrun:
                 targetsubdir = os.path.split(targetfile)[0]
                 working_makedirs(targetsubdir)
                 shutil.copyfile(f, targetfile)
             cnt += 1
-    print
+    print()
     if dryrun:
         action = "dry listed"
     else:
         action = "backed-up"
-    print cnt, "files "+action+" to "+targetdir+"."
+    print(cnt, "files "+action+" to "+targetdir+".")
 
 if __name__ == "__main__":
     main()

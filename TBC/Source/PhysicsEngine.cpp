@@ -582,6 +582,16 @@ void PhysicsEngine::ApplyTorque(PhysicsManager* pPhysicsManager, float pFrameTim
 				pEngineNode.mLock = 0;
 			}
 		}
+		if (mFriction)
+		{
+			// Wants us to scale (down) rotation angle depending on vehicle speed. Otherwise most vehicles
+			// quickly flips, not yeilding very fun gameplay. Plus, it's more like real racing cars! :)
+			Vector3DF lParentVelocity;
+			pPhysicsManager->GetBodyVelocity(pGeometry->GetParent()->GetBodyId(), lParentVelocity);
+			const float lRangeFactor = ::pow(mFriction, lParentVelocity.GetLength());
+			lHiStop *= lRangeFactor;
+			lLoStop *= lRangeFactor;
+		}
 		const float lAngleSpan = (lHiStop-lLoStop)*0.9f;
 		const float lTargetAngle = (lForce < 0)? -lForce*lLoStop+lTarget : lForce*lHiStop+lTarget;
 		const float lDiff = (lTargetAngle-lIrlAngle);
