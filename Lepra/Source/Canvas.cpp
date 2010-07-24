@@ -216,7 +216,7 @@ void Canvas::Reset(const Canvas& pCanvas)
 	SetPalette(pCanvas.GetPalette());
 }
 
-void Canvas::SetBuffer(void* pBuffer, bool pCopy)
+void Canvas::SetBuffer(void* pBuffer, bool pCopy, bool pTakeOwnership)
 {
 	if (pCopy == true)
 	{
@@ -244,7 +244,7 @@ void Canvas::SetBuffer(void* pBuffer, bool pCopy)
 
 		mBuffer = pBuffer;
 
-		mBufferResponsibility = false;
+		mBufferResponsibility = pTakeOwnership;
 	}
 }
 

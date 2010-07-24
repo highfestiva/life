@@ -44,6 +44,7 @@ public:
 	};
 
 	Log(const str& pName, Log* pParent, LogLevel pLevel = LEVEL_INFO);
+	virtual ~Log();
 	void SetupBasicListeners(LogListener* pConsole = 0, LogListener* pDebug = 0,
 		LogListener* pFile = 0, LogListener* pPerformance = 0, LogListener* pMem = 0);
 	void AddListener(LogListener* pLogger, LogLevel pLevel);

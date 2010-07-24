@@ -31,7 +31,7 @@ Client::Client(Cure::TimeManager* pTimeManager, Cure::NetworkAgent* pNetworkAgen
 	mMeasuredNetworkLatencyFrameCount(PHYSICS_FPS*0.3f),
 	mMeasuredNetworkJitterFrameCount(PHYSICS_FPS*0.06f),
 	mStriveSendErrorTimeCounter(0),
-	mStriveSendPauseFrameCount(-100000000),
+	mStriveSendUnpauseFrame(0),
 	mIgnoreStriveErrorTimeCounter(0)
 {
 }
@@ -106,14 +106,14 @@ void Client::QuerySendStriveTimes()
 	{
 		++mStriveSendErrorTimeCounter;
 		mIgnoreStriveErrorTimeCounter = 0;
-		if (mStriveSendPauseFrameCount-mTimeManager->GetCurrentPhysicsFrame() > 0)
+		if (mTimeManager->GetCurrentPhysicsFrameDelta(mStriveSendUnpauseFrame) < 0)
 		{
 			mLog.AInfo("Want to send strive times, but skipping since last transmission is still in effekt.");
 		}
 		else if (mStriveSendErrorTimeCounter >= NETWORK_DEVIATION_ERROR_COUNT)	// Only send if the error repeats itself a few times.
 		{
 			mStriveSendErrorTimeCounter = 0;
-			mStriveSendPauseFrameCount = SendStriveTimes(lNetworkFrameDiffCount);
+			mStriveSendUnpauseFrame = mTimeManager->GetCurrentPhysicsFrameAddFrames(SendStriveTimes(lNetworkFrameDiffCount));
 
 			// Reset the whole latency array to be more like something ideal.
 			size_t lCount = mNetworkFrameLatencyArray.size();
@@ -164,8 +164,9 @@ int Client::SendStriveTimes(int pNetworkFrameDiffCount)
 
 	if (::abs(pNetworkFrameDiffCount) >= PHYSICS_FPS)
 	{
-		SendPhysicsFrame(mTimeManager->GetCurrentPhysicsFrame()+lHalfPingFrameCount);
-		return (lHalfPingFrameCount*2);
+		
+		SendPhysicsFrame(mTimeManager->GetCurrentPhysicsFrameAddFrames(lHalfPingFrameCount));
+		return (lHalfPingFrameCount*2 + 2);
 	}
 
 	int lPhysicsTickAdjustmentFrameCount = PHYSICS_FPS;	// Spread over some time (=frames).
@@ -192,7 +193,7 @@ int Client::SendStriveTimes(int pNetworkFrameDiffCount)
 	}
 	mLog.Infof(_T("Sending time adjustment %i frames, spread over %i frames, to client."), pNetworkFrameDiffCount, lPhysicsTickAdjustmentFrameCount);
 	mNetworkAgent->SendNumberMessage(true, mUserConnection->GetSocket(), Cure::MessageNumber::INFO_ADJUST_TIME, lPhysicsTickAdjustmentFrameCount, lPhysicsTickAdjustmentTime);
-	return (lHalfPingFrameCount*2+lPhysicsTickAdjustmentFrameCount);
+	return (lHalfPingFrameCount*2 + lPhysicsTickAdjustmentFrameCount);
 }
 
 

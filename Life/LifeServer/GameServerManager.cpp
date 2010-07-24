@@ -464,7 +464,7 @@ void GameServerManager::OnLogin(Cure::UserConnection* pUserConnection)
 
 		lClient = new Client(GetTimeManager(), GetNetworkAgent(), pUserConnection);
 		mAccountClientTable.Insert(pUserConnection->GetAccountId(), lClient);
-		lClient->SendPhysicsFrame(GetTimeManager()->GetCurrentPhysicsFrame()+2, lPacket);	// TODO: adjust physics frame diff by ping-ponging some.
+		lClient->SendPhysicsFrame(GetTimeManager()->GetCurrentPhysicsFrameAddFrames(2), lPacket);	// TODO: adjust physics frame diff by ping-ponging some.
 
 		for (AvatarIdSet::const_iterator x = lAvatarIdSet->begin(); x != lAvatarIdSet->end(); ++x)
 		{
@@ -545,7 +545,7 @@ void GameServerManager::DeleteObject(Cure::GameObjectId pInstanceId)
 
 void GameServerManager::AdjustClientSimulationSpeed(Client* pClient, int pClientFrameIndex)
 {
-	int lCurrentFrameDiff = GetTimeManager()->GetCurrentPhysicsFrame() - pClientFrameIndex;
+	const int lCurrentFrameDiff = GetTimeManager()->GetCurrentPhysicsFrameDelta(pClientFrameIndex);
 	// Calculate client network latency and jitter.
 	pClient->StoreFrameDiff(lCurrentFrameDiff);
 
@@ -556,7 +556,7 @@ void GameServerManager::AdjustClientSimulationSpeed(Client* pClient, int pClient
 void GameServerManager::StoreMovement(int pClientFrameIndex, Cure::MessageObjectMovement* pMovement)
 {
 	const int lCurrentPhysicsFrame = GetTimeManager()->GetCurrentPhysicsFrame();
-	const int lFrameOffset = pClientFrameIndex-lCurrentPhysicsFrame;
+	const int lFrameOffset = GetTimeManager()->GetPhysicsFrameDelta(pClientFrameIndex, lCurrentPhysicsFrame);
 	if (lFrameOffset >= 0 && lFrameOffset < NETWORK_POSITIONAL_AHEAD_BUFFER_SIZE)
 	{
 		Cure::MessageObjectMovement* lMovement = pMovement->CloneToStandalone();
@@ -601,13 +601,14 @@ void GameServerManager::ApplyStoredMovement()
 		}
 		lCurrentPhysicsSteps = NETWORK_POSITIONAL_AHEAD_BUFFER_SIZE-1;
 	}
-	int lCurrentPhysicsFrame = GetTimeManager()->GetCurrentPhysicsFrame() - lCurrentPhysicsSteps;
+	int lCurrentPhysicsFrame = GetTimeManager()->GetCurrentPhysicsFrameAddFrames(-lCurrentPhysicsSteps);
 	if (lCurrentPhysicsFrame < 0)
 	{
 		return;
 	}
 	//mLog.Debugf(_T("[frame %i to %i]"), lCurrentPhysicsFrame, GetTimeManager()->GetCurrentPhysicsFrame());
-	for (; lCurrentPhysicsFrame <= GetTimeManager()->GetCurrentPhysicsFrame(); ++lCurrentPhysicsFrame)
+	for (; GetTimeManager()->GetCurrentPhysicsFrameDelta(lCurrentPhysicsFrame) >= 0;
+		lCurrentPhysicsFrame = GetTimeManager()->GetPhysicsFrameAddFrames(lCurrentPhysicsFrame, 1))
 	{
 		const int lFrameCycleIndex = lCurrentPhysicsFrame%NETWORK_POSITIONAL_AHEAD_BUFFER_SIZE;
 		MovementList lMovementList = mMovementArrayList[lFrameCycleIndex];
@@ -622,22 +623,25 @@ void GameServerManager::ApplyStoredMovement()
 			if (lCurrentPhysicsFrame != lMovement->GetFrameIndex())
 			{
 				mLog.AWarning("Throwing away network movement.");
-				continue;	// TRICKY: RAII to keep things simple.
 			}
-			Cure::ContextObject* lContextObject = GetContext()->GetObject(lInstanceId);
-			if (lContextObject)
+			else
 			{
-				if (lMovement->GetType() == Cure::MESSAGE_TYPE_OBJECT_POSITION)
+				Cure::ContextObject* lContextObject = GetContext()->GetObject(lInstanceId);
+				if (lContextObject)
 				{
-					const Cure::ObjectPositionalData& lData =
-						((Cure::MessageObjectPosition*)lMovement)->GetPositionalData();
-					lContextObject->SetFullPosition(lData);
-				}
-				else
-				{
-					mLog.AError("Not implemented!");
+					if (lMovement->GetType() == Cure::MESSAGE_TYPE_OBJECT_POSITION)
+					{
+						const Cure::ObjectPositionalData& lData =
+							((Cure::MessageObjectPosition*)lMovement)->GetPositionalData();
+						lContextObject->SetFullPosition(lData);
+					}
+					else
+					{
+						mLog.AError("Not implemented!");
+					}
 				}
 			}
+			delete lMovement;
 		}
 	}
 }
@@ -930,6 +934,12 @@ void GameServerManager::SendObjects(Client* pClient, bool pCreate, const Context
 		}
 	}
 
+	lPacket->Clear();
+	if (lCreateMessage)	// Store creation info?
+	{
+		GetNetworkAgent()->GetPacketFactory()->GetMessageFactory()->Release(lCreateMessage);
+	}
+	GetNetworkAgent()->GetPacketFactory()->GetMessageFactory()->Release(lPositionMessage);
 	GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
 }
 

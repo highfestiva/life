@@ -115,7 +115,7 @@ public:
 	void PartialCopy(int pX, int pY, const Canvas& pCanvas);
 	void operator= (const Canvas& pCanvas);
 
-	void SetBuffer(void* pBuffer, bool pCopy = false);
+	void SetBuffer(void* pBuffer, bool pCopy = false, bool pTakeOwnership = false);
 	void CreateBuffer();
 	void* GetBuffer() const;
 

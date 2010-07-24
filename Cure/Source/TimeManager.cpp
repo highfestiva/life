@@ -4,10 +4,10 @@
 
 
 
-#include "../../Lepra/Include/Math.h"
-#include "../Include/Cure.h"
-#include "../Include/RuntimeVariable.h"
 #include "../Include/TimeManager.h"
+#include <assert.h>
+#include "../../Lepra/Include/Math.h"
+#include "../Include/RuntimeVariable.h"
 
 
 
@@ -16,10 +16,14 @@ namespace Cure
 
 
 
+static const int gTimeWrapLimit = 10*60;	// Unit is seconds. Anything small is good enough.
+
+
+
 TimeManager::TimeManager():
-	mTargetFrameRate(CURE_RTVAR_SLOW_GET(Cure::GetSettings(), RTVAR_PHYSICS_FPS, 60))
+	mTargetFrameRate(60)
 {
-	Clear(0);
+	Clear(gTimeWrapLimit/2*mTargetFrameRate);
 }
 
 TimeManager::~TimeManager()
@@ -38,16 +42,17 @@ void TimeManager::Clear(int pPhysicsFrameCounter)
 	mPhysicsFrameCounter = pPhysicsFrameCounter;
 	mCurrentFrameTime = 1/(float)mTargetFrameRate;
 	mAverageFrameTime = mCurrentFrameTime;
-	mReportFrame = pPhysicsFrameCounter;
 	mPhysicsFrameTime = mAverageFrameTime;
 	mPhysicsStepCount = 1;
+	mPhysicsFrameWrapLimit = gTimeWrapLimit*mTargetFrameRate;
 }
 
 void TimeManager::TickTime()
 {
 	CURE_RTVAR_GET(mTargetFrameRate, =, Cure::GetSettings(), RTVAR_PHYSICS_FPS, 2);
 	CURE_RTVAR_GET(mRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
-	mRealTimeRatio = Math::Clamp(mRealTimeRatio, 0.1f, 350.0f);
+	mPhysicsFrameWrapLimit = gTimeWrapLimit*mTargetFrameRate;
+	mRealTimeRatio = Math::Clamp(mRealTimeRatio, 0.1f, 4.0f);
 
 	mCurrentFrameTime = (float)mTime.PopTimeDiff();
 	if (mCurrentFrameTime > 1.0)	// Never take longer steps than one second.
@@ -55,6 +60,7 @@ void TimeManager::TickTime()
 		mCurrentFrameTime = 1.0;
 	}
 	mAbsoluteTime += mCurrentFrameTime;
+	mAbsoluteTime = ::fmod(mAbsoluteTime, (float)gTimeWrapLimit);
 
 	mTickTimeModulo += mCurrentFrameTime;
 
@@ -70,15 +76,6 @@ void TimeManager::TickTime()
 	{
 		mAverageFrameTime = Math::Lerp(mAverageFrameTime, mCurrentFrameTime, 0.01f);
 	}
-
-	const int lReportInterval = 5;	// Printout ever x seconds.
-	if (mPhysicsFrameCounter > mReportFrame || mPhysicsFrameCounter < mReportFrame-mTargetFrameRate*lReportInterval)
-	{
-		mReportFrame = mPhysicsFrameCounter + mTargetFrameRate*lReportInterval;
-		log_volatile(mLog.Debugf(_T("Time step. Target fps: %i, avg fps: %.1f,\n")
-			_T("afforded phys steps: %i, afforded phys step time %.1f %%."), 
-			mTargetFrameRate, 1/mAverageFrameTime, GetAffordedPhysicsStepCount(), GetAffordedPhysicsStepTime()*mTargetFrameRate*100));
-	}
 }
 
 void TimeManager::TickPhysics()
@@ -88,7 +85,8 @@ void TimeManager::TickPhysics()
 		const float lThisStepTime = GetAffordedPhysicsTotalTime() / mRealTimeRatio;
 		int lTargetStepCount = (int)::floorf(lThisStepTime * mTargetFrameRate);
 
-		mPhysicsFrameCounter += lTargetStepCount;
+		mPhysicsFrameCounter = GetCurrentPhysicsFrameAddFrames(lTargetStepCount);
+		//mPhysicsFrameCounter += lTargetStepCount;
 		mTickTimeModulo -= lThisStepTime;
 
 		if (mPhysicsSpeedAdjustmentFrameCount > 0)
@@ -112,6 +110,16 @@ float TimeManager::GetAbsoluteTime() const
 	return (mAbsoluteTime);
 }
 
+float TimeManager::GetAbsoluteTimeDiff(float pEnd, float pStart)
+{
+	float lDiff = pEnd - pStart;
+	if (lDiff < 0)
+	{
+		lDiff += gTimeWrapLimit;
+	}
+	return lDiff;
+}
+
 float TimeManager::GetCurrentFrameTime() const
 {
 	return (mCurrentFrameTime);
@@ -120,6 +128,60 @@ float TimeManager::GetCurrentFrameTime() const
 int TimeManager::GetCurrentPhysicsFrame() const
 {
 	return mPhysicsFrameCounter;
+}
+
+int TimeManager::GetCurrentPhysicsFrameAddFrames(int pFrames) const
+{
+	return GetPhysicsFrameAddFrames(mPhysicsFrameCounter, pFrames);
+}
+
+int TimeManager::GetCurrentPhysicsFrameAddSeconds(float pSeconds) const
+{
+	assert(pSeconds <= 60);
+	return GetCurrentPhysicsFrameAddFrames(ConvertSecondsToPhysicsFrames(pSeconds));
+}
+
+int TimeManager::GetPhysicsFrameAddFrames(int pFrameCounter, int pFrames) const
+{
+	assert(pFrames > -mPhysicsFrameWrapLimit/2 &&
+		pFrames < mPhysicsFrameWrapLimit/2);
+
+	int lNewFrame = pFrameCounter + pFrames;
+	if (lNewFrame < 0)
+	{
+		lNewFrame += mPhysicsFrameWrapLimit;
+	}
+	else if (lNewFrame >= mPhysicsFrameWrapLimit)
+	{
+		lNewFrame -= mPhysicsFrameWrapLimit;
+	}
+
+	assert(lNewFrame >= 0 && lNewFrame < mPhysicsFrameWrapLimit);
+	return lNewFrame;
+}
+
+int TimeManager::GetCurrentPhysicsFrameDelta(int pStart) const
+{
+	return GetPhysicsFrameDelta(mPhysicsFrameCounter, pStart);
+}
+
+int TimeManager::GetPhysicsFrameDelta(int pEnd, int pStart) const
+{
+	assert(pEnd >= 0 && pEnd < mPhysicsFrameWrapLimit);
+	assert(pStart >= 0 && pStart < mPhysicsFrameWrapLimit);
+
+	int lDiff = pEnd - pStart;
+	if (lDiff > mPhysicsFrameWrapLimit/2)
+	{
+		lDiff -= mPhysicsFrameWrapLimit;
+	}
+	else if (lDiff < -mPhysicsFrameWrapLimit/2)
+	{
+		lDiff += mPhysicsFrameWrapLimit;
+	}
+
+	assert(lDiff > -mPhysicsFrameWrapLimit/2 && lDiff < mPhysicsFrameWrapLimit/2);
+	return lDiff;
 }
 
 float TimeManager::GetNormalFrameTime() const

@@ -199,8 +199,8 @@ bool GameClientSlaveManager::Render()
 bool GameClientSlaveManager::Paint()
 {
 #ifdef LIFE_DEMO
-	const float lTime = GetTimeManager()->GetAbsoluteTime();
-	if ((mSlaveIndex >= 2 || (mSlaveIndex == 1 && lTime > 15*60))
+	const double lTime = mDemoTime.QueryTimeDiff();
+	if ((mSlaveIndex >= 2 || (mSlaveIndex == 1 && lTime > 10*60))
 		&& !IsQuitting())
 	{
 		const UiTbc::FontManager::FontId lOldFontId = SetFontHeight(36.0);
@@ -461,10 +461,8 @@ bool GameClientSlaveManager::IsLoggingIn() const
 
 bool GameClientSlaveManager::IsUiMoveForbidden(Cure::GameObjectId pObjectId) const
 {
-	//const bool lMoveAllowed = (pObjectId == mAvatarId || GetContext()->IsLocalGameObjectId(pObjectId) ||
-	//	(!GetMaster()->IsLocalObject(pObjectId) && GetMaster()->IsFirstSlave(this)));
-	const bool lMoveAllowed = true;//(pObjectId == mAvatarId || !GetMaster()->IsLocalObject(pObjectId));
-	pObjectId;
+	const bool lMoveAllowed = (pObjectId == mAvatarId || GetContext()->IsLocalGameObjectId(pObjectId) ||
+		(!GetMaster()->IsLocalObject(pObjectId) && GetMaster()->IsFirstSlave(this)));
 	return !lMoveAllowed;
 }
 
@@ -704,24 +702,34 @@ void GameClientSlaveManager::TickUiInput()
 			mAvatarMightSelectTime.UpdateTimer();
 
 			const Options::Vehicle& v = mOptions.GetControl();
-			float lPower;
 			const bool lIsMovingForward = lObject->GetForwardSpeed() > 8.0f;
 #define V(dir) v.mControl[Options::Vehicle::CONTROL_##dir]
 			const float lForward = V(FORWARD);
 			const float lBack = V(BACKWARD);
 			const float lBreakAndBack = V(BREAKANDBACK);
-			lPower = lForward - std::max(lBack, lIsMovingForward? 0.0f : lBreakAndBack);
-			SetAvatarEnginePower(lObject, 0, lPower, mCameraOrientation.x);
-			lPower = V(RIGHT)-V(LEFT);
-			SetAvatarEnginePower(lObject, 1, lPower, mCameraOrientation.x);
-			lPower = V(HANDBREAK) - std::max(V(BREAK), lIsMovingForward? lBreakAndBack : 0.0f);
+			float lPowerFwdRev = lForward - std::max(lBack, lIsMovingForward? 0.0f : lBreakAndBack);
+			SetAvatarEnginePower(lObject, 0, lPowerFwdRev, mCameraOrientation.x);
+			float lPowerLR = V(RIGHT)-V(LEFT);
+			SetAvatarEnginePower(lObject, 1, lPowerLR, mCameraOrientation.x);
+			float lPower = V(HANDBREAK) - std::max(V(BREAK), lIsMovingForward? lBreakAndBack : 0.0f);
 			if (!SetAvatarEnginePower(lObject, 2, lPower, mCameraOrientation.x) &&
 				lBreakAndBack > 0 && Math::IsEpsEqual(lBack, 0.0f, 0.01f))
 			{
 				// Someone is apparently trying to stop/break, but no engine configured for breaking.
 				// Just apply it as a reverse motion.
-				lPower = lForward - lBreakAndBack;
-				SetAvatarEnginePower(lObject, 0, lPower, mCameraOrientation.x);
+				lPowerFwdRev = lForward - lBreakAndBack;
+				SetAvatarEnginePower(lObject, 0, lPowerFwdRev, mCameraOrientation.x);
+			}
+			{
+				// Children have the possibility of just pressing left/right which will cause a forward
+				// motion in the currently used vehicle.
+				bool lIsChild;
+				CURE_RTVAR_TRYGET(lIsChild, =, GetVariableScope(), RTVAR_GAME_ISCHILD, false);
+				if (lIsChild && Math::IsEpsEqual(lPowerFwdRev, 0.0f, 0.05f) && !Math::IsEpsEqual(lPowerLR, 0.0f, 0.05f))
+				{
+					lPowerFwdRev = 0.3f * ::fabs(lPowerLR);
+					SetAvatarEnginePower(lObject, 0, lPowerFwdRev, mCameraOrientation.x);
+				}
 			}
 			lPower = V(UP)-V(DOWN);
 			SetAvatarEnginePower(lObject, 3, lPower, mCameraOrientation.x);
@@ -766,10 +774,10 @@ bool GameClientSlaveManager::SetAvatarEnginePower(Cure::ContextObject* pAvatar, 
 				mEnginePlaybackFile.WriteString(lComment);
 				mEnginePlaybackFile.WriteString(wstrutil::Encode("#" RTVAR_STEERING_PLAYBACKMODE " 2\n"));
 			}
-			const double lTime = GetTimeManager()->GetAbsoluteTime();
+			const float lTime = GetTimeManager()->GetAbsoluteTime();
 			if (lTime != mEnginePlaybackTime)
 			{
-				wstr lCommand = wstrutil::Format(L"sleep %g\n", lTime-mEnginePlaybackTime);
+				wstr lCommand = wstrutil::Format(L"sleep %g\n", Cure::TimeManager::GetAbsoluteTimeDiff(lTime, mEnginePlaybackTime));
 				mEnginePlaybackFile.WriteString(lCommand);
 				mEnginePlaybackTime = lTime;
 			}
@@ -1141,7 +1149,7 @@ void GameClientSlaveManager::ProcessNumber(Cure::MessageNumber::InfoType pType, 
 			if (GetNetworkClient()->GetSocket())
 			{
 				mPingAttemptCount = 0;
-				const float lPingTime = GetTimeManager()->ConvertPhysicsFramesToSeconds(GetTimeManager()->GetCurrentPhysicsFrame()-pInteger);
+				const float lPingTime = GetTimeManager()->ConvertPhysicsFramesToSeconds(GetTimeManager()->GetCurrentPhysicsFrameDelta(pInteger));
 				const float lServerStriveTime = GetTimeManager()->ConvertPhysicsFramesToSeconds((int)pFloat)*2;
 				log_volatile(mLog.Debugf(_T("Pong: this=%ss, server sim strives to be x2=%ss ahead, (self=%s)."),
 					Number::ConvertToPostfixNumber(lPingTime, 2).c_str(),
@@ -1246,7 +1254,8 @@ void GameClientSlaveManager::SetMovement(Cure::GameObjectId pInstanceId, int32 p
 		x = mObjectFrameIndexMap.find(pInstanceId);
 	}
 	const int lLastSetFrameIndex = x->second;	// Last set frame index.
-	if (pFrameIndex-lLastSetFrameIndex >= 0)
+	const int lDeltaFrames = GetConstTimeManager()->GetPhysicsFrameDelta(pFrameIndex, lLastSetFrameIndex);
+	if (lDeltaFrames >= 0 || lDeltaFrames < -1000)	// Either it's newer, or it's long, long ago (meaning time wrap).
 	{
 		x->second = pFrameIndex;
 
@@ -1263,7 +1272,7 @@ void GameClientSlaveManager::SetMovement(Cure::GameObjectId pInstanceId, int32 p
 			{
 				int lMicroSteps;
 				CURE_RTVAR_GET(lMicroSteps, =, GetVariableScope(), RTVAR_PHYSICS_MICROSTEPS, 3);
-				const int lFutureStepCount = (GetTimeManager()->GetCurrentPhysicsFrame()-pFrameIndex) * lMicroSteps;
+				const int lFutureStepCount = GetTimeManager()->GetCurrentPhysicsFrameDelta(pFrameIndex) * lMicroSteps;
 				const float lStepIncrement = GetTimeManager()->GetAffordedPhysicsStepTime() / lMicroSteps;
 				pData.GhostStep(lFutureStepCount, lStepIncrement*lExtrapolationFactor);
 			}

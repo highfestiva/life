@@ -24,6 +24,9 @@ UiServerConsoleManager::UiServerConsoleManager(Cure::GameManager* pGameManager, 
 
 UiServerConsoleManager::~UiServerConsoleManager()
 {
+	Join();
+	delete GetConsoleLogger();
+	SetConsoleLogger(0);
 	delete (mUiConsole);
 	mUiConsole = 0;
 }

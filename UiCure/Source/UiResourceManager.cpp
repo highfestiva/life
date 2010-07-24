@@ -266,24 +266,29 @@ bool GeometryResource::Load()
 	//const str& lFilename = lParts[0];
 	const str& lFilename = GetName();
 
-	DiskFile lFile;
-	if (lFile.Open(lFilename, DiskFile::MODE_READ))
+	for (int x = 0; x < 3; ++x)	// Make more than one attempt, if anti-virus or Windoze is interfering.
 	{
-		UiTbc::ChunkyMeshLoader lLoader(&lFile, false);
-		lGeometry = new UiTbc::TriangleBasedGeometry();
-		bool lOk = lLoader.Load(lGeometry, mCastsShadows);
-		if (!lOk)
+		DiskFile lFile;
+		if (lFile.Open(lFilename, DiskFile::MODE_READ))
 		{
-			assert(false);
-			delete (lGeometry);
-			lGeometry = 0;
+			UiTbc::ChunkyMeshLoader lLoader(&lFile, false);
+			lGeometry = new UiTbc::TriangleBasedGeometry();
+			bool lOk = lLoader.Load(lGeometry, mCastsShadows);
+			if (!lOk)
+			{
+				assert(false);
+				delete (lGeometry);
+				lGeometry = 0;
+			}
+			break;
+		}
+		else
+		{
+			mLog.Errorf(_T("Could not load mesh with name '%s'."), lFilename.c_str());
 		}
 	}
-	else
-	{
-		mLog.Errorf(_T("Could not load mesh with name '%s'."), lFilename.c_str());
-		assert(false);
-	}
+	assert(lGeometry);
+
 	if (lGeometry)
 	{
 		lGeometry->SetBasicMaterialSettings(lMaterial);

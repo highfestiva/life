@@ -47,6 +47,16 @@ Component::~Component()
 	}
 	delete[] mLayout;
 	mLayout = 0;
+
+	if (mParent)
+	{
+		Component* lParent = mParent;
+		for (int x = 0; x < 5; ++x)
+		{
+			lParent->RemoveChild(this, x);
+			lParent->Component::RemoveChild(this, x);
+		}
+	}
 }
 
 void Component::DeleteLayout(int pLayer)

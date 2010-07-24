@@ -54,6 +54,8 @@ ClientConsoleManager::ClientConsoleManager(Cure::GameManager* pGameManager, UiCu
 
 ClientConsoleManager::~ClientConsoleManager()
 {
+	delete GetConsoleLogger();
+	SetConsoleLogger(0);
 	delete (mUiConsole);
 	mUiConsole = 0;
 }

@@ -95,6 +95,7 @@ public:
 	float GetMass() const;
 
 	bool SetPhysics(TBC::ChunkyPhysics* pStructure);
+	void ClearPhysics();
 	TBC::ChunkyPhysics* GetPhysics() const;
 	void SetPhysicsTypeOverride(PhysicsOverride pPhysicsOverride);
 	TBC::ChunkyBoneGeometry* GetStructureGeometry(unsigned pIndex) const;

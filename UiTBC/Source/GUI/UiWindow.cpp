@@ -159,6 +159,14 @@ Window::Window(Painter::ImageID pImageID,
 
 Window::~Window()
 {
+	delete mTRBorder;
+	delete mBRBorder;
+	delete mBLBorder;
+	delete mBBorder;
+	delete mRBorder;
+	delete mTLBorder;
+	delete mTBorder;
+	delete mLBorder;
 }
 
 void Window::Init()

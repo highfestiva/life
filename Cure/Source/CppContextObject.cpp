@@ -31,6 +31,7 @@ CppContextObject::CppContextObject(ResourceManager* pResourceManager, const str&
 
 CppContextObject::~CppContextObject()
 {
+	ClearPhysics();
 	delete (mPhysicsResource);
 	mPhysicsResource = 0;
 	delete (mClassResource);

@@ -39,6 +39,10 @@ MassObject::MassObject(Cure::ResourceManager* pResourceManager, const str& pClas
 
 MassObject::~MassObject()
 {
+	for (int x = 0; x < SQUARE_COUNT; ++x)
+	{
+		delete mSquareArray[x];
+	}
 }
 
 
@@ -137,7 +141,7 @@ void MassObject::MoveToSquare(int pX, int pY)
 		}
 	}
 	// Destroy all that are no longer in use.
-	for (int x = 0; x < SQUARE_SIDE; ++x)
+	for (int x = 0; x < SQUARE_COUNT; ++x)
 	{
 		delete lSquareArray[x];
 	}

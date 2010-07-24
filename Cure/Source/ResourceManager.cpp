@@ -341,6 +341,7 @@ PhysicsResource::PhysicsResource(Cure::ResourceManager* pManager, const str& pNa
 
 PhysicsResource::~PhysicsResource()
 {
+	SetRamData(0);
 }
 
 const str PhysicsResource::GetType() const

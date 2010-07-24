@@ -11,6 +11,7 @@
 #pragma once
 
 #include "../../Lepra/Include/HiResTimer.h"
+#include "Cure.h"
 
 
 
@@ -34,12 +35,29 @@ public:
 	// increase or decrease in physics simulation speed.
 	void TickPhysics();
 	// Returns the actual (calendar) current time since this instance was created.
+	// TRICKY: absolute time wraps - don't use if you don't know what you're doing. Be sure to use
+	// GetAbsoluteTimeDiff() when checking if certain time elapsed!
 	float GetAbsoluteTime() const;
+	// Returns the actual (calendar) time diff between end and start (handles time wrap case).
+	static float GetAbsoluteTimeDiff(float pEnd, float pStart);
 	// Returns the actual (calendar) current time difference between this and the previous
 	// time tick.
 	float GetCurrentFrameTime() const;
 	// Returns the current physics frame (counter). This is increased by ticking physics.
+	// TRICKY: physics frames wraps - don't use if you don't know what you're doing. Be sure to use
+	// GetPhysicsFrameDiff() when checking if certain time elapsed!
 	int GetCurrentPhysicsFrame() const;
+	// Returns the current physics frame (counter) to expect in x seconds.
+	int GetCurrentPhysicsFrameAddFrames(int pFrames) const;
+	// Returns the current physics frame (counter) to expect in x seconds.
+	int GetCurrentPhysicsFrameAddSeconds(float pSeconds) const;
+	// Adds two physical frame (counters) together (handles time wrap case).
+	int GetPhysicsFrameAddFrames(int pFrameCounter, int pFrames) const;
+	// See GetPhysicsFrameDelta() for more info (operates on current frame counter as end).
+	int GetCurrentPhysicsFrameDelta(int pStart) const;
+	// Returns the physics frame (counter) delta between end and start (handles time wrap case). The returned value
+	// is the number of frames between end and start, not a new frame - use GetPhysicsFrameAdd() for that.
+	int GetPhysicsFrameDelta(int pEnd, int pStart) const;
 	// Returns the frame time we normally reach on this system (filtered, sliding average frame time, includes real time ratio).
 	float GetNormalFrameTime() const;
 	// Returns the frame time we normally reach on this system IRL, i.e. not counting real time ratio.
@@ -81,7 +99,7 @@ private:
 	float mPhysicsFrameTime;	// How much time we should move forward each physics step.
 	int mPhysicsStepCount;
 	int mTargetPhysicsStepCount;	// The number of discrete physics steps to perform this frame.
-	int mReportFrame;	// The physics frame we will print status next time.
+	int mPhysicsFrameWrapLimit;
 
 	LOG_CLASS_DECLARE();
 };

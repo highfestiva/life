@@ -206,8 +206,12 @@ protected:
 		float mAngle;
 	};
 	DiskFile mEnginePlaybackFile;	// Used for recording vechile steering playback.
-	double mEnginePlaybackTime;	// Used for recording vechile steering playback.
+	float mEnginePlaybackTime;	// Used for recording vechile steering playback.
 	EnginePower mEnginePowerShadow[TBC::PhysicsEngine::MAX_CONTROLLER_COUNT];	// Used for recording vechile steering playback.
+
+#ifdef LIFE_DEMO
+	HiResTimer mDemoTime;
+#endif // Demo version
 
 	LOG_CLASS_DECLARE();
 };

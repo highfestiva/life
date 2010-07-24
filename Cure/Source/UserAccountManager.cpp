@@ -30,6 +30,7 @@ MemoryUserAccountManager::MemoryUserAccountManager():
 
 MemoryUserAccountManager::~MemoryUserAccountManager()
 {
+	RemoveAllUserAccounts();
 }
 
 bool MemoryUserAccountManager::AddUserAccount(const LoginId& pLoginId)

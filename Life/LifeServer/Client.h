@@ -67,7 +67,7 @@ private:
 	float mMeasuredNetworkLatencyFrameCount;
 	float mMeasuredNetworkJitterFrameCount;
 	int mStriveSendErrorTimeCounter;
-	int mStriveSendPauseFrameCount;
+	int mStriveSendUnpauseFrame;
 	int mIgnoreStriveErrorTimeCounter;
 
 	LOG_CLASS_DECLARE();

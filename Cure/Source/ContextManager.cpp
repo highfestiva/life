@@ -206,7 +206,7 @@ void ContextManager::AddAlarmCallback(ContextObject* pObject, int pAlarmId, floa
 {
 	assert(pObject->GetInstanceId() != 0);
 	const TimeManager* lTime = ((const GameManager*)mGameManager)->GetConstTimeManager();
-	int lFrame = lTime->GetCurrentPhysicsFrame()+lTime->ConvertSecondsToPhysicsFrames(pSeconds);
+	const int lFrame = lTime->GetCurrentPhysicsFrameAddSeconds(pSeconds);
 	mAlarmCallbackObjectSet.insert(Alarm(pObject, lFrame, pAlarmId, pExtraData));
 }
 
@@ -317,13 +317,11 @@ void ContextManager::DispatchAlarmCallbacks()
 	// 1. Extract due alarms into list.
 	// 2. Callback alarms.
 
-	int lCurrentPhysicsFrame = mGameManager->GetConstTimeManager()->GetCurrentPhysicsFrame();
-
 	std::list<Alarm> lCallbackList;
 	AlarmSet::iterator x = mAlarmCallbackObjectSet.begin();
 	while (x != mAlarmCallbackObjectSet.end())
 	{
-		if (x->mFrameTime - lCurrentPhysicsFrame <= 0)
+		if (mGameManager->GetConstTimeManager()->GetCurrentPhysicsFrameDelta(x->mFrameTime) >= 0)
 		{
 			lCallbackList.push_back(*x);
 			mAlarmCallbackObjectSet.erase(x++);

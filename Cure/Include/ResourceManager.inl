@@ -244,6 +244,7 @@ ClassResourceBase<_Class, _ClassLoader>::ClassResourceBase(Cure::ResourceManager
 template<class _Class, class _ClassLoader>
 ClassResourceBase<_Class, _ClassLoader>::~ClassResourceBase()
 {
+	SetRamData(0);
 }
 
 template<class _Class, class _ClassLoader>

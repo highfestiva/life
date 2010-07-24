@@ -81,6 +81,7 @@ public:
 	static ScopePerformanceData* Insert(const str& pName, size_t pHash);
 
 	ScopePerformanceData(ScopePerformanceData* pParent, const str& pName, size_t pHash);
+	~ScopePerformanceData();
 
 	static void ClearAll();
 	void Append(double pPeriodValue, double pTimeOfLastMeasure);

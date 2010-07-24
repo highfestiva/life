@@ -30,9 +30,11 @@ ConsoleManager::~ConsoleManager()
 {
 	Join();
 	mConsoleLogger = 0;
-	delete (mConsolePrompt);
+	delete mConsolePrompt;
 	mConsolePrompt = 0;
 	mVariableScope = 0;
+	delete mConsoleCommandManager;
+	mConsoleCommandManager = 0;
 };
 
 void ConsoleManager::SetConsoleLogger(InteractiveConsoleLogListener* pLogger)

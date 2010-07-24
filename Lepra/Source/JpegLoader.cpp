@@ -9,8 +9,6 @@
 #include "../../ThirdParty/jpeg-6b/jerror.h"
 
 #define INT32 a_stupid_workaround_that_undefines_a_typedef
-
-#define LEPRA_INCLUDE_NO_OS
 #include "../Include/ArchiveFile.h"
 #include "../Include/Canvas.h"
 #include "../Include/DiskFile.h"
@@ -18,8 +16,6 @@
 #include "../Include/Graphics2D.h"
 #include "../Include/JpegLoader.h"
 #include "../Include/ProgressCallback.h"
-#undef LEPRA_INCLUDE_NO_OS
-
 #undef INT32
 
 namespace Lepra

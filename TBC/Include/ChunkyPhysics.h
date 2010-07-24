@@ -68,6 +68,7 @@ public:
 	int GetSpawnerCount() const;
 	const PhysicsSpawner* GetSpawner(int pSpawnerIndex) const;
 	void AddSpawner(PhysicsSpawner* pSpawner);	// Takes ownership of the given spawner.
+	void ClearSpawners();
 
 	// Overrides.
 	void ClearAll(PhysicsManager* pPhysics);

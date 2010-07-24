@@ -24,6 +24,7 @@ public:
 	inline ~SpinLock();
 
 	inline void Acquire();
+	inline void UncheckedAcquire();
 	inline bool TryAcquire();
 	inline void Release();
 
@@ -50,6 +51,11 @@ inline SpinLock::~SpinLock()
 inline void SpinLock::Acquire()
 {
 	assert(!IsOwner());
+	UncheckedAcquire();
+}
+
+inline void SpinLock::UncheckedAcquire()
+{
 	bool lAcquired = BusLock::CompareAndSwap(&mLocked, LOCKED, UNLOCKED);
 	while (!lAcquired)
 	{

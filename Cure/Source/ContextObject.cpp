@@ -101,18 +101,6 @@ ContextObject::~ContextObject()
 		}
 	}
 
-	// Removes bodies from manager, then destroys all physical stuff.
-	if (mManager && mPhysics)
-	{
-		const int lBoneCount = mPhysics->GetBoneCount();
-		for (int x = 0; x < lBoneCount; ++x)
-		{
-			TBC::ChunkyBoneGeometry* lStructureGeometry = mPhysics->GetBoneGeometry(x);
-			mManager->RemovePhysicsBody(lStructureGeometry->GetBodyId());
-		}
-		mPhysics->ClearAll(mManager->GetGameManager()->GetPhysicsManager());
-	}
-
 	// Fuck off, attributes.
 	{
 		AttributeArray::iterator x = mAttributeArray.begin();
@@ -713,6 +701,22 @@ bool ContextObject::SetPhysics(TBC::ChunkyPhysics* pStructure)
 	return (lOk);
 }
 
+void ContextObject::ClearPhysics()
+{
+	// Removes bodies from manager, then destroys all physical stuff.
+	if (mManager && mPhysics)
+	{
+		const int lBoneCount = mPhysics->GetBoneCount();
+		for (int x = 0; x < lBoneCount; ++x)
+		{
+			TBC::ChunkyBoneGeometry* lStructureGeometry = mPhysics->GetBoneGeometry(x);
+			mManager->RemovePhysicsBody(lStructureGeometry->GetBodyId());
+		}
+		mPhysics->ClearAll(mManager->GetGameManager()->GetPhysicsManager());
+		mPhysics = 0;
+	}
+}
+
 TBC::ChunkyPhysics* ContextObject::GetPhysics() const
 {
 	return (mPhysics);
@@ -750,7 +754,7 @@ bool ContextObject::QueryResendTime(float pDeltaTime, bool pUnblockDelta)
 {
 	bool lOkToSend = false;
 	const float lAbsoluteTime = GetManager()->GetGameManager()->GetConstTimeManager()->GetAbsoluteTime();
-	if (mLastSendTime+pDeltaTime <= lAbsoluteTime)
+	if (pDeltaTime <= Cure::TimeManager::GetAbsoluteTimeDiff(lAbsoluteTime, mLastSendTime))
 	{
 		lOkToSend = true;
 		mLastSendTime = lAbsoluteTime - (pUnblockDelta? pDeltaTime+MathTraits<float>::FullEps() : 0);

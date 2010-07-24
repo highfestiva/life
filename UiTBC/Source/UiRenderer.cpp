@@ -1024,17 +1024,16 @@ void Renderer::RemoveGeometry(GeometryID pGeometryID)
 		mGeometryTable.Remove(lGeomIter);
 		mGeometryIDManager.RecycleId((int)pGeometryID);
 
-		if (lGeometryData->mGeometry->IsGeometryReference() == false)
-		{
-			delete (lGeometryData->mTA);
-			lGeometryData->mTA = 0;
-		}
-		else
+		if (lGeometryData->mGeometry->IsGeometryReference())
 		{
 			TBC::GeometryBase* lParentGeometry = ((TBC::GeometryReference*)lGeometryData->mGeometry)->GetParentGeometry();
 			GeometryData* lParentGeometryData = (GeometryData*)lParentGeometry->GetRendererData();
 			lParentGeometryData->mReferenceSet.erase(lGeometryData->mGeometryID);
 		}
+
+		delete (lGeometryData->mTA);
+		lGeometryData->mTA = 0;
+
 		ReleaseGeometry(lGeometryData->mGeometry, GRO_REMOVE_FROM_MATERIAL);
 
 		while (!lGeometryData->mReferenceSet.empty())
@@ -1586,6 +1585,7 @@ void Renderer::RemoveShadowVolume(GeometryID& pShadowVolume)
 
 			ReleaseGeometry(lShadowGeom->mGeometry, GRO_IGNORE_MATERIAL);
 			delete lShadowGeom->mGeometry;
+			delete lShadowGeom;
 		}
 
 		mGeometryIDManager.RecycleId(pShadowVolume);

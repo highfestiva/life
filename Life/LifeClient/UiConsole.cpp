@@ -71,7 +71,10 @@ void UiConsole::Open()
 
 void UiConsole::Close()
 {
-	((UiTbc::ConsoleLogListener*)mManager->GetConsoleLogger())->SetOutputComponent(0);
+	if (mManager->GetConsoleLogger())
+	{
+		((UiTbc::ConsoleLogListener*)mManager->GetConsoleLogger())->SetOutputComponent(0);
+	}
 	((UiTbc::ConsolePrompt*)mManager->GetConsolePrompt())->SetInputComponent(0);
 	CloseGraphics();
 }

@@ -7,6 +7,9 @@
 #include "../../../Lepra/Include/LepraTarget.h"
 #include "../../Include/Win32/UiWin32DirectX9Painter.h"
 #include <math.h>
+#ifdef new
+#undef new
+#endif // new
 #include <D3dx9math.h>
 #include "../../../Lepra/Include/Log.h"
 #include "../../../UiLepra/Include/Win32/UiWin32DirectXDisplay.h"

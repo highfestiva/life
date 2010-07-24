@@ -55,6 +55,12 @@ Application::~Application()
 	mFileLogger = 0;
 	delete (mDebugLogger);
 	mDebugLogger = 0;
+
+	// Drop performance measurement resources.
+	ScopePerformanceData::ClearAll();	// Make all useless.
+	ScopePerformanceData::ClearAll();	// Delete all useless.
+
+	LogType::Close();
 }
 
 void Application::Init()

@@ -7,6 +7,7 @@
 #include "../Include/ChunkyBoneGeometry.h"
 #include "../Include/ChunkyPhysics.h"
 #include "../Include/PhysicsEngine.h"
+#include "../Include/PhysicsSpawner.h"
 #include "../Include/PhysicsTrigger.h"
 
 
@@ -26,8 +27,8 @@ ChunkyPhysics::ChunkyPhysics(TransformOperation pTransformOperation, PhysicsType
 
 ChunkyPhysics::~ChunkyPhysics()
 {
-	assert(mGeometryArray.empty());	// Ensure all resources has been released prior to delete.
-	ClearEngines();
+	//assert(mGeometryArray.empty());	// Ensure all resources has been released prior to delete.
+	ClearAll(0);
 }
 
 
@@ -138,7 +139,10 @@ void ChunkyPhysics::ClearBoneGeometries(PhysicsManager* pPhysics)
 		ChunkyBoneGeometry* lGeometry = mGeometryArray[x];
 		if (lGeometry)
 		{
-			lGeometry->RemovePhysics(pPhysics);
+			if (pPhysics)
+			{
+				lGeometry->RemovePhysics(pPhysics);
+			}
 			delete (lGeometry);
 			mGeometryArray[x] = 0;
 		}
@@ -264,6 +268,16 @@ void ChunkyPhysics::AddSpawner(PhysicsSpawner* pSpawner)
 	mSpawnerArray.push_back(pSpawner);
 }
 
+void ChunkyPhysics::ClearSpawners()
+{
+	SpawnerArray::iterator x = mSpawnerArray.begin();
+	for (; x != mSpawnerArray.end(); ++x)
+	{
+		delete (*x);
+	}
+	mSpawnerArray.clear();
+}
+
 
 
 void ChunkyPhysics::ClearAll(PhysicsManager* pPhysics)
@@ -271,6 +285,8 @@ void ChunkyPhysics::ClearAll(PhysicsManager* pPhysics)
 	ClearBoneGeometries(pPhysics);
 	BoneHierarchy::ClearAll(pPhysics);
 	ClearEngines();
+	ClearTriggers();
+	ClearSpawners();
 }
 
 void ChunkyPhysics::SetBoneCount(int pBoneCount)

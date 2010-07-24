@@ -1,14 +1,12 @@
-/*
-	Class:  Memory
-	Author: Alexander Hugestrand
-	Copyright (c) 2002-2009, Righteous Games
 
-	NOTES:
+// Author: Jonas Byström
+// Copyright (c) 2002-2010, Righteous Games
 
-	Visual C++ fix + memory leak detection in debug mode.
-*/
+
 
 #include "../Include/MemoryLeakTracker.h"
+
+
 
 #if defined(_DEBUG) && defined(LEPRA_WINDOWS) && defined(MEMLEAK_DETECT)
 
@@ -23,6 +21,33 @@
 #include <stdio.h>
 #include <string.h>
 #include <windows.h>
+#include <crtdbg.h>
+#include "../Include/SpinLock.h"
+
+
+
+namespace Lepra
+{
+
+class MemoryLeakTracker
+{
+public:
+
+	friend class MemoryLeakDetector;
+
+	static void AddTrack(void* pAddr, unsigned long pSize, const char* pFName, unsigned long pNum);
+	static bool RemoveTrack(void* pAddr);
+	static void DumpLeaks();
+
+	static int smMaxAllocated;
+	static int smCurrentlyAllocated;
+	static SpinLock smSpinLock;
+	static bool lLeaksDumped;
+};
+
+}
+
+
 
 void* operator new(size_t pSize, const char* pFileName, int pLine)
 {
@@ -30,7 +55,7 @@ void* operator new(size_t pSize, const char* pFileName, int pLine)
 	if (lPointer == 0)
 		throw std::bad_alloc(); // ANSI/ISO compliant behavior
 
-	MemoryLeakTracker::AddTrack(lPointer, (unsigned long)pSize, pFileName, pLine);
+	Lepra::MemoryLeakTracker::AddTrack(lPointer, (unsigned long)pSize, pFileName, pLine);
 
 	return lPointer;
 }
@@ -41,7 +66,7 @@ void* operator new(size_t pSize, const char* pFileName, int pLine)
 	if (lPointer == 0)
 		throw std::bad_alloc(); // ANSI/ISO compliant behavior
 
-	MemoryLeakTracker::AddTrack(lPointer, pSize, "<Unknown file - make sure to include Lepra.h>", 0);
+	Lepra::MemoryLeakTracker::AddTrack(lPointer, pSize, "<Unknown file - make sure to include Lepra.h>", 0);
 
 	return lPointer;
 }
@@ -51,7 +76,7 @@ void operator delete(void* pPointer, const char*, int)
 	//_ASSERT(pPointer != 0);
 	if (pPointer != 0)
 	{
-		MemoryLeakTracker::RemoveTrack(pPointer);
+		Lepra::MemoryLeakTracker::RemoveTrack(pPointer);
 		free(pPointer);
 	}
 }
@@ -61,7 +86,7 @@ void operator delete(void* pPointer)
 	//_ASSERT(pPointer != 0);
 	if (pPointer != 0)
 	{
-		MemoryLeakTracker::RemoveTrack(pPointer);
+		Lepra::MemoryLeakTracker::RemoveTrack(pPointer);
 		free(pPointer);
 	}
 }
@@ -71,22 +96,23 @@ void operator delete[](void* pPointer)
 	//_ASSERT(pPointer != 0);
 	if (pPointer != 0)
 	{
-		MemoryLeakTracker::RemoveTrack(pPointer);
+		Lepra::MemoryLeakTracker::RemoveTrack(pPointer);
 		free(pPointer);
 	}
 }
+
+
 
 namespace Lepra
 {
 
 struct ALLOC_INFO
 {
-	void*				mAddress;
-	unsigned long	    mSize;
-	char	            mFile[256];
-	unsigned long	    mLine;
-
-	ALLOC_INFO* mNextAllocInfo;
+	void*		mAddress;
+	unsigned long	mSize;
+	char		mFile[256];
+	unsigned long	mLine;
+	ALLOC_INFO*	mNextAllocInfo;
 };
 
 ALLOC_INFO* gFirstInfo = 0;
@@ -102,7 +128,7 @@ void MemoryLeakTracker::AddTrack(void* pAddr, unsigned long pSize, const char* p
 {
 	// TODO: optimize HARD!!!
 
-	smSpinLock.Acquire();
+	smSpinLock.UncheckedAcquire();
 
 	ALLOC_INFO* lInfo;
 
@@ -135,7 +161,7 @@ bool MemoryLeakTracker::RemoveTrack(void* pAddr)
 {
 	// TODO: optimize HARD!!!
 
-	smSpinLock.Acquire();
+	smSpinLock.UncheckedAcquire();
 
 	ALLOC_INFO* lCurrentInfo = gFirstInfo;
 	ALLOC_INFO* lPrevInfo = 0;
@@ -168,10 +194,9 @@ bool MemoryLeakTracker::RemoveTrack(void* pAddr)
 		lCurrentInfo = lCurrentInfo->mNextAllocInfo;
 	}
 
-	if (lTrackFound == false)
+	/*if (lTrackFound == false)
 	{
 		char lString[256];
-
 		if (lLeaksDumped == true)
 		{
 			gNumFalseLeaks++;
@@ -181,8 +206,8 @@ bool MemoryLeakTracker::RemoveTrack(void* pAddr)
 		{
 			sprintf(lString, "Released unknown memory address 0x%p (allocated in BSS = global object)\n", pAddr);
 		}
-		OutputDebugString(lString);
-	}
+		OutputDebugStringA(lString);
+	}*/
 
 	smSpinLock.Release();
 
@@ -191,7 +216,7 @@ bool MemoryLeakTracker::RemoveTrack(void* pAddr)
 
 void MemoryLeakTracker::DumpLeaks()
 {
-	smSpinLock.Acquire();
+	smSpinLock.UncheckedAcquire();
 
 	unsigned long lTotalSize = 0;
 	char lBuf[1024];
@@ -258,7 +283,7 @@ void MemoryLeakTracker::DumpLeaks()
 
 		sprintf(&lBuf[lMaxLength2], "bytes unfreed\n");
 
-		OutputDebugString(lBuf);
+		OutputDebugStringA(lBuf);
 		lTotalSize += lCurrentInfo->mSize;
 
 		ALLOC_INFO* lInfo = lCurrentInfo;
@@ -269,11 +294,11 @@ void MemoryLeakTracker::DumpLeaks()
 	}
 
 	sprintf(lBuf, "-----------------------------------------------------------\n");
-	OutputDebugString(lBuf);
+	OutputDebugStringA(lBuf);
 	sprintf(lBuf, "Total Unfreed: %d bytes in %d allocations.\n", lTotalSize, lNumUnfreed);
-	OutputDebugString(lBuf);
+	OutputDebugStringA(lBuf);
 	sprintf(lBuf, "Peak alloc: %d bytes.\n", smMaxAllocated);
-	OutputDebugString(lBuf);
+	OutputDebugStringA(lBuf);
 
 	lLeaksDumped = true;
 

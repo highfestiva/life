@@ -4,13 +4,14 @@
 
 
 
+#include "ConsoleManager.h"
 #include "../Cure/Include/GameManager.h"
 #include "../Cure/Include/RuntimeVariable.h"
+#include "../Cure/Include/TimeManager.h"
 #include "../Lepra/Include/CyclicArray.h"
 #include "../Lepra/Include/LogListener.h"
 #include "../Lepra/Include/Number.h"
 #include "../Lepra/Include/SystemManager.h"
-#include "ConsoleManager.h"
 
 
 
@@ -47,6 +48,7 @@ const ConsoleManager::CommandPair ConsoleManager::mCommandIdList[] =
 	{_T("dump-performance-info"), COMMAND_DUMP_PERFORMANCE_INFO},
 	{_T("help"), COMMAND_HELP},
 	{_T("system-info"), COMMAND_SHOW_SYSTEM_INFO},
+	{_T("game-info"), COMMAND_SHOW_GAME_INFO},
 };
 
 
@@ -308,6 +310,16 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 			mLog.Infof(_T("CPU count:     %u physical, %u cores, %u logical"), SystemManager::GetPhysicalCpuCount(), SystemManager::GetCoreCount(), SystemManager::GetLogicalCpuCount());
 			mLog.Infof(_T("Physical RAM:  %sB"), Number::ConvertToPostfixNumber((double)SystemManager::GetAmountRam(), 1).c_str());
 			mLog.Infof(_T("Available RAM: %sB"), Number::ConvertToPostfixNumber((double)SystemManager::GetAvailRam(), 1).c_str());
+		}
+		break;
+		case COMMAND_SHOW_GAME_INFO:
+		{
+			int lTargetFps;
+			CURE_RTVAR_GET(lTargetFps, =, GetVariableScope(), RTVAR_PHYSICS_FPS, 2);
+			mLog.Infof(_T("Target frame rate:     %i"), lTargetFps);
+			mLog.Infof(_T("Current frame rate:    %g"), 1/mGameManager->GetTimeManager()->GetRealNormalFrameTime());
+			mLog.Infof(_T("Absolute time:	      %g"), mGameManager->GetTimeManager()->GetAbsoluteTime());
+			mLog.Infof(_T("Current physics frame: %i"), mGameManager->GetTimeManager()->GetCurrentPhysicsFrame());
 		}
 		break;
 		case COMMAND_FORK:

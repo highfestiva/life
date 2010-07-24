@@ -4,8 +4,7 @@
 	Copyright (c) 2002-2009, Righteous Games
 */
 
-#ifndef UISTACKLAYOUT_H
-#define UISTACKLAYOUT_H
+#pragma once
 
 #include "UiLayout.h"
 
@@ -46,6 +45,4 @@ private:
 	int mNumComponents;
 };
 
-} // End namespace.
-
-#endif
+}

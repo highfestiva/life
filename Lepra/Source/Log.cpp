@@ -27,6 +27,11 @@ Log::Log(const str& pName, Log* pParent, LogLevel pLevel):
 {
 }
 
+Log::~Log()
+{
+	delete mLoggerListLock;
+}
+
 void Log::SetupBasicListeners(LogListener* pConsole, LogListener* pDebug,
 	LogListener* pFile, LogListener* pPerformance, LogListener* pMem)
 {

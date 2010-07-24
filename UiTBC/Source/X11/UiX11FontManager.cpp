@@ -163,7 +163,7 @@ bool X11FontManager::RenderGlyph(tchar pChar, Canvas& pImage, const PixelRect& p
 		Canvas::BitDepth lSourceBitDepth = Canvas::IntToBitDepth(lBpp);
 		Canvas::BitDepth lTargetBitDepth = pImage.GetBitDepth();
 		pImage.Reset(pRect.GetWidth(), pRect.GetHeight(), lSourceBitDepth);
-		pImage.SetBuffer(lBitmap, true);
+		pImage.SetBuffer(lBitmap, false, true);
 		lBitmap = 0;	// Don't delete it, ownership now taken by calling canvas.
 		pImage.ConvertBitDepth(lTargetBitDepth);
 		pImage.FlipVertical();	// Bitmap is upside down...

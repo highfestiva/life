@@ -146,6 +146,16 @@ ScopePerformanceData::ScopePerformanceData(ScopePerformanceData* pParent, const 
 	}
 }
 
+ScopePerformanceData::~ScopePerformanceData()
+{
+	NodeArray::const_iterator x = mChildArray.begin();
+	for (; x != mChildArray.end(); ++x)
+	{
+		delete *x;
+	}
+	mChildArray.clear();
+}
+
 void ScopePerformanceData::ClearAll()
 {
 	ScopeSpinLock lLock(&mRootLock);
@@ -154,7 +164,8 @@ void ScopePerformanceData::ClearAll()
 	{
 		if ((*x)->GetMaximum() == 0)
 		{
-			mRoots.erase(x++);
+			delete *x;
+			x = mRoots.erase(x);
 		}
 		else
 		{

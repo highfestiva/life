@@ -148,7 +148,8 @@ Engine
   + Stores all key presses and time stamps.
   + Every n seconds stores all object states at time stamps (so that randomized replay can start from any of those time stamps).
   + Use for start/end screen.
-. Fix bug: occationally some meshes (such as the ground) end up rotated. The physics seems OK though. Race condition for the mesh offset transform?
++ Wrap physics frame counter (game could go on forever).
++ Fix bug: occationally some meshes (such as the ground) end up rotated. The physics seems OK though. Race condition for the mesh offset transform?
 . Port client to Mac OS X / Cocoa.
 . I18N.
 . Make sure camera never flies under ground or collides with physical objects. Make camera always keep a free line of sight to the controlled object.
@@ -170,7 +171,6 @@ Engine
 . Chat - client side UI.
 . Text/console clients, plural. Run in same process.
 . Add context-sensitive and more degrees of freedom for control mechanisms: ball+ufo needs analogue fwd-bkg, cranes, excavators, etc.
-. Wrap physics frame counter (game could go on forever).
 . Port input handling, calibration and names.
 . Design GUI. Menus as well as toolbars during play. Also icons for picking vehicle.
 . Make sure memfile log always gets everything (including trace+debug+performance). Tail contents to con and file upon crash.
@@ -254,14 +254,14 @@ Quality
 . Get licences in order. Both C++ and Python. Both mine and third party.
 . Separate input and output data in the data folder. Create a proper directory structure for external release.
 . Remove unused rtvars (such as Ui.2D.PaintMode).
-. Remove all memory leaks.
 . Test thoroughly!
 . Polish.
 . Refactor.
 . Go through all RG e-mail to ensure all is in place.
+| Remove all memory leaks. (Don't put me out, place me at bottom of checklist.)
 | Test with "simulating" single CPU system. (Don't put me out, place me at bottom of checklist.)
 | Test with corrupt/missing resources. (Don't put me out, place me at bottom of checklist.)
-| Test run server on Linux, client on Windows.
+| Test run server on Linux, client on Windows. (Don't put me out, place me at bottom of checklist.)
 | Make sure minimizing the window works. Noticed a problem when moving over a mass object grid border, since the system then tries to upload a mesh via OGL. Make sure all remove gfx objects are created later if minimized.
 
 - When input is hindered (such as when pulling joystick back, then taking down the console) the excavator behaves jerkily.

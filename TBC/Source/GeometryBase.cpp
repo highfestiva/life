@@ -286,6 +286,7 @@ GeometryBase::GeometryBase() :
 	mTangentData(0),
 	mBitangentData(0),
 	mTangentsUVSet(0),
+	mRendererData(0),
 	mParentCell(0),
 	mLastFrameVisible(0),
 	mUVAnimator(0),
@@ -478,6 +479,7 @@ void GeometryBase::SetIndexDataChanged(bool pChanged)
 
 void GeometryBase::SetRendererData(void* pRendererData)
 {
+	assert(!mRendererData);
 	mRendererData = pRendererData;
 }
 
