@@ -57,7 +57,7 @@ class GroupReader(DefaultMAReader):
                                      "deleteComponent", "softModHandle", "softMod", \
                                      "objectSet", "tweak", "imagePlane", "place2dTexture", \
                                      "polyBridgeEdge", "polySeparate", "polyChipOff", \
-                                     "deleteUVSet", "polyAutoProj"]
+                                     "deleteUVSet", "polyAutoProj", "plusMinusAverage"]
                 self.silent_types = ["polyExtrudeFace", "polyTweak", "polyBoolOp"]
                 self.mat_types    = ["lambert", "blinn", "phong", "shadingEngine", "layeredShader", \
                                      "file"]

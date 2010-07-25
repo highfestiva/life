@@ -226,13 +226,21 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics*
 					assert(lGeometry->GetJointId() != INVALID_JOINT);
 					if (lGeometry->GetJointId() != INVALID_JOINT)
 					{
-						// TODO: implement torque "curve" instead of constant angular force.
 						float lValue = mValue[0];
 						float lDirectionalMaxSpeed = ((lValue >= 0)? mMaxSpeed : -mMaxSpeed2) * lValue;
 						if (mEngineType == ENGINE_HINGE_GYRO)
 						{
 							lValue = (lValue+1)*0.5f;
 							lDirectionalMaxSpeed = lValue * (mMaxSpeed - mMaxSpeed2) + mMaxSpeed2;
+						}
+						else if (mEngineType == ENGINE_HINGE_ROLL)
+						{
+							if (lValue > 0)
+							{
+								// Torque curve approximation: -1.6*(x-0.6)^2+1.2 (tested it out, looks ok to me).
+								lValue = lValue-0.6f;
+								lValue = -1.6f * lValue*lValue + 1.2f;
+							}
 						}
 						const float lUsedStrength = mStrength*(::fabs(lValue) + ::fabs(mFriction));
 						float lPreviousStrength = 0;

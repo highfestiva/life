@@ -125,6 +125,8 @@ PhysicsManager::BodyID PhysicsManagerODE::CreateSphere(bool pIsRoot, const Trans
 		::dBodySetMass(lObject->mBodyID, &lMass);
 		::dGeomSetBody(lObject->mGeomID, lObject->mBodyID);
 		::dBodySetAutoDisableDefaults(lObject->mBodyID);
+		::dBodySetAngularDampingThreshold(lObject->mBodyID, 200.0f);
+		::dBodySetAngularDamping(lObject->mBodyID, 0.2f);
 	}
 
 	::dGeomSetData(lObject->mGeomID, lObject);
