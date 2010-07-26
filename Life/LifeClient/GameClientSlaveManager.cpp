@@ -727,8 +727,12 @@ void GameClientSlaveManager::TickUiInput()
 				CURE_RTVAR_TRYGET(lIsChild, =, GetVariableScope(), RTVAR_GAME_ISCHILD, false);
 				if (lIsChild && Math::IsEpsEqual(lPowerFwdRev, 0.0f, 0.05f) && !Math::IsEpsEqual(lPowerLR, 0.0f, 0.05f))
 				{
-					lPowerFwdRev = 0.3f * ::fabs(lPowerLR);
-					SetAvatarEnginePower(lObject, 0, lPowerFwdRev, mCameraOrientation.x);
+					TBC::PhysicsEngine* lEngine = lObject->GetPhysics()->GetEngine(0);
+					if (lEngine)
+					{
+						const float lIntensity = ::fabs(lEngine->GetIntensity());
+						lEngine->SetValue(0, Math::Clamp(10.0f*(0.2f-lIntensity), 0.0f, 1.0f), mCameraOrientation.x);
+					}
 				}
 			}
 			lPower = V(UP)-V(DOWN);

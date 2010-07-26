@@ -31,7 +31,7 @@ Client::Client(Cure::TimeManager* pTimeManager, Cure::NetworkAgent* pNetworkAgen
 	mMeasuredNetworkLatencyFrameCount(PHYSICS_FPS*0.3f),
 	mMeasuredNetworkJitterFrameCount(PHYSICS_FPS*0.06f),
 	mStriveSendErrorTimeCounter(0),
-	mStriveSendUnpauseFrame(0),
+	mStriveSendUnpauseFrame(pTimeManager->GetCurrentPhysicsFrame()),
 	mIgnoreStriveErrorTimeCounter(0)
 {
 }
@@ -122,6 +122,8 @@ void Client::QuerySendStriveTimes()
 		}
 		else
 		{
+			mStriveSendUnpauseFrame = mTimeManager->GetCurrentPhysicsFrame();
+
 			str s;
 			if (lNetworkFrameDiffCount < 0)
 			{

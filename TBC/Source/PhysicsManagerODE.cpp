@@ -40,7 +40,7 @@ PhysicsManagerODE::PhysicsManagerODE()
 	//::dWorldSetAutoDisableTime(mWorldID, 0);
 	//::dWorldSetLinearDampingThreshold(mWorldID, 100.0f);
 	//::dWorldSetLinearDamping(mWorldID, 0.9f);
-	::dWorldSetAngularDampingThreshold(mWorldID, 40.0f);
+	::dWorldSetAngularDampingThreshold(mWorldID, 15.0f);
 	::dWorldSetAngularDamping(mWorldID, 0.5f);
 
 	// Collision space center and extents.

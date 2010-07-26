@@ -228,6 +228,10 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics*
 					{
 						float lValue = mValue[0];
 						float lDirectionalMaxSpeed = ((lValue >= 0)? mMaxSpeed : -mMaxSpeed2) * lValue;
+						float lRotationSpeed;
+						pPhysicsManager->GetAngleRate2(lGeometry->GetJointId(), lRotationSpeed);
+						const float lIntensity = lRotationSpeed / mMaxSpeed;
+						mIntensity += lIntensity;
 						if (mEngineType == ENGINE_HINGE_GYRO)
 						{
 							lValue = (lValue+1)*0.5f;
@@ -237,9 +241,14 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics*
 						{
 							if (lValue > 0)
 							{
-								// Torque curve approximation: -1.6*(x-0.6)^2+1.2 (tested it out, looks ok to me).
-								lValue = lValue-0.6f;
-								lValue = -1.6f * lValue*lValue + 1.2f;
+								// Torque curve approximation, (tested it out, looks ok to me):
+								//   -8*(x-0.65)^2*(x-0.02) + 1
+								//
+								// Starts at about 100 % strength at 0 RPM, local strength minimum of approximately 75 %
+								// at about 25 % RPM, maximum (in range) of 100 % strength at 65 % RPM, and drops to close
+								// to 0 % strength at 100 % RPM.
+								const float lSquare = lIntensity - 0.65f;
+								lValue *= -8 * lSquare * lSquare * (lIntensity-0.02f) + 1;
 							}
 						}
 						const float lUsedStrength = mStrength*(::fabs(lValue) + ::fabs(mFriction));
@@ -249,8 +258,6 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics*
 						const float lTargetSpeed = Math::Lerp(lPreviousTargetSpeed, lDirectionalMaxSpeed*lScale, 0.5f);
 						const float lTargetStrength = Math::Lerp(lPreviousStrength, lUsedStrength, 0.5f);
 						pPhysicsManager->SetAngularMotorRoll(lGeometry->GetJointId(), lTargetStrength, lTargetSpeed);
-						pPhysicsManager->GetAngleRate2(lGeometry->GetJointId(), lPreviousTargetSpeed);
-						mIntensity += lPreviousTargetSpeed / mMaxSpeed;
 					}
 					else
 					{
