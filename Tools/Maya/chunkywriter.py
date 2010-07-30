@@ -662,6 +662,8 @@ class MeshWriter(ChunkyWriter):
                         if node.get_fixed_attribute("rgvtx", optional=True):
                                 meshbasename = node.getParent().meshbasename
                                 self.writemesh(meshbasename+".mesh", node)
+                                if options.options.verbose:
+                                        print("Write %s's mesh parent %s." % (node.getFullName(), meshbasename))
                 self._verifywritten("meshes", self.meshes)
 
         def writemesh(self, filename, node):
