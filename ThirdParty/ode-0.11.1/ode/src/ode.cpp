@@ -494,9 +494,9 @@ void dBodySetMass (dBodyID b, const dMass *mass)
 
   // The centre of mass must be at the origin.
   // Use dMassTranslate( mass, -mass->c[0], -mass->c[1], -mass->c[2] ) to correct it.
-  //Jonte: dUASSERT( fabs( mass->c[0] ) <= dEpsilon &&
-  //Jonte: 			fabs( mass->c[1] ) <= dEpsilon &&
-  //Jonte: 			fabs( mass->c[2] ) <= dEpsilon, "The centre of mass must be at the origin." )
+  //high_festiva: dUASSERT( fabs( mass->c[0] ) <= dEpsilon &&
+  //high_festiva: 			fabs( mass->c[1] ) <= dEpsilon &&
+  //high_festiva: 			fabs( mass->c[2] ) <= dEpsilon, "The centre of mass must be at the origin." )
 
   memcpy (&b->mass,mass,sizeof(dMass));
   if (dInvertPDMatrix (b->mass.I,b->invI,3)==0) {

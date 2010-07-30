@@ -523,7 +523,7 @@ public:
 	virtual void DrawLine(const Vector3DF& pPosition, const Vector3DF& pVector, const Color& pColor) = 0;
 
 	void CalcCamCulling();
-	bool CheckCamCulling(const Vector3DF& pPosition, float pBoundingRadius);
+	bool CheckCamCulling(const Vector3DF& pPosition, float pBoundingRadius) const;
 
 protected:
 	enum GeomReleaseOption

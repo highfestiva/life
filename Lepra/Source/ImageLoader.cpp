@@ -59,7 +59,6 @@ bool ImageLoader::Load(const str& pFileName, Canvas& pCanvas)
 			lOk = false;
 		}
 	}
-	assert(lOk);
 	return (lOk);
 }
 

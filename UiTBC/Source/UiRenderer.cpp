@@ -135,7 +135,7 @@ const PixelRect& Renderer::GetViewport() const
 
 void Renderer::SetViewFrustum(float pFOVAngle, float pNear, float pFar)
 {
-	if (pFOVAngle < 0 || pFOVAngle >= 180 || pNear >= pFar)
+	if (pFOVAngle <= 0 || pFOVAngle >= 180 || pNear >= pFar)
 	{
 		return;
 	}
@@ -1348,10 +1348,7 @@ void Renderer::PrepareProjectionData()
 	const Canvas* lScreen = GetScreen();
 	float64 lAspect = (float64)lScreen->GetWidth() / (float64)lScreen->GetHeight();
 
-	// Convert to radians.
-	float64 lFOVAngleRad = (double)lFOVAngle * PI / 180.0;
-
-	mDX = (1.0 / tan(lFOVAngleRad / 2.0));
+	mDX = 1.0 / tan(Math::Deg2Rad(lFOVAngle) / 2.0);
 	mDY = mDX * lAspect;
 }
 
@@ -1606,17 +1603,15 @@ void Renderer::CalcCamCulling()
 	}
 }
 
-bool Renderer::CheckCamCulling(const Vector3DF& pPosition, float pBoundingRadius)
+bool Renderer::CheckCamCulling(const Vector3DF& pPosition, float pBoundingRadius) const
 {
 	// We only check the frustum planes on the side, and totally ignore the near and far (they currently don't add much).
-	const Vector3DF& lCamPosition = mCameraTransformation.GetPosition();
-	Vector3DF lTemp;
+	Vector3DF lCamRelativePosition(pPosition);
+	lCamRelativePosition.Sub(mCameraTransformation.GetPosition());
 	bool lVisible = true;
 	for (int x = 0; lVisible && x < 4; ++x)
 	{
-		lTemp = pPosition;
-		lTemp.Sub(lCamPosition);
-		lVisible = (mCamFrustumPlanes[x].Dot(lTemp) > -pBoundingRadius);
+		lVisible = (mCamFrustumPlanes[x].Dot(lCamRelativePosition) > -pBoundingRadius);
 	}
 	return lVisible;
 }

@@ -42,6 +42,7 @@ PhysicsManagerODE::PhysicsManagerODE()
 	//::dWorldSetLinearDamping(mWorldID, 0.9f);
 	::dWorldSetAngularDampingThreshold(mWorldID, 15.0f);
 	::dWorldSetAngularDamping(mWorldID, 0.5f);
+	::dWorldSetMaxAngularSpeed(mWorldID, 200.0f);
 
 	// Collision space center and extents.
 	dVector3 lCenter = {0, 0, 0};
@@ -859,6 +860,17 @@ PhysicsManager::JointID PhysicsManagerODE::CreateHingeJoint(BodyID pBody1, BodyI
 	{
 		lObject2->mHasMassChildren = true;
 		dJointAttach(lJointInfo->mJointID, lObject1->mGeomID->body, lObject2->mGeomID->body);
+
+		if (lObject2->mGeomID->type == dBoxClass)
+		{
+			// Someone is attaching a revolving box to another dynamic object. That means that we
+			// potentially could crash into something hard, causing overflow in the physics stepper.
+			// We eliminate by making the 2nd body use a pretty limited maximum angular speed. However,
+			// we raise the angular damping threshold to avoid limiting engine power for these high-
+			// rotation/low torque engines (usually rotor or similar).
+			::dBodySetMaxAngularSpeed(lObject2->mBodyID, 50.0f);
+			::dBodySetAngularDampingThreshold(lObject2->mBodyID, 55.0f);
+		}
 	}
 	else
 	{

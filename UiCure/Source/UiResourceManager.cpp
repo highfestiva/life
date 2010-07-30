@@ -79,7 +79,12 @@ bool PainterImageResource::Load()
 	assert(GetRamData() == 0);
 	SetRamData(new Canvas());
 	ImageLoader lLoader;
-	return (lLoader.Load(GetName(), *GetRamData()));
+	bool lOk = false;
+	for (int x = 0; x < 3 && !lOk; ++x)	// Retry file loading, file might be held by anti-virus/Windoze/similar shit.
+	{
+		lOk = lLoader.Load(GetName(), *GetRamData());
+	}
+	return lOk;
 }
 
 Cure::ResourceLoadState PainterImageResource::PostProcess()
@@ -175,7 +180,11 @@ bool RendererImageResource::Load()
 	assert(GetRamData() == 0);
 	Canvas lImage;
 	ImageLoader lLoader;
-	bool lOk = lLoader.Load(GetName(), lImage);
+	bool lOk = false;
+	for (int x = 0; x < 3 && !lOk; ++x)	// Retry file loading, file might be held by anti-virus/Windoze/similar shit.
+	{
+		lOk = lLoader.Load(GetName(), lImage);
+	}
 	if (lOk)
 	{
 		SetRamData(new UiTbc::Texture(lImage));
@@ -210,7 +219,12 @@ bool TextureResource::Load()
 	assert(GetRamData() == 0);
 	SetRamData(new UiTbc::Texture());
 	UiTbc::TEXLoader lLoader;
-	return (lLoader.Load(GetName(), *GetRamData(), true) == UiTbc::TEXLoader::STATUS_SUCCESS);
+	bool lOk = false;
+	for (int x = 0; x < 3 && !lOk; ++x)	// Retry file loading, file might be held by anti-virus/Windoze/similar shit.
+	{
+		lOk = (lLoader.Load(GetName(), *GetRamData(), true) == UiTbc::TEXLoader::STATUS_SUCCESS);
+	}
+	return lOk;
 }
 
 
@@ -518,15 +532,25 @@ bool SoundResource::Load()
 {
 	assert(!IsUnique());
 	assert(GetRamData() == UiLepra::INVALID_SOUNDID);
-	if (mDimension == DIMENSION_2D)
+	bool lOk = false;
+	for (int x = 0; x < 3 && !lOk; ++x)	// Retry file loading, file might be held by anti-virus/Windoze/similar shit.
 	{
-		SetRamDataType(GetUiManager()->GetSoundManager()->LoadSound2D(GetName(), mLoopMode, 0));
+		UiLepra::SoundManager::SoundID lSoundId;
+		if (mDimension == DIMENSION_2D)
+		{
+			lSoundId = GetUiManager()->GetSoundManager()->LoadSound2D(GetName(), mLoopMode, 0);
+		}
+		else
+		{
+			lSoundId = GetUiManager()->GetSoundManager()->LoadSound3D(GetName(), mLoopMode, 0);
+		}
+		lOk = (lSoundId != UiLepra::INVALID_SOUNDID);
+		if (lOk)
+		{
+			SetRamDataType(lSoundId);
+		}
 	}
-	else
-	{
-		SetRamDataType(GetUiManager()->GetSoundManager()->LoadSound3D(GetName(), mLoopMode, 0));
-	}
-	return (GetRamData() != UiLepra::INVALID_SOUNDID);
+	return lOk;
 }
 
 SoundResource::UserData SoundResource::CreateDiversifiedData() const

@@ -360,7 +360,11 @@ bool PhysicsResource::Load()
 	assert(GetRamData() == 0);
 	SetRamData(new TBC::ChunkyPhysics(TBC::ChunkyPhysics::TRANSFORM_LOCAL2WORLD));
 	DiskFile lFile;
-	bool lOk = lFile.Open(GetName(), DiskFile::MODE_READ);
+	bool lOk = false;
+	for (int x = 0; x < 3 && !lOk; ++x)	// Retry file open, file might be held by anti-virus/Windoze/similar shit.
+	{
+		lOk = lFile.Open(GetName(), DiskFile::MODE_READ);
+	}
 	if (lOk)
 	{
 		TBC::ChunkyPhysicsLoader lLoader(&lFile, false);
@@ -467,7 +471,11 @@ bool PhysicalTerrainResource::Load()
 	const float lLod = 0;
 
 	TerrainPatchLoader lLoader(GetManager());
-	TBC::TerrainPatch* lPatch = lLoader.LoadPatch(lArea, lLod);
+	TBC::TerrainPatch* lPatch = 0;
+	for (int x = 0; x < 3 && !lPatch; ++x)	// Retry file loading, file might be held by anti-virus/Windoze/similar shit.
+	{
+		lPatch = lLoader.LoadPatch(lArea, lLod);
+	}
 	if (lPatch)
 	{
 		SetRamData(lPatch);
@@ -1003,6 +1011,7 @@ void ResourceManager::LoadSingleResource()
 		if (!lIsLoaded)
 		{
 			lResource->SetLoadState(RESOURCE_LOAD_ERROR);
+			assert(false);
 		}
 		{
 			ScopeLock lLock(&mThreadLock);

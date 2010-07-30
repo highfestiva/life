@@ -238,6 +238,7 @@ MassObject::Square::~Square()
 
 void MassObject::Square::SetRender(bool pRender, float pAlpha)
 {
+	pAlpha = Math::Clamp(pAlpha, 0.0f, 1.0f);
 	for (MassMeshArray::iterator x = mMassMeshArray.begin(); x != mMassMeshArray.end(); ++x)
 	{
 		x->first->SetAlwaysVisible(pRender);

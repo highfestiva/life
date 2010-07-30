@@ -120,6 +120,40 @@ void Vehicle::OnPhysicsTick()
 				}
 			}
 		}
+		else if (lTag.mTagName == _T("brake_light"))
+		{
+			if (GetManager()->GetGameManager()->IsUiMoveForbidden(GetInstanceId()))
+			{
+				continue;
+			}
+			if (lTag.mFloatValueList.size() != 3 ||
+				lTag.mStringValueList.size() != 0 ||
+				lTag.mBodyIndexList.size() != 0 ||
+				lTag.mEngineIndexList.size() != 1 ||
+				lTag.mMeshIndexList.size() < 1)
+			{
+				mLog.Errorf(_T("The eye tag '%s' has the wrong # of parameters."), lTag.mTagName.c_str());
+				assert(false);
+				continue;
+			}
+			const TBC::PhysicsEngine* lEngine = mPhysics->GetEngine(lTag.mEngineIndexList[0]);
+			for (size_t y = 0; y < lTag.mMeshIndexList.size(); ++y)
+			{
+				TBC::GeometryBase* lMesh = GetMesh(lTag.mMeshIndexList[y]);
+				if (lMesh)
+				{
+					Vector3DF& lAmbient = lMesh->GetBasicMaterialSettings().mAmbient;
+					if (lEngine->GetValue() != 0)
+					{
+						lAmbient.Set(lTag.mFloatValueList[0], lTag.mFloatValueList[1], lTag.mFloatValueList[2]);
+					}
+					else
+					{
+						lAmbient.Set(0, 0, 0);
+					}
+				}
+			}
+		}
 		else if (lTag.mTagName == _T("engine_sound"))
 		{
 			// Sound controlled by engine.

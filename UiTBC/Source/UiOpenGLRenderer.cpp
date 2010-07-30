@@ -446,6 +446,12 @@ void OpenGLRenderer::SetGlobalMaterialReflectance(float pRed, float pGreen, floa
 	// we need to update the light's diffuseness. And therein lies
 	// the stupidity - light with "diffuseness" doesn't make any sense
 	// at all.
+
+	// TRICKY: must add some to the colors, since black light means disabled light!
+	pRed += 0.01f;
+	pGreen += 0.01f;
+	pBlue += 0.01f;
+
 	for (int i = 0; i < GetLightCount(); i++)
 	{
 		int lLightIndex = GetLightIndex(i);
@@ -453,9 +459,9 @@ void OpenGLRenderer::SetGlobalMaterialReflectance(float pRed, float pGreen, floa
 
 		if (lLightData.mEnabled == true)
 		{
-			float lRed   = lLightData.mColor[0] * pRed;
-			float lGreen = lLightData.mColor[1] * pGreen;
-			float lBlue  = lLightData.mColor[2] * pBlue;
+			const float lRed   = lLightData.mColor[0] * pRed;
+			const float lGreen = lLightData.mColor[1] * pGreen;
+			const float lBlue  = lLightData.mColor[2] * pBlue;
 
 			float lSpecular[] =
 			{
@@ -1063,7 +1069,8 @@ bool OpenGLRenderer::PreRender(TBC::GeometryBase* pGeometry)
 		/*TransformationF t = GetCameraTransformation();
 		t.GetOrientation().Div(t.GetOrientation().GetMagnitude());
 		SetCameraTransformation(t);*/
-		mCamSpaceTransformation.FastInverseTransform(mCameraTransformation, mCameraOrientationInverse, pGeometry->GetTransformation());
+		//mCamSpaceTransformation.FastInverseTransform(mCameraTransformation, mCameraOrientationInverse, pGeometry->GetTransformation());
+		mCamSpaceTransformation = mCameraTransformation.InverseTransform(pGeometry->GetTransformation());
 		/*TransformationF lCamSpaceTransformation = GetCameraTransformation().InverseTransform(pGeometry->GetTransformation());
 		assert(mCamSpaceTransformation.GetPosition().GetDistanceSquared(lCamSpaceTransformation.GetPosition()) < 1e-8);
 		assert((mCamSpaceTransformation.GetOrientation() - lCamSpaceTransformation.GetOrientation()).GetNorm() < 1e-8);*/
@@ -1810,9 +1817,6 @@ void OpenGLRenderer::RegenerateShadowMap(LightData* pLight)
 
 void OpenGLRenderer::Perspective(float pFOVAngle, float pAspectRatio, float pNear, float pFar)
 {
-	// Convert to radians.
-	float lFOVAngle = pFOVAngle * PIF / 180.0f;
-
 	/*
 	    Looking at the FOV from above.
 
@@ -1828,7 +1832,7 @@ void OpenGLRenderer::Perspective(float pFOVAngle, float pAspectRatio, float pNea
 	   Consider the triangle *-x-r.
 
 	   The angle between the line D, and the FOV's right side is halv the 
-	   angle of the FOV, which gives us lFOVAngle / 2.0f.
+	   angle of the FOV, which gives us FOVAngle / 2.0f.
 
 	   Now notice that OpenGL consideres the screen to be a square area with
 	   the coordinates (-1, 1) at left and right screen edges, and (-1, 1)
@@ -1838,9 +1842,9 @@ void OpenGLRenderer::Perspective(float pFOVAngle, float pAspectRatio, float pNea
 	   the projection plane. From no on, "1.0f" represents this distance.
 
 	   Recalling what we have learned in school about trigonometry, we know 
-	   that 1.0f / D = tan(lFOVAngle / 2.0f).
+	   that 1.0f / D = tan(FOVAngle / 2.0f).
 
-	   This implies D = 1.0f / tan(lFOVAngle / 2.0f).
+	   This implies D = 1.0f / tan(FOVAngle / 2.0f).
 
 	   But since this is seen from above, and because of the fact that the
 	   screen area isn't square, this D can only be used for the X-coordinate
@@ -1848,8 +1852,8 @@ void OpenGLRenderer::Perspective(float pFOVAngle, float pAspectRatio, float pNea
 	   D * "aspect ratio".
 	*/
 
-	float lDX = 1.0f / tan(lFOVAngle / 2.0f);
-	float lDY = lDX * pAspectRatio;
+	const float lDX = 1.0f / tan(Math::Deg2Rad(pFOVAngle) / 2.0f);
+	const float lDY = lDX * pAspectRatio;
 
 	float lProjectionMatrix[16];
 
