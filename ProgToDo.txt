@@ -45,6 +45,8 @@ Game
 + Add link to home page in demo end screen.
 + Update and adjust what messages are shown on screen when starting up.
 . Fix bug: road sign for first vehicle is "squashed" when having 3 split-screen players.
+. Remove sound twirps (when in high speeds) by making sound listener velocity slide instead of jerk (just a theory).
+. Make sure that only proper avatars can be played, not levels, stones, road signs, etc.
 . Create material that can easily can be picked-up, loaded and moved around.
 . Create crane that can pull wire up.
 . Bug fix attachments (i.e. crane picks up car) so that they work properly (without crashing).
@@ -75,6 +77,9 @@ Game
   + Change vehicle.
 . Server regularly checks vehicles that don't seem ok (flipped, i.e. "up not pointing up", etc). If the "un-ok" vehicle is unused for x consecutive checks, remove it.
 . Create icon for the game.
+. Fix wheels and tires/body on Corvette: normals suck on wheels, tires/body has "holes" where you can see through.
+. Make all vehicles fun to play in at least one way!
+. Make sure to create many huge vehicles, which can have others inside!
 
 - Add different physical worlds on all sides of the box, and add gravity change! Cewlness x 0x1000000!!!
 - Add login progress bar.

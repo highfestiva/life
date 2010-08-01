@@ -177,7 +177,8 @@ class GroupReader(DefaultMAReader):
                 for node in nodes:
                         node.ignore = False
                 for node in tuple(nodes):
-                        if node.getName().startswith("i_") or node.getName().find(":i_") >= 0:
+                        name = node.getName()
+                        if name.startswith("i_") or name.startswith("polySurface") or name.find(":i_") >= 0:
                                 self._recursiveremove(node, nodes)
                 #print("\n".join([n.getName() for n in nodes]))
                 islands = []
@@ -965,8 +966,11 @@ class GroupReader(DefaultMAReader):
                                 isValid, hasJoint = self._query_attribute(node, "joint", jointCheck, False)
                                 isGroupValid &= isValid
                                 if not node.phys_root and isValid and hasJoint:
-                                        print("Error: root node %s may not be jointed to anything else!" % node.getFullName())
-                                        isGroupValid = False
+                                        pn = node.getName()[4:]
+                                        mn = node.getParent().getName()[4:]
+                                        if pn == mn:
+                                                print("Error: root node %s may not be jointed to anything else!" % node.getFullName())
+                                                isGroupValid = False
                                 isGroupValid &= self._query_attribute(node, "mass", lambda x: (x > 0 and x < 1000000))[0]
                                 isGroupValid &= self._query_attribute(node, "bounce", lambda x: (x >= 0 and x <= 1))[0]
                                 isGroupValid &= self._query_attribute(node, "friction", lambda x: (x >= -100 and x <= 100))[0]
