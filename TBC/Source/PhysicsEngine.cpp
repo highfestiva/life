@@ -554,6 +554,7 @@ void PhysicsEngine::ApplyTorque(PhysicsManager* pPhysicsManager, float pFrameTim
 		float lForce = mValue[0];
 
 		const float lScale = pEngineNode.mScale;
+		const float lReverseScale = (lScale + 1) * 0.5f;	// Move towards linear scaling.
 		float lLoStop;
 		float lHiStop;
 		float lBounce;
@@ -577,13 +578,14 @@ void PhysicsEngine::ApplyTorque(PhysicsManager* pPhysicsManager, float pFrameTim
 			mLog.AError("Bad joint angle!");
 			return;
 		}
+		const float lIrlAngleDirection = (lHiStop < lLoStop)? -lIrlAngle : lIrlAngle;
 
 		if (pEngineNode.mMode == MODE_HALF_LOCK)
 		{
-			if ((lForce < 0.02f && lIrlAngle < lTarget) ||
-				(lForce > -0.02f && lIrlAngle > lTarget))
+			if ((lForce < 0.02f && lIrlAngleDirection < lTarget) ||
+				(lForce > -0.02f && lIrlAngleDirection > lTarget))
 			{
-				if (::fabs(pEngineNode.mLock) < ::fabs(lForce))
+				if (::fabs(lForce) > 0.02)
 				{
 					pEngineNode.mLock = lForce;
 				}
@@ -612,27 +614,39 @@ void PhysicsEngine::ApplyTorque(PhysicsManager* pPhysicsManager, float pFrameTim
 		const float lDiff = (lTargetAngle-lIrlAngle);
 		const float lAbsDiff = ::fabs(lDiff);
 		float lTargetSpeed;
-		const float lBigDiff = lAngleSpan/7;
-		if (lAbsDiff > lBigDiff)
+		const float lAbsBigDiff = ::fabs(lAngleSpan/7);
+		const bool lCloseToGoal = (lAbsDiff > lAbsBigDiff);
+		if (lCloseToGoal)
 		{
 			lTargetSpeed = (lDiff > 0)? mMaxSpeed : -mMaxSpeed;
+			lTargetSpeed *= (lForce > 0)? lScale : lReverseScale;
 		}
 		else
 		{
-			lTargetSpeed = mMaxSpeed*lDiff/lBigDiff;
+			lTargetSpeed = mMaxSpeed*lDiff/lAbsBigDiff;
 		}
-		lTargetSpeed /= lScale;
+		// If we're far from the desired target speed, we speed up.
 		float lCurrentSpeed = 0;
 		if (mEngineType == ENGINE_HINGE2_TURN)
 		{
 			pPhysicsManager->GetAngleRate2(pGeometry->GetJointId(), lCurrentSpeed);
-			lTargetSpeed *= 1+::fabs(lCurrentSpeed)/30;
+			if (lCloseToGoal)
+			{
+				lTargetSpeed *= 1+::fabs(lCurrentSpeed)/30;
+			}
 		}
 		else
 		{
 			pPhysicsManager->GetAngleRate1(pGeometry->GetJointId(), lCurrentSpeed);
-			lTargetSpeed += (lTargetSpeed-lCurrentSpeed)*mMaxSpeed2*lScale*lScale/mMaxSpeed;
+			if (lCloseToGoal)
+			{
+				lTargetSpeed += (lTargetSpeed-lCurrentSpeed) * lScale;
+			}
 		}
+		/*if (Math::IsEpsEqual(lTargetSpeed, 0.0f, 0.01f))	// Stop when almost already at a halt.
+		{
+			lTargetSpeed = 0;
+		}*/
 		pPhysicsManager->SetAngularMotorTurn(pGeometry->GetJointId(), mStrength, lTargetSpeed);
 		mIntensity += (lTargetSpeed - lCurrentSpeed) / mMaxSpeed;
 	}

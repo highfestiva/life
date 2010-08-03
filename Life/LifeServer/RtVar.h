@@ -10,4 +10,6 @@
 
 
 
-#define RTVAR_ALLLOGGEDOUT_AUTOSHUTDOWN	"AllLoggedOut.AutoShutdown"
+#define RTVAR_ALLLOGGEDOUT_AUTOSHUTDOWN	"AllLoggedOut.AutoShutdown"	// Not debug, might be desirable on dedicated servers.
+
+#define RTVAR_GAME_SPAWNPART		"Game.SpawnPart"

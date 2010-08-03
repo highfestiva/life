@@ -29,7 +29,7 @@ PhysicsManagerODE::PhysicsManagerODE()
 	mWorldID = dWorldCreate();
 	
 	// Play with these to make the simulation behave better.
-	::dWorldSetCFM(mWorldID, 0);	// World softness and numerical stability.
+	::dWorldSetCFM(mWorldID, 1e-10f);	// World softness and numerical stability.
 	//::dWorldSetERP(mWorldID, 0.2f);
 
 	::dWorldSetAutoDisableFlag(mWorldID, 1);
@@ -2666,7 +2666,8 @@ bool PhysicsManagerODE::SetJointParams(JointID pJointId, float32 pLowStop, float
 			dJointSetHingeParam(lJointId, dParamLoStop, pLowStop);
 			dJointSetHingeParam(lJointId, dParamHiStop, pHighStop);
 			dJointSetHingeParam(lJointId, dParamBounce, pBounce);
-			dJointSetHingeParam(lJointId, dParamCFM, 1e-5f);
+			dJointSetHingeParam(lJointId, dParamCFM, 1e-9f);
+			dJointSetHingeParam(lJointId, dParamFudgeFactor, 0.01f);
 		}
 		break;
 		case JOINT_HINGE2:

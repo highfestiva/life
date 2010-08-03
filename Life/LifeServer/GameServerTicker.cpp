@@ -25,6 +25,9 @@ GameServerTicker::GameServerTicker(Cure::ResourceManager* pResourceManager,
 	mResourceManager(pResourceManager),
 	mGameManager(0)
 {
+	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_ALLLOGGEDOUT_AUTOSHUTDOWN, false);
+	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_GAME_SPAWNPART, 1.0);
+
 	ConsoleManager lConsole(0, Cure::GetSettings(), 0, 0);
 	lConsole.InitCommands();
 	lConsole.ExecuteCommand(_T("execute-file -i ServerDefault.lsh"));

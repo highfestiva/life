@@ -7,9 +7,11 @@
 #include "Spawner.h"
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/GameManager.h"
+#include "../../Cure/Include/RuntimeVariable.h"
 #include "../../Lepra/Include/HashUtil.h"
 #include "../../Lepra/Include/Random.h"
 #include "../../TBC/Include/PhysicsSpawner.h"
+#include "RtVar.h"
 
 
 
@@ -45,7 +47,11 @@ void Spawner::OnAlarm(int pAlarmId, void* pExtraData)
 		}
 	}
 
-	while (mChildList.size() < GetSpawner()->GetNumber())
+	float lSpawnPart;
+	CURE_RTVAR_GET(lSpawnPart, =(float), Cure::GetSettings(), RTVAR_GAME_SPAWNPART, 1.0);
+	const int lSpawnCount = (int)(GetSpawner()->GetNumber() * lSpawnPart);
+
+	while ((int)mChildList.size() < lSpawnCount)
 	{
 		const str lSpawnObject = GetSpawner()->GetSpawnObject((float)Random::Uniform(0, 1));
 		if (!lSpawnObject.empty())

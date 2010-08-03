@@ -152,6 +152,7 @@ private:
 #define CURE_RTVAR_GET(var, op, scope, name, def)		CURE_RTVAR_TOKEN(var, name); var op (scope)->GetDefaultValue(Cure::RuntimeVariableScope::READ_ONLY, _T(name), def)
 #define CURE_RTVAR_TRYGET(var, op, scope, name, def)		CURE_RTVAR_TOKEN(var, name); var op (scope)->GetDefaultValue(Cure::RuntimeVariableScope::READ_IGNORE, _T(name), def)
 #define CURE_RTVAR_SET(scope, name, value)			(scope)->SetValue(Cure::RuntimeVariable::USAGE_NORMAL, _T(name), value)
+#define CURE_RTVAR_SET_IF_NOT_SET(scope, name, value)		CURE_RTVAR_SET(scope, name, CURE_RTVAR_SLOW_TRYGET(scope, name, value))
 #define CURE_RTVAR_OVERRIDE(scope, name, value)			(scope)->SetValue(Cure::RuntimeVariable::USAGE_OVERRIDE, _T(name), value)
 #define CURE_RTVAR_INTERNAL(scope, name, value)			(scope)->SetValue(Cure::RuntimeVariable::USAGE_INTERNAL, _T(name), value)
 #define CURE_RTVAR_INTERNAL_ARITHMETIC(scope, name, type, arith, value, min)	\

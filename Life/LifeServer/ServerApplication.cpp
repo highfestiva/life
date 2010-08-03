@@ -52,8 +52,6 @@ ServerApplication::ServerApplication(const strutil::strvec& pArgumentList):
 	TBC::Init();
 	Cure::Init();
 
-	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_ALLLOGGEDOUT_AUTOSHUTDOWN, false);
-
 	Init();
 }
 

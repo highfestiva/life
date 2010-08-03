@@ -34,6 +34,9 @@ GameServerManager::GameServerManager(Cure::RuntimeVariableScope* pVariableScope,
 	mTerrainObject(0),
 	mMovementArrayList(NETWORK_POSITIONAL_AHEAD_BUFFER_SIZE)
 {
+	CURE_RTVAR_SET_IF_NOT_SET(Cure::GetSettings(), RTVAR_ALLLOGGEDOUT_AUTOSHUTDOWN, false);
+	CURE_RTVAR_SET_IF_NOT_SET(Cure::GetSettings(), RTVAR_GAME_SPAWNPART, 1.0);
+
 	SetNetworkAgent(new Cure::NetworkServer(pVariableScope, this));
 }
 

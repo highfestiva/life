@@ -1046,16 +1046,19 @@ class GroupReader(DefaultMAReader):
                                                         if node.getName().startswith("m_phys_"):
                                                                 parent.shape = node     # Use triangle mesh as physics shape.
                                                         elif in_nodename:
-                                                                parent.shape = self.findNode(in_nodename)
-                                                                if not parent.shape:
-                                                                        print("Error: %s's input node %s does not exist!" % (node.getFullName(), in_nodename))
-                                                                        isGroupValid = False
-                                                                elif parent.shape.nodetype == "deleteComponent":
-                                                                        in_nodename = parent.shape.getInNode("ig", "ig")[0]
+                                                                while in_nodename:
                                                                         parent.shape = self.findNode(in_nodename)
                                                                         if not parent.shape:
-                                                                                print("Error: %s's deleteComponent's input node %s does not exist!" % (node.getFullName(), in_nodename))
+                                                                                print("Error: %s's input node %s does not exist!" % (node.getFullName(), in_nodename))
                                                                                 isGroupValid = False
+                                                                                in_nodename = False
+                                                                        else:
+                                                                                in_nodename = parent.shape.getInNode("ig", "ig")[0]
+                                                                                if not in_nodename:
+                                                                                        in_nodename = parent.shape.getInNode("ip", "ip")[0]
+                                                                if not parent.shape:
+                                                                        print("Error: %s's input node not found!" % node.getFullName())
+                                                                        isGroupValid = False
                                                         elif node.getName().startswith("phys_"):
                                                                 print("Error: %s does not have an input node. Create node by instancing instead." % (node.getFullName()))
                                                                 isGroupValid = False
