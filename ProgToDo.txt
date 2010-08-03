@@ -80,6 +80,7 @@ Game
 . Fix wheels and tires/body on Corvette: normals suck on wheels, tires/body has "holes" where you can see through.
 . Make all vehicles fun to play in at least one way!
 . Make sure to create many huge vehicles, which can have others inside!
+. Triangulate all meshes inside Maya.
 
 - Add different physical worlds on all sides of the box, and add gravity change! Cewlness x 0x1000000!!!
 - Add login progress bar.
