@@ -25,7 +25,8 @@ namespace UiLepra
 SoundManagerOpenAL::SoundManagerOpenAL(int pMixRate):
 	mDevice(0),
 	mContext(0),
-	mRollOffFactor(1)
+	mRollOffFactor(1),
+	mMasterVolume(1)
 {
 #ifdef LEPRA_WINDOWS
 	alc_init();
@@ -87,6 +88,15 @@ SoundManagerOpenAL::~SoundManagerOpenAL()
 	alc_deinit();
 #endif // Windows
 }
+
+
+
+void SoundManagerOpenAL::SetMasterVolume(float pVolume)
+{
+	mMasterVolume = pVolume;
+}
+
+
 
 SoundManager::SoundID SoundManagerOpenAL::LoadSound2D(const str& pFileName, LoopMode pLoopMode, int pPriority)
 {
@@ -192,7 +202,7 @@ bool SoundManagerOpenAL::Play(SoundInstanceID pSoundIID, float pVolume, float pP
 		return (false);
 	}
 
-	::alSourcef(lSource->mSid, AL_GAIN, pVolume);
+	::alSourcef(lSource->mSid, AL_GAIN, pVolume * mMasterVolume);
 	::alSourcef(lSource->mSid, AL_PITCH, pPitch);
 	::alSourcePlay(lSource->mSid);
 	lSource->mIsPaused = false;
@@ -270,7 +280,7 @@ void SoundManagerOpenAL::SetVolume(SoundInstanceID pSoundIID, float pVolume)
 	{
 		return;
 	}
-	::alSourcef(lSource->mSid, AL_GAIN, pVolume);
+	::alSourcef(lSource->mSid, AL_GAIN, pVolume * mMasterVolume);
 }
 
 void SoundManagerOpenAL::SetPitch(SoundInstanceID pSoundIID, float pPitch)

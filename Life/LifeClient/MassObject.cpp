@@ -69,6 +69,11 @@ void MassObject::SetRender(bool pRender)
 
 void MassObject::UiMove()
 {
+	if (!GetUiManager()->CanRender())	// Can only create/remove graphical mass objects if the renderer is online.
+	{
+		return;
+	}
+
 	int x = mMiddleSquareX;
 	int y = mMiddleSquareY;
 
@@ -84,17 +89,9 @@ void MassObject::UiMove()
 			const size_t lOffset = v*SQUARE_SIDE+u;
 			if (!mSquareArray[lOffset])
 			{
-				//if (u == SQUARE_MID_TO_CORNER && v == 6)
-				{
 				CreateSquare(u, v);
-				return;	// TRICKY: only create a single square every loop to avoid heavy burdon on single loop.
-				}
+				return;	// Optimization: only create a single square every loop to avoid heavy burdon on single loop.
 			}
-			/*if (u != SQUARE_MID_TO_CORNER || v != 6)
-			{
-			delete mSquareArray[lOffset];
-			mSquareArray[lOffset] = 0;
-			}*/
 		}
 	}
 }

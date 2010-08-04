@@ -158,9 +158,10 @@ void Vehicle::OnPhysicsTick()
 		{
 			// Sound controlled by engine.
 
-			if (lTag.mFloatValueList.size() != 9 ||
+			if (lTag.mFloatValueList.size() != 9+lTag.mEngineIndexList.size() ||
 				lTag.mStringValueList.size() != 1 ||
 				lTag.mBodyIndexList.size() != 1 ||
+				lTag.mEngineIndexList.size() < 1 ||
 				lTag.mMeshIndexList.size() != 0)
 			{
 				mLog.Errorf(_T("The engine_sound tag '%s' has the wrong # of parameters."), lTag.mTagName.c_str());
@@ -184,15 +185,7 @@ void Vehicle::OnPhysicsTick()
 			int lBodyIndex = lTag.mBodyIndexList[0];
 			TBC::ChunkyBoneGeometry* lBone = lPhysics->GetBoneGeometry(lBodyIndex);
 			const Vector3DF lPosition = lPhysicsManager->GetBodyPosition(lBone->GetBodyId());
-			const TBC::PhysicsEngine* lEngine = mPhysics->GetEngine(lTag.mEngineIndexList[0]);
-			float lIntensity = ::fabs(lEngine->GetIntensity());
-			const float lThrottleUpSpeed = Math::GetIterateLerpTime(0.2f, lFrameTime);
-			const float lThrottleDownSpeed = Math::GetIterateLerpTime(0.1f, lFrameTime);
-			const float lThrottle = ::fabs(lEngine->GetLerpThrottle(lThrottleUpSpeed, lThrottleDownSpeed));
-			if (lEngine->GetEngineType() != TBC::PhysicsEngine::ENGINE_HINGE_GYRO)
-			{
-				lIntensity *= lThrottle;
-			}
+
 			enum FloatValue
 			{
 				FV_PITCH_LOW = 0,
@@ -204,7 +197,26 @@ void Vehicle::OnPhysicsTick()
 				FV_INTENSITY_LOW,
 				FV_INTENSITY_HIGH,
 				FV_INTENSITY_EXPONENT,
+				FV_ENGINE_FACTOR_BASE,
 			};
+			const float lThrottleUpSpeed = Math::GetIterateLerpTime(0.2f, lFrameTime);
+			const float lThrottleDownSpeed = Math::GetIterateLerpTime(0.1f, lFrameTime);
+			float lIntensity = 0;
+			for (size_t x = 0; x < lTag.mEngineIndexList.size(); ++x)
+			{
+				const TBC::PhysicsEngine* lEngine = mPhysics->GetEngine(lTag.mEngineIndexList[x]);
+				float lEngineIntensity = Math::Clamp(lEngine->GetIntensity(), 0.0f, 1.0f);
+				const bool lIsRotor = (lEngine->GetEngineType() == TBC::PhysicsEngine::ENGINE_HINGE_GYRO);
+				const bool lIsHydraulics = (lEngine->GetEngineType() == TBC::PhysicsEngine::ENGINE_HINGE_TORQUE && lEngine->HasEngineMode(TBC::PhysicsEngine::MODE_HALF_LOCK));
+				if (!lIsRotor && !lIsHydraulics)	// Rotors and hydraulics only look to the intensity, never to the throttle used.
+				{
+					const float lThrottle = ::fabs(lEngine->GetLerpThrottle(lThrottleUpSpeed, lThrottleDownSpeed));
+					lEngineIntensity *= lThrottle;	// Normal, linear throttle.
+				}
+				lEngineIntensity *= lTag.mFloatValueList[FV_ENGINE_FACTOR_BASE+x];
+				lIntensity += lEngineIntensity;
+			}
+			//lIntensity = Math::Clamp(lIntensity, 0, 1);
 			const float lVolumeLerp = ::pow(lIntensity, lTag.mFloatValueList[FV_VOLUME_EXPONENT]);
 			const float lVolume = Math::Lerp(lTag.mFloatValueList[FV_VOLUME_LOW], lTag.mFloatValueList[FV_VOLUME_HIGH], lVolumeLerp);
 			const float lPitchExp = lTag.mFloatValueList[FV_PITCH_EXPONENT];

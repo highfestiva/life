@@ -31,6 +31,8 @@ public:
 	SoundManagerOpenAL(int pMixRate);
 	virtual ~SoundManagerOpenAL();
 
+	virtual void SetMasterVolume(float pVolume);
+
 	SoundID LoadSound2D(const str& pFileName, LoopMode LoopMode, int pPriority);
 	SoundID LoadSound3D(const str& pFileName, LoopMode LoopMode, int pPriority);
 	SoundID LoadStream(const str& pFileName, LoopMode LoopMode, int pPriority);
@@ -143,6 +145,7 @@ private:
 	ALCdevice* mDevice;
 	ALCcontext* mContext;
 	float mRollOffFactor;
+	float mMasterVolume;
 
 	SampleSet mSampleSet;
 	SourceSet mSourceSet;

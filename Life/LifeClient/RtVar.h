@@ -36,3 +36,4 @@
 
 #define RTVAR_UI_3D_CAMDISTANCE		"Ui.3D.CamDistance"
 #define RTVAR_UI_3D_CAMHEIGHT		"Ui.3D.CamHeight"
+#define RTVAR_UI_3D_CAMROTATE		"Ui.3D.CamRotate"

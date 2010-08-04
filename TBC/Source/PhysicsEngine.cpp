@@ -231,7 +231,7 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics*
 						float lRotationSpeed;
 						pPhysicsManager->GetAngleRate2(lGeometry->GetJointId(), lRotationSpeed);
 						const float lIntensity = lRotationSpeed / mMaxSpeed;
-						mIntensity += lIntensity;
+						mIntensity += ::fabs(lIntensity);
 						if (mEngineType == ENGINE_HINGE_GYRO)
 						{
 							lValue = (lValue+1)*0.5f;
@@ -479,9 +479,25 @@ float PhysicsEngine::GetMaxSpeed() const
 float PhysicsEngine::GetLerpThrottle(float pUp, float pDown) const
 {
 	float& lLerpShadow = mSmoothValue[MAX_CONTROLLER_COUNT-1];
-	lLerpShadow = Math::Lerp(lLerpShadow, GetValue(), (GetValue() > lLerpShadow)? pUp : pDown);
+	const float lValue = GetValue();
+	lLerpShadow = Math::Lerp(lLerpShadow, lValue, (lValue > lLerpShadow)? pUp : pDown);
 	return lLerpShadow;
 }
+
+bool PhysicsEngine::HasEngineMode(EngineMode pMode) const
+{
+	EngineNodeArray::const_iterator i = mEngineNodeArray.begin();
+	for (; i != mEngineNodeArray.end(); ++i)
+	{
+		if (i->mMode == pMode)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+
 
 unsigned PhysicsEngine::GetChunkySize() const
 {
@@ -568,7 +584,7 @@ void PhysicsEngine::ApplyTorque(PhysicsManager* pPhysicsManager, float pFrameTim
 			pPhysicsManager->SetAngularMotorTurn(pGeometry->GetJointId(), mStrength, lTargetSpeed);
 			float lActualSpeed = 0;
 			pPhysicsManager->GetAngleRate2(pGeometry->GetJointId(), lActualSpeed);
-			mIntensity += (lTargetSpeed - lActualSpeed) / mMaxSpeed;
+			mIntensity += ::fabs(lTargetSpeed - lActualSpeed) / mMaxSpeed;
 			return;
 		}
 
@@ -619,12 +635,12 @@ void PhysicsEngine::ApplyTorque(PhysicsManager* pPhysicsManager, float pFrameTim
 		if (lCloseToGoal)
 		{
 			lTargetSpeed = (lDiff > 0)? mMaxSpeed : -mMaxSpeed;
-			lTargetSpeed *= (lForce > 0)? lScale : lReverseScale;
 		}
 		else
 		{
 			lTargetSpeed = mMaxSpeed*lDiff/lAbsBigDiff;
 		}
+		lTargetSpeed *= (lForce > 0)? lScale : lReverseScale;
 		// If we're far from the desired target speed, we speed up.
 		float lCurrentSpeed = 0;
 		if (mEngineType == ENGINE_HINGE2_TURN)
@@ -648,7 +664,7 @@ void PhysicsEngine::ApplyTorque(PhysicsManager* pPhysicsManager, float pFrameTim
 			lTargetSpeed = 0;
 		}*/
 		pPhysicsManager->SetAngularMotorTurn(pGeometry->GetJointId(), mStrength, lTargetSpeed);
-		mIntensity += (lTargetSpeed - lCurrentSpeed) / mMaxSpeed;
+		mIntensity += fabs(lTargetSpeed / (mMaxSpeed * lScale));
 	}
 	else
 	{

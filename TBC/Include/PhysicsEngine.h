@@ -73,6 +73,7 @@ public:
 	float GetIntensity() const;
 	float GetMaxSpeed() const;
 	float GetLerpThrottle(float pUp, float pDown) const;
+	bool HasEngineMode(EngineMode pMode) const;
 
 	unsigned GetChunkySize() const;
 	void SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const;

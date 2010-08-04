@@ -61,6 +61,7 @@ void SetDefault(Cure::RuntimeVariableScope* pSettings)
 	CURE_RTVAR_SET(pSettings, RTVAR_UI_SOUND_ENGINE, _T("OpenAL"));
 	CURE_RTVAR_SET(pSettings, RTVAR_UI_SOUND_ROLLOFF, 0.2);
 	CURE_RTVAR_SET(pSettings, RTVAR_UI_SOUND_DOPPLER, 1.3);
+	CURE_RTVAR_SET(pSettings, RTVAR_UI_SOUND_VOLUME, 1.0);
 }
 
 Cure::RuntimeVariableScope* GetSettings()

@@ -28,6 +28,8 @@ public:
 	SoundManagerFMod(int pMixRate);
 	virtual ~SoundManagerFMod();
 
+	virtual void SetMasterVolume(float pVolume);
+
 	SoundID LoadSound2D(const str& pFileName, LoopMode pLoopMode, int pPriority);
 	SoundID LoadSound3D(const str& pFileName, LoopMode LoopMode, int pPriority);
 	SoundID LoadStream(const str& pFileName, LoopMode LoopMode, int pPriority);

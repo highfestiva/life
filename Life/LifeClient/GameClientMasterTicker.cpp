@@ -183,28 +183,37 @@ bool GameClientMasterTicker::Tick()
 			{
 				mUiManager->GetSoundManager()->SetCurrentListener(lSlaveIndex, mActiveSlaveCount);
 				++lSlaveIndex;
-				lOk = lSlave->Render();
+				if (mUiManager->CanRender())
+				{
+					lOk = lSlave->Render();
+				}
 			}
 		}
 	}
 
 	{
 		LEPRA_MEASURE_SCOPE(Paint);
-		mUiManager->Paint();
-		for (x = mSlaveArray.begin(); lOk && x != mSlaveArray.end(); ++x)
+		if (mUiManager->CanRender())
 		{
-			GameClientSlaveManager* lSlave = *x;
-			if (lSlave)
+			mUiManager->Paint();
+			for (x = mSlaveArray.begin(); lOk && x != mSlaveArray.end(); ++x)
 			{
-				lOk = lSlave->Paint();
+				GameClientSlaveManager* lSlave = *x;
+				if (lSlave)
+				{
+					lOk = lSlave->Paint();
+				}
 			}
 		}
 	}
 
 	{
 		LEPRA_MEASURE_SCOPE(DrawGraph);
-		DrawDebugData();
-		DrawPerformanceLineGraph2d();
+		if (mUiManager->CanRender())
+		{
+			DrawDebugData();
+			DrawPerformanceLineGraph2d();
+		}
 	}
 
 	if (mServer)
@@ -881,7 +890,7 @@ bool GameClientMasterTicker::QueryQuit()
 		}
 		DeleteServer();
 #ifdef LIFE_DEMO
-		if (!mUiManager->GetDisplayManager()->IsVisible())
+		if (!mUiManager->CanRender())
 		{
 			return true;
 		}

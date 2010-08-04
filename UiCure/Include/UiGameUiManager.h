@@ -48,6 +48,8 @@ public:
 	bool Open();
 	void Close();
 
+	bool CanRender() const;
+
 	void InputTick();
 	void BeginRender();
 	void Render(const PixelRect& pArea);

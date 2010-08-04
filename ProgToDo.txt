@@ -44,14 +44,14 @@ Game
 + Add elevator to world. Trigger five seconds when after the vehicle enters zone.
 + Add link to home page in demo end screen.
 + Update and adjust what messages are shown on screen when starting up.
++ Remove sound twirps (when in high speeds) by making sound listener velocity slide instead of jerk (just a theory).
+. Put some clouds and the sun in the sky, put something below the platform/ground that makes it obvious that objects that fall over are gone for good.
+. Add server-triggered garage door to world. Make sure trigger coding is easy!!!
 . Fix bug: road sign for first vehicle is "squashed" when having 3 split-screen players.
-. Remove sound twirps (when in high speeds) by making sound listener velocity slide instead of jerk (just a theory).
 . Make sure that only proper avatars can be played, not levels, stones, road signs, etc.
 . Create material that can easily can be picked-up, loaded and moved around.
 . Create crane that can pull wire up.
 . Bug fix attachments (i.e. crane picks up car) so that they work properly (without crashing).
-. Add server-triggered garage door to world. Make sure trigger coding is easy!!!
-. Put some clouds and the sun in the sky, put something below the platform that makes it obvious that the object that fell over is gone.
 . Make vehicle flip over to correct rotation whenever it accidentally flipped to its side/front/back.
 . Add options menu.
 . Picking best possible default input control options.
@@ -81,6 +81,11 @@ Game
 . Make all vehicles fun to play in at least one way!
 . Make sure to create many huge vehicles, which can have others inside!
 . Triangulate all meshes inside Maya.
+. Add fun stuff to the world:
+  - Portals to race track, monster jam court, dino park, castle...
+  - Super speed mode (increase physics real time ratio to 250 % or so).
+  - Senior citicen mode (decrease physics real time ratio to 50 % or so).
+  - Real world mode (no outline rendering; should be blended in through white?).
 
 - Add different physical worlds on all sides of the box, and add gravity change! Cewlness x 0x1000000!!!
 - Add login progress bar.
@@ -156,6 +161,7 @@ Engine
   + Use for start/end screen.
 + Wrap physics frame counter (game could go on forever).
 + Fix bug: occationally some meshes (such as the ground) end up rotated. The physics seems OK though. Race condition for the mesh offset transform?
++ Add master volume.
 . Port client to Mac OS X / Cocoa.
 . I18N.
 . Make sure camera never flies under ground or collides with physical objects. Make camera always keep a free line of sight to the controlled object.
@@ -172,7 +178,7 @@ Engine
 . Spawn engine and load world. Must be able to manage both.
 . Add some type of spawn engine for player vehicles.
 . Use a zipped archive for data.
-. Add "switch to splitscreen" by buttonpress ingame.
+. Add "switch to splitscreen" by MOUSE BUTTON press ingame.
 . Music.
 . Chat - client side UI.
 . Text/console clients, plural. Run in same process.
@@ -180,7 +186,6 @@ Engine
 . Port input handling, calibration and names.
 . Design GUI. Menus as well as toolbars during play. Also icons for picking vehicle.
 . Make sure memfile log always gets everything (including trace+debug+performance). Tail contents to con and file upon crash.
-. Improve vehicle wheel friction.
 . Do not resend positional info frequently when pushed/collided similarly (i.e. excavator holding down monster truck).
 . Make replay functionality for start/end screen.
 . Clear top of log files when too big. Preferrably copy to .log.old and start a new one.
@@ -190,6 +195,8 @@ Engine
 . Port Posix' SystemManager (mostly placeholders at the moment).
 . Port font rendering to X11.
 . Use game icon and make it happen on Windows, Mac, iPhone, X11...
+. Make sure resources are freed when not used for a little while.
+. Make sure sounds are stopped when not played (volume ~ 0), and make sure non-played sounds are placed in resource cache - which means they'll be unloaded after a little while according to the "resource pool freeing" bullet.
 
 - Creating group/world objects as resources.
 - Loading group/world objects from disk.
@@ -198,6 +205,7 @@ Engine
 - Make export script (Maya) auto-run before save.
 - Use animated texture instead of wheels for excavator/bandwagon.
 - Fix bug: orientation merge. When the server sends a new orientation that differs from the local ditto, the merging only works for objects aligned with the root. All others are rotated in some other direction (according to their local axes).
+- Improve vehicle wheel friction.
 
  
 Quality
@@ -235,19 +243,13 @@ Quality
 + If clicking "slowly" the game starts with the mouse state shown as "down". Perhaps the same applies when clicking in another app? This makes it inpossible to click a button on the first attempt after going back to the game.
 + Rename PhysicsEngine and ChunkyXxx classes to sensible names.
 + Descide how to accomodate several split-screen sound "listeners" on OpenAL. Implement.
++ Make sure shutting down client with two simultaneously logged-in users gets logged out from the server.
 . When using 4 splitscreen players, RenderSlaves is the slow part (won't yield 60 FPS on my machine). Check out why. Seems like they're using their CPU time slices (doesn't look as if physics threads are stealing 'em).
-. Serialize physics threads, so that one ends up on each free CPU?
 . Make sure default settings are good on a no-good computer. Like 60 FPS.
-. Make sure shutting down client with two simultaneously logged-in users gets logged out from the server.
 . Add better camera control, such as for the truck (just looking at the trailer looks like shit).
 . Print game version number to log when starting.
 . Add support for checking if loaded controller configuration contains devices no longer present in the system when starting, and if so reset 'em.
 . Add support for auto-configuring best controller configuration.
-. Produce autostarting autotest after commit. Run in Linux at least.
-. Check heap regularly (using _heapchk() in Win32).
-. Add relevant thread safety to classes here and there (NetworkServer, for instance). Add interfaces to isolate functionality. Use Sigges design pattern.
-. Add crash control.
-. Add handling of ODE crashes (numerical overflow, etc).
 . Start alpha-testing with human users.
 . Go through all TODOs.
 . Fix all source file header comments (Righteous games, 2010).
@@ -258,12 +260,19 @@ Quality
 . Automatically downsize rendering (shadows) and physics micro steps if FPS are low. Runtime optimize by turning off pixel shaders, shadow volumes, etc.
 . Check that all log destinations write strings, not raw data, to disk. LogFileXxx (single one) was checked and corrected from WriteData() to WriteString().
 . Get licences in order. Both C++ and Python. Both mine and third party.
+. Release open source code.
 . Separate input and output data in the data folder. Create a proper directory structure for external release.
 . Remove unused rtvars (such as Ui.2D.PaintMode).
 . Test thoroughly!
 . Polish.
 . Refactor.
 . Go through all RG e-mail to ensure all is in place.
+. Produce autostarting autotest after commit. Run in Linux at least.
+. Check heap regularly (using _heapchk() in Win32).
+. Add relevant thread safety to classes here and there (NetworkServer, for instance). Add interfaces to isolate functionality. Use Sigges design pattern.
+. Add crash control.
+. Add handling of ODE crashes (numerical overflow, etc).
+. Serialize physics threads, so that one ends up on each free CPU?
 | Remove all memory leaks. (Don't put me out, place me at bottom of checklist.)
 | Test with "simulating" single CPU system. (Don't put me out, place me at bottom of checklist.)
 | Test with corrupt/missing resources. (Don't put me out, place me at bottom of checklist.)

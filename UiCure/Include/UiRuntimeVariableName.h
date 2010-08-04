@@ -40,3 +40,4 @@
 #define RTVAR_UI_SOUND_ENGINE			"Ui.Sound.Engine"
 #define RTVAR_UI_SOUND_ROLLOFF			"Ui.Sound.RollOff"
 #define RTVAR_UI_SOUND_DOPPLER			"Ui.Sound.Doppler"
+#define RTVAR_UI_SOUND_VOLUME			"Ui.Sound.Volume"

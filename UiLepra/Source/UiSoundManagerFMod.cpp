@@ -45,6 +45,17 @@ SoundManagerFMod::~SoundManagerFMod()
 	delete[] (mChannel);
 }
 
+
+
+
+void SoundManagerFMod::SetMasterVolume(float pVolume)
+{
+	// TODO: implement.
+	pVolume;
+}
+
+
+
 SoundManager::SoundID SoundManagerFMod::LoadSound2D(const str& pFileName, LoopMode pLoopMode, int pPriority)
 {
 	FileNameToSampleTable::Iterator lIter = mFileNameToSampleTable.Find(pFileName);

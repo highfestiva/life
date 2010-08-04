@@ -31,6 +31,8 @@ public:
 	SoundManager();
 	virtual ~SoundManager();
 
+	virtual void SetMasterVolume(float pVolume) = 0;
+
 	enum LoopMode
 	{
 		LOOP_NONE = 0,

@@ -44,6 +44,8 @@ Application::Application(const strutil::strvec& pArgumentList):
 
 Application::~Application()
 {
+	mLog.RawPrint(Log::LEVEL_HEADLINE, _T("---------- The end. ----------\n"));
+
 	// Kill all loggers, hopefully we don't need to log anything else.
 	delete (mConsoleLogger);
 	mConsoleLogger = 0;

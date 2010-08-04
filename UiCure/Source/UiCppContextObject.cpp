@@ -222,7 +222,11 @@ void CppContextObject::DebugDrawPrimitive(DebugPrimitive pPrimitive)
 					if (lJoint != TBC::INVALID_JOINT)
 					{
 						Vector3DF lAnchor;
-						if (mManager->GetGameManager()->GetPhysicsManager()->GetAnchorPos(lJoint, lAnchor))
+						if (lGeometry->GetJointType() == TBC::ChunkyBoneGeometry::JOINT_SLIDER)
+						{
+							// Ignore, no anchor to be had.
+						}
+						else if (mManager->GetGameManager()->GetPhysicsManager()->GetAnchorPos(lJoint, lAnchor))
 						{
 							const float lLength = 1;
 							Vector3DF lAxis;

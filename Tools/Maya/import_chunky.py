@@ -972,7 +972,7 @@ class GroupReader(DefaultMAReader):
                                                 print("Error: root node %s may not be jointed to anything else!" % node.getFullName())
                                                 isGroupValid = False
                                 isGroupValid &= self._query_attribute(node, "mass", lambda x: (x > 0 and x < 1000000))[0]
-                                isGroupValid &= self._query_attribute(node, "bounce", lambda x: (x >= 0 and x <= 1))[0]
+                                isGroupValid &= self._query_attribute(node, "bounce", lambda x: (x >= -2 and x <= 3))[0]
                                 isGroupValid &= self._query_attribute(node, "friction", lambda x: (x >= -100 and x <= 100))[0]
                                 isGroupValid &= self._query_attribute(node, "affected_by_gravity", lambda x: x==True or x==False)[0]
                                 jointtype = node.get_fixed_attribute("joint", True, "")

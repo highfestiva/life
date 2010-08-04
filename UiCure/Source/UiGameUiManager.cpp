@@ -246,10 +246,17 @@ void GameUiManager::Close()
 
 
 
+bool GameUiManager::CanRender() const
+{
+	return mDisplay->IsVisible();
+}
+
+
+
 void GameUiManager::InputTick()
 {
 	UiLepra::Core::ProcessMessages();
-	if (mDisplay->IsVisible())
+	if (CanRender())
 	{
 		mInput->PollEvents();
 	}
@@ -257,7 +264,7 @@ void GameUiManager::InputTick()
 
 void GameUiManager::BeginRender()
 {
-	if (mDisplay->IsVisible())
+	if (CanRender())
 	{
 		mRenderer->ResetClippingRect();
 		bool lEnableClear;
@@ -276,12 +283,20 @@ void GameUiManager::BeginRender()
 		{
 			ClearDepth();
 		}
+
+		float lMasterVolume;
+		CURE_RTVAR_GET(lMasterVolume, =(float), mVariableScope, RTVAR_UI_SOUND_VOLUME, 1.0);
+		mSound->SetMasterVolume(lMasterVolume);
+	}
+	else
+	{
+		mSound->SetMasterVolume(0);
 	}
 }
 
 void GameUiManager::Render(const PixelRect& pArea)
 {
-	if (mDisplay->IsVisible())
+	if (CanRender())
 	{
 		if (pArea.GetWidth() > 0 && pArea.GetHeight() > 0)
 		{
@@ -295,7 +310,7 @@ void GameUiManager::Render(const PixelRect& pArea)
 
 void GameUiManager::Paint()
 {
-	if (mDisplay->IsVisible())
+	if (CanRender())
 	{
 		mCanvas->SetBuffer(0);
 		mPainter->SetDestCanvas(mCanvas);
@@ -312,7 +327,7 @@ void GameUiManager::PreparePaint()
 
 void GameUiManager::EndRender()
 {
-	if (mDisplay->IsVisible())
+	if (CanRender())
 	{
 		UpdateSettings();
 		mDisplay->UpdateScreen();

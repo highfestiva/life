@@ -166,11 +166,6 @@ GameClientMasterTicker* GameClientSlaveManager::GetMaster() const
 
 bool GameClientSlaveManager::Render()
 {
-	if (!mUiManager->GetDisplayManager()->IsVisible())
-	{
-		return (true);
-	}
-
 	ScopeLock lLock(GetTickLock());
 
 	UpdateCameraPosition(true);
@@ -231,9 +226,10 @@ bool GameClientSlaveManager::Paint()
 
 bool GameClientSlaveManager::EndTick()
 {
-	bool lIsDebugging;
-	CURE_RTVAR_GET(lIsDebugging, =, GetVariableScope(), RTVAR_DEBUG_ENABLE, false);
-	if (lIsDebugging)
+	bool lIsDebugDrawing = mUiManager->CanRender();
+	CURE_RTVAR_GET(lIsDebugDrawing, &=, GetVariableScope(), RTVAR_DEBUG_ENABLE, false);
+
+	if (lIsDebugDrawing)
 	{
 		DrawAsyncDebugInfo();
 	}
@@ -241,7 +237,7 @@ bool GameClientSlaveManager::EndTick()
 	bool lOk = Parent::EndTick();
 	if (lOk)
 	{
-		if (lIsDebugging)
+		if (lIsDebugDrawing)
 		{
 			DrawSyncDebugInfo();
 		}
@@ -730,7 +726,7 @@ void GameClientSlaveManager::TickUiInput()
 					TBC::PhysicsEngine* lEngine = lObject->GetPhysics()->GetEngine(0);
 					if (lEngine)
 					{
-						const float lIntensity = ::fabs(lEngine->GetIntensity());
+						const float lIntensity = lEngine->GetIntensity();
 						lEngine->SetValue(0, Math::Clamp(10.0f*(0.2f-lIntensity), 0.0f, 1.0f), mCameraOrientation.x);
 					}
 				}
@@ -811,6 +807,13 @@ void GameClientSlaveManager::TickUiUpdate()
 {
 	((ClientConsoleManager*)GetConsoleManager())->GetUiConsole()->Tick();
 
+	// Camera moves in a "moving average" kinda curve (halfs the distance in x seconds).
+	const float lPhysicsTime = GetTimeManager()->GetAffordedPhysicsTotalTime();
+	if (lPhysicsTime < 1e-5)
+	{
+		return;
+	}
+
 	// TODO: remove camera hack (camera position should be context object controlled).
 	mCameraPreviousPosition = mCameraPosition;
 	Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
@@ -824,10 +827,15 @@ void GameClientSlaveManager::TickUiUpdate()
 		UpdateMassObjects(mCameraPivotPosition);
 	}
 	const Vector3DF lPivotXyPosition(mCameraPivotPosition.x, mCameraPivotPosition.y, mCameraPosition.z);
-	Vector3DF lTargetCameraPosition(mCameraPosition);
-	const float lCurrentCameraXyDistance = lTargetCameraPosition.GetDistance(lPivotXyPosition);
+	Vector3DF lTargetCameraPosition(mCameraPosition-lPivotXyPosition);
+	const float lCurrentCameraXyDistance = lTargetCameraPosition.GetLength();
+	float lRotationFactor;
+	CURE_RTVAR_GET(lRotationFactor, =(float), GetVariableScope(), RTVAR_UI_3D_CAMROTATE, 0.0);
+	QuaternionF lRotation;
+	lRotation.RotateAroundOwnZ(lRotationFactor * lPhysicsTime);
+	lTargetCameraPosition = lRotation * lTargetCameraPosition;
 	const float lSpeedDependantCameraXyDistance = mCameraTargetXyDistance + mCameraTargetXyDistance*mCameraPivotSpeed*0.03f;
-	lTargetCameraPosition = lPivotXyPosition + (lTargetCameraPosition-lPivotXyPosition)*(lSpeedDependantCameraXyDistance/lCurrentCameraXyDistance);
+	lTargetCameraPosition = lPivotXyPosition + lTargetCameraPosition*(lSpeedDependantCameraXyDistance/lCurrentCameraXyDistance);
 	float lCamHeight;
 	CURE_RTVAR_GET(lCamHeight, =(float), GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, 10.0);
 	lTargetCameraPosition.z = mCameraPivotPosition.z + lCamHeight;
@@ -869,13 +877,6 @@ void GameClientSlaveManager::TickUiUpdate()
 	else if (lTargetCameraPosition.z > 200)
 	{
 		lTargetCameraPosition.z = 200.0f;
-	}
-
-	// Camera moves in a "moving average" kinda curve (halfs the distance in x seconds).
-	const float lPhysicsTime = GetTimeManager()->GetAffordedPhysicsTotalTime();
-	if (lPhysicsTime < 1e-5)
-	{
-		return;
 	}
 
 	const float lHalfDistanceTime = 0.1f;	// Time it takes to half the distance from where it is now to where it should be.
@@ -1425,7 +1426,9 @@ void GameClientSlaveManager::UpdateCameraPosition(bool pUpdateMicPosition)
 			{
 				lVelocity.Normalize(lMicrophoneMaxVelocity);
 			}
-			mUiManager->SetMicrophonePosition(lCameraTransform, lVelocity);
+			const float lLerpTime = Math::GetIterateLerpTime(0.1f, lFrameTime);
+			mMicrophoneSpeed = Math::Lerp(mMicrophoneSpeed, lVelocity, lLerpTime);
+			mUiManager->SetMicrophonePosition(lCameraTransform, mMicrophoneSpeed);
 		}
 	}
 }

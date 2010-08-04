@@ -132,7 +132,7 @@ dxJointHinge::getInfo2( dxJoint::Info2 *info )
         ax2[2] = axis2[2];
     }
     dCROSS( b, = , ax1, ax2 );
-    dReal k = info->fps * info->erp;
+    dReal k = info->fps * limot.stop_erp;	// high_festiva: using stop_erp instead of global_erp on hinges seems like a good idea (works for both choppers and excavators).
     info->c[3] = k * dDOT( b, p );
     info->c[4] = k * dDOT( b, q );
 
