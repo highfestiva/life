@@ -163,8 +163,7 @@ bool ChunkyBoneGeometry::CreateJoint(ChunkyPhysics* pStructure, PhysicsManager* 
 
 			const TransformationF& lBodyTransform = pStructure->GetTransformation(this);
 			const Vector3DF lAnchor = lBodyTransform.GetPosition() +
-				(lBodyTransform.GetOrientation() * 
-				Vector3DF(mBodyData.mParameter[PARAM_OFFSET_X], mBodyData.mParameter[PARAM_OFFSET_Y], mBodyData.mParameter[PARAM_OFFSET_Z]));
+				Vector3DF(mBodyData.mParameter[PARAM_OFFSET_X], mBodyData.mParameter[PARAM_OFFSET_Y], mBodyData.mParameter[PARAM_OFFSET_Z]);
 			mJointId = pPhysics->CreateUniversalJoint(mBodyData.mParent->GetBodyId(),
 				GetBodyId(), lAnchor, lAxis1, lAxis2);
 			pPhysics->SetJointParams(mJointId, mBodyData.mParameter[PARAM_LOW_STOP], mBodyData.mParameter[PARAM_HIGH_STOP], 0);

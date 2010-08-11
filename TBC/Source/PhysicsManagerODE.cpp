@@ -938,7 +938,7 @@ PhysicsManager::JointID PhysicsManagerODE::CreateUniversalJoint(BodyID pBody1, B
 		return INVALID_JOINT;
 
 	JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
-	lJointInfo->mJointID = dJointCreateUniversal(mWorldID, 0);
+	lJointInfo->mJointID = ::dJointCreateUniversal(mWorldID, 0);
 	lJointInfo->mType = JOINT_UNIVERSAL;
 	lJointInfo->mListIter = mFeedbackJointList.end();
 	lJointInfo->mListener1 = lObject1->mForceFeedbackListener;
@@ -948,11 +948,11 @@ PhysicsManager::JointID PhysicsManagerODE::CreateUniversalJoint(BodyID pBody1, B
 	if (lObject2 != 0)
 	{
 		lObject2->mHasMassChildren = true;
-		dJointAttach(lJointInfo->mJointID, lObject1->mBodyID, lObject2->mBodyID);
+		::dJointAttach(lJointInfo->mJointID, lObject1->mBodyID, lObject2->mBodyID);
 	}
 	else
 	{
-		dJointAttach(lJointInfo->mJointID, lObject1->mBodyID, 0);
+		::dJointAttach(lJointInfo->mJointID, lObject1->mBodyID, 0);
 	}
 
 	if ((lObject1 != 0 && lObject1->mForceFeedbackListener != 0) || 
@@ -963,9 +963,9 @@ PhysicsManager::JointID PhysicsManagerODE::CreateUniversalJoint(BodyID pBody1, B
 		lJointInfo->mListIter = --mFeedbackJointList.end();
 	}
 
-	dJointSetUniversalAnchor(lJointInfo->mJointID, pAnchorPos.x, pAnchorPos.y, pAnchorPos.z);
-	dJointSetUniversalAxis1(lJointInfo->mJointID, pAxis1.x, pAxis1.y, pAxis1.z);
-	dJointSetUniversalAxis2(lJointInfo->mJointID, pAxis2.x, pAxis2.y, pAxis2.z);
+	::dJointSetUniversalAnchor(lJointInfo->mJointID, pAnchorPos.x, pAnchorPos.y, pAnchorPos.z);
+	::dJointSetUniversalAxis1(lJointInfo->mJointID, pAxis1.x, pAxis1.y, pAxis1.z);
+	::dJointSetUniversalAxis2(lJointInfo->mJointID, pAxis2.x, pAxis2.y, pAxis2.z);
 
 	mJointTable.insert(lJointInfo);
 	return (JointID)lJointInfo;
@@ -1627,13 +1627,14 @@ bool PhysicsManagerODE::SetUniversalDiff(BodyID pBodyId, JointID pJointId, const
 		const QuaternionF lParentQ(lPQ[0], lPQ[1], lPQ[2], lPQ[3]);
 		// Rotate to cross piece orientation.
 		dxJointUniversal* lUniversal = (dxJointUniversal*)lJointInfo->mJointID;
-		QuaternionF lRelativeQ(lUniversal->qrel1[0], lUniversal->qrel1[1], lUniversal->qrel1[2], lUniversal->qrel1[3]);
-		QuaternionF lQ = lParentQ * lRelativeQ;
+		//QuaternionF lRelativeQ(lUniversal->qrel1[0], lUniversal->qrel1[1], lUniversal->qrel1[2], lUniversal->qrel1[3]);
+		QuaternionF lQ = lParentQ;
+		//QuaternionF lQ = lParentQ.GetInverse() * lRelativeQ;
 		// Rotate to body 1's input angle.
 		lQ = QuaternionF(-pDiff.mValue, lAxis1) * lQ;
 		// Apply rotation from cross piece to original child (us).
-		lRelativeQ.Set(lUniversal->qrel2[0], lUniversal->qrel2[1], lUniversal->qrel2[2], lUniversal->qrel2[3]);
-		//lQ = lQ * lRelativeQ;
+		//lRelativeQ.Set(lUniversal->qrel2[0], lUniversal->qrel2[1], lUniversal->qrel2[2], lUniversal->qrel2[3]);
+		//lQ = lRelativeQ.GetInverse() * lQ;
 		// Rotating around body 1's axis changes body 2's axis. Fetch and act on it AFTER rotation 'round axis1.
 		lAxis2 = lQ * Vector3DF(lUniversal->axis2[0], lUniversal->axis2[1], lUniversal->axis2[2]);
 		lQ = QuaternionF(-pDiff.mAngle, lAxis2) * lQ;
@@ -1644,6 +1645,8 @@ bool PhysicsManagerODE::SetUniversalDiff(BodyID pBodyId, JointID pJointId, const
 		// Align anchors (happen after rotation) and store.
 		Vector3DF lAnchor2(lUniversal->anchor2[0], lUniversal->anchor2[1], lUniversal->anchor2[2]);
 		lAnchor2 = lQ*lAnchor2 + lTransform.GetPosition();
+		dVector3 lRealAnchor;
+		::dJointGetUniversalAnchor2(lUniversal, lRealAnchor);
 		lTransform.GetPosition() += lAnchor-lAnchor2;
 		SetBodyTransform(pBodyId, lTransform);
 	}

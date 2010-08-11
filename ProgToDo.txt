@@ -162,6 +162,7 @@ Engine
 + Wrap physics frame counter (game could go on forever).
 + Fix bug: occationally some meshes (such as the ground) end up rotated. The physics seems OK though. Race condition for the mesh offset transform?
 + Add master volume.
+. Fix universal joint network sync (ODE-interface code relies heavily on LOCAL joint axes when receiving REMOTE updates via SetJointDiff).
 . Port client to Mac OS X / Cocoa.
 . I18N.
 . Make sure camera never flies under ground or collides with physical objects. Make camera always keep a free line of sight to the controlled object.

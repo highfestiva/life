@@ -90,15 +90,16 @@ bool PhysicsEngine::SetValue(unsigned pAspect, float pValue, float pZAngle)
 		break;
 		case ENGINE_CAMERA_FLAT_PUSH:
 		{
-			if (pAspect >= mControllerIndex+0 && pAspect <= mControllerIndex+4)
+			if (pAspect >= mControllerIndex+0 && pAspect <= mControllerIndex+6)
 			{
 				switch (pAspect)
 				{
 					case 0:		mValue[0] = pValue;		break;
 					case 4:		mValue[0] += pValue;		break;
-					case 1:		mValue[1] = pValue;		break;
 					case 2:		mValue[0] -= ::fabs(pValue);	break;	// Breaking and handbreaking always reverse.
-					case 3:		mValue[2] = pValue;		break;
+					case 1:		mValue[1] = pValue;		break;
+					case 5:		mValue[1] -= pValue;		break;
+					case 6:		mValue[2] = pValue;		break;
 				}
 				mValue[3] = pZAngle;
 				return (true);
@@ -177,11 +178,32 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics*
 					lVelocityVector = lRotation*lVelocityVector;
 					float lVelocity[3] = { lVelocityVector.y, lVelocityVector.x, lVelocityVector.z };
 					bool lIsSpeeding = (lVelocityVector.GetLength() >= mMaxSpeed);
+					const float lAbsFriction = ::fabs(mFriction);
+					if (mFriction < 0)
+					{
+						// Arcade stabilization for VTOLs.
+						const int lBone = pStructure->GetIndex(lGeometry);
+						const QuaternionF lOrientation =
+							pPhysicsManager->GetBodyOrientation(lGeometry->GetBodyId()) *
+							pStructure->GetOriginalBoneTransformation(lBone).GetOrientation().GetInverse();
+						// 1st: angular velocity damping (skipping z).
+						Vector3DF lAngular;
+						pPhysicsManager->GetBodyAngularVelocity(lGeometry->GetBodyId(), lAngular);
+						lAngular = lOrientation.GetInverse() * lAngular;
+						lAngular.z = 0;
+						lAngular *= -lAbsFriction;
+						Vector3DF lTorque = lOrientation * lAngular;
+						// 2nd: strive towards straight.
+						lAngular = lOrientation * Vector3DF(0, 0, 1);
+						lTorque += Vector3DF(+lAngular.y * lAbsFriction*5, -lAngular.x * lAbsFriction*5, 0);
+						pPhysicsManager->AddTorque(lGeometry->GetBodyId(), lTorque*mStrength*lScale);
+					}
 					for (int i = 0; i < 3; ++i)
 					{
-						if (!lIsSpeeding || (lVelocity[i]>0) != (mValue[i]>0))
+						const float lPush = (1+lAbsFriction) * mValue[i];
+						if (!lIsSpeeding || (lVelocity[i]>0) != (lPush>0))
 						{
-							pPhysicsManager->AddForce(lGeometry->GetBodyId(), mValue[i]*lAxis[i]*mStrength*lScale);
+							pPhysicsManager->AddForce(lGeometry->GetBodyId(), lPush*lAxis[i]*mStrength*lScale);
 						}
 					}
 					mIntensity += lVelocityVector.GetLength() / mMaxSpeed;
