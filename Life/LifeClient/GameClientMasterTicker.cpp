@@ -11,6 +11,7 @@
 #include "../../Cure/Include/TimeManager.h"
 #include "../../Lepra/Include/Network.h"
 #include "../../Lepra/Include/Performance.h"
+#include "../../Lepra/Include/PngLoader.h"
 #include "../../Lepra/Include/SystemManager.h"
 #include "../../UiCure/Include/UiGameUiManager.h"
 #include "../../UiCure/Include/UiCppContextObject.h"
@@ -547,6 +548,39 @@ bool GameClientMasterTicker::Initialize()
 		{
 			mLog.AError("An error ocurred when applying calibration.");
 		}
+
+		UiLepra::PngLoader lLogoLoader;
+		UiLepra::Canvas lCanvas;
+		if (lLogoLoader.Load(_T("Data/fist.png"), lCanvas) == UiLepra::PngLoader::STATUS_SUCCESS)
+		{
+			const UiTbc::Painter::ImageID lImageId = mUiManager->GetDesktopWindow()->GetImageManager()->AddImage(lCanvas, UiTbc::GUIImageManager::STRETCHED, UiTbc::GUIImageManager::NO_BLEND, 255);
+			UiTbc::RectComponent lRect(lImageId, _T("logo"));
+			mUiManager->GetDesktopWindow()->AddChild(&lRect);
+			const unsigned lWidth = mUiManager->GetDisplayManager()->GetWidth();
+			const unsigned lHeight = mUiManager->GetDisplayManager()->GetHeight();
+			lRect.SetPreferredSize(lHeight/2*1024/1034, lHeight/2);
+			lRect.SetPos(lWidth/2 - lRect.GetPreferredWidth()/2, lHeight/15);
+			mUiManager->GetRenderer()->ResetClippingRect();
+			Color lColor;
+			mUiManager->GetRenderer()->SetClearColor(Color());
+			float y = (float)lRect.GetPos().y;
+			for (int z = 0; z < 180 && lOk; ++z)
+			{
+				mUiManager->GetRenderer()->Clear();
+				mUiManager->Paint();
+				mUiManager->GetDisplayManager()->SetVSyncEnabled(true);
+				mUiManager->GetDisplayManager()->UpdateScreen();
+
+				y = Math::Lerp(y, 0.0f, 0.05f);
+				lRect.SetPos(lRect.GetPos().x, (int)y);
+				Thread::Sleep(0.01);
+				mUiManager->InputTick();
+				lOk = (SystemManager::GetQuitRequest() <= 0);
+			}
+			mUiManager->GetDesktopWindow()->RemoveChild(&lRect, 0);
+			mUiManager->GetDesktopWindow()->GetImageManager()->RemoveImage(lImageId);
+		}
+
 		CreatePlayerCountWindow();
 	}
 	return (lOk);

@@ -67,6 +67,19 @@ Painter::ImageID GUIImageManager::AddImage(const Canvas& pImage, ImageStyle pSty
 	return lID;
 }
 
+bool GUIImageManager::RemoveImage(Painter::ImageID pImageId)
+{
+	ImageTable::Iterator lIter = mImageTable.Find(pImageId);
+	if (lIter != mImageTable.End())
+	{
+		mPainter->RemoveImage(pImageId);
+		mImageTable.Remove(lIter);
+		return true;
+	}
+	assert(false);
+	return false;
+}
+
 void GUIImageManager::SetImageOffset(Painter::ImageID pImageID, int pXOffset, int pYOffset)
 {
 	ImageTable::Iterator lIter = mImageTable.Find(pImageID);
