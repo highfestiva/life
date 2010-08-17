@@ -198,15 +198,17 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics*
 						lTorque += Vector3DF(+lAngular.y * lAbsFriction*5, -lAngular.x * lAbsFriction*5, 0);
 						pPhysicsManager->AddTorque(lGeometry->GetBodyId(), lTorque*mStrength*lScale);
 					}
+					float lHighestForce = 0;
 					for (int i = 0; i < 3; ++i)
 					{
 						const float lPush = (1+lAbsFriction) * mValue[i];
 						if (!lIsSpeeding || (lVelocity[i]>0) != (lPush>0))
 						{
+							lHighestForce = std::max(lPush, lHighestForce);
 							pPhysicsManager->AddForce(lGeometry->GetBodyId(), lPush*lAxis[i]*mStrength*lScale);
 						}
 					}
-					mIntensity += lVelocityVector.GetLength() / mMaxSpeed;
+					mIntensity += lHighestForce;
 				}
 				break;
 				case ENGINE_HOVER:
