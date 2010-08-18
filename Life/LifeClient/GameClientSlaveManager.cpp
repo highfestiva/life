@@ -29,7 +29,7 @@
 #include "RoadSignButton.h"
 #include "RtVar.h"
 #include "UiConsole.h"
-#include "Vehicle.h"
+#include "Props.h"
 
 
 
@@ -56,6 +56,7 @@ GameClientSlaveManager::GameClientSlaveManager(GameClientMasterTicker* pMaster, 
 	mJustLookingAtAvatars(false),
 	mRoadSignIndex(0),
 	mLevelId(0),
+	mSun(0),
 	mCameraPosition(0, -200, 100),
 	//mCameraFollowVelocity(0, 1, 0),
 	mCameraUp(0, 0, 1),
@@ -635,9 +636,21 @@ void GameClientSlaveManager::CreateLoginView()
 
 bool GameClientSlaveManager::InitializeTerrain()
 {
+	mSun = 0;
+
 	mLevelId = GetContext()->AllocateGameObjectId(Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
 	bool lOk = CreateObject(mLevelId, _T("level_01"), Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
 	assert(lOk);
+	if (lOk)
+	{
+		mSun = Parent::CreateContextObject(_T("sun"), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+		lOk = (mSun != 0);
+		assert(lOk);
+		if (lOk)
+		{
+			mSun->StartLoading();
+		}
+	}
 	mMassObjectArray.clear();
 	return (lOk);
 }
@@ -922,6 +935,9 @@ void GameClientSlaveManager::TickUiUpdate()
 	Math::RangeAngles(mCameraOrientation.y, lTargetCameraOrientation.y);
 	Math::RangeAngles(mCameraOrientation.z, lTargetCameraOrientation.z);
 	mCameraOrientation = Math::Lerp<Vector3DF, float>(mCameraOrientation, lTargetCameraOrientation, lMovingAveragePart);
+
+	// Set sun relative to camera.
+	mSun->SetRootPosition(mCameraPosition + Vector3DF(0, -350, 50));
 }
 
 bool GameClientSlaveManager::UpdateMassObjects(const Vector3DF& pPosition)
@@ -1202,6 +1218,7 @@ bool GameClientSlaveManager::CreateObject(Cure::GameObjectId pInstanceId, const 
 Cure::ContextObject* GameClientSlaveManager::CreateContextObject(const str& pClassId) const
 {
 	bool lMassObject = false;
+	bool lProps = false;
 	int lInstanceCount = 600;
 	float lSide = 170;
 	if (pClassId.find(_T("flower")) != str::npos || pClassId.find(_T("bush_01")) != str::npos)
@@ -1212,6 +1229,10 @@ Cure::ContextObject* GameClientSlaveManager::CreateContextObject(const str& pCla
 			lInstanceCount = 150;
 			lSide = 290;
 		}
+	}
+	else if (pClassId == _T("sun"))
+	{
+		lProps = true;
 	}
 	if (lMassObject)
 	{
@@ -1224,7 +1245,15 @@ Cure::ContextObject* GameClientSlaveManager::CreateContextObject(const str& pCla
 		}
 		return 0;
 	}
-	Cure::CppContextObject* lObject = new Vehicle(GetResourceManager(), pClassId, mUiManager);
+	Cure::CppContextObject* lObject;
+	if (lProps)
+	{
+		lObject = new Props(GetResourceManager(), pClassId, mUiManager);
+	}
+	else
+	{
+		lObject = new Vehicle(GetResourceManager(), pClassId, mUiManager);
+	}
 	lObject->SetAllowNetworkLogic(false);	// Only server gets to control logic.
 	return (lObject);
 }

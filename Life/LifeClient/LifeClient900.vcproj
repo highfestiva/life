@@ -635,6 +635,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Props.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Props.h"
+				>
+			</File>
+			<File
 				RelativePath=".\RoadSignButton.cpp"
 				>
 			</File>

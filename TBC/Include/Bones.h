@@ -88,6 +88,7 @@ public:
 
 	// Returns the current local transform.
 	const TransformationF& GetBoneTransformation(int pBoneIndex) const;
+	TransformationF& GetBoneTransformation(int pBoneIndex);
 	void SetBoneTransformation(int pBoneIndex, const TransformationF& pTransformation);
 	// Returns the current transform relative to the root bone's origo,
 	// which is in object space.

@@ -556,6 +556,11 @@ void ContextObject::SetRootPosition(const Vector3DF& pPosition)
 {
 	assert(mPhysicsOverride == PHYSICS_OVERRIDE_BONES);
 	mPosition.mPosition.mTransformation.SetPosition(pPosition);
+
+	if (mPhysics && mPhysics->GetBoneCount() > 0)
+	{
+		mPhysics->GetBoneTransformation(0).SetPosition(pPosition);
+	}
 }
 
 QuaternionF ContextObject::GetOrientation() const

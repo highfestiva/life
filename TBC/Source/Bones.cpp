@@ -199,6 +199,12 @@ const TransformationF& BoneHierarchy::GetBoneTransformation(int pBoneIndex) cons
 	return mCurrentBoneTransformation[pBoneIndex];
 }
 
+TransformationF& BoneHierarchy::GetBoneTransformation(int pBoneIndex)
+{
+	assert(pBoneIndex >= 0 && pBoneIndex < mBoneCount);
+	return mCurrentBoneTransformation[pBoneIndex];
+}
+
 void BoneHierarchy::SetBoneTransformation(int pBoneIndex, const TransformationF& pTransformation)
 {
 	assert(pBoneIndex >= 0 && pBoneIndex < mBoneCount);

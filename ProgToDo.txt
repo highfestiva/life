@@ -245,6 +245,7 @@ Quality
 + Rename PhysicsEngine and ChunkyXxx classes to sensible names.
 + Descide how to accomodate several split-screen sound "listeners" on OpenAL. Implement.
 + Make sure shutting down client with two simultaneously logged-in users gets logged out from the server.
+. Add a state renderer, so that logo rendering, menu backdrop, game rendering and demo screen are just different states.
 . When using 4 splitscreen players, RenderSlaves is the slow part (won't yield 60 FPS on my machine). Check out why. Seems like they're using their CPU time slices (doesn't look as if physics threads are stealing 'em).
 . Make sure default settings are good on a no-good computer. Like 60 FPS.
 . Add better camera control, such as for the truck (just looking at the trailer looks like shit).

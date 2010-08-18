@@ -182,6 +182,7 @@ protected:
 
 	Cure::GameObjectId mLevelId;
 	ObjectArray mMassObjectArray;
+	Cure::ContextObject* mSun;
 
 	Vector3DF mCameraPosition;		// TODO: remove hack (should context object controlled)!
 	Vector3DF mCameraPreviousPosition;	// TODO: remove hack (should context object controlled)!
