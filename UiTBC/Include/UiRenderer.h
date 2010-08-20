@@ -452,6 +452,7 @@ public:
 
 	virtual void SetLightPosition(LightID pLightID, float pX, float pY, float pZ);
 	virtual void SetLightDirection(LightID pLightID, float pX, float pY, float pZ);
+	virtual void SetLightColor(LightID pLightID, float r, float g, float b);
 	void GetLightPosition(LightID pLightID, float& pX, float& pY, float& pZ);
 	void GetLightDirection(LightID pLightID, float& pX, float& pY, float& pZ);
 	void GetLightColor(LightID pLightID, float& pR, float& pG, float& pB);

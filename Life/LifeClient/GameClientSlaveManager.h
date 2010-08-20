@@ -112,6 +112,7 @@ protected:
 	bool SetAvatarEnginePower(Cure::ContextObject* pAvatar, unsigned pAspect, float pPower, float pAngle);
 	virtual void TickUiUpdate();
 	bool UpdateMassObjects(const Vector3DF& pPosition);
+	void SetLocalRender(bool pRender);
 	void SetMassRender(bool pRender);
 
 	void PhysicsTick();
@@ -183,6 +184,7 @@ protected:
 	Cure::GameObjectId mLevelId;
 	ObjectArray mMassObjectArray;
 	Cure::ContextObject* mSun;
+	float mSunAngle;
 
 	Vector3DF mCameraPosition;		// TODO: remove hack (should context object controlled)!
 	Vector3DF mCameraPreviousPosition;	// TODO: remove hack (should context object controlled)!

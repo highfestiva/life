@@ -170,13 +170,13 @@ const str& Resource::GetName() const
 
 int Resource::Reference()
 {
-	++mReferenceCount;
+	BusLock::Add(&mReferenceCount, 1);
 	return (mReferenceCount);
 }
 
 int Resource::Dereference()
 {
-	--mReferenceCount;
+	BusLock::Add(&mReferenceCount, -1);
 	assert(mReferenceCount >= 0);
 	return (mReferenceCount);
 }

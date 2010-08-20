@@ -606,6 +606,17 @@ void Renderer::SetLightDirection(LightID pLightID, float pX, float pY, float pZ)
 	}
 }
 
+void Renderer::SetLightColor(LightID pLightID, float r, float g, float b)
+{
+	const int lLightIndex = (int)pLightID;
+	if (lLightIndex == INVALID_LIGHT)
+		return;
+
+	mLightData[lLightIndex].mColor[0] = r;
+	mLightData[lLightIndex].mColor[1] = g;
+	mLightData[lLightIndex].mColor[2] = b;
+}
+
 void Renderer::GetLightPosition(LightID pLightID, float& pX, float& pY, float& pZ)
 {
 	int lLightIndex = (int)pLightID;

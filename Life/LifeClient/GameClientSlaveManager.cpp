@@ -26,10 +26,11 @@
 #include "../LifeApplication.h"
 #include "GameClientMasterTicker.h"
 #include "MassObject.h"
+#include "Props.h"
 #include "RoadSignButton.h"
 #include "RtVar.h"
+#include "Sunlight.h"
 #include "UiConsole.h"
-#include "Props.h"
 
 
 
@@ -57,6 +58,7 @@ GameClientSlaveManager::GameClientSlaveManager(GameClientMasterTicker* pMaster, 
 	mRoadSignIndex(0),
 	mLevelId(0),
 	mSun(0),
+	mSunAngle(0),
 	mCameraPosition(0, -200, 100),
 	//mCameraFollowVelocity(0, 1, 0),
 	mCameraUp(0, 0, 1),
@@ -176,18 +178,15 @@ bool GameClientSlaveManager::Render()
 	UpdateFrustum(lFov);
 
 	LEPRA_MEASURE_SCOPE(SlaveRender);
-	bool lMass;
 	bool lOutline;
 	bool lWireFrame;
-	CURE_RTVAR_GET(lMass, =, GetVariableScope(), RTVAR_UI_3D_ENABLEMASSOBJECTS, false);
 	CURE_RTVAR_GET(lOutline, =, GetVariableScope(), RTVAR_UI_3D_OUTLINEMODE, false);
 	CURE_RTVAR_GET(lWireFrame, =, GetVariableScope(), RTVAR_UI_3D_WIREFRAMEMODE, false);
-	SetMassRender(lMass);
+	SetLocalRender(true);
 	mUiManager->GetRenderer()->EnableOutlineRendering(lOutline);
 	mUiManager->GetRenderer()->EnableWireframe(lWireFrame);
 	mUiManager->Render(mRenderArea);
-
-	SetMassRender(false);	// Hide mass objects from other cameras.
+	SetLocalRender(false);	// Hide sun and mass objects from other cameras.
 
 	return (true);
 }
@@ -733,7 +732,7 @@ void GameClientSlaveManager::TickUiInput()
 				// Children have the possibility of just pressing left/right which will cause a forward
 				// motion in the currently used vehicle.
 				bool lIsChild;
-				CURE_RTVAR_TRYGET(lIsChild, =, GetVariableScope(), RTVAR_GAME_ISCHILD, false);
+				CURE_RTVAR_GET(lIsChild, =, GetVariableScope(), RTVAR_GAME_ISCHILD, false);
 				if (lIsChild && Math::IsEpsEqual(lPowerFwdRev, 0.0f, 0.05f) && !Math::IsEpsEqual(lPowerLR, 0.0f, 0.05f))
 				{
 					TBC::PhysicsEngine* lEngine = lObject->GetPhysics()->GetEngine(0);
@@ -935,9 +934,6 @@ void GameClientSlaveManager::TickUiUpdate()
 	Math::RangeAngles(mCameraOrientation.y, lTargetCameraOrientation.y);
 	Math::RangeAngles(mCameraOrientation.z, lTargetCameraOrientation.z);
 	mCameraOrientation = Math::Lerp<Vector3DF, float>(mCameraOrientation, lTargetCameraOrientation, lMovingAveragePart);
-
-	// Set sun relative to camera.
-	mSun->SetRootPosition(mCameraPosition + Vector3DF(0, -350, 50));
 }
 
 bool GameClientSlaveManager::UpdateMassObjects(const Vector3DF& pPosition)
@@ -968,6 +964,24 @@ bool GameClientSlaveManager::UpdateMassObjects(const Vector3DF& pPosition)
 		lObject->SetRootPosition(pPosition);
 	}
 	return lOk;
+}
+
+void GameClientSlaveManager::SetLocalRender(bool pRender)
+{
+	if (pRender)
+	{
+		// Update light and sun according to this slave's camera.
+		const float lSunDistance = 1100;
+		mSun->SetRootPosition(mCameraPosition + lSunDistance * mMaster->GetSunlight()->GetDirection());
+
+		bool lMass;
+		CURE_RTVAR_GET(lMass, =, GetVariableScope(), RTVAR_UI_3D_ENABLEMASSOBJECTS, false);
+		SetMassRender(lMass);
+	}
+	else
+	{
+		SetMassRender(false);
+	}
 }
 
 void GameClientSlaveManager::SetMassRender(bool pRender)

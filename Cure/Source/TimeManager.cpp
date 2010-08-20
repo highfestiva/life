@@ -23,7 +23,7 @@ static const int gTimeWrapLimit = 10*60;	// Unit is seconds. Anything small is g
 TimeManager::TimeManager():
 	mTargetFrameRate(60)
 {
-	Clear(gTimeWrapLimit/2*mTargetFrameRate);
+	Clear(0);
 }
 
 TimeManager::~TimeManager()
@@ -167,8 +167,12 @@ int TimeManager::GetCurrentPhysicsFrameDelta(int pStart) const
 
 int TimeManager::GetPhysicsFrameDelta(int pEnd, int pStart) const
 {
-	assert(pEnd >= 0 && pEnd < mPhysicsFrameWrapLimit);
-	assert(pStart >= 0 && pStart < mPhysicsFrameWrapLimit);
+	if (pStart >= mPhysicsFrameWrapLimit || pEnd >= mPhysicsFrameWrapLimit)
+	{
+		return -1;
+	}
+	assert(pEnd >= 0);
+	assert(pStart >= 0);
 
 	int lDiff = pEnd - pStart;
 	if (lDiff > mPhysicsFrameWrapLimit/2)

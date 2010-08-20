@@ -592,7 +592,20 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 					str lValue;
 					strutil::CStringToString(pParameterVector[0], lValue);
 					RtScope::SetMode lMode = (lLevel == '.')? RtVar::USAGE_OVERRIDE : RtVar::USAGE_NORMAL;
-					if (lScope->SetValue(lMode, lVariable, lValue))
+					bool lOk;
+					{
+						Cure::GameManager* lManager = GetGameManager();
+						if (lManager)
+						{
+							lManager->GetTickLock()->Acquire();
+						}
+						lOk = lScope->SetValue(lMode, lVariable, lValue);
+						if (lManager)
+						{
+							lManager->GetTickLock()->Release();
+						}
+					}
+					if (lOk)
 					{
 						str lValue = lScope->GetDefaultValue(RtScope::READ_ONLY, lVariable);
 						lValue = strutil::StringToCString(lValue);

@@ -29,6 +29,7 @@
 #include "GameClientViewer.h"
 #include "RoadSignButton.h"
 #include "RtVar.h"
+#include "Sunlight.h"
 #include "UiGameServerManager.h"
 
 // TODO: remove!
@@ -60,7 +61,8 @@ GameClientMasterTicker::GameClientMasterTicker(UiCure::GameUiManager* pUiManager
 	mSlaveBottomSplit(1),
 	mSlaveVSplit(1),
 	mSlaveFade(0),
-	mDemoTime(0)
+	mDemoTime(0),
+	mSunlight(0)
 {
 	mSlaveArray.resize(4, 0);
 
@@ -133,6 +135,10 @@ bool GameClientMasterTicker::Tick()
 	{
 		LEPRA_MEASURE_SCOPE(BeginRenderAndInput);
 
+		float lRealTimeRatio;
+		CURE_RTVAR_GET(lRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
+		mSunlight->Tick(lRealTimeRatio);
+
 		mLocalObjectSet.clear();
 		for (x = mSlaveArray.begin(); x != mSlaveArray.end(); ++x)
 		{
@@ -196,6 +202,8 @@ bool GameClientMasterTicker::Tick()
 		LEPRA_MEASURE_SCOPE(Paint);
 		if (mUiManager->CanRender())
 		{
+			mSunlight->SetDirection(0, 1, -1);
+			mSunlight->SetColor(1.5f, 1.5f, 1.5f);
 			mUiManager->Paint();
 			for (x = mSlaveArray.begin(); lOk && x != mSlaveArray.end(); ++x)
 			{
@@ -329,7 +337,25 @@ bool GameClientMasterTicker::WaitResetUi()
 
 bool GameClientMasterTicker::IsFirstSlave(const GameClientSlaveManager* pSlave) const
 {
-	return !mSlaveArray.empty() && mSlaveArray[0] == pSlave;
+	if (mSlaveArray.empty())
+	{
+		return false;
+	}
+	SlaveArray::const_iterator x = mSlaveArray.begin();
+	for (; x != mSlaveArray.end(); ++x)
+	{
+		GameClientSlaveManager* lSlave = *x;
+		if (lSlave == pSlave)
+		{
+			return true;
+		}
+		if (lSlave)
+		{
+			return false;
+		}
+	}
+	assert(false);
+	return true;
 }
 
 bool GameClientMasterTicker::IsLocalObject(Cure::GameObjectId pInstanceId) const
@@ -372,7 +398,7 @@ float GameClientMasterTicker::UpdateFrustum(float pFov, const PixelRect& pRender
 	float lClipNear;
 	float lClipFar;
 	CURE_RTVAR_GET(lClipNear, =(float), UiCure::GetSettings(), RTVAR_UI_3D_CLIPNEAR, 0.1);
-	CURE_RTVAR_GET(lClipFar, =(float), UiCure::GetSettings(), RTVAR_UI_3D_CLIPFAR, 1000.0);
+	CURE_RTVAR_GET(lClipFar, =(float), UiCure::GetSettings(), RTVAR_UI_3D_CLIPFAR, 2000.0);
 	mUiManager->GetRenderer()->SetViewFrustum(pFov, lClipNear, lClipFar);
 	return (pFov);
 }
@@ -439,6 +465,13 @@ void GameClientMasterTicker::OnSetPlayerCount(int pPlayerCount)
 	{
 		CreateSlave();
 	}
+}
+
+
+
+Sunlight* GameClientMasterTicker::GetSunlight() const
+{
+	return mSunlight;
 }
 
 
@@ -549,36 +582,41 @@ bool GameClientMasterTicker::Initialize()
 			mLog.AError("An error ocurred when applying calibration.");
 		}
 
-		UiLepra::PngLoader lLogoLoader;
-		UiLepra::Canvas lCanvas;
-		if (lLogoLoader.Load(_T("Data/fist.png"), lCanvas) == UiLepra::PngLoader::STATUS_SUCCESS)
+		bool lShowLogo;
+		CURE_RTVAR_GET(lShowLogo, =, UiCure::GetSettings(), RTVAR_GAME_ENABLESTARTLOGO, true);
+		if (lShowLogo)
 		{
-			const UiTbc::Painter::ImageID lImageId = mUiManager->GetDesktopWindow()->GetImageManager()->AddImage(lCanvas, UiTbc::GUIImageManager::STRETCHED, UiTbc::GUIImageManager::NO_BLEND, 255);
-			UiTbc::RectComponent lRect(lImageId, _T("logo"));
-			mUiManager->GetDesktopWindow()->AddChild(&lRect);
-			const unsigned lWidth = mUiManager->GetDisplayManager()->GetWidth();
-			const unsigned lHeight = mUiManager->GetDisplayManager()->GetHeight();
-			lRect.SetPreferredSize(lHeight/2*1024/1034, lHeight/2);
-			lRect.SetPos(lWidth/2 - lRect.GetPreferredWidth()/2, lHeight/15);
-			mUiManager->GetRenderer()->ResetClippingRect();
-			Color lColor;
-			mUiManager->GetRenderer()->SetClearColor(Color());
-			float y = (float)lRect.GetPos().y;
-			for (int z = 0; z < 180 && lOk; ++z)
+			UiLepra::PngLoader lLogoLoader;
+			UiLepra::Canvas lCanvas;
+			if (lLogoLoader.Load(_T("Data/fist.png"), lCanvas) == UiLepra::PngLoader::STATUS_SUCCESS)
 			{
-				mUiManager->GetRenderer()->Clear();
-				mUiManager->Paint();
-				mUiManager->GetDisplayManager()->SetVSyncEnabled(true);
-				mUiManager->GetDisplayManager()->UpdateScreen();
+				const UiTbc::Painter::ImageID lImageId = mUiManager->GetDesktopWindow()->GetImageManager()->AddImage(lCanvas, UiTbc::GUIImageManager::STRETCHED, UiTbc::GUIImageManager::NO_BLEND, 255);
+				UiTbc::RectComponent lRect(lImageId, _T("logo"));
+				mUiManager->GetDesktopWindow()->AddChild(&lRect);
+				const unsigned lWidth = mUiManager->GetDisplayManager()->GetWidth();
+				const unsigned lHeight = mUiManager->GetDisplayManager()->GetHeight();
+				lRect.SetPreferredSize(lHeight/2*1024/1034, lHeight/2);
+				lRect.SetPos(lWidth/2 - lRect.GetPreferredWidth()/2, lHeight/15);
+				mUiManager->GetRenderer()->ResetClippingRect();
+				Color lColor;
+				mUiManager->GetRenderer()->SetClearColor(Color());
+				float y = (float)lRect.GetPos().y;
+				for (int z = 0; z < 180 && lOk; ++z)
+				{
+					mUiManager->GetRenderer()->Clear();
+					mUiManager->Paint();
+					mUiManager->GetDisplayManager()->SetVSyncEnabled(true);
+					mUiManager->GetDisplayManager()->UpdateScreen();
 
-				y = Math::Lerp(y, 0.0f, 0.05f);
-				lRect.SetPos(lRect.GetPos().x, (int)y);
-				Thread::Sleep(0.01);
-				mUiManager->InputTick();
-				lOk = (SystemManager::GetQuitRequest() <= 0);
+					y = Math::Lerp(y, 0.0f, 0.05f);
+					lRect.SetPos(lRect.GetPos().x, (int)y);
+					Thread::Sleep(0.01);
+					mUiManager->InputTick();
+					lOk = (SystemManager::GetQuitRequest() <= 0);
+				}
+				mUiManager->GetDesktopWindow()->RemoveChild(&lRect, 0);
+				mUiManager->GetDesktopWindow()->GetImageManager()->RemoveImage(lImageId);
 			}
-			mUiManager->GetDesktopWindow()->RemoveChild(&lRect, 0);
-			mUiManager->GetDesktopWindow()->GetImageManager()->RemoveImage(lImageId);
 		}
 
 		CreatePlayerCountWindow();
@@ -613,6 +651,8 @@ bool GameClientMasterTicker::Reinitialize()
 			lSlave->Close();
 		}
 	}
+	delete mSunlight;
+	mSunlight = 0;
 	mResourceManager->StopClear();
 	mUiManager->Close();
 	SystemManager::AddQuitRequest(-1);
@@ -627,10 +667,7 @@ bool GameClientMasterTicker::Reinitialize()
 	{
 		mUiManager->GetDesktopWindow()->CreateLayer(new UiTbc::FloatingLayout());
 
-		// TODO: replace with world-load.
-		mUiManager->GetRenderer()->AddDirectionalLight(
-			UiTbc::Renderer::LIGHT_STATIC, Vector3DF(0, 0.5f, -1),
-			Color::Color(255, 255, 255), 1.5f, 20);
+		mSunlight = new Sunlight(mUiManager->GetRenderer());
 		mUiManager->GetInputManager()->AddKeyCodeInputObserver(this);
 	}
 	if (lOk)

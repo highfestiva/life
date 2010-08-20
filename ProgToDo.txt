@@ -45,6 +45,7 @@ Game
 + Add link to home page in demo end screen.
 + Update and adjust what messages are shown on screen when starting up.
 + Remove sound twirps (when in high speeds) by making sound listener velocity slide instead of jerk (just a theory).
+. Bug: when starting 2 split-screens, then killing #1, #2 doesn't update graphics of server-owned objects any more.
 . Put some clouds and the sun in the sky, put something below the platform/ground that makes it obvious that objects that fall over are gone for good.
 . Add server-triggered garage door to world. Make sure trigger coding is easy!!!
 . Fix bug: road sign for first vehicle is "squashed" when having 3 split-screen players.
@@ -162,6 +163,7 @@ Engine
 + Wrap physics frame counter (game could go on forever).
 + Fix bug: occationally some meshes (such as the ground) end up rotated. The physics seems OK though. Race condition for the mesh offset transform?
 + Add master volume.
+. Fix bug: when changing frame rates, the alarm callback sometimes never triggers (or takes forever?). Probably linked to physics frame counter?
 . Fix universal joint network sync (ODE-interface code relies heavily on LOCAL joint axes when receiving REMOTE updates via SetJointDiff).
 . Port client to Mac OS X / Cocoa.
 . I18N.

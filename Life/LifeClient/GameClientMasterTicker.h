@@ -9,6 +9,7 @@
 #include "../../Cure/Include/GameManager.h"
 #include "../../Lepra/Include/Thread.h"
 #include "../../UiCure/Include/UiLineGraph2d.h"
+#include "../../UiTbc/Include/UiRenderer.h"
 #include "InputObserver.h"
 #include "ScreenPart.h"
 
@@ -28,8 +29,9 @@ namespace Life
 
 class ConsoleManager;
 class GameClientSlaveManager;
-class UiGameServerManager;
+class Sunlight;
 class RoadSignButton;
+class UiGameServerManager;
 
 
 
@@ -59,6 +61,8 @@ public:
 	void PreLogin(const str& pServerAddress);
 	void OnExit();
 	void OnSetPlayerCount(int pPlayerCount);
+
+	Sunlight* GetSunlight() const;	// TODO: move this hard-coding to a context object or summat.
 
 private:
 	typedef GameClientSlaveManager* (*SlaveFactoryMethod)(GameClientMasterTicker* pMaster,
@@ -137,6 +141,8 @@ private:
 	HiResTimer* mDemoTime;
 	std::vector<UiCure::LineGraph2d> mPerformanceGraphList;
 	std::hash_set<Cure::GameObjectId> mLocalObjectSet;
+
+	Sunlight* mSunlight;	// TODO: remove hack and come up with something better?
 
 	LOG_CLASS_DECLARE();
 };
