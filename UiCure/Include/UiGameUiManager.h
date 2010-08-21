@@ -51,7 +51,7 @@ public:
 	bool CanRender() const;
 
 	void InputTick();
-	void BeginRender();
+	void BeginRender(const Vector3DF& pBackgroundColor);
 	void Render(const PixelRect& pArea);
 	void Paint();
 	void PreparePaint();

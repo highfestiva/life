@@ -135,10 +135,7 @@ void OpenGLRenderer::Clear(unsigned pClearFlags)
 
 void OpenGLRenderer::SetClearColor(const Color& pColor)
 {
-	glClearColor((float)pColor.mRed   / 255.0f,
-		     (float)pColor.mGreen / 255.0f,
-		     (float)pColor.mBlue  / 255.0f,
-		     1.0f);
+	::glClearColor(pColor.GetRf(), pColor.GetGf(), pColor.GetBf(), 1.0f);
 	OGL_ASSERT();
 }
 
@@ -1218,8 +1215,8 @@ unsigned OpenGLRenderer::RenderScene()
 	if (IsOutlineRenderingEnabled() && !IsWireframeEnabled())
 	{
 		Material::EnableDrawMaterial(false);
-		Vector3DF lColor(1, 1, 1);
-		TBC::GeometryBase::BasicMaterialSettings lMaterial(lColor, lColor, lColor, 1, 1, false);
+		const Vector3DF lColor(mOutlineFillColor.GetRf(), mOutlineFillColor.GetGf(), mOutlineFillColor.GetBf());
+		TBC::GeometryBase::BasicMaterialSettings lMaterial(lColor, lColor, Vector3DF(), 1, 1, false);
 		OpenGLMaterial::SetBasicMaterial(lMaterial, this);
 		GetMaterial(MAT_SINGLE_COLOR_SOLID)->RenderAllGeometry(GetCurrentFrame());
 		GetMaterial(MAT_SINGLE_COLOR_OUTLINE_BLENDED)->RenderAllGeometry(GetCurrentFrame());

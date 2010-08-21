@@ -332,6 +332,7 @@ public:
 
 	virtual void Clear(unsigned pClearFlags = CLEAR_COLORBUFFER | CLEAR_DEPTHBUFFER) = 0;
 	virtual void SetClearColor(const Color& pColor) = 0;
+	virtual void SetOutlineFillColor(const Color& pColor);
 
 	void EnableOutlineRendering(bool pEnable);
 	bool IsOutlineRenderingEnabled() const;
@@ -601,6 +602,8 @@ protected:
 	unsigned mCulledTriangleCount;
 
 	Canvas* mScreen;
+
+	Color mOutlineFillColor;
 
 	// Used for portal rendering.
 	double mDX;

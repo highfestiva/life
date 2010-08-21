@@ -746,7 +746,10 @@ void GameServerManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pT
 		if (lSendCollision)
 		{
 			// We have found a collision. Asynchronously inform all viewers, including the colliding client.
-			pObject1->SetSendCount(3);
+			if (pObject1->GetNetworkObjectType() == Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED)
+			{
+				pObject1->SetSendCount(3);
+			}
 			GetContext()->AddPhysicsSenderObject(pObject1);
 		}
 	}

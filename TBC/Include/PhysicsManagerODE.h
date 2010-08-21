@@ -31,8 +31,8 @@ public:
 
 	virtual bool InitCurrentThread();
 
-	virtual int QueryRayCollisionAgainst(const TransformationF& pRayTransform, float pLength, BodyID pBody,
-		Vector3DF* pCollisionPoints, int pMaxCollisionCount);
+	virtual int QueryRayCollisionAgainst(const Vector3DF& pRayPosition, const Vector3DF& pRayDirection,
+		float pLength, BodyID pBody, Vector3DF* pCollisionPoints, int pMaxCollisionCount);
 
 	virtual BodyID CreateSphere(bool pIsRoot, const TransformationF& pTransform, float32 pMass,
 		float32 pRadius, BodyType pType, float32 pFriction = 1, float32 pBounce = 0,

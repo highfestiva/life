@@ -178,13 +178,14 @@ protected:
 	HiResTimer mAvatarSelectTime;
 	HiResTimer mAvatarMightSelectTime;
 	bool mJustLookingAtAvatars;
+	int mAvatarInvisibleCount;
 	int mRoadSignIndex;
 	RoadSignMap mRoadSignMap;
 
 	Cure::GameObjectId mLevelId;
 	ObjectArray mMassObjectArray;
-	Cure::ContextObject* mSun;
-	float mSunAngle;
+	Cure::ContextObject* mSun;	// TODO: remove hack (should context object controlled)!
+	std::vector<Cure::ContextObject*> mCloudArray;	// TODO: remove hack (should context object controlled)!
 
 	Vector3DF mCameraPosition;		// TODO: remove hack (should context object controlled)!
 	Vector3DF mCameraPreviousPosition;	// TODO: remove hack (should context object controlled)!

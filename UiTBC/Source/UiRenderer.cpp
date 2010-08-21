@@ -100,6 +100,11 @@ const Canvas* Renderer::GetScreen() const
 	return mScreen;
 }
 
+void Renderer::SetOutlineFillColor(const Color& pColor)
+{
+	mOutlineFillColor = pColor;
+}
+
 void Renderer::EnableOutlineRendering(bool pEnable)
 {
 	mIsOutlineRenderEnabled = pEnable;

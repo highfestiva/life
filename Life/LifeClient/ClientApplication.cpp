@@ -58,11 +58,12 @@ ClientApplication::ClientApplication(const strutil::strvec& pArgumentList):
 	UiTbc::Init();
 	UiCure::Init();
 
-	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_GAME_ISCHILD, true);
-	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
-	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_UI_3D_CAMHEIGHT, 10.0);
-	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_UI_3D_CAMROTATE, 0.0);
-	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_GAME_ENABLESTARTLOGO, true);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_GAME_ISCHILD, true);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_GAME_ENABLESTARTLOGO, true);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_GAME_TIMEOFDAYFACTOR, 1.0);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_CAMHEIGHT, 10.0);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_CAMROTATE, 0.0);
 
 	mUiManager = new UiCure::GameUiManager(UiCure::GetSettings());
 

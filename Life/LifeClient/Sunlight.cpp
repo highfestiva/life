@@ -5,6 +5,7 @@
 
 
 #include "Sunlight.h"
+#include "../../UiCure/Include/UiGameUiManager.h"
 
 
 
@@ -13,18 +14,18 @@ namespace Life
 
 
 
-Sunlight::Sunlight(UiTbc::Renderer* pRenderer):
-	mRenderer(pRenderer),
+Sunlight::Sunlight(UiCure::GameUiManager* pUiManager):
+	mUiManager(pUiManager),
 	mAngle(0)
 {
-	mLightId = pRenderer->AddDirectionalLight(
+	mLightId = mUiManager->GetRenderer()->AddDirectionalLight(
 		UiTbc::Renderer::LIGHT_STATIC, Vector3DF(0, 0.5f, -1),
 		Color::Color(255, 255, 255), 1.5f, 20);
 }
 
 Sunlight::~Sunlight()
 {
-	mRenderer->RemoveLight(mLightId);
+	mUiManager->GetRenderer()->RemoveLight(mLightId);
 }
 
 
@@ -47,7 +48,7 @@ void Sunlight::Tick(float pFactor)
 	const float r = 1.5f;
 	const float g = r * (sin(mAngle)*0.05f + 0.95f);
 	const float b = r * (sin(mAngle)*0.1f + 0.9f);
-	mRenderer->SetLightColor(mLightId, r, g, b);
+	mUiManager->GetRenderer()->SetLightColor(mLightId, r, g, b);
 }
 
 const Vector3DF& Sunlight::GetDirection() const
@@ -55,14 +56,31 @@ const Vector3DF& Sunlight::GetDirection() const
 	return mCamSunDirection;
 }
 
+void Sunlight::AddSunColor(Vector3DF& pBaseColor, float pFactor) const
+{
+	float lColorCurve = sin(mAngle)*0.3f*pFactor + 1;
+	lColorCurve *= lColorCurve;
+	pBaseColor.x = Math::Clamp(pBaseColor.x * lColorCurve, 0.0f, 1.0f);
+	pBaseColor.y = Math::Clamp(pBaseColor.y * lColorCurve, 0.0f, 1.0f);
+	pBaseColor.z = Math::Clamp(pBaseColor.z * lColorCurve, 0.0f, 1.0f);
+}
+
+float Sunlight::GetTimeOfDay() const
+{
+	return mAngle / PIF * 2;
+}
+
 void Sunlight::SetDirection(float x, float y, float z)
 {
-	mRenderer->SetLightDirection(mLightId, x, y, z);
+	if (mUiManager->CanRender())
+	{
+		mUiManager->GetRenderer()->SetLightDirection(mLightId, x, y, z);
+	}
 }
 
 void Sunlight::SetColor(float r, float g, float b)
 {
-	mRenderer->SetLightColor(mLightId, r, g, b);
+	mUiManager->GetRenderer()->SetLightColor(mLightId, r, g, b);
 }
 
 

@@ -262,7 +262,7 @@ void GameUiManager::InputTick()
 	}
 }
 
-void GameUiManager::BeginRender()
+void GameUiManager::BeginRender(const Vector3DF& pBackgroundColor)
 {
 	if (CanRender())
 	{
@@ -271,13 +271,7 @@ void GameUiManager::BeginRender()
 		CURE_RTVAR_GET(lEnableClear, =, mVariableScope, RTVAR_UI_3D_ENABLECLEAR, true);
 		if (lEnableClear)
 		{
-			double r;
-			double g;
-			double b;
-			CURE_RTVAR_GET(r, =, mVariableScope, RTVAR_UI_3D_CLEARRED, 0.75);
-			CURE_RTVAR_GET(g, =, mVariableScope, RTVAR_UI_3D_CLEARGREEN, 0.80);
-			CURE_RTVAR_GET(b, =, mVariableScope, RTVAR_UI_3D_CLEARBLUE, 0.85);
-			Clear((float)r, (float)g, (float)b);
+			Clear(pBackgroundColor.x, pBackgroundColor.y, pBackgroundColor.z);
 		}
 		else
 		{

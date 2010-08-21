@@ -45,13 +45,28 @@ Game
 + Add link to home page in demo end screen.
 + Update and adjust what messages are shown on screen when starting up.
 + Remove sound twirps (when in high speeds) by making sound listener velocity slide instead of jerk (just a theory).
-. Bug: when starting 2 split-screens, then killing #1, #2 doesn't update graphics of server-owned objects any more.
-. Put some clouds and the sun in the sky, put something below the platform/ground that makes it obvious that objects that fall over are gone for good.
++ Bug: when starting 2 split-screens, then killing #1, #2 doesn't update graphics of server-owned objects any more.
++ Put some clouds and the sun in the sky, put something below the platform/ground that makes it obvious that objects that fall over are gone for good.
+. Make ingame menu only available through icons (mouse click or hoover).
+  - Autoflip.
+  - Select vehicle.
+  - ...
+. Add steering: mouse controlled using clicks on where one wants to go.
+  - Add markers in game of target destination.
+  - Add tiny AI to control the steering. Must be different for different vehicles/engines.
+. Add "loot" or "goals" in the world.
+  - Visible trigger on top of the dinosaur heads. If you succeed in staying there you get points and firecrackers.
+  - Bullet time triggers on jumps on the monster track. When triggered, sets RTR to 0.2 for x seconds.
+  - Trigger in a "tingling gate" somewhere which gives you toy speed. When triggered, sets RTR to 2.3 for x seconds.
+  - Real world "tingling gate" trigger somewhere. When triggered, disables outline rendering mode for x seconds.
+. Make race track visible in outline rendering mode.
+. Add logic to colliding with a cube/stone. Yields flying stars and sounds.
+. Adjust excavator so stones and cubes can be picked up.
 . Add server-triggered garage door to world. Make sure trigger coding is easy!!!
 . Fix bug: road sign for first vehicle is "squashed" when having 3 split-screen players.
 . Make sure that only proper avatars can be played, not levels, stones, road signs, etc.
-. Create material that can easily can be picked-up, loaded and moved around.
-. Create crane that can pull wire up.
+. Create "sandish" material that can easily can be picked-up, loaded and moved around.
+. Create crane that can pull wire up. Or adjust mobile crane so it can lift things.
 . Bug fix attachments (i.e. crane picks up car) so that they work properly (without crashing).
 . Make vehicle flip over to correct rotation whenever it accidentally flipped to its side/front/back.
 . Add options menu.
@@ -73,15 +88,17 @@ Game
   - Football.
   - Big world.
   - Play online - and make sure that you add tag line "you can play with your kids even if you travel".
+  - Up to four split-screen players.
 . Implement the following settings ingame:
   - Controls (joysticks, control pads, wheels, keyboards...)
   + Change vehicle.
-. Server regularly checks vehicles that don't seem ok (flipped, i.e. "up not pointing up", etc). If the "un-ok" vehicle is unused for x consecutive checks, remove it.
 . Create icon for the game.
 . Fix wheels and tires/body on Corvette: normals suck on wheels, tires/body has "holes" where you can see through.
 . Make all vehicles fun to play in at least one way!
 . Make sure to create many huge vehicles, which can have others inside!
 . Triangulate all meshes inside Maya.
+. Optimize models in Maya by combining meshes with same materials and same roots.
+. Add details to all models to make them more beautiful.
 . Add fun stuff to the world:
   - Portals to race track, monster jam court, dino park, castle...
   - Super speed mode (increase physics real time ratio to 250 % or so).

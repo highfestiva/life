@@ -73,8 +73,8 @@ bool PhysicsManagerODE::InitCurrentThread()
 	return ::dAllocateODEDataForThread((unsigned)dAllocateMaskAll) != 0;
 }
 
-int PhysicsManagerODE::QueryRayCollisionAgainst(const TransformationF& pRayTransform, float pLength, BodyID pBody,
-	Vector3DF* pCollisionPoints, int pMaxCollisionCount)
+int PhysicsManagerODE::QueryRayCollisionAgainst(const Vector3DF& pRayPosition, const Vector3DF& pRayDirection,
+	float pLength, BodyID pBody, Vector3DF* pCollisionPoints, int pMaxCollisionCount)
 {
 	if (pMaxCollisionCount <= 0)
 	{
@@ -83,9 +83,8 @@ int PhysicsManagerODE::QueryRayCollisionAgainst(const TransformationF& pRayTrans
 	}
 
 	dGeomID lRayGeometryId = ::dCreateRay(0, pLength);
-	const Vector3DF& lFrom = pRayTransform.GetPosition();
-	Vector3DF lDir = pRayTransform.GetOrientation() * Vector3DF(0, 0, 1);
-	::dGeomRaySet(lRayGeometryId, lFrom.x, lFrom.y, lFrom.z, lDir.x, lDir.y, lDir.z);
+	::dGeomRaySet(lRayGeometryId, pRayPosition.x, pRayPosition.y, pRayPosition.z,
+		pRayDirection.x, pRayDirection.y, pRayDirection.z);
 
 	ObjectTable::iterator x = mObjectTable.find((Object*)pBody);
 	if (x == mObjectTable.end())

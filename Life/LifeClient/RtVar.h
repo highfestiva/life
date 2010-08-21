@@ -12,6 +12,7 @@
 
 #define RTVAR_GAME_ISCHILD		"Game.IsChild"
 #define RTVAR_GAME_ENABLESTARTLOGO	"Game.EnableStartLogo"
+#define RTVAR_GAME_TIMEOFDAYFACTOR	"Game.TimeOfDayFactor"
 
 #define RTVAR_CTRL_UI_CONTOGGLE		"Control.Ui.ConsoleToggle"
 

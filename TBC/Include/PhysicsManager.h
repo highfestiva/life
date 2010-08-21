@@ -116,12 +116,15 @@ public:
 		float mAngle2Acceleration;
 	};
 
-	virtual ~PhysicsManager(){};
+	PhysicsManager();
+	virtual ~PhysicsManager();
 
 	virtual bool InitCurrentThread() = 0;
 
-	virtual int QueryRayCollisionAgainst(const TransformationF& pRayTransform, float pLength, BodyID pBody,
-		Vector3DF* pCollisionPoints, int pMaxCollisionCount) = 0;
+	int QueryRayCollisionAgainst(const TransformationF& pRayTransform, float pLength, BodyID pBody,
+		Vector3DF* pCollisionPoints, int pMaxCollisionCount);
+	virtual int QueryRayCollisionAgainst(const Vector3DF& pRayPosition, const Vector3DF& pRayDirection,
+		float pLength, BodyID pBody, Vector3DF* pCollisionPoints, int pMaxCollisionCount) = 0;
 
 	// The "friction" parameter is a factor such that the friction coefficient
 	// between two bodies is calculated as mu = body1.friction * body2.friction.

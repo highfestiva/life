@@ -136,8 +136,10 @@ bool GameClientMasterTicker::Tick()
 		LEPRA_MEASURE_SCOPE(BeginRenderAndInput);
 
 		float lRealTimeRatio;
-		CURE_RTVAR_GET(lRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
-		mSunlight->Tick(lRealTimeRatio);
+		CURE_RTVAR_GET(lRealTimeRatio, =(float), UiCure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
+		float lTimeOfDayFactor;
+		CURE_RTVAR_GET(lTimeOfDayFactor, =(float), UiCure::GetSettings(), RTVAR_GAME_TIMEOFDAYFACTOR, 1.0);
+		mSunlight->Tick(lRealTimeRatio * lTimeOfDayFactor);
 
 		mLocalObjectSet.clear();
 		for (x = mSlaveArray.begin(); x != mSlaveArray.end(); ++x)
@@ -149,7 +151,18 @@ bool GameClientMasterTicker::Tick()
 			}
 		}
 
-		mUiManager->BeginRender();
+		float r, g, b;
+		CURE_RTVAR_GET(r, =(float), UiCure::GetSettings(), RTVAR_UI_3D_CLEARRED, 0.75);
+		CURE_RTVAR_GET(g, =(float), UiCure::GetSettings(), RTVAR_UI_3D_CLEARGREEN, 0.80);
+		CURE_RTVAR_GET(b, =(float), UiCure::GetSettings(), RTVAR_UI_3D_CLEARBLUE, 0.85);
+		Vector3DF lColor(r, g, b);
+		mSunlight->AddSunColor(lColor, 2);
+		mUiManager->BeginRender(lColor);
+		lColor.Set(1.2f, 1.2f, 1.2f);
+		mSunlight->AddSunColor(lColor, 1);
+		Color lFillColor;
+		lFillColor.Set(lColor.x, lColor.y, lColor.z, 1.0f);
+		mUiManager->GetRenderer()->SetOutlineFillColor(lFillColor);
 		mUiManager->InputTick();
 	}
 
@@ -423,7 +436,7 @@ void GameClientMasterTicker::PreLogin(const str& pServerAddress)
 	}
 	if (lIsLocalServer && !mServer)
 	{
-		Cure::RuntimeVariableScope* lVariableScope = new Cure::RuntimeVariableScope(Cure::GetSettings());
+		Cure::RuntimeVariableScope* lVariableScope = new Cure::RuntimeVariableScope(UiCure::GetSettings());
 		UiGameServerManager* lServer = new UiGameServerManager(lVariableScope, mResourceManager, mUiManager, PixelRect(0, 0, 100, 100));
 		lServer->StartConsole(new UiTbc::ConsoleLogListener, new UiTbc::ConsolePrompt);
 		if (!lServer->Initialize())
@@ -667,7 +680,7 @@ bool GameClientMasterTicker::Reinitialize()
 	{
 		mUiManager->GetDesktopWindow()->CreateLayer(new UiTbc::FloatingLayout());
 
-		mSunlight = new Sunlight(mUiManager->GetRenderer());
+		mSunlight = new Sunlight(mUiManager);
 		mUiManager->GetInputManager()->AddKeyCodeInputObserver(this);
 	}
 	if (lOk)
@@ -736,7 +749,7 @@ void GameClientMasterTicker::UpdateSlaveLayout()
 
 	int lAveragedSlaves = 1;
 	float lFps;
-	CURE_RTVAR_GET(lFps, =(float), Cure::GetSettings(), RTVAR_PHYSICS_FPS, 30);
+	CURE_RTVAR_GET(lFps, =(float), UiCure::GetSettings(), RTVAR_PHYSICS_FPS, 30);
 	float lFrameTime = 1/lFps;
 	for (int x = 0; x < 4; ++x)
 	{
@@ -811,19 +824,27 @@ void GameClientMasterTicker::SlideSlaveLayout()
 			(int)(lRenderArea.GetHeight() * lRenderAreas[x][3])
 			);
 		const int REQUIRED_PIXELS = 4;
-		if (lPartRenderArea.mLeft <= REQUIRED_PIXELS)
+		if (lPartRenderArea.mLeft <= REQUIRED_PIXELS)	// Hatch onto edge?
 		{
 			lPartRenderArea.mLeft = 0;
 		}
-		if (lPartRenderArea.GetWidth() >= lRenderArea.GetWidth()-REQUIRED_PIXELS)
+		else if (lRenderAreas[x][0] > 0.3f)	// Do we want a border to the left?
+		{
+			lPartRenderArea.mLeft += 1;
+		}
+		if (lPartRenderArea.GetWidth() >= lRenderArea.GetWidth()-REQUIRED_PIXELS)		// Hatch onto edge?
 		{
 			lPartRenderArea.mRight = lRenderArea.mRight;
 		}
-		if (lPartRenderArea.mTop <= REQUIRED_PIXELS)
+		if (lPartRenderArea.mTop <= REQUIRED_PIXELS)	// Hatch onto edge?
 		{
 			lPartRenderArea.mTop = 0;
 		}
-		if (lPartRenderArea.GetHeight() >= lRenderArea.GetHeight()-REQUIRED_PIXELS)
+		else if (lRenderAreas[x][1] > 0.3f)	// Do we want a border to the right?
+		{
+			lPartRenderArea.mTop += 1;
+		}
+		if (lPartRenderArea.GetHeight() >= lRenderArea.GetHeight()-REQUIRED_PIXELS)	// Hatch onto edge?
 		{
 			lPartRenderArea.mBottom = lRenderArea.mBottom;
 		}

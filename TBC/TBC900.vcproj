@@ -491,6 +491,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Source\PhysicsManager.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Source\PhysicsManagerFactory.cpp"
 				>
 			</File>

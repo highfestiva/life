@@ -55,10 +55,10 @@ GameClientSlaveManager::GameClientSlaveManager(GameClientMasterTicker* pMaster, 
 	mLastSentByteCount(0),
 	mPingAttemptCount(0),
 	mJustLookingAtAvatars(false),
+	mAvatarInvisibleCount(0),
 	mRoadSignIndex(0),
 	mLevelId(0),
 	mSun(0),
-	mSunAngle(0),
 	mCameraPosition(0, -200, 100),
 	//mCameraFollowVelocity(0, 1, 0),
 	mCameraUp(0, 0, 1),
@@ -636,6 +636,7 @@ void GameClientSlaveManager::CreateLoginView()
 bool GameClientSlaveManager::InitializeTerrain()
 {
 	mSun = 0;
+	mCloudArray.clear();
 
 	mLevelId = GetContext()->AllocateGameObjectId(Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
 	bool lOk = CreateObject(mLevelId, _T("level_01"), Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
@@ -648,6 +649,18 @@ bool GameClientSlaveManager::InitializeTerrain()
 		if (lOk)
 		{
 			mSun->StartLoading();
+		}
+	}
+	const int lPrimeCloudCount = 11;	// TRICKY: must be prime or clouds start moving in sync.
+	for (int x = 0; lOk && x < lPrimeCloudCount; ++x)
+	{
+		Cure::ContextObject* lCloud = Parent::CreateContextObject(_T("cloud_01"), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+		lOk = (lCloud != 0);
+		assert(lOk);
+		if (lOk)
+		{
+			lCloud->StartLoading();
+			mCloudArray.push_back(lCloud);
 		}
 	}
 	mMassObjectArray.clear();
@@ -761,6 +774,14 @@ void GameClientSlaveManager::TickUiInput()
 				mInputExpireAlarm.Push(0.1f);
 			}
 			mLastSteering = v;
+
+			mAvatarInvisibleCount = 0;
+		}
+		else if (++mAvatarInvisibleCount > 10)
+		{
+			mJustLookingAtAvatars = false;
+			SetRoadSignsVisible(true);
+			mAvatarInvisibleCount = -10000;
 		}
 	}
 }
@@ -891,6 +912,48 @@ void GameClientSlaveManager::TickUiUpdate()
 		lTargetCameraPosition.z = 200.0f;
 	}
 
+	// Now that we've settled where we should be, it's time to check where we actually can see our avatar.
+	// TODO: currently only checks against terrain. Should check against all types of objects(?), which
+	// might mean creating a ray geometry for all vehicles?
+	Cure::ContextObject* lLevel = GetContext()->GetObject(mLevelId);
+	if (lLevel)
+	{
+		const float lCameraAboveGround = 0.2f;
+		lTargetCameraPosition.z -= lCameraAboveGround;
+		const TBC::PhysicsManager::BodyID lTerrainBodyId = lLevel->GetPhysics()->GetBoneGeometry(0)->GetBodyId();
+		Vector3DF lCollisionPoint;
+		float lStepSize = (lTargetCameraPosition - mCameraPivotPosition).GetLength() * 0.5f;
+		for (int y = 0; y < 5; ++y)
+		{
+			int x;
+			for (x = 0; x < 2; ++x)
+			{
+				const Vector3DF lRay = lTargetCameraPosition - mCameraPivotPosition;
+				const bool lIsCollision = (GetPhysicsManager()->QueryRayCollisionAgainst(
+					mCameraPivotPosition, lRay, lRay.GetLength(), lTerrainBodyId, &lCollisionPoint, 1) > 0);
+				if (lIsCollision)
+				{
+					lTargetCameraPosition.z += lStepSize;
+				}
+				else
+				{
+					if (x != 0)
+					{
+						lTargetCameraPosition.z -= lStepSize;
+					}
+					break;
+				}
+			}
+			if (x == 0 && y == 0)
+			{
+				break;
+			}
+			lStepSize *= 1/3.0f;
+			lTargetCameraPosition.z += lStepSize;
+		}
+		lTargetCameraPosition.z += lCameraAboveGround;
+	}
+
 	const float lHalfDistanceTime = 0.1f;	// Time it takes to half the distance from where it is now to where it should be.
 	float lMovingAveragePart = 0.5f*lPhysicsTime/lHalfDistanceTime;
 	if (lMovingAveragePart > 0.8f)
@@ -971,8 +1034,22 @@ void GameClientSlaveManager::SetLocalRender(bool pRender)
 	if (pRender)
 	{
 		// Update light and sun according to this slave's camera.
-		const float lSunDistance = 1100;
+		const float lSunDistance = 1700;
 		mSun->SetRootPosition(mCameraPosition + lSunDistance * mMaster->GetSunlight()->GetDirection());
+
+		const float lCloudDistance = 600;
+		size_t x = 0;
+		for (; x < mCloudArray.size(); ++x)
+		{
+			Cure::ContextObject* lCloud = mCloudArray[x];
+			float lTod = mMaster->GetSunlight()->GetTimeOfDay();
+			lTod += x / (float)mCloudArray.size();
+			lTod *= 2 * PIF;
+			const float x = sin(lTod*2) * lCloudDistance;
+			const float y = cos(lTod) * lCloudDistance;
+			const float z = cos(lTod*3) * lCloudDistance * 0.2f + lCloudDistance * 0.4f;
+			lCloud->SetRootPosition(Vector3DF(x, y, z));
+		}
 
 		bool lMass;
 		CURE_RTVAR_GET(lMass, =, GetVariableScope(), RTVAR_UI_3D_ENABLEMASSOBJECTS, false);
@@ -1244,7 +1321,7 @@ Cure::ContextObject* GameClientSlaveManager::CreateContextObject(const str& pCla
 			lSide = 290;
 		}
 	}
-	else if (pClassId == _T("sun"))
+	else if (pClassId == _T("sun") || strutil::StartsWith(pClassId, _T("cloud")))
 	{
 		lProps = true;
 	}
