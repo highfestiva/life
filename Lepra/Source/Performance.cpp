@@ -242,6 +242,17 @@ ScopePerformanceData* ScopePerformanceData::GetActive()
 	return ((ScopePerformanceData*)Thread::GetExtraData());
 }
 
+ScopePerformanceData::ScopePerformanceData(const ScopePerformanceData&):
+	mHash(0)
+{
+	assert(false);
+}
+
+void ScopePerformanceData::operator=(const ScopePerformanceData&)
+{
+	assert(false);
+}
+
 ScopePerformanceData::NodeArray ScopePerformanceData::mRoots;
 SpinLock ScopePerformanceData::mRootLock;
 

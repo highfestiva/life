@@ -92,12 +92,9 @@ bool GameManager::BeginTick()
 
 	bool lPerformanceText;
 	CURE_RTVAR_GET(lPerformanceText, =, GetVariableScope(), RTVAR_PERFORMANCE_TEXT_ENABLE, false);
-	if (lPerformanceText)
-	{
-		double lReportInterval;
-		CURE_RTVAR_GET(lReportInterval, =, GetVariableScope(), RTVAR_PERFORMANCE_TEXT_INTERVAL, 10.0);
-		TryReportPerformance(lReportInterval);
-	}
+	double lReportInterval;
+	CURE_RTVAR_GET(lReportInterval, =, GetVariableScope(), RTVAR_PERFORMANCE_TEXT_INTERVAL, 1.0);
+	UpdateReportPerformance(lPerformanceText, lReportInterval);
 
 	bool lParallelPhysics;
 	CURE_RTVAR_GET(lParallelPhysics, =, GetVariableScope(), RTVAR_PHYSICS_PARALLEL, true);
@@ -282,7 +279,7 @@ void GameManager::GetSiblings(GameObjectId pInstanceId, ContextObject::Array& pS
 
 
 
-void GameManager::TryReportPerformance(double pReportInterval)
+void GameManager::UpdateReportPerformance(bool pReport, double pReportInterval)
 {
 	mPerformanceReportTimer.UpdateTimer();
 	const double lTimeDiff = mPerformanceReportTimer.GetTimeDiffF();
@@ -294,11 +291,14 @@ void GameManager::TryReportPerformance(double pReportInterval)
 		{
 			mSendBandwidth.Append(lTimeDiff, 0, mNetwork->GetSentByteCount());
 			mReceiveBandwidth.Append(lTimeDiff, 0, mNetwork->GetReceivedByteCount());
-			mLog.Performancef(_T("Network bandwith. Up: %sB/s (peak %sB/s). Down: %sB/s (peak %sB/s)."), 
-				Number::ConvertToPostfixNumber(mSendBandwidth.GetLast(), 2).c_str(),
-				Number::ConvertToPostfixNumber(mSendBandwidth.GetMaximum(), 2).c_str(),
-				Number::ConvertToPostfixNumber(mReceiveBandwidth.GetLast(), 2).c_str(),
-				Number::ConvertToPostfixNumber(mReceiveBandwidth.GetMaximum(), 2).c_str());
+			if (pReport)
+			{
+				mLog.Performancef(_T("Network bandwith. Up: %sB/s (peak %sB/s). Down: %sB/s (peak %sB/s)."), 
+					Number::ConvertToPostfixNumber(mSendBandwidth.GetLast(), 2).c_str(),
+					Number::ConvertToPostfixNumber(mSendBandwidth.GetMaximum(), 2).c_str(),
+					Number::ConvertToPostfixNumber(mReceiveBandwidth.GetLast(), 2).c_str(),
+					Number::ConvertToPostfixNumber(mReceiveBandwidth.GetMaximum(), 2).c_str());
+			}
 		}
 		else
 		{
@@ -306,8 +306,11 @@ void GameManager::TryReportPerformance(double pReportInterval)
 			mReceiveBandwidth.Clear();
 		}
 
-		const ScopePerformanceData::NodeArray lRoots = ScopePerformanceData::GetRoots();
-		ReportPerformance(ScopePerformanceData::GetRoots(), 0);
+		if (pReport)
+		{
+			const ScopePerformanceData::NodeArray lRoots = ScopePerformanceData::GetRoots();
+			ReportPerformance(ScopePerformanceData::GetRoots(), 0);
+		}
 	}
 }
 
@@ -319,6 +322,12 @@ void GameManager::ClearPerformanceData()
 	mReceiveBandwidth.Clear();
 
 	ScopePerformanceData::ClearAll();
+}
+
+void GameManager::GetBandwidthData(BandwidthData& pSent, BandwidthData& pReceived)
+{
+	pSent = mSendBandwidth;
+	pReceived = mReceiveBandwidth;
 }
 
 

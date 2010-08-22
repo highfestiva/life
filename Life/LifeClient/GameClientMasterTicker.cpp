@@ -10,6 +10,7 @@
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../../Cure/Include/TimeManager.h"
 #include "../../Lepra/Include/Network.h"
+#include "../../Lepra/Include/Number.h"
 #include "../../Lepra/Include/Performance.h"
 #include "../../Lepra/Include/PngLoader.h"
 #include "../../Lepra/Include/SystemManager.h"
@@ -1006,21 +1007,39 @@ void GameClientMasterTicker::DrawDebugData() const
 
 	ScopePerformanceData* lMainLoop = ScopePerformanceData::GetRoots()[0];
 	str lFps = strutil::Format(_T("FPS %.1f"), 1/lMainLoop->GetSlidingAverage());
+	int w = 80;
 	int h = 20;
 	bool lShowPerformanceCounters;
 	CURE_RTVAR_GET(lShowPerformanceCounters, =, UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_COUNT, false);
 	if (lShowPerformanceCounters)
 	{
-		lFps += strutil::Format(_T("\nvTRI %i\ncTRI %i"),
+		w = 120;
+		double lUpBandwidth = 0;
+		double lDownBandwidth = 0;
+		for (int x = 0; x < 4; ++x)
+		{
+			if (mSlaveArray[x])
+			{
+				Cure::GameManager::BandwidthData lUp;
+				Cure::GameManager::BandwidthData lDown;
+				mSlaveArray[x]->GetBandwidthData(lUp, lDown);
+				lUpBandwidth += lUp.GetLast();
+				lDownBandwidth += lDown.GetLast();
+			}
+		}
+		
+		lFps += strutil::Format(_T("\nvTRI %i\ncTRI %i\nUpload %sB/s\nDownload %sB/s"),
 			mUiManager->GetRenderer()->GetTriangleCount(true),
-			mUiManager->GetRenderer()->GetTriangleCount(false));
-		h += 16*2;
+			mUiManager->GetRenderer()->GetTriangleCount(false),
+			Number::ConvertToPostfixNumber(lUpBandwidth, 1).c_str(),
+			Number::ConvertToPostfixNumber(lDownBandwidth, 1).c_str());
+		h += 17*4;
 	}
 	mUiManager->GetPainter()->SetColor(Color(0, 0, 0));
 	const int lRight = mUiManager->GetDisplayManager()->GetWidth();
-	mUiManager->GetPainter()->FillRect(lRight-80, 3, lRight-5, h);
+	mUiManager->GetPainter()->FillRect(lRight-w, 3, lRight-5, h);
 	mUiManager->GetPainter()->SetColor(Color(200, 200, 0));
-	mUiManager->GetPainter()->PrintText(lFps, lRight-75, 5);
+	mUiManager->GetPainter()->PrintText(lFps, lRight-w+5, 5);
 }
 
 void GameClientMasterTicker::DrawPerformanceLineGraph2d() const

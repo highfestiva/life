@@ -1588,7 +1588,8 @@ bool DualSocketClientTest::Test()
 	{
 		mLog.AHeadline("Connect without TCP+UDP.");
 		lContext = _T("client forced invalid connect");
-		lClientSocket = lClientMuxSocket.Connect(lServerAddress, 0.5);
+		const std::string lId = SystemManager::GetRandomId();
+		lClientSocket = lClientMuxSocket.Connect(lServerAddress, lId, 0.5);
 		lTestOk = (lClientSocket == 0);
 		assert(lTestOk);
 	}
@@ -1609,7 +1610,8 @@ bool DualSocketClientTest::Test()
 		if (lTestOk)
 		{
 			lContext = _T("client connected without UDP");
-			lClientSocket = lClientMuxSocket.Connect(lServerAddress, 1.0);
+			const std::string lId = SystemManager::GetRandomId();
+			lClientSocket = lClientMuxSocket.Connect(lServerAddress, lId, 1.0);
 			lTestOk = (lClientSocket == 0);
 			assert(lTestOk);
 		}
@@ -1617,7 +1619,7 @@ bool DualSocketClientTest::Test()
 		{
 			lContext = _T("server did not drop client TCP connection in time");
 			Thread::Sleep(0.01);
-			TcpVSocket* lConnectorSocket = lServerTcpMuxSocket->PopReceiverSocket();
+			TcpVSocket* lConnectorSocket = lServerTcpMuxSocket->PopReceiverSocket(true);
 			if (lConnectorSocket != 0)	// Already dropped?
 			{
 				char a[1];
@@ -1631,7 +1633,7 @@ bool DualSocketClientTest::Test()
 
 	// Create and start UDP server (connect should fail if not TCP is up).
 	mLog.AHeadline("Connect without TCP.");
-	UdpMuxSocket lServerUdpMuxSocket(_T("Srv "), lServerAddress);
+	UdpMuxSocket lServerUdpMuxSocket(_T("Srv "), lServerAddress, true);
 	if (lTestOk)
 	{
 		lContext = _T("server UDP socket open");
@@ -1644,7 +1646,8 @@ bool DualSocketClientTest::Test()
 	if (lTestOk)
 	{
 		lContext = _T("client connected without TCP");
-		lClientSocket = lClientMuxSocket.Connect(lServerAddress, 0.5);
+		const std::string lId = SystemManager::GetRandomId();
+		lClientSocket = lClientMuxSocket.Connect(lServerAddress, lId, 0.5);
 		lTestOk = (lClientSocket == 0);
 		assert(lTestOk);
 	}
@@ -1678,7 +1681,8 @@ bool DualSocketClientTest::Test()
 	{
 		lContext = _T("client TCP+UDP connect");
 		Thread::Sleep(0.2);
-		lClientSocket = lClientMuxSocket.Connect(lServerAddress, 2.0);
+		const std::string lId = SystemManager::GetRandomId();
+		lClientSocket = lClientMuxSocket.Connect(lServerAddress, lId, 2.0);
 		lTestOk = (lClientSocket != 0);
 		assert(lTestOk);
 	}
@@ -1779,7 +1783,7 @@ template<class _Server> bool DualSocketClientTest::TestClientServerTransmit(str&
 		typename _Server::VSocket* lSocket = 0;
 		for (int x = 0; lSocket == 0 && x < 500; ++x)
 		{
-			lSocket = pServer.mServerMuxSocket.PopReceiverSocket();
+			lSocket = pServer.mServerMuxSocket.PopReceiverSocket(pSafe);
 			Thread::Sleep(0.001f);
 		}
 		lTestOk = (lSocket != 0 && lSocket == pServer.mServerSocket);
@@ -2015,6 +2019,7 @@ bool TestFFT(const LogDecorator& pAccount)
 	ReportTestResult(pAccount, _T("FFT"), lContext, lTestOk);
 	return (lTestOk);
 }
+*/
 
 bool TestCrypto(const LogDecorator& pAccount)
 {
@@ -2067,16 +2072,15 @@ bool TestCrypto(const LogDecorator& pAccount)
 		lContext = _T("SHA-1 hashing failed.");
 		SHA1 lSHA1;
 		uint8 lHash[20];
-		lSHA1.Hash((const uint8*)"Hello World!", 13, lHash);
-		// TODO: implement!
-//		lTestOk = (::memcmp(lData, lString, sizeof(lData)) != 0);
-//		assert(lTestOk);
+		lSHA1.Hash((const uint8*)"Hello World!", 12, lHash);
+		uint8 lWanted[20] = { 0x2e,0xf7,0xbd,0xe6,0x08,0xce,0x54,0x04,0xe9,0x7d,0x5f,0x04,0x2f,0x95,0xf8,0x9f,0x1c,0x23,0x28,0x71 };
+		lTestOk = (::memcmp(lHash, lWanted, sizeof(lHash)) == 0);
+		assert(lTestOk);
 	}
 
 	ReportTestResult(pAccount, _T("Crypto"), lContext, lTestOk);
 	return (lTestOk);
 }
-*/
 
 void DummyThread(void*)
 {
@@ -2353,8 +2357,8 @@ bool TestPerformance(const LogDecorator& pAccount)
 				SocketAddress lAddress2;
 				lAddress2.Resolve(_T(":46667"));
 				UdpVSocket* lSocket = 0;
-				UdpMuxSocket lMuxSocket1(_T("#1 "), lAddress1);
-				UdpMuxSocket lMuxSocket2(_T("#2 "), lAddress2);
+				UdpMuxSocket lMuxSocket1(_T("#1 "), lAddress1, false);
+				UdpMuxSocket lMuxSocket2(_T("#2 "), lAddress2, true);
 				class DummyAcceptor: public Thread
 				{
 				public:
@@ -2857,7 +2861,7 @@ bool TestLepra()
 		// A special test for the mux- and virtual sockets.
 		lTestOk = TestUDPSockets(gLLog);
 	}
-	/*if (lTestOk)
+	if (lTestOk)
 	{
 		DualSocketClientTest lDualSocketClientTest;
 		lTestOk = lDualSocketClientTest.Test();
@@ -2866,7 +2870,7 @@ bool TestLepra()
 	{
 		DualSocketServerTest lDualSocketServerTest;
 		lTestOk = lDualSocketServerTest.Test();
-	}*/
+	}
 	if (lTestOk)
 	{
 		lTestOk = TestArchive(gLLog);
@@ -2875,10 +2879,10 @@ bool TestLepra()
 //	{
 //		lTestOk = TestFFT(gLLog);
 //	}
-//	if (lTestOk)
-//	{
-//		lTestOk = TestCrypto(gLLog);
-//	}
+	if (lTestOk)
+	{
+		lTestOk = TestCrypto(gLLog);
+	}
 	if (lTestOk)
 	{
 		lTestOk = TestPerformance(gLLog);

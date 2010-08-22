@@ -58,7 +58,7 @@ bool NetworkServer::Start(const str& pHostAddress)
 	{
 		mLog.Info(_T("Server listening to address ") + lAddress.GetAsString() + _T("."));
 		ScopeLock lLock(&mLock);
-		SetMuxSocket(new UdpMuxSocket(_T("Srv "), lAddress, 100, 1000));
+		SetMuxSocket(new MuxSocket(_T("Srv "), lAddress, true, 100, 1000));
 		lOk = mMuxSocket->IsOpen();
 	}
 	return (lOk);
@@ -120,7 +120,7 @@ bool NetworkServer::PlaceInSendBuffer(bool pSafe, Packet* pPacket, UserAccount::
 bool NetworkServer::SendAll()
 {
 	bool lAllSendsOk = true;
-	UdpVSocket* lSocket;
+	VSocket* lSocket;
 	while ((lSocket = mMuxSocket->PopSenderSocket()) != 0)
 	{
 		int lSendCount = lSocket->SendBuffer();
@@ -167,7 +167,7 @@ NetworkServer::ReceiveStatus NetworkServer::ReceiveFirstPacket(Packet* pPacket, 
 	KillDeadSockets();
 
 	ReceiveStatus lStatus = RECEIVE_NO_DATA;
-	UdpVSocket* lSocket;
+	VSocket* lSocket;
 	while ((lSocket = mMuxSocket->PopReceiverSocket()) != 0)
 	{
 		int lDataLength = lSocket->Receive(pPacket->GetWriteBuffer(), pPacket->GetBufferSize());
@@ -237,13 +237,47 @@ NetworkServer::ReceiveStatus NetworkServer::ReceiveFirstPacket(Packet* pPacket, 
 	return (lStatus);
 }
 
+NetworkServer::ReceiveStatus NetworkServer::ReceiveMore(UserAccount::AccountId pAccountId, Packet* pPacket)
+{
+	if (!mMuxSocket)
+	{
+		return RECEIVE_CONNECTION_BROKEN;
+	}
+
+	ScopeLock lLock(&mLock);
+	UserConnection* lUser = HashUtil::FindMapObject(mLoggedInIdUserTable, pAccountId);
+	if (!lUser)
+	{
+		return RECEIVE_CONNECTION_BROKEN;
+	}
+	VSocket* lSocket = lUser->GetSocket();
+	if (!lSocket)
+	{
+		return RECEIVE_CONNECTION_BROKEN;
+	}
+
+	ReceiveStatus lResult = RECEIVE_CONNECTION_BROKEN;
+	const int lDataLength = lSocket->Receive(true, pPacket->GetWriteBuffer() + pPacket->GetPacketSize(),
+		pPacket->GetBufferSize() - pPacket->GetPacketSize());
+	if (lDataLength == 0)
+	{
+		lResult = RECEIVE_NO_DATA;
+	}
+	else if (lDataLength > 0)
+	{
+		pPacket->SetPacketSize(pPacket->GetPacketSize() + lDataLength);
+		lResult = RECEIVE_OK;
+	}
+	return lResult;
+}
+
 
 
 void NetworkServer::PollAccept()
 {
 	if (mPendingLoginTable.size() < 1000)
 	{
-		UdpVSocket* lSocket = mMuxSocket->PollAccept();
+		VSocket* lSocket = mMuxSocket->PollAccept();
 		// TODO: add banning techniques to avoid DoS attacks.
 		if (lSocket)
 		{
@@ -252,7 +286,7 @@ void NetworkServer::PollAccept()
 	}
 }
 
-void NetworkServer::TryLogin(UdpVSocket* pSocket, Packet* pPacket, int pDataLength)
+void NetworkServer::TryLogin(VSocket* pSocket, Packet* pPacket, int pDataLength)
 {
 	{
 		PendingSocketTable::iterator x = mPendingLoginTable.find(pSocket);
@@ -298,7 +332,7 @@ void NetworkServer::TryLogin(UdpVSocket* pSocket, Packet* pPacket, int pDataLeng
 	// TODO: add timeout for sockets in pending state.
 }
 
-RemoteStatus NetworkServer::ManageLogin(UdpVSocket* pSocket, Packet* pPacket)
+RemoteStatus NetworkServer::ManageLogin(VSocket* pSocket, Packet* pPacket)
 {
 	Message* lMessage = pPacket->GetMessageAt(0);
 	MessageLoginRequest* lLoginMessage = (MessageLoginRequest*)lMessage;
@@ -393,7 +427,7 @@ RemoteStatus NetworkServer::QueryLogin(const wstr& pLoginName, MessageLoginReque
 	return (lLoginResult);
 }
 
-void NetworkServer::Login(const wstr& pLoginName, UserAccount::AccountId pAccountId, UdpVSocket* pSocket, Packet* pPacket)
+void NetworkServer::Login(const wstr& pLoginName, UserAccount::AccountId pAccountId, VSocket* pSocket, Packet* pPacket)
 {
 	UserConnection* lUser = mUserConnectionFactory->AllocateUserConnection();
 	lUser->SetLoginName(pLoginName);
@@ -436,7 +470,7 @@ bool NetworkServer::RemoveUser(UserAccount::AccountId pAccountId, bool pDestroy)
 	}
 	if (lUser)
 	{
-		UdpVSocket* lSocket = lUser->GetSocket();
+		VSocket* lSocket = lUser->GetSocket();
 		if (lSocket)
 		{
 			lUser->SetSocket(0);
@@ -474,7 +508,7 @@ void NetworkServer::KillDeadSockets()
 		// Kill all old and dead connections.
 		while (!mSocketTimeoutTable.empty())
 		{
-			UdpVSocket* lSocket = *mSocketTimeoutTable.begin();
+			VSocket* lSocket = *mSocketTimeoutTable.begin();
 			SocketUserTable::iterator y = mSocketUserTable.find(lSocket);
 			if (y != mSocketUserTable.end())
 			{
@@ -506,7 +540,7 @@ void NetworkServer::KillDeadSockets()
 	}
 }
 
-void NetworkServer::DropSocket(UdpVSocket* pSocket)
+void NetworkServer::DropSocket(VSocket* pSocket)
 {
 	ScopeLock lLock(&mLock);
 	pSocket->SendBuffer();
@@ -537,7 +571,7 @@ bool NetworkServer::SendStatusMessage(UserAccount::AccountId pAccountId, int32 p
 
 
 
-void NetworkServer::OnCloseSocket(UdpVSocket* pSocket)
+void NetworkServer::OnCloseSocket(VSocket* pSocket)
 {
 	ScopeLock lLock(&mLock);
 	SocketUserTable::iterator x = mSocketUserTable.find(pSocket);

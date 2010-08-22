@@ -75,6 +75,14 @@ Packet::ParseResult Packet::Parse(unsigned pOffset)
 		{
 			lThisPacketSize += pOffset+PACKET_SIZE_MARKER_LENGTH;
 			lOk = ((unsigned)lThisPacketSize <= mPacketSize);
+			if (!lOk && mPacketSize == PACKET_LENGTH && (unsigned)(lThisPacketSize-pOffset) <= PACKET_LENGTH)
+			{
+				// This means we cut a packet in half (only happens in TCP-backed sockets).
+				::memmove(GetWriteBuffer(), &lData[pOffset], mPacketSize-pOffset);
+				mParsedPacketSize = 0;
+				mPacketSize -= pOffset;
+				return PARSE_SHIFT;
+			}
 		}
 		if (lOk)
 		{

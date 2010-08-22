@@ -21,6 +21,11 @@ namespace Cure
 class NetworkAgent
 {
 public:
+	typedef DualSocket VSocket;
+	typedef DualMuxSocket MuxSocket;
+	//typedef UdpVSocket VSocket;
+	//typedef UdpMuxSocket MuxSocket;
+
 	enum ReceiveStatus
 	{
 		RECEIVE_OK,
@@ -44,18 +49,18 @@ public:
 	uint64 GetReceivedByteCount() const;
 	unsigned GetConnectionCount() const;
 
-	bool SendStatusMessage(UdpVSocket* pSocket, int32 pInteger, RemoteStatus pStatus,
+	bool SendStatusMessage(VSocket* pSocket, int32 pInteger, RemoteStatus pStatus,
 		MessageStatus::InfoType pInfoType, wstr pMessage, Packet* pPacket);
-	bool SendNumberMessage(bool pSafe, UdpVSocket* pSocket, Cure::MessageNumber::InfoType pInfo, int32 pInteger, float32 pFloat, Packet* pPacket = 0);
-	bool SendObjectFullPosition(UdpVSocket* pSocket, GameObjectId pInstanceId, int32 pFrameIndex, const ObjectPositionalData& pData);
-	bool PlaceInSendBuffer(bool pSafe, UdpVSocket* pSocket, Packet* pPacket);
+	bool SendNumberMessage(bool pSafe, VSocket* pSocket, Cure::MessageNumber::InfoType pInfo, int32 pInteger, float32 pFloat, Packet* pPacket = 0);
+	bool SendObjectFullPosition(VSocket* pSocket, GameObjectId pInstanceId, int32 pFrameIndex, const ObjectPositionalData& pData);
+	bool PlaceInSendBuffer(bool pSafe, VSocket* pSocket, Packet* pPacket);
 
 protected:
-	void SetMuxSocket(UdpMuxSocket* pSocket);
+	void SetMuxSocket(MuxSocket* pSocket);
 
 	mutable Lock mLock;
 	RuntimeVariableScope* mVariableScope;
-	UdpMuxSocket* mMuxSocket;
+	MuxSocket* mMuxSocket;
 	PacketFactory* mPacketFactory;
 
 private:

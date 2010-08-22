@@ -43,9 +43,6 @@ private:
 	double mLast;
 	double mSlidingAverage;
 	double mMaximum;
-
-	PerformanceData(const PerformanceData&);
-	void operator=(const PerformanceData&);
 };
 
 
@@ -62,9 +59,6 @@ public:
 
 private:
 	_Data mPreviousValue;
-
-	SequencialPerformanceData(const SequencialPerformanceData&);
-	void operator=(const SequencialPerformanceData&);
 };
 
 
@@ -107,6 +101,9 @@ private:
 
 	static NodeArray mRoots;
 	static SpinLock mRootLock;
+
+	ScopePerformanceData(const ScopePerformanceData&);
+	void operator=(const ScopePerformanceData&);
 };
 
 

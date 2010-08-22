@@ -48,12 +48,12 @@ void UserConnection::SetAccountId(UserAccount::AccountId pAccountId)
 	mAccountId = pAccountId;
 }
 
-UdpVSocket* UserConnection::GetSocket() const
+NetworkAgent::VSocket* UserConnection::GetSocket() const
 {
 	return (mSocket);
 }
 
-void UserConnection::SetSocket(UdpVSocket* pSocket)
+void UserConnection::SetSocket(NetworkAgent::VSocket* pSocket)
 {
 	mSocket = pSocket;
 }

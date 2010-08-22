@@ -82,7 +82,7 @@ unsigned NetworkAgent::GetConnectionCount() const
 }
 
 
-bool NetworkAgent::SendStatusMessage(UdpVSocket* pSocket, int32 pInteger, RemoteStatus pStatus,
+bool NetworkAgent::SendStatusMessage(VSocket* pSocket, int32 pInteger, RemoteStatus pStatus,
 	MessageStatus::InfoType pInfoType, wstr pMessage, Packet* pPacket)
 {
 	pPacket->Release();
@@ -93,7 +93,7 @@ bool NetworkAgent::SendStatusMessage(UdpVSocket* pSocket, int32 pInteger, Remote
 	return (lOk);
 }
 
-bool NetworkAgent::SendNumberMessage(bool pSafe, UdpVSocket* pSocket, MessageNumber::InfoType pInfo, int32 pInteger, float32 pFloat, Packet* pPacket)
+bool NetworkAgent::SendNumberMessage(bool pSafe, VSocket* pSocket, MessageNumber::InfoType pInfo, int32 pInteger, float32 pFloat, Packet* pPacket)
 {
 	Packet* lPacket = pPacket;
 	if (!pPacket)
@@ -111,7 +111,7 @@ bool NetworkAgent::SendNumberMessage(bool pSafe, UdpVSocket* pSocket, MessageNum
 	return (lOk);
 }
 
-bool NetworkAgent::SendObjectFullPosition(UdpVSocket* pSocket, GameObjectId pInstanceId, int32 pFrameIndex, const ObjectPositionalData& pData)
+bool NetworkAgent::SendObjectFullPosition(VSocket* pSocket, GameObjectId pInstanceId, int32 pFrameIndex, const ObjectPositionalData& pData)
 {
 	Packet* lPacket = mPacketFactory->Allocate();
 	MessageObjectPosition* lPosition = (MessageObjectPosition*)mPacketFactory->GetMessageFactory()->Allocate(MESSAGE_TYPE_OBJECT_POSITION);
@@ -122,7 +122,7 @@ bool NetworkAgent::SendObjectFullPosition(UdpVSocket* pSocket, GameObjectId pIns
 	return (lOk);
 }
 
-bool NetworkAgent::PlaceInSendBuffer(bool /*pSafe*/, UdpVSocket* pSocket, Packet* pPacket)
+bool NetworkAgent::PlaceInSendBuffer(bool pSafe, VSocket* pSocket, Packet* pPacket)
 {
 	if (!pSocket)
 	{
@@ -135,6 +135,8 @@ bool NetworkAgent::PlaceInSendBuffer(bool /*pSafe*/, UdpVSocket* pSocket, Packet
 	{
 		log_volatile(mLog.Tracef(_T("Sending message of type %i."), pPacket->GetMessageAt(x)->GetType()));
 	}*/
+
+	pSocket->SetSafeSend(pSafe);
 
 	// Try to append this packet to the existing packet buffer.
 	bool lOk = pPacket->AppendToPacketBuffer(pSocket->GetSendBuffer());
@@ -151,7 +153,7 @@ bool NetworkAgent::PlaceInSendBuffer(bool /*pSafe*/, UdpVSocket* pSocket, Packet
 	return (lOk);
 }
 
-void NetworkAgent::SetMuxSocket(UdpMuxSocket* pSocket)
+void NetworkAgent::SetMuxSocket(MuxSocket* pSocket)
 {
 	delete (mMuxSocket);
 	mMuxSocket = pSocket;

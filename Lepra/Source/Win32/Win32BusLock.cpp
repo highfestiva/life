@@ -38,7 +38,7 @@ void BusLock::Add(int64* pDestination, int64 pAddend)
 {
 	// TODO: implement correctly!
 	//::InterlockedExchangeAdd64(pDestination, pAddend); <- check how this would be implemented in kernel32.dll (my machine does probably not support an IPF-compliant CPU).
-	pDestination += pAddend;
+	*pDestination += pAddend;
 }
 
 

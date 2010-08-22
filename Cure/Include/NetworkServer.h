@@ -53,32 +53,33 @@ public:
 	bool PlaceInSendBuffer(bool pSafe, Packet* pPacket, UserAccount::AccountId pAccountId);
 	bool SendAll();
 	ReceiveStatus ReceiveFirstPacket(Packet* pPacket, UserAccount::AccountId& pAccountId);
+	ReceiveStatus ReceiveMore(UserAccount::AccountId pAccountId, Packet* pPacket);
 
 private:
 	void PollAccept();
-	void TryLogin(UdpVSocket* pSocket, Packet* pPacket, int pDataLength);
+	void TryLogin(VSocket* pSocket, Packet* pPacket, int pDataLength);
 	RemoteStatus QueryLogin(const wstr& pLoginName, MessageLoginRequest* pLoginRequest, UserAccount::AccountId& pAccountId);
-	void Login(const wstr& pUserName, UserAccount::AccountId pAccountId, UdpVSocket* pSocket, Packet* pPacket);
-	RemoteStatus ManageLogin(UdpVSocket* pSocket, Packet* pPacket);
+	void Login(const wstr& pUserName, UserAccount::AccountId pAccountId, VSocket* pSocket, Packet* pPacket);
+	RemoteStatus ManageLogin(VSocket* pSocket, Packet* pPacket);
 	void AddUser(UserConnection* pUserConnection, UserAccount::AccountId& pAccountId);
 	bool RemoveUser(UserAccount::AccountId pAccountId, bool pDestroy);
 	void KillDeadSockets();
-	void DropSocket(UdpVSocket* pSocket);
+	void DropSocket(VSocket* pSocket);
 	UserConnection* GetUser(UserAccount::AccountId pAccountId);
 
 	bool SendStatusMessage(UserAccount::AccountId pAccountId, int32 pInteger, RemoteStatus pStatus,
 		MessageStatus::InfoType pInfoType, wstr pMessage, Packet* pPacket);
 
-	void OnCloseSocket(UdpVSocket* pSocket);
+	void OnCloseSocket(VSocket* pSocket);
 
-	typedef std::hash_set<UdpVSocket*, LEPRA_VOIDP_HASHER> SocketSet;
+	typedef std::hash_set<VSocket*, LEPRA_VOIDP_HASHER> SocketSet;
 	typedef SocketSet PendingSocketTable;
 	typedef std::hash_map<UserAccount::AccountId, UserConnection*> LoggedInIdUserTable;
 	typedef std::pair<UserAccount::AccountId, UserConnection*> LoggedInIdUserPair;
 	typedef std::hash_map<wstr, UserConnection*> LoggedInNameUserTable;
 	typedef std::pair<wstr, UserConnection*> LoggedInNameUserPair;
-	typedef std::hash_map<UdpVSocket*, UserConnection*, LEPRA_VOIDP_HASHER> SocketUserTable;
-	typedef std::pair<UdpVSocket*, UserConnection*> SocketUserPair;
+	typedef std::hash_map<VSocket*, UserConnection*, LEPRA_VOIDP_HASHER> SocketUserTable;
+	typedef std::pair<VSocket*, UserConnection*> SocketUserPair;
 	typedef SocketSet SocketTimeoutTable;
 	typedef std::hash_set<UserAccount::AccountId> AccountIdSet;
 

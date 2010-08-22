@@ -6,8 +6,9 @@
 
 #pragma once
 
-#include "../../Lepra/Include/String.h"
 #include "../../Lepra/Include/Socket.h"
+#include "../../Lepra/Include/String.h"
+#include "NetworkAgent.h"
 #include "UserAccount.h"
 
 
@@ -27,13 +28,13 @@ public:
 	void SetLoginName(const wstr& pName);
 	UserAccount::AccountId GetAccountId() const;
 	void SetAccountId(UserAccount::AccountId pId);
-	UdpVSocket* GetSocket() const;
-	void SetSocket(UdpVSocket* pSocket);
+	NetworkAgent::VSocket* GetSocket() const;
+	void SetSocket(NetworkAgent::VSocket* pSocket);
 
 private:
 	wstr mName;
 	UserAccount::AccountId mAccountId;
-	UdpVSocket* mSocket;
+	NetworkAgent::VSocket* mSocket;
 };
 
 

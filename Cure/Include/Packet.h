@@ -35,6 +35,7 @@ public:
 		PARSE_OK,
 		PARSE_NO_DATA,
 		PARSE_ERROR,
+		PARSE_SHIFT,
 	};
 
 	Packet(MessageFactory* pMessageFactory);

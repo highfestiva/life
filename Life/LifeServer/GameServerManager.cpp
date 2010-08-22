@@ -266,6 +266,18 @@ void GameServerManager::TickInput()
 						ProcessNetworkInputMessage(lClient, lMessage);
 					}
 					lParseResult = lPacket->ParseMore();
+					if (lParseResult == Cure::Packet::PARSE_SHIFT)
+					{
+						lReceived = GetNetworkServer()->ReceiveMore(lAccountId, lPacket);
+						if (lReceived == Cure::NetworkAgent::RECEIVE_OK)
+						{
+							lParseResult = lPacket->ParseMore();
+						}
+						else
+						{
+							lParseResult = Cure::Packet::PARSE_ERROR;
+						}
+					}
 				}
 				while (lParseResult == Cure::Packet::PARSE_OK);
 				if (lParseResult != Cure::Packet::PARSE_NO_DATA)
@@ -887,7 +899,7 @@ void GameServerManager::BroadcastDeleteObject(Cure::GameObjectId pInstanceId)
 	for (; x != mAccountClientTable.End(); ++x)
 	{
 		const Client* lClient = x.GetObject();
-		UdpVSocket* lSocket = lClient->GetUserConnection()->GetSocket();
+		Cure::NetworkAgent::VSocket* lSocket = lClient->GetUserConnection()->GetSocket();
 		if (lSocket)
 		{
 			GetNetworkAgent()->PlaceInSendBuffer(true, lSocket, lPacket);

@@ -47,6 +47,8 @@ public:
 class GameManager
 {
 public:
+	typedef SequencialPerformanceData<uint64> BandwidthData;
+
 	GameManager(RuntimeVariableScope* pVariableScope, ResourceManager* pResourceManager);
 	virtual ~GameManager();
 
@@ -78,8 +80,9 @@ public:
 	virtual void SendAttach(ContextObject* pObject1, unsigned pId1, ContextObject* pObject2, unsigned pId2) = 0;
 	virtual void SendDetach(ContextObject* pObject1, ContextObject* pObject2) = 0;
 
-	void TryReportPerformance(double pReportInterval);
+	void UpdateReportPerformance(bool pReport, double pReportInterval);
 	void ClearPerformanceData();
+	void GetBandwidthData(BandwidthData& mSendBandwidth, BandwidthData& mReceiveBandwidth);
 
 protected:
 	void SetConsoleManager(ConsoleManager* pConsole);
@@ -129,8 +132,8 @@ private:
 	Semaphore* mPhysicsTickDoneSemaphore;
 
 	Timer mPerformanceReportTimer;
-	SequencialPerformanceData<uint64> mSendBandwidth;
-	SequencialPerformanceData<uint64> mReceiveBandwidth;
+	BandwidthData mSendBandwidth;
+	BandwidthData mReceiveBandwidth;
 
 	LOG_CLASS_DECLARE();
 };

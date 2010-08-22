@@ -29,7 +29,7 @@ public:
 		SocketAddress lLocalAddress;
 		if (lLocalAddress.Resolve(_T(":10000")))
 		{
-			mUdpMuxSocket = new UdpMuxSocket(_T("Srv "), lLocalAddress);
+			mUdpMuxSocket = new UdpMuxSocket(_T("Srv "), lLocalAddress, true);
 		}
 	}
 
@@ -88,7 +88,7 @@ public:
 		SocketAddress lLocalAddress;
 		if (lLocalAddress.Resolve(_T(":10001")))
 		{
-			mUdpMuxSocket = new UdpMuxSocket(_T("Client "), lLocalAddress);
+			mUdpMuxSocket = new UdpMuxSocket(_T("Client "), lLocalAddress, false);
 		}
 	}
 

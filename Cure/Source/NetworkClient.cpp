@@ -30,7 +30,8 @@ NetworkClient::NetworkClient(RuntimeVariableScope* pVariableScope):
 	mConnectTimeout(0),
 	mLoginToken(),
 	mLoginTimeout(0),
-	mLoginThread(_T("LoginThread"))
+	mLoginThread(_T("LoginThread")),
+	mSafeReceiveToggle(true)
 {
 }
 
@@ -88,7 +89,7 @@ bool NetworkClient::Connect(const str& pLocalAddress, const str& pServerAddress,
 		ScopeLock lLock(&mLock);
 		for (; lLocalAddress.GetPort() <= lEndPort; lLocalAddress.SetPort(lLocalAddress.GetPort()+1))
 		{
-			SetMuxSocket(new UdpMuxSocket(_T("Client "), lLocalAddress));
+			SetMuxSocket(new MuxSocket(_T("Client "), lLocalAddress, false));
 			if (mMuxSocket->IsOpen())
 			{
 				//mMuxSocket->SetCloseCallback(this, &NetworkClient::OnCloseSocket);
@@ -245,7 +246,7 @@ void NetworkClient::SetLoginAccountId(uint32 pLoginAccountId)
 
 
 
-UdpVSocket* NetworkClient::GetSocket() const
+NetworkAgent::VSocket* NetworkClient::GetSocket() const
 {
 	return (mSocket);
 }
@@ -273,7 +274,8 @@ NetworkAgent::ReceiveStatus NetworkClient::ReceiveNonBlocking(Packet* pPacket)
 	if (mSocket)
 	{
 		pPacket->Release();
-		const int lDataLength = mSocket->Receive(pPacket->GetWriteBuffer(), pPacket->GetBufferSize());
+		mSafeReceiveToggle = !mSafeReceiveToggle;
+		const int lDataLength = mSocket->Receive(mSafeReceiveToggle, pPacket->GetWriteBuffer(), pPacket->GetBufferSize());
 		if (lDataLength == 0)
 		{
 			lResult = RECEIVE_NO_DATA;
@@ -312,6 +314,29 @@ NetworkAgent::ReceiveStatus NetworkClient::ReceiveTimeout(Packet* pPacket, doubl
 		}
 	}
 	return (lStatus);
+}
+
+NetworkAgent::ReceiveStatus NetworkClient::ReceiveMore(Packet* pPacket)
+{
+	ScopeLock lLock(&mLock);
+	if (!mSocket)
+	{
+		return RECEIVE_CONNECTION_BROKEN;
+	}
+
+	ReceiveStatus lResult = RECEIVE_CONNECTION_BROKEN;
+	const int lDataLength = mSocket->Receive(true, pPacket->GetWriteBuffer() + pPacket->GetPacketSize(),
+		pPacket->GetBufferSize() - pPacket->GetPacketSize());
+	if (lDataLength == 0)
+	{
+		lResult = RECEIVE_NO_DATA;
+	}
+	else if (lDataLength > 0)
+	{
+		pPacket->SetPacketSize(pPacket->GetPacketSize() + lDataLength);
+		lResult = RECEIVE_OK;
+	}
+	return lResult;
 }
 
 
@@ -420,7 +445,7 @@ void NetworkClient::StopLoginThread()
 
 
 
-void NetworkClient::OnCloseSocket(UdpVSocket*)
+void NetworkClient::OnCloseSocket(VSocket*)
 {
 	Disconnect(false);
 }

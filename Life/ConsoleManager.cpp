@@ -292,7 +292,7 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 		break;
 		case COMMAND_DUMP_PERFORMANCE_INFO:
 		{
-			mGameManager->TryReportPerformance(0);
+			mGameManager->UpdateReportPerformance(true, 0);
 		}
 		break;
 		case COMMAND_CLEAR_PERFORMANCE_INFO:

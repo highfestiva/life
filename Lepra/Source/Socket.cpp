@@ -799,7 +799,7 @@ void TcpMuxSocket::CloseSocket(TcpVSocket* pSocket, bool pForceDelete)
 	}
 }
 
-TcpVSocket* TcpMuxSocket::PopReceiverSocket()
+TcpVSocket* TcpMuxSocket::PopReceiverSocket(bool)
 {
 	TcpVSocket* lSocket = (TcpVSocket*)PopReceiver();
 	if (lSocket)
@@ -1246,7 +1246,7 @@ LOG_CLASS_DEFINE(NETWORK, UdpSocket);
 
 
 
-UdpMuxSocket::UdpMuxSocket(const str& pName, const SocketAddress& pLocalAddress,
+UdpMuxSocket::UdpMuxSocket(const str& pName, const SocketAddress& pLocalAddress, bool,
 	unsigned pMaxPendingConnectionCount, unsigned pMaxConnectionCount):
 	MuxIo(pMaxPendingConnectionCount, pMaxConnectionCount),
 	Thread(pName+_T("UdpMuxRecv ")+pLocalAddress.GetAsString()),
@@ -1397,7 +1397,7 @@ unsigned UdpMuxSocket::GetConnectionCount() const
 	return (mSocketTable.GetCount());
 }
 
-UdpVSocket* UdpMuxSocket::PopReceiverSocket()
+UdpVSocket* UdpMuxSocket::PopReceiverSocket(bool)
 {
 	UdpVSocket* lSocket = (UdpVSocket*)PopReceiver();
 	return (lSocket);
@@ -1736,15 +1736,20 @@ void UdpVSocket::Flush()
 	SendBuffer();
 }
 
+void UdpVSocket::SetSafeSend(bool)
+{
+}
+
 LOG_CLASS_DEFINE(NETWORK, UdpVSocket);
 
 
 
 DualMuxSocket::DualMuxSocket(const str& pName, const SocketAddress& pLocalAddress, bool pIsServer,
 	unsigned pMaxPendingConnectionCount, unsigned pMaxConnectionCount):
-	mTcpMuxSocket(new TcpMuxSocket(pName, pLocalAddress, pIsServer, pMaxConnectionCount)),
-	mUdpMuxSocket(new UdpMuxSocket(pName, pLocalAddress, pMaxPendingConnectionCount, pMaxConnectionCount)),
-	mConnectDualTimeout(DEFAULT_CONNECT_DUAL_TIMEOUT)
+	mTcpMuxSocket(new TcpMuxSocket(pName, pLocalAddress, pIsServer, pMaxPendingConnectionCount, pMaxConnectionCount)),
+	mUdpMuxSocket(new UdpMuxSocket(pName, pLocalAddress, pIsServer, pMaxPendingConnectionCount, pMaxConnectionCount)),
+	mConnectDualTimeout(DEFAULT_CONNECT_DUAL_TIMEOUT),
+	mPopSafeToggle(false)
 {
 	mTcpMuxSocket->SetCloseCallback(this, &DualMuxSocket::OnCloseTcpSocket);
 	log_atrace("DualMuxSocket()");
@@ -1772,14 +1777,19 @@ bool DualMuxSocket::IsOpen() const
 	return (mTcpMuxSocket && mUdpMuxSocket && mTcpMuxSocket->IsOpen() && mUdpMuxSocket->IsOpen());
 }
 
-DualSocket* DualMuxSocket::Connect(const SocketAddress& pTargetAddress, double pTimeout)
+bool DualMuxSocket::IsOpen(DualSocket* pSocket) const
+{
+	ScopeLock lLock(&mLock);
+	return (HashUtil::FindMapObject(mIdSocketMap, pSocket->GetConnectionId()) == pSocket);
+}
+
+DualSocket* DualMuxSocket::Connect(const SocketAddress& pTargetAddress, const std::string& pConnectionId, double pTimeout)
 {
 	// Simulatanously connect TCP and UDP.
 	ScopeLock lLock(&mLock);
-	std::string lConnectionId = SystemManager::GetRandomId();
 	Semaphore lConnectedSemaphore;
-	Connector<TcpMuxSocket, TcpVSocket> lTcpConnector(_T("TCP connector"), mTcpMuxSocket, pTargetAddress, lConnectionId, pTimeout, lConnectedSemaphore);
-	Connector<UdpMuxSocket, UdpVSocket> lUdpConnector(_T("UDP connector"), mUdpMuxSocket, pTargetAddress, lConnectionId, pTimeout, lConnectedSemaphore);
+	Connector<TcpMuxSocket, TcpVSocket> lTcpConnector(_T("TCP connector"), mTcpMuxSocket, pTargetAddress, pConnectionId, pTimeout, lConnectedSemaphore);
+	Connector<UdpMuxSocket, UdpVSocket> lUdpConnector(_T("UDP connector"), mUdpMuxSocket, pTargetAddress, pConnectionId, pTimeout, lConnectedSemaphore);
 	if (lTcpConnector.Start() && lUdpConnector.Start())
 	{
 		// Wait for both connectors to finish.
@@ -1792,7 +1802,7 @@ DualSocket* DualMuxSocket::Connect(const SocketAddress& pTargetAddress, double p
 	DualSocket* lSocket = 0;
 	if (lTcpConnector.mSocket && lUdpConnector.mSocket)
 	{
-		lSocket = new DualSocket(this, lConnectionId);
+		lSocket = new DualSocket(this, pConnectionId);
 		AddSocket(lSocket, lTcpConnector.mSocket, lUdpConnector.mSocket);
 	}
 	else
@@ -1880,6 +1890,12 @@ DualSocket* DualMuxSocket::PollAccept()
 	return (lSocket);
 }
 
+DualSocket* DualMuxSocket::PopReceiverSocket()
+{
+	mPopSafeToggle = !mPopSafeToggle;
+	return PopReceiverSocket(mPopSafeToggle);
+}
+
 DualSocket* DualMuxSocket::PopReceiverSocket(bool pSafe)
 {
 	ScopeLock lLock(&mLock);
@@ -1888,7 +1904,7 @@ DualSocket* DualMuxSocket::PopReceiverSocket(bool pSafe)
 
 	if (pSafe)
 	{
-		TcpVSocket* lTcpSocket = mTcpMuxSocket->PopReceiverSocket();
+		TcpVSocket* lTcpSocket = mTcpMuxSocket->PopReceiverSocket(pSafe);
 		if (lTcpSocket)
 		{
 			lSocket = HashUtil::FindMapObject(mTcpSocketMap, lTcpSocket);
@@ -1896,7 +1912,7 @@ DualSocket* DualMuxSocket::PopReceiverSocket(bool pSafe)
 	}
 	else
 	{
-		UdpVSocket* lUdpSocket = mUdpMuxSocket->PopReceiverSocket();
+		UdpVSocket* lUdpSocket = mUdpMuxSocket->PopReceiverSocket(pSafe);
 		if (lUdpSocket)
 		{
 			lSocket = HashUtil::FindMapObject(mUdpSocketMap, lUdpSocket);
@@ -1904,10 +1920,17 @@ DualSocket* DualMuxSocket::PopReceiverSocket(bool pSafe)
 	}
 
 	// If we received something, even though the socket isn't fully opened we throw it away.
-	if (lSocket && !lSocket->IsOpen())
+	if (lSocket)
 	{
-		CloseSocket(lSocket);
-		lSocket = 0;
+		if (!lSocket->IsOpen())
+		{
+			CloseSocket(lSocket);
+			lSocket = 0;
+		}
+		else
+		{
+			lSocket->SetSafeReceive(pSafe);
+		}
 	}
 	return (lSocket);
 }
@@ -1939,36 +1962,26 @@ DualSocket* DualMuxSocket::PopSenderSocket()
 	return (lSocket);
 }
 
+uint64 DualMuxSocket::GetSentByteCount() const
+{
+	return GetSentByteCount(false) + GetSentByteCount(true);
+}
+
 uint64 DualMuxSocket::GetSentByteCount(bool pSafe) const
 {
 	ScopeLock lLock(&mLock);
+	return pSafe? mTcpMuxSocket->GetTotalSentByteCount() : mUdpMuxSocket->GetSentByteCount();
+}
 
-	uint64 lCount;
-	if (pSafe)
-	{
-		lCount = mTcpMuxSocket->GetTotalSentByteCount();
-	}
-	else
-	{
-		lCount = mUdpMuxSocket->GetSentByteCount();
-	}
-	return (lCount);
+uint64 DualMuxSocket::GetReceivedByteCount() const
+{
+	return GetReceivedByteCount(false) + GetReceivedByteCount(true);
 }
 
 uint64 DualMuxSocket::GetReceivedByteCount(bool pSafe) const
 {
 	ScopeLock lLock(&mLock);
-
-	uint64 lCount;
-	if (pSafe)
-	{
-		lCount = mTcpMuxSocket->GetTotalReceivedByteCount();
-	}
-	else
-	{
-		lCount = mUdpMuxSocket->GetReceivedByteCount();
-	}
-	return (lCount);
+	return pSafe? mTcpMuxSocket->GetTotalReceivedByteCount() : mUdpMuxSocket->GetReceivedByteCount();
 }
 
 SocketAddress DualMuxSocket::GetLocalAddress() const
@@ -2133,7 +2146,9 @@ DualSocket::DualSocket(DualMuxSocket* pMuxSocket, const std::string& pConnection
 	ConnectionWithId(),
 	mMuxSocket(pMuxSocket),
 	mTcpSocket(0),
-	mUdpSocket(0)
+	mUdpSocket(0),
+	mDefaultSafeSend(false),
+	mDefaultSafeReceive(false)
 {
 	log_atrace("DualSocket()");
 	SetConnectionId(pConnectionId);
@@ -2210,6 +2225,16 @@ void DualSocket::ClearOutputData()
 	}
 }
 
+void DualSocket::SetSafeSend(bool pSafe)
+{
+	mDefaultSafeSend = pSafe;
+}
+
+Datagram& DualSocket::GetSendBuffer() const
+{
+	return GetSendBuffer(mDefaultSafeSend);
+}
+
 Datagram& DualSocket::GetSendBuffer(bool pSafe) const
 {
 	if (pSafe)
@@ -2220,6 +2245,11 @@ Datagram& DualSocket::GetSendBuffer(bool pSafe) const
 	{
 		return (mUdpSocket->GetSendBuffer());
 	}
+}
+
+IOError DualSocket::AppendSendBuffer(const void* pData, int pLength)
+{
+	return AppendSendBuffer(mDefaultSafeSend, pData, pLength);
 }
 
 IOError DualSocket::AppendSendBuffer(bool pSafe, const void* pData, int pLength)
@@ -2261,6 +2291,16 @@ int DualSocket::SendBuffer()
 bool DualSocket::HasSendData() const
 {
 	return (mTcpSocket->HasSendData() || mUdpSocket->HasSendData());
+}
+
+void DualSocket::SetSafeReceive(bool pSafe)
+{
+	mDefaultSafeReceive = pSafe;
+}
+
+int DualSocket::Receive(void* pData, int pLength)
+{
+	return Receive(mDefaultSafeReceive, pData, pLength);
 }
 
 int DualSocket::Receive(bool pSafe, void* pData, int pLength)

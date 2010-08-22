@@ -182,12 +182,14 @@ Engine
 + Add master volume.
 . Fix bug: when changing frame rates, the alarm callback sometimes never triggers (or takes forever?). Probably linked to physics frame counter?
 . Fix universal joint network sync (ODE-interface code relies heavily on LOCAL joint axes when receiving REMOTE updates via SetJointDiff).
+. Go back to using dual UDP/TCP sockets again.
 . Port client to Mac OS X / Cocoa.
 . I18N.
 . Make sure camera never flies under ground or collides with physical objects. Make camera always keep a free line of sight to the controlled object.
 . Collision sounds.
 . Organize data in directories for sounds, meshes, physics, classes, etc.
 . Make all materials use PreRender and PostRender. Clean code up around there.
+. Make Maya import pipeline use the proper materials for each mesh instance (i.e. saucer lights).
 . Add support for break and reverse lights.
 . Create ability for lossless UDP transfers.
 . When having several control units, the "input threshold" does not work. Make a threshold for each input entity.
@@ -217,10 +219,11 @@ Engine
 . Use game icon and make it happen on Windows, Mac, iPhone, X11...
 . Make sure resources are freed when not used for a little while.
 . Make sure sounds are stopped when not played (volume ~ 0), and make sure non-played sounds are placed in resource cache - which means they'll be unloaded after a little while according to the "resource pool freeing" bullet.
+. Create master server, which is able to add and remove the IP and server name. Plus send out a complete list of servers. Server list should be disk-backed.
 
 - Creating group/world objects as resources.
 - Loading group/world objects from disk.
-- Create a master server, which at first only receives user feedback.
+- Create functionality for master server: receive user feedback.
 - Add questionaire to end of demo game (=release client?). Send answers to master server.
 - Make export script (Maya) auto-run before save.
 - Use animated texture instead of wheels for excavator/bandwagon.

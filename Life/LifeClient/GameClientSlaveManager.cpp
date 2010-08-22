@@ -277,6 +277,18 @@ void GameClientSlaveManager::TickNetworkInput()
 					ProcessNetworkInputMessage(lMessage);
 				}
 				lParseResult = lPacket->ParseMore();
+				if (lParseResult == Cure::Packet::PARSE_SHIFT)
+				{
+					lReceived = GetNetworkClient()->ReceiveMore(lPacket);
+					if (lReceived == Cure::NetworkAgent::RECEIVE_OK)
+					{
+						lParseResult = lPacket->ParseMore();
+					}
+					else
+					{
+						lParseResult = Cure::Packet::PARSE_ERROR;
+					}
+				}
 			}
 			while (lParseResult == Cure::Packet::PARSE_OK);
 			if (lParseResult == Cure::Packet::PARSE_NO_DATA)
@@ -353,8 +365,8 @@ bool GameClientSlaveManager::TickNetworkOutput()
 					log_atrace("Position expires.");
 				}
 
-				double lResyncOnDiff;
-				CURE_RTVAR_GET(lResyncOnDiff, =, GetVariableScope(), RTVAR_NETPHYS_RESYNCONDIFFGT, 100.0);
+				float lResyncOnDiff;
+				CURE_RTVAR_GET(lResyncOnDiff, =(float), GetVariableScope(), RTVAR_NETPHYS_RESYNCONDIFFGT, 100.0);
 				if (lForceSendUnsafeClientKeepalive ||
 					lIsPositionExpired ||
 					lPositionalData->GetScaledDifference(&mNetworkOutputGhost) > lResyncOnDiff)
@@ -1400,6 +1412,20 @@ void GameClientSlaveManager::SetMovement(Cure::GameObjectId pInstanceId, int32 p
 				const int lFutureStepCount = GetTimeManager()->GetCurrentPhysicsFrameDelta(pFrameIndex) * lMicroSteps;
 				const float lStepIncrement = GetTimeManager()->GetAffordedPhysicsStepTime() / lMicroSteps;
 				pData.GhostStep(lFutureStepCount, lStepIncrement*lExtrapolationFactor);
+			}
+			bool lSetPosition = true;
+			if (pInstanceId == mAvatarId)
+			{
+				const Cure::ObjectPositionalData* lCurrentPos;
+				if (lObject->UpdateFullPosition(lCurrentPos))
+				{
+					float lResyncOnDiff;
+					CURE_RTVAR_GET(lResyncOnDiff, =(float), GetVariableScope(), RTVAR_NETPHYS_RESYNCONDIFFGT, 100.0);
+					if (pData.GetScaledDifference(lCurrentPos) < lResyncOnDiff)
+					{
+						lSetPosition = false;	// Not enough change to take notice. Would just yield a jerky movement, not much more.
+					}
+				}
 			}
 			lObject->SetFullPosition(pData);
 			bool lEnableSmoothing;

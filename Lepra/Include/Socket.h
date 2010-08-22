@@ -296,7 +296,7 @@ public:
 	void DispatchCloseSocket(TcpVSocket* pSocket);
 	void CloseSocket(TcpVSocket* pSocket, bool pForceDelete = false);
 
-	TcpVSocket* PopReceiverSocket();
+	TcpVSocket* PopReceiverSocket(bool pSafe);
 	TcpVSocket* PopSenderSocket();
 
 	uint64 GetTotalSentByteCount() const;
@@ -400,7 +400,7 @@ class UdpMuxSocket: public MuxIo, protected Thread, public UdpSocket
 public:
 	friend class UdpVSocket;
 
-	UdpMuxSocket(const str& pName, const SocketAddress& pLocalAddress,
+	UdpMuxSocket(const str& pName, const SocketAddress& pLocalAddress, bool pIsServer,
 		unsigned pMaxPendingConnectionCount = 16, unsigned pMaxConnectionCount = 1024);
 	virtual ~UdpMuxSocket();
 
@@ -415,7 +415,7 @@ public:
 	void AddBannedIP(const IPAddress& pIP);
 	void RemoveBannedIP(const IPAddress& pIP);
 
-	UdpVSocket* PopReceiverSocket();
+	UdpVSocket* PopReceiverSocket(bool pSafe);
 	UdpVSocket* PopSenderSocket();
 
 protected:
@@ -475,6 +475,8 @@ public:
 	IOError WriteRaw(const void* pData, size_t pLength);
 	void Flush();
 
+	void SetSafeSend(bool);
+
 private:
 	static const int MAX_INPUT_BUFFERS = 32;
 
@@ -507,8 +509,9 @@ public:
 	virtual ~DualMuxSocket();
 
 	bool IsOpen() const;
+	bool IsOpen(DualSocket* pSocket) const;
 
-	DualSocket* Connect(const SocketAddress& pTargetAddress, double pTimeout);
+	DualSocket* Connect(const SocketAddress& pTargetAddress, const std::string& pConnectionId, double pTimeout);
 
 	void Close();
 	void CloseSocket(DualSocket* pSocket);
@@ -520,10 +523,13 @@ public:
 	void DispatchCloseSocket(DualSocket* pSocket);
 
 	DualSocket* PollAccept();
+	DualSocket* PopReceiverSocket();
 	DualSocket* PopReceiverSocket(bool pSafe);
 	DualSocket* PopSenderSocket();
 
+	uint64 GetSentByteCount() const;
 	uint64 GetSentByteCount(bool pSafe) const;
+	uint64 GetReceivedByteCount() const;
 	uint64 GetReceivedByteCount(bool pSafe) const;
 
 	SocketAddress GetLocalAddress() const;
@@ -558,6 +564,7 @@ private:
 	static const double DEFAULT_CONNECT_DUAL_TIMEOUT;
 	double mConnectDualTimeout;
 	SocketTimeMap mPendingDualConnectMap;
+	bool mPopSafeToggle;
 
 	typedef fastdelegate::FastDelegate1<DualSocket*, void> SocketDispatcher;
 	SocketDispatcher mCloseDispatcher;
@@ -612,11 +619,16 @@ public:
 	SocketAddress GetTargetAddress() const;
 
 	void ClearOutputData();
+	void SetSafeSend(bool pSafe);
+	Datagram& GetSendBuffer() const;
 	Datagram& GetSendBuffer(bool pSafe) const;
+	IOError AppendSendBuffer(const void* pData, int pLength);
 	IOError AppendSendBuffer(bool pSafe, const void* pData, int pLength);
 	int SendBuffer();	// ::send() and ::sendto() return values.
 	bool HasSendData() const;
 
+	void SetSafeReceive(bool pSafe);
+	int Receive(void* pData, int pLength);
 	int Receive(bool pSafe, void* pData, int pLength);
 
 	void TryAddReceiverSocket();
@@ -634,6 +646,8 @@ private:
 	DualMuxSocket* mMuxSocket;
 	TcpVSocket* mTcpSocket;
 	UdpVSocket* mUdpSocket;
+	bool mDefaultSafeSend;
+	bool mDefaultSafeReceive;
 
 	LOG_CLASS_DECLARE();
 };

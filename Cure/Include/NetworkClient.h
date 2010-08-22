@@ -44,11 +44,12 @@ public:
 	uint32 GetLoginAccountId() const;
 	void SetLoginAccountId(uint32 pLoginAccountId);
 
-	UdpVSocket* GetSocket() const;
+	VSocket* GetSocket() const;
 
 	virtual bool SendAll();
 	virtual ReceiveStatus ReceiveNonBlocking(Packet* pPacket);
 	virtual ReceiveStatus ReceiveTimeout(Packet* pPacket, double pTimeout);
+	ReceiveStatus ReceiveMore(Packet* pPacket);
 
 private:
 	bool SendLoginRequest(const LoginId& pLoginId);
@@ -56,9 +57,9 @@ private:
 	void LoginEntry();
 	void StopLoginThread();
 
-	void OnCloseSocket(UdpVSocket*);
+	void OnCloseSocket(VSocket*);
 
-	UdpVSocket* mSocket;
+	VSocket* mSocket;
 	uint32 mLoginAccountId;
 	bool mIsConnecting;
 	bool mIsLoggingIn;
@@ -67,6 +68,7 @@ private:
 	Cure::LoginId mLoginToken;
 	double mLoginTimeout;
 	MemberThread<NetworkClient> mLoginThread;
+	bool mSafeReceiveToggle;
 
 	LOG_CLASS_DECLARE();
 };
