@@ -7,7 +7,10 @@
 #include "GameClientViewer.h"
 #include "../../Cure/Include/ContextManager.h"
 #include "../../TBC/Include/ChunkyPhysics.h"
+#include "../../UiTBC/Include/GUI/UiDesktopWindow.h"
+#include "../../UiTBC/Include/GUI/UiFloatingLayout.h"
 #include "GameClientMasterTicker.h"
+#include "ServerListView.h"
 #include "UiConsole.h"
 #include "Vehicle.h"
 
@@ -55,14 +58,17 @@ void GameClientViewer::TickUiUpdate()
 
 void GameClientViewer::CreateLoginView()
 {
+	QuaternionF lFlip;
+	lFlip.RotateAroundOwnZ(PIF);
 	CreateButton(-0.2f, +0.2f,  6.0f, _T("1"),	_T("road_sign_02"), _T("Data/road_sign_1p.png"), RoadSignButton::SHAPE_BOX);
-	RoadSignButton* lButton = CreateButton(+0.2f, +0.2f,  6.0f, _T("2"),	_T("road_sign_02"), _T("Data/road_sign_1p.png"), RoadSignButton::SHAPE_BOX);
-	QuaternionF lQuaternion;
-	lQuaternion.RotateAroundOwnZ(PIF);
-	lButton->SetOrientation(lQuaternion);
-	CreateButton(-0.2f, -0.2f,  6.0f, _T("3"),	_T("road_sign_02"), _T("Data/road_sign_1p.png"), RoadSignButton::SHAPE_BOX);
-	lButton = CreateButton(+0.2f, -0.2f,  6.0f, _T("4"),	_T("road_sign_02"), _T("Data/road_sign_1p.png"), RoadSignButton::SHAPE_BOX);
-	lButton->SetOrientation(lQuaternion);
+	RoadSignButton* lButton = CreateButton(+0.2f, +0.2f,  6.0f, _T("2"),	_T("road_sign_02"), _T("Data/road_sign_2p.png"), RoadSignButton::SHAPE_BOX);
+	lButton->SetOrientation(lFlip);
+	CreateButton(-0.2f, -0.2f,  6.0f, _T("3"),	_T("road_sign_02"), _T("Data/road_sign_3p.png"), RoadSignButton::SHAPE_BOX);
+	lButton = CreateButton(+0.2f, -0.2f,  6.0f, _T("4"),	_T("road_sign_02"), _T("Data/road_sign_4p.png"), RoadSignButton::SHAPE_BOX);
+	lButton->SetOrientation(lFlip);
+
+	CreateButton(-0.4f, +0.4f, 12.0f, _T("server"),	_T("road_sign_01"), _T("Data/road_sign_roundabout.png"), RoadSignButton::SHAPE_ROUND);
+
 	CreateButton(+0.4f, +0.4f, 12.0f, _T("quit"),	_T("road_sign_01"), _T("Data/road_sign_nostop.png"), RoadSignButton::SHAPE_ROUND);
 }
 
@@ -106,6 +112,16 @@ RoadSignButton* GameClientViewer::CreateButton(float x, float y, float z, const 
 
 void GameClientViewer::OnButtonClick(UiTbc::Button* pButton)
 {
+	if (pButton->GetName() == _T("server"))
+	{
+		GetMaster()->DownloadServerList();
+		View* lView = new ServerListView(0);
+		mUiManager->AssertDesktopLayout(new UiTbc::FloatingLayout());
+		mUiManager->GetDesktopWindow()->AddChild(lView);
+		lView->SetPos(mRenderArea.GetCenterX()-lView->GetSize().x/2,
+			mRenderArea.GetCenterY()-lView->GetSize().y/2);
+		return;
+	}
 	if (pButton->GetName() == _T("quit"))
 	{
 		GetMaster()->OnExit();

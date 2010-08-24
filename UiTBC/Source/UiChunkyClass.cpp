@@ -113,7 +113,7 @@ bool ChunkyClass::UnpackTag(uint8* pBuffer, unsigned pSize)
 				mLog.Errorf(_T("String index %i had wrong length (%i)."), x, lStrSize);
 			}
 			lIndex += lStrSize;
-			lTag.mStringValueList.push_back(lValue);
+			lTag.mStringValueList.push_back(strutil::Encode(lValue));
 		}
 	}
 	if (lOk)

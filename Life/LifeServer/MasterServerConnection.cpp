@@ -231,6 +231,7 @@ bool MasterServerConnection::UploadServerInfo()
 {
 	if (!SendAndAck(_T(MASTER_SERVER_USI) _T(" ") + mLocalServerInfo))
 	{
+		mLocalServerInfo.clear();	// TRICKY: this will make sure that we don't try to drop our server on shutdown.
 		return false;
 	}
 	mLog.Info(_T("Seems to have uploaded server info..."));

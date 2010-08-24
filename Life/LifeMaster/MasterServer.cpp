@@ -47,7 +47,7 @@ bool MasterServer::Run()
 	{
 		return false;
 	}
-	mLog.Headline(_T("Master server up and running. Awaiting connections."));
+	mLog.Headline(_T("Up and running, awaiting connections."));
 	SystemManager::SetQuitRequestCallback(SystemManager::QuitRequestCallback(this, &MasterServer::OnQuitRequest));
 	TcpSocket* lConnectedSocket;
 	while (SystemManager::GetQuitRequest() == 0 && (lConnectedSocket = mSocket->Accept()) != 0)
@@ -248,6 +248,7 @@ bool MasterServer::SendServerList(TcpSocket* pSocket)
 			lServerList += x->second.mName + _T(": ") + x->first + _T("\n");
 		}
 	}
+	lServerList += _T("OK");
 	return Send(pSocket, lServerList);
 }
 

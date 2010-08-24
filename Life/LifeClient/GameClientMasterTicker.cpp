@@ -584,9 +584,13 @@ void GameClientMasterTicker::DeleteSlave(GameClientSlaveManager* pSlave, bool pA
 	assert(mSlaveArray[pSlave->GetSlaveIndex()]);
 	mSlaveArray[pSlave->GetSlaveIndex()] = 0;
 	delete (pSlave);
-	if (--mActiveSlaveCount == 0 && pAllowMainMenu)
+	if (--mActiveSlaveCount == 0)
 	{
-		CreatePlayerCountWindow();
+		//mResourceManager->ForceFreeCache();
+		if (pAllowMainMenu)
+		{
+			CreatePlayerCountWindow();
+		}
 	}
 }
 

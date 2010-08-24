@@ -557,6 +557,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ServerListView.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Sunlight.cpp"
 				>
 			</File>
@@ -616,6 +620,10 @@
 			</File>
 			<File
 				RelativePath=".\RtVar.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ServerListView.h"
 				>
 			</File>
 			<File
