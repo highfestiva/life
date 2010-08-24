@@ -2,8 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="LifeServer"
-	ProjectGUID="{3C46C2E1-41EF-49C2-9D3C-1C69B8CFCDAA}"
+	Name="LifeMaster"
+	ProjectGUID="{3C462CE1-41EF-24C9-93CA-AA169BCC8FCD}"
 	RootNamespace="Life"
 	Keyword="ManagedCProj"
 	TargetFrameworkVersion="0"
@@ -520,35 +520,15 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\Client.cpp"
+				RelativePath=".\MasterApplication.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\Elevator.cpp"
+				RelativePath=".\MasterServer.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\GameServerManager.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\GameServerTicker.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\MasterServerConnection.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ServerApplication.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ServerConsoleManager.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Spawner.cpp"
+				RelativePath=".\MasterServerNetworkParser.cpp"
 				>
 			</File>
 		</Filter>
@@ -558,51 +538,11 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\Client.h"
+				RelativePath=".\MasterServer.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Elevator.h"
-				>
-			</File>
-			<File
-				RelativePath=".\GameServerManager.h"
-				>
-			</File>
-			<File
-				RelativePath=".\GameServerTicker.h"
-				>
-			</File>
-			<File
-				RelativePath=".\MasterServerConnection.h"
-				>
-			</File>
-			<File
-				RelativePath=".\RtVar.h"
-				>
-			</File>
-			<File
-				RelativePath=".\ServerConsoleManager.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Spawner.h"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="Master"
-			>
-			<File
-				RelativePath="..\LifeMaster\MasterServer.h"
-				>
-			</File>
-			<File
-				RelativePath="..\LifeMaster\MasterServerNetworkParser.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\LifeMaster\MasterServerNetworkParser.h"
+				RelativePath=".\MasterServerNetworkParser.h"
 				>
 			</File>
 		</Filter>

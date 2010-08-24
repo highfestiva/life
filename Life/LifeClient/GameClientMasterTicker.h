@@ -29,8 +29,9 @@ namespace Life
 
 class ConsoleManager;
 class GameClientSlaveManager;
-class Sunlight;
+class MasterServerConnection;
 class RoadSignButton;
+class Sunlight;
 class UiGameServerManager;
 
 
@@ -61,6 +62,8 @@ public:
 	void PreLogin(const str& pServerAddress);
 	void OnExit();
 	void OnSetPlayerCount(int pPlayerCount);
+
+	void DownloadServerList();
 
 	Sunlight* GetSunlight() const;	// TODO: move this hard-coding to a context object or summat.
 
@@ -126,6 +129,7 @@ private:
 	bool mIsPlayerCountViewActive;
 
 	UiGameServerManager* mServer;
+	MasterServerConnection* mMasterConnection;
 
 	ConsoleManager* mConsole;
 	bool mRestartUi;

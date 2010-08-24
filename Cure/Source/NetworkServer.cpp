@@ -76,6 +76,11 @@ void NetworkServer::Stop()
 	Parent::Stop();
 }
 
+str NetworkServer::GetLocalAddress() const
+{
+	return mMuxSocket->GetLocalAddress().GetAsString();
+}
+
 
 
 void NetworkServer::Disconnect(UserAccount::AccountId pAccountId, const str& pReason, bool pSendDisconnect)

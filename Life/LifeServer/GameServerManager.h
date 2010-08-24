@@ -28,6 +28,10 @@ namespace Life
 
 
 
+class MasterServerConnection;
+
+
+
 class GameServerManager: public Cure::GameManager, public Cure::NetworkServer::LoginListener
 {
 public:
@@ -37,7 +41,7 @@ public:
 	virtual ~GameServerManager();
 
 	virtual void StartConsole(InteractiveConsoleLogListener* pConsoleLogger, ConsolePrompt* pConsolePrompt);
-	bool Initialize();
+	bool Initialize(MasterServerConnection* pMasterConnection);
 	float GetPowerSaveAmount() const;
 
 	wstrutil::strvec ListUsers();
@@ -106,6 +110,7 @@ private:
 	Cure::ContextObject* mTerrainObject;	// TODO: remove when applicable.
 	MovementArrayList mMovementArrayList;
 	mutable Timer mPowerSaveTimer;
+	MasterServerConnection* mMasterConnection;
 
 	LOG_CLASS_DECLARE();
 };

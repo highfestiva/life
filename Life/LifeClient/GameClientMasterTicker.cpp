@@ -24,6 +24,7 @@
 #include "../../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../../UiTBC/Include/GUI/UiFloatingLayout.h"
 #include "../../UiTBC/Include/UiRenderer.h"
+#include "../LifeServer/MasterServerConnection.h"
 #include "../LifeApplication.h"
 #include "GameClientDemo.h"
 #include "GameClientSlaveManager.h"
@@ -53,6 +54,7 @@ GameClientMasterTicker::GameClientMasterTicker(UiCure::GameUiManager* pUiManager
 	mResourceManager(pResourceManager),
 	mIsPlayerCountViewActive(false),
 	mServer(0),
+	mMasterConnection(new MasterServerConnection),
 	mRestartUi(false),
 	mInitialized(false),
 	mActiveWidth(0),
@@ -112,6 +114,9 @@ GameClientMasterTicker::~GameClientMasterTicker()
 
 	mResourceManager = 0;
 	mUiManager = 0;
+
+	delete mMasterConnection;
+	mMasterConnection = 0;
 }
 
 
@@ -132,6 +137,11 @@ bool GameClientMasterTicker::Tick()
 	ScopeLock lLock(&mLock);
 
 	SlaveArray::iterator x;
+
+	{
+		LEPRA_MEASURE_SCOPE(MasterServerConnectionTick);
+		mMasterConnection->Tick();
+	}
 
 	{
 		LEPRA_MEASURE_SCOPE(BeginRenderAndInput);
@@ -440,7 +450,7 @@ void GameClientMasterTicker::PreLogin(const str& pServerAddress)
 		Cure::RuntimeVariableScope* lVariableScope = new Cure::RuntimeVariableScope(UiCure::GetSettings());
 		UiGameServerManager* lServer = new UiGameServerManager(lVariableScope, mResourceManager, mUiManager, PixelRect(0, 0, 100, 100));
 		lServer->StartConsole(new UiTbc::ConsoleLogListener, new UiTbc::ConsolePrompt);
-		if (!lServer->Initialize())
+		if (!lServer->Initialize(mMasterConnection))
 		{
 			delete lServer;
 			lServer = 0;
@@ -479,6 +489,11 @@ void GameClientMasterTicker::OnSetPlayerCount(int pPlayerCount)
 	{
 		CreateSlave();
 	}
+}
+
+void GameClientMasterTicker::DownloadServerList()
+{
+	mMasterConnection->RequestServerList(_T(""));
 }
 
 

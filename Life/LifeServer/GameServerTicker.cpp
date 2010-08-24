@@ -11,6 +11,7 @@
 #include "../LifeApplication.h"
 #include "RtVar.h"
 #include "GameServerManager.h"
+#include "MasterServerConnection.h"
 #include "ServerConsoleManager.h"
 
 
@@ -23,10 +24,12 @@ namespace Life
 GameServerTicker::GameServerTicker(Cure::ResourceManager* pResourceManager,
 	InteractiveConsoleLogListener* pConsoleLogger):
 	mResourceManager(pResourceManager),
-	mGameManager(0)
+	mGameManager(0),
+	mMasterConnection(new MasterServerConnection)
 {
-	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_ALLLOGGEDOUT_AUTOSHUTDOWN, false);
+	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_APPLICATION_AUTOEXITONEMPTYSERVER, false);
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_GAME_SPAWNPART, 1.0);
+	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_NETWORK_SERVERNAME, _T("My Dedicated Server"));
 
 	ConsoleManager lConsole(0, Cure::GetSettings(), 0, 0);
 	lConsole.InitCommands();
@@ -52,17 +55,23 @@ GameServerTicker::~GameServerTicker()
 	}
 
 	mResourceManager = 0;
+
+	mMasterConnection->GraceClose(5.0);
+	delete mMasterConnection;
+	mMasterConnection = 0;
 }
 
 
 
 bool GameServerTicker::Initialize()
 {
-	return (mGameManager->Initialize());
+	return mGameManager->Initialize(mMasterConnection);
 }
 
 bool GameServerTicker::Tick()
 {
+	mMasterConnection->Tick();
+
 	bool lOk = mGameManager->BeginTick();
 	if (lOk)
 	{
@@ -72,7 +81,7 @@ bool GameServerTicker::Tick()
 	mResourceManager->Tick();
 
 	bool lAutoShutdown;
-	CURE_RTVAR_GET(lAutoShutdown, =, Cure::GetSettings(), RTVAR_ALLLOGGEDOUT_AUTOSHUTDOWN, false);
+	CURE_RTVAR_GET(lAutoShutdown, =, Cure::GetSettings(), RTVAR_APPLICATION_AUTOEXITONEMPTYSERVER, false);
 	if (lAutoShutdown)
 	{
 		static size_t lMaxLoginCount = 0;

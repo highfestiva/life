@@ -20,6 +20,7 @@ namespace Life
 
 
 class GameServerManager;
+class MasterServerConnection;
 
 
 
@@ -38,6 +39,7 @@ private:
 
 	Cure::ResourceManager* mResourceManager;
 	GameServerManager* mGameManager;
+	MasterServerConnection* mMasterConnection;
 
 	LOG_CLASS_DECLARE();
 };

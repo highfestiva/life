@@ -35,6 +35,7 @@ const ClientConsoleManager::CommandPair ClientConsoleManager::mCommandIdList[] =
 	{_T("bye"), COMMAND_BYE},
 	{_T("start-login"), COMMAND_START_LOGIN},
 	{_T("wait-login"), COMMAND_WAIT_LOGIN},
+	{_T("list-servers"), COMMAND_LIST_SERVERS},
 	{_T("logout"), COMMAND_LOGOUT},
 	{_T("start-reset-ui"), COMMAND_START_RESET_UI},
 	{_T("wait-reset-ui"), COMMAND_WAIT_RESET_UI},
@@ -165,6 +166,12 @@ int ClientConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& 
 				{
 					Thread::Sleep(0.01);
 				}
+			}
+			break;
+			case COMMAND_LIST_SERVERS:
+			{
+				mLog.AInfo("Active servers:");
+				((GameClientSlaveManager*)GetGameManager())->GetMaster()->DownloadServerList();
 			}
 			break;
 			case COMMAND_LOGOUT:

@@ -47,6 +47,7 @@ public:
 
 	virtual bool Start(const str& pHostAddress);
 	virtual void Stop();
+	str GetLocalAddress() const;
 
 	void Disconnect(UserAccount::AccountId pAccountId, const str& pReason, bool pSendDisconnect);
 

@@ -119,33 +119,15 @@ int Application::Run()
 		lOk = mGameTicker->Initialize();
 	}
 	bool lQuit = false;
-	PerformanceData lTimeInfo;
-	lTimeInfo.Set(1/60.0, 1/60.0, 1/60.0);
+	mTimeInfo.Set(1/60.0, 1/60.0, 1/60.0);
 	while (lOk && !lQuit)
 	{
 		LEPRA_MEASURE_SCOPE(AppTick);
-
-		{
-			ScopeTimer lSleepTimer(&lTimeInfo);
-			bool lDebug;
-			CURE_RTVAR_GET(lDebug, =, Cure::GetSettings(), RTVAR_DEBUG_ENABLE, false);
-			if (lDebug)
-			{
-				mGameTicker->Profile();
-			}
-			Random::GetRandomNumber();	// To move seed ahead.
-			lOk = mGameTicker->Tick();
-			float lExtraSleep;
-			CURE_RTVAR_GET(lExtraSleep, =(float), Cure::GetSettings(), RTVAR_DEBUG_EXTRASLEEPTIME, 0.0);
-			if (lExtraSleep > 0)
-			{
-				Thread::Sleep(lExtraSleep);
-			}
-		}
+		lOk = Tick();
 		if (lOk)
 		{
 			LEPRA_MEASURE_SCOPE(AppSleep);
-			TickSleep(lTimeInfo.GetSlidingAverage());
+			TickSleep(mTimeInfo.GetSlidingAverage());
 		}
 		lQuit = mGameTicker->QueryQuit();
 	}
@@ -170,6 +152,26 @@ int Application::Run()
 	}
 
 	return (0);
+}
+
+bool Application::Tick()
+{
+	ScopeTimer lSleepTimer(&mTimeInfo);
+	bool lDebug;
+	CURE_RTVAR_GET(lDebug, =, Cure::GetSettings(), RTVAR_DEBUG_ENABLE, false);
+	if (lDebug)
+	{
+		mGameTicker->Profile();
+	}
+	Random::GetRandomNumber();	// To move seed ahead.
+	bool lOk = mGameTicker->Tick();
+	float lExtraSleep;
+	CURE_RTVAR_GET(lExtraSleep, =(float), Cure::GetSettings(), RTVAR_DEBUG_EXTRASLEEPTIME, 0.0);
+	if (lExtraSleep > 0)
+	{
+		Thread::Sleep(lExtraSleep);
+	}
+	return lOk;
 }
 
 void Application::Destroy()

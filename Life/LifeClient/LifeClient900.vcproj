@@ -695,6 +695,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\LifeServer\MasterServerConnection.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\LifeServer\MasterServerConnection.h"
+				>
+			</File>
+			<File
 				RelativePath="..\LifeServer\ServerConsoleManager.cpp"
 				>
 			</File>
@@ -724,6 +732,22 @@
 			</File>
 			<File
 				RelativePath=".\UiServerConsoleManager.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Master"
+			>
+			<File
+				RelativePath="..\LifeMaster\MasterServer.h"
+				>
+			</File>
+			<File
+				RelativePath="..\LifeMaster\MasterServerNetworkParser.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\LifeMaster\MasterServerNetworkParser.h"
 				>
 			</File>
 		</Filter>

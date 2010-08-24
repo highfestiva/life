@@ -1,18 +1,10 @@
-/*
-	Class:  DES
-	Author: Jonas Bystr�
-	Copyright (c) 2002-2009, Righteous Games
 
-	The DES class has methods for encrypting and
-	decrypting data using the single DES algorithm.
-*/
+// Author: Jonas Byström
+// Copyright (c) 2002-2010, Righteous Games
 
 
 
-#ifndef LEPRA_DES_H
-#define LEPRA_DES_H
-
-
+#pragma once
 
 #include "LepraTypes.h"
 
@@ -47,7 +39,3 @@ protected:
 
 
 }
-
-
-
-#endif // !LEPRA_DES_H

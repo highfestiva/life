@@ -211,12 +211,12 @@ template<> const astr astrutil::Encode(const wstr& pString)
 	astr lAnsi;
 	if (sizeof(wchar_t) == 2)
 	{
-		utf8::utf16to8(pString.begin(), pString.end(), back_inserter(lAnsi));
+		utf8::unchecked::utf16to8(pString.begin(), pString.end(), back_inserter(lAnsi));
 	}
 	else
 	{
 		assert(sizeof(wchar_t) == 4);
-		utf8::utf32to8(pString.begin(), pString.end(), back_inserter(lAnsi));
+		utf8::unchecked::utf32to8(pString.begin(), pString.end(), back_inserter(lAnsi));
 	}
 	return (lAnsi);
 }
@@ -227,12 +227,12 @@ template<> const wstr wstrutil::Encode(const astr& pString)
 	wstr lUnicode;
 	if (sizeof(wchar_t) == 2)
 	{
-		utf8::utf8to16(pString.begin(), pString.end(), back_inserter(lUnicode));
+		utf8::unchecked::utf8to16(pString.begin(), pString.end(), back_inserter(lUnicode));
 	}
 	else
 	{
 		assert(sizeof(wchar_t) == 4);
-		utf8::utf8to32(pString.begin(), pString.end(), back_inserter(lUnicode));
+		utf8::unchecked::utf8to32(pString.begin(), pString.end(), back_inserter(lUnicode));
 	}
 	return (lUnicode);
 }

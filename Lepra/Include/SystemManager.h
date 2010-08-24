@@ -6,9 +6,9 @@
 
 #pragma once
 
+#include "../../ThirdParty/FastDelegate/FastDelegate.h"
 #include "LepraTypes.h"
 #include "Log.h"
-#include "String.h"
 #include "String.h"
 
 
@@ -21,6 +21,8 @@ namespace Lepra
 class SystemManager
 {
 public:
+	typedef fastdelegate::FastDelegate1<int, void> QuitRequestCallback;
+
 	static void Init();
 	static void Shutdown();
 
@@ -32,10 +34,11 @@ public:
 	static str GetLoginName();
 	static str QueryFullUserName();
 	static std::string GetRandomId();
+	static std::string GetSystemPseudoId();
 
 	static void WebBrowseTo(const str& pUrl);
 
-	static str GetUniqueHardwareString();
+	static str GetUniqueHardwareString(bool pRandomize);
 
 	// The Cpu frequency may be an approximation, which means that it may vary 
 	// from call to call.
@@ -54,6 +57,7 @@ public:
 
 	static int GetQuitRequest();
 	static void AddQuitRequest(int pValue);
+	static void SetQuitRequestCallback(const QuitRequestCallback& pCallback);
 	static void ExitProcess(int pExitCode);	// Exit this application NOW.
 
 private:
@@ -62,6 +66,7 @@ private:
 	static inline void BOGOMIPSDelay(unsigned pLoopCount);
 
 	static int mQuitRequest;
+	static QuitRequestCallback mQuitRequestCallback;
 
 	LOG_CLASS_DECLARE();
 };

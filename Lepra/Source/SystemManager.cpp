@@ -21,7 +21,7 @@ std::string SystemManager::GetRandomId()
 {
 	str s;
 	s += GetLoginName();
-	s += GetUniqueHardwareString();
+	s += GetUniqueHardwareString(true);
 	s += strutil::IntToString(Random::GetRandomNumber64(), 16);
 	s += strutil::IntToString(GetCpuTick(), 16);
 	s += strutil::IntToString(GetAvailRam(), 16);
@@ -31,10 +31,41 @@ std::string SystemManager::GetRandomId()
 	return (std::string((const char*)lHashData, sizeof(lHashData)));
 }
 
-str SystemManager::GetUniqueHardwareString()
+std::string SystemManager::GetSystemPseudoId()
 {
 	str s;
-	s += strutil::IntToString(QueryCpuFrequency(), 16);
+	s += GetLoginName();
+	s += GetUniqueHardwareString(false);
+	uint8 lHashData[20];
+	SHA1::Hash((const uint8*)s.c_str(), s.length()*sizeof(tchar), lHashData);
+	std::string lResult;
+	for (int x = 0; x < sizeof(lHashData); ++x)
+	{
+		if (lHashData[x] < ' ')
+		{
+			lResult.push_back(' ');
+			lResult.push_back(' '+(lHashData[x]));
+		}
+		else if (lHashData[x] < 127)
+		{
+			lResult.push_back(lHashData[x]);
+		}
+		else
+		{
+			lResult.push_back('?'+(lHashData[x]>>6));
+			lResult.push_back('?'+(lHashData[x]&0x3F));
+		}
+	}
+	return lResult;
+}
+
+str SystemManager::GetUniqueHardwareString(bool pRandomize)
+{
+	str s;
+	if (pRandomize)
+	{
+		s += strutil::IntToString(QueryCpuFrequency(), 16);
+	}
 	s += strutil::IntToString(GetLogicalCpuCount(), 16);
 	s += strutil::IntToString(GetPhysicalCpuCount(), 16);
 	s += strutil::IntToString(GetCoreCount(), 16);
@@ -132,8 +163,16 @@ void SystemManager::AddQuitRequest(int pValue)
 	{
 		mQuitRequest = 0;
 	}
+	if (mQuitRequest > 0 && !mQuitRequestCallback.empty())
+	{
+		mQuitRequestCallback(mQuitRequest);
+	}
 }
 
+void SystemManager::SetQuitRequestCallback(const QuitRequestCallback& pCallback)
+{
+	mQuitRequestCallback = pCallback;
+}
 
 
 unsigned SystemManager::SingleMipsTest()
@@ -169,6 +208,8 @@ BogoLoop:	loop	BogoLoop
 
 
 int SystemManager::mQuitRequest = 0;
+SystemManager::QuitRequestCallback SystemManager::mQuitRequestCallback;
+
 
 LOG_CLASS_DEFINE(GENERAL, SystemManager);
 

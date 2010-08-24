@@ -8,6 +8,7 @@
 
 #include "../Lepra/Include/Application.h"
 #include "../Lepra/Include/LogListener.h"
+#include "../Lepra/Include/Performance.h"
 #include "../Lepra/Include/String.h"
 #include "Life.h"
 
@@ -33,6 +34,7 @@ public:
 	virtual ~Application();
 	void Init();
 	int Run();
+	virtual bool Tick();
 	void Destroy();
 
 	virtual str GetName() const = 0;
@@ -56,6 +58,8 @@ private:
 	FileLogListener* mFileLogger;
 	LogListener* mPerformanceLogger;
 	MemFileLogListener* mMemLogger;
+
+	PerformanceData mTimeInfo;
 
 	LOG_CLASS_DECLARE();
 };

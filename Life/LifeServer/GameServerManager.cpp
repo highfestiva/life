@@ -10,9 +10,11 @@
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../../Cure/Include/TimeManager.h"
 #include "../../Lepra/Include/Path.h"
+#include "../../Lepra/Include/SystemManager.h"
 #include "../../TBC/Include/ChunkyPhysics.h"
 #include "../LifeApplication.h"
 #include "Elevator.h"
+#include "MasterServerConnection.h"
 #include "RtVar.h"
 #include "ServerConsoleManager.h"
 #include "Spawner.h"
@@ -32,16 +34,26 @@ GameServerManager::GameServerManager(Cure::RuntimeVariableScope* pVariableScope,
 	Cure::GameManager(pVariableScope, pResourceManager),
 	mUserAccountManager(new Cure::MemoryUserAccountManager()),
 	mTerrainObject(0),
-	mMovementArrayList(NETWORK_POSITIONAL_AHEAD_BUFFER_SIZE)
+	mMovementArrayList(NETWORK_POSITIONAL_AHEAD_BUFFER_SIZE),
+	mMasterConnection(0)
 {
-	CURE_RTVAR_SET_IF_NOT_SET(Cure::GetSettings(), RTVAR_ALLLOGGEDOUT_AUTOSHUTDOWN, false);
+	CURE_RTVAR_SET_IF_NOT_SET(Cure::GetSettings(), RTVAR_APPLICATION_AUTOEXITONEMPTYSERVER, false);
 	CURE_RTVAR_SET_IF_NOT_SET(Cure::GetSettings(), RTVAR_GAME_SPAWNPART, 1.0);
+	CURE_RTVAR_SET_IF_NOT_SET(Cure::GetSettings(), RTVAR_NETWORK_SERVERNAME, _T("My Server"));
 
 	SetNetworkAgent(new Cure::NetworkServer(pVariableScope, this));
+
 }
 
 GameServerManager::~GameServerManager()
 {
+	if (mMasterConnection)
+	{
+		mMasterConnection->AppendLocalInfo(_T(" --remove true"));
+		mMasterConnection->WaitUntilDone(50.0, true);
+		mMasterConnection = 0;	// Not owned by us, deleted elsewhere.
+	}
+
 	DeleteAllClients();
 
 	delete (mUserAccountManager);
@@ -65,7 +77,7 @@ void GameServerManager::StartConsole(InteractiveConsoleLogListener* pConsoleLogg
 	GetConsoleManager()->Start();
 }
 
-bool GameServerManager::Initialize()
+bool GameServerManager::Initialize(MasterServerConnection* pMasterConnection)
 {
 	bool lOk = InitializeTerrain();
 
@@ -121,6 +133,20 @@ bool GameServerManager::Initialize()
 		if (!lOk)
 		{
 			mLog.Fatalf(_T("Is a server already running on '%s'?"), lAcceptAddress.c_str());
+		}
+	}
+	if (lOk)
+	{
+		mMasterConnection = pMasterConnection;
+		strutil::strvec lAddressParts = strutil::Split(lAcceptAddress, _T(":"), 1);
+		if (lAddressParts.size() == 2)
+		{
+			const str lPort = lAddressParts[1];
+			str lServerName;
+			CURE_RTVAR_GET(lServerName, =, Cure::GetSettings(), RTVAR_NETWORK_SERVERNAME, _T("?"));
+			const str lId = strutil::ReplaceAll(strutil::Encode(SystemManager::GetSystemPseudoId()), _T("\""), _T("''\\''"));
+			const str lLocalServerInfo = _T("--name \"")+lServerName + _T("\" --port ")+lPort + _T(" --id \"")+lId+_T("\"");
+			mMasterConnection->SendLocalInfo(lLocalServerInfo);
 		}
 	}
 	return (lOk);

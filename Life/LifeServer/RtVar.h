@@ -10,6 +10,8 @@
 
 
 
-#define RTVAR_ALLLOGGEDOUT_AUTOSHUTDOWN	"AllLoggedOut.AutoShutdown"	// Not debug, might be desirable on dedicated servers.
+#define RTVAR_APPLICATION_AUTOEXITONEMPTYSERVER	"Application.AutoExitOnEmptyServer"	// Not debug, might be desirable on dedicated servers.
 
-#define RTVAR_GAME_SPAWNPART		"Game.SpawnPart"
+#define RTVAR_GAME_SPAWNPART			"Game.SpawnPart"
+
+#define RTVAR_NETWORK_SERVERNAME		"Network.ServerName"
