@@ -258,6 +258,8 @@ int GameServerManager::GetLoggedInClientCount() const
 
 void GameServerManager::TickInput()
 {
+	UploadServerInfo();
+
 	Cure::Packet* lPacket = GetNetworkAgent()->GetPacketFactory()->Allocate();
 	Cure::NetworkAgent::ReceiveStatus lReceived = Cure::NetworkAgent::RECEIVE_OK;
 	while (lReceived != Cure::NetworkAgent::RECEIVE_NO_DATA)
