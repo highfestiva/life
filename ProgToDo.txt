@@ -59,6 +59,8 @@ Game
   - Bullet time triggers on jumps on the monster track. When triggered, sets RTR to 0.2 for x seconds.
   - Trigger in a "tingling gate" somewhere which gives you toy speed. When triggered, sets RTR to 2.3 for x seconds.
   - Real world "tingling gate" trigger somewhere. When triggered, disables outline rendering mode for x seconds.
+. Add simple cam control for Finne.
+. Add names tags connected to each player. Connected with a line to each vehicle.
 . Make race track visible in outline rendering mode.
 . Add logic to colliding with a cube/stone. Yields flying stars and sounds.
 . Adjust excavator so stones and cubes can be picked up.

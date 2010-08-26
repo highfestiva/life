@@ -43,7 +43,7 @@ private:
 	void OnQuitRequest(int pLevel);
 	void CommandEntry();
 	bool HandleCommandLine(TcpSocket* pSocket, const str& pCommandLine);
-	bool RegisterGameServer(bool pActivate, TcpSocket* pSocket, const str& pName, int pPort, const str& pId);
+	bool RegisterGameServer(bool pActivate, TcpSocket* pSocket, const str& pName, int pPort, int pPlayerCount, const str& pId);
 	bool SendServerList(TcpSocket* pSocket);
 	static bool Send(TcpSocket* pSocket, const str& pData);
 
@@ -58,10 +58,11 @@ private:
 	{
 		str mName;
 		int mPort;
+		int mPlayerCount;
 		str mId;
 		Timer mIdleTime;
 
-		GameServerInfo(const str& pName, int pPort, const str& pId);
+		GameServerInfo(const str& pName, int pPort, int pPlayerCount, const str& pId);
 	};
 
 	typedef std::hash_map<str, GameServerInfo> GameServerTable;

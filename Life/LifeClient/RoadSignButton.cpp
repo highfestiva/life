@@ -11,6 +11,7 @@
 #include "../../TBC/Include/ChunkyPhysics.h"
 #include "../../UiCure/Include/UiGameUiManager.h"
 #include "../../UiTBC/Include/GUI/UiDesktopWindow.h"
+#include "../../UiTBC/Include/GUI/UiFloatingLayout.h"
 #include "GameClientSlaveManager.h"
 
 
@@ -45,7 +46,8 @@ RoadSignButton::RoadSignButton(ScreenPart* pScreenPart, Cure::ResourceManager* p
 	mButton.SetPreferredSize(5, 5);
 	mButton.SetMinSize(5, 5);
 	mButton.SetPos(-50, -50);
-	GetUiManager()->GetDesktopWindow()->AddChild(&mButton);
+	GetUiManager()->AssertDesktopLayout(new UiTbc::FloatingLayout, 0);
+	GetUiManager()->GetDesktopWindow()->AddChild(&mButton, 0, 0, 0);
 
 	mButton.SetOnRender(RoadSignButton, RenderButton);
 	mButton.SetOnIsOver(RoadSignButton, IsOverButton);

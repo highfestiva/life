@@ -74,7 +74,7 @@ public:
 
 	PixelCoord GetMouseDisplayPosition() const;
 
-	void AssertDesktopLayout(UiTbc::Layout* pLayout);
+	void AssertDesktopLayout(UiTbc::Layout* pLayout, int pLayer);
 
 private:
 	void OnResize(int pWidth, int pHeight);

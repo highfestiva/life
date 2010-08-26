@@ -6,11 +6,12 @@
 
 #include "GameClientViewer.h"
 #include "../../Cure/Include/ContextManager.h"
+#include "../../Cure/Include/RuntimeVariable.h"
 #include "../../TBC/Include/ChunkyPhysics.h"
 #include "../../UiTBC/Include/GUI/UiDesktopWindow.h"
-#include "../../UiTBC/Include/GUI/UiFloatingLayout.h"
+#include "../../UiTBC/Include/GUI/UiCenterLayout.h"
+#include "../LifeServer/MasterServerConnection.h"
 #include "GameClientMasterTicker.h"
-#include "ServerListView.h"
 #include "UiConsole.h"
 #include "Vehicle.h"
 
@@ -24,7 +25,8 @@ namespace Life
 GameClientViewer::GameClientViewer(GameClientMasterTicker* pMaster, Cure::RuntimeVariableScope* pVariableScope,
 	Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager, int pSlaveIndex,
 	const PixelRect& pRenderArea):
-	Parent(pMaster, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea)
+	Parent(pMaster, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea),
+	mServerListView(0)
 {
 	mCameraPosition = Vector3DF(-22, -5, 43.1f);
 	mCameraOrientation = Vector3DF(-PIF*1.1f/2, PIF*0.86f/2, 0.05f);
@@ -32,6 +34,7 @@ GameClientViewer::GameClientViewer(GameClientMasterTicker* pMaster, Cure::Runtim
 
 GameClientViewer::~GameClientViewer()
 {
+	CloseJoinServerView();
 }
 
 
@@ -43,6 +46,11 @@ void GameClientViewer::TickUiInput()
 void GameClientViewer::TickUiUpdate()
 {
 	((ClientConsoleManager*)GetConsoleManager())->GetUiConsole()->Tick();
+
+	if (mServerListView)
+	{
+		mServerListView->Tick();
+	}
 
 	/*mCameraPreviousPosition = mCameraPosition;
 	Cure::ContextObject* lObject = GetContext()->GetObject(mBackdropVehicleId);
@@ -99,6 +107,38 @@ void GameClientViewer::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 	}
 }
 
+void GameClientViewer::OnCancelJoinServer()
+{
+	CloseJoinServerView();
+}
+
+void GameClientViewer::OnRequestJoinServer(const str& pServerAddress)
+{
+	GetVariableScope()->SetValue(Cure::RuntimeVariable::USAGE_NORMAL, _T(RTVAR_NETWORK_SERVERADDRESS), pServerAddress);
+	mLog.Infof(_T("Will use server %s when logging in."), pServerAddress.c_str());
+	CloseJoinServerView();
+}
+
+bool GameClientViewer::UpdateServerList(ServerInfoList& pServerList) const
+{
+	return GetMaster()->GetMasterConnection()->UpdateServerList(pServerList);
+}
+
+bool GameClientViewer::IsMasterServerConnectError() const
+{
+	return GetMaster()->GetMasterConnection()->IsConnectError();
+}
+
+void GameClientViewer::CloseJoinServerView()
+{
+	if (mServerListView)
+	{
+		mUiManager->GetDesktopWindow()->RemoveChild(mServerListView, 1);
+		delete (mServerListView);
+		mServerListView = 0;
+	}
+}
+
 RoadSignButton* GameClientViewer::CreateButton(float x, float y, float z, const str& pName, const str& pClass, const str& pTexture, RoadSignButton::Shape pShape)
 {
 	RoadSignButton* lButton = new RoadSignButton(this, GetResourceManager(), mUiManager, pName, pClass, pTexture, pShape);
@@ -114,12 +154,13 @@ void GameClientViewer::OnButtonClick(UiTbc::Button* pButton)
 {
 	if (pButton->GetName() == _T("server"))
 	{
-		GetMaster()->DownloadServerList();
-		View* lView = new ServerListView(0);
-		mUiManager->AssertDesktopLayout(new UiTbc::FloatingLayout());
-		mUiManager->GetDesktopWindow()->AddChild(lView);
-		lView->SetPos(mRenderArea.GetCenterX()-lView->GetSize().x/2,
-			mRenderArea.GetCenterY()-lView->GetSize().y/2);
+		if (!mServerListView)
+		{
+			GetMaster()->DownloadServerList();
+			mServerListView = new ServerListView(this);
+			mUiManager->AssertDesktopLayout(new UiTbc::CenterLayout, 1);
+			mUiManager->GetDesktopWindow()->AddChild(mServerListView, 0, 0, 1);
+		}
 		return;
 	}
 	if (pButton->GetName() == _T("quit"))
@@ -137,6 +178,10 @@ void GameClientViewer::OnButtonClick(UiTbc::Button* pButton)
 		assert(false);
 	}
 }
+
+
+
+LOG_CLASS_DEFINE(GAME, GameClientViewer);
 
 
 

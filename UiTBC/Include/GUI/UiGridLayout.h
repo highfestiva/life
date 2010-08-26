@@ -26,7 +26,7 @@ public:
 	virtual Component* Find(const str& pComponentName);
 	virtual int GetNumComponents() const;
 
-	virtual Component* GetComponentAt(int pRow, int pCol);
+	virtual Component* GetComponentAt(int pRow, int pCol) const;
 
 	virtual Component* GetFirst();
 	virtual Component* GetNext();

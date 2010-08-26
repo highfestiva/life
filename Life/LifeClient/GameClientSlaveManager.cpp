@@ -636,8 +636,8 @@ void GameClientSlaveManager::CreateLoginView()
 		else
 		{
 			mLoginWindow = new ClientLoginView(this, mDisconnectReason);
-			mUiManager->AssertDesktopLayout(new UiTbc::FloatingLayout());
-			mUiManager->GetDesktopWindow()->AddChild(mLoginWindow);
+			mUiManager->AssertDesktopLayout(new UiTbc::FloatingLayout, 0);
+			mUiManager->GetDesktopWindow()->AddChild(mLoginWindow, 0, 0, 0);
 			mLoginWindow->SetPos(mRenderArea.GetCenterX()-mLoginWindow->GetSize().x/2,
 				mRenderArea.GetCenterY()-mLoginWindow->GetSize().y/2);
 			mLoginWindow->GetChild(_T("User"), 0)->SetKeyboardFocus();

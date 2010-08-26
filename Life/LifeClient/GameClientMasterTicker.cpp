@@ -496,6 +496,11 @@ void GameClientMasterTicker::DownloadServerList()
 	mMasterConnection->RequestServerList(_T(""));
 }
 
+const MasterServerConnection* GameClientMasterTicker::GetMasterConnection() const
+{
+	return mMasterConnection;
+}
+
 
 
 Sunlight* GameClientMasterTicker::GetSunlight() const
@@ -625,7 +630,8 @@ bool GameClientMasterTicker::Initialize()
 			{
 				const UiTbc::Painter::ImageID lImageId = mUiManager->GetDesktopWindow()->GetImageManager()->AddImage(lCanvas, UiTbc::GUIImageManager::STRETCHED, UiTbc::GUIImageManager::NO_BLEND, 255);
 				UiTbc::RectComponent lRect(lImageId, _T("logo"));
-				mUiManager->GetDesktopWindow()->AddChild(&lRect);
+				mUiManager->AssertDesktopLayout(new UiTbc::FloatingLayout, 0);
+				mUiManager->GetDesktopWindow()->AddChild(&lRect, 0, 0, 0);
 				const unsigned lWidth = mUiManager->GetDisplayManager()->GetWidth();
 				const unsigned lHeight = mUiManager->GetDisplayManager()->GetHeight();
 				lRect.SetPreferredSize(lHeight/2*1024/1034, lHeight/2);

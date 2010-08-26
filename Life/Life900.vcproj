@@ -467,6 +467,10 @@
 				RelativePath=".\RtVar.h"
 				>
 			</File>
+			<File
+				RelativePath=".\ServerInfo.h"
+				>
+			</File>
 		</Filter>
 	</Files>
 	<Globals>

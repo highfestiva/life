@@ -138,16 +138,7 @@ bool GameServerManager::Initialize(MasterServerConnection* pMasterConnection)
 	if (lOk)
 	{
 		mMasterConnection = pMasterConnection;
-		strutil::strvec lAddressParts = strutil::Split(lAcceptAddress, _T(":"), 1);
-		if (lAddressParts.size() == 2)
-		{
-			const str lPort = lAddressParts[1];
-			str lServerName;
-			CURE_RTVAR_GET(lServerName, =, Cure::GetSettings(), RTVAR_NETWORK_SERVERNAME, _T("?"));
-			const str lId = strutil::ReplaceAll(strutil::Encode(SystemManager::GetSystemPseudoId()), _T("\""), _T("''\\''"));
-			const str lLocalServerInfo = _T("--name \"")+lServerName + _T("\" --port ")+lPort + _T(" --id \"")+lId+_T("\"");
-			mMasterConnection->SendLocalInfo(lLocalServerInfo);
-		}
+		UploadServerInfo();
 	}
 	return (lOk);
 }
@@ -1033,6 +1024,22 @@ Cure::NetworkServer* GameServerManager::GetNetworkServer() const
 }
 
 
+
+void GameServerManager::UploadServerInfo()
+{
+	strutil::strvec lAddressParts = strutil::Split(GetNetworkServer()->GetLocalAddress(), _T(":"), 1);
+	if (lAddressParts.size() == 2)
+	{
+		const str lPort = lAddressParts[1];
+		str lServerName;
+		CURE_RTVAR_GET(lServerName, =, Cure::GetSettings(), RTVAR_NETWORK_SERVERNAME, _T("?"));
+		const str lPlayerCount = strutil::IntToString(GetLoggedInClientCount(), 10);
+		const str lId = strutil::ReplaceAll(strutil::Encode(SystemManager::GetSystemPseudoId()), _T("\""), _T("''\\''"));
+		const str lLocalServerInfo = _T("--name \"")+lServerName + _T("\" --player-count ")+lPlayerCount
+			+ _T(" --port ")+lPort + _T(" --id \"")+lId+_T("\"");
+		mMasterConnection->SendLocalInfo(lLocalServerInfo);
+	}
+}
 
 LOG_CLASS_DEFINE(GAME, GameServerManager);
 

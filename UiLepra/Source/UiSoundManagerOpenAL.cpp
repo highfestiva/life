@@ -111,11 +111,16 @@ SoundManager::SoundID SoundManagerOpenAL::LoadSound2D(const str& pFileName, Loop
 SoundManager::SoundID SoundManagerOpenAL::LoadSound3D(const str& pFileName, LoopMode pLoopMode, int pPriority)
 {
 	Sample* lSample = new Sample(pLoopMode != LOOP_NONE, pPriority);
-	if (lSample->Load(pFileName))
+	bool lOk = false;
+	for (int x = 0; !lOk && x < 3; ++x)
 	{
-		mSampleSet.insert(lSample);
+		lOk = lSample->Load(pFileName);
+		if (lOk)
+		{
+			mSampleSet.insert(lSample);
+		}
 	}
-	else
+	if (!lOk)
 	{
 		assert(false);
 		delete (lSample);

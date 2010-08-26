@@ -8,6 +8,7 @@
 
 #include "GameClientSlaveManager.h"
 #include "RoadSignButton.h"
+#include "ServerListView.h"
 
 
 
@@ -17,7 +18,7 @@ namespace Life
 
 
 // This is just a simple viewer that shows a background for menus and shows off in demo mode.
-class GameClientViewer: public GameClientSlaveManager
+class GameClientViewer: public GameClientSlaveManager, public ServerSelectObserver
 {
 	typedef GameClientSlaveManager Parent;
 public:
@@ -32,8 +33,17 @@ private:
 	virtual void CreateLoginView();
 	virtual bool InitializeTerrain();
 	virtual void OnLoadCompleted(Cure::ContextObject* pObject, bool pOk);
+	virtual void OnCancelJoinServer();
+	virtual void OnRequestJoinServer(const str& pServerAddress);
+	virtual bool UpdateServerList(ServerInfoList& pServerList) const;
+	virtual bool IsMasterServerConnectError() const;
+	void CloseJoinServerView();
 	RoadSignButton* CreateButton(float x, float y, float z, const str& pName, const str& pClass, const str& pTexture, RoadSignButton::Shape pShape);
 	void OnButtonClick(UiTbc::Button* pButton);
+
+	ServerListView* mServerListView;
+
+	LOG_CLASS_DECLARE();
 };
 
 

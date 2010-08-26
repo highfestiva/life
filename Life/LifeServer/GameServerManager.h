@@ -100,6 +100,8 @@ private:
 	LEPRA_DEBUG_CODE(virtual TBC::PhysicsManager* GetPhysicsManager() const);
 	Cure::NetworkServer* GetNetworkServer() const;
 
+	void UploadServerInfo();
+
 	typedef std::list<Cure::MessageObjectMovement*> MovementList;
 	typedef std::vector<MovementList> MovementArrayList;
 	typedef HashTable<Cure::UserAccount::AccountId, Client*> AccountClientTable;

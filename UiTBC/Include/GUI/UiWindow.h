@@ -61,6 +61,7 @@ public:
 	inline int GetTotalBorderWidth();
 
 	virtual bool IsOver(int pScreenX, int pScreenY);
+	virtual bool OnMouseMove(int pMouseX, int pMouseY, int pDeltaX, int pDeltaY);
 
 	inline void SetBackgroundImage(Painter::ImageID pImageID);
 	inline void SetColor(const Color& pColor);
@@ -85,11 +86,9 @@ public:
 
 	// Returns the client rect in screen coordinates.
 	virtual PixelRect GetClientRect() const;
+	RectComponent* GetClientRectComponent() const;
 
 protected:
-	// A convenience function.
-	RectComponent* GetClientRectComponent();
-
 	virtual void SetActive(bool pActive);
 
 	virtual void DoSetSize(int pWidth, int pHeight);

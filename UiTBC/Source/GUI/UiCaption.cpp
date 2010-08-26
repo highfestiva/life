@@ -50,6 +50,7 @@ Caption::Caption(const Color& pActiveColor, const Color& pInactiveColor, int pHe
 	SetPreferredSize(PixelCoord(0, pHeight));
 
 	mLabel = new Label(false, _T("Label"));
+	mLabel->SetPreferredHeight(pHeight);
 
 	RectComponent* lTopLayer = new RectComponent(_T("TopLayer"), new GridLayout(1, 2));
 	lTopLayer->SetPreferredSize(0, 0);
@@ -111,6 +112,7 @@ Caption::Caption(const Color& pActiveTopLeftColor, const Color& pActiveTopRightC
 	SetPreferredSize(PixelCoord(0, pHeight));
 
 	mLabel = new Label(false, _T("Label"));
+	mLabel->SetPreferredHeight(pHeight);
 
 	RectComponent* lTopLayer = new RectComponent(_T("TopLayer"), new GridLayout(1, 2));
 	AddChild(lTopLayer);
@@ -176,6 +178,7 @@ Caption::Caption(Painter::ImageID pActiveLeftImageID, Painter::ImageID pActiveRi
 	SetPreferredSize(0, pHeight);
 
 	mLabel = new Label(false, _T("Label"));
+	mLabel->SetPreferredHeight(pHeight);
 
 	RectComponent* lBottomLayer = new RectComponent(_T("BottomLayer"), new GridLayout(1, 3));
 	lBottomLayer->SetPreferredSize(0, 0);
@@ -252,6 +255,9 @@ Button* Caption::SetButton(Button*& pMemberButton, Button* pNewButton)
 	{
 		mButtonRect->AddChild(pMemberButton, 0, 1);
 		mButtonRect->SetPreferredSize(0, 0, true);
+		const int lGapPixels = 4;
+		mButtonRect->GetParent()->SetPreferredWidth(mButtonRect->GetMinSize().x +
+			mButtonRect->GetNumChildren() * lGapPixels);
 	}
 
 	return lOld;

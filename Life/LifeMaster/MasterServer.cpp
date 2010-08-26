@@ -107,71 +107,34 @@ void MasterServer::CommandEntry()
 
 bool MasterServer::HandleCommandLine(TcpSocket* pSocket, const str& pCommandLine)
 {
-	strutil::strvec lCommandList = strutil::BlockSplit(pCommandLine, _T(" \t\r\n"), false, false);
-	const str lCommand = lCommandList[0];
-	str lName;
-	int lPort = -1;
-	str lId;
-	bool lRemove = false;
-	for (unsigned x = 1; x < lCommandList.size(); x += 2)
+	ServerInfo lServerInfo;
+	if (!MasterServerNetworkParser::ExtractServerInfo(pCommandLine, lServerInfo))
 	{
-		if (lCommandList.size() < x+2)
+		return false;
+	}
+	if (lServerInfo.mCommand == _T(MASTER_SERVER_USI))
+	{
+		if (lServerInfo.mPort < 0 || lServerInfo.mPlayerCount < 0 || lServerInfo.mId.empty())
 		{
-			mLog.Error(_T("Got too few parameters from game server!"));
+			mLog.Errorf(_T("Got bad parameters to command (%s) from game server!"), lServerInfo.mCommand.c_str());
 			return false;
 		}
-		if (lCommandList[x] == _T("--name"))
-		{
-			lName = lCommandList[x+1];
-		}
-		else if (lCommandList[x] == _T("--port"))
-		{
-			if (!strutil::StringToInt(lCommandList[x+1], lPort))
-			{
-				mLog.Error(_T("Got non-integer port parameter from game server!"));
-				return false;
-			}
-			if (lPort < 0 || lPort > 65535)
-			{
-				mLog.Errorf(_T("Got invalid port number (%i) from game server!"), lPort);
-				return false;
-			}
-		}
-		else if (lCommandList[x] == _T("--id"))
-		{
-			lId = lCommandList[x+1];
-		}
-		else if (lCommandList[x] == _T("--remove"))
-		{
-			if (lCommandList[x+1] != _T("true"))
-			{
-				mLog.Errorf(_T("Got bad --remove argument (%s) from game server!"), lCommandList[x+1].c_str());
-				return false;
-			}
-			lRemove = true;
-		}
-		else
-		{
-			mLog.Errorf(_T("Got bad parameter (%s) from game server!"), lCommandList[x].c_str());
-			return false;
-		}
+		return RegisterGameServer(!lServerInfo.mRemove, pSocket, lServerInfo.mName, lServerInfo.mPort,
+			lServerInfo.mPlayerCount, lServerInfo.mId);
 	}
-	if (lCommand == _T(MASTER_SERVER_USI))
-	{
-		return RegisterGameServer(!lRemove, pSocket, lName, lPort, lId);
-	}
-	else if (lCommand == _T(MASTER_SERVER_DSL))
+	else if (lServerInfo.mCommand == _T(MASTER_SERVER_DSL))
 	{
 		return SendServerList(pSocket);
 	}
 	else
 	{
-		mLog.Errorf(_T("Got bad command (%s) from game server!"), lCommand.c_str());
+		mLog.Errorf(_T("Got bad command (%s) from game server!"), lServerInfo.mCommand.c_str());
 	}
 	return false;
 }
 
-bool MasterServer::RegisterGameServer(bool pActivate, TcpSocket* pSocket, const str& pName, int pPort, const str& pId)
+bool MasterServer::RegisterGameServer(bool pActivate, TcpSocket* pSocket, const str& pName, int pPort,
+	int pPlayerCount, const str& pId)
 {
 	bool lOk = false;
 	const str lAddress = pSocket->GetTargetAddress().GetIP().GetAsString() + _T(":") + strutil::IntToString(pPort, 10);
@@ -187,6 +150,8 @@ bool MasterServer::RegisterGameServer(bool pActivate, TcpSocket* pSocket, const 
 				if (lInfo.mId == pId)
 				{
 					lInfo.mName = pName;
+					lInfo.mPort = pPort;
+					lInfo.mPlayerCount = pPlayerCount;
 					lInfo.mIdleTime.PopTimeDiffF();
 					lOk = true;
 				}
@@ -210,7 +175,7 @@ bool MasterServer::RegisterGameServer(bool pActivate, TcpSocket* pSocket, const 
 		}
 		else if (pActivate)
 		{
-			GameServerInfo lInfo(pName, pPort, pId);
+			GameServerInfo lInfo(pName, pPort, pPlayerCount, pId);
 			mGameServerTable.insert(GameServerTable::value_type(lAddress, lInfo));
 			lOk = true;
 		}
@@ -220,11 +185,11 @@ bool MasterServer::RegisterGameServer(bool pActivate, TcpSocket* pSocket, const 
 		}
 		if (lOk)
 		{
-			mLog.RawPrint(Log::LEVEL_INFO, _T("----------------------------------------\nServer list:\n"));
+			mLog.RawPrint(Log::LEVEL_DEBUG, _T("----------------------------------------\nServer list:\n"));
 			GameServerTable::iterator x = mGameServerTable.begin();
 			for (; x != mGameServerTable.end(); ++x)
 			{
-				mLog.RawPrint(Log::LEVEL_INFO, x->second.mName + _T(" @ ") + x->first + _T("\n"));
+				mLog.RawPrint(Log::LEVEL_DEBUG, x->second.mName + _T(" @ ") + x->first + _T("\n"));
 			}
 		}
 	}
@@ -245,7 +210,8 @@ bool MasterServer::SendServerList(TcpSocket* pSocket)
 		GameServerTable::iterator x = mGameServerTable.begin();
 		for (; x != mGameServerTable.end(); ++x)
 		{
-			lServerList += x->second.mName + _T(": ") + x->first + _T("\n");
+			lServerList += _T("--name \"") + x->second.mName + _T("\" --address ") + x->first +
+				_T(" --player-count ") + strutil::IntToString(x->second.mPlayerCount, 10) + _T("\n");
 		}
 	}
 	lServerList += _T("OK");
@@ -279,9 +245,10 @@ MasterServer::CmdHandlerThread::CmdHandlerThread(TcpSocket* pSocket):
 
 
 
-MasterServer::GameServerInfo::GameServerInfo(const str& pName, int pPort, const str& pId):
+MasterServer::GameServerInfo::GameServerInfo(const str& pName, int pPort, int pPlayerCount, const str& pId):
 	mName(pName),
 	mPort(pPort),
+	mPlayerCount(pPlayerCount),
 	mId(pId)
 {
 }

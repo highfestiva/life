@@ -64,6 +64,7 @@ public:
 	void OnSetPlayerCount(int pPlayerCount);
 
 	void DownloadServerList();
+	const MasterServerConnection* GetMasterConnection() const;
 
 	Sunlight* GetSunlight() const;	// TODO: move this hard-coding to a context object or summat.
 

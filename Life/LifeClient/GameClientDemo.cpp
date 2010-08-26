@@ -123,7 +123,8 @@ void GameClientDemo::CreateLoginView()
 	lButton->SetSize(lButtonWidth, lButtonHeight);
 	lButton->UpdateLayout();
 	lButton->SetOnClick(GameClientDemo, BrowseFullInfo);
-	mUiManager->GetDesktopWindow()->AddChild(lButton);
+	GetUiManager()->AssertDesktopLayout(new UiTbc::FloatingLayout, 0);
+	mUiManager->GetDesktopWindow()->AddChild(lButton, 0, 0, 0);
 	lButton->SetPos(lMargin, mUiManager->GetDisplayManager()->GetHeight()-lButtonHeight-lMargin);
 }
 

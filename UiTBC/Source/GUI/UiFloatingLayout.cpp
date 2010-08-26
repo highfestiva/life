@@ -177,7 +177,15 @@ PixelCoord FloatingLayout::GetContentSize() const
 
 void FloatingLayout::MoveToTop(Component* pComponent)
 {
-	if (mChildList.empty() == false)
+	ComponentList::iterator x = mChildList.begin();
+	for (; x != mChildList.end(); ++x)
+	{
+		if (*x == pComponent)
+		{
+			break;
+		}
+	}
+	if (x != mChildList.end())
 	{
 		Component* lLast = *(--mChildList.end());
 		if (lLast->GetType() == Component::WINDOW &&
@@ -186,7 +194,7 @@ void FloatingLayout::MoveToTop(Component* pComponent)
 			((Window*)lLast)->SetActive(false);
 		}
 
-		mChildList.remove(pComponent);
+		mChildList.erase(x);
 		mChildList.push_back(pComponent);
 	}
 }

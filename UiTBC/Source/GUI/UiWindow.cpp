@@ -350,10 +350,10 @@ void Window::SetBorder(unsigned pBorderStyle,
 
 bool Window::IsOver(int pScreenX, int pScreenY)
 {
-	if (GetScreenRect().IsInside(pScreenX, pScreenY) == true)
+	return GetScreenRect().IsInside(pScreenX, pScreenY);
+	/*if (GetScreenRect().IsInside(pScreenX, pScreenY) == true)
 	{
-		Layout* lLayout = Parent::GetLayout();
-
+		Layout* lLayout = GetLayout();
 		if (lLayout != 0)
 		{
 			Component* lChild = lLayout->GetFirst();
@@ -363,13 +363,17 @@ bool Window::IsOver(int pScreenX, int pScreenY)
 				{
 					return lChild->IsOver(pScreenX, pScreenY);
 				}
-
 				lChild = lLayout->GetNext();
 			}
 		}
 	}
+	return false;*/
+}
 
-	return false;
+bool Window::OnMouseMove(int pMouseX, int pMouseY, int pDeltaX, int pDeltaY)
+{
+	Parent::OnMouseMove(pMouseX, pMouseY, pDeltaX, pDeltaY);
+	return IsOver(pMouseX, pMouseY);
 }
 
 void Window::SetCaption(Caption* pCaption)
@@ -392,7 +396,7 @@ PixelRect Window::GetClientRect() const
 	return mCenterComponent->GetScreenRect();
 }
 
-RectComponent* Window::GetClientRectComponent()
+RectComponent* Window::GetClientRectComponent() const
 {
 	return mClientRect;
 }

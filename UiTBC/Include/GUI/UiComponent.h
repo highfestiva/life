@@ -70,9 +70,12 @@ public:
 
 	Component* GetParent();
 	Layout* GetLayout(int pLayer = 0) const;
+	void SetParentLayout(Layout* pLayout);
+	Layout* GetParentLayout() const;
 
 	int CreateLayer(Layout* pLayout);
 	void DeleteLayer(int pLayer);
+	void DeleteChildrenInLayer(int pLayer);
 	void ReplaceLayer(int pLayer, Layout* pLayout);
 
 	const PixelCoord& GetPos() const;
@@ -240,6 +243,7 @@ private:
 	Component* mMouseFocusChild;
 	Component* mKeyboardFocusChild;
 	Layout** mLayout;
+	Layout* mParentLayout;
 
 	PixelCoord mPos;
 	PixelCoord mPreferredSize;
