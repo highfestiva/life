@@ -9,7 +9,7 @@
 #include "../../Cure/Include/GameManager.h"
 #include "../../Lepra/Include/Thread.h"
 #include "../../UiCure/Include/UiLineGraph2d.h"
-#include "../../UiTbc/Include/UiRenderer.h"
+#include "../../UiTBC/Include/UiRenderer.h"
 #include "InputObserver.h"
 #include "ScreenPart.h"
 

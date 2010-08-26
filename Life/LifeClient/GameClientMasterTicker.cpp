@@ -23,7 +23,6 @@
 #include "../../UiTBC/Include/GUI/UiConsolePrompt.h"
 #include "../../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../../UiTBC/Include/GUI/UiFloatingLayout.h"
-#include "../../UiTBC/Include/UiRenderer.h"
 #include "../LifeServer/MasterServerConnection.h"
 #include "../LifeApplication.h"
 #include "GameClientDemo.h"

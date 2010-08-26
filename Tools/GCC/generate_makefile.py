@@ -272,6 +272,7 @@ def main():
         ["UiCure",     "lib",        "UiCure/UiCure900.vcproj", "UiTBC Cure"],
         ["Life",       "lib",        "Life/Life900.vcproj", "Cure"],
         ["LifeServer", "bin",        "Life/LifeServer/LifeServer900.vcproj", "Life"],
+        ["LifeMaster", "bin",        "Life/LifeMaster/LifeMaster900.vcproj", "Lepra"],
         ["LifeClient", "gfx_bin",    "Life/LifeClient/LifeClient900.vcproj", "Life UiCure"],
         ["CureTest",   "gfx_bin",    "UiCure/CureTestApp/CureTestApp900.vcproj", "UiCure"]]
 

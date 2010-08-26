@@ -150,8 +150,8 @@ protected:
 	GameObjectId mInstanceId;
 	str mClassId;
 	NetworkObjectType mNetworkObjectType;
-	void* mExtraData;
 	ContextObject* mParent;
+	void* mExtraData;
 	ChildList mChildList;
 	TriggerMap mTriggerMap;
 	const TBC::PhysicsSpawner* mSpawner;

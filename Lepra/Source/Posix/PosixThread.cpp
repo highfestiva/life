@@ -72,10 +72,6 @@ void* ThreadPointerStorage::GetPointer()
 
 
 
-StaticThread gMainThread(_T("MainThread"));
-
-
-
 static void InitializeSignalMask()
 {
 #if !defined(LEPRA_MAC)

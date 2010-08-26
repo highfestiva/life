@@ -17,8 +17,9 @@ namespace Life
 
 class Props: public Vehicle
 {
-	typedef Vehicle Parent;
 public:
+	typedef Vehicle Parent;
+
 	Props(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager);
 	virtual ~Props();
 

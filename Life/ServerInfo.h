@@ -7,7 +7,7 @@
 #pragma once
 
 #include <vector>
-#include "../Life.h"
+#include "Life.h"
 
 
 
