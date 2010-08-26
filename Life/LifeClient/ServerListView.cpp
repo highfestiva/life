@@ -26,6 +26,8 @@ ServerListView::ServerListView(ServerSelectObserver* pSelectObserver):
 	mSelectObserver(pSelectObserver),
 	mIsMasterConnectError(false)
 {
+	mServerList.push_back(ServerInfo());
+
 	SetPreferredSize(500, 350);
 
 	UiTbc::Component* lRowLayer = AddRow(Color(0, 0, 0), 4);
@@ -35,8 +37,6 @@ ServerListView::ServerListView(ServerSelectObserver* pSelectObserver):
 	AddLabel(_T("Select"), WHITE, 0, lRowLayer);
 
 	CreateLayer(new UiTbc::CenterLayout);
-
-	Tick();
 }
 
 void ServerListView::Tick()
@@ -61,7 +61,7 @@ void ServerListView::Tick()
 		ReplaceLayer(1, new UiTbc::CenterLayout);
 		AddLabel(_T("Please wait while refreshing list..."), GRAY, 0, this, 1)->SetAdaptive(true);
 	}
-	if (mServerList.size() == 1)	// Only the status message, no servers online!
+	else if (mServerList.size() == 1)	// Only the status message, no servers online!
 	{
 		ReplaceLayer(1, new UiTbc::CenterLayout);
 		AddLabel(_T("I'm sorry, but no-one else seems to be running a public server.\n")
@@ -72,10 +72,10 @@ void ServerListView::Tick()
 		DeleteLayer(1);
 	}
 
-	const size_t lServerCount = mServerList.size()-1;	// Ignore the status message.
+	const int lServerCount = (int)mServerList.size() - 1;	// Ignore the status message.
 
 	const UiTbc::GridLayout* lGrid = (UiTbc::GridLayout*)GetClientRectComponent()->GetLayout();
-	for (size_t x = 1; x < 1+10; ++x)
+	for (int x = 1; x < 1+10; ++x)
 	{
 		UiTbc::RectComponent* lRowLayer = (UiTbc::RectComponent*)lGrid->GetComponentAt(x, 0);
 		if (lRowLayer)
@@ -116,7 +116,7 @@ void ServerListView::Tick()
 	}
 
 	GetClientRectComponent()->UpdateLayout();
-	//UpdateLayout();
+	//UpdateLayout();	TRICKY!
 }
 
 
