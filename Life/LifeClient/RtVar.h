@@ -16,6 +16,13 @@
 
 #define RTVAR_CTRL_UI_CONTOGGLE		"Control.Ui.ConsoleToggle"
 
+#define RTVAR_CTRL_UI_CAMUP		"Control.Ui.CamUp"
+#define RTVAR_CTRL_UI_CAMDOWN		"Control.Ui.CamDown"
+#define RTVAR_CTRL_UI_CAMLEFT		"Control.Ui.CamLeft"
+#define RTVAR_CTRL_UI_CAMRIGHT		"Control.Ui.CamRight"
+#define RTVAR_CTRL_UI_CAMFORWARD	"Control.Ui.CamForward"
+#define RTVAR_CTRL_UI_CAMBACKWARD	"Control.Ui.CamBackward"
+
 #define RTVAR_CTRL_STEER_FWD		"Control.Steer.Forward"
 #define RTVAR_CTRL_STEER_BACK		"Control.Steer.Backward"
 #define RTVAR_CTRL_STEER_FWD3D		"Control.Steer.Forward3d"

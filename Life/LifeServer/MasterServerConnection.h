@@ -39,6 +39,7 @@ public:
 	bool IsConnectError() const;
 	double WaitUntilDone(double pTimeout, bool pAllowReconnect);
 	void GraceClose(double pTimeout);
+	bool CloseUnlessUploaded();
 	void Tick();
 
 private:

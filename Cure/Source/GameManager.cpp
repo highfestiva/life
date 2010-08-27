@@ -410,7 +410,7 @@ void GameManager::PhysicsTick()
 	int lMicroSteps;
 	CURE_RTVAR_GET(lMicroSteps, =, GetVariableScope(), RTVAR_PHYSICS_MICROSTEPS, 3);
 	const int lAffordedStepCount = mTime->GetAffordedPhysicsStepCount() * lMicroSteps;
-	const float lStepIncrement = mTime->GetAffordedPhysicsStepTime() / lMicroSteps;
+	float lStepIncrement = mTime->GetAffordedPhysicsStepTime() / lMicroSteps;
 	/*if (lAffordedStepCount != 1 && !Math::IsEpsEqual(lStepIncrement, 1/60.0f))
 	{
 		mLog.Warningf(_T("Game time allows for %i physics steps in increments of %f."),
@@ -423,7 +423,15 @@ void GameManager::PhysicsTick()
 	for (int x = 0; x < lAffordedStepCount; ++x)
 	{
 		ScriptTick(lStepIncrement);
-		mPhysics->StepFast(lStepIncrement);
+		try
+		{
+			mPhysics->StepFast(lStepIncrement);
+		}
+		catch (...)
+		{
+			mLog.Errorf(_T("Got some crash or major problem in physics simulation!"));
+			lStepIncrement *= 0.3f;
+		}
 	}
 	{
 		LEPRA_MEASURE_SCOPE(PostSteps);

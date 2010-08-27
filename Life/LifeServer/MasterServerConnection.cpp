@@ -142,6 +142,15 @@ void MasterServerConnection::GraceClose(double pTimeout)
 	Close(false);
 }
 
+bool MasterServerConnection::CloseUnlessUploaded()
+{
+	if (mUploadedServerInfo.empty())
+	{
+		Close(false);
+	}
+	return mUploadedServerInfo.empty();	// TRICKY: some time has gone by, might have been updated.
+}
+
 void MasterServerConnection::Tick()
 {
 	switch (mState)

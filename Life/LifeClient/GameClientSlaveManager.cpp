@@ -5,6 +5,7 @@
 
 
 #include "GameClientSlaveManager.h"
+#include <algorithm>
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/NetworkClient.h"
 #include "../../Cure/Include/ResourceManager.h"
@@ -54,6 +55,7 @@ GameClientSlaveManager::GameClientSlaveManager(GameClientMasterTicker* pMaster, 
 	mAvatarId(0),
 	mLastSentByteCount(0),
 	mPingAttemptCount(0),
+	mCamRotateExtra(0),
 	mJustLookingAtAvatars(false),
 	mAvatarInvisibleCount(0),
 	mRoadSignIndex(0),
@@ -376,7 +378,7 @@ bool GameClientSlaveManager::TickNetworkOutput()
 						lObject->GetInstanceId(), GetTimeManager()->GetCurrentPhysicsFrame(), mNetworkOutputGhost);
 					lIsSent = true;
 
-					CURE_RTVAR_INTERNAL_ARITHMETIC(GetVariableScope(), RTVAR_DEBUG_NET_SENDPOSCNT, int, +, 1, 0);
+					CURE_RTVAR_INTERNAL_ARITHMETIC(GetVariableScope(), RTVAR_DEBUG_NET_SENDPOSCNT, int, +, 1, 0, 1000000);
 				}
 			}
 		}
@@ -734,17 +736,17 @@ void GameClientSlaveManager::TickUiInput()
 		{
 			mAvatarMightSelectTime.UpdateTimer();
 
-			const Options::Vehicle& v = mOptions.GetControl();
+			const Options::Steering& s = mOptions.GetSteeringControl();
 			const bool lIsMovingForward = lObject->GetForwardSpeed() > 8.0f;
-#define V(dir) v.mControl[Options::Vehicle::CONTROL_##dir]
-			const float lForward = V(FORWARD);
-			const float lBack = V(BACKWARD);
-			const float lBreakAndBack = V(BREAKANDBACK);
+#define S(dir) s.mControl[Options::Steering::CONTROL_##dir]
+			const float lForward = S(FORWARD);
+			const float lBack = S(BACKWARD);
+			const float lBreakAndBack = S(BREAKANDBACK);
 			float lPowerFwdRev = lForward - std::max(lBack, lIsMovingForward? 0.0f : lBreakAndBack);
 			SetAvatarEnginePower(lObject, 0, lPowerFwdRev, mCameraOrientation.x);
-			float lPowerLR = V(RIGHT)-V(LEFT);
+			float lPowerLR = S(RIGHT)-S(LEFT);
 			SetAvatarEnginePower(lObject, 1, lPowerLR, mCameraOrientation.x);
-			float lPower = V(HANDBREAK) - std::max(V(BREAK), lIsMovingForward? lBreakAndBack : 0.0f);
+			float lPower = S(HANDBREAK) - std::max(S(BREAK), lIsMovingForward? lBreakAndBack : 0.0f);
 			if (!SetAvatarEnginePower(lObject, 2, lPower, mCameraOrientation.x) &&
 				lBreakAndBack > 0 && Math::IsEpsEqual(lBack, 0.0f, 0.01f))
 			{
@@ -768,15 +770,15 @@ void GameClientSlaveManager::TickUiInput()
 					}
 				}
 			}
-			lPower = V(UP)-V(DOWN);
+			lPower = S(UP)-S(DOWN);
 			SetAvatarEnginePower(lObject, 3, lPower, mCameraOrientation.x);
-			lPower = V(FORWARD3D) - V(BACKWARD3D);
+			lPower = S(FORWARD3D) - S(BACKWARD3D);
 			SetAvatarEnginePower(lObject, 4, lPower, mCameraOrientation.x);
-			lPower = V(LEFT3D) - V(RIGHT3D);
+			lPower = S(LEFT3D) - S(RIGHT3D);
 			SetAvatarEnginePower(lObject, 5, lPower, mCameraOrientation.x);
-			lPower = V(UP3D) - V(DOWN3D);
+			lPower = S(UP3D) - S(DOWN3D);
 			SetAvatarEnginePower(lObject, 6, lPower, mCameraOrientation.x);
-			const float lSteeringChange = mLastSteering-v;
+			const float lSteeringChange = mLastSteering-s;
 			if (lSteeringChange > 0.5f)
 			{
 				mInputExpireAlarm.Set();
@@ -785,7 +787,16 @@ void GameClientSlaveManager::TickUiInput()
 			{
 				mInputExpireAlarm.Push(0.1f);
 			}
-			mLastSteering = v;
+			mLastSteering = s;
+
+			const float lScale = 50.0f * GetTimeManager()->GetAffordedPhysicsTotalTime();
+			const Options::CamControl& c = mOptions.GetCamControl();
+#define C(dir) c.mControl[Options::CamControl::CAMDIR_##dir]
+			lPower = C(UP)-C(DOWN);
+			CURE_RTVAR_ARITHMETIC(GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, double, +, lPower*lScale, 0.0, 30.0);
+			mCamRotateExtra = (C(RIGHT)-C(LEFT)) * lScale;
+			lPower = C(BACKWARD)-C(FORWARD);
+			CURE_RTVAR_ARITHMETIC(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, double, +, lPower*lScale, 5.0, 100.0);
 
 			mAvatarInvisibleCount = 0;
 		}
@@ -874,11 +885,6 @@ void GameClientSlaveManager::TickUiUpdate()
 	const Vector3DF lPivotXyPosition(mCameraPivotPosition.x, mCameraPivotPosition.y, mCameraPosition.z);
 	Vector3DF lTargetCameraPosition(mCameraPosition-lPivotXyPosition);
 	const float lCurrentCameraXyDistance = lTargetCameraPosition.GetLength();
-	float lRotationFactor;
-	CURE_RTVAR_GET(lRotationFactor, =(float), GetVariableScope(), RTVAR_UI_3D_CAMROTATE, 0.0);
-	QuaternionF lRotation;
-	lRotation.RotateAroundOwnZ(lRotationFactor * lPhysicsTime);
-	lTargetCameraPosition = lRotation * lTargetCameraPosition;
 	const float lSpeedDependantCameraXyDistance = mCameraTargetXyDistance + mCameraTargetXyDistance*mCameraPivotSpeed*0.03f;
 	lTargetCameraPosition = lPivotXyPosition + lTargetCameraPosition*(lSpeedDependantCameraXyDistance/lCurrentCameraXyDistance);
 	float lCamHeight;
@@ -1009,6 +1015,20 @@ void GameClientSlaveManager::TickUiUpdate()
 	Math::RangeAngles(mCameraOrientation.y, lTargetCameraOrientation.y);
 	Math::RangeAngles(mCameraOrientation.z, lTargetCameraOrientation.z);
 	mCameraOrientation = Math::Lerp<Vector3DF, float>(mCameraOrientation, lTargetCameraOrientation, lMovingAveragePart);
+
+	float lRotationFactor;
+	CURE_RTVAR_GET(lRotationFactor, =(float), GetVariableScope(), RTVAR_UI_3D_CAMROTATE, 0.0);
+	lRotationFactor += mCamRotateExtra;
+	TransformationF lTransform(GetCameraQuaternion(), mCameraPosition);
+	lTransform.RotateAroundAnchor(mCameraPivotPosition, Vector3DF(0, 0, 1), lRotationFactor * lPhysicsTime);
+	mCameraPosition = lTransform.GetPosition();
+	float lTheta;
+	float lPhi;
+	float lGimbal;
+	lTransform.GetOrientation().GetEulerAngles(lTheta, lPhi, lGimbal);
+	mCameraOrientation.x = lTheta+PIF/2;
+	mCameraOrientation.y = PIF/2-lPhi;
+	mCameraOrientation.z = lGimbal;
 }
 
 bool GameClientSlaveManager::UpdateMassObjects(const Vector3DF& pPosition)
@@ -1223,7 +1243,7 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 			{
 				SetMovement(lInstanceId, lFrameIndex, lData);
 			}
-			CURE_RTVAR_INTERNAL_ARITHMETIC(GetVariableScope(), RTVAR_DEBUG_NET_RECVPOSCNT, int, +, 1, 0);
+			CURE_RTVAR_INTERNAL_ARITHMETIC(GetVariableScope(), RTVAR_DEBUG_NET_RECVPOSCNT, int, +, 1, 0, 1000000);
 		}
 		break;
 		case Cure::MESSAGE_TYPE_OBJECT_ATTACH:

@@ -47,6 +47,7 @@ Game
 + Remove sound twirps (when in high speeds) by making sound listener velocity slide instead of jerk (just a theory).
 + Bug: when starting 2 split-screens, then killing #1, #2 doesn't update graphics of server-owned objects any more.
 + Put some clouds and the sun in the sky, put something below the platform/ground that makes it obvious that objects that fall over are gone for good.
+. Create a list of server-controlled (=important sync) rtvars. Transmit from server to client upon login. Disallow client settings on these rtvars, and monitor them on server to re-sync them when necessary.
 . Make ingame menu only available through icons (mouse click or hoover).
   - Autoflip.
   - Select vehicle.
@@ -56,7 +57,7 @@ Game
   - Add tiny AI to control the steering. Must be different for different vehicles/engines.
 . Add "loot" or "goals" in the world.
   - Visible trigger on top of the dinosaur heads. If you succeed in staying there you get points and firecrackers.
-  - Bullet time triggers on jumps on the monster track. When triggered, sets RTR to 0.2 for x seconds.
+  - Bullet time triggers on jumps on the monster track. When triggered, sets RTR to 0.2 and CamRotate to 200 for 5 seconds.
   - Trigger in a "tingling gate" somewhere which gives you toy speed. When triggered, sets RTR to 2.3 for x seconds.
   - Real world "tingling gate" trigger somewhere. When triggered, disables outline rendering mode for x seconds.
 . Add simple cam control for Finne.
@@ -72,12 +73,14 @@ Game
 . Bug fix attachments (i.e. crane picks up car) so that they work properly (without crashing).
 . Make vehicle flip over to correct rotation whenever it accidentally flipped to its side/front/back.
 . Add options menu.
+. Add some more detail to the vehicles. Polish the materials, for instance wheels on monster truck should be shiny.
 . Picking best possible default input control options.
 . Adjust the camera view according to the vehicle: huge crane, small ball...
 . Make login adjusted to this type of game (automatic somehow).
 . Show logo when starting game.
 . Make a "what you're missing out on when not running Pro" end screen in demo version. (=release client?)
 . Make a start screen with all settings. Start screen heavily fogged.
+. Separate client slave manager and the signs into states? Could look nicer, but some work.
 . Implement the following settings in the heavily fogged start screen:
   - Nationality (switched real time).
   - Full screen / windowed.
@@ -182,31 +185,32 @@ Engine
 + Wrap physics frame counter (game could go on forever).
 + Fix bug: occationally some meshes (such as the ground) end up rotated. The physics seems OK though. Race condition for the mesh offset transform?
 + Add master volume.
-. Fix bug: when changing frame rates, the alarm callback sometimes never triggers (or takes forever?). Probably linked to physics frame counter?
-. Fix universal joint network sync (ODE-interface code relies heavily on LOCAL joint axes when receiving REMOTE updates via SetJointDiff).
-. Go back to using dual UDP/TCP sockets again.
-. Fix bug: sometimes certain buttons/controls hangs so that for instance "full throttle" is active, even though the button is released.
-. Port client to Mac OS X / Cocoa.
-. I18N.
++ Go back to using dual UDP/TCP sockets again.
++ Load world.
 . Make sure camera never flies under ground or collides with physical objects. Make camera always keep a free line of sight to the controlled object.
 . Collision sounds.
-. Organize data in directories for sounds, meshes, physics, classes, etc.
+. Optimize: startup. Very slow on slow computer.
+. Master server: drop old servers.
+. Fix bug: when changing frame rates, the alarm callback sometimes never triggers (or takes forever?). Probably linked to physics frame counter?
+. Fix universal joint network sync (ODE-interface code relies heavily on LOCAL joint axes when receiving REMOTE updates via SetJointDiff).
+. Fix bug: sometimes certain buttons/controls hangs so that for instance "full throttle" is active, even though the button is released.
+. Test: running remotely with high ping. Mum?
+. Port client to Mac OS X / Cocoa.
+. I18N. Use _() and gettext wrap.
 . Make all materials use PreRender and PostRender. Clean code up around there.
 . Make Maya import pipeline use the proper materials for each mesh instance (i.e. saucer lights).
-. Add support for break and reverse lights.
-. Create ability for lossless UDP transfers.
+. Add support for break and reverse lights. Add light cones for that.
 . When having several control units, the "input threshold" does not work. Make a threshold for each input entity.
 . Remove game source code from engine source code: camera, hard-coded object placements, input handling, etc.
-. Spawn points. Matching against vehicle types...
+. Teleporters: to race track, castle, monster jam site... Show an "icon" above each portal.
+. Bullet time triggers. For instance on monster jumps. Implement on server, so that all physics engines run in sync.
 . Creating a less jittery experience: a) sync lag/jitter immediately after logging in, b) sorting out old msgs on client, c) keeping track of jitter on client side.
 . Moving out platform specifics from (Ui)CppContextObject.cpp to LifeXxx.cpp.
-. Spawn engine and load world. Must be able to manage both.
 . Add some type of spawn engine for player vehicles.
 . Use a zipped archive for data.
 . Add "switch to splitscreen" by MOUSE BUTTON press ingame.
 . Music.
 . Chat - client side UI.
-. Text/console clients, plural. Run in same process.
 . Add context-sensitive and more degrees of freedom for control mechanisms: ball+ufo needs analogue fwd-bkg, cranes, excavators, etc.
 . Port input handling, calibration and names.
 . Design GUI. Menus as well as toolbars during play. Also icons for picking vehicle.
@@ -222,7 +226,6 @@ Engine
 . Use game icon and make it happen on Windows, Mac, iPhone, X11...
 . Make sure resources are freed when not used for a little while.
 . Make sure sounds are stopped when not played (volume ~ 0), and make sure non-played sounds are placed in resource cache - which means they'll be unloaded after a little while according to the "resource pool freeing" bullet.
-. Create master server, which is able to add and remove the IP and server name. Plus send out a complete list of servers. Server list should be disk-backed.
 
 - Creating group/world objects as resources.
 - Loading group/world objects from disk.
@@ -232,6 +235,11 @@ Engine
 - Use animated texture instead of wheels for excavator/bandwagon.
 - Fix bug: orientation merge. When the server sends a new orientation that differs from the local ditto, the merging only works for objects aligned with the root. All others are rotated in some other direction (according to their local axes).
 - Improve vehicle wheel friction.
+- Create ability for lossless UDP transfers.
+- Spawn points. Matching against vehicle types...
+- Text/console clients, plural. Run in same process.
+- Organize data in directories for sounds, meshes, physics, classes, etc.
+- Load levels, go to next level, etc.
 
  
 Quality
@@ -270,34 +278,31 @@ Quality
 + Rename PhysicsEngine and ChunkyXxx classes to sensible names.
 + Descide how to accomodate several split-screen sound "listeners" on OpenAL. Implement.
 + Make sure shutting down client with two simultaneously logged-in users gets logged out from the server.
-. Add a state renderer, so that logo rendering, menu backdrop, game rendering and demo screen are just different states.
++ Check that all log destinations write strings, not raw data, to disk. LogFileXxx (single one) was checked and corrected from WriteData() to WriteString().
++ Separate input and output data in the data folder. Create a proper directory structure for external release.
+. Start alpha-testing with human users.
 . When using 4 splitscreen players, RenderSlaves is the slow part (won't yield 60 FPS on my machine). Check out why. Seems like they're using their CPU time slices (doesn't look as if physics threads are stealing 'em).
-. Make sure default settings are good on a no-good computer. Like 60 FPS.
+. Make sure default settings are good on a no-good computer. Like 60 FPS. 30 FPS?
 . Add better camera control, such as for the truck (just looking at the trailer looks like shit).
 . Print game version number to log when starting.
 . Add support for checking if loaded controller configuration contains devices no longer present in the system when starting, and if so reset 'em.
 . Add support for auto-configuring best controller configuration.
-. Start alpha-testing with human users.
 . Go through all TODOs.
 . Fix all source file header comments (Righteous games, 2010).
+. Add a state renderer, so that logo rendering, menu backdrop, game rendering and demo screen are just different states.
 . Verify that destruction of ContextObject during load does not cause an invalid resource to float around the resource manager.
 . Fix engine mode "half_lock" (or make it synchronized or otherwise improved).
 . Add click sounds to buttons.
 . Go over demo version and release version, making sure that all functionality is in place.
 . Automatically downsize rendering (shadows) and physics micro steps if FPS are low. Runtime optimize by turning off pixel shaders, shadow volumes, etc.
-. Check that all log destinations write strings, not raw data, to disk. LogFileXxx (single one) was checked and corrected from WriteData() to WriteString().
 . Get licences in order. Both C++ and Python. Both mine and third party.
 . Release open source code.
-. Separate input and output data in the data folder. Create a proper directory structure for external release.
 . Remove unused rtvars (such as Ui.2D.PaintMode).
 . Test thoroughly!
 . Polish.
 . Refactor.
 . Go through all RG e-mail to ensure all is in place.
-. Produce autostarting autotest after commit. Run in Linux at least.
 . Check heap regularly (using _heapchk() in Win32).
-. Add relevant thread safety to classes here and there (NetworkServer, for instance). Add interfaces to isolate functionality. Use Sigges design pattern.
-. Add crash control.
 . Add handling of ODE crashes (numerical overflow, etc).
 . Serialize physics threads, so that one ends up on each free CPU?
 | Remove all memory leaks. (Don't put me out, place me at bottom of checklist.)
@@ -315,3 +320,6 @@ Quality
 - Perhaps (?) add ogg/vorbis support if music is wanted.
 - Give feedback while logging in. Especially after a few seconds of nothingness.
 - Disabling keyboard steering when any splitscreen console window is down.
+- Produce autostarting autotest after commit. Run in Linux at least.
+- Add relevant thread safety to classes here and there (NetworkServer, for instance). Add interfaces to isolate functionality. Use Sigges design pattern.
+- Add crash control.

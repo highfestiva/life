@@ -49,9 +49,13 @@ GameServerManager::~GameServerManager()
 {
 	if (mMasterConnection)
 	{
-		mMasterConnection->AppendLocalInfo(_T(" --remove true"));
-		mMasterConnection->WaitUntilDone(50.0, true);
-		mMasterConnection = 0;	// Not owned by us, deleted elsewhere.
+		if (!mMasterConnection->CloseUnlessUploaded())
+		{
+			mLog.Headline(_T("Unregistering server with master."));
+			mMasterConnection->AppendLocalInfo(_T(" --remove true"));
+			mMasterConnection->WaitUntilDone(10.0, true);
+			mMasterConnection = 0;	// Not owned by us, deleted elsewhere.
+		}
 	}
 
 	DeleteAllClients();

@@ -173,7 +173,8 @@ protected:
 	Timer mLastUnsafeReceiveTime;
 	Alarm mCollisionExpireAlarm;
 	Alarm mInputExpireAlarm;
-	Options::Vehicle mLastSteering;
+	Options::Steering mLastSteering;
+	float mCamRotateExtra;
 
 	HiResTimer mAvatarSelectTime;
 	HiResTimer mAvatarMightSelectTime;
