@@ -28,7 +28,7 @@ MasterServerConnection::MasterServerConnection():
 
 MasterServerConnection::~MasterServerConnection()
 {
-	GraceClose(2.0);
+	GraceClose(2.0, true);
 	delete mConnecter;
 	mConnecter = 0;
 }
@@ -130,9 +130,9 @@ double MasterServerConnection::WaitUntilDone(double pTimeout, bool pAllowReconne
 	return lTimer.QueryTimeDiff();
 }
 
-void MasterServerConnection::GraceClose(double pTimeout)
+void MasterServerConnection::GraceClose(double pTimeout, bool pWaitUntilDone)
 {
-	const double lWaitedTime = WaitUntilDone(pTimeout, false);
+	const double lWaitedTime = pWaitUntilDone? WaitUntilDone(pTimeout, false) : 0;
 	mConnecter->RequestStop();
 	if (mSocket)
 	{
@@ -146,7 +146,7 @@ bool MasterServerConnection::CloseUnlessUploaded()
 {
 	if (mUploadedServerInfo.empty())
 	{
-		Close(false);
+		GraceClose(1.0, false);
 	}
 	return mUploadedServerInfo.empty();	// TRICKY: some time has gone by, might have been updated.
 }
@@ -263,7 +263,7 @@ void MasterServerConnection::ConnectEntry()
 	}
 
 	mSocket = new TcpSocket(0);
-	if (!mSocket->IsOpen() || mConnecter->GetStopRequest())
+	if (mConnecter->GetStopRequest() || !mSocket->IsOpen())
 	{
 		mLog.Warning(_T("Could open TCP socket."));
 		Close(true);
@@ -277,7 +277,7 @@ void MasterServerConnection::ConnectEntry()
 		Close(true);
 		return;
 	}
-	if (!mSocket->Connect(lTargetAddress) || mConnecter->GetStopRequest())
+	if (mConnecter->GetStopRequest() || !mSocket->Connect(lTargetAddress))
 	{
 		mLog.Warningf(_T("Could not connect to master server address '%s'."), lMasterServerAddress.c_str());
 		Close(true);

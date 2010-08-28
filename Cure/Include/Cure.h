@@ -45,4 +45,8 @@ enum NetworkObjectType
 
 
 
+#define CURE_STANDARD_FRAME_RATE	30
+
+
+
 }

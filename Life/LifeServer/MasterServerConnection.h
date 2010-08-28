@@ -38,7 +38,7 @@ public:
 	str GetServerListAsText() const;
 	bool IsConnectError() const;
 	double WaitUntilDone(double pTimeout, bool pAllowReconnect);
-	void GraceClose(double pTimeout);
+	void GraceClose(double pTimeout, bool pWaitUntilDone);
 	bool CloseUnlessUploaded();
 	void Tick();
 

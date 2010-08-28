@@ -131,6 +131,7 @@ public:
 		INFO_LOGIN = 1,
 		INFO_CHAT,
 		INFO_AVATAR,
+		INFO_COMMAND,
 	};
 
 	MessageStatus();
@@ -155,6 +156,8 @@ public:
 		INFO_PONG,
 		INFO_AVATAR,
 		INFO_RECREATE_OBJECT,
+		INFO_REQUEST_LOAN,
+		INFO_GRANT_LOAN,
 	};
 
 	MessageNumber();

@@ -74,11 +74,14 @@ public:
 	virtual void OnLoadCompleted(ContextObject* pObject, bool pOk) = 0;
 	virtual void OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque,
 		ContextObject* pObject1, ContextObject* pObject2) = 0;
-	virtual void OnStopped(ContextObject* pObject, TBC::PhysicsManager::BodyID pBodyId) = 0;
+	void OnStopped(ContextObject* pObject, TBC::PhysicsManager::BodyID pBodyId);
 	virtual bool OnPhysicsSend(ContextObject* pObject) = 0;
 	virtual bool IsConnectAuthorized() = 0;
 	virtual void SendAttach(ContextObject* pObject1, unsigned pId1, ContextObject* pObject2, unsigned pId2) = 0;
 	virtual void SendDetach(ContextObject* pObject1, ContextObject* pObject2) = 0;
+	virtual void OnAlarm(int pAlarmId, ContextObject* pObject, void* pExtraData);
+
+	bool ValidateVariable(int pSecurityLevel, const str& pVariable, str& pValue) const;
 
 	void UpdateReportPerformance(bool pReport, double pReportInterval);
 	void ClearPerformanceData();

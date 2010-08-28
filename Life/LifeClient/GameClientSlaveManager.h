@@ -126,13 +126,14 @@ protected:
 	void SetMovement(Cure::GameObjectId pInstanceId, int32 pFrameIndex, Cure::ObjectPositionalData& pData);
 	void OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque,
 		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2);
-	void OnStopped(Cure::ContextObject* pObject, TBC::PhysicsManager::BodyID pBodyId);
 	bool OnPhysicsSend(Cure::ContextObject* pObject);
 	bool IsConnectAuthorized();
 	void SendAttach(Cure::ContextObject*, unsigned, Cure::ContextObject*, unsigned);
 	void SendDetach(Cure::ContextObject*, Cure::ContextObject*);
+	virtual void OnAlarm(int pAlarmId, Cure::ContextObject* pObject, void* pExtraData);
 	void AttachObjects(Cure::GameObjectId pObject1Id, unsigned pBody1Id, Cure::GameObjectId pObject2Id, unsigned pBody2Id);
 	void DetachObjects(Cure::GameObjectId pObject1Id, Cure::GameObjectId pObject2Id);
+	bool IsOwned(Cure::GameObjectId pObjectId) const;
 
 	void CancelLogin();
 	void OnAvatarSelect(UiTbc::Button* pButton);
@@ -152,6 +153,7 @@ protected:
 	typedef std::hash_map<Cure::GameObjectId, int> ObjectFrameIndexMap;
 	typedef std::pair<Cure::GameObjectId, int> ObjectFrameIndexPair;
 	typedef std::hash_map<Cure::GameObjectId, RoadSignButton*> RoadSignMap;
+	typedef std::hash_set<Cure::GameObjectId> ObjectIdSet;
 
 	GameClientMasterTicker* mMaster;
 	UiCure::GameUiManager* mUiManager;
@@ -167,6 +169,7 @@ protected:
 
 	// Network transmission and keepalive info.
 	Cure::GameObjectId mAvatarId;
+	ObjectIdSet mOwnedObjectList;
 	uint64 mLastSentByteCount;
 	Timer mLastSendTime;
 	int mPingAttemptCount;
@@ -198,7 +201,6 @@ protected:
 	float mCameraMaxSpeed;			// TODO: remove hack (should context object controlled)!
 	float mCameraPivotSpeed;		// TODO: remove hack (should context object controlled)!
 	Vector3DF mMicrophoneSpeed;		// TODO: remove hack (should context object controlled)!
-	Cure::ObjectPositionalData mNetworkOutputGhost;	// TODO: remove hack (should be one per controllable object)!
 	bool mAllowMovementInput;
 	Options::ClientOptionsManager mOptions;
 	UiTbc::Window* mLoginWindow;

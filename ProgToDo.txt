@@ -47,7 +47,9 @@ Game
 + Remove sound twirps (when in high speeds) by making sound listener velocity slide instead of jerk (just a theory).
 + Bug: when starting 2 split-screens, then killing #1, #2 doesn't update graphics of server-owned objects any more.
 + Put some clouds and the sun in the sky, put something below the platform/ground that makes it obvious that objects that fall over are gone for good.
-. Create a list of server-controlled (=important sync) rtvars. Transmit from server to client upon login. Disallow client settings on these rtvars, and monitor them on server to re-sync them when necessary.
++ Create a list of server-controlled (=important sync) rtvars. Transmit from server to client upon login. Disallow client settings on these rtvars, and monitor them on server to re-sync them when necessary.
++ Add simple cam control for Finne.
++ Add house that can be torn down, but builds itself up automatically again afterwards.
 . Make ingame menu only available through icons (mouse click or hoover).
   - Autoflip.
   - Select vehicle.
@@ -60,10 +62,10 @@ Game
   - Bullet time triggers on jumps on the monster track. When triggered, sets RTR to 0.2 and CamRotate to 200 for 5 seconds.
   - Trigger in a "tingling gate" somewhere which gives you toy speed. When triggered, sets RTR to 2.3 for x seconds.
   - Real world "tingling gate" trigger somewhere. When triggered, disables outline rendering mode for x seconds.
-. Add simple cam control for Finne.
+. Show steering hint (kbd keys used) for each split-screen when started.
 . Add names tags connected to each player. Connected with a line to each vehicle.
 . Make race track visible in outline rendering mode.
-. Add logic to colliding with a cube/stone. Yields flying stars and sounds.
+. Add logic to colliding with a cube/stone. Yields points: flying stars and sounds.
 . Adjust excavator so stones and cubes can be picked up.
 . Add server-triggered garage door to world. Make sure trigger coding is easy!!!
 . Fix bug: road sign for first vehicle is "squashed" when having 3 split-screen players.
@@ -115,6 +117,7 @@ Game
 - Make a "change avatar" functionality.)
   - When abandoning a vehicle, the vehicle remains in the world.)
   - If there IS a vehicle and it is NOT OCCUPIED of the type that is requested, use it, otherwise create a new one.)
+- Make a small AND INVISIBLE console test command that loops through all RTVARs, setting them to random values and running a tick, just to be able to find settings or combinations that cause crash bugs.
 
 
 Engine
@@ -187,6 +190,7 @@ Engine
 + Add master volume.
 + Go back to using dual UDP/TCP sockets again.
 + Load world.
++ Client must request (and release) ownership of objects that are collided to. Owned objects are broadcasted to all other clients from the owner. Server won't take any own initiaives in the duration of the ownership.
 . Make sure camera never flies under ground or collides with physical objects. Make camera always keep a free line of sight to the controlled object.
 . Collision sounds.
 . Optimize: startup. Very slow on slow computer.
@@ -240,6 +244,7 @@ Engine
 - Text/console clients, plural. Run in same process.
 - Organize data in directories for sounds, meshes, physics, classes, etc.
 - Load levels, go to next level, etc.
+- Add low poly model for shadows.
 
  
 Quality
@@ -289,12 +294,11 @@ Quality
 . Add support for auto-configuring best controller configuration.
 . Go through all TODOs.
 . Fix all source file header comments (Righteous games, 2010).
-. Add a state renderer, so that logo rendering, menu backdrop, game rendering and demo screen are just different states.
 . Verify that destruction of ContextObject during load does not cause an invalid resource to float around the resource manager.
 . Fix engine mode "half_lock" (or make it synchronized or otherwise improved).
 . Add click sounds to buttons.
 . Go over demo version and release version, making sure that all functionality is in place.
-. Automatically downsize rendering (shadows) and physics micro steps if FPS are low. Runtime optimize by turning off pixel shaders, shadow volumes, etc.
+. Automatically downsize rendering (shadows) and physics micro steps if FPS are low. Runtime optimize by turning off pixel shaders, shadow volumes, mass objects, etc.
 . Get licences in order. Both C++ and Python. Both mine and third party.
 . Release open source code.
 . Remove unused rtvars (such as Ui.2D.PaintMode).
@@ -305,6 +309,7 @@ Quality
 . Check heap regularly (using _heapchk() in Win32).
 . Add handling of ODE crashes (numerical overflow, etc).
 . Serialize physics threads, so that one ends up on each free CPU?
+| Test removing all settings files and that everything is perfect with default settings.
 | Remove all memory leaks. (Don't put me out, place me at bottom of checklist.)
 | Test with "simulating" single CPU system. (Don't put me out, place me at bottom of checklist.)
 | Test with corrupt/missing resources. (Don't put me out, place me at bottom of checklist.)
@@ -323,3 +328,4 @@ Quality
 - Produce autostarting autotest after commit. Run in Linux at least.
 - Add relevant thread safety to classes here and there (NetworkServer, for instance). Add interfaces to isolate functionality. Use Sigges design pattern.
 - Add crash control.
+- Add a state renderer, so that logo rendering, menu backdrop, game rendering and demo screen are just different states.

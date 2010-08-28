@@ -28,6 +28,10 @@ class ContextManager
 {
 public:
 	typedef std::hash_map<GameObjectId, ContextObject*> ContextObjectTable;
+	enum
+	{
+		SYSTEM_ALARM_ID = 1000,
+	};
 
 	ContextManager(GameManager* pGameManager);
 	virtual ~ContextManager();

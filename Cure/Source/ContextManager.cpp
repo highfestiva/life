@@ -336,7 +336,14 @@ void ContextManager::DispatchAlarmCallbacks()
 	for (std::list<Alarm>::iterator x = lCallbackList.begin(); x != lCallbackList.end(); ++x)
 	{
 		const Alarm& lAlarm = *x;
-		lAlarm.mObject->OnAlarm(lAlarm.mAlarmId, lAlarm.mExtraData);
+		if (lAlarm.mAlarmId < SYSTEM_ALARM_ID)
+		{
+			lAlarm.mObject->OnAlarm(lAlarm.mAlarmId, lAlarm.mExtraData);
+		}
+		else
+		{
+			mGameManager->OnAlarm(lAlarm.mAlarmId, lAlarm.mObject, lAlarm.mExtraData);
+		}
 	}
 }
 

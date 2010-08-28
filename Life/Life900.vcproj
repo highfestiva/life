@@ -464,6 +464,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\LifeString.h"
+				>
+			</File>
+			<File
 				RelativePath=".\RtVar.h"
 				>
 			</File>

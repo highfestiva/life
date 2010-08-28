@@ -46,6 +46,7 @@ public:
 
 	wstrutil::strvec ListUsers();
 	bool BroadcastChatMessage(const wstr& pMessage);
+	bool BroadcastStatusMessage(Cure::MessageStatus::InfoType pType, const wstr& pString);
 	bool SendChatMessage(const wstr& pClientUserName, const wstr& pMessage);
 
 	int GetLoggedInClientCount() const;
@@ -81,11 +82,11 @@ private:
 	virtual void OnLoadCompleted(Cure::ContextObject* pObject, bool pOk);
 	void OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque,
 		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2);
-	void OnStopped(Cure::ContextObject* pObject, TBC::PhysicsManager::BodyID pBodyId);
 	bool OnPhysicsSend(Cure::ContextObject* pObject);
 	bool IsConnectAuthorized();
 	void SendAttach(Cure::ContextObject* pObject1, unsigned pId1, Cure::ContextObject* pObject2, unsigned pId2);
 	void SendDetach(Cure::ContextObject* pObject1, Cure::ContextObject* pObject2);
+	virtual void OnAlarm(int pAlarmId, Cure::ContextObject* pObject, void* pExtraData);
 	virtual void HandleWorldBoundaries();
 
 	virtual Cure::ContextObject* CreateLogicHandler(const str& pType) const;
@@ -101,6 +102,7 @@ private:
 	Cure::NetworkServer* GetNetworkServer() const;
 
 	void UploadServerInfo();
+	void MonitorRtvars();
 
 	typedef std::list<Cure::MessageObjectMovement*> MovementList;
 	typedef std::vector<MovementList> MovementArrayList;
@@ -113,6 +115,8 @@ private:
 	MovementArrayList mMovementArrayList;
 	mutable Timer mPowerSaveTimer;
 	MasterServerConnection* mMasterConnection;
+	int mPhysicsFpsShadow;
+	float mPhysicsRtrShadow;
 
 	LOG_CLASS_DECLARE();
 };

@@ -63,7 +63,7 @@ bool ExportStructure()
 	str lContext;
 	bool lOk = true;
 
-	int lPhysicsFps = 60;
+	int lPhysicsFps = CURE_STANDARD_FRAME_RATE;
 	TBC::PhysicsManager* lPhysics = TBC::PhysicsManagerFactory::Create(TBC::PhysicsManagerFactory::ENGINE_ODE);
 	if (lOk)
 	{

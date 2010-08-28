@@ -32,6 +32,8 @@ public:
 
 	UiConsole* GetUiConsole() const;
 
+	int FilterExecuteCommand(const str& pCommand);
+
 protected:
 	bool SaveApplicationConfigFile(File* pFile, const wstr& pUserConfig);
 

@@ -21,7 +21,7 @@ static const int gTimeWrapLimit = 10*60;	// Unit is seconds. Anything small is g
 
 
 TimeManager::TimeManager():
-	mTargetFrameRate(60)
+	mTargetFrameRate(CURE_STANDARD_FRAME_RATE)
 {
 	Clear(0);
 }
@@ -52,7 +52,6 @@ void TimeManager::TickTime()
 	CURE_RTVAR_GET(mTargetFrameRate, =, Cure::GetSettings(), RTVAR_PHYSICS_FPS, 2);
 	CURE_RTVAR_GET(mRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
 	mPhysicsFrameWrapLimit = gTimeWrapLimit*mTargetFrameRate;
-	mRealTimeRatio = Math::Clamp(mRealTimeRatio, 0.1f, 4.0f);
 
 	mCurrentFrameTime = (float)mTime.PopTimeDiff();
 	if (mCurrentFrameTime > 1.0)	// Never take longer steps than one second.
@@ -105,8 +104,9 @@ void TimeManager::TickPhysics()
 	}
 }
 
-float TimeManager::GetAbsoluteTime() const
+float TimeManager::GetAbsoluteTime(float pOffset) const
 {
+	if (pOffset) return ::fmod(mAbsoluteTime+pOffset, (float)gTimeWrapLimit);
 	return (mAbsoluteTime);
 }
 

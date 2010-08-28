@@ -20,7 +20,7 @@ Sunlight::Sunlight(UiCure::GameUiManager* pUiManager):
 {
 	mLightId = mUiManager->GetRenderer()->AddDirectionalLight(
 		UiTbc::Renderer::LIGHT_STATIC, Vector3DF(0, 0.5f, -1),
-		Color::Color(255, 255, 255), 1.5f, 20);
+		Color::Color(255, 255, 255), 1.5f, 40);
 }
 
 Sunlight::~Sunlight()

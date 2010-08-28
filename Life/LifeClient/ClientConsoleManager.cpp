@@ -5,6 +5,7 @@
 
 
 #include "../../Cure/Include/RuntimeVariable.h"
+#include "../../Cure/Include/RuntimeVariableName.h"
 #include "../../Cure/Include/TimeManager.h"
 #include "../../Lepra/Include/CyclicArray.h"
 #include "../../Lepra/Include/Number.h"
@@ -80,6 +81,37 @@ void ClientConsoleManager::Join()
 UiConsole* ClientConsoleManager::GetUiConsole() const
 {
 	return (mUiConsole);
+}
+
+
+
+int ClientConsoleManager::FilterExecuteCommand(const str& pCommandLine)
+{
+	const str lCommandDelimitors(_T(" \t\v\r\n"));
+	const strutil::strvec lCommandList = strutil::BlockSplit(pCommandLine, _T(";"), true, true);
+	const int lAllowedCount = 3;
+	const str lAllowedList[lAllowedCount] =
+	{
+		str(_T("#") _T(RTVAR_PHYSICS_FPS)),
+		str(_T("#") _T(RTVAR_PHYSICS_RTR)),
+		str(_T("echo ")),
+	};
+	int lResult = 0;
+	for (size_t lCommandIndex = 0; lResult == 0 && lCommandIndex < lCommandList.size(); ++lCommandIndex)
+	{
+		lResult = -1;
+		const str& lTempCommand = lCommandList[lCommandIndex];
+		const str lCommand = strutil::StripLeft(lTempCommand, lCommandDelimitors);
+		for (int x = 0; x < lAllowedCount; ++x)
+		{
+			if (strutil::StartsWith(lCommand, lAllowedList[x]))
+			{
+				lResult = ExecuteCommand(lCommand);
+				break;
+			}
+		}
+	}
+	return lResult;
 }
 
 

@@ -72,11 +72,11 @@ void Application::Init()
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_DEBUG_ENABLE, false);
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_DEBUG_3D_ENABLEAXES, false);
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_DEBUG_3D_ENABLEJOINTS, false);
-	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_DEBUG_3D_ENABLESHAPES, false);
+	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_DEBUG_3D_ENABLESHAPES, true);
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_YOFFSET, 10);
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_GRAPH, false);
-	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_NAMES, false);
-	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_COUNT, false);
+	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_NAMES, true);
+	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_COUNT, true);
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_DEBUG_EXTRASLEEPTIME, 0.0);
 	CURE_RTVAR_INTERNAL(Cure::GetSettings(), RTVAR_APPLICATION_NAME, _T("Life"));
 
@@ -88,8 +88,8 @@ void Application::Init()
 	mFileLogger = new FileLogListener(GetIoFile(GetName(), _T("log"), false));
 	//mFileLogger->SetLevelThreashold(Log::LEVEL_INFO);
 	mFileLogger->WriteLog(_T("\n\n"), Log::LEVEL_INFO);
-	mPerformanceLogger = new FileLogListener(GetIoFile(GetName()+_T("Performance"), _T("log"), false));
-	mMemLogger = new MemFileLogListener(100*1024);
+	//mPerformanceLogger = new FileLogListener(GetIoFile(GetName()+_T("Performance"), _T("log"), false));
+	mMemLogger = new MemFileLogListener(20*1024);
 	LogType::GetLog(LogType::SUB_ROOT)->SetupBasicListeners(mConsoleLogger, mDebugLogger, mFileLogger, mPerformanceLogger, mMemLogger);
 
 	str lStartMessage = _T("---------- Starting ") + GetName() + _T(". Build type: ") _T(LEPRA_STRING_TYPE_TEXT) _T(" ") _T(LEPRA_BUILD_TYPE_TEXT) _T(" ----------\n");
@@ -119,7 +119,7 @@ int Application::Run()
 		lOk = mGameTicker->Initialize();
 	}
 	bool lQuit = false;
-	mTimeInfo.Set(1/60.0, 1/60.0, 1/60.0);
+	mTimeInfo.Set(1.0/CURE_STANDARD_FRAME_RATE, 1.0/CURE_STANDARD_FRAME_RATE, 1.0/CURE_STANDARD_FRAME_RATE);
 	while (lOk && !lQuit)
 	{
 		LEPRA_MEASURE_SCOPE(AppTick);

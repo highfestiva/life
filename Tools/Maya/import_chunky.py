@@ -623,7 +623,8 @@ class GroupReader(DefaultMAReader):
                                         specular = map(lambda i: sro*i, sc)
 
                                         ec = material.get_fixed_attribute("ec", optional=True, default=1.0)
-                                        shininess = 1.0-ec
+                                        cp = material.get_fixed_attribute("cp", optional=True, default=0.0)
+                                        shininess = max((1.0-ec, cp/100))
 
                                         trans = material.get_fixed_attribute("it", optional=True, default=[0.0]*3)
                                         alpha = 1.0 - sum(trans)/3
