@@ -32,6 +32,8 @@ public:
 
 	UiConsole* GetUiConsole() const;
 
+	int FilterExecuteCommand(const str& pCommand);
+
 protected:
 	bool SaveApplicationConfigFile(File* pFile, const wstr& pUserConfig);
 
@@ -42,7 +44,6 @@ private:
 		COMMAND_BYE,
 		COMMAND_START_LOGIN,
 		COMMAND_WAIT_LOGIN,
-		COMMAND_LIST_SERVERS,
 		COMMAND_LOGOUT,
 		COMMAND_START_RESET_UI,
 		COMMAND_WAIT_RESET_UI,

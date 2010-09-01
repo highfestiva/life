@@ -84,4 +84,86 @@ bool MasterServerNetworkParser::RawToStr(wstr& pStr, const uint8* pRawData, unsi
 
 
 
+bool MasterServerNetworkParser::ExtractServerInfo(const str& pServerString, ServerInfo& pInfo)
+{
+	strutil::strvec lCommandList = strutil::BlockSplit(pServerString, _T(" \t\r\n"), false, false);
+	if (lCommandList.empty())
+	{
+		return false;
+	}
+	unsigned lStartIndex = 0;
+	if (!strutil::StartsWith(lCommandList[0], _T("--")))
+	{
+		pInfo.mCommand = lCommandList[0];
+		lStartIndex = 1;
+	}
+	for (unsigned x = lStartIndex; x < lCommandList.size(); x += 2)
+	{
+		if (lCommandList.size() < x+2)
+		{
+			mLog.Error(_T("Got too few parameters!"));
+			return false;
+		}
+		if (lCommandList[x] == _T("--name"))
+		{
+			pInfo.mName = lCommandList[x+1];
+		}
+		else if (lCommandList[x] == _T("--port"))
+		{
+			if (!strutil::StringToInt(lCommandList[x+1], pInfo.mPort))
+			{
+				mLog.Error(_T("Got non-integer port parameter!"));
+				return false;
+			}
+			if (pInfo.mPort < 0 || pInfo.mPort > 65535)
+			{
+				mLog.Errorf(_T("Got invalid port number (%i)!"), pInfo.mPort);
+				return false;
+			}
+		}
+		else if (lCommandList[x] == _T("--player-count"))
+		{
+			if (!strutil::StringToInt(lCommandList[x+1], pInfo.mPlayerCount))
+			{
+				mLog.Error(_T("Got non-integer player count parameter!"));
+				return false;
+			}
+			if (pInfo.mPlayerCount < 0 || pInfo.mPlayerCount > 512)
+			{
+				mLog.Errorf(_T("Got invalid player count number (%i)!"), pInfo.mPlayerCount);
+				return false;
+			}
+		}
+		else if (lCommandList[x] == _T("--address"))
+		{
+			pInfo.mAddress = lCommandList[x+1];
+		}
+		else if (lCommandList[x] == _T("--id"))
+		{
+			pInfo.mId = lCommandList[x+1];
+		}
+		else if (lCommandList[x] == _T("--remove"))
+		{
+			if (lCommandList[x+1] != _T("true"))
+			{
+				mLog.Errorf(_T("Got bad --remove argument (%s)!"), lCommandList[x+1].c_str());
+				return false;
+			}
+			pInfo.mRemove = true;
+		}
+		else
+		{
+			mLog.Errorf(_T("Got bad parameter (%s)!"), lCommandList[x].c_str());
+			return false;
+		}
+	}
+	return true;
+}
+
+
+
+LOG_CLASS_DEFINE(NETWORK, MasterServerNetworkParser);
+
+
+
 }

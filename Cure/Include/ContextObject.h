@@ -58,6 +58,8 @@ public:
 	GameObjectId GetInstanceId() const;
 	void SetInstanceId(GameObjectId pInstanceId);
 	const str& GetClassId() const;
+	GameObjectId GetOwnerInstanceId() const;
+	void SetOwnerInstanceId(GameObjectId pInstanceId);
 
 	NetworkObjectType GetNetworkObjectType() const;
 	void SetNetworkObjectType(NetworkObjectType pType);
@@ -93,6 +95,8 @@ public:
 	Vector3DF GetVelocity() const;
 	float GetForwardSpeed() const;
 	float GetMass() const;
+	ObjectPositionalData* GetNetworkOutputGhost();
+	void DeleteNetworkOutputGhost();
 
 	bool SetPhysics(TBC::ChunkyPhysics* pStructure);
 	void ClearPhysics();
@@ -148,10 +152,11 @@ protected:
 	ContextManager* mManager;
 	ResourceManager* mResourceManager;
 	GameObjectId mInstanceId;
+	GameObjectId mOwnerInstanceId;
 	str mClassId;
 	NetworkObjectType mNetworkObjectType;
-	void* mExtraData;
 	ContextObject* mParent;
+	void* mExtraData;
 	ChildList mChildList;
 	TriggerMap mTriggerMap;
 	const TBC::PhysicsSpawner* mSpawner;
@@ -161,6 +166,7 @@ protected:
 	PhysicsOverride mPhysicsOverride;
 	float mLastSendTime;
 	ObjectPositionalData mPosition;
+	ObjectPositionalData* mNetworkOutputGhost;
 	int mSendCount;
 	bool mAllowMoveSelf;	// This is set to false when attached to someone/something else.
 	ConnectionList mConnectionList;

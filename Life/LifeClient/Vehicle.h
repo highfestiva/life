@@ -7,7 +7,7 @@
 #pragma once
 
 #include "../../UiCure/Include/UiCppContextObject.h"
-#include "../../UiTbc/Include/UiChunkyClass.h"
+#include "../../UiTBC/Include/UiChunkyClass.h"
 #include "../Life.h"
 
 
@@ -19,8 +19,9 @@ namespace Life
 
 class Vehicle: public UiCure::CppContextObject
 {
-	typedef UiCure::CppContextObject Parent;
 public:
+	typedef UiCure::CppContextObject Parent;
+
 	Vehicle(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager);
 	virtual ~Vehicle();
 

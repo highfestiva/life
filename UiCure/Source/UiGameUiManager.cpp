@@ -427,11 +427,11 @@ PixelCoord GameUiManager::GetMouseDisplayPosition() const
 
 
 
-void GameUiManager::AssertDesktopLayout(UiTbc::Layout* pLayout)
+void GameUiManager::AssertDesktopLayout(UiTbc::Layout* pLayout, int pLayer)
 {
-	if (GetDesktopWindow()->GetLayout(0)->GetType() != pLayout->GetType())
+	if (GetDesktopWindow()->GetLayout(pLayer)->GetType() != pLayout->GetType())
 	{
-		GetDesktopWindow()->ReplaceLayer(0, pLayout);
+		GetDesktopWindow()->ReplaceLayer(pLayer, pLayout);
 	}
 	else
 	{

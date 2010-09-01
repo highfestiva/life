@@ -24,16 +24,22 @@ namespace Options
 ClientOptionsManager::ClientOptionsManager(Cure::RuntimeVariableScope* pVariableScope, int pPriority):
 	OptionsManager(pVariableScope, pPriority)
 {
-	::memset(&mControl, 0, sizeof(mControl));
+	::memset(&mSteeringControl, 0, sizeof(mSteeringControl));
+	::memset(&mCamControl, 0, sizeof(mCamControl));
 	SetDefault(pPriority);
 	DoRefreshConfiguration();
 }
 
 
 
-const Vehicle& ClientOptionsManager::GetControl() const
+const Steering& ClientOptionsManager::GetSteeringControl() const
 {
-	return (mControl);
+	return (mSteeringControl);
+}
+
+const CamControl& ClientOptionsManager::GetCamControl() const
+{
+	return (mCamControl);
 }
 
 
@@ -47,6 +53,12 @@ bool ClientOptionsManager::SetDefault(int pPriority)
 		case 0:
 		{
 			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_CONTOGGLE, _T("Key.PARAGRAPH, Key.ACUTE, Key.APOSTROPHE"));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_CAMUP, _T("Key.PGUP"));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_CAMDOWN, _T("Key.INSERT"));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_CAMLEFT, _T("Key.DEL"));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_CAMRIGHT, _T("Key.PGDOWN"));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_CAMFORWARD, _T("Key.HOME"));
+			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_CAMBACKWARD, _T("Key.END"));
 			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_FWD, _T("Key.UP"));
 			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_BACK, _T(""));
 			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_FWD3D, _T(""));
@@ -138,21 +150,27 @@ void ClientOptionsManager::DoRefreshConfiguration()
 	const KeyValue lEntries[] =
 	{
 		KeyValue(_T(RTVAR_CTRL_UI_CONTOGGLE), &mConsoleToggle),
-		KeyValue(_T(RTVAR_CTRL_STEER_FWD), &mControl.mControl[Vehicle::CONTROL_FORWARD]),
-		KeyValue(_T(RTVAR_CTRL_STEER_BACK), &mControl.mControl[Vehicle::CONTROL_BACKWARD]),
-		KeyValue(_T(RTVAR_CTRL_STEER_FWD3D), &mControl.mControl[Vehicle::CONTROL_FORWARD3D]),
-		KeyValue(_T(RTVAR_CTRL_STEER_BACK3D), &mControl.mControl[Vehicle::CONTROL_BACKWARD3D]),
-		KeyValue(_T(RTVAR_CTRL_STEER_BRKBACK), &mControl.mControl[Vehicle::CONTROL_BREAKANDBACK]),
-		KeyValue(_T(RTVAR_CTRL_STEER_LEFT), &mControl.mControl[Vehicle::CONTROL_LEFT]),
-		KeyValue(_T(RTVAR_CTRL_STEER_RIGHT), &mControl.mControl[Vehicle::CONTROL_RIGHT]),
-		KeyValue(_T(RTVAR_CTRL_STEER_LEFT3D), &mControl.mControl[Vehicle::CONTROL_LEFT3D]),
-		KeyValue(_T(RTVAR_CTRL_STEER_RIGHT3D), &mControl.mControl[Vehicle::CONTROL_RIGHT3D]),
-		KeyValue(_T(RTVAR_CTRL_STEER_UP), &mControl.mControl[Vehicle::CONTROL_UP]),
-		KeyValue(_T(RTVAR_CTRL_STEER_DOWN), &mControl.mControl[Vehicle::CONTROL_DOWN]),
-		KeyValue(_T(RTVAR_CTRL_STEER_UP3D), &mControl.mControl[Vehicle::CONTROL_UP3D]),
-		KeyValue(_T(RTVAR_CTRL_STEER_DOWN3D), &mControl.mControl[Vehicle::CONTROL_DOWN3D]),
-		KeyValue(_T(RTVAR_CTRL_STEER_HANDBRK), &mControl.mControl[Vehicle::CONTROL_HANDBREAK]),
-		KeyValue(_T(RTVAR_CTRL_STEER_BRK), &mControl.mControl[Vehicle::CONTROL_BREAK]),
+		KeyValue(_T(RTVAR_CTRL_STEER_FWD), &mSteeringControl.mControl[Steering::CONTROL_FORWARD]),
+		KeyValue(_T(RTVAR_CTRL_STEER_BACK), &mSteeringControl.mControl[Steering::CONTROL_BACKWARD]),
+		KeyValue(_T(RTVAR_CTRL_STEER_FWD3D), &mSteeringControl.mControl[Steering::CONTROL_FORWARD3D]),
+		KeyValue(_T(RTVAR_CTRL_STEER_BACK3D), &mSteeringControl.mControl[Steering::CONTROL_BACKWARD3D]),
+		KeyValue(_T(RTVAR_CTRL_STEER_BRKBACK), &mSteeringControl.mControl[Steering::CONTROL_BREAKANDBACK]),
+		KeyValue(_T(RTVAR_CTRL_STEER_LEFT), &mSteeringControl.mControl[Steering::CONTROL_LEFT]),
+		KeyValue(_T(RTVAR_CTRL_STEER_RIGHT), &mSteeringControl.mControl[Steering::CONTROL_RIGHT]),
+		KeyValue(_T(RTVAR_CTRL_STEER_LEFT3D), &mSteeringControl.mControl[Steering::CONTROL_LEFT3D]),
+		KeyValue(_T(RTVAR_CTRL_STEER_RIGHT3D), &mSteeringControl.mControl[Steering::CONTROL_RIGHT3D]),
+		KeyValue(_T(RTVAR_CTRL_STEER_UP), &mSteeringControl.mControl[Steering::CONTROL_UP]),
+		KeyValue(_T(RTVAR_CTRL_STEER_DOWN), &mSteeringControl.mControl[Steering::CONTROL_DOWN]),
+		KeyValue(_T(RTVAR_CTRL_STEER_UP3D), &mSteeringControl.mControl[Steering::CONTROL_UP3D]),
+		KeyValue(_T(RTVAR_CTRL_STEER_DOWN3D), &mSteeringControl.mControl[Steering::CONTROL_DOWN3D]),
+		KeyValue(_T(RTVAR_CTRL_STEER_HANDBRK), &mSteeringControl.mControl[Steering::CONTROL_HANDBREAK]),
+		KeyValue(_T(RTVAR_CTRL_STEER_BRK), &mSteeringControl.mControl[Steering::CONTROL_BREAK]),
+		KeyValue(_T(RTVAR_CTRL_UI_CAMLEFT), &mCamControl.mControl[CamControl::CAMDIR_LEFT]),
+		KeyValue(_T(RTVAR_CTRL_UI_CAMRIGHT), &mCamControl.mControl[CamControl::CAMDIR_RIGHT]),
+		KeyValue(_T(RTVAR_CTRL_UI_CAMFORWARD), &mCamControl.mControl[CamControl::CAMDIR_FORWARD]),
+		KeyValue(_T(RTVAR_CTRL_UI_CAMBACKWARD), &mCamControl.mControl[CamControl::CAMDIR_BACKWARD]),
+		KeyValue(_T(RTVAR_CTRL_UI_CAMUP), &mCamControl.mControl[CamControl::CAMDIR_UP]),
+		KeyValue(_T(RTVAR_CTRL_UI_CAMDOWN), &mCamControl.mControl[CamControl::CAMDIR_DOWN]),
 	};
 	SetValuePointers(lEntries, LEPRA_ARRAY_COUNT(lEntries));
 }

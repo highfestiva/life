@@ -13,6 +13,7 @@
 #include "../../UiTBC/Include/GUI/UiConsolePrompt.h"
 #include "../../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../../UiTBC/Include/GUI/UiFileNameField.h"
+#include "../../UiTBC/Include/GUI/UiFloatingLayout.h"
 #include "../../UiTBC/Include/GUI/UiTextArea.h"
 #include "../ConsoleManager.h"
 #include "RtVar.h"
@@ -189,7 +190,8 @@ void UiConsole::InitGraphics()
 	mConsoleComponent->AddChild(mConsoleOutput);
 	mConsoleComponent->AddChild(mConsoleInput);
 
-	mUiManager->GetDesktopWindow()->AddChild(mConsoleComponent, 0, 0, 1);
+	mUiManager->AssertDesktopLayout(new UiTbc::FloatingLayout, 0);
+	mUiManager->GetDesktopWindow()->AddChild(mConsoleComponent, 0, 0, 0);
 	mConsoleComponent->SetPos(mArea.mLeft, mArea.mTop);
 	mConsoleComponent->SetVisible(false);
 
@@ -201,7 +203,7 @@ void UiConsole::CloseGraphics()
 {
 	if (mUiManager && mConsoleComponent)
 	{
-		mUiManager->GetDesktopWindow()->RemoveChild(mConsoleComponent, 1);
+		mUiManager->GetDesktopWindow()->RemoveChild(mConsoleComponent, 0);
 		mConsoleComponent->RemoveChild(mConsoleOutput, 0);
 		mConsoleComponent->RemoveChild(mConsoleInput, 0);
 		mConsoleComponent->SetVisible(false);

@@ -464,7 +464,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\LifeString.h"
+				>
+			</File>
+			<File
 				RelativePath=".\RtVar.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ServerInfo.h"
 				>
 			</File>
 		</Filter>

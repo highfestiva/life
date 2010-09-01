@@ -517,7 +517,7 @@ STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::FastDoubleToString(double pValue)
 			lValue = -lValue;
 		}
 		const size_t lBufferSize = 11;
-		_String::value_type lString[lBufferSize];
+		typename _String::value_type lString[lBufferSize];
 		size_t lIndex = lBufferSize-1;
 		int x;
 		for (x = 0; x < 5; ++x, lValue /= 10)
@@ -525,20 +525,19 @@ STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::FastDoubleToString(double pValue)
 			int lDigit;
 			if ((lDigit = lValue%10) != 0)
 			{
-				lString[lIndex--] = '0' + _String::value_type(lDigit);
+				lString[lIndex--] = '0' + typename _String::value_type(lDigit);
 			}
-			;
 		}
 		for (; x < 6; ++x, lValue /= 10)
 		{
-			lString[lIndex--] = '0' + _String::value_type(lValue%10);
+			lString[lIndex--] = '0' + typename _String::value_type(lValue%10);
 		}
 		lString[lIndex--] = '.';
-		lString[lIndex--] = '0' + _String::value_type(lValue%10);
+		lString[lIndex--] = '0' + typename _String::value_type(lValue%10);
 		lValue /= 10;
 		for (x = 0; lValue && x < 2; ++x, lValue /= 10)
 		{
-			lString[lIndex--] = '0' + _String::value_type(lValue%10);
+			lString[lIndex--] = '0' + typename _String::value_type(lValue%10);
 		}
 		if (lPositive)
 		{

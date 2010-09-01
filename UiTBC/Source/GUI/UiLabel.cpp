@@ -158,8 +158,16 @@ Label::~Label()
 
 void Label::Repaint(Painter* pPainter)
 {
-	mTextWidth  = pPainter->GetStringWidth(_T(" ")+mText);
-	mTextHeight = pPainter->GetFontHeight();
+	SetNeedsRepaint(false);
+
+	const int lTextWidth  = pPainter->GetStringWidth(_T(" ")+mText);
+	const int lTextHeight = pPainter->GetLineHeight() * (std::count(mText.begin(), mText.end(), _T('\n')) + 1);
+	if (mTextWidth != lTextWidth || mTextHeight != lTextHeight)
+	{
+		mTextWidth = lTextWidth;
+		mTextHeight = lTextHeight;
+		GetParent()->UpdateLayout();
+	}
 
 	GUIImageManager* lIMan = GetImageManager();
 
@@ -171,15 +179,14 @@ void Label::Repaint(Painter* pPainter)
 	PixelRect lRect(lPos, lPos + GetSize());
 	pPainter->ReduceClippingRect(lRect);
 
-	int lFontHeight = pPainter->GetLineHeight();
 	int lTextX = lRect.mLeft;
-	int lTextY = lRect.mTop + (lRect.GetHeight() - lFontHeight) / 2;
+	int lTextY = lRect.mTop + (lRect.GetHeight() - mTextHeight) / 2;
 
 	if (mIconID != Painter::INVALID_IMAGEID)
 	{
 		PixelCoord lIconSize(lIMan->GetImageSize(mIconID));
 
-		int lIconY = lTextY + lFontHeight - lIconSize.y + 1;
+		int lIconY = lTextY + mTextHeight - lIconSize.y + 1;
 			//lRect.mTop + (lRect.GetHeight() - lIconSize.y) / 2;
 
 		lIMan->DrawImage(mIconID, lRect.mLeft, lIconY);

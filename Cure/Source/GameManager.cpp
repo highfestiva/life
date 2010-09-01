@@ -277,6 +277,53 @@ void GameManager::GetSiblings(GameObjectId pInstanceId, ContextObject::Array& pS
 	pSiblingArray.push_back(GetContext()->GetObject(pInstanceId));
 }
 
+void GameManager::OnStopped(ContextObject* pObject, TBC::PhysicsManager::BodyID pBodyId)
+{
+#ifdef LEPRA_DEBUG
+	const unsigned lRootIndex = 0;
+	assert(pObject->GetStructureGeometry(lRootIndex));
+	assert(pObject->GetStructureGeometry(lRootIndex)->GetBodyId() == pBodyId);
+#endif // Debug / !Debug
+	(void)pBodyId;
+
+	if (pObject->GetNetworkObjectType() == Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED)
+	{
+		log_volatile(mLog.Debugf(_T("Object %u/%s stopped, sending position."), pObject->GetInstanceId(), pObject->GetClassId().c_str()));
+		GetContext()->AddPhysicsSenderObject(pObject);
+	}
+}
+
+void GameManager::OnAlarm(int, ContextObject*, void*)
+{
+}
+
+
+
+bool GameManager::ValidateVariable(int pSecurityLevel, const str& pVariable, str& pValue) const
+{
+	if (pSecurityLevel < 1 && (pVariable == _T(RTVAR_PHYSICS_FPS) ||
+		pVariable == _T(RTVAR_PHYSICS_RTR)))
+	{
+		mLog.Warning(_T("You're not authorized to change this variable."));
+		return false;
+	}
+	if (pVariable == _T(RTVAR_PHYSICS_FPS) || pVariable == _T(RTVAR_PHYSICS_MICROSTEPS))
+	{
+		int lValue = 0;
+		if (!strutil::StringToInt(pValue, lValue)) return false;
+		lValue = (pVariable == _T(RTVAR_PHYSICS_FPS))? Math::Clamp(lValue, 5, 200) : Math::Clamp(lValue, 1, 10);
+		pValue = strutil::IntToString(lValue, 10);
+	}
+	else if (pVariable == _T(RTVAR_PHYSICS_RTR))
+	{
+		double lValue = 0;
+		if (!strutil::StringToDouble(pValue, lValue)) return false;
+		lValue = Math::Clamp(lValue, 0.01, 4.0);
+		strutil::DoubleToString(lValue, 4, pValue);
+	}
+	return true;
+}
+
 
 
 void GameManager::UpdateReportPerformance(bool pReport, double pReportInterval)
@@ -410,8 +457,8 @@ void GameManager::PhysicsTick()
 	int lMicroSteps;
 	CURE_RTVAR_GET(lMicroSteps, =, GetVariableScope(), RTVAR_PHYSICS_MICROSTEPS, 3);
 	const int lAffordedStepCount = mTime->GetAffordedPhysicsStepCount() * lMicroSteps;
-	const float lStepIncrement = mTime->GetAffordedPhysicsStepTime() / lMicroSteps;
-	/*if (lAffordedStepCount != 1 && !Math::IsEpsEqual(lStepIncrement, 1/60.0f))
+	float lStepIncrement = mTime->GetAffordedPhysicsStepTime() / lMicroSteps;
+	/*if (lAffordedStepCount != 1 && !Math::IsEpsEqual(lStepIncrement, 1/(float)CURE_STANDARD_FRAME_RATE))
 	{
 		mLog.Warningf(_T("Game time allows for %i physics steps in increments of %f."),
 			lAffordedStepCount, lStepIncrement);
@@ -423,7 +470,15 @@ void GameManager::PhysicsTick()
 	for (int x = 0; x < lAffordedStepCount; ++x)
 	{
 		ScriptTick(lStepIncrement);
-		mPhysics->StepFast(lStepIncrement);
+		try
+		{
+			mPhysics->StepFast(lStepIncrement);
+		}
+		catch (...)
+		{
+			mLog.Errorf(_T("Got some crash or major problem in physics simulation!"));
+			lStepIncrement *= 0.3f;
+		}
 	}
 	{
 		LEPRA_MEASURE_SCOPE(PostSteps);

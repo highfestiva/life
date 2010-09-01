@@ -155,13 +155,16 @@ private:
 #define CURE_RTVAR_SET_IF_NOT_SET(scope, name, value)		CURE_RTVAR_SET(scope, name, CURE_RTVAR_SLOW_TRYGET(scope, name, value))
 #define CURE_RTVAR_OVERRIDE(scope, name, value)			(scope)->SetValue(Cure::RuntimeVariable::USAGE_OVERRIDE, _T(name), value)
 #define CURE_RTVAR_INTERNAL(scope, name, value)			(scope)->SetValue(Cure::RuntimeVariable::USAGE_INTERNAL, _T(name), value)
-#define CURE_RTVAR_INTERNAL_ARITHMETIC(scope, name, type, arith, value, min)	\
-{										\
-	type _new_val;								\
-	CURE_RTVAR_TRYGET(_new_val, =, scope, name, min) arith value;		\
-	_new_val = (_new_val >= min)? _new_val : min;				\
-	CURE_RTVAR_INTERNAL(scope, name, _new_val);				\
+#define CURE_RTVAR_BASE_ARITHMETIC(OP_GET, OP_SET, scope, name, type, arith, value, vmin, vmax)	\
+{												\
+	type _new_val;										\
+	OP_GET(_new_val, =, scope, name, vmin) arith value;					\
+	_new_val = std::min(_new_val, vmax);							\
+	_new_val = std::max(_new_val, vmin);							\
+	OP_SET(scope, name, _new_val);								\
 }
+#define CURE_RTVAR_ARITHMETIC(scope, name, type, arith, value, min, max)		CURE_RTVAR_BASE_ARITHMETIC(CURE_RTVAR_GET, CURE_RTVAR_SET, scope, name, type, arith, value, min, max)
+#define CURE_RTVAR_INTERNAL_ARITHMETIC(scope, name, type, arith, value, min, max)	CURE_RTVAR_BASE_ARITHMETIC(CURE_RTVAR_TRYGET, CURE_RTVAR_INTERNAL, scope, name, type, arith, value, min, max)
 
 
 

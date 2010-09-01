@@ -7,14 +7,7 @@
 #pragma once
 
 #include "View.h"
-
-
-
-namespace Cure
-{
-class LoginId;
-class RuntimeVariableScope;
-}
+#include "../ServerInfo.h"
 
 
 
@@ -32,11 +25,15 @@ class ServerListView: public View
 public:
 	ServerListView(ServerSelectObserver* pSelectObserver);
 
+	void Tick();
+
 private:
 	void OnExit();
 	void OnSelect(UiTbc::Button*);
 
 	ServerSelectObserver* mSelectObserver;
+	ServerInfoList mServerList;
+	bool mIsMasterConnectError;
 };
 
 
@@ -44,8 +41,10 @@ private:
 class ServerSelectObserver
 {
 public:
-	virtual void CancelJoinServer() = 0;
-	virtual void RequestJoinServer(const str& pServerAddress) = 0;
+	virtual void OnCancelJoinServer() = 0;
+	virtual void OnRequestJoinServer(const str& pServerAddress) = 0;
+	virtual bool UpdateServerList(ServerInfoList& pServerList) const = 0;
+	virtual bool IsMasterServerConnectError() const = 0;
 };
 
 

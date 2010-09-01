@@ -36,6 +36,9 @@ public:
 
 	virtual void InitCommands();
 
+	void SetSecurityLevel(int pLevel);
+	int GetSecurityLevel() const;
+
 	Cure::GameManager* GetGameManager() const;
 
 protected:
@@ -83,6 +86,7 @@ private:
 	static const CommandPair mCommandIdList[];
 	typedef std::hash_map<str, str> AliasMap;
 
+	int mSecurityLevel;
 	Cure::GameManager* mGameManager;
 	AliasMap mAliasMap;
 	LogListener* mLogger;

@@ -37,7 +37,7 @@ public:
 	// Returns the actual (calendar) current time since this instance was created.
 	// TRICKY: absolute time wraps - don't use if you don't know what you're doing. Be sure to use
 	// GetAbsoluteTimeDiff() when checking if certain time elapsed!
-	float GetAbsoluteTime() const;
+	float GetAbsoluteTime(float pOffset = 0) const;
 	// Returns the actual (calendar) time diff between end and start (handles time wrap case).
 	static float GetAbsoluteTimeDiff(float pEnd, float pStart);
 	// Returns the actual (calendar) current time difference between this and the previous

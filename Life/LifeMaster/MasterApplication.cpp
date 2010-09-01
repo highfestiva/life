@@ -59,7 +59,7 @@ MasterApplication::MasterApplication(const strutil::strvec& pArgumentList):
 	const str lLogName = Path::JoinPath(SystemManager::GetIoDirectory(_T("Life")), _T("Master"), _T("log"));
 	mFileLogger = new FileLogListener(lLogName);
 	mFileLogger->WriteLog(_T("\n\n"), Log::LEVEL_INFO);
-	mMemLogger = new MemFileLogListener(100*1024);
+	mMemLogger = new MemFileLogListener(3*1024);
 	LogType::GetLog(LogType::SUB_ROOT)->SetupBasicListeners(mConsoleLogger, 0, mFileLogger, 0, mMemLogger);
 
 	Network::Start();

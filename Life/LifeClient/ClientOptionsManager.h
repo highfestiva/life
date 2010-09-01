@@ -22,13 +22,15 @@ struct ClientOptionsManager: OptionsManager
 {
 	ClientOptionsManager(Cure::RuntimeVariableScope* pVariableScope, int pPriority);
 
-	const Vehicle& GetControl() const;
+	const Steering& GetSteeringControl() const;
+	const CamControl& GetCamControl() const;
 
 private:
 	virtual bool SetDefault(int pPriority);
 	virtual void DoRefreshConfiguration();
 
-	Vehicle mControl;
+	Steering mSteeringControl;
+	CamControl mCamControl;
 
 	void operator=(const ClientOptionsManager&);
 

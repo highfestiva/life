@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "../Life.h"
+#include "../ServerInfo.h"
 
 
 
@@ -20,6 +20,10 @@ class MasterServerNetworkParser
 public:
 	static unsigned StrToRaw(uint8* pRawData, const wstr& pStr);
 	static bool RawToStr(wstr& pStr, const uint8* pRawData, unsigned pRawLength);
+
+	static bool ExtractServerInfo(const str& pServerString, ServerInfo& pInfo);
+
+	LOG_CLASS_DECLARE();
 };
 
 

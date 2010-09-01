@@ -1252,7 +1252,7 @@ void OpenGLPainter::PrintText(const str& pString, int x, int y)
 	ToScreenCoords(x, y);
 
 	int lCurrentX = x;
-	int lCurrentY = y-3;
+	int lCurrentY = y;
 
 	::glPushAttrib(GL_TEXTURE_BIT | GL_COLOR_BUFFER_BIT);
 

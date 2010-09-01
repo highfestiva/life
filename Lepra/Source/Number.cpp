@@ -32,7 +32,7 @@ str Number::ConvertToPostfixNumber(double pNumber, unsigned decimals)
 		};
 		double lResult = 0;
 		int x;
-		for (x = 0; x < (int)LEPRA_ARRAY_COUNT(lPrefixList); ++x)
+		for (x = 0; x < (int)LEPRA_ARRAY_COUNT(lPrefixList)-1; ++x)
 		{
 			lResult = pNumber/::pow(10.0, lPrefixList[x].mExponent);
 			if (::fabs(lResult) >= 1)

@@ -13,6 +13,7 @@
 #include "../../Cure/Include/UserConnection.h"
 #include "../../Lepra/Include/Math.h"
 #include "../Life.h"
+#include "RtVar.h"
 
 
 
@@ -159,6 +160,26 @@ float Client::GetPhysicsFrameAheadCount() const
 }
 
 
+
+void Client::SendLoginCommands(Cure::Packet* pPacket)
+{
+	int lPhysicsFps;
+	CURE_RTVAR_GET(lPhysicsFps, =, Cure::GetSettings(), RTVAR_PHYSICS_FPS, PHYSICS_FPS);
+	double lPhysicsRtr;
+	CURE_RTVAR_GET(lPhysicsRtr, =, Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
+	str lServerGreeting;
+	CURE_RTVAR_GET(lServerGreeting, =, Cure::GetSettings(), RTVAR_NETWORK_LOGINGREETING, _T(""));
+	const wstr lCmd = wstrutil::Format(
+		L"#" _WIDE(RTVAR_PHYSICS_FPS) L" %i;\n"
+		L"#" _WIDE(RTVAR_PHYSICS_RTR) L" %f;\n"
+		L"%s",
+		lPhysicsFps, lPhysicsRtr, lServerGreeting.c_str());
+	mNetworkAgent->SendStatusMessage(mUserConnection->GetSocket(), 0, Cure::REMOTE_OK,
+		Cure::MessageStatus::INFO_COMMAND, lCmd, pPacket);
+}
+
+
+
 int Client::SendStriveTimes(int pNetworkFrameDiffCount)
 {
 	// TODO: insert half a ping time below!
@@ -166,7 +187,6 @@ int Client::SendStriveTimes(int pNetworkFrameDiffCount)
 
 	if (::abs(pNetworkFrameDiffCount) >= PHYSICS_FPS)
 	{
-		
 		SendPhysicsFrame(mTimeManager->GetCurrentPhysicsFrameAddFrames(lHalfPingFrameCount));
 		return (lHalfPingFrameCount*2 + 2);
 	}

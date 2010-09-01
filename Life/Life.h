@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "../Lepra/Include/Lepra.h"
+#include "../Cure/Include/Cure.h"
 
 
 
@@ -17,7 +17,7 @@ namespace Life
 
 using namespace Lepra;
 
-const int PHYSICS_FPS = 60;
+const int PHYSICS_FPS = CURE_STANDARD_FRAME_RATE;
 
 //#define LIFE_DEMO
 

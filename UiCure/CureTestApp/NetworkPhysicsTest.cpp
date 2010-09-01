@@ -31,7 +31,7 @@
 using namespace Lepra;
 
 const int CLIENT_COUNT = 2;
-const float PHYSICS_FPS = 60.0f;
+const float PHYSICS_FPS = (float)CURE_STANDARD_FRAME_RATE;
 const float PHYSICS_SECONDS_PER_FRAME = 1/PHYSICS_FPS;
 const int NETWORK_LATENCY_CALCULATION_ARRAY_SIZE = (int)PHYSICS_FPS;	// Just pick something small.
 const int NETWORK_POSITIONAL_PACKET_BUFFER_SIZE = (int)PHYSICS_FPS/2;

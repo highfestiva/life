@@ -36,6 +36,7 @@ ServerConsoleManager::ServerConsoleManager(Cure::GameManager* pGameManager, Cure
 	InteractiveConsoleLogListener* pConsoleLogger, ConsolePrompt* pConsolePrompt):
 	ConsoleManager(pGameManager, pVariableScope, pConsoleLogger, pConsolePrompt)
 {
+	SetSecurityLevel(1);
 	InitCommands();
 }
 

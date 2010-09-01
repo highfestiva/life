@@ -9,7 +9,7 @@
 #include "../../Cure/Include/GameManager.h"
 #include "../../Lepra/Include/CyclicArray.h"
 #include "../../Lepra/Include/Random.h"
-#include "../../UiTbc/Include/UiGeometryBatch.h"
+#include "../../UiTBC/Include/UiGeometryBatch.h"
 
 
 

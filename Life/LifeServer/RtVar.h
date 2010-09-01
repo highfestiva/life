@@ -15,3 +15,4 @@
 #define RTVAR_GAME_SPAWNPART			"Game.SpawnPart"
 
 #define RTVAR_NETWORK_SERVERNAME		"Network.ServerName"
+#define RTVAR_NETWORK_LOGINGREETING		"Network.Login.Greeting"

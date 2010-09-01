@@ -9,7 +9,7 @@
 #include "../../Cure/Include/GameManager.h"
 #include "../../Lepra/Include/Thread.h"
 #include "../../UiCure/Include/UiLineGraph2d.h"
-#include "../../UiTbc/Include/UiRenderer.h"
+#include "../../UiTBC/Include/UiRenderer.h"
 #include "InputObserver.h"
 #include "ScreenPart.h"
 
@@ -64,6 +64,7 @@ public:
 	void OnSetPlayerCount(int pPlayerCount);
 
 	void DownloadServerList();
+	const MasterServerConnection* GetMasterConnection() const;
 
 	Sunlight* GetSunlight() const;	// TODO: move this hard-coding to a context object or summat.
 

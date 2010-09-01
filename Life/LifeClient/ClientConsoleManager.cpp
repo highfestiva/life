@@ -5,6 +5,7 @@
 
 
 #include "../../Cure/Include/RuntimeVariable.h"
+#include "../../Cure/Include/RuntimeVariableName.h"
 #include "../../Cure/Include/TimeManager.h"
 #include "../../Lepra/Include/CyclicArray.h"
 #include "../../Lepra/Include/Number.h"
@@ -35,7 +36,6 @@ const ClientConsoleManager::CommandPair ClientConsoleManager::mCommandIdList[] =
 	{_T("bye"), COMMAND_BYE},
 	{_T("start-login"), COMMAND_START_LOGIN},
 	{_T("wait-login"), COMMAND_WAIT_LOGIN},
-	{_T("list-servers"), COMMAND_LIST_SERVERS},
 	{_T("logout"), COMMAND_LOGOUT},
 	{_T("start-reset-ui"), COMMAND_START_RESET_UI},
 	{_T("wait-reset-ui"), COMMAND_WAIT_RESET_UI},
@@ -81,6 +81,37 @@ void ClientConsoleManager::Join()
 UiConsole* ClientConsoleManager::GetUiConsole() const
 {
 	return (mUiConsole);
+}
+
+
+
+int ClientConsoleManager::FilterExecuteCommand(const str& pCommandLine)
+{
+	const str lCommandDelimitors(_T(" \t\v\r\n"));
+	const strutil::strvec lCommandList = strutil::BlockSplit(pCommandLine, _T(";"), true, true);
+	const int lAllowedCount = 3;
+	const str lAllowedList[lAllowedCount] =
+	{
+		str(_T("#") _T(RTVAR_PHYSICS_FPS)),
+		str(_T("#") _T(RTVAR_PHYSICS_RTR)),
+		str(_T("echo ")),
+	};
+	int lResult = 0;
+	for (size_t lCommandIndex = 0; lResult == 0 && lCommandIndex < lCommandList.size(); ++lCommandIndex)
+	{
+		lResult = -1;
+		const str& lTempCommand = lCommandList[lCommandIndex];
+		const str lCommand = strutil::StripLeft(lTempCommand, lCommandDelimitors);
+		for (int x = 0; x < lAllowedCount; ++x)
+		{
+			if (strutil::StartsWith(lCommand, lAllowedList[x]))
+			{
+				lResult = ExecuteCommand(lCommand);
+				break;
+			}
+		}
+	}
+	return lResult;
 }
 
 
@@ -166,12 +197,6 @@ int ClientConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& 
 				{
 					Thread::Sleep(0.01);
 				}
-			}
-			break;
-			case COMMAND_LIST_SERVERS:
-			{
-				mLog.AInfo("Active servers:");
-				((GameClientSlaveManager*)GetGameManager())->GetMaster()->DownloadServerList();
 			}
 			break;
 			case COMMAND_LOGOUT:

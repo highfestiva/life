@@ -5,6 +5,7 @@
 
 
 #include "GameClientSlaveManager.h"
+#include <algorithm>
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/NetworkClient.h"
 #include "../../Cure/Include/ResourceManager.h"
@@ -54,6 +55,7 @@ GameClientSlaveManager::GameClientSlaveManager(GameClientMasterTicker* pMaster, 
 	mAvatarId(0),
 	mLastSentByteCount(0),
 	mPingAttemptCount(0),
+	mCamRotateExtra(0),
 	mJustLookingAtAvatars(false),
 	mAvatarInvisibleCount(0),
 	mRoadSignIndex(0),
@@ -94,6 +96,13 @@ GameClientSlaveManager::~GameClientSlaveManager()
 void GameClientSlaveManager::LoadSettings()
 {
 	GetConsoleManager()->ExecuteCommand(_T("execute-file -i ")+GetApplicationCommandFilename());
+	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_DEBUG_ENABLE, false);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_GAME_TIMEOFDAYFACTOR, 1.0);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_CAMHEIGHT, 10.0);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_CAMROTATE, 0.0);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_PHYSICS_FPS, PHYSICS_FPS);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
 	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_STEERING_PLAYBACKMODE, PLAYBACK_NONE);
 }
 
@@ -344,39 +353,59 @@ bool GameClientSlaveManager::TickNetworkOutput()
 			lForceSendUnsafeClientKeepalive = true;
 		}
 
-		// Check if we should send updates.
-		Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
-		if (lObject)
+		// Check if we should send updates. Send all owned objects at the same time to avoid penetration.
+		bool lSend = false;
+		ObjectIdSet::iterator x = mOwnedObjectList.begin();
+		for (; x != mOwnedObjectList.end(); ++x)
 		{
-			lObject->SetNetworkObjectType(Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
-			const Cure::ObjectPositionalData* lPositionalData = 0;
-			lObject->UpdateFullPosition(lPositionalData);
-			if (lPositionalData && lObject->QueryResendTime(0.1f, true))
+			Cure::ContextObject* lObject = GetContext()->GetObject(*x);
+			if (lObject)
 			{
-				if (!lPositionalData->IsSameStructure(mNetworkOutputGhost))
+				lObject->SetNetworkObjectType(Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
+				const Cure::ObjectPositionalData* lPositionalData = 0;
+				lObject->UpdateFullPosition(lPositionalData);
+				if (lPositionalData && lObject->QueryResendTime(0.1f, true))
 				{
-					mNetworkOutputGhost.CopyData(lPositionalData);
-				}
-				const bool lIsCollisionExpired = mCollisionExpireAlarm.PopExpired(0.6);
-				const bool lIsInputExpired = mInputExpireAlarm.PopExpired(0.0);
-				const bool lIsPositionExpired = (lIsCollisionExpired || lIsInputExpired);
-				if (lIsPositionExpired)
-				{
-					log_atrace("Position expires.");
-				}
+					if (!lPositionalData->IsSameStructure(*lObject->GetNetworkOutputGhost()))
+					{
+						lObject->GetNetworkOutputGhost()->CopyData(lPositionalData);
+					}
+					const bool lIsCollisionExpired = mCollisionExpireAlarm.PopExpired(0.6);
+					const bool lIsInputExpired = mInputExpireAlarm.PopExpired(0.0);
+					const bool lIsPositionExpired = (lIsCollisionExpired || lIsInputExpired);
+					if (lIsPositionExpired)
+					{
+						log_atrace("Position expires.");
+					}
 
-				float lResyncOnDiff;
-				CURE_RTVAR_GET(lResyncOnDiff, =(float), GetVariableScope(), RTVAR_NETPHYS_RESYNCONDIFFGT, 100.0);
-				if (lForceSendUnsafeClientKeepalive ||
-					lIsPositionExpired ||
-					lPositionalData->GetScaledDifference(&mNetworkOutputGhost) > lResyncOnDiff)
+					float lResyncOnDiff;
+					CURE_RTVAR_GET(lResyncOnDiff, =(float), GetVariableScope(), RTVAR_NETPHYS_RESYNCONDIFFGT, 100.0);
+					if (lForceSendUnsafeClientKeepalive ||
+						lIsPositionExpired ||
+						lPositionalData->GetScaledDifference(lObject->GetNetworkOutputGhost()) > lResyncOnDiff)
+					{
+						lSend = true;
+						break;
+					}
+				}
+			}
+		}
+		if (lSend)
+		{
+			ObjectIdSet::iterator x = mOwnedObjectList.begin();
+			for (; x != mOwnedObjectList.end(); ++x)
+			{
+				Cure::ContextObject* lObject = GetContext()->GetObject(*x);
+				if (lObject)
 				{
-					mNetworkOutputGhost.CopyData(lPositionalData);
+					const Cure::ObjectPositionalData* lPositionalData = 0;
+					lObject->UpdateFullPosition(lPositionalData);
+					lObject->GetNetworkOutputGhost()->CopyData(lPositionalData);
 					lSendOk = GetNetworkAgent()->SendObjectFullPosition(GetNetworkClient()->GetSocket(),
-						lObject->GetInstanceId(), GetTimeManager()->GetCurrentPhysicsFrame(), mNetworkOutputGhost);
+						lObject->GetInstanceId(), GetTimeManager()->GetCurrentPhysicsFrame(), *lObject->GetNetworkOutputGhost());
 					lIsSent = true;
 
-					CURE_RTVAR_INTERNAL_ARITHMETIC(GetVariableScope(), RTVAR_DEBUG_NET_SENDPOSCNT, int, +, 1, 0);
+					CURE_RTVAR_INTERNAL_ARITHMETIC(GetVariableScope(), RTVAR_DEBUG_NET_SENDPOSCNT, int, +, 1, 0, 1000000);
 				}
 			}
 		}
@@ -469,7 +498,7 @@ bool GameClientSlaveManager::IsLoggingIn() const
 
 bool GameClientSlaveManager::IsUiMoveForbidden(Cure::GameObjectId pObjectId) const
 {
-	const bool lMoveAllowed = (pObjectId == mAvatarId || GetContext()->IsLocalGameObjectId(pObjectId) ||
+	const bool lMoveAllowed = (IsOwned(pObjectId) || GetContext()->IsLocalGameObjectId(pObjectId) ||
 		(!GetMaster()->IsLocalObject(pObjectId) && GetMaster()->IsFirstSlave(this)));
 	return !lMoveAllowed;
 }
@@ -490,7 +519,7 @@ void GameClientSlaveManager::DoGetSiblings(Cure::GameObjectId pObjectId, Cure::C
 
 void GameClientSlaveManager::AddLocalObjects(std::hash_set<Cure::GameObjectId>& pLocalObjectSet) const
 {
-	pLocalObjectSet.insert(mAvatarId);
+	pLocalObjectSet.insert(mOwnedObjectList.begin(), mOwnedObjectList.end());
 }
 
 
@@ -625,8 +654,12 @@ void GameClientSlaveManager::CreateLoginView()
 		// If first attempt (i.e. no connection problems) just skip interactivity.
 		if (mDisconnectReason.empty())
 		{
-			str lServerName = _T("0.0.0.0:16650");
+			str lServerName = _T(":16650");
 			CURE_RTVAR_TRYGET(lServerName, =, Cure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, lServerName);
+			if (strutil::StartsWith(lServerName, _T("0.0.0.0")))
+			{
+				lServerName = lServerName.substr(7);
+			}
 			const wstr lUsername = wstrutil::Format(L"User%u", mSlaveIndex);
 			wstr lReadablePassword = L"CarPassword";
 			const Cure::MangledPassword lPassword(lReadablePassword);
@@ -636,8 +669,8 @@ void GameClientSlaveManager::CreateLoginView()
 		else
 		{
 			mLoginWindow = new ClientLoginView(this, mDisconnectReason);
-			mUiManager->AssertDesktopLayout(new UiTbc::FloatingLayout());
-			mUiManager->GetDesktopWindow()->AddChild(mLoginWindow);
+			mUiManager->AssertDesktopLayout(new UiTbc::FloatingLayout, 0);
+			mUiManager->GetDesktopWindow()->AddChild(mLoginWindow, 0, 0, 0);
 			mLoginWindow->SetPos(mRenderArea.GetCenterX()-mLoginWindow->GetSize().x/2,
 				mRenderArea.GetCenterY()-mLoginWindow->GetSize().y/2);
 			mLoginWindow->GetChild(_T("User"), 0)->SetKeyboardFocus();
@@ -734,17 +767,17 @@ void GameClientSlaveManager::TickUiInput()
 		{
 			mAvatarMightSelectTime.UpdateTimer();
 
-			const Options::Vehicle& v = mOptions.GetControl();
+			const Options::Steering& s = mOptions.GetSteeringControl();
 			const bool lIsMovingForward = lObject->GetForwardSpeed() > 8.0f;
-#define V(dir) v.mControl[Options::Vehicle::CONTROL_##dir]
-			const float lForward = V(FORWARD);
-			const float lBack = V(BACKWARD);
-			const float lBreakAndBack = V(BREAKANDBACK);
+#define S(dir) s.mControl[Options::Steering::CONTROL_##dir]
+			const float lForward = S(FORWARD);
+			const float lBack = S(BACKWARD);
+			const float lBreakAndBack = S(BREAKANDBACK);
 			float lPowerFwdRev = lForward - std::max(lBack, lIsMovingForward? 0.0f : lBreakAndBack);
 			SetAvatarEnginePower(lObject, 0, lPowerFwdRev, mCameraOrientation.x);
-			float lPowerLR = V(RIGHT)-V(LEFT);
+			float lPowerLR = S(RIGHT)-S(LEFT);
 			SetAvatarEnginePower(lObject, 1, lPowerLR, mCameraOrientation.x);
-			float lPower = V(HANDBREAK) - std::max(V(BREAK), lIsMovingForward? lBreakAndBack : 0.0f);
+			float lPower = S(HANDBREAK) - std::max(S(BREAK), lIsMovingForward? lBreakAndBack : 0.0f);
 			if (!SetAvatarEnginePower(lObject, 2, lPower, mCameraOrientation.x) &&
 				lBreakAndBack > 0 && Math::IsEpsEqual(lBack, 0.0f, 0.01f))
 			{
@@ -768,15 +801,15 @@ void GameClientSlaveManager::TickUiInput()
 					}
 				}
 			}
-			lPower = V(UP)-V(DOWN);
+			lPower = S(UP)-S(DOWN);
 			SetAvatarEnginePower(lObject, 3, lPower, mCameraOrientation.x);
-			lPower = V(FORWARD3D) - V(BACKWARD3D);
+			lPower = S(FORWARD3D) - S(BACKWARD3D);
 			SetAvatarEnginePower(lObject, 4, lPower, mCameraOrientation.x);
-			lPower = V(LEFT3D) - V(RIGHT3D);
+			lPower = S(LEFT3D) - S(RIGHT3D);
 			SetAvatarEnginePower(lObject, 5, lPower, mCameraOrientation.x);
-			lPower = V(UP3D) - V(DOWN3D);
+			lPower = S(UP3D) - S(DOWN3D);
 			SetAvatarEnginePower(lObject, 6, lPower, mCameraOrientation.x);
-			const float lSteeringChange = mLastSteering-v;
+			const float lSteeringChange = mLastSteering-s;
 			if (lSteeringChange > 0.5f)
 			{
 				mInputExpireAlarm.Set();
@@ -785,7 +818,16 @@ void GameClientSlaveManager::TickUiInput()
 			{
 				mInputExpireAlarm.Push(0.1f);
 			}
-			mLastSteering = v;
+			mLastSteering = s;
+
+			const float lScale = 50.0f * GetTimeManager()->GetAffordedPhysicsTotalTime();
+			const Options::CamControl& c = mOptions.GetCamControl();
+#define C(dir) c.mControl[Options::CamControl::CAMDIR_##dir]
+			lPower = C(UP)-C(DOWN);
+			CURE_RTVAR_ARITHMETIC(GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, double, +, lPower*lScale, 0.0, 30.0);
+			mCamRotateExtra = (C(RIGHT)-C(LEFT)) * lScale;
+			lPower = C(BACKWARD)-C(FORWARD);
+			CURE_RTVAR_ARITHMETIC(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, double, +, lPower*lScale, 5.0, 100.0);
 
 			mAvatarInvisibleCount = 0;
 		}
@@ -874,12 +916,7 @@ void GameClientSlaveManager::TickUiUpdate()
 	const Vector3DF lPivotXyPosition(mCameraPivotPosition.x, mCameraPivotPosition.y, mCameraPosition.z);
 	Vector3DF lTargetCameraPosition(mCameraPosition-lPivotXyPosition);
 	const float lCurrentCameraXyDistance = lTargetCameraPosition.GetLength();
-	float lRotationFactor;
-	CURE_RTVAR_GET(lRotationFactor, =(float), GetVariableScope(), RTVAR_UI_3D_CAMROTATE, 0.0);
-	QuaternionF lRotation;
-	lRotation.RotateAroundOwnZ(lRotationFactor * lPhysicsTime);
-	lTargetCameraPosition = lRotation * lTargetCameraPosition;
-	const float lSpeedDependantCameraXyDistance = mCameraTargetXyDistance + mCameraTargetXyDistance*mCameraPivotSpeed*0.03f;
+	const float lSpeedDependantCameraXyDistance = mCameraTargetXyDistance + mCameraPivotSpeed*0.3f;
 	lTargetCameraPosition = lPivotXyPosition + lTargetCameraPosition*(lSpeedDependantCameraXyDistance/lCurrentCameraXyDistance);
 	float lCamHeight;
 	CURE_RTVAR_GET(lCamHeight, =(float), GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, 10.0);
@@ -915,22 +952,16 @@ void GameClientSlaveManager::TickUiUpdate()
 			mCameraPivotPosition;*/
 	}
 
-	if (lTargetCameraPosition.z < -20)
-	{
-		lTargetCameraPosition.z = -20.0f;
-	}
-	else if (lTargetCameraPosition.z > 200)
-	{
-		lTargetCameraPosition.z = 200.0f;
-	}
+	lTargetCameraPosition.x = Math::Clamp(lTargetCameraPosition.x, -1000.0f, 1000.0f);
+	lTargetCameraPosition.y = Math::Clamp(lTargetCameraPosition.y, -1000.0f, 1000.0f);
+	lTargetCameraPosition.z = Math::Clamp(lTargetCameraPosition.z, -20.0f, 200.0f);
 
 	// Now that we've settled where we should be, it's time to check where we actually can see our avatar.
-	// TODO: currently only checks against terrain. Should check against all types of objects(?), which
-	// might mean creating a ray geometry for all vehicles?
+	// TODO: currently only checks against terrain. Add a ray to world, that we can use for this kinda thing.
 	Cure::ContextObject* lLevel = GetContext()->GetObject(mLevelId);
 	if (lLevel)
 	{
-		const float lCameraAboveGround = 0.2f;
+		const float lCameraAboveGround = 0.3f;
 		lTargetCameraPosition.z -= lCameraAboveGround;
 		const TBC::PhysicsManager::BodyID lTerrainBodyId = lLevel->GetPhysics()->GetBoneGeometry(0)->GetBodyId();
 		Vector3DF lCollisionPoint;
@@ -961,7 +992,7 @@ void GameClientSlaveManager::TickUiUpdate()
 				break;
 			}
 			lStepSize *= 1/3.0f;
-			lTargetCameraPosition.z += lStepSize;
+			//lTargetCameraPosition.z += lStepSize;
 		}
 		lTargetCameraPosition.z += lCameraAboveGround;
 	}
@@ -1009,6 +1040,20 @@ void GameClientSlaveManager::TickUiUpdate()
 	Math::RangeAngles(mCameraOrientation.y, lTargetCameraOrientation.y);
 	Math::RangeAngles(mCameraOrientation.z, lTargetCameraOrientation.z);
 	mCameraOrientation = Math::Lerp<Vector3DF, float>(mCameraOrientation, lTargetCameraOrientation, lMovingAveragePart);
+
+	float lRotationFactor;
+	CURE_RTVAR_GET(lRotationFactor, =(float), GetVariableScope(), RTVAR_UI_3D_CAMROTATE, 0.0);
+	lRotationFactor += mCamRotateExtra;
+	TransformationF lTransform(GetCameraQuaternion(), mCameraPosition);
+	lTransform.RotateAroundAnchor(mCameraPivotPosition, Vector3DF(0, 0, 1), lRotationFactor * lPhysicsTime);
+	mCameraPosition = lTransform.GetPosition();
+	float lTheta;
+	float lPhi;
+	float lGimbal;
+	lTransform.GetOrientation().GetEulerAngles(lTheta, lPhi, lGimbal);
+	mCameraOrientation.x = lTheta+PIF/2;
+	mCameraOrientation.y = PIF/2-lPhi;
+	mCameraOrientation.z = lGimbal;
 }
 
 bool GameClientSlaveManager::UpdateMassObjects(const Vector3DF& pPosition)
@@ -1088,12 +1133,16 @@ void GameClientSlaveManager::SetMassRender(bool pRender)
 
 void GameClientSlaveManager::PhysicsTick()
 {
-	Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
-	if (lObject)
+	const int lStepCount = GetTimeManager()->GetAffordedPhysicsStepCount();
+	const float lPhysicsFrameTime = GetTimeManager()->GetAffordedPhysicsStepTime();
+	ObjectIdSet::iterator x = mOwnedObjectList.begin();
+	for (; x != mOwnedObjectList.end(); ++x)
 	{
-		const int lStepCount = GetTimeManager()->GetAffordedPhysicsStepCount();
-		const float lPhysicsFrameTime = GetTimeManager()->GetAffordedPhysicsStepTime();
-		mNetworkOutputGhost.GhostStep(lStepCount, lPhysicsFrameTime);
+		Cure::ContextObject* lObject = GetContext()->GetObject(*x);
+		if (lObject)
+		{
+			lObject->GetNetworkOutputGhost()->GhostStep(lStepCount, lPhysicsFrameTime);
+		}
 	}
 
 	Parent::PhysicsTick();
@@ -1180,6 +1229,25 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 						assert(false);
 					}
 					break;
+					case Cure::MessageStatus::INFO_COMMAND:
+					{
+						if (lMessageStatus->GetRemoteStatus() == Cure::REMOTE_OK)
+						{
+							wstr lCommand;
+							lMessageStatus->GetMessageString(lCommand);
+							ClientConsoleManager* lConsole = ((ClientConsoleManager*)GetConsoleManager());
+							const int lPreviousSecurityLevel = lConsole->GetSecurityLevel();
+							lConsole->SetSecurityLevel(1);
+							int lResult = lConsole->FilterExecuteCommand(strutil::Encode(lCommand));
+							lConsole->SetSecurityLevel(lPreviousSecurityLevel);
+							if (lResult != 0)
+							{
+								mDisconnectReason = _T("Server not safe! Please join some other game.");
+								GetNetworkClient()->Disconnect(false);
+							}
+						}
+					}
+					break;
 				}
 			}
 		}
@@ -1223,7 +1291,7 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 			{
 				SetMovement(lInstanceId, lFrameIndex, lData);
 			}
-			CURE_RTVAR_INTERNAL_ARITHMETIC(GetVariableScope(), RTVAR_DEBUG_NET_RECVPOSCNT, int, +, 1, 0);
+			CURE_RTVAR_INTERNAL_ARITHMETIC(GetVariableScope(), RTVAR_DEBUG_NET_RECVPOSCNT, int, +, 1, 0, 1000000);
 		}
 		break;
 		case Cure::MESSAGE_TYPE_OBJECT_ATTACH:
@@ -1285,7 +1353,23 @@ void GameClientSlaveManager::ProcessNumber(Cure::MessageNumber::InfoType pType, 
 		case Cure::MessageNumber::INFO_AVATAR:
 		{
 			mAvatarId = pInteger;
+			mOwnedObjectList.insert(mAvatarId);
 			mLog.Infof(_T("Got control over avatar with ID %i."), pInteger);
+		}
+		break;
+		case Cure::MessageNumber::INFO_GRANT_LOAN:
+		{
+			const Cure::GameObjectId lInstanceId = pInteger;
+			mOwnedObjectList.insert(lInstanceId);
+			Cure::ContextObject* lObject = GetContext()->GetObject(lInstanceId);
+			if (lObject)
+			{
+				const int lOwnershipFrames = GetTimeManager()->GetPhysicsFrameDelta((int)pFloat, GetTimeManager()->GetCurrentPhysicsFrame());
+				const float lOwnershipSeconds = GetTimeManager()->ConvertPhysicsFramesToSeconds(lOwnershipFrames);
+				lObject->SetNetworkObjectType(Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
+				GetContext()->AddAlarmCallback(lObject, Cure::ContextManager::SYSTEM_ALARM_ID, lOwnershipSeconds, 0);
+				log_volatile(mLog.Debugf(_T("Got control over object with ID %i for %f seconds."), pInteger, lOwnershipSeconds));
+			}
 		}
 		break;
 		default:
@@ -1413,7 +1497,7 @@ void GameClientSlaveManager::SetMovement(Cure::GameObjectId pInstanceId, int32 p
 				const float lStepIncrement = GetTimeManager()->GetAffordedPhysicsStepTime() / lMicroSteps;
 				pData.GhostStep(lFutureStepCount, lStepIncrement*lExtrapolationFactor);
 			}
-			bool lSetPosition = true;
+			/*bool lSetPosition = true;
 			if (pInstanceId == mAvatarId)
 			{
 				const Cure::ObjectPositionalData* lCurrentPos;
@@ -1426,7 +1510,7 @@ void GameClientSlaveManager::SetMovement(Cure::GameObjectId pInstanceId, int32 p
 						lSetPosition = false;	// Not enough change to take notice. Would just yield a jerky movement, not much more.
 					}
 				}
-			}
+			}*/
 			lObject->SetFullPosition(pData);
 			bool lEnableSmoothing;
 			CURE_RTVAR_GET(lEnableSmoothing, =, GetVariableScope(), RTVAR_NETPHYS_ENABLESMOOTHING, true);
@@ -1449,22 +1533,30 @@ void GameClientSlaveManager::SetMovement(Cure::GameObjectId pInstanceId, int32 p
 void GameClientSlaveManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque,
 	Cure::ContextObject* pObject1, Cure::ContextObject* pObject2)
 {
-	if (pObject2 && pObject1 != pObject2 && pObject1->GetInstanceId() == mAvatarId &&
-		pObject1->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY &&
-		pObject2->GetMass() > 0)
+	if (pObject2 && pObject1 != pObject2 && pObject2->GetMass() > 0)
 	{
-		if (IsHighImpact(12.0f, pObject1, pForce, pTorque))
+		if (IsOwned(pObject1->GetInstanceId()))
 		{
-			pObject1->QueryResendTime(0, false);
+			if (IsHighImpact(12.0f, pObject1, pForce, pTorque))
+			{
+				pObject1->QueryResendTime(0, false);
+			}
+			mCollisionExpireAlarm.Set();
 		}
-		mCollisionExpireAlarm.Set();
+		else if (pObject2->GetInstanceId() == mAvatarId &&
+			pObject1->GetNetworkObjectType() == Cure::NETWORK_OBJECT_REMOTE_CONTROLLED)
+		{
+			if (IsHighImpact(1.0f, pObject1, pForce, pTorque))
+			{
+				if (pObject1->QueryResendTime(1.0, false))
+				{
+					GetNetworkAgent()->SendNumberMessage(false, GetNetworkClient()->GetSocket(),
+						Cure::MessageNumber::INFO_REQUEST_LOAN, pObject1->GetInstanceId(), 0, 0);
+					log_adebug("Sending loan request to server.");
+				}
+			}
+		}
 	}
-}
-
-void GameClientSlaveManager::OnStopped(Cure::ContextObject* pObject, TBC::PhysicsManager::BodyID)
-{
-	(void)pObject;
-	log_volatile(mLog.Debugf(_T("Object %u/%s stopped."), pObject->GetInstanceId(), pObject->GetClassId().c_str()));
 }
 
 bool GameClientSlaveManager::OnPhysicsSend(Cure::ContextObject*)
@@ -1486,6 +1578,21 @@ void GameClientSlaveManager::SendAttach(Cure::ContextObject*, unsigned, Cure::Co
 void GameClientSlaveManager::SendDetach(Cure::ContextObject*, Cure::ContextObject*)
 {
 	// Server manages this.
+}
+
+void GameClientSlaveManager::OnAlarm(int pAlarmId, Cure::ContextObject* pObject, void*)
+{
+	if (pAlarmId == Cure::ContextManager::SYSTEM_ALARM_ID)
+	{
+		assert(IsOwned(pObject->GetInstanceId()));
+		mOwnedObjectList.erase(pObject->GetInstanceId());
+		pObject->SetNetworkObjectType(Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
+		pObject->DeleteNetworkOutputGhost();
+	}
+	else
+	{
+		assert(false);
+	}
 }
 
 void GameClientSlaveManager::AttachObjects(Cure::GameObjectId pObject1Id, unsigned pBody1Id,
@@ -1520,6 +1627,11 @@ void GameClientSlaveManager::DetachObjects(Cure::GameObjectId pObject1Id, Cure::
 	}
 }
 
+bool GameClientSlaveManager::IsOwned(Cure::GameObjectId pObjectId) const
+{
+	return (mOwnedObjectList.find(pObjectId) != mOwnedObjectList.end());
+}
+
 
 
 void GameClientSlaveManager::CancelLogin()
@@ -1530,6 +1642,7 @@ void GameClientSlaveManager::CancelLogin()
 
 void GameClientSlaveManager::OnAvatarSelect(UiTbc::Button* pButton)
 {
+	mOwnedObjectList.erase(mAvatarId);
 	mAvatarId = 0;
 
 	Cure::UserAccount::AvatarId lAvatarId = pButton->GetName();
@@ -1572,7 +1685,7 @@ void GameClientSlaveManager::UpdateCameraPosition(bool pUpdateMicPosition)
 			{
 				lVelocity.Normalize(lMicrophoneMaxVelocity);
 			}
-			const float lLerpTime = Math::GetIterateLerpTime(0.1f, lFrameTime);
+			const float lLerpTime = Math::GetIterateLerpTime(0.9f, lFrameTime);
 			mMicrophoneSpeed = Math::Lerp(mMicrophoneSpeed, lVelocity, lLerpTime);
 			mUiManager->SetMicrophonePosition(lCameraTransform, mMicrophoneSpeed);
 		}

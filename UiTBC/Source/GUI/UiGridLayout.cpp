@@ -122,7 +122,7 @@ int GridLayout::GetNumComponents() const
 	return mNumComponents;
 }
 
-Component* GridLayout::GetComponentAt(int pRow, int pCol)
+Component* GridLayout::GetComponentAt(int pRow, int pCol) const
 {
 	Component* lComp = 0;
 	if (mComponent != 0 && pRow >= 0 && pRow < mNumRows && pCol >= 0 && pCol < mNumCols)

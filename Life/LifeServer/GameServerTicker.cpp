@@ -9,9 +9,10 @@
 #include "../../Lepra/Include/SystemManager.h"
 #include "../ConsoleManager.h"
 #include "../LifeApplication.h"
-#include "RtVar.h"
+#include "../LifeString.h"
 #include "GameServerManager.h"
 #include "MasterServerConnection.h"
+#include "RtVar.h"
 #include "ServerConsoleManager.h"
 
 
@@ -29,7 +30,8 @@ GameServerTicker::GameServerTicker(Cure::ResourceManager* pResourceManager,
 {
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_APPLICATION_AUTOEXITONEMPTYSERVER, false);
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_GAME_SPAWNPART, 1.0);
-	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_NETWORK_SERVERNAME, _T("My Dedicated Server"));
+	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_NETWORK_SERVERNAME, _("My Dedicated Server"));
+	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_NETWORK_LOGINGREETING, _("echo 4 \"Welcome to my dedicated server! Enjoy the ride!\""));
 
 	ConsoleManager lConsole(0, Cure::GetSettings(), 0, 0);
 	lConsole.InitCommands();
@@ -56,7 +58,7 @@ GameServerTicker::~GameServerTicker()
 
 	mResourceManager = 0;
 
-	mMasterConnection->GraceClose(5.0);
+	mMasterConnection->GraceClose(1.0, false);
 	delete mMasterConnection;
 	mMasterConnection = 0;
 }

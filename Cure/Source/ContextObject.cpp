@@ -53,6 +53,7 @@ ContextObject::ContextObject(Cure::ResourceManager* pResourceManager, const str&
 	mManager(0),
 	mResourceManager(pResourceManager),
 	mInstanceId(0),
+	mOwnerInstanceId(0),
 	mClassId(pClassId),
 	mNetworkObjectType(NETWORK_OBJECT_LOCAL_ONLY),
 	mParent(0),
@@ -62,6 +63,7 @@ ContextObject::ContextObject(Cure::ResourceManager* pResourceManager, const str&
 	mPhysics(0),
 	mPhysicsOverride(PHYSICS_OVERRIDE_NORMAL),
 	mLastSendTime(0),
+	mNetworkOutputGhost(0),
 	mSendCount(0),
 	mAllowMoveSelf(true)
 {
@@ -70,6 +72,8 @@ ContextObject::ContextObject(Cure::ResourceManager* pResourceManager, const str&
 ContextObject::~ContextObject()
 {
 	log_volatile(mLog.Debugf(_T("Destructing context object %s."), mClassId.c_str()));
+
+	DeleteNetworkOutputGhost();
 
 	if (mParent)
 	{
@@ -145,6 +149,16 @@ void ContextObject::SetInstanceId(GameObjectId pInstanceId)
 const str& ContextObject::GetClassId() const
 {
 	return (mClassId);
+}
+
+GameObjectId ContextObject::GetOwnerInstanceId() const
+{
+	return (mOwnerInstanceId);
+}
+
+void ContextObject::SetOwnerInstanceId(GameObjectId pInstanceId)
+{
+	mOwnerInstanceId = pInstanceId;
 }
 
 
@@ -634,7 +648,20 @@ float ContextObject::GetMass() const
 	return (lTotalMass);
 }
 
+ObjectPositionalData* ContextObject::GetNetworkOutputGhost()
+{
+	if (!mNetworkOutputGhost)
+	{
+		mNetworkOutputGhost = new ObjectPositionalData;
+	}
+	return mNetworkOutputGhost;
+}
 
+void ContextObject::DeleteNetworkOutputGhost()
+{
+	delete mNetworkOutputGhost;
+	mNetworkOutputGhost = 0;
+}
 
 bool ContextObject::SetPhysics(TBC::ChunkyPhysics* pStructure)
 {
@@ -975,7 +1002,7 @@ void ContextObject::ForceSetFullPosition(const ObjectPositionalData& pPositional
 				}
 				SetEnginePower(0, lData->mValue[0], lData->mValue[3]);
 				SetEnginePower(1, lData->mValue[1], lData->mValue[3]);
-				SetEnginePower(3, lData->mValue[2], lData->mValue[3]);	// TRICKY: specialcasing.
+				SetEnginePower(6, lData->mValue[2], lData->mValue[3]);	// TRICKY: specialcasing.
 			}
 			break;
 			case TBC::PhysicsEngine::ENGINE_HOVER:

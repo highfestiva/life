@@ -21,6 +21,7 @@ Component::Component(const str& pName, Layout* pLayout) :
 	mMouseFocusChild(0),
 	mKeyboardFocusChild(0),
 	mLayout(0),
+	mParentLayout(0),
 	mPos(0, 0),
 	mPreferredSize(0, 0),
 	mSize(0, 0),
@@ -65,13 +66,7 @@ void Component::DeleteLayout(int pLayer)
 	{
 		if (mLayout[pLayer] != 0)
 		{
-			Component* lChild = mLayout[pLayer]->GetFirst();
-			while (lChild != 0)
-			{
-				delete lChild;
-				lChild = mLayout[pLayer]->GetNext();
-			}
-
+			DeleteChildrenInLayer(pLayer);
 			delete mLayout[pLayer];
 			mLayout[pLayer] = 0;
 		}
@@ -137,6 +132,19 @@ void Component::DeleteLayer(int pLayer)
 	}
 }
 
+void Component::DeleteChildrenInLayer(int pLayer)
+{
+	if (pLayer >= 0 && pLayer < mLayerCount)
+	{
+		Component* lChild = mLayout[pLayer]->GetFirst();
+		while (lChild != 0)
+		{
+			delete lChild;
+			lChild = mLayout[pLayer]->GetNext();
+		}
+	}
+}
+
 void Component::ReplaceLayer(int pLayer, Layout* pLayout)
 {
 	if (pLayer >= 0 && pLayer < mLayerCount)
@@ -196,6 +204,7 @@ void Component::AddChild(Component* pChild, int pParam1, int pParam2, int pLayer
 	{
 		pChild->SetParent(this);
 		mLayout[pLayer]->Add(pChild, pParam1, pParam2);
+		pChild->SetParentLayout(mLayout[pLayer]);
 	}
 	else
 	{
@@ -208,6 +217,7 @@ void Component::RemoveChild(Component* pChild, int pLayer)
 	if (pLayer >= 0 && pLayer < mLayerCount && mLayout[pLayer] != 0)
 	{
 		mLayout[pLayer]->Remove(pChild);
+		pChild->SetParentLayout(0);
 		if (pChild == mMouseFocusChild)
 		{
 			pChild->ReleaseMouseFocus();
@@ -268,12 +278,11 @@ void Component::RemoveKeyListener(UiLepra::KeyCodeInputObserver* pListener)
 Component* Component::GetChild(int pScreenX, int pScreenY, int pLevelsDown)
 {
 	int i;
-	for (i = mLayerCount - 1; i >= 0; i--)
+	for (i = mLayerCount - 1; i >= 0; --i)
 	{
 		if (mLayout[i] != 0)
 		{
 			Component* lChild = mLayout[i]->GetLast();
-
 			while (lChild != 0)
 			{
 				if (lChild->IsVisible() == true)
@@ -512,18 +521,19 @@ bool Component::OnMouseWheel(int pMouseX, int pMouseY, int pChange, bool pDown)
 
 bool Component::OnMouseMove(int pMouseX, int pMouseY, int pDeltaX, int pDeltaY)
 {
-	for (int i = 0; i < mLayerCount; i++)
+	bool lIsOver = false;
+	for (int i = mLayerCount-1; !lIsOver && i >= 0; --i)
 	{
 		if (mLayout[i] != 0)
 		{
 			Component* lChild = mLayout[i]->GetFirst();
 			for (; lChild; lChild = mLayout[i]->GetNext())
 			{
-				lChild->OnMouseMove(pMouseX, pMouseY, pDeltaX, pDeltaY);
+				lIsOver |= lChild->OnMouseMove(pMouseX, pMouseY, pDeltaX, pDeltaY);
 			}
 		}
 	}
-	return (true);
+	return lIsOver;
 }
 
 bool Component::OnChar(tchar pChar)
@@ -1102,6 +1112,16 @@ Layout* Component::GetLayout(int pLayer) const
 		lLayout = mLayout[pLayer];
 	}
 	return lLayout;
+}
+
+void Component::SetParentLayout(Layout* pLayout)
+{
+	mParentLayout = pLayout;
+}
+
+Layout* Component::GetParentLayout() const
+{
+	return mParentLayout;
 }
 
 Component::Type Component::GetType() const

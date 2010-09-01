@@ -87,6 +87,20 @@ void ConsoleManager::InitCommands()
 	ExecuteCommand(_T("alias debug-focus \"set-subsystem-log-level 4; set-stdout-log-level 0; set-subsystem-log-level\""));
 }
 
+
+
+void ConsoleManager::SetSecurityLevel(int pLevel)
+{
+	mSecurityLevel = pLevel;
+}
+
+int ConsoleManager::GetSecurityLevel() const
+{
+	return mSecurityLevel;
+}
+
+
+
 Cure::GameManager* ConsoleManager::GetGameManager() const
 {
 	return (mGameManager);
@@ -592,18 +606,20 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 					str lValue;
 					strutil::CStringToString(pParameterVector[0], lValue);
 					RtScope::SetMode lMode = (lLevel == '.')? RtVar::USAGE_OVERRIDE : RtVar::USAGE_NORMAL;
-					bool lOk;
+					bool lOk = true;
+					Cure::GameManager* lManager = GetGameManager();
+					if (lManager)
 					{
-						Cure::GameManager* lManager = GetGameManager();
-						if (lManager)
-						{
-							lManager->GetTickLock()->Acquire();
-						}
+						lOk = lManager->ValidateVariable(mSecurityLevel, lVariable, lValue);
+						lManager->GetTickLock()->Acquire();
+					}
+					if (lOk)
+					{
 						lOk = lScope->SetValue(lMode, lVariable, lValue);
-						if (lManager)
-						{
-							lManager->GetTickLock()->Release();
-						}
+					}
+					if (lManager)
+					{
+						lManager->GetTickLock()->Release();
 					}
 					if (lOk)
 					{
@@ -640,10 +656,6 @@ bool ConsoleManager::SaveApplicationConfigFile(File* pFile, const wstr& pUserCon
 	pFile->WriteString(wstr(L"// Generated application shell script section.\n"));
 	std::list<str> lVariableList = GetVariableScope()->GetVariableNameList(Cure::RuntimeVariableScope::SEARCH_EXPORTABLE, 0, 0);
 	bool lSaved = SaveConfigFile(pFile, str(_T(".")), lVariableList, pUserConfig);
-	if (pUserConfig.empty())
-	{
-		pFile->WriteString(wstrutil::Encode(_T("\npush \"echo 4 Welcome ")+SystemManager::QueryFullUserName()+_T("!\"\n")));
-	}
 	return (lSaved);
 }
 

@@ -7,7 +7,7 @@
 #pragma once
 
 #include "../../Lepra/Include/HiResTimer.h"
-#include "../../UiTbc/Include/UiRenderer.h"
+#include "../../UiTBC/Include/UiRenderer.h"
 #include "../Life.h"
 
 

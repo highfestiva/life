@@ -15,7 +15,34 @@ namespace Options
 
 
 
-struct Vehicle
+struct CamControl
+{
+	enum Direction
+	{
+		CAMDIR_UP = 0,
+		CAMDIR_DOWN,
+		CAMDIR_LEFT,
+		CAMDIR_RIGHT,
+		CAMDIR_FORWARD,
+		CAMDIR_BACKWARD,
+		CAMDIR_COUNT
+	};
+	float mControl[CAMDIR_COUNT];
+
+	inline CamControl()
+	{
+		::memset(mControl, 0, sizeof(mControl));
+	}
+
+	inline void operator=(const CamControl& pControl)
+	{
+		::memcpy(mControl, pControl.mControl, sizeof(mControl));
+	}
+};
+
+
+
+struct Steering
 {
 	enum Control
 	{
@@ -38,17 +65,17 @@ struct Vehicle
 	};
 	float mControl[CONTROL_COUNT];
 
-	inline Vehicle()
+	inline Steering()
 	{
 		::memset(mControl, 0, sizeof(mControl));
 	}
 
-	inline void operator=(const Vehicle& pVehicle)
+	inline void operator=(const Steering& pVehicle)
 	{
 		::memcpy(mControl, pVehicle.mControl, sizeof(mControl));
 	}
 
-	inline float operator-(const Vehicle& pVehicle) const
+	inline float operator-(const Steering& pVehicle) const
 	{
 		float lSum = 0;
 		for (int x = 0; x < CONTROL_COUNT; ++x)

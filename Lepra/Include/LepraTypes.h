@@ -47,6 +47,8 @@ typedef double			float64;
 #if defined(LEPRA_MSVC) && !defined(_NATIVE_WCHAR_T_DEFINED)
 typedef uint16			wchar_t;
 #endif // LEPRA_MSVC && !_NATIVE_WCHAR_T_DEFINED
+#define	__WIDE(x)	L ## x
+#define	_WIDE(x)	__WIDE(x)
 #ifdef	LEPRA_UNICODE
 typedef	signed short		stchar;
 typedef	wchar_t			utchar;
@@ -54,7 +56,7 @@ typedef	wchar_t			tchar;
 #ifdef __T
 #undef __T
 #endif
-#define	__T(x)			L ## x
+#define	__T			__WIDE
 #else	// !LEPRA_UNICODE
 typedef signed char		stchar;
 typedef unsigned char		utchar;
