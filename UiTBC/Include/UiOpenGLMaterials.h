@@ -38,7 +38,7 @@ public:
 	virtual void SetBasicMaterial(const TBC::GeometryBase::BasicMaterialSettings& pMaterial);
 	static void SetBasicMaterial(const TBC::GeometryBase::BasicMaterialSettings& pMaterial, OpenGLRenderer* pRenderer);
 
-	virtual void RenderAllBlendedGeometry(unsigned pCurrentFrame);
+	virtual void RenderAllBlendedGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
 
 protected:
 	void UpdateTextureMatrix(TBC::GeometryBase* pGeometry);
@@ -89,7 +89,7 @@ public:
 
 	inline virtual ~OpenGLMatSingleColorBlended(){}
 
-	virtual void RenderAllGeometry(unsigned int pCurrentFrame);
+	virtual void RenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
 	virtual void PreRender();
 	virtual void PostRender();
 
@@ -120,7 +120,7 @@ public:
 	virtual bool AddGeometry(TBC::GeometryBase* pGeometry);
 
 protected:
-	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
+	virtual void DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
 	virtual void RenderGeometry(TBC::GeometryBase* pGeometry);
 
 private:
@@ -141,10 +141,10 @@ public:
 
 	inline virtual ~OpenGLMatVertexColorBlended(){}
 
-	virtual void RenderAllGeometry(unsigned int pCurrentFrame);
+	virtual void RenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
 
 protected:
-	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
+	virtual void DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
 };
 
 
@@ -203,10 +203,10 @@ public:
 
 	inline virtual ~OpenGLMatSingleTextureBlended(){}
 
-	virtual void RenderAllGeometry(unsigned int pCurrentFrame);
+	virtual void RenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
 
 protected:
-	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
+	virtual void DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
 	virtual void PreRender();
 	virtual void PostRender();
 };
@@ -226,7 +226,7 @@ public:
 	inline virtual ~OpenGLMatSingleTextureAlphaTested(){}
 
 protected:
-	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
+	virtual void DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
 	virtual void RenderGeometry(TBC::GeometryBase* pGeometry);
 };
 
@@ -253,7 +253,7 @@ public:
 	virtual bool AddGeometry(TBC::GeometryBase* pGeometry);
 
 protected:
-	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
+	virtual void DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
 	virtual void PrepareBasicMaterialSettings(TBC::GeometryBase* pGeometry);
 
 	bool mSingleColorPass;
@@ -278,7 +278,7 @@ public:
 
 	inline virtual ~OpenGLMatSingleColorEnvMapBlended(){}
 
-	virtual void RenderAllGeometry(unsigned int pCurrentFrame);
+	virtual void RenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
 
 protected:
 	virtual void PrepareBasicMaterialSettings(TBC::GeometryBase* pGeometry);
@@ -305,7 +305,7 @@ public:
 	inline virtual ~OpenGLMatSingleTextureEnvMapSolid(){}
 
 protected:
-	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
+	virtual void DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
 	virtual void RenderGeometry(TBC::GeometryBase* pGeometry);
 	virtual void PrepareBasicMaterialSettings(TBC::GeometryBase* pGeometry);
 
@@ -329,7 +329,7 @@ public:
 
 	inline virtual ~OpenGLMatSingleTextureEnvMapBlended(){}
 
-	virtual void RenderAllGeometry(unsigned int pCurrentFrame);
+	virtual void RenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
 
 protected:
 	virtual void PrepareBasicMaterialSettings(TBC::GeometryBase* pGeometry);
@@ -350,7 +350,7 @@ public:
 	inline virtual ~OpenGLMatTextureAndLightmap(){}
 
 protected:
-	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
+	virtual void DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
 	virtual void RenderGeometry(TBC::GeometryBase* pGeometry);
 
 	bool mFirstPass;
@@ -469,7 +469,7 @@ public:
 	virtual ~OpenGLMatSingleColorSolidPXS();
 
 protected:
-	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
+	virtual void DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
 	virtual void RenderGeometry(TBC::GeometryBase* pGeometry);
 
 	static const char* smVP;
@@ -491,7 +491,7 @@ public:
 	virtual ~OpenGLMatSingleTextureSolidPXS();
 
 protected:
-	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
+	virtual void DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
 	virtual void RenderGeometry(TBC::GeometryBase* pGeometry);
 
 	static const char* smVP;
@@ -513,7 +513,7 @@ public:
 	virtual ~OpenGLMatTextureAndLightmapPXS();
 
 protected:
-	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
+	virtual void DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
 	virtual void RenderGeometry(TBC::GeometryBase* pGeometry);
 
 	static const char* smVP;
@@ -539,7 +539,7 @@ public:
 	virtual ~OpenGLMatTextureSBMapPXS();
 
 protected:
-	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
+	virtual void DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
 	virtual void RenderGeometry(TBC::GeometryBase* pGeometry);
 
 	static const char* smVP;

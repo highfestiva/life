@@ -1180,7 +1180,7 @@ unsigned OpenGLRenderer::RenderScene()
 		{
 			if (GetMaterial((MaterialType)i) != 0)
 			{
-				GetMaterial((MaterialType)i)->RenderAllGeometry(GetCurrentFrame());
+				Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial((MaterialType)i));
 			}
 		}
 
@@ -1218,15 +1218,17 @@ unsigned OpenGLRenderer::RenderScene()
 		const Vector3DF lColor(mOutlineFillColor.GetRf(), mOutlineFillColor.GetGf(), mOutlineFillColor.GetBf());
 		TBC::GeometryBase::BasicMaterialSettings lMaterial(lColor, lColor, Vector3DF(), 1, 1, false);
 		OpenGLMaterial::SetBasicMaterial(lMaterial, this);
-		GetMaterial(MAT_SINGLE_COLOR_SOLID)->RenderAllGeometry(GetCurrentFrame());
-		GetMaterial(MAT_SINGLE_COLOR_OUTLINE_BLENDED)->RenderAllGeometry(GetCurrentFrame());
+		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_SOLID));
+		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_SOLID_PXS), GetMaterial(MAT_SINGLE_COLOR_SOLID));
+		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_OUTLINE_BLENDED));
 		::glCullFace(GL_FRONT);
 		::glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		::glDepthFunc(GL_LEQUAL);
 		::glDisable(GL_LIGHTING);
 		Material::EnableDrawMaterial(true);
-		GetMaterial(MAT_SINGLE_COLOR_SOLID)->RenderAllGeometry(GetCurrentFrame());
-		GetMaterial(MAT_SINGLE_COLOR_OUTLINE_BLENDED)->RenderAllGeometry(GetCurrentFrame());
+		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_SOLID));
+		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_SOLID_PXS), GetMaterial(MAT_SINGLE_COLOR_SOLID));
+		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_OUTLINE_BLENDED));
 		::glCullFace(GL_BACK);
 		::glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		//::glDepthFunc(GL_LESS);
@@ -1241,14 +1243,15 @@ unsigned OpenGLRenderer::RenderScene()
 		// This renders the scene.
 		for (int i = 0; i < (int)MAT_COUNT; ++i)
 		{
-			if (lSkipOutlined && (i == MAT_SINGLE_COLOR_SOLID || i == MAT_SINGLE_COLOR_OUTLINE_BLENDED))
+			if (lSkipOutlined && (i == MAT_SINGLE_COLOR_SOLID || i == MAT_SINGLE_COLOR_OUTLINE_BLENDED ||
+				i == MAT_SINGLE_COLOR_SOLID_PXS))
 			{
 				continue;
 			}
 			Material* lMaterial = GetMaterial((MaterialType)i);
 			if (lMaterial != 0)
 			{
-				lMaterial->RenderAllGeometry(GetCurrentFrame());
+				Material::RenderAllGeometry(GetCurrentFrame(), lMaterial);
 			}
 		}
 		::glDisable(GL_STENCIL_TEST);
