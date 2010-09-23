@@ -217,7 +217,7 @@ MassObject::Square::Square(uint32 pSeed, const MeshArray& pResourceArray,
 		lBatch->SetInstances(&pDisplacementArray[0], lMesh->GetTransformation().GetPosition(),
 			pDisplacementArray.size(), pSeed, 0.8f, 1.3f, 0.6f, 2.0f, 0.7f, 1.2f);
 		typedef UiTbc::Renderer R;
-		R::GeometryID lGeometryId = mRenderer->AddGeometry(lBatch, R::MAT_SINGLE_COLOR_SOLID, R::NO_SHADOWS);
+		R::GeometryID lGeometryId = mRenderer->AddGeometry(lBatch, R::MAT_SINGLE_COLOR_SOLID_PXS, R::NO_SHADOWS);
 		mMassMeshArray.push_back(MassMeshPair(lBatch, lGeometryId));
 	}
 }
@@ -244,9 +244,9 @@ void MassObject::Square::SetRender(bool pRender, float pAlpha)
 		{
 			x->first->SetAlwaysVisible(false);
 		}
-		else if (pAlpha >= 0.999f)
+		else if (pAlpha >= 0.99f)
 		{
-			mRenderer->ChangeMaterial(x->second, UiTbc::Renderer::MAT_SINGLE_COLOR_SOLID);
+			mRenderer->ChangeMaterial(x->second, UiTbc::Renderer::MAT_SINGLE_COLOR_SOLID_PXS);
 		}
 		else
 		{

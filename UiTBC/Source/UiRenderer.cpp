@@ -44,7 +44,6 @@ Renderer::Renderer(Canvas* pScreen) :
 	mCompressedTexturesEnabled(false),
 	mShadowsEnabled(false),
 	mLightsEnabled(false),
-	mFallbackMaterialEnabled(false),
 	mShadowHint(Renderer::SH_VOLUMES_ONLY),
 	mShadowUpdateFrameDelay(0),
 	mClippingRect(0, 0, pScreen->GetWidth(), pScreen->GetHeight())
@@ -274,16 +273,6 @@ bool Renderer::GetShadowsEnabled()
 void Renderer::SetShadowUpdateFrameDelay(unsigned pFrameDelay)
 {
 	mShadowUpdateFrameDelay = pFrameDelay;
-}
-
-void Renderer::SetFallbackMaterialEnabled(bool pEnabled)
-{
-	mFallbackMaterialEnabled = pEnabled;
-}
-
-bool Renderer::GetFallbackMaterialEnabled()
-{
-	return mFallbackMaterialEnabled;
 }
 
 void Renderer::SetEnableDepthSorting(bool pEnabled)
@@ -1108,10 +1097,13 @@ void Renderer::UpdateShadowMaps()
 {
 	for (int i = 0; i < (int)MAT_COUNT; i++)
 	{
-		TBC::GeometryBase* lGeometry = mMaterial[i]->GetFirstVisibleGeometry();
-		while(lGeometry != 0)
+		TBC::GeometryBase* lGeometry = mMaterial[i]->GetFirstGeometry();
+		while (lGeometry)
 		{
-			UpdateShadowMaps(lGeometry);
+			if (lGeometry->GetAlwaysVisible() || lGeometry->GetLastFrameVisible() == mCurrentFrame)
+			{
+				UpdateShadowMaps(lGeometry);
+			}
 			lGeometry = mMaterial[i]->GetNextGeometry();
 		}
 	}

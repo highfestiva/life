@@ -92,7 +92,6 @@ bool NetworkClient::Connect(const str& pLocalAddress, const str& pServerAddress,
 			SetMuxSocket(new MuxSocket(_T("Client "), lLocalAddress, false));
 			if (mMuxSocket->IsOpen())
 			{
-				//mMuxSocket->SetCloseCallback(this, &NetworkClient::OnCloseSocket);
 				break;
 			}
 			delete (mMuxSocket);
@@ -387,7 +386,12 @@ void NetworkClient::LoginEntry()
 				mLog.AInfo("Retrying connect...");
 			}
 			str lPortRange = CURE_RTVAR_SLOW_GET(mVariableScope, RTVAR_NETWORK_CONNECT_LOCALPORTRANGE, _T("1025-65535"));
-			lOk = Connect(_T(":")+lPortRange, mServerHost, mConnectTimeout);
+			str lLocalName;
+			if (strutil::StartsWith(mServerHost, _T("localhost:")) || strutil::StartsWith(mServerHost, _T("127.0.0.1:")))
+			{
+				lLocalName = _T("localhost");
+			}
+			lOk = Connect(lLocalName+_T(":")+lPortRange, mServerHost, mConnectTimeout);
 		}
 		while (++x <= CURE_RTVAR_SLOW_GET(mVariableScope, RTVAR_NETWORK_CONNECT_RETRYCOUNT, 1) && !lOk &&
 			!SystemManager::GetQuitRequest() && !mLoginThread.GetStopRequest());

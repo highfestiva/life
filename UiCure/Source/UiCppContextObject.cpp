@@ -489,13 +489,13 @@ void CppContextObject::TryAddTexture()
 				const bool lIsBlended = (lMesh->GetRamData()->GetBasicMaterialSettings().mAlpha < 1 ||
 					((UiTbc::ChunkyClass*)mUiClassResource->GetRamData())->GetMaterial(x).mShaderName == _T("blend"));
 				UiTbc::Renderer::MaterialType lMaterialType = lIsBlended?
-					UiTbc::Renderer::MAT_SINGLE_TEXTURE_BLENDED : UiTbc::Renderer::MAT_SINGLE_TEXTURE_SOLID;
+					UiTbc::Renderer::MAT_SINGLE_TEXTURE_BLENDED : UiTbc::Renderer::MAT_SINGLE_TEXTURE_SOLID_PXS;
 				mUiManager->GetRenderer()->ChangeMaterial(lMesh->GetData(), lMaterialType);
 				mUiManager->GetRenderer()->TryAddGeometryTexture(lMesh->GetData(), lTexture->GetData());
 			}
 			else
 			{
-				UiTbc::Renderer::MaterialType lMaterialType = UiTbc::Renderer::MAT_SINGLE_COLOR_SOLID;
+				UiTbc::Renderer::MaterialType lMaterialType = UiTbc::Renderer::MAT_SINGLE_COLOR_SOLID_PXS;
 				if (lMesh->GetRamData()->GetBasicMaterialSettings().mAlpha != 1)
 				{
 					lMaterialType = UiTbc::Renderer::MAT_SINGLE_COLOR_BLENDED;

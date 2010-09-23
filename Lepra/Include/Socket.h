@@ -193,7 +193,7 @@ class TcpListenerSocket: public SocketBase
 public:
 	friend class TcpSocket;
 
-	TcpListenerSocket(const SocketAddress& pLocalAddress);
+	TcpListenerSocket(const SocketAddress& pLocalAddress, bool pIsServer);
 	virtual ~TcpListenerSocket();
 
 	// Waits for connection, and returns the connected socket.
@@ -296,7 +296,7 @@ public:
 	void DispatchCloseSocket(TcpVSocket* pSocket);
 	void CloseSocket(TcpVSocket* pSocket, bool pForceDelete = false);
 
-	TcpVSocket* PopReceiverSocket(bool pSafe);
+	TcpVSocket* PopReceiverSocket();
 	TcpVSocket* PopSenderSocket();
 
 	uint64 GetTotalSentByteCount() const;
@@ -371,7 +371,7 @@ private:
 class UdpSocket: public SocketBase
 {
 public:
-	UdpSocket(const SocketAddress& pLocalAddress);
+	UdpSocket(const SocketAddress& pLocalAddress, bool pIsServer);
 	UdpSocket(const UdpSocket& pSocket);
 	virtual ~UdpSocket();
 
@@ -415,7 +415,7 @@ public:
 	void AddBannedIP(const IPAddress& pIP);
 	void RemoveBannedIP(const IPAddress& pIP);
 
-	UdpVSocket* PopReceiverSocket(bool pSafe);
+	UdpVSocket* PopReceiverSocket();
 	UdpVSocket* PopSenderSocket();
 
 protected:
@@ -453,6 +453,7 @@ public:
 
 	void ClearAll();
 
+	int Receive(bool pSafe, void* pData, int pLength);	// ::recv() return value.
 	int Receive(void* pData, int pLength);	// ::recv() return value.
 	int SendBuffer();	// ::send() return value.
 	int DirectSend(const void* pData, int pLength);	// Writes buffer, flushes.

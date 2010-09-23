@@ -261,30 +261,30 @@ public:
 	static bool CheckShaderProgramFunctions();
 	static bool CheckShaderFunctions();
 
-	static inline bool FrameBufferObjectsSupported();
+	static bool IsFrameBufferObjectsSupported();
 
 	// Returns true if the OpenGL version is at least 1.5.
-	static inline bool BufferObjectsSupported();
-	static inline bool AnisotropicFilteringSupported();
-	static inline bool CompressedTexturesSupported();
-	static inline bool MultiTextureSupported();
+	static bool IsBufferObjectsSupported();
+	static bool iSAnisotropicFilteringSupported();
+	static bool IsCompressedTexturesSupported();
+	static bool IsMultiTextureSupported();
 
 	// Returns true if the OpenGL version is at least 1.4.
-	static inline bool ShadowMapsSupported();
+	static bool IsShadowMapsSupported();
 
 	// Returns true if vertex and fragment programs (assembly language) 
 	// are supported.
-	static inline bool ShaderProgramsSupported();
+	static bool IsShaderAsmProgramsSupported();
 	
 	// C-style shaders...
-	static inline bool ShadersSupported();
+	static bool IsShaderCProgramsSupported();
 
-	static inline float GetMaxAnisotropy();
+	static float GetMaxAnisotropy();
 	static void SetAnisotropy(float pAmountAnisotropy);
 
 	// VSync...
-	static inline bool VSyncSupported();
-	static inline bool IsVSyncEnabled();
+	static bool IsVSyncSupported();
+	static bool IsVSyncEnabled();
 	static bool SetVSyncEnabled(bool pEnabled);
 
 protected:
@@ -309,66 +309,6 @@ private:
 	static PFNWGLGETSWAPINTERVALEXTPROC wglGetSwapIntervalEXT;
 #endif
 };
-
-bool OpenGLExtensions::FrameBufferObjectsSupported()
-{
-	return smFrameBufferObjectsSupported;
-}
-
-bool OpenGLExtensions::BufferObjectsSupported()
-{
-	return smBufferObjectsSupported;
-}
-
-bool OpenGLExtensions::AnisotropicFilteringSupported()
-{
-	return smAnisotropicFilteringSupported;
-}
-
-bool OpenGLExtensions::CompressedTexturesSupported()
-{
-	return smCompressedTexturesSupported;
-}
-
-bool OpenGLExtensions::MultiTextureSupported()
-{
-	return smMultiTextureSupported;
-}
-
-bool OpenGLExtensions::ShadowMapsSupported()
-{
-	return smGLVersion14;
-}
-
-bool OpenGLExtensions::ShaderProgramsSupported()
-{
-	return smShaderProgramsSupported;
-}
-
-bool OpenGLExtensions::ShadersSupported()
-{
-	return smShadersSupported;
-}
-
-float OpenGLExtensions::GetMaxAnisotropy()
-{
-	return smMaxAnisotropy;
-}
-
-bool OpenGLExtensions::VSyncSupported()
-{
-	return smVSyncSupported;
-}
-
-bool OpenGLExtensions::IsVSyncEnabled()
-{
-#ifdef LEPRA_WINDOWS
-	return (wglGetSwapIntervalEXT() > 0);
-#else
-#pragma message("Warning: OpenGLExtensions::IsVSyncEnabled() is using default behaviour.")
-	return true;
-#endif
-}
 
 
 

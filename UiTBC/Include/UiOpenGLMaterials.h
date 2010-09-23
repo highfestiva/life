@@ -24,10 +24,6 @@ class OpenGLRenderer;
 
 
 
-//
-//	OpenGLMaterial
-//
-
 class OpenGLMaterial: public Material
 {
 	typedef Material Parent;
@@ -54,6 +50,7 @@ protected:
 
 class OpenGLMatSingleColorSolid: public OpenGLMaterial
 {
+	typedef OpenGLMaterial Parent;
 public:
 	inline OpenGLMatSingleColorSolid(OpenGLRenderer* pRenderer,
 					 Material* pFallBackMaterial) :
@@ -80,10 +77,6 @@ protected:
 
 
 
-//
-//	OpenGLMatSingleColorBlended
-//
-
 class OpenGLMatSingleColorBlended: public OpenGLMatSingleColorSolid
 {
 	typedef OpenGLMatSingleColorSolid Parent;
@@ -106,12 +99,9 @@ protected:
 
 
 
-//
-//	OpenGLMatVertexColorSolid
-//
-
 class OpenGLMatVertexColorSolid: public OpenGLMatSingleColorSolid
 {
+	typedef OpenGLMatSingleColorSolid Parent;
 public:
 	inline OpenGLMatVertexColorSolid(OpenGLRenderer* pRenderer,
 					 Material* pFallBackMaterial) :
@@ -128,9 +118,9 @@ public:
 	inline virtual ~OpenGLMatVertexColorSolid(){}
 
 	virtual bool AddGeometry(TBC::GeometryBase* pGeometry);
-	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame);
 
 protected:
+	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
 	virtual void RenderGeometry(TBC::GeometryBase* pGeometry);
 
 private:
@@ -138,9 +128,6 @@ private:
 };
 
 
-//
-//	OpenGLMatVertexColorBlended
-//
 
 class OpenGLMatVertexColorBlended: public OpenGLMatVertexColorSolid
 {
@@ -155,18 +142,16 @@ public:
 	inline virtual ~OpenGLMatVertexColorBlended(){}
 
 	virtual void RenderAllGeometry(unsigned int pCurrentFrame);
-	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame);
+
 protected:
+	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
 };
 
 
 
-//
-//	OpenGLMatSingleTextureSolid
-//
-
 class OpenGLMatSingleTextureSolid: public OpenGLMatSingleColorSolid
 {
+	typedef OpenGLMatSingleColorSolid Parent;
 public:
 	inline OpenGLMatSingleTextureSolid(OpenGLRenderer* pRenderer,
 					   Material* pFallBackMaterial) :
@@ -198,9 +183,7 @@ private:
 	LOG_CLASS_DECLARE();
 };
 
-//
-//	OpenGLMatSingleTextureBlended
-//
+
 
 class OpenGLMatSingleTextureBlended: public OpenGLMatSingleTextureSolid
 {
@@ -221,20 +204,18 @@ public:
 	inline virtual ~OpenGLMatSingleTextureBlended(){}
 
 	virtual void RenderAllGeometry(unsigned int pCurrentFrame);
-	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame);
-	virtual void PreRender();
-	virtual void PostRender();
 
 protected:
+	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
+	virtual void PreRender();
+	virtual void PostRender();
 };
 
 
-//
-//	OpenGLMatSingleTextureAlphaTested
-//
 
 class OpenGLMatSingleTextureAlphaTested: public OpenGLMatSingleTextureSolid
 {
+	typedef OpenGLMatSingleTextureSolid Parent;
 public:
 	inline OpenGLMatSingleTextureAlphaTested(OpenGLRenderer* pRenderer,
 						 Material* pFallBackMaterial) :
@@ -244,19 +225,16 @@ public:
 
 	inline virtual ~OpenGLMatSingleTextureAlphaTested(){}
 
-	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame);
-
 protected:
+	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
 	virtual void RenderGeometry(TBC::GeometryBase* pGeometry);
 };
 
 
-//
-//	OpenGLMatSingleEnvMapSolid
-//
 
 class OpenGLMatSingleColorEnvMapSolid: public OpenGLMatSingleColorSolid
 {
+	typedef OpenGLMatSingleColorSolid Parent;
 public:
 	inline OpenGLMatSingleColorEnvMapSolid(OpenGLRenderer* pRenderer,
 					       Material* pFallBackMaterial) :
@@ -273,9 +251,9 @@ public:
 	inline virtual ~OpenGLMatSingleColorEnvMapSolid(){}
 
 	virtual bool AddGeometry(TBC::GeometryBase* pGeometry);
-	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame);
 
 protected:
+	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
 	virtual void PrepareBasicMaterialSettings(TBC::GeometryBase* pGeometry);
 
 	bool mSingleColorPass;
@@ -286,9 +264,7 @@ private:
 	LOG_CLASS_DECLARE();
 };
 
-//
-//	OpenGLMatSingleEnvMapBlended
-//
+
 
 class OpenGLMatSingleColorEnvMapBlended: public OpenGLMatSingleColorEnvMapSolid
 {
@@ -303,17 +279,16 @@ public:
 	inline virtual ~OpenGLMatSingleColorEnvMapBlended(){}
 
 	virtual void RenderAllGeometry(unsigned int pCurrentFrame);
-//	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame);
 
 protected:
 	virtual void PrepareBasicMaterialSettings(TBC::GeometryBase* pGeometry);
 };
 
-//
-//	OpenGLMatSingleTextureEnvMapSolid
-//
+
+
 class OpenGLMatSingleTextureEnvMapSolid: public OpenGLMatSingleTextureSolid
 {
+	typedef OpenGLMatSingleTextureSolid Parent;
 public:
 	inline OpenGLMatSingleTextureEnvMapSolid(OpenGLRenderer* pRenderer,
 						 Material* pFallBackMaterial) :
@@ -329,10 +304,8 @@ public:
 
 	inline virtual ~OpenGLMatSingleTextureEnvMapSolid(){}
 
-	virtual bool AddGeometry(TBC::GeometryBase* pGeometry);
-	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame);
-
 protected:
+	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
 	virtual void RenderGeometry(TBC::GeometryBase* pGeometry);
 	virtual void PrepareBasicMaterialSettings(TBC::GeometryBase* pGeometry);
 
@@ -343,9 +316,7 @@ private:
 };
 
 
-//
-//	OpenGLMatSingleTextureEnvMapBlended
-//
+
 class OpenGLMatSingleTextureEnvMapBlended: public OpenGLMatSingleTextureEnvMapSolid
 {
 	typedef OpenGLMatSingleTextureEnvMapSolid Parent;
@@ -359,18 +330,16 @@ public:
 	inline virtual ~OpenGLMatSingleTextureEnvMapBlended(){}
 
 	virtual void RenderAllGeometry(unsigned int pCurrentFrame);
-//	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame);
 
 protected:
 	virtual void PrepareBasicMaterialSettings(TBC::GeometryBase* pGeometry);
 };
 
 
-//
-// OpenGLMatTextureAndLightmap
-//
+
 class OpenGLMatTextureAndLightmap: public OpenGLMatSingleTextureSolid
 {
+	typedef OpenGLMatSingleTextureSolid Parent;
 public:
 	inline OpenGLMatTextureAndLightmap(OpenGLRenderer* pRenderer,
 					   Material* pFallBackMaterial) :
@@ -380,10 +349,8 @@ public:
 
 	inline virtual ~OpenGLMatTextureAndLightmap(){}
 
-	virtual bool AddGeometry(TBC::GeometryBase* pGeometry);
-	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame);
-
 protected:
+	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
 	virtual void RenderGeometry(TBC::GeometryBase* pGeometry);
 
 	bool mFirstPass;
@@ -391,6 +358,7 @@ protected:
 private:
 	LOG_CLASS_DECLARE();
 };
+
 
 
 //
@@ -489,21 +457,19 @@ private:
 	LOG_CLASS_DECLARE();
 };
 
-//
-// OpenGLMatSingleColorSolidPXS
-//
+
+
 class OpenGLMatSingleColorSolidPXS: public OpenGLMatSingleColorSolid, public OpenGLMatPXS
 {
+	typedef OpenGLMatSingleColorSolid Parent;
 public:
 	OpenGLMatSingleColorSolidPXS(OpenGLRenderer* pRenderer,
 				     Material* pFallBackMaterial);
 
 	virtual ~OpenGLMatSingleColorSolidPXS();
 
-	virtual bool AddGeometry(TBC::GeometryBase* pGeometry);
-	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame);
-
 protected:
+	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
 	virtual void RenderGeometry(TBC::GeometryBase* pGeometry);
 
 	static const char* smVP;
@@ -514,21 +480,18 @@ private:
 };
 
 
-//
-// OpenGLMatSingleTextureSolidPXS
-//
+
 class OpenGLMatSingleTextureSolidPXS: public OpenGLMatSingleTextureSolid, public OpenGLMatPXS
 {
+	typedef OpenGLMatSingleTextureSolid Parent;
 public:
 	OpenGLMatSingleTextureSolidPXS(OpenGLRenderer* pRenderer,
 				       Material* pFallBackMaterial);
 
 	virtual ~OpenGLMatSingleTextureSolidPXS();
 
-	virtual bool AddGeometry(TBC::GeometryBase* pGeometry);
-	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame);
-
 protected:
+	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
 	virtual void RenderGeometry(TBC::GeometryBase* pGeometry);
 
 	static const char* smVP;
@@ -540,21 +503,17 @@ private:
 
 
 
-//
-// OpenGLMatTextureAndLightmapPXS
-//
 class OpenGLMatTextureAndLightmapPXS: public OpenGLMatSingleTextureSolid, public OpenGLMatPXS
 {
+	typedef OpenGLMatSingleTextureSolid Parent;
 public:
 	OpenGLMatTextureAndLightmapPXS(OpenGLRenderer* pRenderer,
 				       Material* pFallBackMaterial);
 
 	virtual ~OpenGLMatTextureAndLightmapPXS();
 
-	virtual bool AddGeometry(TBC::GeometryBase* pGeometry);
-	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame);
-
 protected:
+	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
 	virtual void RenderGeometry(TBC::GeometryBase* pGeometry);
 
 	static const char* smVP;
@@ -566,11 +525,9 @@ private:
 
 
 
-//
-// OpenGLMatTextureSBMapPXS
-//
 class OpenGLMatTextureSBMapPXS: public OpenGLMatSingleTextureSolid, public OpenGLMatPXS
 {
+	typedef OpenGLMatSingleTextureSolid Parent;
 public:
 	OpenGLMatTextureSBMapPXS(OpenGLRenderer* pRenderer,
 				 Material* pFallBackMaterial);
@@ -581,10 +538,8 @@ public:
 
 	virtual ~OpenGLMatTextureSBMapPXS();
 
-	virtual bool AddGeometry(TBC::GeometryBase* pGeometry);
-	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame);
-
 protected:
+	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
 	virtual void RenderGeometry(TBC::GeometryBase* pGeometry);
 
 	static const char* smVP;
@@ -594,8 +549,11 @@ private:
 	LOG_CLASS_DECLARE();
 };
 
+
+
 class OpenGLMatTextureDiffuseBumpMapPXS: public OpenGLMatTextureSBMapPXS
 {
+	typedef OpenGLMatTextureSBMapPXS Parent;
 public:
 	OpenGLMatTextureDiffuseBumpMapPXS(OpenGLRenderer* pRenderer,
 					  Material* pFallBackMaterial);

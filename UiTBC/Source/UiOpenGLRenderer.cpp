@@ -179,7 +179,7 @@ void OpenGLRenderer::ResetClippingRect()
 
 void OpenGLRenderer::SetShadowsEnabled(bool pEnabled, ShadowHint pHint)
 {
-	if (UiLepra::OpenGLExtensions::ShadowMapsSupported() == true)
+	if (UiLepra::OpenGLExtensions::IsShadowMapsSupported() == true)
 	{
 		Parent::SetShadowsEnabled(pEnabled, pHint);
 	}
@@ -519,7 +519,7 @@ void OpenGLRenderer::BindMap(int pMapType, TextureData* pTextureData, Texture* p
 {
 	assert(pMapType >= 0 && pMapType < Texture::NUM_MAPS);
 
-	bool lCompress = UiLepra::OpenGLExtensions::CompressedTexturesSupported() &&
+	bool lCompress = UiLepra::OpenGLExtensions::IsCompressedTexturesSupported() &&
 					GetCompressedTexturesEnabled();
 
 	if (pTextureData->mTMapID[pMapType] == mTMapIDManager.GetInvalidId())
@@ -555,7 +555,7 @@ void OpenGLRenderer::BindMap(int pMapType, TextureData* pTextureData, Texture* p
 void OpenGLRenderer::BindCubeMap(TextureData* pTextureData, Texture* pTexture)
 {
 	// Compress textures if possible.
-	bool lCompress = UiLepra::OpenGLExtensions::CompressedTexturesSupported() &&
+	bool lCompress = UiLepra::OpenGLExtensions::IsCompressedTexturesSupported() &&
 				GetCompressedTexturesEnabled();
 
 	int lSize = pTexture->GetCubeMapPosX(0)->GetPixelByteSize();
@@ -670,7 +670,7 @@ void OpenGLRenderer::BindGeometry(TBC::GeometryBase* pGeometry,
 
 	if (pGeometry->IsGeometryReference() == false)
 	{
-		if (UiLepra::OpenGLExtensions::BufferObjectsSupported() == true)
+		if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
 		{
 			OGLGeometryData* lGeometryData = (OGLGeometryData*)pGeometry->GetRendererData();
 
@@ -825,7 +825,7 @@ bool OpenGLRenderer::BindShadowGeometry(UiTbc::ShadowVolume* pShadowVolume, Ligh
 	bool lOK = false;
 
 	OGLGeometryData* lShadowGeom = (OGLGeometryData*)pShadowVolume->GetRendererData();
-	if (UiLepra::OpenGLExtensions::BufferObjectsSupported() == true)
+	if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
 	{
 		// Upload geometry to the GFX hardware.
 
@@ -899,7 +899,7 @@ void OpenGLRenderer::UpdateGeometry(GeometryID pGeometryID)
 		
 		// Force update of shadow volumes.
 
-		if (UiLepra::OpenGLExtensions::BufferObjectsSupported() == true && lGeometry->IsGeometryReference() == false)
+		if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true && lGeometry->IsGeometryReference() == false)
 		{
 			int lVertexCount = lGeometry->GetVertexCount();
 
@@ -992,7 +992,7 @@ void OpenGLRenderer::ReleaseGeometry(TBC::GeometryBase* pUserGeometry, GeomRelea
 	OGLGeometryData* lGeometry = (OGLGeometryData*)pUserGeometry->GetRendererData();
 
 	if (pUserGeometry->IsGeometryReference() == false && 
-		UiLepra::OpenGLExtensions::BufferObjectsSupported() == true)
+		UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
 	{
 		GLuint lVertexBufferID = (GLuint)lGeometry->mVertexBufferID;
 		GLuint lIndexBufferID  = (GLuint)lGeometry->mIndexBufferID;
@@ -1488,7 +1488,7 @@ void OpenGLRenderer::RenderShadowVolumes()
 				(GetCameraTransformation().InverseTransform(lShadowVolume->GetTransformation())).GetAs4x4TransposeMatrix(lModelViewMatrix);
 				glLoadMatrixf(lModelViewMatrix);
 
-				if (UiLepra::OpenGLExtensions::BufferObjectsSupported() == true)
+				if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
 				{
 					GLuint lVertexBufferID = (GLuint)lShadowGeometry->mVertexBufferID;
 					GLuint lIndexBufferID  = (GLuint)lShadowGeometry->mIndexBufferID;
@@ -1646,7 +1646,7 @@ int OpenGLRenderer::RenderShadowMaps()
 				glTexGenfv(GL_R, GL_EYE_PLANE, slRPlane);
 				glTexGenfv(GL_Q, GL_EYE_PLANE, slQPlane);
 
-				if (UiLepra::OpenGLExtensions::BufferObjectsSupported() == true)
+				if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
 				{
 					GLuint lVertexBufferID = (GLuint)lGeometry->mVertexBufferID;
 					GLuint lIndexBufferID  = (GLuint)lGeometry->mIndexBufferID;
@@ -1758,7 +1758,7 @@ void OpenGLRenderer::RegenerateShadowMap(LightData* pLight)
 			(lLightTransformation.InverseTransform(lGeometry->mGeometry->GetTransformation())).GetAs4x4TransposeMatrix(lModelViewMatrix);
 			glLoadMatrixf(lModelViewMatrix);
 
-			if (UiLepra::OpenGLExtensions::BufferObjectsSupported() == true)
+			if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
 			{
 				GLuint lVertexBufferID = (GLuint)lGeometry->mVertexBufferID;
 				GLuint lIndexBufferID  = (GLuint)lGeometry->mIndexBufferID;

@@ -396,9 +396,6 @@ public:
 	bool GetShadowsEnabled();
 	void SetShadowUpdateFrameDelay(unsigned pFrameDelay);
 
-	virtual void SetFallbackMaterialEnabled(bool pEnabled);
-	bool GetFallbackMaterialEnabled();
-
 	virtual void SetDepthWriteEnabled(bool pEnabled) = 0;
 	virtual void SetDepthTestEnabled(bool pEnabled) = 0;
 
@@ -651,7 +648,6 @@ protected:
 	bool mCompressedTexturesEnabled;
 	bool mShadowsEnabled;
 	bool mLightsEnabled;
-	bool mFallbackMaterialEnabled;
 
 	ShadowHint mShadowHint;
 	unsigned mShadowUpdateFrameDelay;

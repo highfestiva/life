@@ -525,7 +525,6 @@ bool OpenRenderer(const Lepra::LogDecorator& pLog, UiLepra::DisplayManager::Cont
 		gFontManager->SetActiveFont(lFontId);
 		gPainter->SetFontManager(gFontManager);
 
-		gRenderer->SetFallbackMaterialEnabled(true);
 		gPainter->SetDestCanvas(gScreen);
 		gPainter->SetRenderMode(UiTbc::Painter::RM_ALPHABLEND);
 	}

@@ -338,7 +338,7 @@ bool BufferedIo::GetInSenderList() const
 
 
 
-TcpListenerSocket::TcpListenerSocket(const SocketAddress& pLocalAddress):
+TcpListenerSocket::TcpListenerSocket(const SocketAddress& pLocalAddress, bool pIsServer):
 	mConnectionCount(0),
 	mLocalAddress(pLocalAddress),
 	mReceiver(0)
@@ -348,7 +348,7 @@ TcpListenerSocket::TcpListenerSocket(const SocketAddress& pLocalAddress):
 	// Initialize the socket.
 	mSocket = CreateTcpSocket();
 
-	if (mSocket != INVALID_SOCKET)
+	if (mSocket != INVALID_SOCKET && pIsServer)
 	{
 		// Init socket address and bind it to the socket.
 		if (::bind(mSocket, (const sockaddr*)&mLocalAddress.GetAddr(), sizeof(mLocalAddress.GetAddr())) == 0)
@@ -645,7 +645,7 @@ LOG_CLASS_DEFINE(NETWORK, TcpSocket);
 TcpMuxSocket::TcpMuxSocket(const str& pName, const SocketAddress& pLocalAddress, bool pIsServer,
 	unsigned pMaxPendingConnectionCount, unsigned pMaxConnectionCount):
 	MuxIo(pMaxPendingConnectionCount, pMaxConnectionCount),
-	TcpListenerSocket(pLocalAddress),
+	TcpListenerSocket(pLocalAddress, pIsServer),
 	mAcceptThread(pName+_T("TcpMuxAccept ")+pLocalAddress.GetAsString()),
 	mSelectThread(pName+_T("TcpMuxSelect ")+pLocalAddress.GetAsString()),
 	mConnectIdTimeout(DEFAULT_CONNECT_ID_TIMEOUT),
@@ -799,7 +799,7 @@ void TcpMuxSocket::CloseSocket(TcpVSocket* pSocket, bool pForceDelete)
 	}
 }
 
-TcpVSocket* TcpMuxSocket::PopReceiverSocket(bool)
+TcpVSocket* TcpMuxSocket::PopReceiverSocket()
 {
 	TcpVSocket* lSocket = (TcpVSocket*)PopReceiver();
 	if (lSocket)
@@ -1163,13 +1163,13 @@ LOG_CLASS_DEFINE(NETWORK, TcpVSocket);
 
 
 
-UdpSocket::UdpSocket(const SocketAddress& pLocalAddress) :
+UdpSocket::UdpSocket(const SocketAddress& pLocalAddress, bool pIsServer):
 	mLocalAddress(pLocalAddress)
 {
 	// Initialize UDP socket.
 	mSocket = CreateUdpSocket();
 
-	if (mSocket != INVALID_SOCKET)
+	if (mSocket != INVALID_SOCKET && pIsServer)
 	{
 		if (::bind(mSocket, (const sockaddr*)&mLocalAddress.GetAddr(), sizeof(mLocalAddress.GetAddr())) != 0)
 		{
@@ -1246,11 +1246,11 @@ LOG_CLASS_DEFINE(NETWORK, UdpSocket);
 
 
 
-UdpMuxSocket::UdpMuxSocket(const str& pName, const SocketAddress& pLocalAddress, bool,
+UdpMuxSocket::UdpMuxSocket(const str& pName, const SocketAddress& pLocalAddress, bool pIsServer,
 	unsigned pMaxPendingConnectionCount, unsigned pMaxConnectionCount):
 	MuxIo(pMaxPendingConnectionCount, pMaxConnectionCount),
 	Thread(pName+_T("UdpMuxRecv ")+pLocalAddress.GetAsString()),
-	UdpSocket(pLocalAddress)
+	UdpSocket(pLocalAddress, pIsServer)
 {
 	log_atrace("UdpMuxSocket()");
 
@@ -1397,7 +1397,7 @@ unsigned UdpMuxSocket::GetConnectionCount() const
 	return (mSocketTable.GetCount());
 }
 
-UdpVSocket* UdpMuxSocket::PopReceiverSocket(bool)
+UdpVSocket* UdpMuxSocket::PopReceiverSocket()
 {
 	UdpVSocket* lSocket = (UdpVSocket*)PopReceiver();
 	return (lSocket);
@@ -1549,6 +1549,11 @@ void UdpVSocket::Init(UdpMuxSocket& pSocket, const SocketAddress& pTargetAddress
 	mMuxIo = &pSocket;
 	mTargetAddress = pTargetAddress;
 	SetConnectionId(pConnectionId);
+}
+
+int UdpVSocket::Receive(bool, void* pData, int pLength)
+{
+	return Receive(pData, pLength);
 }
 
 int UdpVSocket::Receive(void* pData, int pLength)
@@ -1904,7 +1909,7 @@ DualSocket* DualMuxSocket::PopReceiverSocket(bool pSafe)
 
 	if (pSafe)
 	{
-		TcpVSocket* lTcpSocket = mTcpMuxSocket->PopReceiverSocket(pSafe);
+		TcpVSocket* lTcpSocket = mTcpMuxSocket->PopReceiverSocket();
 		if (lTcpSocket)
 		{
 			lSocket = HashUtil::FindMapObject(mTcpSocketMap, lTcpSocket);
@@ -1912,7 +1917,7 @@ DualSocket* DualMuxSocket::PopReceiverSocket(bool pSafe)
 	}
 	else
 	{
-		UdpVSocket* lUdpSocket = mUdpMuxSocket->PopReceiverSocket(pSafe);
+		UdpVSocket* lUdpSocket = mUdpMuxSocket->PopReceiverSocket();
 		if (lUdpSocket)
 		{
 			lSocket = HashUtil::FindMapObject(mUdpSocketMap, lUdpSocket);

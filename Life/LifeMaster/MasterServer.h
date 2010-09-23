@@ -21,8 +21,8 @@
 
 namespace Lepra
 {
-class TcpSocket;
-class TcpListenerSocket;
+class SocketAddress;
+class UdpSocket;
 }
 
 
@@ -41,18 +41,11 @@ public:
 
 private:
 	void OnQuitRequest(int pLevel);
-	void CommandEntry();
-	bool HandleCommandLine(TcpSocket* pSocket, const str& pCommandLine);
-	bool RegisterGameServer(bool pActivate, TcpSocket* pSocket, const str& pName, int pPort, int pPlayerCount, const str& pId);
-	bool SendServerList(TcpSocket* pSocket);
-	static bool Send(TcpSocket* pSocket, const str& pData);
-
-	struct CmdHandlerThread: public MemberThread<MasterServer>
-	{
-		typedef MemberThread<MasterServer> Parent;
-		TcpSocket* mSocket;
-		CmdHandlerThread(TcpSocket* pSocket);
-	};
+	void HandleReceive(const SocketAddress& pRemoteAddress, const uint8* pCommand, unsigned pCommandLength);
+	bool HandleCommandLine(const SocketAddress& pRemoteAddress, const str& pCommandLine);
+	bool RegisterGameServer(bool pActivate, const SocketAddress& pRemoteAddress, const str& pName, int pPort, int pPlayerCount, const str& pId);
+	bool SendServerList(const SocketAddress& pRemoteAddress);
+	bool Send(const SocketAddress& pRemoteAddress, const str& pData);
 
 	struct GameServerInfo
 	{
@@ -67,7 +60,7 @@ private:
 
 	typedef std::hash_map<str, GameServerInfo> GameServerTable;
 
-	TcpListenerSocket* mSocket;
+	UdpSocket* mSocket;
 	Lock mLock;
 	GameServerTable mGameServerTable;
 

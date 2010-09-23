@@ -43,8 +43,8 @@ ClientLoginView::ClientLoginView(ClientLoginObserver* pLoginObserver, const str&
 
 	AddLabel(_T("Server"), WHITE);
 
-	str lServerName = _T(":16650");
-	CURE_RTVAR_TRYGET(lServerName, =, mLoginObserver->GetVariableScope(), RTVAR_NETWORK_SERVERADDRESS, lServerName);
+	str lServerName;
+	CURE_RTVAR_GET(lServerName, =, mLoginObserver->GetVariableScope(), RTVAR_NETWORK_SERVERADDRESS, _T("localhost:16650"));
 	if (strutil::StartsWith(lServerName, _T("0.0.0.0")))
 	{
 		lServerName = lServerName.substr(7);

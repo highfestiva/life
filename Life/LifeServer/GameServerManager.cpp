@@ -118,7 +118,7 @@ bool GameServerManager::Initialize(MasterServerConnection* pMasterConnection)
 	}
 
 	str lAcceptAddress;
-	CURE_RTVAR_GET(lAcceptAddress, =, GetVariableScope(), RTVAR_NETWORK_SERVERADDRESS, _T("0.0.0.0:16650"));
+	CURE_RTVAR_GET(lAcceptAddress, =, GetVariableScope(), RTVAR_NETWORK_SERVERADDRESS, _T("localhost:16650"));
 	if (lOk)
 	{
 		SocketAddress lAddress;
@@ -1073,6 +1073,13 @@ Cure::NetworkServer* GameServerManager::GetNetworkServer() const
 
 void GameServerManager::UploadServerInfo()
 {
+	bool lIsOpenServer;
+	CURE_RTVAR_GET(lIsOpenServer, =, GetVariableScope(), RTVAR_NETWORK_ENABLEOPENSERVER, false);
+	if (!lIsOpenServer)
+	{
+		return;
+	}
+
 	strutil::strvec lAddressParts = strutil::Split(GetNetworkServer()->GetLocalAddress(), _T(":"), 1);
 	if (lAddressParts.size() == 2)
 	{
@@ -1083,6 +1090,7 @@ void GameServerManager::UploadServerInfo()
 		const str lId = strutil::ReplaceAll(strutil::Encode(SystemManager::GetSystemPseudoId()), _T("\""), _T("''\\''"));
 		const str lLocalServerInfo = _T("--name \"")+lServerName + _T("\" --player-count ")+lPlayerCount
 			+ _T(" --port ")+lPort + _T(" --id \"")+lId+_T("\"");
+		// TODO: something like mMasterConnection->SendLocalInfo(GetNetworkServer()->GetSocket(), lLocalServerInfo);
 		mMasterConnection->SendLocalInfo(lLocalServerInfo);
 	}
 }

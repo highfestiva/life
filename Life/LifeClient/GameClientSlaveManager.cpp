@@ -96,13 +96,24 @@ GameClientSlaveManager::~GameClientSlaveManager()
 void GameClientSlaveManager::LoadSettings()
 {
 	GetConsoleManager()->ExecuteCommand(_T("execute-file -i ")+GetApplicationCommandFilename());
-	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_DEBUG_ENABLE, false);
+	// Always default these settings, to avoid that the user can't get rid of undesired behavior.
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_DEBUG_ENABLE, false);
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_GAME_TIMEOFDAYFACTOR, 1.0);
+	bool lIsOpenServer;
+	CURE_RTVAR_GET(lIsOpenServer, =, GetVariableScope(), RTVAR_NETWORK_ENABLEOPENSERVER, false);
+	if (lIsOpenServer)
+	{
+		CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("0.0.0.0:16650"));
+	}
+	else
+	{
+		CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("localhost:16650"));
+	}
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_PHYSICS_FPS, PHYSICS_FPS);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_CAMHEIGHT, 10.0);
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_CAMROTATE, 0.0);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_PHYSICS_FPS, PHYSICS_FPS);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
 	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_STEERING_PLAYBACKMODE, PLAYBACK_NONE);
 }
 
@@ -654,8 +665,8 @@ void GameClientSlaveManager::CreateLoginView()
 		// If first attempt (i.e. no connection problems) just skip interactivity.
 		if (mDisconnectReason.empty())
 		{
-			str lServerName = _T(":16650");
-			CURE_RTVAR_TRYGET(lServerName, =, Cure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, lServerName);
+			str lServerName;
+			CURE_RTVAR_TRYGET(lServerName, =, Cure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("localhost:16650"));
 			if (strutil::StartsWith(lServerName, _T("0.0.0.0")))
 			{
 				lServerName = lServerName.substr(7);

@@ -58,9 +58,12 @@ ClientApplication::ClientApplication(const strutil::strvec& pArgumentList):
 	UiTbc::Init();
 	UiCure::Init();
 
+	// This sets the default settings for client-specific rtvars. Note that these should not be removed,
+	// since that causes the client to start without defaults.
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_GAME_ISCHILD, true);
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_GAME_ENABLESTARTLOGO, true);
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_GAME_TIMEOFDAYFACTOR, 1.0);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_NETWORK_ENABLEOPENSERVER, false);
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_CAMHEIGHT, 10.0);
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_CAMROTATE, 0.0);

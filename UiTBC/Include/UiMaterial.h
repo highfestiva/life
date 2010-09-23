@@ -132,13 +132,10 @@ public:
 
 	virtual void SetBasicMaterial(const TBC::GeometryBase::BasicMaterialSettings& pMaterial) = 0;
 
-	bool IsEmpty() { return mGeometryGroupList.empty(); }
-
 	virtual void PreRender();
 	virtual void PostRender();
 
 	virtual void RenderAllGeometry(unsigned int pCurrentFrame);
-	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame);
 	virtual void RenderAllBlendedGeometry(unsigned pCurrentFrame);
 	virtual void RenderGeometry(TBC::GeometryBase* pGeometry) = 0;
 	virtual void RenderBaseGeometry(TBC::GeometryBase* pGeometry) = 0;
@@ -146,20 +143,19 @@ public:
 	TBC::GeometryBase* GetFirstGeometry();
 	TBC::GeometryBase* GetNextGeometry();
 
-	TBC::GeometryBase* GetFirstVisibleGeometry();
-	TBC::GeometryBase* GetNextVisibleGeometry();
-
 protected:
 	typedef std::list<TBC::GeometryBase*> GeometryList;
 	typedef std::list<GeometryGroup*> GeometryGroupList;
 
+	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
+
 	Renderer::TextureID GetGroupTextureID(TBC::GeometryBase* pGeometry);
-	GeometryGroupList* GetGeometryGroupList();
 
 	static TBC::GeometryBase::BasicMaterialSettings mCurrentMaterial;
 
-private:
 	GeometryGroupList mGeometryGroupList;
+
+private:
 	Renderer* mRenderer;
 	DepthSortHint mSortHint;
 

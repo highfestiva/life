@@ -853,9 +853,9 @@ void GameClientMasterTicker::SlideSlaveLayout()
 		{
 			lPartRenderArea.mLeft = 0;
 		}
-		else if (lRenderAreas[x][0] > 0.3f)	// Do we want a border to the left?
+		else	// Do we want a border to the left?
 		{
-			lPartRenderArea.mLeft += 1;
+			lPartRenderArea.mLeft += (int)(lRenderAreas[x][0] * 4);
 		}
 		if (lPartRenderArea.GetWidth() >= lRenderArea.GetWidth()-REQUIRED_PIXELS)		// Hatch onto edge?
 		{
@@ -865,9 +865,9 @@ void GameClientMasterTicker::SlideSlaveLayout()
 		{
 			lPartRenderArea.mTop = 0;
 		}
-		else if (lRenderAreas[x][1] > 0.3f)	// Do we want a border to the right?
+		else	// Do we want a border to the right?
 		{
-			lPartRenderArea.mTop += 1;
+			lPartRenderArea.mTop += (int)(lRenderAreas[x][1] * 4);
 		}
 		if (lPartRenderArea.GetHeight() >= lRenderArea.GetHeight()-REQUIRED_PIXELS)	// Hatch onto edge?
 		{
