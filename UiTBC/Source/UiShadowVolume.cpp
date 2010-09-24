@@ -83,27 +83,27 @@ void ShadowVolume::SetParentGeometry(TBC::GeometryBase* pParentGeometry)
 	mTriangleCount = 0;
 }
 
-unsigned int ShadowVolume::GetMaxVertexCount() const
+unsigned ShadowVolume::GetMaxVertexCount() const
 {
 	return mParentGeometry->GetMaxVertexCount() * 2;
 }
 
-unsigned int ShadowVolume::GetMaxIndexCount() const
+unsigned ShadowVolume::GetMaxIndexCount() const
 {
 	return mMaxTriangleCount * 3;
 }
 
-unsigned int ShadowVolume::GetVertexCount() const
+unsigned ShadowVolume::GetVertexCount() const
 {
 	return mVertexCount;
 }
 
-unsigned int ShadowVolume::GetIndexCount() const
+unsigned ShadowVolume::GetIndexCount() const
 {
 	return mTriangleCount * 3;
 }
 
-unsigned int ShadowVolume::GetUVSetCount() const
+unsigned ShadowVolume::GetUVSetCount() const
 {
 	return 0;
 }
@@ -182,20 +182,17 @@ void ShadowVolume::InitVertices()
 
 	if (mParentGeometry->GetVertexCount() > mParentVertexCount)
 	{
-		if (mVertexData != 0)
-			delete[] mVertexData;
-
 		mParentVertexCount  = mParentGeometry->GetVertexCount();
 		mVertexCount  = mParentVertexCount * 2;
+		delete[] mVertexData;
 		mVertexData = new float[mVertexCount * 3];
-
 		lInitVertices = true;
 	}
 
 	if (lInitVertices == true)
 	{
 		// Copy vertex data from parent, twice.
-		float* lParentVertexData = mParentGeometry->GetVertexData();
+		const float* lParentVertexData = mParentGeometry->GetVertexData();
 		::memcpy(mVertexData, lParentVertexData, mParentVertexCount * 3 * sizeof(float));
 		::memcpy(&mVertexData[mParentVertexCount * 3], lParentVertexData, mParentVertexCount * 3 * sizeof(float));
 	}
@@ -203,7 +200,7 @@ void ShadowVolume::InitVertices()
 
 void ShadowVolume::InitTO()
 {
-	unsigned int lNumMaxTriangles = mParentGeometry->GetMaxTriangleCount() * 2 + mParentGeometry->GetEdgeCount() * 2;
+	unsigned lNumMaxTriangles = mParentGeometry->GetMaxTriangleCount() * 2 + mParentGeometry->GetEdgeCount() * 2;
 
 	if (lNumMaxTriangles > mMaxTriangleCount)
 	{
@@ -275,7 +272,7 @@ void ShadowVolume::InitTO()
 	} \
 }
 
-void ShadowVolume::UpdateShadowVolume(const Vector3DF& pLightPos, float pShadowRange, bool pDirectional)
+void ShadowVolume::UpdateShadowVolume(const Vector3DF& pLightPos, float pShadowRange, const bool pDirectional)
 {
 	SetTransformation(mParentGeometry->GetTransformation());
 
@@ -305,12 +302,12 @@ void ShadowVolume::UpdateShadowVolume(const Vector3DF& pLightPos, float pShadowR
 	//
 
 	mParentGeometry->GenerateSurfaceNormalData();
-	float* lSurfaceNormalData = mParentGeometry->GetSurfaceNormalData();
-	float* lVertexData = mParentGeometry->GetVertexData();
+	const float* lSurfaceNormalData = mParentGeometry->GetSurfaceNormalData();
+	const float* lVertexData = mParentGeometry->GetVertexData();
 
-	unsigned int i;
-	unsigned int lTriangleCount = mParentGeometry->GetTriangleCount();
-	if (pDirectional == true)
+	unsigned i;
+	const unsigned lTriangleCount = mParentGeometry->GetTriangleCount();
+	if (pDirectional)
 	{
 		// Calculate triangle orientations relative to light source.
 		for (i = 0; i < lTriangleCount; i++)
@@ -318,7 +315,7 @@ void ShadowVolume::UpdateShadowVolume(const Vector3DF& pLightPos, float pShadowR
 			uint32 lVertexIndex[3];
 			mParentGeometry->GetTriangleIndices(i, lVertexIndex);
 			
-			unsigned int lTriIndex = i * 3;
+			const unsigned lTriIndex = i * 3;
 			Vector3DF lSurfaceNormal(lSurfaceNormalData[lTriIndex + 0],
 							 lSurfaceNormalData[lTriIndex + 1],
 							 lSurfaceNormalData[lTriIndex + 2]);
@@ -346,8 +343,8 @@ void ShadowVolume::UpdateShadowVolume(const Vector3DF& pLightPos, float pShadowR
 		for (i = 0; i < mParentVertexCount; i++)
 		{
 			// Read original vertex.
-			int lIndex0 = i * 3;
-			int lIndex1 = (i + mParentVertexCount) * 3;
+			const int lIndex0 = i * 3;
+			const int lIndex1 = (i + mParentVertexCount) * 3;
 
 			mVertexData[lIndex1 + 0] = mVertexData[lIndex0 + 0] + (float)lLightPos.x;
 			mVertexData[lIndex1 + 1] = mVertexData[lIndex0 + 1] + (float)lLightPos.y;
@@ -376,13 +373,13 @@ void ShadowVolume::UpdateShadowVolume(const Vector3DF& pLightPos, float pShadowR
 				mTriangleOrientation[i].mV2 = lVertexIndex[2];
 			}
 			
-			unsigned int lTriIndex = i * 3;
+			const unsigned lTriIndex = i * 3;
 			Vector3DF lSurfaceNormal(lSurfaceNormalData[lTriIndex + 0],
 							 lSurfaceNormalData[lTriIndex + 1],
 							 lSurfaceNormalData[lTriIndex + 2]);
 
 			// Get the vector between one corner of the triangle and the light source.
-			unsigned int lIndex = mTriangleOrientation[i].mV0 * 3;
+			const unsigned lIndex = mTriangleOrientation[i].mV0 * 3;
 			Vector3DF lVector(lVertexData[lIndex + 0] - lLightPos.x,
 						  lVertexData[lIndex + 1] - lLightPos.y,
 						  lVertexData[lIndex + 2] - lLightPos.z);
@@ -401,12 +398,12 @@ void ShadowVolume::UpdateShadowVolume(const Vector3DF& pLightPos, float pShadowR
 			}
 		}
 
-		float lShadowRangeSquared = pShadowRange * pShadowRange;
+		const float lShadowRangeSquared = pShadowRange * pShadowRange;
 		// Move vertex twins away from lightsource.
 		for (i = 0; i < mParentVertexCount; i++)
 		{
 			// Read original vertex.
-			int lIndex0 = i * 3;
+			const int lIndex0 = i * 3;
 			Vector3DF lVector(mVertexData[lIndex0 + 0] - lLightPos.x,
 						  mVertexData[lIndex0 + 1] - lLightPos.y,
 						  mVertexData[lIndex0 + 2] - lLightPos.z);
@@ -416,7 +413,7 @@ void ShadowVolume::UpdateShadowVolume(const Vector3DF& pLightPos, float pShadowR
 			{
 				lVector.Normalize(pShadowRange);
 
-				int lIndex1 = (i + mParentVertexCount) * 3;
+				const int lIndex1 = (i + mParentVertexCount) * 3;
 				mVertexData[lIndex1 + 0] = (float)(lLightPos.x + lVector.x);
 				mVertexData[lIndex1 + 1] = (float)(lLightPos.y + lVector.y);
 				mVertexData[lIndex1 + 2] = (float)(lLightPos.z + lVector.z);
@@ -434,11 +431,11 @@ void ShadowVolume::UpdateShadowVolume(const Vector3DF& pLightPos, float pShadowR
 		mParentGeometry->GenerateEdgeData();
 	}
 
-	TBC::GeometryBase::Edge* lEdges = mParentGeometry->GetEdgeData();
+	const TBC::GeometryBase::Edge* lEdges = mParentGeometry->GetEdgeData();
 
-	for (i = 0; i < mParentGeometry->GetEdgeCount(); i++)
+	for (i = 0; i < mParentGeometry->GetEdgeCount(); ++i)
 	{
-		Edge& lEdge = lEdges[i];
+		const Edge& lEdge = lEdges[i];
 
 		//assert(lEdge.mTriangleCount == 1 || lEdge.mTriangleCount == 2);
 		//assert(lEdge.mVertex[0] != lEdge.mVertex[1]);
@@ -446,8 +443,8 @@ void ShadowVolume::UpdateShadowVolume(const Vector3DF& pLightPos, float pShadowR
 
 		// Set this to true if we have a silhouette edge.
 		bool lExtrudeEdge = false;
-		TriangleOrientation* lFT = 0;
-		unsigned int lIndex = 0;
+		const TriangleOrientation* lFT = 0;
+		unsigned lIndex = 0;
 
 		if (lEdge.mTriangleCount == 2)
 		{

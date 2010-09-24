@@ -30,17 +30,16 @@ OpenGLMaterial::~OpenGLMaterial()
 
 Material::RemoveStatus OpenGLMaterial::RemoveGeometry(TBC::GeometryBase* pGeometry)
 {
-	Material::RemoveStatus lStatus = Material::RemoveGeometry(pGeometry);
+	Material::RemoveStatus lStatus = Parent::RemoveGeometry(pGeometry);
 	if (lStatus == Material::NOT_REMOVED && mFallBackMaterial)
 	{
 		lStatus = mFallBackMaterial->RemoveGeometry(pGeometry);
-
 		if (lStatus == Material::REMOVED)
 		{
 			lStatus = Material::REMOVED_FROM_FALLBACK;
 		}
 	}
-	return (lStatus);
+	return lStatus;
 }
 
 GLenum OpenGLMaterial::GetGLElementType(TBC::GeometryBase* pGeometry)
@@ -1131,7 +1130,7 @@ OpenGLMatPXS::OpenGLMatPXS(const char* pVP, const char* pFP[NUM_FP]):
 		smFPLUTInitialized = true;
 	}
 
-	if (UiLepra::OpenGLExtensions::IsShaderAsmProgramsSupported() == true)
+	if (UiLepra::OpenGLExtensions::IsShaderAsmProgramsSupported())
 	{
 		int i;
 
@@ -1475,8 +1474,7 @@ void OpenGLMatPXS::SetAmbientLight(OpenGLRenderer* pRenderer, TBC::GeometryBase*
 // OpenGLMatSingleColorSolidPXS
 //
 
-OpenGLMatSingleColorSolidPXS::OpenGLMatSingleColorSolidPXS(OpenGLRenderer* pRenderer,
-	Material* pFallBackMaterial):
+OpenGLMatSingleColorSolidPXS::OpenGLMatSingleColorSolidPXS(OpenGLRenderer* pRenderer, Material* pFallBackMaterial):
 	OpenGLMatSingleColorSolid(pRenderer, pFallBackMaterial),
 	OpenGLMatPXS(smVP, smFP)
 {
@@ -1493,7 +1491,7 @@ OpenGLMatSingleColorSolidPXS::~OpenGLMatSingleColorSolidPXS()
 
 void OpenGLMatSingleColorSolidPXS::DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList)
 {
-	if (!UiLepra::OpenGLExtensions::IsShaderAsmProgramsSupported())
+	if (!GetRenderer()->IsPixelShadersEnabled() || !UiLepra::OpenGLExtensions::IsShaderAsmProgramsSupported())
 	{
 		Parent::DoRenderAllGeometry(pCurrentFrame, pGeometryGroupList);
 		return;
@@ -1506,7 +1504,7 @@ void OpenGLMatSingleColorSolidPXS::DoRenderAllGeometry(unsigned pCurrentFrame, c
 
 void OpenGLMatSingleColorSolidPXS::RenderGeometry(TBC::GeometryBase* pGeometry)
 {
-	if (!UiLepra::OpenGLExtensions::IsShaderAsmProgramsSupported())
+	if (!GetRenderer()->IsPixelShadersEnabled() || !UiLepra::OpenGLExtensions::IsShaderAsmProgramsSupported())
 	{
 		Parent::RenderGeometry(pGeometry);
 		return;
@@ -1567,7 +1565,7 @@ OpenGLMatSingleTextureSolidPXS::OpenGLMatSingleTextureSolidPXS(OpenGLRenderer* p
 
 OpenGLMatSingleTextureSolidPXS::~OpenGLMatSingleTextureSolidPXS()
 {
-	if (UiLepra::OpenGLExtensions::IsShaderAsmProgramsSupported() == true)
+	if (UiLepra::OpenGLExtensions::IsShaderAsmProgramsSupported())
 	{
 		UiLepra::OpenGLExtensions::glDeleteProgramsARB(1, (const GLuint*)&mVPID);
 		UiLepra::OpenGLExtensions::glDeleteProgramsARB(NUM_FP, (const GLuint*)mFPID);
@@ -1657,7 +1655,7 @@ OpenGLMatTextureAndLightmapPXS::OpenGLMatTextureAndLightmapPXS(OpenGLRenderer* p
 
 OpenGLMatTextureAndLightmapPXS::~OpenGLMatTextureAndLightmapPXS()
 {
-	if (UiLepra::OpenGLExtensions::IsShaderAsmProgramsSupported() == true)
+	if (UiLepra::OpenGLExtensions::IsShaderAsmProgramsSupported())
 	{
 		UiLepra::OpenGLExtensions::glDeleteProgramsARB(1, (const GLuint*)&mVPID);
 		UiLepra::OpenGLExtensions::glDeleteProgramsARB(NUM_FP, (const GLuint*)mFPID);
@@ -1792,7 +1790,7 @@ OpenGLMatTextureSBMapPXS::OpenGLMatTextureSBMapPXS(OpenGLRenderer* pRenderer,
 
 OpenGLMatTextureSBMapPXS::~OpenGLMatTextureSBMapPXS()
 {
-	if (UiLepra::OpenGLExtensions::IsShaderAsmProgramsSupported() == true)
+	if (UiLepra::OpenGLExtensions::IsShaderAsmProgramsSupported())
 	{
 		UiLepra::OpenGLExtensions::glDeleteProgramsARB(1, (const GLuint*)&mVPID);
 		UiLepra::OpenGLExtensions::glDeleteProgramsARB(NUM_FP, (const GLuint*)mFPID);

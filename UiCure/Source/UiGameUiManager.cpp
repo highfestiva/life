@@ -503,19 +503,29 @@ void GameUiManager::UpdateSettings()
 	mRenderer->SetMipMappingEnabled(lEnableMipMapping);
 	mRenderer->SetViewFrustum((float)lFOV, (float)lClipNear, (float)lClipFar);
 
-	bool lUseShadows = false;
+	UiTbc::Renderer::Shadows lShadowMode = UiTbc::Renderer::NO_SHADOWS;
 	UiTbc::Renderer::ShadowHint lShadowType = UiTbc::Renderer::SH_VOLUMES_ONLY;
+	bool lForceShadowsOnAll = false;
+	if (strutil::StartsWith(lShadowsString, _T("Force")))
+	{
+		lShadowsString = lShadowsString.substr(5);
+		lForceShadowsOnAll = true;
+	}
 	if (lShadowsString == _T("VolumesOnly"))
 	{
-		lUseShadows = true;
+		lShadowMode = UiTbc::Renderer::CAST_SHADOWS;
 		lShadowType = UiTbc::Renderer::SH_VOLUMES_ONLY;
 	}
 	else if (lShadowsString == _T("VolumesAndMaps"))
 	{
-		lUseShadows = true;
+		lShadowMode = UiTbc::Renderer::CAST_SHADOWS;
 		lShadowType = UiTbc::Renderer::SH_VOLUMES_AND_MAPS;
 	}
-	mRenderer->SetShadowsEnabled(lUseShadows, lShadowType);
+	if (lForceShadowsOnAll)
+	{
+		lShadowMode = UiTbc::Renderer::FORCE_CAST_SHADOWS;
+	}
+	mRenderer->SetShadowMode(lShadowMode, lShadowType);
 
 	// ----------------------------------------
 	// 2D rendering settings.

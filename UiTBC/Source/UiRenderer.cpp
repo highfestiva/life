@@ -25,6 +25,7 @@ Renderer::Renderer(Canvas* pScreen) :
 	mFar(10000.0f),
 	mIsOutlineRenderEnabled(false),
 	mIsWireframeEnabled(false),
+	mIsPixelShadersEnabled(true),
 	mViewport(0, 0, pScreen->GetWidth(), pScreen->GetHeight()),
 	mGeometryIDManager(1, 1000000, INVALID_GEOMETRY),
 	mTextureIDManager(1, 1000000, INVALID_TEXTURE),
@@ -42,8 +43,8 @@ Renderer::Renderer(Canvas* pScreen) :
 	mBilinearEnabled(false),
 	mTrilinearEnabled(false),
 	mCompressedTexturesEnabled(false),
-	mShadowsEnabled(false),
 	mLightsEnabled(false),
+	mShadowMode(NO_SHADOWS),
 	mShadowHint(Renderer::SH_VOLUMES_ONLY),
 	mShadowUpdateFrameDelay(0),
 	mClippingRect(0, 0, pScreen->GetWidth(), pScreen->GetHeight())
@@ -122,6 +123,16 @@ void Renderer::EnableWireframe(bool pEnable)
 bool Renderer::IsWireframeEnabled() const
 {
 	return (mIsWireframeEnabled);
+}
+
+void Renderer::EnablePixelShaders(bool pEnable)
+{
+	mIsPixelShadersEnabled = pEnable;
+}
+
+bool Renderer::IsPixelShadersEnabled() const
+{
+	return (mIsPixelShadersEnabled);
 }
 
 void Renderer::SetViewport(const PixelRect& pViewport)
@@ -259,15 +270,15 @@ bool Renderer::GetCompressedTexturesEnabled()
 	return mCompressedTexturesEnabled;
 }
 
-void Renderer::SetShadowsEnabled(bool pEnabled, ShadowHint pHint)
+void Renderer::SetShadowMode(Shadows pShadowMode, ShadowHint pHint)
 {
-	mShadowsEnabled = pEnabled;
+	mShadowMode = pShadowMode;
 	mShadowHint = pHint;
 }
 
-bool Renderer::GetShadowsEnabled()
+Renderer::Shadows Renderer::GetShadowMode()
 {
-	return mShadowsEnabled;
+	return 	mShadowMode;
 }
 
 void Renderer::SetShadowUpdateFrameDelay(unsigned pFrameDelay)
@@ -1006,17 +1017,10 @@ void Renderer::RemoveGeometry(GeometryID pGeometryID)
 		GeometryData* lGeometryData = *lGeomIter;
 		lGeometryData->mGeometry->RemoveListener(this);
 
-		int i;
-		for (i = 0; i < MAX_SHADOW_VOLUMES; i++)
-		{
-			if (lGeometryData->mShadowVolume[i] != 0)
-			{
-				RemoveShadowVolume(lGeometryData->mShadowVolume[i]);
-			}
-		}
+		RemoveShadowVolumes(lGeometryData);
 
 		// Remove the geometry from all spot lights, in case it's added there.
-		for (i = 0; i < mLightCount; i++)
+		for (int i = 0; i < mLightCount; i++)
 		{
 			LightData& lLight = mLightData[mLightIndex[i]];
 			if (lLight.mType == Renderer::LIGHT_SPOT)
@@ -1079,6 +1083,17 @@ Renderer::MaterialType Renderer::GetMaterialType(GeometryID pGeometryID)
 	return (lMaterial);
 }
 
+void Renderer::SetShadows(GeometryID pGeometryID, Renderer::Shadows pShadowMode)
+{
+	GeometryTable::Iterator x = mGeometryTable.Find(pGeometryID);
+	assert(x != mGeometryTable.End());
+	if (x != mGeometryTable.End())
+	{
+		GeometryData* lGeometryData = *x;
+		lGeometryData->mShadow = pShadowMode;
+	}
+}
+
 Renderer::Shadows Renderer::GetShadows(GeometryID pGeometryID)
 {
 	assert(pGeometryID != INVALID_GEOMETRY);
@@ -1112,8 +1127,17 @@ void Renderer::UpdateShadowMaps()
 void Renderer::UpdateShadowMaps(TBC::GeometryBase* pGeometry)
 {
 	GeometryData* lGeometry = (GeometryData*)pGeometry->GetRendererData();
-	if (!mShadowsEnabled || lGeometry->mShadow != CAST_SHADOWS)
+#define MATH_SQUARE(x) (x)*(x)
+	const bool lDenyShadows = (lGeometry->mShadow == FORCE_NO_SHADOWS || mShadowMode <= NO_SHADOWS || mLightCount == 0 ||
+		pGeometry->GetTransformation().GetPosition().GetDistanceSquared(mCameraTransformation.GetPosition()) >= MATH_SQUARE(mLightData[0].mShadowRange * 4));
+	const bool lForceShadows = (mShadowMode == FORCE_CAST_SHADOWS);
+	const bool lEscapeShadows = (lGeometry->mShadow == NO_SHADOWS);
+	if (lDenyShadows || (!lForceShadows && lEscapeShadows))
 	{
+		if (lGeometry->mShadowVolume[0])
+		{
+			RemoveShadowVolumes(lGeometry);
+		}
 		return;
 	}
 
@@ -1571,6 +1595,17 @@ void Renderer::ReleaseShadowMaps()
 		if (mLightData[lIndex].mType == Renderer::LIGHT_SPOT)
 		{
 			mLightData[lIndex].mShadowMapID = ReleaseShadowMap(mLightData[lIndex].mShadowMapID);
+		}
+	}
+}
+
+void Renderer::RemoveShadowVolumes(GeometryData* pOwnerGeometry)
+{
+	for (int i = 0; i < MAX_SHADOW_VOLUMES; ++i)
+	{
+		if (pOwnerGeometry->mShadowVolume[i] != 0)
+		{
+			RemoveShadowVolume(pOwnerGeometry->mShadowVolume[i]);
 		}
 	}
 }

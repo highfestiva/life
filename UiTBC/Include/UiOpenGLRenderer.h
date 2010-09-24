@@ -85,7 +85,7 @@ public:
 	void SetClippingRect(const PixelRect& pRect);
 	void ResetClippingRect();
 
-	void SetShadowsEnabled(bool pEnabled, ShadowHint pHint);
+	void SetShadowMode(Shadows pShadowMode, ShadowHint pHint);
 	void SetDepthWriteEnabled(bool pEnabled);
 	void SetDepthTestEnabled(bool pEnabled);
 

@@ -29,6 +29,7 @@ CppContextObject::CppContextObject(Cure::ResourceManager* pResourceManager, cons
 	mUiManager(pUiManager),
 	mUiClassResource(0),
 	mEnableUi(true),
+	mAllowRootShadow(true),
 	mMeshLoadCount(0),
 	mTextureLoadCount(0),
 	mMeshSlideMode(MESH_SLIDE_STOP)
@@ -63,6 +64,11 @@ CppContextObject::~CppContextObject()
 void CppContextObject::EnableUi(bool pEnable)
 {
 	mEnableUi = pEnable;
+}
+
+void CppContextObject::DisableRootShadow()
+{
+	mAllowRootShadow = false;
 }
 
 
@@ -407,6 +413,10 @@ void CppContextObject::DispatchOnLoadMesh(UserGeometryReferenceResource* pMeshRe
 			}
 		}
 		assert((int)lMeshIndex >= 0);
+		if (lMeshIndex == 0 && !mAllowRootShadow)
+		{
+			mUiManager->GetRenderer()->SetShadows(pMeshResource->GetData(), UiTbc::Renderer::FORCE_NO_SHADOWS);
+		}
 		const UiTbc::ChunkyClass::Material& lLoadedMaterial =
 			((UiTbc::ChunkyClass*)mUiClassResource->GetRamData())->GetMaterial(lMeshIndex);
 		TBC::GeometryBase::BasicMaterialSettings lMaterial(lLoadedMaterial.mAmbient,
@@ -501,8 +511,6 @@ void CppContextObject::TryAddTexture()
 					lMaterialType = UiTbc::Renderer::MAT_SINGLE_COLOR_BLENDED;
 				}
 				mUiManager->GetRenderer()->ChangeMaterial(lMesh->GetData(), lMaterialType);
-				//UiTbc::Renderer::Shadows lShadows = UiTbc::Renderer::CAST_SHADOWS;
-				//lMesh->SetShadows(lShadows);
 			}
 		}
 	}

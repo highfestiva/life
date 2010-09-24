@@ -122,7 +122,7 @@ void OpenGLRenderer::Clear(unsigned pClearFlags)
 		mGLClearMask |= GL_ACCUM_BUFFER_BIT;
 	}
 
-	if (GetShadowsEnabled() == true)
+	if (GetShadowMode() != UiTbc::Renderer::NO_SHADOWS)
 	{
 		// Always clear the stencil buffer if shadows are activated.
 		mGLClearMask |= GL_STENCIL_BUFFER_BIT;
@@ -177,16 +177,9 @@ void OpenGLRenderer::ResetClippingRect()
 	OGL_ASSERT();
 }
 
-void OpenGLRenderer::SetShadowsEnabled(bool pEnabled, ShadowHint pHint)
+void OpenGLRenderer::SetShadowMode(Shadows pShadowMode, ShadowHint pHint)
 {
-	if (UiLepra::OpenGLExtensions::IsShadowMapsSupported() == true)
-	{
-		Parent::SetShadowsEnabled(pEnabled, pHint);
-	}
-	else
-	{
-		Parent::SetShadowsEnabled(pEnabled, SH_VOLUMES_ONLY);
-	}
+	Parent::SetShadowMode(pShadowMode, UiLepra::OpenGLExtensions::IsShadowMapsSupported()? pHint : SH_VOLUMES_ONLY);
 }
 
 void OpenGLRenderer::SetDepthWriteEnabled(bool pEnabled)
@@ -925,7 +918,7 @@ void OpenGLRenderer::UpdateGeometry(GeometryID pGeometryID)
 
 				// Only reset the flag if there are no shadows to update.
 				// The flag will be reset when the shadows are updated.
-				if (lGeomData->mShadow == NO_SHADOWS)
+				if (lGeomData->mShadow <= NO_SHADOWS)
 				{
 					lGeometry->SetVertexDataChanged(false);
 				}
@@ -1162,7 +1155,7 @@ unsigned OpenGLRenderer::RenderScene()
 		Material::EnableDrawMaterial(true);
 	}
 
-	if (GetShadowsEnabled() && GetLightsEnabled())
+	if (GetShadowMode() != NO_SHADOWS && GetLightsEnabled())
 	{
 		UpdateShadowMaps();
 
@@ -1755,7 +1748,7 @@ void OpenGLRenderer::RegenerateShadowMap(LightData* pLight)
 	{
 		OGLGeometryData* lGeometry = (OGLGeometryData*)*lIter;
 
-		if (lGeometry->mShadow == CAST_SHADOWS)
+		if (lGeometry->mShadow >= CAST_SHADOWS)
 		{
 			float lModelViewMatrix[16];
 			(lLightTransformation.InverseTransform(lGeometry->mGeometry->GetTransformation())).GetAs4x4TransposeMatrix(lModelViewMatrix);

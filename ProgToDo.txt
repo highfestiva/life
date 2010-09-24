@@ -50,6 +50,8 @@ Game
 + Create a list of server-controlled (=important sync) rtvars. Transmit from server to client upon login. Disallow client settings on these rtvars, and monitor them on server to re-sync them when necessary.
 + Add simple cam control for Finne.
 + Add house that can be torn down, but builds itself up automatically again afterwards.
+. Add config for the different shadow types: force_no, no, yes, force_yes. Make terrain force_no!
+. Fix color of shadows. Is it possible to somehow fade them in?
 . Smoke puffs from the exhaust.
 . Railroad boom.
 . Rocket which is regularly sent up. How return? Via hatch in the ground? Landing again?

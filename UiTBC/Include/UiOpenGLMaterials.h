@@ -52,8 +52,7 @@ class OpenGLMatSingleColorSolid: public OpenGLMaterial
 {
 	typedef OpenGLMaterial Parent;
 public:
-	inline OpenGLMatSingleColorSolid(OpenGLRenderer* pRenderer,
-					 Material* pFallBackMaterial) :
+	inline OpenGLMatSingleColorSolid(OpenGLRenderer* pRenderer, Material* pFallBackMaterial):
 		OpenGLMaterial(pRenderer, Material::DEPTHSORT_F2B, pFallBackMaterial)
 	{
 	}

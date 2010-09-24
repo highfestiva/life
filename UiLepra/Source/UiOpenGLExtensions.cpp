@@ -28,41 +28,39 @@ void* OpenGLExtensions::GetExtensionPointer(const char* pFunctionName)
 #if defined(LEPRA_WINDOWS)
     return (void*)wglGetProcAddress(pFunctionName);
 #elif defined(LEPRA_MAC)
-    // Mac is a bit more tricky.
-    // First we need the bundle
-    CFBundleRef openGL = 0;
-/*    SInt16      fwVersion = 0;
-    SInt32      fwDir = 0;
-    
-    if(FindFolder(kSystemDomain, kFrameworksFolderType, kDontCreateFolder, &fwVersion, &fwDir) != noErr)
-        return NULL;
-        
-    FSSpec fSpec;
-    FSRef  fRef;
-    if(FSMakeFSSpec(fwVersion, fwDir, "\pOpenGL.framework", &fSpec) != noErr)
-        return NULL;
- 
-    FSpMakeFSRef(&fSpec, &fRef);
-*/  
+	// Mac is a bit more tricky. First we need the bundle.
+	CFBundleRef lOpenGL = 0;
 
-    CFStringRef urlString = CFSTR("/System/Library/OpenGL.framework");
-    CFURLRef url = CFURLCreateWithString(NULL, urlString, NULL);
-    if(!url)
-        return NULL;
-        
-    openGL = CFBundleCreate(kCFAllocatorDefault, url);
-    CFRelease(url);
-    
-    // Then load the function pointer from the bundle
-    CFStringRef string = CFStringCreateWithCString(kCFAllocatorDefault, pFunctionName, kCFStringEncodingMacRoman);
-    void *pFunc = CFBundleGetFunctionPointerForName(openGL, string);
-    
-    // Release the bundle and string
-    CFRelease(string);
-    CFRelease(openGL);
-    
-    // Return the function ponter
-    return pFunc;
+	/*
+	SInt16      fwVersion = 0;
+	SInt32      fwDir = 0;
+	if (FindFolder(kSystemDomain, kFrameworksFolderType, kDontCreateFolder, &fwVersion, &fwDir) != noErr)
+		return NULL;
+	FSSpec fSpec;
+	FSRef  fRef;
+	if (FSMakeFSSpec(fwVersion, fwDir, "\pOpenGL.framework", &fSpec) != noErr)
+		return NULL;
+	FSpMakeFSRef(&fSpec, &fRef);
+	*/  
+
+	CFStringRef lUrlString = CFSTR("/System/Library/OpenGL.framework");
+	CFURLRef lUrl = CFURLCreateWithString(NULL, lUrlString, NULL);
+	if (!lUrl)
+		return NULL;
+
+	lOpenGL = CFBundleCreate(kCFAllocatorDefault, lUrl);
+	CFRelease(lUrl);
+
+	// Then load the function pointer from the bundle.
+	CFStringRef lString = CFStringCreateWithCString(kCFAllocatorDefault, pFunctionName, kCFStringEncodingMacRoman);
+	void* lFunc = CFBundleGetFunctionPointerForName(lOpenGL, lString);
+
+	// Release the bundle and string.
+	CFRelease(lString);
+	CFRelease(lOpenGL);
+
+	// Return the function ponter.
+	return lFunc;
 #elif defined(LEPRA_POSIX)
 	return ((void*)glXGetProcAddress((const GLubyte*)pFunctionName));
 #else // Unkonwn platform
@@ -80,34 +78,34 @@ void OpenGLExtensions::InitExtensions()
 		   lVersion[2] >= '5' && 
 		   lVersion[2] <= '9')
 		{
-			smGLVersion14 = true;
-			smGLVersion15 = true;
+			mIsGLVersion14 = true;
+			mIsGLVersion15 = true;
 		}
 		else if(lVersion[1] == '.' && 
 			lVersion[2] >= '4' && 
 			lVersion[2] <= '9')
 		{
-			smGLVersion14 = true;
+			mIsGLVersion14 = true;
 		}
 	}
 	else if(lVersion[0] >= '2' && lVersion[0] <= '9')
 	{
 		// This must be an OpenGL version way higher than the versions
 		// that existed when this was written. Assume backward compatibility.
-		smGLVersion14 = true;
-		smGLVersion15 = true;
+		mIsGLVersion14 = true;
+		mIsGLVersion15 = true;
 	}
 
 
 	/*
 		Init Frame Buffer Objects...
 	*/
-	if (IsExtensionSupported("GL_EXT_framebuffer_object") == true)
+	if (IsExtensionSupported("GL_EXT_framebuffer_object"))
 	{
-		smFrameBufferObjectsSupported = true;
+		mIsFrameBufferObjectsSupported = true;
 	}
 
-	if (smFrameBufferObjectsSupported == true)
+	if (mIsFrameBufferObjectsSupported)
 	{
 		glIsRenderbufferEXT                      = (PFNGLISRENDERBUFFEREXTPROC)                      GetExtensionPointer("glIsRenderbufferEXT");
 		glBindRenderbufferEXT                    = (PFNGLBINDRENDERBUFFEREXTPROC)                    GetExtensionPointer("glBindRenderbufferEXT");
@@ -127,22 +125,20 @@ void OpenGLExtensions::InitExtensions()
 		glGetFramebufferAttachmentParameterivEXT = (PFNGLGETFRAMEBUFFERATTACHMENTPARAMETERIVEXTPROC) GetExtensionPointer("glGetFramebufferAttachmentParameterivEXT");
 		glGenerateMipmapEXT                      = (PFNGLGENERATEMIPMAPEXTPROC)                      GetExtensionPointer("glGenerateMipmapEXT");
 
-		if (CheckFrameBufferObjectFunctions() == false)
+		if (!CheckFrameBufferObjectFunctions())
 		{
 			ClearFrameBufferObjectFunctions();
-			smFrameBufferObjectsSupported = false;
+			mIsFrameBufferObjectsSupported = false;
 		}
 	}
 
-	/*
-		Init buffer objects.
-	*/
-	if (smGLVersion15 == true || IsExtensionSupported("GL_ARB_vertex_buffer_object") == true)
+	// Init buffer objects.
+	if (mIsGLVersion15 || IsExtensionSupported("GL_ARB_vertex_buffer_object"))
 	{
-		smBufferObjectsSupported = true;
+		mIsBufferObjectsSupported = true;
 	}
 
-	if (smGLVersion15 == true)
+	if (mIsGLVersion15)
 	{
 		glBindBuffer    = (PFNGLBINDBUFFERPROC)   GetExtensionPointer("glBindBuffer");
 		glBufferData    = (PFNGLBUFFERDATAPROC)   GetExtensionPointer("glBufferData");
@@ -152,7 +148,7 @@ void OpenGLExtensions::InitExtensions()
 		glMapBuffer     = (PFNGLMAPBUFFERPROC)    GetExtensionPointer("glMapBuffer");
 		glUnmapBuffer   = (PFNGLUNMAPBUFFERPROC)  GetExtensionPointer("glUnmapBuffer");
 	}
-	if(smBufferObjectsSupported == true && CheckBufferObjectFunctions() == false)
+	if(mIsBufferObjectsSupported && !CheckBufferObjectFunctions())
 	{
 		// Retry with the ARB version...
 		glBindBuffer    = (PFNGLBINDBUFFERPROC)   GetExtensionPointer("glBindBufferARB");
@@ -164,63 +160,44 @@ void OpenGLExtensions::InitExtensions()
 		glUnmapBuffer   = (PFNGLUNMAPBUFFERPROC)  GetExtensionPointer("glUnmapBufferARB");
 	}
 
-	if (smBufferObjectsSupported == true)
+	if (mIsBufferObjectsSupported)
 	{
-		if (CheckBufferObjectFunctions() == false)
+		if (!CheckBufferObjectFunctions())
 		{
 			ClearBufferObjectFunctions();
-			smBufferObjectsSupported = false;
+			mIsBufferObjectsSupported = false;
 		}
 	}
 
-	/*
-		Init anisotropic filtering...
-	*/
-
-	if (IsExtensionSupported("GL_EXT_texture_filter_anisotropic") == true)
+	// Init anisotropic filtering...
+	if (IsExtensionSupported("GL_EXT_texture_filter_anisotropic"))
 	{
-		smAnisotropicFilteringSupported = true;
-		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &smMaxAnisotropy);
+		mIsAnisotropicFilteringSupported = true;
+		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &mMaxAnisotropy);
 	}
 
-	/*
-		Init texture compression.
-	*/
-
-	if (IsExtensionSupported("GL_ARB_texture_compression") == true)
+	// Init texture compression.
+	if (IsExtensionSupported("GL_ARB_texture_compression"))
 	{
-		smCompressedTexturesSupported = true;
+		mIsCompressedTexturesSupported = true;
 		glHint(GL_TEXTURE_COMPRESSION_HINT, GL_NICEST);
 	}
 
 #ifdef LEPRA_WINDOWS
 	// Init vsync on/off.
-	if (IsExtensionSupported("WGL_EXT_swap") == true)
+	if (IsExtensionSupported("WGL_EXT_swap"))
 	{
-		smVSyncSupported = true;
-
-		wglSwapIntervalEXT    = (PFNWGLSWAPINTERVALEXTPROC)    GetExtensionPointer("wglSwapIntervalEXT");
-		wglGetSwapIntervalEXT = (PFNWGLGETSWAPINTERVALEXTPROC) GetExtensionPointer("wglGetSwapIntervalEXT");
-
-		if (wglSwapIntervalEXT    == 0 ||
-		   wglGetSwapIntervalEXT == 0)
-		{
-			smVSyncSupported = false;
-
-			wglSwapIntervalEXT    = 0;
-			wglGetSwapIntervalEXT = 0;
-		}
+		wglSwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC)GetExtensionPointer("wglSwapIntervalEXT");
+		wglGetSwapIntervalEXT = (PFNWGLGETSWAPINTERVALEXTPROC)GetExtensionPointer("wglGetSwapIntervalEXT");
 	}
 #else
 #pragma message("Warning: In OpenGLExtensions::InitExtensions(), VSync is not initialized.")
 #endif
 
-	/*
-		Init multi texture support.
-	*/
-	if (IsExtensionSupported("GL_ARB_multitexture") == true)
+	// Init multi texture support.
+	if (IsExtensionSupported("GL_ARB_multitexture"))
 	{
-		smMultiTextureSupported = true;
+		mIsMultiTextureSupported = true;
 
 		glActiveTexture       = (PFNGLACTIVETEXTUREPROC)       GetExtensionPointer("glActiveTextureARB");
 		glClientActiveTexture = (PFNGLCLIENTACTIVETEXTUREPROC) GetExtensionPointer("glClientActiveTexture");
@@ -257,20 +234,18 @@ void OpenGLExtensions::InitExtensions()
 		glMultiTexCoord4s     = (PFNGLMULTITEXCOORD4SPROC)     GetExtensionPointer("glMultiTexCoord4sARB");
 		glMultiTexCoord4sv    = (PFNGLMULTITEXCOORD4SVPROC)    GetExtensionPointer("glMultiTexCoord4svARB");
 
-		if (CheckMultiTextureFunctions() == false)
+		if (!CheckMultiTextureFunctions())
 		{
-			smMultiTextureSupported = false;
+			mIsMultiTextureSupported = false;
 			ClearMultiTextureFunctions();
 		}
 	}
 
-	/*
-		Init vertex and pixel shader support.
-	*/
-	if (IsExtensionSupported("GL_ARB_vertex_program") == true &&
-	   IsExtensionSupported("GL_ARB_fragment_program") == true)
+	// Init vertex and pixel shader support.
+	if (IsExtensionSupported("GL_ARB_vertex_program") &&
+	   IsExtensionSupported("GL_ARB_fragment_program"))
 	{
-		smShaderProgramsSupported = true;
+		mIsShaderAsmProgramsSupported = true;
 
 		glGenProgramsARB                = (PFNGLGENPROGRAMSARBPROC)                GetExtensionPointer("glGenProgramsARB");
 		glBindProgramARB                = (PFNGLBINDPROGRAMARBPROC)                GetExtensionPointer("glBindProgramARB");
@@ -335,19 +310,19 @@ void OpenGLExtensions::InitExtensions()
 		glVertexAttrib4uivARB           = (PFNGLVERTEXATTRIB4UIVARBPROC)           GetExtensionPointer("glVertexAttrib4uivARB");
 		glVertexAttrib4usvARB           = (PFNGLVERTEXATTRIB4USVARBPROC)           GetExtensionPointer("glVertexAttrib4usvARB");
 
-		if(CheckShaderProgramFunctions() == false)
+		if (!CheckShaderProgramFunctions())
 		{
-			smShaderProgramsSupported = false;
+			mIsShaderAsmProgramsSupported = false;
 			ClearShaderProgramFunctions();
 		}
 	}
 
-	if (IsExtensionSupported("GL_ARB_vertex_shader")        == true &&
-	   IsExtensionSupported("GL_ARB_fragment_shader")      == true &&
-	   IsExtensionSupported("GL_ARB_shader_objects")       == true &&
-	   IsExtensionSupported("GL_ARB_shading_language_100") == true)
+	if (IsExtensionSupported("GL_ARB_vertex_shader")        &&
+	   IsExtensionSupported("GL_ARB_fragment_shader")      &&
+	   IsExtensionSupported("GL_ARB_shader_objects")       &&
+	   IsExtensionSupported("GL_ARB_shading_language_100"))
 	{
-		smShadersSupported = true;
+		mIsShaderCProgramsSupported = true;
 
 		glDeleteObjectARB               = (PFNGLDELETEOBJECTARBPROC)         GetExtensionPointer("glDeleteObjectARB");
 		glGetHandleARB                  = (PFNGLGETHANDLEARBPROC)            GetExtensionPointer("glGetHandleARB");
@@ -389,13 +364,94 @@ void OpenGLExtensions::InitExtensions()
 		glGetUniformivARB               = (PFNGLGETUNIFORMIVARBPROC)         GetExtensionPointer("glGetUniformivARB");
 		glGetShaderSourceARB            = (PFNGLGETSHADERSOURCEARBPROC)      GetExtensionPointer("glGetShaderSourceARB");
 
-		if (CheckShaderFunctions() == false)
+		if (!CheckShaderFunctions())
 		{
-			smShadersSupported = false;
+			mIsShaderCProgramsSupported = false;
 			ClearShaderFunctions();
 		}
 	}
 }
+
+bool OpenGLExtensions::IsFrameBufferObjectsSupported()
+{
+	return mIsFrameBufferObjectsSupported;
+}
+
+bool OpenGLExtensions::IsBufferObjectsSupported()
+{
+	return mIsBufferObjectsSupported;
+}
+
+bool OpenGLExtensions::IsAnisotropicFilteringSupported()
+{
+	return mIsAnisotropicFilteringSupported;
+}
+
+bool OpenGLExtensions::IsCompressedTexturesSupported()
+{
+	return mIsCompressedTexturesSupported;
+}
+
+bool OpenGLExtensions::IsMultiTextureSupported()
+{
+	return mIsMultiTextureSupported;
+}
+
+bool OpenGLExtensions::IsShadowMapsSupported()
+{
+	return mIsGLVersion14;
+}
+
+bool OpenGLExtensions::IsShaderAsmProgramsSupported()
+{
+	return mIsShaderAsmProgramsSupported;
+}
+
+bool OpenGLExtensions::IsShaderCProgramsSupported()
+{
+	return mIsShaderCProgramsSupported;
+}
+
+float OpenGLExtensions::GetMaxAnisotropy()
+{
+	return mMaxAnisotropy;
+}
+
+void OpenGLExtensions::SetAnisotropy(float pAmountAnisotropy)
+{
+	if (mIsAnisotropicFilteringSupported)
+	{
+		glTexParameterf(GL_TEXTURE_2D, GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, pAmountAnisotropy);
+	}
+}
+
+bool OpenGLExtensions::IsVSyncEnabled()
+{
+#ifdef LEPRA_WINDOWS
+	if (wglGetSwapIntervalEXT != 0)
+	{
+		return (wglGetSwapIntervalEXT() > 0);
+	}
+#else
+#pragma message("Warning: OpenGLExtensions::IsVSyncEnabled() is using default behaviour.")
+#endif
+	return true;
+}
+
+bool OpenGLExtensions::SetVSyncEnabled(bool pEnabled)
+{
+#ifdef LEPRA_WINDOWS
+	if (wglSwapIntervalEXT != 0)
+	{
+		return (wglSwapIntervalEXT(pEnabled ? 1 : 0) != FALSE);
+	}
+#else
+#pragma message("Warning: OpenGLExtensions::SetVSyncEnabled() is not implemented.")
+#endif
+	return (false);
+}
+
+
 
 void OpenGLExtensions::ClearFrameBufferObjectFunctions()
 {
@@ -755,103 +811,18 @@ bool OpenGLExtensions::CheckShaderFunctions()
 		glGetShaderSourceARB            != 0);
 }
 
-void OpenGLExtensions::SetAnisotropy(float pAmountAnisotropy)
-{
-	if (smAnisotropicFilteringSupported == true)
-	{
-		glTexParameterf(GL_TEXTURE_2D, GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, pAmountAnisotropy);
-	}
-}
-
-bool OpenGLExtensions::SetVSyncEnabled(bool pEnabled)
-{
-#ifdef LEPRA_WINDOWS
-	if (wglSwapIntervalEXT != 0)
-	{
-		return (wglSwapIntervalEXT(pEnabled ? 1 : 0) != FALSE);
-	}
-#else
-#pragma message("Warning: OpenGLExtensions::SetVSyncEnabled() is not implemented.")
-#endif
-	return (false);
-}
 
 
-
-bool OpenGLExtensions::IsFrameBufferObjectsSupported()
-{
-	return smFrameBufferObjectsSupported;
-}
-
-bool OpenGLExtensions::IsBufferObjectsSupported()
-{
-	return smBufferObjectsSupported;
-}
-
-bool OpenGLExtensions::iSAnisotropicFilteringSupported()
-{
-	return smAnisotropicFilteringSupported;
-}
-
-bool OpenGLExtensions::IsCompressedTexturesSupported()
-{
-	return smCompressedTexturesSupported;
-}
-
-bool OpenGLExtensions::IsMultiTextureSupported()
-{
-	return smMultiTextureSupported;
-}
-
-bool OpenGLExtensions::IsShadowMapsSupported()
-{
-	return smGLVersion14;
-}
-
-bool OpenGLExtensions::IsShaderAsmProgramsSupported()
-{
-	return smShaderProgramsSupported;
-}
-
-bool OpenGLExtensions::IsShaderCProgramsSupported()
-{
-	return smShadersSupported;
-}
-
-float OpenGLExtensions::GetMaxAnisotropy()
-{
-	return smMaxAnisotropy;
-}
-
-bool OpenGLExtensions::IsVSyncSupported()
-{
-	return smVSyncSupported;
-}
-
-bool OpenGLExtensions::IsVSyncEnabled()
-{
-#ifdef LEPRA_WINDOWS
-	return (wglGetSwapIntervalEXT() > 0);
-#else
-#pragma message("Warning: OpenGLExtensions::IsVSyncEnabled() is using default behaviour.")
-	return true;
-#endif
-}
-
-
-
-bool OpenGLExtensions::smGLVersion14                   = false;
-bool OpenGLExtensions::smGLVersion15                   = false;
-bool OpenGLExtensions::smFrameBufferObjectsSupported   = false;
-bool OpenGLExtensions::smBufferObjectsSupported        = false;
-bool OpenGLExtensions::smAnisotropicFilteringSupported = false;
-bool OpenGLExtensions::smCompressedTexturesSupported   = false;
-bool OpenGLExtensions::smMultiTextureSupported         = false;
-bool OpenGLExtensions::smShaderProgramsSupported       = false;
-bool OpenGLExtensions::smShadersSupported              = false;
-bool OpenGLExtensions::smVSyncSupported                = false;
-
-float OpenGLExtensions::smMaxAnisotropy                = 1.0f;
+bool OpenGLExtensions::mIsGLVersion14			= false;
+bool OpenGLExtensions::mIsGLVersion15			= false;
+bool OpenGLExtensions::mIsFrameBufferObjectsSupported	= false;
+bool OpenGLExtensions::mIsBufferObjectsSupported	= false;
+bool OpenGLExtensions::mIsAnisotropicFilteringSupported	= false;
+bool OpenGLExtensions::mIsCompressedTexturesSupported	= false;
+bool OpenGLExtensions::mIsMultiTextureSupported		= false;
+bool OpenGLExtensions::mIsShaderAsmProgramsSupported	= false;
+bool OpenGLExtensions::mIsShaderCProgramsSupported	= false;
+float OpenGLExtensions::mMaxAnisotropy			= 1.0f;
 
 // Declare functions.
 

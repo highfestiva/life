@@ -200,11 +200,14 @@ bool GameClientSlaveManager::Render()
 	LEPRA_MEASURE_SCOPE(SlaveRender);
 	bool lOutline;
 	bool lWireFrame;
+	bool lPixelShaders;
 	CURE_RTVAR_GET(lOutline, =, GetVariableScope(), RTVAR_UI_3D_OUTLINEMODE, false);
 	CURE_RTVAR_GET(lWireFrame, =, GetVariableScope(), RTVAR_UI_3D_WIREFRAMEMODE, false);
+	CURE_RTVAR_GET(lPixelShaders, =, GetVariableScope(), RTVAR_UI_3D_PIXELSHADERS, false);
 	SetLocalRender(true);
 	mUiManager->GetRenderer()->EnableOutlineRendering(lOutline);
 	mUiManager->GetRenderer()->EnableWireframe(lWireFrame);
+	mUiManager->GetRenderer()->EnablePixelShaders(lPixelShaders);
 	mUiManager->Render(mRenderArea);
 	SetLocalRender(false);	// Hide sun and mass objects from other cameras.
 
@@ -695,10 +698,13 @@ bool GameClientSlaveManager::InitializeTerrain()
 	mCloudArray.clear();
 
 	mLevelId = GetContext()->AllocateGameObjectId(Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
-	bool lOk = CreateObject(mLevelId, _T("level_01"), Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
+	UiCure::CppContextObject* lLevel = (UiCure::CppContextObject*)Parent::CreateContextObject(_T("level_01"), Cure::NETWORK_OBJECT_REMOTE_CONTROLLED, mLevelId);
+	bool lOk = (lLevel != 0);
 	assert(lOk);
 	if (lOk)
 	{
+		lLevel->DisableRootShadow();
+		lLevel->StartLoading();
 		mSun = Parent::CreateContextObject(_T("sun"), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 		lOk = (mSun != 0);
 		assert(lOk);
