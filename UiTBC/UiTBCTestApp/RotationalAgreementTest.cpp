@@ -181,7 +181,7 @@ void RunRotationalAgreementTest()
 	UiTbc::OpenGLRenderer lRenderer(&lScreen);
 	TBC::PhysicsManager* lPhysics = TBC::PhysicsManagerFactory::Create(TBC::PhysicsManagerFactory::ENGINE_ODE);
 
-	lRenderer.SetShadowsEnabled(true, UiTbc::Renderer::SH_VOLUMES_AND_MAPS);
+	lRenderer.SetShadowMode(UiTbc::Renderer::CAST_SHADOWS, UiTbc::Renderer::SH_VOLUMES_AND_MAPS);
 	lPhysics->SetGravity(Lepra::Vector3DF(0, 0, -9.82f));
 
 	enum
