@@ -73,7 +73,8 @@ public:
 	virtual void GetSiblings(GameObjectId pObjectId, ContextObject::Array& pSiblingArray) const;
 	virtual void OnLoadCompleted(ContextObject* pObject, bool pOk) = 0;
 	virtual void OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque,
-		ContextObject* pObject1, ContextObject* pObject2) = 0;
+		ContextObject* pObject1, ContextObject* pObject2,
+		TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID pBody2Id) = 0;
 	void OnStopped(ContextObject* pObject, TBC::PhysicsManager::BodyID pBodyId);
 	virtual bool OnPhysicsSend(ContextObject* pObject) = 0;
 	virtual bool IsConnectAuthorized() = 0;
@@ -103,8 +104,6 @@ protected:
 	void WaitPhysicsTick();
 
 	virtual void PhysicsTick();
-	bool IsHighImpact(float pScaleFactor, const ContextObject* pObject, const Vector3DF& pForce,
-		const Vector3DF& pTorque) const;
 
 	bool IsThreadSafe() const;
 

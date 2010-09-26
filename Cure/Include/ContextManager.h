@@ -43,6 +43,7 @@ public:
 	void AddObject(ContextObject* pObject);
 	virtual void RemoveObject(ContextObject* pObject);
 	bool DeleteObject(GameObjectId pInstanceId);
+	void PostKillObject(GameObjectId pInstanceId);
 	ContextObject* GetObject(GameObjectId pInstanceId, bool pForce = false) const;
 	const ContextObjectTable& GetObjectTable() const;
 	void ClearObjects();
@@ -66,6 +67,7 @@ public:
 	void TickPhysics();
 	void HandleIdledBodies();
 	void HandlePhysicsSend();
+	void HandlePostKill();
 
 private:
 	void DispatchPhysicsUpdateCallbacks();
@@ -113,6 +115,7 @@ private:
 	};
 	typedef std::hash_set<Alarm, AlarmHasher> AlarmSet;
 	typedef std::hash_map<TBC::PhysicsManager::BodyID, ContextObject*> BodyTable;
+	typedef std::hash_set<GameObjectId> IdSet;
 	typedef BodyTable::value_type BodyPair;
 
 	GameManager* mGameManager;
@@ -126,6 +129,7 @@ private:
 	ContextObjectTable mPhysicsUpdateCallbackObjectTable;
 	ContextObjectTable mTickCallbackObjectTable;
 	AlarmSet mAlarmCallbackObjectSet;
+	IdSet mPostKillSet;
 
 	LOG_CLASS_DECLARE();
 };

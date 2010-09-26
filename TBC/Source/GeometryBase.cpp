@@ -325,6 +325,16 @@ bool GeometryBase::IsGeometryReference()
 	return false;
 }
 
+void GeometryBase::SetIsSimpleObject()
+{
+	SetFlag(IS_SIMPLE_OBJECT);
+}
+
+bool GeometryBase::IsSimpleObject() const
+{
+	return CheckFlag(IS_SIMPLE_OBJECT);
+}
+
 unsigned int GeometryBase::GetMaxTriangleCount() const
 {
 	switch (GetPrimitiveType())

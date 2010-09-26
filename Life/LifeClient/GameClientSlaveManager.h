@@ -76,6 +76,7 @@ public:
 	virtual void GetSiblings(Cure::GameObjectId pObjectId, Cure::ContextObject::Array& pSiblingArray) const;
 	void DoGetSiblings(Cure::GameObjectId pObjectId, Cure::ContextObject::Array& pSiblingArray) const;
 	void AddLocalObjects(std::hash_set<Cure::GameObjectId>& pLocalObjectSet) const;
+	bool IsInCameraRange(Cure::ContextObject* pObject, float pDistance) const;
 
 	virtual bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
 	virtual bool OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode);
@@ -125,7 +126,8 @@ protected:
 	virtual void OnLoadCompleted(Cure::ContextObject* pObject, bool pOk);
 	void SetMovement(Cure::GameObjectId pInstanceId, int32 pFrameIndex, Cure::ObjectPositionalData& pData);
 	void OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque,
-		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2);
+		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
+		TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID pBody2Id);
 	bool OnPhysicsSend(Cure::ContextObject* pObject);
 	bool IsConnectAuthorized();
 	void SendAttach(Cure::ContextObject*, unsigned, Cure::ContextObject*, unsigned);

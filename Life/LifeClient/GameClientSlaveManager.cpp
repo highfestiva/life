@@ -536,6 +536,12 @@ void GameClientSlaveManager::AddLocalObjects(std::hash_set<Cure::GameObjectId>& 
 	pLocalObjectSet.insert(mOwnedObjectList.begin(), mOwnedObjectList.end());
 }
 
+bool GameClientSlaveManager::IsInCameraRange(Cure::ContextObject* pObject, float pDistance) const
+{
+	return (pObject->GetPosition().GetDistanceSquared(mCameraPivotPosition) <= pDistance*pDistance);
+}
+
+
 
 bool GameClientSlaveManager::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 {
@@ -1434,7 +1440,8 @@ Cure::ContextObject* GameClientSlaveManager::CreateContextObject(const str& pCla
 			lSide = 290;
 		}
 	}
-	else if (pClassId == _T("sun") || strutil::StartsWith(pClassId, _T("cloud")))
+	else if (pClassId == _T("sun") || strutil::StartsWith(pClassId, _T("cloud")) ||
+		strutil::StartsWith(pClassId, _T("mud_particle")))
 	{
 		lProps = true;
 	}
@@ -1548,13 +1555,20 @@ void GameClientSlaveManager::SetMovement(Cure::GameObjectId pInstanceId, int32 p
 }
 
 void GameClientSlaveManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque,
-	Cure::ContextObject* pObject1, Cure::ContextObject* pObject2)
+	Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
+	TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID pBody2Id)
 {
-	if (pObject2 && pObject1 != pObject2 && pObject2->GetMass() > 0)
+	const bool lBothAreDynamic = (!GetPhysicsManager()->IsStaticBody(pBody1Id) && !GetPhysicsManager()->IsStaticBody(pBody2Id));
+	if (!lBothAreDynamic)
+	{
+		return;
+	}
+
+	if (pObject2 && pObject1 != pObject2 && !GetPhysicsManager()->IsStaticBody(pBody2Id))
 	{
 		if (IsOwned(pObject1->GetInstanceId()))
 		{
-			if (IsHighImpact(12.0f, pObject1, pForce, pTorque))
+			if (pObject1->IsImpact(GetPhysicsManager()->GetGravity(), 12.0f, pForce, pTorque))
 			{
 				pObject1->QueryResendTime(0, false);
 			}
@@ -1563,7 +1577,7 @@ void GameClientSlaveManager::OnCollision(const Vector3DF& pForce, const Vector3D
 		else if (pObject2->GetInstanceId() == mAvatarId &&
 			pObject1->GetNetworkObjectType() == Cure::NETWORK_OBJECT_REMOTE_CONTROLLED)
 		{
-			if (IsHighImpact(1.0f, pObject1, pForce, pTorque))
+			if (pObject1->IsImpact(GetPhysicsManager()->GetGravity(), 1.0f, pForce, pTorque))
 			{
 				if (pObject1->QueryResendTime(1.0, false))
 				{

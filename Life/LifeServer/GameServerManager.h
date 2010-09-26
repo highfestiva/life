@@ -81,7 +81,8 @@ private:
 	virtual Cure::ContextObject* CreateContextObject(const str& pClassId) const;
 	virtual void OnLoadCompleted(Cure::ContextObject* pObject, bool pOk);
 	void OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque,
-		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2);
+		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
+		TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID pBody2Id);
 	bool OnPhysicsSend(Cure::ContextObject* pObject);
 	bool IsConnectAuthorized();
 	void SendAttach(Cure::ContextObject* pObject1, unsigned pId1, Cure::ContextObject* pObject2, unsigned pId2);

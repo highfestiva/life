@@ -683,7 +683,7 @@ bool ContextObject::SetPhysics(TBC::ChunkyPhysics* pStructure)
 
 	if (mPhysicsOverride == PHYSICS_OVERRIDE_BONES)
 	{
-		bool lOk = pStructure->BoneHierarchy::FinalizeInit(TBC::ChunkyPhysics::TRANSFORM_NONE);
+		bool lOk = pStructure->FinalizeInit(0, 0, &mPosition.mPosition.mTransformation.GetPosition(), 0, 0);
 		if (lOk)
 		{
 			mPhysics = pStructure;
@@ -772,6 +772,24 @@ TBC::ChunkyBoneGeometry* ContextObject::GetStructureGeometry(TBC::PhysicsManager
 bool ContextObject::SetEnginePower(unsigned pAspect, float pPower, float pAngle)
 {
 	return mPhysics->SetEnginePower(pAspect, pPower, pAngle);
+}
+
+bool ContextObject::IsImpact(const Vector3DF& pGravity, float pScaleFactor, const Vector3DF& pForce, const Vector3DF& pTorque) const
+{
+	const float lMassFactor = 1/GetMass();
+	Vector3DF lGravityDirection = pGravity;
+	lGravityDirection.Normalize();
+	// High angle against direction of gravity means high impact.
+	const float lForceWithoutGravityFactor = (pForce * lGravityDirection) - pForce.Cross(lGravityDirection).GetLength();
+	const float lNormalizedForceFactor = lForceWithoutGravityFactor * lMassFactor;
+	const float lNormalizedTorqueFactor = pTorque.GetLength() * lMassFactor;
+	bool lIsHighImpact = (lNormalizedForceFactor < -16*pScaleFactor || lNormalizedForceFactor >= 2*pScaleFactor || lNormalizedTorqueFactor > 3*pScaleFactor);
+	if (lIsHighImpact)
+	{
+		log_volatile(mLog.Tracef(_T("Collided hard with something dynamic. F=%f, T=%f"),
+			lNormalizedForceFactor, lNormalizedTorqueFactor));
+	}
+	return (lIsHighImpact);
 }
 
 

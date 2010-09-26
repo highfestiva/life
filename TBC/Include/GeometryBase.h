@@ -160,6 +160,8 @@ public:
 	void RemoveListener(Listener* pListener);
 
 	virtual bool IsGeometryReference();
+	void SetIsSimpleObject();
+	bool IsSimpleObject() const;
 
 	virtual GeometryVolatility GetGeometryVolatility() const = 0;
 	virtual void SetGeometryVolatility(GeometryVolatility pVolatility) = 0;
@@ -307,24 +309,25 @@ protected:
 
 	enum //Flags
 	{
-		VERTEX_DATA_CHANGED          = (1 << 0),
-		UV_DATA_CHANGED              = (1 << 1),
-		COLOR_DATA_CHANGED           = (1 << 2),
-		INDEX_DATA_CHANGED           = (1 << 3),
-		BOUNDING_RADIUS_VALID        = (1 << 4),
-		BOUNDING_RADIUS_ALWAYS_VALID = (1 << 5),
-		SURFACE_NORMALS_VALID        = (1 << 6),
-		VERTEX_NORMALS_VALID         = (1 << 7),
-		TANGENTS_VALID               = (1 << 8),
-		IS_SOLID_VOLUME              = (1 << 9),
-		IS_SINGLE_OBJECT             = (1 << 10),
-		IS_CONVEX_VOLUME             = (1 << 11),
-		SOLID_VOLUME_VALID           = (1 << 12),
-		SINGLE_OBJECT_VALID          = (1 << 13),
-		CONVEX_VOLUME_VALID          = (1 << 14),
-		ALWAYS_VISIBLE               = (1 << 15),
-		TRANSFORMATION_CHANGED       = (1 << 16),
-		REF_TRANSFORMATION_CHANGED   = (1 << 17),
+		VERTEX_DATA_CHANGED		= (1 << 0),
+		UV_DATA_CHANGED			= (1 << 1),
+		COLOR_DATA_CHANGED		= (1 << 2),
+		INDEX_DATA_CHANGED		= (1 << 3),
+		BOUNDING_RADIUS_VALID		= (1 << 4),
+		BOUNDING_RADIUS_ALWAYS_VALID	= (1 << 5),
+		SURFACE_NORMALS_VALID		= (1 << 6),
+		VERTEX_NORMALS_VALID		= (1 << 7),
+		TANGENTS_VALID			= (1 << 8),
+		IS_SOLID_VOLUME			= (1 << 9),
+		IS_SINGLE_OBJECT		= (1 << 10),
+		IS_CONVEX_VOLUME		= (1 << 11),
+		SOLID_VOLUME_VALID		= (1 << 12),
+		SINGLE_OBJECT_VALID		= (1 << 13),
+		CONVEX_VOLUME_VALID		= (1 << 14),
+		ALWAYS_VISIBLE			= (1 << 15),
+		TRANSFORMATION_CHANGED		= (1 << 16),
+		REF_TRANSFORMATION_CHANGED	= (1 << 17),
+		IS_SIMPLE_OBJECT		= (1 << 18),
 	};
 
 	void SetFlag(Lepra::uint32 pFlag, bool pValue) { if(pValue) SetFlag(pFlag); else ClearFlag(pFlag); }

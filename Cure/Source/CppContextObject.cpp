@@ -143,14 +143,20 @@ void CppContextObject::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, TBC:
 
 
 void CppContextObject::OnForceApplied(TBC::PhysicsManager::ForceFeedbackListener* pOtherObject,
-	const Vector3DF& pForce, const Vector3DF& pTorque)
+	TBC::PhysicsManager::BodyID pOwnBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
+	const Vector3DF& pForce, const Vector3DF& pTorque,
+	const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity)
 {
+	(void)pPosition;
+	(void)pRelativeVelocity;
+
 	if (!IsAttachedTo((ContextObject*)pOtherObject))
 	{
 		// TODO: replace by sensible values. Like dividing by mass, for instance.
 		//if (pForce.GetLengthSquared() > 100 || pTorque.GetLengthSquared() > 10)
 		{
-			mManager->GetGameManager()->OnCollision(pForce, pTorque, this, (ContextObject*)pOtherObject);
+			mManager->GetGameManager()->OnCollision(pForce, pTorque, this, (ContextObject*)pOtherObject,
+				pOwnBodyId, pOtherBodyId);
 		}
 	}
 }

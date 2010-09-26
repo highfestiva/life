@@ -23,8 +23,16 @@ public:
 	Props(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager);
 	virtual ~Props();
 
+	void StartParticle(const Vector3DF& pStartVelocity);
+
 protected:
+	void DispatchOnLoadMesh(UiCure::UserGeometryReferenceResource* pMeshResource);
 	void OnPhysicsTick();
+	void OnAlarm(int pAlarmId, void* pExtraData);
+
+private:
+	Vector3DF mVelocity;
+	bool mIsParticle;
 };
 
 
