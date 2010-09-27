@@ -243,6 +243,12 @@ void Vehicle::OnForceApplied(TBC::PhysicsManager::ForceFeedbackListener* pOtherO
 {
 	Parent::OnForceApplied(pOtherObject, pOwnBodyId, pOtherBodyId, pForce, pTorque, pPosition, pRelativeVelocity);
 
+	bool lParticlesEnabled;
+	CURE_RTVAR_GET(lParticlesEnabled, =, GetManager()->GetGameManager()->GetVariableScope(), RTVAR_UI_3D_ENABLEPARTICLES, false);
+	if (!lParticlesEnabled)
+	{
+		return;
+	}
 	// Particle emitter code. TODO: separate somewhat. Cleanup.
 	if (mParticleTimer.GetTimeDiff() < 0.01f)
 	{

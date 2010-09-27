@@ -526,6 +526,7 @@ void GameUiManager::UpdateSettings()
 		lShadowMode = UiTbc::Renderer::FORCE_CAST_SHADOWS;
 	}
 	mRenderer->SetShadowMode(lShadowMode, lShadowType);
+	mRenderer->SetShadowUpdateFrameDelay(60);
 
 	// ----------------------------------------
 	// 2D rendering settings.

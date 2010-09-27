@@ -67,6 +67,7 @@ ClientApplication::ClientApplication(const strutil::strvec& pArgumentList):
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_CAMHEIGHT, 10.0);
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_CAMROTATE, 0.0);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEPARTICLES, true);
 
 	mUiManager = new UiCure::GameUiManager(UiCure::GetSettings());
 

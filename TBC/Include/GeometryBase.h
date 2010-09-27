@@ -84,6 +84,7 @@ public:
 	enum GeometryVolatility
 	{
 		GEOM_STATIC = 1,	// Geometry that will never change.
+		GEOM_SEMI_STATIC,	// Geometry that will never change.
 		GEOM_DYNAMIC,		// Geometry that will change occasionally (like terrain).
 		GEOM_VOLATILE,		// Geometry that will change between every frame.
 	};

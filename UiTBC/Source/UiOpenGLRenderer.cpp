@@ -704,6 +704,7 @@ void OpenGLRenderer::BindGeometry(TBC::GeometryBase* pGeometry,
 			switch(pGeometry->GetGeometryVolatility())
 			{
 			case TBC::GeometryBase::GEOM_STATIC:
+			case TBC::GeometryBase::GEOM_SEMI_STATIC:
 				lGLHint = GL_STATIC_DRAW;
 				break;
 			case TBC::GeometryBase::GEOM_DYNAMIC:
@@ -836,6 +837,7 @@ bool OpenGLRenderer::BindShadowGeometry(UiTbc::ShadowVolume* pShadowVolume, Ligh
 		switch(pShadowVolume->GetGeometryVolatility())
 		{
 		case TBC::GeometryBase::GEOM_STATIC:
+		case TBC::GeometryBase::GEOM_SEMI_STATIC:
 			if (pLightHint == LIGHT_MOVABLE)
 				lGLHint = GL_STREAM_DRAW;
 			else

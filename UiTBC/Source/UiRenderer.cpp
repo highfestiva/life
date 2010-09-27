@@ -1250,7 +1250,10 @@ void Renderer::UpdateShadowMaps(TBC::GeometryBase* pGeometry)
 					 lGeomTransformationChanged        == true ||
  					 pGeometry->GetVertexDataChanged() == true ||
 					 lGeometry->mLightID[i]         != mLightIndex[i]) &&
-					(mCurrentFrame - lGeometry->mLastFrameShadowsUpdated) >= mShadowUpdateFrameDelay)
+					(
+						lGeometry->mGeometry->GetGeometryVolatility() >= TBC::GeometryBase::GEOM_SEMI_STATIC ||
+						mCurrentFrame - lGeometry->mLastFrameShadowsUpdated >= mShadowUpdateFrameDelay)
+					)
 				{
 					ShadowVolumeTable::Iterator x = mShadowVolumeTable.Find(lGeometry->mShadowVolume[i]);
 					

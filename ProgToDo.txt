@@ -50,6 +50,7 @@ Game
 + Create a list of server-controlled (=important sync) rtvars. Transmit from server to client upon login. Disallow client settings on these rtvars, and monitor them on server to re-sync them when necessary.
 + Add simple cam control for Finne.
 + Add house that can be torn down, but builds itself up automatically again afterwards.
+. Fix shadows in level_01: all stuff located in (0, 0, 0) probably gets their shadow there too.
 . Add config for the different shadow types: force_no, no, yes, force_yes. Make terrain force_no!
 . Fix color of shadows. Is it possible to somehow fade them in?
 . Smoke puffs from the exhaust.
@@ -197,6 +198,7 @@ Engine
 + Go back to using dual UDP/TCP sockets again.
 + Load world.
 + Client must request (and release) ownership of objects that are collided to. Owned objects are broadcasted to all other clients from the owner. Server won't take any own initiaives in the duration of the ownership.
+. Make sure dynamic meshes on static object (i.e. windmill wings in level_01) have their shadows updated each frame instead of every 60th.
 . Make network connection work with ONLY TCP if UDP is blocked by firewall.
 . Make sure camera never flies under ground or collides with physical objects. Make camera always keep a free line of sight to the controlled object.
 . Collision sounds.

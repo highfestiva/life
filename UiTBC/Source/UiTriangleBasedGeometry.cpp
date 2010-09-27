@@ -1214,7 +1214,7 @@ TBC::GeometryBase::PrimitiveType TriangleBasedGeometry::GetPrimitiveType() const
 
 TBC::GeometryBase::GeometryVolatility TriangleBasedGeometry::GetGeometryVolatility() const
 {
-	assert(mGeometryVolatility == GEOM_STATIC);
+	//assert(mGeometryVolatility == GEOM_STATIC);
 	return (mGeometryVolatility);
 }
 
