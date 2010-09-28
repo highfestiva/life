@@ -849,10 +849,10 @@ void GameClientSlaveManager::TickUiInput()
 			const Options::CamControl& c = mOptions.GetCamControl();
 #define C(dir) c.mControl[Options::CamControl::CAMDIR_##dir]
 			lPower = C(UP)-C(DOWN);
-			CURE_RTVAR_ARITHMETIC(GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, double, +, lPower*lScale, 0.0, 30.0);
+			CURE_RTVAR_ARITHMETIC(GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, double, +, lPower*lScale, -5.0, 30.0);
 			mCamRotateExtra = (C(RIGHT)-C(LEFT)) * lScale;
 			lPower = C(BACKWARD)-C(FORWARD);
-			CURE_RTVAR_ARITHMETIC(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, double, +, lPower*lScale, 5.0, 100.0);
+			CURE_RTVAR_ARITHMETIC(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, double, +, lPower*lScale, 3.0, 100.0);
 
 			mAvatarInvisibleCount = 0;
 		}

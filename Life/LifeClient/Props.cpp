@@ -31,6 +31,7 @@ Props::~Props()
 
 void Props::StartParticle(const Vector3DF& pStartVelocity)
 {
+	assert(pStartVelocity.GetLengthSquared() < 1000*1000);
 	mIsParticle = true;
 	mVelocity = pStartVelocity;
 	GetManager()->AddAlarmCallback(this, 5, 2, 0);
@@ -63,6 +64,7 @@ void Props::OnAlarm(int pAlarmId, void* /*pExtraData*/)
 {
 	if (pAlarmId == 5)
 	{
+		assert(mIsParticle);
 		GetManager()->PostKillObject(GetInstanceId());
 	}
 }

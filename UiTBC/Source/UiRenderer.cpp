@@ -312,9 +312,16 @@ void Renderer::AddAmbience(float pRed, float pGreen, float pBlue)
 	mAmbientBlue  += pBlue;
 }
 
-void Renderer::ResetAmbientLight()
+void Renderer::ResetAmbientLight(bool pPropagate)
 {
-	SetAmbientLight(mOriginalAmbientRed, mOriginalAmbientGreen, mOriginalAmbientBlue);
+	if (pPropagate)
+	{
+		SetAmbientLight(mOriginalAmbientRed, mOriginalAmbientGreen, mOriginalAmbientBlue);
+	}
+	else
+	{
+		Renderer::SetAmbientLight(mOriginalAmbientRed, mOriginalAmbientGreen, mOriginalAmbientBlue);
+	}
 }
 
 int Renderer::AllocLight()
@@ -1246,14 +1253,10 @@ void Renderer::UpdateShadowMaps(TBC::GeometryBase* pGeometry)
 			else if(pGeometry->GetAlwaysVisible() == true ||
 				pGeometry->GetLastFrameVisible() == GetCurrentFrame())
 			{
-				if (	(lLight.mTransformationChanged    == true || 
-					 lGeomTransformationChanged        == true ||
- 					 pGeometry->GetVertexDataChanged() == true ||
-					 lGeometry->mLightID[i]         != mLightIndex[i]) &&
-					(
-						lGeometry->mGeometry->GetGeometryVolatility() >= TBC::GeometryBase::GEOM_SEMI_STATIC ||
-						mCurrentFrame - lGeometry->mLastFrameShadowsUpdated >= mShadowUpdateFrameDelay)
-					)
+				if ((lGeomTransformationChanged || pGeometry->GetVertexDataChanged() ||
+					lGeometry->mLightID[i] != mLightIndex[i]) ||
+					(lLight.mTransformationChanged &&
+					mCurrentFrame - lGeometry->mLastFrameShadowsUpdated >= mShadowUpdateFrameDelay))
 				{
 					ShadowVolumeTable::Iterator x = mShadowVolumeTable.Find(lGeometry->mShadowVolume[i]);
 					

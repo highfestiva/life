@@ -57,6 +57,7 @@ public:
 	void PreparePaint();
 	void EndRender();
 
+	Cure::RuntimeVariableScope* GetVariableScope() const;
 	UiLepra::DisplayManager* GetDisplayManager() const;
 	UiTbc::Renderer* GetRenderer() const;
 	UiTbc::Painter* GetPainter() const;

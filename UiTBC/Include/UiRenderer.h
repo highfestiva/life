@@ -341,7 +341,7 @@ public:
 	void EnableWireframe(bool pEnable);
 	bool IsWireframeEnabled() const;
 	void EnablePixelShaders(bool pEnable);
-	bool IsPixelShadersEnabled() const;
+	virtual bool IsPixelShadersEnabled() const;
 
 	// A viewport is a portion of the screen where the graphics will be rendered.
 	// The center of the viewport is also the center of perspective. The viewport may
@@ -411,7 +411,7 @@ public:
 	// Adds ambient light. Used to implement self illumination in standard materials.
 	virtual void AddAmbience(float pRed, float pGreen, float pBlue);
 	// Sets the ambient light back to the value set in the last call to SetAmbientLight().
-	void ResetAmbientLight();
+	void ResetAmbientLight(bool pPropagate);
 
 	// Adds a light to the scene. 
 	// pLightRadius tells how close an object must be before it starts casting any

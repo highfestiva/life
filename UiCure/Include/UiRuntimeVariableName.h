@@ -26,6 +26,9 @@
 #define RTVAR_UI_3D_AMBIENTRED			"Ui.3D.AmbientRed"
 #define RTVAR_UI_3D_AMBIENTGREEN		"Ui.3D.AmbientGreen"
 #define RTVAR_UI_3D_AMBIENTBLUE			"Ui.3D.AmbientBlue"
+#define RTVAR_UI_3D_AMBIENTREDFACTOR		"Ui.3D.AmbientRedOffset"	// Internal.
+#define RTVAR_UI_3D_AMBIENTGREENFACTOR		"Ui.3D.AmbientGreenOffset"	// Internal.
+#define RTVAR_UI_3D_AMBIENTBLUEFACTOR		"Ui.3D.AmbientBlueOffset"	// Internal.
 #define RTVAR_UI_3D_ENABLETRILINEARFILTERING	"Ui.3D.EnableTrilinearFiltering"
 #define RTVAR_UI_3D_ENABLEBILINEARFILTERING	"Ui.3D.EnableBilinearFiltering"
 #define RTVAR_UI_3D_ENABLEMIPMAPPING		"Ui.3D.EnableMipMapping"

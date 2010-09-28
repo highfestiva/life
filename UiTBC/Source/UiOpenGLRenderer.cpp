@@ -139,6 +139,11 @@ void OpenGLRenderer::SetClearColor(const Color& pColor)
 	OGL_ASSERT();
 }
 
+bool OpenGLRenderer::IsPixelShadersEnabled() const
+{
+	return UiLepra::OpenGLExtensions::IsShaderAsmProgramsSupported() && Parent::IsPixelShadersEnabled();
+}
+
 void OpenGLRenderer::SetViewport(const PixelRect& pViewport)
 {
 	OGL_ASSERT();
@@ -1157,6 +1162,9 @@ unsigned OpenGLRenderer::RenderScene()
 		Material::EnableDrawMaterial(true);
 	}
 
+	float lAmbientRed, lAmbientGreen, lAmbientBlue;
+	GetAmbientLight(lAmbientRed, lAmbientGreen, lAmbientBlue);
+
 	if (GetShadowMode() != NO_SHADOWS && GetLightsEnabled())
 	{
 		UpdateShadowMaps();
@@ -1165,6 +1173,11 @@ unsigned OpenGLRenderer::RenderScene()
 		for (int i = 0; i < GetLightCount(); ++i)
 		{
 			::glDisable(GL_LIGHT0 + GetLightIndex(i));
+		}
+
+		if (IsOutlineRenderingEnabled())
+		{
+			SetAmbientLight(-10, -10, -10);
 		}
 
 		// Prepare the pixel shader materials.
@@ -1210,8 +1223,9 @@ unsigned OpenGLRenderer::RenderScene()
 	if (IsOutlineRenderingEnabled() && !IsWireframeEnabled())
 	{
 		Material::EnableDrawMaterial(false);
+		SetAmbientLight(1, 1, 1);
 		const Vector3DF lColor(mOutlineFillColor.GetRf(), mOutlineFillColor.GetGf(), mOutlineFillColor.GetBf());
-		TBC::GeometryBase::BasicMaterialSettings lMaterial(lColor, lColor, Vector3DF(), 1, 1, false);
+		TBC::GeometryBase::BasicMaterialSettings lMaterial(Vector3DF(1, 1, 1), lColor, Vector3DF(), 1, 1, false);
 		OpenGLMaterial::SetBasicMaterial(lMaterial, this);
 		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_SOLID));
 		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_SOLID_PXS), GetMaterial(MAT_SINGLE_COLOR_SOLID));
@@ -1221,6 +1235,7 @@ unsigned OpenGLRenderer::RenderScene()
 		::glDepthFunc(GL_LEQUAL);
 		::glDisable(GL_LIGHTING);
 		Material::EnableDrawMaterial(true);
+		SetAmbientLight(lAmbientRed, lAmbientGreen, lAmbientBlue);
 		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_SOLID));
 		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_SOLID_PXS), GetMaterial(MAT_SINGLE_COLOR_SOLID));
 		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_OUTLINE_BLENDED));
@@ -1229,6 +1244,8 @@ unsigned OpenGLRenderer::RenderScene()
 		//::glDepthFunc(GL_LESS);
 		lSkipOutlined = true;
 	}
+
+	SetAmbientLight(lAmbientRed, lAmbientGreen, lAmbientBlue);
 
 	{
 		// Prepare the pixel shader materials.
@@ -1243,13 +1260,16 @@ unsigned OpenGLRenderer::RenderScene()
 			{
 				continue;
 			}
+			if (i == MAT_SOLID_COUNT)
+			{
+				::glDisable(GL_STENCIL_TEST);
+			}
 			Material* lMaterial = GetMaterial((MaterialType)i);
 			if (lMaterial != 0)
 			{
 				Material::RenderAllGeometry(GetCurrentFrame(), lMaterial);
 			}
 		}
-		::glDisable(GL_STENCIL_TEST);
 	}
 
 	{
@@ -1299,6 +1319,7 @@ void OpenGLRenderer::RenderRelative(TBC::GeometryBase* pGeometry, const Quaterni
 		GetMaterial(lGeometryData->mMaterialType)->PreRender();
 		GetMaterial(lGeometryData->mMaterialType)->RenderGeometry(pGeometry);
 		GetMaterial(lGeometryData->mMaterialType)->PostRender();
+		ResetAmbientLight(false);
 	}
 
 	if (pLightOrientation)

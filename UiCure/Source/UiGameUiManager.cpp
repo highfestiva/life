@@ -308,8 +308,12 @@ void GameUiManager::Paint()
 	{
 		mCanvas->SetBuffer(0);
 		mPainter->SetDestCanvas(mCanvas);
+		float r, g, b;
+		mRenderer->GetAmbientLight(r, g, b);
+		mRenderer->SetAmbientLight(0.1f, 0.1f, 0.1f);
 		PreparePaint();
 		mDesktopWindow->Repaint(mPainter);
+		mRenderer->SetAmbientLight(r, g, b);
 	}
 }
 
@@ -329,6 +333,11 @@ void GameUiManager::EndRender()
 }
 
 
+
+Cure::RuntimeVariableScope* GameUiManager::GetVariableScope() const
+{
+	return mVariableScope;
+}
 
 UiLepra::DisplayManager* GameUiManager::GetDisplayManager() const
 {
@@ -488,6 +497,17 @@ void GameUiManager::UpdateSettings()
 	CURE_RTVAR_GET(lAmbientRed, =, mVariableScope, RTVAR_UI_3D_AMBIENTRED, 0.1);
 	CURE_RTVAR_GET(lAmbientGreen, =, mVariableScope, RTVAR_UI_3D_AMBIENTGREEN, 0.1);
 	CURE_RTVAR_GET(lAmbientBlue, =, mVariableScope, RTVAR_UI_3D_AMBIENTBLUE, 0.1);
+	CURE_RTVAR_TRYGET(lAmbientRed, *=, mVariableScope, RTVAR_UI_3D_AMBIENTREDFACTOR, 1.0);
+	CURE_RTVAR_TRYGET(lAmbientGreen, *=, mVariableScope, RTVAR_UI_3D_AMBIENTGREENFACTOR, 1.0);
+	CURE_RTVAR_TRYGET(lAmbientBlue, *=, mVariableScope, RTVAR_UI_3D_AMBIENTBLUEFACTOR, 1.0);
+	if (!mRenderer->IsPixelShadersEnabled())
+	{
+		// Without pixel shaders the scene becomes darker for some reason. At least on my computer...
+		lAmbientRed *= 1.5;
+		lAmbientGreen *= 1.5;
+		lAmbientBlue *= 1.5;
+	}
+
 	CURE_RTVAR_GET(lEnableTrilinearFiltering, =, mVariableScope, RTVAR_UI_3D_ENABLETRILINEARFILTERING, false);
 	CURE_RTVAR_GET(lEnableBilinearFiltering, =, mVariableScope, RTVAR_UI_3D_ENABLEBILINEARFILTERING, false);
 	CURE_RTVAR_GET(lEnableMipMapping, =, mVariableScope, RTVAR_UI_3D_ENABLEMIPMAPPING, true);

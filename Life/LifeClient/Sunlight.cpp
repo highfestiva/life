@@ -5,7 +5,9 @@
 
 
 #include "Sunlight.h"
+#include "../../Cure/Include/RuntimeVariable.h"
 #include "../../UiCure/Include/UiGameUiManager.h"
+#include "../../UiCure/Include/UiRuntimeVariableName.h"
 
 
 
@@ -49,6 +51,10 @@ void Sunlight::Tick(float pFactor)
 	const float g = r * (sin(mAngle)*0.05f + 0.95f);
 	const float b = r * (sin(mAngle)*0.1f + 0.9f);
 	mUiManager->GetRenderer()->SetLightColor(mLightId, r, g, b);
+	const double lAmbientFactor = sin(mAngle)*0.5+0.5;
+	CURE_RTVAR_INTERNAL(mUiManager->GetVariableScope(), RTVAR_UI_3D_AMBIENTREDFACTOR, lAmbientFactor);
+	CURE_RTVAR_INTERNAL(mUiManager->GetVariableScope(), RTVAR_UI_3D_AMBIENTGREENFACTOR, lAmbientFactor);
+	CURE_RTVAR_INTERNAL(mUiManager->GetVariableScope(), RTVAR_UI_3D_AMBIENTBLUEFACTOR, lAmbientFactor);
 }
 
 const Vector3DF& Sunlight::GetDirection() const

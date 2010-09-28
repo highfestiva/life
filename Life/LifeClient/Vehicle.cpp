@@ -267,28 +267,39 @@ void Vehicle::OnForceApplied(TBC::PhysicsManager::ForceFeedbackListener* pOtherO
 		{
 			bool lIsHighImpact = lObject->IsImpact(
 				GetManager()->GetGameManager()->GetPhysicsManager()->GetGravity(),
-				2.5f, pForce*0.5f, pTorque*2.5f);
+				0.9f, pForce, pTorque);
 			if (lIsHighImpact)
 			{
-				Cure::ContextObject* lPuff = GetManager()->GetGameManager()->CreateContextObject(_T("mud_particle_01"), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 				Vector3DF lPosition(pPosition);
 				const float lAngle = (float)Random::Uniform(0, PI*2);
-				lPosition.x += 0.4f * cos(lAngle);
-				lPosition.y += 0.4f * sin(lAngle);
+				lPosition.x += 0.2f * cos(lAngle);
+				lPosition.y += 0.2f * sin(lAngle);
 				lPosition.z += (float)Random::Uniform(+0.1f, +0.2f);
-				lPuff->SetInitialTransform(TransformationF(QuaternionF(), lPosition));
 				Vector3DF lRelativeVelocity(pRelativeVelocity);
-				Vector3DF lTorque(pTorque.Cross(Vector3DF(0, 0, -1)));
+				const Vector3DF lUp(0, 0, 1);
+				Vector3DF lTorque(pTorque.Cross(lUp));
 				const float lMassFactor = 1/GetMass();
-				lRelativeVelocity += lTorque * lMassFactor * 0.2f;
-				const float lLength = lRelativeVelocity.GetLength();
-				lRelativeVelocity.z += 1+lLength*0.2f;
-				lRelativeVelocity.x += (float)Random::Uniform(-lLength*0.05f, +lLength*0.05f);
-				lRelativeVelocity.y += (float)Random::Uniform(-lLength*0.05f, +lLength*0.05f);
-				lRelativeVelocity.z += (float)Random::Uniform(-lLength*0.02f, +lLength*0.05f);
-				((Props*)lPuff)->StartParticle(lRelativeVelocity);
-				lPuff->StartLoading();
-				mParticleTimer.ClearTimeDiff();
+				lRelativeVelocity += lTorque * lMassFactor * 0.1f;
+				Vector3DF lRotationSpeed;
+				GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyAngularVelocity(pOtherBodyId, lRotationSpeed);
+				const Vector3DF lRadius = pPosition - GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyPosition(pOtherBodyId);
+				const Vector3DF lRollSpeed(lRotationSpeed.Cross(lRadius) * 0.2f);
+				lPosition += lRollSpeed.GetNormalized(0.3f);
+				const float lRollLength = lRollSpeed.GetLength();
+				const float lCollisionLength = lRelativeVelocity.GetLength();
+				lRelativeVelocity += lRollSpeed;
+				lRelativeVelocity.z += lCollisionLength*0.2f + lRollLength*0.3f;
+				lRelativeVelocity.x += (float)Random::Uniform(-lCollisionLength*0.05f, +lCollisionLength*0.05f);
+				lRelativeVelocity.y += (float)Random::Uniform(-lCollisionLength*0.05f, +lCollisionLength*0.05f);
+				lRelativeVelocity.z += (float)Random::Uniform(-lCollisionLength*0.02f, +lCollisionLength*0.05f);
+				if (lRelativeVelocity.GetLengthSquared() < pRelativeVelocity.GetLengthSquared()*200*200)
+				{
+					Cure::ContextObject* lPuff = GetManager()->GetGameManager()->CreateContextObject(_T("mud_particle_01"), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+					lPuff->SetInitialTransform(TransformationF(QuaternionF(), lPosition));
+					((Props*)lPuff)->StartParticle(lRelativeVelocity);
+					lPuff->StartLoading();
+					mParticleTimer.ClearTimeDiff();
+				}
 			}
 		}
 	}
