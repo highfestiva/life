@@ -42,70 +42,53 @@ bool MasterServer::Run()
 			return false;
 		}
 	}
-	mSocket = new TcpListenerSocket(lAddress);
+	mSocket = new UdpSocket(lAddress, true);
 	if (!mSocket->IsOpen())
 	{
+		mLog.Errorf(_T("Address '%s' seems busy. Terminating."), lAcceptAddress.c_str());
 		return false;
 	}
 	mLog.Headline(_T("Up and running, awaiting connections."));
 	SystemManager::SetQuitRequestCallback(SystemManager::QuitRequestCallback(this, &MasterServer::OnQuitRequest));
-	TcpSocket* lConnectedSocket;
-	while (SystemManager::GetQuitRequest() == 0 && (lConnectedSocket = mSocket->Accept()) != 0)
+	while (SystemManager::GetQuitRequest() == 0 && mSocket)
 	{
-		CmdHandlerThread* lThread = new CmdHandlerThread(lConnectedSocket);
-		lThread->RequestSelfDestruct();
-		if (!lThread->Start(this, &MasterServer::CommandEntry))
+		uint8 lReceiveBuffer[1024];
+		SocketAddress lRemoteAddress;
+		int lReceivedBytes = mSocket->ReceiveFrom(lReceiveBuffer, sizeof(lReceiveBuffer), lRemoteAddress);
+		if (lReceivedBytes > 0)
 		{
-			mLog.Error(_T("Could not start worker thread!"));
-			return false;
+			HandleReceive(lRemoteAddress, lReceiveBuffer, lReceivedBytes);
 		}
 	}
 	mLog.Headline(_T("Terminating master server..."));
-	return false;
+	return true;
 }
 
 
 
 void MasterServer::OnQuitRequest(int)
 {
-	TcpListenerSocket* lSocket = mSocket;
+	UdpSocket* lSocket = mSocket;
 	mSocket = 0;
 	delete lSocket;
 }
 
-void MasterServer::CommandEntry()
+void MasterServer::HandleReceive(const SocketAddress& pRemoteAddress, const uint8* pCommand, unsigned pCommandLength)
 {
-	TcpSocket* lSocket = ((CmdHandlerThread*)Thread::GetCurrentThread())->mSocket;
-	uint8 lRawData[1024];
-	for (;;)
+	wstr lWideData;
+	if (!MasterServerNetworkParser::RawToStr(lWideData, pCommand, pCommandLength))
 	{
-		const int lRawSize = lSocket->Receive(lRawData, sizeof(lRawData));
-		if (lRawSize < 0)
-		{
-			break;
-		}
-		else if (lRawSize == 0)
-		{
-			mLog.Error(_T("Got no data from game server!"));
-			break;
-		}
-		wstr lWideData;
-		if (!MasterServerNetworkParser::RawToStr(lWideData, lRawData, lRawSize))
-		{
-			mLog.Error(_T("Got garbled data from game server!"));
-			break;
-		}
-		const str lCommandLine = strutil::Encode(lWideData);
-		if (!HandleCommandLine(lSocket, lCommandLine))
-		{
-			mLog.Error(_T("Got invalid command from game server!"));
-			break;
-		}
+		mLog.Error(_T("Got garbled data from game server!"));
+		return;
 	}
-	delete lSocket;
+	const str lCommandLine = strutil::Encode(lWideData);
+	if (!HandleCommandLine(pRemoteAddress, lCommandLine))
+	{
+		mLog.Error(_T("Got invalid command from game server!"));
+	}
 }
 
-bool MasterServer::HandleCommandLine(TcpSocket* pSocket, const str& pCommandLine)
+bool MasterServer::HandleCommandLine(const SocketAddress& pRemoteAddress, const str& pCommandLine)
 {
 	ServerInfo lServerInfo;
 	if (!MasterServerNetworkParser::ExtractServerInfo(pCommandLine, lServerInfo))
@@ -119,12 +102,12 @@ bool MasterServer::HandleCommandLine(TcpSocket* pSocket, const str& pCommandLine
 			mLog.Errorf(_T("Got bad parameters to command (%s) from game server!"), lServerInfo.mCommand.c_str());
 			return false;
 		}
-		return RegisterGameServer(!lServerInfo.mRemove, pSocket, lServerInfo.mName, lServerInfo.mPort,
+		return RegisterGameServer(!lServerInfo.mRemove, pRemoteAddress, lServerInfo.mName, lServerInfo.mPort,
 			lServerInfo.mPlayerCount, lServerInfo.mId);
 	}
 	else if (lServerInfo.mCommand == _T(MASTER_SERVER_DSL))
 	{
-		return SendServerList(pSocket);
+		return SendServerList(pRemoteAddress);
 	}
 	else
 	{
@@ -133,11 +116,11 @@ bool MasterServer::HandleCommandLine(TcpSocket* pSocket, const str& pCommandLine
 	return false;
 }
 
-bool MasterServer::RegisterGameServer(bool pActivate, TcpSocket* pSocket, const str& pName, int pPort,
+bool MasterServer::RegisterGameServer(bool pActivate, const SocketAddress& pRemoteAddress, const str& pName, int pPort,
 	int pPlayerCount, const str& pId)
 {
 	bool lOk = false;
-	const str lAddress = pSocket->GetTargetAddress().GetIP().GetAsString() + _T(":") + strutil::IntToString(pPort, 10);
+	const str lAddress = pRemoteAddress.GetAsString();
 
 	{
 		ScopeLock lLock(&mLock);
@@ -196,13 +179,13 @@ bool MasterServer::RegisterGameServer(bool pActivate, TcpSocket* pSocket, const 
 
 	if (lOk)
 	{
-		Send(pSocket, _T("OK"));
+		Send(pRemoteAddress, _T("OK"));
 		return true;
 	}
 	return false;
 }
 
-bool MasterServer::SendServerList(TcpSocket* pSocket)
+bool MasterServer::SendServerList(const SocketAddress& pRemoteAddress)
 {
 	str lServerList;
 	{
@@ -215,10 +198,10 @@ bool MasterServer::SendServerList(TcpSocket* pSocket)
 		}
 	}
 	lServerList += _T("OK");
-	return Send(pSocket, lServerList);
+	return Send(pRemoteAddress, lServerList);
 }
 
-bool MasterServer::Send(TcpSocket* pSocket, const str& pData)
+bool MasterServer::Send(const SocketAddress& pRemoteAddress, const str& pData)
 {
 	uint8 lRawData[1024];
 	if (pData.size() > sizeof(lRawData)/3)
@@ -227,20 +210,12 @@ bool MasterServer::Send(TcpSocket* pSocket, const str& pData)
 		return false;
 	}
 	unsigned lSendByteCount = MasterServerNetworkParser::StrToRaw(lRawData, wstrutil::Encode(pData));
-	if ((unsigned)pSocket->Send(lRawData, lSendByteCount) != lSendByteCount)
+	if ((unsigned)mSocket->SendTo(lRawData, lSendByteCount, pRemoteAddress) != lSendByteCount)
 	{
 		mLog.Warning(_T("Transmission to game server failed."));
 		return false;
 	}
 	return true;
-}
-
-
-
-MasterServer::CmdHandlerThread::CmdHandlerThread(TcpSocket* pSocket):
-	Parent(_T("MasterServerCmdSlave")),
-	mSocket(pSocket)
-{
 }
 
 

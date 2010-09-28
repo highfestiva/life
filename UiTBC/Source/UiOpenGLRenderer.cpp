@@ -122,7 +122,7 @@ void OpenGLRenderer::Clear(unsigned pClearFlags)
 		mGLClearMask |= GL_ACCUM_BUFFER_BIT;
 	}
 
-	if (GetShadowsEnabled() == true)
+	if (GetShadowMode() != UiTbc::Renderer::NO_SHADOWS)
 	{
 		// Always clear the stencil buffer if shadows are activated.
 		mGLClearMask |= GL_STENCIL_BUFFER_BIT;
@@ -137,6 +137,11 @@ void OpenGLRenderer::SetClearColor(const Color& pColor)
 {
 	::glClearColor(pColor.GetRf(), pColor.GetGf(), pColor.GetBf(), 1.0f);
 	OGL_ASSERT();
+}
+
+bool OpenGLRenderer::IsPixelShadersEnabled() const
+{
+	return UiLepra::OpenGLExtensions::IsShaderAsmProgramsSupported() && Parent::IsPixelShadersEnabled();
 }
 
 void OpenGLRenderer::SetViewport(const PixelRect& pViewport)
@@ -177,16 +182,9 @@ void OpenGLRenderer::ResetClippingRect()
 	OGL_ASSERT();
 }
 
-void OpenGLRenderer::SetShadowsEnabled(bool pEnabled, ShadowHint pHint)
+void OpenGLRenderer::SetShadowMode(Shadows pShadowMode, ShadowHint pHint)
 {
-	if (UiLepra::OpenGLExtensions::ShadowMapsSupported() == true)
-	{
-		Parent::SetShadowsEnabled(pEnabled, pHint);
-	}
-	else
-	{
-		Parent::SetShadowsEnabled(pEnabled, SH_VOLUMES_ONLY);
-	}
+	Parent::SetShadowMode(pShadowMode, UiLepra::OpenGLExtensions::IsShadowMapsSupported()? pHint : SH_VOLUMES_ONLY);
 }
 
 void OpenGLRenderer::SetDepthWriteEnabled(bool pEnabled)
@@ -519,7 +517,7 @@ void OpenGLRenderer::BindMap(int pMapType, TextureData* pTextureData, Texture* p
 {
 	assert(pMapType >= 0 && pMapType < Texture::NUM_MAPS);
 
-	bool lCompress = UiLepra::OpenGLExtensions::CompressedTexturesSupported() &&
+	bool lCompress = UiLepra::OpenGLExtensions::IsCompressedTexturesSupported() &&
 					GetCompressedTexturesEnabled();
 
 	if (pTextureData->mTMapID[pMapType] == mTMapIDManager.GetInvalidId())
@@ -555,7 +553,7 @@ void OpenGLRenderer::BindMap(int pMapType, TextureData* pTextureData, Texture* p
 void OpenGLRenderer::BindCubeMap(TextureData* pTextureData, Texture* pTexture)
 {
 	// Compress textures if possible.
-	bool lCompress = UiLepra::OpenGLExtensions::CompressedTexturesSupported() &&
+	bool lCompress = UiLepra::OpenGLExtensions::IsCompressedTexturesSupported() &&
 				GetCompressedTexturesEnabled();
 
 	int lSize = pTexture->GetCubeMapPosX(0)->GetPixelByteSize();
@@ -670,7 +668,7 @@ void OpenGLRenderer::BindGeometry(TBC::GeometryBase* pGeometry,
 
 	if (pGeometry->IsGeometryReference() == false)
 	{
-		if (UiLepra::OpenGLExtensions::BufferObjectsSupported() == true)
+		if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
 		{
 			OGLGeometryData* lGeometryData = (OGLGeometryData*)pGeometry->GetRendererData();
 
@@ -711,6 +709,7 @@ void OpenGLRenderer::BindGeometry(TBC::GeometryBase* pGeometry,
 			switch(pGeometry->GetGeometryVolatility())
 			{
 			case TBC::GeometryBase::GEOM_STATIC:
+			case TBC::GeometryBase::GEOM_SEMI_STATIC:
 				lGLHint = GL_STATIC_DRAW;
 				break;
 			case TBC::GeometryBase::GEOM_DYNAMIC:
@@ -825,7 +824,7 @@ bool OpenGLRenderer::BindShadowGeometry(UiTbc::ShadowVolume* pShadowVolume, Ligh
 	bool lOK = false;
 
 	OGLGeometryData* lShadowGeom = (OGLGeometryData*)pShadowVolume->GetRendererData();
-	if (UiLepra::OpenGLExtensions::BufferObjectsSupported() == true)
+	if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
 	{
 		// Upload geometry to the GFX hardware.
 
@@ -843,6 +842,7 @@ bool OpenGLRenderer::BindShadowGeometry(UiTbc::ShadowVolume* pShadowVolume, Ligh
 		switch(pShadowVolume->GetGeometryVolatility())
 		{
 		case TBC::GeometryBase::GEOM_STATIC:
+		case TBC::GeometryBase::GEOM_SEMI_STATIC:
 			if (pLightHint == LIGHT_MOVABLE)
 				lGLHint = GL_STREAM_DRAW;
 			else
@@ -899,7 +899,7 @@ void OpenGLRenderer::UpdateGeometry(GeometryID pGeometryID)
 		
 		// Force update of shadow volumes.
 
-		if (UiLepra::OpenGLExtensions::BufferObjectsSupported() == true && lGeometry->IsGeometryReference() == false)
+		if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true && lGeometry->IsGeometryReference() == false)
 		{
 			int lVertexCount = lGeometry->GetVertexCount();
 
@@ -925,7 +925,7 @@ void OpenGLRenderer::UpdateGeometry(GeometryID pGeometryID)
 
 				// Only reset the flag if there are no shadows to update.
 				// The flag will be reset when the shadows are updated.
-				if (lGeomData->mShadow == NO_SHADOWS)
+				if (lGeomData->mShadow <= NO_SHADOWS)
 				{
 					lGeometry->SetVertexDataChanged(false);
 				}
@@ -992,7 +992,7 @@ void OpenGLRenderer::ReleaseGeometry(TBC::GeometryBase* pUserGeometry, GeomRelea
 	OGLGeometryData* lGeometry = (OGLGeometryData*)pUserGeometry->GetRendererData();
 
 	if (pUserGeometry->IsGeometryReference() == false && 
-		UiLepra::OpenGLExtensions::BufferObjectsSupported() == true)
+		UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
 	{
 		GLuint lVertexBufferID = (GLuint)lGeometry->mVertexBufferID;
 		GLuint lIndexBufferID  = (GLuint)lGeometry->mIndexBufferID;
@@ -1059,7 +1059,7 @@ bool OpenGLRenderer::ChangeMaterial(GeometryID pGeometryID, MaterialType pMateri
 
 bool OpenGLRenderer::PreRender(TBC::GeometryBase* pGeometry)
 {
-	if (CheckCamCulling(pGeometry->GetTransformation().GetPosition(), pGeometry->GetBoundingRadius()))
+	if (pGeometry->IsSimpleObject() || CheckCamCulling(pGeometry->GetTransformation().GetPosition(), pGeometry->GetBoundingRadius()))
 	{
 		mVisibleTriangleCount += pGeometry->GetTriangleCount();
 		// Transform the geometry.
@@ -1162,7 +1162,10 @@ unsigned OpenGLRenderer::RenderScene()
 		Material::EnableDrawMaterial(true);
 	}
 
-	if (GetShadowsEnabled() && GetLightsEnabled())
+	float lAmbientRed, lAmbientGreen, lAmbientBlue;
+	GetAmbientLight(lAmbientRed, lAmbientGreen, lAmbientBlue);
+
+	if (GetShadowMode() != NO_SHADOWS && GetLightsEnabled())
 	{
 		UpdateShadowMaps();
 
@@ -1170,6 +1173,11 @@ unsigned OpenGLRenderer::RenderScene()
 		for (int i = 0; i < GetLightCount(); ++i)
 		{
 			::glDisable(GL_LIGHT0 + GetLightIndex(i));
+		}
+
+		if (IsOutlineRenderingEnabled())
+		{
+			SetAmbientLight(-10, -10, -10);
 		}
 
 		// Prepare the pixel shader materials.
@@ -1180,7 +1188,7 @@ unsigned OpenGLRenderer::RenderScene()
 		{
 			if (GetMaterial((MaterialType)i) != 0)
 			{
-				GetMaterial((MaterialType)i)->RenderAllGeometry(GetCurrentFrame());
+				Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial((MaterialType)i));
 			}
 		}
 
@@ -1215,23 +1223,29 @@ unsigned OpenGLRenderer::RenderScene()
 	if (IsOutlineRenderingEnabled() && !IsWireframeEnabled())
 	{
 		Material::EnableDrawMaterial(false);
+		SetAmbientLight(1, 1, 1);
 		const Vector3DF lColor(mOutlineFillColor.GetRf(), mOutlineFillColor.GetGf(), mOutlineFillColor.GetBf());
-		TBC::GeometryBase::BasicMaterialSettings lMaterial(lColor, lColor, Vector3DF(), 1, 1, false);
+		TBC::GeometryBase::BasicMaterialSettings lMaterial(Vector3DF(1, 1, 1), lColor, Vector3DF(), 1, 1, false);
 		OpenGLMaterial::SetBasicMaterial(lMaterial, this);
-		GetMaterial(MAT_SINGLE_COLOR_SOLID)->RenderAllGeometry(GetCurrentFrame());
-		GetMaterial(MAT_SINGLE_COLOR_OUTLINE_BLENDED)->RenderAllGeometry(GetCurrentFrame());
+		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_SOLID));
+		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_SOLID_PXS), GetMaterial(MAT_SINGLE_COLOR_SOLID));
+		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_OUTLINE_BLENDED));
 		::glCullFace(GL_FRONT);
 		::glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		::glDepthFunc(GL_LEQUAL);
 		::glDisable(GL_LIGHTING);
 		Material::EnableDrawMaterial(true);
-		GetMaterial(MAT_SINGLE_COLOR_SOLID)->RenderAllGeometry(GetCurrentFrame());
-		GetMaterial(MAT_SINGLE_COLOR_OUTLINE_BLENDED)->RenderAllGeometry(GetCurrentFrame());
+		SetAmbientLight(lAmbientRed, lAmbientGreen, lAmbientBlue);
+		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_SOLID));
+		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_SOLID_PXS), GetMaterial(MAT_SINGLE_COLOR_SOLID));
+		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_OUTLINE_BLENDED));
 		::glCullFace(GL_BACK);
 		::glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		//::glDepthFunc(GL_LESS);
 		lSkipOutlined = true;
 	}
+
+	SetAmbientLight(lAmbientRed, lAmbientGreen, lAmbientBlue);
 
 	{
 		// Prepare the pixel shader materials.
@@ -1241,17 +1255,21 @@ unsigned OpenGLRenderer::RenderScene()
 		// This renders the scene.
 		for (int i = 0; i < (int)MAT_COUNT; ++i)
 		{
-			if (lSkipOutlined && (i == MAT_SINGLE_COLOR_SOLID || i == MAT_SINGLE_COLOR_OUTLINE_BLENDED))
+			if (lSkipOutlined && (i == MAT_SINGLE_COLOR_SOLID || i == MAT_SINGLE_COLOR_OUTLINE_BLENDED ||
+				i == MAT_SINGLE_COLOR_SOLID_PXS))
 			{
 				continue;
+			}
+			if (i == MAT_SOLID_COUNT)
+			{
+				::glDisable(GL_STENCIL_TEST);
 			}
 			Material* lMaterial = GetMaterial((MaterialType)i);
 			if (lMaterial != 0)
 			{
-				lMaterial->RenderAllGeometry(GetCurrentFrame());
+				Material::RenderAllGeometry(GetCurrentFrame(), lMaterial);
 			}
 		}
-		::glDisable(GL_STENCIL_TEST);
 	}
 
 	{
@@ -1301,6 +1319,7 @@ void OpenGLRenderer::RenderRelative(TBC::GeometryBase* pGeometry, const Quaterni
 		GetMaterial(lGeometryData->mMaterialType)->PreRender();
 		GetMaterial(lGeometryData->mMaterialType)->RenderGeometry(pGeometry);
 		GetMaterial(lGeometryData->mMaterialType)->PostRender();
+		ResetAmbientLight(false);
 	}
 
 	if (pLightOrientation)
@@ -1488,7 +1507,7 @@ void OpenGLRenderer::RenderShadowVolumes()
 				(GetCameraTransformation().InverseTransform(lShadowVolume->GetTransformation())).GetAs4x4TransposeMatrix(lModelViewMatrix);
 				glLoadMatrixf(lModelViewMatrix);
 
-				if (UiLepra::OpenGLExtensions::BufferObjectsSupported() == true)
+				if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
 				{
 					GLuint lVertexBufferID = (GLuint)lShadowGeometry->mVertexBufferID;
 					GLuint lIndexBufferID  = (GLuint)lShadowGeometry->mIndexBufferID;
@@ -1646,7 +1665,7 @@ int OpenGLRenderer::RenderShadowMaps()
 				glTexGenfv(GL_R, GL_EYE_PLANE, slRPlane);
 				glTexGenfv(GL_Q, GL_EYE_PLANE, slQPlane);
 
-				if (UiLepra::OpenGLExtensions::BufferObjectsSupported() == true)
+				if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
 				{
 					GLuint lVertexBufferID = (GLuint)lGeometry->mVertexBufferID;
 					GLuint lIndexBufferID  = (GLuint)lGeometry->mIndexBufferID;
@@ -1752,13 +1771,13 @@ void OpenGLRenderer::RegenerateShadowMap(LightData* pLight)
 	{
 		OGLGeometryData* lGeometry = (OGLGeometryData*)*lIter;
 
-		if (lGeometry->mShadow == CAST_SHADOWS)
+		if (lGeometry->mShadow >= CAST_SHADOWS)
 		{
 			float lModelViewMatrix[16];
 			(lLightTransformation.InverseTransform(lGeometry->mGeometry->GetTransformation())).GetAs4x4TransposeMatrix(lModelViewMatrix);
 			glLoadMatrixf(lModelViewMatrix);
 
-			if (UiLepra::OpenGLExtensions::BufferObjectsSupported() == true)
+			if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
 			{
 				GLuint lVertexBufferID = (GLuint)lGeometry->mVertexBufferID;
 				GLuint lIndexBufferID  = (GLuint)lGeometry->mIndexBufferID;

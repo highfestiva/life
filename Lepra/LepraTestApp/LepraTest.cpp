@@ -1214,8 +1214,8 @@ bool TestNetwork(const LogDecorator& pAccount)
 		lContext = _T("UDP exclusive bind");
 		SocketAddress lAddress;
 		lAddress.Resolve(_T(":1025"));
-		UdpSocket lSocket1(lAddress);
-		UdpSocket lSocket2(lAddress);
+		UdpSocket lSocket1(lAddress, true);
+		UdpSocket lSocket2(lAddress, true);
 		lTestOk = (lSocket1.IsOpen() && !lSocket2.IsOpen());
 		assert(lTestOk);
 	}
@@ -1227,9 +1227,9 @@ bool TestNetwork(const LogDecorator& pAccount)
 		lReceiveAddress.Resolve(_T(":47346"));
 		SocketAddress lSendAddress;
 		lSendAddress.Resolve(_T(":47347"));
-		UdpSocket lReceiver(lReceiveAddress);
+		UdpSocket lReceiver(lReceiveAddress, true);
 		assert(lReceiver.IsOpen());
-		UdpSocket lSender(lSendAddress);
+		UdpSocket lSender(lSendAddress, true);
 		assert(lSender.IsOpen());
 		lTestOk = (lSender.SendTo((const uint8*)"Hello World", 12, lReceiveAddress) == 12);
 		assert(lTestOk);
@@ -1252,7 +1252,7 @@ bool TestNetwork(const LogDecorator& pAccount)
 		lReceiveAddress.Resolve(_T(":47346"));
 		SocketAddress lSendAddress;
 		lSendAddress.Resolve(_T(":47347"));
-		TcpListenerSocket lServer(lReceiveAddress);
+		TcpListenerSocket lServer(lReceiveAddress, true);
 		lTestOk = lServer.IsOpen();
 		assert(lTestOk);
 
@@ -1619,7 +1619,7 @@ bool DualSocketClientTest::Test()
 		{
 			lContext = _T("server did not drop client TCP connection in time");
 			Thread::Sleep(0.01);
-			TcpVSocket* lConnectorSocket = lServerTcpMuxSocket->PopReceiverSocket(true);
+			TcpVSocket* lConnectorSocket = lServerTcpMuxSocket->PopReceiverSocket();
 			if (lConnectorSocket != 0)	// Already dropped?
 			{
 				char a[1];
@@ -1783,7 +1783,7 @@ template<class _Server> bool DualSocketClientTest::TestClientServerTransmit(str&
 		typename _Server::VSocket* lSocket = 0;
 		for (int x = 0; lSocket == 0 && x < 500; ++x)
 		{
-			lSocket = pServer.mServerMuxSocket.PopReceiverSocket(pSafe);
+			lSocket = pServer.mServerMuxSocket.PopReceiverSocket();
 			Thread::Sleep(0.001f);
 		}
 		lTestOk = (lSocket != 0 && lSocket == pServer.mServerSocket);
@@ -2336,7 +2336,7 @@ bool TestPerformance(const LogDecorator& pAccount)
 				LEPRA_MEASURE_SCOPE(UdpSocket);
 				SocketAddress lAddress;
 				lAddress.Resolve(_T(":46666"));
-				UdpSocket lSocket(lAddress);
+				UdpSocket lSocket(lAddress, true);
 				{
 					LEPRA_MEASURE_SCOPE(SendTo);
 					lSocket.SendTo((const uint8*)"Hello World", 12, lAddress);

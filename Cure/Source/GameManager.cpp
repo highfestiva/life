@@ -487,29 +487,10 @@ void GameManager::PhysicsTick()
 
 	{
 		LEPRA_MEASURE_SCOPE(Handles);
-		HandleWorldBoundaries();
 		mContext->HandleIdledBodies();
 		mContext->HandlePhysicsSend();
+		HandleWorldBoundaries();
 	}
-}
-
-bool GameManager::IsHighImpact(float pScaleFactor, const ContextObject* pObject, const Vector3DF& pForce,
-	const Vector3DF& pTorque) const
-{
-	const float lMassFactor = 1/pObject->GetMass();
-	Vector3DF lGravityDirection = GetPhysicsManager()->GetGravity();
-	lGravityDirection.Normalize();
-	// High angle against direction of gravity means high impact.
-	const float lForceWithoutGravityFactor = (pForce * lGravityDirection) - pForce.Cross(lGravityDirection).GetLength();
-	const float lNormalizedForceFactor = lForceWithoutGravityFactor * lMassFactor;
-	const float lNormalizedTorqueFactor = pTorque.GetLength() * lMassFactor;
-	bool lIsHighImpact = (lNormalizedForceFactor < -16*pScaleFactor || lNormalizedForceFactor >= 2*pScaleFactor || lNormalizedTorqueFactor > 3*pScaleFactor);
-	if (lIsHighImpact)
-	{
-		log_volatile(mLog.Tracef(_T("Collided hard with something dynamic. F=%f, T=%f"),
-			lNormalizedForceFactor, lNormalizedTorqueFactor));
-	}
-	return (lIsHighImpact);
 }
 
 
@@ -528,6 +509,7 @@ void GameManager::ScriptPhysicsTick()
 {
 	//if (mTime->GetAffordedPhysicsStepCount() > 0)
 	{
+		mContext->HandlePostKill();
 		mContext->TickPhysics();
 	}
 }

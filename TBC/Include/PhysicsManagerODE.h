@@ -271,19 +271,34 @@ private:
 	public:
 		inline JointInfo() :
 			mListener1(0),
-			mListener2(0)
+			mListener2(0),
+			mBody1Id(0),
+			mBody2Id(0)
 		{
+		}
+
+		inline bool IsBody1Static(PhysicsManagerODE* pManager) const
+		{
+			return !mBody1Id || pManager->IsStaticBody(mBody1Id);
+		}
+		inline bool IsBody2Static(PhysicsManagerODE* pManager) const
+		{
+			return !mBody2Id || pManager->IsStaticBody(mBody2Id);
 		}
 
 		dJointID mJointID;
 		JointType mType;
-		bool mBody1Static;
-		bool mBody2Static;
+		BodyID mBody1Id;
+		BodyID mBody2Id;
 		dJointFeedback mFeedback;
 		JointList::iterator mListIter;
 		ForceFeedbackListener* mListener1;
 		ForceFeedbackListener* mListener2;
+		Vector3DF mPosition;
+		Vector3DF mRelativeVelocity;
 	};
+
+	void RemoveJoint(JointInfo* pJointInfo);
 
 	bool GetHingeDiff(BodyID pBodyId, JointID pJointId, Joint1Diff& pDiff) const;
 	bool SetHingeDiff(BodyID pBodyId, JointID pJointId, const Joint1Diff& pDiff);

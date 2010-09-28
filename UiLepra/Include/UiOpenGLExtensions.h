@@ -248,6 +248,23 @@ public:
 
 	static void InitExtensions();
 
+	static bool IsFrameBufferObjectsSupported();
+	static bool IsBufferObjectsSupported();	// Returns true if the OpenGL version is at least 1.5.
+	static bool IsAnisotropicFilteringSupported();
+	static bool IsCompressedTexturesSupported();
+	static bool IsMultiTextureSupported();
+	static bool IsShadowMapsSupported();	// Returns true if the OpenGL version is at least 1.4.
+	static bool IsShaderAsmProgramsSupported();
+	static bool IsShaderCProgramsSupported();
+
+	static float GetMaxAnisotropy();
+	static void SetAnisotropy(float pAmountAnisotropy);
+
+	static bool IsVSyncEnabled();
+	static bool SetVSyncEnabled(bool pEnabled);
+
+protected:
+private:
 	// Sets the functions pointers to null for the corresponding extension.
 	static void ClearFrameBufferObjectFunctions();
 	static void ClearBufferObjectFunctions();
@@ -261,47 +278,17 @@ public:
 	static bool CheckShaderProgramFunctions();
 	static bool CheckShaderFunctions();
 
-	static inline bool FrameBufferObjectsSupported();
+	static bool mIsGLVersion14;
+	static bool mIsGLVersion15;
+	static bool mIsFrameBufferObjectsSupported;
+	static bool mIsBufferObjectsSupported;
+	static bool mIsAnisotropicFilteringSupported;
+	static bool mIsCompressedTexturesSupported;
+	static bool mIsMultiTextureSupported;
+	static bool mIsShaderAsmProgramsSupported;
+	static bool mIsShaderCProgramsSupported;
 
-	// Returns true if the OpenGL version is at least 1.5.
-	static inline bool BufferObjectsSupported();
-	static inline bool AnisotropicFilteringSupported();
-	static inline bool CompressedTexturesSupported();
-	static inline bool MultiTextureSupported();
-
-	// Returns true if the OpenGL version is at least 1.4.
-	static inline bool ShadowMapsSupported();
-
-	// Returns true if vertex and fragment programs (assembly language) 
-	// are supported.
-	static inline bool ShaderProgramsSupported();
-	
-	// C-style shaders...
-	static inline bool ShadersSupported();
-
-	static inline float GetMaxAnisotropy();
-	static void SetAnisotropy(float pAmountAnisotropy);
-
-	// VSync...
-	static inline bool VSyncSupported();
-	static inline bool IsVSyncEnabled();
-	static bool SetVSyncEnabled(bool pEnabled);
-
-protected:
-private:
-
-	static bool smGLVersion14;
-	static bool smGLVersion15;
-	static bool smFrameBufferObjectsSupported;
-	static bool smBufferObjectsSupported;
-	static bool smAnisotropicFilteringSupported;
-	static bool smCompressedTexturesSupported;
-	static bool smMultiTextureSupported;
-	static bool smShaderProgramsSupported;
-	static bool smShadersSupported;
-	static bool smVSyncSupported;
-
-	static float smMaxAnisotropy;
+	static float mMaxAnisotropy;
 
 #ifdef LEPRA_WINDOWS
 	// Vsync on/off.
@@ -309,66 +296,6 @@ private:
 	static PFNWGLGETSWAPINTERVALEXTPROC wglGetSwapIntervalEXT;
 #endif
 };
-
-bool OpenGLExtensions::FrameBufferObjectsSupported()
-{
-	return smFrameBufferObjectsSupported;
-}
-
-bool OpenGLExtensions::BufferObjectsSupported()
-{
-	return smBufferObjectsSupported;
-}
-
-bool OpenGLExtensions::AnisotropicFilteringSupported()
-{
-	return smAnisotropicFilteringSupported;
-}
-
-bool OpenGLExtensions::CompressedTexturesSupported()
-{
-	return smCompressedTexturesSupported;
-}
-
-bool OpenGLExtensions::MultiTextureSupported()
-{
-	return smMultiTextureSupported;
-}
-
-bool OpenGLExtensions::ShadowMapsSupported()
-{
-	return smGLVersion14;
-}
-
-bool OpenGLExtensions::ShaderProgramsSupported()
-{
-	return smShaderProgramsSupported;
-}
-
-bool OpenGLExtensions::ShadersSupported()
-{
-	return smShadersSupported;
-}
-
-float OpenGLExtensions::GetMaxAnisotropy()
-{
-	return smMaxAnisotropy;
-}
-
-bool OpenGLExtensions::VSyncSupported()
-{
-	return smVSyncSupported;
-}
-
-bool OpenGLExtensions::IsVSyncEnabled()
-{
-#ifdef LEPRA_WINDOWS
-	return (wglGetSwapIntervalEXT() > 0);
-#else
-#pragma message("Warning: OpenGLExtensions::IsVSyncEnabled() is using default behaviour.")
-	return true;
-#endif
-}
 
 
 

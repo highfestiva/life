@@ -10,9 +10,12 @@
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../../Cure/Include/TimeManager.h"
 #include "../../Lepra/Include/HashUtil.h"
+#include "../../Lepra/Include/Random.h"
 #include "../../TBC/Include/ChunkyBoneGeometry.h"
 #include "../../TBC/Include/ChunkyPhysics.h"
 #include "../../TBC/Include/PhysicsEngine.h"
+#include "GameClientSlaveManager.h"
+#include "Props.h"
 #include "RtVar.h"
 
 
@@ -42,6 +45,7 @@ Vehicle::~Vehicle()
 void Vehicle::OnPhysicsTick()
 {
 	Parent::OnPhysicsTick();
+	mParticleTimer.UpdateTimer();
 
 	const TBC::ChunkyPhysics* lPhysics = GetPhysics();
 	const UiTbc::ChunkyClass* lClass = GetClass();
@@ -226,6 +230,77 @@ void Vehicle::OnPhysicsTick()
 			mUiManager->GetSoundManager()->SetSoundPosition(lEngineSound->GetData(), lPosition, lVelocity);
 			mUiManager->GetSoundManager()->SetVolume(lEngineSound->GetData(), lVolume);
 			mUiManager->GetSoundManager()->SetPitch(lEngineSound->GetData(), lPitch * lRtrPitch);
+		}
+	}
+}
+
+
+
+void Vehicle::OnForceApplied(TBC::PhysicsManager::ForceFeedbackListener* pOtherObject,
+	TBC::PhysicsManager::BodyID pOwnBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
+	const Vector3DF& pForce, const Vector3DF& pTorque,
+	const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity)
+{
+	Parent::OnForceApplied(pOtherObject, pOwnBodyId, pOtherBodyId, pForce, pTorque, pPosition, pRelativeVelocity);
+
+	bool lParticlesEnabled;
+	CURE_RTVAR_GET(lParticlesEnabled, =, GetManager()->GetGameManager()->GetVariableScope(), RTVAR_UI_3D_ENABLEPARTICLES, false);
+	if (!lParticlesEnabled)
+	{
+		return;
+	}
+	// Particle emitter code. TODO: separate somewhat. Cleanup.
+	if (mParticleTimer.GetTimeDiff() < 0.01f)
+	{
+		return;
+	}
+	const float lRelativeSpeedLimit = 3;
+	if (pRelativeVelocity.GetLengthSquared() < lRelativeSpeedLimit*lRelativeSpeedLimit)
+	{
+		return;
+	}
+	if (GetClassId() == _T("level_01") && GetPhysics()->GetBoneGeometry(0)->GetBodyId() == pOwnBodyId)	// Did someone collide with ground?
+	{
+		const float lDistance = 50;	// Only show gravel particles inside this distance.
+		ContextObject* lObject = (ContextObject*)pOtherObject;
+		if (((GameClientSlaveManager*)GetManager()->GetGameManager())->IsInCameraRange(lObject, lDistance))
+		{
+			bool lIsHighImpact = lObject->IsImpact(
+				GetManager()->GetGameManager()->GetPhysicsManager()->GetGravity(),
+				0.9f, pForce, pTorque);
+			if (lIsHighImpact)
+			{
+				Vector3DF lPosition(pPosition);
+				const float lAngle = (float)Random::Uniform(0, PI*2);
+				lPosition.x += 0.2f * cos(lAngle);
+				lPosition.y += 0.2f * sin(lAngle);
+				lPosition.z += (float)Random::Uniform(+0.1f, +0.2f);
+				Vector3DF lRelativeVelocity(pRelativeVelocity);
+				const Vector3DF lUp(0, 0, 1);
+				Vector3DF lTorque(pTorque.Cross(lUp));
+				const float lMassFactor = 1/GetMass();
+				lRelativeVelocity += lTorque * lMassFactor * 0.1f;
+				Vector3DF lRotationSpeed;
+				GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyAngularVelocity(pOtherBodyId, lRotationSpeed);
+				const Vector3DF lRadius = pPosition - GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyPosition(pOtherBodyId);
+				const Vector3DF lRollSpeed(lRotationSpeed.Cross(lRadius) * 0.2f);
+				lPosition += lRollSpeed.GetNormalized(0.3f);
+				const float lRollLength = lRollSpeed.GetLength();
+				const float lCollisionLength = lRelativeVelocity.GetLength();
+				lRelativeVelocity += lRollSpeed;
+				lRelativeVelocity.z += lCollisionLength*0.2f + lRollLength*0.3f;
+				lRelativeVelocity.x += (float)Random::Uniform(-lCollisionLength*0.05f, +lCollisionLength*0.05f);
+				lRelativeVelocity.y += (float)Random::Uniform(-lCollisionLength*0.05f, +lCollisionLength*0.05f);
+				lRelativeVelocity.z += (float)Random::Uniform(-lCollisionLength*0.02f, +lCollisionLength*0.05f);
+				if (lRelativeVelocity.GetLengthSquared() < pRelativeVelocity.GetLengthSquared()*200*200)
+				{
+					Cure::ContextObject* lPuff = GetManager()->GetGameManager()->CreateContextObject(_T("mud_particle_01"), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+					lPuff->SetInitialTransform(TransformationF(QuaternionF(), lPosition));
+					((Props*)lPuff)->StartParticle(lRelativeVelocity);
+					lPuff->StartLoading();
+					mParticleTimer.ClearTimeDiff();
+				}
+			}
 		}
 	}
 }

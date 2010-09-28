@@ -37,8 +37,9 @@ public:
 	{
 	public:
 		virtual void OnForceApplied(ForceFeedbackListener* pOtherObject,
-			const Vector3D<float32>& pForce,
-			const Vector3D<float32>& pTorque) = 0;
+			BodyID pOwnBodyId, BodyID pOtherBodyId,
+			const Vector3DF& pForce, const Vector3DF& pTorque,
+			const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity) = 0;
 	};
 
 	class TriggerListener
@@ -141,7 +142,7 @@ public:
 		float32 pMass, float32 pRadius, float32 pLength, BodyType pType,
 		float32 pFriction = 1, float32 pBounce = 0, ForceFeedbackListener* pForceListener = 0) = 0;
 	virtual BodyID CreateBox(bool pIsRoot, const Transformation<float32>& pTransform,
-		float32 pMass, const Vector3D<float32>& pSize, BodyType pType,
+		float32 pMass, const Vector3DF& pSize, BodyType pType,
 		float32 pFriction = 1, float32 pBounce = 0, ForceFeedbackListener* pForceListener = 0) = 0;
 	virtual bool Attach(BodyID pStaticBody, BodyID pMainBody) = 0;
 
@@ -192,11 +193,11 @@ public:
 						float32 pLength,
 						TriggerListener* pListener) = 0;
 	virtual TriggerID CreateBoxTrigger(const Transformation<float32>& pTransform,
-						const Vector3D<float32>& pSize,
+						const Vector3DF& pSize,
 						TriggerListener* pListener) = 0;
 	virtual TriggerID CreateRayTrigger(const Transformation<float32>& pTransform,
-						const Vector3D<float32>& pFromPos,
-						const Vector3D<float32>& pToPos,
+						const Vector3DF& pFromPos,
+						const Vector3DF& pToPos,
 						TriggerListener* pListener) = 0;
 
 	virtual void DeleteTrigger(TriggerID pTriggerID) = 0;
@@ -213,29 +214,29 @@ public:
 
 	virtual JointID CreateBallJoint(BodyID pBody1, 
 					BodyID pBody2, 
-					const Vector3D<float32>& pAnchorPos) = 0;
+					const Vector3DF& pAnchorPos) = 0;
 	virtual JointID CreateHingeJoint(BodyID pBody1, 
 					 BodyID pBody2, 
-					 const Vector3D<float32>& pAnchorPos, 
-					 const Vector3D<float32>& pAxis) = 0;
+					 const Vector3DF& pAnchorPos, 
+					 const Vector3DF& pAxis) = 0;
 	virtual JointID CreateHinge2Joint(BodyID pBody1, 
 					  BodyID pBody2, 
-					  const Vector3D<float32>& pAnchorPos, 
-					  const Vector3D<float32>& pAxis1, 
-					  const Vector3D<float32>& pAxis2) = 0;
+					  const Vector3DF& pAnchorPos, 
+					  const Vector3DF& pAxis1, 
+					  const Vector3DF& pAxis2) = 0;
 	virtual JointID CreateUniversalJoint(BodyID pBody1, 
 						 BodyID pBody2, 
-						 const Vector3D<float32>& pAnchorPos, 
-						 const Vector3D<float32>& pAxis1, 
-						 const Vector3D<float32>& pAxis2) = 0;
+						 const Vector3DF& pAnchorPos, 
+						 const Vector3DF& pAxis1, 
+						 const Vector3DF& pAxis2) = 0;
 	virtual JointID CreateSliderJoint(BodyID pBody1, 
 					  BodyID pBody2, 
-					  const Vector3D<float32>& pAxis) = 0;
+					  const Vector3DF& pAxis) = 0;
 	virtual JointID CreateFixedJoint(BodyID pBody1, 
 					 BodyID pBody2) = 0;
 	virtual JointID CreateAngularMotorJoint(BodyID pBody1, 
 						BodyID pBody2, 
-						const Vector3D<float32>& pAxis) = 0;
+						const Vector3DF& pAxis) = 0;
 
 	virtual void DeleteJoint(JointID pJointId) = 0;
 
@@ -250,9 +251,9 @@ public:
 	virtual bool SetJoint3Diff(BodyID pBodyId, JointID pJointId, const Joint3Diff& pDiff) = 0;
 
 	// Returns true on success, false if joint is of wrong type.
-	virtual bool GetAnchorPos(JointID pJointId, Vector3D<float32>& pAnchorPos) const = 0;
-	virtual bool GetAxis1(JointID pJointId, Vector3D<float32>& pAxis1) const = 0;
-	virtual bool GetAxis2(JointID pJointId, Vector3D<float32>& pAxis1) const = 0;
+	virtual bool GetAnchorPos(JointID pJointId, Vector3DF& pAnchorPos) const = 0;
+	virtual bool GetAxis1(JointID pJointId, Vector3DF& pAxis1) const = 0;
+	virtual bool GetAxis2(JointID pJointId, Vector3DF& pAxis1) const = 0;
 	virtual bool GetAngle1(JointID pJointId, float32& pAngle) const = 0;
 	virtual bool GetAngle2(JointID pJointId, float32& pAngle) const = 0;
 	virtual bool GetAngleRate1(JointID pJointId, float32& pAngleRate) const = 0;
@@ -283,24 +284,24 @@ public:
 	virtual bool AddJointTorque(JointID pJointId, float32 pTorque) = 0;
 	virtual bool AddJointTorque(JointID pJointId, float32 pTorque1, float32 pTorque2) = 0;
 
-	virtual void AddForce            (BodyID pBodyId, const Vector3D<float32>& pForce) = 0;
-	virtual void AddTorque           (BodyID pBodyId, const Vector3D<float32>& pTorque) = 0;
-	virtual void AddRelForce         (BodyID pBodyId, const Vector3D<float32>& pForce) = 0;
-	virtual void AddRelTorque        (BodyID pBodyId, const Vector3D<float32>& pTorque) = 0;
-	virtual void AddForceAtPos       (BodyID pBodyId, const Vector3D<float32>& pForce,
-													   const Vector3D<float32>& pPos) = 0;
-	virtual void AddForceAtRelPos    (BodyID pBodyId, const Vector3D<float32>& pForce,
-													   const Vector3D<float32>& pPos) = 0;
-	virtual void AddRelForceAtPos    (BodyID pBodyId, const Vector3D<float32>& pForce,
-													   const Vector3D<float32>& pPos) = 0;
-	virtual void AddRelForceAtRelPos (BodyID pBodyId, const Vector3D<float32>& pForce,
-													   const Vector3D<float32>& pPos) = 0;
+	virtual void AddForce            (BodyID pBodyId, const Vector3DF& pForce) = 0;
+	virtual void AddTorque           (BodyID pBodyId, const Vector3DF& pTorque) = 0;
+	virtual void AddRelForce         (BodyID pBodyId, const Vector3DF& pForce) = 0;
+	virtual void AddRelTorque        (BodyID pBodyId, const Vector3DF& pTorque) = 0;
+	virtual void AddForceAtPos       (BodyID pBodyId, const Vector3DF& pForce,
+													   const Vector3DF& pPos) = 0;
+	virtual void AddForceAtRelPos    (BodyID pBodyId, const Vector3DF& pForce,
+													   const Vector3DF& pPos) = 0;
+	virtual void AddRelForceAtPos    (BodyID pBodyId, const Vector3DF& pForce,
+													   const Vector3DF& pPos) = 0;
+	virtual void AddRelForceAtRelPos (BodyID pBodyId, const Vector3DF& pForce,
+													   const Vector3DF& pPos) = 0;
 
 	virtual void RestrictBody(BodyID pBodyId, float32 pMaxSpeed, float32 pMaxAngularSpeed) = 0;
 
 	virtual void ActivateGravity(BodyID pBodyId) = 0;
 	virtual void DeactivateGravity(BodyID pBodyId) = 0;
-	virtual void SetGravity(const Vector3D<float32>& pGravity) = 0;
+	virtual void SetGravity(const Vector3DF& pGravity) = 0;
 	virtual Vector3DF GetGravity() const = 0;
 
 	virtual void PreSteps() = 0;

@@ -77,15 +77,16 @@ public:
 	
 	// Overloads from Renderer.
 	void Clear(unsigned pClearFlags = CLEAR_COLORBUFFER | CLEAR_DEPTHBUFFER);
-
 	void SetClearColor(const Color& pColor);
+
+	virtual bool IsPixelShadersEnabled() const;
 
 	void SetViewport(const PixelRect& pViewport);
 	void SetViewFrustum(float pFOVAngle, float pNear, float pFar);
 	void SetClippingRect(const PixelRect& pRect);
 	void ResetClippingRect();
 
-	void SetShadowsEnabled(bool pEnabled, ShadowHint pHint);
+	void SetShadowMode(Shadows pShadowMode, ShadowHint pHint);
 	void SetDepthWriteEnabled(bool pEnabled);
 	void SetDepthTestEnabled(bool pEnabled);
 

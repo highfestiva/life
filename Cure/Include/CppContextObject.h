@@ -33,7 +33,9 @@ protected:
 	void OnAlarm(int pAlarmId, void* pExtraData);
 	void OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, TBC::PhysicsManager::ForceFeedbackListener* pBody);
 	void OnForceApplied(TBC::PhysicsManager::ForceFeedbackListener* pOtherObject,
-		const Vector3DF& pForce, const Vector3DF& pTorque);
+		 TBC::PhysicsManager::BodyID pOwnBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
+		 const Vector3DF& pForce, const Vector3DF& pTorque,
+		 const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity);
 
 	void OnLoadClass(UserClassResource* pClassResource);
 	void OnLoadPhysics(UserPhysicsResource* pPhysicsResource);

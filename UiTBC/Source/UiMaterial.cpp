@@ -229,11 +229,6 @@ void Material::EnableDrawMaterial(bool pEnabled)
 
 
 
-Material::GeometryGroupList* Material::GetGeometryGroupList()
-{
-	return &mGeometryGroupList;
-}
-
 Renderer* Material::GetRenderer()
 {
 	return mRenderer;
@@ -303,24 +298,83 @@ void Material::PostRender()
 {
 }
 
-void Material::RenderAllGeometry(unsigned int pCurrentFrame)
+void Material::RenderAllGeometry(unsigned pCurrentFrame, Material* pGeometryContainer, Material* pRenderer)
+{
+	const GeometryGroupList& lGeometries = pGeometryContainer->GetGeometryGroupList();
+	if (lGeometries.empty())
+	{
+		return;
+	}
+	if (!pRenderer)
+	{
+		pRenderer = pGeometryContainer;
+	}
+	pRenderer->RenderAllGeometry(pCurrentFrame, lGeometries);
+}
+
+TBC::GeometryBase* Material::GetFirstGeometry()
+{
+	mGroupIter = mGeometryGroupList.begin();
+	mIndex = 0;
+	TBC::GeometryBase* lGeometry = 0;
+	if(mGroupIter != mGeometryGroupList.end())
+	{
+		lGeometry = (*mGroupIter)->GetGeometry(mIndex);
+	}
+	return lGeometry;
+}
+
+TBC::GeometryBase* Material::GetNextGeometry()
+{
+	TBC::GeometryBase* lGeometry = 0;
+	if (mGroupIter != mGeometryGroupList.end())
+	{
+		++mIndex;
+		if(mIndex >= (*mGroupIter)->GetGeometryCount())
+		{
+			mIndex = 0;
+			++mGroupIter;
+		}
+	}
+	if(mGroupIter != mGeometryGroupList.end())
+	{
+		lGeometry = (*mGroupIter)->GetGeometry(mIndex);
+	}
+	return lGeometry;
+}
+
+void Material::RenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList)
 {
 	if (mEnableDrawMaterial)
 	{
-		DoRenderAllGeometry(pCurrentFrame);
+		DoRenderAllGeometry(pCurrentFrame, pGeometryGroupList);
 	}
 	else
 	{
-		Material::DoRenderAllGeometry(pCurrentFrame);
+		Material::DoRenderAllGeometry(pCurrentFrame, pGeometryGroupList);
 	}
 }
 
-void Material::DoRenderAllGeometry(unsigned int pCurrentFrame)
+void Material::RenderAllBlendedGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList)
+{
+	TBC::GeometryBase::BasicMaterialSettings lPreviousMaterial = mCurrentMaterial;
+	bool lOldEnableDrawMaterial = mEnableDrawMaterial;
+	mEnableDrawMaterial = true;
+	mEnableDepthSort = true;
+
+	DoRenderAllGeometry(pCurrentFrame, pGeometryGroupList);
+
+	SetBasicMaterial(lPreviousMaterial);
+	mEnableDrawMaterial = lOldEnableDrawMaterial;
+	mEnableDepthSort = false;
+}
+
+void Material::DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList)
 {
 	PreRender();
 
-	GeometryGroupList::iterator lIter;
-	for (lIter = mGeometryGroupList.begin(); lIter != mGeometryGroupList.end(); ++lIter)
+	GeometryGroupList::const_iterator lIter;
+	for (lIter = pGeometryGroupList.begin(); lIter != pGeometryGroupList.end(); ++lIter)
 	{
 		GeometryGroup* lGroup = *lIter;
 
@@ -352,7 +406,7 @@ void Material::DoRenderAllGeometry(unsigned int pCurrentFrame)
 					{
 						RenderBaseGeometry(lGeometry);
 					}
-					
+					mRenderer->ResetAmbientLight(true);
 				}
 				mRenderer->PostRender(lGeometry);
 			}
@@ -362,73 +416,7 @@ void Material::DoRenderAllGeometry(unsigned int pCurrentFrame)
 	PostRender();
 }
 
-void Material::RenderAllBlendedGeometry(unsigned pCurrentFrame)
-{
-	TBC::GeometryBase::BasicMaterialSettings lPreviousMaterial = mCurrentMaterial;
-	bool lOldEnableDrawMaterial = mEnableDrawMaterial;
-	mEnableDrawMaterial = true;
-	mEnableDepthSort = true;
-
-	DoRenderAllGeometry(pCurrentFrame);
-
-	SetBasicMaterial(lPreviousMaterial);
-	mEnableDrawMaterial = lOldEnableDrawMaterial;
-	mEnableDepthSort = false;
-}
-
-TBC::GeometryBase* Material::GetFirstGeometry()
-{
-	mGroupIter = mGeometryGroupList.begin();
-	mIndex = 0;
-	TBC::GeometryBase* lGeometry = 0;
-	if(mGroupIter != mGeometryGroupList.end())
-		lGeometry = (*mGroupIter)->GetGeometry(mIndex);
-	return lGeometry;
-}
-
-TBC::GeometryBase* Material::GetNextGeometry()
-{
-	TBC::GeometryBase* lGeometry = 0;
-
-	if(mGroupIter != mGeometryGroupList.end())
-	{
-		++mIndex;
-		if(mIndex >= (*mGroupIter)->GetGeometryCount())
-		{
-			mIndex = 0;
-			++mGroupIter;
-		}
-	}
-
-	if(mGroupIter != mGeometryGroupList.end())
-		lGeometry = (*mGroupIter)->GetGeometry(mIndex);
-
-	return lGeometry;
-}
-
-TBC::GeometryBase* Material::GetFirstVisibleGeometry()
-{
-	unsigned int lCurrentFrame = mRenderer->GetCurrentFrame();
-	TBC::GeometryBase* lGeometry = GetFirstGeometry();
-	while(lGeometry && !lGeometry->GetAlwaysVisible() && lGeometry->GetLastFrameVisible() != lCurrentFrame)
-	{
-		lGeometry = GetNextGeometry();
-	}
-	return lGeometry;
-}
-
-TBC::GeometryBase* Material::GetNextVisibleGeometry()
-{
-	unsigned int lCurrentFrame = mRenderer->GetCurrentFrame();
-	TBC::GeometryBase* lGeometry = GetNextGeometry();
-	while(lGeometry != 0 && (lGeometry->GetAlwaysVisible() == false || lGeometry->GetLastFrameVisible() != lCurrentFrame))
-	{
-		lGeometry = GetNextGeometry();
-	}
-	return lGeometry;
-}
-
-Renderer::TextureID Material::GetGroupTextureID(TBC::GeometryBase* pGeometry)
+Renderer::TextureID Material::GetGroupTextureID(TBC::GeometryBase* pGeometry) const
 {
 	Renderer::TextureID lTextureID = Renderer::INVALID_TEXTURE;
 
@@ -440,6 +428,11 @@ Renderer::TextureID Material::GetGroupTextureID(TBC::GeometryBase* pGeometry)
 	}
 
 	return lTextureID;
+}
+
+const Material::GeometryGroupList& Material::GetGeometryGroupList() const
+{
+	return mGeometryGroupList;
 }
 
 

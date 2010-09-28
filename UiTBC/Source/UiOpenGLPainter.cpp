@@ -1256,7 +1256,7 @@ void OpenGLPainter::PrintText(const str& pString, int x, int y)
 
 	::glPushAttrib(GL_TEXTURE_BIT | GL_COLOR_BUFFER_BIT);
 
-	if (UiLepra::OpenGLExtensions::BufferObjectsSupported() == true)
+	if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
 	{
 		UiLepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, 0);
 		UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);

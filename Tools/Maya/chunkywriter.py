@@ -679,8 +679,9 @@ class MeshWriter(ChunkyWriter):
                 self._addfeat("gfx triangle:gfx triangles", len(node.get_fixed_attribute("rgtri"))/3)
                 with self._fileopenwrite(filename) as f:
                         self.f = f
-                        default_mesh_type = {"static":1, "dynamic":2, "volatile":3}
-                        volatility = [(CHUNK_MESH_VOLATILITY, default_mesh_type["static"])]
+                        default_mesh_type = {"static":1, "semi_static":2, "dynamic":3, "volatile":4}
+                        mesh_type = "static" if self.config["type"] == "static" else "semi_static"
+                        volatility = [(CHUNK_MESH_VOLATILITY, default_mesh_type[mesh_type])]
                         shadows = [(CHUNK_MESH_CASTS_SHADOWS, 1)] if self.config.get("casts_shadows") else []
                         verts = [(CHUNK_MESH_VERTICES, node.get_fixed_attribute("rgvtx"))]
                         polys = [(CHUNK_MESH_TRIANGLES, node.get_fixed_attribute("rgtri"))]

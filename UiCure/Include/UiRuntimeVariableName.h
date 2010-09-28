@@ -19,12 +19,16 @@
 #define RTVAR_UI_3D_ENABLEMASSOBJECTS		"Ui.3D.EnableMassObjects"
 #define RTVAR_UI_3D_OUTLINEMODE			"Ui.3D.OutlineMode"
 #define RTVAR_UI_3D_WIREFRAMEMODE		"Ui.3D.WireframeMode"
+#define RTVAR_UI_3D_PIXELSHADERS		"Ui.3D.PixelShaders"
 #define RTVAR_UI_3D_CLEARRED			"Ui.3D.ClearRed"
 #define RTVAR_UI_3D_CLEARGREEN			"Ui.3D.ClearGreen"
 #define RTVAR_UI_3D_CLEARBLUE			"Ui.3D.ClearBlue"
 #define RTVAR_UI_3D_AMBIENTRED			"Ui.3D.AmbientRed"
 #define RTVAR_UI_3D_AMBIENTGREEN		"Ui.3D.AmbientGreen"
 #define RTVAR_UI_3D_AMBIENTBLUE			"Ui.3D.AmbientBlue"
+#define RTVAR_UI_3D_AMBIENTREDFACTOR		"Ui.3D.AmbientRedOffset"	// Internal.
+#define RTVAR_UI_3D_AMBIENTGREENFACTOR		"Ui.3D.AmbientGreenOffset"	// Internal.
+#define RTVAR_UI_3D_AMBIENTBLUEFACTOR		"Ui.3D.AmbientBlueOffset"	// Internal.
 #define RTVAR_UI_3D_ENABLETRILINEARFILTERING	"Ui.3D.EnableTrilinearFiltering"
 #define RTVAR_UI_3D_ENABLEBILINEARFILTERING	"Ui.3D.EnableBilinearFiltering"
 #define RTVAR_UI_3D_ENABLEMIPMAPPING		"Ui.3D.EnableMipMapping"

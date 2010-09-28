@@ -47,18 +47,22 @@ const CamControl& ClientOptionsManager::GetCamControl() const
 bool ClientOptionsManager::SetDefault(int pPriority)
 {
 	bool lOk = false;
+
 	// TODO: check for installed devices, prioritize, etc.
+
+	// Hmmm... Same cam controls for all split-screen clients. Swell.
+	CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_CAMUP, _T("Key.PGUP"));
+	CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_CAMDOWN, _T("Key.INSERT"));
+	CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_CAMLEFT, _T("Key.DEL"));
+	CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_CAMRIGHT, _T("Key.PGDOWN"));
+	CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_CAMFORWARD, _T("Key.HOME"));
+	CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_CAMBACKWARD, _T("Key.END"));
+
 	switch (pPriority)
 	{
 		case 0:
 		{
 			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_CONTOGGLE, _T("Key.PARAGRAPH, Key.ACUTE, Key.APOSTROPHE"));
-			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_CAMUP, _T("Key.PGUP"));
-			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_CAMDOWN, _T("Key.INSERT"));
-			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_CAMLEFT, _T("Key.DEL"));
-			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_CAMRIGHT, _T("Key.PGDOWN"));
-			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_CAMFORWARD, _T("Key.HOME"));
-			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_CAMBACKWARD, _T("Key.END"));
 			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_FWD, _T("Key.UP"));
 			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_BACK, _T(""));
 			CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_STEER_FWD3D, _T(""));

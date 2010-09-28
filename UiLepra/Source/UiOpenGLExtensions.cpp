@@ -4,193 +4,12 @@
 
 #include "../Include/UiOpenGLExtensions.h"
 
+
+
 namespace UiLepra
 {
 
-bool OpenGLExtensions::smGLVersion14                   = false;
-bool OpenGLExtensions::smGLVersion15                   = false;
-bool OpenGLExtensions::smFrameBufferObjectsSupported   = false;
-bool OpenGLExtensions::smBufferObjectsSupported        = false;
-bool OpenGLExtensions::smAnisotropicFilteringSupported = false;
-bool OpenGLExtensions::smCompressedTexturesSupported   = false;
-bool OpenGLExtensions::smMultiTextureSupported         = false;
-bool OpenGLExtensions::smShaderProgramsSupported       = false;
-bool OpenGLExtensions::smShadersSupported              = false;
-bool OpenGLExtensions::smVSyncSupported                = false;
 
-float OpenGLExtensions::smMaxAnisotropy                = 1.0f;
-
-// Declare functions.
-
-#ifdef LEPRA_WINDOWS
-PFNWGLSWAPINTERVALEXTPROC    OpenGLExtensions::wglSwapIntervalEXT    = 0;
-PFNWGLGETSWAPINTERVALEXTPROC OpenGLExtensions::wglGetSwapIntervalEXT = 0;
-#endif
-
-PFNGLISRENDERBUFFEREXTPROC                      OpenGLExtensions::glIsRenderbufferEXT                      = 0;
-PFNGLBINDRENDERBUFFEREXTPROC                    OpenGLExtensions::glBindRenderbufferEXT                    = 0;
-PFNGLDELETERENDERBUFFERSEXTPROC                 OpenGLExtensions::glDeleteRenderbuffersEXT                 = 0;
-PFNGLGENRENDERBUFFERSEXTPROC                    OpenGLExtensions::glGenRenderbuffersEXT                    = 0;
-PFNGLRENDERBUFFERSTORAGEEXTPROC                 OpenGLExtensions::glRenderbufferStorageEXT                 = 0;
-PFNGLGETRENDERBUFFERPARAMETERIVEXTPROC          OpenGLExtensions::glGetRenderbufferParameterivEXT          = 0;
-PFNGLISFRAMEBUFFEREXTPROC                       OpenGLExtensions::glIsFramebufferEXT                       = 0;
-PFNGLBINDFRAMEBUFFEREXTPROC                     OpenGLExtensions::glBindFramebufferEXT                     = 0;
-PFNGLDELETEFRAMEBUFFERSEXTPROC                  OpenGLExtensions::glDeleteFramebuffersEXT                  = 0;
-PFNGLGENFRAMEBUFFERSEXTPROC                     OpenGLExtensions::glGenFramebuffersEXT                     = 0;
-PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC              OpenGLExtensions::glCheckFramebufferStatusEXT              = 0;
-PFNGLFRAMEBUFFERTEXTURE1DEXTPROC                OpenGLExtensions::glFramebufferTexture1DEXT                = 0;
-PFNGLFRAMEBUFFERTEXTURE2DEXTPROC                OpenGLExtensions::glFramebufferTexture2DEXT                = 0;
-PFNGLFRAMEBUFFERTEXTURE3DEXTPROC                OpenGLExtensions::glFramebufferTexture3DEXT                = 0;
-PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC             OpenGLExtensions::glFramebufferRenderbufferEXT             = 0;
-PFNGLGETFRAMEBUFFERATTACHMENTPARAMETERIVEXTPROC OpenGLExtensions::glGetFramebufferAttachmentParameterivEXT = 0;
-PFNGLGENERATEMIPMAPEXTPROC                      OpenGLExtensions::glGenerateMipmapEXT                      = 0;
-
-
-PFNGLBINDBUFFERPROC       OpenGLExtensions::glBindBuffer       = 0;
-PFNGLBUFFERDATAPROC       OpenGLExtensions::glBufferData       = 0;
-PFNGLBUFFERSUBDATAPROC    OpenGLExtensions::glBufferSubData    = 0;
-PFNGLDELETEBUFFERSPROC    OpenGLExtensions::glDeleteBuffers    = 0;
-PFNGLGENBUFFERSPROC       OpenGLExtensions::glGenBuffers       = 0;
-PFNGLMAPBUFFERPROC        OpenGLExtensions::glMapBuffer        = 0;
-PFNGLUNMAPBUFFERPROC      OpenGLExtensions::glUnmapBuffer      = 0;
-
-PFNGLACTIVETEXTUREPROC    OpenGLExtensions::glActiveTexture    = 0;
-PFNGLCLIENTACTIVETEXTUREPROC OpenGLExtensions::glClientActiveTexture = 0;
-PFNGLMULTITEXCOORD1DPROC  OpenGLExtensions::glMultiTexCoord1d  = 0;
-PFNGLMULTITEXCOORD1DVPROC OpenGLExtensions::glMultiTexCoord1dv = 0;
-PFNGLMULTITEXCOORD1FPROC  OpenGLExtensions::glMultiTexCoord1f  = 0;
-PFNGLMULTITEXCOORD1FVPROC OpenGLExtensions::glMultiTexCoord1fv = 0;
-PFNGLMULTITEXCOORD1IPROC  OpenGLExtensions::glMultiTexCoord1i  = 0;
-PFNGLMULTITEXCOORD1IVPROC OpenGLExtensions::glMultiTexCoord1iv = 0;
-PFNGLMULTITEXCOORD1SPROC  OpenGLExtensions::glMultiTexCoord1s  = 0;
-PFNGLMULTITEXCOORD1SVPROC OpenGLExtensions::glMultiTexCoord1sv = 0;
-PFNGLMULTITEXCOORD2DPROC  OpenGLExtensions::glMultiTexCoord2d  = 0;
-PFNGLMULTITEXCOORD2DVPROC OpenGLExtensions::glMultiTexCoord2dv = 0;
-PFNGLMULTITEXCOORD2FPROC  OpenGLExtensions::glMultiTexCoord2f  = 0;
-PFNGLMULTITEXCOORD2FVPROC OpenGLExtensions::glMultiTexCoord2fv = 0;
-PFNGLMULTITEXCOORD2IPROC  OpenGLExtensions::glMultiTexCoord2i  = 0;
-PFNGLMULTITEXCOORD2IVPROC OpenGLExtensions::glMultiTexCoord2iv = 0;
-PFNGLMULTITEXCOORD2SPROC  OpenGLExtensions::glMultiTexCoord2s  = 0;
-PFNGLMULTITEXCOORD2SVPROC OpenGLExtensions::glMultiTexCoord2sv = 0;
-PFNGLMULTITEXCOORD3DPROC  OpenGLExtensions::glMultiTexCoord3d  = 0;
-PFNGLMULTITEXCOORD3DVPROC OpenGLExtensions::glMultiTexCoord3dv = 0;
-PFNGLMULTITEXCOORD3FPROC  OpenGLExtensions::glMultiTexCoord3f  = 0;
-PFNGLMULTITEXCOORD3FVPROC OpenGLExtensions::glMultiTexCoord3fv = 0;
-PFNGLMULTITEXCOORD3IPROC  OpenGLExtensions::glMultiTexCoord3i  = 0;
-PFNGLMULTITEXCOORD3IVPROC OpenGLExtensions::glMultiTexCoord3iv = 0;
-PFNGLMULTITEXCOORD3SPROC  OpenGLExtensions::glMultiTexCoord3s  = 0;
-PFNGLMULTITEXCOORD3SVPROC OpenGLExtensions::glMultiTexCoord3sv = 0;
-PFNGLMULTITEXCOORD4DPROC  OpenGLExtensions::glMultiTexCoord4d  = 0;
-PFNGLMULTITEXCOORD4DVPROC OpenGLExtensions::glMultiTexCoord4dv = 0;
-PFNGLMULTITEXCOORD4FPROC  OpenGLExtensions::glMultiTexCoord4f  = 0;
-PFNGLMULTITEXCOORD4FVPROC OpenGLExtensions::glMultiTexCoord4fv = 0;
-PFNGLMULTITEXCOORD4IPROC  OpenGLExtensions::glMultiTexCoord4i  = 0;
-PFNGLMULTITEXCOORD4IVPROC OpenGLExtensions::glMultiTexCoord4iv = 0;
-PFNGLMULTITEXCOORD4SPROC  OpenGLExtensions::glMultiTexCoord4s  = 0;
-PFNGLMULTITEXCOORD4SVPROC OpenGLExtensions::glMultiTexCoord4sv = 0;
-
-PFNGLGENPROGRAMSARBPROC                OpenGLExtensions::glGenProgramsARB                = 0;
-PFNGLBINDPROGRAMARBPROC                OpenGLExtensions::glBindProgramARB                = 0;
-PFNGLDELETEPROGRAMSARBPROC             OpenGLExtensions::glDeleteProgramsARB             = 0;
-PFNGLISPROGRAMARBPROC                  OpenGLExtensions::glIsProgramARB                  = 0;
-PFNGLPROGRAMSTRINGARBPROC              OpenGLExtensions::glProgramStringARB              = 0;
-PFNGLGETPROGRAMIVARBPROC               OpenGLExtensions::glGetProgramStringARB           = 0;
-PFNGLENABLEVERTEXATTRIBARRAYARBPROC    OpenGLExtensions::glEnableVertexAttribArrayARB    = 0;
-PFNGLDISABLEVERTEXATTRIBARRAYARBPROC   OpenGLExtensions::glDisableVertexAttribArrayARB   = 0;
-PFNGLGETPROGRAMENVPARAMETERDVARBPROC   OpenGLExtensions::glGetProgramEnvParameterdvARB   = 0;
-PFNGLGETPROGRAMENVPARAMETERFVARBPROC   OpenGLExtensions::glGetProgramEnvParameterfvARB   = 0;
-PFNGLPROGRAMENVPARAMETER4DARBPROC      OpenGLExtensions::glProgramEnvParameter4dARB      = 0;
-PFNGLPROGRAMENVPARAMETER4DVARBPROC     OpenGLExtensions::glProgramEnvParameter4dvARB     = 0;
-PFNGLPROGRAMENVPARAMETER4FARBPROC      OpenGLExtensions::glProgramEnvParameter4fARB      = 0;
-PFNGLPROGRAMENVPARAMETER4FVARBPROC     OpenGLExtensions::glProgramEnvParameter4fvARB     = 0;
-PFNGLGETPROGRAMLOCALPARAMETERDVARBPROC OpenGLExtensions::glGetProgramLocalParameterdvARB = 0;
-PFNGLGETPROGRAMLOCALPARAMETERFVARBPROC OpenGLExtensions::glGetProgramLocalParameterfvARB = 0;
-PFNGLPROGRAMLOCALPARAMETER4DARBPROC    OpenGLExtensions::glProgramLocalParameter4dARB    = 0;
-PFNGLPROGRAMLOCALPARAMETER4DVARBPROC   OpenGLExtensions::glProgramLocalParameter4dvARB   = 0;
-PFNGLPROGRAMLOCALPARAMETER4FARBPROC    OpenGLExtensions::glProgramLocalParameter4fARB    = 0;
-PFNGLPROGRAMLOCALPARAMETER4FVARBPROC   OpenGLExtensions::glProgramLocalParameter4fvARB   = 0;
-PFNGLGETPROGRAMIVARBPROC               OpenGLExtensions::glGetProgramivARB               = 0;
-PFNGLGETVERTEXATTRIBDVARBPROC          OpenGLExtensions::glGetVertexAttribdvARB          = 0;
-PFNGLGETVERTEXATTRIBFVARBPROC          OpenGLExtensions::glGetVertexAttribfvARB          = 0;
-PFNGLGETVERTEXATTRIBIVARBPROC          OpenGLExtensions::glGetVertexAttribivARB          = 0;
-PFNGLGETVERTEXATTRIBPOINTERVARBPROC    OpenGLExtensions::glGetVertexAttribPointervARB    = 0;
-PFNGLVERTEXATTRIBPOINTERARBPROC        OpenGLExtensions::glVertexAttribPointerARB        = 0;
-PFNGLVERTEXATTRIB1DARBPROC             OpenGLExtensions::glVertexAttrib1dARB             = 0;
-PFNGLVERTEXATTRIB1DVARBPROC            OpenGLExtensions::glVertexAttrib1dvARB            = 0;
-PFNGLVERTEXATTRIB1FARBPROC             OpenGLExtensions::glVertexAttrib1fARB             = 0;
-PFNGLVERTEXATTRIB1FVARBPROC            OpenGLExtensions::glVertexAttrib1fvARB            = 0;
-PFNGLVERTEXATTRIB1SARBPROC             OpenGLExtensions::glVertexAttrib1sARB             = 0;
-PFNGLVERTEXATTRIB1SVARBPROC            OpenGLExtensions::glVertexAttrib1svARB            = 0;
-PFNGLVERTEXATTRIB2DARBPROC             OpenGLExtensions::glVertexAttrib2dARB             = 0;
-PFNGLVERTEXATTRIB2DVARBPROC            OpenGLExtensions::glVertexAttrib2dvARB            = 0;
-PFNGLVERTEXATTRIB2FARBPROC             OpenGLExtensions::glVertexAttrib2fARB             = 0;
-PFNGLVERTEXATTRIB2FVARBPROC            OpenGLExtensions::glVertexAttrib2fvARB            = 0;
-PFNGLVERTEXATTRIB2SARBPROC             OpenGLExtensions::glVertexAttrib2sARB             = 0;
-PFNGLVERTEXATTRIB2SVARBPROC            OpenGLExtensions::glVertexAttrib2svARB            = 0;
-PFNGLVERTEXATTRIB3DARBPROC             OpenGLExtensions::glVertexAttrib3dARB             = 0;
-PFNGLVERTEXATTRIB3DVARBPROC            OpenGLExtensions::glVertexAttrib3dvARB            = 0;
-PFNGLVERTEXATTRIB3FARBPROC             OpenGLExtensions::glVertexAttrib3fARB             = 0;
-PFNGLVERTEXATTRIB3FVARBPROC            OpenGLExtensions::glVertexAttrib3fvARB            = 0;
-PFNGLVERTEXATTRIB3SARBPROC             OpenGLExtensions::glVertexAttrib3sARB             = 0;
-PFNGLVERTEXATTRIB3SVARBPROC            OpenGLExtensions::glVertexAttrib3svARB            = 0;
-PFNGLVERTEXATTRIB4NBVARBPROC           OpenGLExtensions::glVertexAttrib4NbvARB           = 0;
-PFNGLVERTEXATTRIB4NIVARBPROC           OpenGLExtensions::glVertexAttrib4NivARB           = 0;
-PFNGLVERTEXATTRIB4NSVARBPROC           OpenGLExtensions::glVertexAttrib4NsvARB           = 0;
-PFNGLVERTEXATTRIB4NUBARBPROC           OpenGLExtensions::glVertexAttrib4NubARB           = 0;
-PFNGLVERTEXATTRIB4NUBVARBPROC          OpenGLExtensions::glVertexAttrib4NubvARB          = 0;
-PFNGLVERTEXATTRIB4NUIVARBPROC          OpenGLExtensions::glVertexAttrib4NuivARB          = 0;
-PFNGLVERTEXATTRIB4NUSVARBPROC          OpenGLExtensions::glVertexAttrib4NusvARB          = 0;
-PFNGLVERTEXATTRIB4BVARBPROC            OpenGLExtensions::glVertexAttrib4bvARB            = 0;
-PFNGLVERTEXATTRIB4DARBPROC             OpenGLExtensions::glVertexAttrib4dARB             = 0;
-PFNGLVERTEXATTRIB4DVARBPROC            OpenGLExtensions::glVertexAttrib4dvARB            = 0;
-PFNGLVERTEXATTRIB4FARBPROC             OpenGLExtensions::glVertexAttrib4fARB             = 0;
-PFNGLVERTEXATTRIB4FVARBPROC            OpenGLExtensions::glVertexAttrib4fvARB            = 0;
-PFNGLVERTEXATTRIB4IVARBPROC            OpenGLExtensions::glVertexAttrib4ivARB            = 0;
-PFNGLVERTEXATTRIB4SARBPROC             OpenGLExtensions::glVertexAttrib4sARB             = 0;
-PFNGLVERTEXATTRIB4SVARBPROC            OpenGLExtensions::glVertexAttrib4svARB            = 0;
-PFNGLVERTEXATTRIB4UBVARBPROC           OpenGLExtensions::glVertexAttrib4ubvARB           = 0;
-PFNGLVERTEXATTRIB4UIVARBPROC           OpenGLExtensions::glVertexAttrib4uivARB           = 0;
-PFNGLVERTEXATTRIB4USVARBPROC           OpenGLExtensions::glVertexAttrib4usvARB           = 0;
-
-PFNGLDELETEOBJECTARBPROC               OpenGLExtensions::glDeleteObjectARB               = 0;
-PFNGLGETHANDLEARBPROC                  OpenGLExtensions::glGetHandleARB                  = 0;
-PFNGLDETACHOBJECTARBPROC               OpenGLExtensions::glDetachObjectARB               = 0;
-PFNGLCREATESHADEROBJECTARBPROC         OpenGLExtensions::glCreateShaderObjectARB         = 0;
-PFNGLSHADERSOURCEARBPROC               OpenGLExtensions::glShaderSourceARB               = 0;
-PFNGLCOMPILESHADERARBPROC              OpenGLExtensions::glCompileShaderARB              = 0;
-PFNGLCREATEPROGRAMOBJECTARBPROC        OpenGLExtensions::glCreateProgramObjectARB        = 0;
-PFNGLATTACHOBJECTARBPROC               OpenGLExtensions::glAttachObjectARB               = 0;
-PFNGLLINKPROGRAMARBPROC                OpenGLExtensions::glLinkProgramARB                = 0;
-PFNGLUSEPROGRAMOBJECTARBPROC           OpenGLExtensions::glUseProgramObjectARB           = 0;
-PFNGLVALIDATEPROGRAMARBPROC            OpenGLExtensions::glValidateProgramARB            = 0;
-PFNGLUNIFORM1FARBPROC                  OpenGLExtensions::glUniform1fARB                  = 0;
-PFNGLUNIFORM2FARBPROC                  OpenGLExtensions::glUniform2fARB                  = 0;
-PFNGLUNIFORM3FARBPROC                  OpenGLExtensions::glUniform3fARB                  = 0;
-PFNGLUNIFORM4FARBPROC                  OpenGLExtensions::glUniform4fARB                  = 0;
-PFNGLUNIFORM1IARBPROC                  OpenGLExtensions::glUniform1iARB                  = 0;
-PFNGLUNIFORM2IARBPROC                  OpenGLExtensions::glUniform2iARB                  = 0;
-PFNGLUNIFORM3IARBPROC                  OpenGLExtensions::glUniform3iARB                  = 0;
-PFNGLUNIFORM4IARBPROC                  OpenGLExtensions::glUniform4iARB                  = 0;
-PFNGLUNIFORM1FVARBPROC                 OpenGLExtensions::glUniform1fvARB                 = 0;
-PFNGLUNIFORM2FVARBPROC                 OpenGLExtensions::glUniform2fvARB                 = 0;
-PFNGLUNIFORM3FVARBPROC                 OpenGLExtensions::glUniform3fvARB                 = 0;
-PFNGLUNIFORM4FVARBPROC                 OpenGLExtensions::glUniform4fvARB                 = 0;
-PFNGLUNIFORM1IVARBPROC                 OpenGLExtensions::glUniform1ivARB                 = 0;
-PFNGLUNIFORM2IVARBPROC                 OpenGLExtensions::glUniform2ivARB                 = 0;
-PFNGLUNIFORM3IVARBPROC                 OpenGLExtensions::glUniform3ivARB                 = 0;
-PFNGLUNIFORM4IVARBPROC                 OpenGLExtensions::glUniform4ivARB                 = 0;
-PFNGLUNIFORMMATRIX2FVARBPROC           OpenGLExtensions::glUniformMatrix2fvARB           = 0;
-PFNGLUNIFORMMATRIX3FVARBPROC           OpenGLExtensions::glUniformMatrix3fvARB           = 0;
-PFNGLUNIFORMMATRIX4FVARBPROC           OpenGLExtensions::glUniformMatrix4fvARB           = 0;
-PFNGLGETOBJECTPARAMETERFVARBPROC       OpenGLExtensions::glGetObjectParameterfvARB       = 0;
-PFNGLGETOBJECTPARAMETERIVARBPROC       OpenGLExtensions::glGetObjectParameterivARB       = 0;
-PFNGLGETINFOLOGARBPROC                 OpenGLExtensions::glGetInfoLogARB                 = 0;
-PFNGLGETATTACHEDOBJECTSARBPROC         OpenGLExtensions::glGetAttachedObjectsARB         = 0;
-PFNGLGETUNIFORMLOCATIONARBPROC         OpenGLExtensions::glGetUniformLocationARB         = 0;
-PFNGLGETACTIVEUNIFORMARBPROC           OpenGLExtensions::glGetActiveUniformARB           = 0;
-PFNGLGETUNIFORMFVARBPROC               OpenGLExtensions::glGetUniformfvARB               = 0;
-PFNGLGETUNIFORMIVARBPROC               OpenGLExtensions::glGetUniformivARB               = 0;
-PFNGLGETSHADERSOURCEARBPROC            OpenGLExtensions::glGetShaderSourceARB            = 0;
 
 bool OpenGLExtensions::IsExtensionSupported(const char* pExtension)
 {
@@ -209,41 +28,39 @@ void* OpenGLExtensions::GetExtensionPointer(const char* pFunctionName)
 #if defined(LEPRA_WINDOWS)
     return (void*)wglGetProcAddress(pFunctionName);
 #elif defined(LEPRA_MAC)
-    // Mac is a bit more tricky.
-    // First we need the bundle
-    CFBundleRef openGL = 0;
-/*    SInt16      fwVersion = 0;
-    SInt32      fwDir = 0;
-    
-    if(FindFolder(kSystemDomain, kFrameworksFolderType, kDontCreateFolder, &fwVersion, &fwDir) != noErr)
-        return NULL;
-        
-    FSSpec fSpec;
-    FSRef  fRef;
-    if(FSMakeFSSpec(fwVersion, fwDir, "\pOpenGL.framework", &fSpec) != noErr)
-        return NULL;
- 
-    FSpMakeFSRef(&fSpec, &fRef);
-*/  
+	// Mac is a bit more tricky. First we need the bundle.
+	CFBundleRef lOpenGL = 0;
 
-    CFStringRef urlString = CFSTR("/System/Library/OpenGL.framework");
-    CFURLRef url = CFURLCreateWithString(NULL, urlString, NULL);
-    if(!url)
-        return NULL;
-        
-    openGL = CFBundleCreate(kCFAllocatorDefault, url);
-    CFRelease(url);
-    
-    // Then load the function pointer from the bundle
-    CFStringRef string = CFStringCreateWithCString(kCFAllocatorDefault, pFunctionName, kCFStringEncodingMacRoman);
-    void *pFunc = CFBundleGetFunctionPointerForName(openGL, string);
-    
-    // Release the bundle and string
-    CFRelease(string);
-    CFRelease(openGL);
-    
-    // Return the function ponter
-    return pFunc;
+	/*
+	SInt16      fwVersion = 0;
+	SInt32      fwDir = 0;
+	if (FindFolder(kSystemDomain, kFrameworksFolderType, kDontCreateFolder, &fwVersion, &fwDir) != noErr)
+		return NULL;
+	FSSpec fSpec;
+	FSRef  fRef;
+	if (FSMakeFSSpec(fwVersion, fwDir, "\pOpenGL.framework", &fSpec) != noErr)
+		return NULL;
+	FSpMakeFSRef(&fSpec, &fRef);
+	*/  
+
+	CFStringRef lUrlString = CFSTR("/System/Library/OpenGL.framework");
+	CFURLRef lUrl = CFURLCreateWithString(NULL, lUrlString, NULL);
+	if (!lUrl)
+		return NULL;
+
+	lOpenGL = CFBundleCreate(kCFAllocatorDefault, lUrl);
+	CFRelease(lUrl);
+
+	// Then load the function pointer from the bundle.
+	CFStringRef lString = CFStringCreateWithCString(kCFAllocatorDefault, pFunctionName, kCFStringEncodingMacRoman);
+	void* lFunc = CFBundleGetFunctionPointerForName(lOpenGL, lString);
+
+	// Release the bundle and string.
+	CFRelease(lString);
+	CFRelease(lOpenGL);
+
+	// Return the function ponter.
+	return lFunc;
 #elif defined(LEPRA_POSIX)
 	return ((void*)glXGetProcAddress((const GLubyte*)pFunctionName));
 #else // Unkonwn platform
@@ -261,34 +78,34 @@ void OpenGLExtensions::InitExtensions()
 		   lVersion[2] >= '5' && 
 		   lVersion[2] <= '9')
 		{
-			smGLVersion14 = true;
-			smGLVersion15 = true;
+			mIsGLVersion14 = true;
+			mIsGLVersion15 = true;
 		}
 		else if(lVersion[1] == '.' && 
 			lVersion[2] >= '4' && 
 			lVersion[2] <= '9')
 		{
-			smGLVersion14 = true;
+			mIsGLVersion14 = true;
 		}
 	}
 	else if(lVersion[0] >= '2' && lVersion[0] <= '9')
 	{
 		// This must be an OpenGL version way higher than the versions
 		// that existed when this was written. Assume backward compatibility.
-		smGLVersion14 = true;
-		smGLVersion15 = true;
+		mIsGLVersion14 = true;
+		mIsGLVersion15 = true;
 	}
 
 
 	/*
 		Init Frame Buffer Objects...
 	*/
-	if (IsExtensionSupported("GL_EXT_framebuffer_object") == true)
+	if (IsExtensionSupported("GL_EXT_framebuffer_object"))
 	{
-		smFrameBufferObjectsSupported = true;
+		mIsFrameBufferObjectsSupported = true;
 	}
 
-	if (smFrameBufferObjectsSupported == true)
+	if (mIsFrameBufferObjectsSupported)
 	{
 		glIsRenderbufferEXT                      = (PFNGLISRENDERBUFFEREXTPROC)                      GetExtensionPointer("glIsRenderbufferEXT");
 		glBindRenderbufferEXT                    = (PFNGLBINDRENDERBUFFEREXTPROC)                    GetExtensionPointer("glBindRenderbufferEXT");
@@ -308,22 +125,20 @@ void OpenGLExtensions::InitExtensions()
 		glGetFramebufferAttachmentParameterivEXT = (PFNGLGETFRAMEBUFFERATTACHMENTPARAMETERIVEXTPROC) GetExtensionPointer("glGetFramebufferAttachmentParameterivEXT");
 		glGenerateMipmapEXT                      = (PFNGLGENERATEMIPMAPEXTPROC)                      GetExtensionPointer("glGenerateMipmapEXT");
 
-		if (CheckFrameBufferObjectFunctions() == false)
+		if (!CheckFrameBufferObjectFunctions())
 		{
 			ClearFrameBufferObjectFunctions();
-			smFrameBufferObjectsSupported = false;
+			mIsFrameBufferObjectsSupported = false;
 		}
 	}
 
-	/*
-		Init buffer objects.
-	*/
-	if (smGLVersion15 == true || IsExtensionSupported("GL_ARB_vertex_buffer_object") == true)
+	// Init buffer objects.
+	if (mIsGLVersion15 || IsExtensionSupported("GL_ARB_vertex_buffer_object"))
 	{
-		smBufferObjectsSupported = true;
+		mIsBufferObjectsSupported = true;
 	}
 
-	if (smGLVersion15 == true)
+	if (mIsGLVersion15)
 	{
 		glBindBuffer    = (PFNGLBINDBUFFERPROC)   GetExtensionPointer("glBindBuffer");
 		glBufferData    = (PFNGLBUFFERDATAPROC)   GetExtensionPointer("glBufferData");
@@ -333,7 +148,7 @@ void OpenGLExtensions::InitExtensions()
 		glMapBuffer     = (PFNGLMAPBUFFERPROC)    GetExtensionPointer("glMapBuffer");
 		glUnmapBuffer   = (PFNGLUNMAPBUFFERPROC)  GetExtensionPointer("glUnmapBuffer");
 	}
-	if(smBufferObjectsSupported == true && CheckBufferObjectFunctions() == false)
+	if(mIsBufferObjectsSupported && !CheckBufferObjectFunctions())
 	{
 		// Retry with the ARB version...
 		glBindBuffer    = (PFNGLBINDBUFFERPROC)   GetExtensionPointer("glBindBufferARB");
@@ -345,63 +160,44 @@ void OpenGLExtensions::InitExtensions()
 		glUnmapBuffer   = (PFNGLUNMAPBUFFERPROC)  GetExtensionPointer("glUnmapBufferARB");
 	}
 
-	if (smBufferObjectsSupported == true)
+	if (mIsBufferObjectsSupported)
 	{
-		if (CheckBufferObjectFunctions() == false)
+		if (!CheckBufferObjectFunctions())
 		{
 			ClearBufferObjectFunctions();
-			smBufferObjectsSupported = false;
+			mIsBufferObjectsSupported = false;
 		}
 	}
 
-	/*
-		Init anisotropic filtering...
-	*/
-
-	if (IsExtensionSupported("GL_EXT_texture_filter_anisotropic") == true)
+	// Init anisotropic filtering...
+	if (IsExtensionSupported("GL_EXT_texture_filter_anisotropic"))
 	{
-		smAnisotropicFilteringSupported = true;
-		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &smMaxAnisotropy);
+		mIsAnisotropicFilteringSupported = true;
+		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &mMaxAnisotropy);
 	}
 
-	/*
-		Init texture compression.
-	*/
-
-	if (IsExtensionSupported("GL_ARB_texture_compression") == true)
+	// Init texture compression.
+	if (IsExtensionSupported("GL_ARB_texture_compression"))
 	{
-		smCompressedTexturesSupported = true;
+		mIsCompressedTexturesSupported = true;
 		glHint(GL_TEXTURE_COMPRESSION_HINT, GL_NICEST);
 	}
 
 #ifdef LEPRA_WINDOWS
 	// Init vsync on/off.
-	if (IsExtensionSupported("WGL_EXT_swap") == true)
+	if (IsExtensionSupported("WGL_EXT_swap"))
 	{
-		smVSyncSupported = true;
-
-		wglSwapIntervalEXT    = (PFNWGLSWAPINTERVALEXTPROC)    GetExtensionPointer("wglSwapIntervalEXT");
-		wglGetSwapIntervalEXT = (PFNWGLGETSWAPINTERVALEXTPROC) GetExtensionPointer("wglGetSwapIntervalEXT");
-
-		if (wglSwapIntervalEXT    == 0 ||
-		   wglGetSwapIntervalEXT == 0)
-		{
-			smVSyncSupported = false;
-
-			wglSwapIntervalEXT    = 0;
-			wglGetSwapIntervalEXT = 0;
-		}
+		wglSwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC)GetExtensionPointer("wglSwapIntervalEXT");
+		wglGetSwapIntervalEXT = (PFNWGLGETSWAPINTERVALEXTPROC)GetExtensionPointer("wglGetSwapIntervalEXT");
 	}
 #else
 #pragma message("Warning: In OpenGLExtensions::InitExtensions(), VSync is not initialized.")
 #endif
 
-	/*
-		Init multi texture support.
-	*/
-	if (IsExtensionSupported("GL_ARB_multitexture") == true)
+	// Init multi texture support.
+	if (IsExtensionSupported("GL_ARB_multitexture"))
 	{
-		smMultiTextureSupported = true;
+		mIsMultiTextureSupported = true;
 
 		glActiveTexture       = (PFNGLACTIVETEXTUREPROC)       GetExtensionPointer("glActiveTextureARB");
 		glClientActiveTexture = (PFNGLCLIENTACTIVETEXTUREPROC) GetExtensionPointer("glClientActiveTexture");
@@ -438,20 +234,18 @@ void OpenGLExtensions::InitExtensions()
 		glMultiTexCoord4s     = (PFNGLMULTITEXCOORD4SPROC)     GetExtensionPointer("glMultiTexCoord4sARB");
 		glMultiTexCoord4sv    = (PFNGLMULTITEXCOORD4SVPROC)    GetExtensionPointer("glMultiTexCoord4svARB");
 
-		if (CheckMultiTextureFunctions() == false)
+		if (!CheckMultiTextureFunctions())
 		{
-			smMultiTextureSupported = false;
+			mIsMultiTextureSupported = false;
 			ClearMultiTextureFunctions();
 		}
 	}
 
-	/*
-		Init vertex and pixel shader support.
-	*/
-	if (IsExtensionSupported("GL_ARB_vertex_program") == true &&
-	   IsExtensionSupported("GL_ARB_fragment_program") == true)
+	// Init vertex and pixel shader support.
+	if (IsExtensionSupported("GL_ARB_vertex_program") &&
+	   IsExtensionSupported("GL_ARB_fragment_program"))
 	{
-		smShaderProgramsSupported = true;
+		mIsShaderAsmProgramsSupported = true;
 
 		glGenProgramsARB                = (PFNGLGENPROGRAMSARBPROC)                GetExtensionPointer("glGenProgramsARB");
 		glBindProgramARB                = (PFNGLBINDPROGRAMARBPROC)                GetExtensionPointer("glBindProgramARB");
@@ -516,19 +310,19 @@ void OpenGLExtensions::InitExtensions()
 		glVertexAttrib4uivARB           = (PFNGLVERTEXATTRIB4UIVARBPROC)           GetExtensionPointer("glVertexAttrib4uivARB");
 		glVertexAttrib4usvARB           = (PFNGLVERTEXATTRIB4USVARBPROC)           GetExtensionPointer("glVertexAttrib4usvARB");
 
-		if(CheckShaderProgramFunctions() == false)
+		if (!CheckShaderProgramFunctions())
 		{
-			smShaderProgramsSupported = false;
+			mIsShaderAsmProgramsSupported = false;
 			ClearShaderProgramFunctions();
 		}
 	}
 
-	if (IsExtensionSupported("GL_ARB_vertex_shader")        == true &&
-	   IsExtensionSupported("GL_ARB_fragment_shader")      == true &&
-	   IsExtensionSupported("GL_ARB_shader_objects")       == true &&
-	   IsExtensionSupported("GL_ARB_shading_language_100") == true)
+	if (IsExtensionSupported("GL_ARB_vertex_shader")        &&
+	   IsExtensionSupported("GL_ARB_fragment_shader")      &&
+	   IsExtensionSupported("GL_ARB_shader_objects")       &&
+	   IsExtensionSupported("GL_ARB_shading_language_100"))
 	{
-		smShadersSupported = true;
+		mIsShaderCProgramsSupported = true;
 
 		glDeleteObjectARB               = (PFNGLDELETEOBJECTARBPROC)         GetExtensionPointer("glDeleteObjectARB");
 		glGetHandleARB                  = (PFNGLGETHANDLEARBPROC)            GetExtensionPointer("glGetHandleARB");
@@ -570,13 +364,94 @@ void OpenGLExtensions::InitExtensions()
 		glGetUniformivARB               = (PFNGLGETUNIFORMIVARBPROC)         GetExtensionPointer("glGetUniformivARB");
 		glGetShaderSourceARB            = (PFNGLGETSHADERSOURCEARBPROC)      GetExtensionPointer("glGetShaderSourceARB");
 
-		if (CheckShaderFunctions() == false)
+		if (!CheckShaderFunctions())
 		{
-			smShadersSupported = false;
+			mIsShaderCProgramsSupported = false;
 			ClearShaderFunctions();
 		}
 	}
 }
+
+bool OpenGLExtensions::IsFrameBufferObjectsSupported()
+{
+	return mIsFrameBufferObjectsSupported;
+}
+
+bool OpenGLExtensions::IsBufferObjectsSupported()
+{
+	return mIsBufferObjectsSupported;
+}
+
+bool OpenGLExtensions::IsAnisotropicFilteringSupported()
+{
+	return mIsAnisotropicFilteringSupported;
+}
+
+bool OpenGLExtensions::IsCompressedTexturesSupported()
+{
+	return mIsCompressedTexturesSupported;
+}
+
+bool OpenGLExtensions::IsMultiTextureSupported()
+{
+	return mIsMultiTextureSupported;
+}
+
+bool OpenGLExtensions::IsShadowMapsSupported()
+{
+	return mIsGLVersion14;
+}
+
+bool OpenGLExtensions::IsShaderAsmProgramsSupported()
+{
+	return mIsShaderAsmProgramsSupported;
+}
+
+bool OpenGLExtensions::IsShaderCProgramsSupported()
+{
+	return mIsShaderCProgramsSupported;
+}
+
+float OpenGLExtensions::GetMaxAnisotropy()
+{
+	return mMaxAnisotropy;
+}
+
+void OpenGLExtensions::SetAnisotropy(float pAmountAnisotropy)
+{
+	if (mIsAnisotropicFilteringSupported)
+	{
+		glTexParameterf(GL_TEXTURE_2D, GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, pAmountAnisotropy);
+	}
+}
+
+bool OpenGLExtensions::IsVSyncEnabled()
+{
+#ifdef LEPRA_WINDOWS
+	if (wglGetSwapIntervalEXT != 0)
+	{
+		return (wglGetSwapIntervalEXT() > 0);
+	}
+#else
+#pragma message("Warning: OpenGLExtensions::IsVSyncEnabled() is using default behaviour.")
+#endif
+	return true;
+}
+
+bool OpenGLExtensions::SetVSyncEnabled(bool pEnabled)
+{
+#ifdef LEPRA_WINDOWS
+	if (wglSwapIntervalEXT != 0)
+	{
+		return (wglSwapIntervalEXT(pEnabled ? 1 : 0) != FALSE);
+	}
+#else
+#pragma message("Warning: OpenGLExtensions::SetVSyncEnabled() is not implemented.")
+#endif
+	return (false);
+}
+
+
 
 void OpenGLExtensions::ClearFrameBufferObjectFunctions()
 {
@@ -936,25 +811,191 @@ bool OpenGLExtensions::CheckShaderFunctions()
 		glGetShaderSourceARB            != 0);
 }
 
-void OpenGLExtensions::SetAnisotropy(float pAmountAnisotropy)
-{
-	if (smAnisotropicFilteringSupported == true)
-	{
-		glTexParameterf(GL_TEXTURE_2D, GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, pAmountAnisotropy);
-	}
-}
 
-bool OpenGLExtensions::SetVSyncEnabled(bool pEnabled)
-{
+
+bool OpenGLExtensions::mIsGLVersion14			= false;
+bool OpenGLExtensions::mIsGLVersion15			= false;
+bool OpenGLExtensions::mIsFrameBufferObjectsSupported	= false;
+bool OpenGLExtensions::mIsBufferObjectsSupported	= false;
+bool OpenGLExtensions::mIsAnisotropicFilteringSupported	= false;
+bool OpenGLExtensions::mIsCompressedTexturesSupported	= false;
+bool OpenGLExtensions::mIsMultiTextureSupported		= false;
+bool OpenGLExtensions::mIsShaderAsmProgramsSupported	= false;
+bool OpenGLExtensions::mIsShaderCProgramsSupported	= false;
+float OpenGLExtensions::mMaxAnisotropy			= 1.0f;
+
+// Declare functions.
+
 #ifdef LEPRA_WINDOWS
-	if (wglSwapIntervalEXT != 0)
-	{
-		return (wglSwapIntervalEXT(pEnabled ? 1 : 0) != FALSE);
-	}
-#else
-#pragma message("Warning: OpenGLExtensions::SetVSyncEnabled() is not implemented.")
+PFNWGLSWAPINTERVALEXTPROC    OpenGLExtensions::wglSwapIntervalEXT    = 0;
+PFNWGLGETSWAPINTERVALEXTPROC OpenGLExtensions::wglGetSwapIntervalEXT = 0;
 #endif
-	return (false);
-}
 
-} // End namespace.
+PFNGLISRENDERBUFFEREXTPROC                      OpenGLExtensions::glIsRenderbufferEXT                      = 0;
+PFNGLBINDRENDERBUFFEREXTPROC                    OpenGLExtensions::glBindRenderbufferEXT                    = 0;
+PFNGLDELETERENDERBUFFERSEXTPROC                 OpenGLExtensions::glDeleteRenderbuffersEXT                 = 0;
+PFNGLGENRENDERBUFFERSEXTPROC                    OpenGLExtensions::glGenRenderbuffersEXT                    = 0;
+PFNGLRENDERBUFFERSTORAGEEXTPROC                 OpenGLExtensions::glRenderbufferStorageEXT                 = 0;
+PFNGLGETRENDERBUFFERPARAMETERIVEXTPROC          OpenGLExtensions::glGetRenderbufferParameterivEXT          = 0;
+PFNGLISFRAMEBUFFEREXTPROC                       OpenGLExtensions::glIsFramebufferEXT                       = 0;
+PFNGLBINDFRAMEBUFFEREXTPROC                     OpenGLExtensions::glBindFramebufferEXT                     = 0;
+PFNGLDELETEFRAMEBUFFERSEXTPROC                  OpenGLExtensions::glDeleteFramebuffersEXT                  = 0;
+PFNGLGENFRAMEBUFFERSEXTPROC                     OpenGLExtensions::glGenFramebuffersEXT                     = 0;
+PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC              OpenGLExtensions::glCheckFramebufferStatusEXT              = 0;
+PFNGLFRAMEBUFFERTEXTURE1DEXTPROC                OpenGLExtensions::glFramebufferTexture1DEXT                = 0;
+PFNGLFRAMEBUFFERTEXTURE2DEXTPROC                OpenGLExtensions::glFramebufferTexture2DEXT                = 0;
+PFNGLFRAMEBUFFERTEXTURE3DEXTPROC                OpenGLExtensions::glFramebufferTexture3DEXT                = 0;
+PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC             OpenGLExtensions::glFramebufferRenderbufferEXT             = 0;
+PFNGLGETFRAMEBUFFERATTACHMENTPARAMETERIVEXTPROC OpenGLExtensions::glGetFramebufferAttachmentParameterivEXT = 0;
+PFNGLGENERATEMIPMAPEXTPROC                      OpenGLExtensions::glGenerateMipmapEXT                      = 0;
+
+
+PFNGLBINDBUFFERPROC       OpenGLExtensions::glBindBuffer       = 0;
+PFNGLBUFFERDATAPROC       OpenGLExtensions::glBufferData       = 0;
+PFNGLBUFFERSUBDATAPROC    OpenGLExtensions::glBufferSubData    = 0;
+PFNGLDELETEBUFFERSPROC    OpenGLExtensions::glDeleteBuffers    = 0;
+PFNGLGENBUFFERSPROC       OpenGLExtensions::glGenBuffers       = 0;
+PFNGLMAPBUFFERPROC        OpenGLExtensions::glMapBuffer        = 0;
+PFNGLUNMAPBUFFERPROC      OpenGLExtensions::glUnmapBuffer      = 0;
+
+PFNGLACTIVETEXTUREPROC    OpenGLExtensions::glActiveTexture    = 0;
+PFNGLCLIENTACTIVETEXTUREPROC OpenGLExtensions::glClientActiveTexture = 0;
+PFNGLMULTITEXCOORD1DPROC  OpenGLExtensions::glMultiTexCoord1d  = 0;
+PFNGLMULTITEXCOORD1DVPROC OpenGLExtensions::glMultiTexCoord1dv = 0;
+PFNGLMULTITEXCOORD1FPROC  OpenGLExtensions::glMultiTexCoord1f  = 0;
+PFNGLMULTITEXCOORD1FVPROC OpenGLExtensions::glMultiTexCoord1fv = 0;
+PFNGLMULTITEXCOORD1IPROC  OpenGLExtensions::glMultiTexCoord1i  = 0;
+PFNGLMULTITEXCOORD1IVPROC OpenGLExtensions::glMultiTexCoord1iv = 0;
+PFNGLMULTITEXCOORD1SPROC  OpenGLExtensions::glMultiTexCoord1s  = 0;
+PFNGLMULTITEXCOORD1SVPROC OpenGLExtensions::glMultiTexCoord1sv = 0;
+PFNGLMULTITEXCOORD2DPROC  OpenGLExtensions::glMultiTexCoord2d  = 0;
+PFNGLMULTITEXCOORD2DVPROC OpenGLExtensions::glMultiTexCoord2dv = 0;
+PFNGLMULTITEXCOORD2FPROC  OpenGLExtensions::glMultiTexCoord2f  = 0;
+PFNGLMULTITEXCOORD2FVPROC OpenGLExtensions::glMultiTexCoord2fv = 0;
+PFNGLMULTITEXCOORD2IPROC  OpenGLExtensions::glMultiTexCoord2i  = 0;
+PFNGLMULTITEXCOORD2IVPROC OpenGLExtensions::glMultiTexCoord2iv = 0;
+PFNGLMULTITEXCOORD2SPROC  OpenGLExtensions::glMultiTexCoord2s  = 0;
+PFNGLMULTITEXCOORD2SVPROC OpenGLExtensions::glMultiTexCoord2sv = 0;
+PFNGLMULTITEXCOORD3DPROC  OpenGLExtensions::glMultiTexCoord3d  = 0;
+PFNGLMULTITEXCOORD3DVPROC OpenGLExtensions::glMultiTexCoord3dv = 0;
+PFNGLMULTITEXCOORD3FPROC  OpenGLExtensions::glMultiTexCoord3f  = 0;
+PFNGLMULTITEXCOORD3FVPROC OpenGLExtensions::glMultiTexCoord3fv = 0;
+PFNGLMULTITEXCOORD3IPROC  OpenGLExtensions::glMultiTexCoord3i  = 0;
+PFNGLMULTITEXCOORD3IVPROC OpenGLExtensions::glMultiTexCoord3iv = 0;
+PFNGLMULTITEXCOORD3SPROC  OpenGLExtensions::glMultiTexCoord3s  = 0;
+PFNGLMULTITEXCOORD3SVPROC OpenGLExtensions::glMultiTexCoord3sv = 0;
+PFNGLMULTITEXCOORD4DPROC  OpenGLExtensions::glMultiTexCoord4d  = 0;
+PFNGLMULTITEXCOORD4DVPROC OpenGLExtensions::glMultiTexCoord4dv = 0;
+PFNGLMULTITEXCOORD4FPROC  OpenGLExtensions::glMultiTexCoord4f  = 0;
+PFNGLMULTITEXCOORD4FVPROC OpenGLExtensions::glMultiTexCoord4fv = 0;
+PFNGLMULTITEXCOORD4IPROC  OpenGLExtensions::glMultiTexCoord4i  = 0;
+PFNGLMULTITEXCOORD4IVPROC OpenGLExtensions::glMultiTexCoord4iv = 0;
+PFNGLMULTITEXCOORD4SPROC  OpenGLExtensions::glMultiTexCoord4s  = 0;
+PFNGLMULTITEXCOORD4SVPROC OpenGLExtensions::glMultiTexCoord4sv = 0;
+
+PFNGLGENPROGRAMSARBPROC                OpenGLExtensions::glGenProgramsARB                = 0;
+PFNGLBINDPROGRAMARBPROC                OpenGLExtensions::glBindProgramARB                = 0;
+PFNGLDELETEPROGRAMSARBPROC             OpenGLExtensions::glDeleteProgramsARB             = 0;
+PFNGLISPROGRAMARBPROC                  OpenGLExtensions::glIsProgramARB                  = 0;
+PFNGLPROGRAMSTRINGARBPROC              OpenGLExtensions::glProgramStringARB              = 0;
+PFNGLGETPROGRAMIVARBPROC               OpenGLExtensions::glGetProgramStringARB           = 0;
+PFNGLENABLEVERTEXATTRIBARRAYARBPROC    OpenGLExtensions::glEnableVertexAttribArrayARB    = 0;
+PFNGLDISABLEVERTEXATTRIBARRAYARBPROC   OpenGLExtensions::glDisableVertexAttribArrayARB   = 0;
+PFNGLGETPROGRAMENVPARAMETERDVARBPROC   OpenGLExtensions::glGetProgramEnvParameterdvARB   = 0;
+PFNGLGETPROGRAMENVPARAMETERFVARBPROC   OpenGLExtensions::glGetProgramEnvParameterfvARB   = 0;
+PFNGLPROGRAMENVPARAMETER4DARBPROC      OpenGLExtensions::glProgramEnvParameter4dARB      = 0;
+PFNGLPROGRAMENVPARAMETER4DVARBPROC     OpenGLExtensions::glProgramEnvParameter4dvARB     = 0;
+PFNGLPROGRAMENVPARAMETER4FARBPROC      OpenGLExtensions::glProgramEnvParameter4fARB      = 0;
+PFNGLPROGRAMENVPARAMETER4FVARBPROC     OpenGLExtensions::glProgramEnvParameter4fvARB     = 0;
+PFNGLGETPROGRAMLOCALPARAMETERDVARBPROC OpenGLExtensions::glGetProgramLocalParameterdvARB = 0;
+PFNGLGETPROGRAMLOCALPARAMETERFVARBPROC OpenGLExtensions::glGetProgramLocalParameterfvARB = 0;
+PFNGLPROGRAMLOCALPARAMETER4DARBPROC    OpenGLExtensions::glProgramLocalParameter4dARB    = 0;
+PFNGLPROGRAMLOCALPARAMETER4DVARBPROC   OpenGLExtensions::glProgramLocalParameter4dvARB   = 0;
+PFNGLPROGRAMLOCALPARAMETER4FARBPROC    OpenGLExtensions::glProgramLocalParameter4fARB    = 0;
+PFNGLPROGRAMLOCALPARAMETER4FVARBPROC   OpenGLExtensions::glProgramLocalParameter4fvARB   = 0;
+PFNGLGETPROGRAMIVARBPROC               OpenGLExtensions::glGetProgramivARB               = 0;
+PFNGLGETVERTEXATTRIBDVARBPROC          OpenGLExtensions::glGetVertexAttribdvARB          = 0;
+PFNGLGETVERTEXATTRIBFVARBPROC          OpenGLExtensions::glGetVertexAttribfvARB          = 0;
+PFNGLGETVERTEXATTRIBIVARBPROC          OpenGLExtensions::glGetVertexAttribivARB          = 0;
+PFNGLGETVERTEXATTRIBPOINTERVARBPROC    OpenGLExtensions::glGetVertexAttribPointervARB    = 0;
+PFNGLVERTEXATTRIBPOINTERARBPROC        OpenGLExtensions::glVertexAttribPointerARB        = 0;
+PFNGLVERTEXATTRIB1DARBPROC             OpenGLExtensions::glVertexAttrib1dARB             = 0;
+PFNGLVERTEXATTRIB1DVARBPROC            OpenGLExtensions::glVertexAttrib1dvARB            = 0;
+PFNGLVERTEXATTRIB1FARBPROC             OpenGLExtensions::glVertexAttrib1fARB             = 0;
+PFNGLVERTEXATTRIB1FVARBPROC            OpenGLExtensions::glVertexAttrib1fvARB            = 0;
+PFNGLVERTEXATTRIB1SARBPROC             OpenGLExtensions::glVertexAttrib1sARB             = 0;
+PFNGLVERTEXATTRIB1SVARBPROC            OpenGLExtensions::glVertexAttrib1svARB            = 0;
+PFNGLVERTEXATTRIB2DARBPROC             OpenGLExtensions::glVertexAttrib2dARB             = 0;
+PFNGLVERTEXATTRIB2DVARBPROC            OpenGLExtensions::glVertexAttrib2dvARB            = 0;
+PFNGLVERTEXATTRIB2FARBPROC             OpenGLExtensions::glVertexAttrib2fARB             = 0;
+PFNGLVERTEXATTRIB2FVARBPROC            OpenGLExtensions::glVertexAttrib2fvARB            = 0;
+PFNGLVERTEXATTRIB2SARBPROC             OpenGLExtensions::glVertexAttrib2sARB             = 0;
+PFNGLVERTEXATTRIB2SVARBPROC            OpenGLExtensions::glVertexAttrib2svARB            = 0;
+PFNGLVERTEXATTRIB3DARBPROC             OpenGLExtensions::glVertexAttrib3dARB             = 0;
+PFNGLVERTEXATTRIB3DVARBPROC            OpenGLExtensions::glVertexAttrib3dvARB            = 0;
+PFNGLVERTEXATTRIB3FARBPROC             OpenGLExtensions::glVertexAttrib3fARB             = 0;
+PFNGLVERTEXATTRIB3FVARBPROC            OpenGLExtensions::glVertexAttrib3fvARB            = 0;
+PFNGLVERTEXATTRIB3SARBPROC             OpenGLExtensions::glVertexAttrib3sARB             = 0;
+PFNGLVERTEXATTRIB3SVARBPROC            OpenGLExtensions::glVertexAttrib3svARB            = 0;
+PFNGLVERTEXATTRIB4NBVARBPROC           OpenGLExtensions::glVertexAttrib4NbvARB           = 0;
+PFNGLVERTEXATTRIB4NIVARBPROC           OpenGLExtensions::glVertexAttrib4NivARB           = 0;
+PFNGLVERTEXATTRIB4NSVARBPROC           OpenGLExtensions::glVertexAttrib4NsvARB           = 0;
+PFNGLVERTEXATTRIB4NUBARBPROC           OpenGLExtensions::glVertexAttrib4NubARB           = 0;
+PFNGLVERTEXATTRIB4NUBVARBPROC          OpenGLExtensions::glVertexAttrib4NubvARB          = 0;
+PFNGLVERTEXATTRIB4NUIVARBPROC          OpenGLExtensions::glVertexAttrib4NuivARB          = 0;
+PFNGLVERTEXATTRIB4NUSVARBPROC          OpenGLExtensions::glVertexAttrib4NusvARB          = 0;
+PFNGLVERTEXATTRIB4BVARBPROC            OpenGLExtensions::glVertexAttrib4bvARB            = 0;
+PFNGLVERTEXATTRIB4DARBPROC             OpenGLExtensions::glVertexAttrib4dARB             = 0;
+PFNGLVERTEXATTRIB4DVARBPROC            OpenGLExtensions::glVertexAttrib4dvARB            = 0;
+PFNGLVERTEXATTRIB4FARBPROC             OpenGLExtensions::glVertexAttrib4fARB             = 0;
+PFNGLVERTEXATTRIB4FVARBPROC            OpenGLExtensions::glVertexAttrib4fvARB            = 0;
+PFNGLVERTEXATTRIB4IVARBPROC            OpenGLExtensions::glVertexAttrib4ivARB            = 0;
+PFNGLVERTEXATTRIB4SARBPROC             OpenGLExtensions::glVertexAttrib4sARB             = 0;
+PFNGLVERTEXATTRIB4SVARBPROC            OpenGLExtensions::glVertexAttrib4svARB            = 0;
+PFNGLVERTEXATTRIB4UBVARBPROC           OpenGLExtensions::glVertexAttrib4ubvARB           = 0;
+PFNGLVERTEXATTRIB4UIVARBPROC           OpenGLExtensions::glVertexAttrib4uivARB           = 0;
+PFNGLVERTEXATTRIB4USVARBPROC           OpenGLExtensions::glVertexAttrib4usvARB           = 0;
+
+PFNGLDELETEOBJECTARBPROC               OpenGLExtensions::glDeleteObjectARB               = 0;
+PFNGLGETHANDLEARBPROC                  OpenGLExtensions::glGetHandleARB                  = 0;
+PFNGLDETACHOBJECTARBPROC               OpenGLExtensions::glDetachObjectARB               = 0;
+PFNGLCREATESHADEROBJECTARBPROC         OpenGLExtensions::glCreateShaderObjectARB         = 0;
+PFNGLSHADERSOURCEARBPROC               OpenGLExtensions::glShaderSourceARB               = 0;
+PFNGLCOMPILESHADERARBPROC              OpenGLExtensions::glCompileShaderARB              = 0;
+PFNGLCREATEPROGRAMOBJECTARBPROC        OpenGLExtensions::glCreateProgramObjectARB        = 0;
+PFNGLATTACHOBJECTARBPROC               OpenGLExtensions::glAttachObjectARB               = 0;
+PFNGLLINKPROGRAMARBPROC                OpenGLExtensions::glLinkProgramARB                = 0;
+PFNGLUSEPROGRAMOBJECTARBPROC           OpenGLExtensions::glUseProgramObjectARB           = 0;
+PFNGLVALIDATEPROGRAMARBPROC            OpenGLExtensions::glValidateProgramARB            = 0;
+PFNGLUNIFORM1FARBPROC                  OpenGLExtensions::glUniform1fARB                  = 0;
+PFNGLUNIFORM2FARBPROC                  OpenGLExtensions::glUniform2fARB                  = 0;
+PFNGLUNIFORM3FARBPROC                  OpenGLExtensions::glUniform3fARB                  = 0;
+PFNGLUNIFORM4FARBPROC                  OpenGLExtensions::glUniform4fARB                  = 0;
+PFNGLUNIFORM1IARBPROC                  OpenGLExtensions::glUniform1iARB                  = 0;
+PFNGLUNIFORM2IARBPROC                  OpenGLExtensions::glUniform2iARB                  = 0;
+PFNGLUNIFORM3IARBPROC                  OpenGLExtensions::glUniform3iARB                  = 0;
+PFNGLUNIFORM4IARBPROC                  OpenGLExtensions::glUniform4iARB                  = 0;
+PFNGLUNIFORM1FVARBPROC                 OpenGLExtensions::glUniform1fvARB                 = 0;
+PFNGLUNIFORM2FVARBPROC                 OpenGLExtensions::glUniform2fvARB                 = 0;
+PFNGLUNIFORM3FVARBPROC                 OpenGLExtensions::glUniform3fvARB                 = 0;
+PFNGLUNIFORM4FVARBPROC                 OpenGLExtensions::glUniform4fvARB                 = 0;
+PFNGLUNIFORM1IVARBPROC                 OpenGLExtensions::glUniform1ivARB                 = 0;
+PFNGLUNIFORM2IVARBPROC                 OpenGLExtensions::glUniform2ivARB                 = 0;
+PFNGLUNIFORM3IVARBPROC                 OpenGLExtensions::glUniform3ivARB                 = 0;
+PFNGLUNIFORM4IVARBPROC                 OpenGLExtensions::glUniform4ivARB                 = 0;
+PFNGLUNIFORMMATRIX2FVARBPROC           OpenGLExtensions::glUniformMatrix2fvARB           = 0;
+PFNGLUNIFORMMATRIX3FVARBPROC           OpenGLExtensions::glUniformMatrix3fvARB           = 0;
+PFNGLUNIFORMMATRIX4FVARBPROC           OpenGLExtensions::glUniformMatrix4fvARB           = 0;
+PFNGLGETOBJECTPARAMETERFVARBPROC       OpenGLExtensions::glGetObjectParameterfvARB       = 0;
+PFNGLGETOBJECTPARAMETERIVARBPROC       OpenGLExtensions::glGetObjectParameterivARB       = 0;
+PFNGLGETINFOLOGARBPROC                 OpenGLExtensions::glGetInfoLogARB                 = 0;
+PFNGLGETATTACHEDOBJECTSARBPROC         OpenGLExtensions::glGetAttachedObjectsARB         = 0;
+PFNGLGETUNIFORMLOCATIONARBPROC         OpenGLExtensions::glGetUniformLocationARB         = 0;
+PFNGLGETACTIVEUNIFORMARBPROC           OpenGLExtensions::glGetActiveUniformARB           = 0;
+PFNGLGETUNIFORMFVARBPROC               OpenGLExtensions::glGetUniformfvARB               = 0;
+PFNGLGETUNIFORMIVARBPROC               OpenGLExtensions::glGetUniformivARB               = 0;
+PFNGLGETSHADERSOURCEARBPROC            OpenGLExtensions::glGetShaderSourceARB            = 0;
+
+
+
+}

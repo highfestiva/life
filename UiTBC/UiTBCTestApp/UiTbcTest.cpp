@@ -525,7 +525,6 @@ bool OpenRenderer(const Lepra::LogDecorator& pLog, UiLepra::DisplayManager::Cont
 		gFontManager->SetActiveFont(lFontId);
 		gPainter->SetFontManager(gFontManager);
 
-		gRenderer->SetFallbackMaterialEnabled(true);
 		gPainter->SetDestCanvas(gScreen);
 		gPainter->SetRenderMode(UiTbc::Painter::RM_ALPHABLEND);
 	}
@@ -2061,7 +2060,7 @@ BumpMapSceneTest::BumpMapSceneTest(const Lepra::LogDecorator& pLog) :
 	gRenderer->SetCameraTransformation(lTransf);
 
 	gRenderer->SetLightsEnabled(true);
-	gRenderer->SetShadowsEnabled(true, UiTbc::Renderer::SH_VOLUMES_ONLY);
+	gRenderer->SetShadowMode(UiTbc::Renderer::CAST_SHADOWS, UiTbc::Renderer::SH_VOLUMES_ONLY);
 	gRenderer->SetAmbientLight(0.4f, 0.4f, 0.4f);
 	gRenderer->SetViewFrustum(90, 0.01f, 300.0f);
 

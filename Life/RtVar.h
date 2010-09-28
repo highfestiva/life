@@ -6,8 +6,6 @@
 
 #pragma once
 
-#define RTVAR_POWERSAVE_FACTOR		"PowerSave.Factor"
-
 #define RTVAR_DEBUG_ENABLE		"Debug.Enable"
 #define RTVAR_DEBUG_3D_ENABLEAXES	"Debug.3D.EnableAxes"
 #define RTVAR_DEBUG_3D_ENABLEJOINTS	"Debug.3D.EnableJoints"
@@ -19,3 +17,7 @@
 #define RTVAR_DEBUG_PERFORMANCE_NAMES	"Debug.Performance.Names"
 #define RTVAR_DEBUG_PERFORMANCE_COUNT	"Debug.Performance.Count"
 #define RTVAR_DEBUG_EXTRASLEEPTIME	"Debug.ExtraSleepTime"
+
+#define RTVAR_NETWORK_ENABLEOPENSERVER	"Network.EnableOpenServer"
+
+#define RTVAR_POWERSAVE_FACTOR		"PowerSave.Factor"

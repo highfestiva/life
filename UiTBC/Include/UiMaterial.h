@@ -132,34 +132,32 @@ public:
 
 	virtual void SetBasicMaterial(const TBC::GeometryBase::BasicMaterialSettings& pMaterial) = 0;
 
-	bool IsEmpty() { return mGeometryGroupList.empty(); }
-
 	virtual void PreRender();
 	virtual void PostRender();
 
-	virtual void RenderAllGeometry(unsigned int pCurrentFrame);
-	virtual void DoRenderAllGeometry(unsigned int pCurrentFrame);
-	virtual void RenderAllBlendedGeometry(unsigned pCurrentFrame);
+	static void RenderAllGeometry(unsigned pCurrentFrame, Material* pGeometryContainer, Material* pRenderer = 0);
 	virtual void RenderGeometry(TBC::GeometryBase* pGeometry) = 0;
 	virtual void RenderBaseGeometry(TBC::GeometryBase* pGeometry) = 0;
 
 	TBC::GeometryBase* GetFirstGeometry();
 	TBC::GeometryBase* GetNextGeometry();
 
-	TBC::GeometryBase* GetFirstVisibleGeometry();
-	TBC::GeometryBase* GetNextVisibleGeometry();
-
 protected:
 	typedef std::list<TBC::GeometryBase*> GeometryList;
 	typedef std::list<GeometryGroup*> GeometryGroupList;
 
-	Renderer::TextureID GetGroupTextureID(TBC::GeometryBase* pGeometry);
-	GeometryGroupList* GetGeometryGroupList();
+	virtual void RenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
+	virtual void RenderAllBlendedGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
+	virtual void DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
+
+	Renderer::TextureID GetGroupTextureID(TBC::GeometryBase* pGeometry) const;
+	const GeometryGroupList& GetGeometryGroupList() const;
 
 	static TBC::GeometryBase::BasicMaterialSettings mCurrentMaterial;
 
-private:
 	GeometryGroupList mGeometryGroupList;
+
+private:
 	Renderer* mRenderer;
 	DepthSortHint mSortHint;
 

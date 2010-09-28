@@ -83,6 +83,7 @@ bool ChunkyMeshLoader::Load(TriangleBasedGeometry* pMeshData, bool& pCastsShadow
 	if (lOk)
 	{
 		lOk = (lGeometryVolatility == TBC::GeometryBase::GEOM_STATIC ||
+			lGeometryVolatility == TBC::GeometryBase::GEOM_SEMI_STATIC ||
 			lGeometryVolatility == TBC::GeometryBase::GEOM_DYNAMIC ||
 			lGeometryVolatility == TBC::GeometryBase::GEOM_VOLATILE);
 	}

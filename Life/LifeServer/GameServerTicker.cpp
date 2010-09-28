@@ -30,6 +30,8 @@ GameServerTicker::GameServerTicker(Cure::ResourceManager* pResourceManager,
 {
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_APPLICATION_AUTOEXITONEMPTYSERVER, false);
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_GAME_SPAWNPART, 1.0);
+	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_NETWORK_ENABLEOPENSERVER, true);
+	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _("0.0.0.0:16650"));
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_NETWORK_SERVERNAME, _("My Dedicated Server"));
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_NETWORK_LOGINGREETING, _("echo 4 \"Welcome to my dedicated server! Enjoy the ride!\""));
 

@@ -39,6 +39,7 @@ public:
 	virtual ~CppContextObject();
 
 	void EnableUi(bool pEnable);
+	void DisableRootShadow();
 
 	virtual void StartLoading();
 
@@ -75,6 +76,7 @@ protected:
 	GameUiManager* mUiManager;
 	UserClassResource* mUiClassResource;
 	bool mEnableUi;
+	bool mAllowRootShadow;
 	MeshArray mMeshResourceArray;
 	size_t mMeshLoadCount;
 	TextureArray mTextureResourceArray;

@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include "../../Lepra/Include/HiResTimer.h"
 #include "../../UiCure/Include/UiCppContextObject.h"
 #include "../../UiTBC/Include/UiChunkyClass.h"
 #include "../Life.h"
@@ -29,11 +30,17 @@ protected:
 	void OnPhysicsTick();
 
 private:
+	void OnForceApplied(TBC::PhysicsManager::ForceFeedbackListener* pOtherObject,
+		 TBC::PhysicsManager::BodyID pOwnBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
+		 const Vector3DF& pForce, const Vector3DF& pTorque,
+		 const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity);
+
 	void LoadPlaySound3d(UiCure::UserSound3dResource* pSoundResource);
 
 	typedef std::hash_map<const UiTbc::ChunkyClass::Tag*, UiCure::UserSound3dResource*, LEPRA_VOIDP_HASHER> TagSoundTable;
 
 	TagSoundTable mEngineSoundTable;
+	HiResTimer mParticleTimer;
 
 	LOG_CLASS_DECLARE();
 };

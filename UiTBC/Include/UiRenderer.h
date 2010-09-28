@@ -107,8 +107,10 @@ public:
 
 	enum Shadows
 	{
-		NO_SHADOWS = 0,
+		FORCE_NO_SHADOWS = 0,
+		NO_SHADOWS,
 		CAST_SHADOWS,
+		FORCE_CAST_SHADOWS,
 	};
 
 	enum ShadowHint
@@ -338,6 +340,8 @@ public:
 	bool IsOutlineRenderingEnabled() const;
 	void EnableWireframe(bool pEnable);
 	bool IsWireframeEnabled() const;
+	void EnablePixelShaders(bool pEnable);
+	virtual bool IsPixelShadersEnabled() const;
 
 	// A viewport is a portion of the screen where the graphics will be rendered.
 	// The center of the viewport is also the center of perspective. The viewport may
@@ -392,12 +396,9 @@ public:
 	virtual void SetCompressedTexturesEnabled(bool pEnabled);
 	bool GetCompressedTexturesEnabled();
 
-	virtual void SetShadowsEnabled(bool pEnabled, ShadowHint pHint);
-	bool GetShadowsEnabled();
+	virtual void SetShadowMode(Shadows pMode, ShadowHint pHint);
+	Shadows GetShadowMode();
 	void SetShadowUpdateFrameDelay(unsigned pFrameDelay);
-
-	virtual void SetFallbackMaterialEnabled(bool pEnabled);
-	bool GetFallbackMaterialEnabled();
 
 	virtual void SetDepthWriteEnabled(bool pEnabled) = 0;
 	virtual void SetDepthTestEnabled(bool pEnabled) = 0;
@@ -410,7 +411,7 @@ public:
 	// Adds ambient light. Used to implement self illumination in standard materials.
 	virtual void AddAmbience(float pRed, float pGreen, float pBlue);
 	// Sets the ambient light back to the value set in the last call to SetAmbientLight().
-	void ResetAmbientLight();
+	void ResetAmbientLight(bool pPropagate);
 
 	// Adds a light to the scene. 
 	// pLightRadius tells how close an object must be before it starts casting any
@@ -484,6 +485,7 @@ public:
 	virtual void RemoveGeometry(GeometryID pGeometryID);
 	virtual void RemoveAllGeometry();
 	MaterialType GetMaterialType(GeometryID pGeometryID);
+	void SetShadows(GeometryID pGeometryID, Renderer::Shadows pShadowMode);
 	Shadows GetShadows(GeometryID pGeometryID);
 	virtual bool ChangeMaterial(GeometryID pGeometryID, MaterialType pMaterialType) = 0;
 
@@ -588,6 +590,7 @@ protected:
 	void ReleaseGeometries();
 	void ReleaseTextureMaps();
 	void ReleaseShadowMaps();
+	void RemoveShadowVolumes(GeometryData* pOwnerGeometry);
 	void RemoveShadowVolume(GeometryID& pShadowVolume);
 
 	void RecalculateFrustumPlanes();
@@ -619,6 +622,7 @@ protected:
 
 	bool mIsOutlineRenderEnabled;
 	bool mIsWireframeEnabled;
+	bool mIsPixelShadersEnabled;
 
 	// Viewport.
 	PixelRect mViewport;
@@ -649,10 +653,9 @@ protected:
 	bool mBilinearEnabled;
 	bool mTrilinearEnabled;
 	bool mCompressedTexturesEnabled;
-	bool mShadowsEnabled;
 	bool mLightsEnabled;
-	bool mFallbackMaterialEnabled;
 
+	Shadows mShadowMode;
 	ShadowHint mShadowHint;
 	unsigned mShadowUpdateFrameDelay;
 

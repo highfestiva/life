@@ -88,6 +88,11 @@ bool ContextManager::DeleteObject(GameObjectId pInstanceId)
 	return (lOk);
 }
 
+void ContextManager::PostKillObject(GameObjectId pInstanceId)
+{
+	mPostKillSet.insert(pInstanceId);
+}
+
 ContextObject* ContextManager::GetObject(GameObjectId pInstanceId, bool pForce) const
 {
 	ContextObjectTable::const_iterator x = mObjectTable.find(pInstanceId);
@@ -288,6 +293,16 @@ void ContextManager::HandlePhysicsSend()
 			++x;
 		}
 	}
+}
+
+void ContextManager::HandlePostKill()
+{
+	IdSet::iterator x = mPostKillSet.begin();
+	for (; x != mPostKillSet.end(); ++x)
+	{
+		DeleteObject(*x);
+	}
+	mPostKillSet.clear();
 }
 
 

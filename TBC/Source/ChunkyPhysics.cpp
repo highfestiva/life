@@ -315,7 +315,7 @@ bool ChunkyPhysics::FinalizeInit(PhysicsManager* pPhysics, unsigned pPhysicsFps,
 		}
 		lOk = Parent::FinalizeInit(mTransformOperation);
 	}
-	if (lOk)
+	if (lOk && pPhysics)
 	{
 		const int lBoneCount = GetBoneCount();
 		for (int x = 0; lOk && x < lBoneCount; ++x)

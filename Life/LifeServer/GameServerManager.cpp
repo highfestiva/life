@@ -118,7 +118,7 @@ bool GameServerManager::Initialize(MasterServerConnection* pMasterConnection)
 	}
 
 	str lAcceptAddress;
-	CURE_RTVAR_GET(lAcceptAddress, =, GetVariableScope(), RTVAR_NETWORK_SERVERADDRESS, _T("0.0.0.0:16650"));
+	CURE_RTVAR_GET(lAcceptAddress, =, GetVariableScope(), RTVAR_NETWORK_SERVERADDRESS, _T("localhost:16650"));
 	if (lOk)
 	{
 		SocketAddress lAddress;
@@ -789,8 +789,15 @@ void GameServerManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 }
 
 void GameServerManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque,
-	Cure::ContextObject* pObject1, Cure::ContextObject* pObject2)
+	Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
+	TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID pBody2Id)
 {
+	const bool lBothAreDynamic = (!GetPhysicsManager()->IsStaticBody(pBody1Id) && !GetPhysicsManager()->IsStaticBody(pBody2Id));
+	if (!lBothAreDynamic)
+	{
+		return;
+	}
+
 	if (pObject1 != pObject2 &&	// I.e. car where a wheel collides with the body.
 		pObject1->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY)	// We only handle network object collisions.
 	{
@@ -799,12 +806,12 @@ void GameServerManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pT
 		const bool lIsServerControlled = (pObject1->GetNetworkObjectType() == Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
 		if (lIsServerControlled)
 		{
-			lSendCollision = IsHighImpact(12.0f, pObject1, pForce, pTorque);
+			lSendCollision = pObject1->IsImpact(GetPhysicsManager()->GetGravity(), 12.0f, pForce, pTorque);
 			/*if (!lSendCollision && lAreBothDynamic)
 			{
 				// If the other object thinks it's a high impact, we go. This is to not
 				// replicate when another - heavier - object is standing on top of us.
-				lSendCollision = IsHighImpact(7.0f, pObject2, pForce, pTorque);
+				lSendCollision = pObject2->IsImpact(GetPhysicsManager()->GetGravity(), 7.0f, pForce, pTorque);
 			}*/
 		}
 		else if (lAreBothDynamic)
@@ -816,7 +823,7 @@ void GameServerManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pT
 			}
 			else
 			{
-				lSendCollision = IsHighImpact(12.0f, pObject1, pForce, pTorque);
+				lSendCollision = pObject1->IsImpact(GetPhysicsManager()->GetGravity(), 12.0f, pForce, pTorque);
 			}
 		}
 		if (lSendCollision)
@@ -1073,6 +1080,13 @@ Cure::NetworkServer* GameServerManager::GetNetworkServer() const
 
 void GameServerManager::UploadServerInfo()
 {
+	bool lIsOpenServer;
+	CURE_RTVAR_GET(lIsOpenServer, =, GetVariableScope(), RTVAR_NETWORK_ENABLEOPENSERVER, false);
+	if (!lIsOpenServer)
+	{
+		return;
+	}
+
 	strutil::strvec lAddressParts = strutil::Split(GetNetworkServer()->GetLocalAddress(), _T(":"), 1);
 	if (lAddressParts.size() == 2)
 	{
@@ -1083,6 +1097,7 @@ void GameServerManager::UploadServerInfo()
 		const str lId = strutil::ReplaceAll(strutil::Encode(SystemManager::GetSystemPseudoId()), _T("\""), _T("''\\''"));
 		const str lLocalServerInfo = _T("--name \"")+lServerName + _T("\" --player-count ")+lPlayerCount
 			+ _T(" --port ")+lPort + _T(" --id \"")+lId+_T("\"");
+		// TODO: something like mMasterConnection->SendLocalInfo(GetNetworkServer()->GetSocket(), lLocalServerInfo);
 		mMasterConnection->SendLocalInfo(lLocalServerInfo);
 	}
 }

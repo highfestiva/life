@@ -95,14 +95,27 @@ GameClientSlaveManager::~GameClientSlaveManager()
 
 void GameClientSlaveManager::LoadSettings()
 {
+	GetConsoleManager()->ExecuteCommand(_T("alias gfx-lo \"#") _T(RTVAR_UI_3D_PIXELSHADERS) _T(" false; #") _T(RTVAR_UI_3D_SHADOWS) _T(" No; #") _T(RTVAR_UI_3D_ENABLEMASSOBJECTS) _T(" false; #") _T(RTVAR_UI_3D_ENABLEPARTICLES) _T(" false\""));
+	GetConsoleManager()->ExecuteCommand(_T("alias gfx-hi \"#") _T(RTVAR_UI_3D_PIXELSHADERS) _T(" true; #") _T(RTVAR_UI_3D_SHADOWS) _T(" ForceShadowVolumes; #") _T(RTVAR_UI_3D_ENABLEMASSOBJECTS) _T(" true; #") _T(RTVAR_UI_3D_ENABLEPARTICLES) _T(" true\""));
 	GetConsoleManager()->ExecuteCommand(_T("execute-file -i ")+GetApplicationCommandFilename());
-	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_DEBUG_ENABLE, false);
+	// Always default these settings, to avoid that the user can't get rid of undesired behavior.
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_DEBUG_ENABLE, false);
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_GAME_TIMEOFDAYFACTOR, 1.0);
+	bool lIsOpenServer;
+	CURE_RTVAR_GET(lIsOpenServer, =, GetVariableScope(), RTVAR_NETWORK_ENABLEOPENSERVER, false);
+	if (lIsOpenServer)
+	{
+		CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("0.0.0.0:16650"));
+	}
+	else
+	{
+		CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("localhost:16650"));
+	}
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_PHYSICS_FPS, PHYSICS_FPS);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_CAMHEIGHT, 10.0);
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_CAMROTATE, 0.0);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_PHYSICS_FPS, PHYSICS_FPS);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
 	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_STEERING_PLAYBACKMODE, PLAYBACK_NONE);
 }
 
@@ -189,11 +202,14 @@ bool GameClientSlaveManager::Render()
 	LEPRA_MEASURE_SCOPE(SlaveRender);
 	bool lOutline;
 	bool lWireFrame;
+	bool lPixelShaders;
 	CURE_RTVAR_GET(lOutline, =, GetVariableScope(), RTVAR_UI_3D_OUTLINEMODE, false);
 	CURE_RTVAR_GET(lWireFrame, =, GetVariableScope(), RTVAR_UI_3D_WIREFRAMEMODE, false);
+	CURE_RTVAR_GET(lPixelShaders, =, GetVariableScope(), RTVAR_UI_3D_PIXELSHADERS, false);
 	SetLocalRender(true);
 	mUiManager->GetRenderer()->EnableOutlineRendering(lOutline);
 	mUiManager->GetRenderer()->EnableWireframe(lWireFrame);
+	mUiManager->GetRenderer()->EnablePixelShaders(lPixelShaders);
 	mUiManager->Render(mRenderArea);
 	SetLocalRender(false);	// Hide sun and mass objects from other cameras.
 
@@ -522,6 +538,12 @@ void GameClientSlaveManager::AddLocalObjects(std::hash_set<Cure::GameObjectId>& 
 	pLocalObjectSet.insert(mOwnedObjectList.begin(), mOwnedObjectList.end());
 }
 
+bool GameClientSlaveManager::IsInCameraRange(Cure::ContextObject* pObject, float pDistance) const
+{
+	return (pObject->GetPosition().GetDistanceSquared(mCameraPivotPosition) <= pDistance*pDistance);
+}
+
+
 
 bool GameClientSlaveManager::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 {
@@ -654,8 +676,8 @@ void GameClientSlaveManager::CreateLoginView()
 		// If first attempt (i.e. no connection problems) just skip interactivity.
 		if (mDisconnectReason.empty())
 		{
-			str lServerName = _T(":16650");
-			CURE_RTVAR_TRYGET(lServerName, =, Cure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, lServerName);
+			str lServerName;
+			CURE_RTVAR_TRYGET(lServerName, =, Cure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("localhost:16650"));
 			if (strutil::StartsWith(lServerName, _T("0.0.0.0")))
 			{
 				lServerName = lServerName.substr(7);
@@ -684,10 +706,13 @@ bool GameClientSlaveManager::InitializeTerrain()
 	mCloudArray.clear();
 
 	mLevelId = GetContext()->AllocateGameObjectId(Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
-	bool lOk = CreateObject(mLevelId, _T("level_01"), Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
+	UiCure::CppContextObject* lLevel = (UiCure::CppContextObject*)Parent::CreateContextObject(_T("level_01"), Cure::NETWORK_OBJECT_REMOTE_CONTROLLED, mLevelId);
+	bool lOk = (lLevel != 0);
 	assert(lOk);
 	if (lOk)
 	{
+		lLevel->DisableRootShadow();
+		lLevel->StartLoading();
 		mSun = Parent::CreateContextObject(_T("sun"), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 		lOk = (mSun != 0);
 		assert(lOk);
@@ -824,10 +849,10 @@ void GameClientSlaveManager::TickUiInput()
 			const Options::CamControl& c = mOptions.GetCamControl();
 #define C(dir) c.mControl[Options::CamControl::CAMDIR_##dir]
 			lPower = C(UP)-C(DOWN);
-			CURE_RTVAR_ARITHMETIC(GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, double, +, lPower*lScale, 0.0, 30.0);
+			CURE_RTVAR_ARITHMETIC(GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, double, +, lPower*lScale, -5.0, 30.0);
 			mCamRotateExtra = (C(RIGHT)-C(LEFT)) * lScale;
 			lPower = C(BACKWARD)-C(FORWARD);
-			CURE_RTVAR_ARITHMETIC(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, double, +, lPower*lScale, 5.0, 100.0);
+			CURE_RTVAR_ARITHMETIC(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, double, +, lPower*lScale, 3.0, 100.0);
 
 			mAvatarInvisibleCount = 0;
 		}
@@ -1417,7 +1442,8 @@ Cure::ContextObject* GameClientSlaveManager::CreateContextObject(const str& pCla
 			lSide = 290;
 		}
 	}
-	else if (pClassId == _T("sun") || strutil::StartsWith(pClassId, _T("cloud")))
+	else if (pClassId == _T("sun") || strutil::StartsWith(pClassId, _T("cloud")) ||
+		strutil::StartsWith(pClassId, _T("mud_particle")))
 	{
 		lProps = true;
 	}
@@ -1531,13 +1557,20 @@ void GameClientSlaveManager::SetMovement(Cure::GameObjectId pInstanceId, int32 p
 }
 
 void GameClientSlaveManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque,
-	Cure::ContextObject* pObject1, Cure::ContextObject* pObject2)
+	Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
+	TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID pBody2Id)
 {
-	if (pObject2 && pObject1 != pObject2 && pObject2->GetMass() > 0)
+	const bool lBothAreDynamic = (!GetPhysicsManager()->IsStaticBody(pBody1Id) && !GetPhysicsManager()->IsStaticBody(pBody2Id));
+	if (!lBothAreDynamic)
+	{
+		return;
+	}
+
+	if (pObject2 && pObject1 != pObject2 && !GetPhysicsManager()->IsStaticBody(pBody2Id))
 	{
 		if (IsOwned(pObject1->GetInstanceId()))
 		{
-			if (IsHighImpact(12.0f, pObject1, pForce, pTorque))
+			if (pObject1->IsImpact(GetPhysicsManager()->GetGravity(), 12.0f, pForce, pTorque))
 			{
 				pObject1->QueryResendTime(0, false);
 			}
@@ -1546,7 +1579,7 @@ void GameClientSlaveManager::OnCollision(const Vector3DF& pForce, const Vector3D
 		else if (pObject2->GetInstanceId() == mAvatarId &&
 			pObject1->GetNetworkObjectType() == Cure::NETWORK_OBJECT_REMOTE_CONTROLLED)
 		{
-			if (IsHighImpact(1.0f, pObject1, pForce, pTorque))
+			if (pObject1->IsImpact(GetPhysicsManager()->GetGravity(), 1.0f, pForce, pTorque))
 			{
 				if (pObject1->QueryResendTime(1.0, false))
 				{

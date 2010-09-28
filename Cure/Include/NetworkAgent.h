@@ -21,10 +21,10 @@ namespace Cure
 class NetworkAgent
 {
 public:
-	typedef DualSocket VSocket;
-	typedef DualMuxSocket MuxSocket;
-	//typedef UdpVSocket VSocket;
-	//typedef UdpMuxSocket MuxSocket;
+	//typedef DualSocket VSocket;
+	//typedef DualMuxSocket MuxSocket;
+	typedef UdpVSocket VSocket;
+	typedef UdpMuxSocket MuxSocket;
 
 	enum ReceiveStatus
 	{
