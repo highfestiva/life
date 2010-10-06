@@ -48,6 +48,7 @@ public:
 	uint64 GetSentByteCount() const;
 	uint64 GetReceivedByteCount() const;
 	unsigned GetConnectionCount() const;
+	MuxSocket* GetMuxSocket() const;	// Use with caution.
 
 	bool SendStatusMessage(VSocket* pSocket, int32 pInteger, RemoteStatus pStatus,
 		MessageStatus::InfoType pInfoType, wstr pMessage, Packet* pPacket);

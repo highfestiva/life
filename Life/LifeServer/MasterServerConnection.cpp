@@ -6,6 +6,7 @@
 
 #include "MasterServerConnection.h"
 #include "../../Lepra/Include/Socket.h"
+#include "../../Lepra/Include/SystemManager.h"
 #include "../LifeMaster/MasterServer.h"
 #include "../LifeMaster/MasterServerNetworkParser.h"
 
@@ -18,7 +19,8 @@ namespace Life
 
 MasterServerConnection::MasterServerConnection():
 	mState(DISCONNECTED),
-	mSocket(0),
+	mMuxSocket(0),
+	mVSocket(0),
 	mConnecter(new MemberThread<MasterServerConnection>(_T("MasterServerConnecter"))),
 	mDisconnectCounter(0),
 	mIsConnectError(false)
@@ -32,6 +34,20 @@ MasterServerConnection::~MasterServerConnection()
 	delete mConnecter;
 	mConnecter = 0;
 }
+
+
+
+void MasterServerConnection::SetMuxSocket(UdpMuxSocket* pMuxSocket, double pConnectTimeout)
+{
+	mConnectTimeout = pConnectTimeout;
+	if (!mMuxSocket || !pMuxSocket || mMuxSocket->GetSysSocket() != pMuxSocket->GetSysSocket() ||
+		!mMuxSocket->IsOpen())
+	{
+		mVSocket = 0;
+	}
+	mMuxSocket = pMuxSocket;
+}
+
 
 
 void MasterServerConnection::SendLocalInfo(const str& pLocalServerInfo)
@@ -117,13 +133,13 @@ double MasterServerConnection::WaitUntilDone(double pTimeout, bool pAllowReconne
 {
 	const int lStartDisonnectCounter = mDisconnectCounter;
 	HiResTimer lTimer;
-	while (lTimer.QueryTimeDiff() < pTimeout && (pAllowReconnect || mSocket) &&
+	while (lTimer.QueryTimeDiff() < pTimeout && (pAllowReconnect || mVSocket) &&
 		lStartDisonnectCounter == mDisconnectCounter && !mStateList.empty())
 	{
 		Tick();
 		Thread::Sleep(0.001);
 	}
-	if (lTimer.QueryTimeDiff() < pTimeout && mSocket && lStartDisonnectCounter == mDisconnectCounter)
+	if (lTimer.QueryTimeDiff() < pTimeout && mVSocket && lStartDisonnectCounter == mDisconnectCounter)
 	{
 		Tick();
 	}
@@ -133,11 +149,6 @@ double MasterServerConnection::WaitUntilDone(double pTimeout, bool pAllowReconne
 void MasterServerConnection::GraceClose(double pTimeout, bool pWaitUntilDone)
 {
 	const double lWaitedTime = pWaitUntilDone? WaitUntilDone(pTimeout, false) : 0;
-	mConnecter->RequestStop();
-	if (mSocket)
-	{
-		mSocket->Close();
-	}
 	mConnecter->Join(pTimeout - lWaitedTime);
 	Close(false);
 }
@@ -204,7 +215,7 @@ void MasterServerConnection::StepState()
 	{
 		case CONNECT:
 		{
-			if (!mConnecter->IsRunning())
+			if (!mConnecter->IsRunning() && QueryMuxValid())
 			{
 				mState = WORKING;
 				if (!mConnecter->Start(this, &MasterServerConnection::ConnectEntry))
@@ -216,7 +227,7 @@ void MasterServerConnection::StepState()
 			else
 			{
 				mLog.Warning(_T("Trying to connect while connecter still running!"));
-				assert(!mSocket);
+				assert(!mVSocket);
 				assert(false);
 			}
 		}
@@ -255,20 +266,13 @@ void MasterServerConnection::StepState()
 
 void MasterServerConnection::ConnectEntry()
 {
-	if (mState != WORKING || mSocket != 0)
+	if (mState != WORKING || mVSocket != 0)
 	{
 		mLog.Warning(_T("Starting connector thread while already working/connected!"));
 		assert(false);
 		return;
 	}
 
-	mSocket = new TcpSocket(0);
-	if (mConnecter->GetStopRequest() || !mSocket->IsOpen())
-	{
-		mLog.Warning(_T("Could open TCP socket."));
-		Close(true);
-		return;
-	}
 	const str lMasterServerAddress(_T(MASTER_SERVER_NAME) _T(":") _T(MASTER_SERVER_PORT));
 	SocketAddress lTargetAddress;
 	if (!lTargetAddress.Resolve(lMasterServerAddress))
@@ -277,7 +281,15 @@ void MasterServerConnection::ConnectEntry()
 		Close(true);
 		return;
 	}
-	if (mConnecter->GetStopRequest() || !mSocket->Connect(lTargetAddress))
+	if (mConnecter->GetStopRequest() || !QueryMuxValid())
+	{
+		mLog.Warningf(_T("Connect to master server '%s' was aborted."), lMasterServerAddress.c_str());
+		Close(true);
+		return;
+	}
+	const std::string lConnectionId = SystemManager::GetRandomId();
+	mVSocket = mMuxSocket->Connect(lTargetAddress, lConnectionId, mConnectTimeout);
+	if (!mVSocket)
 	{
 		mLog.Warningf(_T("Could not connect to master server address '%s'."), lMasterServerAddress.c_str());
 		Close(true);
@@ -322,7 +334,7 @@ bool MasterServerConnection::SendAndAck(const str& pData)
 
 bool MasterServerConnection::Send(const str& pData, str& pReply)
 {
-	if (!mSocket || !mSocket->IsConnected())
+	if (!mVSocket || !QueryMuxValid())
 	{
 		mLog.Warning(_T("Trying to send to master server even though unconnected."));
 		return false;
@@ -334,7 +346,7 @@ bool MasterServerConnection::Send(const str& pData, str& pReply)
 	}
 	uint8 lRawData[1024];
 	unsigned lSendByteCount = MasterServerNetworkParser::StrToRaw(lRawData, wstrutil::Encode(pData));
-	if ((unsigned)mSocket->Send(lRawData, lSendByteCount) != lSendByteCount)
+	if ((unsigned)mVSocket->DirectSend(lRawData, lSendByteCount) != lSendByteCount)
 	{
 		mLog.Warning(_T("Transmission to master server failed."));
 		return false;
@@ -344,13 +356,13 @@ bool MasterServerConnection::Send(const str& pData, str& pReply)
 
 bool MasterServerConnection::Receive(str& pData)
 {
-	if (!mSocket || !mSocket->IsConnected())
+	if (!mVSocket || !QueryMuxValid())
 	{
 		mLog.Warning(_T("Trying to receive master server data even though unconnected."));
 		return false;
 	}
 	uint8 lRawData[1024];
-	int lRawSize = mSocket->Receive(lRawData, sizeof(lRawData));
+	int lRawSize = mVSocket->Receive(lRawData, sizeof(lRawData));
 	if (lRawSize <= 0)
 	{
 		mLog.Warning(_T("Tried to receive data from master server, but it didn't send us any!"));
@@ -373,10 +385,23 @@ void MasterServerConnection::Close(bool pError)
 		mIsConnectError = true;
 	}
 	++mDisconnectCounter;
-	delete mSocket;
-	mSocket = 0;
+	if (mMuxSocket && mVSocket)
+	{
+		mMuxSocket->CloseSocket(mVSocket);
+	}
+	mVSocket = 0;
 	mState = DISCONNECTED;
 	mStateList.clear();	// A) we lost connection, no use trying for a while, or B) nothing more to do (=already empty).
+}
+
+bool MasterServerConnection::QueryMuxValid()
+{
+	bool lInvalid = (!mMuxSocket || !mMuxSocket->IsOpen());
+	if (lInvalid)
+	{
+		mVSocket = 0;
+	}
+	return !lInvalid;
 }
 
 

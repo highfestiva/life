@@ -11,8 +11,8 @@
 #include "../../Lepra/Include/Timer.h"
 #include "../Life.h"
 
-#define MASTER_SERVER_NAME	"rg.servegame.org"
-//#define MASTER_SERVER_NAME	"localhost"
+//#define MASTER_SERVER_NAME	"rg.servegame.org"
+#define MASTER_SERVER_NAME	"localhost"
 #define MASTER_SERVER_PORT	"35749"
 #define MASTER_SERVER_USI	"UploadServerInfo"
 #define MASTER_SERVER_DSL	"DownloadServerList"
@@ -60,7 +60,7 @@ private:
 
 	typedef std::hash_map<str, GameServerInfo> GameServerTable;
 
-	UdpSocket* mSocket;
+	UdpMuxSocket* mMuxSocket;
 	Lock mLock;
 	GameServerTable mGameServerTable;
 

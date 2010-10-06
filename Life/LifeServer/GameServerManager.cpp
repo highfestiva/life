@@ -1098,6 +1098,9 @@ void GameServerManager::UploadServerInfo()
 		const str lLocalServerInfo = _T("--name \"")+lServerName + _T("\" --player-count ")+lPlayerCount
 			+ _T(" --port ")+lPort + _T(" --id \"")+lId+_T("\"");
 		// TODO: something like mMasterConnection->SendLocalInfo(GetNetworkServer()->GetSocket(), lLocalServerInfo);
+		float lConnectTimeout;
+		CURE_RTVAR_GET(lConnectTimeout, =(float), GetVariableScope(), RTVAR_NETWORK_CONNECT_TIMEOUT, 3.0);
+		mMasterConnection->SetMuxSocket(GetNetworkAgent()->GetMuxSocket(), lConnectTimeout);
 		mMasterConnection->SendLocalInfo(lLocalServerInfo);
 	}
 }

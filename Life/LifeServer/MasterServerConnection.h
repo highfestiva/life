@@ -15,7 +15,8 @@
 
 namespace Lepra
 {
-class TcpSocket;
+class UdpMuxSocket;
+class UdpVSocket;
 }
 
 
@@ -30,6 +31,8 @@ class MasterServerConnection
 public:
 	MasterServerConnection();
 	virtual ~MasterServerConnection();
+
+	void SetMuxSocket(UdpMuxSocket* pMuxSocket, double pConnectTimeout);
 
 	void SendLocalInfo(const str& pLocalServerInfo);
 	void AppendLocalInfo(const str& pExtraServerInfo);
@@ -62,6 +65,7 @@ private:
 	bool Send(const str& pData, str& pReply);
 	bool Receive(str& pData);
 	void Close(bool pError);
+	bool QueryMuxValid();
 
 	State mState;
 	std::list<State> mStateList;
@@ -69,7 +73,9 @@ private:
 	str mUploadedServerInfo;
 	str mServerSortCriterias;
 	str mServerList;
-	TcpSocket* mSocket;
+	double mConnectTimeout;
+	UdpMuxSocket* mMuxSocket;
+	UdpVSocket* mVSocket;
 	MemberThread<MasterServerConnection>* mConnecter;
 	volatile int mDisconnectCounter;
 	HiResTimer mIdleTimer;

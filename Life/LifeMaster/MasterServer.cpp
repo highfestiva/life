@@ -17,15 +17,15 @@ namespace Life
 
 
 MasterServer::MasterServer():
-	mSocket(0)
+	mMuxSocket(0)
 {
 }
 
 MasterServer::~MasterServer()
 {
 	SystemManager::AddQuitRequest(+1);
-	delete (mSocket);
-	mSocket = 0;
+	delete (mMuxSocket);
+	mMuxSocket = 0;
 }
 
 bool MasterServer::Run()
@@ -42,19 +42,20 @@ bool MasterServer::Run()
 			return false;
 		}
 	}
-	mSocket = new UdpSocket(lAddress, true);
-	if (!mSocket->IsOpen())
+	mMuxSocket = new UdpMuxSocket(_T("MasterServer"), lAddress, true);
+	if (!mMuxSocket->IsOpen())
 	{
 		mLog.Errorf(_T("Address '%s' seems busy. Terminating."), lAcceptAddress.c_str());
 		return false;
 	}
 	mLog.Headline(_T("Up and running, awaiting connections."));
 	SystemManager::SetQuitRequestCallback(SystemManager::QuitRequestCallback(this, &MasterServer::OnQuitRequest));
-	while (SystemManager::GetQuitRequest() == 0 && mSocket)
+	while (SystemManager::GetQuitRequest() == 0 && mMuxSocket)
 	{
 		uint8 lReceiveBuffer[1024];
 		SocketAddress lRemoteAddress;
-		int lReceivedBytes = mSocket->ReceiveFrom(lReceiveBuffer, sizeof(lReceiveBuffer), lRemoteAddress);
+		int lReceivedBytes = mMuxSocket->Accept();
+		ööö - ReceiveFrom(lReceiveBuffer, sizeof(lReceiveBuffer), lRemoteAddress);
 		if (lReceivedBytes > 0)
 		{
 			HandleReceive(lRemoteAddress, lReceiveBuffer, lReceivedBytes);
@@ -68,8 +69,8 @@ bool MasterServer::Run()
 
 void MasterServer::OnQuitRequest(int)
 {
-	UdpSocket* lSocket = mSocket;
-	mSocket = 0;
+	UdpSocket* lSocket = mMuxSocket;
+	mMuxSocket = 0;
 	delete lSocket;
 }
 
@@ -210,7 +211,7 @@ bool MasterServer::Send(const SocketAddress& pRemoteAddress, const str& pData)
 		return false;
 	}
 	unsigned lSendByteCount = MasterServerNetworkParser::StrToRaw(lRawData, wstrutil::Encode(pData));
-	if ((unsigned)mSocket->SendTo(lRawData, lSendByteCount, pRemoteAddress) != lSendByteCount)
+	if ((unsigned)mMuxSocket->SendTo(lRawData, lSendByteCount, pRemoteAddress) != lSendByteCount)
 	{
 		mLog.Warning(_T("Transmission to game server failed."));
 		return false;
