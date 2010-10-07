@@ -65,6 +65,15 @@ MasterApplication::MasterApplication(const strutil::strvec& pArgumentList):
 	mFileLogger->WriteLog(_T("\n\n"), Log::LEVEL_INFO);
 	mMemLogger = new MemFileLogListener(3*1024);
 	LogType::GetLog(LogType::SUB_ROOT)->SetupBasicListeners(mConsoleLogger, mDebugLogger, mFileLogger, 0, mMemLogger);
+#ifndef NO_LOG_DEBUG_INFO
+	const std::vector<Log*> lLogArray = LogType::GetLogs();
+	std::vector<Log*>::const_iterator x = lLogArray.begin();
+	const Log::LogLevel lLogLevel = Log::LEVEL_DEBUG;
+	for (; x != lLogArray.end(); ++x)
+	{
+		(*x)->SetLevelThreashold(lLogLevel);
+	}
+#endif // Showing debug information.
 
 	Network::Start();
 }

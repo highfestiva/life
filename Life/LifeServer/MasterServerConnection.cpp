@@ -19,6 +19,7 @@ namespace Life
 
 MasterServerConnection::MasterServerConnection():
 	mState(DISCONNECTED),
+	mSocketIoHandler(0),
 	mMuxSocket(0),
 	mVSocket(0),
 	mConnecter(new MemberThread<MasterServerConnection>(_T("MasterServerConnecter"))),
@@ -37,15 +38,25 @@ MasterServerConnection::~MasterServerConnection()
 
 
 
-void MasterServerConnection::SetMuxSocket(UdpMuxSocket* pMuxSocket, double pConnectTimeout)
+void MasterServerConnection::SetSocketInfo(Cure::SocketIoHandler* pSocketIoHandler, double pConnectTimeout)
 {
 	mConnectTimeout = pConnectTimeout;
-	if (!mMuxSocket || !pMuxSocket || mMuxSocket->GetSysSocket() != pMuxSocket->GetSysSocket() ||
-		!mMuxSocket->IsOpen())
+	mSocketIoHandler = pSocketIoHandler;
+	if (!pSocketIoHandler)
 	{
+		mMuxSocket = 0;
 		mVSocket = 0;
 	}
-	mMuxSocket = pMuxSocket;
+	else
+	{
+		Cure::SocketIoHandler::MuxIoSocket* lMuxSocket = pSocketIoHandler->GetMuxIoSocket();
+		if (!mMuxSocket || !lMuxSocket || mMuxSocket->GetSysSocket() != lMuxSocket->GetSysSocket() ||
+			!mMuxSocket->IsOpen())
+		{
+			mVSocket = 0;
+		}
+		mMuxSocket = lMuxSocket;
+	}
 }
 
 
@@ -295,6 +306,7 @@ void MasterServerConnection::ConnectEntry()
 		Close(true);
 		return;
 	}
+	mSocketIoHandler->AddFilterIoSocket(mVSocket, Cure::SocketIoHandler::DropFilterCallback(this, &MasterServerConnection::OnDropSocket));
 	assert(mState == WORKING);
 	mState = CONNECTED;
 	mIdleTimer.PopTimeDiff();
@@ -314,7 +326,7 @@ bool MasterServerConnection::UploadServerInfo()
 
 bool MasterServerConnection::DownloadServerList()
 {
-	if (!Send(_T(MASTER_SERVER_DSL) _T(" ") + mServerSortCriterias, mServerList))
+	if (!SendAndRecv(_T(MASTER_SERVER_DSL) _T(" ") + mServerSortCriterias, mServerList))
 	{
 		return false;
 	}
@@ -325,14 +337,23 @@ bool MasterServerConnection::DownloadServerList()
 bool MasterServerConnection::SendAndAck(const str& pData)
 {
 	str lReply;
-	if (!Send(pData, lReply))
+	if (!SendAndRecv(pData, lReply))
 	{
 		return false;
 	}
 	return lReply == _T("OK");
 }
 
-bool MasterServerConnection::Send(const str& pData, str& pReply)
+bool MasterServerConnection::SendAndRecv(const str& pData, str& pReply)
+{
+	if (!Send(pData))
+	{
+		return false;
+	}
+	return Receive(pReply);
+}
+
+bool MasterServerConnection::Send(const str& pData)
 {
 	if (!mVSocket || !QueryMuxValid())
 	{
@@ -351,7 +372,7 @@ bool MasterServerConnection::Send(const str& pData, str& pReply)
 		mLog.Warning(_T("Transmission to master server failed."));
 		return false;
 	}
-	return Receive(pReply);
+	return true;
 }
 
 bool MasterServerConnection::Receive(str& pData)
@@ -361,6 +382,7 @@ bool MasterServerConnection::Receive(str& pData)
 		mLog.Warning(_T("Trying to receive master server data even though unconnected."));
 		return false;
 	}
+	mVSocket->WaitAvailable(1.0);
 	uint8 lRawData[1024];
 	int lRawSize = mVSocket->Receive(lRawData, sizeof(lRawData));
 	if (lRawSize <= 0)
@@ -387,9 +409,10 @@ void MasterServerConnection::Close(bool pError)
 	++mDisconnectCounter;
 	if (mMuxSocket && mVSocket)
 	{
-		mMuxSocket->CloseSocket(mVSocket);
+		Send(_T(MASTER_SERVER_DC));
+		mSocketIoHandler->KillIoSocket(mVSocket);
 	}
-	mVSocket = 0;
+	assert(mVSocket == 0);
 	mState = DISCONNECTED;
 	mStateList.clear();	// A) we lost connection, no use trying for a while, or B) nothing more to do (=already empty).
 }
@@ -402,6 +425,17 @@ bool MasterServerConnection::QueryMuxValid()
 		mVSocket = 0;
 	}
 	return !lInvalid;
+}
+
+
+
+void MasterServerConnection::OnDropSocket(Cure::SocketIoHandler::VIoSocket* pSocket)
+{
+	//assert(pSocket == mVSocket);
+	if (pSocket == mVSocket)
+	{
+		mVSocket = 0;
+	}
 }
 
 

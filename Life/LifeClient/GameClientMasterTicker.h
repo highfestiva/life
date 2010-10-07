@@ -15,6 +15,10 @@
 
 
 
+namespace Cure
+{
+class NetworkFreeAgent;
+}
 namespace UiCure
 {
 class GameUiManager;
@@ -131,6 +135,7 @@ private:
 
 	UiGameServerManager* mServer;
 	MasterServerConnection* mMasterConnection;
+	Cure::NetworkFreeAgent* mFreeNetworkAgent;
 
 	ConsoleManager* mConsole;
 	bool mRestartUi;

@@ -60,7 +60,7 @@ GameServerTicker::~GameServerTicker()
 
 	mResourceManager = 0;
 
-	mMasterConnection->GraceClose(1.0, false);
+	mMasterConnection->SetSocketInfo(0, -1);
 	delete mMasterConnection;
 	mMasterConnection = 0;
 }

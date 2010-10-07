@@ -293,7 +293,7 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 					(*x)->SetLevelThreashold((Log::LogLevel)lLogLevel);
 					lNewLogLevel = (*x)->GetLevelThreashold();
 				}
-				mLog.Infof(_T("All logs levels' set to %i."), lLogLevel);
+				mLog.Infof(_T("All logs levels' set to %i."), lNewLogLevel);
 			}
 			else
 			{

@@ -17,6 +17,7 @@
 #define MASTER_SERVER_PORT	"35749"
 #define MASTER_SERVER_USI	"UploadServerInfo"
 #define MASTER_SERVER_DSL	"DownloadServerList"
+#define MASTER_SERVER_DC	"Disconnect"
 
 
 
@@ -49,6 +50,7 @@ private:
 	bool RegisterGameServer(bool pActivate, UdpVSocket* pRemote, const str& pName, int pPort, int pPlayerCount, const str& pId);
 	bool SendServerList(UdpVSocket* pRemote);
 	bool Send(UdpVSocket* pRemote, const str& pData);
+	void DropSocket(UdpVSocket* pRemote);
 
 	struct GameServerInfo
 	{

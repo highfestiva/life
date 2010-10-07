@@ -175,6 +175,10 @@ NetworkServer::ReceiveStatus NetworkServer::ReceiveFirstPacket(Packet* pPacket, 
 	VSocket* lSocket;
 	while ((lSocket = mMuxSocket->PopReceiverSocket()) != 0)
 	{
+		if (mSocketReceiveFilterTable.find(lSocket) != mSocketReceiveFilterTable.end())
+		{
+			continue;
+		}
 		int lDataLength = lSocket->Receive(pPacket->GetWriteBuffer(), pPacket->GetBufferSize());
 		UserConnection* lUser;
 		{
@@ -537,7 +541,8 @@ void NetworkServer::KillDeadSockets()
 		// Put all current connections in the "old and dead" bin. If they won't talk within the given
 		// keepalive timeout, we kill them off.
 		// First copy all pending connections.
-		mSocketTimeoutTable = mPendingLoginTable;
+		mSocketTimeoutTable.clear();
+		mSocketTimeoutTable.insert(mPendingLoginTable.begin(), mPendingLoginTable.end());
 		// Then extend with established user connections.
 		SocketUserTable::iterator y = mSocketUserTable.begin();
 		for (; y != mSocketUserTable.end(); ++y)
@@ -553,6 +558,12 @@ void NetworkServer::DropSocket(VSocket* pSocket)
 	pSocket->SendBuffer();
 	mSocketTimeoutTable.erase(pSocket);
 	mPendingLoginTable.erase(pSocket);
+	SocketReceiveFilterTable::iterator x = mSocketReceiveFilterTable.find(pSocket);
+	if (x != mSocketReceiveFilterTable.end())
+	{
+		x->second(x->first);
+		mSocketReceiveFilterTable.erase(x);
+	}
 	mMuxSocket->CloseSocket(pSocket);
 }
 
@@ -578,7 +589,7 @@ bool NetworkServer::SendStatusMessage(UserAccount::AccountId pAccountId, int32 p
 
 
 
-void NetworkServer::OnCloseSocket(VSocket* pSocket)
+/*void NetworkServer::OnCloseSocket(VSocket* pSocket)
 {
 	ScopeLock lLock(&mLock);
 	SocketUserTable::iterator x = mSocketUserTable.find(pSocket);
@@ -597,6 +608,23 @@ void NetworkServer::OnCloseSocket(VSocket* pSocket)
 			pSocket->GetTargetAddress().GetAsString().c_str());
 		DropSocket(pSocket);
 	}
+}*/
+
+
+
+NetworkServer::MuxIoSocket* NetworkServer::GetMuxIoSocket() const
+{
+	return GetMuxSocket();
+}
+
+void NetworkServer::AddFilterIoSocket(VIoSocket* pSocket, const DropFilterCallback& pOnDropCallback)
+{
+	mSocketReceiveFilterTable.insert(SocketReceiveFilterTable::value_type(pSocket, pOnDropCallback));
+}
+
+void NetworkServer::KillIoSocket(VIoSocket* pSocket)
+{
+	DropSocket(pSocket);
 }
 
 

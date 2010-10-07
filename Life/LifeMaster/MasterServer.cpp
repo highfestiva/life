@@ -32,7 +32,7 @@ bool MasterServer::Run()
 {
 	SocketAddress lAddress;
 	str lAcceptAddress = _T("0.0.0.0:") _T(MASTER_SERVER_PORT);
-	if (!lAddress.Resolve(_T("0.0.0.0:") _T(MASTER_SERVER_PORT)))
+	if (!lAddress.Resolve(lAcceptAddress))
 	{
 		mLog.Warningf(_T("Could not resolve address '%s'."), lAcceptAddress.c_str());
 		lAcceptAddress = _T(":") _T(MASTER_SERVER_PORT);
@@ -93,14 +93,11 @@ void MasterServer::KillDeadSockets()
 		mKeepaliveTimer.ClearTimeDiff();
 
 		// Kill all old and dead connections.
-		SocketTable::iterator y = mSocketTimeoutTable.begin();
-		for (; y != mSocketTimeoutTable.end(); ++y)
+		while (!mSocketTimeoutTable.empty())
 		{
-			UdpVSocket* lSocket = *y;
-			mSocketTable.erase(lSocket);
-			mMuxSocket->CloseSocket(lSocket);
+			UdpVSocket* lSocket = *mSocketTimeoutTable.begin();
+			DropSocket(lSocket);
 		}
-		mSocketTimeoutTable.clear();
 		mSocketTimeoutTable.insert(mSocketTable.begin(), mSocketTable.end());
 	}
 }
@@ -120,6 +117,7 @@ void MasterServer::HandleReceive(UdpVSocket* pRemote, const uint8* pCommand, uns
 	if (!MasterServerNetworkParser::RawToStr(lWideData, pCommand, pCommandLength))
 	{
 		mLog.Error(_T("Got garbled data from game server!"));
+		DropSocket(pRemote);
 		return;
 	}
 	const str lCommandLine = strutil::Encode(lWideData);
@@ -149,6 +147,11 @@ bool MasterServer::HandleCommandLine(UdpVSocket* pRemote, const str& pCommandLin
 	else if (lServerInfo.mCommand == _T(MASTER_SERVER_DSL))
 	{
 		return SendServerList(pRemote);
+	}
+	else if (lServerInfo.mCommand == _T(MASTER_SERVER_DC))
+	{
+		DropSocket(pRemote);
+		return true;
 	}
 	else
 	{
@@ -257,6 +260,14 @@ bool MasterServer::Send(UdpVSocket* pRemote, const str& pData)
 		return false;
 	}
 	return true;
+}
+
+void MasterServer::DropSocket(UdpVSocket* pRemote)
+{
+	assert(mSocketTable.find(pRemote) != mSocketTable.end());
+	mSocketTimeoutTable.erase(pRemote);
+	mSocketTable.erase(pRemote);
+	mMuxSocket->CloseSocket(pRemote);
 }
 
 
