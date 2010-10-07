@@ -329,7 +329,7 @@ bool GameManager::ValidateVariable(int pSecurityLevel, const str& pVariable, str
 void GameManager::UpdateReportPerformance(bool pReport, double pReportInterval)
 {
 	mPerformanceReportTimer.UpdateTimer();
-	const double lTimeDiff = mPerformanceReportTimer.GetTimeDiffF();
+	const double lTimeDiff = mPerformanceReportTimer.GetTimeDiff();
 	if (lTimeDiff >= pReportInterval)
 	{
 		mPerformanceReportTimer.ClearTimeDiff();

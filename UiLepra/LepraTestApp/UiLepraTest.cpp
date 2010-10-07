@@ -96,7 +96,7 @@ bool TestGraphics(const Lepra::LogDecorator& pLog)
 		Lepra::Timer lTimer;
 		lTimer.UpdateTimer();
 		lTimer.ClearTimeDiff();
-		while (lTimer.GetTimeDiffF() < 0.5 && !Lepra::SystemManager::GetQuitRequest())
+		while (lTimer.GetTimeDiff() < 0.5 && !Lepra::SystemManager::GetQuitRequest())
 		{
 			UiLepra::Core::ProcessMessages();
 			Lepra::Thread::YieldCpu();

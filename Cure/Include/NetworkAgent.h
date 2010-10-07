@@ -57,6 +57,7 @@ public:
 
 protected:
 	void SetMuxSocket(MuxSocket* pSocket);
+	MuxSocket* GetMuxSocket() const;	// Use with caution.
 
 	mutable Lock mLock;
 	RuntimeVariableScope* mVariableScope;

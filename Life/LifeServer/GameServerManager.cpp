@@ -53,10 +53,20 @@ GameServerManager::~GameServerManager()
 	{
 		if (!mMasterConnection->CloseUnlessUploaded())
 		{
+			bool lSkipQuitForNow = (SystemManager::GetQuitRequest() == 1);
+			if (lSkipQuitForNow)
+			{
+				SystemManager::AddQuitRequest(-1);
+			}
 			mLog.Info(_T("Unregistering server with master. Might take a few secs..."));
 			mMasterConnection->AppendLocalInfo(_T(" --remove true"));
 			mMasterConnection->WaitUntilDone(10.0, true);
+			mMasterConnection->GraceClose(1.0, false);
 			mMasterConnection = 0;	// Not owned by us, deleted elsewhere.
+			if (lSkipQuitForNow)
+			{
+				SystemManager::AddQuitRequest(+1);
+			}
 		}
 	}
 
@@ -159,7 +169,7 @@ float GameServerManager::GetPowerSaveAmount() const
 		lPowerSave = 0;	// Users are currently playing = no power save.
 		mPowerSaveTimer.ClearTimeDiff();
 	}
-	else if (mPowerSaveTimer.GetTimeDiffF() < 10.0)
+	else if (mPowerSaveTimer.GetTimeDiff() < 10.0)
 	{
 		lPowerSave = 0;	// Users played until very recently = no power save yet.
 	}
@@ -1098,6 +1108,9 @@ void GameServerManager::UploadServerInfo()
 		const str lLocalServerInfo = _T("--name \"")+lServerName + _T("\" --player-count ")+lPlayerCount
 			+ _T(" --port ")+lPort + _T(" --id \"")+lId+_T("\"");
 		// TODO: something like mMasterConnection->SendLocalInfo(GetNetworkServer()->GetSocket(), lLocalServerInfo);
+		float lConnectTimeout;
+		CURE_RTVAR_GET(lConnectTimeout, =(float), GetVariableScope(), RTVAR_NETWORK_CONNECT_TIMEOUT, 3.0);
+		mMasterConnection->SetSocketInfo(GetNetworkServer(), lConnectTimeout);
 		mMasterConnection->SendLocalInfo(lLocalServerInfo);
 	}
 }

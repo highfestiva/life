@@ -256,12 +256,10 @@ bool NetworkClient::SendAll()
 {
 	ScopeLock lLock(&mLock);
 	bool lOk = true;
-	if (mSocket && mSocket->HasSendData())
+	VSocket* lSocket;
+	while (mMuxSocket && (lSocket = mMuxSocket->PopSenderSocket()) != 0)
 	{
-		// We need to pop our socket, otherwise the MUX socket will treat us as
-		// if we're going to handle this send asynchronously (later on).
-		mMuxSocket->PopSenderSocket();
-		lOk = (mSocket->SendBuffer() > 0);
+		lOk &= (lSocket->SendBuffer() > 0);
 	}
 	return (lOk);
 }
@@ -410,7 +408,7 @@ void NetworkClient::LoginEntry()
 	if (lOk)
 	{
 		Timer lTimer;
-		while (mIsLoggingIn && lTimer.GetTimeDiffF() < mLoginTimeout &&
+		while (mIsLoggingIn && lTimer.GetTimeDiff() < mLoginTimeout &&
 			!SystemManager::GetQuitRequest() && !mLoginThread.GetStopRequest())
 		{
 			Thread::Sleep(0.05);
@@ -449,10 +447,10 @@ void NetworkClient::StopLoginThread()
 
 
 
-void NetworkClient::OnCloseSocket(VSocket*)
+/*void NetworkClient::OnCloseSocket(VSocket*)
 {
 	Disconnect(false);
-}
+}*/
 
 
 

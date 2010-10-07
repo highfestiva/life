@@ -623,10 +623,10 @@ void ScrollBar::OnIdle()
 			lDelay = mDelay;
 		}
 
-		while (mTimer.GetTimeDiffF() > lDelay)
+		while (mTimer.GetTimeDiff() > lDelay)
 		{
 			SetScrollPos(GetScrollPos() + mScrollSpeed);
-			mTimer.ReduceTimeDiff((uint64)(1000.0 * lDelay));
+			mTimer.ReduceTimeDiff(lDelay);
 			mFirstDelayDone = true;
 			lDelay = mDelay;
 		}
