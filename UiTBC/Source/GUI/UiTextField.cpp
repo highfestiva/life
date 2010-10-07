@@ -440,14 +440,14 @@ void TextField::OnIdle()
 	{
 		lLoop = false;
 
-		if (mMarkerVisible == true && mMarkerTimer.GetTimeDiffF() > mMarkerVisibleTime)
+		if (mMarkerVisible == true && mMarkerTimer.GetTimeDiff() > mMarkerVisibleTime)
 		{
 			mMarkerVisible = false;
 			mMarkerTimer.ReduceTimeDiff(mMarkerVisibleTime);
 			lLoop = true;
 		}
 
-		if (mMarkerVisible == false && mMarkerTimer.GetTimeDiffF() > mMarkerInvisibleTime)
+		if (mMarkerVisible == false && mMarkerTimer.GetTimeDiff() > mMarkerInvisibleTime)
 		{
 			mMarkerVisible = true;
 			mMarkerTimer.ReduceTimeDiff(mMarkerInvisibleTime);

@@ -410,7 +410,7 @@ void NetworkClient::LoginEntry()
 	if (lOk)
 	{
 		Timer lTimer;
-		while (mIsLoggingIn && lTimer.GetTimeDiffF() < mLoginTimeout &&
+		while (mIsLoggingIn && lTimer.GetTimeDiff() < mLoginTimeout &&
 			!SystemManager::GetQuitRequest() && !mLoginThread.GetStopRequest())
 		{
 			Thread::Sleep(0.05);

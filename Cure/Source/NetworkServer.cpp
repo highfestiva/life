@@ -504,8 +504,10 @@ void NetworkServer::KillDeadSockets()
 		mDropUserList.clear();
 	}
 
+	double lKillInterval;
+	CURE_RTVAR_GET(lKillInterval, =, mVariableScope, RTVAR_NETWORK_KEEPALIVE_KILLINTERVAL, 20.0);
 	mKeepaliveTimer.UpdateTimer();
-	if (mKeepaliveTimer.GetTimeDiffF() > CURE_RTVAR_SLOW_GET(mVariableScope, RTVAR_NETWORK_KEEPALIVE_KILLINTERVAL, 20.0))
+	if (mKeepaliveTimer.GetTimeDiff() >= lKillInterval)
 	{
 		// Reset the keepalive timer.
 		mKeepaliveTimer.ClearTimeDiff();

@@ -159,7 +159,7 @@ float GameServerManager::GetPowerSaveAmount() const
 		lPowerSave = 0;	// Users are currently playing = no power save.
 		mPowerSaveTimer.ClearTimeDiff();
 	}
-	else if (mPowerSaveTimer.GetTimeDiffF() < 10.0)
+	else if (mPowerSaveTimer.GetTimeDiff() < 10.0)
 	{
 		lPowerSave = 0;	// Users played until very recently = no power save yet.
 	}

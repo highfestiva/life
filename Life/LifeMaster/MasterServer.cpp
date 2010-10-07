@@ -52,14 +52,32 @@ bool MasterServer::Run()
 	SystemManager::SetQuitRequestCallback(SystemManager::QuitRequestCallback(this, &MasterServer::OnQuitRequest));
 	while (SystemManager::GetQuitRequest() == 0 && mMuxSocket)
 	{
-		uint8 lReceiveBuffer[1024];
-		SocketAddress lRemoteAddress;
-		int lReceivedBytes = mMuxSocket->Accept();
-		ööö - ReceiveFrom(lReceiveBuffer, sizeof(lReceiveBuffer), lRemoteAddress);
-		if (lReceivedBytes > 0)
+		UdpVSocket* lSocket;
+		if (mMuxSocket->GetConnectionCount() == 0)
 		{
-			HandleReceive(lRemoteAddress, lReceiveBuffer, lReceivedBytes);
+			lSocket = mMuxSocket->Accept();
 		}
+		else
+		{
+			lSocket = mMuxSocket->PollAccept();
+		}
+		if (lSocket)
+		{
+			mSocketTable.insert(lSocket);
+		}
+		KillDeadSockets();
+		while ((lSocket = mMuxSocket->PopReceiverSocket()) != 0)
+		{
+			uint8 lReceiveBuffer[1024];
+			SocketAddress lRemoteAddress;
+			int lReceivedBytes = lSocket->Receive(lReceiveBuffer, sizeof(lReceiveBuffer));
+			if (lReceivedBytes > 0)
+			{
+				mSocketTimeoutTable.erase(lSocket);
+				HandleReceive(lSocket, lReceiveBuffer, lReceivedBytes);
+			}
+		}
+		Thread::Sleep(0.01);
 	}
 	mLog.Headline(_T("Terminating master server..."));
 	return true;
@@ -67,14 +85,36 @@ bool MasterServer::Run()
 
 
 
-void MasterServer::OnQuitRequest(int)
+void MasterServer::KillDeadSockets()
 {
-	UdpSocket* lSocket = mMuxSocket;
-	mMuxSocket = 0;
-	delete lSocket;
+	if (mKeepaliveTimer.QueryTimeDiff() > 20.0)
+	{
+		// Reset the keepalive timer.
+		mKeepaliveTimer.ClearTimeDiff();
+
+		// Kill all old and dead connections.
+		SocketTable::iterator y = mSocketTimeoutTable.begin();
+		for (; y != mSocketTimeoutTable.end(); ++y)
+		{
+			UdpVSocket* lSocket = *y;
+			mSocketTable.erase(lSocket);
+			mMuxSocket->CloseSocket(lSocket);
+		}
+		mSocketTimeoutTable.clear();
+		mSocketTimeoutTable.insert(mSocketTable.begin(), mSocketTable.end());
+	}
 }
 
-void MasterServer::HandleReceive(const SocketAddress& pRemoteAddress, const uint8* pCommand, unsigned pCommandLength)
+void MasterServer::OnQuitRequest(int)
+{
+	if (mMuxSocket)
+	{
+		mMuxSocket->Close();
+		mMuxSocket->ReleaseSocketThreads();
+	}
+}
+
+void MasterServer::HandleReceive(UdpVSocket* pRemote, const uint8* pCommand, unsigned pCommandLength)
 {
 	wstr lWideData;
 	if (!MasterServerNetworkParser::RawToStr(lWideData, pCommand, pCommandLength))
@@ -83,13 +123,13 @@ void MasterServer::HandleReceive(const SocketAddress& pRemoteAddress, const uint
 		return;
 	}
 	const str lCommandLine = strutil::Encode(lWideData);
-	if (!HandleCommandLine(pRemoteAddress, lCommandLine))
+	if (!HandleCommandLine(pRemote, lCommandLine))
 	{
 		mLog.Error(_T("Got invalid command from game server!"));
 	}
 }
 
-bool MasterServer::HandleCommandLine(const SocketAddress& pRemoteAddress, const str& pCommandLine)
+bool MasterServer::HandleCommandLine(UdpVSocket* pRemote, const str& pCommandLine)
 {
 	ServerInfo lServerInfo;
 	if (!MasterServerNetworkParser::ExtractServerInfo(pCommandLine, lServerInfo))
@@ -103,12 +143,12 @@ bool MasterServer::HandleCommandLine(const SocketAddress& pRemoteAddress, const 
 			mLog.Errorf(_T("Got bad parameters to command (%s) from game server!"), lServerInfo.mCommand.c_str());
 			return false;
 		}
-		return RegisterGameServer(!lServerInfo.mRemove, pRemoteAddress, lServerInfo.mName, lServerInfo.mPort,
+		return RegisterGameServer(!lServerInfo.mRemove, pRemote, lServerInfo.mName, lServerInfo.mPort,
 			lServerInfo.mPlayerCount, lServerInfo.mId);
 	}
 	else if (lServerInfo.mCommand == _T(MASTER_SERVER_DSL))
 	{
-		return SendServerList(pRemoteAddress);
+		return SendServerList(pRemote);
 	}
 	else
 	{
@@ -117,11 +157,11 @@ bool MasterServer::HandleCommandLine(const SocketAddress& pRemoteAddress, const 
 	return false;
 }
 
-bool MasterServer::RegisterGameServer(bool pActivate, const SocketAddress& pRemoteAddress, const str& pName, int pPort,
+bool MasterServer::RegisterGameServer(bool pActivate, UdpVSocket* pRemote, const str& pName, int pPort,
 	int pPlayerCount, const str& pId)
 {
 	bool lOk = false;
-	const str lAddress = pRemoteAddress.GetAsString();
+	const str lAddress = pRemote->GetTargetAddress().GetAsString();
 
 	{
 		ScopeLock lLock(&mLock);
@@ -136,7 +176,7 @@ bool MasterServer::RegisterGameServer(bool pActivate, const SocketAddress& pRemo
 					lInfo.mName = pName;
 					lInfo.mPort = pPort;
 					lInfo.mPlayerCount = pPlayerCount;
-					lInfo.mIdleTime.PopTimeDiffF();
+					lInfo.mIdleTime.PopTimeDiff();
 					lOk = true;
 				}
 				else
@@ -180,13 +220,13 @@ bool MasterServer::RegisterGameServer(bool pActivate, const SocketAddress& pRemo
 
 	if (lOk)
 	{
-		Send(pRemoteAddress, _T("OK"));
+		Send(pRemote, _T("OK"));
 		return true;
 	}
 	return false;
 }
 
-bool MasterServer::SendServerList(const SocketAddress& pRemoteAddress)
+bool MasterServer::SendServerList(UdpVSocket* pRemote)
 {
 	str lServerList;
 	{
@@ -199,10 +239,10 @@ bool MasterServer::SendServerList(const SocketAddress& pRemoteAddress)
 		}
 	}
 	lServerList += _T("OK");
-	return Send(pRemoteAddress, lServerList);
+	return Send(pRemote, lServerList);
 }
 
-bool MasterServer::Send(const SocketAddress& pRemoteAddress, const str& pData)
+bool MasterServer::Send(UdpVSocket* pRemote, const str& pData)
 {
 	uint8 lRawData[1024];
 	if (pData.size() > sizeof(lRawData)/3)
@@ -211,7 +251,7 @@ bool MasterServer::Send(const SocketAddress& pRemoteAddress, const str& pData)
 		return false;
 	}
 	unsigned lSendByteCount = MasterServerNetworkParser::StrToRaw(lRawData, wstrutil::Encode(pData));
-	if ((unsigned)mMuxSocket->SendTo(lRawData, lSendByteCount, pRemoteAddress) != lSendByteCount)
+	if ((unsigned)pRemote->DirectSend(lRawData, lSendByteCount) != lSendByteCount)
 	{
 		mLog.Warning(_T("Transmission to game server failed."));
 		return false;

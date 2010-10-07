@@ -7,6 +7,7 @@
 #pragma once
 
 #include <hash_map>
+#include <set>
 #include "../../Lepra/Include/MemberThread.h"
 #include "../../Lepra/Include/Timer.h"
 #include "../Life.h"
@@ -22,7 +23,8 @@
 namespace Lepra
 {
 class SocketAddress;
-class UdpSocket;
+class UdpMuxSocket;
+class UdpVSocket;
 }
 
 
@@ -40,12 +42,13 @@ public:
 	bool Run();
 
 private:
+	void KillDeadSockets();
 	void OnQuitRequest(int pLevel);
-	void HandleReceive(const SocketAddress& pRemoteAddress, const uint8* pCommand, unsigned pCommandLength);
-	bool HandleCommandLine(const SocketAddress& pRemoteAddress, const str& pCommandLine);
-	bool RegisterGameServer(bool pActivate, const SocketAddress& pRemoteAddress, const str& pName, int pPort, int pPlayerCount, const str& pId);
-	bool SendServerList(const SocketAddress& pRemoteAddress);
-	bool Send(const SocketAddress& pRemoteAddress, const str& pData);
+	void HandleReceive(UdpVSocket* pRemote, const uint8* pCommand, unsigned pCommandLength);
+	bool HandleCommandLine(UdpVSocket* pRemote, const str& pCommandLine);
+	bool RegisterGameServer(bool pActivate, UdpVSocket* pRemote, const str& pName, int pPort, int pPlayerCount, const str& pId);
+	bool SendServerList(UdpVSocket* pRemote);
+	bool Send(UdpVSocket* pRemote, const str& pData);
 
 	struct GameServerInfo
 	{
@@ -59,10 +62,14 @@ private:
 	};
 
 	typedef std::hash_map<str, GameServerInfo> GameServerTable;
+	typedef std::set<UdpVSocket*> SocketTable;
 
 	UdpMuxSocket* mMuxSocket;
+	SocketTable mSocketTable;
+	SocketTable mSocketTimeoutTable;
 	Lock mLock;
 	GameServerTable mGameServerTable;
+	Timer mKeepaliveTimer;
 
 	LOG_CLASS_DECLARE();
 };

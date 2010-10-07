@@ -265,7 +265,11 @@ bool ClassResourceBase<_Class, _ClassLoader>::Load()
 	assert(Parent::GetRamData() == 0);
 	SetRamData(new _Class());
 	DiskFile lFile;
-	bool lOk = lFile.Open(Parent::GetName(), DiskFile::MODE_READ);
+	bool lOk = false;
+	for (int x = 0; !lOk && x < 3; ++x)
+	{
+		lOk = lFile.Open(Parent::GetName(), DiskFile::MODE_READ);
+	}
 	if (lOk)
 	{
 		_ClassLoader lLoader(&lFile, false);

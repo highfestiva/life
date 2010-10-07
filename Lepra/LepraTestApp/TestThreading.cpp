@@ -294,7 +294,7 @@ bool TestThreading(const LogDecorator& pAccount)
 		assert(lTestOk);
 		if (lTestOk)
 		{
-			double lTime = lTimer.PopTimeDiffF();
+			double lTime = lTimer.PopTimeDiff();
 			lTestOk = (lTime >= 0.9 && lTime < 1.1);
 			assert(lTestOk);
 		}
@@ -310,7 +310,7 @@ bool TestThreading(const LogDecorator& pAccount)
 		assert(lTestOk);
 		if (lTestOk)
 		{
-			double lTime = lTimer.PopTimeDiffF();
+			double lTime = lTimer.PopTimeDiff();
 			lTestOk = (lTime >= 0.0 && lTime < 0.1);
 			assert(lTestOk);
 		}
@@ -323,7 +323,7 @@ bool TestThreading(const LogDecorator& pAccount)
 		assert(lTestOk);
 		if (lTestOk)
 		{
-			double lTime = lTimer.PopTimeDiffF();
+			double lTime = lTimer.PopTimeDiff();
 			lTestOk = (lTime >= 0.0 && lTime < 0.1);
 			assert(lTestOk);
 		}

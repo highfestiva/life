@@ -31,6 +31,7 @@ public:
 
 private:
 	LogListener* mConsoleLogger;
+	DebuggerLogListener* mDebugLogger;
 	FileLogListener* mFileLogger;
 	MemFileLogListener* mMemLogger;
 };
@@ -56,11 +57,14 @@ MasterApplication::MasterApplication(const strutil::strvec& pArgumentList):
 	Lepra::Init();
 
 	mConsoleLogger = new StdioConsoleLogListener;
+#ifndef NO_LOG_DEBUG_INFO
+	mDebugLogger = new DebuggerLogListener();
+#endif // Showing debug information.
 	const str lLogName = Path::JoinPath(SystemManager::GetIoDirectory(_T("Life")), _T("Master"), _T("log"));
 	mFileLogger = new FileLogListener(lLogName);
 	mFileLogger->WriteLog(_T("\n\n"), Log::LEVEL_INFO);
 	mMemLogger = new MemFileLogListener(3*1024);
-	LogType::GetLog(LogType::SUB_ROOT)->SetupBasicListeners(mConsoleLogger, 0, mFileLogger, 0, mMemLogger);
+	LogType::GetLog(LogType::SUB_ROOT)->SetupBasicListeners(mConsoleLogger, mDebugLogger, mFileLogger, 0, mMemLogger);
 
 	Network::Start();
 }
@@ -76,6 +80,8 @@ MasterApplication::~MasterApplication()
 
 	delete (mConsoleLogger);
 	mConsoleLogger = 0;
+	delete (mDebugLogger);
+	mDebugLogger = 0;
 	delete (mMemLogger);
 	mMemLogger = 0;
 	delete (mFileLogger);
