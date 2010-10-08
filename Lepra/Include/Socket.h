@@ -119,9 +119,9 @@ public:
 	void RemoveReceiverNoLock(BufferedIo* pReceiver);
 	bool IsReceiverNoLock(BufferedIo* pReceiver) const;
 
-protected:
 	virtual void ReleaseSocketThreads();
 
+protected:
 	BufferedIo* PopSender();
 	BufferedIo* PopReceiver();
 

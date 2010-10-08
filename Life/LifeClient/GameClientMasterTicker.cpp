@@ -6,6 +6,8 @@
 
 #include "GameClientMasterTicker.h"
 #include <algorithm>
+#include "../../Cure/Include/NetworkClient.h"
+#include "../../Cure/Include/NetworkFreeAgent.h"
 #include "../../Cure/Include/ResourceManager.h"
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../../Cure/Include/TimeManager.h"
@@ -53,6 +55,7 @@ GameClientMasterTicker::GameClientMasterTicker(UiCure::GameUiManager* pUiManager
 	mResourceManager(pResourceManager),
 	mIsPlayerCountViewActive(false),
 	mServer(0),
+	mFreeNetworkAgent(new Cure::NetworkFreeAgent),
 	mMasterConnection(new MasterServerConnection),
 	mRestartUi(false),
 	mInitialized(false),
@@ -116,6 +119,8 @@ GameClientMasterTicker::~GameClientMasterTicker()
 
 	delete mMasterConnection;
 	mMasterConnection = 0;
+	delete mFreeNetworkAgent;
+	mFreeNetworkAgent = 0;
 }
 
 
@@ -139,6 +144,14 @@ bool GameClientMasterTicker::Tick()
 
 	{
 		LEPRA_MEASURE_SCOPE(MasterServerConnectionTick);
+		// If we're not running server: use client network interface for obtaining server list.
+		if (!mServer)
+		{
+			mFreeNetworkAgent->Tick();
+			float lConnectTimeout;
+			CURE_RTVAR_GET(lConnectTimeout, =(float), UiCure::GetSettings(), RTVAR_NETWORK_CONNECT_TIMEOUT, 3.0);
+			mMasterConnection->SetSocketInfo(mFreeNetworkAgent, lConnectTimeout);
+		}
 		mMasterConnection->Tick();
 	}
 

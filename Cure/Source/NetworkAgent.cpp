@@ -82,6 +82,7 @@ unsigned NetworkAgent::GetConnectionCount() const
 }
 
 
+
 bool NetworkAgent::SendStatusMessage(VSocket* pSocket, int32 pInteger, RemoteStatus pStatus,
 	MessageStatus::InfoType pInfoType, wstr pMessage, Packet* pPacket)
 {
@@ -161,6 +162,11 @@ void NetworkAgent::SetMuxSocket(MuxSocket* pSocket)
 	{
 		mMuxSocket->SetDatagramReceiver(mPacketFactory);
 	}*/
+}
+
+NetworkAgent::MuxSocket* NetworkAgent::GetMuxSocket() const
+{
+	return mMuxSocket;
 }
 
 

@@ -487,6 +487,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Source\NetworkFreeAgent.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Source\Packet.cpp"
 				>
 			</File>
@@ -589,6 +593,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Include\NetworkFreeAgent.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Include\Packet.h"
 				>
 			</File>
@@ -649,6 +657,10 @@
 				>
 				<File
 					RelativePath=".\Include\NetworkServer.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Include\SocketIoHandler.h"
 					>
 				</File>
 				<File

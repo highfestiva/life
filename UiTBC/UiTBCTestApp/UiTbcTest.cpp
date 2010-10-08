@@ -264,7 +264,7 @@ bool SceneTest::Run(double pTime)
 			mContext = _T("running");
 		}
 
-		while (mTestOk && lTotalTimer.GetTimeDiffF() < pTime && gInput->ReadKey(UiLepra::InputManager::IN_KBD_ESC) == false)
+		while (mTestOk && lTotalTimer.GetTimeDiff() < pTime && gInput->ReadKey(UiLepra::InputManager::IN_KBD_ESC) == false)
 		{
 			double lDeltaTime = lDeltaTimer.GetTimeDiff();
 			lDeltaTimer.ClearTimeDiff();
@@ -322,7 +322,7 @@ bool SceneTest::Run(double pTime)
 				mDesktopWindow->Repaint();
 			}
 
-			UpdateScene(lTotalTimer.GetTimeDiffF(), lDeltaTime);
+			UpdateScene(lTotalTimer.GetTimeDiff(), lDeltaTime);
 
 			{
 				LEPRA_MEASURE_SCOPE(UpdateScreen);
@@ -961,7 +961,7 @@ bool QuickRender(TBC::GeometryBase* pGeometry, const UiTbc::Renderer::MaterialTy
 			lTotalTimer.UpdateTimer();
 			lFrameTimer.UpdateTimer();
 		}
-		while (pUpdateScreen && lTotalTimer.GetTimeDiffF() < pDuration);
+		while (pUpdateScreen && lTotalTimer.GetTimeDiff() < pDuration);
 	}
 	if (lGraphicId != UiTbc::Renderer::INVALID_GEOMETRY)
 	{
@@ -1308,7 +1308,7 @@ bool TestSkinningSaveLoad(const Lepra::LogDecorator& pLog, double pShowTime)
 	Lepra::Timer lTotalTimer;
 	Lepra::HiResTimer lFrameTimer;
 	Lepra::TransformationF lObjectTransform;
-	while (lTestOk && lTotalTimer.GetTimeDiffF() < pShowTime)
+	while (lTestOk && lTotalTimer.GetTimeDiff() < pShowTime)
 	{
 		lContext = _T("render");
 		if (lTestOk)
@@ -1324,7 +1324,7 @@ bool TestSkinningSaveLoad(const Lepra::LogDecorator& pLog, double pShowTime)
 		if (lTestOk)
 		{
 			Lepra::QuaternionF lRotation;
-			lRotation.RotateAroundVector(Lepra::Vector3DF(0.0f, 0.0f, 1), (float)lTotalTimer.GetTimeDiffF()*Lepra::PIF*2/6.7f);
+			lRotation.RotateAroundVector(Lepra::Vector3DF(0.0f, 0.0f, 1), (float)lTotalTimer.GetTimeDiff()*Lepra::PIF*2/6.7f);
 			lObjectTransform.SetOrientation(lRotation);
 
 			lSkin[0].UpdateAnimatedGeometry();
@@ -1382,7 +1382,7 @@ bool TestMeshImport(const Lepra::LogDecorator& pLog, double pShowTime)
 	}
 	Lepra::Timer lTotalTimer;
 	Lepra::TransformationF lObjectTransform;
-	while (lTestOk && lTotalTimer.GetTimeDiffF() < pShowTime)
+	while (lTestOk && lTotalTimer.GetTimeDiff() < pShowTime)
 	{
 		lContext = _T("render");
 		if (lTestOk)
@@ -1392,7 +1392,7 @@ bool TestMeshImport(const Lepra::LogDecorator& pLog, double pShowTime)
 		if (lTestOk)
 		{
 			Lepra::QuaternionF lRotation;
-			lRotation.RotateAroundVector(Lepra::Vector3DF(0.1f, -0.1f, 1), (float)lTotalTimer.GetTimeDiffF()*Lepra::PIF*2/6.7f);
+			lRotation.RotateAroundVector(Lepra::Vector3DF(0.1f, -0.1f, 1), (float)lTotalTimer.GetTimeDiff()*Lepra::PIF*2/6.7f);
 			lObjectTransform.SetOrientation(lRotation);
 			lTotalTimer.UpdateTimer();
 		}
@@ -2281,7 +2281,7 @@ bool TestGUI(const Lepra::LogDecorator& /*pLog*/, double pShowTime)
 
 		lTotalTimer.UpdateTimer();
 	}
-	while (lTestOk && lTotalTimer.GetTimeDiffF() < pShowTime);
+	while (lTestOk && lTotalTimer.GetTimeDiff() < pShowTime);
 
 	delete lDesktopWindow;
 
@@ -2321,7 +2321,7 @@ bool TestCubicSpline(const Lepra::LogDecorator&, double pShowTime)
 	}
 
 	Lepra::Timer lTimer;
-	while (lTimer.GetTimeDiffF() < pShowTime && gInput->ReadKey(UiLepra::InputManager::IN_KBD_ESC) == false)
+	while (lTimer.GetTimeDiff() < pShowTime && gInput->ReadKey(UiLepra::InputManager::IN_KBD_ESC) == false)
 	{
 		lTimer.UpdateTimer();
 		if (Lepra::SystemManager::GetQuitRequest())

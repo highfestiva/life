@@ -304,12 +304,12 @@ void RunRotationalAgreementTest()
 		Lepra::Timer lDeltaTimer;
 		i = 0;
 		lRenderer.SetClearColor(Lepra::DARK_BLUE);
-		while(!Lepra::SystemManager::GetQuitRequest() && lTotalTimer.GetTimeDiffF() < 60.0f)
+		while(!Lepra::SystemManager::GetQuitRequest() && lTotalTimer.GetTimeDiff() < 60.0f)
 		{
 			for(i = 0; i < DYNAMIC_COUNT; i++)
 			{
 				lDynamicObj[i]->UpdateTransformation();
-				lDynamicObj[i]->mTTL -= (float)lDeltaTimer.GetTimeDiffF();
+				lDynamicObj[i]->mTTL -= (float)lDeltaTimer.GetTimeDiff();
 				if(lDynamicObj[i]->mTTL <= 0.0f)
 				{
 					lDynamicObj[i]->mTTL = (float)DYNAMIC_COUNT;
@@ -327,7 +327,7 @@ void RunRotationalAgreementTest()
 			lDisp->UpdateScreen();
 
 			lDeltaTimer.UpdateTimer();
-			while(lDeltaTimer.GetTimeDiffF() < 0.05f)
+			while(lDeltaTimer.GetTimeDiff() < 0.05f)
 			{
 				Lepra::Thread::YieldCpu();
 				lDeltaTimer.UpdateTimer();

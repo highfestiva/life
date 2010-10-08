@@ -11,8 +11,9 @@
 #include "../../Lepra/Include/MemberThread.h"
 #include "../../Lepra/Include/String.h"
 #include "../../Lepra/Include/Timer.h"
-#include "UserConnection.h"
 #include "NetworkAgent.h"
+#include "SocketIoHandler.h"
+#include "UserConnection.h"
 #include "UserAccountManager.h"
 
 
@@ -27,7 +28,7 @@ class MessageLoginRequest;
 
 
 
-class NetworkServer: public NetworkAgent
+class NetworkServer: public NetworkAgent, public SocketIoHandler
 {
 public:
 	typedef NetworkAgent Parent;
@@ -71,7 +72,11 @@ private:
 	bool SendStatusMessage(UserAccount::AccountId pAccountId, int32 pInteger, RemoteStatus pStatus,
 		MessageStatus::InfoType pInfoType, wstr pMessage, Packet* pPacket);
 
-	void OnCloseSocket(VSocket* pSocket);
+	//void OnCloseSocket(VSocket* pSocket);
+
+	virtual MuxIoSocket* GetMuxIoSocket() const;
+	virtual void AddFilterIoSocket(VIoSocket* pSocket, const DropFilterCallback& pOnDropCallback);
+	virtual void KillIoSocket(VIoSocket* pSocket);
 
 	typedef std::hash_set<VSocket*, LEPRA_VOIDP_HASHER> SocketSet;
 	typedef SocketSet PendingSocketTable;
@@ -82,6 +87,7 @@ private:
 	typedef std::hash_map<VSocket*, UserConnection*, LEPRA_VOIDP_HASHER> SocketUserTable;
 	typedef std::pair<VSocket*, UserConnection*> SocketUserPair;
 	typedef SocketSet SocketTimeoutTable;
+	typedef std::hash_map<VSocket*, DropFilterCallback, LEPRA_VOIDP_HASHER> SocketReceiveFilterTable;
 	typedef std::hash_set<UserAccount::AccountId> AccountIdSet;
 
 	UserConnectionFactory* mUserConnectionFactory;
@@ -91,6 +97,7 @@ private:
 	LoggedInNameUserTable mLoggedInNameUserTable;
 	SocketUserTable mSocketUserTable;
 	SocketTimeoutTable mSocketTimeoutTable;
+	SocketReceiveFilterTable mSocketReceiveFilterTable;
 	AccountIdSet mDropUserList;
 
 	Timer mKeepaliveTimer;

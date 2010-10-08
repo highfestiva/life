@@ -30,9 +30,12 @@ public:
 	inline Timer(const Timer& pTimer);
 	inline virtual ~Timer();
 
-	inline double PopTimeDiffF();
-	inline uint64 GetTime();
-	inline double GetTimeF();
+	// Updates time, returns current time diff and resets time diff.
+	inline double PopTimeDiff();
+	// Updates time, returns current time diff (does NOT reset time diff).
+	inline double QueryTimeDiff();
+	// Returns the time in seconds.
+	inline double GetTime();
 
 	// Updates to the current time. 
 	// Does not update the previous time.
@@ -46,8 +49,7 @@ public:
 
 	// Returns the time difference between the current time
 	// and the previous time.
-	inline uint64 GetTimeDiff() const;
-	inline double GetTimeDiffF() const;
+	inline double GetTimeDiff() const;
 
 	// Operators.
 	inline const Timer& operator = (const Timer& pTimer);
@@ -96,20 +98,20 @@ Timer::~Timer()
 {
 }
 
-double Timer::PopTimeDiffF()
+double Timer::PopTimeDiff()
 {
-	UpdateTimer();
-	double lTime = GetTimeDiffF();
+	double lTime = QueryTimeDiff();
 	ClearTimeDiff();
 	return (lTime);
 }
 
-uint64 Timer::GetTime()
+double Timer::QueryTimeDiff()
 {
-	return mMilliSecs;
+	UpdateTimer();
+	return (GetTimeDiff());
 }
 
-double Timer::GetTimeF()
+double Timer::GetTime()
 {
 	return (double)mMilliSecs * (1.0 / 1000.0);
 }
@@ -128,12 +130,7 @@ void Timer::UpdateTimer()
 #endif // LEPRA_WINDOWS/LEPRA_POSIX/<Unknown target>
 }
 
-uint64 Timer::GetTimeDiff() const
-{
-	return (mMilliSecs - mPrevMilliSecs);
-}
-
-double Timer::GetTimeDiffF() const
+double Timer::GetTimeDiff() const
 {
 	return ((double)(mMilliSecs - mPrevMilliSecs) * (1.0 / 1000.0));
 }

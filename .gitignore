@@ -36,5 +36,8 @@ Final
 /Life/LifeMaster/LifeMaster
 /ThirdParty/stlport/build
 /bin/
+/Data/Download
+Data/*.mb
+Data/*.psd
 *~
 *.so

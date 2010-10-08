@@ -364,7 +364,7 @@ bool GameClientSlaveManager::TickNetworkOutput()
 			mLastSentByteCount = GetNetworkAgent()->GetSentByteCount();
 			mLastSendTime.ClearTimeDiff();
 		}
-		else if (mLastSendTime.GetTimeDiffF() >= lKeepaliveInterval)
+		else if (mLastSendTime.GetTimeDiff() >= lKeepaliveInterval)
 		{
 			lForceSendUnsafeClientKeepalive = true;
 		}
@@ -433,7 +433,7 @@ bool GameClientSlaveManager::TickNetworkOutput()
 			double lPingInterval;
 			CURE_RTVAR_GET(lPingInterval, =, GetVariableScope(), RTVAR_NETWORK_KEEPALIVE_PINGINTERVAL, 7.0);
 			if ((!lIsSent && lForceSendUnsafeClientKeepalive) ||
-				mLastUnsafeReceiveTime.GetTimeDiffF() >= lPingInterval)
+				mLastUnsafeReceiveTime.GetTimeDiff() >= lPingInterval)
 			{
 				int lPingRetryCount;
 				CURE_RTVAR_GET(lPingRetryCount, =, GetVariableScope(), RTVAR_NETWORK_KEEPALIVE_PINGRETRYCOUNT, 4);

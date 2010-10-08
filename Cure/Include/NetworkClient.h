@@ -57,7 +57,7 @@ private:
 	void LoginEntry();
 	void StopLoginThread();
 
-	void OnCloseSocket(VSocket*);
+	//void OnCloseSocket(VSocket*);
 
 	VSocket* mSocket;
 	uint32 mLoginAccountId;

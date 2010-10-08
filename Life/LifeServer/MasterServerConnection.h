@@ -7,16 +7,10 @@
 #pragma once
 
 #include <list>
+#include "../../Cure/Include/SocketIoHandler.h"
 #include "../../Lepra/Include/HiResTimer.h"
 #include "../../Lepra/Include/MemberThread.h"
 #include "../ServerInfo.h"
-
-
-
-namespace Lepra
-{
-class TcpSocket;
-}
 
 
 
@@ -30,6 +24,8 @@ class MasterServerConnection
 public:
 	MasterServerConnection();
 	virtual ~MasterServerConnection();
+
+	void SetSocketInfo(Cure::SocketIoHandler* pMuxSocket, double pConnectTimeout);
 
 	void SendLocalInfo(const str& pLocalServerInfo);
 	void AppendLocalInfo(const str& pExtraServerInfo);
@@ -59,9 +55,13 @@ private:
 	bool UploadServerInfo();
 	bool DownloadServerList();
 	bool SendAndAck(const str& pData);
-	bool Send(const str& pData, str& pReply);
+	bool SendAndRecv(const str& pData, str& pReply);
+	bool Send(const str& pData);
 	bool Receive(str& pData);
 	void Close(bool pError);
+	bool QueryMuxValid();
+
+	void OnDropSocket(Cure::SocketIoHandler::VIoSocket* pSocket);
 
 	State mState;
 	std::list<State> mStateList;
@@ -69,7 +69,10 @@ private:
 	str mUploadedServerInfo;
 	str mServerSortCriterias;
 	str mServerList;
-	TcpSocket* mSocket;
+	double mConnectTimeout;
+	Cure::SocketIoHandler* mSocketIoHandler;
+	Cure::SocketIoHandler::MuxIoSocket* mMuxSocket;
+	Cure::SocketIoHandler::VIoSocket* mVSocket;
 	MemberThread<MasterServerConnection>* mConnecter;
 	volatile int mDisconnectCounter;
 	HiResTimer mIdleTimer;
