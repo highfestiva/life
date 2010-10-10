@@ -2030,7 +2030,7 @@ bool TestCrypto(const LogDecorator& pAccount)
 	{
 		lContext = _T("DES encrypt failed.");
 		DES lDES;
-		lDES.SetKey(0x1234567890FEDABC);
+		lDES.SetKey(LEPRA_ULONGLONG(0x1234567890FEDABC));
 		const char lString[16] = "Hello World!!!!";
 		uint8 lData[16];
 		::memcpy(lData, lString, sizeof(lData));

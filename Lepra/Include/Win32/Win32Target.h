@@ -50,6 +50,10 @@
 
 #define SOCKET_LAST_ERROR()			::WSAGetLastError()
 
+#define LEPRA_LONGLONG(x)			x
+#define LEPRA_ULONGLONG(x)			x
+
+
 namespace Lepra
 {
 	typedef	SOCKET sys_socket;
