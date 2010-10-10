@@ -12,6 +12,7 @@
 #include "../../UiTBC/Include/GUI/UiCenterLayout.h"
 #include "../LifeServer/MasterServerConnection.h"
 #include "GameClientMasterTicker.h"
+#include "RtVar.h"
 #include "UiConsole.h"
 #include "Vehicle.h"
 
@@ -114,7 +115,8 @@ void GameClientViewer::OnCancelJoinServer()
 
 void GameClientViewer::OnRequestJoinServer(const str& pServerAddress)
 {
-	GetVariableScope()->SetValue(Cure::RuntimeVariable::USAGE_NORMAL, _T(RTVAR_NETWORK_SERVERADDRESS), pServerAddress);
+	CURE_RTVAR_SET(GetVariableScope(), RTVAR_NETWORK_SERVERADDRESS, pServerAddress);
+	CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_LOGIN_ISSERVERSELECTED, true);
 	mLog.Infof(_T("Will use server %s when logging in."), pServerAddress.c_str());
 	CloseJoinServerView();
 }

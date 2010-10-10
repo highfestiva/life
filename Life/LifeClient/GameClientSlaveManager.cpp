@@ -95,21 +95,32 @@ GameClientSlaveManager::~GameClientSlaveManager()
 
 void GameClientSlaveManager::LoadSettings()
 {
+	str lExternalServerAddress;
+	CURE_RTVAR_GET(lExternalServerAddress, =, UiCure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("localhost:16650"));
 	GetConsoleManager()->ExecuteCommand(_T("alias gfx-lo \"#") _T(RTVAR_UI_3D_PIXELSHADERS) _T(" false; #") _T(RTVAR_UI_3D_SHADOWS) _T(" No; #") _T(RTVAR_UI_3D_ENABLEMASSOBJECTS) _T(" false; #") _T(RTVAR_UI_3D_ENABLEPARTICLES) _T(" false\""));
 	GetConsoleManager()->ExecuteCommand(_T("alias gfx-hi \"#") _T(RTVAR_UI_3D_PIXELSHADERS) _T(" true; #") _T(RTVAR_UI_3D_SHADOWS) _T(" ForceShadowVolumes; #") _T(RTVAR_UI_3D_ENABLEMASSOBJECTS) _T(" true; #") _T(RTVAR_UI_3D_ENABLEPARTICLES) _T(" true\""));
 	GetConsoleManager()->ExecuteCommand(_T("execute-file -i ")+GetApplicationCommandFilename());
 	// Always default these settings, to avoid that the user can't get rid of undesired behavior.
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_DEBUG_ENABLE, false);
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_GAME_TIMEOFDAYFACTOR, 1.0);
-	bool lIsOpenServer;
-	CURE_RTVAR_GET(lIsOpenServer, =, GetVariableScope(), RTVAR_NETWORK_ENABLEOPENSERVER, false);
-	if (lIsOpenServer)
+	bool lIsServerSelected;
+	CURE_RTVAR_TRYGET(lIsServerSelected, =, UiCure::GetSettings(), RTVAR_LOGIN_ISSERVERSELECTED, false);
+	if (lIsServerSelected)
 	{
-		CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("0.0.0.0:16650"));
+		CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, lExternalServerAddress);
 	}
 	else
 	{
-		CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("localhost:16650"));
+		bool lIsOpenServer;
+		CURE_RTVAR_GET(lIsOpenServer, =, GetVariableScope(), RTVAR_NETWORK_ENABLEOPENSERVER, false);
+		if (lIsOpenServer)
+		{
+			CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("0.0.0.0:16650"));
+		}
+		else
+		{
+			CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("localhost:16650"));
+		}
 	}
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_PHYSICS_FPS, PHYSICS_FPS);
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);

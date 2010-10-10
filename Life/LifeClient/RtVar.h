@@ -42,6 +42,7 @@
 #define RTVAR_STEERING_PLAYBACKMODE	"Control.Steering.PlaybackMode"	// Internal.
 
 #define RTVAR_LOGIN_USERNAME		"Login.UserName"
+#define RTVAR_LOGIN_ISSERVERSELECTED	"Login.IsServerSelected"
 
 #define RTVAR_UI_3D_CAMDISTANCE		"Ui.3D.CamDistance"
 #define RTVAR_UI_3D_CAMHEIGHT		"Ui.3D.CamHeight"
