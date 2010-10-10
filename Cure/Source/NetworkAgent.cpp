@@ -164,11 +164,6 @@ void NetworkAgent::SetMuxSocket(MuxSocket* pSocket)
 	}*/
 }
 
-NetworkAgent::MuxSocket* NetworkAgent::GetMuxSocket() const
-{
-	return mMuxSocket;
-}
-
 
 
 LOG_CLASS_DEFINE(NETWORK, NetworkAgent);

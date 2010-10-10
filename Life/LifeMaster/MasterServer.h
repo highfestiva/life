@@ -12,13 +12,15 @@
 #include "../../Lepra/Include/Timer.h"
 #include "../Life.h"
 
-#define MASTER_SERVER_NAME	"rg.servegame.org"
+//#define MASTER_SERVER_NAME	"rg.servegame.org"
 //#define MASTER_SERVER_NAME	"localhost"
 //#define MASTER_SERVER_NAME	"192.168.2.1"
-//#define MASTER_SERVER_NAME	"192.168.1.20"
+#define MASTER_SERVER_NAME	"192.168.1.21"
 #define MASTER_SERVER_PORT	"35749"
+#define MASTER_SERVER_TIMEOUT	2*60
 #define MASTER_SERVER_USI	"UploadServerInfo"
 #define MASTER_SERVER_DSL	"DownloadServerList"
+#define MASTER_SERVER_IC	"InitiateConnect"
 #define MASTER_SERVER_DC	"Disconnect"
 
 
@@ -45,6 +47,7 @@ public:
 	bool Run();
 
 private:
+	void KillDeadServers();
 	void KillDeadSockets();
 	void OnQuitRequest(int pLevel);
 	void HandleReceive(UdpVSocket* pRemote, const uint8* pCommand, unsigned pCommandLength);
@@ -74,6 +77,7 @@ private:
 	Lock mLock;
 	GameServerTable mGameServerTable;
 	Timer mKeepaliveTimer;
+	Timer mServerIdleTimer;
 
 	LOG_CLASS_DECLARE();
 };

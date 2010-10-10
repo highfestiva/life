@@ -39,6 +39,7 @@ namespace Life
 
 
 class GameClientMasterTicker;
+class MasterServerConnection;
 class RoadSignButton;
 
 
@@ -161,6 +162,8 @@ protected:
 	UiCure::GameUiManager* mUiManager;
 	const int mSlaveIndex;
 	PixelRect mRenderArea;
+
+	MasterServerConnection* mMasterServerConnection;
 
 	ObjectFrameIndexMap mObjectFrameIndexMap;
 

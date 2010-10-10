@@ -30,6 +30,8 @@ public:
 	void SendLocalInfo(const str& pLocalServerInfo);
 	void AppendLocalInfo(const str& pExtraServerInfo);
 	void RequestServerList(const str& pCriterias);
+	void RequestImmediateConnect();
+	void RequestInitiateConnect(const str& pServerConnectAddress);
 	bool UpdateServerList(ServerInfoList& pServerList) const;
 	str GetServerListAsText() const;
 	bool IsConnectError() const;
@@ -45,6 +47,7 @@ private:
 		CONNECTED,
 		UPLOAD_INFO,
 		DOWNLOAD_LIST,
+		INITIATE_CONNECT,
 		DISCONNECTED,
 		WORKING,
 	};
@@ -54,6 +57,7 @@ private:
 	void ConnectEntry();
 	bool UploadServerInfo();
 	bool DownloadServerList();
+	bool InitiateConnect();
 	bool SendAndAck(const str& pData);
 	bool SendAndRecv(const str& pData, str& pReply);
 	bool Send(const str& pData);
@@ -69,6 +73,7 @@ private:
 	str mUploadedServerInfo;
 	str mServerSortCriterias;
 	str mServerList;
+	str mServerConnectAddress;
 	double mConnectTimeout;
 	Cure::SocketIoHandler* mSocketIoHandler;
 	Cure::SocketIoHandler::MuxIoSocket* mMuxSocket;
@@ -76,9 +81,11 @@ private:
 	MemberThread<MasterServerConnection>* mConnecter;
 	volatile int mDisconnectCounter;
 	HiResTimer mIdleTimer;
+	HiResTimer mUploadTimeout;
 	bool mIsConnectError;
 	const static double mConnectedIdleTimeout;
 	const static double mDisconnectedIdleTimeout;
+	const static double mRefreshTimeout;
 
 	LOG_CLASS_DECLARE();
 };

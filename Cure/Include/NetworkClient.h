@@ -9,6 +9,7 @@
 #include "../../Lepra/Include/MemberThread.h"
 #include "NetworkAgent.h"
 #include "RemoteStatus.h"
+#include "SocketIoHandler.h"
 #include "UserAccount.h"
 
 
@@ -22,7 +23,7 @@ class Packet;
 
 
 
-class NetworkClient: public NetworkAgent
+class NetworkClient: public NetworkAgent, public SocketIoHandler
 {
 public:
 	typedef NetworkAgent Parent;
@@ -30,9 +31,10 @@ public:
 	NetworkClient(RuntimeVariableScope* pVariableScope);
 	virtual ~NetworkClient();
 
+	bool Open(const str& pLocalAddress);
 	virtual void Stop();
 
-	virtual bool Connect(const str& pLocalAddress, const str& pServerAddress, double pTimeout);
+	virtual bool Connect(const str& pServerAddress, double pTimeout);
 	void Disconnect(bool pSendDisconnect);
 
 	void StartConnectLogin(const str& pServerHost, double pConnectTimeout, const Cure::LoginId& pLoginToken);
@@ -57,7 +59,13 @@ private:
 	void LoginEntry();
 	void StopLoginThread();
 
+	virtual MuxIoSocket* GetMuxIoSocket() const;
+	virtual void AddFilterIoSocket(VIoSocket* pSocket, const DropFilterCallback& pOnDropCallback);
+	virtual void KillIoSocket(VIoSocket* pSocket);
+
 	//void OnCloseSocket(VSocket*);
+
+	typedef std::hash_map<VSocket*, DropFilterCallback, LEPRA_VOIDP_HASHER> SocketReceiveFilterTable;
 
 	VSocket* mSocket;
 	uint32 mLoginAccountId;
@@ -69,6 +77,7 @@ private:
 	double mLoginTimeout;
 	MemberThread<NetworkClient> mLoginThread;
 	bool mSafeReceiveToggle;
+	SocketReceiveFilterTable mSocketReceiveFilterTable;
 
 	LOG_CLASS_DECLARE();
 };

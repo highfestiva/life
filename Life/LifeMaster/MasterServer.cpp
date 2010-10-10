@@ -66,6 +66,7 @@ bool MasterServer::Run()
 			mSocketTable.insert(lSocket);
 		}
 		KillDeadSockets();
+		KillDeadServers();
 		while ((lSocket = mMuxSocket->PopReceiverSocket()) != 0)
 		{
 			uint8 lReceiveBuffer[1024];
@@ -77,7 +78,7 @@ bool MasterServer::Run()
 				HandleReceive(lSocket, lReceiveBuffer, lReceivedBytes);
 			}
 		}
-		Thread::Sleep(0.01);
+		Thread::Sleep(0.05);
 	}
 	mLog.Headline(_T("Terminating master server..."));
 	return true;
@@ -85,21 +86,44 @@ bool MasterServer::Run()
 
 
 
+void MasterServer::KillDeadServers()
+{
+	if (mServerIdleTimer.QueryTimeDiff() < 20.0)
+	{
+		return;
+	}
+	mServerIdleTimer.ClearTimeDiff();
+
+	GameServerTable::iterator x = mGameServerTable.begin();
+	if (x != mGameServerTable.end())
+	{
+		GameServerInfo& lInfo = x->second;
+		if (lInfo.mIdleTime.QueryTimeDiff() > MASTER_SERVER_TIMEOUT)
+		{
+			mGameServerTable.erase(x++);
+		}
+		else
+		{
+			++x;
+		}
+	}
+}
+
 void MasterServer::KillDeadSockets()
 {
-	if (mKeepaliveTimer.QueryTimeDiff() > 20.0)
+	if (mKeepaliveTimer.QueryTimeDiff() < 20.0)
 	{
-		// Reset the keepalive timer.
-		mKeepaliveTimer.ClearTimeDiff();
-
-		// Kill all old and dead connections.
-		while (!mSocketTimeoutTable.empty())
-		{
-			UdpVSocket* lSocket = *mSocketTimeoutTable.begin();
-			DropSocket(lSocket);
-		}
-		mSocketTimeoutTable.insert(mSocketTable.begin(), mSocketTable.end());
+		return;
 	}
+	mKeepaliveTimer.ClearTimeDiff();
+
+	// Kill all old and dead connections.
+	while (!mSocketTimeoutTable.empty())
+	{
+		UdpVSocket* lSocket = *mSocketTimeoutTable.begin();
+		DropSocket(lSocket);
+	}
+	mSocketTimeoutTable.insert(mSocketTable.begin(), mSocketTable.end());
 }
 
 void MasterServer::OnQuitRequest(int)

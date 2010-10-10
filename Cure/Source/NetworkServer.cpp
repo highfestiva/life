@@ -614,7 +614,7 @@ bool NetworkServer::SendStatusMessage(UserAccount::AccountId pAccountId, int32 p
 
 NetworkServer::MuxIoSocket* NetworkServer::GetMuxIoSocket() const
 {
-	return GetMuxSocket();
+	return mMuxSocket;
 }
 
 void NetworkServer::AddFilterIoSocket(VIoSocket* pSocket, const DropFilterCallback& pOnDropCallback)

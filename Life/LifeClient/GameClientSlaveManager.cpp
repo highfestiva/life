@@ -24,6 +24,7 @@
 #include "../../UiTBC/Include/GUI/UiCustomButton.h"
 #include "../../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../../UiTBC/Include/GUI/UiFloatingLayout.h"
+#include "../LifeServer/MasterServerConnection.h"
 #include "../LifeApplication.h"
 #include "GameClientMasterTicker.h"
 #include "MassObject.h"
@@ -48,6 +49,7 @@ GameClientSlaveManager::GameClientSlaveManager(GameClientMasterTicker* pMaster, 
 	mUiManager(pUiManager),
 	mSlaveIndex(pSlaveIndex),
 	mRenderArea(pRenderArea),
+	mMasterServerConnection(new MasterServerConnection),
 	mFirstInitialize(true),
 	mIsReset(false),
 	mIsResetComplete(false),
@@ -469,6 +471,14 @@ bool GameClientSlaveManager::TickNetworkOutput()
 	{
 		lSendOk = Parent::TickNetworkOutput();
 	}
+
+	{
+		float lConnectTimeout;
+		CURE_RTVAR_GET(lConnectTimeout, =(float), GetVariableScope(), RTVAR_NETWORK_CONNECT_TIMEOUT, 3.0);
+		mMasterServerConnection->SetSocketInfo(lSendOk? GetNetworkClient() : 0, lConnectTimeout);
+		mMasterServerConnection->Tick();
+	}
+
 	// If we were unable to send to server, we conclude that it has silently died.
 	if (!lSendOk)
 	{
@@ -495,12 +505,30 @@ void GameClientSlaveManager::RequestLogin(const str& pServerAddress, const Cure:
 	ScopeLock lLock(GetTickLock());
 
 	CloseLoginGui();
+	mIsReset = false;
+
+	str lPortRange = CURE_RTVAR_SLOW_GET(GetVariableScope(), RTVAR_NETWORK_CONNECT_LOCALPORTRANGE, _T("1025-65535"));
+	str lLocalName;
+	if (strutil::StartsWith(pServerAddress, _T("localhost:")) || strutil::StartsWith(pServerAddress, _T("127.0.0.1:")))
+	{
+		lLocalName = _T("localhost");
+	}
+	str lLocalAddress = lLocalName + _T(':') + lPortRange;
+	if (!GetNetworkClient()->Open(lLocalAddress))
+	{
+		mDisconnectReason = _T("Could not use local sockets.");
+		return;
+	}
+
+	float lConnectTimeout;
+	CURE_RTVAR_GET(lConnectTimeout, =(float), GetVariableScope(), RTVAR_NETWORK_CONNECT_TIMEOUT, 3.0);
+	mMasterServerConnection->SetSocketInfo(GetNetworkClient(), lConnectTimeout);
+	mMasterServerConnection->RequestInitiateConnect(pServerAddress);
 
 	mConnectUserName = strutil::Encode(pLoginToken.GetName());
 	mConnectServerAddress = pServerAddress;
 	mDisconnectReason = _T("Connect failed.");
-	mIsReset = false;
-	GetNetworkClient()->StartConnectLogin(pServerAddress, CURE_RTVAR_SLOW_GET(GetVariableScope(), RTVAR_NETWORK_CONNECT_TIMEOUT, 3.0), pLoginToken);
+	GetNetworkClient()->StartConnectLogin(pServerAddress, lConnectTimeout, pLoginToken);
 }
 
 void GameClientSlaveManager::Logout()

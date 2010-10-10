@@ -40,6 +40,39 @@ NetworkClient::~NetworkClient()
 	Disconnect(true);
 }
 
+bool NetworkClient::Open(const str& pLocalAddress)
+{
+	ScopeLock lLock(&mLock);
+
+	SendDisconnect();
+	Stop();
+
+	bool lOk = true;
+	SocketAddress lLocalAddress;
+	uint16 lEndPort = 0;
+	if (lOk)
+	{
+		lOk = lLocalAddress.ResolveRange(pLocalAddress, lEndPort);
+		assert(lOk);
+	}
+	if (lOk)
+	{
+		ScopeLock lLock(&mLock);
+		for (; lLocalAddress.GetPort() <= lEndPort; lLocalAddress.SetPort(lLocalAddress.GetPort()+1))
+		{
+			SetMuxSocket(new MuxSocket(_T("Client "), lLocalAddress, false));
+			if (mMuxSocket->IsOpen())
+			{
+				break;
+			}
+			delete (mMuxSocket);
+			mMuxSocket = 0;
+		}
+		lOk = (mMuxSocket != 0);
+	}
+	return (lOk);
+}
+
 void NetworkClient::Stop()
 {
 	ScopeLock lLock(&mLock);
@@ -58,23 +91,12 @@ void NetworkClient::Stop()
 
 
 
-bool NetworkClient::Connect(const str& pLocalAddress, const str& pServerAddress, double pTimeout)
+bool NetworkClient::Connect(const str& pServerAddress, double pTimeout)
 {
-	//assert(pLocalAddress.find(_T(":1025")) == str::npos);
-
 	ScopeLock lLock(&mLock);
 
-	SendDisconnect();
-	Stop();
-
 	bool lOk = true;
-	SocketAddress lLocalAddress;
-	uint16 lEndPort = 0;
-	if (lOk)
-	{
-		lOk = lLocalAddress.ResolveRange(pLocalAddress, lEndPort);
-		assert(lOk);
-	}
+
 	SocketAddress lTargetAddress;
 	if (lOk)
 	{
@@ -83,21 +105,6 @@ bool NetworkClient::Connect(const str& pLocalAddress, const str& pServerAddress,
 		{
 			mLog.Warningf(_T("Could not resolve server address '%s'."), pServerAddress.c_str());
 		}
-	}
-	if (lOk)
-	{
-		ScopeLock lLock(&mLock);
-		for (; lLocalAddress.GetPort() <= lEndPort; lLocalAddress.SetPort(lLocalAddress.GetPort()+1))
-		{
-			SetMuxSocket(new MuxSocket(_T("Client "), lLocalAddress, false));
-			if (mMuxSocket->IsOpen())
-			{
-				break;
-			}
-			delete (mMuxSocket);
-			mMuxSocket = 0;
-		}
-		lOk = (mMuxSocket != 0);
 	}
 	if (lOk)
 	{
@@ -383,13 +390,7 @@ void NetworkClient::LoginEntry()
 			{
 				mLog.AInfo("Retrying connect...");
 			}
-			str lPortRange = CURE_RTVAR_SLOW_GET(mVariableScope, RTVAR_NETWORK_CONNECT_LOCALPORTRANGE, _T("1025-65535"));
-			str lLocalName;
-			if (strutil::StartsWith(mServerHost, _T("localhost:")) || strutil::StartsWith(mServerHost, _T("127.0.0.1:")))
-			{
-				lLocalName = _T("localhost");
-			}
-			lOk = Connect(lLocalName+_T(":")+lPortRange, mServerHost, mConnectTimeout);
+			lOk = Connect(mServerHost, mConnectTimeout);
 		}
 		while (++x <= CURE_RTVAR_SLOW_GET(mVariableScope, RTVAR_NETWORK_CONNECT_RETRYCOUNT, 1) && !lOk &&
 			!SystemManager::GetQuitRequest() && !mLoginThread.GetStopRequest());
@@ -443,6 +444,30 @@ void NetworkClient::StopLoginThread()
 		mLoginThread.Join(mConnectTimeout+mLoginTimeout+0.5);
 		mLoginThread.Kill();
 	}
+}
+
+
+
+NetworkClient::MuxIoSocket* NetworkClient::GetMuxIoSocket() const
+{
+	return mMuxSocket;
+}
+
+void NetworkClient::AddFilterIoSocket(VIoSocket* pSocket, const DropFilterCallback& pOnDropCallback)
+{
+	mSocketReceiveFilterTable.insert(SocketReceiveFilterTable::value_type(pSocket, pOnDropCallback));
+}
+
+void NetworkClient::KillIoSocket(VIoSocket* pSocket)
+{
+	pSocket->SendBuffer();
+	SocketReceiveFilterTable::iterator x = mSocketReceiveFilterTable.find(pSocket);
+	if (x != mSocketReceiveFilterTable.end())
+	{
+		x->second(x->first);
+		mSocketReceiveFilterTable.erase(x);
+	}
+	mMuxSocket->CloseSocket(pSocket);
 }
 
 

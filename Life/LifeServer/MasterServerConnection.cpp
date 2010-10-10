@@ -64,9 +64,10 @@ void MasterServerConnection::SetSocketInfo(Cure::SocketIoHandler* pSocketIoHandl
 void MasterServerConnection::SendLocalInfo(const str& pLocalServerInfo)
 {
 	assert(!pLocalServerInfo.empty());
-	if (mLocalServerInfo != pLocalServerInfo)
+	if (mLocalServerInfo != pLocalServerInfo || mUploadTimeout.QueryTimeDiff() >= mRefreshTimeout)
 	{
 		mLocalServerInfo = pLocalServerInfo;
+		mUploadTimeout.ClearTimeDiff();
 		QueryAddState(UPLOAD_INFO);
 	}
 }
@@ -86,6 +87,18 @@ void MasterServerConnection::RequestServerList(const str& pServerCriterias)
 	mServerSortCriterias = pServerCriterias;
 	QueryAddState(DOWNLOAD_LIST);
 	mIdleTimer.ReduceTimeDiff(-1.1*mDisconnectedIdleTimeout);
+}
+
+void MasterServerConnection::RequestImmediateConnect()
+{
+}
+
+void MasterServerConnection::RequestInitiateConnect(const str& pServerConnectAddress)
+{
+	mServerConnectAddress = pServerConnectAddress;
+	QueryAddState(INITIATE_CONNECT);
+	mIdleTimer.ReduceTimeDiff(-1.1*mDisconnectedIdleTimeout);
+	Tick();	// We want this to happen fast.
 }
 
 bool MasterServerConnection::UpdateServerList(ServerInfoList& pServerList) const
@@ -193,6 +206,14 @@ void MasterServerConnection::Tick()
 			}
 		}
 		break;
+		case INITIATE_CONNECT:
+		{
+			if (!InitiateConnect())
+			{
+				Close(true);
+			}
+		}
+		break;
 	}
 	StepState();
 }
@@ -259,6 +280,7 @@ void MasterServerConnection::StepState()
 		break;
 		case UPLOAD_INFO:
 		case DOWNLOAD_LIST:
+		case INITIATE_CONNECT:
 		{
 			mState = CONNECTED;
 		}
@@ -327,6 +349,21 @@ bool MasterServerConnection::UploadServerInfo()
 bool MasterServerConnection::DownloadServerList()
 {
 	if (!SendAndRecv(_T(MASTER_SERVER_DSL) _T(" ") + mServerSortCriterias, mServerList))
+	{
+		return false;
+	}
+	mIsConnectError = false;
+	return true;
+}
+
+bool MasterServerConnection::InitiateConnect()
+{
+	strutil::strvec lVector = strutil::Split(mServerConnectAddress, _T(":"));
+	if (lVector.size() != 2)
+	{
+		return false;
+	}
+	if (!SendAndAck(_T(MASTER_SERVER_IC) _T(" --address ") + lVector[0] + _T(" --port ") + lVector[1]))
 	{
 		return false;
 	}
@@ -441,7 +478,8 @@ void MasterServerConnection::OnDropSocket(Cure::SocketIoHandler::VIoSocket* pSoc
 
 
 const double MasterServerConnection::mConnectedIdleTimeout = 10.0;
-const double MasterServerConnection::mDisconnectedIdleTimeout = 10.0;
+const double MasterServerConnection::mDisconnectedIdleTimeout = MASTER_SERVER_TIMEOUT;
+const double MasterServerConnection::mRefreshTimeout = MASTER_SERVER_TIMEOUT/3-1;
 
 LOG_CLASS_DEFINE(NETWORK_SERVER, MasterServerConnection);
 

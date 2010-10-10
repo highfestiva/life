@@ -147,7 +147,8 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 	{
 		lContext = pPrefix+_T(" client1 invalid force connect");
 		log_volatile(mLog.Debug(_T("---> Testing: ")+lContext));
-		lTestOk = !lClient->Connect(_T(":11332"), _T(":25344"), 0.5);
+		lClient->Open(_T(":11332"));
+		lTestOk = !lClient->Connect(_T(":25344"), 0.5);
 		assert(lTestOk);
 	}
 
@@ -183,7 +184,9 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 	{
 		lContext = pPrefix+_T(" invalid client1 port connect");
 		log_volatile(mLog.Debug(_T("---> Testing: ")+lContext));
-		lTestOk = !lClient->Connect(_T(":11332"), _T(":25343"), 0.5);
+		lTestOk = lClient->Open(_T(":11332"));
+		assert(lTestOk);
+		lTestOk = !lClient->Connect(_T(":25343"), 0.5);
 		assert(lTestOk);
 	}
 
@@ -231,7 +234,9 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 	{
 		lContext = pPrefix+_T(" connect client1");
 		log_volatile(mLog.Debug(_T("---> Testing: ")+lContext));
-		lTestOk = lClient->Connect(_T(":11332"), _T(":25344"), 0.5);
+		lTestOk = lClient->Open(_T(":11332"));
+		assert(lTestOk);
+		lTestOk = lClient->Connect(_T(":25344"), 0.5);
 		assert(lTestOk);
 	}
 	// Make sure that bad username login is denied.
@@ -252,7 +257,9 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 	{
 		lContext = pPrefix+_T(" connect client1 second time");
 		log_volatile(mLog.Debug(_T("---> Testing: ")+lContext));
-		lTestOk = lClient->Connect(_T(":11332"), _T(":25344"), 0.5);
+		lTestOk = lClient->Open(_T(":11332"));
+		assert(lTestOk);
+		lTestOk = lClient->Connect(_T(":25344"), 0.5);
 		assert(lTestOk);
 	}
 	// Make sure that bad password login is denied.
@@ -299,7 +306,9 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 	{
 		lContext = pPrefix+_T(" connect client2");
 		log_volatile(mLog.Debug(_T("---> Testing: ")+lContext));
-		lTestOk = lClient2->Connect(_T(":11333"), _T(":25344"), 0.5);
+		lTestOk = lClient->Open(_T(":11333"));
+		assert(lTestOk);
+		lTestOk = lClient2->Connect(_T(":25344"), 0.5);
 		assert(lTestOk);
 	}
 	// Make sure double login fails.
