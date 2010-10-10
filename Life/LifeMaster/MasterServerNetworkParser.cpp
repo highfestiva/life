@@ -84,7 +84,7 @@ bool MasterServerNetworkParser::RawToStr(wstr& pStr, const uint8* pRawData, unsi
 
 
 
-bool MasterServerNetworkParser::ExtractServerInfo(const str& pServerString, ServerInfo& pInfo)
+bool MasterServerNetworkParser::ExtractServerInfo(const str& pServerString, ServerInfo& pInfo, const SocketAddress* pRemoteAddress)
 {
 	strutil::strvec lCommandList = strutil::BlockSplit(pServerString, _T(" \t\r\n"), false, false);
 	if (lCommandList.empty())
@@ -108,7 +108,7 @@ bool MasterServerNetworkParser::ExtractServerInfo(const str& pServerString, Serv
 		{
 			pInfo.mName = lCommandList[x+1];
 		}
-		else if (lCommandList[x] == _T("--port"))
+		else if (!pRemoteAddress && lCommandList[x] == _T("--port"))
 		{
 			if (!strutil::StringToInt(lCommandList[x+1], pInfo.mPort))
 			{
@@ -134,7 +134,7 @@ bool MasterServerNetworkParser::ExtractServerInfo(const str& pServerString, Serv
 				return false;
 			}
 		}
-		else if (lCommandList[x] == _T("--address"))
+		else if (!pRemoteAddress && lCommandList[x] == _T("--address"))
 		{
 			pInfo.mAddress = lCommandList[x+1];
 		}
@@ -156,6 +156,11 @@ bool MasterServerNetworkParser::ExtractServerInfo(const str& pServerString, Serv
 			mLog.Errorf(_T("Got bad parameter (%s)!"), lCommandList[x].c_str());
 			return false;
 		}
+	}
+	if (pRemoteAddress)
+	{
+		pInfo.mAddress = pRemoteAddress->GetIP().GetAsString();
+		pInfo.mPort = pRemoteAddress->GetPort();
 	}
 	return true;
 }

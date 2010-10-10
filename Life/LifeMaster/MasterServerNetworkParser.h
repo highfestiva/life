@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include "../../Lepra/Include/Socket.h"
 #include "../ServerInfo.h"
 
 
@@ -21,7 +22,7 @@ public:
 	static unsigned StrToRaw(uint8* pRawData, const wstr& pStr);
 	static bool RawToStr(wstr& pStr, const uint8* pRawData, unsigned pRawLength);
 
-	static bool ExtractServerInfo(const str& pServerString, ServerInfo& pInfo);
+	static bool ExtractServerInfo(const str& pServerString, ServerInfo& pInfo, const SocketAddress* pRemoteAddress);
 
 	LOG_CLASS_DECLARE();
 };

@@ -1097,22 +1097,17 @@ void GameServerManager::UploadServerInfo()
 		return;
 	}
 
-	strutil::strvec lAddressParts = strutil::Split(GetNetworkServer()->GetLocalAddress(), _T(":"), 1);
-	if (lAddressParts.size() == 2)
-	{
-		const str lPort = lAddressParts[1];
-		str lServerName;
-		CURE_RTVAR_GET(lServerName, =, Cure::GetSettings(), RTVAR_NETWORK_SERVERNAME, _T("?"));
-		const str lPlayerCount = strutil::IntToString(GetLoggedInClientCount(), 10);
-		const str lId = strutil::ReplaceAll(strutil::Encode(SystemManager::GetSystemPseudoId()), _T("\""), _T("''\\''"));
-		const str lLocalServerInfo = _T("--name \"")+lServerName + _T("\" --player-count ")+lPlayerCount
-			+ _T(" --port ")+lPort + _T(" --id \"")+lId+_T("\"");
-		// TODO: something like mMasterConnection->SendLocalInfo(GetNetworkServer()->GetSocket(), lLocalServerInfo);
-		float lConnectTimeout;
-		CURE_RTVAR_GET(lConnectTimeout, =(float), GetVariableScope(), RTVAR_NETWORK_CONNECT_TIMEOUT, 3.0);
-		mMasterConnection->SetSocketInfo(GetNetworkServer(), lConnectTimeout);
-		mMasterConnection->SendLocalInfo(lLocalServerInfo);
-	}
+	str lServerName;
+	CURE_RTVAR_GET(lServerName, =, Cure::GetSettings(), RTVAR_NETWORK_SERVERNAME, _T("?"));
+	const str lPlayerCount = strutil::IntToString(GetLoggedInClientCount(), 10);
+	const str lId = strutil::ReplaceAll(strutil::Encode(SystemManager::GetSystemPseudoId()), _T("\""), _T("''\\''"));
+	const str lLocalServerInfo = _T("--name \"")+lServerName + _T("\" --player-count ")+lPlayerCount
+		+ _T(" --id \"")+lId+_T("\"");
+	// TODO: something like mMasterConnection->SendLocalInfo(GetNetworkServer()->GetSocket(), lLocalServerInfo);
+	float lConnectTimeout;
+	CURE_RTVAR_GET(lConnectTimeout, =(float), GetVariableScope(), RTVAR_NETWORK_CONNECT_TIMEOUT, 3.0);
+	mMasterConnection->SetSocketInfo(GetNetworkServer(), lConnectTimeout);
+	mMasterConnection->SendLocalInfo(lLocalServerInfo);
 }
 
 void GameServerManager::MonitorRtvars()

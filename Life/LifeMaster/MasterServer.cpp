@@ -130,7 +130,7 @@ void MasterServer::HandleReceive(UdpVSocket* pRemote, const uint8* pCommand, uns
 bool MasterServer::HandleCommandLine(UdpVSocket* pRemote, const str& pCommandLine)
 {
 	ServerInfo lServerInfo;
-	if (!MasterServerNetworkParser::ExtractServerInfo(pCommandLine, lServerInfo))
+	if (!MasterServerNetworkParser::ExtractServerInfo(pCommandLine, lServerInfo, &pRemote->GetTargetAddress()))
 	{
 		return false;
 	}

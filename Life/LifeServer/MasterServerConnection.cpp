@@ -107,7 +107,7 @@ bool MasterServerConnection::UpdateServerList(ServerInfoList& pServerList) const
 	for (; x != lServers.end(); ++x)
 	{
 		ServerInfo lInfo;
-		MasterServerNetworkParser::ExtractServerInfo(*x, lInfo);
+		MasterServerNetworkParser::ExtractServerInfo(*x, lInfo, 0);
 		lNewServerList.push_back(lInfo);
 		if (!lIsUpdated && (y != pServerList.end() && lInfo != *y))
 		{
