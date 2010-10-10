@@ -703,14 +703,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\LifeServer\MasterServerConnection.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\LifeServer\MasterServerConnection.h"
-				>
-			</File>
-			<File
 				RelativePath="..\LifeServer\ServerConsoleManager.cpp"
 				>
 			</File>
@@ -748,6 +740,14 @@
 			>
 			<File
 				RelativePath="..\LifeMaster\MasterServer.h"
+				>
+			</File>
+			<File
+				RelativePath="..\LifeServer\MasterServerConnection.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\LifeServer\MasterServerConnection.h"
 				>
 			</File>
 			<File

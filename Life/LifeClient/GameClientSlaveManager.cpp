@@ -181,6 +181,7 @@ void GameClientSlaveManager::SetIsQuitting()
 	SetRoadSignsVisible(false);
 	GetResourceManager()->Tick();
 	mQuit = true;
+	CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_LOGIN_ISSERVERSELECTED, false);
 }
 
 void GameClientSlaveManager::SetFade(float pFadeAmount)
