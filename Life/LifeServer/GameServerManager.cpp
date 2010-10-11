@@ -12,6 +12,7 @@
 #include "../../Lepra/Include/Path.h"
 #include "../../Lepra/Include/SystemManager.h"
 #include "../../TBC/Include/ChunkyPhysics.h"
+#include "../LifeMaster/MasterServer.h"
 #include "../LifeApplication.h"
 #include "../LifeString.h"
 #include "Elevator.h"
@@ -154,7 +155,7 @@ bool GameServerManager::Initialize(MasterServerConnection* pMasterConnection)
 	if (lOk)
 	{
 		mMasterConnection = pMasterConnection;
-		UploadServerInfo();
+		TickMasterServer();
 	}
 	return (lOk);
 }
@@ -278,7 +279,7 @@ int GameServerManager::GetLoggedInClientCount() const
 
 void GameServerManager::TickInput()
 {
-	UploadServerInfo();
+	TickMasterServer();
 	MonitorRtvars();
 
 	Cure::Packet* lPacket = GetNetworkAgent()->GetPacketFactory()->Allocate();
@@ -1088,7 +1089,7 @@ Cure::NetworkServer* GameServerManager::GetNetworkServer() const
 
 
 
-void GameServerManager::UploadServerInfo()
+void GameServerManager::TickMasterServer()
 {
 	bool lIsOpenServer;
 	CURE_RTVAR_GET(lIsOpenServer, =, GetVariableScope(), RTVAR_NETWORK_ENABLEOPENSERVER, false);
@@ -1108,6 +1109,34 @@ void GameServerManager::UploadServerInfo()
 	CURE_RTVAR_GET(lConnectTimeout, =(float), GetVariableScope(), RTVAR_NETWORK_CONNECT_TIMEOUT, 3.0);
 	mMasterConnection->SetSocketInfo(GetNetworkServer(), lConnectTimeout);
 	mMasterConnection->SendLocalInfo(lLocalServerInfo);
+
+	ServerInfo lServerInfo;
+	if (mMasterConnection->TickReceive(lServerInfo))
+	{
+		HandleMasterCommand(lServerInfo);
+	}
+}
+
+
+bool GameServerManager::HandleMasterCommand(const ServerInfo& pServerInfo)
+{
+	if (pServerInfo.mCommand == _T(MASTER_SERVER_OF))
+	{
+		const str lAddress = pServerInfo.mGivenAddress + strutil::Format(_T(":%u"), pServerInfo.mGivenPort);
+		SocketAddress lSocketAddress;
+		if (lSocketAddress.Resolve(lAddress))
+		{
+			uint8 lData[] = "Argabargle glop-glyph!";	// Just send anything, since we're just doing it to open the local firewall.
+			Cure::SocketIoHandler* lSocketIoHandler = GetNetworkServer();
+			return lSocketIoHandler->GetMuxIoSocket()->SendTo(lData, sizeof(lData), lSocketAddress) == sizeof(lData);
+		}
+	}
+	else
+	{
+		mLog.Errorf(_T("Got bad command (%s) from master server!"), pServerInfo.mCommand.c_str());
+		assert(false);
+	}
+	return false;
 }
 
 void GameServerManager::MonitorRtvars()

@@ -64,6 +64,7 @@ public:
 	float UpdateFrustum(float pFov, const PixelRect& pRenderArea);
 
 	void PreLogin(const str& pServerAddress);
+	bool IsLocalServer() const;
 	void OnExit();
 	void OnSetPlayerCount(int pPlayerCount);
 

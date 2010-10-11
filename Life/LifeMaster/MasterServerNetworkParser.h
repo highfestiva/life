@@ -7,12 +7,16 @@
 #pragma once
 
 #include "../../Lepra/Include/Socket.h"
-#include "../ServerInfo.h"
+#include "../Life.h"
 
 
 
 namespace Life
 {
+
+
+
+struct ServerInfo;
 
 
 

@@ -523,7 +523,21 @@ void GameClientSlaveManager::RequestLogin(const str& pServerAddress, const Cure:
 	float lConnectTimeout;
 	CURE_RTVAR_GET(lConnectTimeout, =(float), GetVariableScope(), RTVAR_NETWORK_CONNECT_TIMEOUT, 3.0);
 	mMasterServerConnection->SetSocketInfo(GetNetworkClient(), lConnectTimeout);
-	mMasterServerConnection->RequestInitiateConnect(pServerAddress);
+	if (!mMaster->IsLocalServer())
+	{
+		mMasterServerConnection->RequestOpenFirewall(pServerAddress);
+		const double lTimeout = 0.6;
+		const double lWaitTime = mMasterServerConnection->WaitUntilDone(lTimeout, true);
+		if (lWaitTime < lTimeout && mMasterServerConnection->IsFirewallOpen())
+		{
+			mLog.AInfo("Master seems to have asked game server to open firewall OK.");
+			Thread::Sleep(lWaitTime+0.02);	// Let's pray. Since we got through in a certain time, perhaps the server will too.
+		}
+		else
+		{
+			mLog.AInfo("Master did not reply in time to if it asked game server to open firewall. Trying anyway.");
+		}
+	}
 
 	mConnectUserName = strutil::Encode(pLoginToken.GetName());
 	mConnectServerAddress = pServerAddress;

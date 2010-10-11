@@ -24,7 +24,8 @@ MasterServerConnection::MasterServerConnection():
 	mVSocket(0),
 	mConnecter(new MemberThread<MasterServerConnection>(_T("MasterServerConnecter"))),
 	mDisconnectCounter(0),
-	mIsConnectError(false)
+	mIsConnectError(false),
+	mLastFirewallOpen(false)
 {
 	mIdleTimer.ReduceTimeDiff(-1.1*mDisconnectedIdleTimeout);
 }
@@ -89,14 +90,11 @@ void MasterServerConnection::RequestServerList(const str& pServerCriterias)
 	mIdleTimer.ReduceTimeDiff(-1.1*mDisconnectedIdleTimeout);
 }
 
-void MasterServerConnection::RequestImmediateConnect()
+void MasterServerConnection::RequestOpenFirewall(const str& pServerConnectAddress)
 {
-}
-
-void MasterServerConnection::RequestInitiateConnect(const str& pServerConnectAddress)
-{
+	mLastFirewallOpen = false;
 	mServerConnectAddress = pServerConnectAddress;
-	QueryAddState(INITIATE_CONNECT);
+	QueryAddState(OPEN_FIREWALL);
 	mIdleTimer.ReduceTimeDiff(-1.1*mDisconnectedIdleTimeout);
 	Tick();	// We want this to happen fast.
 }
@@ -153,6 +151,11 @@ bool MasterServerConnection::IsConnectError() const
 	return mIsConnectError;
 }
 
+bool MasterServerConnection::IsFirewallOpen() const
+{
+	return mLastFirewallOpen;
+}
+
 double MasterServerConnection::WaitUntilDone(double pTimeout, bool pAllowReconnect)
 {
 	const int lStartDisonnectCounter = mDisconnectCounter;
@@ -206,16 +209,39 @@ void MasterServerConnection::Tick()
 			}
 		}
 		break;
-		case INITIATE_CONNECT:
+		case OPEN_FIREWALL:
 		{
-			if (!InitiateConnect())
-			{
-				Close(true);
-			}
+			mLastFirewallOpen = OpenFirewall();
 		}
 		break;
 	}
 	StepState();
+}
+
+bool MasterServerConnection::TickReceive(ServerInfo& pServerInfo)
+{
+	if (mState != CONNECTED || !mVSocket || !QueryMuxValid())
+	{
+		return false;
+	}
+	if (!mVSocket->NeedInputPeek())
+	{
+		return false;
+	}
+	str lCommandLine;
+	if (!Receive(lCommandLine))
+	{
+		mLog.Error(_T("Someone snatched data received from master server!"));
+		assert(false);
+		return false;
+	}
+	if (!MasterServerNetworkParser::ExtractServerInfo(lCommandLine, pServerInfo, &mVSocket->GetTargetAddress()))
+	{
+		mLog.Error(_T("Got bad formatted command from master server!"));
+		assert(false);
+		return false;
+	}
+	return true;
 }
 
 
@@ -280,7 +306,7 @@ void MasterServerConnection::StepState()
 		break;
 		case UPLOAD_INFO:
 		case DOWNLOAD_LIST:
-		case INITIATE_CONNECT:
+		case OPEN_FIREWALL:
 		{
 			mState = CONNECTED;
 		}
@@ -356,14 +382,14 @@ bool MasterServerConnection::DownloadServerList()
 	return true;
 }
 
-bool MasterServerConnection::InitiateConnect()
+bool MasterServerConnection::OpenFirewall()
 {
 	strutil::strvec lVector = strutil::Split(mServerConnectAddress, _T(":"));
 	if (lVector.size() != 2)
 	{
 		return false;
 	}
-	if (!SendAndAck(_T(MASTER_SERVER_IC) _T(" --address ") + lVector[0] + _T(" --port ") + lVector[1]))
+	if (!SendAndAck(_T(MASTER_SERVER_OF) _T(" --address ") + lVector[0] + _T(" --port ") + lVector[1]))
 	{
 		return false;
 	}

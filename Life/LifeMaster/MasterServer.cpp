@@ -7,6 +7,7 @@
 #include "MasterServer.h"
 #include "../../Lepra/Include/Socket.h"
 #include "../../Lepra/Include/SystemManager.h"
+#include "../ServerInfo.h"
 #include "MasterServerNetworkParser.h"
 
 
@@ -70,7 +71,6 @@ bool MasterServer::Run()
 		while ((lSocket = mMuxSocket->PopReceiverSocket()) != 0)
 		{
 			uint8 lReceiveBuffer[1024];
-			SocketAddress lRemoteAddress;
 			int lReceivedBytes = lSocket->Receive(lReceiveBuffer, sizeof(lReceiveBuffer));
 			if (lReceivedBytes > 0)
 			{
@@ -160,17 +160,28 @@ bool MasterServer::HandleCommandLine(UdpVSocket* pRemote, const str& pCommandLin
 	}
 	if (lServerInfo.mCommand == _T(MASTER_SERVER_USI))
 	{
-		if (lServerInfo.mPort < 0 || lServerInfo.mPlayerCount < 0 || lServerInfo.mId.empty())
+		if (lServerInfo.mRemotePort < 0 || lServerInfo.mPlayerCount < 0 || lServerInfo.mId.empty())
 		{
 			mLog.Errorf(_T("Got bad parameters to command (%s) from game server!"), lServerInfo.mCommand.c_str());
 			return false;
 		}
-		return RegisterGameServer(!lServerInfo.mRemove, pRemote, lServerInfo.mName, lServerInfo.mPort,
+		return RegisterGameServer(!lServerInfo.mRemove, pRemote, lServerInfo.mName,
 			lServerInfo.mPlayerCount, lServerInfo.mId);
 	}
 	else if (lServerInfo.mCommand == _T(MASTER_SERVER_DSL))
 	{
 		return SendServerList(pRemote);
+	}
+	else if (lServerInfo.mCommand == _T(MASTER_SERVER_OF))
+	{
+		if (OpenFirewall(lServerInfo))
+		{
+			mLog.Infof(_T("Asking game server to open firewall!"), lServerInfo.mCommand.c_str());
+			Send(pRemote, _T("OK"));
+			return true;
+		}
+		mLog.Errorf(_T("Got request for connecting to offline game server!"), lServerInfo.mCommand.c_str());
+		Send(pRemote, _T("Server offline."));
 	}
 	else if (lServerInfo.mCommand == _T(MASTER_SERVER_DC))
 	{
@@ -184,7 +195,7 @@ bool MasterServer::HandleCommandLine(UdpVSocket* pRemote, const str& pCommandLin
 	return false;
 }
 
-bool MasterServer::RegisterGameServer(bool pActivate, UdpVSocket* pRemote, const str& pName, int pPort,
+bool MasterServer::RegisterGameServer(bool pActivate, UdpVSocket* pRemote, const str& pName,
 	int pPlayerCount, const str& pId)
 {
 	bool lOk = false;
@@ -201,7 +212,6 @@ bool MasterServer::RegisterGameServer(bool pActivate, UdpVSocket* pRemote, const
 				if (lInfo.mId == pId)
 				{
 					lInfo.mName = pName;
-					lInfo.mPort = pPort;
 					lInfo.mPlayerCount = pPlayerCount;
 					lInfo.mIdleTime.PopTimeDiff();
 					lOk = true;
@@ -226,7 +236,7 @@ bool MasterServer::RegisterGameServer(bool pActivate, UdpVSocket* pRemote, const
 		}
 		else if (pActivate)
 		{
-			GameServerInfo lInfo(pName, pPort, pPlayerCount, pId);
+			GameServerInfo lInfo(pName, pPlayerCount, pId);
 			mGameServerTable.insert(GameServerTable::value_type(lAddress, lInfo));
 			lOk = true;
 		}
@@ -256,12 +266,15 @@ bool MasterServer::RegisterGameServer(bool pActivate, UdpVSocket* pRemote, const
 bool MasterServer::SendServerList(UdpVSocket* pRemote)
 {
 	str lServerList;
+	lServerList.reserve(1024);
 	{
 		ScopeLock lLock(&mLock);
 		GameServerTable::iterator x = mGameServerTable.begin();
 		for (; x != mGameServerTable.end(); ++x)
 		{
-			lServerList += _T("--name \"") + x->second.mName + _T("\" --address ") + x->first +
+			const strutil::strvec lFullAddress = strutil::Split(x->first, _T(":"));
+			lServerList += _T("--name \"") + x->second.mName + _T("\" --address ") + lFullAddress[0] +
+				_T("\" --port ") + lFullAddress[1] +
 				_T(" --player-count ") + strutil::IntToString(x->second.mPlayerCount, 10) + _T("\n");
 		}
 	}
@@ -269,6 +282,25 @@ bool MasterServer::SendServerList(UdpVSocket* pRemote)
 	return Send(pRemote, lServerList);
 }
 
+bool MasterServer::OpenFirewall(const ServerInfo& pServerInfo)
+{
+	const str lAddress = pServerInfo.mGivenAddress + strutil::Format(_T(":%u"), pServerInfo.mGivenPort);
+	SocketAddress lSocketAddress;
+	if (lSocketAddress.Resolve(lAddress))
+	{
+		ScopeLock lLock(&mLock);
+		GameServerTable::iterator x = mGameServerTable.find(lAddress);
+		if (x != mGameServerTable.end())
+		{
+			UdpVSocket* lGameServerSocket = mMuxSocket->GetVSocket(lSocketAddress);
+			if (lGameServerSocket)
+			{
+				return Send(lGameServerSocket, _T(MASTER_SERVER_OF) _T(" --address ") + pServerInfo.mRemoteAddress + _T(" --port ") + strutil::IntToString(pServerInfo.mRemotePort, 10));
+			}
+		}
+	}
+	return false;
+}
 bool MasterServer::Send(UdpVSocket* pRemote, const str& pData)
 {
 	uint8 lRawData[1024];
@@ -296,9 +328,8 @@ void MasterServer::DropSocket(UdpVSocket* pRemote)
 
 
 
-MasterServer::GameServerInfo::GameServerInfo(const str& pName, int pPort, int pPlayerCount, const str& pId):
+MasterServer::GameServerInfo::GameServerInfo(const str& pName, int pPlayerCount, const str& pId):
 	mName(pName),
-	mPort(pPort),
 	mPlayerCount(pPlayerCount),
 	mId(pId)
 {

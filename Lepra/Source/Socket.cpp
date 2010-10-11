@@ -1413,6 +1413,12 @@ UdpVSocket* UdpMuxSocket::PopSenderSocket()
 	return (lSocket);
 }
 
+UdpVSocket* UdpMuxSocket::GetVSocket(const SocketAddress& pTargetAddress)
+{
+	ScopeLock lLock(&mIoLock);
+	return mSocketTable.FindObject(pTargetAddress);
+}
+
 void UdpMuxSocket::Run()
 {
 	log_atrace("Receive thread running");

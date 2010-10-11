@@ -20,15 +20,18 @@ struct ServerInfo
 {
 	str mCommand;
 	str mName;
-	str mAddress;
 	str mId;
-	int mPort;
+	str mGivenAddress;
+	str mRemoteAddress;
+	int mGivenPort;
+	int mRemotePort;
 	int mPlayerCount;
 	bool mRemove;
 	double mPing;
 
 	ServerInfo():
-		mPort(-1),
+		mGivenPort(-1),
+		mRemotePort(-1),
 		mPlayerCount(-1),
 		mRemove(false),
 		mPing(-1)
@@ -39,10 +42,12 @@ struct ServerInfo
 	{
 		return mCommand != pOther.mCommand ||
 			mName != pOther.mName ||
-			mAddress != pOther.mAddress ||
-			mPort != pOther.mPort ||
-			mPlayerCount != pOther.mPlayerCount ||
 			mId != pOther.mId ||
+			mGivenAddress != pOther.mGivenAddress ||
+			mRemoteAddress != pOther.mRemoteAddress ||
+			mGivenPort != pOther.mGivenPort ||
+			mRemotePort != pOther.mRemotePort ||
+			mPlayerCount != pOther.mPlayerCount ||
 			mRemove != pOther.mRemove ||
 			mPing != pOther.mPing;
 	};

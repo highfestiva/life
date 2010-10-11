@@ -9,6 +9,7 @@
 #include "../../Lepra/Include/Checksum.h"
 #include "../../Lepra/Include/DES.h"
 #include "../../Lepra/Include/Packer.h"
+#include "../ServerInfo.h"
 
 
 
@@ -108,16 +109,24 @@ bool MasterServerNetworkParser::ExtractServerInfo(const str& pServerString, Serv
 		{
 			pInfo.mName = lCommandList[x+1];
 		}
-		else if (!pRemoteAddress && lCommandList[x] == _T("--port"))
+		else if (lCommandList[x] == _T("--id"))
 		{
-			if (!strutil::StringToInt(lCommandList[x+1], pInfo.mPort))
+			pInfo.mId = lCommandList[x+1];
+		}
+		else if (!pRemoteAddress && lCommandList[x] == _T("--address"))
+		{
+			pInfo.mGivenAddress = lCommandList[x+1];
+		}
+		else if (lCommandList[x] == _T("--port"))
+		{
+			if (!strutil::StringToInt(lCommandList[x+1], pInfo.mGivenPort))
 			{
 				mLog.Error(_T("Got non-integer port parameter!"));
 				return false;
 			}
-			if (pInfo.mPort < 0 || pInfo.mPort > 65535)
+			if (pInfo.mGivenPort < 0 || pInfo.mGivenPort > 65535)
 			{
-				mLog.Errorf(_T("Got invalid port number (%i)!"), pInfo.mPort);
+				mLog.Errorf(_T("Got invalid port number (%i)!"), pInfo.mGivenPort);
 				return false;
 			}
 		}
@@ -133,14 +142,6 @@ bool MasterServerNetworkParser::ExtractServerInfo(const str& pServerString, Serv
 				mLog.Errorf(_T("Got invalid player count number (%i)!"), pInfo.mPlayerCount);
 				return false;
 			}
-		}
-		else if (!pRemoteAddress && lCommandList[x] == _T("--address"))
-		{
-			pInfo.mAddress = lCommandList[x+1];
-		}
-		else if (lCommandList[x] == _T("--id"))
-		{
-			pInfo.mId = lCommandList[x+1];
 		}
 		else if (lCommandList[x] == _T("--remove"))
 		{
@@ -159,8 +160,8 @@ bool MasterServerNetworkParser::ExtractServerInfo(const str& pServerString, Serv
 	}
 	if (pRemoteAddress)
 	{
-		pInfo.mAddress = pRemoteAddress->GetIP().GetAsString();
-		pInfo.mPort = pRemoteAddress->GetPort();
+		pInfo.mRemoteAddress = pRemoteAddress->GetIP().GetAsString();
+		pInfo.mRemotePort = pRemoteAddress->GetPort();
 	}
 	return true;
 }

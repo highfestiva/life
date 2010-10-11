@@ -21,6 +21,7 @@ namespace Life
 
 class GameServerManager;
 class MasterServerConnection;
+struct ServerInfo;
 
 
 

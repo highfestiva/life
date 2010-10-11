@@ -30,15 +30,16 @@ public:
 	void SendLocalInfo(const str& pLocalServerInfo);
 	void AppendLocalInfo(const str& pExtraServerInfo);
 	void RequestServerList(const str& pCriterias);
-	void RequestImmediateConnect();
-	void RequestInitiateConnect(const str& pServerConnectAddress);
+	void RequestOpenFirewall(const str& pServerConnectAddress);
 	bool UpdateServerList(ServerInfoList& pServerList) const;
 	str GetServerListAsText() const;
 	bool IsConnectError() const;
+	bool IsFirewallOpen() const;
 	double WaitUntilDone(double pTimeout, bool pAllowReconnect);
 	void GraceClose(double pTimeout, bool pWaitUntilDone);
 	bool CloseUnlessUploaded();
 	void Tick();
+	bool TickReceive(ServerInfo& pServerInfo);
 
 private:
 	enum State
@@ -47,7 +48,7 @@ private:
 		CONNECTED,
 		UPLOAD_INFO,
 		DOWNLOAD_LIST,
-		INITIATE_CONNECT,
+		OPEN_FIREWALL,
 		DISCONNECTED,
 		WORKING,
 	};
@@ -57,7 +58,7 @@ private:
 	void ConnectEntry();
 	bool UploadServerInfo();
 	bool DownloadServerList();
-	bool InitiateConnect();
+	bool OpenFirewall();
 	bool SendAndAck(const str& pData);
 	bool SendAndRecv(const str& pData, str& pReply);
 	bool Send(const str& pData);
@@ -83,6 +84,7 @@ private:
 	HiResTimer mIdleTimer;
 	HiResTimer mUploadTimeout;
 	bool mIsConnectError;
+	bool mLastFirewallOpen;
 	const static double mConnectedIdleTimeout;
 	const static double mDisconnectedIdleTimeout;
 	const static double mRefreshTimeout;

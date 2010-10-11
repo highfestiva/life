@@ -131,7 +131,7 @@ void ServerListView::OnSelect(UiTbc::Button* pButton)
 	const size_t lServerIndex = (intptr_t)pButton->GetExtraData();
 	if (lServerIndex < mServerList.size())
 	{
-		mSelectObserver->OnRequestJoinServer(mServerList[lServerIndex].mAddress);
+		mSelectObserver->OnRequestJoinServer(mServerList[lServerIndex].mGivenAddress);
 	}
 }
 

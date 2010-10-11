@@ -417,6 +417,7 @@ public:
 
 	UdpVSocket* PopReceiverSocket();
 	UdpVSocket* PopSenderSocket();
+	UdpVSocket* GetVSocket(const SocketAddress& pTargetAddress);
 
 protected:
 	void Run();

@@ -29,6 +29,7 @@ namespace Life
 
 
 class MasterServerConnection;
+struct ServerInfo;
 
 
 
@@ -102,7 +103,8 @@ private:
 	LEPRA_DEBUG_CODE(virtual TBC::PhysicsManager* GetPhysicsManager() const);
 	Cure::NetworkServer* GetNetworkServer() const;
 
-	void UploadServerInfo();
+	void TickMasterServer();
+	bool HandleMasterCommand(const ServerInfo& pServerInfo);
 	void MonitorRtvars();
 
 	typedef std::list<Cure::MessageObjectMovement*> MovementList;

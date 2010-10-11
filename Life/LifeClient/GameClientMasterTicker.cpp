@@ -486,6 +486,11 @@ void GameClientMasterTicker::PreLogin(const str& pServerAddress)
 	}
 }
 
+bool GameClientMasterTicker::IsLocalServer() const
+{
+	return mServer != 0;
+}
+
 void GameClientMasterTicker::OnExit()
 {
 	mLog.Headline(_T("Number of players not picked, quitting."));
