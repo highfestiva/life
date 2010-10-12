@@ -41,35 +41,40 @@ ServerListView::ServerListView(ServerSelectObserver* pSelectObserver):
 
 void ServerListView::Tick()
 {
-	if (!mSelectObserver->IsMasterServerConnectError())
-	{
-		mIsMasterConnectError = false;
-	}
+	// TRICKY! Gaah! Code is worse than it looks.
 	if (!mSelectObserver->UpdateServerList(mServerList))
 	{
 		if (!mIsMasterConnectError && mSelectObserver->IsMasterServerConnectError())
 		{
 			mIsMasterConnectError = true;
+			mServerList.clear();
 			ReplaceLayer(1, new UiTbc::CenterLayout);
 			AddLabel(_T("Problem connecting to master server.\nCheck your network cable and/or firewall settings."), RED, 0, this, 1)->SetPreferredSize(0, 0, true);
 		}
-		return;
+		if (mSelectObserver->IsMasterServerConnectError() == mIsMasterConnectError)
+		{
+			return;
+		}
 	}
+	if (!mSelectObserver->IsMasterServerConnectError())
+	{
+		mIsMasterConnectError = false;
 
-	if (mServerList.size() == 0)	// No response yet!
-	{
-		ReplaceLayer(1, new UiTbc::CenterLayout);
-		AddLabel(_T("Please wait while refreshing list..."), GRAY, 0, this, 1)->SetAdaptive(true);
-	}
-	else if (mServerList.size() == 1)	// Only the status message, no servers online!
-	{
-		ReplaceLayer(1, new UiTbc::CenterLayout);
-		AddLabel(_T("I'm sorry, but no-one else seems to be running a public server.\n")
-			_T("Perhaps you would like to be the first to start one? Click here and there..."), GRAY, 0, this, 1)->SetPreferredSize(0, 0, true);
-	}
-	else if (mServerList.size() > 1)
-	{
-		DeleteLayer(1);
+		if (mServerList.size() == 0)	// No response yet!
+		{
+			ReplaceLayer(1, new UiTbc::CenterLayout);
+			AddLabel(_T("Please wait while refreshing list..."), GRAY, 0, this, 1)->SetAdaptive(true);
+		}
+		else if (mServerList.size() == 1)	// Only the status message, no servers online!
+		{
+			ReplaceLayer(1, new UiTbc::CenterLayout);
+			AddLabel(_T("I'm sorry, but no-one else seems to be running a public server.\n")
+				_T("Perhaps you would like to be the first to start one? Click here and there..."), GRAY, 0, this, 1)->SetPreferredSize(0, 0, true);
+		}
+		else if (mServerList.size() > 1)
+		{
+			DeleteLayer(1);
+		}
 	}
 
 	const int lServerCount = (int)mServerList.size() - 1;	// Ignore the status message.
@@ -131,7 +136,8 @@ void ServerListView::OnSelect(UiTbc::Button* pButton)
 	const size_t lServerIndex = (intptr_t)pButton->GetExtraData();
 	if (lServerIndex < mServerList.size())
 	{
-		mSelectObserver->OnRequestJoinServer(mServerList[lServerIndex].mGivenAddress);
+		mSelectObserver->OnRequestJoinServer(mServerList[lServerIndex].mGivenAddress +
+			strutil::Format(_T(":%i"), mServerList[lServerIndex].mGivenPort));
 	}
 }
 

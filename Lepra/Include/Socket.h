@@ -412,12 +412,11 @@ public:
 	void CloseSocket(UdpVSocket* pSocket);
 	unsigned GetConnectionCount() const;
 
-	void AddBannedIP(const IPAddress& pIP);
-	void RemoveBannedIP(const IPAddress& pIP);
-
 	UdpVSocket* PopReceiverSocket();
 	UdpVSocket* PopSenderSocket();
 	UdpVSocket* GetVSocket(const SocketAddress& pTargetAddress);
+
+	bool SendOpenFirewallData(const SocketAddress& pTargetAddress);
 
 protected:
 	void Run();
@@ -437,6 +436,8 @@ private:
 	SocketTable mSocketTable;
 	SocketTable mAcceptTable;
 	SocketList mAcceptList;
+
+	static const uint8 mOpenFirewallString[27];
 
 	LOG_CLASS_DECLARE();
 };

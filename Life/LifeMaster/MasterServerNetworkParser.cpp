@@ -113,7 +113,7 @@ bool MasterServerNetworkParser::ExtractServerInfo(const str& pServerString, Serv
 		{
 			pInfo.mId = lCommandList[x+1];
 		}
-		else if (!pRemoteAddress && lCommandList[x] == _T("--address"))
+		else if (lCommandList[x] == _T("--address"))
 		{
 			pInfo.mGivenAddress = lCommandList[x+1];
 		}

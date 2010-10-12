@@ -27,7 +27,6 @@ MasterServerConnection::MasterServerConnection():
 	mIsConnectError(false),
 	mLastFirewallOpen(false)
 {
-	mIdleTimer.ReduceTimeDiff(-1.1*mDisconnectedIdleTimeout);
 }
 
 MasterServerConnection::~MasterServerConnection()
@@ -65,7 +64,7 @@ void MasterServerConnection::SetSocketInfo(Cure::SocketIoHandler* pSocketIoHandl
 void MasterServerConnection::SendLocalInfo(const str& pLocalServerInfo)
 {
 	assert(!pLocalServerInfo.empty());
-	if (mLocalServerInfo != pLocalServerInfo || mUploadTimeout.QueryTimeDiff() >= mRefreshTimeout)
+	if (mLocalServerInfo != pLocalServerInfo || mUploadTimeout.QueryTimeDiff() >= mServerInfoTimeout)
 	{
 		mLocalServerInfo = pLocalServerInfo;
 		mUploadTimeout.ClearTimeDiff();
@@ -79,7 +78,7 @@ void MasterServerConnection::AppendLocalInfo(const str& pExtraServerInfo)
 	{
 		mLocalServerInfo += pExtraServerInfo;
 		QueryAddState(UPLOAD_INFO);
-		mIdleTimer.ReduceTimeDiff(-1.1*mDisconnectedIdleTimeout);
+		TriggerConnectTimer();
 	}
 }
 
@@ -87,7 +86,7 @@ void MasterServerConnection::RequestServerList(const str& pServerCriterias)
 {
 	mServerSortCriterias = pServerCriterias;
 	QueryAddState(DOWNLOAD_LIST);
-	mIdleTimer.ReduceTimeDiff(-1.1*mDisconnectedIdleTimeout);
+	TriggerConnectTimer();
 }
 
 void MasterServerConnection::RequestOpenFirewall(const str& pServerConnectAddress)
@@ -95,8 +94,8 @@ void MasterServerConnection::RequestOpenFirewall(const str& pServerConnectAddres
 	mLastFirewallOpen = false;
 	mServerConnectAddress = pServerConnectAddress;
 	QueryAddState(OPEN_FIREWALL);
-	mIdleTimer.ReduceTimeDiff(-1.1*mDisconnectedIdleTimeout);
-	Tick();	// We want this to happen fast.
+	TriggerConnectTimer();
+	Tick();	// We want this to happen real fast.
 }
 
 bool MasterServerConnection::UpdateServerList(ServerInfoList& pServerList) const
@@ -133,7 +132,7 @@ bool MasterServerConnection::UpdateServerList(ServerInfoList& pServerList) const
 			lIsUpdated = true;
 		}
 	}
-	lIsUpdated |= (lNewServerList.size() < pServerList.size());
+	lIsUpdated |= (lNewServerList.size() != pServerList.size());
 	if (lIsUpdated)
 	{
 		pServerList = lNewServerList;
@@ -260,11 +259,14 @@ void MasterServerConnection::QueryAddState(State pState)
 			return;
 		}
 	}
-	if (mStateList.empty())
-	{
-		mIdleTimer.PopTimeDiff();
-	}
+	mIdleTimer.PopTimeDiff();
 	mStateList.push_back(pState);
+}
+
+void MasterServerConnection::TriggerConnectTimer()
+{
+	mIdleTimer.PopTimeDiff();
+	mIdleTimer.ReduceTimeDiff(-1.1*mDisconnectedIdleTimeout);
 }
 
 void MasterServerConnection::StepState()
@@ -300,6 +302,7 @@ void MasterServerConnection::StepState()
 			}
 			else if (mIdleTimer.QueryTimeDiff() >= mConnectedIdleTimeout)
 			{
+				mLog.AError("Internal error - should never disconnect from master server due to idle timeout!");
 				Close(false);
 			}
 		}
@@ -503,9 +506,9 @@ void MasterServerConnection::OnDropSocket(Cure::SocketIoHandler::VIoSocket* pSoc
 
 
 
-const double MasterServerConnection::mConnectedIdleTimeout = 10.0;
-const double MasterServerConnection::mDisconnectedIdleTimeout = MASTER_SERVER_TIMEOUT;
-const double MasterServerConnection::mRefreshTimeout = MASTER_SERVER_TIMEOUT/3-1;
+const double MasterServerConnection::mConnectedIdleTimeout = MASTER_SERVER_TIMEOUT;
+const double MasterServerConnection::mDisconnectedIdleTimeout = 10.0;
+const double MasterServerConnection::mServerInfoTimeout = MASTER_SERVER_TIMEOUT/3-1;
 
 LOG_CLASS_DEFINE(NETWORK_SERVER, MasterServerConnection);
 

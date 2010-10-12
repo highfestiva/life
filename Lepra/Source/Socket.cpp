@@ -1382,6 +1382,8 @@ UdpVSocket* UdpMuxSocket::PollAccept()
 
 void UdpMuxSocket::CloseSocket(UdpVSocket* pSocket)
 {
+	log_volatile(mLog.Debugf(_T("Dropping UDP MUX socket %s."), pSocket->GetTargetAddress().GetAsString().c_str()));
+
 	ScopeLock lLock(&mIoLock);
 	mSocketTable.Remove(pSocket->GetTargetAddress());
 	RemoveSenderNoLock(pSocket);
@@ -1417,6 +1419,11 @@ UdpVSocket* UdpMuxSocket::GetVSocket(const SocketAddress& pTargetAddress)
 {
 	ScopeLock lLock(&mIoLock);
 	return mSocketTable.FindObject(pTargetAddress);
+}
+
+bool UdpMuxSocket::SendOpenFirewallData(const SocketAddress& pTargetAddress)
+{
+	return SendTo(mOpenFirewallString, sizeof(mOpenFirewallString), pTargetAddress) == sizeof(mOpenFirewallString);
 }
 
 void UdpMuxSocket::Run()
@@ -1481,9 +1488,17 @@ void UdpMuxSocket::Run()
 						mLog.AWarning("Too many sockets - didn't accept connect.");
 					}
 				}
+				else if (lBuffer->mDataSize == sizeof(mOpenFirewallString) &&
+					::memcmp(lBuffer->mDataBuffer, mOpenFirewallString, sizeof(mOpenFirewallString)) == 0)
+				{
+					log_atrace("Received an \"open firewall\" datagram.");
+				}
 				else
 				{
 					mLog.AWarning("Non-connected socket sent us junk.");
+					log_volatile(const str lData = strutil::DumpData(lBuffer->mDataBuffer, std::min(lBuffer->mDataSize, 20)));
+					log_volatile(mLog.Debugf(_T("UDP <- %i bytes (%s): %s."), lBuffer->mDataSize,
+						lSourceAddress.GetAsString().c_str(), lData.c_str()));
 				}
 			}
 			else
@@ -1512,6 +1527,8 @@ void UdpMuxSocket::RecycleBuffer(Datagram* pBuffer)
 	ScopeLock lLock(&mIoLock);
 	mBufferAllocator.Free(pBuffer);
 }
+
+const uint8 UdpMuxSocket::mOpenFirewallString[27] = "Aaaarglebargle glop-glyph!";
 
 LOG_CLASS_DEFINE(NETWORK, UdpMuxSocket);
 

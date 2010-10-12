@@ -535,7 +535,7 @@ void GameClientSlaveManager::RequestLogin(const str& pServerAddress, const Cure:
 		}
 		else
 		{
-			mLog.AInfo("Master did not reply in time to if it asked game server to open firewall. Trying anyway.");
+			mLog.AWarning("Master did not reply in time to if it asked game server to open firewall. Trying anyway.");
 		}
 	}
 
@@ -736,10 +736,12 @@ void GameClientSlaveManager::CreateLoginView()
 			{
 				lServerName = lServerName.substr(7);
 			}
-			const wstr lUsername = wstrutil::Format(L"User%u", mSlaveIndex);
-			wstr lReadablePassword = L"CarPassword";
-			const Cure::MangledPassword lPassword(lReadablePassword);
-			const Cure::LoginId lLoginToken(lUsername, lPassword);
+			const str lDefaultUserName = strutil::Format(L"User%u", mSlaveIndex);
+			str lUserName;
+			CURE_RTVAR_TRYGET(lUserName, =, GetVariableScope(), RTVAR_LOGIN_USERNAME, lDefaultUserName);
+                        wstr lReadablePassword = L"CarPassword";
+                        const Cure::MangledPassword lPassword(lReadablePassword);
+			const Cure::LoginId lLoginToken(wstrutil::Encode(lUserName), lPassword);
 			RequestLogin(lServerName, lLoginToken);
 		}
 		else

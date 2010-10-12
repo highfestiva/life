@@ -88,7 +88,7 @@ bool MasterServer::Run()
 
 void MasterServer::KillDeadServers()
 {
-	if (mServerIdleTimer.QueryTimeDiff() < 20.0)
+	if (mServerIdleTimer.QueryTimeDiff() < MASTER_SERVER_TIMEOUT)
 	{
 		return;
 	}
@@ -111,7 +111,7 @@ void MasterServer::KillDeadServers()
 
 void MasterServer::KillDeadSockets()
 {
-	if (mKeepaliveTimer.QueryTimeDiff() < 20.0)
+	if (mKeepaliveTimer.QueryTimeDiff() < MASTER_SERVER_TIMEOUT)
 	{
 		return;
 	}
@@ -274,7 +274,7 @@ bool MasterServer::SendServerList(UdpVSocket* pRemote)
 		{
 			const strutil::strvec lFullAddress = strutil::Split(x->first, _T(":"));
 			lServerList += _T("--name \"") + x->second.mName + _T("\" --address ") + lFullAddress[0] +
-				_T("\" --port ") + lFullAddress[1] +
+				_T(" --port ") + lFullAddress[1] +
 				_T(" --player-count ") + strutil::IntToString(x->second.mPlayerCount, 10) + _T("\n");
 		}
 	}

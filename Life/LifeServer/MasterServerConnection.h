@@ -54,6 +54,7 @@ private:
 	};
 
 	void QueryAddState(State pState);
+	void TriggerConnectTimer();
 	void StepState();
 	void ConnectEntry();
 	bool UploadServerInfo();
@@ -87,7 +88,7 @@ private:
 	bool mLastFirewallOpen;
 	const static double mConnectedIdleTimeout;
 	const static double mDisconnectedIdleTimeout;
-	const static double mRefreshTimeout;
+	const static double mServerInfoTimeout;
 
 	LOG_CLASS_DECLARE();
 };
