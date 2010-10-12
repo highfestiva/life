@@ -9,6 +9,7 @@
 #include "../../Cure/Include/CppContextObject.h"
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../../Cure/Include/TimeManager.h"
+#include "../../Lepra/Include/Network.h"
 #include "../../Lepra/Include/Path.h"
 #include "../../Lepra/Include/SystemManager.h"
 #include "../../TBC/Include/ChunkyPhysics.h"
@@ -1098,14 +1099,27 @@ void GameServerManager::TickMasterServer()
 		return;
 	}
 
+	static str lLocalIpAddress;
+	if (lLocalIpAddress.empty())
+	{
+		IPAddress lIpAddress;
+		if (Network::ResolveHostname(_T(""), lIpAddress))
+		{
+			lLocalIpAddress = lIpAddress.GetAsString();
+		}
+		else
+		{
+			lLocalIpAddress = GetNetworkServer()->GetLocalAddress().GetIP().GetAsString();
+		}
+	}
+
 	str lServerName;
 	CURE_RTVAR_GET(lServerName, =, Cure::GetSettings(), RTVAR_NETWORK_SERVERNAME, _T("?"));
 	const str lPlayerCount = strutil::IntToString(GetLoggedInClientCount(), 10);
 	const str lId = strutil::ReplaceAll(strutil::Encode(SystemManager::GetSystemPseudoId()), _T("\""), _T("''\\''"));
 	const str lLocalServerInfo = _T("--name \"") + lServerName + _T("\" --player-count ") + lPlayerCount
-		+ _T(" --id \"") + lId + _T("\" --internal-address ") +
-		GetNetworkServer()->GetLocalAddress().GetIP().GetAsString() + _T(" --internal-port ") +
-		strutil::Format(_T("%i"), GetNetworkServer()->GetLocalAddress().GetPort());
+		+ _T(" --id \"") + lId + _T("\" --internal-address ") + lLocalIpAddress +
+		_T(" --internal-port ") + strutil::IntToString(GetNetworkServer()->GetLocalAddress().GetPort(), 10);
 	float lConnectTimeout;
 	CURE_RTVAR_GET(lConnectTimeout, =(float), GetVariableScope(), RTVAR_NETWORK_CONNECT_TIMEOUT, 3.0);
 	mMasterConnection->SetSocketInfo(GetNetworkServer(), lConnectTimeout);

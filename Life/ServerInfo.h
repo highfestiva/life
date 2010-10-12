@@ -33,6 +33,7 @@ struct ServerInfo
 
 	ServerInfo():
 		mGivenPort(-1),
+		mInternalPort(-1),
 		mRemotePort(-1),
 		mPlayerCount(-1),
 		mRemove(false),
