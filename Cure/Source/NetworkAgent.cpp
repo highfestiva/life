@@ -81,6 +81,11 @@ unsigned NetworkAgent::GetConnectionCount() const
 	return (mMuxSocket->GetConnectionCount());
 }
 
+const SocketAddress& NetworkAgent::GetLocalAddress() const
+{
+	return mMuxSocket->GetLocalAddress();
+}
+
 
 
 bool NetworkAgent::SendStatusMessage(VSocket* pSocket, int32 pInteger, RemoteStatus pStatus,

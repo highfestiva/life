@@ -523,15 +523,24 @@ void GameClientSlaveManager::RequestLogin(const str& pServerAddress, const Cure:
 	float lConnectTimeout;
 	CURE_RTVAR_GET(lConnectTimeout, =(float), GetVariableScope(), RTVAR_NETWORK_CONNECT_TIMEOUT, 3.0);
 	mMasterServerConnection->SetSocketInfo(GetNetworkClient(), lConnectTimeout);
+	str lServerAddress = pServerAddress;
 	if (!mMaster->IsLocalServer())
 	{
 		mMasterServerConnection->RequestOpenFirewall(pServerAddress);
-		const double lTimeout = 0.6;
+		const double lTimeout = 1.2;
 		const double lWaitTime = mMasterServerConnection->WaitUntilDone(lTimeout, true);
-		if (lWaitTime < lTimeout && mMasterServerConnection->IsFirewallOpen())
+		if (lWaitTime < lTimeout)
 		{
-			mLog.AInfo("Master seems to have asked game server to open firewall OK.");
-			Thread::Sleep(lWaitTime+0.02);	// Let's pray. Since we got through in a certain time, perhaps the server will too.
+			if (mMasterServerConnection->GetFirewallOpenStatus() == MasterServerConnection::FIREWALL_OPENED)
+			{
+				mLog.AInfo("Master seems to have asked game server to open firewall OK.");
+				Thread::Sleep(lWaitTime+0.02);	// Let's pray. Since we got through in a certain time, perhaps the server will too.
+			}
+			else if (mMasterServerConnection->GetFirewallOpenStatus() == MasterServerConnection::FIREWALL_USE_LAN)
+			{
+				mLog.AInfo("Master seems to think the game server is on our LAN. Using that instead.");
+				lServerAddress = mMasterServerConnection->GetLanServerConnectAddress();
+			}
 		}
 		else
 		{
@@ -542,7 +551,7 @@ void GameClientSlaveManager::RequestLogin(const str& pServerAddress, const Cure:
 	mConnectUserName = strutil::Encode(pLoginToken.GetName());
 	mConnectServerAddress = pServerAddress;
 	mDisconnectReason = _T("Connect failed.");
-	GetNetworkClient()->StartConnectLogin(pServerAddress, lConnectTimeout, pLoginToken);
+	GetNetworkClient()->StartConnectLogin(lServerAddress, lConnectTimeout, pLoginToken);
 }
 
 void GameClientSlaveManager::Logout()

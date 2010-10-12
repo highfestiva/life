@@ -174,14 +174,7 @@ bool MasterServer::HandleCommandLine(UdpVSocket* pRemote, const str& pCommandLin
 	}
 	else if (lServerInfo.mCommand == _T(MASTER_SERVER_OF))
 	{
-		if (OpenFirewall(lServerInfo))
-		{
-			mLog.Infof(_T("Asking game server to open firewall!"), lServerInfo.mCommand.c_str());
-			Send(pRemote, _T("OK"));
-			return true;
-		}
-		mLog.Errorf(_T("Got request for connecting to offline game server!"), lServerInfo.mCommand.c_str());
-		Send(pRemote, _T("Server offline."));
+		return OpenFirewall(pRemote, lServerInfo);
 	}
 	else if (lServerInfo.mCommand == _T(MASTER_SERVER_DC))
 	{
@@ -282,9 +275,19 @@ bool MasterServer::SendServerList(UdpVSocket* pRemote)
 	return Send(pRemote, lServerList);
 }
 
-bool MasterServer::OpenFirewall(const ServerInfo& pServerInfo)
+bool MasterServer::OpenFirewall(UdpVSocket* pRemote, const ServerInfo& pServerInfo)
 {
-	const str lAddress = pServerInfo.mGivenAddress + strutil::Format(_T(":%u"), pServerInfo.mGivenPort);
+	if (pServerInfo.mGivenIpAddress == pServerInfo.mRemoteIpAddress)
+	{
+		// The client has the same IP as the server. This means it should try LAN connect instead of
+		// going through the firewall. At least the risk of getting caught in a NAT without hairpin
+		// is significantly decreased.
+		mLog.AInfo("Asking game client to use LAN instead, since they share IP.");
+		return Send(pRemote, _T(MASTER_SERVER_UL) _T(" --internal-address ") + pServerInfo.mInternalIpAddress +
+			_T(" --internal-port ") + pServerInfo.mInternalIpAddress);
+	}
+
+	const str lAddress = pServerInfo.mGivenIpAddress + strutil::Format(_T(":%u"), pServerInfo.mGivenPort);
 	SocketAddress lSocketAddress;
 	if (lSocketAddress.Resolve(lAddress))
 	{
@@ -295,10 +298,16 @@ bool MasterServer::OpenFirewall(const ServerInfo& pServerInfo)
 			UdpVSocket* lGameServerSocket = mMuxSocket->GetVSocket(lSocketAddress);
 			if (lGameServerSocket)
 			{
-				return Send(lGameServerSocket, _T(MASTER_SERVER_OF) _T(" --address ") + pServerInfo.mRemoteAddress + _T(" --port ") + strutil::IntToString(pServerInfo.mRemotePort, 10));
+				if (Send(lGameServerSocket, _T(MASTER_SERVER_OF) _T(" --address ") + pServerInfo.mRemoteIpAddress + _T(" --port ") + strutil::IntToString(pServerInfo.mRemotePort, 10)))
+				{
+					mLog.AInfo("Asked game server to open firewall!");
+					return Send(pRemote, _T("OK"));
+				}
 			}
 		}
 	}
+	mLog.AError("Got request for connecting to offline game server!");
+	Send(pRemote, _T("Server offline."));
 	return false;
 }
 bool MasterServer::Send(UdpVSocket* pRemote, const str& pData)

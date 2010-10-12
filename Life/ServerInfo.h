@@ -21,9 +21,11 @@ struct ServerInfo
 	str mCommand;
 	str mName;
 	str mId;
-	str mGivenAddress;
-	str mRemoteAddress;
+	str mGivenIpAddress;
+	str mInternalIpAddress;
+	str mRemoteIpAddress;
 	int mGivenPort;
+	int mInternalPort;
 	int mRemotePort;
 	int mPlayerCount;
 	bool mRemove;
@@ -43,8 +45,8 @@ struct ServerInfo
 		return mCommand != pOther.mCommand ||
 			mName != pOther.mName ||
 			mId != pOther.mId ||
-			mGivenAddress != pOther.mGivenAddress ||
-			mRemoteAddress != pOther.mRemoteAddress ||
+			mGivenIpAddress != pOther.mGivenIpAddress ||
+			mRemoteIpAddress != pOther.mRemoteIpAddress ||
 			mGivenPort != pOther.mGivenPort ||
 			mRemotePort != pOther.mRemotePort ||
 			mPlayerCount != pOther.mPlayerCount ||

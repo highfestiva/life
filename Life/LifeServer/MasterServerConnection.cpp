@@ -25,7 +25,7 @@ MasterServerConnection::MasterServerConnection():
 	mConnecter(new MemberThread<MasterServerConnection>(_T("MasterServerConnecter"))),
 	mDisconnectCounter(0),
 	mIsConnectError(false),
-	mLastFirewallOpen(false)
+	mLastFirewallOpenStatus(FIREWALL_ERROR)
 {
 }
 
@@ -89,10 +89,10 @@ void MasterServerConnection::RequestServerList(const str& pServerCriterias)
 	TriggerConnectTimer();
 }
 
-void MasterServerConnection::RequestOpenFirewall(const str& pServerConnectAddress)
+void MasterServerConnection::RequestOpenFirewall(const str& pGameServerConnectAddress)
 {
-	mLastFirewallOpen = false;
-	mServerConnectAddress = pServerConnectAddress;
+	mLastFirewallOpenStatus = FIREWALL_ERROR;
+	mGameServerConnectAddress = pGameServerConnectAddress;
 	QueryAddState(OPEN_FIREWALL);
 	TriggerConnectTimer();
 	Tick();	// We want this to happen real fast.
@@ -150,9 +150,14 @@ bool MasterServerConnection::IsConnectError() const
 	return mIsConnectError;
 }
 
-bool MasterServerConnection::IsFirewallOpen() const
+MasterServerConnection::FirewallStatus MasterServerConnection::GetFirewallOpenStatus() const
 {
-	return mLastFirewallOpen;
+	return mLastFirewallOpenStatus;
+}
+
+const str& MasterServerConnection::GetLanServerConnectAddress() const
+{
+	return mLanGameServerAddress;
 }
 
 double MasterServerConnection::WaitUntilDone(double pTimeout, bool pAllowReconnect)
@@ -210,7 +215,7 @@ void MasterServerConnection::Tick()
 		break;
 		case OPEN_FIREWALL:
 		{
-			mLastFirewallOpen = OpenFirewall();
+			mLastFirewallOpenStatus = OpenFirewall();
 		}
 		break;
 	}
@@ -385,19 +390,33 @@ bool MasterServerConnection::DownloadServerList()
 	return true;
 }
 
-bool MasterServerConnection::OpenFirewall()
+MasterServerConnection::FirewallStatus MasterServerConnection::OpenFirewall()
 {
-	strutil::strvec lVector = strutil::Split(mServerConnectAddress, _T(":"));
+	strutil::strvec lVector = strutil::Split(mGameServerConnectAddress, _T(":"));
 	if (lVector.size() != 2)
 	{
-		return false;
+		return FIREWALL_ERROR;
 	}
-	if (!SendAndAck(_T(MASTER_SERVER_OF) _T(" --address ") + lVector[0] + _T(" --port ") + lVector[1]))
+	str lReply;
+	if (!SendAndRecv(_T(MASTER_SERVER_OF) _T(" --address ") + lVector[0] + _T(" --port ") + lVector[1], lReply))
 	{
-		return false;
+		return FIREWALL_ERROR;
 	}
-	mIsConnectError = false;
-	return true;
+	ServerInfo lInfo;
+	if (lReply == _T("OK"))
+	{
+		mIsConnectError = false;
+		return FIREWALL_OPENED;
+	}
+	else if (MasterServerNetworkParser::ExtractServerInfo(lReply, lInfo, 0))
+	{
+		if (lInfo.mCommand == _T(MASTER_SERVER_UL))
+		{
+			mLanGameServerAddress = lInfo.mInternalIpAddress + strutil::Format(_T(":%i"), lInfo.mInternalPort);
+			return FIREWALL_USE_LAN;
+		}
+	}
+	return FIREWALL_ERROR;
 }
 
 bool MasterServerConnection::SendAndAck(const str& pData)

@@ -115,19 +115,32 @@ bool MasterServerNetworkParser::ExtractServerInfo(const str& pServerString, Serv
 		}
 		else if (lCommandList[x] == _T("--address"))
 		{
-			pInfo.mGivenAddress = lCommandList[x+1];
+			pInfo.mGivenIpAddress = lCommandList[x+1];
 		}
-		else if (lCommandList[x] == _T("--port"))
+		else if (lCommandList[x] == _T("--internal-address"))
 		{
-			if (!strutil::StringToInt(lCommandList[x+1], pInfo.mGivenPort))
+			pInfo.mInternalIpAddress = lCommandList[x+1];
+		}
+		else if (lCommandList[x] == _T("--port") || lCommandList[x] == _T("--internal-port"))
+		{
+			int lPort = -1;
+			if (!strutil::StringToInt(lCommandList[x+1], lPort))
 			{
 				mLog.Error(_T("Got non-integer port parameter!"));
 				return false;
 			}
-			if (pInfo.mGivenPort < 0 || pInfo.mGivenPort > 65535)
+			if (lPort < 0 || lPort > 65535)
 			{
-				mLog.Errorf(_T("Got invalid port number (%i)!"), pInfo.mGivenPort);
+				mLog.Errorf(_T("Got invalid port number (%i)!"), lPort);
 				return false;
+			}
+			if (lCommandList[x] == _T("--port"))
+			{
+				pInfo.mGivenPort = lPort;
+			}
+			else
+			{
+				pInfo.mInternalPort = lPort;
 			}
 		}
 		else if (lCommandList[x] == _T("--player-count"))
@@ -160,7 +173,7 @@ bool MasterServerNetworkParser::ExtractServerInfo(const str& pServerString, Serv
 	}
 	if (pRemoteAddress)
 	{
-		pInfo.mRemoteAddress = pRemoteAddress->GetIP().GetAsString();
+		pInfo.mRemoteIpAddress = pRemoteAddress->GetIP().GetAsString();
 		pInfo.mRemotePort = pRemoteAddress->GetPort();
 	}
 	return true;

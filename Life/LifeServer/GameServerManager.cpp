@@ -1102,9 +1102,10 @@ void GameServerManager::TickMasterServer()
 	CURE_RTVAR_GET(lServerName, =, Cure::GetSettings(), RTVAR_NETWORK_SERVERNAME, _T("?"));
 	const str lPlayerCount = strutil::IntToString(GetLoggedInClientCount(), 10);
 	const str lId = strutil::ReplaceAll(strutil::Encode(SystemManager::GetSystemPseudoId()), _T("\""), _T("''\\''"));
-	const str lLocalServerInfo = _T("--name \"")+lServerName + _T("\" --player-count ")+lPlayerCount
-		+ _T(" --id \"")+lId+_T("\"");
-	// TODO: something like mMasterConnection->SendLocalInfo(GetNetworkServer()->GetSocket(), lLocalServerInfo);
+	const str lLocalServerInfo = _T("--name \"") + lServerName + _T("\" --player-count ") + lPlayerCount
+		+ _T(" --id \"") + lId + _T("\" --internal-address ") +
+		GetNetworkServer()->GetLocalAddress().GetIP().GetAsString() + _T(" --internal-port ") +
+		strutil::Format(_T("%i"), GetNetworkServer()->GetLocalAddress().GetPort());
 	float lConnectTimeout;
 	CURE_RTVAR_GET(lConnectTimeout, =(float), GetVariableScope(), RTVAR_NETWORK_CONNECT_TIMEOUT, 3.0);
 	mMasterConnection->SetSocketInfo(GetNetworkServer(), lConnectTimeout);
@@ -1122,7 +1123,7 @@ bool GameServerManager::HandleMasterCommand(const ServerInfo& pServerInfo)
 {
 	if (pServerInfo.mCommand == _T(MASTER_SERVER_OF))
 	{
-		const str lAddress = pServerInfo.mGivenAddress + strutil::Format(_T(":%u"), pServerInfo.mGivenPort);
+		const str lAddress = pServerInfo.mGivenIpAddress + strutil::Format(_T(":%u"), pServerInfo.mGivenPort);
 		SocketAddress lSocketAddress;
 		if (lSocketAddress.Resolve(lAddress))
 		{

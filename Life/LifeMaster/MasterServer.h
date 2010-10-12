@@ -21,6 +21,7 @@
 #define MASTER_SERVER_USI	"UploadServerInfo"
 #define MASTER_SERVER_DSL	"DownloadServerList"
 #define MASTER_SERVER_OF	"OpenFirewall"
+#define MASTER_SERVER_UL	"UseLAN"
 #define MASTER_SERVER_DC	"Disconnect"
 
 
@@ -58,7 +59,7 @@ private:
 	bool HandleCommandLine(UdpVSocket* pRemote, const str& pCommandLine);
 	bool RegisterGameServer(bool pActivate, UdpVSocket* pRemote, const str& pName, int pPlayerCount, const str& pId);
 	bool SendServerList(UdpVSocket* pRemote);
-	bool OpenFirewall(const ServerInfo& pServerInfo);
+	bool OpenFirewall(UdpVSocket* pRemote, const ServerInfo& pServerInfo);
 	bool Send(UdpVSocket* pRemote, const str& pData);
 	void DropSocket(UdpVSocket* pRemote);
 

@@ -48,6 +48,7 @@ public:
 	uint64 GetSentByteCount() const;
 	uint64 GetReceivedByteCount() const;
 	unsigned GetConnectionCount() const;
+	const SocketAddress& GetLocalAddress() const;
 
 	bool SendStatusMessage(VSocket* pSocket, int32 pInteger, RemoteStatus pStatus,
 		MessageStatus::InfoType pInfoType, wstr pMessage, Packet* pPacket);

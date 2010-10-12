@@ -22,6 +22,13 @@ namespace Life
 class MasterServerConnection
 {
 public:
+	enum FirewallStatus
+	{
+		FIREWALL_ERROR,
+		FIREWALL_OPENED,
+		FIREWALL_USE_LAN,
+	};
+
 	MasterServerConnection();
 	virtual ~MasterServerConnection();
 
@@ -30,11 +37,12 @@ public:
 	void SendLocalInfo(const str& pLocalServerInfo);
 	void AppendLocalInfo(const str& pExtraServerInfo);
 	void RequestServerList(const str& pCriterias);
-	void RequestOpenFirewall(const str& pServerConnectAddress);
+	void RequestOpenFirewall(const str& pGameServerConnectAddress);
 	bool UpdateServerList(ServerInfoList& pServerList) const;
 	str GetServerListAsText() const;
 	bool IsConnectError() const;
-	bool IsFirewallOpen() const;
+	FirewallStatus GetFirewallOpenStatus() const;
+	const str& GetLanServerConnectAddress() const;
 	double WaitUntilDone(double pTimeout, bool pAllowReconnect);
 	void GraceClose(double pTimeout, bool pWaitUntilDone);
 	bool CloseUnlessUploaded();
@@ -59,7 +67,7 @@ private:
 	void ConnectEntry();
 	bool UploadServerInfo();
 	bool DownloadServerList();
-	bool OpenFirewall();
+	FirewallStatus OpenFirewall();
 	bool SendAndAck(const str& pData);
 	bool SendAndRecv(const str& pData, str& pReply);
 	bool Send(const str& pData);
@@ -75,7 +83,8 @@ private:
 	str mUploadedServerInfo;
 	str mServerSortCriterias;
 	str mServerList;
-	str mServerConnectAddress;
+	str mGameServerConnectAddress;
+	str mLanGameServerAddress;
 	double mConnectTimeout;
 	Cure::SocketIoHandler* mSocketIoHandler;
 	Cure::SocketIoHandler::MuxIoSocket* mMuxSocket;
@@ -85,7 +94,7 @@ private:
 	HiResTimer mIdleTimer;
 	HiResTimer mUploadTimeout;
 	bool mIsConnectError;
-	bool mLastFirewallOpen;
+	FirewallStatus mLastFirewallOpenStatus;
 	const static double mConnectedIdleTimeout;
 	const static double mDisconnectedIdleTimeout;
 	const static double mServerInfoTimeout;
