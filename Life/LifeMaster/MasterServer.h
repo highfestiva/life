@@ -11,6 +11,7 @@
 #include "../../Lepra/Include/MemberThread.h"
 #include "../../Lepra/Include/Timer.h"
 #include "../Life.h"
+#include "../ServerInfo.h"
 
 #define MASTER_SERVER_NAME	"rg.servegame.org"
 //#define MASTER_SERVER_NAME	"localhost"
@@ -57,20 +58,17 @@ private:
 	void OnQuitRequest(int pLevel);
 	void HandleReceive(UdpVSocket* pRemote, const uint8* pCommand, unsigned pCommandLength);
 	bool HandleCommandLine(UdpVSocket* pRemote, const str& pCommandLine);
-	bool RegisterGameServer(bool pActivate, UdpVSocket* pRemote, const str& pName, int pPlayerCount, const str& pId);
+	bool RegisterGameServer(const ServerInfo& pServerInfo, UdpVSocket* pRemote);
 	bool SendServerList(UdpVSocket* pRemote);
 	bool OpenFirewall(UdpVSocket* pRemote, const ServerInfo& pServerInfo);
 	bool Send(UdpVSocket* pRemote, const str& pData);
 	void DropSocket(UdpVSocket* pRemote);
 
-	struct GameServerInfo
+	struct GameServerInfo: public ServerInfo
 	{
-		str mName;
-		int mPlayerCount;
-		str mId;
 		Timer mIdleTime;
 
-		GameServerInfo(const str& pName, int pPlayerCount, const str& pId);
+		GameServerInfo(const ServerInfo& pServerInfo);
 	};
 
 	typedef std::hash_map<str, GameServerInfo> GameServerTable;

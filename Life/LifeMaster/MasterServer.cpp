@@ -158,6 +158,7 @@ bool MasterServer::HandleCommandLine(UdpVSocket* pRemote, const str& pCommandLin
 	{
 		return false;
 	}
+	mLog.Debugf(_T("Got command: '%s'."), pCommandLine.c_str());
 	if (lServerInfo.mCommand == _T(MASTER_SERVER_USI))
 	{
 		if (lServerInfo.mRemotePort < 0 || lServerInfo.mPlayerCount < 0 || lServerInfo.mId.empty())
@@ -165,8 +166,7 @@ bool MasterServer::HandleCommandLine(UdpVSocket* pRemote, const str& pCommandLin
 			mLog.Errorf(_T("Got bad parameters to command (%s) from game server!"), lServerInfo.mCommand.c_str());
 			return false;
 		}
-		return RegisterGameServer(!lServerInfo.mRemove, pRemote, lServerInfo.mName,
-			lServerInfo.mPlayerCount, lServerInfo.mId);
+		return RegisterGameServer(lServerInfo, pRemote);
 	}
 	else if (lServerInfo.mCommand == _T(MASTER_SERVER_DSL))
 	{
@@ -188,9 +188,10 @@ bool MasterServer::HandleCommandLine(UdpVSocket* pRemote, const str& pCommandLin
 	return false;
 }
 
-bool MasterServer::RegisterGameServer(bool pActivate, UdpVSocket* pRemote, const str& pName,
-	int pPlayerCount, const str& pId)
+bool MasterServer::RegisterGameServer(const ServerInfo& pServerInfo, UdpVSocket* pRemote)
 {
+	const bool lActivate = !pServerInfo.mRemove;
+
 	bool lOk = false;
 	const str lAddress = pRemote->GetTargetAddress().GetAsString();
 
@@ -200,23 +201,22 @@ bool MasterServer::RegisterGameServer(bool pActivate, UdpVSocket* pRemote, const
 		if (x != mGameServerTable.end())
 		{
 			GameServerInfo& lInfo = x->second;
-			if (pActivate)
+			if (lActivate)
 			{
-				if (lInfo.mId == pId)
+				if (lInfo.mId == pServerInfo.mId)
 				{
-					lInfo.mName = pName;
-					lInfo.mPlayerCount = pPlayerCount;
+					lInfo = pServerInfo;
 					lInfo.mIdleTime.PopTimeDiff();
 					lOk = true;
 				}
 				else
 				{
-					mLog.Errorf(_T("Got bad ID (%s) from game server %s!"), pId.c_str(), lInfo.mName.c_str());
+					mLog.Errorf(_T("Got bad ID (%s) from game server %s!"), pServerInfo.mId.c_str(), lInfo.mName.c_str());
 				}
 			}
 			else
 			{
-				if (lInfo.mName == pName && lInfo.mId == pId)
+				if (lInfo.mName == pServerInfo.mName && lInfo.mId == pServerInfo.mId)
 				{
 					mGameServerTable.erase(x);
 					lOk = true;
@@ -227,15 +227,15 @@ bool MasterServer::RegisterGameServer(bool pActivate, UdpVSocket* pRemote, const
 				}
 			}
 		}
-		else if (pActivate)
+		else if (lActivate)
 		{
-			GameServerInfo lInfo(pName, pPlayerCount, pId);
+			GameServerInfo lInfo(pServerInfo);
 			mGameServerTable.insert(GameServerTable::value_type(lAddress, lInfo));
 			lOk = true;
 		}
 		else
 		{
-			mLog.Errorf(_T("Could not drop game server %s, not found."), pName.c_str());
+			mLog.Errorf(_T("Could not drop game server %s, not found."), pServerInfo.mName.c_str());
 		}
 		if (lOk)
 		{
@@ -277,16 +277,6 @@ bool MasterServer::SendServerList(UdpVSocket* pRemote)
 
 bool MasterServer::OpenFirewall(UdpVSocket* pRemote, const ServerInfo& pServerInfo)
 {
-	if (pServerInfo.mGivenIpAddress == pServerInfo.mRemoteIpAddress)
-	{
-		// The client has the same IP as the server. This means it should try LAN connect instead of
-		// going through the firewall. At least the risk of getting caught in a NAT without hairpin
-		// is significantly decreased.
-		mLog.AInfo("Asking game client to use LAN instead, since they share IP.");
-		return Send(pRemote, _T(MASTER_SERVER_UL) _T(" --internal-address ") + pServerInfo.mInternalIpAddress +
-			_T(" --internal-port ") + pServerInfo.mInternalIpAddress);
-	}
-
 	const str lAddress = pServerInfo.mGivenIpAddress + strutil::Format(_T(":%u"), pServerInfo.mGivenPort);
 	SocketAddress lSocketAddress;
 	if (lSocketAddress.Resolve(lAddress))
@@ -295,6 +285,18 @@ bool MasterServer::OpenFirewall(UdpVSocket* pRemote, const ServerInfo& pServerIn
 		GameServerTable::iterator x = mGameServerTable.find(lAddress);
 		if (x != mGameServerTable.end())
 		{
+			if (pServerInfo.mGivenIpAddress == pServerInfo.mRemoteIpAddress)
+			{
+				// The client has the same IP as the server. This means it should try LAN connect instead of
+				// going through the firewall. At least the risk of getting caught in a NAT without hairpin
+				// is significantly decreased.
+				const GameServerInfo& lServerInfo = x->second;
+				mLog.AInfo("Asking game client to use LAN instead, since they share IP.");
+				mLog.Debugf(_T("Internal address is '%s'."), lServerInfo.mInternalIpAddress.c_str());
+				return Send(pRemote, _T(MASTER_SERVER_UL) _T(" --internal-address ") + lServerInfo.mInternalIpAddress +
+					_T(" --internal-port ") + strutil::IntToString(lServerInfo.mInternalPort, 10));
+			}
+
 			UdpVSocket* lGameServerSocket = mMuxSocket->GetVSocket(lSocketAddress);
 			if (lGameServerSocket)
 			{
@@ -337,11 +339,22 @@ void MasterServer::DropSocket(UdpVSocket* pRemote)
 
 
 
-MasterServer::GameServerInfo::GameServerInfo(const str& pName, int pPlayerCount, const str& pId):
-	mName(pName),
-	mPlayerCount(pPlayerCount),
-	mId(pId)
+MasterServer::GameServerInfo::GameServerInfo(const ServerInfo& pServerInfo):
+	ServerInfo(pServerInfo)
+/*	mCommand(pServerInfo.mCommand),
+	mName(pServerInfo.mName),
+	mId(pServerInfo.mId),
+	mGivenIpAddress(pServerInfo.mGivenIpAddress),
+	mInternalIpAddress(pServerInfo.mInternalIpAddress),
+	mRemoteIpAddress(pServerInfo.mRemoteIpAddress),
+	mGivenPort(pServerInfo.mGivenPort),
+	mInternalPort(pServerInfo.mInternalPort),
+	mRemotePort(pServerInfo.mRemotePort),
+	mPlayerCount(pServerInfo.mPlayerCount),
+	mRemove(pServerInfo.mRemove),
+	mPing(pServerInfo.mPing)*/
 {
+	mIdleTime.PopTimeDiff();
 }
 
 
