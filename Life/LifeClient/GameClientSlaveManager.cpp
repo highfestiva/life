@@ -736,7 +736,7 @@ void GameClientSlaveManager::CreateLoginView()
 			{
 				lServerName = lServerName.substr(7);
 			}
-			const str lDefaultUserName = strutil::Format(L"User%u", mSlaveIndex);
+			const str lDefaultUserName = strutil::Format(_T("User%u"), mSlaveIndex);
 			str lUserName;
 			CURE_RTVAR_TRYGET(lUserName, =, GetVariableScope(), RTVAR_LOGIN_USERNAME, lDefaultUserName);
                         wstr lReadablePassword = L"CarPassword";

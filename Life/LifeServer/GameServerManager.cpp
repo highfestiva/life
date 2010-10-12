@@ -1126,9 +1126,9 @@ bool GameServerManager::HandleMasterCommand(const ServerInfo& pServerInfo)
 		SocketAddress lSocketAddress;
 		if (lSocketAddress.Resolve(lAddress))
 		{
-			uint8 lData[] = "Argabargle glop-glyph!";	// Just send anything, since we're just doing it to open the local firewall.
+			mLog.Infof(_T("Attempting to open local firewall to allow remote client connect from %s."), lAddress.c_str());
 			Cure::SocketIoHandler* lSocketIoHandler = GetNetworkServer();
-			return lSocketIoHandler->GetMuxIoSocket()->SendTo(lData, sizeof(lData), lSocketAddress) == sizeof(lData);
+			return lSocketIoHandler->GetMuxIoSocket()->SendOpenFirewallData(lSocketAddress);
 		}
 	}
 	else
