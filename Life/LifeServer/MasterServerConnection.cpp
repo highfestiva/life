@@ -45,7 +45,7 @@ void MasterServerConnection::SetSocketInfo(Cure::SocketIoHandler* pSocketIoHandl
 	if (!pSocketIoHandler)
 	{
 		mMuxSocket = 0;
-		mVSocket = 0;
+		OnDropSocket(mVSocket);
 	}
 	else
 	{
@@ -53,7 +53,7 @@ void MasterServerConnection::SetSocketInfo(Cure::SocketIoHandler* pSocketIoHandl
 		if (!mMuxSocket || !lMuxSocket || mMuxSocket->GetSysSocket() != lMuxSocket->GetSysSocket() ||
 			!mMuxSocket->IsOpen())
 		{
-			mVSocket = 0;
+			OnDropSocket(mVSocket);
 		}
 		mMuxSocket = lMuxSocket;
 	}
@@ -92,6 +92,7 @@ void MasterServerConnection::RequestServerList(const str& pServerCriterias)
 void MasterServerConnection::RequestOpenFirewall(const str& pGameServerConnectAddress)
 {
 	mLastFirewallOpenStatus = FIREWALL_ERROR;
+	mLanGameServerAddress.clear();
 	mGameServerConnectAddress = pGameServerConnectAddress;
 	QueryAddState(OPEN_FIREWALL);
 	TriggerConnectTimer();
@@ -307,7 +308,7 @@ void MasterServerConnection::StepState()
 			}
 			else if (mIdleTimer.QueryTimeDiff() >= mConnectedIdleTimeout)
 			{
-				mLog.AError("Internal error - should never disconnect from master server due to idle timeout!");
+				// This may happen if the player idles too long at the server list GUI.
 				Close(false);
 			}
 		}
@@ -443,6 +444,7 @@ bool MasterServerConnection::Send(const str& pData)
 	if (!mVSocket || !QueryMuxValid())
 	{
 		mLog.Warning(_T("Trying to send to master server even though unconnected."));
+		Close(false);
 		return false;
 	}
 	if (pData.size() > 300)
@@ -507,7 +509,7 @@ bool MasterServerConnection::QueryMuxValid()
 	bool lInvalid = (!mMuxSocket || !mMuxSocket->IsOpen());
 	if (lInvalid)
 	{
-		mVSocket = 0;
+		OnDropSocket(mVSocket);
 	}
 	return !lInvalid;
 }
@@ -520,6 +522,7 @@ void MasterServerConnection::OnDropSocket(Cure::SocketIoHandler::VIoSocket* pSoc
 	if (pSocket == mVSocket)
 	{
 		mVSocket = 0;
+		mState = DISCONNECTED;
 	}
 }
 

@@ -506,6 +506,13 @@ void GameClientMasterTicker::OnSetPlayerCount(int pPlayerCount)
 	{
 		CreateSlave();
 	}
+
+	if (!mServer)
+	{
+		// If client descided we won't run local server, then we have no need for
+		// a master connection any more. Was only used to download server list anyway.
+		mMasterConnection->GraceClose(0.1, false);
+	}
 }
 
 void GameClientMasterTicker::DownloadServerList()

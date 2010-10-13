@@ -105,6 +105,9 @@ void CppContextObject::OnPhysicsTick()
 
 void CppContextObject::UiMove()
 {
+	const float lFrameTime = GetManager()->GetGameManager()->GetTimeManager()->GetRealNormalFrameTime();
+	const float lLerpFactor = Math::GetIterateLerpTime(0.2f, lFrameTime);
+	const Vector3DF lOrigo;
 	TransformationF lPhysicsTransform;
 	if (mMeshSlideMode == MESH_SLIDE_START)
 	{
@@ -134,14 +137,18 @@ void CppContextObject::UiMove()
 			if (mMeshSlideMode == MESH_SLIDE_START)
 			{
 				// Start out by fetching offset.
-				const TransformationF& lTransform = lGfxGeometry->GetBaseTransformation();
-				mMeshOffset.Add(lTransform.GetPosition());
-				mMeshOffset.Sub(lPhysicsTransform.GetPosition());
-				/*if (x == 0)
+				Vector3DF lBasePositionOffset = lGfxGeometry->GetBaseTransformation().GetPosition();
+				lBasePositionOffset.Sub(lPhysicsTransform.GetPosition());
+				Math::Lerp(lBasePositionOffset, lOrigo, lLerpFactor);
+				if (lBasePositionOffset.GetLengthSquared() >= 0.5f*0.5f)	// Motion becomes jerky if we allow filtering of small movements.
 				{
-					lGfxPhysMeshAngularOffset = lPhysicsTransform.GetOrientation().GetInverse() * lTransform.GetOrientation();
-				}*/
-				lPhysicsTransform = lTransform;
+					mMeshOffset.Add(lBasePositionOffset);
+					/*if (x == 0)
+					{
+						lGfxPhysMeshAngularOffset = lPhysicsTransform.GetOrientation().GetInverse() * lTransform.GetOrientation();
+					}*/
+					lPhysicsTransform.GetPosition() += lBasePositionOffset;
+				}
 				++lGfxPhysMeshOffsetCount;
 			}
 			else if (mMeshSlideMode == MESH_SLIDE_RUN)
@@ -178,8 +185,7 @@ void CppContextObject::UiMove()
 			mMeshSlideMode = MESH_SLIDE_STOP;
 		}
 	}
-	const float lFrameTime = GetManager()->GetGameManager()->GetTimeManager()->GetRealNormalFrameTime();
-	mMeshOffset = Math::Lerp(mMeshOffset, Vector3DF(), Math::GetIterateLerpTime(0.12f, lFrameTime));
+	mMeshOffset = Math::Lerp(mMeshOffset, lOrigo, lLerpFactor);
 	//mMeshAngularOffset.Normalize();
 	//mMeshAngularOffset.Slerp(mMeshAngularOffset, QuaternionF(), Math::GetIterateLerpTime(0.12f, lFrameTime));
 }
