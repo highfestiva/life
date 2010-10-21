@@ -155,7 +155,7 @@ void CppContextObject::OnForceApplied(TBC::PhysicsManager::ForceFeedbackListener
 		// TODO: replace by sensible values. Like dividing by mass, for instance.
 		//if (pForce.GetLengthSquared() > 100 || pTorque.GetLengthSquared() > 10)
 		{
-			mManager->GetGameManager()->OnCollision(pForce, pTorque, this, (ContextObject*)pOtherObject,
+			mManager->GetGameManager()->OnCollision(pForce, pTorque, pPosition, this, (ContextObject*)pOtherObject,
 				pOwnBodyId, pOtherBodyId);
 		}
 	}

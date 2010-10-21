@@ -26,6 +26,7 @@
 #include "../../UiTBC/Include/GUI/UiFloatingLayout.h"
 #include "../LifeServer/MasterServerConnection.h"
 #include "../LifeApplication.h"
+#include "CollisionSoundManager.h"
 #include "GameClientMasterTicker.h"
 #include "MassObject.h"
 #include "Props.h"
@@ -47,6 +48,7 @@ GameClientSlaveManager::GameClientSlaveManager(GameClientMasterTicker* pMaster, 
 	Cure::GameManager(pVariableScope, pResourceManager),
 	mMaster(pMaster),
 	mUiManager(pUiManager),
+	mCollisionSoundManager(0),
 	mSlaveIndex(pSlaveIndex),
 	mRenderArea(pRenderArea),
 	mMasterServerConnection(new MasterServerConnection),
@@ -75,6 +77,8 @@ GameClientSlaveManager::GameClientSlaveManager(GameClientMasterTicker* pMaster, 
 	mLoginWindow(0),
 	mEnginePlaybackTime(0)
 {
+	mCollisionSoundManager = new CollisionSoundManager(this, pUiManager);
+
 	::memset(mEnginePowerShadow, 0, sizeof(mEnginePowerShadow));
 
 	mCameraPivotPosition = mCameraPosition + GetCameraQuaternion() * Vector3DF(0, mCameraTargetXyDistance*3, 0);
@@ -984,6 +988,8 @@ void GameClientSlaveManager::TickUiUpdate()
 {
 	((ClientConsoleManager*)GetConsoleManager())->GetUiConsole()->Tick();
 
+	mCollisionSoundManager->Tick();
+
 	// Camera moves in a "moving average" kinda curve (halfs the distance in x seconds).
 	const float lPhysicsTime = GetTimeManager()->GetAffordedPhysicsTotalTime();
 	if (lPhysicsTime < 1e-5)
@@ -1622,10 +1628,14 @@ void GameClientSlaveManager::SetMovement(Cure::GameObjectId pInstanceId, int32 p
 	}
 }
 
-void GameClientSlaveManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque,
+void GameClientSlaveManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
 	Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
 	TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID pBody2Id)
 {
+	assert(!GetPhysicsManager()->IsStaticBody(pBody1Id) || !GetPhysicsManager()->IsStaticBody(pBody2Id));
+
+	mCollisionSoundManager->OnCollision(pForce, pTorque, pPosition, pObject1, pObject2, pBody1Id, pBody2Id);
+
 	const bool lBothAreDynamic = (!GetPhysicsManager()->IsStaticBody(pBody1Id) && !GetPhysicsManager()->IsStaticBody(pBody2Id));
 	if (!lBothAreDynamic)
 	{
@@ -1636,7 +1646,7 @@ void GameClientSlaveManager::OnCollision(const Vector3DF& pForce, const Vector3D
 	{
 		if (IsOwned(pObject1->GetInstanceId()))
 		{
-			if (pObject1->IsImpact(GetPhysicsManager()->GetGravity(), 12.0f, pForce, pTorque))
+			if (pObject1->GetImpact(GetPhysicsManager()->GetGravity(), pForce, pTorque) >= 12.0f)
 			{
 				pObject1->QueryResendTime(0, false);
 			}
@@ -1645,7 +1655,7 @@ void GameClientSlaveManager::OnCollision(const Vector3DF& pForce, const Vector3D
 		else if (pObject2->GetInstanceId() == mAvatarId &&
 			pObject1->GetNetworkObjectType() == Cure::NETWORK_OBJECT_REMOTE_CONTROLLED)
 		{
-			if (pObject1->IsImpact(GetPhysicsManager()->GetGravity(), 1.0f, pForce, pTorque))
+			if (pObject1->GetImpact(GetPhysicsManager()->GetGravity(), pForce, pTorque) >= 1.0f)
 			{
 				if (pObject1->QueryResendTime(1.0, false))
 				{

@@ -800,10 +800,12 @@ void GameServerManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 	}
 }
 
-void GameServerManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque,
+void GameServerManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
 	Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
 	TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID pBody2Id)
 {
+	pPosition;
+
 	const bool lBothAreDynamic = (!GetPhysicsManager()->IsStaticBody(pBody1Id) && !GetPhysicsManager()->IsStaticBody(pBody2Id));
 	if (!lBothAreDynamic)
 	{
@@ -818,12 +820,12 @@ void GameServerManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pT
 		const bool lIsServerControlled = (pObject1->GetNetworkObjectType() == Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
 		if (lIsServerControlled)
 		{
-			lSendCollision = pObject1->IsImpact(GetPhysicsManager()->GetGravity(), 12.0f, pForce, pTorque);
+			lSendCollision = (pObject1->GetImpact(GetPhysicsManager()->GetGravity(), pForce, pTorque) >= 12.0f);
 			/*if (!lSendCollision && lAreBothDynamic)
 			{
 				// If the other object thinks it's a high impact, we go. This is to not
 				// replicate when another - heavier - object is standing on top of us.
-				lSendCollision = pObject2->IsImpact(GetPhysicsManager()->GetGravity(), 7.0f, pForce, pTorque);
+				lSendCollision = (pObject2->GetImpact(GetPhysicsManager()->GetGravity(), pForce, pTorque) >= 7.0f);
 			}*/
 		}
 		else if (lAreBothDynamic)
@@ -835,7 +837,7 @@ void GameServerManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pT
 			}
 			else
 			{
-				lSendCollision = pObject1->IsImpact(GetPhysicsManager()->GetGravity(), 12.0f, pForce, pTorque);
+				lSendCollision = (pObject1->GetImpact(GetPhysicsManager()->GetGravity(), pForce, pTorque) >= 12.0f);
 			}
 		}
 		if (lSendCollision)

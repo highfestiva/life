@@ -265,10 +265,10 @@ void Vehicle::OnForceApplied(TBC::PhysicsManager::ForceFeedbackListener* pOtherO
 		ContextObject* lObject = (ContextObject*)pOtherObject;
 		if (((GameClientSlaveManager*)GetManager()->GetGameManager())->IsInCameraRange(lObject, lDistance))
 		{
-			bool lIsHighImpact = lObject->IsImpact(
+			const float lImpact = lObject->GetImpact(
 				GetManager()->GetGameManager()->GetPhysicsManager()->GetGravity(),
-				0.9f, pForce, pTorque);
-			if (lIsHighImpact)
+				pForce, pTorque);
+			if (lImpact >= 0.9f)
 			{
 				Vector3DF lPosition(pPosition);
 				const float lAngle = (float)Random::Uniform(0, PI*2);

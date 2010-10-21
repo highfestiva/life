@@ -210,7 +210,6 @@ bool SoundManagerOpenAL::Play(SoundInstanceID pSoundIID, float pVolume, float pP
 	::alSourcef(lSource->mSid, AL_GAIN, pVolume * mMasterVolume);
 	::alSourcef(lSource->mSid, AL_PITCH, pPitch);
 	::alSourcePlay(lSource->mSid);
-	lSource->mIsPaused = false;
 	return (true);
 }
 
@@ -220,7 +219,6 @@ void SoundManagerOpenAL::StopAll()
 	for (; x != mSourceSet.end(); ++x)
 	{
 		::alSourceStop((*x)->mSid);
-		(*x)->mIsPaused = true;
 	}
 }
 
@@ -232,7 +230,6 @@ void SoundManagerOpenAL::Stop(SoundInstanceID pSoundIID)
 		return;
 	}
 	::alSourceStop(lSource->mSid);
-	lSource->mIsPaused = true;
 }
 
 void SoundManagerOpenAL::TogglePause(SoundInstanceID pSoundIID)
@@ -242,7 +239,9 @@ void SoundManagerOpenAL::TogglePause(SoundInstanceID pSoundIID)
 	{
 		return;
 	}
-	if (lSource->mIsPaused)
+	ALint lState = AL_PAUSED;
+	alGetSourcei(lSource->mSid, AL_SOURCE_STATE, &lState);
+	if (lState != AL_PLAYING)
 	{
 		::alSourcePlay(lSource->mSid);
 	}
@@ -250,7 +249,6 @@ void SoundManagerOpenAL::TogglePause(SoundInstanceID pSoundIID)
 	{
 		::alSourcePause(lSource->mSid);
 	}
-	lSource->mIsPaused = !lSource->mIsPaused;
 }
 
 bool SoundManagerOpenAL::IsPlaying(SoundInstanceID pSoundIID)
@@ -260,7 +258,9 @@ bool SoundManagerOpenAL::IsPlaying(SoundInstanceID pSoundIID)
 	{
 		return (false);
 	}
-	return (!lSource->mIsPaused);
+	ALint lState = AL_PAUSED;
+	alGetSourcei(lSource->mSid, AL_SOURCE_STATE, &lState);
+	return (lState == AL_PLAYING);
 }
 
 bool SoundManagerOpenAL::IsPaused(SoundInstanceID pSoundIID)
@@ -421,8 +421,7 @@ bool SoundManagerOpenAL::Sample::Load(const str& pFileName)
 
 SoundManagerOpenAL::Source::Source():
 	mSample(0),
-	mSid((ALuint)-1),
-	mIsPaused(true)
+	mSid((ALuint)-1)
 {
 }
 

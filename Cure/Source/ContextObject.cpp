@@ -774,22 +774,25 @@ bool ContextObject::SetEnginePower(unsigned pAspect, float pPower, float pAngle)
 	return mPhysics->SetEnginePower(pAspect, pPower, pAngle);
 }
 
-bool ContextObject::IsImpact(const Vector3DF& pGravity, float pScaleFactor, const Vector3DF& pForce, const Vector3DF& pTorque) const
+float ContextObject::GetImpact(const Vector3DF& pGravity, const Vector3DF& pForce, const Vector3DF& pTorque, float pFactor) const
 {
-	const float lMassFactor = 1/GetMass();
+	const float lMassFactor = pFactor? pFactor : 1/GetMass();
 	Vector3DF lGravityDirection = pGravity;
 	lGravityDirection.Normalize();
 	// High angle against direction of gravity means high impact.
 	const float lForceWithoutGravityFactor = (pForce * lGravityDirection) - pForce.Cross(lGravityDirection).GetLength();
-	const float lNormalizedForceFactor = lForceWithoutGravityFactor * lMassFactor;
+	const float lNormalizedForceFactor = lForceWithoutGravityFactor * lMassFactor * lMassFactor;
 	const float lNormalizedTorqueFactor = pTorque.GetLength() * lMassFactor;
-	bool lIsHighImpact = (lNormalizedForceFactor < -16*pScaleFactor || lNormalizedForceFactor >= 2*pScaleFactor || lNormalizedTorqueFactor > 3*pScaleFactor);
-	if (lIsHighImpact)
+	float lImpact = 0;
+	lImpact = std::max(lImpact, lNormalizedForceFactor*-16);
+	lImpact = std::max(lImpact, lNormalizedForceFactor*2);
+	lImpact = std::max(lImpact, lNormalizedTorqueFactor*3);
+	if (lImpact >= 1.0f)
 	{
 		log_volatile(mLog.Tracef(_T("Collided hard with something dynamic. F=%f, T=%f"),
 			lNormalizedForceFactor, lNormalizedTorqueFactor));
 	}
-	return (lIsHighImpact);
+	return (lImpact);
 }
 
 

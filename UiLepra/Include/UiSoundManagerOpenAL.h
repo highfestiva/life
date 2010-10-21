@@ -136,7 +136,6 @@ private:
 
 		Sample* mSample;
 		ALuint mSid;
-		bool mIsPaused;
 	};
 
 	typedef std::hash_set<Sample*, LEPRA_VOIDP_HASHER> SampleSet;

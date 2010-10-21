@@ -72,7 +72,7 @@ public:
 	virtual bool IsUiMoveForbidden(GameObjectId pObjectId) const;
 	virtual void GetSiblings(GameObjectId pObjectId, ContextObject::Array& pSiblingArray) const;
 	virtual void OnLoadCompleted(ContextObject* pObject, bool pOk) = 0;
-	virtual void OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque,
+	virtual void OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
 		ContextObject* pObject1, ContextObject* pObject2,
 		TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID pBody2Id) = 0;
 	void OnStopped(ContextObject* pObject, TBC::PhysicsManager::BodyID pBodyId);

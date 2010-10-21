@@ -3146,7 +3146,9 @@ void PhysicsManagerODE::DoForceFeedback()
 	{
 		JointInfo* lJointInfo = *x;
 
-		const bool lOneIsDynamic = (!lJointInfo->IsBody1Static(this) || !lJointInfo->IsBody2Static(this));
+		const bool lIsBody1Static = lJointInfo->IsBody1Static(this);
+		const bool lIsBody2Static = lJointInfo->IsBody2Static(this);
+		const bool lOneIsDynamic = (!lIsBody1Static || !lIsBody2Static);
 		if (lJointInfo->mListener1 != lJointInfo->mListener2 && lOneIsDynamic)
 		{
 			if (lJointInfo->mListener1 != 0)
@@ -3164,7 +3166,7 @@ void PhysicsManagerODE::DoForceFeedback()
 			if (lJointInfo->mListener2 != 0)
 			{
 				dJointFeedback* lFeedback = &lJointInfo->mFeedback;
-				if (lJointInfo->IsBody1Static(this))	// Only a single force/torque pair set?
+				if (lIsBody1Static || lIsBody2Static)	// Only a single force/torque pair set?
 				{
 					lJointInfo->mListener2->OnForceApplied(
 						lJointInfo->mListener1,

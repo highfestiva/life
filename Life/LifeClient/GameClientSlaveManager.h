@@ -38,6 +38,7 @@ namespace Life
 
 
 
+class CollisionSoundManager;
 class GameClientMasterTicker;
 class MasterServerConnection;
 class RoadSignButton;
@@ -126,7 +127,7 @@ protected:
 	Cure::ContextObject* CreateContextObject(const str& pClassId) const;
 	virtual void OnLoadCompleted(Cure::ContextObject* pObject, bool pOk);
 	void SetMovement(Cure::GameObjectId pInstanceId, int32 pFrameIndex, Cure::ObjectPositionalData& pData);
-	void OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque,
+	void OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
 		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
 		TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID pBody2Id);
 	bool OnPhysicsSend(Cure::ContextObject* pObject);
@@ -160,6 +161,7 @@ protected:
 
 	GameClientMasterTicker* mMaster;
 	UiCure::GameUiManager* mUiManager;
+	CollisionSoundManager* mCollisionSoundManager;
 	const int mSlaveIndex;
 	PixelRect mRenderArea;
 
