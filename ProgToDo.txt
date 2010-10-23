@@ -201,10 +201,10 @@ Engine
 + Client must request (and release) ownership of objects that are collided to. Owned objects are broadcasted to all other clients from the owner. Server won't take any own initiaives in the duration of the ownership.
 + Make sure dynamic meshes on static object (i.e. windmill wings in level_01) have their shadows updated each frame instead of every 60th.
 + Master server: drop old servers.
++ Collision sounds.
 . Fix network sync now that IsImpact(12.0) => GetImpact() >= ??? (now is mass relative).
 . Make sure camera never collides with physical objects. Make camera always keep a free line of sight to the controlled object.
-. Collision sounds.
-. Optimize: startup. Very slow on slow computer. (Try using zip archives?)
+. Optimize: startup. Very slow on slow computer. Try using zip archives? Using less files might help antivirus?
 . Fix bug: when changing frame rates, the alarm callback sometimes never triggers (or takes forever?). Probably linked to physics frame counter?
 . Fix universal joint network sync (ODE-interface code relies heavily on LOCAL joint axes when receiving REMOTE updates via SetJointDiff).
 . Fix bug: sometimes certain buttons/controls hangs so that for instance "full throttle" is active, even though the button is released.

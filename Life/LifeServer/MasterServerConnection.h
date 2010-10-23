@@ -58,7 +58,7 @@ private:
 		DOWNLOAD_LIST,
 		OPEN_FIREWALL,
 		DISCONNECTED,
-		WORKING,
+		CONNECTING,
 	};
 
 	void QueryAddState(State pState);

@@ -73,6 +73,11 @@ void NetworkServer::Stop()
 		UserConnection* lUser = x->second;
 		RemoveUser(lUser->GetAccountId(), true);
 	}
+	while (!mSocketReceiveFilterTable.empty())
+	{
+		VSocket* lSocket = mSocketReceiveFilterTable.begin()->first;
+		DropSocket(lSocket);
+	}
 	Parent::Stop();
 }
 
@@ -550,16 +555,22 @@ void NetworkServer::KillDeadSockets()
 void NetworkServer::DropSocket(VSocket* pSocket)
 {
 	ScopeLock lLock(&mLock);
-	pSocket->SendBuffer();
-	mSocketTimeoutTable.erase(pSocket);
-	mPendingLoginTable.erase(pSocket);
+	if (pSocket)
+	{
+		pSocket->SendBuffer();
+		mSocketTimeoutTable.erase(pSocket);
+		mPendingLoginTable.erase(pSocket);
+	}
 	SocketReceiveFilterTable::iterator x = mSocketReceiveFilterTable.find(pSocket);
 	if (x != mSocketReceiveFilterTable.end())
 	{
 		x->second(x->first);
 		mSocketReceiveFilterTable.erase(x);
 	}
-	mMuxSocket->CloseSocket(pSocket);
+	if (pSocket)
+	{
+		mMuxSocket->CloseSocket(pSocket);
+	}
 }
 
 UserConnection* NetworkServer::GetUser(UserAccount::AccountId pAccountId)

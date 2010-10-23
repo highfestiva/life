@@ -122,6 +122,11 @@ void NetworkClient::Disconnect(bool pSendDisconnect)
 	StopLoginThread();
 
 	ScopeLock lLock(&mLock);
+	while (!mSocketReceiveFilterTable.empty())
+	{
+		VSocket* lSocket = mSocketReceiveFilterTable.begin()->first;
+		KillIoSocket(lSocket);
+	}
 	if (pSendDisconnect)
 	{
 		SendDisconnect();
@@ -460,14 +465,20 @@ void NetworkClient::AddFilterIoSocket(VIoSocket* pSocket, const DropFilterCallba
 
 void NetworkClient::KillIoSocket(VIoSocket* pSocket)
 {
-	pSocket->SendBuffer();
+	if (pSocket)
+	{
+		pSocket->SendBuffer();
+	}
 	SocketReceiveFilterTable::iterator x = mSocketReceiveFilterTable.find(pSocket);
 	if (x != mSocketReceiveFilterTable.end())
 	{
 		x->second(x->first);
 		mSocketReceiveFilterTable.erase(x);
 	}
-	mMuxSocket->CloseSocket(pSocket);
+	if (pSocket)
+	{
+		mMuxSocket->CloseSocket(pSocket);
+	}
 }
 
 

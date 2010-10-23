@@ -144,7 +144,7 @@ bool GameClientMasterTicker::Tick()
 
 	{
 		LEPRA_MEASURE_SCOPE(MasterServerConnectionTick);
-		// If we're not running server: use client network interface for obtaining server list.
+		// If we're not running server: use free network interface for obtaining server list.
 		if (!mServer)
 		{
 			mFreeNetworkAgent->Tick();

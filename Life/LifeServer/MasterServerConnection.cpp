@@ -283,7 +283,7 @@ void MasterServerConnection::StepState()
 		{
 			if (!mConnecter->IsRunning() && QueryMuxValid())
 			{
-				mState = WORKING;
+				mState = CONNECTING;
 				if (!mConnecter->Start(this, &MasterServerConnection::ConnectEntry))
 				{
 					mLog.Warning(_T("Could not start connecter."));
@@ -334,7 +334,7 @@ void MasterServerConnection::StepState()
 
 void MasterServerConnection::ConnectEntry()
 {
-	if (mState != WORKING || mVSocket != 0)
+	if (mState != CONNECTING || mVSocket != 0)
 	{
 		mLog.Warning(_T("Starting connector thread while already working/connected!"));
 		assert(false);
@@ -356,6 +356,8 @@ void MasterServerConnection::ConnectEntry()
 		return;
 	}
 	const std::string lConnectionId = SystemManager::GetRandomId();
+	Cure::SocketIoHandler::DropFilterCallback lDropCallback(this, &MasterServerConnection::OnDropSocket);
+	mSocketIoHandler->AddFilterIoSocket(0, lDropCallback);
 	mVSocket = mMuxSocket->Connect(lTargetAddress, lConnectionId, mConnectTimeout);
 	if (!mVSocket)
 	{
@@ -363,8 +365,8 @@ void MasterServerConnection::ConnectEntry()
 		Close(true);
 		return;
 	}
-	mSocketIoHandler->AddFilterIoSocket(mVSocket, Cure::SocketIoHandler::DropFilterCallback(this, &MasterServerConnection::OnDropSocket));
-	assert(mState == WORKING);
+	mSocketIoHandler->AddFilterIoSocket(mVSocket, lDropCallback);
+	assert(mState == CONNECTING);
 	mState = CONNECTED;
 	mIdleTimer.PopTimeDiff();
 }
@@ -519,8 +521,12 @@ bool MasterServerConnection::QueryMuxValid()
 void MasterServerConnection::OnDropSocket(Cure::SocketIoHandler::VIoSocket* pSocket)
 {
 	//assert(pSocket == mVSocket);
-	if (pSocket == mVSocket)
+	if (pSocket == mVSocket || pSocket == 0)	// NULL means MUX socket is closing down!
 	{
+		if (mState == CONNECTING)
+		{
+			mConnecter->Join(0.5);
+		}
 		mVSocket = 0;
 		mState = DISCONNECTED;
 	}
