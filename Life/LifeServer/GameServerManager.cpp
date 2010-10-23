@@ -804,9 +804,13 @@ void GameServerManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pT
 	Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
 	TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID pBody2Id)
 {
-	pPosition;
+	(void)pPosition;
+	(void)pBody1Id;
+	(void)pBody2Id;
 
-	const bool lBothAreDynamic = (!GetPhysicsManager()->IsStaticBody(pBody1Id) && !GetPhysicsManager()->IsStaticBody(pBody2Id));
+	const bool lObject1Dynamic = (pObject1->GetPhysics()->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC);
+	const bool lObject2Dynamic = (pObject2->GetPhysics()->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC);
+	const bool lBothAreDynamic = (lObject1Dynamic && lObject2Dynamic);
 	if (!lBothAreDynamic)
 	{
 		return;
@@ -816,19 +820,19 @@ void GameServerManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pT
 		pObject1->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY)	// We only handle network object collisions.
 	{
 		bool lSendCollision = false;
-		const bool lAreBothDynamic = (pObject2 != 0 && pObject2->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY);
+		const bool lAreBothControlled = (pObject2 != 0 && pObject2->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY);
 		const bool lIsServerControlled = (pObject1->GetNetworkObjectType() == Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
 		if (lIsServerControlled)
 		{
 			lSendCollision = (pObject1->GetImpact(GetPhysicsManager()->GetGravity(), pForce, pTorque) >= 12.0f);
-			/*if (!lSendCollision && lAreBothDynamic)
+			/*if (!lSendCollision && lAreBothControlled)
 			{
 				// If the other object thinks it's a high impact, we go. This is to not
 				// replicate when another - heavier - object is standing on top of us.
 				lSendCollision = (pObject2->GetImpact(GetPhysicsManager()->GetGravity(), pForce, pTorque) >= 7.0f);
 			}*/
 		}
-		else if (lAreBothDynamic)
+		else if (lAreBothControlled)
 		{
 			if (pObject1->GetOwnerInstanceId() == pObject2->GetInstanceId() ||
 				pObject2->GetOwnerInstanceId() == pObject1->GetInstanceId())

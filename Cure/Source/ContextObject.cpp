@@ -62,6 +62,7 @@ ContextObject::ContextObject(Cure::ResourceManager* pResourceManager, const str&
 	mIsLoaded(false),
 	mPhysics(0),
 	mPhysicsOverride(PHYSICS_OVERRIDE_NORMAL),
+	mTotalMass(0),
 	mLastSendTime(0),
 	mNetworkOutputGhost(0),
 	mSendCount(0),
@@ -634,18 +635,7 @@ float ContextObject::GetForwardSpeed() const
 
 float ContextObject::GetMass() const
 {
-	float lTotalMass = 0;
-	TBC::PhysicsManager* lPhysicsManager = mManager->GetGameManager()->GetPhysicsManager();
-	const int lBoneCount = mPhysics->GetBoneCount();
-	for (int x = 0; x < lBoneCount; ++x)
-	{
-		const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(x);
-		if (lGeometry->GetBodyId())
-		{
-			lTotalMass += lPhysicsManager->GetBodyMass(lGeometry->GetBodyId());
-		}
-	}
-	return (lTotalMass);
+	return mTotalMass;
 }
 
 ObjectPositionalData* ContextObject::GetNetworkOutputGhost()
@@ -774,23 +764,23 @@ bool ContextObject::SetEnginePower(unsigned pAspect, float pPower, float pAngle)
 	return mPhysics->SetEnginePower(pAspect, pPower, pAngle);
 }
 
-float ContextObject::GetImpact(const Vector3DF& pGravity, const Vector3DF& pForce, const Vector3DF& pTorque, float pFactor) const
+float ContextObject::GetImpact(const Vector3DF& pGravity, const Vector3DF& pForce, const Vector3DF& pTorque, float pExtraMass, float pSidewaysFactor) const
 {
-	const float lMassFactor = pFactor? pFactor : 1/GetMass();
-	Vector3DF lGravityDirection = pGravity;
-	lGravityDirection.Normalize();
+	const float lMassFactor = 1/(GetMass() + pExtraMass);
+	const float lGravityInvertFactor = 1/pGravity.GetLength();
+	const Vector3DF lGravityDirection(pGravity * lGravityInvertFactor);
 	// High angle against direction of gravity means high impact.
-	const float lForceWithoutGravityFactor = (pForce * lGravityDirection) - pForce.Cross(lGravityDirection).GetLength();
-	const float lNormalizedForceFactor = lForceWithoutGravityFactor * lMassFactor * lMassFactor;
-	const float lNormalizedTorqueFactor = pTorque.GetLength() * lMassFactor;
+	const float lOpposingGravityFactor = -(pForce*lGravityDirection) * lGravityInvertFactor * lMassFactor;
+	const float lSidewaysFactor = pForce.Cross(lGravityDirection).GetLength() * lMassFactor;
+	const float lTorqueFactor = pTorque.GetLength() * lMassFactor;
 	float lImpact = 0;
-	lImpact = std::max(lImpact, lNormalizedForceFactor*-16);
-	lImpact = std::max(lImpact, lNormalizedForceFactor*2);
-	lImpact = std::max(lImpact, lNormalizedTorqueFactor*3);
+	lImpact = std::max(lImpact, lOpposingGravityFactor * 0.2f);
+	lImpact = std::max(lImpact, lOpposingGravityFactor * -0.8f);
+	lImpact = std::max(lImpact, lSidewaysFactor * pSidewaysFactor);
+	lImpact = std::max(lImpact, lTorqueFactor * 0.375f);
 	if (lImpact >= 1.0f)
 	{
-		log_volatile(mLog.Tracef(_T("Collided hard with something dynamic. F=%f, T=%f"),
-			lNormalizedForceFactor, lNormalizedTorqueFactor));
+		log_volatile(mLog.Tracef(_T("Collided hard with something dynamic.")));
 	}
 	return (lImpact);
 }
@@ -836,6 +826,19 @@ void ContextObject::OnLoaded()
 	OnPhysicsTick();
 	if (GetPhysics() && GetManager())
 	{
+		// Calculate total mass.
+		assert(mTotalMass == 0);
+		TBC::PhysicsManager* lPhysicsManager = mManager->GetGameManager()->GetPhysicsManager();
+		const int lBoneCount = mPhysics->GetBoneCount();
+		for (int x = 0; x < lBoneCount; ++x)
+		{
+			const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(x);
+			if (lGeometry->GetBodyId())
+			{
+				mTotalMass += lPhysicsManager->GetBodyMass(lGeometry->GetBodyId());
+			}
+		}
+
 		GetManager()->EnablePhysicsUpdateCallback(this);
 	}
 }

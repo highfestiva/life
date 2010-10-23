@@ -40,17 +40,16 @@ public:
 	CollisionSoundManager(Cure::GameManager* pGameManager, UiCure::GameUiManager* pUiManager);
 	virtual ~CollisionSoundManager();
 
-	void Tick();
+	void Tick(const Vector3DF& pCameraPosition);
 	void OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
 		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
-		TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID pBody2Id);
+		TBC::PhysicsManager::BodyID pBody1Id);
 
 private:
-	struct GeometryCombination
+	/*struct GeometryCombination
 	{
-		TBC::ChunkyBoneGeometry* mGeometry1;
-		TBC::ChunkyBoneGeometry* mGeometry2;
-		GeometryCombination(TBC::ChunkyBoneGeometry* pGeometryA, TBC::ChunkyBoneGeometry* pGeometryB);
+		TBC::ChunkyBoneGeometry* mGeometry;
+		GeometryCombination(TBC::ChunkyBoneGeometry* pGeometryA);
 		bool operator==(const GeometryCombination& pOther) const;
 	};
 
@@ -64,24 +63,33 @@ private:
 				const void* p;
 			};
 			__vp vp;
-			vp.p = __x.mGeometry2;
-			vp.s <<= 1;
-			vp.s = (uint8*)vp.p - (uint8*)__x.mGeometry1;
+			vp.p = __x.mGeometry;
 			return vp.s;
 		}
+	};*/
+
+	struct SoundResourceInfo
+	{
+		float mStrength;
+		float mMinimumClamp;
+		SoundResourceInfo();
+		SoundResourceInfo(float pStrength, float pMinimumClamp);
+	//private:
+		//void operator=(const SoundResourceInfo&);
 	};
 
 	struct SoundInfo
 	{
-		const GeometryCombination mKey;
 		Vector3DF mPosition;
-		float mImpact;
+		float mBaseImpact;
+		const SoundResourceInfo mResourceInfo;
 		float mVolume;
 		float mPitch;
 		UiCure::UserSound3dResource* mSound;
-		SoundInfo(const GeometryCombination& pKey);
+		SoundInfo(const SoundResourceInfo& pResourceInfo);
 		~SoundInfo();
-		void UpdateParams();
+		void UpdateImpact();
+		static float GetVolume(float pBaseImpact, const SoundResourceInfo& pResourceInfo);
 	private:
 		void operator=(const SoundInfo&);
 	};
@@ -95,16 +103,17 @@ private:
 		void operator=(const CollisionSoundResource&);
 	};
 
-	SoundInfo* GetPlayingSound(const GeometryCombination& pGeometryKey) const;
-	void PlaySound(const GeometryCombination& pGeometryKey, const Vector3DF& pPosition, float pImpact);
+	SoundInfo* GetPlayingSound(const TBC::ChunkyBoneGeometry* pGeometryKey) const;
+	void PlaySound(const TBC::ChunkyBoneGeometry* pGeometryKey, const Vector3DF& pPosition, float pImpact);
 	void OnSoundLoaded(UiCure::UserSound3dResource* pSoundResource);
 	void UpdateSound(SoundInfo* pSoundInfo);
 
-	typedef std::hash_map<GeometryCombination, SoundInfo*, GeometryKeyHasher> SoundMap;
-	typedef std::hash_map<GeometryCombination, str, GeometryKeyHasher> SoundNameMap;
+	typedef std::hash_map<const TBC::ChunkyBoneGeometry*, SoundInfo*, LEPRA_VOIDP_HASHER> SoundMap;
+	typedef std::hash_map<str, SoundResourceInfo> SoundNameMap;
 
 	Cure::GameManager* mGameManager;
 	UiCure::GameUiManager* mUiManager;
+	Vector3DF mCameraPosition;
 	SoundMap mSoundMap;
 	SoundNameMap mSoundNameMap;
 

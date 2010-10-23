@@ -988,7 +988,7 @@ void GameClientSlaveManager::TickUiUpdate()
 {
 	((ClientConsoleManager*)GetConsoleManager())->GetUiConsole()->Tick();
 
-	mCollisionSoundManager->Tick();
+	mCollisionSoundManager->Tick(mCameraPosition);
 
 	// Camera moves in a "moving average" kinda curve (halfs the distance in x seconds).
 	const float lPhysicsTime = GetTimeManager()->GetAffordedPhysicsTotalTime();
@@ -1630,19 +1630,15 @@ void GameClientSlaveManager::SetMovement(Cure::GameObjectId pInstanceId, int32 p
 
 void GameClientSlaveManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
 	Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
-	TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID pBody2Id)
+	TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID)
 {
-	assert(!GetPhysicsManager()->IsStaticBody(pBody1Id) || !GetPhysicsManager()->IsStaticBody(pBody2Id));
+	LEPRA_DEBUG_CODE(const bool lObject1Dynamic = (pObject1->GetPhysics()->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC));
+	const bool lObject2Dynamic = (pObject2->GetPhysics()->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC);
+	assert(lObject1Dynamic || lObject2Dynamic);
 
-	mCollisionSoundManager->OnCollision(pForce, pTorque, pPosition, pObject1, pObject2, pBody1Id, pBody2Id);
+	mCollisionSoundManager->OnCollision(pForce, pTorque, pPosition, pObject1, pObject2, pBody1Id);
 
-	const bool lBothAreDynamic = (!GetPhysicsManager()->IsStaticBody(pBody1Id) && !GetPhysicsManager()->IsStaticBody(pBody2Id));
-	if (!lBothAreDynamic)
-	{
-		return;
-	}
-
-	if (pObject2 && pObject1 != pObject2 && !GetPhysicsManager()->IsStaticBody(pBody2Id))
+	if (pObject2 && pObject1 != pObject2 && !lObject2Dynamic)
 	{
 		if (IsOwned(pObject1->GetInstanceId()))
 		{

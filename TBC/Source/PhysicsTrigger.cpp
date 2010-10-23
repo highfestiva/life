@@ -6,6 +6,7 @@
 
 #include "../Include/PhysicsTrigger.h"
 #include <assert.h>
+#include "../../Lepra/Include/Endian.h"
 #include "../../Lepra/Include/Math.h"
 #include "../../Lepra/Include/Packer.h"
 #include "../Include/ChunkyBoneGeometry.h"

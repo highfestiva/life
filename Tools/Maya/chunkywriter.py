@@ -527,6 +527,13 @@ class PhysWriter(ChunkyWriter):
                                 self._writeint(connector_types[c])
                 else:
                         self._writeint(0)
+
+                # Write material.
+                material = node.get_fixed_attribute("material")
+                if options.options.verbose:
+                        print("Writing physical material", material);
+                self._writestr(material)
+
                 # Write shape data (dimensions of shape).
                 if options.options.verbose:
                         print("Writing shape %s with rootindex %i." % (node.getName(), rootindex))

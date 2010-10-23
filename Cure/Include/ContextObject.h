@@ -105,7 +105,7 @@ public:
 	TBC::ChunkyBoneGeometry* GetStructureGeometry(unsigned pIndex) const;
 	TBC::ChunkyBoneGeometry* GetStructureGeometry(TBC::PhysicsManager::BodyID pBodyId) const;
 	bool SetEnginePower(unsigned pAspect, float pPower, float pAngle);
-	float GetImpact(const Vector3DF& pGravity, const Vector3DF& pForce, const Vector3DF& pTorque, float pFactor=0) const;
+	float GetImpact(const Vector3DF& pGravity, const Vector3DF& pForce, const Vector3DF& pTorque, float pExtraMass = 0, float pSidewaysFactor = 1) const;
 
 	void ForceSend();
 	bool QueryResendTime(float pDeltaTime, bool pUnblockDelta);
@@ -165,6 +165,7 @@ protected:
 	AttributeArray mAttributeArray;
 	TBC::ChunkyPhysics* mPhysics;
 	PhysicsOverride mPhysicsOverride;
+	float mTotalMass;
 	float mLastSendTime;
 	ObjectPositionalData mPosition;
 	ObjectPositionalData* mNetworkOutputGhost;

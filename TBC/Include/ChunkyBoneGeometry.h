@@ -7,13 +7,17 @@
 #pragma once
 
 #include "../../Lepra/Include/Vector3D.h"
-#include "ChunkyLoader.h"
+//#include "ChunkyLoader.h"
 #include "PhysicsManager.h"
 
 
 
 namespace TBC
 {
+
+
+
+class ChunkyPhysics;
 
 
 
@@ -111,6 +115,7 @@ public:
 	PhysicsManager::TriggerID GetTriggerId() const;
 	bool IsConnectorType(ConnectorType pType) const;
 	void AddConnectorType(ConnectorType pType);
+	const str& GetMaterial() const;
 
 	float GetExtraData() const;
 	void SetExtraData(float pExtraData);
@@ -130,6 +135,7 @@ protected:
 	PhysicsManager::BodyID mBodyId;
 	PhysicsManager::TriggerID mTriggerId;
 	ConnectorArray mConnectorArray;
+	str mMaterial;
 	float mExtraData;
 
 	LOG_CLASS_DECLARE();

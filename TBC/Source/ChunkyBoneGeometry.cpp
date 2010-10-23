@@ -5,9 +5,11 @@
 
 
 #include "../Include/ChunkyBoneGeometry.h"
+#include <assert.h>
 #include "../../Lepra/Include/CyclicArray.h"
+#include "../../Lepra/Include/Endian.h"
+#include "../../Lepra/Include/Packer.h"
 #include "../Include/ChunkyPhysics.h"
-#include "../Include/GeometryBase.h"
 
 
 
@@ -253,6 +255,11 @@ void ChunkyBoneGeometry::AddConnectorType(ConnectorType pType)
 	}
 }
 
+const str& ChunkyBoneGeometry::GetMaterial() const
+{
+	return mMaterial;
+}
+
 
 
 float ChunkyBoneGeometry::GetExtraData() const
@@ -272,11 +279,18 @@ unsigned ChunkyBoneGeometry::GetChunkySize(const void* pData) const
 	unsigned lSize = (unsigned)(sizeof(int32)*8 + sizeof(mBodyData.mParameter) +
 		sizeof(int32) + sizeof(int32)*mConnectorArray.size());
 
-	if (pData && mConnectorArray.empty())	// Shouldn't go here if we have something in RAM already.
+	if (pData && mConnectorArray.empty() && mMaterial.empty())	// Shouldn't go here if we have something in RAM already.
 	{
 		const uint32* lData = (const uint32*)pData;
-		const int x = 8 + LEPRA_ARRAY_COUNT(mBodyData.mParameter);
-		lSize += Endian::BigToHost(lData[x]) * sizeof(ConnectorType);
+		unsigned x = 8 + LEPRA_ARRAY_COUNT(mBodyData.mParameter);
+		const unsigned lConnectorSize = Endian::BigToHost(lData[x]) * sizeof(ConnectorType);
+		lSize += lConnectorSize;
+		x += 1 + lConnectorSize/sizeof(int32);
+		lSize += PackerUnicodeString::UnpackRaw(0, (const uint8*)&lData[x], 100);
+	}
+	else
+	{
+		lSize += PackerUnicodeString::Pack(0, wstrutil::Encode(mMaterial));
 	}
 	return (lSize);
 }
@@ -303,6 +317,7 @@ void ChunkyBoneGeometry::SaveChunkyData(const ChunkyPhysics* pStructure, void* p
 	{
 		lData[y++] = Endian::HostToBig(mConnectorArray[x]);
 	}
+	PackerUnicodeString::Pack((uint8*)&lData[y], wstrutil::Encode(mMaterial));
 }
 
 void ChunkyBoneGeometry::LoadChunkyData(ChunkyPhysics* pStructure, const void* pData)
@@ -328,6 +343,7 @@ void ChunkyBoneGeometry::LoadChunkyData(ChunkyPhysics* pStructure, const void* p
 	{
 		mConnectorArray.push_back((ConnectorType)Endian::BigToHost(lData[y++]));
 	}
+	PackerUnicodeString::Unpack(mMaterial, (uint8*)&lData[y], 100);
 }
 
 

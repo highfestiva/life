@@ -4,8 +4,9 @@
 
 
 
-#include "../Include/ChunkyBoneGeometry.h"
 #include "../Include/ChunkyPhysics.h"
+#include <assert.h>
+#include "../Include/ChunkyBoneGeometry.h"
 #include "../Include/PhysicsEngine.h"
 #include "../Include/PhysicsSpawner.h"
 #include "../Include/PhysicsTrigger.h"

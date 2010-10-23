@@ -952,6 +952,7 @@ class GroupReader(DefaultMAReader):
 
         def validate_phys_group(self, group):
                 isGroupValid = True
+                materials = ("grass", "glass", "concrete", "big_metal", "small_metal", "wood", "plastic", "rubber")
                 # Check that joints and tweaks are correct.
                 for node in group:
                         if node.getName().startswith("phys_") and node.nodetype == "transform":
@@ -977,6 +978,7 @@ class GroupReader(DefaultMAReader):
                                 isGroupValid &= self._query_attribute(node, "bounce", lambda x: (x >= -2 and x <= 3))[0]
                                 isGroupValid &= self._query_attribute(node, "friction", lambda x: (x >= -100 and x <= 100))[0]
                                 isGroupValid &= self._query_attribute(node, "affected_by_gravity", lambda x: x==True or x==False)[0]
+                                isGroupValid &= self._query_attribute(node, "material", lambda x: x in materials)[0]
                                 jointtype = node.get_fixed_attribute("joint", True, "")
                                 if hasJoint and (jointtype == "suspend_hinge" or jointtype == "hinge2"):
                                         isGroupValid &= self._query_attribute(node, "joint_spring_constant", lambda x: x > 0 and x < 1e12)[0]

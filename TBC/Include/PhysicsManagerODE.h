@@ -291,7 +291,6 @@ private:
 		BodyID mBody1Id;
 		BodyID mBody2Id;
 		dJointFeedback mFeedback;
-		JointList::iterator mListIter;
 		ForceFeedbackListener* mListener1;
 		ForceFeedbackListener* mListener2;
 		Vector3DF mPosition;

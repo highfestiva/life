@@ -810,7 +810,6 @@ PhysicsManager::JointID PhysicsManagerODE::CreateBallJoint(BodyID pBody1, BodyID
 	JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
 	lJointInfo->mJointID = dJointCreateBall(mWorldID, 0);
 	lJointInfo->mType = JOINT_BALL;
-	lJointInfo->mListIter = mFeedbackJointList.end();
 	lJointInfo->mListener1 = lObject1->mForceFeedbackListener;
 	lJointInfo->mListener2 = lObject2->mForceFeedbackListener;
 
@@ -825,13 +824,11 @@ PhysicsManager::JointID PhysicsManagerODE::CreateBallJoint(BodyID pBody1, BodyID
 		dJointAttach(lJointInfo->mJointID, lObject1->mBodyID, 0);
 	}
 
-	if ((lObject1 != 0 && lObject1->mForceFeedbackListener != 0) || 
+	/*if ((lObject1 != 0 && lObject1->mForceFeedbackListener != 0) || 
 	   (lObject2 != 0 && lObject2->mForceFeedbackListener != 0))
 	{
 		dJointSetFeedback(lJointInfo->mJointID, &lJointInfo->mFeedback);
-		mFeedbackJointList.push_back(lJointInfo);
-		lJointInfo->mListIter = --mFeedbackJointList.end();
-	}
+	}*/
 
 	dJointSetBallAnchor(lJointInfo->mJointID, pAnchorPos.x, pAnchorPos.y, pAnchorPos.z);
 
@@ -850,7 +847,6 @@ PhysicsManager::JointID PhysicsManagerODE::CreateHingeJoint(BodyID pBody1, BodyI
 	JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
 	lJointInfo->mJointID = dJointCreateHinge(mWorldID, 0);
 	lJointInfo->mType = JOINT_HINGE;
-	lJointInfo->mListIter = mFeedbackJointList.end();
 	lJointInfo->mListener1 = lObject1->mForceFeedbackListener;
 	lJointInfo->mListener2 = lObject2->mForceFeedbackListener;
 
@@ -876,13 +872,11 @@ PhysicsManager::JointID PhysicsManagerODE::CreateHingeJoint(BodyID pBody1, BodyI
 		dJointAttach(lJointInfo->mJointID, lObject1->mGeomID->body, 0);
 	}
 
-	if ((lObject1 != 0 && lObject1->mForceFeedbackListener != 0) || 
+	/*if ((lObject1 != 0 && lObject1->mForceFeedbackListener != 0) || 
 	   (lObject2 != 0 && lObject2->mForceFeedbackListener != 0))
 	{
 		dJointSetFeedback(lJointInfo->mJointID, &lJointInfo->mFeedback);
-		mFeedbackJointList.push_back(lJointInfo);
-		lJointInfo->mListIter = --mFeedbackJointList.end();
-	}
+	}*/
 
 	dJointSetHingeAnchor(lJointInfo->mJointID, pAnchorPos.x, pAnchorPos.y, pAnchorPos.z);
 	dJointSetHingeAxis(lJointInfo->mJointID, pAxis.x, pAxis.y, pAxis.z);
@@ -903,7 +897,6 @@ PhysicsManager::JointID PhysicsManagerODE::CreateHinge2Joint(BodyID pBody1, Body
 	JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
 	lJointInfo->mJointID = dJointCreateHinge2(mWorldID, 0);
 	lJointInfo->mType = JOINT_HINGE2;
-	lJointInfo->mListIter = mFeedbackJointList.end();
 	lJointInfo->mListener1 = lObject1->mForceFeedbackListener;
 	lJointInfo->mListener2 = lObject2->mForceFeedbackListener;
 
@@ -911,13 +904,11 @@ PhysicsManager::JointID PhysicsManagerODE::CreateHinge2Joint(BodyID pBody1, Body
 
 	lObject1->mHasMassChildren = true;
 	lObject2->mHasMassChildren = true;
-	if (lObject1->mForceFeedbackListener != 0 || 
+	/*if (lObject1->mForceFeedbackListener != 0 || 
 	   lObject2->mForceFeedbackListener != 0)
 	{
 		dJointSetFeedback(lJointInfo->mJointID, &lJointInfo->mFeedback);
-		mFeedbackJointList.push_back(lJointInfo);
-		lJointInfo->mListIter = --mFeedbackJointList.end();
-	}
+	}*/
 
 	dJointSetHinge2Anchor(lJointInfo->mJointID, pAnchorPos.x, pAnchorPos.y, pAnchorPos.z);
 	dJointSetHinge2Axis1(lJointInfo->mJointID, pAxis1.x, pAxis1.y, pAxis1.z);
@@ -939,7 +930,6 @@ PhysicsManager::JointID PhysicsManagerODE::CreateUniversalJoint(BodyID pBody1, B
 	JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
 	lJointInfo->mJointID = ::dJointCreateUniversal(mWorldID, 0);
 	lJointInfo->mType = JOINT_UNIVERSAL;
-	lJointInfo->mListIter = mFeedbackJointList.end();
 	lJointInfo->mListener1 = lObject1->mForceFeedbackListener;
 	lJointInfo->mListener2 = lObject2->mForceFeedbackListener;
 
@@ -954,13 +944,11 @@ PhysicsManager::JointID PhysicsManagerODE::CreateUniversalJoint(BodyID pBody1, B
 		::dJointAttach(lJointInfo->mJointID, lObject1->mBodyID, 0);
 	}
 
-	if ((lObject1 != 0 && lObject1->mForceFeedbackListener != 0) || 
+	/*if ((lObject1 != 0 && lObject1->mForceFeedbackListener != 0) || 
 	   (lObject2 != 0 && lObject2->mForceFeedbackListener != 0))
 	{
 		dJointSetFeedback(lJointInfo->mJointID, &lJointInfo->mFeedback);
-		mFeedbackJointList.push_back(lJointInfo);
-		lJointInfo->mListIter = --mFeedbackJointList.end();
-	}
+	}*/
 
 	::dJointSetUniversalAnchor(lJointInfo->mJointID, pAnchorPos.x, pAnchorPos.y, pAnchorPos.z);
 	::dJointSetUniversalAxis1(lJointInfo->mJointID, pAxis1.x, pAxis1.y, pAxis1.z);
@@ -981,7 +969,6 @@ PhysicsManager::JointID PhysicsManagerODE::CreateSliderJoint(BodyID pBody1, Body
 	JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
 	lJointInfo->mJointID = dJointCreateSlider(mWorldID, 0);
 	lJointInfo->mType = JOINT_SLIDER;
-	lJointInfo->mListIter = mFeedbackJointList.end();
 	lJointInfo->mListener1 = lObject1->mForceFeedbackListener;
 	lJointInfo->mListener2 = lObject2->mForceFeedbackListener;
 
@@ -996,13 +983,11 @@ PhysicsManager::JointID PhysicsManagerODE::CreateSliderJoint(BodyID pBody1, Body
 		dJointAttach(lJointInfo->mJointID, lObject1->mBodyID, 0);
 	}
 
-	if ((lObject1 != 0 && lObject1->mForceFeedbackListener != 0) || 
+	/*if ((lObject1 != 0 && lObject1->mForceFeedbackListener != 0) || 
 	   (lObject2 != 0 && lObject2->mForceFeedbackListener != 0))
 	{
 		dJointSetFeedback(lJointInfo->mJointID, &lJointInfo->mFeedback);
-		mFeedbackJointList.push_back(lJointInfo);
-		lJointInfo->mListIter = --mFeedbackJointList.end();
-	}
+	}*/
 
 	dJointSetSliderAxis(lJointInfo->mJointID, pAxis.x, pAxis.y, pAxis.z);
 
@@ -1020,7 +1005,6 @@ PhysicsManager::JointID PhysicsManagerODE::CreateFixedJoint(BodyID pBody1, BodyI
 	JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
 	lJointInfo->mJointID = dJointCreateFixed(mWorldID, 0);
 	lJointInfo->mType = JOINT_FIXED;
-	lJointInfo->mListIter = mFeedbackJointList.end();
 	lJointInfo->mListener1 = lObject1->mForceFeedbackListener;
 	lJointInfo->mListener2 = lObject2->mForceFeedbackListener;
 
@@ -1035,13 +1019,11 @@ PhysicsManager::JointID PhysicsManagerODE::CreateFixedJoint(BodyID pBody1, BodyI
 		dJointAttach(lJointInfo->mJointID, lObject1->mBodyID, 0);
 	}
 
-	if ((lObject1 != 0 && lObject1->mForceFeedbackListener != 0) || 
+	/*if ((lObject1 != 0 && lObject1->mForceFeedbackListener != 0) || 
 	   (lObject2 != 0 && lObject2->mForceFeedbackListener != 0))
 	{
 		dJointSetFeedback(lJointInfo->mJointID, &lJointInfo->mFeedback);
-		mFeedbackJointList.push_back(lJointInfo);
-		lJointInfo->mListIter = --mFeedbackJointList.end();
-	}
+	}*/
 
 	mJointTable.insert(lJointInfo);
 	return (JointID)lJointInfo;
@@ -1058,7 +1040,6 @@ PhysicsManager::JointID PhysicsManagerODE::CreateAngularMotorJoint(BodyID pBody1
 	JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
 	lJointInfo->mJointID = dJointCreateAMotor(mWorldID, 0);
 	lJointInfo->mType = JOINT_ANGULARMOTOR;
-	lJointInfo->mListIter = mFeedbackJointList.end();
 	lJointInfo->mListener1 = lObject1->mForceFeedbackListener;
 	lJointInfo->mListener2 = lObject2->mForceFeedbackListener;
 
@@ -1073,13 +1054,11 @@ PhysicsManager::JointID PhysicsManagerODE::CreateAngularMotorJoint(BodyID pBody1
 		dJointAttach(lJointInfo->mJointID, lObject1->mBodyID, 0);
 	}
 
-	if ((lObject1 != 0 && lObject1->mForceFeedbackListener != 0) || 
+	/*if ((lObject1 != 0 && lObject1->mForceFeedbackListener != 0) || 
 	   (lObject2 != 0 && lObject2->mForceFeedbackListener != 0))
 	{
 		dJointSetFeedback(lJointInfo->mJointID, &lJointInfo->mFeedback);
-		mFeedbackJointList.push_back(lJointInfo);
-		lJointInfo->mListIter = --mFeedbackJointList.end();
-	}
+	}*/
 
 	dJointSetAMotorMode(lJointInfo->mJointID, dAMotorUser);
 	dJointSetAMotorNumAxes(lJointInfo->mJointID, 1);
@@ -1327,10 +1306,6 @@ bool PhysicsManagerODE::SetJoint3Diff(BodyID pBodyId, JointID pJointId, const Jo
 
 void PhysicsManagerODE::RemoveJoint(JointInfo* pJointInfo)
 {
-	if (pJointInfo->mListIter != mFeedbackJointList.end())
-	{
-		mFeedbackJointList.erase(pJointInfo->mListIter);
-	}
 	pJointInfo->mListener1 = 0;
 	pJointInfo->mListener2 = 0;
 	pJointInfo->mBody1Id = 0;
@@ -3142,14 +3117,14 @@ void PhysicsManagerODE::PostSteps()
 void PhysicsManagerODE::DoForceFeedback()
 {
 	JointList::iterator x;
-	for (x = mFeedbackJointList.begin(); x != mFeedbackJointList.end();)
+	for (x = mFeedbackJointList.begin(); x != mFeedbackJointList.end(); ++x)
 	{
 		JointInfo* lJointInfo = *x;
 
 		const bool lIsBody1Static = lJointInfo->IsBody1Static(this);
 		const bool lIsBody2Static = lJointInfo->IsBody2Static(this);
-		const bool lOneIsDynamic = (!lIsBody1Static || !lIsBody2Static);
-		if (lJointInfo->mListener1 != lJointInfo->mListener2 && lOneIsDynamic)
+		//const bool lOneIsDynamic = (!lIsBody1Static || !lIsBody2Static);
+		if (lJointInfo->mListener1 != lJointInfo->mListener2 /*&& lOneIsDynamic*/)
 		{
 			if (lJointInfo->mListener1 != 0)
 			{
@@ -3172,8 +3147,8 @@ void PhysicsManagerODE::DoForceFeedback()
 						lJointInfo->mListener1,
 						lJointInfo->mBody2Id,
 						lJointInfo->mBody1Id,
-						Vector3DF(-lFeedback->f1[0], -lFeedback->f1[1], -lFeedback->f1[2]),
-						Vector3DF(-lFeedback->t1[0], -lFeedback->t1[1], -lFeedback->t1[2]),
+						Vector3DF(lFeedback->f1[0], lFeedback->f1[1], lFeedback->f1[2]),
+						Vector3DF(lFeedback->t1[0], lFeedback->t1[1], lFeedback->t1[2]),
 						lJointInfo->mPosition,
 						lJointInfo->mRelativeVelocity);
 				}
@@ -3190,18 +3165,9 @@ void PhysicsManagerODE::DoForceFeedback()
 				}
 			}
 		}
-
-		if (lJointInfo->mType == JOINT_CONTACT)
-		{
-			JointList::iterator y = x;
-			++x;
-			RemoveJoint(lJointInfo);
-		}
-		else
-		{
-			++x;
-		}
+		RemoveJoint(lJointInfo);
 	}
+	mFeedbackJointList.clear();
 }
 
 void PhysicsManagerODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID pGeom2)
@@ -3337,7 +3303,6 @@ void PhysicsManagerODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID p
 				lJointInfo->mJointID = dJointCreateContact(lThis->mWorldID, lThis->mContactJointGroupID, &lC);
 				lJointInfo->mType = JOINT_CONTACT;
 				lThis->mFeedbackJointList.push_back(lJointInfo);
-				lJointInfo->mListIter = --lThis->mFeedbackJointList.end();
 				lJointInfo->mListener1 = lObject1->mForceFeedbackListener;
 				lJointInfo->mListener2 = lObject2->mForceFeedbackListener;
 				lJointInfo->mPosition = lPosition;
