@@ -43,7 +43,7 @@ void OptionsManager::RefreshConfiguration()
 bool OptionsManager::UpdateInput(UiLepra::InputManager::KeyCode pKeyCode, bool pActive)
 {
 	const str lInputElementName = ConvertToString(pKeyCode);
-	return (SetValue(lInputElementName, pActive? 1.0f : 0.0f));
+	return (SetValue(lInputElementName, pActive? 1.0f : 0.0f, false));
 }
 
 float OptionsManager::UpdateInput(UiLepra::InputElement* pElement)
@@ -53,26 +53,35 @@ float OptionsManager::UpdateInput(UiLepra::InputElement* pElement)
 	const str lInputElementName = pElement->GetFullName();
 	if (pElement->GetType() == UiLepra::InputElement::ANALOGUE)
 	{
-		// Clamp analogue to neutral when close enough.
-		if (Math::IsEpsEqual(lValue, 0.0f, 0.1f))
-		{
-			lValue = 0;
-		}
+		const bool lIsRelative = (pElement->GetInterpretation() == UiLepra::InputElement::RELATIVE_AXIS);
 		// Update both sides for analogue input.
-		if (lValue >= 0)
+		if (lIsRelative)
 		{
-			lValueSet = SetValue(lInputElementName+_T("+"), lValue);
-			SetValue(lInputElementName+_T("-"), 0);
+			lValue *= 0.1f;	// Relative values are more sensitive.
+		}
+		else if (Math::IsEpsEqual(lValue, 0.0f, 0.1f))
+		{
+			lValue = 0;	// Clamp absolute+analogue to neutral when close enough.
+		}
+		if (lValue == 0)
+		{
+			lValueSet = SetValue(lInputElementName+_T("+"), 0, false);
+			SetValue(lInputElementName+_T("-"), 0, false);
+		}
+		else if (lValue >= 0)
+		{
+			lValueSet = SetValue(lInputElementName+_T("+"), lValue, lIsRelative);
+			SetValue(lInputElementName+_T("-"), 0, false);
 		}
 		else
 		{
-			lValueSet = SetValue(lInputElementName+_T("-"), -lValue);
-			SetValue(lInputElementName+_T("+"), 0);
+			lValueSet = SetValue(lInputElementName+_T("-"), -lValue, lIsRelative);
+			SetValue(lInputElementName+_T("+"), 0, false);
 		}
 	}
 	else
 	{
-		lValueSet = SetValue(lInputElementName, lValue);
+		lValueSet = SetValue(lInputElementName, lValue, false);
 	}
 	return (lValueSet);
 }
@@ -109,8 +118,10 @@ const str OptionsManager::ConvertToString(UiLepra::InputManager::KeyCode pKeyCod
 	return (_T("Key.")+UiLepra::InputManager::GetKeyName(pKeyCode));
 }
 
-bool OptionsManager::SetValue(const str& pKey, float pValue)
+bool OptionsManager::SetValue(const str& pKey, float pValue, bool pAdd)
 {
+	log_volatile(mLog.Tracef(_T("Got input %s: %g"), pKey.c_str(), pValue));
+
 	bool lIsAnySteeringValue;
 	std::vector<float*>* lValuePointers = GetValuePointers(pKey, lIsAnySteeringValue);
 	if (!lValuePointers)
@@ -121,7 +132,12 @@ bool OptionsManager::SetValue(const str& pKey, float pValue)
 	bool lInputChanged = false;
 	for (std::vector<float*>::const_iterator x = lValuePointers->begin(); x != lValuePointers->end(); ++x)
 	{
-		if (!Math::IsEpsEqual(*(*x), pValue, 0.06f))
+		if (pAdd)
+		{
+			lInputChanged = true;
+			*(*x) = Math::Clamp(*(*x) + pValue, 0.0f, 1.0f);
+		}
+		else if (!Math::IsEpsEqual(*(*x), pValue, 0.06f))
 		{
 			lInputChanged = true;
 			*(*x) = pValue;

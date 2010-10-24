@@ -776,8 +776,8 @@ float ContextObject::GetImpact(const Vector3DF& pGravity, const Vector3DF& pForc
 	float lImpact = 0;
 	lImpact = std::max(lImpact, lOpposingGravityFactor * 0.2f);
 	lImpact = std::max(lImpact, lOpposingGravityFactor * -0.8f);
-	lImpact = std::max(lImpact, lSidewaysFactor * pSidewaysFactor);
-	lImpact = std::max(lImpact, lTorqueFactor * 0.375f);
+	lImpact = std::max(lImpact, lSidewaysFactor * pSidewaysFactor * 0.01f);
+	lImpact = std::max(lImpact, lTorqueFactor * 0.03f);
 	if (lImpact >= 1.0f)
 	{
 		log_volatile(mLog.Tracef(_T("Collided hard with something dynamic.")));

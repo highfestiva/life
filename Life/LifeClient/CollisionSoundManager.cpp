@@ -93,7 +93,7 @@ void CollisionSoundManager::OnCollision(const Vector3DF& pForce, const Vector3DF
 	{
 		return;
 	}
-	const float lImpact = pObject1->GetImpact(mGameManager->GetPhysicsManager()->GetGravity(), pForce, pTorque*0.01f, 50, 0.01f);
+	const float lImpact = pObject1->GetImpact(mGameManager->GetPhysicsManager()->GetGravity(), pForce, pTorque*0.01f, 50);
 	if (lImpact < 0.5f)
 	{
 		return;

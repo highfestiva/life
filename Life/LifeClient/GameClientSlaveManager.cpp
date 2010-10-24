@@ -1632,33 +1632,33 @@ void GameClientSlaveManager::OnCollision(const Vector3DF& pForce, const Vector3D
 	Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
 	TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID)
 {
-	LEPRA_DEBUG_CODE(const bool lObject1Dynamic = (pObject1->GetPhysics()->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC));
+	const bool lObject1Dynamic = (pObject1->GetPhysics()->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC);
 	const bool lObject2Dynamic = (pObject2->GetPhysics()->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC);
-	assert(lObject1Dynamic || lObject2Dynamic);
+	if (!lObject1Dynamic || !lObject2Dynamic)
+	{
+		return;
+	}
 
 	mCollisionSoundManager->OnCollision(pForce, pTorque, pPosition, pObject1, pObject2, pBody1Id);
 
-	if (pObject2 && pObject1 != pObject2 && !lObject2Dynamic)
+	if (IsOwned(pObject1->GetInstanceId()))
 	{
-		if (IsOwned(pObject1->GetInstanceId()))
+		if (pObject1->GetImpact(GetPhysicsManager()->GetGravity(), pForce, pTorque) >= 2.0f)
 		{
-			if (pObject1->GetImpact(GetPhysicsManager()->GetGravity(), pForce, pTorque) >= 12.0f)
-			{
-				pObject1->QueryResendTime(0, false);
-			}
-			mCollisionExpireAlarm.Set();
+			pObject1->QueryResendTime(0, false);
 		}
-		else if (pObject2->GetInstanceId() == mAvatarId &&
-			pObject1->GetNetworkObjectType() == Cure::NETWORK_OBJECT_REMOTE_CONTROLLED)
+		mCollisionExpireAlarm.Set();
+	}
+	else if (pObject2->GetInstanceId() == mAvatarId &&
+		pObject1->GetNetworkObjectType() == Cure::NETWORK_OBJECT_REMOTE_CONTROLLED)
+	{
+		if (pObject1->GetImpact(GetPhysicsManager()->GetGravity(), pForce, pTorque) >= 0.5f)
 		{
-			if (pObject1->GetImpact(GetPhysicsManager()->GetGravity(), pForce, pTorque) >= 1.0f)
+			if (pObject1->QueryResendTime(1.0, false))
 			{
-				if (pObject1->QueryResendTime(1.0, false))
-				{
-					GetNetworkAgent()->SendNumberMessage(false, GetNetworkClient()->GetSocket(),
-						Cure::MessageNumber::INFO_REQUEST_LOAN, pObject1->GetInstanceId(), 0, 0);
-					log_adebug("Sending loan request to server.");
-				}
+				GetNetworkAgent()->SendNumberMessage(false, GetNetworkClient()->GetSocket(),
+					Cure::MessageNumber::INFO_REQUEST_LOAN, pObject1->GetInstanceId(), 0, 0);
+				log_adebug("Sending loan request to server.");
 			}
 		}
 	}

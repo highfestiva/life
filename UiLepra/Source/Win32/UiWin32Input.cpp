@@ -56,14 +56,14 @@ void Win32InputElement::SetValue(int pValue)
 		mMax = pValue;
 	}
 
-	Win32InputDevice* lDevice = (Win32InputDevice*)GetParentDevice();
-	Win32InputManager* lManager = (Win32InputManager*)lDevice->GetManager();
+	//Win32InputDevice* lDevice = (Win32InputDevice*)GetParentDevice();
+	//Win32InputManager* lManager = (Win32InputManager*)lDevice->GetManager();
 
 	if (GetType() == DIGITAL)
 	{
 		Parent::SetValue(pValue);
 	}
-	else if (GetInterpretation() == RELATIVE_AXIS)
+	/*else if (GetInterpretation() == RELATIVE_AXIS)
 	{
 		// Treat this as a relative axis. Since we don't know the maximum value
 		// of this axis (can probably be infinitly large), we need to scale it down
@@ -76,17 +76,17 @@ void Win32InputElement::SetValue(int pValue)
 
 		if (GetTypeIndex() <= 1)	// Mouse of sorts.
 		{
-			InputElement::SetValue(2.0 * (double)pValue / (double)lManager->mScreenWidth);
+			Parent::SetValue(2.0 * (double)pValue / (double)lManager->mScreenWidth);
 		}
 		else
 		{
-			InputElement::SetValue((double)pValue / 1000.0);
+			Parent::SetValue((double)pValue / 10.0);
 		}
-	}
+	}*/
 	else if (mMin < mMax)
 	{
 		// Scale to +-1.
-		InputElement::SetValue((pValue*2.0-(mMax+mMin)) / (double)(mMax-mMin));
+		Parent::SetValue((pValue*2.0-(mMax+mMin)) / (double)(mMax-mMin));
 	}
 }
 

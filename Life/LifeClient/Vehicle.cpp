@@ -267,8 +267,8 @@ void Vehicle::OnForceApplied(TBC::PhysicsManager::ForceFeedbackListener* pOtherO
 		{
 			const float lImpact = lObject->GetImpact(
 				GetManager()->GetGameManager()->GetPhysicsManager()->GetGravity(),
-				pForce, pTorque);
-			if (lImpact >= 2.5f)
+				pForce, pTorque, 0, 11);
+			if (lImpact >= 0.4f)
 			{
 				Vector3DF lPosition(pPosition);
 				const float lAngle = (float)Random::Uniform(0, PI*2);

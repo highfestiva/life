@@ -44,7 +44,7 @@ protected:
 	virtual void DoRefreshConfiguration();
 
 	static const str ConvertToString(UiLepra::InputManager::KeyCode pKeyCode);
-	bool SetValue(const str& pKey, float pValue);
+	bool SetValue(const str& pKey, float pValue, bool pAdd);
 	std::vector<float*>* GetValuePointers(const str& pKey, bool& pIsAnySteeringValue);
 	void SetValuePointers(const KeyValue pEntries[], size_t pEntryCount);
 
