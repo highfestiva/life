@@ -6,6 +6,7 @@
 
 #include "../Include/ResourceManager.h"
 #include <assert.h>
+#include "../../Lepra/Include/DiskFile.h"
 #include "../../Lepra/Include/HiResTimer.h"
 #include "../../Lepra/Include/SystemManager.h"
 #include "../../TBC/Include/ChunkyPhysics.h"
@@ -359,17 +360,14 @@ bool PhysicsResource::Load()
 	assert(IsUnique());
 	assert(GetRamData() == 0);
 	SetRamData(new TBC::ChunkyPhysics(TBC::ChunkyPhysics::TRANSFORM_LOCAL2WORLD));
-	DiskFile lFile;
-	bool lOk = false;
-	for (int x = 0; x < 3 && !lOk; ++x)	// Retry file open, file might be held by anti-virus/Windoze/similar shit.
-	{
-		lOk = lFile.Open(GetName(), DiskFile::MODE_READ);
-	}
+	File* lFile = GetManager()->QueryFile(GetName());
+	bool lOk = (lFile != 0);
 	if (lOk)
 	{
-		TBC::ChunkyPhysicsLoader lLoader(&lFile, false);
+		TBC::ChunkyPhysicsLoader lLoader(lFile, false);
 		lOk = lLoader.Load(GetRamData());
 	}
+	delete lFile;
 	return (lOk);
 }
 
@@ -582,6 +580,28 @@ void ResourceManager::StopClear()
 	// These just contain pointers, they are not data owners. Thus no delete required.
 	mRequestLoadList.RemoveAll();
 	mLoadedList.RemoveAll();
+}
+
+
+
+File* ResourceManager::QueryFile(const str& pFilename)
+{
+	DiskFile* lFile = new DiskFile;
+	bool lOk = false;
+	for (int x = 0; x < 3 && !lOk; ++x)	// Retry file open, file might be held by anti-virus/Windoze/similar shit.
+	{
+		lOk = lFile->Open(pFilename, DiskFile::MODE_READ);
+	}
+	if (lOk)
+	{
+		return lFile;
+	}
+	else
+	{
+		mLog.Errorf(_T("Could not load file with name '%s'."), pFilename.c_str());
+	}
+	delete lFile;
+	return 0;
 }
 
 

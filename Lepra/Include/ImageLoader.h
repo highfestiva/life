@@ -32,7 +32,8 @@ public:
 
 	enum FileType
 	{
-		BMP = 0,
+		UNKNOWN = -1,
+		BMP,
 		TGA,
 		TIF,
 		JPG,
@@ -42,11 +43,10 @@ public:
 	ImageLoader();
 	virtual ~ImageLoader();
 
+	static FileType GetFileTypeFromName(const str& pFilename);
+
 	bool Load(const str& pFileName, Canvas& pCanvas);
 	bool Save(const str& pFileName, const Canvas& pCanvas);
-
-	bool Load(const str& pArchiveName, const str& pFileName, Canvas& pCanvas);
-	bool Save(const str& pArchiveName, const str& pFileName, const Canvas& pCanvas);
 
 	bool Load(FileType pFileType, Reader& pReader, Canvas& pCanvas);
 	bool Save(FileType pFileType, Writer& pWriter, const Canvas& pCanvas);

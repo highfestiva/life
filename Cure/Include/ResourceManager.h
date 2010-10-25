@@ -9,7 +9,7 @@
 
 #include <list>
 #include <hash_set>
-#include "../../Lepra/Include/DiskFile.h"
+//#include "../../Lepra/Include/DiskFile.h"
 #include "../../Lepra/Include/HashTable.h"
 #include "../../Lepra/Include/MemberThread.h"
 #include "../../Lepra/Include/OrderedMap.h"
@@ -372,6 +372,8 @@ public:
 	virtual ~ResourceManager();
 	bool InitDefault();
 	void StopClear();
+
+	File* QueryFile(const str& pFilename);
 
 	TerrainFunctionManager* GetTerrainFunctionManager() const;
 	void SetTerrainFunctionManager(TerrainFunctionManager* pTerrainFunctionManager);	// May not be changed while its resources are loaded.

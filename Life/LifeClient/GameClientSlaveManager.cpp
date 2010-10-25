@@ -1632,14 +1632,14 @@ void GameClientSlaveManager::OnCollision(const Vector3DF& pForce, const Vector3D
 	Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
 	TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID)
 {
+	mCollisionSoundManager->OnCollision(pForce, pTorque, pPosition, pObject1, pObject2, pBody1Id);
+
 	const bool lObject1Dynamic = (pObject1->GetPhysics()->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC);
 	const bool lObject2Dynamic = (pObject2->GetPhysics()->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC);
 	if (!lObject1Dynamic || !lObject2Dynamic)
 	{
 		return;
 	}
-
-	mCollisionSoundManager->OnCollision(pForce, pTorque, pPosition, pObject1, pObject2, pBody1Id);
 
 	if (IsOwned(pObject1->GetInstanceId()))
 	{

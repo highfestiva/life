@@ -78,12 +78,14 @@ bool PainterImageResource::Load()
 	assert(!IsUnique());
 	assert(GetRamData() == 0);
 	SetRamData(new Canvas());
-	ImageLoader lLoader;
-	bool lOk = false;
-	for (int x = 0; x < 3 && !lOk; ++x)	// Retry file loading, file might be held by anti-virus/Windoze/similar shit.
+	File* lFile = GetManager()->QueryFile(GetName());
+	bool lOk = (lFile != 0);
+	if (lOk)
 	{
-		lOk = lLoader.Load(GetName(), *GetRamData());
+		ImageLoader lLoader;
+		lOk = lLoader.Load(ImageLoader::GetFileTypeFromName(GetName()), *lFile, *GetRamData());
 	}
+	delete lFile;
 	return lOk;
 }
 
@@ -179,12 +181,14 @@ bool RendererImageResource::Load()
 	assert(!IsUnique());
 	assert(GetRamData() == 0);
 	Canvas lImage;
-	ImageLoader lLoader;
-	bool lOk = false;
-	for (int x = 0; x < 3 && !lOk; ++x)	// Retry file loading, file might be held by anti-virus/Windoze/similar shit.
+	File* lFile = GetManager()->QueryFile(GetName());
+	bool lOk = (lFile != 0);
+	if (lOk)
 	{
-		lOk = lLoader.Load(GetName(), lImage);
+		ImageLoader lLoader;
+		lOk = lLoader.Load(ImageLoader::GetFileTypeFromName(GetName()), *lFile, lImage);
 	}
+	delete lFile;
 	if (lOk)
 	{
 		SetRamData(new UiTbc::Texture(lImage));
@@ -198,7 +202,7 @@ bool RendererImageResource::Load()
 
 
 
-TextureResource::TextureResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const str& pName):
+/*TextureResource::TextureResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const str& pName):
 	RendererImageBaseResource(pUiManager, pManager, pName)
 {
 }
@@ -225,7 +229,7 @@ bool TextureResource::Load()
 		lOk = (lLoader.Load(GetName(), *GetRamData(), true) == UiTbc::TEXLoader::STATUS_SUCCESS);
 	}
 	return lOk;
-}
+}*/
 
 
 
@@ -280,27 +284,22 @@ bool GeometryResource::Load()
 	//const str& lFilename = lParts[0];
 	const str& lFilename = GetName();
 
-	for (int x = 0; x < 3; ++x)	// Make more than one attempt, if anti-virus or Windoze is interfering.
+	File* lFile = GetManager()->QueryFile(lFilename);
+	bool lOk = (lFile != 0);
+	if (lOk)
 	{
-		DiskFile lFile;
-		if (lFile.Open(lFilename, DiskFile::MODE_READ))
+		UiTbc::ChunkyMeshLoader lLoader(lFile, false);
+		lGeometry = new UiTbc::TriangleBasedGeometry();
+		lOk = lLoader.Load(lGeometry, mCastsShadows);
+		if (!lOk)
 		{
-			UiTbc::ChunkyMeshLoader lLoader(&lFile, false);
-			lGeometry = new UiTbc::TriangleBasedGeometry();
-			bool lOk = lLoader.Load(lGeometry, mCastsShadows);
-			if (!lOk)
-			{
-				assert(false);
-				delete (lGeometry);
-				lGeometry = 0;
-			}
-			break;
-		}
-		else
-		{
-			mLog.Errorf(_T("Could not load mesh with name '%s'."), lFilename.c_str());
+			assert(false);
+			delete (lGeometry);
+			lGeometry = 0;
 		}
 	}
+	delete lFile;
+	lFile = 0;
 	assert(lGeometry);
 
 	if (lGeometry)

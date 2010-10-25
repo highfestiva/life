@@ -1,6 +1,8 @@
 
-// Author: Alexander Hugestrand
-// Copyright (c) 2002-2009, Righteous Games
+// Author: Jonas Byström
+// Copyright (c) 2002-2010, Righteous Games
+
+
 
 #include "../Include/ImageLoader.h"
 #include <assert.h>
@@ -12,8 +14,12 @@
 #include "../Include/TgaLoader.h"
 #include "../Include/TiffLoader.h"
 
+
+
 namespace Lepra
 {
+
+
 
 ImageLoader::ImageLoader()
 {
@@ -23,153 +29,62 @@ ImageLoader::~ImageLoader()
 {
 }
 
+
+
+ImageLoader::FileType ImageLoader::GetFileTypeFromName(const str& pFilename)
+{
+	str lFileExtension = Path::GetExtension(pFilename);
+	strutil::ToLower(lFileExtension);
+	if (lFileExtension == _T("bmp"))
+	{
+		return BMP;
+	}
+	else if (lFileExtension ==  _T("tga"))
+	{
+		return TGA;
+	}
+	else if (lFileExtension == _T("tif") || lFileExtension == _T("tiff"))
+	{
+		return TIF;
+	}
+	else if (lFileExtension == _T("jpg") || lFileExtension == _T("jpeg"))
+	{
+		return JPG;
+	}
+	else if (lFileExtension == _T("png"))
+	{
+		return PNG;
+	}
+	return UNKNOWN;
+}
+
+
+
 bool ImageLoader::Load(const str& pFileName, Canvas& pCanvas)
 {
-	bool lOk = false;
-	str lFileExtension = Path::GetExtension(pFileName);
-	if (!lFileExtension.empty())
+	DiskFile lFile;
+	if (!lFile.Open(pFileName, DiskFile::MODE_READ))
 	{
-		if (strutil::CompareIgnoreCase(lFileExtension, _T("bmp")) == 0)
-		{
-			BmpLoader lBmpLoader;
-			lOk = (lBmpLoader.Load(pFileName, pCanvas) == BmpLoader::STATUS_SUCCESS);
-		}
-		else if(strutil::CompareIgnoreCase(lFileExtension, _T("tga")) == 0)
-		{
-			TgaLoader lTgaLoader;
-			lOk = (lTgaLoader.Load(pFileName, pCanvas) == TgaLoader::STATUS_SUCCESS);
-		}
-		else if(strutil::CompareIgnoreCase(lFileExtension, _T("tif")) == 0 || strutil::CompareIgnoreCase(lFileExtension, _T("tiff")) == 0)
-		{
-			TiffLoader lTiffLoader;
-			lOk = (lTiffLoader.Load(pFileName, pCanvas) == TiffLoader::STATUS_SUCCESS);
-		}
-		else if(strutil::CompareIgnoreCase(lFileExtension, _T("jpg")) == 0 || strutil::CompareIgnoreCase(lFileExtension, _T("jpeg")) == 0)
-		{
-			JpegLoader lJpegLoader;
-			lOk = (lJpegLoader.Load(pFileName, pCanvas) == JpegLoader::STATUS_SUCCESS);
-		}
-		else if(strutil::CompareIgnoreCase(lFileExtension, _T("png")) == 0)
-		{
-			PngLoader lPngLoader;
-			lOk = (lPngLoader.Load(pFileName, pCanvas) == PngLoader::STATUS_SUCCESS);
-		}
-		else
-		{
-			lOk = false;
-		}
+		return false;
 	}
-	return (lOk);
+	return Load(GetFileTypeFromName(pFileName), lFile, pCanvas);
 }
 
 bool ImageLoader::Save(const str& pFileName, const Canvas& pCanvas)
 {
-	str lFileExtension = Path::GetExtension(pFileName);
-
-	if (strutil::CompareIgnoreCase(lFileExtension, _T("bmp")) == 0)
-	{
-		BmpLoader lBmpLoader;
-		return lBmpLoader.Save(pFileName, pCanvas) == BmpLoader::STATUS_SUCCESS;
-	}
-	else if(strutil::CompareIgnoreCase(lFileExtension, _T("tga")) == 0)
-	{
-		TgaLoader lTgaLoader;
-		return lTgaLoader.Save(pFileName, pCanvas) == TgaLoader::STATUS_SUCCESS;
-	}
-	else if(strutil::CompareIgnoreCase(lFileExtension, _T("tif")) == 0 || strutil::CompareIgnoreCase(lFileExtension, _T("tiff")) == 0)
-	{
-		TiffLoader lTiffLoader;
-		return lTiffLoader.Save(pFileName, pCanvas) == TiffLoader::STATUS_SUCCESS;
-	}
-	else if(strutil::CompareIgnoreCase(lFileExtension, _T("jpg")) == 0 || strutil::CompareIgnoreCase(lFileExtension, _T("jpeg")) == 0)
-	{
-		JpegLoader lJpegLoader;
-		return lJpegLoader.Save(pFileName, pCanvas) == JpegLoader::STATUS_SUCCESS;
-	}
-	else if(strutil::CompareIgnoreCase(lFileExtension, _T("png")) == 0 || strutil::CompareIgnoreCase(lFileExtension, _T("pngf")) == 0)
-	{
-		PngLoader lPngLoader;
-		return lPngLoader.Save(pFileName, pCanvas) == PngLoader::STATUS_SUCCESS;
-	}
-	else
+	DiskFile lFile;
+	if (!lFile.Open(pFileName, DiskFile::MODE_WRITE))
 	{
 		return false;
 	}
+	return Save(GetFileTypeFromName(pFileName), lFile, pCanvas);
 }
 
-bool ImageLoader::Load(const str& pArchiveName, const str& pFileName, Canvas& pCanvas)
-{
-	str lFileExtension = Path::GetExtension(pFileName);
 
-	if (strutil::CompareIgnoreCase(lFileExtension, _T("bmp")) == 0)
-	{
-		BmpLoader lBmpLoader;
-		return lBmpLoader.Load(pArchiveName, pFileName, pCanvas) == BmpLoader::STATUS_SUCCESS;
-	}
-	else if(strutil::CompareIgnoreCase(lFileExtension, _T("tga")) == 0)
-	{
-		TgaLoader lTgaLoader;
-		return lTgaLoader.Load(pArchiveName, pFileName, pCanvas) == TgaLoader::STATUS_SUCCESS;
-	}
-	else if(strutil::CompareIgnoreCase(lFileExtension, _T("tif")) == 0 || strutil::CompareIgnoreCase(lFileExtension, _T("tiff")) == 0)
-	{
-		TiffLoader lTiffLoader;
-		return lTiffLoader.Load(pArchiveName, pFileName, pCanvas) == TiffLoader::STATUS_SUCCESS;
-	}
-	else if(strutil::CompareIgnoreCase(lFileExtension, _T("jpg")) == 0 || strutil::CompareIgnoreCase(lFileExtension, _T("jpeg")) == 0)
-	{
-		JpegLoader lJpegLoader;
-		return lJpegLoader.Load(pArchiveName, pFileName, pCanvas) == JpegLoader::STATUS_SUCCESS;
-	}
-	else if(strutil::CompareIgnoreCase(lFileExtension, _T("png")) == 0 || strutil::CompareIgnoreCase(lFileExtension, _T("pngf")) == 0)
-	{
-		PngLoader lPngLoader;
-		return lPngLoader.Load(pArchiveName, pFileName, pCanvas) == PngLoader::STATUS_SUCCESS;
-	}
-	else
-	{
-		return false;
-	}
-}
-
-bool ImageLoader::Save(const str& pArchiveName, const str& pFileName, const Canvas& pCanvas)
-{
-	str lFileExtension = Path::GetExtension(pFileName);
-
-	if (strutil::CompareIgnoreCase(lFileExtension, _T("bmp")) == 0)
-	{
-		BmpLoader lBmpLoader;
-		return lBmpLoader.Save(pArchiveName, pFileName, pCanvas) == BmpLoader::STATUS_SUCCESS;
-	}
-	else if(strutil::CompareIgnoreCase(lFileExtension, _T("tga")) == 0)
-	{
-		TgaLoader lTgaLoader;
-		return lTgaLoader.Save(pArchiveName, pFileName, pCanvas) == TgaLoader::STATUS_SUCCESS;
-	}
-	else if(strutil::CompareIgnoreCase(lFileExtension, _T("tif")) == 0 || strutil::CompareIgnoreCase(lFileExtension, _T("tiff")) == 0)
-	{
-		TiffLoader lTiffLoader;
-		return lTiffLoader.Save(pArchiveName, pFileName, pCanvas) == TiffLoader::STATUS_SUCCESS;
-	}
-	else if(strutil::CompareIgnoreCase(lFileExtension, _T("jpg")) == 0 || strutil::CompareIgnoreCase(lFileExtension, _T("jpeg")) == 0)
-	{
-		JpegLoader lJpegLoader;
-		return lJpegLoader.Save(pArchiveName, pFileName, pCanvas) == JpegLoader::STATUS_SUCCESS;
-	}
-	else if(strutil::CompareIgnoreCase(lFileExtension, _T("png")) == 0 || strutil::CompareIgnoreCase(lFileExtension, _T("pngf")) == 0)
-	{
-		PngLoader lPngLoader;
-		return lPngLoader.Save(pArchiveName, pFileName, pCanvas) == PngLoader::STATUS_SUCCESS;
-	}
-	else
-	{
-		return false;
-	}
-}
 
 bool ImageLoader::Load(FileType pFileType, Reader& pReader, Canvas& pCanvas)
 {
-	switch(pFileType)
+	switch (pFileType)
 	{
 		case BMP:
 		{
@@ -240,9 +155,10 @@ bool ImageLoader::Save(FileType pFileType, Writer& pWriter, const Canvas& pCanva
 			return lPngLoader.Save(pWriter, pCanvas) == PngLoader::STATUS_SUCCESS;
 		}
 		break;
-		default:
-		return false;
 	}
+	return false;
 }
 
-} // End namespace.
+
+
+}

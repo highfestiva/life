@@ -42,10 +42,10 @@ private:
 	{
 		LoadCallback(pResource);
 	}
-	void TextureLoadCallback(UiCure::UserTextureResource* pResource)
+	/*void TextureLoadCallback(UiCure::UserTextureResource* pResource)
 	{
 		LoadCallback(pResource);
-	}
+	}*/
 	void Sound2dLoadCallback(UiCure::UserSound2dResource* pResource)
 	{
 		LoadCallback(pResource);
@@ -160,7 +160,7 @@ bool ResourceTest::TestAtom()
 		assert(lTestOk);
 	}
 
-	// Test loading a 3D texture (own, mipmapped format).
+	/*// Test loading a 3D texture (own, mipmapped format).
 	// We don't have a texture file, so this test should fail.
 	if (lTestOk)
 	{
@@ -172,9 +172,9 @@ bool ResourceTest::TestAtom()
 		mResourceManager->SafeRelease(&lTexture);
 		lTestOk = (gResourceLoadCount == 2 && gResourceLoadErrorCount == 1);
 		assert(lTestOk);
-	}
+	}*/
 
-	// Test loading a 3D texture that we actually do have (at least if we've ever run the UiTbc tests).
+	/*// Test loading a 3D texture that we actually do have (at least if we've ever run the UiTbc tests).
 	if (lTestOk)
 	{
 		lContext = _T("load 3D texture");
@@ -189,7 +189,7 @@ bool ResourceTest::TestAtom()
 			mLog.AError("texture not available, try running UiTbc test first!");
 		}
 		assert(lTestOk);
-	}
+	}*/
 
 	// Test loading a sound.
 	if (lTestOk)

@@ -123,14 +123,14 @@ public:
 	bool Load();
 };
 
-class TextureResource: public RendererImageBaseResource
+/*class TextureResource: public RendererImageBaseResource
 {
 public:
 	TextureResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const str& pName);
 	virtual ~TextureResource();
 	const str GetType() const;
 	bool Load();
-};
+};*/
 
 
 
@@ -315,7 +315,7 @@ public:
 
 typedef UserUiTypeResource<PainterImageResource>				UserPainterImageResource;
 typedef UserUiTypeResource<RendererImageResource>				UserRendererImageResource;
-typedef UserUiTypeResource<TextureResource>					UserTextureResource;
+//typedef UserUiTypeResource<TextureResource>					UserTextureResource;
 typedef UserUiExtraTypeResource<SoundResource2d, SoundResource::LoopMode>	UserSound2dResource;
 typedef UserUiExtraTypeResource<SoundResource3d, SoundResource::LoopMode>	UserSound3dResource;
 typedef UserUiTypeResource<ClassResource>					UserClassResource;
