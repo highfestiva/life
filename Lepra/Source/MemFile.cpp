@@ -153,6 +153,24 @@ int64 MemFile::GetSize() const
 	return ((int64)mSize);
 }
 
+void MemFile::Resize(size_t pSize)
+{
+	ScopeLock lLock(&mLock);
+	if (pSize >= mBufferSize)
+	{
+		const size_t lNewBufferSize = pSize * 3 / 2;
+		uint8* lBuffer = new uint8[lNewBufferSize];
+		if (mBuffer != 0)
+		{
+			::memcpy(lBuffer, mBuffer, mBufferSize);
+			delete[] mBuffer;
+		}
+		mBuffer = lBuffer;
+		mBufferSize = lNewBufferSize;
+	}
+
+}
+
 void MemFile::CropHead(size_t pFinalSize)
 {
 	ScopeLock lLock(&mLock);
@@ -174,6 +192,15 @@ void MemFile::CropHead(size_t pFinalSize)
 	}
 	assert(mCurrentPos <= mSize);
 }
+
+void* MemFile::GetBuffer(size_t pMinimumSize)
+{
+	Resize(pMinimumSize);
+	mSize = pMinimumSize;
+	return mBuffer;
+}
+
+
 
 int64 MemFile::GetAvailable() const
 {
@@ -214,22 +241,7 @@ IOError MemFile::WriteRaw(const void* pBuffer, size_t pSize)
 
 	size_t lEndPos = mCurrentPos + pSize;
 
-	// Check if we need to allocate more memory.
-	if (lEndPos >= mBufferSize)
-	{
-		size_t lNewBufferSize = (lEndPos * 3) / 2;
-		uint8* lBuffer = new uint8[lNewBufferSize];
-
-		if (mBuffer != 0)
-		{
-			::memcpy(lBuffer, mBuffer, mBufferSize);
-			delete[] mBuffer;
-		}
-
-		mBuffer = lBuffer;
-		mBufferSize = lNewBufferSize;
-	}
-
+	Resize(lEndPos);
 	::memcpy(mBuffer+mCurrentPos, pBuffer, pSize);
 	mCurrentPos += pSize;
 

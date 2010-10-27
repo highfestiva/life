@@ -110,22 +110,20 @@ bool GameServerManager::Initialize(MasterServerConnection* pMasterConnection)
 			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
 			if (lOk)
 			{
-				DiskFile::FindData lFindData;
-				if (DiskFile::FindFirst(_T("Data/*.class"), lFindData))
+				const strutil::strvec lFileArray = GetResourceManager()->ListFiles(_T("Data/*.class"));
+				strutil::strvec::const_iterator x = lFileArray.begin();
+				for (; lOk && x != lFileArray.end(); ++x)
 				{
-					do
+					if (x->find(_T("level_")) != str::npos ||
+						x->find(_T("road_sign")) != str::npos)
 					{
-						if (lFindData.GetName().find(_T("level_")) != str::npos ||
-							lFindData.GetName().find(_T("road_sign")) != str::npos)
-						{
-							continue;
-						}
-						Cure::UserAccount::AvatarId lId(Path::GetFileBase(lFindData.GetName()));
-						lOk = mUserAccountManager->AddUserAvatarId(lUserName, lId);
+						continue;
 					}
-					while (lOk && DiskFile::FindNext(lFindData));
+					Cure::UserAccount::AvatarId lId(Path::GetFileBase(*x));
+					lOk = mUserAccountManager->AddUserAvatarId(lUserName, lId);
 				}
 			}
+			assert(!mUserAccountManager->GetUserAvatarIdSet(lUserName)->empty());
 		}
 	}
 

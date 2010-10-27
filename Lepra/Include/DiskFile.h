@@ -166,6 +166,8 @@ public:
 
 	// Static functions.
 
+	static IOError Load(const str& pFilename, void** pData, int64& pDataSize);	// Retries a few times to avoid anti-virus glitches.
+
 	static bool Exists(const str& pFileName);
 	static bool PathExists(const str& pPathName);
 	static bool Delete(const str& pFileName);

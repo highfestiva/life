@@ -7,20 +7,14 @@
 #pragma once
 
 #include "../../Cure/Include/ResourceManager.h"
-#include "../../Lepra/Include/HashTable.h"
-#include "../../Lepra/Include/MemberThread.h"
-#include "../../Lepra/Include/OrderedMap.h"
-#include "../../Lepra/Include/String.h"
 #include "../../Lepra/Include/Canvas.h"
 #include "../../TBC/Include/GeometryReference.h"
-#include "../../ThirdParty/FastDelegate/FastDelegate.h"
 #include "../../UiLepra/Include/UiSoundManager.h"
 #include "../../UiTBC/Include/UiChunkyClass.h"
 #include "../../UiTBC/Include/UiChunkyLoader.h"
 #include "../../UiTBC/Include/UiPainter.h"
 #include "../../UiTBC/Include/UiRenderer.h"
 #include "UiCure.h"
-#include "UiGameUiManager.h"
 
 
 

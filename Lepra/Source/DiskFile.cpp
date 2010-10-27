@@ -424,6 +424,22 @@ int64 DiskFile::Seek(int64 pOffset, FileOrigin pFrom)
 // Static functions.
 //
 
+IOError DiskFile::Load(const str& pFilename, void** pData, int64& pDataSize)
+{
+	DiskFile lFile;
+	bool lOk = false;
+	for (int x = 0; !lOk && x < 3; ++x)
+	{
+		lOk = lFile.Open(pFilename, DiskFile::MODE_READ);
+	}
+	if (lOk)
+	{
+		pDataSize = lFile.GetSize();
+		return lFile.AllocReadData(pData, (size_t)pDataSize);
+	}
+	return IO_FILE_NOT_FOUND;
+}
+
 bool DiskFile::Exists(const str& pFileName)
 {
 	FILE* lFile = FileOpen(pFileName, _T("rb"));

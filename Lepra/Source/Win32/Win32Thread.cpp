@@ -792,11 +792,8 @@ bool Thread::Join()
 	return (lReturnValue);
 }
 
-bool Thread::Join(float64 pTimeOut)
+bool Thread::GraceJoin(float64 pTimeOut)
 {
-	bool lReturnValue = true;
-
-	SetStopRequest(true);
 	if (GetThreadHandle() != 0)
 	{
 		assert(GetThreadId() != GetCurrentThreadId());
@@ -814,8 +811,7 @@ bool Thread::Join(float64 pTimeOut)
 		mThreadId = 0;
 	}
 	SetStopRequest(false);
-
-	return lReturnValue;
+	return true;
 }
 
 void Thread::Signal(int)

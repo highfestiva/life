@@ -24,6 +24,7 @@ class ConsoleLogListener: public InteractiveConsoleLogListener
 {
 public:
 	ConsoleLogListener(OutputFormat pFormat = FORMAT_PLAIN);
+	~ConsoleLogListener();
 
 	void SetOutputComponent(TextArea* pOutputComponent);
 

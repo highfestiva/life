@@ -42,6 +42,7 @@ public:
 
 	LogListener(str pName, OutputFormat pFormat = FORMAT_THREADEX);
 	virtual ~LogListener();
+	void KillSelf();
 	void AddLog(Log* pLog);
 	void RemoveLog(Log* pLog);
 	void OnLog(const Log* pOriginator, const str& pAccount, const str& pMessage, Log::LogLevel pLevel);
@@ -65,6 +66,7 @@ class StdioConsoleLogListener: public LogListener
 {
 public:
 	StdioConsoleLogListener(OutputFormat pFormat = FORMAT_THREAD_CLASS);
+	virtual ~StdioConsoleLogListener();
 	void WriteLog(const str& pFullMessage, Log::LogLevel pLevel);
 };
 
@@ -88,6 +90,7 @@ class InteractiveStdioConsoleLogListener: public InteractiveConsoleLogListener
 {
 public:
 	InteractiveStdioConsoleLogListener();
+	virtual ~InteractiveStdioConsoleLogListener();
 
 protected:
 	void WriteLog(const str& pFullMessage, Log::LogLevel pLevel);
@@ -102,6 +105,7 @@ class DebuggerLogListener: public LogListener
 {
 public:
 	DebuggerLogListener(OutputFormat pFormat = FORMAT_THREAD_CLASS);
+	virtual ~DebuggerLogListener();
 
 protected:
 	void WriteLog(const str& pFullMessage, Log::LogLevel pLevel);

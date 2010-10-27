@@ -6,11 +6,12 @@
 
 #include "../Include/ResourceManager.h"
 #include <assert.h>
-#include "../../Lepra/Include/DiskFile.h"
 #include "../../Lepra/Include/HiResTimer.h"
+#include "../../Lepra/Include/MemFile.h"
+#include "../../Lepra/Include/Path.h"
 #include "../../Lepra/Include/SystemManager.h"
+#include "../../Lepra/Include/ZipArchive.h"
 #include "../../TBC/Include/ChunkyPhysics.h"
-#include "../Include/ContextObject.h"
 #include "../Include/Cure.h"
 #include "../Include/TerrainFunctionManager.h"
 #include "../Include/TerrainPatchLoader.h"
@@ -488,14 +489,26 @@ LOG_CLASS_DEFINE(PHYSICS, PhysicalTerrainResource);
 ResourceManager::ResourceManager(unsigned pLoaderThreadCount):
 	mTerrainFunctionManager(0),
 	mLoaderThreadCount(pLoaderThreadCount),
-	mLoaderThread(_T("ResourceLoader"))
+	mLoaderThread(_T("ResourceLoader")),
+	mZipLock(new Lock),
+	mZipFile(new ZipArchive)
 {
+	if (mZipFile->OpenArchive(_T("Data.pk3"), ZipArchive::READ_ONLY) != IO_OK)
+	{
+		delete mZipFile;
+		mZipFile = 0;
+	}
 }
 
 ResourceManager::~ResourceManager()
 {
 	StopClear();
 	SetTerrainFunctionManager(0);
+
+	delete mZipFile;
+	mZipFile = 0;
+	delete mZipLock;
+	mZipLock = 0;
 }
 
 bool ResourceManager::InitDefault()
@@ -586,11 +599,33 @@ void ResourceManager::StopClear()
 
 File* ResourceManager::QueryFile(const str& pFilename)
 {
+	const str lFilename = strutil::ReplaceAll(pFilename, '\\', '/');
+	if (mZipFile)
+	{
+		ScopeLock lLock(mZipLock);
+		if (mZipFile->FileOpen(lFilename))
+		{
+			const size_t lSize = (size_t)mZipFile->FileSize();
+			MemFile* lFile = new MemFile;
+			if (mZipFile->FileRead(lFile->GetBuffer(lSize), lSize) != IO_OK)
+			{
+				delete lFile;
+				lFile = 0;
+			}
+			mZipFile->FileClose();
+			if (lFile)
+			{
+				lFile->SeekSet(0);
+				return lFile;
+			}
+		}
+	}
+
 	DiskFile* lFile = new DiskFile;
 	bool lOk = false;
 	for (int x = 0; x < 3 && !lOk; ++x)	// Retry file open, file might be held by anti-virus/Windoze/similar shit.
 	{
-		lOk = lFile->Open(pFilename, DiskFile::MODE_READ);
+		lOk = lFile->Open(lFilename, DiskFile::MODE_READ);
 	}
 	if (lOk)
 	{
@@ -598,10 +633,48 @@ File* ResourceManager::QueryFile(const str& pFilename)
 	}
 	else
 	{
-		mLog.Errorf(_T("Could not load file with name '%s'."), pFilename.c_str());
+		mLog.Errorf(_T("Could not load file with name '%s'."), lFilename.c_str());
 	}
 	delete lFile;
 	return 0;
+}
+
+bool ResourceManager::QueryFileExists(const str& pFilename)
+{
+	if (mZipFile)
+	{
+		ScopeLock lLock(mZipLock);
+		if (mZipFile->FileExist(pFilename))
+		{
+			return true;
+		}
+	}
+	return DiskFile::Exists(pFilename);
+}
+
+strutil::strvec ResourceManager::ListFiles(const str& pWildcard)
+{
+	strutil::strvec lFilenameArray;
+	if (mZipFile)
+	{
+		ScopeLock lLock(mZipLock);
+		str lFilename;
+		for (lFilename = mZipFile->FileFindFirst(); !lFilename.empty(); lFilename = mZipFile->FileFindNext())
+		{
+			if (Path::IsWildcardMatch(pWildcard, lFilename))
+			{
+				lFilenameArray.push_back(lFilename);
+			}
+		}
+		return lFilenameArray;
+	}
+
+	DiskFile::FindData lInfo;
+	for (bool lOk = DiskFile::FindFirst(pWildcard, lInfo); lOk; lOk = DiskFile::FindNext(lInfo))
+	{
+		lFilenameArray.push_back(lInfo.GetName());
+	}
+	return lFilenameArray;
 }
 
 

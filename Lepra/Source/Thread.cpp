@@ -282,6 +282,12 @@ void Thread::Sleep(float64 pTime)
 	}
 }
 
+bool Thread::Join(float64 pTimeOut)
+{
+	SetStopRequest(true);
+	return GraceJoin(pTimeOut);
+}
+
 void Thread::RunThread()
 {
 	SetThreadId(GetCurrentThreadId());

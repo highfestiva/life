@@ -7,13 +7,9 @@
 #pragma once
 #pragma warning(disable: 4505)	// Crappy warning from STL/MSVC.
 
-#include <list>
-#include <hash_set>
-//#include "../../Lepra/Include/DiskFile.h"
 #include "../../Lepra/Include/HashTable.h"
 #include "../../Lepra/Include/MemberThread.h"
 #include "../../Lepra/Include/OrderedMap.h"
-#include "../../Lepra/Include/String.h"
 #include "../../TBC/Include/ChunkyClass.h"
 #include "../../TBC/Include/ChunkyLoader.h"
 #include "../../ThirdParty/FastDelegate/FastDelegate.h"
@@ -21,6 +17,10 @@
 
 
 
+namespace Lepra
+{
+class ZipArchive;
+}
 namespace TBC
 {
 class TerrainPatch;
@@ -374,6 +374,8 @@ public:
 	void StopClear();
 
 	File* QueryFile(const str& pFilename);
+	bool QueryFileExists(const str& pFilename);
+	strutil::strvec ListFiles(const str& pWildcard);
 
 	TerrainFunctionManager* GetTerrainFunctionManager() const;
 	void SetTerrainFunctionManager(TerrainFunctionManager* pTerrainFunctionManager);	// May not be changed while its resources are loaded.
@@ -435,6 +437,8 @@ private:
 	ResourceMapList mRequestLoadList;	// Under way to be loaded by worker thread. TODO: priority map thingie!
 	ResourceMapList mLoadedList;		// Loaded by worker thread, worker thread will injected into the system at end of tick.
 	ResourceSet mResourceSafeLookup;	// Data owner for Resource*.
+	Lock* mZipLock;
+	ZipArchive* mZipFile;
 
 	LOG_CLASS_DECLARE();
 };

@@ -394,9 +394,8 @@ bool Thread::Join()
 	return (true);
 }
 
-bool Thread::Join(float64 pTimeOut)
+bool Thread::GraceJoin(float64 pTimeOut)
 {
-	SetStopRequest(true);
 	if (GetThreadHandle() != 0)
 	{
 		assert(GetThreadId() != GetCurrentThreadId());

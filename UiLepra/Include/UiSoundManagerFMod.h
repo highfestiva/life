@@ -30,9 +30,11 @@ public:
 
 	virtual void SetMasterVolume(float pVolume);
 
-	SoundID LoadSound2D(const str& pFileName, LoopMode pLoopMode, int pPriority);
-	SoundID LoadSound3D(const str& pFileName, LoopMode LoopMode, int pPriority);
-	SoundID LoadStream(const str& pFileName, LoopMode LoopMode, int pPriority);
+	virtual SoundID LoadSound2D(const str& pFileName, LoopMode pLoopMode, int pPriority);
+	virtual SoundID LoadSound2D(const str& pFileName, const void* pData, size_t pDataSize, LoopMode pLoopMode, int pPriority);
+	virtual SoundID LoadSound3D(const str& pFileName, LoopMode LoopMode, int pPriority);
+	virtual SoundID LoadSound3D(const str& pFileName, const void* pData, size_t pDataSize, LoopMode pLoopMode, int pPriority);
+	virtual SoundID LoadStream(const str& pFileName, LoopMode LoopMode, int pPriority);
 
 	void Release(SoundID pSoundID);
 
@@ -98,6 +100,7 @@ public:
 					float pGain);
 
 protected:
+	SoundID LoadSound(const str& pFileName, const void* pData, size_t pDataSize, LoopMode pLoopMode, int pPriority, int pExtraFlags);
 	virtual void DoSetSoundPosition(SoundInstanceID pSoundIID, const Vector3DF& pPos, const Vector3DF& pVel);
 
 private:

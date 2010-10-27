@@ -58,102 +58,22 @@ void SoundManagerFMod::SetMasterVolume(float pVolume)
 
 SoundManager::SoundID SoundManagerFMod::LoadSound2D(const str& pFileName, LoopMode pLoopMode, int pPriority)
 {
-	FileNameToSampleTable::Iterator lIter = mFileNameToSampleTable.Find(pFileName);
-	if (lIter != mFileNameToSampleTable.End())
-	{
-		(*lIter)->mReferenceCount++;
-		return (*lIter)->mID;
-	}
-	else
-	{
-		unsigned lFlags = 0;
-		
-		switch(pLoopMode)
-		{
-		case LOOP_FORWARD:
-			lFlags = FSOUND_LOOP_NORMAL;
-			break;
-		case LOOP_PINGPONG:
-			lFlags = FSOUND_LOOP_BIDI;
-			break;
-		case LOOP_NONE:
-		default:
-			lFlags = FSOUND_LOOP_OFF;
-			break;
-		}
+	return LoadSound(pFileName, 0, 0, pLoopMode, pPriority, FSOUND_2D);
+}
 
-		lFlags |= FSOUND_2D;
-
-		Sample* lSample = new Sample();
-		lSample->mFileName = pFileName;
-		lSample->mID = mSampleIDManager.GetFreeId();
-		lSample->mSample = FSOUND_Sample_Load((int)lSample->mID,
-			astrutil::Encode(pFileName).c_str(), lFlags, 0, 0);
-
-		if (lSample->mSample == 0)
-		{
-			mSampleIDManager.RecycleId(lSample->mID);
-			delete lSample;
-			return mSampleIDManager.GetInvalidId();
-		}
-
-		FSOUND_Sample_SetDefaults(lSample->mSample, -1, -1, -1, pPriority);
-
-		mFileNameToSampleTable.Insert(pFileName, lSample);
-		mIDToSampleTable.Insert(lSample->mID, lSample);
-
-		return lSample->mID;
-	}
+SoundManager::SoundID SoundManagerFMod::LoadSound2D(const str& pFileName, const void* pData, size_t pDataSize, LoopMode pLoopMode, int pPriority)
+{
+	return LoadSound(pFileName, pData, pDataSize, pLoopMode, pPriority, FSOUND_2D);
 }
 
 SoundManager::SoundID SoundManagerFMod::LoadSound3D(const str& pFileName, LoopMode pLoopMode, int pPriority)
 {
-	FileNameToSampleTable::Iterator lIter = mFileNameToSampleTable.Find(pFileName);
-	if (lIter != mFileNameToSampleTable.End())
-	{
-		(*lIter)->mReferenceCount++;
-		return (*lIter)->mID;
-	}
-	else
-	{
-		unsigned lFlags = 0;
-		
-		switch(pLoopMode)
-		{
-		case LOOP_FORWARD:
-			lFlags = FSOUND_LOOP_NORMAL;
-			break;
-		case LOOP_PINGPONG:
-			lFlags = FSOUND_LOOP_BIDI;
-			break;
-		case LOOP_NONE:
-		default:
-			lFlags = FSOUND_LOOP_OFF;
-			break;
-		}
+	return LoadSound(pFileName, 0, 0, pLoopMode, pPriority, FSOUND_HW3D);
+}
 
-		lFlags |= FSOUND_HW3D;
-
-		Sample* lSample = new Sample();
-		lSample->mFileName = pFileName;
-		lSample->mID = mSampleIDManager.GetFreeId();
-		lSample->mSample = FSOUND_Sample_Load((int)lSample->mID,
-			astrutil::Encode(pFileName).c_str(), lFlags, 0, 0);
-
-		if (lSample->mSample == 0)
-		{
-			mSampleIDManager.RecycleId(lSample->mID);
-			delete lSample;
-			return mSampleIDManager.GetInvalidId();
-		}
-
-		FSOUND_Sample_SetDefaults(lSample->mSample, -1, -1, -1, pPriority);
-		
-		mFileNameToSampleTable.Insert(pFileName, lSample);
-		mIDToSampleTable.Insert(lSample->mID, lSample);
-
-		return lSample->mID;
-	}
+SoundManager::SoundID SoundManagerFMod::LoadSound3D(const str& pFileName, const void* pData, size_t pDataSize, LoopMode pLoopMode, int pPriority)
+{
+	return LoadSound(pFileName, pData, pDataSize, pLoopMode, pPriority, FSOUND_HW3D);
 }
 
 SoundManager::SoundID SoundManagerFMod::LoadStream(const str& pFileName, LoopMode pLoopMode, int pPriority)
@@ -493,16 +413,59 @@ void SoundManagerFMod::SetParamEQ(SoundInstanceID pSoundIID, int pFXIndex, float
 
 
 
-int SoundManagerFMod::GetChannel(SoundInstanceID pSoundIID)
+SoundManager::SoundID SoundManagerFMod::LoadSound(const str& pFileName, const void* pData, size_t pDataSize, LoopMode pLoopMode, int pPriority, int pExtraFlags)
 {
-	SoundInstanceTable::Iterator lSIIter = mSoundInstanceTable.Find(pSoundIID);
-	if (lSIIter == mSoundInstanceTable.End())
+	FileNameToSampleTable::Iterator lIter = mFileNameToSampleTable.Find(pFileName);
+	if (lIter != mFileNameToSampleTable.End())
 	{
-		assert(false);
-		return -1;
+		(*lIter)->mReferenceCount++;
+		return (*lIter)->mID;
 	}
 
-	return (*lSIIter).mChannel;
+	unsigned lFlags = 0;
+	switch(pLoopMode)
+	{
+		case LOOP_FORWARD:
+			lFlags = FSOUND_LOOP_NORMAL;
+			break;
+		case LOOP_PINGPONG:
+			lFlags = FSOUND_LOOP_BIDI;
+			break;
+		case LOOP_NONE:
+		default:
+			lFlags = FSOUND_LOOP_OFF;
+			break;
+	}
+
+	lFlags |= pExtraFlags;
+
+	Sample* lSample = new Sample();
+	lSample->mFileName = pFileName;
+	lSample->mID = mSampleIDManager.GetFreeId();
+	if (pData)
+	{
+		lSample->mSample = FSOUND_Sample_Load((int)lSample->mID,
+			(const char*)pData, lFlags, 0, pDataSize);
+	}
+	else
+	{
+		lSample->mSample = FSOUND_Sample_Load((int)lSample->mID,
+			astrutil::Encode(pFileName).c_str(), lFlags, 0, 0);
+	}
+
+	if (lSample->mSample == 0)
+	{
+		mSampleIDManager.RecycleId(lSample->mID);
+		delete lSample;
+		return mSampleIDManager.GetInvalidId();
+	}
+
+	FSOUND_Sample_SetDefaults(lSample->mSample, -1, -1, -1, pPriority);
+
+	mFileNameToSampleTable.Insert(pFileName, lSample);
+	mIDToSampleTable.Insert(lSample->mID, lSample);
+
+	return lSample->mID;
 }
 
 void SoundManagerFMod::DoSetSoundPosition(SoundInstanceID pSoundIID, const Vector3DF& pPos, const Vector3DF& pVel)
@@ -526,6 +489,20 @@ void SoundManagerFMod::DoSetSoundPosition(SoundInstanceID pSoundIID, const Vecto
 	lVel[2] = pVel.z;
 
 	FSOUND_3D_SetAttributes((*lSIIter).mChannel, lPos, lVel);
+}
+
+
+
+int SoundManagerFMod::GetChannel(SoundInstanceID pSoundIID)
+{
+	SoundInstanceTable::Iterator lSIIter = mSoundInstanceTable.Find(pSoundIID);
+	if (lSIIter == mSoundInstanceTable.End())
+	{
+		assert(false);
+		return -1;
+	}
+
+	return (*lSIIter).mChannel;
 }
 
 

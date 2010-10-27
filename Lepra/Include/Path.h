@@ -20,6 +20,8 @@ namespace Lepra
 class Path
 {
 public:
+	typedef strutil::strvec Wildcard;
+
 	static str GetDirectory(const str& pPath);
 	static str GetFileBase(const str& pPath);
 	static str GetExtension(const str& pPath);
@@ -34,6 +36,9 @@ public:
 	static str JoinPath(const str& pDirectory, const str& pFileBase, const str& pExtension = str());
 	static bool NormalizePath(const str& pInputPath, str& pOutputPath);
 	static bool IsPathSeparator(const tchar pCharacter);
+	static Wildcard CreateWildcard(const str& pWildcard);
+	static bool IsWildcardMatch(const str& pWildcard, const str& pFilename, bool pScan = false);
+	static bool IsWildcardMatch(const Wildcard& pWildcard, const str& pFilename, bool pScan = false);
 };
 
 

@@ -8,21 +8,24 @@
 	A class used to load/save tga-files into/from a Canvas.
 */
 
-#ifndef TGALOADER_H
-#define TGALOADER_H
+#pragma once
 
-#include <stdio.h>
-#include "LepraTypes.h"
-#include "../Include/String.h"
+#include "String.h"
+
+
 
 namespace Lepra
 {
+
+
 
 class File;
 class Canvas;
 class Color;
 class Reader;
 class Writer;
+
+
 
 class TgaLoader
 {
@@ -117,7 +120,6 @@ private:
 	static const char* smTruevisionXFile;
 };
 
-} // End namespace.
 
-#endif
 
+}

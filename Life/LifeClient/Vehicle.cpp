@@ -14,6 +14,7 @@
 #include "../../TBC/Include/ChunkyBoneGeometry.h"
 #include "../../TBC/Include/ChunkyPhysics.h"
 #include "../../TBC/Include/PhysicsEngine.h"
+#include "../../UiCure/Include/UiGameUiManager.h"
 #include "GameClientSlaveManager.h"
 #include "Props.h"
 #include "RtVar.h"

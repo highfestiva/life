@@ -27,11 +27,7 @@ LogListener::LogListener(str pName, OutputFormat pFormat):
 
 LogListener::~LogListener()
 {
-	if (mLog)
-	{
-		mLog->RemoveListener(this);
-		assert(mLog == 0);
-	}
+	KillSelf();	// TRICKY: has to be done in own destructor to avoid purecalls.
 }
 
 void LogListener::AddLog(Log* pLog)
@@ -49,6 +45,15 @@ void LogListener::RemoveLog(Log* pLog)
 	if (mLog == pLog)
 	{
 		mLog = 0;
+	}
+}
+
+void LogListener::KillSelf()
+{
+	if (mLog)
+	{
+		mLog->RemoveListener(this);
+		assert(mLog == 0);
 	}
 }
 
@@ -144,6 +149,11 @@ StdioConsoleLogListener::StdioConsoleLogListener(OutputFormat pFormat):
 {
 }
 
+StdioConsoleLogListener::~StdioConsoleLogListener()
+{
+	KillSelf();	// TRICKY: has to be done in own destructor to avoid purecalls.
+}
+
 void StdioConsoleLogListener::WriteLog(const str& pFullMessage, Log::LogLevel pLevel)
 {
 #if defined(LEPRA_WINDOWS)
@@ -199,6 +209,11 @@ InteractiveStdioConsoleLogListener::InteractiveStdioConsoleLogListener()
 {
 }
 
+InteractiveStdioConsoleLogListener::~InteractiveStdioConsoleLogListener()
+{
+	KillSelf();	// TRICKY: has to be done in own destructor to avoid purecalls.
+}
+
 void InteractiveStdioConsoleLogListener::WriteLog(const str& pFullMessage, Log::LogLevel pLevel)
 {
 	ScopeLock lLock(&mLock);
@@ -249,6 +264,11 @@ DebuggerLogListener::DebuggerLogListener(OutputFormat pFormat):
 {
 }
 
+DebuggerLogListener::~DebuggerLogListener()
+{
+	KillSelf();	// TRICKY: has to be done in own destructor to avoid purecalls.
+}
+
 void DebuggerLogListener::WriteLog(const str& pFullMessage, Log::LogLevel)
 {
 #if !defined(NO_LOG_DEBUG_INFO)
@@ -272,6 +292,7 @@ FileLogListener::FileLogListener(const str& pFilename, OutputFormat pFormat):
 
 FileLogListener::~FileLogListener()
 {
+	KillSelf();	// TRICKY: has to be done in own destructor to avoid purecalls.
 	mFile.Close();
 }
 
@@ -297,6 +318,7 @@ MemFileLogListener::MemFileLogListener(uint64 pMaxSize, OutputFormat pFormat):
 
 MemFileLogListener::~MemFileLogListener()
 {
+	KillSelf();	// TRICKY: has to be done in own destructor to avoid purecalls.
 	mFile.Close();
 }
 

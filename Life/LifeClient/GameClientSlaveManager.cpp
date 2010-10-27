@@ -1300,7 +1300,7 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 						Cure::UserAccount::AvatarId lAvatarId = strutil::Encode(lAvatarName);
 						log_adebug("Status: INFO_AVATAR...");
 						str lTextureId = strutil::Format(_T("Data/road_sign_%s.png"), lAvatarId.c_str());
-						if (!DiskFile::Exists(lTextureId))
+						if (!GetResourceManager()->QueryFileExists(lTextureId))
 						{
 							lTextureId = _T("Data/road_sign_car.png");
 						}

@@ -24,12 +24,13 @@ public:
 		Thread(_T("ServerThread")),
 		mUdpMuxSocket(0)
 	{
-		mTestOK = false;
+		mTestOk = false;
 
 		SocketAddress lLocalAddress;
 		if (lLocalAddress.Resolve(_T(":10000")))
 		{
 			mUdpMuxSocket = new UdpMuxSocket(_T("Srv "), lLocalAddress, true);
+			assert(mUdpMuxSocket->IsOpen());
 		}
 	}
 
@@ -40,7 +41,7 @@ public:
 
 	inline bool GetTestOK()
 	{
-		return (mTestOK);
+		return (mTestOk);
 	}
 
 protected:
@@ -48,7 +49,7 @@ protected:
 private:
 
 	UdpMuxSocket* mUdpMuxSocket;
-	bool mTestOK;
+	bool mTestOk;
 };
 
 void ServerThread::Run()
@@ -65,7 +66,8 @@ void ServerThread::Run()
 
 //	printf("\nServer received \"%s\".", astrutil::Encode(lString).c_str());
 	
-	mTestOK = (lString == _T("Hi Server! I am Client!"));
+	mTestOk = (lString == _T("Hi Server! I am Client!"));
+	assert(mTestOk);
 
 	lWriter.WriteString<Lepra::tchar>(_T("Hi Client! I am Server!\n"));
 	lSocket->Flush();
@@ -83,12 +85,13 @@ public:
 		Thread(_T("ClientThread")),
 		mUdpMuxSocket(0)
 	{
-		mTestOK = false;
+		mTestOk = false;
 
 		SocketAddress lLocalAddress;
 		if (lLocalAddress.Resolve(_T(":10001")))
 		{
 			mUdpMuxSocket = new UdpMuxSocket(_T("Client "), lLocalAddress, false);
+			assert(mUdpMuxSocket->IsOpen());
 		}
 	}
 
@@ -99,7 +102,7 @@ public:
 
 	inline bool GetTestOK()
 	{
-		return mTestOK;
+		return mTestOk;
 	}
 
 protected:
@@ -107,7 +110,7 @@ protected:
 private:
 
 	UdpMuxSocket* mUdpMuxSocket;
-	bool mTestOK;
+	bool mTestOk;
 };
 
 void ClientThread::Run()
@@ -129,7 +132,8 @@ void ClientThread::Run()
 
 	//	printf("Client received \"%s\".", astrutil::Encode(lString).c_str());
 		
-		mTestOK = (lString == _T("Hi Client! I am Server!"));
+		mTestOk = (lString == _T("Hi Client! I am Server!"));
+		assert(mTestOk);
 
 		mUdpMuxSocket->CloseSocket(lSocket);
 	}
@@ -152,8 +156,8 @@ bool TestUDPSockets(const LogDecorator& pAccount)
 		ClientThread lClient;
 		lClient.Start();
 
-		lServer.Join(10.0);
-		lClient.Join(10.0);
+		lServer.GraceJoin(10.0);
+		lClient.GraceJoin(10.0);
 
 		lContext = _T("Client/Server UdpMuxSocket communication failed");
 		lTestOk = lClient.GetTestOK() && lServer.GetTestOK();

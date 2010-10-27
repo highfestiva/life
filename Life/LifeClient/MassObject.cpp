@@ -10,6 +10,7 @@
 #include "../../Lepra/Include/CyclicArray.h"
 #include "../../Lepra/Include/Random.h"
 #include "../../UiTBC/Include/UiGeometryBatch.h"
+#include "../../UiCure/Include/UiGameUiManager.h"
 
 
 

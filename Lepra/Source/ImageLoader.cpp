@@ -7,6 +7,7 @@
 #include "../Include/ImageLoader.h"
 #include <assert.h>
 #include "../Include/BmpLoader.h"
+#include "../Include/DiskFile.h"
 #include "../Include/JpegLoader.h"
 #include "../Include/Path.h"
 #include "../Include/PngLoader.h"

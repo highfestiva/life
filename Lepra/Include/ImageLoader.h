@@ -13,18 +13,23 @@
 	The save functions let you save the contents of a Canvas in any of
 	the previously mentioned file formats.
 */
-#ifndef IMAGELOADER_H
-#define IMAGELOADER_H
+
+#pragma once
 
 #include "String.h"
-#include "String.h"
+
+
 
 namespace Lepra
 {
 
+
+
 class Canvas;
 class Reader;
 class Writer;
+
+
 
 class ImageLoader
 {
@@ -50,11 +55,8 @@ public:
 
 	bool Load(FileType pFileType, Reader& pReader, Canvas& pCanvas);
 	bool Save(FileType pFileType, Writer& pWriter, const Canvas& pCanvas);
-
-protected:
-private:
 };
 
-} // End namespace.
 
-#endif
+
+}

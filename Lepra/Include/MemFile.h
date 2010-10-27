@@ -42,7 +42,9 @@ public:
 
 	void Clear();
 	int64 GetSize() const;
+	void Resize(size_t pSize);
 	void CropHead(size_t pFinalSize);
+	void* GetBuffer(size_t pMinimumSize);	// Use with caution, not thread safe.
 
 	// Overrided from InputStream.
 	int64 GetAvailable() const;

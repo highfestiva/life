@@ -22,6 +22,11 @@ ConsoleLogListener::ConsoleLogListener(OutputFormat pFormat):
 {
 }
 
+ConsoleLogListener::~ConsoleLogListener()
+{
+	KillSelf();	// TRICKY: has to be done in own destructor to avoid purecalls.
+}
+
 
 
 void ConsoleLogListener::SetOutputComponent(TextArea* pOutputComponent)

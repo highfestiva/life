@@ -369,6 +369,7 @@ public:
 
 	bool Join();
 	bool Join(float64 pTimeOut);
+	bool GraceJoin(float64 pTimeOut);
 	void Signal(int pSignal);
 	void Kill();
 

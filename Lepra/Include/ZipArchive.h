@@ -31,8 +31,9 @@
 	   will be overwritten.
 */
 
-#ifndef LEPRA_ZIPARCHIVE_H
-#define LEPRA_ZIPARCHIVE_H
+
+
+#pragma once
 
 #include "LepraTypes.h"
 #include "IOError.h"
@@ -42,8 +43,12 @@
 #include "../../ThirdParty/minizip/unzip.h"
 #include "../../ThirdParty/minizip/zip.h"
 
+
+
 namespace Lepra
 {
+
+
 
 class ZipArchive
 {
@@ -115,6 +120,6 @@ private:
 	LOG_CLASS_DECLARE();
 };
 
-} // End namespace.
 
-#endif
+
+}

@@ -4,18 +4,13 @@
 
 
 
+#include "../Include/UiResourceManager.h"
 #include <assert.h>
 #include "../../Cure/Include/TerrainFunctionManager.h"
-#include "../../TBC/Include/ChunkyPhysics.h"
-#include "../../UiLepra/Include/UiInput.h"
-#include "../../UiTBC/Include/UiBasicMeshCreator.h"
-#include "../../UiTBC/Include/UiChunkyLoader.h"
-#include "../../UiTBC/Include/UiTEXLoader.h"
+#include "../../Lepra/Include/MemFile.h"
 #include "../../UiTBC/Include/UiTriangleBasedGeometry.h"
-#include "../../UiTBC/Include/UiUVMapper.h"
 #include "../Include/UiCure.h"
 #include "../Include/UiGameUiManager.h"
-#include "../Include/UiResourceManager.h"
 
 
 
@@ -274,7 +269,7 @@ bool GeometryResource::Load()
 {
 	assert(!IsUnique());
 
-	float lCubeMappingScale = -1;
+	//float lCubeMappingScale = -1;
 	TBC::GeometryBase::BasicMaterialSettings lMaterial;
 	lMaterial.SetColor(0.5f, 0.5f, 0.5f);
 
@@ -305,13 +300,13 @@ bool GeometryResource::Load()
 	if (lGeometry)
 	{
 		lGeometry->SetBasicMaterialSettings(lMaterial);
-		if (lCubeMappingScale > 0)
+		/*if (lCubeMappingScale > 0)
 		{
 			lGeometry->AddEmptyUVSet();
 			Vector2DD lUVOffset(0.5, 0.5);
 			UiTbc::UVMapper::ApplyCubeMapping(lGeometry, 0, lCubeMappingScale, lUVOffset);
 			//lGeometry->DupUVSet(0);
-		}
+		}*/
 
 		SetRamData(lGeometry);
 	}
@@ -531,17 +526,35 @@ bool SoundResource::Load()
 {
 	assert(!IsUnique());
 	assert(GetRamData() == UiLepra::INVALID_SOUNDID);
-	bool lOk = false;
-	for (int x = 0; x < 3 && !lOk; ++x)	// Retry file loading, file might be held by anti-virus/Windoze/similar shit.
+	File* lFile = GetManager()->QueryFile(GetName());
+	bool lOk = (lFile != 0);
+	bool lOwnData = false;
+	void* lData = 0;
+	size_t lDataSize = 0;
+	if (lOk)
+	{
+		lDataSize = (size_t)lFile->GetSize();
+		MemFile* lMemFile = dynamic_cast<MemFile*>(lFile);
+		if (lMemFile)
+		{
+			lData = lMemFile->GetBuffer();
+		}
+		else
+		{
+			lOk = (lFile->AllocReadData(&lData, lDataSize) == IO_OK);
+			lOwnData = true;
+		}
+	}
+	if (lOk)
 	{
 		UiLepra::SoundManager::SoundID lSoundId;
 		if (mDimension == DIMENSION_2D)
 		{
-			lSoundId = GetUiManager()->GetSoundManager()->LoadSound2D(GetName(), mLoopMode, 0);
+			lSoundId = GetUiManager()->GetSoundManager()->LoadSound2D(GetName(), lData, lDataSize, mLoopMode, 0);
 		}
 		else
 		{
-			lSoundId = GetUiManager()->GetSoundManager()->LoadSound3D(GetName(), mLoopMode, 0);
+			lSoundId = GetUiManager()->GetSoundManager()->LoadSound3D(GetName(), lData, lDataSize, mLoopMode, 0);
 		}
 		lOk = (lSoundId != UiLepra::INVALID_SOUNDID);
 		if (lOk)
@@ -549,6 +562,11 @@ bool SoundResource::Load()
 			SetRamDataType(lSoundId);
 		}
 	}
+	if (lOwnData)
+	{
+		delete lData;
+	}
+	delete lFile;
 	return lOk;
 }
 

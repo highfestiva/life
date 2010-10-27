@@ -6,6 +6,7 @@
 
 #include "../Include/UiSoundManagerOpenAL.h"
 #include <assert.h>
+#include "../../Lepra/Include/DiskFile.h"
 #include "../../ThirdParty/freealut-1.1.0/include/AL/alut.h"
 
 
@@ -108,19 +109,43 @@ SoundManager::SoundID SoundManagerOpenAL::LoadSound2D(const str& pFileName, Loop
 	return ((SoundID)lSample);
 }
 
+SoundManager::SoundID SoundManagerOpenAL::LoadSound2D(const str& pFileName, const void* pData, size_t pDataSize, LoopMode pLoopMode, int pPriority)
+{
+	Sample* lSample = (Sample*)LoadSound3D(pFileName, pData, pDataSize, pLoopMode, pPriority);
+	if (lSample)
+	{
+		lSample->mIsAmbient = true;
+	}
+	return ((SoundID)lSample);
+}
+
 SoundManager::SoundID SoundManagerOpenAL::LoadSound3D(const str& pFileName, LoopMode pLoopMode, int pPriority)
 {
+	return LoadSound3D(pFileName, 0, 0, pLoopMode, pPriority);
+}
+
+SoundManager::SoundID SoundManagerOpenAL::LoadSound3D(const str& pFileName, const void* pData, size_t pDataSize, LoopMode pLoopMode, int pPriority)
+{
+	(void)pFileName;
+
 	Sample* lSample = new Sample(pLoopMode != LOOP_NONE, pPriority);
 	bool lOk = false;
-	for (int x = 0; !lOk && x < 3; ++x)
+	if (pData)
 	{
-		lOk = lSample->Load(pFileName);
-		if (lOk)
+		lOk = lSample->Load(pData, pDataSize);
+	}
+	else
+	{
+		for (int x = 0; !lOk && x < 3; ++x)	// TRICKY: retry to avoid anti-virus glitches.
 		{
-			mSampleSet.insert(lSample);
+			lOk = lSample->Load(pFileName);
 		}
 	}
-	if (!lOk)
+	if (lOk)
+	{
+		mSampleSet.insert(lSample);
+	}
+	else
 	{
 		assert(false);
 		delete (lSample);
@@ -414,6 +439,13 @@ bool SoundManagerOpenAL::Sample::Load(const str& pFileName)
 {
 	assert(mBuffer == AL_NONE);
 	mBuffer = ::alutCreateBufferFromFile(astrutil::Encode(pFileName).c_str());
+	return (mBuffer != AL_NONE);
+}
+
+bool SoundManagerOpenAL::Sample::Load(const void* pData, size_t pDataSize)
+{
+	assert(mBuffer == AL_NONE);
+	mBuffer = ::alutCreateBufferFromFileImage(pData, pDataSize);
 	return (mBuffer != AL_NONE);
 }
 

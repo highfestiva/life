@@ -10,6 +10,7 @@
 #include "../../TBC/Include/ChunkyPhysics.h"
 #include "../../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../../UiTBC/Include/GUI/UiCenterLayout.h"
+#include "../../UiCure/Include/UiGameUiManager.h"
 #include "../LifeServer/MasterServerConnection.h"
 #include "GameClientMasterTicker.h"
 #include "RtVar.h"

@@ -33,9 +33,11 @@ public:
 
 	virtual void SetMasterVolume(float pVolume);
 
-	SoundID LoadSound2D(const str& pFileName, LoopMode LoopMode, int pPriority);
-	SoundID LoadSound3D(const str& pFileName, LoopMode LoopMode, int pPriority);
-	SoundID LoadStream(const str& pFileName, LoopMode LoopMode, int pPriority);
+	virtual SoundID LoadSound2D(const str& pFileName, LoopMode LoopMode, int pPriority);
+	virtual SoundID LoadSound2D(const str& pFileName, const void* pData, size_t pDataSize, LoopMode pLoopMode, int pPriority);
+	virtual SoundID LoadSound3D(const str& pFileName, LoopMode LoopMode, int pPriority);
+	virtual SoundID LoadSound3D(const str& pFileName, const void* pData, size_t pDataSize, LoopMode pLoopMode, int pPriority);
+	virtual SoundID LoadStream(const str& pFileName, LoopMode LoopMode, int pPriority);
 
 	void Release(SoundID pSoundID);
 
@@ -120,6 +122,7 @@ private:
 		Sample(bool pLooping, int pPriority);
 		~Sample();
 		bool Load(const str& pFileName);
+		bool Load(const void* pData, size_t pDataSize);
 
 		ALuint mBuffer;
 		bool mIsLooping;

@@ -219,6 +219,59 @@ bool Path::IsPathSeparator(const tchar pCharacter)
 		);
 }
 
+Path::Wildcard Path::CreateWildcard(const str& pWildcard)
+{
+	return strutil::Split(pWildcard, _T("*"));
+}
+
+bool Path::IsWildcardMatch(const str& pWildcard, const str& pFilename, bool pScan)
+{
+	return IsWildcardMatch(CreateWildcard(pWildcard), pFilename, pScan);
+}
+
+bool Path::IsWildcardMatch(const Wildcard& pWildcard, const str& pFilename, bool pScan)
+{
+	bool lHasWildcard = false;
+	Wildcard::const_iterator y = pWildcard.begin();
+	for (; y != pWildcard.end(); ++y)
+	{
+		if (y->empty())
+		{
+			pScan = true;
+			lHasWildcard = true;
+			continue;
+		}
+		size_t x = 0;
+		if (!pScan)
+		{
+			if (pFilename.compare(x, y->size(), *y) == 0)
+			{
+				size_t z = x + y->size();
+				return IsWildcardMatch(Wildcard(++y, pWildcard.end()), pFilename.substr(z), true);
+			}
+			return false;
+		}
+		for (; x < pFilename.size(); ++x)
+		{
+			if (pFilename.compare(x, y->size(), *y) == 0)
+			{
+				size_t z = x + y->size();
+				Wildcard::const_iterator u = y;
+				if (IsWildcardMatch(Wildcard(++u, pWildcard.end()), pFilename.substr(z), true))
+				{
+					return true;
+				}
+			}
+			if (pFilename[x] == '/')
+			{
+				return false;
+			}
+		}
+		return false;
+	}
+	return pFilename.empty() || (lHasWildcard && pFilename.find('/') == str::npos);
+}
+
 
 
 }

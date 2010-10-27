@@ -51,7 +51,9 @@ public:
 
 	// LoadSound2D/3D() loads an entire sound into memory. Returns the handle to the sound.
 	virtual SoundID LoadSound2D(const str& pFileName, LoopMode pLoopMode, int pPriority) = 0;
+	virtual SoundID LoadSound2D(const str& pFileName, const void* pData, size_t pDataSize, LoopMode pLoopMode, int pPriority) = 0;
 	virtual SoundID LoadSound3D(const str& pFileName, LoopMode pLoopMode, int pPriority) = 0;
+	virtual SoundID LoadSound3D(const str& pFileName, const void* pData, size_t pDataSize, LoopMode pLoopMode, int pPriority) = 0;
 	virtual SoundID LoadStream(const str& pFileName, LoopMode pLoopMode, int pPriority) = 0;
 
 	virtual void Release(SoundID pSoundID) = 0;

@@ -7,17 +7,25 @@
 
 	A class used to load/save tiff-files into/from a Canvas.
 */
-#ifndef LEPRA_TIFFLOADER_H
-#define LEPRA_TIFFLOADER_H
 
-#include "LepraTypes.h"
-#include "DiskFile.h"
+#pragma once
+
+#include "String.h"
+
+
 
 namespace Lepra
 {
 
+
+
 class Canvas;
 class Color;
+class File;
+class Reader;
+class Writer;
+
+
 
 class TiffLoader
 {
@@ -298,6 +306,6 @@ bool TiffLoader::CheckBit(unsigned pSource, int pBit)
 	return (pSource & (1 << pBit)) != 0;
 }
 
-} // End namespace.
 
-#endif // !LEPRA_TIFFLOADER_H
+
+}

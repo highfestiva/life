@@ -2700,6 +2700,29 @@ bool TestPath(const LogDecorator& pAccount)
 		lTestOk = !Path::NormalizePath(_T("/../"), lPath);
 		assert(lTestOk);
 	}
+	if (lTestOk)
+	{
+		lContext = _T("wildcard error");
+		lTestOk &=  Path::IsWildcardMatch(_T("/a/b/c.txt"),	_T("/a/b/c.txt"));	assert(lTestOk);
+		lTestOk &=  Path::IsWildcardMatch(_T("/a/*/c.txt"),	_T("/a/b/c.txt"));	assert(lTestOk);
+		lTestOk &=  Path::IsWildcardMatch(_T("/a/b/*.txt"),	_T("/a/b/c.txt"));	assert(lTestOk);
+		lTestOk &=  Path::IsWildcardMatch(_T("/*/*/c.txt"),	_T("/a/b/c.txt"));	assert(lTestOk);
+		lTestOk &=  Path::IsWildcardMatch(_T("/a/*/c.txt"),	_T("/a/bug/c.txt"));	assert(lTestOk);
+		lTestOk &=  Path::IsWildcardMatch(_T("*/c.txt"),	_T("banana/c.txt"));	assert(lTestOk);
+		lTestOk &=  Path::IsWildcardMatch(_T("c.*"),		_T("c.txt"));		assert(lTestOk);
+		lTestOk &=  Path::IsWildcardMatch(_T("*.*"),		_T("c.txt"));		assert(lTestOk);
+		lTestOk &=  Path::IsWildcardMatch(_T("*.txt"),		_T("c.txt"));		assert(lTestOk);
+		lTestOk &=  Path::IsWildcardMatch(_T("*.t*t"),		_T("c.txt"));		assert(lTestOk);
+		lTestOk &= !Path::IsWildcardMatch(_T("/a/c/c.txt"),	_T("/a/b/c.txt"));	assert(lTestOk);
+		lTestOk &= !Path::IsWildcardMatch(_T("/a*/c.txt"),	_T("/a/b/c.txt"));	assert(lTestOk);
+		lTestOk &= !Path::IsWildcardMatch(_T("/*/c.txt"),	_T("/a/b/c.txt"));	assert(lTestOk);
+		lTestOk &= !Path::IsWildcardMatch(_T("*/*.txt"),	_T("/a/b/c.txt"));	assert(lTestOk);
+		lTestOk &= !Path::IsWildcardMatch(_T("*.txt"),		_T("/a/b/c.txt"));	assert(lTestOk);
+		lTestOk &= !Path::IsWildcardMatch(_T("/a/b*"),		_T("/a/bug/c.txt"));	assert(lTestOk);
+		lTestOk &= !Path::IsWildcardMatch(_T("/a/b/c.t*x"),	_T("banana/c.txt"));	assert(lTestOk);
+		lTestOk &= !Path::IsWildcardMatch(_T("t*"),		_T("c.txt"));		assert(lTestOk);
+		lTestOk &= !Path::IsWildcardMatch(_T("*c"),		_T("c.txt"));		assert(lTestOk);
+	}
 
 	ReportTestResult(pAccount, _T("Path"), lContext, lTestOk);
 	return (lTestOk);
@@ -2808,10 +2831,6 @@ bool TestLepra()
 	{
 		lTestOk = TestNumber(gLLog);
 	}
-	/*if (lTestOk)
-	{
-		lTestOk = TestSkipList(gLLog);
-	}*/
 	if (lTestOk)
 	{
 		lTestOk = TestOrderedMap(gLLog);
@@ -2875,10 +2894,6 @@ bool TestLepra()
 	{
 		lTestOk = TestArchive(gLLog);
 	}
-//	if (lTestOk)
-//	{
-//		lTestOk = TestFFT(gLLog);
-//	}
 	if (lTestOk)
 	{
 		lTestOk = TestCrypto(gLLog);

@@ -9,18 +9,23 @@
 	bmp-files using common pixel formats (8-, 15-, 16-, 24- and 32-bit).
 */
 
-#ifndef LEPRA_BMPLOADER_H
-#define LEPRA_BMPLOADER_H
+#pragma once
 
 #include "LepraTypes.h"
 #include "String.h"
 
+
+
 namespace Lepra
 {
-class DiskFile;
+
+
+
 class Canvas;
 class Reader;
 class Writer;
+
+
 
 class BmpLoader
 {
@@ -96,6 +101,6 @@ private:
 
 };
 
-} // End namespace.
 
-#endif // !LEPRA_BMPLOADER_H
+
+}
