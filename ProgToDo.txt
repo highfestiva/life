@@ -107,6 +107,17 @@ Game
 . Implement the following settings ingame:
   - Controls (joysticks, control pads, wheels, keyboards...)
   + Change vehicle.
+. Add to world:
+  - Teleporter gates.
+  - Rocket (takes off every now and then, and a new one arrives).
+  - Love tree with hearts on.
+  - Palm trees.
+  - Castle.
+  - Huge Ice cream.
+  - Mountain.
+  - A huge swing.
+  - A trampoline.
+  - A huge skate board.
 . Create icon for the game.
 . Fix wheels and tires/body on Corvette: normals suck on wheels, tires/body has "holes" where you can see through.
 . Make all vehicles fun to play in at least one way!
@@ -204,15 +215,17 @@ Engine
 + Collision sounds.
 + Fix network sync now that IsImpact(12.0) => GetImpact() >= ??? (now is mass relative).
 + Fix bug: sometimes certain buttons/controls hangs so that for instance "full throttle" is active, even though the button is released.
++ Use a zipped archive for data.
++ Make Maya import pipeline use the proper materials for each mesh instance (i.e. saucer lights).
 . Make sure camera never collides with physical objects. Make camera always keep a free line of sight to the controlled object.
 . Optimize: startup. Very slow on slow computer. Try using zip archives? Using less files might help antivirus?
 . Fix bug: when changing frame rates, the alarm callback sometimes never triggers (or takes forever?). Probably linked to physics frame counter?
 . Fix universal joint network sync (ODE-interface code relies heavily on LOCAL joint axes when receiving REMOTE updates via SetJointDiff).
 . Test: running remotely with high ping. Mum?
 . Port client to Mac OS X / Cocoa.
+. Autobuild Data.pk3.
 . I18N. Use _() and gettext wrap.
 . Make all materials use PreRender and PostRender. Clean code up around there.
-. Make Maya import pipeline use the proper materials for each mesh instance (i.e. saucer lights).
 . Add support for break and reverse lights. Add light cones for that.
 . When having several control units, the "input threshold" does not work. Make a threshold for each input entity.
 . Remove game source code from engine source code: camera, hard-coded object placements, input handling, etc.
@@ -220,7 +233,6 @@ Engine
 . Creating a less jittery experience: a) sync lag/jitter immediately after logging in, b) sorting out old msgs on client, c) keeping track of jitter on client side.
 . Moving out platform specifics from (Ui)CppContextObject.cpp to LifeXxx.cpp.
 . Add some type of spawn engine for player vehicles.
-. Use a zipped archive for data.
 . Add "switch to splitscreen" by MOUSE BUTTON press ingame.
 . Music.
 . Chat - client side UI.
@@ -295,18 +307,19 @@ Quality
 + Make sure shutting down client with two simultaneously logged-in users gets logged out from the server.
 + Check that all log destinations write strings, not raw data, to disk. LogFileXxx (single one) was checked and corrected from WriteData() to WriteString().
 + Separate input and output data in the data folder. Create a proper directory structure for external release.
++ Print game version number to log when starting.
 . Start alpha-testing with human users.
 . When using 4 splitscreen players, RenderSlaves is the slow part (won't yield 60 FPS on my machine). Check out why. Seems like they're using their CPU time slices (doesn't look as if physics threads are stealing 'em).
+. Fix shadow bug (causes strangeness when two shadows overlap).
 . Make sure default settings are good on a no-good computer. Like 60 FPS. 30 FPS?
-. Add better camera control, such as for the truck (just looking at the trailer looks like shit).
-. Print game version number to log when starting.
+. Add better automatic camera control, such as for the truck (just looking at the trailer looks like shit).
 . Add support for checking if loaded controller configuration contains devices no longer present in the system when starting, and if so reset 'em.
 . Add support for auto-configuring best controller configuration.
 . Go through all TODOs.
 . Fix all source file header comments (Righteous games, 2010).
 . Verify that destruction of ContextObject during load does not cause an invalid resource to float around the resource manager.
 . Fix engine mode "half_lock" (or make it synchronized or otherwise improved).
-. Add click sounds to buttons.
+. Add click sounds to buttons (i.e. road signs).
 . Go over demo version and release version, making sure that all functionality is in place.
 . Automatically downsize rendering (shadows) and physics micro steps if FPS are low. Runtime optimize by turning off pixel shaders, shadow volumes, mass objects, etc.
 . Get licences in order. Both C++ and Python. Both mine and third party.

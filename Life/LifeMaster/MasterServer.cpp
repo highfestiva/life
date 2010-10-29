@@ -29,7 +29,9 @@ MasterServer::~MasterServer()
 	mMuxSocket = 0;
 }
 
-bool MasterServer::Run()
+
+
+bool MasterServer::Initialize()
 {
 	SocketAddress lAddress;
 	str lAcceptAddress = _T("0.0.0.0:") _T(MASTER_SERVER_PORT);
@@ -51,37 +53,46 @@ bool MasterServer::Run()
 	}
 	mLog.Headline(_T("Up and running, awaiting connections."));
 	SystemManager::SetQuitRequestCallback(SystemManager::QuitRequestCallback(this, &MasterServer::OnQuitRequest));
-	while (SystemManager::GetQuitRequest() == 0 && mMuxSocket)
-	{
-		UdpVSocket* lSocket;
-		if (mMuxSocket->GetConnectionCount() == 0)
-		{
-			lSocket = mMuxSocket->Accept();
-		}
-		else
-		{
-			lSocket = mMuxSocket->PollAccept();
-		}
-		if (lSocket)
-		{
-			mSocketTable.insert(lSocket);
-		}
-		KillDeadSockets();
-		KillDeadServers();
-		while ((lSocket = mMuxSocket->PopReceiverSocket()) != 0)
-		{
-			uint8 lReceiveBuffer[1024];
-			int lReceivedBytes = lSocket->Receive(lReceiveBuffer, sizeof(lReceiveBuffer));
-			if (lReceivedBytes > 0)
-			{
-				mSocketTimeoutTable.erase(lSocket);
-				HandleReceive(lSocket, lReceiveBuffer, lReceivedBytes);
-			}
-		}
-		Thread::Sleep(0.05);
-	}
-	mLog.Headline(_T("Terminating master server..."));
 	return true;
+}
+
+bool MasterServer::Tick()
+{
+	UdpVSocket* lSocket;
+	if (mMuxSocket->GetConnectionCount() == 0)
+	{
+		lSocket = mMuxSocket->Accept();
+	}
+	else
+	{
+		lSocket = mMuxSocket->PollAccept();
+	}
+	if (lSocket)
+	{
+		mSocketTable.insert(lSocket);
+	}
+	KillDeadSockets();
+	KillDeadServers();
+	while ((lSocket = mMuxSocket->PopReceiverSocket()) != 0)
+	{
+		uint8 lReceiveBuffer[1024];
+		int lReceivedBytes = lSocket->Receive(lReceiveBuffer, sizeof(lReceiveBuffer));
+		if (lReceivedBytes > 0)
+		{
+			mSocketTimeoutTable.erase(lSocket);
+			HandleReceive(lSocket, lReceiveBuffer, lReceivedBytes);
+		}
+	}
+	return true;
+}
+
+void MasterServer::PollRoundTrip()
+{
+}
+
+float MasterServer::GetPowerSaveAmount() const
+{
+	return 0.05f;
 }
 
 

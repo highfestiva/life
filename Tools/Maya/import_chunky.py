@@ -583,10 +583,21 @@ class GroupReader(DefaultMAReader):
                                 mesh = mesh[0]
                                 outs = mesh.getOutNodes("iog", "iog")
                                 shaders = []
-                                for o, _, attr in outs:
+                                spare_shader = None
+                                for o, oname, oattr in outs:
                                         if o.nodetype == "shadingEngine":
                                                 if not o in shaders:
-                                                        shaders.append(o)
+                                                        shader, iattr = o.getInNode("dsm", "dsm")
+                                                        if shader == mesh.getName() or shader.find(node.getName()+"|"+mesh.getName()) >= 0:
+                                                                if options.options.verbose:
+                                                                        print("Using shader %s from connection %s.%s." % (oname, shader, iattr))
+                                                                shaders.append(o)
+                                                        elif shader.find("|phys_") < 0:
+                                                                spare_shader = o
+                                if not shaders and spare_shader:
+                                        if options.options.verbose:
+                                                print("Using spare shader %s for %s." % (spare_shader.getName(), mesh.getFullName()))
+                                        shaders.append(spare_shader)
                                 useShader = True
                                 if len(shaders) != 1:
                                         print("Warning: mesh %s om %s has wrong number of materials (%i)." % (mesh.getName(), node.getName(), len(shaders)))
@@ -613,15 +624,17 @@ class GroupReader(DefaultMAReader):
 
                                         ambc = material.get_fixed_attribute("ambc", optional=True, default=[0.0]*3)
                                         incandescence = material.get_fixed_attribute("ic", optional=True, default=[0.0]*3)
-                                        ambient = map(lambda x,y: x+y, ambc, incandescence)
+                                        ambient = list(map(lambda x,y: x+y, ambc, incandescence))
 
                                         dc = material.get_fixed_attribute("dc", optional=True, default=1.0)
                                         c = material.get_fixed_attribute("c", optional=True, default=[0.9]*3)
-                                        diffuse = map(lambda i: i*dc, c)
+                                        diffuse = list(map(lambda i: i*dc, c))
+                                        if options.options.verbose:
+                                                print("Shader diffuse is", diffuse)
 
                                         sro = material.get_fixed_attribute("sro", optional=True, default=1.0)
                                         sc = material.get_fixed_attribute("c", optional=True, default=[0.5]*3)
-                                        specular = map(lambda i: sro*i, sc)
+                                        specular = list(map(lambda i: sro*i, sc))
 
                                         ec = material.get_fixed_attribute("ec", optional=True, default=1.0)
                                         cp = material.get_fixed_attribute("cp", optional=True, default=0.0)
@@ -633,9 +646,9 @@ class GroupReader(DefaultMAReader):
                                 class Material:
                                         pass
                                 node.mat = Material()
-                                node.mat.ambient   = list(ambient)
-                                node.mat.diffuse   = list(diffuse)
-                                node.mat.specular  = list(specular)
+                                node.mat.ambient   = ambient
+                                node.mat.diffuse   = diffuse
+                                node.mat.specular  = specular
 ##                                if len(node.mat.ambient) != 3 or len(node.mat.diffuse) != 3 or len(node.mat.specular) != 3:
 ##                                        print("Error:", node, node.mat.ambient, node.mat.diffuse, node.mat.specular)
                                 node.mat.shininess = shininess

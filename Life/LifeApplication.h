@@ -38,6 +38,7 @@ public:
 	void Destroy();
 
 	virtual str GetName() const = 0;
+	virtual str GetVersion() const = 0;
 	virtual Cure::GameTicker* CreateGameTicker() const = 0;
 
 	static str GetIoFile(const str& pName, const str& pExt, bool pAddQuotes = true);

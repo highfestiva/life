@@ -405,7 +405,7 @@ Cure::ResourceLoadState GeometryReferenceResource::CreateInstance()
 	{
 		SetRamData(new TBC::GeometryReference(mClassResource->GetRamData()));
 		GetRamData()->SetAlwaysVisible(true);
-		GetRamData()->SetBasicMaterialSettings(mClassResource->GetRamData()->GetBasicMaterialSettings());
+		//GetRamData()->SetBasicMaterialSettings(mClassResource->GetRamData()->GetBasicMaterialSettings());
 		lLoadState = Parent::PostProcess();
 	}
 	return (lLoadState);

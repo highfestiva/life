@@ -4,13 +4,8 @@
 
 
 
-#include "../../Lepra/Include/Application.h"
-#include "../../Lepra/Include/LogListener.h"
-#include "../../Lepra/Include/Network.h"
-#include "../../Lepra/Include/Path.h"
-#include "../../Lepra/Include/Performance.h"
-#include "../../Lepra/Include/SystemManager.h"
-#include "../Life.h"
+#include "../../TBC/Include/TBC.h"
+#include "../LifeApplication.h"
 #include "MasterServer.h"
 
 
@@ -27,13 +22,11 @@ public:
 
 	MasterApplication(const strutil::strvec& pArgumentList);
 	virtual ~MasterApplication();
-	virtual int Run();
 
 private:
-	LogListener* mConsoleLogger;
-	DebuggerLogListener* mDebugLogger;
-	FileLogListener* mFileLogger;
-	MemFileLogListener* mMemLogger;
+	virtual str GetName() const;
+	virtual str GetVersion() const;
+	virtual Cure::GameTicker* CreateGameTicker() const;
 };
 
 
@@ -55,54 +48,34 @@ MasterApplication::MasterApplication(const strutil::strvec& pArgumentList):
 	Parent(pArgumentList)
 {
 	Lepra::Init();
+	TBC::Init();
+	Cure::Init();
 
-	mConsoleLogger = new StdioConsoleLogListener;
-#ifndef NO_LOG_DEBUG_INFO
-	mDebugLogger = new DebuggerLogListener();
-#endif // Showing debug information.
-	const str lLogName = Path::JoinPath(SystemManager::GetIoDirectory(_T("Life")), _T("Master"), _T("log"));
-	mFileLogger = new FileLogListener(lLogName);
-	mFileLogger->WriteLog(_T("\n\n"), Log::LEVEL_INFO);
-	mMemLogger = new MemFileLogListener(3*1024);
-	LogType::GetLog(LogType::SUB_ROOT)->SetupBasicListeners(mConsoleLogger, mDebugLogger, mFileLogger, 0, mMemLogger);
-#ifndef NO_LOG_DEBUG_INFO
-	const std::vector<Log*> lLogArray = LogType::GetLogs();
-	std::vector<Log*>::const_iterator x = lLogArray.begin();
-	const Log::LogLevel lLogLevel = Log::LEVEL_TRACE;
-	for (; x != lLogArray.end(); ++x)
-	{
-		(*x)->SetLevelThreashold(lLogLevel);
-	}
-#endif // Showing debug information.
-
-	Network::Start();
+	Init();
 }
 
 MasterApplication::~MasterApplication()
 {
-	Network::Stop();
+	Destroy();
+
+	Cure::Shutdown();
+	TBC::Shutdown();
 	Lepra::Shutdown();
-
-	// Drop performance measurement resources.
-	ScopePerformanceData::ClearAll();	// Make all useless.
-	ScopePerformanceData::ClearAll();	// Delete all useless.
-
-	delete (mConsoleLogger);
-	mConsoleLogger = 0;
-	delete (mDebugLogger);
-	mDebugLogger = 0;
-	delete (mMemLogger);
-	mMemLogger = 0;
-	delete (mFileLogger);
-	mFileLogger = 0;
-
-	LogType::Close();
 };
 
-int MasterApplication::Run()
+str MasterApplication::GetName() const
 {
-	MasterServer lServer;
-	return lServer.Run()? 1 : 0;
+	return _T(MASTER_APPLICATION_NAME);
+}
+
+str MasterApplication::GetVersion() const
+{
+	return _T(MASTER_SERVER_VERSION);
+}
+
+Cure::GameTicker* MasterApplication::CreateGameTicker() const
+{
+	return new MasterServer;
 }
 
 

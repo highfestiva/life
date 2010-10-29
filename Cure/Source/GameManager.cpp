@@ -457,6 +457,7 @@ void GameManager::PhysicsTick()
 	int lMicroSteps;
 	CURE_RTVAR_GET(lMicroSteps, =, GetVariableScope(), RTVAR_PHYSICS_MICROSTEPS, 3);
 	const int lAffordedStepCount = mTime->GetAffordedPhysicsStepCount() * lMicroSteps;
+	assert(lAffordedStepCount == lMicroSteps);
 	float lStepIncrement = mTime->GetAffordedPhysicsStepTime() / lMicroSteps;
 	/*if (lAffordedStepCount != 1 && !Math::IsEpsEqual(lStepIncrement, 1/(float)CURE_STANDARD_FRAME_RATE))
 	{

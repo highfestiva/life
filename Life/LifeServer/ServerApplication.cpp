@@ -9,6 +9,8 @@
 #include "GameServerTicker.h"
 #include "RtVar.h"
 
+#define VERSION	"0.1"
+
 
 
 namespace Life
@@ -23,10 +25,11 @@ public:
 
 	ServerApplication(const strutil::strvec& pArgumentList);
 	virtual ~ServerApplication();
-	str GetName() const;
-	Cure::GameTicker* CreateGameTicker() const;
 
 private:
+	str GetName() const;
+	str GetVersion() const;
+	Cure::GameTicker* CreateGameTicker() const;
 	LogListener* CreateConsoleLogListener() const;
 };
 
@@ -66,7 +69,12 @@ ServerApplication::~ServerApplication()
 
 str ServerApplication::GetName() const
 {
-	return (_T("Server"));
+	return _T("Server");
+}
+
+str ServerApplication::GetVersion() const
+{
+	return _T(VERSION);
 }
 
 Cure::GameTicker* ServerApplication::CreateGameTicker() const

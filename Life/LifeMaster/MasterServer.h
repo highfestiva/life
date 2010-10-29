@@ -8,12 +8,15 @@
 
 #include <hash_map>
 #include <set>
+#include "../../Cure/Include/GameManager.h"
 #include "../../Lepra/Include/MemberThread.h"
 #include "../../Lepra/Include/Timer.h"
 #include "../Life.h"
 #include "../ServerInfo.h"
 
+#define MASTER_APPLICATION_NAME	"Master"
 #define MASTER_SERVER_NAME	"rg.servegame.org"
+#define MASTER_SERVER_VERSION	"0.1"
 //#define MASTER_SERVER_NAME	"localhost"
 //#define MASTER_SERVER_NAME	"192.168.2.1"
 //#define MASTER_SERVER_NAME	"192.168.1.20"
@@ -45,12 +48,16 @@ struct ServerInfo;
 
 
 
-class MasterServer
+class MasterServer: public Cure::GameTicker
 {
 public:
 	MasterServer();
 	virtual ~MasterServer();
-	bool Run();
+
+	virtual bool Initialize();
+	virtual bool Tick();
+	virtual void PollRoundTrip();
+	virtual float GetPowerSaveAmount() const;
 
 private:
 	void KillDeadServers();

@@ -269,14 +269,14 @@ class ChunkyWriter:
                         self._writefloat(f)
 
 
-        def _writematerial(self, mat):
-                self._writematerial_(mat.ambient, mat.diffuse, mat.specular, \
+        def _writematerial(self, name, mat):
+                self._writematerial_(name, mat.ambient, mat.diffuse, mat.specular, \
                         mat.shininess, mat.alpha, mat.textures, mat.shader)
 
 
-        def _writematerial_(self, ambient, diffuse, specular, shininess, alpha, textures, shader):
+        def _writematerial_(self, name, ambient, diffuse, specular, shininess, alpha, textures, shader):
                 if len(ambient) != 3 or len(diffuse) != 3 or len(specular) != 3:
-                        print("Error: bad number of material elements!")
+                        print("Error: bad number of material elements for %s:" % name, diffuse)
                         #print(ambient, diffuse, specular)
                         sys.exit(18)
                 for f in ambient+diffuse+specular+[shininess,alpha]:
@@ -799,7 +799,9 @@ class ClassWriter(ChunkyWriter):
                 self._writexform(physmeshptr.t)
                 col = [1.0, 0.0, 0.0, 1.0]
                 #self._writematerial(col, col, col, ["da_texture"], "da_shader")
-                self._writematerial(physmeshptr.mat)
+                self._writematerial(physmeshptr.meshbasename, physmeshptr.mat)
+                if options.options.verbose:
+                        print("Wrote material diffuse %s for %s." % (str(physmeshptr.mat.diffuse), physmeshptr.meshbasename))
                 self._addfeat("phys->mesh ptr:phys->mesh ptrs", 1)
 
 

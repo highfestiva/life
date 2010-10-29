@@ -13,6 +13,8 @@
 #include "GameClientMasterTicker.h"
 #include "RtVar.h"
 
+#define VERSION	"0.1"
+
 
 
 namespace Life
@@ -30,6 +32,7 @@ public:
 
 private:
 	str GetName() const;
+	str GetVersion() const;
 	Cure::GameTicker* CreateGameTicker() const;
 
 	UiCure::GameUiManager* mUiManager;
@@ -88,7 +91,12 @@ ClientApplication::~ClientApplication()
 
 str ClientApplication::GetName() const
 {
-	return (_T("Client"));
+	return _T("Client");
+}
+
+str ClientApplication::GetVersion() const
+{
+	return _T(VERSION);
 }
 
 Cure::GameTicker* ClientApplication::CreateGameTicker() const
