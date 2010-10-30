@@ -115,8 +115,7 @@ bool GameManager::BeginTick()
 	{
 		LEPRA_MEASURE_SCOPE(NetworkAndInput);
 
-		mTime->TickTime();
-		mTime->TickPhysics();
+		mTime->Tick();
 
 		// Sorts up incoming network data; adds/removes objects (for instance via remote create/delete).
 		// On UI-based managers we handle user input here as well.
@@ -311,7 +310,7 @@ bool GameManager::ValidateVariable(int pSecurityLevel, const str& pVariable, str
 	{
 		int lValue = 0;
 		if (!strutil::StringToInt(pValue, lValue)) return false;
-		lValue = (pVariable == _T(RTVAR_PHYSICS_FPS))? Math::Clamp(lValue, 5, 200) : Math::Clamp(lValue, 1, 10);
+		lValue = (pVariable == _T(RTVAR_PHYSICS_FPS))? Math::Clamp(lValue, 5, 10000) : Math::Clamp(lValue, 1, 10);
 		pValue = strutil::IntToString(lValue, 10);
 	}
 	else if (pVariable == _T(RTVAR_PHYSICS_RTR))
@@ -457,7 +456,6 @@ void GameManager::PhysicsTick()
 	int lMicroSteps;
 	CURE_RTVAR_GET(lMicroSteps, =, GetVariableScope(), RTVAR_PHYSICS_MICROSTEPS, 3);
 	const int lAffordedStepCount = mTime->GetAffordedPhysicsStepCount() * lMicroSteps;
-	assert(lAffordedStepCount == lMicroSteps);
 	float lStepIncrement = mTime->GetAffordedPhysicsStepTime() / lMicroSteps;
 	/*if (lAffordedStepCount != 1 && !Math::IsEpsEqual(lStepIncrement, 1/(float)CURE_STANDARD_FRAME_RATE))
 	{

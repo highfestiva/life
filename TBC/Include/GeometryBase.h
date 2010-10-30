@@ -163,6 +163,8 @@ public:
 	virtual bool IsGeometryReference();
 	void SetIsSimpleObject();
 	bool IsSimpleObject() const;
+	float GetScale() const;
+	void SetScale(float pScale);
 
 	virtual GeometryVolatility GetGeometryVolatility() const = 0;
 	virtual void SetGeometryVolatility(GeometryVolatility pVolatility) = 0;
@@ -344,6 +346,7 @@ private:
 	BasicMaterialSettings mMaterialSettings;
 
 	float mBoundingRadius;
+	float mScale;
 
 	// Surface normals are primarily used when generating
 	// the shadow volume (used to perform stencil shadows).

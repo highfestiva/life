@@ -103,7 +103,8 @@ private:
 	void DrawDebugData() const;
 	void DrawPerformanceLineGraph2d() const;
 
-	float GetPowerSaveAmount() const;
+	virtual float GetTickTimeReduction() const;
+	virtual float GetPowerSaveAmount() const;
 
 	int OnCommandLocal(const str& pCommand, const strutil::strvec& pParameterVector);
 	void OnCommandError(const str& pCommand, const strutil::strvec& pParameterVector, int pResult);

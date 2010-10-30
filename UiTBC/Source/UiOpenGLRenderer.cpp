@@ -1073,6 +1073,19 @@ bool OpenGLRenderer::PreRender(TBC::GeometryBase* pGeometry)
 		assert((mCamSpaceTransformation.GetOrientation() - lCamSpaceTransformation.GetOrientation()).GetNorm() < 1e-8);*/
 		float lModelViewMatrix[16];
 		mCamSpaceTransformation.GetAs4x4TransposeMatrix(lModelViewMatrix);
+		const float lScale = pGeometry->GetScale();
+		if (lScale != 1)
+		{
+			lModelViewMatrix[0]  *= lScale;
+			lModelViewMatrix[1]  *= lScale;
+			lModelViewMatrix[2]  *= lScale;
+			lModelViewMatrix[4]  *= lScale;
+			lModelViewMatrix[5]  *= lScale;
+			lModelViewMatrix[6]  *= lScale;
+			lModelViewMatrix[8]  *= lScale;
+			lModelViewMatrix[9]  *= lScale;
+			lModelViewMatrix[10] *= lScale;
+		}
 		glMatrixMode(GL_MODELVIEW);
 		glLoadMatrixf(lModelViewMatrix);
 		OGL_ASSERT();
@@ -1505,6 +1518,19 @@ void OpenGLRenderer::RenderShadowVolumes()
 			{
 				float lModelViewMatrix[16];
 				(GetCameraTransformation().InverseTransform(lShadowVolume->GetTransformation())).GetAs4x4TransposeMatrix(lModelViewMatrix);
+				const float lScale = lShadowVolume->GetScale();
+				if (lScale != 1)
+				{
+					lModelViewMatrix[0]  *= lScale;
+					lModelViewMatrix[1]  *= lScale;
+					lModelViewMatrix[2]  *= lScale;
+					lModelViewMatrix[4]  *= lScale;
+					lModelViewMatrix[5]  *= lScale;
+					lModelViewMatrix[6]  *= lScale;
+					lModelViewMatrix[8]  *= lScale;
+					lModelViewMatrix[9]  *= lScale;
+					lModelViewMatrix[10] *= lScale;
+				}
 				glLoadMatrixf(lModelViewMatrix);
 
 				if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)

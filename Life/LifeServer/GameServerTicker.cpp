@@ -106,6 +106,11 @@ void GameServerTicker::PollRoundTrip()
 	mGameManager->TickInput();
 }
 
+float GameServerTicker::GetTickTimeReduction() const
+{
+	return mGameManager->GetTimeManager()->GetTickLoopTimeReduction();
+}
+
 float GameServerTicker::GetPowerSaveAmount() const
 {
 	return (mGameManager->GetPowerSaveAmount());

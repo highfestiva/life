@@ -434,7 +434,7 @@ float GameClientMasterTicker::UpdateFrustum(float pFov, const PixelRect& pRender
 	float lClipNear;
 	float lClipFar;
 	CURE_RTVAR_GET(lClipNear, =(float), UiCure::GetSettings(), RTVAR_UI_3D_CLIPNEAR, 0.1);
-	CURE_RTVAR_GET(lClipFar, =(float), UiCure::GetSettings(), RTVAR_UI_3D_CLIPFAR, 2000.0);
+	CURE_RTVAR_GET(lClipFar, =(float), UiCure::GetSettings(), RTVAR_UI_3D_CLIPFAR, 3000.0);
 	mUiManager->GetRenderer()->SetViewFrustum(pFov, lClipNear, lClipFar);
 	return (pFov);
 }
@@ -1141,6 +1141,18 @@ void GameClientMasterTicker::DrawPerformanceLineGraph2d() const
 }
 
 
+
+float GameClientMasterTicker::GetTickTimeReduction() const
+{
+	for (int x = 0; x < 4; ++x)
+	{
+		if (mSlaveArray[x])
+		{
+			return mSlaveArray[x]->GetTimeManager()->GetTickLoopTimeReduction();
+		}
+	}
+	return 0;
+}
 
 float GameClientMasterTicker::GetPowerSaveAmount() const
 {

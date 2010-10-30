@@ -7,6 +7,7 @@
 #include "../Include/TimeManager.h"
 #include <assert.h>
 #include "../../Lepra/Include/Math.h"
+#include "../../Lepra/Include/Performance.h"
 #include "../Include/RuntimeVariable.h"
 
 
@@ -39,6 +40,7 @@ void TimeManager::Clear(int pPhysicsFrameCounter)
 	mPhysicsSpeedAdjustmentTime = 0;
 	mPhysicsSpeedAdjustmentFrameCount = 0;
 	mAbsoluteTime = 0;
+	mTickTimeOverhead = 0;
 	mPhysicsFrameCounter = pPhysicsFrameCounter;
 	mCurrentFrameTime = 1/(float)mTargetFrameRate;
 	mAverageFrameTime = mCurrentFrameTime;
@@ -47,7 +49,7 @@ void TimeManager::Clear(int pPhysicsFrameCounter)
 	mPhysicsFrameWrapLimit = gTimeWrapLimit*mTargetFrameRate;
 }
 
-void TimeManager::TickTime()
+void TimeManager::Tick()
 {
 	CURE_RTVAR_GET(mTargetFrameRate, =, Cure::GetSettings(), RTVAR_PHYSICS_FPS, 2);
 	CURE_RTVAR_GET(mRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
@@ -63,24 +65,28 @@ void TimeManager::TickTime()
 
 	mTickTimeModulo += mCurrentFrameTime;
 
-	mPhysicsFrameTime = 1/(float)mTargetFrameRate;
-	while (mPhysicsFrameTime*2 < mAverageFrameTime)
+	const float lTargetPeriod = 1/(float)mTargetFrameRate;
+	mPhysicsFrameTime = lTargetPeriod;
+	while (mPhysicsFrameTime*2 < mAverageFrameTime)	// Half framerate if we're on a slow platform, reiterate.
 	{
 		mPhysicsFrameTime *= 2;
 	}
 	mPhysicsStepCount = (int)::floor(mTickTimeModulo / mPhysicsFrameTime);
 	mPhysicsFrameTime *= mRealTimeRatio;
 
+	/*static int c = 0;
+	if (++c >= 11)
+	{
+		mLog.Infof(_T("Instance %p: tick time modulo is %.0f %%."), this, mTickTimeModulo*100/lTargetPeriod);
+		c = 0;
+	}*/
+
+	const float lDesiredModuloOffset = 0.15f;
+	const float lModuloOffset = mTickTimeModulo - (1+lDesiredModuloOffset)*lTargetPeriod;
 	if (mPhysicsStepCount > 0)
 	{
 		mAverageFrameTime = Math::Lerp(mAverageFrameTime, mCurrentFrameTime, 0.01f);
-	}
-}
 
-void TimeManager::TickPhysics()
-{
-	if (GetAffordedPhysicsStepCount() >= 1)
-	{
 		const float lThisStepTime = GetAffordedPhysicsTotalTime() / mRealTimeRatio;
 		int lTargetStepCount = (int)::floorf(lThisStepTime * mTargetFrameRate);
 
@@ -102,6 +108,11 @@ void TimeManager::TickPhysics()
 			mPhysicsSpeedAdjustmentTime = 0;
 		}
 	}
+	/*if (c == 0)
+	{
+		mLog.Infof(_T("Instance %p: modulo offset is %.0f %%."), this, lModuloOffset*100/lTargetPeriod);
+	}*/
+	mTickTimeOverhead = mAverageFrameTime + lModuloOffset*0.3f - lTargetPeriod;
 }
 
 float TimeManager::GetAbsoluteTime(float pOffset) const
@@ -228,6 +239,11 @@ int TimeManager::GetDesiredMicroSteps() const
 	int lMicroSteps;
 	CURE_RTVAR_GET(lMicroSteps, =, Cure::GetSettings(), RTVAR_PHYSICS_MICROSTEPS, 1);
 	return (mTargetFrameRate * lMicroSteps);
+}
+
+float TimeManager::GetTickLoopTimeReduction() const
+{
+	return mTickTimeOverhead;
 }
 
 

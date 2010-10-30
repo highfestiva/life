@@ -204,9 +204,9 @@ protected:
 	Vector3DF mCameraUp;			// TODO: remove hack (should context object controlled)!
 	Vector3DF mCameraOrientation;		// TODO: remove hack (should context object controlled)!
 	Vector3DF mCameraPivotPosition;		// TODO: remove hack (should context object controlled)!
+	Vector3DF mCameraPivotVelocity;		// TODO: remove hack (should context object controlled)!
 	float mCameraTargetXyDistance;		// TODO: remove hack (should context object controlled)!
 	float mCameraMaxSpeed;			// TODO: remove hack (should context object controlled)!
-	float mCameraPivotSpeed;		// TODO: remove hack (should context object controlled)!
 	Vector3DF mMicrophoneSpeed;		// TODO: remove hack (should context object controlled)!
 	bool mAllowMovementInput;
 	Options::ClientOptionsManager mOptions;

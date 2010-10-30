@@ -50,18 +50,21 @@ Game
 + Create a list of server-controlled (=important sync) rtvars. Transmit from server to client upon login. Disallow client settings on these rtvars, and monitor them on server to re-sync them when necessary.
 + Add simple cam control for Finne.
 + Add house that can be torn down, but builds itself up automatically again afterwards.
-. Fix shadows in level_01: all stuff located in (0, 0, 0) probably gets their shadow there too.
-. Add config for the different shadow types: force_no, no, yes, force_yes. Make terrain force_no!
-. Fix color of shadows. Is it possible to somehow fade them in?
++ Add config for the different shadow types: force_no, no, yes, force_yes. Make terrain force_no!
++ Fix color of shadows. Is it possible to somehow fade them in?
++ Find a way to connect through firewalls!
++ Impove camera movement: make it point more in the direction where the object is going.
+. Bullet time triggers. For instance on monster jumps. Implement on server, so that all physics engines run in sync.
 . Smoke puffs from the exhaust.
 . Teleporters: to race track, castle, monster jam site... Show an "icon" above each portal.
-. Railroad boom.
+. Small train + railroad boom.
 . Rocket which is regularly sent up. How return? Via hatch in the ground? Landing again?
-. Find a way to connect through firewalls!
 . Make ingame menu only available through icons (mouse click or hoover).
   - Autoflip.
   - Select vehicle.
   - ...
+. Build stuff in the world (add both dynamic+static and take transformation).
+. Save server state, so that one can continue working on one's world.
 . Add steering: mouse controlled using clicks on where one wants to go.
   - Add markers in game of target destination.
   - Add tiny AI to control the steering. Must be different for different vehicles/engines.
@@ -118,6 +121,8 @@ Game
   - A huge swing.
   - A trampoline.
   - A huge skate board.
+  - Ballon (aircraft) that floats around.
+  - Flying dinosaur that moves around.
 . Create icon for the game.
 . Fix wheels and tires/body on Corvette: normals suck on wheels, tires/body has "holes" where you can see through.
 . Make all vehicles fun to play in at least one way!
@@ -217,9 +222,12 @@ Engine
 + Fix bug: sometimes certain buttons/controls hangs so that for instance "full throttle" is active, even though the button is released.
 + Use a zipped archive for data.
 + Make Maya import pipeline use the proper materials for each mesh instance (i.e. saucer lights).
++ Make sure FPS is smooth, even though it's a fixed number. Currently the physics step count looks like 1, 1, 1, 1, 1, 2, 1, 1...
 . Make sure camera never collides with physical objects. Make camera always keep a free line of sight to the controlled object.
+. Fix shadows, some are not rendered in correct places; trees, monster buildings.
 . Optimize: startup. Very slow on slow computer. Try using zip archives? Using less files might help antivirus?
 . Fix bug: when changing frame rates, the alarm callback sometimes never triggers (or takes forever?). Probably linked to physics frame counter?
+. Fix bug: lerp isn't scaling up properly when increasing framerate.
 . Fix universal joint network sync (ODE-interface code relies heavily on LOCAL joint axes when receiving REMOTE updates via SetJointDiff).
 . Test: running remotely with high ping. Mum?
 . Port client to Mac OS X / Cocoa.
@@ -229,7 +237,6 @@ Engine
 . Add support for break and reverse lights. Add light cones for that.
 . When having several control units, the "input threshold" does not work. Make a threshold for each input entity.
 . Remove game source code from engine source code: camera, hard-coded object placements, input handling, etc.
-. Bullet time triggers. For instance on monster jumps. Implement on server, so that all physics engines run in sync.
 . Creating a less jittery experience: a) sync lag/jitter immediately after logging in, b) sorting out old msgs on client, c) keeping track of jitter on client side.
 . Moving out platform specifics from (Ui)CppContextObject.cpp to LifeXxx.cpp.
 . Add some type of spawn engine for player vehicles.

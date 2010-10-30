@@ -278,6 +278,8 @@ bool GeometryBase::Edge::IsSameEdge(int pVertexIndex1,
 
 GeometryBase::GeometryBase() :
 	mFlags(0),
+	mBoundingRadius(0),
+	mScale(1),
 	mSurfaceNormalData(0),
 	mSurfaceNormalCount(0),
 	mVertexNormalData(0),
@@ -333,6 +335,16 @@ void GeometryBase::SetIsSimpleObject()
 bool GeometryBase::IsSimpleObject() const
 {
 	return CheckFlag(IS_SIMPLE_OBJECT);
+}
+
+float GeometryBase::GetScale() const
+{
+	return mScale;
+}
+
+void GeometryBase::SetScale(float pScale)
+{
+	mScale = pScale;
 }
 
 unsigned int GeometryBase::GetMaxTriangleCount() const
@@ -521,12 +533,12 @@ float GeometryBase::GetBoundingRadius()
 		CalculateBoundingRadius();
 	}
 
-	return mBoundingRadius;
+	return mBoundingRadius * mScale;
 }
 
 void GeometryBase::SetBoundingRadius(float pBoundingRadius)
 {
-	mBoundingRadius = pBoundingRadius;
+	mBoundingRadius = pBoundingRadius / mScale;
 	SetFlag(BOUNDING_RADIUS_ALWAYS_VALID, mBoundingRadius > 0);
 	SetFlag(BOUNDING_RADIUS_VALID, mBoundingRadius > 0);
 }

@@ -71,7 +71,6 @@ GameClientSlaveManager::GameClientSlaveManager(GameClientMasterTicker* pMaster, 
 	mCameraOrientation(PIF/2, acos(mCameraPosition.z/mCameraPosition.y), 0),
 	mCameraTargetXyDistance(20),
 	mCameraMaxSpeed(500),
-	mCameraPivotSpeed(0),
 	mAllowMovementInput(true),
 	mOptions(pVariableScope, pSlaveIndex),
 	mLoginWindow(0),
@@ -1000,19 +999,26 @@ void GameClientSlaveManager::TickUiUpdate()
 	// TODO: remove camera hack (camera position should be context object controlled).
 	mCameraPreviousPosition = mCameraPosition;
 	Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
+	Vector3DF lAvatarPosition = mCameraPivotPosition;
+	float lCameraPivotSpeed = 0;
 	if (lObject)
 	{
 		// Target position is <cam> distance from the avatar along a straight line
 		// (in the XY plane) to where the camera currently is.
-		mCameraPivotPosition = lObject->GetPosition();
-		mCameraPivotSpeed = Math::Lerp(mCameraPivotSpeed, lObject->GetVelocity().GetLength(), 0.1f);
+		lAvatarPosition = lObject->GetPosition();
+		mCameraPivotPosition = lAvatarPosition;
+		Vector3DF lAvatarVelocity = lObject->GetVelocity();
+		lAvatarVelocity.z *= 0.2f;	// Don't take very much action on the up/down speed, that has it's own algo.
+		mCameraPivotVelocity = Math::Lerp(mCameraPivotVelocity, lAvatarVelocity, 0.5f*lPhysicsTime/0.1f);
+		mCameraPivotPosition += mCameraPivotVelocity * 0.6f;	// Look to where the avatar will be in a while.
+		lCameraPivotSpeed = mCameraPivotVelocity.GetLength();
 
 		UpdateMassObjects(mCameraPivotPosition);
 	}
 	const Vector3DF lPivotXyPosition(mCameraPivotPosition.x, mCameraPivotPosition.y, mCameraPosition.z);
 	Vector3DF lTargetCameraPosition(mCameraPosition-lPivotXyPosition);
 	const float lCurrentCameraXyDistance = lTargetCameraPosition.GetLength();
-	const float lSpeedDependantCameraXyDistance = mCameraTargetXyDistance + mCameraPivotSpeed*0.3f;
+	const float lSpeedDependantCameraXyDistance = mCameraTargetXyDistance + lCameraPivotSpeed*0.6f;
 	lTargetCameraPosition = lPivotXyPosition + lTargetCameraPosition*(lSpeedDependantCameraXyDistance/lCurrentCameraXyDistance);
 	float lCamHeight;
 	CURE_RTVAR_GET(lCamHeight, =(float), GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, 10.0);
@@ -1061,15 +1067,15 @@ void GameClientSlaveManager::TickUiUpdate()
 		lTargetCameraPosition.z -= lCameraAboveGround;
 		const TBC::PhysicsManager::BodyID lTerrainBodyId = lLevel->GetPhysics()->GetBoneGeometry(0)->GetBodyId();
 		Vector3DF lCollisionPoint;
-		float lStepSize = (lTargetCameraPosition - mCameraPivotPosition).GetLength() * 0.5f;
+		float lStepSize = (lTargetCameraPosition - lAvatarPosition).GetLength() * 0.5f;
 		for (int y = 0; y < 5; ++y)
 		{
 			int x;
 			for (x = 0; x < 2; ++x)
 			{
-				const Vector3DF lRay = lTargetCameraPosition - mCameraPivotPosition;
+				const Vector3DF lRay = lTargetCameraPosition - lAvatarPosition;
 				const bool lIsCollision = (GetPhysicsManager()->QueryRayCollisionAgainst(
-					mCameraPivotPosition, lRay, lRay.GetLength(), lTerrainBodyId, &lCollisionPoint, 1) > 0);
+					lAvatarPosition, lRay, lRay.GetLength(), lTerrainBodyId, &lCollisionPoint, 1) > 0);
 				if (lIsCollision)
 				{
 					lTargetCameraPosition.z += lStepSize;

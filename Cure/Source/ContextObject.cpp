@@ -601,12 +601,18 @@ Vector3DF ContextObject::GetVelocity() const
 	{
 		mManager->GetGameManager()->GetPhysicsManager()->GetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
 	}
-	/*else
-	{
-		assert(false);
-		// TODO: throw something here...
-	}*/
 	return (lVelocity);
+}
+
+Vector3DF ContextObject::GetAcceleration() const
+{
+	Vector3DF lAcceleration;
+	const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
+	if (lGeometry && lGeometry->GetBodyId() != TBC::INVALID_BODY)
+	{
+		mManager->GetGameManager()->GetPhysicsManager()->GetBodyAcceleration(lGeometry->GetBodyId(), lAcceleration);
+	}
+	return lAcceleration;
 }
 
 float ContextObject::GetForwardSpeed() const

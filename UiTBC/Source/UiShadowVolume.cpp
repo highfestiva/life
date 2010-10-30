@@ -30,7 +30,7 @@ ShadowVolume::ShadowVolume() :
 {
 }
 
-ShadowVolume::ShadowVolume(TBC::GeometryBase* pParentGeometry) :
+ShadowVolume::ShadowVolume(TBC::GeometryBase* pParentGeometry):
 	mVertexData(0),
 	mIndexData(0),
 	mTriangleOrientation(0),
@@ -48,6 +48,8 @@ ShadowVolume::ShadowVolume(TBC::GeometryBase* pParentGeometry) :
 	{
 		mParentGeometry->GenerateEdgeData();
 	}
+
+	SetScale(pParentGeometry->GetScale());
 
 	mMaxTriangleCount = mParentGeometry->GetMaxTriangleCount() * 2 + mParentGeometry->GetEdgeCount() * 2;
 	mTriangleCount = 0;

@@ -239,7 +239,7 @@ void Application::TickSleep(double pMeasuredFrameTime) const
 		int lFps;
 		CURE_RTVAR_GET(lFps, =, Cure::GetSettings(), RTVAR_PHYSICS_FPS, 2);
 		double lWantedFrameTime = lFps? 1.0/lFps : 1;
-		double lSleepTime = lWantedFrameTime - pMeasuredFrameTime;
+		double lSleepTime = lWantedFrameTime - pMeasuredFrameTime - mGameTicker->GetTickTimeReduction();
 		const double MINIMUM_SLEEP_TIME = 0.001;
 		const double MAXIMUM_SLEEP_TIME = 0.01;
 		if (lSleepTime >= MINIMUM_SLEEP_TIME)

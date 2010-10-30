@@ -29,11 +29,10 @@ public:
 	void Clear(int pPhysicsFrameCounter);
 	// Increases time modulo m by the elapsed time and calculates the corresponding number
 	// of physics steps s, s >= 0.
-	void TickTime();
 	// If s > 0 this method increases the physics frame counter, while at the same time
 	// reducing m so that only the remainder is left (m -= s*fps). Also adjusts m for the
 	// increase or decrease in physics simulation speed.
-	void TickPhysics();
+	void Tick();
 	// Returns the actual (calendar) current time since this instance was created.
 	// TRICKY: absolute time wraps - don't use if you don't know what you're doing. Be sure to use
 	// GetAbsoluteTimeDiff() when checking if certain time elapsed!
@@ -75,6 +74,9 @@ public:
 	float GetAffordedPhysicsTotalTime() const;
 	// Returns the desired physics FPS in micro steps.
 	int GetDesiredMicroSteps() const;
+	// Returns how much quicker the tick loop should be in order to achieve perfect loop time.
+	// A negative value means the tick loop should be that much longer.
+	float GetTickLoopTimeReduction() const;
 
 	// Temporarily sets a physics speed adjustmed, which is active for a number of
 	// physics frames. When the speed has been adjusted by a certain time, it goes back to
@@ -91,6 +93,7 @@ private:
 	float mAbsoluteTime;	// Cache of absolute time.
 	float mCurrentFrameTime;	// Time diff between current frame and previous.
 	float mTickTimeModulo;	// Contains the time that was "left over" since last physics step.
+	float mTickTimeOverhead;	// How much slower the call frequency is compared to what we would want.
 	float mRealTimeRatio;
 	float mPhysicsSpeedAdjustmentTime;	// Total number of seconds that our our physics time needs adjusting.
 	int mPhysicsSpeedAdjustmentFrameCount;	// The number of physics steps to adjust our physics time over.

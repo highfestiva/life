@@ -36,6 +36,7 @@ private:
 	virtual bool Initialize();
 	virtual bool Tick();
 	virtual void PollRoundTrip();
+	virtual float GetTickTimeReduction() const;
 	virtual float GetPowerSaveAmount() const;
 
 	Cure::ResourceManager* mResourceManager;

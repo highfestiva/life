@@ -93,6 +93,7 @@ public:
 	void SetRootPosition(const Vector3DF& pPosition);
 	QuaternionF GetOrientation() const;
 	Vector3DF GetVelocity() const;
+	Vector3DF GetAcceleration() const;
 	float GetForwardSpeed() const;
 	float GetMass() const;
 	ObjectPositionalData* GetNetworkOutputGhost();

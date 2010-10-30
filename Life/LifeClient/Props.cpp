@@ -8,6 +8,7 @@
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/GameManager.h"
 #include "../../Cure/Include/TimeManager.h"
+#include "../../Lepra/Include/Random.h"
 
 
 
@@ -45,6 +46,7 @@ void Props::DispatchOnLoadMesh(UiCure::UserGeometryReferenceResource* pMeshResou
 	if (mIsParticle && pMeshResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
 		pMeshResource->GetRamData()->SetIsSimpleObject();
+		pMeshResource->GetRamData()->SetScale((float)Random::Uniform(0.4, 1.6));
 	}
 }
 
