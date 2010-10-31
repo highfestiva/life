@@ -16,7 +16,7 @@
 #include "../../UiCure/Include/UiRuntimeVariableName.h"
 #include "../../UiTBC/Include/UiFontManager.h"
 #include "GameClientMasterTicker.h"
-#include "Vehicle.h"
+#include "Machine.h"
 
 
 
@@ -130,7 +130,7 @@ void GameClientDemo::CreateLoginView()
 
 bool GameClientDemo::InitializeTerrain()
 {
-	Cure::ContextObject* lVehicle = new Vehicle(GetResourceManager(), _T("saucer_01"), mUiManager);
+	Cure::ContextObject* lVehicle = new Machine(GetResourceManager(), _T("saucer_01"), mUiManager);
 	GetContext()->AddLocalObject(lVehicle);
 	mAvatarId = lVehicle->GetInstanceId();
 	lVehicle->SetPhysicsTypeOverride(Cure::ContextObject::PHYSICS_OVERRIDE_STATIC);

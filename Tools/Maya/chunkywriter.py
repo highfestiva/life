@@ -513,6 +513,9 @@ class PhysWriter(ChunkyWriter):
                 j = ir * j
 
                 parameters[6:9] = j[:3]
+
+                parameters[9] = node.get_fixed_attribute("impact_factor", True, 1.0)
+
                 for x in parameters:
                         self._writefloat(float(x))
                 # Write connecor type (may hook other stuff, may get hooked by hookers :).

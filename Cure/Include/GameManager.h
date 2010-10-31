@@ -67,8 +67,8 @@ public:
 	ConsoleManager* GetConsoleManager() const;
 	TimeManager* GetTimeManager();
 
-	ContextObject* CreateContextObject(const str& pClassId, NetworkObjectType pNetworkType,
-		GameObjectId pInstanceId = 0);
+	ContextObject* CreateContextObject(const str& pClassId, NetworkObjectType pNetworkType, GameObjectId pInstanceId = 0);
+	void AddContextObject(ContextObject* pObject, NetworkObjectType pNetworkType, GameObjectId pInstanceId);
 	virtual ContextObject* CreateLogicHandler(const str& pType) const;
 	virtual bool IsUiMoveForbidden(GameObjectId pObjectId) const;
 	virtual void GetSiblings(GameObjectId pObjectId, ContextObject::Array& pSiblingArray) const;

@@ -241,22 +241,26 @@ TimeManager* GameManager::GetTimeManager()
 
 
 
-ContextObject* GameManager::CreateContextObject(const str& pClassId, NetworkObjectType pNetworkType,
-	GameObjectId pInstanceId)
+ContextObject* GameManager::CreateContextObject(const str& pClassId, NetworkObjectType pNetworkType, GameObjectId pInstanceId)
 {
 	ContextObject* lObject = CreateContextObject(pClassId);
-	lObject->SetManager(GetContext());
-	lObject->SetNetworkObjectType(pNetworkType);
+	AddContextObject(lObject, pNetworkType, pInstanceId);
+	return (lObject);
+}
+
+void GameManager::AddContextObject(ContextObject* pObject, NetworkObjectType pNetworkType, GameObjectId pInstanceId)
+{
+	pObject->SetManager(GetContext());
+	pObject->SetNetworkObjectType(pNetworkType);
 	if (pInstanceId)
 	{
-		lObject->SetInstanceId(pInstanceId);
+		pObject->SetInstanceId(pInstanceId);
 	}
 	else
 	{
-		lObject->SetInstanceId(GetContext()->AllocateGameObjectId(pNetworkType));
+		pObject->SetInstanceId(GetContext()->AllocateGameObjectId(pNetworkType));
 	}
-	GetContext()->AddObject(lObject);
-	return (lObject);
+	GetContext()->AddObject(pObject);
 }
 
 ContextObject* GameManager::CreateLogicHandler(const str&) const

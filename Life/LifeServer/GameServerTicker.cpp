@@ -6,6 +6,7 @@
 
 #include "GameServerTicker.h"
 #include "../../Cure/Include/RuntimeVariable.h"
+#include "../../Cure/Include/TimeManager.h"
 #include "../../Lepra/Include/SystemManager.h"
 #include "../ConsoleManager.h"
 #include "../LifeApplication.h"

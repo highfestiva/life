@@ -651,6 +651,22 @@
 			Name="Game"
 			>
 			<File
+				RelativePath=".\Level.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Level.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Machine.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Machine.h"
+				>
+			</File>
+			<File
 				RelativePath=".\MassObject.cpp"
 				>
 			</File>
@@ -672,14 +688,6 @@
 			</File>
 			<File
 				RelativePath=".\RoadSignButton.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Vehicle.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Vehicle.h"
 				>
 			</File>
 		</Filter>

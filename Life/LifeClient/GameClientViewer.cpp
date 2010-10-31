@@ -15,7 +15,7 @@
 #include "GameClientMasterTicker.h"
 #include "RtVar.h"
 #include "UiConsole.h"
-#include "Vehicle.h"
+#include "Machine.h"
 
 
 
@@ -89,7 +89,7 @@ bool GameClientViewer::InitializeTerrain()
 		return (false);
 	}
 
-	Cure::ContextObject* lVehicle = new Vehicle(GetResourceManager(), _T("monster_02"), mUiManager);
+	Cure::ContextObject* lVehicle = new Machine(GetResourceManager(), _T("monster_02"), mUiManager);
 	GetContext()->AddLocalObject(lVehicle);
 	lVehicle->SetInitialTransform(TransformationF(QuaternionF(), Vector3DF(-23, -80, 33)));
 	lVehicle->StartLoading();

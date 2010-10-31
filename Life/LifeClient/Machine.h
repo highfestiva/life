@@ -18,22 +18,22 @@ namespace Life
 
 
 
-class Vehicle: public UiCure::CppContextObject
+class Machine: public UiCure::CppContextObject
 {
 public:
 	typedef UiCure::CppContextObject Parent;
 
-	Vehicle(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager);
-	virtual ~Vehicle();
+	Machine(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager);
+	virtual ~Machine();
 
 protected:
 	void OnPhysicsTick();
 
 private:
 	void OnForceApplied(TBC::PhysicsManager::ForceFeedbackListener* pOtherObject,
-		 TBC::PhysicsManager::BodyID pOwnBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
-		 const Vector3DF& pForce, const Vector3DF& pTorque,
-		 const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity);
+		TBC::PhysicsManager::BodyID pOwnBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
+		const Vector3DF& pForce, const Vector3DF& pTorque,
+		const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity);
 
 	void LoadPlaySound3d(UiCure::UserSound3dResource* pSoundResource);
 
@@ -41,6 +41,8 @@ private:
 
 	TagSoundTable mEngineSoundTable;
 	HiResTimer mParticleTimer;
+	float mExhaustTimeout;
+	bool mCreatedParticles;
 
 	LOG_CLASS_DECLARE();
 };

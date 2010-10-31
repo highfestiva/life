@@ -54,8 +54,8 @@ Game
 + Fix color of shadows. Is it possible to somehow fade them in?
 + Find a way to connect through firewalls!
 + Impove camera movement: make it point more in the direction where the object is going.
++ Smoke puffs from the exhaust.
 . Bullet time triggers. For instance on monster jumps. Implement on server, so that all physics engines run in sync.
-. Smoke puffs from the exhaust.
 . Teleporters: to race track, castle, monster jam site... Show an "icon" above each portal.
 . Small train + railroad boom.
 . Rocket which is regularly sent up. How return? Via hatch in the ground? Landing again?

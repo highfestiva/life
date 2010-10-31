@@ -28,6 +28,8 @@
 #include "../LifeApplication.h"
 #include "CollisionSoundManager.h"
 #include "GameClientMasterTicker.h"
+#include "Level.h"
+#include "Machine.h"
 #include "MassObject.h"
 #include "Props.h"
 #include "RoadSignButton.h"
@@ -604,9 +606,9 @@ void GameClientSlaveManager::AddLocalObjects(std::hash_set<Cure::GameObjectId>& 
 	pLocalObjectSet.insert(mOwnedObjectList.begin(), mOwnedObjectList.end());
 }
 
-bool GameClientSlaveManager::IsInCameraRange(Cure::ContextObject* pObject, float pDistance) const
+bool GameClientSlaveManager::IsInCameraRange(const Vector3DF& pPosition, float pDistance) const
 {
-	return (pObject->GetPosition().GetDistanceSquared(mCameraPivotPosition) <= pDistance*pDistance);
+	return (pPosition.GetDistanceSquared(mCameraPosition) <= pDistance*pDistance);
 }
 
 
@@ -774,14 +776,17 @@ bool GameClientSlaveManager::InitializeTerrain()
 	mCloudArray.clear();
 
 	mLevelId = GetContext()->AllocateGameObjectId(Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
-	UiCure::CppContextObject* lLevel = (UiCure::CppContextObject*)Parent::CreateContextObject(_T("level_01"), Cure::NETWORK_OBJECT_REMOTE_CONTROLLED, mLevelId);
+	UiCure::CppContextObject* lLevel = new Level(GetResourceManager(), _T("level_01"), mUiManager);
+	AddContextObject(lLevel, Cure::NETWORK_OBJECT_REMOTE_CONTROLLED, mLevelId);
 	bool lOk = (lLevel != 0);
 	assert(lOk);
 	if (lOk)
 	{
 		lLevel->DisableRootShadow();
+		lLevel->SetAllowNetworkLogic(false);
 		lLevel->StartLoading();
-		mSun = Parent::CreateContextObject(_T("sun"), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+		mSun = new Props(GetResourceManager(), _T("sun"), mUiManager);
+		AddContextObject(mSun, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 		lOk = (mSun != 0);
 		assert(lOk);
 		if (lOk)
@@ -792,14 +797,10 @@ bool GameClientSlaveManager::InitializeTerrain()
 	const int lPrimeCloudCount = 11;	// TRICKY: must be prime or clouds start moving in sync.
 	for (int x = 0; lOk && x < lPrimeCloudCount; ++x)
 	{
-		Cure::ContextObject* lCloud = Parent::CreateContextObject(_T("cloud_01"), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
-		lOk = (lCloud != 0);
-		assert(lOk);
-		if (lOk)
-		{
-			lCloud->StartLoading();
-			mCloudArray.push_back(lCloud);
-		}
+		Cure::ContextObject* lCloud = new Props(GetResourceManager(), _T("cloud_01"), mUiManager);
+		AddContextObject(lCloud, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+		lCloud->StartLoading();
+		mCloudArray.push_back(lCloud);
 	}
 	mMassObjectArray.clear();
 	return (lOk);
@@ -1162,19 +1163,25 @@ bool GameClientSlaveManager::UpdateMassObjects(const Vector3DF& pPosition)
 {
 	bool lOk = true;
 
-	if (mMassObjectArray.empty())
+	const Cure::ContextObject* lLevel = GetContext()->GetObject(mLevelId);
+	if (lLevel && mMassObjectArray.empty())
 	{
+		const TBC::PhysicsManager::BodyID lTerrainBodyId = lLevel->GetPhysics()->GetBoneGeometry(0)->GetBodyId();
 		if (lOk)
 		{
 			Cure::GameObjectId lMassObjectId = GetContext()->AllocateGameObjectId(Cure::NETWORK_OBJECT_LOCAL_ONLY);
 			mMassObjectArray.push_back(lMassObjectId);
-			lOk = CreateObject(lMassObjectId, _T("flower"), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+			Cure::ContextObject* lFlowers = new MassObject(GetResourceManager(), _T("flower"), mUiManager, lTerrainBodyId, 600, 170);
+			AddContextObject(lFlowers, Cure::NETWORK_OBJECT_LOCAL_ONLY, lMassObjectId);
+			lFlowers->StartLoading();
 		}
 		if (lOk)
 		{
 			Cure::GameObjectId lMassObjectId = GetContext()->AllocateGameObjectId(Cure::NETWORK_OBJECT_LOCAL_ONLY);
 			mMassObjectArray.push_back(lMassObjectId);
-			lOk = CreateObject(lMassObjectId, _T("bush_01"), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+			Cure::ContextObject* lBushes = new MassObject(GetResourceManager(), _T("bush_01"), mUiManager, lTerrainBodyId, 150, 290);
+			AddContextObject(lBushes, Cure::NETWORK_OBJECT_LOCAL_ONLY, lMassObjectId);
+			lBushes->StartLoading();
 		}
 	}
 
@@ -1507,44 +1514,7 @@ bool GameClientSlaveManager::CreateObject(Cure::GameObjectId pInstanceId, const 
 
 Cure::ContextObject* GameClientSlaveManager::CreateContextObject(const str& pClassId) const
 {
-	bool lMassObject = false;
-	bool lProps = false;
-	int lInstanceCount = 600;
-	float lSide = 170;
-	if (pClassId.find(_T("flower")) != str::npos || pClassId.find(_T("bush_01")) != str::npos)
-	{
-		lMassObject = true;
-		if (pClassId.find(_T("bush_01")) != str::npos)
-		{
-			lInstanceCount = 150;
-			lSide = 290;
-		}
-	}
-	else if (pClassId == _T("sun") || strutil::StartsWith(pClassId, _T("cloud")) ||
-		strutil::StartsWith(pClassId, _T("mud_particle")))
-	{
-		lProps = true;
-	}
-	if (lMassObject)
-	{
-		Cure::ContextObject* lLevel = GetContext()->GetObject(mLevelId);
-		assert(lLevel);
-		if (lLevel)
-		{
-			const TBC::PhysicsManager::BodyID lTerrainBodyId = lLevel->GetPhysics()->GetBoneGeometry(0)->GetBodyId();
-			return new MassObject(GetResourceManager(), pClassId, mUiManager, lTerrainBodyId, lInstanceCount, lSide);
-		}
-		return 0;
-	}
-	Cure::CppContextObject* lObject;
-	if (lProps)
-	{
-		lObject = new Props(GetResourceManager(), pClassId, mUiManager);
-	}
-	else
-	{
-		lObject = new Vehicle(GetResourceManager(), pClassId, mUiManager);
-	}
+	Cure::CppContextObject* lObject = new Machine(GetResourceManager(), pClassId, mUiManager);
 	lObject->SetAllowNetworkLogic(false);	// Only server gets to control logic.
 	return (lObject);
 }

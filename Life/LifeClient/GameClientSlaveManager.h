@@ -78,7 +78,7 @@ public:
 	virtual void GetSiblings(Cure::GameObjectId pObjectId, Cure::ContextObject::Array& pSiblingArray) const;
 	void DoGetSiblings(Cure::GameObjectId pObjectId, Cure::ContextObject::Array& pSiblingArray) const;
 	void AddLocalObjects(std::hash_set<Cure::GameObjectId>& pLocalObjectSet) const;
-	bool IsInCameraRange(Cure::ContextObject* pObject, float pDistance) const;
+	bool IsInCameraRange(const Vector3DF& pPosition, float pDistance) const;
 
 	virtual bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
 	virtual bool OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode);

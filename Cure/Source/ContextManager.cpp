@@ -343,7 +343,8 @@ void ContextManager::DispatchAlarmCallbacks()
 		}
 		else
 		{
-			break;
+			//break;
+			++x;
 		}
 	}
 

@@ -27,6 +27,7 @@ const int PARAM_HIGH_STOP	= 5;
 const int PARAM_OFFSET_X	= 6;
 const int PARAM_OFFSET_Y	= 7;
 const int PARAM_OFFSET_Z	= 8;
+const int PARAM_IMPACT_FACTOR	= 9;
 
 
 
@@ -253,6 +254,11 @@ void ChunkyBoneGeometry::AddConnectorType(ConnectorType pType)
 	{
 		mConnectorArray.push_back(pType);
 	}
+}
+
+float ChunkyBoneGeometry::GetImpactFactor() const
+{
+	return mBodyData.mParameter[PARAM_IMPACT_FACTOR];
 }
 
 const str& ChunkyBoneGeometry::GetMaterial() const

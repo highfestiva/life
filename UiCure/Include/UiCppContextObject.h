@@ -66,7 +66,7 @@ protected:
 	void OnLoadMesh(UserGeometryReferenceResource* pMeshResource);
 	virtual void DispatchOnLoadMesh(UserGeometryReferenceResource* pMeshResource);
 	void OnLoadTexture(UserRendererImageResource* pTextureResource);
-	void TryAddTexture();
+	virtual void TryAddTexture();
 	virtual bool TryComplete();
 	virtual str GetMeshInstanceId() const;
 
