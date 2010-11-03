@@ -89,11 +89,12 @@ int ClientConsoleManager::FilterExecuteCommand(const str& pCommandLine)
 {
 	const str lCommandDelimitors(_T(" \t\v\r\n"));
 	const strutil::strvec lCommandList = strutil::BlockSplit(pCommandLine, _T(";"), true, true);
-	const int lAllowedCount = 3;
+	const int lAllowedCount = 4;
 	const str lAllowedList[lAllowedCount] =
 	{
 		str(_T("#") _T(RTVAR_PHYSICS_FPS)),
 		str(_T("#") _T(RTVAR_PHYSICS_RTR)),
+		str(_T("#Ui.3D.")),
 		str(_T("echo ")),
 	};
 	int lResult = 0;

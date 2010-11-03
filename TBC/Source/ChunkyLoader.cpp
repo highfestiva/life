@@ -1136,6 +1136,38 @@ bool ChunkyClassLoader::Load(ChunkyClass* pData)
 void ChunkyClassLoader::AddLoadElements(FileElementList& pElementList, ChunkyClass* pData)
 {
 	pElementList.push_back(ChunkyFileElement(CHUNK_CLASS_PHYSICS, &pData->GetPhysicsBaseName()));
+	pElementList.push_back(ChunkyFileElement(CHUNK_CLASS_TAG_LIST, (void*)pData, -1000));
+}
+
+bool ChunkyClassLoader::LoadElementCallback(ChunkyType pType, uint32 pSize, int64 pChunkEndPosition, void* pStorage)
+{
+	ChunkyClass* lClass = (ChunkyClass*)pStorage;
+	bool lOk = false;
+	if (pType == CHUNK_CLASS_TAG_LIST)
+	{
+		FileElementList lLoadList;
+		lLoadList.push_back(ChunkyFileElement(CHUNK_CLASS_TAG, (void*)lClass));
+		lOk = AllocLoadChunkyList(lLoadList, pChunkEndPosition);
+		assert(lOk);
+	}
+	else if (pType == CHUNK_CLASS_TAG)
+	{
+		uint8* lBuffer = 0;
+		lOk = (mFile->AllocReadData((void**)&lBuffer, pSize) == IO_OK);
+		assert(lOk);
+		if (lOk)
+		{
+			lOk = lClass->UnpackTag(lBuffer, pSize);
+			assert(lOk);
+		}
+		delete[] (lBuffer);
+	}
+	else
+	{
+		lOk = Parent::LoadElementCallback(pType, pSize, pChunkEndPosition, pStorage);
+		assert(lOk);
+	}
+	return (lOk);
 }
 
 

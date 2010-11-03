@@ -2206,7 +2206,7 @@ createNode polyCube -n "polyCube1";
 	setAttr ".cuv" 4;
 createNode phong -n "black";
 	setAttr ".dc" 1;
-	setAttr ".c" -type "float3" 0.10744 0.10744 0.10744 ;
+	setAttr ".c" -type "float3" 0.80744 0.80744 0.80744 ;
 	setAttr ".sc" -type "float3" 1 1 1 ;
 	setAttr ".rfl" 1;
 	setAttr ".rc" -type "float3" 1 1 1 ;

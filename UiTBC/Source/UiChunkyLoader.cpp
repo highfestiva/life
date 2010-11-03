@@ -434,8 +434,7 @@ ChunkyClassLoader::~ChunkyClassLoader()
 void ChunkyClassLoader::AddLoadElements(Parent::FileElementList& pElementList, TBC::ChunkyClass* pData)
 {
 	Parent::AddLoadElements(pElementList, pData);
-	pElementList.push_back(ChunkyFileElement(TBC::CHUNK_CLASS_MESH_LIST, (void*)pData, -1000));
-	pElementList.push_back(ChunkyFileElement(TBC::CHUNK_CLASS_TAG_LIST, (void*)pData, -1000));
+	pElementList.insert(--pElementList.end(), ChunkyFileElement(TBC::CHUNK_CLASS_MESH_LIST, (void*)pData, -1000));
 }
 
 bool ChunkyClassLoader::LoadElementCallback(TBC::ChunkyType pType, uint32 pSize, int64 pChunkEndPosition, void* pStorage)
@@ -446,13 +445,6 @@ bool ChunkyClassLoader::LoadElementCallback(TBC::ChunkyType pType, uint32 pSize,
 	{
 		FileElementList lLoadList;
 		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_CLASS_PHYS_MESH, (void*)lClass));
-		lOk = AllocLoadChunkyList(lLoadList, pChunkEndPosition);
-		assert(lOk);
-	}
-	else if (pType == TBC::CHUNK_CLASS_TAG_LIST)
-	{
-		FileElementList lLoadList;
-		lLoadList.push_back(ChunkyFileElement(TBC::CHUNK_CLASS_TAG, (void*)lClass));
 		lOk = AllocLoadChunkyList(lLoadList, pChunkEndPosition);
 		assert(lOk);
 	}
@@ -529,18 +521,6 @@ bool ChunkyClassLoader::LoadElementCallback(TBC::ChunkyType pType, uint32 pSize,
 			lClass->SetLastMeshMaterial(lMaterial);
 		}
 		assert(lOk);
-		delete[] (lBuffer);
-	}
-	else if (pType == TBC::CHUNK_CLASS_TAG)
-	{
-		uint8* lBuffer = 0;
-		lOk = (mFile->AllocReadData((void**)&lBuffer, pSize) == IO_OK);
-		assert(lOk);
-		if (lOk)
-		{
-			lOk = lClass->UnpackTag(lBuffer, pSize);
-			assert(lOk);
-		}
 		delete[] (lBuffer);
 	}
 	else

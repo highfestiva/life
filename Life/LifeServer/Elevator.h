@@ -27,7 +27,7 @@ public:
 protected:
 	virtual void OnTick(float pFrameTime);
 	virtual void OnAlarm(int pAlarmId, void* pExtraData);
-	void OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, TBC::PhysicsManager::ForceFeedbackListener* pBody);
+	virtual void OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, TBC::PhysicsManager::ForceFeedbackListener* pBody);
 	void Trig(const TBC::PhysicsTrigger* pTrigger);
 
 	float GetActiveMaxSpeedSquare() const;

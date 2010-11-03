@@ -12,8 +12,8 @@
 #define RTVAR_UI_DISPLAY_FREQUENCY		"Ui.Display.Frequency"
 #define RTVAR_UI_DISPLAY_FULLSCREEN		"Ui.Display.FullScreen"
 #define RTVAR_UI_DISPLAY_ENABLEVSYNC		"Ui.Display.EnableVSync"
+#define RTVAR_UI_DISPLAY_RENDERENGINE		"Ui.Display.RenderEngine"
 
-#define RTVAR_UI_3D_RENDERENGINE		"Ui.3D.RenderEngine"
 #define RTVAR_UI_3D_ENABLELIGHTS		"Ui.3D.EnableLights"
 #define RTVAR_UI_3D_ENABLECLEAR			"Ui.3D.EnableClear"
 #define RTVAR_UI_3D_ENABLEMASSOBJECTS		"Ui.3D.EnableMassObjects"

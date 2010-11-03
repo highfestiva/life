@@ -70,8 +70,8 @@ public:
 	virtual ~ChunkyClassLoader();
 
 protected:
-	bool LoadElementCallback(TBC::ChunkyType pType, uint32 pSize, int64 pChunkEndPosition, void* pStorage);
 	virtual void AddLoadElements(Parent::FileElementList& pElementList, TBC::ChunkyClass* pData);
+	bool LoadElementCallback(TBC::ChunkyType pType, uint32 pSize, int64 pChunkEndPosition, void* pStorage);
 
 private:
 	LOG_CLASS_DECLARE();

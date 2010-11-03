@@ -58,7 +58,7 @@ bool GameUiManager::Open()
 	int lDisplayBpp;
 	int lDisplayFrequency;
 	bool lDisplayFullScreen;
-	CURE_RTVAR_GET(lRenderTypeString, =, mVariableScope, RTVAR_UI_3D_RENDERENGINE, _T("OpenGL"));
+	CURE_RTVAR_GET(lRenderTypeString, =, mVariableScope, RTVAR_UI_DISPLAY_RENDERENGINE, _T("OpenGL"));
 	CURE_RTVAR_GET(lDisplayWidth, =, mVariableScope, RTVAR_UI_DISPLAY_WIDTH, 640);
 	CURE_RTVAR_GET(lDisplayHeight, =, mVariableScope, RTVAR_UI_DISPLAY_HEIGHT, 480);
 	CURE_RTVAR_GET(lDisplayBpp, =, mVariableScope, RTVAR_UI_DISPLAY_BITSPERPIXEL, 0);

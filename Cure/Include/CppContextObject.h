@@ -22,16 +22,19 @@ public:
 
 	void SetAllowNetworkLogic(bool pAllow);
 
+	const TBC::ChunkyClass::Tag* FindTag(const str& pTagType, int pFloatValueCount, int pStringValueCount, const std::vector<int>& pTriggerIndexArray) const;
+
 protected:
 	virtual void StartLoading();
 	void StartLoadingPhysics(const str& pPhysicsName);
 	virtual bool TryComplete();
 
 	TBC::ChunkyPhysics* GetPhysics() const;
+	virtual const TBC::ChunkyClass* GetClass() const;
 
 	void OnTick(float pFrameTime);
 	void OnAlarm(int pAlarmId, void* pExtraData);
-	void OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, TBC::PhysicsManager::ForceFeedbackListener* pBody);
+	virtual void OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, TBC::PhysicsManager::ForceFeedbackListener* pBody);
 	void OnForceApplied(TBC::PhysicsManager::ForceFeedbackListener* pOtherObject,
 		 TBC::PhysicsManager::BodyID pOwnBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
 		 const Vector3DF& pForce, const Vector3DF& pTorque,

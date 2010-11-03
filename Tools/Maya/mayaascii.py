@@ -626,6 +626,8 @@ class Node:
 
                 # Key: Local attribute / Value: (nodename, attrname) of source
                 self.in_connections = {}
+                # Key: Local attribute / Value: [(nodename, attrname),...] of source
+                self.in_multi_connections = {}
                 # Key: Local attribute / Value: List of (node, nodename, attrname) tuples
                 self.out_connections = {}
 
@@ -748,6 +750,9 @@ class Node:
                 attribute name.
                 """
                 self.in_connections[localattr] = (nodename, attrname)
+                if not self.in_multi_connections.get(localattr):
+                        self.in_multi_connections[localattr] = []
+                self.in_multi_connections[localattr].append((nodename, attrname))
 
         # addutConnection
         def addOutConnection(self, localattr, node, nodename, attrname):
@@ -804,6 +809,19 @@ class Node:
                 if node==None:
                         node, attr = self.in_connections.get(localattr_short, (None, None))
                 return node, attr
+
+        # getInNodes
+        def getInNodes(self, localattr_long, localattr_short):
+                """Return the nodes and attributes that serves as input for localattr.
+
+                The return value is a list of 2-tuples (nodename, attrname) that specifies
+                *ALL* input connections for localattr. [] is returned if there
+                is no connection.
+                """
+                data = self.in_multi_connections.get(localattr_long, [])
+                if not data:
+                        data = self.in_multi_connections.get(localattr_short, [])
+                return data
 
         # getOutNodes
         def getOutNodes(self, localattr_long, localattr_short):

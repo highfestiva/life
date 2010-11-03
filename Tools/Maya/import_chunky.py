@@ -583,21 +583,21 @@ class GroupReader(DefaultMAReader):
                                 mesh = mesh[0]
                                 outs = mesh.getOutNodes("iog", "iog")
                                 shaders = []
-                                spare_shader = None
+                                default_shader = None
                                 for o, oname, oattr in outs:
                                         if o.nodetype == "shadingEngine":
                                                 if not o in shaders:
-                                                        shader, iattr = o.getInNode("dsm", "dsm")
-                                                        if shader == mesh.getName() or shader.find(node.getName()+"|"+mesh.getName()) >= 0:
-                                                                if options.options.verbose:
-                                                                        print("Using shader %s from connection %s.%s." % (oname, shader, iattr))
-                                                                shaders.append(o)
-                                                        elif shader.find("|phys_") < 0:
-                                                                spare_shader = o
-                                if not shaders and spare_shader:
+                                                        for shader, iattr in o.getInNodes("dsm", "dsm"):
+                                                                if shader == mesh.getName() or shader.find(node.getName()+"|"+mesh.getName()) >= 0:
+                                                                        if options.options.verbose:
+                                                                                print("Using shader %s from connection %s.%s." % (oname, shader, iattr))
+                                                                        shaders.append(o)
+                                                                elif shader.find("|phys_") < 0:
+                                                                        default_shader = o
+                                if not shaders and default_shader:
                                         if options.options.verbose:
-                                                print("Using spare shader %s for %s." % (spare_shader.getName(), mesh.getFullName()))
-                                        shaders.append(spare_shader)
+                                                print("Using default shader %s for %s." % (default_shader.getName(), mesh.getFullName()))
+                                        shaders.append(default_shader)
                                 useShader = True
                                 if len(shaders) != 1:
                                         print("Warning: mesh %s om %s has wrong number of materials (%i)." % (mesh.getName(), node.getName(), len(shaders)))
@@ -841,7 +841,7 @@ class GroupReader(DefaultMAReader):
                                 for name, value in params:
                                         node.fix_attribute(name, value)
                                 def check_connected_to(l):
-                                        ok = (len(l) >= 1)
+                                        ok = (len(l) >= 0)
                                         all_engine_names = []
                                         for e in l:
                                                 ok &= (len(e) == 3)
@@ -849,11 +849,13 @@ class GroupReader(DefaultMAReader):
                                                 ok &= (e[1] >= 0 and e[1] <= 300)
                                                 ok &= (e[2] in ["toggle", "minimum", "maximum"])
                                                 connected_to = self._regexpnodes(e[0], group)
-                                                ok &= (len(connected_to) > 0)
+                                                ok &= (len(connected_to) >= 1)
                                                 for cn in connected_to:
                                                         all_engine_names += [cn.getName()]
                                                         ok &= cn.getName().startswith("engine:")
-                                        engines = "+".join(all_engine_names)
+                                        function = node.get_fixed_attribute("function", False, "")
+                                        priority = node.get_fixed_attribute("priority", False, "")
+                                        engines = function + "__" + str(priority//100) + "__" + "+".join(all_engine_names)
                                         if not engines in self.triggergroups:
                                                 self.triggergroups += [engines]
                                         groupindex = self.triggergroups.index(engines)
@@ -861,7 +863,10 @@ class GroupReader(DefaultMAReader):
                                         return ok
                                 def check_triggered_by(l):
                                         ok = (type(l) == str)
-                                        triggered_by = self.findNode(l)
+                                        try:
+                                                triggered_by = self.findNode(l)
+                                        except KeyError:
+                                                triggered_by = None
                                         ok &= (triggered_by != None or triggertype == "always")
                                         return ok
                                 required = [("type", lambda x: type(x) == str),
@@ -910,7 +915,7 @@ class GroupReader(DefaultMAReader):
 
                         elif section.startswith("tag:"):
                                 tagtype = stripQuotes(config.get(section, "type"))
-                                tagOk = tagtype in ["eye", "brake_light", "reverse_light", "engine_sound", "exhaust"]
+                                tagOk = tagtype in ["eye", "brake_light", "reverse_light", "engine_sound", "exhaust", "trigger_data"]
                                 allApplied &= tagOk
                                 if not tagOk:
                                         print("Error: invalid tag type '%s'." % tagtype)

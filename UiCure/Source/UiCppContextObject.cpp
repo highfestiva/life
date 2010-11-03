@@ -305,7 +305,7 @@ GameUiManager* CppContextObject::GetUiManager() const
 	return (mUiManager);
 }
 
-const UiTbc::ChunkyClass* CppContextObject::GetClass() const
+const TBC::ChunkyClass* CppContextObject::GetClass() const
 {
 	if (mUiClassResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
@@ -330,6 +330,7 @@ TBC::GeometryBase* CppContextObject::GetMesh(int pIndex) const
 	}
 	return (0);
 }
+
 
 
 void CppContextObject::OnLoadClass(UserClassResource* pClassResource)

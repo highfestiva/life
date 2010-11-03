@@ -223,6 +223,7 @@ Engine
 + Use a zipped archive for data.
 + Make Maya import pipeline use the proper materials for each mesh instance (i.e. saucer lights).
 + Make sure FPS is smooth, even though it's a fixed number. Currently the physics step count looks like 1, 1, 1, 1, 1, 2, 1, 1...
+. Drop shadow rendering from semi-transparent meshes (see outline rendering+hovercraft).
 . Make sure camera never collides with physical objects. Make camera always keep a free line of sight to the controlled object.
 . Fix shadows, some are not rendered in correct places; trees, monster buildings.
 . Optimize: startup. Very slow on slow computer. Try using zip archives? Using less files might help antivirus?

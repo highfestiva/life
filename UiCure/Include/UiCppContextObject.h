@@ -58,7 +58,7 @@ protected:
 	};
 
 	GameUiManager* GetUiManager() const;
-	const UiTbc::ChunkyClass* GetClass() const;
+	virtual const TBC::ChunkyClass* GetClass() const;
 	TBC::GeometryBase* GetMesh(int pIndex) const;
 
 	void OnLoadClass(UserClassResource* pClassResource);

@@ -695,6 +695,14 @@
 			Name="Server"
 			>
 			<File
+				RelativePath="..\LifeServer\BulletTime.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\LifeServer\BulletTime.h"
+				>
+			</File>
+			<File
 				RelativePath="..\LifeServer\Client.cpp"
 				>
 			</File>

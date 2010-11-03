@@ -294,6 +294,10 @@ void ContextObject::AddTrigger(TBC::PhysicsManager::TriggerID pTriggerId, const 
 	mTriggerMap.insert(TriggerMap::value_type(pTriggerId, pTrigger));
 }
 
+void ContextObject::FinalizeTriggers()
+{
+}
+
 const void* ContextObject::GetTrigger(TBC::PhysicsManager::TriggerID pTriggerId) const
 {
 	return HashUtil::FindMapObject(mTriggerMap, pTriggerId);
@@ -1177,6 +1181,10 @@ void ContextObject::SetupChildHandlers()
 		const TBC::PhysicsTrigger* lTrigger = mPhysics->GetTrigger(x);
 		if (lLastGroupIndex != lTrigger->GetGroupIndex())
 		{
+			if (lHandlerChild)
+			{
+				lHandlerChild->FinalizeTriggers();
+			}
 			lLastGroupIndex = lTrigger->GetGroupIndex();
 			lHandlerChild = GetManager()->GetGameManager()->CreateLogicHandler(lTrigger->GetFunction());
 			AddChild(lHandlerChild);
@@ -1186,6 +1194,10 @@ void ContextObject::SetupChildHandlers()
 			AddTrigger(lTrigger->GetPhysicsTriggerId(), lHandlerChild);
 			lHandlerChild->AddTrigger(lTrigger->GetPhysicsTriggerId(), lTrigger);
 		}
+	}
+	if (lHandlerChild)
+	{
+		lHandlerChild->FinalizeTriggers();
 	}
 
 	const int lSpawnerCount = mPhysics->GetSpawnerCount();

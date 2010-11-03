@@ -17,7 +17,8 @@ namespace Cure
 
 
 
-static const int gTimeWrapLimit = 10*60;	// Unit is seconds. Anything small is good enough.
+static const int gTimeWrapLimit = 10*60*60;	// Unit is seconds. Anything small is good enough.
+static const int gPhysicsFrameWrapLimit = gTimeWrapLimit*CURE_STANDARD_FRAME_RATE;
 
 
 
@@ -46,14 +47,12 @@ void TimeManager::Clear(int pPhysicsFrameCounter)
 	mAverageFrameTime = mCurrentFrameTime;
 	mPhysicsFrameTime = mAverageFrameTime;
 	mPhysicsStepCount = 1;
-	mPhysicsFrameWrapLimit = gTimeWrapLimit*mTargetFrameRate;
 }
 
 void TimeManager::Tick()
 {
 	CURE_RTVAR_GET(mTargetFrameRate, =, Cure::GetSettings(), RTVAR_PHYSICS_FPS, 2);
 	CURE_RTVAR_GET(mRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
-	mPhysicsFrameWrapLimit = gTimeWrapLimit*mTargetFrameRate;
 
 	mCurrentFrameTime = (float)mTime.PopTimeDiff();
 	if (mCurrentFrameTime > 1.0)	// Never take longer steps than one second.
@@ -148,26 +147,26 @@ int TimeManager::GetCurrentPhysicsFrameAddFrames(int pFrames) const
 
 int TimeManager::GetCurrentPhysicsFrameAddSeconds(float pSeconds) const
 {
-	assert(pSeconds <= 60);
+	assert(pSeconds <= 10*60);
 	return GetCurrentPhysicsFrameAddFrames(ConvertSecondsToPhysicsFrames(pSeconds));
 }
 
 int TimeManager::GetPhysicsFrameAddFrames(int pFrameCounter, int pFrames) const
 {
-	assert(pFrames > -mPhysicsFrameWrapLimit/2 &&
-		pFrames < mPhysicsFrameWrapLimit/2);
+	assert(pFrames > -gTimeWrapLimit/2 &&
+		pFrames < gTimeWrapLimit/2);
 
 	int lNewFrame = pFrameCounter + pFrames;
 	if (lNewFrame < 0)
 	{
-		lNewFrame += mPhysicsFrameWrapLimit;
+		lNewFrame += gTimeWrapLimit;
 	}
-	else if (lNewFrame >= mPhysicsFrameWrapLimit)
+	else if (lNewFrame >= gTimeWrapLimit)
 	{
-		lNewFrame -= mPhysicsFrameWrapLimit;
+		lNewFrame -= gTimeWrapLimit;
 	}
 
-	assert(lNewFrame >= 0 && lNewFrame < mPhysicsFrameWrapLimit);
+	assert(lNewFrame >= 0 && lNewFrame < gTimeWrapLimit);
 	return lNewFrame;
 }
 
@@ -178,7 +177,7 @@ int TimeManager::GetCurrentPhysicsFrameDelta(int pStart) const
 
 int TimeManager::GetPhysicsFrameDelta(int pEnd, int pStart) const
 {
-	if (pStart >= mPhysicsFrameWrapLimit || pEnd >= mPhysicsFrameWrapLimit)
+	if (pStart >= gTimeWrapLimit || pEnd >= gTimeWrapLimit)
 	{
 		return -1;
 	}
@@ -186,16 +185,16 @@ int TimeManager::GetPhysicsFrameDelta(int pEnd, int pStart) const
 	assert(pStart >= 0);
 
 	int lDiff = pEnd - pStart;
-	if (lDiff > mPhysicsFrameWrapLimit/2)
+	if (lDiff > gTimeWrapLimit/2)
 	{
-		lDiff -= mPhysicsFrameWrapLimit;
+		lDiff -= gTimeWrapLimit;
 	}
-	else if (lDiff < -mPhysicsFrameWrapLimit/2)
+	else if (lDiff < -gTimeWrapLimit/2)
 	{
-		lDiff += mPhysicsFrameWrapLimit;
+		lDiff += gTimeWrapLimit;
 	}
 
-	assert(lDiff > -mPhysicsFrameWrapLimit/2 && lDiff < mPhysicsFrameWrapLimit/2);
+	assert(lDiff > -gTimeWrapLimit/2 && lDiff < gTimeWrapLimit/2);
 	return lDiff;
 }
 

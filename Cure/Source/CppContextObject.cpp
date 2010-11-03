@@ -47,6 +47,26 @@ void CppContextObject::SetAllowNetworkLogic(bool pAllow)
 
 
 
+const TBC::ChunkyClass::Tag* CppContextObject::FindTag(const str& pTagType, int pFloatValueCount, int pStringValueCount, const std::vector<int>& pTriggerIndexArray) const
+{
+	const TBC::ChunkyClass* lClass = GetClass();
+	for (size_t x = 0; x < lClass->GetTagCount(); ++x)
+	{
+		const TBC::ChunkyClass::Tag& lTag = lClass->GetTag(x);
+		if (lTag.mTagName == pTagType &&
+			lTag.mFloatValueList.size() == (size_t)pFloatValueCount &&
+			lTag.mStringValueList.size() == (size_t)pStringValueCount &&
+			lTag.mBodyIndexList.size() == pTriggerIndexArray.size() &&
+			std::equal(lTag.mBodyIndexList.begin(), lTag.mBodyIndexList.end(), pTriggerIndexArray.begin()))
+		{
+			return &lTag;
+		}
+	}
+	return 0;
+}
+
+
+
 void CppContextObject::StartLoading()
 {
 	assert(mClassResource == 0);
@@ -96,6 +116,15 @@ TBC::ChunkyPhysics* CppContextObject::GetPhysics() const
 	if (mPhysicsResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
 		return (mPhysicsResource->GetData());
+	}
+	return (0);
+}
+
+const TBC::ChunkyClass* CppContextObject::GetClass() const
+{
+	if (mClassResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
+	{
+		return (mClassResource->GetRamData());
 	}
 	return (0);
 }

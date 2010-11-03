@@ -8,7 +8,6 @@
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/GameManager.h"
 #include "../../Cure/Include/RuntimeVariable.h"
-#include "../../Lepra/Include/HashUtil.h"
 #include "../../Lepra/Include/Random.h"
 #include "../../TBC/Include/PhysicsSpawner.h"
 #include "RtVar.h"

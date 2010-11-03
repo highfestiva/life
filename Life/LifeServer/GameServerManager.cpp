@@ -16,6 +16,7 @@
 #include "../LifeMaster/MasterServer.h"
 #include "../LifeApplication.h"
 #include "../LifeString.h"
+#include "BulletTime.h"
 #include "Elevator.h"
 #include "MasterServerConnection.h"
 #include "RtVar.h"
@@ -949,6 +950,10 @@ Cure::ContextObject* GameServerManager::CreateLogicHandler(const str& pType) con
 	else if (pType == _T("spawner"))
 	{
 		return new Spawner(GetContext());
+	}
+	else if (pType == _T("real_time_ratio"))
+	{
+		return new BulletTime(GetContext());
 	}
 	assert(false);
 	return (0);

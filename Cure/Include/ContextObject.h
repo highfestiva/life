@@ -79,6 +79,7 @@ public:
 	void RemoveAttribute(ContextObjectAttribute* pAttribute);
 
 	void AddTrigger(TBC::PhysicsManager::TriggerID pTriggerId, const void*);
+	virtual void FinalizeTriggers();
 	const void* GetTrigger(TBC::PhysicsManager::TriggerID pTriggerId) const;
 	size_t GetTriggerCount(const void*& pTrigger) const;
 

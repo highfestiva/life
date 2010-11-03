@@ -273,6 +273,7 @@ public:
 
 protected:
 	virtual void AddLoadElements(FileElementList& pElementList, ChunkyClass* pData);
+	bool LoadElementCallback(ChunkyType pType, uint32 pSize, int64 pChunkEndPosition, void* pStorage);
 
 private:
 	LOG_CLASS_DECLARE();

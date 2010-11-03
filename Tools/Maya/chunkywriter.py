@@ -591,9 +591,9 @@ class PhysWriter(ChunkyWriter):
 
                 connected_to = node.get_fixed_attribute("connected_to")
                 connected_to = self._expand_connected_list(connected_to, self.engines)
-                if len(connected_to) < 1:
-                        print("Error: could not find any matching nodes to connect trigger '%s' to." % node.getFullName())
-                        sys.exit(19)
+                #if len(connected_to) < 1:
+                #        print("Error: could not find any matching nodes to connect trigger '%s' to." % node.getFullName())
+                #        sys.exit(19)
                 self._writeint(len(connected_to))
                 for connection in connected_to:
                         engine, delay, function = connection
@@ -775,7 +775,8 @@ class ClassWriter(ChunkyWriter):
                                                 (CHUNK_CLASS_TAG_LIST, tags),
                                         )
                                 )
-                        #pprint.pprint(data)
+                        if options.options.verbose:
+                                pprint.pprint(data)
                         self._writechunk(data)
                         self._addfeat("class:classes", 1)
                 self._verifywritten("physics->mesh links", self.meshes)

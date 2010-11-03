@@ -56,7 +56,7 @@ void Machine::OnPhysicsTick()
 	}
 
 	const TBC::ChunkyPhysics* lPhysics = GetPhysics();
-	const UiTbc::ChunkyClass* lClass = GetClass();
+	const TBC::ChunkyClass* lClass = GetClass();
 	if (!lPhysics || !lClass)
 	{
 		return;
