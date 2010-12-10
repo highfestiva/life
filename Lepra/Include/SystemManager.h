@@ -54,6 +54,7 @@ public:
 	static uint64 GetAvailRam();
 	static uint64 GetAmountVirtualMemory();
 	static uint64 GetAvailVirtualMemory();
+	static double GetSleepResolution();
 
 	static int GetQuitRequest();
 	static void AddQuitRequest(int pValue);
@@ -67,6 +68,8 @@ private:
 
 	static int mQuitRequest;
 	static QuitRequestCallback mQuitRequestCallback;
+
+	static double mSleepResolution;
 
 	LOG_CLASS_DECLARE();
 };

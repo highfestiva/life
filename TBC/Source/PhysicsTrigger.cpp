@@ -107,6 +107,11 @@ void PhysicsTrigger::SetTriggerGeometry(ChunkyBoneGeometry* pGeometry)
 	mTriggerNode = pGeometry;
 }
 
+ChunkyBoneGeometry* PhysicsTrigger::GetTriggerGeometry() const
+{
+	return mTriggerNode;
+}
+
 void PhysicsTrigger::AddControlledEngine(PhysicsEngine* pEngine, float pDelay, str pFunction)
 {
 	EngineTrigger lConnection;

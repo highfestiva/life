@@ -53,7 +53,9 @@ void BulletTime::FinalizeTriggers()
 			const TBC::PhysicsTrigger* lTrigger = lPhysics->GetTrigger(y);
 			if (lTrigger->GetPhysicsTriggerId() == x->first)
 			{
-				lTriggerIndexArray.push_back(y);
+				const int lBoneIndex = lPhysics->GetIndex(lTrigger->GetTriggerGeometry());
+				assert(lBoneIndex >= 0);
+				lTriggerIndexArray.push_back(lBoneIndex);
 				break;
 			}
 		}
@@ -102,6 +104,8 @@ void BulletTime::OnAlarm(int pAlarmId, void* pExtraData)
 
 void BulletTime::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, TBC::PhysicsManager::ForceFeedbackListener* pListener)
 {
+	(void)pTriggerId;
+
 	if (!mAllowBulletTime)
 	{
 		return;
@@ -127,8 +131,6 @@ void BulletTime::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, TBC::Physi
 	}
 
 	mAllowBulletTime = false;
-	const TBC::PhysicsTrigger* lTrigger = (const TBC::PhysicsTrigger*)GetTrigger(pTriggerId);
-	assert(lTrigger);
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_PHYSICS_RTR, mRealTimeRatio);
 	((GameServerManager*)GetManager()->GetGameManager())->BroadcastStatusMessage(
 		Cure::MessageStatus::INFO_COMMAND,

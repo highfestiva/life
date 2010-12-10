@@ -56,6 +56,7 @@ public:
 	const str& GetFunction() const;
 
 	void SetTriggerGeometry(ChunkyBoneGeometry* pGeometry);
+	ChunkyBoneGeometry* GetTriggerGeometry() const;
 	void AddControlledEngine(PhysicsEngine* pEngine, float pDelay, str pFunction);
 	int GetControlledEngineCount() const;
 	const EngineTrigger& GetControlledEngine(int pIndex) const;

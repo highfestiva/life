@@ -317,13 +317,14 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 		break;
 		case COMMAND_SHOW_SYSTEM_INFO:
 		{
-			mLog.Infof(_T("Login:         %s"), SystemManager::GetLoginName().c_str());
-			mLog.Infof(_T("Full name:     %s"), SystemManager::QueryFullUserName().c_str());
-			mLog.Infof(_T("OS:            %s"), SystemManager::GetOsName().c_str());
-			mLog.Infof(_T("CPU:           %s at %sHz"), SystemManager::GetCpuName().c_str(), Number::ConvertToPostfixNumber((double)SystemManager::QueryCpuFrequency(), 1).c_str());
-			mLog.Infof(_T("CPU count:     %u physical, %u cores, %u logical"), SystemManager::GetPhysicalCpuCount(), SystemManager::GetCoreCount(), SystemManager::GetLogicalCpuCount());
-			mLog.Infof(_T("Physical RAM:  %sB"), Number::ConvertToPostfixNumber((double)SystemManager::GetAmountRam(), 1).c_str());
-			mLog.Infof(_T("Available RAM: %sB"), Number::ConvertToPostfixNumber((double)SystemManager::GetAvailRam(), 1).c_str());
+			mLog.Infof(_T("Login:            %s"), SystemManager::GetLoginName().c_str());
+			mLog.Infof(_T("Full name:        %s"), SystemManager::QueryFullUserName().c_str());
+			mLog.Infof(_T("OS:               %s"), SystemManager::GetOsName().c_str());
+			mLog.Infof(_T("CPU:              %s at %sHz"), SystemManager::GetCpuName().c_str(), Number::ConvertToPostfixNumber((double)SystemManager::QueryCpuFrequency(), 1).c_str());
+			mLog.Infof(_T("CPU count:        %u physical, %u cores, %u logical"), SystemManager::GetPhysicalCpuCount(), SystemManager::GetCoreCount(), SystemManager::GetLogicalCpuCount());
+			mLog.Infof(_T("Physical RAM:     %sB"), Number::ConvertToPostfixNumber((double)SystemManager::GetAmountRam(), 1).c_str());
+			mLog.Infof(_T("Available RAM:    %sB"), Number::ConvertToPostfixNumber((double)SystemManager::GetAvailRam(), 1).c_str());
+			mLog.Infof(_T("Sleep resolution: %f s"), SystemManager::GetSleepResolution());
 		}
 		break;
 		case COMMAND_SHOW_GAME_INFO:

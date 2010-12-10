@@ -56,6 +56,15 @@ Game
 + Impove camera movement: make it point more in the direction where the object is going.
 + Smoke puffs from the exhaust.
 . Bullet time triggers. For instance on monster jumps. Implement on server, so that all physics engines run in sync.
+. Have modes:
+  - Normal.
+  - Excavate  = digging or convert earth to blocks.
+  - Build/add = inverted digging or convert blocks to earth (or even blocks=>any structure).
+  - Pick up   = Put blocks in inventory.
+  - Construct = create static objects.
+  - Make      = create dynamic objects.
+  - Conjure   = create trigger objects.
+ (- Attach    = attach dynamic/dynamic or dynamic/static or dynamic/trigger objects via joints.)
 . Teleporters: to race track, castle, monster jam site... Show an "icon" above each portal.
 . Small train + railroad boom.
 . Rocket which is regularly sent up. How return? Via hatch in the ground? Landing again?

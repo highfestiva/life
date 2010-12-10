@@ -239,29 +239,34 @@ void Application::TickSleep(double pMeasuredFrameTime) const
 		int lFps;
 		CURE_RTVAR_GET(lFps, =, Cure::GetSettings(), RTVAR_PHYSICS_FPS, 2);
 		double lWantedFrameTime = lFps? 1.0/lFps : 1;
-		double lSleepTime = lWantedFrameTime - pMeasuredFrameTime - mGameTicker->GetTickTimeReduction();
+		const double lSleepTime = lWantedFrameTime - pMeasuredFrameTime - mGameTicker->GetTickTimeReduction();
 		const double MINIMUM_SLEEP_TIME = 0.001;
 		const double MAXIMUM_SLEEP_TIME = 0.01;
 		if (lSleepTime >= MINIMUM_SLEEP_TIME)
 		{
+			double lSleepTimeLeft = lSleepTime;
 			HiResTimer lSleepTimer;
-			while (lSleepTime >= MINIMUM_SLEEP_TIME)
+			while (lSleepTimeLeft >= MINIMUM_SLEEP_TIME)
 			{
-				if (lSleepTime > MAXIMUM_SLEEP_TIME*1.5)
+				if (lSleepTimeLeft > MAXIMUM_SLEEP_TIME*1.5)
 				{
 					mGameTicker->PollRoundTrip();
 					Thread::Sleep(MAXIMUM_SLEEP_TIME);
 				}
+				else if (lSleepTimeLeft <= SystemManager::GetSleepResolution())
+				{
+					Thread::Sleep(lSleepTimeLeft);
+				}
 				else
 				{
-					Thread::Sleep(lSleepTime);
+					Thread::YieldCpu();	// For lousy computers that have very big sleep intervals.
 				}
-				lSleepTime -= lSleepTimer.PopTimeDiff();
+				lSleepTimeLeft = lSleepTime - lSleepTimer.QueryTimeDiff();
 			}
 		}
 		else
 		{
-			Thread::YieldCpu();	// Play nice!
+			Thread::YieldCpu();	// Play nice even though time's up!
 		}
 	}
 }

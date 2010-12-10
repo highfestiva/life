@@ -4,10 +4,11 @@
 
 
 
+#include "../Include/SystemManager.h"
+#include <algorithm>
 #include "../Include/HiResTimer.h"
 #include "../Include/Random.h"
 #include "../Include/SHA1.h"
-#include "../Include/SystemManager.h"
 #include "../Include/Thread.h"
 
 
@@ -141,6 +142,31 @@ unsigned SystemManager::QueryCpuMips()
 
 
 
+double SystemManager::GetSleepResolution()
+{
+	if (mSleepResolution)
+	{
+		return mSleepResolution;
+	}
+
+	mSleepResolution = 1.0;
+	std::vector<double> lMeasuredTimes;
+	lMeasuredTimes.reserve(5);
+	Thread::YieldCpu();
+	const int lMeasurementCount = 3;
+	for (int x = 0; x < lMeasurementCount; ++x)
+	{
+		HiResTimer lSleepTime;
+		Thread::Sleep(0.001);
+		lMeasuredTimes.push_back(lSleepTime.QueryTimeDiff());
+	}
+	std::sort(lMeasuredTimes.begin(), lMeasuredTimes.end());
+	mSleepResolution = lMeasuredTimes[lMeasurementCount/2];
+	return mSleepResolution;
+}
+
+
+
 int SystemManager::GetQuitRequest()
 {
 	return (mQuitRequest);
@@ -209,7 +235,7 @@ BogoLoop:	loop	BogoLoop
 
 int SystemManager::mQuitRequest = 0;
 SystemManager::QuitRequestCallback SystemManager::mQuitRequestCallback;
-
+double SystemManager::mSleepResolution = 0;
 
 LOG_CLASS_DEFINE(GENERAL, SystemManager);
 
