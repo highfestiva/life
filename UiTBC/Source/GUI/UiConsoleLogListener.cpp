@@ -48,7 +48,7 @@ void ConsoleLogListener::WriteLog(const str& pFullMessage, Log::LogLevel pLevel)
 			case Log::LEVEL_INFO:		lColor.Set(0.7f, 0.7f, 0.7f, 1.0f);	break;
 			case Log::LEVEL_PERFORMANCE:	lColor.Set(0.0f, 1.0f, 0.0f, 1.0f);	break;
 			case Log::LEVEL_HEADLINE:	lColor.Set(1.0f, 1.0f, 1.0f, 1.0f);	break;
-			case Log::LEVEL_WARNING:		lColor.Set(1.0f, 1.0f, 0.0f, 1.0f);	break;
+			case Log::LEVEL_WARNING:	lColor.Set(1.0f, 1.0f, 0.0f, 1.0f);	break;
 			case Log::LEVEL_ERROR:		lColor.Set(1.0f, 0.0f, 0.0f, 1.0f);	break;
 			default:	// Fall through.
 			case Log::LEVEL_FATAL:		lColor.Set(1.0f, 0.5f, 0.0f, 1.0f);	break;

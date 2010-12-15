@@ -36,6 +36,10 @@ UserResource::~UserResource()
 	{
 		SafeRelease(mResource->GetManager());
 	}
+	else
+	{
+		assert(false);
+	}
 	SetParentResource(0);
 }
 
@@ -759,6 +763,14 @@ void ResourceManager::SafeRelease(UserResource* pUserResource)
 			lResource->FreeDiversified(pUserResource);
 			Release(lResource);
 		}
+		else
+		{
+			assert(false);
+		}
+	}
+	else
+	{
+		assert(false);
 	}
 }
 

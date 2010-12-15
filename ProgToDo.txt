@@ -55,7 +55,8 @@ Game
 + Find a way to connect through firewalls!
 + Impove camera movement: make it point more in the direction where the object is going.
 + Smoke puffs from the exhaust.
-. Bullet time triggers. For instance on monster jumps. Implement on server, so that all physics engines run in sync.
++ Bullet time triggers. For instance on monster jumps. Implement on server, so that all physics engines run in sync.
+. Implement pick-up helpers, so that any object O that touches a hoe/fork/whatever, while O is owned by the avatar (controlling the hoe/fork/whatever), causes an attracting force/torque. (So O can be picked up by for instance the excavator.)
 . Have modes:
   - Normal.
   - Excavate  = digging or convert earth to blocks.
@@ -232,7 +233,7 @@ Engine
 + Use a zipped archive for data.
 + Make Maya import pipeline use the proper materials for each mesh instance (i.e. saucer lights).
 + Make sure FPS is smooth, even though it's a fixed number. Currently the physics step count looks like 1, 1, 1, 1, 1, 2, 1, 1...
-. Drop shadow rendering from semi-transparent meshes (see outline rendering+hovercraft).
++ Drop shadow rendering from semi-transparent meshes (see outline rendering+hovercraft).
 . Make sure camera never collides with physical objects. Make camera always keep a free line of sight to the controlled object.
 . Fix shadows, some are not rendered in correct places; trees, monster buildings.
 . Optimize: startup. Very slow on slow computer. Try using zip archives? Using less files might help antivirus?

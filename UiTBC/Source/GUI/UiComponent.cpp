@@ -139,6 +139,7 @@ void Component::DeleteChildrenInLayer(int pLayer)
 		Component* lChild = mLayout[pLayer]->GetFirst();
 		while (lChild != 0)
 		{
+			lChild->SetParent(0);
 			delete lChild;
 			lChild = mLayout[pLayer]->GetNext();
 		}

@@ -77,7 +77,7 @@ public:
 		MAT_TEXTURE_AND_DIFFUSE_BUMPMAP_PXS,	// Texture + normal map. Faster.
 		MAT_TEXTURE_SBMAP_PXS,			// Texture + specular map + normal map.
 
-		MAT_SOLID_COUNT = MAT_TEXTURE_SBMAP_PXS,
+		MAT_LAST_SOLID = MAT_TEXTURE_SBMAP_PXS,
 
 		MAT_SINGLE_TEXTURE_ALPHATESTED,
 

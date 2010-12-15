@@ -112,6 +112,7 @@ public:
 	BoneType GetBoneType() const;
 	PhysicsManager::JointID GetJointId() const;
 	PhysicsManager::BodyID GetBodyId() const;
+	void ResetBodyId();
 	PhysicsManager::TriggerID GetTriggerId() const;
 	bool IsConnectorType(ConnectorType pType) const;
 	void AddConnectorType(ConnectorType pType);

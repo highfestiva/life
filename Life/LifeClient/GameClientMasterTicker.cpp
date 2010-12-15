@@ -650,35 +650,84 @@ bool GameClientMasterTicker::Initialize()
 		{
 			UiLepra::PngLoader lLogoLoader;
 			UiLepra::Canvas lCanvas;
-			if (lLogoLoader.Load(_T("Data/fist.png"), lCanvas) == UiLepra::PngLoader::STATUS_SUCCESS)
+			if (lLogoLoader.Load(_T("Data/megaphone.png"), lCanvas) == UiLepra::PngLoader::STATUS_SUCCESS)
 			{
+				const UiLepra::SoundManager::SoundID lSoundId = mUiManager->GetSoundManager()->LoadSound2D(_T("Data/logo_trumpet.wav"), UiLepra::SoundManager::LOOP_NONE, 0);
+				UiLepra::SoundManager::SoundInstanceID lSoundInstanceId = UiLepra::INVALID_SOUNDINSTANCEID;
+				if (lSoundId != UiLepra::INVALID_SOUNDID)
+				{
+					lSoundInstanceId = mUiManager->GetSoundManager()->CreateSoundInstance(lSoundId);
+					mUiManager->GetSoundManager()->Play(lSoundInstanceId, 1, 1);
+				}
 				const UiTbc::Painter::ImageID lImageId = mUiManager->GetDesktopWindow()->GetImageManager()->AddImage(lCanvas, UiTbc::GUIImageManager::STRETCHED, UiTbc::GUIImageManager::NO_BLEND, 255);
 				UiTbc::RectComponent lRect(lImageId, _T("logo"));
 				mUiManager->AssertDesktopLayout(new UiTbc::FloatingLayout, 0);
 				mUiManager->GetDesktopWindow()->AddChild(&lRect, 0, 0, 0);
 				const unsigned lWidth = mUiManager->GetDisplayManager()->GetWidth();
 				const unsigned lHeight = mUiManager->GetDisplayManager()->GetHeight();
-				lRect.SetPreferredSize(lHeight/2*1024/1034, lHeight/2);
-				lRect.SetPos(lWidth/2 - lRect.GetPreferredWidth()/2, lHeight/15);
+				lRect.SetPreferredSize(lCanvas.GetWidth(), lCanvas.GetHeight());
+				const unsigned lTargetX = lWidth/2 - lCanvas.GetWidth()/2;
+				const unsigned lTargetY = lHeight/2 - lCanvas.GetHeight()/2;
 				mUiManager->GetRenderer()->ResetClippingRect();
 				Color lColor;
 				mUiManager->GetRenderer()->SetClearColor(Color());
-				float y = (float)lRect.GetPos().y;
-				for (int z = 0; z < 180 && lOk; ++z)
-				{
+				mUiManager->GetDisplayManager()->SetVSyncEnabled(true);
+
+				const float lMin = 0;
+				const float lMax = 26;
+				const int lStepCount = 50;
+				const float lBaseStep = (lMax-lMin)/(float)lStepCount;
+			        float lBase = -lMax;
+			        int lCount = 0;
+				const int lTotalFrameCount = 550;
+				for (lCount = 0; lCount <= lTotalFrameCount && SystemManager::GetQuitRequest() == 0; ++lCount)
+		                {
+					if (lCount < lStepCount || lCount > lTotalFrameCount-lStepCount)
+					{
+			                        lBase += lBaseStep;
+					}
+					int lMovement = (int)(::fabs(lBase)*lBase*3);
+					lRect.SetPos(lTargetX+lMovement, lTargetY);
+
 					mUiManager->GetRenderer()->Clear();
 					mUiManager->Paint();
-					mUiManager->GetDisplayManager()->SetVSyncEnabled(true);
 					mUiManager->GetDisplayManager()->UpdateScreen();
 
-					y = Math::Lerp(y, 0.0f, 0.05f);
-					lRect.SetPos(lRect.GetPos().x, (int)y);
-					Thread::Sleep(0.01);
+					if (SystemManager::GetSleepResolution() <= 0.01)
+					{
+						Thread::Sleep(0.01);
+					}
+					else
+					{
+						HiResTimer lTimer;
+						while (lTimer.QueryTimeDiff() < 0.01)
+						{
+							Thread::YieldCpu();
+						}
+					}
 					mUiManager->InputTick();
 					lOk = (SystemManager::GetQuitRequest() <= 0);
+
+					if (lCount == lStepCount)
+					{
+						lBase = 0;
+					}
+					else if (lCount == lTotalFrameCount-lStepCount)
+					{
+						lBase = lMin;
+					}
 				}
 				mUiManager->GetDesktopWindow()->RemoveChild(&lRect, 0);
 				mUiManager->GetDesktopWindow()->GetImageManager()->RemoveImage(lImageId);
+
+				if (lSoundInstanceId != UiLepra::INVALID_SOUNDINSTANCEID)
+				{
+					mUiManager->GetSoundManager()->DeleteSoundInstance(lSoundInstanceId);
+				}
+				if (lSoundId != UiLepra::INVALID_SOUNDID)
+				{
+					mUiManager->GetSoundManager()->Release(lSoundId);
+				}
 			}
 		}
 
@@ -714,6 +763,7 @@ bool GameClientMasterTicker::Reinitialize()
 			lSlave->Close();
 		}
 	}
+	DeleteServer();
 	delete mSunlight;
 	mSunlight = 0;
 	mResourceManager->StopClear();
@@ -732,10 +782,6 @@ bool GameClientMasterTicker::Reinitialize()
 
 		mSunlight = new Sunlight(mUiManager);
 		mUiManager->GetInputManager()->AddKeyCodeInputObserver(this);
-	}
-	if (lOk)
-	{
-		DeleteServer();
 	}
 	if (lOk)
 	{

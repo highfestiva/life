@@ -195,17 +195,26 @@ void ChunkyBoneGeometry::RemovePhysics(PhysicsManager* pPhysics)
 {
 	if (mJointId != INVALID_JOINT)
 	{
-		pPhysics->DeleteJoint(mJointId);
+		if (pPhysics)
+		{
+			pPhysics->DeleteJoint(mJointId);
+		}
 		mJointId = INVALID_JOINT;
 	}
 	if (mBodyId != INVALID_BODY)
 	{
-		pPhysics->DeleteBody(mBodyId);
+		if (pPhysics)
+		{
+			pPhysics->DeleteBody(mBodyId);
+		}
 		mBodyId = INVALID_BODY;
 	}
 	if (mTriggerId != INVALID_TRIGGER)
 	{
-		pPhysics->DeleteTrigger(mTriggerId);
+		if (pPhysics)
+		{
+			pPhysics->DeleteTrigger(mTriggerId);
+		}
 		mTriggerId = INVALID_TRIGGER;
 	}
 }
@@ -236,6 +245,11 @@ PhysicsManager::JointID ChunkyBoneGeometry::GetJointId() const
 PhysicsManager::BodyID ChunkyBoneGeometry::GetBodyId() const
 {
 	return (mBodyId);
+}
+
+void ChunkyBoneGeometry::ResetBodyId()
+{
+	mBodyId = INVALID_BODY;
 }
 
 PhysicsManager::TriggerID ChunkyBoneGeometry::GetTriggerId() const

@@ -140,10 +140,7 @@ void ChunkyPhysics::ClearBoneGeometries(PhysicsManager* pPhysics)
 		ChunkyBoneGeometry* lGeometry = mGeometryArray[x];
 		if (lGeometry)
 		{
-			if (pPhysics)
-			{
-				lGeometry->RemovePhysics(pPhysics);
-			}
+			lGeometry->RemovePhysics(pPhysics);
 			delete (lGeometry);
 			mGeometryArray[x] = 0;
 		}

@@ -1197,7 +1197,7 @@ unsigned OpenGLRenderer::RenderScene()
 		OpenGLMatPXS::PrepareLights(this);
 
 		// Render the scene darkened.
-		for (int i = 0; i < (int)MAT_SOLID_COUNT; i++)
+		for (int i = 0; i <= (int)MAT_LAST_SOLID; i++)
 		{
 			if (GetMaterial((MaterialType)i) != 0)
 			{
@@ -1273,7 +1273,7 @@ unsigned OpenGLRenderer::RenderScene()
 			{
 				continue;
 			}
-			if (i == MAT_SOLID_COUNT)
+			if (i == MAT_LAST_SOLID)
 			{
 				::glDisable(GL_STENCIL_TEST);
 			}

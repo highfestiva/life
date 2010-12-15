@@ -1117,7 +1117,7 @@ Renderer::Shadows Renderer::GetShadows(GeometryID pGeometryID)
 
 void Renderer::UpdateShadowMaps()
 {
-	for (int i = 0; i < (int)MAT_COUNT; i++)
+	for (int i = 0; i <= (int)MAT_LAST_SOLID; i++)
 	{
 		TBC::GeometryBase* lGeometry = mMaterial[i]->GetFirstGeometry();
 		while (lGeometry)
