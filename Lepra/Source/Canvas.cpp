@@ -1927,16 +1927,13 @@ void Canvas::SwapRGB24Bit()
 	for (unsigned y = 0; y < mHeight; y++)
 	{
 		int lOffset = y * mPitch * 3;
-
-		for (unsigned x = 0; x < mWidth; x++)
+		uint8* lBuffer = &((uint8*)mBuffer)[lOffset];
+		const uint8* lEndBuffer = lBuffer + mWidth*3;
+		for (; lBuffer < lEndBuffer; lBuffer += 3)
 		{
-			uint8 r = ((uint8*)mBuffer)[lOffset + 0];
-			uint8 b = ((uint8*)mBuffer)[lOffset + 2];
-
-			((uint8*)mBuffer)[lOffset + 0] = b;
-			((uint8*)mBuffer)[lOffset + 2] = r;
-
-			lOffset += 3;
+			const uint8 r = *lBuffer;
+			*lBuffer = lBuffer[2];
+			lBuffer[2] = r;
 		}
 	}
 }

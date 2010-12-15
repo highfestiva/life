@@ -679,7 +679,7 @@ bool GameClientMasterTicker::Initialize()
 				const float lBaseStep = (lMax-lMin)/(float)lStepCount;
 			        float lBase = -lMax;
 			        int lCount = 0;
-				const int lTotalFrameCount = 550;
+				const int lTotalFrameCount = 600;
 				for (lCount = 0; lCount <= lTotalFrameCount && SystemManager::GetQuitRequest() == 0; ++lCount)
 		                {
 					if (lCount < lStepCount || lCount > lTotalFrameCount-lStepCount)

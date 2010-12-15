@@ -268,32 +268,41 @@ def _copybin(targetdir, buildtype):
 #-------------------- High-level build stuff below. --------------------
 
 
-def cleandata(targetdir=bindir):
+def cleandata():
+        targetdir=bindir
         global removes
         removes += _cleandata("Data")
         removes += _cleandir(os.path.join(targetdir, "Data"))
 
 
-def builddata(targetdir=bindir, buildtype=default_build_mode):
+def builddata():
+        targetdir=bindir
+        buildtype=default_build_mode
         _incremental_build_data()
         _incremental_copy_data(targetdir, buildtype)
 
 
 
-def buildcode(targetdir=bindir, buildtype=default_build_mode):
+def buildcode():
+        targetdir=bindir
+        buildtype=default_build_mode
         if hasdevenv(verbose=True):
                 _createmakes()
                 _buildcode("build", buildtype)
                 _incremental_copy_code(targetdir, buildtype)
 
 
-def build(targetdir=bindir, buildtype=default_build_mode):
+def build():
+        targetdir=bindir
+        buildtype=default_build_mode
         verify_base_dir()
-        buildcode(bindir, default_build_mode)
+        buildcode(bindir, buildtype)
         builddata(targetdir)
 
 
-def rebuild(targetdir=bindir, buildtype=default_build_mode):
+def rebuild():
+        targetdir=bindir
+        buildtype=default_build_mode
         verify_base_dir()
         if hasdevenv(verbose=True):
                 _createmakes(force=True)
@@ -306,7 +315,9 @@ def rebuild(targetdir=bindir, buildtype=default_build_mode):
         builddata(targetdir)
 
 
-def clean(targetdir=bindir, buildtype=default_build_mode):
+def clean():
+        targetdir=bindir
+        buildtype=default_build_mode
         verify_base_dir()
         global removes
         if hasdevenv(verbose=True):
