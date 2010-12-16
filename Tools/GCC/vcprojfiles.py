@@ -62,7 +62,8 @@ def main():
                 doPrint = True               
         if options.filter:
             for fe in options.filter.split(';'):
-                if fe in relp:
+                idx = relp.rfind(fe)
+                if idx >= 0 and (fe[0].islower() or relp[idx+len(fe):][:1].isupper()):
                     doPrint = False
         if doPrint:
             if options.qouted: q = "\""

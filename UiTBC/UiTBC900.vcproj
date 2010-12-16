@@ -698,7 +698,7 @@
 					>
 				</File>
 				<File
-					RelativePath=".\Source\Win32\UWin32iDirectX9Painter.cpp"
+					RelativePath=".\Source\Win32\UiWin32DirectX9Painter.cpp"
 					>
 				</File>
 			</Filter>

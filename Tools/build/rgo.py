@@ -293,11 +293,9 @@ def buildcode():
 
 
 def build():
-        targetdir=bindir
-        buildtype=default_build_mode
         verify_base_dir()
-        buildcode(bindir, buildtype)
-        builddata(targetdir)
+        buildcode()
+        builddata()
 
 
 def rebuild():
@@ -312,7 +310,7 @@ def rebuild():
         else:
                 _cleandir(targetdir+"/Data")
         _cleandata("Data")
-        builddata(targetdir)
+        builddata()
 
 
 def clean():

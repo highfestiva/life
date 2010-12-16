@@ -264,7 +264,7 @@ bool ClassResourceBase<_Class, _ClassLoader>::Load()
 {
 	assert(Parent::GetRamData() == 0);
 	SetRamData(new _Class());
-	File* lFile = GetManager()->QueryFile(GetName());
+	File* lFile = Resource::GetManager()->QueryFile(Resource::GetName());
 	bool lOk = (lFile != 0);
 	if (lOk)
 	{
