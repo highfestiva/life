@@ -75,7 +75,7 @@ def _buildcode(command, buildtype):
 
 
 def _convertdata(filename):
-        run([sys.executable, importscript, filename], "importing "+filename)
+        run([sys.executable, '-OO', importscript, filename], "importing "+filename)
 
 
 def _incremental_build_data():

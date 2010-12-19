@@ -576,7 +576,7 @@ class PhysWriter(ChunkyWriter):
 
 
         def _writetrigger(self, node):
-                types = {"always":1, "movement":2}
+                types = {"non_stop":1, "always":2, "movement":3}
                 self._writeint(types[node.get_fixed_attribute("type")])
                 self._writestr(node.get_fixed_attribute("function"))
                 self._writeint(node.get_fixed_attribute("trigger_group_index"))

@@ -31,15 +31,19 @@ protected:
 	void Trig(const TBC::PhysicsTrigger* pTrigger);
 
 	float GetActiveMaxSpeedSquare() const;
-	void HaltActiveEngines();
+	void HaltActiveEngines(bool pStop);
 
 	void SetFunctionTarget(const str& pFunction, TBC::PhysicsEngine* pEngine);
 
 private:
 	const TBC::PhysicsTrigger* mActiveTrigger;
 	HiResTimer mTrigTime;
+	StopWatch mStopTimer;
+	double mStoppedTime;
 	const double mExitDelay;
-	bool mElevatorRunning;
+	const double mStopDelay;
+	bool mElevatorHasBeenMoving;
+	bool mElevatorIsActive;
 	float mEngineActivity;
 
 	LOG_CLASS_DECLARE();

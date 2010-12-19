@@ -73,6 +73,21 @@ Game
   - Autoflip.
   - Select vehicle.
   - ...
+. Build a lot of mechanical machines in the world:
+  - Huge "inclining plane" attached to a rolling "barrel" in the middle. When going over it more than half-way the plane flips over to the opposite inclination ("leans the other way").
+  - Huge horizontally rotating wheels which requires some timing to drive across to get to the next wheel.
+  - Huge vertically rotating wheel to move across (sorta like a bulging escalator).
+  - A huge ball rolling through a cyclic course: slope, elevator, slope, tube...
+  - Object catapult: one end allow vehicles to fall on it, causing the catapult to throw, the other end allow refilling of objects to throw.
+  - Vehicle catapult: one end allow vehicles to drive on, the other has an engine attached to it which will cause it to throw at regular intervals.
+  - Piston pushing vehicles off a bridge or course somewhere elevated.
+  - Turning bridge which opens either the north-south passage or the east-west passage.
+  - Huge checkweigher with display to show weight of vehicles/objects.
+  - A huge swing.
+  - A huge trampoline.
+  - A huge skate board.
+  - Ballon and/or zeppelin (aircraft) that floats around.
+  - Huge rotating wheel with a stick or plane attached to it, which can push stuff aside or up.
 . Build stuff in the world (add both dynamic+static and take transformation).
 . Save server state, so that one can continue working on one's world.
 . Add steering: mouse controlled using clicks on where one wants to go.
@@ -128,11 +143,7 @@ Game
   - Castle.
   - Huge Ice cream.
   - Mountain.
-  - A huge swing.
-  - A trampoline.
-  - A huge skate board.
-  - Ballon (aircraft) that floats around.
-  - Flying dinosaur that moves around.
+  - Flying pterosaur (type of dinosaur) that moves around.
 . Create icon for the game.
 . Fix wheels and tires/body on Corvette: normals suck on wheels, tires/body has "holes" where you can see through.
 . Make all vehicles fun to play in at least one way!
@@ -145,7 +156,6 @@ Game
   - Super speed mode (increase physics real time ratio to 250 % or so).
   - Senior citicen mode (decrease physics real time ratio to 50 % or so).
   - Real world mode (no outline rendering; should be blended in through white?).
-
 - Add different physical worlds on all sides of the box, and add gravity change! Cewlness x 0x1000000!!!
 - Add login progress bar.
 - Make a "change avatar" functionality.)

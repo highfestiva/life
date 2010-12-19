@@ -608,6 +608,8 @@ class Node:
                 self.nodetype = nodetype
                 # The options dictionary
                 self.opts = opts
+                # Optimization for name.
+                self._name = ''
 
                 # Parent Node object
                 self._parent = None
@@ -654,7 +656,9 @@ class Node:
                 If no node name was specified during the creation of the object,
                 the dummy name 'MayaNode' is returned.
                 """
-                return self.opts.get("name", ["MayaNode"])[0]
+                if not self._name:
+                        self._name = self.opts.get("name", ["MayaNode"])[0]
+                return self._name
 
         # getFullName
         def getFullName(self):
@@ -704,11 +708,11 @@ class Node:
 
         # Jonte was here.
         def addParent(self, parent):
-                if not self.getParent():
+                if not self._parent:
                         self.setParent(parent)
                 else:
                         self._parents.append(parent)
-                        parent._children.append(self)
+                parent._children.append(self)
 
         # iterChildren
         def iterChildren(self):

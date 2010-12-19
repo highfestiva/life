@@ -2626,7 +2626,7 @@ bool PhysicsManagerODE::SetMotorTarget(JointID pJointId, float32 pMaxForce, floa
 	return (true);
 }
 
-bool PhysicsManagerODE::SetJointParams(JointID pJointId, float32 pLowStop, float32 pHighStop, float32 pBounce)
+bool PhysicsManagerODE::SetJointParams(JointID pJointId, float32 pLowStop, float32 pHighStop, float32 pBounce, int pExtraIndex)
 {
 	JointTable::iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
@@ -2657,8 +2657,16 @@ bool PhysicsManagerODE::SetJointParams(JointID pJointId, float32 pLowStop, float
 		break;
 		case JOINT_HINGE2:
 		{
-			dJointSetHinge2Param(lJointId, dParamLoStop, pLowStop);
-			dJointSetHinge2Param(lJointId, dParamHiStop, pHighStop);
+			if (pExtraIndex == 0)
+			{
+				dJointSetHinge2Param(lJointId, dParamLoStop, pLowStop);
+				dJointSetHinge2Param(lJointId, dParamHiStop, pHighStop);
+			}
+			else
+			{
+				dJointSetHinge2Param(lJointId, dParamLoStop2, pLowStop);
+				dJointSetHinge2Param(lJointId, dParamHiStop2, pHighStop);
+			}
 			dJointSetHinge2Param(lJointId, dParamBounce, pBounce);
 		}
 		break;

@@ -21,8 +21,11 @@ namespace Life
 Elevator::Elevator(Cure::ContextManager* pManager):
 	Cure::CppContextObject(pManager->GetGameManager()->GetResourceManager(), _T("Elevator")),
 	mActiveTrigger(0),
+	mStoppedTime(0),
 	mExitDelay(2.0),
-	mElevatorRunning(true),	// Set to get this party started in some cases.
+	mStopDelay(5.0),
+	mElevatorHasBeenMoving(true),	// Set to get this party started in some cases.
+	mElevatorIsActive(true),	// Set to get this party started in some cases.
 	mEngineActivity(1)
 {
 	pManager->AddLocalObject(this);
@@ -41,38 +44,54 @@ void Elevator::OnTick(float pFrameTime)
 
 	const float lSpeedStillSquare = 0.1f;
 	const float lMaxSpeedSquare = GetActiveMaxSpeedSquare();
-	if (lMaxSpeedSquare >= lSpeedStillSquare)
+	if (lMaxSpeedSquare >= lSpeedStillSquare && mElevatorIsActive)
 	{
-		mElevatorRunning = true;
+		mElevatorHasBeenMoving = true;
 	}
 
 	mEngineActivity = Math::Lerp(mEngineActivity, lMaxSpeedSquare, Math::GetIterateLerpTime(0.4f, pFrameTime));
 	if (mEngineActivity < lSpeedStillSquare)
 	{
-		if (mElevatorRunning)
+		if (mStopTimer.IsStarted())
 		{
-			log_adebug("TRIGGER - elevator has stopped.");
-			HaltActiveEngines();
-
-			// Check if we need to restart the "always" trigger.
-			const TBC::PhysicsTrigger* lTrigger = 0;
-			if (GetTriggerCount((const void*&)lTrigger) == 1)
+			mStoppedTime += mStopTimer.PopTimeDiff();
+		}
+		else
+		{
+			mStopTimer.Start();
+		}
+		const TBC::PhysicsTrigger* lTrigger = 0;
+		const int lTriggerCount = GetTriggerCount((const void*&)lTrigger);
+		const bool lIsNonStop = (lTriggerCount == 1 || lTrigger->GetType() == TBC::PhysicsTrigger::TRIGGER_NON_STOP);
+		if (!lIsNonStop || mStoppedTime >= mStopDelay)
+		{
+			mStoppedTime = 0;
+			if (mElevatorHasBeenMoving)
 			{
-				if (lTrigger->GetType() == TBC::PhysicsTrigger::TRIGGER_ALWAYS)
+				log_adebug("TRIGGER - elevator has stopped.");
+				bool lStopEngines = !lIsNonStop;
+				HaltActiveEngines(lStopEngines);
+
+				// Check if we need to restart "non_stop" or "always" trigger.
+				if (lTriggerCount == 1 && lTrigger->GetType() <= TBC::PhysicsTrigger::TRIGGER_ALWAYS)
 				{
 					Trig(lTrigger);
 				}
 			}
-		}
-		mEngineActivity = 100;	// Don't try again in a long time.
+			mEngineActivity = 100;	// Don't try again in a long time.
 
-		// Low engine activity and no longer actively triggered means we lost the previous trigger.
-		if (mActiveTrigger && mActiveTrigger->GetType() != TBC::PhysicsTrigger::TRIGGER_ALWAYS &&
-			mTrigTime.QueryTimeDiff() > mExitDelay)
-		{
-			log_adebug("TRIGGER - exited trigger volume.");
-			mActiveTrigger = 0;
+			// Low engine activity and no longer actively triggered means we lost the previous trigger.
+			if (mActiveTrigger && mActiveTrigger->GetType() > TBC::PhysicsTrigger::TRIGGER_ALWAYS &&
+				mTrigTime.QueryTimeDiff() > mExitDelay)
+			{
+				log_adebug("TRIGGER - exited trigger volume.");
+				mActiveTrigger = 0;
+			}
 		}
+	}
+	else
+	{
+		mStopTimer.Stop();
 	}
 }
 
@@ -86,7 +105,7 @@ void Elevator::OnAlarm(int pAlarmId, void* pExtraData)
 	{
 		SetFunctionTarget(lEngineTrigger->mFunction, lEngineTrigger->mEngine);
 		mEngineActivity = 100;
-		if (mActiveTrigger && mActiveTrigger->GetType() != TBC::PhysicsTrigger::TRIGGER_ALWAYS)
+		if (mActiveTrigger && mActiveTrigger->GetType() > TBC::PhysicsTrigger::TRIGGER_ALWAYS)
 		{
 			// Run engine for some time before *forcing* deactivation.
 			GetManager()->AddAlarmCallback(this, pAlarmId, 60, 0);
@@ -95,7 +114,7 @@ void Elevator::OnAlarm(int pAlarmId, void* pExtraData)
 	else
 	{
 		log_adebug("TRIGGER - no longer triggered.");
-		HaltActiveEngines();
+		HaltActiveEngines(true);
 		mActiveTrigger = 0;
 	}
 }
@@ -148,10 +167,11 @@ float Elevator::GetActiveMaxSpeedSquare() const
 	return (lMaxSpeed);
 }
 
-void Elevator::HaltActiveEngines()
+void Elevator::HaltActiveEngines(bool pStop)
 {
-	mElevatorRunning = false;
-	if (mActiveTrigger)
+	mElevatorHasBeenMoving = false;
+	mElevatorIsActive = false;
+	if (mActiveTrigger && pStop)
 	{
 		const int lEngineCount = mActiveTrigger->GetControlledEngineCount();
 		for (int y = 0; y < lEngineCount; ++y)
@@ -159,6 +179,7 @@ void Elevator::HaltActiveEngines()
 			const TBC::PhysicsTrigger::EngineTrigger& lEngineTrigger = mActiveTrigger->GetControlledEngine(y);
 			lEngineTrigger.mEngine->SetValue(lEngineTrigger.mEngine->GetControllerIndex(), 0, 0);
 		}
+		mParent->ForceSend();	// Transmit our updated engine values.
 	}
 }
 
@@ -192,6 +213,7 @@ void Elevator::SetFunctionTarget(const str& pFunction, TBC::PhysicsEngine* pEngi
 		assert(false);
 	}
 	log_volatile(mLog.Debugf(_T("TRIGGER - activating engine for function %s."), pFunction.c_str()));
+	mElevatorIsActive = true;
 	pEngine->ForceSetValue(4, lTargetValue);	// Store shadow.
 	pEngine->SetValue(pEngine->GetControllerIndex(), lTargetValue, 0);
 	mParent->ForceSend();	// Transmit our updated engine values.

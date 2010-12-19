@@ -141,10 +141,10 @@ class GroupReader(DefaultMAReader):
                 self.mesh_instance_reuse(group)
                 self.setphyspivot(group)
 
-                # Check again to assert no internal failure when splitting vertices / joining normals.
-                if not self.validate_mesh_group(group, checknorms=True):
-                        print("Internal error: meshes are invalid after splitting vertices and joining normals! Terminating due to error.")
-                        sys.exit(3)
+##                # Check again to assert no internal failure when splitting vertices / joining normals.
+##                if not self.validate_mesh_group(group, checknorms=True):
+##                        print("Internal error: meshes are invalid after splitting vertices and joining normals! Terminating due to error.")
+##                        sys.exit(3)
 
                 if not self.fixmaterials(group, mat_group):
                         print("Materials are incorrectly modelled! Terminating due to error.")
@@ -417,7 +417,7 @@ class GroupReader(DefaultMAReader):
 
         def splitverts(self, group):
                 """Split mesh vertices that have different normals or UVs (=hard edges).
-                   But to complicate things, Ikeep vertices together that share a similar normal/UV."""
+                   But to complicate things, I keep vertices together that share a similar normal/UV."""
                 for node in group:
                         vs = node.get_fixed_attribute("rgvtx", optional=True)
                         ts = node.get_fixed_attribute("rgtri", optional=True)
@@ -429,40 +429,69 @@ class GroupReader(DefaultMAReader):
                         if ns:
                                 def textureuv(idx):
                                         if uvs:
-                                                return (uvs[idx*2+0], uvs[idx*2+1])
+                                                idx *= 2
+                                                return (uvs[idx], uvs[idx+1])
                                         return (0.0, 0.0)
                                 def normal(idx):
-                                        return vec3(ns[idx*3+0], ns[idx*3+1], ns[idx*3+2])
+                                        idx *= 3
+                                        return vec3(ns[idx], ns[idx+1], ns[idx+2])
                                 def angle(n1, n2):
-                                        if n1.length() == 0 or n2.length() == 0:
-                                                if n1.length() == 0 and n2.length() == 0:
+                                        m1, m2 = n1.max(), n2.max()
+                                        if m1 == 0 or m2 == 0:
+                                                if m1 == 0 and m2 == 0:
                                                         return 0
                                                 return 180
-                                        return math.degrees(math.fabs(n1.angle(n2)))
-                                def uvdiff(t1, t2):
+                                        return math.degrees(math.fabs(vec3.acos(n1*n2)))
+                                def angle_fast(n1, n2x, n2y, n2z):
+                                        n1_0 = (n1.x==0 and n1.y==0 and n1.z==0)
+                                        n2_0 = (n2x==0 and n2y==0 and n2z==0)
+                                        if n1_0 or n2_0:
+                                                if n1_0 and n2_0:
+                                                        return 0
+                                                return 180
+                                        n2x *= n1.x
+                                        n2y *= n1.y
+                                        n2z *= n1.z
+                                        return math.degrees(math.fabs(vec3.acos(n2x+n2y+n2z)))
+                                def uvdiff_sqr(t1, t2):
                                         dx = t1[0]-t2[0]
                                         dy = t1[1]-t2[1]
-                                        return math.sqrt(dx*dx+dy*dy)
+                                        return dx*dx + dy*dy
 
                                 original_vsc = len(vs)
 
                                 # Create a number of UNIQUE empty lists. Hence the for loop.
                                 shared_indices = []
                                 for u in range(len(vs)//3):
-                                        shared_indices += [[]]
+                                        shared_indices.append([])
 
                                 end = len(ts)
                                 x = 0
                                 while x < end:
                                         shared_indices[ts[x]] += [x]
                                         x += 1
+
+                                # Normalize normal vectors (length=1) for optimization purposes.
+                                ncnt = len(ns)
+                                x = 0
+                                while x < ncnt:
+                                        l = ns[x]*ns[x] + ns[x+1]*ns[x+1] + ns[x+2]*ns[x+2]
+                                        if l:
+                                                f = 1 / math.sqrt(l)
+                                                ns[x]   *= f
+                                                ns[x+1] *= f
+                                                ns[x+2] *= f
+                                        x += 3
+
                                 x = 0
                                 while x < end:
                                         c = normal(shared_indices[ts[x]][0])
                                         d = textureuv(shared_indices[ts[x]][0])
                                         split = []
                                         for s in shared_indices[ts[x]][1:]:
-                                                if angle(c, normal(s)) > 40 or uvdiff(d, textureuv(s)) > 0.01:
+                                                #if angle(c, normal(s)) > 40 or uvdiff_sqr(d, textureuv(s)) > 0.0001:
+                                                i = s*3
+                                                if angle_fast(c, ns[i],ns[i+1],ns[i+2]) > 40 or uvdiff_sqr(d, textureuv(s)) > 0.0001:
                                                         split += [s]
                                         # Push all the once that we don't join together at the end.
                                         if split:
@@ -574,7 +603,7 @@ class GroupReader(DefaultMAReader):
                                 textureNames = []
                                 shaderName = node.get_fixed_attribute("shader", optional=True, default="plain")
 
-                                mesh = self._listchildnodes(node.getFullName(), node, "m_", group, False, \
+                                mesh = self._listchildnodes(node, "m_", group, False, \
                                         lambda n: n.get_fixed_attribute("rgvtx", optional=True))
                                 if not mesh:
                                         print("Error: mesh transform %s has no good meshes." % node.getFullName())
@@ -661,7 +690,8 @@ class GroupReader(DefaultMAReader):
 
 
         def validatehierarchy(self, group):
-                isGroupValid = self._validate_non_recursive(group[0], group)
+                #isGroupValid = self._validate_non_recursive(group[0], group)
+                isGroupValid = True
                 isGroupValid &= self._validatenaming(group[0], group)
                 return isGroupValid
 
@@ -736,8 +766,8 @@ class GroupReader(DefaultMAReader):
 ##                                isGroupValid = False
 ##                                print("Error: mesh '%s' must be prefixed 'phys_' or 'm_'." % node.getFullName())
                         if node.getName().startswith("m_") and node.nodetype == "transform":
-                                node.mesh_children = list(filter(lambda x: x.nodetype == "transform", self._listchildnodes(node.getFullName(), node, "m_", group, False)))
-                                node.phys_children = self._listchildnodes(node.getFullName(), node, "phys_", group, False)
+                                node.mesh_children = list(filter(lambda x: x.nodetype == "transform", self._listchildnodes(node, "m_", group, False)))
+                                node.phys_children = self._listchildnodes(node, "phys_", group, False)
                 return isGroupValid
 
                                 
@@ -832,7 +862,7 @@ class GroupReader(DefaultMAReader):
 
                         elif section.startswith("trigger:"):
                                 triggertype = stripQuotes(config.get(section, "type"))
-                                triggerOk = triggertype in ["movement", "always"]
+                                triggerOk = triggertype in ["movement", "always", "non_stop"]
                                 allApplied &= triggerOk
                                 if not triggerOk:
                                         print("Error: invalid trigger type '%s'." % triggertype)
@@ -867,7 +897,7 @@ class GroupReader(DefaultMAReader):
                                                 triggered_by = self.findNode(l)
                                         except KeyError:
                                                 triggered_by = None
-                                        ok &= (triggered_by != None or triggertype == "always")
+                                        ok &= (triggered_by != None or triggertype in ("always", "non_stop"))
                                         return ok
                                 required = [("type", lambda x: type(x) == str),
                                             ("function", lambda x: type(x) == str),
@@ -1229,7 +1259,7 @@ class GroupReader(DefaultMAReader):
         def _validate_non_recursive(self, basenode, group):
                 isHierarchyValid = True
                 childcount = {}
-                childlist = self._listchildnodes(basenode.getFullName(), basenode, "", group, True)
+                childlist = self._listchildnodes(basenode, "", group, True)
                 for node in childlist:
                         count = childcount.get(node)
                         if not count:
@@ -1244,7 +1274,6 @@ class GroupReader(DefaultMAReader):
 
 
         def _validatenaming(self, rootnode, group):
-                ok = True
                 # Drop empty transforms that do nothing.
                 kills = []
                 for node in group:
@@ -1257,22 +1286,26 @@ class GroupReader(DefaultMAReader):
                                 node.setParent(node.getParent().getParent())
                 for kill in kills:
                         group.remove(kill)
-                # Traverse and check names.
-                for node in group:
-                        if node.getParent() == rootnode and node.nodetype == "transform":
-                                node.kill_empty = False
-                                if node.getName().startswith("phys_"):
-                                        pass
-                                elif node.getName().startswith("m_"):
-                                        if node.getParent() != None and node.getParent().getName().startswith("phys_"):
+
+                # Traverse and check names recursively.
+                def _checknames(rootnode, group):
+                        for node in group:
+                                if node.nodetype == "transform":
+                                        node.kill_empty = False
+                                        if node.getName().startswith("phys_"):
+                                                pass
+                                        elif node.getName().startswith("m_"):
+                                                if node.getParent().getName().startswith("phys_"):
+                                                        ok = False
+                                                        print("Error: mesh node '%s' may not have a 'phys_' parent (set to '%s')." %
+                                                              (node.getFullName(), node.getParent().getName()))
+                                        else:
                                                 ok = False
-                                                print("Error: mesh node '%s' may not have a 'phys_' parent (set to '%s')." %
-                                                      (node.getFullName(), node.getParent().getName()))
-                                else:
-                                        ok = False
-                                        print("Error: node '%s' must be either prefixed 'phys_' or 'm_'" % node.getFullName());
-                                ok &= self._validatenaming(node, group)
-                return ok
+                                                print("Error: node '%s' must be either prefixed 'phys_' or 'm_'" % node.getFullName());
+                                        if not _checknames(node, node._children):
+                                                return False
+                        return True
+                return _checknames(rootnode, rootnode._children)
 
 
         def printnodes(self, nodes):
@@ -1314,7 +1347,7 @@ class GroupReader(DefaultMAReader):
                 parent = None
                 while mparent != None:
                         #print("Looking for phys parent for %s in %s..." % (phys.getName(), mparent.getName()))
-                        children = self._listchildnodes(mparent.getFullName(), mparent, "phys_", group, False)
+                        children = self._listchildnodes(mparent, "phys_", group, False)
                         phys_nodes = list(filter(lambda x: x.getName() != phys.getName(), children))
                         if phys_nodes:
                                 parent = self.find_phys_root(mparent, phys_nodes)
@@ -1361,7 +1394,7 @@ class GroupReader(DefaultMAReader):
                 invcnt = 0
                 if mesh.shape:
                         meshcnt += 1
-                children = self._listchildnodes(mesh.getFullName(), mesh, "m_", group, False)
+                children = self._listchildnodes(mesh, "m_", group, False)
                 #print("Mesh %s has kids:" % mesh.getName())
                 for child in children:
                         #print(" - Child %s.", child.getName())
@@ -1440,18 +1473,28 @@ class GroupReader(DefaultMAReader):
                 return valid_ref
 
 
-        def _listchildnodes(self, path, basenode, prefix, group, recursive, f=None):
-                childlist = []
-                for node in group:
-                        if node.getName().startswith(prefix) and basenode in node.getparents():
-                                if not f or f(node):
-                                        childlist += [node]
-                grandchildlist = []
-                if recursive:
-                        for child in childlist:
-                                childpath = path+"|"+child.getName()
-                                grandchildlist += self._listchildnodes(childpath, child, prefix, group, True, f)
-                return childlist+grandchildlist
+        def _listchildnodes(self, basenode, prefix, group, recursive, f=None):
+                group = basenode._children
+                if prefix:
+                        # Filter out non-prefixed:
+                        fg = []
+                        for node in group:
+                                if node.getName().startswith(prefix):
+                                        fg.append(node)
+                        group = fg
+                def _list_filtered_child_nodes(basenode):
+                        childlist = []
+                        for node in group:
+                                if basenode in node._parents:
+                                        if not f or f(node):
+                                                childlist.append(node)
+                        if recursive:
+                                grandchildlist = []
+                                for child in childlist:
+                                        grandchildlist.extend(_list_filtered_child_nodes(child))
+                                childlist.extend(grandchildlist)
+                        return childlist
+                return _list_filtered_child_nodes(basenode)
 
 
         def _query_attribute(self, node, attrname, check, err_missing=True):

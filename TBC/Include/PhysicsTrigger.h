@@ -31,6 +31,7 @@ public:
 	enum Type
 	{
 		TRIGGER_INVALID = 0,
+		TRIGGER_NON_STOP,
 		TRIGGER_ALWAYS,
 		TRIGGER_MOVEMENT,
 	};

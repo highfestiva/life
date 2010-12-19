@@ -271,7 +271,7 @@ public:
 	virtual bool GetAngularMotorMaxForce(JointID pJointId, float32& pMaxForce) const = 0;
 	virtual bool SetMotorTarget(JointID pJointId, float32 pMaxForce, float32 pTargetVelocity) = 0;
 
-	virtual bool SetJointParams(JointID pJointId, float32 pLowStop, float32 pHighStop, float32 pBounce) = 0;
+	virtual bool SetJointParams(JointID pJointId, float32 pLowStop, float32 pHighStop, float32 pBounce, int pExtraIndex = 0) = 0;
 	virtual bool GetJointParams(JointID pJointId, float32& pLowStop, float32& pHighStop, float32& pBounce) const = 0;
 	virtual bool SetSuspension(JointID pJointId, float32 pFrameTime, float32 pSpringConstant, float32 pDampingConstant) = 0;
 	virtual bool GetSuspension(JointID pJointId, float32& pErp, float32& pCfm) const = 0;

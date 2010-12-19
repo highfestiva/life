@@ -250,4 +250,43 @@ uint64 HiResTimer::GetSystemCounter()
 
 
 
+class StopWatch: public HiResTimer
+{
+	typedef HiResTimer Parent;
+public:
+	inline StopWatch();
+	inline void Start();
+	inline void Stop();
+	inline bool IsStarted() const;
+
+private:
+	bool mIsStarted;
+};
+
+
+
+StopWatch::StopWatch():
+	Parent(0),
+	mIsStarted(false)
+{
+}
+
+void StopWatch::Start()
+{
+	PopTimeDiff();
+	mIsStarted = true;
+}
+
+void StopWatch::Stop()
+{
+	mIsStarted = false;
+}
+
+bool StopWatch::IsStarted() const
+{
+	return mIsStarted;
+}
+
+
+
 }
