@@ -88,6 +88,10 @@ Game
   - A huge skate board.
   - Ballon and/or zeppelin (aircraft) that floats around.
   - Huge rotating wheel with a stick or plane attached to it, which can push stuff aside or up.
+. Add brake lights on all vehicles.
+. Add eyes to all vehicles.
+. Make robot work better.
+. Create a quadropedic robot.
 . Build stuff in the world (add both dynamic+static and take transformation).
 . Save server state, so that one can continue working on one's world.
 . Add steering: mouse controlled using clicks on where one wants to go.
@@ -173,8 +177,8 @@ Engine
 + Fix initial-drag-on-client-window-generates-GUI-click.
 + Don't allow client to send out a change in physics state (transform+vel+acc) when colliding, this should be done by the server.
 + Add more input controllers: mouse, joy, pad... Add both force and max-vel to interface?
-+ Separate up/down from handbreak/break. Create GTA-steering!
-+ Change controls to be more dynamic. For instance: control breaks by means of using roll engine force (re-use engine).
++ Separate up/down from handbrake/brake. Create GTA-steering!
++ Change controls to be more dynamic. For instance: control brakes by means of using roll engine force (re-use engine).
 + Fix so that TAB in GUI does not enter an empty char.
 + Make sure Delete key in GUI deletes a char at once, not at next caret update time.
 + Simple <enter> to "click" default button in dialog (especially true for login).
@@ -244,6 +248,11 @@ Engine
 + Make Maya import pipeline use the proper materials for each mesh instance (i.e. saucer lights).
 + Make sure FPS is smooth, even though it's a fixed number. Currently the physics step count looks like 1, 1, 1, 1, 1, 2, 1, 1...
 + Drop shadow rendering from semi-transparent meshes (see outline rendering+hovercraft).
+. Add version control when connecting to server, so old clients/servers won't crash.
+. Separate static level from objects in it. Use pivots and spawn engines to place stuff. Has several benefits:
+  - only needs to send relevant sync over network,
+  - speeds up loading/editing/saving/converting in/from Maya,
+  - can dynamically LoD or leave out stuff far away.
 . Make sure camera never collides with physical objects. Make camera always keep a free line of sight to the controlled object.
 . Fix shadows, some are not rendered in correct places; trees, monster buildings.
 . Optimize: startup. Very slow on slow computer. Try using zip archives? Using less files might help antivirus?
@@ -255,7 +264,7 @@ Engine
 . Autobuild Data.pk3.
 . I18N. Use _() and gettext wrap.
 . Make all materials use PreRender and PostRender. Clean code up around there.
-. Add support for break and reverse lights. Add light cones for that.
+. Add support for brake and reverse lights. Add light cones for that.
 . When having several control units, the "input threshold" does not work. Make a threshold for each input entity.
 . Remove game source code from engine source code: camera, hard-coded object placements, input handling, etc.
 . Creating a less jittery experience: a) sync lag/jitter immediately after logging in, b) sorting out old msgs on client, c) keeping track of jitter on client side.
@@ -336,6 +345,7 @@ Quality
 + Check that all log destinations write strings, not raw data, to disk. LogFileXxx (single one) was checked and corrected from WriteData() to WriteString().
 + Separate input and output data in the data folder. Create a proper directory structure for external release.
 + Print game version number to log when starting.
+. Make huge swing synchronization work!
 . Start alpha-testing with human users.
 . When using 4 splitscreen players, RenderSlaves is the slow part (won't yield 60 FPS on my machine). Check out why. Seems like they're using their CPU time slices (doesn't look as if physics threads are stealing 'em).
 . Fix shadow bug (causes strangeness when two shadows overlap).

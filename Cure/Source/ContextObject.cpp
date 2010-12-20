@@ -294,7 +294,7 @@ void ContextObject::AddTrigger(TBC::PhysicsManager::TriggerID pTriggerId, const 
 	mTriggerMap.insert(TriggerMap::value_type(pTriggerId, pTrigger));
 }
 
-void ContextObject::FinalizeTriggers()
+void ContextObject::FinalizeTrigger(const TBC::PhysicsTrigger*)
 {
 }
 
@@ -1172,39 +1172,30 @@ void ContextObject::SetParent(ContextObject* pParent)
 
 void ContextObject::SetupChildHandlers()
 {
-	int lLastGroupIndex = -1;
-	ContextObject* lHandlerChild = 0;
-
 	const int lTriggerCount = mPhysics->GetTriggerCount();
 	for (int x = 0; x < lTriggerCount; ++x)
 	{
 		const TBC::PhysicsTrigger* lTrigger = mPhysics->GetTrigger(x);
-		if (lLastGroupIndex != lTrigger->GetGroupIndex())
+		ContextObject* lHandlerChild = GetManager()->GetGameManager()->CreateLogicHandler(lTrigger->GetFunction());
+		AddChild(lHandlerChild);
+		const int lBoneTriggerCount = lTrigger->GetTriggerGeometryCount();
+		for (int x = 0; x < lBoneTriggerCount; ++x)
 		{
-			if (lHandlerChild)
-			{
-				lHandlerChild->FinalizeTriggers();
-			}
-			lLastGroupIndex = lTrigger->GetGroupIndex();
-			lHandlerChild = GetManager()->GetGameManager()->CreateLogicHandler(lTrigger->GetFunction());
-			AddChild(lHandlerChild);
+			AddTrigger(lTrigger->GetPhysicsTriggerId(x), lHandlerChild);
+			lHandlerChild->AddTrigger(lTrigger->GetPhysicsTriggerId(x), lTrigger);
 		}
-		if (lHandlerChild)
+		if (lBoneTriggerCount == 0)
 		{
-			AddTrigger(lTrigger->GetPhysicsTriggerId(), lHandlerChild);
-			lHandlerChild->AddTrigger(lTrigger->GetPhysicsTriggerId(), lTrigger);
+			lHandlerChild->AddTrigger(TBC::INVALID_TRIGGER, lTrigger);
 		}
-	}
-	if (lHandlerChild)
-	{
-		lHandlerChild->FinalizeTriggers();
+		lHandlerChild->FinalizeTrigger(lTrigger);
 	}
 
 	const int lSpawnerCount = mPhysics->GetSpawnerCount();
 	for (int x = 0; x < lSpawnerCount; ++x)
 	{
 		const TBC::PhysicsSpawner* lSpawner = mPhysics->GetSpawner(x);
-		lHandlerChild = GetManager()->GetGameManager()->CreateLogicHandler(lSpawner->GetFunction());
+		ContextObject* lHandlerChild = GetManager()->GetGameManager()->CreateLogicHandler(lSpawner->GetFunction());
 		AddChild(lHandlerChild);
 		lHandlerChild->SetSpawner(lSpawner);
 	}

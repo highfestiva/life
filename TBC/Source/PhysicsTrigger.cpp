@@ -35,9 +35,9 @@ size_t PhysicsTrigger::EngineTrigger::Hash() const
 
 PhysicsTrigger::PhysicsTrigger():
 	mTriggerType(TRIGGER_INVALID),
-	mGroupIndex(-1),
-	mPriority(-1),
-	mTriggerNode(0)
+	//mGroupIndex(-1),
+	mPriority(-1)
+	//mTriggerNode(0)
 {
 }
 
@@ -75,20 +75,17 @@ PhysicsTrigger::Type PhysicsTrigger::GetType() const
 	return (mTriggerType);
 }
 
-PhysicsManager::TriggerID PhysicsTrigger::GetPhysicsTriggerId() const
+PhysicsManager::TriggerID PhysicsTrigger::GetPhysicsTriggerId(int pTriggerGeometryIndex) const
 {
-	if (!mTriggerNode)
-	{
-		return (TBC::INVALID_TRIGGER);
-	}
-	assert(mTriggerNode->GetTriggerId() != 0);
-	return (mTriggerNode->GetTriggerId());
+	assert((size_t)pTriggerGeometryIndex < mTriggerArray.size());
+	assert(mTriggerArray[pTriggerGeometryIndex]->GetTriggerId() != 0);
+	return mTriggerArray[pTriggerGeometryIndex]->GetTriggerId();
 }
 
-int PhysicsTrigger::GetGroupIndex() const
+/*int PhysicsTrigger::GetGroupIndex() const
 {
 	return (mGroupIndex);
-}
+}*/
 
 int PhysicsTrigger::GetPriority() const
 {
@@ -102,14 +99,20 @@ const str& PhysicsTrigger::GetFunction() const
 
 
 
-void PhysicsTrigger::SetTriggerGeometry(ChunkyBoneGeometry* pGeometry)
+void PhysicsTrigger::AddTriggerGeometry(ChunkyBoneGeometry* pGeometry)
 {
-	mTriggerNode = pGeometry;
+	mTriggerArray.push_back(pGeometry);
 }
 
-ChunkyBoneGeometry* PhysicsTrigger::GetTriggerGeometry() const
+int PhysicsTrigger::GetTriggerGeometryCount() const
 {
-	return mTriggerNode;
+	return mTriggerArray.size();
+}
+
+ChunkyBoneGeometry* PhysicsTrigger::GetTriggerGeometry(int pIndex) const
+{
+	assert((size_t)pIndex < mTriggerArray.size());
+	return mTriggerArray[pIndex];
 }
 
 void PhysicsTrigger::AddControlledEngine(PhysicsEngine* pEngine, float pDelay, str pFunction)
@@ -142,7 +145,8 @@ unsigned PhysicsTrigger::GetChunkySize() const
 	{
 		lStringSize += PackerUnicodeString::Pack(0, wstrutil::Encode(x->mFunction));
 	}
-	return ((unsigned)(sizeof(uint32) * 5 +
+	return ((unsigned)(sizeof(uint32) * 4 +
+		sizeof(uint32) * mTriggerArray.size() +
 		(sizeof(uint32)+sizeof(float)) * mConnectionArray.size() +
 		lStringSize));
 }
@@ -153,9 +157,14 @@ void PhysicsTrigger::SaveChunkyData(const ChunkyPhysics* pStructure, void* pData
 	int i = 0;
 	lData[i++] = Endian::HostToBig(mTriggerType);
 	i += PackerUnicodeString::Pack((uint8*)&lData[i], wstrutil::Encode(mFunction));
-	lData[i++] = Endian::HostToBig(mGroupIndex);
+	//lData[i++] = Endian::HostToBig(mGroupIndex);
 	lData[i++] = Endian::HostToBig(mPriority);
-	lData[i++] = Endian::HostToBig(pStructure->GetIndex(mTriggerNode));
+	lData[i++] = Endian::HostToBig((uint32)mTriggerArray.size());
+	for (int x = 0; x < (int)mTriggerArray.size(); ++x)
+	{
+		const ChunkyBoneGeometry* lBone = mTriggerArray[x];
+		lData[i++] = Endian::HostToBig(pStructure->GetIndex(lBone));
+	}
 	lData[i++] = Endian::HostToBig((uint32)mConnectionArray.size());
 	for (int x = 0; x < (int)mConnectionArray.size(); ++x)
 	{
@@ -175,13 +184,15 @@ void PhysicsTrigger::LoadChunkyData(ChunkyPhysics* pStructure, const void* pData
 	int i = 0;
 	mTriggerType = (Type)Endian::BigToHost(lData[i++]);
 	i += PackerUnicodeString::Unpack(mFunction, (uint8*)&lData[i], 1024) / sizeof(lData[0]);
-	mGroupIndex = Endian::BigToHost(lData[i++]);
+	//mGroupIndex = Endian::BigToHost(lData[i++]);
 	mPriority = Endian::BigToHost(lData[i++]);
-	int lPhysTriggerIndex = Endian::BigToHost(lData[i++]);
-	if (lPhysTriggerIndex >= 0)
+	const int lBoneTriggerCount = Endian::BigToHost(lData[i++]);
+	for (int x = 0; x < lBoneTriggerCount; ++x)
 	{
-		SetTriggerGeometry(pStructure->GetBoneGeometry(lPhysTriggerIndex));
-		assert(mTriggerNode);
+		const uint32 lPhysTriggerIndex = Endian::BigToHost(lData[i++]);
+		ChunkyBoneGeometry* lBoneTrigger = pStructure->GetBoneGeometry(lPhysTriggerIndex);
+		assert(lBoneTrigger);
+		AddTriggerGeometry(lBoneTrigger);
 	}
 	const int lEngineCount = Endian::BigToHost(lData[i++]);
 	for (int x = 0; x < lEngineCount; ++x)

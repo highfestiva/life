@@ -892,12 +892,17 @@ class GroupReader(DefaultMAReader):
                                         node.fix_attribute("trigger_group_index", groupindex)
                                         return ok
                                 def check_triggered_by(l):
-                                        ok = (type(l) == str)
-                                        try:
-                                                triggered_by = self.findNode(l)
-                                        except KeyError:
-                                                triggered_by = None
-                                        ok &= (triggered_by != None or triggertype in ("always", "non_stop"))
+                                        ok = (len(l) >= 0)
+                                        if ok and not l:
+                                                ok &= (triggertype in ("always", "non_stop"))
+                                        for e in l:
+                                                ok &= (type(e) == str)
+                                                triggered_by = self._regexpnodes(e, group)
+                                                ok &= (len(triggered_by) > 0)
+                                                for tb in triggered_by:
+                                                        ok &= (tb.nodetype == "transform" and tb.getName().startswith("phys_trig_"))
+                                                        if not ok:
+                                                                print("Error: node %s does not qualify as a trigger." % tb.getName())
                                         return ok
                                 required = [("type", lambda x: type(x) == str),
                                             ("function", lambda x: type(x) == str),
@@ -945,7 +950,7 @@ class GroupReader(DefaultMAReader):
 
                         elif section.startswith("tag:"):
                                 tagtype = stripQuotes(config.get(section, "type"))
-                                tagOk = tagtype in ["eye", "brake_light", "reverse_light", "engine_sound", "exhaust", "trigger_data"]
+                                tagOk = tagtype in ["eye", "brake_light", "reverse_light", "engine_sound", "exhaust", "stunt_trigger_data", "race_trigger_data"]
                                 allApplied &= tagOk
                                 if not tagOk:
                                         print("Error: invalid tag type '%s'." % tagtype)

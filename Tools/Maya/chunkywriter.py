@@ -509,7 +509,7 @@ class PhysWriter(ChunkyWriter):
                 mt = node.get_world_transform()
                 wp = mp * vec4(0,0,0,1)
                 wt = mt * vec4(0,0,0,1)
-                j = wp-wt
+                j = wt-wp
                 j = ir * j
 
                 parameters[6:9] = j[:3]
@@ -579,15 +579,17 @@ class PhysWriter(ChunkyWriter):
                 types = {"non_stop":1, "always":2, "movement":3}
                 self._writeint(types[node.get_fixed_attribute("type")])
                 self._writestr(node.get_fixed_attribute("function"))
-                self._writeint(node.get_fixed_attribute("trigger_group_index"))
+                #self._writeint(node.get_fixed_attribute("trigger_group_index"))
                 self._writeint(node.get_fixed_attribute("priority"))
 
-                triggered_by_name = node.get_fixed_attribute("triggered_by")
-                triggered_by = self._findglobalnode(triggered_by_name)
-                idx = self.bodies.index(triggered_by) if triggered_by else -1
-                if options.options.verbose:
-                        print("Trigger '%s' connected to bone index %i."% (node.getName(), idx))
-                self._writeint(idx)
+                triggered_by_list = node.get_fixed_attribute("triggered_by")
+                triggered_by_list = self._expand_connected_list(triggered_by_list, self.phys_triggers)
+                self._writeint(len(triggered_by_list))
+                for triggered_by in triggered_by_list:
+                        idx = self.bodies.index(triggered_by)
+                        if options.options.verbose:
+                                print("Trigger '%s' connected to bone index %i."% (node.getName(), idx))
+                        self._writeint(idx)
 
                 connected_to = node.get_fixed_attribute("connected_to")
                 connected_to = self._expand_connected_list(connected_to, self.engines)

@@ -727,6 +727,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\LifeServer\RaceTimer.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\LifeServer\RaceTimer.h"
+				>
+			</File>
+			<File
 				RelativePath="..\LifeServer\ServerConsoleManager.cpp"
 				>
 			</File>

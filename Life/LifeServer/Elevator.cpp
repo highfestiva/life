@@ -62,7 +62,7 @@ void Elevator::OnTick(float pFrameTime)
 		}
 		const TBC::PhysicsTrigger* lTrigger = 0;
 		const int lTriggerCount = GetTriggerCount((const void*&)lTrigger);
-		const bool lIsNonStop = (lTriggerCount == 1 || lTrigger->GetType() == TBC::PhysicsTrigger::TRIGGER_NON_STOP);
+		const bool lIsNonStop = (lTriggerCount == 1 && lTrigger->GetType() == TBC::PhysicsTrigger::TRIGGER_NON_STOP);
 		if (!lIsNonStop || mStoppedTime >= mStopDelay)
 		{
 			mStoppedTime = 0;

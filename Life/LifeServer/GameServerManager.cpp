@@ -19,6 +19,7 @@
 #include "BulletTime.h"
 #include "Elevator.h"
 #include "MasterServerConnection.h"
+#include "RaceTimer.h"
 #include "RtVar.h"
 #include "ServerConsoleManager.h"
 #include "Spawner.h"
@@ -954,6 +955,10 @@ Cure::ContextObject* GameServerManager::CreateLogicHandler(const str& pType) con
 	else if (pType == _T("real_time_ratio"))
 	{
 		return new BulletTime(GetContext());
+	}
+	else if (pType == _T("race_timer"))
+	{
+		return new RaceTimer(GetContext());
 	}
 	assert(false);
 	return (0);

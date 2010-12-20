@@ -40,28 +40,18 @@ BulletTime::~BulletTime()
 
 
 
-void BulletTime::FinalizeTriggers()
+void BulletTime::FinalizeTrigger(const TBC::PhysicsTrigger* pTrigger)
 {
 	std::vector<int> lTriggerIndexArray;
-	TriggerMap::iterator x = mTriggerMap.begin();
-	for (; x != mTriggerMap.end(); ++x)
+	const TBC::ChunkyPhysics* lPhysics = mParent->GetPhysics();
+	const int lBoneCount = pTrigger->GetTriggerGeometryCount();
+	for (int x = 0; x < lBoneCount; ++x)
 	{
-		const TBC::ChunkyPhysics* lPhysics = mParent->GetPhysics();
-		const int lTriggerCount = lPhysics->GetTriggerCount();
-		for (int y = 0; y < lTriggerCount; ++y)
-		{
-			const TBC::PhysicsTrigger* lTrigger = lPhysics->GetTrigger(y);
-			if (lTrigger->GetPhysicsTriggerId() == x->first)
-			{
-				const int lBoneIndex = lPhysics->GetIndex(lTrigger->GetTriggerGeometry());
-				assert(lBoneIndex >= 0);
-				lTriggerIndexArray.push_back(lBoneIndex);
-				break;
-			}
-		}
+		const int lBoneIndex = lPhysics->GetIndex(pTrigger->GetTriggerGeometry(x));
+		assert(lBoneIndex >= 0);
+		lTriggerIndexArray.push_back(lBoneIndex);
 	}
-	std::sort(lTriggerIndexArray.begin(), lTriggerIndexArray.end());
-	const TBC::ChunkyClass::Tag* lTag = ((CppContextObject*)mParent)->FindTag(_T("trigger_data"), 5, 2, lTriggerIndexArray);
+	const TBC::ChunkyClass::Tag* lTag = ((CppContextObject*)mParent)->FindTag(_T("stunt_trigger_data"), 5, 2, lTriggerIndexArray);
 	assert(lTag);
 	if (lTag)
 	{

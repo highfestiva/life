@@ -51,13 +51,14 @@ public:
 	static PhysicsTrigger* Load(ChunkyPhysics* pStructure, const void* pData, unsigned pByteCount);
 
 	Type GetType() const;
-	PhysicsManager::TriggerID GetPhysicsTriggerId() const;
-	int GetGroupIndex() const;
+	PhysicsManager::TriggerID GetPhysicsTriggerId(int pTriggerGeometryIndex) const;
+	//int GetGroupIndex() const;
 	int GetPriority() const;
 	const str& GetFunction() const;
 
-	void SetTriggerGeometry(ChunkyBoneGeometry* pGeometry);
-	ChunkyBoneGeometry* GetTriggerGeometry() const;
+	void AddTriggerGeometry(ChunkyBoneGeometry* pGeometry);
+	int GetTriggerGeometryCount() const;
+	ChunkyBoneGeometry* GetTriggerGeometry(int pIndex) const;
 	void AddControlledEngine(PhysicsEngine* pEngine, float pDelay, str pFunction);
 	int GetControlledEngineCount() const;
 	const EngineTrigger& GetControlledEngine(int pIndex) const;
@@ -68,13 +69,15 @@ public:
 private:
 	void LoadChunkyData(ChunkyPhysics* pStructure, const void* pData);
 
+	typedef std::vector<ChunkyBoneGeometry*> BoneTriggerArray;
 	typedef std::vector<EngineTrigger> ConnectionArray;
 
 	Type mTriggerType;
-	int mGroupIndex;
+	//int mGroupIndex;
 	int mPriority;
 	str mFunction;
-	ChunkyBoneGeometry* mTriggerNode;
+	//ChunkyBoneGeometry* mTriggerNode;
+	BoneTriggerArray mTriggerArray;
 	ConnectionArray mConnectionArray;
 
 	LOG_CLASS_DECLARE();

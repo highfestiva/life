@@ -544,6 +544,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\RaceTimer.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ServerApplication.cpp"
 				>
 			</File>
@@ -583,6 +587,10 @@
 			</File>
 			<File
 				RelativePath=".\MasterServerConnection.h"
+				>
+			</File>
+			<File
+				RelativePath=".\RaceTimer.h"
 				>
 			</File>
 			<File

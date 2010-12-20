@@ -19,6 +19,7 @@
 *.lsh
 *.dll
 *.pyc
+*.pyo
 *.zip
 mt.dep
 stlport.res
