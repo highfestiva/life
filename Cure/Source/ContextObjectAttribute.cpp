@@ -5,6 +5,9 @@
 
 
 #include "../Include/ContextObjectAttribute.h"
+#include <assert.h>
+#include "../../Lepra/Include/Packer.h"
+#include "../Include/ContextObject.h"
 
 
 
@@ -13,9 +16,11 @@ namespace Cure
 
 
 
-ContextObjectAttribute::ContextObjectAttribute(ContextObject* pContextObject):
-	mContextObject(pContextObject)
+ContextObjectAttribute::ContextObjectAttribute(ContextObject* pContextObject, const str& pName):
+	mContextObject(pContextObject),
+	mName(pName)
 {
+	mContextObject->AddAttribute(this);
 }
 
 ContextObjectAttribute::~ContextObjectAttribute()
@@ -25,10 +30,58 @@ ContextObjectAttribute::~ContextObjectAttribute()
 
 
 
-ContextObject* ContextObjectAttribute::GetContextObject() const
+const str& ContextObjectAttribute::GetName() const
 {
-	return (mContextObject);
+	return mName;
 }
+
+
+
+void ContextObjectAttribute::SetCreator(const Factory& pFactory)
+{
+	assert(mFactory == 0);
+	mFactory = pFactory;
+}
+
+
+
+int ContextObjectAttribute::Unpack(ContextObject* pContextObject, const uint8* pSource, int pMaxSize)
+{
+	wstr lAttributeName;
+	int lSize = PackerUnicodeString::Unpack(lAttributeName, pSource, pMaxSize);
+	if (lSize < 0)
+	{
+		return -1;
+	}
+	ContextObjectAttribute* lAttribute = pContextObject->GetAttribute(strutil::Encode(lAttributeName));
+	if (!lAttribute)
+	{
+		assert(mFactory);
+		lAttribute = mFactory(pContextObject, lAttributeName);
+		if (!lAttribute)
+		{
+			return -1;
+		}
+	}
+	int lParamsSize = lAttribute->Unpack(pSource, pMaxSize-lSize);
+	if (lParamsSize < 0)
+	{
+		return -1;
+	}
+	lSize += lParamsSize;
+	return lSize;
+}
+
+
+
+void ContextObjectAttribute::operator=(const ContextObjectAttribute&)
+{
+	assert(false);
+}
+
+
+
+ContextObjectAttribute::Factory ContextObjectAttribute::mFactory = 0;
 
 
 

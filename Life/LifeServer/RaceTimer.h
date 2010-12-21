@@ -7,6 +7,7 @@
 #pragma once
 
 #include "../../Cure/Include/CppContextObject.h"
+#include <hash_map>
 #include "../../Lepra/Include/Timer.h"
 #include "../Life.h"
 
@@ -26,11 +27,14 @@ public:
 
 private:
 	virtual void FinalizeTrigger(const TBC::PhysicsTrigger* pTrigger);
-	virtual void OnTick(float pFrameTime);
-	//virtual void OnAlarm(int pAlarmId, void* pExtraData);
+	virtual void OnTick(float);
 	virtual void OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, TBC::PhysicsManager::ForceFeedbackListener* pListener);
 
-	Timer mTriggerTimer;
+	typedef std::hash_map<Cure::GameObjectId, int> DoneMap;
+
+	str mAttributeName;
+	size_t mTriggerCount;
+	DoneMap mDoneMap;
 
 	LOG_CLASS_DECLARE();
 };
