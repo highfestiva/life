@@ -82,7 +82,7 @@ def getmake(builder):
                 make_exe = "/bin/make"
         elif os.path.exists("/usr/bin/make"):
                 make_exe = "/usr/bin/make"
-        if not os.path.exists(make_exe):
+        else:
                 make_exe = None
         #if not make_exe:
         #        print("Warning: no build environment detected!")
