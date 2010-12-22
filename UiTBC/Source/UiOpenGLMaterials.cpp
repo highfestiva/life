@@ -1580,6 +1580,12 @@ void OpenGLMatSingleTextureSolidPXS::DoRenderAllGeometry(unsigned pCurrentFrame,
 
 void OpenGLMatSingleTextureSolidPXS::RenderGeometry(TBC::GeometryBase* pGeometry)
 {
+	if (!GetRenderer()->IsPixelShadersEnabled() || !UiLepra::OpenGLExtensions::IsShaderAsmProgramsSupported())
+	{
+		Parent::RenderGeometry(pGeometry);
+		return;
+	}
+
 	OpenGLRenderer::OGLGeometryData* lGeometry = (OpenGLRenderer::OGLGeometryData*)pGeometry->GetRendererData();
 	PrepareBasicMaterialSettings(pGeometry);
 	OpenGLMatPXS::SetAmbientLight((OpenGLRenderer*)GetRenderer(), pGeometry);
@@ -1605,7 +1611,7 @@ void OpenGLMatSingleTextureSolidPXS::RenderGeometry(TBC::GeometryBase* pGeometry
 
 	if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
 	{
-		GLuint lIndexBufferID  = (GLuint)lGeometry->mIndexBufferID;
+		GLuint lIndexBufferID = (GLuint)lGeometry->mIndexBufferID;
 		
 		UiLepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, (GLuint)lGeometry->mVertexBufferID);
 
@@ -1687,6 +1693,12 @@ void OpenGLMatTextureAndLightmapPXS::DoRenderAllGeometry(unsigned pCurrentFrame,
 
 void OpenGLMatTextureAndLightmapPXS::RenderGeometry(TBC::GeometryBase* pGeometry)
 {
+	if (!GetRenderer()->IsPixelShadersEnabled() || !UiLepra::OpenGLExtensions::IsShaderAsmProgramsSupported())
+	{
+		Parent::RenderGeometry(pGeometry);
+		return;
+	}
+
 	OpenGLRenderer::OGLGeometryData* lGeometry = (OpenGLRenderer::OGLGeometryData*)pGeometry->GetRendererData();
 	PrepareBasicMaterialSettings(pGeometry);
 	OpenGLMatPXS::SetAmbientLight((OpenGLRenderer*)GetRenderer(), pGeometry);
@@ -1830,6 +1842,12 @@ void OpenGLMatTextureSBMapPXS::DoRenderAllGeometry(unsigned pCurrentFrame, const
 
 void OpenGLMatTextureSBMapPXS::RenderGeometry(TBC::GeometryBase* pGeometry)
 {
+	if (!GetRenderer()->IsPixelShadersEnabled() || !UiLepra::OpenGLExtensions::IsShaderAsmProgramsSupported())
+	{
+		Parent::RenderGeometry(pGeometry);
+		return;
+	}
+
 	OpenGLRenderer::OGLGeometryData* lGeometry = (OpenGLRenderer::OGLGeometryData*)pGeometry->GetRendererData();
 	PrepareBasicMaterialSettings(pGeometry);
 	OpenGLMatPXS::SetAmbientLight((OpenGLRenderer*)GetRenderer(), pGeometry);
