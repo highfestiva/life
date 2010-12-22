@@ -5,11 +5,10 @@
 
 
 #include "RaceTimer.h"
-#include <algorithm>
-#include "../../Cure/Include/RuntimeVariable.h"
+#include "../../Cure/Include/TimeManager.h"
 #include "../../TBC/Include/ChunkyPhysics.h"
 #include "../../TBC/Include/PhysicsTrigger.h"
-#include "../LifeClient/RtVar.h"
+#include "../RaceScore.h"
 #include "GameServerManager.h"
 
 
@@ -20,9 +19,11 @@ namespace Life
 
 
 RaceTimer::RaceTimer(Cure::ContextManager* pManager):
-	Cure::CppContextObject(pManager->GetGameManager()->GetResourceManager(), _T("RaceTimer"))
+	Cure::CppContextObject(pManager->GetGameManager()->GetResourceManager(), _T("RaceTimer")),
+	mTriggerCount(0)
 {
 	pManager->AddLocalObject(this);
+	mAttributeName = strutil::Format(_T("race_timer_%u"), GetInstanceId());
 	GetManager()->EnableTickCallback(this);
 }
 
@@ -36,8 +37,8 @@ void RaceTimer::FinalizeTrigger(const TBC::PhysicsTrigger* pTrigger)
 {
 	std::vector<int> lTriggerIndexArray;
 	const TBC::ChunkyPhysics* lPhysics = mParent->GetPhysics();
-	const int lBoneCount = pTrigger->GetTriggerGeometryCount();
-	for (int x = 0; x < lBoneCount; ++x)
+	mTriggerCount = pTrigger->GetTriggerGeometryCount();
+	for (int x = 0; x < (int)mTriggerCount; ++x)
 	{
 		const int lBoneIndex = lPhysics->GetIndex(pTrigger->GetTriggerGeometry(x));
 		assert(lBoneIndex >= 0);
@@ -47,18 +48,69 @@ void RaceTimer::FinalizeTrigger(const TBC::PhysicsTrigger* pTrigger)
 	assert(lTag);
 	if (lTag)
 	{
-		// TODO: ...
 	}
 }
 
 void RaceTimer::OnTick(float)
 {
-	mTriggerTimer.UpdateTimer();
+	const Cure::TimeManager* lTimeManager = GetManager()->GetGameManager()->GetTimeManager();
+	DoneMap::iterator x = mDoneMap.begin();
+	while (x != mDoneMap.end())
+	{
+		if (lTimeManager->GetCurrentPhysicsFrameDelta(x->second) >= 0)
+		{
+			Cure::ContextObject* lObject = GetManager()->GetObject(x->first);
+			if (lObject)
+			{
+				lObject->DeleteAttribute(mAttributeName);
+			}
+			mDoneMap.erase(x++);
+		}
+		else
+		{
+			++x;
+		}
+	}
 }
 
-void RaceTimer::OnTrigger(TBC::PhysicsManager::TriggerID /*pTriggerId*/, TBC::PhysicsManager::ForceFeedbackListener* /*pListener*/)
+void RaceTimer::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, TBC::PhysicsManager::ForceFeedbackListener* pListener)
 {
-	mLog.Headlinef(_T("Should start race timer..."));
+	Cure::ContextObject* lObject = (Cure::ContextObject*)pListener;
+
+	// Check if just finished this race.
+	DoneMap::iterator i = mDoneMap.find(lObject->GetInstanceId());
+	if (i != mDoneMap.end())
+	{
+		return;
+	}
+
+	RaceScore* lRaceScore = (RaceScore*)lObject->GetAttribute(mAttributeName);
+	if (!lRaceScore)
+	{
+		lRaceScore = new RaceScore(lObject, mAttributeName, 1, pTriggerId);
+		mLog.AHeadline("Race started!");
+	}
+	RaceScore::TriggerSet::iterator x = lRaceScore->mTriggerSet.find(pTriggerId);
+	if (x == lRaceScore->mTriggerSet.end())
+	{
+		lRaceScore->mTriggerSet.insert(pTriggerId);
+		mLog.Infof(_T("Hit %u/%u triggers in %f s."), lRaceScore->mTriggerSet.size(), mTriggerCount, lRaceScore->mTimer.QueryTimeDiff());
+		
+	}
+	else if (lRaceScore->mTriggerSet.size() == mTriggerCount && pTriggerId == lRaceScore->mStartTrigger)
+	{
+		if (--lRaceScore->mLapCountLeft <= 0)
+		{
+			mLog.Headlinef(_T("Congratulations - finished race in %f s!"), lRaceScore->mTimer.QueryTimeDiff());
+			mDoneMap.insert(DoneMap::value_type(lObject->GetInstanceId(), GetManager()->GetGameManager()->GetTimeManager()->GetCurrentPhysicsFrameAddSeconds(5.0)));
+		}
+		else
+		{
+			mLog.Headlinef(_T("Lap completed; time is %f s!"), lRaceScore->mTimer.QueryTimeDiff());
+			lRaceScore->mTriggerSet.clear();
+			lRaceScore->mTriggerSet.insert(pTriggerId);
+		}
+	}
 }
 
 

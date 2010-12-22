@@ -99,6 +99,8 @@ void Application::Init()
 
 	mResourceManager = new Cure::ResourceManager(1);
 	mGameTicker = CreateGameTicker();
+
+	InitLife();
 }
 
 int Application::Run()

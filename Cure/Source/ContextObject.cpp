@@ -282,9 +282,34 @@ void ContextObject::AddAttribute(ContextObjectAttribute* pAttribute)
 	mAttributeArray.push_back(pAttribute);
 }
 
-void ContextObject::RemoveAttribute(ContextObjectAttribute* pAttribute)
+void ContextObject::DeleteAttribute(const str& pName)
 {
-	mAttributeArray.erase(std::remove(mAttributeArray.begin(), mAttributeArray.end(), pAttribute), mAttributeArray.end());
+	AttributeArray::iterator x = mAttributeArray.begin();
+	while (x != mAttributeArray.end())
+	{
+		if ((*x)->GetName() == pName)
+		{
+			delete (*x);
+			x = mAttributeArray.erase(x);
+		}
+		else
+		{
+			++x;
+		}
+	}
+}
+
+ContextObjectAttribute* ContextObject::GetAttribute(const str& pName) const
+{
+	AttributeArray::const_iterator x = mAttributeArray.begin();
+	while (x != mAttributeArray.end())
+	{
+		if ((*x)->GetName() == pName)
+		{
+			return *x;
+		}
+	}
+	return 0;
 }
 
 

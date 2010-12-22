@@ -442,7 +442,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Life.cpp"
+				>
+			</File>
+			<File
 				RelativePath="LifeApplication.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\RaceScore.cpp"
 				>
 			</File>
 		</Filter>
@@ -465,6 +473,10 @@
 			</File>
 			<File
 				RelativePath=".\LifeString.h"
+				>
+			</File>
+			<File
+				RelativePath=".\RaceScore.h"
 				>
 			</File>
 			<File
