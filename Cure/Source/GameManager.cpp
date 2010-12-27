@@ -470,18 +470,17 @@ void GameManager::PhysicsTick()
 		LEPRA_MEASURE_SCOPE(PreSteps);
 		mPhysics->PreSteps();
 	}
-	for (int x = 0; x < lAffordedStepCount; ++x)
+	try
 	{
-		ScriptTick(lStepIncrement);
-		try
+		for (int x = 0; x < lAffordedStepCount; ++x)
 		{
+			ScriptTick(lStepIncrement);
 			mPhysics->StepFast(lStepIncrement);
 		}
-		catch (...)
-		{
-			mLog.Errorf(_T("Got some crash or major problem in physics simulation!"));
-			lStepIncrement *= 0.3f;
-		}
+	}
+	catch (...)
+	{
+		mLog.Errorf(_T("Got some crash or major problem in physics simulation!"));
 	}
 	{
 		LEPRA_MEASURE_SCOPE(PostSteps);
