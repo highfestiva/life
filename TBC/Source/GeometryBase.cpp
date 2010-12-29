@@ -18,9 +18,9 @@ namespace TBC
 
 GeometryBase::Edge::Edge()
 {
-	mTriangle = 0;
+	//mTriangle = 0;
 	mTriangleCount = 0;
-	mTriangleElementCount = 0;
+	//mTriangleElementCount = 0;
 
 	mVertex[0] = INVALID_INDEX;
 	mVertex[1] = INVALID_INDEX;
@@ -30,9 +30,9 @@ GeometryBase::Edge::Edge()
 
 GeometryBase::Edge::Edge(const Edge& pEdge)
 {
-	mTriangle = 0;
+	//mTriangle = 0;
 	mTriangleCount = 0;
-	mTriangleElementCount = 0;
+	//mTriangleElementCount = 0;
 
 	mVertex[0] = INVALID_INDEX;
 	mVertex[1] = INVALID_INDEX;
@@ -44,9 +44,9 @@ GeometryBase::Edge::Edge(const Edge& pEdge)
 
 GeometryBase::Edge::Edge(const Edge* pEdge)
 {
-	mTriangle = 0;
+	//mTriangle = 0;
 	mTriangleCount = 0;
-	mTriangleElementCount = 0;
+	//mTriangleElementCount = 0;
 
 	mVertex[0] = INVALID_INDEX;
 	mVertex[1] = INVALID_INDEX;
@@ -63,14 +63,14 @@ GeometryBase::Edge::~Edge()
 
 void GeometryBase::Edge::ClearAll()
 {
-	if (mTriangle != 0)
+	/*if (mTriangle != 0)
 	{
 		delete[] mTriangle;
 		mTriangle = 0;
-	}
+	}*/
 
 	mTriangleCount = 0;
-	mTriangleElementCount = 0;
+	//mTriangleElementCount = 0;
 
 	mVertex[0] = INVALID_INDEX;
 	mVertex[1] = INVALID_INDEX;
@@ -85,20 +85,19 @@ void GeometryBase::Edge::Copy(const Edge* pEdge)
 	mVertex[1] = pEdge->mVertex[1];
 
 	mTriangleCount = pEdge->mTriangleCount;
-	mTriangleElementCount = pEdge->mTriangleCount;
-	mTriangle = new int[mTriangleCount];
-
+	//mTriangleElementCount = pEdge->mTriangleCount;
+	//mTriangle = new int[mTriangleCount];
 	::memcpy(mTriangle, pEdge->mTriangle, mTriangleCount * sizeof(int));
 }
 
 void GeometryBase::Edge::AddTriangle(int pTriangleIndex)
 {
-	if (HaveTriangle(pTriangleIndex) == true)
+	if (HaveTriangle(pTriangleIndex) || mTriangleCount >= 2)
 	{
 		return;
 	}
 
-	if ((mTriangleCount + 1) > mTriangleElementCount)
+	/*if ((mTriangleCount + 1) > mTriangleElementCount)
 	{
 		mTriangleElementCount += (mTriangleElementCount >> 2) + 1;
 		int* lTemp = new int[mTriangleElementCount];
@@ -109,8 +108,7 @@ void GeometryBase::Edge::AddTriangle(int pTriangleIndex)
 			delete[] mTriangle;
 		}
 		mTriangle = lTemp;
-	}
-
+	}*/
 	mTriangle[mTriangleCount] = pTriangleIndex;
 	mTriangleCount++;
 }
@@ -135,8 +133,7 @@ void GeometryBase::Edge::RemoveTriangle(int pTriangleIndex)
 		{
 			mTriangle[i] = mTriangle[i + 1];
 		}
-
-		mTriangleCount--;
+		--mTriangleCount;
 	}
 }
 
@@ -205,7 +202,7 @@ bool GeometryBase::Edge::IsSameEdge(int pVertexIndex1,
 	}
 
 	if (mTriangleCount == 0 ||
-	   lVerticesMatch == false)
+		lVerticesMatch == false)
 	{
 		return lVerticesMatch;
 	}
@@ -280,6 +277,7 @@ GeometryBase::GeometryBase() :
 	mFlags(0),
 	mBoundingRadius(0),
 	mScale(1),
+	mXformUpdateFactor(0),
 	mSurfaceNormalData(0),
 	mSurfaceNormalCount(0),
 	mVertexNormalData(0),
@@ -676,9 +674,15 @@ unsigned int GeometryBase::GetLastFrameVisible() const
 
 void GeometryBase::SetTransformation(const TransformationF& pTransformation)
 {
-	if (mTransformation != pTransformation)
+	QuaternionF lOrientation = mTransformation.GetOrientation();
+	lOrientation.Sub(pTransformation.GetOrientation());
+	mXformUpdateFactor += lOrientation.GetNorm() * 25000 + 
+		mTransformation.GetPosition().GetDistanceSquared(pTransformation.GetPosition()) * 2500;
+	mXformUpdateFactor *= 2;
+	if (mXformUpdateFactor >= 1)
 	{
 		SetFlag(TRANSFORMATION_CHANGED);
+		mXformUpdateFactor = 0;
 	}
 	mTransformation = pTransformation;
 }

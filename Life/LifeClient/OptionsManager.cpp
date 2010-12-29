@@ -35,9 +35,17 @@ void OptionsManager::RefreshConfiguration()
 	if (mLastConfigRefresh.QueryTimeDiff() > 5.0)
 	{
 		mLastConfigRefresh.ClearTimeDiff();
-		mInputMap.clear();
 		DoRefreshConfiguration();
 	}
+}
+
+void OptionsManager::DoRefreshConfiguration()
+{
+	const KeyValue lEntries[] =
+	{
+		KeyValue(_T(RTVAR_CTRL_UI_CONTOGGLE), &mConsoleToggle),
+	};
+	SetValuePointers(lEntries, LEPRA_ARRAY_COUNT(lEntries));
 }
 
 bool OptionsManager::UpdateInput(UiLepra::InputManager::KeyCode pKeyCode, bool pActive)
@@ -100,17 +108,8 @@ float OptionsManager::GetConsoleToggle() const
 
 bool OptionsManager::SetDefault(int)
 {
-	CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_CONTOGGLE, _T("Key.F11"));
+	CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_CONTOGGLE, _T("Key.F11"));
 	return (true);
-}
-
-void OptionsManager::DoRefreshConfiguration()
-{
-	const KeyValue lEntries[] =
-	{
-		KeyValue(_T(RTVAR_CTRL_UI_CONTOGGLE), &mConsoleToggle),
-	};
-	SetValuePointers(lEntries, LEPRA_ARRAY_COUNT(lEntries));
 }
 
 const str OptionsManager::ConvertToString(UiLepra::InputManager::KeyCode pKeyCode)
@@ -160,6 +159,7 @@ std::vector<float*>* OptionsManager::GetValuePointers(const str& pKey, bool& pIs
 
 void OptionsManager::SetValuePointers(const KeyValue pEntries[], size_t pEntryCount)
 {
+	mInputMap.clear();
 	for (size_t x = 0; x < pEntryCount; ++x)
 	{
 		const str lKeys = mVariableScope->GetDefaultValue(Cure::RuntimeVariableScope::READ_ONLY, pEntries[x].first);

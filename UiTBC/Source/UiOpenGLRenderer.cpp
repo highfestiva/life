@@ -363,6 +363,21 @@ void OpenGLRenderer::RemoveLight(LightID pLightID)
 	OGL_ASSERT();
 }
 
+void OpenGLRenderer::EnableAllLights(bool pEnable)
+{
+	for (int i = 0; i < GetLightCount(); ++i)
+	{
+		if (pEnable)
+		{
+			::glEnable(GL_LIGHT0 + GetLightIndex(i));
+		}
+		else
+		{
+			::glDisable(GL_LIGHT0 + GetLightIndex(i));
+		}
+	}
+}
+
 
 
 void OpenGLRenderer::SetLightPosition(LightID pLightID, float pX, float pY, float pZ)

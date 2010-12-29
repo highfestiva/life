@@ -6,6 +6,7 @@
 
 #include "../Include/UiShadowVolume.h"
 #include <assert.h>
+#include "../../Lepra/Include/Thread.h"
 
 
 
@@ -44,6 +45,8 @@ ShadowVolume::ShadowVolume(TBC::GeometryBase* pParentGeometry):
 	mTransformationChanged(false),
 	mParentGeometry(pParentGeometry)
 {
+	LEPRA_DEBUG_CODE(mName = _T("Shdw->") + pParentGeometry->mName);
+
 	if (mParentGeometry->GetEdgeData() == 0)
 	{
 		mParentGeometry->GenerateEdgeData();
@@ -236,12 +239,10 @@ void ShadowVolume::InitTO()
 { \
 	if (to.mChecked == false) \
 	{ \
-		mIndexData[lIndex + 0] = to.mV0; \
-		mIndexData[lIndex + 1] = to.mV1; \
-		mIndexData[lIndex + 2] = to.mV2; \
-		mTriangleCount++; \
-		lIndex += 3; \
- \
+		*lIndexData++ = to.mV0; \
+		*lIndexData++ = to.mV1; \
+		*lIndexData++ = to.mV2; \
+		++mTriangleCount; \
 		to.mChecked = true; \
 	} \
 }
@@ -250,12 +251,10 @@ void ShadowVolume::InitTO()
 { \
 	if (to.mChecked == false) \
 	{ \
-		mIndexData[lIndex + 0] = to.mV0 + mParentVertexCount; \
-		mIndexData[lIndex + 1] = to.mV1 + mParentVertexCount; \
-		mIndexData[lIndex + 2] = to.mV2 + mParentVertexCount; \
-		mTriangleCount++; \
-		lIndex += 3; \
- \
+		*lIndexData++ = to.mV0 + mParentVertexCount; \
+		*lIndexData++ = to.mV1 + mParentVertexCount; \
+		*lIndexData++ = to.mV2 + mParentVertexCount; \
+		++mTriangleCount; \
 		to.mChecked = true; \
 	} \
 }
@@ -264,12 +263,10 @@ void ShadowVolume::InitTO()
 { \
 	if (to.mChecked == false) \
 	{ \
-		mIndexData[lIndex + 0] = to.mV2 + mParentVertexCount; \
-		mIndexData[lIndex + 1] = to.mV1 + mParentVertexCount; \
-		mIndexData[lIndex + 2] = to.mV0 + mParentVertexCount; \
-		mTriangleCount++; \
-		lIndex += 3; \
- \
+		*lIndexData++ = to.mV2 + mParentVertexCount; \
+		*lIndexData++ = to.mV1 + mParentVertexCount; \
+		*lIndexData++ = to.mV0 + mParentVertexCount; \
+		++mTriangleCount; \
 		to.mChecked = true; \
 	} \
 }
@@ -304,78 +301,73 @@ void ShadowVolume::UpdateShadowVolume(const Vector3DF& pLightPos, float pShadowR
 	//
 
 	mParentGeometry->GenerateSurfaceNormalData();
+	const uint32* lIndices = mParentGeometry->GetIndexData();
 	const float* lSurfaceNormalData = mParentGeometry->GetSurfaceNormalData();
 	const float* lVertexData = mParentGeometry->GetVertexData();
 
-	unsigned i;
+	// Warning: optimized code has no support for strips or other primitives!
 	const unsigned lTriangleCount = mParentGeometry->GetTriangleCount();
 	if (pDirectional)
 	{
 		// Calculate triangle orientations relative to light source.
-		for (i = 0; i < lTriangleCount; i++)
+		for (unsigned i = 0; i < lTriangleCount; i++)
 		{
-			uint32 lVertexIndex[3];
-			mParentGeometry->GetTriangleIndices(i, lVertexIndex);
-			
 			const unsigned lTriIndex = i * 3;
-			Vector3DF lSurfaceNormal(lSurfaceNormalData[lTriIndex + 0],
-							 lSurfaceNormalData[lTriIndex + 1],
-							 lSurfaceNormalData[lTriIndex + 2]);
 
 			// Get the vector between one corner of the triangle and the light source.
-			mTriangleOrientation[i].mV0 = lVertexIndex[0];
-			mTriangleOrientation[i].mV1 = lVertexIndex[1];
-			mTriangleOrientation[i].mV2 = lVertexIndex[2];
+			mTriangleOrientation[i].mV0 = lIndices[lTriIndex + 0];
+			mTriangleOrientation[i].mV1 = lIndices[lTriIndex + 1];
+			mTriangleOrientation[i].mV2 = lIndices[lTriIndex + 2];
 			mTriangleOrientation[i].mChecked = false;
 
 			// Light position is now treated as a direction instead.
-			if (lLightPos.Dot(lSurfaceNormal) <= 0.0f)
+			if (lLightPos.Dot(lSurfaceNormalData[lTriIndex + 0], lSurfaceNormalData[lTriIndex + 1],
+				lSurfaceNormalData[lTriIndex + 2]) <= 0)
 			{
 				// Front towards light source.
-				mTriangleOrientation[i].mTO = TO_FRONT;
+				mTriangleOrientation[i].mIsFrontFacing = true;
 			}
 			else
 			{
 				// Back towards light source.
-				mTriangleOrientation[i].mTO = TO_BACK;
+				mTriangleOrientation[i].mIsFrontFacing = false;
 			}
 		}
 
 		// Move vertex twins away from lightsource.
-		for (i = 0; i < mParentVertexCount; i++)
+		const float* lSource = mVertexData;
+		float* lTarget = &mVertexData[mParentVertexCount*3];
+		const float* lEndSource = lTarget;
+		while (lSource != lEndSource)
 		{
-			// Read original vertex.
-			const int lIndex0 = i * 3;
-			const int lIndex1 = (i + mParentVertexCount) * 3;
-
-			mVertexData[lIndex1 + 0] = mVertexData[lIndex0 + 0] + (float)lLightPos.x;
-			mVertexData[lIndex1 + 1] = mVertexData[lIndex0 + 1] + (float)lLightPos.y;
-			mVertexData[lIndex1 + 2] = mVertexData[lIndex0 + 2] + (float)lLightPos.z;
+			*lTarget++ = lLightPos.x + *lSource++;
+			*lTarget++ = lLightPos.y + *lSource++;
+			*lTarget++ = lLightPos.z + *lSource++;
 		}
 	}
-	else // if light is a point light (pDirectional == false).
+	else // Point or spot light.
 	{
 		const uint32* lIndices = mParentGeometry->GetIndexData();
 		// Calculate triangle orientations relative to light source.
-		for (i = 0; i < lTriangleCount; i++)
+		for (unsigned i = 0; i < lTriangleCount; i++)
 		{
-			if (mParentGeometry->GetPrimitiveType() == TBC::GeometryBase::TRIANGLES)
+			const unsigned lTriIndex = i * 3;
+
+			//if (mParentGeometry->GetPrimitiveType() == TBC::GeometryBase::TRIANGLES)
 			{
-				const int lOffset = i * 3;
-				mTriangleOrientation[i].mV0 = lIndices[lOffset + 0];
-				mTriangleOrientation[i].mV1 = lIndices[lOffset + 1];
-				mTriangleOrientation[i].mV2 = lIndices[lOffset + 2];
+				mTriangleOrientation[i].mV0 = lIndices[lTriIndex + 0];
+				mTriangleOrientation[i].mV1 = lIndices[lTriIndex + 1];
+				mTriangleOrientation[i].mV2 = lIndices[lTriIndex + 2];
 			}
-			else
+			/*else
 			{
 				uint32 lVertexIndex[3];
 				mParentGeometry->GetTriangleIndices(i, lVertexIndex);
 				mTriangleOrientation[i].mV0 = lVertexIndex[0];
 				mTriangleOrientation[i].mV1 = lVertexIndex[1];
 				mTriangleOrientation[i].mV2 = lVertexIndex[2];
-			}
+			}*/
 			
-			const unsigned lTriIndex = i * 3;
 			Vector3DF lSurfaceNormal(lSurfaceNormalData[lTriIndex + 0],
 							 lSurfaceNormalData[lTriIndex + 1],
 							 lSurfaceNormalData[lTriIndex + 2]);
@@ -391,18 +383,18 @@ void ShadowVolume::UpdateShadowVolume(const Vector3DF& pLightPos, float pShadowR
 			if (lVector.Dot(lSurfaceNormal) <= 0.0f)
 			{
 				// Front towards light source.
-				mTriangleOrientation[i].mTO = TO_FRONT;
+				mTriangleOrientation[i].mIsFrontFacing = true;
 			}
 			else
 			{
 				// Back towards light source.
-				mTriangleOrientation[i].mTO = TO_BACK;
+				mTriangleOrientation[i].mIsFrontFacing = false;
 			}
 		}
 
 		const float lShadowRangeSquared = pShadowRange * pShadowRange;
 		// Move vertex twins away from lightsource.
-		for (i = 0; i < mParentVertexCount; i++)
+		for (unsigned i = 0; i < mParentVertexCount; i++)
 		{
 			// Read original vertex.
 			const int lIndex0 = i * 3;
@@ -434,88 +426,51 @@ void ShadowVolume::UpdateShadowVolume(const Vector3DF& pLightPos, float pShadowR
 	}
 
 	const TBC::GeometryBase::Edge* lEdges = mParentGeometry->GetEdgeData();
-
-	for (i = 0; i < mParentGeometry->GetEdgeCount(); ++i)
+	const unsigned lEdgeCount = mParentGeometry->GetEdgeCount();
+	Lepra::uint32* lIndexData = mIndexData;
+	for (unsigned i = 0; i < lEdgeCount; ++i)
 	{
 		const Edge& lEdge = lEdges[i];
-
-		//assert(lEdge.mTriangleCount == 1 || lEdge.mTriangleCount == 2);
-		//assert(lEdge.mVertex[0] != lEdge.mVertex[1]);
-		//assert(lEdge.mTriangle[0] != lEdge.mTriangle[1]);
-
-		// Set this to true if we have a silhouette edge.
-		bool lExtrudeEdge = false;
-		const TriangleOrientation* lFT = 0;
-		unsigned lIndex = 0;
-
+		const TriangleOrientation* lFT = 0;	// Set this if we have a silhouette edge.
+		TriangleOrientation& lT0 = mTriangleOrientation[lEdge.mTriangle[0]];
 		if (lEdge.mTriangleCount == 2)
 		{
-			TriangleOrientation& lT0 = mTriangleOrientation[lEdge.mTriangle[0]];
 			TriangleOrientation& lT1 = mTriangleOrientation[lEdge.mTriangle[1]];
 
-			//assert(lT0.mTO != TO_INVALID);
-			//assert(lT1.mTO != TO_INVALID);
-
-			lIndex = mTriangleCount * 3;
-
-			if (lT0.mTO == TO_FRONT)
+			if (lT0.mIsFrontFacing)
 			{
-				// Add front cap triangle.
 				MACRO_ADDFRONTCAPTRIANGLE(lT0);
-
-				if (lT1.mTO == TO_FRONT)
-				{
-					// Add front cap triangle.
-					MACRO_ADDFRONTCAPTRIANGLE(lT1);
-				}
-				else
+				if (!lT1.mIsFrontFacing)
 				{
 					lFT = &lT0;
-					lExtrudeEdge = true;
-
-					// Add back cap triangle.
-					MACRO_ADDBACKCAPTRIANGLE(lT1);
 				}
 			}
 			else
 			{
-				// Add back cap triangle.
 				MACRO_ADDBACKCAPTRIANGLE(lT0);
-
-				if (lT1.mTO == TO_FRONT)
+			}
+			if (lT1.mIsFrontFacing)
+			{
+				MACRO_ADDFRONTCAPTRIANGLE(lT1);
+				if (!lT0.mIsFrontFacing)
 				{
 					lFT = &lT1;
-					lExtrudeEdge = true;
-
-					// Add front cap triangle.
-					MACRO_ADDFRONTCAPTRIANGLE(lT1);
-				}
-				else
-				{
-					// Add back cap triangle.
-					MACRO_ADDBACKCAPTRIANGLE(lT1);
 				}
 			}
-		}
-		else // lEdge.mTriangleCount == 1
-		{
-			TriangleOrientation& lT0 = mTriangleOrientation[lEdge.mTriangle[0]];
-
-			assert(lT0.mTO != TO_INVALID);
-
-			lIndex = mTriangleCount * 3;
-
-			if (lT0.mTO == TO_FRONT)
+			else
 			{
-				// Add front cap triangle.
-				MACRO_ADDFRONTCAPTRIANGLE(lT0);
-				MACRO_ADDBACKCAPTRIANGLE_FLIPPED(lT0);
-				lFT = &lT0;
-				lExtrudeEdge = true;
+				MACRO_ADDBACKCAPTRIANGLE(lT1);
 			}
 		}
+		else if (lT0.mIsFrontFacing)	// Assume only one triangle on edge.
+		{
+			// Add front+back cap triangle.
+			MACRO_ADDFRONTCAPTRIANGLE(lT0);
+			MACRO_ADDBACKCAPTRIANGLE_FLIPPED(lT0);
+			lFT = &lT0;
+		}
 
-		if (lExtrudeEdge == true)
+		if (lFT)
 		{
 			int lV0;
 			int lV1;
@@ -550,15 +505,14 @@ void ShadowVolume::UpdateShadowVolume(const Vector3DF& pLightPos, float pShadowR
 			}
 
 			// Create two triangles that are extruded from the edge.
-			mIndexData[lIndex + 0] = lV0;
-			mIndexData[lIndex + 1] = lV1;
-			mIndexData[lIndex + 2] = lV0 + mParentVertexCount;
-			mIndexData[lIndex + 3] = lV1;
-			mIndexData[lIndex + 4] = lV1 + mParentVertexCount;
-			mIndexData[lIndex + 5] = lV0 + mParentVertexCount;
+			*lIndexData++ = lV0;
+			*lIndexData++ = lV1;
+			*lIndexData++ = lV0 + mParentVertexCount;
+			*lIndexData++ = lV1;
+			*lIndexData++ = lV1 + mParentVertexCount;
+			*lIndexData++ = lV0 + mParentVertexCount;
 
 			mTriangleCount += 2;
-
 			assert(mTriangleCount < mMaxTriangleCount);
 		}
 	}

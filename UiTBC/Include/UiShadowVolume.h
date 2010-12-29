@@ -56,16 +56,9 @@ protected:
 	void ExtrudeEdges();
 private:
 
-	enum TO
-	{
-		TO_INVALID = 0,
-		TO_FRONT,
-		TO_BACK,
-	};
-
 	struct TriangleOrientation
 	{
-		TO mTO;
+		bool mIsFrontFacing;
 		unsigned long mV0;
 		unsigned long mV1;
 		unsigned long mV2;

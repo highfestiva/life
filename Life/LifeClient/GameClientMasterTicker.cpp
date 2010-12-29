@@ -238,8 +238,9 @@ bool GameClientMasterTicker::Tick()
 		LEPRA_MEASURE_SCOPE(Paint);
 		if (mUiManager->CanRender())
 		{
-			mSunlight->SetDirection(0, 1, -1);
-			mSunlight->SetColor(1.5f, 1.5f, 1.5f);
+			mUiManager->GetRenderer()->EnableAllLights(false);
+			UiTbc::Renderer::LightID lLightId = mUiManager->GetRenderer()->AddDirectionalLight(
+				UiTbc::Renderer::LIGHT_STATIC, Vector3DF(0, 1, -1), WHITE, 1.5f, 160);
 			mUiManager->Paint();
 			for (x = mSlaveArray.begin(); lOk && x != mSlaveArray.end(); ++x)
 			{
@@ -249,6 +250,8 @@ bool GameClientMasterTicker::Tick()
 					lOk = lSlave->Paint();
 				}
 			}
+			mUiManager->GetRenderer()->RemoveLight(lLightId);
+			mUiManager->GetRenderer()->EnableAllLights(true);
 		}
 	}
 

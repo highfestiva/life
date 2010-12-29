@@ -6,12 +6,17 @@
 
 #include "../Include/UiRenderer.h"
 #include "../Include/UiMaterial.h"
-#include "../../TBC/Include/GeometryReference.h"
 #include "../../Lepra/Include/Log.h"
 #include "../../Lepra/Include/Math.h"
+#include "../../Lepra/Include/Random.h"
+#include "../../TBC/Include/GeometryReference.h"
+
+
 
 namespace UiTbc
 {
+
+
 
 Renderer::Renderer(Canvas* pScreen) :
 	mCurrentFrame(0),
@@ -1117,6 +1122,8 @@ Renderer::Shadows Renderer::GetShadows(GeometryID pGeometryID)
 
 void Renderer::UpdateShadowMaps()
 {
+	unsigned lTrianglesCalculatedFor = 0;
+	bool lDidStatic = false;
 	for (int i = 0; i <= (int)MAT_LAST_SOLID; i++)
 	{
 		TBC::GeometryBase* lGeometry = mMaterial[i]->GetFirstGeometry();
@@ -1124,14 +1131,23 @@ void Renderer::UpdateShadowMaps()
 		{
 			if (lGeometry->GetAlwaysVisible() || lGeometry->GetLastFrameVisible() == mCurrentFrame)
 			{
-				UpdateShadowMaps(lGeometry);
+				const TBC::GeometryBase::GeometryVolatility lVolatility = lGeometry->GetGeometryVolatility();
+				bool lUpdate = (lTrianglesCalculatedFor < 1000 || lVolatility >= TBC::GeometryBase::GEOM_SEMI_STATIC || !lDidStatic);
+				if (lUpdate)
+				{
+					lTrianglesCalculatedFor += UpdateShadowMaps(lGeometry);
+					if (lVolatility == TBC::GeometryBase::GEOM_STATIC)
+					{
+						lDidStatic = true;
+					}
+				}
 			}
 			lGeometry = mMaterial[i]->GetNextGeometry();
 		}
 	}
 }
 
-void Renderer::UpdateShadowMaps(TBC::GeometryBase* pGeometry)
+unsigned Renderer::UpdateShadowMaps(TBC::GeometryBase* pGeometry)
 {
 	GeometryData* lGeometry = (GeometryData*)pGeometry->GetRendererData();
 #define MATH_SQUARE(x) (x)*(x)
@@ -1145,7 +1161,7 @@ void Renderer::UpdateShadowMaps(TBC::GeometryBase* pGeometry)
 		{
 			RemoveShadowVolumes(lGeometry);
 		}
-		return;
+		return 0;
 	}
 
 	SortLights(pGeometry->GetTransformation().GetPosition());
@@ -1188,6 +1204,7 @@ void Renderer::UpdateShadowMaps(TBC::GeometryBase* pGeometry)
 	bool lGeomTransformationChanged = pGeometry->GetTransformationChanged();
 
 	// Iterate over all the closest light sources and update shadow volumes.
+	unsigned lActiveLightCount = 0;
 	int lLoopMax = MAX_SHADOW_VOLUMES < mLightCount ? MAX_SHADOW_VOLUMES : mLightCount;
 	int i;
 	for (i = 0; i < lLoopMax; i++)
@@ -1217,6 +1234,7 @@ void Renderer::UpdateShadowMaps(TBC::GeometryBase* pGeometry)
 
 		if (lProcessLight == true)
 		{
+			++lActiveLightCount;
 			if (lGeometry->mShadowVolume[i] == 0)
 			{
 				// Light has been enabled. Create shadow volume.
@@ -1250,8 +1268,7 @@ void Renderer::UpdateShadowMaps(TBC::GeometryBase* pGeometry)
 
 				lGeometry->mLightID[i] = mLightIndex[i];
 			}
-			else if(pGeometry->GetAlwaysVisible() == true ||
-				pGeometry->GetLastFrameVisible() == GetCurrentFrame())
+			else
 			{
 				if ((lGeomTransformationChanged || pGeometry->GetVertexDataChanged() ||
 					lGeometry->mLightID[i] != mLightIndex[i]) ||
@@ -1301,8 +1318,10 @@ void Renderer::UpdateShadowMaps(TBC::GeometryBase* pGeometry)
 
 	if (lShadowsUpdated == true)
 	{
-		lGeometry->mLastFrameShadowsUpdated = mCurrentFrame;
+		lGeometry->mLastFrameShadowsUpdated = mCurrentFrame + Random::GetRandomNumber() % (mShadowUpdateFrameDelay / 3);
+		return pGeometry->GetTriangleCount() * lActiveLightCount;
 	}
+	return 0;
 }
 
 unsigned Renderer::GetCurrentFrame() const
@@ -1665,8 +1684,12 @@ bool Renderer::CheckCamCulling(const Vector3DF& pPosition, float pBoundingRadius
 	return lVisible;
 }
 
+
+
 Renderer* Renderer::smRenderer = 0;
 Vector3DF Renderer::smReferencePosition;
 LOG_CLASS_DEFINE(UI_GFX_3D, Renderer);
 
-} // End namespace.
+
+
+}

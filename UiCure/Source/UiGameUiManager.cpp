@@ -514,7 +514,7 @@ void GameUiManager::UpdateSettings()
 	CURE_RTVAR_GET(lFOV, =, mVariableScope, RTVAR_UI_3D_FOV, 45.0);
 	CURE_RTVAR_GET(lClipNear, =, mVariableScope, RTVAR_UI_3D_CLIPNEAR, 0.1);
 	CURE_RTVAR_GET(lClipFar, =, mVariableScope, RTVAR_UI_3D_CLIPFAR, 3000.0);
-	CURE_RTVAR_GET(lShadowsString, =, mVariableScope, RTVAR_UI_3D_SHADOWS, _T("VolumesOnly"));
+	CURE_RTVAR_GET(lShadowsString, =, mVariableScope, RTVAR_UI_3D_SHADOWS, _T("Volumes"));
 
 	mRenderer->SetLightsEnabled(lEnableLights);
 	mRenderer->SetAmbientLight((float)lAmbientRed, (float)lAmbientGreen, (float)lAmbientBlue);
@@ -526,12 +526,12 @@ void GameUiManager::UpdateSettings()
 	UiTbc::Renderer::Shadows lShadowMode = UiTbc::Renderer::NO_SHADOWS;
 	UiTbc::Renderer::ShadowHint lShadowType = UiTbc::Renderer::SH_VOLUMES_ONLY;
 	bool lForceShadowsOnAll = false;
-	if (strutil::StartsWith(lShadowsString, _T("Force")))
+	if (strutil::StartsWith(lShadowsString, _T("Force:")))
 	{
-		lShadowsString = lShadowsString.substr(5);
+		lShadowsString = lShadowsString.substr(6);
 		lForceShadowsOnAll = true;
 	}
-	if (lShadowsString == _T("VolumesOnly"))
+	if (lShadowsString == _T("Volumes"))
 	{
 		lShadowMode = UiTbc::Renderer::CAST_SHADOWS;
 		lShadowType = UiTbc::Renderer::SH_VOLUMES_ONLY;

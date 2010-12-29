@@ -69,10 +69,11 @@ public:
 				int* pTriangles, 
 				int pNumTriangles);
 
-		int* mTriangle;
+		//int* mTriangle;
+		int mTriangle[2];
 		int mVertex[2];
 		int mTriangleCount;
-		int mTriangleElementCount;
+		//int mTriangleElementCount;
 
 		Edge* mReserved;
 	};
@@ -347,6 +348,7 @@ private:
 
 	float mBoundingRadius;
 	float mScale;
+	float mXformUpdateFactor;
 
 	// Surface normals are primarily used when generating
 	// the shadow volume (used to perform stencil shadows).
@@ -379,6 +381,9 @@ private:
 	ListenerList mListenerList;
 
 	size_t mExtraData;
+
+public:
+	LEPRA_DEBUG_CODE(str mName);
 };
 
 

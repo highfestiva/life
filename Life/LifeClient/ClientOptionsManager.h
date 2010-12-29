@@ -25,9 +25,10 @@ struct ClientOptionsManager: OptionsManager
 	const Steering& GetSteeringControl() const;
 	const CamControl& GetCamControl() const;
 
+	virtual void DoRefreshConfiguration();
+
 private:
 	virtual bool SetDefault(int pPriority);
-	virtual void DoRefreshConfiguration();
 
 	Steering mSteeringControl;
 	CamControl mCamControl;
