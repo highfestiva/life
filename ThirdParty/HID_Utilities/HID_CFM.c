@@ -69,8 +69,8 @@ typedef unsigned long  (*fpHIDDequeueElementtype) (pRecDevice pDevice, pRecEleme
 typedef unsigned long  (*fpHIDDequeueDevicetype) (pRecDevice pDevice);
 typedef unsigned char (*fpHIDGetEventtype) (pRecDevice pDevice, void * pHIDEvent);
 typedef long (*fpHIDGetElementValuetype) (pRecDevice pDevice, pRecElement pElement);
-typedef long (*fpHIDCalibrateValuetype) (long value, pRecElement pElement);
-typedef long (*fpHIDScaleValuetype) (long value, pRecElement pElement);
+typedef SInt32 (*fpHIDCalibrateValuetype) (SInt32 value, pRecElement pElement);
+typedef SInt32 (*fpHIDScaleValuetype) (SInt32 value, pRecElement pElement);
 typedef unsigned char (*fpHIDConfigureActiontype) (pRecDevice * ppDevice, pRecElement * ppElement, float timeout);
 typedef void (*fpHIDSaveElementConfigtype) (FILE * fileRef, pRecDevice pDevice, pRecElement pElement, long actionCookie);
 typedef long (*fpHIDRestoreElementConfigtype) (FILE * fileRef, pRecDevice * ppDevice, pRecElement * ppElement);
@@ -318,12 +318,12 @@ long HIDGetElementValue (pRecDevice pDevice, pRecElement pElement)
 	return (*fpHIDGetElementValue) (pDevice, pElement);
 }
 
-long HIDCalibrateValue (long value, pRecElement pElement)
+SInt32 HIDCalibrateValue (SInt32 value, pRecElement pElement)
 {
 	return (*fpHIDCalibrateValue) (value, pElement);
 }
 
-long HIDScaleValue (long value, pRecElement pElement)
+SInt32 HIDScaleValue (SInt32 value, pRecElement pElement)
 {
 	return (*fpHIDScaleValue) (value, pElement);
 }

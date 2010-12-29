@@ -114,9 +114,9 @@ bool MacFontManager::RenderGlyph(tchar pChar, Canvas& pImage, const PixelRect& p
 	// we create a bitmap context
 	textcontext = CGBitmapContextCreate(pImage.GetBuffer(), pImage.GetWidth(), pImage.GetHeight(), 8,
 		pImage.GetWidth()*pImage.GetPixelByteSize(), colorspace, kCGImageAlphaPremultipliedLast);
-	float rect[4] = { pRect.mLeft, pRect.mTop, pRect.mRight, pRect.mBottom };
-	float transparent[4] = { 0, 0, 0, 0 };
-	float text_color[4] = { 1, 1, 1, 1 };
+	CGFloat rect[4] = { pRect.mLeft, pRect.mTop, pRect.mRight, pRect.mBottom };
+	CGFloat transparent[4] = { 0, 0, 0, 0 };
+	CGFloat text_color[4] = { 1, 1, 1, 1 };
 	// if you do this a lot store the color somewhere and release it when you are done with it
 	CGContextSetFillColorWithColor(textcontext, CGColorCreate(colorspace, transparent)); 
 	CGContextFillRect(textcontext, *(CGRect*)rect);
