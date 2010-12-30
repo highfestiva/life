@@ -50,6 +50,7 @@ public:
 	void AddPhysicsSenderObject(ContextObject* pObject);
 	void AddPhysicsBody(ContextObject* pObject, TBC::PhysicsManager::BodyID pBodyId);
 	void RemovePhysicsBody(TBC::PhysicsManager::BodyID pBodyId);
+	void AddAttributeSenderObject(ContextObject* pObject);
 
 	GameObjectId AllocateGameObjectId(NetworkObjectType pNetworkType);
 	void FreeGameObjectId(NetworkObjectType pNetworkType, GameObjectId pInstanceId);
@@ -67,6 +68,7 @@ public:
 	void TickPhysics();
 	void HandleIdledBodies();
 	void HandlePhysicsSend();
+	void HandleAttributeSend();
 	void HandlePostKill();
 
 private:
@@ -126,6 +128,7 @@ private:
 	ContextObjectTable mObjectTable;
 	ContextObjectTable mPhysicsSenderObjectTable;
 	BodyTable mBodyTable;
+	ContextObjectTable mAttributeSenderObjectTable;
 	ContextObjectTable mPhysicsUpdateCallbackObjectTable;
 	ContextObjectTable mTickCallbackObjectTable;
 	AlarmSet mAlarmCallbackObjectSet;

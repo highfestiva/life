@@ -45,6 +45,18 @@ void ContextObjectAttribute::SetCreator(const Factory& pFactory)
 
 
 
+int ContextObjectAttribute::QuerySend() const
+{
+	wstr lAttributeName = wstrutil::Encode(mName);
+	return PackerUnicodeString::Pack(0, lAttributeName);
+}
+
+int ContextObjectAttribute::Pack(uint8* pDestination)
+{
+	wstr lAttributeName = wstrutil::Encode(mName);
+	return PackerUnicodeString::Pack(pDestination, lAttributeName);
+}
+
 int ContextObjectAttribute::Unpack(ContextObject* pContextObject, const uint8* pSource, int pMaxSize)
 {
 	wstr lAttributeName;

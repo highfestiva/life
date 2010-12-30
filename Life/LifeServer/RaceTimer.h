@@ -33,7 +33,7 @@ private:
 	typedef std::hash_map<Cure::GameObjectId, int> DoneMap;
 
 	str mAttributeName;
-	size_t mTriggerCount;
+	unsigned mTriggerCount;
 	DoneMap mDoneMap;
 
 	LOG_CLASS_DECLARE();

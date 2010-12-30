@@ -175,6 +175,7 @@ bool GameManager::EndTick()
 
 bool GameManager::TickNetworkOutput()
 {
+	mContext->HandleAttributeSend();
 	return (mNetwork->SendAll());
 }
 

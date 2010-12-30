@@ -78,6 +78,7 @@ public:
 	void AddAttribute(ContextObjectAttribute* pAttribute);
 	void DeleteAttribute(const str& pName);
 	ContextObjectAttribute* GetAttribute(const str& pName) const;
+	void OnAttributeUpdated(ContextObjectAttribute* pAttribute);
 
 	void AddTrigger(TBC::PhysicsManager::TriggerID pTriggerId, const void*);
 	virtual void FinalizeTrigger(const TBC::PhysicsTrigger* pTrigger);

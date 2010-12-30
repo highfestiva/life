@@ -1646,6 +1646,11 @@ bool GameClientSlaveManager::OnPhysicsSend(Cure::ContextObject*)
 	return (true);	// Say true to drop us from sender list.
 }
 
+bool GameClientSlaveManager::OnAttributeSend(Cure::ContextObject*)
+{
+	return (true);	// Say true to drop us from sender list.
+}
+
 bool GameClientSlaveManager::IsConnectAuthorized()
 {
 	return (false);

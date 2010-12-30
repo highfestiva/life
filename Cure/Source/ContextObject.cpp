@@ -312,6 +312,11 @@ ContextObjectAttribute* ContextObject::GetAttribute(const str& pName) const
 	return 0;
 }
 
+void ContextObject::OnAttributeUpdated(ContextObjectAttribute*)
+{
+	mManager->AddAttributeSenderObject(this);
+}
+
 
 
 void ContextObject::AddTrigger(TBC::PhysicsManager::TriggerID pTriggerId, const void* pTrigger)

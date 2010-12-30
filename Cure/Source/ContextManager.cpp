@@ -68,6 +68,7 @@ void ContextManager::RemoveObject(ContextObject* pObject)
 	DisableTickCallback(pObject);
 	DisablePhysicsUpdateCallback(pObject);
 	mPhysicsSenderObjectTable.erase(pObject->GetInstanceId());
+	mAttributeSenderObjectTable.erase(pObject->GetInstanceId());
 	mObjectTable.erase(pObject->GetInstanceId());
 }
 
@@ -116,6 +117,7 @@ const ContextManager::ContextObjectTable& ContextManager::GetObjectTable() const
 void ContextManager::ClearObjects()
 {
 	mPhysicsSenderObjectTable.clear();
+	mAttributeSenderObjectTable.clear();
 	while (mObjectTable.size() > 0)
 	{
 		ContextObject* lObject = mObjectTable.begin()->second;
@@ -150,6 +152,14 @@ void ContextManager::RemovePhysicsBody(TBC::PhysicsManager::BodyID pBodyId)
 	{
 		mBodyTable.erase(pBodyId);
 	}
+}
+
+void ContextManager::AddAttributeSenderObject(ContextObject* pObject)
+{
+	assert(pObject->GetInstanceId() != 0);
+	assert(mObjectTable.find(pObject->GetInstanceId()) != mObjectTable.end());
+	assert(pObject->GetManager() == this);
+	mAttributeSenderObjectTable.insert(ContextObjectPair(pObject->GetInstanceId(), pObject));
 }
 
 
@@ -287,6 +297,22 @@ void ContextManager::HandlePhysicsSend()
 		if (mGameManager->OnPhysicsSend(x->second))
 		{
 			mPhysicsSenderObjectTable.erase(x++);
+		}
+		else
+		{
+			++x;
+		}
+	}
+}
+
+void ContextManager::HandleAttributeSend()
+{
+	ContextObjectTable::iterator x = mAttributeSenderObjectTable.begin();
+	while (x != mAttributeSenderObjectTable.end())
+	{
+		if (mGameManager->OnAttributeSend(x->second))
+		{
+			mAttributeSenderObjectTable.erase(x++);
 		}
 		else
 		{

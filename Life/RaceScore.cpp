@@ -6,6 +6,7 @@
 
 #include "RaceScore.h"
 #include <assert.h>
+#include "../Cure/Include/ContextObject.h"
 #include "../Lepra/Include/Packer.h"
 
 
@@ -33,7 +34,7 @@ RaceScore::RaceScore(Cure::ContextObject* pContextObject, const str& pName, int 
 	mTriggedCount(1),
 	mTriggerCount(2)
 {
-	mTriggerSet.insert(mStartTrigger);
+	AddTriggered(mStartTrigger);
 }
 
 RaceScore::~RaceScore()
@@ -42,19 +43,65 @@ RaceScore::~RaceScore()
 
 
 
-int RaceScore::QuerySend() const
+RaceScore::TriggerId RaceScore::GetStartTrigger() const
 {
-	return mIsUpdated? 1+sizeof(uint32)+1+1 : 0;
+	return mStartTrigger;
 }
 
-void RaceScore::Pack(uint8* pDestination)
+bool RaceScore::IsTriggered(TriggerId pTriggerId) const
 {
+	TriggerSet::const_iterator x = mTriggerSet.find(pTriggerId);
+	return (x != mTriggerSet.end());
+}
+
+void RaceScore::AddTriggered(TriggerId pTriggerId)
+{
+	mTriggerSet.insert(pTriggerId);
+	mIsUpdated = true;
+	mContextObject->OnAttributeUpdated(this);
+}
+
+unsigned RaceScore::GetTriggedCount() const
+{
+	return mTriggerSet.size();
+}
+
+int RaceScore::StartNewLap()
+{
+	if (--mLapCountLeft > 0)
+	{
+		mTriggerSet.clear();
+		mTriggerSet.insert(mStartTrigger);
+		mIsUpdated = true;
+		mContextObject->OnAttributeUpdated(this);
+	}
+	return mLapCountLeft;
+}
+
+double RaceScore::GetTime()
+{
+	return mTimer.QueryTimeDiff();
+}
+
+
+
+int RaceScore::QuerySend() const
+{
+	return mIsUpdated? Parent::QuerySend()+1+sizeof(uint16)+1+1 : 0;
+}
+
+int RaceScore::Pack(uint8* pDestination)
+{
+	const int lParentSize = Parent::Pack(pDestination);
+	pDestination += lParentSize;
 	pDestination[0] = (uint8)mLapCountLeft;
-	PackerInt32::Pack(pDestination+1, -1);
-	pDestination[5] = (uint8)mTriggerSet.size();
-	pDestination[6] = (uint8)mTriggerCount;
+	PackerInt16::Pack(pDestination+1, -1);
+	pDestination[3] = (uint8)mTriggerSet.size();
+	pDestination[4] = (uint8)mTriggerCount;
 
 	mIsUpdated = false;
+
+	return lParentSize + 5;
 }
 
 int RaceScore::Unpack(const uint8* pSource, int pMaxSize)
@@ -70,6 +117,11 @@ int RaceScore::Unpack(const uint8* pSource, int pMaxSize)
 	mTriggerCount = pSource[6];
 	mIsUpdated = true;
 	return 1+sizeof(uint32)+1+1;
+}
+
+RaceScore::NetworkType RaceScore::GetNetworkType() const
+{
+	return TYPE_SERVER;
 }
 
 

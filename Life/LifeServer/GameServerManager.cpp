@@ -868,6 +868,13 @@ bool GameServerManager::OnPhysicsSend(Cure::ContextObject* pObject)
 	return (lLastSend);
 }
 
+bool GameServerManager::OnAttributeSend(Cure::ContextObject* pObject)
+{
+	mLog.AInfo("Sending attribute(s) for a context object...");
+	(void)pObject;
+	return true;
+}
+
 bool GameServerManager::IsConnectAuthorized()
 {
 	return (true);
