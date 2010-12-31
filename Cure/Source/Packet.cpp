@@ -825,6 +825,54 @@ uint32 MessageObjectDetach::GetObject2Id() const
 
 
 
+MessageObjectAttribute::MessageObjectAttribute()
+{
+}
+
+MessageType MessageObjectAttribute::GetType() const
+{
+	return (MESSAGE_TYPE_OBJECT_ATTRIBUTE);
+}
+
+int MessageObjectAttribute::Parse(const uint8* pData, int pSize)
+{
+	int lTotalSize = -1;
+	if ((MessageType)pData[0] == MESSAGE_TYPE_OBJECT_ATTRIBUTE)
+	{
+		lTotalSize = Parent::Parse(pData, pSize);
+		if (lTotalSize > 0)
+		{
+			int lByteSize;
+			const int lInt16UnpackSize = PackerInt16::Unpack(lByteSize, &pData[lTotalSize], pSize);
+			if (lInt16UnpackSize > 0)
+			{
+				lTotalSize += lInt16UnpackSize + lByteSize;
+				if (pSize < lTotalSize)
+				{
+					lTotalSize = -1;
+				}
+			}
+		}
+	}
+	return (lTotalSize);
+}
+
+uint8* MessageObjectAttribute::GetWriteBuffer(Packet* pPacket, uint32 pInstanceId, unsigned pSize)
+{
+	int lOffset = Store(pPacket, pInstanceId);
+	lOffset += PackerInt16::Pack(&mWritableData[lOffset], pSize);
+	pPacket->AddPacketSize(lOffset+pSize);
+	return &mWritableData[lOffset];
+}
+
+const uint8* MessageObjectAttribute::GetReadBuffer(unsigned& pSize) const
+{
+	PackerInt16::Unpack((int&)pSize, &mData[1+sizeof(uint32)], 2);
+	return &mData[1+sizeof(uint32)+sizeof(int16)];
+}
+
+
+
 PacketFactory::PacketFactory(MessageFactory* pMessageFactory):
 	mMessageFactory(pMessageFactory)
 {
@@ -878,6 +926,7 @@ Message* MessageFactory::Allocate(MessageType pType)
 		case MESSAGE_TYPE_OBJECT_POSITION:	lMessage = new MessageObjectPosition();		break;
 		case MESSAGE_TYPE_OBJECT_ATTACH:	lMessage = new MessageObjectAttach();		break;
 		case MESSAGE_TYPE_OBJECT_DETACH:	lMessage = new MessageObjectDetach();		break;
+		case MESSAGE_TYPE_OBJECT_ATTRIBUTE:	lMessage = new MessageObjectAttribute();	break;
 	}
 	if (!lMessage)
 	{

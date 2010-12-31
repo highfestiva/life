@@ -7,6 +7,7 @@
 #include "GameServerManager.h"
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/CppContextObject.h"
+#include "../../Cure/Include/ContextObjectAttribute.h"
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../../Cure/Include/TimeManager.h"
 #include "../../Lepra/Include/Network.h"
@@ -871,7 +872,56 @@ bool GameServerManager::OnPhysicsSend(Cure::ContextObject* pObject)
 bool GameServerManager::OnAttributeSend(Cure::ContextObject* pObject)
 {
 	mLog.AInfo("Sending attribute(s) for a context object...");
-	(void)pObject;
+	typedef Cure::ContextObject::AttributeArray AttributeArray;
+	const AttributeArray& lAttributes = pObject->GetAttributes();
+	AttributeArray::const_iterator x = lAttributes.begin();
+	for (; x != lAttributes.end(); ++x)
+	{
+		Cure::ContextObjectAttribute* lAttribute = *x;
+		const int lSendSize = lAttribute->QuerySend();
+		if (lSendSize > 0)
+		{
+			Cure::Packet* lPacket = GetNetworkAgent()->GetPacketFactory()->Allocate();
+			Cure::MessageObjectAttribute* lAttribMessage = (Cure::MessageObjectAttribute*)GetNetworkAgent()->
+				GetPacketFactory()->GetMessageFactory()->Allocate(Cure::MESSAGE_TYPE_OBJECT_ATTRIBUTE);
+			lPacket->AddMessage(lAttribMessage);
+			lAttribute->Pack(lAttribMessage->GetWriteBuffer(lPacket, pObject->GetInstanceId(), lSendSize));
+
+			assert(!GetNetworkAgent()->GetLock()->IsOwner());
+			ScopeLock lTickLock(GetTickLock());
+			switch (lAttribute->GetNetworkType())
+			{
+				case Cure::ContextObjectAttribute::TYPE_SERVER_BROADCAST:
+				case Cure::ContextObjectAttribute::TYPE_BOTH_BROADCAST:
+				{
+					BroadcastPacket(0, lPacket, true);
+				}
+				break;
+				default:
+				{
+					Cure::UserAccount::AccountId lAccountId = (Cure::UserAccount::AccountId)(intptr_t)pObject->GetExtraData();
+					if (!lAccountId)
+					{
+						mLog.AError("Error: trying to attribute sync to avatar without avatar!");
+						break;
+					}
+					const Client* lClient = GetClientByAccount(lAccountId);
+					if (!lClient)
+					{
+						mLog.AError("Error: client seems to have logged off before attribute sync happened.");
+						break;
+					}
+					Cure::NetworkAgent::VSocket* lSocket = lClient->GetUserConnection()->GetSocket();
+					if (lSocket)
+					{
+						GetNetworkAgent()->PlaceInSendBuffer(true, lSocket, lPacket);
+					}
+				}
+				break;
+			}
+			GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
+		}
+	}
 	return true;
 }
 

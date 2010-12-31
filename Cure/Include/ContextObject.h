@@ -48,6 +48,7 @@ public:
 	};
 
 	typedef std::vector<ContextObject*> Array;
+	typedef std::vector<ContextObjectAttribute*> AttributeArray;
 
 	ContextObject(ResourceManager* pResourceManager, const str& pClassId);
 	virtual ~ContextObject();
@@ -78,6 +79,7 @@ public:
 	void AddAttribute(ContextObjectAttribute* pAttribute);
 	void DeleteAttribute(const str& pName);
 	ContextObjectAttribute* GetAttribute(const str& pName) const;
+	const AttributeArray& GetAttributes() const;
 	void OnAttributeUpdated(ContextObjectAttribute* pAttribute);
 
 	void AddTrigger(TBC::PhysicsManager::TriggerID pTriggerId, const void*);
@@ -137,7 +139,6 @@ protected:
 
 	ResourceManager* GetResourceManager() const;
 
-	typedef std::vector<ContextObjectAttribute*> AttributeArray;
 	struct Connection
 	{
 		Connection(ContextObject* pObject, TBC::PhysicsManager::JointID pJointId, TBC::PhysicsEngine* pEngine):

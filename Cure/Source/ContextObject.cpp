@@ -312,6 +312,11 @@ ContextObjectAttribute* ContextObject::GetAttribute(const str& pName) const
 	return 0;
 }
 
+const ContextObject::AttributeArray& ContextObject::GetAttributes() const
+{
+	return mAttributeArray;
+}
+
 void ContextObject::OnAttributeUpdated(ContextObjectAttribute*)
 {
 	mManager->AddAttributeSenderObject(this);
