@@ -36,6 +36,8 @@ void Spawner::OnAlarm(int pAlarmId, void* pExtraData)
 {
 	Parent::OnAlarm(pAlarmId, pExtraData);
 
+	/*
+	TODO: fix by adding separate alarms for create and destroy stuff...
 	if (GetSpawner()->GetInterval())
 	{
 		if (!mChildList.empty())
@@ -45,12 +47,13 @@ void Spawner::OnAlarm(int pAlarmId, void* pExtraData)
 			GetManager()->DeleteObject(lObject->GetInstanceId());
 		}
 	}
+	*/
 
 	float lSpawnPart;
 	CURE_RTVAR_GET(lSpawnPart, =(float), Cure::GetSettings(), RTVAR_GAME_SPAWNPART, 1.0);
 	const int lSpawnCount = (int)(GetSpawner()->GetNumber() * lSpawnPart);
 
-	while ((int)mChildList.size() < lSpawnCount)
+	if ((int)mChildList.size() < lSpawnCount)
 	{
 		const str lSpawnObject = GetSpawner()->GetSpawnObject((float)Random::Uniform(0, 1));
 		if (!lSpawnObject.empty())
