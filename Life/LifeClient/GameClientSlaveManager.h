@@ -77,7 +77,7 @@ public:
 	bool IsUiMoveForbidden(Cure::GameObjectId pObjectId) const;
 	virtual void GetSiblings(Cure::GameObjectId pObjectId, Cure::ContextObject::Array& pSiblingArray) const;
 	void DoGetSiblings(Cure::GameObjectId pObjectId, Cure::ContextObject::Array& pSiblingArray) const;
-	void AddLocalObjects(std::hash_set<Cure::GameObjectId>& pLocalObjectSet) const;
+	void AddLocalObjects(std::hash_set<Cure::GameObjectId>& pLocalObjectSet);
 	bool IsInCameraRange(const Vector3DF& pPosition, float pDistance) const;
 
 	virtual bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
@@ -142,6 +142,7 @@ protected:
 
 	void CancelLogin();
 	void OnAvatarSelect(UiTbc::Button* pButton);
+	void DropAvatar();
 	Cure::RuntimeVariableScope* GetVariableScope() const;
 
 	Cure::NetworkClient* GetNetworkClient() const;
@@ -177,6 +178,7 @@ protected:
 
 	// Network transmission and keepalive info.
 	Cure::GameObjectId mAvatarId;
+	bool mHadAvatar;
 	ObjectIdSet mOwnedObjectList;
 	uint64 mLastSentByteCount;
 	Timer mLastSendTime;

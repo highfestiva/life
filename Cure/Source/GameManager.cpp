@@ -460,23 +460,34 @@ void GameManager::PhysicsTick()
 
 	int lMicroSteps;
 	CURE_RTVAR_GET(lMicroSteps, =, GetVariableScope(), RTVAR_PHYSICS_MICROSTEPS, 3);
-	const int lAffordedStepCount = mTime->GetAffordedPhysicsStepCount() * lMicroSteps;
-	float lStepIncrement = mTime->GetAffordedPhysicsStepTime() / lMicroSteps;
-	/*if (lAffordedStepCount != 1 && !Math::IsEpsEqual(lStepIncrement, 1/(float)CURE_STANDARD_FRAME_RATE))
+	const int lAffordedStepCount = mTime->GetAffordedPhysicsStepCount();
+	const int lAffordedMicroStepCount = lAffordedStepCount * lMicroSteps;
+	const float lStepTime = mTime->GetAffordedPhysicsStepTime();
+	const float lStepIncrement = lStepTime / lMicroSteps;
+	/*if (lAffordedMicroStepCount != 1 && !Math::IsEpsEqual(lStepIncrement, 1/(float)CURE_STANDARD_FRAME_RATE))
 	{
 		mLog.Warningf(_T("Game time allows for %i physics steps in increments of %f."),
-			lAffordedStepCount, lStepIncrement);
+			lAffordedMicroStepCount, lStepIncrement);
 	}*/
 	{
 		LEPRA_MEASURE_SCOPE(PreSteps);
 		mPhysics->PreSteps();
 	}
+	bool lFastAlgo;
+	CURE_RTVAR_GET(lFastAlgo, =, GetVariableScope(), RTVAR_PHYSICS_FASTALGO, true);
 	try
 	{
-		for (int x = 0; x < lAffordedStepCount; ++x)
+		for (int x = 0; x < lAffordedMicroStepCount; ++x)
 		{
-			ScriptTick(lStepIncrement);
-			mPhysics->StepFast(lStepIncrement);
+			ScriptTick(lStepIncrement);	// Ticks engines, so needs to be run every physics step.
+			if (lFastAlgo)
+			{
+				mPhysics->StepFast(lStepIncrement);
+			}
+			else
+			{
+				mPhysics->StepAccurate(lStepIncrement);
+			}
 		}
 	}
 	catch (...)

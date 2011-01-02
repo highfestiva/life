@@ -203,6 +203,20 @@ ScopePerformanceData::NodeArray ScopePerformanceData::GetChildren() const
 	return (lChildrenCopy);
 }
 
+const ScopePerformanceData* ScopePerformanceData::GetChild(const str& pName) const
+{
+	ScopeSpinLock lLock(&mRootLock);
+	NodeArray::const_iterator x = mChildArray.begin();
+	for (; x != mChildArray.end(); ++x)
+	{
+		if ((*x)->GetName().find(pName) != str::npos)
+		{
+			return *x;
+		}
+	}
+	return 0;
+}
+
 void ScopePerformanceData::ClearAll(NodeArray& pNodes)
 {
 	NodeArray::iterator x = pNodes.begin();

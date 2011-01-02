@@ -59,6 +59,7 @@ GameClientSlaveManager::GameClientSlaveManager(GameClientMasterTicker* pMaster, 
 	mIsResetComplete(false),
 	mQuit(false),
 	mAvatarId(0),
+	mHadAvatar(false),
 	mLastSentByteCount(0),
 	mPingAttemptCount(0),
 	mCamRotateExtra(0),
@@ -602,8 +603,21 @@ void GameClientSlaveManager::DoGetSiblings(Cure::GameObjectId pObjectId, Cure::C
 	}
 }
 
-void GameClientSlaveManager::AddLocalObjects(std::hash_set<Cure::GameObjectId>& pLocalObjectSet) const
+void GameClientSlaveManager::AddLocalObjects(std::hash_set<Cure::GameObjectId>& pLocalObjectSet)
 {
+	if (mAvatarId)
+	{
+		Cure::ContextObject* lAvatar = GetContext()->GetObject(mAvatarId);
+		if (mHadAvatar && !lAvatar)
+		{
+			DropAvatar();
+		}
+		else if (lAvatar)
+		{
+			mHadAvatar = true;
+		}
+	}
+
 	pLocalObjectSet.insert(mOwnedObjectList.begin(), mOwnedObjectList.end());
 }
 
@@ -1384,7 +1398,12 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 		case Cure::MESSAGE_TYPE_DELETE_OBJECT:
 		{
 			Cure::MessageDeleteObject* lMessageDeleteObject = (Cure::MessageDeleteObject*)pMessage;
-			GetContext()->DeleteObject(lMessageDeleteObject->GetObjectId());
+			Cure::GameObjectId lId = lMessageDeleteObject->GetObjectId();
+			GetContext()->DeleteObject(lId);
+			if (lId == mAvatarId)
+			{
+				DropAvatar();
+			}
 		}
 		break;
 		case Cure::MESSAGE_TYPE_OBJECT_POSITION:
@@ -1729,8 +1748,7 @@ void GameClientSlaveManager::CancelLogin()
 
 void GameClientSlaveManager::OnAvatarSelect(UiTbc::Button* pButton)
 {
-	mOwnedObjectList.erase(mAvatarId);
-	mAvatarId = 0;
+	DropAvatar();
 
 	Cure::UserAccount::AvatarId lAvatarId = pButton->GetName();
 	log_volatile(mLog.Debugf(_T("Clicked avatar %s."), lAvatarId.c_str()));
@@ -1741,6 +1759,13 @@ void GameClientSlaveManager::OnAvatarSelect(UiTbc::Button* pButton)
 
 	SetRoadSignsVisible(false);
 	mAvatarSelectTime.ClearTimeDiff();
+}
+
+void GameClientSlaveManager::DropAvatar()
+{
+	mOwnedObjectList.erase(mAvatarId);
+	mAvatarId = 0;
+	mHadAvatar = false;
 }
 
 Cure::RuntimeVariableScope* GameClientSlaveManager::GetVariableScope() const

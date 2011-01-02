@@ -36,10 +36,10 @@ UserResource::~UserResource()
 	{
 		SafeRelease(mResource->GetManager());
 	}
-	else
+	/*else
 	{
 		assert(false);
-	}
+	}*/
 	SetParentResource(0);
 }
 

@@ -1103,10 +1103,13 @@ void GameClientMasterTicker::DrawDebugData() const
 		return;
 	}
 
-	ScopePerformanceData* lMainLoop = ScopePerformanceData::GetRoots()[0];
-	str lFps = strutil::Format(_T("FPS %.1f"), 1/lMainLoop->GetSlidingAverage());
+	const ScopePerformanceData* lMainLoop = ScopePerformanceData::GetRoots()[0];
+	str lInfo = strutil::Format(_T("FPS %.1f"), 1/lMainLoop->GetSlidingAverage());
+	const ScopePerformanceData* lAppSleep = lMainLoop->GetChild(_T("AppSleep"));
+	const double lPercent = 100 * (lMainLoop->GetSlidingAverage()-lAppSleep->GetSlidingAverage()) / lMainLoop->GetSlidingAverage() + 0.5f;
+	lInfo += strutil::Format(_T("\nUsedPerf %2.f %%"), lPercent);
 	int w = 80;
-	int h = 20;
+	int h = 37;
 	bool lShowPerformanceCounters;
 	CURE_RTVAR_GET(lShowPerformanceCounters, =, UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_COUNT, false);
 	if (lShowPerformanceCounters)
@@ -1126,7 +1129,7 @@ void GameClientMasterTicker::DrawDebugData() const
 			}
 		}
 		
-		lFps += strutil::Format(_T("\nvTRI %i\ncTRI %i\nUpload %sB/s\nDownload %sB/s"),
+		lInfo += strutil::Format(_T("\nvTRI %i\ncTRI %i\nUpload %sB/s\nDownload %sB/s"),
 			mUiManager->GetRenderer()->GetTriangleCount(true),
 			mUiManager->GetRenderer()->GetTriangleCount(false),
 			Number::ConvertToPostfixNumber(lUpBandwidth, 1).c_str(),
@@ -1137,7 +1140,7 @@ void GameClientMasterTicker::DrawDebugData() const
 	const int lRight = mUiManager->GetDisplayManager()->GetWidth();
 	mUiManager->GetPainter()->FillRect(lRight-w, 3, lRight-5, h);
 	mUiManager->GetPainter()->SetColor(Color(200, 200, 0));
-	mUiManager->GetPainter()->PrintText(lFps, lRight-w+5, 5);
+	mUiManager->GetPainter()->PrintText(lInfo, lRight-w+5, 5);
 }
 
 void GameClientMasterTicker::DrawPerformanceLineGraph2d() const
