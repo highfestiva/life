@@ -75,7 +75,7 @@ int ContextObjectAttribute::Unpack(ContextObject* pContextObject, const uint8* p
 			return -1;
 		}
 	}
-	int lParamsSize = lAttribute->Unpack(pSource, pMaxSize-lSize);
+	int lParamsSize = lAttribute->Unpack(&pSource[lSize], pMaxSize-lSize);
 	if (lParamsSize < 0)
 	{
 		return -1;

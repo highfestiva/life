@@ -36,7 +36,7 @@ public:
 protected:
 	void DispatchOnLoadMesh(UiCure::UserGeometryReferenceResource* pMeshResource);
 	virtual void TryAddTexture();
-	void OnPhysicsTick();
+	void OnTick();
 	void OnAlarm(int pAlarmId, void* pExtraData);
 
 private:

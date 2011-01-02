@@ -32,7 +32,7 @@ protected:
 	TBC::ChunkyPhysics* GetPhysics() const;
 	virtual const TBC::ChunkyClass* GetClass() const;
 
-	void OnTick(float pFrameTime);
+	void OnMicroTick(float pFrameTime);
 	void OnAlarm(int pAlarmId, void* pExtraData);
 	virtual void OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, TBC::PhysicsManager::ForceFeedbackListener* pBody);
 	void OnForceApplied(TBC::PhysicsManager::ForceFeedbackListener* pOtherObject,

@@ -39,6 +39,7 @@ const ClientConsoleManager::CommandPair ClientConsoleManager::mCommandIdList[] =
 	{_T("logout"), COMMAND_LOGOUT},
 	{_T("start-reset-ui"), COMMAND_START_RESET_UI},
 	{_T("wait-reset-ui"), COMMAND_WAIT_RESET_UI},
+	{_T("wait-loaded"), COMMAND_WAIT_LOADED},
 	{_T("add-player"), COMMAND_ADD_PLAYER},
 	{_T("set-avatar-engine-power"), COMMAND_SET_AVATAR_ENGINE_POWER},
 };
@@ -230,6 +231,20 @@ int ClientConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& 
 				else
 				{
 					mLog.AError("UI restarted was not completed in time!");
+					lResult = 1;
+				}
+			}
+			break;
+			case COMMAND_WAIT_LOADED:
+			{
+				mLog.AInfo("Waiting for resource pump to complete loading...");
+				if (((GameClientSlaveManager*)GetGameManager())->GetMaster()->WaitLoaded())
+				{
+					mLog.AInfo("Everything loaded.");
+				}
+				else
+				{
+					mLog.AError("Load not completed in time!");
 					lResult = 1;
 				}
 			}

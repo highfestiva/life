@@ -6,7 +6,10 @@
 
 #include "RaceScore.h"
 #include <assert.h>
+#include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/ContextObject.h"
+#include "../Cure/Include/GameManager.h"
+#include "../Cure/Include/TimeManager.h"
 #include "../Lepra/Include/Packer.h"
 
 
@@ -16,16 +19,6 @@ namespace Life
 
 
 
-RaceScore::RaceScore(Cure::ContextObject* pContextObject, const str& pName):
-	Parent(pContextObject, pName),
-	mIsUpdated(true),
-	mLapCountLeft(0),
-	mStartTrigger(TBC::INVALID_TRIGGER),
-	mTriggedCount(0),
-	mTriggerCount(2)
-{
-}
-
 RaceScore::RaceScore(Cure::ContextObject* pContextObject, const str& pName, int pLapCount, TBC::PhysicsManager::TriggerID pStartTrigger):
 	Parent(pContextObject, pName),
 	mIsUpdated(true),
@@ -34,7 +27,11 @@ RaceScore::RaceScore(Cure::ContextObject* pContextObject, const str& pName, int 
 	mTriggedCount(1),
 	mTriggerCount(2)
 {
-	AddTriggered(mStartTrigger);
+	mPhysicsFrameStart = mContextObject->GetManager()->GetGameManager()->GetTimeManager()->GetCurrentPhysicsFrame();
+	if (mStartTrigger != TBC::INVALID_TRIGGER)
+	{
+		AddTriggered(mStartTrigger);
+	}
 }
 
 RaceScore::~RaceScore()
@@ -78,9 +75,10 @@ int RaceScore::StartNewLap()
 	return mLapCountLeft;
 }
 
-double RaceScore::GetTime()
+double RaceScore::GetTime() const
 {
-	return mTimer.QueryTimeDiff();
+	const int lDiff = mContextObject->GetManager()->GetGameManager()->GetTimeManager()->GetCurrentPhysicsFrameDelta(mPhysicsFrameStart);
+	return mContextObject->GetManager()->GetGameManager()->GetTimeManager()->ConvertPhysicsFramesToSeconds(lDiff);
 }
 
 
@@ -95,28 +93,27 @@ int RaceScore::Pack(uint8* pDestination)
 	const int lParentSize = Parent::Pack(pDestination);
 	pDestination += lParentSize;
 	pDestination[0] = (uint8)mLapCountLeft;
-	PackerInt16::Pack(pDestination+1, -1);
+	PackerInt16::Pack(pDestination+1, mPhysicsFrameStart);
 	pDestination[3] = (uint8)mTriggerSet.size();
 	pDestination[4] = (uint8)mTriggerCount;
 
 	mIsUpdated = false;
 
-	return lParentSize + 5;
+	return lParentSize + 1+sizeof(uint16)+1+1;
 }
 
 int RaceScore::Unpack(const uint8* pSource, int pMaxSize)
 {
-	if (pMaxSize < 1+sizeof(uint32)+1+1)
+	if (pMaxSize < 1+sizeof(uint16)+1+1)
 	{
 		return -1;
 	}
 	mLapCountLeft = pSource[0];
-	int lTimeTick;
-	PackerInt32::Unpack(lTimeTick, pSource+1, pMaxSize);
-	mTriggedCount = pSource[5];
-	mTriggerCount = pSource[6];
+	PackerInt16::Unpack(mPhysicsFrameStart, pSource+1, pMaxSize);
+	mTriggedCount = pSource[3];
+	mTriggerCount = pSource[4];
 	mIsUpdated = true;
-	return 1+sizeof(uint32)+1+1;
+	return 1+sizeof(uint16)+1+1;
 }
 
 RaceScore::NetworkType RaceScore::GetNetworkType() const

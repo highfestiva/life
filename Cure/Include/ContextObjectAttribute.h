@@ -7,6 +7,7 @@
 #pragma once
 
 #include "Cure.h"
+#include "../../ThirdParty/FastDelegate/FastDelegate.h"
 
 
 
@@ -34,7 +35,7 @@ public:
 	virtual ~ContextObjectAttribute();
 	const str& GetName() const;
 
-	typedef ContextObjectAttribute* (*Factory)(ContextObject*, const str&);
+	typedef fastdelegate::FastDelegate2<ContextObject*, const str&, ContextObjectAttribute*> Factory;
 	static void SetCreator(const Factory& pFactory);
 
 	virtual int QuerySend() const;	// Returns number of bytes it needs to send.

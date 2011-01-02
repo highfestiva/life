@@ -362,6 +362,16 @@ const TBC::PhysicsSpawner* ContextObject::GetSpawner() const
 
 
 
+void ContextObject::AddChild(ContextObject* pChild)
+{
+	assert(pChild->GetInstanceId() != 0);
+	assert(std::find(mChildList.begin(), mChildList.end(), pChild) == mChildList.end());
+	mChildList.push_back(pChild);
+	pChild->SetParent(this);
+}
+
+
+
 bool ContextObject::UpdateFullPosition(const ObjectPositionalData*& pPositionalData)
 {
 	if (!mPhysics)
@@ -868,7 +878,7 @@ void ContextObject::SetSendCount(int pCount)
 
 void ContextObject::OnLoaded()
 {
-	OnPhysicsTick();
+	OnTick();
 	if (GetPhysics() && GetManager())
 	{
 		// Calculate total mass.
@@ -884,11 +894,11 @@ void ContextObject::OnLoaded()
 			}
 		}
 
-		GetManager()->EnablePhysicsUpdateCallback(this);
+		GetManager()->EnableTickCallback(this);
 	}
 }
 
-void ContextObject::OnPhysicsTick()
+void ContextObject::OnTick()
 {
 }
 
@@ -1186,14 +1196,6 @@ void ContextObject::AddAttachment(ContextObject* pObject, TBC::PhysicsManager::J
 }
 
 
-
-void ContextObject::AddChild(ContextObject* pChild)
-{
-	assert(pChild->GetInstanceId() != 0);
-	assert(std::find(mChildList.begin(), mChildList.end(), pChild) == mChildList.end());
-	mChildList.push_back(pChild);
-	pChild->SetParent(this);
-}
 
 void ContextObject::RemoveChild(ContextObject* pChild)
 {

@@ -90,6 +90,8 @@ public:
 	void SetSpawner(const TBC::PhysicsSpawner* pSpawner);
 	const TBC::PhysicsSpawner* GetSpawner() const;
 
+	void AddChild(ContextObject* pChild);
+
 	bool UpdateFullPosition(const ObjectPositionalData*& pPositionalData);
 	void SetFullPosition(const ObjectPositionalData& pPositionalData);
 	void SetInitialTransform(const TransformationF& pTransformation);
@@ -120,9 +122,9 @@ public:
 
 	virtual void StartLoading() = 0;
 	virtual void OnLoaded();
-	virtual void OnTick(float pFrameTime) = 0;
+	virtual void OnMicroTick(float pFrameTime) = 0;
 	virtual void OnAlarm(int pAlarmId, void* pExtraData) = 0;
-	virtual void OnPhysicsTick();
+	virtual void OnTick();
 
 protected:
 	void ForceSetFullPosition(const ObjectPositionalData& pPositionalData, const TBC::ChunkyBoneGeometry* pGeometry);
@@ -130,7 +132,6 @@ protected:
 	bool IsAttachedTo(ContextObject* pObject) const;
 	void AddAttachment(ContextObject* pObject, TBC::PhysicsManager::JointID pJoint, TBC::PhysicsEngine* pEngine);
 
-	void AddChild(ContextObject* pChild);
 	void RemoveChild(ContextObject* pChild);
 	void SetParent(ContextObject* pParent);
 	void SetupChildHandlers();

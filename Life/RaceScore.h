@@ -24,7 +24,6 @@ class RaceScore: public Cure::ContextObjectAttribute
 public:
 	typedef TBC::PhysicsManager::TriggerID TriggerId;
 
-	RaceScore(Cure::ContextObject* pContextObject, const str& pName);
 	RaceScore(Cure::ContextObject* pContextObject, const str& pName, int pLapCount, TBC::PhysicsManager::TriggerID pStartTrigger);
 	virtual ~RaceScore();
 
@@ -33,7 +32,7 @@ public:
 	void AddTriggered(TriggerId pTriggerId);
 	unsigned GetTriggedCount() const;
 	int StartNewLap();
-	double GetTime();
+	double GetTime() const;
 
 private:
 	virtual int QuerySend() const;	// Returns number of bytes it needs to send.
@@ -45,7 +44,7 @@ private:
 
 	bool mIsUpdated;
 	int mLapCountLeft;
-	HiResTimer mTimer;
+	int mPhysicsFrameStart;
 	TBC::PhysicsManager::TriggerID mStartTrigger;
 	TriggerSet mTriggerSet;
 	size_t mTriggedCount;

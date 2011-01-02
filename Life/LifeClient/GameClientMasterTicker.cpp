@@ -30,10 +30,10 @@
 #include "GameClientDemo.h"
 #include "GameClientSlaveManager.h"
 #include "GameClientViewer.h"
-#include "RoadSignButton.h"
 #include "RtVar.h"
 #include "Sunlight.h"
 #include "UiGameServerManager.h"
+#include "UiRaceScore.h"
 
 // TODO: remove!
 #include "UiConsole.h"
@@ -72,6 +72,9 @@ GameClientMasterTicker::GameClientMasterTicker(UiCure::GameUiManager* pUiManager
 	mSlaveArray.resize(4, 0);
 
 	UiLepra::DisplayManager::EnableScreensaver(false);
+
+	Cure::ContextObjectAttribute::SetCreator(Cure::ContextObjectAttribute::Factory(
+		this, &GameClientMasterTicker::CreateObjectAttribute));
 
 	mConsole = new ConsoleManager(0, UiCure::GetSettings(), 0, 0);
 	mConsole->InitCommands();
@@ -374,6 +377,15 @@ bool GameClientMasterTicker::WaitResetUi()
 	return (!mRestartUi);
 }
 
+bool GameClientMasterTicker::WaitLoaded()
+{
+	for (int x = 0; mResourceManager->IsLoading() && x < 200; ++x)
+	{
+		Thread::Sleep(0.1);
+	}
+	return !mResourceManager->IsLoading();
+}
+
 bool GameClientMasterTicker::IsFirstSlave(const GameClientSlaveManager* pSlave) const
 {
 	if (mSlaveArray.empty())
@@ -560,6 +572,29 @@ GameClientSlaveManager* GameClientMasterTicker::CreateDemo(GameClientMasterTicke
 #else // !Demo
 	return new GameClientViewer(pMaster, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea);
 #endif // Demo / !Demo
+}
+
+Cure::ContextObjectAttribute* GameClientMasterTicker::CreateObjectAttribute(Cure::ContextObject* pObject, const str& pAttributeName)
+{
+	ScreenPart* lScreenPart = this;
+	SlaveArray::iterator x;
+	for (x = mSlaveArray.begin(); x != mSlaveArray.end(); ++x)
+	{
+		GameClientSlaveManager* lSlave = *x;
+		if (lSlave)
+		{
+			if (lSlave->IsOwned(pObject->GetInstanceId()))
+			{
+				lScreenPart = lSlave;
+				break;
+			}
+		}
+	}
+	if (strutil::StartsWith(pAttributeName, _T("race_timer_")))
+	{
+		return new UiRaceScore(pObject, pAttributeName, lScreenPart, mUiManager, pAttributeName);
+	}
+	return Life::CreateObjectAttribute(pObject, pAttributeName);
 }
 
 bool GameClientMasterTicker::CreateSlave(SlaveFactoryMethod pCreate)

@@ -84,7 +84,7 @@ void CppContextObject::StartLoading()
 
 
 
-void CppContextObject::OnPhysicsTick()
+void CppContextObject::OnTick()
 {
 	if (!mEnableUi)
 	{

@@ -36,6 +36,8 @@ GameServerTicker::GameServerTicker(Cure::ResourceManager* pResourceManager,
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_NETWORK_SERVERNAME, _("My Dedicated Server"));
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_NETWORK_LOGINGREETING, _("echo 4 \"Welcome to my dedicated server! Enjoy the ride!\""));
 
+	Cure::ContextObjectAttribute::SetCreator(&CreateObjectAttribute);
+
 	ConsoleManager lConsole(0, Cure::GetSettings(), 0, 0);
 	lConsole.InitCommands();
 	lConsole.ExecuteCommand(_T("execute-file -i ServerDefault.lsh"));

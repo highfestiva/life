@@ -7,6 +7,7 @@
 #include "Elevator.h"
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/GameManager.h"
+#include "../../Cure/Include/TimeManager.h"
 #include "../../Lepra/Include/HashUtil.h"
 #include "../../TBC/Include/PhysicsEngine.h"
 #include "../../TBC/Include/PhysicsTrigger.h"
@@ -38,9 +39,9 @@ Elevator::~Elevator()
 
 
 
-void Elevator::OnTick(float pFrameTime)
+void Elevator::OnTick()
 {
-	Parent::OnTick(pFrameTime);
+	Parent::OnTick();
 
 	const float lSpeedStillSquare = 0.1f;
 	const float lMaxSpeedSquare = GetActiveMaxSpeedSquare();
@@ -49,7 +50,8 @@ void Elevator::OnTick(float pFrameTime)
 		mElevatorHasBeenMoving = true;
 	}
 
-	mEngineActivity = Math::Lerp(mEngineActivity, lMaxSpeedSquare, Math::GetIterateLerpTime(0.4f, pFrameTime));
+	const float lFrameTime = GetManager()->GetGameManager()->GetTimeManager()->GetNormalFrameTime();
+	mEngineActivity = Math::Lerp(mEngineActivity, lMaxSpeedSquare, Math::GetIterateLerpTime(0.4f, lFrameTime));
 	if (mEngineActivity < lSpeedStillSquare)
 	{
 		if (mStopTimer.IsStarted())

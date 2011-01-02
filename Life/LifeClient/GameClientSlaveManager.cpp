@@ -7,6 +7,7 @@
 #include "GameClientSlaveManager.h"
 #include <algorithm>
 #include "../../Cure/Include/ContextManager.h"
+#include "../../Cure/Include/ContextObjectAttribute.h"
 #include "../../Cure/Include/NetworkClient.h"
 #include "../../Cure/Include/ResourceManager.h"
 #include "../../Cure/Include/RuntimeVariable.h"
@@ -624,6 +625,11 @@ void GameClientSlaveManager::AddLocalObjects(std::hash_set<Cure::GameObjectId>& 
 bool GameClientSlaveManager::IsInCameraRange(const Vector3DF& pPosition, float pDistance) const
 {
 	return (pPosition.GetDistanceSquared(mCameraPosition) <= pDistance*pDistance);
+}
+
+bool GameClientSlaveManager::IsOwned(Cure::GameObjectId pObjectId) const
+{
+	return (mOwnedObjectList.find(pObjectId) != mOwnedObjectList.end());
 }
 
 
@@ -1442,6 +1448,15 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 			DetachObjects(lObject1Id, lObject2Id);
 		}
 		break;
+		case Cure::MESSAGE_TYPE_OBJECT_ATTRIBUTE:
+		{
+			Cure::MessageObjectAttribute* lMessageAttrib = (Cure::MessageObjectAttribute*)pMessage;
+			Cure::GameObjectId lObjectId = lMessageAttrib->GetObjectId();
+			unsigned lByteSize = 0;
+			const uint8* lBuffer = lMessageAttrib->GetReadBuffer(lByteSize);
+			SetObjectAttribute(lObjectId, lBuffer, lByteSize);
+		}
+		break;
 		default:
 		{
 			mLog.AError("Got bad message type from server.");
@@ -1733,9 +1748,13 @@ void GameClientSlaveManager::DetachObjects(Cure::GameObjectId pObject1Id, Cure::
 	}
 }
 
-bool GameClientSlaveManager::IsOwned(Cure::GameObjectId pObjectId) const
+void GameClientSlaveManager::SetObjectAttribute(Cure::GameObjectId pObjectId, const uint8* pData, unsigned pSize)
 {
-	return (mOwnedObjectList.find(pObjectId) != mOwnedObjectList.end());
+	Cure::ContextObject* lObject = GetContext()->GetObject(pObjectId);
+	if (lObject)
+	{
+		Cure::ContextObjectAttribute::Unpack(lObject, pData, pSize);
+	}
 }
 
 

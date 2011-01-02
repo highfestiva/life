@@ -34,12 +34,12 @@ ChunkyPhysics::~ChunkyPhysics()
 
 
 
-void ChunkyPhysics::OnTick(PhysicsManager* pPhysicsManager, float pFrameTime)
+void ChunkyPhysics::OnMicroTick(PhysicsManager* pPhysicsManager, float pFrameTime)
 {
 	EngineArray::iterator x = mEngineArray.begin();
 	for (; x != mEngineArray.end(); ++x)
 	{
-		(*x)->OnTick(pPhysicsManager, this, pFrameTime);
+		(*x)->OnMicroTick(pPhysicsManager, this, pFrameTime);
 	}
 }
 

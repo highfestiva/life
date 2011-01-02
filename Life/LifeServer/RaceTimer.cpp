@@ -51,7 +51,7 @@ void RaceTimer::FinalizeTrigger(const TBC::PhysicsTrigger* pTrigger)
 	}
 }
 
-void RaceTimer::OnTick(float)
+void RaceTimer::OnTick()
 {
 	const Cure::TimeManager* lTimeManager = GetManager()->GetGameManager()->GetTimeManager();
 	DoneMap::iterator x = mDoneMap.begin();

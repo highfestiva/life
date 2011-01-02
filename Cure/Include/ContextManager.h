@@ -56,10 +56,10 @@ public:
 	void FreeGameObjectId(NetworkObjectType pNetworkType, GameObjectId pInstanceId);
 	bool IsLocalGameObjectId(GameObjectId pInstanceId) const;
 
-	void EnablePhysicsUpdateCallback(ContextObject* pObject);
-	void DisablePhysicsUpdateCallback(ContextObject* pObject);
 	void EnableTickCallback(ContextObject* pObject);
 	void DisableTickCallback(ContextObject* pObject);
+	void EnableMicroTickCallback(ContextObject* pObject);
+	void DisableMicroTickCallback(ContextObject* pObject);
 	void AddAlarmCallback(ContextObject* pObject, int pAlarmId, float pSeconds, void* pExtraData);
 	void CancelPendingAlarmCallbacksById(ContextObject* pObject, int pAlarmId);
 	void CancelPendingAlarmCallbacks(ContextObject* pObject);
@@ -72,8 +72,8 @@ public:
 	void HandlePostKill();
 
 private:
-	void DispatchPhysicsUpdateCallbacks();
-	void DispatchTickCallbacks(float pFrameTimeDelta);
+	void DispatchTickCallbacks();
+	void DispatchMicroTickCallbacks(float pFrameTimeDelta);
 	void DispatchAlarmCallbacks();
 
 	typedef IdManager<GameObjectId> ObjectIdManager;
@@ -129,8 +129,8 @@ private:
 	ContextObjectTable mPhysicsSenderObjectTable;
 	BodyTable mBodyTable;
 	ContextObjectTable mAttributeSenderObjectTable;
-	ContextObjectTable mPhysicsUpdateCallbackObjectTable;
 	ContextObjectTable mTickCallbackObjectTable;
+	ContextObjectTable mMicroTickCallbackObjectTable;
 	AlarmSet mAlarmCallbackObjectSet;
 	IdSet mPostKillSet;
 

@@ -45,9 +45,9 @@ Machine::~Machine()
 
 
 
-void Machine::OnPhysicsTick()
+void Machine::OnTick()
 {
-	Parent::OnPhysicsTick();
+	Parent::OnTick();
 	mParticleTimer.UpdateTimer();
 	if (mCreatedParticles)
 	{

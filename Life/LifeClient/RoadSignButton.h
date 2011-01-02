@@ -44,7 +44,7 @@ public:
 	void MoveSign(const float pFrameTime);
 
 protected:
-	void OnPhysicsTick();
+	void OnTick();
 	void RenderButton(UiTbc::CustomButton*);
 	bool IsOverButton(UiTbc::CustomButton* pButton, int x, int y);
 	virtual void LoadTextures();
