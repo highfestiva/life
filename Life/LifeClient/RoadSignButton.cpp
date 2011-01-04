@@ -191,7 +191,7 @@ void RoadSignButton::MoveSign(const float pFrameTime)
 	}
 }
 
-void RoadSignButton::OnPhysicsTick()
+void RoadSignButton::OnTick()
 {
 	if (!GetManager())
 	{

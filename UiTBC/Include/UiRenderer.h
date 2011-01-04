@@ -442,6 +442,7 @@ public:
 	LightID AddSpotLight(LightHint pHint, const Vector3DF& pPos, const Vector3DF& pDir, const Color& pColor, float pLightIntensity, float pCutoffAngle, float pSpotExponent, float pLightRadius, float pShadowRange);
 
 	virtual void RemoveLight(LightID pLightID);
+	virtual void EnableAllLights(bool pEnable) = 0;
 	void RemoveAllLights();
 	int GetMaxLights();
 	int GetLightCount();
@@ -495,7 +496,7 @@ public:
 	virtual void PostRender(TBC::GeometryBase* pGeometry) = 0;
 
 	void UpdateShadowMaps();
-	void UpdateShadowMaps(TBC::GeometryBase* pGeometry);
+	unsigned UpdateShadowMaps(TBC::GeometryBase* pGeometry);	// Returns the number of triangles calculated for.
 
 	virtual unsigned RenderScene() = 0;
 

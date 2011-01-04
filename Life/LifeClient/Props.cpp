@@ -68,7 +68,7 @@ void Props::TryAddTexture()
 	Parent::TryAddTexture();
 }
 
-void Props::OnPhysicsTick()
+void Props::OnTick()
 {
 	const float lFrameTime = GetManager()->GetGameManager()->GetTimeManager()->GetNormalFrameTime();
 	mTime += lFrameTime;
@@ -98,7 +98,7 @@ void Props::OnPhysicsTick()
 		break;
 	}
 
-	Parent::OnPhysicsTick();	// TRICKY: not a vehicle in this sense.
+	Parent::OnTick();	// TRICKY: not a vehicle in this sense.
 }
 
 void Props::OnAlarm(int pAlarmId, void* /*pExtraData*/)

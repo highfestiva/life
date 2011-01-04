@@ -27,7 +27,7 @@ public:
 	virtual ~Machine();
 
 protected:
-	void OnPhysicsTick();
+	void OnTick();
 
 private:
 	void OnForceApplied(TBC::PhysicsManager::ForceFeedbackListener* pOtherObject,

@@ -55,6 +55,8 @@ public:
 	bool StartResetUi();
 	bool WaitResetUi();
 
+	bool WaitLoaded();
+
 	bool IsFirstSlave(const GameClientSlaveManager* pSlave) const;
 	bool IsLocalObject(Cure::GameObjectId pInstanceId) const;
 	void GetSiblings(Cure::GameObjectId pObjectId, Cure::ContextObject::Array& pSiblingArray) const;
@@ -86,6 +88,7 @@ private:
 	static GameClientSlaveManager* CreateDemo(GameClientMasterTicker* pMaster,
 		Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
 		UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea);
+	Cure::ContextObjectAttribute* CreateObjectAttribute(Cure::ContextObject* pObject, const str& pAttributeName);
 	bool CreateSlave(SlaveFactoryMethod pCreate);
 	void AddSlave(GameClientSlaveManager* pSlave);
 	void DeleteSlave(GameClientSlaveManager* pSlave, bool pAllowMainMenu);

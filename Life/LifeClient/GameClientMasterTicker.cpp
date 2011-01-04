@@ -30,10 +30,10 @@
 #include "GameClientDemo.h"
 #include "GameClientSlaveManager.h"
 #include "GameClientViewer.h"
-#include "RoadSignButton.h"
 #include "RtVar.h"
 #include "Sunlight.h"
 #include "UiGameServerManager.h"
+#include "UiRaceScore.h"
 
 // TODO: remove!
 #include "UiConsole.h"
@@ -72,6 +72,9 @@ GameClientMasterTicker::GameClientMasterTicker(UiCure::GameUiManager* pUiManager
 	mSlaveArray.resize(4, 0);
 
 	UiLepra::DisplayManager::EnableScreensaver(false);
+
+	Cure::ContextObjectAttribute::SetCreator(Cure::ContextObjectAttribute::Factory(
+		this, &GameClientMasterTicker::CreateObjectAttribute));
 
 	mConsole = new ConsoleManager(0, UiCure::GetSettings(), 0, 0);
 	mConsole->InitCommands();
@@ -238,8 +241,9 @@ bool GameClientMasterTicker::Tick()
 		LEPRA_MEASURE_SCOPE(Paint);
 		if (mUiManager->CanRender())
 		{
-			mSunlight->SetDirection(0, 1, -1);
-			mSunlight->SetColor(1.5f, 1.5f, 1.5f);
+			mUiManager->GetRenderer()->EnableAllLights(false);
+			UiTbc::Renderer::LightID lLightId = mUiManager->GetRenderer()->AddDirectionalLight(
+				UiTbc::Renderer::LIGHT_STATIC, Vector3DF(0, 1, -1), WHITE, 1.5f, 160);
 			mUiManager->Paint();
 			for (x = mSlaveArray.begin(); lOk && x != mSlaveArray.end(); ++x)
 			{
@@ -249,6 +253,8 @@ bool GameClientMasterTicker::Tick()
 					lOk = lSlave->Paint();
 				}
 			}
+			mUiManager->GetRenderer()->RemoveLight(lLightId);
+			mUiManager->GetRenderer()->EnableAllLights(true);
 		}
 	}
 
@@ -369,6 +375,15 @@ bool GameClientMasterTicker::WaitResetUi()
 		Thread::Sleep(0.1);
 	}
 	return (!mRestartUi);
+}
+
+bool GameClientMasterTicker::WaitLoaded()
+{
+	for (int x = 0; mResourceManager->IsLoading() && x < 200; ++x)
+	{
+		Thread::Sleep(0.1);
+	}
+	return !mResourceManager->IsLoading();
 }
 
 bool GameClientMasterTicker::IsFirstSlave(const GameClientSlaveManager* pSlave) const
@@ -557,6 +572,29 @@ GameClientSlaveManager* GameClientMasterTicker::CreateDemo(GameClientMasterTicke
 #else // !Demo
 	return new GameClientViewer(pMaster, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea);
 #endif // Demo / !Demo
+}
+
+Cure::ContextObjectAttribute* GameClientMasterTicker::CreateObjectAttribute(Cure::ContextObject* pObject, const str& pAttributeName)
+{
+	ScreenPart* lScreenPart = this;
+	SlaveArray::iterator x;
+	for (x = mSlaveArray.begin(); x != mSlaveArray.end(); ++x)
+	{
+		GameClientSlaveManager* lSlave = *x;
+		if (lSlave)
+		{
+			if (lSlave->IsOwned(pObject->GetInstanceId()))
+			{
+				lScreenPart = lSlave;
+				break;
+			}
+		}
+	}
+	if (strutil::StartsWith(pAttributeName, _T("race_timer_")))
+	{
+		return new UiRaceScore(pObject, pAttributeName, lScreenPart, mUiManager, pAttributeName);
+	}
+	return Life::CreateObjectAttribute(pObject, pAttributeName);
 }
 
 bool GameClientMasterTicker::CreateSlave(SlaveFactoryMethod pCreate)
@@ -1100,10 +1138,13 @@ void GameClientMasterTicker::DrawDebugData() const
 		return;
 	}
 
-	ScopePerformanceData* lMainLoop = ScopePerformanceData::GetRoots()[0];
-	str lFps = strutil::Format(_T("FPS %.1f"), 1/lMainLoop->GetSlidingAverage());
+	const ScopePerformanceData* lMainLoop = ScopePerformanceData::GetRoots()[0];
+	str lInfo = strutil::Format(_T("FPS %.1f"), 1/lMainLoop->GetSlidingAverage());
+	const ScopePerformanceData* lAppSleep = lMainLoop->GetChild(_T("AppSleep"));
+	const double lPercent = 100 * (lMainLoop->GetSlidingAverage()-lAppSleep->GetSlidingAverage()) / lMainLoop->GetSlidingAverage() + 0.5f;
+	lInfo += strutil::Format(_T("\nUsedPerf %2.f %%"), lPercent);
 	int w = 80;
-	int h = 20;
+	int h = 37;
 	bool lShowPerformanceCounters;
 	CURE_RTVAR_GET(lShowPerformanceCounters, =, UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_COUNT, false);
 	if (lShowPerformanceCounters)
@@ -1123,7 +1164,7 @@ void GameClientMasterTicker::DrawDebugData() const
 			}
 		}
 		
-		lFps += strutil::Format(_T("\nvTRI %i\ncTRI %i\nUpload %sB/s\nDownload %sB/s"),
+		lInfo += strutil::Format(_T("\nvTRI %i\ncTRI %i\nUpload %sB/s\nDownload %sB/s"),
 			mUiManager->GetRenderer()->GetTriangleCount(true),
 			mUiManager->GetRenderer()->GetTriangleCount(false),
 			Number::ConvertToPostfixNumber(lUpBandwidth, 1).c_str(),
@@ -1134,7 +1175,7 @@ void GameClientMasterTicker::DrawDebugData() const
 	const int lRight = mUiManager->GetDisplayManager()->GetWidth();
 	mUiManager->GetPainter()->FillRect(lRight-w, 3, lRight-5, h);
 	mUiManager->GetPainter()->SetColor(Color(200, 200, 0));
-	mUiManager->GetPainter()->PrintText(lFps, lRight-w+5, 5);
+	mUiManager->GetPainter()->PrintText(lInfo, lRight-w+5, 5);
 }
 
 void GameClientMasterTicker::DrawPerformanceLineGraph2d() const

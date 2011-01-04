@@ -78,6 +78,7 @@ public:
 		TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID pBody2Id) = 0;
 	void OnStopped(ContextObject* pObject, TBC::PhysicsManager::BodyID pBodyId);
 	virtual bool OnPhysicsSend(ContextObject* pObject) = 0;
+	virtual bool OnAttributeSend(ContextObject* pObject) = 0;
 	virtual bool IsConnectAuthorized() = 0;
 	virtual void SendAttach(ContextObject* pObject1, unsigned pId1, ContextObject* pObject2, unsigned pId2) = 0;
 	virtual void SendDetach(ContextObject* pObject1, ContextObject* pObject2) = 0;

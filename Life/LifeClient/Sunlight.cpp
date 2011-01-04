@@ -21,8 +21,8 @@ Sunlight::Sunlight(UiCure::GameUiManager* pUiManager):
 	mAngle(0)
 {
 	mLightId = mUiManager->GetRenderer()->AddDirectionalLight(
-		UiTbc::Renderer::LIGHT_STATIC, Vector3DF(0, 0.5f, -1),
-		Color::Color(255, 255, 255), 1.5f, 40);
+		UiTbc::Renderer::LIGHT_MOVABLE, Vector3DF(0, 0.5f, -1),
+		Color::Color(255, 255, 255), 1.5f, 60);
 }
 
 Sunlight::~Sunlight()
@@ -41,12 +41,11 @@ void Sunlight::Tick(float pFactor)
 	}
 	// "Physical" and "light" height actual differ, otherwise sun would never
 	// be seen in the camera, since it would be to far up in the sky.
-	const float lPhysicalSunHeight = (sin(mAngle) + 1.4f) * 0.1f;
 	const float lLightSunHeight = sin(mAngle)*1.2f + 1.6f;
-	mCamSunDirection.x = -sin(mAngle);
-	mCamSunDirection.y = -cos(mAngle);
-	mCamSunDirection.z = lPhysicalSunHeight;
-	SetDirection(-mCamSunDirection.x, -mCamSunDirection.y, -lLightSunHeight);
+	mCamSunDirection.x = sin(mAngle);
+	mCamSunDirection.y = cos(mAngle);
+	mCamSunDirection.z = -lLightSunHeight;
+	SetDirection(mCamSunDirection.x, mCamSunDirection.y, mCamSunDirection.z);
 	const float r = 1.5f;
 	const float g = r * (sin(mAngle)*0.05f + 0.95f);
 	const float b = r * (sin(mAngle)*0.1f + 0.9f);

@@ -36,10 +36,10 @@ UserResource::~UserResource()
 	{
 		SafeRelease(mResource->GetManager());
 	}
-	else
+	/*else
 	{
 		assert(false);
-	}
+	}*/
 	SetParentResource(0);
 }
 
@@ -744,11 +744,6 @@ void ResourceManager::LoadUnique(const str& pName, UserResource* pUserResource, 
 	StartLoad(lResource);
 }
 
-bool ResourceManager::IsCreated(const str& pName) const
-{
-	return (mActiveResourceTable.FindObject(pName) != 0);
-}
-
 void ResourceManager::SafeRelease(UserResource* pUserResource)
 {
 	Resource* lResource = pUserResource->GetResource();
@@ -824,6 +819,12 @@ void ResourceManager::Release(Resource* pResource)
 	{
 		log_volatile(mLog.Debug(_T("Resource ")+pResource->GetName()+_T(" dereferenced, but has other references.")));
 	}
+}
+
+bool ResourceManager::IsLoading()
+{
+	ScopeLock lLock(&mThreadLock);
+	return (mRequestLoadList.GetCount() || mLoadedList.GetCount());
 }
 
 

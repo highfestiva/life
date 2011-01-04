@@ -83,6 +83,7 @@ public:
 	static NodeArray GetRoots();
 	const str& GetName() const;
 	NodeArray GetChildren() const;
+	const ScopePerformanceData* GetChild(const str& pName) const;
 
 protected:
 	static void ClearAll(NodeArray& pNodes);

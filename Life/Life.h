@@ -31,7 +31,6 @@ const int PHYSICS_FPS = CURE_STANDARD_FRAME_RATE;
 
 
 
-void InitLife();
 Cure::ContextObjectAttribute* CreateObjectAttribute(Cure::ContextObject* pObject, const str& pAttributeName);
 
 

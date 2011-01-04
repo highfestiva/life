@@ -17,6 +17,7 @@ namespace TBC
 GeometryReference::GeometryReference(GeometryBase* pGeometry) :
 	mGeometry(pGeometry)
 {
+	LEPRA_DEBUG_CODE(mName = _T("Ref->") + pGeometry->mName);
 	SetFlag(TRANSFORMATION_CHANGED | REF_TRANSFORMATION_CHANGED);
 }
 

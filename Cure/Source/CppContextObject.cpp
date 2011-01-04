@@ -94,9 +94,9 @@ bool CppContextObject::TryComplete()
 
 	if (mPhysicsResource->GetLoadState() == RESOURCE_LOAD_COMPLETE)
 	{
-		if (GetPhysics() && GetManager())
+		if (GetPhysics() && GetPhysics()->GetEngineCount() > 0 && GetManager())
 		{
-			GetManager()->EnableTickCallback(this);	// TODO: clear out this mess. How to use these two callback types?
+			GetManager()->EnableMicroTickCallback(this);	// Used for engine force applications each micro frame.
 		}
 		SetLoadResult(true);
 		return (true);
@@ -131,11 +131,11 @@ const TBC::ChunkyClass* CppContextObject::GetClass() const
 
 
 
-void CppContextObject::OnTick(float pFrameTime)
+void CppContextObject::OnMicroTick(float pFrameTime)
 {
 	if (mPhysics && GetManager())
 	{
-		mPhysics->OnTick(GetManager()->GetGameManager()->GetPhysicsManager(), pFrameTime);
+		mPhysics->OnMicroTick(GetManager()->GetGameManager()->GetPhysicsManager(), pFrameTime);
 	}
 }
 

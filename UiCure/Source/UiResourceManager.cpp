@@ -285,6 +285,7 @@ bool GeometryResource::Load()
 	{
 		UiTbc::ChunkyMeshLoader lLoader(lFile, false);
 		lGeometry = new UiTbc::TriangleBasedGeometry();
+		LEPRA_DEBUG_CODE(lGeometry->mName = lFilename);
 		lOk = lLoader.Load(lGeometry, mCastsShadows);
 		if (!lOk)
 		{

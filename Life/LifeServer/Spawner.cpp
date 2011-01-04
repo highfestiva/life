@@ -23,7 +23,8 @@ Spawner::Spawner(Cure::ContextManager* pManager):
 	Cure::CppContextObject(pManager->GetGameManager()->GetResourceManager(), _T("Spawner"))
 {
 	pManager->AddLocalObject(this);
-	pManager->AddAlarmCallback(this, 0, 0.5, 0);
+	pManager->AddAlarmCallback(this, 0, 0.5, 0);	// Create.
+	pManager->AddAlarmCallback(this, 1, 0.5, 0);	// Destroy.
 }
 
 Spawner::~Spawner()
@@ -36,21 +37,31 @@ void Spawner::OnAlarm(int pAlarmId, void* pExtraData)
 {
 	Parent::OnAlarm(pAlarmId, pExtraData);
 
-	if (GetSpawner()->GetInterval())
+	const TBC::PhysicsSpawner::IntervalArray& lIntervals = GetSpawner()->GetIntervals();
+	if (lIntervals.size() != 2)
 	{
-		if (!mChildList.empty())
-		{
-			const ContextObject* lObject = mChildList.front();
-			mChildList.pop_front();
-			GetManager()->DeleteObject(lObject->GetInstanceId());
-		}
+		mLog.AError("Error: spawner has badly configured intervals!");
+		assert(false);
+		return;
 	}
 
+	if (pAlarmId == 0)
+	{
+		OnCreate(lIntervals[0]);
+	}
+	else
+	{
+		OnDestroy(lIntervals[1]);
+	}
+}
+
+void Spawner::OnCreate(float pCreateInterval)
+{
 	float lSpawnPart;
 	CURE_RTVAR_GET(lSpawnPart, =(float), Cure::GetSettings(), RTVAR_GAME_SPAWNPART, 1.0);
 	const int lSpawnCount = (int)(GetSpawner()->GetNumber() * lSpawnPart);
 
-	while ((int)mChildList.size() < lSpawnCount)
+	if ((int)mChildList.size() < lSpawnCount)
 	{
 		const str lSpawnObject = GetSpawner()->GetSpawnObject((float)Random::Uniform(0, 1));
 		if (!lSpawnObject.empty())
@@ -63,9 +74,20 @@ void Spawner::OnAlarm(int pAlarmId, void* pExtraData)
 		}
 	}
 
-	if (GetSpawner()->GetInterval())
+	GetManager()->AddAlarmCallback(this, 0, pCreateInterval, 0);
+}
+
+void Spawner::OnDestroy(float pDestroyInterval)
+{
+	if (pDestroyInterval)
 	{
-		GetManager()->AddAlarmCallback(this, 0, GetSpawner()->GetInterval(), 0);
+		if (!mChildList.empty())
+		{
+			const ContextObject* lObject = mChildList.front();
+			mChildList.pop_front();
+			GetManager()->DeleteObject(lObject->GetInstanceId());
+		}
+		GetManager()->AddAlarmCallback(this, 1, pDestroyInterval, 0);
 	}
 }
 

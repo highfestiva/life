@@ -22,19 +22,29 @@ class RaceScore: public Cure::ContextObjectAttribute
 {
 	typedef Cure::ContextObjectAttribute Parent;
 public:
-	RaceScore(Cure::ContextObject* pContextObject, const str& pName);
+	typedef TBC::PhysicsManager::TriggerID TriggerId;
+
 	RaceScore(Cure::ContextObject* pContextObject, const str& pName, int pLapCount, TBC::PhysicsManager::TriggerID pStartTrigger);
 	virtual ~RaceScore();
 
+	TriggerId GetStartTrigger() const;
+	bool IsTriggered(TriggerId pTriggerId) const;
+	void AddTriggered(TriggerId pTriggerId);
+	unsigned GetTriggedCount() const;
+	int StartNewLap();
+	double GetTime() const;
+
+private:
 	virtual int QuerySend() const;	// Returns number of bytes it needs to send.
-	virtual void Pack(uint8* pDestination);
+	virtual int Pack(uint8* pDestination);
 	virtual int Unpack(const uint8* pSource, int pMaxSize);	// Retuns number of bytes unpacked, or -1.
+	virtual NetworkType GetNetworkType() const;
 
 	typedef std::hash_set<TBC::PhysicsManager::TriggerID> TriggerSet;
 
 	bool mIsUpdated;
 	int mLapCountLeft;
-	HiResTimer mTimer;
+	int mPhysicsFrameStart;
 	TBC::PhysicsManager::TriggerID mStartTrigger;
 	TriggerSet mTriggerSet;
 	size_t mTriggedCount;

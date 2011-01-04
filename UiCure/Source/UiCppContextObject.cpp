@@ -84,7 +84,7 @@ void CppContextObject::StartLoading()
 
 
 
-void CppContextObject::OnPhysicsTick()
+void CppContextObject::OnTick()
 {
 	if (!mEnableUi)
 	{
@@ -242,7 +242,13 @@ void CppContextObject::DebugDrawPrimitive(DebugPrimitive pPrimitive)
 						{
 							const float lLength = 1;
 							Vector3DF lAxis;
-							if (mManager->GetGameManager()->GetPhysicsManager()->GetAxis1(lJoint, lAxis))
+							if (lGeometry->GetJointType() == TBC::ChunkyBoneGeometry::JOINT_BALL)
+							{
+								// Ball joints don't have axes.
+								mUiManager->GetRenderer()->DrawLine(lAnchor, Vector3DF(0,0,3), BLACK);
+								break;
+							}
+							else if (mManager->GetGameManager()->GetPhysicsManager()->GetAxis1(lJoint, lAxis))
 							{
 								mUiManager->GetRenderer()->DrawLine(lAnchor, lAxis*lLength, DARK_GRAY);
 							}

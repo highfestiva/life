@@ -117,6 +117,11 @@ LineGraph2d::ColorPicker::ColorPicker(int pIndex, UiTbc::Painter* mPainter)
 		0xFF8000, 0xFF0080, 0x80FF00, 0x00FF80, 0x8000FF, 0x0080FF, 0x804000, 0x800040,
 	};
 	int lColor = lColorTable[pIndex%LEPRA_ARRAY_COUNT(lColorTable)];
+	if (pIndex >= LEPRA_ARRAY_COUNT(lColorTable))
+	{
+		lColor >>= 1;
+		lColor &= 0x7F7F7F;
+	}
 	typedef uint8 u8;
 	mPainter->SetColor((u8)(lColor>>16), (u8)(lColor>>8), (u8)lColor, 255);
 }

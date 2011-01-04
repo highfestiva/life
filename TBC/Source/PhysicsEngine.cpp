@@ -145,7 +145,7 @@ void PhysicsEngine::ForceSetValue(unsigned pAspect, float pValue)
 
 
 
-void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics* pStructure, float pFrameTime) const
+void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics* pStructure, float pFrameTime) const
 {
 	const float lLimitedFrameTime = std::min(pFrameTime, 0.1f);
 	const float lNormalizedFrameTime = lLimitedFrameTime * 90;

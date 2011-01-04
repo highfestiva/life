@@ -65,9 +65,10 @@ void ContextManager::AddObject(ContextObject* pObject)
 void ContextManager::RemoveObject(ContextObject* pObject)
 {
 	CancelPendingAlarmCallbacks(pObject);
+	DisableMicroTickCallback(pObject);
 	DisableTickCallback(pObject);
-	DisablePhysicsUpdateCallback(pObject);
 	mPhysicsSenderObjectTable.erase(pObject->GetInstanceId());
+	mAttributeSenderObjectTable.erase(pObject->GetInstanceId());
 	mObjectTable.erase(pObject->GetInstanceId());
 }
 
@@ -116,6 +117,7 @@ const ContextManager::ContextObjectTable& ContextManager::GetObjectTable() const
 void ContextManager::ClearObjects()
 {
 	mPhysicsSenderObjectTable.clear();
+	mAttributeSenderObjectTable.clear();
 	while (mObjectTable.size() > 0)
 	{
 		ContextObject* lObject = mObjectTable.begin()->second;
@@ -150,6 +152,14 @@ void ContextManager::RemovePhysicsBody(TBC::PhysicsManager::BodyID pBodyId)
 	{
 		mBodyTable.erase(pBodyId);
 	}
+}
+
+void ContextManager::AddAttributeSenderObject(ContextObject* pObject)
+{
+	assert(pObject->GetInstanceId() != 0);
+	assert(mObjectTable.find(pObject->GetInstanceId()) != mObjectTable.end());
+	assert(pObject->GetManager() == this);
+	mAttributeSenderObjectTable.insert(ContextObjectPair(pObject->GetInstanceId(), pObject));
 }
 
 
@@ -187,16 +197,6 @@ bool ContextManager::IsLocalGameObjectId(GameObjectId pInstanceId) const
 
 
 
-void ContextManager::EnablePhysicsUpdateCallback(ContextObject* pObject)
-{
-	mPhysicsUpdateCallbackObjectTable.insert(ContextObjectPair(pObject->GetInstanceId(), pObject));
-}
-
-void ContextManager::DisablePhysicsUpdateCallback(ContextObject* pObject)
-{
-	mPhysicsUpdateCallbackObjectTable.erase(pObject->GetInstanceId());
-}
-
 void ContextManager::EnableTickCallback(ContextObject* pObject)
 {
 	mTickCallbackObjectTable.insert(ContextObjectPair(pObject->GetInstanceId(), pObject));
@@ -205,6 +205,16 @@ void ContextManager::EnableTickCallback(ContextObject* pObject)
 void ContextManager::DisableTickCallback(ContextObject* pObject)
 {
 	mTickCallbackObjectTable.erase(pObject->GetInstanceId());
+}
+
+void ContextManager::EnableMicroTickCallback(ContextObject* pObject)
+{
+	mMicroTickCallbackObjectTable.insert(ContextObjectPair(pObject->GetInstanceId(), pObject));
+}
+
+void ContextManager::DisableMicroTickCallback(ContextObject* pObject)
+{
+	mMicroTickCallbackObjectTable.erase(pObject->GetInstanceId());
 }
 
 void ContextManager::AddAlarmCallback(ContextObject* pObject, int pAlarmId, float pSeconds, void* pExtraData)
@@ -251,13 +261,13 @@ void ContextManager::CancelPendingAlarmCallbacks(ContextObject* pObject)
 
 void ContextManager::Tick(float pTimeDelta)
 {
-	DispatchTickCallbacks(pTimeDelta);
+	DispatchMicroTickCallbacks(pTimeDelta);
 	DispatchAlarmCallbacks();
 }
 
 void ContextManager::TickPhysics()
 {
-	DispatchPhysicsUpdateCallbacks();
+	DispatchTickCallbacks();
 }
 
 void ContextManager::HandleIdledBodies()
@@ -295,6 +305,22 @@ void ContextManager::HandlePhysicsSend()
 	}
 }
 
+void ContextManager::HandleAttributeSend()
+{
+	ContextObjectTable::iterator x = mAttributeSenderObjectTable.begin();
+	while (x != mAttributeSenderObjectTable.end())
+	{
+		if (mGameManager->OnAttributeSend(x->second))
+		{
+			mAttributeSenderObjectTable.erase(x++);
+		}
+		else
+		{
+			++x;
+		}
+	}
+}
+
 void ContextManager::HandlePostKill()
 {
 	IdSet::iterator x = mPostKillSet.begin();
@@ -307,22 +333,22 @@ void ContextManager::HandlePostKill()
 
 
 
-void ContextManager::DispatchPhysicsUpdateCallbacks()
-{
-	ContextObjectTable::iterator x = mPhysicsUpdateCallbackObjectTable.begin();
-	for (; x != mPhysicsUpdateCallbackObjectTable.end(); ++x)
-	{
-		ContextObject* lObject = x->second;
-		lObject->OnPhysicsTick();
-	}
-}
-
-void ContextManager::DispatchTickCallbacks(float pTimeDelta)
+void ContextManager::DispatchTickCallbacks()
 {
 	ContextObjectTable::iterator x = mTickCallbackObjectTable.begin();
 	for (; x != mTickCallbackObjectTable.end(); ++x)
 	{
-		x->second->OnTick(pTimeDelta);
+		ContextObject* lObject = x->second;
+		lObject->OnTick();
+	}
+}
+
+void ContextManager::DispatchMicroTickCallbacks(float pTimeDelta)
+{
+	ContextObjectTable::iterator x = mMicroTickCallbackObjectTable.begin();
+	for (; x != mMicroTickCallbackObjectTable.end(); ++x)
+	{
+		x->second->OnMicroTick(pTimeDelta);
 	}
 }
 

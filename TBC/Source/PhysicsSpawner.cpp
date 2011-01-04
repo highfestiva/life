@@ -81,9 +81,9 @@ float PhysicsSpawner::GetNumber() const
 	return mNumber;
 }
 
-float PhysicsSpawner::GetInterval() const
+const PhysicsSpawner::IntervalArray& PhysicsSpawner::GetIntervals() const
 {
-	return mInterval;
+	return mIntervalArray;
 }
 
 const str PhysicsSpawner::GetSpawnObject(float pProbabilityThreshold) const
@@ -110,8 +110,9 @@ unsigned PhysicsSpawner::GetChunkySize() const
 	{
 		lStringSize += PackerUnicodeString::Pack(0, wstrutil::Encode(x->mSpawnObject));
 	}
-	return ((unsigned)(sizeof(uint32) * 3 +
-		sizeof(float) * 2 +
+	return ((unsigned)(sizeof(uint32) * 4 +
+		sizeof(float) +
+		sizeof(float) * mIntervalArray.size() +
 		sizeof(float) * mSpawnObjectArray.size() +
 		lStringSize));
 }
@@ -124,7 +125,12 @@ void PhysicsSpawner::SaveChunkyData(const ChunkyPhysics* pStructure, void* pData
 	i += PackerUnicodeString::Pack((uint8*)&lData[i], wstrutil::Encode(mFunction));
 	lData[i++] = Endian::HostToBig(pStructure->GetIndex(mSpawnerNode));
 	lData[i++] = Endian::HostToBigF(mNumber);
-	lData[i++] = Endian::HostToBigF(mInterval);
+	lData[i++] = Endian::HostToBig((uint32)mIntervalArray.size());
+	IntervalArray::const_iterator y = mIntervalArray.begin();
+	for (; y != mIntervalArray.end(); ++y)
+	{
+		lData[i++] = Endian::HostToBigF(*y);
+	}
 	SpawnObjectArray::const_iterator x = mSpawnObjectArray.begin();
 	for (; x != mSpawnObjectArray.end(); ++x)
 	{
@@ -145,7 +151,11 @@ void PhysicsSpawner::LoadChunkyData(ChunkyPhysics* pStructure, const void* pData
 	const int lBodyIndex = Endian::BigToHost(lData[i++]);
 	mSpawnerNode = pStructure->GetBoneGeometry(lBodyIndex);
 	mNumber = Endian::BigToHostF(lData[i++]);
-	mInterval = Endian::BigToHostF(lData[i++]);
+	const int lIntervalCount = Endian::BigToHost(lData[i++]);
+	for (int x = 0; x < lIntervalCount; ++x)
+	{
+		mIntervalArray.push_back(Endian::BigToHostF(lData[i++]));
+	}
 	const int lSpawnObjectCount = Endian::BigToHost(lData[i++]);
 	for (int x = 0; x < lSpawnObjectCount; ++x)
 	{

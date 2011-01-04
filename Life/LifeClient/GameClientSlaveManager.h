@@ -77,8 +77,9 @@ public:
 	bool IsUiMoveForbidden(Cure::GameObjectId pObjectId) const;
 	virtual void GetSiblings(Cure::GameObjectId pObjectId, Cure::ContextObject::Array& pSiblingArray) const;
 	void DoGetSiblings(Cure::GameObjectId pObjectId, Cure::ContextObject::Array& pSiblingArray) const;
-	void AddLocalObjects(std::hash_set<Cure::GameObjectId>& pLocalObjectSet) const;
+	void AddLocalObjects(std::hash_set<Cure::GameObjectId>& pLocalObjectSet);
 	bool IsInCameraRange(const Vector3DF& pPosition, float pDistance) const;
+	bool IsOwned(Cure::GameObjectId pObjectId) const;
 
 	virtual bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
 	virtual bool OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode);
@@ -130,17 +131,19 @@ protected:
 	void OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
 		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
 		TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID pBody2Id);
-	bool OnPhysicsSend(Cure::ContextObject* pObject);
+	virtual bool OnPhysicsSend(Cure::ContextObject* pObject);
+	virtual bool OnAttributeSend(Cure::ContextObject* pObject);
 	bool IsConnectAuthorized();
 	void SendAttach(Cure::ContextObject*, unsigned, Cure::ContextObject*, unsigned);
 	void SendDetach(Cure::ContextObject*, Cure::ContextObject*);
 	virtual void OnAlarm(int pAlarmId, Cure::ContextObject* pObject, void* pExtraData);
 	void AttachObjects(Cure::GameObjectId pObject1Id, unsigned pBody1Id, Cure::GameObjectId pObject2Id, unsigned pBody2Id);
 	void DetachObjects(Cure::GameObjectId pObject1Id, Cure::GameObjectId pObject2Id);
-	bool IsOwned(Cure::GameObjectId pObjectId) const;
+	void SetObjectAttribute(Cure::GameObjectId pObjectId, const uint8* pData, unsigned pSize);
 
 	void CancelLogin();
 	void OnAvatarSelect(UiTbc::Button* pButton);
+	void DropAvatar();
 	Cure::RuntimeVariableScope* GetVariableScope() const;
 
 	Cure::NetworkClient* GetNetworkClient() const;
@@ -176,6 +179,7 @@ protected:
 
 	// Network transmission and keepalive info.
 	Cure::GameObjectId mAvatarId;
+	bool mHadAvatar;
 	ObjectIdSet mOwnedObjectList;
 	uint64 mLastSentByteCount;
 	Timer mLastSendTime;

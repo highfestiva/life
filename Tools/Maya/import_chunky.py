@@ -916,7 +916,7 @@ class GroupReader(DefaultMAReader):
 
                         elif section.startswith("spawner:"):
                                 spawnertype = stripQuotes(config.get(section, "type"))
-                                spawnerOk = spawnertype in ["immediate", "teleport"]
+                                spawnerOk = spawnertype in ["teleport", "creator"]
                                 allApplied &= spawnerOk
                                 if not spawnerOk:
                                         print("Error: invalid spawner type '%s'." % spawnertype)
@@ -941,7 +941,7 @@ class GroupReader(DefaultMAReader):
                                             ("function", lambda x: type(x) == str),
                                             ("connected_to", check_connected_to),
                                             ("number", lambda x: x >= -1),
-                                            ("interval", lambda x: x >= 0),
+                                            ("intervals", lambda x: type(x) == list),
                                             ("spawn_objects", check_spawn_objects)]
                                 for name, spawner_check in required:
                                         allApplied &= self._query_attribute(node, name, spawner_check)[0]

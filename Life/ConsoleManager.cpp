@@ -606,7 +606,7 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 				{
 					str lValue;
 					strutil::CStringToString(pParameterVector[0], lValue);
-					RtScope::SetMode lMode = (lLevel == '.')? RtVar::USAGE_OVERRIDE : RtVar::USAGE_NORMAL;
+					RtScope::SetMode lMode = (lLevel == '.')? RtVar::USAGE_USER_OVERRIDE : RtVar::USAGE_NORMAL;
 					bool lOk = true;
 					Cure::GameManager* lManager = GetGameManager();
 					if (lManager)

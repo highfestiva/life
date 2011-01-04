@@ -192,7 +192,11 @@ void dxStepBody (dxBody *b, dReal h)
   if (b->flags & dxBodyMaxAngularSpeed) {
         const dReal max_ang_speed = b->max_angular_speed;
         const dReal aspeed = dDOT( b->avel, b->avel );
-        if (aspeed > max_ang_speed*max_ang_speed) {
+	if (dIsNan(aspeed))	// high_festiva added this scope.
+	{
+		dSetZero(b->avel, 3);
+	}
+        else if (aspeed > max_ang_speed*max_ang_speed) {
                 const dReal coef = max_ang_speed/dSqrt(aspeed);
                 dOPEC(b->avel, *=, coef);
         }

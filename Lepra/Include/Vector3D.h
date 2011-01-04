@@ -61,6 +61,7 @@ class Vector3D
 		inline void Div(_TVarType pScalar);
 
 		inline _TVarType Dot(const Vector3D<_TVarType>& pV) const;
+		inline _TVarType Dot(_TVarType pX, _TVarType pY, _TVarType pZ) const;
 
 		inline _TVarType GetLength() const;
 		inline _TVarType GetLengthSquared() const;

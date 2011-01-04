@@ -37,7 +37,7 @@ public:
 	ChunkyPhysics(TransformOperation pTransformOperation = TRANSFORM_NONE, PhysicsType pPhysicsType = STATIC);
 	virtual ~ChunkyPhysics();
 
-	void OnTick(PhysicsManager* pPhysicsManager, float pFrameTime);
+	void OnMicroTick(PhysicsManager* pPhysicsManager, float pFrameTime);
 
 	void SetPhysicsType(PhysicsType pPhysicsType);	// You may use this to change into a ragdoll (COLLISION_DETECT_ONLY -> DYNAMIC), or back.
 	PhysicsType GetPhysicsType() const;

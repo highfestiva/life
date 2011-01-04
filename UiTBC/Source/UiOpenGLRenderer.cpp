@@ -363,6 +363,22 @@ void OpenGLRenderer::RemoveLight(LightID pLightID)
 	OGL_ASSERT();
 }
 
+void OpenGLRenderer::EnableAllLights(bool pEnable)
+{
+	for (int i = 0; i < GetLightCount(); ++i)
+	{
+		GetLightData(i).mEnabled = pEnable;
+		if (pEnable)
+		{
+			::glEnable(GL_LIGHT0 + GetLightIndex(i));
+		}
+		else
+		{
+			::glDisable(GL_LIGHT0 + GetLightIndex(i));
+		}
+	}
+}
+
 
 
 void OpenGLRenderer::SetLightPosition(LightID pLightID, float pX, float pY, float pZ)
@@ -1314,7 +1330,7 @@ void OpenGLRenderer::RenderRelative(TBC::GeometryBase* pGeometry, const Quaterni
 
 	::glEnable(GL_DEPTH_TEST);
 
-	const int lLightIndex = GetLightIndex(0);
+	const int lLightIndex = GetLightIndex(GetLightCount()-1);
 	const LightData& lLightData = GetLightData(lLightIndex);
 	if (pLightOrientation)
 	{

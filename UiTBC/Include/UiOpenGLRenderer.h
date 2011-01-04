@@ -113,7 +113,8 @@ public:
 			     float pLightRadius,
 			     float pShadowRange);
 
-	void RemoveLight(LightID pLightID);
+	virtual void RemoveLight(LightID pLightID);
+	virtual void EnableAllLights(bool pEnable);
 
 	void SetLightPosition(LightID pLightID, float pX, float pY, float pZ);
 	void SetLightDirection(LightID pLightID, float pX, float pY, float pZ);

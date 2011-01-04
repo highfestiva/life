@@ -86,6 +86,7 @@ enum MessageType
 	MESSAGE_TYPE_OBJECT_POSITION,
 	MESSAGE_TYPE_OBJECT_ATTACH,
 	MESSAGE_TYPE_OBJECT_DETACH,
+	MESSAGE_TYPE_OBJECT_ATTRIBUTE,
 };
 
 
@@ -261,6 +262,18 @@ public:
 	int Parse(const uint8* pData, int pSize);
 	int Store(Packet* pPacket, uint32 pObject1Id, uint32 pObject2Id);
 	uint32 GetObject2Id() const;
+};
+
+class MessageObjectAttribute: public MessageObject
+{
+public:
+	typedef MessageObject Parent;
+
+	MessageObjectAttribute();
+	MessageType GetType() const;
+	int Parse(const uint8* pData, int pSize);
+	uint8* GetWriteBuffer(Packet* pPacket, uint32 pInstanceId, unsigned pSize);
+	const uint8* GetReadBuffer(unsigned& pSize) const;
 };
 
 

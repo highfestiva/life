@@ -65,7 +65,7 @@ void BulletTime::FinalizeTrigger(const TBC::PhysicsTrigger* pTrigger)
 	}
 }
 
-void BulletTime::OnTick(float)
+void BulletTime::OnTick()
 {
 	if (!mLastFrameTriggered)
 	{

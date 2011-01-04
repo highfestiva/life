@@ -7,6 +7,7 @@
 #include "GameClientSlaveManager.h"
 #include <algorithm>
 #include "../../Cure/Include/ContextManager.h"
+#include "../../Cure/Include/ContextObjectAttribute.h"
 #include "../../Cure/Include/NetworkClient.h"
 #include "../../Cure/Include/ResourceManager.h"
 #include "../../Cure/Include/RuntimeVariable.h"
@@ -59,6 +60,7 @@ GameClientSlaveManager::GameClientSlaveManager(GameClientMasterTicker* pMaster, 
 	mIsResetComplete(false),
 	mQuit(false),
 	mAvatarId(0),
+	mHadAvatar(false),
 	mLastSentByteCount(0),
 	mPingAttemptCount(0),
 	mCamRotateExtra(0),
@@ -105,8 +107,9 @@ void GameClientSlaveManager::LoadSettings()
 	str lExternalServerAddress;
 	CURE_RTVAR_GET(lExternalServerAddress, =, UiCure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("localhost:16650"));
 	GetConsoleManager()->ExecuteCommand(_T("alias gfx-lo \"#") _T(RTVAR_UI_3D_PIXELSHADERS) _T(" false; #") _T(RTVAR_UI_3D_SHADOWS) _T(" No; #") _T(RTVAR_UI_3D_ENABLEMASSOBJECTS) _T(" false; #") _T(RTVAR_UI_3D_ENABLEPARTICLES) _T(" false\""));
-	GetConsoleManager()->ExecuteCommand(_T("alias gfx-hi \"#") _T(RTVAR_UI_3D_PIXELSHADERS) _T(" true; #") _T(RTVAR_UI_3D_SHADOWS) _T(" ForceShadowVolumes; #") _T(RTVAR_UI_3D_ENABLEMASSOBJECTS) _T(" true; #") _T(RTVAR_UI_3D_ENABLEPARTICLES) _T(" true\""));
+	GetConsoleManager()->ExecuteCommand(_T("alias gfx-hi \"#") _T(RTVAR_UI_3D_PIXELSHADERS) _T(" true; #") _T(RTVAR_UI_3D_SHADOWS) _T(" Force:Volumes; #") _T(RTVAR_UI_3D_ENABLEMASSOBJECTS) _T(" true; #") _T(RTVAR_UI_3D_ENABLEPARTICLES) _T(" true\""));
 	GetConsoleManager()->ExecuteCommand(_T("execute-file -i ")+GetApplicationCommandFilename());
+	mOptions.DoRefreshConfiguration();
 	// Always default these settings, to avoid that the user can't get rid of undesired behavior.
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_DEBUG_ENABLE, false);
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_GAME_TIMEOFDAYFACTOR, 1.0);
@@ -601,14 +604,32 @@ void GameClientSlaveManager::DoGetSiblings(Cure::GameObjectId pObjectId, Cure::C
 	}
 }
 
-void GameClientSlaveManager::AddLocalObjects(std::hash_set<Cure::GameObjectId>& pLocalObjectSet) const
+void GameClientSlaveManager::AddLocalObjects(std::hash_set<Cure::GameObjectId>& pLocalObjectSet)
 {
+	if (mAvatarId)
+	{
+		Cure::ContextObject* lAvatar = GetContext()->GetObject(mAvatarId);
+		if (mHadAvatar && !lAvatar)
+		{
+			DropAvatar();
+		}
+		else if (lAvatar)
+		{
+			mHadAvatar = true;
+		}
+	}
+
 	pLocalObjectSet.insert(mOwnedObjectList.begin(), mOwnedObjectList.end());
 }
 
 bool GameClientSlaveManager::IsInCameraRange(const Vector3DF& pPosition, float pDistance) const
 {
 	return (pPosition.GetDistanceSquared(mCameraPosition) <= pDistance*pDistance);
+}
+
+bool GameClientSlaveManager::IsOwned(Cure::GameObjectId pObjectId) const
+{
+	return (mOwnedObjectList.find(pObjectId) != mOwnedObjectList.end());
 }
 
 
@@ -1283,7 +1304,7 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 				mDisconnectReason.clear();
 				ClearRoadSigns();
 				// A successful login: lets store these parameters for next time!
-				CURE_RTVAR_OVERRIDE(GetVariableScope(), RTVAR_LOGIN_USERNAME, mConnectUserName);
+				CURE_RTVAR_SYS_OVERRIDE(GetVariableScope(), RTVAR_LOGIN_USERNAME, mConnectUserName);
 				CURE_RTVAR_SET(GetVariableScope(), RTVAR_NETWORK_SERVERADDRESS, mConnectServerAddress);
 				mMasterServerConnection->GraceClose(0.1, false);
 			}
@@ -1383,7 +1404,12 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 		case Cure::MESSAGE_TYPE_DELETE_OBJECT:
 		{
 			Cure::MessageDeleteObject* lMessageDeleteObject = (Cure::MessageDeleteObject*)pMessage;
-			GetContext()->DeleteObject(lMessageDeleteObject->GetObjectId());
+			Cure::GameObjectId lId = lMessageDeleteObject->GetObjectId();
+			GetContext()->DeleteObject(lId);
+			if (lId == mAvatarId)
+			{
+				DropAvatar();
+			}
 		}
 		break;
 		case Cure::MESSAGE_TYPE_OBJECT_POSITION:
@@ -1420,6 +1446,15 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 			Cure::GameObjectId lObject1Id = lMessageDetach->GetObjectId();
 			Cure::GameObjectId lObject2Id = lMessageDetach->GetObject2Id();
 			DetachObjects(lObject1Id, lObject2Id);
+		}
+		break;
+		case Cure::MESSAGE_TYPE_OBJECT_ATTRIBUTE:
+		{
+			Cure::MessageObjectAttribute* lMessageAttrib = (Cure::MessageObjectAttribute*)pMessage;
+			Cure::GameObjectId lObjectId = lMessageAttrib->GetObjectId();
+			unsigned lByteSize = 0;
+			const uint8* lBuffer = lMessageAttrib->GetReadBuffer(lByteSize);
+			SetObjectAttribute(lObjectId, lBuffer, lByteSize);
 		}
 		break;
 		default:
@@ -1645,6 +1680,11 @@ bool GameClientSlaveManager::OnPhysicsSend(Cure::ContextObject*)
 	return (true);	// Say true to drop us from sender list.
 }
 
+bool GameClientSlaveManager::OnAttributeSend(Cure::ContextObject*)
+{
+	return (true);	// Say true to drop us from sender list.
+}
+
 bool GameClientSlaveManager::IsConnectAuthorized()
 {
 	return (false);
@@ -1708,9 +1748,13 @@ void GameClientSlaveManager::DetachObjects(Cure::GameObjectId pObject1Id, Cure::
 	}
 }
 
-bool GameClientSlaveManager::IsOwned(Cure::GameObjectId pObjectId) const
+void GameClientSlaveManager::SetObjectAttribute(Cure::GameObjectId pObjectId, const uint8* pData, unsigned pSize)
 {
-	return (mOwnedObjectList.find(pObjectId) != mOwnedObjectList.end());
+	Cure::ContextObject* lObject = GetContext()->GetObject(pObjectId);
+	if (lObject)
+	{
+		Cure::ContextObjectAttribute::Unpack(lObject, pData, pSize);
+	}
 }
 
 
@@ -1723,8 +1767,7 @@ void GameClientSlaveManager::CancelLogin()
 
 void GameClientSlaveManager::OnAvatarSelect(UiTbc::Button* pButton)
 {
-	mOwnedObjectList.erase(mAvatarId);
-	mAvatarId = 0;
+	DropAvatar();
 
 	Cure::UserAccount::AvatarId lAvatarId = pButton->GetName();
 	log_volatile(mLog.Debugf(_T("Clicked avatar %s."), lAvatarId.c_str()));
@@ -1735,6 +1778,13 @@ void GameClientSlaveManager::OnAvatarSelect(UiTbc::Button* pButton)
 
 	SetRoadSignsVisible(false);
 	mAvatarSelectTime.ClearTimeDiff();
+}
+
+void GameClientSlaveManager::DropAvatar()
+{
+	mOwnedObjectList.erase(mAvatarId);
+	mAvatarId = 0;
+	mHadAvatar = false;
 }
 
 Cure::RuntimeVariableScope* GameClientSlaveManager::GetVariableScope() const

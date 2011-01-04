@@ -51,7 +51,7 @@ void RaceTimer::FinalizeTrigger(const TBC::PhysicsTrigger* pTrigger)
 	}
 }
 
-void RaceTimer::OnTick(float)
+void RaceTimer::OnTick()
 {
 	const Cure::TimeManager* lTimeManager = GetManager()->GetGameManager()->GetTimeManager();
 	DoneMap::iterator x = mDoneMap.begin();
@@ -90,25 +90,22 @@ void RaceTimer::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, TBC::Physic
 		lRaceScore = new RaceScore(lObject, mAttributeName, 1, pTriggerId);
 		mLog.AHeadline("Race started!");
 	}
-	RaceScore::TriggerSet::iterator x = lRaceScore->mTriggerSet.find(pTriggerId);
-	if (x == lRaceScore->mTriggerSet.end())
+	if (!lRaceScore->IsTriggered(pTriggerId))
 	{
-		lRaceScore->mTriggerSet.insert(pTriggerId);
-		mLog.Infof(_T("Hit %u/%u triggers in %f s."), lRaceScore->mTriggerSet.size(), mTriggerCount, lRaceScore->mTimer.QueryTimeDiff());
+		lRaceScore->AddTriggered(pTriggerId);
+		mLog.Infof(_T("Hit %u/%u triggers in %f s."), lRaceScore->GetTriggedCount(), mTriggerCount, lRaceScore->GetTime());
 		
 	}
-	else if (lRaceScore->mTriggerSet.size() == mTriggerCount && pTriggerId == lRaceScore->mStartTrigger)
+	else if (lRaceScore->GetTriggedCount() == mTriggerCount && pTriggerId == lRaceScore->GetStartTrigger())
 	{
-		if (--lRaceScore->mLapCountLeft <= 0)
+		if (lRaceScore->StartNewLap() <= 0)
 		{
-			mLog.Headlinef(_T("Congratulations - finished race in %f s!"), lRaceScore->mTimer.QueryTimeDiff());
+			mLog.Headlinef(_T("Congratulations - finished race in %f s!"), lRaceScore->GetTime());
 			mDoneMap.insert(DoneMap::value_type(lObject->GetInstanceId(), GetManager()->GetGameManager()->GetTimeManager()->GetCurrentPhysicsFrameAddSeconds(5.0)));
 		}
 		else
 		{
-			mLog.Headlinef(_T("Lap completed; time is %f s!"), lRaceScore->mTimer.QueryTimeDiff());
-			lRaceScore->mTriggerSet.clear();
-			lRaceScore->mTriggerSet.insert(pTriggerId);
+			mLog.Headlinef(_T("Lap completed; time is %f s!"), lRaceScore->GetTime());
 		}
 	}
 }

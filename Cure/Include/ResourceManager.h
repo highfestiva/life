@@ -386,9 +386,9 @@ public:
 	// name as a renderer resource is an error with undefined behaviour.
 	void Load(const str& pName, UserResource* pUserResource, UserResource::LoadCallback pCallback);
 	void LoadUnique(const str& pName, UserResource* pUserResource, UserResource::LoadCallback pCallback);
-	bool IsCreated(const str& pName) const;
 	void SafeRelease(UserResource* pUserResource);
 	void Release(Resource* pResource);
+	bool IsLoading();
 
 	void Tick();	// Call often, preferably every frame.
 	unsigned ForceFreeCache();	// Called to force immediate freeing of all resources.

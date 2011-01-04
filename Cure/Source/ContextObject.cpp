@@ -312,6 +312,16 @@ ContextObjectAttribute* ContextObject::GetAttribute(const str& pName) const
 	return 0;
 }
 
+const ContextObject::AttributeArray& ContextObject::GetAttributes() const
+{
+	return mAttributeArray;
+}
+
+void ContextObject::OnAttributeUpdated(ContextObjectAttribute*)
+{
+	mManager->AddAttributeSenderObject(this);
+}
+
 
 
 void ContextObject::AddTrigger(TBC::PhysicsManager::TriggerID pTriggerId, const void* pTrigger)
@@ -348,6 +358,16 @@ void ContextObject::SetSpawner(const TBC::PhysicsSpawner* pSpawner)
 const TBC::PhysicsSpawner* ContextObject::GetSpawner() const
 {
 	return mSpawner;
+}
+
+
+
+void ContextObject::AddChild(ContextObject* pChild)
+{
+	assert(pChild->GetInstanceId() != 0);
+	assert(std::find(mChildList.begin(), mChildList.end(), pChild) == mChildList.end());
+	mChildList.push_back(pChild);
+	pChild->SetParent(this);
 }
 
 
@@ -858,7 +878,7 @@ void ContextObject::SetSendCount(int pCount)
 
 void ContextObject::OnLoaded()
 {
-	OnPhysicsTick();
+	OnTick();
 	if (GetPhysics() && GetManager())
 	{
 		// Calculate total mass.
@@ -874,11 +894,11 @@ void ContextObject::OnLoaded()
 			}
 		}
 
-		GetManager()->EnablePhysicsUpdateCallback(this);
+		GetManager()->EnableTickCallback(this);
 	}
 }
 
-void ContextObject::OnPhysicsTick()
+void ContextObject::OnTick()
 {
 }
 
@@ -1176,14 +1196,6 @@ void ContextObject::AddAttachment(ContextObject* pObject, TBC::PhysicsManager::J
 }
 
 
-
-void ContextObject::AddChild(ContextObject* pChild)
-{
-	assert(pChild->GetInstanceId() != 0);
-	assert(std::find(mChildList.begin(), mChildList.end(), pChild) == mChildList.end());
-	mChildList.push_back(pChild);
-	pChild->SetParent(this);
-}
 
 void ContextObject::RemoveChild(ContextObject* pChild)
 {

@@ -690,6 +690,22 @@
 				RelativePath=".\RoadSignButton.h"
 				>
 			</File>
+			<File
+				RelativePath=".\StopWatch.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\StopWatch.h"
+				>
+			</File>
+			<File
+				RelativePath=".\UiRaceScore.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\UiRaceScore.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Server"
