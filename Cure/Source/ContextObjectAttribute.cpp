@@ -57,7 +57,7 @@ int ContextObjectAttribute::Unpack(ContextObject* pContextObject, const uint8* p
 	if (!lAttribute)
 	{
 		assert(mFactory);
-		lAttribute = mFactory(pContextObject, lAttributeName);
+		lAttribute = mFactory(pContextObject, strutil::Encode(lAttributeName));
 		if (!lAttribute)
 		{
 			return -1;

@@ -428,6 +428,7 @@ bool MacInputManager::OnMessage(NSEvent* pEvent)
 
 void MacInputManager::SetKey(KeyCode pWParam, long pLParam, bool pIsDown)
 {
+	printf("Key: %i", pWParam);
 	/*if (pLParam&0x1000000)	// Extended key = right Alt, Ctrl...
 	{
 		switch (pWParam)

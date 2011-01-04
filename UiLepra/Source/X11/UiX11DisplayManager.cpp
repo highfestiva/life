@@ -76,6 +76,8 @@ X11DisplayManager::~X11DisplayManager()
 	CloseScreen();
 
 	delete[] mEnumeratedDisplayMode;
+	mEnumeratedDisplayMode = 0;
+	mEnumeratedDisplayModeCount = 0;
 
 	ObserverSetTable::Iterator lTIter;
 	for (lTIter = mObserverSetTable.First();
