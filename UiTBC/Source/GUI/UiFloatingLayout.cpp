@@ -31,7 +31,7 @@ void FloatingLayout::Add(Component* pComponent, int pParam1, int pParam2)
 {
 	if (mChildList.empty() == false)
 	{
-		Component* lChild = *(--mChildList.end());
+		Component* lChild = mChildList.back();
 		if (lChild->GetType() == Component::WINDOW)
 		{
 			((Window*)lChild)->SetActive(false);
@@ -39,7 +39,7 @@ void FloatingLayout::Add(Component* pComponent, int pParam1, int pParam2)
 	}
 
 	mChildList.push_back(pComponent);
-	mChildList.unique();
+	//mChildList.unique();
 
 	if (pComponent->GetType() == Component::WINDOW)
 	{
@@ -107,18 +107,19 @@ Component* FloatingLayout::GetFirst()
 	{
 		return *mIter;
 	}
-
 	return 0;
 }
 
 Component* FloatingLayout::GetNext()
 {
-	++mIter;
 	if (mIter != mChildList.end())
 	{
-		return *mIter;
+		++mIter;
+		if (mIter != mChildList.end())
+		{
+			return *mIter;
+		}
 	}
-
 	return 0;
 }
 

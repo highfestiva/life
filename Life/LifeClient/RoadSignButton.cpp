@@ -103,6 +103,7 @@ void RoadSignButton::SetIsMovingIn(bool pIsMovingIn)
 
 void RoadSignButton::MoveSign(const float pFrameTime)
 {
+	mButton.SetVisible(mActive);
 	if (!mActive)
 	{
 		return;

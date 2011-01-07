@@ -23,8 +23,7 @@ StopWatch::StopWatch(ScreenPart* pScreenPart, UiCure::GameUiManager* pUiManager,
 	const str& pAttributeName):
 	Parent(0, pClassResourceName, pUiManager),
 	mScreenPart(pScreenPart),
-	mAttributeName(pAttributeName),
-	mLabel()
+	mAttributeName(pAttributeName)
 {
 	mLabel.SetPreferredSize(50, 20);
 	mLabel.SetMinSize(30, 15);

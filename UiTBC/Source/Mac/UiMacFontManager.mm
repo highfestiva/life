@@ -127,7 +127,7 @@ bool MacFontManager::RenderGlyph(tchar pChar, Canvas& pImage, const PixelRect& p
 
 	pImage.FlipVertical();	// Upside down. TODO: verify... We currently do this on both Win and Mac...
 
-	/*printf("Rendering glyph '%c' (height=%i):\n", pChar, pImage.GetHeight());
+	printf("Rendering glyph '%c' (height=%i):\n", pChar, pImage.GetHeight());
 	for (int y = 0; y < (int)pImage.GetHeight(); ++y)
 	{
 		for (int x = 0; x < (int)pImage.GetWidth(); ++x)
@@ -142,7 +142,7 @@ bool MacFontManager::RenderGlyph(tchar pChar, Canvas& pImage, const PixelRect& p
 			}
 		}
 		printf("\n");
-	}*/
+	}
 
 	return (true);
 

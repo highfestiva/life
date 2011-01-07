@@ -349,30 +349,32 @@ def _prepare_run():
         return pre, post
 
 
-def startclient():
+def _bgrun(name):
         _printresult()
         pre, post = _prepare_run()
         import subprocess
-        subprocess.Popen(pre+"LifeClient"+post, shell=True)
+        subprocess.Popen(pre+name+post, shell=True)
         os.chdir("..")
-def startserver():
+def _fgrun(name, app=""):
         _printresult()
         pre, post = _prepare_run()
-        os.system(pre+"LifeServer"+post)
+        os.system(app+pre+name+post)
         os.chdir("..")
+def startclient():
+	_fgrun("LifeClient")
+def bgclient():
+	_bgrun("LifeClient")
+def startserver():
+	fgrun("LifeServer")
+def bgserver():
+	bgrun("LifeServer")
 def start():
-        startclient()
+        bgclient()
         startserver()
 def gdbtest():
-        _printresult()
-        pre, post = _prepare_run()
-        os.system("gdb "+pre+"CureTestApp"+post)
-        os.chdir("..")
+	_fgrun("CureTestApp", "gdb")
 def gdbclient():
-        _printresult()
-        pre, post = _prepare_run()
-        os.system("gdb "+pre+"LifeClient"+post)
-        os.chdir("..")
+	_fgrun("LifeClient", "gdb")
 
 
 if __name__ == "__main__":

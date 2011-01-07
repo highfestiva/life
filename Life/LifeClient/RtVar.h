@@ -10,10 +10,6 @@
 
 
 
-#define RTVAR_GAME_ISCHILD		"Game.IsChild"
-#define RTVAR_GAME_ENABLESTARTLOGO	"Game.EnableStartLogo"
-#define RTVAR_GAME_TIMEOFDAYFACTOR	"Game.TimeOfDayFactor"
-
 #define RTVAR_CTRL_UI_CONTOGGLE		"Control.Ui.ConsoleToggle"
 
 #define RTVAR_CTRL_UI_CAMUP		"Control.Ui.CamUp"
@@ -40,6 +36,12 @@
 #define RTVAR_CTRL_STEER_BRK		"Control.Steer.Break"
 
 #define RTVAR_STEERING_PLAYBACKMODE	"Control.Steering.PlaybackMode"	// Internal.
+
+#define RTVAR_DEBUG_INPUT_PRINT		"Debug.Input.Print"
+
+#define RTVAR_GAME_ISCHILD		"Game.IsChild"
+#define RTVAR_GAME_ENABLESTARTLOGO	"Game.EnableStartLogo"
+#define RTVAR_GAME_TIMEOFDAYFACTOR	"Game.TimeOfDayFactor"
 
 #define RTVAR_LOGIN_USERNAME		"Login.UserName"
 #define RTVAR_LOGIN_ISSERVERSELECTED	"Login.IsServerSelected"

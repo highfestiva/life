@@ -34,7 +34,9 @@ Debug
 Release Candidate
 Final
 /Life/LifeClient/LifeClient
+/Life/LifeServer/LifeServer
 /Life/LifeMaster/LifeMaster
+/UiCure/CureTestApp/CureTestApp
 /ThirdParty/stlport/build
 /bin/
 /Data/Download

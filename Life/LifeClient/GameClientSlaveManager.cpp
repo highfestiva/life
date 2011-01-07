@@ -656,6 +656,13 @@ bool GameClientSlaveManager::OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode)
 
 void GameClientSlaveManager::OnInput(UiLepra::InputElement* pElement)
 {
+	bool lOutputInput;
+	CURE_RTVAR_GET(lOutputInput, =, GetVariableScope(), RTVAR_DEBUG_INPUT_PRINT, false);
+	if (lOutputInput)
+	{
+		mLog.Infof(_T("Input %s: %f."), pElement->GetFullName().c_str(), pElement->GetValue());
+	}
+	
 	mOptions.RefreshConfiguration();
 
 	if (mAvatarSelectTime.QueryTimeDiff() > 1.0)
