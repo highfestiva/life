@@ -23,6 +23,7 @@
 #ifndef _ODE_COMMON_H_
 #define _ODE_COMMON_H_
 #include <ode/odeconfig.h>
+#include "../../ode/src/config.h" /* high_festiva was here... */
 #include <ode/error.h>
 #include <math.h>
 
@@ -153,6 +154,8 @@ typedef dReal dQuaternion[4];
 #define dIsNan(x) (_isnanf(x))
 #elif defined(HAVE_ISNANF)
 #define dIsNan(x) (isnanf(x))
+#elif defined(__APPLE__) && defined(HAVE_ISNAN) /* high_festiva was here. */
+#define dIsNan(x) (isnan(x)) /* high_festiva was here. */
 #else
   /*
      fall back to _isnan which is the VC way,

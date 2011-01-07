@@ -6,7 +6,7 @@
 
 #pragma once
 
-#import <Cocoa/Cocoa.h>
+//#import <Cocoa/Cocoa.h>
 #import <AppKit/AppKit.h>
 
 #include "../../../Lepra/Include/HashTable.h"

@@ -30,7 +30,7 @@
 
 #elif defined(LEPRA_MAC)
 
-#include <Carbon/Carbon.h>
+//#include <Carbon/Carbon.h>
 #include <OpenGL/gl.h>
 #include <OpenGL/glu.h>
 #include <OpenGL/glext.h>
@@ -63,12 +63,12 @@ class OpenGLExtensions
 public:
 	
 	static bool IsExtensionSupported(const char* pExtension);
+#if !defined(LEPRA_MAC)
 	static void* GetExtensionPointer(const char* pFunctionName);
+#endif // !Mac
 
-	/*
-		OpenGL extension function pointers...
-		TODO: Implement more.
-	*/
+	// OpenGL extension function pointers...
+	// TODO: Implement more.
 
 	// Frame buffer objects.
 	static PFNGLISRENDERBUFFEREXTPROC                      glIsRenderbufferEXT;

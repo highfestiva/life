@@ -23,15 +23,19 @@ bool OpenGLExtensions::IsExtensionSupported(const char* pExtension)
 	return (lGLExtensions.find(lExtension.c_str(), 0) >= 0);
 }
 
+#if defined(LEPRA_MAC)
+#define GET_EXTENSION_POINTER(f) (&::f)
+#else
+#define GET_EXTENSION_POINTER(f) GetExtensionPointer(#f)
 void* OpenGLExtensions::GetExtensionPointer(const char* pFunctionName)
 {
 #if defined(LEPRA_WINDOWS)
     return (void*)wglGetProcAddress(pFunctionName);
-#elif defined(LEPRA_MAC)
+/*#elif defined(LEPRA_MAC)
 	// Mac is a bit more tricky. First we need the bundle.
 	CFBundleRef lOpenGL = 0;
 
-	/*
+#if 0
 	SInt16      fwVersion = 0;
 	SInt32      fwDir = 0;
 	if (FindFolder(kSystemDomain, kFrameworksFolderType, kDontCreateFolder, &fwVersion, &fwDir) != noErr)
@@ -41,7 +45,7 @@ void* OpenGLExtensions::GetExtensionPointer(const char* pFunctionName)
 	if (FSMakeFSSpec(fwVersion, fwDir, "\pOpenGL.framework", &fSpec) != noErr)
 		return NULL;
 	FSpMakeFSRef(&fSpec, &fRef);
-	*/  
+#endif
 
 	CFStringRef lUrlString = CFSTR("/System/Library/OpenGL.framework");
 	CFURLRef lUrl = CFURLCreateWithString(NULL, lUrlString, NULL);
@@ -60,13 +64,14 @@ void* OpenGLExtensions::GetExtensionPointer(const char* pFunctionName)
 	CFRelease(lOpenGL);
 
 	// Return the function ponter.
-	return lFunc;
+	return lFunc;*/
 #elif defined(LEPRA_POSIX)
 	return ((void*)glXGetProcAddress((const GLubyte*)pFunctionName));
 #else // Unkonwn platform
 #error "WTF! Waco platform!"
-#endif // Win / Mac / Posix
+#endif // Win / Posix
 }
+#endif // Mac / !Mac
 
 void OpenGLExtensions::InitExtensions()
 {
@@ -107,23 +112,23 @@ void OpenGLExtensions::InitExtensions()
 
 	if (mIsFrameBufferObjectsSupported)
 	{
-		glIsRenderbufferEXT                      = (PFNGLISRENDERBUFFEREXTPROC)                      GetExtensionPointer("glIsRenderbufferEXT");
-		glBindRenderbufferEXT                    = (PFNGLBINDRENDERBUFFEREXTPROC)                    GetExtensionPointer("glBindRenderbufferEXT");
-		glDeleteRenderbuffersEXT                 = (PFNGLDELETERENDERBUFFERSEXTPROC)                 GetExtensionPointer("glDeleteRenderbuffersEXT");
-		glGenRenderbuffersEXT                    = (PFNGLGENRENDERBUFFERSEXTPROC)                    GetExtensionPointer("glGenRenderbuffersEXT");
-		glRenderbufferStorageEXT                 = (PFNGLRENDERBUFFERSTORAGEEXTPROC)                 GetExtensionPointer("glRenderbufferStorageEXT");
-		glGetRenderbufferParameterivEXT          = (PFNGLGETRENDERBUFFERPARAMETERIVEXTPROC)          GetExtensionPointer("glGetRenderbufferParameterivEXT");
-		glIsFramebufferEXT                       = (PFNGLISFRAMEBUFFEREXTPROC)                       GetExtensionPointer("glIsFramebufferEXT");
-		glBindFramebufferEXT                     = (PFNGLBINDFRAMEBUFFEREXTPROC)                     GetExtensionPointer("glBindFramebufferEXT");
-		glDeleteFramebuffersEXT                  = (PFNGLDELETEFRAMEBUFFERSEXTPROC)                  GetExtensionPointer("glDeleteFramebuffersEXT");
-		glGenFramebuffersEXT                     = (PFNGLGENFRAMEBUFFERSEXTPROC)                     GetExtensionPointer("glGenFramebuffersEXT");
-		glCheckFramebufferStatusEXT              = (PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC)              GetExtensionPointer("glCheckFramebufferStatusEXT");
-		glFramebufferTexture1DEXT                = (PFNGLFRAMEBUFFERTEXTURE1DEXTPROC)                GetExtensionPointer("glFramebufferTexture1DEXT");
-		glFramebufferTexture2DEXT                = (PFNGLFRAMEBUFFERTEXTURE2DEXTPROC)                GetExtensionPointer("glFramebufferTexture2DEXT");
-		glFramebufferTexture3DEXT                = (PFNGLFRAMEBUFFERTEXTURE3DEXTPROC)                GetExtensionPointer("glFramebufferTexture3DEXT");
-		glFramebufferRenderbufferEXT             = (PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC)             GetExtensionPointer("glFramebufferRenderbufferEXT");
-		glGetFramebufferAttachmentParameterivEXT = (PFNGLGETFRAMEBUFFERATTACHMENTPARAMETERIVEXTPROC) GetExtensionPointer("glGetFramebufferAttachmentParameterivEXT");
-		glGenerateMipmapEXT                      = (PFNGLGENERATEMIPMAPEXTPROC)                      GetExtensionPointer("glGenerateMipmapEXT");
+		glIsRenderbufferEXT                      = (PFNGLISRENDERBUFFEREXTPROC)                      GET_EXTENSION_POINTER(glIsRenderbufferEXT);
+		glBindRenderbufferEXT                    = (PFNGLBINDRENDERBUFFEREXTPROC)                    GET_EXTENSION_POINTER(glBindRenderbufferEXT);
+		glDeleteRenderbuffersEXT                 = (PFNGLDELETERENDERBUFFERSEXTPROC)                 GET_EXTENSION_POINTER(glDeleteRenderbuffersEXT);
+		glGenRenderbuffersEXT                    = (PFNGLGENRENDERBUFFERSEXTPROC)                    GET_EXTENSION_POINTER(glGenRenderbuffersEXT);
+		glRenderbufferStorageEXT                 = (PFNGLRENDERBUFFERSTORAGEEXTPROC)                 GET_EXTENSION_POINTER(glRenderbufferStorageEXT);
+		glGetRenderbufferParameterivEXT          = (PFNGLGETRENDERBUFFERPARAMETERIVEXTPROC)          GET_EXTENSION_POINTER(glGetRenderbufferParameterivEXT);
+		glIsFramebufferEXT                       = (PFNGLISFRAMEBUFFEREXTPROC)                       GET_EXTENSION_POINTER(glIsFramebufferEXT);
+		glBindFramebufferEXT                     = (PFNGLBINDFRAMEBUFFEREXTPROC)                     GET_EXTENSION_POINTER(glBindFramebufferEXT);
+		glDeleteFramebuffersEXT                  = (PFNGLDELETEFRAMEBUFFERSEXTPROC)                  GET_EXTENSION_POINTER(glDeleteFramebuffersEXT);
+		glGenFramebuffersEXT                     = (PFNGLGENFRAMEBUFFERSEXTPROC)                     GET_EXTENSION_POINTER(glGenFramebuffersEXT);
+		glCheckFramebufferStatusEXT              = (PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC)              GET_EXTENSION_POINTER(glCheckFramebufferStatusEXT);
+		glFramebufferTexture1DEXT                = (PFNGLFRAMEBUFFERTEXTURE1DEXTPROC)                GET_EXTENSION_POINTER(glFramebufferTexture1DEXT);
+		glFramebufferTexture2DEXT                = (PFNGLFRAMEBUFFERTEXTURE2DEXTPROC)                GET_EXTENSION_POINTER(glFramebufferTexture2DEXT);
+		glFramebufferTexture3DEXT                = (PFNGLFRAMEBUFFERTEXTURE3DEXTPROC)                GET_EXTENSION_POINTER(glFramebufferTexture3DEXT);
+		glFramebufferRenderbufferEXT             = (PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC)             GET_EXTENSION_POINTER(glFramebufferRenderbufferEXT);
+		glGetFramebufferAttachmentParameterivEXT = (PFNGLGETFRAMEBUFFERATTACHMENTPARAMETERIVEXTPROC) GET_EXTENSION_POINTER(glGetFramebufferAttachmentParameterivEXT);
+		glGenerateMipmapEXT                      = (PFNGLGENERATEMIPMAPEXTPROC)                      GET_EXTENSION_POINTER(glGenerateMipmapEXT);
 
 		if (!CheckFrameBufferObjectFunctions())
 		{
@@ -140,24 +145,24 @@ void OpenGLExtensions::InitExtensions()
 
 	if (mIsGLVersion15)
 	{
-		glBindBuffer    = (PFNGLBINDBUFFERPROC)   GetExtensionPointer("glBindBuffer");
-		glBufferData    = (PFNGLBUFFERDATAPROC)   GetExtensionPointer("glBufferData");
-		glBufferSubData = (PFNGLBUFFERSUBDATAPROC)GetExtensionPointer("glBufferSubData");
-		glDeleteBuffers = (PFNGLDELETEBUFFERSPROC)GetExtensionPointer("glDeleteBuffers");
-		glGenBuffers    = (PFNGLGENBUFFERSPROC)   GetExtensionPointer("glGenBuffers");
-		glMapBuffer     = (PFNGLMAPBUFFERPROC)    GetExtensionPointer("glMapBuffer");
-		glUnmapBuffer   = (PFNGLUNMAPBUFFERPROC)  GetExtensionPointer("glUnmapBuffer");
+		glBindBuffer    = (PFNGLBINDBUFFERPROC)   GET_EXTENSION_POINTER(glBindBuffer);
+		glBufferData    = (PFNGLBUFFERDATAPROC)   GET_EXTENSION_POINTER(glBufferData);
+		glBufferSubData = (PFNGLBUFFERSUBDATAPROC)GET_EXTENSION_POINTER(glBufferSubData);
+		glDeleteBuffers = (PFNGLDELETEBUFFERSPROC)GET_EXTENSION_POINTER(glDeleteBuffers);
+		glGenBuffers    = (PFNGLGENBUFFERSPROC)   GET_EXTENSION_POINTER(glGenBuffers);
+		glMapBuffer     = (PFNGLMAPBUFFERPROC)    GET_EXTENSION_POINTER(glMapBuffer);
+		glUnmapBuffer   = (PFNGLUNMAPBUFFERPROC)  GET_EXTENSION_POINTER(glUnmapBuffer);
 	}
 	if(mIsBufferObjectsSupported && !CheckBufferObjectFunctions())
 	{
 		// Retry with the ARB version...
-		glBindBuffer    = (PFNGLBINDBUFFERPROC)   GetExtensionPointer("glBindBufferARB");
-		glBufferData    = (PFNGLBUFFERDATAPROC)   GetExtensionPointer("glBufferDataARB");
-		glBufferSubData = (PFNGLBUFFERSUBDATAPROC)GetExtensionPointer("glBufferSubDataARB");
-		glDeleteBuffers = (PFNGLDELETEBUFFERSPROC)GetExtensionPointer("glDeleteBuffersARB");
-		glGenBuffers    = (PFNGLGENBUFFERSPROC)   GetExtensionPointer("glGenBuffersARB");
-		glMapBuffer     = (PFNGLMAPBUFFERPROC)    GetExtensionPointer("glMapBufferARB");
-		glUnmapBuffer   = (PFNGLUNMAPBUFFERPROC)  GetExtensionPointer("glUnmapBufferARB");
+		glBindBuffer    = (PFNGLBINDBUFFERPROC)   GET_EXTENSION_POINTER(glBindBufferARB);
+		glBufferData    = (PFNGLBUFFERDATAPROC)   GET_EXTENSION_POINTER(glBufferDataARB);
+		glBufferSubData = (PFNGLBUFFERSUBDATAPROC)GET_EXTENSION_POINTER(glBufferSubDataARB);
+		glDeleteBuffers = (PFNGLDELETEBUFFERSPROC)GET_EXTENSION_POINTER(glDeleteBuffersARB);
+		glGenBuffers    = (PFNGLGENBUFFERSPROC)   GET_EXTENSION_POINTER(glGenBuffersARB);
+		glMapBuffer     = (PFNGLMAPBUFFERPROC)    GET_EXTENSION_POINTER(glMapBufferARB);
+		glUnmapBuffer   = (PFNGLUNMAPBUFFERPROC)  GET_EXTENSION_POINTER(glUnmapBufferARB);
 	}
 
 	if (mIsBufferObjectsSupported)
@@ -187,8 +192,8 @@ void OpenGLExtensions::InitExtensions()
 	// Init vsync on/off.
 	if (IsExtensionSupported("WGL_EXT_swap"))
 	{
-		wglSwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC)GetExtensionPointer("wglSwapIntervalEXT");
-		wglGetSwapIntervalEXT = (PFNWGLGETSWAPINTERVALEXTPROC)GetExtensionPointer("wglGetSwapIntervalEXT");
+		wglSwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC)GET_EXTENSION_POINTER(wglSwapIntervalEXT);
+		wglGetSwapIntervalEXT = (PFNWGLGETSWAPINTERVALEXTPROC)GET_EXTENSION_POINTER(wglGetSwapIntervalEXT);
 	}
 #else
 #pragma message("Warning: In OpenGLExtensions::InitExtensions(), VSync is not initialized.")
@@ -199,40 +204,40 @@ void OpenGLExtensions::InitExtensions()
 	{
 		mIsMultiTextureSupported = true;
 
-		glActiveTexture       = (PFNGLACTIVETEXTUREPROC)       GetExtensionPointer("glActiveTextureARB");
-		glClientActiveTexture = (PFNGLCLIENTACTIVETEXTUREPROC) GetExtensionPointer("glClientActiveTexture");
-		glMultiTexCoord1d     = (PFNGLMULTITEXCOORD1DPROC)     GetExtensionPointer("glMultiTexCoord1dARB");
-		glMultiTexCoord1dv    = (PFNGLMULTITEXCOORD1DVPROC)    GetExtensionPointer("glMultiTexCoord1dvARB");
-		glMultiTexCoord1f     = (PFNGLMULTITEXCOORD1FPROC)     GetExtensionPointer("glMultiTexCoord1fARB");
-		glMultiTexCoord1fv    = (PFNGLMULTITEXCOORD1FVPROC)    GetExtensionPointer("glMultiTexCoord1fvARB");
-		glMultiTexCoord1i     = (PFNGLMULTITEXCOORD1IPROC)     GetExtensionPointer("glMultiTexCoord1iARB");
-		glMultiTexCoord1iv    = (PFNGLMULTITEXCOORD1IVPROC)    GetExtensionPointer("glMultiTexCoord1ivARB");
-		glMultiTexCoord1s     = (PFNGLMULTITEXCOORD1SPROC)     GetExtensionPointer("glMultiTexCoord1sARB");
-		glMultiTexCoord1sv    = (PFNGLMULTITEXCOORD1SVPROC)    GetExtensionPointer("glMultiTexCoord1svARB");
-		glMultiTexCoord2d     = (PFNGLMULTITEXCOORD2DPROC)     GetExtensionPointer("glMultiTexCoord2dARB");
-		glMultiTexCoord2dv    = (PFNGLMULTITEXCOORD2DVPROC)    GetExtensionPointer("glMultiTexCoord2dvARB");
-		glMultiTexCoord2f     = (PFNGLMULTITEXCOORD2FPROC)     GetExtensionPointer("glMultiTexCoord2fARB");
-		glMultiTexCoord2fv    = (PFNGLMULTITEXCOORD2FVPROC)    GetExtensionPointer("glMultiTexCoord2fvARB");
-		glMultiTexCoord2i     = (PFNGLMULTITEXCOORD2IPROC)     GetExtensionPointer("glMultiTexCoord2iARB");
-		glMultiTexCoord2iv    = (PFNGLMULTITEXCOORD2IVPROC)    GetExtensionPointer("glMultiTexCoord2ivARB");
-		glMultiTexCoord2s     = (PFNGLMULTITEXCOORD2SPROC)     GetExtensionPointer("glMultiTexCoord2sARB");
-		glMultiTexCoord2sv    = (PFNGLMULTITEXCOORD2SVPROC)    GetExtensionPointer("glMultiTexCoord2svARB");
-		glMultiTexCoord3d     = (PFNGLMULTITEXCOORD3DPROC)     GetExtensionPointer("glMultiTexCoord3dARB");
-		glMultiTexCoord3dv    = (PFNGLMULTITEXCOORD3DVPROC)    GetExtensionPointer("glMultiTexCoord3dvARB");
-		glMultiTexCoord3f     = (PFNGLMULTITEXCOORD3FPROC)     GetExtensionPointer("glMultiTexCoord3fARB");
-		glMultiTexCoord3fv    = (PFNGLMULTITEXCOORD3FVPROC)    GetExtensionPointer("glMultiTexCoord3fvARB");
-		glMultiTexCoord3i     = (PFNGLMULTITEXCOORD3IPROC)     GetExtensionPointer("glMultiTexCoord3iARB");
-		glMultiTexCoord3iv    = (PFNGLMULTITEXCOORD3IVPROC)    GetExtensionPointer("glMultiTexCoord3ivARB");
-		glMultiTexCoord3s     = (PFNGLMULTITEXCOORD3SPROC)     GetExtensionPointer("glMultiTexCoord3sARB");
-		glMultiTexCoord3sv    = (PFNGLMULTITEXCOORD3SVPROC)    GetExtensionPointer("glMultiTexCoord3svARB");
-		glMultiTexCoord4d     = (PFNGLMULTITEXCOORD4DPROC)     GetExtensionPointer("glMultiTexCoord4dARB");
-		glMultiTexCoord4dv    = (PFNGLMULTITEXCOORD4DVPROC)    GetExtensionPointer("glMultiTexCoord4dvARB");
-		glMultiTexCoord4f     = (PFNGLMULTITEXCOORD4FPROC)     GetExtensionPointer("glMultiTexCoord4fARB");
-		glMultiTexCoord4fv    = (PFNGLMULTITEXCOORD4FVPROC)    GetExtensionPointer("glMultiTexCoord4fvARB");
-		glMultiTexCoord4i     = (PFNGLMULTITEXCOORD4IPROC)     GetExtensionPointer("glMultiTexCoord4iARB");
-		glMultiTexCoord4iv    = (PFNGLMULTITEXCOORD4IVPROC)    GetExtensionPointer("glMultiTexCoord4ivARB");
-		glMultiTexCoord4s     = (PFNGLMULTITEXCOORD4SPROC)     GetExtensionPointer("glMultiTexCoord4sARB");
-		glMultiTexCoord4sv    = (PFNGLMULTITEXCOORD4SVPROC)    GetExtensionPointer("glMultiTexCoord4svARB");
+		glActiveTexture       = (PFNGLACTIVETEXTUREPROC)       GET_EXTENSION_POINTER(glActiveTextureARB);
+		glClientActiveTexture = (PFNGLCLIENTACTIVETEXTUREPROC) GET_EXTENSION_POINTER(glClientActiveTexture);
+		glMultiTexCoord1d     = (PFNGLMULTITEXCOORD1DPROC)     GET_EXTENSION_POINTER(glMultiTexCoord1dARB);
+		glMultiTexCoord1dv    = (PFNGLMULTITEXCOORD1DVPROC)    GET_EXTENSION_POINTER(glMultiTexCoord1dvARB);
+		glMultiTexCoord1f     = (PFNGLMULTITEXCOORD1FPROC)     GET_EXTENSION_POINTER(glMultiTexCoord1fARB);
+		glMultiTexCoord1fv    = (PFNGLMULTITEXCOORD1FVPROC)    GET_EXTENSION_POINTER(glMultiTexCoord1fvARB);
+		glMultiTexCoord1i     = (PFNGLMULTITEXCOORD1IPROC)     GET_EXTENSION_POINTER(glMultiTexCoord1iARB);
+		glMultiTexCoord1iv    = (PFNGLMULTITEXCOORD1IVPROC)    GET_EXTENSION_POINTER(glMultiTexCoord1ivARB);
+		glMultiTexCoord1s     = (PFNGLMULTITEXCOORD1SPROC)     GET_EXTENSION_POINTER(glMultiTexCoord1sARB);
+		glMultiTexCoord1sv    = (PFNGLMULTITEXCOORD1SVPROC)    GET_EXTENSION_POINTER(glMultiTexCoord1svARB);
+		glMultiTexCoord2d     = (PFNGLMULTITEXCOORD2DPROC)     GET_EXTENSION_POINTER(glMultiTexCoord2dARB);
+		glMultiTexCoord2dv    = (PFNGLMULTITEXCOORD2DVPROC)    GET_EXTENSION_POINTER(glMultiTexCoord2dvARB);
+		glMultiTexCoord2f     = (PFNGLMULTITEXCOORD2FPROC)     GET_EXTENSION_POINTER(glMultiTexCoord2fARB);
+		glMultiTexCoord2fv    = (PFNGLMULTITEXCOORD2FVPROC)    GET_EXTENSION_POINTER(glMultiTexCoord2fvARB);
+		glMultiTexCoord2i     = (PFNGLMULTITEXCOORD2IPROC)     GET_EXTENSION_POINTER(glMultiTexCoord2iARB);
+		glMultiTexCoord2iv    = (PFNGLMULTITEXCOORD2IVPROC)    GET_EXTENSION_POINTER(glMultiTexCoord2ivARB);
+		glMultiTexCoord2s     = (PFNGLMULTITEXCOORD2SPROC)     GET_EXTENSION_POINTER(glMultiTexCoord2sARB);
+		glMultiTexCoord2sv    = (PFNGLMULTITEXCOORD2SVPROC)    GET_EXTENSION_POINTER(glMultiTexCoord2svARB);
+		glMultiTexCoord3d     = (PFNGLMULTITEXCOORD3DPROC)     GET_EXTENSION_POINTER(glMultiTexCoord3dARB);
+		glMultiTexCoord3dv    = (PFNGLMULTITEXCOORD3DVPROC)    GET_EXTENSION_POINTER(glMultiTexCoord3dvARB);
+		glMultiTexCoord3f     = (PFNGLMULTITEXCOORD3FPROC)     GET_EXTENSION_POINTER(glMultiTexCoord3fARB);
+		glMultiTexCoord3fv    = (PFNGLMULTITEXCOORD3FVPROC)    GET_EXTENSION_POINTER(glMultiTexCoord3fvARB);
+		glMultiTexCoord3i     = (PFNGLMULTITEXCOORD3IPROC)     GET_EXTENSION_POINTER(glMultiTexCoord3iARB);
+		glMultiTexCoord3iv    = (PFNGLMULTITEXCOORD3IVPROC)    GET_EXTENSION_POINTER(glMultiTexCoord3ivARB);
+		glMultiTexCoord3s     = (PFNGLMULTITEXCOORD3SPROC)     GET_EXTENSION_POINTER(glMultiTexCoord3sARB);
+		glMultiTexCoord3sv    = (PFNGLMULTITEXCOORD3SVPROC)    GET_EXTENSION_POINTER(glMultiTexCoord3svARB);
+		glMultiTexCoord4d     = (PFNGLMULTITEXCOORD4DPROC)     GET_EXTENSION_POINTER(glMultiTexCoord4dARB);
+		glMultiTexCoord4dv    = (PFNGLMULTITEXCOORD4DVPROC)    GET_EXTENSION_POINTER(glMultiTexCoord4dvARB);
+		glMultiTexCoord4f     = (PFNGLMULTITEXCOORD4FPROC)     GET_EXTENSION_POINTER(glMultiTexCoord4fARB);
+		glMultiTexCoord4fv    = (PFNGLMULTITEXCOORD4FVPROC)    GET_EXTENSION_POINTER(glMultiTexCoord4fvARB);
+		glMultiTexCoord4i     = (PFNGLMULTITEXCOORD4IPROC)     GET_EXTENSION_POINTER(glMultiTexCoord4iARB);
+		glMultiTexCoord4iv    = (PFNGLMULTITEXCOORD4IVPROC)    GET_EXTENSION_POINTER(glMultiTexCoord4ivARB);
+		glMultiTexCoord4s     = (PFNGLMULTITEXCOORD4SPROC)     GET_EXTENSION_POINTER(glMultiTexCoord4sARB);
+		glMultiTexCoord4sv    = (PFNGLMULTITEXCOORD4SVPROC)    GET_EXTENSION_POINTER(glMultiTexCoord4svARB);
 
 		if (!CheckMultiTextureFunctions())
 		{
@@ -247,68 +252,68 @@ void OpenGLExtensions::InitExtensions()
 	{
 		mIsShaderAsmProgramsSupported = true;
 
-		glGenProgramsARB                = (PFNGLGENPROGRAMSARBPROC)                GetExtensionPointer("glGenProgramsARB");
-		glBindProgramARB                = (PFNGLBINDPROGRAMARBPROC)                GetExtensionPointer("glBindProgramARB");
-		glDeleteProgramsARB             = (PFNGLDELETEPROGRAMSARBPROC)             GetExtensionPointer("glDeleteProgramsARB");
-		glIsProgramARB                  = (PFNGLISPROGRAMARBPROC)                  GetExtensionPointer("glIsProgramARB");
-		glProgramStringARB              = (PFNGLPROGRAMSTRINGARBPROC)              GetExtensionPointer("glProgramStringARB");
-		glGetProgramStringARB           = (PFNGLGETPROGRAMIVARBPROC)               GetExtensionPointer("glGetProgramStringARB");
-		glEnableVertexAttribArrayARB    = (PFNGLENABLEVERTEXATTRIBARRAYARBPROC)    GetExtensionPointer("glEnableVertexAttribArrayARB");
-		glDisableVertexAttribArrayARB   = (PFNGLDISABLEVERTEXATTRIBARRAYARBPROC)   GetExtensionPointer("glDisableVertexAttribArrayARB");
-		glGetProgramEnvParameterdvARB   = (PFNGLGETPROGRAMENVPARAMETERDVARBPROC)   GetExtensionPointer("glGetProgramEnvParameterdvARB");
-		glGetProgramEnvParameterfvARB   = (PFNGLGETPROGRAMENVPARAMETERFVARBPROC)   GetExtensionPointer("glGetProgramEnvParameterfvARB");
-		glProgramEnvParameter4dARB      = (PFNGLPROGRAMENVPARAMETER4DARBPROC)      GetExtensionPointer("glProgramEnvParameter4dARB");
-		glProgramEnvParameter4dvARB     = (PFNGLPROGRAMENVPARAMETER4DVARBPROC)     GetExtensionPointer("glProgramEnvParameter4dvARB");
-		glProgramEnvParameter4fARB      = (PFNGLPROGRAMENVPARAMETER4FARBPROC)      GetExtensionPointer("glProgramEnvParameter4fARB");
-		glProgramEnvParameter4fvARB     = (PFNGLPROGRAMENVPARAMETER4FVARBPROC)     GetExtensionPointer("glProgramEnvParameter4fvARB");
-		glGetProgramLocalParameterdvARB = (PFNGLGETPROGRAMLOCALPARAMETERDVARBPROC) GetExtensionPointer("glGetProgramLocalParameterdvARB");
-		glGetProgramLocalParameterfvARB = (PFNGLGETPROGRAMLOCALPARAMETERFVARBPROC) GetExtensionPointer("glGetProgramLocalParameterfvARB");
-		glProgramLocalParameter4dARB    = (PFNGLPROGRAMLOCALPARAMETER4DARBPROC)    GetExtensionPointer("glProgramLocalParameter4dARB");
-		glProgramLocalParameter4dvARB   = (PFNGLPROGRAMLOCALPARAMETER4DVARBPROC)   GetExtensionPointer("glProgramLocalParameter4dvARB");
-		glProgramLocalParameter4fARB    = (PFNGLPROGRAMLOCALPARAMETER4FARBPROC)    GetExtensionPointer("glProgramLocalParameter4fARB");
-		glProgramLocalParameter4fvARB   = (PFNGLPROGRAMLOCALPARAMETER4FVARBPROC)   GetExtensionPointer("glProgramLocalParameter4fvARB");
-		glGetProgramivARB               = (PFNGLGETPROGRAMIVARBPROC)               GetExtensionPointer("glGetProgramivARB");
-		glGetVertexAttribdvARB          = (PFNGLGETVERTEXATTRIBDVARBPROC)          GetExtensionPointer("glGetVertexAttribdvARB");
-		glGetVertexAttribfvARB          = (PFNGLGETVERTEXATTRIBFVARBPROC)          GetExtensionPointer("glGetVertexAttribfvARB");
-		glGetVertexAttribivARB          = (PFNGLGETVERTEXATTRIBIVARBPROC)          GetExtensionPointer("glGetVertexAttribivARB");
-		glGetVertexAttribPointervARB    = (PFNGLGETVERTEXATTRIBPOINTERVARBPROC)    GetExtensionPointer("glGetVertexAttribPointervARB");
-		glVertexAttribPointerARB        = (PFNGLVERTEXATTRIBPOINTERARBPROC)        GetExtensionPointer("glVertexAttribPointerARB");
-		glVertexAttrib1dARB             = (PFNGLVERTEXATTRIB1DARBPROC)             GetExtensionPointer("glVertexAttrib1dARB");
-		glVertexAttrib1dvARB            = (PFNGLVERTEXATTRIB1DVARBPROC)            GetExtensionPointer("glVertexAttrib1dvARB");
-		glVertexAttrib1fARB             = (PFNGLVERTEXATTRIB1FARBPROC)             GetExtensionPointer("glVertexAttrib1fARB");
-		glVertexAttrib1fvARB            = (PFNGLVERTEXATTRIB1FVARBPROC)            GetExtensionPointer("glVertexAttrib1fvARB");
-		glVertexAttrib1sARB             = (PFNGLVERTEXATTRIB1SARBPROC)             GetExtensionPointer("glVertexAttrib1sARB");
-		glVertexAttrib1svARB            = (PFNGLVERTEXATTRIB1SVARBPROC)            GetExtensionPointer("glVertexAttrib1svARB");
-		glVertexAttrib2dARB             = (PFNGLVERTEXATTRIB2DARBPROC)             GetExtensionPointer("glVertexAttrib2dARB");
-		glVertexAttrib2dvARB            = (PFNGLVERTEXATTRIB2DVARBPROC)            GetExtensionPointer("glVertexAttrib2dvARB");
-		glVertexAttrib2fARB             = (PFNGLVERTEXATTRIB2FARBPROC)             GetExtensionPointer("glVertexAttrib2fARB");
-		glVertexAttrib2fvARB            = (PFNGLVERTEXATTRIB2FVARBPROC)            GetExtensionPointer("glVertexAttrib2fvARB");
-		glVertexAttrib2sARB             = (PFNGLVERTEXATTRIB2SARBPROC)             GetExtensionPointer("glVertexAttrib2sARB");
-		glVertexAttrib2svARB            = (PFNGLVERTEXATTRIB2SVARBPROC)            GetExtensionPointer("glVertexAttrib2svARB");
-		glVertexAttrib3dARB             = (PFNGLVERTEXATTRIB3DARBPROC)             GetExtensionPointer("glVertexAttrib3dARB");
-		glVertexAttrib3dvARB            = (PFNGLVERTEXATTRIB3DVARBPROC)            GetExtensionPointer("glVertexAttrib3dvARB");
-		glVertexAttrib3fARB             = (PFNGLVERTEXATTRIB3FARBPROC)             GetExtensionPointer("glVertexAttrib3fARB");
-		glVertexAttrib3fvARB            = (PFNGLVERTEXATTRIB3FVARBPROC)            GetExtensionPointer("glVertexAttrib3fvARB");
-		glVertexAttrib3sARB             = (PFNGLVERTEXATTRIB3SARBPROC)             GetExtensionPointer("glVertexAttrib3sARB");
-		glVertexAttrib3svARB            = (PFNGLVERTEXATTRIB3SVARBPROC)            GetExtensionPointer("glVertexAttrib3svARB");
-		glVertexAttrib4NbvARB           = (PFNGLVERTEXATTRIB4NBVARBPROC)           GetExtensionPointer("glVertexAttrib4NbvARB");
-		glVertexAttrib4NivARB           = (PFNGLVERTEXATTRIB4NIVARBPROC)           GetExtensionPointer("glVertexAttrib4NivARB");
-		glVertexAttrib4NsvARB           = (PFNGLVERTEXATTRIB4NSVARBPROC)           GetExtensionPointer("glVertexAttrib4NsvARB");
-		glVertexAttrib4NubARB           = (PFNGLVERTEXATTRIB4NUBARBPROC)           GetExtensionPointer("glVertexAttrib4NubARB");
-		glVertexAttrib4NubvARB          = (PFNGLVERTEXATTRIB4NUBVARBPROC)          GetExtensionPointer("glVertexAttrib4NubvARB");
-		glVertexAttrib4NuivARB          = (PFNGLVERTEXATTRIB4NUIVARBPROC)          GetExtensionPointer("glVertexAttrib4NuivARB");
-		glVertexAttrib4NusvARB          = (PFNGLVERTEXATTRIB4NUSVARBPROC)          GetExtensionPointer("glVertexAttrib4NusvARB");
-		glVertexAttrib4bvARB            = (PFNGLVERTEXATTRIB4BVARBPROC)            GetExtensionPointer("glVertexAttrib4bvARB");
-		glVertexAttrib4dARB             = (PFNGLVERTEXATTRIB4DARBPROC)             GetExtensionPointer("glVertexAttrib4dARB");
-		glVertexAttrib4dvARB            = (PFNGLVERTEXATTRIB4DVARBPROC)            GetExtensionPointer("glVertexAttrib4dvARB");
-		glVertexAttrib4fARB             = (PFNGLVERTEXATTRIB4FARBPROC)             GetExtensionPointer("glVertexAttrib4fARB");
-		glVertexAttrib4fvARB            = (PFNGLVERTEXATTRIB4FVARBPROC)            GetExtensionPointer("glVertexAttrib4fvARB");
-		glVertexAttrib4ivARB            = (PFNGLVERTEXATTRIB4IVARBPROC)            GetExtensionPointer("glVertexAttrib4ivARB");
-		glVertexAttrib4sARB             = (PFNGLVERTEXATTRIB4SARBPROC)             GetExtensionPointer("glVertexAttrib4sARB");
-		glVertexAttrib4svARB            = (PFNGLVERTEXATTRIB4SVARBPROC)            GetExtensionPointer("glVertexAttrib4svARB");
-		glVertexAttrib4ubvARB           = (PFNGLVERTEXATTRIB4UBVARBPROC)           GetExtensionPointer("glVertexAttrib4ubvARB");
-		glVertexAttrib4uivARB           = (PFNGLVERTEXATTRIB4UIVARBPROC)           GetExtensionPointer("glVertexAttrib4uivARB");
-		glVertexAttrib4usvARB           = (PFNGLVERTEXATTRIB4USVARBPROC)           GetExtensionPointer("glVertexAttrib4usvARB");
+		glGenProgramsARB                = (PFNGLGENPROGRAMSARBPROC)                GET_EXTENSION_POINTER(glGenProgramsARB);
+		glBindProgramARB                = (PFNGLBINDPROGRAMARBPROC)                GET_EXTENSION_POINTER(glBindProgramARB);
+		glDeleteProgramsARB             = (PFNGLDELETEPROGRAMSARBPROC)             GET_EXTENSION_POINTER(glDeleteProgramsARB);
+		glIsProgramARB                  = (PFNGLISPROGRAMARBPROC)                  GET_EXTENSION_POINTER(glIsProgramARB);
+		glProgramStringARB              = (PFNGLPROGRAMSTRINGARBPROC)              GET_EXTENSION_POINTER(glProgramStringARB);
+		glGetProgramStringARB           = (PFNGLGETPROGRAMIVARBPROC)               GET_EXTENSION_POINTER(glGetProgramStringARB);
+		glEnableVertexAttribArrayARB    = (PFNGLENABLEVERTEXATTRIBARRAYARBPROC)    GET_EXTENSION_POINTER(glEnableVertexAttribArrayARB);
+		glDisableVertexAttribArrayARB   = (PFNGLDISABLEVERTEXATTRIBARRAYARBPROC)   GET_EXTENSION_POINTER(glDisableVertexAttribArrayARB);
+		glGetProgramEnvParameterdvARB   = (PFNGLGETPROGRAMENVPARAMETERDVARBPROC)   GET_EXTENSION_POINTER(glGetProgramEnvParameterdvARB);
+		glGetProgramEnvParameterfvARB   = (PFNGLGETPROGRAMENVPARAMETERFVARBPROC)   GET_EXTENSION_POINTER(glGetProgramEnvParameterfvARB);
+		glProgramEnvParameter4dARB      = (PFNGLPROGRAMENVPARAMETER4DARBPROC)      GET_EXTENSION_POINTER(glProgramEnvParameter4dARB);
+		glProgramEnvParameter4dvARB     = (PFNGLPROGRAMENVPARAMETER4DVARBPROC)     GET_EXTENSION_POINTER(glProgramEnvParameter4dvARB);
+		glProgramEnvParameter4fARB      = (PFNGLPROGRAMENVPARAMETER4FARBPROC)      GET_EXTENSION_POINTER(glProgramEnvParameter4fARB);
+		glProgramEnvParameter4fvARB     = (PFNGLPROGRAMENVPARAMETER4FVARBPROC)     GET_EXTENSION_POINTER(glProgramEnvParameter4fvARB);
+		glGetProgramLocalParameterdvARB = (PFNGLGETPROGRAMLOCALPARAMETERDVARBPROC) GET_EXTENSION_POINTER(glGetProgramLocalParameterdvARB);
+		glGetProgramLocalParameterfvARB = (PFNGLGETPROGRAMLOCALPARAMETERFVARBPROC) GET_EXTENSION_POINTER(glGetProgramLocalParameterfvARB);
+		glProgramLocalParameter4dARB    = (PFNGLPROGRAMLOCALPARAMETER4DARBPROC)    GET_EXTENSION_POINTER(glProgramLocalParameter4dARB);
+		glProgramLocalParameter4dvARB   = (PFNGLPROGRAMLOCALPARAMETER4DVARBPROC)   GET_EXTENSION_POINTER(glProgramLocalParameter4dvARB);
+		glProgramLocalParameter4fARB    = (PFNGLPROGRAMLOCALPARAMETER4FARBPROC)    GET_EXTENSION_POINTER(glProgramLocalParameter4fARB);
+		glProgramLocalParameter4fvARB   = (PFNGLPROGRAMLOCALPARAMETER4FVARBPROC)   GET_EXTENSION_POINTER(glProgramLocalParameter4fvARB);
+		glGetProgramivARB               = (PFNGLGETPROGRAMIVARBPROC)               GET_EXTENSION_POINTER(glGetProgramivARB);
+		glGetVertexAttribdvARB          = (PFNGLGETVERTEXATTRIBDVARBPROC)          GET_EXTENSION_POINTER(glGetVertexAttribdvARB);
+		glGetVertexAttribfvARB          = (PFNGLGETVERTEXATTRIBFVARBPROC)          GET_EXTENSION_POINTER(glGetVertexAttribfvARB);
+		glGetVertexAttribivARB          = (PFNGLGETVERTEXATTRIBIVARBPROC)          GET_EXTENSION_POINTER(glGetVertexAttribivARB);
+		glGetVertexAttribPointervARB    = (PFNGLGETVERTEXATTRIBPOINTERVARBPROC)    GET_EXTENSION_POINTER(glGetVertexAttribPointervARB);
+		glVertexAttribPointerARB        = (PFNGLVERTEXATTRIBPOINTERARBPROC)        GET_EXTENSION_POINTER(glVertexAttribPointerARB);
+		glVertexAttrib1dARB             = (PFNGLVERTEXATTRIB1DARBPROC)             GET_EXTENSION_POINTER(glVertexAttrib1dARB);
+		glVertexAttrib1dvARB            = (PFNGLVERTEXATTRIB1DVARBPROC)            GET_EXTENSION_POINTER(glVertexAttrib1dvARB);
+		glVertexAttrib1fARB             = (PFNGLVERTEXATTRIB1FARBPROC)             GET_EXTENSION_POINTER(glVertexAttrib1fARB);
+		glVertexAttrib1fvARB            = (PFNGLVERTEXATTRIB1FVARBPROC)            GET_EXTENSION_POINTER(glVertexAttrib1fvARB);
+		glVertexAttrib1sARB             = (PFNGLVERTEXATTRIB1SARBPROC)             GET_EXTENSION_POINTER(glVertexAttrib1sARB);
+		glVertexAttrib1svARB            = (PFNGLVERTEXATTRIB1SVARBPROC)            GET_EXTENSION_POINTER(glVertexAttrib1svARB);
+		glVertexAttrib2dARB             = (PFNGLVERTEXATTRIB2DARBPROC)             GET_EXTENSION_POINTER(glVertexAttrib2dARB);
+		glVertexAttrib2dvARB            = (PFNGLVERTEXATTRIB2DVARBPROC)            GET_EXTENSION_POINTER(glVertexAttrib2dvARB);
+		glVertexAttrib2fARB             = (PFNGLVERTEXATTRIB2FARBPROC)             GET_EXTENSION_POINTER(glVertexAttrib2fARB);
+		glVertexAttrib2fvARB            = (PFNGLVERTEXATTRIB2FVARBPROC)            GET_EXTENSION_POINTER(glVertexAttrib2fvARB);
+		glVertexAttrib2sARB             = (PFNGLVERTEXATTRIB2SARBPROC)             GET_EXTENSION_POINTER(glVertexAttrib2sARB);
+		glVertexAttrib2svARB            = (PFNGLVERTEXATTRIB2SVARBPROC)            GET_EXTENSION_POINTER(glVertexAttrib2svARB);
+		glVertexAttrib3dARB             = (PFNGLVERTEXATTRIB3DARBPROC)             GET_EXTENSION_POINTER(glVertexAttrib3dARB);
+		glVertexAttrib3dvARB            = (PFNGLVERTEXATTRIB3DVARBPROC)            GET_EXTENSION_POINTER(glVertexAttrib3dvARB);
+		glVertexAttrib3fARB             = (PFNGLVERTEXATTRIB3FARBPROC)             GET_EXTENSION_POINTER(glVertexAttrib3fARB);
+		glVertexAttrib3fvARB            = (PFNGLVERTEXATTRIB3FVARBPROC)            GET_EXTENSION_POINTER(glVertexAttrib3fvARB);
+		glVertexAttrib3sARB             = (PFNGLVERTEXATTRIB3SARBPROC)             GET_EXTENSION_POINTER(glVertexAttrib3sARB);
+		glVertexAttrib3svARB            = (PFNGLVERTEXATTRIB3SVARBPROC)            GET_EXTENSION_POINTER(glVertexAttrib3svARB);
+		glVertexAttrib4NbvARB           = (PFNGLVERTEXATTRIB4NBVARBPROC)           GET_EXTENSION_POINTER(glVertexAttrib4NbvARB);
+		glVertexAttrib4NivARB           = (PFNGLVERTEXATTRIB4NIVARBPROC)           GET_EXTENSION_POINTER(glVertexAttrib4NivARB);
+		glVertexAttrib4NsvARB           = (PFNGLVERTEXATTRIB4NSVARBPROC)           GET_EXTENSION_POINTER(glVertexAttrib4NsvARB);
+		glVertexAttrib4NubARB           = (PFNGLVERTEXATTRIB4NUBARBPROC)           GET_EXTENSION_POINTER(glVertexAttrib4NubARB);
+		glVertexAttrib4NubvARB          = (PFNGLVERTEXATTRIB4NUBVARBPROC)          GET_EXTENSION_POINTER(glVertexAttrib4NubvARB);
+		glVertexAttrib4NuivARB          = (PFNGLVERTEXATTRIB4NUIVARBPROC)          GET_EXTENSION_POINTER(glVertexAttrib4NuivARB);
+		glVertexAttrib4NusvARB          = (PFNGLVERTEXATTRIB4NUSVARBPROC)          GET_EXTENSION_POINTER(glVertexAttrib4NusvARB);
+		glVertexAttrib4bvARB            = (PFNGLVERTEXATTRIB4BVARBPROC)            GET_EXTENSION_POINTER(glVertexAttrib4bvARB);
+		glVertexAttrib4dARB             = (PFNGLVERTEXATTRIB4DARBPROC)             GET_EXTENSION_POINTER(glVertexAttrib4dARB);
+		glVertexAttrib4dvARB            = (PFNGLVERTEXATTRIB4DVARBPROC)            GET_EXTENSION_POINTER(glVertexAttrib4dvARB);
+		glVertexAttrib4fARB             = (PFNGLVERTEXATTRIB4FARBPROC)             GET_EXTENSION_POINTER(glVertexAttrib4fARB);
+		glVertexAttrib4fvARB            = (PFNGLVERTEXATTRIB4FVARBPROC)            GET_EXTENSION_POINTER(glVertexAttrib4fvARB);
+		glVertexAttrib4ivARB            = (PFNGLVERTEXATTRIB4IVARBPROC)            GET_EXTENSION_POINTER(glVertexAttrib4ivARB);
+		glVertexAttrib4sARB             = (PFNGLVERTEXATTRIB4SARBPROC)             GET_EXTENSION_POINTER(glVertexAttrib4sARB);
+		glVertexAttrib4svARB            = (PFNGLVERTEXATTRIB4SVARBPROC)            GET_EXTENSION_POINTER(glVertexAttrib4svARB);
+		glVertexAttrib4ubvARB           = (PFNGLVERTEXATTRIB4UBVARBPROC)           GET_EXTENSION_POINTER(glVertexAttrib4ubvARB);
+		glVertexAttrib4uivARB           = (PFNGLVERTEXATTRIB4UIVARBPROC)           GET_EXTENSION_POINTER(glVertexAttrib4uivARB);
+		glVertexAttrib4usvARB           = (PFNGLVERTEXATTRIB4USVARBPROC)           GET_EXTENSION_POINTER(glVertexAttrib4usvARB);
 
 		if (!CheckShaderProgramFunctions())
 		{
@@ -324,45 +329,45 @@ void OpenGLExtensions::InitExtensions()
 	{
 		mIsShaderCProgramsSupported = true;
 
-		glDeleteObjectARB               = (PFNGLDELETEOBJECTARBPROC)         GetExtensionPointer("glDeleteObjectARB");
-		glGetHandleARB                  = (PFNGLGETHANDLEARBPROC)            GetExtensionPointer("glGetHandleARB");
-		glDetachObjectARB               = (PFNGLDETACHOBJECTARBPROC)         GetExtensionPointer("glDetachObjectARB");
-		glCreateShaderObjectARB         = (PFNGLCREATESHADEROBJECTARBPROC)   GetExtensionPointer("glCreateShaderObjectARB");
-		glShaderSourceARB               = (PFNGLSHADERSOURCEARBPROC)         GetExtensionPointer("glShaderSourceARB");
-		glCompileShaderARB              = (PFNGLCOMPILESHADERARBPROC)        GetExtensionPointer("glCompileShaderARB");
-		glCreateProgramObjectARB        = (PFNGLCREATEPROGRAMOBJECTARBPROC)  GetExtensionPointer("glCreateProgramObjectARB");
-		glAttachObjectARB               = (PFNGLATTACHOBJECTARBPROC)         GetExtensionPointer("glAttachObjectARB");
-		glLinkProgramARB                = (PFNGLLINKPROGRAMARBPROC)          GetExtensionPointer("glLinkProgramARB");
-		glUseProgramObjectARB           = (PFNGLUSEPROGRAMOBJECTARBPROC)     GetExtensionPointer("glUseProgramObjectARB");
-		glValidateProgramARB            = (PFNGLVALIDATEPROGRAMARBPROC)      GetExtensionPointer("glValidateProgramARB");
-		glUniform1fARB                  = (PFNGLUNIFORM1FARBPROC)            GetExtensionPointer("glUniform1fARB");
-		glUniform2fARB                  = (PFNGLUNIFORM2FARBPROC)            GetExtensionPointer("glUniform2fARB");
-		glUniform3fARB                  = (PFNGLUNIFORM3FARBPROC)            GetExtensionPointer("glUniform3fARB");
-		glUniform4fARB                  = (PFNGLUNIFORM4FARBPROC)            GetExtensionPointer("glUniform4fARB");
-		glUniform1iARB                  = (PFNGLUNIFORM1IARBPROC)            GetExtensionPointer("glUniform1iARB");
-		glUniform2iARB                  = (PFNGLUNIFORM2IARBPROC)            GetExtensionPointer("glUniform2iARB");
-		glUniform3iARB                  = (PFNGLUNIFORM3IARBPROC)            GetExtensionPointer("glUniform3iARB");
-		glUniform4iARB                  = (PFNGLUNIFORM4IARBPROC)            GetExtensionPointer("glUniform4iARB");
-		glUniform1fvARB                 = (PFNGLUNIFORM1FVARBPROC)           GetExtensionPointer("glUniform1fvARB");
-		glUniform2fvARB                 = (PFNGLUNIFORM2FVARBPROC)           GetExtensionPointer("glUniform2fvARB");
-		glUniform3fvARB                 = (PFNGLUNIFORM3FVARBPROC)           GetExtensionPointer("glUniform3fvARB");
-		glUniform4fvARB                 = (PFNGLUNIFORM4FVARBPROC)           GetExtensionPointer("glUniform4fvARB");
-		glUniform1ivARB                 = (PFNGLUNIFORM1IVARBPROC)           GetExtensionPointer("glUniform1ivARB");
-		glUniform2ivARB                 = (PFNGLUNIFORM2IVARBPROC)           GetExtensionPointer("glUniform2ivARB");
-		glUniform3ivARB                 = (PFNGLUNIFORM3IVARBPROC)           GetExtensionPointer("glUniform3ivARB");
-		glUniform4ivARB                 = (PFNGLUNIFORM4IVARBPROC)           GetExtensionPointer("glUniform4ivARB");
-		glUniformMatrix2fvARB           = (PFNGLUNIFORMMATRIX2FVARBPROC)     GetExtensionPointer("glUniformMatrix2fvARB");
-		glUniformMatrix3fvARB           = (PFNGLUNIFORMMATRIX3FVARBPROC)     GetExtensionPointer("glUniformMatrix3fvARB");
-		glUniformMatrix4fvARB           = (PFNGLUNIFORMMATRIX4FVARBPROC)     GetExtensionPointer("glUniformMatrix4fvARB");
-		glGetObjectParameterfvARB       = (PFNGLGETOBJECTPARAMETERFVARBPROC) GetExtensionPointer("glGetObjectParameterfvARB");
-		glGetObjectParameterivARB       = (PFNGLGETOBJECTPARAMETERIVARBPROC) GetExtensionPointer("glGetObjectParameterivARB");
-		glGetInfoLogARB                 = (PFNGLGETINFOLOGARBPROC)           GetExtensionPointer("glGetInfoLogARB");
-		glGetAttachedObjectsARB         = (PFNGLGETATTACHEDOBJECTSARBPROC)   GetExtensionPointer("glGetAttachedObjectsARB");
-		glGetUniformLocationARB         = (PFNGLGETUNIFORMLOCATIONARBPROC)   GetExtensionPointer("glGetUniformLocationARB");
-		glGetActiveUniformARB           = (PFNGLGETACTIVEUNIFORMARBPROC)     GetExtensionPointer("glGetActiveUniformARB");
-		glGetUniformfvARB               = (PFNGLGETUNIFORMFVARBPROC)         GetExtensionPointer("glGetUniformfvARB");
-		glGetUniformivARB               = (PFNGLGETUNIFORMIVARBPROC)         GetExtensionPointer("glGetUniformivARB");
-		glGetShaderSourceARB            = (PFNGLGETSHADERSOURCEARBPROC)      GetExtensionPointer("glGetShaderSourceARB");
+		glDeleteObjectARB               = (PFNGLDELETEOBJECTARBPROC)         GET_EXTENSION_POINTER(glDeleteObjectARB);
+		glGetHandleARB                  = (PFNGLGETHANDLEARBPROC)            GET_EXTENSION_POINTER(glGetHandleARB);
+		glDetachObjectARB               = (PFNGLDETACHOBJECTARBPROC)         GET_EXTENSION_POINTER(glDetachObjectARB);
+		glCreateShaderObjectARB         = (PFNGLCREATESHADEROBJECTARBPROC)   GET_EXTENSION_POINTER(glCreateShaderObjectARB);
+		glShaderSourceARB               = (PFNGLSHADERSOURCEARBPROC)         GET_EXTENSION_POINTER(glShaderSourceARB);
+		glCompileShaderARB              = (PFNGLCOMPILESHADERARBPROC)        GET_EXTENSION_POINTER(glCompileShaderARB);
+		glCreateProgramObjectARB        = (PFNGLCREATEPROGRAMOBJECTARBPROC)  GET_EXTENSION_POINTER(glCreateProgramObjectARB);
+		glAttachObjectARB               = (PFNGLATTACHOBJECTARBPROC)         GET_EXTENSION_POINTER(glAttachObjectARB);
+		glLinkProgramARB                = (PFNGLLINKPROGRAMARBPROC)          GET_EXTENSION_POINTER(glLinkProgramARB);
+		glUseProgramObjectARB           = (PFNGLUSEPROGRAMOBJECTARBPROC)     GET_EXTENSION_POINTER(glUseProgramObjectARB);
+		glValidateProgramARB            = (PFNGLVALIDATEPROGRAMARBPROC)      GET_EXTENSION_POINTER(glValidateProgramARB);
+		glUniform1fARB                  = (PFNGLUNIFORM1FARBPROC)            GET_EXTENSION_POINTER(glUniform1fARB);
+		glUniform2fARB                  = (PFNGLUNIFORM2FARBPROC)            GET_EXTENSION_POINTER(glUniform2fARB);
+		glUniform3fARB                  = (PFNGLUNIFORM3FARBPROC)            GET_EXTENSION_POINTER(glUniform3fARB);
+		glUniform4fARB                  = (PFNGLUNIFORM4FARBPROC)            GET_EXTENSION_POINTER(glUniform4fARB);
+		glUniform1iARB                  = (PFNGLUNIFORM1IARBPROC)            GET_EXTENSION_POINTER(glUniform1iARB);
+		glUniform2iARB                  = (PFNGLUNIFORM2IARBPROC)            GET_EXTENSION_POINTER(glUniform2iARB);
+		glUniform3iARB                  = (PFNGLUNIFORM3IARBPROC)            GET_EXTENSION_POINTER(glUniform3iARB);
+		glUniform4iARB                  = (PFNGLUNIFORM4IARBPROC)            GET_EXTENSION_POINTER(glUniform4iARB);
+		glUniform1fvARB                 = (PFNGLUNIFORM1FVARBPROC)           GET_EXTENSION_POINTER(glUniform1fvARB);
+		glUniform2fvARB                 = (PFNGLUNIFORM2FVARBPROC)           GET_EXTENSION_POINTER(glUniform2fvARB);
+		glUniform3fvARB                 = (PFNGLUNIFORM3FVARBPROC)           GET_EXTENSION_POINTER(glUniform3fvARB);
+		glUniform4fvARB                 = (PFNGLUNIFORM4FVARBPROC)           GET_EXTENSION_POINTER(glUniform4fvARB);
+		glUniform1ivARB                 = (PFNGLUNIFORM1IVARBPROC)           GET_EXTENSION_POINTER(glUniform1ivARB);
+		glUniform2ivARB                 = (PFNGLUNIFORM2IVARBPROC)           GET_EXTENSION_POINTER(glUniform2ivARB);
+		glUniform3ivARB                 = (PFNGLUNIFORM3IVARBPROC)           GET_EXTENSION_POINTER(glUniform3ivARB);
+		glUniform4ivARB                 = (PFNGLUNIFORM4IVARBPROC)           GET_EXTENSION_POINTER(glUniform4ivARB);
+		glUniformMatrix2fvARB           = (PFNGLUNIFORMMATRIX2FVARBPROC)     GET_EXTENSION_POINTER(glUniformMatrix2fvARB);
+		glUniformMatrix3fvARB           = (PFNGLUNIFORMMATRIX3FVARBPROC)     GET_EXTENSION_POINTER(glUniformMatrix3fvARB);
+		glUniformMatrix4fvARB           = (PFNGLUNIFORMMATRIX4FVARBPROC)     GET_EXTENSION_POINTER(glUniformMatrix4fvARB);
+		glGetObjectParameterfvARB       = (PFNGLGETOBJECTPARAMETERFVARBPROC) GET_EXTENSION_POINTER(glGetObjectParameterfvARB);
+		glGetObjectParameterivARB       = (PFNGLGETOBJECTPARAMETERIVARBPROC) GET_EXTENSION_POINTER(glGetObjectParameterivARB);
+		glGetInfoLogARB                 = (PFNGLGETINFOLOGARBPROC)           GET_EXTENSION_POINTER(glGetInfoLogARB);
+		glGetAttachedObjectsARB         = (PFNGLGETATTACHEDOBJECTSARBPROC)   GET_EXTENSION_POINTER(glGetAttachedObjectsARB);
+		glGetUniformLocationARB         = (PFNGLGETUNIFORMLOCATIONARBPROC)   GET_EXTENSION_POINTER(glGetUniformLocationARB);
+		glGetActiveUniformARB           = (PFNGLGETACTIVEUNIFORMARBPROC)     GET_EXTENSION_POINTER(glGetActiveUniformARB);
+		glGetUniformfvARB               = (PFNGLGETUNIFORMFVARBPROC)         GET_EXTENSION_POINTER(glGetUniformfvARB);
+		glGetUniformivARB               = (PFNGLGETUNIFORMIVARBPROC)         GET_EXTENSION_POINTER(glGetUniformivARB);
+		glGetShaderSourceARB            = (PFNGLGETSHADERSOURCEARBPROC)      GET_EXTENSION_POINTER(glGetShaderSourceARB);
 
 		if (!CheckShaderFunctions())
 		{
