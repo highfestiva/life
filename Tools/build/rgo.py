@@ -372,9 +372,9 @@ def start():
         bgclient()
         startserver()
 def gdbtest():
-	_fgrun("CureTestApp", "gdb")
+	_fgrun("CureTestApp", "gdb ")
 def gdbclient():
-	_fgrun("LifeClient", "gdb")
+	_fgrun("LifeClient", "gdb ")
 
 
 if __name__ == "__main__":

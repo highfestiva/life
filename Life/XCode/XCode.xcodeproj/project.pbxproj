@@ -487,8 +487,8 @@
 		B1E059DC12D79F1C00FA3F9D /* pbxindex.header */ = {isa = PBXFileReference; lastKnownFileType = file; path = pbxindex.header; sourceTree = "<group>"; };
 		B1E059DD12D79F1C00FA3F9D /* protocols.pbxbtree */ = {isa = PBXFileReference; lastKnownFileType = file; path = protocols.pbxbtree; sourceTree = "<group>"; };
 		B1E059DE12D79F1C00FA3F9D /* refs.pbxbtree */ = {isa = PBXFileReference; lastKnownFileType = file; path = refs.pbxbtree; sourceTree = "<group>"; };
-		B1E059E012D79F1C00FA3F9D /* control */ = {isa = PBXFileReference; lastKnownFileType = file; path = control; sourceTree = "<group>"; };
-		B1E059E112D79F1C00FA3F9D /* strings */ = {isa = PBXFileReference; lastKnownFileType = file; path = strings; sourceTree = "<group>"; };
+		B1E059E012D79F1C00FA3F9D /* control */ = {isa = PBXFileReference; lastKnownFileType = text; path = control; sourceTree = "<group>"; };
+		B1E059E112D79F1C00FA3F9D /* strings */ = {isa = PBXFileReference; lastKnownFileType = text; path = strings; sourceTree = "<group>"; };
 		B1E059E212D79F1C00FA3F9D /* subclasses.pbxbtree */ = {isa = PBXFileReference; lastKnownFileType = file; path = subclasses.pbxbtree; sourceTree = "<group>"; };
 		B1E059E312D79F1C00FA3F9D /* PD.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = PD.xcodeproj; sourceTree = "<group>"; };
 		B1E059E612D79F1C00FA3F9D /* makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = makefile; sourceTree = "<group>"; };

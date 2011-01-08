@@ -60,7 +60,7 @@ void StopWatch::OnTick()
 		return;
 	}
 	PixelRect lArea = mScreenPart->GetRenderArea();
-	mLabel.SetPos(lArea.mRight-50, lArea.mTop);
+	mLabel.SetPos(lArea.mRight-65, lArea.mTop+16);
 	const double lTime = lScore->GetTime();
 	const int lMinute = (int)(lTime / 60);
 	const int lSecond = (int)::fmod(lTime, 60);

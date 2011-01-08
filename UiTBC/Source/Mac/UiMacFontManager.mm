@@ -5,6 +5,7 @@
 
 
 #include "../../Include/Mac/UiMacFontManager.h"
+#import <Cocoa/Cocoa.h>
 #include "../../../UiLepra/Include/Mac/UiMacDisplayManager.h"
 
 
@@ -121,13 +122,13 @@ bool MacFontManager::RenderGlyph(tchar pChar, Canvas& pImage, const PixelRect& p
 	CGContextSetFillColorWithColor(textcontext, CGColorCreate(colorspace, transparent)); 
 	CGContextFillRect(textcontext, *(CGRect*)rect);
 	CGContextSetFillColorWithColor(textcontext, CGColorCreate(colorspace, text_color));
-	CGContextSelectFont(textcontext, "Arial", 14.0f, kCGEncodingMacRoman);
-	CGContextShowTextAtPoint(textcontext, 0, 0, &pChar, 1);
+	CGContextSelectFont(textcontext, "Arial", 10.0f, kCGEncodingMacRoman);
+	CGContextShowTextAtPoint(textcontext, 0, pRect.GetHeight()/4, &pChar, 1);
 	CGContextFlush(textcontext);
 
 	pImage.FlipVertical();	// Upside down. TODO: verify... We currently do this on both Win and Mac...
 
-	printf("Rendering glyph '%c' (height=%i):\n", pChar, pImage.GetHeight());
+	/*printf("Rendering glyph '%c' (height=%i):\n", pChar, pImage.GetHeight());
 	for (int y = 0; y < (int)pImage.GetHeight(); ++y)
 	{
 		for (int x = 0; x < (int)pImage.GetWidth(); ++x)
@@ -142,7 +143,7 @@ bool MacFontManager::RenderGlyph(tchar pChar, Canvas& pImage, const PixelRect& p
 			}
 		}
 		printf("\n");
-	}
+	}*/
 
 	return (true);
 
@@ -243,22 +244,19 @@ bool MacFontManager::RenderGlyph(tchar pChar, Canvas& pImage, const PixelRect& p
 
 int MacFontManager::GetCharWidth(const tchar pChar) const
 {
-	/*MacFont* lFont = (MacFont*)mCurrentFont;
-	HGDIOBJ lDefaultObject = ::SelectObject(mDC, lFont->mMacFontHandle);
-	ABC lABC;
-	INT lWidth;
-	int lCharWidth = 0;
-	if (::GetCharABCWidths(mDC, (utchar)pChar, (utchar)pChar, &lABC) != FALSE)
-	{
-		lCharWidth = (int)lABC.abcA + (int)lABC.abcB + (int)lABC.abcC;
-	}
-	else if (::GetCharWidth32(mDC, (utchar)pChar, (utchar)pChar, &lWidth) != FALSE)
-	{
-		lCharWidth = (int)lWidth;
-	}
-	::SelectObject(mDC, lDefaultObject);
-	return (lCharWidth);*/
-	return (7);
+	//MacFont* lFont = (MacFont*)mCurrentFont;
+	// TODO: convert to i18n though utf8-lib.
+	tchar lTempString[2] = {0, 0};
+	lTempString[0] = pChar;
+	NSString* someString = [NSString stringWithUTF8String:lTempString];
+	NSFont* lFont = [NSFont fontWithName:@"Arial" size:10.0f];
+	NSSize lSize = [lFont advancementForGlyph:[lFont glyphWithName:someString]];
+	return lSize.width+1;
+	/*CGFloat lStartX = CGContextGetTextPosition();
+	Set the text drawing mode to kCGTextInvisible using the function CGContextSetTextDrawingMode.
+	Draw the text by calling the function CGContextShowText to draw the text at the current text position.
+	Determine the final text position by calling the function CGContextGetTextPosition.
+	Subtract the starting position from the ending position to determine th*/
 }
 
 

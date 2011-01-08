@@ -125,7 +125,7 @@ void* Canvas::CreateBuffer(unsigned pWidth, unsigned pHeight, BitDepth pBitDepth
 		break;
 	case BITDEPTH_32_BIT:
 		pPixelSize = 4;
-		return new long[pWidth * pHeight];
+		return new uint32[pWidth * pHeight];
 		break;
 	case BITDEPTH_16_BIT_PER_CHANNEL:
 		pPixelSize = 6;
@@ -133,7 +133,7 @@ void* Canvas::CreateBuffer(unsigned pWidth, unsigned pHeight, BitDepth pBitDepth
 		break;
 	case BITDEPTH_32_BIT_PER_CHANNEL:
 		pPixelSize = 12;
-		return new long[pWidth * pHeight * 3];
+		return new uint32[pWidth * pHeight * 3];
 		break;
 	}
 
@@ -456,7 +456,7 @@ void Canvas::FlipHorizontal()
 			{
 				for (unsigned x = 0; x < mWidth; x++)
 				{
-					((unsigned long*)lBuffer)[lYOffset + x] = ((unsigned long*)mBuffer)[lYOffset + (mWidth - (x + 1))];
+					((uint32*)lBuffer)[lYOffset + x] = ((uint32*)mBuffer)[lYOffset + (mWidth - (x + 1))];
 				}
 				break;
 			}
@@ -551,7 +551,7 @@ void Canvas::FlipVertical()
 			{
 				for (unsigned x = 0; x < mWidth; x++)
 				{
-					((unsigned long*)lBuffer)[lDestYOffset + x] = ((unsigned long*)mBuffer)[lSrcYOffset + x];
+					((uint32*)lBuffer)[lDestYOffset + x] = ((uint32*)mBuffer)[lSrcYOffset + x];
 				}
 				break;
 			}
@@ -780,7 +780,7 @@ void Canvas::Rotate90DegClockWise(int pSteps)
 
 					for (unsigned x = 0; x < lDestWidth; x++)
 					{
-						((unsigned long*)lBuffer)[lDestYOffset + x] = ((unsigned long*)mBuffer)[(mHeight - (x + 1)) * mPitch + y];
+						((uint32*)lBuffer)[lDestYOffset + x] = ((uint32*)mBuffer)[(mHeight - (x + 1)) * mPitch + y];
 					}
 				}
 				break;
@@ -793,7 +793,7 @@ void Canvas::Rotate90DegClockWise(int pSteps)
 
 					for (unsigned x = 0; x < lDestWidth; x++)
 					{
-						((unsigned long*)lBuffer)[lDestYOffset + x] = ((unsigned long*)mBuffer)[(mHeight - (y + 1)) * mPitch + (mWidth - (x + 1))];
+						((uint32*)lBuffer)[lDestYOffset + x] = ((uint32*)mBuffer)[(mHeight - (y + 1)) * mPitch + (mWidth - (x + 1))];
 					}
 				}
 				break;
@@ -806,7 +806,7 @@ void Canvas::Rotate90DegClockWise(int pSteps)
 
 					for (unsigned x = 0; x < lDestWidth; x++)
 					{
-						((unsigned long*)lBuffer)[lDestYOffset + x] = ((unsigned long*)mBuffer)[x * mPitch + (mWidth - (y + 1))];
+						((uint32*)lBuffer)[lDestYOffset + x] = ((uint32*)mBuffer)[x * mPitch + (mWidth - (y + 1))];
 					}
 				}
 				break;
@@ -1169,7 +1169,7 @@ void Canvas::Resize24BitFast(unsigned pNewWidth, unsigned pNewHeight)
 
 void Canvas::Resize32BitFast(unsigned pNewWidth, unsigned pNewHeight)
 {
-	unsigned long* lBuffer = new unsigned long[pNewWidth * pNewHeight];
+	uint32* lBuffer = new uint32[pNewWidth * pNewHeight];
 
 	int lSrcX = 0;
 	int lSrcY = 0;
@@ -1185,7 +1185,7 @@ void Canvas::Resize32BitFast(unsigned pNewWidth, unsigned pNewHeight)
 
 		for (unsigned x = 0; x < pNewWidth; x++)
 		{
-			lBuffer[lDestYOffset + x] = ((unsigned long*)mBuffer)[lSrcYOffset + (lSrcX >> 16)];
+			lBuffer[lDestYOffset + x] = ((uint32*)mBuffer)[lSrcYOffset + (lSrcX >> 16)];
 			lSrcX += lSrcXStep;
 		}
 
@@ -1595,7 +1595,7 @@ void Canvas::Resize24BitSmooth(unsigned pNewWidth, unsigned pNewHeight)
 void Canvas::Resize32BitSmooth(unsigned pNewWidth, unsigned pNewHeight)
 {
 	// Create the new buffer...
-	unsigned long* lBuffer = new unsigned long[pNewWidth * pNewHeight];
+	uint32* lBuffer = new uint32[pNewWidth * pNewHeight];
 
 	float32 lScaleX = (float32)mWidth / (float32)pNewWidth;
 	float32 lScaleY = (float32)mHeight / (float32)pNewHeight;
@@ -1646,7 +1646,7 @@ void Canvas::Resize32BitSmooth(unsigned pNewWidth, unsigned pNewHeight)
 
 						if (lU >= 0 && lU < (int)mWidth)
 						{
-							unsigned long lColor = ((unsigned long*)mBuffer)[lVOffset + lU];
+							uint32 lColor = ((uint32*)mBuffer)[lVOffset + lU];
 
 							lA += GammaLookup::GammaToLinearFloat((uint8)((lColor >> 24) & 0xFF)) * (*lSGW);
 							lR += GammaLookup::GammaToLinearFloat((uint8)((lColor >> 16) & 0xFF)) * (*lSGW);
@@ -1663,10 +1663,10 @@ void Canvas::Resize32BitSmooth(unsigned pNewWidth, unsigned pNewHeight)
 
 			// Convert back to normal colors
 			float32 lOneOverWeightSum = 1.0f / lWeightSum;
-			unsigned long lA32 = GammaLookup::LinearToGamma((uint16)floor(lA * lOneOverWeightSum));
-			unsigned long lR32 = GammaLookup::LinearToGamma((uint16)floor(lR * lOneOverWeightSum));
-			unsigned long lG32 = GammaLookup::LinearToGamma((uint16)floor(lG * lOneOverWeightSum));
-			unsigned long lB32 = GammaLookup::LinearToGamma((uint16)floor(lB * lOneOverWeightSum));
+			uint32 lA32 = GammaLookup::LinearToGamma((uint16)floor(lA * lOneOverWeightSum));
+			uint32 lR32 = GammaLookup::LinearToGamma((uint16)floor(lR * lOneOverWeightSum));
+			uint32 lG32 = GammaLookup::LinearToGamma((uint16)floor(lG * lOneOverWeightSum));
+			uint32 lB32 = GammaLookup::LinearToGamma((uint16)floor(lB * lOneOverWeightSum));
 
 			lBuffer[lDestOffset++] = (lA32 << 24) | (lR32 << 16) | (lG32 << 8) | lB32;
 		}

@@ -509,7 +509,8 @@ class PhysWriter(ChunkyWriter):
                 mt = node.get_world_transform()
                 wp = mp * vec4(0,0,0,1)
                 wt = mt * vec4(0,0,0,1)
-                j = wt-wp
+                #j = wt-wp
+                j = wp-wt
                 j = ir * j
 
                 parameters[6:9] = j[:3]

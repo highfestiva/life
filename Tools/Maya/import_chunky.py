@@ -1,4 +1,6 @@
-﻿# License: LGPL 2.1 (utilizes Python Computer Graphics Kit (cgkit), see other .py files for more info).
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# License: LGPL 2.1 (utilizes Python Computer Graphics Kit (cgkit), see other .py files for more info).
 # Created by Jonas Byström, 2009-07-17 for Righteous Engine tool chain.
 
 
@@ -768,6 +770,8 @@ class GroupReader(DefaultMAReader):
                         if node.getName().startswith("m_") and node.nodetype == "transform":
                                 node.mesh_children = list(filter(lambda x: x.nodetype == "transform", self._listchildnodes(node, "m_", group, False)))
                                 node.phys_children = self._listchildnodes(node, "phys_", group, False)
+                                if options.options.verbose:
+                                        print("Phys children are", node.phys_children)
                 return isGroupValid
 
                                 
@@ -1493,10 +1497,12 @@ class GroupReader(DefaultMAReader):
                                 if basenode in node._parents:
                                         if not f or f(node):
                                                 childlist.append(node)
+                        childlist = sorted(childlist, key=lambda n: n.getFullName())
                         if recursive:
                                 grandchildlist = []
                                 for child in childlist:
                                         grandchildlist.extend(_list_filtered_child_nodes(child))
+                                grandchildlist = sorted(grandchildlist, key=lambda n: n.getFullName())
                                 childlist.extend(grandchildlist)
                         return childlist
                 return _list_filtered_child_nodes(basenode)
