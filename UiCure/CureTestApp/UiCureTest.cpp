@@ -114,7 +114,7 @@ ResourceTest::ResourceTest()
 {
 	mUiManager = new UiCure::GameUiManager(UiCure::GetSettings());
 	mUiManager->Open();
-	mResourceManager = new Cure::ResourceManager(1);
+	mResourceManager = new Cure::ResourceManager(1, str());
 	mResourceManager->InitDefault();
 
 	mPhysicsResource = new Cure::UserPhysicsResource();

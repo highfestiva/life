@@ -12,7 +12,7 @@
 
 
 
-Lepra::Application* gApplication = 0;
+static Lepra::Application* gApplication = 0;
 
 
 
@@ -40,17 +40,11 @@ Lepra::Application* gApplication = 0;
 @implementation UiLepraLoadedDispatcher
 - (void) applicationDidFinishLaunching: (NSNotification *) note
 {
-	int status;
-
-	/* Set the working directory to the .app's parent directory */
-	//[self setupWorkingDirectory:gFinderLaunch];
-
 	// Hand off to main application code.
 	gApplication->Init();
-	status = gApplication->Run();
-
-	// We're done, thank you for playing.
-	exit(status);
+	const int lExitStatus = gApplication->Run();
+	delete gApplication;
+	exit(lExitStatus);
 }
 @end
 

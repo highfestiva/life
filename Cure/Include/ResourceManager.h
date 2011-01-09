@@ -368,7 +368,7 @@ public:
 	typedef std::pair<str, str> StringPair;
 	typedef std::list<StringPair> NameTypeList;
 
-	ResourceManager(unsigned pLoaderThreadCount);
+	ResourceManager(unsigned pLoaderThreadCount, const str& pPathPrefix);
 	virtual ~ResourceManager();
 	bool InitDefault();
 	void StopClear();
@@ -429,6 +429,7 @@ private:
 	TerrainFunctionManager* mTerrainFunctionManager;
 
 	unsigned mLoaderThreadCount;
+	const str mPathPrefix;
 	MemberThread<ResourceManager> mLoaderThread;	// TODO: increase max loader thread count (put in list).
 	Semaphore mLoadSemaphore;
 	mutable Lock mThreadLock;

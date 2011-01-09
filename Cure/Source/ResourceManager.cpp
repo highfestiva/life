@@ -490,14 +490,15 @@ LOG_CLASS_DEFINE(PHYSICS, PhysicalTerrainResource);
 
 
 
-ResourceManager::ResourceManager(unsigned pLoaderThreadCount):
+ResourceManager::ResourceManager(unsigned pLoaderThreadCount, const str& pPathPrefix):
 	mTerrainFunctionManager(0),
 	mLoaderThreadCount(pLoaderThreadCount),
+	mPathPrefix(pPathPrefix),
 	mLoaderThread(_T("ResourceLoader")),
 	mZipLock(new Lock),
 	mZipFile(new ZipArchive)
 {
-	if (mZipFile->OpenArchive(_T("Data.pk3"), ZipArchive::READ_ONLY) != IO_OK)
+	if (mZipFile->OpenArchive(mPathPrefix + _T("Data.pk3"), ZipArchive::READ_ONLY) != IO_OK)
 	{
 		delete mZipFile;
 		mZipFile = 0;
@@ -603,7 +604,7 @@ void ResourceManager::StopClear()
 
 File* ResourceManager::QueryFile(const str& pFilename)
 {
-	const str lFilename = strutil::ReplaceAll(pFilename, '\\', '/');
+	str lFilename = strutil::ReplaceAll(pFilename, '\\', '/');
 	if (mZipFile)
 	{
 		ScopeLock lLock(mZipLock);
@@ -625,6 +626,7 @@ File* ResourceManager::QueryFile(const str& pFilename)
 		}
 	}
 
+	lFilename = mPathPrefix + lFilename;
 	DiskFile* lFile = new DiskFile;
 	bool lOk = false;
 	for (int x = 0; x < 3 && !lOk; ++x)	// Retry file open, file might be held by anti-virus/Windoze/similar shit.
@@ -653,7 +655,8 @@ bool ResourceManager::QueryFileExists(const str& pFilename)
 			return true;
 		}
 	}
-	return DiskFile::Exists(pFilename);
+	const str lFilename = mPathPrefix + strutil::ReplaceAll(pFilename, '\\', '/');
+	return DiskFile::Exists(lFilename);
 }
 
 strutil::strvec ResourceManager::ListFiles(const str& pWildcard)
@@ -673,8 +676,9 @@ strutil::strvec ResourceManager::ListFiles(const str& pWildcard)
 		return lFilenameArray;
 	}
 
+	const str lWildcard = mPathPrefix + strutil::ReplaceAll(pWildcard, '\\', '/');
 	DiskFile::FindData lInfo;
-	for (bool lOk = DiskFile::FindFirst(pWildcard, lInfo); lOk; lOk = DiskFile::FindNext(lInfo))
+	for (bool lOk = DiskFile::FindFirst(lWildcard, lInfo); lOk; lOk = DiskFile::FindNext(lInfo))
 	{
 		lFilenameArray.push_back(lInfo.GetName());
 	}

@@ -97,7 +97,12 @@ void Application::Init()
 	str lStartMessage = _T("Starting ") + lApplicationName + _T(" ") + GetName() + _T(", version ") + GetVersion() + _T(", build type: ") _T(LEPRA_STRING_TYPE_TEXT) _T(" ") _T(LEPRA_BUILD_TYPE_TEXT) _T(".\n");
 	mLog.RawPrint(Log::LEVEL_HEADLINE, lStartMessage);
 
-	mResourceManager = new Cure::ResourceManager(1);
+	str lPathPrefix;
+#if defined(LEPRA_MAC)
+	lPathPrefix = Path::GetDirectory(mArgumentVector[0]);
+#endif // Mac
+	mLog.Debugf(_T("Using path prefix: %s"), lPathPrefix.c_str());
+	mResourceManager = new Cure::ResourceManager(1, lPathPrefix);
 	mGameTicker = CreateGameTicker();
 }
 

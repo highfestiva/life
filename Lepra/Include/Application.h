@@ -28,16 +28,20 @@ int main(int argc, const char* argv[])	\
 	{	\
 		lArguments.push_back(Lepra::strutil::Encode(Lepra::astr(argv[x])));	\
 	}	\
-	ClassName lApplication(lArguments);	\
-	return Method(lApplication);	\
+	ClassName* lApplication = new ClassName(lArguments);	\
+	const int lStatus = Method(*lApplication);	\
+	delete lApplication;	\
+	return lStatus;	\
 }
 #else // !LEPRA_CONSOLE (Let's assume it's M$Win, shall we?)
 #define LEPRA_RUN_APPLICATION(ClassName, Method)	\
 int WINAPI wWinMain(HINSTANCE, HINSTANCE, PTSTR, int)	\
 {	\
 	Lepra::strutil::strvec lArguments(Lepra::strutil::BlockSplit(::GetCommandLine(), _T(" \t\v\r\n"), false, false));	\
-	ClassName lApplication(lArguments);	\
-	return Method(lApplication);	\
+	ClassName* lApplication = new ClassName(lArguments);	\
+	const int lStatus = Method(*lApplication);	\
+	delete lApplication;	\
+	return lStatus;	\
 }
 #endif // LEPRA_CONSOLE/!LEPRA_CONSOLE
 

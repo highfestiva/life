@@ -74,7 +74,7 @@ bool TerrainTest::Test()
 	str lContext;
 	bool lTestOk = true;
 
-	Cure::ResourceManager* lResourceManager = new Cure::ResourceManager(1);
+	Cure::ResourceManager* lResourceManager = new Cure::ResourceManager(1, str());
 	lResourceManager->InitDefault();
 	Cure::TerrainManager lTerrainManager(lResourceManager);	// Creates the TerrainFunctionManager and throws it at the resource manager.
 

@@ -1064,7 +1064,7 @@ bool TestSystemManager(const LogDecorator& pAccount)
 		lTestOk = (lOs == _T("Darwin") || lOs == _T("Linux"));
 #else // <Unknown target>
 #error "Not implemented for this platform!"
-#endif // LEPRA_WINDOWS/LEPRA_LINUX/LEPRA_MACOSX/<Unknown target>
+#endif // LEPRA_WINDOWS/LEPRA_POSIX/<Unknown target>
 		assert(lTestOk);
 	}
 	if (lTestOk)

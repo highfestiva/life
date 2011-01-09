@@ -5,6 +5,7 @@
 
 
 #include "../../Cure/Include/RuntimeVariable.h"
+#include "../../Lepra/Include/SystemManager.h"
 #include "../../UiCure/Include/UiCure.h"
 #include "../../UiCure/Include/UiGameUiManager.h"
 #include "../../UiLepra/Include/UiCore.h"
@@ -37,6 +38,8 @@ private:
 	Cure::GameTicker* CreateGameTicker() const;
 
 	UiCure::GameUiManager* mUiManager;
+
+	LOG_CLASS_DECLARE();
 };
 
 
@@ -110,6 +113,10 @@ Cure::GameTicker* ClientApplication::CreateGameTicker() const
 	GameClientMasterTicker* lMaster = new GameClientMasterTicker(mUiManager, mResourceManager);
 	return (lMaster);
 }
+
+
+
+LOG_CLASS_DEFINE(GAME, ClientApplication);
 
 
 

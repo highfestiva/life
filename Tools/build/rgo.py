@@ -265,8 +265,38 @@ def _copybin(targetdir, buildtype):
         _incremental_copy(fl, os.path.join(targetdir, "Data"), buildtype)
 
 
+def _macappify(exe):
+        os.chdir("bin")
+        import glob
+        fl = glob.glob("*")
+        fs = []
+        for f in fl:
+                if os.path.isfile(f):
+                        fs += [f]
+        for i in fs:
+                for o in fs:
+                        os.system("install_name_tool -change %s @executable_path/%s %s" % (o, o, i))
+        import shutil
+        shutil.copytree("../Tools/build/macosx", exe+".app")
+        for f in fl:
+                os.rename(f, os.path.join(exe+".app/Contents/MacOS", f))
+        plist = ".app/Contents/Info.plist"
+        r = open(exe+plist, "rt")
+        w = open(exe+plist+".tmp", "wt")
+        for line in r:
+                w.write(line.replace("@EXE_NAME@", exe).replace("@BUNDLE_NAME@", exe))
+        r.close()
+        w.close()
+        os.remove(exe+plist)
+        os.rename(exe+plist+".tmp", exe+plist)
+        os.chdir("..")
+
+
 #-------------------- High-level build stuff below. --------------------
 
+
+def macappify():
+        _macappify("LifeClient")
 
 def cleandata():
         targetdir=bindir
@@ -372,9 +402,9 @@ def start():
         bgclient()
         startserver()
 def gdbtest():
-	_fgrun("CureTestApp", "gdb ")
+        _fgrun("CureTestApp", "gdb ")
 def gdbclient():
-	_fgrun("LifeClient", "gdb ")
+        _fgrun("LifeClient", "gdb ")
 
 
 if __name__ == "__main__":
