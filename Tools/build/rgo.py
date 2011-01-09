@@ -265,7 +265,7 @@ def _copybin(targetdir, buildtype):
         _incremental_copy(fl, os.path.join(targetdir, "Data"), buildtype)
 
 
-def _macappify(exe):
+def _macappify(exe, name):
         os.chdir("bin")
         import glob
         fl = glob.glob("*")
@@ -278,13 +278,14 @@ def _macappify(exe):
                         os.system("install_name_tool -change %s @executable_path/%s %s" % (o, o, i))
         import shutil
         shutil.copytree("../Tools/build/macosx", exe+".app")
-        for f in fl:
+        for f in fs:
                 os.rename(f, os.path.join(exe+".app/Contents/MacOS", f))
+        os.rename("Data", exe+".app/Contents/Resources/Data")
         plist = ".app/Contents/Info.plist"
         r = open(exe+plist, "rt")
         w = open(exe+plist+".tmp", "wt")
         for line in r:
-                w.write(line.replace("@EXE_NAME@", exe).replace("@BUNDLE_NAME@", exe))
+                w.write(line.replace("@EXE_NAME@", exe).replace("@BUNDLE_NAME@", name))
         r.close()
         w.close()
         os.remove(exe+plist)
@@ -292,11 +293,28 @@ def _macappify(exe):
         os.chdir("..")
 
 
+def _demacappify(wildcard):
+        os.chdir("bin")
+        import glob
+        import shutil
+        apps = glob.glob(wildcard)
+        for app in apps:
+                fl  = glob.glob(os.path.join(app, "Contents/MacOS/*"))
+                fl += glob.glob(os.path.join(app, "Contents/Resources/Data"))
+                for f in fl:
+                        os.rename(f, os.path.split(f)[1])
+                shutil.rmtree(app)
+        os.chdir("..")
+
+
 #-------------------- High-level build stuff below. --------------------
 
 
-def macappify():
-        _macappify("LifeClient")
+def macappify_client():
+        _macappify("LifeClient", "Da Client")
+
+def demacappify():
+        _demacappify("*.app")
 
 def cleandata():
         targetdir=bindir
@@ -410,8 +428,10 @@ def gdbclient():
 if __name__ == "__main__":
         usage = "usage: %prog [options] <filespec>\n" + \
                 "Runs some type of build command. Try build, rebuild, clean, builddata, or something like that."
-        parser = optparse.OptionParser(usage=usage, version="%prog 0.1")
-        parser.add_option("-m", "--buildmode", dest="buildmode", default="debug", help="Pick one of the build modes: "+", ".join(buildtypes))
+        parser = optparse.OptionParser(usage=usage, version="%prog 0.2")
+        parser.add_option("-m", "--buildmode", dest="buildmode", default="debug", help="Pick one of the build modes: %s. Default is debug." % ", ".join(buildtypes))
+        ismac = (getosname() == "Mac")
+        parser.add_option("-a", "--demacappify", dest="demacappify", default=ismac, help="Quietly try to de-Mac-.App'ify the target before building; default is %s." % str(ismac))
         options, args = parser.parse_args()
 
         if len(args) < 1:
@@ -423,6 +443,9 @@ if __name__ == "__main__":
         default_build_mode = options.buildmode
         if buildtypes.index(options.buildmode) > 0:
                 ziptype = options.buildmode
+
+        if options.demacappify:
+                demacappify()
 
         for arg in args:
                 exec(arg+"()")

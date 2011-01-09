@@ -6,6 +6,7 @@
 
 #include "../Include/ResourceManager.h"
 #include <assert.h>
+#include "../../Lepra/Include/Canvas.h"
 #include "../../Lepra/Include/HiResTimer.h"
 #include "../../Lepra/Include/MemFile.h"
 #include "../../Lepra/Include/Path.h"
@@ -130,6 +131,10 @@ void UserResource::SetResource(Resource* pResource)
 void UserResource::PostProcess()
 {
 }
+
+
+
+// ----------------------------------------------------------------------------
 
 
 
@@ -340,6 +345,10 @@ LOG_CLASS_DEFINE(GENERAL_RESOURCES, Resource);
 
 
 
+// ----------------------------------------------------------------------------
+
+
+
 PhysicsResource::PhysicsResource(Cure::ResourceManager* pManager, const str& pName):
 	Parent(pManager, pName)
 {
@@ -386,6 +395,10 @@ ClassResource::ClassResource(Cure::ResourceManager* pManager, const str& pName):
 ClassResource::~ClassResource()
 {
 }
+
+
+
+// ----------------------------------------------------------------------------
 
 
 
@@ -440,6 +453,10 @@ LOG_CLASS_DEFINE(GAME_CONTEXT, ContextObjectResource);*/
 
 
 
+// ----------------------------------------------------------------------------
+
+
+
 PhysicalTerrainResource::PhysicalTerrainResource(ResourceManager* pManager, const str& pName):
 	Parent(pManager, pName)
 {
@@ -487,6 +504,51 @@ bool PhysicalTerrainResource::Load()
 }
 
 LOG_CLASS_DEFINE(PHYSICS, PhysicalTerrainResource);
+
+
+
+// ----------------------------------------------------------------------------
+
+
+
+RamImageResource::RamImageResource(Cure::ResourceManager* pManager, const str& pName):
+	Parent(pManager, pName)
+{
+}
+
+RamImageResource::~RamImageResource()
+{
+}
+
+const str RamImageResource::GetType() const
+{
+	return (_T("RamImg"));
+}
+
+RamImageResource::UserData RamImageResource::GetUserData(const Cure::UserResource*) const
+{
+	return (GetRamData());
+}
+
+bool RamImageResource::Load()
+{
+	assert(!IsUnique());
+	assert(GetRamData() == 0);
+	SetRamData(new Canvas());
+	File* lFile = GetManager()->QueryFile(GetName());
+	bool lOk = (lFile != 0);
+	if (lOk)
+	{
+		ImageLoader lLoader;
+		lOk = lLoader.Load(ImageLoader::GetFileTypeFromName(GetName()), *lFile, *GetRamData());
+	}
+	delete lFile;
+	return lOk;
+}
+
+
+
+// ----------------------------------------------------------------------------
 
 
 

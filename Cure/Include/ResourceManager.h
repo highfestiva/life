@@ -19,6 +19,7 @@
 
 namespace Lepra
 {
+class Canvas;
 class ZipArchive;
 }
 namespace TBC
@@ -88,6 +89,8 @@ template<class UserResourceType, class ResourceType>
 class UserTypeResourceBase: public UserResource
 {
 public:
+	typedef UserResourceType TypeUserResourceType;
+	typedef ResourceType TypeResourceType;
 	typedef fastdelegate::FastDelegate1<UserResourceType*, void> TypeLoadCallback;
 
 	UserTypeResourceBase();
@@ -133,6 +136,21 @@ protected:
 
 private:
 	mutable ExtraType mExtraData;
+};
+
+
+
+template<class _UserResourceType>
+class UserResourceOwner
+{
+public:
+	UserResourceOwner(_UserResourceType* pUserResource, Cure::ResourceManager* pManager, const str& pName);
+	virtual ~UserResourceOwner();
+
+protected:
+	void OnLoadCallback(_UserResourceType* pUserResource);
+
+	_UserResourceType* mUserResource;
 };
 
 
@@ -354,11 +372,27 @@ private:
 
 
 
+class RamImageResource: public RamResource<Canvas*>
+{
+	typedef RamResource<Canvas*> Parent;
+public:
+	typedef Canvas* UserData;
+
+	RamImageResource(Cure::ResourceManager* pManager, const str& pName);
+	virtual ~RamImageResource();
+	const str GetType() const;
+	UserData GetUserData(const UserResource*) const;
+	bool Load();
+};
+
+
+
 typedef UserTypeResource<PhysicsResource>		UserPhysicsResource;
 typedef UserTypeResource<ClassResource>			UserClassResource;
 //typedef UserTypeResource<TBC::...>			UserAnimationResource;
 //typedef UserTypeResource<ContextObjectResource>	UserContextObjectResource;
 typedef UserTypeResource<PhysicalTerrainResource>	UserPhysicalTerrainResource;
+typedef UserTypeResource<RamImageResource>		UserRamImageResource;
 
 
 

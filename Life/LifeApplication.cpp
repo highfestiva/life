@@ -100,6 +100,8 @@ void Application::Init()
 	str lPathPrefix;
 #if defined(LEPRA_MAC)
 	lPathPrefix = Path::GetDirectory(mArgumentVector[0]);
+	lPathPrefix = Path::GetParentDirectory(lPathPrefix);
+	lPathPrefix = Path::JoinPath(lPathPrefix, _T("Resources/"));
 #endif // Mac
 	mLog.Debugf(_T("Using path prefix: %s"), lPathPrefix.c_str());
 	mResourceManager = new Cure::ResourceManager(1, lPathPrefix);

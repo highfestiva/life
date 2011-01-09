@@ -123,6 +123,32 @@ void UserExtraTypeResource<ResourceType, SubtypeExtraType>::SetExtraData(const S
 
 
 
+template<class _UserResourceType>
+UserResourceOwner<_UserResourceType>::UserResourceOwner(_UserResourceType* pUserResource, Cure::ResourceManager* pManager, const str& pName):
+	mUserResource(pUserResource)
+{
+	mUserResource->Load(pManager, pName, typename _UserResourceType::TypeLoadCallback(this, &UserResourceOwner::OnLoadCallback));
+}
+
+template<class _UserResourceType>
+UserResourceOwner<_UserResourceType>::~UserResourceOwner()
+{
+	delete mUserResource;
+	mUserResource = 0;
+}
+
+template<class _UserResourceType>
+void UserResourceOwner<_UserResourceType>::OnLoadCallback(_UserResourceType* pUserResource)
+{
+	(void)pUserResource;
+}
+
+
+
+// ----------------------------------------------------------------------------
+
+
+
 template<class RamData>
 RamData RamResource<RamData>::GetRamData() const
 {

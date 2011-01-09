@@ -55,8 +55,8 @@ GameClientMasterTicker::GameClientMasterTicker(UiCure::GameUiManager* pUiManager
 	mResourceManager(pResourceManager),
 	mIsPlayerCountViewActive(false),
 	mServer(0),
-	mFreeNetworkAgent(new Cure::NetworkFreeAgent),
 	mMasterConnection(new MasterServerConnection),
+	mFreeNetworkAgent(new Cure::NetworkFreeAgent),
 	mRestartUi(false),
 	mInitialized(false),
 	mActiveWidth(0),
@@ -686,17 +686,26 @@ bool GameClientMasterTicker::Initialize()
 		CURE_RTVAR_GET(lShowLogo, =, UiCure::GetSettings(), RTVAR_GAME_ENABLESTARTLOGO, true);
 		if (lShowLogo)
 		{
-			UiLepra::PngLoader lLogoLoader;
-			UiLepra::Canvas lCanvas;
-			if (lLogoLoader.Load(_T("Data/megaphone.png"), lCanvas) == UiLepra::PngLoader::STATUS_SUCCESS)
+			Cure::UserRamImageResource* lLogo = new Cure::UserRamImageResource;
+			Cure::UserResourceOwner<Cure::UserRamImageResource> lLogoHolder(lLogo, mResourceManager, _T("Data/megaphone.png"));
+			UiCure::UserSound2dResource* lLogoSound = new UiCure::UserSound2dResource(mUiManager, UiLepra::SoundManager::LOOP_NONE);
+			Cure::UserResourceOwner<UiCure::UserSound2dResource> lLogoSoundHolder(lLogoSound, mResourceManager, _T("Data/logo_trumpet.wav"));
+			for (int x = 0; x < 1000; ++x)
 			{
-				const UiLepra::SoundManager::SoundID lSoundId = mUiManager->GetSoundManager()->LoadSound2D(_T("Data/logo_trumpet.wav"), UiLepra::SoundManager::LOOP_NONE, 0);
-				UiLepra::SoundManager::SoundInstanceID lSoundInstanceId = UiLepra::INVALID_SOUNDINSTANCEID;
-				if (lSoundId != UiLepra::INVALID_SOUNDID)
+				mResourceManager->Tick();
+				if (lLogo->GetLoadState() != Cure::RESOURCE_LOAD_IN_PROGRESS &&
+					lLogoSound->GetLoadState() != Cure::RESOURCE_LOAD_IN_PROGRESS)
 				{
-					lSoundInstanceId = mUiManager->GetSoundManager()->CreateSoundInstance(lSoundId);
-					mUiManager->GetSoundManager()->Play(lSoundInstanceId, 1, 1);
+					break;
 				}
+				Thread::Sleep(0.001);
+			}
+			if (lLogo->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE &&
+				lLogoSound->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
+			{
+				mUiManager->GetSoundManager()->Play(lLogoSound->GetData(), 1, 1);
+
+				UiLepra::Canvas& lCanvas = *lLogo->GetRamData();
 				const UiTbc::Painter::ImageID lImageId = mUiManager->GetDesktopWindow()->GetImageManager()->AddImage(lCanvas, UiTbc::GUIImageManager::STRETCHED, UiTbc::GUIImageManager::NO_BLEND, 255);
 				UiTbc::RectComponent lRect(lImageId, _T("logo"));
 				mUiManager->AssertDesktopLayout(new UiTbc::FloatingLayout, 0);
@@ -757,17 +766,9 @@ bool GameClientMasterTicker::Initialize()
 				}
 				mUiManager->GetDesktopWindow()->RemoveChild(&lRect, 0);
 				mUiManager->GetDesktopWindow()->GetImageManager()->RemoveImage(lImageId);
-
-				if (lSoundInstanceId != UiLepra::INVALID_SOUNDINSTANCEID)
-				{
-					mUiManager->GetSoundManager()->DeleteSoundInstance(lSoundInstanceId);
-				}
-				if (lSoundId != UiLepra::INVALID_SOUNDID)
-				{
-					mUiManager->GetSoundManager()->Release(lSoundId);
-				}
 			}
 		}
+		mResourceManager->ForceFreeCache();
 
 		CreatePlayerCountWindow();
 	}

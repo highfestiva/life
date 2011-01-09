@@ -720,7 +720,7 @@ DisplayMode MacDisplayManager::ConvertNativeDisplayMode(CFDictionaryRef pMode)
 	CFNumberGetValue(lResHeight, kCFNumberSInt32Type, &lHeight);
 	int lBpp;
 	CFNumberGetValue(lResBitsPerPixel, kCFNumberSInt32Type, &lBpp);
-	int lRefreshRate;
+	float lRefreshRate;
 	CFNumberGetValue(lResRefreshRate, kCFNumberFloat32Type, &lRefreshRate);
 
 	DisplayMode lDisplayMode;

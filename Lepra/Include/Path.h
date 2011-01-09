@@ -34,6 +34,7 @@ public:
 	static strutil::strvec SplitNodes(const str& pDirectory, bool pExcludeLeadingDirectory = true, bool pExcludeTrailingDirectory = true);
 	// Joins a directory, filename and extension to full/filename.ext (if ext != "").
 	static str JoinPath(const str& pDirectory, const str& pFileBase, const str& pExtension = str());
+	static str GetParentDirectory(const str& pDirectory);
 	static bool NormalizePath(const str& pInputPath, str& pOutputPath);
 	static bool IsPathSeparator(const tchar pCharacter);
 	static Wildcard CreateWildcard(const str& pWildcard);
