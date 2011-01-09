@@ -20,7 +20,7 @@
 
 // TRICKY: implemented this code in macros, since it is target specific.
 #ifdef LEPRA_CONSOLE
-#define LEPRA_RUN_APPLICATION(ClassName)	\
+#define LEPRA_RUN_APPLICATION(ClassName, Method)	\
 int main(int argc, const char* argv[])	\
 {	\
 	Lepra::strutil::strvec lArguments;	\
@@ -29,15 +29,15 @@ int main(int argc, const char* argv[])	\
 		lArguments.push_back(Lepra::strutil::Encode(Lepra::astr(argv[x])));	\
 	}	\
 	ClassName lApplication(lArguments);	\
-	return (lApplication.Run());	\
+	return Method(lApplication);	\
 }
 #else // !LEPRA_CONSOLE (Let's assume it's M$Win, shall we?)
-#define LEPRA_RUN_APPLICATION(ClassName)	\
+#define LEPRA_RUN_APPLICATION(ClassName, Method)	\
 int WINAPI wWinMain(HINSTANCE, HINSTANCE, PTSTR, int)	\
 {	\
 	Lepra::strutil::strvec lArguments(Lepra::strutil::BlockSplit(::GetCommandLine(), _T(" \t\v\r\n"), false, false));	\
 	ClassName lApplication(lArguments);	\
-	return (lApplication.Run());	\
+	return Method(lApplication);	\
 }
 #endif // LEPRA_CONSOLE/!LEPRA_CONSOLE
 
@@ -53,12 +53,17 @@ class Application
 public:
 	Application(const strutil::strvec& pArgumentVector);
 	virtual ~Application();
+	virtual void Init() = 0;
 
 	virtual int Run() = 0;
 
 protected:
 	strutil::strvec mArgumentVector;
 };
+
+
+
+int Main(Application& pApplication);
 
 
 

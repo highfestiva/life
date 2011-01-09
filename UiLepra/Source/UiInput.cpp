@@ -465,6 +465,50 @@ void InputManager::RemoveMouseInputObserver(MouseInputObserver* pListener)
 	mMouseObserverList.erase(pListener);
 }
 
+bool InputManager::NotifyOnChar(tchar pChar)
+{
+	bool lConsumed = false;
+	TextObserverList::iterator x = mTextObserverList.begin();
+	for (; !lConsumed && x != mTextObserverList.end(); ++x)
+	{
+		lConsumed = (*x)->OnChar(pChar);
+	}
+	return (lConsumed);
+}
+
+bool InputManager::NotifyOnKeyDown(KeyCode pKeyCode)
+{
+	bool lConsumed = false;
+	KeyCodeObserverList::iterator x = mKeyCodeObserverList.begin();
+	for (; !lConsumed && x != mKeyCodeObserverList.end(); ++x)
+	{
+		lConsumed = (*x)->OnKeyDown(pKeyCode);
+	}
+	return (lConsumed);
+}
+
+bool InputManager::NotifyOnKeyUp(KeyCode pKeyCode)
+{
+	bool lConsumed = false;
+	KeyCodeObserverList::iterator x = mKeyCodeObserverList.begin();
+	for (; !lConsumed && x != mKeyCodeObserverList.end(); ++x)
+	{
+		lConsumed = (*x)->OnKeyUp(pKeyCode);
+	}
+	return (lConsumed);
+}
+
+bool InputManager::NotifyMouseDoubleClick()
+{
+	bool lConsumed = false;
+	MouseObserverList::iterator x = mMouseObserverList.begin();
+	for (; !lConsumed && x != mMouseObserverList.end(); ++x)
+	{
+		lConsumed = (*x)->OnDoubleClick();
+	}
+	return (lConsumed);
+}
+
 bool InputManager::ReadKey(KeyCode pKeyCode)
 {
 	return (mKeyDown[(int)pKeyCode]);
@@ -572,50 +616,6 @@ str InputManager::GetKeyName(KeyCode pKeyCode)
 void InputManager::SetKey(KeyCode pKeyCode, bool pValue)
 {
 	mKeyDown[(int)pKeyCode] = pValue;
-}
-
-bool InputManager::NotifyOnChar(tchar pChar)
-{
-	bool lConsumed = false;
-	TextObserverList::iterator x = mTextObserverList.begin();
-	for (; !lConsumed && x != mTextObserverList.end(); ++x)
-	{
-		lConsumed = (*x)->OnChar(pChar);
-	}
-	return (lConsumed);
-}
-
-bool InputManager::NotifyOnKeyDown(KeyCode pKeyCode)
-{
-	bool lConsumed = false;
-	KeyCodeObserverList::iterator x = mKeyCodeObserverList.begin();
-	for (; !lConsumed && x != mKeyCodeObserverList.end(); ++x)
-	{
-		lConsumed = (*x)->OnKeyDown(pKeyCode);
-	}
-	return (lConsumed);
-}
-
-bool InputManager::NotifyOnKeyUp(KeyCode pKeyCode)
-{
-	bool lConsumed = false;
-	KeyCodeObserverList::iterator x = mKeyCodeObserverList.begin();
-	for (; !lConsumed && x != mKeyCodeObserverList.end(); ++x)
-	{
-		lConsumed = (*x)->OnKeyUp(pKeyCode);
-	}
-	return (lConsumed);
-}
-
-bool InputManager::NotifyMouseDoubleClick()
-{
-	bool lConsumed = false;
-	MouseObserverList::iterator x = mMouseObserverList.begin();
-	for (; !lConsumed && x != mMouseObserverList.end(); ++x)
-	{
-		lConsumed = (*x)->OnDoubleClick();
-	}
-	return (lConsumed);
 }
 
 void InputManager::PollEvents()

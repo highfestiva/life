@@ -24,4 +24,12 @@ Application::~Application()
 
 
 
+int Main(Application& pApplication)
+{
+	pApplication.Init();
+	return pApplication.Run();
+}
+
+
+
 }

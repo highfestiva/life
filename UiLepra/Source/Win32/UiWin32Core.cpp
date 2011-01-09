@@ -17,6 +17,14 @@ namespace UiLepra
 
 
 
+int UiMain(Lepra::Application& pApplicatio)
+{
+	pApplication.Init();
+	return pApplication.Run();
+}
+
+
+
 void Core::Init()
 {
 	Win32Core::Init();

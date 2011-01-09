@@ -481,6 +481,11 @@ public:
 	virtual float64 GetCursorX() = 0;
 	virtual float64 GetCursorY() = 0;
 
+	bool NotifyOnChar(tchar pChar);
+	bool NotifyOnKeyDown(KeyCode pKeyCode);
+	bool NotifyOnKeyUp(KeyCode pKeyCode);
+	bool NotifyMouseDoubleClick();
+
 	bool ReadKey(KeyCode pKeyCode);
 
 	static str GetKeyName(KeyCode pKeyCode);
@@ -490,13 +495,6 @@ protected:
 	DeviceList mDeviceList;
 
 	InputManager();
-
-	// Will notify all text input observers...
-	// Is called from the subclass.
-	bool NotifyOnChar(tchar pChar);
-	bool NotifyOnKeyDown(KeyCode pKeyCode);
-	bool NotifyOnKeyUp(KeyCode pKeyCode);
-	bool NotifyMouseDoubleClick();
 
 	void SetKey(KeyCode pKeyCode, bool pValue);
 

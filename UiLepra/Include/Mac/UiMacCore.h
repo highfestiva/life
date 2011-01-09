@@ -15,7 +15,7 @@
 #include "../UiLepra.h"
 
 
-@interface UiMacApplication : NSApplication
+/*@interface UiMacApplication : NSApplication
 {
 
 }
@@ -23,7 +23,8 @@
 - (void)run;
 - (void)terminate:(id)sender;
 
-@end
+@end*/
+
 
 namespace UiLepra
 {
@@ -48,13 +49,12 @@ public:
 	static void RemoveDisplayManager(MacDisplayManager* pDisplayManager);
 	static MacDisplayManager* GetDisplayManager(NSWindow* pWindowHandle);
 
-private:
+//private:
 	static Lock* mLock;
 	typedef HashTable<NSWindow*, MacDisplayManager*, LEPRA_VOIDP_HASHER> WindowTable;
 	static WindowTable mWindowTable;
 
-	static UiMacApplication* mApplication;
-
+	static NSApplication* mApplication;
 };
 
 

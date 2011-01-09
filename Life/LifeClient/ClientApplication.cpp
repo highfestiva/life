@@ -7,7 +7,7 @@
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../../UiCure/Include/UiCure.h"
 #include "../../UiCure/Include/UiGameUiManager.h"
-#include "../../UiLepra/Include/UiLepra.h"
+#include "../../UiLepra/Include/UiCore.h"
 #include "../../UiTBC/Include/UiTBC.h"
 #include "../LifeApplication.h"
 #include "GameClientMasterTicker.h"
@@ -29,6 +29,7 @@ public:
 
 	ClientApplication(const strutil::strvec& pArgumentList);
 	virtual ~ClientApplication();
+	virtual void Init();
 
 private:
 	str GetName() const;
@@ -44,7 +45,7 @@ private:
 
 
 
-LEPRA_RUN_APPLICATION(Life::ClientApplication);
+LEPRA_RUN_APPLICATION(Life::ClientApplication, UiLepra::UiMain);
 
 
 
@@ -56,6 +57,22 @@ namespace Life
 ClientApplication::ClientApplication(const strutil::strvec& pArgumentList):
 	Application(pArgumentList),
 	mUiManager(0)
+{
+}
+
+ClientApplication::~ClientApplication()
+{
+	Destroy();
+
+	delete (mUiManager);
+	mUiManager = 0;
+
+	UiCure::Shutdown();
+	UiTbc::Shutdown();
+	UiLepra::Shutdown();
+}
+
+void ClientApplication::Init()
 {
 	UiLepra::Init();
 	UiTbc::Init();
@@ -75,19 +92,7 @@ ClientApplication::ClientApplication(const strutil::strvec& pArgumentList):
 
 	mUiManager = new UiCure::GameUiManager(UiCure::GetSettings());
 
-	Init();
-}
-
-ClientApplication::~ClientApplication()
-{
-	Destroy();
-
-	delete (mUiManager);
-	mUiManager = 0;
-
-	UiCure::Shutdown();
-	UiTbc::Shutdown();
-	UiLepra::Shutdown();
+	Parent::Init();
 }
 
 str ClientApplication::GetName() const

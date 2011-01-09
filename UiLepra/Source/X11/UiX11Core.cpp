@@ -17,6 +17,14 @@ namespace UiLepra
 
 
 
+int UiMain(Lepra::Application& pApplicatio)
+{
+	pApplication.Init();
+	return pApplication.Run();
+}
+
+
+
 void Core::Init()
 {
 	X11Core::Init();

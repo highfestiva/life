@@ -18,25 +18,27 @@
 @interface NativeWindow: NSWindow
 {
 }
-- (void)mouseMoved: (NSEvent*)theEvent;
-- (void)keyDown: (NSEvent*)theEvent;
-- (void)keyUp: (NSEvent*)theEvent;
-/*- (void)scrollWheel: (NSEvent*)theEvent;
-- (void)keyDown: (NSEvent*)theEvent;
-- (void)keyUp: (NSEvent*)theEvent;
-- (void)mouseDown: (NSEvent*)theEvent;
-- (void)rightMouseDown: (NSEvent*)theEvent;
-- (void)otherMouseDown: (NSEvent*)theEvent;
-- (void)mouseUp: (NSEvent*)theEvent;
-- (void)rightMouseUp: (NSEvent*)theEvent;
-- (void)otherMouseUp: (NSEvent*)theEvent;*/
-- (BOOL)acceptsFirstResponder;
 @end
 
 @implementation NativeWindow
+/*- (void) mouseDown: (NSEvent*)theEvent
+{
+	//printf("Mouse down i min favoritvy\n");
+	//[self setAcceptsMouseMovedEvents: YES];
+	//[self setIgnoresMouseEvents: NO];
+}*/
+
+- (void) mouseDragged: (NSEvent*)theEvent
+{
+	//printf("Mouse dragged i min favoritvy\n");
+	//[self setAcceptsMouseMovedEvents: YES];
+	//[self setIgnoresMouseEvents: NO];
+	[self mouseMoved: theEvent];
+}
+
 - (void)mouseMoved: (NSEvent*)theEvent
 {
-	printf("Window mouseMoved!\n");
+	//printf("mouseMoved!\n");
 	//[super mouseMoved:theEvent];
 
 	UiLepra::MacInputManager* lInput = UiLepra::MacInputManager::GetSingleton();
@@ -46,27 +48,20 @@
 		lInput->SetMousePosition(lPoint.x, lPoint.y);
 	}
 }
-- (void) mouseDown: (NSEvent*)theEvent
-{
-	printf("Mouse down i min favoritvy\n");
-	[self setAcceptsMouseMovedEvents: YES];
-	[self setIgnoresMouseEvents: NO];
-}
-
-- (void) mouseDragged: (NSEvent*)theEvent
-{
-	printf("Mouse dragged i min favoritvy\n");
-	[self setAcceptsMouseMovedEvents: YES];
-	[self setIgnoresMouseEvents: NO];
-	[self mouseMoved: theEvent];
-}
 - (void)keyDown: (NSEvent*)theEvent
 {
-	printf("window keydown!\n");
+	NSString *characters = [theEvent characters];
+	unichar character = [characters characterAtIndex: 0];
+	UiLepra::MacInputManager* lInput = UiLepra::MacInputManager::GetSingleton();
+	if (lInput)
+	{
+		// TODO: handle stuff like NSRightArrowFunctionKey, NSLeftArrowFunctionKey.
+		lInput->NotifyOnChar(character);
+	}
 }
 - (void)keyUp: (NSEvent*)theEvent
 {
-	printf("window keyup!\n");
+	//printf("view keyup!\n");
 }
 /*- (void)mouseDown: (NSEvent*)theEvent
 {
@@ -97,6 +92,10 @@
 	//((MacInputManager*)InputManager::GetInputManager())->OSXScrollWheelEvent([theEvent deltaY]/10.0f);
 }*/
 - (BOOL)acceptsFirstResponder
+{
+	return YES;
+}
+- (BOOL)becomeFirstResponder
 {
 	return YES;
 }

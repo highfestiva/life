@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include "../../Lepra/Include/Application.h"
+
 
 
 namespace UiLepra
@@ -19,6 +21,10 @@ public:
 	static void Shutdown();
 	static void ProcessMessages();
 };
+
+
+
+int UiMain(Lepra::Application& pApplication);
 
 
 

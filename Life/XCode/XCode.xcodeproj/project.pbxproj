@@ -479,18 +479,6 @@
 		B1E059CF12D79F1C00FA3F9D /* Spawner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Spawner.h; sourceTree = "<group>"; };
 		B1E059D012D79F1C00FA3F9D /* Spawner.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = Spawner.o; sourceTree = "<group>"; };
 		B1E059D112D79F1C00FA3F9D /* LifeString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LifeString.h; sourceTree = "<group>"; };
-		B1E059D712D79F1C00FA3F9D /* categories.pbxbtree */ = {isa = PBXFileReference; lastKnownFileType = file; path = categories.pbxbtree; sourceTree = "<group>"; };
-		B1E059D812D79F1C00FA3F9D /* cdecls.pbxbtree */ = {isa = PBXFileReference; lastKnownFileType = file; path = cdecls.pbxbtree; sourceTree = "<group>"; };
-		B1E059D912D79F1C00FA3F9D /* decls.pbxbtree */ = {isa = PBXFileReference; lastKnownFileType = file; path = decls.pbxbtree; sourceTree = "<group>"; };
-		B1E059DA12D79F1C00FA3F9D /* files.pbxbtree */ = {isa = PBXFileReference; lastKnownFileType = file; path = files.pbxbtree; sourceTree = "<group>"; };
-		B1E059DB12D79F1C00FA3F9D /* imports.pbxbtree */ = {isa = PBXFileReference; lastKnownFileType = file; path = imports.pbxbtree; sourceTree = "<group>"; };
-		B1E059DC12D79F1C00FA3F9D /* pbxindex.header */ = {isa = PBXFileReference; lastKnownFileType = file; path = pbxindex.header; sourceTree = "<group>"; };
-		B1E059DD12D79F1C00FA3F9D /* protocols.pbxbtree */ = {isa = PBXFileReference; lastKnownFileType = file; path = protocols.pbxbtree; sourceTree = "<group>"; };
-		B1E059DE12D79F1C00FA3F9D /* refs.pbxbtree */ = {isa = PBXFileReference; lastKnownFileType = file; path = refs.pbxbtree; sourceTree = "<group>"; };
-		B1E059E012D79F1C00FA3F9D /* control */ = {isa = PBXFileReference; lastKnownFileType = text; path = control; sourceTree = "<group>"; };
-		B1E059E112D79F1C00FA3F9D /* strings */ = {isa = PBXFileReference; lastKnownFileType = text; path = strings; sourceTree = "<group>"; };
-		B1E059E212D79F1C00FA3F9D /* subclasses.pbxbtree */ = {isa = PBXFileReference; lastKnownFileType = file; path = subclasses.pbxbtree; sourceTree = "<group>"; };
-		B1E059E312D79F1C00FA3F9D /* PD.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = PD.xcodeproj; sourceTree = "<group>"; };
 		B1E059E612D79F1C00FA3F9D /* makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = makefile; sourceTree = "<group>"; };
 		B1E059E712D79F1C00FA3F9D /* RaceScore.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RaceScore.cpp; sourceTree = "<group>"; };
 		B1E059E812D79F1C00FA3F9D /* RaceScore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RaceScore.h; sourceTree = "<group>"; };
@@ -3977,7 +3965,6 @@
 				B1E059A412D79F1C00FA3F9D /* LifeMaster */,
 				B1E059AF12D79F1C00FA3F9D /* LifeServer */,
 				B1E059D112D79F1C00FA3F9D /* LifeString.h */,
-				B1E059D212D79F1C00FA3F9D /* Mac */,
 				B1E059E612D79F1C00FA3F9D /* makefile */,
 				B1E059E712D79F1C00FA3F9D /* RaceScore.cpp */,
 				B1E059E812D79F1C00FA3F9D /* RaceScore.h */,
@@ -4124,72 +4111,6 @@
 				B1E059D012D79F1C00FA3F9D /* Spawner.o */,
 			);
 			path = LifeServer;
-			sourceTree = "<group>";
-		};
-		B1E059D212D79F1C00FA3F9D /* Mac */ = {
-			isa = PBXGroup;
-			children = (
-				B1E059D312D79F1C00FA3F9D /* PD */,
-			);
-			path = Mac;
-			sourceTree = "<group>";
-		};
-		B1E059D312D79F1C00FA3F9D /* PD */ = {
-			isa = PBXGroup;
-			children = (
-				B1E059D412D79F1C00FA3F9D /* build */,
-				B1E059E312D79F1C00FA3F9D /* PD.xcodeproj */,
-			);
-			path = PD;
-			sourceTree = "<group>";
-		};
-		B1E059D412D79F1C00FA3F9D /* build */ = {
-			isa = PBXGroup;
-			children = (
-				B1E059D512D79F1C00FA3F9D /* PD.build */,
-			);
-			path = build;
-			sourceTree = "<group>";
-		};
-		B1E059D512D79F1C00FA3F9D /* PD.build */ = {
-			isa = PBXGroup;
-			children = (
-				B1E059D612D79F1C00FA3F9D /* PD.pbxindex */,
-			);
-			path = PD.build;
-			sourceTree = "<group>";
-		};
-		B1E059D612D79F1C00FA3F9D /* PD.pbxindex */ = {
-			isa = PBXGroup;
-			children = (
-				B1E059D712D79F1C00FA3F9D /* categories.pbxbtree */,
-				B1E059D812D79F1C00FA3F9D /* cdecls.pbxbtree */,
-				B1E059D912D79F1C00FA3F9D /* decls.pbxbtree */,
-				B1E059DA12D79F1C00FA3F9D /* files.pbxbtree */,
-				B1E059DB12D79F1C00FA3F9D /* imports.pbxbtree */,
-				B1E059DC12D79F1C00FA3F9D /* pbxindex.header */,
-				B1E059DD12D79F1C00FA3F9D /* protocols.pbxbtree */,
-				B1E059DE12D79F1C00FA3F9D /* refs.pbxbtree */,
-				B1E059DF12D79F1C00FA3F9D /* strings.pbxstrings */,
-				B1E059E212D79F1C00FA3F9D /* subclasses.pbxbtree */,
-			);
-			path = PD.pbxindex;
-			sourceTree = "<group>";
-		};
-		B1E059DF12D79F1C00FA3F9D /* strings.pbxstrings */ = {
-			isa = PBXGroup;
-			children = (
-				B1E059E012D79F1C00FA3F9D /* control */,
-				B1E059E112D79F1C00FA3F9D /* strings */,
-			);
-			path = strings.pbxstrings;
-			sourceTree = "<group>";
-		};
-		B1E059E412D79F1C00FA3F9D /* Products */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 		B1E059EE12D79F1C00FA3F9D /* TBC */ = {
@@ -9293,12 +9214,6 @@
 			);
 			mainGroup = B1E0563012D79EBE00FA3F9D;
 			projectDirPath = "";
-			projectReferences = (
-				{
-					ProductGroup = B1E059E412D79F1C00FA3F9D /* Products */;
-					ProjectRef = B1E059E312D79F1C00FA3F9D /* PD.xcodeproj */;
-				},
-			);
 			projectRoot = "";
 			targets = (
 			);

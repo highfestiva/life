@@ -13,64 +13,6 @@
 
 
 
-@interface NativeGLView: NSOpenGLView
-{
-}
-- (void)mouseMoved: (NSEvent*)theEvent;
-- (void)keyDown: (NSEvent*)theEvent;
-- (void)keyUp: (NSEvent*)theEvent;
-- (BOOL)acceptsFirstResponder;
-@end
-
-@implementation NativeGLView
-
-- (void) mouseDown: (NSEvent*)theEvent
-{
-	printf("Mouse down i min favoritvy\n");
-	[[self window] setAcceptsMouseMovedEvents: YES];
-	[[self window] setIgnoresMouseEvents: NO];
-}
-
-- (void) mouseDragged: (NSEvent*)theEvent
-{
-	printf("Mouse dragged i min favoritvy\n");
-	[[self window] setAcceptsMouseMovedEvents: YES];
-	[[self window] setIgnoresMouseEvents: NO];
-	[self mouseMoved: theEvent];
-}
-
-- (void)mouseMoved: (NSEvent*)theEvent
-{
-	printf("mouseMoved!\n");
-	//[super mouseMoved:theEvent];
-
-	UiLepra::MacInputManager* lInput = UiLepra::MacInputManager::GetSingleton();
-	if (lInput)
-	{
-		NSPoint lPoint = [theEvent locationInWindow];
-		lInput->SetMousePosition(lPoint.x, lPoint.y);
-	}
-}
-- (void)keyDown: (NSEvent*)theEvent
-{
-	printf("view keydown!\n");
-}
-- (void)keyUp: (NSEvent*)theEvent
-{
-	printf("view keyup!\n");
-}
-- (BOOL)acceptsFirstResponder
-{
-	return YES;
-}
-- (BOOL)resignFirstResponder
-{
-	return YES;
-}
-@end
-
-
-
 namespace UiLepra
 {
 
@@ -393,7 +335,7 @@ bool MacOpenGLDisplay::SetGLPixelFormat()
 	NSOpenGLPixelFormat* lPixelFormat = [NSOpenGLPixelFormat alloc];
 	[lPixelFormat initWithAttributes:lPixelFormatAttribs];
 
-	mGlView = [NativeGLView alloc];
+	mGlView = [NSOpenGLView alloc];
 	[mGlView initWithFrame:[mWnd frame] pixelFormat:lPixelFormat];
 	[mWnd setContentView:mGlView];
 	[mWnd setAcceptsMouseMovedEvents: YES];
