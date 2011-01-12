@@ -508,6 +508,8 @@ private:
 	MouseObserverList mMouseObserverList;
 
 	bool mKeyDown[256];
+
+	LOG_CLASS_DECLARE();
 };
 
 

@@ -50,7 +50,6 @@ typedef uint16			wchar_t;
 #define	__WIDE(x)	L ## x
 #define	_WIDE(x)	__WIDE(x)
 #ifdef	LEPRA_UNICODE
-typedef	signed short		stchar;
 typedef	wchar_t			utchar;
 typedef	wchar_t			tchar;
 #ifdef __T
@@ -58,7 +57,6 @@ typedef	wchar_t			tchar;
 #endif
 #define	__T			__WIDE
 #else	// !LEPRA_UNICODE
-typedef signed char		stchar;
 typedef unsigned char		utchar;
 typedef char			tchar;
 #ifdef __T

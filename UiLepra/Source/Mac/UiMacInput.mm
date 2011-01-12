@@ -5,6 +5,7 @@
 
 
 #include "../../Include/Mac/UiMacInput.h"
+#include "../../../Lepra/Include/CyclicArray.h"
 #include "../../../Lepra/Include/Log.h"
 #include "../../Include/Mac/UiMacCore.h"
 #include "../../Include/Mac/UiMacDisplayManager.h"
@@ -253,7 +254,7 @@ void MacInputDevice::EnumElements()
 							printf("Misc element:\n");
 							printf("-------------\n");
 							printf("name: %s\n", lCurrentElement->name);
-							printf("usagePage: %i\nusage: %i\n", lCurrentElement->usagePage, lCurrentElement->usage);
+							printf("usagePage: %li\nusage: %li\n", lCurrentElement->usagePage, lCurrentElement->usage);
 							printf("usagename: %s\n", name);
 						}
 						break;
@@ -264,7 +265,7 @@ void MacInputDevice::EnumElements()
 			case kIOHIDElementTypeInput_ScanCodes:
 			{
 				printf("warning: kIOHIDElementTypeInput_ScanCodes support not implemented yet!\n");
-				printf("min: %i\nmax: %i\nsize: %i\n", lCurrentElement->min, lCurrentElement->max, lCurrentElement->size);
+				printf("min: %li\nmax: %li\nsize: %li\n", lCurrentElement->min, lCurrentElement->max, lCurrentElement->size);
 			}
 			break;
 			default:
@@ -289,9 +290,9 @@ LOG_CLASS_DEFINE(UI_INPUT, MacInputDevice);
 
 MacInputManager::MacInputManager(MacDisplayManager* pDisplayManager):
 	mDisplayManager(pDisplayManager),
-	//mDirectInput(0),
 	mEnumError(false),
 	mInitialized(false),
+	mKeyModifiers(0x100),
 	mScreenWidth(0),
 	mScreenHeight(0),
 	mCursorX(0),
@@ -370,66 +371,165 @@ void MacInputManager::Refresh()
 	}*/
 }
 
+unichar MacInputManager::ConvertChar(unichar pChar)
+{
+	bool lIsChar;
+	ConvertCharToKeyCode(pChar, lIsChar);
+	if (!lIsChar)
+	{
+		return 0;
+	}
+	switch (pChar)
+	{
+		case 0x7F:	return '\b';
+	}
+	return pChar;
+}
+
+MacInputManager::KeyCode MacInputManager::ConvertCharToKeyCode(unichar pChar, bool& pIsChar)
+{
+	pIsChar = true;
+#define NC()	pIsChar = false;
+	mLog.Infof(_T("Got key: %x (%u, '%c')"), (unsigned)pChar, (unsigned)pChar, pChar);
+	switch (pChar)
+	{
+		case NSUpArrowFunctionKey:	NC();	return IN_KBD_UP;
+		case NSDownArrowFunctionKey:	NC();	return IN_KBD_DOWN;
+		case NSLeftArrowFunctionKey:	NC();	return IN_KBD_LEFT;
+		case NSRightArrowFunctionKey:	NC();	return IN_KBD_RIGHT;
+		case NSF1FunctionKey:		NC();	return IN_KBD_F1;
+		case NSF2FunctionKey:		NC();	return IN_KBD_F2;
+		case NSF3FunctionKey:		NC();	return IN_KBD_F3;
+		case NSF4FunctionKey:		NC();	return IN_KBD_F4;
+		case NSF5FunctionKey:		NC();	return IN_KBD_F5;
+		case NSF6FunctionKey:		NC();	return IN_KBD_F6;
+		case NSF7FunctionKey:		NC();	return IN_KBD_F7;
+		case NSF8FunctionKey:		NC();	return IN_KBD_F8;
+		case NSF9FunctionKey:		NC();	return IN_KBD_F9;
+		case NSF10FunctionKey:		NC();	return IN_KBD_F10;
+		case NSF11FunctionKey:		NC();	return IN_KBD_F11;
+		case NSF12FunctionKey:		NC();	return IN_KBD_F12;
+		case 0xF746:	// Fall thru.
+		case NSInsertFunctionKey:	NC();	return IN_KBD_INSERT;
+		case NSDeleteFunctionKey:	NC();	return IN_KBD_DEL;
+		case NSHomeFunctionKey:		NC();	return IN_KBD_HOME;
+		case NSEndFunctionKey:		NC();	return IN_KBD_END;
+		case NSPageUpFunctionKey:	NC();	return IN_KBD_PGUP;
+		case NSPageDownFunctionKey:	NC();	return IN_KBD_PGDOWN;
+		case NSSysReqFunctionKey:	// Fall thru.
+		case NSPrintScreenFunctionKey:	NC();	return IN_KBD_PRINT_SCREEN;
+		case NSScrollLockFunctionKey:	NC();	return IN_KBD_SCROLL_LOCK;
+		case NSBreakFunctionKey:	// Fall thru.
+		case NSPauseFunctionKey:	NC();	return IN_KBD_PAUSE;
+		case NSMenuFunctionKey:		NC();	return IN_KBD_CONTEXT_MENU;
+	}
+	if (pChar >= 'a' && pChar <= 'z')
+	{
+		pChar -= 'a'-'A';
+	}
+	return (KeyCode)pChar;
+}
+
 MacDisplayManager* MacInputManager::GetDisplayManager() const
 {
 	return (mDisplayManager);
 }
 
-bool MacInputManager::OnMessage(NSEvent* pEvent)
+void MacInputManager::OnEvent(NSEvent* pEvent)
 {
-	bool lConsumed = false;
-	/*switch (pMsg)
+	bool lIsKeyDown = false;
+	switch ([pEvent type])
 	{
-		case WM_CHAR:
+		case NSKeyDown:
 		{
-			lConsumed = NotifyOnChar((tchar)pwParam);
+			{
+				const NSString* lCharacters = [pEvent charactersIgnoringModifiers];
+				const unsigned lCharacterCount = [lCharacters length];
+				for (unsigned x = 0; x < lCharacterCount; ++x)
+				{
+					unichar lChar = [lCharacters characterAtIndex:x];
+					lChar = ConvertChar(lChar);
+					if (lChar)
+					{
+						NotifyOnChar(lChar);
+					}
+				}
+			}
+			lIsKeyDown = true;
+		}
+		// TRICKY: fall thru!
+		case NSKeyUp:
+		{
+			const NSString* lCharacters = [pEvent characters];
+			const unsigned lCharacterCount = [lCharacters length];
+			for (unsigned x = 0; x < lCharacterCount; ++x)
+			{
+				const unichar lChar = [lCharacters characterAtIndex:x];
+				bool lIsChar;
+				const KeyCode lKey = ConvertCharToKeyCode(lChar, lIsChar);
+				SetKey(lKey, lIsKeyDown);
+				if (lIsKeyDown)
+				{
+					NotifyOnKeyDown(lKey);
+				}
+				else
+				{
+					NotifyOnKeyUp(lKey);
+				}
+
+			}
 		}
 		break;
-		case WM_LBUTTONDBLCLK:
+		case NSFlagsChanged:
 		{
-			lConsumed = NotifyMouseDoubleClick();
+			const NSUInteger lKeyModifiers = [pEvent modifierFlags];
+			const NSUInteger lDeltaModifiers = mKeyModifiers ^ lKeyModifiers;
+			const int lTranslationTable[][2] =
+			{
+				{ UiLepra::InputManager::IN_KBD_LCTRL,	1<<0, },
+				{ UiLepra::InputManager::IN_KBD_LSHIFT,	1<<1, },
+				{ UiLepra::InputManager::IN_KBD_RSHIFT,	1<<2, },
+				{ UiLepra::InputManager::IN_KBD_LALT,	1<<3, },
+				{ UiLepra::InputManager::IN_KBD_RALT,	1<<4, },
+				{ UiLepra::InputManager::IN_KBD_LWIN,	1<<5, },
+				{ UiLepra::InputManager::IN_KBD_RWIN,	1<<6, },
+				{ UiLepra::InputManager::IN_KBD_RCTRL,	1<<13, },
+			};
+			for (unsigned x = 0; x < LEPRA_ARRAY_COUNT(lTranslationTable); ++x)
+			{
+				if (!(lDeltaModifiers & lTranslationTable[x][1]))
+				{
+					continue;
+				}
+				const bool lIsKeyDown = (lKeyModifiers & lTranslationTable[x][1]);
+				SetKey((KeyCode)lTranslationTable[x][0], lIsKeyDown);
+				if (lIsKeyDown)
+				{
+					NotifyOnKeyDown((KeyCode)lTranslationTable[x][0]);
+				}
+				else
+				{
+					NotifyOnKeyUp((KeyCode)lTranslationTable[x][0]);
+				}
+			}
+			mKeyModifiers = lKeyModifiers;
 		}
 		break;
-		case WM_MOUSEMOVE:
-		case WM_NCMOUSEMOVE:
+		case NSMouseMoved:
+		case NSLeftMouseDragged:
+		case NSRightMouseDragged:
 		{
-			int x = GET_X_LPARAM(plParam);
-			int y = GET_Y_LPARAM(plParam);
-			SetMousePosition(pMsg, x, y);
+			NSPoint lPoint = [pEvent locationInWindow];
+			SetMousePosition(lPoint.x, lPoint.y);
 		}
 		break;
-		case WM_KEYUP:
-		{
-			SetKey((KeyCode)pwParam, plParam, false);
-			lConsumed = NotifyOnKeyUp((KeyCode)pwParam);
-		}
-		break;
-		case WM_KEYDOWN:
-		{
-			SetKey((KeyCode)pwParam, plParam, true);
-			lConsumed = NotifyOnKeyDown((KeyCode)pwParam);
-		}
-		break;
-		case WM_SYSKEYUP:
-		{
-			SetKey((KeyCode)pwParam, plParam, false);
-			lConsumed = NotifyOnKeyUp((KeyCode)pwParam);
-		}
-		break;
-		case WM_SYSKEYDOWN:
-		{
-			SetKey((KeyCode)pwParam, plParam, true);
-			lConsumed = NotifyOnKeyDown((KeyCode)pwParam);
-		}
-		break;
-	}*/
-	return (lConsumed);
+	}
 }
 
-void MacInputManager::SetKey(KeyCode pWParam, long pLParam, bool pIsDown)
+/*void MacInputManager::SetKey(KeyCode pWParam, bool pIsDown)
 {
 	printf("Key: %i", pWParam);
-	/*if (pLParam&0x1000000)	// Extended key = right Alt, Ctrl...
+	if (pLParam&0x1000000)	// Extended key = right Alt, Ctrl...
 	{
 		switch (pWParam)
 		{
@@ -440,9 +540,9 @@ void MacInputManager::SetKey(KeyCode pWParam, long pLParam, bool pIsDown)
 	else if (pWParam == IN_KBD_LSHIFT && (pLParam&0xFF0000) == 0x360000)
 	{
 		pWParam = IN_KBD_RSHIFT;
-	}*/
+	}
 	Parent::SetKey(pWParam, pIsDown);
-}
+}*/
 
 /*BOOL CALLBACK MacInputManager::EnumDeviceCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvRef)
 {
@@ -602,20 +702,12 @@ void MacInputManager::AddObserver()
 	if (mDisplayManager)
 	{
 		// Listen to text input and standard mouse events.
-		/*mDisplayManager->AddObserver(WM_CHAR, this);
-		mDisplayManager->AddObserver(WM_SYSKEYDOWN, this);
-		mDisplayManager->AddObserver(WM_SYSKEYUP, this);
-		mDisplayManager->AddObserver(WM_KEYDOWN, this);
-		mDisplayManager->AddObserver(WM_KEYUP, this);
-		mDisplayManager->AddObserver(WM_MOUSEMOVE, this);
-		mDisplayManager->AddObserver(WM_NCMOUSEMOVE, this);
-		mDisplayManager->AddObserver(WM_LBUTTONDBLCLK, this);
-		mDisplayManager->AddObserver(WM_LBUTTONDOWN, this);
-		mDisplayManager->AddObserver(WM_RBUTTONDOWN, this);
-		mDisplayManager->AddObserver(WM_MBUTTONDOWN, this);
-		mDisplayManager->AddObserver(WM_LBUTTONUP, this);
-		mDisplayManager->AddObserver(WM_RBUTTONUP, this);
-		mDisplayManager->AddObserver(WM_MBUTTONUP, this);*/
+		mDisplayManager->AddObserver(NSKeyDown, this);
+		mDisplayManager->AddObserver(NSKeyUp, this);
+		mDisplayManager->AddObserver(NSFlagsChanged, this);
+		mDisplayManager->AddObserver(NSMouseMoved, this);
+		mDisplayManager->AddObserver(NSLeftMouseDragged, this);
+		mDisplayManager->AddObserver(NSRightMouseDragged, this);
 	}
 }
 
@@ -630,6 +722,8 @@ void MacInputManager::RemoveObserver()
 
 
 MacInputManager* MacInputManager::mInputManagerSingleton = 0;
+
+LOG_CLASS_DEFINE(UI_INPUT, MacInputManager);
 
 
 

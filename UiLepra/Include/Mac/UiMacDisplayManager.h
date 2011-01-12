@@ -20,10 +20,7 @@ namespace UiLepra
 class MacObserver
 {
 public:
-	// Returns true if the message was processed. Returns false otherwise.
-	// If there are many observers listening to the same message,
-	// returning true will stop propagation.
-	virtual bool OnMessage(NSEvent* e) = 0;
+	virtual void OnEvent(NSEvent* e) = 0;
 };
 
 class MacDisplayManager: public DisplayManager, public MacObserver
@@ -52,7 +49,7 @@ public:
 
 	NSWindow* GetWindow() const;
 
-	bool DispatchMessage(NSEvent* e);
+	void DispatchEvent(NSEvent* e);
 
 	void ProcessMessages();
 	void AddObserver(int pMessage, MacObserver* pObserver);
@@ -61,7 +58,7 @@ public:
 	// Show a popup dialog with a message.
 	void ShowMessageBox(const str& pMsg, const str& pCaption);
 
-	virtual bool OnMessage(NSEvent* e);
+	virtual void OnEvent(NSEvent* e);
 
 protected:
 

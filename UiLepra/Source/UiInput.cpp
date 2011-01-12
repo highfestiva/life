@@ -742,6 +742,8 @@ unsigned InputManager::GetDeviceIndex(InputDevice* pDevice) const
 	return 0;
 }
 
+LOG_CLASS_DEFINE(UI_INPUT, InputManager);
+
 
 
 }

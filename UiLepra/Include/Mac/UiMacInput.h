@@ -120,9 +120,12 @@ public:
 	virtual double GetCursorY();
 	void SetMousePosition(int x, int y);
 
+	static unichar ConvertChar(unichar pChar);
+	static KeyCode ConvertCharToKeyCode(unichar pChar, bool& pIsChar);
+
 protected:
-	bool OnMessage(NSEvent* pEvent);
-	void SetKey(KeyCode pWParam, long pLParam, bool pIsDown);
+	virtual void OnEvent(NSEvent* pEvent);
+	//void SetKey(KeyCode pWParam, long pLParam, bool pIsDown);
 
 private:
 	// The DirectInput device enumeration callback.
@@ -137,11 +140,10 @@ private:
 
 	MacDisplayManager* mDisplayManager;
 
-	// The DirectInput object.
-	//LPDIRECTINPUT8 mDirectInput;
-
 	bool mEnumError;
 	bool mInitialized;
+
+	NSUInteger mKeyModifiers;
 
 	// The entire display area (not just the user's window).
 	int mScreenWidth;
@@ -155,6 +157,8 @@ private:
 	InputDevice* mKeyboard;
 	InputDevice* mMouse;
 	int mTypeCount[InputDevice::TYPE_COUNT];
+
+	LOG_CLASS_DECLARE();
 };
 
 

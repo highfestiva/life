@@ -17,6 +17,7 @@
 
 @interface NativeWindow: NSWindow
 {
+	UiLepra::MacDisplayManager* mDisplayManager;
 }
 @end
 
@@ -33,36 +34,33 @@
 	//printf("Mouse dragged i min favoritvy\n");
 	//[self setAcceptsMouseMovedEvents: YES];
 	//[self setIgnoresMouseEvents: NO];
-	[self mouseMoved: theEvent];
+	//[self mouseMoved: theEvent];
+	mDisplayManager->DispatchEvent(theEvent);
 }
 
 - (void)mouseMoved: (NSEvent*)theEvent
 {
 	//printf("mouseMoved!\n");
 	//[super mouseMoved:theEvent];
+	mDisplayManager->DispatchEvent(theEvent);
+}
 
-	UiLepra::MacInputManager* lInput = UiLepra::MacInputManager::GetSingleton();
-	if (lInput)
-	{
-		NSPoint lPoint = [theEvent locationInWindow];
-		lInput->SetMousePosition(lPoint.x, lPoint.y);
-	}
-}
-- (void)keyDown: (NSEvent*)theEvent
+-(void) keyDown:(NSEvent*)theEvent
 {
-	NSString *characters = [theEvent characters];
-	unichar character = [characters characterAtIndex: 0];
-	UiLepra::MacInputManager* lInput = UiLepra::MacInputManager::GetSingleton();
-	if (lInput)
-	{
-		// TODO: handle stuff like NSRightArrowFunctionKey, NSLeftArrowFunctionKey.
-		lInput->NotifyOnChar(character);
-	}
+	mDisplayManager->DispatchEvent(theEvent);
 }
-- (void)keyUp: (NSEvent*)theEvent
+
+-(void) keyUp:(NSEvent*)theEvent
 {
 	//printf("view keyup!\n");
+	mDisplayManager->DispatchEvent(theEvent);
 }
+
+-(void) flagsChanged:(NSEvent*)theEvent
+{
+	mDisplayManager->DispatchEvent(theEvent);
+}
+
 /*- (void)mouseDown: (NSEvent*)theEvent
 {
 	//((UiLepra::MacInputManager*)InputManager::GetInputManager())->OSXMouseDownEvent(0);
@@ -138,8 +136,7 @@ MacDisplayManager::MacDisplayManager():
 	mMaximized(false),
 	mNormalWidth(0),
 	mNormalHeight(0),
-	mCaptionSet(false),
-	mConsumeChar(true)
+	mCaptionSet(false)
 {
 	// Obtain number of available displays.
 	CGDisplayCount lDisplayCount = 0;
@@ -239,7 +236,12 @@ void MacDisplayManager::SetCaption(const str& pCaption, bool pInternalCall)
 
 		if (pInternalCall == false || mCaptionSet == false)
 		{
-			[mWnd setTitle: [NSString stringWithCString: astrutil::Encode(pCaption).c_str()]];
+#if defined(LEPRA_UNICODE)
+			NSString* lTitle = [NSString stringWithCString:pCaption.c_str() encoding:NSUTF32StringEncoding];
+#else
+			NSString* lTitle = [NSString stringWithCString:pCaption.c_str() encoding:NSUTF8StringEncoding];
+#endif
+			[mWnd setTitle:lTitle];
 		}
 	}
 }
@@ -355,11 +357,13 @@ bool MacDisplayManager::InitWindow()
 
 	bool lOk = mIsOpen = true;
 
-	mWnd = [NativeWindow alloc];
+	NativeWindow* lWnd = [NativeWindow alloc];
+	mWnd = lWnd;
 	[mWnd	initWithContentRect:	NSMakeRect(0, 0, mDisplayMode.mWidth, mDisplayMode.mHeight)
 		styleMask:		NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask
 		backing:		NSBackingStoreBuffered
 		defer:			NO];
+	lWnd->mDisplayManager = this;
 	[mWnd setAcceptsMouseMovedEvents: YES];
 	[mWnd setIgnoresMouseEvents: NO];
         [mWnd setReleasedWhenClosed: YES];
@@ -530,43 +534,22 @@ NSWindow* MacDisplayManager::GetWindow() const
 	return mWnd;
 }
 
-bool MacDisplayManager::DispatchMessage(NSEvent* e)
+void MacDisplayManager::DispatchEvent(NSEvent* e)
 {
-	/*if (pMessage == WM_CHAR && mConsumeChar)
-	{
-		return (true);
-	}
-
-	bool lConsumed = false;
-	ObserverSetTable::Iterator lTIter = mObserverSetTable.Find(pMessage);
+	ObserverSetTable::Iterator lTIter = mObserverSetTable.Find([e type]);
 	if (lTIter != mObserverSetTable.End())
 	{
 		ObserverSet* lSet = *lTIter;
 		ObserverSet::iterator lLIter;
 		for (lLIter = lSet->begin(); lLIter != lSet->end(); ++lLIter)
 		{
-			lConsumed |= (*lLIter)->OnMessage(pMessage, pwParam, plParam);
+			(*lLIter)->OnEvent(e);
 		}
 	}
-	if (pMessage == WM_KEYDOWN)
-	{
-		mConsumeChar = lConsumed;
-	}
-	return (lConsumed);*/
-	return (false);
 }
 
 void MacDisplayManager::ProcessMessages()
 {
-	if (mWnd != 0)
-	{
-		/*MSG lMsg;
-		while (::PeekMessage(&lMsg, mWnd, 0, 0, PM_REMOVE) == TRUE)
-		{
-			::TranslateMessage(&lMsg);
-			::DispatchMessage(&lMsg);
-		}*/
-	}
 }
 
 void MacDisplayManager::AddObserver(int pMessage, MacObserver* pObserver)
@@ -640,7 +623,7 @@ void MacDisplayManager::ShowMessageBox(const str& pMsg, const str& pCaption)
 	// StandardAlert() I googled, whatever that might be.
 }
 
-bool MacDisplayManager::OnMessage(NSEvent* e)
+void MacDisplayManager::OnEvent(NSEvent* e)
 {
 	/*switch(pMsg)
 	{
@@ -697,7 +680,6 @@ bool MacDisplayManager::OnMessage(NSEvent* e)
 		}
 		break;
 	}*/
-	return (0);
 }
 
 
