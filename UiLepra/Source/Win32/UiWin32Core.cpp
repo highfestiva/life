@@ -17,7 +17,7 @@ namespace UiLepra
 
 
 
-int UiMain(Lepra::Application& pApplicatio)
+int UiMain(Lepra::Application& pApplication)
 {
 	pApplication.Init();
 	return pApplication.Run();
