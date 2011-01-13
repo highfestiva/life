@@ -584,23 +584,41 @@ void MacInputManager::EnumDevices()
 		mDeviceList.push_back(lDevice);
 		
 		InputDevice::Interpretation lInterpretation = InputDevice::TYPE_OTHER;
-		if (lDevice->GetNumDigitalElements() > 0 && lDevice->GetNumDigitalElements() < 15 &&
-			lDevice->GetNumAnalogueElements() >= 2)
+		if (lHIDDevice->usagePage == kHIDPage_GenericDesktop &&
+			(lHIDDevice->usage == kHIDUsage_GD_Pointer ||
+			lHIDDevice->usage == kHIDUsage_GD_Mouse))
 		{
 			lInterpretation = InputDevice::TYPE_MOUSE;
 		}
-		else if (lDevice->GetNumDigitalElements() >= 80)
+		else if (lHIDDevice->usagePage == kHIDPage_GenericDesktop &&
+			(lHIDDevice->usage == kHIDUsage_GD_Keypad ||
+			lHIDDevice->usage == kHIDUsage_GD_Keyboard))
 		{
 			lInterpretation = InputDevice::TYPE_KEYBOARD;
 		}
+		else if (lHIDDevice->usagePage == kHIDPage_GenericDesktop &&
+			(lHIDDevice->usage == kHIDUsage_GD_Joystick ||
+			lHIDDevice->usage == kHIDUsage_GD_MultiAxisController))
+		{
+			lInterpretation = InputDevice::TYPE_JOYSTICK;
+		}
+		else if (lHIDDevice->usagePage == kHIDPage_GenericDesktop &&
+			lHIDDevice->usage == kHIDUsage_GD_GamePad)
+		{
+			lInterpretation = InputDevice::TYPE_GAMEPAD;
+		}
+		else
+		{
+			log_volatile(mLog.Debugf(_T("%s is not of known type: usage=%i, usagePage=%i."),
+				lDevice->GetIdentifier().c_str(), lHIDDevice->usage, lHIDDevice->usagePage));
+		}
 		lDevice->SetInterpretation(lInterpretation, mTypeCount[lInterpretation]);
 		++mTypeCount[lInterpretation];
-		
-		if (lInterpretation == InputDevice::TYPE_MOUSE)
+		if (!mMouse && lInterpretation == InputDevice::TYPE_MOUSE)
 		{
 			mMouse = lDevice;
 		}
-		else if (lInterpretation == InputDevice::TYPE_KEYBOARD)
+		else if (!mKeyboard && lInterpretation == InputDevice::TYPE_KEYBOARD)
 		{
 			mKeyboard = lDevice;
 		}
