@@ -32,6 +32,7 @@ MacInputElement::MacInputElement(Type pType, Interpretation pInterpretation, int
 	mMax(MIN_INT)
 {
 	SetIdentifier(strutil::Encode((const char*)mElement->name));
+	//mLog.Headlinef(_T("%s got Mac input element %s of type %i w/ index %i."), pParentDevice->GetIdentifier().c_str(), mElement->name, GetType(), pTypeIndex);
 }
 
 MacInputElement::~MacInputElement()
@@ -55,14 +56,14 @@ void MacInputElement::SetValue(int pValue)
 		mMax = pValue;
 	}
 
-	MacInputDevice* lDevice = (MacInputDevice*)GetParentDevice();
-	MacInputManager* lManager = (MacInputManager*)lDevice->GetManager();
+	//Win32InputDevice* lDevice = (Win32InputDevice*)GetParentDevice();
+	//Win32InputManager* lManager = (Win32InputManager*)lDevice->GetManager();
 
 	if (GetType() == DIGITAL)
 	{
 		Parent::SetValue(pValue);
 	}
-	else if (GetInterpretation() == RELATIVE_AXIS)
+	/*else if (GetInterpretation() == RELATIVE_AXIS)
 	{
 		// Treat this as a relative axis. Since we don't know the maximum value
 		// of this axis (can probably be infinitly large), we need to scale it down
@@ -75,17 +76,17 @@ void MacInputElement::SetValue(int pValue)
 
 		if (GetTypeIndex() <= 1)	// Mouse of sorts.
 		{
-			InputElement::SetValue(2.0 * (double)pValue / (double)lManager->mScreenWidth);
+			Parent::SetValue(2.0 * (double)pValue / (double)lManager->mScreenWidth);
 		}
 		else
 		{
-			InputElement::SetValue((double)pValue / 1000.0);
+			Parent::SetValue((double)pValue / 10.0);
 		}
-	}
+	}*/
 	else if (mMin < mMax)
 	{
 		// Scale to +-1.
-		InputElement::SetValue((pValue*2.0-(mMax+mMin)) / (double)(mMax-mMin));
+		Parent::SetValue((pValue*2.0-(mMax+mMin)) / (double)(mMax-mMin));
 	}
 }
 
@@ -174,18 +175,8 @@ void MacInputDevice::PollEvents()
 		{
 			MacInputElement* lElement = (MacInputElement*)*x;
 			pRecElement lNativeElement = lElement->GetNativeElement();
-			if (lElement->GetType() == InputElement::ANALOGUE)
-			{
-				const int32 lValue = HIDGetElementValue(mNativeDevice, lNativeElement);
-				const int32 lValueCal = HIDCalibrateValue(lValue, lNativeElement);
-				const int32 lValueScale = HIDScaleValue(lValueCal, lNativeElement);
-				lElement->SetValue(lValueScale / 127.5f - 1);
-			}
-			else if (lElement->GetType() == InputElement::DIGITAL)
-			{
-				const int32 lValue = HIDGetElementValue(mNativeDevice, lNativeElement);
-				lElement->SetValue((lValue > 0)? 1 : 0);
-			}
+			const int32 lValue = HIDGetElementValue(mNativeDevice, lNativeElement);
+			lElement->SetValue(lValue);
 		}
 	}
 }
@@ -251,18 +242,18 @@ void MacInputDevice::EnumElements()
 						break;
 						default:
 						{
-							printf("Misc element:\n");
+							/*printf("Misc element:\n");
 							printf("-------------\n");
 							printf("name: %s\n", lCurrentElement->name);
 							printf("usagePage: %li\nusage: %li\n", lCurrentElement->usagePage, lCurrentElement->usage);
-							printf("usagename: %s\n", name);
+							printf("usagename: %s\n", name);*/
 						}
 						break;
 					}
 				}
 			}
 			break;
-			case kIOHIDElementTypeInput_ScanCodes:
+			/*case kIOHIDElementTypeInput_ScanCodes:
 			{
 				printf("warning: kIOHIDElementTypeInput_ScanCodes support not implemented yet!\n");
 				printf("min: %li\nmax: %li\nsize: %li\n", lCurrentElement->min, lCurrentElement->max, lCurrentElement->size);
@@ -271,7 +262,7 @@ void MacInputDevice::EnumElements()
 			default:
 			{
 				printf("unknown element type: %d\n", lCurrentElement->type);
-			}
+			}*/
 			break;
 		}
 		if (lElement)
@@ -292,7 +283,7 @@ MacInputManager::MacInputManager(MacDisplayManager* pDisplayManager):
 	mDisplayManager(pDisplayManager),
 	mEnumError(false),
 	mInitialized(false),
-	mKeyModifiers(0x100),
+	mKeyModifiers(0),
 	mScreenWidth(0),
 	mScreenHeight(0),
 	mCursorX(0),
@@ -309,8 +300,6 @@ MacInputManager::MacInputManager(MacDisplayManager* pDisplayManager):
 	Refresh();
 
 	AddObserver();
-
-	mInputManagerSingleton = this;
 
 	mInitialized = true;
 }
@@ -334,11 +323,6 @@ MacInputManager::~MacInputManager()
 	mDisplayManager = 0;
 }
 
-MacInputManager* MacInputManager::GetSingleton()
-{
-	return (mInputManagerSingleton);
-}
-
 bool MacInputManager::IsInitialized()
 {
 	return (mInitialized);
@@ -346,8 +330,8 @@ bool MacInputManager::IsInitialized()
 
 void MacInputManager::Refresh()
 {
-	mScreenWidth  = 640;
-	mScreenHeight = 480;
+	mScreenWidth  = mDisplayManager->GetWidth();
+	mScreenHeight = mDisplayManager->GetHeight();
 	/*if (mDisplayManager != 0 && mDisplayManager->GetHWND() != 0)
 	{
 		RECT lRect;
@@ -374,23 +358,23 @@ void MacInputManager::Refresh()
 unichar MacInputManager::ConvertChar(unichar pChar)
 {
 	bool lIsChar;
-	ConvertCharToKeyCode(pChar, lIsChar);
+	ConvertCharToKeyCode(pChar, false, lIsChar);
 	if (!lIsChar)
 	{
 		return 0;
 	}
 	switch (pChar)
 	{
+		case 3:		return '\r';	// Numpad-ENTER.
 		case 0x7F:	return '\b';
 	}
 	return pChar;
 }
 
-MacInputManager::KeyCode MacInputManager::ConvertCharToKeyCode(unichar pChar, bool& pIsChar)
+MacInputManager::KeyCode MacInputManager::ConvertCharToKeyCode(unichar pChar, bool pIsNumpad, bool& pIsChar)
 {
 	pIsChar = true;
-#define NC()	pIsChar = false;
-	mLog.Infof(_T("Got key: %x (%u, '%c')"), (unsigned)pChar, (unsigned)pChar, pChar);
+#define NC()	pIsChar = false
 	switch (pChar)
 	{
 		case NSUpArrowFunctionKey:	NC();	return IN_KBD_UP;
@@ -427,6 +411,22 @@ MacInputManager::KeyCode MacInputManager::ConvertCharToKeyCode(unichar pChar, bo
 	{
 		pChar -= 'a'-'A';
 	}
+	else if (pIsNumpad)
+	{
+		if (pChar >= '0' && pChar <= '9')
+		{
+			return (KeyCode)(IN_KBD_NUMPAD_0 + pChar - '0');
+		}
+		switch (pChar)
+		{
+			case '+':	return IN_KBD_NUMPAD_PLUS;
+			case '-':	return IN_KBD_NUMPAD_MINUS;
+			case '*':	return IN_KBD_NUMPAD_MUL;
+			case '/':	return IN_KBD_NUMPAD_DIV;
+			case '.':	// Fall thru.
+			case ',':	return IN_KBD_NUMPAD_DOT;
+		}
+	}
 	return (KeyCode)pChar;
 }
 
@@ -438,39 +438,29 @@ MacDisplayManager* MacInputManager::GetDisplayManager() const
 void MacInputManager::OnEvent(NSEvent* pEvent)
 {
 	bool lIsKeyDown = false;
-	switch ([pEvent type])
+	const NSEventType lType = [pEvent type];
+	switch (lType)
 	{
 		case NSKeyDown:
 		{
-			{
-				const NSString* lCharacters = [pEvent charactersIgnoringModifiers];
-				const unsigned lCharacterCount = [lCharacters length];
-				for (unsigned x = 0; x < lCharacterCount; ++x)
-				{
-					unichar lChar = [lCharacters characterAtIndex:x];
-					lChar = ConvertChar(lChar);
-					if (lChar)
-					{
-						NotifyOnChar(lChar);
-					}
-				}
-			}
 			lIsKeyDown = true;
-		}
-		// TRICKY: fall thru!
+		}	// TRICKY: fall thru to handle keyDown notification BEFORE OnChar is dispatched!
 		case NSKeyUp:
 		{
-			const NSString* lCharacters = [pEvent characters];
+			const NSString* lCharacters = [pEvent charactersIgnoringModifiers];
+			const bool lIsNumpad = (([pEvent modifierFlags] & NSNumericPadKeyMask) != 0);
 			const unsigned lCharacterCount = [lCharacters length];
+			bool lConsumed = false;
 			for (unsigned x = 0; x < lCharacterCount; ++x)
 			{
 				const unichar lChar = [lCharacters characterAtIndex:x];
 				bool lIsChar;
-				const KeyCode lKey = ConvertCharToKeyCode(lChar, lIsChar);
+				const KeyCode lKey = ConvertCharToKeyCode(lChar, lIsNumpad, lIsChar);
 				SetKey(lKey, lIsKeyDown);
 				if (lIsKeyDown)
 				{
-					NotifyOnKeyDown(lKey);
+					//mLog.Infof(_T("Got key down: %x (%u, '%c'%s)."), (unsigned)lChar, (unsigned)lChar, lChar, lIsNumpad? _T(", numpad") : _T(""));
+					lConsumed |= NotifyOnKeyDown(lKey);
 				}
 				else
 				{
@@ -478,22 +468,35 @@ void MacInputManager::OnEvent(NSEvent* pEvent)
 				}
 
 			}
+			// Handle OnChar dispatching.
+			if (lIsKeyDown && !lConsumed)
+			{
+				const NSString* lCharacters = [pEvent characters];
+				const unsigned lCharacterCount = [lCharacters length];
+				for (unsigned x = 0; x < lCharacterCount; ++x)
+				{
+					unichar lChar = [lCharacters characterAtIndex:x];
+					//mLog.Infof(_T("Got char: %x (%u, '%c')"), (unsigned)lChar, (unsigned)lChar, lChar);
+					lChar = ConvertChar(lChar);
+					if (lChar)
+					{
+						NotifyOnChar(lChar);
+					}
+				}
+			}
 		}
-		break;
 		case NSFlagsChanged:
 		{
 			const NSUInteger lKeyModifiers = [pEvent modifierFlags];
+			//mLog.Infof(_T("Got key modifiers: %x (%u)"), lKeyModifiers, lKeyModifiers);
 			const NSUInteger lDeltaModifiers = mKeyModifiers ^ lKeyModifiers;
 			const int lTranslationTable[][2] =
 			{
-				{ UiLepra::InputManager::IN_KBD_LCTRL,	1<<0, },
-				{ UiLepra::InputManager::IN_KBD_LSHIFT,	1<<1, },
-				{ UiLepra::InputManager::IN_KBD_RSHIFT,	1<<2, },
-				{ UiLepra::InputManager::IN_KBD_LALT,	1<<3, },
-				{ UiLepra::InputManager::IN_KBD_RALT,	1<<4, },
-				{ UiLepra::InputManager::IN_KBD_LWIN,	1<<5, },
-				{ UiLepra::InputManager::IN_KBD_RWIN,	1<<6, },
-				{ UiLepra::InputManager::IN_KBD_RCTRL,	1<<13, },
+				{ UiLepra::InputManager::IN_KBD_CAPS_LOCK,	NSAlphaShiftKeyMask, },
+				{ UiLepra::InputManager::IN_KBD_LSHIFT,		NSShiftKeyMask, },
+				{ UiLepra::InputManager::IN_KBD_LCTRL,		NSControlKeyMask, },
+				{ UiLepra::InputManager::IN_KBD_LALT,		NSAlternateKeyMask, },
+				{ UiLepra::InputManager::IN_KBD_LOS,		NSCommandKeyMask, },
 			};
 			for (unsigned x = 0; x < LEPRA_ARRAY_COUNT(lTranslationTable); ++x)
 			{
@@ -526,104 +529,14 @@ void MacInputManager::OnEvent(NSEvent* pEvent)
 	}
 }
 
-/*void MacInputManager::SetKey(KeyCode pWParam, bool pIsDown)
-{
-	printf("Key: %i", pWParam);
-	if (pLParam&0x1000000)	// Extended key = right Alt, Ctrl...
-	{
-		switch (pWParam)
-		{
-			case IN_KBD_LCTRL:		pWParam = IN_KBD_RCTRL;	break;
-			case IN_KBD_LALT:		pWParam = IN_KBD_RALT;	break;
-		}
-	}
-	else if (pWParam == IN_KBD_LSHIFT && (pLParam&0xFF0000) == 0x360000)
-	{
-		pWParam = IN_KBD_RSHIFT;
-	}
-	Parent::SetKey(pWParam, pIsDown);
-}*/
-
-/*BOOL CALLBACK MacInputManager::EnumDeviceCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvRef)
-{
-	MacInputManager* lInputManager = (MacInputManager*)pvRef;
-
-	HRESULT lHR;
-	LPDIRECTINPUTDEVICE8 lDIDevice;
-	
-	lHR = lInputManager->mDirectInput->CreateDevice(lpddi->guidInstance, &lDIDevice, 0);
-
-	if (lHR != DI_OK)
-	{
-		lInputManager->mEnumError = true;
-		return DIENUM_STOP;
-	}
-
-	MacInputDevice* lDevice = new MacInputDevice(lDIDevice, lpddi, lInputManager);
-	InputDevice::Interpretation lInterpretation = InputDevice::TYPE_OTHER;
-	switch (lpddi->dwDevType & 0xFF)
-	{
-		case DI8DEVTYPE_MOUSE:		lInterpretation = InputDevice::TYPE_MOUSE;	break;
-		case DI8DEVTYPE_KEYBOARD:	lInterpretation = InputDevice::TYPE_KEYBOARD;	break;
-		case DI8DEVTYPE_JOYSTICK:	lInterpretation = InputDevice::TYPE_JOYSTICK;	break;
-		case DI8DEVTYPE_GAMEPAD:	lInterpretation = InputDevice::TYPE_GAMEPAD;	break;
-		case DI8DEVTYPE_1STPERSON:	lInterpretation = InputDevice::TYPE_1STPERSON;	break;
-		case DI8DEVTYPE_DRIVING:
-		{
-			switch ((lpddi->dwDevType>>8) & 0xFF)
-			{
-				case DI8DEVTYPEDRIVING_COMBINEDPEDALS:
-				case DI8DEVTYPEDRIVING_DUALPEDALS:
-				case DI8DEVTYPEDRIVING_THREEPEDALS:	lInterpretation = InputDevice::TYPE_PEDALS;	break;
-				default:				lInterpretation = InputDevice::TYPE_WHEEL;	break;
-			}
-		}
-		break;
-		case DI8DEVTYPE_FLIGHT:
-		{
-			switch ((lpddi->dwDevType>>8) & 0xFF)
-			{
-				case DI8DEVTYPEFLIGHT_RC:	lInterpretation = InputDevice::TYPE_GAMEPAD;	break;
-				case DI8DEVTYPEFLIGHT_STICK:	lInterpretation = InputDevice::TYPE_JOYSTICK;	break;
-				default:			lInterpretation = InputDevice::TYPE_FLIGHT;	break;
-			}
-		}
-		break;
-		case DI8DEVTYPE_SUPPLEMENTAL:
-		{
-			switch ((lpddi->dwDevType>>8) & 0xFF)
-			{
-				case DI8DEVTYPESUPPLEMENTAL_COMBINEDPEDALS:
-				case DI8DEVTYPESUPPLEMENTAL_DUALPEDALS:
-				case DI8DEVTYPESUPPLEMENTAL_RUDDERPEDALS:
-				case DI8DEVTYPESUPPLEMENTAL_THREEPEDALS:	lInterpretation = InputDevice::TYPE_PEDALS;	break;
-			}
-		}
-		break;
-	}
-	lDevice->SetInterpretation(lInterpretation, lInputManager->mTypeCount[lInterpretation]);
-	++lInputManager->mTypeCount[lInterpretation];
-	if (lInterpretation == InputDevice::TYPE_MOUSE && lInputManager->mMouse == 0)
-	{
-		lInputManager->mMouse = lDevice;
-	}
-	else if (lInterpretation == InputDevice::TYPE_KEYBOARD && lInputManager->mKeyboard == 0)
-	{
-		lInputManager->mKeyboard = lDevice;
-	}
-	lInputManager->mDeviceList.push_back(lDevice);
-
-	return (DIENUM_CONTINUE);
-}*/
-
 void MacInputManager::ShowCursor()
 {
-	//::ShowCursor(TRUE);
+	CGDisplayHideCursor(kCGDirectMainDisplay);
 }
 
 void MacInputManager::HideCursor()
 {
-	//::ShowCursor(FALSE);
+	CGDisplayShowCursor(kCGDirectMainDisplay);
 }
 
 double MacInputManager::GetCursorX()
@@ -671,11 +584,12 @@ void MacInputManager::EnumDevices()
 		mDeviceList.push_back(lDevice);
 		
 		InputDevice::Interpretation lInterpretation = InputDevice::TYPE_OTHER;
-		if (lDevice->GetNumDigitalElements() < 15 && lDevice->GetNumAnalogueElements() >= 2)
+		if (lDevice->GetNumDigitalElements() > 0 && lDevice->GetNumDigitalElements() < 15 &&
+			lDevice->GetNumAnalogueElements() >= 2)
 		{
 			lInterpretation = InputDevice::TYPE_MOUSE;
 		}
-		else if (lDevice->GetNumDigitalElements() >= 40)
+		else if (lDevice->GetNumDigitalElements() >= 80)
 		{
 			lInterpretation = InputDevice::TYPE_KEYBOARD;
 		}
@@ -685,12 +599,10 @@ void MacInputManager::EnumDevices()
 		if (lInterpretation == InputDevice::TYPE_MOUSE)
 		{
 			mMouse = lDevice;
-			//printf("GOT MOUSE!!!\n");
 		}
 		else if (lInterpretation == InputDevice::TYPE_KEYBOARD)
 		{
 			mKeyboard = lDevice;
-			//printf("GOT KEYBOARD!!!\n");
 		}
 		
 		lHIDDevice = HIDGetNextDevice(lHIDDevice);
@@ -718,10 +630,6 @@ void MacInputManager::RemoveObserver()
 		mDisplayManager->RemoveObserver((MacInputManager*)this);
 	}
 }
-
-
-
-MacInputManager* MacInputManager::mInputManagerSingleton = 0;
 
 LOG_CLASS_DEFINE(UI_INPUT, MacInputManager);
 

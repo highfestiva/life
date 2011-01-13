@@ -130,6 +130,11 @@ void MacOpenGLDisplay::OnResize(int pWidth, int pHeight)
 
 void MacOpenGLDisplay::Resize(int pWidth, int pHeight)
 {
+	if (!mGlView)
+	{
+		return;
+	}
+
 	if (IsFullScreen() == true)
 	{
 		// Since we are in fullscreen mode, we ignore the width and height
@@ -263,6 +268,8 @@ bool MacOpenGLDisplay::InitScreen()
 		//OpenGLExtensions::InitExtensions();
 	}
 
+	[mWnd setContentSize:mWnd.frame.size];
+
 	return true;
 }
 
@@ -325,7 +332,7 @@ bool MacOpenGLDisplay::SetGLPixelFormat()
 	{
 		*lAttrib++ = NSOpenGLPFADepthSize;
 		*lAttrib++ = (NSOpenGLPixelFormatAttribute)mDisplayMode.mBitDepth;
-	 }
+	}
 	if (true)	// TODO: stencil depth somehow?
 	{
 		*lAttrib++ = NSOpenGLPFAStencilSize;
@@ -336,13 +343,17 @@ bool MacOpenGLDisplay::SetGLPixelFormat()
 	[lPixelFormat initWithAttributes:lPixelFormatAttribs];
 
 	mGlView = [NSOpenGLView alloc];
-	[mGlView initWithFrame:[mWnd frame] pixelFormat:lPixelFormat];
+	//CGRect lContentSize = [mWnd contentSize];
+	[mGlView initWithFrame:mWnd.frame pixelFormat:lPixelFormat];
 	[mWnd setContentView:mGlView];
 	[mWnd setAcceptsMouseMovedEvents: YES];
 	[mWnd setIgnoresMouseEvents: NO];
+	//[mGlView setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
+	//[mGlView setAutoresizesSubviews:YES];
 	//[mWnd setFrame: NSMakeRect(0, 0, mScreen->GetActiveResolution().GetWidth(), mScreen->GetActiveResolution().GetHeight()) display: YES];
+	//mGlView.frame = lContentSize;
 
-	[mGlView reshape];
+	//[mGlView reshape];
 	return (true);	// TODO: add error checking!
 }
 

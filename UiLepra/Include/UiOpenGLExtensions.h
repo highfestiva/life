@@ -30,7 +30,7 @@
 
 #elif defined(LEPRA_MAC)
 
-//#include <Carbon/Carbon.h>
+#include <OpenGL/OpenGL.h>
 #include <OpenGL/gl.h>
 #include <OpenGL/glu.h>
 #include <OpenGL/glext.h>

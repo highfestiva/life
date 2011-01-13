@@ -202,7 +202,7 @@ def _printresult():
                 return
         showed_result = True
         if updates+removes:     print("Operation successful, %i resulting files updated(/removed)." % (updates+removes))
-        else:                   print("Already up-to-date.")
+        else:                   print("Build up-to-date.")
 
 
 def _createmakes(force=False):

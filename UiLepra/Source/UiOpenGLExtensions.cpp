@@ -437,6 +437,11 @@ bool OpenGLExtensions::IsVSyncEnabled()
 	{
 		return (wglGetSwapIntervalEXT() > 0);
 	}
+#elif defined(LEPRA_MAC)
+	CGLContextObj lContext = CGLGetCurrentContext();
+	GLint lSwapInterval = 0;
+	CGLGetParameter(lContext, kCGLCPSwapInterval, &lSwapInterval);
+	return lSwapInterval != 0;
 #else
 #pragma message("Warning: OpenGLExtensions::IsVSyncEnabled() is using default behaviour.")
 #endif
@@ -450,6 +455,10 @@ bool OpenGLExtensions::SetVSyncEnabled(bool pEnabled)
 	{
 		return (wglSwapIntervalEXT(pEnabled ? 1 : 0) != FALSE);
 	}
+#elif defined(LEPRA_MAC)
+	CGLContextObj lContext = CGLGetCurrentContext();
+	GLint lSwapInterval = pEnabled? 1 : 0;
+	CGLSetParameter(lContext, kCGLCPSwapInterval, &lSwapInterval);
 #else
 #pragma message("Warning: OpenGLExtensions::SetVSyncEnabled() is not implemented.")
 #endif

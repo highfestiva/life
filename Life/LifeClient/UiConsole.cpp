@@ -29,7 +29,7 @@ UiConsole::UiConsole(ConsoleManager* pManager, UiCure::GameUiManager* pUiManager
 	mManager(pManager),
 	mUiManager(pUiManager),
 	mArea(pArea),
-	mColor(10, 30, 20, 160),
+	mColor(10, 20, 30, 230),
 	mConsoleComponent(0),
 	mConsoleOutput(0),
 	mConsoleInput(0),

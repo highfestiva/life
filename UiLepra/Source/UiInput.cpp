@@ -127,6 +127,7 @@ void InputElement::SetValue(float64 pNewValue)
 	if (mInterpretation == RELATIVE_AXIS || ::fabs(pNewValue - mValue) > lInputEpsilon)
 	{
 		//::printf("%s(%i) = %f\n", GetIdentifier().c_str(), GetTypeIndex(), pNewValue);
+		//mLog.Infof(_T("%s(%i) = %f\n"), GetIdentifier().c_str(), GetTypeIndex(), pNewValue);
 
 		mPrevValue = mValue;
 		mValue = pNewValue;
@@ -138,6 +139,12 @@ void InputElement::SetValue(float64 pNewValue)
 		}
 	}
 }
+
+LOG_CLASS_DEFINE(UI_INPUT, InputElement);
+
+
+
+// ---------------------------------------------------------------------------
 
 
 
@@ -415,9 +422,11 @@ bool InputDevice::SetCalibration(const CalibrationData& pData)
 	return (lOk);
 }
 
+LOG_CLASS_DEFINE(UI_INPUT, InputDevice);
 
 
 
+// ---------------------------------------------------------------------------
 
 
 
@@ -541,8 +550,8 @@ str InputManager::GetKeyName(KeyCode pKeyCode)
 		X(PRINT_SCREEN);
 		X(INSERT);
 		X(DEL);
-		X(LWIN);
-		X(RWIN);
+		X(LOS);
+		X(ROS);
 		X(CONTEXT_MENU);
 		X(NUMPAD_0);
 		X(NUMPAD_1);

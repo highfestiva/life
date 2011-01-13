@@ -15,80 +15,38 @@
 
 
 
-@interface NativeWindow: NSWindow
+@interface NativeWindow: NSWindow <NSWindowDelegate>
 {
-	UiLepra::MacDisplayManager* mDisplayManager;
+	@public UiLepra::MacDisplayManager* mDisplayManager;
 }
 @end
 
 @implementation NativeWindow
-/*- (void) mouseDown: (NSEvent*)theEvent
-{
-	//printf("Mouse down i min favoritvy\n");
-	//[self setAcceptsMouseMovedEvents: YES];
-	//[self setIgnoresMouseEvents: NO];
-}*/
-
-- (void) mouseDragged: (NSEvent*)theEvent
-{
-	//printf("Mouse dragged i min favoritvy\n");
-	//[self setAcceptsMouseMovedEvents: YES];
-	//[self setIgnoresMouseEvents: NO];
-	//[self mouseMoved: theEvent];
-	mDisplayManager->DispatchEvent(theEvent);
-}
-
-- (void)mouseMoved: (NSEvent*)theEvent
-{
-	//printf("mouseMoved!\n");
-	//[super mouseMoved:theEvent];
-	mDisplayManager->DispatchEvent(theEvent);
-}
-
 -(void) keyDown:(NSEvent*)theEvent
 {
 	mDisplayManager->DispatchEvent(theEvent);
 }
-
 -(void) keyUp:(NSEvent*)theEvent
 {
-	//printf("view keyup!\n");
 	mDisplayManager->DispatchEvent(theEvent);
 }
-
 -(void) flagsChanged:(NSEvent*)theEvent
 {
 	mDisplayManager->DispatchEvent(theEvent);
 }
-
-/*- (void)mouseDown: (NSEvent*)theEvent
+- (void) mouseDragged: (NSEvent*)theEvent
 {
-	//((UiLepra::MacInputManager*)InputManager::GetInputManager())->OSXMouseDownEvent(0);
+	mDisplayManager->DispatchEvent(theEvent);
 }
-- (void)rightMouseDown: (NSEvent*)theEvent
+- (void)mouseMoved: (NSEvent*)theEvent
 {
-	//((UiLepra::MacInputManager*)InputManager::GetInputManager())->OSXMouseDownEvent(1);
+	mDisplayManager->DispatchEvent(theEvent);
 }
-- (void)otherMouseDown: (NSEvent*)theEvent
+-(void) windowDidResize:(NSNotification*)notification
 {
-	//((UiLepra::MacInputManager*)InputManager::GetInputManager())->OSXMouseDownEvent(2);
+	NSView* lView = [self contentView];
+	mDisplayManager->DispatchResize(lView.frame.size.width, lView.frame.size.height);
 }
-- (void)mouseUp: (NSEvent*)theEvent
-{
-	//((UiLepra::MacInputManager*)InputManager::GetInputManager())->OSXMouseUpEvent(0);
-}
-- (void)rightMouseUp: (NSEvent*)theEvent
-{
-	//((UiLepra::MacInputManager*)InputManager::GetInputManager())->OSXMouseUpEvent(1);
-}
-- (void)otherMouseUp: (NSEvent*)theEvent
-{
-	//((UiLepra::MacInputManager*)InputManager::GetInputManager())->OSXMouseUpEvent(2);
-}
-- (void)scrollWheel: (NSEvent*)theEvent
-{
-	//((MacInputManager*)InputManager::GetInputManager())->OSXScrollWheelEvent([theEvent deltaY]/10.0f);
-}*/
 - (BOOL)acceptsFirstResponder
 {
 	return YES;
@@ -110,6 +68,19 @@ namespace UiLepra
 
 
 
+static NSString* Encode(const str& pText)
+{
+#if defined(LEPRA_UNICODE)
+	NSString* lText = [NSString stringWithCString:pText.c_str() encoding:NSUTF32StringEncoding];
+#else
+	NSString* lText = [NSString stringWithCString:pText.c_str() encoding:NSUTF8StringEncoding];
+#endif
+	return lText;
+}
+
+
+
+
 DisplayManager* DisplayManager::CreateDisplayManager(ContextType pCT)
 {
 	DisplayManager* lDisplayManager = 0;
@@ -121,8 +92,9 @@ DisplayManager* DisplayManager::CreateDisplayManager(ContextType pCT)
 	return (lDisplayManager);
 }
 
-void DisplayManager::EnableScreensaver(bool /*pEnable*/)
+void DisplayManager::EnableScreensaver(bool pEnable)
 {
+	(void)pEnable;
 	// TODO: implement!
 }
 
@@ -159,7 +131,8 @@ MacDisplayManager::MacDisplayManager():
 	}
 	if(lDisplayCount >= 1)
 	{
-		CFArrayRef lModeList = CGDisplayAvailableModes(lDisplays[0]);
+		//CGSize lScreenResolution = CGDisplayBounds(lDisplays[0]).size;
+		CFArrayRef lModeList = CGDisplayCopyAllDisplayModes(lDisplays[0], NULL);
 		if (!lModeList)
 		{
 			throw std::runtime_error("CoreGraphics error: fetch of display modes failed.");
@@ -169,7 +142,7 @@ MacDisplayManager::MacDisplayManager():
 		mEnumeratedDisplayMode = new DisplayMode[mEnumeratedDisplayModeCount];
 		for (CFIndex x = 0; x < lModeCount; ++x)
 		{
-			CFDictionaryRef lMode = (CFDictionaryRef)CFArrayGetValueAtIndex(lModeList, x);
+			CGDisplayModeRef lMode = (CGDisplayModeRef)CFArrayGetValueAtIndex(lModeList, x);
 			mEnumeratedDisplayMode[x] = ConvertNativeDisplayMode(lMode);
 		}
 	}
@@ -236,12 +209,7 @@ void MacDisplayManager::SetCaption(const str& pCaption, bool pInternalCall)
 
 		if (pInternalCall == false || mCaptionSet == false)
 		{
-#if defined(LEPRA_UNICODE)
-			NSString* lTitle = [NSString stringWithCString:pCaption.c_str() encoding:NSUTF32StringEncoding];
-#else
-			NSString* lTitle = [NSString stringWithCString:pCaption.c_str() encoding:NSUTF8StringEncoding];
-#endif
-			[mWnd setTitle:lTitle];
+			[mWnd setTitle:Encode(pCaption)];
 		}
 	}
 }
@@ -319,12 +287,6 @@ bool MacDisplayManager::OpenScreen(const DisplayMode& pDisplayMode, ScreenMode p
 	if (lOk)
 	{
 		lOk = mIsOpen = InitScreen();
-		if (mIsOpen)
-		{
-			// TODO: fix.
-			/*AddObserver(WM_SIZE, this);
-			AddObserver(WM_SIZING, this);*/
-		}
 	}
 
 	return lOk;
@@ -335,8 +297,6 @@ void MacDisplayManager::CloseScreen()
 	if (mIsOpen)
 	{
 		mIsOpen = false;
-		MacCore::RemoveDisplayManager(this);
-		RemoveObserver(this);
 
 		if (mWnd)
 		{
@@ -364,12 +324,14 @@ bool MacDisplayManager::InitWindow()
 		backing:		NSBackingStoreBuffered
 		defer:			NO];
 	lWnd->mDisplayManager = this;
+	lWnd.delegate = lWnd;
 	[mWnd setAcceptsMouseMovedEvents: YES];
 	[mWnd setIgnoresMouseEvents: NO];
         [mWnd setReleasedWhenClosed: YES];
 	[mWnd makeKeyAndOrderFront: nil];
 	[mWnd	setFrame:	NSMakeRect(0, 0, mDisplayMode.mWidth, mDisplayMode.mHeight)
 		display:	YES];
+	[mWnd center];
 
 	++mWindowCount;
 
@@ -454,47 +416,27 @@ bool MacDisplayManager::InitWindow()
 
 void MacDisplayManager::GetBorderSize(int& pSizeX, int& pSizeY)
 {
-	//if (mScreenMode == FULLSCREEN ||
-	//   mScreenMode == SPLASH_WINDOW)
+	if (mScreenMode == FULLSCREEN || mScreenMode == SPLASH_WINDOW)
 	{
 		pSizeX = 0;
 		pSizeY = 0;
 	}
-	// TODO: implement!
-	/*else if(mWnd != 0)
+	else if (mWnd)
 	{
-		// Use the safest way there is... Taking the difference between
-		// the size of the window and the size of the client area.
-		// These numbers can't lie.
-		RECT lClientRect;
-		RECT lWindowRect;
-		::GetClientRect(mWnd, &lClientRect);
-		::GetWindowRect(mWnd, &lWindowRect);
-
-		pSizeX = ((lWindowRect.right - lWindowRect.left) -
-					(lClientRect.right - lClientRect.left));
-
-		pSizeY = ((lWindowRect.bottom - lWindowRect.top) -
-					(lClientRect.bottom - lClientRect.top));
+		const int lWindowWidth	= mWnd.frame.size.width;
+		const int lWindowHeight	= mWnd.frame.size.height;
+		NSView* lView = [mWnd contentView];
+		const int lViewWidth	= lView.frame.size.width;
+		const int lViewHeight	= lView.frame.size.height;
+		pSizeX = lWindowWidth - lViewWidth;
+		pSizeY = lWindowHeight - lViewHeight;
 	}
 	else
 	{
-		// We have to use the awful system function GetSystemMetrics().
-		// I don't trust that function at all, or any of the values it returns.
-		if (mScreenMode == WINDOWED)
-		{
-			pSizeX = ::GetSystemMetrics(SM_CXSIZEFRAME) * 2;
-			pSizeY = ::GetSystemMetrics(SM_CYSIZEFRAME) * 2 +
-					   ::GetSystemMetrics(SM_CYCAPTION);
-		}
-		else
-		{
-			// Static window.
-			pSizeX = ::GetSystemMetrics(SM_CXFIXEDFRAME) * 2;
-			pSizeY = ::GetSystemMetrics(SM_CYFIXEDFRAME) * 2 +
-					   ::GetSystemMetrics(SM_CYCAPTION);
-		}
-	}*/
+		assert(false);
+		pSizeX = 0;
+		pSizeY = 0;
+	}
 }
 
 int MacDisplayManager::GetWindowWidth(int pClientWidth)
@@ -620,100 +562,33 @@ void MacDisplayManager::RemoveObserver(MacObserver* pObserver)
 
 void MacDisplayManager::ShowMessageBox(const str& pMsg, const str& pCaption)
 {
-	// StandardAlert() I googled, whatever that might be.
-}
-
-void MacDisplayManager::OnEvent(NSEvent* e)
-{
-	/*switch(pMsg)
-	{
-		case WM_SIZING:
-		{
-			LPRECT lRect = (LPRECT)(intptr_t)plParam;
-
-			int lClientWidth  = GetClientWidth(lRect->right - lRect->left);
-			int lClientHeight = GetClientHeight(lRect->bottom - lRect->top);
-
-			DispatchResize(lClientWidth, lClientHeight);
-			mMinimized = false;
-			mMaximized = false;
-		}
-		break;
-		case WM_SIZE:
-		{
-			switch(pwParam)
-			{
-				case SIZE_MINIMIZED:
-				{
-					DispatchMinimize();
-					mMinimized = true;
-				} break;
-				case SIZE_MAXIMIZED:
-				{
-					mNormalWidth  = mDisplayMode.mWidth;
-					mNormalHeight = mDisplayMode.mHeight;
-					DispatchMaximize((int)LOWORD(plParam), (int)HIWORD(plParam));
-					mMaximized = true;
-				} break;
-				case SIZE_RESTORED:
-				{
-					int lWindowWidth;
-					int lWindowHeight;
-
-					if (mMaximized == true)
-					{
-						lWindowWidth  = GetWindowWidth(mNormalWidth);
-						lWindowHeight = GetWindowHeight(mNormalHeight);
-					}
-					else
-					{
-						lWindowWidth  = GetWindowWidth(mDisplayMode.mWidth);
-						lWindowHeight = GetWindowHeight(mDisplayMode.mHeight);
-					}
-
-					DispatchResize((int)LOWORD(plParam), (int)HIWORD(plParam));
-
-					mMinimized = false;
-					mMaximized = false;
-				} break;
-			}
-		}
-		break;
-	}*/
+	NSRunAlertPanel(Encode(pCaption), Encode(pMsg), nil, nil, nil);
 }
 
 
 
-DisplayMode MacDisplayManager::ConvertNativeDisplayMode(CFDictionaryRef pMode)
+DisplayMode MacDisplayManager::ConvertNativeDisplayMode(CGDisplayModeRef pMode)
 {
-	CFNumberRef lResWidth = (CFNumberRef)CFDictionaryGetValue(pMode, kCGDisplayWidth);
-	CFNumberRef lResHeight = (CFNumberRef)CFDictionaryGetValue(pMode, kCGDisplayHeight);
-	CFNumberRef lResRefreshRate = (CFNumberRef)CFDictionaryGetValue(pMode, kCGDisplayRefreshRate);
-	CFNumberRef lResBitsPerPixel = (CFNumberRef)CFDictionaryGetValue(pMode, kCGDisplayBitsPerPixel);
-
-	if (!lResWidth || !lResHeight || !lResRefreshRate || !lResBitsPerPixel)
-	{
-		throw std::runtime_error("Unknown error while inspecting display mode.");
-	}
-
-	int lWidth;
-	CFNumberGetValue(lResWidth, kCFNumberSInt32Type, &lWidth);
-	int lHeight;
-	CFNumberGetValue(lResHeight, kCFNumberSInt32Type, &lHeight);
-	int lBpp;
-	CFNumberGetValue(lResBitsPerPixel, kCFNumberSInt32Type, &lBpp);
-	float lRefreshRate;
-	CFNumberGetValue(lResRefreshRate, kCFNumberFloat32Type, &lRefreshRate);
-
 	DisplayMode lDisplayMode;
-	lDisplayMode.mWidth = lWidth;
-	lDisplayMode.mHeight = lHeight;
-	lDisplayMode.mBitDepth = lBpp;
-	lDisplayMode.mRefreshRate = lRefreshRate;
+	lDisplayMode.mWidth = CGDisplayModeGetWidth(pMode);
+	lDisplayMode.mHeight = CGDisplayModeGetHeight(pMode);
+	lDisplayMode.mRefreshRate = (int)CGDisplayModeGetRefreshRate(pMode);
+	lDisplayMode.mBitDepth = 0;
+	CFStringRef lPixEnc = CGDisplayModeCopyPixelEncoding(pMode);
+	if (CFStringCompare(lPixEnc, CFSTR(IO32BitDirectPixels), kCFCompareCaseInsensitive) == kCFCompareEqualTo)
+	{
+		lDisplayMode.mBitDepth = 32;
+	}
+	else if(CFStringCompare(lPixEnc, CFSTR(IO16BitDirectPixels), kCFCompareCaseInsensitive) == kCFCompareEqualTo)
+	{
+		lDisplayMode.mBitDepth = 16;
+	}
+	else if(CFStringCompare(lPixEnc, CFSTR(IO8BitIndexedPixels), kCFCompareCaseInsensitive) == kCFCompareEqualTo)
+	{
+		lDisplayMode.mBitDepth = 8;
+	}
 	return (lDisplayMode);
 }
-
-
 
 int MacDisplayManager::mWindowCount = 0;
 LOG_CLASS_DEFINE(UI_GFX, MacDisplayManager);

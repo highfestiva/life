@@ -151,6 +151,8 @@ private:
 
 	typedef std::vector<InputFunctor*> FunctorArray;
 	FunctorArray mFunctorArray;
+
+	LOG_CLASS_DECLARE();
 };
 
 #define ADD_INPUT_CALLBACK(_e, _func, _class) \
@@ -248,6 +250,8 @@ private:
 	bool mActive;
 
 	str mIdentifier;
+
+	LOG_CLASS_DECLARE();
 };
 
 
@@ -333,8 +337,8 @@ public:
 		IN_KBD_X		= 88,
 		IN_KBD_Y		= 89,
 		IN_KBD_Z		= 90,
-		IN_KBD_LWIN	= 91,
-		IN_KBD_RWIN	= 92,
+		IN_KBD_LOS		= 91,
+		IN_KBD_ROS		= 92,
 
 		IN_KBD_CONTEXT_MENU	= 93,	// The "windows menu" button on Microsoft-compatible keyboards.
 

@@ -8762,8 +8762,10 @@
 		B1E0659112D79F2200FA3F9D /* Include */ = {
 			isa = PBXGroup;
 			children = (
-				B1E0659212D79F2200FA3F9D /* GLEXT.H */,
 				B1E0659312D79F2200FA3F9D /* Mac */,
+				B1E065A212D79F2200FA3F9D /* Win32 */,
+				B1E065A912D79F2200FA3F9D /* X11 */,
+				B1E0659212D79F2200FA3F9D /* GLEXT.H */,
 				B1E0659812D79F2200FA3F9D /* macglext.h */,
 				B1E0659912D79F2200FA3F9D /* UiCore.h */,
 				B1E0659A12D79F2200FA3F9D /* UiDisplayManager.h */,
@@ -8774,8 +8776,6 @@
 				B1E0659F12D79F2200FA3F9D /* UiSoundManagerFMod.h */,
 				B1E065A012D79F2200FA3F9D /* UiSoundManagerMock.h */,
 				B1E065A112D79F2200FA3F9D /* UiSoundManagerOpenAL.h */,
-				B1E065A212D79F2200FA3F9D /* Win32 */,
-				B1E065A912D79F2200FA3F9D /* X11 */,
 			);
 			path = Include;
 			sourceTree = "<group>";
@@ -8831,6 +8831,8 @@
 			isa = PBXGroup;
 			children = (
 				B1E065B712D79F2200FA3F9D /* Mac */,
+				B1E065CF12D79F2200FA3F9D /* Win32 */,
+				B1E065D512D79F2200FA3F9D /* X11 */,
 				B1E065C012D79F2200FA3F9D /* UiDisplayManager.cpp */,
 				B1E065C112D79F2200FA3F9D /* UiDisplayManager.o */,
 				B1E065C212D79F2200FA3F9D /* UiInput.cpp */,
@@ -8846,8 +8848,6 @@
 				B1E065CC12D79F2200FA3F9D /* UiSoundManagerMock.cpp */,
 				B1E065CD12D79F2200FA3F9D /* UiSoundManagerOpenAL.cpp */,
 				B1E065CE12D79F2200FA3F9D /* UiSoundManagerOpenAL.o */,
-				B1E065CF12D79F2200FA3F9D /* Win32 */,
-				B1E065D512D79F2200FA3F9D /* X11 */,
 			);
 			path = Source;
 			sourceTree = "<group>";

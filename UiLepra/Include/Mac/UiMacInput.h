@@ -41,9 +41,7 @@ public:
 	str GetCalibration() const;
 	bool SetCalibration(const str& pData);
 
-protected:
 private:
-
 	enum
 	{
 		MAX_INT = 0x7FFFFFFF,
@@ -99,8 +97,6 @@ public:
 	MacInputManager(MacDisplayManager* pDisplayManager);
 	virtual ~MacInputManager();
 
-	static MacInputManager* GetSingleton();	// TODO: remove this abomination!
-
 	bool IsInitialized();
 	virtual void Refresh();
 
@@ -121,7 +117,7 @@ public:
 	void SetMousePosition(int x, int y);
 
 	static unichar ConvertChar(unichar pChar);
-	static KeyCode ConvertCharToKeyCode(unichar pChar, bool& pIsChar);
+	static KeyCode ConvertCharToKeyCode(unichar pChar, bool pIsNumpad, bool& pIsChar);
 
 protected:
 	virtual void OnEvent(NSEvent* pEvent);
@@ -135,8 +131,6 @@ private:
 
 	void AddObserver();
 	void RemoveObserver();
-
-	static MacInputManager* mInputManagerSingleton;	// TODO: remove this abomination!
 
 	MacDisplayManager* mDisplayManager;
 

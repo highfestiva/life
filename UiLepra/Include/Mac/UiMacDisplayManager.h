@@ -23,7 +23,7 @@ public:
 	virtual void OnEvent(NSEvent* e) = 0;
 };
 
-class MacDisplayManager: public DisplayManager, public MacObserver
+class MacDisplayManager: public DisplayManager
 {
 public:
 	friend class DisplayManager;
@@ -58,10 +58,7 @@ public:
 	// Show a popup dialog with a message.
 	void ShowMessageBox(const str& pMsg, const str& pCaption);
 
-	virtual void OnEvent(NSEvent* e);
-
 protected:
-
 	// Normal resize (not maximize, nor minimized).
 	virtual void OnResize(int pWidth, int pHeight) = 0;
 
@@ -92,7 +89,7 @@ protected:
 		return mMaximized;
 	}
 
-	static DisplayMode ConvertNativeDisplayMode(CFDictionaryRef pMode);
+	static DisplayMode ConvertNativeDisplayMode(CGDisplayModeRef pMode);
 	
 	//Screen Stuff
 
