@@ -108,12 +108,12 @@ bool GameManager::BeginTick()
 	}
 
 	{
-		LEPRA_MEASURE_SCOPE(AcquireTickLock);
+		//LEPRA_MEASURE_SCOPE(AcquireTickLock);
 		GetTickLock()->Acquire();
 	}
 
 	{
-		LEPRA_MEASURE_SCOPE(NetworkAndInput);
+		//LEPRA_MEASURE_SCOPE(NetworkAndInput);
 
 		mTime->Tick();
 
@@ -129,7 +129,7 @@ bool GameManager::BeginTick()
 
 	if (mTime->GetAffordedPhysicsStepCount() > 0)
 	{
-		LEPRA_MEASURE_SCOPE(StartPhysics);
+		//LEPRA_MEASURE_SCOPE(StartPhysics);
 		// Physics thread
 		// 1. does *NOT* add/delete objects,
 		// 2. processes context objects ("scripts"),
@@ -145,7 +145,7 @@ bool GameManager::BeginTick()
 
 bool GameManager::EndTick()
 {
-	LEPRA_MEASURE_SCOPE(EndTick);
+	//LEPRA_MEASURE_SCOPE(EndTick);
 
 	if (mTime->GetAffordedPhysicsStepCount() > 0)
 	{
@@ -162,7 +162,7 @@ bool GameManager::EndTick()
 
 
 	{
-		LEPRA_MEASURE_SCOPE(NetworkSend);
+		//LEPRA_MEASURE_SCOPE(NetworkSend);
 
 		// Sends network packets. Among other things, movement of locally-controlled objects are sent.
 		// This must be run after input processing, otherwise input-physics-output loop won't have
@@ -495,12 +495,12 @@ void GameManager::PhysicsTick()
 		mLog.Errorf(_T("Got some crash or major problem in physics simulation!"));
 	}
 	{
-		LEPRA_MEASURE_SCOPE(PostSteps);
+		//LEPRA_MEASURE_SCOPE(PostSteps);
 		mPhysics->PostSteps();
 	}
 
 	{
-		LEPRA_MEASURE_SCOPE(Handles);
+		//LEPRA_MEASURE_SCOPE(Handles);
 		mContext->HandleIdledBodies();
 		mContext->HandlePhysicsSend();
 		HandleWorldBoundaries();

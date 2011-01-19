@@ -116,6 +116,7 @@ public:
 	virtual double GetCursorY();
 	void SetMousePosition(int x, int y);
 
+	static KeyCode ConvertMacKeyCodeToKeyCode(unsigned pMacKeyCode);
 	static unichar ConvertChar(unichar pChar);
 	static KeyCode ConvertCharToKeyCode(unichar pChar, bool pIsNumpad, bool& pIsChar);
 

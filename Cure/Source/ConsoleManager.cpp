@@ -176,7 +176,7 @@ bool ConsoleManager::ForkExecuteCommand(const str& pCommand)
 		{
 			log_volatile(mConsole->GetLog().Debug(_T("ForkThread: started.")));
 			mConsole->AddFork(this);
-			if (mConsole->ExecuteCommand(mCommand, false) != 0)
+			if (mConsole->ExecuteCommand(mCommand) != 0)
 			{
 				mConsole->GetLog().AError("ForkThread: execution resulted in an error.");
 			}

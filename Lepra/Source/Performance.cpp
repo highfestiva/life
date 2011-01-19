@@ -46,10 +46,25 @@ void PerformanceData::Append(double pPeriodValue, double pTimeOfLastMeasure)
 	}
 	else
 	{
-		mMinimum = (pPeriodValue < mMinimum)? pPeriodValue : mMinimum;
+		if (pPeriodValue < mMinimum)
+		{
+			mMinimum = pPeriodValue;
+		}
+		else if (pPeriodValue > mMaximum)
+		{
+			mMaximum = pPeriodValue;
+		}
+		else
+		{
+			// Close the gap between min and max (equalizer style) so the
+			// fluctuation has some relevance even after startup.
+			const double lStep = (mMaximum-mMinimum) * 0.001;
+			mMinimum += lStep;
+			mMaximum -= lStep;
+		}
+
 		mLast = pPeriodValue;
 		mSlidingAverage = Math::Lerp(mSlidingAverage, mLast, 0.05);
-		mMaximum = (pPeriodValue > mMaximum)? pPeriodValue : mMaximum;
 	}
 }
 

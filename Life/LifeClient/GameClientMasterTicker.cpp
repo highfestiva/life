@@ -216,7 +216,7 @@ bool GameClientMasterTicker::Tick()
 	}
 
 	{
-		LEPRA_MEASURE_SCOPE(RenderSlaves);
+		//LEPRA_MEASURE_SCOPE(RenderSlaves);
 
 		mUiManager->GetRenderer()->ClearDebugInfo();
 
@@ -269,7 +269,7 @@ bool GameClientMasterTicker::Tick()
 
 	if (mServer)
 	{
-		LEPRA_MEASURE_SCOPE(ServerEndTick);
+		//LEPRA_MEASURE_SCOPE(ServerEndTick);
 		mServer->EndTick();
 	}
 
@@ -299,7 +299,7 @@ bool GameClientMasterTicker::Tick()
 	}
 
 	{
-		LEPRA_MEASURE_SCOPE(UpdateSlaveLayout);
+		//LEPRA_MEASURE_SCOPE(UpdateSlaveLayout);
 		if (mActiveWidth != mUiManager->GetDisplayManager()->GetWidth() ||
 			mActiveHeight != mUiManager->GetDisplayManager()->GetHeight())
 		{
@@ -320,7 +320,7 @@ bool GameClientMasterTicker::Tick()
 	}
 	else
 	{
-		LEPRA_MEASURE_SCOPE(RunYieldCommand);
+		//LEPRA_MEASURE_SCOPE(RunYieldCommand);
 		mConsole->ExecuteYieldCommand();
 	}
 

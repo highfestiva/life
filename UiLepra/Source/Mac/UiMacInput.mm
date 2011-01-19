@@ -355,6 +355,132 @@ void MacInputManager::Refresh()
 	}*/
 }
 
+MacInputManager::KeyCode MacInputManager::ConvertMacKeyCodeToKeyCode(unsigned pMacKeyCode)
+{
+	switch (pMacKeyCode)
+	{
+		case kVK_ANSI_A:		return IN_KBD_A;
+		case kVK_ANSI_B:		return IN_KBD_B;
+		case kVK_ANSI_C:		return IN_KBD_C;
+		case kVK_ANSI_D:		return IN_KBD_D;
+		case kVK_ANSI_E:		return IN_KBD_E;
+		case kVK_ANSI_F:		return IN_KBD_F;
+		case kVK_ANSI_G:		return IN_KBD_G;
+		case kVK_ANSI_H:		return IN_KBD_H;
+		case kVK_ANSI_I:		return IN_KBD_I;
+		case kVK_ANSI_J:		return IN_KBD_J;
+		case kVK_ANSI_K:		return IN_KBD_K;
+		case kVK_ANSI_L:		return IN_KBD_L;
+		case kVK_ANSI_M:		return IN_KBD_M;
+		case kVK_ANSI_N:		return IN_KBD_N;
+		case kVK_ANSI_O:		return IN_KBD_O;
+		case kVK_ANSI_P:		return IN_KBD_P;
+		case kVK_ANSI_Q:		return IN_KBD_Q;
+		case kVK_ANSI_R:		return IN_KBD_R;
+		case kVK_ANSI_S:		return IN_KBD_S;
+		case kVK_ANSI_T:		return IN_KBD_T;
+		case kVK_ANSI_U:		return IN_KBD_U;
+		case kVK_ANSI_V:		return IN_KBD_V;
+		case kVK_ANSI_W:		return IN_KBD_W;
+		case kVK_ANSI_X:		return IN_KBD_X;
+		case kVK_ANSI_Y:		return IN_KBD_Y;
+		case kVK_ANSI_Z:		return IN_KBD_Z;
+		case kVK_ANSI_1:		return IN_KBD_1;
+		case kVK_ANSI_2:		return IN_KBD_2;
+		case kVK_ANSI_3:		return IN_KBD_3;
+		case kVK_ANSI_4:		return IN_KBD_4;
+		case kVK_ANSI_5:		return IN_KBD_5;
+		case kVK_ANSI_6:		return IN_KBD_6;
+		case kVK_ANSI_7:		return IN_KBD_7;
+		case kVK_ANSI_8:		return IN_KBD_8;
+		case kVK_ANSI_9:		return IN_KBD_9;
+		case kVK_ANSI_0:		return IN_KBD_0;
+		case kVK_ANSI_Equal:		return IN_KBD_PLUS;
+		case kVK_ANSI_Minus:		return IN_KBD_ACUTE;
+		case kVK_ANSI_RightBracket:	return IN_KBD_AA;
+		case kVK_ANSI_LeftBracket:	return IN_KBD_DIAERESIS;
+		case kVK_ANSI_Quote:		return IN_KBD_OE;
+		case kVK_ANSI_Semicolon:	return IN_KBD_AE;
+		case kVK_ANSI_Backslash:	return IN_KBD_APOSTROPHE;
+		case kVK_ANSI_Comma:		return IN_KBD_COMMA;
+		case kVK_ANSI_Slash:		return IN_KBD_MINUS;
+		case kVK_ANSI_Period:		return IN_KBD_DOT;
+		case kVK_ANSI_Grave:		return IN_KBD_PARAGRAPH;
+		case kVK_ANSI_KeypadDecimal:	return IN_KBD_NUMPAD_DOT;
+		case kVK_ANSI_KeypadMultiply:	return IN_KBD_NUMPAD_MUL;
+		case kVK_ANSI_KeypadPlus:	return IN_KBD_NUMPAD_PLUS;
+		case kVK_ANSI_KeypadClear:	return IN_KBD_NUM_LOCK;
+		case kVK_ANSI_KeypadDivide:	return IN_KBD_NUMPAD_DIV;
+		case kVK_ANSI_KeypadEnter:	return IN_KBD_ENTER;
+		case kVK_ANSI_KeypadMinus:	return IN_KBD_NUMPAD_MINUS;
+		case kVK_ANSI_KeypadEquals:	return IN_KBD_NUM_LOCK;
+		case kVK_ANSI_Keypad0:		return IN_KBD_NUMPAD_0;
+		case kVK_ANSI_Keypad1:		return IN_KBD_NUMPAD_1;
+		case kVK_ANSI_Keypad2:		return IN_KBD_NUMPAD_2;
+		case kVK_ANSI_Keypad3:		return IN_KBD_NUMPAD_3;
+		case kVK_ANSI_Keypad4:		return IN_KBD_NUMPAD_4;
+		case kVK_ANSI_Keypad5:		return IN_KBD_NUMPAD_5;
+		case kVK_ANSI_Keypad6:		return IN_KBD_NUMPAD_6;
+		case kVK_ANSI_Keypad7:		return IN_KBD_NUMPAD_7;
+		case kVK_ANSI_Keypad8:		return IN_KBD_NUMPAD_8;
+		case kVK_ANSI_Keypad9:		return IN_KBD_NUMPAD_9;
+		case kVK_Return:		return IN_KBD_ENTER;
+		case kVK_Tab:			return IN_KBD_TAB;
+		case kVK_Space:			return IN_KBD_SPACE;
+		case kVK_Delete:		return IN_KBD_DEL;
+		case kVK_Escape:		return IN_KBD_ESC;
+		case kVK_Command:		return IN_KBD_LALT;
+		case kVK_Shift:			return IN_KBD_LSHIFT;
+		case kVK_CapsLock:		return IN_KBD_CAPS_LOCK;
+		case kVK_Option:		return IN_KBD_LOS;
+		case kVK_Control:		return IN_KBD_LCTRL;
+		case kVK_RightShift:		return IN_KBD_RSHIFT;
+		case kVK_RightOption:		return IN_KBD_ROS;
+		case kVK_RightControl:		return IN_KBD_RCTRL;
+		case kVK_Function:		return IN_KBD_CONTEXT_MENU;
+		case kVK_F17:			return IN_KBD_F12;
+		case kVK_VolumeUp:		return IN_KBD_QUICK_INCR_VOLUME;
+		case kVK_VolumeDown:		return IN_KBD_QUICK_DECR_VOLUME;
+		case kVK_Mute:			return IN_KBD_QUICK_SOUND_MUTE;
+		case kVK_F18:			return IN_KBD_F12;
+		case kVK_F19:			return IN_KBD_F12;
+		case kVK_F20:			return IN_KBD_F12;
+		case kVK_F5:			return IN_KBD_F5;
+		case kVK_F6:			return IN_KBD_F6;
+		case kVK_F7:			return IN_KBD_F7;
+		case kVK_F3:			return IN_KBD_F3;
+		case kVK_F8:			return IN_KBD_F8;
+		case kVK_F9:			return IN_KBD_F9;
+		case kVK_F11:			return IN_KBD_F11;
+		case kVK_F13:			return IN_KBD_F12;
+		case kVK_F16:			return IN_KBD_F12;
+		case kVK_F14:			return IN_KBD_F12;
+		case kVK_F10:			return IN_KBD_F10;
+		case kVK_F12:			return IN_KBD_F12;
+		case kVK_F15:			return IN_KBD_F12;
+		case kVK_Help:			return IN_KBD_F1;
+		case kVK_Home:			return IN_KBD_HOME;
+		case kVK_PageUp:		return IN_KBD_PGUP;
+		case kVK_ForwardDelete:		return IN_KBD_DEL;
+		case kVK_F4:			return IN_KBD_F4;
+		case kVK_End:			return IN_KBD_END;
+		case kVK_F2:			return IN_KBD_F2;
+		case kVK_PageDown:		return IN_KBD_PGDOWN;
+		case kVK_F1:			return IN_KBD_F1;
+		case kVK_LeftArrow:		return IN_KBD_LEFT;
+		case kVK_RightArrow:		return IN_KBD_RIGHT;
+		case kVK_DownArrow:		return IN_KBD_DOWN;
+		case kVK_UpArrow:		return IN_KBD_UP;
+		case kVK_ISO_Section:		return IN_KBD_PAUSE;
+		case kVK_JIS_Yen:		return IN_KBD_PRINT_SCREEN;
+		case kVK_JIS_Underscore:	return IN_KBD_PRINT_SCREEN;
+		case kVK_JIS_KeypadComma:	return IN_KBD_NUMPAD_DOT;
+		case kVK_JIS_Eisu:		return IN_KBD_NUM_LOCK;
+		case kVK_JIS_Kana:		return IN_KBD_NUM_LOCK;
+	}
+	return IN_KBD_CONTEXT_MENU;
+}
+
 unichar MacInputManager::ConvertChar(unichar pChar)
 {
 	bool lIsChar;
@@ -447,27 +573,20 @@ void MacInputManager::OnEvent(NSEvent* pEvent)
 		}	// TRICKY: fall thru to handle keyDown notification BEFORE OnChar is dispatched!
 		case NSKeyUp:
 		{
-			const NSString* lCharacters = [pEvent charactersIgnoringModifiers];
-			const bool lIsNumpad = (([pEvent modifierFlags] & NSNumericPadKeyMask) != 0);
-			const unsigned lCharacterCount = [lCharacters length];
+			const unsigned lMacKeyCode = [pEvent keyCode];	// Hardware independent key code.
 			bool lConsumed = false;
-			for (unsigned x = 0; x < lCharacterCount; ++x)
+			const KeyCode lKey = ConvertMacKeyCodeToKeyCode(lMacKeyCode);
+			SetKey(lKey, lIsKeyDown);
+			//mLog.Infof(_T("Got key %s: %x (%u, '%c')."), lIsKeyDown? _T("down") : _T("up"), lMacKeyCode, lMacKeyCode, lMacKeyCode);
+			if (lIsKeyDown)
 			{
-				const unichar lChar = [lCharacters characterAtIndex:x];
-				bool lIsChar;
-				const KeyCode lKey = ConvertCharToKeyCode(lChar, lIsNumpad, lIsChar);
-				SetKey(lKey, lIsKeyDown);
-				if (lIsKeyDown)
-				{
-					//mLog.Infof(_T("Got key down: %x (%u, '%c'%s)."), (unsigned)lChar, (unsigned)lChar, lChar, lIsNumpad? _T(", numpad") : _T(""));
-					lConsumed |= NotifyOnKeyDown(lKey);
-				}
-				else
-				{
-					NotifyOnKeyUp(lKey);
-				}
-
+				lConsumed |= NotifyOnKeyDown(lKey);
 			}
+			else
+			{
+				NotifyOnKeyUp(lKey);
+			}
+
 			// Handle OnChar dispatching.
 			if (lIsKeyDown && !lConsumed)
 			{
@@ -485,6 +604,7 @@ void MacInputManager::OnEvent(NSEvent* pEvent)
 				}
 			}
 		}
+		break;
 		case NSFlagsChanged:
 		{
 			const NSUInteger lKeyModifiers = [pEvent modifierFlags];
