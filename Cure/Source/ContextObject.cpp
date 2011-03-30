@@ -302,7 +302,7 @@ void ContextObject::DeleteAttribute(const str& pName)
 ContextObjectAttribute* ContextObject::GetAttribute(const str& pName) const
 {
 	AttributeArray::const_iterator x = mAttributeArray.begin();
-	while (x != mAttributeArray.end())
+	for (; x != mAttributeArray.end(); ++x)
 	{
 		if ((*x)->GetName() == pName)
 		{

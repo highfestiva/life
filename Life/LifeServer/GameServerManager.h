@@ -86,7 +86,7 @@ private:
 		TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID pBody2Id);
 	virtual bool OnPhysicsSend(Cure::ContextObject* pObject);
 	virtual bool OnAttributeSend(Cure::ContextObject* pObject);
-	bool IsConnectAuthorized();
+	bool IsServer();
 	void SendAttach(Cure::ContextObject* pObject1, unsigned pId1, Cure::ContextObject* pObject2, unsigned pId2);
 	void SendDetach(Cure::ContextObject* pObject1, Cure::ContextObject* pObject2);
 	virtual void OnAlarm(int pAlarmId, Cure::ContextObject* pObject, void* pExtraData);

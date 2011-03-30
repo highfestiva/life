@@ -163,7 +163,7 @@ void CppContextObject::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, TBC:
 	/*
 	TODO: put this back when attaching objects to each other is working.
 	ContextObject* lObject2 = (ContextObject*)mManager->GetGameManager()->GetPhysicsManager()->GetForceFeedbackListener(pBody2);
-	if (mManager->GetGameManager()->IsConnectAuthorized() && lObject2)
+	if (mManager->GetGameManager()->IsServer() && lObject2)
 	{
 		AttachToObject(pBody1, lObject2, pBody2);
 	}*/

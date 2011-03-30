@@ -925,7 +925,7 @@ bool GameServerManager::OnAttributeSend(Cure::ContextObject* pObject)
 	return true;
 }
 
-bool GameServerManager::IsConnectAuthorized()
+bool GameServerManager::IsServer()
 {
 	return (true);
 }

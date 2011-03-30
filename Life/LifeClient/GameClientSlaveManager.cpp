@@ -26,6 +26,7 @@
 #include "../../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../../UiTBC/Include/GUI/UiFloatingLayout.h"
 #include "../LifeServer/MasterServerConnection.h"
+#include "../FloatAttribute.h"
 #include "../LifeApplication.h"
 #include "CollisionSoundManager.h"
 #include "GameClientMasterTicker.h"
@@ -112,6 +113,7 @@ void GameClientSlaveManager::LoadSettings()
 	mOptions.DoRefreshConfiguration();
 	// Always default these settings, to avoid that the user can't get rid of undesired behavior.
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_DEBUG_ENABLE, false);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_DEBUG_INPUT_PRINT, false);
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_GAME_TIMEOFDAYFACTOR, 1.0);
 	bool lIsServerSelected;
 	CURE_RTVAR_TRYGET(lIsServerSelected, =, UiCure::GetSettings(), RTVAR_LOGIN_ISSERVERSELECTED, false);
@@ -911,8 +913,7 @@ void GameClientSlaveManager::TickUiInput()
 			{
 				// Children have the possibility of just pressing left/right which will cause a forward
 				// motion in the currently used vehicle.
-				bool lIsChild;
-				CURE_RTVAR_GET(lIsChild, =, GetVariableScope(), RTVAR_GAME_ISCHILD, false);
+				const bool lIsChild = QueryIsChild(lObject);
 				if (lIsChild && Math::IsEpsEqual(lPowerFwdRev, 0.0f, 0.05f) && !Math::IsEpsEqual(lPowerLR, 0.0f, 0.05f))
 				{
 					TBC::PhysicsEngine* lEngine = lObject->GetPhysics()->GetEngine(0);
@@ -1692,7 +1693,7 @@ bool GameClientSlaveManager::OnAttributeSend(Cure::ContextObject*)
 	return (true);	// Say true to drop us from sender list.
 }
 
-bool GameClientSlaveManager::IsConnectAuthorized()
+bool GameClientSlaveManager::IsServer()
 {
 	return (false);
 }
@@ -1792,6 +1793,20 @@ void GameClientSlaveManager::DropAvatar()
 	mOwnedObjectList.erase(mAvatarId);
 	mAvatarId = 0;
 	mHadAvatar = false;
+}
+
+bool GameClientSlaveManager::QueryIsChild(Cure::ContextObject* pAvatar) const
+{
+	const str lName = _T("float_is_child");
+	FloatAttribute* lAttribute = (FloatAttribute*)pAvatar->GetAttribute(lName);
+	if (!lAttribute)
+	{
+		lAttribute = new FloatAttribute(pAvatar, lName, 0);
+	}
+	bool lIsChild;
+	CURE_RTVAR_GET(lIsChild, =, GetVariableScope(), RTVAR_GAME_ISCHILD, false);
+	lAttribute->SetValue(lIsChild? 1.0f : 0.0f);
+	return lIsChild;
 }
 
 Cure::RuntimeVariableScope* GameClientSlaveManager::GetVariableScope() const

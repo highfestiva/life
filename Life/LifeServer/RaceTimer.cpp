@@ -94,7 +94,6 @@ void RaceTimer::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, TBC::Physic
 	{
 		lRaceScore->AddTriggered(pTriggerId);
 		mLog.Infof(_T("Hit %u/%u triggers in %f s."), lRaceScore->GetTriggedCount(), mTriggerCount, lRaceScore->GetTime());
-		
 	}
 	else if (lRaceScore->GetTriggedCount() == mTriggerCount && pTriggerId == lRaceScore->GetStartTrigger())
 	{

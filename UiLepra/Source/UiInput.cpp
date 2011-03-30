@@ -71,22 +71,7 @@ const str& InputElement::GetIdentifier() const
 
 str InputElement::GetFullName() const
 {
-	str lName;
-	switch (GetParentDevice()->GetInterpretation())
-	{
-		case InputDevice::TYPE_MOUSE:		lName += _T("Mouse");		break;
-		case InputDevice::TYPE_KEYBOARD:	lName += _T("Keyboard");	break;
-		case InputDevice::TYPE_JOYSTICK:	lName += _T("Joystick");	break;
-		case InputDevice::TYPE_GAMEPAD:		lName += _T("GamePad");		break;
-		case InputDevice::TYPE_1STPERSON:	lName += _T("1stPerson");	break;
-		case InputDevice::TYPE_PEDALS:		lName += _T("Pedals");		break;
-		case InputDevice::TYPE_WHEEL:		lName += _T("Wheel");		break;
-		case InputDevice::TYPE_FLIGHT:		lName += _T("Flight");		break;
-		default:				lName += _T("Device");		break;
-	}
-	lName += strutil::IntToString(GetParentDevice()->GetTypeIndex(), 10)+_T(".");
-	lName += GetName();
-	return (lName);
+	return GetParentDevice()->GetUniqueIdentifier() + _T(".") + GetIdentifier();
 }
 
 str InputElement::GetName() const
@@ -234,11 +219,17 @@ unsigned InputDevice::GetNumAnalogueElements()
 void InputDevice::SetIdentifier(const str& pIdentifier)
 {
 	mIdentifier = pIdentifier;
+	mUniqueIdentifier = mIdentifier + strutil::IntToString(GetManager()->QueryIdentifierCount(mIdentifier), 10);
 }
 
 const str& InputDevice::GetIdentifier() const
 {
 	return mIdentifier;
+}
+
+const str& InputDevice::GetUniqueIdentifier() const
+{
+	return mUniqueIdentifier;
 }
 
 const InputElement* InputDevice::GetElement(const str& pIdentifier) const
@@ -708,19 +699,16 @@ InputDevice* InputManager::FindDevice(const str& pDeviceIdentifier, int pN)
 	return 0;
 }
 
-int InputManager::GetDeviceCount(const str& pDeviceIdentifier) const
+int InputManager::QueryIdentifierCount(const str& pDeviceIdentifier) const
 {
 	int lCount = 0;
-
-	DeviceList::const_iterator x;
-	for (x = mDeviceList.begin(); 
-		x != mDeviceList.end(); 
-		++x)
+	DeviceList::const_iterator x = mDeviceList.begin();
+	for (; x != mDeviceList.end(); ++x)
 	{
 		InputDevice* lDevice = *x;
 		if (pDeviceIdentifier == lDevice->GetIdentifier())
 		{
-			lCount++;
+			++lCount;
 		}
 	}
 

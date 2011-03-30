@@ -220,6 +220,7 @@ public:
 
 	void SetIdentifier(const str& pIdentifier);
 	const str& GetIdentifier() const;
+	const str& GetUniqueIdentifier() const;
 
 	// Sets an observer on the entire device. (All elements).
 	// The device takes care of deleting the functor.
@@ -250,6 +251,7 @@ private:
 	bool mActive;
 
 	str mIdentifier;
+	str mUniqueIdentifier;
 
 	LOG_CLASS_DECLARE();
 };
@@ -443,7 +445,7 @@ public:
 	InputDevice* FindDevice(const str& pDeviceIdentifier, int pN = 0);
 
 	// Returns the number of devices with the same identifier.
-	int GetDeviceCount(const str& pDeviceIdentifier) const;
+	int QueryIdentifierCount(const str& pDeviceIdentifier) const;
 
 	// Returns which index the device has in the list of devices with the
 	// same identifier. Thus, if there are two gamepads, and we pass one

@@ -119,7 +119,7 @@ const str OptionsManager::ConvertToString(UiLepra::InputManager::KeyCode pKeyCod
 
 bool OptionsManager::SetValue(const str& pKey, float pValue, bool pAdd)
 {
-	log_volatile(mLog.Tracef(_T("Got input %s: %g"), pKey.c_str(), pValue));
+	//log_volatile(mLog.Tracef(_T("Got input %s: %g"), pKey.c_str(), pValue));
 
 	bool lIsAnySteeringValue;
 	std::vector<float*>* lValuePointers = GetValuePointers(pKey, lIsAnySteeringValue);

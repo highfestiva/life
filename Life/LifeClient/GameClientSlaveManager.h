@@ -133,7 +133,7 @@ protected:
 		TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID pBody2Id);
 	virtual bool OnPhysicsSend(Cure::ContextObject* pObject);
 	virtual bool OnAttributeSend(Cure::ContextObject* pObject);
-	bool IsConnectAuthorized();
+	bool IsServer();
 	void SendAttach(Cure::ContextObject*, unsigned, Cure::ContextObject*, unsigned);
 	void SendDetach(Cure::ContextObject*, Cure::ContextObject*);
 	virtual void OnAlarm(int pAlarmId, Cure::ContextObject* pObject, void* pExtraData);
@@ -144,6 +144,7 @@ protected:
 	void CancelLogin();
 	void OnAvatarSelect(UiTbc::Button* pButton);
 	void DropAvatar();
+	bool QueryIsChild(Cure::ContextObject* pAvatar) const;
 	Cure::RuntimeVariableScope* GetVariableScope() const;
 
 	Cure::NetworkClient* GetNetworkClient() const;

@@ -442,6 +442,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\FloatAttribute.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Life.cpp"
 				>
 			</File>
@@ -461,6 +465,10 @@
 			>
 			<File
 				RelativePath=".\ConsoleManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\FloatAttribute.h"
 				>
 			</File>
 			<File
