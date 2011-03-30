@@ -41,6 +41,7 @@ const ConsoleManager::CommandPair ConsoleManager::mCommandIdList[] =
 	{_T("set-stdout-log-level"), COMMAND_SET_STDOUT_LOG_LEVEL},
 	{_T("set-subsystem-log-level"), COMMAND_SET_SUBSYSTEM_LOG_LEVEL},
 	{_T("sleep"), COMMAND_SLEEP},
+	{_T("wait-loaded"), COMMAND_WAIT_LOADED},
 
 	// Info/debug stuff.
 	{_T("clear-performance-info"), COMMAND_CLEAR_PERFORMANCE_INFO},
@@ -53,12 +54,12 @@ const ConsoleManager::CommandPair ConsoleManager::mCommandIdList[] =
 
 
 
-ConsoleManager::ConsoleManager(Cure::GameManager* pGameManager,
-	Cure::RuntimeVariableScope* pVariableScope,
-	InteractiveConsoleLogListener* pConsoleLogger,
+ConsoleManager::ConsoleManager(Cure::ResourceManager* pResourceManager, Cure::GameManager* pGameManager,
+	Cure::RuntimeVariableScope* pVariableScope, InteractiveConsoleLogListener* pConsoleLogger,
 	ConsolePrompt* pConsolePrompt):
 	Cure::ConsoleManager(pVariableScope, pConsoleLogger, pConsolePrompt),
 	mGameManager(pGameManager),
+	mResourceManager(pResourceManager),
 	mLogger(0)
 {
 }
@@ -105,6 +106,13 @@ Cure::GameManager* ConsoleManager::GetGameManager() const
 {
 	return (mGameManager);
 }
+
+void ConsoleManager::SetGameManager(Cure::GameManager* pGameManager)
+{
+	mGameManager = pGameManager;
+}
+
+
 
 unsigned ConsoleManager::GetCommandCount() const
 {
@@ -306,13 +314,27 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 		break;
 		case COMMAND_DUMP_PERFORMANCE_INFO:
 		{
-			mGameManager->UpdateReportPerformance(true, 0);
+			if (mGameManager)
+			{
+				mGameManager->UpdateReportPerformance(true, 0);
+			}
+			else
+			{
+				mLog.AError("Can not dump performance info, since game manager not present in this context.");
+			}
 		}
 		break;
 		case COMMAND_CLEAR_PERFORMANCE_INFO:
 		{
-			log_performance(_T("Clearing performance data."));
-			mGameManager->ClearPerformanceData();
+			if (mGameManager)
+			{
+				log_performance(_T("Clearing performance data."));
+				mGameManager->ClearPerformanceData();
+			}
+			else
+			{
+				mLog.AError("Can not clear performance info, since game manager not present in this context.");
+			}
 		}
 		break;
 		case COMMAND_SHOW_SYSTEM_INFO:
@@ -332,9 +354,12 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 			int lTargetFps;
 			CURE_RTVAR_GET(lTargetFps, =, GetVariableScope(), RTVAR_PHYSICS_FPS, 2);
 			mLog.Infof(_T("Target frame rate:     %i"), lTargetFps);
-			mLog.Infof(_T("Current frame rate:    %g"), 1/mGameManager->GetTimeManager()->GetRealNormalFrameTime());
-			mLog.Infof(_T("Absolute time:	      %g"), mGameManager->GetTimeManager()->GetAbsoluteTime());
-			mLog.Infof(_T("Current physics frame: %i"), mGameManager->GetTimeManager()->GetCurrentPhysicsFrame());
+			if (mGameManager)
+			{
+				mLog.Infof(_T("Current frame rate:    %g"), 1/mGameManager->GetTimeManager()->GetRealNormalFrameTime());
+				mLog.Infof(_T("Absolute time:	      %g"), mGameManager->GetTimeManager()->GetAbsoluteTime());
+				mLog.Infof(_T("Current physics frame: %i"), mGameManager->GetTimeManager()->GetCurrentPhysicsFrame());
+			}
 		}
 		break;
 		case COMMAND_FORK:
@@ -434,7 +459,7 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 		case COMMAND_LIST_ACTIVE_RESOURCES:
 		{
 			typedef Cure::ResourceManager::NameTypeList NameTypeList;
-			NameTypeList lNameTypeList = mGameManager->GetResourceManager()->QueryResourceNames();
+			NameTypeList lNameTypeList = mResourceManager->QueryResourceNames();
 			mLog.Infof(_T("Currently %u active resources:"), lNameTypeList.size());
 			lNameTypeList.sort();
 			for (NameTypeList::iterator x = lNameTypeList.begin(); x != lNameTypeList.end(); ++x)
@@ -462,6 +487,25 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 			{
 				mLog.Warningf(_T("usage: %s <secs>"), pCommand.c_str());
 				mLog.AWarning("Sleeps <secs> where secs is a decimal number, e.g. 0.001.");
+				lResult = 1;
+			}
+		}
+		break;
+		case COMMAND_WAIT_LOADED:
+		{
+			mLog.AInfo("Waiting for resource pump to complete loading...");
+			// Start out by waiting for the game manager, if we don't have one yet.
+			for (int x = 0; !mGameManager && x < 200; ++x)
+			{
+				Thread::Sleep(0.1);
+			}
+			if (mResourceManager->WaitLoading())
+			{
+				mLog.AInfo("Everything loaded.");
+			}
+			else
+			{
+				mLog.AError("Load not completed in time!");
 				lResult = 1;
 			}
 		}
@@ -594,7 +638,7 @@ int ConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& pParam
 					{
 						str lValue = lScope->GetDefaultValue(RtScope::READ_ONLY, lVariable);
 						lValue = strutil::StringToCString(lValue);
-						mLog.Infof(_T("%s"), lValue.c_str());
+						mLog.Infof(_T("%s %s"), lVariable.c_str(), lValue.c_str());
 					}
 					else
 					{

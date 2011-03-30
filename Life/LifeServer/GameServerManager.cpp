@@ -92,7 +92,7 @@ void GameServerManager::StartConsole(InteractiveConsoleLogListener* pConsoleLogg
 {
 	if (!GetConsoleManager())
 	{
-		SetConsoleManager(new ServerConsoleManager(this, GetVariableScope(), pConsoleLogger, pConsolePrompt));
+		SetConsoleManager(new ServerConsoleManager(GetResourceManager(), this, GetVariableScope(), pConsoleLogger, pConsolePrompt));
 	}
 	GetConsoleManager()->PushYieldCommand(_T("execute-file -i ") + Application::GetIoFile(_T("ServerApplication"), _T("lsh")));
 	GetConsoleManager()->Start();
@@ -381,7 +381,8 @@ Client* GameServerManager::GetClientByAccount(Cure::UserAccount::AccountId pAcco
 bool GameServerManager::InitializeTerrain()
 {
 	assert(mTerrainObject == 0);
-	mTerrainObject = Parent::CreateContextObject(_T("level_01"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
+	mTerrainObject = new Cure::CppContextObject(GetResourceManager(), _T("level_01"));
+	AddContextObject(mTerrainObject, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
 	mTerrainObject->StartLoading();
 	return (true);
 }
@@ -445,7 +446,7 @@ void GameServerManager::ProcessNetworkInputMessage(Client* pClient, Cure::Messag
 			}
 			else
 			{
-				mLog.Warningf(_T("Client %s tried to control instance ID %i."),
+				mLog.Warningf(_T("Client %s tried to control instance ID %i, but was not in possession."),
 					strutil::Encode(pClient->GetUserConnection()->GetLoginName()).c_str(),
 					lInstanceId);
 			}
@@ -651,7 +652,7 @@ void GameServerManager::StoreMovement(int pClientFrameIndex, Cure::MessageObject
 	else
 	{
 		// This input data is already old or too much ahead! Skip it.
-		mLog.Warningf(_T("Skipping store of movement (%i frames ahead)."), lFrameOffset);
+		log_volatile(mLog.Debugf(_T("Skipping store of movement (%i frames ahead)."), lFrameOffset));
 	}
 }
 

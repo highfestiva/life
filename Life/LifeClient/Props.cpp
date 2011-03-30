@@ -111,4 +111,9 @@ void Props::OnAlarm(int pAlarmId, void* /*pExtraData*/)
 }
 
 
+
+LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, Props);
+
+
+
 }

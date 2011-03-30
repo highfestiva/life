@@ -89,7 +89,7 @@ GameClientSlaveManager::GameClientSlaveManager(GameClientMasterTicker* pMaster, 
 
 	SetNetworkAgent(new Cure::NetworkClient(GetVariableScope()));
 
-	SetConsoleManager(new ClientConsoleManager(this, mUiManager, GetVariableScope(), mRenderArea));
+	SetConsoleManager(new ClientConsoleManager(GetResourceManager(), this, mUiManager, GetVariableScope(), mRenderArea));
 }
 
 GameClientSlaveManager::~GameClientSlaveManager()
@@ -136,9 +136,9 @@ void GameClientSlaveManager::LoadSettings()
 	}
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_PHYSICS_FPS, PHYSICS_FPS);
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_CAMHEIGHT, 10.0);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_UI_3D_CAMROTATE, 0.0);
+	CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
+	CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_UI_3D_CAMHEIGHT, 10.0);
+	CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_UI_3D_CAMROTATE, 0.0);
 	CURE_RTVAR_INTERNAL(GetVariableScope(), RTVAR_STEERING_PLAYBACKMODE, PLAYBACK_NONE);
 }
 
@@ -947,10 +947,10 @@ void GameClientSlaveManager::TickUiInput()
 			const Options::CamControl& c = mOptions.GetCamControl();
 #define C(dir) c.mControl[Options::CamControl::CAMDIR_##dir]
 			lPower = C(UP)-C(DOWN);
-			CURE_RTVAR_ARITHMETIC(GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, double, +, lPower*lScale, -5.0, 30.0);
+			CURE_RTVAR_INTERNAL_ARITHMETIC(GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, double, +, lPower*lScale, -5.0, 30.0);
 			mCamRotateExtra = (C(RIGHT)-C(LEFT)) * lScale;
 			lPower = C(BACKWARD)-C(FORWARD);
-			CURE_RTVAR_ARITHMETIC(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, double, +, lPower*lScale, 3.0, 100.0);
+			CURE_RTVAR_INTERNAL_ARITHMETIC(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, double, +, lPower*lScale, 3.0, 100.0);
 
 			mAvatarInvisibleCount = 0;
 		}
@@ -1557,7 +1557,15 @@ bool GameClientSlaveManager::CreateObject(Cure::GameObjectId pInstanceId, const 
 
 Cure::ContextObject* GameClientSlaveManager::CreateContextObject(const str& pClassId) const
 {
-	Cure::CppContextObject* lObject = new Machine(GetResourceManager(), pClassId, mUiManager);
+	Cure::CppContextObject* lObject;
+	if (pClassId == _T("stone") || pClassId == _T("cube"))	// TODO: remove hard-coding?
+	{
+		lObject = new UiCure::CppContextObject(GetResourceManager(), pClassId, mUiManager);
+	}
+	else
+	{
+		lObject = new Machine(GetResourceManager(), pClassId, mUiManager);
+	}
 	lObject->SetAllowNetworkLogic(false);	// Only server gets to control logic.
 	return (lObject);
 }
@@ -1572,7 +1580,7 @@ void GameClientSlaveManager::OnLoadCompleted(Cure::ContextObject* pObject, bool 
 		}
 		else
 		{
-			log_volatile(mLog.Debugf(_T("Loaded object %s."), pObject->GetClassId().c_str()));
+			log_volatile(mLog.Tracef(_T("Loaded object %s."), pObject->GetClassId().c_str()));
 		}
 	}
 	else

@@ -76,7 +76,7 @@ GameClientMasterTicker::GameClientMasterTicker(UiCure::GameUiManager* pUiManager
 	Cure::ContextObjectAttribute::SetCreator(Cure::ContextObjectAttribute::Factory(
 		this, &GameClientMasterTicker::CreateObjectAttribute));
 
-	mConsole = new ConsoleManager(0, UiCure::GetSettings(), 0, 0);
+	mConsole = new ConsoleManager(mResourceManager, 0, UiCure::GetSettings(), 0, 0);
 	mConsole->InitCommands();
 	mConsole->GetConsoleCommandManager()->AddExecutor(
 		new ConsoleExecutor<GameClientMasterTicker>(
@@ -377,15 +377,6 @@ bool GameClientMasterTicker::WaitResetUi()
 	return (!mRestartUi);
 }
 
-bool GameClientMasterTicker::WaitLoaded()
-{
-	for (int x = 0; mResourceManager->IsLoading() && x < 200; ++x)
-	{
-		Thread::Sleep(0.1);
-	}
-	return !mResourceManager->IsLoading();
-}
-
 bool GameClientMasterTicker::IsFirstSlave(const GameClientSlaveManager* pSlave) const
 {
 	if (mSlaveArray.empty())
@@ -620,6 +611,10 @@ bool GameClientMasterTicker::CreateSlave(SlaveFactoryMethod pCreate)
 		if (mInitialized)
 		{
 			lOk = lSlave->Open();
+			if (lOk && mConsole->GetGameManager() == 0)
+			{
+				mConsole->SetGameManager(lSlave);
+			}
 		}
 	}
 	else
@@ -636,6 +631,7 @@ void GameClientMasterTicker::AddSlave(GameClientSlaveManager* pSlave)
 		pSlave->LoadSettings();
 		assert(mSlaveArray[pSlave->GetSlaveIndex()] == 0);
 		mSlaveArray[pSlave->GetSlaveIndex()] = pSlave;
+		pSlave->GetContext()->SetLocalRange(pSlave->GetSlaveIndex(), mSlaveArray.size());
 		++mActiveSlaveCount;
 	}
 }
@@ -651,6 +647,10 @@ void GameClientMasterTicker::DeleteSlave(GameClientSlaveManager* pSlave, bool pA
 	assert(mSlaveArray[pSlave->GetSlaveIndex()]);
 	mSlaveArray[pSlave->GetSlaveIndex()] = 0;
 	delete (pSlave);
+	if (mConsole->GetGameManager() == pSlave)
+	{
+		mConsole->SetGameManager(0);
+	}
 	if (--mActiveSlaveCount == 0)
 	{
 		//mResourceManager->ForceFreeCache();
@@ -805,6 +805,7 @@ bool GameClientMasterTicker::Reinitialize()
 	DeleteServer();
 	delete mSunlight;
 	mSunlight = 0;
+	mConsole->SetGameManager(0);
 	mResourceManager->StopClear();
 	mUiManager->Close();
 	SystemManager::AddQuitRequest(-1);

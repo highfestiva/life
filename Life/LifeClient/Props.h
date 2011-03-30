@@ -44,6 +44,8 @@ private:
 	ParticleType mParticleType;
 	float mScale;
 	float mTime;
+
+	LOG_CLASS_DECLARE();
 };
 
 

@@ -15,6 +15,7 @@
 namespace Cure
 {
 class GameManager;
+class ResourceManager;
 }
 
 
@@ -28,9 +29,8 @@ class ConsoleManager: public Cure::ConsoleManager
 {
 	typedef Cure::ConsoleManager Parent;
 public:
-	ConsoleManager(Cure::GameManager* pGameManager,
-		Cure::RuntimeVariableScope* pVariableScope,
-		InteractiveConsoleLogListener* pConsoleLogger,
+	ConsoleManager(Cure::ResourceManager* pResourceManager, Cure::GameManager* pGameManager,
+		Cure::RuntimeVariableScope* pVariableScope, InteractiveConsoleLogListener* pConsoleLogger,
 		ConsolePrompt* pConsolePrompt);
 	virtual ~ConsoleManager();
 
@@ -40,6 +40,7 @@ public:
 	int GetSecurityLevel() const;
 
 	Cure::GameManager* GetGameManager() const;
+	void SetGameManager(Cure::GameManager* pGameManager);
 
 protected:
 	enum CommandCommon
@@ -60,6 +61,7 @@ protected:
 		COMMAND_SET_STDOUT_LOG_LEVEL,
 		COMMAND_SET_SUBSYSTEM_LOG_LEVEL,
 		COMMAND_SLEEP,
+		COMMAND_WAIT_LOADED,
 
 		COMMAND_DUMP_PERFORMANCE_INFO,
 		COMMAND_CLEAR_PERFORMANCE_INFO,
@@ -88,6 +90,7 @@ private:
 
 	int mSecurityLevel;
 	Cure::GameManager* mGameManager;
+	Cure::ResourceManager* mResourceManager;
 	AliasMap mAliasMap;
 	LogListener* mLogger;
 	LOG_CLASS_DECLARE();

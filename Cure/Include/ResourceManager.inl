@@ -27,13 +27,15 @@ UserTypeResourceBase<UserResourceType, ResourceType>::~UserTypeResourceBase()
 
 template<class UserResourceType, class ResourceType>
 void UserTypeResourceBase<UserResourceType, ResourceType>::Load(
-	ResourceManager* pResourceManager, const str& pName, TypeLoadCallback pCallback)
+	ResourceManager* pResourceManager, const str& pName, TypeLoadCallback pCallback, bool pKeep)
 {
 	// JB-TRICKY: this is what I gather that it takes to cast a callback parameter.
 	//            The memento contains the "this" and "method" pointers...
 	LoadCallback lCallbackCast;
 	lCallbackCast.SetMemento(pCallback.GetMemento());
 	pResourceManager->Load(pName, this, lCallbackCast);
+	GetResource()->SetIsUnique(!pKeep);
+
 }
 
 template<class UserResourceType, class ResourceType>

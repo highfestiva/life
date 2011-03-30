@@ -72,7 +72,7 @@ ContextObject::ContextObject(Cure::ResourceManager* pResourceManager, const str&
 
 ContextObject::~ContextObject()
 {
-	log_volatile(mLog.Debugf(_T("Destructing context object %s."), mClassId.c_str()));
+	log_volatile(mLog.Tracef(_T("Destructing context object %s."), mClassId.c_str()));
 
 	DeleteNetworkOutputGhost();
 
@@ -781,7 +781,7 @@ bool ContextObject::SetPhysics(TBC::ChunkyPhysics* pStructure)
 void ContextObject::ClearPhysics()
 {
 	// Removes bodies from manager, then destroys all physical stuff.
-	if (mManager && mPhysics)
+	if (mManager && mPhysics && mPhysicsOverride != PHYSICS_OVERRIDE_BONES)
 	{
 		const int lBoneCount = mPhysics->GetBoneCount();
 		for (int x = 0; x < lBoneCount; ++x)

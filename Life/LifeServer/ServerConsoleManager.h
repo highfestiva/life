@@ -21,8 +21,9 @@ class ServerConsoleManager: public ConsoleManager
 {
 	typedef ConsoleManager Parent;
 public:
-	ServerConsoleManager(Cure::GameManager* pGameServerManager, Cure::RuntimeVariableScope* pVariableScope,
-		InteractiveConsoleLogListener* pConsoleLogger, ConsolePrompt* pConsolePrompt);
+	ServerConsoleManager(Cure::ResourceManager* pResourceManager, Cure::GameManager* pGameServerManager,
+		Cure::RuntimeVariableScope* pVariableScope, InteractiveConsoleLogListener* pConsoleLogger,
+		ConsolePrompt* pConsolePrompt);
 	virtual ~ServerConsoleManager();
 
 private:

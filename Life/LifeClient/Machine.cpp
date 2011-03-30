@@ -271,7 +271,7 @@ void Machine::OnTick()
 				{
 					continue;
 				}
-				mExhaustTimeout = 1.01f;
+				mExhaustTimeout = 1.51f;
 				TBC::GeometryBase* lMesh = GetMesh(lTag.mMeshIndexList[y]);
 				if (lMesh)
 				{
@@ -279,6 +279,7 @@ void Machine::OnTick()
 					lTransform.GetPosition() += lOffset;
 					Props* lPuff = new Props(GetResourceManager(), _T("mud_particle_01"), mUiManager);
 					GetManager()->GetGameManager()->AddContextObject(lPuff, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+					//mLog.Infof(_T("Machine %i creates fume particle %i."), GetInstanceId(), lPuff->GetInstanceId());
 					lPuff->DisableRootShadow();
 					lPuff->SetInitialTransform(lTransform);
 					lPuff->StartParticle(Props::PARTICLE_GAS, lVelocity, 3);

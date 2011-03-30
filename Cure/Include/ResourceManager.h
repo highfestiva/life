@@ -96,7 +96,7 @@ public:
 	UserTypeResourceBase();
 	virtual ~UserTypeResourceBase();
 
-	void Load(ResourceManager* pResourceManager, const str& pName, TypeLoadCallback pCallback);
+	void Load(ResourceManager* pResourceManager, const str& pName, TypeLoadCallback pCallback, bool pKeep = true);
 	void LoadUnique(ResourceManager* pResourceManager, const str& pName, TypeLoadCallback pCallback);
 
 	typename ResourceType::UserRamData GetRamData() const;
@@ -423,6 +423,7 @@ public:
 	void SafeRelease(UserResource* pUserResource);
 	void Release(Resource* pResource);
 	bool IsLoading();
+	bool WaitLoading();
 
 	void Tick();	// Call often, preferably every frame.
 	unsigned ForceFreeCache();	// Called to force immediate freeing of all resources.

@@ -186,7 +186,7 @@ bool ChunkyLoader::AllocLoadChunkyList(FileElementList& pLoadList, int64 pChunkE
 						c[1] = (tchar)((lType>>16)&0x7F);
 						c[2] = (tchar)((lType>>8)&0x7F);
 						c[3] = (tchar)((lType>>0)&0x7F);
-						log_volatile(mLog.Debugf(_T("Loading chunk '%c%c%c%c'."),
+						log_volatile(mLog.Tracef(_T("Loading chunk '%c%c%c%c'."),
 							c[0], c[1], c[2], c[3]));
 					}
 					lElement.mIsElementLoaded = true;
@@ -985,7 +985,7 @@ bool ChunkyPhysicsLoader::LoadElementCallback(ChunkyType pType, uint32 pSize, in
 
 		if (lOk)
 		{
-			log_volatile(mLog.Debugf(_T("Current bone index is %i."),
+			log_volatile(mLog.Tracef(_T("Current bone index is %i."),
 				mCurrentBoneIndex));
 			lPhysics->SetBoneChildCount(mCurrentBoneIndex, lChildCount);
 			for (int x = 0; lOk && x < lChildCount; ++x)

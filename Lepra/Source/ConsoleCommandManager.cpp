@@ -155,12 +155,21 @@ int ConsoleCommandManager::Execute(const str& pCommand, bool pAppendToHistory)
 				lParameterTokenList = strutil::BlockSplit(lParameters, lCommandDelimitors, false, true);
 			}
 
-			lExecutionResult = -1;
+			bool lExecutedOk = false;
+			lExecutionResult = -2;
 			CommandExecutorSet::iterator x = mCommandExecutorSet.begin();
 			for (; x != mCommandExecutorSet.end() && lExecutionResult < 0; ++x)
 			{
 				lExecutionResult = (*x)->Execute(lCommand, lParameterTokenList);
-				if (lExecutionResult != 0)
+				if (lExecutionResult == 0)
+				{
+					lExecutedOk = true;
+				}
+			}
+			if (!lExecutedOk)
+			{
+				x = mCommandExecutorSet.begin();
+				for (; x != mCommandExecutorSet.end() && lExecutionResult < 0; ++x)
 				{
 					(*x)->OnExecutionError(lCommand, lParameterTokenList, lExecutionResult);
 				}

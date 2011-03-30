@@ -81,13 +81,22 @@ void CppContextObject::StartLoadingPhysics(const str& pPhysicsName)
 	assert(mPhysicsResource == 0);
 	mPhysicsResource = new UserPhysicsResource();
 	const str lAssetName = pPhysicsName+_T(".phys");	// TODO: move to central source file.
-	mPhysicsResource->LoadUnique(GetResourceManager(), lAssetName,
-		UserPhysicsResource::TypeLoadCallback(this, &CppContextObject::OnLoadPhysics));
+	if (mPhysicsOverride == PHYSICS_OVERRIDE_BONES)
+	{
+		// If we're only in it for the bones, we can manage without a unique physics object.
+		mPhysicsResource->Load(GetResourceManager(), lAssetName,
+			UserPhysicsResource::TypeLoadCallback(this, &CppContextObject::OnLoadPhysics));
+	}
+	else
+	{
+		mPhysicsResource->LoadUnique(GetResourceManager(), lAssetName,
+			UserPhysicsResource::TypeLoadCallback(this, &CppContextObject::OnLoadPhysics));
+	}
 }
 
 bool CppContextObject::TryComplete()
 {
-	if (!mPhysicsResource)
+	if (!mPhysicsResource || IsLoaded())
 	{
 		return (false);
 	}

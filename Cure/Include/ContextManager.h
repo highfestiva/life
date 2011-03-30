@@ -37,6 +37,7 @@ public:
 	virtual ~ContextManager();
 
 	GameManager* GetGameManager() const;
+	void SetLocalRange(unsigned pIndex, unsigned pCount);	// Sets the range that will be used for local ID's.
 
 	void SetIsObjectOwner(bool pIsObjectOwner);
 	void AddLocalObject(ContextObject* pObject);

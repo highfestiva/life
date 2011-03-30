@@ -23,8 +23,8 @@ class ClientConsoleManager: public ConsoleManager
 {
 	typedef ConsoleManager Parent;
 public:
-	ClientConsoleManager(Cure::GameManager* pGameManager, UiCure::GameUiManager* pUiManager,
-		Cure::RuntimeVariableScope* pVariableScope, const PixelRect& pArea);
+	ClientConsoleManager(Cure::ResourceManager* pResourceManager, Cure::GameManager* pGameManager,
+		UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVariableScope, const PixelRect& pArea);
 	virtual ~ClientConsoleManager();
 
 	virtual bool Start();
@@ -47,7 +47,6 @@ private:
 		COMMAND_LOGOUT,
 		COMMAND_START_RESET_UI,
 		COMMAND_WAIT_RESET_UI,
-		COMMAND_WAIT_LOADED,
 		COMMAND_ADD_PLAYER,
 		COMMAND_SET_AVATAR_ENGINE_POWER,
 	};

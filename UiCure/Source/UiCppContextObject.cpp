@@ -348,10 +348,24 @@ void CppContextObject::OnLoadClass(UserClassResource* pClassResource)
 		assert(false);
 		return;
 	}
-	else
+
+	const size_t lMeshCount = lClass->GetMeshCount();
+	if (mEnableUi)
 	{
-		StartLoadingPhysics(lClass->GetPhysicsBaseName());
+		assert(lMeshCount > 0);
+		for (size_t x = 0; x < lMeshCount; ++x)
+		{
+			int lPhysIndex = -1;
+			str lMeshName;
+			TransformationF lTransform;
+			lClass->GetMesh(x, lPhysIndex, lMeshName, lTransform);
+			UserGeometryReferenceResource* lMesh = new UserGeometryReferenceResource(
+				mUiManager, GeometryOffset(lPhysIndex, lTransform));
+			mMeshResourceArray.push_back(lMesh);
+		}
 	}
+
+	StartLoadingPhysics(lClass->GetPhysicsBaseName());
 
 	if (!mEnableUi)
 	{
@@ -360,9 +374,10 @@ void CppContextObject::OnLoadClass(UserClassResource* pClassResource)
 
 	assert(mMeshLoadCount == 0);
 	//assert(mTextureLoadCount == 0);
-	const size_t lMeshCount = lClass->GetMeshCount();
-	assert(lMeshCount > 0);
-	for (size_t x = 0; x < lMeshCount; ++x)
+	assert(lMeshCount == mMeshResourceArray.size());
+	size_t x = 0;
+	MeshArray::iterator y = mMeshResourceArray.begin();
+	for (; y != mMeshResourceArray.end(); ++x, ++y)
 	{
 		int lPhysIndex = -1;
 		str lMeshName;
@@ -379,12 +394,14 @@ void CppContextObject::OnLoadClass(UserClassResource* pClassResource)
 		{
 			lMeshInstance = strutil::Format(_T("%s_%s"), lMeshNameList[1].c_str(), GetMeshInstanceId().c_str());
 		}
-		UserGeometryReferenceResource* lMesh = new UserGeometryReferenceResource(
-			mUiManager, GeometryOffset(lPhysIndex, lTransform));
-		mMeshResourceArray.push_back(lMesh);
-		lMesh->Load(GetResourceManager(),
+		// TRICKY: load non-unique, since this mesh reference is shared. However, we set it as
+		// "don't keep", which makes sure it doesn't get cached. Example: client 0's car 1 mesh
+		// is the same as client 1's car 1 mesh. But when car 1 dies, the mesh REFERENCE should
+		// also die immediately. (The MESH, on the other hand, is a totally different topic.)
+		(*y)->Load(GetResourceManager(),
 			strutil::Format(_T("%s.mesh;%s"), lMeshName.c_str(), lMeshInstance.c_str()),
-			UserGeometryReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh));
+			UserGeometryReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh),
+			false);
 	}
 	LoadTextures();
 }

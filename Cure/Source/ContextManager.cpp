@@ -38,6 +38,14 @@ GameManager* ContextManager::GetGameManager() const
 	return (mGameManager);
 }
 
+void ContextManager::SetLocalRange(unsigned pIndex, unsigned pCount)
+{
+	assert(mObjectTable.empty());
+	const GameObjectId lStartId = 0x40000000;
+	const GameObjectId lBlockSize = (0x7FFFFFFF-lStartId-pCount)/pCount;
+	const GameObjectId lOffset = lStartId + lBlockSize*pIndex;
+	mLocalObjectIdManager = ObjectIdManager(lOffset, lOffset+lBlockSize-1, 0xFFFFFFFF);
+}
 
 
 void ContextManager::SetIsObjectOwner(bool pIsObjectOwner)
@@ -78,7 +86,7 @@ bool ContextManager::DeleteObject(GameObjectId pInstanceId)
 	ContextObject* lObject = GetObject(pInstanceId, true);
 	if (lObject)
 	{
-		log_volatile(mLog.Debugf(_T("Deleting context object %i."), pInstanceId));
+		log_volatile(mLog.Tracef(_T("Deleting context object %i."), pInstanceId));
 		delete (lObject);
 		lOk = true;
 	}

@@ -472,11 +472,16 @@ SoundManagerOpenAL::Source::~Source()
 
 bool SoundManagerOpenAL::Source::SetSample(Sample* pSample, float pRollOffFactor)
 {
+	::alGenSources(1, &mSid);
+	if (mSid == (ALuint)-1)
+	{
+		return false;
+	}
+
 	assert(mSample == 0);
 	mSample = pSample;
 	mSample->mSourceList.insert(this);
 
-	::alGenSources(1, &mSid);
 	::alSourcei(mSid, AL_LOOPING, mSample->mIsLooping? 1 : 0);
 	if (mSample->mIsAmbient)
 	{
@@ -490,7 +495,7 @@ bool SoundManagerOpenAL::Source::SetSample(Sample* pSample, float pRollOffFactor
 		::alSourcef(mSid, AL_ROLLOFF_FACTOR, pRollOffFactor);
 	}
 	::alSourcei(mSid, AL_BUFFER, mSample->mBuffer);
-	return (mSid != (ALuint)-1);
+	return true;
 }
 
 

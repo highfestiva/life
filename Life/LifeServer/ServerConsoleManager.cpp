@@ -32,9 +32,10 @@ const ConsoleManager::CommandPair ServerConsoleManager::mCommandIdList[] =
 
 
 
-ServerConsoleManager::ServerConsoleManager(Cure::GameManager* pGameManager, Cure::RuntimeVariableScope* pVariableScope,
-	InteractiveConsoleLogListener* pConsoleLogger, ConsolePrompt* pConsolePrompt):
-	ConsoleManager(pGameManager, pVariableScope, pConsoleLogger, pConsolePrompt)
+ServerConsoleManager::ServerConsoleManager(Cure::ResourceManager* pResourceManager, Cure::GameManager* pGameManager,
+	Cure::RuntimeVariableScope* pVariableScope, InteractiveConsoleLogListener* pConsoleLogger,
+	ConsolePrompt* pConsolePrompt):
+	ConsoleManager(pResourceManager, pGameManager, pVariableScope, pConsoleLogger, pConsolePrompt)
 {
 	SetSecurityLevel(1);
 	InitCommands();

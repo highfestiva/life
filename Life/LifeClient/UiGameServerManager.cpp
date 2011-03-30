@@ -44,7 +44,7 @@ void UiGameServerManager::SetRenderArea(const PixelRect& pRenderArea)
 
 void UiGameServerManager::StartConsole(InteractiveConsoleLogListener* pConsoleLogger, ConsolePrompt* pConsolePrompt)
 {
-	SetConsoleManager(new UiServerConsoleManager(this, mUiManager, GetVariableScope(), mRenderArea,
+	SetConsoleManager(new UiServerConsoleManager(GetResourceManager(), this, mUiManager, GetVariableScope(), mRenderArea,
 		pConsoleLogger, pConsolePrompt));
 	Parent::StartConsole(0, 0);
 }

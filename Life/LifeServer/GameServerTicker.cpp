@@ -39,7 +39,7 @@ GameServerTicker::GameServerTicker(Cure::ResourceManager* pResourceManager,
 
 	Cure::ContextObjectAttribute::SetCreator(&CreateObjectAttribute);
 
-	ConsoleManager lConsole(0, Cure::GetSettings(), 0, 0);
+	ConsoleManager lConsole(mResourceManager, 0, Cure::GetSettings(), 0, 0);
 	lConsole.InitCommands();
 	lConsole.ExecuteCommand(_T("execute-file -i ServerDefault.lsh"));
 	lConsole.ExecuteCommand(_T("execute-file -i ") + Application::GetIoFile(_T("ServerBase"), _T("lsh")));
@@ -57,7 +57,7 @@ GameServerTicker::~GameServerTicker()
 	mGameManager = 0;
 
 	{
-		ConsoleManager lConsole(0, Cure::GetSettings(), 0, 0);
+		ConsoleManager lConsole(mResourceManager, 0, Cure::GetSettings(), 0, 0);
 		lConsole.InitCommands();
 		lConsole.ExecuteCommand(_T("save-system-config-file 0 ") + Application::GetIoFile(_T("ServerBase"), _T("lsh")));
 	}

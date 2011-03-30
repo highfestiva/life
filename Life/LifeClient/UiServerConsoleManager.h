@@ -32,8 +32,8 @@ class UiServerConsoleManager: public ServerConsoleManager
 {
 	typedef ServerConsoleManager Parent;
 public:
-	UiServerConsoleManager(Cure::GameManager* pGameManager, UiCure::GameUiManager* pUiManager,
-		Cure::RuntimeVariableScope* pVariableScope, const PixelRect& pArea,
+	UiServerConsoleManager(Cure::ResourceManager* pResourceManager, Cure::GameManager* pGameManager,
+		UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVariableScope, const PixelRect& pArea,
 		InteractiveConsoleLogListener* pConsoleLogger, ConsolePrompt* pConsolePrompt);
 	virtual ~UiServerConsoleManager();
 

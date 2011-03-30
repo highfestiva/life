@@ -55,8 +55,6 @@ public:
 	bool StartResetUi();
 	bool WaitResetUi();
 
-	bool WaitLoaded();
-
 	bool IsFirstSlave(const GameClientSlaveManager* pSlave) const;
 	bool IsLocalObject(Cure::GameObjectId pInstanceId) const;
 	void GetSiblings(Cure::GameObjectId pObjectId, Cure::ContextObject::Array& pSiblingArray) const;
