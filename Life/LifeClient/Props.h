@@ -31,6 +31,7 @@ public:
 	Props(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager);
 	virtual ~Props();
 
+	void SetOpacity(float pOpacity);
 	void StartParticle(ParticleType pParticleType, const Vector3DF& pStartVelocity, float pScale);
 
 protected:
@@ -44,6 +45,7 @@ private:
 	ParticleType mParticleType;
 	float mScale;
 	float mTime;
+	float mOpacity;
 
 	LOG_CLASS_DECLARE();
 };

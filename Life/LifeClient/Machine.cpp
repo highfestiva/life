@@ -245,7 +245,7 @@ void Machine::OnTick()
 			{
 				continue;
 			}
-			if (lTag.mFloatValueList.size() != 6 ||
+			if (lTag.mFloatValueList.size() != 7 ||
 				lTag.mStringValueList.size() != 0 ||
 				lTag.mEngineIndexList.size() != 1 ||
 				lTag.mBodyIndexList.size() != 0 ||
@@ -255,32 +255,38 @@ void Machine::OnTick()
 				assert(false);
 				continue;
 			}
-
 			const TBC::PhysicsEngine* lEngine = mPhysics->GetEngine(lTag.mEngineIndexList[0]);
+			mExhaustTimeout -= std::max(0.15f, lEngine->GetIntensity()) * lFrameTime * 25;
+			if (mExhaustTimeout > 0)
+			{
+				continue;
+			}
+			mExhaustTimeout = 1.51f;
+
 			const QuaternionF lOriginalOrientation = GetOrientation();
 			Vector3DF lOffset(lTag.mFloatValueList[0], lTag.mFloatValueList[1], lTag.mFloatValueList[2]);
 			lOffset = lOriginalOrientation*lOffset;
 			Vector3DF lVelocity(lTag.mFloatValueList[3], lTag.mFloatValueList[4], lTag.mFloatValueList[5]);
+			const float lOpacity = lTag.mFloatValueList[6];
 			lVelocity = lOriginalOrientation*lVelocity;
 			lVelocity += GetVelocity();
 			for (size_t y = 0; y < lTag.mMeshIndexList.size(); ++y)
 			{
-				mExhaustTimeout -= std::max(0.15f, lEngine->GetIntensity()) * lFrameTime * 25;
-				if (mExhaustTimeout > 0)
-				{
-					continue;
-				}
-				mExhaustTimeout = 1.51f;
 				TBC::GeometryBase* lMesh = GetMesh(lTag.mMeshIndexList[y]);
 				if (lMesh)
 				{
-					TransformationF lTransform = lMesh->GetBaseTransformation();
+					int lPhysIndex = -1;
+					str lMeshName;
+					TransformationF lTransform;
+					((UiTbc::ChunkyClass*)GetClass())->GetMesh(lTag.mMeshIndexList[y], lPhysIndex, lMeshName, lTransform);
+					lTransform = lMesh->GetBaseTransformation() * lTransform;
 					lTransform.GetPosition() += lOffset;
 					Props* lPuff = new Props(GetResourceManager(), _T("mud_particle_01"), mUiManager);
 					GetManager()->GetGameManager()->AddContextObject(lPuff, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 					//mLog.Infof(_T("Machine %i creates fume particle %i."), GetInstanceId(), lPuff->GetInstanceId());
 					lPuff->DisableRootShadow();
 					lPuff->SetInitialTransform(lTransform);
+					lPuff->SetOpacity(lOpacity);
 					lPuff->StartParticle(Props::PARTICLE_GAS, lVelocity, 3);
 					lPuff->StartLoading();
 				}

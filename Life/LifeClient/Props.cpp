@@ -21,7 +21,8 @@ Props::Props(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCur
 	Parent(pResourceManager, pClassId, pUiManager),
 	mParticleType(PARTICLE_NONE),
 	mScale(1),
-	mTime(0)
+	mTime(0),
+	mOpacity(0.5f)
 {
 	SetPhysicsTypeOverride(PHYSICS_OVERRIDE_BONES);
 }
@@ -31,6 +32,11 @@ Props::~Props()
 }
 
 
+
+void Props::SetOpacity(float pOpacity)
+{
+	mOpacity = pOpacity;
+}
 
 void Props::StartParticle(ParticleType pParticleType, const Vector3DF& pStartVelocity, float pScale)
 {
@@ -91,7 +97,7 @@ void Props::OnTick()
 			{
 				if (mMeshResourceArray[x]->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 				{
-					mMeshResourceArray[x]->GetRamData()->GetBasicMaterialSettings().mAlpha = 0.3f * sin(mTime*0.5f*PIF);
+					mMeshResourceArray[x]->GetRamData()->GetBasicMaterialSettings().mAlpha = mOpacity * sin(mTime*0.5f*PIF);
 				}
 			}
 		}
