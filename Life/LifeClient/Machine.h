@@ -37,8 +37,6 @@ private:
 
 	void LoadPlaySound3d(UiCure::UserSound3dResource* pSoundResource);
 
-	float GetAttributeFloatValue(const str& pAttributeName) const;
-
 	typedef std::hash_map<const UiTbc::ChunkyClass::Tag*, UiCure::UserSound3dResource*, LEPRA_VOIDP_HASHER> TagSoundTable;
 
 	TagSoundTable mEngineSoundTable;

@@ -65,7 +65,7 @@ int ContextObjectAttribute::Unpack(ContextObject* pContextObject, const uint8* p
 	{
 		return -1;
 	}
-	
+
 	ContextObjectAttribute* lAttribute = pContextObject->GetAttribute(lAttributeName);
 	if (!lAttribute)
 	{

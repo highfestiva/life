@@ -6,7 +6,7 @@
 
 #include "Life.h"
 #include <assert.h>
-#include "FloatAttribute.h"
+#include "../Cure/Include/FloatAttribute.h"
 
 
 
@@ -26,7 +26,7 @@ Cure::ContextObjectAttribute* CreateObjectAttribute(Cure::ContextObject* pObject
 {
 	if (strutil::StartsWith(pAttributeName, _T("float_")))
 	{
-		return new FloatAttribute(pObject, pAttributeName, 0);
+		return new Cure::FloatAttribute(pObject, pAttributeName, 0);
 	}
 	(void)pObject;
 	(void)pAttributeName;

@@ -139,12 +139,11 @@ protected:
 	virtual void OnAlarm(int pAlarmId, Cure::ContextObject* pObject, void* pExtraData);
 	void AttachObjects(Cure::GameObjectId pObject1Id, unsigned pBody1Id, Cure::GameObjectId pObject2Id, unsigned pBody2Id);
 	void DetachObjects(Cure::GameObjectId pObject1Id, Cure::GameObjectId pObject2Id);
-	void SetObjectAttribute(Cure::GameObjectId pObjectId, const uint8* pData, unsigned pSize);
 
 	void CancelLogin();
 	void OnAvatarSelect(UiTbc::Button* pButton);
 	void DropAvatar();
-	bool QueryIsChild(Cure::ContextObject* pAvatar) const;
+	bool QuerySetIsChild(Cure::ContextObject* pAvatar) const;
 	Cure::RuntimeVariableScope* GetVariableScope() const;
 
 	Cure::NetworkClient* GetNetworkClient() const;

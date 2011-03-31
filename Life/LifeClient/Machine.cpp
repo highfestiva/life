@@ -15,7 +15,6 @@
 #include "../../TBC/Include/ChunkyPhysics.h"
 #include "../../TBC/Include/PhysicsEngine.h"
 #include "../../UiCure/Include/UiGameUiManager.h"
-#include "../FloatAttribute.h"
 #include "GameClientSlaveManager.h"
 #include "Props.h"
 #include "RtVar.h"
@@ -63,7 +62,7 @@ void Machine::OnTick()
 		return;
 	}
 	const float lFrameTime = std::min(0.1f, GetManager()->GetGameManager()->GetTimeManager()->GetNormalFrameTime());
-	const bool lIsChild = (GetAttributeFloatValue(_T("float_is_child")) > 0.5f)? true : false;
+	const bool lIsChild = IsAttributeTrue(_T("float_is_child"));
 	float lRealTimeRatio;
 	CURE_RTVAR_GET(lRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
 	const TBC::PhysicsManager* lPhysicsManager = mManager->GetGameManager()->GetPhysicsManager();
@@ -374,18 +373,6 @@ void Machine::LoadPlaySound3d(UiCure::UserSound3dResource* pSoundResource)
 	{
 		mUiManager->GetSoundManager()->Play(pSoundResource->GetData(), 0, 1.0);
 	}
-}
-
-
-
-float Machine::GetAttributeFloatValue(const str& pAttributeName) const
-{
-	const FloatAttribute* lFloatAttribute = (const FloatAttribute*)GetAttribute(pAttributeName);
-	if (!lFloatAttribute)
-	{
-		return 0;
-	}
-	return lFloatAttribute->GetValue();
 }
 
 

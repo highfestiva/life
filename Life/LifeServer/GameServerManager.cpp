@@ -14,6 +14,7 @@
 #include "../../Lepra/Include/Path.h"
 #include "../../Lepra/Include/SystemManager.h"
 #include "../../TBC/Include/ChunkyPhysics.h"
+#include "../../TBC/Include/PhysicsEngine.h"
 #include "../LifeMaster/MasterServer.h"
 #include "../LifeApplication.h"
 #include "../LifeString.h"
@@ -32,6 +33,7 @@ namespace Life
 
 
 
+const float NETWORK_POSITIONAL_RESEND_INTERVAL = 0.6f;
 const int NETWORK_POSITIONAL_AHEAD_BUFFER_SIZE = PHYSICS_FPS/2;
 
 
@@ -511,6 +513,15 @@ void GameServerManager::ProcessNetworkInputMessage(Client* pClient, Cure::Messag
 			}
 		}
 		break;
+		case Cure::MESSAGE_TYPE_OBJECT_ATTRIBUTE:
+		{
+			Cure::MessageObjectAttribute* lMessageAttrib = (Cure::MessageObjectAttribute*)pMessage;
+			Cure::GameObjectId lObjectId = lMessageAttrib->GetObjectId();
+			unsigned lByteSize = 0;
+			const uint8* lBuffer = lMessageAttrib->GetReadBuffer(lByteSize);
+			GetContext()->UnpackObjectAttribute(lObjectId, lBuffer, lByteSize);
+		}
+		break;
 		default:
 		{
 			mLog.AError("Got bad message type from client.");
@@ -815,6 +826,10 @@ void GameServerManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pT
 	const bool lBothAreDynamic = (lObject1Dynamic && lObject2Dynamic);
 	if (!lBothAreDynamic)
 	{
+		if (lObject1Dynamic)
+		{
+			FlipCheck(pObject1);
+		}
 		return;
 	}
 
@@ -852,10 +867,59 @@ void GameServerManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pT
 	}
 }
 
+void GameServerManager::FlipCheck(Cure::ContextObject* pObject) const
+{
+	// No use in repositioning the poor sod, unless we're ready to send it.
+	if (!pObject->QueryResendTime(NETWORK_POSITIONAL_RESEND_INTERVAL, true))
+	{
+		return;
+	}
+
+	// Check if we've landed on our side.
+	Vector3DF lUp(0, 0, 1);
+	lUp = pObject->GetOrientation() * lUp;
+	if (lUp.z > 0.2f ||
+		pObject->GetVelocity().GetLengthSquared() > 1*1 ||
+		pObject->GetAngularVelocity().GetLengthSquared() > 1*1)
+	{
+		// Nope, still standing, or at least moving. Might be drunken style,
+		// but at least not on it's head yet.
+		return;
+	}
+	// A grown-up still activating an engine = leave 'em be.
+	if (!pObject->IsAttributeTrue(_T("float_is_child")))
+	{
+		const int lEngineCount = pObject->GetPhysics()->GetEngineCount();
+		for (int x = 0; x < lEngineCount; ++x)
+		{
+			if (::fabs(pObject->GetPhysics()->GetEngine(x)->GetValue()) > 0.4f)
+			{
+				return;
+			}
+		}
+	}
+
+	// Yup, reset vehicle in the direction it was heading.
+	const Cure::ObjectPositionalData* lOriginalPositionData;
+	pObject->UpdateFullPosition(lOriginalPositionData);
+	Cure::ObjectPositionalData lPositionData;
+	lPositionData.CopyData(lOriginalPositionData);
+	lPositionData.mPosition.mVelocity.Set(0, 0, 0);
+	lPositionData.mPosition.mAngularVelocity.Set(0, 0, 0);
+	TransformationF& lTransform = lPositionData.mPosition.mTransformation;
+	lTransform.SetPosition(pObject->GetPosition() + Vector3DF(0, 0, 4));
+	Vector3DF lEulerAngles;
+	pObject->GetOrientation().GetEulerAngles(lEulerAngles);
+	lTransform.GetOrientation().SetEulerAngles(lEulerAngles.x, 0, 0);
+	lTransform.GetOrientation() *= pObject->GetPhysics()->GetOriginalBoneTransformation(0).GetOrientation();
+	pObject->SetFullPosition(lPositionData);
+	GetContext()->AddPhysicsSenderObject(pObject);
+}
+
 bool GameServerManager::OnPhysicsSend(Cure::ContextObject* pObject)
 {
 	bool lLastSend = false;
-	if (pObject->QueryResendTime(0.6f, false))
+	if (pObject->QueryResendTime(NETWORK_POSITIONAL_RESEND_INTERVAL, false))
 	{
 		lLastSend = true;
 		log_volatile(mLog.Debugf(_T("Sending pos for %s."), pObject->GetClassId().c_str()));

@@ -6,6 +6,7 @@
 
 #include "../Include/ContextManager.h"
 #include <list>
+#include "../Include/ContextObjectAttribute.h"
 #include "../Include/ContextObject.h"
 #include "../Include/GameManager.h"
 #include "../Include/TimeManager.h"
@@ -168,6 +169,19 @@ void ContextManager::AddAttributeSenderObject(ContextObject* pObject)
 	assert(mObjectTable.find(pObject->GetInstanceId()) != mObjectTable.end());
 	assert(pObject->GetManager() == this);
 	mAttributeSenderObjectTable.insert(ContextObjectPair(pObject->GetInstanceId(), pObject));
+}
+
+void ContextManager::UnpackObjectAttribute(GameObjectId pObjectId, const uint8* pData, unsigned pSize)
+{
+	ContextObject* lObject = GetObject(pObjectId);
+	if (lObject)
+	{
+		ContextObjectAttribute::Unpack(lObject, pData, pSize);
+	}
+	else
+	{
+		mLog.Errorf(_T("Trying to unpack attribute for non-existent object %u."), pObjectId);
+	}
 }
 
 

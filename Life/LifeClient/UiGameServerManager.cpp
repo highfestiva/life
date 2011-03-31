@@ -100,6 +100,8 @@ void UiGameServerManager::TickInput()
 
 Cure::ContextObject* UiGameServerManager::CreateContextObject(const str& pClassId) const
 {
+	// TRICKY: must be of UI object to not clash with client slaves
+	// that are running in the same process.
 	UiCure::CppContextObject* lObject = new UiCure::CppContextObject(GetResourceManager(), pClassId, mUiManager);
 	lObject->EnableUi(false);
 	return (lObject);

@@ -51,7 +51,9 @@ public:
 	void AddPhysicsSenderObject(ContextObject* pObject);
 	void AddPhysicsBody(ContextObject* pObject, TBC::PhysicsManager::BodyID pBodyId);
 	void RemovePhysicsBody(TBC::PhysicsManager::BodyID pBodyId);
+
 	void AddAttributeSenderObject(ContextObject* pObject);
+	void UnpackObjectAttribute(GameObjectId pObjectId, const uint8* pData, unsigned pSize);
 
 	GameObjectId AllocateGameObjectId(NetworkObjectType pNetworkType);
 	void FreeGameObjectId(NetworkObjectType pNetworkType, GameObjectId pInstanceId);

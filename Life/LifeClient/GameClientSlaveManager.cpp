@@ -8,6 +8,7 @@
 #include <algorithm>
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/ContextObjectAttribute.h"
+#include "../../Cure/Include/FloatAttribute.h"
 #include "../../Cure/Include/NetworkClient.h"
 #include "../../Cure/Include/ResourceManager.h"
 #include "../../Cure/Include/RuntimeVariable.h"
@@ -26,7 +27,6 @@
 #include "../../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../../UiTBC/Include/GUI/UiFloatingLayout.h"
 #include "../LifeServer/MasterServerConnection.h"
-#include "../FloatAttribute.h"
 #include "../LifeApplication.h"
 #include "CollisionSoundManager.h"
 #include "GameClientMasterTicker.h"
@@ -913,7 +913,7 @@ void GameClientSlaveManager::TickUiInput()
 			{
 				// Children have the possibility of just pressing left/right which will cause a forward
 				// motion in the currently used vehicle.
-				const bool lIsChild = QueryIsChild(lObject);
+				const bool lIsChild = QuerySetIsChild(lObject);
 				if (lIsChild && Math::IsEpsEqual(lPowerFwdRev, 0.0f, 0.05f) && !Math::IsEpsEqual(lPowerLR, 0.0f, 0.05f))
 				{
 					TBC::PhysicsEngine* lEngine = lObject->GetPhysics()->GetEngine(0);
@@ -1462,7 +1462,7 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 			Cure::GameObjectId lObjectId = lMessageAttrib->GetObjectId();
 			unsigned lByteSize = 0;
 			const uint8* lBuffer = lMessageAttrib->GetReadBuffer(lByteSize);
-			SetObjectAttribute(lObjectId, lBuffer, lByteSize);
+			GetContext()->UnpackObjectAttribute(lObjectId, lBuffer, lByteSize);
 		}
 		break;
 		default:
@@ -1696,9 +1696,34 @@ bool GameClientSlaveManager::OnPhysicsSend(Cure::ContextObject*)
 	return (true);	// Say true to drop us from sender list.
 }
 
-bool GameClientSlaveManager::OnAttributeSend(Cure::ContextObject*)
+bool GameClientSlaveManager::OnAttributeSend(Cure::ContextObject* pObject)
 {
-	return (true);	// Say true to drop us from sender list.
+	mLog.AInfo("Sending attribute(s) for a context object...");
+	typedef Cure::ContextObject::AttributeArray AttributeArray;
+	const AttributeArray& lAttributes = pObject->GetAttributes();
+	AttributeArray::const_iterator x = lAttributes.begin();
+	for (; x != lAttributes.end(); ++x)
+	{
+		Cure::ContextObjectAttribute* lAttribute = *x;
+		const int lSendSize = lAttribute->QuerySend();
+		if (lSendSize > 0)
+		{
+			assert(lAttribute->GetNetworkType() == Cure::ContextObjectAttribute::TYPE_BOTH ||
+				lAttribute->GetNetworkType() == Cure::ContextObjectAttribute::TYPE_BOTH_BROADCAST);
+			Cure::Packet* lPacket = GetNetworkAgent()->GetPacketFactory()->Allocate();
+			Cure::MessageObjectAttribute* lAttribMessage = (Cure::MessageObjectAttribute*)GetNetworkAgent()->
+				GetPacketFactory()->GetMessageFactory()->Allocate(Cure::MESSAGE_TYPE_OBJECT_ATTRIBUTE);
+			lPacket->AddMessage(lAttribMessage);
+			lAttribute->Pack(lAttribMessage->GetWriteBuffer(lPacket, pObject->GetInstanceId(), lSendSize));
+
+			assert(!GetNetworkAgent()->GetLock()->IsOwner());
+			ScopeLock lTickLock(GetTickLock());
+			GetNetworkAgent()->PlaceInSendBuffer(true, GetNetworkClient()->GetSocket(), lPacket);
+
+			GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
+		}
+	}
+	return true;	// Say true to drop us from sender list.
 }
 
 bool GameClientSlaveManager::IsServer()
@@ -1764,15 +1789,6 @@ void GameClientSlaveManager::DetachObjects(Cure::GameObjectId pObject1Id, Cure::
 	}
 }
 
-void GameClientSlaveManager::SetObjectAttribute(Cure::GameObjectId pObjectId, const uint8* pData, unsigned pSize)
-{
-	Cure::ContextObject* lObject = GetContext()->GetObject(pObjectId);
-	if (lObject)
-	{
-		Cure::ContextObjectAttribute::Unpack(lObject, pData, pSize);
-	}
-}
-
 
 
 void GameClientSlaveManager::CancelLogin()
@@ -1803,13 +1819,13 @@ void GameClientSlaveManager::DropAvatar()
 	mHadAvatar = false;
 }
 
-bool GameClientSlaveManager::QueryIsChild(Cure::ContextObject* pAvatar) const
+bool GameClientSlaveManager::QuerySetIsChild(Cure::ContextObject* pAvatar) const
 {
 	const str lName = _T("float_is_child");
-	FloatAttribute* lAttribute = (FloatAttribute*)pAvatar->GetAttribute(lName);
+	Cure::FloatAttribute* lAttribute = (Cure::FloatAttribute*)pAvatar->GetAttribute(lName);
 	if (!lAttribute)
 	{
-		lAttribute = new FloatAttribute(pAvatar, lName, 0);
+		lAttribute = new Cure::FloatAttribute(pAvatar, lName, 0);
 	}
 	bool lIsChild;
 	CURE_RTVAR_GET(lIsChild, =, GetVariableScope(), RTVAR_GAME_ISCHILD, false);

@@ -6,21 +6,21 @@
 
 #pragma once
 
-#include "../Cure/Include/ContextObjectAttribute.h"
-#include "Life.h"
+#include "Cure.h"
+#include "ContextObjectAttribute.h"
 
 
 
-namespace Life
+namespace Cure
 {
 
 
 
-class FloatAttribute: public Cure::ContextObjectAttribute
+class FloatAttribute: public ContextObjectAttribute
 {
-	typedef Cure::ContextObjectAttribute Parent;
+	typedef ContextObjectAttribute Parent;
 public:
-	FloatAttribute(Cure::ContextObject* pContextObject, const str& pName, float pValue);
+	FloatAttribute(ContextObject* pContextObject, const str& pName, float pValue);
 	virtual ~FloatAttribute();
 
 	float GetValue() const;

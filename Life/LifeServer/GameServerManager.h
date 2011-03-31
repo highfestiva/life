@@ -84,6 +84,7 @@ private:
 	void OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
 		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
 		TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID pBody2Id);
+	void FlipCheck(Cure::ContextObject* pObject) const;
 	virtual bool OnPhysicsSend(Cure::ContextObject* pObject);
 	virtual bool OnAttributeSend(Cure::ContextObject* pObject);
 	bool IsServer();

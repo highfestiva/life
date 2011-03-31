@@ -21,6 +21,7 @@
 #include "../Include/ContextManager.h"
 #include "../Include/ContextObjectAttribute.h"
 #include "../Include/Cure.h"
+#include "../Include/FloatAttribute.h"
 #include "../Include/GameManager.h"
 #include "../Include/TimeManager.h"
 
@@ -317,6 +318,21 @@ const ContextObject::AttributeArray& ContextObject::GetAttributes() const
 	return mAttributeArray;
 }
 
+float ContextObject::GetAttributeFloatValue(const str& pAttributeName) const
+{
+	const FloatAttribute* lFloatAttribute = (const FloatAttribute*)GetAttribute(pAttributeName);
+	if (!lFloatAttribute)
+	{
+		return 0;
+	}
+	return lFloatAttribute->GetValue();
+}
+
+bool ContextObject::IsAttributeTrue(const str& pAttributeName) const
+{
+	return (GetAttributeFloatValue(pAttributeName) > 0.5f);
+}
+
 void ContextObject::OnAttributeUpdated(ContextObjectAttribute*)
 {
 	mManager->AddAttributeSenderObject(this);
@@ -400,6 +416,7 @@ bool ContextObject::UpdateFullPosition(const ObjectPositionalData*& pPositionalD
 	for (int x = 0; x < lGeometryCount; ++x)
 	{
 		// TODO: add support for parent ID??? (JB 2009-07-07: Don't know anymore what this comment might mean.)
+		// ??? Could it be when connected to something else, like a car connected to a crane?
 		const TBC::ChunkyBoneGeometry* lStructureGeometry = mPhysics->GetBoneGeometry(x);
 		if (!lStructureGeometry)
 		{
@@ -651,6 +668,17 @@ Vector3DF ContextObject::GetVelocity() const
 		mManager->GetGameManager()->GetPhysicsManager()->GetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
 	}
 	return (lVelocity);
+}
+
+Vector3DF ContextObject::GetAngularVelocity() const
+{
+	Vector3DF lAngularVelocity;
+	const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
+	if (lGeometry && lGeometry->GetBodyId() != TBC::INVALID_BODY)
+	{
+		mManager->GetGameManager()->GetPhysicsManager()->GetBodyAngularVelocity(lGeometry->GetBodyId(), lAngularVelocity);
+	}
+	return lAngularVelocity;
 }
 
 Vector3DF ContextObject::GetAcceleration() const

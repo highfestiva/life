@@ -4,22 +4,20 @@
 
 
 
-#include "FloatAttribute.h"
+#include "../Include/FloatAttribute.h"
 #include <assert.h>
-#include "../Cure/Include/ContextManager.h"
-#include "../Cure/Include/ContextObject.h"
-#include "../Cure/Include/GameManager.h"
-#include "../Cure/Include/TimeManager.h"
-#include "../Lepra/Include/Packer.h"
+#include "../../Lepra/Include/Packer.h"
+#include "../Include/ContextManager.h"
+#include "../Include/GameManager.h"
 
 
 
-namespace Life
+namespace Cure
 {
 
 
 
-FloatAttribute::FloatAttribute(Cure::ContextObject* pContextObject, const str& pName, float pValue):
+FloatAttribute::FloatAttribute(ContextObject* pContextObject, const str& pName, float pValue):
 	Parent(pContextObject, pName),
 	mIsUpdated(true),
 	mValue(pValue)
@@ -43,6 +41,7 @@ void FloatAttribute::SetValue(float pValue)
 	{
 		mValue = pValue;
 		mIsUpdated = true;
+		mContextObject->OnAttributeUpdated(this);
 	}
 }
 

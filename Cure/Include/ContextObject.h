@@ -80,6 +80,8 @@ public:
 	void DeleteAttribute(const str& pName);
 	ContextObjectAttribute* GetAttribute(const str& pName) const;
 	const AttributeArray& GetAttributes() const;
+	float GetAttributeFloatValue(const str& pAttributeName) const;
+	bool IsAttributeTrue(const str& pAttributeName) const;
 	void OnAttributeUpdated(ContextObjectAttribute* pAttribute);
 
 	void AddTrigger(TBC::PhysicsManager::TriggerID pTriggerId, const void*);
@@ -100,6 +102,7 @@ public:
 	void SetRootPosition(const Vector3DF& pPosition);
 	QuaternionF GetOrientation() const;
 	Vector3DF GetVelocity() const;
+	Vector3DF GetAngularVelocity() const;
 	Vector3DF GetAcceleration() const;
 	float GetForwardSpeed() const;
 	float GetMass() const;
