@@ -39,8 +39,10 @@ public:
 
 	void OnMicroTick(PhysicsManager* pPhysicsManager, float pFrameTime);
 
-	void SetPhysicsType(PhysicsType pPhysicsType);	// You may use this to change into a ragdoll (COLLISION_DETECT_ONLY -> DYNAMIC), or back.
 	PhysicsType GetPhysicsType() const;
+	void SetPhysicsType(PhysicsType pPhysicsType);	// You may use this to change into a ragdoll (COLLISION_DETECT_ONLY -> DYNAMIC), or back.
+	bool IsGuided() const;	// Gets help with automatic motions, such as flipping over.
+	void SetIsGuided(bool pIsGuided);
 
 	ChunkyBoneGeometry* GetBoneGeometry(int pBoneIndex) const;
 	ChunkyBoneGeometry* GetBoneGeometry(PhysicsManager::BodyID pBodyId) const;
@@ -90,6 +92,7 @@ private:
 	SpawnerArray mSpawnerArray;
 	TransformOperation mTransformOperation;
 	PhysicsType mPhysicsType;
+	bool mIsGuided;
 	unsigned mUniqeGeometryIndex;
 
 	LOG_CLASS_DECLARE();

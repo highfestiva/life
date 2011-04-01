@@ -413,9 +413,9 @@ def startclient():
 def bgclient():
 	_bgrun("LifeClient")
 def startserver():
-	fgrun("LifeServer")
+	_fgrun("LifeServer")
 def bgserver():
-	bgrun("LifeServer")
+	_bgrun("LifeServer")
 def start():
         bgclient()
         startserver()

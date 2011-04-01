@@ -1193,7 +1193,6 @@ void ResourceManager::LoadSingleResource()
 		if (!lIsLoaded)
 		{
 			lResource->SetLoadState(RESOURCE_LOAD_ERROR);
-			assert(false);
 		}
 		{
 			ScopeLock lLock(&mThreadLock);

@@ -52,6 +52,8 @@ public:
 
 	int GetLoggedInClientCount() const;
 
+	void Build(const str& pWhat);
+
 	void TickInput();
 
 private:

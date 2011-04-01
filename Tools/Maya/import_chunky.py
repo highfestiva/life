@@ -993,7 +993,8 @@ class GroupReader(DefaultMAReader):
                         if section.startswith("config:") or section.startswith("trigger:"):
                                 used_sections[section] = True
                 required = [("type", lambda x: chunkywriter.physics_type.get(x) != None)]
-                optional = [("casts_shadows", lambda x: x == None or type(x) == bool)]
+                optional = [("casts_shadows", lambda x: x == None or type(x) == bool),
+                            ("guided", lambda x: x == None or type(x) == bool)]
                 for name, config_check in required+optional:
                         ok = config_check(self.config.get(name))
                         allApplied &= ok

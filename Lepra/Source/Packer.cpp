@@ -136,6 +136,29 @@ int PackerInt16::Unpack(int& pDestination, const uint8* pSource, int pSize)
 
 
 
+int PackerUInt16::Pack(uint8* pDestination, int pSource)
+{
+	*(uint16*)pDestination = Endian::HostToBig((uint16)pSource);
+	return (sizeof(uint16));
+}
+
+int PackerUInt16::Unpack(int& pDestination, const uint8* pSource, int pSize)
+{
+	int lSize = -1;
+	if (pSize >= (int)sizeof(uint16))
+	{
+		lSize = sizeof(uint16);
+		pDestination = Endian::BigToHost(*(uint16*)pSource);
+	}
+	else
+	{
+		lSize = -1;
+	}
+	return (lSize);
+}
+
+
+
 int PackerReal::Pack(uint8* pDestination, float pSource)
 {
 	*(float*)pDestination = Endian::HostToBig(pSource);

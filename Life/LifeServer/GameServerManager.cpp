@@ -46,6 +46,7 @@ GameServerManager::GameServerManager(Cure::RuntimeVariableScope* pVariableScope,
 	mMasterConnection(0)
 {
 	CURE_RTVAR_SET_IF_NOT_SET(Cure::GetSettings(), RTVAR_APPLICATION_AUTOEXITONEMPTYSERVER, false);
+	CURE_RTVAR_SET_IF_NOT_SET(Cure::GetSettings(), RTVAR_GAME_AUTOFLIPENABLED, true);
 	CURE_RTVAR_SET_IF_NOT_SET(Cure::GetSettings(), RTVAR_GAME_SPAWNPART, 1.0);
 	CURE_RTVAR_SET_IF_NOT_SET(Cure::GetSettings(), RTVAR_NETWORK_SERVERNAME, strutil::Format(_("%s's server"), SystemManager::GetLoginName().c_str()));
 	CURE_RTVAR_SET_IF_NOT_SET(Cure::GetSettings(), RTVAR_NETWORK_LOGINGREETING, _("echo 4 \"Welcome to my server! Enjoy the ride!\""));
@@ -277,6 +278,44 @@ int GameServerManager::GetLoggedInClientCount() const
 	ScopeLock lTickLock(GetTickLock());
 	ScopeLock lNetLock(GetNetworkAgent()->GetLock());
 	return (mAccountClientTable.GetCount());
+}
+
+
+
+void GameServerManager::Build(const str& pWhat)
+{
+	assert(!GetNetworkAgent()->GetLock()->IsOwner());
+	ScopeLock lTickLock(GetTickLock());
+	ScopeLock lNetLock(GetNetworkAgent()->GetLock());
+
+	for (int x = 0; x < 400 && !IsThreadSafe(); ++x)
+	{
+		if (x > 3) lNetLock.Release();
+		if (x > 7) lTickLock.Release();
+		Thread::Sleep(0.005);
+		if (x > 7) lTickLock.Acquire();
+		if (x > 3) lNetLock.Acquire();
+	}
+	if (!IsThreadSafe())
+	{
+		mLog.AError("Could never reach a thread-safe slice. Aborting construction.");
+		return;
+	}
+
+	AccountClientTable::Iterator x = mAccountClientTable.First();
+	for (; x != mAccountClientTable.End(); ++x)
+	{
+		const Client* lClient = x.GetObject();
+		Cure::ContextObject* lObject = GetContext()->GetObject(lClient->GetAvatarId());
+		if (lObject)
+		{
+			Vector3DF lPosition = lObject->GetPosition() + Vector3DF(10, 0, 0);
+			mLog.Info(_T("Building object '")+pWhat+_T("' near user ")+strutil::Encode(lClient->GetUserConnection()->GetLoginName())+_T("."));
+			Cure::ContextObject* lObject = Parent::CreateContextObject(pWhat, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
+			lObject->SetInitialTransform(TransformationF(QuaternionF(), lPosition));
+			lObject->StartLoading();
+		}
+	}
 }
 
 
@@ -808,8 +847,7 @@ void GameServerManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 		{
 			mLog.Errorf(_T("Could not load object of type %s."), pObject->GetClassId().c_str());
 		}
-		assert(false);
-		delete (pObject);
+		GetContext()->PostKillObject(pObject->GetInstanceId());
 	}
 }
 
@@ -826,7 +864,7 @@ void GameServerManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pT
 	const bool lBothAreDynamic = (lObject1Dynamic && lObject2Dynamic);
 	if (!lBothAreDynamic)
 	{
-		if (lObject1Dynamic)
+		if (lObject1Dynamic && pObject1->GetPhysics()->IsGuided())
 		{
 			FlipCheck(pObject1);
 		}
@@ -869,6 +907,13 @@ void GameServerManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pT
 
 void GameServerManager::FlipCheck(Cure::ContextObject* pObject) const
 {
+	bool lAutoFlipEnabled;
+	CURE_RTVAR_GET(lAutoFlipEnabled, =, GetVariableScope(), RTVAR_GAME_AUTOFLIPENABLED, true);
+	if (!lAutoFlipEnabled)
+	{
+		return;
+	}
+
 	// No use in repositioning the poor sod, unless we're ready to send it.
 	if (!pObject->QueryResendTime(NETWORK_POSITIONAL_RESEND_INTERVAL, true))
 	{

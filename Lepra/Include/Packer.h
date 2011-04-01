@@ -51,6 +51,13 @@ public:
 	static int Unpack(int& pDestination, const uint8* pSource, int pSize);
 };
 
+class PackerUInt16	// Single int16 (even though "int" used as parameter).
+{
+public:
+	static int Pack(uint8* pDestination, int pSource);
+	static int Unpack(int& pDestination, const uint8* pSource, int pSize);
+};
+
 class PackerReal
 {
 public:

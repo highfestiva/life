@@ -534,7 +534,19 @@ void GameClientSlaveManager::RequestLogin(const str& pServerAddress, const Cure:
 	CURE_RTVAR_GET(lConnectTimeout, =(float), GetVariableScope(), RTVAR_NETWORK_CONNECT_TIMEOUT, 3.0);
 	mMasterServerConnection->SetSocketInfo(GetNetworkClient(), lConnectTimeout);
 	str lServerAddress = pServerAddress;
-	if (!mMaster->IsLocalServer())
+	bool lIsLocalAddress = false;
+	{
+		SocketAddress lResolvedAddress;
+		if (lResolvedAddress.Resolve(lServerAddress))
+		{
+			str lIp = lResolvedAddress.GetIP().GetAsString();
+			if (lIp == _T("127.0.0.1") || lIp == _T("::1") || lIp == _T("0:0:0:0:0:0:0:1"))
+			{
+				lIsLocalAddress = true;
+			}
+		}
+	}
+	if (!mMaster->IsLocalServer() && !lIsLocalAddress)
 	{
 		mMasterServerConnection->RequestOpenFirewall(pServerAddress);
 		const double lTimeout = 1.2;
@@ -1586,8 +1598,7 @@ void GameClientSlaveManager::OnLoadCompleted(Cure::ContextObject* pObject, bool 
 	else
 	{
 		mLog.Errorf(_T("Could not load object of type %s."), pObject->GetClassId().c_str());
-		assert(false);
-		delete (pObject);
+		GetContext()->PostKillObject(pObject->GetInstanceId());
 	}
 }
 

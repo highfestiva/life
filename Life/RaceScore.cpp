@@ -93,7 +93,7 @@ int RaceScore::Pack(uint8* pDestination)
 	const int lParentSize = Parent::Pack(pDestination);
 	pDestination += lParentSize;
 	pDestination[0] = (uint8)mLapCountLeft;
-	PackerInt16::Pack(pDestination+1, mPhysicsFrameStart);
+	PackerUInt16::Pack(pDestination+1, mPhysicsFrameStart);
 	pDestination[3] = (uint8)mTriggerSet.size();
 	pDestination[4] = (uint8)mTriggerCount;
 
@@ -109,7 +109,7 @@ int RaceScore::Unpack(const uint8* pSource, int pMaxSize)
 		return -1;
 	}
 	mLapCountLeft = pSource[0];
-	PackerInt16::Unpack(mPhysicsFrameStart, pSource+1, pMaxSize);
+	PackerUInt16::Unpack(mPhysicsFrameStart, pSource+1, pMaxSize);
 	mTriggedCount = pSource[3];
 	mTriggerCount = pSource[4];
 	mIsUpdated = true;

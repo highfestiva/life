@@ -40,7 +40,7 @@ void Props::SetOpacity(float pOpacity)
 
 void Props::StartParticle(ParticleType pParticleType, const Vector3DF& pStartVelocity, float pScale)
 {
-	assert(pStartVelocity.GetLengthSquared() < 1000*1000);
+	//assert(pStartVelocity.GetLengthSquared() < 1000*1000);
 	mParticleType = pParticleType;
 	mVelocity = pStartVelocity;
 	mScale = pScale;

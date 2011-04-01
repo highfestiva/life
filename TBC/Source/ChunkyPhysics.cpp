@@ -22,6 +22,7 @@ ChunkyPhysics::ChunkyPhysics(TransformOperation pTransformOperation, PhysicsType
 	BoneHierarchy(),
 	mTransformOperation(pTransformOperation),
 	mPhysicsType(pPhysicsType),
+	mIsGuided(true),
 	mUniqeGeometryIndex(0)
 {
 }
@@ -45,16 +46,27 @@ void ChunkyPhysics::OnMicroTick(PhysicsManager* pPhysicsManager, float pFrameTim
 
 
 
+ChunkyPhysics::PhysicsType ChunkyPhysics::GetPhysicsType() const
+{
+	return (mPhysicsType);
+}
+
 void ChunkyPhysics::SetPhysicsType(PhysicsType pPhysicsType)
 {
 	// TODO: implement change in physics engine.
 	mPhysicsType = pPhysicsType;
 }
 
-ChunkyPhysics::PhysicsType ChunkyPhysics::GetPhysicsType() const
+bool ChunkyPhysics::IsGuided() const
 {
-	return (mPhysicsType);
+	return mIsGuided;
 }
+
+void ChunkyPhysics::SetIsGuided(bool pIsGuided)
+{
+	mIsGuided = pIsGuided;
+}
+
 
 ChunkyBoneGeometry* ChunkyPhysics::GetBoneGeometry(int pBoneIndex) const
 {

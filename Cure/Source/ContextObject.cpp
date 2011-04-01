@@ -753,6 +753,10 @@ bool ContextObject::SetPhysics(TBC::ChunkyPhysics* pStructure)
 			lTransformation = mPosition.mPosition.mTransformation;
 		}
 	}
+	else
+	{
+		lTransformation = mPosition.mPosition.mTransformation;
+	}
 
 	if (mPhysicsOverride == PHYSICS_OVERRIDE_BONES)
 	{
