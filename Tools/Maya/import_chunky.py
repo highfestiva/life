@@ -171,7 +171,7 @@ class GroupReader(DefaultMAReader):
                         node.ignore = True
                 except ValueError:
                         pass
-                children = tuple(filter(lambda n: n.getParent() == node, nodes))
+                children = tuple(filter(lambda n: n.getParent() == node, nodes))        # Use conversion to avoid lazy evaluation, which will cause iterator to skip some = error.
                 for child in children:
                         self._recursiveremove(child, nodes)
 
@@ -445,16 +445,10 @@ class GroupReader(DefaultMAReader):
                                                 return 180
                                         return math.degrees(math.fabs(vec3.acos(n1*n2)))
                                 def angle_fast(n1, n2x, n2y, n2z):
-                                        n1_0 = (n1.x==0 and n1.y==0 and n1.z==0)
-                                        n2_0 = (n2x==0 and n2y==0 and n2z==0)
-                                        if n1_0 or n2_0:
-                                                if n1_0 and n2_0:
-                                                        return 0
-                                                return 180
-                                        n2x *= n1.x
-                                        n2y *= n1.y
-                                        n2z *= n1.z
-                                        return math.degrees(math.fabs(vec3.acos(n2x+n2y+n2z)))
+                                        x = n1.x*n2x + n1.y*n2y + n1.z*n2z
+                                        if x < 0.65:    # Ugly, hard-coded optimization.
+                                                return 0.7
+                                        return vec3.acos(x)
                                 def uvdiff_sqr(t1, t2):
                                         dx = t1[0]-t2[0]
                                         dy = t1[1]-t2[1]
@@ -486,6 +480,7 @@ class GroupReader(DefaultMAReader):
                                         x += 3
 
                                 x = 0
+                                ang_cmp = 40*math.pi/180
                                 while x < end:
                                         c = normal(shared_indices[ts[x]][0])
                                         d = textureuv(shared_indices[ts[x]][0])
@@ -493,7 +488,7 @@ class GroupReader(DefaultMAReader):
                                         for s in shared_indices[ts[x]][1:]:
                                                 #if angle(c, normal(s)) > 40 or uvdiff_sqr(d, textureuv(s)) > 0.0001:
                                                 i = s*3
-                                                if angle_fast(c, ns[i],ns[i+1],ns[i+2]) > 40 or uvdiff_sqr(d, textureuv(s)) > 0.0001:
+                                                if angle_fast(c, ns[i],ns[i+1],ns[i+2]) > ang_cmp or uvdiff_sqr(d, textureuv(s)) > 0.0001:
                                                         split += [s]
                                         # Push all the once that we don't join together at the end.
                                         if split:
