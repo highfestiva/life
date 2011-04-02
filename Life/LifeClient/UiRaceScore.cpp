@@ -5,6 +5,7 @@
 
 
 #include "UiRaceScore.h"
+#include "../../Cure/Include/ContextManager.h"
 #include "StopWatch.h"
 
 

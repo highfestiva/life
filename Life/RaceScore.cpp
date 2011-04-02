@@ -78,7 +78,12 @@ int RaceScore::StartNewLap()
 double RaceScore::GetTime() const
 {
 	const int lDiff = mContextObject->GetManager()->GetGameManager()->GetTimeManager()->GetCurrentPhysicsFrameDelta(mPhysicsFrameStart);
-	return mContextObject->GetManager()->GetGameManager()->GetTimeManager()->ConvertPhysicsFramesToSeconds(lDiff);
+	const float lSeconds = mContextObject->GetManager()->GetGameManager()->GetTimeManager()->ConvertPhysicsFramesToSeconds(lDiff);
+	if (lSeconds > 5*60*60)
+	{
+		mContextObject->DeleteAttribute(mName);
+	}
+	return lSeconds;
 }
 
 
@@ -93,13 +98,13 @@ int RaceScore::Pack(uint8* pDestination)
 	const int lParentSize = Parent::Pack(pDestination);
 	pDestination += lParentSize;
 	pDestination[0] = (uint8)mLapCountLeft;
-	PackerUInt16::Pack(pDestination+1, mPhysicsFrameStart);
-	pDestination[3] = (uint8)mTriggerSet.size();
-	pDestination[4] = (uint8)mTriggerCount;
+	PackerInt32::Pack(pDestination+1, mPhysicsFrameStart);
+	pDestination[5] = (uint8)mTriggerSet.size();
+	pDestination[6] = (uint8)mTriggerCount;
 
 	mIsUpdated = false;
 
-	return lParentSize + 1+sizeof(uint16)+1+1;
+	return lParentSize + 1+sizeof(int32)+1+1;
 }
 
 int RaceScore::Unpack(const uint8* pSource, int pMaxSize)
@@ -109,11 +114,11 @@ int RaceScore::Unpack(const uint8* pSource, int pMaxSize)
 		return -1;
 	}
 	mLapCountLeft = pSource[0];
-	PackerUInt16::Unpack(mPhysicsFrameStart, pSource+1, pMaxSize);
-	mTriggedCount = pSource[3];
-	mTriggerCount = pSource[4];
+	PackerInt32::Unpack(mPhysicsFrameStart, pSource+1, pMaxSize);
+	mTriggedCount = pSource[5];
+	mTriggerCount = pSource[6];
 	mIsUpdated = true;
-	return 1+sizeof(uint16)+1+1;
+	return 1+sizeof(int32)+1+1;
 }
 
 RaceScore::NetworkType RaceScore::GetNetworkType() const
