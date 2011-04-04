@@ -20,6 +20,8 @@ public:
 	CppContextObject(ResourceManager* pResourceManager, const str& pClassId);
 	virtual ~CppContextObject();
 
+	void StabilizeTick();
+
 	void SetAllowNetworkLogic(bool pAllow);
 
 	const TBC::ChunkyClass::Tag* FindTag(const str& pTagType, int pFloatValueCount, int pStringValueCount, const std::vector<int>& pTriggerIndexArray) const;

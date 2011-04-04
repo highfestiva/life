@@ -42,6 +42,8 @@ public:
 		Cure::ResourceManager* pResourceManager);
 	virtual ~GameServerManager();
 
+	virtual bool BeginTick();
+
 	virtual void StartConsole(InteractiveConsoleLogListener* pConsoleLogger, ConsolePrompt* pConsolePrompt);
 	bool Initialize(MasterServerConnection* pMasterConnection);
 	float GetPowerSaveAmount() const;

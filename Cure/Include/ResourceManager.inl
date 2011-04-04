@@ -230,6 +230,7 @@ DiversifiedResource<RamData, DiversifiedData>::~DiversifiedResource()
 template<class RamData, class DiversifiedData>
 DiversifiedData DiversifiedResource<RamData, DiversifiedData>::GetUserData(const UserResource* pUserResource)
 {
+	ScopeLock lLock(&mLock);
 	DiversifiedData lInstanceId = (DiversifiedData)0;
 	typename UserDataTable::iterator x = mUserDiversifiedTable.find(pUserResource);
 	if (x != mUserDiversifiedTable.end())
@@ -248,6 +249,7 @@ DiversifiedData DiversifiedResource<RamData, DiversifiedData>::GetUserData(const
 template<class RamData, class DiversifiedData>
 void DiversifiedResource<RamData, DiversifiedData>::FreeDiversified(UserResource* pUserResource)
 {
+	ScopeLock lLock(&mLock);
 	typename UserDataTable::iterator x = mUserDiversifiedTable.find(pUserResource);
 	if (x != mUserDiversifiedTable.end())
 	{

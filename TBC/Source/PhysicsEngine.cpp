@@ -182,22 +182,9 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 					const float lAbsFriction = ::fabs(mFriction);
 					if (mFriction < 0)
 					{
-						// Arcade stabilization for VTOLs.
-						const int lBone = pStructure->GetIndex(lGeometry);
-						const QuaternionF lOrientation =
-							pPhysicsManager->GetBodyOrientation(lGeometry->GetBodyId()) *
-							pStructure->GetOriginalBoneTransformation(lBone).GetOrientation().GetInverse();
-						// 1st: angular velocity damping (skipping z).
-						Vector3DF lAngular;
-						pPhysicsManager->GetBodyAngularVelocity(lGeometry->GetBodyId(), lAngular);
-						lAngular = lOrientation.GetInverse() * lAngular;
-						lAngular.z = 0;
-						lAngular *= -lAbsFriction;
-						Vector3DF lTorque = lOrientation * lAngular;
-						// 2nd: strive towards straight.
-						lAngular = lOrientation * Vector3DF(0, 0, 1);
-						lTorque += Vector3DF(+lAngular.y * lAbsFriction*5, -lAngular.x * lAbsFriction*5, 0);
-						pPhysicsManager->AddTorque(lGeometry->GetBodyId(), lTorque*mStrength*lScale);
+						// Arcade stabilization to keep vehicle "up" pointing up. Can be used for
+						// for VTOLs and similar stuff.
+						ArcadeStabilize(pPhysicsManager, pStructure, lGeometry, mStrength*lScale, lAbsFriction);
 					}
 					float lHighestForce = 0;
 					for (int i = 0; i < 3; ++i)
@@ -471,6 +458,28 @@ float PhysicsEngine::GetCurrentMaxSpeedSquare(const PhysicsManager* pPhysicsMana
 		lMaxSpeed = (lSpeed > lMaxSpeed)? lSpeed : lMaxSpeed;
 	}
 	return (lMaxSpeed);
+}
+
+
+
+void PhysicsEngine::ArcadeStabilize(PhysicsManager* pPhysicsManager, const ChunkyPhysics* pStructure,
+	const ChunkyBoneGeometry* pGeometry, float pStrength, float pAbsFriction)
+{
+	const int lBone = pStructure->GetIndex(pGeometry);
+	const QuaternionF lOrientation =
+		pPhysicsManager->GetBodyOrientation(pGeometry->GetBodyId()) *
+		pStructure->GetOriginalBoneTransformation(lBone).GetOrientation().GetInverse();
+	// 1st: angular velocity damping (skipping z).
+	Vector3DF lAngular;
+	pPhysicsManager->GetBodyAngularVelocity(pGeometry->GetBodyId(), lAngular);
+	lAngular = lOrientation.GetInverse() * lAngular;
+	lAngular.z = 0;
+	lAngular *= -pAbsFriction;
+	Vector3DF lTorque = lOrientation * lAngular;
+	// 2nd: strive towards straight.
+	lAngular = lOrientation * Vector3DF(0, 0, 1);
+	lTorque += Vector3DF(+lAngular.y * pAbsFriction*5, -lAngular.x * pAbsFriction*5, 0);
+	pPhysicsManager->AddTorque(pGeometry->GetBodyId(), lTorque*pStrength);
 }
 
 

@@ -293,6 +293,11 @@ void Machine::OnTick()
 			}
 		}
 	}
+
+	if (lIsChild)
+	{
+		StabilizeTick();
+	}
 }
 
 

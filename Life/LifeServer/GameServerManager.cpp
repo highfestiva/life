@@ -92,6 +92,27 @@ GameServerManager::~GameServerManager()
 
 
 
+bool GameServerManager::BeginTick()
+{
+	AccountClientTable::Iterator x = mAccountClientTable.First();
+	for (; x != mAccountClientTable.End(); ++x)
+	{
+		const Client* lClient = x.GetObject();
+		Cure::CppContextObject* lObject = (Cure::CppContextObject*)GetContext()->GetObject(lClient->GetAvatarId());
+		if (lObject)
+		{
+			if (lObject->IsAttributeTrue(_T("float_is_child")))
+			{
+				lObject->StabilizeTick();
+			}
+		}
+	}
+
+	return Parent::BeginTick();
+}
+
+
+
 void GameServerManager::StartConsole(InteractiveConsoleLogListener* pConsoleLogger, ConsolePrompt* pConsolePrompt)
 {
 	if (!GetConsoleManager())
@@ -950,12 +971,9 @@ void GameServerManager::FlipCheck(Cure::ContextObject* pObject) const
 	pObject->UpdateFullPosition(lOriginalPositionData);
 	Cure::ObjectPositionalData lPositionData;
 	lPositionData.CopyData(lOriginalPositionData);
-	lPositionData.mPosition.mVelocity.Set(0, 0, 0);
-	lPositionData.mPosition.mAngularVelocity.Set(0, 0, 0);
-	lPositionData.mPosition.mAcceleration.Set(0, 0, 0);
-	lPositionData.mPosition.mAngularAcceleration.Set(0, 0, 0);
+	lPositionData.Stop();
 	TransformationF& lTransform = lPositionData.mPosition.mTransformation;
-	lTransform.SetPosition(pObject->GetPosition() + Vector3DF(0, 0, 4));
+	lTransform.SetPosition(pObject->GetPosition() + Vector3DF(0, 0, 5));
 	Vector3DF lEulerAngles;
 	pObject->GetOrientation().GetEulerAngles(lEulerAngles);
 	lTransform.GetOrientation().SetEulerAngles(lEulerAngles.x, 0, 0);

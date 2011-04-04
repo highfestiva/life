@@ -50,6 +50,11 @@ void PositionalData::SetScale(float pScale)
 	mScale = pScale;
 }
 
+void PositionalData::Stop()
+{
+	// To stop or not to stop...
+}
+
 
 
 int PositionalData6::GetStaticPackSize()
@@ -98,6 +103,14 @@ float PositionalData6::GetBiasedDifference(const PositionalData* pReference) con
 		GetDifference(mAngularVelocity, lReference.mAngularVelocity)*1.0f +
 		GetDifference(mAngularAcceleration, lReference.mAngularAcceleration)*1.0f);
 	return (lWeightedDifferenceSum);
+}
+
+void PositionalData6::Stop()
+{
+	mVelocity.Set(0, 0, 0);
+	mAcceleration.Set(0, 0, 0);
+	mAngularVelocity.Set(0, 0, 0);
+	mAngularAcceleration.Set(0, 0, 0);
 }
 
 float PositionalData6::GetDifference(const QuaternionF& pQ1, const QuaternionF& pQ2)
@@ -211,6 +224,12 @@ PositionalData* PositionalData3::Clone() const
 	return (new PositionalData3(*this));
 }
 
+void PositionalData3::Stop()
+{
+	mVelocity[0] = mVelocity[1] = mVelocity[2] = 0;
+	mAcceleration[0] = mAcceleration[1] = mAcceleration[2] = 0;
+}
+
 
 
 int PositionalData2::GetPackSize() const
@@ -275,6 +294,12 @@ PositionalData* PositionalData2::Clone() const
 	return (new PositionalData2(*this));
 }
 
+void PositionalData2::Stop()
+{
+	mVelocity[0] = mVelocity[1] = 0;
+	mAcceleration[0] = mAcceleration[1] = 0;
+}
+
 
 
 int PositionalData1::GetPackSize() const
@@ -328,6 +353,12 @@ void PositionalData1::CopyData(const PositionalData* pData)
 PositionalData* PositionalData1::Clone() const
 {
 	return (new PositionalData1(*this));
+}
+
+void PositionalData1::Stop()
+{
+	mVelocity = 0;
+	mAcceleration = 0;
 }
 
 
@@ -438,7 +469,6 @@ int ObjectPositionalData::Unpack(const uint8* pData, int pSize)
 			case TYPE_POSITION_2:	lPosition = new PositionalData2;	break;
 			case TYPE_POSITION_1:	lPosition = new PositionalData1;	break;
 			case TYPE_REAL_4:	lPosition = new RealData4;		break;
-			case TYPE_REAL_1_BOOL:	lPosition = new RealData1Bool;		break;
 			case TYPE_REAL_1:	lPosition = new RealData1;		break;
 		}
 		if (!lPosition)
@@ -562,6 +592,16 @@ PositionalData* ObjectPositionalData::Clone() const
 	return (lData);
 }
 
+void ObjectPositionalData::Stop()
+{
+	mPosition.Stop();
+	BodyPositionArray::const_iterator x = mBodyPositionArray.begin();
+	for (; x != mBodyPositionArray.end(); ++x)
+	{
+		(*x)->Stop();
+	}
+}
+
 bool ObjectPositionalData::IsSameStructure(const ObjectPositionalData& pCopy) const
 {
 	if (mBodyPositionArray.size() != pCopy.mBodyPositionArray.size())
@@ -648,58 +688,6 @@ void RealData4::CopyData(const PositionalData* pData)
 PositionalData* RealData4::Clone() const
 {
 	return (new RealData4(*this));
-}
-
-
-
-int RealData1Bool::GetPackSize() const
-{
-	return (1+sizeof(mValue)+1);
-}
-
-int RealData1Bool::Pack(uint8* pData) const
-{
-	int lSize = 0;
-	pData[lSize++] = (uint8)TYPE_REAL_1_BOOL;
-	lSize += PackerReal::Pack(&pData[lSize], mValue);
-	pData[lSize++] = (uint8)mBool;
-	return (lSize);
-}
-
-int RealData1Bool::Unpack(const uint8* pData, int pSize)
-{
-	CHECK_SIZE(1+sizeof(mValue)+1);
-	int lSize = 0;
-	CHECK_TYPE(TYPE_REAL_1_BOOL);
-	lSize += PackerReal::Unpack(mValue, &pData[lSize], sizeof(float));
-	mBool = (pData[lSize++] != 0);
-	return (lSize);
-}
-
-float RealData1Bool::GetBiasedDifference(const PositionalData* pReference) const
-{
-	const RealData1Bool& lReference = (const RealData1Bool&)*pReference;
-	float lWeightedDifferenceSum =
-		::fabs(mValue-lReference.mValue)*1000 +
-		::abs((int)mBool-(int)mBool)*1000;
-	return (lWeightedDifferenceSum);
-}
-
-PositionalData::Type RealData1Bool::GetType() const
-{
-	return (TYPE_REAL_1_BOOL);
-}
-
-void RealData1Bool::CopyData(const PositionalData* pData)
-{
-	assert(pData->GetType() == GetType());
-	const RealData1Bool& lCopy = *(RealData1Bool*)pData;
-	*this = lCopy;
-}
-
-PositionalData* RealData1Bool::Clone() const
-{
-	return (new RealData1Bool(*this));
 }
 
 

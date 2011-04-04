@@ -273,6 +273,8 @@ protected:
 	virtual void ReleaseDiversifiedData(DiversifiedData pData) const = 0;
 
 	typedef std::hash_map<const UserResource*, DiversifiedData, LEPRA_VOIDP_HASHER> UserDataTable;
+
+	Lock mLock;
 	UserDataTable mUserDiversifiedTable;
 };
 

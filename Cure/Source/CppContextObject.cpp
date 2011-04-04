@@ -40,6 +40,44 @@ CppContextObject::~CppContextObject()
 
 
 
+void CppContextObject::StabilizeTick()
+{
+	const TBC::ChunkyPhysics* lPhysics = GetPhysics();
+	const TBC::ChunkyClass* lClass = GetClass();
+	if (!lPhysics || !lClass)
+	{
+		return;
+	}
+	if (lPhysics->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC && lPhysics->IsGuided())
+	{
+		float lChildStabilityFactor = 1;
+		int lBodyIndex = 0;
+		for (size_t x = 0; x < lClass->GetTagCount(); ++x)
+		{
+			const TBC::ChunkyClass::Tag& lTag = lClass->GetTag(x);
+			if (lTag.mTagName == _T("upright_stabilizer"))
+			{
+				if (lTag.mFloatValueList.size() != 1 ||
+					lTag.mStringValueList.size() != 0 ||
+					lTag.mBodyIndexList.size() != 1 ||
+					lTag.mEngineIndexList.size() != 0 ||
+					lTag.mMeshIndexList.size() != 0)
+				{
+					mLog.Errorf(_T("The upright_stabilizer tag '%s' has the wrong # of parameters."), lTag.mTagName.c_str());
+					assert(false);
+					return;
+				}
+				lChildStabilityFactor = lTag.mFloatValueList[0];
+				lBodyIndex = lTag.mBodyIndexList[0];
+			}
+		}
+		TBC::PhysicsEngine::ArcadeStabilize(mManager->GetGameManager()->GetPhysicsManager(),
+			lPhysics, lPhysics->GetBoneGeometry(lBodyIndex), GetMass()*lChildStabilityFactor*5, 1);
+	}
+}
+
+
+
 void CppContextObject::SetAllowNetworkLogic(bool pAllow)
 {
 	mAllowNetworkLogic = pAllow;
