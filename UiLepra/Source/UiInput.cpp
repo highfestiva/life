@@ -108,7 +108,7 @@ void InputElement::ClearFunctors()
 
 void InputElement::SetValue(float64 pNewValue)
 {
-	static const float64 lInputEpsilon = 1e-8;
+	static const float64 lInputEpsilon = 0.02;
 	if (mInterpretation == RELATIVE_AXIS || ::fabs(pNewValue - mValue) > lInputEpsilon)
 	{
 		//::printf("%s(%i) = %f\n", GetIdentifier().c_str(), GetTypeIndex(), pNewValue);

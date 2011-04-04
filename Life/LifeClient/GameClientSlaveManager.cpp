@@ -46,10 +46,10 @@ namespace Life
 
 
 
-GameClientSlaveManager::GameClientSlaveManager(GameClientMasterTicker* pMaster, Cure::RuntimeVariableScope* pVariableScope,
-	Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager, int pSlaveIndex,
-	const PixelRect& pRenderArea):
-	Cure::GameManager(pVariableScope, pResourceManager),
+GameClientSlaveManager::GameClientSlaveManager(GameClientMasterTicker* pMaster, const Cure::TimeManager* pTime,
+	Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
+	UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea):
+	Cure::GameManager(pTime, pVariableScope, pResourceManager),
 	mMaster(pMaster),
 	mUiManager(pUiManager),
 	mCollisionSoundManager(0),
@@ -761,7 +761,7 @@ bool GameClientSlaveManager::Reset()	// Run when disconnected. Removes all objec
 
 	GetNetworkClient()->Disconnect(true);
 	mPingAttemptCount = 0;
-	GetTimeManager()->Clear(0);
+	//GetTimeManager()->Clear(0);
 
 	mObjectFrameIndexMap.clear();
 
@@ -1492,13 +1492,13 @@ void GameClientSlaveManager::ProcessNumber(Cure::MessageNumber::InfoType pType, 
 		case Cure::MessageNumber::INFO_SET_TIME:
 		{
 			log_volatile(mLog.Tracef(_T("Setting physics frame to %i."), pInteger));
-			GetTimeManager()->SetCurrentPhysicsFrame(pInteger);
+			mMaster->GetTimeManager()->SetCurrentPhysicsFrame(pInteger);
 		}
 		break;
 		case Cure::MessageNumber::INFO_ADJUST_TIME:
 		{
 			log_atrace("Adjusting time.");
-			GetTimeManager()->SetPhysicsSpeedAdjustment(pFloat, pInteger);
+			mMaster->GetTimeManager()->SetPhysicsSpeedAdjustment(pFloat, pInteger);
 		}
 		break;
 		case Cure::MessageNumber::INFO_PONG:
@@ -1611,7 +1611,7 @@ void GameClientSlaveManager::SetMovement(Cure::GameObjectId pInstanceId, int32 p
 		x = mObjectFrameIndexMap.find(pInstanceId);
 	}
 	const int lLastSetFrameIndex = x->second;	// Last set frame index.
-	const int lDeltaFrames = GetConstTimeManager()->GetPhysicsFrameDelta(pFrameIndex, lLastSetFrameIndex);
+	const int lDeltaFrames = GetTimeManager()->GetPhysicsFrameDelta(pFrameIndex, lLastSetFrameIndex);
 	if (lDeltaFrames >= 0 || lDeltaFrames < -1000)	// Either it's newer, or it's long, long ago (meaning time wrap).
 	{
 		x->second = pFrameIndex;
@@ -1685,12 +1685,13 @@ void GameClientSlaveManager::OnCollision(const Vector3DF& pForce, const Vector3D
 		{
 			pObject1->QueryResendTime(0, false);
 		}
-		mCollisionExpireAlarm.Set();
+		mCollisionExpireAlarm.SetIfNotSet();
 	}
 	else if (pObject2->GetInstanceId() == mAvatarId &&
 		pObject1->GetNetworkObjectType() == Cure::NETWORK_OBJECT_REMOTE_CONTROLLED)
 	{
-		if (pObject1->GetImpact(GetPhysicsManager()->GetGravity(), pForce, pTorque) >= 0.5f)
+		if (!mMaster->IsLocalObject(pObject2->GetInstanceId()) &&
+			pObject1->GetImpact(GetPhysicsManager()->GetGravity(), pForce, pTorque) >= 0.5f)
 		{
 			if (pObject1->QueryResendTime(1.0, false))
 			{

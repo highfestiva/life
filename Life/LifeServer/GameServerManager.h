@@ -38,7 +38,8 @@ class GameServerManager: public Cure::GameManager, public Cure::NetworkServer::L
 public:
 	typedef Cure::GameManager Parent;
 
-	GameServerManager(Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager);
+	GameServerManager(const Cure::TimeManager* pTime, Cure::RuntimeVariableScope* pVariableScope,
+		Cure::ResourceManager* pResourceManager);
 	virtual ~GameServerManager();
 
 	virtual void StartConsole(InteractiveConsoleLogListener* pConsoleLogger, ConsolePrompt* pConsolePrompt);

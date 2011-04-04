@@ -31,7 +31,7 @@ namespace Life
 class Client
 {
 public:
-	Client(Cure::TimeManager* pTimeManager, Cure::NetworkAgent* pNetworkAgent, Cure::UserConnection* pUserConnection);
+	Client(const Cure::TimeManager* pTimeManager, Cure::NetworkAgent* pNetworkAgent, Cure::UserConnection* pUserConnection);
 	virtual ~Client();
 
 	Cure::UserConnection* GetUserConnection() const;
@@ -59,7 +59,7 @@ private:
 	static const int NETWORK_LATENCY_CALCULATION_ARRAY_SIZE = NETWORK_DEVIATION_ERROR_COUNT;
 	typedef std::vector<int> NetworkLatencyArray;
 
-	Cure::TimeManager* mTimeManager;
+	const Cure::TimeManager* mTimeManager;
 	Cure::NetworkAgent* mNetworkAgent;
 	Cure::UserConnection* mUserConnection;
 	Cure::ContextObject* mAvatar;

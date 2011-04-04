@@ -16,9 +16,9 @@ namespace Life
 
 
 
-UiGameServerManager::UiGameServerManager(Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
-	UiCure::GameUiManager* pUiManager, const PixelRect& pArea):
-	GameServerManager(pVariableScope, pResourceManager),
+UiGameServerManager::UiGameServerManager(const Cure::TimeManager* pTime, Cure::RuntimeVariableScope* pVariableScope,
+	Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager, const PixelRect& pArea):
+	GameServerManager(pTime, pVariableScope, pResourceManager),
 	mUiManager(pUiManager),
 	mRenderArea(pArea),
 	mOptions(pVariableScope, 0),

@@ -773,7 +773,7 @@ bool ContextObject::SetPhysics(TBC::ChunkyPhysics* pStructure)
 	}
 
 	TBC::PhysicsManager* lPhysics = mManager->GetGameManager()->GetPhysicsManager();
-	const int lPhysicsFps = mManager->GetGameManager()->GetConstTimeManager()->GetDesiredMicroSteps();
+	const int lPhysicsFps = mManager->GetGameManager()->GetTimeManager()->GetDesiredMicroSteps();
 	bool lOk = (mPhysics == 0 && pStructure->FinalizeInit(lPhysics, lPhysicsFps, &lTransformation.GetPosition(), this, this));
 	assert(lOk);
 	if (lOk)
@@ -883,7 +883,7 @@ void ContextObject::ForceSend()
 bool ContextObject::QueryResendTime(float pDeltaTime, bool pUnblockDelta)
 {
 	bool lOkToSend = false;
-	const float lAbsoluteTime = GetManager()->GetGameManager()->GetConstTimeManager()->GetAbsoluteTime();
+	const float lAbsoluteTime = GetManager()->GetGameManager()->GetTimeManager()->GetAbsoluteTime();
 	if (pDeltaTime <= Cure::TimeManager::GetAbsoluteTimeDiff(lAbsoluteTime, mLastSendTime))
 	{
 		lOkToSend = true;

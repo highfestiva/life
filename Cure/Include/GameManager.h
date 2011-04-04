@@ -33,14 +33,19 @@ class TimeManager;
 class GameTicker
 {
 public:
+	GameTicker();
 	virtual ~GameTicker();
 	virtual bool Initialize() = 0;
 	virtual bool Tick() = 0;
 	virtual void PollRoundTrip() = 0;	// Polls network for any incoming to yield lower latency.
 	virtual float GetTickTimeReduction() const = 0;	// Returns how much quicker the tick loop should be; can be negative.
 	virtual float GetPowerSaveAmount() const = 0;
+	TimeManager* GetTimeManager();
 	virtual void Profile();	// Make sure it's quick, since it runs outside all profiling timers.
 	virtual bool QueryQuit();
+
+private:
+	TimeManager* mTimeManager;
 };
 
 
@@ -50,10 +55,9 @@ class GameManager
 public:
 	typedef SequencialPerformanceData<uint64> BandwidthData;
 
-	GameManager(RuntimeVariableScope* pVariableScope, ResourceManager* pResourceManager);
+	GameManager(const TimeManager* pTime, RuntimeVariableScope* pVariableScope, ResourceManager* pResourceManager);
 	virtual ~GameManager();
 
-	void ResetPhysicsTime(int pStartPhysicsFrame);
 	virtual bool BeginTick();
 	virtual bool EndTick();
 	virtual bool TickNetworkOutput();
@@ -62,10 +66,9 @@ public:
 	RuntimeVariableScope* GetVariableScope() const;
 	ResourceManager* GetResourceManager() const;
 	ContextManager* GetContext() const;
-	const TimeManager* GetConstTimeManager() const;
+	const TimeManager* GetTimeManager() const;
 	LEPRA_DEBUG_CODE(virtual) TBC::PhysicsManager* GetPhysicsManager() const;
 	ConsoleManager* GetConsoleManager() const;
-	TimeManager* GetTimeManager();
 
 	ContextObject* CreateContextObject(const str& pClassId, NetworkObjectType pNetworkType, GameObjectId pInstanceId = 0);
 	void AddContextObject(ContextObject* pObject, NetworkObjectType pNetworkType, GameObjectId pInstanceId);
@@ -126,7 +129,7 @@ private:
 	RuntimeVariableScope* mVariableScope;
 	ResourceManager* mResource;
 	NetworkAgent* mNetwork;
-	TimeManager* mTime;
+	const TimeManager* mTime;
 	TBC::PhysicsManager* mPhysics;
 	ContextManager* mContext;
 	TerrainManager* mTerrain;

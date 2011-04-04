@@ -22,9 +22,9 @@ class GameClientDemo: public GameClientSlaveManager
 {
 	typedef GameClientSlaveManager Parent;
 public:
-	GameClientDemo(GameClientMasterTicker* pMaster, Cure::RuntimeVariableScope* pVariableScope,
-		Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager, int pSlaveIndex,
-		const PixelRect& pRenderArea);
+	GameClientDemo(GameClientMasterTicker* pMaster, const Cure::TimeManager* pTime,
+		Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
+		UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea);
 	virtual ~GameClientDemo();
 
 private:

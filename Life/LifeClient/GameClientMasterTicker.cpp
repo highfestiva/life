@@ -139,6 +139,8 @@ bool GameClientMasterTicker::Tick()
 {
 	LEPRA_MEASURE_SCOPE(MasterTicker);
 
+	GetTimeManager()->Tick();
+
 	bool lOk = true;
 
 	ScopeLock lLock(&mLock);
@@ -466,7 +468,7 @@ void GameClientMasterTicker::PreLogin(const str& pServerAddress)
 	if (lIsLocalServer && !mServer)
 	{
 		Cure::RuntimeVariableScope* lVariableScope = new Cure::RuntimeVariableScope(UiCure::GetSettings());
-		UiGameServerManager* lServer = new UiGameServerManager(lVariableScope, mResourceManager, mUiManager, PixelRect(0, 0, 100, 100));
+		UiGameServerManager* lServer = new UiGameServerManager(GetTimeManager(), lVariableScope, mResourceManager, mUiManager, PixelRect(0, 0, 100, 100));
 		lServer->StartConsole(new UiTbc::ConsoleLogListener, new UiTbc::ConsolePrompt);
 		if (!lServer->Initialize(mMasterConnection))
 		{
@@ -541,27 +543,30 @@ Sunlight* GameClientMasterTicker::GetSunlight() const
 
 
 GameClientSlaveManager* GameClientMasterTicker::CreateSlaveManager(GameClientMasterTicker* pMaster,
-	Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
-	UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea)
+	Cure::TimeManager* pTime, Cure::RuntimeVariableScope* pVariableScope,
+	Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager,
+	int pSlaveIndex, const PixelRect& pRenderArea)
 {
-	return new GameClientSlaveManager(pMaster, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea);
+	return new GameClientSlaveManager(pMaster, pTime, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea);
 }
 
 GameClientSlaveManager* GameClientMasterTicker::CreateViewer(GameClientMasterTicker* pMaster,
-	Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
-	UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea)
+	Cure::TimeManager* pTime, Cure::RuntimeVariableScope* pVariableScope,
+	Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager,
+	int pSlaveIndex, const PixelRect& pRenderArea)
 {
-	return new GameClientViewer(pMaster, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea);
+	return new GameClientViewer(pMaster, pTime, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea);
 }
 
 GameClientSlaveManager* GameClientMasterTicker::CreateDemo(GameClientMasterTicker* pMaster,
-	Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
-	UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea)
+	Cure::TimeManager* pTime, Cure::RuntimeVariableScope* pVariableScope,
+	Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager,
+	int pSlaveIndex, const PixelRect& pRenderArea)
 {
 #ifdef LIFE_DEMO
-	return new GameClientDemo(pMaster, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea);
+	return new GameClientDemo(pMaster, pTime, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea);
 #else // !Demo
-	return new GameClientViewer(pMaster, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea);
+	return new GameClientViewer(pMaster, pTime, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea);
 #endif // Demo / !Demo
 }
 
@@ -605,7 +610,7 @@ bool GameClientMasterTicker::CreateSlave(SlaveFactoryMethod pCreate)
 		}
 		assert(lFreeSlaveIndex < 4);
 		Cure::RuntimeVariableScope* lVariables = new Cure::RuntimeVariableScope(UiCure::GetSettings());
-		GameClientSlaveManager* lSlave = pCreate(this, lVariables, mResourceManager,
+		GameClientSlaveManager* lSlave = pCreate(this, GetTimeManager(), lVariables, mResourceManager,
 			mUiManager, lFreeSlaveIndex, lRenderArea);
 		AddSlave(lSlave);
 		if (mInitialized)

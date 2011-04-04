@@ -49,9 +49,9 @@ class GameClientSlaveManager: public Cure::GameManager, public InputObserver, pr
 {
 	typedef Cure::GameManager Parent;
 public:
-	GameClientSlaveManager(GameClientMasterTicker* pMaster, Cure::RuntimeVariableScope* pVariableScope,
-		Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager, int pSlaveIndex,
-		const PixelRect& pRenderArea);
+	GameClientSlaveManager(GameClientMasterTicker* pMaster, const Cure::TimeManager* pTime,
+		Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
+		UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea);
 	virtual ~GameClientSlaveManager();
 	void LoadSettings();
 	void SetRenderArea(const PixelRect& pRenderArea);

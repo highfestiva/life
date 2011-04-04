@@ -25,8 +25,18 @@ namespace Cure
 
 
 
+GameTicker::GameTicker():
+	mTimeManager(new TimeManager)
+{
+}
+
 GameTicker::~GameTicker()
 {
+}
+
+TimeManager* GameTicker::GetTimeManager()
+{
+	return mTimeManager;
 }
 
 void GameTicker::Profile()
@@ -40,12 +50,12 @@ bool GameTicker::QueryQuit()
 
 
 
-GameManager::GameManager(RuntimeVariableScope* pVariableScope, ResourceManager* pResourceManager):
+GameManager::GameManager(const TimeManager* pTime, RuntimeVariableScope* pVariableScope, ResourceManager* pResourceManager):
 	mIsThreadSafe(true),
 	mVariableScope(pVariableScope),
 	mResource(pResourceManager),
 	mNetwork(0),
-	mTime(new TimeManager),
+	mTime(pTime),
 	mPhysics(TBC::PhysicsManagerFactory::Create(TBC::PhysicsManagerFactory::ENGINE_ODE)),
 	mContext(0),
 	mTerrain(0),//new TerrainManager(pResourceManager)),
@@ -66,8 +76,7 @@ GameManager::~GameManager()
 	mConsole = 0;
 	delete (mContext);
 	mContext = 0;
-	delete (mTime);
-	mTime = 0;
+	mTime = 0;	// Not owned resource.
 	delete (mTerrain);
 	mTerrain = 0;
 	delete (mPhysics);
@@ -80,11 +89,6 @@ GameManager::~GameManager()
 }
 
 
-
-void GameManager::ResetPhysicsTime(int pStartPhysicsFrame)
-{
-	mTime->Clear(pStartPhysicsFrame);
-}
 
 bool GameManager::BeginTick()
 {
@@ -115,7 +119,7 @@ bool GameManager::BeginTick()
 	{
 		//LEPRA_MEASURE_SCOPE(NetworkAndInput);
 
-		mTime->Tick();
+		//mTime->Tick();
 
 		// Sorts up incoming network data; adds/removes objects (for instance via remote create/delete).
 		// On UI-based managers we handle user input here as well.
@@ -138,6 +142,10 @@ bool GameManager::BeginTick()
 		// Performance determines if this is done by a worker thread, or done synchronously
 		// by the current thread. (Single CPU => single thread...)
 		StartPhysicsTick();
+	}
+	else
+	{
+		log_adebug("Could not afford a physics step.");
 	}
 
 	return (true);
@@ -201,7 +209,7 @@ ContextManager* GameManager::GetContext() const
 	return (mContext);
 }
 
-const TimeManager* GameManager::GetConstTimeManager() const
+const TimeManager* GameManager::GetTimeManager() const
 {
 	return (mTime);
 }
@@ -233,11 +241,6 @@ TBC::PhysicsManager* GameManager::GetPhysicsManager() const
 ConsoleManager* GameManager::GetConsoleManager() const
 {
 	return (mConsole);
-}
-
-TimeManager* GameManager::GetTimeManager()
-{
-	return (mTime);
 }
 
 

@@ -48,7 +48,7 @@ GameServerTicker::GameServerTicker(Cure::ResourceManager* pResourceManager,
 	pResourceManager->InitDefault();
 
 	Cure::RuntimeVariableScope* lVariableScope = new Cure::RuntimeVariableScope(Cure::GetSettings());
-	mGameManager = new GameServerManager(lVariableScope, pResourceManager);
+	mGameManager = new GameServerManager(GetTimeManager(), lVariableScope, pResourceManager);
 	mGameManager->StartConsole(pConsoleLogger, new StdioConsolePrompt);
 }
 
@@ -80,6 +80,8 @@ bool GameServerTicker::Initialize()
 bool GameServerTicker::Tick()
 {
 	mMasterConnection->Tick();
+
+	GetTimeManager()->Tick();
 
 	bool lOk = mGameManager->BeginTick();
 	if (lOk)

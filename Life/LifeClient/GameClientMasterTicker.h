@@ -75,17 +75,21 @@ public:
 
 private:
 	typedef GameClientSlaveManager* (*SlaveFactoryMethod)(GameClientMasterTicker* pMaster,
-		Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
-		UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea);
+		Cure::TimeManager* pTime, Cure::RuntimeVariableScope* pVariableScope,
+		Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager,
+		int pSlaveIndex, const PixelRect& pRenderArea);
 	static GameClientSlaveManager* CreateSlaveManager(GameClientMasterTicker* pMaster,
-		Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
-		UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea);
+		Cure::TimeManager* pTime, Cure::RuntimeVariableScope* pVariableScope,
+		Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager,
+		int pSlaveIndex, const PixelRect& pRenderArea);
 	static GameClientSlaveManager* CreateViewer(GameClientMasterTicker* pMaster,
-		Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
-		UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea);
+		Cure::TimeManager* pTime, Cure::RuntimeVariableScope* pVariableScope,
+		Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager,
+		int pSlaveIndex, const PixelRect& pRenderArea);
 	static GameClientSlaveManager* CreateDemo(GameClientMasterTicker* pMaster,
-		Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
-		UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea);
+		Cure::TimeManager* pTime, Cure::RuntimeVariableScope* pVariableScope,
+		Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager,
+		int pSlaveIndex, const PixelRect& pRenderArea);
 	Cure::ContextObjectAttribute* CreateObjectAttribute(Cure::ContextObject* pObject, const str& pAttributeName);
 	bool CreateSlave(SlaveFactoryMethod pCreate);
 	void AddSlave(GameClientSlaveManager* pSlave);

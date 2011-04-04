@@ -22,7 +22,7 @@ namespace Life
 
 
 
-Client::Client(Cure::TimeManager* pTimeManager, Cure::NetworkAgent* pNetworkAgent, Cure::UserConnection* pUserConnection):
+Client::Client(const Cure::TimeManager* pTimeManager, Cure::NetworkAgent* pNetworkAgent, Cure::UserConnection* pUserConnection):
 	mTimeManager(pTimeManager),
 	mNetworkAgent(pNetworkAgent),
 	mUserConnection(pUserConnection),

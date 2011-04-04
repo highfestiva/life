@@ -175,7 +175,6 @@ bool ConsoleManager::ForkExecuteCommand(const str& pCommand)
 		void Run()
 		{
 			log_volatile(mConsole->GetLog().Debug(_T("ForkThread: started.")));
-			mConsole->AddFork(this);
 			if (mConsole->ExecuteCommand(mCommand) != 0)
 			{
 				mConsole->GetLog().AError("ForkThread: execution resulted in an error.");
@@ -188,6 +187,7 @@ bool ConsoleManager::ForkExecuteCommand(const str& pCommand)
 		void operator=(const ForkThread&) {};
 	};
 	ForkThread* lExecutor = new ForkThread(this, pCommand);
+	AddFork(lExecutor);
 	lExecutor->RequestSelfDestruct();
 	return (lExecutor->Start());
 }

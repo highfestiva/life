@@ -56,6 +56,8 @@ Game
 + Impove camera movement: make it point more in the direction where the object is going.
 + Smoke puffs from the exhaust.
 + Bullet time triggers. For instance on monster jumps. Implement on server, so that all physics engines run in sync.
+. Extend auto-flip feature so that if the avatar is_child, the system will apply helper forces designed to keep it from toppling over.
+. Server: make create (and auto-flip/teleport) move the object upward until it does not collide against anything, like 0.5 meters at a time.
 . Implement pick-up helpers, so that any object O that touches a hoe/fork/whatever, while O is owned by the avatar (controlling the hoe/fork/whatever), causes an attracting force/torque. (So O can be picked up by for instance the excavator.)
 . Have modes:
   - Normal.

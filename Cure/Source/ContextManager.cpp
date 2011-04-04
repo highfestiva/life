@@ -242,7 +242,7 @@ void ContextManager::DisableMicroTickCallback(ContextObject* pObject)
 void ContextManager::AddAlarmCallback(ContextObject* pObject, int pAlarmId, float pSeconds, void* pExtraData)
 {
 	assert(pObject->GetInstanceId() != 0);
-	const TimeManager* lTime = ((const GameManager*)mGameManager)->GetConstTimeManager();
+	const TimeManager* lTime = ((const GameManager*)mGameManager)->GetTimeManager();
 	const int lFrame = lTime->GetCurrentPhysicsFrameAddSeconds(pSeconds);
 	mAlarmCallbackObjectSet.insert(Alarm(pObject, lFrame, pAlarmId, pExtraData));
 }
@@ -384,7 +384,7 @@ void ContextManager::DispatchAlarmCallbacks()
 	AlarmSet::iterator x = mAlarmCallbackObjectSet.begin();
 	while (x != mAlarmCallbackObjectSet.end())
 	{
-		if (mGameManager->GetConstTimeManager()->GetCurrentPhysicsFrameDelta(x->mFrameTime) >= 0)
+		if (mGameManager->GetTimeManager()->GetCurrentPhysicsFrameDelta(x->mFrameTime) >= 0)
 		{
 			lCallbackList.push_back(*x);
 			mAlarmCallbackObjectSet.erase(x++);

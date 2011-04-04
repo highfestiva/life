@@ -79,7 +79,7 @@ double RaceScore::GetTime() const
 {
 	const int lDiff = mContextObject->GetManager()->GetGameManager()->GetTimeManager()->GetCurrentPhysicsFrameDelta(mPhysicsFrameStart);
 	const float lSeconds = mContextObject->GetManager()->GetGameManager()->GetTimeManager()->ConvertPhysicsFramesToSeconds(lDiff);
-	if (lSeconds > 5*60*60)
+	if (lSeconds > 5*60)
 	{
 		mContextObject->DeleteAttribute(mName);
 	}

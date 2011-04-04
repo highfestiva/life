@@ -35,7 +35,6 @@ public:
 	virtual ~UiRaceScore();
 
 private:
-	Cure::GameObjectId mStopWatchId;
 };
 
 

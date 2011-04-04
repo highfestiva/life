@@ -22,8 +22,8 @@ class UiGameServerManager: public GameServerManager
 {
 	typedef GameServerManager Parent;
 public:
-	UiGameServerManager(Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
-		UiCure::GameUiManager* pUiManager, const PixelRect& pArea);
+	UiGameServerManager(const Cure::TimeManager* pTime, Cure::RuntimeVariableScope* pVariableScope,
+		Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager, const PixelRect& pArea);
 	virtual ~UiGameServerManager();
 	void SetRenderArea(const PixelRect& pRenderArea);
 

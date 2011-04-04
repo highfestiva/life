@@ -38,8 +38,9 @@ const int NETWORK_POSITIONAL_AHEAD_BUFFER_SIZE = PHYSICS_FPS/2;
 
 
 
-GameServerManager::GameServerManager(Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager):
-	Cure::GameManager(pVariableScope, pResourceManager),
+GameServerManager::GameServerManager(const Cure::TimeManager* pTime,
+	Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager):
+	Cure::GameManager(pTime, pVariableScope, pResourceManager),
 	mUserAccountManager(new Cure::MemoryUserAccountManager()),
 	mTerrainObject(0),
 	mMovementArrayList(NETWORK_POSITIONAL_AHEAD_BUFFER_SIZE),
@@ -951,6 +952,8 @@ void GameServerManager::FlipCheck(Cure::ContextObject* pObject) const
 	lPositionData.CopyData(lOriginalPositionData);
 	lPositionData.mPosition.mVelocity.Set(0, 0, 0);
 	lPositionData.mPosition.mAngularVelocity.Set(0, 0, 0);
+	lPositionData.mPosition.mAcceleration.Set(0, 0, 0);
+	lPositionData.mPosition.mAngularAcceleration.Set(0, 0, 0);
 	TransformationF& lTransform = lPositionData.mPosition.mTransformation;
 	lTransform.SetPosition(pObject->GetPosition() + Vector3DF(0, 0, 4));
 	Vector3DF lEulerAngles;
@@ -1184,29 +1187,31 @@ void GameServerManager::SendObjects(Client* pClient, bool pCreate, const Context
 	{
 		Cure::ContextObject* lObject = x->second;
 		// Don't send local objects.
-		if (lObject->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY)
+		if (lObject->GetNetworkObjectType() == Cure::NETWORK_OBJECT_LOCAL_ONLY)
 		{
-			lPacket->Clear();
-
-			if (lCreateMessage)	// Store creation info?
-			{
-				lPacket->AddMessage(lCreateMessage);
-				TransformationF lTransformation(lObject->GetOrientation(), lObject->GetPosition());
-				lCreateMessage->Store(lPacket, lObject->GetInstanceId(),
-					 lTransformation, wstrutil::Encode(lObject->GetClassId()));
-			}
-
-			const Cure::ObjectPositionalData* lPosition;
-			if (lObject->UpdateFullPosition(lPosition))
-			{
-				lPacket->AddMessage(lPositionMessage);
-				lPositionMessage->Store(lPacket, lObject->GetInstanceId(),
-					GetTimeManager()->GetCurrentPhysicsFrame(), *lPosition);
-			}
-
-			// Send.
-			GetNetworkAgent()->PlaceInSendBuffer(true, pClient->GetUserConnection()->GetSocket(), lPacket);
+			continue;
 		}
+
+		lPacket->Clear();
+
+		if (lCreateMessage)	// Store creation info?
+		{
+			lPacket->AddMessage(lCreateMessage);
+			TransformationF lTransformation(lObject->GetOrientation(), lObject->GetPosition());
+			lCreateMessage->Store(lPacket, lObject->GetInstanceId(),
+				 lTransformation, wstrutil::Encode(lObject->GetClassId()));
+		}
+
+		const Cure::ObjectPositionalData* lPosition;
+		if (lObject->UpdateFullPosition(lPosition))
+		{
+			lPacket->AddMessage(lPositionMessage);
+			lPositionMessage->Store(lPacket, lObject->GetInstanceId(),
+				GetTimeManager()->GetCurrentPhysicsFrame(), *lPosition);
+		}
+
+		// Send.
+		GetNetworkAgent()->PlaceInSendBuffer(true, pClient->GetUserConnection()->GetSocket(), lPacket);
 	}
 
 	lPacket->Clear();

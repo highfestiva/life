@@ -22,9 +22,9 @@ class GameClientViewer: public GameClientSlaveManager, public ServerSelectObserv
 {
 	typedef GameClientSlaveManager Parent;
 public:
-	GameClientViewer(GameClientMasterTicker* pMaster, Cure::RuntimeVariableScope* pVariableScope,
-		Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager, int pSlaveIndex,
-		const PixelRect& pRenderArea);
+	GameClientViewer(GameClientMasterTicker* pMaster, const Cure::TimeManager* pTime,
+		Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
+		UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea);
 	virtual ~GameClientViewer();
 
 private:
