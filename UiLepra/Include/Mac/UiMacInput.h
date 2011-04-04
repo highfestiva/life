@@ -112,8 +112,8 @@ public:
 	virtual void ShowCursor();
 	virtual void HideCursor();
 
-	virtual double GetCursorX();
-	virtual double GetCursorY();
+	virtual float GetCursorX();
+	virtual float GetCursorY();
 	void SetMousePosition(int x, int y);
 
 	static KeyCode ConvertMacKeyCodeToKeyCode(unsigned pMacKeyCode);
@@ -145,8 +145,8 @@ private:
 	int mScreenHeight;
 
 	// Mouse related stuff.
-	double mCursorX;
-	double mCursorY;
+	float mCursorX;
+	float mCursorY;
 
 	// Default devices.
 	InputDevice* mKeyboard;

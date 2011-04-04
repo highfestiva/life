@@ -79,17 +79,17 @@ void X11InputElement::SetValue(int pValue)
 
 		if (GetTypeIndex() <= 1)	// Mouse of sorts.
 		{
-			Parent::SetValue(2.0 * (double)pValue / (double)lManager->mScreenWidth);
+			Parent::SetValue(2.0f * (float)pValue / (float)lManager->mScreenWidth);
 		}
 		else
 		{
-			Parent::SetValue((double)pValue / 10.0);
+			Parent::SetValue((float)pValue / 10.0f);
 		}
 	}*/
 	else if (mMin < mMax)
 	{
 		// Scale to +-1.
-		Parent::SetValue((pValue*2.0-(mMax+mMin)) / (double)(mMax-mMin));
+		Parent::SetValue((pValue*2.0f-(mMax+mMin)) / (float)(mMax-mMin));
 	}
 }
 
@@ -637,12 +637,12 @@ void X11InputManager::HideCursor()
 	::ShowCursor(FALSE);
 }
 
-double X11InputManager::GetCursorX()
+float X11InputManager::GetCursorX()
 {
 	return mCursorX;
 }
 
-double X11InputManager::GetCursorY()
+float X11InputManager::GetCursorY()
 {
 	return mCursorY;
 }
@@ -709,8 +709,8 @@ void X11InputManager::SetMousePosition(int pMsg, int x, int y)
 		y = lPoint.y;
 	}
 
-	mCursorX = 2.0 * (double)x / (double)mScreenWidth  - 1.0;
-	mCursorY = 2.0 * (double)y / (double)mScreenHeight - 1.0;
+	mCursorX = 2.0f * (float)x / (float)mScreenWidth  - 1.0f;
+	mCursorY = 2.0f * (float)y / (float)mScreenHeight - 1.0f;
 }
 
 bool X11InputManager::IsInitialized()

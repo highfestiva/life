@@ -61,7 +61,7 @@ void Win32InputElement::SetValue(int pValue)
 
 	if (GetType() == DIGITAL)
 	{
-		Parent::SetValue(pValue);
+		Parent::SetValue((float)pValue);
 	}
 	/*else if (GetInterpretation() == RELATIVE_AXIS)
 	{
@@ -76,17 +76,17 @@ void Win32InputElement::SetValue(int pValue)
 
 		if (GetTypeIndex() <= 1)	// Mouse of sorts.
 		{
-			Parent::SetValue(2.0 * (double)pValue / (double)lManager->mScreenWidth);
+			Parent::SetValue(2.0f * (float)pValue / (float)lManager->mScreenWidth);
 		}
 		else
 		{
-			Parent::SetValue((double)pValue / 10.0);
+			Parent::SetValue((float)pValue / 10.0f);
 		}
 	}*/
 	else if (mMin < mMax)
 	{
 		// Scale to +-1.
-		Parent::SetValue((pValue*2.0-(mMax+mMin)) / (double)(mMax-mMin));
+		Parent::SetValue((pValue*2.0f-(mMax+mMin)) / (float)(mMax-mMin));
 	}
 }
 
@@ -366,7 +366,7 @@ void Win32InputDevice::PollEvents()
 				else
 				{
 					int lValue = mDeviceObjectData[i].dwData;
-					SetElementValue(lElement, (lValue&0x80)? 1.0 : 0.0);
+					SetElementValue(lElement, (lValue&0x80)? 1.0f : 0.0f);
 				}
 			}
 
@@ -635,12 +635,12 @@ void Win32InputManager::HideCursor()
 	::ShowCursor(FALSE);
 }
 
-double Win32InputManager::GetCursorX()
+float Win32InputManager::GetCursorX()
 {
 	return mCursorX;
 }
 
-double Win32InputManager::GetCursorY()
+float Win32InputManager::GetCursorY()
 {
 	return mCursorY;
 }
@@ -707,8 +707,8 @@ void Win32InputManager::SetMousePosition(int pMsg, int x, int y)
 		y = lPoint.y;
 	}
 
-	mCursorX = 2.0 * (double)x / (double)mScreenWidth  - 1.0;
-	mCursorY = 2.0 * (double)y / (double)mScreenHeight - 1.0;
+	mCursorX = 2.0f * (float)x / (float)mScreenWidth  - 1.0f;
+	mCursorY = 2.0f * (float)y / (float)mScreenHeight - 1.0f;
 }
 
 bool Win32InputManager::IsInitialized()

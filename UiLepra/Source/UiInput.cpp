@@ -49,17 +49,17 @@ InputDevice* InputElement::GetParentDevice() const
 	return (mParentDevice);
 }
 
-bool InputElement::GetBooleanValue(float64 pThreshold) const
+bool InputElement::GetBooleanValue(float pThreshold) const
 {
 	return (mValue >= pThreshold);
 }
 
-float64 InputElement::GetValue() const
+float InputElement::GetValue() const
 {
 	return mValue;
 }
 
-float64 InputElement::GetDeltaValue() const
+float InputElement::GetDeltaValue() const
 {
 	return (mValue - mPrevValue);
 }
@@ -106,9 +106,9 @@ void InputElement::ClearFunctors()
 	mFunctorArray.clear();
 }
 
-void InputElement::SetValue(float64 pNewValue)
+void InputElement::SetValue(float pNewValue)
 {
-	static const float64 lInputEpsilon = 0.02;
+	static const float lInputEpsilon = 0.02f;
 	if (mInterpretation == RELATIVE_AXIS || ::fabs(pNewValue - mValue) > lInputEpsilon)
 	{
 		//::printf("%s(%i) = %f\n", GetIdentifier().c_str(), GetTypeIndex(), pNewValue);
@@ -178,7 +178,7 @@ void InputDevice::SetActive(bool pActive)
 	mActive = pActive;
 }
 
-void InputDevice::SetElementValue(InputElement* pElement, float64 pValue)
+void InputDevice::SetElementValue(InputElement* pElement, float pValue)
 {
 	pElement->SetValue(pValue);
 }

@@ -111,16 +111,16 @@ public:
 	//    Returns true if "pressed", false otherwise.
 	// If analogue:
 	//    Returns true if the analogue value is greater than pThreshold.
-	bool GetBooleanValue(float64 pThreshold = 0.5) const;
+	bool GetBooleanValue(float pThreshold = 0.5) const;
 
 	// If digital:
 	//    Returns 1 if "pressed", 0 otherwise.
 	// If analogue:
 	//    Returns the analogue value normalized around -1 and 1.
-	float64 GetValue() const;
+	float GetValue() const;
 
 	// Returns the difference between the current value and the previous value.
-	float64 GetDeltaValue() const;
+	float GetDeltaValue() const;
 
 	void SetIdentifier(const str& pIdentifier);
 	const str& GetIdentifier() const;
@@ -136,11 +136,11 @@ public:
 	virtual bool SetCalibration(const str& pData) = 0;
 
 protected:
-	void SetValue(float64 pNewValue);
+	void SetValue(float pNewValue);
 private:
 
-	float64 mPrevValue;
-	float64 mValue;
+	float mPrevValue;
+	float mValue;
 
 	Type mType;
 	Interpretation mInterpretation;
@@ -234,7 +234,7 @@ protected:
 
 	void SetActive(bool pActive);
 
-	void SetElementValue(InputElement* pElement, float64 pValue);
+	void SetElementValue(InputElement* pElement, float pValue);
 
 	ElementArray mElementArray;
 
@@ -484,8 +484,8 @@ public:
 	virtual void HideCursor() = 0;
 
 	// Range: [-1, 1] (Left and right, up and down)
-	virtual float64 GetCursorX() = 0;
-	virtual float64 GetCursorY() = 0;
+	virtual float GetCursorX() = 0;
+	virtual float GetCursorY() = 0;
 
 	bool NotifyOnChar(tchar pChar);
 	bool NotifyOnKeyDown(KeyCode pKeyCode);

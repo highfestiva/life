@@ -57,7 +57,7 @@ bool OptionsManager::UpdateInput(UiLepra::InputManager::KeyCode pKeyCode, bool p
 float OptionsManager::UpdateInput(UiLepra::InputElement* pElement)
 {
 	bool lValueSet;
-	float lValue = (float)pElement->GetValue();
+	float lValue = pElement->GetValue();
 	const str lInputElementName = pElement->GetFullName();
 	if (pElement->GetType() == UiLepra::InputElement::ANALOGUE)
 	{

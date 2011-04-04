@@ -76,17 +76,17 @@ void MacInputElement::SetValue(int pValue)
 
 		if (GetTypeIndex() <= 1)	// Mouse of sorts.
 		{
-			Parent::SetValue(2.0 * (double)pValue / (double)lManager->mScreenWidth);
+			Parent::SetValue(2.0f * (float)pValue / (float)lManager->mScreenWidth);
 		}
 		else
 		{
-			Parent::SetValue((double)pValue / 10.0);
+			Parent::SetValue((float)pValue / 10.0f);
 		}
 	}*/
 	else if (mMin < mMax)
 	{
 		// Scale to +-1.
-		Parent::SetValue((pValue*2.0-(mMax+mMin)) / (double)(mMax-mMin));
+		Parent::SetValue((pValue*2.0f-(mMax+mMin)) / (float)(mMax-mMin));
 	}
 }
 
@@ -659,12 +659,12 @@ void MacInputManager::HideCursor()
 	CGDisplayShowCursor(kCGDirectMainDisplay);
 }
 
-double MacInputManager::GetCursorX()
+float MacInputManager::GetCursorX()
 {
 	return mCursorX;
 }
 
-double MacInputManager::GetCursorY()
+float MacInputManager::GetCursorY()
 {
 	return mCursorY;
 }
