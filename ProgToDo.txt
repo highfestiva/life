@@ -56,7 +56,9 @@ Game
 + Impove camera movement: make it point more in the direction where the object is going.
 + Smoke puffs from the exhaust.
 + Bullet time triggers. For instance on monster jumps. Implement on server, so that all physics engines run in sync.
-. Extend auto-flip feature so that if the avatar is_child, the system will apply helper forces designed to keep it from toppling over.
++ Make vehicle flip over to correct rotation whenever it accidentally flipped to its side/front/back.
++ Extend auto-flip feature so that if the avatar is_child, the system will apply helper forces designed to keep it from toppling over.
++ Show logo when starting game.
 . Server: make create (and auto-flip/teleport) move the object upward until it does not collide against anything, like 0.5 meters at a time.
 . Implement pick-up helpers, so that any object O that touches a hoe/fork/whatever, while O is owned by the avatar (controlling the hoe/fork/whatever), causes an attracting force/torque. (So O can be picked up by for instance the excavator.)
 . Have modes:
@@ -112,16 +114,15 @@ Game
 . Add server-triggered garage door to world. Make sure trigger coding is easy!!!
 . Fix bug: road sign for first vehicle is "squashed" when having 3 split-screen players.
 . Make sure that only proper avatars can be played, not levels, stones, road signs, etc.
-. Create "sandish" material that can easily can be picked-up, loaded and moved around.
+. Make sure only intended stuff can be built, not levels, suns, clouds, road signs, etc.
+. Create "sandish" material that can easily can be picked-up, loaded and moved around. (At least something should happen when digging into the ground with the excavator.)
 . Create crane that can pull wire up. Or adjust mobile crane so it can lift things.
 . Bug fix attachments (i.e. crane picks up car) so that they work properly (without crashing).
-. Make vehicle flip over to correct rotation whenever it accidentally flipped to its side/front/back.
 . Add options menu.
 . Add some more detail to the vehicles. Polish the materials, for instance wheels on monster truck should be shiny.
 . Picking best possible default input control options.
 . Adjust the camera view according to the vehicle: huge crane, small ball...
 . Make login adjusted to this type of game (automatic somehow).
-. Show logo when starting game.
 . Make a "what you're missing out on when not running Pro" end screen in demo version. (=release client?)
 . Make a start screen with all settings. Start screen heavily fogged.
 . Separate client slave manager and the signs into states? Could look nicer, but some work.
@@ -164,6 +165,7 @@ Game
   - Real world mode (no outline rendering; should be blended in through white?).
 - Add different physical worlds on all sides of the box, and add gravity change! Cewlness x 0x1000000!!!
 - Add login progress bar.
+- Allow setting of own (main) color on vehicle.
 - Make a "change avatar" functionality.)
   - When abandoning a vehicle, the vehicle remains in the world.)
   - If there IS a vehicle and it is NOT OCCUPIED of the type that is requested, use it, otherwise create a new one.)
@@ -250,6 +252,11 @@ Engine
 + Make Maya import pipeline use the proper materials for each mesh instance (i.e. saucer lights).
 + Make sure FPS is smooth, even though it's a fixed number. Currently the physics step count looks like 1, 1, 1, 1, 1, 2, 1, 1...
 + Drop shadow rendering from semi-transparent meshes (see outline rendering+hovercraft).
++ When having several control units, the "input threshold" does not work. Make a threshold for each input entity.
++ Do not resend positional info frequently when pushed/collided similarly (i.e. excavator holding down monster truck).
++ Make replay functionality for start/end screen.
++ Clear top of log files when too big. (Currently clears the file of too big; good enough but best.)
++ Port client to Mac OS X / Cocoa.
 . Add version control when connecting to server, so old clients/servers won't crash.
 . Separate static level from objects in it. Use pivots and spawn engines to place stuff. Has several benefits:
   - only needs to send relevant sync over network,
@@ -257,17 +264,16 @@ Engine
   - can dynamically LoD or leave out stuff far away.
 . Make sure camera never collides with physical objects. Make camera always keep a free line of sight to the controlled object.
 . Fix shadows, some are not rendered in correct places; trees, monster buildings.
+. Optimize shadows (should volumes be used at all?).
 . Optimize: startup. Very slow on slow computer. Try using zip archives? Using less files might help antivirus?
 . Fix bug: when changing frame rates, the alarm callback sometimes never triggers (or takes forever?). Probably linked to physics frame counter?
 . Fix bug: lerp isn't scaling up properly when increasing framerate.
 . Fix universal joint network sync (ODE-interface code relies heavily on LOCAL joint axes when receiving REMOTE updates via SetJointDiff).
 . Test: running remotely with high ping. Mum?
-. Port client to Mac OS X / Cocoa.
 . Autobuild Data.pk3.
 . I18N. Use _() and gettext wrap.
 . Make all materials use PreRender and PostRender. Clean code up around there.
 . Add support for brake and reverse lights. Add light cones for that.
-. When having several control units, the "input threshold" does not work. Make a threshold for each input entity.
 . Remove game source code from engine source code: camera, hard-coded object placements, input handling, etc.
 . Creating a less jittery experience: a) sync lag/jitter immediately after logging in, b) sorting out old msgs on client, c) keeping track of jitter on client side.
 . Moving out platform specifics from (Ui)CppContextObject.cpp to LifeXxx.cpp.
@@ -279,9 +285,6 @@ Engine
 . Port input handling, calibration and names.
 . Design GUI. Menus as well as toolbars during play. Also icons for picking vehicle.
 . Make sure memfile log always gets everything (including trace+debug+performance). Tail contents to con and file upon crash.
-. Do not resend positional info frequently when pushed/collided similarly (i.e. excavator holding down monster truck).
-. Make replay functionality for start/end screen.
-. Clear top of log files when too big. Preferrably copy to .log.old and start a new one.
 . Add GCC build targets for debug, rc, final. Update build script.
 . Install X11 on my computer... Yarrrghhh... Mongooooolllll!!!!..........
 . Port client to X11.
@@ -349,15 +352,14 @@ Quality
 + Print game version number to log when starting.
 . Make huge swing synchronization work!
 . Start alpha-testing with human users.
-. When using 4 splitscreen players, RenderSlaves is the slow part (won't yield 60 FPS on my machine). Check out why. Seems like they're using their CPU time slices (doesn't look as if physics threads are stealing 'em).
+. When using 4 splitscreen players, RenderSlaves is the slow part (won't yield 60 FPS on my machine). Seems like it's the shadow volumes.
 . Fix shadow bug (causes strangeness when two shadows overlap).
-. Make sure default settings are good on a no-good computer. Like 60 FPS. 30 FPS?
+. Make sure default settings are good on a no-good computer. Like 30 FPS?
 . Add better automatic camera control, such as for the truck (just looking at the trailer looks like shit).
 . Add support for checking if loaded controller configuration contains devices no longer present in the system when starting, and if so reset 'em.
 . Add support for auto-configuring best controller configuration.
 . Go through all TODOs.
-. Fix all source file header comments (Righteous games, 2010).
-. Verify that destruction of ContextObject during load does not cause an invalid resource to float around the resource manager.
+. Fix all source file header comments (Pixel Doctrine, 2011).
 . Fix engine mode "half_lock" (or make it synchronized or otherwise improved).
 . Add click sounds to buttons (i.e. road signs).
 . Go over demo version and release version, making sure that all functionality is in place.
@@ -368,7 +370,7 @@ Quality
 . Test thoroughly!
 . Polish.
 . Refactor.
-. Go through all RG e-mail to ensure all is in place.
+. Go through all auld (Righteous Games) e-mail to ensure all is in place.
 . Check heap regularly (using _heapchk() in Win32).
 . Add handling of ODE crashes (numerical overflow, etc).
 . Serialize physics threads, so that one ends up on each free CPU?
@@ -379,6 +381,7 @@ Quality
 | Test run server on Linux, client on Windows. (Don't put me out, place me at bottom of checklist.)
 | Make sure minimizing the window works. Noticed a problem when moving over a mass object grid border, since the system then tries to upload a mesh via OGL. Make sure all remove gfx objects are created later if minimized.
 
+- Verify that destruction of ContextObject during load does not cause an invalid resource to float around the resource manager.
 - When input is hindered (such as when pulling joystick back, then taking down the console) the excavator behaves jerkily.
 - Assertions on high and stable frame rate. Includes the network sliding average frame rate (should be filtered?).
 - Create and use "lag socket" (sys_socket through factory?).

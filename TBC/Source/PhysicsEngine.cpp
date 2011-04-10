@@ -414,9 +414,9 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 							const float lValue = (mValue[0] > 0)? mValue[0]*mMaxSpeed : mValue[0]*mMaxSpeed2;
 							pPhysicsManager->SetMotorTarget(lGeometry->GetJointId(), mStrength, lValue*lScale);
 						}
-						Vector3DF lVelocity;
-						pPhysicsManager->GetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
-						mIntensity += lVelocity.GetLength() / mMaxSpeed;
+						float lSpeed = 0;
+						pPhysicsManager->GetSliderSpeed(lGeometry->GetJointId(), lSpeed);
+						mIntensity += ::fabs(lSpeed) / mMaxSpeed;
 					}
 				}
 				break;

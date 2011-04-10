@@ -169,7 +169,7 @@ void Machine::OnTick()
 		{
 			// Sound controlled by engine.
 
-			if (lTag.mFloatValueList.size() != 9+lTag.mEngineIndexList.size() ||
+			if (lTag.mFloatValueList.size() != 1+9+lTag.mEngineIndexList.size() ||
 				lTag.mStringValueList.size() != 1 ||
 				lTag.mBodyIndexList.size() != 1 ||
 				lTag.mEngineIndexList.size() < 1 ||
@@ -199,7 +199,8 @@ void Machine::OnTick()
 
 			enum FloatValue
 			{
-				FV_PITCH_LOW = 0,
+				FV_THROTTLE_FACTOR = 0,
+				FV_PITCH_LOW,
 				FV_PITCH_HIGH,
 				FV_PITCH_EXPONENT,
 				FV_VOLUME_LOW,
@@ -217,12 +218,10 @@ void Machine::OnTick()
 			{
 				const TBC::PhysicsEngine* lEngine = mPhysics->GetEngine(lTag.mEngineIndexList[x]);
 				float lEngineIntensity = Math::Clamp(lEngine->GetIntensity(), 0.0f, 1.0f);
-				const bool lIsRotor = (lEngine->GetEngineType() == TBC::PhysicsEngine::ENGINE_HINGE_GYRO);
-				const bool lIsHydraulics = (lEngine->GetEngineType() == TBC::PhysicsEngine::ENGINE_HINGE_TORQUE && lEngine->HasEngineMode(TBC::PhysicsEngine::MODE_HALF_LOCK));
-				if (!lIsRotor && !lIsHydraulics)	// Rotors and hydraulics only look to the intensity, never to the throttle used.
+				if (lTag.mFloatValueList[FV_THROTTLE_FACTOR] > 0)
 				{
 					const float lThrottle = ::fabs(lEngine->GetLerpThrottle(lThrottleUpSpeed, lThrottleDownSpeed));
-					lEngineIntensity *= lThrottle;	// Normal, linear throttle.
+					lEngineIntensity *= lThrottle * lTag.mFloatValueList[FV_THROTTLE_FACTOR];
 				}
 				lEngineIntensity *= lTag.mFloatValueList[FV_ENGINE_FACTOR_BASE+x];
 				lIntensity += lEngineIntensity;

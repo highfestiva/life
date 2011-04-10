@@ -277,7 +277,7 @@ public:
 	virtual bool GetSuspension(JointID pJointId, float32& pErp, float32& pCfm) const = 0;
 
 	virtual bool GetSliderPos(JointID pJointId, float32& pPos) const = 0;
-	virtual bool GetSliderSpeed(JointID pJointId, float32& pSleep) const = 0;
+	virtual bool GetSliderSpeed(JointID pJointId, float32& pSpeed) const = 0;
 
 	// Adding a force to a joint is only possible on slider joints.
 	virtual bool AddJointForce(JointID pJointId, float32 pForce) = 0;
