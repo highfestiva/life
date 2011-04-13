@@ -61,13 +61,15 @@ void Machine::OnTick()
 	{
 		return;
 	}
-	const float lFrameTime = std::min(0.1f, GetManager()->GetGameManager()->GetTimeManager()->GetNormalFrameTime());
+	const Cure::TimeManager* lTimeManager = GetManager()->GetGameManager()->GetTimeManager();
+	const float lFrameTime = std::min(0.1f, lTimeManager->GetNormalFrameTime());
 	const bool lIsChild = IsAttributeTrue(_T("float_is_child"));
 	float lRealTimeRatio;
 	CURE_RTVAR_GET(lRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
 	const TBC::PhysicsManager* lPhysicsManager = mManager->GetGameManager()->GetPhysicsManager();
 	Vector3DF lVelocity;
 	lPhysicsManager->GetBodyVelocity(lPhysics->GetBoneGeometry(lPhysics->GetRootBone())->GetBodyId(), lVelocity);
+	size_t lEngineSoundIndex = 0;
 	for (size_t x = 0; x < lClass->GetTagCount(); ++x)
 	{
 		const UiTbc::ChunkyClass::Tag& lTag = lClass->GetTag(x);
@@ -105,6 +107,17 @@ void Machine::OnTick()
 					float lBounce = 0;
 					lPhysicsManager->GetJointParams(lJoint, lLowStop, lHighStop, lBounce);
 					lJointValue = lDiff.mAngle1 * 2 / (lHighStop-lLowStop);
+				}
+				break;
+				case TBC::ChunkyBoneGeometry::JOINT_HINGE:
+				{
+					TBC::PhysicsManager::Joint1Diff lDiff;
+					lPhysicsManager->GetJoint1Diff(lBone->GetBodyId(), lJoint, lDiff);
+					float lLowStop = 0;
+					float lHighStop = 0;
+					float lBounce = 0;
+					lPhysicsManager->GetJointParams(lJoint, lLowStop, lHighStop, lBounce);
+					lJointValue = lDiff.mValue * 2 / (lHighStop-lLowStop);
 				}
 				break;
 				default:
@@ -214,17 +227,29 @@ void Machine::OnTick()
 			const float lThrottleUpSpeed = Math::GetIterateLerpTime(0.2f, lFrameTime);
 			const float lThrottleDownSpeed = Math::GetIterateLerpTime(0.1f, lFrameTime);
 			float lIntensity = 0;
-			for (size_t x = 0; x < lTag.mEngineIndexList.size(); ++x)
+			for (size_t y = 0; y < lTag.mEngineIndexList.size(); ++y)
 			{
-				const TBC::PhysicsEngine* lEngine = mPhysics->GetEngine(lTag.mEngineIndexList[x]);
+				const TBC::PhysicsEngine* lEngine = mPhysics->GetEngine(lTag.mEngineIndexList[y]);
 				float lEngineIntensity = Math::Clamp(lEngine->GetIntensity(), 0.0f, 1.0f);
 				if (lTag.mFloatValueList[FV_THROTTLE_FACTOR] > 0)
 				{
 					const float lThrottle = ::fabs(lEngine->GetLerpThrottle(lThrottleUpSpeed, lThrottleDownSpeed));
 					lEngineIntensity *= lThrottle * lTag.mFloatValueList[FV_THROTTLE_FACTOR];
 				}
-				lEngineIntensity *= lTag.mFloatValueList[FV_ENGINE_FACTOR_BASE+x];
+				lEngineIntensity *= lTag.mFloatValueList[FV_ENGINE_FACTOR_BASE+y];
 				lIntensity += lEngineIntensity;
+			}
+			if (lTag.mFloatValueList[FV_THROTTLE_FACTOR] <= 0)
+			{
+				// If motor is on/off type (electric for instance), we smooth out the
+				// intensity, or it will become very jerky as wheels wobble along.
+				if (mEngineSoundIntensity.size() <= lEngineSoundIndex)
+				{
+					mEngineSoundIntensity.resize(lEngineSoundIndex+1);
+				}
+				const float lSmooth = std::min(lFrameTime*8.0f, 0.5f);
+				lIntensity = mEngineSoundIntensity[lEngineSoundIndex] = Math::Lerp(mEngineSoundIntensity[lEngineSoundIndex], lIntensity, lSmooth);
+				++lEngineSoundIndex;
 			}
 			//lIntensity = Math::Clamp(lIntensity, 0, 1);
 			const float lVolumeLerp = ::pow(lIntensity, lTag.mFloatValueList[FV_VOLUME_EXPONENT]);
@@ -244,7 +269,20 @@ void Machine::OnTick()
 			{
 				continue;
 			}
-			if (lTag.mFloatValueList.size() != 7 ||
+
+			enum FloatValue
+			{
+				FV_X = 0,
+				FV_Y,
+				FV_Z,
+				FV_VX,
+				FV_VY,
+				FV_VZ,
+				FV_DENSITY,
+				FV_OPACITY,
+				FV_COUNT
+			};
+			if (lTag.mFloatValueList.size() != FV_COUNT ||
 				lTag.mStringValueList.size() != 0 ||
 				lTag.mEngineIndexList.size() != 1 ||
 				lTag.mBodyIndexList.size() != 0 ||
@@ -255,7 +293,8 @@ void Machine::OnTick()
 				continue;
 			}
 			const TBC::PhysicsEngine* lEngine = mPhysics->GetEngine(lTag.mEngineIndexList[0]);
-			mExhaustTimeout -= std::max(0.15f, lEngine->GetIntensity()) * lFrameTime * 25;
+			const float lDensity = lTag.mFloatValueList[FV_DENSITY];
+			mExhaustTimeout -= std::max(0.15f, lEngine->GetIntensity() * lDensity) * lFrameTime * 25;
 			if (mExhaustTimeout > 0)
 			{
 				continue;
@@ -263,12 +302,12 @@ void Machine::OnTick()
 			mExhaustTimeout = 1.51f;
 
 			const QuaternionF lOriginalOrientation = GetOrientation();
-			Vector3DF lOffset(lTag.mFloatValueList[0], lTag.mFloatValueList[1], lTag.mFloatValueList[2]);
+			Vector3DF lOffset(lTag.mFloatValueList[FV_X], lTag.mFloatValueList[FV_Y], lTag.mFloatValueList[FV_Z]);
 			lOffset = lOriginalOrientation*lOffset;
-			Vector3DF lVelocity(lTag.mFloatValueList[3], lTag.mFloatValueList[4], lTag.mFloatValueList[5]);
-			const float lOpacity = lTag.mFloatValueList[6];
+			Vector3DF lVelocity(lTag.mFloatValueList[FV_VX], lTag.mFloatValueList[FV_VY], lTag.mFloatValueList[FV_VZ]);
+			const float lOpacity = lTag.mFloatValueList[FV_OPACITY];
 			lVelocity = lOriginalOrientation*lVelocity;
-			lVelocity += GetVelocity();
+			lVelocity += GetVelocity()*0.5f;
 			for (size_t y = 0; y < lTag.mMeshIndexList.size(); ++y)
 			{
 				TBC::GeometryBase* lMesh = GetMesh(lTag.mMeshIndexList[y]);

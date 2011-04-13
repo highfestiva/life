@@ -100,6 +100,7 @@ public:
 	TransformationF GetInitialTransform() const;
 	Vector3DF GetPosition() const;
 	void SetRootPosition(const Vector3DF& pPosition);
+	void SetRootOrientation(const QuaternionF& pOrientation);
 	QuaternionF GetOrientation() const;
 	Vector3DF GetVelocity() const;
 	Vector3DF GetAngularVelocity() const;

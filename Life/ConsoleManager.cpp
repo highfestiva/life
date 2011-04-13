@@ -704,6 +704,13 @@ bool ConsoleManager::SaveApplicationConfigFile(File* pFile, const wstr& pUserCon
 	return (lSaved);
 }
 
+Cure::ResourceManager* ConsoleManager::GetResourceManager() const
+{
+	return mResourceManager;
+}
+
+
+
 wstr ConsoleManager::LoadUserConfig(File* pFile)
 {
 	wstr lUserConfig;

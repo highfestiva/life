@@ -49,6 +49,9 @@ private:
 		COMMAND_WAIT_RESET_UI,
 		COMMAND_ADD_PLAYER,
 		COMMAND_SET_AVATAR_ENGINE_POWER,
+#if defined(LEPRA_DEBUG) && defined(LEPRA_WINDOWS)
+		COMMAND_BUILD_DATA,
+#endif // Debug & Windows
 	};
 
 	virtual unsigned GetCommandCount() const;

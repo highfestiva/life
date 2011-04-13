@@ -46,6 +46,7 @@ private:
 	float mScale;
 	float mTime;
 	float mOpacity;
+	Vector3DF mAngularVelocity;
 
 	LOG_CLASS_DECLARE();
 };

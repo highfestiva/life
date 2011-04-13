@@ -191,7 +191,10 @@ void GameClientSlaveManager::SetIsQuitting()
 	CloseLoginGui();
 	((ClientConsoleManager*)GetConsoleManager())->GetUiConsole()->SetVisible(false);
 	SetRoadSignsVisible(false);
-	GetResourceManager()->Tick();
+	if (Thread::GetCurrentThread()->GetThreadName() == _T("MainThread"))
+	{
+		GetResourceManager()->Tick();
+	}
 	mQuit = true;
 	CURE_RTVAR_INTERNAL(UiCure::GetSettings(), RTVAR_LOGIN_ISSERVERSELECTED, false);
 }
@@ -597,6 +600,20 @@ bool GameClientSlaveManager::IsLoggingIn() const
 	return (GetNetworkClient()->IsConnecting() || GetNetworkClient()->IsLoggingIn());
 }
 
+void GameClientSlaveManager::SelectAvatar(const Cure::UserAccount::AvatarId& pAvatarId)
+{
+	DropAvatar();
+
+	log_volatile(mLog.Debugf(_T("Clicked avatar %s."), pAvatarId.c_str()));
+	Cure::Packet* lPacket = GetNetworkAgent()->GetPacketFactory()->Allocate();
+	GetNetworkAgent()->SendStatusMessage(GetNetworkClient()->GetSocket(), 0, Cure::REMOTE_OK,
+		Cure::MessageStatus::INFO_AVATAR, wstrutil::Encode(pAvatarId), lPacket);
+	GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
+
+	SetRoadSignsVisible(false);
+	mAvatarSelectTime.ClearTimeDiff();
+}
+
 bool GameClientSlaveManager::IsUiMoveForbidden(Cure::GameObjectId pObjectId) const
 {
 	const bool lMoveAllowed = (IsOwned(pObjectId) || GetContext()->IsLocalGameObjectId(pObjectId) ||
@@ -644,6 +661,11 @@ bool GameClientSlaveManager::IsInCameraRange(const Vector3DF& pPosition, float p
 bool GameClientSlaveManager::IsOwned(Cure::GameObjectId pObjectId) const
 {
 	return (mOwnedObjectList.find(pObjectId) != mOwnedObjectList.end());
+}
+
+Cure::GameObjectId GameClientSlaveManager::GetAvatarInstanceId() const
+{
+	return mAvatarId;
 }
 
 
@@ -1811,17 +1833,8 @@ void GameClientSlaveManager::CancelLogin()
 
 void GameClientSlaveManager::OnAvatarSelect(UiTbc::Button* pButton)
 {
-	DropAvatar();
-
 	Cure::UserAccount::AvatarId lAvatarId = pButton->GetName();
-	log_volatile(mLog.Debugf(_T("Clicked avatar %s."), lAvatarId.c_str()));
-	Cure::Packet* lPacket = GetNetworkAgent()->GetPacketFactory()->Allocate();
-	GetNetworkAgent()->SendStatusMessage(GetNetworkClient()->GetSocket(), 0, Cure::REMOTE_OK,
-		Cure::MessageStatus::INFO_AVATAR, wstrutil::Encode(lAvatarId), lPacket);
-	GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
-
-	SetRoadSignsVisible(false);
-	mAvatarSelectTime.ClearTimeDiff();
+	SelectAvatar(lAvatarId);
 }
 
 void GameClientSlaveManager::DropAvatar()

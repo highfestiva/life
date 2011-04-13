@@ -80,6 +80,8 @@ protected:
 
 	virtual bool SaveApplicationConfigFile(File* pFile, const wstr& pUserConfig);
 
+	Cure::ResourceManager* GetResourceManager() const;
+
 private:
 	wstr LoadUserConfig(File* pFile);
 	bool SaveSystemConfigFile(int pScopeSkipCount, File* pFile, const wstr& pUserConfig);

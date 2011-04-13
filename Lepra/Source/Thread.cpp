@@ -193,7 +193,10 @@ Thread::~Thread()
 {
 	if (!GetSelfDestruct())
 	{
-		Join();
+		if (!Join(20.0))
+		{
+			Kill();
+		}
 	}
 }
 
@@ -293,6 +296,7 @@ void Thread::RunThread()
 	SetThreadId(GetCurrentThreadId());
 	SetRunning(true);
 	mSemaphore.Signal();
+	YieldCpu();
 	Run();
 	SetRunning(false);
 	PostRun();

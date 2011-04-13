@@ -74,12 +74,14 @@ public:
 	void RequestLogin(const str& pServerAddress, const Cure::LoginId& pLoginToken);
 	void Logout();
 	bool IsLoggingIn() const;
+	void SelectAvatar(const Cure::UserAccount::AvatarId& pAvatarId);
 	bool IsUiMoveForbidden(Cure::GameObjectId pObjectId) const;
 	virtual void GetSiblings(Cure::GameObjectId pObjectId, Cure::ContextObject::Array& pSiblingArray) const;
 	void DoGetSiblings(Cure::GameObjectId pObjectId, Cure::ContextObject::Array& pSiblingArray) const;
 	void AddLocalObjects(std::hash_set<Cure::GameObjectId>& pLocalObjectSet);
 	bool IsInCameraRange(const Vector3DF& pPosition, float pDistance) const;
 	bool IsOwned(Cure::GameObjectId pObjectId) const;
+	Cure::GameObjectId GetAvatarInstanceId() const;
 
 	virtual bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
 	virtual bool OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode);

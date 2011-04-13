@@ -44,6 +44,10 @@ void Props::StartParticle(ParticleType pParticleType, const Vector3DF& pStartVel
 	mParticleType = pParticleType;
 	mVelocity = pStartVelocity;
 	mScale = pScale;
+	const float lAngularRange = 2;
+	mAngularVelocity.Set((float)Random::Uniform(-lAngularRange, lAngularRange),
+		(float)Random::Uniform(-lAngularRange, lAngularRange),
+		(float)Random::Uniform(-lAngularRange*0.1f, lAngularRange*0.1f));
 	GetManager()->AddAlarmCallback(this, 5, 2, 0);
 }
 
@@ -88,11 +92,18 @@ void Props::OnTick()
 		break;
 		case PARTICLE_GAS:
 		{
-			SetRootPosition(GetPosition() + mVelocity*lFrameTime);
 			const float lLerp = Math::GetIterateLerpTime(0.08f, lFrameTime);
 			mVelocity.x = Math::Lerp(mVelocity.x, 0.0f, lLerp);
 			mVelocity.y = Math::Lerp(mVelocity.y, 0.0f, lLerp);
 			mVelocity.z = Math::Lerp(mVelocity.z, 3.0f, lLerp);
+			SetRootPosition(GetPosition() + mVelocity*lFrameTime);
+
+			QuaternionF lOrientation = GetOrientation();
+			lOrientation.RotateAroundOwnX(lFrameTime * mAngularVelocity.x * mVelocity.x);
+			lOrientation.RotateAroundOwnY(lFrameTime * mAngularVelocity.y * mVelocity.y);
+			lOrientation.RotateAroundOwnY(lFrameTime * mAngularVelocity.z * mVelocity.z);
+			SetRootOrientation(lOrientation);
+
 			for (size_t x = 0; x < mMeshResourceArray.size(); ++x)
 			{
 				if (mMeshResourceArray[x]->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
