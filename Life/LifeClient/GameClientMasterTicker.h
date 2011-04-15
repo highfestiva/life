@@ -65,6 +65,7 @@ public:
 
 	void PreLogin(const str& pServerAddress);
 	bool IsLocalServer() const;
+	UiGameServerManager* GetLocalServer() const;
 	void OnExit();
 	void OnSetPlayerCount(int pPlayerCount);
 
@@ -141,6 +142,7 @@ private:
 	bool mIsPlayerCountViewActive;
 
 	UiGameServerManager* mServer;
+	Cure::TimeManager* mServerTimeManager;
 	MasterServerConnection* mMasterConnection;
 	Cure::NetworkFreeAgent* mFreeNetworkAgent;
 

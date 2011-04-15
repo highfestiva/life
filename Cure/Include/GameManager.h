@@ -40,6 +40,7 @@ public:
 	virtual void PollRoundTrip() = 0;	// Polls network for any incoming to yield lower latency.
 	virtual float GetTickTimeReduction() const = 0;	// Returns how much quicker the tick loop should be; can be negative.
 	virtual float GetPowerSaveAmount() const = 0;
+	const TimeManager* GetTimeManager() const;
 	TimeManager* GetTimeManager();
 	virtual void Profile();	// Make sure it's quick, since it runs outside all profiling timers.
 	virtual bool QueryQuit();

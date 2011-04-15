@@ -38,6 +38,7 @@
 #include "RtVar.h"
 #include "Sunlight.h"
 #include "UiConsole.h"
+#include "UiGameServerManager.h"
 
 
 
@@ -113,7 +114,15 @@ void GameClientSlaveManager::LoadSettings()
 	mOptions.DoRefreshConfiguration();
 	// Always default these settings, to avoid that the user can't get rid of undesired behavior.
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_DEBUG_ENABLE, false);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_DEBUG_3D_ENABLEAXES, false);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_DEBUG_3D_ENABLEJOINTS, false);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_DEBUG_3D_ENABLESHAPES, true);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_DEBUG_3D_DRAWLOCALSERVER, true);
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_DEBUG_INPUT_PRINT, false);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_YOFFSET, 10);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_GRAPH, false);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_NAMES, true);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_COUNT, true);
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_GAME_TIMEOFDAYFACTOR, 1.0);
 	bool lIsServerSelected;
 	CURE_RTVAR_TRYGET(lIsServerSelected, =, UiCure::GetSettings(), RTVAR_LOGIN_ISSERVERSELECTED, false);
@@ -405,9 +414,13 @@ bool GameClientSlaveManager::TickNetworkOutput()
 			if (lObject)
 			{
 				lObject->SetNetworkObjectType(Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
+				if (!lObject->QueryResendTime(0.1f, true))
+				{
+					continue;
+				}
 				const Cure::ObjectPositionalData* lPositionalData = 0;
 				lObject->UpdateFullPosition(lPositionalData);
-				if (lPositionalData && lObject->QueryResendTime(0.1f, true))
+				if (lPositionalData)
 				{
 					if (!lPositionalData->IsSameStructure(*lObject->GetNetworkOutputGhost()))
 					{
@@ -449,6 +462,12 @@ bool GameClientSlaveManager::TickNetworkOutput()
 					lIsSent = true;
 
 					CURE_RTVAR_INTERNAL_ARITHMETIC(GetVariableScope(), RTVAR_DEBUG_NET_SENDPOSCNT, int, +, 1, 0, 1000000);
+
+					/*for (int x = 0; x < lObject->GetPhysics()->GetEngineCount(); ++x)
+					{
+						TBC::PhysicsEngine* lEngine = lObject->GetPhysics()->GetEngine(x);
+						log_volatile(mLog.Debugf(_T("Sync'ed engine of type %i with value %f."), lEngine->GetEngineType(), lEngine->GetValue()));
+					}*/
 				}
 			}
 		}
@@ -731,8 +750,8 @@ void GameClientSlaveManager::OnInput(UiLepra::InputElement* pElement)
 
 bool GameClientSlaveManager::SetAvatarEnginePower(unsigned pAspect, float pPower, float pAngle)
 {
-	assert(pAspect >= 0 && pAspect < TBC::PhysicsEngine::MAX_CONTROLLER_COUNT);
-	if (pAspect < 0 && pAspect >= TBC::PhysicsEngine::MAX_CONTROLLER_COUNT)
+	assert(pAspect >= 0 && pAspect < TBC::PhysicsEngine::ASPECT_COUNT);
+	if (pAspect < 0 && pAspect >= TBC::PhysicsEngine::ASPECT_COUNT)
 	{
 		return false;
 	}
@@ -925,6 +944,8 @@ void GameClientSlaveManager::TickUiInput()
 		{
 			mAvatarMightSelectTime.UpdateTimer();
 
+			QuerySetIsChild(lObject);
+
 			const Options::Steering& s = mOptions.GetSteeringControl();
 			const bool lIsMovingForward = lObject->GetForwardSpeed() > 8.0f;
 #define S(dir) s.mControl[Options::Steering::CONTROL_##dir]
@@ -943,20 +964,6 @@ void GameClientSlaveManager::TickUiInput()
 				// Just apply it as a reverse motion.
 				lPowerFwdRev = lForward - lBreakAndBack;
 				SetAvatarEnginePower(lObject, 0, lPowerFwdRev, mCameraOrientation.x);
-			}
-			{
-				// Children have the possibility of just pressing left/right which will cause a forward
-				// motion in the currently used vehicle.
-				const bool lIsChild = QuerySetIsChild(lObject);
-				if (lIsChild && Math::IsEpsEqual(lPowerFwdRev, 0.0f, 0.05f) && !Math::IsEpsEqual(lPowerLR, 0.0f, 0.05f))
-				{
-					TBC::PhysicsEngine* lEngine = lObject->GetPhysics()->GetEngine(0);
-					if (lEngine)
-					{
-						const float lIntensity = lEngine->GetIntensity();
-						lEngine->SetValue(0, Math::Clamp(10.0f*(0.2f-lIntensity), 0.0f, 1.0f), mCameraOrientation.x);
-					}
-				}
 			}
 			lPower = S(UP)-S(DOWN);
 			SetAvatarEnginePower(lObject, 3, lPower, mCameraOrientation.x);
@@ -1955,12 +1962,15 @@ void GameClientSlaveManager::DrawSyncDebugInfo()
 	bool lDebugAxes;
 	bool lDebugJoints;
 	bool lDebugShapes;
+	bool lDrawLocalServer;
 	CURE_RTVAR_GET(lDebugAxes, =, GetVariableScope(), RTVAR_DEBUG_3D_ENABLEAXES, false);
 	CURE_RTVAR_GET(lDebugJoints, =, GetVariableScope(), RTVAR_DEBUG_3D_ENABLEJOINTS, false);
 	CURE_RTVAR_GET(lDebugShapes, =, GetVariableScope(), RTVAR_DEBUG_3D_ENABLESHAPES, false);
+	CURE_RTVAR_GET(lDrawLocalServer, =, GetVariableScope(), RTVAR_DEBUG_3D_DRAWLOCALSERVER, true);
 	if (lDebugAxes || lDebugJoints || lDebugShapes)
 	{
 		ScopeLock lLock(GetTickLock());
+		const Cure::ContextManager* lServerContext = GetMaster()->IsLocalServer()? GetMaster()->GetLocalServer()->GetContext() : 0;
 		mUiManager->GetRenderer()->ResetClippingRect();
 		mUiManager->GetRenderer()->SetClippingRect(mRenderArea);
 		mUiManager->GetRenderer()->SetViewport(mRenderArea);
@@ -1969,11 +1979,24 @@ void GameClientSlaveManager::DrawSyncDebugInfo()
 		CURE_RTVAR_GET(lFov, =(float), GetVariableScope(), RTVAR_UI_3D_FOV, 45.0);
 		UpdateFrustum(lFov);
 
-		const Cure::ContextManager::ContextObjectTable& lObjectTable = GetContext()->GetObjectTable();
+		const Cure::ContextManager* lContext = GetContext();
+		const Cure::ContextManager::ContextObjectTable& lObjectTable = lContext->GetObjectTable();
 		Cure::ContextManager::ContextObjectTable::const_iterator x = lObjectTable.begin();
 		for (; x != lObjectTable.end(); ++x)
 		{
-			UiCure::CppContextObject* lObject = dynamic_cast<UiCure::CppContextObject*>(x->second);
+			UiCure::CppContextObject* lObject;
+			if (lDrawLocalServer && lServerContext)
+			{
+				if (lContext->IsLocalGameObjectId(x->first))
+				{
+					continue;
+				}
+				lObject = dynamic_cast<UiCure::CppContextObject*>(lServerContext->GetObject(x->first));
+			}
+			else
+			{
+				lObject = dynamic_cast<UiCure::CppContextObject*>(x->second);
+			}
 			if (!lObject)
 			{
 				continue;

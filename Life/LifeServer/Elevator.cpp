@@ -203,7 +203,7 @@ void Elevator::SetFunctionTarget(const str& pFunction, TBC::PhysicsEngine* pEngi
 		lTargetValue = -pEngine->GetValue();
 		if (Math::IsEpsEqual(lTargetValue, 0.0f))
 		{
-			lTargetValue = -pEngine->GetValues()[4];	// Invert shadow if stopped.
+			lTargetValue = -pEngine->GetValues()[TBC::PhysicsEngine::ASPECT_LOCAL_SHADOW];	// Invert shadow if stopped.
 			if (Math::IsEpsEqual(lTargetValue, 0.0f))
 			{
 				lTargetValue = -1;
@@ -216,7 +216,7 @@ void Elevator::SetFunctionTarget(const str& pFunction, TBC::PhysicsEngine* pEngi
 	}
 	log_volatile(mLog.Debugf(_T("TRIGGER - activating engine for function %s."), pFunction.c_str()));
 	mElevatorIsActive = true;
-	pEngine->ForceSetValue(4, lTargetValue);	// Store shadow.
+	pEngine->ForceSetValue(TBC::PhysicsEngine::ASPECT_LOCAL_SHADOW, lTargetValue);	// Store shadow.
 	pEngine->SetValue(pEngine->GetControllerIndex(), lTargetValue, 0);
 	mParent->ForceSend();	// Transmit our updated engine values.
 }

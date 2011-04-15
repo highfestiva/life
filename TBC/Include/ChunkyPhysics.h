@@ -57,6 +57,7 @@ public:
 
 	int GetEngineCount() const;
 	PhysicsEngine* GetEngine(int pEngineIndex) const;
+	int GetEngineIndexFromControllerIndex(int pStartEngineIndex, int pEngineStep, unsigned pControllerIndex) const;
 	int GetEngineIndex(const PhysicsEngine* pEngine) const;
 	void AddEngine(PhysicsEngine* pEngine);	// Takes ownership of the given engine.
 	bool SetEnginePower(unsigned pAspect, float pPower, float pAngle);

@@ -65,7 +65,7 @@ public:
 
 	bool Render();
 	virtual bool Paint();
-	bool EndTick();
+	virtual bool EndTick();
 	void TickNetworkInput();
 	bool TickNetworkOutput();
 
@@ -228,7 +228,7 @@ protected:
 	};
 	DiskFile mEnginePlaybackFile;	// Used for recording vechile steering playback.
 	float mEnginePlaybackTime;	// Used for recording vechile steering playback.
-	EnginePower mEnginePowerShadow[TBC::PhysicsEngine::MAX_CONTROLLER_COUNT];	// Used for recording vechile steering playback.
+	EnginePower mEnginePowerShadow[TBC::PhysicsEngine::ASPECT_COUNT];	// Used for recording vechile steering playback.
 
 #ifdef LIFE_DEMO
 	HiResTimer mDemoTime;

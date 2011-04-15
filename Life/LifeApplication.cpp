@@ -71,13 +71,6 @@ void Application::Init()
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_PHYSICS_FPS, PHYSICS_FPS);
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_POWERSAVE_FACTOR, 2.0);
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_DEBUG_ENABLE, false);
-	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_DEBUG_3D_ENABLEAXES, false);
-	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_DEBUG_3D_ENABLEJOINTS, false);
-	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_DEBUG_3D_ENABLESHAPES, true);
-	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_YOFFSET, 10);
-	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_GRAPH, false);
-	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_NAMES, true);
-	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_COUNT, true);
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_DEBUG_EXTRASLEEPTIME, 0.0);
 	const str lApplicationName(_T("Life"));
 	CURE_RTVAR_INTERNAL(Cure::GetSettings(), RTVAR_APPLICATION_NAME, lApplicationName);

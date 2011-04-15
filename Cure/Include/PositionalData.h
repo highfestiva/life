@@ -52,7 +52,7 @@ protected:
 	virtual float GetBiasedDifference(const PositionalData* pReference) const = 0;
 
 private:
-	float mScale;
+	float mSubHierarchyScale;
 };
 
 // Six degrees of freedom in position, velocity and acceleration.

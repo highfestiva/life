@@ -481,7 +481,7 @@ void CppContextObject::OnLoadTexture(UserRendererImageResource* pTextureResource
 
 void CppContextObject::TryAddTexture()
 {
-	if (!mUiClassResource)
+	if (!mUiClassResource || !mUiManager->CanRender())
 	{
 		return;
 	}

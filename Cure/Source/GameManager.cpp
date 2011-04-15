@@ -34,6 +34,11 @@ GameTicker::~GameTicker()
 {
 }
 
+const TimeManager* GameTicker::GetTimeManager() const
+{
+	return mTimeManager;
+}
+
 TimeManager* GameTicker::GetTimeManager()
 {
 	return mTimeManager;
@@ -467,11 +472,11 @@ void GameManager::PhysicsTick()
 	const int lAffordedMicroStepCount = lAffordedStepCount * lMicroSteps;
 	const float lStepTime = mTime->GetAffordedPhysicsStepTime();
 	const float lStepIncrement = lStepTime / lMicroSteps;
-	/*if (lAffordedMicroStepCount != 1 && !Math::IsEpsEqual(lStepIncrement, 1/(float)CURE_STANDARD_FRAME_RATE))
+	if (lAffordedStepCount != 1)
 	{
 		mLog.Warningf(_T("Game time allows for %i physics steps in increments of %f."),
 			lAffordedMicroStepCount, lStepIncrement);
-	}*/
+	}
 	{
 		LEPRA_MEASURE_SCOPE(PreSteps);
 		mPhysics->PreSteps();

@@ -194,6 +194,18 @@ PhysicsEngine* ChunkyPhysics::GetEngine(int pEngineIndex) const
 	return (mEngineArray[pEngineIndex]);
 }
 
+int ChunkyPhysics::GetEngineIndexFromControllerIndex(int pStartEngineIndex, int pEngineStep, unsigned pControllerIndex) const
+{
+	for (int x = pStartEngineIndex; x >= 0 && x < (int)mEngineArray.size(); x += pEngineStep)
+	{
+		if (mEngineArray[x]->GetControllerIndex() == pControllerIndex)
+		{
+			return x;
+		}
+	}
+	return -1;
+}
+
 int ChunkyPhysics::GetEngineIndex(const PhysicsEngine* pEngine) const
 {
 	for (size_t x = 0; x < mEngineArray.size(); ++x)

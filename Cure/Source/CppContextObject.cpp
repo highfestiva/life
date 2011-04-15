@@ -182,6 +182,35 @@ void CppContextObject::OnMicroTick(float pFrameTime)
 {
 	if (mPhysics && GetManager())
 	{
+		const bool lIsChild = IsAttributeTrue(_T("float_is_child"));
+		int lAccIndex = GetPhysics()->GetEngineIndexFromControllerIndex(GetPhysics()->GetEngineCount()-1, -1, 0);
+		const int lTurnIndex = GetPhysics()->GetEngineIndexFromControllerIndex(0, 1, 1);
+		if (lIsChild && lAccIndex >= 0 && lTurnIndex >= 0)
+		{
+			// Children have the possibility of just pressing left/right which will cause a forward
+			// motion in the currently used vehicle.
+			TBC::PhysicsEngine* lAcc = GetPhysics()->GetEngine(lAccIndex);
+			const TBC::PhysicsEngine* lTurn = GetPhysics()->GetEngine(lTurnIndex);
+			const float lPowerFwdRev = lAcc->GetValue();
+			const float lPowerLR = lTurn->GetValue();
+			float lAutoTurnAccValue = 0;
+			if (Math::IsEpsEqual(lPowerFwdRev, 0.0f, 0.05f) && !Math::IsEpsEqual(lPowerLR, 0.0f, 0.05f))
+			{
+				const float lIntensity = lAcc->GetIntensity();
+				lAutoTurnAccValue = Math::Clamp(10.0f*(0.2f-lIntensity), 0.0f, 1.0f);
+			}
+			// Throttle up all relevant acc engines.
+			for (;;)
+			{
+				lAcc->ForceSetValue(TBC::PhysicsEngine::ASPECT_LOCAL_PRIMARY, lAutoTurnAccValue);
+				lAccIndex = GetPhysics()->GetEngineIndexFromControllerIndex(lAccIndex-1, -1, 0);
+				if (lAccIndex < 0)
+				{
+					break;
+				}
+				lAcc = GetPhysics()->GetEngine(lAccIndex);
+			}
+		}
 		mPhysics->OnMicroTick(GetManager()->GetGameManager()->GetPhysicsManager(), pFrameTime);
 	}
 }

@@ -545,7 +545,7 @@ bool ContextObject::UpdateFullPosition(const ObjectPositionalData*& pPositionalD
 			{
 				GETSET_OBJECT_POSITIONAL_AT(mPosition, y, RealData4, lData, PositionalData::TYPE_REAL_4, 1);
 				++y;
-				::memcpy(lData->mValue, lEngine->GetValues(), sizeof(float)*4);
+				::memcpy(lData->mValue, lEngine->GetValues(), sizeof(float)*TBC::PhysicsEngine::ASPECT_MAX_REMOTE_COUNT);
 			}
 			break;
 			case TBC::PhysicsEngine::ENGINE_HOVER:
