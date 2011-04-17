@@ -1719,7 +1719,7 @@ void GameClientSlaveManager::OnCollision(const Vector3DF& pForce, const Vector3D
 	else if (pObject2->GetInstanceId() == mAvatarId &&
 		pObject1->GetNetworkObjectType() == Cure::NETWORK_OBJECT_REMOTE_CONTROLLED)
 	{
-		if (!mMaster->IsLocalObject(pObject2->GetInstanceId()) &&
+		if (!mMaster->IsLocalObject(pObject1->GetInstanceId()) &&
 			pObject1->GetImpact(GetPhysicsManager()->GetGravity(), pForce, pTorque) >= 0.5f)
 		{
 			if (pObject1->QueryResendTime(1.0, false))

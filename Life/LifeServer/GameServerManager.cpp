@@ -551,7 +551,8 @@ void GameServerManager::ProcessNetworkInputMessage(Client* pClient, Cure::Messag
 				Cure::ContextObject* lObject = GetContext()->GetObject(lInstanceId);
 				if (lObject)
 				{
-					if (lObject->GetNetworkObjectType() == Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED)
+					if (lObject->GetOwnerInstanceId() == pClient->GetAvatarId() ||	// Reloan?
+						lObject->GetNetworkObjectType() == Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED)
 					{
 						const float lClientOwnershipTime = 10.0f;
 						const float lServerOwnershipTime = lClientOwnershipTime * 1.3f;
@@ -898,6 +899,12 @@ void GameServerManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pT
 	if (pObject1 != pObject2 &&	// I.e. car where a wheel collides with the body.
 		pObject1->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY)	// We only handle network object collisions.
 	{
+		if (pObject1->GetOwnerInstanceId() == pObject2->GetInstanceId() ||
+			pObject2->GetOwnerInstanceId() == pObject1->GetInstanceId())
+		{
+			return;	// The client knows best what collisions have happened.
+		}
+
 		bool lSendCollision = false;
 		const bool lAreBothControlled = (pObject2 != 0 && pObject2->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY);
 		const bool lIsServerControlled = (pObject1->GetNetworkObjectType() == Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
