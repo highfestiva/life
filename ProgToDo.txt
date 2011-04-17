@@ -257,6 +257,8 @@ Engine
 + Make replay functionality for start/end screen.
 + Clear top of log files when too big. (Currently clears the file of too big; good enough but best.)
 + Port client to Mac OS X / Cocoa.
+. Make sure it won't jerk when some other process is using a whole CPU! We should manage fine on a single one with only two clients.
+. Fix bug: seems like the graphics movement ownership is incorrect. When splitscreen user2 (left) picks up a cube with the frontloader it hops around like crazy (but still seems to stay long inside the bucket).
 . Add version control when connecting to server, so old clients/servers won't crash.
 . Separate static level from objects in it. Use pivots and spawn engines to place stuff. Has several benefits:
   - only needs to send relevant sync over network,

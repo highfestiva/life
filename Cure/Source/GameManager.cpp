@@ -472,11 +472,11 @@ void GameManager::PhysicsTick()
 	const int lAffordedMicroStepCount = lAffordedStepCount * lMicroSteps;
 	const float lStepTime = mTime->GetAffordedPhysicsStepTime();
 	const float lStepIncrement = lStepTime / lMicroSteps;
-	if (lAffordedStepCount != 1)
+	/*if (lAffordedStepCount != 1)
 	{
 		mLog.Warningf(_T("Game time allows for %i physics steps in increments of %f."),
 			lAffordedMicroStepCount, lStepIncrement);
-	}
+	}*/
 	{
 		LEPRA_MEASURE_SCOPE(PreSteps);
 		mPhysics->PreSteps();

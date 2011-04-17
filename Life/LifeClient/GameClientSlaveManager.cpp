@@ -947,7 +947,7 @@ void GameClientSlaveManager::TickUiInput()
 			QuerySetIsChild(lObject);
 
 			const Options::Steering& s = mOptions.GetSteeringControl();
-			const bool lIsMovingForward = lObject->GetForwardSpeed() > 8.0f;
+			const bool lIsMovingForward = lObject->GetForwardSpeed() > 3.0f;
 #define S(dir) s.mControl[Options::Steering::CONTROL_##dir]
 			const float lForward = S(FORWARD);
 			const float lBack = S(BACKWARD);

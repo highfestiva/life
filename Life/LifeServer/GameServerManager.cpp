@@ -553,13 +553,15 @@ void GameServerManager::ProcessNetworkInputMessage(Client* pClient, Cure::Messag
 				{
 					if (lObject->GetNetworkObjectType() == Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED)
 					{
-						const float lOwnershipTime = 10.0f;
-						int lEndFrame = GetTimeManager()->GetCurrentPhysicsFrameAddSeconds(lOwnershipTime);
+						const float lClientOwnershipTime = 10.0f;
+						const float lServerOwnershipTime = lClientOwnershipTime * 1.3f;
+						int lEndFrame = GetTimeManager()->GetCurrentPhysicsFrameAddSeconds(lClientOwnershipTime);
 						lObject->SetNetworkObjectType(Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
 						GetNetworkAgent()->SendNumberMessage(true, pClient->GetUserConnection()->GetSocket(),
 							Cure::MessageNumber::INFO_GRANT_LOAN, lInstanceId, (float)lEndFrame);
 						lObject->SetOwnerInstanceId(pClient->GetAvatarId());
-						GetContext()->AddAlarmCallback(lObject, Cure::ContextManager::SYSTEM_ALARM_ID, lOwnershipTime, 0);
+						GetContext()->CancelPendingAlarmCallbacksById(lObject, Cure::ContextManager::SYSTEM_ALARM_ID);
+						GetContext()->AddAlarmCallback(lObject, Cure::ContextManager::SYSTEM_ALARM_ID, lServerOwnershipTime, 0);
 					}
 				}
 				else
