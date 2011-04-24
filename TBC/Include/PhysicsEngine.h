@@ -75,8 +75,10 @@ public:
 	void OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics* pStructure, float pFrameTime) const;
 	float GetCurrentMaxSpeedSquare(const PhysicsManager* pPhysicsManager) const;
 
-	static void ArcadeStabilize(PhysicsManager* pPhysicsManager, const ChunkyPhysics* pStructure,
-		const ChunkyBoneGeometry* pGeometry, float pStrength, float pAbsFriction);
+	static void UprightStabilize(PhysicsManager* pPhysicsManager, const ChunkyPhysics* pStructure,
+		const ChunkyBoneGeometry* pGeometry, float pStrength, float pFriction);
+	static void ForwardStabilize(PhysicsManager* pPhysicsManager, const ChunkyPhysics* pStructure,
+		const ChunkyBoneGeometry* pGeometry, float pStrength, float pFriction);
 
 	unsigned GetControllerIndex() const;
 	float GetValue() const;

@@ -99,12 +99,14 @@ bool GameServerManager::BeginTick()
 	{
 		const Client* lClient = x.GetObject();
 		Cure::CppContextObject* lObject = (Cure::CppContextObject*)GetContext()->GetObject(lClient->GetAvatarId());
-		if (lObject)
+		if (!lObject)
 		{
-			if (lObject->IsAttributeTrue(_T("float_is_child")))
-			{
-				lObject->StabilizeTick();
-			}
+			continue;
+		}
+		if (lObject->IsAttributeTrue(_T("float_is_child")) ||
+			lObject->GetGuideMode() == TBC::ChunkyPhysics::GUIDE_ALWAYS)
+		{
+			lObject->StabilizeTick();
 		}
 	}
 
@@ -889,7 +891,7 @@ void GameServerManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pT
 	const bool lBothAreDynamic = (lObject1Dynamic && lObject2Dynamic);
 	if (!lBothAreDynamic)
 	{
-		if (lObject1Dynamic && pObject1->GetPhysics()->IsGuided())
+		if (lObject1Dynamic && pObject1->GetPhysics()->GetGuideMode() >= TBC::ChunkyPhysics::GUIDE_EXTERNAL)
 		{
 			FlipCheck(pObject1);
 		}

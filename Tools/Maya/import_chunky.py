@@ -949,7 +949,7 @@ class GroupReader(DefaultMAReader):
 
                         elif section.startswith("tag:"):
                                 tagtype = stripQuotes(config.get(section, "type"))
-                                tagOk = tagtype in ["eye", "brake_light", "reverse_light", "engine_sound", "exhaust", "stunt_trigger_data", "race_trigger_data", "upright_stabilizer"]
+                                tagOk = tagtype in ["eye", "brake_light", "reverse_light", "engine_sound", "exhaust", "stunt_trigger_data", "race_trigger_data", "upright_stabilizer", "forward_stabilizer"]
                                 allApplied &= tagOk
                                 if not tagOk:
                                         print("Error: invalid tag type '%s'." % tagtype)
@@ -989,7 +989,7 @@ class GroupReader(DefaultMAReader):
                                 used_sections[section] = True
                 required = [("type", lambda x: chunkywriter.physics_type.get(x) != None)]
                 optional = [("casts_shadows", lambda x: x == None or type(x) == bool),
-                            ("guided", lambda x: x == None or type(x) == bool)]
+                            ("guide_mode", lambda x: x == None or x in ("never", "external", "always"))]
                 for name, config_check in required+optional:
                         ok = config_check(self.config.get(name))
                         allApplied &= ok

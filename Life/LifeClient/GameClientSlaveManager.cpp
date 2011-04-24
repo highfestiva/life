@@ -433,13 +433,16 @@ bool GameClientSlaveManager::TickNetworkOutput()
 					{
 						log_atrace("Position expires.");
 					}
+					const bool lIsAllwedDiffSend = mSendExpireAlarm.PopExpired(0.5);
 
 					float lResyncOnDiff;
 					CURE_RTVAR_GET(lResyncOnDiff, =(float), GetVariableScope(), RTVAR_NETPHYS_RESYNCONDIFFGT, 100.0);
 					if (lForceSendUnsafeClientKeepalive ||
 						lIsPositionExpired ||
-						lPositionalData->GetScaledDifference(lObject->GetNetworkOutputGhost()) > lResyncOnDiff)
+						(lIsAllwedDiffSend &&
+						lPositionalData->GetScaledDifference(lObject->GetNetworkOutputGhost()) > lResyncOnDiff))
 					{
+						mSendExpireAlarm.Set();
 						lSend = true;
 						break;
 					}
@@ -751,11 +754,6 @@ void GameClientSlaveManager::OnInput(UiLepra::InputElement* pElement)
 bool GameClientSlaveManager::SetAvatarEnginePower(unsigned pAspect, float pPower, float pAngle)
 {
 	assert(pAspect >= 0 && pAspect < TBC::PhysicsEngine::ASPECT_COUNT);
-	if (pAspect < 0 && pAspect >= TBC::PhysicsEngine::ASPECT_COUNT)
-	{
-		return false;
-	}
-
 	Cure::ContextObject* lObject = GetContext()->GetObject(mAvatarId);
 	if (lObject)
 	{
@@ -1217,16 +1215,19 @@ void GameClientSlaveManager::TickUiUpdate()
 	float lRotationFactor;
 	CURE_RTVAR_GET(lRotationFactor, =(float), GetVariableScope(), RTVAR_UI_3D_CAMROTATE, 0.0);
 	lRotationFactor += mCamRotateExtra;
-	TransformationF lTransform(GetCameraQuaternion(), mCameraPosition);
-	lTransform.RotateAroundAnchor(mCameraPivotPosition, Vector3DF(0, 0, 1), lRotationFactor * lPhysicsTime);
-	mCameraPosition = lTransform.GetPosition();
-	float lTheta;
-	float lPhi;
-	float lGimbal;
-	lTransform.GetOrientation().GetEulerAngles(lTheta, lPhi, lGimbal);
-	mCameraOrientation.x = lTheta+PIF/2;
-	mCameraOrientation.y = PIF/2-lPhi;
-	mCameraOrientation.z = lGimbal;
+	if (lRotationFactor)
+	{
+		TransformationF lTransform(GetCameraQuaternion(), mCameraPosition);
+		lTransform.RotateAroundAnchor(mCameraPivotPosition, Vector3DF(0, 0, 1), lRotationFactor * lPhysicsTime);
+		mCameraPosition = lTransform.GetPosition();
+		float lTheta;
+		float lPhi;
+		float lGimbal;
+		lTransform.GetOrientation().GetEulerAngles(lTheta, lPhi, lGimbal);
+		mCameraOrientation.x = lTheta+PIF/2;
+		mCameraOrientation.y = PIF/2-lPhi;
+		mCameraOrientation.z = lGimbal;
+	}
 }
 
 bool GameClientSlaveManager::UpdateMassObjects(const Vector3DF& pPosition)

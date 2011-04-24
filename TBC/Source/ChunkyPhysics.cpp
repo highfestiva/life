@@ -22,7 +22,7 @@ ChunkyPhysics::ChunkyPhysics(TransformOperation pTransformOperation, PhysicsType
 	BoneHierarchy(),
 	mTransformOperation(pTransformOperation),
 	mPhysicsType(pPhysicsType),
-	mIsGuided(true),
+	mGuideMode(GUIDE_EXTERNAL),
 	mUniqeGeometryIndex(0)
 {
 }
@@ -57,14 +57,14 @@ void ChunkyPhysics::SetPhysicsType(PhysicsType pPhysicsType)
 	mPhysicsType = pPhysicsType;
 }
 
-bool ChunkyPhysics::IsGuided() const
+ChunkyPhysics::GuideMode ChunkyPhysics::GetGuideMode() const
 {
-	return mIsGuided;
+	return mGuideMode;
 }
 
-void ChunkyPhysics::SetIsGuided(bool pIsGuided)
+void ChunkyPhysics::SetGuideMode(GuideMode pGuideMode)
 {
-	mIsGuided = pIsGuided;
+	mGuideMode = pGuideMode;
 }
 
 

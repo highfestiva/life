@@ -8,6 +8,7 @@
 #include <assert.h>
 #include "../../Lepra/Include/Endian.h"
 #include "../../Lepra/Include/Math.h"
+#include "../../Lepra/Include/Vector2D.h"
 #include "../Include/ChunkyBoneGeometry.h"
 #include "../Include/ChunkyPhysics.h"
 
@@ -15,6 +16,10 @@
 
 namespace TBC
 {
+
+
+
+#define CUBE_DIAGONAL	1.2247448713915890490986420373529f
 
 
 
@@ -177,27 +182,24 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 					lAxis[1] = lRotation*lAxis[1];
 					Vector3DF lVelocityVector;
 					pPhysicsManager->GetBodyVelocity(lGeometry->GetBodyId(), lVelocityVector);
-					lVelocityVector = lRotation*lVelocityVector;
-					float lVelocity[3] = { lVelocityVector.y, lVelocityVector.x, lVelocityVector.z };
-					bool lIsSpeeding = (lVelocityVector.GetLength() >= mMaxSpeed);
-					const float lAbsFriction = ::fabs(mFriction);
-					if (mFriction < 0)
-					{
-						// Arcade stabilization to keep vehicle "up" pointing up. Can be used for
-						// for VTOLs and similar stuff.
-						ArcadeStabilize(pPhysicsManager, pStructure, lGeometry, mStrength*lScale, lAbsFriction);
-					}
-					float lHighestForce = 0;
+					//lVelocityVector = lRotation*lVelocityVector;
+					Vector3DF lPushVector;
 					for (int i = 0; i <= ASPECT_TERTIARY; ++i)
 					{
-						const float lPush = (1+lAbsFriction) * mValue[i];
-						if (!lIsSpeeding || (lVelocity[i]>0) != (lPush>0))
-						{
-							lHighestForce = std::max(lPush, lHighestForce);
-							pPhysicsManager->AddForce(lGeometry->GetBodyId(), lPush*lAxis[i]*mStrength*lScale);
-						}
+						lPushVector += (1/CUBE_DIAGONAL) * mValue[i] * lAxis[i];
 					}
-					mIntensity += lHighestForce;
+					const float lPushForce = lPushVector.GetLength();
+					if (lPushForce > 0.1f || mFriction != 0)
+					{
+						if (lPushForce > 0.1f)
+						{
+							lVelocityVector += lVelocityVector.ProjectOntoPlane(lPushVector / lPushForce);
+						}
+						lVelocityVector *= (0.1f + mFriction*0.4f) * lPushForce / mMaxSpeed;
+						lPushVector -= lVelocityVector;
+						pPhysicsManager->AddForce(lGeometry->GetBodyId(), lPushVector*mStrength*lScale);
+					}
+					mIntensity += lPushForce;
 				}
 				break;
 				case ENGINE_HOVER:
@@ -463,8 +465,8 @@ float PhysicsEngine::GetCurrentMaxSpeedSquare(const PhysicsManager* pPhysicsMana
 
 
 
-void PhysicsEngine::ArcadeStabilize(PhysicsManager* pPhysicsManager, const ChunkyPhysics* pStructure,
-	const ChunkyBoneGeometry* pGeometry, float pStrength, float pAbsFriction)
+void PhysicsEngine::UprightStabilize(PhysicsManager* pPhysicsManager, const ChunkyPhysics* pStructure,
+	const ChunkyBoneGeometry* pGeometry, float pStrength, float pFriction)
 {
 	const int lBone = pStructure->GetIndex(pGeometry);
 	const QuaternionF lOrientation =
@@ -475,12 +477,49 @@ void PhysicsEngine::ArcadeStabilize(PhysicsManager* pPhysicsManager, const Chunk
 	pPhysicsManager->GetBodyAngularVelocity(pGeometry->GetBodyId(), lAngular);
 	lAngular = lOrientation.GetInverse() * lAngular;
 	lAngular.z = 0;
-	lAngular *= -pAbsFriction;
+	lAngular *= -pFriction;
 	Vector3DF lTorque = lOrientation * lAngular;
 	// 2nd: strive towards straight.
 	lAngular = lOrientation * Vector3DF(0, 0, 1);
-	lTorque += Vector3DF(+lAngular.y * pAbsFriction*5, -lAngular.x * pAbsFriction*5, 0);
+	lTorque += Vector3DF(+lAngular.y * pFriction*5, -lAngular.x * pFriction*5, 0);
 	pPhysicsManager->AddTorque(pGeometry->GetBodyId(), lTorque*pStrength);
+}
+
+void PhysicsEngine::ForwardStabilize(PhysicsManager* pPhysicsManager, const ChunkyPhysics* pStructure,
+	const ChunkyBoneGeometry* pGeometry, float pStrength, float pFriction)
+{
+	const int lBone = pStructure->GetIndex(pGeometry);
+	const QuaternionF lOrientation =
+		pPhysicsManager->GetBodyOrientation(pGeometry->GetBodyId()) *
+		pStructure->GetOriginalBoneTransformation(lBone).GetOrientation().GetInverse();
+	// 1st: angular velocity damping in Z-axis.
+	Vector3DF lAngular;
+	pPhysicsManager->GetBodyAngularVelocity(pGeometry->GetBodyId(), lAngular);
+	lAngular = lOrientation.GetInverse() * lAngular;
+	lAngular.x = 0;
+	lAngular.y = 0;
+	lAngular.z *= -pFriction * 3;
+	Vector3DF lTorque = lOrientation * lAngular;
+	// 2nd: strive towards straight towards where we're heading.
+	Vector3DF lVelocity3d;
+	pPhysicsManager->GetBodyVelocity(pGeometry->GetBodyId(), lVelocity3d);
+	Vector2DF lVelocity2d(lVelocity3d.x, lVelocity3d.y);
+	Vector3DF lForward3d = lOrientation.GetInverse() * Vector3DF(0, 1, 0);
+	Vector2DF lForward2d(lForward3d.x, lForward3d.y);
+	if (lForward2d.GetLengthSquared() > 0.1f && lVelocity2d.GetLengthSquared() > 0.1f)
+	{
+		float lAngle = -lVelocity2d.GetAngle() - lForward2d.GetAngle();
+		if (lAngle > PIF)
+		{
+			lAngle -= 2*PIF;
+		}
+		else if (lAngle < -PIF)
+		{
+			lAngle += 2*PIF;
+		}
+		lTorque.z += lAngle;
+	}
+	pPhysicsManager->AddTorque(pGeometry->GetBodyId(), lTorque*pStrength * 1.5);
 }
 
 

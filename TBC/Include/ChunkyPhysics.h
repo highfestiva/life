@@ -33,6 +33,12 @@ public:
 		STATIC = 1,	// Static world object.
 		DYNAMIC		// Dynamic object within the world.
 	};
+	enum GuideMode
+	{
+		GUIDE_NEVER = 0,
+		GUIDE_EXTERNAL,		// Guiding happens (e.g. child steering).
+		GUIDE_ALWAYS,
+	};
 
 	ChunkyPhysics(TransformOperation pTransformOperation = TRANSFORM_NONE, PhysicsType pPhysicsType = STATIC);
 	virtual ~ChunkyPhysics();
@@ -41,8 +47,8 @@ public:
 
 	PhysicsType GetPhysicsType() const;
 	void SetPhysicsType(PhysicsType pPhysicsType);	// You may use this to change into a ragdoll (COLLISION_DETECT_ONLY -> DYNAMIC), or back.
-	bool IsGuided() const;	// Gets help with automatic motions, such as flipping over.
-	void SetIsGuided(bool pIsGuided);
+	GuideMode GetGuideMode() const;	// Gets help with automatic motions, such as flipping over.
+	void SetGuideMode(GuideMode pGuideMode);
 
 	ChunkyBoneGeometry* GetBoneGeometry(int pBoneIndex) const;
 	ChunkyBoneGeometry* GetBoneGeometry(PhysicsManager::BodyID pBodyId) const;
@@ -93,7 +99,7 @@ private:
 	SpawnerArray mSpawnerArray;
 	TransformOperation mTransformOperation;
 	PhysicsType mPhysicsType;
-	bool mIsGuided;
+	GuideMode mGuideMode;
 	unsigned mUniqeGeometryIndex;
 
 	LOG_CLASS_DECLARE();

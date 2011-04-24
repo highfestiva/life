@@ -62,6 +62,7 @@ public:
 	inline _TVarType GetDistanceSquared(const Vector2D& pV) const;
 
 	inline _TVarType GetAngle() const;
+	inline _TVarType GetAngle(const Vector2D& pV) const;
 
 	void Normalize(_TVarType pLength = 1.0f);
 

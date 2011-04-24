@@ -332,7 +332,7 @@ void Machine::OnTick()
 		}
 	}
 
-	if (lIsChild)
+	if (lIsChild || lPhysics->GetGuideMode() == TBC::ChunkyPhysics::GUIDE_ALWAYS)
 	{
 		StabilizeTick();
 	}

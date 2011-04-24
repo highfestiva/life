@@ -94,6 +94,7 @@ Game
   - Huge rotating wheel with a stick or plane attached to it, which can push stuff aside or up.
 . Add brake lights on all vehicles.
 . Add eyes to all vehicles.
+. Group vehicles according to cost and/or difficulty. Could be cost on one axis, difficulty on another.
 . Make robot work better.
 . Create a quadropedic robot.
 . Build stuff in the world (add both dynamic+static and take transformation).

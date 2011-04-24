@@ -329,6 +329,11 @@ V3D_TEMPLATE _TVarType V3D_QUAL::GetDistanceSquared(const Vector3D<_TVarType>& p
 	return (lDx * lDx + lDy * lDy + lDz * lDz);
 }
 
+V3D_TEMPLATE _TVarType V3D_QUAL::GetAngle(const Vector3D<_TVarType>& pV) const
+{
+	return Math::Acos(Dot(pV) / GetLength() / pV.GetLength());
+}
+
 V3D_TEMPLATE _TVarType V3D_QUAL::GetPolarCoordAngleZ() const
 {
 	_TVarType lX = (_TVarType)sqrt(x * x + z * z);

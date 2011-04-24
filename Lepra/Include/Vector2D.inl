@@ -168,7 +168,7 @@ V2D_TEMPLATE _TVarType V2D_QUAL::GetDistanceSquared(const Vector2D<_TVarType>& p
 
 V2D_TEMPLATE _TVarType V2D_QUAL::GetAngle() const
 {
-	if (fabs(x) <= MathTraits<_TVarType>::FullEps())
+	/*if (fabs(x) <= MathTraits<_TVarType>::FullEps())
 	{
 		if (y >= 0)
 			return (_TVarType)(PI/2);
@@ -186,7 +186,13 @@ V2D_TEMPLATE _TVarType V2D_QUAL::GetAngle() const
 			return (_TVarType)((PI / 2) - atan(y / x));
 		else
 			return (_TVarType)(-(PI / 2) - atan(y / x));
-	}
+	}*/
+	return atan2(y, x);
+}
+
+V2D_TEMPLATE _TVarType V2D_QUAL::GetAngle(const Vector2D<_TVarType>& pV) const
+{
+	return Math::Acos(Dot(pV) / GetLength() / pV.GetLength());
 }
 
 V2D_TEMPLATE void V2D_QUAL::Cross(const Vector2D<_TVarType>& pV)

@@ -40,6 +40,15 @@ CppContextObject::~CppContextObject()
 
 
 
+TBC::ChunkyPhysics::GuideMode CppContextObject::GetGuideMode() const
+{
+	if (GetPhysics())
+	{
+		return GetPhysics()->GetGuideMode();
+	}
+	return TBC::ChunkyPhysics::GUIDE_EXTERNAL;
+}
+
 void CppContextObject::StabilizeTick()
 {
 	const TBC::ChunkyPhysics* lPhysics = GetPhysics();
@@ -48,9 +57,9 @@ void CppContextObject::StabilizeTick()
 	{
 		return;
 	}
-	if (lPhysics->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC && lPhysics->IsGuided())
+	if (lPhysics->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC && lPhysics->GetGuideMode() >= TBC::ChunkyPhysics::GUIDE_EXTERNAL)
 	{
-		float lChildStabilityFactor = 1;
+		float lStabilityFactor = 1;
 		int lBodyIndex = 0;
 		for (size_t x = 0; x < lClass->GetTagCount(); ++x)
 		{
@@ -67,12 +76,29 @@ void CppContextObject::StabilizeTick()
 					assert(false);
 					return;
 				}
-				lChildStabilityFactor = lTag.mFloatValueList[0];
+				lStabilityFactor = lTag.mFloatValueList[0];
 				lBodyIndex = lTag.mBodyIndexList[0];
+				TBC::PhysicsEngine::UprightStabilize(mManager->GetGameManager()->GetPhysicsManager(),
+					lPhysics, lPhysics->GetBoneGeometry(lBodyIndex), GetMass()*lStabilityFactor*5, 1);
+			}
+			else if (lTag.mTagName == _T("forward_stabilizer"))
+			{
+				if (lTag.mFloatValueList.size() != 1 ||
+					lTag.mStringValueList.size() != 0 ||
+					lTag.mBodyIndexList.size() != 1 ||
+					lTag.mEngineIndexList.size() != 0 ||
+					lTag.mMeshIndexList.size() != 0)
+				{
+					mLog.Errorf(_T("The forward_stabilizer tag '%s' has the wrong # of parameters."), lTag.mTagName.c_str());
+					assert(false);
+					return;
+				}
+				lStabilityFactor = lTag.mFloatValueList[0];
+				lBodyIndex = lTag.mBodyIndexList[0];
+				TBC::PhysicsEngine::ForwardStabilize(mManager->GetGameManager()->GetPhysicsManager(),
+					lPhysics, lPhysics->GetBoneGeometry(lBodyIndex), GetMass()*lStabilityFactor*5, 1);
 			}
 		}
-		TBC::PhysicsEngine::ArcadeStabilize(mManager->GetGameManager()->GetPhysicsManager(),
-			lPhysics, lPhysics->GetBoneGeometry(lBodyIndex), GetMass()*lChildStabilityFactor*5, 1);
 	}
 }
 
