@@ -493,22 +493,17 @@ void PhysicsEngine::ForwardStabilize(PhysicsManager* pPhysicsManager, const Chun
 		pPhysicsManager->GetBodyOrientation(pGeometry->GetBodyId()) *
 		pStructure->GetOriginalBoneTransformation(lBone).GetOrientation().GetInverse();
 	// 1st: angular velocity damping in Z-axis.
-	Vector3DF lAngular;
-	pPhysicsManager->GetBodyAngularVelocity(pGeometry->GetBodyId(), lAngular);
-	lAngular = lOrientation.GetInverse() * lAngular;
-	lAngular.x = 0;
-	lAngular.y = 0;
-	lAngular.z *= -pFriction * 3;
-	Vector3DF lTorque = lOrientation * lAngular;
-	// 2nd: strive towards straight towards where we're heading.
 	Vector3DF lVelocity3d;
+	pPhysicsManager->GetBodyAngularVelocity(pGeometry->GetBodyId(), lVelocity3d);
+	const float lAngularVelocity = lVelocity3d.z;
+	// 2nd: strive towards straight towards where we're heading.
 	pPhysicsManager->GetBodyVelocity(pGeometry->GetBodyId(), lVelocity3d);
 	Vector2DF lVelocity2d(lVelocity3d.x, lVelocity3d.y);
-	Vector3DF lForward3d = lOrientation.GetInverse() * Vector3DF(0, 1, 0);
+	const Vector3DF lForward3d = lOrientation * Vector3DF(0, 1, 0);
 	Vector2DF lForward2d(lForward3d.x, lForward3d.y);
-	if (lForward2d.GetLengthSquared() > 0.1f && lVelocity2d.GetLengthSquared() > 0.1f)
+	if (lForward2d.GetLengthSquared() > 0.1f && lVelocity2d.GetLengthSquared() > 0.3f)
 	{
-		float lAngle = -lVelocity2d.GetAngle() - lForward2d.GetAngle();
+		float lAngle = lVelocity2d.GetAngle() - lForward2d.GetAngle();
 		if (lAngle > PIF)
 		{
 			lAngle -= 2*PIF;
@@ -517,9 +512,9 @@ void PhysicsEngine::ForwardStabilize(PhysicsManager* pPhysicsManager, const Chun
 		{
 			lAngle += 2*PIF;
 		}
-		lTorque.z += lAngle;
+		lVelocity3d.Set(0, 0, (6*lAngle - lAngularVelocity*pFriction*1.5f) * pStrength);
+		pPhysicsManager->AddTorque(pGeometry->GetBodyId(), lVelocity3d);
 	}
-	pPhysicsManager->AddTorque(pGeometry->GetBodyId(), lTorque*pStrength * 1.5);
 }
 
 
@@ -532,6 +527,21 @@ unsigned PhysicsEngine::GetControllerIndex() const
 float PhysicsEngine::GetValue() const
 {
 	assert(mControllerIndex >= 0 && mControllerIndex < ASPECT_COUNT);
+	if (mEngineType == ENGINE_CAMERA_FLAT_PUSH)
+	{
+		const float a = ::fabs(mValue[ASPECT_PRIMARY]);
+		const float b = ::fabs(mValue[ASPECT_SECONDARY]);
+		const float c = ::fabs(mValue[ASPECT_TERTIARY]);
+		if (a > b || a > c)
+		{
+			return mValue[ASPECT_PRIMARY];
+		}
+		if (b > c)
+		{
+			return mValue[ASPECT_SECONDARY];
+		}
+		return mValue[ASPECT_TERTIARY];
+	}
 	return mValue[ASPECT_PRIMARY];
 }
 

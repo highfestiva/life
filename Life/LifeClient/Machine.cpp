@@ -120,6 +120,12 @@ void Machine::OnTick()
 					lJointValue = lDiff.mValue * 2 / (lHighStop-lLowStop);
 				}
 				break;
+				case TBC::ChunkyBoneGeometry::JOINT_EXCLUDE:
+				{
+					// Simple, dead eyes.
+					lJointValue = 0;
+				}
+				break;
 				default:
 				{
 					mLog.Errorf(_T("Joint type %i not implemented for tag type %s."), lBone->GetJointType(), lTag.mTagName.c_str());
