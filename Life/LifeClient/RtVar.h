@@ -52,6 +52,7 @@
 #define RTVAR_GAME_ISCHILD		"Game.IsChild"
 #define RTVAR_GAME_ENABLESTARTLOGO	"Game.EnableStartLogo"
 #define RTVAR_GAME_TIMEOFDAYFACTOR	"Game.TimeOfDayFactor"
+#define RTVAR_GAME_FORCEEYES		"Game.ForceEyes"
 
 #define RTVAR_LOGIN_USERNAME		"Login.UserName"
 #define RTVAR_LOGIN_ISSERVERSELECTED	"Login.IsServerSelected"

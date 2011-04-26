@@ -124,6 +124,7 @@ void GameClientSlaveManager::LoadSettings()
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_NAMES, true);
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_COUNT, true);
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_GAME_TIMEOFDAYFACTOR, 1.0);
+	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_GAME_FORCEEYES, false);
 	bool lIsServerSelected;
 	CURE_RTVAR_TRYGET(lIsServerSelected, =, UiCure::GetSettings(), RTVAR_LOGIN_ISSERVERSELECTED, false);
 	if (lIsServerSelected)

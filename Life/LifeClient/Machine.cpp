@@ -64,6 +64,8 @@ void Machine::OnTick()
 	const Cure::TimeManager* lTimeManager = GetManager()->GetGameManager()->GetTimeManager();
 	const float lFrameTime = std::min(0.1f, lTimeManager->GetNormalFrameTime());
 	const bool lIsChild = IsAttributeTrue(_T("float_is_child"));
+	bool lForceEyes;
+	CURE_RTVAR_GET(lForceEyes, =, Cure::GetSettings(), RTVAR_GAME_FORCEEYES, false);
 	float lRealTimeRatio;
 	CURE_RTVAR_GET(lRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
 	const TBC::PhysicsManager* lPhysicsManager = mManager->GetGameManager()->GetPhysicsManager();
@@ -84,7 +86,7 @@ void Machine::OnTick()
 			}
 			if (lTag.mFloatValueList.size() != 1 ||
 				lTag.mStringValueList.size() != 0 ||
-				lTag.mBodyIndexList.size() != 1 ||
+				lTag.mBodyIndexList.size()+lTag.mEngineIndexList.size() != 1 ||
 				lTag.mMeshIndexList.size() < 1)
 			{
 				mLog.Errorf(_T("The eye tag '%s' has the wrong # of parameters."), lTag.mTagName.c_str());
@@ -93,45 +95,54 @@ void Machine::OnTick()
 			}
 
 			float lJointValue = 0;
-			int lBodyIndex = lTag.mBodyIndexList[0];
-			TBC::ChunkyBoneGeometry* lBone = lPhysics->GetBoneGeometry(lBodyIndex);
-			TBC::PhysicsManager::JointID lJoint = lBone->GetJointId();
-			switch (lBone->GetJointType())
+			if (!lTag.mBodyIndexList.empty())
 			{
-				case TBC::ChunkyBoneGeometry::JOINT_HINGE2:
+				int lBodyIndex = lTag.mBodyIndexList[0];
+				TBC::ChunkyBoneGeometry* lBone = lPhysics->GetBoneGeometry(lBodyIndex);
+				TBC::PhysicsManager::JointID lJoint = lBone->GetJointId();
+				switch (lBone->GetJointType())
 				{
-					TBC::PhysicsManager::Joint3Diff lDiff;
-					lPhysicsManager->GetJoint3Diff(lBone->GetBodyId(), lJoint, lDiff);
-					float lLowStop = 0;
-					float lHighStop = 0;
-					float lBounce = 0;
-					lPhysicsManager->GetJointParams(lJoint, lLowStop, lHighStop, lBounce);
-					lJointValue = lDiff.mAngle1 * 2 / (lHighStop-lLowStop);
+					case TBC::ChunkyBoneGeometry::JOINT_HINGE2:
+					{
+						TBC::PhysicsManager::Joint3Diff lDiff;
+						lPhysicsManager->GetJoint3Diff(lBone->GetBodyId(), lJoint, lDiff);
+						float lLowStop = 0;
+						float lHighStop = 0;
+						float lBounce = 0;
+						lPhysicsManager->GetJointParams(lJoint, lLowStop, lHighStop, lBounce);
+						lJointValue = lDiff.mAngle1 * 2 / (lHighStop-lLowStop);
+					}
+					break;
+					case TBC::ChunkyBoneGeometry::JOINT_HINGE:
+					{
+						TBC::PhysicsManager::Joint1Diff lDiff;
+						lPhysicsManager->GetJoint1Diff(lBone->GetBodyId(), lJoint, lDiff);
+						float lLowStop = 0;
+						float lHighStop = 0;
+						float lBounce = 0;
+						lPhysicsManager->GetJointParams(lJoint, lLowStop, lHighStop, lBounce);
+						lJointValue = lDiff.mValue * 2 / (lHighStop-lLowStop);
+					}
+					break;
+					case TBC::ChunkyBoneGeometry::JOINT_EXCLUDE:
+					{
+						// Simple, dead eyes.
+						lJointValue = 0;
+					}
+					break;
+					default:
+					{
+						mLog.Errorf(_T("Joint type %i not implemented for tag type %s."), lBone->GetJointType(), lTag.mTagName.c_str());
+						assert(false);
+					}
+					break;
 				}
-				break;
-				case TBC::ChunkyBoneGeometry::JOINT_HINGE:
-				{
-					TBC::PhysicsManager::Joint1Diff lDiff;
-					lPhysicsManager->GetJoint1Diff(lBone->GetBodyId(), lJoint, lDiff);
-					float lLowStop = 0;
-					float lHighStop = 0;
-					float lBounce = 0;
-					lPhysicsManager->GetJointParams(lJoint, lLowStop, lHighStop, lBounce);
-					lJointValue = lDiff.mValue * 2 / (lHighStop-lLowStop);
-				}
-				break;
-				case TBC::ChunkyBoneGeometry::JOINT_EXCLUDE:
-				{
-					// Simple, dead eyes.
-					lJointValue = 0;
-				}
-				break;
-				default:
-				{
-					mLog.Errorf(_T("Joint type %i not implemented for tag type %s."), lBone->GetJointType(), lTag.mTagName.c_str());
-					assert(false);
-				}
-				break;
+			}
+			else
+			{
+				const int lEngineIndex = lTag.mEngineIndexList[0];
+				TBC::PhysicsEngine* lEngine = lPhysics->GetEngine(lEngineIndex);
+				lJointValue = lEngine->GetLerpThrottle(0.1f, 0.1f);
 			}
 			const float lScale = lTag.mFloatValueList[0];
 			const float lJointRightValue = lJointValue * lScale;
@@ -146,7 +157,7 @@ void Machine::OnTick()
 					lTransform.MoveBackward(lJointDownValue);
 					lMesh->SetTransformation(lTransform);
 					lMesh->SetTransformationChanged(true);
-					lMesh->SetAlwaysVisible(lIsChild);
+					lMesh->SetAlwaysVisible(lIsChild || lForceEyes);
 				}
 			}
 		}
