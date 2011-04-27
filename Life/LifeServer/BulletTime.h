@@ -26,7 +26,7 @@ public:
 
 private:
 	virtual void FinalizeTrigger(const TBC::PhysicsTrigger* pTrigger);
-	virtual void OnTick(float pFrameTime);
+	virtual void OnTick();
 	virtual void OnAlarm(int pAlarmId, void* pExtraData);
 	virtual void OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, TBC::PhysicsManager::ForceFeedbackListener* pListener);
 

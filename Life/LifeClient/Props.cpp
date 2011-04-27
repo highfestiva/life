@@ -21,7 +21,8 @@ Props::Props(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCur
 	Parent(pResourceManager, pClassId, pUiManager),
 	mParticleType(PARTICLE_NONE),
 	mScale(1),
-	mTime(0)
+	mTime(0),
+	mOpacity(0.5f)
 {
 	SetPhysicsTypeOverride(PHYSICS_OVERRIDE_BONES);
 }
@@ -32,12 +33,21 @@ Props::~Props()
 
 
 
+void Props::SetOpacity(float pOpacity)
+{
+	mOpacity = pOpacity;
+}
+
 void Props::StartParticle(ParticleType pParticleType, const Vector3DF& pStartVelocity, float pScale)
 {
-	assert(pStartVelocity.GetLengthSquared() < 1000*1000);
+	//assert(pStartVelocity.GetLengthSquared() < 1000*1000);
 	mParticleType = pParticleType;
 	mVelocity = pStartVelocity;
 	mScale = pScale;
+	const float lAngularRange = 2;
+	mAngularVelocity.Set((float)Random::Uniform(-lAngularRange, lAngularRange),
+		(float)Random::Uniform(-lAngularRange, lAngularRange),
+		(float)Random::Uniform(-lAngularRange*0.1f, lAngularRange*0.1f));
 	GetManager()->AddAlarmCallback(this, 5, 2, 0);
 }
 
@@ -68,7 +78,7 @@ void Props::TryAddTexture()
 	Parent::TryAddTexture();
 }
 
-void Props::OnPhysicsTick()
+void Props::OnTick()
 {
 	const float lFrameTime = GetManager()->GetGameManager()->GetTimeManager()->GetNormalFrameTime();
 	mTime += lFrameTime;
@@ -82,23 +92,30 @@ void Props::OnPhysicsTick()
 		break;
 		case PARTICLE_GAS:
 		{
-			SetRootPosition(GetPosition() + mVelocity*lFrameTime);
 			const float lLerp = Math::GetIterateLerpTime(0.08f, lFrameTime);
 			mVelocity.x = Math::Lerp(mVelocity.x, 0.0f, lLerp);
 			mVelocity.y = Math::Lerp(mVelocity.y, 0.0f, lLerp);
 			mVelocity.z = Math::Lerp(mVelocity.z, 3.0f, lLerp);
+			SetRootPosition(GetPosition() + mVelocity*lFrameTime);
+
+			QuaternionF lOrientation = GetOrientation();
+			lOrientation.RotateAroundOwnX(lFrameTime * mAngularVelocity.x * mVelocity.x);
+			lOrientation.RotateAroundOwnY(lFrameTime * mAngularVelocity.y * mVelocity.y);
+			lOrientation.RotateAroundOwnY(lFrameTime * mAngularVelocity.z * mVelocity.z);
+			SetRootOrientation(lOrientation);
+
 			for (size_t x = 0; x < mMeshResourceArray.size(); ++x)
 			{
 				if (mMeshResourceArray[x]->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 				{
-					mMeshResourceArray[x]->GetRamData()->GetBasicMaterialSettings().mAlpha = 0.3f * sin(mTime*0.5f*PIF);
+					mMeshResourceArray[x]->GetRamData()->GetBasicMaterialSettings().mAlpha = mOpacity * sin(mTime*0.5f*PIF);
 				}
 			}
 		}
 		break;
 	}
 
-	Parent::OnPhysicsTick();	// TRICKY: not a vehicle in this sense.
+	Parent::OnTick();	// TRICKY: not a vehicle in this sense.
 }
 
 void Props::OnAlarm(int pAlarmId, void* /*pExtraData*/)
@@ -109,6 +126,11 @@ void Props::OnAlarm(int pAlarmId, void* /*pExtraData*/)
 		GetManager()->PostKillObject(GetInstanceId());
 	}
 }
+
+
+
+LOG_CLASS_DEFINE(GAME_CONTEXT_CPP, Props);
+
 
 
 }

@@ -49,9 +49,9 @@ class GameClientSlaveManager: public Cure::GameManager, public InputObserver, pr
 {
 	typedef Cure::GameManager Parent;
 public:
-	GameClientSlaveManager(GameClientMasterTicker* pMaster, Cure::RuntimeVariableScope* pVariableScope,
-		Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager, int pSlaveIndex,
-		const PixelRect& pRenderArea);
+	GameClientSlaveManager(GameClientMasterTicker* pMaster, const Cure::TimeManager* pTime,
+		Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
+		UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea);
 	virtual ~GameClientSlaveManager();
 	void LoadSettings();
 	void SetRenderArea(const PixelRect& pRenderArea);
@@ -65,7 +65,7 @@ public:
 
 	bool Render();
 	virtual bool Paint();
-	bool EndTick();
+	virtual bool EndTick();
 	void TickNetworkInput();
 	bool TickNetworkOutput();
 
@@ -74,11 +74,14 @@ public:
 	void RequestLogin(const str& pServerAddress, const Cure::LoginId& pLoginToken);
 	void Logout();
 	bool IsLoggingIn() const;
+	void SelectAvatar(const Cure::UserAccount::AvatarId& pAvatarId);
 	bool IsUiMoveForbidden(Cure::GameObjectId pObjectId) const;
 	virtual void GetSiblings(Cure::GameObjectId pObjectId, Cure::ContextObject::Array& pSiblingArray) const;
 	void DoGetSiblings(Cure::GameObjectId pObjectId, Cure::ContextObject::Array& pSiblingArray) const;
-	void AddLocalObjects(std::hash_set<Cure::GameObjectId>& pLocalObjectSet) const;
+	void AddLocalObjects(std::hash_set<Cure::GameObjectId>& pLocalObjectSet);
 	bool IsInCameraRange(const Vector3DF& pPosition, float pDistance) const;
+	bool IsOwned(Cure::GameObjectId pObjectId) const;
+	Cure::GameObjectId GetAvatarInstanceId() const;
 
 	virtual bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
 	virtual bool OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode);
@@ -130,17 +133,19 @@ protected:
 	void OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
 		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
 		TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID pBody2Id);
-	bool OnPhysicsSend(Cure::ContextObject* pObject);
-	bool IsConnectAuthorized();
+	virtual bool OnPhysicsSend(Cure::ContextObject* pObject);
+	virtual bool OnAttributeSend(Cure::ContextObject* pObject);
+	bool IsServer();
 	void SendAttach(Cure::ContextObject*, unsigned, Cure::ContextObject*, unsigned);
 	void SendDetach(Cure::ContextObject*, Cure::ContextObject*);
 	virtual void OnAlarm(int pAlarmId, Cure::ContextObject* pObject, void* pExtraData);
 	void AttachObjects(Cure::GameObjectId pObject1Id, unsigned pBody1Id, Cure::GameObjectId pObject2Id, unsigned pBody2Id);
 	void DetachObjects(Cure::GameObjectId pObject1Id, Cure::GameObjectId pObject2Id);
-	bool IsOwned(Cure::GameObjectId pObjectId) const;
 
 	void CancelLogin();
 	void OnAvatarSelect(UiTbc::Button* pButton);
+	void DropAvatar();
+	bool QuerySetIsChild(Cure::ContextObject* pAvatar) const;
 	Cure::RuntimeVariableScope* GetVariableScope() const;
 
 	Cure::NetworkClient* GetNetworkClient() const;
@@ -176,6 +181,7 @@ protected:
 
 	// Network transmission and keepalive info.
 	Cure::GameObjectId mAvatarId;
+	bool mHadAvatar;
 	ObjectIdSet mOwnedObjectList;
 	uint64 mLastSentByteCount;
 	Timer mLastSendTime;
@@ -183,6 +189,7 @@ protected:
 	Timer mLastUnsafeReceiveTime;
 	Alarm mCollisionExpireAlarm;
 	Alarm mInputExpireAlarm;
+	Alarm mSendExpireAlarm;
 	Options::Steering mLastSteering;
 	float mCamRotateExtra;
 
@@ -222,7 +229,7 @@ protected:
 	};
 	DiskFile mEnginePlaybackFile;	// Used for recording vechile steering playback.
 	float mEnginePlaybackTime;	// Used for recording vechile steering playback.
-	EnginePower mEnginePowerShadow[TBC::PhysicsEngine::MAX_CONTROLLER_COUNT];	// Used for recording vechile steering playback.
+	EnginePower mEnginePowerShadow[TBC::PhysicsEngine::ASPECT_COUNT];	// Used for recording vechile steering playback.
 
 #ifdef LIFE_DEMO
 	HiResTimer mDemoTime;

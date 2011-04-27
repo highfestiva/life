@@ -31,12 +31,13 @@ public:
 	Props(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager);
 	virtual ~Props();
 
+	void SetOpacity(float pOpacity);
 	void StartParticle(ParticleType pParticleType, const Vector3DF& pStartVelocity, float pScale);
 
 protected:
 	void DispatchOnLoadMesh(UiCure::UserGeometryReferenceResource* pMeshResource);
 	virtual void TryAddTexture();
-	void OnPhysicsTick();
+	void OnTick();
 	void OnAlarm(int pAlarmId, void* pExtraData);
 
 private:
@@ -44,6 +45,10 @@ private:
 	ParticleType mParticleType;
 	float mScale;
 	float mTime;
+	float mOpacity;
+	Vector3DF mAngularVelocity;
+
+	LOG_CLASS_DECLARE();
 };
 
 

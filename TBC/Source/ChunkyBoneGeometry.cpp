@@ -177,6 +177,21 @@ bool ChunkyBoneGeometry::CreateJoint(ChunkyPhysics* pStructure, PhysicsManager* 
 			pPhysics->SetAngularMotorTurn(mJointId, 0, 0);*/
 			lOk = true;
 		}
+		else if (mBodyData.mJointType == JOINT_BALL)
+		{
+			const TransformationF& lBodyTransform = pStructure->GetTransformation(this);
+			const Vector3DF lAnchor = lBodyTransform.GetPosition() -
+				Vector3DF(mBodyData.mParameter[PARAM_OFFSET_X], mBodyData.mParameter[PARAM_OFFSET_Y], mBodyData.mParameter[PARAM_OFFSET_Z]);
+			mJointId = pPhysics->CreateBallJoint(mBodyData.mParent->GetBodyId(),
+				GetBodyId(), lAnchor);
+			/*pPhysics->SetJointParams(mJointId, mBodyData.mParameter[PARAM_LOW_STOP], mBodyData.mParameter[PARAM_HIGH_STOP], 0);
+			pPhysics->SetJointParams(mJointId, mBodyData.mParameter[PARAM_LOW_STOP], mBodyData.mParameter[PARAM_HIGH_STOP], 0);
+			pPhysics->SetSuspension(mJointId, 1/(float)pPhysicsFps, mBodyData.mParameter[0],
+				mBodyData.mParameter[1]);
+			pPhysics->SetAngularMotorRoll(mJointId, 0, 0);
+			pPhysics->SetAngularMotorTurn(mJointId, 0, 0);*/
+			lOk = true;
+		}
 		else
 		{
 			assert(false);

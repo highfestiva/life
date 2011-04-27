@@ -78,8 +78,7 @@ def stripQuotes(s):
         """
         if s[0]=='"':
                 return s[1:-1]
-        else:
-                return s
+        return s
         
 
 # MAPreProcessor
@@ -1414,16 +1413,20 @@ class MAReader:
                 opts = {}
                 
                 i=0
-                while i<len(arglist):
+                c = len(arglist)
+                while i<c:
                         arg = arglist[i]
                         i += 1
-                        try:
-                                float(arg)
-                                is_number = True
-                        except:
+                        if arg[0] != '"':
+                                try:
+                                        float(arg)
+                                        is_number = True
+                                except:
+                                        is_number = False
+                                a = arg
+                        else:
                                 is_number = False
-                        # Option?
-                        a = stripQuotes(arg)
+                                a = arg[1:-1]
                         if a[0:1]=="-" and not is_number:
                                 # Convert short names into long names...
                                 optname = name_dict.get(a[1:], a[1:])
@@ -1486,7 +1489,6 @@ class MAReader:
                         self.args = []
                         self.processCommands(s[n+1:])
 
-        # splitCommand
         def splitCommand(self, s):
                 """Split a command into its arguments.
 
@@ -1523,7 +1525,6 @@ class MAReader:
                                         n += e+1
                                 return s[:b].split() + [s[b:e+1]] + s2, n
 
-        # findString
         def findString(self, s):
                 """Find the first string occurence.
 
@@ -1535,24 +1536,21 @@ class MAReader:
                 'a="foo'                  -> (2, None)
                 'a="foo \" spam"' -> (2,14)
                 """
-                #'
-                offset = 0
+                # Search the beginning of a string
+                n1 = s.find('"', 0)
+                if n1==-1:
+                        return None,None
+                # Search the end of the string (ignore quoted apostrophes)...
+                start = n1+1
+                n2 = None
                 while 1:
-                        # Search the beginning of a string
-                        n1 = s.find('"', offset)
-                        if n1==-1:
-                                return None,None
-                        # Search the end of the string (ignore quoted apostrophes)...
-                        start = n1+1
-                        n2 = None
-                        while 1:
-                                n2 = s.find('"', start)
-                                if n2==-1:
-                                        return n1,None
-                                elif s[n2-1]!='\\':
-                                        return n1,n2
-                                else:
-                                        start = n2+1
+                        n2 = s.find('"', start)
+                        if n2==-1:
+                                return n1,None
+                        elif s[n2-1]!='\\':
+                                return n1,n2
+                        else:
+                                start = n2+1
 
 # DefaultMAReader
 class DefaultMAReader(MAReader):

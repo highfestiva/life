@@ -13,64 +13,6 @@
 
 
 
-@interface NativeGLView: NSOpenGLView
-{
-}
-- (void)mouseMoved: (NSEvent*)theEvent;
-- (void)keyDown: (NSEvent*)theEvent;
-- (void)keyUp: (NSEvent*)theEvent;
-- (BOOL)acceptsFirstResponder;
-@end
-
-@implementation NativeGLView
-
-- (void) mouseDown: (NSEvent*)theEvent
-{
-	printf("Mouse down i min favoritvy\n");
-	[[self window] setAcceptsMouseMovedEvents: YES];
-	[[self window] setIgnoresMouseEvents: NO];
-}
-
-- (void) mouseDragged: (NSEvent*)theEvent
-{
-	printf("Mouse dragged i min favoritvy\n");
-	[[self window] setAcceptsMouseMovedEvents: YES];
-	[[self window] setIgnoresMouseEvents: NO];
-	[self mouseMoved: theEvent];
-}
-
-- (void)mouseMoved: (NSEvent*)theEvent
-{
-	printf("mouseMoved!\n");
-	//[super mouseMoved:theEvent];
-
-	UiLepra::MacInputManager* lInput = UiLepra::MacInputManager::GetSingleton();
-	if (lInput)
-	{
-		NSPoint lPoint = [theEvent locationInWindow];
-		lInput->SetMousePosition(lPoint.x, lPoint.y);
-	}
-}
-- (void)keyDown: (NSEvent*)theEvent
-{
-	printf("view keydown!\n");
-}
-- (void)keyUp: (NSEvent*)theEvent
-{
-	printf("view keyup!\n");
-}
-- (BOOL)acceptsFirstResponder
-{
-	return YES;
-}
-- (BOOL)resignFirstResponder
-{
-	return YES;
-}
-@end
-
-
-
 namespace UiLepra
 {
 
@@ -188,6 +130,11 @@ void MacOpenGLDisplay::OnResize(int pWidth, int pHeight)
 
 void MacOpenGLDisplay::Resize(int pWidth, int pHeight)
 {
+	if (!mGlView)
+	{
+		return;
+	}
+
 	if (IsFullScreen() == true)
 	{
 		// Since we are in fullscreen mode, we ignore the width and height
@@ -321,6 +268,8 @@ bool MacOpenGLDisplay::InitScreen()
 		//OpenGLExtensions::InitExtensions();
 	}
 
+	[mWnd setContentSize:mWnd.frame.size];
+
 	return true;
 }
 
@@ -383,7 +332,7 @@ bool MacOpenGLDisplay::SetGLPixelFormat()
 	{
 		*lAttrib++ = NSOpenGLPFADepthSize;
 		*lAttrib++ = (NSOpenGLPixelFormatAttribute)mDisplayMode.mBitDepth;
-	 }
+	}
 	if (true)	// TODO: stencil depth somehow?
 	{
 		*lAttrib++ = NSOpenGLPFAStencilSize;
@@ -393,14 +342,18 @@ bool MacOpenGLDisplay::SetGLPixelFormat()
 	NSOpenGLPixelFormat* lPixelFormat = [NSOpenGLPixelFormat alloc];
 	[lPixelFormat initWithAttributes:lPixelFormatAttribs];
 
-	mGlView = [NativeGLView alloc];
-	[mGlView initWithFrame:[mWnd frame] pixelFormat:lPixelFormat];
+	mGlView = [NSOpenGLView alloc];
+	//CGRect lContentSize = [mWnd contentSize];
+	[mGlView initWithFrame:mWnd.frame pixelFormat:lPixelFormat];
 	[mWnd setContentView:mGlView];
 	[mWnd setAcceptsMouseMovedEvents: YES];
 	[mWnd setIgnoresMouseEvents: NO];
+	//[mGlView setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
+	//[mGlView setAutoresizesSubviews:YES];
 	//[mWnd setFrame: NSMakeRect(0, 0, mScreen->GetActiveResolution().GetWidth(), mScreen->GetActiveResolution().GetHeight()) display: YES];
+	//mGlView.frame = lContentSize;
 
-	[mGlView reshape];
+	//[mGlView reshape];
 	return (true);	// TODO: add error checking!
 }
 

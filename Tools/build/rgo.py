@@ -202,7 +202,7 @@ def _printresult():
                 return
         showed_result = True
         if updates+removes:     print("Operation successful, %i resulting files updated(/removed)." % (updates+removes))
-        else:                   print("Already up-to-date.")
+        else:                   print("Build up-to-date.")
 
 
 def _createmakes(force=False):
@@ -265,8 +265,56 @@ def _copybin(targetdir, buildtype):
         _incremental_copy(fl, os.path.join(targetdir, "Data"), buildtype)
 
 
+def _macappify(exe, name):
+        os.chdir("bin")
+        import glob
+        fl = glob.glob("*")
+        fs = []
+        for f in fl:
+                if os.path.isfile(f):
+                        fs += [f]
+        for i in fs:
+                for o in fs:
+                        os.system("install_name_tool -change %s @executable_path/%s %s" % (o, o, i))
+        import shutil
+        shutil.copytree("../Tools/build/macosx", exe+".app")
+        for f in fs:
+                os.rename(f, os.path.join(exe+".app/Contents/MacOS", f))
+        os.rename("Data", exe+".app/Contents/Resources/Data")
+        plist = ".app/Contents/Info.plist"
+        r = open(exe+plist, "rt")
+        w = open(exe+plist+".tmp", "wt")
+        for line in r:
+                w.write(line.replace("@EXE_NAME@", exe).replace("@BUNDLE_NAME@", name))
+        r.close()
+        w.close()
+        os.remove(exe+plist)
+        os.rename(exe+plist+".tmp", exe+plist)
+        os.chdir("..")
+
+
+def _demacappify(wildcard):
+        os.chdir("bin")
+        import glob
+        import shutil
+        apps = glob.glob(wildcard)
+        for app in apps:
+                fl  = glob.glob(os.path.join(app, "Contents/MacOS/*"))
+                fl += glob.glob(os.path.join(app, "Contents/Resources/Data"))
+                for f in fl:
+                        os.rename(f, os.path.split(f)[1])
+                shutil.rmtree(app)
+        os.chdir("..")
+
+
 #-------------------- High-level build stuff below. --------------------
 
+
+def macappify_client():
+        _macappify("LifeClient", "Da Client")
+
+def demacappify():
+        _demacappify("*.app")
 
 def cleandata():
         targetdir=bindir
@@ -349,37 +397,41 @@ def _prepare_run():
         return pre, post
 
 
-def startclient():
+def _bgrun(name):
         _printresult()
         pre, post = _prepare_run()
         import subprocess
-        subprocess.Popen(pre+"LifeClient"+post, shell=True)
+        subprocess.Popen(pre+name+post, shell=True)
         os.chdir("..")
-def startserver():
+def _fgrun(name, app=""):
         _printresult()
         pre, post = _prepare_run()
-        os.system(pre+"LifeServer"+post)
+        os.system(app+pre+name+post)
         os.chdir("..")
+def startclient():
+	_fgrun("LifeClient")
+def bgclient():
+	_bgrun("LifeClient")
+def startserver():
+	_fgrun("LifeServer")
+def bgserver():
+	_bgrun("LifeServer")
 def start():
-        startclient()
+        bgclient()
         startserver()
 def gdbtest():
-        _printresult()
-        pre, post = _prepare_run()
-        os.system("gdb "+pre+"CureTestApp"+post)
-        os.chdir("..")
+        _fgrun("CureTestApp", "gdb ")
 def gdbclient():
-        _printresult()
-        pre, post = _prepare_run()
-        os.system("gdb "+pre+"LifeClient"+post)
-        os.chdir("..")
+        _fgrun("LifeClient", "gdb ")
 
 
 if __name__ == "__main__":
         usage = "usage: %prog [options] <filespec>\n" + \
                 "Runs some type of build command. Try build, rebuild, clean, builddata, or something like that."
-        parser = optparse.OptionParser(usage=usage, version="%prog 0.1")
-        parser.add_option("-m", "--buildmode", dest="buildmode", default="debug", help="Pick one of the build modes: "+", ".join(buildtypes))
+        parser = optparse.OptionParser(usage=usage, version="%prog 0.2")
+        parser.add_option("-m", "--buildmode", dest="buildmode", default="debug", help="Pick one of the build modes: %s. Default is debug." % ", ".join(buildtypes))
+        ismac = (getosname() == "Mac")
+        parser.add_option("-a", "--demacappify", dest="demacappify", default=ismac, help="Quietly try to de-Mac-.App'ify the target before building; default is %s." % str(ismac))
         options, args = parser.parse_args()
 
         if len(args) < 1:
@@ -391,6 +443,9 @@ if __name__ == "__main__":
         default_build_mode = options.buildmode
         if buildtypes.index(options.buildmode) > 0:
                 ziptype = options.buildmode
+
+        if options.demacappify:
+                demacappify()
 
         for arg in args:
                 exec(arg+"()")

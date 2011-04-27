@@ -38,8 +38,11 @@ class GameServerManager: public Cure::GameManager, public Cure::NetworkServer::L
 public:
 	typedef Cure::GameManager Parent;
 
-	GameServerManager(Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager);
+	GameServerManager(const Cure::TimeManager* pTime, Cure::RuntimeVariableScope* pVariableScope,
+		Cure::ResourceManager* pResourceManager);
 	virtual ~GameServerManager();
+
+	virtual bool BeginTick();
 
 	virtual void StartConsole(InteractiveConsoleLogListener* pConsoleLogger, ConsolePrompt* pConsolePrompt);
 	bool Initialize(MasterServerConnection* pMasterConnection);
@@ -51,6 +54,8 @@ public:
 	bool SendChatMessage(const wstr& pClientUserName, const wstr& pMessage);
 
 	int GetLoggedInClientCount() const;
+
+	void Build(const str& pWhat);
 
 	void TickInput();
 
@@ -84,8 +89,10 @@ private:
 	void OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
 		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
 		TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID pBody2Id);
-	bool OnPhysicsSend(Cure::ContextObject* pObject);
-	bool IsConnectAuthorized();
+	void FlipCheck(Cure::ContextObject* pObject) const;
+	virtual bool OnPhysicsSend(Cure::ContextObject* pObject);
+	virtual bool OnAttributeSend(Cure::ContextObject* pObject);
+	bool IsServer();
 	void SendAttach(Cure::ContextObject* pObject1, unsigned pId1, Cure::ContextObject* pObject2, unsigned pId2);
 	void SendDetach(Cure::ContextObject* pObject1, Cure::ContextObject* pObject2);
 	virtual void OnAlarm(int pAlarmId, Cure::ContextObject* pObject, void* pExtraData);

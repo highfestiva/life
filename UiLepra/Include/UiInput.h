@@ -111,16 +111,16 @@ public:
 	//    Returns true if "pressed", false otherwise.
 	// If analogue:
 	//    Returns true if the analogue value is greater than pThreshold.
-	bool GetBooleanValue(float64 pThreshold = 0.5) const;
+	bool GetBooleanValue(float pThreshold = 0.5) const;
 
 	// If digital:
 	//    Returns 1 if "pressed", 0 otherwise.
 	// If analogue:
 	//    Returns the analogue value normalized around -1 and 1.
-	float64 GetValue() const;
+	float GetValue() const;
 
 	// Returns the difference between the current value and the previous value.
-	float64 GetDeltaValue() const;
+	float GetDeltaValue() const;
 
 	void SetIdentifier(const str& pIdentifier);
 	const str& GetIdentifier() const;
@@ -136,11 +136,11 @@ public:
 	virtual bool SetCalibration(const str& pData) = 0;
 
 protected:
-	void SetValue(float64 pNewValue);
+	void SetValue(float pNewValue);
 private:
 
-	float64 mPrevValue;
-	float64 mValue;
+	float mPrevValue;
+	float mValue;
 
 	Type mType;
 	Interpretation mInterpretation;
@@ -151,6 +151,8 @@ private:
 
 	typedef std::vector<InputFunctor*> FunctorArray;
 	FunctorArray mFunctorArray;
+
+	LOG_CLASS_DECLARE();
 };
 
 #define ADD_INPUT_CALLBACK(_e, _func, _class) \
@@ -218,6 +220,7 @@ public:
 
 	void SetIdentifier(const str& pIdentifier);
 	const str& GetIdentifier() const;
+	const str& GetUniqueIdentifier() const;
 
 	// Sets an observer on the entire device. (All elements).
 	// The device takes care of deleting the functor.
@@ -231,7 +234,7 @@ protected:
 
 	void SetActive(bool pActive);
 
-	void SetElementValue(InputElement* pElement, float64 pValue);
+	void SetElementValue(InputElement* pElement, float pValue);
 
 	ElementArray mElementArray;
 
@@ -248,6 +251,9 @@ private:
 	bool mActive;
 
 	str mIdentifier;
+	str mUniqueIdentifier;
+
+	LOG_CLASS_DECLARE();
 };
 
 
@@ -333,8 +339,8 @@ public:
 		IN_KBD_X		= 88,
 		IN_KBD_Y		= 89,
 		IN_KBD_Z		= 90,
-		IN_KBD_LWIN	= 91,
-		IN_KBD_RWIN	= 92,
+		IN_KBD_LOS		= 91,
+		IN_KBD_ROS		= 92,
 
 		IN_KBD_CONTEXT_MENU	= 93,	// The "windows menu" button on Microsoft-compatible keyboards.
 
@@ -439,7 +445,7 @@ public:
 	InputDevice* FindDevice(const str& pDeviceIdentifier, int pN = 0);
 
 	// Returns the number of devices with the same identifier.
-	int GetDeviceCount(const str& pDeviceIdentifier) const;
+	int QueryIdentifierCount(const str& pDeviceIdentifier) const;
 
 	// Returns which index the device has in the list of devices with the
 	// same identifier. Thus, if there are two gamepads, and we pass one
@@ -478,8 +484,13 @@ public:
 	virtual void HideCursor() = 0;
 
 	// Range: [-1, 1] (Left and right, up and down)
-	virtual float64 GetCursorX() = 0;
-	virtual float64 GetCursorY() = 0;
+	virtual float GetCursorX() = 0;
+	virtual float GetCursorY() = 0;
+
+	bool NotifyOnChar(tchar pChar);
+	bool NotifyOnKeyDown(KeyCode pKeyCode);
+	bool NotifyOnKeyUp(KeyCode pKeyCode);
+	bool NotifyMouseDoubleClick();
 
 	bool ReadKey(KeyCode pKeyCode);
 
@@ -490,13 +501,6 @@ protected:
 	DeviceList mDeviceList;
 
 	InputManager();
-
-	// Will notify all text input observers...
-	// Is called from the subclass.
-	bool NotifyOnChar(tchar pChar);
-	bool NotifyOnKeyDown(KeyCode pKeyCode);
-	bool NotifyOnKeyUp(KeyCode pKeyCode);
-	bool NotifyMouseDoubleClick();
 
 	void SetKey(KeyCode pKeyCode, bool pValue);
 
@@ -510,6 +514,8 @@ private:
 	MouseObserverList mMouseObserverList;
 
 	bool mKeyDown[256];
+
+	LOG_CLASS_DECLARE();
 };
 
 

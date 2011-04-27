@@ -39,15 +39,23 @@ void Alarm::Set()
 	mIsActive = true;
 }
 
-bool Alarm::IsExpired(double pOptionalWaitTime)
+void Alarm::SetIfNotSet()
 {
-	mTimer.UpdateTimer();
-	return (mIsActive && mTimer.GetTimeDiff() >= pOptionalWaitTime);
+	if (!mIsActive)
+	{
+		Set();
+	}
 }
 
-bool Alarm::PopExpired(double pOptionalWaitTime)
+bool Alarm::IsExpired(double pWaitTime)
 {
-	bool lIsExpired = IsExpired(pOptionalWaitTime);
+	mTimer.UpdateTimer();
+	return (mIsActive && mTimer.GetTimeDiff() >= pWaitTime);
+}
+
+bool Alarm::PopExpired(double pWaitTime)
+{
+	bool lIsExpired = IsExpired(pWaitTime);
 	if (lIsExpired)
 	{
 		Reset();

@@ -62,11 +62,13 @@ void OpenGLPainter::SetAlphaValue(uint8 pAlpha)
 {
 	OGL_ASSERT();
 
-	Painter::SetAlphaValue(pAlpha);
-	float lAlpha = (float)GetAlphaValue() / 255.0f;
-	::glAlphaFunc(GL_GEQUAL, (GLclampf)lAlpha);
-
-	OGL_ASSERT();
+	if (GetAlphaValue() != pAlpha)
+	{
+		Painter::SetAlphaValue(pAlpha);
+		float lAlpha = (float)GetAlphaValue() / 255.0f;
+		::glAlphaFunc(GL_GEQUAL, (GLclampf)lAlpha);
+		OGL_ASSERT();
+	}
 }
 
 void OpenGLPainter::SetRenderMode(RenderMode pRM)

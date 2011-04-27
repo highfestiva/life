@@ -12,6 +12,7 @@
 
 #define RTVAR_APPLICATION_AUTOEXITONEMPTYSERVER	"Application.AutoExitOnEmptyServer"	// Not debug, might be desirable on dedicated servers.
 
+#define RTVAR_GAME_AUTOFLIPENABLED		"Game.AutoFlipEnabled"
 #define RTVAR_GAME_SPAWNPART			"Game.SpawnPart"
 
 #define RTVAR_NETWORK_SERVERNAME		"Network.ServerName"

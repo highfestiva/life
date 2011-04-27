@@ -85,6 +85,10 @@
 
 #if defined(ODE_PLATFORM_OSX)
   #define macintosh
+  /* high_festiva added these HAVE_xxx lines below. */
+  #define HAVE_ISNAN 1
+//#define HAVE___ISNAN 1
+//#define HAVE___ISNANF 1
 #endif
 
 #if !defined(ODE_PLATFORM_OSX) && !defined(ODE_PLATFORM_PS3)

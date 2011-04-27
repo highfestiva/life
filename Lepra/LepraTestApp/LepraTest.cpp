@@ -38,6 +38,7 @@
 #include "../Include/SpinLock.h"
 #include "../Include/String.h"
 #include "../Include/SystemManager.h"
+#include "../Include/Timer.h"
 #include "../Include/Transformation.h"
 
 
@@ -1019,6 +1020,30 @@ bool TestTransformation(const LogDecorator& pAccount)
 	return (lTestOk);
 }
 
+bool TestTimers(const LogDecorator& pAccount)
+{
+	str lContext;
+	bool lTestOk = true;
+
+	// Basic timer test.
+	if (lTestOk)
+	{
+		lContext = _T("timer");
+		Thread::Sleep(0.001);	// Bail early on cpu time slice.
+		HiResTimer lHiTimer;
+		Timer lLoTimer;
+		Thread::Sleep(0.100);
+		const double lHiTime = lHiTimer.QueryTimeDiff();
+		const double lLoTime = lLoTimer.QueryTimeDiff();
+		lTestOk = (lHiTime > 0.090 && lHiTime < 0.150 &&
+			lLoTime > 0.090 && lLoTime < 0.150);
+		assert(lTestOk);
+	}
+
+	ReportTestResult(pAccount, _T("Timers"), lContext, lTestOk);
+	return (lTestOk);
+}
+
 bool TestSystemManager(const LogDecorator& pAccount)
 {
 	str lContext;
@@ -1064,7 +1089,7 @@ bool TestSystemManager(const LogDecorator& pAccount)
 		lTestOk = (lOs == _T("Darwin") || lOs == _T("Linux"));
 #else // <Unknown target>
 #error "Not implemented for this platform!"
-#endif // LEPRA_WINDOWS/LEPRA_LINUX/LEPRA_MACOSX/<Unknown target>
+#endif // LEPRA_WINDOWS/LEPRA_POSIX/<Unknown target>
 		assert(lTestOk);
 	}
 	if (lTestOk)
@@ -2858,6 +2883,10 @@ bool TestLepra()
 	if (lTestOk)
 	{
 		lTestOk = TestTransformation(gLLog);
+	}
+	if (lTestOk)
+	{
+		lTestOk = TestTimers(gLLog);
 	}
 	if (lTestOk)
 	{

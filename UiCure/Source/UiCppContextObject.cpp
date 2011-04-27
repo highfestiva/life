@@ -84,7 +84,7 @@ void CppContextObject::StartLoading()
 
 
 
-void CppContextObject::OnPhysicsTick()
+void CppContextObject::OnTick()
 {
 	if (!mEnableUi)
 	{
@@ -112,6 +112,7 @@ void CppContextObject::UiMove()
 	if (mMeshSlideMode == MESH_SLIDE_START)
 	{
 		mMeshOffset.Set(0, 0, 0);
+		mLog.Debugf(_T("Starting slide of mesh on object %u/%s."), GetInstanceId(), GetClassId().c_str());
 	}
 	//QuaternionF lGfxPhysMeshAngularOffset;
 	int lGfxPhysMeshOffsetCount = 0;
@@ -242,7 +243,13 @@ void CppContextObject::DebugDrawPrimitive(DebugPrimitive pPrimitive)
 						{
 							const float lLength = 1;
 							Vector3DF lAxis;
-							if (mManager->GetGameManager()->GetPhysicsManager()->GetAxis1(lJoint, lAxis))
+							if (lGeometry->GetJointType() == TBC::ChunkyBoneGeometry::JOINT_BALL)
+							{
+								// Ball joints don't have axes.
+								mUiManager->GetRenderer()->DrawLine(lAnchor, Vector3DF(0,0,3), BLACK);
+								break;
+							}
+							else if (mManager->GetGameManager()->GetPhysicsManager()->GetAxis1(lJoint, lAxis))
 							{
 								mUiManager->GetRenderer()->DrawLine(lAnchor, lAxis*lLength, DARK_GRAY);
 							}
@@ -339,13 +346,27 @@ void CppContextObject::OnLoadClass(UserClassResource* pClassResource)
 	if (pClassResource->GetLoadState() != Cure::RESOURCE_LOAD_COMPLETE)
 	{
 		mLog.Errorf(_T("Could not load class '%s'."), pClassResource->GetName().c_str());
-		assert(false);
+		GetManager()->PostKillObject(GetInstanceId());
 		return;
 	}
-	else
+
+	const size_t lMeshCount = lClass->GetMeshCount();
+	if (mEnableUi)
 	{
-		StartLoadingPhysics(lClass->GetPhysicsBaseName());
+		assert(lMeshCount > 0);
+		for (size_t x = 0; x < lMeshCount; ++x)
+		{
+			int lPhysIndex = -1;
+			str lMeshName;
+			TransformationF lTransform;
+			lClass->GetMesh(x, lPhysIndex, lMeshName, lTransform);
+			UserGeometryReferenceResource* lMesh = new UserGeometryReferenceResource(
+				mUiManager, GeometryOffset(lPhysIndex, lTransform));
+			mMeshResourceArray.push_back(lMesh);
+		}
 	}
+
+	StartLoadingPhysics(lClass->GetPhysicsBaseName());
 
 	if (!mEnableUi)
 	{
@@ -354,9 +375,10 @@ void CppContextObject::OnLoadClass(UserClassResource* pClassResource)
 
 	assert(mMeshLoadCount == 0);
 	//assert(mTextureLoadCount == 0);
-	const size_t lMeshCount = lClass->GetMeshCount();
-	assert(lMeshCount > 0);
-	for (size_t x = 0; x < lMeshCount; ++x)
+	assert(lMeshCount == mMeshResourceArray.size());
+	size_t x = 0;
+	MeshArray::iterator y = mMeshResourceArray.begin();
+	for (; y != mMeshResourceArray.end(); ++x, ++y)
 	{
 		int lPhysIndex = -1;
 		str lMeshName;
@@ -373,12 +395,14 @@ void CppContextObject::OnLoadClass(UserClassResource* pClassResource)
 		{
 			lMeshInstance = strutil::Format(_T("%s_%s"), lMeshNameList[1].c_str(), GetMeshInstanceId().c_str());
 		}
-		UserGeometryReferenceResource* lMesh = new UserGeometryReferenceResource(
-			mUiManager, GeometryOffset(lPhysIndex, lTransform));
-		mMeshResourceArray.push_back(lMesh);
-		lMesh->Load(GetResourceManager(),
+		// TRICKY: load non-unique, since this mesh reference is shared. However, we set it as
+		// "don't keep", which makes sure it doesn't get cached. Example: client 0's car 1 mesh
+		// is the same as client 1's car 1 mesh. But when car 1 dies, the mesh REFERENCE should
+		// also die immediately. (The MESH, on the other hand, is a totally different topic.)
+		(*y)->Load(GetResourceManager(),
 			strutil::Format(_T("%s.mesh;%s"), lMeshName.c_str(), lMeshInstance.c_str()),
-			UserGeometryReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh));
+			UserGeometryReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh),
+			false);
 	}
 	LoadTextures();
 }
@@ -436,8 +460,8 @@ void CppContextObject::DispatchOnLoadMesh(UserGeometryReferenceResource* pMeshRe
 	}
 	else
 	{
-		mLog.AError("Could not load mesh! Shit.");
-		assert(false);
+		mLog.AError("Could not load mesh! Sheit.");
+		GetManager()->PostKillObject(GetInstanceId());
 	}
 }
 
@@ -457,7 +481,7 @@ void CppContextObject::OnLoadTexture(UserRendererImageResource* pTextureResource
 
 void CppContextObject::TryAddTexture()
 {
-	if (!mUiClassResource)
+	if (!mUiClassResource || !mUiManager->CanRender())
 	{
 		return;
 	}

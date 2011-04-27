@@ -25,6 +25,7 @@ public:
 
 	ServerApplication(const strutil::strvec& pArgumentList);
 	virtual ~ServerApplication();
+	virtual void Init();
 
 private:
 	str GetName() const;
@@ -39,7 +40,7 @@ private:
 
 
 
-LEPRA_RUN_APPLICATION(Life::ServerApplication);
+LEPRA_RUN_APPLICATION(Life::ServerApplication, Lepra::Main);
 
 
 
@@ -51,11 +52,6 @@ namespace Life
 ServerApplication::ServerApplication(const strutil::strvec& pArgumentList):
 	Application(pArgumentList)
 {
-	Lepra::Init();
-	TBC::Init();
-	Cure::Init();
-
-	Init();
 }
 
 ServerApplication::~ServerApplication()
@@ -66,6 +62,15 @@ ServerApplication::~ServerApplication()
 	TBC::Shutdown();
 	Lepra::Shutdown();
 };
+
+void ServerApplication::Init()
+{
+	Lepra::Init();
+	TBC::Init();
+	Cure::Init();
+
+	Parent::Init();
+}
 
 str ServerApplication::GetName() const
 {

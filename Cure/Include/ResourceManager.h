@@ -19,6 +19,7 @@
 
 namespace Lepra
 {
+class Canvas;
 class ZipArchive;
 }
 namespace TBC
@@ -88,12 +89,14 @@ template<class UserResourceType, class ResourceType>
 class UserTypeResourceBase: public UserResource
 {
 public:
+	typedef UserResourceType TypeUserResourceType;
+	typedef ResourceType TypeResourceType;
 	typedef fastdelegate::FastDelegate1<UserResourceType*, void> TypeLoadCallback;
 
 	UserTypeResourceBase();
 	virtual ~UserTypeResourceBase();
 
-	void Load(ResourceManager* pResourceManager, const str& pName, TypeLoadCallback pCallback);
+	void Load(ResourceManager* pResourceManager, const str& pName, TypeLoadCallback pCallback, bool pKeep = true);
 	void LoadUnique(ResourceManager* pResourceManager, const str& pName, TypeLoadCallback pCallback);
 
 	typename ResourceType::UserRamData GetRamData() const;
@@ -133,6 +136,21 @@ protected:
 
 private:
 	mutable ExtraType mExtraData;
+};
+
+
+
+template<class _UserResourceType>
+class UserResourceOwner
+{
+public:
+	UserResourceOwner(_UserResourceType* pUserResource, Cure::ResourceManager* pManager, const str& pName);
+	virtual ~UserResourceOwner();
+
+protected:
+	void OnLoadCallback(_UserResourceType* pUserResource);
+
+	_UserResourceType* mUserResource;
 };
 
 
@@ -255,6 +273,8 @@ protected:
 	virtual void ReleaseDiversifiedData(DiversifiedData pData) const = 0;
 
 	typedef std::hash_map<const UserResource*, DiversifiedData, LEPRA_VOIDP_HASHER> UserDataTable;
+
+	Lock mLock;
 	UserDataTable mUserDiversifiedTable;
 };
 
@@ -354,11 +374,27 @@ private:
 
 
 
+class RamImageResource: public RamResource<Canvas*>
+{
+	typedef RamResource<Canvas*> Parent;
+public:
+	typedef Canvas* UserData;
+
+	RamImageResource(Cure::ResourceManager* pManager, const str& pName);
+	virtual ~RamImageResource();
+	const str GetType() const;
+	UserData GetUserData(const UserResource*) const;
+	bool Load();
+};
+
+
+
 typedef UserTypeResource<PhysicsResource>		UserPhysicsResource;
 typedef UserTypeResource<ClassResource>			UserClassResource;
 //typedef UserTypeResource<TBC::...>			UserAnimationResource;
 //typedef UserTypeResource<ContextObjectResource>	UserContextObjectResource;
 typedef UserTypeResource<PhysicalTerrainResource>	UserPhysicalTerrainResource;
+typedef UserTypeResource<RamImageResource>		UserRamImageResource;
 
 
 
@@ -368,7 +404,7 @@ public:
 	typedef std::pair<str, str> StringPair;
 	typedef std::list<StringPair> NameTypeList;
 
-	ResourceManager(unsigned pLoaderThreadCount);
+	ResourceManager(unsigned pLoaderThreadCount, const str& pPathPrefix);
 	virtual ~ResourceManager();
 	bool InitDefault();
 	void StopClear();
@@ -386,9 +422,10 @@ public:
 	// name as a renderer resource is an error with undefined behaviour.
 	void Load(const str& pName, UserResource* pUserResource, UserResource::LoadCallback pCallback);
 	void LoadUnique(const str& pName, UserResource* pUserResource, UserResource::LoadCallback pCallback);
-	bool IsCreated(const str& pName) const;
 	void SafeRelease(UserResource* pUserResource);
 	void Release(Resource* pResource);
+	bool IsLoading();
+	bool WaitLoading();
 
 	void Tick();	// Call often, preferably every frame.
 	unsigned ForceFreeCache();	// Called to force immediate freeing of all resources.
@@ -429,6 +466,7 @@ private:
 	TerrainFunctionManager* mTerrainFunctionManager;
 
 	unsigned mLoaderThreadCount;
+	const str mPathPrefix;
 	MemberThread<ResourceManager> mLoaderThread;	// TODO: increase max loader thread count (put in list).
 	Semaphore mLoadSemaphore;
 	mutable Lock mThreadLock;

@@ -40,6 +40,70 @@ CppContextObject::~CppContextObject()
 
 
 
+TBC::ChunkyPhysics::GuideMode CppContextObject::GetGuideMode() const
+{
+	if (GetPhysics())
+	{
+		return GetPhysics()->GetGuideMode();
+	}
+	return TBC::ChunkyPhysics::GUIDE_EXTERNAL;
+}
+
+void CppContextObject::StabilizeTick()
+{
+	const TBC::ChunkyPhysics* lPhysics = GetPhysics();
+	const TBC::ChunkyClass* lClass = GetClass();
+	if (!lPhysics || !lClass)
+	{
+		return;
+	}
+	if (lPhysics->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC && lPhysics->GetGuideMode() >= TBC::ChunkyPhysics::GUIDE_EXTERNAL)
+	{
+		float lStabilityFactor = 1;
+		int lBodyIndex = 0;
+		for (size_t x = 0; x < lClass->GetTagCount(); ++x)
+		{
+			const TBC::ChunkyClass::Tag& lTag = lClass->GetTag(x);
+			if (lTag.mTagName == _T("upright_stabilizer"))
+			{
+				if (lTag.mFloatValueList.size() != 1 ||
+					lTag.mStringValueList.size() != 0 ||
+					lTag.mBodyIndexList.size() != 1 ||
+					lTag.mEngineIndexList.size() != 0 ||
+					lTag.mMeshIndexList.size() != 0)
+				{
+					mLog.Errorf(_T("The upright_stabilizer tag '%s' has the wrong # of parameters."), lTag.mTagName.c_str());
+					assert(false);
+					return;
+				}
+				lStabilityFactor = lTag.mFloatValueList[0];
+				lBodyIndex = lTag.mBodyIndexList[0];
+				TBC::PhysicsEngine::UprightStabilize(mManager->GetGameManager()->GetPhysicsManager(),
+					lPhysics, lPhysics->GetBoneGeometry(lBodyIndex), GetMass()*lStabilityFactor*5, 1);
+			}
+			else if (lTag.mTagName == _T("forward_stabilizer"))
+			{
+				if (lTag.mFloatValueList.size() != 1 ||
+					lTag.mStringValueList.size() != 0 ||
+					lTag.mBodyIndexList.size() != 1 ||
+					lTag.mEngineIndexList.size() != 0 ||
+					lTag.mMeshIndexList.size() != 0)
+				{
+					mLog.Errorf(_T("The forward_stabilizer tag '%s' has the wrong # of parameters."), lTag.mTagName.c_str());
+					assert(false);
+					return;
+				}
+				lStabilityFactor = lTag.mFloatValueList[0];
+				lBodyIndex = lTag.mBodyIndexList[0];
+				TBC::PhysicsEngine::ForwardStabilize(mManager->GetGameManager()->GetPhysicsManager(),
+					lPhysics, lPhysics->GetBoneGeometry(lBodyIndex), GetMass()*lStabilityFactor*5, 1);
+			}
+		}
+	}
+}
+
+
+
 void CppContextObject::SetAllowNetworkLogic(bool pAllow)
 {
 	mAllowNetworkLogic = pAllow;
@@ -81,22 +145,31 @@ void CppContextObject::StartLoadingPhysics(const str& pPhysicsName)
 	assert(mPhysicsResource == 0);
 	mPhysicsResource = new UserPhysicsResource();
 	const str lAssetName = pPhysicsName+_T(".phys");	// TODO: move to central source file.
-	mPhysicsResource->LoadUnique(GetResourceManager(), lAssetName,
-		UserPhysicsResource::TypeLoadCallback(this, &CppContextObject::OnLoadPhysics));
+	if (mPhysicsOverride == PHYSICS_OVERRIDE_BONES)
+	{
+		// If we're only in it for the bones, we can manage without a unique physics object.
+		mPhysicsResource->Load(GetResourceManager(), lAssetName,
+			UserPhysicsResource::TypeLoadCallback(this, &CppContextObject::OnLoadPhysics));
+	}
+	else
+	{
+		mPhysicsResource->LoadUnique(GetResourceManager(), lAssetName,
+			UserPhysicsResource::TypeLoadCallback(this, &CppContextObject::OnLoadPhysics));
+	}
 }
 
 bool CppContextObject::TryComplete()
 {
-	if (!mPhysicsResource)
+	if (!mPhysicsResource || IsLoaded())
 	{
 		return (false);
 	}
 
 	if (mPhysicsResource->GetLoadState() == RESOURCE_LOAD_COMPLETE)
 	{
-		if (GetPhysics() && GetManager())
+		if (GetPhysics() && GetPhysics()->GetEngineCount() > 0 && GetManager())
 		{
-			GetManager()->EnableTickCallback(this);	// TODO: clear out this mess. How to use these two callback types?
+			GetManager()->EnableMicroTickCallback(this);	// Used for engine force applications each micro frame.
 		}
 		SetLoadResult(true);
 		return (true);
@@ -131,11 +204,40 @@ const TBC::ChunkyClass* CppContextObject::GetClass() const
 
 
 
-void CppContextObject::OnTick(float pFrameTime)
+void CppContextObject::OnMicroTick(float pFrameTime)
 {
 	if (mPhysics && GetManager())
 	{
-		mPhysics->OnTick(GetManager()->GetGameManager()->GetPhysicsManager(), pFrameTime);
+		const bool lIsChild = IsAttributeTrue(_T("float_is_child"));
+		int lAccIndex = GetPhysics()->GetEngineIndexFromControllerIndex(GetPhysics()->GetEngineCount()-1, -1, 0);
+		const int lTurnIndex = GetPhysics()->GetEngineIndexFromControllerIndex(0, 1, 1);
+		if (lIsChild && lAccIndex >= 0 && lTurnIndex >= 0)
+		{
+			// Children have the possibility of just pressing left/right which will cause a forward
+			// motion in the currently used vehicle.
+			TBC::PhysicsEngine* lAcc = GetPhysics()->GetEngine(lAccIndex);
+			const TBC::PhysicsEngine* lTurn = GetPhysics()->GetEngine(lTurnIndex);
+			const float lPowerFwdRev = lAcc->GetValue();
+			const float lPowerLR = lTurn->GetValue();
+			float lAutoTurnAccValue = 0;
+			if (Math::IsEpsEqual(lPowerFwdRev, 0.0f, 0.05f) && !Math::IsEpsEqual(lPowerLR, 0.0f, 0.05f))
+			{
+				const float lIntensity = lAcc->GetIntensity();
+				lAutoTurnAccValue = Math::Clamp(10.0f*(0.2f-lIntensity), 0.0f, 1.0f);
+			}
+			// Throttle up all relevant acc engines.
+			for (;;)
+			{
+				lAcc->ForceSetValue(TBC::PhysicsEngine::ASPECT_LOCAL_PRIMARY, lAutoTurnAccValue);
+				lAccIndex = GetPhysics()->GetEngineIndexFromControllerIndex(lAccIndex-1, -1, 0);
+				if (lAccIndex < 0)
+				{
+					break;
+				}
+				lAcc = GetPhysics()->GetEngine(lAccIndex);
+			}
+		}
+		mPhysics->OnMicroTick(GetManager()->GetGameManager()->GetPhysicsManager(), pFrameTime);
 	}
 }
 
@@ -163,7 +265,7 @@ void CppContextObject::OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, TBC:
 	/*
 	TODO: put this back when attaching objects to each other is working.
 	ContextObject* lObject2 = (ContextObject*)mManager->GetGameManager()->GetPhysicsManager()->GetForceFeedbackListener(pBody2);
-	if (mManager->GetGameManager()->IsConnectAuthorized() && lObject2)
+	if (mManager->GetGameManager()->IsServer() && lObject2)
 	{
 		AttachToObject(pBody1, lObject2, pBody2);
 	}*/
@@ -198,7 +300,7 @@ void CppContextObject::OnLoadClass(UserClassResource* pClassResource)
 	if (pClassResource->GetLoadState() != Cure::RESOURCE_LOAD_COMPLETE)
 	{
 		mLog.Errorf(_T("Could not load class '%s'."), pClassResource->GetName().c_str());
-		assert(false);
+		GetManager()->PostKillObject(GetInstanceId());
 		return;
 	}
 	else
@@ -212,7 +314,7 @@ void CppContextObject::OnLoadPhysics(UserPhysicsResource* pPhysicsResource)
 	if (pPhysicsResource->GetLoadState() != RESOURCE_LOAD_COMPLETE)
 	{
 		mLog.Errorf(_T("Could not load physics class '%s'."), pPhysicsResource->GetName().c_str());
-		assert(false);
+		GetManager()->PostKillObject(GetInstanceId());
 		return;
 	}
 

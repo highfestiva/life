@@ -126,6 +126,8 @@ SoundManager::SoundID SoundManagerOpenAL::LoadSound3D(const str& pFileName, Loop
 
 SoundManager::SoundID SoundManagerOpenAL::LoadSound3D(const str& pFileName, const void* pData, size_t pDataSize, LoopMode pLoopMode, int pPriority)
 {
+	ScopeLock lLock(&mLock);
+
 	(void)pFileName;
 
 	Sample* lSample = new Sample(pLoopMode != LOOP_NONE, pPriority);
@@ -162,6 +164,7 @@ SoundManager::SoundID SoundManagerOpenAL::LoadStream(const str& pFileName, LoopM
 
 void SoundManagerOpenAL::Release(SoundID pSoundID)
 {
+	ScopeLock lLock(&mLock);
 	Sample* lSample = GetSample(pSoundID);
 	if (!lSample)
 	{
@@ -174,6 +177,7 @@ void SoundManagerOpenAL::Release(SoundID pSoundID)
 
 double SoundManagerOpenAL::GetStreamTime(SoundID pSoundID)
 {
+	ScopeLock lLock(&mLock);
 	Sample* lSample = GetSample(pSoundID);
 	if (!lSample)
 	{
@@ -192,6 +196,7 @@ double SoundManagerOpenAL::GetStreamTime(SoundID pSoundID)
 
 SoundManager::SoundInstanceID SoundManagerOpenAL::CreateSoundInstance(SoundID pSoundID)
 {
+	ScopeLock lLock(&mLock);
 	Sample* lSample = GetSample(pSoundID);
 	if (!lSample)
 	{
@@ -214,6 +219,7 @@ SoundManager::SoundInstanceID SoundManagerOpenAL::CreateSoundInstance(SoundID pS
 
 void SoundManagerOpenAL::DeleteSoundInstance(SoundInstanceID pSoundIID)
 {
+	ScopeLock lLock(&mLock);
 	Source* lSource = GetSource(pSoundIID);
 	if (!lSource)
 	{
@@ -226,6 +232,7 @@ void SoundManagerOpenAL::DeleteSoundInstance(SoundInstanceID pSoundIID)
 
 bool SoundManagerOpenAL::Play(SoundInstanceID pSoundIID, float pVolume, float pPitch)
 {
+	ScopeLock lLock(&mLock);
 	Source* lSource = GetSource(pSoundIID);
 	if (!lSource)
 	{
@@ -240,6 +247,7 @@ bool SoundManagerOpenAL::Play(SoundInstanceID pSoundIID, float pVolume, float pP
 
 void SoundManagerOpenAL::StopAll()
 {
+	ScopeLock lLock(&mLock);
 	SourceSet::iterator x = mSourceSet.begin();
 	for (; x != mSourceSet.end(); ++x)
 	{
@@ -249,6 +257,7 @@ void SoundManagerOpenAL::StopAll()
 
 void SoundManagerOpenAL::Stop(SoundInstanceID pSoundIID)
 {
+	ScopeLock lLock(&mLock);
 	Source* lSource = GetSource(pSoundIID);
 	if (!lSource)
 	{
@@ -259,6 +268,7 @@ void SoundManagerOpenAL::Stop(SoundInstanceID pSoundIID)
 
 void SoundManagerOpenAL::TogglePause(SoundInstanceID pSoundIID)
 {
+	ScopeLock lLock(&mLock);
 	Source* lSource = GetSource(pSoundIID);
 	if (!lSource)
 	{
@@ -278,6 +288,7 @@ void SoundManagerOpenAL::TogglePause(SoundInstanceID pSoundIID)
 
 bool SoundManagerOpenAL::IsPlaying(SoundInstanceID pSoundIID)
 {
+	ScopeLock lLock(&mLock);
 	Source* lSource = GetSource(pSoundIID);
 	if (!lSource)
 	{
@@ -295,6 +306,7 @@ bool SoundManagerOpenAL::IsPaused(SoundInstanceID pSoundIID)
 
 void SoundManagerOpenAL::SetPan(SoundInstanceID pSoundIID, float)
 {
+	ScopeLock lLock(&mLock);
 	Source* lSource = GetSource(pSoundIID);
 	if (!lSource)
 	{
@@ -305,6 +317,7 @@ void SoundManagerOpenAL::SetPan(SoundInstanceID pSoundIID, float)
 
 void SoundManagerOpenAL::SetVolume(SoundInstanceID pSoundIID, float pVolume)
 {
+	ScopeLock lLock(&mLock);
 	Source* lSource = GetSource(pSoundIID);
 	if (!lSource)
 	{
@@ -315,6 +328,7 @@ void SoundManagerOpenAL::SetVolume(SoundInstanceID pSoundIID, float pVolume)
 
 void SoundManagerOpenAL::SetPitch(SoundInstanceID pSoundIID, float pPitch)
 {
+	ScopeLock lLock(&mLock);
 	Source* lSource = GetSource(pSoundIID);
 	if (!lSource)
 	{
@@ -339,6 +353,7 @@ void SoundManagerOpenAL::SetDopplerFactor(float pFactor)
 
 void SoundManagerOpenAL::SetRollOffFactor(float pFactor)
 {
+	ScopeLock lLock(&mLock);
 	mRollOffFactor = pFactor;
 	SourceSet::iterator x = mSourceSet.begin();
 	for (; x != mSourceSet.end(); ++x)
@@ -371,6 +386,7 @@ void SoundManagerOpenAL::SetParamEQ(SoundInstanceID, int, float, float, float)
 
 void SoundManagerOpenAL::DoSetSoundPosition(SoundInstanceID pSoundIID, const Vector3DF& pPos, const Vector3DF& pVel)
 {
+	ScopeLock lLock(&mLock);
 	Source* lSource = GetSource(pSoundIID);
 	if (!lSource)
 	{
@@ -406,6 +422,7 @@ SoundManagerOpenAL::Sample* SoundManagerOpenAL::GetSample(SoundID pSoundID) cons
 
 SoundManagerOpenAL::Source* SoundManagerOpenAL::GetSource(SoundInstanceID pSoundInstanceID) const
 {
+	ScopeLock lLock(&mLock);
 	Source* lSource = (Source*)pSoundInstanceID;
 	SourceSet::const_iterator x = mSourceSet.find(lSource);
 	if (x == mSourceSet.end())
@@ -472,11 +489,16 @@ SoundManagerOpenAL::Source::~Source()
 
 bool SoundManagerOpenAL::Source::SetSample(Sample* pSample, float pRollOffFactor)
 {
+	::alGenSources(1, &mSid);
+	if (mSid == (ALuint)-1)
+	{
+		return false;
+	}
+
 	assert(mSample == 0);
 	mSample = pSample;
 	mSample->mSourceList.insert(this);
 
-	::alGenSources(1, &mSid);
 	::alSourcei(mSid, AL_LOOPING, mSample->mIsLooping? 1 : 0);
 	if (mSample->mIsAmbient)
 	{
@@ -490,7 +512,7 @@ bool SoundManagerOpenAL::Source::SetSample(Sample* pSample, float pRollOffFactor
 		::alSourcef(mSid, AL_ROLLOFF_FACTOR, pRollOffFactor);
 	}
 	::alSourcei(mSid, AL_BUFFER, mSample->mBuffer);
-	return (mSid != (ALuint)-1);
+	return true;
 }
 
 

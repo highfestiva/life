@@ -148,6 +148,16 @@ str Path::JoinPath(const str& pDirectory, const str& pFileBase, const str& pExte
 	return (lFullFilename);
 }
 
+str Path::GetParentDirectory(const str& pDirectory)
+{
+	strutil::strvec lNodes = SplitNodes(pDirectory, false, true);
+	if (lNodes.size() >= 1)
+	{
+		lNodes[lNodes.size()-1].clear();
+	}
+	return strutil::Join(lNodes, _T("/"));
+}
+
 bool Path::NormalizePath(const str& pInputPath, str& pOutputPath)
 {
 	strutil::strvec lDirectoryArray = Path::SplitNodes(pInputPath, false, false);

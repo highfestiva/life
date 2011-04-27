@@ -43,7 +43,7 @@
 				ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #if !defined  (kBuildingLibrary)
-	#define kVerboseErrors
+//#define kVerboseErrors high_festiva was here!
 
 // system includes ----------------------------------------------------------
 

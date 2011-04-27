@@ -7,15 +7,6 @@
 #pragma once
 
 #define RTVAR_DEBUG_ENABLE		"Debug.Enable"
-#define RTVAR_DEBUG_3D_ENABLEAXES	"Debug.3D.EnableAxes"
-#define RTVAR_DEBUG_3D_ENABLEJOINTS	"Debug.3D.EnableJoints"
-#define RTVAR_DEBUG_3D_ENABLESHAPES	"Debug.3D.EnableShapes"
-#define RTVAR_DEBUG_NET_SENDPOSCNT	"Debug.Net.SendPositionCount"		// Internal.
-#define RTVAR_DEBUG_NET_RECVPOSCNT	"Debug.Net.ReceivePositionCount"	// Internal.
-#define RTVAR_DEBUG_PERFORMANCE_YOFFSET	"Debug.Performance.YOffset"
-#define RTVAR_DEBUG_PERFORMANCE_GRAPH	"Debug.Performance.Graph"
-#define RTVAR_DEBUG_PERFORMANCE_NAMES	"Debug.Performance.Names"
-#define RTVAR_DEBUG_PERFORMANCE_COUNT	"Debug.Performance.Count"
 #define RTVAR_DEBUG_EXTRASLEEPTIME	"Debug.ExtraSleepTime"
 
 #define RTVAR_NETWORK_ENABLEOPENSERVER	"Network.EnableOpenServer"

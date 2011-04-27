@@ -293,7 +293,12 @@ V3D_TEMPLATE void V3D_QUAL::Div(_TVarType pScalar)
 
 V3D_TEMPLATE _TVarType V3D_QUAL::Dot(const Vector3D<_TVarType>& pV) const
 {
-	return (x * pV.x + y * pV.y + z * pV.z);
+	return Dot(pV.x, pV.y, pV.z);
+}
+
+V3D_TEMPLATE _TVarType V3D_QUAL::Dot(_TVarType pX, _TVarType pY, _TVarType pZ) const
+{
+	return x*pX + y*pY + z*pZ;
 }
 
 V3D_TEMPLATE _TVarType V3D_QUAL::GetLength() const
@@ -322,6 +327,11 @@ V3D_TEMPLATE _TVarType V3D_QUAL::GetDistanceSquared(const Vector3D<_TVarType>& p
 	_TVarType lDz = pV.z - z;
 
 	return (lDx * lDx + lDy * lDy + lDz * lDz);
+}
+
+V3D_TEMPLATE _TVarType V3D_QUAL::GetAngle(const Vector3D<_TVarType>& pV) const
+{
+	return Math::Acos(Dot(pV) / GetLength() / pV.GetLength());
 }
 
 V3D_TEMPLATE _TVarType V3D_QUAL::GetPolarCoordAngleZ() const

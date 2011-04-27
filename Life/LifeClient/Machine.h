@@ -27,7 +27,7 @@ public:
 	virtual ~Machine();
 
 protected:
-	void OnPhysicsTick();
+	void OnTick();
 
 private:
 	void OnForceApplied(TBC::PhysicsManager::ForceFeedbackListener* pOtherObject,
@@ -38,8 +38,10 @@ private:
 	void LoadPlaySound3d(UiCure::UserSound3dResource* pSoundResource);
 
 	typedef std::hash_map<const UiTbc::ChunkyClass::Tag*, UiCure::UserSound3dResource*, LEPRA_VOIDP_HASHER> TagSoundTable;
+	typedef std::vector<float> TagSoundIntensityArray;
 
 	TagSoundTable mEngineSoundTable;
+	TagSoundIntensityArray mEngineSoundIntensity;
 	HiResTimer mParticleTimer;
 	float mExhaustTimeout;
 	bool mCreatedParticles;

@@ -7,12 +7,14 @@
 #include "GameServerManager.h"
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/CppContextObject.h"
+#include "../../Cure/Include/ContextObjectAttribute.h"
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../../Cure/Include/TimeManager.h"
 #include "../../Lepra/Include/Network.h"
 #include "../../Lepra/Include/Path.h"
 #include "../../Lepra/Include/SystemManager.h"
 #include "../../TBC/Include/ChunkyPhysics.h"
+#include "../../TBC/Include/PhysicsEngine.h"
 #include "../LifeMaster/MasterServer.h"
 #include "../LifeApplication.h"
 #include "../LifeString.h"
@@ -31,18 +33,21 @@ namespace Life
 
 
 
+const float NETWORK_POSITIONAL_RESEND_INTERVAL = 0.6f;
 const int NETWORK_POSITIONAL_AHEAD_BUFFER_SIZE = PHYSICS_FPS/2;
 
 
 
-GameServerManager::GameServerManager(Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager):
-	Cure::GameManager(pVariableScope, pResourceManager),
+GameServerManager::GameServerManager(const Cure::TimeManager* pTime,
+	Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager):
+	Cure::GameManager(pTime, pVariableScope, pResourceManager),
 	mUserAccountManager(new Cure::MemoryUserAccountManager()),
 	mTerrainObject(0),
 	mMovementArrayList(NETWORK_POSITIONAL_AHEAD_BUFFER_SIZE),
 	mMasterConnection(0)
 {
 	CURE_RTVAR_SET_IF_NOT_SET(Cure::GetSettings(), RTVAR_APPLICATION_AUTOEXITONEMPTYSERVER, false);
+	CURE_RTVAR_SET_IF_NOT_SET(Cure::GetSettings(), RTVAR_GAME_AUTOFLIPENABLED, true);
 	CURE_RTVAR_SET_IF_NOT_SET(Cure::GetSettings(), RTVAR_GAME_SPAWNPART, 1.0);
 	CURE_RTVAR_SET_IF_NOT_SET(Cure::GetSettings(), RTVAR_NETWORK_SERVERNAME, strutil::Format(_("%s's server"), SystemManager::GetLoginName().c_str()));
 	CURE_RTVAR_SET_IF_NOT_SET(Cure::GetSettings(), RTVAR_NETWORK_LOGINGREETING, _("echo 4 \"Welcome to my server! Enjoy the ride!\""));
@@ -87,11 +92,34 @@ GameServerManager::~GameServerManager()
 
 
 
+bool GameServerManager::BeginTick()
+{
+	AccountClientTable::Iterator x = mAccountClientTable.First();
+	for (; x != mAccountClientTable.End(); ++x)
+	{
+		const Client* lClient = x.GetObject();
+		Cure::CppContextObject* lObject = (Cure::CppContextObject*)GetContext()->GetObject(lClient->GetAvatarId());
+		if (!lObject)
+		{
+			continue;
+		}
+		if (lObject->IsAttributeTrue(_T("float_is_child")) ||
+			lObject->GetGuideMode() == TBC::ChunkyPhysics::GUIDE_ALWAYS)
+		{
+			lObject->StabilizeTick();
+		}
+	}
+
+	return Parent::BeginTick();
+}
+
+
+
 void GameServerManager::StartConsole(InteractiveConsoleLogListener* pConsoleLogger, ConsolePrompt* pConsolePrompt)
 {
 	if (!GetConsoleManager())
 	{
-		SetConsoleManager(new ServerConsoleManager(this, GetVariableScope(), pConsoleLogger, pConsolePrompt));
+		SetConsoleManager(new ServerConsoleManager(GetResourceManager(), this, GetVariableScope(), pConsoleLogger, pConsolePrompt));
 	}
 	GetConsoleManager()->PushYieldCommand(_T("execute-file -i ") + Application::GetIoFile(_T("ServerApplication"), _T("lsh")));
 	GetConsoleManager()->Start();
@@ -278,6 +306,44 @@ int GameServerManager::GetLoggedInClientCount() const
 
 
 
+void GameServerManager::Build(const str& pWhat)
+{
+	assert(!GetNetworkAgent()->GetLock()->IsOwner());
+	ScopeLock lTickLock(GetTickLock());
+	ScopeLock lNetLock(GetNetworkAgent()->GetLock());
+
+	for (int x = 0; x < 400 && !IsThreadSafe(); ++x)
+	{
+		if (x > 3) lNetLock.Release();
+		if (x > 7) lTickLock.Release();
+		Thread::Sleep(0.005);
+		if (x > 7) lTickLock.Acquire();
+		if (x > 3) lNetLock.Acquire();
+	}
+	if (!IsThreadSafe())
+	{
+		mLog.AError("Could never reach a thread-safe slice. Aborting construction.");
+		return;
+	}
+
+	AccountClientTable::Iterator x = mAccountClientTable.First();
+	for (; x != mAccountClientTable.End(); ++x)
+	{
+		const Client* lClient = x.GetObject();
+		Cure::ContextObject* lObject = GetContext()->GetObject(lClient->GetAvatarId());
+		if (lObject)
+		{
+			Vector3DF lPosition = lObject->GetPosition() + Vector3DF(10, 0, 0);
+			mLog.Info(_T("Building object '")+pWhat+_T("' near user ")+strutil::Encode(lClient->GetUserConnection()->GetLoginName())+_T("."));
+			Cure::ContextObject* lObject = Parent::CreateContextObject(pWhat, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
+			lObject->SetInitialTransform(TransformationF(QuaternionF(), lPosition));
+			lObject->StartLoading();
+		}
+	}
+}
+
+
+
 void GameServerManager::TickInput()
 {
 	TickMasterServer();
@@ -380,7 +446,8 @@ Client* GameServerManager::GetClientByAccount(Cure::UserAccount::AccountId pAcco
 bool GameServerManager::InitializeTerrain()
 {
 	assert(mTerrainObject == 0);
-	mTerrainObject = Parent::CreateContextObject(_T("level_01"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
+	mTerrainObject = new Cure::CppContextObject(GetResourceManager(), _T("level_01"));
+	AddContextObject(mTerrainObject, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
 	mTerrainObject->StartLoading();
 	return (true);
 }
@@ -444,7 +511,7 @@ void GameServerManager::ProcessNetworkInputMessage(Client* pClient, Cure::Messag
 			}
 			else
 			{
-				mLog.Warningf(_T("Client %s tried to control instance ID %i."),
+				mLog.Warningf(_T("Client %s tried to control instance ID %i, but was not in possession."),
 					strutil::Encode(pClient->GetUserConnection()->GetLoginName()).c_str(),
 					lInstanceId);
 			}
@@ -486,15 +553,18 @@ void GameServerManager::ProcessNetworkInputMessage(Client* pClient, Cure::Messag
 				Cure::ContextObject* lObject = GetContext()->GetObject(lInstanceId);
 				if (lObject)
 				{
-					if (lObject->GetNetworkObjectType() == Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED)
+					if (lObject->GetOwnerInstanceId() == pClient->GetAvatarId() ||	// Reloan?
+						lObject->GetNetworkObjectType() == Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED)
 					{
-						const float lOwnershipTime = 10.0f;
-						int lEndFrame = GetTimeManager()->GetCurrentPhysicsFrameAddSeconds(lOwnershipTime);
+						const float lClientOwnershipTime = 10.0f;
+						const float lServerOwnershipTime = lClientOwnershipTime * 1.3f;
+						int lEndFrame = GetTimeManager()->GetCurrentPhysicsFrameAddSeconds(lClientOwnershipTime);
 						lObject->SetNetworkObjectType(Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
 						GetNetworkAgent()->SendNumberMessage(true, pClient->GetUserConnection()->GetSocket(),
 							Cure::MessageNumber::INFO_GRANT_LOAN, lInstanceId, (float)lEndFrame);
 						lObject->SetOwnerInstanceId(pClient->GetAvatarId());
-						GetContext()->AddAlarmCallback(lObject, Cure::ContextManager::SYSTEM_ALARM_ID, lOwnershipTime, 0);
+						GetContext()->CancelPendingAlarmCallbacksById(lObject, Cure::ContextManager::SYSTEM_ALARM_ID);
+						GetContext()->AddAlarmCallback(lObject, Cure::ContextManager::SYSTEM_ALARM_ID, lServerOwnershipTime, 0);
 					}
 				}
 				else
@@ -507,6 +577,15 @@ void GameServerManager::ProcessNetworkInputMessage(Client* pClient, Cure::Messag
 			{
 				mLog.AError("Received an invalid MessageNumber from client.");
 			}
+		}
+		break;
+		case Cure::MESSAGE_TYPE_OBJECT_ATTRIBUTE:
+		{
+			Cure::MessageObjectAttribute* lMessageAttrib = (Cure::MessageObjectAttribute*)pMessage;
+			Cure::GameObjectId lObjectId = lMessageAttrib->GetObjectId();
+			unsigned lByteSize = 0;
+			const uint8* lBuffer = lMessageAttrib->GetReadBuffer(lByteSize);
+			GetContext()->UnpackObjectAttribute(lObjectId, lBuffer, lByteSize);
 		}
 		break;
 		default:
@@ -650,7 +729,7 @@ void GameServerManager::StoreMovement(int pClientFrameIndex, Cure::MessageObject
 	else
 	{
 		// This input data is already old or too much ahead! Skip it.
-		mLog.Warningf(_T("Skipping store of movement (%i frames ahead)."), lFrameOffset);
+		log_volatile(mLog.Debugf(_T("Skipping store of movement (%i frames ahead)."), lFrameOffset));
 	}
 }
 
@@ -795,8 +874,7 @@ void GameServerManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 		{
 			mLog.Errorf(_T("Could not load object of type %s."), pObject->GetClassId().c_str());
 		}
-		assert(false);
-		delete (pObject);
+		GetContext()->PostKillObject(pObject->GetInstanceId());
 	}
 }
 
@@ -813,12 +891,22 @@ void GameServerManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pT
 	const bool lBothAreDynamic = (lObject1Dynamic && lObject2Dynamic);
 	if (!lBothAreDynamic)
 	{
+		if (lObject1Dynamic && pObject1->GetPhysics()->GetGuideMode() >= TBC::ChunkyPhysics::GUIDE_EXTERNAL)
+		{
+			FlipCheck(pObject1);
+		}
 		return;
 	}
 
 	if (pObject1 != pObject2 &&	// I.e. car where a wheel collides with the body.
 		pObject1->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY)	// We only handle network object collisions.
 	{
+		if (pObject1->GetOwnerInstanceId() == pObject2->GetInstanceId() ||
+			pObject2->GetOwnerInstanceId() == pObject1->GetInstanceId())
+		{
+			return;	// The client knows best what collisions have happened.
+		}
+
 		bool lSendCollision = false;
 		const bool lAreBothControlled = (pObject2 != 0 && pObject2->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY);
 		const bool lIsServerControlled = (pObject1->GetNetworkObjectType() == Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
@@ -850,10 +938,65 @@ void GameServerManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pT
 	}
 }
 
+void GameServerManager::FlipCheck(Cure::ContextObject* pObject) const
+{
+	bool lAutoFlipEnabled;
+	CURE_RTVAR_GET(lAutoFlipEnabled, =, GetVariableScope(), RTVAR_GAME_AUTOFLIPENABLED, true);
+	if (!lAutoFlipEnabled)
+	{
+		return;
+	}
+
+	// No use in repositioning the poor sod, unless we're ready to send it.
+	if (!pObject->QueryResendTime(NETWORK_POSITIONAL_RESEND_INTERVAL, true))
+	{
+		return;
+	}
+
+	// Check if we've landed on our side.
+	Vector3DF lUp(0, 0, 1);
+	lUp = pObject->GetOrientation() * lUp;
+	if (lUp.z > 0.2f ||
+		pObject->GetVelocity().GetLengthSquared() > 1*1 ||
+		pObject->GetAngularVelocity().GetLengthSquared() > 1*1)
+	{
+		// Nope, still standing, or at least moving. Might be drunken style,
+		// but at least not on it's head yet.
+		return;
+	}
+	// A grown-up still activating an engine = leave 'em be.
+	if (!pObject->IsAttributeTrue(_T("float_is_child")))
+	{
+		const int lEngineCount = pObject->GetPhysics()->GetEngineCount();
+		for (int x = 0; x < lEngineCount; ++x)
+		{
+			if (::fabs(pObject->GetPhysics()->GetEngine(x)->GetValue()) > 0.4f)
+			{
+				return;
+			}
+		}
+	}
+
+	// Yup, reset vehicle in the direction it was heading.
+	const Cure::ObjectPositionalData* lOriginalPositionData;
+	pObject->UpdateFullPosition(lOriginalPositionData);
+	Cure::ObjectPositionalData lPositionData;
+	lPositionData.CopyData(lOriginalPositionData);
+	lPositionData.Stop();
+	TransformationF& lTransform = lPositionData.mPosition.mTransformation;
+	lTransform.SetPosition(pObject->GetPosition() + Vector3DF(0, 0, 5));
+	Vector3DF lEulerAngles;
+	pObject->GetOrientation().GetEulerAngles(lEulerAngles);
+	lTransform.GetOrientation().SetEulerAngles(lEulerAngles.x, 0, 0);
+	lTransform.GetOrientation() *= pObject->GetPhysics()->GetOriginalBoneTransformation(0).GetOrientation();
+	pObject->SetFullPosition(lPositionData);
+	GetContext()->AddPhysicsSenderObject(pObject);
+}
+
 bool GameServerManager::OnPhysicsSend(Cure::ContextObject* pObject)
 {
 	bool lLastSend = false;
-	if (pObject->QueryResendTime(0.6f, false))
+	if (pObject->QueryResendTime(NETWORK_POSITIONAL_RESEND_INTERVAL, false))
 	{
 		lLastSend = true;
 		log_volatile(mLog.Debugf(_T("Sending pos for %s."), pObject->GetClassId().c_str()));
@@ -868,7 +1011,63 @@ bool GameServerManager::OnPhysicsSend(Cure::ContextObject* pObject)
 	return (lLastSend);
 }
 
-bool GameServerManager::IsConnectAuthorized()
+bool GameServerManager::OnAttributeSend(Cure::ContextObject* pObject)
+{
+	mLog.AInfo("Sending attribute(s) for a context object...");
+	typedef Cure::ContextObject::AttributeArray AttributeArray;
+	const AttributeArray& lAttributes = pObject->GetAttributes();
+	AttributeArray::const_iterator x = lAttributes.begin();
+	for (; x != lAttributes.end(); ++x)
+	{
+		Cure::ContextObjectAttribute* lAttribute = *x;
+		const int lSendSize = lAttribute->QuerySend();
+		if (lSendSize > 0)
+		{
+			Cure::Packet* lPacket = GetNetworkAgent()->GetPacketFactory()->Allocate();
+			Cure::MessageObjectAttribute* lAttribMessage = (Cure::MessageObjectAttribute*)GetNetworkAgent()->
+				GetPacketFactory()->GetMessageFactory()->Allocate(Cure::MESSAGE_TYPE_OBJECT_ATTRIBUTE);
+			lPacket->AddMessage(lAttribMessage);
+			lAttribute->Pack(lAttribMessage->GetWriteBuffer(lPacket, pObject->GetInstanceId(), lSendSize));
+
+			assert(!GetNetworkAgent()->GetLock()->IsOwner());
+			ScopeLock lTickLock(GetTickLock());
+			switch (lAttribute->GetNetworkType())
+			{
+				case Cure::ContextObjectAttribute::TYPE_SERVER_BROADCAST:
+				case Cure::ContextObjectAttribute::TYPE_BOTH_BROADCAST:
+				{
+					BroadcastPacket(0, lPacket, true);
+				}
+				break;
+				default:
+				{
+					Cure::UserAccount::AccountId lAccountId = (Cure::UserAccount::AccountId)(intptr_t)pObject->GetExtraData();
+					if (!lAccountId)
+					{
+						mLog.AError("Error: trying to attribute sync to avatar without avatar!");
+						break;
+					}
+					const Client* lClient = GetClientByAccount(lAccountId);
+					if (!lClient)
+					{
+						mLog.AError("Error: client seems to have logged off before attribute sync happened.");
+						break;
+					}
+					Cure::NetworkAgent::VSocket* lSocket = lClient->GetUserConnection()->GetSocket();
+					if (lSocket)
+					{
+						GetNetworkAgent()->PlaceInSendBuffer(true, lSocket, lPacket);
+					}
+				}
+				break;
+			}
+			GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
+		}
+	}
+	return true;
+}
+
+bool GameServerManager::IsServer()
 {
 	return (true);
 }
@@ -1017,29 +1216,31 @@ void GameServerManager::SendObjects(Client* pClient, bool pCreate, const Context
 	{
 		Cure::ContextObject* lObject = x->second;
 		// Don't send local objects.
-		if (lObject->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY)
+		if (lObject->GetNetworkObjectType() == Cure::NETWORK_OBJECT_LOCAL_ONLY)
 		{
-			lPacket->Clear();
-
-			if (lCreateMessage)	// Store creation info?
-			{
-				lPacket->AddMessage(lCreateMessage);
-				TransformationF lTransformation(lObject->GetOrientation(), lObject->GetPosition());
-				lCreateMessage->Store(lPacket, lObject->GetInstanceId(),
-					 lTransformation, wstrutil::Encode(lObject->GetClassId()));
-			}
-
-			const Cure::ObjectPositionalData* lPosition;
-			if (lObject->UpdateFullPosition(lPosition))
-			{
-				lPacket->AddMessage(lPositionMessage);
-				lPositionMessage->Store(lPacket, lObject->GetInstanceId(),
-					GetTimeManager()->GetCurrentPhysicsFrame(), *lPosition);
-			}
-
-			// Send.
-			GetNetworkAgent()->PlaceInSendBuffer(true, pClient->GetUserConnection()->GetSocket(), lPacket);
+			continue;
 		}
+
+		lPacket->Clear();
+
+		if (lCreateMessage)	// Store creation info?
+		{
+			lPacket->AddMessage(lCreateMessage);
+			TransformationF lTransformation(lObject->GetOrientation(), lObject->GetPosition());
+			lCreateMessage->Store(lPacket, lObject->GetInstanceId(),
+				 lTransformation, wstrutil::Encode(lObject->GetClassId()));
+		}
+
+		const Cure::ObjectPositionalData* lPosition;
+		if (lObject->UpdateFullPosition(lPosition))
+		{
+			lPacket->AddMessage(lPositionMessage);
+			lPositionMessage->Store(lPacket, lObject->GetInstanceId(),
+				GetTimeManager()->GetCurrentPhysicsFrame(), *lPosition);
+		}
+
+		// Send.
+		GetNetworkAgent()->PlaceInSendBuffer(true, pClient->GetUserConnection()->GetSocket(), lPacket);
 	}
 
 	lPacket->Clear();

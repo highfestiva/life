@@ -65,6 +65,7 @@ public:
 
 	void PreLogin(const str& pServerAddress);
 	bool IsLocalServer() const;
+	UiGameServerManager* GetLocalServer() const;
 	void OnExit();
 	void OnSetPlayerCount(int pPlayerCount);
 
@@ -75,17 +76,22 @@ public:
 
 private:
 	typedef GameClientSlaveManager* (*SlaveFactoryMethod)(GameClientMasterTicker* pMaster,
-		Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
-		UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea);
+		Cure::TimeManager* pTime, Cure::RuntimeVariableScope* pVariableScope,
+		Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager,
+		int pSlaveIndex, const PixelRect& pRenderArea);
 	static GameClientSlaveManager* CreateSlaveManager(GameClientMasterTicker* pMaster,
-		Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
-		UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea);
+		Cure::TimeManager* pTime, Cure::RuntimeVariableScope* pVariableScope,
+		Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager,
+		int pSlaveIndex, const PixelRect& pRenderArea);
 	static GameClientSlaveManager* CreateViewer(GameClientMasterTicker* pMaster,
-		Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
-		UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea);
+		Cure::TimeManager* pTime, Cure::RuntimeVariableScope* pVariableScope,
+		Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager,
+		int pSlaveIndex, const PixelRect& pRenderArea);
 	static GameClientSlaveManager* CreateDemo(GameClientMasterTicker* pMaster,
-		Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
-		UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea);
+		Cure::TimeManager* pTime, Cure::RuntimeVariableScope* pVariableScope,
+		Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager,
+		int pSlaveIndex, const PixelRect& pRenderArea);
+	Cure::ContextObjectAttribute* CreateObjectAttribute(Cure::ContextObject* pObject, const str& pAttributeName);
 	bool CreateSlave(SlaveFactoryMethod pCreate);
 	void AddSlave(GameClientSlaveManager* pSlave);
 	void DeleteSlave(GameClientSlaveManager* pSlave, bool pAllowMainMenu);
@@ -136,6 +142,7 @@ private:
 	bool mIsPlayerCountViewActive;
 
 	UiGameServerManager* mServer;
+	Cure::TimeManager* mServerTimeManager;
 	MasterServerConnection* mMasterConnection;
 	Cure::NetworkFreeAgent* mFreeNetworkAgent;
 

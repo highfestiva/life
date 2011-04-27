@@ -6,6 +6,7 @@
 
 #include "../Include/ContextManager.h"
 #include <list>
+#include "../Include/ContextObjectAttribute.h"
 #include "../Include/ContextObject.h"
 #include "../Include/GameManager.h"
 #include "../Include/TimeManager.h"
@@ -38,6 +39,14 @@ GameManager* ContextManager::GetGameManager() const
 	return (mGameManager);
 }
 
+void ContextManager::SetLocalRange(unsigned pIndex, unsigned pCount)
+{
+	assert(mObjectTable.empty());
+	const GameObjectId lStartId = 0x40000000;
+	const GameObjectId lBlockSize = (0x7FFFFFFF-lStartId-pCount)/pCount;
+	const GameObjectId lOffset = lStartId + lBlockSize*pIndex;
+	mLocalObjectIdManager = ObjectIdManager(lOffset, lOffset+lBlockSize-1, 0xFFFFFFFF);
+}
 
 
 void ContextManager::SetIsObjectOwner(bool pIsObjectOwner)
@@ -65,9 +74,10 @@ void ContextManager::AddObject(ContextObject* pObject)
 void ContextManager::RemoveObject(ContextObject* pObject)
 {
 	CancelPendingAlarmCallbacks(pObject);
+	DisableMicroTickCallback(pObject);
 	DisableTickCallback(pObject);
-	DisablePhysicsUpdateCallback(pObject);
 	mPhysicsSenderObjectTable.erase(pObject->GetInstanceId());
+	mAttributeSenderObjectTable.erase(pObject->GetInstanceId());
 	mObjectTable.erase(pObject->GetInstanceId());
 }
 
@@ -77,7 +87,7 @@ bool ContextManager::DeleteObject(GameObjectId pInstanceId)
 	ContextObject* lObject = GetObject(pInstanceId, true);
 	if (lObject)
 	{
-		log_volatile(mLog.Debugf(_T("Deleting context object %i."), pInstanceId));
+		log_volatile(mLog.Tracef(_T("Deleting context object %i."), pInstanceId));
 		delete (lObject);
 		lOk = true;
 	}
@@ -116,6 +126,7 @@ const ContextManager::ContextObjectTable& ContextManager::GetObjectTable() const
 void ContextManager::ClearObjects()
 {
 	mPhysicsSenderObjectTable.clear();
+	mAttributeSenderObjectTable.clear();
 	while (mObjectTable.size() > 0)
 	{
 		ContextObject* lObject = mObjectTable.begin()->second;
@@ -149,6 +160,27 @@ void ContextManager::RemovePhysicsBody(TBC::PhysicsManager::BodyID pBodyId)
 	if (pBodyId != TBC::INVALID_BODY)
 	{
 		mBodyTable.erase(pBodyId);
+	}
+}
+
+void ContextManager::AddAttributeSenderObject(ContextObject* pObject)
+{
+	assert(pObject->GetInstanceId() != 0);
+	assert(mObjectTable.find(pObject->GetInstanceId()) != mObjectTable.end());
+	assert(pObject->GetManager() == this);
+	mAttributeSenderObjectTable.insert(ContextObjectPair(pObject->GetInstanceId(), pObject));
+}
+
+void ContextManager::UnpackObjectAttribute(GameObjectId pObjectId, const uint8* pData, unsigned pSize)
+{
+	ContextObject* lObject = GetObject(pObjectId);
+	if (lObject)
+	{
+		ContextObjectAttribute::Unpack(lObject, pData, pSize);
+	}
+	else
+	{
+		mLog.Errorf(_T("Trying to unpack attribute for non-existent object %u."), pObjectId);
 	}
 }
 
@@ -187,16 +219,6 @@ bool ContextManager::IsLocalGameObjectId(GameObjectId pInstanceId) const
 
 
 
-void ContextManager::EnablePhysicsUpdateCallback(ContextObject* pObject)
-{
-	mPhysicsUpdateCallbackObjectTable.insert(ContextObjectPair(pObject->GetInstanceId(), pObject));
-}
-
-void ContextManager::DisablePhysicsUpdateCallback(ContextObject* pObject)
-{
-	mPhysicsUpdateCallbackObjectTable.erase(pObject->GetInstanceId());
-}
-
 void ContextManager::EnableTickCallback(ContextObject* pObject)
 {
 	mTickCallbackObjectTable.insert(ContextObjectPair(pObject->GetInstanceId(), pObject));
@@ -207,10 +229,20 @@ void ContextManager::DisableTickCallback(ContextObject* pObject)
 	mTickCallbackObjectTable.erase(pObject->GetInstanceId());
 }
 
+void ContextManager::EnableMicroTickCallback(ContextObject* pObject)
+{
+	mMicroTickCallbackObjectTable.insert(ContextObjectPair(pObject->GetInstanceId(), pObject));
+}
+
+void ContextManager::DisableMicroTickCallback(ContextObject* pObject)
+{
+	mMicroTickCallbackObjectTable.erase(pObject->GetInstanceId());
+}
+
 void ContextManager::AddAlarmCallback(ContextObject* pObject, int pAlarmId, float pSeconds, void* pExtraData)
 {
 	assert(pObject->GetInstanceId() != 0);
-	const TimeManager* lTime = ((const GameManager*)mGameManager)->GetConstTimeManager();
+	const TimeManager* lTime = ((const GameManager*)mGameManager)->GetTimeManager();
 	const int lFrame = lTime->GetCurrentPhysicsFrameAddSeconds(pSeconds);
 	mAlarmCallbackObjectSet.insert(Alarm(pObject, lFrame, pAlarmId, pExtraData));
 }
@@ -251,13 +283,13 @@ void ContextManager::CancelPendingAlarmCallbacks(ContextObject* pObject)
 
 void ContextManager::Tick(float pTimeDelta)
 {
-	DispatchTickCallbacks(pTimeDelta);
+	DispatchMicroTickCallbacks(pTimeDelta);
 	DispatchAlarmCallbacks();
 }
 
 void ContextManager::TickPhysics()
 {
-	DispatchPhysicsUpdateCallbacks();
+	DispatchTickCallbacks();
 }
 
 void ContextManager::HandleIdledBodies()
@@ -295,6 +327,22 @@ void ContextManager::HandlePhysicsSend()
 	}
 }
 
+void ContextManager::HandleAttributeSend()
+{
+	ContextObjectTable::iterator x = mAttributeSenderObjectTable.begin();
+	while (x != mAttributeSenderObjectTable.end())
+	{
+		if (mGameManager->OnAttributeSend(x->second))
+		{
+			mAttributeSenderObjectTable.erase(x++);
+		}
+		else
+		{
+			++x;
+		}
+	}
+}
+
 void ContextManager::HandlePostKill()
 {
 	IdSet::iterator x = mPostKillSet.begin();
@@ -307,22 +355,22 @@ void ContextManager::HandlePostKill()
 
 
 
-void ContextManager::DispatchPhysicsUpdateCallbacks()
-{
-	ContextObjectTable::iterator x = mPhysicsUpdateCallbackObjectTable.begin();
-	for (; x != mPhysicsUpdateCallbackObjectTable.end(); ++x)
-	{
-		ContextObject* lObject = x->second;
-		lObject->OnPhysicsTick();
-	}
-}
-
-void ContextManager::DispatchTickCallbacks(float pTimeDelta)
+void ContextManager::DispatchTickCallbacks()
 {
 	ContextObjectTable::iterator x = mTickCallbackObjectTable.begin();
 	for (; x != mTickCallbackObjectTable.end(); ++x)
 	{
-		x->second->OnTick(pTimeDelta);
+		ContextObject* lObject = x->second;
+		lObject->OnTick();
+	}
+}
+
+void ContextManager::DispatchMicroTickCallbacks(float pTimeDelta)
+{
+	ContextObjectTable::iterator x = mMicroTickCallbackObjectTable.begin();
+	for (; x != mMicroTickCallbackObjectTable.end(); ++x)
+	{
+		x->second->OnMicroTick(pTimeDelta);
 	}
 }
 
@@ -336,7 +384,7 @@ void ContextManager::DispatchAlarmCallbacks()
 	AlarmSet::iterator x = mAlarmCallbackObjectSet.begin();
 	while (x != mAlarmCallbackObjectSet.end())
 	{
-		if (mGameManager->GetConstTimeManager()->GetCurrentPhysicsFrameDelta(x->mFrameTime) >= 0)
+		if (mGameManager->GetTimeManager()->GetCurrentPhysicsFrameDelta(x->mFrameTime) >= 0)
 		{
 			lCallbackList.push_back(*x);
 			mAlarmCallbackObjectSet.erase(x++);

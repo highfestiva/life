@@ -1,4 +1,6 @@
-﻿# License: LGPL 2.1 (utilizes Python Computer Graphics Kit (cgkit), see other .py files for more info).
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# License: LGPL 2.1 (utilizes Python Computer Graphics Kit (cgkit), see other .py files for more info).
 # Created by Jonas Byström, 2009-07-17 for Righteous Engine tool chain.
 
 
@@ -58,7 +60,7 @@ class GroupReader(DefaultMAReader):
                                      "objectSet", "tweak", "imagePlane", "place2dTexture", \
                                      "polyBridgeEdge", "polySeparate", "polyChipOff", \
                                      "deleteUVSet", "polyAutoProj", "plusMinusAverage", \
-                                     "transformGeometry"]
+                                     "transformGeometry", "cameraView"]
                 self.silent_types = ["polyExtrudeFace", "polyTweak", "polyBoolOp"]
                 self.mat_types    = ["lambert", "blinn", "phong", "shadingEngine", "layeredShader", \
                                      "file"]
@@ -169,7 +171,7 @@ class GroupReader(DefaultMAReader):
                         node.ignore = True
                 except ValueError:
                         pass
-                children = tuple(filter(lambda n: n.getParent() == node, nodes))
+                children = tuple(filter(lambda n: n.getParent() == node, nodes))        # Use conversion to avoid lazy evaluation, which will cause iterator to skip some = error.
                 for child in children:
                         self._recursiveremove(child, nodes)
 
@@ -443,16 +445,10 @@ class GroupReader(DefaultMAReader):
                                                 return 180
                                         return math.degrees(math.fabs(vec3.acos(n1*n2)))
                                 def angle_fast(n1, n2x, n2y, n2z):
-                                        n1_0 = (n1.x==0 and n1.y==0 and n1.z==0)
-                                        n2_0 = (n2x==0 and n2y==0 and n2z==0)
-                                        if n1_0 or n2_0:
-                                                if n1_0 and n2_0:
-                                                        return 0
-                                                return 180
-                                        n2x *= n1.x
-                                        n2y *= n1.y
-                                        n2z *= n1.z
-                                        return math.degrees(math.fabs(vec3.acos(n2x+n2y+n2z)))
+                                        x = n1.x*n2x + n1.y*n2y + n1.z*n2z
+                                        if x < 0.65:    # Ugly, hard-coded optimization.
+                                                return 0.7
+                                        return vec3.acos(x)
                                 def uvdiff_sqr(t1, t2):
                                         dx = t1[0]-t2[0]
                                         dy = t1[1]-t2[1]
@@ -484,6 +480,7 @@ class GroupReader(DefaultMAReader):
                                         x += 3
 
                                 x = 0
+                                ang_cmp = 40*math.pi/180
                                 while x < end:
                                         c = normal(shared_indices[ts[x]][0])
                                         d = textureuv(shared_indices[ts[x]][0])
@@ -491,7 +488,7 @@ class GroupReader(DefaultMAReader):
                                         for s in shared_indices[ts[x]][1:]:
                                                 #if angle(c, normal(s)) > 40 or uvdiff_sqr(d, textureuv(s)) > 0.0001:
                                                 i = s*3
-                                                if angle_fast(c, ns[i],ns[i+1],ns[i+2]) > 40 or uvdiff_sqr(d, textureuv(s)) > 0.0001:
+                                                if angle_fast(c, ns[i],ns[i+1],ns[i+2]) > ang_cmp or uvdiff_sqr(d, textureuv(s)) > 0.0001:
                                                         split += [s]
                                         # Push all the once that we don't join together at the end.
                                         if split:
@@ -768,6 +765,8 @@ class GroupReader(DefaultMAReader):
                         if node.getName().startswith("m_") and node.nodetype == "transform":
                                 node.mesh_children = list(filter(lambda x: x.nodetype == "transform", self._listchildnodes(node, "m_", group, False)))
                                 node.phys_children = self._listchildnodes(node, "phys_", group, False)
+                                if options.options.verbose:
+                                        print("Phys children are", node.phys_children)
                 return isGroupValid
 
                                 
@@ -916,7 +915,7 @@ class GroupReader(DefaultMAReader):
 
                         elif section.startswith("spawner:"):
                                 spawnertype = stripQuotes(config.get(section, "type"))
-                                spawnerOk = spawnertype in ["immediate", "teleport"]
+                                spawnerOk = spawnertype in ["teleport", "creator"]
                                 allApplied &= spawnerOk
                                 if not spawnerOk:
                                         print("Error: invalid spawner type '%s'." % spawnertype)
@@ -941,7 +940,7 @@ class GroupReader(DefaultMAReader):
                                             ("function", lambda x: type(x) == str),
                                             ("connected_to", check_connected_to),
                                             ("number", lambda x: x >= -1),
-                                            ("interval", lambda x: x >= 0),
+                                            ("intervals", lambda x: type(x) == list),
                                             ("spawn_objects", check_spawn_objects)]
                                 for name, spawner_check in required:
                                         allApplied &= self._query_attribute(node, name, spawner_check)[0]
@@ -950,7 +949,7 @@ class GroupReader(DefaultMAReader):
 
                         elif section.startswith("tag:"):
                                 tagtype = stripQuotes(config.get(section, "type"))
-                                tagOk = tagtype in ["eye", "brake_light", "reverse_light", "engine_sound", "exhaust", "stunt_trigger_data", "race_trigger_data"]
+                                tagOk = tagtype in ["eye", "brake_light", "reverse_light", "engine_sound", "exhaust", "stunt_trigger_data", "race_trigger_data", "upright_stabilizer", "forward_stabilizer"]
                                 allApplied &= tagOk
                                 if not tagOk:
                                         print("Error: invalid tag type '%s'." % tagtype)
@@ -989,7 +988,8 @@ class GroupReader(DefaultMAReader):
                         if section.startswith("config:") or section.startswith("trigger:"):
                                 used_sections[section] = True
                 required = [("type", lambda x: chunkywriter.physics_type.get(x) != None)]
-                optional = [("casts_shadows", lambda x: x == None or type(x) == bool)]
+                optional = [("casts_shadows", lambda x: x == None or type(x) == bool),
+                            ("guide_mode", lambda x: x == None or x in ("never", "external", "always"))]
                 for name, config_check in required+optional:
                         ok = config_check(self.config.get(name))
                         allApplied &= ok
@@ -1493,10 +1493,12 @@ class GroupReader(DefaultMAReader):
                                 if basenode in node._parents:
                                         if not f or f(node):
                                                 childlist.append(node)
+                        childlist = sorted(childlist, key=lambda n: n.getFullName())
                         if recursive:
                                 grandchildlist = []
                                 for child in childlist:
                                         grandchildlist.extend(_list_filtered_child_nodes(child))
+                                grandchildlist = sorted(grandchildlist, key=lambda n: n.getFullName())
                                 childlist.extend(grandchildlist)
                         return childlist
                 return _list_filtered_child_nodes(basenode)

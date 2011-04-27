@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "../../Lepra/Include/Lepra.h"	// TRICKY: must be here due to a #define compile optimization.
+#include "../../TBC/Include/ChunkyPhysics.h"
 #include "ContextObject.h"
 #include "ResourceManager.h"
 
@@ -20,6 +22,9 @@ public:
 	CppContextObject(ResourceManager* pResourceManager, const str& pClassId);
 	virtual ~CppContextObject();
 
+	TBC::ChunkyPhysics::GuideMode GetGuideMode() const;
+	void StabilizeTick();
+
 	void SetAllowNetworkLogic(bool pAllow);
 
 	const TBC::ChunkyClass::Tag* FindTag(const str& pTagType, int pFloatValueCount, int pStringValueCount, const std::vector<int>& pTriggerIndexArray) const;
@@ -32,7 +37,7 @@ protected:
 	TBC::ChunkyPhysics* GetPhysics() const;
 	virtual const TBC::ChunkyClass* GetClass() const;
 
-	void OnTick(float pFrameTime);
+	void OnMicroTick(float pFrameTime);
 	void OnAlarm(int pAlarmId, void* pExtraData);
 	virtual void OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, TBC::PhysicsManager::ForceFeedbackListener* pBody);
 	void OnForceApplied(TBC::PhysicsManager::ForceFeedbackListener* pOtherObject,

@@ -7,6 +7,7 @@
 #include "Elevator.h"
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/GameManager.h"
+#include "../../Cure/Include/TimeManager.h"
 #include "../../Lepra/Include/HashUtil.h"
 #include "../../TBC/Include/PhysicsEngine.h"
 #include "../../TBC/Include/PhysicsTrigger.h"
@@ -38,9 +39,9 @@ Elevator::~Elevator()
 
 
 
-void Elevator::OnTick(float pFrameTime)
+void Elevator::OnTick()
 {
-	Parent::OnTick(pFrameTime);
+	Parent::OnTick();
 
 	const float lSpeedStillSquare = 0.1f;
 	const float lMaxSpeedSquare = GetActiveMaxSpeedSquare();
@@ -49,7 +50,8 @@ void Elevator::OnTick(float pFrameTime)
 		mElevatorHasBeenMoving = true;
 	}
 
-	mEngineActivity = Math::Lerp(mEngineActivity, lMaxSpeedSquare, Math::GetIterateLerpTime(0.4f, pFrameTime));
+	const float lFrameTime = GetManager()->GetGameManager()->GetTimeManager()->GetNormalFrameTime();
+	mEngineActivity = Math::Lerp(mEngineActivity, lMaxSpeedSquare, Math::GetIterateLerpTime(0.4f, lFrameTime));
 	if (mEngineActivity < lSpeedStillSquare)
 	{
 		if (mStopTimer.IsStarted())
@@ -201,7 +203,7 @@ void Elevator::SetFunctionTarget(const str& pFunction, TBC::PhysicsEngine* pEngi
 		lTargetValue = -pEngine->GetValue();
 		if (Math::IsEpsEqual(lTargetValue, 0.0f))
 		{
-			lTargetValue = -pEngine->GetValues()[4];	// Invert shadow if stopped.
+			lTargetValue = -pEngine->GetValues()[TBC::PhysicsEngine::ASPECT_LOCAL_SHADOW];	// Invert shadow if stopped.
 			if (Math::IsEpsEqual(lTargetValue, 0.0f))
 			{
 				lTargetValue = -1;
@@ -214,7 +216,7 @@ void Elevator::SetFunctionTarget(const str& pFunction, TBC::PhysicsEngine* pEngi
 	}
 	log_volatile(mLog.Debugf(_T("TRIGGER - activating engine for function %s."), pFunction.c_str()));
 	mElevatorIsActive = true;
-	pEngine->ForceSetValue(4, lTargetValue);	// Store shadow.
+	pEngine->ForceSetValue(TBC::PhysicsEngine::ASPECT_LOCAL_SHADOW, lTargetValue);	// Store shadow.
 	pEngine->SetValue(pEngine->GetControllerIndex(), lTargetValue, 0);
 	mParent->ForceSend();	// Transmit our updated engine values.
 }

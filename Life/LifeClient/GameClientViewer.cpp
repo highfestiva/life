@@ -24,10 +24,10 @@ namespace Life
 
 
 
-GameClientViewer::GameClientViewer(GameClientMasterTicker* pMaster, Cure::RuntimeVariableScope* pVariableScope,
-	Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager, int pSlaveIndex,
-	const PixelRect& pRenderArea):
-	Parent(pMaster, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea),
+GameClientViewer::GameClientViewer(GameClientMasterTicker* pMaster, const Cure::TimeManager* pTime,
+	Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
+	UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea):
+	Parent(pMaster, pTime, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea),
 	mServerListView(0)
 {
 	mCameraPosition = Vector3DF(-22, -5, 43.1f);
@@ -91,7 +91,7 @@ bool GameClientViewer::InitializeTerrain()
 
 	Cure::ContextObject* lVehicle = new Machine(GetResourceManager(), _T("monster_02"), mUiManager);
 	GetContext()->AddLocalObject(lVehicle);
-	lVehicle->SetInitialTransform(TransformationF(QuaternionF(), Vector3DF(-23, -80, 33)));
+	lVehicle->SetInitialTransform(TransformationF(QuaternionF(), Vector3DF(-23, -80, 53)));
 	lVehicle->StartLoading();
 	mAvatarId = lVehicle->GetInstanceId();
 	GetConsoleManager()->ExecuteCommand(_T("fork execute-file Data/Steering.rec"));

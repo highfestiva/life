@@ -77,7 +77,7 @@ double RuntimeVariable::GetRealValue() const
 void RuntimeVariable::SetValue(const str& pValue, Usage pUsage)
 {
 	mValue = pValue;
-	if (pUsage != USAGE_NORMAL)
+	if (pUsage >= USAGE_SYS_OVERRIDE)
 	{
 		mDefaultValue = pValue;
 	}
@@ -268,8 +268,8 @@ bool RuntimeVariableScope::IsDefined(const str& pName)
 bool RuntimeVariableScope::SetValue(SetMode pSetMode, const str& pName, const str& pValue)
 {
 	bool lTypeOk = true;
-
-	RuntimeVariable* lVariable = GetVariable(pName, pSetMode != RuntimeVariable::USAGE_OVERRIDE);
+	bool lIsRecursive = (pSetMode == RuntimeVariable::USAGE_NORMAL || pSetMode == RuntimeVariable::USAGE_INTERNAL);
+	RuntimeVariable* lVariable = GetVariable(pName, lIsRecursive);
 	str lValue = Cast(pValue);
 	if (lVariable)
 	{

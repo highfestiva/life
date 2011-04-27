@@ -27,11 +27,12 @@ class ChunkyPhysics;
 class PhysicsSpawner
 {
 public:
+	typedef std::vector<float> IntervalArray;
 	enum Type
 	{
 		SPAWNER_INVALID = 0,
 		SPAWNER_TELEPORT,
-		SPAWNER_IMMEDIATE,
+		SPAWNER_CREATOR,
 	};
 
 	PhysicsSpawner();
@@ -43,7 +44,7 @@ public:
 	const str& GetFunction() const;
 	TransformationF GetSpawnPoint(const ChunkyPhysics* pStructure, const Vector3DF& pScaledPoint) const;
 	float GetNumber() const;
-	float GetInterval() const;
+	const IntervalArray& GetIntervals() const;
 	const str GetSpawnObject(float pProbabilityThreshold) const;
 
 	unsigned GetChunkySize() const;
@@ -64,7 +65,7 @@ private:
 	str mFunction;
 	ChunkyBoneGeometry* mSpawnerNode;
 	float mNumber;
-	float mInterval;
+	IntervalArray mIntervalArray;
 	SpawnObjectArray mSpawnObjectArray;
 	
 

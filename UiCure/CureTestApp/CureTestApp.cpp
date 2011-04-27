@@ -60,6 +60,7 @@ class CureTestApplication: public Application
 {
 public:
 	CureTestApplication(const strutil::strvec& pArgumentList);
+	virtual void Init();
 	int Run();
 
 private:
@@ -77,7 +78,7 @@ private:
 	LOG_CLASS_DECLARE();
 };
 
-LEPRA_RUN_APPLICATION(CureTestApplication);
+LEPRA_RUN_APPLICATION(CureTestApplication, LEPRA_NS::Main);
 
 CureTestApplication::CureTestApplication(const strutil::strvec& pArgumentList):
 	Application(pArgumentList),
@@ -122,15 +123,18 @@ CureTestApplication::CureTestApplication(const strutil::strvec& pArgumentList):
 		mTestBits &= ~lMask;
 		mTestBits |= lMask;
 	}
+}
+
+void CureTestApplication::Init()
+{
+	LEPRA_NS::Init();
+	TBC_NS::Init();
+	CURE_NS::Init();
 };
 
 
 int CureTestApplication::Run()
 {
-	LEPRA_NS::Init();
-	TBC_NS::Init();
-	CURE_NS::Init();
-
 	// We like to be on a single CPU on the time measuring thread, due to high resolution timers,
 	// which may differ between different CPU cores. Several seconds can differ between different cores.
 	Thread::GetCurrentThread()->SetCpuAffinityMask(0x0001);

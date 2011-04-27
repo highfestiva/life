@@ -6,8 +6,14 @@
 
 #include "Life.h"
 #include <assert.h>
-#include "../Cure/Include/ContextObjectAttribute.h"
-#include "RaceScore.h"
+#include "../Cure/Include/FloatAttribute.h"
+
+
+
+namespace Cure
+{
+class ContextObjectAttribute;
+}
 
 
 
@@ -16,17 +22,14 @@ namespace Life
 
 
 
-void InitLife()
-{
-	Cure::ContextObjectAttribute::SetCreator(&CreateObjectAttribute);
-}
-
 Cure::ContextObjectAttribute* CreateObjectAttribute(Cure::ContextObject* pObject, const str& pAttributeName)
 {
-	if (strutil::StartsWith(pAttributeName, _T("race_timer_")))
+	if (strutil::StartsWith(pAttributeName, _T("float_")))
 	{
-		return new RaceScore(pObject, pAttributeName);
+		return new Cure::FloatAttribute(pObject, pAttributeName, 0);
 	}
+	(void)pObject;
+	(void)pAttributeName;
 	assert(false);
 	return 0;
 }

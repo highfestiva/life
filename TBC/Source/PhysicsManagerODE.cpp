@@ -29,8 +29,9 @@ PhysicsManagerODE::PhysicsManagerODE()
 	mWorldID = dWorldCreate();
 	
 	// Play with these to make the simulation behave better.
-	::dWorldSetCFM(mWorldID, 1e-10f);	// World softness and numerical stability.
-	::dWorldSetERP(mWorldID, 0.4f);
+	::dWorldSetCFM(mWorldID, 1e-9f);	// World softness and numerical stability.
+	::dWorldSetERP(mWorldID, 0.9f);		// Error reduction.
+	::dWorldSetQuickStepNumIterations(mWorldID, 20);
 
 	::dWorldSetAutoDisableFlag(mWorldID, 1);
 	

@@ -44,6 +44,7 @@ SoundManager::~SoundManager()
 
 void SoundManager::SetSoundPosition(SoundInstanceID pSoundIID, const Vector3DF& pPos, const Vector3DF& pVel)
 {
+	ScopeLock lLock(&mLock);
 	MicrophoneLocation& lLocation = mMicrophoneArray[mCurrentMicrophone];
 	const Vector3DF lMicRelativePos = lLocation.mTransform.InverseTransform(pPos);
 	const Vector3DF lMicRelativeVel = lLocation.mVelocityTransform.InverseTransform(pVel);
@@ -52,6 +53,7 @@ void SoundManager::SetSoundPosition(SoundInstanceID pSoundIID, const Vector3DF& 
 
 void SoundManager::SetCurrentListener(int pListenerIndex, int pListenerCount)
 {
+	ScopeLock lLock(&mLock);
 	assert(pListenerIndex < pListenerCount);
 	mCurrentMicrophone = pListenerIndex;
 	if (mMicrophoneArray.size() != (size_t)pListenerCount)
@@ -63,6 +65,7 @@ void SoundManager::SetCurrentListener(int pListenerIndex, int pListenerCount)
 void SoundManager::SetListenerPosition(const Vector3DF& pPos, const Vector3DF& pVel,
 	const Vector3DF& pUp, const Vector3DF& pForward)
 {
+	ScopeLock lLock(&mLock);
 	const Vector3DF lLeft = pForward.Cross(pUp);
 	RotationMatrixF lRotation(lLeft, pForward, pUp);
 	MicrophoneLocation& lLocation = mMicrophoneArray[mCurrentMicrophone];

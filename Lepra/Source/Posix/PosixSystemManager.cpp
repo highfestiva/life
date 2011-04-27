@@ -36,7 +36,11 @@ static str ExecGetStdout(const char* pExecutable)
 	char lRaw[1024];
 	::memset(lRaw, 0, sizeof(lRaw));
 	::fread(lRaw, sizeof(lRaw), 1, lFile);
+#ifdef LEPRA_MAC
+	::pclose(lFile);
+#else	// Posix.
 	::fclose(lFile);
+#endif	// Mac / Posix.
 	str lStdout(strutil::Encode(lRaw));
 	if (lStdout.length() > 1)
 	{

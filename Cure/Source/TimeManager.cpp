@@ -153,20 +153,20 @@ int TimeManager::GetCurrentPhysicsFrameAddSeconds(float pSeconds) const
 
 int TimeManager::GetPhysicsFrameAddFrames(int pFrameCounter, int pFrames) const
 {
-	assert(pFrames > -gTimeWrapLimit/2 &&
-		pFrames < gTimeWrapLimit/2);
+	assert(pFrames > -gPhysicsFrameWrapLimit/2 &&
+		pFrames < gPhysicsFrameWrapLimit/2);
 
 	int lNewFrame = pFrameCounter + pFrames;
 	if (lNewFrame < 0)
 	{
-		lNewFrame += gTimeWrapLimit;
+		lNewFrame += gPhysicsFrameWrapLimit;
 	}
-	else if (lNewFrame >= gTimeWrapLimit)
+	else if (lNewFrame >= gPhysicsFrameWrapLimit)
 	{
-		lNewFrame -= gTimeWrapLimit;
+		lNewFrame -= gPhysicsFrameWrapLimit;
 	}
 
-	assert(lNewFrame >= 0 && lNewFrame < gTimeWrapLimit);
+	assert(lNewFrame >= 0 && lNewFrame < gPhysicsFrameWrapLimit);
 	return lNewFrame;
 }
 
@@ -177,24 +177,25 @@ int TimeManager::GetCurrentPhysicsFrameDelta(int pStart) const
 
 int TimeManager::GetPhysicsFrameDelta(int pEnd, int pStart) const
 {
-	if (pStart >= gTimeWrapLimit || pEnd >= gTimeWrapLimit)
+	if (pStart >= gPhysicsFrameWrapLimit || pEnd >= gPhysicsFrameWrapLimit)
 	{
+		assert(false);
 		return -1;
 	}
 	assert(pEnd >= 0);
 	assert(pStart >= 0);
 
 	int lDiff = pEnd - pStart;
-	if (lDiff > gTimeWrapLimit/2)
+	if (lDiff > gPhysicsFrameWrapLimit/2)
 	{
-		lDiff -= gTimeWrapLimit;
+		lDiff -= gPhysicsFrameWrapLimit;
 	}
-	else if (lDiff < -gTimeWrapLimit/2)
+	else if (lDiff < -gPhysicsFrameWrapLimit/2)
 	{
-		lDiff += gTimeWrapLimit;
+		lDiff += gPhysicsFrameWrapLimit;
 	}
 
-	assert(lDiff > -gTimeWrapLimit/2 && lDiff < gTimeWrapLimit/2);
+	assert(lDiff >= -gPhysicsFrameWrapLimit/2 && lDiff <= gPhysicsFrameWrapLimit/2);
 	return lDiff;
 }
 

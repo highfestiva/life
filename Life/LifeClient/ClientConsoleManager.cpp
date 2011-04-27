@@ -4,11 +4,13 @@
 
 
 
+#include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../../Cure/Include/RuntimeVariableName.h"
 #include "../../Cure/Include/TimeManager.h"
 #include "../../Lepra/Include/CyclicArray.h"
 #include "../../Lepra/Include/Number.h"
+#include "../../Lepra/Include/Path.h"
 #include "../../Lepra/Include/SystemManager.h"
 #include "../../UiCure/Include/UiGameUiManager.h"
 #include "../../UiTBC/Include/GUI/UiConsoleLogListener.h"
@@ -41,13 +43,17 @@ const ClientConsoleManager::CommandPair ClientConsoleManager::mCommandIdList[] =
 	{_T("wait-reset-ui"), COMMAND_WAIT_RESET_UI},
 	{_T("add-player"), COMMAND_ADD_PLAYER},
 	{_T("set-avatar-engine-power"), COMMAND_SET_AVATAR_ENGINE_POWER},
+#if defined(LEPRA_DEBUG) && defined(LEPRA_WINDOWS)
+	{_T("builddata"), COMMAND_BUILD_DATA},
+#endif // Debug & Windows
 };
 
 
 
-ClientConsoleManager::ClientConsoleManager(Cure::GameManager* pGameManager, UiCure::GameUiManager* pUiManager,
-	Cure::RuntimeVariableScope* pVariableScope, const PixelRect& pArea):
-	ConsoleManager(pGameManager, pVariableScope, new UiTbc::ConsoleLogListener, new UiTbc::ConsolePrompt)
+ClientConsoleManager::ClientConsoleManager(Cure::ResourceManager* pResourceManager, Cure::GameManager* pGameManager,
+	UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVariableScope, const PixelRect& pArea):
+	ConsoleManager(pResourceManager, pGameManager, pVariableScope, new UiTbc::ConsoleLogListener,
+		new UiTbc::ConsolePrompt)
 {
 	InitCommands();
 	mUiConsole = new UiConsole(this, pUiManager, pArea);
@@ -271,6 +277,33 @@ int ClientConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& 
 				}
 			}
 			break;
+#if defined(LEPRA_DEBUG) && defined(LEPRA_WINDOWS)
+			case COMMAND_BUILD_DATA:
+			{
+				const Cure::GameObjectId lAvatarId = ((GameClientSlaveManager*)GetGameManager())->GetAvatarInstanceId();
+				if (!lAvatarId)
+				{
+					break;
+				}
+				const str lAvatarType = GetGameManager()->GetContext()->GetObject(lAvatarId)->GetClassId();
+				((GameClientSlaveManager*)GetGameManager())->Logout();
+				Thread::Sleep(0.5);
+				GetResourceManager()->ForceFreeCache();
+				const str lCurrentDir = SystemManager::GetCurrentDirectory();
+				::SetCurrentDirectoryA(astrutil::Encode(Path::GetParentDirectory(lCurrentDir)).c_str());
+				::system("c:/Program/Python31/python.exe -B Tools/build/rgo.py builddata");
+				::SetCurrentDirectoryA(astrutil::Encode(lCurrentDir).c_str());
+				const str lUserName = CURE_RTVAR_SLOW_GET(GetVariableScope(), RTVAR_LOGIN_USERNAME, EmptyString);
+				const str lServer = CURE_RTVAR_SLOW_GET(GetVariableScope(), RTVAR_NETWORK_SERVERADDRESS, EmptyString);
+				str lPw(_T("CarPassword"));
+				const Cure::LoginId lLoginId(lUserName, Cure::MangledPassword(lPw));
+				((GameClientSlaveManager*)GetGameManager())->RequestLogin(lServer, lLoginId);
+				((GameClientSlaveManager*)GetGameManager())->ToggleConsole();
+				ExecuteCommand(_T("wait-login"));
+				((GameClientSlaveManager*)GetGameManager())->SelectAvatar(lAvatarType);
+			}
+			break;
+#endif // Debug & Windows
 			default:
 			{
 				lResult = -1;

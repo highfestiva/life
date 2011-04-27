@@ -21,6 +21,8 @@
 *.pyc
 *.pyo
 *.zip
+*.mode1v3
+*.pbxuser
 mt.dep
 stlport.res
 makefile
@@ -34,7 +36,10 @@ Debug
 Release Candidate
 Final
 /Life/LifeClient/LifeClient
+/Life/LifeServer/LifeServer
 /Life/LifeMaster/LifeMaster
+/Life/XCode/build
+/UiCure/CureTestApp/CureTestApp
 /ThirdParty/stlport/build
 /bin/
 /Data/Download

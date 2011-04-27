@@ -30,10 +30,10 @@
 #include "GameClientDemo.h"
 #include "GameClientSlaveManager.h"
 #include "GameClientViewer.h"
-#include "RoadSignButton.h"
 #include "RtVar.h"
 #include "Sunlight.h"
 #include "UiGameServerManager.h"
+#include "UiRaceScore.h"
 
 // TODO: remove!
 #include "UiConsole.h"
@@ -55,8 +55,9 @@ GameClientMasterTicker::GameClientMasterTicker(UiCure::GameUiManager* pUiManager
 	mResourceManager(pResourceManager),
 	mIsPlayerCountViewActive(false),
 	mServer(0),
-	mFreeNetworkAgent(new Cure::NetworkFreeAgent),
+	mServerTimeManager(new Cure::TimeManager),
 	mMasterConnection(new MasterServerConnection),
+	mFreeNetworkAgent(new Cure::NetworkFreeAgent),
 	mRestartUi(false),
 	mInitialized(false),
 	mActiveWidth(0),
@@ -73,7 +74,10 @@ GameClientMasterTicker::GameClientMasterTicker(UiCure::GameUiManager* pUiManager
 
 	UiLepra::DisplayManager::EnableScreensaver(false);
 
-	mConsole = new ConsoleManager(0, UiCure::GetSettings(), 0, 0);
+	Cure::ContextObjectAttribute::SetCreator(Cure::ContextObjectAttribute::Factory(
+		this, &GameClientMasterTicker::CreateObjectAttribute));
+
+	mConsole = new ConsoleManager(mResourceManager, 0, UiCure::GetSettings(), 0, 0);
 	mConsole->InitCommands();
 	mConsole->GetConsoleCommandManager()->AddExecutor(
 		new ConsoleExecutor<GameClientMasterTicker>(
@@ -135,6 +139,9 @@ bool GameClientMasterTicker::CreateSlave()
 bool GameClientMasterTicker::Tick()
 {
 	LEPRA_MEASURE_SCOPE(MasterTicker);
+
+	GetTimeManager()->Tick();
+	mServerTimeManager->Tick();
 
 	bool lOk = true;
 
@@ -213,7 +220,7 @@ bool GameClientMasterTicker::Tick()
 	}
 
 	{
-		LEPRA_MEASURE_SCOPE(RenderSlaves);
+		//LEPRA_MEASURE_SCOPE(RenderSlaves);
 
 		mUiManager->GetRenderer()->ClearDebugInfo();
 
@@ -238,8 +245,9 @@ bool GameClientMasterTicker::Tick()
 		LEPRA_MEASURE_SCOPE(Paint);
 		if (mUiManager->CanRender())
 		{
-			mSunlight->SetDirection(0, 1, -1);
-			mSunlight->SetColor(1.5f, 1.5f, 1.5f);
+			mUiManager->GetRenderer()->EnableAllLights(false);
+			UiTbc::Renderer::LightID lLightId = mUiManager->GetRenderer()->AddDirectionalLight(
+				UiTbc::Renderer::LIGHT_STATIC, Vector3DF(0, 1, -1), WHITE, 1.5f, 160);
 			mUiManager->Paint();
 			for (x = mSlaveArray.begin(); lOk && x != mSlaveArray.end(); ++x)
 			{
@@ -249,6 +257,8 @@ bool GameClientMasterTicker::Tick()
 					lOk = lSlave->Paint();
 				}
 			}
+			mUiManager->GetRenderer()->RemoveLight(lLightId);
+			mUiManager->GetRenderer()->EnableAllLights(true);
 		}
 	}
 
@@ -263,7 +273,7 @@ bool GameClientMasterTicker::Tick()
 
 	if (mServer)
 	{
-		LEPRA_MEASURE_SCOPE(ServerEndTick);
+		//LEPRA_MEASURE_SCOPE(ServerEndTick);
 		mServer->EndTick();
 	}
 
@@ -293,7 +303,7 @@ bool GameClientMasterTicker::Tick()
 	}
 
 	{
-		LEPRA_MEASURE_SCOPE(UpdateSlaveLayout);
+		//LEPRA_MEASURE_SCOPE(UpdateSlaveLayout);
 		if (mActiveWidth != mUiManager->GetDisplayManager()->GetWidth() ||
 			mActiveHeight != mUiManager->GetDisplayManager()->GetHeight())
 		{
@@ -314,7 +324,7 @@ bool GameClientMasterTicker::Tick()
 	}
 	else
 	{
-		LEPRA_MEASURE_SCOPE(RunYieldCommand);
+		//LEPRA_MEASURE_SCOPE(RunYieldCommand);
 		mConsole->ExecuteYieldCommand();
 	}
 
@@ -460,7 +470,7 @@ void GameClientMasterTicker::PreLogin(const str& pServerAddress)
 	if (lIsLocalServer && !mServer)
 	{
 		Cure::RuntimeVariableScope* lVariableScope = new Cure::RuntimeVariableScope(UiCure::GetSettings());
-		UiGameServerManager* lServer = new UiGameServerManager(lVariableScope, mResourceManager, mUiManager, PixelRect(0, 0, 100, 100));
+		UiGameServerManager* lServer = new UiGameServerManager(mServerTimeManager, lVariableScope, mResourceManager, mUiManager, PixelRect(0, 0, 100, 100));
 		lServer->StartConsole(new UiTbc::ConsoleLogListener, new UiTbc::ConsolePrompt);
 		if (!lServer->Initialize(mMasterConnection))
 		{
@@ -489,6 +499,11 @@ void GameClientMasterTicker::PreLogin(const str& pServerAddress)
 bool GameClientMasterTicker::IsLocalServer() const
 {
 	return mServer != 0;
+}
+
+UiGameServerManager* GameClientMasterTicker::GetLocalServer() const
+{
+	return mServer;
 }
 
 void GameClientMasterTicker::OnExit()
@@ -535,28 +550,54 @@ Sunlight* GameClientMasterTicker::GetSunlight() const
 
 
 GameClientSlaveManager* GameClientMasterTicker::CreateSlaveManager(GameClientMasterTicker* pMaster,
-	Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
-	UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea)
+	Cure::TimeManager* pTime, Cure::RuntimeVariableScope* pVariableScope,
+	Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager,
+	int pSlaveIndex, const PixelRect& pRenderArea)
 {
-	return new GameClientSlaveManager(pMaster, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea);
+	return new GameClientSlaveManager(pMaster, pTime, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea);
 }
 
 GameClientSlaveManager* GameClientMasterTicker::CreateViewer(GameClientMasterTicker* pMaster,
-	Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
-	UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea)
+	Cure::TimeManager* pTime, Cure::RuntimeVariableScope* pVariableScope,
+	Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager,
+	int pSlaveIndex, const PixelRect& pRenderArea)
 {
-	return new GameClientViewer(pMaster, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea);
+	return new GameClientViewer(pMaster, pTime, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea);
 }
 
 GameClientSlaveManager* GameClientMasterTicker::CreateDemo(GameClientMasterTicker* pMaster,
-	Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
-	UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea)
+	Cure::TimeManager* pTime, Cure::RuntimeVariableScope* pVariableScope,
+	Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager,
+	int pSlaveIndex, const PixelRect& pRenderArea)
 {
 #ifdef LIFE_DEMO
-	return new GameClientDemo(pMaster, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea);
+	return new GameClientDemo(pMaster, pTime, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea);
 #else // !Demo
-	return new GameClientViewer(pMaster, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea);
+	return new GameClientViewer(pMaster, pTime, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea);
 #endif // Demo / !Demo
+}
+
+Cure::ContextObjectAttribute* GameClientMasterTicker::CreateObjectAttribute(Cure::ContextObject* pObject, const str& pAttributeName)
+{
+	ScreenPart* lScreenPart = this;
+	SlaveArray::iterator x;
+	for (x = mSlaveArray.begin(); x != mSlaveArray.end(); ++x)
+	{
+		GameClientSlaveManager* lSlave = *x;
+		if (lSlave)
+		{
+			if (lSlave->IsOwned(pObject->GetInstanceId()))
+			{
+				lScreenPart = lSlave;
+				break;
+			}
+		}
+	}
+	if (strutil::StartsWith(pAttributeName, _T("race_timer_")))
+	{
+		return new UiRaceScore(pObject, pAttributeName, lScreenPart, mUiManager, pAttributeName);
+	}
+	return Life::CreateObjectAttribute(pObject, pAttributeName);
 }
 
 bool GameClientMasterTicker::CreateSlave(SlaveFactoryMethod pCreate)
@@ -576,12 +617,16 @@ bool GameClientMasterTicker::CreateSlave(SlaveFactoryMethod pCreate)
 		}
 		assert(lFreeSlaveIndex < 4);
 		Cure::RuntimeVariableScope* lVariables = new Cure::RuntimeVariableScope(UiCure::GetSettings());
-		GameClientSlaveManager* lSlave = pCreate(this, lVariables, mResourceManager,
+		GameClientSlaveManager* lSlave = pCreate(this, GetTimeManager(), lVariables, mResourceManager,
 			mUiManager, lFreeSlaveIndex, lRenderArea);
 		AddSlave(lSlave);
 		if (mInitialized)
 		{
 			lOk = lSlave->Open();
+			if (lOk && mConsole->GetGameManager() == 0)
+			{
+				mConsole->SetGameManager(lSlave);
+			}
 		}
 	}
 	else
@@ -598,6 +643,7 @@ void GameClientMasterTicker::AddSlave(GameClientSlaveManager* pSlave)
 		pSlave->LoadSettings();
 		assert(mSlaveArray[pSlave->GetSlaveIndex()] == 0);
 		mSlaveArray[pSlave->GetSlaveIndex()] = pSlave;
+		pSlave->GetContext()->SetLocalRange(pSlave->GetSlaveIndex(), mSlaveArray.size());
 		++mActiveSlaveCount;
 	}
 }
@@ -613,6 +659,10 @@ void GameClientMasterTicker::DeleteSlave(GameClientSlaveManager* pSlave, bool pA
 	assert(mSlaveArray[pSlave->GetSlaveIndex()]);
 	mSlaveArray[pSlave->GetSlaveIndex()] = 0;
 	delete (pSlave);
+	if (mConsole->GetGameManager() == pSlave)
+	{
+		mConsole->SetGameManager(0);
+	}
 	if (--mActiveSlaveCount == 0)
 	{
 		//mResourceManager->ForceFreeCache();
@@ -648,17 +698,26 @@ bool GameClientMasterTicker::Initialize()
 		CURE_RTVAR_GET(lShowLogo, =, UiCure::GetSettings(), RTVAR_GAME_ENABLESTARTLOGO, true);
 		if (lShowLogo)
 		{
-			UiLepra::PngLoader lLogoLoader;
-			UiLepra::Canvas lCanvas;
-			if (lLogoLoader.Load(_T("Data/megaphone.png"), lCanvas) == UiLepra::PngLoader::STATUS_SUCCESS)
+			Cure::UserRamImageResource* lLogo = new Cure::UserRamImageResource;
+			Cure::UserResourceOwner<Cure::UserRamImageResource> lLogoHolder(lLogo, mResourceManager, _T("Data/megaphone.png"));
+			UiCure::UserSound2dResource* lLogoSound = new UiCure::UserSound2dResource(mUiManager, UiLepra::SoundManager::LOOP_NONE);
+			Cure::UserResourceOwner<UiCure::UserSound2dResource> lLogoSoundHolder(lLogoSound, mResourceManager, _T("Data/logo_trumpet.wav"));
+			for (int x = 0; x < 1000; ++x)
 			{
-				const UiLepra::SoundManager::SoundID lSoundId = mUiManager->GetSoundManager()->LoadSound2D(_T("Data/logo_trumpet.wav"), UiLepra::SoundManager::LOOP_NONE, 0);
-				UiLepra::SoundManager::SoundInstanceID lSoundInstanceId = UiLepra::INVALID_SOUNDINSTANCEID;
-				if (lSoundId != UiLepra::INVALID_SOUNDID)
+				mResourceManager->Tick();
+				if (lLogo->GetLoadState() != Cure::RESOURCE_LOAD_IN_PROGRESS &&
+					lLogoSound->GetLoadState() != Cure::RESOURCE_LOAD_IN_PROGRESS)
 				{
-					lSoundInstanceId = mUiManager->GetSoundManager()->CreateSoundInstance(lSoundId);
-					mUiManager->GetSoundManager()->Play(lSoundInstanceId, 1, 1);
+					break;
 				}
+				Thread::Sleep(0.001);
+			}
+			if (lLogo->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE &&
+				lLogoSound->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
+			{
+				mUiManager->GetSoundManager()->Play(lLogoSound->GetData(), 1, 1);
+
+				UiLepra::Canvas& lCanvas = *lLogo->GetRamData();
 				const UiTbc::Painter::ImageID lImageId = mUiManager->GetDesktopWindow()->GetImageManager()->AddImage(lCanvas, UiTbc::GUIImageManager::STRETCHED, UiTbc::GUIImageManager::NO_BLEND, 255);
 				UiTbc::RectComponent lRect(lImageId, _T("logo"));
 				mUiManager->AssertDesktopLayout(new UiTbc::FloatingLayout, 0);
@@ -719,17 +778,9 @@ bool GameClientMasterTicker::Initialize()
 				}
 				mUiManager->GetDesktopWindow()->RemoveChild(&lRect, 0);
 				mUiManager->GetDesktopWindow()->GetImageManager()->RemoveImage(lImageId);
-
-				if (lSoundInstanceId != UiLepra::INVALID_SOUNDINSTANCEID)
-				{
-					mUiManager->GetSoundManager()->DeleteSoundInstance(lSoundInstanceId);
-				}
-				if (lSoundId != UiLepra::INVALID_SOUNDID)
-				{
-					mUiManager->GetSoundManager()->Release(lSoundId);
-				}
 			}
 		}
+		mResourceManager->ForceFreeCache();
 
 		CreatePlayerCountWindow();
 	}
@@ -766,6 +817,7 @@ bool GameClientMasterTicker::Reinitialize()
 	DeleteServer();
 	delete mSunlight;
 	mSunlight = 0;
+	mConsole->SetGameManager(0);
 	mResourceManager->StopClear();
 	mUiManager->Close();
 	SystemManager::AddQuitRequest(-1);
@@ -851,7 +903,7 @@ void GameClientMasterTicker::UpdateSlaveLayout()
 	{
 		if (mSlaveArray[x])
 		{
-			lFrameTime += mSlaveArray[x]->GetTimeManager()->GetNormalFrameTime();
+			lFrameTime += GetTimeManager()->GetNormalFrameTime();
 			++lAveragedSlaves;
 		}
 	}
@@ -1100,10 +1152,13 @@ void GameClientMasterTicker::DrawDebugData() const
 		return;
 	}
 
-	ScopePerformanceData* lMainLoop = ScopePerformanceData::GetRoots()[0];
-	str lFps = strutil::Format(_T("FPS %.1f"), 1/lMainLoop->GetSlidingAverage());
+	const ScopePerformanceData* lMainLoop = ScopePerformanceData::GetRoots()[0];
+	str lInfo = strutil::Format(_T("FPS %.1f"), 1/lMainLoop->GetSlidingAverage());
+	const ScopePerformanceData* lAppSleep = lMainLoop->GetChild(_T("AppSleep"));
+	const double lPercent = 100 * (lMainLoop->GetSlidingAverage()-lAppSleep->GetSlidingAverage()) / lMainLoop->GetSlidingAverage() + 0.5f;
+	lInfo += strutil::Format(_T("\nUsedPerf %2.f %%"), lPercent);
 	int w = 80;
-	int h = 20;
+	int h = 37;
 	bool lShowPerformanceCounters;
 	CURE_RTVAR_GET(lShowPerformanceCounters, =, UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_COUNT, false);
 	if (lShowPerformanceCounters)
@@ -1123,7 +1178,7 @@ void GameClientMasterTicker::DrawDebugData() const
 			}
 		}
 		
-		lFps += strutil::Format(_T("\nvTRI %i\ncTRI %i\nUpload %sB/s\nDownload %sB/s"),
+		lInfo += strutil::Format(_T("\nvTRI %i\ncTRI %i\nUpload %sB/s\nDownload %sB/s"),
 			mUiManager->GetRenderer()->GetTriangleCount(true),
 			mUiManager->GetRenderer()->GetTriangleCount(false),
 			Number::ConvertToPostfixNumber(lUpBandwidth, 1).c_str(),
@@ -1134,7 +1189,7 @@ void GameClientMasterTicker::DrawDebugData() const
 	const int lRight = mUiManager->GetDisplayManager()->GetWidth();
 	mUiManager->GetPainter()->FillRect(lRight-w, 3, lRight-5, h);
 	mUiManager->GetPainter()->SetColor(Color(200, 200, 0));
-	mUiManager->GetPainter()->PrintText(lFps, lRight-w+5, 5);
+	mUiManager->GetPainter()->PrintText(lInfo, lRight-w+5, 5);
 }
 
 void GameClientMasterTicker::DrawPerformanceLineGraph2d() const
@@ -1190,14 +1245,7 @@ void GameClientMasterTicker::DrawPerformanceLineGraph2d() const
 
 float GameClientMasterTicker::GetTickTimeReduction() const
 {
-	for (int x = 0; x < 4; ++x)
-	{
-		if (mSlaveArray[x])
-		{
-			return mSlaveArray[x]->GetTimeManager()->GetTickLoopTimeReduction();
-		}
-	}
-	return 0;
+	return GetTimeManager()->GetTickLoopTimeReduction();
 }
 
 float GameClientMasterTicker::GetPowerSaveAmount() const

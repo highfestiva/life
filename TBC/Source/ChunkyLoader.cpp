@@ -143,8 +143,8 @@ bool ChunkyLoader::AllocLoadChunkyList(FileElementList& pLoadList, int64 pChunkE
 				C(CHUNK_SKIN_BWG_VERTICES) || C(CHUNK_SKIN_BWG_WEIGHTS) || C(CHUNK_ANIMATION) || C(CHUNK_ANIMATION_MODE) ||
 				C(CHUNK_ANIMATION_FRAME_COUNT) || C(CHUNK_ANIMATION_BONE_COUNT) || C(CHUNK_ANIMATION_USE_SPLINES) || C(CHUNK_ANIMATION_TIME) ||
 				C(CHUNK_ANIMATION_ROOT_NODE) || C(CHUNK_ANIMATION_KEYFRAME) || C(CHUNK_ANIMATION_KEYFRAME_TIME) || C(CHUNK_ANIMATION_KEYFRAME_TRANSFORM) ||
-				C(CHUNK_PHYSICS) || C(CHUNK_PHYSICS_BONE_COUNT) || C(CHUNK_PHYSICS_PHYSICS_TYPE) || C(CHUNK_PHYSICS_ENGINE_COUNT) ||
-				C(CHUNK_PHYSICS_TRIGGER_COUNT) || C(CHUNK_PHYSICS_SPAWNER_COUNT) ||
+				C(CHUNK_PHYSICS) || C(CHUNK_PHYSICS_BONE_COUNT) || C(CHUNK_PHYSICS_PHYSICS_TYPE) || C(CHUNK_PHYSICS_PHYSICS_GUIDE_MODE) ||
+				C(CHUNK_PHYSICS_ENGINE_COUNT) || C(CHUNK_PHYSICS_TRIGGER_COUNT) || C(CHUNK_PHYSICS_SPAWNER_COUNT) ||
 				C(CHUNK_PHYSICS_BONE_CONTAINER) || C(CHUNK_PHYSICS_BONE_CHILD_LIST) || C(CHUNK_PHYSICS_BONE_TRANSFORM) ||
 				C(CHUNK_PHYSICS_BONE_SHAPE) || C(CHUNK_PHYSICS_ENGINE_CONTAINER) || C(CHUNK_PHYSICS_ENGINE) || C(CHUNK_PHYSICS_TRIGGER_CONTAINER) ||
 				C(CHUNK_PHYSICS_TRIGGER) || C(CHUNK_PHYSICS_SPAWNER_CONTAINER) || C(CHUNK_PHYSICS_SPAWNER) || 
@@ -186,7 +186,7 @@ bool ChunkyLoader::AllocLoadChunkyList(FileElementList& pLoadList, int64 pChunkE
 						c[1] = (tchar)((lType>>16)&0x7F);
 						c[2] = (tchar)((lType>>8)&0x7F);
 						c[3] = (tchar)((lType>>0)&0x7F);
-						log_volatile(mLog.Debugf(_T("Loading chunk '%c%c%c%c'."),
+						log_volatile(mLog.Tracef(_T("Loading chunk '%c%c%c%c'."),
 							c[0], c[1], c[2], c[3]));
 					}
 					lElement.mIsElementLoaded = true;
@@ -729,6 +729,7 @@ bool ChunkyPhysicsLoader::Load(ChunkyPhysics* pPhysics)
 
 	int32 lBoneCount = -1;
 	int32 lPhysicsType = -1;
+	int32 lGuideMode = 1;
 	int32 lEngineCount = -1;
 	int32 lTriggerCount = -1;
 	int32 lSpawnerCount = -1;
@@ -737,6 +738,7 @@ bool ChunkyPhysicsLoader::Load(ChunkyPhysics* pPhysics)
 		FileElementList lLoadList;
 		lLoadList.push_back(ChunkyFileElement(CHUNK_PHYSICS_BONE_COUNT, &lBoneCount));
 		lLoadList.push_back(ChunkyFileElement(CHUNK_PHYSICS_PHYSICS_TYPE, &lPhysicsType));
+		lLoadList.push_back(ChunkyFileElement(CHUNK_PHYSICS_PHYSICS_GUIDE_MODE, &lGuideMode));
 		lLoadList.push_back(ChunkyFileElement(CHUNK_PHYSICS_ENGINE_COUNT, &lEngineCount));
 		lLoadList.push_back(ChunkyFileElement(CHUNK_PHYSICS_TRIGGER_COUNT, &lTriggerCount));
 		lLoadList.push_back(ChunkyFileElement(CHUNK_PHYSICS_SPAWNER_COUNT, &lSpawnerCount));
@@ -747,8 +749,8 @@ bool ChunkyPhysicsLoader::Load(ChunkyPhysics* pPhysics)
 	{
 		// Check that all mandatories have been found.
 		lOk = (lBoneCount >= 1 && lBoneCount < 10000 &&
-			(lPhysicsType == ChunkyPhysics::STATIC ||
-			lPhysicsType == ChunkyPhysics::DYNAMIC) &&
+			(lPhysicsType == ChunkyPhysics::STATIC || lPhysicsType == ChunkyPhysics::DYNAMIC) &&
+			(lGuideMode >= ChunkyPhysics::GUIDE_NEVER && lGuideMode <= ChunkyPhysics::GUIDE_ALWAYS) &&
 			lEngineCount >= 0 && lEngineCount < 1000 &&
 			lTriggerCount >= 0 && lTriggerCount < 1000);
 	}
@@ -756,6 +758,7 @@ bool ChunkyPhysicsLoader::Load(ChunkyPhysics* pPhysics)
 	{
 		pPhysics->SetBoneCount(lBoneCount);
 		pPhysics->SetPhysicsType((ChunkyPhysics::PhysicsType)lPhysicsType);
+		pPhysics->SetGuideMode((ChunkyPhysics::GuideMode)lGuideMode);
 
 		FileElementList lLoadList;
 		mCurrentBoneIndex = 0;
@@ -985,7 +988,7 @@ bool ChunkyPhysicsLoader::LoadElementCallback(ChunkyType pType, uint32 pSize, in
 
 		if (lOk)
 		{
-			log_volatile(mLog.Debugf(_T("Current bone index is %i."),
+			log_volatile(mLog.Tracef(_T("Current bone index is %i."),
 				mCurrentBoneIndex));
 			lPhysics->SetBoneChildCount(mCurrentBoneIndex, lChildCount);
 			for (int x = 0; lOk && x < lChildCount; ++x)

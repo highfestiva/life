@@ -48,6 +48,7 @@ public:
 	};
 
 	typedef std::vector<ContextObject*> Array;
+	typedef std::vector<ContextObjectAttribute*> AttributeArray;
 
 	ContextObject(ResourceManager* pResourceManager, const str& pClassId);
 	virtual ~ContextObject();
@@ -78,6 +79,10 @@ public:
 	void AddAttribute(ContextObjectAttribute* pAttribute);
 	void DeleteAttribute(const str& pName);
 	ContextObjectAttribute* GetAttribute(const str& pName) const;
+	const AttributeArray& GetAttributes() const;
+	float GetAttributeFloatValue(const str& pAttributeName) const;
+	bool IsAttributeTrue(const str& pAttributeName) const;
+	void OnAttributeUpdated(ContextObjectAttribute* pAttribute);
 
 	void AddTrigger(TBC::PhysicsManager::TriggerID pTriggerId, const void*);
 	virtual void FinalizeTrigger(const TBC::PhysicsTrigger* pTrigger);
@@ -87,14 +92,18 @@ public:
 	void SetSpawner(const TBC::PhysicsSpawner* pSpawner);
 	const TBC::PhysicsSpawner* GetSpawner() const;
 
+	void AddChild(ContextObject* pChild);
+
 	bool UpdateFullPosition(const ObjectPositionalData*& pPositionalData);
 	void SetFullPosition(const ObjectPositionalData& pPositionalData);
 	void SetInitialTransform(const TransformationF& pTransformation);
 	TransformationF GetInitialTransform() const;
 	Vector3DF GetPosition() const;
 	void SetRootPosition(const Vector3DF& pPosition);
+	void SetRootOrientation(const QuaternionF& pOrientation);
 	QuaternionF GetOrientation() const;
 	Vector3DF GetVelocity() const;
+	Vector3DF GetAngularVelocity() const;
 	Vector3DF GetAcceleration() const;
 	float GetForwardSpeed() const;
 	float GetMass() const;
@@ -117,9 +126,9 @@ public:
 
 	virtual void StartLoading() = 0;
 	virtual void OnLoaded();
-	virtual void OnTick(float pFrameTime) = 0;
+	virtual void OnMicroTick(float pFrameTime) = 0;
 	virtual void OnAlarm(int pAlarmId, void* pExtraData) = 0;
-	virtual void OnPhysicsTick();
+	virtual void OnTick();
 
 protected:
 	void ForceSetFullPosition(const ObjectPositionalData& pPositionalData, const TBC::ChunkyBoneGeometry* pGeometry);
@@ -127,7 +136,6 @@ protected:
 	bool IsAttachedTo(ContextObject* pObject) const;
 	void AddAttachment(ContextObject* pObject, TBC::PhysicsManager::JointID pJoint, TBC::PhysicsEngine* pEngine);
 
-	void AddChild(ContextObject* pChild);
 	void RemoveChild(ContextObject* pChild);
 	void SetParent(ContextObject* pParent);
 	void SetupChildHandlers();
@@ -136,7 +144,6 @@ protected:
 
 	ResourceManager* GetResourceManager() const;
 
-	typedef std::vector<ContextObjectAttribute*> AttributeArray;
 	struct Connection
 	{
 		Connection(ContextObject* pObject, TBC::PhysicsManager::JointID pJointId, TBC::PhysicsEngine* pEngine):

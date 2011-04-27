@@ -22,7 +22,7 @@ namespace Life
 
 
 
-Client::Client(Cure::TimeManager* pTimeManager, Cure::NetworkAgent* pNetworkAgent, Cure::UserConnection* pUserConnection):
+Client::Client(const Cure::TimeManager* pTimeManager, Cure::NetworkAgent* pNetworkAgent, Cure::UserConnection* pUserConnection):
 	mTimeManager(pTimeManager),
 	mNetworkAgent(pNetworkAgent),
 	mUserConnection(pUserConnection),
@@ -109,7 +109,7 @@ void Client::QuerySendStriveTimes()
 		mIgnoreStriveErrorTimeCounter = 0;
 		if (mTimeManager->GetCurrentPhysicsFrameDelta(mStriveSendUnpauseFrame) < 0)
 		{
-			mLog.AInfo("Want to send strive times, but skipping since last transmission is still in effekt.");
+			log_adebug("Want to send strive times, but skipping since last transmission is still in effekt.");
 		}
 		else if (mStriveSendErrorTimeCounter >= NETWORK_DEVIATION_ERROR_COUNT)	// Only send if the error repeats itself a few times.
 		{
@@ -213,7 +213,7 @@ int Client::SendStriveTimes(int pNetworkFrameDiffCount)
 		lPhysicsTickAdjustmentTime = (float)-pNetworkFrameDiffCount/lPhysicsTickAdjustmentFrameCount;
 		pNetworkFrameDiffCount = -pNetworkFrameDiffCount;
 	}
-	mLog.Infof(_T("Sending time adjustment %i frames, spread over %i frames, to client."), pNetworkFrameDiffCount, lPhysicsTickAdjustmentFrameCount);
+	log_volatile(mLog.Debugf(_T("Sending time adjustment %i frames, spread over %i frames, to client."), pNetworkFrameDiffCount, lPhysicsTickAdjustmentFrameCount));
 	mNetworkAgent->SendNumberMessage(true, mUserConnection->GetSocket(), Cure::MessageNumber::INFO_ADJUST_TIME, lPhysicsTickAdjustmentFrameCount, lPhysicsTickAdjustmentTime);
 	return (lHalfPingFrameCount*2 + lPhysicsTickAdjustmentFrameCount);
 }

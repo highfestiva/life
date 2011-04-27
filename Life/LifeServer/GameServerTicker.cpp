@@ -5,6 +5,7 @@
 
 
 #include "GameServerTicker.h"
+#include "../../Cure/Include/ContextObjectAttribute.h"
 #include "../../Cure/Include/RuntimeVariable.h"
 #include "../../Cure/Include/TimeManager.h"
 #include "../../Lepra/Include/SystemManager.h"
@@ -30,13 +31,16 @@ GameServerTicker::GameServerTicker(Cure::ResourceManager* pResourceManager,
 	mMasterConnection(new MasterServerConnection)
 {
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_APPLICATION_AUTOEXITONEMPTYSERVER, false);
+	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_GAME_AUTOFLIPENABLED, true);
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_GAME_SPAWNPART, 1.0);
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_NETWORK_ENABLEOPENSERVER, true);
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _("0.0.0.0:16650"));
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_NETWORK_SERVERNAME, _("My Dedicated Server"));
 	CURE_RTVAR_SET(Cure::GetSettings(), RTVAR_NETWORK_LOGINGREETING, _("echo 4 \"Welcome to my dedicated server! Enjoy the ride!\""));
 
-	ConsoleManager lConsole(0, Cure::GetSettings(), 0, 0);
+	Cure::ContextObjectAttribute::SetCreator(&CreateObjectAttribute);
+
+	ConsoleManager lConsole(mResourceManager, 0, Cure::GetSettings(), 0, 0);
 	lConsole.InitCommands();
 	lConsole.ExecuteCommand(_T("execute-file -i ServerDefault.lsh"));
 	lConsole.ExecuteCommand(_T("execute-file -i ") + Application::GetIoFile(_T("ServerBase"), _T("lsh")));
@@ -44,7 +48,7 @@ GameServerTicker::GameServerTicker(Cure::ResourceManager* pResourceManager,
 	pResourceManager->InitDefault();
 
 	Cure::RuntimeVariableScope* lVariableScope = new Cure::RuntimeVariableScope(Cure::GetSettings());
-	mGameManager = new GameServerManager(lVariableScope, pResourceManager);
+	mGameManager = new GameServerManager(GetTimeManager(), lVariableScope, pResourceManager);
 	mGameManager->StartConsole(pConsoleLogger, new StdioConsolePrompt);
 }
 
@@ -54,7 +58,7 @@ GameServerTicker::~GameServerTicker()
 	mGameManager = 0;
 
 	{
-		ConsoleManager lConsole(0, Cure::GetSettings(), 0, 0);
+		ConsoleManager lConsole(mResourceManager, 0, Cure::GetSettings(), 0, 0);
 		lConsole.InitCommands();
 		lConsole.ExecuteCommand(_T("save-system-config-file 0 ") + Application::GetIoFile(_T("ServerBase"), _T("lsh")));
 	}
@@ -76,6 +80,8 @@ bool GameServerTicker::Initialize()
 bool GameServerTicker::Tick()
 {
 	mMasterConnection->Tick();
+
+	GetTimeManager()->Tick();
 
 	bool lOk = mGameManager->BeginTick();
 	if (lOk)

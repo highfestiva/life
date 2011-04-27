@@ -33,14 +33,22 @@ public:
 		STATIC = 1,	// Static world object.
 		DYNAMIC		// Dynamic object within the world.
 	};
+	enum GuideMode
+	{
+		GUIDE_NEVER = 0,
+		GUIDE_EXTERNAL,		// Guiding happens (e.g. child steering).
+		GUIDE_ALWAYS,
+	};
 
 	ChunkyPhysics(TransformOperation pTransformOperation = TRANSFORM_NONE, PhysicsType pPhysicsType = STATIC);
 	virtual ~ChunkyPhysics();
 
-	void OnTick(PhysicsManager* pPhysicsManager, float pFrameTime);
+	void OnMicroTick(PhysicsManager* pPhysicsManager, float pFrameTime);
 
-	void SetPhysicsType(PhysicsType pPhysicsType);	// You may use this to change into a ragdoll (COLLISION_DETECT_ONLY -> DYNAMIC), or back.
 	PhysicsType GetPhysicsType() const;
+	void SetPhysicsType(PhysicsType pPhysicsType);	// You may use this to change into a ragdoll (COLLISION_DETECT_ONLY -> DYNAMIC), or back.
+	GuideMode GetGuideMode() const;	// Gets help with automatic motions, such as flipping over.
+	void SetGuideMode(GuideMode pGuideMode);
 
 	ChunkyBoneGeometry* GetBoneGeometry(int pBoneIndex) const;
 	ChunkyBoneGeometry* GetBoneGeometry(PhysicsManager::BodyID pBodyId) const;
@@ -55,6 +63,7 @@ public:
 
 	int GetEngineCount() const;
 	PhysicsEngine* GetEngine(int pEngineIndex) const;
+	int GetEngineIndexFromControllerIndex(int pStartEngineIndex, int pEngineStep, unsigned pControllerIndex) const;
 	int GetEngineIndex(const PhysicsEngine* pEngine) const;
 	void AddEngine(PhysicsEngine* pEngine);	// Takes ownership of the given engine.
 	bool SetEnginePower(unsigned pAspect, float pPower, float pAngle);
@@ -90,6 +99,7 @@ private:
 	SpawnerArray mSpawnerArray;
 	TransformOperation mTransformOperation;
 	PhysicsType mPhysicsType;
+	GuideMode mGuideMode;
 	unsigned mUniqeGeometryIndex;
 
 	LOG_CLASS_DECLARE();

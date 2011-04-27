@@ -32,6 +32,7 @@ struct OptionsManager
 	OptionsManager(Cure::RuntimeVariableScope* pVariableScope, int pPriority);
 
 	void RefreshConfiguration();
+	virtual void DoRefreshConfiguration();
 	bool UpdateInput(UiLepra::InputManager::KeyCode pKeyCode, bool pActive);
 	float UpdateInput(UiLepra::InputElement* pElement);
 	void ResetToggles();
@@ -41,7 +42,6 @@ protected:
 	typedef std::pair<const str, float*> KeyValue;
 
 	virtual bool SetDefault(int pPriority);
-	virtual void DoRefreshConfiguration();
 
 	static const str ConvertToString(UiLepra::InputManager::KeyCode pKeyCode);
 	bool SetValue(const str& pKey, float pValue, bool pAdd);

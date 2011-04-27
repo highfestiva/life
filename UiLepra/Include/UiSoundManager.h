@@ -7,6 +7,7 @@
 #pragma once
 
 #include "../../Lepra/Include/String.h"
+#include "../../Lepra/Include/Thread.h"
 #include "../../Lepra/Include/Transformation.h"
 #include "../../Lepra/Include/Vector3D.h"
 #include "UiLepra.h"
@@ -158,6 +159,8 @@ protected:
 	typedef std::vector<MicrophoneLocation> MicrophoneLocationArray;
 	MicrophoneLocationArray mMicrophoneArray;
 	size_t mCurrentMicrophone;
+
+	mutable Lock mLock;
 
 private:
 };

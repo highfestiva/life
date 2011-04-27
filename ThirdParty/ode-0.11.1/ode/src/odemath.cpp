@@ -136,6 +136,7 @@ int _dSafeNormalize4 (dVector4 a)
 	return 1;
   }
   else {
+    dIASSERT(false);	// high_festiva was here!
     a[0] = 1;
     a[1] = 0;
     a[2] = 0;

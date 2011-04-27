@@ -21,6 +21,7 @@
 #include "../Include/ContextManager.h"
 #include "../Include/ContextObjectAttribute.h"
 #include "../Include/Cure.h"
+#include "../Include/FloatAttribute.h"
 #include "../Include/GameManager.h"
 #include "../Include/TimeManager.h"
 
@@ -72,7 +73,7 @@ ContextObject::ContextObject(Cure::ResourceManager* pResourceManager, const str&
 
 ContextObject::~ContextObject()
 {
-	log_volatile(mLog.Debugf(_T("Destructing context object %s."), mClassId.c_str()));
+	log_volatile(mLog.Tracef(_T("Destructing context object %s."), mClassId.c_str()));
 
 	DeleteNetworkOutputGhost();
 
@@ -302,7 +303,7 @@ void ContextObject::DeleteAttribute(const str& pName)
 ContextObjectAttribute* ContextObject::GetAttribute(const str& pName) const
 {
 	AttributeArray::const_iterator x = mAttributeArray.begin();
-	while (x != mAttributeArray.end())
+	for (; x != mAttributeArray.end(); ++x)
 	{
 		if ((*x)->GetName() == pName)
 		{
@@ -310,6 +311,31 @@ ContextObjectAttribute* ContextObject::GetAttribute(const str& pName) const
 		}
 	}
 	return 0;
+}
+
+const ContextObject::AttributeArray& ContextObject::GetAttributes() const
+{
+	return mAttributeArray;
+}
+
+float ContextObject::GetAttributeFloatValue(const str& pAttributeName) const
+{
+	const FloatAttribute* lFloatAttribute = (const FloatAttribute*)GetAttribute(pAttributeName);
+	if (!lFloatAttribute)
+	{
+		return 0;
+	}
+	return lFloatAttribute->GetValue();
+}
+
+bool ContextObject::IsAttributeTrue(const str& pAttributeName) const
+{
+	return (GetAttributeFloatValue(pAttributeName) > 0.5f);
+}
+
+void ContextObject::OnAttributeUpdated(ContextObjectAttribute*)
+{
+	mManager->AddAttributeSenderObject(this);
 }
 
 
@@ -352,6 +378,16 @@ const TBC::PhysicsSpawner* ContextObject::GetSpawner() const
 
 
 
+void ContextObject::AddChild(ContextObject* pChild)
+{
+	assert(pChild->GetInstanceId() != 0);
+	assert(std::find(mChildList.begin(), mChildList.end(), pChild) == mChildList.end());
+	mChildList.push_back(pChild);
+	pChild->SetParent(this);
+}
+
+
+
 bool ContextObject::UpdateFullPosition(const ObjectPositionalData*& pPositionalData)
 {
 	if (!mPhysics)
@@ -380,6 +416,7 @@ bool ContextObject::UpdateFullPosition(const ObjectPositionalData*& pPositionalD
 	for (int x = 0; x < lGeometryCount; ++x)
 	{
 		// TODO: add support for parent ID??? (JB 2009-07-07: Don't know anymore what this comment might mean.)
+		// ??? Could it be when connected to something else, like a car connected to a crane?
 		const TBC::ChunkyBoneGeometry* lStructureGeometry = mPhysics->GetBoneGeometry(x);
 		if (!lStructureGeometry)
 		{
@@ -508,7 +545,7 @@ bool ContextObject::UpdateFullPosition(const ObjectPositionalData*& pPositionalD
 			{
 				GETSET_OBJECT_POSITIONAL_AT(mPosition, y, RealData4, lData, PositionalData::TYPE_REAL_4, 1);
 				++y;
-				::memcpy(lData->mValue, lEngine->GetValues(), sizeof(float)*4);
+				::memcpy(lData->mValue, lEngine->GetValues(), sizeof(float)*TBC::PhysicsEngine::ASPECT_MAX_REMOTE_COUNT);
 			}
 			break;
 			case TBC::PhysicsEngine::ENGINE_HOVER:
@@ -607,6 +644,17 @@ void ContextObject::SetRootPosition(const Vector3DF& pPosition)
 	}
 }
 
+void ContextObject::SetRootOrientation(const QuaternionF& pOrientation)
+{
+	assert(mPhysicsOverride == PHYSICS_OVERRIDE_BONES);
+	mPosition.mPosition.mTransformation.SetOrientation(pOrientation);
+
+	if (mPhysics && mPhysics->GetBoneCount() > 0)
+	{
+		mPhysics->GetBoneTransformation(0).SetOrientation(pOrientation);
+	}
+}
+
 QuaternionF ContextObject::GetOrientation() const
 {
 	if (mPhysics)
@@ -631,6 +679,17 @@ Vector3DF ContextObject::GetVelocity() const
 		mManager->GetGameManager()->GetPhysicsManager()->GetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
 	}
 	return (lVelocity);
+}
+
+Vector3DF ContextObject::GetAngularVelocity() const
+{
+	Vector3DF lAngularVelocity;
+	const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
+	if (lGeometry && lGeometry->GetBodyId() != TBC::INVALID_BODY)
+	{
+		mManager->GetGameManager()->GetPhysicsManager()->GetBodyAngularVelocity(lGeometry->GetBodyId(), lAngularVelocity);
+	}
+	return lAngularVelocity;
 }
 
 Vector3DF ContextObject::GetAcceleration() const
@@ -705,6 +764,10 @@ bool ContextObject::SetPhysics(TBC::ChunkyPhysics* pStructure)
 			lTransformation = mPosition.mPosition.mTransformation;
 		}
 	}
+	else
+	{
+		lTransformation = mPosition.mPosition.mTransformation;
+	}
 
 	if (mPhysicsOverride == PHYSICS_OVERRIDE_BONES)
 	{
@@ -721,7 +784,7 @@ bool ContextObject::SetPhysics(TBC::ChunkyPhysics* pStructure)
 	}
 
 	TBC::PhysicsManager* lPhysics = mManager->GetGameManager()->GetPhysicsManager();
-	const int lPhysicsFps = mManager->GetGameManager()->GetConstTimeManager()->GetDesiredMicroSteps();
+	const int lPhysicsFps = mManager->GetGameManager()->GetTimeManager()->GetDesiredMicroSteps();
 	bool lOk = (mPhysics == 0 && pStructure->FinalizeInit(lPhysics, lPhysicsFps, &lTransformation.GetPosition(), this, this));
 	assert(lOk);
 	if (lOk)
@@ -761,7 +824,7 @@ bool ContextObject::SetPhysics(TBC::ChunkyPhysics* pStructure)
 void ContextObject::ClearPhysics()
 {
 	// Removes bodies from manager, then destroys all physical stuff.
-	if (mManager && mPhysics)
+	if (mManager && mPhysics && mPhysicsOverride != PHYSICS_OVERRIDE_BONES)
 	{
 		const int lBoneCount = mPhysics->GetBoneCount();
 		for (int x = 0; x < lBoneCount; ++x)
@@ -831,7 +894,7 @@ void ContextObject::ForceSend()
 bool ContextObject::QueryResendTime(float pDeltaTime, bool pUnblockDelta)
 {
 	bool lOkToSend = false;
-	const float lAbsoluteTime = GetManager()->GetGameManager()->GetConstTimeManager()->GetAbsoluteTime();
+	const float lAbsoluteTime = GetManager()->GetGameManager()->GetTimeManager()->GetAbsoluteTime();
 	if (pDeltaTime <= Cure::TimeManager::GetAbsoluteTimeDiff(lAbsoluteTime, mLastSendTime))
 	{
 		lOkToSend = true;
@@ -858,7 +921,7 @@ void ContextObject::SetSendCount(int pCount)
 
 void ContextObject::OnLoaded()
 {
-	OnPhysicsTick();
+	OnTick();
 	if (GetPhysics() && GetManager())
 	{
 		// Calculate total mass.
@@ -874,11 +937,11 @@ void ContextObject::OnLoaded()
 			}
 		}
 
-		GetManager()->EnablePhysicsUpdateCallback(this);
+		GetManager()->EnableTickCallback(this);
 	}
 }
 
-void ContextObject::OnPhysicsTick()
+void ContextObject::OnTick()
 {
 }
 
@@ -1176,14 +1239,6 @@ void ContextObject::AddAttachment(ContextObject* pObject, TBC::PhysicsManager::J
 }
 
 
-
-void ContextObject::AddChild(ContextObject* pChild)
-{
-	assert(pChild->GetInstanceId() != 0);
-	assert(std::find(mChildList.begin(), mChildList.end(), pChild) == mChildList.end());
-	mChildList.push_back(pChild);
-	pChild->SetParent(this);
-}
 
 void ContextObject::RemoveChild(ContextObject* pChild)
 {

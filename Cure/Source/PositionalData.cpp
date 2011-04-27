@@ -32,7 +32,7 @@ namespace Cure
 
 
 PositionalData::PositionalData():
-	mScale(1)
+	mSubHierarchyScale(1)
 {
 }
 
@@ -42,12 +42,17 @@ PositionalData::~PositionalData()
 
 float PositionalData::GetScaledDifference(const PositionalData* pReference) const
 {
-	return (mScale*GetBiasedDifference(pReference));
+	return (mSubHierarchyScale*GetBiasedDifference(pReference));
 }
 
 void PositionalData::SetScale(float pScale)
 {
-	mScale = pScale;
+	mSubHierarchyScale = pScale;
+}
+
+void PositionalData::Stop()
+{
+	// To stop or not to stop...
 }
 
 
@@ -97,7 +102,15 @@ float PositionalData6::GetBiasedDifference(const PositionalData* pReference) con
 		GetDifference(mAcceleration, lReference.mAcceleration)*3.0f +	// Linear acceleration is by far the most important one when doing some simple "CrocketBalls".
 		GetDifference(mAngularVelocity, lReference.mAngularVelocity)*1.0f +
 		GetDifference(mAngularAcceleration, lReference.mAngularAcceleration)*1.0f);
-	return (lWeightedDifferenceSum);
+	return lWeightedDifferenceSum / 8;
+}
+
+void PositionalData6::Stop()
+{
+	mVelocity.Set(0, 0, 0);
+	mAcceleration.Set(0, 0, 0);
+	mAngularVelocity.Set(0, 0, 0);
+	mAngularAcceleration.Set(0, 0, 0);
 }
 
 float PositionalData6::GetDifference(const QuaternionF& pQ1, const QuaternionF& pQ2)
@@ -191,7 +204,7 @@ float PositionalData3::GetBiasedDifference(const PositionalData* pReference) con
 		::fabs(mAcceleration[0]-lReference.mAcceleration[0]) +
 		::fabs(mAcceleration[1]-lReference.mAcceleration[1]) +
 		::fabs(mAcceleration[2]-lReference.mAcceleration[2]);
-	return (lWeightedDifferenceSum);
+	return lWeightedDifferenceSum / 11;
 }
 
 PositionalData::Type PositionalData3::GetType() const
@@ -209,6 +222,12 @@ void PositionalData3::CopyData(const PositionalData* pData)
 PositionalData* PositionalData3::Clone() const
 {
 	return (new PositionalData3(*this));
+}
+
+void PositionalData3::Stop()
+{
+	mVelocity[0] = mVelocity[1] = mVelocity[2] = 0;
+	mAcceleration[0] = mAcceleration[1] = mAcceleration[2] = 0;
 }
 
 
@@ -255,7 +274,7 @@ float PositionalData2::GetBiasedDifference(const PositionalData* pReference) con
 		::fabs(mVelocity[1]-lReference.mVelocity[1]) +
 		::fabs(mAcceleration[0]-lReference.mAcceleration[0]) +
 		::fabs(mAcceleration[1]-lReference.mAcceleration[1]);
-	return (lWeightedDifferenceSum);
+	return lWeightedDifferenceSum / 8;
 }
 
 PositionalData::Type PositionalData2::GetType() const
@@ -273,6 +292,12 @@ void PositionalData2::CopyData(const PositionalData* pData)
 PositionalData* PositionalData2::Clone() const
 {
 	return (new PositionalData2(*this));
+}
+
+void PositionalData2::Stop()
+{
+	mVelocity[0] = mVelocity[1] = 0;
+	mAcceleration[0] = mAcceleration[1] = 0;
 }
 
 
@@ -310,7 +335,7 @@ float PositionalData1::GetBiasedDifference(const PositionalData* pReference) con
 		::fabs(mTransformation-lReference.mTransformation) +
 		::fabs(mVelocity-lReference.mVelocity)*3.0f +		// Linear acceleration seems by far the most important one.
 		::fabs(mAcceleration-lReference.mAcceleration);
-	return (lWeightedDifferenceSum);
+	return lWeightedDifferenceSum / 5;
 }
 
 PositionalData::Type PositionalData1::GetType() const
@@ -328,6 +353,12 @@ void PositionalData1::CopyData(const PositionalData* pData)
 PositionalData* PositionalData1::Clone() const
 {
 	return (new PositionalData1(*this));
+}
+
+void PositionalData1::Stop()
+{
+	mVelocity = 0;
+	mAcceleration = 0;
 }
 
 
@@ -438,7 +469,6 @@ int ObjectPositionalData::Unpack(const uint8* pData, int pSize)
 			case TYPE_POSITION_2:	lPosition = new PositionalData2;	break;
 			case TYPE_POSITION_1:	lPosition = new PositionalData1;	break;
 			case TYPE_REAL_4:	lPosition = new RealData4;		break;
-			case TYPE_REAL_1_BOOL:	lPosition = new RealData1Bool;		break;
 			case TYPE_REAL_1:	lPosition = new RealData1;		break;
 		}
 		if (!lPosition)
@@ -477,7 +507,7 @@ float ObjectPositionalData::GetBiasedDifference(const PositionalData* pReference
 		lDiff += (*x)->GetScaledDifference(*y);
 	}
 	assert((x == mBodyPositionArray.end()) == (y == lReference.mBodyPositionArray.end()));
-	return (lDiff);
+	return lDiff / (1 + mBodyPositionArray.size());
 }
 
 PositionalData* ObjectPositionalData::GetAt(size_t pIndex) const
@@ -562,6 +592,16 @@ PositionalData* ObjectPositionalData::Clone() const
 	return (lData);
 }
 
+void ObjectPositionalData::Stop()
+{
+	mPosition.Stop();
+	BodyPositionArray::const_iterator x = mBodyPositionArray.begin();
+	for (; x != mBodyPositionArray.end(); ++x)
+	{
+		(*x)->Stop();
+	}
+}
+
 bool ObjectPositionalData::IsSameStructure(const ObjectPositionalData& pCopy) const
 {
 	if (mBodyPositionArray.size() != pCopy.mBodyPositionArray.size())
@@ -626,11 +666,11 @@ float RealData4::GetBiasedDifference(const PositionalData* pReference) const
 {
 	const RealData4& lReference = (const RealData4&)*pReference;
 	float lWeightedDifferenceSum =
-		::fabs(mValue[0]-lReference.mValue[0])*100.0f +
-		::fabs(mValue[1]-lReference.mValue[1])*100.0f +
-		::fabs(mValue[2]-lReference.mValue[2])*100.0f +
-		::fabs(mValue[3]-lReference.mValue[3])*100.0f;
-	return (lWeightedDifferenceSum);
+		::fabs(mValue[0]-lReference.mValue[0])*2 +
+		::fabs(mValue[1]-lReference.mValue[1])*2 +
+		::fabs(mValue[2]-lReference.mValue[2])*2 +
+		::fabs(mValue[3]-lReference.mValue[3])*2;
+	return lWeightedDifferenceSum / 4;
 }
 
 PositionalData::Type RealData4::GetType() const
@@ -648,58 +688,6 @@ void RealData4::CopyData(const PositionalData* pData)
 PositionalData* RealData4::Clone() const
 {
 	return (new RealData4(*this));
-}
-
-
-
-int RealData1Bool::GetPackSize() const
-{
-	return (1+sizeof(mValue)+1);
-}
-
-int RealData1Bool::Pack(uint8* pData) const
-{
-	int lSize = 0;
-	pData[lSize++] = (uint8)TYPE_REAL_1_BOOL;
-	lSize += PackerReal::Pack(&pData[lSize], mValue);
-	pData[lSize++] = (uint8)mBool;
-	return (lSize);
-}
-
-int RealData1Bool::Unpack(const uint8* pData, int pSize)
-{
-	CHECK_SIZE(1+sizeof(mValue)+1);
-	int lSize = 0;
-	CHECK_TYPE(TYPE_REAL_1_BOOL);
-	lSize += PackerReal::Unpack(mValue, &pData[lSize], sizeof(float));
-	mBool = (pData[lSize++] != 0);
-	return (lSize);
-}
-
-float RealData1Bool::GetBiasedDifference(const PositionalData* pReference) const
-{
-	const RealData1Bool& lReference = (const RealData1Bool&)*pReference;
-	float lWeightedDifferenceSum =
-		::fabs(mValue-lReference.mValue)*1000 +
-		::abs((int)mBool-(int)mBool)*1000;
-	return (lWeightedDifferenceSum);
-}
-
-PositionalData::Type RealData1Bool::GetType() const
-{
-	return (TYPE_REAL_1_BOOL);
-}
-
-void RealData1Bool::CopyData(const PositionalData* pData)
-{
-	assert(pData->GetType() == GetType());
-	const RealData1Bool& lCopy = *(RealData1Bool*)pData;
-	*this = lCopy;
-}
-
-PositionalData* RealData1Bool::Clone() const
-{
-	return (new RealData1Bool(*this));
 }
 
 
@@ -730,8 +718,8 @@ float RealData1::GetBiasedDifference(const PositionalData* pReference) const
 {
 	const RealData1& lReference = (const RealData1&)*pReference;
 	float lWeightedDifferenceSum =
-		::fabs(mValue-lReference.mValue)*1000;
-	return (lWeightedDifferenceSum);
+		::fabs(mValue-lReference.mValue)*3;
+	return lWeightedDifferenceSum / 1;
 }
 
 PositionalData::Type RealData1::GetType() const

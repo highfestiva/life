@@ -25,8 +25,23 @@ namespace Cure
 
 
 
+GameTicker::GameTicker():
+	mTimeManager(new TimeManager)
+{
+}
+
 GameTicker::~GameTicker()
 {
+}
+
+const TimeManager* GameTicker::GetTimeManager() const
+{
+	return mTimeManager;
+}
+
+TimeManager* GameTicker::GetTimeManager()
+{
+	return mTimeManager;
 }
 
 void GameTicker::Profile()
@@ -40,12 +55,12 @@ bool GameTicker::QueryQuit()
 
 
 
-GameManager::GameManager(RuntimeVariableScope* pVariableScope, ResourceManager* pResourceManager):
+GameManager::GameManager(const TimeManager* pTime, RuntimeVariableScope* pVariableScope, ResourceManager* pResourceManager):
 	mIsThreadSafe(true),
 	mVariableScope(pVariableScope),
 	mResource(pResourceManager),
 	mNetwork(0),
-	mTime(new TimeManager),
+	mTime(pTime),
 	mPhysics(TBC::PhysicsManagerFactory::Create(TBC::PhysicsManagerFactory::ENGINE_ODE)),
 	mContext(0),
 	mTerrain(0),//new TerrainManager(pResourceManager)),
@@ -66,8 +81,7 @@ GameManager::~GameManager()
 	mConsole = 0;
 	delete (mContext);
 	mContext = 0;
-	delete (mTime);
-	mTime = 0;
+	mTime = 0;	// Not owned resource.
 	delete (mTerrain);
 	mTerrain = 0;
 	delete (mPhysics);
@@ -80,11 +94,6 @@ GameManager::~GameManager()
 }
 
 
-
-void GameManager::ResetPhysicsTime(int pStartPhysicsFrame)
-{
-	mTime->Clear(pStartPhysicsFrame);
-}
 
 bool GameManager::BeginTick()
 {
@@ -108,14 +117,14 @@ bool GameManager::BeginTick()
 	}
 
 	{
-		LEPRA_MEASURE_SCOPE(AcquireTickLock);
+		//LEPRA_MEASURE_SCOPE(AcquireTickLock);
 		GetTickLock()->Acquire();
 	}
 
 	{
-		LEPRA_MEASURE_SCOPE(NetworkAndInput);
+		//LEPRA_MEASURE_SCOPE(NetworkAndInput);
 
-		mTime->Tick();
+		//mTime->Tick();
 
 		// Sorts up incoming network data; adds/removes objects (for instance via remote create/delete).
 		// On UI-based managers we handle user input here as well.
@@ -129,7 +138,7 @@ bool GameManager::BeginTick()
 
 	if (mTime->GetAffordedPhysicsStepCount() > 0)
 	{
-		LEPRA_MEASURE_SCOPE(StartPhysics);
+		//LEPRA_MEASURE_SCOPE(StartPhysics);
 		// Physics thread
 		// 1. does *NOT* add/delete objects,
 		// 2. processes context objects ("scripts"),
@@ -139,13 +148,17 @@ bool GameManager::BeginTick()
 		// by the current thread. (Single CPU => single thread...)
 		StartPhysicsTick();
 	}
+	else
+	{
+		log_adebug("Could not afford a physics step.");
+	}
 
 	return (true);
 }
 
 bool GameManager::EndTick()
 {
-	LEPRA_MEASURE_SCOPE(EndTick);
+	//LEPRA_MEASURE_SCOPE(EndTick);
 
 	if (mTime->GetAffordedPhysicsStepCount() > 0)
 	{
@@ -162,7 +175,7 @@ bool GameManager::EndTick()
 
 
 	{
-		LEPRA_MEASURE_SCOPE(NetworkSend);
+		//LEPRA_MEASURE_SCOPE(NetworkSend);
 
 		// Sends network packets. Among other things, movement of locally-controlled objects are sent.
 		// This must be run after input processing, otherwise input-physics-output loop won't have
@@ -175,6 +188,7 @@ bool GameManager::EndTick()
 
 bool GameManager::TickNetworkOutput()
 {
+	mContext->HandleAttributeSend();
 	return (mNetwork->SendAll());
 }
 
@@ -200,7 +214,7 @@ ContextManager* GameManager::GetContext() const
 	return (mContext);
 }
 
-const TimeManager* GameManager::GetConstTimeManager() const
+const TimeManager* GameManager::GetTimeManager() const
 {
 	return (mTime);
 }
@@ -232,11 +246,6 @@ TBC::PhysicsManager* GameManager::GetPhysicsManager() const
 ConsoleManager* GameManager::GetConsoleManager() const
 {
 	return (mConsole);
-}
-
-TimeManager* GameManager::GetTimeManager()
-{
-	return (mTime);
 }
 
 
@@ -459,37 +468,47 @@ void GameManager::PhysicsTick()
 
 	int lMicroSteps;
 	CURE_RTVAR_GET(lMicroSteps, =, GetVariableScope(), RTVAR_PHYSICS_MICROSTEPS, 3);
-	const int lAffordedStepCount = mTime->GetAffordedPhysicsStepCount() * lMicroSteps;
-	float lStepIncrement = mTime->GetAffordedPhysicsStepTime() / lMicroSteps;
-	/*if (lAffordedStepCount != 1 && !Math::IsEpsEqual(lStepIncrement, 1/(float)CURE_STANDARD_FRAME_RATE))
+	const int lAffordedStepCount = mTime->GetAffordedPhysicsStepCount();
+	const int lAffordedMicroStepCount = lAffordedStepCount * lMicroSteps;
+	const float lStepTime = mTime->GetAffordedPhysicsStepTime();
+	const float lStepIncrement = lStepTime / lMicroSteps;
+	/*if (lAffordedStepCount != 1)
 	{
 		mLog.Warningf(_T("Game time allows for %i physics steps in increments of %f."),
-			lAffordedStepCount, lStepIncrement);
+			lAffordedMicroStepCount, lStepIncrement);
 	}*/
 	{
 		LEPRA_MEASURE_SCOPE(PreSteps);
 		mPhysics->PreSteps();
 	}
-	for (int x = 0; x < lAffordedStepCount; ++x)
+	bool lFastAlgo;
+	CURE_RTVAR_GET(lFastAlgo, =, GetVariableScope(), RTVAR_PHYSICS_FASTALGO, true);
+	try
 	{
-		ScriptTick(lStepIncrement);
-		try
+		for (int x = 0; x < lAffordedMicroStepCount; ++x)
 		{
-			mPhysics->StepFast(lStepIncrement);
-		}
-		catch (...)
-		{
-			mLog.Errorf(_T("Got some crash or major problem in physics simulation!"));
-			lStepIncrement *= 0.3f;
+			ScriptTick(lStepIncrement);	// Ticks engines, so needs to be run every physics step.
+			if (lFastAlgo)
+			{
+				mPhysics->StepFast(lStepIncrement);
+			}
+			else
+			{
+				mPhysics->StepAccurate(lStepIncrement);
+			}
 		}
 	}
+	catch (...)
 	{
-		LEPRA_MEASURE_SCOPE(PostSteps);
+		mLog.Errorf(_T("Got some crash or major problem in physics simulation!"));
+	}
+	{
+		//LEPRA_MEASURE_SCOPE(PostSteps);
 		mPhysics->PostSteps();
 	}
 
 	{
-		LEPRA_MEASURE_SCOPE(Handles);
+		//LEPRA_MEASURE_SCOPE(Handles);
 		mContext->HandleIdledBodies();
 		mContext->HandlePhysicsSend();
 		HandleWorldBoundaries();

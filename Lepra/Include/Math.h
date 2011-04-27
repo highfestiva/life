@@ -132,6 +132,8 @@ public:
 	// The base 2 logarithm of x, rounded down to nearest lower integer.
 	static int Log2(int x);
 
+	template<class _T> static _T Acos(_T pAngle);
+
 	template<class _T, class _Vector> static _T CalculateMedian(const _Vector& pArray);
 	// Not necessarily standard deviation, if not providing arithmetic mean.
 	template<class _ReturnType, class _ArrayType, class _Vector> static _ReturnType CalculateDeviation(const _Vector& pArray, const _ArrayType& pMean);
@@ -153,6 +155,19 @@ template<class _Type> void Math::RangeAngles(_Type& pAngle1, _Type& pAngle2)
 	{
 		pAngle1 += (_Type)(PI*2);
 	}
+}
+
+template<class _T> static _T Math::Acos(_T pAngle)
+{
+	if (pAngle + MathTraits<_T>::FullEps() >= 1)
+	{
+		return 0;
+	}
+	if (pAngle - MathTraits<_T>::FullEps() <= -1)
+	{
+		return MathTraits<_T>::Pi();
+	}
+	return ::acos(pAngle);
 }
 
 template<class _T, class _Vector> _T Math::CalculateMedian(const _Vector& pArray)

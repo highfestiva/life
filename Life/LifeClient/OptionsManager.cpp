@@ -35,9 +35,17 @@ void OptionsManager::RefreshConfiguration()
 	if (mLastConfigRefresh.QueryTimeDiff() > 5.0)
 	{
 		mLastConfigRefresh.ClearTimeDiff();
-		mInputMap.clear();
 		DoRefreshConfiguration();
 	}
+}
+
+void OptionsManager::DoRefreshConfiguration()
+{
+	const KeyValue lEntries[] =
+	{
+		KeyValue(_T(RTVAR_CTRL_UI_CONTOGGLE), &mConsoleToggle),
+	};
+	SetValuePointers(lEntries, LEPRA_ARRAY_COUNT(lEntries));
 }
 
 bool OptionsManager::UpdateInput(UiLepra::InputManager::KeyCode pKeyCode, bool pActive)
@@ -49,7 +57,7 @@ bool OptionsManager::UpdateInput(UiLepra::InputManager::KeyCode pKeyCode, bool p
 float OptionsManager::UpdateInput(UiLepra::InputElement* pElement)
 {
 	bool lValueSet;
-	float lValue = (float)pElement->GetValue();
+	float lValue = pElement->GetValue();
 	const str lInputElementName = pElement->GetFullName();
 	if (pElement->GetType() == UiLepra::InputElement::ANALOGUE)
 	{
@@ -100,17 +108,8 @@ float OptionsManager::GetConsoleToggle() const
 
 bool OptionsManager::SetDefault(int)
 {
-	CURE_RTVAR_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_CONTOGGLE, _T("Key.F11"));
+	CURE_RTVAR_SYS_OVERRIDE(mVariableScope, RTVAR_CTRL_UI_CONTOGGLE, _T("Key.F11"));
 	return (true);
-}
-
-void OptionsManager::DoRefreshConfiguration()
-{
-	const KeyValue lEntries[] =
-	{
-		KeyValue(_T(RTVAR_CTRL_UI_CONTOGGLE), &mConsoleToggle),
-	};
-	SetValuePointers(lEntries, LEPRA_ARRAY_COUNT(lEntries));
 }
 
 const str OptionsManager::ConvertToString(UiLepra::InputManager::KeyCode pKeyCode)
@@ -120,7 +119,7 @@ const str OptionsManager::ConvertToString(UiLepra::InputManager::KeyCode pKeyCod
 
 bool OptionsManager::SetValue(const str& pKey, float pValue, bool pAdd)
 {
-	log_volatile(mLog.Tracef(_T("Got input %s: %g"), pKey.c_str(), pValue));
+	//log_volatile(mLog.Tracef(_T("Got input %s: %g"), pKey.c_str(), pValue));
 
 	bool lIsAnySteeringValue;
 	std::vector<float*>* lValuePointers = GetValuePointers(pKey, lIsAnySteeringValue);
@@ -160,6 +159,7 @@ std::vector<float*>* OptionsManager::GetValuePointers(const str& pKey, bool& pIs
 
 void OptionsManager::SetValuePointers(const KeyValue pEntries[], size_t pEntryCount)
 {
+	mInputMap.clear();
 	for (size_t x = 0; x < pEntryCount; ++x)
 	{
 		const str lKeys = mVariableScope->GetDefaultValue(Cure::RuntimeVariableScope::READ_ONLY, pEntries[x].first);

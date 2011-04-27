@@ -47,9 +47,17 @@ public:
 		MODE_NORMAL = 1,
 		MODE_HALF_LOCK,
 	};
-	enum
+	enum EngineAspects
 	{
-		MAX_CONTROLLER_COUNT = 8,
+		ASPECT_PRIMARY		= 0,
+		ASPECT_SECONDARY	= 1,
+		ASPECT_TERTIARY		= 2,
+		ASPECT_CAM		= 3,
+		ASPECT_MAX_REMOTE_COUNT	= 4,
+
+		ASPECT_LOCAL_SHADOW	= 4,
+		ASPECT_LOCAL_PRIMARY	= 5,
+		ASPECT_COUNT		= 8
 	};
 
 	PhysicsEngine(EngineType pEngineType, float pStrength,
@@ -64,8 +72,13 @@ public:
 	bool SetValue(unsigned pAspect, float pValue, float pZAngle);
 	void ForceSetValue(unsigned pAspect, float pValue);
 
-	void OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics* pStructure, float pFrameTime) const;
+	void OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics* pStructure, float pFrameTime) const;
 	float GetCurrentMaxSpeedSquare(const PhysicsManager* pPhysicsManager) const;
+
+	static void UprightStabilize(PhysicsManager* pPhysicsManager, const ChunkyPhysics* pStructure,
+		const ChunkyBoneGeometry* pGeometry, float pStrength, float pFriction);
+	static void ForwardStabilize(PhysicsManager* pPhysicsManager, const ChunkyPhysics* pStructure,
+		const ChunkyBoneGeometry* pGeometry, float pStrength, float pFriction);
 
 	unsigned GetControllerIndex() const;
 	float GetValue() const;
@@ -107,9 +120,9 @@ private:
 	float mFriction;
 	unsigned mControllerIndex;
 	EngineNodeArray mEngineNodeArray;
-	float mValue[MAX_CONTROLLER_COUNT];
+	float mValue[ASPECT_COUNT];
 	mutable float mIntensity;
-	mutable float mSmoothValue[MAX_CONTROLLER_COUNT];
+	mutable float mSmoothValue[ASPECT_COUNT];
 
 	LOG_CLASS_DECLARE();
 };

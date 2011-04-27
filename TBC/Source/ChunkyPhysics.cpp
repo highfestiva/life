@@ -22,6 +22,7 @@ ChunkyPhysics::ChunkyPhysics(TransformOperation pTransformOperation, PhysicsType
 	BoneHierarchy(),
 	mTransformOperation(pTransformOperation),
 	mPhysicsType(pPhysicsType),
+	mGuideMode(GUIDE_EXTERNAL),
 	mUniqeGeometryIndex(0)
 {
 }
@@ -34,16 +35,21 @@ ChunkyPhysics::~ChunkyPhysics()
 
 
 
-void ChunkyPhysics::OnTick(PhysicsManager* pPhysicsManager, float pFrameTime)
+void ChunkyPhysics::OnMicroTick(PhysicsManager* pPhysicsManager, float pFrameTime)
 {
 	EngineArray::iterator x = mEngineArray.begin();
 	for (; x != mEngineArray.end(); ++x)
 	{
-		(*x)->OnTick(pPhysicsManager, this, pFrameTime);
+		(*x)->OnMicroTick(pPhysicsManager, this, pFrameTime);
 	}
 }
 
 
+
+ChunkyPhysics::PhysicsType ChunkyPhysics::GetPhysicsType() const
+{
+	return (mPhysicsType);
+}
 
 void ChunkyPhysics::SetPhysicsType(PhysicsType pPhysicsType)
 {
@@ -51,10 +57,16 @@ void ChunkyPhysics::SetPhysicsType(PhysicsType pPhysicsType)
 	mPhysicsType = pPhysicsType;
 }
 
-ChunkyPhysics::PhysicsType ChunkyPhysics::GetPhysicsType() const
+ChunkyPhysics::GuideMode ChunkyPhysics::GetGuideMode() const
 {
-	return (mPhysicsType);
+	return mGuideMode;
 }
+
+void ChunkyPhysics::SetGuideMode(GuideMode pGuideMode)
+{
+	mGuideMode = pGuideMode;
+}
+
 
 ChunkyBoneGeometry* ChunkyPhysics::GetBoneGeometry(int pBoneIndex) const
 {
@@ -180,6 +192,18 @@ PhysicsEngine* ChunkyPhysics::GetEngine(int pEngineIndex) const
 {
 	assert((size_t)pEngineIndex < mEngineArray.size());
 	return (mEngineArray[pEngineIndex]);
+}
+
+int ChunkyPhysics::GetEngineIndexFromControllerIndex(int pStartEngineIndex, int pEngineStep, unsigned pControllerIndex) const
+{
+	for (int x = pStartEngineIndex; x >= 0 && x < (int)mEngineArray.size(); x += pEngineStep)
+	{
+		if (mEngineArray[x]->GetControllerIndex() == pControllerIndex)
+		{
+			return x;
+		}
+	}
+	return -1;
 }
 
 int ChunkyPhysics::GetEngineIndex(const PhysicsEngine* pEngine) const

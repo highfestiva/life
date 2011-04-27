@@ -37,6 +37,7 @@ public:
 	virtual ~ContextManager();
 
 	GameManager* GetGameManager() const;
+	void SetLocalRange(unsigned pIndex, unsigned pCount);	// Sets the range that will be used for local ID's.
 
 	void SetIsObjectOwner(bool pIsObjectOwner);
 	void AddLocalObject(ContextObject* pObject);
@@ -51,14 +52,17 @@ public:
 	void AddPhysicsBody(ContextObject* pObject, TBC::PhysicsManager::BodyID pBodyId);
 	void RemovePhysicsBody(TBC::PhysicsManager::BodyID pBodyId);
 
+	void AddAttributeSenderObject(ContextObject* pObject);
+	void UnpackObjectAttribute(GameObjectId pObjectId, const uint8* pData, unsigned pSize);
+
 	GameObjectId AllocateGameObjectId(NetworkObjectType pNetworkType);
 	void FreeGameObjectId(NetworkObjectType pNetworkType, GameObjectId pInstanceId);
 	bool IsLocalGameObjectId(GameObjectId pInstanceId) const;
 
-	void EnablePhysicsUpdateCallback(ContextObject* pObject);
-	void DisablePhysicsUpdateCallback(ContextObject* pObject);
 	void EnableTickCallback(ContextObject* pObject);
 	void DisableTickCallback(ContextObject* pObject);
+	void EnableMicroTickCallback(ContextObject* pObject);
+	void DisableMicroTickCallback(ContextObject* pObject);
 	void AddAlarmCallback(ContextObject* pObject, int pAlarmId, float pSeconds, void* pExtraData);
 	void CancelPendingAlarmCallbacksById(ContextObject* pObject, int pAlarmId);
 	void CancelPendingAlarmCallbacks(ContextObject* pObject);
@@ -67,11 +71,12 @@ public:
 	void TickPhysics();
 	void HandleIdledBodies();
 	void HandlePhysicsSend();
+	void HandleAttributeSend();
 	void HandlePostKill();
 
 private:
-	void DispatchPhysicsUpdateCallbacks();
-	void DispatchTickCallbacks(float pFrameTimeDelta);
+	void DispatchTickCallbacks();
+	void DispatchMicroTickCallbacks(float pFrameTimeDelta);
 	void DispatchAlarmCallbacks();
 
 	typedef IdManager<GameObjectId> ObjectIdManager;
@@ -126,8 +131,9 @@ private:
 	ContextObjectTable mObjectTable;
 	ContextObjectTable mPhysicsSenderObjectTable;
 	BodyTable mBodyTable;
-	ContextObjectTable mPhysicsUpdateCallbackObjectTable;
+	ContextObjectTable mAttributeSenderObjectTable;
 	ContextObjectTable mTickCallbackObjectTable;
+	ContextObjectTable mMicroTickCallbackObjectTable;
 	AlarmSet mAlarmCallbackObjectSet;
 	IdSet mPostKillSet;
 

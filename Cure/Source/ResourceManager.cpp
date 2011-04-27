@@ -6,6 +6,7 @@
 
 #include "../Include/ResourceManager.h"
 #include <assert.h>
+#include "../../Lepra/Include/Canvas.h"
 #include "../../Lepra/Include/HiResTimer.h"
 #include "../../Lepra/Include/MemFile.h"
 #include "../../Lepra/Include/Path.h"
@@ -36,10 +37,10 @@ UserResource::~UserResource()
 	{
 		SafeRelease(mResource->GetManager());
 	}
-	else
+	/*else
 	{
 		assert(false);
-	}
+	}*/
 	SetParentResource(0);
 }
 
@@ -133,6 +134,10 @@ void UserResource::PostProcess()
 
 
 
+// ----------------------------------------------------------------------------
+
+
+
 Resource::Resource(ResourceManager* pManager, const str& pName):
 	mManager(pManager),
 	mName(pName),
@@ -145,7 +150,7 @@ Resource::Resource(ResourceManager* pManager, const str& pName):
 Resource::~Resource()
 {
 	mState = RESOURCE_LOAD_ERROR;
-	log_volatile(mLog.Debugf((_T("Deleting resource ")+mName).c_str(), Log::LEVEL_TRACE));
+	log_volatile(mLog.Tracef((_T("Deleting resource ")+mName).c_str(), Log::LEVEL_TRACE));
 	mManager = 0;
 
 	CallbackList::iterator x = mLoadCallbackList.begin();
@@ -340,6 +345,10 @@ LOG_CLASS_DEFINE(GENERAL_RESOURCES, Resource);
 
 
 
+// ----------------------------------------------------------------------------
+
+
+
 PhysicsResource::PhysicsResource(Cure::ResourceManager* pManager, const str& pName):
 	Parent(pManager, pName)
 {
@@ -362,7 +371,7 @@ PhysicsResource::UserData PhysicsResource::GetUserData(const Cure::UserResource*
 
 bool PhysicsResource::Load()
 {
-	assert(IsUnique());
+	//assert(IsUnique());
 	assert(GetRamData() == 0);
 	SetRamData(new TBC::ChunkyPhysics(TBC::ChunkyPhysics::TRANSFORM_LOCAL2WORLD));
 	File* lFile = GetManager()->QueryFile(GetName());
@@ -386,6 +395,10 @@ ClassResource::ClassResource(Cure::ResourceManager* pManager, const str& pName):
 ClassResource::~ClassResource()
 {
 }
+
+
+
+// ----------------------------------------------------------------------------
 
 
 
@@ -440,6 +453,10 @@ LOG_CLASS_DEFINE(GAME_CONTEXT, ContextObjectResource);*/
 
 
 
+// ----------------------------------------------------------------------------
+
+
+
 PhysicalTerrainResource::PhysicalTerrainResource(ResourceManager* pManager, const str& pName):
 	Parent(pManager, pName)
 {
@@ -490,14 +507,60 @@ LOG_CLASS_DEFINE(PHYSICS, PhysicalTerrainResource);
 
 
 
-ResourceManager::ResourceManager(unsigned pLoaderThreadCount):
+// ----------------------------------------------------------------------------
+
+
+
+RamImageResource::RamImageResource(Cure::ResourceManager* pManager, const str& pName):
+	Parent(pManager, pName)
+{
+}
+
+RamImageResource::~RamImageResource()
+{
+}
+
+const str RamImageResource::GetType() const
+{
+	return (_T("RamImg"));
+}
+
+RamImageResource::UserData RamImageResource::GetUserData(const Cure::UserResource*) const
+{
+	return (GetRamData());
+}
+
+bool RamImageResource::Load()
+{
+	assert(!IsUnique());
+	assert(GetRamData() == 0);
+	SetRamData(new Canvas());
+	File* lFile = GetManager()->QueryFile(GetName());
+	bool lOk = (lFile != 0);
+	if (lOk)
+	{
+		ImageLoader lLoader;
+		lOk = lLoader.Load(ImageLoader::GetFileTypeFromName(GetName()), *lFile, *GetRamData());
+	}
+	delete lFile;
+	return lOk;
+}
+
+
+
+// ----------------------------------------------------------------------------
+
+
+
+ResourceManager::ResourceManager(unsigned pLoaderThreadCount, const str& pPathPrefix):
 	mTerrainFunctionManager(0),
 	mLoaderThreadCount(pLoaderThreadCount),
+	mPathPrefix(pPathPrefix),
 	mLoaderThread(_T("ResourceLoader")),
 	mZipLock(new Lock),
 	mZipFile(new ZipArchive)
 {
-	if (mZipFile->OpenArchive(_T("Data.pk3"), ZipArchive::READ_ONLY) != IO_OK)
+	if (mZipFile->OpenArchive(mPathPrefix + _T("Data.pk3"), ZipArchive::READ_ONLY) != IO_OK)
 	{
 		delete mZipFile;
 		mZipFile = 0;
@@ -603,7 +666,7 @@ void ResourceManager::StopClear()
 
 File* ResourceManager::QueryFile(const str& pFilename)
 {
-	const str lFilename = strutil::ReplaceAll(pFilename, '\\', '/');
+	str lFilename = strutil::ReplaceAll(pFilename, '\\', '/');
 	if (mZipFile)
 	{
 		ScopeLock lLock(mZipLock);
@@ -625,6 +688,7 @@ File* ResourceManager::QueryFile(const str& pFilename)
 		}
 	}
 
+	lFilename = mPathPrefix + lFilename;
 	DiskFile* lFile = new DiskFile;
 	bool lOk = false;
 	for (int x = 0; x < 3 && !lOk; ++x)	// Retry file open, file might be held by anti-virus/Windoze/similar shit.
@@ -653,7 +717,8 @@ bool ResourceManager::QueryFileExists(const str& pFilename)
 			return true;
 		}
 	}
-	return DiskFile::Exists(pFilename);
+	const str lFilename = mPathPrefix + strutil::ReplaceAll(pFilename, '\\', '/');
+	return DiskFile::Exists(lFilename);
 }
 
 strutil::strvec ResourceManager::ListFiles(const str& pWildcard)
@@ -673,8 +738,9 @@ strutil::strvec ResourceManager::ListFiles(const str& pWildcard)
 		return lFilenameArray;
 	}
 
+	const str lWildcard = mPathPrefix + strutil::ReplaceAll(pWildcard, '\\', '/');
 	DiskFile::FindData lInfo;
-	for (bool lOk = DiskFile::FindFirst(pWildcard, lInfo); lOk; lOk = DiskFile::FindNext(lInfo))
+	for (bool lOk = DiskFile::FindFirst(lWildcard, lInfo); lOk; lOk = DiskFile::FindNext(lInfo))
 	{
 		lFilenameArray.push_back(lInfo.GetName());
 	}
@@ -744,11 +810,6 @@ void ResourceManager::LoadUnique(const str& pName, UserResource* pUserResource, 
 	StartLoad(lResource);
 }
 
-bool ResourceManager::IsCreated(const str& pName) const
-{
-	return (mActiveResourceTable.FindObject(pName) != 0);
-}
-
 void ResourceManager::SafeRelease(UserResource* pUserResource)
 {
 	Resource* lResource = pUserResource->GetResource();
@@ -787,7 +848,7 @@ void ResourceManager::Release(Resource* pResource)
 			{
 				// A completely loaded resource dropped, place it "on the way out" of the system.
 				mCachedResourceTable.Insert(pResource->GetName(), pResource);
-				log_volatile(mLog.Debug(_T("Loaded resource ")+pResource->GetName()+_T(" dereferenced. Placed in cache.")));
+				log_volatile(mLog.Trace(_T("Loaded resource ")+pResource->GetName()+_T(" dereferenced. Placed in cache.")));
 				pResource->Suspend();
 			}
 			else
@@ -807,9 +868,10 @@ void ResourceManager::Release(Resource* pResource)
 		}
 		else
 		{
+			mActiveResourceTable.Remove(pResource->GetName());	// TRICKY: this is for shared resources that are not to be kept any more when dereferenced.
 			if (PrepareRemoveInLoadProgress(pResource))
 			{
-				log_volatile(mLog.Debug(_T("Resource ")+pResource->GetName()+_T(" (unique) dereferenced. Deleted immediately.")));
+				log_volatile(mLog.Trace(_T("Resource ")+pResource->GetName()+_T(" (unique) dereferenced. Deleted immediately.")));
 				assert(mRequestLoadList.Find(pResource) == mRequestLoadList.End());
 				DeleteResource(pResource);
 			}
@@ -822,8 +884,23 @@ void ResourceManager::Release(Resource* pResource)
 	}
 	else
 	{
-		log_volatile(mLog.Debug(_T("Resource ")+pResource->GetName()+_T(" dereferenced, but has other references.")));
+		log_volatile(mLog.Trace(_T("Resource ")+pResource->GetName()+_T(" dereferenced, but has other references.")));
 	}
+}
+
+bool ResourceManager::IsLoading()
+{
+	ScopeLock lLock(&mThreadLock);
+	return (mRequestLoadList.GetCount() || mLoadedList.GetCount());
+}
+
+bool ResourceManager::WaitLoading()
+{
+	for (int x = 0; IsLoading() && x < 200; ++x)
+	{
+		Thread::Sleep(0.1);
+	}
+	return !IsLoading();
 }
 
 
@@ -918,13 +995,13 @@ Resource* ResourceManager::GetAddCachedResource(const str& pName, UserResource* 
 		mActiveResourceTable.Insert(lResource->GetName(), lResource);
 		assert(mRequestLoadList.Find(lResource) == mRequestLoadList.End());
 		pMustLoad = true;
-		log_volatile(mLog.Debug(_T("Resource ")+pName+_T(" created + starts loading.")));
+		log_volatile(mLog.Trace(_T("Resource ")+pName+_T(" created + starts loading.")));
 	}
 	else
 	{
 		if (lResource->GetLoadState() == RESOURCE_UNLOADED)
 		{
-			log_volatile(mLog.Debug(_T("Resource ")+pName+_T(" will reload.")));
+			log_volatile(mLog.Trace(_T("Resource ")+pName+_T(" will reload.")));
 			pMustLoad = true;
 		}
 		else if (lResource->GetLoadState() == RESOURCE_LOAD_IN_PROGRESS)
@@ -933,10 +1010,10 @@ Resource* ResourceManager::GetAddCachedResource(const str& pName, UserResource* 
 		}
 		else
 		{
-			log_volatile(mLog.Debug(_T("Resource ")+pName+_T(" already loaded, will use it instead of reloading.")));
+			log_volatile(mLog.Trace(_T("Resource ")+pName+_T(" already loaded, will use it instead of reloading.")));
 		}
 	}
-	assert(!lResource->IsUnique());
+	//assert(!lResource->IsUnique());
 	lResource->Reference();
 	return (lResource);
 }
@@ -950,7 +1027,7 @@ void ResourceManager::StartLoad(Resource* pResource)
 	pResource->SetLoadState(RESOURCE_LOAD_IN_PROGRESS);
 	assert(mRequestLoadList.GetCount() < 10000);	// Just run GetCount() to validate internal integrity.
 	log_volatile(const str& lName = pResource->GetName());
-	log_volatile(mLog.Debugf(_T("Requesting load of '%s' (%s)."), lName.c_str(), pResource->GetType().c_str()));
+	log_volatile(mLog.Tracef(_T("Requesting load of '%s' (%s)."), lName.c_str(), pResource->GetType().c_str()));
 	assert(mRequestLoadList.Find(pResource) == mRequestLoadList.End());
 	mRequestLoadList.PushBack(pResource, pResource);
 	mLoadSemaphore.Signal();
@@ -1109,14 +1186,13 @@ void ResourceManager::LoadSingleResource()
 	if (lResource)
 	{
 		assert(lResource->GetLoadState() == RESOURCE_LOAD_IN_PROGRESS);
-		log_volatile(mLog.Debugf(_T("Loading %s with %i resources in list (inclusive)."),
+		log_volatile(mLog.Tracef(_T("Loading %s with %i resources in list (inclusive)."),
 			lResource->GetName().c_str(), lListCount));
 		const bool lIsLoaded = lResource->Load();
 		assert(lResource->GetLoadState() == RESOURCE_LOAD_IN_PROGRESS);
 		if (!lIsLoaded)
 		{
 			lResource->SetLoadState(RESOURCE_LOAD_ERROR);
-			assert(false);
 		}
 		{
 			ScopeLock lLock(&mThreadLock);

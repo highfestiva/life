@@ -61,12 +61,15 @@ class Vector3D
 		inline void Div(_TVarType pScalar);
 
 		inline _TVarType Dot(const Vector3D<_TVarType>& pV) const;
+		inline _TVarType Dot(_TVarType pX, _TVarType pY, _TVarType pZ) const;
 
 		inline _TVarType GetLength() const;
 		inline _TVarType GetLengthSquared() const;
 
 		inline _TVarType GetDistance(const Vector3D<_TVarType>& pV) const;
 		inline _TVarType GetDistanceSquared(const Vector3D<_TVarType>& pV) const;
+
+		inline _TVarType GetAngle(const Vector3D<_TVarType>& pV) const;
 
 		// Z & Y refers to the axis of rotation.
 		inline _TVarType GetPolarCoordAngleZ() const;

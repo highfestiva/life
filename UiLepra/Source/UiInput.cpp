@@ -49,17 +49,17 @@ InputDevice* InputElement::GetParentDevice() const
 	return (mParentDevice);
 }
 
-bool InputElement::GetBooleanValue(float64 pThreshold) const
+bool InputElement::GetBooleanValue(float pThreshold) const
 {
 	return (mValue >= pThreshold);
 }
 
-float64 InputElement::GetValue() const
+float InputElement::GetValue() const
 {
 	return mValue;
 }
 
-float64 InputElement::GetDeltaValue() const
+float InputElement::GetDeltaValue() const
 {
 	return (mValue - mPrevValue);
 }
@@ -71,22 +71,7 @@ const str& InputElement::GetIdentifier() const
 
 str InputElement::GetFullName() const
 {
-	str lName;
-	switch (GetParentDevice()->GetInterpretation())
-	{
-		case InputDevice::TYPE_MOUSE:		lName += _T("Mouse");		break;
-		case InputDevice::TYPE_KEYBOARD:	lName += _T("Keyboard");	break;
-		case InputDevice::TYPE_JOYSTICK:	lName += _T("Joystick");	break;
-		case InputDevice::TYPE_GAMEPAD:		lName += _T("GamePad");		break;
-		case InputDevice::TYPE_1STPERSON:	lName += _T("1stPerson");	break;
-		case InputDevice::TYPE_PEDALS:		lName += _T("Pedals");		break;
-		case InputDevice::TYPE_WHEEL:		lName += _T("Wheel");		break;
-		case InputDevice::TYPE_FLIGHT:		lName += _T("Flight");		break;
-		default:				lName += _T("Device");		break;
-	}
-	lName += strutil::IntToString(GetParentDevice()->GetTypeIndex(), 10)+_T(".");
-	lName += GetName();
-	return (lName);
+	return GetParentDevice()->GetUniqueIdentifier() + _T(".") + GetIdentifier();
 }
 
 str InputElement::GetName() const
@@ -121,12 +106,13 @@ void InputElement::ClearFunctors()
 	mFunctorArray.clear();
 }
 
-void InputElement::SetValue(float64 pNewValue)
+void InputElement::SetValue(float pNewValue)
 {
-	static const float64 lInputEpsilon = 1e-8;
+	static const float lInputEpsilon = 0.02f;
 	if (mInterpretation == RELATIVE_AXIS || ::fabs(pNewValue - mValue) > lInputEpsilon)
 	{
 		//::printf("%s(%i) = %f\n", GetIdentifier().c_str(), GetTypeIndex(), pNewValue);
+		//mLog.Infof(_T("%s(%i) = %f\n"), GetIdentifier().c_str(), GetTypeIndex(), pNewValue);
 
 		mPrevValue = mValue;
 		mValue = pNewValue;
@@ -138,6 +124,12 @@ void InputElement::SetValue(float64 pNewValue)
 		}
 	}
 }
+
+LOG_CLASS_DEFINE(UI_INPUT, InputElement);
+
+
+
+// ---------------------------------------------------------------------------
 
 
 
@@ -186,7 +178,7 @@ void InputDevice::SetActive(bool pActive)
 	mActive = pActive;
 }
 
-void InputDevice::SetElementValue(InputElement* pElement, float64 pValue)
+void InputDevice::SetElementValue(InputElement* pElement, float pValue)
 {
 	pElement->SetValue(pValue);
 }
@@ -227,11 +219,17 @@ unsigned InputDevice::GetNumAnalogueElements()
 void InputDevice::SetIdentifier(const str& pIdentifier)
 {
 	mIdentifier = pIdentifier;
+	mUniqueIdentifier = mIdentifier + strutil::IntToString(GetManager()->QueryIdentifierCount(mIdentifier), 10);
 }
 
 const str& InputDevice::GetIdentifier() const
 {
 	return mIdentifier;
+}
+
+const str& InputDevice::GetUniqueIdentifier() const
+{
+	return mUniqueIdentifier;
 }
 
 const InputElement* InputDevice::GetElement(const str& pIdentifier) const
@@ -415,9 +413,11 @@ bool InputDevice::SetCalibration(const CalibrationData& pData)
 	return (lOk);
 }
 
+LOG_CLASS_DEFINE(UI_INPUT, InputDevice);
 
 
 
+// ---------------------------------------------------------------------------
 
 
 
@@ -465,6 +465,50 @@ void InputManager::RemoveMouseInputObserver(MouseInputObserver* pListener)
 	mMouseObserverList.erase(pListener);
 }
 
+bool InputManager::NotifyOnChar(tchar pChar)
+{
+	bool lConsumed = false;
+	TextObserverList::iterator x = mTextObserverList.begin();
+	for (; !lConsumed && x != mTextObserverList.end(); ++x)
+	{
+		lConsumed = (*x)->OnChar(pChar);
+	}
+	return (lConsumed);
+}
+
+bool InputManager::NotifyOnKeyDown(KeyCode pKeyCode)
+{
+	bool lConsumed = false;
+	KeyCodeObserverList::iterator x = mKeyCodeObserverList.begin();
+	for (; !lConsumed && x != mKeyCodeObserverList.end(); ++x)
+	{
+		lConsumed = (*x)->OnKeyDown(pKeyCode);
+	}
+	return (lConsumed);
+}
+
+bool InputManager::NotifyOnKeyUp(KeyCode pKeyCode)
+{
+	bool lConsumed = false;
+	KeyCodeObserverList::iterator x = mKeyCodeObserverList.begin();
+	for (; !lConsumed && x != mKeyCodeObserverList.end(); ++x)
+	{
+		lConsumed = (*x)->OnKeyUp(pKeyCode);
+	}
+	return (lConsumed);
+}
+
+bool InputManager::NotifyMouseDoubleClick()
+{
+	bool lConsumed = false;
+	MouseObserverList::iterator x = mMouseObserverList.begin();
+	for (; !lConsumed && x != mMouseObserverList.end(); ++x)
+	{
+		lConsumed = (*x)->OnDoubleClick();
+	}
+	return (lConsumed);
+}
+
 bool InputManager::ReadKey(KeyCode pKeyCode)
 {
 	return (mKeyDown[(int)pKeyCode]);
@@ -497,8 +541,8 @@ str InputManager::GetKeyName(KeyCode pKeyCode)
 		X(PRINT_SCREEN);
 		X(INSERT);
 		X(DEL);
-		X(LWIN);
-		X(RWIN);
+		X(LOS);
+		X(ROS);
 		X(CONTEXT_MENU);
 		X(NUMPAD_0);
 		X(NUMPAD_1);
@@ -572,50 +616,6 @@ str InputManager::GetKeyName(KeyCode pKeyCode)
 void InputManager::SetKey(KeyCode pKeyCode, bool pValue)
 {
 	mKeyDown[(int)pKeyCode] = pValue;
-}
-
-bool InputManager::NotifyOnChar(tchar pChar)
-{
-	bool lConsumed = false;
-	TextObserverList::iterator x = mTextObserverList.begin();
-	for (; !lConsumed && x != mTextObserverList.end(); ++x)
-	{
-		lConsumed = (*x)->OnChar(pChar);
-	}
-	return (lConsumed);
-}
-
-bool InputManager::NotifyOnKeyDown(KeyCode pKeyCode)
-{
-	bool lConsumed = false;
-	KeyCodeObserverList::iterator x = mKeyCodeObserverList.begin();
-	for (; !lConsumed && x != mKeyCodeObserverList.end(); ++x)
-	{
-		lConsumed = (*x)->OnKeyDown(pKeyCode);
-	}
-	return (lConsumed);
-}
-
-bool InputManager::NotifyOnKeyUp(KeyCode pKeyCode)
-{
-	bool lConsumed = false;
-	KeyCodeObserverList::iterator x = mKeyCodeObserverList.begin();
-	for (; !lConsumed && x != mKeyCodeObserverList.end(); ++x)
-	{
-		lConsumed = (*x)->OnKeyUp(pKeyCode);
-	}
-	return (lConsumed);
-}
-
-bool InputManager::NotifyMouseDoubleClick()
-{
-	bool lConsumed = false;
-	MouseObserverList::iterator x = mMouseObserverList.begin();
-	for (; !lConsumed && x != mMouseObserverList.end(); ++x)
-	{
-		lConsumed = (*x)->OnDoubleClick();
-	}
-	return (lConsumed);
 }
 
 void InputManager::PollEvents()
@@ -699,19 +699,16 @@ InputDevice* InputManager::FindDevice(const str& pDeviceIdentifier, int pN)
 	return 0;
 }
 
-int InputManager::GetDeviceCount(const str& pDeviceIdentifier) const
+int InputManager::QueryIdentifierCount(const str& pDeviceIdentifier) const
 {
 	int lCount = 0;
-
-	DeviceList::const_iterator x;
-	for (x = mDeviceList.begin(); 
-		x != mDeviceList.end(); 
-		++x)
+	DeviceList::const_iterator x = mDeviceList.begin();
+	for (; x != mDeviceList.end(); ++x)
 	{
 		InputDevice* lDevice = *x;
 		if (pDeviceIdentifier == lDevice->GetIdentifier())
 		{
-			lCount++;
+			++lCount;
 		}
 	}
 
@@ -741,6 +738,8 @@ unsigned InputManager::GetDeviceIndex(InputDevice* pDevice) const
 
 	return 0;
 }
+
+LOG_CLASS_DEFINE(UI_INPUT, InputManager);
 
 
 

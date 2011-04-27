@@ -288,6 +288,10 @@ FileLogListener::FileLogListener(const str& pFilename, OutputFormat pFormat):
 	LogListener(_T("file"), pFormat)
 {
 	mFile.Open(pFilename, DiskFile::MODE_TEXT_WRITE_APPEND);
+	if (mFile.GetSize() > 3*1024*1024)	// If the log starts getting big, do something about it.
+	{
+		mFile.Open(pFilename, DiskFile::MODE_TEXT_WRITE);
+	}
 }
 
 FileLogListener::~FileLogListener()

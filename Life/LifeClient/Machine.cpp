@@ -45,9 +45,9 @@ Machine::~Machine()
 
 
 
-void Machine::OnPhysicsTick()
+void Machine::OnTick()
 {
-	Parent::OnPhysicsTick();
+	Parent::OnTick();
 	mParticleTimer.UpdateTimer();
 	if (mCreatedParticles)
 	{
@@ -61,14 +61,17 @@ void Machine::OnPhysicsTick()
 	{
 		return;
 	}
-	const float lFrameTime = std::min(0.1f, GetManager()->GetGameManager()->GetTimeManager()->GetNormalFrameTime());
-	bool lIsChild;
+	const Cure::TimeManager* lTimeManager = GetManager()->GetGameManager()->GetTimeManager();
+	const float lFrameTime = std::min(0.1f, lTimeManager->GetNormalFrameTime());
+	const bool lIsChild = IsAttributeTrue(_T("float_is_child"));
+	bool lForceEyes;
+	CURE_RTVAR_GET(lForceEyes, =, Cure::GetSettings(), RTVAR_GAME_FORCEEYES, false);
 	float lRealTimeRatio;
-	CURE_RTVAR_GET(lIsChild, =, mManager->GetGameManager()->GetVariableScope(), RTVAR_GAME_ISCHILD, true);
 	CURE_RTVAR_GET(lRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
 	const TBC::PhysicsManager* lPhysicsManager = mManager->GetGameManager()->GetPhysicsManager();
 	Vector3DF lVelocity;
 	lPhysicsManager->GetBodyVelocity(lPhysics->GetBoneGeometry(lPhysics->GetRootBone())->GetBodyId(), lVelocity);
+	size_t lEngineSoundIndex = 0;
 	for (size_t x = 0; x < lClass->GetTagCount(); ++x)
 	{
 		const UiTbc::ChunkyClass::Tag& lTag = lClass->GetTag(x);
@@ -83,7 +86,7 @@ void Machine::OnPhysicsTick()
 			}
 			if (lTag.mFloatValueList.size() != 1 ||
 				lTag.mStringValueList.size() != 0 ||
-				lTag.mBodyIndexList.size() != 1 ||
+				lTag.mBodyIndexList.size()+lTag.mEngineIndexList.size() != 1 ||
 				lTag.mMeshIndexList.size() < 1)
 			{
 				mLog.Errorf(_T("The eye tag '%s' has the wrong # of parameters."), lTag.mTagName.c_str());
@@ -92,28 +95,54 @@ void Machine::OnPhysicsTick()
 			}
 
 			float lJointValue = 0;
-			int lBodyIndex = lTag.mBodyIndexList[0];
-			TBC::ChunkyBoneGeometry* lBone = lPhysics->GetBoneGeometry(lBodyIndex);
-			TBC::PhysicsManager::JointID lJoint = lBone->GetJointId();
-			switch (lBone->GetJointType())
+			if (!lTag.mBodyIndexList.empty())
 			{
-				case TBC::ChunkyBoneGeometry::JOINT_HINGE2:
+				int lBodyIndex = lTag.mBodyIndexList[0];
+				TBC::ChunkyBoneGeometry* lBone = lPhysics->GetBoneGeometry(lBodyIndex);
+				TBC::PhysicsManager::JointID lJoint = lBone->GetJointId();
+				switch (lBone->GetJointType())
 				{
-					TBC::PhysicsManager::Joint3Diff lDiff;
-					lPhysicsManager->GetJoint3Diff(lBone->GetBodyId(), lJoint, lDiff);
-					float lLowStop = 0;
-					float lHighStop = 0;
-					float lBounce = 0;
-					lPhysicsManager->GetJointParams(lJoint, lLowStop, lHighStop, lBounce);
-					lJointValue = lDiff.mAngle1 * 2 / (lHighStop-lLowStop);
+					case TBC::ChunkyBoneGeometry::JOINT_HINGE2:
+					{
+						TBC::PhysicsManager::Joint3Diff lDiff;
+						lPhysicsManager->GetJoint3Diff(lBone->GetBodyId(), lJoint, lDiff);
+						float lLowStop = 0;
+						float lHighStop = 0;
+						float lBounce = 0;
+						lPhysicsManager->GetJointParams(lJoint, lLowStop, lHighStop, lBounce);
+						lJointValue = lDiff.mAngle1 * 2 / (lHighStop-lLowStop);
+					}
+					break;
+					case TBC::ChunkyBoneGeometry::JOINT_HINGE:
+					{
+						TBC::PhysicsManager::Joint1Diff lDiff;
+						lPhysicsManager->GetJoint1Diff(lBone->GetBodyId(), lJoint, lDiff);
+						float lLowStop = 0;
+						float lHighStop = 0;
+						float lBounce = 0;
+						lPhysicsManager->GetJointParams(lJoint, lLowStop, lHighStop, lBounce);
+						lJointValue = lDiff.mValue * 2 / (lHighStop-lLowStop);
+					}
+					break;
+					case TBC::ChunkyBoneGeometry::JOINT_EXCLUDE:
+					{
+						// Simple, dead eyes.
+						lJointValue = 0;
+					}
+					break;
+					default:
+					{
+						mLog.Errorf(_T("Joint type %i not implemented for tag type %s."), lBone->GetJointType(), lTag.mTagName.c_str());
+						assert(false);
+					}
+					break;
 				}
-				break;
-				default:
-				{
-					mLog.Errorf(_T("Joint type %i not implemented for tag type %s."), lBone->GetJointType(), lTag.mTagName.c_str());
-					assert(false);
-				}
-				break;
+			}
+			else
+			{
+				const int lEngineIndex = lTag.mEngineIndexList[0];
+				TBC::PhysicsEngine* lEngine = lPhysics->GetEngine(lEngineIndex);
+				lJointValue = lEngine->GetLerpThrottle(0.1f, 0.1f);
 			}
 			const float lScale = lTag.mFloatValueList[0];
 			const float lJointRightValue = lJointValue * lScale;
@@ -128,7 +157,7 @@ void Machine::OnPhysicsTick()
 					lTransform.MoveBackward(lJointDownValue);
 					lMesh->SetTransformation(lTransform);
 					lMesh->SetTransformationChanged(true);
-					lMesh->SetAlwaysVisible(lIsChild);
+					lMesh->SetAlwaysVisible(lIsChild || lForceEyes);
 				}
 			}
 		}
@@ -170,7 +199,7 @@ void Machine::OnPhysicsTick()
 		{
 			// Sound controlled by engine.
 
-			if (lTag.mFloatValueList.size() != 9+lTag.mEngineIndexList.size() ||
+			if (lTag.mFloatValueList.size() != 1+9+lTag.mEngineIndexList.size() ||
 				lTag.mStringValueList.size() != 1 ||
 				lTag.mBodyIndexList.size() != 1 ||
 				lTag.mEngineIndexList.size() < 1 ||
@@ -200,7 +229,8 @@ void Machine::OnPhysicsTick()
 
 			enum FloatValue
 			{
-				FV_PITCH_LOW = 0,
+				FV_THROTTLE_FACTOR = 0,
+				FV_PITCH_LOW,
 				FV_PITCH_HIGH,
 				FV_PITCH_EXPONENT,
 				FV_VOLUME_LOW,
@@ -214,19 +244,29 @@ void Machine::OnPhysicsTick()
 			const float lThrottleUpSpeed = Math::GetIterateLerpTime(0.2f, lFrameTime);
 			const float lThrottleDownSpeed = Math::GetIterateLerpTime(0.1f, lFrameTime);
 			float lIntensity = 0;
-			for (size_t x = 0; x < lTag.mEngineIndexList.size(); ++x)
+			for (size_t y = 0; y < lTag.mEngineIndexList.size(); ++y)
 			{
-				const TBC::PhysicsEngine* lEngine = mPhysics->GetEngine(lTag.mEngineIndexList[x]);
+				const TBC::PhysicsEngine* lEngine = mPhysics->GetEngine(lTag.mEngineIndexList[y]);
 				float lEngineIntensity = Math::Clamp(lEngine->GetIntensity(), 0.0f, 1.0f);
-				const bool lIsRotor = (lEngine->GetEngineType() == TBC::PhysicsEngine::ENGINE_HINGE_GYRO);
-				const bool lIsHydraulics = (lEngine->GetEngineType() == TBC::PhysicsEngine::ENGINE_HINGE_TORQUE && lEngine->HasEngineMode(TBC::PhysicsEngine::MODE_HALF_LOCK));
-				if (!lIsRotor && !lIsHydraulics)	// Rotors and hydraulics only look to the intensity, never to the throttle used.
+				if (lTag.mFloatValueList[FV_THROTTLE_FACTOR] > 0)
 				{
 					const float lThrottle = ::fabs(lEngine->GetLerpThrottle(lThrottleUpSpeed, lThrottleDownSpeed));
-					lEngineIntensity *= lThrottle;	// Normal, linear throttle.
+					lEngineIntensity *= lThrottle * lTag.mFloatValueList[FV_THROTTLE_FACTOR];
 				}
-				lEngineIntensity *= lTag.mFloatValueList[FV_ENGINE_FACTOR_BASE+x];
+				lEngineIntensity *= lTag.mFloatValueList[FV_ENGINE_FACTOR_BASE+y];
 				lIntensity += lEngineIntensity;
+			}
+			if (lTag.mFloatValueList[FV_THROTTLE_FACTOR] <= 0)
+			{
+				// If motor is on/off type (electric for instance), we smooth out the
+				// intensity, or it will become very jerky as wheels wobble along.
+				if (mEngineSoundIntensity.size() <= lEngineSoundIndex)
+				{
+					mEngineSoundIntensity.resize(lEngineSoundIndex+1);
+				}
+				const float lSmooth = std::min(lFrameTime*8.0f, 0.5f);
+				lIntensity = mEngineSoundIntensity[lEngineSoundIndex] = Math::Lerp(mEngineSoundIntensity[lEngineSoundIndex], lIntensity, lSmooth);
+				++lEngineSoundIndex;
 			}
 			//lIntensity = Math::Clamp(lIntensity, 0, 1);
 			const float lVolumeLerp = ::pow(lIntensity, lTag.mFloatValueList[FV_VOLUME_EXPONENT]);
@@ -246,7 +286,20 @@ void Machine::OnPhysicsTick()
 			{
 				continue;
 			}
-			if (lTag.mFloatValueList.size() != 6 ||
+
+			enum FloatValue
+			{
+				FV_X = 0,
+				FV_Y,
+				FV_Z,
+				FV_VX,
+				FV_VY,
+				FV_VZ,
+				FV_DENSITY,
+				FV_OPACITY,
+				FV_COUNT
+			};
+			if (lTag.mFloatValueList.size() != FV_COUNT ||
 				lTag.mStringValueList.size() != 0 ||
 				lTag.mEngineIndexList.size() != 1 ||
 				lTag.mBodyIndexList.size() != 0 ||
@@ -256,36 +309,49 @@ void Machine::OnPhysicsTick()
 				assert(false);
 				continue;
 			}
-
 			const TBC::PhysicsEngine* lEngine = mPhysics->GetEngine(lTag.mEngineIndexList[0]);
+			const float lDensity = lTag.mFloatValueList[FV_DENSITY];
+			mExhaustTimeout -= std::max(0.15f, lEngine->GetIntensity() * lDensity) * lFrameTime * 25;
+			if (mExhaustTimeout > 0)
+			{
+				continue;
+			}
+			mExhaustTimeout = 1.51f;
+
 			const QuaternionF lOriginalOrientation = GetOrientation();
-			Vector3DF lOffset(lTag.mFloatValueList[0], lTag.mFloatValueList[1], lTag.mFloatValueList[2]);
+			Vector3DF lOffset(lTag.mFloatValueList[FV_X], lTag.mFloatValueList[FV_Y], lTag.mFloatValueList[FV_Z]);
 			lOffset = lOriginalOrientation*lOffset;
-			Vector3DF lVelocity(lTag.mFloatValueList[3], lTag.mFloatValueList[4], lTag.mFloatValueList[5]);
+			Vector3DF lVelocity(lTag.mFloatValueList[FV_VX], lTag.mFloatValueList[FV_VY], lTag.mFloatValueList[FV_VZ]);
+			const float lOpacity = lTag.mFloatValueList[FV_OPACITY];
 			lVelocity = lOriginalOrientation*lVelocity;
-			lVelocity += GetVelocity();
+			lVelocity += GetVelocity()*0.5f;
 			for (size_t y = 0; y < lTag.mMeshIndexList.size(); ++y)
 			{
-				mExhaustTimeout -= std::max(0.15f, lEngine->GetIntensity()) * lFrameTime * 25;
-				if (mExhaustTimeout > 0)
-				{
-					continue;
-				}
-				mExhaustTimeout = 1.01f;
 				TBC::GeometryBase* lMesh = GetMesh(lTag.mMeshIndexList[y]);
 				if (lMesh)
 				{
-					TransformationF lTransform = lMesh->GetBaseTransformation();
+					int lPhysIndex = -1;
+					str lMeshName;
+					TransformationF lTransform;
+					((UiTbc::ChunkyClass*)GetClass())->GetMesh(lTag.mMeshIndexList[y], lPhysIndex, lMeshName, lTransform);
+					lTransform = lMesh->GetBaseTransformation() * lTransform;
 					lTransform.GetPosition() += lOffset;
 					Props* lPuff = new Props(GetResourceManager(), _T("mud_particle_01"), mUiManager);
 					GetManager()->GetGameManager()->AddContextObject(lPuff, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+					//mLog.Infof(_T("Machine %i creates fume particle %i."), GetInstanceId(), lPuff->GetInstanceId());
 					lPuff->DisableRootShadow();
 					lPuff->SetInitialTransform(lTransform);
+					lPuff->SetOpacity(lOpacity);
 					lPuff->StartParticle(Props::PARTICLE_GAS, lVelocity, 3);
 					lPuff->StartLoading();
 				}
 			}
 		}
+	}
+
+	if (lIsChild || lPhysics->GetGuideMode() == TBC::ChunkyPhysics::GUIDE_ALWAYS)
+	{
+		StabilizeTick();
 	}
 }
 

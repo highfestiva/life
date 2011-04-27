@@ -18,6 +18,7 @@ import struct
 import sys
 
 physics_type = {"static":1, "dynamic":2, "collision_detect_only":3}
+guide_mode = {"never":0, "external":1, "always":2, None:1}
 
 CHUNK_CLASS                        = "CLAS"
 CHUNK_CLASS_PHYSICS                = "CLPH"
@@ -29,6 +30,7 @@ CHUNK_CLASS_TAG                    = "CLTA"
 CHUNK_PHYSICS                      = "PHYS"
 CHUNK_PHYSICS_BONE_COUNT           = "PHBC"
 CHUNK_PHYSICS_PHYSICS_TYPE         = "PHPT"
+CHUNK_PHYSICS_PHYSICS_GUIDE_MODE   = "PHGM"
 CHUNK_PHYSICS_BONE_CONTAINER       = "PHBO"
 CHUNK_PHYSICS_BONE_CHILD_LIST      = "PHCL"
 CHUNK_PHYSICS_BONE_TRANSFORM       = "PHBT"
@@ -412,6 +414,7 @@ class PhysWriter(ChunkyWriter):
                                         (
                                                 (CHUNK_PHYSICS_BONE_COUNT, len(self.bodies)),
                                                 (CHUNK_PHYSICS_PHYSICS_TYPE, physics_type[self.config["type"]]),
+                                                (CHUNK_PHYSICS_PHYSICS_GUIDE_MODE, guide_mode[self.config.get("guide_mode")]),
                                                 (CHUNK_PHYSICS_ENGINE_COUNT, len(engines)),
                                                 (CHUNK_PHYSICS_TRIGGER_COUNT, len(triggers)),
                                                 (CHUNK_PHYSICS_SPAWNER_COUNT, len(spawners)),
@@ -509,7 +512,8 @@ class PhysWriter(ChunkyWriter):
                 mt = node.get_world_transform()
                 wp = mp * vec4(0,0,0,1)
                 wt = mt * vec4(0,0,0,1)
-                j = wt-wp
+                #j = wt-wp
+                j = wp-wt
                 j = ir * j
 
                 parameters[6:9] = j[:3]
@@ -610,7 +614,7 @@ class PhysWriter(ChunkyWriter):
 
 
         def _writespawner(self, node):
-                types = {"teleport":1, "immediate":2}
+                types = {"teleport":1, "creator":2}
                 self._writeint(types[node.get_fixed_attribute("type")])
                 self._writestr(node.get_fixed_attribute("function"))
 
@@ -621,8 +625,10 @@ class PhysWriter(ChunkyWriter):
                         print("Spawner '%s' connected to body index %i."% (node.getName(), idx))
                 self._writeint(idx)
                 self._writefloat(float(node.get_fixed_attribute("number")))
-                self._writefloat(float(node.get_fixed_attribute("interval")))
-
+                intervals = node.get_fixed_attribute("intervals")
+                self._writeint(len(intervals))
+                for interval in intervals:
+                        self._writefloat(float(interval))
                 spawn_objects = node.get_fixed_attribute("spawn_objects")
                 self._writeint(len(spawn_objects))
                 for spawn_class_distribution in spawn_objects:

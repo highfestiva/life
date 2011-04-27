@@ -46,10 +46,25 @@ void PerformanceData::Append(double pPeriodValue, double pTimeOfLastMeasure)
 	}
 	else
 	{
-		mMinimum = (pPeriodValue < mMinimum)? pPeriodValue : mMinimum;
+		if (pPeriodValue < mMinimum)
+		{
+			mMinimum = pPeriodValue;
+		}
+		else if (pPeriodValue > mMaximum)
+		{
+			mMaximum = pPeriodValue;
+		}
+		else
+		{
+			// Close the gap between min and max (equalizer style) so the
+			// fluctuation has some relevance even after startup.
+			const double lStep = (mMaximum-mMinimum) * 0.001;
+			mMinimum += lStep;
+			mMaximum -= lStep;
+		}
+
 		mLast = pPeriodValue;
 		mSlidingAverage = Math::Lerp(mSlidingAverage, mLast, 0.05);
-		mMaximum = (pPeriodValue > mMaximum)? pPeriodValue : mMaximum;
 	}
 }
 
@@ -201,6 +216,20 @@ ScopePerformanceData::NodeArray ScopePerformanceData::GetChildren() const
 	ScopeSpinLock lLock(&mRootLock);
 	NodeArray lChildrenCopy(mChildArray);
 	return (lChildrenCopy);
+}
+
+const ScopePerformanceData* ScopePerformanceData::GetChild(const str& pName) const
+{
+	ScopeSpinLock lLock(&mRootLock);
+	NodeArray::const_iterator x = mChildArray.begin();
+	for (; x != mChildArray.end(); ++x)
+	{
+		if ((*x)->GetName().find(pName) != str::npos)
+		{
+			return *x;
+		}
+	}
+	return 0;
 }
 
 void ScopePerformanceData::ClearAll(NodeArray& pNodes)

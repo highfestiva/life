@@ -1,0 +1,6 @@
+Line feed config:
+ - Mac OS X & Linux: git config --global core.autocrlf input
+ - Windows: git config --global core.autocrlf true
+ - Efteråt:
+   rm .git/index
+   git reset --hard HEAD

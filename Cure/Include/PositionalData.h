@@ -31,7 +31,6 @@ public:
 		TYPE_POSITION_2,
 		TYPE_POSITION_1,
 		TYPE_REAL_4,
-		TYPE_REAL_1_BOOL,
 		TYPE_REAL_1,
 		TYPE_COUNT
 	};
@@ -47,11 +46,13 @@ public:
 	virtual void CopyData(const PositionalData* pData) = 0;
 	virtual PositionalData* Clone() const = 0;
 
+	virtual void Stop();
+
 protected:
 	virtual float GetBiasedDifference(const PositionalData* pReference) const = 0;
 
 private:
-	float mScale;
+	float mSubHierarchyScale;
 };
 
 // Six degrees of freedom in position, velocity and acceleration.
@@ -69,6 +70,8 @@ public:
 	int Pack(uint8* pData) const;
 	int Unpack(const uint8* pData, int pSize);
 	float GetBiasedDifference(const PositionalData* pReference) const;
+
+	virtual void Stop();
 
 private:
 	static float GetDifference(const QuaternionF& pQ1, const QuaternionF& pQ2);
@@ -97,6 +100,8 @@ public:
 	Type GetType() const;
 	void CopyData(const PositionalData* pData);
 	PositionalData* Clone() const;
+
+	virtual void Stop();
 };
 
 // Two degrees of freedom in position, velocity and acceleration.
@@ -115,6 +120,8 @@ public:
 	Type GetType() const;
 	void CopyData(const PositionalData* pData);
 	PositionalData* Clone() const;
+
+	virtual void Stop();
 };
 
 // One degree of freedom in position, velocity and acceleration.
@@ -133,6 +140,8 @@ public:
 	Type GetType() const;
 	void CopyData(const PositionalData* pData);
 	PositionalData* Clone() const;
+
+	virtual void Stop();
 };
 
 // A container with it's own positional info.
@@ -164,6 +173,8 @@ public:
 	void CopyData(const PositionalData* pData);
 	PositionalData* Clone() const;
 
+	virtual void Stop();
+
 	bool IsSameStructure(const ObjectPositionalData& pCopy) const;
 
 private:
@@ -177,22 +188,6 @@ class RealData4: public PositionalData
 {
 public:
 	float mValue[4];
-
-	int GetPackSize() const;
-	int Pack(uint8* pData) const;
-	int Unpack(const uint8* pData, int pSize);
-	float GetBiasedDifference(const PositionalData* pReference) const;
-
-	Type GetType() const;
-	void CopyData(const PositionalData* pData);
-	PositionalData* Clone() const;
-};
-
-class RealData1Bool: public PositionalData
-{
-public:
-	float mValue;
-	bool mBool;
 
 	int GetPackSize() const;
 	int Pack(uint8* pData) const;

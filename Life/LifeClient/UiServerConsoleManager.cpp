@@ -14,10 +14,10 @@ namespace Life
 
 
 
-UiServerConsoleManager::UiServerConsoleManager(Cure::GameManager* pGameManager, UiCure::GameUiManager* pUiManager,
-	Cure::RuntimeVariableScope* pVariableScope, const PixelRect& pArea,
+UiServerConsoleManager::UiServerConsoleManager(Cure::ResourceManager* pResourceManager, Cure::GameManager* pGameManager,
+	UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVariableScope, const PixelRect& pArea,
 	InteractiveConsoleLogListener* pConsoleLogger, ConsolePrompt* pConsolePrompt):
-	ServerConsoleManager(pGameManager, pVariableScope, pConsoleLogger, pConsolePrompt)
+	ServerConsoleManager(pResourceManager, pGameManager, pVariableScope, pConsoleLogger, pConsolePrompt)
 {
 	mUiConsole = new UiConsole(this, pUiManager, pArea);
 }

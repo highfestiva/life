@@ -25,10 +25,10 @@ namespace Life
 
 
 
-GameClientDemo::GameClientDemo(GameClientMasterTicker* pMaster, Cure::RuntimeVariableScope* pVariableScope,
-	Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager, int pSlaveIndex,
-	const PixelRect& pRenderArea):
-	Parent(pMaster, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea),
+GameClientDemo::GameClientDemo(GameClientMasterTicker* pMaster, const Cure::TimeManager* pTime,
+	Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
+	UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea):
+	Parent(pMaster, pTime, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea),
 	mCameraAngle(0),
 	mInfoTextX(-10000),
 	mInfoTextTargetY(-100),
@@ -69,7 +69,7 @@ bool GameClientDemo::Paint()
 		}
 		mInfoText = mInfoTextArray[mCurrentInfoTextIndex];
 	}
-	const float lFrameTime = GetConstTimeManager()->GetRealNormalFrameTime();
+	const float lFrameTime = GetTimeManager()->GetRealNormalFrameTime();
 	mInfoTextSlideY = Math::Lerp(mInfoTextSlideY, mInfoTextTargetY, Math::GetIterateLerpTime(0.8f, lFrameTime));
 
 	const int lWidth = mUiManager->GetDisplayManager()->GetWidth();
@@ -108,7 +108,7 @@ void GameClientDemo::TickUiUpdate()
 	mCameraPosition = mCameraPivotPosition - lRotation*Vector3DF(10+sin(mCameraAngle*4.3f), 0, 0);
 	mCameraPreviousPosition = mCameraPosition;
 	mCameraOrientation = Vector3DF(mCameraAngle, PIF/2, 0);
-	mCameraAngle += GetConstTimeManager()->GetNormalFrameTime();
+	mCameraAngle += GetTimeManager()->GetNormalFrameTime();
 }
 
 void GameClientDemo::CreateLoginView()

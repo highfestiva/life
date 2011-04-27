@@ -27,13 +27,15 @@ UserTypeResourceBase<UserResourceType, ResourceType>::~UserTypeResourceBase()
 
 template<class UserResourceType, class ResourceType>
 void UserTypeResourceBase<UserResourceType, ResourceType>::Load(
-	ResourceManager* pResourceManager, const str& pName, TypeLoadCallback pCallback)
+	ResourceManager* pResourceManager, const str& pName, TypeLoadCallback pCallback, bool pKeep)
 {
 	// JB-TRICKY: this is what I gather that it takes to cast a callback parameter.
 	//            The memento contains the "this" and "method" pointers...
 	LoadCallback lCallbackCast;
 	lCallbackCast.SetMemento(pCallback.GetMemento());
 	pResourceManager->Load(pName, this, lCallbackCast);
+	GetResource()->SetIsUnique(!pKeep);
+
 }
 
 template<class UserResourceType, class ResourceType>
@@ -123,6 +125,32 @@ void UserExtraTypeResource<ResourceType, SubtypeExtraType>::SetExtraData(const S
 
 
 
+template<class _UserResourceType>
+UserResourceOwner<_UserResourceType>::UserResourceOwner(_UserResourceType* pUserResource, Cure::ResourceManager* pManager, const str& pName):
+	mUserResource(pUserResource)
+{
+	mUserResource->Load(pManager, pName, typename _UserResourceType::TypeLoadCallback(this, &UserResourceOwner::OnLoadCallback));
+}
+
+template<class _UserResourceType>
+UserResourceOwner<_UserResourceType>::~UserResourceOwner()
+{
+	delete mUserResource;
+	mUserResource = 0;
+}
+
+template<class _UserResourceType>
+void UserResourceOwner<_UserResourceType>::OnLoadCallback(_UserResourceType* pUserResource)
+{
+	(void)pUserResource;
+}
+
+
+
+// ----------------------------------------------------------------------------
+
+
+
 template<class RamData>
 RamData RamResource<RamData>::GetRamData() const
 {
@@ -202,6 +230,7 @@ DiversifiedResource<RamData, DiversifiedData>::~DiversifiedResource()
 template<class RamData, class DiversifiedData>
 DiversifiedData DiversifiedResource<RamData, DiversifiedData>::GetUserData(const UserResource* pUserResource)
 {
+	ScopeLock lLock(&mLock);
 	DiversifiedData lInstanceId = (DiversifiedData)0;
 	typename UserDataTable::iterator x = mUserDiversifiedTable.find(pUserResource);
 	if (x != mUserDiversifiedTable.end())
@@ -220,6 +249,7 @@ DiversifiedData DiversifiedResource<RamData, DiversifiedData>::GetUserData(const
 template<class RamData, class DiversifiedData>
 void DiversifiedResource<RamData, DiversifiedData>::FreeDiversified(UserResource* pUserResource)
 {
+	ScopeLock lLock(&mLock);
 	typename UserDataTable::iterator x = mUserDiversifiedTable.find(pUserResource);
 	if (x != mUserDiversifiedTable.end())
 	{

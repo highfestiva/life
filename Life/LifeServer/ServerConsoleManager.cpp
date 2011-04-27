@@ -24,6 +24,7 @@ const ConsoleManager::CommandPair ServerConsoleManager::mCommandIdList[] =
 
 	// Info/debug stuff.
 	{_T("list-users"), COMMAND_LIST_USERS},
+	{_T("build"), COMMAND_BUILD},
 
 	// Communication.
 	{_T("broadcast-msg"), COMMAND_BROADCAST_CHAT_MESSAGE},
@@ -32,9 +33,10 @@ const ConsoleManager::CommandPair ServerConsoleManager::mCommandIdList[] =
 
 
 
-ServerConsoleManager::ServerConsoleManager(Cure::GameManager* pGameManager, Cure::RuntimeVariableScope* pVariableScope,
-	InteractiveConsoleLogListener* pConsoleLogger, ConsolePrompt* pConsolePrompt):
-	ConsoleManager(pGameManager, pVariableScope, pConsoleLogger, pConsolePrompt)
+ServerConsoleManager::ServerConsoleManager(Cure::ResourceManager* pResourceManager, Cure::GameManager* pGameManager,
+	Cure::RuntimeVariableScope* pVariableScope, InteractiveConsoleLogListener* pConsoleLogger,
+	ConsolePrompt* pConsolePrompt):
+	ConsoleManager(pResourceManager, pGameManager, pVariableScope, pConsoleLogger, pConsolePrompt)
 {
 	SetSecurityLevel(1);
 	InitCommands();
@@ -147,6 +149,19 @@ int ServerConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& 
 					mLog.Info(_T("\t\"") + strutil::Encode(lUserNameList[x]) + _T("\""));
 				}
 				mLog.Infof(_T("A total of %u users logged in."), (unsigned)lUserNameList.size());
+			}
+			break;
+			case COMMAND_BUILD:
+			{
+				if (pParameterVector.size() == 1)
+				{
+					((GameServerManager*)GetGameManager())->Build(pParameterVector[0]);
+				}
+				else
+				{
+					mLog.Warningf(_T("usage: %s <what>"), pCommand.c_str());
+					lResult = 1;
+				}
 			}
 			break;
 			default:

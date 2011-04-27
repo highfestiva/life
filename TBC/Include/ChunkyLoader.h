@@ -116,6 +116,7 @@ enum ChunkyType
 	CHUNK_PHYSICS                      = ENUMIFY('P','H','Y','S'),	// Physics file type.
 	CHUNK_PHYSICS_BONE_COUNT           = ENUMIFY('P','H','B','C'),	// Number of bones. Mandatory.
 	CHUNK_PHYSICS_PHYSICS_TYPE         = ENUMIFY('P','H','P','T'),	// Physics type: dynamic, static, etc. Mandatory.
+	CHUNK_PHYSICS_PHYSICS_GUIDE_MODE   = ENUMIFY('P','H','G','M'),	// Never, sometimes or always guided. Optional.
 	CHUNK_PHYSICS_ENGINE_COUNT         = ENUMIFY('P','H','E','C'),	// Number of engines. Mandatory.
 	CHUNK_PHYSICS_TRIGGER_COUNT        = ENUMIFY('P','H','T','C'),	// Number of triggers. Mandatory.
 	CHUNK_PHYSICS_SPAWNER_COUNT        = ENUMIFY('P','H','S','C'),	// Number of triggers. Mandatory.

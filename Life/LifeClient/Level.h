@@ -6,10 +6,7 @@
 
 #pragma once
 
-#include "../../Lepra/Include/HiResTimer.h"
-#include "../../UiCure/Include/UiCppContextObject.h"
-#include "../../UiTBC/Include/UiChunkyClass.h"
-#include "../Life.h"
+#include "Machine.h"
 
 
 
@@ -18,10 +15,10 @@ namespace Life
 
 
 
-class Level: public UiCure::CppContextObject
+class Level: public Machine
 {
 public:
-	typedef UiCure::CppContextObject Parent;
+	typedef Machine Parent;
 
 	Level(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager);
 	virtual ~Level();

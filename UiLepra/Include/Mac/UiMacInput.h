@@ -41,9 +41,7 @@ public:
 	str GetCalibration() const;
 	bool SetCalibration(const str& pData);
 
-protected:
 private:
-
 	enum
 	{
 		MAX_INT = 0x7FFFFFFF,
@@ -99,8 +97,6 @@ public:
 	MacInputManager(MacDisplayManager* pDisplayManager);
 	virtual ~MacInputManager();
 
-	static MacInputManager* GetSingleton();	// TODO: remove this abomination!
-
 	bool IsInitialized();
 	virtual void Refresh();
 
@@ -116,13 +112,17 @@ public:
 	virtual void ShowCursor();
 	virtual void HideCursor();
 
-	virtual double GetCursorX();
-	virtual double GetCursorY();
+	virtual float GetCursorX();
+	virtual float GetCursorY();
 	void SetMousePosition(int x, int y);
 
+	static KeyCode ConvertMacKeyCodeToKeyCode(unsigned pMacKeyCode);
+	static unichar ConvertChar(unichar pChar);
+	static KeyCode ConvertCharToKeyCode(unichar pChar, bool pIsNumpad, bool& pIsChar);
+
 protected:
-	bool OnMessage(NSEvent* pEvent);
-	void SetKey(KeyCode pWParam, long pLParam, bool pIsDown);
+	virtual void OnEvent(NSEvent* pEvent);
+	//void SetKey(KeyCode pWParam, long pLParam, bool pIsDown);
 
 private:
 	// The DirectInput device enumeration callback.
@@ -133,28 +133,27 @@ private:
 	void AddObserver();
 	void RemoveObserver();
 
-	static MacInputManager* mInputManagerSingleton;	// TODO: remove this abomination!
-
 	MacDisplayManager* mDisplayManager;
-
-	// The DirectInput object.
-	//LPDIRECTINPUT8 mDirectInput;
 
 	bool mEnumError;
 	bool mInitialized;
+
+	NSUInteger mKeyModifiers;
 
 	// The entire display area (not just the user's window).
 	int mScreenWidth;
 	int mScreenHeight;
 
 	// Mouse related stuff.
-	double mCursorX;
-	double mCursorY;
+	float mCursorX;
+	float mCursorY;
 
 	// Default devices.
 	InputDevice* mKeyboard;
 	InputDevice* mMouse;
 	int mTypeCount[InputDevice::TYPE_COUNT];
+
+	LOG_CLASS_DECLARE();
 };
 
 

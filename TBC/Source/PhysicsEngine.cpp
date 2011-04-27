@@ -8,6 +8,7 @@
 #include <assert.h>
 #include "../../Lepra/Include/Endian.h"
 #include "../../Lepra/Include/Math.h"
+#include "../../Lepra/Include/Vector2D.h"
 #include "../Include/ChunkyBoneGeometry.h"
 #include "../Include/ChunkyPhysics.h"
 
@@ -15,6 +16,10 @@
 
 namespace TBC
 {
+
+
+
+#define CUBE_DIAGONAL	1.2247448713915890490986420373529f
 
 
 
@@ -76,7 +81,7 @@ void PhysicsEngine::AddControlledGeometry(ChunkyBoneGeometry* pGeometry, float p
 
 bool PhysicsEngine::SetValue(unsigned pAspect, float pValue, float pZAngle)
 {
-	assert(mControllerIndex >= 0 && mControllerIndex < MAX_CONTROLLER_COUNT);
+	assert(mControllerIndex >= 0 && mControllerIndex < ASPECT_COUNT);
 
 	pValue = (pValue > 1)? 1 : pValue;
 	pValue = (pValue < -1)? -1 : pValue;
@@ -95,14 +100,14 @@ bool PhysicsEngine::SetValue(unsigned pAspect, float pValue, float pZAngle)
 			{
 				switch (pAspect)
 				{
-					case 0:		mValue[0] = pValue;		break;
-					case 4:		mValue[0] += pValue;		break;
-					case 2:		mValue[0] -= ::fabs(pValue);	break;	// Breaking and handbreaking always reverse.
-					case 1:		mValue[1] = pValue;		break;
-					case 5:		mValue[1] -= pValue;		break;
-					case 6:		mValue[2] = pValue;		break;
+					case 0:		mValue[ASPECT_PRIMARY]    = pValue;		break;
+					case 4:		mValue[ASPECT_PRIMARY]   += pValue;		break;
+					case 2:		mValue[ASPECT_PRIMARY]   -= ::fabs(pValue);	break;	// Breaking and handbreaking always reverse.
+					case 1:		mValue[ASPECT_SECONDARY]  = pValue;		break;
+					case 5:		mValue[ASPECT_SECONDARY] -= pValue;		break;
+					case 6:		mValue[ASPECT_TERTIARY]	  = pValue;		break;
 				}
-				mValue[3] = pZAngle;
+				mValue[ASPECT_CAM] = pZAngle;
 				return (true);
 			}
 		}
@@ -119,7 +124,7 @@ bool PhysicsEngine::SetValue(unsigned pAspect, float pValue, float pZAngle)
 		{
 			if (pAspect == mControllerIndex)
 			{
-				mValue[0] = pValue;
+				mValue[ASPECT_PRIMARY] = pValue;
 				return (true);
 			}
 		}
@@ -145,10 +150,11 @@ void PhysicsEngine::ForceSetValue(unsigned pAspect, float pValue)
 
 
 
-void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics* pStructure, float pFrameTime) const
+void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics* pStructure, float pFrameTime) const
 {
 	const float lLimitedFrameTime = std::min(pFrameTime, 0.1f);
 	const float lNormalizedFrameTime = lLimitedFrameTime * 90;
+	const float lPrimaryForce = (mValue[ASPECT_LOCAL_PRIMARY] > ::fabs(mValue[ASPECT_PRIMARY]))? mValue[ASPECT_LOCAL_PRIMARY] : mValue[ASPECT_PRIMARY];
 	mIntensity = 0;
 	EngineNodeArray::const_iterator i = mEngineNodeArray.begin();
 	for (; i != mEngineNodeArray.end(); ++i)
@@ -171,50 +177,34 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics*
 					Vector3DF lAxis[3] = {Vector3DF(0, 1, 0),
 						Vector3DF(1, 0, 0), Vector3DF(0, 0, 1)};
 					QuaternionF lRotation;
-					lRotation.RotateAroundWorldZ(mValue[3] - MathTraits<float>::Pi() / 2);
+					lRotation.RotateAroundWorldZ(mValue[ASPECT_CAM] - MathTraits<float>::Pi() / 2);
 					lAxis[0] = lRotation*lAxis[0];
 					lAxis[1] = lRotation*lAxis[1];
 					Vector3DF lVelocityVector;
 					pPhysicsManager->GetBodyVelocity(lGeometry->GetBodyId(), lVelocityVector);
-					lVelocityVector = lRotation*lVelocityVector;
-					float lVelocity[3] = { lVelocityVector.y, lVelocityVector.x, lVelocityVector.z };
-					bool lIsSpeeding = (lVelocityVector.GetLength() >= mMaxSpeed);
-					const float lAbsFriction = ::fabs(mFriction);
-					if (mFriction < 0)
+					//lVelocityVector = lRotation*lVelocityVector;
+					Vector3DF lPushVector;
+					for (int i = 0; i <= ASPECT_TERTIARY; ++i)
 					{
-						// Arcade stabilization for VTOLs.
-						const int lBone = pStructure->GetIndex(lGeometry);
-						const QuaternionF lOrientation =
-							pPhysicsManager->GetBodyOrientation(lGeometry->GetBodyId()) *
-							pStructure->GetOriginalBoneTransformation(lBone).GetOrientation().GetInverse();
-						// 1st: angular velocity damping (skipping z).
-						Vector3DF lAngular;
-						pPhysicsManager->GetBodyAngularVelocity(lGeometry->GetBodyId(), lAngular);
-						lAngular = lOrientation.GetInverse() * lAngular;
-						lAngular.z = 0;
-						lAngular *= -lAbsFriction;
-						Vector3DF lTorque = lOrientation * lAngular;
-						// 2nd: strive towards straight.
-						lAngular = lOrientation * Vector3DF(0, 0, 1);
-						lTorque += Vector3DF(+lAngular.y * lAbsFriction*5, -lAngular.x * lAbsFriction*5, 0);
-						pPhysicsManager->AddTorque(lGeometry->GetBodyId(), lTorque*mStrength*lScale);
+						lPushVector += (1/CUBE_DIAGONAL) * mValue[i] * lAxis[i];
 					}
-					float lHighestForce = 0;
-					for (int i = 0; i < 3; ++i)
+					const float lPushForce = lPushVector.GetLength();
+					if (lPushForce > 0.1f || mFriction != 0)
 					{
-						const float lPush = (1+lAbsFriction) * mValue[i];
-						if (!lIsSpeeding || (lVelocity[i]>0) != (lPush>0))
+						if (lPushForce > 0.1f)
 						{
-							lHighestForce = std::max(lPush, lHighestForce);
-							pPhysicsManager->AddForce(lGeometry->GetBodyId(), lPush*lAxis[i]*mStrength*lScale);
+							lVelocityVector += lVelocityVector.ProjectOntoPlane(lPushVector / lPushForce);
 						}
+						lVelocityVector *= (0.1f + mFriction*0.4f) * lPushForce / mMaxSpeed;
+						lPushVector -= lVelocityVector;
+						pPhysicsManager->AddForce(lGeometry->GetBodyId(), lPushVector*mStrength*lScale);
 					}
-					mIntensity += lHighestForce;
+					mIntensity += lPushForce;
 				}
 				break;
 				case ENGINE_HOVER:
 				{
-					if (mValue[0] != 0 || mValue[1] != 0)
+					if (lPrimaryForce != 0 || mValue[ASPECT_SECONDARY] != 0)
 					{
 						// Arcade stabilization for lifter (typically hovercraft, elevator or similar vehicle).
 						Vector3DF lLiftPivot = pPhysicsManager->GetBodyPosition(lGeometry->GetBodyId()) + Vector3DF(0,0,1)*mFriction*lScale;
@@ -237,7 +227,7 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics*
 						Vector3DF lY;
 						Vector3DF lZ;
 						lAxis.GetNormalized().GetOrthogonals(lY, lZ);
-						const float lStrength = 3 * mValue[0] * mStrength;
+						const float lStrength = 3 * lPrimaryForce * mStrength;
 						lZ *= lStrength;
 						Vector3DF lPos;
 						pPhysicsManager->GetAnchorPos(lGeometry->GetJointId(), lPos);
@@ -251,7 +241,7 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics*
 					assert(lGeometry->GetJointId() != INVALID_JOINT);
 					if (lGeometry->GetJointId() != INVALID_JOINT)
 					{
-						float lValue = mValue[0];
+						float lValue = lPrimaryForce;
 						float lDirectionalMaxSpeed = ((lValue >= 0)? mMaxSpeed : -mMaxSpeed2) * lValue;
 						float lRotationSpeed;
 						pPhysicsManager->GetAngleRate2(lGeometry->GetJointId(), lRotationSpeed);
@@ -298,8 +288,8 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics*
 						// "Max speed" used as a type of "break threashold", so that a joystick or similar
 						// won't start breaking on the tiniest movement. "Scaling" here determines part of
 						// functionality (such as only affecting some wheels), may be positive or negative.
-						const float lAbsValue = ::fabs(mValue[0]);
-						if (lAbsValue > mMaxSpeed && mValue[0] < lScale)
+						const float lAbsValue = ::fabs(lPrimaryForce);
+						if (lAbsValue > mMaxSpeed && lPrimaryForce < lScale)
 						{
 							const float lBreakForceUsed = mStrength*lAbsValue;
 							lGeometry->SetExtraData(1);
@@ -329,7 +319,7 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics*
 					if (lGeometry->GetJointId() != INVALID_JOINT)
 					{
 						const Vector3DF lRotorForce = GetRotorLiftForce(pPhysicsManager, lGeometry, lEngineNode);
-						Vector3DF lLiftForce = lRotorForce * mValue[0];
+						Vector3DF lLiftForce = lRotorForce * lPrimaryForce;
 						const int lParentBone = pStructure->GetIndex(lGeometry->GetParent());
 						const QuaternionF lOrientation =
 							pPhysicsManager->GetBodyOrientation(lGeometry->GetParent()->GetBodyId()) *
@@ -357,9 +347,9 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics*
 
 						// Smooth rotor force - for digital controls and to make acceleration seem more realistic.
 						const float lSmooth = lNormalizedFrameTime * 0.05f * lEngineNode.mScale;
-						lLiftForce.x = mSmoothValue[0] = Math::Lerp(mSmoothValue[0], lLiftForce.x, lSmooth);
-						lLiftForce.y = mSmoothValue[1] = Math::Lerp(mSmoothValue[1], lLiftForce.y, lSmooth);
-						lLiftForce.z = mSmoothValue[2] = Math::Lerp(mSmoothValue[2], lLiftForce.z, lSmooth);
+						lLiftForce.x = mSmoothValue[ASPECT_PRIMARY] = Math::Lerp(mSmoothValue[ASPECT_PRIMARY], lLiftForce.x, lSmooth);
+						lLiftForce.y = mSmoothValue[ASPECT_SECONDARY] = Math::Lerp(mSmoothValue[ASPECT_SECONDARY], lLiftForce.y, lSmooth);
+						lLiftForce.z = mSmoothValue[ASPECT_TERTIARY] = Math::Lerp(mSmoothValue[ASPECT_TERTIARY], lLiftForce.z, lSmooth);
 
 						// Counteract rotor's movement through perpendicular air.
 						Vector3DF lDragForce;
@@ -379,9 +369,9 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics*
 					assert(lGeometry->GetJointId() != INVALID_JOINT);
 					if (lGeometry->GetJointId() != INVALID_JOINT)
 					{
-						const Vector3DF lLiftForce = GetRotorLiftForce(pPhysicsManager, lGeometry, lEngineNode) * ::fabs(mValue[0]);
+						const Vector3DF lLiftForce = GetRotorLiftForce(pPhysicsManager, lGeometry, lEngineNode) * ::fabs(lPrimaryForce);
 						const int lParentBone = pStructure->GetIndex(lGeometry->GetParent());
-						const float lPlacement = (mValue[0] >= 0)? 1.0f : -1.0f;
+						const float lPlacement = (lPrimaryForce >= 0)? 1.0f : -1.0f;
 						const Vector3DF lOffset =
 							pPhysicsManager->GetBodyOrientation(lGeometry->GetParent()->GetBodyId()) *
 							pStructure->GetOriginalBoneTransformation(lParentBone).GetOrientation().GetInverse() *
@@ -411,7 +401,7 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics*
 					assert(lGeometry->GetJointId() != INVALID_JOINT);
 					if (lGeometry->GetJointId() != INVALID_JOINT)
 					{
-						if (!mValue[0] && lEngineNode.mMode != MODE_HALF_LOCK)	// Normal slider behavior is to pull back to origin while half-lock keep last motor target.
+						if (!lPrimaryForce && lEngineNode.mMode != MODE_HALF_LOCK)	// Normal slider behavior is to pull back to origin while half-lock keep last motor target.
 						{
 							float lPosition;
 							pPhysicsManager->GetSliderPos(lGeometry->GetJointId(), lPosition);
@@ -424,12 +414,12 @@ void PhysicsEngine::OnTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics*
 						}
 						else
 						{
-							const float lValue = (mValue[0] > 0)? mValue[0]*mMaxSpeed : mValue[0]*mMaxSpeed2;
+							const float lValue = (lPrimaryForce > 0)? lPrimaryForce*mMaxSpeed : lPrimaryForce*mMaxSpeed2;
 							pPhysicsManager->SetMotorTarget(lGeometry->GetJointId(), mStrength, lValue*lScale);
 						}
-						Vector3DF lVelocity;
-						pPhysicsManager->GetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
-						mIntensity += lVelocity.GetLength() / mMaxSpeed;
+						float lSpeed = 0;
+						pPhysicsManager->GetSliderSpeed(lGeometry->GetJointId(), lSpeed);
+						mIntensity += ::fabs(lSpeed) / mMaxSpeed;
 					}
 				}
 				break;
@@ -475,6 +465,60 @@ float PhysicsEngine::GetCurrentMaxSpeedSquare(const PhysicsManager* pPhysicsMana
 
 
 
+void PhysicsEngine::UprightStabilize(PhysicsManager* pPhysicsManager, const ChunkyPhysics* pStructure,
+	const ChunkyBoneGeometry* pGeometry, float pStrength, float pFriction)
+{
+	const int lBone = pStructure->GetIndex(pGeometry);
+	const QuaternionF lOrientation =
+		pPhysicsManager->GetBodyOrientation(pGeometry->GetBodyId()) *
+		pStructure->GetOriginalBoneTransformation(lBone).GetOrientation().GetInverse();
+	// 1st: angular velocity damping (skipping z).
+	Vector3DF lAngular;
+	pPhysicsManager->GetBodyAngularVelocity(pGeometry->GetBodyId(), lAngular);
+	lAngular = lOrientation.GetInverse() * lAngular;
+	lAngular.z = 0;
+	lAngular *= -pFriction;
+	Vector3DF lTorque = lOrientation * lAngular;
+	// 2nd: strive towards straight.
+	lAngular = lOrientation * Vector3DF(0, 0, 1);
+	lTorque += Vector3DF(+lAngular.y * pFriction*5, -lAngular.x * pFriction*5, 0);
+	pPhysicsManager->AddTorque(pGeometry->GetBodyId(), lTorque*pStrength);
+}
+
+void PhysicsEngine::ForwardStabilize(PhysicsManager* pPhysicsManager, const ChunkyPhysics* pStructure,
+	const ChunkyBoneGeometry* pGeometry, float pStrength, float pFriction)
+{
+	const int lBone = pStructure->GetIndex(pGeometry);
+	const QuaternionF lOrientation =
+		pPhysicsManager->GetBodyOrientation(pGeometry->GetBodyId()) *
+		pStructure->GetOriginalBoneTransformation(lBone).GetOrientation().GetInverse();
+	// 1st: angular velocity damping in Z-axis.
+	Vector3DF lVelocity3d;
+	pPhysicsManager->GetBodyAngularVelocity(pGeometry->GetBodyId(), lVelocity3d);
+	const float lAngularVelocity = lVelocity3d.z;
+	// 2nd: strive towards straight towards where we're heading.
+	pPhysicsManager->GetBodyVelocity(pGeometry->GetBodyId(), lVelocity3d);
+	Vector2DF lVelocity2d(lVelocity3d.x, lVelocity3d.y);
+	const Vector3DF lForward3d = lOrientation * Vector3DF(0, 1, 0);
+	Vector2DF lForward2d(lForward3d.x, lForward3d.y);
+	if (lForward2d.GetLengthSquared() > 0.1f && lVelocity2d.GetLengthSquared() > 0.3f)
+	{
+		float lAngle = lVelocity2d.GetAngle() - lForward2d.GetAngle();
+		if (lAngle > PIF)
+		{
+			lAngle -= 2*PIF;
+		}
+		else if (lAngle < -PIF)
+		{
+			lAngle += 2*PIF;
+		}
+		lVelocity3d.Set(0, 0, (6*lAngle - lAngularVelocity*pFriction*1.5f) * pStrength);
+		pPhysicsManager->AddTorque(pGeometry->GetBodyId(), lVelocity3d);
+	}
+}
+
+
+
 unsigned PhysicsEngine::GetControllerIndex() const
 {
 	return (mControllerIndex);
@@ -482,13 +526,28 @@ unsigned PhysicsEngine::GetControllerIndex() const
 
 float PhysicsEngine::GetValue() const
 {
-	assert(mControllerIndex >= 0 && mControllerIndex < MAX_CONTROLLER_COUNT);
-	return (mValue[0]);
+	assert(mControllerIndex >= 0 && mControllerIndex < ASPECT_COUNT);
+	if (mEngineType == ENGINE_CAMERA_FLAT_PUSH)
+	{
+		const float a = ::fabs(mValue[ASPECT_PRIMARY]);
+		const float b = ::fabs(mValue[ASPECT_SECONDARY]);
+		const float c = ::fabs(mValue[ASPECT_TERTIARY]);
+		if (a > b || a > c)
+		{
+			return mValue[ASPECT_PRIMARY];
+		}
+		if (b > c)
+		{
+			return mValue[ASPECT_SECONDARY];
+		}
+		return mValue[ASPECT_TERTIARY];
+	}
+	return mValue[ASPECT_PRIMARY];
 }
 
 const float* PhysicsEngine::GetValues() const
 {
-	return (mValue);
+	return mValue;
 }
 
 float PhysicsEngine::GetIntensity() const
@@ -503,7 +562,7 @@ float PhysicsEngine::GetMaxSpeed() const
 
 float PhysicsEngine::GetLerpThrottle(float pUp, float pDown) const
 {
-	float& lLerpShadow = mSmoothValue[MAX_CONTROLLER_COUNT-1];
+	float& lLerpShadow = mSmoothValue[ASPECT_LOCAL_SHADOW];
 	const float lValue = GetValue();
 	lLerpShadow = Math::Lerp(lLerpShadow, lValue, (lValue > lLerpShadow)? pUp : pDown);
 	return lLerpShadow;
@@ -560,7 +619,7 @@ void PhysicsEngine::LoadChunkyData(ChunkyPhysics* pStructure, const void* pData)
 	mMaxSpeed2 = Endian::BigToHostF(lData[3]);
 	mFriction = Endian::BigToHostF(lData[4]);
 	mControllerIndex = Endian::BigToHost(lData[5]);
-	assert(mControllerIndex >= 0 && mControllerIndex < MAX_CONTROLLER_COUNT);
+	assert(mControllerIndex >= 0 && mControllerIndex < ASPECT_COUNT);
 	const int lControlledNodeCount = Endian::BigToHost(lData[6]);
 	int x;
 	for (x = 0; x < lControlledNodeCount; ++x)
@@ -590,111 +649,111 @@ void PhysicsEngine::ApplyTorque(PhysicsManager* pPhysicsManager, float pFrameTim
 	pFrameTime;
 
 	assert(pGeometry->GetJointId() != INVALID_JOINT);
-	if (pGeometry->GetJointId() != INVALID_JOINT)
+	if (pGeometry->GetJointId() == INVALID_JOINT)
 	{
-		float lForce = mValue[0];
+		mLog.AError("Missing torque joint!");
+		return;
+	}
 
-		const float lScale = pEngineNode.mScale;
-		const float lReverseScale = (lScale + 1) * 0.5f;	// Move towards linear scaling.
-		float lLoStop;
-		float lHiStop;
-		float lBounce;
-		pPhysicsManager->GetJointParams(pGeometry->GetJointId(), lLoStop, lHiStop, lBounce);
-		//const float lMiddle = (lLoStop+lHiStop)*0.5f;
-		const float lTarget = 0;
-		if (lLoStop < -1000 || lHiStop > 1000)
-		{
-			// Open interval -> relative torque.
-			const float lTargetSpeed = lForce*lScale*mMaxSpeed;
-			pPhysicsManager->SetAngularMotorTurn(pGeometry->GetJointId(), mStrength, lTargetSpeed);
-			float lActualSpeed = 0;
-			pPhysicsManager->GetAngleRate2(pGeometry->GetJointId(), lActualSpeed);
-			mIntensity += ::fabs(lTargetSpeed - lActualSpeed) / mMaxSpeed;
-			return;
-		}
+	const float lPrimaryForce = (mValue[ASPECT_LOCAL_PRIMARY] > ::fabs(mValue[ASPECT_PRIMARY]))? mValue[ASPECT_LOCAL_PRIMARY] : mValue[ASPECT_PRIMARY];
+	float lForce = lPrimaryForce;
 
-		float lIrlAngle;
-		if (!pPhysicsManager->GetAngle1(pGeometry->GetJointId(), lIrlAngle))
-		{
-			mLog.AError("Bad joint angle!");
-			return;
-		}
-		const float lIrlAngleDirection = (lHiStop < lLoStop)? -lIrlAngle : lIrlAngle;
+	const float lScale = pEngineNode.mScale;
+	const float lReverseScale = (lScale + 1) * 0.5f;	// Move towards linear scaling.
+	float lLoStop;
+	float lHiStop;
+	float lBounce;
+	pPhysicsManager->GetJointParams(pGeometry->GetJointId(), lLoStop, lHiStop, lBounce);
+	//const float lMiddle = (lLoStop+lHiStop)*0.5f;
+	const float lTarget = 0;
+	if (lLoStop < -1000 || lHiStop > 1000)
+	{
+		// Open interval -> relative torque.
+		const float lTargetSpeed = lForce*lScale*mMaxSpeed;
+		pPhysicsManager->SetAngularMotorTurn(pGeometry->GetJointId(), mStrength, lTargetSpeed);
+		float lActualSpeed = 0;
+		pPhysicsManager->GetAngleRate2(pGeometry->GetJointId(), lActualSpeed);
+		mIntensity += ::fabs(lTargetSpeed - lActualSpeed) / mMaxSpeed;
+		return;
+	}
 
-		if (pEngineNode.mMode == MODE_HALF_LOCK)
+	float lIrlAngle;
+	if (!pPhysicsManager->GetAngle1(pGeometry->GetJointId(), lIrlAngle))
+	{
+		mLog.AError("Bad joint angle!");
+		return;
+	}
+	const float lIrlAngleDirection = (lHiStop < lLoStop)? -lIrlAngle : lIrlAngle;
+
+	if (pEngineNode.mMode == MODE_HALF_LOCK)
+	{
+		if ((lForce < 0.02f && lIrlAngleDirection < lTarget) ||
+			(lForce > -0.02f && lIrlAngleDirection > lTarget))
 		{
-			if ((lForce < 0.02f && lIrlAngleDirection < lTarget) ||
-				(lForce > -0.02f && lIrlAngleDirection > lTarget))
+			if (::fabs(lForce) > 0.02)
 			{
-				if (::fabs(lForce) > 0.02)
-				{
-					pEngineNode.mLock = lForce;
-				}
-				else
-				{
-					lForce = pEngineNode.mLock;
-				}
+				pEngineNode.mLock = lForce;
 			}
 			else
 			{
-				pEngineNode.mLock = 0;
-			}
-		}
-		if (mFriction)
-		{
-			// Wants us to scale (down) rotation angle depending on vehicle speed. Otherwise most vehicles
-			// quickly flips, not yeilding very fun gameplay. Plus, it's more like real racing cars! :)
-			Vector3DF lParentVelocity;
-			pPhysicsManager->GetBodyVelocity(pGeometry->GetParent()->GetBodyId(), lParentVelocity);
-			const float lRangeFactor = ::pow(mFriction, lParentVelocity.GetLength());
-			lHiStop *= lRangeFactor;
-			lLoStop *= lRangeFactor;
-		}
-		const float lAngleSpan = (lHiStop-lLoStop)*0.9f;
-		const float lTargetAngle = (lForce < 0)? -lForce*lLoStop+lTarget : lForce*lHiStop+lTarget;
-		const float lDiff = (lTargetAngle-lIrlAngle);
-		const float lAbsDiff = ::fabs(lDiff);
-		float lTargetSpeed;
-		const float lAbsBigDiff = ::fabs(lAngleSpan/7);
-		const bool lCloseToGoal = (lAbsDiff > lAbsBigDiff);
-		if (lCloseToGoal)
-		{
-			lTargetSpeed = (lDiff > 0)? mMaxSpeed : -mMaxSpeed;
-		}
-		else
-		{
-			lTargetSpeed = mMaxSpeed*lDiff/lAbsBigDiff;
-		}
-		lTargetSpeed *= (lForce > 0)? lScale : lReverseScale;
-		// If we're far from the desired target speed, we speed up.
-		float lCurrentSpeed = 0;
-		if (mEngineType == ENGINE_HINGE2_TURN)
-		{
-			pPhysicsManager->GetAngleRate2(pGeometry->GetJointId(), lCurrentSpeed);
-			if (lCloseToGoal)
-			{
-				lTargetSpeed *= 1+::fabs(lCurrentSpeed)/30;
+				lForce = pEngineNode.mLock;
 			}
 		}
 		else
 		{
-			pPhysicsManager->GetAngleRate1(pGeometry->GetJointId(), lCurrentSpeed);
-			if (lCloseToGoal)
-			{
-				lTargetSpeed += (lTargetSpeed-lCurrentSpeed) * lScale;
-			}
+			pEngineNode.mLock = 0;
 		}
-		/*if (Math::IsEpsEqual(lTargetSpeed, 0.0f, 0.01f))	// Stop when almost already at a halt.
-		{
-			lTargetSpeed = 0;
-		}*/
-		pPhysicsManager->SetAngularMotorTurn(pGeometry->GetJointId(), mStrength, lTargetSpeed);
-		mIntensity += fabs(lTargetSpeed / (mMaxSpeed * lScale));
+	}
+	if (mFriction)
+	{
+		// Wants us to scale (down) rotation angle depending on vehicle speed. Otherwise most vehicles
+		// quickly flips, not yeilding very fun gameplay. Plus, it's more like real racing cars! :)
+		Vector3DF lParentVelocity;
+		pPhysicsManager->GetBodyVelocity(pGeometry->GetParent()->GetBodyId(), lParentVelocity);
+		const float lRangeFactor = ::pow(mFriction, lParentVelocity.GetLength());
+		lHiStop *= lRangeFactor;
+		lLoStop *= lRangeFactor;
+	}
+	const float lAngleSpan = (lHiStop-lLoStop)*0.9f;
+	const float lTargetAngle = (lForce < 0)? -lForce*lLoStop+lTarget : lForce*lHiStop+lTarget;
+	const float lDiff = (lTargetAngle-lIrlAngle);
+	const float lAbsDiff = ::fabs(lDiff);
+	float lTargetSpeed;
+	const float lAbsBigDiff = ::fabs(lAngleSpan/7);
+	const bool lCloseToGoal = (lAbsDiff > lAbsBigDiff);
+	if (lCloseToGoal)
+	{
+		lTargetSpeed = (lDiff > 0)? mMaxSpeed : -mMaxSpeed;
 	}
 	else
 	{
-		mLog.AError("Missing turn joint!");
+		lTargetSpeed = mMaxSpeed*lDiff/lAbsBigDiff;
 	}
+	lTargetSpeed *= (lForce > 0)? lScale : lReverseScale;
+	// If we're far from the desired target speed, we speed up.
+	float lCurrentSpeed = 0;
+	if (mEngineType == ENGINE_HINGE2_TURN)
+	{
+		pPhysicsManager->GetAngleRate2(pGeometry->GetJointId(), lCurrentSpeed);
+		if (lCloseToGoal)
+		{
+			lTargetSpeed *= 1+::fabs(lCurrentSpeed)/30;
+		}
+	}
+	else
+	{
+		pPhysicsManager->GetAngleRate1(pGeometry->GetJointId(), lCurrentSpeed);
+		if (lCloseToGoal)
+		{
+			lTargetSpeed += (lTargetSpeed-lCurrentSpeed) * lScale;
+		}
+	}
+	/*if (Math::IsEpsEqual(lTargetSpeed, 0.0f, 0.01f))	// Stop when almost already at a halt.
+	{
+		lTargetSpeed = 0;
+	}*/
+	pPhysicsManager->SetAngularMotorTurn(pGeometry->GetJointId(), mStrength, lTargetSpeed);
+	mIntensity += fabs(lTargetSpeed / (mMaxSpeed * lScale));
 }
 
 

@@ -10,10 +10,6 @@
 
 
 
-#define RTVAR_GAME_ISCHILD		"Game.IsChild"
-#define RTVAR_GAME_ENABLESTARTLOGO	"Game.EnableStartLogo"
-#define RTVAR_GAME_TIMEOFDAYFACTOR	"Game.TimeOfDayFactor"
-
 #define RTVAR_CTRL_UI_CONTOGGLE		"Control.Ui.ConsoleToggle"
 
 #define RTVAR_CTRL_UI_CAMUP		"Control.Ui.CamUp"
@@ -40,6 +36,23 @@
 #define RTVAR_CTRL_STEER_BRK		"Control.Steer.Break"
 
 #define RTVAR_STEERING_PLAYBACKMODE	"Control.Steering.PlaybackMode"	// Internal.
+
+#define RTVAR_DEBUG_3D_ENABLEAXES	"Debug.3D.EnableAxes"
+#define RTVAR_DEBUG_3D_ENABLEJOINTS	"Debug.3D.EnableJoints"
+#define RTVAR_DEBUG_3D_ENABLESHAPES	"Debug.3D.EnableShapes"
+#define RTVAR_DEBUG_3D_DRAWLOCALSERVER	"Debug.3D.DrawLocalServer"
+#define RTVAR_DEBUG_INPUT_PRINT		"Debug.Input.Print"
+#define RTVAR_DEBUG_NET_SENDPOSCNT	"Debug.Net.SendPositionCount"		// Internal.
+#define RTVAR_DEBUG_NET_RECVPOSCNT	"Debug.Net.ReceivePositionCount"	// Internal.
+#define RTVAR_DEBUG_PERFORMANCE_YOFFSET	"Debug.Performance.YOffset"
+#define RTVAR_DEBUG_PERFORMANCE_GRAPH	"Debug.Performance.Graph"
+#define RTVAR_DEBUG_PERFORMANCE_NAMES	"Debug.Performance.Names"
+#define RTVAR_DEBUG_PERFORMANCE_COUNT	"Debug.Performance.Count"
+
+#define RTVAR_GAME_ISCHILD		"Game.IsChild"
+#define RTVAR_GAME_ENABLESTARTLOGO	"Game.EnableStartLogo"
+#define RTVAR_GAME_TIMEOFDAYFACTOR	"Game.TimeOfDayFactor"
+#define RTVAR_GAME_FORCEEYES		"Game.ForceEyes"
 
 #define RTVAR_LOGIN_USERNAME		"Login.UserName"
 #define RTVAR_LOGIN_ISSERVERSELECTED	"Login.IsServerSelected"
