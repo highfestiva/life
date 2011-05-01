@@ -1206,7 +1206,7 @@ unsigned OpenGLRenderer::RenderScene()
 
 		if (IsOutlineRenderingEnabled())
 		{
-			SetAmbientLight(-10, -10, -10);
+			SetAmbientLight(lAmbientRed*0.5f, lAmbientGreen*0.5f, lAmbientBlue*0.5f);
 		}
 
 		// Prepare the pixel shader materials.
@@ -1271,6 +1271,10 @@ unsigned OpenGLRenderer::RenderScene()
 		::glCullFace(GL_BACK);
 		::glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		//::glDepthFunc(GL_LESS);
+		if (GetLightsEnabled())
+		{
+			::glEnable(GL_LIGHTING);
+		}
 		lSkipOutlined = true;
 	}
 

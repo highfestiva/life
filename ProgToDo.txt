@@ -59,7 +59,9 @@ Game
 + Make vehicle flip over to correct rotation whenever it accidentally flipped to its side/front/back.
 + Extend auto-flip feature so that if the avatar is_child, the system will apply helper forces designed to keep it from toppling over.
 + Show logo when starting game.
-. Server: make create (and auto-flip/teleport) move the object upward until it does not collide against anything, like 0.5 meters at a time.
+. Sync server's Game.TimeOfDay to client upon login.
+. Make sun disappear at night (currently stays below "floor").
+. Server: make it so create (and auto-flip/teleport) move the object upward until it does not collide against anything, like 0.5 meters at a time.
 . Implement pick-up helpers, so that any object O that touches a hoe/fork/whatever, while O is owned by the avatar (controlling the hoe/fork/whatever), causes an attracting force/torque. (So O can be picked up by for instance the excavator.)
 . Have modes:
   - Normal.
@@ -95,6 +97,7 @@ Game
 . Add brake lights on all vehicles.
 . Add eyes to all vehicles.
 . Group vehicles according to cost and/or difficulty. Could be cost on one axis, difficulty on another.
+. Create graphical-only butterflies in the world.
 . Make robot work better.
 . Create a quadropedic robot.
 . Build stuff in the world (add both dynamic+static and take transformation).
@@ -151,7 +154,7 @@ Game
   - Castle.
   - Huge Ice cream.
   - Mountain.
-  - Flying pterosaur (type of dinosaur) that moves around.
+  - Flying pterosaur.
 . Create icon for the game.
 . Fix wheels and tires/body on Corvette: normals suck on wheels, tires/body has "holes" where you can see through.
 . Make all vehicles fun to play in at least one way!

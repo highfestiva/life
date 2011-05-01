@@ -173,7 +173,7 @@ void Machine::OnTick()
 				lTag.mEngineIndexList.size() != 1 ||
 				lTag.mMeshIndexList.size() < 1)
 			{
-				mLog.Errorf(_T("The eye tag '%s' has the wrong # of parameters."), lTag.mTagName.c_str());
+				mLog.Errorf(_T("The brake_light tag '%s' has the wrong # of parameters."), lTag.mTagName.c_str());
 				assert(false);
 				continue;
 			}
