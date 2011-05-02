@@ -299,6 +299,7 @@ Engine
 . Use game icon and make it happen on Windows, Mac, iPhone, X11...
 . Make sure resources are freed when not used for a little while.
 . Make sure sounds are stopped when not played (volume ~ 0), and make sure non-played sounds are placed in resource cache - which means they'll be unloaded after a little while according to the "resource pool freeing" bullet.
+. Implement depth of field to blur stuff that is far away. Looks good in outline rendering mode.
 
 - Make network connection work with ONLY TCP if UDP is blocked by firewall.
 - Creating group/world objects as resources.

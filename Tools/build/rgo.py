@@ -246,7 +246,7 @@ def _buildzip(builder, buildtype=ziptype):
         #print(type(appname), type(osname), type(hwname), type(buildtype), type(datename))
         targetdir=appname+"."+osname+"."+hwname+"."+buildtype+"."+datename
         if buildtype == "rc":
-                targetdir = "PRE_RELEASE."+targetdir
+                targetdir = "PRE_ALPHA."+targetdir
         elif buildtype != "final":
                 targetdir = "NO_RELEASE."+targetdir
         os.mkdir(targetdir)
@@ -263,6 +263,24 @@ def _copybin(targetdir, buildtype):
         _incremental_copy(fl, targetdir, buildtype)
         fl = glob.glob("bin/Data/*")
         _incremental_copy(fl, os.path.join(targetdir, "Data"), buildtype)
+
+
+def _builddata(targetdir, buildtype):
+        _incremental_build_data()
+        _incremental_copy_data(targetdir, buildtype)
+
+
+def _rebuild(targetdir, buildtype):
+        verify_base_dir()
+        if hasdevenv(verbose=True):
+                _createmakes(force=True)
+                _cleandir(targetdir)
+                _buildcode("rebuild", buildtype)
+                _incremental_copy_code(targetdir, buildtype)
+        else:
+                _cleandir(targetdir+"/Data")
+        _cleandata(targetdir+"/Data")
+        _builddata(targetdir+"/Data", buildtype)
 
 
 def _macappify(exe, name):
@@ -324,11 +342,7 @@ def cleandata():
 
 
 def builddata():
-        targetdir=bindir
-        buildtype=default_build_mode
-        _incremental_build_data()
-        _incremental_copy_data(targetdir, buildtype)
-
+	_builddata(bindir, default_build_mode)
 
 
 def buildcode():
@@ -347,18 +361,7 @@ def build():
 
 
 def rebuild():
-        targetdir=bindir
-        buildtype=default_build_mode
-        verify_base_dir()
-        if hasdevenv(verbose=True):
-                _createmakes(force=True)
-                _cleandir(targetdir)
-                _buildcode("rebuild", buildtype)
-                _incremental_copy_code(targetdir, buildtype)
-        else:
-                _cleandir(targetdir+"/Data")
-        _cleandata("Data")
-        builddata()
+	_rebuild(bindir, default_build_mode)
 
 
 def clean():
@@ -375,7 +378,7 @@ def clean():
 
 
 def buildzip():
-        _buildzip(rebuild)
+        _buildzip(_rebuild)
 
 
 def builddirtyzip():
