@@ -543,7 +543,7 @@ bool ContextObject::UpdateFullPosition(const ObjectPositionalData*& pPositionalD
 		{
 			case TBC::PhysicsEngine::ENGINE_CAMERA_FLAT_PUSH:
 			{
-				GETSET_OBJECT_POSITIONAL_AT(mPosition, y, RealData4, lData, PositionalData::TYPE_REAL_4, 1);
+				GETSET_OBJECT_POSITIONAL_AT(mPosition, y, RealData4, lData, PositionalData::TYPE_REAL_4, 100);
 				++y;
 				::memcpy(lData->mValue, lEngine->GetValues(), sizeof(float)*TBC::PhysicsEngine::ASPECT_MAX_REMOTE_COUNT);
 			}
@@ -558,7 +558,7 @@ bool ContextObject::UpdateFullPosition(const ObjectPositionalData*& pPositionalD
 			case TBC::PhysicsEngine::ENGINE_TILTER:
 			case TBC::PhysicsEngine::ENGINE_SLIDER_FORCE:
 			{
-				GETSET_OBJECT_POSITIONAL_AT(mPosition, y, RealData1, lData, PositionalData::TYPE_REAL_1, 1);
+				GETSET_OBJECT_POSITIONAL_AT(mPosition, y, RealData1, lData, PositionalData::TYPE_REAL_1, 100);
 				++y;
 				lData->mValue = lEngine->GetValue();
 				assert(lData->mValue >= -1 && lData->mValue <= 1);

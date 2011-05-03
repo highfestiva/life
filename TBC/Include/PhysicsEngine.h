@@ -92,6 +92,8 @@ public:
 	void SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const;
 
 private:
+	float GetPrimaryValue() const;
+
 	void LoadChunkyData(ChunkyPhysics* pStructure, const void* pData);
 
 	struct EngineNode

@@ -970,7 +970,7 @@ void GameServerManager::FlipCheck(Cure::ContextObject* pObject) const
 		const int lEngineCount = pObject->GetPhysics()->GetEngineCount();
 		for (int x = 0; x < lEngineCount; ++x)
 		{
-			if (::fabs(pObject->GetPhysics()->GetEngine(x)->GetValue()) > 0.4f)
+			if (::fabs(pObject->GetPhysics()->GetEngine(x)->GetValue()) > 0.6f)
 			{
 				return;
 			}

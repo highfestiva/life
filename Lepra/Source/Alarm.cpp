@@ -34,8 +34,7 @@ void Alarm::Push(double pInitialWaitTime)
 
 void Alarm::Set()
 {
-	mTimer.UpdateTimer();
-	mTimer.ClearTimeDiff();
+	mTimer.PopTimeDiff();
 	mIsActive = true;
 }
 

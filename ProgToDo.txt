@@ -162,6 +162,7 @@ Game
 . Triangulate all meshes inside Maya.
 . Optimize models in Maya by combining meshes with same materials and same roots.
 . Add details to all models to make them more beautiful.
+. Inform grown-up users that they have to reset their throttle to flip over if they're on their back.
 . Add fun stuff to the world:
   - Portals to race track, monster jam court, dino park, castle...
   - Super speed mode (increase physics real time ratio to 250 % or so).

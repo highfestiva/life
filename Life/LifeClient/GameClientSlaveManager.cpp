@@ -434,7 +434,7 @@ bool GameClientSlaveManager::TickNetworkOutput()
 					{
 						log_atrace("Position expires.");
 					}
-					const bool lIsAllwedDiffSend = mSendExpireAlarm.PopExpired(0.5);
+					const bool lIsAllwedDiffSend = mSendExpireAlarm.IsExpired(0.5);
 
 					float lResyncOnDiff;
 					CURE_RTVAR_GET(lResyncOnDiff, =(float), GetVariableScope(), RTVAR_NETPHYS_RESYNCONDIFFGT, 100.0);

@@ -563,7 +563,7 @@ float PhysicsEngine::GetMaxSpeed() const
 float PhysicsEngine::GetLerpThrottle(float pUp, float pDown) const
 {
 	float& lLerpShadow = mSmoothValue[ASPECT_LOCAL_SHADOW];
-	const float lValue = GetValue();
+	const float lValue = GetPrimaryValue();
 	lLerpShadow = Math::Lerp(lLerpShadow, lValue, (lValue > lLerpShadow)? pUp : pDown);
 	return lLerpShadow;
 }
@@ -608,6 +608,17 @@ void PhysicsEngine::SaveChunkyData(const ChunkyPhysics* pStructure, void* pData)
 		lData[9+x*3] = Endian::HostToBig(lControlledNode.mMode);
 	}
 }
+
+
+
+float PhysicsEngine::GetPrimaryValue() const
+{
+	const float lForce = GetValue();
+	const float lPrimaryForce = (mValue[ASPECT_LOCAL_PRIMARY] > ::fabs(lForce))? mValue[ASPECT_LOCAL_PRIMARY] : lForce;
+	return lPrimaryForce;
+}
+
+
 
 void PhysicsEngine::LoadChunkyData(ChunkyPhysics* pStructure, const void* pData)
 {
@@ -655,8 +666,7 @@ void PhysicsEngine::ApplyTorque(PhysicsManager* pPhysicsManager, float pFrameTim
 		return;
 	}
 
-	const float lPrimaryForce = (mValue[ASPECT_LOCAL_PRIMARY] > ::fabs(mValue[ASPECT_PRIMARY]))? mValue[ASPECT_LOCAL_PRIMARY] : mValue[ASPECT_PRIMARY];
-	float lForce = lPrimaryForce;
+	float lForce = GetPrimaryValue();
 
 	const float lScale = pEngineNode.mScale;
 	const float lReverseScale = (lScale + 1) * 0.5f;	// Move towards linear scaling.
