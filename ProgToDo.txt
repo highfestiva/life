@@ -61,6 +61,7 @@ Game
 + Show logo when starting game.
 . Sync server's Game.TimeOfDay to client upon login.
 . Make sun disappear at night (currently stays below "floor").
+. Fix sizes+weights of vehicles so that some are not twice the size of others, when they should not be.
 . Server: make it so create (and auto-flip/teleport) move the object upward until it does not collide against anything, like 0.5 meters at a time.
 . Implement pick-up helpers, so that any object O that touches a hoe/fork/whatever, while O is owned by the avatar (controlling the hoe/fork/whatever), causes an attracting force/torque. (So O can be picked up by for instance the excavator.)
 . Have modes:

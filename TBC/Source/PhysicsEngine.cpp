@@ -254,7 +254,7 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 						}
 						else if (mEngineType == ENGINE_HINGE_ROLL)
 						{
-							if (lValue > 0)
+							//if (lValue > 0)
 							{
 								// Torque curve approximation, (tested it out, looks ok to me):
 								//   -8*(x-0.65)^2*(x-0.02) + 1
