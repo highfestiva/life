@@ -80,21 +80,42 @@ Game
   - Autoflip.
   - Select vehicle.
   - ...
-. Build a lot of mechanical machines in the world:
-  - Huge "inclining plane" attached to a rolling "barrel" in the middle. When going over it more than half-way the plane flips over to the opposite inclination ("leans the other way").
+. Different vehicles can build+place different mechanical machines in the world.
+  - Everybody can build basic primitives: floor and walls.
+  - All vehicles can demolish primitives.
+  - Dynamic: ball.
+  - Dynamic: tube.
+  - Dynamic: cube.
+  - Dynamic: stone.
+  - Dynamic: "inclining plane" attached to a rolling "barrel" in the middle. When going over it more than half-way the plane flips over to the opposite inclination ("leans the other way").
   - Huge horizontally rotating wheels which requires some timing to drive across to get to the next wheel.
-  - Huge vertically rotating wheel to move across (sorta like a bulging escalator).
-  - A huge ball rolling through a cyclic course: slope, elevator, slope, tube...
-  - Object catapult: one end allow vehicles to fall on it, causing the catapult to throw, the other end allow refilling of objects to throw.
-  - Vehicle catapult: one end allow vehicles to drive on, the other has an engine attached to it which will cause it to throw at regular intervals.
+  - Huge horizontally rotating tube to move across (sorta like a bulging escalator).
+  - Huge catapult (can be used for driving on vehicles on one side and shooting out vehicles or objects on the other).
   - Piston pushing vehicles off a bridge or course somewhere elevated.
+  - Fixed bridge.
   - Turning bridge which opens either the north-south passage or the east-west passage.
   - Huge checkweigher with display to show weight of vehicles/objects.
+  - Auto-sliding door.
+  - Auto-opening door.
+  - Revolving door.
+  - A wind mill.
   - A huge swing.
-  - A huge trampoline.
-  - A huge skate board.
-  - Ballon and/or zeppelin (aircraft) that floats around.
+  - A huge auto-timed trampoline.
+  - Horizontal auto-timed elevator.
+  - Vertical triggered elevator.
+  - Dynamic: A huge skate board.
+  - Dynamic: Ballon and/or zeppelin (aircraft) that floats around.
   - Huge rotating wheel with a stick or plane attached to it, which can push stuff aside or up.
+  - Bullet-time trigger.
+  - Hold-still trigger.
+  - One/few (desirable) vehicle(s) handles living objects (for decoration): butterflies, grass, trees... (Could be egg AND saucer?)
+. Currently selected material/texture is always used.
+. When building floors/walls: Place as you go with a specific UI. Always static, always same base-size. Up/down on floor picks fixed angle (0, -11.25, -22.5, -45) and adjust length factor according to angle. Same principle with walls.
+. When building other objects: pick size in 1D UI grid, with x^2 scale.
+. All static objects are placed in a 3D grid. All dynamic objects appear straight ahead of the vehicle.
+. All created dynamic objects have a life-span. After that they're removed from the world.
+. Building is rejected whenever an object intersects with the designated place in the grid, unless both are totally static. Floor/wall may of course not be built in the exact same spot/angle as another.
+. Building drains energy. Without energy, no building. Energy is increased when dynamic objects are placed/pushed into the "dissolver". Even avatars count.
 . Add brake lights on all vehicles.
 . Add eyes to all vehicles.
 . Group vehicles according to cost and/or difficulty. Could be cost on one axis, difficulty on another.
@@ -263,6 +284,7 @@ Engine
 + Make replay functionality for start/end screen.
 + Clear top of log files when too big. (Currently clears the file of too big; good enough but best.)
 + Port client to Mac OS X / Cocoa.
+. Make physical simulation as one on local server+splitscreens. MAKE IT CONFIGURABLE WEATHER OR NOT TO RUN ONE SIMULATION, so I can test network properly.
 . Make sure it won't jerk when some other process is using a whole CPU! We should manage fine on a single one with only two clients.
 . Fix bug: seems like the graphics movement ownership is incorrect. When splitscreen user2 (left) picks up a cube with the frontloader it hops around like crazy (but still seems to stay long inside the bucket).
 . Add version control when connecting to server, so old clients/servers won't crash.

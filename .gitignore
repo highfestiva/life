@@ -41,8 +41,9 @@ Final
 /Life/XCode/build
 /UiCure/CureTestApp/CureTestApp
 /ThirdParty/stlport/build
+/ThirdParty/Release
 /bin/
-/Data/Download
+Data/Download
 Data/*.mb
 Data/*.psd
 *~
