@@ -65,12 +65,12 @@ namespace System
 static Timer mTimer;
 namespace out
 {
-void println(str s)
+inline void println(str s)
 {
 	LogType::GetLog(LogType::SUB_ROOT)->RawPrint(s+_T("\n"));
 }
 }
-long currentTimeMillis()
+inline long currentTimeMillis()
 {
 	return (long)(mTimer.QueryTimeDiff()*1000L);
 }
@@ -80,7 +80,7 @@ long currentTimeMillis()
 
 namespace Math
 {
-double random()
+inline double random()
 {
 	return Random::Uniform();
 }
@@ -88,11 +88,11 @@ template<class _T> static _T abs(_T v)
 {
 	return (v > 0)? v : -v;
 }
-double sqrt(double v)
+inline double sqrt(double v)
 {
 	return ::sqrt(v);
 }
-double pow(double u, double v)
+inline double pow(double u, double v)
 {
 	return ::pow(u, v);
 }

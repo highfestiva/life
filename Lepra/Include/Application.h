@@ -34,8 +34,13 @@ int main(int argc, const char* argv[])	\
 	return lStatus;	\
 }
 #else // !LEPRA_CONSOLE (Let's assume it's M$Win, shall we?)
+#ifdef LEPRA_UNICODE
+#define LEPRA_WINMAIN wWinMain
+#else // ANSI
+#define LEPRA_WINMAIN WinMain
+#endif // Unicode/ANSI
 #define LEPRA_RUN_APPLICATION(ClassName, Method)	\
-int WINAPI wWinMain(HINSTANCE, HINSTANCE, PTSTR, int)	\
+int WINAPI LEPRA_WINMAIN(HINSTANCE, HINSTANCE, PTSTR, int)	\
 {	\
 	Lepra::strutil::strvec lArguments(Lepra::strutil::BlockSplit(::GetCommandLine(), _T(" \t\v\r\n"), false, false));	\
 	ClassName* lApplication = new ClassName(lArguments);	\

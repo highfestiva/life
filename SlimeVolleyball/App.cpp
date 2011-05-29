@@ -4,8 +4,11 @@
 
 
 
+#include "../Lepra/Include/Application.h"
+#include "../Lepra/Include/LogListener.h"
 #include "../Lepra/Include/SystemManager.h"
 #include "../UiLepra/Include/UiCore.h"
+#include "../UiLepra/Include/UiLepra.h"
 #include "SlimeVolleyball.hpp"
 
 
@@ -21,10 +24,12 @@ public:
 
 	App(const strutil::strvec& pArgumentList);
 	virtual ~App();
-	virtual void Init();
-	virtual int Run();
 
 private:
+	virtual void Init();
+	virtual int Run();
+	bool Poll();
+
 	SlimeVolleyball* mGame;
 };
 
@@ -62,11 +67,12 @@ void App::Init()
 
 int App::Run()
 {
+	UiLepra::Init();
+
 	StdioConsoleLogListener lConsoleLogger;
 	DebuggerLogListener lDebugLogger;
 	LogType::GetLog(LogType::SUB_ROOT)->SetupBasicListeners(&lConsoleLogger, &lDebugLogger, 0, 0, 0);
 
-	UiLepra::Init();
 	bool lOk = true;
 	if (lOk)
 	{
@@ -85,13 +91,13 @@ int App::Run()
 	bool lQuit = false;
 	while (lOk && !lQuit)
 	{
-		lOk = Poll(mGame);
+		lOk = Poll();
 		lQuit = (SystemManager::GetQuitRequest() != 0);
 	}
 	return lQuit? 0 : 1;
 }
 
-bool Poll()
+bool App::Poll()
 {
 	UiLepra::Core::ProcessMessages();
 	return true;

@@ -18,9 +18,10 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			OutputDirectory="$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="4"
+			ConfigurationType="1"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="2"
 			ManagedExtensions="0"
 			>
@@ -43,7 +44,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="&quot;..\ThirdParty\stlport\stlport&quot;"
-				PreprocessorDefinitions="WIN32;_DEBUG"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="false"
 				BasicRuntimeChecks="0"
 				RuntimeLibrary="1"
@@ -63,11 +64,22 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(ProjectDir)/Lib/$(InputName)D.lib"
+				Name="VCLinkerTool"
+				AdditionalDependencies="fmodvc.lib Netapi32.lib"
+				OutputFile="$(OutDir)\$(ProjectName).exe"
+				LinkIncremental="2"
+				AdditionalLibraryDirectories="..\ThirdParty\stlport\lib;..\ThirdParty\fmod\api\lib"
+				IgnoreDefaultLibraryNames="msvcrtd.lib"
+				GenerateDebugInformation="true"
+				AssemblyDebug="1"
+				GenerateMapFile="true"
+				SubSystem="1"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -79,14 +91,18 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Final|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			OutputDirectory="$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="4"
+			ConfigurationType="1"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="2"
 			ManagedExtensions="0"
 			>
@@ -110,7 +126,7 @@
 				InlineFunctionExpansion="2"
 				FavorSizeOrSpeed="1"
 				AdditionalIncludeDirectories="&quot;..\ThirdParty\stlport\stlport&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;NO_LOG_DEBUG_INFO"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;NO_LOG_DEBUG_INFO"
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
 				TreatWChar_tAsBuiltInType="true"
@@ -129,11 +145,19 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(ProjectDir)/Lib/$(InputName).lib"
+				Name="VCLinkerTool"
+				AdditionalDependencies="fmodvc.lib Netapi32.lib"
+				OutputFile="$(OutDir)\$(ProjectName).exe"
+				AdditionalLibraryDirectories="..\ThirdParty\stlport\lib;..\ThirdParty\fmod\api\lib"
+				IgnoreDefaultLibraryNames=""
+				GenerateMapFile="true"
+				SubSystem="2"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -145,14 +169,18 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Release Candidate|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			OutputDirectory="$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="4"
+			ConfigurationType="1"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="2"
 			ManagedExtensions="0"
 			WholeProgramOptimization="1"
@@ -177,7 +205,7 @@
 				InlineFunctionExpansion="2"
 				FavorSizeOrSpeed="1"
 				AdditionalIncludeDirectories="&quot;..\ThirdParty\stlport\stlport&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
 				TreatWChar_tAsBuiltInType="true"
@@ -196,11 +224,20 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(ProjectDir)/Lib/$(InputName)RC.lib"
+				Name="VCLinkerTool"
+				AdditionalDependencies="fmodvc.lib Netapi32.lib"
+				OutputFile="$(OutDir)\$(ProjectName).exe"
+				AdditionalLibraryDirectories="..\ThirdParty\stlport\lib;..\ThirdParty\fmod\api\lib"
+				IgnoreDefaultLibraryNames="msvcrt.lib"
+				GenerateDebugInformation="true"
+				GenerateMapFile="true"
+				SubSystem="1"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -212,14 +249,18 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Unicode Debug|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			OutputDirectory="$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="4"
+			ConfigurationType="1"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="1"
 			ManagedExtensions="0"
 			>
@@ -242,7 +283,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="&quot;..\ThirdParty\stlport\stlport&quot;"
-				PreprocessorDefinitions="WIN32;_DEBUG"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="false"
 				BasicRuntimeChecks="0"
 				RuntimeLibrary="1"
@@ -262,11 +303,22 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(ProjectDir)/Lib/$(InputName)UD.lib"
+				Name="VCLinkerTool"
+				AdditionalDependencies="fmodvc.lib Netapi32.lib"
+				OutputFile="$(OutDir)\$(ProjectName).exe"
+				LinkIncremental="2"
+				AdditionalLibraryDirectories="..\ThirdParty\stlport\lib;..\ThirdParty\fmod\api\lib"
+				IgnoreDefaultLibraryNames="msvcrtd.lib"
+				GenerateDebugInformation="true"
+				AssemblyDebug="1"
+				GenerateMapFile="true"
+				SubSystem="1"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -278,16 +330,21 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Unicode Final|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			OutputDirectory="$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="4"
+			ConfigurationType="1"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="1"
 			ManagedExtensions="0"
+			WholeProgramOptimization="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -309,7 +366,7 @@
 				InlineFunctionExpansion="2"
 				FavorSizeOrSpeed="1"
 				AdditionalIncludeDirectories="&quot;..\ThirdParty\stlport\stlport&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;NO_LOG_DEBUG_INFO"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;NO_LOG_DEBUG_INFO"
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
 				TreatWChar_tAsBuiltInType="true"
@@ -328,11 +385,20 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(ProjectDir)/Lib/$(InputName)U.lib"
+				Name="VCLinkerTool"
+				AdditionalDependencies="fmodvc.lib Netapi32.lib"
+				OutputFile="$(OutDir)\$(ProjectName).exe"
+				AdditionalLibraryDirectories="..\ThirdParty\stlport\lib;..\ThirdParty\fmod\api\lib"
+				IgnoreDefaultLibraryNames=""
+				GenerateDebugInformation="true"
+				GenerateMapFile="true"
+				SubSystem="2"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -344,16 +410,21 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Unicode Release Candidate|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			OutputDirectory="$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="4"
+			ConfigurationType="1"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="1"
 			ManagedExtensions="0"
+			WholeProgramOptimization="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -375,7 +446,7 @@
 				InlineFunctionExpansion="2"
 				FavorSizeOrSpeed="1"
 				AdditionalIncludeDirectories="&quot;..\ThirdParty\stlport\stlport&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
 				TreatWChar_tAsBuiltInType="true"
@@ -394,11 +465,20 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(ProjectDir)/Lib/$(InputName)URC.lib"
+				Name="VCLinkerTool"
+				AdditionalDependencies="fmodvc.lib Netapi32.lib"
+				OutputFile="$(OutDir)\$(ProjectName).exe"
+				AdditionalLibraryDirectories="..\ThirdParty\stlport\lib;..\ThirdParty\fmod\api\lib"
+				IgnoreDefaultLibraryNames="msvcrt.lib"
+				GenerateDebugInformation="true"
+				GenerateMapFile="true"
+				SubSystem="1"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -408,6 +488,9 @@
 			/>
 			<Tool
 				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -435,7 +518,7 @@
 		<Filter
 			Name="Source Files"
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
-			UniqueIdentifier="{4CF773F1-C75A-4763-A660-232AD2A752ED}"
+			UniqueIdentifier="{C734F7F1-C7A5-4376-A066-2A32FFD752A2}"
 			>
 			<File
 				RelativePath=".\App.cpp"
@@ -449,7 +532,7 @@
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
-			UniqueIdentifier="{39953809-89BD-4b04-88EB-2EBFB625FBE5}"
+			UniqueIdentifier="{93959380-89BD-4b04-88EB-625FBEBFB52E}"
 			>
 			<File
 				RelativePath=".\CrapAI.hpp"
