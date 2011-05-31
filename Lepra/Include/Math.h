@@ -157,7 +157,7 @@ template<class _Type> void Math::RangeAngles(_Type& pAngle1, _Type& pAngle2)
 	}
 }
 
-template<class _T> static _T Math::Acos(_T pAngle)
+template<class _T> _T Math::Acos(_T pAngle)
 {
 	if (pAngle + MathTraits<_T>::FullEps() >= 1)
 	{
