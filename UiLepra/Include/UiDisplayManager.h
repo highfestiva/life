@@ -161,12 +161,11 @@ public:
 	virtual bool FindDisplayMode(DisplayMode& pDisplayMode, int pWidth, int pHeight, int pBitDepth);
 	virtual bool FindDisplayMode(DisplayMode& pDisplayMode, int pWidth, int pHeight, int pBitDepth, int pRefreshRate);
 
-	virtual unsigned GetWidth() = 0;
-	virtual unsigned GetHeight() = 0;
-	virtual unsigned GetBitDepth() = 0;
-	virtual unsigned GetRefreshRate() = 0;
-	virtual unsigned GetPitch() = 0;
-	virtual bool IsFullScreen() = 0;
+	virtual unsigned GetWidth() const = 0;
+	virtual unsigned GetHeight() const = 0;
+	virtual unsigned GetBitDepth() const = 0;
+	virtual unsigned GetRefreshRate() const = 0;
+	virtual bool IsFullScreen() const = 0;
 
 	// Returns the canvas describing the screen. In accelerated modes 
 	// (OpenGL, DirectX etc) you can't assume that there is a valid pointer

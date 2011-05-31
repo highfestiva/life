@@ -59,14 +59,15 @@ int ContextObjectAttribute::Pack(uint8* pDestination)
 
 int ContextObjectAttribute::Unpack(ContextObject* pContextObject, const uint8* pSource, int pMaxSize)
 {
-	wstr lAttributeName;
-	int lSize = PackerUnicodeString::Unpack(lAttributeName, pSource, pMaxSize);
+	wstr lWideAttributeName;
+	int lSize = PackerUnicodeString::Unpack(lWideAttributeName, pSource, pMaxSize);
 	if (lSize < 0)
 	{
 		return -1;
 	}
 
-	ContextObjectAttribute* lAttribute = pContextObject->GetAttribute(strutil::Encode(lAttributeName));
+	str lAttributeName = strutil::Encode(lWideAttributeName);
+	ContextObjectAttribute* lAttribute = pContextObject->GetAttribute(lAttributeName);
 	if (!lAttribute)
 	{
 		assert(mFactory);

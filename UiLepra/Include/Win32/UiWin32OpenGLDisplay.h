@@ -30,8 +30,6 @@ public:
 
 	ContextType GetContextType();
 
-	unsigned GetPitch();
-
 protected:
 	void OnResize(int pWidth, int pHeight);
 	void OnMinimize();

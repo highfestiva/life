@@ -137,27 +137,27 @@ void Win32DisplayManager::Unregister()
 	}
 }
 
-unsigned Win32DisplayManager::GetWidth() 
+unsigned Win32DisplayManager::GetWidth() const
 {
 	return mDisplayMode.mWidth;
 }
 
-unsigned Win32DisplayManager::GetHeight() 
+unsigned Win32DisplayManager::GetHeight() const
 {
 	return mDisplayMode.mHeight;
 }
 
-unsigned Win32DisplayManager::GetBitDepth() 
+unsigned Win32DisplayManager::GetBitDepth() const
 {
 	return mDisplayMode.mBitDepth;
 }
 
-unsigned Win32DisplayManager::GetRefreshRate()
+unsigned Win32DisplayManager::GetRefreshRate() const
 {
 	return mDisplayMode.mRefreshRate;
 }
 
-bool Win32DisplayManager::IsFullScreen() 
+bool Win32DisplayManager::IsFullScreen() const
 {
 	return (mScreenMode == DisplayManager::FULLSCREEN);
 }

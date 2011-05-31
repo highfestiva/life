@@ -691,6 +691,12 @@ void DirectX9Painter::DoFillTriangle(float pX1, float pY1, float pU1, float pV1,
 	mD3DDevice->SetTexture(0, 0);
 }
 
+void DirectX9Painter::DrawFan(const std::vector<Vector2DF> pCoords, bool pFill)
+{
+	pCoords;
+	pFill;
+}
+
 Painter::ImageID DirectX9Painter::AddImage(const Canvas* pImage, const Canvas* pAlphaBuffer)
 {
 	if (pImage == 0 && pAlphaBuffer == 0)

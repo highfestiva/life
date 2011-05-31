@@ -168,27 +168,27 @@ MacDisplayManager::~MacDisplayManager()
 	}
 }
 
-unsigned MacDisplayManager::GetWidth() 
+unsigned MacDisplayManager::GetWidth() const
 {
 	return mDisplayMode.mWidth;
 }
 
-unsigned MacDisplayManager::GetHeight() 
+unsigned MacDisplayManager::GetHeight() const
 {
 	return mDisplayMode.mHeight;
 }
 
-unsigned MacDisplayManager::GetBitDepth() 
+unsigned MacDisplayManager::GetBitDepth() const
 {
 	return mDisplayMode.mBitDepth;
 }
 
-unsigned MacDisplayManager::GetRefreshRate()
+unsigned MacDisplayManager::GetRefreshRate() const
 {
 	return mDisplayMode.mRefreshRate;
 }
 
-bool MacDisplayManager::IsFullScreen() 
+bool MacDisplayManager::IsFullScreen() const
 {
 	return (mScreenMode == DisplayManager::FULLSCREEN);
 }

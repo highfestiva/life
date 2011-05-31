@@ -44,11 +44,11 @@ public:
 	virtual bool IsVisible() const;
 
 	// Returns the pointer if available, NULL otherwise.
-	virtual unsigned GetWidth();
-	virtual unsigned GetHeight();
-	virtual unsigned GetBitDepth();
-	virtual unsigned GetRefreshRate();
-	virtual bool IsFullScreen();
+	virtual unsigned GetWidth() const;
+	virtual unsigned GetHeight() const;
+	virtual unsigned GetBitDepth() const;
+	virtual unsigned GetRefreshRate() const;
+	virtual bool IsFullScreen() const;
 
 	Display* GetDisplay() const;
 	Window GetWindow() const;

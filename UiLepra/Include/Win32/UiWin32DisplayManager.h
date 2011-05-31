@@ -44,11 +44,11 @@ public:
 
 	virtual bool IsVisible() const;
 
-	virtual unsigned GetWidth();
-	virtual unsigned GetHeight();
-	virtual unsigned GetBitDepth();
-	virtual unsigned GetRefreshRate();
-	virtual bool IsFullScreen();
+	virtual unsigned GetWidth() const;
+	virtual unsigned GetHeight() const;
+	virtual unsigned GetBitDepth() const;
+	virtual unsigned GetRefreshRate() const;
+	virtual bool IsFullScreen() const;
 
 	HWND GetHWND();
 

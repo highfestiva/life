@@ -636,6 +636,28 @@ void OpenGLPainter::DoFillShadedRect(int pLeft, int pTop, int pRight, int pBotto
 	OGL_ASSERT();
 }
 
+void OpenGLPainter::DrawFan(const std::vector<Vector2DF> pCoords, bool pFill)
+{
+	OGL_ASSERT();
+
+	Color& lColor = GetColorInternal(0);
+	::glColor4ub(lColor.mRed, lColor.mGreen, lColor.mBlue, GetAlphaValue());
+	::glBegin(pFill? GL_TRIANGLE_FAN : GL_LINE_STRIP);
+	std::vector<Vector2DF>::const_iterator i = pCoords.begin();
+	for (; i != pCoords.end(); ++i)
+	{
+		float x = i->x;
+		float y = i->y;
+		ToScreenCoords(x, y);
+		x -= 0.5f;
+		y -= 0.5f;
+		::glVertex2f(x, y);
+	}
+	::glEnd();
+
+	OGL_ASSERT();
+}
+
 Painter::ImageID OpenGLPainter::AddImage(const Canvas* pImage, const Canvas* pAlphaBuffer)
 {
 	OGL_ASSERT();

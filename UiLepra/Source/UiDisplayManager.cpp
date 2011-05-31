@@ -320,7 +320,6 @@ bool DisplayManager::FindDisplayMode(DisplayMode& pDisplayMode, int pWidth, int 
 void DisplayManager::GetScreenCanvas(Canvas& pCanvas)
 {
 	pCanvas.Reset(GetWidth(), GetHeight(), Canvas::IntToBitDepth(GetBitDepth()));
-	pCanvas.SetPitch(GetPitch());
 }
 
 void DisplayManager::GetScreenCanvas(Canvas* pCanvas)

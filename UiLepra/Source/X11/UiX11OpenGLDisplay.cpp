@@ -86,11 +86,6 @@ DisplayManager::ContextType X11OpenGLDisplay::GetContextType()
 	return DisplayManager::OPENGL_CONTEXT;
 }
 
-unsigned X11OpenGLDisplay::GetPitch()
-{
-	return mDisplayMode.mWidth;
-}
-
 void X11OpenGLDisplay::SetFocus(bool pFocus)
 {
 	if (IsFullScreen() == true)

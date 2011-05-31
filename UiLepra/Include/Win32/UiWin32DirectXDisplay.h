@@ -29,8 +29,6 @@ public:
 
 	inline ContextType GetContextType();
 
-	unsigned GetPitch();
-
 	inline IDirect3DDevice9* GetD3DDevice();
 
 protected:

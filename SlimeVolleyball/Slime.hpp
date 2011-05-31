@@ -4,6 +4,8 @@
 #include "../Lepra/Include/Random.h"
 #include "../Lepra/Include/StringUtility.h"
 #include "../Lepra/Include/Timer.h"
+#include "../UiLepra/Include/UiDisplayManager.h"
+#include "../UiTBC/Include/UiPainter.h"
 
 
 
@@ -30,9 +32,16 @@ using namespace Lepra;
 class FontMetrics
 {
 public:
-	int stringWidth(str s) { return s.length()*7; }
-	int getHeight() { return 15; }
-	int getAscent() { return 4; }
+	FontMetrics(UiTbc::Painter* pPainter):
+		mPainter(pPainter)
+	{
+	}
+	int stringWidth(str s) { return mPainter->GetStringWidth(s); }
+	int getHeight() { return mPainter->GetFontHeight(); }
+	int getAscent() { return getHeight()*4/5; }
+
+private:
+	UiTbc::Painter* mPainter;
 };
 
 class Graphics
@@ -41,14 +50,81 @@ public:
 	int width;
 	int height;
 
-	void drawString(str s, int x, int y) {s;x;y;}
-	FontMetrics getFontMetrics() { return FontMetrics(); }
+	Graphics():
+		width(0),
+		height(0)
+	{
+	}
 
-	void setColor(Color c) {c;}
-	void fillRect(int x, int y, int w, int h) {x;y;w;h;}
-	void fillArc(int x, int y, int rx, int ry, int a1, int a2) {x;y;rx;ry;a1;a2;}
-	void fillOval(int x, int y, int rx, int ry) {x;y;rx;ry;}
-	void drawOval(int x, int y, int rx, int ry) {x;y;rx;ry;}
+	Graphics(const UiLepra::DisplayManager* pDisplayManager,
+		UiTbc::Painter* pPainter):
+		width(pDisplayManager->GetWidth()),
+		height(pDisplayManager->GetHeight()),
+		mPainter(pPainter)
+	{
+	}
+
+	void centerString(str s, int y)
+	{
+		drawString(s, width / 2 - getFontMetrics().stringWidth(s) / 2, y - getFontMetrics().getAscent()/2);
+	}
+	void drawString(str s, int x, int y)
+	{
+		mPainter->PrintText(s, x, y);
+	}
+
+	FontMetrics getFontMetrics() { return FontMetrics(mPainter); }
+
+	void setColor(Color c)
+	{
+		mPainter->SetColor(c, 0);
+		mPainter->SetColor(c, 1);
+	}
+	void fillRect(int x, int y, int w, int h)
+	{
+		mPainter->FillRect(x, y, x+w, y+h);
+	}
+	void fillArc(int x, int y, int rx, int ry, int a1, int a2)
+	{
+		DrawFan(x, y, rx, ry, a1, a2, true);
+	}
+	void fillOval(int x, int y, int rx, int ry)
+	{
+		DrawFan(x, y, rx, ry, 0, 360, true);
+	}
+	void drawOval(int x, int y, int rx, int ry)
+	{
+		DrawFan(x, y, rx, ry, 0, 360, false);
+	}
+
+private:
+	void DrawFan(int x, int y, int rx, int ry, int a1, int a2, bool pFill)
+	{
+		size_t lCurveCount = std::max(rx, ry) / 3 + 5;
+		std::vector<Vector2DF> lCoords;
+		const float lMidX = x + rx*0.5f;
+		const float lMidY = y + ry*0.5f;
+		if (pFill)
+		{
+			lCoords.push_back(Vector2DF(lMidX, lMidY));
+		}
+		const float lStartAngle = Lepra::Math::Deg2Rad((float)a1);
+		const float lEndAngle = Lepra::Math::Deg2Rad((float)a2);
+		const float lDeltaAngle = (lEndAngle-lStartAngle)/(lCurveCount-1);
+		const float lXRadius = rx*0.5f;
+		const float lYRadius = ry*0.5f;
+		float lAngle = lStartAngle;
+		for (size_t i = 0; i < lCurveCount; ++i)
+		{
+			lCoords.push_back(Vector2DF(
+				lMidX + cos(lAngle)*lXRadius,
+				lMidY - sin(lAngle)*lYRadius));
+			lAngle += lDeltaAngle;
+		}
+		mPainter->DrawFan(lCoords, pFill);
+	}
+
+	UiTbc::Painter* mPainter;
 };
 
 class Event

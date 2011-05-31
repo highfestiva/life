@@ -25,7 +25,7 @@ namespace Slime
 
 
 
-class App: public Application, public UiLepra::DisplayResizeObserver
+class App: public Application, public UiLepra::DisplayResizeObserver, public UiLepra::KeyCodeInputObserver
 {
 public:
 	typedef Application Parent;
@@ -48,6 +48,9 @@ private:
 	void EndRender();
 	void Clear(float pRed, float pGreen, float pBlue, bool pClearDepth = true);
 	bool CanRender() const;
+
+	virtual bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
+	virtual bool OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode);
 
 	void OnResize(int pWidth, int pHeight);
 	void OnMinimize();
@@ -96,8 +99,8 @@ App::~App()
 
 bool App::Open()
 {
-	const int lDisplayWidth = 600;
-	const int lDisplayHeight = 400;
+	const int lDisplayWidth = 780;
+	const int lDisplayHeight = 430;
 	int lDisplayBpp = 0;
 	int lDisplayFrequency = 0;
 	bool lDisplayFullScreen = false;
@@ -149,6 +152,7 @@ bool App::Open()
 	}
 	if (lOk)
 	{
+		mDisplay->SetCaption("Slime Volleyball");
 		mDisplay->AddResizeObserver(this);
 
 		mCanvas = new Canvas(lDisplayMode.mWidth, lDisplayMode.mHeight, Canvas::IntToBitDepth(lDisplayMode.mBitDepth));
@@ -175,7 +179,7 @@ bool App::Open()
 		mPainter->SetFontManager(mFontManager);
 
 		const str lFont =  _T("Times New Roman");
-		const double lFontHeight = 14.0;
+		const double lFontHeight = 20.0;
 		UiTbc::FontManager::FontId lFontId = mFontManager->QueryAddFont(lFont, lFontHeight);
 		const tchar* lFontNames[] =
 		{
@@ -199,7 +203,8 @@ bool App::Open()
 	if (lOk)
 	{
 		mInput = UiLepra::InputManager::CreateInputManager(mDisplay);
-		mInput->ActivateAll();
+		//mInput->ActivateAll();
+		mInput->AddKeyCodeInputObserver(this);
 	}
 	if (lOk)
 	{
@@ -357,7 +362,7 @@ int App::Run()
 	if (lOk)
 	{
 		mGame = new SlimeVolleyball;
-		lOk = mGame->init();
+		lOk = mGame->init(Graphics(mDisplay, mPainter));
 	}
 	bool lQuit = false;
 	while (lOk && !lQuit)
@@ -374,8 +379,10 @@ bool App::Poll()
 	UiLepra::Core::ProcessMessages();
 	BeginRender(Vector3DF(0,0,0));
 	Render(PixelRect(0,0,100,100));
-	PreparePaint();
+	Graphics g(mDisplay, mPainter);
 	Paint();
+	mGame->paint(g);
+	mGame->run();
 	EndRender();
 	return true;
 }
@@ -459,6 +466,35 @@ bool App::CanRender() const
 {
 	return mDisplay->IsVisible();
 }
+
+
+bool App::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
+{
+	Event lEvent;
+	switch (pKeyCode)
+	{
+		case UiLepra::InputManager::IN_KBD_SPACE:
+			lEvent.id = 501;
+			mGame->handleEvent(lEvent);
+			break;
+		default:
+			lEvent.id = 401;
+			lEvent.key = pKeyCode;
+			mGame->handleEvent(lEvent);
+			break;
+	}
+	return false;
+}
+
+bool App::OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode)
+{
+	Event lEvent;
+	lEvent.id = 402;
+	lEvent.key = pKeyCode;
+	mGame->handleEvent(lEvent);
+	return false;
+}
+
 
 
 void App::OnResize(int pWidth, int pHeight)

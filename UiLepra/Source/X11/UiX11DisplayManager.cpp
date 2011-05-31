@@ -89,27 +89,27 @@ X11DisplayManager::~X11DisplayManager()
 	}
 }
 
-unsigned X11DisplayManager::GetWidth() 
+unsigned X11DisplayManager::GetWidth() const
 {
 	return mDisplayMode.mWidth;
 }
 
-unsigned X11DisplayManager::GetHeight() 
+unsigned X11DisplayManager::GetHeight() const
 {
 	return mDisplayMode.mHeight;
 }
 
-unsigned X11DisplayManager::GetBitDepth() 
+unsigned X11DisplayManager::GetBitDepth() const
 {
 	return mDisplayMode.mBitDepth;
 }
 
-unsigned X11DisplayManager::GetRefreshRate()
+unsigned X11DisplayManager::GetRefreshRate() const
 {
 	return mDisplayMode.mRefreshRate;
 }
 
-bool X11DisplayManager::IsFullScreen() 
+bool X11DisplayManager::IsFullScreen() const
 {
 	return (mScreenMode == DisplayManager::FULLSCREEN);
 }

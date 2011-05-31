@@ -93,11 +93,6 @@ DisplayManager::ContextType Win32OpenGLDisplay::GetContextType()
 	return DisplayManager::OPENGL_CONTEXT;
 }
 
-unsigned Win32OpenGLDisplay::GetPitch()
-{
-	return mDisplayMode.mWidth;
-}
-
 void Win32OpenGLDisplay::SetFocus(bool pFocus)
 {
 	if (IsFullScreen() == true)

@@ -87,12 +87,6 @@ bool Win32DirectXDisplay::SetVSyncEnabled(bool pEnabled)
 }
 
 
-unsigned Win32DirectXDisplay::GetPitch()
-{
-	// TODO: Return the actual pitch of the screen.
-	return mDisplayMode.mWidth;
-}
-
 void Win32DirectXDisplay::OnResize(int pWidth, int pHeight)
 {
 	Resize(pWidth, pHeight);
