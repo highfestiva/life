@@ -92,11 +92,6 @@ DisplayManager::ContextType MacOpenGLDisplay::GetContextType()
 	return DisplayManager::OPENGL_CONTEXT;
 }
 
-unsigned MacOpenGLDisplay::GetPitch()
-{
-	return mDisplayMode.mWidth;
-}
-
 void MacOpenGLDisplay::SetFocus(bool pFocus)
 {
 	if (IsFullScreen() == true)

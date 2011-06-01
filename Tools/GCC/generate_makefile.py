@@ -64,11 +64,11 @@ lib%(lib)s.so:\t$(OBJS)
 foot_lib_nowarn = foot_lib
 
 head_bin = head_lib+"""
-LIBS = -lLife -lCure -lTBC -lLepra -lThirdParty -lstlportstlg -lpthread -ldl """ + librt + """ %(libs)s
+LIBS = %(deplib_switches)s -lstlportstlg -lpthread -ldl """ + librt + """ %(libs)s
 """
 
-head_gfx_bin = head_bin+"""
-LIBS = -lLife -lUiCure -lUiTBC -lUiLepra """ + openal_ui + """ -lalut -lCure -lTBC -lLepra -lThirdParty -lstlportstlg -lpthread -ldl """ + librt + " " + libgl + """ %(libs)s
+head_gfx_bin = """
+LIBS = %(deplib_switches)s """ + openal_ui + """ -lstlportstlg -lpthread -ldl """ + librt + " " + libgl + """ %(libs)s
 """
 
     
@@ -183,9 +183,10 @@ def generate_makefile(vcfile, makename, includedirs, libdirs, deplibs, header, f
     cpps = [x for x in cpps if issrc(x)]
     objs = [os.path.splitext(x)[0]+".o" for x in cpps]
     f = create_makefile(makename, vcfile, type)
+    deplib_switches = " ".join(deplibs)
     includes = " ".join(["-I%s" % i for i in includedirs])
     libs = " ".join(["-L%s" % i for i in libdirs])
-    f.write(header % {"includes":includes, "libs":libs})
+    f.write(header % {"deplib_switches":deplib_switches, "includes":includes, "libs":libs})
     write_contents(f, cpps, objs)
     f.write(footer % {"lib":libname, "libs":libs, "deplibs":' '.join(deplibs)})
     f.close()
@@ -264,17 +265,18 @@ def main():
     projects = [
         ["ThirdParty", "lib_nowarn", "ThirdParty/ThirdPartyLib_900.vcproj", ""],
         ["alut",       "lib_nowarn", "ThirdParty/freealut-1.1.0/admin/VisualStudioDotNET/alut/alut900.vcproj", ""],
-        ["Lepra",      "lib",        "Lepra/Lepra900.vcproj", "ThirdParty"],
-        ["TBC",        "lib",        "TBC/TBC900.vcproj", "Lepra"],
-        ["Cure",       "lib",        "Cure/Cure900.vcproj", "TBC"],
-        ["UiLepra",    "lib",        "UiLepra/UiLepra900.vcproj", "Lepra alut"+space_mac_hid],
-        ["UiTBC",      "lib",        "UiTBC/UiTBC900.vcproj", "UiLepra TBC"],
-        ["UiCure",     "lib",        "UiCure/UiCure900.vcproj", "UiTBC Cure"],
-        ["Life",       "lib",        "Life/Life900.vcproj", "Cure"],
-        ["LifeServer", "bin",        "Life/LifeServer/LifeServer900.vcproj", "Life"],
-        ["LifeMaster", "bin",        "Life/LifeMaster/LifeMaster900.vcproj", "Lepra"],
-        ["LifeClient", "gfx_bin",    "Life/LifeClient/LifeClient900.vcproj", "Life UiCure"],
-        ["CureTest",   "gfx_bin",    "UiCure/CureTestApp/CureTestApp900.vcproj", "UiCure"]]
+        ["Lepra",           "lib",        "Lepra/Lepra900.vcproj", "ThirdParty"],
+        ["TBC",             "lib",        "TBC/TBC900.vcproj", "Lepra"],
+        ["Cure",            "lib",        "Cure/Cure900.vcproj", "TBC"],
+        ["UiLepra",         "lib",        "UiLepra/UiLepra900.vcproj", "Lepra alut"+space_mac_hid],
+        ["UiTBC",           "lib",        "UiTBC/UiTBC900.vcproj", "UiLepra TBC"],
+        ["UiCure",          "lib",        "UiCure/UiCure900.vcproj", "UiTBC Cure"],
+        ["Life",            "lib",        "Life/Life900.vcproj", "Cure"],
+        ["LifeServer",      "bin",        "Life/LifeServer/LifeServer900.vcproj", "Life"],
+        ["LifeMaster",      "bin",        "Life/LifeMaster/LifeMaster900.vcproj", "Life"],
+        ["LifeClient",      "gfx_bin",    "Life/LifeClient/LifeClient900.vcproj", "Life UiCure"],
+        ["SlimeVolleyball", "gfx_bin",    "SlimeVolleyball/SlimeVolleyball900.vcproj", "UiTBC"],
+        ["CureTest",        "gfx_bin",    "UiCure/CureTestApp/CureTestApp900.vcproj", "UiCure"]]
 
     if sys.platform != 'darwin':
         projects = [["OpenAL", "lib_nowarn", "ThirdParty/openal-soft-1.10.622/OpenAL_900.vcproj", ""]] + projects

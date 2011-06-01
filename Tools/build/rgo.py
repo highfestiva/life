@@ -298,7 +298,10 @@ def _macappify(exe, name):
         shutil.copytree("../Tools/build/macosx", exe+".app")
         for f in fs:
                 os.rename(f, os.path.join(exe+".app/Contents/MacOS", f))
-        os.rename("Data", exe+".app/Contents/Resources/Data")
+        try:
+                os.rename("Data", exe+".app/Contents/Resources/Data")
+        except:
+                pass
         plist = ".app/Contents/Info.plist"
         r = open(exe+plist, "rt")
         w = open(exe+plist+".tmp", "wt")
@@ -330,6 +333,9 @@ def _demacappify(wildcard):
 
 def macappify_client():
         _macappify("LifeClient", "Da Client")
+
+def macappify_slime():
+        _macappify("SlimeVolleyball", "Slime Volleyball")
 
 def demacappify():
         _demacappify("*.app")
