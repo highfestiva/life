@@ -23,9 +23,11 @@
 *.zip
 *.mode1v3
 *.pbxuser
+*.bak
 mt.dep
 stlport.res
 makefile
+Makefile
 .mayaSwatches
 tmp
 *.mel
@@ -39,6 +41,7 @@ Final
 /Life/LifeServer/LifeServer
 /Life/LifeMaster/LifeMaster
 /Life/XCode/build
+/SlimeVolleyball/SlimeVolleyball
 /UiCure/CureTestApp/CureTestApp
 /ThirdParty/stlport/build
 /ThirdParty/Release

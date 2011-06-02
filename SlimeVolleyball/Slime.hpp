@@ -73,7 +73,10 @@ public:
 		mPainter->PrintText(s, x, y);
 	}
 
-	FontMetrics getFontMetrics() { return FontMetrics(mPainter); }
+	FontMetrics getFontMetrics()
+	{
+		return FontMetrics(mPainter);
+	}
 
 	void setColor(Color c)
 	{
@@ -100,7 +103,7 @@ public:
 private:
 	void DrawFan(int x, int y, int rx, int ry, int a1, int a2, bool pFill)
 	{
-		size_t lCurveCount = std::max(rx, ry) / 3 + 5;
+		const size_t lCurveCount = (std::max(rx, ry) / 3 + 13) & (~3);
 		std::vector<Vector2DF> lCoords;
 		const float lMidX = x + rx*0.5f;
 		const float lMidY = y + ry*0.5f;

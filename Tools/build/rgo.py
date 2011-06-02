@@ -457,5 +457,9 @@ if __name__ == "__main__":
                 demacappify()
 
         for arg in args:
-                exec(arg+"()")
+                try:
+                        exec(arg+"()")
+                except NameError:
+                        print("Error: no such command %s!" % arg)
+                        sys.exit(1)
         _printresult()

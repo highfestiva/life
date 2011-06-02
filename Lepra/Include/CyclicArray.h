@@ -11,12 +11,12 @@
 
 
 #define LEPRA_ARRAY_COUNT(a)	(sizeof(a)/sizeof(a[0]))
-#define LEPRA_ARRAY_ASSIGN(a,v)				\
-{							\
-	for (int x = 0; x < LEPRA_ARRAY_COUNT(a); ++x)	\
-	{						\
-		a[x] = v[x];				\
-	}						\
+#define LEPRA_ARRAY_ASSIGN(a,v)					\
+{								\
+	for (size_t x = 0; x < LEPRA_ARRAY_COUNT(a); ++x)	\
+	{							\
+		a[x] = v[x];					\
+	}							\
 }
 
 

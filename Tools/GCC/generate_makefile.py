@@ -32,11 +32,16 @@ if sys.platform == 'darwin':
     mac_hid = 'HID'
     space_mac_hid = ' '+mac_hid
     cflags_1 += ' -framework OpenGL -framework CoreServices -framework OpenAL -DMAC_OS_X_VERSION=1050'
-    ldflags += ' -framework OpenGL -framework AppKit -framework Cocoa -lobjc -lstlportstlg -framework CoreServices %(libs)s %(deplibs)s -lIOKit '
+    ldflags += ' -framework AppKit -framework Cocoa -lobjc -framework CoreServices -lIOKit '
 
-head_lib = cflags_1+" -Wall "+cflags_2+"\n"
+cflags_head = cflags_1+" -Wall "+cflags_2+"\n"
+cflags_nowarn_head = cflags_1+" "+cflags_2+"\n"
+libs_head = "LIBS = %(deplib_switches)s -lstlportstlg -lpthread -ldl " + librt + " %(libs)s\n"
+gfx_libs_head = "LIBS = %(deplib_switches)s " + openal_ui + " -lstlportstlg -lpthread -ldl " + librt + " " + libgl + " %(libs)s\n"
 
-head_lib_nowarn = cflags_1+" "+cflags_2+"\n"
+head_lib = cflags_head+libs_head
+head_lib_nowarn = cflags_nowarn_head+libs_head
+head_gfx_lib = cflags_head+gfx_libs_head
 
 foot_rules = """
 .SUFFIXES: .o .mm
@@ -58,20 +63,15 @@ all:\tlib%(lib)s.so $(OBJS)
 clean:
 \t@rm -f lib%(lib)s.so $(OBJS)
 lib%(lib)s.so:\t$(OBJS)
-\tg++ -shared """ + ldflags + ' ' + openal_noui + """ -o $@ $(OBJS)
+\tg++ -shared $(LIBS) """ + ldflags + ' ' + openal_noui + """ -o $@ $(OBJS)
 """+foot_rules
 
 foot_lib_nowarn = foot_lib
+foot_gfx_lib = foot_lib
 
-head_bin = head_lib+"""
-LIBS = %(deplib_switches)s -lstlportstlg -lpthread -ldl """ + librt + """ %(libs)s
-"""
+head_bin = head_lib
 
-head_gfx_bin = """
-LIBS = %(deplib_switches)s """ + openal_ui + """ -lstlportstlg -lpthread -ldl """ + librt + " " + libgl + """ %(libs)s
-"""
-
-    
+head_gfx_bin = head_gfx_lib
 
 foot_bin = """
 all:\t%(lib)s $(OBJS)
@@ -212,7 +212,7 @@ def get_dep_libs(vcfileinfolist, depnames):
     return deps
 
 def generate_makefiles(basedir, vcfileinfolist):
-    files = {"bin":[], "gfx_bin":[], "lib":[]}
+    files = {"bin":[], "gfx_bin":[], "lib":[], "gfx_lib":[]}
 
     for name, type, vcfile, deps in vcfileinfolist:
         basetype = "lib" if type.startswith("lib") else type
@@ -256,21 +256,21 @@ def generate_makefiles(basedir, vcfileinfolist):
 
     makename = os.path.join(basedir, "makefile")
     printstart(makename)
-    generate_base_make(makename, files["bin"]+files["gfx_bin"], files["lib"])
+    generate_base_make(makename, files["bin"]+files["gfx_bin"], files["lib"]+files["gfx_lib"])
     printend("base")
 
 
 def main():
     basedir = "../../"
     projects = [
-        ["ThirdParty", "lib_nowarn", "ThirdParty/ThirdPartyLib_900.vcproj", ""],
-        ["alut",       "lib_nowarn", "ThirdParty/freealut-1.1.0/admin/VisualStudioDotNET/alut/alut900.vcproj", ""],
+        ["ThirdParty",      "lib_nowarn", "ThirdParty/ThirdPartyLib_900.vcproj", ""],
+        ["alut",            "lib_nowarn", "ThirdParty/freealut-1.1.0/admin/VisualStudioDotNET/alut/alut900.vcproj", ""],
         ["Lepra",           "lib",        "Lepra/Lepra900.vcproj", "ThirdParty"],
         ["TBC",             "lib",        "TBC/TBC900.vcproj", "Lepra"],
         ["Cure",            "lib",        "Cure/Cure900.vcproj", "TBC"],
-        ["UiLepra",         "lib",        "UiLepra/UiLepra900.vcproj", "Lepra alut"+space_mac_hid],
-        ["UiTBC",           "lib",        "UiTBC/UiTBC900.vcproj", "UiLepra TBC"],
-        ["UiCure",          "lib",        "UiCure/UiCure900.vcproj", "UiTBC Cure"],
+        ["UiLepra",         "gfx_lib",    "UiLepra/UiLepra900.vcproj", "Lepra alut"+space_mac_hid],
+        ["UiTBC",           "gfx_lib",    "UiTBC/UiTBC900.vcproj", "UiLepra TBC"],
+        ["UiCure",          "gfx_lib",    "UiCure/UiCure900.vcproj", "UiTBC Cure"],
         ["Life",            "lib",        "Life/Life900.vcproj", "Cure"],
         ["LifeServer",      "bin",        "Life/LifeServer/LifeServer900.vcproj", "Life"],
         ["LifeMaster",      "bin",        "Life/LifeMaster/LifeMaster900.vcproj", "Life"],

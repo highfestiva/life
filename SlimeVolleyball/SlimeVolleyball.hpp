@@ -101,16 +101,14 @@ class SlimeVolleyball
 
 	public: bool init(const Graphics& pGraphics)
 	{
-		System::out::println("One Slime: http://www.student.uwa.edu.au/~wedgey/slime1/");
-
 		this->screen = pGraphics;
 		this->nWidth = this->screen.width;
-		this->nHeight = this->screen.height;
+		this->nHeight = this->screen.height*4/5;
 		this->fInPlay = this->fEndGame = false;
 		this->promptMsg = "Click the mouse to play!";
 		str s[] = { "Inferior Human Controlled Slime ", "The Pathetic White Slime ", "Angry Red Slimonds ", "The Slime Master ", "Psycho Slime ", "Psycho Slime " };
 		LEPRA_ARRAY_ASSIGN(this->slimeColText, s);
-		Color c[] = { YELLOW, WHITE, RED, BLACK, BLUE, BLUE };
+		Color c[] = { YELLOW, Color(220,235,220), RED, BLACK, BLUE, BLUE };
 		LEPRA_ARRAY_ASSIGN(this->slimeColours, c);
 		str s2[] = { "You are a loser!", this->slimeColText[2] + "gives you the gong!", this->slimeColText[3] + "says \"You are seriously inept.\"", this->slimeColText[4] + "laughs at the pathetic slow opposition.", this->slimeColText[5] + "is still invincible!" };
 		LEPRA_ARRAY_ASSIGN(this->loserText1, s2);
@@ -120,6 +118,7 @@ class SlimeVolleyball
 		this->gameScore = 0;
 		this->bGameOver = true;
 		this->paused = false;
+		this->mLoopTimer.PopTimeDiff();
 
 		this->aiMode = aiStartLevel;
 
@@ -181,18 +180,18 @@ class SlimeVolleyball
 	{
 		this->screen = paramGraphics;
 		this->nWidth = paramGraphics.width;
-		this->nHeight = paramGraphics.height;
+		this->nHeight = paramGraphics.height*4/5;
 		paramGraphics.setColor(this->SKY_COL);
 		paramGraphics.fillRect(0, 0, this->nWidth, 4 * this->nHeight / 5);
 		paramGraphics.setColor(this->COURT_COL);
-		paramGraphics.fillRect(0, 4 * this->nHeight / 5, this->nWidth, this->nHeight / 5);
+		paramGraphics.fillRect(0, 4 * this->nHeight / 5, this->nWidth, this->nHeight/2);
 		paramGraphics.setColor(WHITE);
 		paramGraphics.fillRect(this->nWidth / 2 - 2, 7 * this->nHeight / 10, 4, this->nHeight / 10 + 5);
 		FontMetrics localFontMetrics = paramGraphics.getFontMetrics();
 		if (this->bGameOver)
 		{
-			this->screen.centerString("Slime Volleyball: One Slime", this->nHeight / 2);
-			paramGraphics.centerString("Code base by Quin Pendragon", this->nHeight / 2 + localFontMetrics.getHeight() * 2);
+			this->screen.centerString("Slime Volleyball", this->nHeight / 2);
+			paramGraphics.centerString("Applet code base by Quin Pendragon", this->nHeight / 2 + localFontMetrics.getHeight() * 2);
 			paramGraphics.centerString("AI and Mod by Daniel Wedge", this->nHeight / 2 + localFontMetrics.getHeight() * 3);
 			paramGraphics.centerString("Port by high_festiva", this->nHeight / 2 + localFontMetrics.getHeight() * 4);
 			paramGraphics.setColor(LIGHT_RED);
@@ -619,23 +618,23 @@ class SlimeVolleyball
 
 	private: str MakeTime(long paramLong)
 	{
-		str str = "";
+		str s = "";
 
 		long l1 = paramLong / 1000L % 60L;
 		long l2 = paramLong / 60000L % 60L;
 
-		str = str + strutil::IntToString(l2, 10) + ":";
-		if (l1 < 10L) str = str + "0";
-		str = str + strutil::IntToString(l1, 10);
-		return str;
+		s = strutil::IntToString(l2, 10) + ":";
+		if (l1 < 10L) s += "0";
+		s += strutil::IntToString(l1, 10);
+		return s;
 	}
 
 	private: void DrawStatus()
 	{
 		str s = str("Score: ") + strutil::IntToString(this->gameScore, 10) + (!this->fInPlay ? "" : str("	 Time: ") + MakeTime((this->paused ? this->pausedTime : System::currentTimeMillis()) - this->startTime));
 		this->screen.setColor(WHITE);
-		int i = this->nHeight / 15;
-		this->screen.centerString(s, i/5 + i/2);
+		int i = this->nHeight*5/4 * 7/8 - 10;
+		this->screen.centerString(s, i);
 	}
 
 	public: void drawPrompt() {
@@ -686,6 +685,7 @@ class SlimeVolleyball
 			this->fP1Touched = this->fP2Touched = 0;
 			this->fServerMoved = false;
 			//repaint();
+			mLoopTimer.PopTimeDiff();
 			this->startTime += System::currentTimeMillis() - _run_l;
 		}
 

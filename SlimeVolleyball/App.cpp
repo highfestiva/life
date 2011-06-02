@@ -99,8 +99,8 @@ App::~App()
 
 bool App::Open()
 {
-	const int lDisplayWidth = 780;
-	const int lDisplayHeight = 430;
+	const int lDisplayWidth = 480;
+	const int lDisplayHeight = 320;
 	int lDisplayBpp = 0;
 	int lDisplayFrequency = 0;
 	bool lDisplayFullScreen = false;
@@ -178,9 +178,8 @@ bool App::Open()
 		//mFontManager->SetColor(Color(0, 0, 0, 0), 1);
 		mPainter->SetFontManager(mFontManager);
 
-		const str lFont =  _T("Times New Roman");
-		const double lFontHeight = 20.0;
-		UiTbc::FontManager::FontId lFontId = mFontManager->QueryAddFont(lFont, lFontHeight);
+		UiTbc::FontManager::FontId lFontId = UiTbc::FontManager::INVALID_FONTID;
+		const double lFontHeight = lDisplayHeight / 21.0;
 		const tchar* lFontNames[] =
 		{
 			_T("Times New Roman"),
@@ -193,6 +192,21 @@ bool App::Open()
 		for (int x = 0; lFontNames[x] && lFontId == UiTbc::FontManager::INVALID_FONTID; ++x)
 		{
 			lFontId = mFontManager->QueryAddFont(lFontNames[x], lFontHeight);
+		}
+
+		{
+		  Canvas lCanvas(30, 30, Canvas::BITDEPTH_32_BIT);
+		  mFontManager->RenderGlyph('S', lCanvas, PixelRect(0,0,30,30));
+		  for (int y = 0; y < 30; ++y)
+		    {
+		      for (int x = 0; x < 30; ++x)
+			{
+			  Color c;
+			  lCanvas.GetPixelColor(x, y, c);
+			  printf("%2.2X ", c.mRed);
+			}
+		      printf("\n");
+		    }
 		}
 	}
 	if (lOk)
