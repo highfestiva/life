@@ -7,6 +7,14 @@ Mac x86_64:
     (DON'T Edit build/Makefiles/gmake/sysid.mak and change the M_ARCH := line to x86_64.)
     Instead keep fingers crossed.
 
+iOS:
+    Run
+	cd /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin
+	ln g++-4.2 armv6-apple-darwin10-g++-4.2
+	ln gcc-4.2 armv6-apple-darwin10-gcc-4.2
+	PATH=/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:$PATH
+	./configure --target=armv6-apple-darwin10 --with-cxx="g++-4.2" --with-cc="gcc-4.2" --with-extra-cflags="-arch armv6 -D_DARWIN_C_SOURCE -D_STLP_THREADS -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS4.2.sdk -I/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS4.2.sdk/usr/include/c++/4.2.1/armv6-apple-darwin10 -gdwarf-2 -mthumb -miphoneos-version-min=3.0" --with-extra-cxxflags="-arch armv6 -D_DARWIN_C_SOURCE -D_STLP_THREADS -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS4.2.sdk -I/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS4.2.sdk/usr/include/c++/4.2.1/armv6-apple-darwin10 -gdwarf-2 -mthumb -miphoneos-version-min=3.0" --with-extra-ldflags="-arch armv6 -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS4.2.sdk -gdwarf-2 -mthumb -miphoneos-version-min=3.0 -lgcc_eh -dead_strip /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS4.2.sdk/usr/lib/dylib1.o"
+
 Windows:
     <cmd.exe> (can't run in msys)
     configure.bat msvc9

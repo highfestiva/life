@@ -6,14 +6,32 @@ import os
 import sys
 
 
+stlport_path = "ThirdParty/stlport/build/lib/obj/gcc/so_stlg"
+
 cextraflags = ""
 if sys.platform == 'darwin':
-    cextraflags = "-D_DARWIN_C_SOURCE -D_STLP_THREADS"
+    cextraflags = " -D_DARWIN_C_SOURCE -D_STLP_THREADS"
+    if os.environ.get('PD_BUILD_IOS'):
+        darwin_kit = '-framework UIKit'
+        stlport_path = "ThirdParty/stlport/build/lib/obj/armv6-apple-darwin10-gcc/so_stlg"
+    else:
+        darwin_kit = '-framework AppKit -framework Cocoa -framework CoreServices -lIOKit'
 
-cflags_1 = """
-CFLAGS = -O0 -ggdb -fPIC """+cextraflags+""" -D_STLP_DEBUG -D_POSIX_PTHREAD_SEMANTICS %(includes)s -DPOSIX -D_XOPEN_SOURCE=600 -D_DEBUG -D_CONSOLE -DPNG_NO_ASSEMBLER_CODE -DdSingle -DdTLS_ENABLED=1 -DHAVE_CONFIG_H=1 -DLEPRA_WITHOUT_FMOD"""
+platform_extraflags = ''
+if os.environ.get('PD_BUILD_IOS'):
+    compiler_path = '/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/'
+    platform_extraflags = ' -arch armv6 -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS4.2.sdk -fvisibility=hidden -gdwarf-2 -mthumb -miphoneos-version-min=3.0'
+else:
+    compiler_path = ''
+cextraflags += platform_extraflags
+
+
+cflags_1 = "C_COMPILER = "+compiler_path+"""gcc
+CPP_COMPILER = """+compiler_path+"""g++
+
+CFLAGS = -O0 -ggdb -fPIC"""+cextraflags+""" -D_STLP_DEBUG -D_POSIX_PTHREAD_SEMANTICS %(includes)s -DPOSIX -D_XOPEN_SOURCE=600 -D_DEBUG -D_CONSOLE -DPNG_NO_ASSEMBLER_CODE -DdSingle -DdTLS_ENABLED=1 -DHAVE_CONFIG_H=1 -DLEPRA_WITHOUT_FMOD"""
 cflags_2 = "-Wno-unknown-pragmas"
-ldflags = ""
+ldflags = platform_extraflags
 
 librt = '-lrt'
 libgl = '-lGL'
@@ -32,7 +50,7 @@ if sys.platform == 'darwin':
     mac_hid = 'HID'
     space_mac_hid = ' '+mac_hid
     cflags_1 += ' -framework OpenGL -framework CoreServices -framework OpenAL -DMAC_OS_X_VERSION=1050'
-    ldflags += ' -framework AppKit -framework Cocoa -lobjc -framework CoreServices -lIOKit '
+    ldflags += ' '+darwin_kit+' -lobjc '
 
 cflags_head = cflags_1+" -Wall "+cflags_2+"\n"
 cflags_nowarn_head = cflags_1+" "+cflags_2+"\n"
@@ -50,11 +68,11 @@ depend:
 \t#@grep -Ev "\\.o: .*([T]hirdParty|/[u]sr)/" makefile >.tmpmake
 \t#@mv .tmpmake makefile
 .c.o:
-\tgcc $(CFLAGS) -o $@ -c $<
+\t$(C_COMPILER) $(CFLAGS) -o $@ -c $<
 .cpp.o:
-\tg++ $(CFLAGS) -o $@ -c $<
+\t$(CPP_COMPILER) $(CFLAGS) -o $@ -c $<
 .mm.o:
-\tg++ $(CFLAGS) -o $@ -c $<
+\t$(CPP_COMPILER) $(CFLAGS) -o $@ -c $<
 
 """
 
@@ -63,7 +81,7 @@ all:\tlib%(lib)s.so $(OBJS)
 clean:
 \t@rm -f lib%(lib)s.so $(OBJS)
 lib%(lib)s.so:\t$(OBJS)
-\tg++ -shared $(LIBS) """ + ldflags + ' ' + openal_noui + """ -o $@ $(OBJS)
+\t$(CPP_COMPILER) -shared $(LIBS) """ + ldflags + ' ' + openal_noui + """ -o $@ $(OBJS)
 """+foot_rules
 
 foot_lib_nowarn = foot_lib
@@ -78,7 +96,7 @@ all:\t%(lib)s $(OBJS)
 clean:
 \t@rm -f %(lib)s $(OBJS)
 %(lib)s:\t$(OBJS)
-\tg++ $(LIBS) """ + ldflags + """ -o $@ $(OBJS)
+\t$(CPP_COMPILER) $(LIBS) """ + ldflags + """ -o $@ $(OBJS)
 """+foot_rules
 
 foot_gfx_bin = foot_bin
@@ -108,7 +126,7 @@ depend:
 \tdone
 
 $(BINS):\t$(OBJS)
-\t@if test -f ThirdParty/stlport/build/lib/obj/gcc/so_stlg/libstlportstlg""" + stllibfile + """; then cp ThirdParty/stlport/build/lib/obj/gcc/so_stlg/libstlportstlg""" + stllibfile + """ bin/; fi
+\t@if test -f """+stlport_path+"/libstlportstlg" + stllibfile + "; then cp "+stlport_path+"/libstlportstlg" + stllibfile + """ bin/; fi
 \t@cp $@ bin/
 
 $(OBJS):\t$(SRCS)
@@ -229,7 +247,7 @@ def generate_makefiles(basedir, vcfileinfolist):
         os.path.relpath(basedir+"ThirdParty/ode-0.11.1/OPCODE", projdir),
         os.path.relpath(basedir+"ThirdParty/ode-0.11.1/GIMPACT/include", projdir),
         os.path.relpath(basedir+"ThirdParty/ode-0.11.1/ou/include", projdir)]
-        libdirs = [os.path.relpath(basedir+"ThirdParty/stlport/build/lib/obj/gcc/so_stlg", projdir),
+        libdirs = [os.path.relpath(basedir+stlport_path, projdir),
         os.path.relpath(basedir+"ThirdParty", projdir),
         os.path.relpath(basedir+"ThirdParty/openal-soft-1.10.622", projdir),
         os.path.relpath(basedir+"ThirdParty/freealut-1.1.0/admin/VisualStudioDotNET/alut", projdir),

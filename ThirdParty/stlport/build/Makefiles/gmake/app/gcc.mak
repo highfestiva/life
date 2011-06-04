@@ -124,6 +124,9 @@ _LGCC_S := -lgcc_s.10.5
 else
 _LGCC_S := -lgcc_s.10.4
 endif
+ifeq ($(M_ARCH),arm)
+_LGCC_S := -lgcc
+endif
 else
 _LGCC_S := -lgcc_s
 # end of GCC_APPLE_CC

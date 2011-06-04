@@ -27,7 +27,7 @@ typedef __int64			int64;
 typedef unsigned __int64	uint64;
 typedef float			float32;
 typedef double			float64;
-#elif defined(LEPRA_GCC_X86_32) || defined(LEPRA_GCC_X86_64) || defined(LEPRA_GCC_POWERPC)
+#elif defined(LEPRA_GCC_X86_32) || defined(LEPRA_GCC_X86_64) || defined(LEPRA_GCC_POWERPC) || defined(LEPRA_GCC_ARM)
 typedef signed char		int8;
 typedef unsigned char		uint8;
 typedef signed short		int16;

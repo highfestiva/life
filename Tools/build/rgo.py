@@ -196,6 +196,14 @@ def _cleandir(da_dir):
         return removes
 
 
+def _checkplatform():
+	if sys.platform == 'darwin':
+		ios = os.environ.get('PD_BUILD_IOS')
+		if ios == None:
+			print("You must set env var PD_BUILD_IOS to 0 or 1 depending on your target. Exiting.")
+			sys.exit(1)
+
+
 def _printresult():
         global showed_result
         if showed_result:
@@ -298,8 +306,10 @@ def _macappify(exe, name):
         shutil.copytree("../Tools/build/macosx", exe+".app")
         for f in fs:
                 os.rename(f, os.path.join(exe+".app/Contents/MacOS", f))
+                updates += 1
         try:
                 os.rename("Data", exe+".app/Contents/Resources/Data")
+                updates += 1
         except:
                 pass
         plist = ".app/Contents/Info.plist"
@@ -311,6 +321,7 @@ def _macappify(exe, name):
         w.close()
         os.remove(exe+plist)
         os.rename(exe+plist+".tmp", exe+plist)
+        updates += 1
         os.chdir("..")
 
 
@@ -434,7 +445,7 @@ def gdbclient():
         _fgrun("LifeClient", "gdb ")
 
 
-if __name__ == "__main__":
+def main():
         usage = "usage: %prog [options] <filespec>\n" + \
                 "Runs some type of build command. Try build, rebuild, clean, builddata, or something like that."
         parser = optparse.OptionParser(usage=usage, version="%prog 0.2")
@@ -456,6 +467,8 @@ if __name__ == "__main__":
         if options.demacappify:
                 demacappify()
 
+        _checkplatform()
+
         for arg in args:
                 try:
                         exec(arg+"()")
@@ -463,3 +476,7 @@ if __name__ == "__main__":
                         print("Error: no such command %s!" % arg)
                         sys.exit(1)
         _printresult()
+
+
+if __name__ == "__main__":
+	main()

@@ -100,6 +100,10 @@ inline uint64 SystemManager::GetCpuTick()
 		: "=r"(upper),"=r"(lower),"=r"(tmp)
 	);
 	return (((uint64)upper)<<32 | lower)*75;
+#elif defined(LEPRA_GCC_ARM)
+        timeval lTimeValue;
+        ::gettimeofday(&lTimeValue, 0);
+	return ((uint64)lTimeValue.tv_sec*1000000 + lTimeValue.tv_usec);
 #else
 #error "GetCpuTick() not yet implemented on this platform."
 #endif // Platform.

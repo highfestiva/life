@@ -16,3 +16,11 @@ AR := ar
 AR_INS_R := -r -s
 AR_EXTR := -x
 AR_OUT = $@
+
+APPLE_OS = mac
+ifeq ($(M_ARCH),armv6)
+APPLE_OS = ios
+endif
+ifeq ($(M_ARCH),armv7)
+APPLE_OS = ios
+endif

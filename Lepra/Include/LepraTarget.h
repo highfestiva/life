@@ -67,13 +67,18 @@
 #define LEPRA_GCC_X86_32
 #elif defined(__POWERPC__)
 #define LEPRA_GCC_POWERPC
+#elif defined(__arm__)
+#define LEPRA_GCC_ARM
 #else	// Unknown hardware.
 #error "Hardware platform not supported!"
-#endif // _X86_/ARM
+#endif
 
 #if defined(__APPLE__)
 #define LEPRA_MAC
-#endif
+#if defined(LEPRA_GCC_ARM)
+#define LEPRA_IOS
+#endif // iOS
+#endif // Mac
 
 #if defined(DEBUG) || defined(_DEBUG)
 #define LEPRA_DEBUG
