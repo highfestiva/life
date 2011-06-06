@@ -1,0 +1,6 @@
+#include "UiOpenGLMaterial_DiffuseBumpMapShaders.cxx"
+#include "UiOpenGLMaterial_SBMapShaders.cxx"
+#include "UiOpenGLMaterial_SingleColorShaders.cxx"
+#include "UiOpenGLMaterial_SingleTextureShaders.cxx"
+#include "UiOpenGLMaterial_TextureAndLightmapShaders.cxx"
+#include "UiOpenGLMaterials.cxx"

@@ -6,8 +6,9 @@
 
 #pragma once
 
-#include "../UiInput.h"
 #include "../UiLepra.h"
+#ifndef LEPRA_IOS
+#include "../UiInput.h"
 #import <AppKit/AppKit.h>
 #include <HID_Utilities.h>
 #include <HID_Queue_Utilities.h>
@@ -159,3 +160,5 @@ private:
 
 
 }
+
+#endif // !iOS

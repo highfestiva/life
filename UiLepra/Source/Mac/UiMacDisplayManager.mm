@@ -10,43 +10,48 @@
 #include "../../../Lepra/Include/String.h"
 #include "../../../Lepra/Include/SystemManager.h"
 #include "../../Include/UiLepra.h"
-#include "../../Include/Mac/UiMacInput.h"
 #include "../../Include/Mac/UiMacOpenGLDisplay.h"
 
 
 
+#ifdef LEPRA_IOS
+@interface NativeWindow: LEPRA_APPLE_WINDOW
+#else // !iOS
 @interface NativeWindow: NSWindow <NSWindowDelegate>
+#endif // iOS/!iOS
 {
 	@public UiLepra::MacDisplayManager* mDisplayManager;
 }
 @end
 
 @implementation NativeWindow
--(void) keyDown:(NSEvent*)theEvent
+-(void) keyDown:(LEPRA_APPLE_EVENT*)theEvent
 {
 	mDisplayManager->DispatchEvent(theEvent);
 }
--(void) keyUp:(NSEvent*)theEvent
+-(void) keyUp:(LEPRA_APPLE_EVENT*)theEvent
 {
 	mDisplayManager->DispatchEvent(theEvent);
 }
--(void) flagsChanged:(NSEvent*)theEvent
+-(void) flagsChanged:(LEPRA_APPLE_EVENT*)theEvent
 {
 	mDisplayManager->DispatchEvent(theEvent);
 }
-- (void) mouseDragged: (NSEvent*)theEvent
+- (void) mouseDragged: (LEPRA_APPLE_EVENT*)theEvent
 {
 	mDisplayManager->DispatchEvent(theEvent);
 }
-- (void)mouseMoved: (NSEvent*)theEvent
+- (void)mouseMoved: (LEPRA_APPLE_EVENT*)theEvent
 {
 	mDisplayManager->DispatchEvent(theEvent);
 }
+#ifndef LEPRA_IOS
 -(void) windowDidResize:(NSNotification*)notification
 {
 	NSView* lView = [self contentView];
 	mDisplayManager->DispatchResize(lView.frame.size.width, lView.frame.size.height);
 }
+#endif // !iOS
 - (BOOL)acceptsFirstResponder
 {
 	return YES;
@@ -68,6 +73,7 @@ namespace UiLepra
 
 
 
+#ifndef LEPRA_IOS
 static NSString* Encode(const str& pText)
 {
 #if defined(LEPRA_UNICODE)
@@ -77,7 +83,7 @@ static NSString* Encode(const str& pText)
 #endif
 	return lText;
 }
-
+#endif // !iOS
 
 
 
@@ -110,6 +116,17 @@ MacDisplayManager::MacDisplayManager():
 	mNormalHeight(0),
 	mCaptionSet(false)
 {
+#ifdef LEPRA_IOS
+	mScreenMode = FULLSCREEN;
+	mEnumeratedDisplayModeCount = 1;
+	mEnumeratedDisplayMode = new DisplayMode[mEnumeratedDisplayModeCount];
+	DisplayMode lDisplayMode;
+	lDisplayMode.mWidth = 480;
+	lDisplayMode.mHeight = 320;
+	lDisplayMode.mRefreshRate = 0;
+	lDisplayMode.mBitDepth = 0;
+	mEnumeratedDisplayMode[0] = lDisplayMode;
+#else // !iOS
 	// Obtain number of available displays.
 	CGDisplayCount lDisplayCount = 0;
 	CGDisplayErr lError = CGGetActiveDisplayList(0, 0, &lDisplayCount);
@@ -148,6 +165,7 @@ MacDisplayManager::MacDisplayManager():
 	}
 	
 	delete[] (lDisplays);
+#endif // iOS/!iOS
 }
 
 MacDisplayManager::~MacDisplayManager()
@@ -200,6 +218,7 @@ void MacDisplayManager::SetCaption(const str& pCaption)
 
 void MacDisplayManager::SetCaption(const str& pCaption, bool pInternalCall)
 {
+#ifndef LEPRA_IOS
 	if (mIsOpen)
 	{
 		if (pInternalCall == false)
@@ -212,6 +231,7 @@ void MacDisplayManager::SetCaption(const str& pCaption, bool pInternalCall)
 			[mWnd setTitle:Encode(pCaption)];
 		}
 	}
+#endif // !iOS
 }
 
 bool MacDisplayManager::OpenScreen(const DisplayMode& pDisplayMode, ScreenMode pScreenMode)
@@ -300,7 +320,7 @@ void MacDisplayManager::CloseScreen()
 
 		if (mWnd)
 		{
-			[mWnd close];
+			[mWnd release];
 			mWnd = 0;
 		}
 	}
@@ -319,11 +339,13 @@ bool MacDisplayManager::InitWindow()
 
 	NativeWindow* lWnd = [NativeWindow alloc];
 	mWnd = lWnd;
+#ifdef LEPRA_IOS
+	[mWnd makeKeyAndVisible];
+#else // !iOS
 	[mWnd	initWithContentRect:	NSMakeRect(0, 0, mDisplayMode.mWidth, mDisplayMode.mHeight)
 		styleMask:		NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask
 		backing:		NSBackingStoreBuffered
 		defer:			NO];
-	lWnd->mDisplayManager = this;
 	lWnd.delegate = lWnd;
 	[mWnd setAcceptsMouseMovedEvents: YES];
 	[mWnd setIgnoresMouseEvents: NO];
@@ -332,6 +354,8 @@ bool MacDisplayManager::InitWindow()
 	[mWnd	setFrame:	NSMakeRect(0, 0, mDisplayMode.mWidth, mDisplayMode.mHeight)
 		display:	YES];
 	[mWnd center];
+#endif // iOS/!iOS
+	lWnd->mDisplayManager = this;
 
 	++mWindowCount;
 
@@ -423,13 +447,8 @@ void MacDisplayManager::GetBorderSize(int& pSizeX, int& pSizeY)
 	}
 	else if (mWnd)
 	{
-		const int lWindowWidth	= mWnd.frame.size.width;
-		const int lWindowHeight	= mWnd.frame.size.height;
-		NSView* lView = [mWnd contentView];
-		const int lViewWidth	= lView.frame.size.width;
-		const int lViewHeight	= lView.frame.size.height;
-		pSizeX = lWindowWidth - lViewWidth;
-		pSizeY = lWindowHeight - lViewHeight;
+		pSizeX = 0;
+		pSizeY = 0;
 	}
 	else
 	{
@@ -471,12 +490,12 @@ int MacDisplayManager::GetClientHeight(int pWindowHeight)
 	return pWindowHeight - lBorderSizeY;
 }
 
-NSWindow* MacDisplayManager::GetWindow() const
+LEPRA_APPLE_WINDOW* MacDisplayManager::GetWindow() const
 {
 	return mWnd;
 }
 
-void MacDisplayManager::DispatchEvent(NSEvent* e)
+void MacDisplayManager::DispatchEvent(LEPRA_APPLE_EVENT* e)
 {
 	ObserverSetTable::Iterator lTIter = mObserverSetTable.Find([e type]);
 	if (lTIter != mObserverSetTable.End())
@@ -562,11 +581,13 @@ void MacDisplayManager::RemoveObserver(MacObserver* pObserver)
 
 void MacDisplayManager::ShowMessageBox(const str& pMsg, const str& pCaption)
 {
+#ifndef LEPRA_IOS
 	NSRunAlertPanel(Encode(pCaption), Encode(pMsg), nil, nil, nil);
+#endif // !iOS
 }
 
 
-
+#ifndef LEPRA_IOS
 DisplayMode MacDisplayManager::ConvertNativeDisplayMode(CGDisplayModeRef pMode)
 {
 	DisplayMode lDisplayMode;
@@ -589,6 +610,9 @@ DisplayMode MacDisplayManager::ConvertNativeDisplayMode(CGDisplayModeRef pMode)
 	}
 	return (lDisplayMode);
 }
+#endif // !iOS
+
+
 
 int MacDisplayManager::mWindowCount = 0;
 LOG_CLASS_DEFINE(UI_GFX, MacDisplayManager);

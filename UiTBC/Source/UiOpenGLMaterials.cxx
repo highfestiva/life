@@ -68,11 +68,11 @@ void OpenGLMaterial::SetBasicMaterial(const TBC::GeometryBase::BasicMaterialSett
 	const float lDiffuse[]  = { pMaterial.mDiffuse.x,  pMaterial.mDiffuse.y,  pMaterial.mDiffuse.z,  pMaterial.mAlpha };
 	const float lSpecular[] = { pMaterial.mSpecular.x, pMaterial.mSpecular.y, pMaterial.mSpecular.z, pMaterial.mAlpha };
 
-	::glColor4fv(lDiffuse);
+	::glColor4f(lDiffuse[0], lDiffuse[1], lDiffuse[2], lDiffuse[3]);
 	::glMaterialfv(GL_FRONT, GL_AMBIENT, lAmbient);
 	::glMaterialfv(GL_FRONT, GL_DIFFUSE, lDiffuse);
 	::glMaterialfv(GL_FRONT, GL_SPECULAR, lSpecular);
-	::glMateriali(GL_FRONT, GL_SHININESS, (int)(pMaterial.mShininess * 128.0f));
+	::glMaterialf(GL_FRONT, GL_SHININESS, pMaterial.mShininess*0.5f);
 	::glShadeModel(pMaterial.mSmooth ? GL_SMOOTH : GL_FLAT);
 
 	pRenderer->SetGlobalMaterialReflectance(pMaterial.mDiffuse.x, pMaterial.mDiffuse.y, pMaterial.mDiffuse.z, pMaterial.mShininess);
@@ -86,14 +86,18 @@ void OpenGLMaterial::RenderAllBlendedGeometry(unsigned pCurrentFrame, const Geom
 {
 	::glDepthMask(GL_FALSE);
 	::glDisable(GL_CULL_FACE);
+#ifndef LEPRA_GL_ES
 	GLint lOldFill[2];
 	::glGetIntegerv(GL_POLYGON_MODE, lOldFill);
 	::glPolygonMode(GL_FRONT_AND_BACK, GetRenderer()->IsWireframeEnabled()? GL_LINE : GL_FILL);
+#endif // !GLES
 	Parent::RenderAllBlendedGeometry(pCurrentFrame, pGeometryGroupList);
 	::glEnable(GL_CULL_FACE);
 	::glDepthMask(GL_TRUE);
+#ifndef LEPRA_GL_ES
 	::glPolygonMode(GL_FRONT, lOldFill[0]);
 	::glPolygonMode(GL_BACK, lOldFill[1]);
+#endif // !GLES
 }
 
 
@@ -127,16 +131,17 @@ void OpenGLMatSingleColorSolid::PreRender()
 {
 	::glDisable(GL_ALPHA_TEST);
 	::glDisable(GL_BLEND);
-	::glDisable(GL_LOGIC_OP);
+	//::glDisable(GL_LOGIC_OP);
 	::glDisable(GL_TEXTURE_2D);
 
 	::glEnableClientState(GL_VERTEX_ARRAY);
 	::glEnableClientState(GL_NORMAL_ARRAY);
 	::glDisableClientState(GL_COLOR_ARRAY);
 	::glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+#ifndef LEPRA_GL_ES
 	::glEnable(GL_COLOR_MATERIAL);
-
 	::glColorMaterial(GL_FRONT, GL_AMBIENT);
+#endif // !GLES
 }
 
 void OpenGLMatSingleColorSolid::PostRender()
@@ -165,9 +170,9 @@ void OpenGLMatSingleColorSolid::RenderBaseGeometry(TBC::GeometryBase* pGeometry)
 		glNormalPointer(GL_FLOAT, 0, (GLvoid*)lGeometry->mNormalOffset);
 
 		UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lIndexBufferID);
-		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry), 
+		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry),
 			       pGeometry->GetIndexCount(),
-			       GL_UNSIGNED_INT, 
+			       LEPRA_GL_INDEX_TYPE,
 			       0);
 	}
 	else
@@ -176,7 +181,7 @@ void OpenGLMatSingleColorSolid::RenderBaseGeometry(TBC::GeometryBase* pGeometry)
 		glNormalPointer(GL_FLOAT, 0, pGeometry->GetNormalData());
 		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry),
 			       pGeometry->GetIndexCount(),
-			       GL_UNSIGNED_INT,
+			       LEPRA_GL_INDEX_TYPE,
 			       pGeometry->GetIndexData());
 	}
 
@@ -212,9 +217,10 @@ void OpenGLMatSingleColorBlended::PreRender()
 	::glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	::glEnableClientState(GL_VERTEX_ARRAY);
 	::glEnableClientState(GL_NORMAL_ARRAY);
+#ifndef LEPRA_GL_ES
 	::glEnable(GL_COLOR_MATERIAL);
-
 	::glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+#endif // !GLES
 }
 
 void OpenGLMatSingleColorBlended::PostRender()
@@ -274,7 +280,7 @@ void OpenGLMatVertexColorSolid::RenderGeometry(TBC::GeometryBase* pGeometry)
 		UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lIndexBufferID);
 		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry), 
 			       pGeometry->GetIndexCount(),
-			       GL_UNSIGNED_INT, 
+			       LEPRA_GL_INDEX_TYPE,
 			       0);
 	}
 	else
@@ -290,7 +296,7 @@ void OpenGLMatVertexColorSolid::RenderGeometry(TBC::GeometryBase* pGeometry)
 
 		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry),
 			       pGeometry->GetIndexCount(),
-			       GL_UNSIGNED_INT,
+			       LEPRA_GL_INDEX_TYPE,
 			       pGeometry->GetIndexData());
 	}
 }
@@ -352,14 +358,14 @@ void OpenGLMatSingleTextureSolid::RenderGeometry(TBC::GeometryBase* pGeometry)
 
 		UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lIndexBufferID);
 
-		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry), pGeometry->GetIndexCount(), GL_UNSIGNED_INT, 0);
+		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry), pGeometry->GetIndexCount(), LEPRA_GL_INDEX_TYPE, 0);
 	}
 	else
 	{
 		glVertexPointer(3, GL_FLOAT, 0, pGeometry->GetVertexData());
 		glNormalPointer(GL_FLOAT, 0, pGeometry->GetNormalData());
 		glTexCoordPointer(2, GL_FLOAT, 0, pGeometry->GetUVData(0));
-		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry), pGeometry->GetIndexCount(), GL_UNSIGNED_INT, pGeometry->GetIndexData());
+		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry), pGeometry->GetIndexCount(), LEPRA_GL_INDEX_TYPE, pGeometry->GetIndexData());
 	}
 }
 
@@ -367,18 +373,18 @@ void OpenGLMatSingleTextureSolid::PreRender()
 {
 	::glDisable(GL_ALPHA_TEST);
 	::glDisable(GL_BLEND);
-	::glDisable(GL_LOGIC_OP);
+	//::glDisable(GL_LOGIC_OP);
 	::glEnable(GL_TEXTURE_2D);
 
 	::glEnableClientState(GL_VERTEX_ARRAY);
 	::glEnableClientState(GL_NORMAL_ARRAY);
 	::glDisableClientState(GL_COLOR_ARRAY);
 	::glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+#ifndef LEPRA_GL_ES
 	::glEnable(GL_COLOR_MATERIAL);
-
 	::glColorMaterial(GL_FRONT, GL_AMBIENT);
-
 	::glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR);
+#endif // !GLES
 }
 
 void OpenGLMatSingleTextureSolid::PostRender()
@@ -486,7 +492,9 @@ void OpenGLMatSingleColorEnvMapSolid::DoRenderAllGeometry(unsigned pCurrentFrame
 	// support blending the texture with the base color of the material.
 	// So, first we render a "single color material" pass,
 	// and then we blend in the environment map on top of that.
+#ifndef LEPRA_GL_ES
 	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+#endif // !GLES
 
 	// Pass 1, single color.
 	mSingleColorPass = true;
@@ -524,6 +532,7 @@ void OpenGLMatSingleColorEnvMapSolid::DoRenderAllGeometry(unsigned pCurrentFrame
 		mTextureParamMin = GL_NEAREST_MIPMAP_NEAREST;
 	}
 
+#ifndef LEPRA_GL_ES
 	if (((OpenGLRenderer*)GetRenderer())->IsEnvMapCubeMap() == true)
 	{
 		// Use cube mapping.
@@ -559,6 +568,7 @@ void OpenGLMatSingleColorEnvMapSolid::DoRenderAllGeometry(unsigned pCurrentFrame
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	}
+#endif // !GLES
 
 	glMatrixMode(GL_TEXTURE);
 	float lTextureMatrix[16];
@@ -583,6 +593,7 @@ void OpenGLMatSingleColorEnvMapSolid::DoRenderAllGeometry(unsigned pCurrentFrame
 
 	((OpenGLRenderer*)GetRenderer())->SetAmbientLight(lAmbientRed, lAmbientGreen, lAmbientBlue);
 
+#ifndef LEPRA_GL_ES
 	if (((OpenGLRenderer*)GetRenderer())->IsEnvMapCubeMap() == true)
 	{
 		glDisable(GL_TEXTURE_GEN_S);
@@ -595,6 +606,7 @@ void OpenGLMatSingleColorEnvMapSolid::DoRenderAllGeometry(unsigned pCurrentFrame
 		glDisable(GL_TEXTURE_GEN_S);
 		glDisable(GL_TEXTURE_GEN_T);
 	}
+#endif // !GLES
 
 	glMatrixMode(GL_TEXTURE);
 	glLoadIdentity();
@@ -647,7 +659,9 @@ void OpenGLMatSingleTextureEnvMapSolid::DoRenderAllGeometry(unsigned pCurrentFra
 	// multi texture support. But we still need multi texture support though.
 	// So, first we render a normal "single texture" pass,
 	// and then we blend in the environment map on top of that.
+#ifndef LEPRA_GL_ES
 	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+#endif // !GLES
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	glDisableClientState(GL_COLOR_ARRAY);
 
@@ -694,6 +708,7 @@ void OpenGLMatSingleTextureEnvMapSolid::DoRenderAllGeometry(unsigned pCurrentFra
 		mTextureParamMin = GL_NEAREST_MIPMAP_NEAREST;
 	}
 
+#ifndef LEPRA_GL_ES
 	if (((OpenGLRenderer*)GetRenderer())->IsEnvMapCubeMap() == true)
 	{
 		// Use cube mapping.
@@ -730,6 +745,7 @@ void OpenGLMatSingleTextureEnvMapSolid::DoRenderAllGeometry(unsigned pCurrentFra
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	}
+#endif // !GLES
 
 	glMatrixMode(GL_TEXTURE);
 	float lTextureMatrix[16];
@@ -763,6 +779,7 @@ void OpenGLMatSingleTextureEnvMapSolid::DoRenderAllGeometry(unsigned pCurrentFra
 
 	UiLepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE1);
 	UiLepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE1);
+#ifndef LEPRA_GL_ES
 	if (((OpenGLRenderer*)GetRenderer())->IsEnvMapCubeMap() == true)
 	{
 		glDisable(GL_TEXTURE_GEN_S);
@@ -776,6 +793,7 @@ void OpenGLMatSingleTextureEnvMapSolid::DoRenderAllGeometry(unsigned pCurrentFra
 		glDisable(GL_TEXTURE_GEN_T);
 		glDisable(GL_TEXTURE_2D);
 	}
+#endif // !GLES
 
 	glMatrixMode(GL_TEXTURE);
 	glLoadIdentity();
@@ -815,7 +833,7 @@ void OpenGLMatSingleTextureEnvMapSolid::RenderGeometry(TBC::GeometryBase* pGeome
 		UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lIndexBufferID);
 		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry), 
 			       pGeometry->GetIndexCount(),
-			       GL_UNSIGNED_INT, 
+			       LEPRA_GL_INDEX_TYPE,
 			       0);
 	}
 	else
@@ -825,7 +843,7 @@ void OpenGLMatSingleTextureEnvMapSolid::RenderGeometry(TBC::GeometryBase* pGeome
 		glTexCoordPointer(2, GL_FLOAT, 0, pGeometry->GetUVData(0));
 		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry),
 			       pGeometry->GetIndexCount(),
-			       GL_UNSIGNED_INT,
+			       LEPRA_GL_INDEX_TYPE,
 			       pGeometry->GetIndexData());
 	}
 }
@@ -893,7 +911,9 @@ void OpenGLMatTextureAndLightmap::DoRenderAllGeometry(unsigned pCurrentFrame, co
 	// 2. Render the color map with dynamic lights and ADD it to the result from pass 1.
 	//    (cout = c * lm + c * L = c(L + lm).
 
+#ifndef LEPRA_GL_ES
 	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+#endif // !GLES
 
 	//
 	// Pass 1.
@@ -1017,7 +1037,7 @@ void OpenGLMatTextureAndLightmap::RenderGeometry(TBC::GeometryBase* pGeometry)
 		UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lIndexBufferID);
 		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry), 
 			       pGeometry->GetIndexCount(),
-			       GL_UNSIGNED_INT, 
+			       LEPRA_GL_INDEX_TYPE,
 			       0);
 	}
 	else
@@ -1026,7 +1046,7 @@ void OpenGLMatTextureAndLightmap::RenderGeometry(TBC::GeometryBase* pGeometry)
 		glNormalPointer(GL_FLOAT, 0, pGeometry->GetNormalData());
 		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry),
 			       pGeometry->GetIndexCount(),
-			       GL_UNSIGNED_INT,
+			       LEPRA_GL_INDEX_TYPE,
 			       pGeometry->GetIndexData());
 	}
 }
@@ -1057,6 +1077,7 @@ int OpenGLMatPXS::smLightCount = 0;
 OpenGLMatPXS::OpenGLMatPXS(const char* pVP, const char* pFP[NUM_FP]):
 	mVPID(0)
 {
+#ifndef LEPRA_GL_ES
 	::memset(mFPID, 0, sizeof(mFPID));
 
 	if (smFPLUTInitialized == false)
@@ -1179,10 +1200,12 @@ OpenGLMatPXS::OpenGLMatPXS(const char* pVP, const char* pFP[NUM_FP]):
 		}
 		glDisable(GL_FRAGMENT_PROGRAM_ARB);
 	}
+#endif // !GLES
 }
 
 void OpenGLMatPXS::SetToFallbackFP(int pFPType)
 {
+#ifdef LEPRA_GL_ES
 	int& lDestFP = mFPID[pFPType];
 
 	switch(pFPType)
@@ -1248,10 +1271,12 @@ void OpenGLMatPXS::SetToFallbackFP(int pFPType)
 		lDestFP = mFPID[FP_1DIR1POINT];
 		break;
 	};
+#endif // !GLES
 }
 
 void OpenGLMatPXS::PrepareLights(OpenGLRenderer* pRenderer)
 {
+#ifndef LEPRA_GL_ES
 	//
 	// All pixel shaded materials support up to 3 simultaneous lights. 
 	// The fragment shaders need the lights sorted in the following order:
@@ -1395,10 +1420,12 @@ void OpenGLMatPXS::PrepareLights(OpenGLRenderer* pRenderer)
 
 		smLightCount++;
 	}
+#endif // !GLES
 }
 
 void OpenGLMatPXS::PrepareShaderPrograms(OpenGLRenderer* /*pRenderer*/)
 {
+#ifndef LEPRA_GL_ES
 	// Lookup which fragment shader to use for this combination of lights.
 	int lSelectedFP = smFPLUT[smNumDirLights][smNumPntLights][smNumSptLights];
 
@@ -1421,16 +1448,20 @@ void OpenGLMatPXS::PrepareShaderPrograms(OpenGLRenderer* /*pRenderer*/)
 	// Set the cutoff angle and spot exponent.
 	UiLepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, 1, smLightCut);
 	UiLepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, 2, smLightExp);
+#endif // !GLES
 }
 
 void OpenGLMatPXS::CleanupShaderPrograms()
 {
+#ifndef LEPRA_GL_ES
 	glDisable(GL_VERTEX_PROGRAM_ARB);
 	glDisable(GL_FRAGMENT_PROGRAM_ARB);
+#endif // !GLES
 }
 
 void OpenGLMatPXS::SetAmbientLight(OpenGLRenderer* pRenderer, TBC::GeometryBase* pGeometry)
 {
+#ifndef LEPRA_GL_ES
 	float r, g, b;
 	pRenderer->GetAmbientLight(r, g, b);
 
@@ -1461,6 +1492,7 @@ void OpenGLMatPXS::SetAmbientLight(OpenGLRenderer* pRenderer, TBC::GeometryBase*
 	lLightAmbient[2] = (GLfloat)b;
 	lLightAmbient[3] = 0;
 	UiLepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, 3, lLightAmbient);
+#endif // !GLES
 }
 
 //
@@ -1475,11 +1507,13 @@ OpenGLMatSingleColorSolidPXS::OpenGLMatSingleColorSolidPXS(OpenGLRenderer* pRend
 
 OpenGLMatSingleColorSolidPXS::~OpenGLMatSingleColorSolidPXS()
 {
+#ifndef LEPRA_GL_ES
 	if (UiLepra::OpenGLExtensions::IsShaderAsmProgramsSupported() == true)
 	{
 		UiLepra::OpenGLExtensions::glDeleteProgramsARB(1, (const GLuint*)&mVPID);
 		UiLepra::OpenGLExtensions::glDeleteProgramsARB(NUM_FP, (const GLuint*)mFPID);
 	}
+#endif // !GLES
 }
 
 void OpenGLMatSingleColorSolidPXS::DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList)
@@ -1507,6 +1541,7 @@ void OpenGLMatSingleColorSolidPXS::RenderGeometry(TBC::GeometryBase* pGeometry)
 	PrepareBasicMaterialSettings(pGeometry);
 	OpenGLMatPXS::SetAmbientLight((OpenGLRenderer*)GetRenderer(), pGeometry);
 
+#ifndef LEPRA_GL_ES
 	float lSpecular[4];
 	const TBC::GeometryBase::BasicMaterialSettings& lMatSettings = pGeometry->GetBasicMaterialSettings();
 	lSpecular[0] = lMatSettings.mShininess;
@@ -1514,6 +1549,7 @@ void OpenGLMatSingleColorSolidPXS::RenderGeometry(TBC::GeometryBase* pGeometry)
 	lSpecular[2] = lMatSettings.mShininess;
 	lSpecular[3] = lMatSettings.mShininess;
 	UiLepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, 0, lSpecular);
+#endif // !GLES
 
 	if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
 	{
@@ -1527,7 +1563,7 @@ void OpenGLMatSingleColorSolidPXS::RenderGeometry(TBC::GeometryBase* pGeometry)
 		UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lIndexBufferID);
 		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry), 
 			       pGeometry->GetIndexCount(),
-			       GL_UNSIGNED_INT, 
+			       LEPRA_GL_INDEX_TYPE,
 			       0);
 	}
 	else
@@ -1536,7 +1572,7 @@ void OpenGLMatSingleColorSolidPXS::RenderGeometry(TBC::GeometryBase* pGeometry)
 		glNormalPointer(GL_FLOAT, 0, pGeometry->GetNormalData());
 		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry),
 			       pGeometry->GetIndexCount(),
-			       GL_UNSIGNED_INT,
+			       LEPRA_GL_INDEX_TYPE,
 			       pGeometry->GetIndexData());
 	}
 }
@@ -1557,11 +1593,13 @@ OpenGLMatSingleTextureSolidPXS::OpenGLMatSingleTextureSolidPXS(OpenGLRenderer* p
 
 OpenGLMatSingleTextureSolidPXS::~OpenGLMatSingleTextureSolidPXS()
 {
+#ifndef LEPRA_GL_ES
 	if (UiLepra::OpenGLExtensions::IsShaderAsmProgramsSupported())
 	{
 		UiLepra::OpenGLExtensions::glDeleteProgramsARB(1, (const GLuint*)&mVPID);
 		UiLepra::OpenGLExtensions::glDeleteProgramsARB(NUM_FP, (const GLuint*)mFPID);
 	}
+#endif // !GLES
 }
 
 void OpenGLMatSingleTextureSolidPXS::DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList)
@@ -1594,13 +1632,16 @@ void OpenGLMatSingleTextureSolidPXS::RenderGeometry(TBC::GeometryBase* pGeometry
 	UiLepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE0);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	glEnable(GL_TEXTURE_2D);
+#ifndef LEPRA_GL_ES
 	glDisable(GL_TEXTURE_GEN_S);
 	glDisable(GL_TEXTURE_GEN_T);
+#endif // !GLES
 
 	BindTexture(lGeometry->mTA->mMaps[0].mMapID[Texture::COLOR_MAP]);
 
 	OpenGLMaterial::UpdateTextureMatrix(lGeometry->mGeometry);
 	
+#ifndef LEPRA_GL_ES
 	float lSpecular[4];
 	const TBC::GeometryBase::BasicMaterialSettings& lMatSettings = pGeometry->GetBasicMaterialSettings();
 	lSpecular[0] = lMatSettings.mShininess;
@@ -1608,6 +1649,7 @@ void OpenGLMatSingleTextureSolidPXS::RenderGeometry(TBC::GeometryBase* pGeometry
 	lSpecular[2] = lMatSettings.mShininess;
 	lSpecular[3] = lMatSettings.mShininess;
 	UiLepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, 0, lSpecular);
+#endif // !GLES
 
 	if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
 	{
@@ -1622,7 +1664,7 @@ void OpenGLMatSingleTextureSolidPXS::RenderGeometry(TBC::GeometryBase* pGeometry
 		UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lIndexBufferID);
 		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry), 
 			       pGeometry->GetIndexCount(),
-			       GL_UNSIGNED_INT, 
+			       LEPRA_GL_INDEX_TYPE,
 			       0);
 	}
 	else
@@ -1632,7 +1674,7 @@ void OpenGLMatSingleTextureSolidPXS::RenderGeometry(TBC::GeometryBase* pGeometry
 		glTexCoordPointer(2, GL_FLOAT, 0, pGeometry->GetUVData(0));
 		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry),
 			       pGeometry->GetIndexCount(),
-			       GL_UNSIGNED_INT,
+			       LEPRA_GL_INDEX_TYPE,
 			       pGeometry->GetIndexData());
 	}
 }
@@ -1652,11 +1694,13 @@ OpenGLMatTextureAndLightmapPXS::OpenGLMatTextureAndLightmapPXS(OpenGLRenderer* p
 
 OpenGLMatTextureAndLightmapPXS::~OpenGLMatTextureAndLightmapPXS()
 {
+#ifndef LEPRA_GL_ES
 	if (UiLepra::OpenGLExtensions::IsShaderAsmProgramsSupported())
 	{
 		UiLepra::OpenGLExtensions::glDeleteProgramsARB(1, (const GLuint*)&mVPID);
 		UiLepra::OpenGLExtensions::glDeleteProgramsARB(NUM_FP, (const GLuint*)mFPID);
 	}
+#endif // !GLES
 }
 
 void OpenGLMatTextureAndLightmapPXS::DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList)
@@ -1738,6 +1782,7 @@ void OpenGLMatTextureAndLightmapPXS::RenderGeometry(TBC::GeometryBase* pGeometry
 		glTexCoordPointer(2, GL_FLOAT, 0, pGeometry->GetUVData(1));
 	}
 
+#ifndef LEPRA_GL_ES
 	float lSpecular[4];
 	const TBC::GeometryBase::BasicMaterialSettings& lMatSettings = pGeometry->GetBasicMaterialSettings();
 	lSpecular[0] = lMatSettings.mShininess;
@@ -1745,6 +1790,7 @@ void OpenGLMatTextureAndLightmapPXS::RenderGeometry(TBC::GeometryBase* pGeometry
 	lSpecular[2] = lMatSettings.mShininess;
 	lSpecular[3] = lMatSettings.mShininess;
 	UiLepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, 0, lSpecular);
+#endif // !GLES
 
 	if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
 	{
@@ -1753,7 +1799,7 @@ void OpenGLMatTextureAndLightmapPXS::RenderGeometry(TBC::GeometryBase* pGeometry
 
 		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry), 
 			       pGeometry->GetIndexCount(),
-			       GL_UNSIGNED_INT, 
+			       LEPRA_GL_INDEX_TYPE,
 			       0);
 	}
 	else
@@ -1762,7 +1808,7 @@ void OpenGLMatTextureAndLightmapPXS::RenderGeometry(TBC::GeometryBase* pGeometry
 		glNormalPointer(GL_FLOAT, 0, pGeometry->GetNormalData());
 		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry),
 			       pGeometry->GetIndexCount(),
-			       GL_UNSIGNED_INT,
+			       LEPRA_GL_INDEX_TYPE,
 			       pGeometry->GetIndexData());
 	}
 }
@@ -1792,11 +1838,13 @@ OpenGLMatTextureSBMapPXS::OpenGLMatTextureSBMapPXS(OpenGLRenderer* pRenderer,
 
 OpenGLMatTextureSBMapPXS::~OpenGLMatTextureSBMapPXS()
 {
+#ifndef LEPRA_GL_ES
 	if (UiLepra::OpenGLExtensions::IsShaderAsmProgramsSupported())
 	{
 		UiLepra::OpenGLExtensions::glDeleteProgramsARB(1, (const GLuint*)&mVPID);
 		UiLepra::OpenGLExtensions::glDeleteProgramsARB(NUM_FP, (const GLuint*)mFPID);
 	}
+#endif // !GLES
 }
 
 void OpenGLMatTextureSBMapPXS::DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList)
@@ -1908,6 +1956,7 @@ void OpenGLMatTextureSBMapPXS::RenderGeometry(TBC::GeometryBase* pGeometry)
 		glTexCoordPointer(3, GL_FLOAT, 0, pGeometry->GetBitangentData());
 	}
 
+#ifndef LEPRA_GL_ES
 	float lSpecular[4];
 	const TBC::GeometryBase::BasicMaterialSettings& lMatSettings = pGeometry->GetBasicMaterialSettings();
 	lSpecular[0] = lMatSettings.mShininess;
@@ -1915,6 +1964,7 @@ void OpenGLMatTextureSBMapPXS::RenderGeometry(TBC::GeometryBase* pGeometry)
 	lSpecular[2] = lMatSettings.mShininess;
 	lSpecular[3] = lMatSettings.mShininess;
 	UiLepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, 0, lSpecular);
+#endif // !GLES
 
 	if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
 	{
@@ -1923,7 +1973,7 @@ void OpenGLMatTextureSBMapPXS::RenderGeometry(TBC::GeometryBase* pGeometry)
 
 		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry), 
 			       pGeometry->GetIndexCount(),
-			       GL_UNSIGNED_INT, 
+			       LEPRA_GL_INDEX_TYPE,
 			       0);
 	}
 	else
@@ -1932,7 +1982,7 @@ void OpenGLMatTextureSBMapPXS::RenderGeometry(TBC::GeometryBase* pGeometry)
 		glNormalPointer(GL_FLOAT, 0, pGeometry->GetNormalData());
 		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry),
 			       pGeometry->GetIndexCount(),
-			       GL_UNSIGNED_INT,
+			       LEPRA_GL_INDEX_TYPE,
 			       pGeometry->GetIndexData());
 	}
 }
@@ -1946,13 +1996,6 @@ OpenGLMatTextureDiffuseBumpMapPXS::OpenGLMatTextureDiffuseBumpMapPXS(OpenGLRende
 
 OpenGLMatTextureDiffuseBumpMapPXS::~OpenGLMatTextureDiffuseBumpMapPXS()
 {
-	// This is already done in the superclass.
-/*	if (UiLepra::OpenGLExtensions::IsShaderAsmProgramsSupported() == true)
-	{
-		UiLepra::OpenGLExtensions::glDeleteProgramsARB(1, (const GLuint*)&mVPID);
-		UiLepra::OpenGLExtensions::glDeleteProgramsARB(NUM_FP, (const GLuint*)mFPID);
-	}
-*/
 }
 
 

@@ -20,7 +20,7 @@ namespace UiLepra
 class MacObserver
 {
 public:
-	virtual void OnEvent(NSEvent* e) = 0;
+	virtual void OnEvent(LEPRA_APPLE_EVENT* e) = 0;
 };
 
 class MacDisplayManager: public DisplayManager
@@ -47,9 +47,9 @@ public:
 	virtual unsigned GetRefreshRate() const;
 	virtual bool IsFullScreen() const;
 
-	NSWindow* GetWindow() const;
+	LEPRA_APPLE_WINDOW* GetWindow() const;
 
-	void DispatchEvent(NSEvent* e);
+	void DispatchEvent(LEPRA_APPLE_EVENT* e);
 
 	void ProcessMessages();
 	void AddObserver(int pMessage, MacObserver* pObserver);
@@ -89,8 +89,10 @@ protected:
 		return mMaximized;
 	}
 
+#ifndef LEPRA_IOS
 	static DisplayMode ConvertNativeDisplayMode(CGDisplayModeRef pMode);
-	
+#endif // !iOS
+
 	//Screen Stuff
 
 	DisplayMode mDisplayMode;
@@ -98,7 +100,7 @@ protected:
 
 	static int mWindowCount;
 
-	NSWindow* mWnd;
+	LEPRA_APPLE_WINDOW* mWnd;
 	bool mIsOpen;
 
 	bool mMinimized;

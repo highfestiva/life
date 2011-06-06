@@ -30,41 +30,7 @@ bool OpenGLExtensions::IsExtensionSupported(const char* pExtension)
 void* OpenGLExtensions::GetExtensionPointer(const char* pFunctionName)
 {
 #if defined(LEPRA_WINDOWS)
-    return (void*)wglGetProcAddress(pFunctionName);
-/*#elif defined(LEPRA_MAC)
-	// Mac is a bit more tricky. First we need the bundle.
-	CFBundleRef lOpenGL = 0;
-
-#if 0
-	SInt16      fwVersion = 0;
-	SInt32      fwDir = 0;
-	if (FindFolder(kSystemDomain, kFrameworksFolderType, kDontCreateFolder, &fwVersion, &fwDir) != noErr)
-		return NULL;
-	FSSpec fSpec;
-	FSRef  fRef;
-	if (FSMakeFSSpec(fwVersion, fwDir, "\pOpenGL.framework", &fSpec) != noErr)
-		return NULL;
-	FSpMakeFSRef(&fSpec, &fRef);
-#endif
-
-	CFStringRef lUrlString = CFSTR("/System/Library/OpenGL.framework");
-	CFURLRef lUrl = CFURLCreateWithString(NULL, lUrlString, NULL);
-	if (!lUrl)
-		return NULL;
-
-	lOpenGL = CFBundleCreate(kCFAllocatorDefault, lUrl);
-	CFRelease(lUrl);
-
-	// Then load the function pointer from the bundle.
-	CFStringRef lString = CFStringCreateWithCString(kCFAllocatorDefault, pFunctionName, kCFStringEncodingMacRoman);
-	void* lFunc = CFBundleGetFunctionPointerForName(lOpenGL, lString);
-
-	// Release the bundle and string.
-	CFRelease(lString);
-	CFRelease(lOpenGL);
-
-	// Return the function ponter.
-	return lFunc;*/
+	return (void*)wglGetProcAddress(pFunctionName);
 #elif defined(LEPRA_POSIX)
 	return ((void*)glXGetProcAddress((const GLubyte*)pFunctionName));
 #else // Unkonwn platform
@@ -102,9 +68,8 @@ void OpenGLExtensions::InitExtensions()
 	}
 
 
-	/*
-		Init Frame Buffer Objects...
-	*/
+#ifndef LEPRA_GL_ES_1
+	// Init Frame Buffer Objects...
 	if (IsExtensionSupported("GL_EXT_framebuffer_object"))
 	{
 		mIsFrameBufferObjectsSupported = true;
@@ -136,6 +101,7 @@ void OpenGLExtensions::InitExtensions()
 			mIsFrameBufferObjectsSupported = false;
 		}
 	}
+#endif // !ES1
 
 	// Init buffer objects.
 	if (mIsGLVersion15 || IsExtensionSupported("GL_ARB_vertex_buffer_object"))
@@ -150,9 +116,16 @@ void OpenGLExtensions::InitExtensions()
 		glBufferSubData = (PFNGLBUFFERSUBDATAPROC)GET_EXTENSION_POINTER(glBufferSubData);
 		glDeleteBuffers = (PFNGLDELETEBUFFERSPROC)GET_EXTENSION_POINTER(glDeleteBuffers);
 		glGenBuffers    = (PFNGLGENBUFFERSPROC)   GET_EXTENSION_POINTER(glGenBuffers);
+#ifdef LEPRA_GL_ES_1
+		glMapBuffer     = (PFNGLMAPBUFFERPROC)    GET_EXTENSION_POINTER(glMapBufferOES);
+		glUnmapBuffer   = (PFNGLUNMAPBUFFERPROC)  GET_EXTENSION_POINTER(glUnmapBufferOES);
+#else // !GLES1
 		glMapBuffer     = (PFNGLMAPBUFFERPROC)    GET_EXTENSION_POINTER(glMapBuffer);
 		glUnmapBuffer   = (PFNGLUNMAPBUFFERPROC)  GET_EXTENSION_POINTER(glUnmapBuffer);
+#endif // GLES1/!GLES1
 	}
+
+#ifndef LEPRA_GL_ES_1
 	if(mIsBufferObjectsSupported && !CheckBufferObjectFunctions())
 	{
 		// Retry with the ARB version...
@@ -164,6 +137,7 @@ void OpenGLExtensions::InitExtensions()
 		glMapBuffer     = (PFNGLMAPBUFFERPROC)    GET_EXTENSION_POINTER(glMapBufferARB);
 		glUnmapBuffer   = (PFNGLUNMAPBUFFERPROC)  GET_EXTENSION_POINTER(glUnmapBufferARB);
 	}
+#endif // !ES1
 
 	if (mIsBufferObjectsSupported)
 	{
@@ -174,6 +148,7 @@ void OpenGLExtensions::InitExtensions()
 		}
 	}
 
+#ifndef LEPRA_GL_ES_1
 	// Init anisotropic filtering...
 	if (IsExtensionSupported("GL_EXT_texture_filter_anisotropic"))
 	{
@@ -187,6 +162,7 @@ void OpenGLExtensions::InitExtensions()
 		mIsCompressedTexturesSupported = true;
 		glHint(GL_TEXTURE_COMPRESSION_HINT, GL_NICEST);
 	}
+#endif // !ES1
 
 #ifdef LEPRA_WINDOWS
 	// Init vsync on/off.
@@ -199,6 +175,7 @@ void OpenGLExtensions::InitExtensions()
 #pragma message("Warning: In OpenGLExtensions::InitExtensions(), VSync is not initialized.")
 #endif
 
+#ifndef LEPRA_GL_ES_1
 	// Init multi texture support.
 	if (IsExtensionSupported("GL_ARB_multitexture"))
 	{
@@ -375,6 +352,7 @@ void OpenGLExtensions::InitExtensions()
 			ClearShaderFunctions();
 		}
 	}
+#endif // !ES1
 }
 
 bool OpenGLExtensions::IsFrameBufferObjectsSupported()
@@ -437,7 +415,7 @@ bool OpenGLExtensions::IsVSyncEnabled()
 	{
 		return (wglGetSwapIntervalEXT() > 0);
 	}
-#elif defined(LEPRA_MAC)
+#elif defined(LEPRA_MAC) && !defined(LEPRA_IOS)
 	CGLContextObj lContext = CGLGetCurrentContext();
 	GLint lSwapInterval = 0;
 	CGLGetParameter(lContext, kCGLCPSwapInterval, &lSwapInterval);
@@ -455,7 +433,7 @@ bool OpenGLExtensions::SetVSyncEnabled(bool pEnabled)
 	{
 		return (wglSwapIntervalEXT(pEnabled ? 1 : 0) != FALSE);
 	}
-#elif defined(LEPRA_MAC)
+#elif defined(LEPRA_MAC) && !defined(LEPRA_IOS)
 	CGLContextObj lContext = CGLGetCurrentContext();
 	GLint lSwapInterval = pEnabled? 1 : 0;
 	CGLSetParameter(lContext, kCGLCPSwapInterval, &lSwapInterval);
@@ -469,6 +447,7 @@ bool OpenGLExtensions::SetVSyncEnabled(bool pEnabled)
 
 void OpenGLExtensions::ClearFrameBufferObjectFunctions()
 {
+#ifndef LEPRA_GL_ES_1
 	glIsRenderbufferEXT                      = 0;
 	glBindRenderbufferEXT                    = 0;
 	glDeleteRenderbuffersEXT                 = 0;
@@ -486,6 +465,7 @@ void OpenGLExtensions::ClearFrameBufferObjectFunctions()
 	glFramebufferRenderbufferEXT             = 0;
 	glGetFramebufferAttachmentParameterivEXT = 0;
 	glGenerateMipmapEXT                      = 0;
+#endif // !ES1
 }
 
 void OpenGLExtensions::ClearBufferObjectFunctions()
@@ -501,6 +481,7 @@ void OpenGLExtensions::ClearBufferObjectFunctions()
 
 void OpenGLExtensions::ClearMultiTextureFunctions()
 {
+#ifndef LEPRA_GL_ES_1
 	glActiveTexture       = 0;
 	glClientActiveTexture = 0;
 	glMultiTexCoord1d     = 0;
@@ -535,10 +516,12 @@ void OpenGLExtensions::ClearMultiTextureFunctions()
 	glMultiTexCoord4iv    = 0;
 	glMultiTexCoord4s     = 0;
 	glMultiTexCoord4sv    = 0;
+#endif // !ES1
 }
 
 void OpenGLExtensions::ClearShaderProgramFunctions()
 {
+#ifndef LEPRA_GL_ES_1
 	glGenProgramsARB                = 0;
 	glBindProgramARB                = 0;
 	glDeleteProgramsARB             = 0;
@@ -601,10 +584,12 @@ void OpenGLExtensions::ClearShaderProgramFunctions()
 	glVertexAttrib4ubvARB           = 0;
 	glVertexAttrib4uivARB           = 0;
 	glVertexAttrib4usvARB           = 0;
+#endif // !ES1
 }
 
 void OpenGLExtensions::ClearShaderFunctions()
 {
+#ifndef LEPRA_GL_ES_1
 	glDeleteObjectARB               = 0;
 	glGetHandleARB                  = 0;
 	glDetachObjectARB               = 0;
@@ -644,10 +629,12 @@ void OpenGLExtensions::ClearShaderFunctions()
 	glGetUniformfvARB               = 0;
 	glGetUniformivARB               = 0;
 	glGetShaderSourceARB            = 0;
+#endif // !ES1
 }
 
 bool OpenGLExtensions::CheckFrameBufferObjectFunctions()
 {
+#ifndef LEPRA_GL_ES_1
 	return (glIsRenderbufferEXT                      != 0 &&
 		glBindRenderbufferEXT                    != 0 &&
 		glDeleteRenderbuffersEXT                 != 0 &&
@@ -665,6 +652,9 @@ bool OpenGLExtensions::CheckFrameBufferObjectFunctions()
 		glFramebufferRenderbufferEXT             != 0 &&
 		glGetFramebufferAttachmentParameterivEXT != 0 &&
 		glGenerateMipmapEXT                      != 0);
+#else // !ES1
+	return false;
+#endif // ES1/!ES1
 }
 
 bool OpenGLExtensions::CheckBufferObjectFunctions()
@@ -680,6 +670,7 @@ bool OpenGLExtensions::CheckBufferObjectFunctions()
 
 bool OpenGLExtensions::CheckMultiTextureFunctions()
 {
+#ifndef LEPRA_GL_ES_1
 	return (glActiveTexture       != 0 &&
 		glClientActiveTexture != 0 &&
 		glMultiTexCoord1d     != 0 &&
@@ -714,10 +705,14 @@ bool OpenGLExtensions::CheckMultiTextureFunctions()
 		glMultiTexCoord4iv    != 0 &&
 		glMultiTexCoord4s     != 0 &&
 		glMultiTexCoord4sv    != 0);
+#else // !ES1
+	return false;
+#endif // ES1/!ES1
 }
 
 bool OpenGLExtensions::CheckShaderProgramFunctions()
 {
+#ifndef LEPRA_GL_ES_1
 	return (glGenProgramsARB                != 0 &&
 		glBindProgramARB                != 0 &&
 		glDeleteProgramsARB             != 0 &&
@@ -780,10 +775,14 @@ bool OpenGLExtensions::CheckShaderProgramFunctions()
 		glVertexAttrib4ubvARB           != 0 &&
 		glVertexAttrib4uivARB           != 0 &&
 		glVertexAttrib4usvARB           != 0);
+#else // !ES1
+	return false;
+#endif // ES1/!ES1
 }
 
 bool OpenGLExtensions::CheckShaderFunctions()
 {
+#ifndef LEPRA_GL_ES_1
 	return (glDeleteObjectARB               != 0 &&
 		glGetHandleARB                  != 0 &&
 		glDetachObjectARB               != 0 &&
@@ -823,6 +822,9 @@ bool OpenGLExtensions::CheckShaderFunctions()
 		glGetUniformfvARB               != 0 &&
 		glGetUniformivARB               != 0 &&
 		glGetShaderSourceARB            != 0);
+#else // !ES1
+	return false;
+#endif // ES1/!ES1
 }
 
 
@@ -845,6 +847,7 @@ PFNWGLSWAPINTERVALEXTPROC    OpenGLExtensions::wglSwapIntervalEXT    = 0;
 PFNWGLGETSWAPINTERVALEXTPROC OpenGLExtensions::wglGetSwapIntervalEXT = 0;
 #endif
 
+#ifndef LEPRA_GL_ES_1
 PFNGLISRENDERBUFFEREXTPROC                      OpenGLExtensions::glIsRenderbufferEXT                      = 0;
 PFNGLBINDRENDERBUFFEREXTPROC                    OpenGLExtensions::glBindRenderbufferEXT                    = 0;
 PFNGLDELETERENDERBUFFERSEXTPROC                 OpenGLExtensions::glDeleteRenderbuffersEXT                 = 0;
@@ -862,7 +865,7 @@ PFNGLFRAMEBUFFERTEXTURE3DEXTPROC                OpenGLExtensions::glFramebufferT
 PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC             OpenGLExtensions::glFramebufferRenderbufferEXT             = 0;
 PFNGLGETFRAMEBUFFERATTACHMENTPARAMETERIVEXTPROC OpenGLExtensions::glGetFramebufferAttachmentParameterivEXT = 0;
 PFNGLGENERATEMIPMAPEXTPROC                      OpenGLExtensions::glGenerateMipmapEXT                      = 0;
-
+#endif // !ES1
 
 PFNGLBINDBUFFERPROC       OpenGLExtensions::glBindBuffer       = 0;
 PFNGLBUFFERDATAPROC       OpenGLExtensions::glBufferData       = 0;
@@ -874,6 +877,7 @@ PFNGLUNMAPBUFFERPROC      OpenGLExtensions::glUnmapBuffer      = 0;
 
 PFNGLACTIVETEXTUREPROC    OpenGLExtensions::glActiveTexture    = 0;
 PFNGLCLIENTACTIVETEXTUREPROC OpenGLExtensions::glClientActiveTexture = 0;
+#ifndef LEPRA_GL_ES_1
 PFNGLMULTITEXCOORD1DPROC  OpenGLExtensions::glMultiTexCoord1d  = 0;
 PFNGLMULTITEXCOORD1DVPROC OpenGLExtensions::glMultiTexCoord1dv = 0;
 PFNGLMULTITEXCOORD1FPROC  OpenGLExtensions::glMultiTexCoord1f  = 0;
@@ -1009,6 +1013,7 @@ PFNGLGETACTIVEUNIFORMARBPROC           OpenGLExtensions::glGetActiveUniformARB  
 PFNGLGETUNIFORMFVARBPROC               OpenGLExtensions::glGetUniformfvARB               = 0;
 PFNGLGETUNIFORMIVARBPROC               OpenGLExtensions::glGetUniformivARB               = 0;
 PFNGLGETSHADERSOURCEARBPROC            OpenGLExtensions::glGetShaderSourceARB            = 0;
+#endif // !ES1
 
 
 

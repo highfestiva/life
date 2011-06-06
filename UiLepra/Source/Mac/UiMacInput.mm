@@ -5,6 +5,7 @@
 
 
 #include "../../Include/Mac/UiMacInput.h"
+#ifndef LEPRA_IOS
 #include "../../../Lepra/Include/CyclicArray.h"
 #include "../../../Lepra/Include/Log.h"
 #include "../../Include/Mac/UiMacCore.h"
@@ -774,3 +775,5 @@ LOG_CLASS_DEFINE(UI_INPUT, MacInputManager);
 
 
 }
+
+#endif // !iOS

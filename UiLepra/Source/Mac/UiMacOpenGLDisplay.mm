@@ -50,7 +50,12 @@ void MacOpenGLDisplay::CloseScreen()
 
 bool MacOpenGLDisplay::Activate()
 {
+#ifdef LEPRA_IOS
+	mGlView.context = mGlContext;
+	[mGlView setFramebuffer];
+#else // !iOS
 	[mGlContext makeCurrentContext];
+#endif // iOS/!iOS
 	return true;
 }
 
@@ -66,7 +71,11 @@ bool MacOpenGLDisplay::UpdateScreen()
 	GLboolean lScissorsEnabled = ::glIsEnabled(GL_SCISSOR_TEST);
 	::glDisable(GL_SCISSOR_TEST);
 
+#ifdef LEPRA_IOS
+	[mGlView presentFramebuffer];
+#else // !iOS
 	[mGlContext flushBuffer];
+#endif // iOS/!iOS
 
 	if (lScissorsEnabled)
 	{
@@ -111,7 +120,11 @@ void MacOpenGLDisplay::Deactivate()
 {
 	if (mIsOpen)
 	{
-		[NSOpenGLContext clearCurrentContext];
+#ifdef LEPRA_IOS
+		[LEPRA_APPLE_GL_CONTEXT setCurrentContext:nil];
+#else // !iOS
+		[LEPRA_APPLE_GL_CONTEXT clearCurrentContext];
+#endif // iOS/!iOS
 	}
 }
 
@@ -263,7 +276,9 @@ bool MacOpenGLDisplay::InitScreen()
 		//OpenGLExtensions::InitExtensions();
 	}
 
+#ifndef LEPRA_IOS
 	[mWnd setContentSize:mWnd.frame.size];
+#endif // !iOS
 
 	return true;
 }
@@ -281,7 +296,11 @@ bool MacOpenGLDisplay::CreateGLContext()
 {
 	if (mGlContext == 0)
 	{
+#ifdef LEPRA_IOS
+		mGlContext = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES1];
+#else // !iOS
 		mGlContext = [mGlView openGLContext];
+#endif // iOS/!iOS
 	}
 
 	bool lOk = (mGlContext != 0);
@@ -301,9 +320,7 @@ void MacOpenGLDisplay::DeleteGLContext()
 	}
 	if (mContextUserCount == 0)
 	{
-		[NSOpenGLContext clearCurrentContext];
-//		::glXMakeCurrent(GetDisplay(), 0, 0);
-//		::glXDestroyContext(GetDisplay(), mGlContext);
+		Deactivate();
 		mGlContext = 0;
 	}
 }
@@ -312,6 +329,10 @@ void MacOpenGLDisplay::DeleteGLContext()
 
 bool MacOpenGLDisplay::SetGLPixelFormat()
 {
+#ifdef LEPRA_IOS
+	mGlView = [[EAGLView alloc] initWithFrame:mWnd.bounds];
+	[mWnd addSubview:mGlView];
+#else // !iOS
 	NSOpenGLPixelFormatAttribute lPixelFormatAttribs[32];
 	NSOpenGLPixelFormatAttribute* lAttrib = lPixelFormatAttribs;
 
@@ -349,12 +370,13 @@ bool MacOpenGLDisplay::SetGLPixelFormat()
 	//mGlView.frame = lContentSize;
 
 	//[mGlView reshape];
+#endif // iOS/!iOS
 	return (true);	// TODO: add error checking!
 }
 
 
 
-NSOpenGLContext* MacOpenGLDisplay::mGlContext = 0;
+LEPRA_APPLE_GL_CONTEXT* MacOpenGLDisplay::mGlContext = 0;
 int MacOpenGLDisplay::mContextUserCount = 0;
 
 

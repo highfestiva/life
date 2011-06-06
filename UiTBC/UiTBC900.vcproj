@@ -495,35 +495,47 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Source\UiOpenGLMaterial_DiffuseBumpMapShaders.cpp"
+				RelativePath=".\Source\UiOpenGLMaterial_DiffuseBumpMapShaders.cxx"
 				>
 			</File>
 			<File
-				RelativePath=".\Source\UiOpenGLMaterial_SBMapShaders.cpp"
+				RelativePath=".\Source\UiOpenGLMaterial_SBMapShaders.cxx"
 				>
 			</File>
 			<File
-				RelativePath=".\Source\UiOpenGLMaterial_SingleColorShaders.cpp"
+				RelativePath=".\Source\UiOpenGLMaterial_SingleColorShaders.cxx"
 				>
 			</File>
 			<File
-				RelativePath=".\Source\UiOpenGLMaterial_SingleTextureShaders.cpp"
+				RelativePath=".\Source\UiOpenGLMaterial_SingleTextureShaders.cxx"
 				>
 			</File>
 			<File
-				RelativePath=".\Source\UiOpenGLMaterial_TextureAndLightmapShaders.cpp"
+				RelativePath=".\Source\UiOpenGLMaterial_TextureAndLightmapShaders.cxx"
 				>
 			</File>
 			<File
-				RelativePath=".\Source\UiOpenGLMaterials.cpp"
+				RelativePath=".\Source\UiOpenGLMaterials.cxx"
 				>
 			</File>
 			<File
-				RelativePath=".\Source\UiOpenGLPainter.cpp"
+				RelativePath=".\Source\UiOpenGLMaterials.mm"
 				>
 			</File>
 			<File
-				RelativePath=".\Source\UiOpenGLRenderer.cpp"
+				RelativePath=".\Source\UiOpenGLPainter.cxx"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\UiOpenGLPainter.mm"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\UiOpenGLRenderer.cxx"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\UiOpenGLRenderer.mm"
 				>
 			</File>
 			<File

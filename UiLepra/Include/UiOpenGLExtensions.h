@@ -23,13 +23,29 @@
 
 #if defined(LEPRA_WINDOWS)
 
+#define LEPRA_GL_INDEX_TYPE GL_UNSIGNED_INT
+typedef unsigned gl_idx_t;
 #include <gl/gl.h>
 #include <gl/glu.h>
 #include "Win32/WGLEXT.h"
 #include "GLEXT.H"
 
+#elif defined(LEPRA_IOS)
+
+#define LEPRA_GL_ES
+#define LEPRA_GL_ES_1
+#define LEPRA_GL_INDEX_TYPE GL_UNSIGNED_SHORT
+typedef unsigned short gl_idx_t;
+#include <OpenGLES/EAGL.h>
+#include <OpenGLES/ES1/gl.h>
+#include <OpenGLES/ES1/glext.h>
+#include <sys/time.h>
+#include "iosglext.h"
+
 #elif defined(LEPRA_MAC)
 
+#define LEPRA_GL_INDEX_TYPE GL_UNSIGNED_INT
+typedef unsigned gl_idx_t;
 #include <OpenGL/OpenGL.h>
 #include <OpenGL/gl.h>
 #include <OpenGL/glu.h>
@@ -39,6 +55,8 @@
 
 #elif defined(LEPRA_POSIX)
 
+#define LEPRA_GL_INDEX_TYPE GL_UNSIGNED_INT
+typedef unsigned gl_idx_t;
 #include <GL/glx.h>
 #include <GL/gl.h>
 #include <GL/glext.h>
@@ -101,6 +119,7 @@ public:
 	// Multi texture.
 	static PFNGLACTIVETEXTUREPROC       glActiveTexture;
 	static PFNGLCLIENTACTIVETEXTUREPROC glClientActiveTexture;
+#ifndef LEPRA_GL_ES_1
 	static PFNGLMULTITEXCOORD1DPROC     glMultiTexCoord1d;
 	static PFNGLMULTITEXCOORD1DVPROC    glMultiTexCoord1dv;
 	static PFNGLMULTITEXCOORD1FPROC     glMultiTexCoord1f;
@@ -245,6 +264,7 @@ public:
 	static PFNGLGETUNIFORMFVARBPROC               glGetUniformfvARB;
 	static PFNGLGETUNIFORMIVARBPROC               glGetUniformivARB;
 	static PFNGLGETSHADERSOURCEARBPROC            glGetShaderSourceARB;
+#endif // !ES1
 
 	static void InitExtensions();
 

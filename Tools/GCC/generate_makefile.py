@@ -6,21 +6,25 @@ import os
 import sys
 
 
-stlport_path = "ThirdParty/stlport/build/lib/obj/gcc/so_stlg"
+is_ios = os.environ.get('PD_BUILD_IOS')
+is_mac = (sys.platform == 'darwin')
 
-cextraflags = ""
-if sys.platform == 'darwin':
-    cextraflags = " -D_DARWIN_C_SOURCE -D_STLP_THREADS"
-    if os.environ.get('PD_BUILD_IOS'):
-        darwin_kit = '-framework UIKit'
+cextraflags = ''
+glframework = 'OpenGL'
+stlport_path = "ThirdParty/stlport/build/lib/obj/gcc/so_stlg"
+if is_mac:
+    cextraflags = ' -D_DARWIN_C_SOURCE -D_STLP_THREADS'
+    if is_ios:
+        darwin_kit = '-framework UIKit -framework Foundation -framework QuartzCore'
         stlport_path = "ThirdParty/stlport/build/lib/obj/armv6-apple-darwin10-gcc/so_stlg"
+        glframework = 'OpenGLES'
     else:
         darwin_kit = '-framework AppKit -framework Cocoa -framework CoreServices -lIOKit'
 
 platform_extraflags = ''
-if os.environ.get('PD_BUILD_IOS'):
+if is_ios:
     compiler_path = '/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/'
-    platform_extraflags = ' -arch armv6 -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS4.2.sdk -fvisibility=hidden -gdwarf-2 -mthumb -miphoneos-version-min=3.0'
+    platform_extraflags = ' -arch armv6 -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS4.2.sdk -gdwarf-2 -mthumb -miphoneos-version-min=3.0'
 else:
     compiler_path = ''
 cextraflags += platform_extraflags
@@ -41,15 +45,15 @@ stllibfile = '.so.5.2'
 mac_hid = ''
 space_mac_hid = ''
 
-if sys.platform == 'darwin':
+if is_mac:
     librt = ''
     openal_noui = '-framework OpenAL'
     openal_ui = '-framework OpenAL'
-    libgl = '-framework OpenGL'
+    libgl = '-framework '+glframework
     stllibfile = '.5.2.dylib'
     mac_hid = 'HID'
     space_mac_hid = ' '+mac_hid
-    cflags_1 += ' -framework OpenGL -framework CoreServices -framework OpenAL -DMAC_OS_X_VERSION=1050'
+    cflags_1 += ' -framework '+glframework+' -framework CoreServices -framework OpenAL -DMAC_OS_X_VERSION=1050'
     ldflags += ' '+darwin_kit+' -lobjc '
 
 cflags_head = cflags_1+" -Wall "+cflags_2+"\n"
@@ -68,6 +72,8 @@ depend:
 \t#@grep -Ev "\\.o: .*([T]hirdParty|/[u]sr)/" makefile >.tmpmake
 \t#@mv .tmpmake makefile
 .c.o:
+\t$(C_COMPILER) $(CFLAGS) -o $@ -c $<
+.m.o:
 \t$(C_COMPILER) $(CFLAGS) -o $@ -c $<
 .cpp.o:
 \t$(CPP_COMPILER) $(CFLAGS) -o $@ -c $<
@@ -96,7 +102,7 @@ all:\t%(lib)s $(OBJS)
 clean:
 \t@rm -f %(lib)s $(OBJS)
 %(lib)s:\t$(OBJS)
-\t$(CPP_COMPILER) $(LIBS) """ + ldflags + """ -o $@ $(OBJS)
+\t$(CPP_COMPILER) $(LIBS) -dead_strip """ + ldflags + """ -o $@ $(OBJS)
 """+foot_rules
 
 foot_gfx_bin = foot_bin
@@ -148,7 +154,8 @@ def printend(type):
 
 def issrc(fname):
     ext = os.path.splitext(fname)[1]
-    return (ext == ".cpp" or ext == ".c" or ext == ".mm")
+    return (ext == ".cpp" or ext == ".c" or ext == '.m' or ext == ".mm" \
+                or (ext == '.cxx' and not is_mac))
 
 def create_makefile(makename, srcname, type):
     f = open(makename, "wt")
@@ -191,7 +198,7 @@ def generate_makefile(vcfile, makename, includedirs, libdirs, deplibs, header, f
     libname = convert_out_name(vcfile)
     projbasedir = os.path.dirname(vcfile)
     extrafilter = ""
-    if sys.platform == "darwin":
+    if is_mac:
         extrafilter = "\\;X11\\;x11"
     else:
         extrafilter = "\\;Mac\\;mac"
@@ -259,7 +266,7 @@ def generate_makefiles(basedir, vcfileinfolist):
         os.path.relpath(basedir+"UiCure", projdir),
         os.path.relpath(basedir+"Life", projdir)]
 
-        if sys.platform != 'darwin':
+        if not is_mac:
             includedirs = [os.path.relpath(basedir+"ThirdParty/openal-soft-1.10.622/OpenAL32/Include/", projdir),
                 os.path.relpath(basedir+"ThirdParty/openal-soft-1.10.622/include/", projdir)]+includedirs
         else:
@@ -296,10 +303,22 @@ def main():
         ["SlimeVolleyball", "gfx_bin",    "SlimeVolleyball/SlimeVolleyball900.vcproj", "UiTBC"],
         ["CureTest",        "gfx_bin",    "UiCure/CureTestApp/CureTestApp900.vcproj", "UiCure"]]
 
-    if sys.platform != 'darwin':
+    if not is_mac:
         projects = [["OpenAL", "lib_nowarn", "ThirdParty/openal-soft-1.10.622/OpenAL_900.vcproj", ""]] + projects
     else:
         projects = [[mac_hid, "lib_nowarn", "ThirdParty/HID_Utilities/HID_Utilities.vcproj", ""]] + projects
+
+    skipnames = os.environ.get("PD_SKIP_PROJECTS")
+    if skipnames:
+        for skip in skipnames.split(":"):
+            drop_projects = []
+            for project in projects:
+                if project[0].find(skip) >= 0:
+                    #print("Dropping project %s." % project)
+                    drop_projects += [project]
+            [projects.remove(dp) for dp in drop_projects]
+    #print(projects)
+
     generate_makefiles(basedir, projects)
 
 if __name__ == '__main__':

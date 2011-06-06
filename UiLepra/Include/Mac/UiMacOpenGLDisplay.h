@@ -6,8 +6,13 @@
 
 #pragma once
 
+#include "../UiOpenGLExtensions.h"
 #include "UiMacDisplayManager.h"
-#include <OpenGL/gl.h>
+#ifdef LEPRA_IOS
+#include "EAGLView.h"
+#endif // iOS
+
+
 
 namespace UiLepra
 {
@@ -47,8 +52,8 @@ private:
 	void DeleteGLContext();
 	bool SetGLPixelFormat();
 
-	NSOpenGLView* mGlView;
-	static NSOpenGLContext* mGlContext;
+	LEPRA_APPLE_GL_VIEW* mGlView;
+	static LEPRA_APPLE_GL_CONTEXT* mGlContext;
 	static int mContextUserCount;
 };
 
