@@ -7,24 +7,28 @@ import sys
 
 
 is_ios = os.environ.get('PD_BUILD_IOS')
+is_ios_sim = os.environ.get('PD_BUILD_IOS_SIM')
 is_mac = (sys.platform == 'darwin')
 
 cextraflags = ''
 glframework = 'OpenGL'
-stlport_path = "ThirdParty/stlport/build/lib/obj/gcc/so_stlg"
+gcc = 'gcc'
 if is_mac:
     cextraflags = ' -D_DARWIN_C_SOURCE -D_STLP_THREADS'
     if is_ios:
         darwin_kit = '-framework UIKit -framework Foundation -framework QuartzCore -framework CoreGraphics'
-        stlport_path = "ThirdParty/stlport/build/lib/obj/armv6-apple-darwin10-gcc/so_stlg"
         glframework = 'OpenGLES'
+        gcc = 'i686-apple-darwin10-gcc' if is_ios_sim else 'armv6-apple-darwin10-gcc'
     else:
         darwin_kit = '-framework AppKit -framework Cocoa -framework CoreServices -lIOKit'
+stlport_path = 'ThirdParty/stlport/build/lib/obj/'+gcc+'/so_stlg'
 
 platform_extraflags = ''
 if is_ios:
-    compiler_path = '/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/'
-    platform_extraflags = ' -arch armv6 -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS4.2.sdk -gdwarf-2 -mthumb -miphoneos-version-min=3.0'
+    target = 'iPhoneOS' if not is_ios_sim else 'iPhoneSimulator'
+    arch = 'armv6' if not is_ios_sim else 'i386'
+    compiler_path = '/Developer/Platforms/'+target+'.platform/Developer/usr/bin/'
+    platform_extraflags = ' -arch '+arch+' -isysroot /Developer/Platforms/'+target+'.platform/Developer/SDKs/'+target+'4.2.sdk -gdwarf-2 -mthumb -miphoneos-version-min=3.0'
 else:
     compiler_path = ''
 cextraflags += platform_extraflags
