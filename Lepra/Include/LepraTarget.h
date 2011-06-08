@@ -136,4 +136,12 @@
 #else
 #error "No recognized target platform specified!"
 #endif // LEPRA_WINDOWS/LEPRA_POSIX/?
-	
+
+
+// We keep some graphics stuff here, since primitives are defined
+// in Lepra, not in UiLepra (only drawing there).
+#if defined(LEPRA_IOS)
+typedef unsigned short vtx_idx_t;
+#else // !iOS
+typedef unsigned vtx_idx_t;
+#endif // iOS/!iOS

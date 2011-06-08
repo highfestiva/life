@@ -82,9 +82,12 @@ void OpenGLPainter::SetRenderMode(RenderMode pRM)
 
 void OpenGLPainter::PrePaint()
 {
+#ifndef LEPRA_GL_ES
 	::glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+#endif // !GLES
 	::glClear(GL_DEPTH_BUFFER_BIT);
 	DoSetRenderMode();
+	::glEnableClientState(GL_VERTEX_ARRAY);
 }
 
 void OpenGLPainter::SetClippingRect(int pLeft, int pTop, int pRight, int pBottom)
@@ -117,9 +120,11 @@ void OpenGLPainter::ResetClippingRect()
 	// Definition of the viewport. The point (0, 0) is defined as the center of the
 	// pixel in the top left corner. Thus, the top left corner of the screen has
 	// the coordinates (-0.5, -0.5).
+#ifndef LEPRA_GL_ES
 	glOrtho(-0.5, (float32)GetCanvas()->GetWidth() - 0.5,
 			(float32)GetCanvas()->GetHeight() - 0.5, -0.5,
 			0.0f, 1.0f);
+#endif // !GLES
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
@@ -218,15 +223,14 @@ void OpenGLPainter::DoDrawPixel(int x, int y)
 
 	ToScreenCoords(x, y);
 
-	GLfloat lX = (GLfloat)x;
-	GLfloat lY = (GLfloat)y;
-
 	Color& lColor = GetColorInternal(0);
 	glColor4ub(lColor.mRed, lColor.mGreen, lColor.mBlue, GetAlphaValue());
 	glPointSize(1);
-	glBegin(GL_POINTS);
-	glVertex2f(lX, lY);
-	glEnd();
+
+	GLshort v[] = {(GLshort)x, (GLshort)y};
+	::glVertexPointer(2, GL_SHORT, 0, v);
+	::glDrawArrays(GL_POINTS, 0, 1);
+	::glDisableClientState(GL_VERTEX_ARRAY);
 
 	OGL_ASSERT();
 }
@@ -242,10 +246,9 @@ void OpenGLPainter::DoDrawLine(int pX1, int pY1, int pX2, int pY2)
 	glColor4ub(lColor.mRed, lColor.mGreen, lColor.mBlue, GetAlphaValue());
 
 	//glLineWidth(1);
-	glBegin(GL_LINES);
-	glVertex2i(pX1, pY1);
-	glVertex2i(pX2, pY2);
-	glEnd();
+	GLshort v[] = {(GLshort)pX1, (GLshort)pY2, (GLshort)pX2, (GLshort)pY2};
+	::glVertexPointer(2, GL_SHORT, 0, v);
+	::glDrawArrays(GL_LINES, 0, 2);
 
 	OGL_ASSERT();
 }
@@ -270,13 +273,9 @@ void OpenGLPainter::DoFillTriangle(float pX1, float pY1,
 	Color& lColor = GetColorInternal(0);
 	glColor4ub(lColor.mRed, lColor.mGreen, lColor.mBlue, GetAlphaValue());
 
-	glBegin(GL_TRIANGLES);
-
-	glVertex2f(pX1, pY1);
-	glVertex2f(pX2, pY2);
-	glVertex2f(pX3, pY3);
-
-	glEnd();
+	GLfloat v[] = {pX1, pY2, pX2, pY2, pX3, pY3};
+	::glVertexPointer(2, GL_FLOAT, 0, v);
+	::glDrawArrays(GL_TRIANGLES, 0, 3);
 
 	OGL_ASSERT();
 }
@@ -298,17 +297,16 @@ void OpenGLPainter::DoFillShadedTriangle(float pX1, float pY1,
 	pY2 = pY2 - 0.5f;
 	pY3 = pY3 - 0.5f;
 
-	glBegin(GL_TRIANGLES);
-
 	Color* lColor = &GetColorInternal(0);
-	glColor4ub(lColor[0].mRed, lColor[0].mGreen, lColor[0].mBlue, GetAlphaValue());
-	glVertex2f(pX1, pY1);
-	glColor4ub(lColor[1].mRed, lColor[1].mGreen, lColor[1].mBlue, GetAlphaValue());
-	glVertex2f(pX2, pY2);
-	glColor4ub(lColor[2].mRed, lColor[2].mGreen, lColor[2].mBlue, GetAlphaValue());
-	glVertex2f(pX3, pY3);
-
-	glEnd();
+	GLubyte c[] = {lColor[0].mRed, lColor[0].mGreen, lColor[0].mBlue, GetAlphaValue(),
+		      lColor[1].mRed, lColor[1].mGreen, lColor[1].mBlue, GetAlphaValue(),
+		      lColor[2].mRed, lColor[2].mGreen, lColor[2].mBlue, GetAlphaValue()};
+	GLfloat v[] = {pX1, pY2, pX2, pY2, pX3, pY3};
+	::glEnableClientState(GL_COLOR_ARRAY);
+	::glColorPointer(4, GL_UNSIGNED_BYTE, 0, c);
+	::glVertexPointer(2, GL_FLOAT, 0, v);
+	::glDrawArrays(GL_TRIANGLES, 0, 3);
+	::glDisableClientState(GL_COLOR_ARRAY);
 
 	OGL_ASSERT();
 }
@@ -338,14 +336,16 @@ void OpenGLPainter::DoFillTriangle(float pX1, float pY1, float pU1, float pV1,
 	pY2	= pY2 - 0.5f;
 	pY3	= pY3 - 0.5f;
 
-	glPushAttrib(GL_TEXTURE_BIT);
+	//glPushAttrib(GL_TEXTURE_BIT);
 	glEnable(GL_TEXTURE_2D);
 
 	glBindTexture (GL_TEXTURE_2D, (unsigned)pImageID);
 	glPixelStorei (GL_UNPACK_ALIGNMENT, 1);
+#ifndef LEPRA_GL_ES
 	glPixelStorei (GL_UNPACK_ROW_LENGTH, 0);
 	glPixelStorei (GL_UNPACK_SKIP_ROWS, 0);
 	glPixelStorei (GL_UNPACK_SKIP_PIXELS, 0);
+#endif // !GLES
 	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -362,16 +362,13 @@ void OpenGLPainter::DoFillTriangle(float pX1, float pY1, float pU1, float pV1,
 		glColor4ub(255, 255, 255, GetAlphaValue());
 	}
 
-	glBegin(GL_TRIANGLES);
-
-	glTexCoord2f(pU1, pV1);
-	glVertex2f(pX1, pY1);
-	glTexCoord2f(pU2, pV2);
-	glVertex2f(pX2, pY2);
-	glTexCoord2f(pU3, pV3);
-	glVertex2f(pX3, pY3);
-
-	glEnd();
+	GLfloat u[] = {pU1, pV2, pU2, pV2, pU3, pV3};
+	GLfloat v[] = {pX1, pY2, pX2, pY2, pX3, pY3};
+	::glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	::glTexCoordPointer(2, GL_FLOAT, 0, u);
+	::glVertexPointer(2, GL_FLOAT, 0, v);
+	::glDrawArrays(GL_TRIANGLES, 0, 3);
+	::glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	glDisable(GL_TEXTURE_2D);
 
 	OGL_ASSERT();
@@ -437,7 +434,7 @@ void OpenGLPainter::DoDrawRect(int pLeft, int pTop, int pRight, int pBottom, int
 	lColor[22] = mRCol[1].y;
 	lColor[23] = mRCol[1].z;
 
-	const static GLuint lIndices[] = {0,4,7, 0,7,3, 0,1,5, 0,5,4, 1,2,6, 1,6,5, 7,6,2, 7,2,3};
+	const static vtx_idx_t lIndices[] = {0,4,7, 0,7,3, 0,1,5, 0,5,4, 1,2,6, 1,6,5, 7,6,2, 7,2,3};
 
 	glColor4ub(255, 255, 255, GetAlphaValue());
 
@@ -447,7 +444,7 @@ void OpenGLPainter::DoDrawRect(int pLeft, int pTop, int pRight, int pBottom, int
 	glColorPointer(3, GL_FLOAT, 0, lColor);
 	glDrawElements(GL_TRIANGLES,
 			24,
-			GL_UNSIGNED_INT,
+			LEPRA_GL_INDEX_TYPE,
 			lIndices);
 	glDisableClientState(GL_COLOR_ARRAY);
 
@@ -469,14 +466,9 @@ void OpenGLPainter::DoFillRect(int pLeft, int pTop, int pRight, int pBottom)
 	Color& lColor = GetColorInternal(0);
 	glColor4ub(lColor.mRed, lColor.mGreen, lColor.mBlue, GetAlphaValue());
 
-	glBegin(GL_TRIANGLE_FAN);
-
-	glVertex2f(lLeft, lTop);
-	glVertex2f(lRight, lTop);
-	glVertex2f(lRight, lBottom);
-	glVertex2f(lLeft, lBottom);
-
-	glEnd();
+	GLfloat v[] = {lLeft, lTop, lRight, lTop, lRight, lBottom, lLeft, lBottom};
+	::glVertexPointer(2, GL_FLOAT, 0, v);
+	::glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
 	OGL_ASSERT();
 }
@@ -575,7 +567,7 @@ void OpenGLPainter::DoDraw3DRect(int pLeft, int pTop, int pRight, int pBottom, i
 	lColor[34] = mRCol[lThree].y;
 	lColor[35] = mRCol[lThree].z;
 
-	//const static GLuint lsIndices[] = {0,1,7, 0,7,6, 0,6,10, 0,10,4, 8,2,3, 8,3,9, 11,9,3, 11,3,5};
+	const static vtx_idx_t lsIndices[] = {0,1,7, 0,7,6, 0,6,10, 0,10,4, 8,2,3, 8,3,9, 11,9,3, 11,3,5};
 
 	::glDisableClientState(GL_NORMAL_ARRAY);
 	::glDisableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -583,7 +575,7 @@ void OpenGLPainter::DoDraw3DRect(int pLeft, int pTop, int pRight, int pBottom, i
 	glVertexPointer(2, GL_FLOAT, 0, lVertex);
 	glEnableClientState(GL_COLOR_ARRAY);
 	glColorPointer(3, GL_FLOAT, 0, lColor);
-	//glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, lsIndices);
+	glDrawElements(GL_TRIANGLES, 12, LEPRA_GL_INDEX_TYPE, lsIndices);
 	glDisableClientState(GL_COLOR_ARRAY);
 
 	OGL_ASSERT();
@@ -610,28 +602,20 @@ void OpenGLPainter::DoFillShadedRect(int pLeft, int pTop, int pRight, int pBotto
 	GLfloat lBotG = (GLfloat)(mRCol[3].y + mRCol[2].y) * 0.5f;
 	GLfloat lBotB = (GLfloat)(mRCol[3].z + mRCol[2].z) * 0.5f;
 
-	glBegin(GL_TRIANGLE_FAN);
-
-	glColor4f((lTopR + lBotR) * 0.5f, (lTopG + lBotG) * 0.5f, (lTopB + lBotB) * 0.5f, (GLfloat)GetAlphaValue() / 255.0f);
-	glVertex2f((lLeft + lRight) * 0.5f, (lTop + lBottom) * 0.5f);
-
 	Color* lColor = &GetColorInternal(0);
-	glColor4ub(lColor[0].mRed, lColor[0].mGreen, lColor[0].mBlue, GetAlphaValue());
-	glVertex2f(lLeft, lTop);
-
-	glColor4ub(lColor[1].mRed, lColor[1].mGreen, lColor[1].mBlue, GetAlphaValue());
-	glVertex2f(lRight, lTop);
-
-	glColor4ub(lColor[2].mRed, lColor[2].mGreen, lColor[2].mBlue, GetAlphaValue());
-	glVertex2f(lRight, lBottom);
-
-	glColor4ub(lColor[3].mRed, lColor[3].mGreen, lColor[3].mBlue, GetAlphaValue());
-	glVertex2f(lLeft, lBottom);
-
-	glColor4ub(lColor[0].mRed, lColor[0].mGreen, lColor[0].mBlue, GetAlphaValue());
-	glVertex2f(lLeft, lTop);
-
-	glEnd();
+#define UBCOL(f) (GLubyte)((f)*128)
+	GLubyte c[] = {UBCOL(lTopR + lBotR), UBCOL(lTopG + lBotG), UBCOL(lTopB + lBotB), GetAlphaValue(),
+		       lColor[0].mRed, lColor[0].mGreen, lColor[0].mBlue, GetAlphaValue(),
+		       lColor[1].mRed, lColor[1].mGreen, lColor[1].mBlue, GetAlphaValue(),
+		       lColor[2].mRed, lColor[2].mGreen, lColor[2].mBlue, GetAlphaValue(),
+		       lColor[2].mRed, lColor[2].mGreen, lColor[2].mBlue, GetAlphaValue(),
+		       lColor[0].mRed, lColor[0].mGreen, lColor[0].mBlue, GetAlphaValue()};
+	GLfloat v[] = {(lLeft + lRight) * 0.5f, (lTop + lBottom) * 0.5f, lLeft, lTop, lRight, lTop, lLeft, lBottom, lLeft, lTop};
+	::glEnableClientState(GL_COLOR_ARRAY);
+	::glColorPointer(4, GL_UNSIGNED_BYTE, 0, c);
+	::glVertexPointer(2, GL_FLOAT, 0, v);
+	::glDrawArrays(GL_TRIANGLE_FAN, 0, 6);
+	::glDisableClientState(GL_COLOR_ARRAY);
 
 	OGL_ASSERT();
 }
@@ -642,18 +626,22 @@ void OpenGLPainter::DrawFan(const std::vector<Vector2DF> pCoords, bool pFill)
 
 	Color& lColor = GetColorInternal(0);
 	::glColor4ub(lColor.mRed, lColor.mGreen, lColor.mBlue, GetAlphaValue());
-	::glBegin(pFill? GL_TRIANGLE_FAN : GL_LINE_STRIP);
+	size_t c = pCoords.size();
+	GLfloat* v = new GLfloat[c*2];
 	std::vector<Vector2DF>::const_iterator i = pCoords.begin();
-	for (; i != pCoords.end(); ++i)
+	for (int j = 0; i != pCoords.end(); ++i, ++j)
 	{
 		float x = i->x;
 		float y = i->y;
 		ToScreenCoords(x, y);
 		x -= 0.5f;
 		y -= 0.5f;
-		::glVertex2f(x, y);
+		v[j*2+0] = x;
+		v[j*2+1] = y;
 	}
-	::glEnd();
+	::glVertexPointer(2, GL_FLOAT, 0, v);
+	::glDrawArrays(pFill? GL_TRIANGLE_FAN : GL_LINE_STRIP, 0, c);
+	delete[] v;
 
 	OGL_ASSERT();
 }
@@ -1049,16 +1037,15 @@ void OpenGLPainter::DoDrawAlphaImage(ImageID pImageID, int x, int y)
 	GLfloat lTop    = (GLfloat)y - 0.5f;
 	GLfloat lBottom = (GLfloat)(y + lTexture->mHeight) - 0.5f;
 
-	glPushAttrib(GL_TEXTURE_BIT);
-	glPushAttrib(GL_COLOR_BUFFER_BIT);
-
-	glEnable(GL_TEXTURE_2D);
+	::glEnable(GL_TEXTURE_2D);
 
 	glBindTexture (GL_TEXTURE_2D, pImageID);
 	glPixelStorei (GL_UNPACK_ALIGNMENT, 1);
+#ifndef LEPRA_GL_ES
 	glPixelStorei (GL_UNPACK_ROW_LENGTH, 0);
 	glPixelStorei (GL_UNPACK_SKIP_ROWS, 0);
 	glPixelStorei (GL_UNPACK_SKIP_PIXELS, 0);
+#endif // !GLES
 	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -1076,24 +1063,14 @@ void OpenGLPainter::DoDrawAlphaImage(ImageID pImageID, int x, int y)
 		glColor4ub(lColor.mRed, lColor.mGreen, lColor.mBlue, GetAlphaValue());
 	}
 
-	glBegin(GL_TRIANGLE_FAN);
-
-	glTexCoord2f(0, 0);
-	glVertex2f(lLeft, lTop);
-
-	glTexCoord2f(1, 0);
-	glVertex2f(lRight, lTop);
-
-	glTexCoord2f(1, 1);
-	glVertex2f(lRight, lBottom);
-
-	glTexCoord2f(0, 1);
-	glVertex2f(lLeft, lBottom);
-
-	glEnd();
-
-	glPopAttrib();
-	glPopAttrib();
+	GLfloat u[] = {0,0, 1,0, 1,1, 0,1};
+	GLfloat v[] = {lLeft,lTop, lRight,lTop, lRight,lBottom, lLeft,lBottom};
+	::glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	::glTexCoordPointer(2, GL_FLOAT, 0, u);
+	::glVertexPointer(2, GL_FLOAT, 0, v);
+	::glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+	::glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	::glDisable(GL_TEXTURE_2D);
 
 	OGL_ASSERT();
 }
@@ -1117,15 +1094,15 @@ void OpenGLPainter::DoDrawImage(ImageID pImageID, const PixelRect& pRect)
 	ToScreenCoords(lLeft, lTop);
 	ToScreenCoords(lRight, lBottom);
 
-	glPushAttrib(GL_TEXTURE_BIT);
-
-	glEnable(GL_TEXTURE_2D);
+	::glEnable(GL_TEXTURE_2D);
 
 	glBindTexture (GL_TEXTURE_2D, pImageID);
 	glPixelStorei (GL_UNPACK_ALIGNMENT, 1);
+#ifndef LEPRA_GL_ES
 	glPixelStorei (GL_UNPACK_ROW_LENGTH, 0);
 	glPixelStorei (GL_UNPACK_SKIP_ROWS, 0);
 	glPixelStorei (GL_UNPACK_SKIP_PIXELS, 0);
+#endif // !GLES
 	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -1142,23 +1119,14 @@ void OpenGLPainter::DoDrawImage(ImageID pImageID, const PixelRect& pRect)
 		glColor4ub(255, 255, 255, GetAlphaValue());
 	}
 
-	glBegin(GL_TRIANGLE_FAN);
-
-	glTexCoord2f(0, 0);
-	glVertex2f(lLeft, lTop);
-
-	glTexCoord2f(1, 0);
-	glVertex2f(lRight, lTop);
-
-	glTexCoord2f(1, 1);
-	glVertex2f(lRight, lBottom);
-
-	glTexCoord2f(0, 1);
-	glVertex2f(lLeft, lBottom);
-
-	glEnd();
-
-	glPopAttrib();
+	GLfloat u[] = {0,0, 1,0, 1,1, 0,1};
+	GLfloat v[] = {lLeft,lTop, lRight,lTop, lRight,lBottom, lLeft,lBottom};
+	::glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	::glTexCoordPointer(2, GL_FLOAT, 0, u);
+	::glVertexPointer(2, GL_FLOAT, 0, v);
+	::glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+	::glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	::glDisable(GL_TEXTURE_2D);
 
 	OGL_ASSERT();
 }
@@ -1193,15 +1161,15 @@ void OpenGLPainter::DoDrawImage(ImageID pImageID, const PixelRect& pRect, const 
 	ToScreenCoords(lLeft, lTop);
 	ToScreenCoords(lRight, lBottom);
 
-	glPushAttrib(GL_TEXTURE_BIT);
-
-	glEnable(GL_TEXTURE_2D);
+	::glEnable(GL_TEXTURE_2D);
 
 	glBindTexture (GL_TEXTURE_2D, pImageID);
 	glPixelStorei (GL_UNPACK_ALIGNMENT, 1);
+#ifndef LEPRA_GL_ES
 	glPixelStorei (GL_UNPACK_ROW_LENGTH, 0);
 	glPixelStorei (GL_UNPACK_SKIP_ROWS, 0);
 	glPixelStorei (GL_UNPACK_SKIP_PIXELS, 0);
+#endif // !GLES
 	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -1225,23 +1193,14 @@ void OpenGLPainter::DoDrawImage(ImageID pImageID, const PixelRect& pRect, const 
 	GLfloat lVTop    = ((GLfloat)pSubpatchRect.mTop    + 0.5f) * lOneOverHeight;
 	GLfloat lVBottom = ((GLfloat)pSubpatchRect.mBottom + 0.5f) * lOneOverHeight;
 
-	glBegin(GL_TRIANGLE_FAN);
-
-	glTexCoord2f(lULeft, lVTop);
-	glVertex2f(lLeft, lTop);
-
-	glTexCoord2f(lURight, lVTop);
-	glVertex2f(lRight, lTop);
-
-	glTexCoord2f(lURight, lVBottom);
-	glVertex2f(lRight, lBottom);
-
-	glTexCoord2f(lULeft, lVBottom);
-	glVertex2f(lLeft, lBottom);
-
-	glEnd();
-
-	glPopAttrib();
+	GLfloat u[] = {lULeft,lVTop, lURight,lVTop, lURight,lVBottom, lULeft,lVBottom};
+	GLfloat v[] = {lLeft,lTop, lRight,lTop, lRight,lBottom, lLeft,lBottom};
+	::glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	::glTexCoordPointer(2, GL_FLOAT, 0, u);
+	::glVertexPointer(2, GL_FLOAT, 0, v);
+	::glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+	::glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	::glDisable(GL_TEXTURE_2D);
 
 	OGL_ASSERT();
 }
@@ -1278,7 +1237,7 @@ void OpenGLPainter::PrintText(const str& pString, int x, int y)
 	int lCurrentX = x;
 	int lCurrentY = y;
 
-	::glPushAttrib(GL_TEXTURE_BIT | GL_COLOR_BUFFER_BIT);
+	//::glPushAttrib(GL_TEXTURE_BIT | GL_COLOR_BUFFER_BIT);
 
 	if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
 	{
@@ -1286,11 +1245,12 @@ void OpenGLPainter::PrintText(const str& pString, int x, int y)
 		UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
 	::glDisableClientState(GL_COLOR_ARRAY);
+#ifndef LEPRA_GL_ES
 	::glDisableClientState(GL_INDEX_ARRAY);
+#endif // !GLES
 	::glDisableClientState(GL_NORMAL_ARRAY);
 	::glEnableClientState(GL_VERTEX_ARRAY);
 	::glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	//::glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
 	PushAttrib(ATTR_RENDERMODE);
 	if (mSmoothFont)
@@ -1319,25 +1279,37 @@ void OpenGLPainter::PrintText(const str& pString, int x, int y)
 	FontTexture* lFontTexture = SelectGlyphs(lFontHash, lFontHeight, pString);
 	const int lFontTextureHeight = lFontTexture->GetHeight();
 
-	static const GLuint lTemplateGlyphIndices[4] =
-	{
-		0, 1, 3, 2,
-	};
-
 	const size_t lStringLength = pString.length();
 	int lGlyphIndex = 0;
 	const size_t STACK_GLYPH_CAPACITY = 256;
-	GLuint lArrayGlyphIndices[4*STACK_GLYPH_CAPACITY];
-	GLint lArrayVertices[2*4*STACK_GLYPH_CAPACITY];
+#ifdef LEPRA_GL_ES
+#define INDICES_PER_GLYPH 6
+#define VERTEX_TYPE       GLshort
+#define VERTEX_TYPE_GL_ID GL_SHORT
+	static const vtx_idx_t lTemplateGlyphIndices[] =
+	{
+		0, 1, 2, 2, 1, 3,
+	};
+#else // !GLES
+#define INDICES_PER_GLYPH 4
+#define VERTEX_TYPE       GLint
+#define VERTEX_TYPE_GL_ID GL_INT
+	static const vtx_idx_t lTemplateGlyphIndices[] =
+	{
+		0, 1, 3, 2,
+	};
+#endif // GLES/!GLES
+	vtx_idx_t lArrayGlyphIndices[INDICES_PER_GLYPH*STACK_GLYPH_CAPACITY];
+	vtx_idx_t* lGlyphIndices = lArrayGlyphIndices;
+	VERTEX_TYPE lArrayVertices[2*4*STACK_GLYPH_CAPACITY];
 	GLfloat lArrayUv[2*4*STACK_GLYPH_CAPACITY];
-	GLuint* lGlyphIndices = lArrayGlyphIndices;
-	GLint* lVertices = lArrayVertices;
+	VERTEX_TYPE* lVertices = lArrayVertices;
 	GLfloat* lUv = lArrayUv;
 	bool lAllocPrimitives = (lStringLength > STACK_GLYPH_CAPACITY);
 	if (lAllocPrimitives)
 	{
-		lGlyphIndices = new GLuint[4*lStringLength];
-		lVertices = new GLint[2*4*lStringLength];
+		lGlyphIndices = new vtx_idx_t[INDICES_PER_GLYPH*lStringLength];
+		lVertices = new VERTEX_TYPE[2*4*lStringLength];
 		lUv = new GLfloat[2*4*lStringLength];
 	}
 
@@ -1368,7 +1340,7 @@ void OpenGLPainter::PrintText(const str& pString, int x, int y)
 				continue;
 			}
 			const float lTextureWidth = (float)lFontTexture->GetWidth();
-			const GLint lTemplateVertices[2*4] =
+			const VERTEX_TYPE lTemplateVertices[2*4] =
 			{
 				lCurrentX,		lCurrentY,
 				lCurrentX + lCharWidth,	lCurrentY,
@@ -1382,11 +1354,14 @@ void OpenGLPainter::PrintText(const str& pString, int x, int y)
 				(lTextureX + 0.5f)/lTextureWidth,		0,
 				(lTextureX + lCharWidth)/lTextureWidth,	0,
 			};
-
+			const int lIndexBase = lGlyphIndex*INDICES_PER_GLYPH;
 			const int lVertexBase = lGlyphIndex*4;
+			for (int i = 0; i < INDICES_PER_GLYPH; ++i)
+			{
+				lGlyphIndices[lIndexBase+i] = lTemplateGlyphIndices[i]+lVertexBase;
+			}
 			for (int i = 0; i < 4; ++i)
 			{
-				lGlyphIndices[lVertexBase+i] = lTemplateGlyphIndices[i]+lVertexBase;
 				lVertices[(lVertexBase+i)*2+0] = lTemplateVertices[i*2+0];
 				lVertices[(lVertexBase+i)*2+1] = lTemplateVertices[i*2+1];
 				lUv[(lVertexBase+i)*2+0] = lTemplateUv[i*2+0];
@@ -1398,9 +1373,13 @@ void OpenGLPainter::PrintText(const str& pString, int x, int y)
 		}
 	}
 
-	::glVertexPointer(2, GL_INT, 0, lVertices);
+	::glVertexPointer(2, VERTEX_TYPE_GL_ID, 0, lVertices);
 	::glTexCoordPointer(2, GL_FLOAT, 0, lUv);
-	::glDrawElements(GL_QUADS, 4*lGlyphIndex, GL_UNSIGNED_INT, lGlyphIndices);
+#ifdef LEPRA_GL_ES
+	::glDrawElements(GL_TRIANGLES, INDICES_PER_GLYPH*lGlyphIndex, LEPRA_GL_INDEX_TYPE, lGlyphIndices);
+#else // !GLES
+	::glDrawElements(GL_QUADS, INDICES_PER_GLYPH*lGlyphIndex, LEPRA_GL_INDEX_TYPE, lGlyphIndices);
+#endif // GLES/!GLES
 
 	if (lAllocPrimitives)
 	{
@@ -1411,7 +1390,8 @@ void OpenGLPainter::PrintText(const str& pString, int x, int y)
 
 	PopAttrib();
 
-	::glPopAttrib();
+	::glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	::glDisable(GL_TEXTURE_2D);
 }
 
 void OpenGLPainter::ReadPixels(Canvas& pDestCanvas, const PixelRect& pRect)
@@ -1464,11 +1444,13 @@ void OpenGLPainter::ReadPixels(Canvas& pDestCanvas, const PixelRect& pRect)
 		pDestCanvas.CreateBuffer();
 	}
 
+	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+#ifndef LEPRA_GL_ES
 	glReadBuffer(GL_FRONT_LEFT);
-	glPixelStorei (GL_PACK_ALIGNMENT, 1);
-	glPixelStorei (GL_PACK_ROW_LENGTH, 0);
-	glPixelStorei (GL_PACK_SKIP_ROWS, 0);
-	glPixelStorei (GL_PACK_SKIP_PIXELS, 0);
+	glPixelStorei(GL_PACK_ROW_LENGTH, 0);
+	glPixelStorei(GL_PACK_SKIP_ROWS, 0);
+	glPixelStorei(GL_PACK_SKIP_PIXELS, 0);
+#endif // !GLES
 
 	switch(GetCanvas()->GetBitDepth())
 	{
@@ -1512,6 +1494,16 @@ void OpenGLPainter::SetFontSmoothness(bool pSmooth)
 
 
 
+void OpenGLPainter::AdjustVertexFormat(unsigned& pVertexFormat)
+{
+#ifdef LEPRA_GL_ES
+	pVertexFormat |= Geometry2D::VTX_INDEX16;
+#else // !GLES
+	// Default behaviour. Do nothing.
+	pVertexFormat;
+#endif
+}
+
 void OpenGLPainter::DoRenderDisplayList(std::vector<DisplayEntity*>* pDisplayList)
 {
 	OGL_ASSERT();
@@ -1519,15 +1511,15 @@ void OpenGLPainter::DoRenderDisplayList(std::vector<DisplayEntity*>* pDisplayLis
 	PushAttrib(ATTR_ALL);
 
 	::glDisableClientState(GL_NORMAL_ARRAY);
+#ifndef LEPRA_GL_ES
 	::glDisableClientState(GL_INDEX_ARRAY);
+#endif // !GLES
 	UiLepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, 0);
 	UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 	std::vector<DisplayEntity*>::iterator it;
 	for(it = pDisplayList->begin(); it != pDisplayList->end(); ++it)
 	{
-		glPushAttrib(GL_TEXTURE_BIT);
-
 		DisplayEntity* lGeneratedGeometry = *it;
 		Painter::SetClippingRect(lGeneratedGeometry->GetClippingRect());
 		SetAlphaValue(lGeneratedGeometry->GetAlpha());
@@ -1552,13 +1544,15 @@ void OpenGLPainter::DoRenderDisplayList(std::vector<DisplayEntity*>* pDisplayLis
 			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 			glTexCoordPointer(2, GL_FLOAT, 0, lGeneratedGeometry->GetGeometry().GetUVData());
 
-			glEnable(GL_TEXTURE_2D);
+			::glEnable(GL_TEXTURE_2D);
 
 			glBindTexture (GL_TEXTURE_2D, lGeneratedGeometry->GetImageID());
 			glPixelStorei (GL_UNPACK_ALIGNMENT, 1);
+#ifndef LEPRA_GL_ES
 			glPixelStorei (GL_UNPACK_ROW_LENGTH, 0);
 			glPixelStorei (GL_UNPACK_SKIP_ROWS, 0);
 			glPixelStorei (GL_UNPACK_SKIP_PIXELS, 0);
+#endif // !GLES
 			glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 			glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 			glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -1581,10 +1575,15 @@ void OpenGLPainter::DoRenderDisplayList(std::vector<DisplayEntity*>* pDisplayLis
 		}
 
 		const int lTriangleEntryCount = lGeneratedGeometry->GetGeometry().GetTriangleCount() * 3;
-		const uint32* lTriangleData = lGeneratedGeometry->GetGeometry().GetTriangleData();
-		::glDrawElements(GL_TRIANGLES, lTriangleEntryCount, GL_UNSIGNED_INT, lTriangleData);
+#ifdef LEPRA_GL_ES
+		const uint16* lTriangleData16 = lGeneratedGeometry->GetGeometry().GetTriangleData16();
+		::glDrawElements(GL_TRIANGLES, lTriangleEntryCount, GL_UNSIGNED_SHORT, lTriangleData16);
+#else // !GLES
+		const uint32* lTriangleData32 = lGeneratedGeometry->GetGeometry().GetTriangleData32();
+		::glDrawElements(GL_TRIANGLES, lTriangleEntryCount, GL_UNSIGNED_INT, lTriangleData32);
+#endif
 
-		::glPopAttrib();
+		::glDisable(GL_TEXTURE_2D);
 	}
 
 	glDisableClientState(GL_COLOR_ARRAY);

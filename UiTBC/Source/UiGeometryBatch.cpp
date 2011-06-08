@@ -72,7 +72,7 @@ void GeometryBatch::SetInstances(const TransformationF* pDisplacement, const Vec
 
 		if (mIndexCount > 0)
 		{
-			mIndex = new uint32[mIndexCount];
+			mIndex = new vtx_idx_t[mIndexCount];
 		}
 
 		if (mGeometryInstance->GetColorData() != 0)
@@ -242,7 +242,7 @@ float* GeometryBatch::GetUVData(unsigned int pUVSet) const
 	return 0;
 }
 
-uint32* GeometryBatch::GetIndexData() const
+vtx_idx_t* GeometryBatch::GetIndexData() const
 {
 	return mIndex;
 }

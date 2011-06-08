@@ -36,6 +36,7 @@ public:
 		VTX_INTERLEAVED = (1 << 0), // Opposite is separate buffers.
 		VTX_UV          = (1 << 1), // Texture coordinates.
 		VTX_RGB         = (1 << 2), // Vertex colors.
+		VTX_INDEX16     = (1 << 3), // Indices are 16-bit.
 	};
 
 	// Structs used for the interleaved format. Direct3D compatible.
@@ -83,13 +84,13 @@ public:
 		float v;
 	};
 
-	Geometry2D(Lepra::uint16 pVertexFormat = VTX_RGB,
+	Geometry2D(unsigned pVertexFormat = VTX_RGB,
 		int pVertexCapacity = 16, int pTriangleCapacity = 8);
 	~Geometry2D();
-	void Init(Lepra::uint16 pVertexFormat = VTX_RGB,
+	void Init(unsigned pVertexFormat = VTX_RGB,
 		int pVertexCapacity = 16, int pTriangleCapacity = 8);
 
-	inline Lepra::uint16 GetVertexFormat() const { return mVertexFormat; }
+	inline unsigned GetVertexFormat() const { return mVertexFormat; }
 
 	// Will allocate exactly the amount of space specified by the parameter.
 	void ReallocVertexBuffers(int pVertexCapacity);
@@ -118,7 +119,8 @@ public:
 	inline const void* GetVertexData() const { return mVertexData; }
 	inline const float* GetColorData() const { return mColorData; }
 	inline const float* GetUVData() const { return mUVData; }
-	inline const Lepra::uint32* GetTriangleData() const { return mTriangleData; }
+	inline const Lepra::uint16* GetTriangleData16() const { return mTriangleData16; }
+	inline const Lepra::uint32* GetTriangleData32() const { return mTriangleData32; }
 	inline int GetVertexCapacity() const { return mVertexCapacity; }
 	inline int GetTriangleCapacity() const { return mTriangleCapacity; }
 	inline int GetVertexCount() const { return mVertexCount; }
@@ -127,7 +129,7 @@ public:
 	inline const Vector2DF& GetPos() const { return mPos; }
 	inline void SetPos(const Vector2DF& pPos) { mPos = pPos; }
 
-	inline bool IsFlagSet(Lepra::uint16 pFlag) { return ((mVertexFormat & pFlag) != 0); }
+	inline bool IsFlagSet(unsigned pFlag) { return ((mVertexFormat & pFlag) != 0); }
 
 private:
 	void Realloc(void** pData, size_t pNewSize, size_t pBytesToCopy);
@@ -135,12 +137,16 @@ private:
 	Geometry2D(const Geometry2D&);
 	void operator=(const Geometry2D&);
 
-	Lepra::uint16 mVertexFormat;
+	unsigned mVertexFormat;
 
 	void* mVertexData;
 	float* mColorData;
 	float* mUVData;
-	Lepra::uint32* mTriangleData;
+	union
+	{
+		Lepra::uint16* mTriangleData16;
+		Lepra::uint32* mTriangleData32;
+	};
 	int mVertexCapacity;
 	int mTriangleCapacity;
 	int mVertexCount;

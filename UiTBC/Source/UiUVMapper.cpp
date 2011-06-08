@@ -65,7 +65,7 @@ bool UVMapper::ApplyCubeMapping(TBC::GeometryBase* pGeometry, unsigned int pUVSe
 
 	float* lVertexData = pGeometry->GetVertexData();
 	float* lSurfaceNormal = pGeometry->GetSurfaceNormalData();
-	uint32* lIndex = pGeometry->GetIndexData();
+	vtx_idx_t* lIndex = pGeometry->GetIndexData();
 	float* lUVData = pGeometry->GetUVData(pUVSet);
 
 	pScale = 1.0f / pScale;

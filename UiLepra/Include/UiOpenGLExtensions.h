@@ -24,7 +24,6 @@
 #if defined(LEPRA_WINDOWS)
 
 #define LEPRA_GL_INDEX_TYPE GL_UNSIGNED_INT
-typedef unsigned gl_idx_t;
 #include <gl/gl.h>
 #include <gl/glu.h>
 #include "Win32/WGLEXT.h"
@@ -35,7 +34,6 @@ typedef unsigned gl_idx_t;
 #define LEPRA_GL_ES
 #define LEPRA_GL_ES_1
 #define LEPRA_GL_INDEX_TYPE GL_UNSIGNED_SHORT
-typedef unsigned short gl_idx_t;
 #include <OpenGLES/EAGL.h>
 #include <OpenGLES/ES1/gl.h>
 #include <OpenGLES/ES1/glext.h>
@@ -45,7 +43,6 @@ typedef unsigned short gl_idx_t;
 #elif defined(LEPRA_MAC)
 
 #define LEPRA_GL_INDEX_TYPE GL_UNSIGNED_INT
-typedef unsigned gl_idx_t;
 #include <OpenGL/OpenGL.h>
 #include <OpenGL/gl.h>
 #include <OpenGL/glu.h>
@@ -56,7 +53,6 @@ typedef unsigned gl_idx_t;
 #elif defined(LEPRA_POSIX)
 
 #define LEPRA_GL_INDEX_TYPE GL_UNSIGNED_INT
-typedef unsigned gl_idx_t;
 #include <GL/glx.h>
 #include <GL/gl.h>
 #include <GL/glext.h>

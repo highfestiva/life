@@ -60,14 +60,14 @@ public:
 
 	virtual float*         GetVertexData() const;
 	virtual float*         GetUVData(unsigned int pUVSet) const;
-	virtual uint32* GetIndexData() const;
-	virtual uint8*  GetColorData() const;
+	virtual vtx_idx_t*     GetIndexData() const;
+	virtual uint8*         GetColorData() const;
 
 protected:
 private:
 	float* mVertex;
 	float** mUV;
-	uint32* mIndex;
+	vtx_idx_t* mIndex;
 	uint8* mColor;
 	unsigned int mVertexCount;
 	unsigned int mIndexCount;

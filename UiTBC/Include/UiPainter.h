@@ -272,7 +272,7 @@ protected:
 		              Lepra::uint8 pAlpha,
 		              ImageID pImageID,
 		              const PixelRect& pClippingRect,
-			      Lepra::uint16 pVertexFormat) :
+			      unsigned pVertexFormat) :
 			mRM(pRM),
 			mAlpha(pAlpha),
 			mImageID(pImageID),
@@ -285,7 +285,7 @@ protected:
 		          Lepra::uint8 pAlpha,
 		          ImageID pImageID,
 		          const PixelRect& pClippingRect,
-			  Lepra::uint16 pVertexFormat)
+			  unsigned pVertexFormat)
 		{
 			mRM = pRM;
 			mAlpha = pAlpha;
@@ -335,13 +335,13 @@ protected:
 
 	// Returns pVertexFormat | whatever-flags-the-painter-needs. The flags
 	// are defined in Geometry2D, and the default behaviour is to do nothing.
-	virtual void AdjustVertexFormat(Lepra::uint16& pVertexFormat);
+	virtual void AdjustVertexFormat(unsigned& pVertexFormat);
 
 	// This function will return the geometry of either a newly create DisplayEntity 
 	// or the current (last) one in the current display list, depending on wether the 
 	// last entity matches the given parameters. The newly created DisplayEntity will 
 	// be  appended at the end of the display list.
-	Geometry2D* FetchDisplayEntity(Lepra::uint16 pVertexFormat = 0, ImageID pImageID = INVALID_IMAGEID);
+	Geometry2D* FetchDisplayEntity(unsigned pVertexFormat = 0, ImageID pImageID = INVALID_IMAGEID);
 
 	void CreateLine(int pX1, int pY1, int pX2, int pY2);
 	void CreateRectFrame(int pLeft, int pTop, int pRight, int pBottom, int pWidth);

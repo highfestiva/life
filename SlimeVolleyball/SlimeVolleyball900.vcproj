@@ -521,7 +521,11 @@
 			UniqueIdentifier="{C734F7F1-C7A5-4376-A066-2A32FFD752A2}"
 			>
 			<File
-				RelativePath=".\App.cpp"
+				RelativePath=".\App.cxx"
+				>
+			</File>
+			<File
+				RelativePath=".\App.mm"
 				>
 			</File>
 			<File

@@ -112,7 +112,7 @@ float* GeometryReference::GetUVData(unsigned int pUVSet) const
 	return mGeometry->GetUVData(pUVSet);
 }
 
-uint32* GeometryReference::GetIndexData() const
+vtx_idx_t* GeometryReference::GetIndexData() const
 {
 	return mGeometry->GetIndexData();
 }

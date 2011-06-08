@@ -117,10 +117,12 @@ void OpenGLRenderer::Clear(unsigned pClearFlags)
 	{
 		mGLClearMask |= GL_STENCIL_BUFFER_BIT;
 	}
+#ifndef LEPRA_GL_ES
 	if (CheckFlag(pClearFlags, CLEAR_ACCUMULATIONBUFFER))
 	{
 		mGLClearMask |= GL_ACCUM_BUFFER_BIT;
 	}
+#endif // !GLES
 
 	if (GetShadowMode() != UiTbc::Renderer::NO_SHADOWS)
 	{
@@ -294,8 +296,8 @@ void OpenGLRenderer::SetupGLLight(int pLightIndex, const LightData& pLight)
 
 	if (pLight.mType != LIGHT_SPOT)
 	{
-		int l180 = 180;
-		glLighti(lLight, GL_SPOT_CUTOFF, l180);
+		float l180 = 180.0f;
+		glLightf(lLight, GL_SPOT_CUTOFF, l180);
 
 		float lDir[3] = {0, 0, -1};
 		glLightfv(lLight, GL_SPOT_DIRECTION, lDir);
@@ -568,6 +570,7 @@ void OpenGLRenderer::BindMap(int pMapType, TextureData* pTextureData, Texture* p
 
 void OpenGLRenderer::BindCubeMap(TextureData* pTextureData, Texture* pTexture)
 {
+#ifndef LEPRA_GL_ES
 	// Compress textures if possible.
 	bool lCompress = UiLepra::OpenGLExtensions::IsCompressedTexturesSupported() &&
 				GetCompressedTexturesEnabled();
@@ -648,6 +651,7 @@ void OpenGLRenderer::BindCubeMap(TextureData* pTextureData, Texture* pTexture)
 			     pTexture->GetCubeMapNegZ(i)->GetBuffer());
 	}
 	OGL_ASSERT();
+#endif // !GLES
 }
 
 void OpenGLRenderer::ReleaseMap(TextureData* pTextureData)
@@ -732,7 +736,11 @@ void OpenGLRenderer::BindGeometry(TBC::GeometryBase* pGeometry,
 				lGLHint = GL_DYNAMIC_DRAW;
 				break;
 			case TBC::GeometryBase::GEOM_VOLATILE:
+#ifdef LEPRA_GL_ES
+				lGLHint = GL_DYNAMIC_DRAW;
+#else // !GLES
 				lGLHint = GL_STREAM_DRAW;
+#endif // GLES/!GLES
 				break;
 			}
 			
@@ -822,12 +830,12 @@ void OpenGLRenderer::BindGeometry(TBC::GeometryBase* pGeometry,
 			// Bind and create the index buffer in GFX memory.
 			UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, (GLuint)lGeometryData->mIndexBufferID);
 			UiLepra::OpenGLExtensions::glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-							      pGeometry->GetMaxIndexCount() * sizeof(unsigned int),
+							      pGeometry->GetMaxIndexCount() * sizeof(vtx_idx_t),
 							      0, lGLHint);
 
 			UiLepra::OpenGLExtensions::glBufferSubData(GL_ELEMENT_ARRAY_BUFFER,
 								 0,
-								 pGeometry->GetIndexCount() * sizeof(unsigned int),
+								 pGeometry->GetIndexCount() * sizeof(vtx_idx_t),
 								 (void*)pGeometry->GetIndexData());
 		}
 	}
@@ -855,6 +863,7 @@ bool OpenGLRenderer::BindShadowGeometry(UiTbc::ShadowVolume* pShadowVolume, Ligh
 
 		// Set the most appropriate buffer object hint.
 		GLenum lGLHint = GL_DYNAMIC_DRAW;
+#ifndef LEPRA_GL_ES
 		switch(pShadowVolume->GetGeometryVolatility())
 		{
 		case TBC::GeometryBase::GEOM_STATIC:
@@ -874,6 +883,7 @@ bool OpenGLRenderer::BindShadowGeometry(UiTbc::ShadowVolume* pShadowVolume, Ligh
 			lGLHint = GL_STREAM_DRAW;
 			break;
 		}
+#endif // !GLES
 		
 		// Bind and create the vertex buffer in GFX memory.
 		//log_volatile(mLog.Tracef(_T("glBindBuffer %u (vertex)."), lShadowGeom->mVertexBufferID));
@@ -893,7 +903,7 @@ bool OpenGLRenderer::BindShadowGeometry(UiTbc::ShadowVolume* pShadowVolume, Ligh
 		// Bind and create the index buffer in GFX memory.
 		UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, (GLuint)lShadowGeom->mIndexBufferID);
 		UiLepra::OpenGLExtensions::glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-						      pShadowVolume->GetMaxIndexCount() * sizeof(unsigned int),
+						      pShadowVolume->GetMaxIndexCount() * sizeof(vtx_idx_t),
 						      pShadowVolume->GetIndexData(), lGLHint);
 
 		lOK = true;
@@ -995,7 +1005,7 @@ void OpenGLRenderer::UpdateGeometry(GeometryID pGeometryID)
 			{
 				UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, (GLuint)lGeomData->mIndexBufferID);
 				UiLepra::OpenGLExtensions::glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0,
-					lGeometry->GetTriangleCount() * 3 * sizeof(unsigned int),
+					lGeometry->GetTriangleCount() * 3 * sizeof(vtx_idx_t),
 					(void*)lGeometry->GetIndexData());
 			}
 		}
@@ -1130,11 +1140,10 @@ void OpenGLRenderer::DrawLine(const Vector3DF& pPosition, const Vector3DF& pVect
 	glMatrixMode(GL_MODELVIEW);
 	glLoadMatrixf(lModelViewMatrix);
 
-	glColor3ub(pColor.mRed, pColor.mGreen, pColor.mBlue);
-	glBegin(GL_LINES);
-	glVertex3f(pPosition.x, pPosition.y, pPosition.z);
-	glVertex3f(pPosition.x+pVector.x, pPosition.y+pVector.y, pPosition.z+pVector.z);
-	glEnd();
+	glColor4ub(pColor.mRed, pColor.mGreen, pColor.mBlue, 255);
+	GLfloat v[] = {pPosition.x, pPosition.y, pPosition.z, pPosition.x+pVector.x, pPosition.y+pVector.y, pPosition.z+pVector.z};
+	::glVertexPointer(3, GL_FLOAT, 0, v);
+	::glDrawArrays(GL_LINES, 0, 2);
 
 	OGL_ASSERT();
 }
@@ -1169,7 +1178,9 @@ unsigned OpenGLRenderer::RenderScene()
 
 		CalcCamCulling();
 
+#ifndef LEPRA_GL_ES
 		::glPushAttrib(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_ENABLE_BIT | GL_VIEWPORT_BIT);
+#endif // !GLES
 
 		::glDisable(GL_COLOR_LOGIC_OP);
 		::glDisable(GL_ALPHA_TEST);
@@ -1179,14 +1190,15 @@ unsigned OpenGLRenderer::RenderScene()
 		::glDepthMask(GL_TRUE);
 		::glFrontFace(GL_CCW);
 		::glShadeModel(GL_SMOOTH);
-		::glPolygonMode(GL_FRONT_AND_BACK, IsWireframeEnabled()? GL_LINE : GL_FILL);
 		::glDepthFunc(GL_LESS);
 		::glCullFace(GL_BACK);
 		::glLineWidth(3.0f);
 		::glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
 		::glEnable(GL_LINE_SMOOTH);
-
+#ifndef LEPRA_GL_ES
+		::glPolygonMode(GL_FRONT_AND_BACK, IsWireframeEnabled()? GL_LINE : GL_FILL);
 		::glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, 1);
+#endif // !GLES
 
 		Material::EnableDrawMaterial(true);
 	}
@@ -1260,7 +1272,9 @@ unsigned OpenGLRenderer::RenderScene()
 		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_SOLID_PXS), GetMaterial(MAT_SINGLE_COLOR_SOLID));
 		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_OUTLINE_BLENDED));
 		::glCullFace(GL_FRONT);
+#ifndef LEPRA_GL_ES
 		::glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+#endif // !GLES
 		::glDepthFunc(GL_LEQUAL);
 		::glDisable(GL_LIGHTING);
 		Material::EnableDrawMaterial(true);
@@ -1269,7 +1283,9 @@ unsigned OpenGLRenderer::RenderScene()
 		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_SOLID_PXS), GetMaterial(MAT_SINGLE_COLOR_SOLID));
 		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_OUTLINE_BLENDED));
 		::glCullFace(GL_BACK);
+#ifndef LEPRA_GL_ES
 		::glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+#endif // !GLES
 		//::glDepthFunc(GL_LESS);
 		if (GetLightsEnabled())
 		{
@@ -1314,7 +1330,9 @@ unsigned OpenGLRenderer::RenderScene()
 
 		StepCurrentFrame();
 
+#ifndef LEPRA_GL_ES
 		::glPopAttrib();
+#endif // !GLES
 	}
 
 	OGL_ASSERT();
@@ -1484,14 +1502,16 @@ void OpenGLRenderer::RenderShadowVolumes()
 	OGL_ASSERT();
 
 	// Disable all fancy gfx.
+#ifndef LEPRA_GL_ES
 	glPushAttrib(GL_ENABLE_BIT | GL_LIGHTING_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	glDisable(GL_LOGIC_OP);
+#endif // !GLES
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_LIGHTING);
 	glDisable(GL_COLOR_MATERIAL);
 	glDisable(GL_NORMALIZE);
 	glDisable(GL_ALPHA_TEST);
 	glDisable(GL_BLEND);
-	glDisable(GL_LOGIC_OP);
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glDisableClientState(GL_NORMAL_ARRAY);
 	glDisableClientState(GL_COLOR_ARRAY);
@@ -1578,13 +1598,13 @@ void OpenGLRenderer::RenderShadowVolumes()
 					{
 						UiLepra::OpenGLExtensions::glBufferSubData(GL_ELEMENT_ARRAY_BUFFER,
 															0,
-															lShadowVolume->GetTriangleCount() * 3 * sizeof(unsigned int),
+															lShadowVolume->GetTriangleCount() * 3 * sizeof(vtx_idx_t),
 															(void*)lShadowVolume->GetIndexData());
 					}
 
 					glDrawElements(GL_TRIANGLES,
 								lShadowVolume->GetTriangleCount() * 3,
-								GL_UNSIGNED_INT,
+								LEPRA_GL_INDEX_TYPE,
 								0);
 				}
 				else
@@ -1592,7 +1612,7 @@ void OpenGLRenderer::RenderShadowVolumes()
 					glVertexPointer(3, GL_FLOAT, 0, lShadowVolume->GetVertexData());
 					glDrawElements(GL_TRIANGLES,
 								lShadowVolume->GetTriangleCount() * 3,
-								GL_UNSIGNED_INT,
+								LEPRA_GL_INDEX_TYPE,
 								lShadowVolume->GetIndexData());
 				}
 			}
@@ -1600,7 +1620,9 @@ void OpenGLRenderer::RenderShadowVolumes()
 	}	
 
 	// Reset all settings.
+#ifndef LEPRA_GL_ES
 	glPopAttrib();
+#endif // !GLES
 	glShadeModel(GL_SMOOTH);
 	glColorMask(1, 1, 1, 1);
 	glDepthFunc(GL_LEQUAL);
@@ -1614,13 +1636,14 @@ int OpenGLRenderer::RenderShadowMaps()
 {
 	OGL_ASSERT();
 
+#ifndef LEPRA_GL_ES
 	glPushAttrib(GL_ENABLE_BIT | GL_LIGHTING_BIT | GL_DEPTH_BUFFER_BIT | GL_VIEWPORT_BIT);
+	glDisable(GL_LOGIC_OP);
 	glDisable(GL_LIGHTING);
 	glDisable(GL_COLOR_MATERIAL);
 	glDisable(GL_NORMALIZE);
 	glDisable(GL_ALPHA_TEST);
 	glDisable(GL_BLEND);
-	glDisable(GL_LOGIC_OP);
 	glShadeModel(GL_FLAT);
 
 	glEnable(GL_TEXTURE_2D);
@@ -1724,7 +1747,7 @@ int OpenGLRenderer::RenderShadowMaps()
 					
 					glDrawElements(GL_TRIANGLES,
 								lGeometry->mGeometry->GetTriangleCount() * 3,
-								GL_UNSIGNED_INT,
+								LEPRA_GL_INDEX_TYPE,
 								0);
 				}
 				else
@@ -1732,7 +1755,7 @@ int OpenGLRenderer::RenderShadowMaps()
 					glVertexPointer(3, GL_FLOAT, 0, lGeometry->mGeometry->GetVertexData());
 					glDrawElements(GL_TRIANGLES,
 								lGeometry->mGeometry->GetTriangleCount() * 3,
-								GL_UNSIGNED_INT,
+								LEPRA_GL_INDEX_TYPE,
 								lGeometry->mGeometry->GetIndexData());
 				}
 			}
@@ -1763,10 +1786,14 @@ int OpenGLRenderer::RenderShadowMaps()
 	OGL_ASSERT();
 
 	return lCount;
+#else // GLES
+	return 0;
+#endif // !GLES/GLES
 }
 
 void OpenGLRenderer::RegenerateShadowMap(LightData* pLight)
 {
+#ifndef LEPRA_GL_ES
 	glPushAttrib(GL_ENABLE_BIT | GL_LIGHTING_BIT | GL_DEPTH_BUFFER_BIT | GL_VIEWPORT_BIT);
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_LIGHTING);
@@ -1836,7 +1863,7 @@ void OpenGLRenderer::RegenerateShadowMap(LightData* pLight)
 				
 				glDrawElements(GL_TRIANGLES,
 							lGeometry->mGeometry->GetTriangleCount() * 3,
-							GL_UNSIGNED_INT,
+							LEPRA_GL_INDEX_TYPE,
 							0);
 			}
 			else
@@ -1844,7 +1871,7 @@ void OpenGLRenderer::RegenerateShadowMap(LightData* pLight)
 				glVertexPointer(3, GL_FLOAT, 0, lGeometry->mGeometry->GetVertexData());
 				glDrawElements(GL_TRIANGLES,
 							lGeometry->mGeometry->GetTriangleCount() * 3,
-							GL_UNSIGNED_INT,
+							LEPRA_GL_INDEX_TYPE,
 							lGeometry->mGeometry->GetIndexData());
 			}
 		}
@@ -1875,6 +1902,7 @@ void OpenGLRenderer::RegenerateShadowMap(LightData* pLight)
 	pLight->mShadowMapNeedUpdate = false;
 
 	OGL_ASSERT();
+#endif // !GLES
 }
 
 void OpenGLRenderer::Perspective(float pFOVAngle, float pAspectRatio, float pNear, float pFar)
@@ -1965,10 +1993,12 @@ void OpenGLRenderer::SetPixelFormat(int& pSize, GLenum& pPixelFormat, bool pComp
 		mLog.Info(pErrorMessage);
 	}
 
+#ifndef LEPRA_GL_ES
 	if (pCompress == true)
 	{
 		pSize = (pSize == 4) ? GL_COMPRESSED_RGBA : GL_COMPRESSED_RGB;
 	}
+#endif // !GLES
 }
 
 

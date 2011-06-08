@@ -186,10 +186,10 @@ public:
 	// Default is 0. Tangents and bitangents are used with bump/normal mapping.
 	void SetTangentsUVSet(unsigned int pUVSet);
 
-	virtual float*         GetVertexData() const                   = 0;
+	virtual float*         GetVertexData() const                  = 0;
 	virtual float*         GetUVData(unsigned int pUVSet) const   = 0;
-	virtual Lepra::uint32* GetIndexData() const                    = 0;
-	virtual Lepra::uint8*  GetColorData() const                    = 0;
+	virtual vtx_idx_t*     GetIndexData() const                   = 0;
+	virtual Lepra::uint8*  GetColorData() const                   = 0;
 
 	virtual float* GetNormalData() const;
 	float*         GetSurfaceNormalData() const;

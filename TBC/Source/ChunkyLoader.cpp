@@ -531,6 +531,20 @@ uint32* ChunkyLoader::AllocInitBigEndian(const uint32* pData, unsigned pCount)
 	return (lData);
 }
 
+uint32* ChunkyLoader::AllocInitBigEndian(const uint16* pData, unsigned pCount)
+{
+	if (!pData || !pCount)
+	{
+		return (0);
+	}
+	uint32* lData = new uint32[pCount];
+	for (unsigned x = 0; x < pCount; ++x)
+	{
+		lData[x] = Endian::HostToBig(pData[x]);
+	}
+	return (lData);
+}
+
 
 
 ChunkyAnimationLoader::ChunkyAnimationLoader(File* pFile, bool pIsFileOwner):

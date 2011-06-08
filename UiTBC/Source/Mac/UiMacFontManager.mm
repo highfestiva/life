@@ -5,7 +5,13 @@
 
 
 #include "../../Include/Mac/UiMacFontManager.h"
+#ifdef LEPRA_IOS
+#import <UIKit/UIKit.h>
+#define TBC_APPLE_FONT UIFont
+#else // !iOS
 #import <Cocoa/Cocoa.h>
+#define TBC_APPLE_FONT NSFont
+#endif // iOS/!iOS
 #include "../../../UiLepra/Include/Mac/UiMacDisplayManager.h"
 
 
@@ -124,12 +130,16 @@ int MacFontManager::GetCharWidth(const tchar pChar) const
 	tchar lTempString[2] = {0, 0};
 	lTempString[0] = pChar;
 	NSString* lFontName = [NSString stringWithUTF8String:mCurrentFont->mName.c_str()];
-	NSFont* lFont = [NSFont fontWithName:lFontName size:mCurrentFont->mSize];
+	TBC_APPLE_FONT* lFont = [TBC_APPLE_FONT fontWithName:lFontName size:mCurrentFont->mSize];
+#ifdef LEPRA_IOS
+	CGSize lSize = [[NSString stringWithUTF8String:lTempString] sizeWithFont:lFont];
+#else // !iOS
 	NSGlyph* lGlyph = (NSGlyph*)malloc(sizeof(NSGlyph)); 
 	const wstr lString = wstrutil::Encode(str(lTempString));
 	CTFontGetGlyphsForCharacters((CTFontRef)lFont, (const UniChar*)lString.c_str(), (CGGlyph*)lGlyph, 1);
 	NSSize lSize = [lFont advancementForGlyph:*lGlyph];
 	free(lGlyph);
+#endif // iOS/!iOS
 	return lSize.width+1;
 }
 

@@ -169,6 +169,7 @@ def _incremental_copy_data(targetdir, buildtype):
 
 
 def _cleandata(da_dir):
+        global removes
         removes = 0
         import glob
         fl = glob.glob(da_dir+"/*.class") + glob.glob(da_dir+"/*.mesh") + glob.glob(da_dir+"/*.phys")
@@ -179,6 +180,7 @@ def _cleandata(da_dir):
 
 
 def _cleandir(da_dir):
+        global removes
         removes = 0
         import glob
         fl = glob.glob(da_dir + "/*")
@@ -205,7 +207,7 @@ def _checkplatform():
 
 
 def _printresult():
-        global showed_result
+        global showed_result, updates, removes
         if showed_result:
                 return
         showed_result = True
@@ -292,6 +294,7 @@ def _rebuild(targetdir, buildtype):
 
 
 def _macappify(exe, name):
+        global updates
         os.chdir("bin")
         import glob
         fl = glob.glob("*")
@@ -472,8 +475,9 @@ def main():
         for arg in args:
                 try:
                         exec(arg+"()")
-                except NameError:
+                except NameError as e:
                         print("Error: no such command %s!" % arg)
+                        print(e)
                         sys.exit(1)
         _printresult()
 

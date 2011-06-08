@@ -389,7 +389,7 @@ void Painter::ClearFontBuffers()
 {
 }
 
-Geometry2D* Painter::FetchDisplayEntity(uint16 pVertexFormat, ImageID pImageID)
+Geometry2D* Painter::FetchDisplayEntity(unsigned pVertexFormat, ImageID pImageID)
 {
 	AdjustVertexFormat(pVertexFormat);
 
@@ -788,7 +788,7 @@ void Painter::GetScreenCoordClippingRect(PixelRect& pClippingRect) const
 	ToScreenCoords(pClippingRect.mRight, pClippingRect.mBottom);
 }
 
-void Painter::AdjustVertexFormat(uint16&)
+void Painter::AdjustVertexFormat(unsigned&)
 {
 	// Default behaviour. Do nothing.
 }

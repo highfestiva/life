@@ -123,7 +123,7 @@ float* ShadowVolume::GetUVData(unsigned int) const
 	return 0;
 }
 
-uint32* ShadowVolume::GetIndexData() const
+vtx_idx_t* ShadowVolume::GetIndexData() const
 {
 	return mIndexData;
 }
@@ -231,7 +231,7 @@ void ShadowVolume::InitTO()
 
 	if (mIndexData == 0)
 	{
-		mIndexData = new uint32[mMaxTriangleCount * 3];
+		mIndexData = new vtx_idx_t[mMaxTriangleCount * 3];
 	}
 }
 
@@ -301,7 +301,7 @@ void ShadowVolume::UpdateShadowVolume(const Vector3DF& pLightPos, float pShadowR
 	//
 
 	mParentGeometry->GenerateSurfaceNormalData();
-	const uint32* lIndices = mParentGeometry->GetIndexData();
+	const vtx_idx_t* lIndices = mParentGeometry->GetIndexData();
 	const float* lSurfaceNormalData = mParentGeometry->GetSurfaceNormalData();
 	const float* lVertexData = mParentGeometry->GetVertexData();
 
@@ -347,7 +347,7 @@ void ShadowVolume::UpdateShadowVolume(const Vector3DF& pLightPos, float pShadowR
 	}
 	else // Point or spot light.
 	{
-		const uint32* lIndices = mParentGeometry->GetIndexData();
+		const vtx_idx_t* lIndices = mParentGeometry->GetIndexData();
 		// Calculate triangle orientations relative to light source.
 		for (unsigned i = 0; i < lTriangleCount; i++)
 		{
@@ -427,7 +427,7 @@ void ShadowVolume::UpdateShadowVolume(const Vector3DF& pLightPos, float pShadowR
 
 	const TBC::GeometryBase::Edge* lEdges = mParentGeometry->GetEdgeData();
 	const unsigned lEdgeCount = mParentGeometry->GetEdgeCount();
-	Lepra::uint32* lIndexData = mIndexData;
+	vtx_idx_t* lIndexData = mIndexData;
 	for (unsigned i = 0; i < lEdgeCount; ++i)
 	{
 		const Edge& lEdge = lEdges[i];

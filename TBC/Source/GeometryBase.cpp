@@ -381,7 +381,7 @@ unsigned int GeometryBase::GetTriangleCount() const
 
 void GeometryBase::GetTriangleIndices(int pTriangle, uint32 pIndices[3])
 {
-	const uint32* lIndices = GetIndexData();
+	const vtx_idx_t* lIndices = GetIndexData();
 	switch (GetPrimitiveType())
 	{
 		case TRIANGLES:
@@ -803,7 +803,7 @@ bool GeometryBase::IsSingleObject()
 	}
 
 	unsigned int lTriangleCount = GetTriangleCount();
-	uint32* lIndices   = GetIndexData();
+	vtx_idx_t* lIndices   = GetIndexData();
 
 	if (lIndices == 0 || lTriangleCount == 0)
 	{
@@ -1446,7 +1446,7 @@ void GeometryBase::GenerateTangentAndBitangentData()
 
 bool GeometryBase::VerifyIndexData()
 {
-	uint32* lIndex = GetIndexData();
+	vtx_idx_t* lIndex = GetIndexData();
 	unsigned int lNumIndex = GetTriangleCount() * 3;
 	unsigned int lNumVertex = GetVertexCount();
 

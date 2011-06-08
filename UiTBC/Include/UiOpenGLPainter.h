@@ -94,6 +94,7 @@ protected:
 	void PrintText(const str& pString, int x, int y);
 	void SetFontSmoothness(bool pSmooth);
 
+	virtual void AdjustVertexFormat(unsigned& pVertexFormat);
 	void DoRenderDisplayList(std::vector<DisplayEntity*>* pDisplayList);
 
 	virtual void ClearFontBuffers();

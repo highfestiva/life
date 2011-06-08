@@ -196,10 +196,10 @@ void TriangleBasedGeometry::Set(Vector3DF* pVertices,
 		if (pIndices != 0)
 		{
 			// Copy index data.
-			mIndexData = new uint32[mIndexCount];
+			mIndexData = new vtx_idx_t[mIndexCount];
 			for (i = 0; i < mIndexCount; i++)
 			{
-				mIndexData[i] = pIndices[i];
+				mIndexData[i] = (vtx_idx_t)pIndices[i];
 			}
 		}
 	}
@@ -276,7 +276,7 @@ void TriangleBasedGeometry::Set(float* pVertexData,
 		if (pIndices != 0)
 		{
 			// Copy index data.
-			mIndexData = new uint32[mIndexCount];
+			mIndexData = new vtx_idx_t[mIndexCount];
 			for (i = 0; i < mIndexCount; i++)
 			{
 				mIndexData[i] = pIndices[i];
@@ -371,8 +371,8 @@ void TriangleBasedGeometry::Copy(const TriangleBasedGeometry& pGeometry)
 		if (lGeometry.GetIndexData() != 0)
 		{
 			// Copy index data.
-			const uint32* lIndices = lGeometry.GetIndexData();
-			mIndexData = new uint32[mIndexCount];
+			const vtx_idx_t* lIndices = lGeometry.GetIndexData();
+			mIndexData = new vtx_idx_t[mIndexCount];
 			for (i = 0; i < mIndexCount; i++)
 			{
 				mIndexData[i] = lIndices[i];
@@ -677,7 +677,7 @@ void TriangleBasedGeometry::FlipTriangles()
 		{
 			for (unsigned int i = 0; i < mIndexCount; i += 3)
 			{
-				unsigned int lTemp = mIndexData[i + 0];
+				vtx_idx_t lTemp = mIndexData[i + 0];
 				mIndexData[i + 0] = mIndexData[i + 1];
 				mIndexData[i + 1] = lTemp;
 			}
@@ -685,7 +685,7 @@ void TriangleBasedGeometry::FlipTriangles()
 		else if (mPrimitiveType == TBC::GeometryBase::TRIANGLE_STRIP && mIndexCount > 2)
 		{
 			// We only need to flip the first one, and the rest will follow.
-			unsigned int lTemp = mIndexData[1];
+			vtx_idx_t lTemp = mIndexData[1];
 			mIndexData[1] = mIndexData[2];
 			mIndexData[2] = lTemp;
 		}
@@ -707,7 +707,7 @@ void TriangleBasedGeometry::FlipTriangle(int pTriangleIndex)
 	{
 		int i = pTriangleIndex * 3;
 
-		unsigned int lTemp = mIndexData[i + 0];
+		vtx_idx_t lTemp = mIndexData[i + 0];
 		mIndexData[i + 0] = mIndexData[i + 1];
 		mIndexData[i + 1] = lTemp;
 
@@ -1025,7 +1025,7 @@ void TriangleBasedGeometry::AddGeometry(TriangleBasedGeometry* pGeometry)
 	unsigned int lNumTriangles = GetTriangleCount() + pGeometry->GetTriangleCount();
 
 	float* lVertexData = new float[lVertexCount * 3];
-	uint32* lIndices = new uint32[lNumTriangles * 3];
+	vtx_idx_t* lIndices = new vtx_idx_t[lNumTriangles * 3];
 
 	unsigned int i;
 	int lIndex = 0;
@@ -1201,7 +1201,7 @@ uint8* TriangleBasedGeometry::GetColorData() const
 	return mColorData;
 }
 
-uint32* TriangleBasedGeometry::GetIndexData() const
+vtx_idx_t* TriangleBasedGeometry::GetIndexData() const
 {
 	return mIndexData;
 }

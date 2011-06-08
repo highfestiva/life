@@ -217,6 +217,7 @@ protected:
 
 	uint32* AllocInitBigEndian(const float* pData, unsigned pCount);
 	uint32* AllocInitBigEndian(const uint32* pData, unsigned pCount);
+	uint32* AllocInitBigEndian(const uint16* pData, unsigned pCount);
 
 	File* mFile;
 	bool mIsFileOwner;

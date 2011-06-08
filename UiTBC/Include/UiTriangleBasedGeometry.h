@@ -93,7 +93,7 @@ public:
 
 	virtual float* GetVertexData() const;
 	virtual float* GetUVData(unsigned int pUVSet = 0) const;
-	virtual Lepra::uint32* GetIndexData() const;
+	virtual vtx_idx_t* GetIndexData() const;
 	virtual Lepra::uint8* GetColorData() const;
 
 	void SetColorData(unsigned char* pColorData, ColorFormat pColorFormat);
@@ -145,7 +145,7 @@ private:
 	float* mVertexData;			// Triplets of (x, y, z).
 	float** mUVData;			// Doublets of (u, v).
 	unsigned char* mColorData;
-	Lepra::uint32* mIndexData;	// Triplets of vertex indices.
+	vtx_idx_t* mIndexData;	// Triplets of vertex indices.
 
 	ColorFormat mColorFormat;
 

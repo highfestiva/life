@@ -67,8 +67,8 @@ public:
 
 	float*         GetVertexData() const;
 	float*         GetUVData(unsigned int pUVSet) const;
-	uint32* GetIndexData() const;
-	uint8*  GetColorData() const;
+	vtx_idx_t*     GetIndexData() const;
+	uint8*         GetColorData() const;
 	float*         GetNormalData() const;
 
 	ColorFormat GetColorFormat() const;

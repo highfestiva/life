@@ -15,7 +15,7 @@ stlport_path = "ThirdParty/stlport/build/lib/obj/gcc/so_stlg"
 if is_mac:
     cextraflags = ' -D_DARWIN_C_SOURCE -D_STLP_THREADS'
     if is_ios:
-        darwin_kit = '-framework UIKit -framework Foundation -framework QuartzCore'
+        darwin_kit = '-framework UIKit -framework Foundation -framework QuartzCore -framework CoreGraphics'
         stlport_path = "ThirdParty/stlport/build/lib/obj/armv6-apple-darwin10-gcc/so_stlg"
         glframework = 'OpenGLES'
     else:

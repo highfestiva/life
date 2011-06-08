@@ -219,7 +219,7 @@ float* AnimatedGeometry::GetUVData(unsigned int pUVSet) const
 	return mOriginalGeometry->GetUVData(pUVSet);
 }
 
-uint32* AnimatedGeometry::GetIndexData() const
+vtx_idx_t* AnimatedGeometry::GetIndexData() const
 {
 	return mOriginalGeometry->GetIndexData();
 }

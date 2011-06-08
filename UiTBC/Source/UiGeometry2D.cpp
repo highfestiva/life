@@ -15,17 +15,25 @@ namespace UiTbc
 
 
 
-Geometry2D::Geometry2D(uint16 pVertexFormat, int pVertexCapacity, int pTriangleCapacity):
+Geometry2D::Geometry2D(unsigned pVertexFormat, int pVertexCapacity, int pTriangleCapacity):
 	mVertexFormat(pVertexFormat),
 	mVertexData(0),
 	mColorData(0),
 	mUVData(0),
-	mTriangleData(new uint32[pTriangleCapacity * 3]),
 	mVertexCapacity(0),
 	mTriangleCapacity(pTriangleCapacity),
 	mVertexCount(0),
 	mTriangleCount(0)
 {
+	if (IsFlagSet(VTX_INDEX16))
+	{
+		mTriangleData16 = new uint16[pTriangleCapacity];
+	}
+	else
+	{
+		mTriangleData32 = new uint32[pTriangleCapacity];
+	}
+
 	Init(pVertexFormat, pVertexCapacity, pTriangleCapacity);
 }
 
@@ -34,10 +42,17 @@ Geometry2D::~Geometry2D()
 	delete[] (float*)mVertexData;	// Cast to dumb type; we don't want any destructor anyways.
 	delete[] mColorData;
 	delete[] mUVData;
-	delete[] mTriangleData;
+	if (IsFlagSet(VTX_INDEX16))
+	{
+		delete[] mTriangleData16;
+	}
+	else
+	{
+		delete[] mTriangleData32;
+	}
 }
 
-void Geometry2D::Init(uint16 pVertexFormat, int pVertexCapacity, int pTriangleCapacity)
+void Geometry2D::Init(unsigned pVertexFormat, int pVertexCapacity, int pTriangleCapacity)
 {
 	mVertexFormat = pVertexFormat;
 
@@ -45,7 +60,7 @@ void Geometry2D::Init(uint16 pVertexFormat, int pVertexCapacity, int pTriangleCa
 	{
 		if (IsFlagSet(VTX_INTERLEAVED))
 		{
-			uint16 lFlags = (mVertexFormat & (VTX_UV | VTX_RGB));
+			unsigned lFlags = (mVertexFormat & (VTX_UV | VTX_RGB));
 			switch(lFlags)
 			{
 				case 0: mVertexData = new VertexXY[pVertexCapacity]; break;
@@ -105,7 +120,7 @@ void Geometry2D::ReallocVertexBuffers(int pVertexCapacity)
 {
 	if (IsFlagSet(VTX_INTERLEAVED))
 	{
-		uint16 lFlags = (mVertexFormat & (VTX_UV | VTX_RGB));
+		unsigned lFlags = (mVertexFormat & (VTX_UV | VTX_RGB));
 		switch(lFlags)
 		{
 			case 0: Realloc(&mVertexData, pVertexCapacity * sizeof(VertexXY), mVertexCount * sizeof(VertexXY)); break;
@@ -135,10 +150,20 @@ void Geometry2D::ReallocVertexBuffers(int pVertexCapacity)
 
 void Geometry2D::ReallocTriangleBuffer(int pTriangleCapacity)
 {
-	uint32* lTriangleData = new uint32[pTriangleCapacity * 3];
-	::memcpy(lTriangleData, mTriangleData, std::min(pTriangleCapacity, mTriangleCount) * 3 * sizeof(uint32));
-	delete[] mTriangleData;
-	mTriangleData = lTriangleData;
+	if (IsFlagSet(VTX_INDEX16))
+	{
+		uint16* lTriangleData16 = new uint16[pTriangleCapacity * 3];
+		::memcpy(lTriangleData16, mTriangleData16, std::min(pTriangleCapacity, mTriangleCount) * 3 * sizeof(uint16));
+		delete[] mTriangleData16;
+		mTriangleData16 = lTriangleData16;
+	}
+	else
+	{
+		uint32* lTriangleData32 = new uint32[pTriangleCapacity * 3];
+		::memcpy(lTriangleData32, mTriangleData32, std::min(pTriangleCapacity, mTriangleCount) * 3 * sizeof(uint32));
+		delete[] mTriangleData32;
+		mTriangleData32 = lTriangleData32;
+	}
 	mTriangleCapacity = pTriangleCapacity;
 }
 
@@ -278,9 +303,18 @@ void Geometry2D::SetTriangle(uint32 pV1, uint32 pV2, uint32 pV3)
 	AssureTriangleCapacity(mTriangleCount + 1);
 
 	int lTriangleIndex = mTriangleCount * 3;
-	mTriangleData[lTriangleIndex + 0] = pV1;
-	mTriangleData[lTriangleIndex + 1] = pV2;
-	mTriangleData[lTriangleIndex + 2] = pV3;
+	if (IsFlagSet(VTX_INDEX16))
+	{
+		mTriangleData16[lTriangleIndex + 0] = (uint16)pV1;
+		mTriangleData16[lTriangleIndex + 1] = (uint16)pV2;
+		mTriangleData16[lTriangleIndex + 2] = (uint16)pV3;
+	}
+	else
+	{
+		mTriangleData32[lTriangleIndex + 0] = pV1;
+		mTriangleData32[lTriangleIndex + 1] = pV2;
+		mTriangleData32[lTriangleIndex + 2] = pV3;
+	}
 	mTriangleCount++;
 }
 

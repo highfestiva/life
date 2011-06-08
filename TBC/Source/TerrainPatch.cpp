@@ -101,7 +101,7 @@ TerrainPatch::TerrainPatch(const Vector2D<int>& pPosition,
 	mVertexData = new float[mVertexCount * 3];
 	mUVData[0] = new float[mVertexCount * 2];
 	mUVData[1] = new float[mVertexCount * 2];
-	mIndexData = new uint32[mTriangleCount * 3];
+	mIndexData = new vtx_idx_t[mTriangleCount * 3];
 
 	//SetVertexData(pVertexData);
 	SetToFlatTerrainPatch();
@@ -926,7 +926,7 @@ float* TerrainPatch::GetUVData(unsigned int pUVSet) const
 	return lUVSet;
 }
 
-uint32* TerrainPatch::GetIndexData() const
+vtx_idx_t* TerrainPatch::GetIndexData() const
 {
 	return mIndexData;
 }

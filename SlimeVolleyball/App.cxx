@@ -216,9 +216,11 @@ bool App::Open()
 	}
 	if (lOk)
 	{
+#ifndef LEPRA_IOS
 		mInput = UiLepra::InputManager::CreateInputManager(mDisplay);
 		//mInput->ActivateAll();
 		mInput->AddKeyCodeInputObserver(this);
+#endif // !iOS
 	}
 	if (lOk)
 	{

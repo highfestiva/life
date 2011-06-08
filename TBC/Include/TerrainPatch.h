@@ -113,8 +113,8 @@ public:
 
 	float*         GetVertexData() const;
 	float*         GetUVData(unsigned int pUVSet) const;
-	uint32* GetIndexData() const;
-	uint8*  GetColorData() const;
+	vtx_idx_t*     GetIndexData() const;
+	uint8*         GetColorData() const;
 
 protected:
 	// Returns the pointer to the vertex data. Treats pIndex as if the vertices
@@ -200,7 +200,7 @@ private:
 
 	float* mVertexData;
 	float* mUVData[2];
-	uint32* mIndexData;
+	vtx_idx_t* mIndexData;
 
 	// Misc data.
 	Vector2DF mSouthWestCorner;
