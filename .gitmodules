@@ -1,0 +1,3 @@
+[submodule "Tools/iphonesim"]
+	path = Tools/iphonesim
+	url = https://github.com/jhaynie/iphonesim.git
