@@ -9,7 +9,7 @@ import sys
 from rgohelp import *
 
 
-appname = "Life"
+appnames = ["Life", "SlimeVolleyball"]
 testappname = "UiCure/CureTestApp"
 osname = getosname()
 hwname = gethwname()
@@ -150,7 +150,7 @@ def _incremental_copy_code(targetdir, buildtype):
                                         obj = obj.split()[0]
                                 if obj.startswith("ThirdParty/"):
                                         fl += glob.glob(os.path.join(obj, lgpl_tt[buildtype], "*.dll"))
-                                elif obj.startswith(appname+"/") or obj.startswith(testappname):
+                                elif list(filter(lambda x: x, [obj.startswith(an) for an in appnames])) or obj.startswith(testappname):
                                         fl += glob.glob(os.path.join(obj, own_tt[buildtype], "*.exe"))
                 if hwname.find("64") >= 0:
                         fl += ["ThirdParty/fmod/api/fmod64.dll"]
@@ -254,7 +254,7 @@ def _buildzip(builder, buildtype=ziptype):
         verify_base_dir()
         #print(appname, osname, hwname, buildtype, datename)
         #print(type(appname), type(osname), type(hwname), type(buildtype), type(datename))
-        targetdir=appname+"."+osname+"."+hwname+"."+buildtype+"."+datename
+        targetdir=appnames[0]+"."+osname+"."+hwname+"."+buildtype+"."+datename
         if buildtype == "rc":
                 targetdir = "PRE_ALPHA."+targetdir
         elif buildtype != "final":
@@ -415,7 +415,7 @@ def _prepare_run():
                 post = ".exe"
         if not os.path.exists("LifeClient"+post) or not os.path.exists("LifeServer"+post):
                 reason = "binaries not compiled" if hasdevenv() else "missing C++ build environment"
-                print("Could not run %s due to %s." % (appname, reason))
+                print("Could not run %s due to %s." % (appnames[0], reason))
                 sys.exit(2)
         return pre, post
 
