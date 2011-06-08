@@ -1205,7 +1205,7 @@ OpenGLMatPXS::OpenGLMatPXS(const char* pVP, const char* pFP[NUM_FP]):
 
 void OpenGLMatPXS::SetToFallbackFP(int pFPType)
 {
-#ifdef LEPRA_GL_ES
+#ifndef LEPRA_GL_ES
 	int& lDestFP = mFPID[pFPType];
 
 	switch(pFPType)

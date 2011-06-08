@@ -362,8 +362,8 @@ void OpenGLPainter::DoFillTriangle(float pX1, float pY1, float pU1, float pV1,
 		glColor4ub(255, 255, 255, GetAlphaValue());
 	}
 
-	GLfloat u[] = {pU1, pV2, pU2, pV2, pU3, pV3};
-	GLfloat v[] = {pX1, pY2, pX2, pY2, pX3, pY3};
+	GLfloat u[] = {pU1, pV1, pU2, pV2, pU3, pV3};
+	GLfloat v[] = {pX1, pY1, pX2, pY2, pX3, pY3};
 	::glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	::glTexCoordPointer(2, GL_FLOAT, 0, u);
 	::glVertexPointer(2, GL_FLOAT, 0, v);

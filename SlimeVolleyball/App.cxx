@@ -193,21 +193,6 @@ bool App::Open()
 		{
 			lFontId = mFontManager->QueryAddFont(lFontNames[x], lFontHeight);
 		}
-
-		{
-		  Canvas lCanvas(30, 30, Canvas::BITDEPTH_32_BIT);
-		  mFontManager->RenderGlyph('S', lCanvas, PixelRect(0,0,30,30));
-		  for (int y = 0; y < 30; ++y)
-		    {
-		      for (int x = 0; x < 30; ++x)
-			{
-			  Color c;
-			  lCanvas.GetPixelColor(x, y, c);
-			  printf("%2.2X ", c.mRed);
-			}
-		      printf("\n");
-		    }
-		}
 	}
 	if (lOk)
 	{

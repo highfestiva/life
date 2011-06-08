@@ -295,8 +295,8 @@ int ClientConsoleManager::OnCommand(const str& pCommand, const strutil::strvec& 
 				::SetCurrentDirectoryA(astrutil::Encode(lCurrentDir).c_str());
 				const str lUserName = CURE_RTVAR_SLOW_GET(GetVariableScope(), RTVAR_LOGIN_USERNAME, EmptyString);
 				const str lServer = CURE_RTVAR_SLOW_GET(GetVariableScope(), RTVAR_NETWORK_SERVERADDRESS, EmptyString);
-				str lPw(_T("CarPassword"));
-				const Cure::LoginId lLoginId(lUserName, Cure::MangledPassword(lPw));
+				wstr lPw(L"CarPassword");
+				const Cure::LoginId lLoginId(wstrutil::Encode(lUserName), Cure::MangledPassword(lPw));
 				((GameClientSlaveManager*)GetGameManager())->RequestLogin(lServer, lLoginId);
 				((GameClientSlaveManager*)GetGameManager())->ToggleConsole();
 				ExecuteCommand(_T("wait-login"));

@@ -726,6 +726,7 @@ void OpenGLRenderer::BindGeometry(TBC::GeometryBase* pGeometry,
 
 			// Set the most appropriate buffer object hint.
 			GLenum lGLHint = GL_DYNAMIC_DRAW;
+#ifndef LEPRA_GL_ES
 			switch(pGeometry->GetGeometryVolatility())
 			{
 			case TBC::GeometryBase::GEOM_STATIC:
@@ -736,14 +737,10 @@ void OpenGLRenderer::BindGeometry(TBC::GeometryBase* pGeometry,
 				lGLHint = GL_DYNAMIC_DRAW;
 				break;
 			case TBC::GeometryBase::GEOM_VOLATILE:
-#ifdef LEPRA_GL_ES
-				lGLHint = GL_DYNAMIC_DRAW;
-#else // !GLES
 				lGLHint = GL_STREAM_DRAW;
-#endif // GLES/!GLES
 				break;
 			}
-			
+#endif // !GLES
 			// Bind and create the vertex buffer in GFX memory.
 			//log_volatile(mLog.Tracef(_T("glBindBuffer %u (vertex)."), lGeometryData->mVertexBufferID));
 			UiLepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, 
