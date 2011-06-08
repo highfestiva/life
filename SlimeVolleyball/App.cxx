@@ -152,7 +152,7 @@ bool App::Open()
 	}
 	if (lOk)
 	{
-		mDisplay->SetCaption("Slime Volleyball");
+		mDisplay->SetCaption(_T("Slime Volleyball"));
 		mDisplay->AddResizeObserver(this);
 
 		mCanvas = new Canvas(lDisplayMode.mWidth, lDisplayMode.mHeight, Canvas::IntToBitDepth(lDisplayMode.mBitDepth));

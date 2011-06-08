@@ -36,7 +36,7 @@ public:
 		mPainter(pPainter)
 	{
 	}
-	int stringWidth(str s) { return mPainter->GetStringWidth(s); }
+	int stringWidth(astr s) { return mPainter->GetStringWidth(strutil::Encode(s)); }
 	int getHeight() { return mPainter->GetFontHeight(); }
 	int getAscent() { return getHeight()*4/5; }
 
@@ -64,13 +64,13 @@ public:
 	{
 	}
 
-	void centerString(str s, int y)
+	void centerString(astr s, int y)
 	{
 		drawString(s, width / 2 - getFontMetrics().stringWidth(s) / 2, y - getFontMetrics().getAscent()/2);
 	}
-	void drawString(str s, int x, int y)
+	void drawString(astr s, int x, int y)
 	{
-		mPainter->PrintText(s, x, y);
+		mPainter->PrintText(strutil::Encode(s), x, y);
 	}
 
 	FontMetrics getFontMetrics()
@@ -144,9 +144,9 @@ namespace System
 static Timer mTimer;
 namespace out
 {
-inline void println(str s)
+inline void println(astr s)
 {
-	LogType::GetLog(LogType::SUB_ROOT)->RawPrint(s+_T("\n"));
+	LogType::GetLog(LogType::SUB_ROOT)->RawPrint(strutil::Encode(s)+_T("\n"));
 }
 }
 inline long currentTimeMillis()
