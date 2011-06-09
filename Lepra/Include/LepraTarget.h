@@ -56,7 +56,7 @@
 #endif // !_WIN32_WCE
 
 ////////////////////////////// Target //////////////////////////////
-#elif defined(__GNUG__)	// GCC (C++).
+#elif defined(__GNUG__)	|| defined (__GNUC__) // GCC
 
 #define LEPRA_GCC
 #if defined(__x86_64__) || defined(__ia64__)
@@ -75,7 +75,7 @@
 
 #if defined(__APPLE__)
 #define LEPRA_MAC
-#if defined(LEPRA_GCC_ARM)
+#if defined(LEPRA_GCC_ARM) || defined(LEPRA_IPHONE_SIMULATOR)
 #define LEPRA_IOS
 #endif // iOS
 #endif // Mac

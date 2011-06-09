@@ -7,8 +7,12 @@ import sys
 
 
 is_ios = os.environ.get('PD_BUILD_IOS')
+if is_ios: is_ios = int(is_ios)
 is_ios_sim = os.environ.get('PD_BUILD_IOS_SIM')
+if is_ios_sim: is_ios_sim = int(is_ios_sim)
 is_mac = (sys.platform == 'darwin')
+
+print("iOS: %s, iOS sim: %s, mac: %s" % (is_ios, is_ios_sim, is_mac))
 
 cextraflags = ''
 glframework = 'OpenGL'
@@ -29,6 +33,8 @@ if is_ios:
     arch = 'armv6' if not is_ios_sim else 'i386'
     compiler_path = '/Developer/Platforms/'+target+'.platform/Developer/usr/bin/'
     platform_extraflags = ' -arch '+arch+' -isysroot /Developer/Platforms/'+target+'.platform/Developer/SDKs/'+target+'4.2.sdk -gdwarf-2 -mthumb -miphoneos-version-min=3.0'
+    if is_ios_sim:
+        platform_extraflags += ' -DLEPRA_IPHONE_SIMULATOR'
 else:
     compiler_path = ''
 cextraflags += platform_extraflags

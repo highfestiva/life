@@ -36,10 +36,15 @@
 #define LEPRA_ULONGLONG(x)			x ## ULL
 
 
+
+#if defined(__cplusplus)
 namespace Lepra
 {
 	// OS types.
 	typedef	int sys_socket;
 }
+#endif // C++
+
+
 
 #endif // !LEPRA_INCLUDE_NO_OS

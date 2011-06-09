@@ -340,7 +340,7 @@ bool MacDisplayManager::InitWindow()
 	NativeWindow* lWnd = [NativeWindow alloc];
 	mWnd = lWnd;
 #ifdef LEPRA_IOS
-	[mWnd makeKeyAndVisible];
+	[mWnd initWithFrame:[UIScreen mainScreen].bounds];
 #else // !iOS
 	[mWnd	initWithContentRect:	NSMakeRect(0, 0, mDisplayMode.mWidth, mDisplayMode.mHeight)
 		styleMask:		NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask

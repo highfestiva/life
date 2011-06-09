@@ -70,7 +70,7 @@ public:
 	}
 	void drawString(astr s, int x, int y)
 	{
-		mPainter->PrintText(strutil::Encode(s), x, y);
+		//mPainter->PrintText(strutil::Encode(s), x, y);
 	}
 
 	FontMetrics getFontMetrics()

@@ -201,6 +201,7 @@ bool App::Open()
 	}
 	if (lOk)
 	{
+		mInput = 0;
 #ifndef LEPRA_IOS
 		mInput = UiLepra::InputManager::CreateInputManager(mDisplay);
 		//mInput->ActivateAll();
@@ -278,7 +279,8 @@ void App::UpdateSettings()
 	double lFOV = 70.0;
 	double lClipNear = 0.1;
 	double lClipFar = 500.0;
-	str lShadowsString = _T("Force:Volumes");
+	//str lShadowsString = _T("Force:Volumes");
+	str lShadowsString = _T("Nope");
 	if (!mRenderer->IsPixelShadersEnabled())
 	{
 		// Without pixel shaders the scene becomes darker for some reason. At least on my computer...

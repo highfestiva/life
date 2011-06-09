@@ -202,7 +202,11 @@ END_OBJ :=
 # this is dummy option; but nevertheless, with _LSUPCPP_AUX_OBJ
 # trick (as in static library) we can resolve problem, in potential
 ifdef GCC_APPLE_CC
-STDLIBS := ${_LGCC_S} -lc -lm -all_load ${_LSUPCPP} ${_LGCC_EH}
+STDCPPLIB :=
+ifdef PD_BUILD_IOS_SIM
+STDCPPLIB := -lstdc++
+endif
+STDLIBS := ${_LGCC_S} -lc -lm -all_load ${_LSUPCPP} ${_LGCC_EH} ${STDCPPLIB}
 else
 LDFLAGS += -single_module
 STDLIBS := ${_LGCC_S} -lc -lm -all_load -lsupc++ ${_LGCC_EH}

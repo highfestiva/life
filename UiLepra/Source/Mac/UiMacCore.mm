@@ -152,6 +152,8 @@ int UiMain(Application& pApplication)
 {
 	NSAutoreleasePool* lPool = [[NSAutoreleasePool alloc] init];
 
+	gApplication = &pApplication;
+
 #ifndef LEPRA_IOS
 #if defined(UILEPRA_USE_CPS)
 	// Ensure the application object is initialised.
@@ -171,18 +173,18 @@ int UiMain(Application& pApplication)
 	[NSApp setMainMenu:[[NSMenu alloc] init]];
 	setApplicationMenu();
 	setupWindowMenu();
-#endif // !iOS
 
-	gApplication = &pApplication;
+	UiLepraLoadedDispatcher* lLoadedDispatcher = [[UiLepraLoadedDispatcher alloc] init];
+	[MacCore::mApplication setDelegate:lLoadedDispatcher];
+	[MacCore::mApplication run];
+	[lLoadedDispatcher release];
 
-	//UiLepraLoadedDispatcher* lLoadedDispatcher = [[UiLepraLoadedDispatcher alloc] init];
-	//[MacCore::mApplication setDelegate:lLoadedDispatcher];
-	//[MacCore::mApplication run];
-	//[lLoadedDispatcher release];
+#else // iOS
+	UIApplicationMain(0, 0, nil, @"UiLepraLoadedDispatcher");
+#endif // !iOS/iOS
 
-	int rc = UIApplicationMain(0, 0, nil, @"UiLepraLoadedDispatcher");
 	[lPool release];
-	return rc;
+	return 0;
 }
 
 

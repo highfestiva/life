@@ -108,11 +108,14 @@ void DesktopWindow::Init(const tchar* /*pImageDefinitionFile*/, const tchar* /*p
 
 	mImageManager.SetPainter(mPainter);
 
-	mInputManager->AddTextInputObserver(this);
-	mInputManager->AddKeyCodeInputObserver(this);
-	mInputManager->AddMouseInputObserver(this);
-
-	UiLepra::InputDevice* lMouse = mInputManager->GetMouse();
+	UiLepra::InputDevice* lMouse = 0;
+	if (mInputManager)
+	{
+		mInputManager->AddTextInputObserver(this);
+		mInputManager->AddKeyCodeInputObserver(this);
+		mInputManager->AddMouseInputObserver(this);
+		lMouse = mInputManager->GetMouse();
+	}
 
 	if (lMouse != 0)
 	{
@@ -227,19 +230,22 @@ void DesktopWindow::Repaint(Painter* /*pPainter*/)
 	float64 lWidth  = (float64)mMouseArea.GetWidth();
 	float64 lHeight = (float64)mMouseArea.GetHeight();
 
-	mMouseX = (int)((mInputManager->GetCursorX() + 1.0) * lWidth / 2.0);
-	mMouseY = (int)((mInputManager->GetCursorY() + 1.0) * lHeight / 2.0);
-
-	ClampMouse(mMouseX, mMouseY);
-
-	if (mMouseEnabled == true)
+	if (mInputManager)
 	{
-		if (mMousePrevX != mMouseX || mMousePrevY != mMouseY)
+		mMouseX = (int)((mInputManager->GetCursorX() + 1.0) * lWidth / 2.0);
+		mMouseY = (int)((mInputManager->GetCursorY() + 1.0) * lHeight / 2.0);
+
+		ClampMouse(mMouseX, mMouseY);
+
+		if (mMouseEnabled == true)
 		{
-			OnMouseMove(mMouseX, mMouseY, mMouseX - mMousePrevX, mMouseY - mMousePrevY);
+			if (mMousePrevX != mMouseX || mMousePrevY != mMouseY)
+			{
+				OnMouseMove(mMouseX, mMouseY, mMouseX - mMousePrevX, mMouseY - mMousePrevY);
+			}
+			mMousePrevX = mMouseX;
+			mMousePrevY = mMouseY;
 		}
-		mMousePrevX = mMouseX;
-		mMousePrevY = mMouseY;
 	}
 
 	if (NeedsRepaint() == true || mUpdateLayout)

@@ -1,6 +1,12 @@
 // Xcode-generated on 2011-06-05, with tiny modifications.
 
 
+
+#include "../../../Lepra/Include/LepraTarget.h"
+#ifdef LEPRA_IOS
+
+
+
 #import <QuartzCore/QuartzCore.h>
 #import "../../Include/Mac/EAGLView.h"
 
@@ -21,15 +27,13 @@
 
 - (id)initWithFrame:(CGRect)frame
 {
-    if ((self = [super initWithFrame:frame]))
-    {
-      CAEAGLLayer *eaglLayer = (CAEAGLLayer *)self.layer;
-        
-      eaglLayer.opaque = TRUE;
-      eaglLayer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
-						     [NSNumber numberWithBool:FALSE], kEAGLDrawablePropertyRetainedBacking,
-						   kEAGLColorFormatRGBA8, kEAGLDrawablePropertyColorFormat,
-						   nil];
+	if ((self = [super initWithFrame:frame]))
+	{
+		CAEAGLLayer*eaglLayer = (CAEAGLLayer*)self.layer;
+		eaglLayer.opaque = TRUE;
+		eaglLayer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
+			[NSNumber numberWithBool:FALSE], kEAGLDrawablePropertyRetainedBacking,
+			kEAGLColorFormatRGBA8, kEAGLDrawablePropertyColorFormat, nil];
     }
     
   return self;
@@ -143,3 +147,6 @@
 }
 
 @end
+
+
+#endif // iOS

@@ -14,7 +14,7 @@ namespace Lepra
 
 
 
-#ifndef LEPRA_GCC_X86_32
+#if 1 //ndef LEPRA_GCC_X86_32
 static pthread_mutex_t g_CASMutex = PTHREAD_MUTEX_INITIALIZER;
 #endif // !i386
 
@@ -23,7 +23,7 @@ static pthread_mutex_t g_CASMutex = PTHREAD_MUTEX_INITIALIZER;
 bool BusLock::CompareAndSwap(long* pDest, long pSrc, long pComperand)
 {
 	bool lResult = false;
-#ifdef LEPRA_GCC_X86_32
+#if 0 //def LEPRA_GCC_X86_32
 	// Optimized with i386 assembler.
 	__asm __volatile__
 	(

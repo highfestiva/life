@@ -298,6 +298,7 @@ bool MacOpenGLDisplay::CreateGLContext()
 	{
 #ifdef LEPRA_IOS
 		mGlContext = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES1];
+		[EAGLContext setCurrentContext:mGlContext];
 #else // !iOS
 		mGlContext = [mGlView openGLContext];
 #endif // iOS/!iOS
@@ -332,6 +333,7 @@ bool MacOpenGLDisplay::SetGLPixelFormat()
 #ifdef LEPRA_IOS
 	mGlView = [[EAGLView alloc] initWithFrame:mWnd.bounds];
 	[mWnd addSubview:mGlView];
+	[mWnd makeKeyAndVisible];	// Only visible after we add the view.
 #else // !iOS
 	NSOpenGLPixelFormatAttribute lPixelFormatAttribs[32];
 	NSOpenGLPixelFormatAttribute* lAttrib = lPixelFormatAttribs;

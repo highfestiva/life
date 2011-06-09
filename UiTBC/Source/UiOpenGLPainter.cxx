@@ -1625,13 +1625,15 @@ FontTexture* OpenGLPainter::SelectGlyphs(uint32 pFontHash, int pFontHeight, cons
 	{
 		lFontTexture->StoreGlyph(pString[x], GetFontManager());
 	}
+	OGL_ASSERT();
 	::glBindTexture(GL_TEXTURE_2D, pFontHash);
 	if (lFontTexture->IsUpdated())
 	{
 		lFontTexture->ResetIsUpdated();
+		OGL_ASSERT();
 		::glTexImage2D(GL_TEXTURE_2D,
 			0,
-			4,
+			GL_RGBA,
 			lFontTexture->GetWidth(),
 			lFontTexture->GetHeight(),
 			0,
