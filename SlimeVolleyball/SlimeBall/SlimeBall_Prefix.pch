@@ -8,3 +8,5 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 #endif
+
+#include "../../Lepra/Include/LepraTarget.h"

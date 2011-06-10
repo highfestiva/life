@@ -49,8 +49,10 @@ static Lepra::Application* gApplication = 0;
 	// Hand off to main application code.
 	gApplication->Init();
 	const int lExitStatus = gApplication->Run();
+#ifndef LEPRA_IOS
 	delete gApplication;
 	exit(lExitStatus);
+#endif // !iOS
 }
 @end
 
@@ -183,7 +185,7 @@ int UiMain(Application& pApplication)
 	[lLoadedDispatcher release];
 
 #else // iOS
-	MacCore::mApplication = [NSApplication sharedApplication];
+	MacCore::mApplication = [UIApplication sharedApplication];
 	UIApplicationMain(0, 0, nil, @"UiLepraLoadedDispatcher");
 #endif // !iOS/iOS
 

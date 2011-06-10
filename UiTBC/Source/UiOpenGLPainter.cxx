@@ -107,6 +107,29 @@ void OpenGLPainter::SetClippingRect(int pLeft, int pTop, int pRight, int pBottom
 	OGL_ASSERT();
 }
 
+static void my_glOrtho(GLfloat pLeft, GLfloat pRight, GLfloat pBottom, GLfloat pTop,
+	GLfloat pZNear, GLfloat pZFar)
+{
+	const float tx = - (pRight + pLeft) / (pRight - pLeft);
+	const float ty = - (pTop + pBottom) / (pTop - pBottom);
+	const float tz = - (pZFar + pZNear) / (pZFar - pZNear);
+	/*const float m[16] =
+	{
+		2 / (pRight - pLeft), 0, 0, tx,
+		0, 2/(pTop - pBottom), 0, ty,
+		0, 0, -2/(pZFar - pZNear), tz,
+		0, 0, 0, 1
+	};*/
+	const float m[16] =
+	{
+		2 / (pRight - pLeft), 0, 0, 0,
+		0, 2/(pTop - pBottom), 0, 0,
+		0, 0, -2/(pZFar - pZNear), 0,
+		tx, ty, tz, 1
+	};
+	::glMultMatrixf(m);
+}
+
 void OpenGLPainter::ResetClippingRect()
 {
 	OGL_ASSERT();
@@ -120,11 +143,14 @@ void OpenGLPainter::ResetClippingRect()
 	// Definition of the viewport. The point (0, 0) is defined as the center of the
 	// pixel in the top left corner. Thus, the top left corner of the screen has
 	// the coordinates (-0.5, -0.5).
-#ifndef LEPRA_GL_ES
-	glOrtho(-0.5, (float32)GetCanvas()->GetWidth() - 0.5,
+	my_glOrtho(-0.5, (float32)GetCanvas()->GetWidth() - 0.5,
 			(float32)GetCanvas()->GetHeight() - 0.5, -0.5,
 			0.0f, 1.0f);
-#endif // !GLES
+#ifdef LEPRA_IOS
+	glRotatef(90, 0, 0, 1);
+	glTranslatef(0, -(float)GetCanvas()->GetWidth(), 0);	// TRICKY: float cast necessary, otherwise nothing is shown on screen! Bug?!?
+#endif // iOS
+	
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 

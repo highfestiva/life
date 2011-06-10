@@ -29,6 +29,11 @@ class SlimeVolleyball
 	private: int p1YV;
 	private: int p2XV;
 	private: int p2YV;
+	private: bool tapActive;
+	private: int p1TapX;
+	private: int p1TapY;
+	private: int p2TapX;
+	private: int p2TapY;
 	private: int ballX;
 	private: int ballY;
 	private: int ballVX;
@@ -101,6 +106,7 @@ class SlimeVolleyball
 
 	public: bool init(const Graphics& pGraphics)
 	{
+		this->tapActive = false;
 		this->screen = pGraphics;
 		this->nWidth = this->screen.width;
 		this->nHeight = this->screen.height*4/5;
@@ -650,9 +656,17 @@ class SlimeVolleyball
 
 	public: void run()
 	{
+#ifndef LEPRA_IOS
 		mAverageLoopTime = Lepra::Math::Lerp(mAverageLoopTime, mLoopTimer.QueryTimeDiff(), 0.05);
 		Thread::Sleep(0.02 - mSpeed/1000.0 - mAverageLoopTime);
 		mLoopTimer.PopTimeDiff();
+
+#endif // !iOS
+
+		if (tapActive)
+		{
+			doTapMove();
+		}
 
 		drawScores();
 		drawPrompt();
@@ -883,6 +897,39 @@ class SlimeVolleyball
 		this->fInPlay = false;
 		this->promptMsg = "";
 		//repaint();
+	}
+
+	public: void MoveTo(float x, float y)
+	{
+		tapActive = true;
+		const int ix = x*1000/screen.width;
+		if (ix < 500)
+		{
+			p1TapX = ix;
+		}
+		else
+		{
+			p2TapX = ix;
+		}
+
+	}
+
+	public: void doTapMove()
+	{
+		{
+			const int dx = p1TapX-p1X;
+			if (dx <  0) moveP1Left();
+			if (dx == 0) moveP1Stop();
+			if (dx >  0) moveP1Right();
+		}
+		/*if (two player game)
+		{
+			const int dx = p2TapX-p2X;
+			if (dx <  0) moveP2Left();
+			if (dx == 0) moveP2Stop();
+			if (dx >  0) moveP2Right();
+		}*/
+
 	}
 };
 

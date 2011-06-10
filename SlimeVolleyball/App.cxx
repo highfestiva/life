@@ -33,7 +33,11 @@ public:
 	App(const strutil::strvec& pArgumentList);
 	virtual ~App();
 
+	static bool PollApp();
+	static void OnTap(float x, float y);
+
 private:
+	Graphics GetGraphics();
 	bool Open();
 	void Close();
 	void UpdateSettings();
@@ -56,6 +60,7 @@ private:
 	void OnMinimize();
 	void OnMaximize(int pWidth, int pHeight);
 
+	static App* mApp;
 	SlimeVolleyball* mGame;
 
 	UiLepra::DisplayManager* mDisplay;
@@ -88,6 +93,7 @@ namespace Slime
 App::App(const strutil::strvec& pArgumentList):
 	Application(pArgumentList)
 {
+	mApp = this;
 }
 
 App::~App()
@@ -97,10 +103,42 @@ App::~App()
 	UiLepra::Shutdown();
 }
 
+bool App::PollApp()
+{
+	if (!mApp->Poll())
+	{
+		return false;
+	}
+	return (SystemManager::GetQuitRequest() == 0);
+}
+
+void App::OnTap(float x, float y)
+{
+	mApp->mGame->MoveTo(y, x);
+}
+
+Graphics App::GetGraphics()
+{
+#ifdef LEPRA_IOS
+	const int w = mDisplay->GetHeight();
+	const int h = mDisplay->GetWidth();
+#else // !iOS
+	const int w = mDisplay->GetWidth();
+	const int h = mDisplay->GetHeight();
+#endif // iOS/!iOS
+	return Graphics(w, h, mPainter);
+}
+
 bool App::Open()
 {
-	const int lDisplayWidth = 480;
-	const int lDisplayHeight = 320;
+#ifdef LEPRA_IOS
+	CGSize lSize = [UIScreen mainScreen].bounds.size;
+	const int lDisplayWidth = lSize.width;
+	const int lDisplayHeight = lSize.height;
+#else // !iOS
+	const int lDisplayWidth = 580;
+	const int lDisplayHeight = 400;
+#endif // iOS/!iOS
 	int lDisplayBpp = 0;
 	int lDisplayFrequency = 0;
 	bool lDisplayFullScreen = false;
@@ -365,8 +403,9 @@ int App::Run()
 	if (lOk)
 	{
 		mGame = new SlimeVolleyball;
-		lOk = mGame->init(Graphics(mDisplay, mPainter));
+		lOk = mGame->init(GetGraphics());
 	}
+#ifndef LEPRA_IOS
 	bool lQuit = false;
 	while (lOk && !lQuit)
 	{
@@ -375,6 +414,14 @@ int App::Run()
 	}
 	Close();
 	return lQuit? 0 : 1;
+#else // iOS
+	AnimatedApp* lApp = [AnimatedApp alloc];
+	[lApp startTick];
+	Event lEvent;
+	lEvent.id = 501;
+	mGame->handleEvent(lEvent);
+	return 0;
+#endif // !iOS/iOS
 }
 
 bool App::Poll()
@@ -382,9 +429,8 @@ bool App::Poll()
 	UiLepra::Core::ProcessMessages();
 	BeginRender(Vector3DF(0,0,0));
 	Render(PixelRect(0,0,100,100));
-	Graphics g(mDisplay, mPainter);
 	Paint();
-	mGame->paint(g);
+	mGame->paint(GetGraphics());
 	mGame->run();
 	EndRender();
 	return true;
@@ -522,6 +568,7 @@ void App::OnMaximize(int pWidth, int pHeight)
 
 
 
+App* App::mApp = 0;
 LOG_CLASS_DEFINE(GAME, App);
 
 

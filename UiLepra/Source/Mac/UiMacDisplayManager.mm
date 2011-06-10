@@ -121,8 +121,8 @@ MacDisplayManager::MacDisplayManager():
 	mEnumeratedDisplayModeCount = 1;
 	mEnumeratedDisplayMode = new DisplayMode[mEnumeratedDisplayModeCount];
 	DisplayMode lDisplayMode;
-	lDisplayMode.mWidth = 480;
-	lDisplayMode.mHeight = 320;
+	lDisplayMode.mWidth = 320;
+	lDisplayMode.mHeight = 480;
 	lDisplayMode.mRefreshRate = 0;
 	lDisplayMode.mBitDepth = 0;
 	mEnumeratedDisplayMode[0] = lDisplayMode;

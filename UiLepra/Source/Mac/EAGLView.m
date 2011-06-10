@@ -2,13 +2,15 @@
 
 
 
-#include "../../../Lepra/Include/LepraTarget.h"
+//#include "../../../Lepra/Include/LepraTarget.h"
 #ifdef LEPRA_IOS
 
 
 
 #import <QuartzCore/QuartzCore.h>
 #import "../../Include/Mac/EAGLView.h"
+
+static EAGLView* gSharedView;
 
 @interface EAGLView (PrivateMethods)
 - (void)createFramebuffer;
@@ -18,6 +20,8 @@
 @implementation EAGLView
 
 @dynamic context;
+@synthesize isOpen;
+@synthesize responder;
 
 // You must implement this method
 + (Class)layerClass
@@ -27,15 +31,20 @@
 
 - (id)initWithFrame:(CGRect)frame
 {
-	if ((self = [super initWithFrame:frame]))
-	{
-		CAEAGLLayer*eaglLayer = (CAEAGLLayer*)self.layer;
-		eaglLayer.opaque = TRUE;
-		eaglLayer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
-			[NSNumber numberWithBool:FALSE], kEAGLDrawablePropertyRetainedBacking,
-			kEAGLColorFormatRGBA8, kEAGLDrawablePropertyColorFormat, nil];
+  if ((self = [super initWithFrame:frame]))
+    {
+      CAEAGLLayer*eaglLayer = (CAEAGLLayer*)self.layer;
+      eaglLayer.opaque = TRUE;
+      eaglLayer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
+        [NSNumber numberWithBool:FALSE], kEAGLDrawablePropertyRetainedBacking,
+        kEAGLColorFormatRGBA8, kEAGLDrawablePropertyColorFormat, nil];
     }
-    
+
+  self.multipleTouchEnabled = YES;
+  gSharedView = self;
+  isOpen = false;
+  responder = nil;
+
   return self;
 }
 
@@ -106,7 +115,13 @@
 	  glDeleteRenderbuffers(1, &colorRenderbuffer);
 	  colorRenderbuffer = 0;
         }
+      isOpen = false;
     }
+}
+
++ (EAGLView*)sharedView
+{
+  return gSharedView;
 }
 
 - (void)setFramebuffer
@@ -121,6 +136,7 @@
       glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebuffer);
         
       glViewport(0, 0, framebufferWidth, framebufferHeight);
+      isOpen = true;
     }
 }
 
@@ -146,7 +162,24 @@
   [self deleteFramebuffer];
 }
 
+- (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event
+{
+  if (responder)
+  {
+    [responder touchesMoved:touches withEvent:event];
+  }
+}
+
+- (void)touchesMoved:(NSSet*)touches withEvent:(UIEvent*)event
+{
+  if (responder)
+  {
+    [responder touchesMoved:touches withEvent:event];
+  }
+}
+
 @end
+
 
 
 #endif // iOS

@@ -4,7 +4,6 @@
 #include "../Lepra/Include/Random.h"
 #include "../Lepra/Include/StringUtility.h"
 #include "../Lepra/Include/Timer.h"
-#include "../UiLepra/Include/UiDisplayManager.h"
 #include "../UiTBC/Include/UiPainter.h"
 
 
@@ -56,10 +55,10 @@ public:
 	{
 	}
 
-	Graphics(const UiLepra::DisplayManager* pDisplayManager,
+	Graphics(int w, int h,
 		UiTbc::Painter* pPainter):
-		width(pDisplayManager->GetWidth()),
-		height(pDisplayManager->GetHeight()),
+		width(w),
+		height(h),
 		mPainter(pPainter)
 	{
 	}

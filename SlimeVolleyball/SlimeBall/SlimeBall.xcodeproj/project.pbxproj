@@ -410,10 +410,11 @@
 
 /* Begin PBXFileReference section */
 		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
-		1D6058910D05DD3D006BFB54 /* SlimeVolleyball.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SlimeVolleyball.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		1D6058910D05DD3D006BFB54 /* SlimeBall.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SlimeBall.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DF5F4DF0D08C38300B7A737 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		288765FC0DF74451002DB57D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
-		8D1107310486CEB800E47090 /* SlimeVolleyball-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "SlimeVolleyball-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
+		8D1107310486CEB800E47090 /* SlimeBall-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "SlimeBall-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
+		B16FB5F713A2CB04001C315F /* Slime.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Slime.hpp; sourceTree = "<group>"; };
 		B19A13C213A122CE0051A61C /* UiBorderComponent.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiBorderComponent.cpp; sourceTree = "<group>"; };
 		B19A13C313A122CE0051A61C /* UiButton.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiButton.cpp; sourceTree = "<group>"; };
 		B19A13C413A122CE0051A61C /* UiCaption.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiCaption.cpp; sourceTree = "<group>"; };
@@ -557,7 +558,6 @@
 		B19A155513A124AB0051A61C /* UiSoundManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiSoundManager.cpp; sourceTree = "<group>"; };
 		B19A155713A124AB0051A61C /* UiSoundManagerMock.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiSoundManagerMock.cpp; sourceTree = "<group>"; };
 		B19A155813A124AB0051A61C /* UiSoundManagerOpenAL.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiSoundManagerOpenAL.cpp; sourceTree = "<group>"; };
-		B19A159113A127010051A61C /* SlimeVolleyball_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SlimeVolleyball_Prefix.pch; path = SlimeVolleyball/SlimeVolleyball_Prefix.pch; sourceTree = "<group>"; };
 		B19A15AD13A127E40051A61C /* FastDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FastDelegate.h; sourceTree = "<group>"; };
 		B19A15AE13A127E40051A61C /* FastDelegateBind.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FastDelegateBind.h; sourceTree = "<group>"; };
 		B19A16C513A127E40051A61C /* alutBufferData.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = alutBufferData.c; sourceTree = "<group>"; };
@@ -953,6 +953,7 @@
 		B19A29A213A1391E0051A61C /* warning_disable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = warning_disable.h; sourceTree = "<group>"; };
 		B19A29D713A13A8A0051A61C /* fstream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = fstream.cpp; sourceTree = "<group>"; };
 		B19A29E113A13B9B0051A61C /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		B1F35B0A13A200690064153E /* SlimeBall_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SlimeBall_Prefix.pch; path = SlimeBall/SlimeBall_Prefix.pch; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -975,7 +976,7 @@
 		19C28FACFE9D520D11CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				1D6058910D05DD3D006BFB54 /* SlimeVolleyball.app */,
+				1D6058910D05DD3D006BFB54 /* SlimeBall.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -983,7 +984,7 @@
 		28EEBF621118D79A00187D67 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
-				8D1107310486CEB800E47090 /* SlimeVolleyball-Info.plist */,
+				8D1107310486CEB800E47090 /* SlimeBall-Info.plist */,
 			);
 			name = Shared;
 			sourceTree = "<group>";
@@ -1141,7 +1142,8 @@
 		B19A146913A122DE0051A61C /* SlimeVolleyball */ = {
 			isa = PBXGroup;
 			children = (
-				B19A159113A127010051A61C /* SlimeVolleyball_Prefix.pch */,
+				B16FB5F713A2CB04001C315F /* Slime.hpp */,
+				B1F35B0A13A200690064153E /* SlimeBall_Prefix.pch */,
 				B19A146B13A122DE0051A61C /* App.mm */,
 				B19A147213A122DF0051A61C /* SlimeAI.cpp */,
 			);
@@ -1813,9 +1815,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		1D6058900D05DD3D006BFB54 /* SlimeVolleyball */ = {
+		1D6058900D05DD3D006BFB54 /* SlimeBall */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1D6058960D05DD3E006BFB54 /* Build configuration list for PBXNativeTarget "SlimeVolleyball" */;
+			buildConfigurationList = 1D6058960D05DD3E006BFB54 /* Build configuration list for PBXNativeTarget "SlimeBall" */;
 			buildPhases = (
 				1D60588D0D05DD3D006BFB54 /* Resources */,
 				1D60588E0D05DD3D006BFB54 /* Sources */,
@@ -1825,9 +1827,9 @@
 			);
 			dependencies = (
 			);
-			name = SlimeVolleyball;
-			productName = SlimeVolleyball;
-			productReference = 1D6058910D05DD3D006BFB54 /* SlimeVolleyball.app */;
+			name = SlimeBall;
+			productName = SlimeBall;
+			productReference = 1D6058910D05DD3D006BFB54 /* SlimeBall.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -1835,7 +1837,7 @@
 /* Begin PBXProject section */
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
-			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "SlimeVolleyball" */;
+			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "SlimeBall" */;
 			compatibilityVersion = "Xcode 3.1";
 			developmentRegion = English;
 			hasScannedForEncodings = 1;
@@ -1849,7 +1851,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				1D6058900D05DD3D006BFB54 /* SlimeVolleyball */,
+				1D6058900D05DD3D006BFB54 /* SlimeBall */,
 			);
 		};
 /* End PBXProject section */
@@ -2276,7 +2278,7 @@
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = SlimeVolleyball_Prefix.pch;
+				GCC_PREFIX_HEADER = SlimeBall_Prefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					_DEBUG,
 					"HAVE_STDINT_H=1",
@@ -2284,6 +2286,7 @@
 					"HAVE_STAT=1",
 					"HAVE_USLEEP=1",
 					LEPRA_WITHOUT_FMOD,
+					LEPRA_IPHONE_SIMULATOR,
 				);
 				HEADER_SEARCH_PATHS = (
 					"\"$(SRCROOT)/../../ThirdParty/stlport/stlport\"",
@@ -2291,14 +2294,14 @@
 					"\"$(SRCROOT)/../../ThirdParty/utf8cpp\"",
 					"\"$(SRCROOT)/../../ThirdParty/freealut-1.1.0/include\"",
 				);
-				INFOPLIST_FILE = "SlimeVolleyball-Info.plist";
+				INFOPLIST_FILE = "SlimeBall-Info.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/../../Lepra\"",
 					"\"$(SRCROOT)/../../TBC\"",
-					"\"$(SRCROOT)/../../ThirdParty/stlport/build/lib/obj/i686-apple-darwin10-gcc/so_stlg\"",
+					"\"$(SRCROOT)/../../ThirdParty/stlport/build/lib/obj/gcc/so_stlg\"",
 				);
-				PRODUCT_NAME = SlimeVolleyball;
+				PRODUCT_NAME = SlimeBall;
 			};
 			name = Debug;
 		};
@@ -2308,13 +2311,14 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = SlimeVolleyball_Prefix.pch;
+				GCC_PREFIX_HEADER = SlimeBall_Prefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"HAVE_STDINT_H=1",
 					"HAVE_STAT=1",
 					"HAVE_UNISTD_H=1",
 					"HAVE_USLEEP=1",
 					LEPRA_WITHOUT_FMOD,
+					LEPRA_IPHONE_SIMULATOR,
 				);
 				HEADER_SEARCH_PATHS = (
 					"\"$(SRCROOT)/../../ThirdParty/stlport/stlport\"",
@@ -2322,14 +2326,14 @@
 					"\"$(SRCROOT)/../../ThirdParty/utf8cpp\"",
 					"\"$(SRCROOT)/../../ThirdParty/freealut-1.1.0/include\"",
 				);
-				INFOPLIST_FILE = "SlimeVolleyball-Info.plist";
+				INFOPLIST_FILE = "SlimeBall-Info.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/../../Lepra\"",
 					"\"$(SRCROOT)/../../TBC\"",
-					"\"$(SRCROOT)/../../ThirdParty/stlport/build/lib/obj/i686-apple-darwin10-gcc/so_stlg\"",
+					"\"$(SRCROOT)/../../ThirdParty/stlport/build/lib/obj/gcc/so_stlg\"",
 				);
-				PRODUCT_NAME = SlimeVolleyball;
+				PRODUCT_NAME = SlimeBall;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -2366,7 +2370,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		1D6058960D05DD3E006BFB54 /* Build configuration list for PBXNativeTarget "SlimeVolleyball" */ = {
+		1D6058960D05DD3E006BFB54 /* Build configuration list for PBXNativeTarget "SlimeBall" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1D6058940D05DD3E006BFB54 /* Debug */,
@@ -2375,7 +2379,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		C01FCF4E08A954540054247B /* Build configuration list for PBXProject "SlimeVolleyball" */ = {
+		C01FCF4E08A954540054247B /* Build configuration list for PBXProject "SlimeBall" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C01FCF4F08A954540054247B /* Debug */,
