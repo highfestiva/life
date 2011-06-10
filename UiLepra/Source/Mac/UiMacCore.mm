@@ -155,9 +155,10 @@ int UiMain(Application& pApplication)
 	gApplication = &pApplication;
 
 #ifndef LEPRA_IOS
-#if defined(UILEPRA_USE_CPS)
 	// Ensure the application object is initialised.
-	MacCore::mApplication = [LEPRA_APPLE_APP sharedApplication];
+	[NSApplication sharedApplication];
+
+#if defined(UILEPRA_USE_CPS)
 
 	{
 		CPSProcessSerNum PSN;
@@ -169,17 +170,20 @@ int UiMain(Application& pApplication)
 	}
 #endif // CPS
 
+	MacCore::mApplication = NSApp;
+
 	// Setup menu.
 	[NSApp setMainMenu:[[NSMenu alloc] init]];
 	setApplicationMenu();
 	setupWindowMenu();
 
 	UiLepraLoadedDispatcher* lLoadedDispatcher = [[UiLepraLoadedDispatcher alloc] init];
-	[MacCore::mApplication setDelegate:lLoadedDispatcher];
-	[MacCore::mApplication run];
+	[NSApp setDelegate:lLoadedDispatcher];
+	[NSApp run];
 	[lLoadedDispatcher release];
 
 #else // iOS
+	MacCore::mApplication = [NSApplication sharedApplication];
 	UIApplicationMain(0, 0, nil, @"UiLepraLoadedDispatcher");
 #endif // !iOS/iOS
 

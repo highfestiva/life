@@ -112,7 +112,7 @@ all:\t%(lib)s $(OBJS)
 clean:
 \t@rm -f %(lib)s $(OBJS)
 %(lib)s:\t$(OBJS)
-\t$(CPP_COMPILER) $(LIBS) -dead_strip """ + ldflags + """ -o $@ $(OBJS)
+\t$(CPP_COMPILER) $(LIBS) """ + ldflags + """ -o $@ $(OBJS)
 """+foot_rules
 
 foot_gfx_bin = foot_bin

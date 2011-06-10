@@ -339,6 +339,7 @@ bool MacDisplayManager::InitWindow()
 
 	NativeWindow* lWnd = [NativeWindow alloc];
 	mWnd = lWnd;
+	lWnd->mDisplayManager = this;
 #ifdef LEPRA_IOS
 	[mWnd initWithFrame:[UIScreen mainScreen].bounds];
 #else // !iOS
@@ -355,7 +356,6 @@ bool MacDisplayManager::InitWindow()
 		display:	YES];
 	[mWnd center];
 #endif // iOS/!iOS
-	lWnd->mDisplayManager = this;
 
 	++mWindowCount;
 

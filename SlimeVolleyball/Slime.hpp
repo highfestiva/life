@@ -70,7 +70,9 @@ public:
 	}
 	void drawString(astr s, int x, int y)
 	{
-		//mPainter->PrintText(strutil::Encode(s), x, y);
+#ifndef LEPRA_IOS
+		mPainter->PrintText(strutil::Encode(s), x, y);
+#endif // !iOS
 	}
 
 	FontMetrics getFontMetrics()
