@@ -53,6 +53,9 @@ private:
 	void Clear(float pRed, float pGreen, float pBlue, bool pClearDepth = true);
 	bool CanRender() const;
 
+	virtual void Suspend();
+	virtual void Resume();
+
 	virtual bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
 	virtual bool OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode);
 
@@ -61,6 +64,9 @@ private:
 	void OnMaximize(int pWidth, int pHeight);
 
 	static App* mApp;
+#ifdef LEPRA_IOS
+	AnimatedApp* mAnimatedApp;
+#endif // iOS
 	SlimeVolleyball* mGame;
 
 	UiLepra::DisplayManager* mDisplay;
@@ -289,13 +295,9 @@ void App::Close()
 	mRenderer = 0;
 	delete (mCanvas);
 	mCanvas = 0;
-
-	if (mDisplay)
-	{
-		mDisplay->RemoveResizeObserver(this);
-		delete (mDisplay);
-		mDisplay = 0;
-	}
+	mDisplay->RemoveResizeObserver(this);
+	delete (mDisplay);
+	mDisplay = 0;
 
 	// Poll system to let go of old windows.
 	UiLepra::Core::ProcessMessages();
@@ -415,11 +417,7 @@ int App::Run()
 	Close();
 	return lQuit? 0 : 1;
 #else // iOS
-	AnimatedApp* lApp = [AnimatedApp alloc];
-	[lApp startTick];
-	Event lEvent;
-	lEvent.id = 501;
-	mGame->handleEvent(lEvent);
+	mAnimatedApp = [AnimatedApp alloc];
 	return 0;
 #endif // !iOS/iOS
 }
@@ -514,6 +512,22 @@ void App::Clear(float pRed, float pGreen, float pBlue, bool pClearDepth)
 bool App::CanRender() const
 {
 	return mDisplay->IsVisible();
+}
+
+
+
+void App::Suspend()
+{
+#ifdef LEPRA_IOS
+	[mAnimatedApp stopTick];
+#endif // iOS
+}
+
+void App::Resume()
+{
+#ifdef LEPRA_IOS
+	[mAnimatedApp startTick];
+#endif // iOS
 }
 
 

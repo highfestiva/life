@@ -66,6 +66,9 @@ public:
 
 	virtual int Run() = 0;
 
+	virtual void Suspend();
+	virtual void Resume();
+
 protected:
 	strutil::strvec mArgumentVector;
 };

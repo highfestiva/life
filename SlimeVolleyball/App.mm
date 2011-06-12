@@ -35,14 +35,14 @@
 @implementation AnimatedApp
 -(void) startTick
 {
-	animationTimer = [NSTimer scheduledTimerWithTimeInterval:0.02 target:self selector:@selector(tick) userInfo:nil repeats:YES];
+	animationTimer = [NSTimer scheduledTimerWithTimeInterval:0.0225 target:self selector:@selector(tick) userInfo:nil repeats:YES];
 	[EAGLView sharedView].responder = self;
 }
 
 -(void) stopTick
 {
 	[animationTimer invalidate];
-	[animationTimer release];
+	animationTimer = nil;
 }
 
 -(void) tick

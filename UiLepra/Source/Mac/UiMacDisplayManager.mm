@@ -27,29 +27,29 @@
 @implementation NativeWindow
 -(void) keyDown:(LEPRA_APPLE_EVENT*)theEvent
 {
-	mDisplayManager->DispatchEvent(theEvent);
+	if (mDisplayManager) mDisplayManager->DispatchEvent(theEvent);
 }
 -(void) keyUp:(LEPRA_APPLE_EVENT*)theEvent
 {
-	mDisplayManager->DispatchEvent(theEvent);
+	if (mDisplayManager) mDisplayManager->DispatchEvent(theEvent);
 }
 -(void) flagsChanged:(LEPRA_APPLE_EVENT*)theEvent
 {
-	mDisplayManager->DispatchEvent(theEvent);
+	if (mDisplayManager) mDisplayManager->DispatchEvent(theEvent);
 }
 - (void) mouseDragged: (LEPRA_APPLE_EVENT*)theEvent
 {
-	mDisplayManager->DispatchEvent(theEvent);
+	if (mDisplayManager) mDisplayManager->DispatchEvent(theEvent);
 }
 - (void)mouseMoved: (LEPRA_APPLE_EVENT*)theEvent
 {
-	mDisplayManager->DispatchEvent(theEvent);
+	if (mDisplayManager) mDisplayManager->DispatchEvent(theEvent);
 }
 #ifndef LEPRA_IOS
 -(void) windowDidResize:(NSNotification*)notification
 {
 	NSView* lView = [self contentView];
-	mDisplayManager->DispatchResize(lView.frame.size.width, lView.frame.size.height);
+	if (mDisplayManager) mDisplayManager->DispatchResize(lView.frame.size.width, lView.frame.size.height);
 }
 #endif // !iOS
 - (BOOL)acceptsFirstResponder
@@ -320,6 +320,7 @@ void MacDisplayManager::CloseScreen()
 
 		if (mWnd)
 		{
+			((NativeWindow*)mWnd)->mDisplayManager = nil;
 			[mWnd release];
 			mWnd = 0;
 		}

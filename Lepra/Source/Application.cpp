@@ -22,6 +22,14 @@ Application::~Application()
 {
 }
 
+void Application::Suspend()
+{
+}
+
+void Application::Resume()
+{
+}
+
 
 
 int Main(Application& pApplication)

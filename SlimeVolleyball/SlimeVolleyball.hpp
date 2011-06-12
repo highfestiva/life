@@ -20,8 +20,8 @@ class SlimeVolleyball
 {
 	private: static const int TAP_JUMP_HEIGHT = 50;
 	private: static const int TAP_JUMP_MIN_HEIGHT = 27;
-	private: static const int TAP_JUMP_DELTA_HEIGHT = 7;
-	private: static const int TAP_BASE = 100;
+	private: static const int TAP_JUMP_DELTA_HEIGHT = 5;
+	private: static const int TAP_BASE = 150;
 	private: int nWidth;
 	private: int nHeight;
 	private: int p1X;
@@ -682,12 +682,9 @@ class SlimeVolleyball
 
 	public: void run()
 	{
-#ifndef LEPRA_IOS
 		mAverageLoopTime = Lepra::Math::Lerp(mAverageLoopTime, mLoopTimer.QueryTimeDiff(), 0.05);
-		Thread::Sleep(0.02 - mSpeed/1000.0 - mAverageLoopTime);
+		Thread::Sleep(0.0225 - mSpeed/1000.0 - mAverageLoopTime);
 		mLoopTimer.PopTimeDiff();
-
-#endif // !iOS
 
 		if (tapActive)
 		{
@@ -1005,10 +1002,16 @@ class SlimeVolleyball
 			else if (p1TapJump)
 			{
 				if (p1TapY < TAP_BASE+TAP_JUMP_HEIGHT ||
-					(p1TapY < TAP_BASE+TAP_JUMP_HEIGHT*2 && p1TapY-p1LastTapY <= -TAP_JUMP_DELTA_HEIGHT/3) ||
-					(p1TapY < TAP_BASE+TAP_JUMP_HEIGHT+TAP_JUMP_MIN_HEIGHT && p1TapY-p1LastTapY <= -TAP_JUMP_DELTA_HEIGHT))
+					(p1TapY < TAP_BASE+TAP_JUMP_HEIGHT+TAP_JUMP_MIN_HEIGHT && p1TapY-p1LastTapY <= -TAP_JUMP_DELTA_HEIGHT/3) ||
+					(p1TapY < TAP_BASE+TAP_JUMP_HEIGHT*2 && p1TapY-p1LastTapY <= -TAP_JUMP_DELTA_HEIGHT))
 				{
 					p1TapJump = false;
+				}
+				else if (p1TapY > TAP_BASE+TAP_JUMP_HEIGHT*4 ||
+					p1TapY-p1LastTapY >= TAP_JUMP_DELTA_HEIGHT*2)
+				{
+					// If we desperately want to jump, let's jump.
+					moveP1Jump();
 				}
 			}
 		}

@@ -43,7 +43,7 @@ static Lepra::Application* gApplication = 0;
 #ifdef LEPRA_IOS
 -(void) applicationDidFinishLaunching:(UIApplication*)application
 #else // !iOS
-- (void) applicationDidFinishLaunching:(NSNotification*)note
+-(void) applicationDidFinishLaunching:(NSNotification*)note
 #endif // iOS/!iOS
 {
 	// Hand off to main application code.
@@ -54,6 +54,17 @@ static Lepra::Application* gApplication = 0;
 	exit(lExitStatus);
 #endif // !iOS
 }
+
+#ifdef LEPRA_IOS
+- (void)applicationWillResignActive:(UIApplication *)application
+{
+	gApplication->Suspend();
+}
+- (void)applicationDidBecomeActive:(UIApplication *)application
+{
+	gApplication->Resume();
+}
+#endif // iOS
 @end
 
 
