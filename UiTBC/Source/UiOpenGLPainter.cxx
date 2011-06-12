@@ -640,7 +640,7 @@ void OpenGLPainter::DoFillShadedRect(int pLeft, int pTop, int pRight, int pBotto
 	::glEnableClientState(GL_COLOR_ARRAY);
 	::glColorPointer(4, GL_UNSIGNED_BYTE, 0, c);
 	::glVertexPointer(2, GL_FLOAT, 0, v);
-	::glDrawArrays(GL_TRIANGLE_FAN, 0, 6);
+	::glDrawArrays(GL_TRIANGLE_FAN, 0, 5);
 	::glDisableClientState(GL_COLOR_ARRAY);
 
 	OGL_ASSERT();

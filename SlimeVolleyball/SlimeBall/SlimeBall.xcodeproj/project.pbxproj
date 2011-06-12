@@ -10,6 +10,7 @@
 		1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; };
 		1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF5F4DF0D08C38300B7A737 /* UIKit.framework */; };
 		288765FD0DF74451002DB57D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 288765FC0DF74451002DB57D /* CoreGraphics.framework */; };
+		B1988C7713A477DB0007174C /* SlimeAI.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1988C7613A477DB0007174C /* SlimeAI.mm */; };
 		B19A141913A122CE0051A61C /* UiBorderComponent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A13C213A122CE0051A61C /* UiBorderComponent.cpp */; };
 		B19A141A13A122CE0051A61C /* UiButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A13C313A122CE0051A61C /* UiButton.cpp */; };
 		B19A141B13A122CE0051A61C /* UiCaption.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A13C413A122CE0051A61C /* UiCaption.cpp */; };
@@ -65,7 +66,6 @@
 		B19A145913A122CE0051A61C /* UiTriangleBasedGeometry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A140413A122CE0051A61C /* UiTriangleBasedGeometry.cpp */; };
 		B19A145A13A122CE0051A61C /* UiUVMapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A140513A122CE0051A61C /* UiUVMapper.cpp */; };
 		B19A148F13A122DF0051A61C /* App.mm in Sources */ = {isa = PBXBuildFile; fileRef = B19A146B13A122DE0051A61C /* App.mm */; };
-		B19A149213A122DF0051A61C /* SlimeAI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A147213A122DF0051A61C /* SlimeAI.cpp */; };
 		B19A14BA13A1247C0051A61C /* Bones.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A14A813A1247C0051A61C /* Bones.cpp */; };
 		B19A14BB13A1247C0051A61C /* ChunkyBoneGeometry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A14A913A1247C0051A61C /* ChunkyBoneGeometry.cpp */; };
 		B19A14BC13A1247C0051A61C /* ChunkyClass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A14AA13A1247C0051A61C /* ChunkyClass.cpp */; };
@@ -415,6 +415,7 @@
 		288765FC0DF74451002DB57D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		8D1107310486CEB800E47090 /* SlimeBall-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "SlimeBall-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
 		B16FB5F713A2CB04001C315F /* Slime.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Slime.hpp; sourceTree = "<group>"; };
+		B1988C7613A477DB0007174C /* SlimeAI.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = SlimeAI.mm; sourceTree = "<group>"; };
 		B19A13C213A122CE0051A61C /* UiBorderComponent.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiBorderComponent.cpp; sourceTree = "<group>"; };
 		B19A13C313A122CE0051A61C /* UiButton.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiButton.cpp; sourceTree = "<group>"; };
 		B19A13C413A122CE0051A61C /* UiCaption.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiCaption.cpp; sourceTree = "<group>"; };
@@ -470,7 +471,6 @@
 		B19A140413A122CE0051A61C /* UiTriangleBasedGeometry.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiTriangleBasedGeometry.cpp; sourceTree = "<group>"; };
 		B19A140513A122CE0051A61C /* UiUVMapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiUVMapper.cpp; sourceTree = "<group>"; };
 		B19A146B13A122DE0051A61C /* App.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = App.mm; sourceTree = "<group>"; };
-		B19A147213A122DF0051A61C /* SlimeAI.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SlimeAI.cpp; sourceTree = "<group>"; };
 		B19A14A813A1247C0051A61C /* Bones.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Bones.cpp; sourceTree = "<group>"; };
 		B19A14A913A1247C0051A61C /* ChunkyBoneGeometry.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ChunkyBoneGeometry.cpp; sourceTree = "<group>"; };
 		B19A14AA13A1247C0051A61C /* ChunkyClass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ChunkyClass.cpp; sourceTree = "<group>"; };
@@ -1142,10 +1142,10 @@
 		B19A146913A122DE0051A61C /* SlimeVolleyball */ = {
 			isa = PBXGroup;
 			children = (
+				B1988C7613A477DB0007174C /* SlimeAI.mm */,
 				B16FB5F713A2CB04001C315F /* Slime.hpp */,
 				B1F35B0A13A200690064153E /* SlimeBall_Prefix.pch */,
 				B19A146B13A122DE0051A61C /* App.mm */,
-				B19A147213A122DF0051A61C /* SlimeAI.cpp */,
 			);
 			name = SlimeVolleyball;
 			path = ..;
@@ -1938,7 +1938,6 @@
 				B19A145913A122CE0051A61C /* UiTriangleBasedGeometry.cpp in Sources */,
 				B19A145A13A122CE0051A61C /* UiUVMapper.cpp in Sources */,
 				B19A148F13A122DF0051A61C /* App.mm in Sources */,
-				B19A149213A122DF0051A61C /* SlimeAI.cpp in Sources */,
 				B19A14BA13A1247C0051A61C /* Bones.cpp in Sources */,
 				B19A14BB13A1247C0051A61C /* ChunkyBoneGeometry.cpp in Sources */,
 				B19A14BC13A1247C0051A61C /* ChunkyClass.cpp in Sources */,
@@ -2264,6 +2263,7 @@
 				B19A29CB13A1391E0051A61C /* strstream.cpp in Sources */,
 				B19A29CC13A1391E0051A61C /* time_facets.cpp in Sources */,
 				B19A29D813A13A8A0051A61C /* fstream.cpp in Sources */,
+				B1988C7713A477DB0007174C /* SlimeAI.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

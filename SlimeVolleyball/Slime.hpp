@@ -48,6 +48,7 @@ class Graphics
 public:
 	int width;
 	int height;
+	UiTbc::Painter* mPainter;
 
 	Graphics():
 		width(0),
@@ -127,8 +128,6 @@ private:
 		}
 		mPainter->DrawFan(lCoords, pFill);
 	}
-
-	UiTbc::Painter* mPainter;
 };
 
 class Event

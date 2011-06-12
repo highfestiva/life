@@ -529,7 +529,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\SlimeAI.cpp"
+				RelativePath=".\SlimeAI.cxx"
+				>
+			</File>
+			<File
+				RelativePath=".\SlimeAI.mm"
 				>
 			</File>
 		</Filter>

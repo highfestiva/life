@@ -3,6 +3,7 @@
 #include "../Lepra/Include/HiResTimer.h"
 #include "../Lepra/Include/Thread.h"
 #include "../UiLepra/Include/UiInput.h"
+#include "../UiLepra/Include/UiOpenGLExtensions.h"
 #include "SlimeAI.hpp"
 #include "CrapAI.hpp"
 #include "DannoAI.hpp"
@@ -17,6 +18,10 @@ namespace Slime
 
 class SlimeVolleyball
 {
+	private: static const int TAP_JUMP_HEIGHT = 50;
+	private: static const int TAP_JUMP_MIN_HEIGHT = 27;
+	private: static const int TAP_JUMP_DELTA_HEIGHT = 7;
+	private: static const int TAP_BASE = 100;
 	private: int nWidth;
 	private: int nHeight;
 	private: int p1X;
@@ -32,8 +37,10 @@ class SlimeVolleyball
 	private: bool tapActive;
 	private: int p1TapX;
 	private: int p1TapY;
+	private: bool p1TapJump;
 	private: int p2TapX;
 	private: int p2TapY;
+	private: bool p2TapJump;
 	private: int ballX;
 	private: int ballY;
 	private: int ballVX;
@@ -242,6 +249,8 @@ class SlimeVolleyball
 		}
 
 		drawScores();
+
+		drawTapIndicators();
 	}
 
 	public: bool handleEvent(Event paramEvent)
@@ -252,36 +261,7 @@ class SlimeVolleyball
 			//showStatus("Slime Volleyball: One Slime: http://www.student.uwa.edu.au/~wedgey/");
 			break;
 		case 501:
-			this->mousePressed = true;
-			if (this->fInPlay)
-				break;
-			this->fEndGame = false;
-			this->fInPlay = true;
-			this->p1X = 200;
-			this->p1Y = 0;
-			this->p2X = 800;
-			this->p2Y = 0;
-			this->p1XV = 0;
-			this->p1YV = 0;
-			this->p2XV = 0;
-			this->p2YV = 0;
-			this->ballX = 200;
-			this->ballY = 400;
-			this->ballVX = 0;
-			this->ballVY = 0;
-			this->hitNetSinceTouched = false;
-			this->promptMsg = "";
-			if ((this->gameScore != 0) && (this->aiMode < 4))
-				this->aiMode += 1;
-			if (this->bGameOver)
-			{
-				this->aiMode = aiStartLevel;
-				this->bGameOver = false;
-				this->gameScore = 0;
-			}
-			setAI();
-			//repaint();
-			this->StartRun();
+			resetGame();
 			break;
 
 		case 401:
@@ -371,6 +351,52 @@ class SlimeVolleyball
 		}
 
 		return false;
+	}
+
+	private: void resetGame()
+	{
+		this->mousePressed = true;
+		if (this->fInPlay)
+			return;
+		this->fEndGame = false;
+		this->fInPlay = true;
+		this->p1X = 200;
+		this->p1Y = 0;
+		this->p2X = 800;
+		this->p2Y = 0;
+		this->p1XV = 0;
+		this->p1YV = 0;
+		this->p2XV = 0;
+		this->p2YV = 0;
+		this->ballX = 200;
+		this->ballY = 400;
+		this->ballVX = 0;
+		this->ballVY = 0;
+		resetTap();
+		this->hitNetSinceTouched = false;
+		this->promptMsg = "";
+		if ((this->gameScore != 0) && (this->aiMode < 4))
+			this->aiMode += 1;
+		if (this->bGameOver)
+		{
+			this->aiMode = aiStartLevel;
+			this->bGameOver = false;
+			this->gameScore = 0;
+		}
+		setAI();
+		//repaint();
+		this->StartRun();
+	}
+
+	private: void resetTap()
+	{
+		tapActive = false;
+		p1TapX = p1X;
+		p1TapY = 0;
+		p1TapJump = false;
+		p2TapX = p2X;
+		p2TapY = 0;
+		p2TapJump = false;
 	}
 
 	public: void moveP1Left() {
@@ -684,6 +710,7 @@ class SlimeVolleyball
 			this->promptMsg = "";
 			if ((this->fP1PointsWon == 6) || (this->fP2PointsWon == 6))
 				finishGame();
+			resetTap();
 			this->p1X = 200;
 			this->p1Y = 0;
 			this->p2X = 800;
@@ -781,6 +808,10 @@ class SlimeVolleyball
 				mWaitRunTimer.ReduceTimeDiff(1.5);
 				mWasFrozen = true;
 			}
+		}
+		else if (tapActive)
+		{
+			resetGame();
 		}
 	}
 
@@ -899,17 +930,92 @@ class SlimeVolleyball
 		//repaint();
 	}
 
+	private: void drawTapIndicators()
+	{
+#ifdef LEPRA_IOS
+		int py;
+		Color lColor = p1TapJump? RED : GREEN;
+		screen.setColor(lColor);
+		py = xformy(TAP_BASE);
+		screen.fillRect(xformx(25), py, xformx(450), 3);
+		if (p1TapJump)
+		{
+			py = xformy(TAP_BASE+TAP_JUMP_HEIGHT) - 15;
+			screen.fillRect(xformx(25), py, xformx(450), 3);
+		}
+		/* if (two plyr)
+		{
+		}*/
+		if (!tapActive)
+		{
+			return;
+		}
+		drawSpike(xformx(p1TapX), py-160, 160, lColor);
+		/*if (two plyr)
+		{
+		}*/
+#endif // iOS
+	}
+
+	private: int xformx(int x)
+	{
+		return x*screen.width/1000;
+	}
+
+	private: int xformy(int y)
+	{
+		return (1000-y)*screen.height/1000;
+	}
+
+	private: void drawSpike(int x, int y, int h, const Color c)
+	{
+		GLubyte C[] = {c.mRed, c.mGreen, c.mBlue, 150,
+			       c.mRed, c.mGreen, c.mBlue, 50,
+			       c.mRed, c.mGreen, c.mBlue, 50,
+			       c.mRed, c.mGreen, c.mBlue, 255,
+			       c.mRed, c.mGreen, c.mBlue, 255};
+		GLfloat v[] = {x, (y+h)*0.5f, x-1, y, x+1, y, x+1, y+h, x-1, y+h};
+		::glEnableClientState(GL_COLOR_ARRAY);
+		::glColorPointer(4, GL_UNSIGNED_BYTE, 0, C);
+		::glVertexPointer(2, GL_FLOAT, 0, v);
+		::glDrawArrays(GL_TRIANGLE_FAN, 0, 5);
+		::glDisableClientState(GL_COLOR_ARRAY);
+	}
+
 	public: void MoveTo(float x, float y)
 	{
 		tapActive = true;
 		const int ix = x*1000/screen.width;
+		const int iy = y*1000/screen.height;
 		if (ix < 500)
 		{
 			p1TapX = ix;
+			const int p1LastTapY = p1TapY;
+			p1TapY = iy;
+			if (!p1TapJump)
+			{
+				if (p1TapY > TAP_BASE+TAP_JUMP_HEIGHT*2 ||
+					(p1TapY > TAP_BASE+TAP_JUMP_HEIGHT && p1TapY-p1LastTapY >= TAP_JUMP_DELTA_HEIGHT/3) ||
+					(p1TapY > TAP_BASE+TAP_JUMP_MIN_HEIGHT && p1TapY-p1LastTapY >= TAP_JUMP_DELTA_HEIGHT))
+				{
+					p1TapJump = true;
+					moveP1Jump();
+				}
+			}
+			else if (p1TapJump)
+			{
+				if (p1TapY < TAP_BASE+TAP_JUMP_HEIGHT ||
+					(p1TapY < TAP_BASE+TAP_JUMP_HEIGHT*2 && p1TapY-p1LastTapY <= -TAP_JUMP_DELTA_HEIGHT/3) ||
+					(p1TapY < TAP_BASE+TAP_JUMP_HEIGHT+TAP_JUMP_MIN_HEIGHT && p1TapY-p1LastTapY <= -TAP_JUMP_DELTA_HEIGHT))
+				{
+					p1TapJump = false;
+				}
+			}
 		}
 		else
 		{
 			p2TapX = ix;
+			p2TapY = iy;
 		}
 
 	}
@@ -917,17 +1023,14 @@ class SlimeVolleyball
 	public: void doTapMove()
 	{
 		{
+			const int lDistance = fP1Fire? 16 : 8;
 			const int dx = p1TapX-p1X;
-			if (dx <  0) moveP1Left();
-			if (dx == 0) moveP1Stop();
-			if (dx >  0) moveP1Right();
+			if (dx <= -lDistance)		p1XV = -lDistance;
+			else if (dx >= lDistance)	p1XV = lDistance;
+			else				p1XV = dx;
 		}
 		/*if (two player game)
 		{
-			const int dx = p2TapX-p2X;
-			if (dx <  0) moveP2Left();
-			if (dx == 0) moveP2Stop();
-			if (dx >  0) moveP2Right();
 		}*/
 
 	}

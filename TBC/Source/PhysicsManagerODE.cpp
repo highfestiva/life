@@ -1556,7 +1556,7 @@ bool PhysicsManagerODE::SetSliderDiff(BodyID pBodyId, JointID pJointId, const Jo
 bool PhysicsManagerODE::GetUniversalDiff(BodyID pBodyId, JointID pJointId, Joint2Diff& pDiff) const
 {
 	LEPRA_DEBUG_CODE(JointInfo* lJointInfo = (JointInfo*)pJointId;)
-	assert(lJointInfo->mType == JOINT_UNIVERSAL);
+	LEPRA_DEBUG_CODE(assert(lJointInfo->mType == JOINT_UNIVERSAL));
 
 	Vector3DF lAxis1;
 	Vector3DF lAxis2;
@@ -1683,7 +1683,7 @@ bool PhysicsManagerODE::SetUniversalDiff(BodyID pBodyId, JointID pJointId, const
 bool PhysicsManagerODE::GetHinge2Diff(BodyID pBodyId, JointID pJointId, Joint3Diff& pDiff) const
 {
 	LEPRA_DEBUG_CODE(JointInfo* lJointInfo = (JointInfo*)pJointId;)
-	assert(lJointInfo->mType == JOINT_HINGE2);
+	LEPRA_DEBUG_CODE(assert(lJointInfo->mType == JOINT_HINGE2));
 
 	Vector3DF lAxis1;
 	Vector3DF lAxis2;
@@ -1733,7 +1733,7 @@ bool PhysicsManagerODE::GetHinge2Diff(BodyID pBodyId, JointID pJointId, Joint3Di
 bool PhysicsManagerODE::SetHinge2Diff(BodyID pBodyId, JointID pJointId, const Joint3Diff& pDiff)
 {
 	LEPRA_DEBUG_CODE(JointInfo* lJointInfo = (JointInfo*)pJointId;)
-	assert(lJointInfo->mType == JOINT_HINGE2);
+	LEPRA_DEBUG_CODE(assert(lJointInfo->mType == JOINT_HINGE2));
 
 	Vector3DF lAxis1;
 	Vector3DF lAxis2;

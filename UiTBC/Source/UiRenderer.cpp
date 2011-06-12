@@ -1062,7 +1062,7 @@ void Renderer::RemoveGeometry(GeometryID pGeometryID)
 			// Remove references recursively.
 			LEPRA_DEBUG_CODE(const size_t lReferenceCount = lGeometryData->mReferenceSet.size());
 			RemoveGeometry(*lGeometryData->mReferenceSet.begin());
-			assert(lReferenceCount == lGeometryData->mReferenceSet.size()+1);
+			LEPRA_DEBUG_CODE(assert(lReferenceCount == lGeometryData->mReferenceSet.size()+1));
 		}
 
 		delete lGeometryData;
