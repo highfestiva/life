@@ -82,12 +82,25 @@ void OpenGLPainter::SetRenderMode(RenderMode pRM)
 
 void OpenGLPainter::PrePaint()
 {
+	::glClear(GL_DEPTH_BUFFER_BIT);
 #ifndef LEPRA_GL_ES
 	::glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 #endif // !GLES
-	::glClear(GL_DEPTH_BUFFER_BIT);
+	::glHint(GL_LINE_SMOOTH_HINT, GL_FASTEST);
+	::glLineWidth(1);
 	DoSetRenderMode();
+	::glDisable(GL_TEXTURE_2D);
+	::glDisable(GL_CULL_FACE);
+	::glDisable(GL_LINE_SMOOTH);
 	::glEnableClientState(GL_VERTEX_ARRAY);
+	::glDisableClientState(GL_INDEX_ARRAY);
+	::glDisableClientState(GL_NORMAL_ARRAY);
+	::glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
+	{
+		UiLepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, 0);
+		UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	}
 }
 
 void OpenGLPainter::SetClippingRect(int pLeft, int pTop, int pRight, int pBottom)
@@ -113,13 +126,6 @@ static void my_glOrtho(GLfloat pLeft, GLfloat pRight, GLfloat pBottom, GLfloat p
 	const float tx = - (pRight + pLeft) / (pRight - pLeft);
 	const float ty = - (pTop + pBottom) / (pTop - pBottom);
 	const float tz = - (pZFar + pZNear) / (pZFar - pZNear);
-	/*const float m[16] =
-	{
-		2 / (pRight - pLeft), 0, 0, tx,
-		0, 2/(pTop - pBottom), 0, ty,
-		0, 0, -2/(pZFar - pZNear), tz,
-		0, 0, 0, 1
-	};*/
 	const float m[16] =
 	{
 		2 / (pRight - pLeft), 0, 0, 0,
@@ -143,9 +149,9 @@ void OpenGLPainter::ResetClippingRect()
 	// Definition of the viewport. The point (0, 0) is defined as the center of the
 	// pixel in the top left corner. Thus, the top left corner of the screen has
 	// the coordinates (-0.5, -0.5).
-	my_glOrtho(-0.5, (float32)GetCanvas()->GetWidth() - 0.5,
-			(float32)GetCanvas()->GetHeight() - 0.5, -0.5,
-			0.0f, 1.0f);
+	my_glOrtho(-0.5f, (float32)GetCanvas()->GetWidth() - 0.5f,
+		(float32)GetCanvas()->GetHeight() - 0.5f, -0.5f,
+		0, 1);
 #ifdef LEPRA_IOS
 	glRotatef(90, 0, 0, 1);
 	glTranslatef(0, -(float)GetCanvas()->GetWidth(), 0);	// TRICKY: float cast necessary, otherwise nothing is shown on screen! Bug?!?
@@ -188,12 +194,6 @@ void OpenGLPainter::SetColor(const Color& pColor, unsigned pColorIndex)
 void OpenGLPainter::DoSetRenderMode() const
 {
 	OGL_ASSERT();
-
-	::glDisableClientState(GL_NORMAL_ARRAY);
-	::glDisable(GL_CULL_FACE);
-	::glLineWidth(1);
-	::glHint(GL_LINE_SMOOTH_HINT, GL_FASTEST);
-	::glDisable(GL_LINE_SMOOTH);
 
 	switch(GetRenderMode())
 	{
@@ -256,7 +256,7 @@ void OpenGLPainter::DoDrawPixel(int x, int y)
 	GLshort v[] = {(GLshort)x, (GLshort)y};
 	::glVertexPointer(2, GL_SHORT, 0, v);
 	::glDrawArrays(GL_POINTS, 0, 1);
-	::glDisableClientState(GL_VERTEX_ARRAY);
+	//::glDisableClientState(GL_VERTEX_ARRAY);
 
 	OGL_ASSERT();
 }
@@ -272,7 +272,7 @@ void OpenGLPainter::DoDrawLine(int pX1, int pY1, int pX2, int pY2)
 	glColor4ub(lColor.mRed, lColor.mGreen, lColor.mBlue, GetAlphaValue());
 
 	//glLineWidth(1);
-	GLshort v[] = {(GLshort)pX1, (GLshort)pY2, (GLshort)pX2, (GLshort)pY2};
+	GLshort v[] = {(GLshort)pX1, (GLshort)pY1, (GLshort)pX2, (GLshort)pY2};
 	::glVertexPointer(2, GL_SHORT, 0, v);
 	::glDrawArrays(GL_LINES, 0, 2);
 
@@ -299,7 +299,7 @@ void OpenGLPainter::DoFillTriangle(float pX1, float pY1,
 	Color& lColor = GetColorInternal(0);
 	glColor4ub(lColor.mRed, lColor.mGreen, lColor.mBlue, GetAlphaValue());
 
-	GLfloat v[] = {pX1, pY2, pX2, pY2, pX3, pY3};
+	GLfloat v[] = {pX1, pY1, pX2, pY2, pX3, pY3};
 	::glVertexPointer(2, GL_FLOAT, 0, v);
 	::glDrawArrays(GL_TRIANGLES, 0, 3);
 
@@ -327,7 +327,7 @@ void OpenGLPainter::DoFillShadedTriangle(float pX1, float pY1,
 	GLubyte c[] = {lColor[0].mRed, lColor[0].mGreen, lColor[0].mBlue, GetAlphaValue(),
 		      lColor[1].mRed, lColor[1].mGreen, lColor[1].mBlue, GetAlphaValue(),
 		      lColor[2].mRed, lColor[2].mGreen, lColor[2].mBlue, GetAlphaValue()};
-	GLfloat v[] = {pX1, pY2, pX2, pY2, pX3, pY3};
+	GLfloat v[] = {pX1, pY1, pX2, pY2, pX3, pY3};
 	::glEnableClientState(GL_COLOR_ARRAY);
 	::glColorPointer(4, GL_UNSIGNED_BYTE, 0, c);
 	::glVertexPointer(2, GL_FLOAT, 0, v);
@@ -595,8 +595,8 @@ void OpenGLPainter::DoDraw3DRect(int pLeft, int pTop, int pRight, int pBottom, i
 
 	const static vtx_idx_t lsIndices[] = {0,1,7, 0,7,6, 0,6,10, 0,10,4, 8,2,3, 8,3,9, 11,9,3, 11,3,5};
 
-	::glDisableClientState(GL_NORMAL_ARRAY);
-	::glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	//::glDisableClientState(GL_NORMAL_ARRAY);
+	//::glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	// Enabled in ResetClippingRect().
 	glVertexPointer(2, GL_FLOAT, 0, lVertex);
 	glEnableClientState(GL_COLOR_ARRAY);
@@ -636,11 +636,11 @@ void OpenGLPainter::DoFillShadedRect(int pLeft, int pTop, int pRight, int pBotto
 		       lColor[2].mRed, lColor[2].mGreen, lColor[2].mBlue, GetAlphaValue(),
 		       lColor[2].mRed, lColor[2].mGreen, lColor[2].mBlue, GetAlphaValue(),
 		       lColor[0].mRed, lColor[0].mGreen, lColor[0].mBlue, GetAlphaValue()};
-	GLfloat v[] = {(lLeft + lRight) * 0.5f, (lTop + lBottom) * 0.5f, lLeft, lTop, lRight, lTop, lLeft, lBottom, lLeft, lTop};
+	GLfloat v[] = {(lLeft + lRight) * 0.5f, (lTop + lBottom) * 0.5f, lLeft, lTop, lRight, lTop, lRight, lBottom, lLeft, lBottom, lLeft, lTop};
 	::glEnableClientState(GL_COLOR_ARRAY);
 	::glColorPointer(4, GL_UNSIGNED_BYTE, 0, c);
 	::glVertexPointer(2, GL_FLOAT, 0, v);
-	::glDrawArrays(GL_TRIANGLE_FAN, 0, 5);
+	::glDrawArrays(GL_TRIANGLE_FAN, 0, 6);
 	::glDisableClientState(GL_COLOR_ARRAY);
 
 	OGL_ASSERT();

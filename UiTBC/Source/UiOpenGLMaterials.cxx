@@ -147,7 +147,7 @@ void OpenGLMatSingleColorSolid::PreRender()
 void OpenGLMatSingleColorSolid::PostRender()
 {
 	::glDisableClientState(GL_NORMAL_ARRAY);
-	::glDisableClientState(GL_VERTEX_ARRAY);
+	//::glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 void OpenGLMatSingleColorSolid::RenderBaseGeometry(TBC::GeometryBase* pGeometry)
@@ -226,7 +226,7 @@ void OpenGLMatSingleColorBlended::PreRender()
 void OpenGLMatSingleColorBlended::PostRender()
 {
 	::glDisableClientState(GL_NORMAL_ARRAY);
-	::glDisableClientState(GL_VERTEX_ARRAY);
+	//::glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 
@@ -391,7 +391,7 @@ void OpenGLMatSingleTextureSolid::PostRender()
 {
 	::glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	::glDisableClientState(GL_NORMAL_ARRAY);
-	::glDisableClientState(GL_VERTEX_ARRAY);
+	//::glDisableClientState(GL_VERTEX_ARRAY);
 	::glDisable(GL_TEXTURE_2D);
 }
 

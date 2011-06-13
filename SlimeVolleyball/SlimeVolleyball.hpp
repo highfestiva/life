@@ -971,7 +971,10 @@ class SlimeVolleyball
 			       c.mRed, c.mGreen, c.mBlue, 50,
 			       c.mRed, c.mGreen, c.mBlue, 255,
 			       c.mRed, c.mGreen, c.mBlue, 255};
-		GLfloat v[] = {x, (y+h)*0.5f, x-1, y, x+1, y, x+1, y+h, x-1, y+h};
+		GLfloat fx = (GLfloat)x;
+		GLfloat fy = (GLfloat)y;
+		GLfloat fh = (GLfloat)h;
+		GLfloat v[] = {fx, (fy+fh)*0.5f, fx-1, fy, fx+1, fy, fx+1, fy+fh, fx-1, fy+fh};
 		::glEnableClientState(GL_COLOR_ARRAY);
 		::glColorPointer(4, GL_UNSIGNED_BYTE, 0, C);
 		::glVertexPointer(2, GL_FLOAT, 0, v);
@@ -982,8 +985,8 @@ class SlimeVolleyball
 	public: void MoveTo(float x, float y)
 	{
 		tapActive = true;
-		const int ix = x*1000/screen.width;
-		const int iy = y*1000/screen.height;
+		const int ix = (int)(x*1000/screen.width);
+		const int iy = (int)(y*1000/screen.height);
 		if (ix < 500)
 		{
 			p1TapX = ix;
