@@ -646,8 +646,8 @@ TcpMuxSocket::TcpMuxSocket(const str& pName, const SocketAddress& pLocalAddress,
 	unsigned pMaxPendingConnectionCount, unsigned pMaxConnectionCount):
 	MuxIo(pMaxPendingConnectionCount, pMaxConnectionCount),
 	TcpListenerSocket(pLocalAddress, pIsServer),
-	mAcceptThread(pName+_T("TcpMuxAccept ")+pLocalAddress.GetAsString()),
-	mSelectThread(pName+_T("TcpMuxSelect ")+pLocalAddress.GetAsString()),
+	mAcceptThread(astrutil::Encode(pName+_T("TcpMuxAccept ")+pLocalAddress.GetAsString())),
+	mSelectThread(astrutil::Encode(pName+_T("TcpMuxSelect ")+pLocalAddress.GetAsString())),
 	mConnectIdTimeout(DEFAULT_CONNECT_ID_TIMEOUT),
 	mActiveReceiverMapChanged(false),
 	mConnectedSocketSemaphore(100),
@@ -1249,7 +1249,7 @@ LOG_CLASS_DEFINE(NETWORK, UdpSocket);
 UdpMuxSocket::UdpMuxSocket(const str& pName, const SocketAddress& pLocalAddress, bool pIsServer,
 	unsigned pMaxPendingConnectionCount, unsigned pMaxConnectionCount):
 	MuxIo(pMaxPendingConnectionCount, pMaxConnectionCount),
-	Thread(pName+_T("UdpMuxRecv ")+pLocalAddress.GetAsString()),
+	Thread(astrutil::Encode(pName+_T("UdpMuxRecv ")+pLocalAddress.GetAsString())),
 	UdpSocket(pLocalAddress, pIsServer)
 {
 	log_atrace("UdpMuxSocket()");

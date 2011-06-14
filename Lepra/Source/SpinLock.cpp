@@ -19,7 +19,7 @@ namespace Lepra
 
 void VerifySoleAccessor::OnError(const Thread* pOwner)
 {
-	str lOwnerName = pOwner? pOwner->GetThreadName() : _T("<Unknown>");
+	str lOwnerName = pOwner? strutil::Encode(pOwner->GetThreadName()) : _T("<Unknown>");
 	mLog.Errorf(_T("Someone else is accessing our resource, namely thread %s at %p!"),
 		lOwnerName.c_str(), pOwner);
 	assert(false);

@@ -19,7 +19,7 @@ namespace Lepra
 
 
 
-StaticThread gMainThread(_T("MainThread"));
+StaticThread gMainThread("MainThread");
 
 
 
@@ -163,7 +163,7 @@ CompatibleSemaphoreBC::~CompatibleSemaphoreBC()
 
 
 
-RWLockBC::RWLockBC(const str& pRWLockName) :
+RWLockBC::RWLockBC(const astr& pRWLockName) :
 	mName(pRWLockName)
 {
 }
@@ -172,14 +172,14 @@ RWLockBC::~RWLockBC()
 {
 }
 
-str RWLockBC::GetName()
+astr RWLockBC::GetName()
 {
 	return mName;
 }
 
 
 
-Thread::Thread(const str& pThreadName) :
+Thread::Thread(const astr& pThreadName):
 	mThreadName(pThreadName),
 	mRunning(false),
 	mStopRequested(false),
@@ -210,7 +210,7 @@ bool Thread::QueryInitializeThread()
 	Thread* lSelf = GetCurrentThread();
 	if (!lSelf)
 	{
-		lSelf = new StaticThread(_T("OnTheFly"));
+		lSelf = new StaticThread("OnTheFly");
 		lSelf->RequestSelfDestruct();
 		InitializeThread(lSelf);
 		return true;
@@ -262,7 +262,7 @@ void Thread::RequestSelfDestruct()
 	mSelfDestruct = true;
 }
 
-const str& Thread::GetThreadName() const
+const astr& Thread::GetThreadName() const
 {
 	return (mThreadName);
 }
@@ -315,7 +315,7 @@ LOG_CLASS_DEFINE(GENERAL, Thread);
 
 
 
-StaticThread::StaticThread(const str& pThreadName):
+StaticThread::StaticThread(const astr& pThreadName):
 	Thread(pThreadName),
 	mThreadEntry(0),
 	mData(0)

@@ -577,7 +577,7 @@ private:
 	public:
 		Connector(const str& pName, _MuxSocket* pMuxSocket, const SocketAddress& pTargetAddress,
 			const std::string& pConnectionId, double pTimeout, Semaphore& pSemaphore):
-			Thread(pName),
+			Thread(astrutil::Encode(pName)),
 			mMuxSocket(pMuxSocket),
 			mSocket(0),
 			mTargetAddress(pTargetAddress),

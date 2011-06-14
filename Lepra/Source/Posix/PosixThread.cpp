@@ -249,7 +249,7 @@ void PosixSemaphore::Signal()
 
 
 
-PosixRWLock::PosixRWLock(const str& pRWLockName):
+PosixRWLock::PosixRWLock(const astr& pRWLockName):
 	RWLockBC(pRWLockName)
 {
 	::pthread_rwlock_init(&mReadWriteLock, 0);

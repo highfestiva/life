@@ -610,7 +610,7 @@ void Win32CompatibleSemaphore::Release(int pNumPermits)
 
 
 
-Win32RWLock::Win32RWLock(const str& pRWLockName) :
+Win32RWLock::Win32RWLock(const astr& pRWLockName) :
 	RWLockBC(pRWLockName),
 	mReadCondition(&mWriteLock),
 	mWriteCondition(&mWriteLock),
@@ -752,7 +752,7 @@ bool Thread::Start()
 	{
 		SetStopRequest(false);
 
-		DWORD lThreadId;
+		DWORD lThreadId = 0;
 		mThreadHandle = (size_t)::CreateThread(0, 0, ThreadEntry, this, 0, &lThreadId);
 		if (mThreadHandle)
 		{
@@ -762,7 +762,7 @@ bool Thread::Start()
 		else
 		{
 			SetRunning(false);
-			mLog.Errorf((_T("Failed to start thread ")+GetThreadName()+_T("!")).c_str());
+			mLog.Errorf((_T("Failed to start thread ")+strutil::Encode(GetThreadName())+_T("!")).c_str());
 			lOk = false;
 		}
 	}
@@ -800,7 +800,7 @@ bool Thread::GraceJoin(float64 pTimeOut)
 		if (::WaitForSingleObject((HANDLE)GetThreadHandle(), (DWORD)(pTimeOut * 1000.0)) == WAIT_TIMEOUT)
 		{
 			// Possible dead lock...
-			mLog.Warningf((_T("Failed to join thread \"") + GetThreadName() + _T("\"! Deadlock?")).c_str());
+			mLog.Warningf((_T("Failed to join thread \"") + strutil::Encode(GetThreadName()) + _T("\"! Deadlock?")).c_str());
 			return (false);	// RAII simplifies here.
 		}
 		if (GetThreadHandle())

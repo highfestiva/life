@@ -95,7 +95,7 @@ protected:
 class PosixRWLock: public RWLockBC
 {
 public:
-	PosixRWLock(const str& pRWLockName);
+	PosixRWLock(const astr& pRWLockName);
 	virtual ~PosixRWLock();
 
 	void AcquireRead();
