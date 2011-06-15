@@ -19,6 +19,10 @@ namespace UiLepra
 
 
 
+class SoundStream;
+
+
+
 class SoundManager
 {
 public:
@@ -55,7 +59,7 @@ public:
 	virtual SoundID LoadSound2D(const str& pFileName, const void* pData, size_t pDataSize, LoopMode pLoopMode, int pPriority) = 0;
 	virtual SoundID LoadSound3D(const str& pFileName, LoopMode pLoopMode, int pPriority) = 0;
 	virtual SoundID LoadSound3D(const str& pFileName, const void* pData, size_t pDataSize, LoopMode pLoopMode, int pPriority) = 0;
-	virtual SoundID LoadStream(const str& pFileName, LoopMode pLoopMode, int pPriority) = 0;
+	virtual SoundStream* CreateSoundStream(const str& pFileName, LoopMode pLoopMode, int pPriority) = 0;
 
 	virtual void Release(SoundID pSoundID) = 0;
 

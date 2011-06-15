@@ -282,7 +282,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\ThirdParty\stlport\stlport;&quot;../ThirdParty/openal-soft-1.10.622/include&quot;;&quot;../ThirdParty/freealut-1.1.0/include&quot;;&quot;../ThirdParty/libogg-1.2.2/include&quot;;&quot;../ThirdParty/libvorbis-1.3.2/include&quot;;../ThirdParty/openalpp/include"
+				AdditionalIncludeDirectories="..\ThirdParty\stlport\stlport"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="false"
 				BasicRuntimeChecks="0"

@@ -6,8 +6,9 @@
 
 #include "../Include/UiSoundManagerOpenAL.h"
 #include <assert.h>
-#include "../../Lepra/Include/DiskFile.h"
 #include "../../ThirdParty/freealut-1.1.0/include/AL/alut.h"
+//#include "../../Lepra/Include/DiskFile.h"
+#include "../Include/UiOggAlStream.h"
 
 
 
@@ -156,10 +157,9 @@ SoundManager::SoundID SoundManagerOpenAL::LoadSound3D(const str& pFileName, cons
 	return ((SoundID)lSample);
 }
 
-SoundManager::SoundID SoundManagerOpenAL::LoadStream(const str& pFileName, LoopMode pLoopMode, int pPriority)
+SoundStream* SoundManagerOpenAL::CreateSoundStream(const str& pFileName, LoopMode pLoopMode, int)
 {
-	// TODO: should read a stream, not buffer the thing.
-	return (LoadSound2D(pFileName, pLoopMode, pPriority));
+	return new OggAlStream(pFileName, pLoopMode != LOOP_NONE);
 }
 
 void SoundManagerOpenAL::Release(SoundID pSoundID)

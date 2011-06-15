@@ -12,20 +12,13 @@
 #include "../UiLepra/Include/UiLepra.h"
 #include "../UiLepra/Include/UiInput.h"
 #include "../UiLepra/Include/UiSoundManager.h"
+#include "../UiLepra/Include/UiSoundStream.h"
 #include "../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../UiTBC/Include/GUI/UiFloatingLayout.h"
 #include "../UiTBC/Include/UiFontManager.h"
 #include "../UiTBC/Include/UiOpenGLPainter.h"
 #include "../UiTBC/Include/UiOpenGLRenderer.h"
 #include "SlimeVolleyball.hpp"
-#include <vorbis/vorbisfile.h>
-
-#include < AL/al.h >
-#include < AL/alut.h >
-#include < vorbis/vorbisfile.h >
-#include < cstdio >
-#include < iostream >
-#include < vector >
 
 #define BUFFER_SIZE   32768     // 32 KB buffers
 
@@ -45,6 +38,7 @@ public:
 
 	static bool PollApp();
 	static void OnTap(float x, float y);
+	void OnInput(UiLepra::InputElement* pElement);
 
 private:
 	Graphics GetGraphics();
@@ -87,6 +81,7 @@ private:
 	UiTbc::DesktopWindow* mDesktopWindow;
 	UiLepra::InputManager* mInput;
 	UiLepra::SoundManager* mSound;
+	UiLepra::SoundStream* mMusicStreamer;
 
 	LOG_CLASS_DECLARE();
 };
@@ -131,6 +126,18 @@ bool App::PollApp()
 void App::OnTap(float x, float y)
 {
 	mApp->mGame->MoveTo(y, x);
+}
+
+void App::OnInput(UiLepra::InputElement* pElement)
+{
+	if (pElement->GetParentDevice() == mInput->GetMouse() &&
+		pElement->GetType() == UiLepra::InputElement::DIGITAL &&
+		pElement->GetBooleanValue())
+	{
+		Event lEvent;
+		lEvent.id = 501;
+		mGame->handleEvent(lEvent);
+	}
 }
 
 Graphics App::GetGraphics()
@@ -260,6 +267,29 @@ bool App::Open()
 		mInput = UiLepra::InputManager::CreateInputManager(mDisplay);
 		//mInput->ActivateAll();
 		mInput->AddKeyCodeInputObserver(this);
+		if (mInput->GetMouse())
+		{
+			class AppInputFunctor: public UiLepra::InputFunctor
+			{
+			public:
+				inline AppInputFunctor(App* pApp):
+					mApp(pApp)
+				{
+				}
+			private:
+				inline void Call(UiLepra::InputElement* pElement)
+				{
+					mApp->OnInput(pElement);
+				}
+				inline UiLepra::InputFunctor* CreateCopy() const
+				{
+					return new AppInputFunctor(mApp);
+				}
+				App* mApp;
+			};
+			mInput->GetMouse()->AddFunctor(new AppInputFunctor(this));
+			mInput->ActivateAll();
+		}
 #endif // !iOS
 	}
 	if (lOk)
@@ -274,70 +304,11 @@ bool App::Open()
 	}
 	if (lOk)
 	{
-		ALint state;                // The state of the sound source
-		ALuint bufferID;            // The OpenAL sound buffer ID
-		ALuint sourceID;            // The OpenAL sound source
-		ALenum format;              // The sound data format
-		ALsizei freq;               // The frequency of the sound data
-		std::vector < char > bufferData; // The sound buffer data from file
-
-		// Initialize the OpenAL library
-		alutInit(0, 0);
-
-		// Create sound buffer and source
-		alGenBuffers(1, &bufferID);
-		alGenSources(1, &sourceID);
-
-		// Set the source and listener to the same location
-		alListener3f(AL_POSITION, 0.0f, 0.0f, 0.0f);
-		alSource3f(sourceID, AL_POSITION, 0.0f, 0.0f, 0.0f);
-  
-		int endian = 0;             // 0 for Little-Endian, 1 for Big-Endian
-		int bitStream;
-		long bytes;
-		char array[BUFFER_SIZE];    // Local fixed size array
-		FILE *f;
-
-		// Open for binary reading
-		fopen_s(&f, "Data/Tingaliin.ogg", "rb");
-
-		vorbis_info *pInfo;
-		OggVorbis_File oggFile;
-		ov_open(f, &oggFile, NULL, 0);
-		// Get some information about the OGG file
-		pInfo = ov_info(&oggFile, -1);
-
-		// Check the number of channels... always use 16-bit samples
-		if (pInfo->channels == 1)
-			format = AL_FORMAT_MONO16;
-		else
-			format = AL_FORMAT_STEREO16;
-		// end if
-
-		// The frequency of the sampling rate
-		freq = pInfo->rate;
-		do {
-			// Read up to a buffer's worth of decoded sound data
-			bytes = ov_read(&oggFile, array, BUFFER_SIZE, endian, 2, 1, &bitStream);
-			// Append to end of buffer
-			bufferData.insert(bufferData.end(), array, array + bytes);
-		} while (bytes > 0 && bufferData.size() < BUFFER_SIZE*5);
-		ov_clear(&oggFile);
-		// Upload sound data to buffer
-		alBufferData(bufferID, format, &bufferData[0], static_cast < ALsizei > (bufferData.size()), freq);
-
-		// Attach sound buffer to source
-		alSourcei(sourceID, AL_BUFFER, bufferID);
-		// Finally, play the sound!!!
-		alSourcePlay(sourceID);
-		// This is a busy wait loop but should be good enough for example purpose
-		do {
-			// Query the state of the souce
-			alGetSourcei(sourceID, AL_SOURCE_STATE, &state);
-		} while (state != AL_STOPPED);
-		// Clean up sound buffer and source
-		alDeleteBuffers(1, &bufferID);
-		alDeleteSources(1, &sourceID);
+		mMusicStreamer = mSound->CreateSoundStream(_T("Data/Tingaliin.ogg"), UiLepra::SoundManager::LOOP_FORWARD, 0);
+		if (!mMusicStreamer || !mMusicStreamer->Playback())
+		{
+			mLog.Errorf(_T("Unable to play beautiful muzak!"));
+		}
 	}
 	if (lOk)
 	{
@@ -354,6 +325,9 @@ void App::Close()
 	UiLepra::Core::ProcessMessages();
 	Thread::Sleep(0.05);
 	UiLepra::Core::ProcessMessages();
+
+	delete mMusicStreamer;
+	mMusicStreamer = 0;
 
 	delete (mSound);
 	mSound = 0;
@@ -508,6 +482,19 @@ bool App::Poll()
 	mGame->paint(GetGraphics());
 	mGame->run();
 	EndRender();
+
+#ifndef LEPRA_IOS
+	mInput->PollEvents();
+	mInput->Refresh();
+#endif // !iOS
+
+	if (mMusicStreamer->Update())
+	{
+		if(!mMusicStreamer->IsPlaying())
+		{
+			mMusicStreamer->Playback();
+		}
+	}
 	return true;
 }
 
@@ -614,18 +601,9 @@ void App::Resume()
 bool App::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 {
 	Event lEvent;
-	switch (pKeyCode)
-	{
-		case UiLepra::InputManager::IN_KBD_SPACE:
-			lEvent.id = 501;
-			mGame->handleEvent(lEvent);
-			break;
-		default:
-			lEvent.id = 401;
-			lEvent.key = pKeyCode;
-			mGame->handleEvent(lEvent);
-			break;
-	}
+	lEvent.id = 401;
+	lEvent.key = pKeyCode;
+	mGame->handleEvent(lEvent);
 	return false;
 }
 

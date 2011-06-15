@@ -34,7 +34,7 @@ public:
 	virtual SoundID LoadSound2D(const str& pFileName, const void* pData, size_t pDataSize, LoopMode pLoopMode, int pPriority);
 	virtual SoundID LoadSound3D(const str& pFileName, LoopMode LoopMode, int pPriority);
 	virtual SoundID LoadSound3D(const str& pFileName, const void* pData, size_t pDataSize, LoopMode pLoopMode, int pPriority);
-	virtual SoundID LoadStream(const str& pFileName, LoopMode LoopMode, int pPriority);
+	virtual SoundStream* CreateSoundStream(const str& pFileName, LoopMode pLoopMode, int pPriority);
 
 	void Release(SoundID pSoundID);
 
