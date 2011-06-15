@@ -595,6 +595,10 @@
 				RelativePath=".\Source\UiSoundManagerOpenAL.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\Source\UiSoundStream.cpp"
+				>
+			</File>
 			<Filter
 				Name="Win32"
 				>

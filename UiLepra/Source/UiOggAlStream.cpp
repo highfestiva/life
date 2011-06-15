@@ -21,8 +21,8 @@ namespace UiLepra
 
 OggAlStream::OggAlStream(const str& pFilename, bool pLoop)
 {
-	Open(pFilename);
-	pLoop;	// TODO: enable looping sounds.
+	mIsLooping = pLoop;
+	mIsOpen = Open(pFilename);
 }
 
 OggAlStream::~OggAlStream()
@@ -45,6 +45,11 @@ bool OggAlStream::Playback()
 	alSourceQueueBuffers(mAlSource, 2, mAlBuffers);
 	alSourcePlay(mAlSource);
 	return true;
+}
+
+bool OggAlStream::Rewind()
+{
+	return (ov_raw_seek(&mOggStream, 0) == 0);
 }
 
 bool OggAlStream::IsPlaying() const
@@ -70,6 +75,11 @@ bool OggAlStream::Update()
 
 		alSourceQueueBuffers(mAlSource, 1, &buffer);
 		AL_CHECK();
+	}
+	if (!lIsActive && mIsLooping)
+	{
+		Clear();
+		lIsActive = Rewind();
 	}
 	return lIsActive;
 }

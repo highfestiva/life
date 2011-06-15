@@ -19,6 +19,11 @@ public:
 	virtual bool Playback() = 0;
 	virtual bool IsPlaying() const = 0;
 	virtual bool Update() = 0;
+	bool IsOpen() const;
+
+protected:
+	bool mIsOpen;
+	bool mIsLooping;
 };
 
 

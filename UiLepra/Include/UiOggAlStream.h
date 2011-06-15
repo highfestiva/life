@@ -21,6 +21,7 @@ public:
 	OggAlStream(const str& pFilename, bool pLoop);
 	virtual ~OggAlStream();
 	virtual bool Playback();		// play the Ogg stream
+	virtual bool Rewind();
 	virtual bool IsPlaying() const;		// check if the source is playing
 	virtual bool Update();			// update the stream if necessary
 

@@ -159,7 +159,13 @@ SoundManager::SoundID SoundManagerOpenAL::LoadSound3D(const str& pFileName, cons
 
 SoundStream* SoundManagerOpenAL::CreateSoundStream(const str& pFileName, LoopMode pLoopMode, int)
 {
-	return new OggAlStream(pFileName, pLoopMode != LOOP_NONE);
+	SoundStream* lSoundStream = new OggAlStream(pFileName, pLoopMode == LOOP_FORWARD);
+	if (!lSoundStream->IsOpen())
+	{
+		delete lSoundStream;
+		lSoundStream = 0;
+	}
+	return lSoundStream;;
 }
 
 void SoundManagerOpenAL::Release(SoundID pSoundID)
