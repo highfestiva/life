@@ -30,7 +30,7 @@ NetworkClient::NetworkClient(RuntimeVariableScope* pVariableScope):
 	mConnectTimeout(0),
 	mLoginToken(),
 	mLoginTimeout(0),
-	mLoginThread(_T("LoginThread")),
+	mLoginThread("LoginThread"),
 	mSafeReceiveToggle(true)
 {
 }

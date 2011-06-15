@@ -1285,7 +1285,7 @@ bool TestNetwork(const LogDecorator& pAccount)
 		{
 		public:
 			DummyAcceptor(TcpListenerSocket* pServerSocket):
-				Thread(_T("DummyAcceptor")),
+				Thread("DummyAcceptor"),
 				mServerSocket(pServerSocket),
 				mConnectSocket(0)
 			{
@@ -1525,7 +1525,7 @@ template<class _MuxSocket, class _VSocket> class ServerSocketHandler: public Thr
 public:
 	typedef _VSocket VSocket;
 	typedef _VSocket* (_MuxSocket::*_AcceptMethod)();
-	ServerSocketHandler(const str& pName, _MuxSocket& pServerSocket, _AcceptMethod pAcceptMethod, bool pLoop):
+	ServerSocketHandler(const astr& pName, _MuxSocket& pServerSocket, _AcceptMethod pAcceptMethod, bool pLoop):
 		Thread(pName),
 		mServerSocket(0),
 		mServerMuxSocket(pServerSocket),
@@ -1631,7 +1631,7 @@ bool DualSocketClientTest::Test()
 		}
 		ServerSocketHandler<TcpMuxSocket, TcpVSocket>* lServer =
 			new ServerSocketHandler<TcpMuxSocket, TcpVSocket>(
-				_T("TcpDummyServerSocket"), *lServerTcpMuxSocket, &TcpMuxSocket::Accept, false);
+				"TcpDummyServerSocket", *lServerTcpMuxSocket, &TcpMuxSocket::Accept, false);
 		if (lTestOk)
 		{
 			lContext = _T("client connected without UDP");
@@ -1667,7 +1667,7 @@ bool DualSocketClientTest::Test()
 	}
 	ServerSocketHandler<UdpMuxSocket, UdpVSocket>* lUdpServer =
 		new ServerSocketHandler<UdpMuxSocket, UdpVSocket>(
-			_T("UDP Server"), lServerUdpMuxSocket, &UdpMuxSocket::Accept, true);
+			"UDP Server", lServerUdpMuxSocket, &UdpMuxSocket::Accept, true);
 	if (lTestOk)
 	{
 		lContext = _T("client connected without TCP");
@@ -1701,7 +1701,7 @@ bool DualSocketClientTest::Test()
 	}
 	ServerSocketHandler<TcpMuxSocket, TcpVSocket>* lTcpServer =
 		new ServerSocketHandler<TcpMuxSocket, TcpVSocket>(
-			_T("TCP Server"), lServerTcpMuxSocket, &TcpMuxSocket::Accept, true);
+			"TCP Server", lServerTcpMuxSocket, &TcpMuxSocket::Accept, true);
 	if (lTestOk)
 	{
 		lContext = _T("client TCP+UDP connect");
@@ -1870,7 +1870,7 @@ bool DualSocketServerTest::Test()
 	{
 	public:
 		ServerSocketHandler(DualMuxSocket& pServerSocket):
-			Thread(_T("GameServerSocket")),
+			Thread("GameServerSocket"),
 			mServerMuxSocket(pServerSocket)
 		{
 			bool started = Start();
@@ -2264,7 +2264,7 @@ bool TestPerformance(const LogDecorator& pAccount)
 			}
 
 			{
-				StaticThread lThread(_T("Condition"));
+				StaticThread lThread("Condition");
 				Condition lCondition;
 				gCondition = &lCondition;
 				lThread.Start(ConditionThread, 0);
@@ -2285,7 +2285,7 @@ bool TestPerformance(const LogDecorator& pAccount)
 			}
 
 			{
-				StaticThread lThread(_T("CompatibleCondition"));
+				StaticThread lThread("CompatibleCondition");
 				CompatibleCondition lCondition;
 				gCompatibleCondition = &lCondition;
 				lThread.Start(CompatibleConditionThread, 0);
@@ -2308,7 +2308,7 @@ bool TestPerformance(const LogDecorator& pAccount)
 			{
 				Thread::YieldCpu();	// Yield to not get a starved Cpu time slice.
 				LEPRA_MEASURE_SCOPE(StaticThread);
-				StaticThread lThread(_T("PerformanceTest"));
+				StaticThread lThread("PerformanceTest");
 				{
 					LEPRA_MEASURE_SCOPE(Start);
 					lThread.Start(DummyThread, 0);
@@ -2388,7 +2388,7 @@ bool TestPerformance(const LogDecorator& pAccount)
 				{
 				public:
 					DummyAcceptor(UdpMuxSocket* pSocket):
-						Thread(_T("DummyAcceptor")),
+						Thread("DummyAcceptor"),
 						mSocket(pSocket)
 					{
 					}
@@ -2765,7 +2765,7 @@ bool TestMemFileConcurrency(const LogDecorator& pAccount)
 		{
 		public:
 			FileTrasher(LogListener& pFile, Semaphore& pSemaphore):
-				Thread(_T("Trasher")),
+				Thread("Trasher"),
 				mFile(pFile),
 				mSemaphore(pSemaphore)
 			{

@@ -201,7 +201,7 @@ void GameClientSlaveManager::SetIsQuitting()
 	CloseLoginGui();
 	((ClientConsoleManager*)GetConsoleManager())->GetUiConsole()->SetVisible(false);
 	SetRoadSignsVisible(false);
-	if (Thread::GetCurrentThread()->GetThreadName() == _T("MainThread"))
+	if (Thread::GetCurrentThread()->GetThreadName() == "MainThread")
 	{
 		GetResourceManager()->Tick();
 	}

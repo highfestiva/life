@@ -110,7 +110,7 @@ bool TestThreading(const LogDecorator& pAccount)
 		lContext = _T("thread start");
 		for (unsigned x = 0; x < 100 && lTestOk; ++x)
 		{
-			StaticThread lThread(_T("StartupTest"));
+			StaticThread lThread("StartupTest");
 			gThreadTestCounter = 7;
 			lTestOk = lThread.Start(IncreaseThread, 0);
 			assert(lTestOk);
@@ -150,7 +150,7 @@ bool TestThreading(const LogDecorator& pAccount)
 		assert(lTestOk);
 	}
 
-	StaticThread lThread(_T("LockTest"));
+	StaticThread lThread("LockTest");
 	if (lTestOk)
 	{
 		lContext = _T("mutex exclusiveness");
@@ -240,7 +240,7 @@ bool TestThreading(const LogDecorator& pAccount)
 		lContext = _T("MemberThread");
 		{
 			MemberThreadTestClass lTestClass;
-			MemberThread<MemberThreadTestClass> lThread(_T("TestMemberThread"));
+			MemberThread<MemberThreadTestClass> lThread("TestMemberThread");
 			gThreadTestCounter = -5;
 			lTestOk = lThread.Start(&lTestClass, &MemberThreadTestClass::OnTest);
 			assert(lTestOk);
@@ -267,7 +267,7 @@ bool TestThreading(const LogDecorator& pAccount)
 		lContext = _T("sub thread ID");
 		ThreadIdTestClass lTestInstance;
 		lTestInstance.mThreadId = 0;
-		MemberThread<ThreadIdTestClass> lThread(_T("TestThreadId"));
+		MemberThread<ThreadIdTestClass> lThread("TestThreadId");
 		if (lTestOk)
 		{
 			lTestOk = lThread.Start(&lTestInstance, &ThreadIdTestClass::StoreId);
@@ -335,7 +335,7 @@ bool TestThreading(const LogDecorator& pAccount)
 		assert(lTestOk);
 	}
 
-	StaticThread lStlLockerThread(_T("STL locker"));
+	StaticThread lStlLockerThread("STL locker");
 	if (lTestOk)
 	{
 		lContext = _T("STL lock exclusive");
@@ -358,8 +358,8 @@ bool TestThreading(const LogDecorator& pAccount)
 		assert(lTestOk);
 	}
 
-	StaticThread lMemAllocThread(_T("MemAllocator"));
-	StaticThread lMemUseThread(_T("MemUser"));
+	StaticThread lMemAllocThread("MemAllocator");
+	StaticThread lMemUseThread("MemUser");
 	if (lTestOk)
 	{
 		lContext = _T("Memory allocator");

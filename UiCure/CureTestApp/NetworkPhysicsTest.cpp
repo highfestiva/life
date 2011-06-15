@@ -280,7 +280,7 @@ bool NetworkLoginClients()
 	{
 	public:
 		ServerPoller(Cure::NetworkServer* pServer):
-			Thread(_T("Server poller")),
+			Thread("Server poller"),
 			mServer(pServer)
 		{
 		}

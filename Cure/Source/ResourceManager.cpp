@@ -556,7 +556,7 @@ ResourceManager::ResourceManager(unsigned pLoaderThreadCount, const str& pPathPr
 	mTerrainFunctionManager(0),
 	mLoaderThreadCount(pLoaderThreadCount),
 	mPathPrefix(pPathPrefix),
-	mLoaderThread(_T("ResourceLoader")),
+	mLoaderThread("ResourceLoader"),
 	mZipLock(new Lock),
 	mZipFile(new ZipArchive)
 {

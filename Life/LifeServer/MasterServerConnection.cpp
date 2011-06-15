@@ -22,7 +22,7 @@ MasterServerConnection::MasterServerConnection():
 	mSocketIoHandler(0),
 	mMuxSocket(0),
 	mVSocket(0),
-	mConnecter(new MemberThread<MasterServerConnection>(_T("MasterServerConnecter"))),
+	mConnecter(new MemberThread<MasterServerConnection>("MasterServerConnecter")),
 	mDisconnectCounter(0),
 	mIsConnectError(false),
 	mLastFirewallOpenStatus(FIREWALL_ERROR)

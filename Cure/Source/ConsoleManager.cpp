@@ -22,7 +22,7 @@ ConsoleManager::ConsoleManager(RuntimeVariableScope* pVariableScope, Interactive
 	mConsoleLogger(pConsoleLogger),
 	mConsolePrompt(pConsolePrompt),
 	mConsoleCommandManager(0),
-	mConsoleThread(_T("ConsoleThread"))
+	mConsoleThread("ConsoleThread")
 {
 }
 
@@ -166,7 +166,7 @@ bool ConsoleManager::ForkExecuteCommand(const str& pCommand)
 	{
 	public:
 		ForkThread(ConsoleManager* pConsole, const str& pCommand):
-			Thread(_T("ConsoleFork")),
+			Thread("ConsoleFork"),
 			mConsole(pConsole),
 			mCommand(pCommand)
 		{

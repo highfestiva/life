@@ -21,7 +21,7 @@ class ServerThread : public Thread
 {
 public:
 	inline ServerThread():
-		Thread(_T("ServerThread")),
+		Thread("ServerThread"),
 		mUdpMuxSocket(0)
 	{
 		mTestOk = false;
@@ -82,7 +82,7 @@ class ClientThread : public Thread
 {
 public:
 	inline ClientThread() :
-		Thread(_T("ClientThread")),
+		Thread("ClientThread"),
 		mUdpMuxSocket(0)
 	{
 		mTestOk = false;

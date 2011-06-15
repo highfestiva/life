@@ -575,7 +575,7 @@ void GameManager::CreatePhysicsThread()
 		mPhysicsTickStartSemaphore = new Semaphore();
 		mPhysicsTickDoneSemaphore = new Semaphore();
 
-		mPhysicsWorkerThread = new MemberThread<GameManager>(_T("PhysicsThread"));
+		mPhysicsWorkerThread = new MemberThread<GameManager>("PhysicsThread");
 		mPhysicsWorkerThread->Start(this, &GameManager::PhysicsThreadEntry);
 	}
 }
