@@ -6,6 +6,7 @@
 
 #include "../Lepra/Include/Application.h"
 #include "../Lepra/Include/LogListener.h"
+#include "../Lepra/Include/Path.h"
 #include "../Lepra/Include/SystemManager.h"
 #include "../UiLepra/Include/UiCore.h"
 #include "../UiLepra/Include/UiDisplayManager.h"
@@ -82,6 +83,7 @@ private:
 	UiLepra::InputManager* mInput;
 	UiLepra::SoundManager* mSound;
 	UiLepra::SoundStream* mMusicStreamer;
+	str mPathPrefix;
 
 	LOG_CLASS_DECLARE();
 };
@@ -304,7 +306,7 @@ bool App::Open()
 	}
 	if (lOk)
 	{
-		mMusicStreamer = mSound->CreateSoundStream(_T("Data/Tingaliin.ogg"), UiLepra::SoundManager::LOOP_FORWARD, 0);
+		mMusicStreamer = mSound->CreateSoundStream(mPathPrefix+_T("Data/Tingaliin.ogg"), UiLepra::SoundManager::LOOP_FORWARD, 0);
 		if (!mMusicStreamer || !mMusicStreamer->Playback())
 		{
 			mLog.Errorf(_T("Unable to play beautiful muzak!"));
@@ -431,6 +433,11 @@ void App::UpdateSettings()
 
 void App::Init()
 {
+#if defined(LEPRA_MAC)
+	mPathPrefix = Path::GetDirectory(mArgumentVector[0]);
+	mPathPrefix = Path::GetParentDirectory(mPathPrefix);
+	mPathPrefix = Path::JoinPath(mPathPrefix, _T("Resources/"));
+#endif // Mac
 }
 
 
