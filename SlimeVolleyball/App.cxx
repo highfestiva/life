@@ -306,7 +306,7 @@ bool App::Open()
 	}
 	if (lOk)
 	{
-		mMusicStreamer = mSound->CreateSoundStream(mPathPrefix+_T("Data/Tingaliin.ogg"), UiLepra::SoundManager::LOOP_FORWARD, 0);
+		mMusicStreamer = mSound->CreateSoundStream(mPathPrefix+_T("Tingaliin.ogg"), UiLepra::SoundManager::LOOP_FORWARD, 0);
 		if (!mMusicStreamer || !mMusicStreamer->Playback())
 		{
 			mLog.Errorf(_T("Unable to play beautiful muzak!"));
@@ -433,11 +433,7 @@ void App::UpdateSettings()
 
 void App::Init()
 {
-#if defined(LEPRA_MAC)
-	mPathPrefix = Path::GetDirectory(mArgumentVector[0]);
-	mPathPrefix = Path::GetParentDirectory(mPathPrefix);
-	mPathPrefix = Path::JoinPath(mPathPrefix, _T("Resources/"));
-#endif // Mac
+	mPathPrefix = SystemManager::GetDataDirectory(mArgumentVector[0]);
 }
 
 
@@ -495,7 +491,7 @@ bool App::Poll()
 	mInput->Refresh();
 #endif // !iOS
 
-	if (mMusicStreamer->Update())
+	if (mMusicStreamer && mMusicStreamer->Update())
 	{
 		if(!mMusicStreamer->IsPlaying())
 		{

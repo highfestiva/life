@@ -85,6 +85,7 @@ void OpenGLPainter::PrePaint()
 	::glClear(GL_DEPTH_BUFFER_BIT);
 #ifndef LEPRA_GL_ES
 	::glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	::glDisableClientState(GL_INDEX_ARRAY);
 #endif // !GLES
 	::glHint(GL_LINE_SMOOTH_HINT, GL_FASTEST);
 	::glLineWidth(1);
@@ -93,7 +94,6 @@ void OpenGLPainter::PrePaint()
 	::glDisable(GL_CULL_FACE);
 	::glDisable(GL_LINE_SMOOTH);
 	::glEnableClientState(GL_VERTEX_ARRAY);
-	::glDisableClientState(GL_INDEX_ARRAY);
 	::glDisableClientState(GL_NORMAL_ARRAY);
 	::glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
