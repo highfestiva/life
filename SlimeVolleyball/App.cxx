@@ -14,6 +14,7 @@
 #include "../UiLepra/Include/UiInput.h"
 #include "../UiLepra/Include/UiSoundManager.h"
 #include "../UiLepra/Include/UiSoundStream.h"
+#include "../UiTBC/Include/GUI/UiButton.h"
 #include "../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../UiTBC/Include/GUI/UiFloatingLayout.h"
 #include "../UiTBC/Include/UiFontManager.h"
@@ -38,7 +39,7 @@ public:
 
 	static bool PollApp();
 	static void OnTap(float x, float y);
-	void OnInput(UiLepra::InputElement* pElement);
+	//void OnInput(UiLepra::InputElement* pElement);
 
 private:
 	Graphics GetGraphics();
@@ -66,6 +67,8 @@ private:
 	void OnResize(int pWidth, int pHeight);
 	void OnMinimize();
 	void OnMaximize(int pWidth, int pHeight);
+
+	void OnClick(UiTbc::Button* pButton);
 
 	static App* mApp;
 #ifdef LEPRA_IOS
@@ -129,7 +132,7 @@ void App::OnTap(float x, float y)
 	mApp->mGame->MoveTo(y, x);
 }
 
-void App::OnInput(UiLepra::InputElement* pElement)
+/*void App::OnInput(UiLepra::InputElement* pElement)
 {
 	if (pElement->GetParentDevice() == mInput->GetMouse() &&
 		pElement->GetType() == UiLepra::InputElement::DIGITAL &&
@@ -139,7 +142,7 @@ void App::OnInput(UiLepra::InputElement* pElement)
 		lEvent.id = 501;
 		mGame->handleEvent(lEvent);
 	}
-}
+}*/
 
 Graphics App::GetGraphics()
 {
@@ -266,9 +269,9 @@ bool App::Open()
 		mInput = 0;
 #ifndef LEPRA_IOS
 		mInput = UiLepra::InputManager::CreateInputManager(mDisplay);
-		//mInput->ActivateAll();
+		mInput->ActivateAll();
 		mInput->AddKeyCodeInputObserver(this);
-		if (mInput->GetMouse())
+		/*if (mInput->GetMouse())
 		{
 			class AppInputFunctor: public UiLepra::InputFunctor
 			{
@@ -290,7 +293,7 @@ bool App::Open()
 			};
 			mInput->GetMouse()->AddFunctor(new AppInputFunctor(this));
 			mInput->ActivateAll();
-		}
+		}*/
 #endif // !iOS
 	}
 	if (lOk)
@@ -298,6 +301,24 @@ bool App::Open()
 		mDesktopWindow = new UiTbc::DesktopWindow(mInput, mPainter, new UiTbc::FloatingLayout(), 0, 0);
 		mDesktopWindow->SetIsHollow(true);
 		mDesktopWindow->SetPreferredSize(mCanvas->GetWidth(), mCanvas->GetHeight());
+		UiTbc::Button* lButton = new UiTbc::Button(Color(0, 192, 0), _T(""));
+		lButton->SetText(_T("Lazy"));
+		lButton->SetPreferredSize(150, 50);
+		mDesktopWindow->AddChild(lButton);
+		lButton->SetPos(20, 20);
+		lButton->SetOnClick(App, OnClick);
+		lButton = new UiTbc::Button(Color(192, 192, 0), _T(""));
+		lButton->SetText(_T("Hard"));
+		lButton->SetPreferredSize(150, 50);
+		mDesktopWindow->AddChild(lButton);
+		lButton->SetPos(20, 100);
+		lButton->SetOnClick(App, OnClick);
+		lButton = new UiTbc::Button(Color(192, 0, 0), _T(""));
+		lButton->SetText(_T("Original"));
+		lButton->SetPreferredSize(150, 50);
+		mDesktopWindow->AddChild(lButton);
+		lButton->SetOnClick(App, OnClick);
+		lButton->SetPos(20, 180);
 	}
 	if (lOk)
 	{
@@ -479,9 +500,10 @@ bool App::Poll()
 {
 	UiLepra::Core::ProcessMessages();
 	BeginRender(Vector3DF(0,0,0));
-	Render(PixelRect(0,0,100,100));
-	Paint();
+	Render(PixelRect(0, 0, mDisplay->GetWidth(), mDisplay->GetHeight()));
+	PreparePaint();
 	mGame->paint(GetGraphics());
+	Paint();
 	mGame->run();
 	EndRender();
 
@@ -537,21 +559,20 @@ void App::Paint()
 {
 	if (CanRender())
 	{
-		mCanvas->SetBuffer(0);
-		mPainter->SetDestCanvas(mCanvas);
-		float r, g, b;
-		mRenderer->GetAmbientLight(r, g, b);
-		mRenderer->SetAmbientLight(0.1f, 0.1f, 0.1f);
-		PreparePaint();
 		mDesktopWindow->Repaint(mPainter);
-		mRenderer->SetAmbientLight(r, g, b);
 	}
 }
 
 void App::PreparePaint()
 {
-	mPainter->ResetClippingRect();
-	mPainter->PrePaint();
+	if (CanRender())
+	{
+		mCanvas->SetBuffer(0);
+		mPainter->SetDestCanvas(mCanvas);
+		mRenderer->SetAmbientLight(0.1f, 0.1f, 0.1f);
+		mPainter->ResetClippingRect();
+		mPainter->PrePaint();
+	}
 }
 
 void App::EndRender()
@@ -638,6 +659,24 @@ void App::OnMinimize()
 void App::OnMaximize(int pWidth, int pHeight)
 {
 	OnResize(pWidth, pHeight);
+}
+
+void App::OnClick(UiTbc::Button* pButton)
+{
+	if (pButton->GetText() == _T("Lazy"))
+	{
+		mGame->mSpeed = -20;
+	}
+	else if (pButton->GetText() == _T("Hard"))
+	{
+		mGame->mSpeed = -10;
+	}
+	else if (pButton->GetText() == _T("Original"))
+	{
+		mGame->mSpeed = 0;
+	}
+	pButton->SetVisible(false);
+	mGame->resetGame();
 }
 
 

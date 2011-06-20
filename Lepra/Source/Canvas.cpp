@@ -2287,6 +2287,11 @@ void Canvas::RotateChannels96Bit(int pSteps)
 
 void Canvas::ConvertBitDepth(BitDepth pBitDepth)
 {
+	if (mBitDepth == pBitDepth)
+	{
+		return;
+	}
+
 	switch(pBitDepth)
 	{
 		case BITDEPTH_8_BIT:

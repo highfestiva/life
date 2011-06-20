@@ -87,7 +87,7 @@ class SlimeVolleyball
 	private: int _run_k;
 	private: int _run_m;
 	private: long _run_l;
-	private: int mSpeed;
+	public: int mSpeed;
 	private: HiResTimer mWaitRunTimer;
 	private: double mAverageLoopTime;
 	private: HiResTimer mLoopTimer;
@@ -406,7 +406,7 @@ class SlimeVolleyball
 		return false;
 	}
 
-	private: void resetGame()
+	public: void resetGame()
 	{
 		this->mousePressed = true;
 		if (this->fInPlay)

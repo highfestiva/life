@@ -118,7 +118,7 @@ Window::Window(const Color& pColor,
 	mCaption(0),
 	mBorder(false),
 	mBorderWidth(0),
-	mBodyColor(192, 192, 192),
+	mBodyColor(pColor),
 	mBorderStyle(0)
 {
 	mClientRect = new RectComponent(pColor, _T("ClientRect"), pLayout);
