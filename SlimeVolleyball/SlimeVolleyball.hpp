@@ -102,7 +102,7 @@ class SlimeVolleyball
 	public: SlimeVolleyball()
 	{
 		CLEAR_MEMBERS(nWidth, bGameOver);
-		mPlayerCount = 1;
+		mPlayerCount = 2;
 	}
 
 	public: bool init(const Graphics& pGraphics)
@@ -122,7 +122,7 @@ class SlimeVolleyball
 		LEPRA_ARRAY_ASSIGN(this->loserText1, s2);
 		astr s3[] = { "Better luck next time.", "So who has the red face bombing out on level 2, huh?", "Congrats on reaching level 3.", "Congrats on reaching level 4!", "You fell at the last hurdle... but get up and try again!" };
 		LEPRA_ARRAY_ASSIGN(this->loserText2, s3);
-		astr s4[] = { "Big Red Slime ", "Magic Green Slime ", "Golden Boy ", "The Great White Slime ", "The Grass Tree© " };
+		astr s4[] = { "Big Red Slime ", "Magic Green Slime ", "Golden Boy ", "The Great White Slime ", "The Grass Treeï¿½ " };
 		LEPRA_ARRAY_ASSIGN(this->humanSlimeColText, s4);
 		Color c2[] = { RED, GREEN, YELLOW, WHITE, BLACK };
 		LEPRA_ARRAY_ASSIGN(this->humanSlimeColours, c2);
@@ -446,10 +446,10 @@ class SlimeVolleyball
 	private: void resetTap()
 	{
 		tapActive = false;
-		p1TapX = p1X;
+		p1TapX = 200;
 		p1TapY = 0;
 		p1TapJump = false;
-		p2TapX = p2X;
+		p2TapX = 800;
 		p2TapY = 0;
 		p2TapJump = false;
 	}
@@ -1007,28 +1007,28 @@ class SlimeVolleyball
 		screen.setColor(p1TapJump? RED : GREEN);
 		const int py = xformy(TAP_BASE);
 		const int pyj = xformy(TAP_BASE+TAP_JUMP_HEIGHT) - 15;
-		screen.fillRect(xformx(25), py, xformx(475), 3);
+		screen.fillRect(xformx(50), py, xformx(450), 3);
 		if (p1TapJump)
 		{
-			screen.fillRect(xformx(25), pyj, xformx(475), 3);
+			screen.fillRect(xformx(50), pyj, xformx(450), 3);
 		}
 		if (mPlayerCount == 2)
 		{
 			screen.setColor(p2TapJump? RED : GREEN);
-			screen.fillRect(xformx(525), py, xformx(975), 3);
+			screen.fillRect(xformx(550), py, xformx(950), 3);
 			if (p2TapJump)
 			{
-				screen.fillRect(xformx(525), pyj, xformx(975), 3);
+				screen.fillRect(xformx(550), pyj, xformx(950), 3);
 			}
 		}
 		if (!tapActive)
 		{
 			return;
 		}
-		drawSpike(xformx(p1TapX), py-160, 160, p1TapJump? RED : GREEN);
+		drawSpike(xformx(p1TapX), p1TapJump? pyj-160 : py-160, 160, p1TapJump? RED : GREEN);
 		if (mPlayerCount == 2)
 		{
-			drawSpike(xformx(p1TapX), py-160, 160, p2TapJump? RED : GREEN);
+			drawSpike(xformx(p2TapX), p2TapJump? pyj-160 : py-160, 160, p2TapJump? RED : GREEN);
 		}
 #endif // iOS
 	}
