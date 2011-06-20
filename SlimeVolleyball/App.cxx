@@ -20,7 +20,6 @@
 #include "../UiTBC/Include/UiOpenGLRenderer.h"
 #include "SlimeVolleyball.hpp"
 
-#define BUFFER_SIZE   32768     // 32 KB buffers
 
 
 namespace Slime

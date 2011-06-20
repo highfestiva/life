@@ -58,38 +58,31 @@ class SlimeVolleyball
 	private: int fP2Touches;
 	private: int fP1TouchesTot;
 	private: int fP2TouchesTot;
-	private: int fP1Clangers;
-	private: int fP2Clangers;
-	private: int fP1Aces;
-	private: int fP2Aces;
-	private: int fP1Winners;
-	private: int fP2Winners;
-	private: int fP1PointsWon;
-	private: int fP2PointsWon;
-	private: bool fP1HitStill;
-	private: bool fP2HitStill;
-	private: long fP1Frames;
-	private: long fP2Frames;
-	private: int fP1Super;
-	private: int fP2Super;
+	/*private: int fP1PointsWon;
+	private: int fP2PointsWon;*/
+	private: int nPointsScored;
+	private: int nScore;
 	private: bool fServerMoved;
-	private: bool hitNetSinceTouched;
 	private: bool doRunGameThread;
 	private: bool fEndGame;
 	private: long startTime;
 	private: long gameTime;
-	private: long crossedNetTime;
 	private: long pausedTime;
 	private: bool paused;
 	private: int scoringRun;
 	private: astr slimeColText[6];
 	private: Color slimeColours[6];
+	private: Color humanSlimeColours[5];
+	private: Color* activeSlimeColours;
+	private: int activeColCount;
 	private: astr loserText1[5];
 	private: astr loserText2[5];
+	private: astr humanSlimeColText[5];
+	private: astr* activeSlimeColText;
 	private: Color SKY_COL;
 	private: Color COURT_COL;
 	private: Color BALL_COL;
-	private: static const int pointsToWin = 6;
+	private: int frenzyCol;
 	private: int _run_j;
 	private: int _run_k;
 	private: int _run_m;
@@ -101,14 +94,15 @@ class SlimeVolleyball
 	private: bool mWasFrozen;
 	private: int aiMode;
 	private: SlimeAI* ai;
-	private: int gameScore;
 	private: bool bGameOver;
+	private: int mPlayerCount;
 
 	private: static const int aiStartLevel = 0;
 
 	public: SlimeVolleyball()
 	{
 		CLEAR_MEMBERS(nWidth, bGameOver);
+		mPlayerCount = 1;
 	}
 
 	public: bool init(const Graphics& pGraphics)
@@ -118,6 +112,7 @@ class SlimeVolleyball
 		this->nWidth = this->screen.width;
 		this->nHeight = this->screen.height*4/5;
 		this->fInPlay = this->fEndGame = false;
+		nScore = 5;
 		this->promptMsg = "Click the mouse to play!";
 		astr s[] = { "Inferior Human Controlled Slime ", "The Pathetic White Slime ", "Angry Red Slimonds ", "The Slime Master ", "Psycho Slime ", "Psycho Slime " };
 		LEPRA_ARRAY_ASSIGN(this->slimeColText, s);
@@ -127,8 +122,11 @@ class SlimeVolleyball
 		LEPRA_ARRAY_ASSIGN(this->loserText1, s2);
 		astr s3[] = { "Better luck next time.", "So who has the red face bombing out on level 2, huh?", "Congrats on reaching level 3.", "Congrats on reaching level 4!", "You fell at the last hurdle... but get up and try again!" };
 		LEPRA_ARRAY_ASSIGN(this->loserText2, s3);
+		astr s4[] = { "Big Red Slime ", "Magic Green Slime ", "Golden Boy ", "The Great White Slime ", "The Grass Tree© " };
+		LEPRA_ARRAY_ASSIGN(this->humanSlimeColText, s4);
+		Color c2[] = { RED, GREEN, YELLOW, WHITE, BLACK };
+		LEPRA_ARRAY_ASSIGN(this->humanSlimeColours, c2);
 		this->p1Col = 0;
-		this->gameScore = 0;
 		this->bGameOver = true;
 		this->paused = false;
 		this->mLoopTimer.PopTimeDiff();
@@ -142,8 +140,9 @@ class SlimeVolleyball
 
 	private: void setAI()
 	{
-		this->fP1PointsWon = 0;
-		this->fP2PointsWon = 0;
+		//this->fP1PointsWon = 0;
+		//this->fP2PointsWon = 0;
+		this->nScore = 5;
 		delete this->ai;
 		switch (this->aiMode)
 		{
@@ -182,33 +181,37 @@ class SlimeVolleyball
 			this->SKY_COL = BLACK;
 			this->COURT_COL = RED;
 			this->BALL_COL = YELLOW;
-			this->fP2PointsWon = 5;
+			this->nScore = 1;
 			break;
 		}
 		this->p2Col = (this->aiMode + 1);
 		this->ai->init(this, 2);
 	}
 
-	public: void paint(Graphics paramGraphics)
+	public: void paint(const Graphics& paramGraphics)
 	{
+		activeSlimeColText = (mPlayerCount == 2)? humanSlimeColText : slimeColText;
+		activeSlimeColours = (mPlayerCount == 2)? humanSlimeColours : slimeColours;
+		activeColCount = (mPlayerCount == 2)? LEPRA_ARRAY_COUNT(humanSlimeColours) : LEPRA_ARRAY_COUNT(slimeColours);
+
 		this->screen = paramGraphics;
-		this->nWidth = paramGraphics.width;
-		this->nHeight = paramGraphics.height*4/5;
-		paramGraphics.setColor(this->SKY_COL);
-		paramGraphics.fillRect(0, 0, this->nWidth, 4 * this->nHeight / 5);
-		paramGraphics.setColor(this->COURT_COL);
-		paramGraphics.fillRect(0, 4 * this->nHeight / 5, this->nWidth, this->nHeight/2);
-		paramGraphics.setColor(WHITE);
-		paramGraphics.fillRect(this->nWidth / 2 - 2, 7 * this->nHeight / 10, 4, this->nHeight / 10 + 5);
-		FontMetrics localFontMetrics = paramGraphics.getFontMetrics();
+		this->nWidth = screen.width;
+		this->nHeight = screen.height*4/5;
+		screen.setColor(this->SKY_COL);
+		screen.fillRect(0, 0, this->nWidth, 4 * this->nHeight / 5);
+		screen.setColor(this->COURT_COL);
+		screen.fillRect(0, 4 * this->nHeight / 5, this->nWidth, this->nHeight/2);
+		screen.setColor(WHITE);
+		screen.fillRect(this->nWidth / 2 - 2, 7 * this->nHeight / 10, 4, this->nHeight / 10 + 5);
+		FontMetrics localFontMetrics = screen.getFontMetrics();
 		if (this->bGameOver)
 		{
 			this->screen.centerString("Slime Volleyball", this->nHeight / 2);
-			paramGraphics.centerString("Applet code base by Quin Pendragon", this->nHeight / 2 + localFontMetrics.getHeight() * 2);
-			paramGraphics.centerString("AI and Mod by Daniel Wedge", this->nHeight / 2 + localFontMetrics.getHeight() * 3);
-			paramGraphics.centerString("Port by high_festiva", this->nHeight / 2 + localFontMetrics.getHeight() * 4);
-			paramGraphics.setColor(LIGHT_RED);
-			paramGraphics.centerString("Latest version is at pixeldoctrine.com", this->nHeight / 2 + localFontMetrics.getHeight() * 11 / 2);
+			screen.centerString("Applet code base by Quin Pendragon", this->nHeight / 2 + localFontMetrics.getHeight() * 2);
+			screen.centerString("AI and Mod by Daniel Wedge", this->nHeight / 2 + localFontMetrics.getHeight() * 3);
+			screen.centerString("Port by high_festiva", this->nHeight / 2 + localFontMetrics.getHeight() * 4);
+			screen.setColor(LIGHT_RED);
+			screen.centerString("Latest version is at pixeldoctrine.com", this->nHeight / 2 + localFontMetrics.getHeight() * 11 / 2);
 			if (this->aiMode != 0)
 				this->promptMsg = "Click the mouse to play or press C to continue...";
 			else
@@ -223,23 +226,23 @@ class SlimeVolleyball
 
 		if (!this->fInPlay)
 		{
-			paramGraphics.setColor(WHITE);
+			screen.setColor(WHITE);
 			astr s1 = astr("Level ") + astrutil::IntToString(this->aiMode + 1, 10) + " clear!";
 			this->screen.centerString(s1, this->nHeight / 3);
-			astr s2 = astr("Your score: ") + astrutil::IntToString(this->gameScore, 10);
-			paramGraphics.centerString(s2, this->nHeight / 2);
-			if (this->fP1PointsWon == 6)
+			//astr s2 = astr("Your score: ") + astrutil::IntToString(this->gameScore, 10);
+			//screen.centerString(s2, this->nHeight / 2);
+			/*if (this->fP1PointsWon == 6)
 			{
 				astr s3 = astr("Level bonus: ") + astrutil::IntToString(1000 * this->fP1PointsWon / (this->fP1PointsWon + this->fP2PointsWon) * scale(), 10) + " points";
-				paramGraphics.centerString(s3, this->nHeight / 2 + localFontMetrics.getHeight());
+				screen.centerString(s3, this->nHeight / 2 + localFontMetrics.getHeight());
 				astr s4 = astr("Time bonus: ") + astrutil::IntToString((this->gameTime < 300000L ? 300000L - this->gameTime : 0L) / 1000L * scale(), 10) + " points";
-				paramGraphics.centerString(s4, this->nHeight / 2 + localFontMetrics.getHeight() * 2);
+				screen.centerString(s4, this->nHeight / 2 + localFontMetrics.getHeight() * 2);
 				if (this->fP2PointsWon == 0)
 				{
 					astr s5 = astr("Flawless Victory: ") + astrutil::IntToString(1000 * scale(), 10) + " points";
-					paramGraphics.centerString(s5, this->nHeight / 2 + localFontMetrics.getHeight() * 3);
+					screen.centerString(s5, this->nHeight / 2 + localFontMetrics.getHeight() * 3);
 				}
-			}
+			}*/
 			this->promptMsg = "Click the mouse to continue...";
 			drawPrompt();
 			this->promptMsg = "";
@@ -268,20 +271,56 @@ class SlimeVolleyball
 		case 403:
 			switch (paramEvent.key)
 			{
+			case UiLepra::InputManager::IN_KBD_DOWN:
+				if (mPlayerCount == 2)
+				{
+					do
+						this->p2Col = (this->p2Col != 4 ? this->p2Col + 1 : 0);
+					while (this->p1Col == this->p2Col);
+				}
+				break;
+			case UiLepra::InputManager::IN_KBD_LEFT:
+				if (mPlayerCount == 2)
+				{
+					moveP2Left();
+					break;
+				}
+				// TRICKY: fall thru.
 			case 'a':
 			case 'A':
-			case UiLepra::InputManager::IN_KBD_LEFT:
 				moveP1Left();
 				break;
+			case UiLepra::InputManager::IN_KBD_RIGHT:
+				if (mPlayerCount == 2)
+				{
+					moveP2Right();
+					break;
+				}
+				// TRICKY: fall thru.
 			case 'd':
 			case 'D':
-			case UiLepra::InputManager::IN_KBD_RIGHT:
 				moveP1Right();
 				break;
+				// TRICKY: fall thru.
+			case UiLepra::InputManager::IN_KBD_UP:
+				if (mPlayerCount == 2)
+				{
+					moveP2Jump();
+					break;
+				}
+				// TRICKY: fall thru.
 			case 'w':
 			case 'W':
-			case UiLepra::InputManager::IN_KBD_UP:
 				moveP1Jump();
+				break;
+			case 's':
+			case 'S':
+				if (mPlayerCount == 2)
+				{
+					do
+						this->p1Col = (this->p1Col != 4 ? this->p1Col + 1 : 0);
+					while (this->p1Col == this->p2Col);
+				}
 				break;
 			case 'c':
 			case 'C':
@@ -301,10 +340,8 @@ class SlimeVolleyball
 				this->ballY = 400;
 				this->ballVX = 0;
 				this->ballVY = 0;
-				this->hitNetSinceTouched = false;
 				this->promptMsg = "";
 				this->bGameOver = false;
-				this->gameScore = 0;
 				setAI();
 				//repaint();
 				this->StartRun();
@@ -336,18 +373,34 @@ class SlimeVolleyball
 		case 404:
 			switch (paramEvent.key)
 			{
+			case UiLepra::InputManager::IN_KBD_LEFT:
+				if (mPlayerCount == 2)
+				{
+					if (this->p2XV >= 0) break;
+					this->p2XV = 0;
+					break;
+				}
+				// TRICKY: fall thru.
 			case 'a':
 			case 'A':
-			case UiLepra::InputManager::IN_KBD_LEFT:
 				if (this->p1XV >= 0) break;
 				this->p1XV = 0;
 				break;
+
+			case UiLepra::InputManager::IN_KBD_RIGHT:
+				if (mPlayerCount == 2)
+				{
+					if (this->p2XV <= 0) break;
+					this->p2XV = 0;
+					break;
+				}
+				// TRICKY: fall thru.
 			case 'd':
 			case 'D':
-			case UiLepra::InputManager::IN_KBD_RIGHT:
 				if (this->p1XV <= 0) break;
 				this->p1XV = 0;
-			}break;
+			}
+			break;
 		}
 
 		return false;
@@ -372,16 +425,18 @@ class SlimeVolleyball
 		this->ballY = 400;
 		this->ballVX = 0;
 		this->ballVY = 0;
+		this->nPointsScored = 0;
+		this->nScore = 5;
+		fP1Fire = false;
+		fP2Fire = false;
 		resetTap();
-		this->hitNetSinceTouched = false;
 		this->promptMsg = "";
-		if ((this->gameScore != 0) && (this->aiMode < 4))
+		if (this->aiMode < 4)
 			this->aiMode += 1;
 		if (this->bGameOver)
 		{
 			this->aiMode = aiStartLevel;
 			this->bGameOver = false;
-			this->gameScore = 0;
 		}
 		setAI();
 		//repaint();
@@ -440,7 +495,11 @@ class SlimeVolleyball
 
 	private: void MoveSlimers()
 	{
-		doAI();
+		if (mPlayerCount == 1)
+		{
+			doAI();
+		}
+
 		this->p1X += this->p1XV;
 		if (this->p1X < 50)
 			this->p1X = 50;
@@ -467,7 +526,8 @@ class SlimeVolleyball
 		}
 	}
 
-	private: void DrawSlimers() {
+	private: void DrawSlimers()
+	{
 		this->superFlash = (!this->superFlash);
 		int i = this->nWidth / 10;
 		int j = this->nHeight / 10;
@@ -477,7 +537,7 @@ class SlimeVolleyball
 		int i1 = 4 * this->nHeight / 5 - this->ballY * this->nHeight / 1000;
 		int i2 = this->p1X * this->nWidth / 1000 - i / 2;
 		int i3 = 7 * this->nHeight / 10 - this->p1Y * this->nHeight / 1000;
-		this->screen.setColor((this->fP1Fire) && (this->superFlash) ? WHITE : this->slimeColours[this->p1Col]);
+		this->screen.setColor((this->fP1Fire) && (this->superFlash) ? this->activeSlimeColours[frenzyCol = ++frenzyCol % activeColCount] : this->activeSlimeColours[this->p1Col]);
 		this->screen.fillArc(i2, i3, i, 2 * j, 0, 180);
 		int i4 = this->p1X + 38;
 		int i5 = this->p1Y - 60;
@@ -492,7 +552,7 @@ class SlimeVolleyball
 		this->screen.fillOval(i2 - 4 * i6 / i8 - 3 * k / 4, i3 - 4 * i7 / i8 - 3 * m / 4, k / 2, m / 2);
 		i2 = this->p2X * this->nWidth / 1000 - i / 2;
 		i3 = 7 * this->nHeight / 10 - this->p2Y * this->nHeight / 1000;
-		this->screen.setColor((this->fP2Fire) && (this->superFlash) ? WHITE : this->slimeColours[this->p2Col]);
+		this->screen.setColor((this->fP2Fire) && (this->superFlash) ? this->activeSlimeColours[frenzyCol = ++frenzyCol % activeColCount] : this->activeSlimeColours[this->p2Col]);
 		this->screen.fillArc(i2, i3, i, 2 * j, 0, 180);
 		i4 = this->p2X - 18;
 		i5 = this->p2Y - 60;
@@ -506,6 +566,34 @@ class SlimeVolleyball
 		this->screen.setColor(BLACK);
 		this->screen.fillOval(i2 - 4 * i6 / i8 - 3 * k / 4, i3 - 4 * i7 / i8 - 3 * m / 4, k / 2, m / 2);
 		if ((!this->fP1Fire) && (!this->fP2Fire)) this->superFlash = false; 
+
+		if (this->nScore > 8)
+		{
+			int i10 = this->p1X * this->nWidth / 1000;
+			int i11 = 7 * this->nHeight / 10 - (this->p1Y - 40) * this->nHeight / 1000;
+			int i12 = this->nWidth / 20;
+			int i13 = this->nHeight / 20;
+			int i14 = 0;
+			do
+			{
+				this->screen.setColor(DARK_GRAY);
+				this->screen.drawArc(i10, i11 + i14, i12, i13, -30, -150);
+				i14++; } while (i14 < 3);
+			return;
+		}
+		if (this->nScore < 2)
+		{
+			int i10 = this->nWidth / 20;
+			int i11 = this->nHeight / 20;
+			int i12 = this->p2X * this->nWidth / 1000 - i10;
+			int i13 = 7 * this->nHeight / 10 - (this->p2Y - 40) * this->nHeight / 1000;
+			int i14 = 0;
+			do
+			{
+				this->screen.setColor(DARK_GRAY);
+				this->screen.drawArc(i12, i13 + i14, i10, i11, -10, -150);
+				i14++; } while (i14 < 3);
+		}
 	}
 
 	private: void MoveBall()
@@ -543,8 +631,6 @@ class SlimeVolleyball
 					this->fP1Touches += 1;
 					this->fP1TouchesTot += 1;
 					this->fP2Touches = 0;
-					this->fP1HitStill = ((this->p1YV == 0) && (this->p1XV == 0));
-					this->hitNetSinceTouched = false;
 				}
 			}
 			m = (this->ballX - this->p2X) * 2;
@@ -575,8 +661,6 @@ class SlimeVolleyball
 					this->fP1Touches = 0;
 					this->fP2Touches += 1;
 					this->fP2TouchesTot += 1;
-					this->fP2HitStill = ((this->p2YV == 0) && (this->p2XV == 0));
-					this->hitNetSinceTouched = false;
 				}
 			}
 
@@ -599,11 +683,9 @@ class SlimeVolleyball
 				else if (this->ballX < 500) {
 					this->ballX = 480;
 					this->ballVX = (this->ballVX >= 0 ? -this->ballVX : this->ballVX);
-					this->hitNetSinceTouched = true;
 				} else {
 					this->ballX = 520;
 					this->ballVX = (this->ballVX <= 0 ? -this->ballVX : this->ballVX);
-					this->hitNetSinceTouched = true;
 				}
 			}
 		}
@@ -618,33 +700,26 @@ class SlimeVolleyball
 		this->screen.fillOval(j - i, k - i, i * 2, i * 2);
 	}
 
-	private: void drawScores() {
-		int i = this->nHeight / 15;
-		int j = 20;
-
-		for (int k = 0; k < 6; k++)
+	private: void drawScores()
+	{
+		Graphics localGraphics = this->screen;
+		int i = this->nHeight / 20+2;
+		for (int j = 0; j < this->nScore; j++)
 		{
-			if (this->fP1PointsWon >= k + 1)
-			{
-				this->screen.setColor(this->slimeColours[this->p1Col]);
-				this->screen.fillOval(j+2, i*1/5+2, i-4, i-4);
-			}
-			this->screen.setColor(WHITE);
-			this->screen.drawOval(j, i*1/5, i, i);
-			j += i + 10;
+			int k = (j + 1) * this->nWidth / 24;
+			localGraphics.setColor(this->activeSlimeColours[this->p1Col]);
+			localGraphics.fillOval(k+2, 20+2, i-4, i-4);
+			localGraphics.setColor(WHITE);
+			localGraphics.drawOval(k, 20, i, i);
 		}
 
-		j = this->nWidth - 20 - 6 * (i + 10);
-		for (int m = 0; m < 6; m++)
+		for (int k = 0; k < 10 - this->nScore; k++)
 		{
-			if (this->fP2PointsWon >= 6 - m)
-			{
-				this->screen.setColor(this->slimeColours[this->p2Col]);
-				this->screen.fillOval(j+2, i*1/5+2, i-4, i-4);
-			}
-			this->screen.setColor(WHITE);
-			this->screen.drawOval(j, i*1/5, i, i);
-			j += i + 10;
+			int m = this->nWidth - (k + 1) * this->nWidth / 24 - i;
+			localGraphics.setColor(this->activeSlimeColours[this->p2Col]);
+			localGraphics.fillOval(m+2, 20+2, i-4, i-4);
+			localGraphics.setColor(WHITE);
+			localGraphics.drawOval(m, 20, i, i);
 		}
 	}
 
@@ -663,7 +738,7 @@ class SlimeVolleyball
 
 	private: void DrawStatus()
 	{
-		astr s = astr("Score: ") + astrutil::IntToString(this->gameScore, 10) + (!this->fInPlay ? "" : astr("	 Time: ") + MakeTime((this->paused ? this->pausedTime : System::currentTimeMillis()) - this->startTime));
+		astr s = (!this->fInPlay ? "" : astr("	 Time: ") + MakeTime((this->paused ? this->pausedTime : System::currentTimeMillis()) - this->startTime));
 		this->screen.setColor(WHITE);
 		int i = this->nHeight*5/4 * 7/8 - 10;
 		this->screen.centerString(s, i);
@@ -682,6 +757,10 @@ class SlimeVolleyball
 
 	public: void run()
 	{
+		activeSlimeColText = (mPlayerCount == 2)? humanSlimeColText : slimeColText;
+		activeSlimeColours = (mPlayerCount == 2)? humanSlimeColours : slimeColours;
+		activeColCount = (mPlayerCount == 2)? LEPRA_ARRAY_COUNT(humanSlimeColours) : LEPRA_ARRAY_COUNT(slimeColours);
+
 		mAverageLoopTime = Lepra::Math::Lerp(mAverageLoopTime, mLoopTimer.QueryTimeDiff(), 0.05);
 		Thread::Sleep(0.0225 - mSpeed/1000.0 - mAverageLoopTime);
 		mLoopTimer.PopTimeDiff();
@@ -705,7 +784,8 @@ class SlimeVolleyball
 		{
 			mWasFrozen = false;
 			this->promptMsg = "";
-			if ((this->fP1PointsWon == 6) || (this->fP2PointsWon == 6))
+			//if ((this->fP1PointsWon == 6) || (this->fP2PointsWon == 6))
+			if ((this->nScore == 0) || (this->nScore == 10))
 				finishGame();
 			resetTap();
 			this->p1X = 200;
@@ -741,61 +821,68 @@ class SlimeVolleyball
 			if (this->ballY < 35)	// Uh-oh...
 			{
 				_run_l = System::currentTimeMillis();
-				if (this->ballX > 500)
-					this->fP1PointsWon += 1;
-				else {
-					this->fP2PointsWon += 1;
+				this->nPointsScored += 1;
+				this->nScore += (this->ballX <= 500 ? -1 : 1);
+				if ((this->ballX <= 500) && (this->scoringRun >= 0)) this->scoringRun += 1;
+				else if ((this->ballX > 500) && (this->scoringRun <= 0)) this->scoringRun -= 1;
+				else if ((this->ballX <= 500) && (this->scoringRun <= 0)) this->scoringRun = 1;
+				else if ((this->ballX > 500) && (this->scoringRun >= 0)) this->scoringRun = -1;
+				this->promptMsg = (this->ballX <= 500 ? this->activeSlimeColText[this->p2Col] : this->activeSlimeColText[this->p1Col]);
+				if ((!this->fP1Touched) && (!this->fP2Touched)) {
+					this->promptMsg = "What can I say?";
 				}
-
-				if ((this->ballX <= 500) && ((this->fP1Touches >= 3) || ((this->hitNetSinceTouched) && (this->fP1Touches > 0)) || (0==this->fP2Touched) || (
-					(this->fP1HitStill) && (this->fP1Touches > 0)))) {
-					this->fP1Clangers += 1;
+				else if ((this->scoringRun < 0 ? -this->scoringRun : this->scoringRun) == 3) {
+					this->promptMsg += "is on fire!";
 				}
-				else if ((this->ballX > 500) && ((this->fP2Touches >= 3) || ((this->hitNetSinceTouched) && (this->fP2Touches > 0)) || (0==this->fP1Touched) || (
-					(this->fP2HitStill) && (this->fP2Touches > 0)))) {
-					this->fP2Clangers += 1;
-				}
-
-				if ((0!=this->fP1Touched) && (0==this->fP2Touched) && (this->ballX >= 500)) {
-					this->fP1Aces += 1;
-					_run_j = 1;
-					this->gameScore += 200 * scale();
-				}
-				else if ((0!=this->fP2Touched) && (0==this->fP1Touched) && (this->ballX < 500)) {
-					this->fP2Aces += 1;
-					_run_j = 1;
-				}
-				else if ((this->ballX > 500) && (this->fP1Touches > 0)) {
-					this->fP1Winners += 1;
-					_run_k = 1;
-					this->gameScore += 100 * scale();
-				}
-				else if ((this->ballX <= 500) && (this->fP2Touches > 0)) {
-					this->fP2Winners += 1;
-					_run_k = 1;
-				}
-
-				if ((this->ballX > 500) && (_run_k == 0) && (_run_j == 0)) {
-					this->gameScore += 50 * scale();
-				}
-
-				this->promptMsg = (this->ballX <= 500 ? this->slimeColText[this->p2Col] : this->slimeColText[this->p1Col]);
-
-				if ((this->fP1PointsWon == 6) || (this->fP2PointsWon == 6))
-					this->promptMsg += "wins!";
-				else if (_run_j != 0)
+				else if (((this->ballX > 500) && (this->fP1Touched) && (!this->fP2Touched)) || ((this->ballX <= 500) && (!this->fP1Touched) && (this->fP2Touched))) {
 					this->promptMsg += "aces the serve!";
-				else if (_run_k != 0)
-					this->promptMsg += "scores a winner!";
-				else if (((this->ballX > 500) && (0==this->fP1Touched) && (0!=this->fP2Touched)) || ((this->ballX <= 500) && (0!=this->fP1Touched) && (0==this->fP2Touched)))
-					this->promptMsg += "laughs at his opponent's inability to serve!";
-				else if (this->fP1PointsWon == this->fP2PointsWon)
-					this->promptMsg += "draws level!";
-				else if (((this->ballX > 500) && (this->fP1PointsWon == this->fP2PointsWon + 1)) || (
-					(this->ballX <= 500) && (this->fP1PointsWon + 1 == this->fP2PointsWon)))
-					this->promptMsg += "takes the lead!";
+				}
+				else if (((this->ballX > 500) && (!this->fP1Touched) && (this->fP2Touched)) || ((this->ballX <= 500) && (this->fP1Touched) && (!this->fP2Touched)))
+					this->promptMsg += "dies laughing! :P";
 				else
-					this->promptMsg += "scores!";
+					switch (this->nScore)
+					{
+					case 0:
+					case 10:
+						if (this->nPointsScored == 5)
+							this->promptMsg += "Wins with a QUICK FIVE!!!";
+						else if (this->scoringRun == 8)
+							this->promptMsg += "Wins with a BIG NINE!!!";
+						else
+							this->promptMsg += "Wins!!!";
+						break;
+					case 4:
+						this->promptMsg += (this->ballX >= 500 ? "Scores!" : "takes the lead!!");
+						break;
+					case 6:
+						this->promptMsg += (this->ballX <= 500 ? "Scores!" : "takes the lead!!");
+						break;
+					case 5:
+						this->promptMsg += "Equalizes!";
+						break;
+					default:
+						this->promptMsg += "Scores!";
+						break;
+					}
+
+				if (this->scoringRun <= -3)
+				{
+					fP1Fire = true;
+				}
+				else if (this->scoringRun >= 3 && mPlayerCount == 2)
+				{
+					fP2Fire = true;
+				}
+				else
+				{
+					fP1Fire = false;
+					if (mPlayerCount == 2)
+					{
+						fP2Fire = false;
+					}
+				}
+
+				//this->fCanChangeCol = false;
 				_run_m = this->ballX;
 
 				_run_j = 0;
@@ -814,17 +901,17 @@ class SlimeVolleyball
 
 	private: void finishGame()
 	{
-		if (this->fP1PointsWon == 6)
+		if (mPlayerCount == 1 && nScore == 10)
 		{
 			this->gameTime = (System::currentTimeMillis() - this->startTime);
-			if (this->fP1PointsWon == 6)
+			/*if (this->fP1PointsWon == 6)
 			{
 				this->gameScore += 1000 * this->fP1PointsWon / (this->fP1PointsWon + this->fP2PointsWon) * scale();
 
 				this->gameScore = (int)(this->gameScore + (this->gameTime < 300000L ? 300000L - this->gameTime : 0L) / 1000L * scale());
 			}
 			if (this->fP2PointsWon == 0)
-				this->gameScore += 1000 * scale();
+				this->gameScore += 1000 * scale();*/
 			if (this->aiMode == 4)
 			{
 				this->aiMode = 5;
@@ -864,7 +951,7 @@ class SlimeVolleyball
 		this->bGameOver = true;
 	}
 
-	private: void fatality(Graphics /*paramGraphics*/)
+	private: void fatality(const Graphics& /*paramGraphics*/)
 	{
 	}
 
@@ -879,9 +966,9 @@ class SlimeVolleyball
 			Thread::Sleep(paramLong*0.001);
 	}
 
-	private: int scale() {
+	/*private: int scale() {
 		return (int)Math::pow(2.0, this->aiMode);
-	}
+	}*/
 	public: void destroy() {
 		if (this->doRunGameThread) {
 			StopRun();
@@ -897,22 +984,9 @@ class SlimeVolleyball
 		this->fP2Touches = 0;
 		this->fP1TouchesTot = 0;
 		this->fP2TouchesTot = 0;
-		this->fP1Clangers = 0;
-		this->fP2Clangers = 0;
-		this->fP1Aces = 0;
-		this->fP2Aces = 0;
-		this->fP1Winners = 0;
-		this->fP2Winners = 0;
-		this->fP1Frames = 0L;
-		this->fP2Frames = 0L;
-		this->fP1Super = 0;
-		this->fP2Super = 0;
-		this->fP1HitStill = false;
-		this->fP2HitStill = false;
 		this->fServerMoved = false;
 		drawScores();
 		this->fP1Touched = this->fP2Touched = 0;
-		this->hitNetSinceTouched = false;
 		this->bGameOver = false;
 		this->startTime = System::currentTimeMillis();
 		_run_j = 0;
@@ -930,27 +1004,32 @@ class SlimeVolleyball
 	private: void drawTapIndicators()
 	{
 #ifdef LEPRA_IOS
-		int py;
-		Color lColor = p1TapJump? RED : GREEN;
-		screen.setColor(lColor);
-		py = xformy(TAP_BASE);
-		screen.fillRect(xformx(25), py, xformx(450), 3);
+		screen.setColor(p1TapJump? RED : GREEN);
+		const int py = xformy(TAP_BASE);
+		const int pyj = xformy(TAP_BASE+TAP_JUMP_HEIGHT) - 15;
+		screen.fillRect(xformx(25), py, xformx(475), 3);
 		if (p1TapJump)
 		{
-			py = xformy(TAP_BASE+TAP_JUMP_HEIGHT) - 15;
-			screen.fillRect(xformx(25), py, xformx(450), 3);
+			screen.fillRect(xformx(25), pyj, xformx(475), 3);
 		}
-		/* if (two plyr)
+		if (mPlayerCount == 2)
 		{
-		}*/
+			screen.setColor(p2TapJump? RED : GREEN);
+			screen.fillRect(xformx(525), py, xformx(975), 3);
+			if (p2TapJump)
+			{
+				screen.fillRect(xformx(525), pyj, xformx(975), 3);
+			}
+		}
 		if (!tapActive)
 		{
 			return;
 		}
-		drawSpike(xformx(p1TapX), py-160, 160, lColor);
-		/*if (two plyr)
+		drawSpike(xformx(p1TapX), py-160, 160, p1TapJump? RED : GREEN);
+		if (mPlayerCount == 2)
 		{
-		}*/
+			drawSpike(xformx(p1TapX), py-160, 160, p2TapJump? RED : GREEN);
+		}
 #endif // iOS
 	}
 
@@ -1018,10 +1097,36 @@ class SlimeVolleyball
 				}
 			}
 		}
-		else
+		else if (mPlayerCount == 2)
 		{
 			p2TapX = ix;
+			const int p2LastTapY = p2TapY;
 			p2TapY = iy;
+			if (!p2TapJump)
+			{
+				if (p2TapY > TAP_BASE+TAP_JUMP_HEIGHT*2 ||
+					(p2TapY > TAP_BASE+TAP_JUMP_HEIGHT && p2TapY-p2LastTapY >= TAP_JUMP_DELTA_HEIGHT/3) ||
+					(p2TapY > TAP_BASE+TAP_JUMP_MIN_HEIGHT && p2TapY-p2LastTapY >= TAP_JUMP_DELTA_HEIGHT))
+				{
+					p2TapJump = true;
+					moveP2Jump();
+				}
+			}
+			else if (p2TapJump)
+			{
+				if (p2TapY < TAP_BASE+TAP_JUMP_HEIGHT ||
+					(p2TapY < TAP_BASE+TAP_JUMP_HEIGHT+TAP_JUMP_MIN_HEIGHT && p2TapY-p2LastTapY <= -TAP_JUMP_DELTA_HEIGHT/3) ||
+					(p2TapY < TAP_BASE+TAP_JUMP_HEIGHT*2 && p2TapY-p2LastTapY <= -TAP_JUMP_DELTA_HEIGHT))
+				{
+					p2TapJump = false;
+				}
+				else if (p2TapY > TAP_BASE+TAP_JUMP_HEIGHT*4 ||
+					p2TapY-p2LastTapY >= TAP_JUMP_DELTA_HEIGHT*2)
+				{
+					// If we desperately want to jump, let's jump.
+					moveP2Jump();
+				}
+			}
 		}
 
 	}
@@ -1035,9 +1140,14 @@ class SlimeVolleyball
 			else if (dx >= lDistance)	p1XV = lDistance;
 			else				p1XV = dx;
 		}
-		/*if (two player game)
+		if (mPlayerCount == 2)
 		{
-		}*/
+			const int lDistance = fP2Fire? 16 : 8;
+			const int dx = p2TapX-p2X;
+			if (dx <= -lDistance)		p2XV = -lDistance;
+			else if (dx >= lDistance)	p2XV = lDistance;
+			else				p2XV = dx;
+		}
 
 	}
 };

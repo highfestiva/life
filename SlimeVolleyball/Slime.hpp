@@ -99,6 +99,10 @@ public:
 	{
 		DrawFan(x, y, rx, ry, 0, 360, false);
 	}
+	void drawArc(int x, int y, int rx, int ry, int a1, int a2)
+	{
+		DrawFan(x, y, rx, ry, a1, a2, false);
+	}
 
 private:
 	void DrawFan(int x, int y, int rx, int ry, int a1, int a2, bool pFill)
