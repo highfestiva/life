@@ -31,6 +31,7 @@ public:
 	static str GetCurrentDirectory();
 	static str GetUserDirectory();
 	static str GetIoDirectory(const str& pAppName);
+	static str GetDataDirectory(const str& pArgv0);
 	static str GetLoginName();
 	static str QueryFullUserName();
 	static std::string GetRandomId();

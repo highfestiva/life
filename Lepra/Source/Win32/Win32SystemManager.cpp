@@ -155,6 +155,14 @@ str SystemManager::GetIoDirectory(const str& pAppName)
 	return (lIoDir);
 }
 
+str SystemManager::GetDataDirectory(const str& pArgv0)
+{
+	pArgv0;
+	return _T("Data/");
+}
+
+
+
 str SystemManager::GetLoginName()
 {
 	wchar_t lLoginName[128];

@@ -100,6 +100,22 @@ str SystemManager::GetIoDirectory(const str& pAppName)
 	return (lIoDir);
 }
 
+str SystemManager::GetDataDirectory(const str& pArgv0)
+{
+#if defined(LEPRA_IOS)
+	return Path::GetDirectory(pArgv0);
+#elif defined(LEPRA_MAC)
+	str lDataDir = Path::GetDirectory(pArgv0);
+	lDataDir = Path::GetParentDirectory(lDataDir);
+	return Path::JoinPath(lDataDir, _T("Resources/Data/"));
+#else // Posix
+	pArgv0;
+	return _T("Data/");
+#endif // iOS/Mac/Posix
+}
+
+
+
 str SystemManager::GetLoginName()
 {
 	const char* lLoginName = ::getlogin();

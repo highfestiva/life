@@ -3,7 +3,15 @@
 
 
 
+#pragma once
+
+#include "UiLepra.h"
+#if defined(LEPRA_MAC)
+#include <OpenAL/al.h>
+#include <OpenAL/alc.h>
+#else // !Mac
 #include <AL/al.h>
+#endif // Mac/!Mac
 #include <vorbis/vorbisfile.h>
 #include "UiLepra.h"
 #include "UiSoundStream.h"
