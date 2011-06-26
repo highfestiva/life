@@ -65,6 +65,7 @@
 	while ((lTouch = (UITouch*)[e nextObject]))
 	{
 		CGPoint lTapPosition = [lTouch locationInView:nil];
+		TODO: use [lTouch previousLocationInView:nil] to find out where the touch initially began, then pass those (x;y) along to be able to determine if player 1 or player 2!
 		Slime::App::OnTap(lTapPosition.x, lTapPosition.y);
 	}
 }

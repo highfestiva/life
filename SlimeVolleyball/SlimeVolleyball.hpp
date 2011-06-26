@@ -48,7 +48,7 @@ class SlimeVolleyball
 	private: Graphics screen;
 	private: astr promptMsg;
 	private: bool mousePressed;
-	private: bool fInPlay;
+	public: bool fInPlay;
 	private: bool fP1Fire;
 	private: bool fP2Fire;
 	private: bool superFlash;
@@ -92,10 +92,10 @@ class SlimeVolleyball
 	private: double mAverageLoopTime;
 	private: HiResTimer mLoopTimer;
 	private: bool mWasFrozen;
-	private: int aiMode;
+	public: int aiMode;
 	private: SlimeAI* ai;
-	private: bool bGameOver;
-	private: int mPlayerCount;
+	public: bool bGameOver;
+	public: int mPlayerCount;
 
 	private: static const int aiStartLevel = 0;
 
@@ -919,17 +919,18 @@ class SlimeVolleyball
 			}
 		} else {
 			gameOver(false);
-		}this->fInPlay = false;
+		}
+		this->fInPlay = false;
 		this->StopRun();
 	}
 
-	private: void gameOver(bool paramBoolean)
+	private: void gameOver(bool fDidWin)
 	{
 		FontMetrics localFontMetrics1 = this->screen.getFontMetrics();
 		drawScores();
 		DrawStatus();
 		FontMetrics localFontMetrics2 = this->screen.getFontMetrics();
-		if (!paramBoolean)
+		if (!fDidWin)
 		{
 			this->screen.setColor(this->COURT_COL);
 			this->screen.fillRect((this->nWidth - max(localFontMetrics2.stringWidth(this->loserText1[this->aiMode]), localFontMetrics2.stringWidth(this->loserText2[this->aiMode]))) / 2 - 30, this->nHeight / 2 - localFontMetrics2.getAscent() * 5, max(localFontMetrics2.stringWidth(this->loserText1[this->aiMode]), localFontMetrics2.stringWidth(this->loserText2[this->aiMode])) + 60, localFontMetrics2.getAscent() * 5 + localFontMetrics1.getAscent() * 2);
@@ -966,14 +967,6 @@ class SlimeVolleyball
 			Thread::Sleep(paramLong*0.001);
 	}
 
-	/*private: int scale() {
-		return (int)Math::pow(2.0, this->aiMode);
-	}*/
-	public: void destroy() {
-		if (this->doRunGameThread) {
-			StopRun();
-		}
-	}
 	private: void StartRun()
 	{
 		this->doRunGameThread = true;
@@ -1149,6 +1142,11 @@ class SlimeVolleyball
 			else				p2XV = dx;
 		}
 
+	}
+
+	public: bool canContinue()
+	{
+		return (mPlayerCount == 1 && aiMode > 0 && aiMode < 4);
 	}
 };
 

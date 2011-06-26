@@ -49,6 +49,7 @@ private:
 	virtual void Init();
 	virtual int Run();
 	bool Poll();
+	void Logic();
 
 	void BeginRender(const Vector3DF& pBackgroundColor);
 	void Render(const PixelRect& pArea);
@@ -68,7 +69,9 @@ private:
 	void OnMinimize();
 	void OnMaximize(int pWidth, int pHeight);
 
-	void OnClick(UiTbc::Button* pButton);
+	void OnSpeedClick(UiTbc::Button* pButton);
+	void OnPClick(UiTbc::Button* pButton);
+	void OnFinishedClick(UiTbc::Button* pButton);
 
 	static App* mApp;
 #ifdef LEPRA_IOS
@@ -86,6 +89,14 @@ private:
 	UiLepra::SoundManager* mSound;
 	UiLepra::SoundStream* mMusicStreamer;
 	str mPathPrefix;
+	UiTbc::Button* mLazyButton;
+	UiTbc::Button* mHardButton;
+	UiTbc::Button* mOriginalButton;
+	UiTbc::Button* m1PButton;
+	UiTbc::Button* m2PButton;
+	UiTbc::Button* mNextButton;
+	UiTbc::Button* mResetButton;
+	UiTbc::Button* mRetryButton;
 
 	LOG_CLASS_DECLARE();
 };
@@ -244,7 +255,7 @@ bool App::Open()
 		mPainter->SetFontManager(mFontManager);
 
 		UiTbc::FontManager::FontId lFontId = UiTbc::FontManager::INVALID_FONTID;
-		const double lFontHeight = lDisplayHeight / 21.0;
+		const double lFontHeight = lDisplayHeight / 24.0;
 		const tchar* lFontNames[] =
 		{
 			_T("Times New Roman"),
@@ -301,24 +312,64 @@ bool App::Open()
 		mDesktopWindow = new UiTbc::DesktopWindow(mInput, mPainter, new UiTbc::FloatingLayout(), 0, 0);
 		mDesktopWindow->SetIsHollow(true);
 		mDesktopWindow->SetPreferredSize(mCanvas->GetWidth(), mCanvas->GetHeight());
-		UiTbc::Button* lButton = new UiTbc::Button(Color(0, 192, 0), _T(""));
-		lButton->SetText(_T("Lazy"));
-		lButton->SetPreferredSize(150, 50);
-		mDesktopWindow->AddChild(lButton);
-		lButton->SetPos(20, 20);
-		lButton->SetOnClick(App, OnClick);
-		lButton = new UiTbc::Button(Color(192, 192, 0), _T(""));
-		lButton->SetText(_T("Hard"));
-		lButton->SetPreferredSize(150, 50);
-		mDesktopWindow->AddChild(lButton);
-		lButton->SetPos(20, 100);
-		lButton->SetOnClick(App, OnClick);
-		lButton = new UiTbc::Button(Color(192, 0, 0), _T(""));
-		lButton->SetText(_T("Original"));
-		lButton->SetPreferredSize(150, 50);
-		mDesktopWindow->AddChild(lButton);
-		lButton->SetOnClick(App, OnClick);
-		lButton->SetPos(20, 180);
+		mLazyButton = new UiTbc::Button(Color(0, 192, 0), _T(""));
+		mLazyButton->SetText(_T("Lazy"));
+		mLazyButton->SetPreferredSize(150, 50);
+		mDesktopWindow->AddChild(mLazyButton);
+		mLazyButton->SetPos(20, 20);
+		mLazyButton->SetOnClick(App, OnSpeedClick);
+		mLazyButton->SetVisible(false);
+		mHardButton = new UiTbc::Button(Color(192, 192, 0), _T(""));
+		mHardButton->SetText(_T("Hard"));
+		mHardButton->SetPreferredSize(150, 50);
+		mDesktopWindow->AddChild(mHardButton);
+		mHardButton->SetPos(20, 100);
+		mHardButton->SetOnClick(App, OnSpeedClick);
+		mHardButton->SetVisible(false);
+		mOriginalButton = new UiTbc::Button(Color(192, 0, 0), _T(""));
+		mOriginalButton->SetText(_T("Original"));
+		mOriginalButton->SetPreferredSize(150, 50);
+		mDesktopWindow->AddChild(mOriginalButton);
+		mOriginalButton->SetOnClick(App, OnSpeedClick);
+		mOriginalButton->SetPos(20, 180);
+		mOriginalButton->SetVisible(false);
+
+		m1PButton = new UiTbc::Button(Color(128, 64, 0), _T(""));
+		m1PButton->SetText(_T("1P"));
+		m1PButton->SetPreferredSize(150, 50);
+		mDesktopWindow->AddChild(m1PButton);
+		m1PButton->SetOnClick(App, OnPClick);
+		m1PButton->SetPos(20, 70);
+		m1PButton->SetVisible(false);
+		m2PButton = new UiTbc::Button(Color(128, 170, 160), _T(""));
+		m2PButton->SetText(_T("2P"));
+		m2PButton->SetPreferredSize(150, 50);
+		mDesktopWindow->AddChild(m2PButton);
+		m2PButton->SetOnClick(App, OnPClick);
+		m2PButton->SetPos(20, 160);
+		m2PButton->SetVisible(false);
+
+		mNextButton = new UiTbc::Button(Color(0, 255, 0), _T(""));
+		mNextButton->SetText(_T("Next"));
+		mNextButton->SetPreferredSize(150, 50);
+		mDesktopWindow->AddChild(mNextButton);
+		mNextButton->SetOnClick(App, OnFinishedClick);
+		mNextButton->SetPos(20, 100);
+		mNextButton->SetVisible(false);
+		mResetButton = new UiTbc::Button(Color(255, 0, 0), _T(""));
+		mResetButton->SetText(_T("Reset"));
+		mResetButton->SetPreferredSize(150, 50);
+		mDesktopWindow->AddChild(mResetButton);
+		mResetButton->SetOnClick(App, OnFinishedClick);
+		mResetButton->SetPos(20, 70);
+		mResetButton->SetVisible(false);
+		mRetryButton = new UiTbc::Button(Color(150, 150, 0), _T(""));
+		mRetryButton->SetText(_T("Retry"));
+		mRetryButton->SetPreferredSize(150, 50);
+		mDesktopWindow->AddChild(mRetryButton);
+		mRetryButton->SetOnClick(App, OnFinishedClick);
+		mRetryButton->SetPos(20, 160);
+		mRetryButton->SetVisible(false);
 	}
 	if (lOk)
 	{
@@ -505,6 +556,7 @@ bool App::Poll()
 	mGame->paint(GetGraphics());
 	Paint();
 	mGame->run();
+	Logic();
 	EndRender();
 
 #ifndef LEPRA_IOS
@@ -520,6 +572,38 @@ bool App::Poll()
 		}
 	}
 	return true;
+}
+
+void App::Logic()
+{
+	if (mGame->fInPlay)
+	{
+		return;
+	}
+
+	if (mGame->mPlayerCount == 1)
+	{
+		if (!mGame->bGameOver && !mNextButton->IsVisible())
+		{
+			mNextButton->SetVisible(true);
+		}
+		else if (mGame->bGameOver && !mResetButton->IsVisible())
+		{
+			mResetButton->SetVisible(true);
+			if (mGame->canContinue())
+			{
+				mRetryButton->SetVisible(true);
+			}
+		}
+		return;
+	}
+
+	if (!mLazyButton->IsVisible() && !m1PButton->IsVisible())
+	{
+		mLazyButton->SetVisible(true);
+		mHardButton->SetVisible(true);
+		mOriginalButton->SetVisible(true);
+	}
 }
 
 void App::BeginRender(const Vector3DF& pBackgroundColor)
@@ -661,22 +745,62 @@ void App::OnMaximize(int pWidth, int pHeight)
 	OnResize(pWidth, pHeight);
 }
 
-void App::OnClick(UiTbc::Button* pButton)
+void App::OnSpeedClick(UiTbc::Button* pButton)
 {
-	if (pButton->GetText() == _T("Lazy"))
+	if (pButton == mLazyButton)
 	{
-		mGame->mSpeed = -20;
+		mGame->mSpeed = -15;
 	}
-	else if (pButton->GetText() == _T("Hard"))
+	else if (pButton == mHardButton)
 	{
-		mGame->mSpeed = -10;
+		mGame->mSpeed = -6;
 	}
-	else if (pButton->GetText() == _T("Original"))
+	else if (pButton == mOriginalButton)
 	{
 		mGame->mSpeed = 0;
 	}
-	pButton->SetVisible(false);
+	mLazyButton->SetVisible(false);
+	mHardButton->SetVisible(false);
+	mOriginalButton->SetVisible(false);
+	m1PButton->SetVisible(true);
+	m2PButton->SetVisible(true);
+}
+
+void App::OnPClick(UiTbc::Button* pButton)
+{
+	mGame->mPlayerCount = 1;
+	if (pButton == m2PButton)
+	{
+		mGame->mPlayerCount = 2;
+	}
+	m1PButton->SetVisible(false);
+	m2PButton->SetVisible(false);
+
 	mGame->resetGame();
+}
+
+void App::OnFinishedClick(UiTbc::Button* pButton)
+{
+	if (pButton == mNextButton)
+	{
+		Event lEvent;
+		lEvent.id = 501;
+		mGame->handleEvent(lEvent);
+	}
+	else if (pButton == mRetryButton)
+	{
+		Event lEvent;
+		lEvent.id = 401;
+		lEvent.key = 'c';
+		mGame->handleEvent(lEvent);
+	}
+	else if (pButton == mResetButton)
+	{
+		mGame->resetGame();
+	}
+	mNextButton->SetVisible(false);
+	mResetButton->SetVisible(false);
+	mRetryButton->SetVisible(false);
 }
 
 
