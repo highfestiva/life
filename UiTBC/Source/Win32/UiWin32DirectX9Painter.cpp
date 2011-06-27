@@ -79,6 +79,12 @@ void DirectX9Painter::SetRenderMode(RenderMode pRM)
 	}
 }
 
+void DirectX9Painter::Clear(const Color& pColor)
+{
+	pColor;
+	// TODO: implement!
+}
+
 void DirectX9Painter::PrePaint()
 {
 	DoSetRenderMode();

@@ -132,6 +132,7 @@ public:
 	virtual void SetDestCanvas(Canvas* pCanvas);
 	Canvas* GetCanvas() const;
 
+	virtual void Clear(const Color& pColor) = 0;
 	virtual void PrePaint() = 0;
 
 	// Returns false only if stack owerflow/underflow.

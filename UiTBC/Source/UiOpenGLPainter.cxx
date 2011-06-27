@@ -80,6 +80,12 @@ void OpenGLPainter::SetRenderMode(RenderMode pRM)
 	}
 }
 
+void OpenGLPainter::Clear(const Color& pColor)
+{
+	::glClearColor(pColor.GetRf(), pColor.GetGf(), pColor.GetBf(), 1.0f);
+	::glClear(GL_COLOR_BUFFER_BIT);
+}
+
 void OpenGLPainter::PrePaint()
 {
 	::glClear(GL_DEPTH_BUFFER_BIT);

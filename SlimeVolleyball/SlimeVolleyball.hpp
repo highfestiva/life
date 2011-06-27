@@ -79,7 +79,7 @@ class SlimeVolleyball
 	private: astr loserText2[5];
 	private: astr humanSlimeColText[5];
 	private: astr* activeSlimeColText;
-	private: Color SKY_COL;
+	public: Color SKY_COL;
 	private: Color COURT_COL;
 	private: Color BALL_COL;
 	private: int frenzyCol;
@@ -197,8 +197,8 @@ class SlimeVolleyball
 		this->screen = paramGraphics;
 		this->nWidth = screen.width;
 		this->nHeight = screen.height*4/5;
-		screen.setColor(this->SKY_COL);
-		screen.fillRect(0, 0, this->nWidth, 4 * this->nHeight / 5);
+		/*screen.setColor(this->SKY_COL);
+		screen.fillRect(0, 0, this->nWidth, 4 * this->nHeight / 5);*/
 		screen.setColor(this->COURT_COL);
 		screen.fillRect(0, 4 * this->nHeight / 5, this->nWidth, this->nHeight/2);
 		screen.setColor(WHITE);

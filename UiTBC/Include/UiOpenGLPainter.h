@@ -42,7 +42,8 @@ public:
 	// Set the drawing surface.
 	void SetDestCanvas(Canvas* pCanvas);
 	void SetRenderMode(RenderMode pRM);
-	void PrePaint();
+	virtual void Clear(const Color& pColor);
+	virtual void PrePaint();
 
 	// Set the current alpha value. Overrides alpha buffer...
 	// In 8-bit color mode, this is a specific color that will "be" transparent.
