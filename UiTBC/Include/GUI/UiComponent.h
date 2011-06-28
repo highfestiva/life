@@ -96,7 +96,8 @@ public:
 	bool IsAdaptive();
 
 	void SetVisible(bool pVisible);
-	bool IsVisible();
+	bool IsVisible() const;
+	bool IsLocalVisible() const;
 
 	// Sets and gets the selected flag. The selected flag isn't actually used
 	// within this class, but is stored here to make it easier to implement

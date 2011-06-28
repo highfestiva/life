@@ -640,7 +640,7 @@ void OpenGLPainter::DoFillShadedRect(int pLeft, int pTop, int pRight, int pBotto
 		       lColor[0].mRed, lColor[0].mGreen, lColor[0].mBlue, GetAlphaValue(),
 		       lColor[1].mRed, lColor[1].mGreen, lColor[1].mBlue, GetAlphaValue(),
 		       lColor[2].mRed, lColor[2].mGreen, lColor[2].mBlue, GetAlphaValue(),
-		       lColor[2].mRed, lColor[2].mGreen, lColor[2].mBlue, GetAlphaValue(),
+		       lColor[3].mRed, lColor[3].mGreen, lColor[3].mBlue, GetAlphaValue(),
 		       lColor[0].mRed, lColor[0].mGreen, lColor[0].mBlue, GetAlphaValue()};
 	GLfloat v[] = {(lLeft + lRight) * 0.5f, (lTop + lBottom) * 0.5f, lLeft, lTop, lRight, lTop, lRight, lBottom, lLeft, lBottom, lLeft, lTop};
 	::glEnableClientState(GL_COLOR_ARRAY);

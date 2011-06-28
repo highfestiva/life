@@ -66,7 +66,13 @@ public:
 
 	void centerString(astr s, int y)
 	{
-		drawString(s, width / 2 - getFontMetrics().stringWidth(s) / 2, y - getFontMetrics().getAscent()/2);
+		typedef astrutil::strvec svec;
+		svec ss = astrutil::Split(s, "\n");
+		for (svec::iterator x = ss.begin(); x != ss.end(); ++x)
+		{
+			drawString(*x, width / 2 - getFontMetrics().stringWidth(*x) / 2, y - getFontMetrics().getAscent()/2);
+			y += getFontMetrics().getHeight();
+		}
 	}
 	void drawString(astr s, int x, int y)
 	{
@@ -107,7 +113,7 @@ public:
 private:
 	void DrawFan(int x, int y, int rx, int ry, int a1, int a2, bool pFill)
 	{
-		const size_t lCurveCount = (std::max(rx, ry) / 3 + 13) & (~3);
+		const size_t lCurveCount = ((rx*2 + ry*2) / 20 + std::abs(a1-a2)/20 + 12) & (~7);
 		std::vector<Vector2DF> lCoords;
 		const float lMidX = x + rx*0.5f;
 		const float lMidY = y + ry*0.5f;

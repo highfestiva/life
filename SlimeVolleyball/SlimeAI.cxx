@@ -11,6 +11,7 @@ namespace Slime
 SlimeAI::SlimeAI()
 {
 	CLEAR_MEMBERS(ballX, app);
+	mPercent = 100;
 	team = -1;
 }
 
@@ -56,11 +57,11 @@ void SlimeAI::move(int paramInt)
 		switch (paramInt)
 		{
 			case 0:
-				this->app->moveP2Left(); return;
+				this->app->moveP2Left(mPercent); return;
 			case 1:
-				this->app->moveP2Right(); return;
+				this->app->moveP2Right(mPercent); return;
 			case 2:
-				this->app->moveP2Jump(); return;
+				this->app->moveP2Jump(mPercent); return;
 			case 3:
 				this->app->moveP2Stop(); return;
 		}

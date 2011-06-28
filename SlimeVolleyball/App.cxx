@@ -38,7 +38,7 @@ public:
 	virtual ~App();
 
 	static bool PollApp();
-	static void OnTap(float x, float y);
+	static void OnTap(float x, float y, bool pIsLowest);
 
 private:
 	Graphics GetGraphics();
@@ -86,6 +86,7 @@ private:
 	UiLepra::SoundManager* mSound;
 	UiLepra::SoundStream* mMusicStreamer;
 	str mPathPrefix;
+	int mLayoutFrameCounter;
 	UiTbc::Button* mLazyButton;
 	UiTbc::Button* mHardButton;
 	UiTbc::Button* mOriginalButton;
@@ -114,7 +115,8 @@ namespace Slime
 
 
 App::App(const strutil::strvec& pArgumentList):
-	Application(pArgumentList)
+	Application(pArgumentList),
+	mLayoutFrameCounter(-10)
 {
 	mApp = this;
 }
@@ -133,9 +135,9 @@ bool App::PollApp()
 	return (SystemManager::GetQuitRequest() == 0);
 }
 
-void App::OnTap(float x, float y)
+void App::OnTap(float x, float y, bool pIsLowest)
 {
-	mApp->mGame->MoveTo(y, x);
+	mApp->mGame->MoveTo(y, x, pIsLowest);
 }
 
 Graphics App::GetGraphics()
@@ -157,8 +159,8 @@ bool App::Open()
 	const int lDisplayWidth = lSize.width;
 	const int lDisplayHeight = lSize.height;
 #else // !iOS
-	const int lDisplayWidth = 580;
-	const int lDisplayHeight = 400;
+	const int lDisplayWidth = 760;
+	const int lDisplayHeight = 524;
 #endif // iOS/!iOS
 	int lDisplayBpp = 0;
 	int lDisplayFrequency = 0;
@@ -264,11 +266,11 @@ bool App::Open()
 		mDesktopWindow = new UiTbc::DesktopWindow(mInput, mPainter, new UiTbc::FloatingLayout(), 0, 0);
 		mDesktopWindow->SetIsHollow(true);
 		mDesktopWindow->SetPreferredSize(mCanvas->GetWidth(), mCanvas->GetHeight());
-		mLazyButton = CreateButton(_T("Novice Speed"), Color(0, 192, 0), mDesktopWindow);
+		mLazyButton = CreateButton(_T("Zzzzz"), Color(50, 150, 0), mDesktopWindow);
 		mLazyButton->SetOnClick(App, OnSpeedClick);
-		mHardButton = CreateButton(_T("Trainee Speed"), Color(192, 192, 0), mDesktopWindow);
+		mHardButton = CreateButton(_T("n00b"), Color(150, 150, 0), mDesktopWindow);
 		mHardButton->SetOnClick(App, OnSpeedClick);
-		mOriginalButton = CreateButton(_T("Original Speed"), Color(192, 0, 0), mDesktopWindow);
+		mOriginalButton = CreateButton(_T("Original"), Color(150, 50, 0), mDesktopWindow);
 		mOriginalButton->SetOnClick(App, OnSpeedClick);
 
 		m1PButton = CreateButton(_T("1P"), Color(128, 64, 0), mDesktopWindow);
@@ -276,9 +278,9 @@ bool App::Open()
 		m2PButton = CreateButton(_T("2P"), Color(128, 170, 160), mDesktopWindow);
 		m2PButton->SetOnClick(App, OnPClick);
 
-		mNextButton = CreateButton(_T("Next"), Color(0, 240, 0), mDesktopWindow);
+		mNextButton = CreateButton(_T("Next"), Color(0, 192, 0), mDesktopWindow);
 		mNextButton->SetOnClick(App, OnFinishedClick);
-		mResetButton = CreateButton(_T("Reset"), Color(240, 0, 0), mDesktopWindow);
+		mResetButton = CreateButton(_T("Quit"), Color(192, 0, 0), mDesktopWindow);
 		mResetButton->SetOnClick(App, OnFinishedClick);
 		mRetryButton = CreateButton(_T("Retry"), Color(150, 150, 0), mDesktopWindow);
 		mRetryButton->SetOnClick(App, OnFinishedClick);
@@ -380,6 +382,12 @@ bool App::Poll()
 {
 	UiLepra::Core::ProcessMessages();
 	PreparePaint();
+	++mLayoutFrameCounter;
+	if (mLayoutFrameCounter < 0 || mLayoutFrameCounter > 220)
+	{
+		mLayoutFrameCounter = 0;
+		Layout();
+	}
 	mGame->paint(GetGraphics());
 	Paint();
 	mGame->run();
@@ -427,6 +435,7 @@ void App::Logic()
 
 	if (!mLazyButton->IsVisible() && !m1PButton->IsVisible())
 	{
+		mGame->ShowTitle();
 		mLazyButton->SetVisible(true);
 		mHardButton->SetVisible(true);
 		mOriginalButton->SetVisible(true);
@@ -439,17 +448,17 @@ void App::Layout()
 	{
 		return;
 	}
-	const int x = mDisplay->GetWidth()/2 - mLazyButton->GetSize().x/2;
-	const int h = mLazyButton->GetSize().y;
-	const int my = mDisplay->GetHeight()/2 - h/2;
-	mLazyButton->SetPos(x, my-h*2);
-	mHardButton->SetPos(x, my);
-	mOriginalButton->SetPos(x, my+h*2);
-	m1PButton->SetPos(x, my-h);
-	m2PButton->SetPos(x, my+h);
-	mNextButton->SetPos(x, my-h*2);
-	mResetButton->SetPos(x, my);
-	mRetryButton->SetPos(x, my+h*2);
+	const int x = 20;
+	const int dy = mLazyButton->GetSize().y * 4/3;
+	const int sy = mCanvas->GetHeight() / 20 + 34;
+	mLazyButton->SetPos(x, sy);
+	mHardButton->SetPos(x, sy+dy);
+	mOriginalButton->SetPos(x, sy+dy*2);
+	m1PButton->SetPos(x, sy);
+	m2PButton->SetPos(x, sy+dy);
+	mNextButton->SetPos(x, sy);
+	mResetButton->SetPos(x, sy);
+	mRetryButton->SetPos(x, sy+dy);
 }
 
 
@@ -583,20 +592,15 @@ void App::OnFinishedClick(UiTbc::Button* pButton)
 {
 	if (pButton == mNextButton)
 	{
-		Event lEvent;
-		lEvent.id = 501;
-		mGame->handleEvent(lEvent);
+		mGame->nextGameLevel();
 	}
 	else if (pButton == mRetryButton)
 	{
-		Event lEvent;
-		lEvent.id = 401;
-		lEvent.key = 'c';
-		mGame->handleEvent(lEvent);
+		mGame->retryGame();
 	}
 	else if (pButton == mResetButton)
 	{
-		mGame->resetGame();
+		mGame->mPlayerCount = 2;	// TRICKY: quit == 2P game over.
 	}
 	mNextButton->SetVisible(false);
 	mResetButton->SetVisible(false);
@@ -605,11 +609,12 @@ void App::OnFinishedClick(UiTbc::Button* pButton)
 
 UiTbc::Button* App::CreateButton(const str& pText, const Color& pColor, UiTbc::DesktopWindow* pDesktop)
 {
-	UiTbc::Button* lButton = new UiTbc::Button(UiTbc::BorderComponent::ZIGZAG, 2, pColor, _T(""));
+	UiTbc::Button* lButton = new UiTbc::Button(UiTbc::BorderComponent::LINEAR, 6, pColor, _T(""));
 	lButton->SetText(pText);
-	lButton->SetPreferredSize(150, 50);
+	lButton->SetPreferredSize(pDesktop->GetSize().x/6, pDesktop->GetSize().y/9);
 	pDesktop->AddChild(lButton);
 	lButton->SetVisible(false);
+	lButton->UpdateLayout();
 	return lButton;
 }
 

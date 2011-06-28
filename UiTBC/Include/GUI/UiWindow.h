@@ -56,28 +56,28 @@ public:
 				   Painter::ImageID pLeftID,
    				   Painter::ImageID pRightID);
 
-	inline unsigned GetBorderStyle();
-	inline int GetBorderWidth();
-	inline int GetTotalBorderWidth();
+	unsigned GetBorderStyle();
+	int GetBorderWidth();
+	int GetTotalBorderWidth();
 
 	virtual bool IsOver(int pScreenX, int pScreenY);
 	virtual bool OnMouseMove(int pMouseX, int pMouseY, int pDeltaX, int pDeltaY);
 
-	inline void SetBackgroundImage(Painter::ImageID pImageID);
-	inline void SetColor(const Color& pColor);
+	void SetBackgroundImage(Painter::ImageID pImageID);
+	void SetColor(const Color& pColor);
 
 	virtual void SetCaption(Caption* pCaption);
-	inline Caption* GetCaption();
+	Caption* GetCaption();
 
-	inline Painter::ImageID GetBackgroundImage();
-	inline const Color& GetColor();
+	Painter::ImageID GetBackgroundImage();
+	const Color& GetColor();
 
 	virtual void AddChild(Component* pChild, int pParam1 = 0, int pParam2 = 0);
 	virtual void RemoveChild(Component* pChild, int pLayer);
 	virtual Component* GetChild(const str& pName, int pLayer);
 	virtual int GetNumChildren() const;
 
-	inline virtual Type GetType() const;
+	virtual Type GetType() const;
 
 	virtual bool OnChar(tchar pChar);
 	virtual bool OnLButtonDown(int pMouseX, int pMouseY);
@@ -95,7 +95,7 @@ protected:
 
 private:
 	void Init();
-	inline bool Check(unsigned pFlags, unsigned pFlag);
+	bool Check(unsigned pFlags, unsigned pFlag);
 
 	BorderComponent* mTLBorder;
 	BorderComponent* mTRBorder;
@@ -116,61 +116,6 @@ private:
 	Color mBodyColor;
 	unsigned mBorderStyle;
 };
-
-bool Window::Check(unsigned pFlags, unsigned pFlag)
-{
-	return ((pFlags & pFlag) != 0);
-}
-
-Caption* Window::GetCaption()
-{
-	return mCaption;
-}
-
-void Window::SetBackgroundImage(Painter::ImageID pImageID)
-{
-	SetNeedsRepaint(pImageID != mClientRect->GetImage());
-	mClientRect->SetImage(pImageID);
-}
-
-void Window::SetColor(const Color& pColor)
-{
-	SetNeedsRepaint(pColor != mClientRect->GetColor());
-	mClientRect->SetColor(pColor);
-}
-
-Painter::ImageID Window::GetBackgroundImage()
-{
-	return mClientRect->GetImage();
-}
-
-const Color& Window::GetColor()
-{
-	return mBodyColor;
-}
-
-unsigned Window::GetBorderStyle()
-{
-	return mBorderStyle;
-}
-
-int Window::GetBorderWidth()
-{
-	return mBorderWidth;
-}
-
-int Window::GetTotalBorderWidth()
-{
-	if (Check(mBorderStyle, BORDER_HALF) == true)
-		return mBorderWidth;
-	else
-		return mBorderWidth * 2;
-}
-
-Component::Type Window::GetType() const
-{
-	return Component::WINDOW;
-}
 
 
 

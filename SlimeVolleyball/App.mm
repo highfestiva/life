@@ -61,12 +61,21 @@
 - (void)touchesMoved:(NSSet*)touches withEvent:(UIEvent*)event
 {
 	NSEnumerator* e = [touches objectEnumerator];
+	int lLowest = -1;
 	UITouch* lTouch;
 	while ((lTouch = (UITouch*)[e nextObject]))
 	{
 		CGPoint lTapPosition = [lTouch locationInView:nil];
-		TODO: use [lTouch previousLocationInView:nil] to find out where the touch initially began, then pass those (x;y) along to be able to determine if player 1 or player 2!
-		Slime::App::OnTap(lTapPosition.x, lTapPosition.y);
+		if (lLowest < lTapPosition.y)
+		{
+			lLowest = lTapPosition.y;
+		}
+	}
+	e = [touches objectEnumerator];
+	while ((lTouch = (UITouch*)[e nextObject]))
+	{
+		CGPoint lTapPosition = [lTouch locationInView:nil];
+		Slime::App::OnTap(lTapPosition.x, lTapPosition.y, (lTapPosition.y == lLowest));
 	}
 }
 

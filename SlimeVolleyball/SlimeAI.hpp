@@ -29,6 +29,7 @@ class SlimeAI
 	protected: bool p1Fire;
 	protected: bool p2Fire;
 	protected: int team;
+	protected: int mPercent;
 	private: int player;
 	private: SlimeVolleyball* app;
 	public: static const int LEFT = 0;

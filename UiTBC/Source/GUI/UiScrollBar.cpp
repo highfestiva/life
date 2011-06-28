@@ -637,4 +637,33 @@ void ScrollBar::OnIdle()
 
 
 
+float64 ScrollBar::GetScrollPos()
+{
+	return mPos;
+}
+
+void ScrollBar::SetScrollDelay(float64 pFirstDelay, float64 pDelay)
+{
+	mFirstDelay = pFirstDelay;
+	mDelay = pDelay;
+}
+
+void ScrollBar::SetStaticScrollerSize(int pScrollerSize)
+{
+	mScrollerSize = pScrollerSize;
+	SetNeedsRepaint(true);
+}
+
+Component::Type ScrollBar::GetType() const
+{
+	return Component::SCROLLBAR;
+}
+
+void ScrollBar::SetOwner(Component* pOwner)
+{
+	mOwner = pOwner;
+}
+
+
+
 }

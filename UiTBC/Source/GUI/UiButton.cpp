@@ -25,7 +25,7 @@ Button::Button(const str& pName) :
 	mTextColor(OFF_BLACK),
 	mTextBackgColor(255, 255, 255),
 	mPressed(false),
-	mState(RELEASED),
+	mState(PRESSED),
 	mExtraData(0)
 {
 	InitializeHoover();
@@ -43,7 +43,7 @@ Button::Button(const Color& pColor, const str& pName):
 	mTextColor(OFF_BLACK),
 	mTextBackgColor(255, 255, 255),
 	mPressed(false),
-	mState(RELEASED),
+	mState(PRESSED),
 	mExtraData(0)
 {
 	InitializeHoover();
@@ -62,7 +62,7 @@ Button::Button(BorderComponent::BorderShadeFunc pShadeFunc, int pBorderWidth, co
 	mTextColor(OFF_BLACK),
 	mTextBackgColor(255, 255, 255),
 	mPressed(false),
-	mState(RELEASED),
+	mState(PRESSED),
 	mExtraData(0)
 {
 	InitializeHoover();
@@ -89,7 +89,7 @@ Button::Button(Painter::ImageID pReleasedImageID, Painter::ImageID pPressedImage
 	mTextColor(OFF_BLACK),
 	mTextBackgColor(255, 255, 255),
 	mPressed(false),
-	mState(RELEASED),
+	mState(PRESSED),
 	mExtraData(0)
 {
 	InitializeHoover();
@@ -108,12 +108,13 @@ void Button::InitializeHoover()
 	mHooverColor = GetColor() * 1.2f;
 	mPressColor = GetColor() * 0.95f;
 	GetClientRectComponent()->SetIsHollow(false);
+	SetPressed(false);
 }
 
 void Button::SetPressed(bool pPressed)
 {
 	mPressed = pPressed;
-	SetState(mPressed? PRESSED : HasMouseFocus()? RELEASED : RELEASED_HOOVER);
+	SetState(mPressed? PRESSED : HasMouseFocus()? RELEASED_HOOVER : RELEASED);
 }
 
 void Button::SetState(State pState)
@@ -155,9 +156,9 @@ void Button::SetState(State pState)
 	{
 		if (mState == PRESSED || mState == PRESSING || mState == PRESSED_HOOVER)
 		{
+			Parent::SetColor(mPressColor);
 			unsigned lStyle = Parent::GetBorderStyle() | Parent::BORDER_SUNKEN;
 			Parent::SetBorder(lStyle, Parent::GetBorderWidth());
-			Parent::SetColor(mPressColor);
 		}
 		else if (mState == RELEASED_HOOVER)
 		{
@@ -165,9 +166,9 @@ void Button::SetState(State pState)
 		}
 		else
 		{
+			Parent::SetColor(GetColor());
 			unsigned lStyle = (Parent::GetBorderStyle() & (~Parent::BORDER_SUNKEN));
 			Parent::SetBorder(lStyle, Parent::GetBorderWidth());
-			Parent::SetColor(GetColor());
 		}
 	}
 

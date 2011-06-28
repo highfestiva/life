@@ -234,7 +234,7 @@ void GridLayout::UpdateLayout()
 		{
 			int lIndex = y * mNumCols + x;
 				
-			if (mComponent[lIndex] != 0 && mComponent[lIndex]->IsVisible() == true)
+			if (mComponent[lIndex] != 0 && mComponent[lIndex]->IsLocalVisible() == true)
 			{
 				lEmptyRow = false;
 
@@ -275,7 +275,7 @@ void GridLayout::UpdateLayout()
 		{
 			int lIndex = y * mNumCols + x;
 				
-			if (mComponent[lIndex] != 0 && mComponent[lIndex]->IsVisible() == true)
+			if (mComponent[lIndex] != 0 && mComponent[lIndex]->IsLocalVisible() == true)
 			{
 				lEmptyCol = false;
 
@@ -375,7 +375,7 @@ void GridLayout::UpdateLayout()
 			{
 				int lIndex = y * mNumCols + x;
 					
-				if (mComponent[lIndex] != 0 && mComponent[lIndex]->IsVisible() == true)
+				if (mComponent[lIndex] != 0 && mComponent[lIndex]->IsLocalVisible() == true)
 				{
 					PixelCoord lPos(mComponent[lIndex]->GetPos());
 					PixelCoord lSize(mComponent[lIndex]->GetSize());
@@ -419,7 +419,7 @@ void GridLayout::UpdateLayout()
 			{
 				int lIndex = y * mNumCols + x;
 					
-				if (mComponent[lIndex] != 0 && mComponent[lIndex]->IsVisible() == true)
+				if (mComponent[lIndex] != 0 && mComponent[lIndex]->IsLocalVisible() == true)
 				{
 					PixelCoord lPos(mComponent[lIndex]->GetPos());
 					PixelCoord lSize(mComponent[lIndex]->GetSize());

@@ -258,6 +258,9 @@ void Window::Init()
 	Parent::AddChild(mLBorder, 1, 0);
 
 	Parent::AddChild(mCenterComponent, 1, 1);
+
+	SetColor(mBodyColor);
+	SetNeedsRepaint(true);
 }
 
 void Window::SetBorder(unsigned pBorderStyle, int pWidth)
@@ -559,6 +562,74 @@ void Window::DoSetSize(int pWidth, int pHeight)
 	Parent::DoSetSize(pWidth, pHeight);
 	mCenterComponent->SetSize(pWidth, pHeight);
 	mCenterComponent->UpdateLayout();
+}
+
+
+
+bool Window::Check(unsigned pFlags, unsigned pFlag)
+{
+	return ((pFlags & pFlag) != 0);
+}
+
+Caption* Window::GetCaption()
+{
+	return mCaption;
+}
+
+void Window::SetBackgroundImage(Painter::ImageID pImageID)
+{
+	SetNeedsRepaint(pImageID != mClientRect->GetImage());
+	mClientRect->SetImage(pImageID);
+}
+
+void Window::SetColor(const Color& pColor)
+{
+	SetNeedsRepaint(pColor != mClientRect->GetColor());
+	mClientRect->SetColor(pColor);
+
+	BorderComponent::BorderShadeFunc lFunc =
+		Check(mBorderStyle, BORDER_LINEARSHADING)? BorderComponent::LINEAR : BorderComponent::ZIGZAG;
+	mTLBorder->Set(pColor, lFunc);
+	mTRBorder->Set(pColor, lFunc);
+	mBRBorder->Set(pColor, lFunc);
+	mBLBorder->Set(pColor, lFunc);
+	mTBorder->Set(pColor, lFunc);
+	mBBorder->Set(pColor, lFunc);
+	mLBorder->Set(pColor, lFunc);
+	mRBorder->Set(pColor, lFunc);
+}
+
+Painter::ImageID Window::GetBackgroundImage()
+{
+	return mClientRect->GetImage();
+}
+
+const Color& Window::GetColor()
+{
+	return mBodyColor;
+}
+
+unsigned Window::GetBorderStyle()
+{
+	return mBorderStyle;
+}
+
+int Window::GetBorderWidth()
+{
+	return mBorderWidth;
+}
+
+int Window::GetTotalBorderWidth()
+{
+	if (Check(mBorderStyle, BORDER_HALF) == true)
+		return mBorderWidth;
+	else
+		return mBorderWidth * 2;
+}
+
+Component::Type Window::GetType() const
+{
+	return Component::WINDOW;
 }
 
 

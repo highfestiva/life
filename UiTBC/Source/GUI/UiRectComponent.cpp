@@ -160,4 +160,79 @@ void RectComponent::SetIsHollow(bool pIsHollow)
 
 
 
+void RectComponent::SetImage(Painter::ImageID pImageID)
+{
+	mImageID = pImageID;
+	SetNeedsRepaint(true);
+}
+
+void RectComponent::SetColor(const Color& pColor)
+{
+	mShaded = false;
+	SetNeedsRepaint(mColor[0] != pColor);
+	mColor[0] = pColor;
+}
+
+void RectComponent::SetColor(const Color& pTopLeftColor,
+			     const Color& pTopRightColor,
+			     const Color& pBottomRightColor,
+			     const Color& pBottomLeftColor)
+{
+	mShaded = true;
+	SetNeedsRepaint(mColor[0] != pTopLeftColor || mColor[1] != pTopRightColor || 
+			mColor[2] != pBottomRightColor || mColor[3] != pBottomLeftColor);
+	mColor[0] = pTopLeftColor;
+	mColor[1] = pTopRightColor;
+	mColor[2] = pBottomRightColor;
+	mColor[3] = pBottomLeftColor;
+}
+
+Painter::ImageID RectComponent::GetImage()
+{
+	return mImageID;
+}
+
+Color RectComponent::GetColor()
+{
+	return mColor[0];
+}
+
+void RectComponent::GetColor(Color& pTopLeftColor,
+			     Color& pTopRightColor,
+			     Color& pBottomRightColor,
+			     Color& pBottomLeftColor)
+{
+	pTopLeftColor     = mColor[0];
+	pTopRightColor    = mColor[1];
+	pBottomRightColor = mColor[2];
+	pBottomLeftColor  = mColor[3];
+}
+
+Component::Type RectComponent::GetType() const
+{
+	return Component::RECTCOMPONENT;
+}
+
+bool RectComponent::IsHollow()
+{
+	return mHollow;
+}
+
+bool RectComponent::IsShaded()
+{
+	return mShaded;
+}
+
+void RectComponent::SetBehaveSolid(bool pBehaveSolid)
+{
+	mBehaveSolid = pBehaveSolid;
+}
+
+bool RectComponent::GetBehaveSolid() const
+{
+	return mBehaveSolid;
+}
+
+
+
 }

@@ -320,8 +320,8 @@ void Component::UpdateLayout()
 
 			while (lChild != 0)
 			{
-				if (lChild->IsVisible() == true &&
-				    lChild->NeedsRepaint() == true)
+				if (lChild->IsLocalVisible() &&
+				    lChild->NeedsRepaint())
 				{
 					lChild->UpdateLayout();
 				}
@@ -980,7 +980,7 @@ void Component::SetVisible(bool pVisible)
 	mVisible = pVisible;
 }
 
-bool Component::IsVisible()
+bool Component::IsVisible() const
 {
 	bool lParentVisible = mVisible;
 	if (mParent && mVisible)
@@ -988,6 +988,11 @@ bool Component::IsVisible()
 		lParentVisible = mParent->IsVisible();
 	}
 	return (lParentVisible);
+}
+
+bool Component::IsLocalVisible() const
+{
+	return mVisible;
 }
 
 PixelCoord Component::ClientToWindow(const PixelCoord& pCoords)
@@ -1092,7 +1097,7 @@ bool Component::GetSelected() const
 
 bool Component::HasMouseFocus() const
 {
-	return (mParent->mMouseFocusChild == this);
+	return (mParent && mParent->mMouseFocusChild == this);
 }
 
 bool Component::HasKeyboardFocus() const

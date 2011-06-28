@@ -37,7 +37,7 @@ STR_UTIL_TEMPLATE typename STR_UTIL_QUAL::strvec STR_UTIL_QUAL::Split(const _Str
 	// If the string ends with a delimitor.
 	else if (pString.length() > 0 && pCharDelimitors.find_first_of(pString[pString.length()-1]) != str::npos)
 	{
-		lTokenVector.push_back(str());
+		lTokenVector.push_back(_String());
 	}
 	return (lTokenVector);
 }

@@ -10,11 +10,9 @@ namespace Slime
 
 class DannoAI: public SlimeAI
 {
-	private: double JUMPINESS;
 	private: int serveType;
 
-	public: DannoAI():
-		JUMPINESS(0.85)
+	public: DannoAI()
 	{
 		this->team = 4;
 		this->serveType = -1;

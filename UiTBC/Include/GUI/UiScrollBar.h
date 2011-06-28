@@ -50,13 +50,13 @@ public:
 	float64 GetScrollRatioMax() const;
 
 	// Makes the scroller width/height static with the given size.
-	inline void SetStaticScrollerSize(int pScrollerSize);
+	void SetStaticScrollerSize(int pScrollerSize);
 
 	// Scroll position is in the range [0, 1].
-	inline float64 GetScrollPos();
+	float64 GetScrollPos();
 	void SetScrollPos(float64 pPos);
 
-	inline void SetScrollDelay(float64 pFirstDelay, float64 pDelay);
+	void SetScrollDelay(float64 pFirstDelay, float64 pDelay);
 
 	virtual void Repaint(Painter* pPainter);
 
@@ -65,9 +65,9 @@ public:
 	virtual void OnConnectedToDesktopWindow();
 	virtual void OnIdle();
 
-	inline virtual Type GetType() const;
+	virtual Type GetType() const;
 
-	inline void SetOwner(Component* pOwner);
+	void SetOwner(Component* pOwner);
 
 protected:
 
@@ -148,33 +148,6 @@ private:
 
 	Component* mOwner;
 };
-
-float64 ScrollBar::GetScrollPos()
-{
-	return mPos;
-}
-
-void ScrollBar::SetScrollDelay(float64 pFirstDelay, float64 pDelay)
-{
-	mFirstDelay = pFirstDelay;
-	mDelay = pDelay;
-}
-
-void ScrollBar::SetStaticScrollerSize(int pScrollerSize)
-{
-	mScrollerSize = pScrollerSize;
-	SetNeedsRepaint(true);
-}
-
-Component::Type ScrollBar::GetType() const
-{
-	return Component::SCROLLBAR;
-}
-
-void ScrollBar::SetOwner(Component* pOwner)
-{
-	mOwner = pOwner;
-}
 
 
 
