@@ -94,8 +94,8 @@ class SlimeVolleyball
 	public: int mPlayerCount;
 	private: bool mShowTitle;
 
-	private: static const int aiStartLevel = 0;
-	private: static const int ai2PStartLevel = 1;
+#define aiStartLevel   0
+#define ai2PStartLevel 1
 
 	public: SlimeVolleyball()
 	{
@@ -213,10 +213,11 @@ class SlimeVolleyball
 		{
 			const int h = localFontMetrics.getHeight();
 			this->screen.centerString("Slime (Volley)Ball", this->nHeight / 2 - h*4);
-			screen.centerString("Applet code base by Quin Pendragon", this->nHeight / 2 - h*2);
-			screen.centerString("AI by Daniel Wedge", this->nHeight / 2 - h);
-			screen.centerString("Port by Pixel Doctrine", this->nHeight / 2);
-			screen.centerString("Music by Grotesco", this->nHeight / 2 + h);
+			astr s = "Base by Quin Pendragon\n" \
+				"AI by Daniel Wedge\n" \
+				"Port by Pixel Doctrine\n" \
+				"Music by Grotesco";
+			screen.centerString(s, this->nHeight / 2 - h*2);
 			drawScores();
 			DrawStatus();
 			return;

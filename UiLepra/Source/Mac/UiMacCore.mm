@@ -243,13 +243,20 @@ void MacCore::ProcessMessages()
 	}
 
 #ifndef LEPRA_IOS
-	LEPRA_APPLE_EVENT* lEvent =
-		[mApplication	nextEventMatchingMask:	NSAnyEventMask
-				untilDate:		nil
-				inMode:			NSDefaultRunLoopMode
-				dequeue:		YES];
-	[mApplication sendEvent:lEvent];
-	[mApplication updateWindows];
+	LEPRA_APPLE_EVENT* lEvent;
+	do
+	{
+		lEvent = [mApplication nextEventMatchingMask:NSAnyEventMask
+						   untilDate:nil
+						      inMode:NSDefaultRunLoopMode
+						     dequeue:YES];
+		if (lEvent)
+		{
+			[mApplication sendEvent:lEvent];
+		}
+	}
+	while (lEvent);
+	//[mApplication updateWindows];
 #endif // !iOS
 
 	for (WindowTable::Iterator x = mWindowTable.First(); x != mWindowTable.End(); ++x)

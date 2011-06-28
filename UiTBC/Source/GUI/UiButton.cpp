@@ -216,7 +216,7 @@ void Button::Repaint(Painter* pPainter)
 
 	pPainter->PushAttrib(Painter::ATTR_ALL);
 	PixelRect lRect(GetClientRect());
-	pPainter->ReduceClippingRect(lRect);
+	//pPainter->ReduceClippingRect(lRect);
 
 	int lOffset = GetPressed() ? 1 : 0;
 	int lTextX = lRect.mLeft;

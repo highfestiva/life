@@ -293,6 +293,7 @@ bool App::Open()
 	}
 	if (lOk)
 	{
+		mMusicStreamer = 0;
 		mMusicStreamer = mSound->CreateSoundStream(mPathPrefix+_T("Tingaliin.ogg"), UiLepra::SoundManager::LOOP_FORWARD, 0);
 		if (!mMusicStreamer || !mMusicStreamer->Playback())
 		{
@@ -611,7 +612,11 @@ UiTbc::Button* App::CreateButton(const str& pText, const Color& pColor, UiTbc::D
 {
 	UiTbc::Button* lButton = new UiTbc::Button(UiTbc::BorderComponent::LINEAR, 6, pColor, _T(""));
 	lButton->SetText(pText);
+#ifdef LEPRA_IOS
+	lButton->SetPreferredSize(pDesktop->GetSize().y/6, pDesktop->GetSize().x/9);
+#else // !iOS
 	lButton->SetPreferredSize(pDesktop->GetSize().x/6, pDesktop->GetSize().y/9);
+#endif // iOS / !iOS
 	pDesktop->AddChild(lButton);
 	lButton->SetVisible(false);
 	lButton->UpdateLayout();

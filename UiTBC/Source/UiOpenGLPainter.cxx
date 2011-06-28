@@ -1303,6 +1303,10 @@ void OpenGLPainter::PrintText(const str& pString, int x, int y)
 	const int lSpaceSize = GetFontManager()->GetCharWidth(' ');
 	const int lTabSize = lSpaceSize*4;
 
+#ifdef LEPRA_MAC
+	lCurrentY -= lFontHeight/2;
+#endif // Mac
+
 	const Color lColor = GetColorInternal(0);
 	assert(lColor != BLACK);	// Does not show.
 	GetFontManager()->SetColor(Color(255, 255, 255, 255));

@@ -80,7 +80,7 @@ void RectComponent::Repaint(Painter* pPainter)
 	PixelRect lClippingRect(lRect);
 	lClippingRect.mRight++;
 	lClippingRect.mBottom++;
-	pPainter->ReduceClippingRect(lClippingRect);
+	//pPainter->ReduceClippingRect(lClippingRect);
 
 	if (mHollow == false)
 	{
