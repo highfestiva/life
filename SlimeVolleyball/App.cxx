@@ -8,6 +8,7 @@
 #include "../Lepra/Include/LogListener.h"
 #include "../Lepra/Include/Path.h"
 #include "../Lepra/Include/SystemManager.h"
+#include "../UiLepra/Include/Mac/UiIosInput.h"
 #include "../UiLepra/Include/UiCore.h"
 #include "../UiLepra/Include/UiDisplayManager.h"
 #include "../UiLepra/Include/UiLepra.h"
@@ -39,6 +40,7 @@ public:
 
 	static bool PollApp();
 	static void OnTap(float x, float y, bool pIsLowest);
+	static void OnMouseTap(float x, float y, bool pPressed);
 
 private:
 	Graphics GetGraphics();
@@ -60,6 +62,7 @@ private:
 
 	virtual bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
 	virtual bool OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode);
+	virtual void OnMouseMove(float x, float y, bool pPressed);
 
 	void OnResize(int pWidth, int pHeight);
 	void OnMinimize();
@@ -140,15 +143,15 @@ void App::OnTap(float x, float y, bool pIsLowest)
 	mApp->mGame->MoveTo(y, x, pIsLowest);
 }
 
+void App::OnMouseTap(float x, float y, bool pPressed)
+{
+	mApp->OnMouseMove(y, x, pPressed);
+}
+
 Graphics App::GetGraphics()
 {
-#ifdef LEPRA_IOS
-	const int w = mDisplay->GetHeight();
-	const int h = mDisplay->GetWidth();
-#else // !iOS
 	const int w = mDisplay->GetWidth();
 	const int h = mDisplay->GetHeight();
-#endif // iOS/!iOS
 	return Graphics(w, h, mPainter);
 }
 
@@ -156,8 +159,8 @@ bool App::Open()
 {
 #ifdef LEPRA_IOS
 	CGSize lSize = [UIScreen mainScreen].bounds.size;
-	const int lDisplayWidth = lSize.width;
-	const int lDisplayHeight = lSize.height;
+	const int lDisplayWidth = lSize.height;
+	const int lDisplayHeight = lSize.width;
 #else // !iOS
 	const int lDisplayWidth = 760;
 	const int lDisplayHeight = 524;
@@ -217,6 +220,9 @@ bool App::Open()
 		mDisplay->AddResizeObserver(this);
 
 		mCanvas = new Canvas(lDisplayMode.mWidth, lDisplayMode.mHeight, Canvas::IntToBitDepth(lDisplayMode.mBitDepth));
+#ifdef LEPRA_IOS
+		mCanvas->SetOutputRotation(90);
+#endif // iOS
 	}
 	if (lOk)
 	{
@@ -254,23 +260,20 @@ bool App::Open()
 	}
 	if (lOk)
 	{
-		mInput = 0;
-#ifndef LEPRA_IOS
 		mInput = UiLepra::InputManager::CreateInputManager(mDisplay);
 		mInput->ActivateAll();
 		mInput->AddKeyCodeInputObserver(this);
-#endif // !iOS
 	}
 	if (lOk)
 	{
 		mDesktopWindow = new UiTbc::DesktopWindow(mInput, mPainter, new UiTbc::FloatingLayout(), 0, 0);
 		mDesktopWindow->SetIsHollow(true);
 		mDesktopWindow->SetPreferredSize(mCanvas->GetWidth(), mCanvas->GetHeight());
-		mLazyButton = CreateButton(_T("Zzzzz"), Color(50, 150, 0), mDesktopWindow);
+		mLazyButton = CreateButton(_T("Zzzlow"), Color(50, 150, 0), mDesktopWindow);
 		mLazyButton->SetOnClick(App, OnSpeedClick);
 		mHardButton = CreateButton(_T("n00b"), Color(150, 150, 0), mDesktopWindow);
 		mHardButton->SetOnClick(App, OnSpeedClick);
-		mOriginalButton = CreateButton(_T("Original"), Color(150, 50, 0), mDesktopWindow);
+		mOriginalButton = CreateButton(_T("Classic"), Color(150, 50, 0), mDesktopWindow);
 		mOriginalButton->SetOnClick(App, OnSpeedClick);
 
 		m1PButton = CreateButton(_T("1P"), Color(128, 64, 0), mDesktopWindow);
@@ -395,10 +398,8 @@ bool App::Poll()
 	Logic();
 	EndRender();
 
-#ifndef LEPRA_IOS
 	mInput->PollEvents();
 	mInput->Refresh();
-#endif // !iOS
 
 	if (mMusicStreamer && mMusicStreamer->Update())
 	{
@@ -478,7 +479,7 @@ void App::PreparePaint()
 	{
 		mCanvas->SetBuffer(0);
 		mPainter->SetDestCanvas(mCanvas);
-		mPainter->ResetClippingRect();
+		//mPainter->ResetClippingRect();
 		mPainter->Clear(mGame->SKY_COL);
 		mPainter->PrePaint();
 	}
@@ -530,6 +531,19 @@ bool App::OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode)
 	lEvent.key = pKeyCode;
 	mGame->handleEvent(lEvent);
 	return false;
+}
+
+void App::OnMouseMove(float x, float y, bool pPressed)
+{
+	x;
+	y;
+	pPressed;
+#ifdef LEPRA_IOS
+	((UiLepra::IosInputManager*)mInput)->SetMousePosition(x, y);
+	((UiLepra::IosInputElement*)mInput->GetMouse()->GetButton(0))->SetValue(pPressed? 1 : 0);
+	((UiLepra::IosInputElement*)mInput->GetMouse()->GetAxis(0))->SetValue(x);
+	((UiLepra::IosInputElement*)mInput->GetMouse()->GetAxis(1))->SetValue(y);
+#endif // iOS
 }
 
 
@@ -612,11 +626,7 @@ UiTbc::Button* App::CreateButton(const str& pText, const Color& pColor, UiTbc::D
 {
 	UiTbc::Button* lButton = new UiTbc::Button(UiTbc::BorderComponent::LINEAR, 6, pColor, _T(""));
 	lButton->SetText(pText);
-#ifdef LEPRA_IOS
-	lButton->SetPreferredSize(pDesktop->GetSize().y/6, pDesktop->GetSize().x/9);
-#else // !iOS
-	lButton->SetPreferredSize(pDesktop->GetSize().x/6, pDesktop->GetSize().y/9);
-#endif // iOS / !iOS
+	lButton->SetPreferredSize(pDesktop->GetSize().x/5, pDesktop->GetSize().y/9);
 	pDesktop->AddChild(lButton);
 	lButton->SetVisible(false);
 	lButton->UpdateLayout();

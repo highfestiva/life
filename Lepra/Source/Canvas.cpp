@@ -35,6 +35,7 @@ Canvas::Canvas()
 	mHeight = 0;
 	mPitch = 0;
 	mPixelSize = 1;
+	mOutputRotation = 0;
 }
 
 Canvas::Canvas(unsigned pWidth, unsigned pHeight, BitDepth pBitDepth)
@@ -45,6 +46,7 @@ Canvas::Canvas(unsigned pWidth, unsigned pHeight, BitDepth pBitDepth)
 	mWidth = pWidth;
 	mHeight = pHeight;
 	mPitch = pWidth;
+	mOutputRotation = 0;
 
 	switch(mBitDepth)
 	{
@@ -76,6 +78,7 @@ Canvas::Canvas(const Canvas& pCanvas, bool pCopy)
 	mWidth = pCanvas.GetWidth();
 	mHeight = pCanvas.GetHeight();
 	mPitch = pCanvas.GetPitch();
+	mOutputRotation = 0;
 
 	SetPalette(pCanvas.GetPalette());
 
@@ -4059,6 +4062,21 @@ void Canvas::PremultiplyAlpha()
 			((uint8*)mBuffer)[i + 2] = (uint8)((r * a) / 255);
 		}
 	}
+}
+
+void Canvas::SetOutputRotation(int pRotation)
+{
+	mOutputRotation = pRotation;
+}
+
+unsigned Canvas::GetActualWidth() const
+{
+	return (mOutputRotation%180 == 0)? mWidth : mHeight;
+}
+
+unsigned Canvas::GetActualHeight() const
+{
+	return (mOutputRotation%180 == 0)? mHeight : mWidth;
 }
 
 void Canvas::SetAlpha(uint8 pTrue, uint8 pFalse, uint8 pCompareValue, CmpFunc pFunc)

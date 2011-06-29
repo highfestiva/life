@@ -61,8 +61,9 @@
 - (void)touchesMoved:(NSSet*)touches withEvent:(UIEvent*)event
 {
 	NSEnumerator* e = [touches objectEnumerator];
-	int lLowest = -1;
 	UITouch* lTouch;
+	/*int lLowest = -1;
+	int lTouchCount = 0;
 	while ((lTouch = (UITouch*)[e nextObject]))
 	{
 		CGPoint lTapPosition = [lTouch locationInView:nil];
@@ -70,13 +71,28 @@
 		{
 			lLowest = lTapPosition.y;
 		}
+		bool lIsPressed = (lTouch.phase != UITouchPhaseEnded && lTouch.phase != UITouchPhaseEnded);
+		Slime::App::OnMouseTap(lTapPosition.x, lTapPosition.y, lIsPressed);
+		++lTouchCount;
 	}
-	e = [touches objectEnumerator];
+	e = [touches objectEnumerator];*/
 	while ((lTouch = (UITouch*)[e nextObject]))
 	{
 		CGPoint lTapPosition = [lTouch locationInView:nil];
-		Slime::App::OnTap(lTapPosition.x, lTapPosition.y, (lTapPosition.y == lLowest));
+		Slime::App::OnTap(lTapPosition.x, lTapPosition.y, false);
+		bool lIsPressed = (lTouch.phase != UITouchPhaseEnded && lTouch.phase != UITouchPhaseEnded);
+		Slime::App::OnMouseTap(lTapPosition.x, lTapPosition.y, lIsPressed);
 	}
+}
+
+- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
+{
+	[self touchesMoved:touches withEvent:event];
+}
+
+- (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
+{
+	[self touchesMoved:touches withEvent:event];
 }
 
 @end

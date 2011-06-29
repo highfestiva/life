@@ -227,7 +227,7 @@ bool Painter::PopAttrib()
 		{
 			PixelRect lRect = mAttribClipRectStack.back();
 			mAttribClipRectStack.pop_back();
-			SetClippingRect(lRect.mLeft, lRect.mTop, lRect.mRight, lRect.mBottom);
+			//SetClippingRect(lRect.mLeft, lRect.mTop, lRect.mRight, lRect.mBottom);
 		}
 		else
 		{

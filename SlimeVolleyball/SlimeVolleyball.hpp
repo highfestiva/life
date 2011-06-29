@@ -1028,20 +1028,24 @@ class SlimeVolleyball
 
 	private: void drawSpike(int x, int y, int h, const Color c)
 	{
-		GLubyte C[] = {c.mRed, c.mGreen, c.mBlue, 150,
-			       c.mRed, c.mGreen, c.mBlue, 50,
-			       c.mRed, c.mGreen, c.mBlue, 50,
+		GLubyte C[] = {c.mRed, c.mGreen, c.mBlue, 100,
+			       c.mRed, c.mGreen, c.mBlue, 20,
+			       c.mRed, c.mGreen, c.mBlue, 20,
 			       c.mRed, c.mGreen, c.mBlue, 255,
-			       c.mRed, c.mGreen, c.mBlue, 255};
+			       c.mRed, c.mGreen, c.mBlue, 255,
+			       c.mRed, c.mGreen, c.mBlue, 20,};
 		GLfloat fx = (GLfloat)x;
 		GLfloat fy = (GLfloat)y;
 		GLfloat fh = (GLfloat)h;
-		GLfloat v[] = {fx, (fy+fh)*0.5f, fx-1, fy, fx+1, fy, fx+1, fy+fh, fx-1, fy+fh};
+		GLfloat v[] = {fx, (fy+fh)*0.5f, fx-1, fy, fx+1, fy, fx+1, fy+fh, fx-1, fy+fh, fx-1, fy};
+		::glEnable(GL_BLEND);
+		::glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		::glEnableClientState(GL_COLOR_ARRAY);
 		::glColorPointer(4, GL_UNSIGNED_BYTE, 0, C);
 		::glVertexPointer(2, GL_FLOAT, 0, v);
-		::glDrawArrays(GL_TRIANGLE_FAN, 0, 5);
+		::glDrawArrays(GL_TRIANGLE_FAN, 0, 6);
 		::glDisableClientState(GL_COLOR_ARRAY);
+		::glDisable(GL_BLEND);
 	}
 
 	public: void MoveTo(float x, float y, bool pIsLowest)
@@ -1049,7 +1053,7 @@ class SlimeVolleyball
 		tapActive = true;
 		const int ix = (int)(x*1000/screen.width);
 		const int iy = (int)(y*1000/screen.height);
-		if (ix < 600 && !pIsLowest)
+		if (ix < 500)
 		{
 			p1TapX = std::min(ix, 500);
 			const int p1LastTapY = p1TapY;
@@ -1080,7 +1084,7 @@ class SlimeVolleyball
 				}
 			}
 		}
-		else if (mPlayerCount == 2 && ix > 400 && pIsLowest)
+		else if (mPlayerCount == 2 && ix > 500)
 		{
 			p2TapX = std::max(ix, 500);
 			const int p2LastTapY = p2TapY;

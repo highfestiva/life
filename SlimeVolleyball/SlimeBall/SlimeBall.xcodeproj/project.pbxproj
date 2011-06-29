@@ -421,6 +421,7 @@
 		B1A1E02413AA77710097B8D0 /* UiOggAlStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A1E02213AA77710097B8D0 /* UiOggAlStream.cpp */; };
 		B1A1E02513AA77710097B8D0 /* UiSoundStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A1E02313AA77710097B8D0 /* UiSoundStream.cpp */; };
 		B1A1E05213AA97480097B8D0 /* Tingaliin.ogg in Resources */ = {isa = PBXBuildFile; fileRef = B1A1E05113AA97480097B8D0 /* Tingaliin.ogg */; };
+		B1CC28E413BA906B009BD34A /* UiIosInput.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1CC28E313BA906B009BD34A /* UiIosInput.mm */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -1030,6 +1031,7 @@
 		B1A1E02213AA77710097B8D0 /* UiOggAlStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiOggAlStream.cpp; sourceTree = "<group>"; };
 		B1A1E02313AA77710097B8D0 /* UiSoundStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiSoundStream.cpp; sourceTree = "<group>"; };
 		B1A1E05113AA97480097B8D0 /* Tingaliin.ogg */ = {isa = PBXFileReference; lastKnownFileType = file; path = Tingaliin.ogg; sourceTree = "<group>"; };
+		B1CC28E313BA906B009BD34A /* UiIosInput.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = UiIosInput.mm; sourceTree = "<group>"; };
 		B1F35B0A13A200690064153E /* SlimeBall_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SlimeBall_Prefix.pch; path = SlimeBall/SlimeBall_Prefix.pch; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -1346,6 +1348,7 @@
 		B19A154A13A124AB0051A61C /* Mac */ = {
 			isa = PBXGroup;
 			children = (
+				B1CC28E313BA906B009BD34A /* UiIosInput.mm */,
 				B19A154B13A124AB0051A61C /* EAGLView.m */,
 				B19A154C13A124AB0051A61C /* UiMacCore.mm */,
 				B19A154D13A124AB0051A61C /* UiMacDisplayManager.mm */,
@@ -2531,6 +2534,7 @@
 				B1A1DF4313AA6CC60097B8D0 /* window.c in Sources */,
 				B1A1E02413AA77710097B8D0 /* UiOggAlStream.cpp in Sources */,
 				B1A1E02513AA77710097B8D0 /* UiSoundStream.cpp in Sources */,
+				B1CC28E413BA906B009BD34A /* UiIosInput.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -121,7 +121,11 @@ void OpenGLPainter::SetClippingRect(int pLeft, int pTop, int pRight, int pBottom
 	Painter::SetClippingRect(pLeft, pTop, pRight, pBottom);
 	ToScreenCoords(pLeft, pTop);
 	ToScreenCoords(pRight, pBottom);
+#ifdef LEPRA_IOS
+	::glScissor(GetCanvas()->GetHeight() - pBottom, pLeft, pBottom - pTop, pRight - pLeft);
+#else // !iOS
 	::glScissor(pLeft, GetCanvas()->GetHeight() - pBottom, pRight - pLeft, pBottom - pTop);
+#endif // iOS/!iOS
 
 	OGL_ASSERT();
 }
@@ -148,19 +152,17 @@ void OpenGLPainter::ResetClippingRect()
 
 	// A call to this function should reset OpenGL's projection matrix to orthogonal
 	// in order to work together with OpenGL3DAPI.
-	glViewport(0, 0, GetCanvas()->GetWidth(), GetCanvas()->GetHeight());
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
+	::glViewport(0, 0, GetCanvas()->GetActualWidth(), GetCanvas()->GetActualHeight());
+	::glMatrixMode(GL_PROJECTION);
+	::glLoadIdentity();
 
-	// Definition of the viewport. The point (0, 0) is defined as the center of the
-	// pixel in the top left corner. Thus, the top left corner of the screen has
-	// the coordinates (-0.5, -0.5).
-	my_glOrtho(-0.5f, (float32)GetCanvas()->GetWidth() - 0.5f,
-		(float32)GetCanvas()->GetHeight() - 0.5f, -0.5f,
+	// Avoid glut, use my version instead.
+	my_glOrtho(0, (float32)GetCanvas()->GetActualWidth(),
+		(float32)GetCanvas()->GetActualHeight(), 0,
 		0, 1);
 #ifdef LEPRA_IOS
 	glRotatef(90, 0, 0, 1);
-	glTranslatef(0, -(float)GetCanvas()->GetWidth(), 0);	// TRICKY: float cast necessary, otherwise nothing is shown on screen! Bug?!?
+	glTranslatef(0, -(float)GetCanvas()->GetHeight(), 0);	// TRICKY: float cast necessary, otherwise nothing is shown on screen! Bug?!?
 #endif // iOS
 	
 	glMatrixMode(GL_MODELVIEW);
@@ -295,13 +297,6 @@ void OpenGLPainter::DoFillTriangle(float pX1, float pY1,
 	ToScreenCoords(pX2, pY2);
 	ToScreenCoords(pX3, pY3);
 
-	pX1 = pX1 - 0.5f;
-	pX2 = pX2 - 0.5f;
-	pX3 = pX3 - 0.5f;
-	pY1 = pY1 - 0.5f;
-	pY2 = pY2 - 0.5f;
-	pY3 = pY3 - 0.5f;
-
 	Color& lColor = GetColorInternal(0);
 	glColor4ub(lColor.mRed, lColor.mGreen, lColor.mBlue, GetAlphaValue());
 
@@ -321,13 +316,6 @@ void OpenGLPainter::DoFillShadedTriangle(float pX1, float pY1,
 	ToScreenCoords(pX1, pY1);
 	ToScreenCoords(pX2, pY2);
 	ToScreenCoords(pX3, pY3);
-
-	pX1 = pX1 - 0.5f;
-	pX2 = pX2 - 0.5f;
-	pX3 = pX3 - 0.5f;
-	pY1 = pY1 - 0.5f;
-	pY2 = pY2 - 0.5f;
-	pY3 = pY3 - 0.5f;
 
 	Color* lColor = &GetColorInternal(0);
 	GLubyte c[] = {lColor[0].mRed, lColor[0].mGreen, lColor[0].mBlue, GetAlphaValue(),
@@ -360,13 +348,6 @@ void OpenGLPainter::DoFillTriangle(float pX1, float pY1, float pU1, float pV1,
 	{
 		return;
 	}
-
-	pX1	= pX1 - 0.5f;
-	pX2	= pX2 - 0.5f;
-	pX3	= pX3 - 0.5f;
-	pY1	= pY1 - 0.5f;
-	pY2	= pY2 - 0.5f;
-	pY3	= pY3 - 0.5f;
 
 	//glPushAttrib(GL_TEXTURE_BIT);
 	glEnable(GL_TEXTURE_2D);
@@ -413,10 +394,10 @@ void OpenGLPainter::DoDrawRect(int pLeft, int pTop, int pRight, int pBottom, int
 	ToScreenCoords(pLeft, pTop);
 	ToScreenCoords(pRight, pBottom);
 
-	GLfloat lLeft   = (GLfloat)pLeft - 0.5f;
-	GLfloat lRight  = (GLfloat)pRight - 0.5f;
-	GLfloat lTop    = (GLfloat)pTop - 0.5f;
-	GLfloat lBottom = (GLfloat)pBottom - 0.5f;
+	GLfloat lLeft   = (GLfloat)pLeft;
+	GLfloat lRight  = (GLfloat)pRight;
+	GLfloat lTop    = (GLfloat)pTop;
+	GLfloat lBottom = (GLfloat)pBottom;
 
 	GLfloat lVertex[8 * 2];
 	lVertex[0] = lLeft; // Outer top left.
@@ -490,10 +471,10 @@ void OpenGLPainter::DoFillRect(int pLeft, int pTop, int pRight, int pBottom)
 	ToScreenCoords(pLeft, pTop);
 	ToScreenCoords(pRight, pBottom);
 
-	GLfloat lLeft   = (GLfloat)pLeft - 0.5f;
-	GLfloat lRight  = (GLfloat)pRight - 0.5f;
-	GLfloat lTop    = (GLfloat)pTop - 0.5f;
-	GLfloat lBottom = (GLfloat)pBottom - 0.5f;
+	GLfloat lLeft   = (GLfloat)pLeft;
+	GLfloat lRight  = (GLfloat)pRight;
+	GLfloat lTop    = (GLfloat)pTop;
+	GLfloat lBottom = (GLfloat)pBottom;
 
 	Color& lColor = GetColorInternal(0);
 	glColor4ub(lColor.mRed, lColor.mGreen, lColor.mBlue, GetAlphaValue());
@@ -512,10 +493,10 @@ void OpenGLPainter::DoDraw3DRect(int pLeft, int pTop, int pRight, int pBottom, i
 	ToScreenCoords(pLeft, pTop);
 	ToScreenCoords(pRight, pBottom);
 
-	GLfloat lLeft   = (GLfloat)pLeft - 0.5f;
-	GLfloat lRight  = (GLfloat)pRight - 0.5f;
-	GLfloat lTop    = (GLfloat)pTop - 0.5f;
-	GLfloat lBottom = (GLfloat)pBottom - 0.5f;
+	GLfloat lLeft   = (GLfloat)pLeft;
+	GLfloat lRight  = (GLfloat)pRight;
+	GLfloat lTop    = (GLfloat)pTop;
+	GLfloat lBottom = (GLfloat)pBottom;
 
 	GLfloat lVertex[12 * 2];
 	lVertex[0] = lLeft; // Outer top left.
@@ -620,10 +601,10 @@ void OpenGLPainter::DoFillShadedRect(int pLeft, int pTop, int pRight, int pBotto
 	ToScreenCoords(pLeft, pTop);
 	ToScreenCoords(pRight, pBottom);
 
-	GLfloat lLeft   = (GLfloat)pLeft - 0.5f;
-	GLfloat lRight  = (GLfloat)pRight - 0.5f;
-	GLfloat lTop    = (GLfloat)pTop - 0.5f;
-	GLfloat lBottom = (GLfloat)pBottom - 0.5f;
+	GLfloat lLeft   = (GLfloat)pLeft;
+	GLfloat lRight  = (GLfloat)pRight;
+	GLfloat lTop    = (GLfloat)pTop;
+	GLfloat lBottom = (GLfloat)pBottom;
 
 	// Calculate the color in the middle of the rect.
 	GLfloat lTopR = (GLfloat)(mRCol[0].x + mRCol[1].x) * 0.5f;
@@ -666,8 +647,6 @@ void OpenGLPainter::DrawFan(const std::vector<Vector2DF> pCoords, bool pFill)
 		float x = i->x;
 		float y = i->y;
 		ToScreenCoords(x, y);
-		x -= 0.5f;
-		y -= 0.5f;
 		v[j*2+0] = x;
 		v[j*2+1] = y;
 	}
@@ -1064,10 +1043,10 @@ void OpenGLPainter::DoDrawAlphaImage(ImageID pImageID, int x, int y)
 
 	Texture* lTexture = *lIter;
 
-	GLfloat lLeft   = (GLfloat)x - 0.5f;
-	GLfloat lRight  = (GLfloat)(x + lTexture->mWidth) - 0.5f;
-	GLfloat lTop    = (GLfloat)y - 0.5f;
-	GLfloat lBottom = (GLfloat)(y + lTexture->mHeight) - 0.5f;
+	GLfloat lLeft   = (GLfloat)x;
+	GLfloat lRight  = (GLfloat)(x + lTexture->mWidth);
+	GLfloat lTop    = (GLfloat)y;
+	GLfloat lBottom = (GLfloat)(y + lTexture->mHeight);
 
 	::glEnable(GL_TEXTURE_2D);
 
@@ -1118,10 +1097,10 @@ void OpenGLPainter::DoDrawImage(ImageID pImageID, const PixelRect& pRect)
 		return;
 	}
 
-	GLfloat lLeft   = (GLfloat)pRect.mLeft - 0.5f;
-	GLfloat lRight  = (GLfloat)pRect.mRight - 0.5f;
-	GLfloat lTop    = (GLfloat)pRect.mTop - 0.5f;
-	GLfloat lBottom = (GLfloat)pRect.mBottom - 0.5f;
+	GLfloat lLeft   = (GLfloat)pRect.mLeft;
+	GLfloat lRight  = (GLfloat)pRect.mRight;
+	GLfloat lTop    = (GLfloat)pRect.mTop;
+	GLfloat lBottom = (GLfloat)pRect.mBottom;
 
 	ToScreenCoords(lLeft, lTop);
 	ToScreenCoords(lRight, lBottom);
@@ -1185,10 +1164,10 @@ void OpenGLPainter::DoDrawImage(ImageID pImageID, const PixelRect& pRect, const 
 
 	Texture* lTexture = *lIter;
 
-	GLfloat lLeft   = (GLfloat)pRect.mLeft - 0.5f;
-	GLfloat lRight  = (GLfloat)pRect.mRight - 0.5f;
-	GLfloat lTop    = (GLfloat)pRect.mTop - 0.5f;
-	GLfloat lBottom = (GLfloat)pRect.mBottom - 0.5f;
+	GLfloat lLeft   = (GLfloat)pRect.mLeft;
+	GLfloat lRight  = (GLfloat)pRect.mRight;
+	GLfloat lTop    = (GLfloat)pRect.mTop;
+	GLfloat lBottom = (GLfloat)pRect.mBottom;
 
 	ToScreenCoords(lLeft, lTop);
 	ToScreenCoords(lRight, lBottom);
@@ -1220,10 +1199,10 @@ void OpenGLPainter::DoDrawImage(ImageID pImageID, const PixelRect& pRect, const 
 
 	GLfloat lOneOverWidth  = 1.0f / (GLfloat)lTexture->mWidth;
 	GLfloat lOneOverHeight = 1.0f / (GLfloat)lTexture->mHeight;
-	GLfloat lULeft   = ((GLfloat)pSubpatchRect.mLeft   + 0.5f) * lOneOverWidth;
-	GLfloat lURight  = ((GLfloat)pSubpatchRect.mRight  + 0.5f) * lOneOverWidth;
-	GLfloat lVTop    = ((GLfloat)pSubpatchRect.mTop    + 0.5f) * lOneOverHeight;
-	GLfloat lVBottom = ((GLfloat)pSubpatchRect.mBottom + 0.5f) * lOneOverHeight;
+	GLfloat lULeft   = ((GLfloat)pSubpatchRect.mLeft)   * lOneOverWidth;
+	GLfloat lURight  = ((GLfloat)pSubpatchRect.mRight)  * lOneOverWidth;
+	GLfloat lVTop    = ((GLfloat)pSubpatchRect.mTop)    * lOneOverHeight;
+	GLfloat lVBottom = ((GLfloat)pSubpatchRect.mBottom) * lOneOverHeight;
 
 	GLfloat u[] = {lULeft,lVTop, lURight,lVTop, lURight,lVBottom, lULeft,lVBottom};
 	GLfloat v[] = {lLeft,lTop, lRight,lTop, lRight,lBottom, lLeft,lBottom};
@@ -1304,7 +1283,7 @@ void OpenGLPainter::PrintText(const str& pString, int x, int y)
 	const int lTabSize = lSpaceSize*4;
 
 #ifdef LEPRA_MAC
-	lCurrentY -= lFontHeight/2;
+	lCurrentY -= lFontHeight * 3 / 10;
 #endif // Mac
 
 	const Color lColor = GetColorInternal(0);
@@ -1385,9 +1364,9 @@ void OpenGLPainter::PrintText(const str& pString, int x, int y)
 			};
 			const GLfloat lTemplateUv[2*4] =
 			{
-				(lTextureX + 0.5f)/lTextureWidth,		1,
+				lTextureX/lTextureWidth,		1,
 				(lTextureX + lCharWidth)/lTextureWidth,	1,
-				(lTextureX + 0.5f)/lTextureWidth,		0,
+				lTextureX/lTextureWidth,		0,
 				(lTextureX + lCharWidth)/lTextureWidth,	0,
 			};
 			const int lIndexBase = lGlyphIndex*INDICES_PER_GLYPH;

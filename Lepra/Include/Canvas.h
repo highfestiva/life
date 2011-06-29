@@ -201,6 +201,10 @@ public:
 	// Premultiplies the alpha channel with the rgb color values.
 	void PremultiplyAlpha();
 
+	void SetOutputRotation(int pRotation);
+	unsigned GetActualWidth() const;
+	unsigned GetActualHeight() const;
+
 private:
 
 	void* CreateBuffer(unsigned pWidth, unsigned pHeight, BitDepth pBitDepth, unsigned& pPixelSize);
@@ -262,6 +266,7 @@ private:
 	unsigned mHeight;
 	unsigned mPitch;
 	unsigned mPixelSize;
+	int mOutputRotation;
 
 	void* mBuffer;
 

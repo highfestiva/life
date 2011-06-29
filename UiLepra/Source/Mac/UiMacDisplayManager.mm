@@ -301,6 +301,11 @@ bool MacDisplayManager::OpenScreen(const DisplayMode& pDisplayMode, ScreenMode p
 
 	if (lOk)
 	{
+/*#ifdef LEPRA_IOS
+		int w = mDisplayMode.mWidth;
+		mDisplayMode.mWidth = mDisplayMode.mHeight;
+		mDisplayMode.mHeight = w;
+#endif // iOS*/
 		lOk = InitWindow();
 	}
 

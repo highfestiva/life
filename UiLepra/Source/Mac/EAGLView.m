@@ -164,18 +164,35 @@ static EAGLView* gSharedView;
 
 - (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event
 {
-  if (responder)
-  {
-    [responder touchesMoved:touches withEvent:event];
-  }
+	if (responder)
+	{
+		[responder touchesMoved:touches withEvent:event];
+	}
 }
 
 - (void)touchesMoved:(NSSet*)touches withEvent:(UIEvent*)event
 {
-  if (responder)
-  {
-    [responder touchesMoved:touches withEvent:event];
-  }
+	if (responder)
+	{
+		[responder touchesMoved:touches withEvent:event];
+	}
+}
+
+
+- (void)touchesEnded:(NSSet*)touches withEvent:(UIEvent*)event
+{
+	if (responder)
+	{
+		[responder touchesEnded:touches withEvent:event];
+	}
+}
+
+- (void)touchesCancelled:(NSSet*)touches withEvent:(UIEvent*)event
+{
+	if (responder)
+	{
+		[responder touchesCancelled:touches withEvent:event];
+	}
 }
 
 @end
