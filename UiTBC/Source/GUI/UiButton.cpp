@@ -25,6 +25,7 @@ Button::Button(const str& pName) :
 	mTextColor(OFF_BLACK),
 	mTextBackgColor(255, 255, 255),
 	mPressed(false),
+	mImageButton(false),
 	mState(PRESSED),
 	mExtraData(0)
 {
@@ -43,6 +44,7 @@ Button::Button(const Color& pColor, const str& pName):
 	mTextColor(OFF_BLACK),
 	mTextBackgColor(255, 255, 255),
 	mPressed(false),
+	mImageButton(false),
 	mState(PRESSED),
 	mExtraData(0)
 {
@@ -62,6 +64,7 @@ Button::Button(BorderComponent::BorderShadeFunc pShadeFunc, int pBorderWidth, co
 	mTextColor(OFF_BLACK),
 	mTextBackgColor(255, 255, 255),
 	mPressed(false),
+	mImageButton(false),
 	mState(PRESSED),
 	mExtraData(0)
 {
@@ -89,6 +92,7 @@ Button::Button(Painter::ImageID pReleasedImageID, Painter::ImageID pPressedImage
 	mTextColor(OFF_BLACK),
 	mTextBackgColor(255, 255, 255),
 	mPressed(false),
+	mImageButton(true),
 	mState(PRESSED),
 	mExtraData(0)
 {
