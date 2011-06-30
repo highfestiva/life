@@ -16,6 +16,55 @@ namespace Slime
 
 
 
+struct FingerMovement
+{
+	int mStartX;
+	int mStartY;
+	int mLastX;
+	int mLastY;
+	bool mIsPress;
+
+	inline FingerMovement(int x, int y):
+		mStartX(x),
+		mStartY(y),
+		mLastX(x),
+		mLastY(y),
+		mIsPress(true)
+	{
+	}
+
+	inline bool Update(int pLastX, int pLastY, int pNewX, int pNewY)
+	{
+		if (std::abs(mLastX-pLastX) < 10 && std::abs(mLastY-pLastY) < 10)
+		{
+			mLastX = pNewX;
+			mLastY = pNewY;
+			return true;
+		}
+		return false;
+	}
+};
+
+typedef std::list<Slime::FingerMovement> FingerMoveList;
+extern FingerMoveList gFingerMoveList;
+
+inline int countStartPos(bool pLeft, int pScreenWidth)
+{
+	int count = 0;
+	FingerMoveList::iterator i = gFingerMoveList.begin();
+	for (; i != gFingerMoveList.end(); ++i)
+	{
+		const int ox = (int)(i->mStartY*1000/pScreenWidth);
+		if ((pLeft && ox < 500) || (!pLeft && ox > 500))
+		{
+			++count;
+		}
+	}
+	return count;
+}
+
+
+
 class SlimeVolleyball
 {
 	private: static const int TAP_JUMP_HEIGHT = 50;
@@ -222,6 +271,19 @@ class SlimeVolleyball
 			DrawStatus();
 			return;
 		}
+
+#ifdef LEPRA_IOS
+		if (mPlayerCount == 1)
+		{
+			const int dx = screen.width*2/10;
+			const int x = screen.width - std::min(std::max(dx, 120), 60); 
+			const int dy = screen.height*2/10;
+			const int y = screen.height - std::min(std::max(dy, 120), 60); 
+			const float a = System::currentTimeMillis() * 0.005f;
+			screen.setColor(Color(sin(a)*20+50, -sin(a)*15+50, 0));
+			screen.fillOval(x-15, y-15, 30, 30);
+		}
+#endif // iOS
 
 		if (!this->fInPlay && !this->bGameOver)
 		{
@@ -987,31 +1049,26 @@ class SlimeVolleyball
 	private: void drawTapIndicators()
 	{
 #ifdef LEPRA_IOS
-		screen.setColor(p1TapJump? RED : GREEN);
+		const bool p1jmp = (p1Y > 0);
+		const bool p2jmp = (p2Y > 0);
+		screen.setColor(p1jmp? RED : GREEN);
 		const int py = xformy(TAP_BASE);
+		const int jh = TAP_JUMP_HEIGHT*screen.height/1000 + 15;
 		const int pyj = xformy(TAP_BASE+TAP_JUMP_HEIGHT) - 15;
 		screen.fillRect(xformx(50), py, xformx(450), 3);
-		if (p1TapJump)
-		{
-			screen.fillRect(xformx(50), pyj, xformx(450), 3);
-		}
 		if (mPlayerCount == 2)
 		{
-			screen.setColor(p2TapJump? RED : GREEN);
+			screen.setColor(p2jmp? RED : GREEN);
 			screen.fillRect(xformx(550), py, xformx(950), 3);
-			if (p2TapJump)
-			{
-				screen.fillRect(xformx(550), pyj, xformx(950), 3);
-			}
 		}
 		if (!tapActive)
 		{
 			return;
 		}
-		drawSpike(xformx(p1TapX), p1TapJump? pyj-160 : py-160, 160, p1TapJump? RED : GREEN);
+		drawSpike(xformx(p1TapX), p1jmp? pyj-160 : py-160, p1jmp? 160+jh: 160, p1jmp? RED : GREEN);
 		if (mPlayerCount == 2)
 		{
-			drawSpike(xformx(p2TapX), p2TapJump? pyj-160 : py-160, 160, p2TapJump? RED : GREEN);
+			drawSpike(xformx(p2TapX), p2jmp? pyj-160 : py-160, p2jmp? 160+jh: 160, p2jmp? RED : GREEN);
 		}
 #endif // iOS
 	}
@@ -1048,70 +1105,71 @@ class SlimeVolleyball
 		::glDisable(GL_BLEND);
 	}
 
-	public: void MoveTo(float x, float y, bool pIsLowest)
+	public: void MoveTo(const FingerMovement& pMove)
 	{
 		tapActive = true;
-		const int ix = (int)(x*1000/screen.width);
-		const int iy = (int)(y*1000/screen.height);
-		if (ix < 500)
+		const int ox = (int)(pMove.mStartY*1000/screen.width);
+		//const int oy = (int)(pMove.mStartX*1000/screen.height);
+		int ix = (int)(pMove.mLastY*1000/screen.width);
+		const int iy = (int)(pMove.mLastX*1000/screen.height);
+		if (mPlayerCount == 1)
 		{
-			p1TapX = std::min(ix, 500);
-			const int p1LastTapY = p1TapY;
-			p1TapY = iy;
-			if (!p1TapJump)
+			if (ox < 600)
 			{
-				if (p1TapY > TAP_BASE+TAP_JUMP_HEIGHT*2 ||
-					(p1TapY > TAP_BASE+TAP_JUMP_HEIGHT && p1TapY-p1LastTapY >= TAP_JUMP_DELTA_HEIGHT/3) ||
-					(p1TapY > TAP_BASE+TAP_JUMP_MIN_HEIGHT && p1TapY-p1LastTapY >= TAP_JUMP_DELTA_HEIGHT))
+				p1TapX = std::min(ix, 500);
+				p1TapY = iy;
+			}
+			else if (ox > 600)
+			{
+				if (pMove.mIsPress && !p1TapJump)
 				{
-					p1TapJump = true;
 					moveP1Jump();
 				}
+				p1TapJump = pMove.mIsPress;
 			}
-			else if (p1TapJump)
+		}
+		else
+		{
+			if (ox < 500)	// P1.
 			{
-				if (p1TapY < TAP_BASE+TAP_JUMP_HEIGHT ||
-					(p1TapY < TAP_BASE+TAP_JUMP_HEIGHT+TAP_JUMP_MIN_HEIGHT && p1TapY-p1LastTapY <= -TAP_JUMP_DELTA_HEIGHT/3) ||
-					(p1TapY < TAP_BASE+TAP_JUMP_HEIGHT*2 && p1TapY-p1LastTapY <= -TAP_JUMP_DELTA_HEIGHT))
+				ix = std::min(500, ix);
+				const int lFingers = countStartPos(true, screen.width);
+				if (lFingers >= 2)
+				{
+					if (!p1TapJump)
+					{
+						moveP1Jump();
+					}
+				}
+				else
 				{
 					p1TapJump = false;
 				}
-				else if (p1TapY > TAP_BASE+TAP_JUMP_HEIGHT*4 ||
-					p1TapY-p1LastTapY >= TAP_JUMP_DELTA_HEIGHT*2)
+				if (lFingers == 1 || std::abs(ix-p1TapX) < 15)
 				{
-					// If we desperately want to jump, let's jump.
-					moveP1Jump();
+					p1TapX = ix;
+					p1TapY = iy;
 				}
 			}
-		}
-		else if (mPlayerCount == 2 && ix > 500)
-		{
-			p2TapX = std::max(ix, 500);
-			const int p2LastTapY = p2TapY;
-			p2TapY = iy;
-			if (!p2TapJump)
+			if (ox > 500)	// P2
 			{
-				if (p2TapY > TAP_BASE+TAP_JUMP_HEIGHT*2 ||
-					(p2TapY > TAP_BASE+TAP_JUMP_HEIGHT && p2TapY-p2LastTapY >= TAP_JUMP_DELTA_HEIGHT/3) ||
-					(p2TapY > TAP_BASE+TAP_JUMP_MIN_HEIGHT && p2TapY-p2LastTapY >= TAP_JUMP_DELTA_HEIGHT))
+				ix = std::max(500, ix);
+				const int lFingers = countStartPos(false, screen.width);
+				if (lFingers >= 2)
 				{
-					p2TapJump = true;
-					moveP2Jump();
+					if (!p2TapJump)
+					{
+						moveP2Jump();
+					}
 				}
-			}
-			else if (p2TapJump)
-			{
-				if (p2TapY < TAP_BASE+TAP_JUMP_HEIGHT ||
-					(p2TapY < TAP_BASE+TAP_JUMP_HEIGHT+TAP_JUMP_MIN_HEIGHT && p2TapY-p2LastTapY <= -TAP_JUMP_DELTA_HEIGHT/3) ||
-					(p2TapY < TAP_BASE+TAP_JUMP_HEIGHT*2 && p2TapY-p2LastTapY <= -TAP_JUMP_DELTA_HEIGHT))
+				else
 				{
 					p2TapJump = false;
 				}
-				else if (p2TapY > TAP_BASE+TAP_JUMP_HEIGHT*4 ||
-					p2TapY-p2LastTapY >= TAP_JUMP_DELTA_HEIGHT*2)
+				if (lFingers == 1 || std::abs(ix-p2TapX) < 15)
 				{
-					// If we desperately want to jump, let's jump.
-					moveP2Jump();
+					p2TapX = ix;
+					p2TapY = iy;
 				}
 			}
 		}

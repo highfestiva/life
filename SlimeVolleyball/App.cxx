@@ -30,6 +30,10 @@ namespace Slime
 
 
 
+FingerMoveList gFingerMoveList;
+
+
+
 class App: public Application, public UiLepra::DisplayResizeObserver, public UiLepra::KeyCodeInputObserver
 {
 public:
@@ -39,7 +43,7 @@ public:
 	virtual ~App();
 
 	static bool PollApp();
-	static void OnTap(float x, float y, bool pIsLowest);
+	static void OnTap(const FingerMovement& pMove);
 	static void OnMouseTap(float x, float y, bool pPressed);
 
 private:
@@ -138,9 +142,9 @@ bool App::PollApp()
 	return (SystemManager::GetQuitRequest() == 0);
 }
 
-void App::OnTap(float x, float y, bool pIsLowest)
+void App::OnTap(const FingerMovement& pMove)
 {
-	mApp->mGame->MoveTo(y, x, pIsLowest);
+	mApp->mGame->MoveTo(pMove);
 }
 
 void App::OnMouseTap(float x, float y, bool pPressed)
@@ -512,6 +516,11 @@ void App::Resume()
 #ifdef LEPRA_IOS
 	[mAnimatedApp startTick];
 #endif // iOS
+	if (mMusicStreamer)
+	{
+		mMusicStreamer->Stop();
+		mMusicStreamer->Playback();
+	}
 }
 
 

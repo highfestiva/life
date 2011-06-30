@@ -58,29 +58,55 @@
 	}
 }
 
+-(Slime::FingerMovement&) getFingerMovement:(UITouch*)touch
+{
+	CGPoint lThis = [touch locationInView:nil];
+	CGPoint lPrevious = [touch previousLocationInView:nil];
+	Slime::FingerMoveList::iterator i = Slime::gFingerMoveList.begin();
+	for (; i != Slime::gFingerMoveList.end(); ++i)
+	{
+		if (i->Update(lPrevious.x, lPrevious.y, lThis.x, lThis.y))
+		{
+			return *i;
+		}
+	}
+	Slime::gFingerMoveList.push_back(Slime::FingerMovement(lThis.x, lThis.y));
+	return Slime::gFingerMoveList.back();
+}
+
+-(void) dropFingerMovement:(UITouch*)touch
+{
+	CGPoint lThis = [touch locationInView:nil];
+	CGPoint lPrevious = [touch previousLocationInView:nil];
+	Slime::FingerMoveList::iterator i = Slime::gFingerMoveList.begin();
+	for (; i != Slime::gFingerMoveList.end(); ++i)
+	{
+		if (i->Update(lPrevious.x, lPrevious.y, lThis.x, lThis.y))
+		{
+			Slime::gFingerMoveList.erase(i);
+			return;
+		}
+	}
+	// Oops! This happens, but not sure why.
+	Slime::gFingerMoveList.clear();
+}
+
 - (void)touchesMoved:(NSSet*)touches withEvent:(UIEvent*)event
 {
 	NSEnumerator* e = [touches objectEnumerator];
 	UITouch* lTouch;
-	/*int lLowest = -1;
-	int lTouchCount = 0;
 	while ((lTouch = (UITouch*)[e nextObject]))
 	{
 		CGPoint lTapPosition = [lTouch locationInView:nil];
-		if (lLowest < lTapPosition.y)
+		bool lIsPressed = (lTouch.phase != UITouchPhaseEnded && lTouch.phase != UITouchPhaseEnded);
+		Slime::FingerMovement& lMove = [self getFingerMovement:lTouch];
+		lMove.mIsPress = lIsPressed;
+		Slime::App::OnTap(lMove);
+		if (!lIsPressed)
 		{
-			lLowest = lTapPosition.y;
+			[self dropFingerMovement:lTouch];
 		}
-		bool lIsPressed = (lTouch.phase != UITouchPhaseEnded && lTouch.phase != UITouchPhaseEnded);
-		Slime::App::OnMouseTap(lTapPosition.x, lTapPosition.y, lIsPressed);
-		++lTouchCount;
-	}
-	e = [touches objectEnumerator];*/
-	while ((lTouch = (UITouch*)[e nextObject]))
-	{
-		CGPoint lTapPosition = [lTouch locationInView:nil];
-		Slime::App::OnTap(lTapPosition.x, lTapPosition.y, false);
-		bool lIsPressed = (lTouch.phase != UITouchPhaseEnded && lTouch.phase != UITouchPhaseEnded);
+
 		Slime::App::OnMouseTap(lTapPosition.x, lTapPosition.y, lIsPressed);
 	}
 }

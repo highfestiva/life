@@ -59,6 +59,13 @@ bool OggAlStream::IsPlaying() const
 	return (state == AL_PLAYING);
 }
 
+bool OggAlStream::Stop()
+{
+	alSourceStop(mAlSource);
+	Clear();
+	return Rewind();
+}
+
 bool OggAlStream::Update()
 {
 	bool lIsActive = true;

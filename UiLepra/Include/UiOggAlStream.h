@@ -31,6 +31,7 @@ public:
 	virtual bool Playback();		// play the Ogg stream
 	virtual bool Rewind();
 	virtual bool IsPlaying() const;		// check if the source is playing
+	virtual bool Stop();
 	virtual bool Update();			// update the stream if necessary
 
 protected:
