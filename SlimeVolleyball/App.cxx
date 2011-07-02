@@ -273,23 +273,23 @@ bool App::Open()
 		mDesktopWindow = new UiTbc::DesktopWindow(mInput, mPainter, new UiTbc::FloatingLayout(), 0, 0);
 		mDesktopWindow->SetIsHollow(true);
 		mDesktopWindow->SetPreferredSize(mCanvas->GetWidth(), mCanvas->GetHeight());
-		mLazyButton = CreateButton(_T("Zzzlow"), Color(50, 150, 0), mDesktopWindow);
+		mLazyButton = CreateButton(_T("Slower"), Color(50, 150, 0), mDesktopWindow);
 		mLazyButton->SetOnClick(App, OnSpeedClick);
-		mHardButton = CreateButton(_T("n00b"), Color(150, 150, 0), mDesktopWindow);
+		mHardButton = CreateButton(_T("Slow"), Color(192, 192, 0), mDesktopWindow);
 		mHardButton->SetOnClick(App, OnSpeedClick);
-		mOriginalButton = CreateButton(_T("Classic"), Color(150, 50, 0), mDesktopWindow);
+		mOriginalButton = CreateButton(_T("Original"), Color(210, 0, 0), mDesktopWindow);
 		mOriginalButton->SetOnClick(App, OnSpeedClick);
 
 		m1PButton = CreateButton(_T("1P"), Color(128, 64, 0), mDesktopWindow);
 		m1PButton->SetOnClick(App, OnPClick);
-		m2PButton = CreateButton(_T("2P"), Color(128, 170, 160), mDesktopWindow);
+		m2PButton = CreateButton(_T("2P"), Color(128, 0, 128), mDesktopWindow);
 		m2PButton->SetOnClick(App, OnPClick);
 
-		mNextButton = CreateButton(_T("Next"), Color(0, 192, 0), mDesktopWindow);
+		mNextButton = CreateButton(_T("Next"), Color(50, 150, 0), mDesktopWindow);
 		mNextButton->SetOnClick(App, OnFinishedClick);
-		mResetButton = CreateButton(_T("Quit"), Color(192, 0, 0), mDesktopWindow);
+		mResetButton = CreateButton(_T("Menu"), Color(210, 0, 0), mDesktopWindow);
 		mResetButton->SetOnClick(App, OnFinishedClick);
-		mRetryButton = CreateButton(_T("Retry"), Color(150, 150, 0), mDesktopWindow);
+		mRetryButton = CreateButton(_T("Rematch"), Color(192, 192, 0), mDesktopWindow);
 		mRetryButton->SetOnClick(App, OnFinishedClick);
 
 		Layout();
@@ -381,7 +381,7 @@ int App::Run()
 	Close();
 	return lQuit? 0 : 1;
 #else // iOS
-	mAnimatedApp = [AnimatedApp alloc];
+	mAnimatedApp = [[AnimatedApp alloc] init:mCanvas];
 	return 0;
 #endif // !iOS/iOS
 }
@@ -635,7 +635,8 @@ UiTbc::Button* App::CreateButton(const str& pText, const Color& pColor, UiTbc::D
 {
 	UiTbc::Button* lButton = new UiTbc::Button(UiTbc::BorderComponent::LINEAR, 6, pColor, _T(""));
 	lButton->SetText(pText);
-	lButton->SetPreferredSize(pDesktop->GetSize().x/5, pDesktop->GetSize().y/9);
+	const int h = std::max(pDesktop->GetSize().y/9, 44);
+	lButton->SetPreferredSize(pDesktop->GetSize().x/5, h);
 	pDesktop->AddChild(lButton);
 	lButton->SetVisible(false);
 	lButton->UpdateLayout();

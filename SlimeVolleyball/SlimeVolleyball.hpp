@@ -261,7 +261,7 @@ class SlimeVolleyball
 		if (mShowTitle)
 		{
 			const int h = localFontMetrics.getHeight();
-			this->screen.centerString("Slime (Volley)Ball", this->nHeight / 2 - h*4);
+			this->screen.centerString("SlimeBall", this->nHeight / 2 - h*4);
 			astr s = "Base by Quin Pendragon\n" \
 				"AI by Daniel Wedge\n" \
 				"Port by Pixel Doctrine\n" \
@@ -271,19 +271,6 @@ class SlimeVolleyball
 			DrawStatus();
 			return;
 		}
-
-#ifdef LEPRA_IOS
-		if (mPlayerCount == 1)
-		{
-			const int dx = screen.width*2/10;
-			const int x = screen.width - std::min(std::max(dx, 120), 60); 
-			const int dy = screen.height*2/10;
-			const int y = screen.height - std::min(std::max(dy, 120), 60); 
-			const float a = System::currentTimeMillis() * 0.005f;
-			screen.setColor(Color(sin(a)*20+50, -sin(a)*15+50, 0));
-			screen.fillOval(x-15, y-15, 30, 30);
-		}
-#endif // iOS
 
 		if (!this->fInPlay && !this->bGameOver)
 		{
@@ -811,7 +798,7 @@ class SlimeVolleyball
 	{
 		astr s = (!this->fInPlay ? "" : astr("	 Time: ") + MakeTime((this->paused ? this->pausedTime : System::currentTimeMillis()) - this->startTime));
 		this->screen.setColor(WHITE);
-		int i = this->nHeight*5/4 * 7/8 - 10;
+		int i = this->nHeight*5/4 * 7/8 + 5;
 		this->screen.centerString(s, i);
 	}
 
@@ -1049,26 +1036,37 @@ class SlimeVolleyball
 	private: void drawTapIndicators()
 	{
 #ifdef LEPRA_IOS
+		const int dy = screen.height*2/10;
+		const int y = screen.height - std::min(std::max(dy, 120), 60); 
+		const int h = screen.height/3;
+		const int jh = h * 3/2;
+		const int yt = y - h;
+		const int jyt = y - jh;
 		const bool p1jmp = (p1Y > 0);
 		const bool p2jmp = (p2Y > 0);
 		screen.setColor(p1jmp? RED : GREEN);
-		const int py = xformy(TAP_BASE);
-		const int jh = TAP_JUMP_HEIGHT*screen.height/1000 + 15;
-		const int pyj = xformy(TAP_BASE+TAP_JUMP_HEIGHT) - 15;
-		screen.fillRect(xformx(50), py, xformx(450), 3);
+		screen.fillRect(xformx(50), y-1, xformx(400), 3);
 		if (mPlayerCount == 2)
 		{
 			screen.setColor(p2jmp? RED : GREEN);
-			screen.fillRect(xformx(550), py, xformx(950), 3);
+			screen.fillRect(xformx(550), y-1, xformx(400), 3);
+		}
+		if (mPlayerCount == 1)
+		{
+			const int dx = screen.width*2/10;
+			const int x = screen.width - std::min(std::max(dx, 120), 60); 
+			const float a = System::currentTimeMillis() * 0.005f;
+			screen.setColor(Color(sin(a)*20+50, -sin(a)*15+50, 0));
+			screen.fillOval(x-15, y-15, 30, 30);
 		}
 		if (!tapActive)
 		{
 			return;
 		}
-		drawSpike(xformx(p1TapX), p1jmp? pyj-160 : py-160, p1jmp? 160+jh: 160, p1jmp? RED : GREEN);
+		drawSpike(xformx(p1TapX), p1jmp? jyt : yt, p1jmp? jh : h, p1jmp? RED : GREEN);
 		if (mPlayerCount == 2)
 		{
-			drawSpike(xformx(p2TapX), p2jmp? pyj-160 : py-160, p2jmp? 160+jh: 160, p2jmp? RED : GREEN);
+			drawSpike(xformx(p2TapX), p2jmp? jyt : yt, p2jmp? jh : h, p2jmp? RED : GREEN);
 		}
 #endif // iOS
 	}

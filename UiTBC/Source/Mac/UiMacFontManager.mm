@@ -97,10 +97,31 @@ bool MacFontManager::RenderGlyph(tchar pChar, Canvas& pImage, const PixelRect& p
 	//CGContextSetCharacterSpacing(textcontext, 1);
 	CGContextSetTextDrawingMode(textcontext, kCGTextFillStroke);
 	CGContextSetRGBStrokeColor(textcontext, 1,1,1,0.5);
-	CGContextShowTextAtPoint(textcontext, 0, pRect.GetHeight()/4, &pChar, 1);
+	int y = pRect.GetHeight()-mCurrentFont->mSize;
+	if (y < pRect.GetHeight()/4)
+	{
+		y = pRect.GetHeight()/4;
+	}
+	CGContextShowTextAtPoint(textcontext, 0, y, &pChar, 1);
 	CGContextFlush(textcontext);
 
 	pImage.FlipVertical();	// Upside down.
+
+	// Strengthen the colors!
+	for (int y = 0; y < (int)pImage.GetHeight(); ++y)
+	{
+		for (int x = 0; x < (int)pImage.GetWidth(); ++x)
+		{
+			Color lColor = pImage.GetPixelColor(x, y);
+			if (lColor.mAlpha)
+			{
+				lColor.mRed	= 255;
+				lColor.mGreen	= 255;
+				lColor.mBlue	= 255;
+				pImage.SetPixelColor(x, y, lColor);
+			}
+		}
+	}
 
 	/*printf("Rendering glyph '%c' (height=%i):\n", pChar, pImage.GetHeight());
 	for (int y = 0; y < (int)pImage.GetHeight(); ++y)

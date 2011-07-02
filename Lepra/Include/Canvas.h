@@ -201,6 +201,7 @@ public:
 	// Premultiplies the alpha channel with the rgb color values.
 	void PremultiplyAlpha();
 
+	int GetOutputRotation() const;
 	void SetOutputRotation(int pRotation);
 	unsigned GetActualWidth() const;
 	unsigned GetActualHeight() const;

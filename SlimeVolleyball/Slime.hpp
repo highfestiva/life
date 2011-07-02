@@ -116,7 +116,7 @@ private:
 		const size_t lCurveCount = ((rx*2 + ry*2) / 20 + std::abs(a1-a2)/20 + 12) & (~7);
 		std::vector<Vector2DF> lCoords;
 		const float lMidX = x + rx*0.5f;
-		const float lMidY = y + ry*0.5f + 0.6f;
+		const float lMidY = y + ry*0.5f;
 		if (pFill)
 		{
 			lCoords.push_back(Vector2DF(lMidX, lMidY));

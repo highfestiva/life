@@ -10,6 +10,10 @@
 		1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; };
 		1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF5F4DF0D08C38300B7A737 /* UIKit.framework */; };
 		288765FD0DF74451002DB57D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 288765FC0DF74451002DB57D /* CoreGraphics.framework */; };
+		B196560B13BE6AB5006A1422 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = B196560713BE6AB5006A1422 /* Icon.png */; };
+		B196560C13BE6AB5006A1422 /* Icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B196560813BE6AB5006A1422 /* Icon@2x.png */; };
+		B196560F13BE6C3B006A1422 /* Icon-72.png in Resources */ = {isa = PBXBuildFile; fileRef = B196560E13BE6C3B006A1422 /* Icon-72.png */; };
+		B196562513BE6F94006A1422 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = B196562413BE6F94006A1422 /* Default.png */; };
 		B1988C7713A477DB0007174C /* SlimeAI.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1988C7613A477DB0007174C /* SlimeAI.mm */; };
 		B19A141913A122CE0051A61C /* UiBorderComponent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A13C213A122CE0051A61C /* UiBorderComponent.cpp */; };
 		B19A141A13A122CE0051A61C /* UiButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B19A13C313A122CE0051A61C /* UiButton.cpp */; };
@@ -431,6 +435,10 @@
 		288765FC0DF74451002DB57D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		8D1107310486CEB800E47090 /* SlimeBall-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "SlimeBall-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
 		B16FB5F713A2CB04001C315F /* Slime.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Slime.hpp; sourceTree = "<group>"; };
+		B196560713BE6AB5006A1422 /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Icon.png; path = ../Data/Icon.png; sourceTree = SOURCE_ROOT; };
+		B196560813BE6AB5006A1422 /* Icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon@2x.png"; path = "../Data/Icon@2x.png"; sourceTree = SOURCE_ROOT; };
+		B196560E13BE6C3B006A1422 /* Icon-72.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon-72.png"; path = "../Data/Icon-72.png"; sourceTree = SOURCE_ROOT; };
+		B196562413BE6F94006A1422 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Default.png; path = ../Data/Default.png; sourceTree = SOURCE_ROOT; };
 		B1988C7613A477DB0007174C /* SlimeAI.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = SlimeAI.mm; sourceTree = "<group>"; };
 		B19A13C213A122CE0051A61C /* UiBorderComponent.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiBorderComponent.cpp; sourceTree = "<group>"; };
 		B19A13C313A122CE0051A61C /* UiButton.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiButton.cpp; sourceTree = "<group>"; };
@@ -2053,6 +2061,10 @@
 		B1A1E04913AA970E0097B8D0 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				B196562413BE6F94006A1422 /* Default.png */,
+				B196560E13BE6C3B006A1422 /* Icon-72.png */,
+				B196560713BE6AB5006A1422 /* Icon.png */,
+				B196560813BE6AB5006A1422 /* Icon@2x.png */,
 				B1A1E05013AA97470097B8D0 /* Data */,
 			);
 			name = Resources;
@@ -2117,6 +2129,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				B1A1E05213AA97480097B8D0 /* Tingaliin.ogg in Resources */,
+				B196560B13BE6AB5006A1422 /* Icon.png in Resources */,
+				B196560C13BE6AB5006A1422 /* Icon@2x.png in Resources */,
+				B196560F13BE6C3B006A1422 /* Icon-72.png in Resources */,
+				B196562513BE6F94006A1422 /* Default.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2615,6 +2631,58 @@
 			};
 			name = Release;
 		};
+		B196571713BE9B2B006A1422 /* Distribution */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
+				GCC_C_LANGUAGE_STANDARD = c99;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
+				PREBINDING = NO;
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Distribution;
+		};
+		B196571813BE9B2B006A1422 /* Distribution */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = SlimeBall_Prefix.pch;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"HAVE_STDINT_H=1",
+					"HAVE_STAT=1",
+					"HAVE_UNISTD_H=1",
+					"HAVE_USLEEP=1",
+					LEPRA_WITHOUT_FMOD,
+					LEPRA_IPHONE_SIMULATOR,
+				);
+				HEADER_SEARCH_PATHS = (
+					"\"$(SRCROOT)/../../ThirdParty/stlport/stlport\"",
+					"\"$(SRCROOT)/../../ThirdParty/ode-0.11.1/include\"",
+					"\"$(SRCROOT)/../../ThirdParty/utf8cpp\"",
+					"\"$(SRCROOT)/../../ThirdParty/freealut-1.1.0/include\"",
+					"\"$(SRCROOT)/../../ThirdParty/libogg-1.2.2/include\"",
+					"\"$(SRCROOT)/../../ThirdParty/libvorbis-1.3.2/include\"",
+					"\"$(SRCROOT)/../../ThirdParty/libvorbis-1.3.2/lib\"",
+				);
+				INFOPLIST_FILE = "SlimeBall-Info.plist";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../../Lepra\"",
+					"\"$(SRCROOT)/../../TBC\"",
+					"\"$(SRCROOT)/../../ThirdParty/stlport/build/lib/obj/gcc/so_stlg\"",
+				);
+				PRODUCT_NAME = SlimeBall;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Distribution;
+		};
 		C01FCF4F08A954540054247B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -2652,6 +2720,7 @@
 			buildConfigurations = (
 				1D6058940D05DD3E006BFB54 /* Debug */,
 				1D6058950D05DD3E006BFB54 /* Release */,
+				B196571813BE9B2B006A1422 /* Distribution */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -2661,6 +2730,7 @@
 			buildConfigurations = (
 				C01FCF4F08A954540054247B /* Debug */,
 				C01FCF5008A954540054247B /* Release */,
+				B196571713BE9B2B006A1422 /* Distribution */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

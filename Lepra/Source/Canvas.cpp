@@ -4064,6 +4064,11 @@ void Canvas::PremultiplyAlpha()
 	}
 }
 
+int Canvas::GetOutputRotation() const
+{
+	return mOutputRotation;
+}
+
 void Canvas::SetOutputRotation(int pRotation)
 {
 	mOutputRotation = pRotation;

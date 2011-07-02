@@ -160,11 +160,16 @@ void OpenGLPainter::ResetClippingRect()
 	my_glOrtho(0, (float32)GetCanvas()->GetActualWidth(),
 		(float32)GetCanvas()->GetActualHeight(), 0,
 		0, 1);
-#ifdef LEPRA_IOS
-	glRotatef(90, 0, 0, 1);
-	glTranslatef(0, -(float)GetCanvas()->GetHeight(), 0);	// TRICKY: float cast necessary, otherwise nothing is shown on screen! Bug?!?
-#endif // iOS
-	
+	glRotatef(GetCanvas()->GetOutputRotation(), 0, 0, 1);
+	if (GetCanvas()->GetOutputRotation() == 90)
+	{
+		glTranslatef(0, -(float)GetCanvas()->GetHeight(), 0);	// TRICKY: float cast necessary, otherwise nothing is shown on screen! Bug?!?
+	}
+	else if (GetCanvas()->GetOutputRotation() == -90)
+	{
+		glTranslatef(-(float)GetCanvas()->GetWidth(), 0, 0);	// TRICKY: float cast necessary, otherwise nothing is shown on screen! Bug?!?
+	}
+
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
@@ -1281,10 +1286,6 @@ void OpenGLPainter::PrintText(const str& pString, int x, int y)
 	const int lLineHeight = GetFontManager()->GetLineHeight();
 	const int lSpaceSize = GetFontManager()->GetCharWidth(' ');
 	const int lTabSize = lSpaceSize*4;
-
-#ifdef LEPRA_MAC
-	lCurrentY -= lFontHeight * 3 / 10;
-#endif // Mac
 
 	const Color lColor = GetColorInternal(0);
 	assert(lColor != BLACK);	// Does not show.
