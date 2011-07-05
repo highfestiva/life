@@ -6,26 +6,32 @@ import os
 import sys
 
 
+is_debug = True
+if len(sys.argv) > 1 and sys.argv[1] == '--release':
+    is_debug = False
+
+
 is_ios = os.environ.get('PD_BUILD_IOS')
 if is_ios: is_ios = int(is_ios)
 is_ios_sim = os.environ.get('PD_BUILD_IOS_SIM')
 if is_ios_sim: is_ios_sim = int(is_ios_sim)
 is_mac = (sys.platform == 'darwin')
 
-print("iOS: %s, iOS sim: %s, mac: %s" % (is_ios, is_ios_sim, is_mac))
+#print("iOS: %s, iOS sim: %s, mac: %s" % (is_ios, is_ios_sim, is_mac))
 
 cextraflags = ''
 glframework = 'OpenGL'
 gcc = 'gcc'
+stllibext = '.so.5.2'
 if is_mac:
     cextraflags = ' -D_DARWIN_C_SOURCE -D_STLP_THREADS'
+    stllibext = '.5.2.dylib'
     if is_ios:
         darwin_kit = '-framework UIKit -framework Foundation -framework QuartzCore -framework CoreGraphics'
         glframework = 'OpenGLES'
         gcc = 'i686-apple-darwin10-gcc' if is_ios_sim else 'armv6-apple-darwin10-gcc'
     else:
         darwin_kit = '-framework AppKit -framework Cocoa -framework CoreServices -lIOKit'
-stlport_path = 'ThirdParty/stlport/build/lib/obj/'+gcc+'/so_stlg'
 
 platform_extraflags = ''
 if is_ios:
@@ -37,13 +43,23 @@ if is_ios:
         platform_extraflags += ' -DLEPRA_IPHONE_SIMULATOR'
 else:
     compiler_path = ''
+    if is_mac:
+        platform_extraflags = ' -mmacosx-version-min=10.5'
 cextraflags += platform_extraflags
 
+c_current_flags = '-O0 -ggdb -D_DEBUG' if is_debug else '-O3'
+stl_subdir = 'so_stlg' if is_debug else 'so'
+stl_lib = 'stlportstlg' if is_debug else 'stlport'
+#stllibext = stllibext if is_debug else '.a'
+link_type_flag = '-shared' #if is_debug else '-static'
+link_bin_type_flag = '' #if is_debug else '-static'
+link_output_ext = '.so' #if is_debug else '.a'
+stlport_path = 'ThirdParty/stlport/build/lib/obj/'+gcc+'/'+stl_subdir
 
 cflags_1 = "C_COMPILER = "+compiler_path+"""gcc
 CPP_COMPILER = """+compiler_path+"""g++
 
-CFLAGS = -O0 -ggdb -fPIC"""+cextraflags+""" -D_STLP_DEBUG -D_POSIX_PTHREAD_SEMANTICS %(includes)s -DPOSIX -D_XOPEN_SOURCE=600 -D_DEBUG -D_CONSOLE -DPNG_NO_ASSEMBLER_CODE -DdSingle -DdTLS_ENABLED=1 -DHAVE_CONFIG_H=1 -DLEPRA_WITHOUT_FMOD"""
+CFLAGS = """+c_current_flags+" -fPIC"+cextraflags+" -D_POSIX_PTHREAD_SEMANTICS %(includes)s -DPOSIX -D_XOPEN_SOURCE=600 -D_CONSOLE -DPNG_NO_ASSEMBLER_CODE -DdSingle -DdTLS_ENABLED=1 -DHAVE_CONFIG_H=1 -DLEPRA_WITHOUT_FMOD"
 cflags_2 = "-Wno-unknown-pragmas"
 ldflags = platform_extraflags
 
@@ -51,7 +67,6 @@ librt = '-lrt'
 libgl = '-lGL'
 openal_noui = ''
 openal_ui = '-lOpenAL'
-stllibfile = '.so.5.2'
 mac_hid = ''
 space_mac_hid = ''
 
@@ -60,16 +75,23 @@ if is_mac:
     openal_noui = '-framework OpenAL'
     openal_ui = '-framework OpenAL'
     libgl = '-framework '+glframework
-    stllibfile = '.5.2.dylib'
     mac_hid = 'HID'
     space_mac_hid = ' '+mac_hid
     cflags_1 += ' -framework '+glframework+' -framework CoreServices -framework OpenAL -DMAC_OS_X_VERSION=1050'
     ldflags += ' '+darwin_kit+' -lobjc '
 
+shared_if_copy_stlport_lib = """\t@if test -f """+stlport_path+"/lib"+stl_lib + stllibext + "; then cp "+stlport_path+"/lib"+stl_lib + stllibext + """ bin/; fi
+"""
+static_if_copy_stlport_lib = ""
+current_if_copy_stlport_lib = shared_if_copy_stlport_lib #if is_debug else static_if_copy_stlport_lib
+link_line = "$(CPP_COMPILER) "+link_type_flag+" $(LIBS) " + ldflags + ' ' + openal_noui + " -o $@ $(OBJS)"
+#if not is_debug:
+#    link_line = 'ar -r -s $@ $(OBJS)'
+
 cflags_head = cflags_1+" -Wall "+cflags_2+"\n"
 cflags_nowarn_head = cflags_1+" "+cflags_2+"\n"
-libs_head = "LIBS = %(deplib_switches)s -lstlportstlg -lpthread -ldl " + librt + " %(libs)s\n"
-gfx_libs_head = "LIBS = %(deplib_switches)s " + openal_ui + " -lstlportstlg -lpthread -ldl " + librt + " " + libgl + " %(libs)s\n"
+libs_head = "LIBS = %(deplib_switches)s -l"+stl_lib+" -lpthread -ldl " + librt + " %(libs)s\n"
+gfx_libs_head = "LIBS = %(deplib_switches)s " + openal_ui + " -l"+stl_lib+" -lpthread -ldl " + librt + " " + libgl + " %(libs)s\n"
 
 head_lib = cflags_head+libs_head
 head_lib_nowarn = cflags_nowarn_head+libs_head
@@ -93,11 +115,11 @@ depend:
 """
 
 foot_lib = """
-all:\tlib%(lib)s.so $(OBJS)
+all:\tlib%(lib)s"""+link_output_ext+""" $(OBJS)
 clean:
-\t@rm -f lib%(lib)s.so $(OBJS)
-lib%(lib)s.so:\t$(OBJS)
-\t$(CPP_COMPILER) -shared $(LIBS) """ + ldflags + ' ' + openal_noui + """ -o $@ $(OBJS)
+\t@rm -f lib%(lib)s"""+link_output_ext+""" $(OBJS)
+lib%(lib)s"""+link_output_ext+""":\t$(OBJS)
+\t"""+link_line+"""
 """+foot_rules
 
 foot_lib_nowarn = foot_lib
@@ -112,7 +134,7 @@ all:\t%(lib)s $(OBJS)
 clean:
 \t@rm -f %(lib)s $(OBJS)
 %(lib)s:\t$(OBJS)
-\t$(CPP_COMPILER) $(LIBS) """ + ldflags + """ -o $@ $(OBJS)
+\t$(CPP_COMPILER) """+link_bin_type_flag+""" $(LIBS) """ + ldflags + """ -o $@ $(OBJS)
 """+foot_rules
 
 foot_gfx_bin = foot_bin
@@ -142,8 +164,7 @@ depend:
 \tdone
 
 $(BINS):\t$(OBJS)
-\t@if test -f """+stlport_path+"/libstlportstlg" + stllibfile + "; then cp "+stlport_path+"/libstlportstlg" + stllibfile + """ bin/; fi
-\t@cp $@ bin/
+"""+current_if_copy_stlport_lib+"""\t@cp $@ bin/
 
 $(OBJS):\t$(SRCS)
 \t$(MAKE) -C $@
@@ -152,7 +173,7 @@ $(SRCS):
 \t$(MAKE) -C $@
 \t@rm -f $(BINS)
 \t@mkdir -p bin
-\t@cp $@/*.so bin/
+\t@cp $@/*"""+link_output_ext+""" bin/
 """
 
 
@@ -197,7 +218,7 @@ def convert_out_name(vcfile):
 def linux_bin_name(type, vcfile):
     rawname = convert_out_name(vcfile)
     if type == "lib":
-        rawname = "lib"+rawname+".so"
+        rawname = "lib"+rawname+link_output_ext
     pathname = os.path.join(os.path.dirname(vcfile), rawname)
     #print pathname
     return pathname

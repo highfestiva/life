@@ -5,7 +5,8 @@
 
 #include <assert.h>
 #include <../src/stlport_prefix.h>
-#include <stl/_threads.h>
+//#include <stl/_threads.h>
+#include <locale>
 #include "../Include/Timer.h"
 #include "../Include/HiResTimer.h"
 #include "../Include/Log.h"

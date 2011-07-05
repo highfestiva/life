@@ -219,7 +219,10 @@ def _createmakes(force=False):
         if os.path.exists("makefile") and not force:
                 return
         os.chdir(makefilescriptdir)
-        run([sys.executable, makefilescript], "generating makefiles")
+        r = [sys.executable, makefilescript]
+        if default_build_mode != 'debug':
+                r += ['--release']
+        run(r, "generating makefiles")
         cnt = len(makefilescriptdir.split("/"))
         os.chdir("/".join([".."]*cnt))
 
@@ -463,8 +466,10 @@ def main():
         if not options.buildmode in buildtypes:
                 print("Unknown build mode!")
                 sys.exit(1)
+        global default_build_mode
         default_build_mode = options.buildmode
         if buildtypes.index(options.buildmode) > 0:
+                global ziptype
                 ziptype = options.buildmode
 
         if options.demacappify:

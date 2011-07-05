@@ -776,7 +776,7 @@ void GameServerManager::ApplyStoredMovement()
 		MovementList lMovementList = mMovementArrayList[lFrameCycleIndex];
 		LEPRA_DEBUG_CODE(size_t lMovementCount = lMovementList.size();)
 		mMovementArrayList[lFrameCycleIndex].clear();
-		assert(lMovementCount == lMovementList.size());
+		LEPRA_DEBUG_CODE(assert(lMovementCount == lMovementList.size()));
 		MovementList::iterator x = lMovementList.begin();
 		for (; x != lMovementList.end(); ++x)
 		{

@@ -75,6 +75,7 @@ private:
 	void OnSpeedClick(UiTbc::Button* pButton);
 	void OnPClick(UiTbc::Button* pButton);
 	void OnFinishedClick(UiTbc::Button* pButton);
+	void OnGetiPhoneClick(UiTbc::Button*);
 
 	static UiTbc::Button* CreateButton(const str& pText, const Color& pColor, UiTbc::DesktopWindow* pDesktop);
 
@@ -102,6 +103,7 @@ private:
 	UiTbc::Button* mNextButton;
 	UiTbc::Button* mResetButton;
 	UiTbc::Button* mRetryButton;
+	UiTbc::Button* mGetiPhoneButton;
 
 	LOG_CLASS_DECLARE();
 };
@@ -292,6 +294,10 @@ bool App::Open()
 		mRetryButton = CreateButton(_T("Rematch"), Color(192, 192, 0), mDesktopWindow);
 		mRetryButton->SetOnClick(App, OnFinishedClick);
 
+		mGetiPhoneButton = CreateButton(_T("4 iPhone!"), Color(45, 45, 45), mDesktopWindow);
+		mGetiPhoneButton->SetVisible(true);
+		mGetiPhoneButton->SetOnClick(App, OnGetiPhoneClick);
+
 		Layout();
 	}
 	if (lOk)
@@ -454,9 +460,14 @@ void App::Layout()
 	{
 		return;
 	}
-	const int x = 20;
-	const int dy = mLazyButton->GetSize().y * 4/3;
+	const int s = 20;
+	const int x = s;
+	const int px = mLazyButton->GetSize().x;
+	const int py = mLazyButton->GetSize().y;
+	const int dy = py * 4/3;
 	const int sy = mCanvas->GetHeight() / 20 + 34;
+	const int tx = mCanvas->GetWidth() - s - px;
+	const int ty = mCanvas->GetHeight() - s - py;
 	mLazyButton->SetPos(x, sy);
 	mHardButton->SetPos(x, sy+dy);
 	mOriginalButton->SetPos(x, sy+dy*2);
@@ -465,6 +476,10 @@ void App::Layout()
 	mNextButton->SetPos(x, sy);
 	mResetButton->SetPos(x, sy);
 	mRetryButton->SetPos(x, sy+dy);
+	if (mGetiPhoneButton)
+	{
+		mGetiPhoneButton->SetPos(tx, ty);
+	}
 }
 
 
@@ -629,6 +644,13 @@ void App::OnFinishedClick(UiTbc::Button* pButton)
 	mNextButton->SetVisible(false);
 	mResetButton->SetVisible(false);
 	mRetryButton->SetVisible(false);
+}
+
+ void App::OnGetiPhoneClick(UiTbc::Button*)
+{
+	SystemManager::WebBrowseTo(_T("http://itunes.apple.com/us/app/slimeball/id447966821?mt=8&ls=1"));
+	delete mGetiPhoneButton;
+	mGetiPhoneButton = 0;
 }
 
 UiTbc::Button* App::CreateButton(const str& pText, const Color& pColor, UiTbc::DesktopWindow* pDesktop)

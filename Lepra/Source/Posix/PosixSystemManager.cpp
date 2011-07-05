@@ -145,6 +145,7 @@ void SystemManager::WebBrowseTo(const str& pUrl)
 		lFound = lFound || (::system(("sensible-browser "+lUrl).c_str()) == 0);
 		lFound = lFound || (::system(("firefox "+lUrl).c_str()) == 0);
 #endif // OS X / Other Posix
+		::_exit(0);
 		::exit(0);
 	}
 }

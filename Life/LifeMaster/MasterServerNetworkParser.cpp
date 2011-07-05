@@ -37,8 +37,8 @@ unsigned MasterServerNetworkParser::StrToRaw(uint8* pRawData, const wstr& pStr)
 	lDes.Encrypt(&pRawData[lHeaderSize+lDataSize], lFooterSize);
 	const int lSize = lHeaderSize + lDataSize + lFooterSize;
 	LEPRA_DEBUG_CODE(wstr lTextStr);
-	assert(MasterServerNetworkParser::RawToStr(lTextStr, pRawData, lSize));
-	assert(lTextStr == pStr);
+	LEPRA_DEBUG_CODE(assert(MasterServerNetworkParser::RawToStr(lTextStr, pRawData, lSize)));
+	LEPRA_DEBUG_CODE(assert(lTextStr == pStr));
 	return lSize;
 }
 
