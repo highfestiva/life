@@ -8,7 +8,9 @@
 
 
 
+#ifdef LEPRA_WINDOWS
 HINSTANCE ghInstance = 0;
+#endif // Windows
 
 
 
