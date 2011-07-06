@@ -19,6 +19,7 @@ public:
 	virtual bool Playback() = 0;
 	virtual bool IsPlaying() const = 0;
 	virtual bool Stop() = 0;
+	virtual bool Pause() = 0;
 	virtual bool Update() = 0;
 	bool IsOpen() const;
 

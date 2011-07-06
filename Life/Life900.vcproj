@@ -288,6 +288,7 @@
 			ConfigurationType="4"
 			CharacterSet="1"
 			ManagedExtensions="0"
+			WholeProgramOptimization="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"

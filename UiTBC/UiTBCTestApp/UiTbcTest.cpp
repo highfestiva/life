@@ -1452,7 +1452,7 @@ TerrainFunctionTest::TerrainFunctionTest(const Lepra::LogDecorator& pLog) :
 		}
 	}
 	mTriangleCountInfo = _T(" - ") + Lepra::Number::ConvertToPostfixNumber(lTriangleCount, 1) + _T(" triangles in scene.");
-	mLog.Debug(mTriangleCountInfo);
+	log_volatile(mLog.Debug(mTriangleCountInfo));
 	if (mTestOk)
 	{
 		mContext = _T("cone function");

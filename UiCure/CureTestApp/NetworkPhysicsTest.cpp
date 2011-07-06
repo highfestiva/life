@@ -572,11 +572,11 @@ void MaybeSendClientStriveTimes(int pAgentIndex)
 			double lLateDropPercent = 100.0*lClient.mPacketUsageLateDropCount/(lClient.mPacketUsageLateDropCount+lClient.mPacketUsageEarlyDropCount+lClient.mPacketUsageUseCount);
 			double lEarlyDropPercent = 100.0*lClient.mPacketUsageEarlyDropCount/(lClient.mPacketUsageLateDropCount+lClient.mPacketUsageEarlyDropCount+lClient.mPacketUsageUseCount);
 			str s = Lepra::strutil::Format(_T("Client %i: data arrives %i frames early on average with a drop of %.1f %% (late) and %.1f %% (early)."), pAgentIndex, -lNetworkFrameDiffCount, lLateDropPercent, lEarlyDropPercent);
-			gNptLog.Debug(_T("Server find client in range ")+s);
+			log_volatile(gNptLog.Debug(_T("Server find client in range ")+s));
 			s = Lepra::strutil::Format(_T("Client %i: up %.1f kB/s, down %.1f kB/s (%.2f FPS)."), pAgentIndex,
 				(lClient.mNetworkAgent->GetSentByteCount()-lClient.mBandwidthLastSent)/1000.0/(gAbsoluteTime-lClient.mBandwidthStartMeasureTime),
 				(lClient.mNetworkAgent->GetReceivedByteCount()-lClient.mBandwidthLastReceived)/1000.0/(gAbsoluteTime-lClient.mBandwidthStartMeasureTime), gFPS);
-			gNptLog.Debug(_T("Client bandwidth ")+s);
+			log_volatile(gNptLog.Debug(_T("Client bandwidth ")+s));
 			lClient.mBandwidthLastSent = lClient.mNetworkAgent->GetSentByteCount();
 			lClient.mBandwidthLastReceived = lClient.mNetworkAgent->GetReceivedByteCount();
 			lClient.mBandwidthStartMeasureTime = gAbsoluteTime;
@@ -641,7 +641,7 @@ void ClientReceive(int pAgentIndex)
 	}
 	else if (lReceived != Cure::NetworkAgent::RECEIVE_NO_DATA)
 	{
-		gNptLog.Debug(_T("Client networking error: problem receiving data!"));
+		log_volatile(gNptLog.Debug(_T("Client networking error: problem receiving data!")));
 	}
 	gServer.mNetworkAgent->GetPacketFactory()->Release(lPacket);
 }

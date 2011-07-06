@@ -174,7 +174,7 @@ bool MasterServer::HandleCommandLine(UdpVSocket* pRemote, const str& pCommandLin
 	{
 		return false;
 	}
-	mLog.Debugf(_T("Got command: '%s'."), pCommandLine.c_str());
+	log_volatile(mLog.Debugf(_T("Got command: '%s'."), pCommandLine.c_str()));
 	if (lServerInfo.mCommand == _T(MASTER_SERVER_USI))
 	{
 		if (lServerInfo.mRemotePort < 0 || lServerInfo.mPlayerCount < 0 || lServerInfo.mId.empty())
@@ -308,7 +308,7 @@ bool MasterServer::OpenFirewall(UdpVSocket* pRemote, const ServerInfo& pServerIn
 				// is significantly decreased.
 				const GameServerInfo& lServerInfo = x->second;
 				mLog.AInfo("Asking game client to use LAN instead, since they share IP.");
-				mLog.Debugf(_T("Internal address is '%s'."), lServerInfo.mInternalIpAddress.c_str());
+				log_volatile(mLog.Debugf(_T("Internal address is '%s'."), lServerInfo.mInternalIpAddress.c_str()));
 				return Send(pRemote, _T(MASTER_SERVER_UL) _T(" --internal-address ") + lServerInfo.mInternalIpAddress +
 					_T(" --internal-port ") + strutil::IntToString(lServerInfo.mInternalPort, 10));
 			}

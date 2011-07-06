@@ -123,7 +123,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="&quot;..\..\ThirdParty\ode-0.11.1\include&quot;;&quot;..\..\ThirdParty\stlport\stlport&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;NO_LOG_DEBUG_INFO"
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
 				TreatWChar_tAsBuiltInType="true"
@@ -337,6 +337,7 @@
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="1"
 			ManagedExtensions="0"
+			WholeProgramOptimization="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -356,7 +357,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="&quot;..\..\ThirdParty\ode-0.11.1\include&quot;;&quot;..\..\ThirdParty\stlport\stlport&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;NO_LOG_DEBUG_INFO"
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
 				TreatWChar_tAsBuiltInType="true"

@@ -8,6 +8,10 @@
 
 
 
+HINSTANCE ghInstance = 0;
+
+
+
 namespace Lepra
 {
 

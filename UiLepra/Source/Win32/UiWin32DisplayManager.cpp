@@ -12,6 +12,8 @@
 #include "../../Include/Win32/UiWin32DirectXDisplay.h"
 #include "../../Include/Win32/UiWin32OpenGLDisplay.h"
 
+#define IDI_MAIN_ICON 1001	// This must be identical to resource definition in the .rc file.
+
 
 
 namespace UiLepra
@@ -102,24 +104,24 @@ bool Win32DisplayManager::Register()
 		msWindowClass.cbSize		= sizeof(msWindowClass);
 		msWindowClass.cbClsExtra	= 0;
 		msWindowClass.cbWndExtra	= 0;
-		msWindowClass.hbrBackground	= GetStockBrush(HOLLOW_BRUSH/*BLACK_BRUSH*/);
-		msWindowClass.style		= CS_DBLCLKS | CS_HREDRAW | CS_VREDRAW /*| CS_OWNDC*/;
+		msWindowClass.hbrBackground	= GetStockBrush(BLACK_BRUSH);
+		msWindowClass.style		= CS_DBLCLKS;
 		msWindowClass.lpfnWndProc	= WndProc;
-		msWindowClass.hInstance	= (HINSTANCE)mshThisInstance;
-		msWindowClass.hIcon		= LoadIcon( (HINSTANCE)mshThisInstance, NULL);
-		msWindowClass.hIconSm		= LoadIcon( (HINSTANCE)mshThisInstance, NULL);
-		msWindowClass.hCursor		= LoadCursor( NULL, IDC_ARROW );
-		msWindowClass.lpszMenuName	= _T("LepraWin32Menu");
+		msWindowClass.hInstance		= (HINSTANCE)mshThisInstance;
+		msWindowClass.hIcon		= ::LoadIcon((HINSTANCE)mshThisInstance, MAKEINTRESOURCE(IDI_MAIN_ICON));
+		msWindowClass.hIconSm		= ::LoadIcon((HINSTANCE)mshThisInstance, MAKEINTRESOURCE(IDI_MAIN_ICON));
+		msWindowClass.hCursor		= ::LoadCursor((HINSTANCE)mshThisInstance, IDC_ARROW);
+		msWindowClass.lpszMenuName	= NULL;
 		msWindowClass.lpszClassName	= _T("LepraWin32Class");
 
 		lOk = (RegisterClassEx(&msWindowClass) != 0);
 	}
 	if (lOk) 
 	{
-		mDisplayMode.mWidth		= 0;
-		mDisplayMode.mHeight		= 0;
+		mDisplayMode.mWidth	= 0;
+		mDisplayMode.mHeight	= 0;
 		mDisplayMode.mBitDepth	= 0;
-		mInitialized = true;
+		mInitialized		= true;
 	}
 	else
 	{
@@ -341,20 +343,18 @@ bool Win32DisplayManager::InitWindow()
 				{
 					lWindowWidth = GetWindowWidth(lWindowWidth);
 					lWindowHeight = GetWindowHeight(lWindowHeight);
-
 					DWORD lStyle = WS_OVERLAPPED | WS_SYSMENU | WS_MINIMIZEBOX;
-
 					if (mScreenMode == DisplayManager::WINDOWED)
 					{
 						lStyle |= (WS_SIZEBOX | WS_MAXIMIZEBOX);
 					}
-
-					mWnd = ::CreateWindowEx(0, _T("LepraWin32Class"), _T("Lepra"),
+					mWnd = ::CreateWindowEx(WS_EX_APPWINDOW,
+						_T("LepraWin32Class"), _T("Lepra"),
 						lStyle,
 						GetSystemMetrics(SM_CXSCREEN) / 2 - lWindowHeight / 2,
 						GetSystemMetrics(SM_CYSCREEN) / 2 - lWindowHeight / 2,
 						lWindowWidth, lWindowHeight,
-						GetDesktopWindow(), NULL, (HINSTANCE)mshThisInstance, NULL);
+						NULL, NULL, (HINSTANCE)mshThisInstance, NULL);
 				}
 				break;
 				default:

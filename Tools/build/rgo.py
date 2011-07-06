@@ -152,10 +152,10 @@ def _incremental_copy_code(targetdir, buildtype):
                                         fl += glob.glob(os.path.join(obj, lgpl_tt[buildtype], "*.dll"))
                                 elif list(filter(lambda x: x, [obj.startswith(an) for an in appnames])) or obj.startswith(testappname):
                                         fl += glob.glob(os.path.join(obj, own_tt[buildtype], "*.exe"))
-                if hwname.find("64") >= 0:
-                        fl += ["ThirdParty/fmod/api/fmod64.dll"]
-                else:
-                        fl += ["ThirdParty/fmod/api/fmod.dll"]
+                #if hwname.find("64") >= 0:
+                #        fl += ["ThirdParty/fmod/api/fmod64.dll"]
+                #else:
+                #        fl += ["ThirdParty/fmod/api/fmod.dll"]
         _incremental_copy(fl, targetdir, buildtype)
 
 
@@ -170,7 +170,6 @@ def _incremental_copy_data(targetdir, buildtype):
 
 def _cleandata(da_dir):
         global removes
-        removes = 0
         import glob
         fl = glob.glob(da_dir+"/*.class") + glob.glob(da_dir+"/*.mesh") + glob.glob(da_dir+"/*.phys")
         for filename in fl:
@@ -181,7 +180,6 @@ def _cleandata(da_dir):
 
 def _cleandir(da_dir):
         global removes
-        removes = 0
         import glob
         fl = glob.glob(da_dir + "/*")
         for filename in fl:

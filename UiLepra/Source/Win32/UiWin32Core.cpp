@@ -12,6 +12,10 @@
 
 
 
+extern HINSTANCE ghInstance;
+
+
+
 namespace UiLepra
 {
 
@@ -55,7 +59,7 @@ void Win32Core::Shutdown()
 
 HINSTANCE Win32Core::GetAppInstance()
 {
-	return (HINSTANCE)::GetModuleHandle(0);
+	return ghInstance;
 }
 
 void Win32Core::ProcessMessages()

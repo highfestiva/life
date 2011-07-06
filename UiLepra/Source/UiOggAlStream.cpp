@@ -61,9 +61,14 @@ bool OggAlStream::IsPlaying() const
 
 bool OggAlStream::Stop()
 {
-	alSourceStop(mAlSource);
-	Clear();
+	Pause();
 	return Rewind();
+}
+
+bool OggAlStream::Pause()
+{
+	alSourceStop(mAlSource);
+	return Clear();
 }
 
 bool OggAlStream::Update()

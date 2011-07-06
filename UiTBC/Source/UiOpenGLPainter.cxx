@@ -160,7 +160,7 @@ void OpenGLPainter::ResetClippingRect()
 	my_glOrtho(0, (float32)GetCanvas()->GetActualWidth(),
 		(float32)GetCanvas()->GetActualHeight(), 0,
 		0, 1);
-	glRotatef(GetCanvas()->GetOutputRotation(), 0, 0, 1);
+	glRotatef((float)GetCanvas()->GetOutputRotation(), 0, 0, 1);
 	if (GetCanvas()->GetOutputRotation() == 90)
 	{
 		glTranslatef(0, -(float)GetCanvas()->GetHeight(), 0);	// TRICKY: float cast necessary, otherwise nothing is shown on screen! Bug?!?

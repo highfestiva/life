@@ -91,7 +91,7 @@ void Application::Init()
 	mLog.RawPrint(Log::LEVEL_HEADLINE, lStartMessage);
 
 	const str lPathPrefix = SystemManager::GetDataDirectory(mArgumentVector[0]);
-	mLog.Debugf(_T("Using path prefix: %s"), lPathPrefix.c_str());
+	log_volatile(mLog.Debugf(_T("Using path prefix: %s"), lPathPrefix.c_str()));
 	mResourceManager = new Cure::ResourceManager(1, lPathPrefix);
 	mGameTicker = CreateGameTicker();
 }

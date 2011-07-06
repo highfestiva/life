@@ -1537,8 +1537,8 @@ void GameClientSlaveManager::ProcessNumber(Cure::MessageNumber::InfoType pType, 
 			if (GetNetworkClient()->GetSocket())
 			{
 				mPingAttemptCount = 0;
-				const float lPingTime = GetTimeManager()->ConvertPhysicsFramesToSeconds(GetTimeManager()->GetCurrentPhysicsFrameDelta(pInteger));
-				const float lServerStriveTime = GetTimeManager()->ConvertPhysicsFramesToSeconds((int)pFloat)*2;
+				log_volatile(const float lPingTime = GetTimeManager()->ConvertPhysicsFramesToSeconds(GetTimeManager()->GetCurrentPhysicsFrameDelta(pInteger)));
+				log_volatile(const float lServerStriveTime = GetTimeManager()->ConvertPhysicsFramesToSeconds((int)pFloat)*2);
 				log_volatile(mLog.Debugf(_T("Pong: this=%ss, server sim strives to be x2=%ss ahead, (self=%s)."),
 					Number::ConvertToPostfixNumber(lPingTime, 2).c_str(),
 					Number::ConvertToPostfixNumber(lServerStriveTime, 2).c_str(),

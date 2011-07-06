@@ -44,7 +44,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\ThirdParty\stlport\stlport;&quot;../ThirdParty/openal-soft-1.10.622/include&quot;;&quot;../ThirdParty/freealut-1.1.0/include&quot;;&quot;../ThirdParty/libogg-1.2.2/include&quot;;&quot;../ThirdParty/libvorbis-1.3.2/include&quot;;../ThirdParty/openalpp/include"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
+				PreprocessorDefinitions="WIN32;_DEBUG"
 				MinimalRebuild="false"
 				BasicRuntimeChecks="0"
 				RuntimeLibrary="1"
@@ -65,7 +65,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="fmodvc.lib Netapi32.lib"
+				AdditionalDependencies="Netapi32.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\ThirdParty\stlport\lib;..\ThirdParty\fmod\api\lib"
@@ -73,7 +73,7 @@
 				GenerateDebugInformation="true"
 				AssemblyDebug="1"
 				GenerateMapFile="true"
-				SubSystem="1"
+				SubSystem="2"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -146,7 +146,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="fmodvc.lib Netapi32.lib"
+				AdditionalDependencies="Netapi32.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				AdditionalLibraryDirectories="..\ThirdParty\stlport\lib;..\ThirdParty\fmod\api\lib"
 				IgnoreDefaultLibraryNames=""
@@ -225,13 +225,13 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="fmodvc.lib Netapi32.lib"
+				AdditionalDependencies="Netapi32.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				AdditionalLibraryDirectories="..\ThirdParty\stlport\lib;..\ThirdParty\fmod\api\lib"
 				IgnoreDefaultLibraryNames="msvcrt.lib"
 				GenerateDebugInformation="true"
 				GenerateMapFile="true"
-				SubSystem="1"
+				SubSystem="2"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -283,7 +283,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\ThirdParty\stlport\stlport"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
+				PreprocessorDefinitions="WIN32;_DEBUG"
 				MinimalRebuild="false"
 				BasicRuntimeChecks="0"
 				RuntimeLibrary="1"
@@ -304,7 +304,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="fmodvc.lib Netapi32.lib"
+				AdditionalDependencies="Netapi32.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\ThirdParty\stlport\lib;..\ThirdParty\fmod\api\lib"
@@ -312,7 +312,7 @@
 				GenerateDebugInformation="true"
 				AssemblyDebug="1"
 				GenerateMapFile="true"
-				SubSystem="1"
+				SubSystem="2"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -386,7 +386,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="fmodvc.lib Netapi32.lib"
+				AdditionalDependencies="Netapi32.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				AdditionalLibraryDirectories="..\ThirdParty\stlport\lib;..\ThirdParty\fmod\api\lib"
 				IgnoreDefaultLibraryNames=""
@@ -466,13 +466,13 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="fmodvc.lib Netapi32.lib"
+				AdditionalDependencies="Netapi32.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				AdditionalLibraryDirectories="..\ThirdParty\stlport\lib;..\ThirdParty\fmod\api\lib"
 				IgnoreDefaultLibraryNames="msvcrt.lib"
 				GenerateDebugInformation="true"
 				GenerateMapFile="true"
-				SubSystem="1"
+				SubSystem="2"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -529,11 +529,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Data\Slime.ico"
+				>
+			</File>
+			<File
 				RelativePath=".\SlimeAI.cxx"
 				>
 			</File>
 			<File
 				RelativePath=".\SlimeAI.mm"
+				>
+			</File>
+			<File
+				RelativePath=".\SlimeBall.rc"
 				>
 			</File>
 		</Filter>

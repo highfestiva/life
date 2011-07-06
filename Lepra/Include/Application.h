@@ -40,8 +40,10 @@ int main(int argc, const char* argv[])	\
 #define LEPRA_WINMAIN WinMain
 #endif // Unicode/ANSI
 #define LEPRA_RUN_APPLICATION(ClassName, Method)	\
-int WINAPI LEPRA_WINMAIN(HINSTANCE, HINSTANCE, PTSTR, int)	\
+extern HINSTANCE ghInstance;	\
+int WINAPI LEPRA_WINMAIN(HINSTANCE hInstance, HINSTANCE, PTSTR, int)	\
 {	\
+	ghInstance = hInstance;	\
 	Lepra::strutil::strvec lArguments(Lepra::strutil::BlockSplit(::GetCommandLine(), _T(" \t\v\r\n"), false, false));	\
 	ClassName* lApplication = new ClassName(lArguments);	\
 	const int lStatus = Method(*lApplication);	\

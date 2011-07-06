@@ -710,11 +710,11 @@
 				Name="Win32"
 				>
 				<File
-					RelativePath=".\Source\Win32\UiWin32FontManager.cpp"
+					RelativePath=".\Source\Win32\UiWin32DirectX9Painter.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\Source\Win32\UiWin32DirectX9Painter.cpp"
+					RelativePath=".\Source\Win32\UiWin32FontManager.cpp"
 					>
 				</File>
 			</Filter>

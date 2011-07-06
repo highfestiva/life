@@ -112,7 +112,7 @@ void CppContextObject::UiMove()
 	if (mMeshSlideMode == MESH_SLIDE_START)
 	{
 		mMeshOffset.Set(0, 0, 0);
-		mLog.Debugf(_T("Starting slide of mesh on object %u/%s."), GetInstanceId(), GetClassId().c_str());
+		log_volatile(mLog.Debugf(_T("Starting slide of mesh on object %u/%s."), GetInstanceId(), GetClassId().c_str()));
 	}
 	//QuaternionF lGfxPhysMeshAngularOffset;
 	int lGfxPhysMeshOffsetCount = 0;

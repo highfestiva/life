@@ -395,18 +395,21 @@ int App::Run()
 bool App::Poll()
 {
 	UiLepra::Core::ProcessMessages();
-	PreparePaint();
-	++mLayoutFrameCounter;
-	if (mLayoutFrameCounter < 0 || mLayoutFrameCounter > 220)
+	if (mDisplay->IsVisible())
 	{
-		mLayoutFrameCounter = 0;
-		Layout();
+		PreparePaint();
+		++mLayoutFrameCounter;
+		if (mLayoutFrameCounter < 0 || mLayoutFrameCounter > 220)
+		{
+			mLayoutFrameCounter = 0;
+			Layout();
+		}
+		mGame->paint(GetGraphics());
+		Paint();
+		mGame->run();
+		Logic();
+		EndRender();
 	}
-	mGame->paint(GetGraphics());
-	Paint();
-	mGame->run();
-	Logic();
-	EndRender();
 
 	mInput->PollEvents();
 	mInput->Refresh();
@@ -415,6 +418,7 @@ bool App::Poll()
 	{
 		if(!mMusicStreamer->IsPlaying())
 		{
+			mMusicStreamer->Pause();
 			mMusicStreamer->Playback();
 		}
 	}
