@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="SlimeVolleyball"
-	ProjectGUID="{C3462C1E-43EF-49C2-9DC3-1C69B8FCCDBC}"
-	RootNamespace="SlimeVolleyball"
+	Name="GrenadeRun"
+	ProjectGUID="{62C34C1E-4E3F-C492-C39D-69B8FCCDBC1C}"
+	RootNamespace="GrenadeRun"
 	Keyword="ManagedCProj"
 	TargetFrameworkVersion="0"
 	>
@@ -529,19 +529,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Icons\Slime.ico"
+				RelativePath=".\Icons\GrenadeRun.ico"
 				>
 			</File>
 			<File
-				RelativePath=".\SlimeAI.cxx"
-				>
-			</File>
-			<File
-				RelativePath=".\SlimeAI.mm"
-				>
-			</File>
-			<File
-				RelativePath=".\SlimeBall.rc"
+				RelativePath=".\GrenadeRun.rc"
 				>
 			</File>
 		</Filter>
@@ -550,30 +542,6 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93959380-89BD-4b04-88EB-625FBEBFB52E}"
 			>
-			<File
-				RelativePath=".\CrapAI.hpp"
-				>
-			</File>
-			<File
-				RelativePath=".\DannoAI.hpp"
-				>
-			</File>
-			<File
-				RelativePath=".\DannoAI2.hpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Slime.hpp"
-				>
-			</File>
-			<File
-				RelativePath=".\SlimeAI.hpp"
-				>
-			</File>
-			<File
-				RelativePath=".\SlimeVolleyball.hpp"
-				>
-			</File>
 		</Filter>
 	</Files>
 	<Globals>

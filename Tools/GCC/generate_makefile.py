@@ -335,6 +335,7 @@ def main():
         ["LifeMaster",      "bin",        "Life/LifeMaster/LifeMaster900.vcproj", "Life"],
         ["LifeClient",      "gfx_bin",    "Life/LifeClient/LifeClient900.vcproj", "Life UiCure"],
         ["SlimeVolleyball", "gfx_bin",    "SlimeVolleyball/SlimeVolleyball900.vcproj", "UiTBC"],
+        ["GrenadeRun",      "gfx_bin",    "GrenadeRun/GrenadeRun900.vcproj", "UiCure"],
         ["CureTest",        "gfx_bin",    "UiCure/CureTestApp/CureTestApp900.vcproj", "UiCure"]]
 
     if not is_mac:

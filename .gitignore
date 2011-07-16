@@ -47,8 +47,8 @@ Final
 /ThirdParty/stlport/build
 /ThirdParty/Release
 /bin/
-Data/Download
-Data/*.mb
-Data/*.psd
+*/Data/Download
+*/Data/*.mb
+*/Data/*.psd
 *~
 *.so
