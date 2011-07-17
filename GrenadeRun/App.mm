@@ -85,37 +85,37 @@ using namespace Lepra;
 	}
 	else
 	{
-		Slime::App::PollApp();
+		GrenadeRun::App::PollApp();
 	}
 }
 
--(Slime::FingerMovement&) getFingerMovement:(const CGPoint&)pLocation previous:(const CGPoint&)pPrevious
+-(GrenadeRun::FingerMovement&) getFingerMovement:(const CGPoint&)pLocation previous:(const CGPoint&)pPrevious
 {
-	Slime::FingerMoveList::iterator i = Slime::gFingerMoveList.begin();
-	for (; i != Slime::gFingerMoveList.end(); ++i)
+	GrenadeRun::FingerMoveList::iterator i = GrenadeRun::gFingerMoveList.begin();
+	for (; i != GrenadeRun::gFingerMoveList.end(); ++i)
 	{
 		if (i->Update(pPrevious.x, pPrevious.y, pLocation.x, pLocation.y))
 		{
 			return *i;
 		}
 	}
-	Slime::gFingerMoveList.push_back(Slime::FingerMovement(pLocation.x, pLocation.y));
-	return Slime::gFingerMoveList.back();
+	GrenadeRun::gFingerMoveList.push_back(GrenadeRun::FingerMovement(pLocation.x, pLocation.y));
+	return GrenadeRun::gFingerMoveList.back();
 }
 
 -(void) dropFingerMovement:(const CGPoint&)pLocation previous:(const CGPoint&)pPrevious
 {
-	Slime::FingerMoveList::iterator i = Slime::gFingerMoveList.begin();
-	for (; i != Slime::gFingerMoveList.end(); ++i)
+	GrenadeRun::FingerMoveList::iterator i = GrenadeRun::gFingerMoveList.begin();
+	for (; i != GrenadeRun::gFingerMoveList.end(); ++i)
 	{
 		if (i->Update(pPrevious.x, pPrevious.y, pLocation.x, pLocation.y))
 		{
-			Slime::gFingerMoveList.erase(i);
+			GrenadeRun::gFingerMoveList.erase(i);
 			return;
 		}
 	}
 	// Oops! This happens, but not sure why.
-	Slime::gFingerMoveList.clear();
+	GrenadeRun::gFingerMoveList.clear();
 }
 
 -(CGPoint) xform:(const CGPoint&)pLocation
@@ -140,15 +140,15 @@ using namespace Lepra;
 		CGPoint lTapPosition = [self xform:[lTouch locationInView:nil]];
 		CGPoint lPrevTapPosition = [self xform:[lTouch previousLocationInView:nil]];
 		bool lIsPressed = (lTouch.phase != UITouchPhaseEnded && lTouch.phase != UITouchPhaseEnded);
-		Slime::FingerMovement& lMove = [self getFingerMovement:lTapPosition previous:lPrevTapPosition];
+		GrenadeRun::FingerMovement& lMove = [self getFingerMovement:lTapPosition previous:lPrevTapPosition];
 		lMove.mIsPress = lIsPressed;
-		Slime::App::OnTap(lMove);
+		GrenadeRun::App::OnTap(lMove);
 		if (!lIsPressed)
 		{
 			[self dropFingerMovement:lTapPosition previous:lPrevTapPosition];
 		}
 
-		Slime::App::OnMouseTap(lTapPosition.x, lTapPosition.y, lIsPressed);
+		GrenadeRun::App::OnMouseTap(lTapPosition.x, lTapPosition.y, lIsPressed);
 	}
 }
 

@@ -344,6 +344,11 @@ UiLepra::DisplayManager* GameUiManager::GetDisplayManager() const
 	return (mDisplay);
 }
 
+Canvas* GameUiManager::GetCanvas() const
+{
+	return mCanvas;
+}
+
 UiTbc::Renderer* GameUiManager::GetRenderer() const
 {
 	return (mRenderer);

@@ -4,28 +4,26 @@
 
 
 
+#include <list>
+#include "../Cure/Include/RuntimeVariable.h"
 #include "../Lepra/Include/Application.h"
 #include "../Lepra/Include/LogListener.h"
-#include "../Lepra/Include/Path.h"
 #include "../Lepra/Include/SystemManager.h"
-#include "../UiLepra/Include/Mac/UiIosInput.h"
+#include "../UiCure/Include/UiCure.h"
+#include "../UiCure/Include/UiGameUiManager.h"
+#include "../UiCure/Include/UiRuntimeVariableName.h"
 #include "../UiLepra/Include/UiCore.h"
 #include "../UiLepra/Include/UiDisplayManager.h"
-#include "../UiLepra/Include/UiLepra.h"
 #include "../UiLepra/Include/UiInput.h"
 #include "../UiLepra/Include/UiSoundManager.h"
 #include "../UiLepra/Include/UiSoundStream.h"
 #include "../UiTBC/Include/GUI/UiButton.h"
 #include "../UiTBC/Include/GUI/UiDesktopWindow.h"
-#include "../UiTBC/Include/GUI/UiFloatingLayout.h"
-#include "../UiTBC/Include/UiFontManager.h"
-#include "../UiTBC/Include/UiOpenGLPainter.h"
-#include "../UiTBC/Include/UiOpenGLRenderer.h"
-#include "SlimeVolleyball.hpp"
+#include "Game.h"
 
 
 
-namespace Slime
+namespace GrenadeRun
 {
 
 
@@ -47,19 +45,12 @@ public:
 	static void OnMouseTap(float x, float y, bool pPressed);
 
 private:
-	Graphics GetGraphics();
 	bool Open();
 	void Close();
 	virtual void Init();
 	virtual int Run();
 	bool Poll();
-	void Logic();
 	void Layout();
-
-	void Paint();
-	void PreparePaint();
-	void EndRender();
-	bool CanRender() const;
 
 	virtual void Suspend();
 	virtual void Resume();
@@ -83,17 +74,12 @@ private:
 #ifdef LEPRA_IOS
 	AnimatedApp* mAnimatedApp;
 #endif // iOS
-	SlimeVolleyball* mGame;
+	Game* mGame;
 
-	UiLepra::DisplayManager* mDisplay;
-	Canvas* mCanvas;
-	UiTbc::Painter* mPainter;
-	UiTbc::FontManager* mFontManager;
-	UiTbc::DesktopWindow* mDesktopWindow;
-	UiLepra::InputManager* mInput;
-	UiLepra::SoundManager* mSound;
+	Cure::ResourceManager* mResourceManager;
+	Cure::RuntimeVariableScope* mVariableScope;
+	UiCure::GameUiManager* mUiManager;
 	UiLepra::SoundStream* mMusicStreamer;
-	str mPathPrefix;
 	int mLayoutFrameCounter;
 	UiTbc::Button* mLazyButton;
 	UiTbc::Button* mHardButton;
@@ -114,24 +100,28 @@ private:
 
 
 
-LEPRA_RUN_APPLICATION(Slime::App, UiLepra::UiMain);
+LEPRA_RUN_APPLICATION(GrenadeRun::App, UiLepra::UiMain);
 
 
 
-namespace Slime
+namespace GrenadeRun
 {
 
 
 
 App::App(const strutil::strvec& pArgumentList):
 	Application(pArgumentList),
-	mLayoutFrameCounter(-10)
+	mLayoutFrameCounter(-10),
+	mVariableScope(0)
 {
 	mApp = this;
 }
 
 App::~App()
 {
+	mVariableScope = 0;
+	UiCure::Shutdown();
+	UiTbc::Shutdown();
 	UiLepra::Shutdown();
 }
 
@@ -154,13 +144,6 @@ void App::OnMouseTap(float x, float y, bool pPressed)
 	mApp->OnMouseMove(y, x, pPressed);
 }
 
-Graphics App::GetGraphics()
-{
-	const int w = mDisplay->GetWidth();
-	const int h = mDisplay->GetHeight();
-	return Graphics(w, h, mPainter);
-}
-
 bool App::Open()
 {
 #ifdef LEPRA_IOS
@@ -174,140 +157,72 @@ bool App::Open()
 	int lDisplayBpp = 0;
 	int lDisplayFrequency = 0;
 	bool lDisplayFullScreen = false;
-	UiLepra::DisplayManager::ContextType lRenderingContext = UiLepra::DisplayManager::OPENGL_CONTEXT;
-	const UiLepra::SoundManager::ContextType lSoundContext = UiLepra::SoundManager::CONTEXT_OPENAL;
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_DISPLAY_RENDERENGINE, _T("OpenGL"));
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_DISPLAY_WIDTH, lDisplayWidth);
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_DISPLAY_HEIGHT, lDisplayHeight);
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_DISPLAY_BITSPERPIXEL, lDisplayBpp);
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_DISPLAY_FREQUENCY, lDisplayFrequency);
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_DISPLAY_FULLSCREEN, lDisplayFullScreen);
 
-	// Initialize UI based on settings parameters.
-	bool lOk = true;
-	mDisplay = UiLepra::DisplayManager::CreateDisplayManager(lRenderingContext);
-	UiLepra::DisplayMode lDisplayMode;
-	if (lDisplayBpp > 0 && lDisplayFrequency > 0)
-	{
-		lOk = mDisplay->FindDisplayMode(lDisplayMode, lDisplayWidth, lDisplayHeight, lDisplayBpp, lDisplayFrequency);
-	}
-	else if (lDisplayBpp > 0)
-	{
-		lOk = mDisplay->FindDisplayMode(lDisplayMode, lDisplayWidth, lDisplayHeight, lDisplayBpp);
-	}
-	else
-	{
-		lOk = mDisplay->FindDisplayMode(lDisplayMode, lDisplayWidth, lDisplayHeight);
-	}
-	if (!lOk)
-	{
-		str lError(strutil::Format(_T("Unsupported resolution %ux%u."), lDisplayWidth, lDisplayHeight));
-		if (lDisplayFullScreen)
-		{
-			mLog.Error(lError);
-		}
-		else
-		{
-			lOk = true;	// Go ahead - running in a window is OK.
-			lDisplayMode.mWidth = lDisplayWidth;
-			lDisplayMode.mHeight = lDisplayHeight;
-			lDisplayMode.mBitDepth = lDisplayBpp;
-			lDisplayMode.mRefreshRate = lDisplayFrequency;
-		}
-	}
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_SOUND_ENGINE, _T("OpenAL"));
+
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_DISPLAY_ENABLEVSYNC, false);
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLELIGHTS, true);
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLETRILINEARFILTERING, false);
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLEBILINEARFILTERING, false);
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLEMIPMAPPING, false);
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_FOV, 60.0);
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_CLIPNEAR, 1.0);
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_CLIPFAR, 3000.0);
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_SHADOWS, _T("None"));
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_SOUND_ROLLOFF, 0.2);
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_SOUND_DOPPLER, 1.3);
+
+	mUiManager = new UiCure::GameUiManager(mVariableScope);
+	bool lOk = mUiManager->Open();
 	if (lOk)
 	{
-		if (lDisplayFullScreen)
-		{
-			lOk = mDisplay->OpenScreen(lDisplayMode, UiLepra::DisplayManager::FULLSCREEN);
-		}
-		else
-		{
-			lOk = mDisplay->OpenScreen(lDisplayMode, UiLepra::DisplayManager::WINDOWED);
-		}
-	}
-	if (lOk)
-	{
-		mDisplay->SetCaption(_T("Slime Volleyball"));
-		mDisplay->AddResizeObserver(this);
-
-		mCanvas = new Canvas(lDisplayMode.mWidth, lDisplayMode.mHeight, Canvas::IntToBitDepth(lDisplayMode.mBitDepth));
 #ifdef LEPRA_IOS
-		mCanvas->SetOutputRotation(90);
+		mUiManager->GetCanvas()->SetOutputRotation(90);
 #endif // iOS
+		mUiManager->GetInputManager()->AddKeyCodeInputObserver(this);
 	}
 	if (lOk)
 	{
-		if (lRenderingContext == UiLepra::DisplayManager::OPENGL_CONTEXT)
-		{
-			mPainter = new UiTbc::OpenGLPainter;
-		}
-	}
-
-	if (lOk)
-	{
-		mFontManager = UiTbc::FontManager::Create(mDisplay);
-		mPainter->SetFontManager(mFontManager);
-
-		UiTbc::FontManager::FontId lFontId = UiTbc::FontManager::INVALID_FONTID;
-		const double lFontHeight = lDisplayHeight / 24.0;
-		const tchar* lFontNames[] =
-		{
-			_T("Times New Roman"),
-			_T("Arial"),
-			_T("Courier New"),
-			_T("Verdana"),
-			_T("Helvetica"),
-			0
-		};
-		for (int x = 0; lFontNames[x] && lFontId == UiTbc::FontManager::INVALID_FONTID; ++x)
-		{
-			lFontId = mFontManager->QueryAddFont(lFontNames[x], lFontHeight);
-		}
-	}
-	if (lOk)
-	{
-		mCanvas->SetBuffer(0);
-		mPainter->SetDestCanvas(mCanvas);
-	}
-	if (lOk)
-	{
-		mInput = UiLepra::InputManager::CreateInputManager(mDisplay);
-		mInput->ActivateAll();
-		mInput->AddKeyCodeInputObserver(this);
-	}
-	if (lOk)
-	{
-		mDesktopWindow = new UiTbc::DesktopWindow(mInput, mPainter, new UiTbc::FloatingLayout(), 0, 0);
-		mDesktopWindow->SetIsHollow(true);
-		mDesktopWindow->SetPreferredSize(mCanvas->GetWidth(), mCanvas->GetHeight());
-		mLazyButton = CreateButton(_T("Slower"), Color(50, 150, 0), mDesktopWindow);
+		UiTbc::DesktopWindow* lDesktopWindow = mUiManager->GetDesktopWindow();
+		mLazyButton = CreateButton(_T("Slower"), Color(50, 150, 0), lDesktopWindow);
 		mLazyButton->SetOnClick(App, OnSpeedClick);
-		mHardButton = CreateButton(_T("Slow"), Color(192, 192, 0), mDesktopWindow);
+		mHardButton = CreateButton(_T("Slow"), Color(192, 192, 0), lDesktopWindow);
 		mHardButton->SetOnClick(App, OnSpeedClick);
-		mOriginalButton = CreateButton(_T("Original"), Color(210, 0, 0), mDesktopWindow);
+		mOriginalButton = CreateButton(_T("Original"), Color(210, 0, 0), lDesktopWindow);
 		mOriginalButton->SetOnClick(App, OnSpeedClick);
 
-		m1PButton = CreateButton(_T("1P"), Color(128, 64, 0), mDesktopWindow);
+		m1PButton = CreateButton(_T("1P"), Color(128, 64, 0), lDesktopWindow);
 		m1PButton->SetOnClick(App, OnPClick);
-		m2PButton = CreateButton(_T("2P"), Color(128, 0, 128), mDesktopWindow);
+		m2PButton = CreateButton(_T("2P"), Color(128, 0, 128), lDesktopWindow);
 		m2PButton->SetOnClick(App, OnPClick);
 
-		mNextButton = CreateButton(_T("Next"), Color(50, 150, 0), mDesktopWindow);
+		mNextButton = CreateButton(_T("Next"), Color(50, 150, 0), lDesktopWindow);
 		mNextButton->SetOnClick(App, OnFinishedClick);
-		mResetButton = CreateButton(_T("Menu"), Color(210, 0, 0), mDesktopWindow);
+		mResetButton = CreateButton(_T("Menu"), Color(210, 0, 0), lDesktopWindow);
 		mResetButton->SetOnClick(App, OnFinishedClick);
-		mRetryButton = CreateButton(_T("Rematch"), Color(192, 192, 0), mDesktopWindow);
+		mRetryButton = CreateButton(_T("Rematch"), Color(192, 192, 0), lDesktopWindow);
 		mRetryButton->SetOnClick(App, OnFinishedClick);
 
-		mGetiPhoneButton = CreateButton(_T("4 iPhone!"), Color(45, 45, 45), mDesktopWindow);
+		mGetiPhoneButton = 0;
+#ifndef LEPRA_IOS
+		mGetiPhoneButton = CreateButton(_T("4 iPhone!"), Color(45, 45, 45), lDesktopWindow);
 		mGetiPhoneButton->SetVisible(true);
 		mGetiPhoneButton->SetOnClick(App, OnGetiPhoneClick);
+#endif // iOS
 
 		Layout();
 	}
 	if (lOk)
 	{
-		mSound = UiLepra::SoundManager::CreateSoundManager(lSoundContext);
-	}
-	if (lOk)
-	{
+		const str lPathPrefix = SystemManager::GetDataDirectory(mArgumentVector[0]);
 		mMusicStreamer = 0;
-		mMusicStreamer = mSound->CreateSoundStream(mPathPrefix+_T("Tingaliin.ogg"), UiLepra::SoundManager::LOOP_FORWARD, 0);
+		mMusicStreamer = mUiManager->GetSoundManager()->CreateSoundStream(lPathPrefix+_T("Tingaliin.ogg"), UiLepra::SoundManager::LOOP_FORWARD, 0);
 		if (!mMusicStreamer || !mMusicStreamer->Playback())
 		{
 			mLog.Errorf(_T("Unable to play beautiful muzak!"));
@@ -328,24 +243,15 @@ void App::Close()
 	delete mMusicStreamer;
 	mMusicStreamer = 0;
 
-	delete (mSound);
-	mSound = 0;
+	delete mGame;
+	mGame = 0;
 
-	delete (mDesktopWindow);
-	mDesktopWindow = 0;
+	mUiManager->GetDisplayManager()->RemoveResizeObserver(this);
+	delete mUiManager;
+	mUiManager = 0;
 
-	delete (mInput);
-	mInput = 0;
-
-	delete (mFontManager);
-	mFontManager = 0;
-	delete (mPainter);
-	mPainter = 0;
-	delete (mCanvas);
-	mCanvas = 0;
-	mDisplay->RemoveResizeObserver(this);
-	delete (mDisplay);
-	mDisplay = 0;
+	delete mResourceManager;	// Resource manager lives long enough for all volontary resources to disappear.
+	mResourceManager = 0;
 
 	// Poll system to let go of old windows.
 	UiLepra::Core::ProcessMessages();
@@ -355,13 +261,18 @@ void App::Close()
 
 void App::Init()
 {
-	mPathPrefix = SystemManager::GetDataDirectory(mArgumentVector[0]);
 }
 
 
 int App::Run()
 {
 	UiLepra::Init();
+	UiTbc::Init();
+	UiCure::Init();
+	mVariableScope = UiCure::GetSettings();
+	CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_PARALLEL, false);	// Let's do it same on all platforms.
+	CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_MICROSTEPS, 1);
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLELIGHTS, false);
 
 	StdioConsoleLogListener lConsoleLogger;
 	DebuggerLogListener lDebugLogger;
@@ -370,12 +281,17 @@ int App::Run()
 	bool lOk = true;
 	if (lOk)
 	{
+		const str lPathPrefix = SystemManager::GetDataDirectory(mArgumentVector[0]);
+		mResourceManager = new Cure::ResourceManager(1, lPathPrefix);
+	}
+	if (lOk)
+	{
 		lOk = Open();
 	}
 	if (lOk)
 	{
-		mGame = new SlimeVolleyball;
-		lOk = mGame->init(GetGraphics());
+		mGame = new Game(mUiManager, mVariableScope, mResourceManager);
+		lOk = mGame->Initialize();
 	}
 #ifndef LEPRA_IOS
 	bool lQuit = false;
@@ -387,32 +303,49 @@ int App::Run()
 	Close();
 	return lQuit? 0 : 1;
 #else // iOS
-	mAnimatedApp = [[AnimatedApp alloc] init:mCanvas];
+	mAnimatedApp = [[AnimatedApp alloc] init:mUiManager->GetCanvas()];
 	return 0;
 #endif // !iOS/iOS
 }
 
 bool App::Poll()
 {
-	UiLepra::Core::ProcessMessages();
-	if (mDisplay->IsVisible())
+	bool lOk = true;
+	if (lOk)
 	{
-		PreparePaint();
-		++mLayoutFrameCounter;
-		if (mLayoutFrameCounter < 0 || mLayoutFrameCounter > 220)
-		{
-			mLayoutFrameCounter = 0;
-			Layout();
-		}
-		mGame->paint(GetGraphics());
-		Paint();
-		mGame->run();
-		Logic();
-		EndRender();
+		float r, g, b;
+		CURE_RTVAR_GET(r, =(float), mVariableScope, RTVAR_UI_3D_CLEARRED, 0.75);
+		CURE_RTVAR_GET(g, =(float), mVariableScope, RTVAR_UI_3D_CLEARGREEN, 0.80);
+		CURE_RTVAR_GET(b, =(float), mVariableScope, RTVAR_UI_3D_CLEARBLUE, 0.85);
+		Vector3DF lColor(r, g, b);
+		mUiManager->BeginRender(lColor);
 	}
-
-	mInput->PollEvents();
-	mInput->Refresh();
+	if (lOk)
+	{
+		mUiManager->InputTick();
+	}
+	if (lOk)
+	{
+		mGame->BeginTick();
+	}
+	if (lOk)
+	{
+		lOk = mUiManager->CanRender();
+	}
+	if (lOk)
+	{
+		lOk = mGame->Render();
+	}
+	if (lOk)
+	{
+		mUiManager->Paint();
+	}
+	if (lOk)
+	{
+		lOk = mGame->EndTick();
+	}
+	mResourceManager->Tick();
+	mUiManager->EndRender();
 
 	if (mMusicStreamer && mMusicStreamer->Update())
 	{
@@ -423,39 +356,6 @@ bool App::Poll()
 		}
 	}
 	return true;
-}
-
-void App::Logic()
-{
-	if (mGame->fInPlay)
-	{
-		return;
-	}
-
-	if (mGame->mPlayerCount == 1)
-	{
-		if (!mGame->bGameOver && !mNextButton->IsVisible())
-		{
-			mNextButton->SetVisible(true);
-		}
-		else if (mGame->bGameOver && !mResetButton->IsVisible())
-		{
-			mResetButton->SetVisible(true);
-			if (mGame->canContinue())
-			{
-				mRetryButton->SetVisible(true);
-			}
-		}
-		return;
-	}
-
-	if (!mLazyButton->IsVisible() && !m1PButton->IsVisible())
-	{
-		mGame->ShowTitle();
-		mLazyButton->SetVisible(true);
-		mHardButton->SetVisible(true);
-		mOriginalButton->SetVisible(true);
-	}
 }
 
 void App::Layout()
@@ -469,9 +369,9 @@ void App::Layout()
 	const int px = mLazyButton->GetSize().x;
 	const int py = mLazyButton->GetSize().y;
 	const int dy = py * 4/3;
-	const int sy = mCanvas->GetHeight() / 20 + 34;
-	const int tx = mCanvas->GetWidth() - s - px;
-	const int ty = mCanvas->GetHeight() - s - py;
+	const int sy = mUiManager->GetCanvas()->GetHeight() / 20 + 34;
+	const int tx = mUiManager->GetCanvas()->GetWidth() - s - px;
+	const int ty = mUiManager->GetCanvas()->GetHeight() - s - py;
 	mLazyButton->SetPos(x, sy);
 	mHardButton->SetPos(x, sy+dy);
 	mOriginalButton->SetPos(x, sy+dy*2);
@@ -484,41 +384,6 @@ void App::Layout()
 	{
 		mGetiPhoneButton->SetPos(tx, ty);
 	}
-}
-
-
-
-void App::Paint()
-{
-	if (CanRender())
-	{
-		mDesktopWindow->Repaint(mPainter);
-	}
-}
-
-void App::PreparePaint()
-{
-	if (CanRender())
-	{
-		mCanvas->SetBuffer(0);
-		mPainter->SetDestCanvas(mCanvas);
-		//mPainter->ResetClippingRect();
-		mPainter->Clear(mGame->SKY_COL);
-		mPainter->PrePaint();
-	}
-}
-
-void App::EndRender()
-{
-	if (CanRender())
-	{
-		mDisplay->UpdateScreen();
-	}
-}
-
-bool App::CanRender() const
-{
-	return mDisplay->IsVisible();
 }
 
 
@@ -543,21 +408,13 @@ void App::Resume()
 }
 
 
-bool App::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
+bool App::OnKeyDown(UiLepra::InputManager::KeyCode /*pKeyCode*/)
 {
-	Event lEvent;
-	lEvent.id = 401;
-	lEvent.key = pKeyCode;
-	mGame->handleEvent(lEvent);
 	return false;
 }
 
-bool App::OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode)
+bool App::OnKeyUp(UiLepra::InputManager::KeyCode /*pKeyCode*/)
 {
-	Event lEvent;
-	lEvent.id = 402;
-	lEvent.key = pKeyCode;
-	mGame->handleEvent(lEvent);
 	return false;
 }
 
@@ -576,15 +433,8 @@ void App::OnMouseMove(float x, float y, bool pPressed)
 
 
 
-void App::OnResize(int pWidth, int pHeight)
+void App::OnResize(int /*pWidth*/, int /*pHeight*/)
 {
-	if (mCanvas)
-	{
-		mCanvas->Reset(pWidth, pHeight, mCanvas->GetBitDepth());
-		mDesktopWindow->SetPreferredSize(mCanvas->GetWidth(), mCanvas->GetHeight());
-		mDesktopWindow->SetSize(mCanvas->GetWidth(), mCanvas->GetHeight());
-		mInput->Refresh();
-	}
 	Layout();
 }
 
@@ -601,15 +451,15 @@ void App::OnSpeedClick(UiTbc::Button* pButton)
 {
 	if (pButton == mLazyButton)
 	{
-		mGame->mSpeed = -15;
+		//mGame->mSpeed = -15;
 	}
 	else if (pButton == mHardButton)
 	{
-		mGame->mSpeed = -5;
+		//mGame->mSpeed = -5;
 	}
 	else if (pButton == mOriginalButton)
 	{
-		mGame->mSpeed = 0;
+		//mGame->mSpeed = 0;
 	}
 	mLazyButton->SetVisible(false);
 	mHardButton->SetVisible(false);
@@ -620,30 +470,30 @@ void App::OnSpeedClick(UiTbc::Button* pButton)
 
 void App::OnPClick(UiTbc::Button* pButton)
 {
-	mGame->mPlayerCount = 1;
+	//mGame->mPlayerCount = 1;
 	if (pButton == m2PButton)
 	{
-		mGame->mPlayerCount = 2;
+		//mGame->mPlayerCount = 2;
 	}
 	m1PButton->SetVisible(false);
 	m2PButton->SetVisible(false);
 
-	mGame->resetGame();
+	//mGame->resetGame();
 }
 
 void App::OnFinishedClick(UiTbc::Button* pButton)
 {
 	if (pButton == mNextButton)
 	{
-		mGame->nextGameLevel();
+		//mGame->nextGameLevel();
 	}
 	else if (pButton == mRetryButton)
 	{
-		mGame->retryGame();
+		//mGame->retryGame();
 	}
 	else if (pButton == mResetButton)
 	{
-		mGame->mPlayerCount = 2;	// TRICKY: quit == 2P game over.
+		//mGame->mPlayerCount = 2;	// TRICKY: quit == 2P game over.
 	}
 	mNextButton->SetVisible(false);
 	mResetButton->SetVisible(false);

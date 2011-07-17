@@ -59,6 +59,7 @@ public:
 
 	Cure::RuntimeVariableScope* GetVariableScope() const;
 	UiLepra::DisplayManager* GetDisplayManager() const;
+	Canvas* GetCanvas() const;
 	UiTbc::Renderer* GetRenderer() const;
 	UiTbc::Painter* GetPainter() const;
 	UiTbc::FontManager* GetFontManager() const;

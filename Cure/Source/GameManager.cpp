@@ -189,7 +189,11 @@ bool GameManager::EndTick()
 bool GameManager::TickNetworkOutput()
 {
 	mContext->HandleAttributeSend();
-	return (mNetwork->SendAll());
+	if (mNetwork)
+	{
+		return (mNetwork->SendAll());
+	}
+	return true;
 }
 
 Lock* GameManager::GetTickLock() const
@@ -346,7 +350,7 @@ void GameManager::UpdateReportPerformance(bool pReport, double pReportInterval)
 	{
 		mPerformanceReportTimer.ClearTimeDiff();
 
-		if (mNetwork->IsOpen())
+		if (mNetwork && mNetwork->IsOpen())
 		{
 			mSendBandwidth.Append(lTimeDiff, 0, mNetwork->GetSentByteCount());
 			mReceiveBandwidth.Append(lTimeDiff, 0, mNetwork->GetReceivedByteCount());
