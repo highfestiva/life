@@ -140,7 +140,7 @@ bool GameServerManager::Initialize(MasterServerConnection* pMasterConnection)
 			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
 			if (lOk)
 			{
-				const strutil::strvec lFileArray = GetResourceManager()->ListFiles(_T("Data/*.class"));
+				const strutil::strvec lFileArray = GetResourceManager()->ListFiles(_T("*.class"));
 				strutil::strvec::const_iterator x = lFileArray.begin();
 				for (; lOk && x != lFileArray.end(); ++x)
 				{

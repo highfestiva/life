@@ -71,6 +71,7 @@ public:
 	LEPRA_DEBUG_CODE(virtual) TBC::PhysicsManager* GetPhysicsManager() const;
 	ConsoleManager* GetConsoleManager() const;
 
+	virtual bool IsObjectRelevant(const Vector3DF& pPosition, float pDistance) const;
 	ContextObject* CreateContextObject(const str& pClassId, NetworkObjectType pNetworkType, GameObjectId pInstanceId = 0);
 	void AddContextObject(ContextObject* pObject, NetworkObjectType pNetworkType, GameObjectId pInstanceId);
 	virtual ContextObject* CreateLogicHandler(const str& pType) const;

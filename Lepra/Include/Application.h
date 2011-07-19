@@ -20,9 +20,18 @@
 
 // TRICKY: implemented this code in macros, since it is target specific.
 #ifdef LEPRA_CONSOLE
+#ifdef LEPRA_WINDOWS
+#define EXTERN_HINSTANCE	extern HINSTANCE ghInstance
+#define FETCH_HINSTANCE()	ghInstance = (HINSTANCE)::GetModuleHandle(0)
+#else // !Win
+#define EXTERN_HINSTANCE
+#define FETCH_HINSTANCE()
+#endif // Win32/Other.
 #define LEPRA_RUN_APPLICATION(ClassName, Method)	\
+EXTERN_HINSTANCE;	\
 int main(int argc, const char* argv[])	\
 {	\
+	FETCH_HINSTANCE();	\
 	Lepra::strutil::strvec lArguments;	\
 	for (int x = 0; x < argc; ++x)	\
 	{	\

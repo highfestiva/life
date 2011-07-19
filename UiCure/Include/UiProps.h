@@ -6,20 +6,19 @@
 
 #pragma once
 
-#include "../../UiCure/Include/UiCppContextObject.h"
-#include "../Life.h"
+#include "UiCppContextObject.h"
 
 
 
-namespace Life
+namespace UiCure
 {
 
 
 
-class Props: public UiCure::CppContextObject
+class Props: public CppContextObject
 {
 public:
-	typedef UiCure::CppContextObject Parent;
+	typedef CppContextObject Parent;
 
 	enum ParticleType
 	{
@@ -28,14 +27,14 @@ public:
 		PARTICLE_GAS,
 	};
 
-	Props(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager);
+	Props(Cure::ResourceManager* pResourceManager, const str& pClassId, GameUiManager* pUiManager);
 	virtual ~Props();
 
 	void SetOpacity(float pOpacity);
 	void StartParticle(ParticleType pParticleType, const Vector3DF& pStartVelocity, float pScale);
 
 protected:
-	void DispatchOnLoadMesh(UiCure::UserGeometryReferenceResource* pMeshResource);
+	void DispatchOnLoadMesh(UserGeometryReferenceResource* pMeshResource);
 	virtual void TryAddTexture();
 	void OnTick();
 	void OnAlarm(int pAlarmId, void* pExtraData);

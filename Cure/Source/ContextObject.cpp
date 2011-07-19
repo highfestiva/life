@@ -1257,6 +1257,10 @@ void ContextObject::SetupChildHandlers()
 	{
 		const TBC::PhysicsTrigger* lTrigger = mPhysics->GetTrigger(x);
 		ContextObject* lHandlerChild = GetManager()->GetGameManager()->CreateLogicHandler(lTrigger->GetFunction());
+		if (!lHandlerChild)
+		{
+			continue;
+		}
 		AddChild(lHandlerChild);
 		const int lBoneTriggerCount = lTrigger->GetTriggerGeometryCount();
 		for (int x = 0; x < lBoneTriggerCount; ++x)
@@ -1276,6 +1280,10 @@ void ContextObject::SetupChildHandlers()
 	{
 		const TBC::PhysicsSpawner* lSpawner = mPhysics->GetSpawner(x);
 		ContextObject* lHandlerChild = GetManager()->GetGameManager()->CreateLogicHandler(lSpawner->GetFunction());
+		if (!lHandlerChild)
+		{
+			continue;
+		}
 		AddChild(lHandlerChild);
 		lHandlerChild->SetSpawner(lSpawner);
 	}

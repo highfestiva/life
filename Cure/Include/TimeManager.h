@@ -101,7 +101,6 @@ private:
 	float mAverageFrameTime;	// The sliding average step length.
 	float mPhysicsFrameTime;	// How much time we should move forward each physics step.
 	int mPhysicsStepCount;
-	int mTargetPhysicsStepCount;	// The number of discrete physics steps to perform this frame.
 
 	LOG_CLASS_DECLARE();
 };

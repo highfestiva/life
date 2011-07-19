@@ -6,24 +6,23 @@
 
 #pragma once
 
+#include "UiCppContextObject.h"
 #include "../../Lepra/Include/HiResTimer.h"
-#include "../../UiCure/Include/UiCppContextObject.h"
 #include "../../UiTBC/Include/UiChunkyClass.h"
-#include "../Life.h"
 
 
 
-namespace Life
+namespace UiCure
 {
 
 
 
-class Machine: public UiCure::CppContextObject
+class Machine: public CppContextObject
 {
 public:
-	typedef UiCure::CppContextObject Parent;
+	typedef CppContextObject Parent;
 
-	Machine(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager);
+	Machine(Cure::ResourceManager* pResourceManager, const str& pClassId, GameUiManager* pUiManager);
 	virtual ~Machine();
 
 protected:
@@ -35,9 +34,9 @@ private:
 		const Vector3DF& pForce, const Vector3DF& pTorque,
 		const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity);
 
-	void LoadPlaySound3d(UiCure::UserSound3dResource* pSoundResource);
+	void LoadPlaySound3d(UserSound3dResource* pSoundResource);
 
-	typedef std::hash_map<const UiTbc::ChunkyClass::Tag*, UiCure::UserSound3dResource*, LEPRA_VOIDP_HASHER> TagSoundTable;
+	typedef std::hash_map<const UiTbc::ChunkyClass::Tag*, UserSound3dResource*, LEPRA_VOIDP_HASHER> TagSoundTable;
 	typedef std::vector<float> TagSoundIntensityArray;
 
 	TagSoundTable mEngineSoundTable;

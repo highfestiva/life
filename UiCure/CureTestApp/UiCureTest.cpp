@@ -136,7 +136,7 @@ bool ResourceTest::TestAtom()
 	{
 		lContext = _T("load 2D image");
 		UiCure::UserRendererImageResource lImage(mUiManager);
-		lImage.Load(mResourceManager, _T("Data/normalmap.tga"), UiCure::UserRendererImageResource::TypeLoadCallback(this, &ResourceTest::RendererImageLoadCallback));
+		lImage.Load(mResourceManager, _T("normalmap.tga"), UiCure::UserRendererImageResource::TypeLoadCallback(this, &ResourceTest::RendererImageLoadCallback));
 		Lepra::Thread::Sleep(0.4);
 		mResourceManager->Tick();
 		mResourceManager->SafeRelease(&lImage);
@@ -152,7 +152,7 @@ bool ResourceTest::TestAtom()
 		// unique throughout all resource types.
 		mResourceManager->ForceFreeCache();
 		UiCure::UserPainterImageResource lImage(mUiManager);
-		lImage.Load(mResourceManager, _T("Data/normalmap.tga"), UiCure::UserPainterImageResource::TypeLoadCallback(this, &ResourceTest::PainterImageLoadCallback));
+		lImage.Load(mResourceManager, _T("normalmap.tga"), UiCure::UserPainterImageResource::TypeLoadCallback(this, &ResourceTest::PainterImageLoadCallback));
 		Lepra::Thread::Sleep(0.4);
 		mResourceManager->Tick();
 		mResourceManager->SafeRelease(&lImage);
@@ -166,7 +166,7 @@ bool ResourceTest::TestAtom()
 	{
 		lContext = _T("load 3D texture");
 		UiCure::UserTextureResource lTexture(mUiManager);
-		lTexture.Load(mResourceManager, _T("Data/NoSuchFile.tex"), UiCure::UserTextureResource::TypeLoadCallback(this, &ResourceTest::TextureLoadCallback));
+		lTexture.Load(mResourceManager, _T("NoSuchFile.tex"), UiCure::UserTextureResource::TypeLoadCallback(this, &ResourceTest::TextureLoadCallback));
 		Lepra::Thread::Sleep(0.4);
 		mResourceManager->Tick();
 		mResourceManager->SafeRelease(&lTexture);
@@ -179,7 +179,7 @@ bool ResourceTest::TestAtom()
 	{
 		lContext = _T("load 3D texture");
 		UiCure::UserTextureResource lTexture(mUiManager);
-		lTexture.Load(mResourceManager, _T("Data/normalmap.tex"), UiCure::UserTextureResource::TypeLoadCallback(this, &ResourceTest::TextureLoadCallback));
+		lTexture.Load(mResourceManager, _T("normalmap.tex"), UiCure::UserTextureResource::TypeLoadCallback(this, &ResourceTest::TextureLoadCallback));
 		Lepra::Thread::Sleep(0.4);
 		mResourceManager->Tick();
 		mResourceManager->SafeRelease(&lTexture);
@@ -196,7 +196,7 @@ bool ResourceTest::TestAtom()
 	{
 		lContext = _T("load sound");
 		UiCure::UserSound2dResource lSound(mUiManager, UiLepra::SoundManager::LOOP_NONE);
-		lSound.Load(mResourceManager, _T("Data/Bark.wav"), UiCure::UserSound2dResource::TypeLoadCallback(this, &ResourceTest::Sound2dLoadCallback));
+		lSound.Load(mResourceManager, _T("Bark.wav"), UiCure::UserSound2dResource::TypeLoadCallback(this, &ResourceTest::Sound2dLoadCallback));
 		Lepra::Thread::Sleep(0.4);
 		mResourceManager->Tick();
 		lTestOk = (gResourceLoadCount == 4 && gResourceLoadErrorCount == 1);
@@ -226,7 +226,7 @@ bool ResourceTest::TestClass()
 		gResourceLoadCount = 0;
 		gResourceLoadErrorCount = 0;
 		UiCure::UserClassResource lClass(mUiManager);
-		lClass.Load(mResourceManager, _T("Data/tractor_01.class"), UiCure::UserClassResource::TypeLoadCallback(this, &ResourceTest::ClassLoadCallback));
+		lClass.Load(mResourceManager, _T("tractor_01.class"), UiCure::UserClassResource::TypeLoadCallback(this, &ResourceTest::ClassLoadCallback));
 		for (int x = 0; gResourceLoadCount != 12 && x < 100; ++x)
 		{
 			Lepra::Thread::Sleep(0.01);
@@ -299,10 +299,10 @@ bool ResourceTest::TestStress()
 				new UiCure::UserGeometryReferenceResource(mUiManager, UiCure::GeometryOffset(0));
 			UiCure::UserGeometryReferenceResource* lMesh1 =
 				new UiCure::UserGeometryReferenceResource(mUiManager, UiCure::GeometryOffset(0));
-			lMesh0->LoadUnique(mResourceManager, _T("Data/tractor_01_rear_wheel0.mesh;0"),
+			lMesh0->LoadUnique(mResourceManager, _T("tractor_01_rear_wheel0.mesh;0"),
 				UiCure::UserGeometryReferenceResource::TypeLoadCallback(this,
 					&ResourceTest::MeshRefLoadCallback));
-			lMesh1->LoadUnique(mResourceManager, _T("Data/tractor_01_rear_wheel0.mesh;0"),
+			lMesh1->LoadUnique(mResourceManager, _T("tractor_01_rear_wheel0.mesh;0"),
 				UiCure::UserGeometryReferenceResource::TypeLoadCallback(this,
 					&ResourceTest::MeshRefLoadCallback));
 			delete (lMesh1);
@@ -347,9 +347,9 @@ bool ResourceTest::TestStress()
 			typedef UiCure::UserUiTypeResource<UiCure::GeometryResource> UserMesh;
 			UserMesh* lMesh0 = new UserMesh(mUiManager);
 			UserMesh* lMesh1 = new UserMesh(mUiManager);
-			lMesh0->Load(mResourceManager, _T("Data/tractor_01_rear_wheel0.mesh"),
+			lMesh0->Load(mResourceManager, _T("tractor_01_rear_wheel0.mesh"),
 				UserMesh::TypeLoadCallback(this, &ResourceTest::MeshLoadCallback));
-			lMesh1->Load(mResourceManager, _T("Data/tractor_01_rear_wheel0.mesh"),
+			lMesh1->Load(mResourceManager, _T("tractor_01_rear_wheel0.mesh"),
 				UserMesh::TypeLoadCallback(this, &ResourceTest::MeshLoadCallback));
 			delete (lMesh1);
 			delete (lMesh0);
@@ -395,7 +395,7 @@ bool ResourceTest::TestStress()
 			for (int y = 0; y < lAddCount; ++y)
 			{
 				UiCure::UserClassResource* lClass = new UiCure::UserClassResource(mUiManager);
-				lClass->LoadUnique(mResourceManager, _T("Data/tractor_01.class"),
+				lClass->LoadUnique(mResourceManager, _T("tractor_01.class"),
 					UiCure::UserClassResource::TypeLoadCallback(this, &ResourceTest::DumbClassLoadCallback));
 				lResources.push_back(lClass);
 			}
@@ -473,7 +473,7 @@ bool ResourceTest::TestStress()
 			{
 				UiCure::UserGeometryReferenceResource* lMesh =
 					new UiCure::UserGeometryReferenceResource(mUiManager, UiCure::GeometryOffset(0));
-				lMesh->Load(mResourceManager, _T("Data/tractor_01_front_wheel0.mesh;0"),
+				lMesh->Load(mResourceManager, _T("tractor_01_front_wheel0.mesh;0"),
 					UiCure::UserGeometryReferenceResource::TypeLoadCallback(this,
 						&ResourceTest::MeshRefLoadCallback));
 				lResources.push_back(lMesh);

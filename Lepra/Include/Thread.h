@@ -385,7 +385,7 @@ protected:
 	void SetThreadId(size_t pThreadId);
 
 private:
-	astr mThreadName;
+	astr mThreadName;	// Must be ANSI, to be compliant with non-unicode builds.
 
 	volatile bool mRunning;
 	volatile bool mStopRequested;

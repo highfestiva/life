@@ -94,7 +94,10 @@ private:
 	virtual Cure::ContextObject* CreateContextObject(const str& pClassId) const;
 	virtual bool InitializeTerrain();
 
+	Cure::ContextObject* CreateLogicHandler(const str&) const;
+
 	UiCure::GameUiManager* mUiManager;
+	UiCure::CppContextObject* mLevel;
 	UiCure::CppContextObject* mLauncher;
 };
 

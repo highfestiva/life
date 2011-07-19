@@ -659,27 +659,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Machine.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Machine.h"
-				>
-			</File>
-			<File
 				RelativePath=".\MassObject.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\MassObject.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Props.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Props.h"
 				>
 			</File>
 			<File

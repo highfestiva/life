@@ -52,7 +52,6 @@
 #define RTVAR_GAME_ISCHILD		"Game.IsChild"
 #define RTVAR_GAME_ENABLESTARTLOGO	"Game.EnableStartLogo"
 #define RTVAR_GAME_TIMEOFDAYFACTOR	"Game.TimeOfDayFactor"
-#define RTVAR_GAME_FORCEEYES		"Game.ForceEyes"
 
 #define RTVAR_LOGIN_USERNAME		"Login.UserName"
 #define RTVAR_LOGIN_ISSERVERSELECTED	"Login.IsServerSelected"
@@ -60,4 +59,3 @@
 #define RTVAR_UI_3D_CAMDISTANCE		"Ui.3D.CamDistance"
 #define RTVAR_UI_3D_CAMHEIGHT		"Ui.3D.CamHeight"
 #define RTVAR_UI_3D_CAMROTATE		"Ui.3D.CamRotate"
-#define RTVAR_UI_3D_ENABLEPARTICLES	"Ui.3D.EnableParticles"

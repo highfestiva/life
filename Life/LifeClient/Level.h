@@ -6,7 +6,8 @@
 
 #pragma once
 
-#include "Machine.h"
+#include "../../UiCure/Include/UiMachine.h"
+#include "../Life.h"
 
 
 
@@ -15,10 +16,10 @@ namespace Life
 
 
 
-class Level: public Machine
+class Level: public UiCure::Machine
 {
 public:
-	typedef Machine Parent;
+	typedef UiCure::Machine Parent;
 
 	Level(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager);
 	virtual ~Level();

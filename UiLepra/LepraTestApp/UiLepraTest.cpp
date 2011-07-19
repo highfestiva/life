@@ -124,7 +124,7 @@ bool TestSound(const Lepra::LogDecorator& pLog)
 	if (lTestOk)
 	{
 		lContext = _T("load sound");
-		lSound = lSoundManager->LoadSound3D(_T("Data/Bark.wav"), UiLepra::SoundManager::LOOP_FORWARD, 0);
+		lSound = lSoundManager->LoadSound3D(_T("Bark.wav"), UiLepra::SoundManager::LOOP_FORWARD, 0);
 		lTestOk = (lSound != UiLepra::INVALID_SOUNDID);
 		assert(lTestOk);
 	}

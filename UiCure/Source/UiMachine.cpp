@@ -4,7 +4,7 @@
 
 
 
-#include "Machine.h"
+#include "../Include/UiMachine.h"
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/GameManager.h"
 #include "../../Cure/Include/RuntimeVariable.h"
@@ -14,19 +14,18 @@
 #include "../../TBC/Include/ChunkyBoneGeometry.h"
 #include "../../TBC/Include/ChunkyPhysics.h"
 #include "../../TBC/Include/PhysicsEngine.h"
-#include "../../UiCure/Include/UiGameUiManager.h"
-#include "GameClientSlaveManager.h"
-#include "Props.h"
-#include "RtVar.h"
+#include "../Include/UiGameUiManager.h"
+#include "../Include/UiProps.h"
+#include "../Include/UiRuntimeVariableName.h"
 
 
 
-namespace Life
+namespace UiCure
 {
 
 
 
-Machine::Machine(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager):
+Machine::Machine(Cure::ResourceManager* pResourceManager, const str& pClassId, GameUiManager* pUiManager):
 	Parent(pResourceManager, pClassId, pUiManager),
 	mExhaustTimeout(0),
 	mCreatedParticles(false)
@@ -64,8 +63,6 @@ void Machine::OnTick()
 	const Cure::TimeManager* lTimeManager = GetManager()->GetGameManager()->GetTimeManager();
 	const float lFrameTime = std::min(0.1f, lTimeManager->GetNormalFrameTime());
 	const bool lIsChild = IsAttributeTrue(_T("float_is_child"));
-	bool lForceEyes;
-	CURE_RTVAR_GET(lForceEyes, =, Cure::GetSettings(), RTVAR_GAME_FORCEEYES, false);
 	float lRealTimeRatio;
 	CURE_RTVAR_GET(lRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
 	const TBC::PhysicsManager* lPhysicsManager = mManager->GetGameManager()->GetPhysicsManager();
@@ -157,7 +154,7 @@ void Machine::OnTick()
 					lTransform.MoveBackward(lJointDownValue);
 					lMesh->SetTransformation(lTransform);
 					lMesh->SetTransformationChanged(true);
-					lMesh->SetAlwaysVisible(lIsChild || lForceEyes);
+					lMesh->SetAlwaysVisible(lIsChild);
 				}
 			}
 		}
@@ -209,14 +206,14 @@ void Machine::OnTick()
 				assert(false);
 				continue;
 			}
-			UiCure::UserSound3dResource* lEngineSound = HashUtil::FindMapObject(mEngineSoundTable, &lTag);
+			UserSound3dResource* lEngineSound = HashUtil::FindMapObject(mEngineSoundTable, &lTag);
 			if (lEngineSound == 0)
 			{
-				const str lSoundName = _T("Data/")+lTag.mStringValueList[0];
-				lEngineSound = new UiCure::UserSound3dResource(GetUiManager(), UiLepra::SoundManager::LOOP_FORWARD);
+				const str lSoundName = lTag.mStringValueList[0];
+				lEngineSound = new UserSound3dResource(GetUiManager(), UiLepra::SoundManager::LOOP_FORWARD);
 				mEngineSoundTable.insert(TagSoundTable::value_type(&lTag, lEngineSound));
 				lEngineSound->Load(GetResourceManager(), lSoundName,
-					UiCure::UserSound3dResource::TypeLoadCallback(this, &Machine::LoadPlaySound3d));
+					UserSound3dResource::TypeLoadCallback(this, &Machine::LoadPlaySound3d));
 			}
 			if (lEngineSound->GetLoadState() != Cure::RESOURCE_LOAD_COMPLETE)
 			{
@@ -365,7 +362,7 @@ void Machine::OnForceApplied(TBC::PhysicsManager::ForceFeedbackListener* pOtherO
 	Parent::OnForceApplied(pOtherObject, pOwnBodyId, pOtherBodyId, pForce, pTorque, pPosition, pRelativeVelocity);
 
 	bool lParticlesEnabled;
-	CURE_RTVAR_GET(lParticlesEnabled, =, GetManager()->GetGameManager()->GetVariableScope(), RTVAR_UI_3D_ENABLEPARTICLES, false);
+	CURE_RTVAR_GET(lParticlesEnabled, =, UiCure::GetSettings(), RTVAR_UI_3D_ENABLEPARTICLES, false);
 	if (!lParticlesEnabled)
 	{
 		return;
@@ -386,7 +383,7 @@ void Machine::OnForceApplied(TBC::PhysicsManager::ForceFeedbackListener* pOtherO
 		return;
 	}
 	const float lDistance = 100;	// Only show gravel particles inside this distance.
-	if (!((GameClientSlaveManager*)GetManager()->GetGameManager())->IsInCameraRange(pPosition, lDistance))
+	if (!GetManager()->GetGameManager()->IsObjectRelevant(pPosition, lDistance))
 	{
 		return;
 	}
@@ -432,7 +429,7 @@ void Machine::OnForceApplied(TBC::PhysicsManager::ForceFeedbackListener* pOtherO
 
 
 
-void Machine::LoadPlaySound3d(UiCure::UserSound3dResource* pSoundResource)
+void Machine::LoadPlaySound3d(UserSound3dResource* pSoundResource)
 {
 	assert(pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE);
 	if (pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)

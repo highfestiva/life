@@ -574,7 +574,7 @@ void TextField::Repaint(Painter* pPainter)
 
 	pPainter->PushAttrib(Painter::ATTR_ALL);
 
-	PixelRect lRect(GetClientRect());
+	const PixelRect lRect(GetClientRect());
 	pPainter->ReduceClippingRect(lRect);
 
 	int lMarkerX  = mTextX + pPainter->GetStringWidth(GetVisibleText().substr(0, mMarkerPos));

@@ -42,6 +42,7 @@ void TimeManager::Clear(int pPhysicsFrameCounter)
 	mPhysicsSpeedAdjustmentFrameCount = 0;
 	mAbsoluteTime = 0;
 	mTickTimeOverhead = 0;
+	mRealTimeRatio = 1.0;
 	mPhysicsFrameCounter = pPhysicsFrameCounter;
 	mCurrentFrameTime = 1/(float)mTargetFrameRate;
 	mAverageFrameTime = mCurrentFrameTime;

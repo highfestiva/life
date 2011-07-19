@@ -372,7 +372,7 @@ bool Thread::Start()
 		else
 		{
 			SetRunning(false);
-			mLog.Errorf((_T("Failed to start thread ")+GetThreadName()+_T("!")).c_str());
+			mLog.Errorf((_T("Failed to start thread ")+strutil::Encode(GetThreadName())+_T("!")).c_str());
 			lOk = false;
 		}
 	}
@@ -402,7 +402,7 @@ bool Thread::GraceJoin(float64 pTimeOut)
 		if (!mSemaphore.Wait(pTimeOut))
 		{
 			// Possible dead lock...
-			mLog.Warningf((_T("Failed to timed join thread \"") + GetThreadName() + _T("\"! Deadlock?")).c_str());
+			mLog.Warningf((_T("Failed to timed join thread \"") + strutil::Encode(GetThreadName()) + _T("\"! Deadlock?")).c_str());
 			return (false);	// RAII simplifies here.
 		}
 		Join();
@@ -424,7 +424,7 @@ void Thread::Kill()
 	if (GetThreadHandle() != 0)
 	{
 		assert(GetThreadId() != GetCurrentThreadId());
-		mLog.Warningf(_T("Forcing kill of thread %s."), GetThreadName().c_str());
+		mLog.Warning(_T("Forcing kill of thread ") + strutil::Encode(GetThreadName()));
 		::pthread_kill((pthread_t)mThreadHandle, SIGHUP);
 		Join();
 		SetRunning(false);

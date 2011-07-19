@@ -139,7 +139,7 @@ void CollisionSoundManager::PlaySound(const TBC::ChunkyBoneGeometry* pGeometryKe
 	lSoundInfo->mBaseImpact = pImpact;
 	lSoundInfo->mSound = new CollisionSoundResource(mUiManager, lSoundInfo);
 	mSoundMap.insert(SoundMap::value_type(pGeometryKey, lSoundInfo));
-	lSoundInfo->mSound->Load(mGameManager->GetResourceManager(), _T("Data/collision_")+lMaterial+_T(".wav"),
+	lSoundInfo->mSound->Load(mGameManager->GetResourceManager(), _T("collision_")+lMaterial+_T(".wav"),
 		UiCure::UserSound3dResource::TypeLoadCallback(this, &CollisionSoundManager::OnSoundLoaded));
 }
 

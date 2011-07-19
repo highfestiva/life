@@ -699,9 +699,9 @@ bool GameClientMasterTicker::Initialize()
 		if (lShowLogo)
 		{
 			Cure::UserRamImageResource* lLogo = new Cure::UserRamImageResource;
-			Cure::UserResourceOwner<Cure::UserRamImageResource> lLogoHolder(lLogo, mResourceManager, _T("Data/megaphone.png"));
+			Cure::UserResourceOwner<Cure::UserRamImageResource> lLogoHolder(lLogo, mResourceManager, _T("megaphone.png"));
 			UiCure::UserSound2dResource* lLogoSound = new UiCure::UserSound2dResource(mUiManager, UiLepra::SoundManager::LOOP_NONE);
-			Cure::UserResourceOwner<UiCure::UserSound2dResource> lLogoSoundHolder(lLogoSound, mResourceManager, _T("Data/logo_trumpet.wav"));
+			Cure::UserResourceOwner<UiCure::UserSound2dResource> lLogoSoundHolder(lLogoSound, mResourceManager, _T("logo_trumpet.wav"));
 			for (int x = 0; x < 1000; ++x)
 			{
 				mResourceManager->Tick();

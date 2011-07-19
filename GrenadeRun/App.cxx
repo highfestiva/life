@@ -246,12 +246,12 @@ void App::Close()
 	delete mGame;
 	mGame = 0;
 
+	delete mResourceManager;	// Resource manager lives long enough for all volontary resources to disappear.
+	mResourceManager = 0;
+
 	mUiManager->GetDisplayManager()->RemoveResizeObserver(this);
 	delete mUiManager;
 	mUiManager = 0;
-
-	delete mResourceManager;	// Resource manager lives long enough for all volontary resources to disappear.
-	mResourceManager = 0;
 
 	// Poll system to let go of old windows.
 	UiLepra::Core::ProcessMessages();
@@ -269,16 +269,26 @@ int App::Run()
 	UiLepra::Init();
 	UiTbc::Init();
 	UiCure::Init();
-	mVariableScope = UiCure::GetSettings();
-	CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_PARALLEL, false);	// Let's do it same on all platforms.
-	CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_MICROSTEPS, 1);
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLELIGHTS, false);
 
 	StdioConsoleLogListener lConsoleLogger;
 	DebuggerLogListener lDebugLogger;
-	LogType::GetLog(LogType::SUB_ROOT)->SetupBasicListeners(&lConsoleLogger, &lDebugLogger, 0, 0, 0);
-
+	{
+		LogType::GetLog(LogType::SUB_ROOT)->SetupBasicListeners(&lConsoleLogger, &lDebugLogger, 0, 0, 0);
+		/*const std::vector<Log*> lLogArray = LogType::GetLogs();
+		std::vector<Log*>::const_iterator x = lLogArray.begin();
+		for (; x != lLogArray.end(); ++x)
+		{
+			(*x)->SetLevelThreashold(Log::LEVEL_LOWEST_TYPE);
+		}*/
+	}
 	bool lOk = true;
+	if (lOk)
+	{
+		mVariableScope = UiCure::GetSettings();
+		CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_PARALLEL, false);	// Let's do it same on all platforms.
+		CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_MICROSTEPS, 1);
+		CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLELIGHTS, false);
+	}
 	if (lOk)
 	{
 		const str lPathPrefix = SystemManager::GetDataDirectory(mArgumentVector[0]);
@@ -292,6 +302,10 @@ int App::Run()
 	{
 		mGame = new Game(mUiManager, mVariableScope, mResourceManager);
 		lOk = mGame->Initialize();
+	}
+	if (lOk)
+	{
+		lOk = mResourceManager->InitDefault();
 	}
 #ifndef LEPRA_IOS
 	bool lQuit = false;
@@ -334,6 +348,10 @@ bool App::Poll()
 	}
 	if (lOk)
 	{
+		TransformationF t(QuaternionF(0.97324896f, -0.22975297f, 1.3694344e-008f, -5.8010158e-008f), Vector3DF(0, -168, 80));
+		//TransformationF t;
+		//t.SetPosition(Vector3DF(0, -300, 80));
+		mUiManager->SetCameraPosition(t);
 		lOk = mGame->Render();
 	}
 	if (lOk)

@@ -471,6 +471,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Source\UiMachine.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\UiProps.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Source\UiResourceManager.cpp"
 				>
 			</File>
@@ -494,6 +502,14 @@
 			</File>
 			<File
 				RelativePath=".\Include\UiLineGraph2d.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Include\UiMachine.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Include\UiProps.h"
 				>
 			</File>
 			<File

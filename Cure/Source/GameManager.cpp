@@ -254,6 +254,13 @@ ConsoleManager* GameManager::GetConsoleManager() const
 
 
 
+bool GameManager::IsObjectRelevant(const Vector3DF& pPosition, float pDistance) const
+{
+	pPosition;
+	pDistance;
+	return true;
+}
+
 ContextObject* GameManager::CreateContextObject(const str& pClassId, NetworkObjectType pNetworkType, GameObjectId pInstanceId)
 {
 	ContextObject* lObject = CreateContextObject(pClassId);

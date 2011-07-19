@@ -101,7 +101,7 @@ class GroupReader(DefaultMAReader):
                 if not group[0].getName().startswith("m_"):
                         print("Error: root must be a mesh named 'm_...' something, not '%s'." % group[0].getName())
                         sys.exit(2)
-                config = configparser.SafeConfigParser()
+                config = configparser.SafeConfigParser(inline_comment_prefixes=(";",))
                 try:
                         ininame = self.basename+".ini"
                         f = codecs.open(ininame, "r", encoding="latin-1")

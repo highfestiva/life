@@ -12,6 +12,7 @@ import options
 import shape
 
 import math
+import os
 import pprint
 import re
 import struct
@@ -285,7 +286,7 @@ class ChunkyWriter:
                         self._writefloat(f)
                 self._writeint(len(textures))
                 for texture in textures:
-                        self._writestr(texture)
+                        self._writestr(os.path.basename(texture))
                 self._writestr(shader)
 
 
@@ -769,7 +770,7 @@ class ClassWriter(ChunkyWriter):
                                 p = p[0:3]
                                 t = self._normalizexform(q[:]+p[:])
                                 physidx = self.bodies.index(phys)
-                                meshptrs += [(CHUNK_CLASS_PHYS_MESH, PhysMeshPtr(physidx, m.meshbasename, t, m.mat))]
+                                meshptrs += [(CHUNK_CLASS_PHYS_MESH, PhysMeshPtr(physidx, os.path.basename(m.meshbasename), t, m.mat))]
                         tags = []
                         for node in self.group:
                                 if node.getName().startswith("tag:"):
@@ -778,7 +779,7 @@ class ClassWriter(ChunkyWriter):
                         data =  (
                                         CHUNK_CLASS,
                                         (
-                                                (CHUNK_CLASS_PHYSICS, self.basename),
+                                                (CHUNK_CLASS_PHYSICS, os.path.basename(self.basename)),
                                                 (CHUNK_CLASS_MESH_LIST, meshptrs),
                                                 (CHUNK_CLASS_TAG_LIST, tags),
                                         )

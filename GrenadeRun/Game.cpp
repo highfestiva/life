@@ -6,7 +6,8 @@
 
 #include "Game.h"
 #include "../Cure/Include/RuntimeVariable.h"
-#include "../UiCure/Include/UiCppContextObject.h"
+#include "../UiCure/Include/UiMachine.h"
+#include "../UiCure/Include/UiProps.h"
 #include "../UiCure/Include/UiGameUiManager.h"
 
 
@@ -30,13 +31,31 @@ Game::~Game()
 
 bool Game::Initialize()
 {
-	return true;
+	bool lOk = true;
+	if (lOk)
+	{
+		lOk = InitializeTerrain();
+	}
+	if (lOk)
+	{
+		mLauncher = new UiCure::Props(GetResourceManager(), _T("launcher"), mUiManager);
+		AddContextObject(mLauncher, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+		lOk = (mLauncher != 0);
+		assert(lOk);
+		if (lOk)
+		{
+			mLauncher->StartLoading();
+		}
+	}
+	return lOk;
 }
 
 
 
 bool Game::Render()
 {
+	PixelRect lRect(0, 0, mUiManager->GetCanvas()->GetActualWidth(), mUiManager->GetCanvas()->GetActualHeight());
+	mUiManager->Render(lRect);
 	return true;
 }
 
@@ -132,16 +151,25 @@ bool Game::InitializeTerrain()
 	bool lOk = true;
 	if (lOk)
 	{
-		mLauncher = new UiCure::CppContextObject(GetResourceManager(), _T("launcher"), mUiManager);
-		AddContextObject(mLauncher, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
-		lOk = (mLauncher != 0);
+		mLevel = new UiCure::Machine(GetResourceManager(), _T("level_01"), mUiManager);
+		AddContextObject(mLevel, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+		lOk = (mLevel != 0);
 		assert(lOk);
 		if (lOk)
 		{
-			mLauncher->StartLoading();
+			mLevel->DisableRootShadow();
+			mLevel->SetAllowNetworkLogic(false);
+			mLevel->StartLoading();
 		}
 	}
 	return lOk;
+}
+
+
+
+Cure::ContextObject* Game::CreateLogicHandler(const str&) const
+{
+	return 0;
 }
 
 

@@ -11,11 +11,11 @@
 #include "../../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "../../UiTBC/Include/GUI/UiCenterLayout.h"
 #include "../../UiCure/Include/UiGameUiManager.h"
+#include "../../UiCure/Include/UiMachine.h"
 #include "../LifeServer/MasterServerConnection.h"
 #include "GameClientMasterTicker.h"
 #include "RtVar.h"
 #include "UiConsole.h"
-#include "Machine.h"
 
 
 
@@ -70,16 +70,16 @@ void GameClientViewer::CreateLoginView()
 {
 	QuaternionF lFlip;
 	lFlip.RotateAroundOwnZ(PIF);
-	CreateButton(-0.2f, +0.2f,  6.0f, _T("1"),	_T("road_sign_02"), _T("Data/road_sign_1p.png"), RoadSignButton::SHAPE_BOX);
-	RoadSignButton* lButton = CreateButton(+0.2f, +0.2f,  6.0f, _T("2"),	_T("road_sign_02"), _T("Data/road_sign_2p.png"), RoadSignButton::SHAPE_BOX);
+	CreateButton(-0.2f, +0.2f,  6.0f, _T("1"),	_T("road_sign_02"), _T("road_sign_1p.png"), RoadSignButton::SHAPE_BOX);
+	RoadSignButton* lButton = CreateButton(+0.2f, +0.2f,  6.0f, _T("2"),	_T("road_sign_02"), _T("road_sign_2p.png"), RoadSignButton::SHAPE_BOX);
 	lButton->SetOrientation(lFlip);
-	CreateButton(-0.2f, -0.2f,  6.0f, _T("3"),	_T("road_sign_02"), _T("Data/road_sign_3p.png"), RoadSignButton::SHAPE_BOX);
-	lButton = CreateButton(+0.2f, -0.2f,  6.0f, _T("4"),	_T("road_sign_02"), _T("Data/road_sign_4p.png"), RoadSignButton::SHAPE_BOX);
+	CreateButton(-0.2f, -0.2f,  6.0f, _T("3"),	_T("road_sign_02"), _T("road_sign_3p.png"), RoadSignButton::SHAPE_BOX);
+	lButton = CreateButton(+0.2f, -0.2f,  6.0f, _T("4"),	_T("road_sign_02"), _T("road_sign_4p.png"), RoadSignButton::SHAPE_BOX);
 	lButton->SetOrientation(lFlip);
 
-	CreateButton(-0.4f, +0.4f, 12.0f, _T("server"),	_T("road_sign_01"), _T("Data/road_sign_roundabout.png"), RoadSignButton::SHAPE_ROUND);
+	CreateButton(-0.4f, +0.4f, 12.0f, _T("server"),	_T("road_sign_01"), _T("road_sign_roundabout.png"), RoadSignButton::SHAPE_ROUND);
 
-	CreateButton(+0.4f, +0.4f, 12.0f, _T("quit"),	_T("road_sign_01"), _T("Data/road_sign_nostop.png"), RoadSignButton::SHAPE_ROUND);
+	CreateButton(+0.4f, +0.4f, 12.0f, _T("quit"),	_T("road_sign_01"), _T("road_sign_nostop.png"), RoadSignButton::SHAPE_ROUND);
 }
 
 bool GameClientViewer::InitializeTerrain()
@@ -89,7 +89,7 @@ bool GameClientViewer::InitializeTerrain()
 		return (false);
 	}
 
-	Cure::ContextObject* lVehicle = new Machine(GetResourceManager(), _T("monster_02"), mUiManager);
+	Cure::ContextObject* lVehicle = new UiCure::Machine(GetResourceManager(), _T("monster_02"), mUiManager);
 	GetContext()->AddLocalObject(lVehicle);
 	lVehicle->SetInitialTransform(TransformationF(QuaternionF(), Vector3DF(-23, -80, 53)));
 	lVehicle->StartLoading();

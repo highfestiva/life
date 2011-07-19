@@ -22,6 +22,8 @@
 #include "../../Lepra/Include/Timer.h"
 #include "../../TBC/Include/ChunkyPhysics.h"
 #include "../../UiCure/Include/UiGameUiManager.h"
+#include "../../UiCure/Include/UiMachine.h"
+#include "../../UiCure/Include/UiProps.h"
 #include "../../UiCure/Include/UiRuntimeVariableName.h"
 #include "../../UiTBC/Include/GUI/UiCustomButton.h"
 #include "../../UiTBC/Include/GUI/UiDesktopWindow.h"
@@ -31,9 +33,7 @@
 #include "CollisionSoundManager.h"
 #include "GameClientMasterTicker.h"
 #include "Level.h"
-#include "Machine.h"
 #include "MassObject.h"
-#include "Props.h"
 #include "RoadSignButton.h"
 #include "RtVar.h"
 #include "Sunlight.h"
@@ -124,7 +124,6 @@ void GameClientSlaveManager::LoadSettings()
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_NAMES, true);
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_DEBUG_PERFORMANCE_COUNT, true);
 	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_GAME_TIMEOFDAYFACTOR, 1.0);
-	CURE_RTVAR_SET(UiCure::GetSettings(), RTVAR_GAME_FORCEEYES, false);
 	bool lIsServerSelected;
 	CURE_RTVAR_TRYGET(lIsServerSelected, =, UiCure::GetSettings(), RTVAR_LOGIN_ISSERVERSELECTED, false);
 	if (lIsServerSelected)
@@ -676,7 +675,7 @@ void GameClientSlaveManager::AddLocalObjects(std::hash_set<Cure::GameObjectId>& 
 	pLocalObjectSet.insert(mOwnedObjectList.begin(), mOwnedObjectList.end());
 }
 
-bool GameClientSlaveManager::IsInCameraRange(const Vector3DF& pPosition, float pDistance) const
+bool GameClientSlaveManager::IsObjectRelevant(const Vector3DF& pPosition, float pDistance) const
 {
 	return (pPosition.GetDistanceSquared(mCameraPosition) <= pDistance*pDistance);
 }
@@ -867,7 +866,7 @@ bool GameClientSlaveManager::InitializeTerrain()
 		lLevel->DisableRootShadow();
 		lLevel->SetAllowNetworkLogic(false);
 		lLevel->StartLoading();
-		mSun = new Props(GetResourceManager(), _T("sun"), mUiManager);
+		mSun = new UiCure::Props(GetResourceManager(), _T("sun"), mUiManager);
 		AddContextObject(mSun, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 		lOk = (mSun != 0);
 		assert(lOk);
@@ -879,7 +878,7 @@ bool GameClientSlaveManager::InitializeTerrain()
 	const int lPrimeCloudCount = 11;	// TRICKY: must be prime or clouds start moving in sync.
 	for (int x = 0; lOk && x < lPrimeCloudCount; ++x)
 	{
-		Cure::ContextObject* lCloud = new Props(GetResourceManager(), _T("cloud_01"), mUiManager);
+		Cure::ContextObject* lCloud = new UiCure::Props(GetResourceManager(), _T("cloud_01"), mUiManager);
 		AddContextObject(lCloud, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 		lCloud->StartLoading();
 		mCloudArray.push_back(lCloud);
@@ -1384,10 +1383,10 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 						lMessageStatus->GetMessageString(lAvatarName);
 						Cure::UserAccount::AvatarId lAvatarId = strutil::Encode(lAvatarName);
 						log_adebug("Status: INFO_AVATAR...");
-						str lTextureId = strutil::Format(_T("Data/road_sign_%s.png"), lAvatarId.c_str());
+						str lTextureId = strutil::Format(_T("road_sign_%s.png"), lAvatarId.c_str());
 						if (!GetResourceManager()->QueryFileExists(lTextureId))
 						{
-							lTextureId = _T("Data/road_sign_car.png");
+							lTextureId = _T("road_sign_car.png");
 						}
 						RoadSignButton* lButton = new RoadSignButton(this, GetResourceManager(),
 							mUiManager, lAvatarId, _T("road_sign_01"), lTextureId, RoadSignButton::SHAPE_ROUND);
@@ -1607,7 +1606,7 @@ Cure::ContextObject* GameClientSlaveManager::CreateContextObject(const str& pCla
 	}
 	else
 	{
-		lObject = new Machine(GetResourceManager(), pClassId, mUiManager);
+		lObject = new UiCure::Machine(GetResourceManager(), pClassId, mUiManager);
 	}
 	lObject->SetAllowNetworkLogic(false);	// Only server gets to control logic.
 	return (lObject);

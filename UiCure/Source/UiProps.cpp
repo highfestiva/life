@@ -4,7 +4,7 @@
 
 
 
-#include "Props.h"
+#include "../Include/UiProps.h"
 #include "../../Cure/Include/ContextManager.h"
 #include "../../Cure/Include/GameManager.h"
 #include "../../Cure/Include/TimeManager.h"
@@ -12,12 +12,12 @@
 
 
 
-namespace Life
+namespace UiCure
 {
 
 
 
-Props::Props(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager):
+Props::Props(Cure::ResourceManager* pResourceManager, const str& pClassId, GameUiManager* pUiManager):
 	Parent(pResourceManager, pClassId, pUiManager),
 	mParticleType(PARTICLE_NONE),
 	mScale(1),
@@ -53,7 +53,7 @@ void Props::StartParticle(ParticleType pParticleType, const Vector3DF& pStartVel
 
 
 
-void Props::DispatchOnLoadMesh(UiCure::UserGeometryReferenceResource* pMeshResource)
+void Props::DispatchOnLoadMesh(UserGeometryReferenceResource* pMeshResource)
 {
 	Parent::DispatchOnLoadMesh(pMeshResource);
 	if (mParticleType != PARTICLE_NONE && pMeshResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)

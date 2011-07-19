@@ -77,7 +77,7 @@ DWORD __stdcall ThreadEntry(void* pThread)
 	gExtraDataStorage.SetPointer(0);
 	assert(gThreadStorage.GetPointer() == lThread);
 	assert(Thread::GetCurrentThread() == lThread);
-	SetVisualStudioThreadName(astrutil::Encode(lThread->GetThreadName()).c_str(), (DWORD)-1);
+	SetVisualStudioThreadName(lThread->GetThreadName().c_str(), (DWORD)-1);
 	RunThread(lThread);
 	return 0;
 }
@@ -708,7 +708,7 @@ void Thread::InitializeThread(Thread* pThread)
 	pThread->SetThreadId(GetCurrentThreadId());
 	assert(gThreadStorage.GetPointer() == pThread);
 	assert(Thread::GetCurrentThread() == pThread);
-	SetVisualStudioThreadName(astrutil::Encode(pThread->GetThreadName()).c_str(), (DWORD)-1);
+	SetVisualStudioThreadName(pThread->GetThreadName().c_str(), (DWORD)-1);
 }
 
 size_t Thread::GetCurrentThreadId()
@@ -824,7 +824,7 @@ void Thread::Kill()
 	if (GetThreadHandle() != 0)
 	{
 		assert(GetThreadId() != GetCurrentThreadId());
-		mLog.Warningf(_T("Forcing kill of thread %s."), GetThreadName().c_str());
+		mLog.Warning(_T("Forcing kill of thread ") + strutil::Encode(GetThreadName()));
 		::TerminateThread((HANDLE)GetThreadHandle(), 0);
 		SetRunning(false);
 		::CloseHandle((HANDLE)GetThreadHandle());

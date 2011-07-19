@@ -135,7 +135,7 @@ void CppContextObject::StartLoading()
 {
 	assert(mClassResource == 0);
 	mClassResource = new UserClassResource();
-	const str lAssetName = _T("Data/")+GetClassId()+_T(".class");	// TODO: move to central source file.
+	const str lAssetName = GetClassId()+_T(".class");	// TODO: move to central source file.
 	mClassResource->Load(GetResourceManager(), lAssetName,
 		UserClassResource::TypeLoadCallback(this, &CppContextObject::OnLoadClass));
 }
