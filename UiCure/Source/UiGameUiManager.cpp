@@ -208,6 +208,11 @@ bool GameUiManager::Open()
 
 void GameUiManager::Close()
 {
+	if (mDisplay)
+	{
+		mDisplay->RemoveResizeObserver(this);
+	}
+
 	// Poll system to let go of old windows.
 	UiLepra::Core::ProcessMessages();
 	Thread::Sleep(0.05);
@@ -233,7 +238,6 @@ void GameUiManager::Close()
 
 	if (mDisplay)
 	{
-		mDisplay->RemoveResizeObserver(this);
 		delete (mDisplay);
 		mDisplay = 0;
 	}

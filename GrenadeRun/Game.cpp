@@ -6,9 +6,11 @@
 
 #include "Game.h"
 #include "../Cure/Include/RuntimeVariable.h"
+#include "../Cure/Include/TimeManager.h"
 #include "../UiCure/Include/UiMachine.h"
 #include "../UiCure/Include/UiProps.h"
 #include "../UiCure/Include/UiGameUiManager.h"
+#include "Grenade.h"
 
 
 
@@ -38,6 +40,18 @@ bool Game::Initialize()
 	}
 	if (lOk)
 	{
+		mVehicle = (UiCure::CppContextObject*)Parent::CreateContextObject(_T("monster_02"), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+		lOk = (mVehicle != 0);
+		assert(lOk);
+		if (lOk)
+		{
+			TransformationF t(QuaternionF(), Vector3DF(-100, -140, -39));
+			mVehicle->SetInitialTransform(t);
+			mVehicle->StartLoading();
+		}
+	}
+	if (lOk)
+	{
 		mLauncher = new UiCure::Props(GetResourceManager(), _T("launcher"), mUiManager);
 		AddContextObject(mLauncher, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 		lOk = (mLauncher != 0);
@@ -50,26 +64,66 @@ bool Game::Initialize()
 	return lOk;
 }
 
+bool Game::Tick()
+{
+	GameTicker::GetTimeManager()->Tick();
+	return true;
+}
+
+
+
+UiCure::CppContextObject* Game::GetP1()
+{
+	return mVehicle;
+}
+
+UiCure::CppContextObject* Game::GetP2()
+{
+	return mLauncher;
+}
+
+bool Game::Shoot()
+{
+	Grenade* lGrenade = (Grenade*)Parent::CreateContextObject(_T("grenade"), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+	bool lOk = (lGrenade != 0);
+	assert(lOk);
+	if (lOk)
+	{
+		TransformationF t(QuaternionF(), mLauncher->GetPosition()+Vector3DF(0, 0, +1.0f));
+		lGrenade->SetInitialTransform(t);
+		lGrenade->Start();
+		lGrenade->StartLoading();
+	}
+	return lOk;
+}
 
 
 bool Game::Render()
 {
-	PixelRect lRect(0, 0, mUiManager->GetCanvas()->GetActualWidth(), mUiManager->GetCanvas()->GetActualHeight());
-	mUiManager->Render(lRect);
+	TransformationF t(QuaternionF(), Vector3DF(-100, -140, -10));
+	t.GetOrientation().RotateAroundOwnZ(-PIF/8);
+	mUiManager->SetCameraPosition(t);
+	const PixelRect lFullRect(0, 0, mUiManager->GetCanvas()->GetActualWidth(), mUiManager->GetCanvas()->GetActualHeight());
+	PixelRect lLeftRect = lFullRect;
+	lLeftRect.mRight = lLeftRect.mRight/2 - 5;
+	mUiManager->Render(lLeftRect);
+
+	t = TransformationF(QuaternionF(), Vector3DF(300, -300, 30));
+	t.GetOrientation().RotateAroundOwnZ(PIF/4);
+	mUiManager->SetCameraPosition(t);
+	mLauncher->SetRootPosition(t.GetPosition()+Vector3DF(-0.8f, +0.8f, -0.7f));
+	PixelRect lRightRect = lFullRect;
+	lRightRect.mLeft = lLeftRect.mRight + 10;
+	mUiManager->Render(lRightRect);
 	return true;
 }
 
 
 
-void Game::MoveTo(const FingerMovement& /*pMove*/)
+/*void Game::MoveTo(const FingerMovement& pMove)
 {
-}
+}*/
 
-
-bool Game::Tick()
-{
-	return true;
-}
 
 void Game::PollRoundTrip()
 {
@@ -142,8 +196,11 @@ void Game::TickInput()
 
 Cure::ContextObject* Game::CreateContextObject(const str& pClassId) const
 {
-	pClassId;
-	return 0;
+	if (strutil::StartsWith(pClassId, _T("grenade")))
+	{
+		return new Grenade(GetResourceManager(), pClassId, mUiManager);
+	}
+	return new UiCure::Machine(GetResourceManager(), pClassId, mUiManager);
 }
 
 bool Game::InitializeTerrain()
@@ -151,14 +208,13 @@ bool Game::InitializeTerrain()
 	bool lOk = true;
 	if (lOk)
 	{
-		mLevel = new UiCure::Machine(GetResourceManager(), _T("level_01"), mUiManager);
+		mLevel = new UiCure::Machine(GetResourceManager(), _T("level_1"), mUiManager);
 		AddContextObject(mLevel, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 		lOk = (mLevel != 0);
 		assert(lOk);
 		if (lOk)
 		{
 			mLevel->DisableRootShadow();
-			mLevel->SetAllowNetworkLogic(false);
 			mLevel->StartLoading();
 		}
 	}

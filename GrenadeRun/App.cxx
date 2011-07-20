@@ -9,6 +9,7 @@
 #include "../Lepra/Include/Application.h"
 #include "../Lepra/Include/LogListener.h"
 #include "../Lepra/Include/SystemManager.h"
+#include "../UiCure/Include/UiCppContextObject.h"
 #include "../UiCure/Include/UiCure.h"
 #include "../UiCure/Include/UiGameUiManager.h"
 #include "../UiCure/Include/UiRuntimeVariableName.h"
@@ -20,6 +21,11 @@
 #include "../UiTBC/Include/GUI/UiButton.h"
 #include "../UiTBC/Include/GUI/UiDesktopWindow.h"
 #include "Game.h"
+
+
+
+#define UIKEY(name)	UiLepra::InputManager::IN_KBD_##name
+#define FPS		20.0
 
 
 
@@ -55,6 +61,7 @@ private:
 	virtual void Suspend();
 	virtual void Resume();
 
+	bool Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor);
 	virtual bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
 	virtual bool OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode);
 	virtual void OnMouseMove(float x, float y, bool pPressed);
@@ -76,6 +83,8 @@ private:
 #endif // iOS
 	Game* mGame;
 
+	double mAverageLoopTime;
+	HiResTimer mLoopTimer;
 	Cure::ResourceManager* mResourceManager;
 	Cure::RuntimeVariableScope* mVariableScope;
 	UiCure::GameUiManager* mUiManager;
@@ -112,7 +121,8 @@ namespace GrenadeRun
 App::App(const strutil::strvec& pArgumentList):
 	Application(pArgumentList),
 	mLayoutFrameCounter(-10),
-	mVariableScope(0)
+	mVariableScope(0),
+	mAverageLoopTime(1/FPS)
 {
 	mApp = this;
 }
@@ -136,7 +146,8 @@ bool App::PollApp()
 
 void App::OnTap(const FingerMovement& pMove)
 {
-	mApp->mGame->MoveTo(pMove);
+	pMove;
+	//mApp->mGame->MoveTo(pMove);
 }
 
 void App::OnMouseTap(float x, float y, bool pPressed)
@@ -168,13 +179,16 @@ bool App::Open()
 
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_DISPLAY_ENABLEVSYNC, false);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLELIGHTS, true);
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLETRILINEARFILTERING, false);
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLETRILINEARFILTERING, true);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLEBILINEARFILTERING, false);
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLEMIPMAPPING, false);
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLEMIPMAPPING, true);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_FOV, 60.0);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_CLIPNEAR, 1.0);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_CLIPFAR, 3000.0);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_SHADOWS, _T("None"));
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_AMBIENTRED, 0.8);
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_AMBIENTGREEN, 0.8);
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_AMBIENTBLUE, 0.8);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_SOUND_ROLLOFF, 0.2);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_SOUND_DOPPLER, 1.3);
 
@@ -222,7 +236,7 @@ bool App::Open()
 	{
 		const str lPathPrefix = SystemManager::GetDataDirectory(mArgumentVector[0]);
 		mMusicStreamer = 0;
-		mMusicStreamer = mUiManager->GetSoundManager()->CreateSoundStream(lPathPrefix+_T("Tingaliin.ogg"), UiLepra::SoundManager::LOOP_FORWARD, 0);
+		mMusicStreamer = mUiManager->GetSoundManager()->CreateSoundStream(lPathPrefix+_T("Oiit.ogg"), UiLepra::SoundManager::LOOP_FORWARD, 0);
 		if (!mMusicStreamer || !mMusicStreamer->Playback())
 		{
 			mLog.Errorf(_T("Unable to play beautiful muzak!"));
@@ -235,6 +249,9 @@ bool App::Open()
 
 void App::Close()
 {
+	mUiManager->GetInputManager()->RemoveKeyCodeInputObserver(this);
+	mUiManager->GetDisplayManager()->RemoveResizeObserver(this);
+
 	// Poll system to let go of old windows.
 	UiLepra::Core::ProcessMessages();
 	Thread::Sleep(0.05);
@@ -249,7 +266,6 @@ void App::Close()
 	delete mResourceManager;	// Resource manager lives long enough for all volontary resources to disappear.
 	mResourceManager = 0;
 
-	mUiManager->GetDisplayManager()->RemoveResizeObserver(this);
 	delete mUiManager;
 	mUiManager = 0;
 
@@ -286,7 +302,8 @@ int App::Run()
 	{
 		mVariableScope = UiCure::GetSettings();
 		CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_PARALLEL, false);	// Let's do it same on all platforms.
-		CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_MICROSTEPS, 1);
+		CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_MICROSTEPS, 3);
+		CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_FPS, FPS);
 		CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLELIGHTS, false);
 	}
 	if (lOk)
@@ -309,13 +326,12 @@ int App::Run()
 	}
 #ifndef LEPRA_IOS
 	bool lQuit = false;
-	while (lOk && !lQuit)
+	while (!lQuit)
 	{
-		lOk = Poll();
-		lQuit = (SystemManager::GetQuitRequest() != 0);
+		lQuit = !Poll();
 	}
 	Close();
-	return lQuit? 0 : 1;
+	return 0;
 #else // iOS
 	mAnimatedApp = [[AnimatedApp alloc] init:mUiManager->GetCanvas()];
 	return 0;
@@ -325,6 +341,13 @@ int App::Run()
 bool App::Poll()
 {
 	bool lOk = true;
+	if (lOk)
+	{
+		mAverageLoopTime = Lepra::Math::Lerp(mAverageLoopTime, mLoopTimer.QueryTimeDiff(), 0.05);
+		Thread::Sleep(1/FPS - mAverageLoopTime);
+		mLoopTimer.PopTimeDiff();
+		lOk = (SystemManager::GetQuitRequest() == 0);
+	}
 	if (lOk)
 	{
 		float r, g, b;
@@ -348,10 +371,6 @@ bool App::Poll()
 	}
 	if (lOk)
 	{
-		TransformationF t(QuaternionF(0.97324896f, -0.22975297f, 1.3694344e-008f, -5.8010158e-008f), Vector3DF(0, -168, 80));
-		//TransformationF t;
-		//t.SetPosition(Vector3DF(0, -300, 80));
-		mUiManager->SetCameraPosition(t);
 		lOk = mGame->Render();
 	}
 	if (lOk)
@@ -361,6 +380,10 @@ bool App::Poll()
 	if (lOk)
 	{
 		lOk = mGame->EndTick();
+	}
+	if (lOk)
+	{
+		lOk = mGame->Tick();
 	}
 	mResourceManager->Tick();
 	mUiManager->EndRender();
@@ -373,7 +396,7 @@ bool App::Poll()
 			mMusicStreamer->Playback();
 		}
 	}
-	return true;
+	return lOk;
 }
 
 void App::Layout()
@@ -426,14 +449,48 @@ void App::Resume()
 }
 
 
-bool App::OnKeyDown(UiLepra::InputManager::KeyCode /*pKeyCode*/)
+bool App::Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor)
 {
+	if (!mGame)
+	{
+		return false;
+	}
+	UiCure::CppContextObject* lAvatar1 = mGame->GetP1();
+	UiCure::CppContextObject* lAvatar2 = mGame->GetP2();
+	if (!lAvatar1)
+	{
+		return false;
+	}
+	if (!lAvatar2)
+	{
+		lAvatar2 = lAvatar1;
+	}
+	if (pKeyCode == UIKEY(SPACE) && pFactor > 0)
+	{
+		mGame->Shoot();
+	}
+	switch (pKeyCode)
+	{
+		case UIKEY(W):		lAvatar2->SetEnginePower(0, +1*pFactor, 0);	break;
+		case UIKEY(S):		lAvatar2->SetEnginePower(0, -1*pFactor, 0);	break;
+		case UIKEY(A):		lAvatar2->SetEnginePower(1, -1*pFactor, 0);	break;
+		case UIKEY(D):		lAvatar2->SetEnginePower(1, +1*pFactor, 0);	break;
+		case UIKEY(UP):		lAvatar1->SetEnginePower(0, +1*pFactor, 0);	break;
+		case UIKEY(DOWN):	lAvatar1->SetEnginePower(0, -1*pFactor, 0);	break;
+		case UIKEY(LEFT):	lAvatar1->SetEnginePower(1, -1*pFactor, 0);	break;
+		case UIKEY(RIGHT):	lAvatar1->SetEnginePower(1, +1*pFactor, 0);	break;
+	}
 	return false;
 }
 
-bool App::OnKeyUp(UiLepra::InputManager::KeyCode /*pKeyCode*/)
+bool App::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
 {
-	return false;
+	return Steer(pKeyCode, 1);
+}
+
+bool App::OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode)
+{
+	return Steer(pKeyCode, 0);
 }
 
 void App::OnMouseMove(float x, float y, bool pPressed)

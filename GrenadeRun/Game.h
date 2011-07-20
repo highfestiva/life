@@ -66,17 +66,22 @@ typedef std::list<FingerMovement> FingerMoveList;
 
 class Game: public Cure::GameTicker, public Cure::GameManager
 {
+	typedef GameManager Parent;
 public:
 	Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager);
 	virtual ~Game();
 	virtual bool Initialize();
+	virtual bool Tick();
+
+	UiCure::CppContextObject* GetP1();
+	UiCure::CppContextObject* GetP2();
+	bool Shoot();
 
 	bool Render();
 
-	void MoveTo(const FingerMovement& pMove);
+	//void MoveTo(const FingerMovement& pMove);
 
 private:
-	virtual bool Tick();
 	virtual void PollRoundTrip();	// Polls network for any incoming to yield lower latency.
 	virtual float GetTickTimeReduction() const;	// Returns how much quicker the tick loop should be; can be negative.
 	virtual float GetPowerSaveAmount() const;
@@ -98,6 +103,7 @@ private:
 
 	UiCure::GameUiManager* mUiManager;
 	UiCure::CppContextObject* mLevel;
+	UiCure::CppContextObject* mVehicle;
 	UiCure::CppContextObject* mLauncher;
 };
 
