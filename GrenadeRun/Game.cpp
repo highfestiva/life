@@ -7,6 +7,7 @@
 #include "Game.h"
 #include "../Cure/Include/RuntimeVariable.h"
 #include "../Cure/Include/TimeManager.h"
+#include "../UiCure/Include/UiCollisionSoundManager.h"
 #include "../UiCure/Include/UiMachine.h"
 #include "../UiCure/Include/UiProps.h"
 #include "../UiCure/Include/UiGameUiManager.h"
@@ -24,10 +25,14 @@ Game::Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVaria
 	Cure::GameManager(Cure::GameTicker::GetTimeManager(), new Cure::RuntimeVariableScope(pVariableScope), pResourceManager),
 	mUiManager(pUiManager)
 {
+	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
+	mCollisionSoundManager->AddSound(_T("explosion"), UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f));
 }
 
 Game::~Game()
 {
+	delete mCollisionSoundManager;
+	mCollisionSoundManager = 0;
 	mUiManager = 0;
 }
 
@@ -40,7 +45,7 @@ bool Game::Initialize()
 	}
 	if (lOk)
 	{
-		mVehicle = (UiCure::CppContextObject*)Parent::CreateContextObject(_T("monster_02"), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+		mVehicle = (UiCure::CppContextObject*)Parent::CreateContextObject(_T("mobile_crane_01"), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 		lOk = (mVehicle != 0);
 		assert(lOk);
 		if (lOk)
@@ -67,6 +72,19 @@ bool Game::Initialize()
 bool Game::Tick()
 {
 	GameTicker::GetTimeManager()->Tick();
+	Vector3DF lPosition;
+	Vector3DF lVelocity;
+	if (mVehicle)
+	{
+		lPosition = mVehicle->GetPosition()+Vector3DF(0, 0, 50);
+		lVelocity = mVehicle->GetVelocity();
+	}
+	else
+	{
+		lPosition = mLauncher->GetPosition();
+	}
+	mCollisionSoundManager->Tick(lPosition);
+	mUiManager->SetMicrophonePosition(TransformationF(QuaternionF(), lPosition), lVelocity);
 	return true;
 }
 
@@ -89,7 +107,7 @@ bool Game::Shoot()
 	assert(lOk);
 	if (lOk)
 	{
-		TransformationF t(QuaternionF(), mLauncher->GetPosition()+Vector3DF(0, 0, +1.0f));
+		TransformationF t(QuaternionF(), mLauncher->GetPosition()+Vector3DF(0, 0, +5.0f));
 		lGrenade->SetInitialTransform(t);
 		lGrenade->Start();
 		lGrenade->StartLoading();
@@ -97,6 +115,20 @@ bool Game::Shoot()
 	return lOk;
 }
 
+void Game::Blast(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition, Cure::ContextObject* pObject1)
+{
+	mCollisionSoundManager->OnCollision(pForce, pTorque, pPosition, pObject1, mLevel, pObject1->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), 10000);
+
+	UiCure::Props* lPuff = new UiCure::Props(GetResourceManager(), _T("cloud_01"), mUiManager);
+	AddContextObject(lPuff, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+	//mLog.Infof(_T("Machine %i creates fume particle %i."), GetInstanceId(), lPuff->GetInstanceId());
+	lPuff->DisableRootShadow();
+	TransformationF lTransform(QuaternionF(), pPosition);
+	lPuff->SetInitialTransform(lTransform);
+	lPuff->SetOpacity(0.3f);
+	lPuff->StartParticle(UiCure::Props::PARTICLE_GAS, Vector3DF(), 0.3f);
+	lPuff->StartLoading();
+}
 
 bool Game::Render()
 {
@@ -111,7 +143,7 @@ bool Game::Render()
 	t = TransformationF(QuaternionF(), Vector3DF(300, -300, 30));
 	t.GetOrientation().RotateAroundOwnZ(PIF/4);
 	mUiManager->SetCameraPosition(t);
-	mLauncher->SetRootPosition(t.GetPosition()+Vector3DF(-0.8f, +0.8f, -0.7f));
+	mLauncher->SetRootPosition(t.GetPosition()+Vector3DF(-10.5f, +10.5f, -6.5f));
 	PixelRect lRightRect = lFullRect;
 	lRightRect.mLeft = lLeftRect.mRight + 10;
 	mUiManager->Render(lRightRect);

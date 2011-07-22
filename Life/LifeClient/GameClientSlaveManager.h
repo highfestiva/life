@@ -30,6 +30,10 @@ namespace Cure
 {
 class NetworkClient;
 }
+namespace UiCure
+{
+class CollisionSoundManager;
+}
 
 
 
@@ -38,7 +42,6 @@ namespace Life
 
 
 
-class CollisionSoundManager;
 class GameClientMasterTicker;
 class MasterServerConnection;
 class RoadSignButton;
@@ -166,7 +169,7 @@ protected:
 
 	GameClientMasterTicker* mMaster;
 	UiCure::GameUiManager* mUiManager;
-	CollisionSoundManager* mCollisionSoundManager;
+	UiCure::CollisionSoundManager* mCollisionSoundManager;
 	const int mSlaveIndex;
 	PixelRect mRenderArea;
 

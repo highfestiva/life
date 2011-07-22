@@ -9,7 +9,7 @@
 #include "../../Lepra/Include/Vector3D.h"
 #include "../../TBC/Include/PhysicsManager.h"
 #include "../../UiCure/Include/UiResourceManager.h"
-#include "../Life.h"
+#include "UiCure.h"
 
 
 
@@ -22,28 +22,40 @@ namespace TBC
 {
 class ChunkyBoneGeometry;
 }
+
+
+
 namespace UiCure
 {
+
+
+
 class GameUiManager;
-}
-
-
-
-namespace Life
-{
 
 
 
 class CollisionSoundManager
 {
 public:
+	struct SoundResourceInfo
+	{
+		float mStrength;
+		float mMinimumClamp;
+		SoundResourceInfo();
+		SoundResourceInfo(float pStrength, float pMinimumClamp);
+	//private:
+		//void operator=(const SoundResourceInfo&);
+	};
+
 	CollisionSoundManager(Cure::GameManager* pGameManager, UiCure::GameUiManager* pUiManager);
 	virtual ~CollisionSoundManager();
+
+	void AddSound(const str& pName, const SoundResourceInfo& pInfo);
 
 	void Tick(const Vector3DF& pCameraPosition);
 	void OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
 		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
-		TBC::PhysicsManager::BodyID pBody1Id);
+		TBC::PhysicsManager::BodyID pBody1Id, float pMaxDistance);
 
 private:
 	/*struct GeometryCombination
@@ -67,16 +79,6 @@ private:
 			return vp.s;
 		}
 	};*/
-
-	struct SoundResourceInfo
-	{
-		float mStrength;
-		float mMinimumClamp;
-		SoundResourceInfo();
-		SoundResourceInfo(float pStrength, float pMinimumClamp);
-	//private:
-		//void operator=(const SoundResourceInfo&);
-	};
 
 	struct SoundInfo
 	{

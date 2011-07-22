@@ -224,11 +224,11 @@ bool App::Open()
 		mRetryButton->SetOnClick(App, OnFinishedClick);
 
 		mGetiPhoneButton = 0;
-#ifndef LEPRA_IOS
+/*#ifndef LEPRA_IOS
 		mGetiPhoneButton = CreateButton(_T("4 iPhone!"), Color(45, 45, 45), lDesktopWindow);
 		mGetiPhoneButton->SetVisible(true);
 		mGetiPhoneButton->SetOnClick(App, OnGetiPhoneClick);
-#endif // iOS
+#endif // iOS*/
 
 		Layout();
 	}
@@ -236,11 +236,11 @@ bool App::Open()
 	{
 		const str lPathPrefix = SystemManager::GetDataDirectory(mArgumentVector[0]);
 		mMusicStreamer = 0;
-		mMusicStreamer = mUiManager->GetSoundManager()->CreateSoundStream(lPathPrefix+_T("Oiit.ogg"), UiLepra::SoundManager::LOOP_FORWARD, 0);
+		/*mMusicStreamer = mUiManager->GetSoundManager()->CreateSoundStream(lPathPrefix+_T("Oiit.ogg"), UiLepra::SoundManager::LOOP_FORWARD, 0);
 		if (!mMusicStreamer || !mMusicStreamer->Playback())
 		{
 			mLog.Errorf(_T("Unable to play beautiful muzak!"));
-		}
+		}*/
 	}
 
 	UiLepra::Core::ProcessMessages();
@@ -304,7 +304,7 @@ int App::Run()
 		CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_PARALLEL, false);	// Let's do it same on all platforms.
 		CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_MICROSTEPS, 3);
 		CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_FPS, FPS);
-		CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLELIGHTS, false);
+		//CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLELIGHTS, false);
 	}
 	if (lOk)
 	{

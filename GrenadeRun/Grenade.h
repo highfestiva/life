@@ -30,7 +30,16 @@ public:
 	void Start();
 
 private:
-	void OnAlarm(int, void*);
+	void OnTick();
+	void OnAlarm(int pAlarmId, void*);
+	virtual void OnForceApplied(TBC::PhysicsManager::ForceFeedbackListener* pOtherObject,
+		TBC::PhysicsManager::BodyID pOwnBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
+		const Vector3DF& pForce, const Vector3DF& pTorque,
+		const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity);
+	void LoadPlaySound3d(UiCure::UserSound3dResource* pSoundResource);
+
+	UiCure::UserSound3dResource* mShreekSound;
+	bool mExploded;
 
 	LOG_CLASS_DECLARE();
 };

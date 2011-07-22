@@ -673,10 +673,13 @@ QuaternionF ContextObject::GetOrientation() const
 Vector3DF ContextObject::GetVelocity() const
 {
 	Vector3DF lVelocity;
-	const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
-	if (lGeometry && lGeometry->GetBodyId() != TBC::INVALID_BODY)
+	if (mPhysics)
 	{
-		mManager->GetGameManager()->GetPhysicsManager()->GetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
+		const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
+		if (lGeometry && lGeometry->GetBodyId() != TBC::INVALID_BODY)
+		{
+			mManager->GetGameManager()->GetPhysicsManager()->GetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
+		}
 	}
 	return (lVelocity);
 }

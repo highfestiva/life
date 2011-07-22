@@ -4,15 +4,15 @@
 
 
 
-#include "CollisionSoundManager.h"
+#include "../Include/UiCollisionSoundManager.h"
 #include "../../Lepra/Include/CyclicArray.h"
 #include "../../Lepra/Include/HashUtil.h"
 #include "../../Cure/Include/GameManager.h"
-#include "../../UiCure/Include/UiGameUiManager.h"
+#include "../Include/UiGameUiManager.h"
 
 
 
-namespace Life
+namespace UiCure
 {
 
 
@@ -25,17 +25,17 @@ CollisionSoundManager::CollisionSoundManager(Cure::GameManager* pGameManager, Ui
 	mGameManager(pGameManager),
 	mUiManager(pUiManager)
 {
-	mSoundNameMap.insert(SoundNameMap::value_type(_T("small_metal"),	SoundResourceInfo(0.2f, 0.4f)));
-	mSoundNameMap.insert(SoundNameMap::value_type(_T("big_metal"),		SoundResourceInfo(1.5f, 0.4f)));
-	mSoundNameMap.insert(SoundNameMap::value_type(_T("plastic"),		SoundResourceInfo(1.0f, 0.4f)));
-	mSoundNameMap.insert(SoundNameMap::value_type(_T("rubber"),		SoundResourceInfo(1.0f, 0.5f)));
-	mSoundNameMap.insert(SoundNameMap::value_type(_T("wood"),		SoundResourceInfo(1.0f, 0.5f)));
 }
 
 CollisionSoundManager::~CollisionSoundManager()
 {
 	mUiManager = 0;
 	mGameManager = 0;
+}
+
+void CollisionSoundManager::AddSound(const str& pName, const SoundResourceInfo& pInfo)
+{
+	mSoundNameMap.insert(SoundNameMap::value_type(pName, pInfo));
 }
 
 
@@ -77,9 +77,9 @@ void CollisionSoundManager::Tick(const Vector3DF& pCameraPosition)
 
 void CollisionSoundManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
 	Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
-	TBC::PhysicsManager::BodyID pBody1Id)
+	TBC::PhysicsManager::BodyID pBody1Id, float pMaxDistance)
 {
-	if (pPosition.GetDistanceSquared(mCameraPosition) > 200*200)
+	if (pPosition.GetDistanceSquared(mCameraPosition) > pMaxDistance*pMaxDistance)
 	{
 		return;
 	}

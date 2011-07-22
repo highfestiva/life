@@ -17,8 +17,9 @@ class RuntimeVariableScope;
 
 namespace UiCure
 {
-class GameUiManager;
+class CollisionSoundManager;
 class CppContextObject;
+class GameUiManager;
 }
 
 
@@ -76,6 +77,7 @@ public:
 	UiCure::CppContextObject* GetP1();
 	UiCure::CppContextObject* GetP2();
 	bool Shoot();
+	void Blast(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition, Cure::ContextObject* pObject1);
 
 	bool Render();
 
@@ -102,6 +104,7 @@ private:
 	Cure::ContextObject* CreateLogicHandler(const str&) const;
 
 	UiCure::GameUiManager* mUiManager;
+	UiCure::CollisionSoundManager* mCollisionSoundManager;
 	UiCure::CppContextObject* mLevel;
 	UiCure::CppContextObject* mVehicle;
 	UiCure::CppContextObject* mLauncher;

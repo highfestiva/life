@@ -21,6 +21,7 @@
 #include "../../Lepra/Include/Time.h"
 #include "../../Lepra/Include/Timer.h"
 #include "../../TBC/Include/ChunkyPhysics.h"
+#include "../../UiCure/Include/UiCollisionSoundManager.h"
 #include "../../UiCure/Include/UiGameUiManager.h"
 #include "../../UiCure/Include/UiMachine.h"
 #include "../../UiCure/Include/UiProps.h"
@@ -30,7 +31,6 @@
 #include "../../UiTBC/Include/GUI/UiFloatingLayout.h"
 #include "../LifeServer/MasterServerConnection.h"
 #include "../LifeApplication.h"
-#include "CollisionSoundManager.h"
 #include "GameClientMasterTicker.h"
 #include "Level.h"
 #include "MassObject.h"
@@ -82,7 +82,12 @@ GameClientSlaveManager::GameClientSlaveManager(GameClientMasterTicker* pMaster, 
 	mLoginWindow(0),
 	mEnginePlaybackTime(0)
 {
-	mCollisionSoundManager = new CollisionSoundManager(this, pUiManager);
+	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
+	mCollisionSoundManager->AddSound(_T("small_metal"),	UiCure::CollisionSoundManager::SoundResourceInfo(0.2f, 0.4f));
+	mCollisionSoundManager->AddSound(_T("big_metal"),	UiCure::CollisionSoundManager::SoundResourceInfo(1.5f, 0.4f));
+	mCollisionSoundManager->AddSound(_T("plastic"),		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.4f));
+	mCollisionSoundManager->AddSound(_T("rubber"),		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f));
+	mCollisionSoundManager->AddSound(_T("wood"),		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f));
 
 	::memset(mEnginePowerShadow, 0, sizeof(mEnginePowerShadow));
 
@@ -1700,7 +1705,7 @@ void GameClientSlaveManager::OnCollision(const Vector3DF& pForce, const Vector3D
 	Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
 	TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID)
 {
-	mCollisionSoundManager->OnCollision(pForce, pTorque, pPosition, pObject1, pObject2, pBody1Id);
+	mCollisionSoundManager->OnCollision(pForce, pTorque, pPosition, pObject1, pObject2, pBody1Id, 200);
 
 	const bool lObject1Dynamic = (pObject1->GetPhysics()->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC);
 	const bool lObject2Dynamic = (pObject2->GetPhysics()->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC);

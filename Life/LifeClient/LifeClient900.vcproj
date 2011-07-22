@@ -537,10 +537,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\CollisionSoundManager.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\GameClientDemo.cpp"
 				>
 			</File>
@@ -596,10 +592,6 @@
 			</File>
 			<File
 				RelativePath=".\ClientOptionsManager.h"
-				>
-			</File>
-			<File
-				RelativePath=".\CollisionSoundManager.h"
 				>
 			</File>
 			<File
