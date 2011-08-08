@@ -4,10 +4,10 @@
 #include "../Lepra/Include/Thread.h"
 #include "../UiLepra/Include/UiInput.h"
 #include "../UiLepra/Include/UiOpenGLExtensions.h"
-#include "SlimeAI.hpp"
 #include "CrapAI.hpp"
 #include "DannoAI.hpp"
 #include "DannoAI2.hpp"
+#include "HighfestivaAI.hpp"
 
 
 
@@ -161,9 +161,9 @@ class SlimeVolleyball
 		this->fInPlay = this->fEndGame = false;
 		nScore = 5;
 		this->promptMsg = "";
-		astr s[] = { "Inferior Human Controlled Slime ", "The Lazy Orange Slime ", "The Pathetic White Slime ", "Angry Red Slimonds ", "The Slime Master ", "Psycho Slime ", "Psycho Slime " };
+		astr s[] = { "Inferior Human Controlled Slime ", "The Lazy Orange Slime ", "The Pathetic White Slime ", "Angry Red Slimonds ", "The Slime Master ", "Psycho Slime ", "Slime Wall " };
 		LEPRA_ARRAY_ASSIGN(this->slimeColText, s);
-		Color c[] = { YELLOW, ORANGE, Color(220,235,220), RED, BLACK, BLUE, BLUE };
+		Color c[] = { YELLOW, ORANGE, Color(220,235,220), RED, BLACK, BLUE, PINK };
 		LEPRA_ARRAY_ASSIGN(this->slimeColours, c);
 		astr s2[] = { "You are a loser!", this->slimeColText[2] + "delivers pwnage!", this->slimeColText[3] + "gives you the gong!", this->slimeColText[4] + "says \"You are seriously inept.\"", this->slimeColText[5] + "laughs at the pathetic slow opposition.", this->slimeColText[6] + "is still invincible!" };
 		LEPRA_ARRAY_ASSIGN(this->loserText1, s2);
@@ -230,12 +230,11 @@ class SlimeVolleyball
 			this->BALL_COL = YELLOW;
 			break;
 		case 5:
-			this->ai = new DannoAI2();
-			this->fP2Fire = true;
-			this->SKY_COL = BLACK;
-			this->COURT_COL = RED;
-			this->BALL_COL = YELLOW;
-			this->nScore = 1;
+			this->ai = new HighfestivaAI();
+			this->fP2Fire = false;
+			this->SKY_COL = DARK_CYAN;
+			this->COURT_COL = BLACK;
+			this->BALL_COL = LIGHT_GREEN;
 			break;
 		}
 		this->p2Col = (this->aiMode + 1);
@@ -1195,7 +1194,7 @@ class SlimeVolleyball
 
 	public: bool canContinue()
 	{
-		return (mPlayerCount == 1 && aiMode < 5);
+		return (mPlayerCount == 1 && aiMode <= 5);
 	}
 };
 
