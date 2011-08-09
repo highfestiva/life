@@ -424,8 +424,8 @@
 		B1A1DF4313AA6CC60097B8D0 /* window.c in Sources */ = {isa = PBXBuildFile; fileRef = B1A1DD9813AA6CC60097B8D0 /* window.c */; };
 		B1A1E02413AA77710097B8D0 /* UiOggAlStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A1E02213AA77710097B8D0 /* UiOggAlStream.cpp */; };
 		B1A1E02513AA77710097B8D0 /* UiSoundStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A1E02313AA77710097B8D0 /* UiSoundStream.cpp */; };
-		B1A1E05213AA97480097B8D0 /* Tingaliin.ogg in Resources */ = {isa = PBXBuildFile; fileRef = B1A1E05113AA97480097B8D0 /* Tingaliin.ogg */; };
 		B1CC28E413BA906B009BD34A /* UiIosInput.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1CC28E313BA906B009BD34A /* UiIosInput.mm */; };
+		B1EE502813F0AE11000BB3B5 /* Tingaliin.ogg in Resources */ = {isa = PBXBuildFile; fileRef = B1EE502713F0AE11000BB3B5 /* Tingaliin.ogg */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -1038,8 +1038,8 @@
 		B1A1DD9913AA6CC60097B8D0 /* window.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = window.h; sourceTree = "<group>"; };
 		B1A1E02213AA77710097B8D0 /* UiOggAlStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiOggAlStream.cpp; sourceTree = "<group>"; };
 		B1A1E02313AA77710097B8D0 /* UiSoundStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiSoundStream.cpp; sourceTree = "<group>"; };
-		B1A1E05113AA97480097B8D0 /* Tingaliin.ogg */ = {isa = PBXFileReference; lastKnownFileType = file; path = Tingaliin.ogg; sourceTree = "<group>"; };
 		B1CC28E313BA906B009BD34A /* UiIosInput.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = UiIosInput.mm; sourceTree = "<group>"; };
+		B1EE502713F0AE11000BB3B5 /* Tingaliin.ogg */ = {isa = PBXFileReference; lastKnownFileType = file; path = Tingaliin.ogg; sourceTree = "<group>"; };
 		B1F35B0A13A200690064153E /* SlimeBall_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SlimeBall_Prefix.pch; path = SlimeBall/SlimeBall_Prefix.pch; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -2061,22 +2061,22 @@
 		B1A1E04913AA970E0097B8D0 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				B1EE502613F0AE11000BB3B5 /* Data */,
 				B196562413BE6F94006A1422 /* Default.png */,
 				B196560E13BE6C3B006A1422 /* Icon-72.png */,
 				B196560713BE6AB5006A1422 /* Icon.png */,
 				B196560813BE6AB5006A1422 /* Icon@2x.png */,
-				B1A1E05013AA97470097B8D0 /* Data */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
 		};
-		B1A1E05013AA97470097B8D0 /* Data */ = {
+		B1EE502613F0AE11000BB3B5 /* Data */ = {
 			isa = PBXGroup;
 			children = (
-				B1A1E05113AA97480097B8D0 /* Tingaliin.ogg */,
+				B1EE502713F0AE11000BB3B5 /* Tingaliin.ogg */,
 			);
 			name = Data;
-			path = ../../bin/Data;
+			path = ../Data;
 			sourceTree = SOURCE_ROOT;
 		};
 /* End PBXGroup section */
@@ -2128,11 +2128,11 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B1A1E05213AA97480097B8D0 /* Tingaliin.ogg in Resources */,
 				B196560B13BE6AB5006A1422 /* Icon.png in Resources */,
 				B196560C13BE6AB5006A1422 /* Icon@2x.png in Resources */,
 				B196560F13BE6C3B006A1422 /* Icon-72.png in Resources */,
 				B196562513BE6F94006A1422 /* Default.png in Resources */,
+				B1EE502813F0AE11000BB3B5 /* Tingaliin.ogg in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

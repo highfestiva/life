@@ -294,9 +294,12 @@ bool App::Open()
 		mRetryButton = CreateButton(_T("Rematch"), Color(192, 192, 0), mDesktopWindow);
 		mRetryButton->SetOnClick(App, OnFinishedClick);
 
+#ifdef LEPRA_IOS
+		mGetiPhoneButton = 0;
+#else // !iOS
 		mGetiPhoneButton = CreateButton(_T("4 iPhone!"), Color(45, 45, 45), mDesktopWindow);
-		mGetiPhoneButton->SetVisible(true);
 		mGetiPhoneButton->SetOnClick(App, OnGetiPhoneClick);
+#endif // iOS / !iOS
 
 		Layout();
 	}

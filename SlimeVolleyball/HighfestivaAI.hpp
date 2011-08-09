@@ -27,24 +27,28 @@ class HighfestivaAI: public SlimeAI
 
 		int j = xAtY(this->p2Y + this->p2VY + 30);
 		int i;
-		if (Math::abs(ballVX) < 5)
+		if (ballVX == 0 && Math::abs(p2X-j) <= 10)
 		{
-			i = 0;
+			i = (int)(Math::random()*31) - 15;
+		}
+		else if (Math::abs(ballVX) < 5)
+		{
+			i = (int)(Math::random()*11) - 5;
 		}
 		else if (ballVX < 0)
 		{
 			if (j > 700)
 			{
-				i = 45 + (int)(Math::random()*10);
+				i = 45 + (int)(Math::random()*11);
 			}
 			else
 			{
-				i = 10 + (int)(Math::random()*10);
+				i = 10 + (int)(Math::random()*11);
 			}
 		}
 		else
 		{
-			i = -45 - (int)(Math::random()*10);
+			i = -45 - (int)(Math::random()*11);
 		}
 		/*if (j < 600) i = 0;
 		else if (j < 700) i = 5; else {
@@ -52,10 +56,9 @@ class HighfestivaAI: public SlimeAI
 		}*/
 		if (j < 450)
 		{
-			if (Math::abs(this->p2X - 666) < 10) move(3);
-			else if (this->p2X > 666) move(0);
-			else if (this->p2X < 666) move(1);
-
+			if (Math::abs(this->p2X - 700) < 10) move(3);
+			else if (this->p2X > 700) move(0);
+			else if (this->p2X < 700) move(1);
 		}
 		else if (Math::abs(this->p2X - j - i) < 10) move(3);
 		else if (j + i < this->p2X) move(0);

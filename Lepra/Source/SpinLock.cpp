@@ -4,8 +4,6 @@
 
 
 
-#pragma once
-
 #include "../Include/SpinLock.h"
 #include <assert.h>
 #include <stdexcept>

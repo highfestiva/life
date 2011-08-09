@@ -48,7 +48,7 @@ static Lepra::Application* gApplication = 0;
 {
 	// Hand off to main application code.
 	gApplication->Init();
-	const int lExitStatus = gApplication->Run();
+	gApplication->Run();
 #ifndef LEPRA_IOS
 	delete gApplication;
 	exit(lExitStatus);
