@@ -34,11 +34,13 @@
 #define LEPRA_GL_ES
 #define LEPRA_GL_ES_1
 #define LEPRA_GL_INDEX_TYPE GL_UNSIGNED_SHORT
+#ifdef __OBJC__
 #include <OpenGLES/EAGL.h>
 #include <OpenGLES/ES1/gl.h>
 #include <OpenGLES/ES1/glext.h>
 #include <sys/time.h>
 #include "iosglext.h"
+#endif // Objective-C
 
 #elif defined(LEPRA_MAC)
 

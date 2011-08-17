@@ -467,7 +467,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Source\UiGameUiManager.cpp"
+				RelativePath=".\Source\UiGameUiManager.cxx"
 				>
 			</File>
 			<File

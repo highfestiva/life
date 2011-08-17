@@ -13,6 +13,7 @@
 #include "../UiCure/Include/UiCure.h"
 #include "../UiCure/Include/UiGameUiManager.h"
 #include "../UiCure/Include/UiRuntimeVariableName.h"
+#include "../UiLepra/Include/Mac/UiIosInput.h"
 #include "../UiLepra/Include/UiCore.h"
 #include "../UiLepra/Include/UiDisplayManager.h"
 #include "../UiLepra/Include/UiInput.h"
@@ -499,10 +500,10 @@ void App::OnMouseMove(float x, float y, bool pPressed)
 	y;
 	pPressed;
 #ifdef LEPRA_IOS
-	((UiLepra::IosInputManager*)mInput)->SetMousePosition(x, y);
-	((UiLepra::IosInputElement*)mInput->GetMouse()->GetButton(0))->SetValue(pPressed? 1 : 0);
-	((UiLepra::IosInputElement*)mInput->GetMouse()->GetAxis(0))->SetValue(x);
-	((UiLepra::IosInputElement*)mInput->GetMouse()->GetAxis(1))->SetValue(y);
+	((UiLepra::IosInputManager*)mUiManager->GetInputManager())->SetMousePosition(x, y);
+	((UiLepra::IosInputElement*)mUiManager->GetInputManager()->GetMouse()->GetButton(0))->SetValue(pPressed? 1 : 0);
+	((UiLepra::IosInputElement*)mUiManager->GetInputManager()->GetMouse()->GetAxis(0))->SetValue(x);
+	((UiLepra::IosInputElement*)mUiManager->GetInputManager()->GetMouse()->GetAxis(1))->SetValue(y);
 #endif // iOS
 }
 
