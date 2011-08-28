@@ -471,6 +471,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Source\UiGameUiManager.mm"
+				>
+			</File>
+			<File
 				RelativePath=".\Source\UiLineGraph2d.cpp"
 				>
 			</File>

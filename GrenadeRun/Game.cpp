@@ -23,7 +23,11 @@ namespace GrenadeRun
 Game::Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager):
 	Cure::GameTicker(),
 	Cure::GameManager(Cure::GameTicker::GetTimeManager(), new Cure::RuntimeVariableScope(pVariableScope), pResourceManager),
-	mUiManager(pUiManager)
+	mUiManager(pUiManager),
+	mCollisionSoundManager(0),
+	mLevel(0),
+	mVehicle(0),
+	mLauncher(0)
 {
 	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
 	mCollisionSoundManager->AddSound(_T("explosion"), UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f));

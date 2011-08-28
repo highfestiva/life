@@ -48,8 +48,8 @@ else:
 cextraflags += platform_extraflags
 
 c_current_flags = '-O0 -ggdb -D_DEBUG' if is_debug else '-O3'
-stl_subdir = 'so_stlg' if is_debug else 'so'
-stl_lib = 'stlportstlg' if is_debug else 'stlport'
+stl_subdir = 'so' #'so_stlg' if is_debug else 'so'
+stl_lib = 'stlport' #'stlportstlg' if is_debug else 'stlport'
 #stllibext = stllibext if is_debug else '.a'
 link_type_flag = '-shared' #if is_debug else '-static'
 link_bin_type_flag = '' #if is_debug else '-static'

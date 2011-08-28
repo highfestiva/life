@@ -360,6 +360,9 @@ def macappify_client():
 def macappify_slime():
 	_macappify("SlimeVolleyball", "Slime Volleyball")
 
+def macappify_gr():
+	_macappify("GrenadeRun", "Grenade Run")
+
 def demacappify():
 	_demacappify("*.app")
 

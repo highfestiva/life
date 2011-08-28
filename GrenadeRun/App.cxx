@@ -8,6 +8,7 @@
 #include "../Cure/Include/RuntimeVariable.h"
 #include "../Lepra/Include/Application.h"
 #include "../Lepra/Include/LogListener.h"
+#include "../Lepra/Include/Path.h"
 #include "../Lepra/Include/SystemManager.h"
 #include "../UiCure/Include/UiCppContextObject.h"
 #include "../UiCure/Include/UiCure.h"
@@ -26,7 +27,7 @@
 
 
 #define UIKEY(name)	UiLepra::InputManager::IN_KBD_##name
-#define FPS		20.0
+#define FPS		20
 
 
 
@@ -123,7 +124,7 @@ App::App(const strutil::strvec& pArgumentList):
 	Application(pArgumentList),
 	mLayoutFrameCounter(-10),
 	mVariableScope(0),
-	mAverageLoopTime(1/FPS)
+	mAverageLoopTime(1.0/FPS)
 {
 	mApp = this;
 }
@@ -289,8 +290,10 @@ int App::Run()
 
 	StdioConsoleLogListener lConsoleLogger;
 	DebuggerLogListener lDebugLogger;
+	const str lLogName = Path::JoinPath(SystemManager::GetIoDirectory(_T("KillCutie")), _T("log"), _T("txt"));
+	FileLogListener lFileLogger(lLogName);
 	{
-		LogType::GetLog(LogType::SUB_ROOT)->SetupBasicListeners(&lConsoleLogger, &lDebugLogger, 0, 0, 0);
+		LogType::GetLog(LogType::SUB_ROOT)->SetupBasicListeners(&lConsoleLogger, &lDebugLogger, &lFileLogger, 0, 0);
 		/*const std::vector<Log*> lLogArray = LogType::GetLogs();
 		std::vector<Log*>::const_iterator x = lLogArray.begin();
 		for (; x != lLogArray.end(); ++x)
@@ -345,7 +348,7 @@ bool App::Poll()
 	if (lOk)
 	{
 		mAverageLoopTime = Lepra::Math::Lerp(mAverageLoopTime, mLoopTimer.QueryTimeDiff(), 0.05);
-		Thread::Sleep(1/FPS - mAverageLoopTime);
+		Thread::Sleep(1.0/FPS - mAverageLoopTime);
 		mLoopTimer.PopTimeDiff();
 		lOk = (SystemManager::GetQuitRequest() == 0);
 	}
