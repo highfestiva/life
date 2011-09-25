@@ -108,6 +108,7 @@ private:
 	UiCure::CppContextObject* mLevel;
 	UiCure::CppContextObject* mVehicle;
 	UiCure::CppContextObject* mLauncher;
+	double mTime;
 };
 
 

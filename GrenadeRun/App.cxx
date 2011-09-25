@@ -79,6 +79,9 @@ private:
 
 	static UiTbc::Button* CreateButton(const str& pText, const Color& pColor, UiTbc::DesktopWindow* pDesktop);
 
+	StdioConsoleLogListener mConsoleLogger;
+	DebuggerLogListener mDebugLogger;
+
 	static App* mApp;
 #ifdef LEPRA_IOS
 	AnimatedApp* mAnimatedApp;
@@ -288,18 +291,16 @@ int App::Run()
 	UiTbc::Init();
 	UiCure::Init();
 
-	StdioConsoleLogListener lConsoleLogger;
-	DebuggerLogListener lDebugLogger;
 	const str lLogName = Path::JoinPath(SystemManager::GetIoDirectory(_T("KillCutie")), _T("log"), _T("txt"));
 	FileLogListener lFileLogger(lLogName);
 	{
-		LogType::GetLog(LogType::SUB_ROOT)->SetupBasicListeners(&lConsoleLogger, &lDebugLogger, &lFileLogger, 0, 0);
-		/*const std::vector<Log*> lLogArray = LogType::GetLogs();
+		LogType::GetLog(LogType::SUB_ROOT)->SetupBasicListeners(&mConsoleLogger, &mDebugLogger, &lFileLogger, 0, 0);
+		const std::vector<Log*> lLogArray = LogType::GetLogs();
 		std::vector<Log*>::const_iterator x = lLogArray.begin();
 		for (; x != lLogArray.end(); ++x)
 		{
-			(*x)->SetLevelThreashold(Log::LEVEL_LOWEST_TYPE);
-		}*/
+			(*x)->SetLevelThreashold(Log::LEVEL_INFO);
+		}
 	}
 	bool lOk = true;
 	if (lOk)
@@ -507,6 +508,7 @@ void App::OnMouseMove(float x, float y, bool pPressed)
 	((UiLepra::IosInputElement*)mUiManager->GetInputManager()->GetMouse()->GetButton(0))->SetValue(pPressed? 1 : 0);
 	((UiLepra::IosInputElement*)mUiManager->GetInputManager()->GetMouse()->GetAxis(0))->SetValue(x);
 	((UiLepra::IosInputElement*)mUiManager->GetInputManager()->GetMouse()->GetAxis(1))->SetValue(y);
+	Steer(UIKEY(UP), pPressed? 1 : 0);
 #endif // iOS
 }
 

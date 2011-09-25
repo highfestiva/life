@@ -150,7 +150,7 @@ void OpenGLRenderer::SetViewport(const PixelRect& pViewport)
 {
 	OGL_ASSERT();
 	Parent::SetViewport(pViewport);
-	glViewport(pViewport.mLeft, GetScreen()->GetHeight() - pViewport.mBottom, 
+	glViewport(pViewport.mLeft, GetScreen()->GetActualHeight() - pViewport.mBottom, 
 		pViewport.GetWidth(), pViewport.GetHeight());
 	OGL_ASSERT();
 }
@@ -168,20 +168,13 @@ void OpenGLRenderer::SetViewFrustum(float pFOVAngle, float pNear, float pFar)
 void OpenGLRenderer::SetClippingRect(const PixelRect& pRect)
 {
 	Parent::SetClippingRect(pRect);
-	glScissor(pRect.mLeft, 
-		  GetScreen()->GetHeight() - pRect.mBottom, 
-		  pRect.GetWidth(), pRect.GetHeight());
+	::glScissor(pRect.mLeft, GetScreen()->GetActualHeight() - pRect.mBottom, pRect.GetWidth(), pRect.GetHeight());
 	OGL_ASSERT();
 }
 
 void OpenGLRenderer::ResetClippingRect()
 {
 	Parent::ResetClippingRect();
-	const PixelRect& lClippingRect = GetClippingRect();
-	glScissor(lClippingRect.mLeft, 
-		  GetScreen()->GetHeight() - lClippingRect.mBottom, 
-		  lClippingRect.GetWidth(), lClippingRect.GetHeight());
-	OGL_ASSERT();
 }
 
 void OpenGLRenderer::SetShadowMode(Shadows pShadowMode, ShadowHint pHint)
@@ -533,6 +526,7 @@ const Canvas* OpenGLRenderer::GetMap(int pMapType, int pMipMapLevel, Texture* pU
 
 void OpenGLRenderer::BindMap(int pMapType, TextureData* pTextureData, Texture* pTexture)
 {
+	OGL_ASSERT();
 	assert(pMapType >= 0 && pMapType < Texture::NUM_MAPS);
 
 	bool lCompress = UiLepra::OpenGLExtensions::IsCompressedTexturesSupported() &&
@@ -544,6 +538,7 @@ void OpenGLRenderer::BindMap(int pMapType, TextureData* pTextureData, Texture* p
 	}
 
 	glBindTexture(GL_TEXTURE_2D, pTextureData->mTMapID[pMapType]);
+	OGL_ASSERT();
 
 	int lSize = GetMap(pMapType, 0, pTexture)->GetPixelByteSize();
 	assert(lSize == 1 || lSize == 3 || lSize == 4);
@@ -551,6 +546,15 @@ void OpenGLRenderer::BindMap(int pMapType, TextureData* pTextureData, Texture* p
 	GLenum lPixelFormat;
 	SetPixelFormat(lSize, lPixelFormat, lCompress, 
 		strutil::Format(_T("AddTexture() - the texture has an invalid pixel size of %i bytes!"), lSize));
+	OGL_ASSERT();
+
+	switch (lSize)
+	{
+		case 1:	lSize = GL_ALPHA;	break;
+		case 3:	lSize = GL_RGB;		break;
+		default:
+		case 4: lSize = GL_RGBA;	break;
+	}
 
 	for (int i = 0; i < pTexture->GetNumMipMapLevels(); i++)
 	{
@@ -564,6 +568,7 @@ void OpenGLRenderer::BindMap(int pMapType, TextureData* pTextureData, Texture* p
 			     lPixelFormat, // TODO: Verify that this is GL_LUMINANCE for specular maps.
 			     GL_UNSIGNED_BYTE,
 			     lMap->GetBuffer());
+		OGL_ASSERT();
 	}
 	OGL_ASSERT();
 }
@@ -1202,6 +1207,19 @@ unsigned OpenGLRenderer::RenderScene()
 
 	float lAmbientRed, lAmbientGreen, lAmbientBlue;
 	GetAmbientLight(lAmbientRed, lAmbientGreen, lAmbientBlue);
+
+	/*{
+		float pX1 = 0; float pY1 = 0; float pZ1 = 0;
+		float pX2 = 0; float pY2 = 0; float pZ2 = 100;
+		float pX3 = 100; float pY3 = 100; float pZ3 = 0;
+
+		::glColor4ub(255, 0, 0, 255);
+
+		GLfloat v[] = {pX1, pY1, pZ1, pX2, pY2, pZ2, pX3, pY3, pZ3};
+		::glVertexPointer(3, GL_FLOAT, 0, v);
+		::glDrawArrays(GL_TRIANGLES, 0, 3);
+		return GetCurrentFrame();
+	}*/
 
 	if (GetShadowMode() != NO_SHADOWS && GetLightsEnabled())
 	{

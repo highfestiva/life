@@ -5,6 +5,7 @@
 
 
 #include <assert.h>
+#include "../Include/Posix/MacLog.h"
 #include "../Include/LepraTarget.h"
 #include "../Include/LogListener.h"
 #include "../Include/Time.h"
@@ -273,6 +274,8 @@ void DebuggerLogListener::WriteLog(const str& pFullMessage, Log::LogLevel)
 #if !defined(NO_LOG_DEBUG_INFO)
 #if defined(LEPRA_WINDOWS)
 	OutputDebugString((_T(">>>")+pFullMessage).c_str());
+#elif defined(LEPRA_MAC)
+	MacLog::Write(_T(">>>")+pFullMessage);
 #else // !Windows
 	// Usually "console" is equivalent to "debug console" on other systems.
 #endif // Windows/!Windows

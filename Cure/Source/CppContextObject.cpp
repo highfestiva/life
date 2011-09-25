@@ -300,6 +300,7 @@ void CppContextObject::OnLoadClass(UserClassResource* pClassResource)
 	if (pClassResource->GetLoadState() != Cure::RESOURCE_LOAD_COMPLETE)
 	{
 		mLog.Errorf(_T("Could not load class '%s'."), pClassResource->GetName().c_str());
+		assert(false);
 		GetManager()->PostKillObject(GetInstanceId());
 		return;
 	}
@@ -314,6 +315,7 @@ void CppContextObject::OnLoadPhysics(UserPhysicsResource* pPhysicsResource)
 	if (pPhysicsResource->GetLoadState() != RESOURCE_LOAD_COMPLETE)
 	{
 		mLog.Errorf(_T("Could not load physics class '%s'."), pPhysicsResource->GetName().c_str());
+		assert(false);
 		GetManager()->PostKillObject(GetInstanceId());
 		return;
 	}

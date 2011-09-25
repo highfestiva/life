@@ -13,6 +13,14 @@
 
 
 
+#ifdef LEPRA_DEBUG
+#define OGL_ASSERT()	{ GLenum lGlError = glGetError(); assert(lGlError == GL_NO_ERROR); }
+#else // !Debug
+#define OGL_ASSERT()
+#endif // Debug / !Debug
+
+
+
 namespace UiTbc
 {
 
@@ -69,11 +77,12 @@ void OpenGLMaterial::SetBasicMaterial(const TBC::GeometryBase::BasicMaterialSett
 	const float lSpecular[] = { pMaterial.mSpecular.x, pMaterial.mSpecular.y, pMaterial.mSpecular.z, pMaterial.mAlpha };
 
 	::glColor4f(lDiffuse[0], lDiffuse[1], lDiffuse[2], lDiffuse[3]);
-	::glMaterialfv(GL_FRONT, GL_AMBIENT, lAmbient);
-	::glMaterialfv(GL_FRONT, GL_DIFFUSE, lDiffuse);
-	::glMaterialfv(GL_FRONT, GL_SPECULAR, lSpecular);
-	::glMaterialf(GL_FRONT, GL_SHININESS, pMaterial.mShininess*0.5f);
+	::glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, lAmbient);
+	::glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, lDiffuse);
+	::glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, lSpecular);
+	::glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, pMaterial.mShininess*0.5f);
 	::glShadeModel(pMaterial.mSmooth ? GL_SMOOTH : GL_FLAT);
+	OGL_ASSERT();
 
 	pRenderer->SetGlobalMaterialReflectance(pMaterial.mDiffuse.x, pMaterial.mDiffuse.y, pMaterial.mDiffuse.z, pMaterial.mShininess);
 
@@ -138,8 +147,8 @@ void OpenGLMatSingleColorSolid::PreRender()
 	::glEnableClientState(GL_NORMAL_ARRAY);
 	::glDisableClientState(GL_COLOR_ARRAY);
 	::glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-#ifndef LEPRA_GL_ES
 	::glEnable(GL_COLOR_MATERIAL);
+#ifndef LEPRA_GL_ES
 	::glColorMaterial(GL_FRONT, GL_AMBIENT);
 #endif // !GLES
 }
@@ -217,8 +226,8 @@ void OpenGLMatSingleColorBlended::PreRender()
 	::glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	::glEnableClientState(GL_VERTEX_ARRAY);
 	::glEnableClientState(GL_NORMAL_ARRAY);
-#ifndef LEPRA_GL_ES
 	::glEnable(GL_COLOR_MATERIAL);
+#ifndef LEPRA_GL_ES
 	::glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 #endif // !GLES
 }
@@ -380,8 +389,8 @@ void OpenGLMatSingleTextureSolid::PreRender()
 	::glEnableClientState(GL_NORMAL_ARRAY);
 	::glDisableClientState(GL_COLOR_ARRAY);
 	::glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-#ifndef LEPRA_GL_ES
 	::glEnable(GL_COLOR_MATERIAL);
+#ifndef LEPRA_GL_ES
 	::glColorMaterial(GL_FRONT, GL_AMBIENT);
 	::glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR);
 #endif // !GLES
@@ -507,7 +516,9 @@ void OpenGLMatSingleColorEnvMapSolid::DoRenderAllGeometry(unsigned pCurrentFrame
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
+#ifndef LEPRA_GL_ES
 	int lEnvMapID = ((OpenGLRenderer*)GetRenderer())->GetEnvMapID();
+#endif // !GLES
 
 	mTextureParamMin = GL_NEAREST;
 	mTextureParamMag = GL_NEAREST;
@@ -683,7 +694,9 @@ void OpenGLMatSingleTextureEnvMapSolid::DoRenderAllGeometry(unsigned pCurrentFra
 	UiLepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE1);
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
+#ifndef LEPRA_GL_ES
 	int lEnvMapID = ((OpenGLRenderer*)GetRenderer())->GetEnvMapID();
+#endif // !GLES
 
 	mTextureParamMin = GL_NEAREST;
 	mTextureParamMag = GL_NEAREST;

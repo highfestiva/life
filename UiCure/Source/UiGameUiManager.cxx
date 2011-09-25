@@ -298,7 +298,6 @@ void GameUiManager::Render(const PixelRect& pArea)
 	{
 		if (pArea.GetWidth() > 0 && pArea.GetHeight() > 0)
 		{
-			mRenderer->ResetClippingRect();
 			mRenderer->SetClippingRect(pArea);
 			mRenderer->SetViewport(pArea);
 			mRenderer->RenderScene();

@@ -24,8 +24,12 @@
 #define png_jmpbuf(png_ptr) ((png_ptr)->jmpbuf)
 #endif
 
+
+
 namespace Lepra
 {
+
+
 
 PngLoader::Status PngLoader::Load(const str& pFileName, Canvas& pCanvas)
 {
@@ -109,24 +113,28 @@ PngLoader::Status PngLoader::Load(Reader& pReader, Canvas& pCanvas)
 
 	if (CheckIfPNG() == false)
 	{
+		mLog.AWarning("PNG header error!");
 		return STATUS_READ_HEADER_ERROR;
 	}
 
 	png_structp lPNG = png_create_read_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
 	if (lPNG == 0)
 	{
+		mLog.AError("PNG reader runs out of memory!");
 		return STATUS_MEMORY_ERROR;
 	}
 
 	png_infop lInfo = png_create_info_struct(lPNG);
 	if (lInfo == 0)
 	{
+		mLog.AError("PNG reader runs out of memory!");
 		png_destroy_read_struct(&lPNG, png_infopp_NULL, png_infopp_NULL);
 		return STATUS_MEMORY_ERROR;
 	}
 
 	if (setjmp(png_jmpbuf(lPNG)))
 	{
+		mLog.AError("PNG reader runs out of memory!");
 		png_destroy_read_struct(&lPNG, &lInfo, png_infopp_NULL);
 		return STATUS_MEMORY_ERROR;
 	}
@@ -251,6 +259,7 @@ PngLoader::Status PngLoader::Load(Reader& pReader, Canvas& pCanvas)
 		}
 		break;
 	default:
+		mLog.AError("PNG is of unknown type!");
 		png_destroy_read_struct(&lPNG, &lInfo, 0);
 		return STATUS_READ_INFO_ERROR;
 	}
@@ -401,5 +410,11 @@ void PngLoader::WriteDataCallback(png_structp pPNG, png_bytep pData, png_size_t 
 void PngLoader::FlushCallback(png_structp /*pPNG*/)
 {
 }
+
+
+
+LOG_CLASS_DEFINE(UI_GFX_2D, PngLoader);
+
+
 
 } // End namespace.

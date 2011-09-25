@@ -27,7 +27,8 @@ Game::Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVaria
 	mCollisionSoundManager(0),
 	mLevel(0),
 	mVehicle(0),
-	mLauncher(0)
+	mLauncher(0),
+	mTime(0)
 {
 	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
 	mCollisionSoundManager->AddSound(_T("explosion"), UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f));
@@ -76,11 +77,12 @@ bool Game::Initialize()
 bool Game::Tick()
 {
 	GameTicker::GetTimeManager()->Tick();
+	mTime += GameTicker::GetTimeManager()->GetNormalFrameTime();
 	Vector3DF lPosition;
 	Vector3DF lVelocity;
 	if (mVehicle)
 	{
-		lPosition = mVehicle->GetPosition()+Vector3DF(0, 0, 50);
+		lPosition = mVehicle->GetPosition()+Vector3DF(0, 0, 20);
 		lVelocity = mVehicle->GetVelocity();
 	}
 	else
@@ -138,10 +140,22 @@ bool Game::Render()
 {
 	TransformationF t(QuaternionF(), Vector3DF(-100, -140, -10));
 	t.GetOrientation().RotateAroundOwnZ(-PIF/8);
+	if (mVehicle && mVehicle->IsLoaded())
+	{
+		t.GetPosition() = mVehicle->GetPosition() + Vector3DF(15*sin((float)mTime), -15*cos((float)mTime), 3);
+		t.GetOrientation().RotateAroundOwnZ(mTime);
+	}
 	mUiManager->SetCameraPosition(t);
 	const PixelRect lFullRect(0, 0, mUiManager->GetCanvas()->GetActualWidth(), mUiManager->GetCanvas()->GetActualHeight());
 	PixelRect lLeftRect = lFullRect;
-	lLeftRect.mRight = lLeftRect.mRight/2 - 5;
+	if (lFullRect.mRight < lFullRect.mBottom)	// Portrait?
+	{
+		lLeftRect.mBottom = lLeftRect.mBottom/2 - 5;
+	}
+	else
+	{
+		lLeftRect.mRight = lLeftRect.mRight/2 - 5;
+	}
 	mUiManager->Render(lLeftRect);
 
 	t = TransformationF(QuaternionF(), Vector3DF(300, -300, 30));
@@ -149,7 +163,14 @@ bool Game::Render()
 	mUiManager->SetCameraPosition(t);
 	mLauncher->SetRootPosition(t.GetPosition()+Vector3DF(-10.5f, +10.5f, -6.5f));
 	PixelRect lRightRect = lFullRect;
-	lRightRect.mLeft = lLeftRect.mRight + 10;
+	if (lFullRect.mRight < lFullRect.mBottom)	// Portrait?
+	{
+		lRightRect.mTop = lLeftRect.mBottom + 10;
+	}
+	else
+	{
+		lRightRect.mLeft = lLeftRect.mRight + 10;
+	}
 	mUiManager->Render(lRightRect);
 	return true;
 }

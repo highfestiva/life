@@ -6,6 +6,7 @@
 
 #include "../../Include/Mac/UiMacDisplayManager.h"
 #include <stdexcept>
+#include "../../../Lepra/Include/Posix/MacLog.h"
 #include "../../../Lepra/Include/Log.h"
 #include "../../../Lepra/Include/String.h"
 #include "../../../Lepra/Include/SystemManager.h"
@@ -70,20 +71,6 @@
 
 namespace UiLepra
 {
-
-
-
-#ifndef LEPRA_IOS
-static NSString* Encode(const str& pText)
-{
-#if defined(LEPRA_UNICODE)
-	NSString* lText = [NSString stringWithCString:pText.c_str() encoding:NSUTF32StringEncoding];
-#else
-	NSString* lText = [NSString stringWithCString:pText.c_str() encoding:NSUTF8StringEncoding];
-#endif
-	return lText;
-}
-#endif // !iOS
 
 
 
@@ -228,7 +215,7 @@ void MacDisplayManager::SetCaption(const str& pCaption, bool pInternalCall)
 
 		if (pInternalCall == false || mCaptionSet == false)
 		{
-			[mWnd setTitle:Encode(pCaption)];
+			[mWnd setTitle:MacLog::Encode(pCaption)];
 		}
 	}
 #endif // !iOS
@@ -588,7 +575,7 @@ void MacDisplayManager::RemoveObserver(MacObserver* pObserver)
 void MacDisplayManager::ShowMessageBox(const str& pMsg, const str& pCaption)
 {
 #ifndef LEPRA_IOS
-	NSRunAlertPanel(Encode(pCaption), Encode(pMsg), nil, nil, nil);
+	NSRunAlertPanel(MacLog::Encode(pCaption), MacLog::Encode(pMsg), nil, nil, nil);
 #endif // !iOS
 }
 

@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "String.h"
+#include "Log.h"
 #include "../../ThirdParty/lpng1212/png.h"
 
 
@@ -57,6 +57,7 @@ private:
 
 	Reader* mReader;
 	Writer* mWriter;
+	LOG_CLASS_DECLARE();
 };
 
 

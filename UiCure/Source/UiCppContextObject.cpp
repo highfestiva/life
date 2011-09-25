@@ -346,6 +346,7 @@ void CppContextObject::OnLoadClass(UserClassResource* pClassResource)
 	if (pClassResource->GetLoadState() != Cure::RESOURCE_LOAD_COMPLETE)
 	{
 		mLog.Errorf(_T("Could not load class '%s'."), pClassResource->GetName().c_str());
+		assert(false);
 		GetManager()->PostKillObject(GetInstanceId());
 		return;
 	}
@@ -461,6 +462,7 @@ void CppContextObject::DispatchOnLoadMesh(UserGeometryReferenceResource* pMeshRe
 	else
 	{
 		mLog.AError("Could not load mesh! Sheit.");
+		assert(false);
 		GetManager()->PostKillObject(GetInstanceId());
 	}
 }

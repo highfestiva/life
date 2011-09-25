@@ -201,7 +201,7 @@ void Renderer::ReduceClippingRect(const PixelRect& pRect)
 
 void Renderer::ResetClippingRect()
 {
-	SetClippingRect(PixelRect(0, 0, mScreen->GetWidth(), mScreen->GetHeight()));
+	SetClippingRect(PixelRect(0, 0, mScreen->GetActualWidth(), mScreen->GetActualHeight()));
 }
 
 const PixelRect& Renderer::GetClippingRect() const
@@ -212,6 +212,7 @@ const PixelRect& Renderer::GetClippingRect() const
 void Renderer::SetCameraTransformation(const TransformationF& pTransformation)
 {
 	mCameraTransformation = pTransformation;
+	mCameraTransformation.RotateRoll(GetScreen()->GetOutputRotation() * PIF / -180.0f);
 	mCameraOrientationInverse = mCameraTransformation.GetOrientation().GetInverse();
 }
 
