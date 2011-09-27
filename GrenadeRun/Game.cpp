@@ -50,7 +50,7 @@ bool Game::Initialize()
 	}
 	if (lOk)
 	{
-		mVehicle = (UiCure::CppContextObject*)Parent::CreateContextObject(_T("mobile_crane_01"), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+		mVehicle = (UiCure::CppContextObject*)Parent::CreateContextObject(_T("cutie"), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 		lOk = (mVehicle != 0);
 		assert(lOk);
 		if (lOk)
@@ -143,7 +143,7 @@ bool Game::Render()
 	if (mVehicle && mVehicle->IsLoaded())
 	{
 		t.GetPosition() = mVehicle->GetPosition() + Vector3DF(15*sin((float)mTime), -15*cos((float)mTime), 3);
-		t.GetOrientation().RotateAroundOwnZ(mTime);
+		t.GetOrientation().RotateAroundOwnZ((float)mTime);
 	}
 	mUiManager->SetCameraPosition(t);
 	const PixelRect lFullRect(0, 0, mUiManager->GetCanvas()->GetActualWidth(), mUiManager->GetCanvas()->GetActualHeight());
