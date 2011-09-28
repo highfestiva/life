@@ -82,7 +82,7 @@ bool Game::Tick()
 	Vector3DF lVelocity;
 	if (mVehicle)
 	{
-		lPosition = mVehicle->GetPosition()+Vector3DF(0, 0, 20);
+		lPosition = mVehicle->GetPosition()+Vector3DF(0, 0, 2);
 		lVelocity = mVehicle->GetVelocity();
 	}
 	else
@@ -134,6 +134,21 @@ void Game::Blast(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector
 	lPuff->SetOpacity(0.3f);
 	lPuff->StartParticle(UiCure::Props::PARTICLE_GAS, Vector3DF(), 0.3f);
 	lPuff->StartLoading();
+
+	if (mVehicle && mVehicle->IsLoaded())
+	{
+		Vector3DF v = mVehicle->GetPosition() - pPosition;
+		float d = v.GetLength();
+		v /= d;
+		d = (d < 0.5f)? 0.5f : d;
+		d *= 0.08f;
+		const float lMaxForceFactor = 2000.0f;
+		const float f = std::min(lMaxForceFactor, lMaxForceFactor / ::pow(d, 3.0f)) * mVehicle->GetMass();
+		v *= f;
+		v.z = f/5;
+		const TBC::ChunkyBoneGeometry* lGeometry = mVehicle->ContextObject::GetPhysics()->GetBoneGeometry(0);
+		GetPhysicsManager()->AddForce(lGeometry->GetBodyId(), v);
+	}
 }
 
 bool Game::Render()
@@ -144,6 +159,7 @@ bool Game::Render()
 	{
 		t.GetPosition() = mVehicle->GetPosition() + Vector3DF(15*sin((float)mTime), -15*cos((float)mTime), 3);
 		t.GetOrientation().RotateAroundOwnZ((float)mTime);
+		t.GetOrientation().RotateAroundOwnY(-PIF*0.5f);
 	}
 	mUiManager->SetCameraPosition(t);
 	const PixelRect lFullRect(0, 0, mUiManager->GetCanvas()->GetActualWidth(), mUiManager->GetCanvas()->GetActualHeight());
@@ -160,6 +176,7 @@ bool Game::Render()
 
 	t = TransformationF(QuaternionF(), Vector3DF(300, -300, 30));
 	t.GetOrientation().RotateAroundOwnZ(PIF/4);
+	t.GetOrientation().RotateAroundOwnY(PIF*0.5f);
 	mUiManager->SetCameraPosition(t);
 	mLauncher->SetRootPosition(t.GetPosition()+Vector3DF(-10.5f, +10.5f, -6.5f));
 	PixelRect lRightRect = lFullRect;

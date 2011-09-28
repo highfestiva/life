@@ -127,7 +127,7 @@ void Grenade::LoadPlaySound3d(UiCure::UserSound3dResource* pSoundResource)
 	if (pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
 		mUiManager->GetSoundManager()->SetSoundPosition(mShreekSound->GetData(), GetPosition(), GetVelocity());
-		mUiManager->GetSoundManager()->Play(pSoundResource->GetData(), 1.0, 10.0);
+		mUiManager->GetSoundManager()->Play(pSoundResource->GetData(), 0.5f, 1.0);
 	}
 }
 
