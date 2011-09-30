@@ -7,6 +7,7 @@
 #include "Game.h"
 #include "../Cure/Include/RuntimeVariable.h"
 #include "../Cure/Include/TimeManager.h"
+#include "../TBC/Include/PhysicsEngine.h"
 #include "../UiCure/Include/UiCollisionSoundManager.h"
 #include "../UiCure/Include/UiMachine.h"
 #include "../UiCure/Include/UiProps.h"
@@ -77,7 +78,9 @@ bool Game::Initialize()
 bool Game::Tick()
 {
 	GameTicker::GetTimeManager()->Tick();
+
 	mTime += GameTicker::GetTimeManager()->GetNormalFrameTime();
+
 	Vector3DF lPosition;
 	Vector3DF lVelocity;
 	if (mVehicle)
@@ -91,6 +94,15 @@ bool Game::Tick()
 	}
 	mCollisionSoundManager->Tick(lPosition);
 	mUiManager->SetMicrophonePosition(TransformationF(QuaternionF(), lPosition), lVelocity);
+
+	if (mLauncher && mLauncher->IsLoaded())
+	{
+		QuaternionF lQuaternion = mLauncher->GetOrientation();
+		lQuaternion.RotateAroundWorldZ(mLauncher->ContextObject::GetPhysics()->GetEngine(1)->GetLerpThrottle(0.2f, 0.2f) * -0.01f);
+		lQuaternion.RotateAroundOwnX(mLauncher->ContextObject::GetPhysics()->GetEngine(0)->GetLerpThrottle(0.2f, 0.2f) * -0.01f);
+		mLauncher->SetRootOrientation(lQuaternion);
+	}
+
 	return true;
 }
 
@@ -113,7 +125,7 @@ bool Game::Shoot()
 	assert(lOk);
 	if (lOk)
 	{
-		TransformationF t(QuaternionF(), mLauncher->GetPosition()+Vector3DF(0, 0, +5.0f));
+		TransformationF t(mLauncher->GetOrientation(), mLauncher->GetPosition()+Vector3DF(0, 0, +5.0f));
 		lGrenade->SetInitialTransform(t);
 		lGrenade->Start();
 		lGrenade->StartLoading();
@@ -159,7 +171,9 @@ bool Game::Render()
 	{
 		t.GetPosition() = mVehicle->GetPosition() + Vector3DF(15*sin((float)mTime), -15*cos((float)mTime), 3);
 		t.GetOrientation().RotateAroundOwnZ((float)mTime);
+//#ifdef LEPRA_IOS
 		t.GetOrientation().RotateAroundOwnY(-PIF*0.5f);
+//#endif // iOS
 	}
 	mUiManager->SetCameraPosition(t);
 	const PixelRect lFullRect(0, 0, mUiManager->GetCanvas()->GetActualWidth(), mUiManager->GetCanvas()->GetActualHeight());
@@ -176,7 +190,9 @@ bool Game::Render()
 
 	t = TransformationF(QuaternionF(), Vector3DF(300, -300, 30));
 	t.GetOrientation().RotateAroundOwnZ(PIF/4);
+//#ifdef LEPRA_IOS
 	t.GetOrientation().RotateAroundOwnY(PIF*0.5f);
+//#endif // iOS
 	mUiManager->SetCameraPosition(t);
 	mLauncher->SetRootPosition(t.GetPosition()+Vector3DF(-10.5f, +10.5f, -6.5f));
 	PixelRect lRightRect = lFullRect;
@@ -216,8 +232,16 @@ float Game::GetPowerSaveAmount() const
 
 
 
-void Game::OnLoadCompleted(Cure::ContextObject* /*pObject*/, bool /*pOk*/)
+void Game::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 {
+	if (pOk && pObject == mLauncher)
+	{
+		// Create a mock engine on the launcher that we use to navigate.
+		TBC::PhysicsEngine* lPitchEngine = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_TILTER, 1, 1, 1, 1, 0);
+		pObject->GetPhysics()->AddEngine(lPitchEngine);
+		TBC::PhysicsEngine* lYawEngine = new TBC::PhysicsEngine(TBC::PhysicsEngine::ENGINE_HINGE_ROLL, 1, 1, 1, 1, 1);
+		pObject->GetPhysics()->AddEngine(lYawEngine);
+	}
 }
 
 void Game::OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,

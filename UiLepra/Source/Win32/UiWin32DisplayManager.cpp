@@ -640,6 +640,7 @@ bool Win32DisplayManager::OnMessage(int pMsg, int pwParam, long plParam)
 				{
 					DispatchMinimize();
 					mMinimized = true;
+					mMaximized = false;
 				}
 				break;
 				case SIZE_MAXIMIZED:
@@ -648,6 +649,7 @@ bool Win32DisplayManager::OnMessage(int pMsg, int pwParam, long plParam)
 					mNormalHeight = mDisplayMode.mHeight;
 					DispatchMaximize((int)LOWORD(plParam), (int)HIWORD(plParam));
 					mMaximized = true;
+					mMinimized = false;
 				}
 				break;
 				case SIZE_RESTORED:

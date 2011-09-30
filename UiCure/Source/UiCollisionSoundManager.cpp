@@ -200,11 +200,11 @@ CollisionSoundManager::SoundResourceInfo::SoundResourceInfo(float pStrength, flo
 
 CollisionSoundManager::SoundInfo::SoundInfo(const SoundResourceInfo& pResourceInfo):
 	mBaseImpact(0),
-	mResourceInfo(pResourceInfo)
+	mResourceInfo(pResourceInfo),
+	mVolume(0),
+	mPitch(0),
+	mSound(0)
 {
-	::memset(&mVolume, 0, sizeof(mVolume));
-	::memset(&mPitch, 0, sizeof(mPitch));
-	::memset(&mSound, 0, sizeof(mSound));
 }
 
 CollisionSoundManager::SoundInfo::~SoundInfo()

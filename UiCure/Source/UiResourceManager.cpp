@@ -318,6 +318,10 @@ Cure::ResourceLoadState GeometryResource::PostProcess()
 {
 	typedef UiTbc::Renderer R;
 	assert(mOptimizedData == R::INVALID_GEOMETRY);
+	if (!GetUiManager()->CanRender())
+	{
+		return Cure::RESOURCE_LOAD_IN_PROGRESS;
+	}
 	mOptimizedData = GetUiManager()->GetRenderer()->AddGeometry(GetRamData(), R::MAT_NULL,
 		mCastsShadows? R::CAST_SHADOWS : R::NO_SHADOWS);
 	assert(mOptimizedData != R::INVALID_GEOMETRY);

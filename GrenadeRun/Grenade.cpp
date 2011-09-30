@@ -54,16 +54,19 @@ void Grenade::OnTick()
 			const float lPitch = -lVelocity.GetAngle(Vector3DF(0,0,l));
 			Vector3DF lXY = Vector3DF(lVelocity.x, lVelocity.y, 0);
 			const float l2 = lXY.GetLength();
-			const float lYaw = lXY.GetAngle(Vector3DF(0,l2,0));
-			QuaternionF q;
-			//q.SetEulerAngles(lYaw, lPitch, 0);
-			q.RotateAroundWorldZ(lPosition.z/100);
-			q.RotateAroundWorldX(lPitch);
-			q.RotateAroundWorldZ(lYaw);
-			TransformationF t;
-			t.GetOrientation() = q * mPhysics->GetOriginalBoneTransformation(0).GetOrientation();
-			t.SetPosition(lPosition);
-			GetManager()->GetGameManager()->GetPhysicsManager()->SetBodyTransform(lBodyId, t);
+			if (l2)
+			{
+				const float lYaw = lXY.GetAngle(Vector3DF(0,l2,0));
+				QuaternionF q;
+				//q.SetEulerAngles(lYaw, lPitch, 0);
+				q.RotateAroundWorldZ(lPosition.z/100);
+				q.RotateAroundWorldX(lPitch);
+				q.RotateAroundWorldZ(lYaw);
+				TransformationF t;
+				t.GetOrientation() = q * mPhysics->GetOriginalBoneTransformation(0).GetOrientation();
+				t.SetPosition(lPosition);
+				GetManager()->GetGameManager()->GetPhysicsManager()->SetBodyTransform(lBodyId, t);
+			}
 		}
 	}
 	Parent::OnTick();
@@ -76,7 +79,7 @@ void Grenade::OnAlarm(int pAlarmId, void*)
 	{
 		switch (pAlarmId)
 		{
-			case 1:
+			case 1:	// Has started falling, now stop grenade in launcher pipe and wait some time before firing.
 			{
 				GetManager()->AddAlarmCallback(this, 2, 1.5f, 0);
 				GetManager()->GetGameManager()->GetPhysicsManager()->DeactivateGravity(lGeometry->GetBodyId());
@@ -84,14 +87,14 @@ void Grenade::OnAlarm(int pAlarmId, void*)
 				GetManager()->GetGameManager()->GetPhysicsManager()->SetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
 			}
 			break;
-			case 2:
+			case 2:	// Grenade has been stopped some in the pipe to simulate it falling all the way to the bottom, now fire it!
 			{
 				mShreekSound = new UiCure::UserSound3dResource(GetUiManager(), UiLepra::SoundManager::LOOP_FORWARD);
 				mShreekSound->Load(GetResourceManager(), _T("incoming.wav"),
 					UiCure::UserSound3dResource::TypeLoadCallback(this, &Grenade::LoadPlaySound3d));
 
 				GetManager()->GetGameManager()->GetPhysicsManager()->ActivateGravity(lGeometry->GetBodyId());
-				Vector3DF lVelocity(-38, 32, 40);
+				Vector3DF lVelocity = GetOrientation() * Vector3DF(0, 0, 80);
 				GetManager()->GetGameManager()->GetPhysicsManager()->SetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
 			}
 			break;
@@ -127,7 +130,7 @@ void Grenade::LoadPlaySound3d(UiCure::UserSound3dResource* pSoundResource)
 	if (pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
 		mUiManager->GetSoundManager()->SetSoundPosition(mShreekSound->GetData(), GetPosition(), GetVelocity());
-		mUiManager->GetSoundManager()->Play(pSoundResource->GetData(), 0.5f, 1.0);
+		mUiManager->GetSoundManager()->Play(pSoundResource->GetData(), 0.7f, 1.0);
 	}
 }
 
