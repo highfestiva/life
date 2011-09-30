@@ -93,6 +93,11 @@ SoundManagerOpenAL::~SoundManagerOpenAL()
 
 
 
+float SoundManagerOpenAL::GetMasterVolume() const
+{
+	return mMasterVolume;
+}
+
 void SoundManagerOpenAL::SetMasterVolume(float pVolume)
 {
 	mMasterVolume = pVolume;
@@ -159,7 +164,7 @@ SoundManager::SoundID SoundManagerOpenAL::LoadSound3D(const str& pFileName, cons
 
 SoundStream* SoundManagerOpenAL::CreateSoundStream(const str& pFileName, LoopMode pLoopMode, int)
 {
-	SoundStream* lSoundStream = new OggAlStream(pFileName, pLoopMode == LOOP_FORWARD);
+	SoundStream* lSoundStream = new OggAlStream(this, pFileName, pLoopMode == LOOP_FORWARD);
 	if (!lSoundStream->IsOpen())
 	{
 		delete lSoundStream;

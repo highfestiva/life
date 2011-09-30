@@ -29,6 +29,9 @@ Game::Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVaria
 	mLevel(0),
 	mVehicle(0),
 	mLauncher(0),
+	mIsLaunching(false),
+	mLauncherYaw(PIF/4),
+	mLauncherPitch(-PIF/4),
 	mTime(0)
 {
 	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
@@ -95,11 +98,15 @@ bool Game::Tick()
 	mCollisionSoundManager->Tick(lPosition);
 	mUiManager->SetMicrophonePosition(TransformationF(QuaternionF(), lPosition), lVelocity);
 
-	if (mLauncher && mLauncher->IsLoaded())
+	if (mLauncher && mLauncher->IsLoaded() && !mIsLaunching)
 	{
-		QuaternionF lQuaternion = mLauncher->GetOrientation();
-		lQuaternion.RotateAroundWorldZ(mLauncher->ContextObject::GetPhysics()->GetEngine(1)->GetLerpThrottle(0.2f, 0.2f) * -0.01f);
-		lQuaternion.RotateAroundOwnX(mLauncher->ContextObject::GetPhysics()->GetEngine(0)->GetLerpThrottle(0.2f, 0.2f) * -0.01f);
+		QuaternionF lQuaternion;
+		mLauncherYaw -= mLauncher->ContextObject::GetPhysics()->GetEngine(1)->GetLerpThrottle(0.2f, 0.2f) * 0.01f;
+		mLauncherPitch -= mLauncher->ContextObject::GetPhysics()->GetEngine(0)->GetLerpThrottle(0.2f, 0.2f) * 0.01f;
+		mLauncherYaw = Math::Clamp(mLauncherYaw, PIF/180, PIF*7/16);
+		mLauncherPitch = Math::Clamp(mLauncherPitch, -PIF*7/16, -PIF/16);
+		lQuaternion.RotateAroundWorldZ(mLauncherYaw);
+		lQuaternion.RotateAroundOwnX(mLauncherPitch);
 		mLauncher->SetRootOrientation(lQuaternion);
 	}
 
@@ -118,8 +125,22 @@ UiCure::CppContextObject* Game::GetP2()
 	return mLauncher;
 }
 
+void Game::GetVehicleMotion(Vector3DF& pPosition, Vector3DF pVelocity)
+{
+	if (mVehicle && mVehicle->IsLoaded())
+	{
+		pPosition = mVehicle->GetPosition();
+		pVelocity = mVehicle->GetVelocity();
+	}
+}
+
 bool Game::Shoot()
 {
+	if (mIsLaunching)
+	{
+		return false;
+	}
+
 	Grenade* lGrenade = (Grenade*)Parent::CreateContextObject(_T("grenade"), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 	bool lOk = (lGrenade != 0);
 	assert(lOk);
@@ -129,8 +150,14 @@ bool Game::Shoot()
 		lGrenade->SetInitialTransform(t);
 		lGrenade->Start();
 		lGrenade->StartLoading();
+		mIsLaunching = true;
 	}
 	return lOk;
+}
+
+void Game::OnPostLaunchGrenade()
+{
+	mIsLaunching = false;
 }
 
 void Game::Blast(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition, Cure::ContextObject* pObject1)
@@ -171,9 +198,9 @@ bool Game::Render()
 	{
 		t.GetPosition() = mVehicle->GetPosition() + Vector3DF(15*sin((float)mTime), -15*cos((float)mTime), 3);
 		t.GetOrientation().RotateAroundOwnZ((float)mTime);
-//#ifdef LEPRA_IOS
+#ifdef LEPRA_IOS
 		t.GetOrientation().RotateAroundOwnY(-PIF*0.5f);
-//#endif // iOS
+#endif // iOS
 	}
 	mUiManager->SetCameraPosition(t);
 	const PixelRect lFullRect(0, 0, mUiManager->GetCanvas()->GetActualWidth(), mUiManager->GetCanvas()->GetActualHeight());
@@ -190,9 +217,9 @@ bool Game::Render()
 
 	t = TransformationF(QuaternionF(), Vector3DF(300, -300, 30));
 	t.GetOrientation().RotateAroundOwnZ(PIF/4);
-//#ifdef LEPRA_IOS
+#ifdef LEPRA_IOS
 	t.GetOrientation().RotateAroundOwnY(PIF*0.5f);
-//#endif // iOS
+#endif // iOS
 	mUiManager->SetCameraPosition(t);
 	mLauncher->SetRootPosition(t.GetPosition()+Vector3DF(-10.5f, +10.5f, -6.5f));
 	PixelRect lRightRect = lFullRect;

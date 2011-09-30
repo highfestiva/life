@@ -39,6 +39,7 @@ private:
 	void LoadPlaySound3d(UiCure::UserSound3dResource* pSoundResource);
 
 	UiCure::UserSound3dResource* mShreekSound;
+	UiCure::UserSound3dResource* mLaunchSound;
 	bool mExploded;
 
 	LOG_CLASS_DECLARE();

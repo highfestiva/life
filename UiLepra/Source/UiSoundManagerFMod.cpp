@@ -48,6 +48,11 @@ SoundManagerFMod::~SoundManagerFMod()
 
 
 
+float SoundManagerFMod::GetMasterVolume() const
+{
+	return 1;
+}
+
 void SoundManagerFMod::SetMasterVolume(float pVolume)
 {
 	// TODO: implement.

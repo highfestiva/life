@@ -26,7 +26,9 @@ namespace UiLepra
 class OggAlStream: public SoundStream
 {
 public:
-	OggAlStream(const str& pFilename, bool pLoop);
+	typedef SoundStream Parent;
+
+	OggAlStream(SoundManager* pSoundManager, const str& pFilename, bool pLoop);
 	virtual ~OggAlStream();
 	virtual bool Playback();		// play the Ogg stream
 	virtual bool Rewind();

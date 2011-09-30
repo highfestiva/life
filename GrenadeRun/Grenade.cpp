@@ -21,12 +21,15 @@ namespace GrenadeRun
 Grenade::Grenade(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager):
 	Parent(pResourceManager, pClassId, pUiManager),
 	mShreekSound(0),
+	mLaunchSound(0),
 	mExploded(false)
 {
 }
 
 Grenade::~Grenade()
 {
+	delete mLaunchSound;
+	mLaunchSound = 0;
 	delete mShreekSound;
 	mShreekSound = 0;
 }
@@ -69,6 +72,13 @@ void Grenade::OnTick()
 			}
 		}
 	}
+	if (mLaunchSound && mLaunchSound->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
+	{
+		Vector3DF lPosition;
+		Vector3DF lVelocity;
+		((Game*)GetManager()->GetGameManager())->GetVehicleMotion(lPosition, lVelocity);
+		mUiManager->GetSoundManager()->SetSoundPosition(mLaunchSound->GetData(), lPosition, lVelocity);
+	}
 	Parent::OnTick();
 }
 
@@ -93,9 +103,20 @@ void Grenade::OnAlarm(int pAlarmId, void*)
 				mShreekSound->Load(GetResourceManager(), _T("incoming.wav"),
 					UiCure::UserSound3dResource::TypeLoadCallback(this, &Grenade::LoadPlaySound3d));
 
+				mLaunchSound = new UiCure::UserSound3dResource(GetUiManager(), UiLepra::SoundManager::LOOP_NONE);
+				mLaunchSound->Load(GetResourceManager(), _T("launch.wav"),
+					UiCure::UserSound3dResource::TypeLoadCallback(this, &Grenade::LoadPlaySound3d));
+
 				GetManager()->GetGameManager()->GetPhysicsManager()->ActivateGravity(lGeometry->GetBodyId());
-				Vector3DF lVelocity = GetOrientation() * Vector3DF(0, 0, 80);
+				Vector3DF lVelocity = GetOrientation() * Vector3DF(0, 0, 40);
 				GetManager()->GetGameManager()->GetPhysicsManager()->SetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
+
+				GetManager()->AddAlarmCallback(this, 3, 0.5f, 0);
+			}
+			break;
+			case 3:
+			{
+				((Game*)GetManager()->GetGameManager())->OnPostLaunchGrenade();
 			}
 			break;
 		}
@@ -129,8 +150,19 @@ void Grenade::LoadPlaySound3d(UiCure::UserSound3dResource* pSoundResource)
 	assert(pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE);
 	if (pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
-		mUiManager->GetSoundManager()->SetSoundPosition(mShreekSound->GetData(), GetPosition(), GetVelocity());
-		mUiManager->GetSoundManager()->Play(pSoundResource->GetData(), 0.7f, 1.0);
+		if (pSoundResource == mShreekSound)
+		{
+			mUiManager->GetSoundManager()->SetSoundPosition(pSoundResource->GetData(), GetPosition(), GetVelocity());
+			mUiManager->GetSoundManager()->Play(pSoundResource->GetData(), 0.7f, 1.0);
+		}
+		else
+		{
+			Vector3DF lPosition;
+			Vector3DF lVelocity;
+			((Game*)GetManager()->GetGameManager())->GetVehicleMotion(lPosition, lVelocity);
+			mUiManager->GetSoundManager()->SetSoundPosition(pSoundResource->GetData(), lPosition, lVelocity);
+			mUiManager->GetSoundManager()->Play(pSoundResource->GetData(), 5.0f, 1.0);
+		}
 	}
 }
 

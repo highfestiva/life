@@ -76,7 +76,9 @@ public:
 
 	UiCure::CppContextObject* GetP1();
 	UiCure::CppContextObject* GetP2();
+	void GetVehicleMotion(Vector3DF& pPosition, Vector3DF pVelocity);
 	bool Shoot();
+	void OnPostLaunchGrenade();
 	void Blast(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition, Cure::ContextObject* pObject1);
 
 	bool Render();
@@ -108,6 +110,9 @@ private:
 	UiCure::CppContextObject* mLevel;
 	UiCure::CppContextObject* mVehicle;
 	UiCure::CppContextObject* mLauncher;
+	bool mIsLaunching;
+	float mLauncherYaw;
+	float mLauncherPitch;
 	double mTime;
 };
 

@@ -104,6 +104,7 @@ private:
 	UiTbc::Button* mResetButton;
 	UiTbc::Button* mRetryButton;
 	UiTbc::Button* mGetiPhoneButton;
+	UiTbc::RectComponent* mPlayerSplitter;
 
 	LOG_CLASS_DECLARE();
 };
@@ -204,6 +205,8 @@ bool App::Open()
 #ifdef LEPRA_IOS
 		mUiManager->GetCanvas()->SetOutputRotation(90);
 #endif // iOS
+		mUiManager->GetDisplayManager()->SetCaption(_T("Kill Cutie"));
+		mUiManager->GetDisplayManager()->AddResizeObserver(this);
 		mUiManager->GetInputManager()->AddKeyCodeInputObserver(this);
 	}
 	if (lOk)
@@ -235,6 +238,9 @@ bool App::Open()
 		mGetiPhoneButton->SetOnClick(App, OnGetiPhoneClick);
 #endif // iOS*/
 
+		mPlayerSplitter = new UiTbc::RectComponent(BLACK, _T("Splitter"));
+		lDesktopWindow->AddChild(mPlayerSplitter);
+
 		Layout();
 	}
 	if (lOk)
@@ -245,6 +251,10 @@ bool App::Open()
 		if (!mMusicStreamer || !mMusicStreamer->Playback())
 		{
 			mLog.Errorf(_T("Unable to play beautiful muzak!"));
+		}
+		else
+		{
+			mMusicStreamer->SetVolume(0.5f);
 		}
 	}
 
@@ -407,7 +417,13 @@ bool App::Poll()
 
 void App::Layout()
 {
-	if (!mLazyButton)
+	PixelRect lRect = mUiManager->GetDesktopWindow()->GetScreenRect();
+	lRect.mLeft = lRect.GetCenterX()-5;
+	lRect.mRight = lRect.mLeft+10;
+	mPlayerSplitter->SetPos(lRect.mLeft, lRect.mTop);
+	mPlayerSplitter->SetPreferredSize(lRect.GetSize());
+
+	/*if (!mLazyButton)
 	{
 		return;
 	}
@@ -430,7 +446,7 @@ void App::Layout()
 	if (mGetiPhoneButton)
 	{
 		mGetiPhoneButton->SetPos(tx, ty);
-	}
+	}*/
 }
 
 

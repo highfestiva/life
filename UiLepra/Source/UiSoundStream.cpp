@@ -13,11 +13,23 @@ namespace UiLepra
 
 
 
+SoundStream::SoundStream(SoundManager* pSoundManager):
+	mSoundManager(pSoundManager),
+	mIsOpen(false),
+	mIsLooping(false),
+	mVolume(1)
+{
+}
+
 bool SoundStream::IsOpen() const
 {
 	return mIsOpen;
 }
 
+void SoundStream::SetVolume(float pVolume)
+{
+	mVolume = pVolume;
+}
 
 
 }
