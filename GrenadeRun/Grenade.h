@@ -27,11 +27,12 @@ public:
 	Grenade(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager);
 	virtual ~Grenade();
 
-	void Start();
-
 private:
+	void UnlockLauncher();
+	void Launch();
 	void OnTick();
-	void OnAlarm(int pAlarmId, void*);
+	void OnAlarm(int, void*);
+	virtual bool TryComplete();
 	virtual void OnForceApplied(TBC::PhysicsManager::ForceFeedbackListener* pOtherObject,
 		TBC::PhysicsManager::BodyID pOwnBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
 		const Vector3DF& pForce, const Vector3DF& pTorque,
@@ -40,6 +41,9 @@ private:
 
 	UiCure::UserSound3dResource* mShreekSound;
 	UiCure::UserSound3dResource* mLaunchSound;
+	int mTimeFrameCreated;
+	bool mIsLaunched;
+	bool mUnlockedLauncher;
 	bool mExploded;
 
 	LOG_CLASS_DECLARE();

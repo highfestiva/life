@@ -98,7 +98,7 @@ bool Game::Tick()
 	mCollisionSoundManager->Tick(lPosition);
 	mUiManager->SetMicrophonePosition(TransformationF(QuaternionF(), lPosition), lVelocity);
 
-	if (mLauncher && mLauncher->IsLoaded() && !mIsLaunching)
+	if (mLauncher && mLauncher->IsLoaded())
 	{
 		QuaternionF lQuaternion;
 		mLauncherYaw -= mLauncher->ContextObject::GetPhysics()->GetEngine(1)->GetLerpThrottle(0.2f, 0.2f) * 0.01f;
@@ -125,12 +125,21 @@ UiCure::CppContextObject* Game::GetP2()
 	return mLauncher;
 }
 
-void Game::GetVehicleMotion(Vector3DF& pPosition, Vector3DF pVelocity)
+void Game::GetVehicleMotion(Vector3DF& pPosition, Vector3DF pVelocity) const
 {
 	if (mVehicle && mVehicle->IsLoaded())
 	{
 		pPosition = mVehicle->GetPosition();
 		pVelocity = mVehicle->GetVelocity();
+	}
+}
+
+void Game::GetLauncherTransform(TransformationF& pTransform) const
+{
+	if (mLauncher && mLauncher->IsLoaded())
+	{
+		pTransform.SetPosition(mLauncher->GetPosition());
+		pTransform.SetOrientation(mLauncher->GetOrientation());
 	}
 }
 
@@ -148,14 +157,13 @@ bool Game::Shoot()
 	{
 		TransformationF t(mLauncher->GetOrientation(), mLauncher->GetPosition()+Vector3DF(0, 0, +5.0f));
 		lGrenade->SetInitialTransform(t);
-		lGrenade->Start();
 		lGrenade->StartLoading();
 		mIsLaunching = true;
 	}
 	return lOk;
 }
 
-void Game::OnPostLaunchGrenade()
+void Game::UnlockLauncher()
 {
 	mIsLaunching = false;
 }

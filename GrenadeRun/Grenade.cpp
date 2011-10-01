@@ -6,6 +6,7 @@
 
 #include "Grenade.h"
 #include "../Cure/Include/ContextManager.h"
+#include "../Cure/Include/TimeManager.h"
 #include "../TBC/Include/ChunkyBoneGeometry.h"
 #include "../UiCure/Include/UiGameUiManager.h"
 #include "../UiCure/Include/UiProps.h"
@@ -22,6 +23,9 @@ Grenade::Grenade(Cure::ResourceManager* pResourceManager, const str& pClassId, U
 	Parent(pResourceManager, pClassId, pUiManager),
 	mShreekSound(0),
 	mLaunchSound(0),
+	mTimeFrameCreated(-1),
+	mIsLaunched(false),
+	mUnlockedLauncher(false),
 	mExploded(false)
 {
 }
@@ -36,12 +40,34 @@ Grenade::~Grenade()
 
 
 
-void Grenade::Start()
+void Grenade::UnlockLauncher()
 {
-	GetManager()->AddAlarmCallback(this, 1, 1.1f, 0);
+	if (!mUnlockedLauncher)
+	{
+		mUnlockedLauncher = true;
+		((Game*)GetManager()->GetGameManager())->UnlockLauncher();
+	}
 }
 
+void Grenade::Launch()
+{
+	mIsLaunched = true;
 
+	mShreekSound = new UiCure::UserSound3dResource(GetUiManager(), UiLepra::SoundManager::LOOP_FORWARD);
+	mShreekSound->Load(GetResourceManager(), _T("incoming.wav"),
+		UiCure::UserSound3dResource::TypeLoadCallback(this, &Grenade::LoadPlaySound3d));
+
+	mLaunchSound = new UiCure::UserSound3dResource(GetUiManager(), UiLepra::SoundManager::LOOP_NONE);
+	mLaunchSound->Load(GetResourceManager(), _T("launch.wav"),
+		UiCure::UserSound3dResource::TypeLoadCallback(this, &Grenade::LoadPlaySound3d));
+
+	const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
+	GetManager()->GetGameManager()->GetPhysicsManager()->ActivateGravity(lGeometry->GetBodyId());
+	Vector3DF lVelocity = GetOrientation() * Vector3DF(0, 0, 40);
+	GetManager()->GetGameManager()->GetPhysicsManager()->SetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
+
+	GetManager()->AddAlarmCallback(this, 3, 1.5f, 0);
+}
 
 void Grenade::OnTick()
 {
@@ -79,51 +105,42 @@ void Grenade::OnTick()
 		((Game*)GetManager()->GetGameManager())->GetVehicleMotion(lPosition, lVelocity);
 		mUiManager->GetSoundManager()->SetSoundPosition(mLaunchSound->GetData(), lPosition, lVelocity);
 	}
+	if (!mIsLaunched && mTimeFrameCreated >= 0)
+	{
+		TransformationF lTransform;
+		((Game*)GetManager()->GetGameManager())->GetLauncherTransform(lTransform);
+		const Cure::TimeManager* lTimeManager = GetManager()->GetGameManager()->GetTimeManager();
+		const float lTime = lTimeManager->ConvertPhysicsFramesToSeconds(lTimeManager->GetCurrentPhysicsFrameDelta(mTimeFrameCreated));
+		const float lLauncherLength = 3.0f;
+		float h = lLauncherLength/2+6 - lTime*lTime*5.0f;
+		h = std::max(-lLauncherLength/2, h);
+		const Vector3DF lFalling = lTransform.GetOrientation() * Vector3DF(0, 0, h);
+		lTransform.GetPosition() += lFalling;
+		lTransform.GetOrientation() *= GetPhysics()->GetOriginalBoneTransformation(0).GetOrientation().GetInverse();
+		GetManager()->GetGameManager()->GetPhysicsManager()->SetBodyTransform(GetPhysics()->GetBoneGeometry(0)->GetBodyId(), lTransform);
+		if (h <= -lLauncherLength/2+0.1f)
+		{
+			Launch();
+		}
+	}
 	Parent::OnTick();
 }
 
-void Grenade::OnAlarm(int pAlarmId, void*)
+void Grenade::OnAlarm(int, void*)
 {
-	const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
-	if (lGeometry && lGeometry->GetBodyId() != TBC::INVALID_BODY)
-	{
-		switch (pAlarmId)
-		{
-			case 1:	// Has started falling, now stop grenade in launcher pipe and wait some time before firing.
-			{
-				GetManager()->AddAlarmCallback(this, 2, 1.5f, 0);
-				GetManager()->GetGameManager()->GetPhysicsManager()->DeactivateGravity(lGeometry->GetBodyId());
-				Vector3DF lVelocity;
-				GetManager()->GetGameManager()->GetPhysicsManager()->SetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
-			}
-			break;
-			case 2:	// Grenade has been stopped some in the pipe to simulate it falling all the way to the bottom, now fire it!
-			{
-				mShreekSound = new UiCure::UserSound3dResource(GetUiManager(), UiLepra::SoundManager::LOOP_FORWARD);
-				mShreekSound->Load(GetResourceManager(), _T("incoming.wav"),
-					UiCure::UserSound3dResource::TypeLoadCallback(this, &Grenade::LoadPlaySound3d));
-
-				mLaunchSound = new UiCure::UserSound3dResource(GetUiManager(), UiLepra::SoundManager::LOOP_NONE);
-				mLaunchSound->Load(GetResourceManager(), _T("launch.wav"),
-					UiCure::UserSound3dResource::TypeLoadCallback(this, &Grenade::LoadPlaySound3d));
-
-				GetManager()->GetGameManager()->GetPhysicsManager()->ActivateGravity(lGeometry->GetBodyId());
-				Vector3DF lVelocity = GetOrientation() * Vector3DF(0, 0, 40);
-				GetManager()->GetGameManager()->GetPhysicsManager()->SetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
-
-				GetManager()->AddAlarmCallback(this, 3, 0.5f, 0);
-			}
-			break;
-			case 3:
-			{
-				((Game*)GetManager()->GetGameManager())->OnPostLaunchGrenade();
-			}
-			break;
-		}
-	}
+	UnlockLauncher();
 }
 
-
+bool Grenade::TryComplete()
+{
+	bool lOk = Parent::TryComplete();
+	if (GetPhysics())
+	{
+		GetPhysics()->EnableGravity(GetManager()->GetGameManager()->GetPhysicsManager(), false);
+		mTimeFrameCreated = GetManager()->GetGameManager()->GetTimeManager()->GetCurrentPhysicsFrame();
+	}
+	return lOk;
+}
 
 void Grenade::OnForceApplied(TBC::PhysicsManager::ForceFeedbackListener* pOtherObject,
 	TBC::PhysicsManager::BodyID pOwnBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
@@ -140,6 +157,8 @@ void Grenade::OnForceApplied(TBC::PhysicsManager::ForceFeedbackListener* pOtherO
 		return;
 	}
 	mExploded = true;
+
+	UnlockLauncher();
 
 	GetManager()->PostKillObject(GetInstanceId());
 	((Game*)GetManager()->GetGameManager())->Blast(pForce, pTorque, pPosition, this);
