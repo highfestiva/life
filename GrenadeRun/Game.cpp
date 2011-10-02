@@ -5,6 +5,7 @@
 
 
 #include "Game.h"
+#include "../Cure/Include/FloatAttribute.h"
 #include "../Cure/Include/RuntimeVariable.h"
 #include "../Cure/Include/TimeManager.h"
 #include "../TBC/Include/PhysicsEngine.h"
@@ -26,6 +27,7 @@ Game::Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVaria
 	Cure::GameManager(Cure::GameTicker::GetTimeManager(), new Cure::RuntimeVariableScope(pVariableScope), pResourceManager),
 	mUiManager(pUiManager),
 	mCollisionSoundManager(0),
+	mLightId(UiTbc::Renderer::INVALID_LIGHT),
 	mLevel(0),
 	mVehicle(0),
 	mLauncher(0),
@@ -40,6 +42,8 @@ Game::Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVaria
 
 Game::~Game()
 {
+	mUiManager->GetRenderer()->RemoveLight(mLightId);
+
 	delete mCollisionSoundManager;
 	mCollisionSoundManager = 0;
 	mUiManager = 0;
@@ -51,6 +55,13 @@ bool Game::Initialize()
 	if (lOk)
 	{
 		lOk = InitializeTerrain();
+	}
+	if (lOk)
+	{
+		mLightId = mUiManager->GetRenderer()->AddDirectionalLight(
+			UiTbc::Renderer::LIGHT_MOVABLE, Vector3DF(-1, 0.5f, -1.5),
+			Color::Color(255, 255, 255), 2.5f, 300);
+		mUiManager->GetRenderer()->EnableAllLights(true);
 	}
 	if (lOk)
 	{
@@ -269,6 +280,11 @@ float Game::GetPowerSaveAmount() const
 
 void Game::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 {
+	if (pOk && pObject == mVehicle)
+	{
+		const str lName = _T("float_is_child");
+		new Cure::FloatAttribute(mVehicle, lName, 1);
+	}
 	if (pOk && pObject == mLauncher)
 	{
 		// Create a mock engine on the launcher that we use to navigate.

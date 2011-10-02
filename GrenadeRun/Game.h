@@ -5,6 +5,7 @@
 
 
 #include "../Cure/Include/GameManager.h"
+#include "../UiTbc/Include/UiRenderer.h"
 
 
 
@@ -108,6 +109,7 @@ private:
 
 	UiCure::GameUiManager* mUiManager;
 	UiCure::CollisionSoundManager* mCollisionSoundManager;
+	UiTbc::Renderer::LightID mLightId;
 	UiCure::CppContextObject* mLevel;
 	UiCure::CppContextObject* mVehicle;
 	UiCure::CppContextObject* mLauncher;

@@ -9,7 +9,7 @@ import sys
 from rgohelp import *
 
 
-appnames = ["Life", "SlimeVolleyball"]
+appnames = ["Life", "SlimeVolleyball", "GrenadeRun"]
 testappname = "UiCure/CureTestApp"
 osname = getosname()
 hwname = gethwname()

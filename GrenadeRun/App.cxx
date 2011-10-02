@@ -90,6 +90,7 @@ private:
 
 	double mAverageLoopTime;
 	HiResTimer mLoopTimer;
+	bool mDoLayout;
 	Cure::ResourceManager* mResourceManager;
 	Cure::RuntimeVariableScope* mVariableScope;
 	UiCure::GameUiManager* mUiManager;
@@ -128,7 +129,8 @@ App::App(const strutil::strvec& pArgumentList):
 	Application(pArgumentList),
 	mLayoutFrameCounter(-10),
 	mVariableScope(0),
-	mAverageLoopTime(1.0/FPS)
+	mAverageLoopTime(1.0/FPS),
+	mDoLayout(true)
 {
 	mApp = this;
 }
@@ -191,10 +193,10 @@ bool App::Open()
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_FOV, 60.0);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_CLIPNEAR, 1.0);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_CLIPFAR, 3000.0);
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_SHADOWS, _T("None"));
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_AMBIENTRED, 0.8);
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_AMBIENTGREEN, 0.8);
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_AMBIENTBLUE, 0.8);
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_SHADOWS, _T("Force:Volume"));
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_AMBIENTRED, 0.5);
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_AMBIENTGREEN, 0.5);
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_AMBIENTBLUE, 0.5);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_SOUND_ROLLOFF, 0.2);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_SOUND_DOPPLER, 1.3);
 
@@ -240,8 +242,6 @@ bool App::Open()
 
 		mPlayerSplitter = new UiTbc::RectComponent(BLACK, _T("Splitter"));
 		lDesktopWindow->AddChild(mPlayerSplitter);
-
-		Layout();
 	}
 	if (lOk)
 	{
@@ -363,6 +363,10 @@ bool App::Poll()
 		mLoopTimer.PopTimeDiff();
 		lOk = (SystemManager::GetQuitRequest() == 0);
 	}
+	if (lOk && mDoLayout)
+	{
+		Layout();
+	}
 	if (lOk)
 	{
 		float r, g, b;
@@ -422,6 +426,7 @@ void App::Layout()
 	lRect.mRight = lRect.mLeft+10;
 	mPlayerSplitter->SetPos(lRect.mLeft, lRect.mTop);
 	mPlayerSplitter->SetPreferredSize(lRect.GetSize());
+	mDoLayout = false;
 
 	/*if (!mLazyButton)
 	{
@@ -534,7 +539,7 @@ void App::OnMouseMove(float x, float y, bool pPressed)
 
 void App::OnResize(int /*pWidth*/, int /*pHeight*/)
 {
-	Layout();
+	mDoLayout = true;
 }
 
 void App::OnMinimize()
