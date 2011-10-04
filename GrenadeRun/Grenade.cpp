@@ -19,11 +19,12 @@ namespace GrenadeRun
 
 
 
-Grenade::Grenade(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager):
+Grenade::Grenade(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager, float pMuzzleVelocity):
 	Parent(pResourceManager, pClassId, pUiManager),
 	mShreekSound(0),
 	mLaunchSound(0),
 	mTimeFrameCreated(-1),
+	mMuzzleVelocity(pMuzzleVelocity),
 	mIsLaunched(false),
 	mUnlockedLauncher(false),
 	mExploded(false)
@@ -63,10 +64,10 @@ void Grenade::Launch()
 
 	const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
 	GetManager()->GetGameManager()->GetPhysicsManager()->ActivateGravity(lGeometry->GetBodyId());
-	Vector3DF lVelocity = GetOrientation() * Vector3DF(0, 0, 40);
+	Vector3DF lVelocity = GetOrientation() * Vector3DF(0, 0, mMuzzleVelocity);
 	GetManager()->GetGameManager()->GetPhysicsManager()->SetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
 
-	GetManager()->AddAlarmCallback(this, 3, 1.5f, 0);
+	GetManager()->AddAlarmCallback(this, 3, 0.3f, 0);
 }
 
 void Grenade::OnTick()
@@ -76,7 +77,7 @@ void Grenade::OnTick()
 		const Vector3DF lPosition = GetPosition();
 		Vector3DF lVelocity = GetVelocity();
 		mUiManager->GetSoundManager()->SetSoundPosition(mShreekSound->GetData(), lPosition, lVelocity);
-		if (lVelocity.GetLengthSquared() > 10*10)
+		if (lVelocity.GetLengthSquared() > 1*1)
 		{
 			TBC::PhysicsManager::BodyID lBodyId = mPhysics->GetBoneGeometry(0)->GetBodyId();
 			const float l = lVelocity.GetLength();
@@ -90,7 +91,7 @@ void Grenade::OnTick()
 				//q.SetEulerAngles(lYaw, lPitch, 0);
 				q.RotateAroundWorldZ(lPosition.z/100);
 				q.RotateAroundWorldX(lPitch);
-				q.RotateAroundWorldZ(lYaw);
+				q.RotateAroundWorldZ((lVelocity.x > 0)? -lYaw : lYaw);
 				TransformationF t;
 				t.GetOrientation() = q * mPhysics->GetOriginalBoneTransformation(0).GetOrientation();
 				t.SetPosition(lPosition);
@@ -112,7 +113,7 @@ void Grenade::OnTick()
 		const Cure::TimeManager* lTimeManager = GetManager()->GetGameManager()->GetTimeManager();
 		const float lTime = lTimeManager->ConvertPhysicsFramesToSeconds(lTimeManager->GetCurrentPhysicsFrameDelta(mTimeFrameCreated));
 		const float lLauncherLength = 3.0f;
-		float h = lLauncherLength/2+6 - lTime*lTime*5.0f;
+		float h = lLauncherLength/2+6 - lTime*lTime*8.0f;
 		h = std::max(-lLauncherLength/2, h);
 		const Vector3DF lFalling = lTransform.GetOrientation() * Vector3DF(0, 0, h);
 		lTransform.GetPosition() += lFalling;
@@ -122,6 +123,10 @@ void Grenade::OnTick()
 		{
 			Launch();
 		}
+	}
+	if (GetPosition().z <= -300)
+	{
+		GetManager()->PostKillObject(GetInstanceId());
 	}
 	Parent::OnTick();
 }

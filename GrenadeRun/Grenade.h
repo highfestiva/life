@@ -24,7 +24,7 @@ class Grenade: public UiCure::Machine
 public:
 	typedef UiCure::Machine Parent;
 
-	Grenade(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager);
+	Grenade(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager, float pMuzzleVelocity);
 	virtual ~Grenade();
 
 private:
@@ -42,6 +42,7 @@ private:
 	UiCure::UserSound3dResource* mShreekSound;
 	UiCure::UserSound3dResource* mLaunchSound;
 	int mTimeFrameCreated;
+	float mMuzzleVelocity;
 	bool mIsLaunched;
 	bool mUnlockedLauncher;
 	bool mExploded;

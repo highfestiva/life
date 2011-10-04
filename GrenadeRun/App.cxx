@@ -246,8 +246,8 @@ bool App::Open()
 	if (lOk)
 	{
 		const str lPathPrefix = SystemManager::GetDataDirectory(mArgumentVector[0]);
-		//mMusicStreamer = 0;
-		mMusicStreamer = mUiManager->GetSoundManager()->CreateSoundStream(lPathPrefix+_T("Oiit.ogg"), UiLepra::SoundManager::LOOP_FORWARD, 0);
+		mMusicStreamer = 0;
+		//mMusicStreamer = mUiManager->GetSoundManager()->CreateSoundStream(lPathPrefix+_T("Oiit.ogg"), UiLepra::SoundManager::LOOP_FORWARD, 0);
 		if (!mMusicStreamer || !mMusicStreamer->Playback())
 		{
 			mLog.Errorf(_T("Unable to play beautiful muzak!"));

@@ -32,7 +32,7 @@ Game::Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVaria
 	mVehicle(0),
 	mLauncher(0),
 	mIsLaunching(false),
-	mLauncherYaw(PIF/4),
+	mLauncherYaw(0),
 	mLauncherPitch(-PIF/4),
 	mTime(0)
 {
@@ -70,7 +70,7 @@ bool Game::Initialize()
 		assert(lOk);
 		if (lOk)
 		{
-			TransformationF t(QuaternionF(), Vector3DF(-100, -140, -39));
+			TransformationF t(QuaternionF(), Vector3DF(-173, -85, 7));
 			mVehicle->SetInitialTransform(t);
 			mVehicle->StartLoading();
 		}
@@ -83,6 +83,7 @@ bool Game::Initialize()
 		assert(lOk);
 		if (lOk)
 		{
+			mLauncher->DisableRootShadow();
 			mLauncher->StartLoading();
 		}
 	}
@@ -114,8 +115,8 @@ bool Game::Tick()
 		QuaternionF lQuaternion;
 		mLauncherYaw -= mLauncher->ContextObject::GetPhysics()->GetEngine(1)->GetLerpThrottle(0.2f, 0.2f) * 0.01f;
 		mLauncherPitch -= mLauncher->ContextObject::GetPhysics()->GetEngine(0)->GetLerpThrottle(0.2f, 0.2f) * 0.01f;
-		mLauncherYaw = Math::Clamp(mLauncherYaw, PIF/180, PIF*7/16);
-		mLauncherPitch = Math::Clamp(mLauncherPitch, -PIF*7/16, -PIF/16);
+		mLauncherYaw = Math::Clamp(mLauncherYaw, -PIF/2, PIF/2);
+		mLauncherPitch = Math::Clamp(mLauncherPitch, -PIF/2*2/3, -PIF/90);
 		lQuaternion.RotateAroundWorldZ(mLauncherYaw);
 		lQuaternion.RotateAroundOwnX(mLauncherPitch);
 		mLauncher->SetRootOrientation(lQuaternion);
@@ -232,15 +233,26 @@ bool Game::Render()
 	{
 		lLeftRect.mRight = lLeftRect.mRight/2 - 5;
 	}
+	mUiManager->GetRenderer()->SetViewFrustum(60, 3, 1000);
 	mUiManager->Render(lLeftRect);
 
-	t = TransformationF(QuaternionF(), Vector3DF(300, -300, 30));
-	t.GetOrientation().RotateAroundOwnZ(PIF/4);
+	const Vector3DF lLauncherPosition(0, -215, 27);
+
+	float lRange = 150.0f;
+	if (mVehicle && mVehicle->IsLoaded())
+	{
+		lRange = lLauncherPosition.GetDistance(mVehicle->GetPosition());
+	}
+
+	const float lCamDistance = 10;
+	const Vector3DF lCamOffset(lCamDistance*sin(mLauncherYaw), -lCamDistance*cos(mLauncherYaw), 9.0f - lRange/100.0f);
+	t = TransformationF(QuaternionF(), lLauncherPosition + lCamOffset);
+	t.GetOrientation().RotateAroundOwnZ(mLauncherYaw*0.8f);
 #ifdef LEPRA_IOS
 	t.GetOrientation().RotateAroundOwnY(PIF*0.5f);
 #endif // iOS
 	mUiManager->SetCameraPosition(t);
-	mLauncher->SetRootPosition(t.GetPosition()+Vector3DF(-10.5f, +10.5f, -6.5f));
+	mLauncher->SetRootPosition(lLauncherPosition);
 	PixelRect lRightRect = lFullRect;
 	if (lFullRect.mRight < lFullRect.mBottom)	// Portrait?
 	{
@@ -250,6 +262,7 @@ bool Game::Render()
 	{
 		lRightRect.mLeft = lLeftRect.mRight + 10;
 	}
+	mUiManager->GetRenderer()->SetViewFrustum(std::min(60.0f, 9000/lRange), 3, 1000);
 	mUiManager->Render(lRightRect);
 	return true;
 }
@@ -347,7 +360,12 @@ Cure::ContextObject* Game::CreateContextObject(const str& pClassId) const
 {
 	if (strutil::StartsWith(pClassId, _T("grenade")))
 	{
-		return new Grenade(GetResourceManager(), pClassId, mUiManager);
+		float lMuzzleVelocity = 50.0;
+		if (mLauncher && mLauncher->IsLoaded() && mVehicle && mVehicle->IsLoaded())
+		{
+			lMuzzleVelocity = ::pow(mLauncher->GetPosition().GetDistance(mVehicle->GetPosition()), 0.5f) * 3.5f;
+		}
+		return new Grenade(GetResourceManager(), pClassId, mUiManager, lMuzzleVelocity);
 	}
 	return new UiCure::Machine(GetResourceManager(), pClassId, mUiManager);
 }
@@ -357,7 +375,7 @@ bool Game::InitializeTerrain()
 	bool lOk = true;
 	if (lOk)
 	{
-		mLevel = new UiCure::Machine(GetResourceManager(), _T("level_1"), mUiManager);
+		mLevel = new UiCure::Machine(GetResourceManager(), _T("level_2"), mUiManager);
 		AddContextObject(mLevel, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 		lOk = (mLevel != 0);
 		assert(lOk);
