@@ -508,7 +508,15 @@ void App::OnMouseMove(float x, float y, bool pPressed)
 	((UiLepra::IosInputElement*)mUiManager->GetInputManager()->GetMouse()->GetButton(0))->SetValue(pPressed? 1 : 0);
 	((UiLepra::IosInputElement*)mUiManager->GetInputManager()->GetMouse()->GetAxis(0))->SetValue(x);
 	((UiLepra::IosInputElement*)mUiManager->GetInputManager()->GetMouse()->GetAxis(1))->SetValue(y);
-	Steer(UIKEY(UP), pPressed? 1 : 0);
+	if (x < 480/2)
+	{
+		Steer(UIKEY(UP), pPressed? 1 : 0);
+	}
+	else
+	{
+		Steer(UIKEY(SPACE), pPressed? 1 : 0);
+	}
+
 #endif // iOS
 }
 

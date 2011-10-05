@@ -460,6 +460,10 @@
 		B1A1E02413AA77710097B8D0 /* UiOggAlStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A1E02213AA77710097B8D0 /* UiOggAlStream.cpp */; };
 		B1A1E02513AA77710097B8D0 /* UiSoundStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A1E02313AA77710097B8D0 /* UiSoundStream.cpp */; };
 		B1B4899013F9BD6C0047C78A /* GrenadeRun-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = B1B4898F13F9BD6C0047C78A /* GrenadeRun-Info.plist */; };
+		B1B7E60E142FAFA00077E0C4 /* cloud_01_cloud.mesh in Resources */ = {isa = PBXBuildFile; fileRef = B1B7E60B142FAFA00077E0C4 /* cloud_01_cloud.mesh */; };
+		B1B7E60F142FAFA00077E0C4 /* cloud_01.phys in Resources */ = {isa = PBXBuildFile; fileRef = B1B7E60C142FAFA00077E0C4 /* cloud_01.phys */; };
+		B1B7E610142FAFA00077E0C4 /* incoming.wav in Resources */ = {isa = PBXBuildFile; fileRef = B1B7E60D142FAFA00077E0C4 /* incoming.wav */; };
+		B1B7E61E142FAFE60077E0C4 /* cloud_01.class in Resources */ = {isa = PBXBuildFile; fileRef = B1B7E61D142FAFE60077E0C4 /* cloud_01.class */; };
 		B1BC71C6140EC22D003F70F3 /* grenade_grenade.mesh in Resources */ = {isa = PBXBuildFile; fileRef = B1BC71BD140EC22D003F70F3 /* grenade_grenade.mesh */; };
 		B1BC71C7140EC22D003F70F3 /* grenade.class in Resources */ = {isa = PBXBuildFile; fileRef = B1BC71BE140EC22D003F70F3 /* grenade.class */; };
 		B1BC71C8140EC22D003F70F3 /* grenade.phys in Resources */ = {isa = PBXBuildFile; fileRef = B1BC71BF140EC22D003F70F3 /* grenade.phys */; };
@@ -1136,6 +1140,10 @@
 		B1A1E02313AA77710097B8D0 /* UiSoundStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiSoundStream.cpp; sourceTree = "<group>"; };
 		B1B4898F13F9BD6C0047C78A /* GrenadeRun-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GrenadeRun-Info.plist"; sourceTree = "<group>"; };
 		B1B489A313F9BE4A0047C78A /* GrenadeRun_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GrenadeRun_Prefix.pch; path = GrenadeRunXcode/GrenadeRun_Prefix.pch; sourceTree = "<group>"; };
+		B1B7E60B142FAFA00077E0C4 /* cloud_01_cloud.mesh */ = {isa = PBXFileReference; lastKnownFileType = file; name = cloud_01_cloud.mesh; path = ../Data/cloud_01_cloud.mesh; sourceTree = SOURCE_ROOT; };
+		B1B7E60C142FAFA00077E0C4 /* cloud_01.phys */ = {isa = PBXFileReference; lastKnownFileType = file; name = cloud_01.phys; path = ../Data/cloud_01.phys; sourceTree = SOURCE_ROOT; };
+		B1B7E60D142FAFA00077E0C4 /* incoming.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = incoming.wav; path = ../Data/incoming.wav; sourceTree = SOURCE_ROOT; };
+		B1B7E61D142FAFE60077E0C4 /* cloud_01.class */ = {isa = PBXFileReference; lastKnownFileType = compiled.javaclass; name = cloud_01.class; path = ../Data/cloud_01.class; sourceTree = SOURCE_ROOT; };
 		B1BC71BD140EC22D003F70F3 /* grenade_grenade.mesh */ = {isa = PBXFileReference; lastKnownFileType = file; name = grenade_grenade.mesh; path = ../Data/grenade_grenade.mesh; sourceTree = SOURCE_ROOT; };
 		B1BC71BE140EC22D003F70F3 /* grenade.class */ = {isa = PBXFileReference; lastKnownFileType = compiled.javaclass; name = grenade.class; path = ../Data/grenade.class; sourceTree = SOURCE_ROOT; };
 		B1BC71BF140EC22D003F70F3 /* grenade.phys */ = {isa = PBXFileReference; lastKnownFileType = file; name = grenade.phys; path = ../Data/grenade.phys; sourceTree = SOURCE_ROOT; };
@@ -2248,6 +2256,10 @@
 		B1A1E05013AA97470097B8D0 /* Data */ = {
 			isa = PBXGroup;
 			children = (
+				B1B7E61D142FAFE60077E0C4 /* cloud_01.class */,
+				B1B7E60B142FAFA00077E0C4 /* cloud_01_cloud.mesh */,
+				B1B7E60C142FAFA00077E0C4 /* cloud_01.phys */,
+				B1B7E60D142FAFA00077E0C4 /* incoming.wav */,
 				B1BC744B140F011F003F70F3 /* ground_1_test.png */,
 				B1BC72BF140EDAF2003F70F3 /* mud_particle_01_particle.mesh */,
 				B1BC72C0140EDAF2003F70F3 /* mud_particle_01.class */,
@@ -2361,6 +2373,10 @@
 				B1BC72C3140EDAF2003F70F3 /* mud_particle_01.class in Resources */,
 				B1BC72C4140EDAF2003F70F3 /* mud_particle_01.phys in Resources */,
 				B1BC744C140F011F003F70F3 /* ground_1_test.png in Resources */,
+				B1B7E60E142FAFA00077E0C4 /* cloud_01_cloud.mesh in Resources */,
+				B1B7E60F142FAFA00077E0C4 /* cloud_01.phys in Resources */,
+				B1B7E610142FAFA00077E0C4 /* incoming.wav in Resources */,
+				B1B7E61E142FAFE60077E0C4 /* cloud_01.class in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

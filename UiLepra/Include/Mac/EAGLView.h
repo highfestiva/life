@@ -21,7 +21,7 @@
  GLint framebufferHeight;
     
  // The OpenGL ES names for the framebuffer and renderbuffer used to render to this view.
- GLuint defaultFramebuffer, colorRenderbuffer;
+ GLuint defaultFramebuffer, colorRenderbuffer, depthRenderbuffer;
 
  bool isOpen;
  UIResponder* responder;
