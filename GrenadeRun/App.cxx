@@ -192,7 +192,7 @@ bool App::Open()
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLEMIPMAPPING, true);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_FOV, 60.0);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_CLIPNEAR, 1.0);
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_CLIPFAR, 3000.0);
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_CLIPFAR, 1000.0);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_SHADOWS, _T("Force:Volume"));
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_AMBIENTRED, 0.5);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_AMBIENTGREEN, 0.5);
@@ -531,15 +531,44 @@ void App::OnMouseMove(float x, float y, bool pPressed)
 	((UiLepra::IosInputElement*)mUiManager->GetInputManager()->GetMouse()->GetButton(0))->SetValue(pPressed? 1 : 0);
 	((UiLepra::IosInputElement*)mUiManager->GetInputManager()->GetMouse()->GetAxis(0))->SetValue(x);
 	((UiLepra::IosInputElement*)mUiManager->GetInputManager()->GetMouse()->GetAxis(1))->SetValue(y);
-	if (x < 480/2)
-	{
-		Steer(UIKEY(UP), pPressed? 1 : 0);
-	}
-	else
-	{
-		Steer(UIKEY(SPACE), pPressed? 1 : 0);
-	}
 
+	UiCure::CppContextObject* lAvatar1 = mGame->GetP1();
+	UiCure::CppContextObject* lAvatar2 = mGame->GetP2();
+	const CGSize lScreenSize = [UIScreen mainScreen].bounds.size;
+	const int w = lScreenSize.height;
+	const int h = lScreenSize.width;
+	const int s = 30 + w / 16;
+	const float lFactor = pPressed? 1 : 0;
+	if (x <= s)	// Close to bottom of player 1's screen?
+	{
+		if (y >= h - s)		// Player 1's lower left corner.
+		{
+			lAvatar1->SetEnginePower(0, (2*x-s)*lFactor/s, 0);
+			lAvatar1->SetEnginePower(1, (2*(h-y)-s)*lFactor/s, 0);
+		}
+		else if (y <= s)	// Player 1's lower right corner.
+		{
+			if (pPressed)
+			{
+				lAvatar1->SetEnginePower(2, +1*lFactor, 0);
+			}
+		}
+	}
+	else if (x >= w - s)	// Close to bottom player 2's screen?
+	{
+		if (y <= s)		// Player 2's lower left corner.
+		{
+			lAvatar2->SetEnginePower(0, (2*(x-w)+s)*lFactor/s, 0);
+			lAvatar2->SetEnginePower(1, (2*y-s)*lFactor/s, 0);
+		}
+		else if (y >= h - s)	// Player 2's lower right corner.
+		{
+			if (pPressed)
+			{
+				mGame->Shoot();
+			}
+		}
+	}
 #endif // iOS
 }
 

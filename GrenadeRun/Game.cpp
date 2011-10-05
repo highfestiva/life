@@ -286,6 +286,7 @@ bool Game::Render()
 	t.GetOrientation().RotateAroundOwnZ(mLauncherYaw*0.8f);
 #ifdef LEPRA_IOS
 	t.GetOrientation().RotateAroundOwnY(PIF*0.5f);
+	t.GetPosition().z -= 2.0f;
 #endif // iOS
 	mUiManager->SetCameraPosition(t);
 	mLauncher->SetRootPosition(lLauncherPosition);
