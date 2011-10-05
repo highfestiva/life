@@ -91,6 +91,11 @@ GameManager::~GameManager()
 	mResource = 0;
 	delete (mVariableScope);
 	mVariableScope = 0;
+
+	while (mLock.IsOwner())
+	{
+		mLock.Release();
+	}
 }
 
 

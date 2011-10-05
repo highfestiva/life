@@ -5,6 +5,7 @@
 
 #include "../Include/UiOggAlStream.h"
 #include <ogg/ogg.h>
+#include "../Include/UiSoundManager.h"
 
 #ifdef LEPRA_MSVC
 #pragma warning(disable: 4996)	// fopen unsafe.
@@ -19,7 +20,8 @@ namespace UiLepra
 
 
 
-OggAlStream::OggAlStream(const str& pFilename, bool pLoop)
+OggAlStream::OggAlStream(SoundManager* pSoundManager, const str& pFilename, bool pLoop):
+	Parent(pSoundManager)
 {
 	mIsLooping = pLoop;
 	mIsOpen = Open(pFilename);
@@ -76,6 +78,7 @@ bool OggAlStream::Update()
 	bool lIsActive = true;
 	int lProcessedBufferCount;
 	alGetSourcei(mAlSource, AL_BUFFERS_PROCESSED, &lProcessedBufferCount);
+	alSourcef(mAlSource, AL_GAIN, mVolume * mSoundManager->GetMasterVolume());
 	AL_CHECK();
 	while (lProcessedBufferCount--)
 	{

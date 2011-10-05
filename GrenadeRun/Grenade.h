@@ -24,14 +24,15 @@ class Grenade: public UiCure::Machine
 public:
 	typedef UiCure::Machine Parent;
 
-	Grenade(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager);
+	Grenade(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager, float pMuzzleVelocity);
 	virtual ~Grenade();
 
-	void Start();
-
 private:
+	void UnlockLauncher();
+	void Launch();
 	void OnTick();
-	void OnAlarm(int pAlarmId, void*);
+	void OnAlarm(int, void*);
+	virtual bool TryComplete();
 	virtual void OnForceApplied(TBC::PhysicsManager::ForceFeedbackListener* pOtherObject,
 		TBC::PhysicsManager::BodyID pOwnBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
 		const Vector3DF& pForce, const Vector3DF& pTorque,
@@ -39,6 +40,11 @@ private:
 	void LoadPlaySound3d(UiCure::UserSound3dResource* pSoundResource);
 
 	UiCure::UserSound3dResource* mShreekSound;
+	UiCure::UserSound3dResource* mLaunchSound;
+	int mTimeFrameCreated;
+	float mMuzzleVelocity;
+	bool mIsLaunched;
+	bool mUnlockedLauncher;
 	bool mExploded;
 
 	LOG_CLASS_DECLARE();

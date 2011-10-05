@@ -6,6 +6,7 @@
 
 #include "Grenade.h"
 #include "../Cure/Include/ContextManager.h"
+#include "../Cure/Include/TimeManager.h"
 #include "../TBC/Include/ChunkyBoneGeometry.h"
 #include "../UiCure/Include/UiGameUiManager.h"
 #include "../UiCure/Include/UiProps.h"
@@ -18,27 +19,56 @@ namespace GrenadeRun
 
 
 
-Grenade::Grenade(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager):
+Grenade::Grenade(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager, float pMuzzleVelocity):
 	Parent(pResourceManager, pClassId, pUiManager),
 	mShreekSound(0),
+	mLaunchSound(0),
+	mTimeFrameCreated(-1),
+	mMuzzleVelocity(pMuzzleVelocity),
+	mIsLaunched(false),
+	mUnlockedLauncher(false),
 	mExploded(false)
 {
 }
 
 Grenade::~Grenade()
 {
+	delete mLaunchSound;
+	mLaunchSound = 0;
 	delete mShreekSound;
 	mShreekSound = 0;
 }
 
 
 
-void Grenade::Start()
+void Grenade::UnlockLauncher()
 {
-	GetManager()->AddAlarmCallback(this, 1, 1.1f, 0);
+	if (!mUnlockedLauncher)
+	{
+		mUnlockedLauncher = true;
+		((Game*)GetManager()->GetGameManager())->UnlockLauncher();
+	}
 }
 
+void Grenade::Launch()
+{
+	mIsLaunched = true;
 
+	mShreekSound = new UiCure::UserSound3dResource(GetUiManager(), UiLepra::SoundManager::LOOP_FORWARD);
+	mShreekSound->Load(GetResourceManager(), _T("incoming.wav"),
+		UiCure::UserSound3dResource::TypeLoadCallback(this, &Grenade::LoadPlaySound3d));
+
+	mLaunchSound = new UiCure::UserSound3dResource(GetUiManager(), UiLepra::SoundManager::LOOP_NONE);
+	mLaunchSound->Load(GetResourceManager(), _T("launch.wav"),
+		UiCure::UserSound3dResource::TypeLoadCallback(this, &Grenade::LoadPlaySound3d));
+
+	const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
+	GetManager()->GetGameManager()->GetPhysicsManager()->ActivateGravity(lGeometry->GetBodyId());
+	Vector3DF lVelocity = GetOrientation() * Vector3DF(0, 0, mMuzzleVelocity);
+	GetManager()->GetGameManager()->GetPhysicsManager()->SetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
+
+	GetManager()->AddAlarmCallback(this, 3, 0.3f, 0);
+}
 
 void Grenade::OnTick()
 {
@@ -47,59 +77,75 @@ void Grenade::OnTick()
 		const Vector3DF lPosition = GetPosition();
 		Vector3DF lVelocity = GetVelocity();
 		mUiManager->GetSoundManager()->SetSoundPosition(mShreekSound->GetData(), lPosition, lVelocity);
-		if (lVelocity.GetLengthSquared() > 10*10)
+		if (lVelocity.GetLengthSquared() > 1*1)
 		{
 			TBC::PhysicsManager::BodyID lBodyId = mPhysics->GetBoneGeometry(0)->GetBodyId();
 			const float l = lVelocity.GetLength();
 			const float lPitch = -lVelocity.GetAngle(Vector3DF(0,0,l));
 			Vector3DF lXY = Vector3DF(lVelocity.x, lVelocity.y, 0);
 			const float l2 = lXY.GetLength();
-			const float lYaw = lXY.GetAngle(Vector3DF(0,l2,0));
-			QuaternionF q;
-			//q.SetEulerAngles(lYaw, lPitch, 0);
-			q.RotateAroundWorldZ(lPosition.z/100);
-			q.RotateAroundWorldX(lPitch);
-			q.RotateAroundWorldZ(lYaw);
-			TransformationF t;
-			t.GetOrientation() = q * mPhysics->GetOriginalBoneTransformation(0).GetOrientation();
-			t.SetPosition(lPosition);
-			GetManager()->GetGameManager()->GetPhysicsManager()->SetBodyTransform(lBodyId, t);
+			if (l2)
+			{
+				const float lYaw = lXY.GetAngle(Vector3DF(0,l2,0));
+				QuaternionF q;
+				//q.SetEulerAngles(lYaw, lPitch, 0);
+				q.RotateAroundWorldZ(lPosition.z/100);
+				q.RotateAroundWorldX(lPitch);
+				q.RotateAroundWorldZ((lVelocity.x > 0)? -lYaw : lYaw);
+				TransformationF t;
+				t.GetOrientation() = q * mPhysics->GetOriginalBoneTransformation(0).GetOrientation();
+				t.SetPosition(lPosition);
+				GetManager()->GetGameManager()->GetPhysicsManager()->SetBodyTransform(lBodyId, t);
+			}
 		}
+	}
+	if (mLaunchSound && mLaunchSound->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
+	{
+		Vector3DF lPosition;
+		Vector3DF lVelocity;
+		((Game*)GetManager()->GetGameManager())->GetVehicleMotion(lPosition, lVelocity);
+		mUiManager->GetSoundManager()->SetSoundPosition(mLaunchSound->GetData(), lPosition, lVelocity);
+	}
+	if (!mIsLaunched && mTimeFrameCreated >= 0)
+	{
+		TransformationF lTransform;
+		((Game*)GetManager()->GetGameManager())->GetLauncherTransform(lTransform);
+		const Cure::TimeManager* lTimeManager = GetManager()->GetGameManager()->GetTimeManager();
+		const float lTime = lTimeManager->ConvertPhysicsFramesToSeconds(lTimeManager->GetCurrentPhysicsFrameDelta(mTimeFrameCreated));
+		const float lLauncherLength = 3.0f;
+		float h = lLauncherLength/2+6 - lTime*lTime*8.0f;
+		h = std::max(-lLauncherLength/2, h);
+		const Vector3DF lFalling = lTransform.GetOrientation() * Vector3DF(0, 0, h);
+		lTransform.GetPosition() += lFalling;
+		lTransform.GetOrientation() *= GetPhysics()->GetOriginalBoneTransformation(0).GetOrientation().GetInverse();
+		GetManager()->GetGameManager()->GetPhysicsManager()->SetBodyTransform(GetPhysics()->GetBoneGeometry(0)->GetBodyId(), lTransform);
+		if (h <= -lLauncherLength/2+0.1f)
+		{
+			Launch();
+		}
+	}
+	if (GetPosition().z <= -300)
+	{
+		GetManager()->PostKillObject(GetInstanceId());
 	}
 	Parent::OnTick();
 }
 
-void Grenade::OnAlarm(int pAlarmId, void*)
+void Grenade::OnAlarm(int, void*)
 {
-	const TBC::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
-	if (lGeometry && lGeometry->GetBodyId() != TBC::INVALID_BODY)
-	{
-		switch (pAlarmId)
-		{
-			case 1:
-			{
-				GetManager()->AddAlarmCallback(this, 2, 1.5f, 0);
-				GetManager()->GetGameManager()->GetPhysicsManager()->DeactivateGravity(lGeometry->GetBodyId());
-				Vector3DF lVelocity;
-				GetManager()->GetGameManager()->GetPhysicsManager()->SetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
-			}
-			break;
-			case 2:
-			{
-				mShreekSound = new UiCure::UserSound3dResource(GetUiManager(), UiLepra::SoundManager::LOOP_FORWARD);
-				mShreekSound->Load(GetResourceManager(), _T("incoming.wav"),
-					UiCure::UserSound3dResource::TypeLoadCallback(this, &Grenade::LoadPlaySound3d));
-
-				GetManager()->GetGameManager()->GetPhysicsManager()->ActivateGravity(lGeometry->GetBodyId());
-				Vector3DF lVelocity(-38, 32, 40);
-				GetManager()->GetGameManager()->GetPhysicsManager()->SetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
-			}
-			break;
-		}
-	}
+	UnlockLauncher();
 }
 
-
+bool Grenade::TryComplete()
+{
+	bool lOk = Parent::TryComplete();
+	if (GetPhysics())
+	{
+		GetPhysics()->EnableGravity(GetManager()->GetGameManager()->GetPhysicsManager(), false);
+		mTimeFrameCreated = GetManager()->GetGameManager()->GetTimeManager()->GetCurrentPhysicsFrame();
+	}
+	return lOk;
+}
 
 void Grenade::OnForceApplied(TBC::PhysicsManager::ForceFeedbackListener* pOtherObject,
 	TBC::PhysicsManager::BodyID pOwnBodyId, TBC::PhysicsManager::BodyID pOtherBodyId,
@@ -117,8 +163,10 @@ void Grenade::OnForceApplied(TBC::PhysicsManager::ForceFeedbackListener* pOtherO
 	}
 	mExploded = true;
 
+	UnlockLauncher();
+
 	GetManager()->PostKillObject(GetInstanceId());
-	((Game*)GetManager()->GetGameManager())->Blast(pForce, pTorque, pPosition, this);
+	((Game*)GetManager()->GetGameManager())->Detonate(pForce, pTorque, pPosition, this);
 }
 
 void Grenade::LoadPlaySound3d(UiCure::UserSound3dResource* pSoundResource)
@@ -126,8 +174,19 @@ void Grenade::LoadPlaySound3d(UiCure::UserSound3dResource* pSoundResource)
 	assert(pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE);
 	if (pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
-		mUiManager->GetSoundManager()->SetSoundPosition(mShreekSound->GetData(), GetPosition(), GetVelocity());
-		mUiManager->GetSoundManager()->Play(pSoundResource->GetData(), 1.0, 10.0);
+		if (pSoundResource == mShreekSound)
+		{
+			mUiManager->GetSoundManager()->SetSoundPosition(pSoundResource->GetData(), GetPosition(), GetVelocity());
+			mUiManager->GetSoundManager()->Play(pSoundResource->GetData(), 0.7f, 1.0);
+		}
+		else
+		{
+			Vector3DF lPosition;
+			Vector3DF lVelocity;
+			((Game*)GetManager()->GetGameManager())->GetVehicleMotion(lPosition, lVelocity);
+			mUiManager->GetSoundManager()->SetSoundPosition(pSoundResource->GetData(), lPosition, lVelocity);
+			mUiManager->GetSoundManager()->Play(pSoundResource->GetData(), 5.0f, 1.0);
+		}
 	}
 }
 

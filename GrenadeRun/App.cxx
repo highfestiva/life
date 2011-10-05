@@ -90,6 +90,7 @@ private:
 
 	double mAverageLoopTime;
 	HiResTimer mLoopTimer;
+	bool mDoLayout;
 	Cure::ResourceManager* mResourceManager;
 	Cure::RuntimeVariableScope* mVariableScope;
 	UiCure::GameUiManager* mUiManager;
@@ -104,6 +105,7 @@ private:
 	UiTbc::Button* mResetButton;
 	UiTbc::Button* mRetryButton;
 	UiTbc::Button* mGetiPhoneButton;
+	UiTbc::RectComponent* mPlayerSplitter;
 
 	LOG_CLASS_DECLARE();
 };
@@ -127,7 +129,8 @@ App::App(const strutil::strvec& pArgumentList):
 	Application(pArgumentList),
 	mLayoutFrameCounter(-10),
 	mVariableScope(0),
-	mAverageLoopTime(1.0/FPS)
+	mAverageLoopTime(1.0/FPS),
+	mDoLayout(true)
 {
 	mApp = this;
 }
@@ -190,10 +193,10 @@ bool App::Open()
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_FOV, 60.0);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_CLIPNEAR, 1.0);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_CLIPFAR, 3000.0);
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_SHADOWS, _T("None"));
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_AMBIENTRED, 0.8);
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_AMBIENTGREEN, 0.8);
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_AMBIENTBLUE, 0.8);
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_SHADOWS, _T("Force:Volume"));
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_AMBIENTRED, 0.5);
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_AMBIENTGREEN, 0.5);
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_AMBIENTBLUE, 0.5);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_SOUND_ROLLOFF, 0.2);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_SOUND_DOPPLER, 1.3);
 
@@ -204,6 +207,8 @@ bool App::Open()
 #ifdef LEPRA_IOS
 		mUiManager->GetCanvas()->SetOutputRotation(90);
 #endif // iOS
+		mUiManager->GetDisplayManager()->SetCaption(_T("Kill Cutie"));
+		mUiManager->GetDisplayManager()->AddResizeObserver(this);
 		mUiManager->GetInputManager()->AddKeyCodeInputObserver(this);
 	}
 	if (lOk)
@@ -235,17 +240,22 @@ bool App::Open()
 		mGetiPhoneButton->SetOnClick(App, OnGetiPhoneClick);
 #endif // iOS*/
 
-		Layout();
+		mPlayerSplitter = new UiTbc::RectComponent(BLACK, _T("Splitter"));
+		lDesktopWindow->AddChild(mPlayerSplitter);
 	}
 	if (lOk)
 	{
 		const str lPathPrefix = SystemManager::GetDataDirectory(mArgumentVector[0]);
 		mMusicStreamer = 0;
-		/*mMusicStreamer = mUiManager->GetSoundManager()->CreateSoundStream(lPathPrefix+_T("Oiit.ogg"), UiLepra::SoundManager::LOOP_FORWARD, 0);
+		//mMusicStreamer = mUiManager->GetSoundManager()->CreateSoundStream(lPathPrefix+_T("Oiit.ogg"), UiLepra::SoundManager::LOOP_FORWARD, 0);
 		if (!mMusicStreamer || !mMusicStreamer->Playback())
 		{
 			mLog.Errorf(_T("Unable to play beautiful muzak!"));
-		}*/
+		}
+		else
+		{
+			mMusicStreamer->SetVolume(0.5f);
+		}
 	}
 
 	UiLepra::Core::ProcessMessages();
@@ -353,6 +363,10 @@ bool App::Poll()
 		mLoopTimer.PopTimeDiff();
 		lOk = (SystemManager::GetQuitRequest() == 0);
 	}
+	if (lOk && mDoLayout)
+	{
+		Layout();
+	}
 	if (lOk)
 	{
 		float r, g, b;
@@ -370,15 +384,16 @@ bool App::Poll()
 	{
 		mGame->BeginTick();
 	}
+	bool lRender = false;
 	if (lOk)
 	{
-		lOk = mUiManager->CanRender();
+		lRender = mUiManager->CanRender();
 	}
-	if (lOk)
+	if (lOk && lRender)
 	{
 		lOk = mGame->Render();
 	}
-	if (lOk)
+	if (lOk && lRender)
 	{
 		mUiManager->Paint();
 	}
@@ -406,7 +421,14 @@ bool App::Poll()
 
 void App::Layout()
 {
-	if (!mLazyButton)
+	PixelRect lRect = mUiManager->GetDesktopWindow()->GetScreenRect();
+	lRect.mLeft = lRect.GetCenterX()-5;
+	lRect.mRight = lRect.mLeft+10;
+	mPlayerSplitter->SetPos(lRect.mLeft, lRect.mTop);
+	mPlayerSplitter->SetPreferredSize(lRect.GetSize());
+	mDoLayout = false;
+
+	/*if (!mLazyButton)
 	{
 		return;
 	}
@@ -429,7 +451,7 @@ void App::Layout()
 	if (mGetiPhoneButton)
 	{
 		mGetiPhoneButton->SetPos(tx, ty);
-	}
+	}*/
 }
 
 
@@ -484,6 +506,7 @@ bool App::Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor)
 		case UIKEY(DOWN):	lAvatar1->SetEnginePower(0, -1*pFactor, 0);	break;
 		case UIKEY(LEFT):	lAvatar1->SetEnginePower(1, -1*pFactor, 0);	break;
 		case UIKEY(RIGHT):	lAvatar1->SetEnginePower(1, +1*pFactor, 0);	break;
+		case UIKEY(NUMPAD_0):	lAvatar1->SetEnginePower(2, +1*pFactor, 0);	break;
 	}
 	return false;
 }
@@ -524,7 +547,7 @@ void App::OnMouseMove(float x, float y, bool pPressed)
 
 void App::OnResize(int /*pWidth*/, int /*pHeight*/)
 {
-	Layout();
+	mDoLayout = true;
 }
 
 void App::OnMinimize()

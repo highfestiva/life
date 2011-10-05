@@ -5,6 +5,7 @@
 
 
 #include "../Cure/Include/GameManager.h"
+#include "../UiTbc/Include/UiRenderer.h"
 
 
 
@@ -76,8 +77,11 @@ public:
 
 	UiCure::CppContextObject* GetP1();
 	UiCure::CppContextObject* GetP2();
+	void GetVehicleMotion(Vector3DF& pPosition, Vector3DF pVelocity) const;
+	void GetLauncherTransform(TransformationF& pTransform) const;
 	bool Shoot();
-	void Blast(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition, Cure::ContextObject* pObject1);
+	void UnlockLauncher();
+	void Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition, Cure::ContextObject* pObject1);
 
 	bool Render();
 
@@ -105,9 +109,13 @@ private:
 
 	UiCure::GameUiManager* mUiManager;
 	UiCure::CollisionSoundManager* mCollisionSoundManager;
+	UiTbc::Renderer::LightID mLightId;
 	UiCure::CppContextObject* mLevel;
 	UiCure::CppContextObject* mVehicle;
 	UiCure::CppContextObject* mLauncher;
+	bool mIsLaunching;
+	float mLauncherYaw;
+	float mLauncherPitch;
 	double mTime;
 };
 

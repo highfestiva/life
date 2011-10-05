@@ -339,7 +339,7 @@ void Machine::OnTick()
 					lPuff->DisableRootShadow();
 					lPuff->SetInitialTransform(lTransform);
 					lPuff->SetOpacity(lOpacity);
-					lPuff->StartParticle(Props::PARTICLE_GAS, lVelocity, 3);
+					lPuff->StartParticle(Props::PARTICLE_GAS, lVelocity, 3, 0.5f, 2.0f);
 					lPuff->StartLoading();
 				}
 			}
@@ -421,7 +421,7 @@ void Machine::OnForceApplied(TBC::PhysicsManager::ForceFeedbackListener* pOtherO
 		Props* lPuff = new Props(GetResourceManager(), _T("mud_particle_01"), mUiManager);
 		GetManager()->GetGameManager()->AddContextObject(lPuff, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 		lPuff->SetInitialTransform(TransformationF(QuaternionF(), lPosition));
-		lPuff->StartParticle(Props::PARTICLE_SOLID, lRelativeVelocity, 1);
+		lPuff->StartParticle(Props::PARTICLE_SOLID, lRelativeVelocity, 1, 2, 2);
 		lPuff->StartLoading();
 		mCreatedParticles = true;
 	}

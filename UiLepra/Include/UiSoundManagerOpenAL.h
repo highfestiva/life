@@ -31,6 +31,7 @@ public:
 	SoundManagerOpenAL(int pMixRate);
 	virtual ~SoundManagerOpenAL();
 
+	virtual float GetMasterVolume() const;
 	virtual void SetMasterVolume(float pVolume);
 
 	virtual SoundID LoadSound2D(const str& pFileName, LoopMode LoopMode, int pPriority);

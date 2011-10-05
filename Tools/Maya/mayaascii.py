@@ -1502,28 +1502,65 @@ class MAReader:
                 'setAttr -k off ".v";' -> (['setAttr', '-k', 'off', '".v"'], 19)
                 """
                 # Search for a quoted string
-                b,e = self.findString(s)
+##                b,e = self.findString(s)
                 # Search for the first semicolon (which might be the true command
                 # separator or not)
-                n = s.find(";")
+##                n = s.find(";")
                 # Was a semicolon before the first string? Then the string belongs
                 # to a subsequent command, so ignore it for now
-                if n!=-1 and b!=None and n<b:
-                        b = e = None
+##                if n!=-1 and b!=None and n<b:
+##                        b = e = None
                 # No string found?
-                if b==None:
-                        if n==-1:
-                                return s.split(), -1
+##                if b==None:
+##                        if n==-1:
+##                                return s.split(), -1
+##                        else:
+##                                return s[:n].split(), n
+##                else:
+##                        if e==None:
+##                                return s[:b].split() + [s[b:]+'"'], -1
+##                        else:
+##                                print("Splitting at index", e+1, "of", len(s))
+##                                s2,n = self.splitCommand(s[e+1:])
+##                                if n!=-1:
+##                                        n += e+1
+##                                return s[:b].split() + [s[b:e+1]] + s2, n
+                # high_festiva trying to optimize (and make it work).
+                instr = False
+                inescape = False
+                a = ''
+                rs = []
+                cut_index = -1
+                for idx,ch in enumerate(s):
+                        if instr:
+                                a += ch
+                                if inescape:
+                                        inescape = False
+                                elif ch == '\\':
+                                        inescape = True
+                                elif ch == '"':
+                                        if a:
+                                                rs += [a]
+                                                a = ''
+                                        instr = False
+                        elif ch == '"':
+                                if a:
+                                        rs += [a]
+                                a = ch
+                                instr = True
+                        elif ch == ';':
+                                if a:
+                                        rs += [a]
+                                cut_index = idx
+                                break
+                        elif ch == ' ' or ch == '\t' or ch == '\n':
+                                if a:
+                                        rs += [a]
+                                        a = ''
                         else:
-                                return s[:n].split(), n
-                else:
-                        if e==None:
-                                return s[:b].split() + [s[b:]+'"'], -1
-                        else:
-                                s2,n = self.splitCommand(s[e+1:])
-                                if n!=-1:
-                                        n += e+1
-                                return s[:b].split() + [s[b:e+1]] + s2, n
+                                a += ch
+                return rs, cut_index
+
 
         def findString(self, s):
                 """Find the first string occurence.

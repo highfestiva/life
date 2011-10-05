@@ -31,7 +31,7 @@ public:
 	virtual ~Props();
 
 	void SetOpacity(float pOpacity);
-	void StartParticle(ParticleType pParticleType, const Vector3DF& pStartVelocity, float pScale);
+	void StartParticle(ParticleType pParticleType, const Vector3DF& pStartVelocity, float pScale, float pAngularRange, float pTime);
 
 protected:
 	void DispatchOnLoadMesh(UserGeometryReferenceResource* pMeshResource);
@@ -44,6 +44,7 @@ private:
 	ParticleType mParticleType;
 	float mScale;
 	float mTime;
+	float mLifeTime;
 	float mOpacity;
 	Vector3DF mAngularVelocity;
 
