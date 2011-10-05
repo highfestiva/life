@@ -81,7 +81,7 @@ public:
 	void GetLauncherTransform(TransformationF& pTransform) const;
 	bool Shoot();
 	void UnlockLauncher();
-	void Blast(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition, Cure::ContextObject* pObject1);
+	void Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition, Cure::ContextObject* pObject1);
 
 	bool Render();
 

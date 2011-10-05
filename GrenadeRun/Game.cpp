@@ -8,6 +8,7 @@
 #include "../Cure/Include/FloatAttribute.h"
 #include "../Cure/Include/RuntimeVariable.h"
 #include "../Cure/Include/TimeManager.h"
+#include "../Lepra/Include/Random.h"
 #include "../TBC/Include/PhysicsEngine.h"
 #include "../UiCure/Include/UiCollisionSoundManager.h"
 #include "../UiCure/Include/UiMachine.h"
@@ -180,19 +181,54 @@ void Game::UnlockLauncher()
 	mIsLaunching = false;
 }
 
-void Game::Blast(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition, Cure::ContextObject* pObject1)
+void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition, Cure::ContextObject* pObject1)
 {
 	mCollisionSoundManager->OnCollision(pForce, pTorque, pPosition, pObject1, mLevel, pObject1->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), 10000);
 
-	UiCure::Props* lPuff = new UiCure::Props(GetResourceManager(), _T("cloud_01"), mUiManager);
-	AddContextObject(lPuff, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
-	//mLog.Infof(_T("Machine %i creates fume particle %i."), GetInstanceId(), lPuff->GetInstanceId());
-	lPuff->DisableRootShadow();
-	TransformationF lTransform(QuaternionF(), pPosition);
-	lPuff->SetInitialTransform(lTransform);
-	lPuff->SetOpacity(0.3f);
-	lPuff->StartParticle(UiCure::Props::PARTICLE_GAS, Vector3DF(), 0.3f);
-	lPuff->StartLoading();
+	{
+		const int lParticleCount = 200;
+		for (int i = 0; i < lParticleCount; ++i)
+		{
+			UiCure::Props* lPuff = new UiCure::Props(GetResourceManager(), _T("mud_particle_01"), mUiManager);
+			AddContextObject(lPuff, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+			lPuff->DisableRootShadow();
+			float x = (float)Random::Uniform(-1, 1);
+			float y = (float)Random::Uniform(-1, 1);
+			float z = 0;
+			TransformationF lTransform(QuaternionF(), pPosition + Vector3DF(x, y, z));
+			lPuff->SetInitialTransform(lTransform);
+			const float lOpacity = (float)Random::Uniform(0.3f, 2.2f);
+			lPuff->SetOpacity(lOpacity);
+			const float lAngle = (float)Random::Uniform(0, 2*PIF);
+			x = (20.0f * i/lParticleCount - 10) * cos(lAngle);
+			y = (10 * (float)Random::Uniform(-1, 1)) * sin(lAngle);
+			z = (30 + 12 * sin(5*PIF*i/lParticleCount) * (float)Random::Uniform(0.0, 1)) * (float)Random::Uniform(0.2f, 1.0f);
+			lPuff->StartParticle(UiCure::Props::PARTICLE_SOLID, Vector3DF(x, y, z), 3.0f / lOpacity, 0.5f, 6.0f);
+			lPuff->StartLoading();
+		}
+	}
+
+	{
+		const int lParticleCount = 10;
+		for (int i = 0; i < lParticleCount; ++i)
+		{
+			UiCure::Props* lPuff = new UiCure::Props(GetResourceManager(), _T("cloud_01"), mUiManager);
+			AddContextObject(lPuff, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+			lPuff->DisableRootShadow();
+			float x = (float)Random::Uniform(-1, 1);
+			float y = (float)Random::Uniform(-1, 1);
+			float z = (float)Random::Uniform(-1, 1);
+			TransformationF lTransform(QuaternionF(), pPosition + Vector3DF(x, y, z));
+			lPuff->SetInitialTransform(lTransform);
+			const float lOpacity = (float)Random::Uniform(0.025f, 0.1f);
+			lPuff->SetOpacity(lOpacity);
+			x = x*17;
+			y = y*17;
+			z = (float)Random::Uniform(0, 10);
+			lPuff->StartParticle(UiCure::Props::PARTICLE_GAS, Vector3DF(x, y, z), 0.002f / lOpacity, 0.1f, 5.0f);
+			lPuff->StartLoading();
+		}
+	}
 
 	if (mVehicle && mVehicle->IsLoaded())
 	{

@@ -166,7 +166,7 @@ void Grenade::OnForceApplied(TBC::PhysicsManager::ForceFeedbackListener* pOtherO
 	UnlockLauncher();
 
 	GetManager()->PostKillObject(GetInstanceId());
-	((Game*)GetManager()->GetGameManager())->Blast(pForce, pTorque, pPosition, this);
+	((Game*)GetManager()->GetGameManager())->Detonate(pForce, pTorque, pPosition, this);
 }
 
 void Grenade::LoadPlaySound3d(UiCure::UserSound3dResource* pSoundResource)

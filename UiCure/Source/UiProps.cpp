@@ -22,7 +22,8 @@ Props::Props(Cure::ResourceManager* pResourceManager, const str& pClassId, GameU
 	mParticleType(PARTICLE_NONE),
 	mScale(1),
 	mTime(0),
-	mOpacity(0.5f)
+	mLifeTime(2),
+	mOpacity(1)
 {
 	SetPhysicsTypeOverride(PHYSICS_OVERRIDE_BONES);
 }
@@ -38,17 +39,17 @@ void Props::SetOpacity(float pOpacity)
 	mOpacity = pOpacity;
 }
 
-void Props::StartParticle(ParticleType pParticleType, const Vector3DF& pStartVelocity, float pScale)
+void Props::StartParticle(ParticleType pParticleType, const Vector3DF& pStartVelocity, float pScale, float pAngularRange, float pTime)
 {
 	//assert(pStartVelocity.GetLengthSquared() < 1000*1000);
 	mParticleType = pParticleType;
 	mVelocity = pStartVelocity;
 	mScale = pScale;
-	const float lAngularRange = 2;
-	mAngularVelocity.Set((float)Random::Uniform(-lAngularRange, lAngularRange),
-		(float)Random::Uniform(-lAngularRange, lAngularRange),
-		(float)Random::Uniform(-lAngularRange*0.1f, lAngularRange*0.1f));
-	GetManager()->AddAlarmCallback(this, 5, 2, 0);
+	mAngularVelocity.Set((float)Random::Uniform(-pAngularRange, pAngularRange),
+		(float)Random::Uniform(-pAngularRange, pAngularRange),
+		(float)Random::Uniform(-pAngularRange*0.1f, pAngularRange*0.1f));
+	mLifeTime = pTime;
+	GetManager()->AddAlarmCallback(this, 5, mLifeTime, 0);
 }
 
 
@@ -65,13 +66,17 @@ void Props::DispatchOnLoadMesh(UserGeometryReferenceResource* pMeshResource)
 
 void Props::TryAddTexture()
 {
-	if (mParticleType == PARTICLE_GAS)
+	for (size_t x = 0; x < mMeshResourceArray.size(); ++x)
 	{
-		for (size_t x = 0; x < mMeshResourceArray.size(); ++x)
+		if (mMeshResourceArray[x]->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 		{
-			if (mMeshResourceArray[x]->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
+			if (mParticleType == PARTICLE_GAS)
 			{
 				mMeshResourceArray[x]->GetRamData()->GetBasicMaterialSettings().mAlpha = 0.01f;
+			}
+			else if (mParticleType == PARTICLE_SOLID)
+			{
+				mMeshResourceArray[x]->GetRamData()->GetBasicMaterialSettings().mAlpha = mOpacity;
 			}
 		}
 	}
@@ -88,6 +93,20 @@ void Props::OnTick()
 		{
 			SetRootPosition(GetPosition() + mVelocity*lFrameTime);
 			mVelocity.z -= 9.82f*lFrameTime;
+
+			QuaternionF lOrientation = GetOrientation();
+			lOrientation.RotateAroundOwnX(lFrameTime * mAngularVelocity.x * mVelocity.x);
+			lOrientation.RotateAroundOwnY(lFrameTime * mAngularVelocity.y * mVelocity.y);
+			lOrientation.RotateAroundOwnZ(lFrameTime * mAngularVelocity.z * mVelocity.z);
+			SetRootOrientation(lOrientation);
+
+			if (mTime > mLifeTime-1)
+			{
+				for (size_t x = 0; x < mMeshResourceArray.size(); ++x)
+				{
+					mMeshResourceArray[x]->GetRamData()->GetBasicMaterialSettings().mAlpha = mOpacity * (mLifeTime-mTime);
+				}
+			}
 		}
 		break;
 		case PARTICLE_GAS:
@@ -101,14 +120,14 @@ void Props::OnTick()
 			QuaternionF lOrientation = GetOrientation();
 			lOrientation.RotateAroundOwnX(lFrameTime * mAngularVelocity.x * mVelocity.x);
 			lOrientation.RotateAroundOwnY(lFrameTime * mAngularVelocity.y * mVelocity.y);
-			lOrientation.RotateAroundOwnY(lFrameTime * mAngularVelocity.z * mVelocity.z);
+			lOrientation.RotateAroundOwnZ(lFrameTime * mAngularVelocity.z * mVelocity.z);
 			SetRootOrientation(lOrientation);
 
 			for (size_t x = 0; x < mMeshResourceArray.size(); ++x)
 			{
 				if (mMeshResourceArray[x]->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 				{
-					mMeshResourceArray[x]->GetRamData()->GetBasicMaterialSettings().mAlpha = mOpacity * sin(mTime*0.5f*PIF);
+					mMeshResourceArray[x]->GetRamData()->GetBasicMaterialSettings().mAlpha = mOpacity * sin(mTime/mLifeTime*PIF);
 				}
 			}
 		}
