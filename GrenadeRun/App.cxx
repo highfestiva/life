@@ -187,18 +187,24 @@ bool App::Open()
 
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_DISPLAY_ENABLEVSYNC, false);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLELIGHTS, true);
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLETRILINEARFILTERING, true);
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLETRILINEARFILTERING, false);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLEBILINEARFILTERING, false);
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLEMIPMAPPING, true);
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLEMIPMAPPING, false);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_FOV, 60.0);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_CLIPNEAR, 1.0);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_CLIPFAR, 1000.0);
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_SHADOWS, _T("Force:Volume"));
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_SHADOWS, _T("None"));
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_AMBIENTRED, 0.5);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_AMBIENTGREEN, 0.5);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_AMBIENTBLUE, 0.5);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_SOUND_ROLLOFF, 0.2);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_SOUND_DOPPLER, 1.3);
+
+#ifndef LEPRA_IOS
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLETRILINEARFILTERING, true);
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLEMIPMAPPING, true);
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_SHADOWS, _T("Force:Volume"));	
+#endif // !iOS
 
 	mUiManager = new UiCure::GameUiManager(mVariableScope);
 	bool lOk = mUiManager->Open();
@@ -214,7 +220,7 @@ bool App::Open()
 	if (lOk)
 	{
 		UiTbc::DesktopWindow* lDesktopWindow = mUiManager->GetDesktopWindow();
-		mLazyButton = CreateButton(_T("Slower"), Color(50, 150, 0), lDesktopWindow);
+		/*mLazyButton = CreateButton(_T("Slower"), Color(50, 150, 0), lDesktopWindow);
 		mLazyButton->SetOnClick(App, OnSpeedClick);
 		mHardButton = CreateButton(_T("Slow"), Color(192, 192, 0), lDesktopWindow);
 		mHardButton->SetOnClick(App, OnSpeedClick);
@@ -231,7 +237,7 @@ bool App::Open()
 		mResetButton = CreateButton(_T("Menu"), Color(210, 0, 0), lDesktopWindow);
 		mResetButton->SetOnClick(App, OnFinishedClick);
 		mRetryButton = CreateButton(_T("Rematch"), Color(192, 192, 0), lDesktopWindow);
-		mRetryButton->SetOnClick(App, OnFinishedClick);
+		mRetryButton->SetOnClick(App, OnFinishedClick);*/
 
 		mGetiPhoneButton = 0;
 /*#ifndef LEPRA_IOS

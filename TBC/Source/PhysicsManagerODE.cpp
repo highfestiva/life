@@ -24,7 +24,7 @@ namespace TBC
 
 
 
-PhysicsManagerODE::PhysicsManagerODE()
+PhysicsManagerODE::PhysicsManagerODE(float pRadius, int pLevels)
 {
 	mWorldID = dWorldCreate();
 	
@@ -47,8 +47,8 @@ PhysicsManagerODE::PhysicsManagerODE()
 
 	// Collision space center and extents.
 	dVector3 lCenter = {0, 0, 0};
-	dVector3 lExtents = {2000, 2000, 2000};
-	mSpaceID = ::dQuadTreeSpaceCreate(0, lCenter, lExtents, 8);
+	dVector3 lExtents = {pRadius, pRadius, pRadius};
+	mSpaceID = ::dQuadTreeSpaceCreate(0, lCenter, lExtents, pLevels);
 
 	::dWorldSetGravity(mWorldID, 0, 0, -9.82f);
 

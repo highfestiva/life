@@ -25,7 +25,7 @@ namespace GrenadeRun
 
 Game::Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager):
 	Cure::GameTicker(),
-	Cure::GameManager(Cure::GameTicker::GetTimeManager(), new Cure::RuntimeVariableScope(pVariableScope), pResourceManager),
+	Cure::GameManager(Cure::GameTicker::GetTimeManager(), new Cure::RuntimeVariableScope(pVariableScope), pResourceManager, 400, 3),
 	mUiManager(pUiManager),
 	mCollisionSoundManager(0),
 	mLightId(UiTbc::Renderer::INVALID_LIGHT),

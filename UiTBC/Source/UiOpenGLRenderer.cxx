@@ -569,6 +569,10 @@ void OpenGLRenderer::BindMap(int pMapType, TextureData* pTextureData, Texture* p
 			     GL_UNSIGNED_BYTE,
 			     lMap->GetBuffer());
 		OGL_ASSERT();
+		if (!GetMipMappingEnabled())
+		{
+			break;
+		}
 	}
 	OGL_ASSERT();
 }

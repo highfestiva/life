@@ -569,7 +569,7 @@ bool SoundResource::Load()
 	}
 	if (lOwnData)
 	{
-		delete lData;
+		delete (char*)lData;
 	}
 	delete lFile;
 	return lOk;

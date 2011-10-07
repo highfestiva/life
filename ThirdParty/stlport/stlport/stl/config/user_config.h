@@ -137,8 +137,9 @@
  * Note : _STLP_DEBUG and _STLP_DEBUG_ALLOC don't set this option automatically.
  */
 // high_festiva was here /*
-#define _STLP_DEBUG_UNINITIALIZED 1
-#define _STLP_DEBUG_ALLOC 1
+// Removed again...
+//#define _STLP_DEBUG_UNINITIALIZED 1
+//#define _STLP_DEBUG_ALLOC 1
 // high_festiva was here */
 
 /*
@@ -148,7 +149,8 @@
  * or otherwise abused. A good value may already be defined for your platform.
  */
 // high_festiva was here /*
-#define _STLP_SHRED_BYTE 0xA3
+// Removed again...
+// #define _STLP_SHRED_BYTE 0xA3
 // high_festiva was here */
 
 /*

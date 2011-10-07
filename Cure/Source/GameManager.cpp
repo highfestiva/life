@@ -55,13 +55,13 @@ bool GameTicker::QueryQuit()
 
 
 
-GameManager::GameManager(const TimeManager* pTime, RuntimeVariableScope* pVariableScope, ResourceManager* pResourceManager):
+GameManager::GameManager(const TimeManager* pTime, RuntimeVariableScope* pVariableScope, ResourceManager* pResourceManager, float pPhysicsRadius, int pPhysicsLevels):
 	mIsThreadSafe(true),
 	mVariableScope(pVariableScope),
 	mResource(pResourceManager),
 	mNetwork(0),
 	mTime(pTime),
-	mPhysics(TBC::PhysicsManagerFactory::Create(TBC::PhysicsManagerFactory::ENGINE_ODE)),
+	mPhysics(TBC::PhysicsManagerFactory::Create(TBC::PhysicsManagerFactory::ENGINE_ODE, pPhysicsRadius, pPhysicsLevels)),
 	mContext(0),
 	mTerrain(0),//new TerrainManager(pResourceManager)),
 	mConsole(0),
