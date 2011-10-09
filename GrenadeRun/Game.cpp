@@ -162,6 +162,22 @@ void Game::GetLauncherTransform(TransformationF& pTransform) const
 	}
 }
 
+void Game::SetThrottle(UiCure::CppContextObject* pPlayer, float pThrottle)
+{
+	if (pPlayer == mLauncher)
+	{
+		mLauncher->SetEnginePower(0, pThrottle, 0);
+		return;
+	}
+	if (pThrottle < 0 && mVehicle->GetForwardSpeed() > 0.5f)
+	{
+		mVehicle->SetEnginePower(2, pThrottle, 0);
+		return;
+	}
+	mVehicle->SetEnginePower(2, 0, 0);	// Disengage brakes.
+	mVehicle->SetEnginePower(0, pThrottle, 0);
+}
+
 bool Game::Shoot()
 {
 	if (mIsLaunching)

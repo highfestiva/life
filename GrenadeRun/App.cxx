@@ -436,8 +436,8 @@ void App::DrawButtons() const
 {
 	const float lButtonWidth = BUTTON_WIDTH;	// TODO: fix for Retina.
 	const float lButtonRadius = lButtonWidth/2;
-	const float w = (float)mUiManager->GetCanvas()->GetActualWidth();
-	const float h = (float)mUiManager->GetCanvas()->GetActualHeight();
+	const float w = (float)mUiManager->GetCanvas()->GetWidth();
+	const float h = (float)mUiManager->GetCanvas()->GetHeight();
 	const float m = BUTTON_MARGIN;
 	const float m2 = m*2;
 
@@ -588,32 +588,33 @@ void App::OnMouseMove(float x, float y, bool pPressed)
 
 	UiCure::CppContextObject* lAvatar1 = mGame->GetP1();
 	UiCure::CppContextObject* lAvatar2 = mGame->GetP2();
-	const float lButtonWidth = BUTTON_WIDTH;	// TODO: fix for Retina.
-	const float w = (float)mUiManager->GetCanvas()->GetActualWidth();
-	const float h = (float)mUiManager->GetCanvas()->GetActualHeight();
+	const float w = (float)mUiManager->GetCanvas()->GetWidth();
+	const float h = (float)mUiManager->GetCanvas()->GetHeight();
+	std::swap(x, y);
+	y = h-y;
 	const float m = BUTTON_MARGIN;
 	const float lSingleWidth = m*2 + BUTTON_WIDTH;
 	const float lDoubleWidth = m*3 + BUTTON_WIDTH*2;
 	const float s = lDoubleWidth / 2;
 	if (x <= lDoubleWidth && y <= lSingleWidth)	// P1 up/down?
 	{
-		lAvatar1->SetEnginePower(0, (x-s)/s*lFactor, 0);
+		mGame->SetThrottle(lAvatar1, (x-s)/s);
 	}
 	else if (x <= lSingleWidth && y >= h-lDoubleWidth)	// P1 left/right?
 	{
-		lAvatar1->SetEnginePower(1, (y-(h-s))/s*lFactor, 0);
+		lAvatar1->SetEnginePower(1, (y-(h-s))/s, 0);
 	}
 	else if (x >= w-lDoubleWidth && y >= h-lSingleWidth)	// P2 up/down?
 	{
-		lAvatar2->SetEnginePower(0, (w-s-x)/s*lFactor, 0);
+		mGame->SetThrottle(lAvatar2, (x-(w-s))/s);
 	}
 	else if (x >= w-lSingleWidth && y <= lDoubleWidth)	// P1 left/right?
 	{
-		lAvatar1->SetEnginePower(1, (s-y)/s*lFactor, 0);
+		lAvatar2->SetEnginePower(1, (s-y)/s, 0);
 	}
-	else if (x <= lSingleWidth && y >= h/2-s && y <= h/2+s)	// Bomb?
+	else if (x >= w-lSingleWidth && y >= h/2-s && y <= h/2+s)	// Bomb?
 	{
-		Game->Shoot();
+		mGame->Shoot();
 	}
 #endif // iOS
 }

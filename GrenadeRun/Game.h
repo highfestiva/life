@@ -79,6 +79,7 @@ public:
 	UiCure::CppContextObject* GetP2();
 	void GetVehicleMotion(Vector3DF& pPosition, Vector3DF pVelocity) const;
 	void GetLauncherTransform(TransformationF& pTransform) const;
+	void SetThrottle(UiCure::CppContextObject* pPlayer, float pThrottle);
 	bool Shoot();
 	void UnlockLauncher();
 	void Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition, Cure::ContextObject* pObject1);

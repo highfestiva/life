@@ -492,7 +492,6 @@
 		B1BC71CB140EC22D003F70F3 /* launcher.class in Resources */ = {isa = PBXBuildFile; fileRef = B1BC71C2140EC22D003F70F3 /* launcher.class */; };
 		B1BC71CC140EC22D003F70F3 /* launcher.phys in Resources */ = {isa = PBXBuildFile; fileRef = B1BC71C3140EC22D003F70F3 /* launcher.phys */; };
 		B1BC71D2140EC242003F70F3 /* Oiit.ogg in Resources */ = {isa = PBXBuildFile; fileRef = B1BC71D0140EC242003F70F3 /* Oiit.ogg */; };
-		B1BC72A6140ED9FE003F70F3 /* blue_eye.png in Resources */ = {isa = PBXBuildFile; fileRef = B1BC72A5140ED9FE003F70F3 /* blue_eye.png */; };
 		B1BC72AB140EDA48003F70F3 /* truck_01.wav in Resources */ = {isa = PBXBuildFile; fileRef = B1BC72AA140EDA48003F70F3 /* truck_01.wav */; };
 		B1BC72C2140EDAF2003F70F3 /* mud_particle_01_particle.mesh in Resources */ = {isa = PBXBuildFile; fileRef = B1BC72BF140EDAF2003F70F3 /* mud_particle_01_particle.mesh */; };
 		B1BC72C3140EDAF2003F70F3 /* mud_particle_01.class in Resources */ = {isa = PBXBuildFile; fileRef = B1BC72C0140EDAF2003F70F3 /* mud_particle_01.class */; };
@@ -1178,7 +1177,6 @@
 		B1BC71C2140EC22D003F70F3 /* launcher.class */ = {isa = PBXFileReference; lastKnownFileType = compiled.javaclass; name = launcher.class; path = ../Data/launcher.class; sourceTree = SOURCE_ROOT; };
 		B1BC71C3140EC22D003F70F3 /* launcher.phys */ = {isa = PBXFileReference; lastKnownFileType = file; name = launcher.phys; path = ../Data/launcher.phys; sourceTree = SOURCE_ROOT; };
 		B1BC71D0140EC242003F70F3 /* Oiit.ogg */ = {isa = PBXFileReference; lastKnownFileType = file; name = Oiit.ogg; path = ../Data/Oiit.ogg; sourceTree = SOURCE_ROOT; };
-		B1BC72A5140ED9FE003F70F3 /* blue_eye.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = blue_eye.png; path = ../Data/blue_eye.png; sourceTree = SOURCE_ROOT; };
 		B1BC72AA140EDA48003F70F3 /* truck_01.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = truck_01.wav; path = ../Data/truck_01.wav; sourceTree = SOURCE_ROOT; };
 		B1BC72BF140EDAF2003F70F3 /* mud_particle_01_particle.mesh */ = {isa = PBXFileReference; lastKnownFileType = file; name = mud_particle_01_particle.mesh; path = ../Data/mud_particle_01_particle.mesh; sourceTree = SOURCE_ROOT; };
 		B1BC72C0140EDAF2003F70F3 /* mud_particle_01.class */ = {isa = PBXFileReference; lastKnownFileType = compiled.javaclass; name = mud_particle_01.class; path = ../Data/mud_particle_01.class; sourceTree = SOURCE_ROOT; };
@@ -2297,7 +2295,6 @@
 				B1BC72C0140EDAF2003F70F3 /* mud_particle_01.class */,
 				B1BC72C1140EDAF2003F70F3 /* mud_particle_01.phys */,
 				B1BC72AA140EDA48003F70F3 /* truck_01.wav */,
-				B1BC72A5140ED9FE003F70F3 /* blue_eye.png */,
 				B1BC71D0140EC242003F70F3 /* Oiit.ogg */,
 				B1BC71BD140EC22D003F70F3 /* grenade_grenade.mesh */,
 				B1BC71BE140EC22D003F70F3 /* grenade.class */,
@@ -2371,7 +2368,6 @@
 				B1BC71CB140EC22D003F70F3 /* launcher.class in Resources */,
 				B1BC71CC140EC22D003F70F3 /* launcher.phys in Resources */,
 				B1BC71D2140EC242003F70F3 /* Oiit.ogg in Resources */,
-				B1BC72A6140ED9FE003F70F3 /* blue_eye.png in Resources */,
 				B1BC72AB140EDA48003F70F3 /* truck_01.wav in Resources */,
 				B1BC72C2140EDAF2003F70F3 /* mud_particle_01_particle.mesh in Resources */,
 				B1BC72C3140EDAF2003F70F3 /* mud_particle_01.class in Resources */,
