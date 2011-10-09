@@ -239,7 +239,7 @@ void RoadSignButton::RenderButton(UiTbc::CustomButton*)
 		lLightOrientation.RotateAroundOwnX(PIF/8);
 		GetUiManager()->GetRenderer()->RenderRelative(lGfxGeometry, &lLightOrientation);
 	}
-	GetUiManager()->PreparePaint();	// Back to painting again afterwards.
+	GetUiManager()->PreparePaint(false);	// Back to painting again afterwards.
 }
 
 bool RoadSignButton::IsOverButton(UiTbc::CustomButton* pButton, int x, int y)

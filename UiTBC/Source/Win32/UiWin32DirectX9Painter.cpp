@@ -85,8 +85,9 @@ void DirectX9Painter::Clear(const Color& pColor)
 	// TODO: implement!
 }
 
-void DirectX9Painter::PrePaint()
+void DirectX9Painter::PrePaint(bool pClearDepthBuffer)
 {
+	pClearDepthBuffer;
 	DoSetRenderMode();
 }
 

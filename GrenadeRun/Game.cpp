@@ -17,6 +17,12 @@
 #include "Grenade.h"
 
 
+#ifdef LEPRA_IOS
+#define LEPRA_IOS_LOOKNFEEL
+#endif // iOS
+#define LEPRA_IOS_LOOKNFEEL
+
+
 
 namespace GrenadeRun
 {
@@ -186,7 +192,8 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 	mCollisionSoundManager->OnCollision(pForce, pTorque, pPosition, pObject1, mLevel, pObject1->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), 10000);
 
 	{
-		const int lParticleCount = 200;
+		// Stones and mud.
+		const int lParticleCount = 100;
 		for (int i = 0; i < lParticleCount; ++i)
 		{
 			UiCure::Props* lPuff = new UiCure::Props(GetResourceManager(), _T("mud_particle_01"), mUiManager);
@@ -197,18 +204,17 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 			float z = 0;
 			TransformationF lTransform(QuaternionF(), pPosition + Vector3DF(x, y, z));
 			lPuff->SetInitialTransform(lTransform);
-			const float lOpacity = (float)Random::Uniform(0.3f, 2.2f);
-			lPuff->SetOpacity(lOpacity);
 			const float lAngle = (float)Random::Uniform(0, 2*PIF);
 			x = (20.0f * i/lParticleCount - 10) * cos(lAngle);
-			y = (10 * (float)Random::Uniform(-1, 1)) * sin(lAngle);
+			y = (8 * (float)Random::Uniform(-1, 1)) * sin(lAngle);
 			z = (30 + 12 * sin(5*PIF*i/lParticleCount) * (float)Random::Uniform(0.0, 1)) * (float)Random::Uniform(0.2f, 1.0f);
-			lPuff->StartParticle(UiCure::Props::PARTICLE_SOLID, Vector3DF(x, y, z), 3.0f / lOpacity, 0.5f, 6.0f);
+			lPuff->StartParticle(UiCure::Props::PARTICLE_SOLID, Vector3DF(x, y, z), (float)Random::Uniform(6, 12), 0.5f, (float)Random::Uniform(3, 7));
 			lPuff->StartLoading();
 		}
 	}
 
 	{
+		// Release gas puffs.
 		const int lParticleCount = 10;
 		for (int i = 0; i < lParticleCount; ++i)
 		{
@@ -225,7 +231,7 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 			x = x*17;
 			y = y*17;
 			z = (float)Random::Uniform(0, 10);
-			lPuff->StartParticle(UiCure::Props::PARTICLE_GAS, Vector3DF(x, y, z), 0.002f / lOpacity, 0.1f, 5.0f);
+			lPuff->StartParticle(UiCure::Props::PARTICLE_GAS, Vector3DF(x, y, z), 0.003f / lOpacity, 0.1f, (float)Random::Uniform(2, 6));
 			lPuff->StartLoading();
 		}
 	}
@@ -254,7 +260,7 @@ bool Game::Render()
 	{
 		t.GetPosition() = mVehicle->GetPosition() + Vector3DF(15*sin((float)mTime), -15*cos((float)mTime), 3);
 		t.GetOrientation().RotateAroundOwnZ((float)mTime);
-#ifdef LEPRA_IOS
+#ifdef LEPRA_IOS_LOOKNFEEL
 		t.GetOrientation().RotateAroundOwnY(-PIF*0.5f);
 #endif // iOS
 	}
@@ -275,18 +281,20 @@ bool Game::Render()
 	const Vector3DF lLauncherPosition(0, -215, 27);
 
 	float lRange = 150.0f;
+	float lLookDownAngle = -PIF/15;
 	if (mVehicle && mVehicle->IsLoaded())
 	{
 		lRange = lLauncherPosition.GetDistance(mVehicle->GetPosition());
+		lLookDownAngle = ::sin((mVehicle->GetPosition().z-lLauncherPosition.z)/lRange);
 	}
 
 	const float lCamDistance = 10;
-	const Vector3DF lCamOffset(lCamDistance*sin(mLauncherYaw), -lCamDistance*cos(mLauncherYaw), 9.0f - lRange/100.0f);
+	const Vector3DF lCamOffset(lCamDistance*sin(mLauncherYaw), -lCamDistance*cos(mLauncherYaw), 9.5f + 5*lLookDownAngle - lRange/75.0f);
 	t = TransformationF(QuaternionF(), lLauncherPosition + lCamOffset);
 	t.GetOrientation().RotateAroundOwnZ(mLauncherYaw*0.8f);
-#ifdef LEPRA_IOS
+	t.GetOrientation().RotateAroundOwnX(lLookDownAngle);
+#ifdef LEPRA_IOS_LOOKNFEEL
 	t.GetOrientation().RotateAroundOwnY(PIF*0.5f);
-	t.GetPosition().z -= 2.0f;
 #endif // iOS
 	mUiManager->SetCameraPosition(t);
 	mLauncher->SetRootPosition(lLauncherPosition);

@@ -86,9 +86,12 @@ void OpenGLPainter::Clear(const Color& pColor)
 	::glClear(GL_COLOR_BUFFER_BIT);
 }
 
-void OpenGLPainter::PrePaint()
+void OpenGLPainter::PrePaint(bool pClearDepthBuffer)
 {
-	::glClear(GL_DEPTH_BUFFER_BIT);
+	if (pClearDepthBuffer)
+	{
+		::glClear(GL_DEPTH_BUFFER_BIT);
+	}
 #ifndef LEPRA_GL_ES
 	::glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	::glDisableClientState(GL_INDEX_ARRAY);

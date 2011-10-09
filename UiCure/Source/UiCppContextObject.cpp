@@ -30,6 +30,7 @@ CppContextObject::CppContextObject(Cure::ResourceManager* pResourceManager, cons
 	mUiClassResource(0),
 	mEnableUi(true),
 	mAllowRootShadow(true),
+	mEnablePixelShader(true),
 	mMeshLoadCount(0),
 	mTextureLoadCount(0),
 	mMeshSlideMode(MESH_SLIDE_STOP)
@@ -69,6 +70,11 @@ void CppContextObject::EnableUi(bool pEnable)
 void CppContextObject::DisableRootShadow()
 {
 	mAllowRootShadow = false;
+}
+
+void CppContextObject::EnablePixelShader(bool pEnable)
+{
+	mEnablePixelShader = pEnable;
 }
 
 
@@ -509,6 +515,7 @@ void CppContextObject::TryAddTexture()
 		UserGeometryReferenceResource* lMesh = mMeshResourceArray[x];
 		if (mUiManager->GetRenderer()->GetMaterialType(lMesh->GetData()) == UiTbc::Renderer::MAT_NULL)
 		{
+			const bool lTransparent = (lMesh->GetRamData()->GetBasicMaterialSettings().mAlpha < 1);
 			if (lMesh->GetRamData()->GetUVData(0) && mTextureResourceArray.size() > 0)
 			{
 				UserRendererImageResource* lTexture = 0;
@@ -529,17 +536,20 @@ void CppContextObject::TryAddTexture()
 				{
 					lTexture = mTextureResourceArray[0];
 				}
-				const bool lIsBlended = (lMesh->GetRamData()->GetBasicMaterialSettings().mAlpha < 1 ||
+				const bool lIsBlended = (lTransparent ||
 					((UiTbc::ChunkyClass*)mUiClassResource->GetRamData())->GetMaterial(x).mShaderName == _T("blend"));
-				UiTbc::Renderer::MaterialType lMaterialType = lIsBlended?
-					UiTbc::Renderer::MAT_SINGLE_TEXTURE_BLENDED : UiTbc::Renderer::MAT_SINGLE_TEXTURE_SOLID_PXS;
+				UiTbc::Renderer::MaterialType lMaterialType = mEnablePixelShader? UiTbc::Renderer::MAT_SINGLE_TEXTURE_SOLID_PXS : UiTbc::Renderer::MAT_SINGLE_TEXTURE_SOLID;
+				if (lIsBlended)
+				{
+					lMaterialType = UiTbc::Renderer::MAT_SINGLE_TEXTURE_BLENDED;
+				}
 				mUiManager->GetRenderer()->ChangeMaterial(lMesh->GetData(), lMaterialType);
 				mUiManager->GetRenderer()->TryAddGeometryTexture(lMesh->GetData(), lTexture->GetData());
 			}
 			else
 			{
-				UiTbc::Renderer::MaterialType lMaterialType = UiTbc::Renderer::MAT_SINGLE_COLOR_SOLID_PXS;
-				if (lMesh->GetRamData()->GetBasicMaterialSettings().mAlpha != 1)
+				UiTbc::Renderer::MaterialType lMaterialType = mEnablePixelShader? UiTbc::Renderer::MAT_SINGLE_COLOR_SOLID_PXS : UiTbc::Renderer::MAT_SINGLE_COLOR_SOLID_PXS;
+				if (lTransparent)
 				{
 					lMaterialType = UiTbc::Renderer::MAT_SINGLE_COLOR_BLENDED;
 				}

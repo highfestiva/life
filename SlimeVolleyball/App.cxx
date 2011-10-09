@@ -507,7 +507,7 @@ void App::PreparePaint()
 		mPainter->SetDestCanvas(mCanvas);
 		//mPainter->ResetClippingRect();
 		mPainter->Clear(mGame->SKY_COL);
-		mPainter->PrePaint();
+		mPainter->PrePaint(false);
 	}
 }
 

@@ -313,7 +313,7 @@ bool SceneTest::Run(double pTime)
 				//gRenderer->ResetClippingRect();
 				gRenderer->RenderScene();
 				gPainter->ResetClippingRect();
-				gPainter->PrePaint();
+				gPainter->PrePaint(true);
 
 				gPainter->SetColor(Lepra::WHITE);
 				const Lepra::Vector3DF& lPos = lCam.GetPosition();
@@ -2243,7 +2243,7 @@ bool TestGUI(const Lepra::LogDecorator& /*pLog*/, double pShowTime)
 {
 	gPainter->ResetClippingRect();
 	gPainter->SetRenderMode(UiTbc::Painter::RM_NORMAL);
-	gPainter->PrePaint();
+	gPainter->PrePaint(true);
 
 	UiTbc::DesktopWindow* lDesktopWindow = new UiTbc::DesktopWindow(gInput, gPainter, Lepra::DARK_GREEN, new UiTbc::FloatingLayout(), 0, 0);
 	lDesktopWindow->SetPreferredSize(gScreen->GetWidth(), gScreen->GetHeight());

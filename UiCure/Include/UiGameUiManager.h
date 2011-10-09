@@ -53,8 +53,8 @@ public:
 	void InputTick();
 	void BeginRender(const Vector3DF& pBackgroundColor);
 	void Render(const PixelRect& pArea);
-	void Paint();
-	void PreparePaint();
+	void Paint(bool pClearDepthBuffer);
+	void PreparePaint(bool pClearDepthBuffer);
 	void EndRender();
 
 	Cure::RuntimeVariableScope* GetVariableScope() const;

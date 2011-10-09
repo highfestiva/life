@@ -46,6 +46,7 @@ private:
 	float mTime;
 	float mLifeTime;
 	float mOpacity;
+	bool mIsFadingOut;
 	Vector3DF mAngularVelocity;
 
 	LOG_CLASS_DECLARE();

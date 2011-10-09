@@ -50,7 +50,7 @@ namespace Life
 GameClientSlaveManager::GameClientSlaveManager(GameClientMasterTicker* pMaster, const Cure::TimeManager* pTime,
 	Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
 	UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea):
-	Cure::GameManager(pTime, pVariableScope, pResourceManager),
+	Cure::GameManager(pTime, pVariableScope, pResourceManager, 2000, 7),
 	mMaster(pMaster),
 	mUiManager(pUiManager),
 	mCollisionSoundManager(0),

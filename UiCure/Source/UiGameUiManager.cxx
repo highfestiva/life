@@ -305,7 +305,7 @@ void GameUiManager::Render(const PixelRect& pArea)
 	}
 }
 
-void GameUiManager::Paint()
+void GameUiManager::Paint(bool pClearDepthBuffer)
 {
 	if (CanRender())
 	{
@@ -314,16 +314,16 @@ void GameUiManager::Paint()
 		float r, g, b;
 		mRenderer->GetAmbientLight(r, g, b);
 		mRenderer->SetAmbientLight(0.1f, 0.1f, 0.1f);
-		PreparePaint();
+		PreparePaint(pClearDepthBuffer);
 		mDesktopWindow->Repaint(mPainter);
 		mRenderer->SetAmbientLight(r, g, b);
 	}
 }
 
-void GameUiManager::PreparePaint()
+void GameUiManager::PreparePaint(bool pClearDepthBuffer)
 {
 	mPainter->ResetClippingRect();
-	mPainter->PrePaint();
+	mPainter->PrePaint(pClearDepthBuffer);
 }
 
 void GameUiManager::EndRender()

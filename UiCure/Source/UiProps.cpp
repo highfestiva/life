@@ -9,6 +9,7 @@
 #include "../../Cure/Include/GameManager.h"
 #include "../../Cure/Include/TimeManager.h"
 #include "../../Lepra/Include/Random.h"
+#include "../Include/UiGameUiManager.h"
 
 
 
@@ -23,8 +24,10 @@ Props::Props(Cure::ResourceManager* pResourceManager, const str& pClassId, GameU
 	mScale(1),
 	mTime(0),
 	mLifeTime(2),
-	mOpacity(1)
+	mOpacity(1),
+	mIsFadingOut(false)
 {
+	EnablePixelShader(false);
 	SetPhysicsTypeOverride(PHYSICS_OVERRIDE_BONES);
 }
 
@@ -100,12 +103,20 @@ void Props::OnTick()
 			lOrientation.RotateAroundOwnZ(lFrameTime * mAngularVelocity.z * mVelocity.z);
 			SetRootOrientation(lOrientation);
 
-			if (mTime > mLifeTime-1)
+			const float lTimeLeft = mLifeTime-mTime;
+			if (lTimeLeft < 1)
 			{
+				const float lFadeOutOpacity = mOpacity * lTimeLeft;
 				for (size_t x = 0; x < mMeshResourceArray.size(); ++x)
 				{
-					mMeshResourceArray[x]->GetRamData()->GetBasicMaterialSettings().mAlpha = mOpacity * (mLifeTime-mTime);
+					UserGeometryReferenceResource* lMesh = mMeshResourceArray[x];
+					if (!mIsFadingOut && mOpacity >= 1)
+					{
+						mUiManager->GetRenderer()->ChangeMaterial(lMesh->GetData(), UiTbc::Renderer::MAT_SINGLE_COLOR_BLENDED);
+					}
+					lMesh->GetRamData()->GetBasicMaterialSettings().mAlpha = lFadeOutOpacity;
 				}
+				mIsFadingOut = true;
 			}
 		}
 		break;
@@ -123,11 +134,12 @@ void Props::OnTick()
 			lOrientation.RotateAroundOwnZ(lFrameTime * mAngularVelocity.z * mVelocity.z);
 			SetRootOrientation(lOrientation);
 
+			const float lGasOpacity = mOpacity * sin(mTime/mLifeTime*PIF);
 			for (size_t x = 0; x < mMeshResourceArray.size(); ++x)
 			{
 				if (mMeshResourceArray[x]->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 				{
-					mMeshResourceArray[x]->GetRamData()->GetBasicMaterialSettings().mAlpha = mOpacity * sin(mTime/mLifeTime*PIF);
+					mMeshResourceArray[x]->GetRamData()->GetBasicMaterialSettings().mAlpha = lGasOpacity;
 				}
 			}
 		}

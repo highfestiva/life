@@ -28,6 +28,8 @@
 
 #define UIKEY(name)	UiLepra::InputManager::IN_KBD_##name
 #define FPS		20
+#define BUTTON_WIDTH	28
+#define BUTTON_MARGIN	8
 
 
 
@@ -58,6 +60,8 @@ private:
 	virtual void Init();
 	virtual int Run();
 	bool Poll();
+	void DrawButtons() const;
+	void DrawButton(float x, float y, float pRadius, float pAngle, int pCorners) const;
 	void Layout();
 
 	virtual void Suspend();
@@ -160,7 +164,7 @@ void App::OnTap(const FingerMovement& pMove)
 
 void App::OnMouseTap(float x, float y, bool pPressed)
 {
-	mApp->OnMouseMove(y, x, pPressed);
+	mApp->OnMouseMove(x, y, pPressed);
 }
 
 bool App::Open()
@@ -170,8 +174,10 @@ bool App::Open()
 	const int lDisplayWidth = lSize.height;
 	const int lDisplayHeight = lSize.width;
 #else // !iOS
-	const int lDisplayWidth = 760;
-	const int lDisplayHeight = 524;
+//	const int lDisplayWidth = 760;
+//	const int lDisplayHeight = 524;
+	const int lDisplayWidth = 485;
+	const int lDisplayHeight = 340;
 #endif // iOS/!iOS
 	int lDisplayBpp = 0;
 	int lDisplayFrequency = 0;
@@ -401,7 +407,8 @@ bool App::Poll()
 	}
 	if (lOk && lRender)
 	{
-		mUiManager->Paint();
+		mUiManager->Paint(false);
+		DrawButtons();
 	}
 	if (lOk)
 	{
@@ -423,6 +430,47 @@ bool App::Poll()
 		}
 	}
 	return lOk;
+}
+
+void App::DrawButtons() const
+{
+	const float lButtonWidth = BUTTON_WIDTH;	// TODO: fix for Retina.
+	const float lButtonRadius = lButtonWidth/2;
+	const float w = (float)mUiManager->GetCanvas()->GetActualWidth();
+	const float h = (float)mUiManager->GetCanvas()->GetActualHeight();
+	const float m = BUTTON_MARGIN;
+	const float m2 = m*2;
+
+	mUiManager->GetPainter()->SetColor(Color(64, 64, 255), 0);
+	// Left player.
+	DrawButton(m2+lButtonWidth*1.5f,	m+lButtonRadius,		lButtonRadius, +PIF/2,	3);	// Up.
+	DrawButton(m+lButtonRadius,		m+lButtonRadius,		lButtonRadius, -PIF/2,	3);	// Down.
+	DrawButton(m+lButtonRadius,		h-m2-lButtonWidth*1.5f,		lButtonRadius, 0,	3);	// Left.
+	DrawButton(m+lButtonRadius,		h-m-lButtonRadius,		lButtonRadius, PIF,	3);	// Right.
+	// Right player.
+	DrawButton(w-m2-lButtonWidth*1.5f,	h-m-lButtonRadius,		lButtonRadius, -PIF/2,	3);	// Up.
+	DrawButton(w-m-lButtonRadius,		h-m-lButtonRadius,		lButtonRadius, +PIF/2,	3);	// Down.
+	DrawButton(w-m-lButtonRadius,		m2+lButtonWidth*1.5f,		lButtonRadius, PIF,	3);	// Left.
+	DrawButton(w-m-lButtonRadius,		m+lButtonRadius,		lButtonRadius, 0,	3);	// Right.
+	// Bomb button.
+	DrawButton(w-m-lButtonRadius,		h/2,				lButtonRadius,	PIF/4,	4);	// Square.
+}
+
+void App::DrawButton(float x, float y, float pRadius, float pAngle, int pCorners) const
+{
+	const float lRoundRadius = pRadius * 0.96f;
+	const float lRoundAngle = PIF/16;
+	std::vector<Vector2DF> lCoords;
+	lCoords.push_back(Vector2DF(x, y));
+	for (int i = 0; i < pCorners; ++i)
+	{
+		lCoords.push_back(Vector2DF(x+lRoundRadius*::sin(pAngle-lRoundAngle), y-lRoundRadius*::cos(pAngle-lRoundAngle)));
+		lCoords.push_back(Vector2DF(x+pRadius*::sin(pAngle), y-pRadius*::cos(pAngle)));
+		lCoords.push_back(Vector2DF(x+lRoundRadius*::sin(pAngle+lRoundAngle), y-lRoundRadius*::cos(pAngle+lRoundAngle)));
+		pAngle += 2*PIF/pCorners;
+	}
+	lCoords.push_back(lCoords[1]);
+	mUiManager->GetPainter()->DrawFan(lCoords, true);
 }
 
 void App::Layout()
@@ -490,11 +538,11 @@ bool App::Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor)
 	}
 	UiCure::CppContextObject* lAvatar1 = mGame->GetP1();
 	UiCure::CppContextObject* lAvatar2 = mGame->GetP2();
-	if (!lAvatar1)
+	if (!lAvatar1 || !lAvatar1->IsLoaded())
 	{
 		return false;
 	}
-	if (!lAvatar2)
+	if (!lAvatar2 ||!lAvatar2->IsLoaded())
 	{
 		lAvatar2 = lAvatar1;
 	}
@@ -540,40 +588,32 @@ void App::OnMouseMove(float x, float y, bool pPressed)
 
 	UiCure::CppContextObject* lAvatar1 = mGame->GetP1();
 	UiCure::CppContextObject* lAvatar2 = mGame->GetP2();
-	const CGSize lScreenSize = [UIScreen mainScreen].bounds.size;
-	const int w = lScreenSize.height;
-	const int h = lScreenSize.width;
-	const int s = 30 + w / 16;
-	const float lFactor = pPressed? 1 : 0;
-	if (x <= s)	// Close to bottom of player 1's screen?
+	const float lButtonWidth = BUTTON_WIDTH;	// TODO: fix for Retina.
+	const float w = (float)mUiManager->GetCanvas()->GetActualWidth();
+	const float h = (float)mUiManager->GetCanvas()->GetActualHeight();
+	const float m = BUTTON_MARGIN;
+	const float lSingleWidth = m*2 + BUTTON_WIDTH;
+	const float lDoubleWidth = m*3 + BUTTON_WIDTH*2;
+	const float s = lDoubleWidth / 2;
+	if (x <= lDoubleWidth && y <= lSingleWidth)	// P1 up/down?
 	{
-		if (y >= h - s)		// Player 1's lower left corner.
-		{
-			lAvatar1->SetEnginePower(0, (2*x-s)*lFactor/s, 0);
-			lAvatar1->SetEnginePower(1, (2*(h-y)-s)*lFactor/s, 0);
-		}
-		else if (y <= s)	// Player 1's lower right corner.
-		{
-			if (pPressed)
-			{
-				lAvatar1->SetEnginePower(2, +1*lFactor, 0);
-			}
-		}
+		lAvatar1->SetEnginePower(0, (x-s)/s*lFactor, 0);
 	}
-	else if (x >= w - s)	// Close to bottom player 2's screen?
+	else if (x <= lSingleWidth && y >= h-lDoubleWidth)	// P1 left/right?
 	{
-		if (y <= s)		// Player 2's lower left corner.
-		{
-			lAvatar2->SetEnginePower(0, (2*(x-w)+s)*lFactor/s, 0);
-			lAvatar2->SetEnginePower(1, (2*y-s)*lFactor/s, 0);
-		}
-		else if (y >= h - s)	// Player 2's lower right corner.
-		{
-			if (pPressed)
-			{
-				mGame->Shoot();
-			}
-		}
+		lAvatar1->SetEnginePower(1, (y-(h-s))/s*lFactor, 0);
+	}
+	else if (x >= w-lDoubleWidth && y >= h-lSingleWidth)	// P2 up/down?
+	{
+		lAvatar2->SetEnginePower(0, (w-s-x)/s*lFactor, 0);
+	}
+	else if (x >= w-lSingleWidth && y <= lDoubleWidth)	// P1 left/right?
+	{
+		lAvatar1->SetEnginePower(1, (s-y)/s*lFactor, 0);
+	}
+	else if (x <= lSingleWidth && y >= h/2-s && y <= h/2+s)	// Bomb?
+	{
+		Game->Shoot();
 	}
 #endif // iOS
 }

@@ -133,7 +133,7 @@ public:
 	Canvas* GetCanvas() const;
 
 	virtual void Clear(const Color& pColor) = 0;
-	virtual void PrePaint() = 0;
+	virtual void PrePaint(bool pClearDepthBuffer) = 0;
 
 	// Returns false only if stack owerflow/underflow.
 	bool PushAttrib(unsigned pAttrib);

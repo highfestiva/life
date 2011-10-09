@@ -248,7 +248,7 @@ bool GameClientMasterTicker::Tick()
 			mUiManager->GetRenderer()->EnableAllLights(false);
 			UiTbc::Renderer::LightID lLightId = mUiManager->GetRenderer()->AddDirectionalLight(
 				UiTbc::Renderer::LIGHT_STATIC, Vector3DF(0, 1, -1), WHITE, 1.5f, 160);
-			mUiManager->Paint();
+			mUiManager->Paint(true);
 			for (x = mSlaveArray.begin(); lOk && x != mSlaveArray.end(); ++x)
 			{
 				GameClientSlaveManager* lSlave = *x;
@@ -749,7 +749,7 @@ bool GameClientMasterTicker::Initialize()
 					lRect.SetPos(lTargetX+lMovement, lTargetY);
 
 					mUiManager->GetRenderer()->Clear();
-					mUiManager->Paint();
+					mUiManager->Paint(false);
 					mUiManager->GetDisplayManager()->UpdateScreen();
 
 					if (SystemManager::GetSleepResolution() <= 0.01)

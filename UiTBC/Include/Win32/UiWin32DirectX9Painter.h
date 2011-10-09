@@ -42,7 +42,7 @@ public:
 	void SetDestCanvas(Canvas* pCanvas);
 	void SetRenderMode(RenderMode pRM);
 	virtual void Clear(const Color& pColor);
-	virtual void PrePaint();
+	virtual void PrePaint(bool pClearDepthBuffer);
 
 	void SetAlphaValue(uint8 pAlpha);
 

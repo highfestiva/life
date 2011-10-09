@@ -40,6 +40,7 @@ public:
 
 	void EnableUi(bool pEnable);
 	void DisableRootShadow();
+	void EnablePixelShader(bool pEnable);
 
 	virtual void StartLoading();
 
@@ -77,6 +78,7 @@ protected:
 	UserClassResource* mUiClassResource;
 	bool mEnableUi;
 	bool mAllowRootShadow;
+	bool mEnablePixelShader;
 	MeshArray mMeshResourceArray;
 	size_t mMeshLoadCount;
 	TextureArray mTextureResourceArray;
