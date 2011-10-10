@@ -28,6 +28,7 @@ using namespace Lepra;
 -(void) startTick;
 -(void) stopTick;
 -(void) tick;
+-(void) dropFingerMovements;
 @end
 #endif // iOS
 
@@ -86,6 +87,7 @@ using namespace Lepra;
 	else
 	{
 		GrenadeRun::App::PollApp();
+		[self dropFingerMovements];
 	}
 }
 
@@ -94,8 +96,10 @@ using namespace Lepra;
 	GrenadeRun::FingerMoveList::iterator i = GrenadeRun::gFingerMoveList.begin();
 	for (; i != GrenadeRun::gFingerMoveList.end(); ++i)
 	{
+		NSLog(@"get: (%i; %i) ==? (%i; %i)", (int)i->mLastX, (int)i->mLastY, (int)pLocation.x, (int)pLocation.y);
 		if (i->Update(pPrevious.x, pPrevious.y, pLocation.x, pLocation.y))
 		{
+			NSLog(@"get: Match!");
 			return *i;
 		}
 	}
@@ -103,19 +107,22 @@ using namespace Lepra;
 	return GrenadeRun::gFingerMoveList.back();
 }
 
--(void) dropFingerMovement:(const CGPoint&)pLocation previous:(const CGPoint&)pPrevious
+-(void) dropFingerMovements
 {
 	GrenadeRun::FingerMoveList::iterator i = GrenadeRun::gFingerMoveList.begin();
-	for (; i != GrenadeRun::gFingerMoveList.end(); ++i)
+	for (; i != GrenadeRun::gFingerMoveList.end();)
 	{
-		if (i->Update(pPrevious.x, pPrevious.y, pLocation.x, pLocation.y))
+		if (!i->mIsPress)
 		{
-			GrenadeRun::gFingerMoveList.erase(i);
-			return;
+			GrenadeRun::gFingerMoveList.erase(i++);
+			//return;
 		}
+		else
+		{
+			++i;
+		}
+
 	}
-	// Oops! This happens, but not sure why.
-	GrenadeRun::gFingerMoveList.clear();
 }
 
 -(CGPoint) xform:(const CGPoint&)pLocation
@@ -139,16 +146,16 @@ using namespace Lepra;
 	{
 		CGPoint lTapPosition = [self xform:[lTouch locationInView:nil]];
 		CGPoint lPrevTapPosition = [self xform:[lTouch previousLocationInView:nil]];
-		bool lIsPressed = (lTouch.phase != UITouchPhaseEnded && lTouch.phase != UITouchPhaseEnded);
+		bool lIsPressed = (lTouch.phase != UITouchPhaseEnded && lTouch.phase != UITouchPhaseCancelled);
 		GrenadeRun::FingerMovement& lMove = [self getFingerMovement:lTapPosition previous:lPrevTapPosition];
 		lMove.mIsPress = lIsPressed;
-		GrenadeRun::App::OnTap(lMove);
+		/*GrenadeRun::App::OnTap(lMove);
 		if (!lIsPressed)
 		{
 			[self dropFingerMovement:lTapPosition previous:lPrevTapPosition];
-		}
+		}*/
 
-		GrenadeRun::App::OnMouseTap(lTapPosition.x, lTapPosition.y, lIsPressed);
+		//GrenadeRun::App::OnMouseTap(lTapPosition.x, lTapPosition.y, lIsPressed);
 	}
 }
 

@@ -171,7 +171,7 @@ void Game::SetThrottle(UiCure::CppContextObject* pPlayer, float pThrottle)
 	}
 	if (pThrottle < 0 && mVehicle->GetForwardSpeed() > 0.5f)
 	{
-		mVehicle->SetEnginePower(2, pThrottle, 0);
+		mVehicle->SetEnginePower(2, -pThrottle, 0);
 		return;
 	}
 	mVehicle->SetEnginePower(2, 0, 0);	// Disengage brakes.

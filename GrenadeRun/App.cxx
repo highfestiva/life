@@ -51,8 +51,6 @@ public:
 	virtual ~App();
 
 	static bool PollApp();
-	static void OnTap(const FingerMovement& pMove);
-	static void OnMouseTap(float x, float y, bool pPressed);
 
 private:
 	bool Open();
@@ -60,6 +58,7 @@ private:
 	virtual void Init();
 	virtual int Run();
 	bool Poll();
+	void PollTaps();
 	void DrawButtons() const;
 	void DrawButton(float x, float y, float pRadius, float pAngle, int pCorners) const;
 	void Layout();
@@ -154,17 +153,6 @@ bool App::PollApp()
 		return false;
 	}
 	return (SystemManager::GetQuitRequest() == 0);
-}
-
-void App::OnTap(const FingerMovement& pMove)
-{
-	pMove;
-	//mApp->mGame->MoveTo(pMove);
-}
-
-void App::OnMouseTap(float x, float y, bool pPressed)
-{
-	mApp->OnMouseMove(x, y, pPressed);
 }
 
 bool App::Open()
@@ -391,6 +379,7 @@ bool App::Poll()
 	if (lOk)
 	{
 		mUiManager->InputTick();
+		PollTaps();
 	}
 	if (lOk)
 	{
@@ -454,6 +443,29 @@ void App::DrawButtons() const
 	DrawButton(w-m-lButtonRadius,		m+lButtonRadius,		lButtonRadius, 0,	3);	// Right.
 	// Bomb button.
 	DrawButton(w-m-lButtonRadius,		h/2,				lButtonRadius,	PIF/4,	4);	// Square.
+}
+
+void App::PollTaps()
+{
+	UiCure::CppContextObject* lAvatar1 = mGame->GetP1();
+	UiCure::CppContextObject* lAvatar2 = mGame->GetP2();
+	if (!lAvatar1 || !lAvatar1->IsLoaded())
+	{
+		return;
+	}
+	if (!lAvatar2 ||!lAvatar2->IsLoaded())
+	{
+		lAvatar2 = lAvatar1;
+	}
+	mGame->SetThrottle(lAvatar1, 0);
+	lAvatar1->SetEnginePower(1, 0, 0);
+	mGame->SetThrottle(lAvatar2, 0);
+	lAvatar2->SetEnginePower(1, 0, 0);
+	FingerMoveList::iterator x = gFingerMoveList.begin();
+	for (; x != gFingerMoveList.end(); ++x)
+	{
+		OnMouseMove(x->mLastX, x->mLastY, x->mIsPress);
+	}
 }
 
 void App::DrawButton(float x, float y, float pRadius, float pAngle, int pCorners) const
@@ -596,21 +608,22 @@ void App::OnMouseMove(float x, float y, bool pPressed)
 	const float lSingleWidth = m*2 + BUTTON_WIDTH;
 	const float lDoubleWidth = m*3 + BUTTON_WIDTH*2;
 	const float s = lDoubleWidth / 2;
+#define CLAMPUP(v)	Math::Clamp((v)*2, -1.0f, 1.0f)
 	if (x <= lDoubleWidth && y <= lSingleWidth)	// P1 up/down?
 	{
-		mGame->SetThrottle(lAvatar1, (x-s)/s);
+		mGame->SetThrottle(lAvatar1, CLAMPUP((x-s)/s));
 	}
 	else if (x <= lSingleWidth && y >= h-lDoubleWidth)	// P1 left/right?
 	{
-		lAvatar1->SetEnginePower(1, (y-(h-s))/s, 0);
+		lAvatar1->SetEnginePower(1, CLAMPUP((y-(h-s))/s), 0);
 	}
 	else if (x >= w-lDoubleWidth && y >= h-lSingleWidth)	// P2 up/down?
 	{
-		mGame->SetThrottle(lAvatar2, (x-(w-s))/s);
+		mGame->SetThrottle(lAvatar2, CLAMPUP((x-(w-s))/s));
 	}
 	else if (x >= w-lSingleWidth && y <= lDoubleWidth)	// P1 left/right?
 	{
-		lAvatar2->SetEnginePower(1, (s-y)/s, 0);
+		lAvatar2->SetEnginePower(1, CLAMPUP((s-y)/s), 0);
 	}
 	else if (x >= w-lSingleWidth && y >= h/2-s && y <= h/2+s)	// Bomb?
 	{

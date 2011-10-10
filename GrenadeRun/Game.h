@@ -53,7 +53,7 @@ struct FingerMovement
 
 	inline bool Update(int pLastX, int pLastY, int pNewX, int pNewY)
 	{
-		if (std::abs(mLastX-pLastX) < 10 && std::abs(mLastY-pLastY) < 10)
+		if (std::abs(mLastX-pLastX) < 22 && std::abs(mLastY-pLastY) < 22)
 		{
 			mLastX = pNewX;
 			mLastY = pNewY;
