@@ -38,10 +38,10 @@ Game::Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVaria
 	mLevel(0),
 	mVehicle(0),
 	mLauncher(0),
+	mVehicleCamPos(0, 0, 200),
 	mIsLaunching(false),
 	mLauncherYaw(0),
-	mLauncherPitch(-PIF/4),
-	mTime(0)
+	mLauncherPitch(-PIF/4)
 {
 	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
 	mCollisionSoundManager->AddSound(_T("explosion"), UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f));
@@ -100,8 +100,6 @@ bool Game::Initialize()
 bool Game::Tick()
 {
 	GameTicker::GetTimeManager()->Tick();
-
-	mTime += GameTicker::GetTimeManager()->GetNormalFrameTime();
 
 	Vector3DF lPosition;
 	Vector3DF lVelocity;
@@ -271,11 +269,24 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 bool Game::Render()
 {
 	TransformationF t(QuaternionF(), Vector3DF(-100, -140, -10));
-	t.GetOrientation().RotateAroundOwnZ(-PIF/8);
 	if (mVehicle && mVehicle->IsLoaded())
 	{
-		t.GetPosition() = mVehicle->GetPosition() + Vector3DF(15*sin((float)mTime), -15*cos((float)mTime), 3);
-		t.GetOrientation().RotateAroundOwnZ((float)mTime);
+		const Vector3DF lVehiclePos = mVehicle->GetPosition();
+		Vector3DF lOffset = mVehicleCamPos - lVehiclePos;
+		lOffset.z = 0;
+		const float lCamXYDistance = 40;
+		const float lCamHeight = 15;
+		lOffset.Normalize(lCamXYDistance);
+		float lAngle = (-lOffset).GetAngle(Vector3DF(0, lCamXYDistance, 0));
+		if (lOffset.x < 0)
+		{
+			lAngle = -lAngle;
+		}
+		t.GetOrientation().RotateAroundOwnZ(lAngle);
+		t.GetOrientation().RotateAroundOwnX(-::tan(lCamHeight/lCamXYDistance)+PIF/12);
+		lOffset.z = lCamHeight;
+		mVehicleCamPos = lVehiclePos + lOffset;
+		t.GetPosition() = mVehicleCamPos;
 #ifdef LEPRA_IOS_LOOKNFEEL
 		t.GetOrientation().RotateAroundOwnY(-PIF*0.5f);
 #endif // iOS
@@ -305,7 +316,7 @@ bool Game::Render()
 	}
 
 	const float lCamDistance = 10;
-	const Vector3DF lCamOffset(lCamDistance*sin(mLauncherYaw), -lCamDistance*cos(mLauncherYaw), 9.5f + 5*lLookDownAngle - lRange/75.0f);
+	const Vector3DF lCamOffset(lCamDistance*sin(mLauncherYaw), -lCamDistance*cos(mLauncherYaw), 9.5f + 5*lLookDownAngle - lRange/60.0f);
 	t = TransformationF(QuaternionF(), lLauncherPosition + lCamOffset);
 	t.GetOrientation().RotateAroundOwnZ(mLauncherYaw*0.8f);
 	t.GetOrientation().RotateAroundOwnX(lLookDownAngle);

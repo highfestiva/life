@@ -116,10 +116,10 @@ private:
 	UiCure::CppContextObject* mLevel;
 	UiCure::CppContextObject* mVehicle;
 	UiCure::CppContextObject* mLauncher;
+	Vector3DF mVehicleCamPos;
 	bool mIsLaunching;
 	float mLauncherYaw;
 	float mLauncherPitch;
-	double mTime;
 };
 
 

@@ -117,6 +117,15 @@ private:
 
 
 
+struct IsPressing
+{
+    IsPressing(int pTag): mTag(pTag) {}
+    bool operator()(const FingerMovement& pTouch) { return (pTouch.mTag == mTag); }
+    int mTag;
+};
+
+
+
 }
 
 
@@ -194,10 +203,11 @@ bool App::Open()
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_AMBIENTRED, 0.5);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_AMBIENTGREEN, 0.5);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_AMBIENTBLUE, 0.5);
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_SOUND_ROLLOFF, 0.2);
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_SOUND_DOPPLER, 1.3);
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_SOUND_ROLLOFF, 0.7);
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_SOUND_DOPPLER, 1.0);
 
 #ifndef LEPRA_IOS
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_SOUND_ROLLOFF, 0.2);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLETRILINEARFILTERING, true);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLEMIPMAPPING, true);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_SHADOWS, _T("Force:Volume"));	
@@ -484,12 +494,6 @@ void App::DrawHud() const
 		return;
 	}
 
-	struct IsPressing
-	{
-	    IsPressing(int pTag): mTag(pTag) {}
-	    bool operator()(const FingerMovement& pTouch) { return (pTouch.mTag == mTag); }
-	    int mTag;
-	};
 	float lForce;
 	const TBC::PhysicsEngine* lGas;
 	const TBC::PhysicsEngine* lBrakes;

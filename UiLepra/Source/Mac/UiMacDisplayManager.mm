@@ -220,7 +220,7 @@ void MacDisplayManager::SetCaption(const str& pCaption, bool pInternalCall)
 #endif // !iOS
 }
 
-bool MacDisplayManager::OpenScreen(const DisplayMode& pDisplayMode, ScreenMode pScreenMode)
+bool MacDisplayManager::OpenScreen(const DisplayMode& pDisplayMode, ScreenMode pScreenMode, Orientation pOrientation)
 {
 	bool lOk = true;
 
