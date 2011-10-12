@@ -10,6 +10,7 @@
 #include "../Lepra/Include/LogListener.h"
 #include "../Lepra/Include/Path.h"
 #include "../Lepra/Include/SystemManager.h"
+#include "../TBC/Include/PhysicsEngine.h"
 #include "../UiCure/Include/UiCppContextObject.h"
 #include "../UiCure/Include/UiCure.h"
 #include "../UiCure/Include/UiGameUiManager.h"
@@ -28,8 +29,8 @@
 
 #define UIKEY(name)	UiLepra::InputManager::IN_KBD_##name
 #define FPS		20
-#define BUTTON_WIDTH	28
-#define BUTTON_MARGIN	8
+#define BUTTON_WIDTH	40
+#define BUTTON_MARGIN	2
 
 
 
@@ -59,8 +60,9 @@ private:
 	virtual int Run();
 	bool Poll();
 	void PollTaps();
-	void DrawButtons() const;
+	void DrawHud() const;
 	void DrawButton(float x, float y, float pRadius, float pAngle, int pCorners) const;
+	void DrawForceMeter(int x, int y, float pAngle, float pForce, bool pAreEqual) const;
 	void Layout();
 
 	virtual void Suspend();
@@ -69,7 +71,7 @@ private:
 	bool Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor);
 	virtual bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
 	virtual bool OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode);
-	virtual void OnMouseMove(float x, float y, bool pPressed);
+	virtual int DoTap(float x, float y, bool pPressed);
 
 	void OnResize(int pWidth, int pHeight);
 	void OnMinimize();
@@ -176,6 +178,7 @@ bool App::Open()
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_DISPLAY_BITSPERPIXEL, lDisplayBpp);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_DISPLAY_FREQUENCY, lDisplayFrequency);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_DISPLAY_FULLSCREEN, lDisplayFullScreen);
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_DISPLAY_ORIENTATION, _T("Fixed"));
 
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_SOUND_ENGINE, _T("OpenAL"));
 
@@ -397,7 +400,7 @@ bool App::Poll()
 	if (lOk && lRender)
 	{
 		mUiManager->Paint(false);
-		DrawButtons();
+		DrawHud();
 	}
 	if (lOk)
 	{
@@ -421,7 +424,36 @@ bool App::Poll()
 	return lOk;
 }
 
-void App::DrawButtons() const
+void App::PollTaps()
+{
+#ifdef LEPRA_IOS
+	UiCure::CppContextObject* lAvatar1 = mGame->GetP1();
+	UiCure::CppContextObject* lAvatar2 = mGame->GetP2();
+	if (!lAvatar1 || !lAvatar1->IsLoaded() || !lAvatar2 ||!lAvatar2->IsLoaded())
+	{
+		return;
+	}
+	mGame->SetThrottle(lAvatar1, 0);
+	lAvatar1->SetEnginePower(1, 0, 0);
+	mGame->SetThrottle(lAvatar2, 0);
+	lAvatar2->SetEnginePower(1, 0, 0);
+	FingerMoveList::iterator x = gFingerMoveList.begin();
+	for (; x != gFingerMoveList.end();)
+	{
+		x->mTag = DoTap((float)x->mLastX, (float)x->mLastY, x->mIsPress);
+		if (x->mTag > 0)
+		{
+			++x;
+		}
+		else
+		{
+			gFingerMoveList.erase(x++);
+		}
+	}
+#endif // iOS
+}
+
+void App::DrawHud() const
 {
 	const float lButtonWidth = BUTTON_WIDTH;	// TODO: fix for Retina.
 	const float lButtonRadius = lButtonWidth/2;
@@ -443,28 +475,53 @@ void App::DrawButtons() const
 	DrawButton(w-m-lButtonRadius,		m+lButtonRadius,		lButtonRadius, 0,	3);	// Right.
 	// Bomb button.
 	DrawButton(w-m-lButtonRadius,		h/2,				lButtonRadius,	PIF/4,	4);	// Square.
-}
 
-void App::PollTaps()
-{
-	UiCure::CppContextObject* lAvatar1 = mGame->GetP1();
-	UiCure::CppContextObject* lAvatar2 = mGame->GetP2();
-	if (!lAvatar1 || !lAvatar1->IsLoaded())
+	// Draw touch force meters, to give a visual indication of steering.
+	Cure::ContextObject* lAvatar1 = mGame->GetP1();
+	Cure::ContextObject* lAvatar2 = mGame->GetP2();
+	if (!lAvatar1 || !lAvatar1->IsLoaded() || !lAvatar2 || !lAvatar2->IsLoaded())
 	{
 		return;
 	}
-	if (!lAvatar2 ||!lAvatar2->IsLoaded())
+
+	struct IsPressing
 	{
-		lAvatar2 = lAvatar1;
+	    IsPressing(int pTag): mTag(pTag) {}
+	    bool operator()(const FingerMovement& pTouch) { return (pTouch.mTag == mTag); }
+	    int mTag;
+	};
+	float lForce;
+	const TBC::PhysicsEngine* lGas;
+	const TBC::PhysicsEngine* lBrakes;
+	const TBC::PhysicsEngine* lTurn;
+	{
+		lGas = lAvatar1->GetPhysics()->GetEngine(0);
+		lBrakes = lAvatar1->GetPhysics()->GetEngine(2);
+		lForce = lGas->GetValue() + lBrakes->GetValue();
+		if (lForce != 0 || std::find_if(gFingerMoveList.begin(), gFingerMoveList.end(), IsPressing(1)) != gFingerMoveList.end())
+		{
+			DrawForceMeter((int)(m2+lButtonWidth*4), (int)(m+lButtonRadius), -PIF/2, lForce, false);
+		}
+		lTurn = lAvatar1->GetPhysics()->GetEngine(1);
+		lForce = lTurn->GetValue();
+		if (lForce != 0 || std::find_if(gFingerMoveList.begin(), gFingerMoveList.end(), IsPressing(2)) != gFingerMoveList.end())
+		{
+			DrawForceMeter((int)(m2+lButtonWidth*4), (int)(h-m-lButtonWidth), PIF, lForce, true);
+		}
 	}
-	mGame->SetThrottle(lAvatar1, 0);
-	lAvatar1->SetEnginePower(1, 0, 0);
-	mGame->SetThrottle(lAvatar2, 0);
-	lAvatar2->SetEnginePower(1, 0, 0);
-	FingerMoveList::iterator x = gFingerMoveList.begin();
-	for (; x != gFingerMoveList.end(); ++x)
 	{
-		OnMouseMove(x->mLastX, x->mLastY, x->mIsPress);
+		lGas = lAvatar2->GetPhysics()->GetEngine(0);
+		lForce = lGas->GetValue() + lBrakes->GetValue();
+		if (lForce != 0 || std::find_if(gFingerMoveList.begin(), gFingerMoveList.end(), IsPressing(1)) != gFingerMoveList.end())
+		{
+			DrawForceMeter((int)(w-m2-lButtonWidth*4), (int)(h-m-lButtonRadius), -PIF/2, lForce, false);
+		}
+		lTurn = lAvatar2->GetPhysics()->GetEngine(1);
+		lForce = lTurn->GetValue();
+		if (lForce != 0 || std::find_if(gFingerMoveList.begin(), gFingerMoveList.end(), IsPressing(2)) != gFingerMoveList.end())
+		{
+			DrawForceMeter((int)(w-m2-lButtonWidth*4), (int)(m+lButtonWidth), 0, lForce, true);
+		}
 	}
 }
 
@@ -483,6 +540,55 @@ void App::DrawButton(float x, float y, float pRadius, float pAngle, int pCorners
 	}
 	lCoords.push_back(lCoords[1]);
 	mUiManager->GetPainter()->DrawFan(lCoords, true);
+}
+
+void App::DrawForceMeter(int x, int y, float pAngle, float pForce, bool pAreEqual) const
+{
+	Color lColor = YELLOW;
+	Color lTargetColor = RED;
+	if (pForce < 0)
+	{
+		pForce = -pForce;
+		pAngle += PIF;
+		if (!pAreEqual)
+		{
+			lTargetColor = BLUE;
+		}
+	}
+	const int lBarCount = 5;
+	const int lBarHeight = BUTTON_WIDTH/lBarCount/2;
+	const int lBarWidth = BUTTON_WIDTH;
+	const float lForceStep = 1.0f/lBarCount - MathTraits<float>::FullEps();
+	float lCurrentForce = 0;
+	const int lXStep = -(int)(::sin(pAngle)*lBarHeight*2);
+	const int lYStep = -(int)(::cos(pAngle)*lBarHeight*2);
+	const bool lXIsMain = ::abs(lXStep) >= ::abs(lYStep);
+	const int lStartCount = -lBarCount+1;
+	x += lXStep * lStartCount;
+	y += lYStep * lStartCount;
+	for (int i = lStartCount; i < lBarCount; ++i)
+	{
+		const Color c = (i >= 0)? Color(lColor, lTargetColor, lCurrentForce) : DARK_GRAY;
+		mUiManager->GetPainter()->SetColor(c);
+		if (lXIsMain)
+		{
+			mUiManager->GetPainter()->FillRect(x, y-lBarWidth/2, x+lBarHeight, y+lBarWidth/2);
+		}
+		else
+		{
+			mUiManager->GetPainter()->FillRect(x-lBarWidth/2, y, x+lBarWidth/2, y+lBarHeight);
+		}
+		x += lXStep;
+		y += lYStep;
+		if (i >= 0)
+		{
+			lCurrentForce += lForceStep;
+			if (lCurrentForce > pForce)
+			{
+				break;
+			}
+		}
+	}
 }
 
 void App::Layout()
@@ -587,7 +693,7 @@ bool App::OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode)
 	return Steer(pKeyCode, 0);
 }
 
-void App::OnMouseMove(float x, float y, bool pPressed)
+int App::DoTap(float x, float y, bool pPressed)
 {
 	x;
 	y;
@@ -612,24 +718,30 @@ void App::OnMouseMove(float x, float y, bool pPressed)
 	if (x <= lDoubleWidth && y <= lSingleWidth)	// P1 up/down?
 	{
 		mGame->SetThrottle(lAvatar1, CLAMPUP((x-s)/s));
+		return 1;
 	}
 	else if (x <= lSingleWidth && y >= h-lDoubleWidth)	// P1 left/right?
 	{
 		lAvatar1->SetEnginePower(1, CLAMPUP((y-(h-s))/s), 0);
+		return 2;
 	}
 	else if (x >= w-lDoubleWidth && y >= h-lSingleWidth)	// P2 up/down?
 	{
 		mGame->SetThrottle(lAvatar2, CLAMPUP((x-(w-s))/s));
+		return 3;
 	}
 	else if (x >= w-lSingleWidth && y <= lDoubleWidth)	// P1 left/right?
 	{
 		lAvatar2->SetEnginePower(1, CLAMPUP((s-y)/s), 0);
+		return 4;
 	}
 	else if (x >= w-lSingleWidth && y >= h/2-s && y <= h/2+s)	// Bomb?
 	{
 		mGame->Shoot();
+		return 5;
 	}
 #endif // iOS
+	return 0;
 }
 
 

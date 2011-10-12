@@ -86,7 +86,7 @@ bool TestGraphics(const Lepra::LogDecorator& pLog)
 	if (lTestOk)
 	{
 		lContext = _T("open screen");
-		lTestOk = lDisplay->OpenScreen(lDisplayMode, UiLepra::DisplayManager::WINDOWED);
+		lTestOk = lDisplay->OpenScreen(lDisplayMode, UiLepra::DisplayManager::WINDOWED, UiLepra::DisplayManager::ORIENTATION_ALLOW_ANY);
 		assert(lTestOk);
 	}
 

@@ -122,13 +122,28 @@ bool GameUiManager::Open()
 	}
 	if (lOk)
 	{
+		str lDisplayOrientation;
+		CURE_RTVAR_GET(lDisplayOrientation, =, mVariableScope, RTVAR_UI_DISPLAY_ORIENTATION, _T("AllowUpsideDown"));
+		UiLepra::DisplayManager::Orientation lOrientation = UiLepra::DisplayManager::ORIENTATION_ALLOW_UPSIDE_DOWN;
+		if (lDisplayOrientation == _T("AllowAny"))
+		{
+			lOrientation = UiLepra::DisplayManager::ORIENTATION_ALLOW_ANY;
+		}
+		else if (lDisplayOrientation == _T("AllowUpsideDown"))
+		{
+			lOrientation = UiLepra::DisplayManager::ORIENTATION_ALLOW_UPSIDE_DOWN;
+		}
+		else if (lDisplayOrientation == _T("Fixed"))
+		{
+			lOrientation = UiLepra::DisplayManager::ORIENTATION_FIXED;
+		}
 		if (lDisplayFullScreen)
 		{
-			lOk = mDisplay->OpenScreen(lDisplayMode, UiLepra::DisplayManager::FULLSCREEN);
+			lOk = mDisplay->OpenScreen(lDisplayMode, UiLepra::DisplayManager::FULLSCREEN, lOrientation);
 		}
 		else
 		{
-			lOk = mDisplay->OpenScreen(lDisplayMode, UiLepra::DisplayManager::WINDOWED);
+			lOk = mDisplay->OpenScreen(lDisplayMode, UiLepra::DisplayManager::WINDOWED, lOrientation);
 		}
 	}
 	if (lOk)

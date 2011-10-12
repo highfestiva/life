@@ -94,7 +94,6 @@ void DisplayManager::EnableScreensaver(bool pEnable)
 
 
 MacDisplayManager::MacDisplayManager():
-	mScreenMode(DisplayManager::WINDOWED),
 	mWnd(0),
 	mIsOpen(false),
 	mMinimized(false),
@@ -239,6 +238,7 @@ bool MacDisplayManager::OpenScreen(const DisplayMode& pDisplayMode, ScreenMode p
 	if (lOk)
 	{
 		mScreenMode = pScreenMode;
+		mOrientation = pOrientation;
 
 		if (mScreenMode == DisplayManager::FULLSCREEN)
 		{

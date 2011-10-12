@@ -14,22 +14,24 @@
 @interface EAGLView : UIView
 {
 @private
-  EAGLContext *context;
-    
-// The pixel dimensions of the CAEAGLLayer.
- GLint framebufferWidth;
- GLint framebufferHeight;
-    
- // The OpenGL ES names for the framebuffer and renderbuffer used to render to this view.
- GLuint defaultFramebuffer, colorRenderbuffer, depthRenderbuffer;
+	EAGLContext *context;
 
- bool isOpen;
- UIResponder* responder;
+	// The pixel dimensions of the CAEAGLLayer.
+	GLint framebufferWidth;
+	GLint framebufferHeight;
+
+	// The OpenGL ES names for the framebuffer and renderbuffer used to render to this view.
+	GLuint defaultFramebuffer, colorRenderbuffer, depthRenderbuffer;
+
+	bool isOpen;
+	UIResponder* responder;
+	int orientationStrictness;
 }
 
 @property (nonatomic, retain) EAGLContext *context;
 @property (nonatomic, readonly) bool isOpen;
 @property (nonatomic, assign) UIResponder* responder;
+@property (nonatomic, assign) int orientationStrictness;
 
 + (EAGLView*)sharedView;
 - (void)setFramebuffer;

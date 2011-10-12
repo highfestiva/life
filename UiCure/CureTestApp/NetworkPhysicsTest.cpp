@@ -350,7 +350,7 @@ bool CreateWorld(AgentData& pAgentData)
 {
 	bool lTestOk = true;
 	pAgentData.mTickTimeModulo = 0;
-	pAgentData.mPhysics = TBC::PhysicsManagerFactory::Create(TBC::PhysicsManagerFactory::ENGINE_ODE);
+	pAgentData.mPhysics = TBC::PhysicsManagerFactory::Create(TBC::PhysicsManagerFactory::ENGINE_ODE, 1000, 6);
 	pAgentData.mPhysics->SetGravity(Lepra::Vector3DF(0, 0, -10));
 	// Create floor on server.
 	const float lFloorSize = 100;
@@ -872,7 +872,7 @@ bool OpenWindow(AgentData& pAgentData, const str& pCaption)
 	if (lTestOk)
 	{
 		lContext = _T("open screen");
-		lTestOk = pAgentData.mDisplay->OpenScreen(lDisplayMode, UiLepra::DisplayManager::WINDOWED);
+		lTestOk = pAgentData.mDisplay->OpenScreen(lDisplayMode, UiLepra::DisplayManager::WINDOWED, UiLepra::DisplayManager::ORIENTATION_ALLOW_ANY);
 	}
 	if (lTestOk)
 	{

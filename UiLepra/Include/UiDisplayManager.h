@@ -88,10 +88,17 @@ public:
 
 	enum ScreenMode
 	{
-		WINDOWED,		// Windowed and resizable.
+		WINDOWED,	// Windowed and resizable.
 		STATIC_WINDOW,	// Windowed and not resizable.
 		SPLASH_WINDOW,	// No border.
 		FULLSCREEN,
+	};
+
+	enum Orientation
+	{
+		ORIENTATION_ALLOW_ANY,
+		ORIENTATION_ALLOW_UPSIDE_DOWN,
+		ORIENTATION_FIXED,
 	};
 
 	enum ContextType
@@ -119,7 +126,7 @@ public:
 	virtual void SetCaption(const str& pCaption) = 0;
 
 	// Creates a window in windowed or fullscreen mode on the main display device.
-	virtual bool OpenScreen(const DisplayMode& pDisplayMode, ScreenMode pMode) = 0;
+	virtual bool OpenScreen(const DisplayMode& pDisplayMode, ScreenMode pMode, Orientation pOrientation) = 0;
 	virtual void CloseScreen() = 0;
 
 	void AddResizeObserver(DisplayResizeObserver* pResizeObserver);
@@ -180,6 +187,10 @@ public:
 protected:
 	typedef std::hash_set<DisplayResizeObserver*, LEPRA_VOIDP_HASHER> ResizeObserverSet;
 	ResizeObserverSet mResizeObserverSet;
+
+	DisplayMode mDisplayMode;
+	ScreenMode mScreenMode;	// Fullscreen or windowed.
+	Orientation mOrientation;
 
 	DisplayMode* mEnumeratedDisplayMode;
 	int mEnumeratedDisplayModeCount;

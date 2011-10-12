@@ -15,6 +15,8 @@ namespace UiLepra
 
 
 DisplayManager::DisplayManager():
+	mScreenMode(WINDOWED),
+	mOrientation(ORIENTATION_ALLOW_ANY),
 	mEnumeratedDisplayMode(0),
 	mEnumeratedDisplayModeCount(0)
 {

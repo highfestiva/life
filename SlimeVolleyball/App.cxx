@@ -213,11 +213,11 @@ bool App::Open()
 	{
 		if (lDisplayFullScreen)
 		{
-			lOk = mDisplay->OpenScreen(lDisplayMode, UiLepra::DisplayManager::FULLSCREEN);
+			lOk = mDisplay->OpenScreen(lDisplayMode, UiLepra::DisplayManager::FULLSCREEN, UiLepra::DisplayManager::ORIENTATION_ALLOW_UPSIDE_DOWN);
 		}
 		else
 		{
-			lOk = mDisplay->OpenScreen(lDisplayMode, UiLepra::DisplayManager::WINDOWED);
+			lOk = mDisplay->OpenScreen(lDisplayMode, UiLepra::DisplayManager::WINDOWED, UiLepra::DisplayManager::ORIENTATION_ALLOW_UPSIDE_DOWN);
 		}
 	}
 	if (lOk)

@@ -299,6 +299,10 @@ bool MacOpenGLDisplay::CreateGLContext()
 #ifdef LEPRA_IOS
 		mGlContext = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES1];
 		[EAGLContext setCurrentContext:mGlContext];
+		switch (mOrientation)
+		{
+			
+		}
 #else // !iOS
 		mGlContext = [mGlView openGLContext];
 #endif // iOS/!iOS
@@ -332,6 +336,12 @@ bool MacOpenGLDisplay::SetGLPixelFormat()
 {
 #ifdef LEPRA_IOS
 	mGlView = [[EAGLView alloc] initWithFrame:mWnd.bounds];
+	switch (mOrientation)
+	{
+		case ORIENTATION_ALLOW_ANY:		mGlView.orientationStrictness = 0;	break;
+		case ORIENTATION_ALLOW_UPSIDE_DOWN:	mGlView.orientationStrictness = 1;	break;
+		case ORIENTATION_FIXED:			mGlView.orientationStrictness = 2;	break;
+	}
 	[mWnd addSubview:mGlView];
 	[mWnd makeKeyAndVisible];	// Only visible after we add the view.
 #else // !iOS

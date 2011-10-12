@@ -39,7 +39,7 @@ public:
 	virtual void SetCaption(const str& pCaption);
 
 	// The border flag only has effect in windowed mode.
-	virtual bool OpenScreen(const DisplayMode& pDisplayMode, ScreenMode pMode);
+	virtual bool OpenScreen(const DisplayMode& pDisplayMode, ScreenMode pMode, Orientation pOrientation);
 	virtual void CloseScreen();
 
 	virtual bool IsVisible() const;
@@ -99,9 +99,6 @@ protected:
 	}
 
 	//Screen Stuff
-
-	DisplayMode mDisplayMode;
-	ScreenMode mScreenMode;	// Fullscreen or windowed.
 
 	static int msWindowCount;
 	static int msRegisterCount;

@@ -42,7 +42,6 @@ void DisplayManager::EnableScreensaver(bool pEnable)
 
 
 Win32DisplayManager::Win32DisplayManager() :
-	mScreenMode(DisplayManager::WINDOWED),
 	mWnd(0),
 	mInitialized(false),
 	mScreenOpened(false),
@@ -185,7 +184,7 @@ void Win32DisplayManager::SetCaption(const str& pCaption, bool pInternalCall)
 	}
 }
 
-bool Win32DisplayManager::OpenScreen(const DisplayMode& pDisplayMode, ScreenMode pScreenMode)
+bool Win32DisplayManager::OpenScreen(const DisplayMode& pDisplayMode, ScreenMode pScreenMode, Orientation pOrientation)
 {
 	bool lOk = true;
 
@@ -208,6 +207,7 @@ bool Win32DisplayManager::OpenScreen(const DisplayMode& pDisplayMode, ScreenMode
 	if (lOk)
 	{
 		mScreenMode = pScreenMode;
+		mOrientation = pOrientation;
 
 		if (mScreenMode == DisplayManager::FULLSCREEN)
 		{

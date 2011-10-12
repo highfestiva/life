@@ -11,6 +11,7 @@
 #define RTVAR_UI_DISPLAY_BITSPERPIXEL		"Ui.Display.BitsPerPixel"
 #define RTVAR_UI_DISPLAY_FREQUENCY		"Ui.Display.Frequency"
 #define RTVAR_UI_DISPLAY_FULLSCREEN		"Ui.Display.FullScreen"
+#define RTVAR_UI_DISPLAY_ORIENTATION		"Ui.Display.Orientation"
 #define RTVAR_UI_DISPLAY_ENABLEVSYNC		"Ui.Display.EnableVSync"
 #define RTVAR_UI_DISPLAY_RENDERENGINE		"Ui.Display.RenderEngine"
 

@@ -493,8 +493,8 @@ bool OpenRenderer(const Lepra::LogDecorator& pLog, UiLepra::DisplayManager::Cont
 	if (lOk)
 	{
 		lContext = _T("open screen");
-		//lOk = gDisplay->OpenScreen(lDisplayMode, UiLepra::DisplayManager::FULLSCREEN);
-		lOk = gDisplay->OpenScreen(lDisplayMode, UiLepra::DisplayManager::WINDOWED);
+		//lOk = gDisplay->OpenScreen(lDisplayMode, UiLepra::DisplayManager::FULLSCREEN, UiLepra::DisplayManager::ORIENTATION_ALLOW_ANY);
+		lOk = gDisplay->OpenScreen(lDisplayMode, UiLepra::DisplayManager::WINDOWED, UiLepra::DisplayManager::ORIENTATION_ALLOW_ANY);
 	}
 	if (lOk)
 	{

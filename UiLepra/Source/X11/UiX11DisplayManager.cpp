@@ -37,7 +37,6 @@ void DisplayManager::EnableScreensaver(bool /*pEnable*/)
 
 
 X11DisplayManager::X11DisplayManager() :
-	mScreenMode(DisplayManager::WINDOWED),
 	mDisplay(0),
 	mWnd(0),
 	mIsOpen(false),
@@ -135,7 +134,7 @@ void X11DisplayManager::SetCaption(const str& pCaption, bool pInternalCall)
 	}
 }
 
-bool X11DisplayManager::OpenScreen(const DisplayMode& pDisplayMode, ScreenMode pScreenMode)
+bool X11DisplayManager::OpenScreen(const DisplayMode& pDisplayMode, ScreenMode pScreenMode, Orientation pOrientation)
 {
 	bool lOk = true;
 
@@ -153,6 +152,7 @@ bool X11DisplayManager::OpenScreen(const DisplayMode& pDisplayMode, ScreenMode p
 	if (lOk)
 	{
 		mScreenMode = pScreenMode;
+		mOrientation = pOrientation;
 
 		if (mScreenMode == DisplayManager::FULLSCREEN)
 		{

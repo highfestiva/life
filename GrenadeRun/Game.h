@@ -41,13 +41,15 @@ struct FingerMovement
 	int mLastX;
 	int mLastY;
 	bool mIsPress;
+	int mTag;
 
 	inline FingerMovement(int x, int y):
 		mStartX(x),
 		mStartY(y),
 		mLastX(x),
 		mLastY(y),
-		mIsPress(true)
+		mIsPress(true),
+		mTag(0)
 	{
 	}
 
