@@ -83,6 +83,7 @@ public:
 	void GetLauncherTransform(TransformationF& pTransform) const;
 	void SetThrottle(UiCure::CppContextObject* pPlayer, float pThrottle);
 	bool Shoot();
+	float GetMuzzleVelocity() const;
 	void UnlockLauncher();
 	void Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition, Cure::ContextObject* pObject1);
 

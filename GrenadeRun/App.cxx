@@ -19,6 +19,7 @@
 #include "../UiLepra/Include/UiCore.h"
 #include "../UiLepra/Include/UiDisplayManager.h"
 #include "../UiLepra/Include/UiInput.h"
+#include "../UiLepra/Include/UiOpenGLExtensions.h"	// Included to get the gl-headers.
 #include "../UiLepra/Include/UiSoundManager.h"
 #include "../UiLepra/Include/UiSoundStream.h"
 #include "../UiTBC/Include/GUI/UiButton.h"
@@ -63,6 +64,9 @@ private:
 	void DrawHud() const;
 	void DrawButton(float x, float y, float pRadius, float pAngle, int pCorners) const;
 	void DrawForceMeter(int x, int y, float pAngle, float pForce, bool pAreEqual) const;
+	void GetLauncherAngles(Cure::ContextObject* pAvatar1, Cure::ContextObject* pAvatar2,
+		float& pPitch, float& pGuidePitch, float& pYaw, float& pGuideYaw) const;
+	void DrawBarrel(float x, float y, float pAngle) const;
 	void Layout();
 
 	virtual void Suspend();
@@ -472,7 +476,6 @@ void App::DrawHud() const
 	const float m = BUTTON_MARGIN;
 	const float m2 = m*2;
 
-	mUiManager->GetPainter()->SetColor(Color(64, 64, 255), 0);
 	// Left player.
 	DrawButton(m2+lButtonWidth*1.5f,	m+lButtonRadius,		lButtonRadius, +PIF/2,	3);	// Up.
 	DrawButton(m+lButtonRadius,		m+lButtonRadius,		lButtonRadius, -PIF/2,	3);	// Down.
@@ -513,24 +516,51 @@ void App::DrawHud() const
 			DrawForceMeter((int)(m2+lButtonWidth*4), (int)(h-m-lButtonWidth), PIF, lForce, true);
 		}
 	}
+	bool lDrawPitchGuide = true;
+	bool lDrawYawGuide = true;
 	{
 		lGas = lAvatar2->GetPhysics()->GetEngine(0);
-		lForce = lGas->GetValue() + lBrakes->GetValue();
-		if (lForce != 0 || std::find_if(gFingerMoveList.begin(), gFingerMoveList.end(), IsPressing(1)) != gFingerMoveList.end())
+		lForce = lGas->GetValue();
+		if (lForce != 0 || std::find_if(gFingerMoveList.begin(), gFingerMoveList.end(), IsPressing(3)) != gFingerMoveList.end())
 		{
-			DrawForceMeter((int)(w-m2-lButtonWidth*4), (int)(h-m-lButtonRadius), -PIF/2, lForce, false);
+			DrawForceMeter((int)(w-m2-lButtonWidth*4), (int)(h-m*1.5f-lButtonRadius), -PIF/2, lForce, false);
+			lDrawPitchGuide = false;
 		}
 		lTurn = lAvatar2->GetPhysics()->GetEngine(1);
 		lForce = lTurn->GetValue();
-		if (lForce != 0 || std::find_if(gFingerMoveList.begin(), gFingerMoveList.end(), IsPressing(2)) != gFingerMoveList.end())
+		if (lForce != 0 || std::find_if(gFingerMoveList.begin(), gFingerMoveList.end(), IsPressing(4)) != gFingerMoveList.end())
 		{
-			DrawForceMeter((int)(w-m2-lButtonWidth*4), (int)(m+lButtonWidth), 0, lForce, true);
+			DrawForceMeter((int)(w-m2-lButtonWidth*4), (int)(m*1.5f+lButtonWidth), 0, lForce, true);
+			lDrawYawGuide = false;
 		}
+	}
+
+	// Draw launcher guides
+	const float lDrawAngle = 0;
+	float lPitch;
+	float lGuidePitch;
+	float lYaw;
+	float lGuideYaw;
+	GetLauncherAngles(lAvatar1, lAvatar2, lPitch, lGuidePitch, lYaw, lGuideYaw);
+	if (lDrawPitchGuide)
+	{
+		mUiManager->GetPainter()->SetColor(Color(80, 30, 30), 0);
+		DrawBarrel(w-m2-lButtonWidth*3.5f, h-m*1.5f-lButtonRadius, lGuidePitch+lDrawAngle);
+		mUiManager->GetPainter()->SetColor(Color(140, 140, 140), 0);
+		DrawBarrel(w-m2-lButtonWidth*3.5f, h-m*1.5f-lButtonRadius, lPitch+lDrawAngle);
+	}
+	if (lDrawYawGuide)
+	{
+		mUiManager->GetPainter()->SetColor(Color(80, 30, 30), 0);
+		DrawBarrel(w-m2-lButtonWidth*3.5f, m*1.5f+lButtonWidth, lGuideYaw+lDrawAngle);
+		mUiManager->GetPainter()->SetColor(Color(140, 140, 140), 0);
+		DrawBarrel(w-m2-lButtonWidth*3.5f, m*1.5f+lButtonWidth, lYaw+lDrawAngle);
 	}
 }
 
 void App::DrawButton(float x, float y, float pRadius, float pAngle, int pCorners) const
 {
+	pRadius -= 2;
 	const float lRoundRadius = pRadius * 0.96f;
 	const float lRoundAngle = PIF/16;
 	std::vector<Vector2DF> lCoords;
@@ -543,7 +573,18 @@ void App::DrawButton(float x, float y, float pRadius, float pAngle, int pCorners
 		pAngle += 2*PIF/pCorners;
 	}
 	lCoords.push_back(lCoords[1]);
+	mUiManager->GetPainter()->SetColor(Color(64, 64, 255), 0);
 	mUiManager->GetPainter()->DrawFan(lCoords, true);
+	const Vector2DF lCenter(x, y);
+	for (int i = 0; i < lCoords.size()-1; ++i)
+	{
+		const Vector2DF c = lCoords[i+1]-lCenter;
+		lCoords[i] = c*44.0f/40 + lCenter;
+	}
+	lCoords.pop_back();
+	::glLineWidth(2);
+	mUiManager->GetPainter()->SetColor(Color(230, 220, 200), 0);
+	mUiManager->GetPainter()->DrawFan(lCoords, false);
 }
 
 void App::DrawForceMeter(int x, int y, float pAngle, float pForce, bool pAreEqual) const
@@ -572,7 +613,7 @@ void App::DrawForceMeter(int x, int y, float pAngle, float pForce, bool pAreEqua
 	y += lYStep * lStartCount;
 	for (int i = lStartCount; i < lBarCount; ++i)
 	{
-		const Color c = (i >= 0)? Color(lColor, lTargetColor, lCurrentForce) : DARK_GRAY;
+		const Color c = (i >= 0 && lCurrentForce <= pForce)? Color(lColor, lTargetColor, lCurrentForce) : DARK_GRAY;
 		mUiManager->GetPainter()->SetColor(c);
 		if (lXIsMain)
 		{
@@ -587,13 +628,67 @@ void App::DrawForceMeter(int x, int y, float pAngle, float pForce, bool pAreEqua
 		if (i >= 0)
 		{
 			lCurrentForce += lForceStep;
-			if (lCurrentForce > pForce)
-			{
-				break;
-			}
 		}
 	}
 }
+
+void App::GetLauncherAngles(Cure::ContextObject* pAvatar1, Cure::ContextObject* pAvatar2,
+	float& pPitch, float& pGuidePitch, float& pYaw, float& pGuideYaw) const
+{
+	const Vector3DF lDelta = pAvatar1->GetPosition() - pAvatar2->GetPosition();
+	const Vector2DF lYawVector(lDelta.x, lDelta.y);
+	pGuideYaw = lYawVector.GetAngle(Vector2DF(0, 1));
+	if (lDelta.x > 0)
+	{
+		pGuideYaw = -pGuideYaw;
+	}
+
+	float lRoll;
+	pAvatar2->GetOrientation().GetEulerAngles(pYaw, pPitch, lRoll);
+
+	const float h = lDelta.z;
+	const float v = mGame->GetMuzzleVelocity();
+	const float vup = v * ::cos(pPitch);
+	// g*t^2/2 - vup*t + h = 0
+	//
+	// Quaderatic formula:
+	// ax^2 + bx + c = 0
+	// =>
+	//     -b +- sqrt(b^2 - 4ac)
+	// x = ---------------------
+	//             2a
+	const float a = 9.82f/2;
+	const float b = -vup;
+	const float c = h;
+	const float b2 = b*b;
+	const float _4ac = 4*a*c;
+	if (b2 < _4ac)	// Does not compute.
+	{
+		pGuidePitch = -PIF/4;
+	}
+	else
+	{
+		const float t = (-b + sqrt(b2 - _4ac)) / (2*a);
+		const float vfwd = lYawVector.GetLength() / t;
+		pGuidePitch = -::atan(vfwd/vup);
+	}
+}
+
+void App::DrawBarrel(float x, float y, float pAngle) const
+{
+	const float lIndicatorLength = BUTTON_WIDTH;
+	const float ca = ::cos(pAngle);
+	const float sa = ::sin(pAngle);
+	const float lWidth = BUTTON_WIDTH/10/2;
+	std::vector<Vector2DF> lCoords;
+	lCoords.push_back(Vector2DF(x-sa*lWidth, y-ca*lWidth));
+	lCoords.push_back(Vector2DF(x+sa*lWidth, y+ca*lWidth));
+	lCoords.push_back(lCoords[1] + Vector2DF(-lIndicatorLength*ca, lIndicatorLength*sa));
+	lCoords.push_back(lCoords[0] + Vector2DF(-lIndicatorLength*ca, lIndicatorLength*sa));
+	mUiManager->GetPainter()->DrawFan(lCoords, true);
+}
+
+
 
 void App::Layout()
 {

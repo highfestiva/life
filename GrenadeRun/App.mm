@@ -46,23 +46,7 @@ using namespace Lepra;
 -(id) init:(Canvas*)pCanvas
 {
 	canvas = pCanvas;
-	UIDevice* lDevice = [UIDevice currentDevice];
-	[lDevice beginGeneratingDeviceOrientationNotifications];
-	[[NSNotificationCenter defaultCenter] addObserver:self
-						 selector:@selector(orientationDidChange:)
-						     name:UIDeviceOrientationDidChangeNotification
-						   object:nil];
 	return self;
-}
-
--(void) orientationDidChange:(NSNotification*)notification
-{
-	UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
-	if (orientation == UIDeviceOrientationLandscapeLeft ||
-		orientation == UIDeviceOrientationLandscapeRight)
-	{
-		canvas->SetOutputRotation((orientation == UIDeviceOrientationLandscapeLeft)? 90 : -90);
-	}
 }
 
 -(void) startTick

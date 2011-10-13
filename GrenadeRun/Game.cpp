@@ -105,7 +105,7 @@ bool Game::Tick()
 	Vector3DF lVelocity;
 	if (mVehicle)
 	{
-		lPosition = mVehicle->GetPosition()+Vector3DF(0, 0, 2);
+		lPosition = mVehicle->GetPosition()+Vector3DF(0, 0, -2);
 		lVelocity = mVehicle->GetVelocity();
 	}
 	else
@@ -194,6 +194,16 @@ bool Game::Shoot()
 		mIsLaunching = true;
 	}
 	return lOk;
+}
+
+float Game::GetMuzzleVelocity() const
+{
+	float lMuzzleVelocity = 50.0;
+	if (mLauncher && mLauncher->IsLoaded() && mVehicle && mVehicle->IsLoaded())
+	{
+		lMuzzleVelocity = ::pow(mLauncher->GetPosition().GetDistance(mVehicle->GetPosition()), 0.5f) * 3.5f;
+	}
+	return lMuzzleVelocity;
 }
 
 void Game::UnlockLauncher()
@@ -432,12 +442,7 @@ Cure::ContextObject* Game::CreateContextObject(const str& pClassId) const
 {
 	if (strutil::StartsWith(pClassId, _T("grenade")))
 	{
-		float lMuzzleVelocity = 50.0;
-		if (mLauncher && mLauncher->IsLoaded() && mVehicle && mVehicle->IsLoaded())
-		{
-			lMuzzleVelocity = ::pow(mLauncher->GetPosition().GetDistance(mVehicle->GetPosition()), 0.5f) * 3.5f;
-		}
-		return new Grenade(GetResourceManager(), pClassId, mUiManager, lMuzzleVelocity);
+		return new Grenade(GetResourceManager(), pClassId, mUiManager, GetMuzzleVelocity());
 	}
 	return new UiCure::Machine(GetResourceManager(), pClassId, mUiManager);
 }
