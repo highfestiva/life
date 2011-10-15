@@ -206,6 +206,11 @@ float Game::GetMuzzleVelocity() const
 	return lMuzzleVelocity;
 }
 
+bool Game::IsLauncherLocked() const
+{
+	return mIsLaunching;
+}
+
 void Game::UnlockLauncher()
 {
 	mIsLaunching = false;

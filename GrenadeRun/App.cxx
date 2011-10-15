@@ -63,6 +63,7 @@ private:
 	void PollTaps();
 	void DrawHud() const;
 	void DrawButton(float x, float y, float pRadius, float pAngle, int pCorners) const;
+	void DrawButton(float x, float y, float pRadius, float pAngle, int pCorners, const Color& pColor) const;
 	void DrawForceMeter(int x, int y, float pAngle, float pForce, bool pAreEqual) const;
 	void GetLauncherAngles(Cure::ContextObject* pAvatar1, Cure::ContextObject* pAvatar2,
 		float& pPitch, float& pGuidePitch, float& pYaw, float& pGuideYaw) const;
@@ -487,7 +488,9 @@ void App::DrawHud() const
 	DrawButton(w-m-lButtonRadius,		m2+lButtonWidth*1.5f,		lButtonRadius, PIF,	3);	// Left.
 	DrawButton(w-m-lButtonRadius,		m+lButtonRadius,		lButtonRadius, 0,	3);	// Right.
 	// Bomb button.
-	DrawButton(w-m-lButtonRadius,		h/2,				lButtonRadius,	PIF/4,	4);	// Square.
+	bool lIsLocked = mGame->IsLauncherLocked();
+	Color c = lIsLocked? Color(190, 48, 55) : Color(57, 60, 190);
+	DrawButton(w-m-lButtonRadius,		h/2,				lButtonRadius,	-PIF/2,	5, c);	// Square.
 
 	// Draw touch force meters, to give a visual indication of steering.
 	Cure::ContextObject* lAvatar1 = mGame->GetP1();
@@ -504,7 +507,7 @@ void App::DrawHud() const
 	{
 		lGas = lAvatar1->GetPhysics()->GetEngine(0);
 		lBrakes = lAvatar1->GetPhysics()->GetEngine(2);
-		lForce = lGas->GetValue() + lBrakes->GetValue();
+		lForce = lGas->GetValue() - lBrakes->GetValue();
 		if (lForce != 0 || std::find_if(gFingerMoveList.begin(), gFingerMoveList.end(), IsPressing(1)) != gFingerMoveList.end())
 		{
 			DrawForceMeter((int)(m2+lButtonWidth*4), (int)(m+lButtonRadius), -PIF/2, lForce, false);
@@ -516,22 +519,18 @@ void App::DrawHud() const
 			DrawForceMeter((int)(m2+lButtonWidth*4), (int)(h-m-lButtonWidth), PIF, lForce, true);
 		}
 	}
-	bool lDrawPitchGuide = true;
-	bool lDrawYawGuide = true;
 	{
 		lGas = lAvatar2->GetPhysics()->GetEngine(0);
 		lForce = lGas->GetValue();
 		if (lForce != 0 || std::find_if(gFingerMoveList.begin(), gFingerMoveList.end(), IsPressing(3)) != gFingerMoveList.end())
 		{
 			DrawForceMeter((int)(w-m2-lButtonWidth*4), (int)(h-m*1.5f-lButtonRadius), -PIF/2, lForce, false);
-			lDrawPitchGuide = false;
 		}
 		lTurn = lAvatar2->GetPhysics()->GetEngine(1);
 		lForce = lTurn->GetValue();
 		if (lForce != 0 || std::find_if(gFingerMoveList.begin(), gFingerMoveList.end(), IsPressing(4)) != gFingerMoveList.end())
 		{
 			DrawForceMeter((int)(w-m2-lButtonWidth*4), (int)(m*1.5f+lButtonWidth), 0, lForce, true);
-			lDrawYawGuide = false;
 		}
 	}
 
@@ -542,23 +541,26 @@ void App::DrawHud() const
 	float lYaw;
 	float lGuideYaw;
 	GetLauncherAngles(lAvatar1, lAvatar2, lPitch, lGuidePitch, lYaw, lGuideYaw);
-	if (lDrawPitchGuide)
 	{
-		mUiManager->GetPainter()->SetColor(Color(80, 30, 30), 0);
-		DrawBarrel(w-m2-lButtonWidth*3.5f, h-m*1.5f-lButtonRadius, lGuidePitch+lDrawAngle);
+		mUiManager->GetPainter()->SetColor(Color(100, 30, 30), 0);
+		DrawBarrel(w-m*1.5-lButtonWidth/2, h-m2-lButtonWidth-8, lGuidePitch+lDrawAngle);
 		mUiManager->GetPainter()->SetColor(Color(140, 140, 140), 0);
-		DrawBarrel(w-m2-lButtonWidth*3.5f, h-m*1.5f-lButtonRadius, lPitch+lDrawAngle);
+		DrawBarrel(w-m*1.5-lButtonWidth/2, h-m2-lButtonWidth-8, lPitch+lDrawAngle);
 	}
-	if (lDrawYawGuide)
 	{
-		mUiManager->GetPainter()->SetColor(Color(80, 30, 30), 0);
-		DrawBarrel(w-m2-lButtonWidth*3.5f, m*1.5f+lButtonWidth, lGuideYaw+lDrawAngle);
+		mUiManager->GetPainter()->SetColor(Color(100, 30, 30), 0);
+		DrawBarrel(w-m2-lButtonWidth-8, m*1.5f+lButtonWidth, lGuideYaw+lDrawAngle);
 		mUiManager->GetPainter()->SetColor(Color(140, 140, 140), 0);
-		DrawBarrel(w-m2-lButtonWidth*3.5f, m*1.5f+lButtonWidth, lYaw+lDrawAngle);
+		DrawBarrel(w-m2-lButtonWidth-8, m*1.5f+lButtonWidth, lYaw+lDrawAngle);
 	}
 }
 
 void App::DrawButton(float x, float y, float pRadius, float pAngle, int pCorners) const
+{
+	DrawButton(x, y, pRadius, pAngle, pCorners, Color(Color(57, 60, 190)));
+}
+
+void App::DrawButton(float x, float y, float pRadius, float pAngle, int pCorners, const Color& pColor) const
 {
 	pRadius -= 2;
 	const float lRoundRadius = pRadius * 0.96f;
@@ -573,7 +575,7 @@ void App::DrawButton(float x, float y, float pRadius, float pAngle, int pCorners
 		pAngle += 2*PIF/pCorners;
 	}
 	lCoords.push_back(lCoords[1]);
-	mUiManager->GetPainter()->SetColor(Color(64, 64, 255), 0);
+	mUiManager->GetPainter()->SetColor(pColor, 0);
 	mUiManager->GetPainter()->DrawFan(lCoords, true);
 	const Vector2DF lCenter(x, y);
 	for (int i = 0; i < lCoords.size()-1; ++i)
@@ -583,7 +585,7 @@ void App::DrawButton(float x, float y, float pRadius, float pAngle, int pCorners
 	}
 	lCoords.pop_back();
 	::glLineWidth(2);
-	mUiManager->GetPainter()->SetColor(Color(230, 220, 200), 0);
+	mUiManager->GetPainter()->SetColor(Color(170, 180, 190), 0);
 	mUiManager->GetPainter()->DrawFan(lCoords, false);
 }
 
