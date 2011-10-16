@@ -64,6 +64,8 @@ private:
 	void DrawHud() const;
 	void DrawButton(float x, float y, float pRadius, float pAngle, int pCorners) const;
 	void DrawButton(float x, float y, float pRadius, float pAngle, int pCorners, const Color& pColor) const;
+	void DrawCircle(float x, float y, float pRadius) const;
+	void DrawCircle(float x, float y, float pRadius, const Color& pColor) const;
 	void DrawForceMeter(int x, int y, float pAngle, float pForce, bool pAreEqual) const;
 	void GetLauncherAngles(Cure::ContextObject* pAvatar1, Cure::ContextObject* pAvatar2,
 		float& pPitch, float& pGuidePitch, float& pYaw, float& pGuideYaw) const;
@@ -76,7 +78,7 @@ private:
 	bool Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor);
 	virtual bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
 	virtual bool OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode);
-	virtual int DoTap(float x, float y, bool pPressed);
+	virtual int PollTap(FingerMovement& pMovement);
 
 	void OnResize(int pWidth, int pHeight);
 	void OnMinimize();
@@ -455,8 +457,7 @@ void App::PollTaps()
 	FingerMoveList::iterator x = gFingerMoveList.begin();
 	for (; x != gFingerMoveList.end();)
 	{
-		x->mTag = DoTap((float)x->mLastX, (float)x->mLastY, x->mIsPress);
-		if (x->mTag > 0)
+		if (PollTap(*x) > 0)
 		{
 			++x;
 		}
@@ -478,19 +479,15 @@ void App::DrawHud() const
 	const float m2 = m*2;
 
 	// Left player.
-	DrawButton(m2+lButtonWidth*1.5f,	m+lButtonRadius,		lButtonRadius, +PIF/2,	3);	// Up.
-	DrawButton(m+lButtonRadius,		m+lButtonRadius,		lButtonRadius, -PIF/2,	3);	// Down.
-	DrawButton(m+lButtonRadius,		h-m2-lButtonWidth*1.5f,		lButtonRadius, 0,	3);	// Left.
-	DrawButton(m+lButtonRadius,		h-m-lButtonRadius,		lButtonRadius, PIF,	3);	// Right.
+	DrawCircle(m+lButtonWidth,	m+lButtonRadius,	lButtonRadius);	// Up/down.
+	DrawCircle(m+lButtonRadius,	h-m-lButtonWidth,	lButtonRadius);	// Left/right.
 	// Right player.
-	DrawButton(w-m2-lButtonWidth*1.5f,	h-m-lButtonRadius,		lButtonRadius, -PIF/2,	3);	// Up.
-	DrawButton(w-m-lButtonRadius,		h-m-lButtonRadius,		lButtonRadius, +PIF/2,	3);	// Down.
-	DrawButton(w-m-lButtonRadius,		m2+lButtonWidth*1.5f,		lButtonRadius, PIF,	3);	// Left.
-	DrawButton(w-m-lButtonRadius,		m+lButtonRadius,		lButtonRadius, 0,	3);	// Right.
+	DrawCircle(w-m-lButtonWidth,	h-m-lButtonRadius,	lButtonRadius);	// Up/down.
+	DrawCircle(w-m-lButtonRadius,	m+lButtonWidth,		lButtonRadius);	// Left/right.
 	// Bomb button.
 	bool lIsLocked = mGame->IsLauncherLocked();
 	Color c = lIsLocked? Color(190, 48, 55) : Color(57, 60, 190);
-	DrawButton(w-m-lButtonRadius,		h/2,				lButtonRadius,	-PIF/2,	5, c);	// Square.
+	DrawButton(w-m-lButtonRadius,	h/2,			lButtonRadius,	-PIF/2,	3, c);
 
 	// Draw touch force meters, to give a visual indication of steering.
 	Cure::ContextObject* lAvatar1 = mGame->GetP1();
@@ -543,9 +540,9 @@ void App::DrawHud() const
 	GetLauncherAngles(lAvatar1, lAvatar2, lPitch, lGuidePitch, lYaw, lGuideYaw);
 	{
 		mUiManager->GetPainter()->SetColor(Color(100, 30, 30), 0);
-		DrawBarrel(w-m*1.5-lButtonWidth/2, h-m2-lButtonWidth-8, lGuidePitch+lDrawAngle);
+		DrawBarrel(w-m*1.5f-lButtonWidth/2, h-m2-lButtonWidth-8, lGuidePitch+lDrawAngle);
 		mUiManager->GetPainter()->SetColor(Color(140, 140, 140), 0);
-		DrawBarrel(w-m*1.5-lButtonWidth/2, h-m2-lButtonWidth-8, lPitch+lDrawAngle);
+		DrawBarrel(w-m*1.5f-lButtonWidth/2, h-m2-lButtonWidth-8, lPitch+lDrawAngle);
 	}
 	{
 		mUiManager->GetPainter()->SetColor(Color(100, 30, 30), 0);
@@ -578,7 +575,7 @@ void App::DrawButton(float x, float y, float pRadius, float pAngle, int pCorners
 	mUiManager->GetPainter()->SetColor(pColor, 0);
 	mUiManager->GetPainter()->DrawFan(lCoords, true);
 	const Vector2DF lCenter(x, y);
-	for (int i = 0; i < lCoords.size()-1; ++i)
+	for (size_t i = 0; i < lCoords.size()-1; ++i)
 	{
 		const Vector2DF c = lCoords[i+1]-lCenter;
 		lCoords[i] = c*44.0f/40 + lCenter;
@@ -587,6 +584,25 @@ void App::DrawButton(float x, float y, float pRadius, float pAngle, int pCorners
 	::glLineWidth(2);
 	mUiManager->GetPainter()->SetColor(Color(170, 180, 190), 0);
 	mUiManager->GetPainter()->DrawFan(lCoords, false);
+}
+
+void App::DrawCircle(float x, float y, float pRadius) const
+{
+	DrawCircle(x, y, pRadius, Color(Color(57, 60, 190)));
+}
+
+void App::DrawCircle(float x, float y, float pRadius, const Color& pColor) const
+{
+	pRadius -= 2;
+	std::vector<Vector2DF> lCoords;
+	lCoords.push_back(Vector2DF(x, y));
+	for (float lAngle = 0; lAngle < 2*PIF; lAngle += 2*PIF/16)
+	{
+		lCoords.push_back(Vector2DF(x+pRadius*::sin(lAngle), y-pRadius*::cos(lAngle)));
+	}
+	lCoords.push_back(lCoords[1]);
+	mUiManager->GetPainter()->SetColor(pColor, 0);
+	mUiManager->GetPainter()->DrawFan(lCoords, true);
 }
 
 void App::DrawForceMeter(int x, int y, float pAngle, float pForce, bool pAreEqual) const
@@ -794,12 +810,15 @@ bool App::OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode)
 	return Steer(pKeyCode, 0);
 }
 
-int App::DoTap(float x, float y, bool pPressed)
+int App::PollTap(FingerMovement& pMovement)
 {
-	x;
-	y;
-	pPressed;
+	pMovement;
+	int lTag = 0;
 #ifdef LEPRA_IOS
+	const float x = pMovement.mLastX;
+	const float y = pMovement.mLastY;
+	const float lStartX = pMovement.mStartX;
+	const float lStartY = pMovement.mStartY;
 	((UiLepra::IosInputManager*)mUiManager->GetInputManager())->SetMousePosition(x, y);
 	((UiLepra::IosInputElement*)mUiManager->GetInputManager()->GetMouse()->GetButton(0))->SetValue(pPressed? 1 : 0);
 	((UiLepra::IosInputElement*)mUiManager->GetInputManager()->GetMouse()->GetAxis(0))->SetValue(x);
@@ -812,37 +831,38 @@ int App::DoTap(float x, float y, bool pPressed)
 	std::swap(x, y);
 	y = h-y;
 	const float m = BUTTON_MARGIN;
-	const float lSingleWidth = m*2 + BUTTON_WIDTH;
-	const float lDoubleWidth = m*3 + BUTTON_WIDTH*2;
+	const float lSingleWidth = (m*2 + BUTTON_WIDTH) * 1.5f;
+	const float lDoubleWidth = (m*3 + BUTTON_WIDTH*2) * 1.5f;
 	const float s = lDoubleWidth / 2;
 #define CLAMPUP(v)	Math::Clamp((v)*2, -1.0f, 1.0f)
-	if (x <= lDoubleWidth && y <= lSingleWidth)	// P1 up/down?
+	if (lStartX <= lDoubleWidth && lStartY <= lSingleWidth)	// P1 up/down?
 	{
-		mGame->SetThrottle(lAvatar1, CLAMPUP((x-s)/s));
-		return 1;
+		mGame->SetThrottle(lAvatar1, CLAMPUP((x-lStartX)/s));
+		lTag = 1;
 	}
-	else if (x <= lSingleWidth && y >= h-lDoubleWidth)	// P1 left/right?
+	else if (lStartX <= lSingleWidth && lStartY >= h-lDoubleWidth)	// P1 left/right?
 	{
-		lAvatar1->SetEnginePower(1, CLAMPUP((y-(h-s))/s), 0);
-		return 2;
+		lAvatar1->SetEnginePower(1, CLAMPUP((y-lStartY)/s), 0);
+		lTag = 2;
 	}
-	else if (x >= w-lDoubleWidth && y >= h-lSingleWidth)	// P2 up/down?
+	else if (lStartX >= w-lDoubleWidth && lStartY >= h-lSingleWidth)	// P2 up/down?
 	{
-		mGame->SetThrottle(lAvatar2, CLAMPUP((x-(w-s))/s));
-		return 3;
+		mGame->SetThrottle(lAvatar2, CLAMPUP((x-lStartX)/s));
+		lTag = 3;
 	}
-	else if (x >= w-lSingleWidth && y <= lDoubleWidth)	// P1 left/right?
+	else if (lStartX >= w-lSingleWidth && lStartY <= lDoubleWidth)	// P1 left/right?
 	{
-		lAvatar2->SetEnginePower(1, CLAMPUP((s-y)/s), 0);
-		return 4;
+		lAvatar2->SetEnginePower(1, CLAMPUP((lStartY-y)/s), 0);
+		lTag = 4;
 	}
 	else if (x >= w-lSingleWidth && y >= h/2-s && y <= h/2+s)	// Bomb?
 	{
 		mGame->Shoot();
-		return 5;
+		lTag = 5;
 	}
+	pMovement.mTag = lTag;
 #endif // iOS
-	return 0;
+	return lTag;
 }
 
 
