@@ -62,8 +62,8 @@ private:
 	bool Poll();
 	void PollTaps();
 	void DrawHud() const;
-	void DrawButton(float x, float y, float pRadius, float pAngle, int pCorners) const;
-	void DrawButton(float x, float y, float pRadius, float pAngle, int pCorners, const Color& pColor) const;
+	void DrawRoundedPolygon(float x, float y, float pRadius, float pAngle, int pCorners) const;
+	void DrawRoundedPolygon(float x, float y, float pRadius, float pAngle, int pCorners, const Color& pColor) const;
 	void DrawCircle(float x, float y, float pRadius) const;
 	void DrawCircle(float x, float y, float pRadius, const Color& pColor) const;
 	void DrawForceMeter(int x, int y, float pAngle, float pForce, bool pAreEqual) const;
@@ -479,15 +479,23 @@ void App::DrawHud() const
 	const float m2 = m*2;
 
 	// Left player.
-	DrawCircle(m+lButtonWidth,	m+lButtonRadius,	lButtonRadius);	// Up/down.
-	DrawCircle(m+lButtonRadius,	h-m-lButtonWidth,	lButtonRadius);	// Left/right.
+	DrawCircle(m+lButtonWidth,			m+lButtonRadius,	lButtonRadius);	// Up/down.
+	DrawRoundedPolygon(m2+lButtonWidth*1.6f,	m+lButtonRadius,	lButtonRadius*0.6f,	+PIF/2,	3);
+	DrawRoundedPolygon(lButtonWidth*0.4f,		m+lButtonRadius,	lButtonRadius*0.6f,	-PIF/2,	3);
+	DrawCircle(m+lButtonRadius,			h-m-lButtonWidth,	lButtonRadius);	// Left/right.
+	DrawRoundedPolygon(m+lButtonRadius,		h-m2-lButtonWidth*1.6f,	lButtonRadius*0.6f,	0,	3);
+	DrawRoundedPolygon(m+lButtonRadius,		h-lButtonWidth*0.4f,	lButtonRadius*0.6f,	PIF,	3);
 	// Right player.
-	DrawCircle(w-m-lButtonWidth,	h-m-lButtonRadius,	lButtonRadius);	// Up/down.
-	DrawCircle(w-m-lButtonRadius,	m+lButtonWidth,		lButtonRadius);	// Left/right.
+	DrawCircle(w-m-lButtonWidth,			h-m-lButtonRadius,	lButtonRadius);	// Up/down.
+	DrawRoundedPolygon(w-m2-lButtonWidth*1.6f,	h-m-lButtonRadius,	lButtonRadius*0.6f,	-PIF/2,	3);
+	DrawRoundedPolygon(w-lButtonWidth*0.4f,		h-m-lButtonRadius,	lButtonRadius*0.6f,	+PIF/2,	3);
+	DrawCircle(w-m-lButtonRadius,			m+lButtonWidth,		lButtonRadius);	// Left/right.
+	DrawRoundedPolygon(w-m-lButtonRadius,		m2+lButtonWidth*1.6f,	lButtonRadius*0.6f,	PIF,	3);
+	DrawRoundedPolygon(w-m-lButtonRadius,		lButtonWidth*0.4f,	lButtonRadius*0.6f,	0,	3);
 	// Bomb button.
 	bool lIsLocked = mGame->IsLauncherLocked();
-	Color c = lIsLocked? Color(190, 48, 55) : Color(57, 60, 190);
-	DrawButton(w-m-lButtonRadius,	h/2,			lButtonRadius,	-PIF/2,	3, c);
+	Color c = lIsLocked? Color(50, 52, 51) : Color(190, 48, 55);
+	DrawRoundedPolygon(w-m-lButtonRadius,	h/2,			lButtonRadius,	-PIF/2,	6, c);
 
 	// Draw touch force meters, to give a visual indication of steering.
 	Cure::ContextObject* lAvatar1 = mGame->GetP1();
@@ -521,7 +529,7 @@ void App::DrawHud() const
 		lForce = lGas->GetValue();
 		if (lForce != 0 || std::find_if(gFingerMoveList.begin(), gFingerMoveList.end(), IsPressing(3)) != gFingerMoveList.end())
 		{
-			DrawForceMeter((int)(w-m2-lButtonWidth*4), (int)(h-m*1.5f-lButtonRadius), -PIF/2, lForce, false);
+			DrawForceMeter((int)(w-m2-lButtonWidth*4), (int)(h-m*1.5f-lButtonRadius), -PIF/2, lForce, true);
 		}
 		lTurn = lAvatar2->GetPhysics()->GetEngine(1);
 		lForce = lTurn->GetValue();
@@ -552,12 +560,12 @@ void App::DrawHud() const
 	}
 }
 
-void App::DrawButton(float x, float y, float pRadius, float pAngle, int pCorners) const
+void App::DrawRoundedPolygon(float x, float y, float pRadius, float pAngle, int pCorners) const
 {
-	DrawButton(x, y, pRadius, pAngle, pCorners, Color(Color(57, 60, 190)));
+	DrawRoundedPolygon(x, y, pRadius, pAngle, pCorners, Color(Color(57, 60, 190)));
 }
 
-void App::DrawButton(float x, float y, float pRadius, float pAngle, int pCorners, const Color& pColor) const
+void App::DrawRoundedPolygon(float x, float y, float pRadius, float pAngle, int pCorners, const Color& pColor) const
 {
 	pRadius -= 2;
 	const float lRoundRadius = pRadius * 0.96f;
@@ -574,7 +582,7 @@ void App::DrawButton(float x, float y, float pRadius, float pAngle, int pCorners
 	lCoords.push_back(lCoords[1]);
 	mUiManager->GetPainter()->SetColor(pColor, 0);
 	mUiManager->GetPainter()->DrawFan(lCoords, true);
-	const Vector2DF lCenter(x, y);
+	/*const Vector2DF lCenter(x, y);
 	for (size_t i = 0; i < lCoords.size()-1; ++i)
 	{
 		const Vector2DF c = lCoords[i+1]-lCenter;
@@ -583,7 +591,7 @@ void App::DrawButton(float x, float y, float pRadius, float pAngle, int pCorners
 	lCoords.pop_back();
 	::glLineWidth(2);
 	mUiManager->GetPainter()->SetColor(Color(170, 180, 190), 0);
-	mUiManager->GetPainter()->DrawFan(lCoords, false);
+	mUiManager->GetPainter()->DrawFan(lCoords, false);*/
 }
 
 void App::DrawCircle(float x, float y, float pRadius) const
@@ -689,6 +697,7 @@ void App::GetLauncherAngles(Cure::ContextObject* pAvatar1, Cure::ContextObject* 
 		const float t = (-b + sqrt(b2 - _4ac)) / (2*a);
 		const float vfwd = lYawVector.GetLength() / t;
 		pGuidePitch = -::atan(vfwd/vup);
+		pGuidePitch += (pGuidePitch-pPitch);	// Homebrew.
 	}
 }
 
@@ -815,12 +824,12 @@ int App::PollTap(FingerMovement& pMovement)
 	pMovement;
 	int lTag = 0;
 #ifdef LEPRA_IOS
-	const float x = pMovement.mLastX;
-	const float y = pMovement.mLastY;
-	const float lStartX = pMovement.mStartX;
-	const float lStartY = pMovement.mStartY;
+	float x = pMovement.mLastX;
+	float y = pMovement.mLastY;
+	float lStartX = pMovement.mStartX;
+	float lStartY = pMovement.mStartY;
 	((UiLepra::IosInputManager*)mUiManager->GetInputManager())->SetMousePosition(x, y);
-	((UiLepra::IosInputElement*)mUiManager->GetInputManager()->GetMouse()->GetButton(0))->SetValue(pPressed? 1 : 0);
+	((UiLepra::IosInputElement*)mUiManager->GetInputManager()->GetMouse()->GetButton(0))->SetValue(pMovement.mIsPress? 1 : 0);
 	((UiLepra::IosInputElement*)mUiManager->GetInputManager()->GetMouse()->GetAxis(0))->SetValue(x);
 	((UiLepra::IosInputElement*)mUiManager->GetInputManager()->GetMouse()->GetAxis(1))->SetValue(y);
 
@@ -829,7 +838,9 @@ int App::PollTap(FingerMovement& pMovement)
 	const float w = (float)mUiManager->GetCanvas()->GetWidth();
 	const float h = (float)mUiManager->GetCanvas()->GetHeight();
 	std::swap(x, y);
+	std::swap(lStartX, lStartY);
 	y = h-y;
+	lStartY = h-lStartY;
 	const float m = BUTTON_MARGIN;
 	const float lSingleWidth = (m*2 + BUTTON_WIDTH) * 1.5f;
 	const float lDoubleWidth = (m*3 + BUTTON_WIDTH*2) * 1.5f;

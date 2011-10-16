@@ -67,7 +67,7 @@ bool Game::Initialize()
 	{
 		mLightId = mUiManager->GetRenderer()->AddDirectionalLight(
 			UiTbc::Renderer::LIGHT_MOVABLE, Vector3DF(-1, 0.5f, -1.5),
-			Color::Color(255, 255, 255), 2.5f, 300);
+			Color::Color(255, 255, 255), 1.0f, 300);
 		mUiManager->GetRenderer()->EnableAllLights(true);
 	}
 	if (lOk)
