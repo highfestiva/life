@@ -80,10 +80,10 @@ using namespace Lepra;
 	GrenadeRun::FingerMoveList::iterator i = GrenadeRun::gFingerMoveList.begin();
 	for (; i != GrenadeRun::gFingerMoveList.end(); ++i)
 	{
-		NSLog(@"get: (%i; %i) ==? (%i; %i)", (int)i->mLastX, (int)i->mLastY, (int)pLocation.x, (int)pLocation.y);
+		//NSLog(@"get: (%i; %i) ==? (%i; %i)", (int)i->mLastX, (int)i->mLastY, (int)pLocation.x, (int)pLocation.y);
 		if (i->Update(pPrevious.x, pPrevious.y, pLocation.x, pLocation.y))
 		{
-			NSLog(@"get: Match!");
+			//NSLog(@"get: Match!");
 			return *i;
 		}
 	}
