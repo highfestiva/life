@@ -460,10 +460,10 @@
 		B1A1E02413AA77710097B8D0 /* UiOggAlStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A1E02213AA77710097B8D0 /* UiOggAlStream.cpp */; };
 		B1A1E02513AA77710097B8D0 /* UiSoundStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A1E02313AA77710097B8D0 /* UiSoundStream.cpp */; };
 		B1B4899013F9BD6C0047C78A /* GrenadeRun-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = B1B4898F13F9BD6C0047C78A /* GrenadeRun-Info.plist */; };
-		B1BC71D2140EC242003F70F3 /* Oiit.ogg in Resources */ = {isa = PBXBuildFile; fileRef = B1BC71D0140EC242003F70F3 /* Oiit.ogg */; };
 		B1BC733D140EEAEE003F70F3 /* MacLog.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1BC733C140EEAEE003F70F3 /* MacLog.mm */; };
 		B1CC28E413BA906B009BD34A /* UiIosInput.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1CC28E313BA906B009BD34A /* UiIosInput.mm */; };
-		B1D4474D1450BD2F00D58FF2 /* Data.zip in Resources */ = {isa = PBXBuildFile; fileRef = B1D4474C1450BD2F00D58FF2 /* Data.zip */; };
+		B1FB29231450C8CC00F1C762 /* Oiit.ogg in Resources */ = {isa = PBXBuildFile; fileRef = B1FB29211450C8CC00F1C762 /* Oiit.ogg */; };
+		B1FB293A1450CAD600F1C762 /* Data.pk3 in Resources */ = {isa = PBXBuildFile; fileRef = B1FB29391450CAD600F1C762 /* Data.pk3 */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -1111,10 +1111,10 @@
 		B1A1E02313AA77710097B8D0 /* UiSoundStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiSoundStream.cpp; sourceTree = "<group>"; };
 		B1B4898F13F9BD6C0047C78A /* GrenadeRun-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GrenadeRun-Info.plist"; sourceTree = "<group>"; };
 		B1B489A313F9BE4A0047C78A /* GrenadeRun_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GrenadeRun_Prefix.pch; path = GrenadeRunXcode/GrenadeRun_Prefix.pch; sourceTree = "<group>"; };
-		B1BC71D0140EC242003F70F3 /* Oiit.ogg */ = {isa = PBXFileReference; lastKnownFileType = file; name = Oiit.ogg; path = ../Data/Oiit.ogg; sourceTree = SOURCE_ROOT; };
 		B1BC733C140EEAEE003F70F3 /* MacLog.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MacLog.mm; sourceTree = "<group>"; };
 		B1CC28E313BA906B009BD34A /* UiIosInput.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = UiIosInput.mm; sourceTree = "<group>"; };
-		B1D4474C1450BD2F00D58FF2 /* Data.zip */ = {isa = PBXFileReference; lastKnownFileType = archive.zip; name = Data.zip; path = ../Data/Data.zip; sourceTree = SOURCE_ROOT; };
+		B1FB29211450C8CC00F1C762 /* Oiit.ogg */ = {isa = PBXFileReference; lastKnownFileType = file; name = Oiit.ogg; path = ../Data/Oiit.ogg; sourceTree = SOURCE_ROOT; };
+		B1FB29391450CAD600F1C762 /* Data.pk3 */ = {isa = PBXFileReference; lastKnownFileType = file; name = Data.pk3; path = ../Data/Data.pk3; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -2186,24 +2186,23 @@
 		B1A1E04913AA970E0097B8D0 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				B1FB291E1450C8A600F1C762 /* Data */,
 				B196562413BE6F94006A1422 /* Default.png */,
 				B196560E13BE6C3B006A1422 /* Icon-72.png */,
 				B196560713BE6AB5006A1422 /* Icon.png */,
 				B196560813BE6AB5006A1422 /* Icon@2x.png */,
-				B1A1E05013AA97470097B8D0 /* Data */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
 		};
-		B1A1E05013AA97470097B8D0 /* Data */ = {
+		B1FB291E1450C8A600F1C762 /* Data */ = {
 			isa = PBXGroup;
 			children = (
-				B1D4474C1450BD2F00D58FF2 /* Data.zip */,
-				B1BC71D0140EC242003F70F3 /* Oiit.ogg */,
+				B1FB29391450CAD600F1C762 /* Data.pk3 */,
+				B1FB29211450C8CC00F1C762 /* Oiit.ogg */,
 			);
 			name = Data;
-			path = ../../bin/Data;
-			sourceTree = SOURCE_ROOT;
+			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
@@ -2259,8 +2258,8 @@
 				B196560F13BE6C3B006A1422 /* Icon-72.png in Resources */,
 				B196562513BE6F94006A1422 /* Default.png in Resources */,
 				B1B4899013F9BD6C0047C78A /* GrenadeRun-Info.plist in Resources */,
-				B1BC71D2140EC242003F70F3 /* Oiit.ogg in Resources */,
-				B1D4474D1450BD2F00D58FF2 /* Data.zip in Resources */,
+				B1FB29231450C8CC00F1C762 /* Oiit.ogg in Resources */,
+				B1FB293A1450CAD600F1C762 /* Data.pk3 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

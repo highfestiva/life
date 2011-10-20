@@ -55,7 +55,7 @@ public:
 	void Tick(const Vector3DF& pCameraPosition);
 	void OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
 		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
-		TBC::PhysicsManager::BodyID pBody1Id, float pMaxDistance);
+		TBC::PhysicsManager::BodyID pBody1Id, float pMaxDistance, bool pIsLoud);
 
 private:
 	/*struct GeometryCombination

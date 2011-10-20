@@ -77,7 +77,7 @@ void CollisionSoundManager::Tick(const Vector3DF& pCameraPosition)
 
 void CollisionSoundManager::OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
 	Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
-	TBC::PhysicsManager::BodyID pBody1Id, float pMaxDistance)
+	TBC::PhysicsManager::BodyID pBody1Id, float pMaxDistance, bool pIsLoud)
 {
 	if (pPosition.GetDistanceSquared(mCameraPosition) > pMaxDistance*pMaxDistance)
 	{
@@ -93,10 +93,14 @@ void CollisionSoundManager::OnCollision(const Vector3DF& pForce, const Vector3DF
 	{
 		return;
 	}
-	const float lImpact = pObject1->GetImpact(mGameManager->GetPhysicsManager()->GetGravity(), pForce, pTorque*0.01f, 50);
+	float lImpact = pObject1->GetImpact(mGameManager->GetPhysicsManager()->GetGravity(), pForce, pTorque*0.01f, 50);
 	if (lImpact < 0.5f)
 	{
-		return;
+		if (!pIsLoud)
+		{
+			return;
+		}
+		lImpact = 0.5f;
 	}
 
 	const TBC::ChunkyBoneGeometry* lKey = pObject1->GetStructureGeometry(pBody1Id);

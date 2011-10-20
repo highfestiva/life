@@ -399,7 +399,9 @@ def builddata_gr():
 	_builddata("GrenadeRun", bindir, default_build_mode)
 
 def zipdata_gr():
-	zipdir("GrenadeRun/Data", _include_data_files, "GrenadeRun/Data/Data.zip")
+	os.chdir('GrenadeRun/Data')
+	zipdir('', _include_data_files, "Data.pk3")
+	os.chdir('../../')
 
 
 def buildcode():

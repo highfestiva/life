@@ -20,6 +20,7 @@
 *.dll
 *.pyc
 *.pyo
+*.pk3
 *.zip
 *.mode1v3
 *.pbxuser
@@ -41,6 +42,8 @@ Final
 /Life/LifeServer/LifeServer
 /Life/LifeMaster/LifeMaster
 /Life/XCode/build
+/GrenadeRun/GrenadeRun
+/GrenadeRun/GrenadeRunXcode/build
 /SlimeVolleyball/SlimeVolleyball
 /SlimeVolleyball/SlimeBall/build
 /UiCure/CureTestApp/CureTestApp
