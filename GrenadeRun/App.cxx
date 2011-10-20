@@ -6,6 +6,7 @@
 
 #include <list>
 #include "../Cure/Include/RuntimeVariable.h"
+#include "../Cure/Include/TimeManager.h"
 #include "../Lepra/Include/Application.h"
 #include "../Lepra/Include/LogListener.h"
 #include "../Lepra/Include/Path.h"
@@ -62,14 +63,18 @@ private:
 	bool Poll();
 	void PollTaps();
 	void DrawHud() const;
-	void DrawButton(float x, float y, float pRadius, float pAngle, int pCorners) const;
-	void DrawButton(float x, float y, float pRadius, float pAngle, int pCorners, const Color& pColor) const;
+	void DrawRoundedPolygon(float x, float y, float pRadius, float pAngle, int pCorners) const;
+	void DrawRoundedPolygon(float x, float y, float pRadius, float pAngle, int pCorners, const Color& pColor) const;
 	void DrawCircle(float x, float y, float pRadius) const;
 	void DrawCircle(float x, float y, float pRadius, const Color& pColor) const;
 	void DrawForceMeter(int x, int y, float pAngle, float pForce, bool pAreEqual) const;
 	void GetLauncherAngles(Cure::ContextObject* pAvatar1, Cure::ContextObject* pAvatar2,
 		float& pPitch, float& pGuidePitch, float& pYaw, float& pGuideYaw) const;
-	void DrawBarrel(float x, float y, float pAngle) const;
+	void GetBallisticData(const Vector3DF& pPosition1, const Vector3DF& pPosition2,
+		float pPitch, float& pGuidePitch, float pYaw, float& pGuideYaw, float &pTime) const;
+	void DrawBarrelIndicator(float x, float y, float pAngle, float pLength, float pBaseWidth, bool pIsArrow) const;
+	void InfoText(int pPlayer, const str& pInfo, float pAngle, float dx = 0, float dy = 0) const;
+	void DrawInfoTexts() const;
 	void Layout();
 
 	virtual void Suspend();
@@ -102,6 +107,14 @@ private:
 
 	double mAverageLoopTime;
 	HiResTimer mLoopTimer;
+
+	struct InfoTextData
+	{
+		str mText;
+		Vector2DF mCoord;
+		float mAngle;
+	};
+
 	bool mDoLayout;
 	Cure::ResourceManager* mResourceManager;
 	Cure::RuntimeVariableScope* mVariableScope;
@@ -118,6 +131,19 @@ private:
 	UiTbc::Button* mRetryButton;
 	UiTbc::Button* mGetiPhoneButton;
 	UiTbc::RectComponent* mPlayerSplitter;
+	float mAngleTime;
+	Color mTouchCenterColor;
+	Color mTouchSteerColor;
+	Color mTouchShootColor;
+	Color mInfoTextColor;
+	mutable float mPenX;
+	mutable float mPenY;
+	typedef std::vector<InfoTextData> InfoTextArray;
+	mutable InfoTextArray mInfoTextArray;
+	mutable HiResTimer mPlayer1LastTouch;
+	mutable HiResTimer mPlayer2LastTouch;
+	mutable HiResTimer mPlayer1TouchDelay;
+	mutable HiResTimer mPlayer2TouchDelay;
 
 	LOG_CLASS_DECLARE();
 };
@@ -151,7 +177,8 @@ App::App(const strutil::strvec& pArgumentList):
 	mLayoutFrameCounter(-10),
 	mVariableScope(0),
 	mAverageLoopTime(1.0/FPS),
-	mDoLayout(true)
+	mDoLayout(true),
+	mAngleTime(0)
 {
 	mApp = this;
 }
@@ -339,6 +366,7 @@ int App::Run()
 		CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_PARALLEL, false);	// Let's do it same on all platforms.
 		CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_MICROSTEPS, 3);
 		CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_FPS, FPS);
+		CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_ISFIXEDFPS, true);
 		//CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLELIGHTS, false);
 	}
 	if (lOk)
@@ -357,6 +385,8 @@ int App::Run()
 	}
 	if (lOk)
 	{
+		mGame->Cure::GameTicker::GetTimeManager()->Tick();
+		mGame->Cure::GameTicker::GetTimeManager()->Clear(1);
 		lOk = mResourceManager->InitDefault();
 	}
 #ifndef LEPRA_IOS
@@ -378,9 +408,16 @@ bool App::Poll()
 	bool lOk = true;
 	if (lOk)
 	{
+		// Adjust frame rate, or it will be hopelessly high...
 		mAverageLoopTime = Lepra::Math::Lerp(mAverageLoopTime, mLoopTimer.QueryTimeDiff(), 0.05);
-		Thread::Sleep(1.0/FPS - mAverageLoopTime);
+		const double lDelayTime = 1.0/FPS - mAverageLoopTime;
+		Thread::Sleep(lDelayTime);
 		mLoopTimer.PopTimeDiff();
+	}
+	if (lOk)
+	{
+		mAngleTime += 1.0f/FPS/10;
+		mAngleTime -= (mAngleTime > 2*PIF)? 2*PIF : 0;
 		lOk = (SystemManager::GetQuitRequest() == 0);
 	}
 	if (lOk && mDoLayout)
@@ -417,6 +454,10 @@ bool App::Poll()
 	if (lOk && lRender)
 	{
 		mUiManager->Paint(false);
+		mTouchCenterColor = Color(102, 120, 190)*(1.1f+::sin(mAngleTime*40)*0.2f);
+		mTouchSteerColor = Color(102, 120, 190)*(1.0f+::sin(mAngleTime*41)*0.3f);
+		mTouchShootColor = Color(170, 38, 45)*(1.1f+::sin(mAngleTime*37)*0.2f);
+		mInfoTextColor = Color(127, 127, 127)*(1+::sin(mAngleTime*27)*0.9f);
 		DrawHud();
 	}
 	if (lOk)
@@ -479,15 +520,28 @@ void App::DrawHud() const
 	const float m2 = m*2;
 
 	// Left player.
-	DrawCircle(m+lButtonWidth,	m+lButtonRadius,	lButtonRadius);	// Up/down.
-	DrawCircle(m+lButtonRadius,	h-m-lButtonWidth,	lButtonRadius);	// Left/right.
+	DrawCircle(m+lButtonWidth,			m+lButtonRadius,	lButtonRadius-2);	// Up/down.
+	InfoText(1, _T("Throttle/brake"), 0, 14, 0);
+	DrawRoundedPolygon(m2+lButtonWidth*1.6f,	m+lButtonRadius,	lButtonRadius*0.5f,	+PIF/2,	3);
+	DrawRoundedPolygon(lButtonWidth*0.4f,		m+lButtonRadius,	lButtonRadius*0.5f,	-PIF/2,	3);
+	DrawCircle(m+lButtonRadius,			h-m-lButtonWidth,	lButtonRadius-2);	// Left/right.
+	InfoText(1, _T("Left/right"), -PIF/2);
+	DrawRoundedPolygon(m+lButtonRadius,		h-m2-lButtonWidth*1.6f,	lButtonRadius*0.5f,	0,	3);
+	DrawRoundedPolygon(m+lButtonRadius,		h-lButtonWidth*0.4f,	lButtonRadius*0.5f,	PIF,	3);
 	// Right player.
-	DrawCircle(w-m-lButtonWidth,	h-m-lButtonRadius,	lButtonRadius);	// Up/down.
-	DrawCircle(w-m-lButtonRadius,	m+lButtonWidth,		lButtonRadius);	// Left/right.
+	DrawCircle(w-m-lButtonWidth,			h-m-lButtonRadius,	lButtonRadius-2);	// Up/down.
+	InfoText(2, _T("Up/down"), PIF);
+	DrawRoundedPolygon(w-m2-lButtonWidth*1.6f,	h-m-lButtonRadius,	lButtonRadius*0.5f,	-PIF/2,	3);
+	DrawRoundedPolygon(w-lButtonWidth*0.4f,		h-m-lButtonRadius,	lButtonRadius*0.5f,	+PIF/2,	3);
+	DrawCircle(w-m-lButtonRadius,			m+lButtonWidth,		lButtonRadius-2);	// Left/right.
+	InfoText(2, _T("Left/right"), PIF/2);
+	DrawRoundedPolygon(w-m-lButtonRadius,		m2+lButtonWidth*1.6f,	lButtonRadius*0.5f,	PIF,	3);
+	DrawRoundedPolygon(w-m-lButtonRadius,		lButtonWidth*0.4f,	lButtonRadius*0.5f,	0,	3);
 	// Bomb button.
 	bool lIsLocked = mGame->IsLauncherLocked();
-	Color c = lIsLocked? Color(190, 48, 55) : Color(57, 60, 190);
-	DrawButton(w-m-lButtonRadius,	h/2,			lButtonRadius,	-PIF/2,	3, c);
+	Color c = lIsLocked? Color(10, 10, 10) : mTouchShootColor;
+	DrawRoundedPolygon(w-m-lButtonRadius,		h/2,			lButtonRadius,	-PIF/2,	6, c);
+	InfoText(2, _T("BOOOM!"), PIF/2);
 
 	// Draw touch force meters, to give a visual indication of steering.
 	Cure::ContextObject* lAvatar1 = mGame->GetP1();
@@ -508,12 +562,14 @@ void App::DrawHud() const
 		if (lForce != 0 || std::find_if(gFingerMoveList.begin(), gFingerMoveList.end(), IsPressing(1)) != gFingerMoveList.end())
 		{
 			DrawForceMeter((int)(m2+lButtonWidth*4), (int)(m+lButtonRadius), -PIF/2, lForce, false);
+			InfoText(1, _T("Acceleration"), 0);
 		}
 		lTurn = lAvatar1->GetPhysics()->GetEngine(1);
 		lForce = lTurn->GetValue();
 		if (lForce != 0 || std::find_if(gFingerMoveList.begin(), gFingerMoveList.end(), IsPressing(2)) != gFingerMoveList.end())
 		{
 			DrawForceMeter((int)(m2+lButtonWidth*4), (int)(h-m-lButtonWidth), PIF, lForce, true);
+			InfoText(1, _T("Steering wheel"), -PIF/2, 0, -20);
 		}
 	}
 	{
@@ -521,13 +577,15 @@ void App::DrawHud() const
 		lForce = lGas->GetValue();
 		if (lForce != 0 || std::find_if(gFingerMoveList.begin(), gFingerMoveList.end(), IsPressing(3)) != gFingerMoveList.end())
 		{
-			DrawForceMeter((int)(w-m2-lButtonWidth*4), (int)(h-m*1.5f-lButtonRadius), -PIF/2, lForce, false);
+			DrawForceMeter((int)(w-m2-lButtonWidth*4), (int)(h-m*1.5f-lButtonRadius), -PIF/2, lForce, true);
+			InfoText(2, _T("Lift power"), PIF);
 		}
 		lTurn = lAvatar2->GetPhysics()->GetEngine(1);
 		lForce = lTurn->GetValue();
 		if (lForce != 0 || std::find_if(gFingerMoveList.begin(), gFingerMoveList.end(), IsPressing(4)) != gFingerMoveList.end())
 		{
 			DrawForceMeter((int)(w-m2-lButtonWidth*4), (int)(m*1.5f+lButtonWidth), 0, lForce, true);
+			InfoText(2, _T("Turn power"), PIF/2);
 		}
 	}
 
@@ -539,27 +597,47 @@ void App::DrawHud() const
 	float lGuideYaw;
 	GetLauncherAngles(lAvatar1, lAvatar2, lPitch, lGuidePitch, lYaw, lGuideYaw);
 	{
-		mUiManager->GetPainter()->SetColor(Color(100, 30, 30), 0);
-		DrawBarrel(w-m*1.5f-lButtonWidth/2, h-m2-lButtonWidth-8, lGuidePitch+lDrawAngle);
+		const float x = w-m*1.5f-lButtonWidth/2;
+		const float y = h-m2-lButtonWidth-8;
+		mUiManager->GetPainter()->SetColor(Color(60, 40, 20), 0);
+		std::vector<Vector2DF> lCoords;
+		lCoords.push_back(Vector2DF(x-2, y+lButtonWidth/3));
+		lCoords.push_back(Vector2DF(x-2, y-lButtonWidth/2));
+		lCoords.push_back(Vector2DF(x+8, y-lButtonWidth/2));
+		lCoords.push_back(Vector2DF(x+8, y+lButtonWidth/3));
+		lCoords.push_back(lCoords[0]);
+		mUiManager->GetPainter()->DrawFan(lCoords, true);
+		mUiManager->GetPainter()->SetColor(Color(150, 20, 20), 0);
+		DrawBarrelIndicator(x, y, lGuidePitch+lDrawAngle, 1.1f, 3.0f, true);
+		mUiManager->GetPainter()->SetColor(Color(220, 210, 200), 0);
+		DrawBarrelIndicator(x, y, lGuidePitch+lDrawAngle, 0.9f, 1.4f, true);
 		mUiManager->GetPainter()->SetColor(Color(140, 140, 140), 0);
-		DrawBarrel(w-m*1.5f-lButtonWidth/2, h-m2-lButtonWidth-8, lPitch+lDrawAngle);
+		DrawBarrelIndicator(x, y, lPitch+lDrawAngle, 1, 1, false);
+		InfoText(2, _T("Up/down compass"), PIF, -20-lButtonRadius, -lButtonRadius/2);
 	}
 	{
-		mUiManager->GetPainter()->SetColor(Color(100, 30, 30), 0);
-		DrawBarrel(w-m2-lButtonWidth-8, m*1.5f+lButtonWidth, lGuideYaw+lDrawAngle);
+		mUiManager->GetPainter()->SetColor(Color(150, 20, 20), 0);
+		DrawBarrelIndicator(w-m2-lButtonWidth-8, m*1.5f+lButtonWidth, lGuideYaw+lDrawAngle, 1.1f, 3.0f, true);
+		mUiManager->GetPainter()->SetColor(Color(220, 210, 200), 0);
+		DrawBarrelIndicator(w-m2-lButtonWidth-8, m*1.5f+lButtonWidth, lGuideYaw+lDrawAngle, 0.9f, 1.4f, true);
 		mUiManager->GetPainter()->SetColor(Color(140, 140, 140), 0);
-		DrawBarrel(w-m2-lButtonWidth-8, m*1.5f+lButtonWidth, lYaw+lDrawAngle);
+		DrawBarrelIndicator(w-m2-lButtonWidth-8, m*1.5f+lButtonWidth, lYaw+lDrawAngle, 1, 1, false);
+		InfoText(2, _T("Left/right compass"), PIF/2, -lButtonRadius, 30);
 	}
+
+	DrawInfoTexts();
 }
 
-void App::DrawButton(float x, float y, float pRadius, float pAngle, int pCorners) const
+void App::DrawRoundedPolygon(float x, float y, float pRadius, float pAngle, int pCorners) const
 {
-	DrawButton(x, y, pRadius, pAngle, pCorners, Color(Color(57, 60, 190)));
+	DrawRoundedPolygon(x, y, pRadius, pAngle, pCorners, mTouchSteerColor);
 }
 
-void App::DrawButton(float x, float y, float pRadius, float pAngle, int pCorners, const Color& pColor) const
+void App::DrawRoundedPolygon(float x, float y, float pRadius, float pAngle, int pCorners, const Color& pColor) const
 {
-	pRadius -= 2;
+	mPenX = x;
+	mPenY = y;
+	//pRadius -= 2;
 	const float lRoundRadius = pRadius * 0.96f;
 	const float lRoundAngle = PIF/16;
 	std::vector<Vector2DF> lCoords;
@@ -574,7 +652,7 @@ void App::DrawButton(float x, float y, float pRadius, float pAngle, int pCorners
 	lCoords.push_back(lCoords[1]);
 	mUiManager->GetPainter()->SetColor(pColor, 0);
 	mUiManager->GetPainter()->DrawFan(lCoords, true);
-	const Vector2DF lCenter(x, y);
+	/*const Vector2DF lCenter(x, y);
 	for (size_t i = 0; i < lCoords.size()-1; ++i)
 	{
 		const Vector2DF c = lCoords[i+1]-lCenter;
@@ -583,17 +661,18 @@ void App::DrawButton(float x, float y, float pRadius, float pAngle, int pCorners
 	lCoords.pop_back();
 	::glLineWidth(2);
 	mUiManager->GetPainter()->SetColor(Color(170, 180, 190), 0);
-	mUiManager->GetPainter()->DrawFan(lCoords, false);
+	mUiManager->GetPainter()->DrawFan(lCoords, false);*/
 }
 
 void App::DrawCircle(float x, float y, float pRadius) const
 {
-	DrawCircle(x, y, pRadius, Color(Color(57, 60, 190)));
+	DrawCircle(x, y, pRadius, mTouchCenterColor);
 }
 
 void App::DrawCircle(float x, float y, float pRadius, const Color& pColor) const
 {
-	pRadius -= 2;
+	mPenX = x;
+	mPenY = y;
 	std::vector<Vector2DF> lCoords;
 	lCoords.push_back(Vector2DF(x, y));
 	for (float lAngle = 0; lAngle < 2*PIF; lAngle += 2*PIF/16)
@@ -607,6 +686,9 @@ void App::DrawCircle(float x, float y, float pRadius, const Color& pColor) const
 
 void App::DrawForceMeter(int x, int y, float pAngle, float pForce, bool pAreEqual) const
 {
+	mPenX = x;
+	mPenY = y;
+
 	Color lColor = YELLOW;
 	Color lTargetColor = RED;
 	if (pForce < 0)
@@ -653,16 +735,30 @@ void App::DrawForceMeter(int x, int y, float pAngle, float pForce, bool pAreEqua
 void App::GetLauncherAngles(Cure::ContextObject* pAvatar1, Cure::ContextObject* pAvatar2,
 	float& pPitch, float& pGuidePitch, float& pYaw, float& pGuideYaw) const
 {
-	const Vector3DF lDelta = pAvatar1->GetPosition() - pAvatar2->GetPosition();
+	// GetBallisticData calculates the trajectory by polynome approximation (don't remember
+	// the math any more), but calling it twice gets us pretty close to the sweet spot.
+	Vector3DF lPosition1 = pAvatar1->GetPosition();
+	const Vector3DF lPosition2 = pAvatar2->GetPosition();
+	float lRoll;
+	pAvatar2->GetOrientation().GetEulerAngles(pYaw, pPitch, lRoll);
+	float lTime = 10.0f;
+	GetBallisticData(lPosition1, lPosition2, pPitch, pGuidePitch, pYaw, pGuideYaw, lTime);
+	lPosition1 += pAvatar1->GetVelocity() * lTime;
+	const float lBetterPitch = pGuidePitch;
+	const float lBetterYaw = pGuideYaw;
+	GetBallisticData(lPosition1, lPosition2, lBetterPitch, pGuidePitch, lBetterYaw, pGuideYaw, lTime);
+}
+
+void App::GetBallisticData(const Vector3DF& pPosition1, const Vector3DF& pPosition2,
+	float pPitch, float& pGuidePitch, float pYaw, float& pGuideYaw, float &pTime) const
+{
+	const Vector3DF lDelta = pPosition1 - pPosition2;
 	const Vector2DF lYawVector(lDelta.x, lDelta.y);
 	pGuideYaw = lYawVector.GetAngle(Vector2DF(0, 1));
 	if (lDelta.x > 0)
 	{
 		pGuideYaw = -pGuideYaw;
 	}
-
-	float lRoll;
-	pAvatar2->GetOrientation().GetEulerAngles(pYaw, pPitch, lRoll);
 
 	const float h = lDelta.z;
 	const float v = mGame->GetMuzzleVelocity();
@@ -687,25 +783,80 @@ void App::GetLauncherAngles(Cure::ContextObject* pAvatar1, Cure::ContextObject* 
 	else
 	{
 		const float t = (-b + sqrt(b2 - _4ac)) / (2*a);
+		pTime = t;
 		const float vfwd = lYawVector.GetLength() / t;
 		pGuidePitch = -::atan(vfwd/vup);
+		pGuidePitch += (pGuidePitch-pPitch);	// Homebrew... seems to be working! :)
 	}
 }
 
-void App::DrawBarrel(float x, float y, float pAngle) const
+void App::DrawBarrelIndicator(float x, float y, float pAngle, float pLength, float pBaseWidth, bool pIsArrow) const
 {
-	const float lIndicatorLength = BUTTON_WIDTH;
+	mPenX = x;
+	mPenY = y;
+
+	const float lIndicatorLength = BUTTON_WIDTH * pLength;
 	const float ca = ::cos(pAngle);
 	const float sa = ::sin(pAngle);
-	const float lWidth = BUTTON_WIDTH/10/2;
+	const float lWidth = BUTTON_WIDTH/10/2 * pBaseWidth;
 	std::vector<Vector2DF> lCoords;
 	lCoords.push_back(Vector2DF(x-sa*lWidth, y-ca*lWidth));
 	lCoords.push_back(Vector2DF(x+sa*lWidth, y+ca*lWidth));
-	lCoords.push_back(lCoords[1] + Vector2DF(-lIndicatorLength*ca, lIndicatorLength*sa));
-	lCoords.push_back(lCoords[0] + Vector2DF(-lIndicatorLength*ca, lIndicatorLength*sa));
+	lCoords.push_back(Vector2DF(x+sa*lWidth-lIndicatorLength*ca, y+ca*lWidth+lIndicatorLength*sa));
+	if (pIsArrow)
+	{
+		lCoords.push_back(Vector2DF(x-(lIndicatorLength+pBaseWidth*1.4f)*ca, y+(lIndicatorLength+pBaseWidth*1.4f)*sa));
+	}
+	lCoords.push_back(Vector2DF(x-sa*lWidth-lIndicatorLength*ca, y-ca*lWidth+lIndicatorLength*sa));
 	mUiManager->GetPainter()->DrawFan(lCoords, true);
 }
 
+void App::InfoText(int pPlayer, const str& pInfo, const float pAngle, float dx, float dy) const
+{
+	const double lLastTime = (pPlayer == 1)? mPlayer1LastTouch.QueryTimeDiff() : mPlayer2LastTouch.QueryTimeDiff();
+	const double lShowDelayTime = (pPlayer == 1)? mPlayer1TouchDelay.QueryTimeDiff() : mPlayer2TouchDelay.QueryTimeDiff();
+	if (lLastTime < 20)	// Delay until shown.
+	{
+		if (lShowDelayTime > 3)	// Delay after next touch until hidden.
+		{
+			return;
+		}
+	}
+	else
+	{
+		(pPlayer == 1)? mPlayer1TouchDelay.ClearTimeDiff() : mPlayer2TouchDelay.ClearTimeDiff();
+	}
+	InfoTextData lData;
+	lData.mText = pInfo;
+	lData.mCoord = Vector2DF(mPenX+dx, mPenY+dy);
+	lData.mAngle = pAngle;
+	mInfoTextArray.push_back(lData);
+}
+
+void App::DrawInfoTexts() const
+{
+	const Color c = mUiManager->GetPainter()->GetColor(0);
+	mUiManager->GetPainter()->SetColor(mInfoTextColor, 0);
+	::glMatrixMode(GL_PROJECTION);
+
+	for (size_t x = 0; x < mInfoTextArray.size(); ++x)
+	{
+		const InfoTextData& lData = mInfoTextArray[x];
+		const int w = mUiManager->GetPainter()->GetStringWidth(lData.mText);
+		const int h = mUiManager->GetPainter()->GetFontHeight();
+		const float lAngle = -lData.mAngle;
+		::glPushMatrix();
+		::glRotatef(lAngle*180/PIF, 0, 0, 1);
+		const int x = lData.mCoord.x*cos(lAngle) + lData.mCoord.y*sin(lAngle) - w/2;
+		const int y = lData.mCoord.y*cos(lAngle) - lData.mCoord.x*sin(lAngle) - h/2;
+		mUiManager->GetPainter()->PrintText(lData.mText, x, y);
+		::glPopMatrix();
+	}
+	mInfoTextArray.clear();
+
+	::glMatrixMode(GL_MODELVIEW);
+	mUiManager->GetPainter()->SetColor(c, 0);
+}
 
 
 void App::Layout()
@@ -815,12 +966,12 @@ int App::PollTap(FingerMovement& pMovement)
 	pMovement;
 	int lTag = 0;
 #ifdef LEPRA_IOS
-	const float x = pMovement.mLastX;
-	const float y = pMovement.mLastY;
-	const float lStartX = pMovement.mStartX;
-	const float lStartY = pMovement.mStartY;
+	float x = pMovement.mLastX;
+	float y = pMovement.mLastY;
+	float lStartX = pMovement.mStartX;
+	float lStartY = pMovement.mStartY;
 	((UiLepra::IosInputManager*)mUiManager->GetInputManager())->SetMousePosition(x, y);
-	((UiLepra::IosInputElement*)mUiManager->GetInputManager()->GetMouse()->GetButton(0))->SetValue(pPressed? 1 : 0);
+	((UiLepra::IosInputElement*)mUiManager->GetInputManager()->GetMouse()->GetButton(0))->SetValue(pMovement.mIsPress? 1 : 0);
 	((UiLepra::IosInputElement*)mUiManager->GetInputManager()->GetMouse()->GetAxis(0))->SetValue(x);
 	((UiLepra::IosInputElement*)mUiManager->GetInputManager()->GetMouse()->GetAxis(1))->SetValue(y);
 
@@ -829,7 +980,9 @@ int App::PollTap(FingerMovement& pMovement)
 	const float w = (float)mUiManager->GetCanvas()->GetWidth();
 	const float h = (float)mUiManager->GetCanvas()->GetHeight();
 	std::swap(x, y);
+	std::swap(lStartX, lStartY);
 	y = h-y;
+	lStartY = h-lStartY;
 	const float m = BUTTON_MARGIN;
 	const float lSingleWidth = (m*2 + BUTTON_WIDTH) * 1.5f;
 	const float lDoubleWidth = (m*3 + BUTTON_WIDTH*2) * 1.5f;
@@ -838,26 +991,31 @@ int App::PollTap(FingerMovement& pMovement)
 	if (lStartX <= lDoubleWidth && lStartY <= lSingleWidth)	// P1 up/down?
 	{
 		mGame->SetThrottle(lAvatar1, CLAMPUP((x-lStartX)/s));
+		mPlayer1LastTouch.ClearTimeDiff();
 		lTag = 1;
 	}
 	else if (lStartX <= lSingleWidth && lStartY >= h-lDoubleWidth)	// P1 left/right?
 	{
 		lAvatar1->SetEnginePower(1, CLAMPUP((y-lStartY)/s), 0);
+		mPlayer1LastTouch.ClearTimeDiff();
 		lTag = 2;
 	}
 	else if (lStartX >= w-lDoubleWidth && lStartY >= h-lSingleWidth)	// P2 up/down?
 	{
 		mGame->SetThrottle(lAvatar2, CLAMPUP((x-lStartX)/s));
+		mPlayer2LastTouch.ClearTimeDiff();
 		lTag = 3;
 	}
 	else if (lStartX >= w-lSingleWidth && lStartY <= lDoubleWidth)	// P1 left/right?
 	{
 		lAvatar2->SetEnginePower(1, CLAMPUP((lStartY-y)/s), 0);
+		mPlayer2LastTouch.ClearTimeDiff();
 		lTag = 4;
 	}
 	else if (x >= w-lSingleWidth && y >= h/2-s && y <= h/2+s)	// Bomb?
 	{
 		mGame->Shoot();
+		mPlayer2LastTouch.ClearTimeDiff();
 		lTag = 5;
 	}
 	pMovement.mTag = lTag;

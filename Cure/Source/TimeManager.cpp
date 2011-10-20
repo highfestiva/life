@@ -54,6 +54,8 @@ void TimeManager::Tick()
 {
 	CURE_RTVAR_GET(mTargetFrameRate, =, Cure::GetSettings(), RTVAR_PHYSICS_FPS, 2);
 	CURE_RTVAR_GET(mRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
+	bool lIsFixedFps;
+	CURE_RTVAR_GET(lIsFixedFps, =, Cure::GetSettings(), RTVAR_PHYSICS_ISFIXEDFPS, false);
 
 	mCurrentFrameTime = (float)mTime.PopTimeDiff();
 	if (mCurrentFrameTime > 1.0)	// Never take longer steps than one second.
@@ -62,6 +64,12 @@ void TimeManager::Tick()
 	}
 	mAbsoluteTime += mCurrentFrameTime;
 	mAbsoluteTime = ::fmod(mAbsoluteTime, (float)gTimeWrapLimit);
+
+	if (lIsFixedFps)
+	{
+		mPhysicsFrameCounter = GetCurrentPhysicsFrameAddFrames(1);
+		return;
+	}
 
 	mTickTimeModulo += mCurrentFrameTime;
 

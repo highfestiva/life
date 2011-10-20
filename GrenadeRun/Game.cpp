@@ -67,7 +67,7 @@ bool Game::Initialize()
 	{
 		mLightId = mUiManager->GetRenderer()->AddDirectionalLight(
 			UiTbc::Renderer::LIGHT_MOVABLE, Vector3DF(-1, 0.5f, -1.5),
-			Color::Color(255, 255, 255), 2.5f, 300);
+			Color::Color(255, 255, 255), 1.0f, 300);
 		mUiManager->GetRenderer()->EnableAllLights(true);
 	}
 	if (lOk)
@@ -78,6 +78,7 @@ bool Game::Initialize()
 		if (lOk)
 		{
 			TransformationF t(QuaternionF(), Vector3DF(-173, -85, 7));
+			t.GetOrientation().RotateAroundOwnZ(-PIF*0.6f);
 			mVehicle->SetInitialTransform(t);
 			mVehicle->StartLoading();
 		}
@@ -321,19 +322,25 @@ bool Game::Render()
 	mUiManager->Render(lLeftRect);
 
 	const Vector3DF lLauncherPosition(0, -215, 27);
+	const float lLauncherHeight = 6;
+	const Vector3DF lMuzzlePosition(lLauncherPosition + mLauncher->GetOrientation()*Vector3DF(0, 0, lLauncherHeight));
 
 	float lRange = 150.0f;
-	float lLookDownAngle = -PIF/15;
+	float lLookDownAngle = -PIF/2;
 	if (mVehicle && mVehicle->IsLoaded())
 	{
-		lRange = lLauncherPosition.GetDistance(mVehicle->GetPosition());
-		lLookDownAngle = ::sin((mVehicle->GetPosition().z-lLauncherPosition.z)/lRange);
+		lRange = lMuzzlePosition.GetDistance(mVehicle->GetPosition());
+		lLookDownAngle = ::sin((mVehicle->GetPosition().z-lMuzzlePosition.z)/lRange);
 	}
 
+	Vector3DF lStraightVector(mVehicle->GetPosition() - lMuzzlePosition);
 	const float lCamDistance = 10;
-	const Vector3DF lCamOffset(lCamDistance*sin(mLauncherYaw), -lCamDistance*cos(mLauncherYaw), 9.5f + 5*lLookDownAngle - lRange/60.0f);
-	t = TransformationF(QuaternionF(), lLauncherPosition + lCamOffset);
-	t.GetOrientation().RotateAroundOwnZ(mLauncherYaw*0.8f);
+	lStraightVector.Normalize(lCamDistance);
+	lStraightVector.x = lCamDistance*sin(mLauncherYaw);
+	lStraightVector.y = -lCamDistance*cos(mLauncherYaw);
+	lStraightVector.z = -lStraightVector.z + lLauncherHeight*0.7f;
+	t = TransformationF(QuaternionF(), lLauncherPosition+lStraightVector);
+	t.GetOrientation().RotateAroundOwnZ(mLauncherYaw*0.9f);
 	t.GetOrientation().RotateAroundOwnX(lLookDownAngle);
 #ifdef LEPRA_IOS_LOOKNFEEL
 	t.GetOrientation().RotateAroundOwnY(PIF*0.5f);

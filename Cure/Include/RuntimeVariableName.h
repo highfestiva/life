@@ -50,3 +50,4 @@
 #define RTVAR_PHYSICS_MICROSTEPS		"Physics.MicroSteps"
 #define RTVAR_PHYSICS_FASTALGO			"Physics.FastAlgo"
 #define RTVAR_PHYSICS_PARALLEL			"Physics.Parallel"
+#define RTVAR_PHYSICS_ISFIXEDFPS		"Physics.IsFixedFps"
