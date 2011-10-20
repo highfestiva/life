@@ -1,4 +1,4 @@
-﻿
+
 # Author: Jonas Byström
 # Copyright (c) 2002-2009, Righteous Games
 
@@ -55,17 +55,17 @@ def _buildcode(command, buildtype):
 	projext = "900" if ver == 9 else "";
 	if command == "build":
 		_buildstl()
-		if osname == "Windows": args = [make, "/useenv", "/M2", "Life"+projext+".sln", own_tt[buildtype]+"|Win32"]
-		else:		   args = [make]
+		if osname == "Windows":	args = [make, "/useenv", "/M2", "Life"+projext+".sln", own_tt[buildtype]+"|Win32"]
+		else:			args = [make]
 		what = "incremental building code"
 	elif command == "rebuild":
 		_buildstl()
 		if osname == "Windows": args = [make, "/useenv", "/M2", "/rebuild", "Life"+projext+".sln", own_tt[buildtype]+"|Win32"]
-		else:		   args = [make, "clean", "all"]
+		else:			args = [make, "clean", "all"]
 		what = "rebuilding code"
 	elif command == "clean":
 		if osname == "Windows": args = [make, "/useenv", "/clean", "Life"+projext+".sln", own_tt[buildtype]+"|Win32"]
-		else:		   args = [make, "clean"]
+		else:			args = [make, "clean"]
 		what = "cleaning code"
 	if osname == "Windows":
 		os.chdir("Life")
@@ -105,7 +105,7 @@ def _incremental_build_data(sourcedir):
 			if filetime(f) < ft:
 				#print("Converting %s since %s has an older timestamp!" % (basename, f))
 				for f in fs:
-				     os.remove(f)
+					os.remove(f)
 				_convertdata(ma)
 				break
 
@@ -217,8 +217,8 @@ def _printresult():
 	if showed_result:
 		return
 	showed_result = True
-	if updates+removes:     print("Operation successful, %i resulting files updated(/removed)." % (updates+removes))
-	else:		   print("Build up-to-date.")
+	if updates+removes:	print("Operation successful, %i resulting files updated(/removed)." % (updates+removes))
+	else:			print("Build up-to-date.")
 
 
 def _createmakes(force=False):
@@ -250,7 +250,7 @@ def _create_zip(targetdir, buildtype):
 		targetfile = targetdir+".zip"
 		if buildtype != "final":
 			targetfile = targetdir+".iszip"
-		zipdir(targetdir, targetfile)
+		zipdir(targetdir, lambda x: True, targetfile)
 	else:
 		targetfile = targetdir+".tar.gz"
 		if buildtype != "final":
@@ -351,6 +351,20 @@ def _demacappify(wildcard):
 	os.chdir("..")
 
 
+def _include_data_files(fn):
+	fn = fn.lower()
+	return fn.endswith(".class") or \
+		fn.endswith(".mesh") or \
+		fn.endswith(".phys") or \
+		fn.endswith(".wav") or \
+		fn.endswith(".png") or \
+		fn.endswith(".jpg") or \
+		fn.endswith(".tga") or \
+		fn.endswith(".tif") or \
+		fn.endswith(".tiff") or \
+		fn.endswith(".bmp")
+
+
 #-------------------- High-level build stuff below. --------------------
 
 
@@ -383,6 +397,9 @@ def builddata_slime():
 
 def builddata_gr():
 	_builddata("GrenadeRun", bindir, default_build_mode)
+
+def zipdata_gr():
+	zipdir("GrenadeRun/Data", _include_data_files, "GrenadeRun/Data/Data.zip")
 
 
 def buildcode():

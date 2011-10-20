@@ -10,27 +10,6 @@
 		1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; };
 		1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF5F4DF0D08C38300B7A737 /* UIKit.framework */; };
 		288765FD0DF74451002DB57D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 288765FC0DF74451002DB57D /* CoreGraphics.framework */; };
-		B122F1A9143D0A9D00305D34 /* blue_eye.png in Resources */ = {isa = PBXBuildFile; fileRef = B122F1A5143D0A9D00305D34 /* blue_eye.png */; };
-		B122F1AA143D0A9D00305D34 /* collision_explosion.wav in Resources */ = {isa = PBXBuildFile; fileRef = B122F1A6143D0A9D00305D34 /* collision_explosion.wav */; };
-		B122F1AB143D0A9D00305D34 /* cutie_body.mesh in Resources */ = {isa = PBXBuildFile; fileRef = B122F1A7143D0A9D00305D34 /* cutie_body.mesh */; };
-		B122F1AC143D0A9D00305D34 /* cutie_brake_lights.mesh in Resources */ = {isa = PBXBuildFile; fileRef = B122F1A8143D0A9D00305D34 /* cutie_brake_lights.mesh */; };
-		B122F1BE143D0AD600305D34 /* cutie_brows.mesh in Resources */ = {isa = PBXBuildFile; fileRef = B122F1AD143D0AD600305D34 /* cutie_brows.mesh */; };
-		B122F1BF143D0AD600305D34 /* cutie_eye0.mesh in Resources */ = {isa = PBXBuildFile; fileRef = B122F1AE143D0AD600305D34 /* cutie_eye0.mesh */; };
-		B122F1C0143D0AD600305D34 /* cutie_flooring.mesh in Resources */ = {isa = PBXBuildFile; fileRef = B122F1AF143D0AD600305D34 /* cutie_flooring.mesh */; };
-		B122F1C1143D0AD600305D34 /* cutie_grill.mesh in Resources */ = {isa = PBXBuildFile; fileRef = B122F1B0143D0AD600305D34 /* cutie_grill.mesh */; };
-		B122F1C2143D0AD600305D34 /* cutie_headlights.mesh in Resources */ = {isa = PBXBuildFile; fileRef = B122F1B1143D0AD600305D34 /* cutie_headlights.mesh */; };
-		B122F1C3143D0AD600305D34 /* cutie_lines.mesh in Resources */ = {isa = PBXBuildFile; fileRef = B122F1B2143D0AD600305D34 /* cutie_lines.mesh */; };
-		B122F1C4143D0AD600305D34 /* cutie_wheel_cap_rr_rl_fr_fl.mesh in Resources */ = {isa = PBXBuildFile; fileRef = B122F1B3143D0AD600305D34 /* cutie_wheel_cap_rr_rl_fr_fl.mesh */; };
-		B122F1C5143D0AD600305D34 /* cutie_wheel_rr_rl_fr_fl.mesh in Resources */ = {isa = PBXBuildFile; fileRef = B122F1B4143D0AD600305D34 /* cutie_wheel_rr_rl_fr_fl.mesh */; };
-		B122F1C6143D0AD600305D34 /* cutie_windows.mesh in Resources */ = {isa = PBXBuildFile; fileRef = B122F1B5143D0AD600305D34 /* cutie_windows.mesh */; };
-		B122F1C7143D0AD600305D34 /* cutie.class in Resources */ = {isa = PBXBuildFile; fileRef = B122F1B6143D0AD600305D34 /* cutie.class */; };
-		B122F1C8143D0AD600305D34 /* cutie.phys in Resources */ = {isa = PBXBuildFile; fileRef = B122F1B7143D0AD600305D34 /* cutie.phys */; };
-		B122F1C9143D0AD600305D34 /* cutie.wav in Resources */ = {isa = PBXBuildFile; fileRef = B122F1B8143D0AD600305D34 /* cutie.wav */; };
-		B122F1CA143D0AD600305D34 /* ground_2.png in Resources */ = {isa = PBXBuildFile; fileRef = B122F1B9143D0AD600305D34 /* ground_2.png */; };
-		B122F1CB143D0AD600305D34 /* launch.wav in Resources */ = {isa = PBXBuildFile; fileRef = B122F1BA143D0AD600305D34 /* launch.wav */; };
-		B122F1CC143D0AD600305D34 /* level_2_phys_ground.mesh in Resources */ = {isa = PBXBuildFile; fileRef = B122F1BB143D0AD600305D34 /* level_2_phys_ground.mesh */; };
-		B122F1CD143D0AD600305D34 /* level_2.class in Resources */ = {isa = PBXBuildFile; fileRef = B122F1BC143D0AD600305D34 /* level_2.class */; };
-		B122F1CE143D0AD600305D34 /* level_2.phys in Resources */ = {isa = PBXBuildFile; fileRef = B122F1BD143D0AD600305D34 /* level_2.phys */; };
 		B15F793913FC59DE00E01A90 /* ConsoleManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F791E13FC59DE00E01A90 /* ConsoleManager.cpp */; };
 		B15F793A13FC59DE00E01A90 /* ContextManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F791F13FC59DE00E01A90 /* ContextManager.cpp */; };
 		B15F793B13FC59DE00E01A90 /* ContextObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F792013FC59DE00E01A90 /* ContextObject.cpp */; };
@@ -481,23 +460,10 @@
 		B1A1E02413AA77710097B8D0 /* UiOggAlStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A1E02213AA77710097B8D0 /* UiOggAlStream.cpp */; };
 		B1A1E02513AA77710097B8D0 /* UiSoundStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1A1E02313AA77710097B8D0 /* UiSoundStream.cpp */; };
 		B1B4899013F9BD6C0047C78A /* GrenadeRun-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = B1B4898F13F9BD6C0047C78A /* GrenadeRun-Info.plist */; };
-		B1B7E60E142FAFA00077E0C4 /* cloud_01_cloud.mesh in Resources */ = {isa = PBXBuildFile; fileRef = B1B7E60B142FAFA00077E0C4 /* cloud_01_cloud.mesh */; };
-		B1B7E60F142FAFA00077E0C4 /* cloud_01.phys in Resources */ = {isa = PBXBuildFile; fileRef = B1B7E60C142FAFA00077E0C4 /* cloud_01.phys */; };
-		B1B7E610142FAFA00077E0C4 /* incoming.wav in Resources */ = {isa = PBXBuildFile; fileRef = B1B7E60D142FAFA00077E0C4 /* incoming.wav */; };
-		B1B7E61E142FAFE60077E0C4 /* cloud_01.class in Resources */ = {isa = PBXBuildFile; fileRef = B1B7E61D142FAFE60077E0C4 /* cloud_01.class */; };
-		B1BC71C6140EC22D003F70F3 /* grenade_grenade.mesh in Resources */ = {isa = PBXBuildFile; fileRef = B1BC71BD140EC22D003F70F3 /* grenade_grenade.mesh */; };
-		B1BC71C7140EC22D003F70F3 /* grenade.class in Resources */ = {isa = PBXBuildFile; fileRef = B1BC71BE140EC22D003F70F3 /* grenade.class */; };
-		B1BC71C8140EC22D003F70F3 /* grenade.phys in Resources */ = {isa = PBXBuildFile; fileRef = B1BC71BF140EC22D003F70F3 /* grenade.phys */; };
-		B1BC71CA140EC22D003F70F3 /* launcher_launcher.mesh in Resources */ = {isa = PBXBuildFile; fileRef = B1BC71C1140EC22D003F70F3 /* launcher_launcher.mesh */; };
-		B1BC71CB140EC22D003F70F3 /* launcher.class in Resources */ = {isa = PBXBuildFile; fileRef = B1BC71C2140EC22D003F70F3 /* launcher.class */; };
-		B1BC71CC140EC22D003F70F3 /* launcher.phys in Resources */ = {isa = PBXBuildFile; fileRef = B1BC71C3140EC22D003F70F3 /* launcher.phys */; };
 		B1BC71D2140EC242003F70F3 /* Oiit.ogg in Resources */ = {isa = PBXBuildFile; fileRef = B1BC71D0140EC242003F70F3 /* Oiit.ogg */; };
-		B1BC72AB140EDA48003F70F3 /* truck_01.wav in Resources */ = {isa = PBXBuildFile; fileRef = B1BC72AA140EDA48003F70F3 /* truck_01.wav */; };
-		B1BC72C2140EDAF2003F70F3 /* mud_particle_01_particle.mesh in Resources */ = {isa = PBXBuildFile; fileRef = B1BC72BF140EDAF2003F70F3 /* mud_particle_01_particle.mesh */; };
-		B1BC72C3140EDAF2003F70F3 /* mud_particle_01.class in Resources */ = {isa = PBXBuildFile; fileRef = B1BC72C0140EDAF2003F70F3 /* mud_particle_01.class */; };
-		B1BC72C4140EDAF2003F70F3 /* mud_particle_01.phys in Resources */ = {isa = PBXBuildFile; fileRef = B1BC72C1140EDAF2003F70F3 /* mud_particle_01.phys */; };
 		B1BC733D140EEAEE003F70F3 /* MacLog.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1BC733C140EEAEE003F70F3 /* MacLog.mm */; };
 		B1CC28E413BA906B009BD34A /* UiIosInput.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1CC28E313BA906B009BD34A /* UiIosInput.mm */; };
+		B1D4474D1450BD2F00D58FF2 /* Data.zip in Resources */ = {isa = PBXBuildFile; fileRef = B1D4474C1450BD2F00D58FF2 /* Data.zip */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -505,27 +471,6 @@
 		1D6058910D05DD3D006BFB54 /* GrenadeRun.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GrenadeRun.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DF5F4DF0D08C38300B7A737 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		288765FC0DF74451002DB57D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
-		B122F1A5143D0A9D00305D34 /* blue_eye.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = blue_eye.png; sourceTree = "<group>"; };
-		B122F1A6143D0A9D00305D34 /* collision_explosion.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = collision_explosion.wav; sourceTree = "<group>"; };
-		B122F1A7143D0A9D00305D34 /* cutie_body.mesh */ = {isa = PBXFileReference; lastKnownFileType = file; path = cutie_body.mesh; sourceTree = "<group>"; };
-		B122F1A8143D0A9D00305D34 /* cutie_brake_lights.mesh */ = {isa = PBXFileReference; lastKnownFileType = file; path = cutie_brake_lights.mesh; sourceTree = "<group>"; };
-		B122F1AD143D0AD600305D34 /* cutie_brows.mesh */ = {isa = PBXFileReference; lastKnownFileType = file; path = cutie_brows.mesh; sourceTree = "<group>"; };
-		B122F1AE143D0AD600305D34 /* cutie_eye0.mesh */ = {isa = PBXFileReference; lastKnownFileType = file; path = cutie_eye0.mesh; sourceTree = "<group>"; };
-		B122F1AF143D0AD600305D34 /* cutie_flooring.mesh */ = {isa = PBXFileReference; lastKnownFileType = file; path = cutie_flooring.mesh; sourceTree = "<group>"; };
-		B122F1B0143D0AD600305D34 /* cutie_grill.mesh */ = {isa = PBXFileReference; lastKnownFileType = file; path = cutie_grill.mesh; sourceTree = "<group>"; };
-		B122F1B1143D0AD600305D34 /* cutie_headlights.mesh */ = {isa = PBXFileReference; lastKnownFileType = file; path = cutie_headlights.mesh; sourceTree = "<group>"; };
-		B122F1B2143D0AD600305D34 /* cutie_lines.mesh */ = {isa = PBXFileReference; lastKnownFileType = file; path = cutie_lines.mesh; sourceTree = "<group>"; };
-		B122F1B3143D0AD600305D34 /* cutie_wheel_cap_rr_rl_fr_fl.mesh */ = {isa = PBXFileReference; lastKnownFileType = file; path = cutie_wheel_cap_rr_rl_fr_fl.mesh; sourceTree = "<group>"; };
-		B122F1B4143D0AD600305D34 /* cutie_wheel_rr_rl_fr_fl.mesh */ = {isa = PBXFileReference; lastKnownFileType = file; path = cutie_wheel_rr_rl_fr_fl.mesh; sourceTree = "<group>"; };
-		B122F1B5143D0AD600305D34 /* cutie_windows.mesh */ = {isa = PBXFileReference; lastKnownFileType = file; path = cutie_windows.mesh; sourceTree = "<group>"; };
-		B122F1B6143D0AD600305D34 /* cutie.class */ = {isa = PBXFileReference; lastKnownFileType = compiled.javaclass; path = cutie.class; sourceTree = "<group>"; };
-		B122F1B7143D0AD600305D34 /* cutie.phys */ = {isa = PBXFileReference; lastKnownFileType = file; path = cutie.phys; sourceTree = "<group>"; };
-		B122F1B8143D0AD600305D34 /* cutie.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = cutie.wav; sourceTree = "<group>"; };
-		B122F1B9143D0AD600305D34 /* ground_2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ground_2.png; sourceTree = "<group>"; };
-		B122F1BA143D0AD600305D34 /* launch.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = launch.wav; sourceTree = "<group>"; };
-		B122F1BB143D0AD600305D34 /* level_2_phys_ground.mesh */ = {isa = PBXFileReference; lastKnownFileType = file; path = level_2_phys_ground.mesh; sourceTree = "<group>"; };
-		B122F1BC143D0AD600305D34 /* level_2.class */ = {isa = PBXFileReference; lastKnownFileType = compiled.javaclass; path = level_2.class; sourceTree = "<group>"; };
-		B122F1BD143D0AD600305D34 /* level_2.phys */ = {isa = PBXFileReference; lastKnownFileType = file; path = level_2.phys; sourceTree = "<group>"; };
 		B15F791E13FC59DE00E01A90 /* ConsoleManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ConsoleManager.cpp; path = ../../Cure/Source/ConsoleManager.cpp; sourceTree = SOURCE_ROOT; };
 		B15F791F13FC59DE00E01A90 /* ContextManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ContextManager.cpp; path = ../../Cure/Source/ContextManager.cpp; sourceTree = SOURCE_ROOT; };
 		B15F792013FC59DE00E01A90 /* ContextObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ContextObject.cpp; path = ../../Cure/Source/ContextObject.cpp; sourceTree = SOURCE_ROOT; };
@@ -1166,23 +1111,10 @@
 		B1A1E02313AA77710097B8D0 /* UiSoundStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UiSoundStream.cpp; sourceTree = "<group>"; };
 		B1B4898F13F9BD6C0047C78A /* GrenadeRun-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GrenadeRun-Info.plist"; sourceTree = "<group>"; };
 		B1B489A313F9BE4A0047C78A /* GrenadeRun_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GrenadeRun_Prefix.pch; path = GrenadeRunXcode/GrenadeRun_Prefix.pch; sourceTree = "<group>"; };
-		B1B7E60B142FAFA00077E0C4 /* cloud_01_cloud.mesh */ = {isa = PBXFileReference; lastKnownFileType = file; name = cloud_01_cloud.mesh; path = ../Data/cloud_01_cloud.mesh; sourceTree = SOURCE_ROOT; };
-		B1B7E60C142FAFA00077E0C4 /* cloud_01.phys */ = {isa = PBXFileReference; lastKnownFileType = file; name = cloud_01.phys; path = ../Data/cloud_01.phys; sourceTree = SOURCE_ROOT; };
-		B1B7E60D142FAFA00077E0C4 /* incoming.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = incoming.wav; path = ../Data/incoming.wav; sourceTree = SOURCE_ROOT; };
-		B1B7E61D142FAFE60077E0C4 /* cloud_01.class */ = {isa = PBXFileReference; lastKnownFileType = compiled.javaclass; name = cloud_01.class; path = ../Data/cloud_01.class; sourceTree = SOURCE_ROOT; };
-		B1BC71BD140EC22D003F70F3 /* grenade_grenade.mesh */ = {isa = PBXFileReference; lastKnownFileType = file; name = grenade_grenade.mesh; path = ../Data/grenade_grenade.mesh; sourceTree = SOURCE_ROOT; };
-		B1BC71BE140EC22D003F70F3 /* grenade.class */ = {isa = PBXFileReference; lastKnownFileType = compiled.javaclass; name = grenade.class; path = ../Data/grenade.class; sourceTree = SOURCE_ROOT; };
-		B1BC71BF140EC22D003F70F3 /* grenade.phys */ = {isa = PBXFileReference; lastKnownFileType = file; name = grenade.phys; path = ../Data/grenade.phys; sourceTree = SOURCE_ROOT; };
-		B1BC71C1140EC22D003F70F3 /* launcher_launcher.mesh */ = {isa = PBXFileReference; lastKnownFileType = file; name = launcher_launcher.mesh; path = ../Data/launcher_launcher.mesh; sourceTree = SOURCE_ROOT; };
-		B1BC71C2140EC22D003F70F3 /* launcher.class */ = {isa = PBXFileReference; lastKnownFileType = compiled.javaclass; name = launcher.class; path = ../Data/launcher.class; sourceTree = SOURCE_ROOT; };
-		B1BC71C3140EC22D003F70F3 /* launcher.phys */ = {isa = PBXFileReference; lastKnownFileType = file; name = launcher.phys; path = ../Data/launcher.phys; sourceTree = SOURCE_ROOT; };
 		B1BC71D0140EC242003F70F3 /* Oiit.ogg */ = {isa = PBXFileReference; lastKnownFileType = file; name = Oiit.ogg; path = ../Data/Oiit.ogg; sourceTree = SOURCE_ROOT; };
-		B1BC72AA140EDA48003F70F3 /* truck_01.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = truck_01.wav; path = ../Data/truck_01.wav; sourceTree = SOURCE_ROOT; };
-		B1BC72BF140EDAF2003F70F3 /* mud_particle_01_particle.mesh */ = {isa = PBXFileReference; lastKnownFileType = file; name = mud_particle_01_particle.mesh; path = ../Data/mud_particle_01_particle.mesh; sourceTree = SOURCE_ROOT; };
-		B1BC72C0140EDAF2003F70F3 /* mud_particle_01.class */ = {isa = PBXFileReference; lastKnownFileType = compiled.javaclass; name = mud_particle_01.class; path = ../Data/mud_particle_01.class; sourceTree = SOURCE_ROOT; };
-		B1BC72C1140EDAF2003F70F3 /* mud_particle_01.phys */ = {isa = PBXFileReference; lastKnownFileType = file; name = mud_particle_01.phys; path = ../Data/mud_particle_01.phys; sourceTree = SOURCE_ROOT; };
 		B1BC733C140EEAEE003F70F3 /* MacLog.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MacLog.mm; sourceTree = "<group>"; };
 		B1CC28E313BA906B009BD34A /* UiIosInput.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = UiIosInput.mm; sourceTree = "<group>"; };
+		B1D4474C1450BD2F00D58FF2 /* Data.zip */ = {isa = PBXFileReference; lastKnownFileType = archive.zip; name = Data.zip; path = ../Data/Data.zip; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -2266,42 +2198,8 @@
 		B1A1E05013AA97470097B8D0 /* Data */ = {
 			isa = PBXGroup;
 			children = (
-				B122F1AD143D0AD600305D34 /* cutie_brows.mesh */,
-				B122F1AE143D0AD600305D34 /* cutie_eye0.mesh */,
-				B122F1AF143D0AD600305D34 /* cutie_flooring.mesh */,
-				B122F1B0143D0AD600305D34 /* cutie_grill.mesh */,
-				B122F1B1143D0AD600305D34 /* cutie_headlights.mesh */,
-				B122F1B2143D0AD600305D34 /* cutie_lines.mesh */,
-				B122F1B3143D0AD600305D34 /* cutie_wheel_cap_rr_rl_fr_fl.mesh */,
-				B122F1B4143D0AD600305D34 /* cutie_wheel_rr_rl_fr_fl.mesh */,
-				B122F1B5143D0AD600305D34 /* cutie_windows.mesh */,
-				B122F1B6143D0AD600305D34 /* cutie.class */,
-				B122F1B7143D0AD600305D34 /* cutie.phys */,
-				B122F1B8143D0AD600305D34 /* cutie.wav */,
-				B122F1B9143D0AD600305D34 /* ground_2.png */,
-				B122F1BA143D0AD600305D34 /* launch.wav */,
-				B122F1BB143D0AD600305D34 /* level_2_phys_ground.mesh */,
-				B122F1BC143D0AD600305D34 /* level_2.class */,
-				B122F1BD143D0AD600305D34 /* level_2.phys */,
-				B122F1A5143D0A9D00305D34 /* blue_eye.png */,
-				B122F1A6143D0A9D00305D34 /* collision_explosion.wav */,
-				B122F1A7143D0A9D00305D34 /* cutie_body.mesh */,
-				B122F1A8143D0A9D00305D34 /* cutie_brake_lights.mesh */,
-				B1B7E61D142FAFE60077E0C4 /* cloud_01.class */,
-				B1B7E60B142FAFA00077E0C4 /* cloud_01_cloud.mesh */,
-				B1B7E60C142FAFA00077E0C4 /* cloud_01.phys */,
-				B1B7E60D142FAFA00077E0C4 /* incoming.wav */,
-				B1BC72BF140EDAF2003F70F3 /* mud_particle_01_particle.mesh */,
-				B1BC72C0140EDAF2003F70F3 /* mud_particle_01.class */,
-				B1BC72C1140EDAF2003F70F3 /* mud_particle_01.phys */,
-				B1BC72AA140EDA48003F70F3 /* truck_01.wav */,
+				B1D4474C1450BD2F00D58FF2 /* Data.zip */,
 				B1BC71D0140EC242003F70F3 /* Oiit.ogg */,
-				B1BC71BD140EC22D003F70F3 /* grenade_grenade.mesh */,
-				B1BC71BE140EC22D003F70F3 /* grenade.class */,
-				B1BC71BF140EC22D003F70F3 /* grenade.phys */,
-				B1BC71C1140EC22D003F70F3 /* launcher_launcher.mesh */,
-				B1BC71C2140EC22D003F70F3 /* launcher.class */,
-				B1BC71C3140EC22D003F70F3 /* launcher.phys */,
 			);
 			name = Data;
 			path = ../../bin/Data;
@@ -2361,42 +2259,8 @@
 				B196560F13BE6C3B006A1422 /* Icon-72.png in Resources */,
 				B196562513BE6F94006A1422 /* Default.png in Resources */,
 				B1B4899013F9BD6C0047C78A /* GrenadeRun-Info.plist in Resources */,
-				B1BC71C6140EC22D003F70F3 /* grenade_grenade.mesh in Resources */,
-				B1BC71C7140EC22D003F70F3 /* grenade.class in Resources */,
-				B1BC71C8140EC22D003F70F3 /* grenade.phys in Resources */,
-				B1BC71CA140EC22D003F70F3 /* launcher_launcher.mesh in Resources */,
-				B1BC71CB140EC22D003F70F3 /* launcher.class in Resources */,
-				B1BC71CC140EC22D003F70F3 /* launcher.phys in Resources */,
 				B1BC71D2140EC242003F70F3 /* Oiit.ogg in Resources */,
-				B1BC72AB140EDA48003F70F3 /* truck_01.wav in Resources */,
-				B1BC72C2140EDAF2003F70F3 /* mud_particle_01_particle.mesh in Resources */,
-				B1BC72C3140EDAF2003F70F3 /* mud_particle_01.class in Resources */,
-				B1BC72C4140EDAF2003F70F3 /* mud_particle_01.phys in Resources */,
-				B1B7E60E142FAFA00077E0C4 /* cloud_01_cloud.mesh in Resources */,
-				B1B7E60F142FAFA00077E0C4 /* cloud_01.phys in Resources */,
-				B1B7E610142FAFA00077E0C4 /* incoming.wav in Resources */,
-				B1B7E61E142FAFE60077E0C4 /* cloud_01.class in Resources */,
-				B122F1A9143D0A9D00305D34 /* blue_eye.png in Resources */,
-				B122F1AA143D0A9D00305D34 /* collision_explosion.wav in Resources */,
-				B122F1AB143D0A9D00305D34 /* cutie_body.mesh in Resources */,
-				B122F1AC143D0A9D00305D34 /* cutie_brake_lights.mesh in Resources */,
-				B122F1BE143D0AD600305D34 /* cutie_brows.mesh in Resources */,
-				B122F1BF143D0AD600305D34 /* cutie_eye0.mesh in Resources */,
-				B122F1C0143D0AD600305D34 /* cutie_flooring.mesh in Resources */,
-				B122F1C1143D0AD600305D34 /* cutie_grill.mesh in Resources */,
-				B122F1C2143D0AD600305D34 /* cutie_headlights.mesh in Resources */,
-				B122F1C3143D0AD600305D34 /* cutie_lines.mesh in Resources */,
-				B122F1C4143D0AD600305D34 /* cutie_wheel_cap_rr_rl_fr_fl.mesh in Resources */,
-				B122F1C5143D0AD600305D34 /* cutie_wheel_rr_rl_fr_fl.mesh in Resources */,
-				B122F1C6143D0AD600305D34 /* cutie_windows.mesh in Resources */,
-				B122F1C7143D0AD600305D34 /* cutie.class in Resources */,
-				B122F1C8143D0AD600305D34 /* cutie.phys in Resources */,
-				B122F1C9143D0AD600305D34 /* cutie.wav in Resources */,
-				B122F1CA143D0AD600305D34 /* ground_2.png in Resources */,
-				B122F1CB143D0AD600305D34 /* launch.wav in Resources */,
-				B122F1CC143D0AD600305D34 /* level_2_phys_ground.mesh in Resources */,
-				B122F1CD143D0AD600305D34 /* level_2.class in Resources */,
-				B122F1CE143D0AD600305D34 /* level_2.phys in Resources */,
+				B1D4474D1450BD2F00D58FF2 /* Data.zip in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
