@@ -1,0 +1,25 @@
+Computer demo
+-------------
+Draw roads+cliffs on texture
+Level: remove hole (behind goal) that Cutie can fall into.
+Tower for launcher.
+2 x garage/house for Cutie.
+Place static and dynamic stones in the level.
+Place dynamic crates in the level.
+Create flag that's raised when parked in the opposite garage.
+Elevator from ravine to left mountain.
+Crane+pendulum that may knock Cutie over on the bridge.
+Cutify Cutie.
+Icon x god-knows-how-many resolutions (iOS x 4, PC, Mac).
+
+iOS release
+-----------
+Admin: add button in center, for alert:restart/continue.
+Main menu: enter P1+P2 names, select map. Remember last names.
+Default image (=splash) for iPhone, Retina, iPad. Pixel Doctrine logo.
+Screen shots + marketing texts.
+Extra vehicle: cute monster truck.
+2 extra levels.
+Delete all resources when switching level.
+Turn the table when completing a level.
+Autostart next/same level.
