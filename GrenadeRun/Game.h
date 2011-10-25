@@ -110,7 +110,7 @@ private:
 	virtual Cure::ContextObject* CreateContextObject(const str& pClassId) const;
 	virtual bool InitializeTerrain();
 
-	Cure::ContextObject* CreateLogicHandler(const str&) const;
+	Cure::ContextObject* CreateLogicHandler(const str& pType) const;
 
 	UiCure::GameUiManager* mUiManager;
 	UiCure::CollisionSoundManager* mCollisionSoundManager;

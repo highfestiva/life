@@ -544,6 +544,10 @@
 				RelativePath=".\GrenadeRun.rc"
 				>
 			</File>
+			<File
+				RelativePath=".\Spawner.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -556,6 +560,10 @@
 			</File>
 			<File
 				RelativePath=".\Grenade.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Spawner.h"
 				>
 			</File>
 		</Filter>

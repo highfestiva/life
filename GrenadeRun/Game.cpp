@@ -5,6 +5,7 @@
 
 
 #include "Game.h"
+#include "../Cure/Include/ContextManager.h"
 #include "../Cure/Include/FloatAttribute.h"
 #include "../Cure/Include/RuntimeVariable.h"
 #include "../Cure/Include/TimeManager.h"
@@ -15,6 +16,7 @@
 #include "../UiCure/Include/UiProps.h"
 #include "../UiCure/Include/UiGameUiManager.h"
 #include "Grenade.h"
+#include "Spawner.h"
 
 
 #ifdef LEPRA_IOS
@@ -266,18 +268,26 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 		}
 	}
 
-	if (mVehicle && mVehicle->IsLoaded())
+	Cure::ContextManager::ContextObjectTable lObjectTable = GetContext()->GetObjectTable();
+	Cure::ContextManager::ContextObjectTable::iterator x = lObjectTable.begin();
+	for (; x != lObjectTable.end(); ++x)
 	{
-		Vector3DF v = mVehicle->GetPosition() - pPosition;
+		const Cure::ContextObject* lObject = x->second;
+		TBC::ChunkyPhysics* lPhysics = lObject->ContextObject::GetPhysics();
+		if (!lObject->IsLoaded() || !lPhysics || lPhysics->GetPhysicsType() == TBC::ChunkyPhysics::STATIC)
+		{
+			continue;
+		}
+		Vector3DF v = lObject->GetPosition() - pPosition;
 		float d = v.GetLength();
 		v /= d;
 		d = (d < 0.5f)? 0.5f : d;
 		d *= 0.08f;
 		const float lMaxForceFactor = 2000.0f;
-		const float f = std::min(lMaxForceFactor, lMaxForceFactor / ::pow(d, 3.0f)) * mVehicle->GetMass();
+		const float f = std::min(lMaxForceFactor, lMaxForceFactor / ::pow(d, 3.0f)) * lObject->GetMass();
 		v *= f;
 		v.z = f/5;
-		const TBC::ChunkyBoneGeometry* lGeometry = mVehicle->ContextObject::GetPhysics()->GetBoneGeometry(0);
+		const TBC::ChunkyBoneGeometry* lGeometry = lPhysics->GetBoneGeometry(0);
 		GetPhysicsManager()->AddForce(lGeometry->GetBodyId(), v);
 	}
 }
@@ -479,9 +489,26 @@ bool Game::InitializeTerrain()
 
 
 
-Cure::ContextObject* Game::CreateLogicHandler(const str&) const
+Cure::ContextObject* Game::CreateLogicHandler(const str& pType) const
 {
-	return 0;
+	/*if (pType == _T("trig_elevator"))
+	{
+		return new Elevator(GetContext());
+	}
+	else*/ if (pType == _T("spawner"))
+	{
+		return new Spawner(GetContext());
+	}
+	/*else if (pType == _T("real_time_ratio"))
+	{
+		return new BulletTime(GetContext());
+	}
+	else if (pType == _T("race_timer"))
+	{
+		return new RaceTimer(GetContext());
+	}*/
+	assert(false);
+	return (0);
 }
 
 

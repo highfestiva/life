@@ -89,7 +89,7 @@ public:
 	const void* GetTrigger(TBC::PhysicsManager::TriggerID pTriggerId) const;
 	size_t GetTriggerCount(const void*& pTrigger) const;
 
-	void SetSpawner(const TBC::PhysicsSpawner* pSpawner);
+	virtual void SetSpawner(const TBC::PhysicsSpawner* pSpawner);
 	const TBC::PhysicsSpawner* GetSpawner() const;
 
 	void AddChild(ContextObject* pChild);

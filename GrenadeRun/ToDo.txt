@@ -1,11 +1,15 @@
+Done
+----
+Level: remove hole (behind goal) that Cutie can fall into.
+Tower for launcher.
+Place static stones in the level.
+Place dynamic crates in the level.
+
+
 Computer demo
 -------------
 Draw roads+cliffs on texture
-Level: remove hole (behind goal) that Cutie can fall into.
-Tower for launcher.
 2 x garage/house for Cutie.
-Place static and dynamic stones in the level.
-Place dynamic crates in the level.
 Create flag that's raised when parked in the opposite garage.
 Elevator from ravine to left mountain.
 Crane+pendulum that may knock Cutie over on the bridge.

@@ -241,7 +241,7 @@ bool App::Open()
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_SOUND_DOPPLER, 1.0);
 
 #ifndef LEPRA_IOS
-	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_SOUND_ROLLOFF, 0.2);
+	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_SOUND_ROLLOFF, 0.5);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLETRILINEARFILTERING, true);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLEMIPMAPPING, true);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_SHADOWS, _T("Force:Volume"));	
@@ -686,8 +686,8 @@ void App::DrawCircle(float x, float y, float pRadius, const Color& pColor) const
 
 void App::DrawForceMeter(int x, int y, float pAngle, float pForce, bool pAreEqual) const
 {
-	mPenX = x;
-	mPenY = y;
+	mPenX = (float)x;
+	mPenY = (float)y;
 
 	Color lColor = YELLOW;
 	Color lTargetColor = RED;
@@ -750,7 +750,7 @@ void App::GetLauncherAngles(Cure::ContextObject* pAvatar1, Cure::ContextObject* 
 }
 
 void App::GetBallisticData(const Vector3DF& pPosition1, const Vector3DF& pPosition2,
-	float pPitch, float& pGuidePitch, float pYaw, float& pGuideYaw, float &pTime) const
+	float pPitch, float& pGuidePitch, float /*pYaw*/, float& pGuideYaw, float &pTime) const
 {
 	const Vector3DF lDelta = pPosition1 - pPosition2;
 	const Vector2DF lYawVector(lDelta.x, lDelta.y);
@@ -847,9 +847,9 @@ void App::DrawInfoTexts() const
 		const float lAngle = -lData.mAngle;
 		::glPushMatrix();
 		::glRotatef(lAngle*180/PIF, 0, 0, 1);
-		const int x = lData.mCoord.x*cos(lAngle) + lData.mCoord.y*sin(lAngle) - w/2;
-		const int y = lData.mCoord.y*cos(lAngle) - lData.mCoord.x*sin(lAngle) - h/2;
-		mUiManager->GetPainter()->PrintText(lData.mText, x, y);
+		const int cx = (int)(lData.mCoord.x*cos(lAngle) + lData.mCoord.y*sin(lAngle) - w/2);
+		const int cy = (int)(lData.mCoord.y*cos(lAngle) - lData.mCoord.x*sin(lAngle) - h/2);
+		mUiManager->GetPainter()->PrintText(lData.mText, cx, cy);
 		::glPopMatrix();
 	}
 	mInfoTextArray.clear();
