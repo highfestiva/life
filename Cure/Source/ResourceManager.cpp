@@ -896,7 +896,7 @@ bool ResourceManager::IsLoading()
 
 bool ResourceManager::WaitLoading()
 {
-	for (int x = 0; IsLoading() && x < 200; ++x)
+	for (int x = 0; IsLoading() && SystemManager::GetQuitRequest() == 0 && x < 200; ++x)
 	{
 		Thread::Sleep(0.1);
 	}

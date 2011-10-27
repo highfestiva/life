@@ -50,7 +50,7 @@ namespace Life
 GameClientSlaveManager::GameClientSlaveManager(GameClientMasterTicker* pMaster, const Cure::TimeManager* pTime,
 	Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
 	UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea):
-	Cure::GameManager(pTime, pVariableScope, pResourceManager, 2000, 7),
+	Cure::GameManager(pTime, pVariableScope, pResourceManager, 2000, 7, 1),
 	mMaster(pMaster),
 	mUiManager(pUiManager),
 	mCollisionSoundManager(0),
@@ -1705,7 +1705,7 @@ void GameClientSlaveManager::OnCollision(const Vector3DF& pForce, const Vector3D
 	Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
 	TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID)
 {
-	mCollisionSoundManager->OnCollision(pForce, pTorque, pPosition, pObject1, pObject2, pBody1Id, 200);
+	mCollisionSoundManager->OnCollision(pForce, pTorque, pPosition, pObject1, pObject2, pBody1Id, 200, false);
 
 	const bool lObject1Dynamic = (pObject1->GetPhysics()->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC);
 	const bool lObject2Dynamic = (pObject2->GetPhysics()->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC);

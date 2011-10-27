@@ -519,6 +519,7 @@ void App::DrawHud() const
 	const float m = BUTTON_MARGIN;
 	const float m2 = m*2;
 
+#ifdef LEPRA_IOS
 	// Left player.
 	DrawCircle(m+lButtonWidth,			m+lButtonRadius,	lButtonRadius-2);	// Up/down.
 	InfoText(1, _T("Throttle/brake"), 0, 14, 0);
@@ -542,6 +543,7 @@ void App::DrawHud() const
 	Color c = lIsLocked? Color(10, 10, 10) : mTouchShootColor;
 	DrawRoundedPolygon(w-m-lButtonRadius,		h/2,			lButtonRadius,	-PIF/2,	6, c);
 	InfoText(2, _T("BOOOM!"), PIF/2);
+#endif // iOS
 
 	// Draw touch force meters, to give a visual indication of steering.
 	Cure::ContextObject* lAvatar1 = mGame->GetP1();
@@ -551,6 +553,7 @@ void App::DrawHud() const
 		return;
 	}
 
+#ifdef LEPRA_IOS
 	float lForce;
 	const TBC::PhysicsEngine* lGas;
 	const TBC::PhysicsEngine* lBrakes;
@@ -588,6 +591,7 @@ void App::DrawHud() const
 			InfoText(2, _T("Turn power"), PIF/2);
 		}
 	}
+#endif // iOS
 
 	// Draw launcher guides
 	const float lDrawAngle = 0;
@@ -835,6 +839,7 @@ void App::InfoText(int pPlayer, const str& pInfo, const float pAngle, float dx, 
 
 void App::DrawInfoTexts() const
 {
+#ifdef LEPRA_IOS
 	const Color c = mUiManager->GetPainter()->GetColor(0);
 	mUiManager->GetPainter()->SetColor(mInfoTextColor, 0);
 	::glMatrixMode(GL_PROJECTION);
@@ -852,10 +857,12 @@ void App::DrawInfoTexts() const
 		mUiManager->GetPainter()->PrintText(lData.mText, cx, cy);
 		::glPopMatrix();
 	}
-	mInfoTextArray.clear();
 
 	::glMatrixMode(GL_MODELVIEW);
 	mUiManager->GetPainter()->SetColor(c, 0);
+#endif // iOS
+
+	mInfoTextArray.clear();
 }
 
 

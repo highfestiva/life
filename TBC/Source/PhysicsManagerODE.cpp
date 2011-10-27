@@ -24,7 +24,7 @@ namespace TBC
 
 
 
-PhysicsManagerODE::PhysicsManagerODE(float pRadius, int pLevels)
+PhysicsManagerODE::PhysicsManagerODE(float pRadius, int pLevels, float pSensitivity)
 {
 	mWorldID = dWorldCreate();
 	
@@ -35,9 +35,9 @@ PhysicsManagerODE::PhysicsManagerODE(float pRadius, int pLevels)
 
 	::dWorldSetAutoDisableFlag(mWorldID, 1);
 	
-	::dWorldSetAutoDisableLinearThreshold(mWorldID, 0.02f);
-	::dWorldSetAutoDisableAngularThreshold(mWorldID, 0.02f);
-	::dWorldSetAutoDisableSteps(mWorldID, 2);
+	::dWorldSetAutoDisableLinearThreshold(mWorldID, 0.02f/pSensitivity);
+	::dWorldSetAutoDisableAngularThreshold(mWorldID, 0.02f/pSensitivity);
+	::dWorldSetAutoDisableSteps(mWorldID, (int)(2*pSensitivity));
 	//::dWorldSetAutoDisableTime(mWorldID, 0);
 	//::dWorldSetLinearDampingThreshold(mWorldID, 100.0f);
 	//::dWorldSetLinearDamping(mWorldID, 0.9f);

@@ -14,13 +14,13 @@ namespace TBC
 
 
 
-PhysicsManager* PhysicsManagerFactory::Create(Engine pEngine, float pRadius, int pLevels)
+PhysicsManager* PhysicsManagerFactory::Create(Engine pEngine, float pRadius, int pLevels, float pSensitivity)
 {
 	PhysicsManager* lEngine = 0;
 	switch (pEngine)
 	{
-		case ENGINE_ODE:	lEngine = new PhysicsManagerODE(pRadius, pLevels);	break;
-		default:		mLog.Error(_T("Physics type not supported."));		break;
+		case ENGINE_ODE:	lEngine = new PhysicsManagerODE(pRadius, pLevels, pSensitivity);	break;
+		default:		mLog.Error(_T("Physics type not supported."));				break;
 	}
 	return (lEngine);
 }

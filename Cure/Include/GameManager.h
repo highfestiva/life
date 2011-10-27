@@ -56,7 +56,7 @@ class GameManager
 public:
 	typedef SequencialPerformanceData<uint64> BandwidthData;
 
-	GameManager(const TimeManager* pTime, RuntimeVariableScope* pVariableScope, ResourceManager* pResourceManager, float pPhysicsRadius, int pPhysicsLevels);
+	GameManager(const TimeManager* pTime, RuntimeVariableScope* pVariableScope, ResourceManager* pResourceManager, float pPhysicsRadius, int pPhysicsLevels, float pPhysicsSensitivity);
 	virtual ~GameManager();
 
 	virtual bool BeginTick();

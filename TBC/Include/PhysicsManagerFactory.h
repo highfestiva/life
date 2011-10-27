@@ -34,7 +34,7 @@ public:
 		ENGINE_BULLET = 3,
 	};
 
-	static PhysicsManager* Create(Engine pEngine, float pRadius, int pLevels);
+	static PhysicsManager* Create(Engine pEngine, float pRadius, int pLevels, float pSensitivity);
 
 	LOG_CLASS_DECLARE();
 };

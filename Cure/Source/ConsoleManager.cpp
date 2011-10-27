@@ -82,6 +82,15 @@ void ConsoleManager::Join()
 		}
 		Thread::Sleep(0.01f);
 	}
+	{
+		// Kill forks.
+		ScopeLock lLock(&mLock);
+		ForkList::iterator x = mForkList.begin();
+		for (; x != mForkList.end(); ++x)
+		{
+			(*x)->Kill();
+		}
+	}
 }
 
 
@@ -186,6 +195,10 @@ bool ConsoleManager::ForkExecuteCommand(const str& pCommand)
 		str mCommand;
 		void operator=(const ForkThread&) {};
 	};
+	if (SystemManager::GetQuitRequest())
+	{
+		return false;
+	}
 	ForkThread* lExecutor = new ForkThread(this, pCommand);
 	AddFork(lExecutor);
 	lExecutor->RequestSelfDestruct();

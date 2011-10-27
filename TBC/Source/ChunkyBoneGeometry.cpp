@@ -180,7 +180,7 @@ bool ChunkyBoneGeometry::CreateJoint(ChunkyPhysics* pStructure, PhysicsManager* 
 		else if (mBodyData.mJointType == JOINT_BALL)
 		{
 			const TransformationF& lBodyTransform = pStructure->GetTransformation(this);
-			const Vector3DF lAnchor = lBodyTransform.GetPosition() -
+			const Vector3DF lAnchor = lBodyTransform.GetPosition() +
 				Vector3DF(mBodyData.mParameter[PARAM_OFFSET_X], mBodyData.mParameter[PARAM_OFFSET_Y], mBodyData.mParameter[PARAM_OFFSET_Z]);
 			mJointId = pPhysics->CreateBallJoint(mBodyData.mParent->GetBodyId(),
 				GetBodyId(), lAnchor);

@@ -22,7 +22,7 @@
 #ifdef LEPRA_IOS
 #define LEPRA_IOS_LOOKNFEEL
 #endif // iOS
-#define LEPRA_IOS_LOOKNFEEL
+//#define LEPRA_IOS_LOOKNFEEL
 
 
 
@@ -33,7 +33,7 @@ namespace GrenadeRun
 
 Game::Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager):
 	Cure::GameTicker(),
-	Cure::GameManager(Cure::GameTicker::GetTimeManager(), new Cure::RuntimeVariableScope(pVariableScope), pResourceManager, 400, 3),
+	Cure::GameManager(Cure::GameTicker::GetTimeManager(), new Cure::RuntimeVariableScope(pVariableScope), pResourceManager, 400, 3, 3),
 	mUiManager(pUiManager),
 	mCollisionSoundManager(0),
 	mLightId(UiTbc::Renderer::INVALID_LIGHT),
@@ -219,13 +219,15 @@ void Game::UnlockLauncher()
 	mIsLaunching = false;
 }
 
-void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition, Cure::ContextObject* pObject1)
+void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
+	Cure::ContextObject* pExplosive, Cure::ContextObject* pTarget, TBC::PhysicsManager::BodyID pExplosiveBodyId, TBC::PhysicsManager::BodyID pTargetBodyId)
 {
-	mCollisionSoundManager->OnCollision(pForce, pTorque, pPosition, pObject1, mLevel, pObject1->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), 10000, true);
+	mCollisionSoundManager->OnCollision(pForce, pTorque, pPosition, pExplosive, mLevel, pExplosiveBodyId, 10000, true);
 
+	if (pTarget == mLevel)
 	{
-		// Stones and mud.
-		const int lParticleCount = 100;
+		// Stones and mud. More if hit ground, less otherwise.
+		const int lParticleCount = (mLevel->GetStructureGeometry((unsigned)0)->GetBodyId() == pTargetBodyId)? 100 : 10;
 		for (int i = 0; i < lParticleCount; ++i)
 		{
 			UiCure::Props* lPuff = new UiCure::Props(GetResourceManager(), _T("mud_particle_01"), mUiManager);
@@ -274,21 +276,35 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 	{
 		const Cure::ContextObject* lObject = x->second;
 		TBC::ChunkyPhysics* lPhysics = lObject->ContextObject::GetPhysics();
-		if (!lObject->IsLoaded() || !lPhysics || lPhysics->GetPhysicsType() == TBC::ChunkyPhysics::STATIC)
+		if (!lObject->IsLoaded() || !lPhysics)
 		{
 			continue;
 		}
-		Vector3DF v = lObject->GetPosition() - pPosition;
-		float d = v.GetLength();
-		v /= d;
-		d = (d < 0.5f)? 0.5f : d;
-		d *= 0.08f;
-		const float lMaxForceFactor = 2000.0f;
-		const float f = std::min(lMaxForceFactor, lMaxForceFactor / ::pow(d, 3.0f)) * lObject->GetMass();
-		v *= f;
-		v.z = f/5;
-		const TBC::ChunkyBoneGeometry* lGeometry = lPhysics->GetBoneGeometry(0);
-		GetPhysicsManager()->AddForce(lGeometry->GetBodyId(), v);
+		// Dynamics only get hit in the main body, while statics gets all their dynamic sub-bodies hit.
+		const int lBoneCount = (lPhysics->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC)? 1 : lPhysics->GetBoneCount();
+		for (int x = 0; x < lBoneCount; ++x)
+		{
+			const TBC::ChunkyBoneGeometry* lGeometry = lPhysics->GetBoneGeometry(x);
+			if (lGeometry->GetBodyId() == TBC::INVALID_BODY)
+			{
+				continue;
+			}
+			Vector3DF f = GetPhysicsManager()->GetBodyPosition(lGeometry->GetBodyId()) - pPosition;
+			float d = f.GetLength();
+			if (d > 50*3)
+			{
+				continue;
+			}
+			d = 1/d;
+			f *= d;
+			d *= 12;
+			d = d*d*d;
+			const float lMaxForceFactor = 2000.0f;
+			const float ff = lMaxForceFactor * lObject->GetMass() * std::min(1.0f, d);
+			f *= ff;
+			f.z = ff*0.2f;
+			GetPhysicsManager()->AddForce(lGeometry->GetBodyId(), f);
+		}
 	}
 }
 

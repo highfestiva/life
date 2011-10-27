@@ -221,7 +221,10 @@ def adjustnode(node):
         def getabsirot(self):
                 root = self.getphysmaster().getParent()
                 #print("getabsirot checking", root)
-                return root.gettransformto(None, "inverse_initial_r").inverse().decompose()[1]
+                ir = root.gettransformto(None, "inverse_initial_r").decompose()[1]
+                if root.flipjoints:
+                        ir = ir.rotate(math.pi, vec3(1,0,0))
+                return ir
         node.fix_attribute = types.MethodType(fix_attribute, node)
         node.get_fixed_attribute = types.MethodType(get_fixed_attribute, node)
         node.get_final_local_transform = types.MethodType(get_final_local_transform, node)

@@ -86,7 +86,8 @@ public:
 	float GetMuzzleVelocity() const;
 	bool IsLauncherLocked() const;
 	void UnlockLauncher();
-	void Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition, Cure::ContextObject* pObject1);
+	void Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
+		Cure::ContextObject* pExplosive, Cure::ContextObject* pTarget, TBC::PhysicsManager::BodyID pExplosiveBodyId, TBC::PhysicsManager::BodyID pTargetBodyId);
 
 	bool Render();
 

@@ -323,6 +323,7 @@ class GroupReader(DefaultMAReader):
                 xa, ya, za = (math.pi/2, 0, math.pi) if self.config["type"] == "dynamic" else (math.pi/2, 0, 0)
                 t.fix_attribute("ra", vec3(xa, ya, za))
                 t.fix_attribute("r", vec3(0,0,0))
+                t.flipjoints = (self.config["type"] != "dynamic")
 
                 o = t.get_fixed_attribute("t", optional=True, default=(0,0,0))
                 if vec3(o).length() > 1e-12:
@@ -567,8 +568,8 @@ class GroupReader(DefaultMAReader):
                         if v > 1:
                                 instancecount += 1
                                 #print("Got mesh instance:", k, v)
-                if len(group) >= 8 and instancecount == 0:
-                        print("%s: warning: has no mesh instances; highly unlikely! At least the wheels should be, right?" % self.basename)
+                if len(group) >= 25 and instancecount == 0:
+                        print("%s: warning: has no mesh instances (total of %i nodes); highly unlikely! At least the wheels should be, right?" % (self.basename, len(group)))
 
 
         def setphyspivot(self, group):

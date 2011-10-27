@@ -99,7 +99,7 @@ def _incremental_build_data(sourcedir):
 				real_fs += [f]
 		fs = real_fs
 		if not fs:
-			print("Converting %s as no converted files exist!" % (basename,))
+			#print("Converting %s as no converted files exist!" % (basename,))
 			_convertdata(ma)
 		for f in fs:
 			if filetime(f) < ft:

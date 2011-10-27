@@ -71,6 +71,10 @@ GameClientMasterTicker::GameClientMasterTicker(UiCure::GameUiManager* pUiManager
 	mSunlight(0)
 {
 	mSlaveArray.resize(4, 0);
+	mSlaveArray[0] = 0;
+	mSlaveArray[1] = 0;
+	mSlaveArray[2] = 0;
+	mSlaveArray[3] = 0;
 
 	UiLepra::DisplayManager::EnableScreensaver(false);
 
@@ -656,10 +660,10 @@ void GameClientMasterTicker::DeleteSlave(GameClientSlaveManager* pSlave, bool pA
 	}
 
 	ScopeLock lLock(&mLock);
-	assert(mSlaveArray[pSlave->GetSlaveIndex()]);
+	assert(mSlaveArray[pSlave->GetSlaveIndex()] == pSlave);
 	mSlaveArray[pSlave->GetSlaveIndex()] = 0;
 	delete (pSlave);
-	if (mConsole->GetGameManager() == pSlave)
+	if (mConsole && mConsole->GetGameManager() == pSlave)
 	{
 		mConsole->SetGameManager(0);
 	}
@@ -765,7 +769,7 @@ bool GameClientMasterTicker::Initialize()
 						}
 					}
 					mUiManager->InputTick();
-					lOk = (SystemManager::GetQuitRequest() <= 0);
+					//lOk = (SystemManager::GetQuitRequest() <= 0);
 
 					if (lCount == lStepCount)
 					{

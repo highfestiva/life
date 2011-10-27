@@ -26,7 +26,7 @@ namespace TBC
 class PhysicsManagerODE: public PhysicsManager
 {
 public:
-	PhysicsManagerODE(float pRadius, int pLevels);
+	PhysicsManagerODE(float pRadius, int pLevels, float pSensitivity);
 	virtual ~PhysicsManagerODE();
 
 	virtual bool InitCurrentThread();

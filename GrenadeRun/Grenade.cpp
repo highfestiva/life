@@ -152,7 +152,6 @@ void Grenade::OnForceApplied(TBC::PhysicsManager::ForceFeedbackListener* pOtherO
 	const Vector3DF& pForce, const Vector3DF& pTorque,
 	const Vector3DF& pPosition, const Vector3DF& pRelativeVelocity)
 {
-	pOtherObject;
 	pOwnBodyId;
 	pOtherBodyId;
 	pRelativeVelocity;
@@ -166,7 +165,8 @@ void Grenade::OnForceApplied(TBC::PhysicsManager::ForceFeedbackListener* pOtherO
 	UnlockLauncher();
 
 	GetManager()->PostKillObject(GetInstanceId());
-	((Game*)GetManager()->GetGameManager())->Detonate(pForce, pTorque, pPosition, this);
+	((Game*)GetManager()->GetGameManager())->Detonate(pForce, pTorque, pPosition,
+		this, (Cure::ContextObject*)pOtherObject, pOwnBodyId, pOtherBodyId);
 }
 
 void Grenade::LoadPlaySound3d(UiCure::UserSound3dResource* pSoundResource)
