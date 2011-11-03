@@ -751,6 +751,8 @@ void App::GetLauncherAngles(Cure::ContextObject* pAvatar1, Cure::ContextObject* 
 	const float lBetterPitch = pGuidePitch;
 	const float lBetterYaw = pGuideYaw;
 	GetBallisticData(lPosition1, lPosition2, lBetterPitch, pGuidePitch, lBetterYaw, pGuideYaw, lTime);
+	pGuidePitch = Math::Clamp(pGuidePitch, -PIF/2, 0.0f);
+	pGuideYaw = Math::Clamp(pGuideYaw, -PIF/2, PIF/2);
 }
 
 void App::GetBallisticData(const Vector3DF& pPosition1, const Vector3DF& pPosition2,
@@ -790,7 +792,7 @@ void App::GetBallisticData(const Vector3DF& pPosition1, const Vector3DF& pPositi
 		pTime = t;
 		const float vfwd = lYawVector.GetLength() / t;
 		pGuidePitch = -::atan(vfwd/vup);
-		pGuidePitch += (pGuidePitch-pPitch);	// Homebrew... seems to be working! :)
+		pGuidePitch += (pGuidePitch-pPitch);	// Homebrew... seems to be working somewhat! :)
 	}
 }
 
@@ -945,8 +947,8 @@ bool App::Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor)
 	}
 	switch (pKeyCode)
 	{
-		case UIKEY(W):		lAvatar2->SetEnginePower(0, +1*pFactor, 0);	break;
-		case UIKEY(S):		lAvatar2->SetEnginePower(0, -1*pFactor, 0);	break;
+		case UIKEY(W):		lAvatar2->SetEnginePower(0, -1*pFactor, 0);	break;
+		case UIKEY(S):		lAvatar2->SetEnginePower(0, +1*pFactor, 0);	break;
 		case UIKEY(A):		lAvatar2->SetEnginePower(1, -1*pFactor, 0);	break;
 		case UIKEY(D):		lAvatar2->SetEnginePower(1, +1*pFactor, 0);	break;
 		case UIKEY(UP):		lAvatar1->SetEnginePower(0, +1*pFactor, 0);	break;

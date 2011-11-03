@@ -289,7 +289,8 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 			{
 				continue;
 			}
-			Vector3DF f = GetPhysicsManager()->GetBodyPosition(lGeometry->GetBodyId()) - pPosition;
+			const Vector3DF lBodyCenter = GetPhysicsManager()->GetBodyPosition(lGeometry->GetBodyId());
+			Vector3DF f = lBodyCenter - pPosition;
 			float d = f.GetLength();
 			if (d > 50*3)
 			{
@@ -302,7 +303,7 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 			const float lMaxForceFactor = 2000.0f;
 			const float ff = lMaxForceFactor * lObject->GetMass() * std::min(1.0f, d);
 			f *= ff;
-			f.z = ff*0.2f;
+			f.z += ff*0.2f;
 			GetPhysicsManager()->AddForce(lGeometry->GetBodyId(), f);
 		}
 	}
