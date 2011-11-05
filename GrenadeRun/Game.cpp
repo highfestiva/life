@@ -282,6 +282,7 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 			continue;
 		}
 		// Dynamics only get hit in the main body, while statics gets all their dynamic sub-bodies hit.
+		const Vector3DF lEpicenter = pPosition + Vector3DF(0, 0, -1.5f);
 		const int lBoneCount = (lPhysics->GetPhysicsType() == TBC::ChunkyPhysics::DYNAMIC)? 1 : lPhysics->GetBoneCount();
 		for (int x = 0; x < lBoneCount; ++x)
 		{
@@ -291,7 +292,7 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 				continue;
 			}
 			const Vector3DF lBodyCenter = GetPhysicsManager()->GetBodyPosition(lGeometry->GetBodyId());
-			Vector3DF f = lBodyCenter - pPosition;
+			Vector3DF f = lBodyCenter - lEpicenter;
 			float d = f.GetLength();
 			if (d > 50*3)
 			{
@@ -303,8 +304,11 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 			d = d*d*d;
 			const float lMaxForceFactor = 2000.0f;
 			const float ff = lMaxForceFactor * lObject->GetMass() * std::min(1.0f, d);
+			if (f.z <= 0.1f)
+			{
+				f.z += 0.3f;
+			}
 			f *= ff;
-			f.z += ff*0.2f;
 			GetPhysicsManager()->AddForce(lGeometry->GetBodyId(), f);
 		}
 	}
