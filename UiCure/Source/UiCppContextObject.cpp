@@ -31,6 +31,7 @@ CppContextObject::CppContextObject(Cure::ResourceManager* pResourceManager, cons
 	mEnableUi(true),
 	mAllowRootShadow(true),
 	mEnablePixelShader(true),
+	mEnableMeshSlide(true),
 	mMeshLoadCount(0),
 	mTextureLoadCount(0),
 	mMeshSlideMode(MESH_SLIDE_STOP)
@@ -75,6 +76,11 @@ void CppContextObject::DisableRootShadow()
 void CppContextObject::EnablePixelShader(bool pEnable)
 {
 	mEnablePixelShader = pEnable;
+}
+
+void CppContextObject::EnableMeshSlide(bool pEnable)
+{
+	mEnableMeshSlide = pEnable;
 }
 
 
@@ -139,6 +145,11 @@ void CppContextObject::UiMove()
 				mLog.Warningf(_T("Physical body for %s not loaded!"), lResource->GetName().c_str());
 				continue;
 			}
+			if (!mEnableMeshSlide && mPhysics->GetPhysicsType() == TBC::ChunkyPhysics::STATIC && mPhysics->GetBodyType(lGeometry) == TBC::PhysicsManager::STATIC)
+			{
+				// Forget it, we're not sliding static meshes.
+				continue;
+			}
 			mManager->GetGameManager()->GetPhysicsManager()->GetBodyTransform(lGeometry->GetBodyId(), lPhysicsTransform);
 
 			if (mMeshSlideMode == MESH_SLIDE_START)
@@ -200,6 +211,25 @@ void CppContextObject::UiMove()
 void CppContextObject::ActivateLerp()
 {
 	mMeshSlideMode = MESH_SLIDE_START;
+}
+
+
+
+TBC::GeometryBase* CppContextObject::GetMesh(int pIndex) const
+{
+	if (pIndex < (int)mMeshResourceArray.size())
+	{
+		UserGeometryReferenceResource* lResource = mMeshResourceArray[pIndex];
+		if (lResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
+		{
+			return (lResource->GetRamData());
+		}
+	}
+	else
+	{
+		assert(false);
+	}
+	return (0);
 }
 
 
@@ -323,23 +353,6 @@ const TBC::ChunkyClass* CppContextObject::GetClass() const
 	if (mUiClassResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
 		return (mUiClassResource->GetRamData());
-	}
-	return (0);
-}
-
-TBC::GeometryBase* CppContextObject::GetMesh(int pIndex) const
-{
-	if (pIndex < (int)mMeshResourceArray.size())
-	{
-		UserGeometryReferenceResource* lResource = mMeshResourceArray[pIndex];
-		if (lResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
-		{
-			return (lResource->GetRamData());
-		}
-	}
-	else
-	{
-		assert(false);
 	}
 	return (0);
 }

@@ -4,6 +4,8 @@
 
 
 
+#pragma once
+
 #include "../Cure/Include/GameManager.h"
 #include "../UiTbc/Include/UiRenderer.h"
 

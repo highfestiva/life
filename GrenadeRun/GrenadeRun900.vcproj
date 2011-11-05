@@ -529,6 +529,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Ctf.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Game.cpp"
 				>
 			</File>
@@ -554,6 +558,10 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93959380-89BD-4b04-88EB-625FBEBFB52E}"
 			>
+			<File
+				RelativePath=".\Ctf.h"
+				>
+			</File>
 			<File
 				RelativePath=".\Game.h"
 				>

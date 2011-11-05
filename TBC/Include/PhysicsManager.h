@@ -29,7 +29,7 @@ public:
 
 	enum BodyType
 	{
-		STATIC = 0,	// Static world object.
+		STATIC = 1,	// Static world object.
 		DYNAMIC,	// Dynamic object within the world.
 	};
 

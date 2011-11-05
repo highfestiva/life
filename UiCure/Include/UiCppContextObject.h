@@ -41,12 +41,15 @@ public:
 	void EnableUi(bool pEnable);
 	void DisableRootShadow();
 	void EnablePixelShader(bool pEnable);
+	void EnableMeshSlide(bool pEnable);
 
 	virtual void StartLoading();
 
 	void OnTick();
 	virtual void UiMove();
 	void ActivateLerp();
+
+	TBC::GeometryBase* GetMesh(int pIndex) const;
 
 	void DebugDrawPrimitive(DebugPrimitive pPrimitive);
 
@@ -60,7 +63,6 @@ protected:
 
 	GameUiManager* GetUiManager() const;
 	virtual const TBC::ChunkyClass* GetClass() const;
-	TBC::GeometryBase* GetMesh(int pIndex) const;
 
 	void OnLoadClass(UserClassResource* pClassResource);
 	virtual void LoadTextures();
@@ -79,6 +81,7 @@ protected:
 	bool mEnableUi;
 	bool mAllowRootShadow;
 	bool mEnablePixelShader;
+	bool mEnableMeshSlide;
 	MeshArray mMeshResourceArray;
 	size_t mMeshLoadCount;
 	TextureArray mTextureResourceArray;

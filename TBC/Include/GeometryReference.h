@@ -28,6 +28,7 @@ public:
 
 	const TransformationF& GetOffsetTransformation() const;
 	void SetOffsetTransformation(const TransformationF& pOffset);
+	void AddOffset(const Vector3DF& pOffset);
 
 	// Overloads from GeometryBase.
 	const TransformationF& GetTransformation();

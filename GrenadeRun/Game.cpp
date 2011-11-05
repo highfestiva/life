@@ -15,6 +15,7 @@
 #include "../UiCure/Include/UiMachine.h"
 #include "../UiCure/Include/UiProps.h"
 #include "../UiCure/Include/UiGameUiManager.h"
+#include "Ctf.h"
 #include "Grenade.h"
 #include "Spawner.h"
 
@@ -508,22 +509,14 @@ bool Game::InitializeTerrain()
 
 Cure::ContextObject* Game::CreateLogicHandler(const str& pType) const
 {
-	/*if (pType == _T("trig_elevator"))
-	{
-		return new Elevator(GetContext());
-	}
-	else*/ if (pType == _T("spawner"))
+	if (pType == _T("spawner"))
 	{
 		return new Spawner(GetContext());
 	}
-	/*else if (pType == _T("real_time_ratio"))
+	else if (pType == _T("trig_ctf"))
 	{
-		return new BulletTime(GetContext());
+		return new Ctf(GetContext());
 	}
-	else if (pType == _T("race_timer"))
-	{
-		return new RaceTimer(GetContext());
-	}*/
 	assert(false);
 	return (0);
 }

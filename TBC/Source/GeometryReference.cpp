@@ -42,6 +42,12 @@ void GeometryReference::SetOffsetTransformation(const TransformationF& pOffset)
 	mOffset = pOffset;
 }
 
+void GeometryReference::AddOffset(const Vector3DF& pOffset)
+{
+	SetFlag(TRANSFORMATION_CHANGED | REF_TRANSFORMATION_CHANGED);
+	mOffset.GetPosition() += pOffset;
+}
+
 const TransformationF& GeometryReference::GetTransformation()
 {
 	if (!CheckFlag(TRANSFORMATION_CHANGED | REF_TRANSFORMATION_CHANGED))

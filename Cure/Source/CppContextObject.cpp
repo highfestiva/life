@@ -167,6 +167,11 @@ bool CppContextObject::TryComplete()
 
 	if (mPhysicsResource->GetLoadState() == RESOURCE_LOAD_COMPLETE)
 	{
+		for (ChildList::iterator x = mChildList.begin(); x != mChildList.end(); ++x)
+		{
+			CppContextObject* lChild = (CppContextObject*)*x;
+			lChild->TryComplete();
+		}
 		if (GetPhysics() && GetPhysics()->GetEngineCount() > 0 && GetManager())
 		{
 			GetManager()->EnableMicroTickCallback(this);	// Used for engine force applications each micro frame.
