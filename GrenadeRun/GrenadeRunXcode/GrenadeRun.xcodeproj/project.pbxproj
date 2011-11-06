@@ -10,6 +10,9 @@
 		1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; };
 		1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF5F4DF0D08C38300B7A737 /* UIKit.framework */; };
 		288765FD0DF74451002DB57D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 288765FC0DF74451002DB57D /* CoreGraphics.framework */; };
+		B106D4C11467342800E009B8 /* Cutie.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B106D4C01467342800E009B8 /* Cutie.cpp */; };
+		B106E0AE146734DD00E009B8 /* Ctf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B106E0AD146734DD00E009B8 /* Ctf.cpp */; };
+		B106E0B2146734F300E009B8 /* Spawner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B106E0B1146734F300E009B8 /* Spawner.cpp */; };
 		B15F793913FC59DE00E01A90 /* ConsoleManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F791E13FC59DE00E01A90 /* ConsoleManager.cpp */; };
 		B15F793A13FC59DE00E01A90 /* ContextManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F791F13FC59DE00E01A90 /* ContextManager.cpp */; };
 		B15F793B13FC59DE00E01A90 /* ContextObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B15F792013FC59DE00E01A90 /* ContextObject.cpp */; };
@@ -471,6 +474,9 @@
 		1D6058910D05DD3D006BFB54 /* GrenadeRun.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GrenadeRun.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DF5F4DF0D08C38300B7A737 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		288765FC0DF74451002DB57D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		B106D4C01467342800E009B8 /* Cutie.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Cutie.cpp; sourceTree = "<group>"; };
+		B106E0AD146734DD00E009B8 /* Ctf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Ctf.cpp; sourceTree = "<group>"; };
+		B106E0B1146734F300E009B8 /* Spawner.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Spawner.cpp; sourceTree = "<group>"; };
 		B15F791E13FC59DE00E01A90 /* ConsoleManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ConsoleManager.cpp; path = ../../Cure/Source/ConsoleManager.cpp; sourceTree = SOURCE_ROOT; };
 		B15F791F13FC59DE00E01A90 /* ContextManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ContextManager.cpp; path = ../../Cure/Source/ContextManager.cpp; sourceTree = SOURCE_ROOT; };
 		B15F792013FC59DE00E01A90 /* ContextObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ContextObject.cpp; path = ../../Cure/Source/ContextObject.cpp; sourceTree = SOURCE_ROOT; };
@@ -1354,6 +1360,9 @@
 		B19A146913A122DE0051A61C /* GrenadeRun */ = {
 			isa = PBXGroup;
 			children = (
+				B106E0B1146734F300E009B8 /* Spawner.cpp */,
+				B106E0AD146734DD00E009B8 /* Ctf.cpp */,
+				B106D4C01467342800E009B8 /* Cutie.cpp */,
 				B15F798713FC5E6000E01A90 /* Game.cpp */,
 				B15F798813FC5E6000E01A90 /* Grenade.cpp */,
 				B1B489A313F9BE4A0047C78A /* GrenadeRun_Prefix.pch */,
@@ -2714,6 +2723,9 @@
 				B15F798913FC5E6000E01A90 /* Game.cpp in Sources */,
 				B15F798A13FC5E6000E01A90 /* Grenade.cpp in Sources */,
 				B1BC733D140EEAEE003F70F3 /* MacLog.mm in Sources */,
+				B106D4C11467342800E009B8 /* Cutie.cpp in Sources */,
+				B106E0AE146734DD00E009B8 /* Ctf.cpp in Sources */,
+				B106E0B2146734F300E009B8 /* Spawner.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

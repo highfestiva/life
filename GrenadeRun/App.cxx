@@ -915,7 +915,7 @@ void App::DrawInfoTexts() const
 	for (size_t x = 0; x < mInfoTextArray.size(); ++x)
 	{
 		const InfoTextData& lData = mInfoTextArray[x];
-		PrintText(lData.mText, -lData.mAngle, cx, cy);
+		PrintText(lData.mText, -lData.mAngle, lData.mCoord.x, lData.mCoord.y);
 	}
 
 	mUiManager->GetPainter()->SetColor(c, 0);
