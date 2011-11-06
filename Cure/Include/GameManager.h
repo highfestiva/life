@@ -65,6 +65,7 @@ public:
 	Lock* GetTickLock() const;
 
 	RuntimeVariableScope* GetVariableScope() const;
+	void SetVariableScope(RuntimeVariableScope* pScope);
 	ResourceManager* GetResourceManager() const;
 	ContextManager* GetContext() const;
 	const TimeManager* GetTimeManager() const;

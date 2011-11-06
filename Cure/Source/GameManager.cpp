@@ -213,6 +213,11 @@ RuntimeVariableScope* GameManager::GetVariableScope() const
 	return (mVariableScope);
 }
 
+void GameManager::SetVariableScope(RuntimeVariableScope* pScope)
+{
+	mVariableScope = pScope;
+}
+
 ResourceManager* GameManager::GetResourceManager() const
 {
 	return (mResource);

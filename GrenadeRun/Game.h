@@ -33,6 +33,7 @@ namespace GrenadeRun
 
 
 using namespace Lepra;
+class Cutie;
 
 
 
@@ -90,6 +91,7 @@ public:
 	void UnlockLauncher();
 	void Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
 		Cure::ContextObject* pExplosive, Cure::ContextObject* pTarget, TBC::PhysicsManager::BodyID pExplosiveBodyId, TBC::PhysicsManager::BodyID pTargetBodyId);
+	void OnCapture();	// CTF
 
 	bool Render();
 
@@ -119,7 +121,7 @@ private:
 	UiCure::CollisionSoundManager* mCollisionSoundManager;
 	UiTbc::Renderer::LightID mLightId;
 	UiCure::CppContextObject* mLevel;
-	UiCure::CppContextObject* mVehicle;
+	Cutie* mVehicle;
 	UiCure::CppContextObject* mLauncher;
 	Vector3DF mVehicleCamPos;
 	bool mIsLaunching;

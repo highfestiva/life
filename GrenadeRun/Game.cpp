@@ -12,10 +12,11 @@
 #include "../Lepra/Include/Random.h"
 #include "../TBC/Include/PhysicsEngine.h"
 #include "../UiCure/Include/UiCollisionSoundManager.h"
-#include "../UiCure/Include/UiMachine.h"
-#include "../UiCure/Include/UiProps.h"
 #include "../UiCure/Include/UiGameUiManager.h"
+#include "../UiCure/Include/UiProps.h"
+#include "../UiCure/Include/UiRuntimeVariableName.h"
 #include "Ctf.h"
+#include "Cutie.h"
 #include "Grenade.h"
 #include "Spawner.h"
 
@@ -34,7 +35,7 @@ namespace GrenadeRun
 
 Game::Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager):
 	Cure::GameTicker(),
-	Cure::GameManager(Cure::GameTicker::GetTimeManager(), new Cure::RuntimeVariableScope(pVariableScope), pResourceManager, 400, 3, 3),
+	Cure::GameManager(Cure::GameTicker::GetTimeManager(), pVariableScope, pResourceManager, 400, 3, 3),
 	mUiManager(pUiManager),
 	mCollisionSoundManager(0),
 	mLightId(UiTbc::Renderer::INVALID_LIGHT),
@@ -57,6 +58,7 @@ Game::~Game()
 	delete mCollisionSoundManager;
 	mCollisionSoundManager = 0;
 	mUiManager = 0;
+	SetVariableScope(0);	// Not owned by us.
 }
 
 bool Game::Initialize()
@@ -64,6 +66,7 @@ bool Game::Initialize()
 	bool lOk = true;
 	if (lOk)
 	{
+		CURE_RTVAR_SET(GetVariableScope(), "Game.Winner", -1);
 		lOk = InitializeTerrain();
 	}
 	if (lOk)
@@ -75,7 +78,7 @@ bool Game::Initialize()
 	}
 	if (lOk)
 	{
-		mVehicle = (UiCure::CppContextObject*)Parent::CreateContextObject(_T("cutie"), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+		mVehicle = (Cutie*)Parent::CreateContextObject(_T("cutie"), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 		lOk = (mVehicle != 0);
 		assert(lOk);
 		if (lOk)
@@ -125,7 +128,7 @@ bool Game::Tick()
 		mLauncherYaw -= mLauncher->ContextObject::GetPhysics()->GetEngine(1)->GetLerpThrottle(0.2f, 0.2f) * 0.01f;
 		mLauncherPitch -= mLauncher->ContextObject::GetPhysics()->GetEngine(0)->GetLerpThrottle(0.2f, 0.2f) * 0.01f;
 		mLauncherYaw = Math::Clamp(mLauncherYaw, -PIF/2, PIF/2);
-		mLauncherPitch = Math::Clamp(mLauncherPitch, -PIF/2*2/3, -PIF/90);
+		mLauncherPitch = Math::Clamp(mLauncherPitch, -PIF/2*0.6f, -PIF/90);
 		lQuaternion.RotateAroundWorldZ(mLauncherYaw);
 		lQuaternion.RotateAroundOwnX(mLauncherPitch);
 		mLauncher->SetRootOrientation(lQuaternion);
@@ -302,16 +305,30 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 			f *= d;
 			d *= 12;
 			d = d*d*d;
+			d = std::min(1.0f, d);
 			const float lMaxForceFactor = 2000.0f;
-			const float ff = lMaxForceFactor * lObject->GetMass() * std::min(1.0f, d);
+			const float ff = lMaxForceFactor * lObject->GetMass() * d;
 			if (f.z <= 0.1f)
 			{
 				f.z += 0.3f;
 			}
 			f *= ff;
 			GetPhysicsManager()->AddForce(lGeometry->GetBodyId(), f);
+			if (lObject == mVehicle)
+			{
+				mVehicle->DrainHealth(d * 0.7f);
+				if (mVehicle->GetHealth() <= 0)
+				{
+					CURE_RTVAR_SET(GetVariableScope(), "Game.Winner", 1);
+				}
+			}
 		}
 	}
+}
+
+void Game::OnCapture()
+{
+	CURE_RTVAR_SET(GetVariableScope(), "Game.Winner", 0);
 }
 
 bool Game::Render()
@@ -487,6 +504,10 @@ Cure::ContextObject* Game::CreateContextObject(const str& pClassId) const
 	if (strutil::StartsWith(pClassId, _T("grenade")))
 	{
 		return new Grenade(GetResourceManager(), pClassId, mUiManager, GetMuzzleVelocity());
+	}
+	else if (strutil::StartsWith(pClassId, _T("cutie")))
+	{
+		return new Cutie(GetResourceManager(), pClassId, mUiManager);
 	}
 	return new UiCure::Machine(GetResourceManager(), pClassId, mUiManager);
 }

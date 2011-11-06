@@ -12,6 +12,8 @@ Space ship flight. Fly though predefined map, steer using swipe left/right/up/do
 
 Spider Tank. Two thumbs steering.
 
+MMO space flight. Ships parks in "bee hives", LoD the whole world. Fly, shoot. Guild vs. guild.
+
 Single player vehicle simulation puzzle. Sorta like light-Bot, but in more dimentsions and with vehicles. The steering is a chart with different input (at interval times) and a slider next to each which determins "how much". Also add a road sign selector at the top of the chart (iPhone-like slider left/right?) where you can pick your vechile. Start/stop button. Done!
 
 Playing a Matrix-style octopus! Flying quickly, swirling arms, landing hard, climbing and flying away again.

@@ -25,6 +25,8 @@
 #include "../UiLepra/Include/UiSoundStream.h"
 #include "../UiTBC/Include/GUI/UiButton.h"
 #include "../UiTBC/Include/GUI/UiDesktopWindow.h"
+#include "../UiTBC/Include/UiFontManager.h"
+#include "Cutie.h"
 #include "Game.h"
 
 
@@ -67,7 +69,8 @@ private:
 	void DrawRoundedPolygon(float x, float y, float pRadius, float pAngle, int pCorners, const Color& pColor) const;
 	void DrawCircle(float x, float y, float pRadius) const;
 	void DrawCircle(float x, float y, float pRadius, const Color& pColor) const;
-	void DrawForceMeter(int x, int y, float pAngle, float pForce, bool pAreEqual) const;
+	void DrawForceMeter(int x, int y, float pAngle, float pForce, bool pSidesAreEqual) const;
+	void DrawHealthMeter(int x, int y, float pAngle, float pSize, float pHealth) const;
 	void GetLauncherAngles(Cure::ContextObject* pAvatar1, Cure::ContextObject* pAvatar2,
 		float& pPitch, float& pGuidePitch, float& pYaw, float& pGuideYaw) const;
 	void GetBallisticData(const Vector3DF& pPosition1, const Vector3DF& pPosition2,
@@ -75,6 +78,7 @@ private:
 	void DrawBarrelIndicator(float x, float y, float pAngle, float pLength, float pBaseWidth, bool pIsArrow) const;
 	void InfoText(int pPlayer, const str& pInfo, float pAngle, float dx = 0, float dy = 0) const;
 	void DrawInfoTexts() const;
+	void PrintText(const str& pText, float pAngle, int pCenterX, int pCenterY) const;
 	void Layout();
 
 	virtual void Suspend();
@@ -144,6 +148,7 @@ private:
 	mutable HiResTimer mPlayer2LastTouch;
 	mutable HiResTimer mPlayer1TouchDelay;
 	mutable HiResTimer mPlayer2TouchDelay;
+	UiTbc::FontManager::FontId mBigFontId;
 
 	LOG_CLASS_DECLARE();
 };
@@ -178,7 +183,8 @@ App::App(const strutil::strvec& pArgumentList):
 	mVariableScope(0),
 	mAverageLoopTime(1.0/FPS),
 	mDoLayout(true),
-	mAngleTime(0)
+	mAngleTime(0),
+	mBigFontId(UiTbc::FontManager::INVALID_FONTID)
 {
 	mApp = this;
 }
@@ -207,10 +213,8 @@ bool App::Open()
 	const int lDisplayWidth = lSize.height;
 	const int lDisplayHeight = lSize.width;
 #else // !iOS
-//	const int lDisplayWidth = 760;
-//	const int lDisplayHeight = 524;
-	const int lDisplayWidth = 485;
-	const int lDisplayHeight = 340;
+	const int lDisplayWidth = 760;
+	const int lDisplayHeight = 524;
 #endif // iOS/!iOS
 	int lDisplayBpp = 0;
 	int lDisplayFrequency = 0;
@@ -289,6 +293,10 @@ bool App::Open()
 
 		mPlayerSplitter = new UiTbc::RectComponent(BLACK, _T("Splitter"));
 		lDesktopWindow->AddChild(mPlayerSplitter);
+	}
+	if (lOk)
+	{
+		mBigFontId = mUiManager->GetFontManager()->QueryAddFont(_T("Helvetica"), 24);
 	}
 	if (lOk)
 	{
@@ -519,6 +527,30 @@ void App::DrawHud() const
 	const float m = BUTTON_MARGIN;
 	const float m2 = m*2;
 
+	int lWinner;
+	CURE_RTVAR_GET(lWinner, =, mVariableScope, "Game.Winner", -1);
+#ifdef LEPRA_IOS
+	const float lAngle = PIF/2;
+#else // Computer.
+	const float lAngle = 0;
+#endif // iOS / computer
+	if (lWinner >= 0)
+	{
+		UiTbc::FontManager::FontId lFontId = mUiManager->GetFontManager()->GetActiveFontId();
+		mUiManager->GetFontManager()->SetActiveFont(mBigFontId);
+		if (lWinner == 0)
+		{
+			PrintText(_T("WIN!"),   -lAngle, (int)(w*1/4), (int)(h/2));
+			PrintText(_T("LOOSE!"), +lAngle, (int)(w*3/4), (int)(h/2));
+		}
+		else if (lWinner == 1)
+		{
+			PrintText(_T("LOOSE!"), -lAngle, (int)(w*1/4), (int)(h/2));
+			PrintText(_T("WIN!"),   +lAngle, (int)(w*3/4), (int)(h/2));
+		}
+		mUiManager->GetFontManager()->SetActiveFont(lFontId);
+	}
+
 #ifdef LEPRA_IOS
 	// Left player.
 	DrawCircle(m+lButtonWidth,			m+lButtonRadius,	lButtonRadius-2);	// Up/down.
@@ -552,6 +584,9 @@ void App::DrawHud() const
 	{
 		return;
 	}
+
+	Cutie* lCutie = (Cutie*)lAvatar1;
+	DrawHealthMeter((int)w/2, (int)h/2, PIF, h/2, lCutie->GetHealth());
 
 #ifdef LEPRA_IOS
 	float lForce;
@@ -688,7 +723,7 @@ void App::DrawCircle(float x, float y, float pRadius, const Color& pColor) const
 	mUiManager->GetPainter()->DrawFan(lCoords, true);
 }
 
-void App::DrawForceMeter(int x, int y, float pAngle, float pForce, bool pAreEqual) const
+void App::DrawForceMeter(int x, int y, float pAngle, float pForce, bool pSidesAreEqual) const
 {
 	mPenX = (float)x;
 	mPenY = (float)y;
@@ -699,7 +734,7 @@ void App::DrawForceMeter(int x, int y, float pAngle, float pForce, bool pAreEqua
 	{
 		pForce = -pForce;
 		pAngle += PIF;
-		if (!pAreEqual)
+		if (!pSidesAreEqual)
 		{
 			lTargetColor = BLUE;
 		}
@@ -733,6 +768,38 @@ void App::DrawForceMeter(int x, int y, float pAngle, float pForce, bool pAreEqua
 		{
 			lCurrentForce += lForceStep;
 		}
+	}
+}
+
+void App::DrawHealthMeter(int x, int y, float pAngle, float pSize, float pHealth) const
+{
+	Color lStartColor = RED;
+	Color lEndColor = GREEN;
+	const int lBarCount = 19;
+	const int lBarHeight = (int)(pSize/lBarCount*0.5f);
+	const int lBarWidth = BUTTON_WIDTH;
+	const float lHealthStep = 1.0f/lBarCount - 0.01f;
+	float lCurrentHealth = 0;
+	const int lXStep = -(int)(::sin(pAngle)*lBarHeight*2);
+	const int lYStep = -(int)(::cos(pAngle)*lBarHeight*2);
+	const bool lXIsMain = ::abs(lXStep) >= ::abs(lYStep);
+	x -= (int)(lXStep * lBarCount*0.5f);
+	y -= (int)(lYStep * lBarCount*0.5f);
+	for (int i = 0; i < lBarCount && lCurrentHealth < pHealth; ++i)
+	{
+		const Color c(lStartColor, lEndColor, lCurrentHealth);
+		mUiManager->GetPainter()->SetColor(c);
+		if (lXIsMain)
+		{
+			mUiManager->GetPainter()->FillRect(x, y-lBarWidth/2, x+lBarHeight, y+lBarWidth/2);
+		}
+		else
+		{
+			mUiManager->GetPainter()->FillRect(x-lBarWidth/2, y, x+lBarWidth/2, y+lBarHeight);
+		}
+		x += lXStep;
+		y += lYStep;
+		lCurrentHealth += lHealthStep;
 	}
 }
 
@@ -844,27 +911,29 @@ void App::DrawInfoTexts() const
 #ifdef LEPRA_IOS
 	const Color c = mUiManager->GetPainter()->GetColor(0);
 	mUiManager->GetPainter()->SetColor(mInfoTextColor, 0);
-	::glMatrixMode(GL_PROJECTION);
 
 	for (size_t x = 0; x < mInfoTextArray.size(); ++x)
 	{
 		const InfoTextData& lData = mInfoTextArray[x];
-		const int w = mUiManager->GetPainter()->GetStringWidth(lData.mText);
-		const int h = mUiManager->GetPainter()->GetFontHeight();
-		const float lAngle = -lData.mAngle;
-		::glPushMatrix();
-		::glRotatef(lAngle*180/PIF, 0, 0, 1);
-		const int cx = (int)(lData.mCoord.x*cos(lAngle) + lData.mCoord.y*sin(lAngle) - w/2);
-		const int cy = (int)(lData.mCoord.y*cos(lAngle) - lData.mCoord.x*sin(lAngle) - h/2);
-		mUiManager->GetPainter()->PrintText(lData.mText, cx, cy);
-		::glPopMatrix();
+		PrintText(lData.mText, -lData.mAngle, cx, cy);
 	}
 
-	::glMatrixMode(GL_MODELVIEW);
 	mUiManager->GetPainter()->SetColor(c, 0);
 #endif // iOS
 
 	mInfoTextArray.clear();
+}
+
+void App::PrintText(const str& pText, float pAngle, int pCenterX, int pCenterY) const
+{
+	::glMatrixMode(GL_PROJECTION);
+	::glPushMatrix();
+	::glRotatef(pAngle*180/PIF, 0, 0, 1);
+	const int w = mUiManager->GetPainter()->GetStringWidth(pText);
+	const int h = mUiManager->GetPainter()->GetFontHeight();
+	mUiManager->GetPainter()->PrintText(pText, pCenterX-w/2, pCenterY-h/2);
+	::glPopMatrix();
+	::glMatrixMode(GL_MODELVIEW);
 }
 
 

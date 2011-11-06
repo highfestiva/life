@@ -78,6 +78,7 @@ void Ctf::OnTick()
 		if ((mFlagTop - mFlagMesh->GetOffsetTransformation().GetPosition()).Dot(mCatchingFlagVelocity) <= 0)
 		{
 			mCatchingFlagVelocity.Set(0, 0, 0);
+			((Game*)GetManager()->GetGameManager())->OnCapture();
 		}
 	}
 	else
