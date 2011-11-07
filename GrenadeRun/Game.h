@@ -92,6 +92,7 @@ public:
 	void Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
 		Cure::ContextObject* pExplosive, Cure::ContextObject* pTarget, TBC::PhysicsManager::BodyID pExplosiveBodyId, TBC::PhysicsManager::BodyID pTargetBodyId);
 	void OnCapture();	// CTF
+	int GetWinnerIndex() const;
 
 	bool Render();
 
@@ -127,6 +128,7 @@ private:
 	bool mIsLaunching;
 	float mLauncherYaw;
 	float mLauncherPitch;
+	int mWinnerIndex;
 };
 
 

@@ -31,6 +31,7 @@
 
 
 
+//#define LEPRA_IOS_LnF
 #define UIKEY(name)	UiLepra::InputManager::IN_KBD_##name
 #define FPS		20
 #define BUTTON_WIDTH	40
@@ -244,7 +245,7 @@ bool App::Open()
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_SOUND_ROLLOFF, 0.7);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_SOUND_DOPPLER, 1.0);
 
-#ifndef LEPRA_IOS
+#ifndef LEPRA_IOS_LnF
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_SOUND_ROLLOFF, 0.5);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLETRILINEARFILTERING, true);
 	CURE_RTVAR_SET(mVariableScope, RTVAR_UI_3D_ENABLEMIPMAPPING, true);
@@ -296,7 +297,9 @@ bool App::Open()
 	}
 	if (lOk)
 	{
+		UiTbc::FontManager::FontId lDefaultFontId = mUiManager->GetFontManager()->GetActiveFontId();
 		mBigFontId = mUiManager->GetFontManager()->QueryAddFont(_T("Helvetica"), 24);
+		mUiManager->GetFontManager()->SetActiveFont(lDefaultFontId);
 	}
 	if (lOk)
 	{
@@ -527,9 +530,8 @@ void App::DrawHud() const
 	const float m = BUTTON_MARGIN;
 	const float m2 = m*2;
 
-	int lWinner;
-	CURE_RTVAR_GET(lWinner, =, mVariableScope, "Game.Winner", -1);
-#ifdef LEPRA_IOS
+	const int lWinner = mGame->GetWinnerIndex();
+#ifdef LEPRA_IOS_LnF
 	const float lAngle = PIF/2;
 #else // Computer.
 	const float lAngle = 0;
@@ -540,18 +542,22 @@ void App::DrawHud() const
 		mUiManager->GetFontManager()->SetActiveFont(mBigFontId);
 		if (lWinner == 0)
 		{
+			mUiManager->GetPainter()->SetColor(GREEN, 0);
 			PrintText(_T("WIN!"),   -lAngle, (int)(w*1/4), (int)(h/2));
+			mUiManager->GetPainter()->SetColor(RED, 0);
 			PrintText(_T("LOOSE!"), +lAngle, (int)(w*3/4), (int)(h/2));
 		}
 		else if (lWinner == 1)
 		{
+			mUiManager->GetPainter()->SetColor(RED, 0);
 			PrintText(_T("LOOSE!"), -lAngle, (int)(w*1/4), (int)(h/2));
+			mUiManager->GetPainter()->SetColor(GREEN, 0);
 			PrintText(_T("WIN!"),   +lAngle, (int)(w*3/4), (int)(h/2));
 		}
 		mUiManager->GetFontManager()->SetActiveFont(lFontId);
 	}
 
-#ifdef LEPRA_IOS
+#ifdef LEPRA_IOS_LnF
 	// Left player.
 	DrawCircle(m+lButtonWidth,			m+lButtonRadius,	lButtonRadius-2);	// Up/down.
 	InfoText(1, _T("Throttle/brake"), 0, 14, 0);
@@ -588,7 +594,7 @@ void App::DrawHud() const
 	Cutie* lCutie = (Cutie*)lAvatar1;
 	DrawHealthMeter((int)w/2, (int)h/2, PIF, h/2, lCutie->GetHealth());
 
-#ifdef LEPRA_IOS
+#ifdef LEPRA_IOS_LnF
 	float lForce;
 	const TBC::PhysicsEngine* lGas;
 	const TBC::PhysicsEngine* lBrakes;
@@ -778,7 +784,7 @@ void App::DrawHealthMeter(int x, int y, float pAngle, float pSize, float pHealth
 	const int lBarCount = 19;
 	const int lBarHeight = (int)(pSize/lBarCount*0.5f);
 	const int lBarWidth = BUTTON_WIDTH;
-	const float lHealthStep = 1.0f/lBarCount - 0.01f;
+	const float lHealthStep = 1.0f/lBarCount - 0.004f;
 	float lCurrentHealth = 0;
 	const int lXStep = -(int)(::sin(pAngle)*lBarHeight*2);
 	const int lYStep = -(int)(::cos(pAngle)*lBarHeight*2);
@@ -908,14 +914,14 @@ void App::InfoText(int pPlayer, const str& pInfo, const float pAngle, float dx, 
 
 void App::DrawInfoTexts() const
 {
-#ifdef LEPRA_IOS
+#ifdef LEPRA_IOS_LnF
 	const Color c = mUiManager->GetPainter()->GetColor(0);
 	mUiManager->GetPainter()->SetColor(mInfoTextColor, 0);
 
 	for (size_t x = 0; x < mInfoTextArray.size(); ++x)
 	{
 		const InfoTextData& lData = mInfoTextArray[x];
-		PrintText(lData.mText, -lData.mAngle, lData.mCoord.x, lData.mCoord.y);
+		PrintText(lData.mText, -lData.mAngle, (int)lData.mCoord.x, (int)lData.mCoord.y);
 	}
 
 	mUiManager->GetPainter()->SetColor(c, 0);
@@ -929,9 +935,11 @@ void App::PrintText(const str& pText, float pAngle, int pCenterX, int pCenterY) 
 	::glMatrixMode(GL_PROJECTION);
 	::glPushMatrix();
 	::glRotatef(pAngle*180/PIF, 0, 0, 1);
+	const int cx = (int)(pCenterX*cos(pAngle) + pCenterY*sin(pAngle));
+	const int cy = (int)(pCenterY*cos(pAngle) - pCenterX*sin(pAngle));
 	const int w = mUiManager->GetPainter()->GetStringWidth(pText);
 	const int h = mUiManager->GetPainter()->GetFontHeight();
-	mUiManager->GetPainter()->PrintText(pText, pCenterX-w/2, pCenterY-h/2);
+	mUiManager->GetPainter()->PrintText(pText, cx-w/2, cy-h/2);
 	::glPopMatrix();
 	::glMatrixMode(GL_MODELVIEW);
 }

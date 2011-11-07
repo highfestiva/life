@@ -29,6 +29,8 @@ public:
 
 	void DrainHealth(float pDrain);
 	float GetHealth() const;
+	bool QueryFlip();
+	bool IsUpsideDown() const;
 
 private:
 	float mHealth;

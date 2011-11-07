@@ -45,7 +45,8 @@ Game::Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVaria
 	mVehicleCamPos(0, 0, 200),
 	mIsLaunching(false),
 	mLauncherYaw(0),
-	mLauncherPitch(-PIF/4)
+	mLauncherPitch(-PIF/4),
+	mWinnerIndex(-1)
 {
 	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
 	mCollisionSoundManager->AddSound(_T("explosion"), UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f));
@@ -66,7 +67,7 @@ bool Game::Initialize()
 	bool lOk = true;
 	if (lOk)
 	{
-		CURE_RTVAR_SET(GetVariableScope(), "Game.Winner", -1);
+		mWinnerIndex = -1;
 		lOk = InitializeTerrain();
 	}
 	if (lOk)
@@ -114,6 +115,8 @@ bool Game::Tick()
 	{
 		lPosition = mVehicle->GetPosition()+Vector3DF(0, 0, -2);
 		lVelocity = mVehicle->GetVelocity();
+
+		mVehicle->QueryFlip();
 	}
 	else
 	{
@@ -319,7 +322,7 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 				mVehicle->DrainHealth(d * 0.7f);
 				if (mVehicle->GetHealth() <= 0)
 				{
-					CURE_RTVAR_SET(GetVariableScope(), "Game.Winner", 1);
+					mWinnerIndex = (mWinnerIndex != 0)? 1 : mWinnerIndex;
 				}
 			}
 		}
@@ -328,7 +331,12 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 
 void Game::OnCapture()
 {
-	CURE_RTVAR_SET(GetVariableScope(), "Game.Winner", 0);
+	mWinnerIndex = (mWinnerIndex != 1)? 0 : mWinnerIndex;
+}
+
+int Game::GetWinnerIndex() const
+{
+	return mWinnerIndex;
 }
 
 bool Game::Render()
