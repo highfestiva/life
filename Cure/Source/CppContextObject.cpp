@@ -111,6 +111,24 @@ void CppContextObject::SetAllowNetworkLogic(bool pAllow)
 
 
 
+TBC::ChunkyPhysics* CppContextObject::GetPhysics() const
+{
+	if (mPhysicsResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
+	{
+		return (mPhysicsResource->GetData());
+	}
+	return (0);
+}
+
+const TBC::ChunkyClass* CppContextObject::GetClass() const
+{
+	if (mClassResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
+	{
+		return (mClassResource->GetRamData());
+	}
+	return (0);
+}
+
 const TBC::ChunkyClass::Tag* CppContextObject::FindTag(const str& pTagType, int pFloatValueCount, int pStringValueCount, const std::vector<int>& pTriggerIndexArray) const
 {
 	const TBC::ChunkyClass* lClass = GetClass();
@@ -185,26 +203,6 @@ bool CppContextObject::TryComplete()
 		return (true);
 	}
 	return (false);
-}
-
-
-
-TBC::ChunkyPhysics* CppContextObject::GetPhysics() const
-{
-	if (mPhysicsResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
-	{
-		return (mPhysicsResource->GetData());
-	}
-	return (0);
-}
-
-const TBC::ChunkyClass* CppContextObject::GetClass() const
-{
-	if (mClassResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
-	{
-		return (mClassResource->GetRamData());
-	}
-	return (0);
 }
 
 

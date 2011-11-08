@@ -43,6 +43,7 @@ Game::Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVaria
 	mVehicle(0),
 	mLauncher(0),
 	mVehicleCamPos(0, 0, 200),
+	mVehicleCamHeight(15),
 	mIsLaunching(false),
 	mLauncherYaw(0),
 	mLauncherPitch(-PIF/4),
@@ -342,22 +343,40 @@ int Game::GetWinnerIndex() const
 bool Game::Render()
 {
 	TransformationF t(QuaternionF(), Vector3DF(-100, -140, -10));
-	if (mVehicle && mVehicle->IsLoaded())
+	if (mVehicle && mVehicle->IsLoaded() && mLevel && mLevel->IsLoaded())
 	{
 		const Vector3DF lVehiclePos = mVehicle->GetPosition();
 		Vector3DF lOffset = mVehicleCamPos - lVehiclePos;
 		lOffset.z = 0;
 		const float lCamXYDistance = 40;
-		const float lCamHeight = 15;
+		float lCamHeight = 15;
 		lOffset.Normalize(lCamXYDistance);
+		lOffset.z = lCamHeight;
+
+		const TBC::PhysicsManager::BodyID lTerrainBodyId = mLevel->GetPhysics()->GetBoneGeometry(0)->GetBodyId();
+		Vector3DF lCollisionPoint;
+		int x = 0;
+		for (x = 0; x < 3; ++x)
+		{
+			const bool lIsCollision = (GetPhysicsManager()->QueryRayCollisionAgainst(
+				lVehiclePos, lOffset, lOffset.GetLength(), lTerrainBodyId, &lCollisionPoint, 1) > 0);
+			if (!lIsCollision)
+			{
+				break;
+			}
+			lCamHeight += 15;
+			lOffset.z = lCamHeight;
+		}
+		mVehicleCamHeight = Math::Lerp(mVehicleCamHeight, lCamHeight, 0.2f);
+		lOffset.z = mVehicleCamHeight;
+
 		float lAngle = (-lOffset).GetAngle(Vector3DF(0, lCamXYDistance, 0));
 		if (lOffset.x < 0)
 		{
 			lAngle = -lAngle;
 		}
 		t.GetOrientation().RotateAroundOwnZ(lAngle);
-		t.GetOrientation().RotateAroundOwnX(-::tan(lCamHeight/lCamXYDistance)+PIF/12);
-		lOffset.z = lCamHeight;
+		t.GetOrientation().RotateAroundOwnX(-::atan(mVehicleCamHeight/lCamXYDistance) + PIF/18);
 		mVehicleCamPos = lVehiclePos + lOffset;
 		t.GetPosition() = mVehicleCamPos;
 #ifdef LEPRA_IOS_LOOKNFEEL

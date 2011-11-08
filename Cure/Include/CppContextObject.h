@@ -27,15 +27,14 @@ public:
 
 	void SetAllowNetworkLogic(bool pAllow);
 
+	TBC::ChunkyPhysics* GetPhysics() const;
+	virtual const TBC::ChunkyClass* GetClass() const;
 	const TBC::ChunkyClass::Tag* FindTag(const str& pTagType, int pFloatValueCount, int pStringValueCount, const std::vector<int>& pTriggerIndexArray) const;
 
 protected:
 	virtual void StartLoading();
 	void StartLoadingPhysics(const str& pPhysicsName);
 	virtual bool TryComplete();
-
-	TBC::ChunkyPhysics* GetPhysics() const;
-	virtual const TBC::ChunkyClass* GetClass() const;
 
 	void OnMicroTick(float pFrameTime);
 	void OnAlarm(int pAlarmId, void* pExtraData);

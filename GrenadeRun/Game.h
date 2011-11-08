@@ -125,6 +125,7 @@ private:
 	Cutie* mVehicle;
 	UiCure::CppContextObject* mLauncher;
 	Vector3DF mVehicleCamPos;
+	float mVehicleCamHeight;
 	bool mIsLaunching;
 	float mLauncherYaw;
 	float mLauncherPitch;

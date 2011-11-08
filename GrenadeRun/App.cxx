@@ -31,6 +31,9 @@
 
 
 
+#ifdef LEPRA_IOS
+#define LEPRA_IOS_LnF
+#endif // iOS
 //#define LEPRA_IOS_LnF
 #define UIKEY(name)	UiLepra::InputManager::IN_KBD_##name
 #define FPS		20
@@ -120,6 +123,7 @@ private:
 		float mAngle;
 	};
 
+	bool mIsRunning;
 	bool mDoLayout;
 	Cure::ResourceManager* mResourceManager;
 	Cure::RuntimeVariableScope* mVariableScope;
@@ -183,6 +187,7 @@ App::App(const strutil::strvec& pArgumentList):
 	mLayoutFrameCounter(-10),
 	mVariableScope(0),
 	mAverageLoopTime(1.0/FPS),
+	mIsRunning(false),
 	mDoLayout(true),
 	mAngleTime(0),
 	mBigFontId(UiTbc::FontManager::INVALID_FONTID)
@@ -431,6 +436,12 @@ bool App::Poll()
 		mAngleTime -= (mAngleTime > 2*PIF)? 2*PIF : 0;
 		lOk = (SystemManager::GetQuitRequest() == 0);
 	}
+	if (!mIsRunning && mResourceManager->IsLoading())
+	{
+		mResourceManager->Tick();
+		return lOk;
+	}
+	mIsRunning = true;
 	if (lOk && mDoLayout)
 	{
 		Layout();
@@ -543,16 +554,16 @@ void App::DrawHud() const
 		if (lWinner == 0)
 		{
 			mUiManager->GetPainter()->SetColor(GREEN, 0);
-			PrintText(_T("WIN!"),   -lAngle, (int)(w*1/4), (int)(h/2));
+			PrintText(_T("WIN!"),   +lAngle, (int)(w*1/4), (int)(h/2));
 			mUiManager->GetPainter()->SetColor(RED, 0);
-			PrintText(_T("LOOSE!"), +lAngle, (int)(w*3/4), (int)(h/2));
+			PrintText(_T("LOOSE!"), -lAngle, (int)(w*3/4), (int)(h/2));
 		}
 		else if (lWinner == 1)
 		{
 			mUiManager->GetPainter()->SetColor(RED, 0);
-			PrintText(_T("LOOSE!"), -lAngle, (int)(w*1/4), (int)(h/2));
+			PrintText(_T("LOOSE!"), +lAngle, (int)(w*1/4), (int)(h/2));
 			mUiManager->GetPainter()->SetColor(GREEN, 0);
-			PrintText(_T("WIN!"),   +lAngle, (int)(w*3/4), (int)(h/2));
+			PrintText(_T("WIN!"),   -lAngle, (int)(w*3/4), (int)(h/2));
 		}
 		mUiManager->GetFontManager()->SetActiveFont(lFontId);
 	}
@@ -1067,6 +1078,9 @@ int App::PollTap(FingerMovement& pMovement)
 	const float h = (float)mUiManager->GetCanvas()->GetHeight();
 	std::swap(x, y);
 	std::swap(lStartX, lStartY);
+	const float lTapMargin = 28.0f;
+	lStartX = Math::Clamp(lStartX, lTapMargin, w-lTapMargin);
+	lStartY = Math::Clamp(lStartY, lTapMargin, h-lTapMargin);
 	y = h-y;
 	lStartY = h-lStartY;
 	const float m = BUTTON_MARGIN;
