@@ -24,11 +24,14 @@ public:
 	Ctf(Cure::ContextManager* pManager);
 	virtual ~Ctf();
 
+	Vector3DF GetPosition() const;
+
 private:
-	virtual void FinalizeTrigger(const TBC::PhysicsTrigger*);
+	virtual void FinalizeTrigger(const TBC::PhysicsTrigger* pTrigger);
 	virtual void OnTick();
 	virtual void OnTrigger(TBC::PhysicsManager::TriggerID pTriggerId, TBC::PhysicsManager::ForceFeedbackListener* pListener);
 
+	const TBC::PhysicsTrigger* mTrigger;
 	Vector3DF mFlagOffset;
 	Vector3DF mFlagTop;
 	Vector3DF mCatchingFlagVelocity;

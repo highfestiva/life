@@ -7,6 +7,7 @@
 #include "Ctf.h"
 #include "../Cure/Include/CppContextObject.h"
 #include "../Cure/Include/ContextManager.h"
+#include "../TBC/Include/PhysicsTrigger.h"
 #include "../UiCure/Include/UiCppContextObject.h"
 
 
@@ -18,6 +19,7 @@ namespace GrenadeRun
 
 Ctf::Ctf(Cure::ContextManager* pManager):
 	Parent(pManager->GetGameManager()->GetResourceManager(), _T("Ctf")),
+	mTrigger(0),
 	mLastFrameTriggered(false),
 	mIsTriggerTimerStarted(false),
 	mFlagMesh(0)
@@ -32,8 +34,17 @@ Ctf::~Ctf()
 
 
 
-void Ctf::FinalizeTrigger(const TBC::PhysicsTrigger*)
+Vector3DF Ctf::GetPosition() const
 {
+	const TBC::ChunkyBoneGeometry* lCutieGoal = mTrigger->GetTriggerGeometry(0);
+	return GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyPosition(lCutieGoal->GetTriggerId());
+}
+
+
+
+void Ctf::FinalizeTrigger(const TBC::PhysicsTrigger* pTrigger)
+{
+	mTrigger = pTrigger;
 	UiCure::CppContextObject* lParent = (UiCure::CppContextObject*)mParent;
 	const TBC::ChunkyClass::Tag* lTag = lParent->FindTag(_T("stunt_trigger_data"), 4, 0, std::vector<int>());
 	assert(lTag && lTag->mMeshIndexList.size() == 1);

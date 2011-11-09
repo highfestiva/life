@@ -28,6 +28,7 @@
 #include "../UiTBC/Include/UiFontManager.h"
 #include "Cutie.h"
 #include "Game.h"
+#include "Launcher.h"
 
 
 
@@ -75,10 +76,6 @@ private:
 	void DrawCircle(float x, float y, float pRadius, const Color& pColor) const;
 	void DrawForceMeter(int x, int y, float pAngle, float pForce, bool pSidesAreEqual) const;
 	void DrawHealthMeter(int x, int y, float pAngle, float pSize, float pHealth) const;
-	void GetLauncherAngles(Cure::ContextObject* pAvatar1, Cure::ContextObject* pAvatar2,
-		float& pPitch, float& pGuidePitch, float& pYaw, float& pGuideYaw) const;
-	void GetBallisticData(const Vector3DF& pPosition1, const Vector3DF& pPosition2,
-		float pPitch, float& pGuidePitch, float pYaw, float& pGuideYaw, float &pTime) const;
 	void DrawBarrelIndicator(float x, float y, float pAngle, float pLength, float pBaseWidth, bool pIsArrow) const;
 	void InfoText(int pPlayer, const str& pInfo, float pAngle, float dx = 0, float dy = 0) const;
 	void DrawInfoTexts() const;
@@ -651,7 +648,7 @@ void App::DrawHud() const
 	float lGuidePitch;
 	float lYaw;
 	float lGuideYaw;
-	GetLauncherAngles(lAvatar1, lAvatar2, lPitch, lGuidePitch, lYaw, lGuideYaw);
+	mGame->GetLauncher()->GetAngles(mGame->GetCutie(), lPitch, lGuidePitch, lYaw, lGuideYaw);
 	{
 		const float x = w-m*1.5f-lButtonWidth/2;
 		const float y = h-m2-lButtonWidth-8;
@@ -820,66 +817,6 @@ void App::DrawHealthMeter(int x, int y, float pAngle, float pSize, float pHealth
 	}
 }
 
-void App::GetLauncherAngles(Cure::ContextObject* pAvatar1, Cure::ContextObject* pAvatar2,
-	float& pPitch, float& pGuidePitch, float& pYaw, float& pGuideYaw) const
-{
-	// GetBallisticData calculates the trajectory by polynome approximation (don't remember
-	// the math any more), but calling it twice gets us pretty close to the sweet spot.
-	Vector3DF lPosition1 = pAvatar1->GetPosition();
-	const Vector3DF lPosition2 = pAvatar2->GetPosition();
-	float lRoll;
-	pAvatar2->GetOrientation().GetEulerAngles(pYaw, pPitch, lRoll);
-	float lTime = 10.0f;
-	GetBallisticData(lPosition1, lPosition2, pPitch, pGuidePitch, pYaw, pGuideYaw, lTime);
-	lPosition1 += pAvatar1->GetVelocity() * lTime;
-	const float lBetterPitch = pGuidePitch;
-	const float lBetterYaw = pGuideYaw;
-	GetBallisticData(lPosition1, lPosition2, lBetterPitch, pGuidePitch, lBetterYaw, pGuideYaw, lTime);
-	pGuidePitch = Math::Clamp(pGuidePitch, -PIF/2, 0.0f);
-	pGuideYaw = Math::Clamp(pGuideYaw, -PIF/2, PIF/2);
-}
-
-void App::GetBallisticData(const Vector3DF& pPosition1, const Vector3DF& pPosition2,
-	float pPitch, float& pGuidePitch, float /*pYaw*/, float& pGuideYaw, float &pTime) const
-{
-	const Vector3DF lDelta = pPosition1 - pPosition2;
-	const Vector2DF lYawVector(lDelta.x, lDelta.y);
-	pGuideYaw = lYawVector.GetAngle(Vector2DF(0, 1));
-	if (lDelta.x > 0)
-	{
-		pGuideYaw = -pGuideYaw;
-	}
-
-	const float h = lDelta.z;
-	const float v = mGame->GetMuzzleVelocity();
-	const float vup = v * ::cos(pPitch);
-	// g*t^2/2 - vup*t + h = 0
-	//
-	// Quaderatic formula:
-	// ax^2 + bx + c = 0
-	// =>
-	//     -b +- sqrt(b^2 - 4ac)
-	// x = ---------------------
-	//             2a
-	const float a = 9.82f/2;
-	const float b = -vup;
-	const float c = h;
-	const float b2 = b*b;
-	const float _4ac = 4*a*c;
-	if (b2 < _4ac)	// Does not compute.
-	{
-		pGuidePitch = -PIF/4;
-	}
-	else
-	{
-		const float t = (-b + sqrt(b2 - _4ac)) / (2*a);
-		pTime = t;
-		const float vfwd = lYawVector.GetLength() / t;
-		pGuidePitch = -::atan(vfwd/vup);
-		pGuidePitch += (pGuidePitch-pPitch);	// Homebrew... seems to be working somewhat! :)
-	}
-}
-
 void App::DrawBarrelIndicator(float x, float y, float pAngle, float pLength, float pBaseWidth, bool pIsArrow) const
 {
 	mPenX = x;
@@ -1029,7 +966,7 @@ bool App::Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor)
 	{
 		lAvatar2 = lAvatar1;
 	}
-	if (pKeyCode == UIKEY(SPACE) && pFactor > 0)
+	if ((pKeyCode == UIKEY(E) || pKeyCode == UIKEY(F)) && pFactor > 0)
 	{
 		mGame->Shoot();
 	}
@@ -1039,10 +976,16 @@ bool App::Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor)
 		case UIKEY(S):		lAvatar2->SetEnginePower(0, +1*pFactor, 0);	break;
 		case UIKEY(A):		lAvatar2->SetEnginePower(1, -1*pFactor, 0);	break;
 		case UIKEY(D):		lAvatar2->SetEnginePower(1, +1*pFactor, 0);	break;
-		case UIKEY(UP):		lAvatar1->SetEnginePower(0, +1*pFactor, 0);	break;
-		case UIKEY(DOWN):	lAvatar1->SetEnginePower(0, -1*pFactor, 0);	break;
-		case UIKEY(LEFT):	lAvatar1->SetEnginePower(1, -1*pFactor, 0);	break;
-		case UIKEY(RIGHT):	lAvatar1->SetEnginePower(1, +1*pFactor, 0);	break;
+		case UIKEY(UP):
+		case UIKEY(NUMPAD_8):	lAvatar1->SetEnginePower(0, +1*pFactor, 0);	break;
+		case UIKEY(DOWN):
+		case UIKEY(NUMPAD_2):
+		case UIKEY(NUMPAD_5):	lAvatar1->SetEnginePower(0, -1*pFactor, 0);	break;
+		case UIKEY(LEFT):
+		case UIKEY(NUMPAD_4):	lAvatar1->SetEnginePower(1, -1*pFactor, 0);	break;
+		case UIKEY(RIGHT):
+		case UIKEY(NUMPAD_6):	lAvatar1->SetEnginePower(1, +1*pFactor, 0);	break;
+		case UIKEY(INSERT):
 		case UIKEY(NUMPAD_0):	lAvatar1->SetEnginePower(2, +1*pFactor, 0);	break;
 	}
 	return false;

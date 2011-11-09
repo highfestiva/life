@@ -18,6 +18,8 @@
 #include "Ctf.h"
 #include "Cutie.h"
 #include "Grenade.h"
+#include "Launcher.h"
+#include "LauncherAi.h"
 #include "Spawner.h"
 
 
@@ -41,13 +43,15 @@ Game::Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVaria
 	mLightId(UiTbc::Renderer::INVALID_LIGHT),
 	mLevel(0),
 	mVehicle(0),
-	mLauncher(0),
 	mVehicleCamPos(0, 0, 200),
 	mVehicleCamHeight(15),
 	mIsLaunching(false),
 	mLauncherYaw(0),
 	mLauncherPitch(-PIF/4),
-	mWinnerIndex(-1)
+	mWinnerIndex(-1),
+	mCtf(0),
+	mLauncher(0),
+	mLauncherAi(0)
 {
 	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
 	mCollisionSoundManager->AddSound(_T("explosion"), UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f));
@@ -61,6 +65,15 @@ Game::~Game()
 	mCollisionSoundManager = 0;
 	mUiManager = 0;
 	SetVariableScope(0);	// Not owned by us.
+
+	mCtf = 0;
+	mLauncher = 0;
+	mLauncherAi = 0;
+}
+
+UiCure::GameUiManager* Game::GetUiManager() const
+{
+	return mUiManager;
 }
 
 bool Game::Initialize()
@@ -93,7 +106,7 @@ bool Game::Initialize()
 	}
 	if (lOk)
 	{
-		mLauncher = new UiCure::Props(GetResourceManager(), _T("launcher"), mUiManager);
+		mLauncher = new Launcher(this);
 		AddContextObject(mLauncher, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 		lOk = (mLauncher != 0);
 		assert(lOk);
@@ -102,6 +115,12 @@ bool Game::Initialize()
 			mLauncher->DisableRootShadow();
 			mLauncher->StartLoading();
 		}
+	}
+	if (lOk)
+	{
+		mLauncherAi = new LauncherAi(this);
+		AddContextObject(mLauncherAi, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+		mLauncherAi->Init();
 	}
 	return lOk;
 }
@@ -143,14 +162,29 @@ bool Game::Tick()
 
 
 
-UiCure::CppContextObject* Game::GetP1()
+UiCure::CppContextObject* Game::GetP1() const
 {
 	return mVehicle;
 }
 
-UiCure::CppContextObject* Game::GetP2()
+UiCure::CppContextObject* Game::GetP2() const
 {
 	return mLauncher;
+}
+
+Cutie* Game::GetCutie() const
+{
+	return mVehicle;
+}
+
+Launcher* Game::GetLauncher() const
+{
+	return mLauncher;
+}
+
+Ctf* Game::GetCtf() const
+{
+	return mCtf;
 }
 
 void Game::GetVehicleMotion(Vector3DF& pPosition, Vector3DF pVelocity) const
@@ -351,6 +385,12 @@ bool Game::Render()
 		const float lCamXYDistance = 40;
 		float lCamHeight = 15;
 		lOffset.Normalize(lCamXYDistance);
+		float lAngle = (-lOffset).GetAngle(Vector3DF(0, lCamXYDistance, 0));
+		if (lOffset.x < 0)
+		{
+			lAngle = -lAngle;
+		}
+		t.GetOrientation().RotateAroundOwnZ(lAngle);
 		lOffset.z = lCamHeight;
 
 		const TBC::PhysicsManager::BodyID lTerrainBodyId = mLevel->GetPhysics()->GetBoneGeometry(0)->GetBodyId();
@@ -370,12 +410,6 @@ bool Game::Render()
 		mVehicleCamHeight = Math::Lerp(mVehicleCamHeight, lCamHeight, 0.2f);
 		lOffset.z = mVehicleCamHeight;
 
-		float lAngle = (-lOffset).GetAngle(Vector3DF(0, lCamXYDistance, 0));
-		if (lOffset.x < 0)
-		{
-			lAngle = -lAngle;
-		}
-		t.GetOrientation().RotateAroundOwnZ(lAngle);
 		t.GetOrientation().RotateAroundOwnX(-::atan(mVehicleCamHeight/lCamXYDistance) + PIF/18);
 		mVehicleCamPos = lVehiclePos + lOffset;
 		t.GetPosition() = mVehicleCamPos;
@@ -567,7 +601,8 @@ Cure::ContextObject* Game::CreateLogicHandler(const str& pType) const
 	}
 	else if (pType == _T("trig_ctf"))
 	{
-		return new Ctf(GetContext());
+		mCtf = new Ctf(GetContext());
+		return mCtf;
 	}
 	assert(false);
 	return (0);

@@ -553,6 +553,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Launcher.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\LauncherAi.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Spawner.cpp"
 				>
 			</File>
@@ -576,6 +584,14 @@
 			</File>
 			<File
 				RelativePath=".\Grenade.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Launcher.h"
+				>
+			</File>
+			<File
+				RelativePath=".\LauncherAi.h"
 				>
 			</File>
 			<File

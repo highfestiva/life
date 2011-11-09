@@ -33,7 +33,10 @@ namespace GrenadeRun
 
 
 using namespace Lepra;
+class Ctf;
 class Cutie;
+class Launcher;
+class LauncherAi;
 
 
 
@@ -77,11 +80,15 @@ class Game: public Cure::GameTicker, public Cure::GameManager
 public:
 	Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager);
 	virtual ~Game();
+	UiCure::GameUiManager* GetUiManager() const;
 	virtual bool Initialize();
 	virtual bool Tick();
 
-	UiCure::CppContextObject* GetP1();
-	UiCure::CppContextObject* GetP2();
+	UiCure::CppContextObject* GetP1() const;
+	UiCure::CppContextObject* GetP2() const;
+	Cutie* GetCutie() const;
+	Launcher* GetLauncher() const;
+	Ctf* GetCtf() const;
 	void GetVehicleMotion(Vector3DF& pPosition, Vector3DF pVelocity) const;
 	void GetLauncherTransform(TransformationF& pTransform) const;
 	void SetThrottle(UiCure::CppContextObject* pPlayer, float pThrottle);
@@ -123,13 +130,16 @@ private:
 	UiTbc::Renderer::LightID mLightId;
 	UiCure::CppContextObject* mLevel;
 	Cutie* mVehicle;
-	UiCure::CppContextObject* mLauncher;
 	Vector3DF mVehicleCamPos;
 	float mVehicleCamHeight;
 	bool mIsLaunching;
 	float mLauncherYaw;
 	float mLauncherPitch;
 	int mWinnerIndex;
+
+	mutable Ctf* mCtf;
+	Launcher* mLauncher;
+	LauncherAi* mLauncherAi;
 };
 
 

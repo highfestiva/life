@@ -277,6 +277,7 @@ public:
 		IN_KBD_BACKSPACE	= 8,
 		IN_KBD_TAB		= 9,
 
+		IN_KBD_CENTER		= 12,
 		IN_KBD_ENTER		= 13,
 
 		IN_KBD_LSHIFT		= 16,
