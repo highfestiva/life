@@ -204,6 +204,7 @@ public:
 
 	virtual TriggerListener* GetTriggerListener(TriggerID pTrigger) = 0;
 	virtual ForceFeedbackListener* GetForceFeedbackListener(BodyID pBody) = 0;
+	virtual void SetForceFeedbackListener(BodyID pBody, ForceFeedbackListener* pListener) = 0;
 
 	virtual void GetTriggerTransform(TriggerID pTriggerID, Transformation<float32>& pTransform) = 0;
 	virtual void SetTriggerTransform(TriggerID pTriggerID, const Transformation<float32>& pTransform) = 0;

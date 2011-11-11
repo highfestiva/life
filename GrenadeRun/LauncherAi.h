@@ -7,8 +7,7 @@
 #pragma once
 
 #include "../Cure/Include/CppContextObject.h"
-//#include "../Lepra/Include/HiResTimer.h"
-//#include "Game.h"
+#include "Game.h"
 
 
 
@@ -33,6 +32,7 @@ private:
 	virtual void OnTick();
 
 	Game* mGame;
+	HiResTimer mLastShot;
 
 	LOG_CLASS_DECLARE();
 };

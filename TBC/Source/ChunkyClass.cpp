@@ -136,6 +136,16 @@ void ChunkyClass::AddTag(const Tag& pTag)
 	mTagArray.push_back(pTag);
 }
 
+void ChunkyClass::RemoveTag(size_t pTagIndex)
+{
+	if (pTagIndex >= GetTagCount())
+	{
+		assert(false);
+		return;
+	}
+	mTagArray.erase(&mTagArray[pTagIndex]);
+}
+
 size_t ChunkyClass::GetTagCount() const
 {
 	return (mTagArray.size());

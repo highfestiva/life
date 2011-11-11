@@ -6,6 +6,7 @@
 
 #include "LauncherAi.h"
 #include "../Cure/Include/ContextManager.h"
+#include "../Lepra/Include/Random.h"
 #include "Ctf.h"
 #include "Cutie.h"
 #include "Game.h"
@@ -43,12 +44,40 @@ void LauncherAi::OnTick()
 	}
 
 	Vector3DF lTargetPosition = mGame->GetCutie()->GetPosition();
-	Vector3DF lTargetVelocity = mGame->GetCutie()->GetVelocity();
-	if (lTargetPosition.GetDistance(mGame->GetCtf()->GetPosition()) < 20*3)
+	Vector3DF lTargetVelocity = mGame->GetCutie()->GetVelocity() +
+		mGame->GetCutie()->GetAcceleration() * 7;
+	const float lTargetSpeed = lTargetVelocity.GetLength();
+	const Vector3DF lCtfPosition = mGame->GetCtf()->GetPosition();
+	const Vector3DF lDelta = lCtfPosition-lTargetPosition;
+	const float lCtfDistance = lDelta.GetLength();
+	const bool lHeadingTowardsCtf = ((lDelta/lCtfDistance).Dot(lTargetVelocity/lTargetSpeed) > 0.8f);
+	if (lCtfDistance < 20*3)
 	{
-		lTargetPosition = mGame->GetCtf()->GetPosition();
-		lTargetVelocity = Vector3DF();
+		// She's close, assume she's going to be close and brake hard soon.
+		//lTargetPosition = (lTargetPosition+lCtfPosition) * 0.5f;
+		lTargetVelocity *= 0.3f;
 	}
+	else if (lHeadingTowardsCtf)
+	{
+		if (lCtfDistance < 170*3)
+		{
+			if (lTargetSpeed * 10 > lCtfDistance * 1.2f)
+			{
+				// She's probably going to reach the target and brake hard,
+				// so don't aim too far ahead.
+				lTargetVelocity *= 0.4f;
+			}
+			else if (lTargetSpeed * 10 > lCtfDistance)
+			{
+				// She's going fast, but not superfast and thus she'll brake
+				// hard, so don't aim too far ahead.
+				lTargetVelocity *= 0.7f;
+			}
+		}
+	}
+
+	//lTargetPosition.x += (float)Random::Uniform(-2, 2);
+	//lTargetPosition.y += (float)Random::Uniform(-2, 2);
 
 	float lPitch;
 	float lGuidePitch;
@@ -56,7 +85,7 @@ void LauncherAi::OnTick()
 	float lGuideYaw;
 	mGame->GetLauncher()->GetAngles(lTargetPosition, lTargetVelocity, lPitch, lGuidePitch, lYaw, lGuideYaw);
 	const float lVelocity = lTargetVelocity.GetLength();
-	const float lPitchFactor = ::fabs((lPitch - lGuidePitch) * (lVelocity+5));
+	const float lPitchFactor = ::fabs((lPitch - lGuidePitch) * (lVelocity+3) + 0.03f);
 	if (lPitch < lGuidePitch)
 	{
 		mGame->GetLauncher()->SetEnginePower(0, -1*lPitchFactor, 0);
@@ -65,7 +94,7 @@ void LauncherAi::OnTick()
 	{
 		mGame->GetLauncher()->SetEnginePower(0, +1*lPitchFactor, 0);
 	}
-	const float lYawFactor = ::fabs((lYaw - lGuideYaw) * (lVelocity+5));
+	const float lYawFactor = ::fabs((lYaw - lGuideYaw) * (lVelocity+4) + 0.03f);
 	if (lYaw < lGuideYaw)
 	{
 		mGame->GetLauncher()->SetEnginePower(1, -1*lYawFactor, 0);
@@ -74,9 +103,13 @@ void LauncherAi::OnTick()
 	{
 		mGame->GetLauncher()->SetEnginePower(1, +1*lYawFactor, 0);
 	}
-	if (lYawFactor < 0.1f && lPitchFactor < 0.1f)
+	const double lLastShotDiff = mLastShot.QueryTimeDiff();
+	if (lLastShotDiff > 2.5f &&	// Wait at least this long.
+		((lYawFactor < 0.1f && lPitchFactor < 0.1f) ||	// In range.
+		lLastShotDiff > 5.0f))
 	{
 		mGame->Shoot();
+		mLastShot.ClearTimeDiff();
 	}
 }
 

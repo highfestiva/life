@@ -257,6 +257,11 @@ PhysicsManager::JointID ChunkyBoneGeometry::GetJointId() const
 	return (mJointId);
 }
 
+void ChunkyBoneGeometry::ResetJointId()
+{
+	mJointId = INVALID_JOINT;
+}
+
 PhysicsManager::BodyID ChunkyBoneGeometry::GetBodyId() const
 {
 	return (mBodyId);

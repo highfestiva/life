@@ -40,6 +40,7 @@ public:
 
 	bool UnpackTag(uint8* pBuffer, unsigned pSize);
 	void AddTag(const Tag& pTag);
+	void RemoveTag(size_t pTagIndex);
 	size_t GetTagCount() const;
 	const Tag& GetTag(size_t pTagIndex) const;
 

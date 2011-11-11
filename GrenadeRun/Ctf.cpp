@@ -97,7 +97,7 @@ void Ctf::OnTick()
 		// Move down if not at bottom.
 		if ((mFlagOffset - (mFlagMesh->GetOffsetTransformation().GetPosition() - mFlagTop)).Dot(mFlagOffset) > 0)
 		{
-			mFlagMesh->AddOffset(mCatchingFlagVelocity / -10);
+			mFlagMesh->AddOffset(mCatchingFlagVelocity / -60);
 		}
 	}
 

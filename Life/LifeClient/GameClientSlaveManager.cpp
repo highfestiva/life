@@ -424,8 +424,7 @@ bool GameClientSlaveManager::TickNetworkOutput()
 					continue;
 				}
 				const Cure::ObjectPositionalData* lPositionalData = 0;
-				lObject->UpdateFullPosition(lPositionalData);
-				if (lPositionalData)
+				if (lObject->UpdateFullPosition(lPositionalData))
 				{
 					if (!lPositionalData->IsSameStructure(*lObject->GetNetworkOutputGhost()))
 					{
@@ -463,19 +462,21 @@ bool GameClientSlaveManager::TickNetworkOutput()
 				if (lObject)
 				{
 					const Cure::ObjectPositionalData* lPositionalData = 0;
-					lObject->UpdateFullPosition(lPositionalData);
-					lObject->GetNetworkOutputGhost()->CopyData(lPositionalData);
-					lSendOk = GetNetworkAgent()->SendObjectFullPosition(GetNetworkClient()->GetSocket(),
-						lObject->GetInstanceId(), GetTimeManager()->GetCurrentPhysicsFrame(), *lObject->GetNetworkOutputGhost());
-					lIsSent = true;
-
-					CURE_RTVAR_INTERNAL_ARITHMETIC(GetVariableScope(), RTVAR_DEBUG_NET_SENDPOSCNT, int, +, 1, 0, 1000000);
-
-					/*for (int x = 0; x < lObject->GetPhysics()->GetEngineCount(); ++x)
+					if (lObject->UpdateFullPosition(lPositionalData))
 					{
-						TBC::PhysicsEngine* lEngine = lObject->GetPhysics()->GetEngine(x);
-						log_volatile(mLog.Debugf(_T("Sync'ed engine of type %i with value %f."), lEngine->GetEngineType(), lEngine->GetValue()));
-					}*/
+						lObject->GetNetworkOutputGhost()->CopyData(lPositionalData);
+						lSendOk = GetNetworkAgent()->SendObjectFullPosition(GetNetworkClient()->GetSocket(),
+							lObject->GetInstanceId(), GetTimeManager()->GetCurrentPhysicsFrame(), *lObject->GetNetworkOutputGhost());
+						lIsSent = true;
+
+						CURE_RTVAR_INTERNAL_ARITHMETIC(GetVariableScope(), RTVAR_DEBUG_NET_SENDPOSCNT, int, +, 1, 0, 1000000);
+
+						/*for (int x = 0; x < lObject->GetPhysics()->GetEngineCount(); ++x)
+						{
+							TBC::PhysicsEngine* lEngine = lObject->GetPhysics()->GetEngine(x);
+							log_volatile(mLog.Debugf(_T("Sync'ed engine of type %i with value %f."), lEngine->GetEngineType(), lEngine->GetValue()));
+						}*/
+					}
 				}
 			}
 		}

@@ -33,7 +33,11 @@ public:
 	bool IsUpsideDown() const;
 
 private:
+	virtual void OnTick();
+
 	float mHealth;
+	int mKillJointsTickCount;
+	int mWheelExpelTickCount;
 
 	LOG_CLASS_DECLARE();
 };

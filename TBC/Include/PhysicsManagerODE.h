@@ -97,6 +97,7 @@ public:
 
 	virtual TriggerListener* GetTriggerListener(TriggerID pTrigger);
 	virtual ForceFeedbackListener* GetForceFeedbackListener(BodyID pBody);
+	virtual void SetForceFeedbackListener(BodyID pBody, ForceFeedbackListener* pListener);
 
 	virtual void GetTriggerTransform(TriggerID pTriggerID, TransformationF& pTransform);
 	virtual void SetTriggerTransform(TriggerID pTriggerID, const TransformationF& pTransform);

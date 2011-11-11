@@ -1296,6 +1296,10 @@ void ContextObject::SetupChildHandlers()
 
 bool ContextObject::IsSameInstance(TBC::PhysicsManager::ForceFeedbackListener* pOther)
 {
+	if (!pOther)
+	{
+		return false;
+	}
 	return (((ContextObject*)pOther)->GetInstanceId() == GetInstanceId());
 }
 

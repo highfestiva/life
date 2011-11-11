@@ -85,7 +85,10 @@ void Launcher::GetBallisticData(const Vector3DF& pPosition1, const Vector3DF& pP
 		pTime = t;
 		const float vfwd = lYawVector.GetLength() / t;
 		pGuidePitch = -::atan(vfwd/vup);
-		pGuidePitch += (pGuidePitch-pPitch);	// Homebrew... seems to be working somewhat! :)
+		if (pGuidePitch < pPitch)	// Aiming downwards?
+		{
+			pGuidePitch += (pGuidePitch-pPitch);	// Tss! Homebrew... seems to be working somewhat! :)
+		}
 	}
 }
 

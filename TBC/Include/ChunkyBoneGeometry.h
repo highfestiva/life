@@ -111,6 +111,7 @@ public:
 	JointType GetJointType() const;
 	BoneType GetBoneType() const;
 	PhysicsManager::JointID GetJointId() const;
+	void ResetJointId();
 	PhysicsManager::BodyID GetBodyId() const;
 	void ResetBodyId();
 	PhysicsManager::TriggerID GetTriggerId() const;

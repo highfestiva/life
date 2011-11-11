@@ -378,6 +378,10 @@ void Machine::OnForceApplied(TBC::PhysicsManager::ForceFeedbackListener* pOtherO
 		return;
 	}
 	const Cure::ContextObject* lOtherObject = (Cure::ContextObject*)pOtherObject;
+	if (!lOtherObject)
+	{
+		return;
+	}
 	if (lOtherObject->GetPhysics()->GetBoneGeometry(pOtherBodyId)->GetMaterial() != _T("grass"))
 	{
 		return;

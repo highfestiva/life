@@ -791,6 +791,17 @@ PhysicsManager::ForceFeedbackListener* PhysicsManagerODE::GetForceFeedbackListen
 	return (lObject->mForceFeedbackListener);
 }
 
+void PhysicsManagerODE::SetForceFeedbackListener(BodyID pBody, ForceFeedbackListener* pListener)
+{
+	Object* lObject = (Object*)pBody;
+	if (lObject->mWorldID != mWorldID)
+	{
+		mLog.Errorf(_T("SetForceFeedbackListener() - Body %i is not part of this world!"), pBody);
+		return;
+	}
+	lObject->mForceFeedbackListener = pListener;
+}
+
 void PhysicsManagerODE::GetTriggerTransform(TriggerID pTriggerID, TransformationF& pTransform)
 {
 	GetBodyTransform((BodyID)pTriggerID, pTransform);

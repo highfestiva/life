@@ -67,7 +67,7 @@ void Grenade::Launch()
 	Vector3DF lVelocity = GetOrientation() * Vector3DF(0, 0, mMuzzleVelocity);
 	GetManager()->GetGameManager()->GetPhysicsManager()->SetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
 
-	GetManager()->AddAlarmCallback(this, 3, 1.2f, 0);
+	GetManager()->AddAlarmCallback(this, 3, 1.6f, 0);
 }
 
 void Grenade::OnTick()

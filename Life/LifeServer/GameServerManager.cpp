@@ -979,18 +979,24 @@ void GameServerManager::FlipCheck(Cure::ContextObject* pObject) const
 
 	// Yup, reset vehicle in the direction it was heading.
 	const Cure::ObjectPositionalData* lOriginalPositionData;
-	pObject->UpdateFullPosition(lOriginalPositionData);
-	Cure::ObjectPositionalData lPositionData;
-	lPositionData.CopyData(lOriginalPositionData);
-	lPositionData.Stop();
-	TransformationF& lTransform = lPositionData.mPosition.mTransformation;
-	lTransform.SetPosition(pObject->GetPosition() + Vector3DF(0, 0, 5));
-	Vector3DF lEulerAngles;
-	pObject->GetOrientation().GetEulerAngles(lEulerAngles);
-	lTransform.GetOrientation().SetEulerAngles(lEulerAngles.x, 0, 0);
-	lTransform.GetOrientation() *= pObject->GetPhysics()->GetOriginalBoneTransformation(0).GetOrientation();
-	pObject->SetFullPosition(lPositionData);
-	GetContext()->AddPhysicsSenderObject(pObject);
+	if (pObject->UpdateFullPosition(lOriginalPositionData))
+	{
+		Cure::ObjectPositionalData lPositionData;
+		lPositionData.CopyData(lOriginalPositionData);
+		lPositionData.Stop();
+		TransformationF& lTransform = lPositionData.mPosition.mTransformation;
+		lTransform.SetPosition(pObject->GetPosition() + Vector3DF(0, 0, 5));
+		Vector3DF lEulerAngles;
+		pObject->GetOrientation().GetEulerAngles(lEulerAngles);
+		lTransform.GetOrientation().SetEulerAngles(lEulerAngles.x, 0, 0);
+		lTransform.GetOrientation() *= pObject->GetPhysics()->GetOriginalBoneTransformation(0).GetOrientation();
+		pObject->SetFullPosition(lPositionData);
+		GetContext()->AddPhysicsSenderObject(pObject);
+	}
+	else
+	{
+		mLog.AErrorf(_T("Error: vehicle %i could not be flipped!"), pObject->GetInstanceId());
+	}
 }
 
 bool GameServerManager::OnPhysicsSend(Cure::ContextObject* pObject)
