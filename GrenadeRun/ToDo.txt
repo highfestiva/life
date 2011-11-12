@@ -12,7 +12,7 @@ Place health bar over Cutie in non-iOS only.
 
 Computer demo
 -------------
-Draw roads+cliffs on texture
+Draw roads+cliffs and render shadows on texture.
 Collision sounds for wreck ball, thumps for hitting the ground hard, etc.
 AI for Cutie.
 Elevator from ravine to left mountain.

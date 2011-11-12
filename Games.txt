@@ -2,13 +2,13 @@
 
 Kill Cutie
 
-Static Grenade Aim Game
+Bombulum - use the pendulum to push bombs off their respective "poles" befor they blow up. Gravity is from the center in all directions. "Poles" are elevators that rise "up" towards the center.
 
 Car Jumpin'
 
 Helicopter Gravity Force 3D - steer using accelerometer, add a "calibrate" button somewhere.
 
-Space ship flight. Fly though predefined map, steer using swipe left/right/up/down? Or accelerometer?
+Space ship flight. Fly though predefined map, steer using swipe left/right/up/down? Or accelerometer? Fly close to ground, to give impression of moving VERY fast.
 
 Spider Tank. Two thumbs steering.
 
