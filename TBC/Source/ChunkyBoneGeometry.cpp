@@ -236,6 +236,11 @@ void ChunkyBoneGeometry::RemovePhysics(PhysicsManager* pPhysics)
 
 
 
+float ChunkyBoneGeometry::GetMass() const
+{
+	return mBodyData.mMass;
+}
+
 ChunkyBoneGeometry* ChunkyBoneGeometry::GetParent() const
 {
 	return (mBodyData.mParent);

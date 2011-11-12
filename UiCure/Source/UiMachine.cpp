@@ -241,14 +241,19 @@ void Machine::OnTick()
 			const float lThrottleUpSpeed = Math::GetIterateLerpTime(0.2f, lFrameTime);
 			const float lThrottleDownSpeed = Math::GetIterateLerpTime(0.1f, lFrameTime);
 			float lIntensity = 0;
+			float lLowVolume = lTag.mFloatValueList[FV_VOLUME_LOW];
 			for (size_t y = 0; y < lTag.mEngineIndexList.size(); ++y)
 			{
 				const TBC::PhysicsEngine* lEngine = mPhysics->GetEngine(lTag.mEngineIndexList[y]);
 				float lEngineIntensity = Math::Clamp(lEngine->GetIntensity(), 0.0f, 1.0f);
 				if (lTag.mFloatValueList[FV_THROTTLE_FACTOR] > 0)
 				{
-					const float lThrottle = ::fabs(lEngine->GetLerpThrottle(lThrottleUpSpeed, lThrottleDownSpeed));
-					lEngineIntensity *= lThrottle * lTag.mFloatValueList[FV_THROTTLE_FACTOR];
+					const float lThrottle =
+						::fabs(lEngine->GetLerpThrottle(lThrottleUpSpeed, lThrottleDownSpeed)) *
+						lTag.mFloatValueList[FV_THROTTLE_FACTOR];
+					lEngineIntensity *= lThrottle;
+					const float lCarburetorSound = ::fabs(lEngine->GetValue()) * 0.7f;
+					lLowVolume = Math::Lerp(lLowVolume, lTag.mFloatValueList[FV_VOLUME_HIGH], lCarburetorSound);
 				}
 				lEngineIntensity *= lTag.mFloatValueList[FV_ENGINE_FACTOR_BASE+y];
 				lIntensity += lEngineIntensity;
@@ -267,7 +272,7 @@ void Machine::OnTick()
 			}
 			//lIntensity = Math::Clamp(lIntensity, 0, 1);
 			const float lVolumeLerp = ::pow(lIntensity, lTag.mFloatValueList[FV_VOLUME_EXPONENT]);
-			const float lVolume = Math::Lerp(lTag.mFloatValueList[FV_VOLUME_LOW], lTag.mFloatValueList[FV_VOLUME_HIGH], lVolumeLerp);
+			const float lVolume = Math::Lerp(lLowVolume, lTag.mFloatValueList[FV_VOLUME_HIGH], lVolumeLerp);
 			const float lPitchExp = lTag.mFloatValueList[FV_PITCH_EXPONENT];
 			const float lPitchLerp = ::pow(lIntensity, lPitchExp);
 			const float lPitch = Math::Lerp(lTag.mFloatValueList[FV_PITCH_LOW], lTag.mFloatValueList[FV_PITCH_HIGH], lPitchLerp);

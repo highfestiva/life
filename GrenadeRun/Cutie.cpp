@@ -48,11 +48,11 @@ void Cutie::DrainHealth(float pDrain)
 	const float lSpeed = GetVelocity().GetLength();
 	if (lSpeed < 1)
 	{
-		mWheelExpelTickCount = 70;
+		mWheelExpelTickCount = 50;
 	}
 	else
 	{
-		mWheelExpelTickCount = 30 + (int)(40/lSpeed);
+		mWheelExpelTickCount = 20 + (int)(30/lSpeed);
 	}
 	GetPhysics()->ClearEngines();
 	TBC::ChunkyClass* lClass = (TBC::ChunkyClass*)GetClass();
@@ -139,16 +139,20 @@ void Cutie::OnTick()
 	--mWheelExpelTickCount;
 	if (mKillJointsTickCount <= 0)
 	{
+		mKillJointsTickCount = 0x7FFFFFFF;
 		// Remove the joints, but don't allow collisions with body yet.
-		mKillJointsTickCount = 10000;
+		const Vector3DF lPosition = GetPosition();
 		const int lBoneCount = GetPhysics()->GetBoneCount();
 		for (int x = 0; x < lBoneCount; ++x)
 		{
-			TBC::ChunkyBoneGeometry* lGeometry = GetPhysics()->GetBoneGeometry(x);
-			if (lGeometry->GetJointType() != TBC::ChunkyBoneGeometry::JOINT_EXCLUDE)
+			TBC::ChunkyBoneGeometry* lWheel = GetPhysics()->GetBoneGeometry(x);
+			if (lWheel->GetJointType() != TBC::ChunkyBoneGeometry::JOINT_EXCLUDE)
 			{
-				GetManager()->GetGameManager()->GetPhysicsManager()->DeleteJoint(lGeometry->GetJointId());
-				lGeometry->ResetJointId();
+				GetManager()->GetGameManager()->GetPhysicsManager()->DeleteJoint(lWheel->GetJointId());
+				lWheel->ResetJointId();
+				// Push the wheel away somewhat, not too much.
+				const Vector3DF lWheelPosition = GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyPosition(lWheel->GetBodyId());
+				GetManager()->GetGameManager()->GetPhysicsManager()->AddForce(lWheel->GetBodyId(), (lWheelPosition-lPosition)*7*lWheel->GetMass());
 			}
 		}
 	}
@@ -160,11 +164,11 @@ void Cutie::OnTick()
 	const int lBoneCount = GetPhysics()->GetBoneCount();
 	for (int x = 0; x < lBoneCount; ++x)
 	{
-		TBC::ChunkyBoneGeometry* lGeometry = GetPhysics()->GetBoneGeometry(x);
-		if (lGeometry->GetJointType() != TBC::ChunkyBoneGeometry::JOINT_EXCLUDE)
+		TBC::ChunkyBoneGeometry* lWheel = GetPhysics()->GetBoneGeometry(x);
+		if (lWheel->GetJointType() != TBC::ChunkyBoneGeometry::JOINT_EXCLUDE)
 		{
-			GetManager()->RemovePhysicsBody(lGeometry->GetBodyId());
-			GetManager()->GetGameManager()->GetPhysicsManager()->SetForceFeedbackListener(lGeometry->GetBodyId(), 0);
+			GetManager()->RemovePhysicsBody(lWheel->GetBodyId());
+			GetManager()->GetGameManager()->GetPhysicsManager()->SetForceFeedbackListener(lWheel->GetBodyId(), 0);
 		}
 	}
 }

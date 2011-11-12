@@ -107,6 +107,7 @@ public:
 		const TransformationF& pTransform) = 0;
 	void RemovePhysics(PhysicsManager* pPhysics);
 
+	float GetMass() const;
 	ChunkyBoneGeometry* GetParent() const;
 	JointType GetJointType() const;
 	BoneType GetBoneType() const;

@@ -5,16 +5,17 @@ Tower for launcher.
 Place static stones in the level.
 Place dynamic crates in the level.
 Create flag that's raised when parked in the opposite garage.
-
+2 x garage/house for Cutie.
+Crane+pendulum that may knock Cutie over on the bridge.
+Raise VOLUME depending on throttle (not pitch though).
+Place health bar over Cutie in non-iOS only.
 
 Computer demo
 -------------
-Raise VOLUME depending on throttle (not pitch though).
-Add collision sounds for wreck ball, thumps for hitting the ground hard, etc.
 Draw roads+cliffs on texture
-2 x garage/house for Cutie.
+Collision sounds for wreck ball, thumps for hitting the ground hard, etc.
+AI for Cutie.
 Elevator from ravine to left mountain.
-Crane+pendulum that may knock Cutie over on the bridge.
 Cutify Cutie.
 Icon x god-knows-how-many resolutions (iOS x 4, PC, Mac).
 
@@ -26,6 +27,9 @@ Default image (=splash) for iPhone, Retina, iPad. Pixel Doctrine logo.
 Screen shots + marketing texts.
 Extra vehicle: cute monster truck.
 2 extra levels.
-Delete all resources when switching level.
+Delete all resources when switching level (and make sure!).
 Turn the table when completing a level.
 Autostart next/same level.
+Score counting.
+Optimize.
+Hiscore release.

@@ -151,6 +151,7 @@ private:
 	mutable HiResTimer mPlayer1TouchDelay;
 	mutable HiResTimer mPlayer2TouchDelay;
 	UiTbc::FontManager::FontId mBigFontId;
+	float mReverseAndBrake;
 
 	LOG_CLASS_DECLARE();
 };
@@ -187,7 +188,8 @@ App::App(const strutil::strvec& pArgumentList):
 	mIsRunning(false),
 	mDoLayout(true),
 	mAngleTime(0),
-	mBigFontId(UiTbc::FontManager::INVALID_FONTID)
+	mBigFontId(UiTbc::FontManager::INVALID_FONTID),
+	mReverseAndBrake(0)
 {
 	mApp = this;
 }
@@ -429,6 +431,19 @@ bool App::Poll()
 	}
 	if (lOk)
 	{
+		// Take care of the "brake and reverse" steering.
+		if (mGame->GetCutie() && mGame->GetCutie()->IsLoaded())
+		{
+			const bool lIsMovingForward = (mGame->GetCutie()->GetForwardSpeed() > 2.0f);
+			if (mReverseAndBrake)
+			{
+				mGame->GetCutie()->SetEnginePower(0, lIsMovingForward? 0 : -1*mReverseAndBrake, 0);	// Reverse.
+				mGame->GetCutie()->SetEnginePower(2, lIsMovingForward? +1*mReverseAndBrake : 0, 0);	// Brake.
+			}
+		}
+	}
+	if (lOk)
+	{
 		mAngleTime += 1.0f/FPS/10;
 		mAngleTime -= (mAngleTime > 2*PIF)? 2*PIF : 0;
 		lOk = (SystemManager::GetQuitRequest() == 0);
@@ -600,7 +615,11 @@ void App::DrawHud() const
 	}
 
 	Cutie* lCutie = (Cutie*)lAvatar1;
+#ifdef LEPRA_IOS_LnF
 	DrawHealthMeter((int)w/2, (int)h/2, PIF, h/2, lCutie->GetHealth());
+#else // !iOS
+	DrawHealthMeter((int)w/4, (int)(lButtonWidth*0.7f), -PIF/2, w/3, lCutie->GetHealth());
+#endif // iOS/!iOS
 
 #ifdef LEPRA_IOS_LnF
 	float lForce;
@@ -799,9 +818,9 @@ void App::DrawHealthMeter(int x, int y, float pAngle, float pSize, float pHealth
 	const bool lXIsMain = ::abs(lXStep) >= ::abs(lYStep);
 	x -= (int)(lXStep * lBarCount*0.5f);
 	y -= (int)(lYStep * lBarCount*0.5f);
-	for (int i = 0; i < lBarCount && lCurrentHealth < pHealth; ++i)
+	for (int i = 0; i < lBarCount; ++i)
 	{
-		const Color c(lStartColor, lEndColor, lCurrentHealth);
+		const Color c = (lCurrentHealth < pHealth)? Color(lStartColor, lEndColor, lCurrentHealth) : DARK_GRAY;
 		mUiManager->GetPainter()->SetColor(c);
 		if (lXIsMain)
 		{
@@ -980,7 +999,16 @@ bool App::Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor)
 		case UIKEY(NUMPAD_8):	lAvatar1->SetEnginePower(0, +1*pFactor, 0);	break;
 		case UIKEY(DOWN):
 		case UIKEY(NUMPAD_2):
-		case UIKEY(NUMPAD_5):	lAvatar1->SetEnginePower(0, -1*pFactor, 0);	break;
+		case UIKEY(NUMPAD_5):
+		{
+			mReverseAndBrake = pFactor;
+			if (!mReverseAndBrake)
+			{
+				lAvatar1->SetEnginePower(0, 0, 0);
+				lAvatar1->SetEnginePower(2, 0, 0);
+			}
+		}
+		break;
 		case UIKEY(LEFT):
 		case UIKEY(NUMPAD_4):	lAvatar1->SetEnginePower(1, -1*pFactor, 0);	break;
 		case UIKEY(RIGHT):
