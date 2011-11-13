@@ -108,7 +108,7 @@ void LauncherAi::OnTick()
 		((lYawFactor < 0.1f && lPitchFactor < 0.1f) ||	// In range.
 		lLastShotDiff > 5.0f))
 	{
-		mGame->Shoot();
+		//mGame->Shoot();
 		mLastShot.ClearTimeDiff();
 	}
 }

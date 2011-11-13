@@ -79,6 +79,10 @@ void CollisionSoundManager::OnCollision(const Vector3DF& pForce, const Vector3DF
 	Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
 	TBC::PhysicsManager::BodyID pBody1Id, float pMaxDistance, bool pIsLoud)
 {
+	if (!pObject1 || !pObject2)
+	{
+		return;
+	}
 	if (pPosition.GetDistanceSquared(mCameraPosition) > pMaxDistance*pMaxDistance)
 	{
 		return;

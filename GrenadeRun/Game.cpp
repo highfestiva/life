@@ -55,6 +55,10 @@ Game::Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVaria
 {
 	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
 	mCollisionSoundManager->AddSound(_T("explosion"), UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f));
+	mCollisionSoundManager->AddSound(_T("small_metal"),	UiCure::CollisionSoundManager::SoundResourceInfo(0.2f, 0.4f));
+	mCollisionSoundManager->AddSound(_T("big_metal"),	UiCure::CollisionSoundManager::SoundResourceInfo(1.5f, 0.4f));
+	mCollisionSoundManager->AddSound(_T("rubber"),		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f));
+	mCollisionSoundManager->AddSound(_T("wood"),		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f));
 }
 
 Game::~Game()
@@ -516,13 +520,8 @@ void Game::OnCollision(const Vector3DF& pForce, const Vector3DF& pTorque, const 
 	Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
 	TBC::PhysicsManager::BodyID pBody1Id, TBC::PhysicsManager::BodyID pBody2Id)
 {
-	pForce;
-	pTorque;
-	pPosition;
-	pObject1;
-	pObject2;
-	pBody1Id;
-	pBody2Id;
+	(void)pBody2Id;
+	mCollisionSoundManager->OnCollision(pForce, pTorque, pPosition, pObject1, pObject2, pBody1Id, 2000, false);
 }
 
 bool Game::OnPhysicsSend(Cure::ContextObject* pObject)

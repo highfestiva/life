@@ -9,12 +9,15 @@ Create flag that's raised when parked in the opposite garage.
 Crane+pendulum that may knock Cutie over on the bridge.
 Raise VOLUME depending on throttle (not pitch though).
 Place health bar over Cutie in non-iOS only.
+Draw roads+cliffs and render shadows on texture.
 
 Computer demo
 -------------
-Draw roads+cliffs and render shadows on texture.
 Collision sounds for wreck ball, thumps for hitting the ground hard, etc.
 AI for Cutie.
+Move HUD for landscape mode.
+Adjust HUD for keyboard controls.
+Show keyboard controls when starting.
 Elevator from ravine to left mountain.
 Cutify Cutie.
 Icon x god-knows-how-many resolutions (iOS x 4, PC, Mac).
