@@ -91,6 +91,17 @@ bool Game::Initialize()
 	{
 		mWinnerIndex = -1;
 		mPreviousFrameWinnerIndex = -1;
+
+		QuaternionF lRotation;
+		lRotation.RotateAroundOwnX(-PIF/4);
+		lRotation.RotateAroundOwnZ(-PIF/8);
+		mLeftCamera = TransformationF(lRotation, Vector3DF(-50, -100, 70));
+		mRightCamera = mLeftCamera;
+#ifdef LEPRA_IOS_LOOKNFEEL
+		mLeftCamera.GetOrientation().RotateAroundOwnY(-PIF*0.5f);
+		mRightCamera.GetOrientation().RotateAroundOwnY(+PIF*0.5f);
+#endif // iOS
+
 		lOk = InitializeTerrain();
 	}
 	if (lOk)
@@ -447,7 +458,7 @@ bool Game::Render()
 	{
 		const Vector3DF lCutie = mVehicle->GetPosition();
 		const Vector3DF lGoal = mCtf->GetPosition();
-		const double lTotalTime = 4.0;
+		const double lTotalTime = 35.0;
 		const double lFrameTime = 1.0/FPS;
 		mFlyByTime += lFrameTime;
 		if (mFlyByTime > lTotalTime)
@@ -455,29 +466,73 @@ bool Game::Render()
 			mIsFlyingBy = false;
 			return true;
 		}
+
 		TransformationF t;
-		if (mFlyByTime < lTotalTime * 1/3)
+		const double lSweepTime = lTotalTime * 0.25;
+		if (mFlyByTime < lSweepTime)
 		{
-			t = TransformationF(QuaternionF(), lCutie+Vector3DF(0, -40, 20));
-		}
-		else if (mFlyByTime < lTotalTime * 2/3)
-		{
-			t = TransformationF(QuaternionF(), lGoal+Vector3DF(0, -40, 20));
+			// Sweep around the area in a circle.
+			const float a = 0.8f * 2*PIF * (float)(mFlyByTime/lSweepTime);
+			t.GetOrientation().RotateAroundOwnZ(a + PIF/2);
+			t.GetOrientation().RotateAroundOwnX(-PIF/8);
+			t.SetPosition(Vector3DF(::cos(a)*240, ::sin(a)*240, ::sin(a+PIF/8)*50 + 80));
 		}
 		else
 		{
-			t = TransformationF(QuaternionF(), lLauncherPosition+Vector3DF(0, -40, 20));
+			// Look at cutie, goal and launcher in more detail.
+			const double lDetailTime = lTotalTime - lSweepTime;
+			// Orientation. Treat orientation and position in different time slices, because if
+			// both happen at the same time, perception of space is without a doubt lost.
+			if (mFlyByTime-lSweepTime < lDetailTime * 3/12)
+			{
+				t.GetOrientation().RotateAroundOwnZ(+PIF*11/12);
+				t.GetOrientation().RotateAroundOwnX(-PIF/8);
+			}
+			else if (mFlyByTime-lSweepTime < lDetailTime * 7/12)
+			{
+				t.GetOrientation().RotateAroundOwnZ(-PIF*2/5);
+				t.GetOrientation().RotateAroundOwnX(-PIF/8);
+			}
+			else if (mFlyByTime-lSweepTime < lDetailTime * 10/12)
+			{
+				t.GetOrientation().RotateAroundOwnZ(+PIF*7/8);
+				t.GetOrientation().RotateAroundOwnX(-PIF/10);
+			}
+			else
+			{
+				t.GetOrientation().RotateAroundOwnZ(+PIF/2);
+				t.GetOrientation().RotateAroundOwnX(-PIF/4);
+			}
+			// Position.
+			if (mFlyByTime-lSweepTime < lDetailTime * 1/3)
+			{
+				t.SetPosition(lCutie + Vector3DF(+4, +20, +10));
+			}
+			else if (mFlyByTime-lSweepTime < lDetailTime * 2/3)
+			{
+				t.SetPosition(lGoal + Vector3DF(-40, -30, +30));
+			}
+			else if (mFlyByTime-lSweepTime < lDetailTime * 10/12)
+			{
+				t.SetPosition(lLauncherPosition + Vector3DF(+5, +15, +10));
+			}
+			else
+			{
+				t.SetPosition(lLauncherPosition + Vector3DF(+14, 0, +14));
+			}
 		}
 #ifdef LEPRA_IOS_LOOKNFEEL
 		t.GetOrientation().RotateAroundOwnY(-PIF*0.5f);
 #endif // iOS
-		mUiManager->SetCameraPosition(t);
+		mLeftCamera.Interpolate(mLeftCamera, t, 0.05f);
+		mUiManager->SetCameraPosition(mLeftCamera);
 		mUiManager->GetRenderer()->SetViewFrustum(60, 3, 1000);
 		mUiManager->Render(lLeftRect);
 #ifdef LEPRA_IOS_LOOKNFEEL
 		t.GetOrientation().RotateAroundOwnY(PIF);
 #endif // iOS
-		mUiManager->SetCameraPosition(t);
+		mRightCamera.Interpolate(mRightCamera, t, 0.05f);
+		mUiManager->SetCameraPosition(mRightCamera);
 		mUiManager->Render(lRightRect);
 		return true;
 	}
@@ -522,7 +577,8 @@ bool Game::Render()
 		t.GetOrientation().RotateAroundOwnY(-PIF*0.5f);
 #endif // iOS
 	}
-	mUiManager->SetCameraPosition(t);
+	mLeftCamera.Interpolate(mLeftCamera, t, 0.1f);
+	mUiManager->SetCameraPosition(mLeftCamera);
 	mUiManager->GetRenderer()->SetViewFrustum(60, 3, 1000);
 	mUiManager->Render(lLeftRect);
 
@@ -549,7 +605,8 @@ bool Game::Render()
 #ifdef LEPRA_IOS_LOOKNFEEL
 	t.GetOrientation().RotateAroundOwnY(PIF*0.5f);
 #endif // iOS
-	mUiManager->SetCameraPosition(t);
+	mRightCamera.Interpolate(mRightCamera, t, 0.1f);
+	mUiManager->SetCameraPosition(mRightCamera);
 	mUiManager->GetRenderer()->SetViewFrustum(std::min(60.0f, 9000/lRange), 3, 1000);
 	mUiManager->Render(lRightRect);
 	return true;

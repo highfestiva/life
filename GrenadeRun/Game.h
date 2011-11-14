@@ -145,6 +145,9 @@ private:
 	int mWinnerIndex;
 	int mPreviousFrameWinnerIndex;
 
+	TransformationF mLeftCamera;
+	TransformationF mRightCamera;
+
 	mutable Ctf* mCtf;
 	Launcher* mLauncher;
 	LauncherAi* mLauncherAi;

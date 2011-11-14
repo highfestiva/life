@@ -14,10 +14,10 @@ Draw roads+cliffs and render shadows on texture.
 Flatten Cutie start ground...
 Drop unnecessary polygons on Cutie. Fix normals.
 Fanfare when somebody wins. "Bad" when computer wins.
+Camera fly-by before start.
 
 Computer demo
 -------------
-Camera fly-by before start.
 Polish on level_2 roads (in texture).
 AI for Cutie.
 Move HUD for landscape mode.
