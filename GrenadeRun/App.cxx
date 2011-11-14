@@ -37,7 +37,6 @@
 #endif // iOS
 //#define LEPRA_IOS_LnF
 #define UIKEY(name)	UiLepra::InputManager::IN_KBD_##name
-#define FPS		20
 #define BUTTON_WIDTH	40
 #define BUTTON_MARGIN	2
 
@@ -546,6 +545,11 @@ void App::PollTaps()
 
 void App::DrawHud() const
 {
+	if (mGame->IsFlyingBy())
+	{
+		return;
+	}
+
 	const float lButtonWidth = BUTTON_WIDTH;	// TODO: fix for Retina.
 	const float lButtonRadius = lButtonWidth/2;
 	const float w = (float)mUiManager->GetCanvas()->GetWidth();

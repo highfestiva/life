@@ -11,6 +11,10 @@
 
 
 
+#define FPS		20
+
+
+
 namespace Cure
 {
 class ContextObject;
@@ -96,6 +100,7 @@ public:
 	float GetMuzzleVelocity() const;
 	bool IsLauncherLocked() const;
 	void UnlockLauncher();
+	bool IsFlyingBy() const;
 	void Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
 		Cure::ContextObject* pExplosive, Cure::ContextObject* pTarget, TBC::PhysicsManager::BodyID pExplosiveBodyId, TBC::PhysicsManager::BodyID pTargetBodyId);
 	void OnCapture();	// CTF
@@ -129,6 +134,8 @@ private:
 	UiCure::CollisionSoundManager* mCollisionSoundManager;
 	UiTbc::Renderer::LightID mLightId;
 	UiCure::CppContextObject* mLevel;
+	bool mIsFlyingBy;
+	double mFlyByTime;
 	Cutie* mVehicle;
 	Vector3DF mVehicleCamPos;
 	float mVehicleCamHeight;
@@ -136,10 +143,12 @@ private:
 	float mLauncherYaw;
 	float mLauncherPitch;
 	int mWinnerIndex;
+	int mPreviousFrameWinnerIndex;
 
 	mutable Ctf* mCtf;
 	Launcher* mLauncher;
 	LauncherAi* mLauncherAi;
+	int mComputerIndex;
 };
 
 

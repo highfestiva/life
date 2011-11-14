@@ -38,7 +38,7 @@ void LauncherAi::Init()
 
 void LauncherAi::OnTick()
 {
-	if (!mGame->GetLauncher()->IsLoaded() || !mGame->GetCutie()->IsLoaded())
+	if (mGame->IsFlyingBy())
 	{
 		return;
 	}
@@ -108,7 +108,7 @@ void LauncherAi::OnTick()
 		((lYawFactor < 0.1f && lPitchFactor < 0.1f) ||	// In range.
 		lLastShotDiff > 5.0f))
 	{
-		//mGame->Shoot();
+		mGame->Shoot();
 		mLastShot.ClearTimeDiff();
 	}
 }

@@ -15,6 +15,7 @@
 #include "../UiCure/Include/UiGameUiManager.h"
 #include "../UiCure/Include/UiProps.h"
 #include "../UiCure/Include/UiRuntimeVariableName.h"
+#include "../UiCure/Include/UiSound.h"
 #include "Ctf.h"
 #include "Cutie.h"
 #include "Grenade.h"
@@ -42,6 +43,8 @@ Game::Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVaria
 	mCollisionSoundManager(0),
 	mLightId(UiTbc::Renderer::INVALID_LIGHT),
 	mLevel(0),
+	mIsFlyingBy(true),
+	mFlyByTime(0),
 	mVehicle(0),
 	mVehicleCamPos(0, 0, 200),
 	mVehicleCamHeight(15),
@@ -49,6 +52,7 @@ Game::Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVaria
 	mLauncherYaw(0),
 	mLauncherPitch(-PIF/4),
 	mWinnerIndex(-1),
+	mPreviousFrameWinnerIndex(-1),
 	mCtf(0),
 	mLauncher(0),
 	mLauncherAi(0)
@@ -86,6 +90,7 @@ bool Game::Initialize()
 	if (lOk)
 	{
 		mWinnerIndex = -1;
+		mPreviousFrameWinnerIndex = -1;
 		lOk = InitializeTerrain();
 	}
 	if (lOk)
@@ -125,6 +130,12 @@ bool Game::Initialize()
 		mLauncherAi = new LauncherAi(this);
 		AddContextObject(mLauncherAi, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 		mLauncherAi->Init();
+		mComputerIndex = 1;
+	}
+	if (lOk)
+	{
+		mIsFlyingBy = true;
+		mFlyByTime = 0;
 	}
 	return lOk;
 }
@@ -160,6 +171,23 @@ bool Game::Tick()
 		lQuaternion.RotateAroundOwnX(mLauncherPitch);
 		mLauncher->SetRootOrientation(lQuaternion);
 	}
+
+	if (mPreviousFrameWinnerIndex == -1 && mWinnerIndex != -1)
+	{
+		if (mWinnerIndex == 0 && mComputerIndex != 0)
+		{
+			AddContextObject(new UiCure::Sound(GetResourceManager(), _T("win.wav"), mUiManager), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+		}
+		else if (mWinnerIndex == 1 && mComputerIndex != 1)
+		{
+			AddContextObject(new UiCure::Sound(GetResourceManager(), _T("win.wav"), mUiManager), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+		}
+		else
+		{
+			AddContextObject(new UiCure::Sound(GetResourceManager(), _T("kia.wav"), mUiManager), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+		}
+	}
+	mPreviousFrameWinnerIndex = mWinnerIndex;
 
 	return true;
 }
@@ -263,6 +291,11 @@ bool Game::IsLauncherLocked() const
 void Game::UnlockLauncher()
 {
 	mIsLaunching = false;
+}
+
+bool Game::IsFlyingBy() const
+{
+	return mIsFlyingBy;
 }
 
 void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
@@ -380,8 +413,76 @@ int Game::GetWinnerIndex() const
 
 bool Game::Render()
 {
+	if (!mVehicle || !mVehicle->IsLoaded() ||
+		!mLevel || !mLevel->IsLoaded() ||
+		!mCtf)
+	{
+		return true;
+	}
+
+	const PixelRect lFullRect(0, 0, mUiManager->GetCanvas()->GetActualWidth(), mUiManager->GetCanvas()->GetActualHeight());
+	PixelRect lLeftRect = lFullRect;
+	if (lFullRect.mRight < lFullRect.mBottom)	// Portrait?
+	{
+		lLeftRect.mBottom = lLeftRect.mBottom/2 - 5;
+	}
+	else
+	{
+		lLeftRect.mRight = lLeftRect.mRight/2 - 5;
+	}
+	PixelRect lRightRect = lFullRect;
+	if (lFullRect.mRight < lFullRect.mBottom)	// Portrait?
+	{
+		lRightRect.mTop = lLeftRect.mBottom + 10;
+	}
+	else
+	{
+		lRightRect.mLeft = lLeftRect.mRight + 10;
+	}
+
+	const Vector3DF lLauncherPosition(0, -215, 27);
+	mLauncher->SetRootPosition(lLauncherPosition);
+
+	if (mIsFlyingBy)
+	{
+		const Vector3DF lCutie = mVehicle->GetPosition();
+		const Vector3DF lGoal = mCtf->GetPosition();
+		const double lTotalTime = 4.0;
+		const double lFrameTime = 1.0/FPS;
+		mFlyByTime += lFrameTime;
+		if (mFlyByTime > lTotalTime)
+		{
+			mIsFlyingBy = false;
+			return true;
+		}
+		TransformationF t;
+		if (mFlyByTime < lTotalTime * 1/3)
+		{
+			t = TransformationF(QuaternionF(), lCutie+Vector3DF(0, -40, 20));
+		}
+		else if (mFlyByTime < lTotalTime * 2/3)
+		{
+			t = TransformationF(QuaternionF(), lGoal+Vector3DF(0, -40, 20));
+		}
+		else
+		{
+			t = TransformationF(QuaternionF(), lLauncherPosition+Vector3DF(0, -40, 20));
+		}
+#ifdef LEPRA_IOS_LOOKNFEEL
+		t.GetOrientation().RotateAroundOwnY(-PIF*0.5f);
+#endif // iOS
+		mUiManager->SetCameraPosition(t);
+		mUiManager->GetRenderer()->SetViewFrustum(60, 3, 1000);
+		mUiManager->Render(lLeftRect);
+#ifdef LEPRA_IOS_LOOKNFEEL
+		t.GetOrientation().RotateAroundOwnY(PIF);
+#endif // iOS
+		mUiManager->SetCameraPosition(t);
+		mUiManager->Render(lRightRect);
+		return true;
+	}
+
 	TransformationF t(QuaternionF(), Vector3DF(-100, -140, -10));
-	if (mVehicle && mVehicle->IsLoaded() && mLevel && mLevel->IsLoaded())
 	{
 		const Vector3DF lVehiclePos = mVehicle->GetPosition();
 		Vector3DF lOffset = mVehicleCamPos - lVehiclePos;
@@ -422,20 +523,9 @@ bool Game::Render()
 #endif // iOS
 	}
 	mUiManager->SetCameraPosition(t);
-	const PixelRect lFullRect(0, 0, mUiManager->GetCanvas()->GetActualWidth(), mUiManager->GetCanvas()->GetActualHeight());
-	PixelRect lLeftRect = lFullRect;
-	if (lFullRect.mRight < lFullRect.mBottom)	// Portrait?
-	{
-		lLeftRect.mBottom = lLeftRect.mBottom/2 - 5;
-	}
-	else
-	{
-		lLeftRect.mRight = lLeftRect.mRight/2 - 5;
-	}
 	mUiManager->GetRenderer()->SetViewFrustum(60, 3, 1000);
 	mUiManager->Render(lLeftRect);
 
-	const Vector3DF lLauncherPosition(0, -215, 27);
 	const float lLauncherHeight = 6;
 	const Vector3DF lMuzzlePosition(lLauncherPosition + mLauncher->GetOrientation()*Vector3DF(0, 0, lLauncherHeight));
 
@@ -460,16 +550,6 @@ bool Game::Render()
 	t.GetOrientation().RotateAroundOwnY(PIF*0.5f);
 #endif // iOS
 	mUiManager->SetCameraPosition(t);
-	mLauncher->SetRootPosition(lLauncherPosition);
-	PixelRect lRightRect = lFullRect;
-	if (lFullRect.mRight < lFullRect.mBottom)	// Portrait?
-	{
-		lRightRect.mTop = lLeftRect.mBottom + 10;
-	}
-	else
-	{
-		lRightRect.mLeft = lLeftRect.mRight + 10;
-	}
 	mUiManager->GetRenderer()->SetViewFrustum(std::min(60.0f, 9000/lRange), 3, 1000);
 	mUiManager->Render(lRightRect);
 	return true;

@@ -9,11 +9,16 @@ Create flag that's raised when parked in the opposite garage.
 Crane+pendulum that may knock Cutie over on the bridge.
 Raise VOLUME depending on throttle (not pitch though).
 Place health bar over Cutie in non-iOS only.
+Collision sounds for wreck ball, thumps for hitting the ground hard, etc.
 Draw roads+cliffs and render shadows on texture.
+Flatten Cutie start ground...
+Drop unnecessary polygons on Cutie. Fix normals.
+Fanfare when somebody wins. "Bad" when computer wins.
 
 Computer demo
 -------------
-Collision sounds for wreck ball, thumps for hitting the ground hard, etc.
+Camera fly-by before start.
+Polish on level_2 roads (in texture).
 AI for Cutie.
 Move HUD for landscape mode.
 Adjust HUD for keyboard controls.
