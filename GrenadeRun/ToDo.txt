@@ -18,26 +18,29 @@ Camera fly-by before start.
 
 Computer demo
 -------------
-Polish on level_2 roads (in texture).
-AI for Cutie.
+Adjust for single rendering view (and no splitter).
+Main menu: single player/two players/about, enter P1+P2 names (remember last), select map, select car.
+Admin: add button in center, for alert:restart/continue.
 Move HUD for landscape mode.
 Adjust HUD for keyboard controls.
+Adjust HUD for single/dual play.
+Polish on level_2 roads (in texture).
+AI for Cutie.
 Show keyboard controls when starting.
 Elevator from ravine to left mountain.
 Cutify Cutie.
-Icon x god-knows-how-many resolutions (iOS x 4, PC, Mac).
-
-iOS release
------------
-Admin: add button in center, for alert:restart/continue.
-Main menu: enter P1+P2 names, select map. Remember last names.
-Default image (=splash) for iPhone, Retina, iPad. Pixel Doctrine logo.
-Screen shots + marketing texts.
-Extra vehicle: cute monster truck.
-2 extra levels.
 Delete all resources when switching level (and make sure!).
 Turn the table when completing a level.
 Autostart next/same level.
 Score counting.
 Optimize.
+Memory leak check.
+Icon x god-knows-how-many resolutions (iOS x 4, PC, Mac).
+
+iOS release
+-----------
+Default image (=splash) for iPhone, Retina, iPad. Pixel Doctrine logo.
+Screen shots + marketing texts.
+Extra vehicle: cute monster truck.
+2 extra levels: castle and machine.
 Hiscore release.

@@ -141,7 +141,7 @@ bool Game::Initialize()
 		mLauncherAi = new LauncherAi(this);
 		AddContextObject(mLauncherAi, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 		mLauncherAi->Init();
-		mComputerIndex = 1;
+		mComputerIndex = 0;
 	}
 	if (lOk)
 	{
@@ -422,6 +422,11 @@ int Game::GetWinnerIndex() const
 	return mWinnerIndex;
 }
 
+int Game::GetComputerIndex() const
+{
+	return mComputerIndex;
+}
+
 bool Game::Render()
 {
 	if (!mVehicle || !mVehicle->IsLoaded() ||
@@ -450,6 +455,12 @@ bool Game::Render()
 	{
 		lRightRect.mLeft = lLeftRect.mRight + 10;
 	}
+	switch (GetComputerIndex())
+	{
+		case -1:			break;	// Two player game.
+		case 0:	lRightRect = lFullRect;	break;	// Single player, to right.
+		case 1:	lLeftRect = lFullRect;	break;	// Single player, to left.
+	}
 
 	const Vector3DF lLauncherPosition(0, -215, 27);
 	mLauncher->SetRootPosition(lLauncherPosition);
@@ -458,7 +469,7 @@ bool Game::Render()
 	{
 		const Vector3DF lCutie = mVehicle->GetPosition();
 		const Vector3DF lGoal = mCtf->GetPosition();
-		const double lTotalTime = 35.0;
+		const double lTotalTime = 1.0;
 		const double lFrameTime = 1.0/FPS;
 		mFlyByTime += lFrameTime;
 		if (mFlyByTime > lTotalTime)
@@ -483,23 +494,39 @@ bool Game::Render()
 			const double lDetailTime = lTotalTime - lSweepTime;
 			// Orientation. Treat orientation and position in different time slices, because if
 			// both happen at the same time, perception of space is without a doubt lost.
-			if (mFlyByTime-lSweepTime < lDetailTime * 3/12)
+			if (mFlyByTime-lSweepTime < lDetailTime * 1/12)
 			{
+				// Stare right at Cutie.
+				t.GetOrientation().RotateAroundOwnZ(+PIF/2);
+				t.GetOrientation().RotateAroundOwnX(-PIF/8);
+			}
+			else if (mFlyByTime-lSweepTime < lDetailTime * 3/12)
+			{
+				// Stand beside Cutie.
 				t.GetOrientation().RotateAroundOwnZ(+PIF*11/12);
 				t.GetOrientation().RotateAroundOwnX(-PIF/8);
 			}
+			else if (mFlyByTime-lSweepTime < lDetailTime * 4/12)
+			{
+				// Look up at the goal.
+				t.GetOrientation().RotateAroundOwnZ(-PIF*2/5);
+				t.GetOrientation().RotateAroundOwnX(+PIF/12);
+			}
 			else if (mFlyByTime-lSweepTime < lDetailTime * 7/12)
 			{
+				// Look down at the goal.
 				t.GetOrientation().RotateAroundOwnZ(-PIF*2/5);
 				t.GetOrientation().RotateAroundOwnX(-PIF/8);
 			}
 			else if (mFlyByTime-lSweepTime < lDetailTime * 10/12)
 			{
+				// Look right at the launcher.
 				t.GetOrientation().RotateAroundOwnZ(+PIF*7/8);
 				t.GetOrientation().RotateAroundOwnX(-PIF/10);
 			}
 			else
 			{
+				// Stand beside the launcher.
 				t.GetOrientation().RotateAroundOwnZ(+PIF/2);
 				t.GetOrientation().RotateAroundOwnX(-PIF/4);
 			}
@@ -514,31 +541,39 @@ bool Game::Render()
 			}
 			else if (mFlyByTime-lSweepTime < lDetailTime * 10/12)
 			{
-				t.SetPosition(lLauncherPosition + Vector3DF(+5, +15, +10));
+				t.SetPosition(lLauncherPosition + Vector3DF(+5, +15, +10));	// In front of launcher.
 			}
 			else
 			{
-				t.SetPosition(lLauncherPosition + Vector3DF(+14, 0, +14));
+				t.SetPosition(lLauncherPosition + Vector3DF(+14, 0, +14));	// Beside launcher.
 			}
 		}
 #ifdef LEPRA_IOS_LOOKNFEEL
 		t.GetOrientation().RotateAroundOwnY(-PIF*0.5f);
 #endif // iOS
-		mLeftCamera.Interpolate(mLeftCamera, t, 0.05f);
-		mUiManager->SetCameraPosition(mLeftCamera);
-		mUiManager->GetRenderer()->SetViewFrustum(60, 3, 1000);
-		mUiManager->Render(lLeftRect);
+		if (GetComputerIndex() != 0)
+		{
+			mLeftCamera.Interpolate(mLeftCamera, t, 0.05f);
+			mUiManager->SetCameraPosition(mLeftCamera);
+			mUiManager->GetRenderer()->SetViewFrustum(60, 3, 1000);
+			mUiManager->Render(lLeftRect);
+		}
+		if (GetComputerIndex() != 1)
+		{
 #ifdef LEPRA_IOS_LOOKNFEEL
-		t.GetOrientation().RotateAroundOwnY(PIF);
+			t.GetOrientation().RotateAroundOwnY(PIF);
 #endif // iOS
-		mRightCamera.Interpolate(mRightCamera, t, 0.05f);
-		mUiManager->SetCameraPosition(mRightCamera);
-		mUiManager->Render(lRightRect);
+			mRightCamera.Interpolate(mRightCamera, t, 0.05f);
+			mUiManager->SetCameraPosition(mRightCamera);
+			mUiManager->GetRenderer()->SetViewFrustum(60, 3, 1000);
+			mUiManager->Render(lRightRect);
+		}
 		return true;
 	}
 
-	TransformationF t(QuaternionF(), Vector3DF(-100, -140, -10));
+	if (GetComputerIndex() != 0)
 	{
+		TransformationF t(QuaternionF(), Vector3DF(-100, -140, -10));
 		const Vector3DF lVehiclePos = mVehicle->GetPosition();
 		Vector3DF lOffset = mVehicleCamPos - lVehiclePos;
 		lOffset.z = 0;
@@ -576,39 +611,42 @@ bool Game::Render()
 #ifdef LEPRA_IOS_LOOKNFEEL
 		t.GetOrientation().RotateAroundOwnY(-PIF*0.5f);
 #endif // iOS
+		mLeftCamera.Interpolate(mLeftCamera, t, 0.1f);
+		mUiManager->SetCameraPosition(mLeftCamera);
+		mUiManager->GetRenderer()->SetViewFrustum(60, 3, 1000);
+		mUiManager->Render(lLeftRect);
 	}
-	mLeftCamera.Interpolate(mLeftCamera, t, 0.1f);
-	mUiManager->SetCameraPosition(mLeftCamera);
-	mUiManager->GetRenderer()->SetViewFrustum(60, 3, 1000);
-	mUiManager->Render(lLeftRect);
 
-	const float lLauncherHeight = 6;
-	const Vector3DF lMuzzlePosition(lLauncherPosition + mLauncher->GetOrientation()*Vector3DF(0, 0, lLauncherHeight));
-
-	float lRange = 150.0f;
-	float lLookDownAngle = -PIF/2;
-	if (mVehicle && mVehicle->IsLoaded())
+	if (GetComputerIndex() != 1)
 	{
-		lRange = lMuzzlePosition.GetDistance(mVehicle->GetPosition());
-		lLookDownAngle = ::sin((mVehicle->GetPosition().z-lMuzzlePosition.z)/lRange);
-	}
+		const float lLauncherHeight = 6;
+		const Vector3DF lMuzzlePosition(lLauncherPosition + mLauncher->GetOrientation()*Vector3DF(0, 0, lLauncherHeight));
 
-	Vector3DF lStraightVector(mVehicle->GetPosition() - lMuzzlePosition);
-	const float lCamDistance = 10;
-	lStraightVector.Normalize(lCamDistance);
-	lStraightVector.x = lCamDistance*sin(mLauncherYaw);
-	lStraightVector.y = -lCamDistance*cos(mLauncherYaw);
-	lStraightVector.z = -lStraightVector.z + lLauncherHeight*0.7f;
-	t = TransformationF(QuaternionF(), lLauncherPosition+lStraightVector);
-	t.GetOrientation().RotateAroundOwnZ(mLauncherYaw*0.9f);
-	t.GetOrientation().RotateAroundOwnX(lLookDownAngle);
+		float lRange = 150.0f;
+		float lLookDownAngle = -PIF/2;
+		if (mVehicle && mVehicle->IsLoaded())
+		{
+			lRange = lMuzzlePosition.GetDistance(mVehicle->GetPosition());
+			lLookDownAngle = ::sin((mVehicle->GetPosition().z-lMuzzlePosition.z)/lRange);
+		}
+
+		Vector3DF lStraightVector(mVehicle->GetPosition() - lMuzzlePosition);
+		const float lCamDistance = 10;
+		lStraightVector.Normalize(lCamDistance);
+		lStraightVector.x = lCamDistance*sin(mLauncherYaw);
+		lStraightVector.y = -lCamDistance*cos(mLauncherYaw);
+		lStraightVector.z = -lStraightVector.z + lLauncherHeight*0.7f;
+		TransformationF t(QuaternionF(), lLauncherPosition+lStraightVector);
+		t.GetOrientation().RotateAroundOwnZ(mLauncherYaw*0.9f);
+		t.GetOrientation().RotateAroundOwnX(lLookDownAngle);
 #ifdef LEPRA_IOS_LOOKNFEEL
-	t.GetOrientation().RotateAroundOwnY(PIF*0.5f);
+		t.GetOrientation().RotateAroundOwnY(PIF*0.5f);
 #endif // iOS
-	mRightCamera.Interpolate(mRightCamera, t, 0.1f);
-	mUiManager->SetCameraPosition(mRightCamera);
-	mUiManager->GetRenderer()->SetViewFrustum(std::min(60.0f, 9000/lRange), 3, 1000);
-	mUiManager->Render(lRightRect);
+		mRightCamera.Interpolate(mRightCamera, t, 0.1f);
+		mUiManager->SetCameraPosition(mRightCamera);
+		mUiManager->GetRenderer()->SetViewFrustum(std::min(60.0f, 9000/lRange), 3, 1000);
+		mUiManager->Render(lRightRect);
+	}
 	return true;
 }
 
