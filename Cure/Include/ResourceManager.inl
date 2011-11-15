@@ -274,7 +274,7 @@ ClassResourceBase<_Class, _ClassLoader>::ClassResourceBase(Cure::ResourceManager
 template<class _Class, class _ClassLoader>
 ClassResourceBase<_Class, _ClassLoader>::~ClassResourceBase()
 {
-	SetRamData((_Class*)0);
+	Parent::SetRamData((_Class*)0);
 }
 
 template<class _Class, class _ClassLoader>
@@ -293,7 +293,7 @@ template<class _Class, class _ClassLoader>
 bool ClassResourceBase<_Class, _ClassLoader>::Load()
 {
 	assert(Parent::GetRamData() == 0);
-	SetRamData(new _Class());
+	Parent::SetRamData(new _Class());
 	File* lFile = Resource::GetManager()->QueryFile(Resource::GetName());
 	bool lOk = (lFile != 0);
 	if (lOk)

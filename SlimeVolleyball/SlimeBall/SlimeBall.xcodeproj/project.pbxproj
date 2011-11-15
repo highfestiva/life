@@ -10,6 +10,7 @@
 		1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; };
 		1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF5F4DF0D08C38300B7A737 /* UIKit.framework */; };
 		288765FD0DF74451002DB57D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 288765FC0DF74451002DB57D /* CoreGraphics.framework */; };
+		35128A0514725ADE0006467C /* MacLog.mm in Sources */ = {isa = PBXBuildFile; fileRef = 35128A0414725ADE0006467C /* MacLog.mm */; };
 		B196560B13BE6AB5006A1422 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = B196560713BE6AB5006A1422 /* Icon.png */; };
 		B196560C13BE6AB5006A1422 /* Icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B196560813BE6AB5006A1422 /* Icon@2x.png */; };
 		B196560F13BE6C3B006A1422 /* Icon-72.png in Resources */ = {isa = PBXBuildFile; fileRef = B196560E13BE6C3B006A1422 /* Icon-72.png */; };
@@ -433,6 +434,7 @@
 		1D6058910D05DD3D006BFB54 /* SlimeBall.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SlimeBall.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DF5F4DF0D08C38300B7A737 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		288765FC0DF74451002DB57D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		35128A0414725ADE0006467C /* MacLog.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MacLog.mm; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* SlimeBall-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "SlimeBall-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
 		B16FB5F713A2CB04001C315F /* Slime.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Slime.hpp; sourceTree = "<group>"; };
 		B196560713BE6AB5006A1422 /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Icon.png; path = ../Icons/Icon.png; sourceTree = SOURCE_ROOT; };
@@ -1328,6 +1330,7 @@
 		B19A14F113A124940051A61C /* Posix */ = {
 			isa = PBXGroup;
 			children = (
+				35128A0414725ADE0006467C /* MacLog.mm */,
 				B19A14F213A124940051A61C /* PosixAntiCrack.cpp */,
 				B19A14F313A124940051A61C /* PosixBusLock.cpp */,
 				B19A14F413A124940051A61C /* PosixSystemManager.cpp */,
@@ -2551,6 +2554,7 @@
 				B1A1E02413AA77710097B8D0 /* UiOggAlStream.cpp in Sources */,
 				B1A1E02513AA77710097B8D0 /* UiSoundStream.cpp in Sources */,
 				B1CC28E413BA906B009BD34A /* UiIosInput.mm in Sources */,
+				35128A0514725ADE0006467C /* MacLog.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

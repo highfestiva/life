@@ -469,7 +469,7 @@ bool Game::Render()
 	{
 		const Vector3DF lCutie = mVehicle->GetPosition();
 		const Vector3DF lGoal = mCtf->GetPosition();
-		const double lTotalTime = 1.0;
+		const double lTotalTime = 35.0;
 		const double lFrameTime = 1.0/FPS;
 		mFlyByTime += lFrameTime;
 		if (mFlyByTime > lTotalTime)

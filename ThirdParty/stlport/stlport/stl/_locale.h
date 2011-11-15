@@ -40,6 +40,7 @@
 #endif
 
 #include <stl/_facets_fwd.h>
+#include <stl/_string.h>    // high_festiva was here!
 
 _STLP_BEGIN_NAMESPACE
 

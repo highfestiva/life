@@ -653,6 +653,7 @@ void App::DrawHud() const
 	const TBC::PhysicsEngine* lGas;
 	const TBC::PhysicsEngine* lBrakes;
 	const TBC::PhysicsEngine* lTurn;
+    if (lAvatar1->GetPhysics()->GetEngineCount() >= 2)
 	{
 		lGas = lAvatar1->GetPhysics()->GetEngine(0);
 		lBrakes = lAvatar1->GetPhysics()->GetEngine(2);
@@ -670,6 +671,7 @@ void App::DrawHud() const
 			InfoText(1, _T("Steering wheel"), -PIF/2, 0, -20);
 		}
 	}
+    if (lAvatar2->GetPhysics()->GetEngineCount() >= 2)
 	{
 		lGas = lAvatar2->GetPhysics()->GetEngine(0);
 		lForce = lGas->GetValue();

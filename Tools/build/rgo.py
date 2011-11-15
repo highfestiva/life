@@ -338,6 +338,10 @@ def _macappify(exe, name):
 
 
 def _demacappify(wildcard):
+	try:
+		os.mkdir("bin")
+	except:
+		pass
 	os.chdir("bin")
 	import glob
 	import shutil

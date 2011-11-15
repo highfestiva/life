@@ -10,6 +10,9 @@
 		1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; };
 		1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF5F4DF0D08C38300B7A737 /* UIKit.framework */; };
 		288765FD0DF74451002DB57D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 288765FC0DF74451002DB57D /* CoreGraphics.framework */; };
+		35128A4D147262150006467C /* UiSound.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 35128A4C147262150006467C /* UiSound.cpp */; };
+		35128A51147262300006467C /* Launcher.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 35128A4F147262300006467C /* Launcher.cpp */; };
+		35128A52147262300006467C /* LauncherAi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 35128A50147262300006467C /* LauncherAi.cpp */; };
 		B106D4C11467342800E009B8 /* Cutie.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B106D4C01467342800E009B8 /* Cutie.cpp */; };
 		B106E0AE146734DD00E009B8 /* Ctf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B106E0AD146734DD00E009B8 /* Ctf.cpp */; };
 		B106E0B2146734F300E009B8 /* Spawner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B106E0B1146734F300E009B8 /* Spawner.cpp */; };
@@ -474,6 +477,9 @@
 		1D6058910D05DD3D006BFB54 /* GrenadeRun.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GrenadeRun.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DF5F4DF0D08C38300B7A737 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		288765FC0DF74451002DB57D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		35128A4C147262150006467C /* UiSound.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UiSound.cpp; path = ../../UiCure/Source/UiSound.cpp; sourceTree = "<group>"; };
+		35128A4F147262300006467C /* Launcher.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Launcher.cpp; sourceTree = "<group>"; };
+		35128A50147262300006467C /* LauncherAi.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LauncherAi.cpp; sourceTree = "<group>"; };
 		B106D4C01467342800E009B8 /* Cutie.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Cutie.cpp; sourceTree = "<group>"; };
 		B106E0AD146734DD00E009B8 /* Ctf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Ctf.cpp; sourceTree = "<group>"; };
 		B106E0B1146734F300E009B8 /* Spawner.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Spawner.cpp; sourceTree = "<group>"; };
@@ -1230,6 +1236,7 @@
 		B15F795413FC59E300E01A90 /* UiCure */ = {
 			isa = PBXGroup;
 			children = (
+				35128A4C147262150006467C /* UiSound.cpp */,
 				B15F798013FC5E1500E01A90 /* UiGameUiManager.mm */,
 				B15F795513FC5A0500E01A90 /* UiCollisionSoundManager.cpp */,
 				B15F795613FC5A0500E01A90 /* UiCppContextObject.cpp */,
@@ -1360,6 +1367,8 @@
 		B19A146913A122DE0051A61C /* GrenadeRun */ = {
 			isa = PBXGroup;
 			children = (
+				35128A4F147262300006467C /* Launcher.cpp */,
+				35128A50147262300006467C /* LauncherAi.cpp */,
 				B106E0B1146734F300E009B8 /* Spawner.cpp */,
 				B106E0AD146734DD00E009B8 /* Ctf.cpp */,
 				B106D4C01467342800E009B8 /* Cutie.cpp */,
@@ -2726,6 +2735,9 @@
 				B106D4C11467342800E009B8 /* Cutie.cpp in Sources */,
 				B106E0AE146734DD00E009B8 /* Ctf.cpp in Sources */,
 				B106E0B2146734F300E009B8 /* Spawner.cpp in Sources */,
+				35128A4D147262150006467C /* UiSound.cpp in Sources */,
+				35128A51147262300006467C /* Launcher.cpp in Sources */,
+				35128A52147262300006467C /* LauncherAi.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
