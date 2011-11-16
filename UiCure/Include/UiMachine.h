@@ -24,6 +24,7 @@ public:
 
 	Machine(Cure::ResourceManager* pResourceManager, const str& pClassId, GameUiManager* pUiManager);
 	virtual ~Machine();
+	void DeleteEngineSounds();
 
 protected:
 	void OnTick();

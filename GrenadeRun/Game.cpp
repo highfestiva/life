@@ -24,12 +24,6 @@
 #include "Spawner.h"
 
 
-#ifdef LEPRA_IOS
-#define LEPRA_IOS_LOOKNFEEL
-#endif // iOS
-//#define LEPRA_IOS_LOOKNFEEL
-
-
 
 namespace GrenadeRun
 {
@@ -97,7 +91,7 @@ bool Game::Initialize()
 		lRotation.RotateAroundOwnZ(-PIF/8);
 		mLeftCamera = TransformationF(lRotation, Vector3DF(-50, -100, 70));
 		mRightCamera = mLeftCamera;
-#ifdef LEPRA_IOS_LOOKNFEEL
+#ifdef LEPRA_IOS_LOOKANDFEEL
 		mLeftCamera.GetOrientation().RotateAroundOwnY(-PIF*0.5f);
 		mRightCamera.GetOrientation().RotateAroundOwnY(+PIF*0.5f);
 #endif // iOS
@@ -141,7 +135,7 @@ bool Game::Initialize()
 		mLauncherAi = new LauncherAi(this);
 		AddContextObject(mLauncherAi, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 		mLauncherAi->Init();
-		mComputerIndex = 0;
+		mComputerIndex = -1;
 	}
 	if (lOk)
 	{
@@ -469,7 +463,7 @@ bool Game::Render()
 	{
 		const Vector3DF lCutie = mVehicle->GetPosition();
 		const Vector3DF lGoal = mCtf->GetPosition();
-		const double lTotalTime = 35.0;
+		const double lTotalTime = 5.0;
 		const double lFrameTime = 1.0/FPS;
 		mFlyByTime += lFrameTime;
 		if (mFlyByTime > lTotalTime)
@@ -548,8 +542,12 @@ bool Game::Render()
 				t.SetPosition(lLauncherPosition + Vector3DF(+14, 0, +14));	// Beside launcher.
 			}
 		}
-#ifdef LEPRA_IOS_LOOKNFEEL
-		t.GetOrientation().RotateAroundOwnY(-PIF*0.5f);
+#ifdef LEPRA_IOS_LOOKANDFEEL
+		// If computer runs the launcher, the vehicle should be displayed in landscape mode.
+		if (GetComputerIndex() != 1)
+		{
+			t.GetOrientation().RotateAroundOwnY(-PIF*0.5f);
+		}
 #endif // iOS
 		if (GetComputerIndex() != 0)
 		{
@@ -560,7 +558,8 @@ bool Game::Render()
 		}
 		if (GetComputerIndex() != 1)
 		{
-#ifdef LEPRA_IOS_LOOKNFEEL
+#ifdef LEPRA_IOS_LOOKANDFEEL
+			// The launcher is always displayed in portrait, both for single and dual play.
 			t.GetOrientation().RotateAroundOwnY(PIF);
 #endif // iOS
 			mRightCamera.Interpolate(mRightCamera, t, 0.05f);
@@ -608,8 +607,12 @@ bool Game::Render()
 		t.GetOrientation().RotateAroundOwnX(-::atan(mVehicleCamHeight/lCamXYDistance) + PIF/18);
 		mVehicleCamPos = lVehiclePos + lOffset;
 		t.GetPosition() = mVehicleCamPos;
-#ifdef LEPRA_IOS_LOOKNFEEL
-		t.GetOrientation().RotateAroundOwnY(-PIF*0.5f);
+#ifdef LEPRA_IOS_LOOKANDFEEL
+		// If computer runs the launcher, the vehicle should be displayed in landscape mode.
+		if (GetComputerIndex() != 1)
+		{
+			t.GetOrientation().RotateAroundOwnY(-PIF*0.5f);
+		}
 #endif // iOS
 		mLeftCamera.Interpolate(mLeftCamera, t, 0.1f);
 		mUiManager->SetCameraPosition(mLeftCamera);
@@ -639,7 +642,8 @@ bool Game::Render()
 		TransformationF t(QuaternionF(), lLauncherPosition+lStraightVector);
 		t.GetOrientation().RotateAroundOwnZ(mLauncherYaw*0.9f);
 		t.GetOrientation().RotateAroundOwnX(lLookDownAngle);
-#ifdef LEPRA_IOS_LOOKNFEEL
+#ifdef LEPRA_IOS_LOOKANDFEEL
+		// The launcher is always displayed in portrait, both for single and dual play.
 		t.GetOrientation().RotateAroundOwnY(PIF*0.5f);
 #endif // iOS
 		mRightCamera.Interpolate(mRightCamera, t, 0.1f);

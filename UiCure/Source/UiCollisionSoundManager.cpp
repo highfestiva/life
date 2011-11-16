@@ -111,11 +111,21 @@ void CollisionSoundManager::OnCollision(const Vector3DF& pForce, const Vector3DF
 	SoundInfo* lSoundInfo = GetPlayingSound(lKey);
 	if (lSoundInfo)
 	{
-		if (lImpact > lSoundInfo->mBaseImpact*1.8)
+		const double lTime = (lSoundInfo->mSound->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)? mUiManager->GetSoundManager()->GetStreamTime(lSoundInfo->mSound->GetRamData()) : 0;
+		if (lTime < 0.2f)
 		{
-			// We are louder! Play us instead!
-			lSoundInfo->mBaseImpact = lImpact;
-			UpdateSound(lSoundInfo);
+			if (lImpact > lSoundInfo->mBaseImpact * 1.2f)
+			{
+				// We are louder! Use our impact instead!
+				lSoundInfo->mBaseImpact = lImpact;
+				UpdateSound(lSoundInfo);
+			}
+		}
+		else
+		{
+			// Either we are much newer, or our volume is much higher. Replay!
+			StopSound(lKey);
+			PlaySound(lKey, pPosition, lImpact);
 		}
 	}
 	else
@@ -178,17 +188,18 @@ void CollisionSoundManager::UpdateSound(SoundInfo* pSoundInfo)
 	}
 }
 
-
-
-/*CollisionSoundManager::GeometryCombination::GeometryCombination(TBC::ChunkyBoneGeometry* pGeometry):
-	mGeometry(pGeometry)
+void CollisionSoundManager::StopSound(const TBC::ChunkyBoneGeometry* pGeometryKey)
 {
+	SoundMap::iterator x = mSoundMap.find(pGeometryKey);
+	if (x == mSoundMap.end())
+	{
+		return;
+	}
+	SoundInfo* lSoundInfo = x->second;
+	mSoundMap.erase(x);
+	mUiManager->GetSoundManager()->Stop(lSoundInfo->mSound->GetData());
+	delete lSoundInfo;
 }
-
-bool CollisionSoundManager::GeometryCombination::operator==(const GeometryCombination& pOther) const
-{
-	return (mGeometry == pOther.mGeometry);
-}*/
 
 
 

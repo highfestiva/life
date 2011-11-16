@@ -72,6 +72,7 @@ void Cutie::DrainHealth(float pDrain)
 			++x;
 		}*/
 	}
+	DeleteEngineSounds();
 }
 
 float Cutie::GetHealth() const

@@ -32,10 +32,6 @@
 
 
 
-#ifdef LEPRA_IOS
-#define LEPRA_IOS_LOOKANDFEEL
-#endif // iOS
-//#define LEPRA_IOS_LOOKANDFEEL
 #define UIKEY(name)	UiLepra::InputManager::IN_KBD_##name
 #define BUTTON_WIDTH	40
 #define BUTTON_MARGIN	2
@@ -160,9 +156,9 @@ private:
 
 struct IsPressing
 {
-    IsPressing(int pTag): mTag(pTag) {}
-    bool operator()(const FingerMovement& pTouch) { return (pTouch.mTag == mTag); }
-    int mTag;
+	IsPressing(int pTag): mTag(pTag) {}
+	bool operator()(const FingerMovement& pTouch) { return (pTouch.mTag == mTag); }
+	int mTag;
 };
 
 
@@ -558,13 +554,13 @@ void App::DrawHud() const
 	const float m = BUTTON_MARGIN;
 
 	const int lWinner = mGame->GetWinnerIndex();
-#ifdef LEPRA_IOS_LOOKANDFEEL
-	const float lAngle = PIF/2;
-#else // Computer.
-	const float lAngle = 0;
-#endif // iOS / computer
 	if (lWinner >= 0)
 	{
+#ifdef LEPRA_IOS_LOOKANDFEEL
+		const float lAngle = (mGame->GetComputerIndex() != 1)? PIF/2 : 0;
+#else // Computer.
+		const float lAngle = 0;
+#endif // iOS / computer
 		UiTbc::FontManager::FontId lFontId = mUiManager->GetFontManager()->GetActiveFontId();
 		mUiManager->GetFontManager()->SetActiveFont(mBigFontId);
 		if (mGame->GetComputerIndex() < 0)
@@ -572,7 +568,7 @@ void App::DrawHud() const
 			if (lWinner == 0)
 			{
 				mUiManager->GetPainter()->SetColor(GREEN, 0);
-				PrintText(_T("WON!"),   +lAngle, (int)(w*1/4), (int)(h/2));
+				PrintText(_T("WON!"),  +lAngle, (int)(w*1/4), (int)(h/2));
 				mUiManager->GetPainter()->SetColor(RED, 0);
 				PrintText(_T("LOST!"), -lAngle, (int)(w*3/4), (int)(h/2));
 			}
@@ -581,7 +577,7 @@ void App::DrawHud() const
 				mUiManager->GetPainter()->SetColor(RED, 0);
 				PrintText(_T("LOST!"), +lAngle, (int)(w*1/4), (int)(h/2));
 				mUiManager->GetPainter()->SetColor(GREEN, 0);
-				PrintText(_T("WON!"),   -lAngle, (int)(w*3/4), (int)(h/2));
+				PrintText(_T("WON!"),  -lAngle, (int)(w*3/4), (int)(h/2));
 			}
 		}
 		else
@@ -601,29 +597,49 @@ void App::DrawHud() const
 	}
 
 #ifdef LEPRA_IOS_LOOKANDFEEL
-	// Left player.
-	DrawCircle(m+lButtonWidth,			m+lButtonRadius,	lButtonRadius-2);	// Up/down.
-	InfoText(1, _T("Throttle/brake"), 0, 14, 0);
-	DrawRoundedPolygon(m*2+lButtonWidth*1.6f,	m+lButtonRadius,	lButtonRadius*0.5f,	+PIF/2,	3);
-	DrawRoundedPolygon(lButtonWidth*0.4f,		m+lButtonRadius,	lButtonRadius*0.5f,	-PIF/2,	3);
-	DrawCircle(m+lButtonRadius,			h-m-lButtonWidth,	lButtonRadius-2);	// Left/right.
-	InfoText(1, _T("Left/right"), -PIF/2);
-	DrawRoundedPolygon(m+lButtonRadius,		h-m*2-lButtonWidth*1.6f,lButtonRadius*0.5f,	0,	3);
-	DrawRoundedPolygon(m+lButtonRadius,		h-lButtonWidth*0.4f,	lButtonRadius*0.5f,	PIF,	3);
-	// Right player.
-	DrawCircle(w-m-lButtonWidth,			h-m-lButtonRadius,	lButtonRadius-2);	// Up/down.
-	InfoText(2, _T("Up/down"), PIF);
-	DrawRoundedPolygon(w-m*2-lButtonWidth*1.6f,	h-m-lButtonRadius,	lButtonRadius*0.5f,	-PIF/2,	3);
-	DrawRoundedPolygon(w-lButtonWidth*0.4f,		h-m-lButtonRadius,	lButtonRadius*0.5f,	+PIF/2,	3);
-	DrawCircle(w-m-lButtonRadius,			m+lButtonWidth,		lButtonRadius-2);	// Left/right.
-	InfoText(2, _T("Left/right"), PIF/2);
-	DrawRoundedPolygon(w-m-lButtonRadius,		m*2+lButtonWidth*1.6f,	lButtonRadius*0.5f,	PIF,	3);
-	DrawRoundedPolygon(w-m-lButtonRadius,		lButtonWidth*0.4f,	lButtonRadius*0.5f,	0,	3);
-	// Bomb button.
-	bool lIsLocked = mGame->IsLauncherLocked();
-	Color c = lIsLocked? Color(10, 10, 10) : mTouchShootColor;
-	DrawRoundedPolygon(w-m-lButtonRadius,		h/2,			lButtonRadius,	-PIF/2,	6, c);
-	InfoText(2, _T("BOOOM!"), PIF/2);
+	if (mGame->GetComputerIndex() != 0)
+	{
+		// Left player.
+		if (mGame->GetComputerIndex() < 0)	// 2P?
+		{
+			DrawCircle(m+lButtonWidth,			m+lButtonRadius,	lButtonRadius-2);	// Up/down.
+			InfoText(1, _T("Throttle/brake"), 0, 14, 0);
+			DrawRoundedPolygon(m*2+lButtonWidth*1.6f,	m+lButtonRadius,	lButtonRadius*0.5f,	+PIF/2,	3);
+			DrawRoundedPolygon(lButtonWidth*0.4f,		m+lButtonRadius,	lButtonRadius*0.5f,	-PIF/2,	3);
+			DrawCircle(m+lButtonRadius,			h-m-lButtonWidth,	lButtonRadius-2);	// Left/right.
+			InfoText(1, _T("Left/right"), -PIF/2);
+			DrawRoundedPolygon(m+lButtonRadius,		h-m*2-lButtonWidth*1.6f,lButtonRadius*0.5f,	0,	3);
+			DrawRoundedPolygon(m+lButtonRadius,		h-lButtonWidth*0.4f,	lButtonRadius*0.5f,	PIF,	3);
+		}
+		else
+		{
+			DrawCircle(m+lButtonRadius,			h-m-lButtonWidth,		lButtonRadius-2);	// Up/down.
+			InfoText(1, _T("Throttle/brake"), PIF/2, 0, -14);
+			DrawRoundedPolygon(m+lButtonRadius,		h-m*2-lButtonWidth*1.6f,	lButtonRadius*0.5f,	0,	3);
+			DrawRoundedPolygon(m+lButtonRadius,		h-lButtonWidth*0.4f,		lButtonRadius*0.5f,	+PIF,	3);
+			DrawCircle(w-m-lButtonWidth,			h-m-lButtonRadius,		lButtonRadius-2);	// Left/right.
+			InfoText(1, _T("Left/right"), 0);
+			DrawRoundedPolygon(w-m*2-lButtonWidth*1.6f,	h-m-lButtonRadius,		lButtonRadius*0.5f,	-PIF/2,	3);
+			DrawRoundedPolygon(w-lButtonWidth*0.4f,		h-m-lButtonRadius,		lButtonRadius*0.5f,	+PIF/2,	3);
+		}
+	}
+	if (mGame->GetComputerIndex() != 1)
+	{
+		// Right player.
+		DrawCircle(w-m-lButtonWidth,			h-m-lButtonRadius,	lButtonRadius-2);	// Up/down.
+		InfoText(2, _T("Up/down"), PIF);
+		DrawRoundedPolygon(w-m*2-lButtonWidth*1.6f,	h-m-lButtonRadius,	lButtonRadius*0.5f,	-PIF/2,	3);
+		DrawRoundedPolygon(w-lButtonWidth*0.4f,		h-m-lButtonRadius,	lButtonRadius*0.5f,	+PIF/2,	3);
+		DrawCircle(w-m-lButtonRadius,			m+lButtonWidth,		lButtonRadius-2);	// Left/right.
+		InfoText(2, _T("Left/right"), PIF/2);
+		DrawRoundedPolygon(w-m-lButtonRadius,		m*2+lButtonWidth*1.6f,	lButtonRadius*0.5f,	PIF,	3);
+		DrawRoundedPolygon(w-m-lButtonRadius,		lButtonWidth*0.4f,	lButtonRadius*0.5f,	0,	3);
+		// Bomb button.
+		bool lIsLocked = mGame->IsLauncherLocked();
+		Color c = lIsLocked? Color(10, 10, 10) : mTouchShootColor;
+		DrawRoundedPolygon(w-m-lButtonRadius,		h/2,			lButtonRadius,	-PIF/2,	6, c);
+		InfoText(2, _T("BOOOM!"), PIF/2);
+	}
 #endif // iOS
 
 	// Draw touch force meters, to give a visual indication of steering.
@@ -653,25 +669,44 @@ void App::DrawHud() const
 	const TBC::PhysicsEngine* lGas;
 	const TBC::PhysicsEngine* lBrakes;
 	const TBC::PhysicsEngine* lTurn;
-    if (lAvatar1->GetPhysics()->GetEngineCount() >= 2)
+	if ( lAvatar1->GetPhysics()->GetEngineCount() >= 3)
 	{
-		lGas = lAvatar1->GetPhysics()->GetEngine(0);
-		lBrakes = lAvatar1->GetPhysics()->GetEngine(2);
-		lForce = lGas->GetValue() - lBrakes->GetValue();
-		if (lForce != 0 || std::find_if(gFingerMoveList.begin(), gFingerMoveList.end(), IsPressing(1)) != gFingerMoveList.end())
+		if (mGame->GetComputerIndex() != 0)
 		{
-			DrawForceMeter((int)(m*2+lButtonWidth*4), (int)(m+lButtonRadius), -PIF/2, lForce, false);
-			InfoText(1, _T("Acceleration"), 0);
-		}
-		lTurn = lAvatar1->GetPhysics()->GetEngine(1);
-		lForce = lTurn->GetValue();
-		if (lForce != 0 || std::find_if(gFingerMoveList.begin(), gFingerMoveList.end(), IsPressing(2)) != gFingerMoveList.end())
-		{
-			DrawForceMeter((int)(m*2+lButtonWidth*4), (int)(h-m-lButtonWidth), PIF, lForce, true);
-			InfoText(1, _T("Steering wheel"), -PIF/2, 0, -20);
+			lGas = lAvatar1->GetPhysics()->GetEngine(0);
+			lBrakes = lAvatar1->GetPhysics()->GetEngine(2);
+			lForce = lGas->GetValue() - lBrakes->GetValue();
+			if (lForce != 0 || std::find_if(gFingerMoveList.begin(), gFingerMoveList.end(), IsPressing(1)) != gFingerMoveList.end())
+			{
+				if (mGame->GetComputerIndex() < 0)	// 2P?
+				{
+					DrawForceMeter((int)(m*2+lButtonWidth*4), (int)(m+lButtonRadius), -PIF/2, lForce, false);
+					InfoText(1, _T("Acceleration"), 0);
+				}
+				else
+				{
+					DrawForceMeter((int)(m+lButtonRadius), (int)(h-m*2-lButtonWidth*4), 0, lForce, false);
+					InfoText(1, _T("Acceleration"), +PIF/2);
+				}
+			}
+			lTurn = lAvatar1->GetPhysics()->GetEngine(1);
+			lForce = lTurn->GetValue();
+			if (lForce != 0 || std::find_if(gFingerMoveList.begin(), gFingerMoveList.end(), IsPressing(2)) != gFingerMoveList.end())
+			{
+				if (mGame->GetComputerIndex() < 0)	// 2P?
+				{
+					DrawForceMeter((int)(m*2+lButtonWidth*4), (int)(h-m-lButtonWidth), PIF, lForce, true);
+					InfoText(1, _T("Steering wheel"), -PIF/2, 0, -20);
+				}
+				else
+				{
+					DrawForceMeter((int)(w-m-lButtonWidth), (int)(h-m*2-lButtonWidth*4), -PIF/2, lForce, true);
+					InfoText(1, _T("Steering wheel"), 0, -20, 0);
+				}
+			}
 		}
 	}
-    if (lAvatar2->GetPhysics()->GetEngineCount() >= 2)
+	if (mGame->GetComputerIndex() != 1 && lAvatar2->GetPhysics()->GetEngineCount() >= 2)
 	{
 		lGas = lAvatar2->GetPhysics()->GetEngine(0);
 		lForce = lGas->GetValue();
@@ -701,25 +736,25 @@ void App::DrawHud() const
 	{
 		float x;
 		float y;
+#ifdef LEPRA_IOS_LOOKANDFEEL
+		x = w-m*1.5f-lButtonWidth/2;
+		y = h-m*2-lButtonWidth-8;
+#else // !iOS
 		if (mGame->GetComputerIndex() < 0)	// Two players.
 		{
-#ifdef LEPRA_IOS_LOOKANDFEEL
-			x = w-m*1.5f-lButtonWidth/2;
-			y = h-m*2-lButtonWidth-8;
-#else // !iOS
 			lDrawAngle = -PIF/2;
 			x = w/2+m+lButtonWidth;
-			y = h-m;
-#endif // iOS/!iOS
+			y = h-m*2;
 		}
 		else	// Single player launcher.
 		{
 			lDrawAngle = -PIF/2;
 			x = +m+lButtonWidth;
-			y = h-m;
+			y = h-m*2;
 		}
+#endif // iOS/!iOS
 		mUiManager->GetPainter()->SetColor(Color(60, 40, 20), 0);
-		DrawBarrelIndicatorGround(x+3, y, lDrawAngle,  10, lButtonWidth/2);
+		DrawBarrelIndicatorGround(x, y, lDrawAngle, lButtonWidth*0.4f, 8);
 		mUiManager->GetPainter()->SetColor(Color(150, 20, 20), 0);
 		DrawBarrelIndicator(x, y, lGuidePitch+lDrawAngle, 1.1f, 3.0f, true);
 		mUiManager->GetPainter()->SetColor(Color(220, 210, 200), 0);
@@ -732,23 +767,14 @@ void App::DrawHud() const
 	{
 		float x;
 		float y;
-		if (mGame->GetComputerIndex() < 0)	// Two players.
-		{
 #ifdef LEPRA_IOS_LOOKANDFEEL
-			x = w-m*2-lButtonWidth-8;
-			y = m*1.5f+lButtonWidth;
+		x = w-m*2-lButtonWidth-8;
+		y = m*1.5f+lButtonWidth;
 #else // !iOS
-			lDrawAngle = -PIF/2;
-			x = w-m-lButtonWidth;
-			y = h-m;
+		lDrawAngle = -PIF/2;
+		x = w-m-lButtonWidth;
+		y = h-m*2;
 #endif // iOS/!iOS
-		}
-		else	// Single player launcher.
-		{
-			lDrawAngle = -PIF/2;
-			x = w-m-lButtonWidth;
-			y = h-m;
-		}
 		mUiManager->GetPainter()->SetColor(Color(150, 20, 20), 0);
 		DrawBarrelIndicator(x, y, lGuideYaw+lDrawAngle, 1.1f, 3.0f, true);
 		mUiManager->GetPainter()->SetColor(Color(220, 210, 200), 0);
@@ -899,13 +925,15 @@ void App::DrawHealthMeter(int x, int y, float pAngle, float pSize, float pHealth
 
 void App::DrawBarrelIndicatorGround(float x, float y, float pAngle, float pBaseLength, float pBaseWidth) const
 {
-	//const float sa = ::sin(pAngle);
+	const float sa = ::sin(pAngle);
 	const float ca = ::cos(pAngle);
+	x += 3*ca - 3*sa;
+	y -= 2*ca + 2*sa;
 	std::vector<Vector2DF> lCoords;
-	lCoords.push_back(Vector2DF(x-ca*pBaseWidth, y+ca*pBaseLength));
-	lCoords.push_back(Vector2DF(x-ca*pBaseWidth, y-ca*pBaseLength));
-	lCoords.push_back(Vector2DF(x+ca*pBaseWidth, y-ca*pBaseLength));
-	lCoords.push_back(Vector2DF(x+ca*pBaseWidth, y+ca*pBaseLength));
+	lCoords.push_back(Vector2DF(x-ca*pBaseWidth+sa*pBaseLength, y+ca*pBaseLength-sa*pBaseWidth));
+	lCoords.push_back(Vector2DF(x-ca*pBaseWidth-sa*pBaseLength, y-ca*pBaseLength-sa*pBaseWidth));
+	lCoords.push_back(Vector2DF(x+ca*pBaseWidth-sa*pBaseLength, y-ca*pBaseLength+sa*pBaseWidth));
+	lCoords.push_back(Vector2DF(x+ca*pBaseWidth+sa*pBaseLength, y+ca*pBaseLength+sa*pBaseWidth));
 	lCoords.push_back(lCoords[0]);
 	mUiManager->GetPainter()->DrawFan(lCoords, true);
 }

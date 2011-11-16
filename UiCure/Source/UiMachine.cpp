@@ -34,6 +34,11 @@ Machine::Machine(Cure::ResourceManager* pResourceManager, const str& pClassId, G
 
 Machine::~Machine()
 {
+	DeleteEngineSounds();
+}
+
+void Machine::DeleteEngineSounds()
+{
 	TagSoundTable::iterator x = mEngineSoundTable.begin();
 	for (; x != mEngineSoundTable.end(); ++x)
 	{

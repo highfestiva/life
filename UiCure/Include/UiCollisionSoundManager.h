@@ -109,6 +109,7 @@ private:
 	void PlaySound(const TBC::ChunkyBoneGeometry* pGeometryKey, const Vector3DF& pPosition, float pImpact);
 	void OnSoundLoaded(UiCure::UserSound3dResource* pSoundResource);
 	void UpdateSound(SoundInfo* pSoundInfo);
+	void StopSound(const TBC::ChunkyBoneGeometry* pGeometryKey);
 
 	typedef std::hash_map<const TBC::ChunkyBoneGeometry*, SoundInfo*, LEPRA_VOIDP_HASHER> SoundMap;
 	typedef std::hash_map<str, SoundResourceInfo> SoundNameMap;
