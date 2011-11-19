@@ -872,7 +872,7 @@ bool GameClientMasterTicker::Reinitialize()
 			}
 			lDevice->AddFunctor(new MasterInputFunctor(this));
 		}*/
-		mUiManager->GetInputManager()->AddFunctor(new MasterInputFunctor(this));
+		mUiManager->GetInputManager()->AddFunctor(new MasterInputFunctor(this, &GameClientMasterTicker::OnInput));
 
 		SlaveArray::iterator x;
 		for (x = mSlaveArray.begin(); lOk && x != mSlaveArray.end(); ++x)
@@ -1425,23 +1425,6 @@ void GameClientMasterTicker::StashCalibration()
 				_T("Calibration.")+lDeviceId+_T(".")+lElement.first, lElement.second);
 		}
 	}
-}
-
-
-
-GameClientMasterTicker::MasterInputFunctor::MasterInputFunctor(GameClientMasterTicker* pManager):
-	mManager(pManager)
-{
-}
-
-void GameClientMasterTicker::MasterInputFunctor::Call(UiLepra::InputElement* pElement)
-{
-	mManager->OnInput(pElement);
-}
-
-UiLepra::InputFunctor* GameClientMasterTicker::MasterInputFunctor::CreateCopy() const
-{
-	return (new MasterInputFunctor(mManager));
 }
 
 

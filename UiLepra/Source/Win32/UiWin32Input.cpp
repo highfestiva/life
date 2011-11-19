@@ -645,6 +645,12 @@ float Win32InputManager::GetCursorY()
 	return mCursorY;
 }
 
+void Win32InputManager::SetMousePosition(int x, int y)
+{
+	mCursorX = 2.0f * x / mScreenWidth  - 1.0f;
+	mCursorY = 2.0f * y / mScreenHeight - 1.0f;
+}
+
 const InputDevice* Win32InputManager::GetKeyboard() const
 {
 	return mKeyboard;
@@ -706,9 +712,7 @@ void Win32InputManager::SetMousePosition(int pMsg, int x, int y)
 		x = lPoint.x;
 		y = lPoint.y;
 	}
-
-	mCursorX = 2.0f * (float)x / (float)mScreenWidth  - 1.0f;
-	mCursorY = 2.0f * (float)y / (float)mScreenHeight - 1.0f;
+	SetMousePosition(x, y);
 }
 
 bool Win32InputManager::IsInitialized()

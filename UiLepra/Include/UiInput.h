@@ -118,6 +118,9 @@ public:
 	// If analogue:
 	//    Returns the analogue value normalized around -1 and 1.
 	float GetValue() const;
+	// Sets the uncalibrated value of this device.
+	// (Only useful with analogue elements).
+	virtual void SetValue(int pNewValue) = 0;
 
 	// Returns the difference between the current value and the previous value.
 	float GetDeltaValue() const;
@@ -136,7 +139,7 @@ public:
 	virtual bool SetCalibration(const str& pData) = 0;
 
 protected:
-	void SetValue(float pNewValue);
+	virtual void SetValue(float pNewValue);
 private:
 
 	float mPrevValue;
@@ -487,6 +490,7 @@ public:
 	// Range: [-1, 1] (Left and right, up and down)
 	virtual float GetCursorX() = 0;
 	virtual float GetCursorY() = 0;
+	virtual void SetMousePosition(int x, int y) = 0;
 
 	bool NotifyOnChar(tchar pChar);
 	bool NotifyOnKeyDown(KeyCode pKeyCode);

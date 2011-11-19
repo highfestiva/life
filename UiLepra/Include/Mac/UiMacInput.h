@@ -37,7 +37,7 @@ public:
 
 	// Sets the uncalibrated value of this device.
 	// (Only useful with analogue elements).
-	void SetValue(int pValue);
+	virtual void SetValue(int pValue);
 
 	str GetCalibration() const;
 	bool SetCalibration(const str& pData);
@@ -115,7 +115,7 @@ public:
 
 	virtual float GetCursorX();
 	virtual float GetCursorY();
-	void SetMousePosition(int x, int y);
+	virtual void SetMousePosition(int x, int y);
 
 	static KeyCode ConvertMacKeyCodeToKeyCode(unsigned pMacKeyCode);
 	static unichar ConvertChar(unichar pChar);

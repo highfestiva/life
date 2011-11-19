@@ -124,16 +124,7 @@ private:
 	bool ApplyCalibration();
 	void StashCalibration();
 
-	class MasterInputFunctor: public UiLepra::InputFunctor
-	{
-	public:
-		MasterInputFunctor(GameClientMasterTicker* pManager);
-	private:
-		void Call(UiLepra::InputElement* pElement);
-		UiLepra::InputFunctor* CreateCopy() const;
-		GameClientMasterTicker* mManager;
-	};
-
+	typedef UiLepra::TInputFunctor<GameClientMasterTicker> MasterInputFunctor;
 	typedef std::vector<GameClientSlaveManager*> SlaveArray;
 
 	Lock mLock;

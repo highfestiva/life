@@ -84,6 +84,10 @@ private:
 	bool Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor);
 	virtual bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
 	virtual bool OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode);
+#if !defined(LEPRA_IOS) && defined(LEPRA_IOS_LOOKANDFEEL)
+	void OnMouseInput(UiLepra::InputElement* pElement);
+	bool mIsMouseDown;
+#endif // Computer emulating iOS
 	virtual int PollTap(FingerMovement& pMovement);
 
 	void OnResize(int pWidth, int pHeight);
@@ -262,6 +266,10 @@ bool App::Open()
 		mUiManager->GetDisplayManager()->SetCaption(_T("Kill Cutie"));
 		mUiManager->GetDisplayManager()->AddResizeObserver(this);
 		mUiManager->GetInputManager()->AddKeyCodeInputObserver(this);
+#if !defined(LEPRA_IOS) && defined(LEPRA_IOS_LOOKANDFEEL)
+		mIsMouseDown = false;
+		mUiManager->GetInputManager()->GetMouse()->AddFunctor(new UiLepra::TInputFunctor<App>(this, &App::OnMouseInput));
+#endif // Computer emulating iOS
 	}
 	if (lOk)
 	{
@@ -514,7 +522,7 @@ bool App::Poll()
 
 void App::PollTaps()
 {
-#ifdef LEPRA_IOS
+#ifdef LEPRA_IOS_LOOKANDFEEL
 	UiCure::CppContextObject* lAvatar1 = mGame->GetP1();
 	UiCure::CppContextObject* lAvatar2 = mGame->GetP2();
 	if (!lAvatar1 || !lAvatar1->IsLoaded() || !lAvatar2 ||!lAvatar2->IsLoaded())
@@ -537,7 +545,7 @@ void App::PollTaps()
 			gFingerMoveList.erase(x++);
 		}
 	}
-#endif // iOS
+#endif // iOS L&F
 }
 
 void App::DrawHud() const
@@ -1132,19 +1140,48 @@ bool App::OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode)
 	return Steer(pKeyCode, 0);
 }
 
+#if !defined(LEPRA_IOS) && defined(LEPRA_IOS_LOOKANDFEEL)
+void App::OnMouseInput(UiLepra::InputElement* pElement)
+{
+	if (pElement->GetType() == UiLepra::InputElement::DIGITAL)
+	{
+		mIsMouseDown = pElement->GetBooleanValue();
+	}
+	UiLepra::InputManager* lInput = mUiManager->GetInputManager();
+	if (mIsMouseDown)
+	{
+		const int y = (int)((1+lInput->GetCursorX())*mUiManager->GetCanvas()->GetWidth()/2);
+		const int x = (int)((1-lInput->GetCursorY())*mUiManager->GetCanvas()->GetHeight()/2);
+		if (gFingerMoveList.empty())
+		{
+			gFingerMoveList.push_back(FingerMovement(x, y));
+		}
+		FingerMovement& lMovement = gFingerMoveList.back();
+		lMovement.mLastX = x;
+		lMovement.mLastY = y;
+	}
+	else
+	{
+		gFingerMoveList.clear();
+	}
+}
+#endif // Computer emulating iOS
+
 int App::PollTap(FingerMovement& pMovement)
 {
-	pMovement;
 	int lTag = 0;
+#ifdef LEPRA_IOS_LOOKANDFEEL
 #ifdef LEPRA_IOS
-	float x = pMovement.mLastX;
-	float y = pMovement.mLastY;
-	float lStartX = pMovement.mStartX;
-	float lStartY = pMovement.mStartY;
-	((UiLepra::IosInputManager*)mUiManager->GetInputManager())->SetMousePosition(x, y);
-	((UiLepra::IosInputElement*)mUiManager->GetInputManager()->GetMouse()->GetButton(0))->SetValue(pMovement.mIsPress? 1 : 0);
-	((UiLepra::IosInputElement*)mUiManager->GetInputManager()->GetMouse()->GetAxis(0))->SetValue(x);
-	((UiLepra::IosInputElement*)mUiManager->GetInputManager()->GetMouse()->GetAxis(1))->SetValue(y);
+	mUiManager->GetInputManager()->SetMousePosition(pMovement.mLastX, pMovement.mLastY);
+	mUiManager->GetInputManager()->GetMouse()->GetButton(0)->SetValue(pMovement.mIsPress? 1 : 0);
+	mUiManager->GetInputManager()->GetMouse()->GetAxis(0)->SetValue(pMovement.mLastX);
+	mUiManager->GetInputManager()->GetMouse()->GetAxis(1)->SetValue(pMovement.mLastY);
+#endif // iOS
+
+	float x = (float)pMovement.mLastX;
+	float y = (float)pMovement.mLastY;
+	float lStartX = (float)pMovement.mStartX;
+	float lStartY = (float)pMovement.mStartY;
 
 	UiCure::CppContextObject* lAvatar1 = mGame->GetP1();
 	UiCure::CppContextObject* lAvatar2 = mGame->GetP2();
@@ -1162,38 +1199,63 @@ int App::PollTap(FingerMovement& pMovement)
 	const float lDoubleWidth = (m*3 + BUTTON_WIDTH*2) * 1.5f;
 	const float s = lDoubleWidth / 2;
 #define CLAMPUP(v)	Math::Clamp((v)*2, -1.0f, 1.0f)
-	if (lStartX <= lDoubleWidth && lStartY <= lSingleWidth)	// P1 up/down?
+	if (mGame->GetComputerIndex() != 0)
 	{
-		mGame->SetThrottle(lAvatar1, CLAMPUP((x-lStartX)/s));
-		mPlayer1LastTouch.ClearTimeDiff();
-		lTag = 1;
+		if (mGame->GetComputerIndex() != 1)	// Dual play = portrait layout.
+		{
+			if (lStartX <= lDoubleWidth && lStartY <= lSingleWidth)	// P1 up/down?
+			{
+				mGame->SetThrottle(lAvatar1, CLAMPUP((x-lStartX)/s));
+				mPlayer1LastTouch.ClearTimeDiff();
+				lTag = 1;
+			}
+			else if (lStartX <= lSingleWidth && lStartY >= h-lDoubleWidth)	// P1 left/right?
+			{
+				lAvatar1->SetEnginePower(1, CLAMPUP((y-lStartY)/s), 0);
+				mPlayer1LastTouch.ClearTimeDiff();
+				lTag = 2;
+			}
+		}
+		else	// Cutie vs. computer = landscape layout.
+		{
+			if (lStartX <= lSingleWidth && lStartY >= h-lDoubleWidth)	// P1 up/down?
+			{
+				mGame->SetThrottle(lAvatar1, CLAMPUP((lStartY-y)/s));
+				mPlayer1LastTouch.ClearTimeDiff();
+				lTag = 1;
+			}
+			else if (lStartX >= h-lDoubleWidth && lStartY >= h-lSingleWidth)	// P1 left/right?
+			{
+				lAvatar1->SetEnginePower(1, CLAMPUP((x-lStartX)/s), 0);
+				mPlayer1LastTouch.ClearTimeDiff();
+				lTag = 2;
+			}
+		}
 	}
-	else if (lStartX <= lSingleWidth && lStartY >= h-lDoubleWidth)	// P1 left/right?
+	if (mGame->GetComputerIndex() != 1)
 	{
-		lAvatar1->SetEnginePower(1, CLAMPUP((y-lStartY)/s), 0);
-		mPlayer1LastTouch.ClearTimeDiff();
-		lTag = 2;
-	}
-	else if (lStartX >= w-lDoubleWidth && lStartY >= h-lSingleWidth)	// P2 up/down?
-	{
-		mGame->SetThrottle(lAvatar2, CLAMPUP((x-lStartX)/s));
-		mPlayer2LastTouch.ClearTimeDiff();
-		lTag = 3;
-	}
-	else if (lStartX >= w-lSingleWidth && lStartY <= lDoubleWidth)	// P1 left/right?
-	{
-		lAvatar2->SetEnginePower(1, CLAMPUP((lStartY-y)/s), 0);
-		mPlayer2LastTouch.ClearTimeDiff();
-		lTag = 4;
-	}
-	else if (x >= w-lSingleWidth && y >= h/2-s && y <= h/2+s)	// Bomb?
-	{
-		mGame->Shoot();
-		mPlayer2LastTouch.ClearTimeDiff();
-		lTag = 5;
+		// Launcher always in portrait mode.
+		if (lStartX >= w-lDoubleWidth && lStartY >= h-lSingleWidth)	// P2 up/down?
+		{
+			mGame->SetThrottle(lAvatar2, CLAMPUP((x-lStartX)/s));
+			mPlayer2LastTouch.ClearTimeDiff();
+			lTag = 3;
+		}
+		else if (lStartX >= w-lSingleWidth && lStartY <= lDoubleWidth)	// P1 left/right?
+		{
+			lAvatar2->SetEnginePower(1, CLAMPUP((lStartY-y)/s), 0);
+			mPlayer2LastTouch.ClearTimeDiff();
+			lTag = 4;
+		}
+		else if (x >= w-lSingleWidth && y >= h/2-s && y <= h/2+s)	// Bomb?
+		{
+			mGame->Shoot();
+			mPlayer2LastTouch.ClearTimeDiff();
+			lTag = 5;
+		}
 	}
 	pMovement.mTag = lTag;
-#endif // iOS
+#endif // iOS L&F
 	return lTag;
 }
 

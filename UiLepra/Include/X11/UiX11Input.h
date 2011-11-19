@@ -133,6 +133,7 @@ public:
 
 	virtual float GetCursorX();
 	virtual float GetCursorY();
+	virtual void SetMousePosition(int x, int y);
 
 	bool IsInitialized();
 

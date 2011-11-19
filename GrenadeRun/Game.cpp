@@ -132,10 +132,10 @@ bool Game::Initialize()
 	}
 	if (lOk)
 	{
-		mLauncherAi = new LauncherAi(this);
+		/*mLauncherAi = new LauncherAi(this);
 		AddContextObject(mLauncherAi, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
-		mLauncherAi->Init();
-		mComputerIndex = -1;
+		mLauncherAi->Init();*/
+		mComputerIndex = 0;
 	}
 	if (lOk)
 	{
@@ -333,7 +333,7 @@ void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vec
 
 	{
 		// Release gas puffs.
-		const int lParticleCount = 10;
+		const int lParticleCount = 5;
 		for (int i = 0; i < lParticleCount; ++i)
 		{
 			UiCure::Props* lPuff = new UiCure::Props(GetResourceManager(), _T("cloud_01"), mUiManager);
