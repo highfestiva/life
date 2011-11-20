@@ -1406,7 +1406,6 @@ void App::OnPauseClick(UiTbc::Button*)
 	UiTbc::Dialog<App>* d = new UiTbc::Dialog<App>(mUiManager->GetDesktopWindow(), _T(""), UiTbc::Dialog<App>::Action(this, &App::OnPauseAction));
 	d->AddButton(1, _T("Resume"));
 	d->AddButton(2, _T("Main menu"));
-	d->FireAndForget();
 }
 
 void App::OnPauseAction(UiTbc::Button* pButton)

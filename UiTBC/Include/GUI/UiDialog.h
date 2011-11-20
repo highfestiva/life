@@ -16,27 +16,22 @@ namespace UiTbc
 
 
 template<class _Target>
-class Dialog: public Component
+class Dialog: public RectComponent
 {
-	typedef Component Parent;
+	typedef RectComponent Parent;
 public:
 	typedef Button::Delegate Action;
 
 	Dialog(Component* pParent, const str& pText, Action pTarget);
 	virtual ~Dialog();
 	void AddButton(int pTag, const str& pText);
-	void FireAndForget();
-
-	virtual void Repaint(Painter* pPainter);
-	virtual void UpdateLayout();
 
 private:
+	virtual void UpdateLayout();
 	void OnClick(Button* pButton);
 
 	typedef std::vector<Button*> ButtonList;
 
-	Color mBackground;
-	Color mForeground;
 	str mText;
 	Action mTarget;
 	ButtonList mButtonList;

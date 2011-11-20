@@ -15,7 +15,8 @@ RectComponent::RectComponent(const str& pName, Layout* pLayout) :
 	mShaded(false),
 	mHollow(true),
 	mBehaveSolid(false),
-	mImageID(Painter::INVALID_IMAGEID)
+	mImageID(Painter::INVALID_IMAGEID),
+	mCornerRadius(0)
 {
 }
 
@@ -24,7 +25,8 @@ RectComponent::RectComponent(const Color& pColor, const str& pName, Layout* pLay
 	mShaded(false),
 	mHollow(false),
 	mBehaveSolid(false),
-	mImageID(Painter::INVALID_IMAGEID)
+	mImageID(Painter::INVALID_IMAGEID),
+	mCornerRadius(0)
 {
 	mColor[0] = pColor;
 	mColor[1].Set(0, 0, 0, 0);
@@ -42,6 +44,7 @@ RectComponent::RectComponent(const Color& pTopLeftColor,
 	mShaded(true),
 	mHollow(false),
 	mBehaveSolid(false),
+	mCornerRadius(0),
 	mImageID(Painter::INVALID_IMAGEID)
 {
 	mColor[0] = pTopLeftColor;
@@ -55,6 +58,7 @@ RectComponent::RectComponent(Painter::ImageID pImageID, const str& pName, Layout
 	mShaded(false),
 	mHollow(false),
 	mBehaveSolid(false),
+	mCornerRadius(0),
 	mImageID(pImageID)
 {
 	mColor[0].Set(0, 0, 0, 0);
@@ -84,25 +88,47 @@ void RectComponent::Repaint(Painter* pPainter)
 
 	if (mHollow == false)
 	{
-		if (mImageID == Painter::INVALID_IMAGEID)
+		if (mCornerRadius == 0)
 		{
-			pPainter->SetColor(mColor[0], 0);
-			pPainter->SetAlphaValue(mColor[0].mAlpha);
-			if (mShaded == true)
+			if (mImageID == Painter::INVALID_IMAGEID)
 			{
-				pPainter->SetColor(mColor[1], 1);
-				pPainter->SetColor(mColor[2], 2);
-				pPainter->SetColor(mColor[3], 3);
-				pPainter->FillShadedRect(lRect);
+				pPainter->SetColor(mColor[0], 0);
+				pPainter->SetAlphaValue(mColor[0].mAlpha);
+				if (mShaded == true)
+				{
+					pPainter->SetColor(mColor[1], 1);
+					pPainter->SetColor(mColor[2], 2);
+					pPainter->SetColor(mColor[3], 3);
+					pPainter->FillShadedRect(lRect);
+				}
+				else
+				{
+					pPainter->FillRect(lRect);
+				}
 			}
 			else
 			{
-				pPainter->FillRect(lRect);
+				lIMan->DrawImage(mImageID, lRect);
 			}
 		}
-		else
+		else	// Draw with rounded corners.
 		{
-			lIMan->DrawImage(mImageID, lRect);
+			pPainter->SetColor(mColor[0], 0);
+			pPainter->SetAlphaValue(mColor[0].mAlpha);
+			PixelRect lRect(GetScreenPos(), GetScreenPos() + GetSize());
+			const int x = lRect.GetCenterX();
+			const int y = lRect.GetCenterY();
+			const int dx = lRect.GetWidth()/2;
+			const int dy = lRect.GetHeight()/2;
+			std::vector<Vector2DF> lCoords;
+			lCoords.push_back(Vector2DF((float)x, (float)y));
+			AddRadius(lCoords, x-dx+mCornerRadius, y-dy+mCornerRadius, mCornerRadius, +PIF/2, 0);
+			AddRadius(lCoords, x+dx-mCornerRadius, y-dy+mCornerRadius, mCornerRadius, 0,      -PIF/2);
+			AddRadius(lCoords, x+dx-mCornerRadius, y+dy-mCornerRadius, mCornerRadius, -PIF/2, -PIF);
+			AddRadius(lCoords, x-dx+mCornerRadius, y+dy-mCornerRadius, mCornerRadius, +PIF,   +PIF/2);
+			// Back to start.
+			lCoords.push_back(lCoords[1]);
+			pPainter->DrawFan(lCoords, true);
 		}
 	}
 
@@ -233,6 +259,24 @@ bool RectComponent::GetBehaveSolid() const
 	return mBehaveSolid;
 }
 
+
+
+void RectComponent::SetCornerRadius(int pRadius)
+{
+	mCornerRadius = pRadius;
+}
+
+void RectComponent::AddRadius(VertexList& pVertexList, int x, int y, int r, float pStartAngle, float pEndAngle)
+{
+	const float lAngleDiff = pEndAngle-pStartAngle;
+	const int lCount = (int)(r * ::fabs(lAngleDiff) * 0.32f);
+	const float lAngleStep = lAngleDiff/(lCount-1);
+	float a = pStartAngle;
+	for (int i = 0; i < lCount; ++i, a+=lAngleStep)
+	{
+		pVertexList.push_back(Vector2DF(x-r*::sin(a), y-r*::cos(a)));
+	}
+}
 
 
 }

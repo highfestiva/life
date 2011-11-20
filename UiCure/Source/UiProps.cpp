@@ -24,6 +24,7 @@ Props::Props(Cure::ResourceManager* pResourceManager, const str& pClassId, GameU
 	mScale(1),
 	mTime(0),
 	mLifeTime(2),
+	mFadeOutTime(0.6f),
 	mOpacity(1),
 	mIsFadingOut(false)
 {
@@ -55,6 +56,10 @@ void Props::StartParticle(ParticleType pParticleType, const Vector3DF& pStartVel
 	GetManager()->AddAlarmCallback(this, 5, mLifeTime, 0);
 }
 
+void Props::SetFadeOutTime(float pTime)
+{
+	mFadeOutTime = pTime;
+}
 
 
 void Props::DispatchOnLoadMesh(UserGeometryReferenceResource* pMeshResource)
@@ -104,9 +109,9 @@ void Props::OnTick()
 			SetRootOrientation(lOrientation);
 
 			const float lTimeLeft = mLifeTime-mTime;
-			if (lTimeLeft < 1)
+			if (lTimeLeft < mFadeOutTime)
 			{
-				const float lFadeOutOpacity = mOpacity * lTimeLeft;
+				const float lFadeOutOpacity = mOpacity * lTimeLeft / mFadeOutTime;
 				for (size_t x = 0; x < mMeshResourceArray.size(); ++x)
 				{
 					UserGeometryReferenceResource* lMesh = mMeshResourceArray[x];

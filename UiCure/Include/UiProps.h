@@ -32,6 +32,7 @@ public:
 
 	void SetOpacity(float pOpacity);
 	void StartParticle(ParticleType pParticleType, const Vector3DF& pStartVelocity, float pScale, float pAngularRange, float pTime);
+	void SetFadeOutTime(float pTime);
 
 protected:
 	void DispatchOnLoadMesh(UserGeometryReferenceResource* pMeshResource);
@@ -45,6 +46,7 @@ private:
 	float mScale;
 	float mTime;
 	float mLifeTime;
+	float mFadeOutTime;
 	float mOpacity;
 	bool mIsFadingOut;
 	Vector3DF mAngularVelocity;

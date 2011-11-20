@@ -5,12 +5,12 @@
 
 template<class _Target>
 Dialog<_Target>::Dialog(Component* pParent, const str& pText, Action pTarget):
-	Parent(_T("Dialog"), new FloatingLayout),
-	mBackground(WHITE),
-	mForeground(DARK_GRAY),
+	Parent(WHITE, _T("Dialog"), new FloatingLayout),
 	mText(pText),
 	mTarget(pTarget)
 {
+	SetCornerRadius(20);
+	mColor[1] = DARK_GRAY;
 	const PixelCoord& lSize = pParent->GetSize();
 	const int w = std::max(lSize.x/2, 200);
 	const int h = std::max(lSize.y/2, 100);
@@ -28,8 +28,8 @@ Dialog<_Target>::~Dialog()
 template<class _Target>
 void Dialog<_Target>::AddButton(int pTag, const str& pText)
 {
-	Button* lButton = new Button(BorderComponent::ZIGZAG, 1, Color(mBackground, mForeground, 0.8f), _T("DialogButton"));
-	lButton->SetText(pText, mForeground);
+	Button* lButton = new Button(BorderComponent::ZIGZAG, 1, Color(mColor[0], mColor[1], 0.3f), _T("DialogButton"));
+	lButton->SetText(pText, mColor[1]);
 	lButton->SetTag(pTag);
 	AddChild(lButton);
 	mButtonList.push_back(lButton);
@@ -37,48 +37,7 @@ void Dialog<_Target>::AddButton(int pTag, const str& pText)
 	lButton->SetOnClick(Dialog, OnClick);
 }
 
-template<class _Target>
-void Dialog<_Target>::FireAndForget()
-{
-}
 
-
-
-template<class _Target>
-void Dialog<_Target>::Repaint(Painter* pPainter)
-{
-	PixelRect lRect(GetScreenPos(), GetScreenPos() + GetSize());
-	const float x = (float)lRect.GetCenterX();
-	const float y = (float)lRect.GetCenterY();
-	const float dx = (float)lRect.GetWidth()/2;
-	const float dy = (float)lRect.GetHeight()/2;
-	const float rdx = dx * 0.04f;
-	const float rdy = dy * 0.04f;
-	std::vector<Vector2DF> lCoords;
-	lCoords.push_back(Vector2DF(x, y));
-	// Upper left.
-	lCoords.push_back(Vector2DF(x-dx-rdx,   y-dy+rdy*2));
-	lCoords.push_back(Vector2DF(x-dx,       y-dy));
-	lCoords.push_back(Vector2DF(x-dx+rdx*2, y-dy-rdy));
-	// Upper right.
-	lCoords.push_back(Vector2DF(x+dx-rdx*2, y-dy-rdy));
-	lCoords.push_back(Vector2DF(x+dx,       y-dy));
-	lCoords.push_back(Vector2DF(x+dx+rdx,   y-dy+rdy*2));
-	// Lower right.
-	lCoords.push_back(Vector2DF(x+dx+rdx,   y+dy-rdy*2));
-	lCoords.push_back(Vector2DF(x+dx,       y+dy));
-	lCoords.push_back(Vector2DF(x+dx-rdx*2, y+dy+rdy));
-	// Lower left.
-	lCoords.push_back(Vector2DF(x-dx+rdx*2, y+dy+rdy));
-	lCoords.push_back(Vector2DF(x-dx,       y+dy));
-	lCoords.push_back(Vector2DF(x-dx-rdx,   y+dy-rdy*2));
-	// Back to start.
-	lCoords.push_back(lCoords[1]);
-	pPainter->SetColor(mBackground, 0);
-	pPainter->DrawFan(lCoords, true);
-
-	Parent::Repaint(pPainter);
-}
 
 template<class _Target>
 void Dialog<_Target>::UpdateLayout()
@@ -99,8 +58,6 @@ void Dialog<_Target>::UpdateLayout()
 
 	Parent::UpdateLayout();
 }
-
-
 
 template<class _Target>
 void Dialog<_Target>::OnClick(Button* pButton)
