@@ -463,6 +463,7 @@ Color::Color(const Color& pColor1, const Color& pColor2, float t)
 	mRed   = GammaLookup::LinearToGamma((int)Math::Lerp(r1, r2, t));
 	mGreen = GammaLookup::LinearToGamma((int)Math::Lerp(g1, g2, t));
 	mBlue  = GammaLookup::LinearToGamma((int)Math::Lerp(b1, b2, t));
+	mAlpha = Math::Lerp(pColor1.mAlpha, pColor2.mAlpha, t);
 }
 
 int Color::Max(int v1, int v2) const

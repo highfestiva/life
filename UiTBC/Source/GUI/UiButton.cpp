@@ -282,6 +282,16 @@ void* Button::GetExtraData() const
 	return (mExtraData);
 }
 
+void Button::SetTag(int pTag)
+{
+	SetExtraData((void*)pTag);
+}
+
+int Button::GetTag() const
+{
+	return (int)GetExtraData();
+}
+
 bool Button::OnLButtonDown(int pMouseX, int pMouseY)
 {
 	if (IsOver(pMouseX, pMouseY) == true)

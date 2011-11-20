@@ -112,9 +112,7 @@ bool Game::Initialize()
 		assert(lOk);
 		if (lOk)
 		{
-			TransformationF t(QuaternionF(), Vector3DF(-173, -85, 7));
-			t.GetOrientation().RotateAroundOwnZ(-PIF*0.6f);
-			mVehicle->SetInitialTransform(t);
+			mVehicle->SetInitialTransform(GetCutieStart());
 			mVehicle->StartLoading();
 		}
 	}
@@ -145,6 +143,13 @@ bool Game::Initialize()
 	return lOk;
 }
 
+TransformationF Game::GetCutieStart() const
+{
+	TransformationF t(QuaternionF(), Vector3DF(-173, -85, 7));
+	t.GetOrientation().RotateAroundOwnZ(-PIF*0.6f);
+	return t;
+}
+
 bool Game::Tick()
 {
 	GameTicker::GetTimeManager()->Tick();
@@ -154,6 +159,21 @@ bool Game::Tick()
 	if (mVehicle)
 	{
 		lPosition = mVehicle->GetPosition()+Vector3DF(0, 0, -2);
+		if (lPosition.z < -100)
+		{
+			const Cure::ObjectPositionalData* lPosition = 0;
+			mVehicle->UpdateFullPosition(lPosition);
+			if (lPosition)
+			{
+				Cure::ObjectPositionalData* lNewPlacement = (Cure::ObjectPositionalData*)lPosition->Clone();
+				lNewPlacement->mPosition.mTransformation = GetCutieStart();
+				lNewPlacement->mPosition.mVelocity.Set(0, 0, 0);
+				lNewPlacement->mPosition.mAcceleration.Set(0, 0, 0);
+				lNewPlacement->mPosition.mAngularVelocity.Set(0, 0, 0);
+				lNewPlacement->mPosition.mAngularAcceleration.Set(0, 0, 0);
+				mVehicle->SetFullPosition(*lNewPlacement);
+			}
+		}
 		lVelocity = mVehicle->GetVelocity();
 
 		mVehicle->QueryFlip();
@@ -421,6 +441,14 @@ int Game::GetComputerIndex() const
 	return mComputerIndex;
 }
 
+void Game::NextComputerIndex()
+{
+	if (++mComputerIndex > 1)
+	{
+		mComputerIndex = -1;
+	}
+}
+
 bool Game::Render()
 {
 	if (!mVehicle || !mVehicle->IsLoaded() ||
@@ -463,7 +491,7 @@ bool Game::Render()
 	{
 		const Vector3DF lCutie = mVehicle->GetPosition();
 		const Vector3DF lGoal = mCtf->GetPosition();
-		const double lTotalTime = 5.0;
+		const double lTotalTime = 1.0;
 		const double lFrameTime = 1.0/FPS;
 		mFlyByTime += lFrameTime;
 		if (mFlyByTime > lTotalTime)

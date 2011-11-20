@@ -15,15 +15,15 @@ Flatten Cutie start ground...
 Drop unnecessary polygons on Cutie. Fix normals.
 Fanfare when somebody wins. "Bad" when computer wins.
 Camera fly-by before start.
-
-Computer demo
--------------
 Adjust for single rendering view (and no splitter).
-Main menu: single player/two players/about, enter P1+P2 names (remember last), select map, select car.
-Admin: add button in center, for alert:restart/continue.
 Move HUD for landscape mode.
 Adjust HUD for keyboard controls.
 Adjust HUD for single/dual play.
+
+Computer demo
+-------------
+Main menu: single player/two players/about, enter P1+P2 names (remember last), select map, select car.
+Admin: add button in center, for alert:restart/continue.
 Polish on level_2 roads (in texture).
 AI for Cutie.
 Show keyboard controls when starting.

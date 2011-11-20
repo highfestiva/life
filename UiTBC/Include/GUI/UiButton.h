@@ -135,6 +135,8 @@ public:
 
 	void SetExtraData(void* pData);
 	void* GetExtraData() const;
+	void SetTag(int pTag);
+	int GetTag() const;
 
 	State GetState();
 	void SetState(State pState);

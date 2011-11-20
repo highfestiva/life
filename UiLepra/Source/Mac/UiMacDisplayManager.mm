@@ -576,7 +576,15 @@ void MacDisplayManager::ShowMessageBox(const str& pMsg, const str& pCaption)
 {
 #ifndef LEPRA_IOS
 	NSRunAlertPanel(MacLog::Encode(pCaption), MacLog::Encode(pMsg), nil, nil, nil);
-#endif // !iOS
+#else // iOS
+	UIAlertView* message = [[UIAlertView alloc]
+		initWithTitle:MacLog::Encode(pCaption)
+		      message:MacLog::Encode(pMsg)
+		     delegate:nil
+	    cancelButtonTitle:@"OK"
+	    otherButtonTitles:nil];
+	[message show];
+#endif // !iOS / iOS
 }
 
 

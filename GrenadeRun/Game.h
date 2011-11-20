@@ -14,7 +14,7 @@
 #ifdef LEPRA_IOS
 #define LEPRA_IOS_LOOKANDFEEL
 #endif // iOS
-#define LEPRA_IOS_LOOKANDFEEL
+//#define LEPRA_IOS_LOOKANDFEEL
 #define FPS		20
 
 
@@ -90,6 +90,7 @@ public:
 	virtual ~Game();
 	UiCure::GameUiManager* GetUiManager() const;
 	virtual bool Initialize();
+	TransformationF GetCutieStart() const;
 	virtual bool Tick();
 
 	UiCure::CppContextObject* GetP1() const;
@@ -110,6 +111,7 @@ public:
 	void OnCapture();	// CTF
 	int GetWinnerIndex() const;	// -1, 0, or 1.
 	int GetComputerIndex() const;	// -1, 0, or 1.
+	void NextComputerIndex();
 
 	bool Render();
 

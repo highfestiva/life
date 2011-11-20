@@ -984,6 +984,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\Include\GUI\UiDialog.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Include\GUI\UiDialog.inl"
+					>
+				</File>
+				<File
 					RelativePath=".\Include\GUI\UiFileNameField.h"
 					>
 				</File>

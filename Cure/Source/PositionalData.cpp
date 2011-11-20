@@ -584,6 +584,7 @@ void ObjectPositionalData::CopyData(const PositionalData* pData)
 PositionalData* ObjectPositionalData::Clone() const
 {
 	ObjectPositionalData* lData = new ObjectPositionalData;
+	lData->mPosition = mPosition;
 	BodyPositionArray::const_iterator x = mBodyPositionArray.begin();
 	for (; x != mBodyPositionArray.end(); ++x)
 	{

@@ -25,6 +25,7 @@
 #include "../UiLepra/Include/UiSoundStream.h"
 #include "../UiTBC/Include/GUI/UiButton.h"
 #include "../UiTBC/Include/GUI/UiDesktopWindow.h"
+#include "../UiTBC/Include/GUI/UiDialog.h"
 #include "../UiTBC/Include/UiFontManager.h"
 #include "Cutie.h"
 #include "Game.h"
@@ -97,9 +98,11 @@ private:
 	void OnSpeedClick(UiTbc::Button* pButton);
 	void OnPClick(UiTbc::Button* pButton);
 	void OnFinishedClick(UiTbc::Button* pButton);
+	void OnPauseClick(UiTbc::Button*);
+	void OnPauseAction(UiTbc::Button* pButton);
 	void OnGetiPhoneClick(UiTbc::Button*);
 
-	static UiTbc::Button* CreateButton(const str& pText, const Color& pColor, UiTbc::DesktopWindow* pDesktop);
+	static UiTbc::Button* CreateButton(const str& pText, const Color& pColor, UiTbc::Component* pParent);
 
 	StdioConsoleLogListener mConsoleLogger;
 	DebuggerLogListener mDebugLogger;
@@ -120,8 +123,9 @@ private:
 		float mAngle;
 	};
 
-	bool mIsRunning;
+	bool mIsLoaded;
 	bool mDoLayout;
+	bool mIsPaused;
 	Cure::ResourceManager* mResourceManager;
 	Cure::RuntimeVariableScope* mVariableScope;
 	UiCure::GameUiManager* mUiManager;
@@ -135,6 +139,7 @@ private:
 	UiTbc::Button* mNextButton;
 	UiTbc::Button* mResetButton;
 	UiTbc::Button* mRetryButton;
+	UiTbc::Button* mPauseButton;
 	UiTbc::Button* mGetiPhoneButton;
 	UiTbc::RectComponent* mPlayerSplitter;
 	float mAngleTime;
@@ -185,8 +190,11 @@ App::App(const strutil::strvec& pArgumentList):
 	mLayoutFrameCounter(-10),
 	mVariableScope(0),
 	mAverageLoopTime(1.0/FPS),
-	mIsRunning(false),
+	mIsLoaded(false),
 	mDoLayout(true),
+	mIsPaused(false),
+	mPauseButton(0),
+	mGetiPhoneButton(0),
 	mAngleTime(0),
 	mBigFontId(UiTbc::FontManager::INVALID_FONTID),
 	mReverseAndBrake(0)
@@ -293,15 +301,18 @@ bool App::Open()
 		mRetryButton = CreateButton(_T("Rematch"), Color(192, 192, 0), lDesktopWindow);
 		mRetryButton->SetOnClick(App, OnFinishedClick);*/
 
-		mGetiPhoneButton = 0;
-/*#ifndef LEPRA_IOS
+		mPlayerSplitter = new UiTbc::RectComponent(BLACK, _T("Splitter"));
+		lDesktopWindow->AddChild(mPlayerSplitter);
+
+		mPauseButton = CreateButton(_T("Pause"), Color(95, 95, 95), lDesktopWindow);
+		mPauseButton->SetVisible(true);
+		mPauseButton->SetOnClick(App, OnPauseClick);
+
+#ifndef LEPRA_IOS_LOOKANDFEEL
 		mGetiPhoneButton = CreateButton(_T("4 iPhone!"), Color(45, 45, 45), lDesktopWindow);
 		mGetiPhoneButton->SetVisible(true);
 		mGetiPhoneButton->SetOnClick(App, OnGetiPhoneClick);
-#endif // iOS*/
-
-		mPlayerSplitter = new UiTbc::RectComponent(BLACK, _T("Splitter"));
-		lDesktopWindow->AddChild(mPlayerSplitter);
+#endif // iOS L&F
 	}
 	if (lOk)
 	{
@@ -382,7 +393,7 @@ int App::Run()
 	if (lOk)
 	{
 		mVariableScope = UiCure::GetSettings();
-		CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_PARALLEL, false);	// Let's do it same on all platforms.
+		CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_PARALLEL, false);	// Let's do it same on all platforms, so we can render stuff from physics data.
 		CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_MICROSTEPS, 3);
 		CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_FPS, FPS);
 		CURE_RTVAR_SET(mVariableScope, RTVAR_PHYSICS_ISFIXEDFPS, true);
@@ -452,12 +463,12 @@ bool App::Poll()
 		mAngleTime -= (mAngleTime > 2*PIF)? 2*PIF : 0;
 		lOk = (SystemManager::GetQuitRequest() == 0);
 	}
-	if (!mIsRunning && mResourceManager->IsLoading())
+	if (!mIsLoaded && mResourceManager->IsLoading())
 	{
 		mResourceManager->Tick();
 		return lOk;
 	}
-	mIsRunning = true;
+	mIsLoaded = true;
 	if (lOk && mDoLayout)
 	{
 		Layout();
@@ -476,7 +487,7 @@ bool App::Poll()
 		mUiManager->InputTick();
 		PollTaps();
 	}
-	if (lOk)
+	if (lOk && !mIsPaused)
 	{
 		mGame->BeginTick();
 	}
@@ -498,11 +509,11 @@ bool App::Poll()
 		mInfoTextColor = Color(127, 127, 127)*(1+::sin(mAngleTime*27)*0.9f);
 		DrawHud();
 	}
-	if (lOk)
+	if (lOk && !mIsPaused)
 	{
 		lOk = mGame->EndTick();
 	}
-	if (lOk)
+	if (lOk && !mIsPaused)
 	{
 		lOk = mGame->Tick();
 	}
@@ -906,7 +917,7 @@ void App::DrawHealthMeter(int x, int y, float pAngle, float pSize, float pHealth
 	const int lBarCount = 19;
 	const int lBarHeight = (int)(pSize/lBarCount*0.5f);
 	const int lBarWidth = BUTTON_WIDTH;
-	const float lHealthStep = 1.0f/lBarCount - 0.004f;
+	const float lHealthStep = 1.0f/lBarCount - 0.0001f*lBarCount;
 	float lCurrentHealth = 0;
 	const int lXStep = -(int)(::sin(pAngle)*lBarHeight*2);
 	const int lYStep = -(int)(::cos(pAngle)*lBarHeight*2);
@@ -1032,36 +1043,62 @@ void App::Layout()
 	mPlayerSplitter->SetVisible(mGame->GetComputerIndex() < 0);
 	mDoLayout = false;
 
-	/*if (!mLazyButton)
+	if (!mPauseButton)
 	{
 		return;
 	}
-	const int s = 20;
-	const int x = s;
-	const int px = mLazyButton->GetSize().x;
-	const int py = mLazyButton->GetSize().y;
-	const int dy = py * 4/3;
-	const int sy = mUiManager->GetCanvas()->GetHeight() / 20 + 34;
-	const int tx = mUiManager->GetCanvas()->GetWidth() - s - px;
-	const int ty = mUiManager->GetCanvas()->GetHeight() - s - py;
-	mLazyButton->SetPos(x, sy);
+	const int s = 8;
+	//const int x = s;
+	const int px = mPauseButton->GetSize().x;
+	const int py = mPauseButton->GetSize().y;
+	//const int dy = py * 4/3;
+	//const int sy = mUiManager->GetCanvas()->GetHeight() / 20 + 34;
+	int tx;
+	int ty;
+	int tx2;
+	int ty2;
+	if (mGame->GetComputerIndex() < 0)
+	{
+		tx = mUiManager->GetCanvas()->GetWidth()/2 - px/2;
+		ty = mUiManager->GetCanvas()->GetHeight() - s - py;
+		tx2 = tx;
+		ty2 = s;
+	}
+	else
+	{
+		tx = mUiManager->GetCanvas()->GetWidth() - s - px;
+		ty = s;
+		tx2 = s;
+		ty2 = ty;
+	}
+	/*mLazyButton->SetPos(x, sy);
 	mHardButton->SetPos(x, sy+dy);
 	mOriginalButton->SetPos(x, sy+dy*2);
 	m1PButton->SetPos(x, sy);
 	m2PButton->SetPos(x, sy+dy);
 	mNextButton->SetPos(x, sy);
 	mResetButton->SetPos(x, sy);
-	mRetryButton->SetPos(x, sy+dy);
+	mRetryButton->SetPos(x, sy+dy);*/
 	if (mGetiPhoneButton)
 	{
 		mGetiPhoneButton->SetPos(tx, ty);
-	}*/
+	}
+	mPauseButton->SetPos(tx2, ty2);
 }
 
 
 
 void App::Suspend()
 {
+	mIsPaused = true;
+	if (mMusicStreamer)
+	{
+		mMusicStreamer->Pause();
+	}
+	if (mPauseButton)
+	{
+		mPauseButton->SetVisible(false);
+	}
 #ifdef LEPRA_IOS
 	[mAnimatedApp stopTick];
 #endif // iOS
@@ -1069,6 +1106,7 @@ void App::Suspend()
 
 void App::Resume()
 {
+	mIsPaused = false;
 #ifdef LEPRA_IOS
 	[mAnimatedApp startTick];
 #endif // iOS
@@ -1076,6 +1114,10 @@ void App::Resume()
 	{
 		mMusicStreamer->Stop();
 		mMusicStreamer->Playback();
+	}
+	if (mPauseButton)
+	{
+		mPauseButton->SetVisible(true);
 	}
 }
 
@@ -1126,6 +1168,34 @@ bool App::Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor)
 		case UIKEY(NUMPAD_6):	lAvatar1->SetEnginePower(1, +1*pFactor, 0);	break;
 		case UIKEY(INSERT):
 		case UIKEY(NUMPAD_0):	lAvatar1->SetEnginePower(2, +1*pFactor, 0);	break;
+
+#ifdef LEPRA_DEBUG
+		case UIKEY(0):
+		{
+			if (!pFactor)
+			{
+				mGame->NextComputerIndex();
+				mDoLayout = true;
+			}
+		}
+		break;
+
+		case UIKEY(PLUS):
+		{
+			if (!pFactor)
+			{
+				const Cure::ObjectPositionalData* lPosition = 0;
+				lAvatar1->UpdateFullPosition(lPosition);
+				if (lPosition)
+				{
+					Cure::ObjectPositionalData* lNewPlacement = (Cure::ObjectPositionalData*)lPosition->Clone();
+					lNewPlacement->mPosition.mTransformation.GetPosition().x -= 10;
+					lAvatar1->SetFullPosition(*lNewPlacement);
+				}
+			}
+		}
+		break;
+#endif // Debug
 	}
 	return false;
 }
@@ -1169,6 +1239,7 @@ void App::OnMouseInput(UiLepra::InputElement* pElement)
 
 int App::PollTap(FingerMovement& pMovement)
 {
+	(void)pMovement;
 	int lTag = 0;
 #ifdef LEPRA_IOS_LOOKANDFEEL
 #ifdef LEPRA_IOS
@@ -1328,20 +1399,45 @@ void App::OnFinishedClick(UiTbc::Button* pButton)
 	mRetryButton->SetVisible(false);
 }
 
- void App::OnGetiPhoneClick(UiTbc::Button*)
+void App::OnPauseClick(UiTbc::Button*)
+{
+	Suspend();
+
+	UiTbc::Dialog<App>* d = new UiTbc::Dialog<App>(mUiManager->GetDesktopWindow(), _T(""), UiTbc::Dialog<App>::Action(this, &App::OnPauseAction));
+	d->AddButton(1, _T("Resume"));
+	d->AddButton(2, _T("Main menu"));
+	d->FireAndForget();
+}
+
+void App::OnPauseAction(UiTbc::Button* pButton)
+{
+	Resume();
+	if (pButton->GetTag() == 2)
+	{
+		delete mGame;
+		mGame = new Game(mUiManager, mVariableScope, mResourceManager);
+		mGame->Initialize();
+		mGame->Cure::GameTicker::GetTimeManager()->Tick();
+		mGame->Cure::GameTicker::GetTimeManager()->Clear(1);
+		mIsLoaded = false;
+		mDoLayout = true;
+	}
+}
+
+void App::OnGetiPhoneClick(UiTbc::Button*)
 {
 	SystemManager::WebBrowseTo(_T("http://itunes.apple.com/us/app/slimeball/id447966821?mt=8&ls=1"));
 	delete mGetiPhoneButton;
 	mGetiPhoneButton = 0;
 }
 
-UiTbc::Button* App::CreateButton(const str& pText, const Color& pColor, UiTbc::DesktopWindow* pDesktop)
+UiTbc::Button* App::CreateButton(const str& pText, const Color& pColor, UiTbc::Component* pParent)
 {
 	UiTbc::Button* lButton = new UiTbc::Button(UiTbc::BorderComponent::LINEAR, 6, pColor, _T(""));
 	lButton->SetText(pText);
-	const int h = std::max(pDesktop->GetSize().y/9, 44);
-	lButton->SetPreferredSize(pDesktop->GetSize().x/5, h);
-	pDesktop->AddChild(lButton);
+	const int h = std::max(pParent->GetSize().y/9, 44);
+	lButton->SetPreferredSize(pParent->GetSize().x/5, h);
+	pParent->AddChild(lButton);
 	lButton->SetVisible(false);
 	lButton->UpdateLayout();
 	return lButton;
