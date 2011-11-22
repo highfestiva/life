@@ -15,6 +15,7 @@
 #include "../UiCure/Include/UiCppContextObject.h"
 #include "../UiCure/Include/UiCure.h"
 #include "../UiCure/Include/UiGameUiManager.h"
+#include "../UiCure/Include/UiIconButton.h"
 #include "../UiCure/Include/UiRuntimeVariableName.h"
 #include "../UiLepra/Include/Mac/UiIosInput.h"
 #include "../UiLepra/Include/UiCore.h"
@@ -36,6 +37,8 @@
 #define UIKEY(name)	UiLepra::InputManager::IN_KBD_##name
 #define BUTTON_WIDTH	40
 #define BUTTON_MARGIN	2
+#define COLOR_DIALOG	Color(255, 255, 255, 192)
+#define ICONBTN(i,n)	new UiCure::IconButton(mUiManager, mResourceManager, _T(i), _T(n))
 
 
 
@@ -78,6 +81,7 @@ private:
 	void DrawInfoTexts() const;
 	void PrintText(const str& pText, float pAngle, int pCenterX, int pCenterY) const;
 	void Layout();
+	void MainMenu();
 
 	virtual void Suspend();
 	virtual void Resume();
@@ -95,9 +99,9 @@ private:
 	void OnMinimize();
 	void OnMaximize(int pWidth, int pHeight);
 
-	void OnSpeedClick(UiTbc::Button* pButton);
-	void OnPClick(UiTbc::Button* pButton);
-	void OnFinishedClick(UiTbc::Button* pButton);
+	void OnMainMenuAction(UiTbc::Button* pButton);
+	void OnLevelAction(UiTbc::Button* pButton);
+	void OnVehicleAction(UiTbc::Button* pButton);
 	void OnPauseClick(UiTbc::Button*);
 	void OnPauseAction(UiTbc::Button* pButton);
 	void OnGetiPhoneClick(UiTbc::Button*);
@@ -355,6 +359,8 @@ void App::Close()
 	delete mGame;
 	mGame = 0;
 
+	mUiManager->DeleteDesktopWindow();
+
 	delete mResourceManager;	// Resource manager lives long enough for all volontary resources to disappear.
 	mResourceManager = 0;
 
@@ -411,12 +417,16 @@ int App::Run()
 	if (lOk)
 	{
 		mGame = new Game(mUiManager, mVariableScope, mResourceManager);
-		lOk = mGame->Initialize();
+		mGame->SetComputerDifficulty(-1);
+		mGame->SetComputerIndex(0);
+		mGame->SetPaused(true);
+		lOk = mGame->SetLevel(_T("level_2"));
 	}
 	if (lOk)
 	{
 		mGame->Cure::GameTicker::GetTimeManager()->Tick();
 		mGame->Cure::GameTicker::GetTimeManager()->Clear(1);
+		MainMenu();
 		lOk = mResourceManager->InitDefault();
 	}
 #ifndef LEPRA_IOS
@@ -468,6 +478,7 @@ bool App::Poll()
 		mResourceManager->Tick();
 		return lOk;
 	}
+	mResourceManager->ForceFreeCache();
 	mIsLoaded = true;
 	if (lOk && mDoLayout)
 	{
@@ -1090,14 +1101,9 @@ void App::Layout()
 
 void App::Suspend()
 {
-	mIsPaused = true;
 	if (mMusicStreamer)
 	{
 		mMusicStreamer->Pause();
-	}
-	if (mPauseButton)
-	{
-		mPauseButton->SetVisible(false);
 	}
 #ifdef LEPRA_IOS
 	[mAnimatedApp stopTick];
@@ -1106,7 +1112,6 @@ void App::Suspend()
 
 void App::Resume()
 {
-	mIsPaused = false;
 #ifdef LEPRA_IOS
 	[mAnimatedApp startTick];
 #endif // iOS
@@ -1114,10 +1119,6 @@ void App::Resume()
 	{
 		mMusicStreamer->Stop();
 		mMusicStreamer->Playback();
-	}
-	if (mPauseButton)
-	{
-		mPauseButton->SetVisible(true);
 	}
 }
 
@@ -1332,6 +1333,19 @@ int App::PollTap(FingerMovement& pMovement)
 
 
 
+void App::MainMenu()
+{
+	mIsPaused = true;
+	mGame->SetIsFlyingBy(false);
+	mPauseButton->SetVisible(false);
+	UiTbc::Dialog<App>* d = new UiTbc::Dialog<App>(mUiManager->GetDesktopWindow(), _T(""), UiTbc::Dialog<App>::Action(this, &App::OnMainMenuAction));
+	d->SetColor(COLOR_DIALOG);
+	d->AddButton(1, ICONBTN("btn_1p.png", "Single player"));
+	d->AddButton(2, ICONBTN("btn_2p.png", "Two players"));
+}
+
+
+
 void App::OnResize(int /*pWidth*/, int /*pHeight*/)
 {
 	mDoLayout = true;
@@ -1346,80 +1360,92 @@ void App::OnMaximize(int pWidth, int pHeight)
 	OnResize(pWidth, pHeight);
 }
 
-void App::OnSpeedClick(UiTbc::Button* pButton)
+void App::OnMainMenuAction(UiTbc::Button* pButton)
 {
-	if (pButton == mLazyButton)
+	if (pButton->GetTag() == 1)
 	{
-		//mGame->mSpeed = -15;
+		// 1P
+		mGame->SetComputerIndex(1);
 	}
-	else if (pButton == mHardButton)
+	else
 	{
-		//mGame->mSpeed = -5;
+		// 2P
+		mGame->SetComputerIndex(-1);
 	}
-	else if (pButton == mOriginalButton)
-	{
-		//mGame->mSpeed = 0;
-	}
-	mLazyButton->SetVisible(false);
-	mHardButton->SetVisible(false);
-	mOriginalButton->SetVisible(false);
-	m1PButton->SetVisible(true);
-	m2PButton->SetVisible(true);
+	UiTbc::Dialog<App>* d = new UiTbc::Dialog<App>(mUiManager->GetDesktopWindow(), _T("Select level"), UiTbc::Dialog<App>::Action(this, &App::OnLevelAction));
+	d->SetColor(COLOR_DIALOG);
+	d->AddButton(1, ICONBTN("btn_lvl2.png", "Pendulum"));
+	d->AddButton(2, ICONBTN("btn_lvl3.png", "Elevate"));
+	d->AddButton(3, ICONBTN("btn_lvl4.png", "RoboCastle"));
 }
 
-void App::OnPClick(UiTbc::Button* pButton)
+void App::OnLevelAction(UiTbc::Button* pButton)
 {
-	//mGame->mPlayerCount = 1;
-	if (pButton == m2PButton)
+	str lLevel = _T("level_2");
+	switch (pButton->GetTag())
 	{
-		//mGame->mPlayerCount = 2;
+		case 1:	lLevel = _T("level_2");	break;
+		case 2:	lLevel = _T("level_3");	break;
+		case 3:	lLevel = _T("level_4");	break;
 	}
-	m1PButton->SetVisible(false);
-	m2PButton->SetVisible(false);
-
-	//mGame->resetGame();
+	if (mGame->GetLevel() != lLevel)
+	{
+		mGame->SetLevel(lLevel);
+	}
+	UiTbc::Dialog<App>* d = new UiTbc::Dialog<App>(mUiManager->GetDesktopWindow(), _T("Select vehicle"), UiTbc::Dialog<App>::Action(this, &App::OnVehicleAction));
+	d->SetColor(COLOR_DIALOG);
+	d->AddButton(1, _T("Cutie"));
+	d->AddButton(2, _T("Hardie"));
+	d->AddButton(3, _T("Speedie"));
+	d->AddButton(4, _T("Sleepie"));
 }
 
-void App::OnFinishedClick(UiTbc::Button* pButton)
+void App::OnVehicleAction(UiTbc::Button* pButton)
 {
-	if (pButton == mNextButton)
+	str lVehicle = _T("cutie");
+	switch (pButton->GetTag())
 	{
-		//mGame->nextGameLevel();
+		case 1:	lVehicle = _T("cutie");		break;
+		case 2:	lVehicle = _T("hardie");	break;
+		case 3:	lVehicle = _T("speedie");	break;
+		case 4:	lVehicle = _T("sleepie");	break;
 	}
-	else if (pButton == mRetryButton)
-	{
-		//mGame->retryGame();
-	}
-	else if (pButton == mResetButton)
-	{
-		//mGame->mPlayerCount = 2;	// TRICKY: quit == 2P game over.
-	}
-	mNextButton->SetVisible(false);
-	mResetButton->SetVisible(false);
-	mRetryButton->SetVisible(false);
+	mGame->SetVehicle(lVehicle);
+	mGame->SetPaused(false);
+	mGame->SetIsFlyingBy(true);
 }
 
 void App::OnPauseClick(UiTbc::Button*)
 {
-	Suspend();
-
+	mIsPaused = true;
+	mGame->SetPaused(true);
+	mPauseButton->SetVisible(false);
 	UiTbc::Dialog<App>* d = new UiTbc::Dialog<App>(mUiManager->GetDesktopWindow(), _T(""), UiTbc::Dialog<App>::Action(this, &App::OnPauseAction));
+	d->SetColor(COLOR_DIALOG);
 	d->AddButton(1, _T("Resume"));
-	d->AddButton(2, _T("Main menu"));
+	d->AddButton(2, _T("Restart"));
+	d->AddButton(3, _T("Main menu"));
 }
 
 void App::OnPauseAction(UiTbc::Button* pButton)
 {
-	Resume();
-	if (pButton->GetTag() == 2)
+	mIsPaused = false;
+	mGame->SetPaused(false);
+	mPauseButton->SetVisible(true);
+	if (pButton->GetTag() == 2 || pButton->GetTag() == 3)
 	{
+		const str lLevel = mGame->GetLevel();
 		delete mGame;
 		mGame = new Game(mUiManager, mVariableScope, mResourceManager);
-		mGame->Initialize();
+		mGame->SetLevel(lLevel);
 		mGame->Cure::GameTicker::GetTimeManager()->Tick();
 		mGame->Cure::GameTicker::GetTimeManager()->Clear(1);
 		mIsLoaded = false;
 		mDoLayout = true;
+		if (pButton->GetTag() == 3)
+		{
+			MainMenu();
+		}
 	}
 }
 

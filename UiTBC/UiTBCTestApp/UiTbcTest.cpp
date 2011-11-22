@@ -188,7 +188,7 @@ public:
 	void OnClose(UiTbc::Button*)
 	{
 		UiTbc::DesktopWindow* lDesktopWindow = (UiTbc::DesktopWindow*)GetParentOfType(UiTbc::Component::DESKTOPWINDOW);
-		lDesktopWindow->DeleteComponent(this, 0);
+		lDesktopWindow->PostDeleteComponent(this, 0);
 	}
 
 	void OnNewWindow(UiTbc::Button*)

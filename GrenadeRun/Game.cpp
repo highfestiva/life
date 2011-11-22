@@ -49,7 +49,10 @@ Game::Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVaria
 	mPreviousFrameWinnerIndex(-1),
 	mCtf(0),
 	mLauncher(0),
-	mLauncherAi(0)
+	mLauncherAi(0),
+	mComputerIndex(-1),
+	mComputerDifficulty(0.5f),
+	mIsPaused(false)
 {
 	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
 	mCollisionSoundManager->AddSound(_T("explosion"), UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f));
@@ -78,69 +81,20 @@ UiCure::GameUiManager* Game::GetUiManager() const
 	return mUiManager;
 }
 
-bool Game::Initialize()
+const str& Game::GetLevel() const
 {
-	bool lOk = true;
-	if (lOk)
-	{
-		mWinnerIndex = -1;
-		mPreviousFrameWinnerIndex = -1;
+	return mLevelName;
+}
 
-		QuaternionF lRotation;
-		lRotation.RotateAroundOwnX(-PIF/4);
-		lRotation.RotateAroundOwnZ(-PIF/8);
-		mLeftCamera = TransformationF(lRotation, Vector3DF(-50, -100, 70));
-		mRightCamera = mLeftCamera;
-#ifdef LEPRA_IOS_LOOKANDFEEL
-		mLeftCamera.GetOrientation().RotateAroundOwnY(-PIF*0.5f);
-		mRightCamera.GetOrientation().RotateAroundOwnY(+PIF*0.5f);
-#endif // iOS
+bool Game::SetLevel(const str& pLevel)
+{
+	mLevelName = pLevel;
+	return Initialize();
+}
 
-		lOk = InitializeTerrain();
-	}
-	if (lOk)
-	{
-		mLightId = mUiManager->GetRenderer()->AddDirectionalLight(
-			UiTbc::Renderer::LIGHT_MOVABLE, Vector3DF(-1, 0.5f, -1.5),
-			Color::Color(255, 255, 255), 1.0f, 300);
-		mUiManager->GetRenderer()->EnableAllLights(true);
-	}
-	if (lOk)
-	{
-		mVehicle = (Cutie*)Parent::CreateContextObject(_T("cutie"), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
-		lOk = (mVehicle != 0);
-		assert(lOk);
-		if (lOk)
-		{
-			mVehicle->SetInitialTransform(GetCutieStart());
-			mVehicle->StartLoading();
-		}
-	}
-	if (lOk)
-	{
-		mLauncher = new Launcher(this);
-		AddContextObject(mLauncher, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
-		lOk = (mLauncher != 0);
-		assert(lOk);
-		if (lOk)
-		{
-			mLauncher->DisableRootShadow();
-			mLauncher->StartLoading();
-		}
-	}
-	if (lOk)
-	{
-		/*mLauncherAi = new LauncherAi(this);
-		AddContextObject(mLauncherAi, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
-		mLauncherAi->Init();*/
-		mComputerIndex = 0;
-	}
-	if (lOk)
-	{
-		mIsFlyingBy = true;
-		mFlyByTime = 0;
-	}
-	return lOk;
+bool Game::RestartLevel()
+{
+	return Initialize();
 }
 
 TransformationF Game::GetCutieStart() const
@@ -218,6 +172,23 @@ bool Game::Tick()
 }
 
 
+
+void Game::SetVehicle(const str& pVehicle)
+{
+	if (mVehicle && mVehicle->GetClassId() == pVehicle)
+	{
+		return;
+	}
+	delete mVehicle;
+	mVehicle = (Cutie*)Parent::CreateContextObject(pVehicle, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+	bool lOk = (mVehicle != 0);
+	assert(lOk);
+	if (lOk)
+	{
+		mVehicle->SetInitialTransform(GetCutieStart());
+		mVehicle->StartLoading();
+	}
+}
 
 UiCure::CppContextObject* Game::GetP1() const
 {
@@ -321,6 +292,11 @@ void Game::UnlockLauncher()
 bool Game::IsFlyingBy() const
 {
 	return mIsFlyingBy;
+}
+
+void Game::SetIsFlyingBy(bool pFlyingBy)
+{
+	mIsFlyingBy = pFlyingBy;
 }
 
 void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
@@ -436,6 +412,12 @@ int Game::GetWinnerIndex() const
 	return mWinnerIndex;
 }
 
+void Game::SetComputerIndex(int pIndex)
+{
+	assert(pIndex >= -1 && pIndex <= 1);
+	mComputerIndex = pIndex;
+}
+
 int Game::GetComputerIndex() const
 {
 	return mComputerIndex;
@@ -447,6 +429,17 @@ void Game::NextComputerIndex()
 	{
 		mComputerIndex = -1;
 	}
+}
+
+void Game::SetComputerDifficulty(float pDifficulty)
+{
+	assert(pDifficulty >= -1 && pDifficulty <= 1);
+	mComputerDifficulty = pDifficulty;
+}
+
+void Game::SetPaused(bool pPaused)
+{
+	mIsPaused = pPaused;
 }
 
 bool Game::Render()
@@ -487,14 +480,22 @@ bool Game::Render()
 	const Vector3DF lLauncherPosition(0, -215, 27);
 	mLauncher->SetRootPosition(lLauncherPosition);
 
-	if (mIsFlyingBy)
+	if (mIsFlyingBy || mIsPaused)
 	{
 		const Vector3DF lCutie = mVehicle->GetPosition();
 		const Vector3DF lGoal = mCtf->GetPosition();
-		const double lTotalTime = 1.0;
+		const double lTotalTime = 35.0;
 		const double lFrameTime = 1.0/FPS;
-		mFlyByTime += lFrameTime;
-		if (mFlyByTime > lTotalTime)
+		bool mForceCircle = mIsPaused;
+		if (mIsFlyingBy && mIsPaused)
+		{
+			mForceCircle = false;
+		}
+		else
+		{
+			mFlyByTime += lFrameTime;
+		}
+		if (mFlyByTime > lTotalTime && !mIsPaused)
 		{
 			mIsFlyingBy = false;
 			return true;
@@ -502,7 +503,7 @@ bool Game::Render()
 
 		TransformationF t;
 		const double lSweepTime = lTotalTime * 0.25;
-		if (mFlyByTime < lSweepTime)
+		if (mFlyByTime < lSweepTime || mForceCircle)
 		{
 			// Sweep around the area in a circle.
 			const float a = 0.8f * 2*PIF * (float)(mFlyByTime/lSweepTime);
@@ -779,12 +780,75 @@ Cure::ContextObject* Game::CreateContextObject(const str& pClassId) const
 	return new UiCure::Machine(GetResourceManager(), pClassId, mUiManager);
 }
 
+bool Game::Initialize()
+{
+	bool lOk = true;
+	if (lOk)
+	{
+		mWinnerIndex = -1;
+		mPreviousFrameWinnerIndex = -1;
+
+		QuaternionF lRotation;
+		lRotation.RotateAroundOwnX(-PIF/4);
+		lRotation.RotateAroundOwnZ(-PIF/8);
+		mLeftCamera = TransformationF(lRotation, Vector3DF(-50, -100, 70));
+		mRightCamera = mLeftCamera;
+#ifdef LEPRA_IOS_LOOKANDFEEL
+		mLeftCamera.GetOrientation().RotateAroundOwnY(-PIF*0.5f);
+		mRightCamera.GetOrientation().RotateAroundOwnY(+PIF*0.5f);
+#endif // iOS
+
+		lOk = InitializeTerrain();
+	}
+	if (lOk)
+	{
+		mLightId = mUiManager->GetRenderer()->AddDirectionalLight(
+			UiTbc::Renderer::LIGHT_MOVABLE, Vector3DF(-1, 0.5f, -1.5),
+			Color::Color(255, 255, 255), 1.0f, 300);
+		mUiManager->GetRenderer()->EnableAllLights(true);
+	}
+	if (lOk)
+	{
+		SetVehicle(_T("cutie"));
+	}
+	if (lOk)
+	{
+		mLauncher = new Launcher(this);
+		AddContextObject(mLauncher, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+		lOk = (mLauncher != 0);
+		assert(lOk);
+		if (lOk)
+		{
+			mLauncher->DisableRootShadow();
+			mLauncher->StartLoading();
+		}
+	}
+	if (lOk && mComputerDifficulty > 0)
+	{
+		if (mComputerIndex == 0)
+		{
+		}
+		else if (mComputerIndex == 1)
+		{
+			mLauncherAi = new LauncherAi(this);
+			AddContextObject(mLauncherAi, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+			mLauncherAi->Init();
+		}
+	}
+	if (lOk)
+	{
+		mIsFlyingBy = true;
+		mFlyByTime = 0;
+	}
+	return lOk;
+}
+
 bool Game::InitializeTerrain()
 {
 	bool lOk = true;
 	if (lOk)
 	{
-		mLevel = new UiCure::Machine(GetResourceManager(), _T("level_2"), mUiManager);
+		mLevel = new UiCure::Machine(GetResourceManager(), mLevelName, mUiManager);
 		AddContextObject(mLevel, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 		lOk = (mLevel != 0);
 		assert(lOk);

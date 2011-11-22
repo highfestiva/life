@@ -56,24 +56,38 @@ void GUIImageManager::SetPainter(Painter* pPainter)
 Painter::ImageID GUIImageManager::AddImage(const Canvas& pImage, ImageStyle pStyle, BlendFunc pBlendFunc, uint8 pAlphaValue)
 {
 	Canvas lImage(pImage, true);
-
 	if (mSwapRGB == true)
 	{
 		lImage.SwapRGBOrder();
 	}
-
 	Painter::ImageID lID = mPainter->AddImage(&lImage, 0);
-	mImageTable.Insert(lID, new Image(lID, lImage, pStyle, pBlendFunc, pAlphaValue));
+	AddLoadedImage(lImage, lID, pStyle, pBlendFunc, pAlphaValue);
 	return lID;
+}
+
+void GUIImageManager::AddLoadedImage(const Canvas& pImage, Painter::ImageID pImageId, ImageStyle pStyle, BlendFunc pBlendFunc, uint8 pAlphaValue)
+{
+	mImageTable.Insert(pImageId, new Image(pImageId, pImage, pStyle, pBlendFunc, pAlphaValue));
 }
 
 bool GUIImageManager::RemoveImage(Painter::ImageID pImageId)
 {
+	const bool lDropped = DropImage(pImageId);
+	if (lDropped)
+	{
+		mPainter->RemoveImage(pImageId);
+	}
+	return lDropped;
+}
+
+bool GUIImageManager::DropImage(Painter::ImageID pImageId)
+{
 	ImageTable::Iterator lIter = mImageTable.Find(pImageId);
 	if (lIter != mImageTable.End())
 	{
-		mPainter->RemoveImage(pImageId);
+		Image* lImage = *lIter;
 		mImageTable.Remove(lIter);
+		delete lImage;
 		return true;
 	}
 	assert(false);

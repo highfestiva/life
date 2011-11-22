@@ -47,6 +47,7 @@ public:
 
 	bool Open();
 	void Close();
+	void DeleteDesktopWindow();
 
 	bool CanRender() const;
 

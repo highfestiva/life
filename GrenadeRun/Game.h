@@ -89,10 +89,13 @@ public:
 	Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager);
 	virtual ~Game();
 	UiCure::GameUiManager* GetUiManager() const;
-	virtual bool Initialize();
+	const str& GetLevel() const;
+	bool SetLevel(const str& pLevel);
+	bool RestartLevel();
 	TransformationF GetCutieStart() const;
 	virtual bool Tick();
 
+	void SetVehicle(const str& pVehicle);
 	UiCure::CppContextObject* GetP1() const;
 	UiCure::CppContextObject* GetP2() const;
 	Cutie* GetCutie() const;
@@ -106,12 +109,16 @@ public:
 	bool IsLauncherLocked() const;
 	void UnlockLauncher();
 	bool IsFlyingBy() const;
+	void SetIsFlyingBy(bool pFlyingBy);
 	void Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
 		Cure::ContextObject* pExplosive, Cure::ContextObject* pTarget, TBC::PhysicsManager::BodyID pExplosiveBodyId, TBC::PhysicsManager::BodyID pTargetBodyId);
 	void OnCapture();	// CTF
 	int GetWinnerIndex() const;	// -1, 0, or 1.
+	void SetComputerIndex(int pIndex);	// -1, 0, or 1.
 	int GetComputerIndex() const;	// -1, 0, or 1.
 	void NextComputerIndex();
+	void SetComputerDifficulty(float pDifficulty);	// -1,[0,1], -1=inactive.
+	void SetPaused(bool pPaused);
 
 	bool Render();
 
@@ -133,6 +140,7 @@ private:
 	virtual void SendDetach(Cure::ContextObject* pObject1, Cure::ContextObject* pObject2);
 	virtual void TickInput();
 	virtual Cure::ContextObject* CreateContextObject(const str& pClassId) const;
+	virtual bool Initialize();
 	virtual bool InitializeTerrain();
 
 	Cure::ContextObject* CreateLogicHandler(const str& pType) const;
@@ -141,6 +149,7 @@ private:
 	UiCure::CollisionSoundManager* mCollisionSoundManager;
 	UiTbc::Renderer::LightID mLightId;
 	UiCure::CppContextObject* mLevel;
+	str mLevelName;
 	bool mIsFlyingBy;
 	double mFlyByTime;
 	Cutie* mVehicle;
@@ -159,6 +168,8 @@ private:
 	Launcher* mLauncher;
 	LauncherAi* mLauncherAi;
 	int mComputerIndex;
+	float mComputerDifficulty;
+	bool mIsPaused;
 };
 
 

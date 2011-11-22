@@ -263,6 +263,12 @@ void GameUiManager::Close()
 	UiLepra::Core::ProcessMessages();
 }
 
+void GameUiManager::DeleteDesktopWindow()
+{
+	delete (mDesktopWindow);
+	mDesktopWindow = 0;
+}
+
 
 
 bool GameUiManager::CanRender() const

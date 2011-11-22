@@ -149,6 +149,11 @@ void Canvas::Copy(const Canvas& pCanvas)
 	Reset(pCanvas.GetWidth(), pCanvas.GetHeight(), pCanvas.GetBitDepth());
 	SetPitch(pCanvas.GetPitch());
 
+	if (!pCanvas.GetBuffer())
+	{
+		return;
+	}
+
 	unsigned lPixelSize;
 	mBuffer = CreateBuffer(mPitch, mHeight, pCanvas.GetBitDepth(), lPixelSize);
 

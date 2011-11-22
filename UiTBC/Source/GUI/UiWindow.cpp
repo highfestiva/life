@@ -582,6 +582,12 @@ void Window::SetBackgroundImage(Painter::ImageID pImageID)
 	mClientRect->SetImage(pImageID);
 }
 
+void Window::SetBaseColor(const Color& pColor)
+{
+	mBodyColor = pColor;
+	SetColor(pColor);
+}
+
 void Window::SetColor(const Color& pColor)
 {
 	SetNeedsRepaint(pColor != mClientRect->GetColor());

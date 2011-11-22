@@ -475,6 +475,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Source\UiIconButton.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Source\UiLineGraph2d.cpp"
 				>
 			</File>
@@ -514,6 +518,10 @@
 			</File>
 			<File
 				RelativePath=".\Include\UiGameUiManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Include\UiIconButton.h"
 				>
 			</File>
 			<File

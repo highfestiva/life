@@ -1,0 +1,77 @@
+
+// Author: Alexander Hugestrand
+// Copyright (c) 2002-2009, Righteous Games
+
+
+
+#include "../Include/UiIconButton.h"
+#include "../Include/UiResourceManager.h"
+
+
+
+namespace UiCure
+{
+
+
+
+IconButton::IconButton(GameUiManager* pUiManager, Cure::ResourceManager* pResourceManager,
+		const str& pIconImageName, const str& pText):
+	Parent(_T("IconButton")),
+	mIconResource(new UserPainterKeepImageResource(pUiManager, PainterImageResource::RELEASE_NONE)),
+	mHighlightedIconId(UiTbc::Painter::INVALID_IMAGEID)
+{
+	SetText(pText);
+	mIconResource->Load(pResourceManager, pIconImageName,
+		UserPainterKeepImageResource::TypeLoadCallback(this, &IconButton::PainterImageLoadCallback));
+}
+
+IconButton::~IconButton()
+{
+	if (mIconResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
+	{
+		GetImageManager()->DropImage(mIconResource->GetData());
+		GetImageManager()->RemoveImage(mHighlightedIconId);
+	}
+	delete mIconResource;
+	mIconResource = 0;
+}
+
+
+
+void IconButton::PainterImageLoadCallback(UserPainterKeepImageResource* pResource)
+{
+	assert(pResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE);
+	if (pResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
+	{
+		Canvas& lCanvas = *pResource->GetRamData();
+		bool lHasTransparent = false;
+		const unsigned w = lCanvas.GetWidth();
+		const unsigned h = lCanvas.GetHeight();
+		for (unsigned y = 0; y < h; ++y)
+		{
+			for (unsigned x = 0; x < w; ++x)
+			{
+				Color c = lCanvas.GetPixelColor(x, y);
+				if (c.mAlpha)
+				{
+					c = Color(c, BLUE, 0.3f);
+					lCanvas.SetPixelColor(x, y, c);
+				}
+				else
+				{
+					lHasTransparent = true;
+				}
+			}
+		}
+		const UiTbc::GUIImageManager::BlendFunc lBlendFunc = lHasTransparent? UiTbc::GUIImageManager::ALPHABLEND : UiTbc::GUIImageManager::NO_BLEND;
+		GetImageManager()->AddLoadedImage(lCanvas, pResource->GetData(), UiTbc::GUIImageManager::CENTERED, lBlendFunc, 255);
+		mHighlightedIconId = GetImageManager()->AddImage(lCanvas, UiTbc::GUIImageManager::CENTERED, lBlendFunc, 255);
+		lCanvas.SetBuffer(0);	// Free buffer.
+		SetIcon(pResource->GetData(), ICON_CENTER);
+		SetHighlightedIcon(mHighlightedIconId);
+	}
+}
+
+
+
+}

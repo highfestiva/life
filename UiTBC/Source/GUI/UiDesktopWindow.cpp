@@ -88,6 +88,12 @@ DesktopWindow::~DesktopWindow()
 {
 	PurgeDeleted();
 
+	// TRICKY: this has gotta be done here, too. Component parent
+	// does this, but only after the image manager is deleted, which
+	// causes the component still holding images to blow up when they
+	// get killed.
+	DeleteAllLayers();
+
 	ListUtil::DeleteAll(mCleanerList);
 
 	mInputManager->RemoveTextInputObserver(this);
@@ -162,6 +168,7 @@ void DesktopWindow::PurgeDeleted()
 			mPainter->RemoveImage(lChild->mImageID);
 			lChild->ReleaseKeyboardFocus();
 		}
+		RemoveChild(lChild, 0);
 	}
 	// Delete all queued components.
 	ListUtil::DeleteAll(mDeleteQueue);
@@ -364,9 +371,8 @@ bool DesktopWindow::OnDoubleClick()
 	return (false);
 }
 
-void DesktopWindow::DeleteComponent(Component* pComponent, int pLayer)
+void DesktopWindow::PostDeleteComponent(Component* pComponent, int /*pLayer*/)
 {
-	RemoveChild(pComponent, pLayer);
 	mDeleteQueue.push_back(pComponent);
 }
 

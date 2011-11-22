@@ -42,12 +42,7 @@ Component::~Component()
 	mKeyboardFocusChild = 0;
 	mMouseFocusChild = 0;
 
-	for (int i = 0; i < mLayerCount; i++)
-	{
-		DeleteLayout(i);
-	}
-	delete[] mLayout;
-	mLayout = 0;
+	DeleteAllLayers();
 
 	if (mParent)
 	{
@@ -58,6 +53,17 @@ Component::~Component()
 			lParent->Component::RemoveChild(this, x);
 		}
 	}
+}
+
+void Component::DeleteAllLayers()
+{
+	for (int i = 0; i < mLayerCount; i++)
+	{
+		DeleteLayout(i);
+	}
+	mLayerCount = 0;
+	delete[] mLayout;
+	mLayout = 0;
 }
 
 void Component::DeleteLayout(int pLayer)

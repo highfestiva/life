@@ -82,14 +82,24 @@ class PainterImageResource: public Cure::OptimizedResource<Canvas*, UiTbc::Paint
 {
 	typedef Cure::OptimizedResource<Canvas*, UiTbc::Painter::ImageID> Parent;
 public:
+	enum ImageReleaseMode
+	{
+		RELEASE_DELETE = 1,
+		RELEASE_FREE_BUFFER,
+		RELEASE_NONE,
+	};
 	typedef UiTbc::Painter::ImageID UserData;
 
 	PainterImageResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const str& pName);
+	PainterImageResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const str& pName, ImageReleaseMode pReleaseMode);
 	virtual ~PainterImageResource();
 	const str GetType() const;
 	UserData GetUserData(const Cure::UserResource* pUserResource) const;
 	bool Load();
 	Cure::ResourceLoadState PostProcess();
+
+private:
+	ImageReleaseMode mReleaseMode;
 };
 
 
@@ -307,15 +317,16 @@ public:
 
 
 
-typedef UserUiTypeResource<PainterImageResource>				UserPainterImageResource;
-typedef UserUiTypeResource<RendererImageResource>				UserRendererImageResource;
-//typedef UserUiTypeResource<TextureResource>					UserTextureResource;
-typedef UserUiExtraTypeResource<SoundResource2d, SoundResource::LoopMode>	UserSound2dResource;
-typedef UserUiExtraTypeResource<SoundResource3d, SoundResource::LoopMode>	UserSound3dResource;
-typedef UserUiTypeResource<ClassResource>					UserClassResource;
-//typedef Cure::UserTypeResource<TBC::...>					UserPhysicsResource;
-//typedef UserUiTypeResource<TBC::...>						UserAnimationResource;
-//typedef Cure::UserTypeResource<...>						UserTerrainResource;
+typedef UserUiTypeResource<PainterImageResource>						UserPainterImageResource;
+typedef UserUiExtraTypeResource<PainterImageResource, PainterImageResource::ImageReleaseMode>	UserPainterKeepImageResource;
+typedef UserUiTypeResource<RendererImageResource>						UserRendererImageResource;
+//typedef UserUiTypeResource<TextureResource>							UserTextureResource;
+typedef UserUiExtraTypeResource<SoundResource2d, SoundResource::LoopMode>			UserSound2dResource;
+typedef UserUiExtraTypeResource<SoundResource3d, SoundResource::LoopMode>			UserSound3dResource;
+typedef UserUiTypeResource<ClassResource>							UserClassResource;
+//typedef Cure::UserTypeResource<TBC::...>							UserPhysicsResource;
+//typedef UserUiTypeResource<TBC::...>								UserAnimationResource;
+//typedef Cure::UserTypeResource<...>								UserTerrainResource;
 
 
 

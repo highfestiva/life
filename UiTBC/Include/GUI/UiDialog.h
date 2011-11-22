@@ -25,8 +25,10 @@ public:
 	Dialog(Component* pParent, const str& pText, Action pTarget);
 	virtual ~Dialog();
 	void AddButton(int pTag, const str& pText);
+	void AddButton(int pTag, Button* pButton);
 
 private:
+	virtual void Repaint(Painter* pPainter);
 	virtual void UpdateLayout();
 	void OnClick(Button* pButton);
 
@@ -35,6 +37,9 @@ private:
 	str mText;
 	Action mTarget;
 	ButtonList mButtonList;
+	Button* mClickedButton;
+	bool mIsClosing;
+	int mAnimationStep;
 };
 
 

@@ -92,7 +92,7 @@ public:
 
 	// This function will put the component in the delete queue
 	// which is processed once for every call to Repaint().
-	void DeleteComponent(Component* pComponent, int pLayer);
+	void PostDeleteComponent(Component* pComponent, int pLayer);
 
 	// Returns the painter given in the constructor.
 	Painter* GetPainter();

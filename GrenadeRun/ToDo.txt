@@ -26,6 +26,7 @@ Main menu: single player/two players/about, enter P1+P2 names (remember last), s
 Admin: add button in center, for alert:restart/continue.
 Polish on level_2 roads (in texture).
 AI for Cutie.
+Game over view.
 Show keyboard controls when starting.
 Elevator from ravine to left mountain.
 Cutify Cutie.

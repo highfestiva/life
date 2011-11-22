@@ -41,7 +41,15 @@ GameUiManager* UiResource::GetUiManager() const
 
 PainterImageResource::PainterImageResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const str& pName):
 	Parent(pManager, pName),
-	UiResource(pUiManager)
+	UiResource(pUiManager),
+	mReleaseMode(RELEASE_DELETE)
+{
+}
+
+PainterImageResource::PainterImageResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const str& pName, ImageReleaseMode pReleaseMode):
+	Parent(pManager, pName),
+	UiResource(pUiManager),
+	mReleaseMode(pReleaseMode)
 {
 }
 
@@ -89,7 +97,12 @@ Cure::ResourceLoadState PainterImageResource::PostProcess()
 	assert(mOptimizedData == UiTbc::Painter::INVALID_IMAGEID);
 	mOptimizedData = GetUiManager()->GetPainter()->AddImage(GetRamData(), 0);
 	assert(mOptimizedData != UiTbc::Painter::INVALID_IMAGEID);
-	SetRamData(0);
+	switch (mReleaseMode)
+	{
+		case RELEASE_DELETE:		SetRamData(0);			break;
+		case RELEASE_FREE_BUFFER:	GetRamData()->SetBuffer(0);	break;
+		case RELEASE_NONE:						break;
+	}
 	Cure::ResourceLoadState lLoadState;
 	if (mOptimizedData == UiTbc::Painter::INVALID_IMAGEID)
 	{

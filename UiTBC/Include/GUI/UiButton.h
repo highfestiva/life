@@ -103,7 +103,7 @@ public:
 
 	virtual ~Button();
 
-	void InitializeHoover();
+	virtual void SetBaseColor(const Color& pColor);
 
 	virtual void SetPressed(bool pPressed);
 	bool GetPressed();
@@ -116,8 +116,9 @@ public:
 	void SetOnClickDelegate(const Delegate& pOnClick);
 	void SetOnDragDelegate(const DelegateXY& pOnDrag);
 
-	void SetIcon(Painter::ImageID pIconID,
-			    IconAlignment pAlignment);
+	void SetIcon(Painter::ImageID pIconID, IconAlignment pAlignment);
+	Painter::ImageID GetIconCanvas() const;
+	void SetHighlightedIcon(Painter::ImageID pIconId);
 
 	void SetText(const str& pText, const Color& pTextColor = Lepra::WHITE, const Color& pBackgColor = Lepra::BLACK);
 	const str& GetText();
@@ -160,6 +161,7 @@ private:
 	Painter::ImageID mPressingImageID;
 
 	Painter::ImageID mIconID;
+	Painter::ImageID mHighlightedIconId;
 	IconAlignment mIconAlignment;
 
 	str mText;

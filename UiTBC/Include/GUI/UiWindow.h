@@ -64,6 +64,7 @@ public:
 	virtual bool OnMouseMove(int pMouseX, int pMouseY, int pDeltaX, int pDeltaY);
 
 	void SetBackgroundImage(Painter::ImageID pImageID);
+	virtual void SetBaseColor(const Color& pColor);
 	void SetColor(const Color& pColor);
 
 	virtual void SetCaption(Caption* pCaption);

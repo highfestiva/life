@@ -995,7 +995,7 @@ void GameServerManager::FlipCheck(Cure::ContextObject* pObject) const
 	}
 	else
 	{
-		mLog.AErrorf(_T("Error: vehicle %i could not be flipped!"), pObject->GetInstanceId());
+		mLog.Errorf(_T("Error: vehicle %i could not be flipped!"), pObject->GetInstanceId());
 	}
 }
 
