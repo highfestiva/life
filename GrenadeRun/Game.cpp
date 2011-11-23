@@ -37,7 +37,7 @@ Game::Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVaria
 	mCollisionSoundManager(0),
 	mLightId(UiTbc::Renderer::INVALID_LIGHT),
 	mLevel(0),
-	mIsFlyingBy(true),
+	mFlybyMode(FLYBY_INTRODUCTION),
 	mFlyByTime(0),
 	mVehicle(0),
 	mVehicleCamPos(0, 0, 200),
@@ -51,8 +51,7 @@ Game::Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVaria
 	mLauncher(0),
 	mLauncherAi(0),
 	mComputerIndex(-1),
-	mComputerDifficulty(0.5f),
-	mIsPaused(false)
+	mComputerDifficulty(0.5f)
 {
 	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
 	mCollisionSoundManager->AddSound(_T("explosion"), UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f));
@@ -289,14 +288,18 @@ void Game::UnlockLauncher()
 	mIsLaunching = false;
 }
 
-bool Game::IsFlyingBy() const
+Game::FlybyMode Game::GetFlybyMode() const
 {
-	return mIsFlyingBy;
+	return mFlybyMode;
 }
 
-void Game::SetIsFlyingBy(bool pFlyingBy)
+void Game::SetFlybyMode(FlybyMode pFlybyMode)
 {
-	mIsFlyingBy = pFlyingBy;
+	mFlybyMode = pFlybyMode;
+	if (pFlybyMode == FLYBY_INTRODUCTION)
+	{
+		mFlyByTime = 0;
+	}
 }
 
 void Game::Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
@@ -437,11 +440,6 @@ void Game::SetComputerDifficulty(float pDifficulty)
 	mComputerDifficulty = pDifficulty;
 }
 
-void Game::SetPaused(bool pPaused)
-{
-	mIsPaused = pPaused;
-}
-
 bool Game::Render()
 {
 	if (!mVehicle || !mVehicle->IsLoaded() ||
@@ -452,151 +450,37 @@ bool Game::Render()
 	}
 
 	const PixelRect lFullRect(0, 0, mUiManager->GetCanvas()->GetActualWidth(), mUiManager->GetCanvas()->GetActualHeight());
-	PixelRect lLeftRect = lFullRect;
+	mLeftRect = lFullRect;
 	if (lFullRect.mRight < lFullRect.mBottom)	// Portrait?
 	{
-		lLeftRect.mBottom = lLeftRect.mBottom/2 - 5;
+		mLeftRect.mBottom = mLeftRect.mBottom/2 - 5;
 	}
 	else
 	{
-		lLeftRect.mRight = lLeftRect.mRight/2 - 5;
+		mLeftRect.mRight = mLeftRect.mRight/2 - 5;
 	}
-	PixelRect lRightRect = lFullRect;
+	mRightRect = lFullRect;
 	if (lFullRect.mRight < lFullRect.mBottom)	// Portrait?
 	{
-		lRightRect.mTop = lLeftRect.mBottom + 10;
+		mRightRect.mTop = mLeftRect.mBottom + 10;
 	}
 	else
 	{
-		lRightRect.mLeft = lLeftRect.mRight + 10;
+		mRightRect.mLeft = mLeftRect.mRight + 10;
 	}
 	switch (GetComputerIndex())
 	{
 		case -1:			break;	// Two player game.
-		case 0:	lRightRect = lFullRect;	break;	// Single player, to right.
-		case 1:	lLeftRect = lFullRect;	break;	// Single player, to left.
+		case 0:	mRightRect = lFullRect;	break;	// Single player, to right.
+		case 1:	mLeftRect = lFullRect;	break;	// Single player, to left.
 	}
 
 	const Vector3DF lLauncherPosition(0, -215, 27);
 	mLauncher->SetRootPosition(lLauncherPosition);
 
-	if (mIsFlyingBy || mIsPaused)
+	if (mFlybyMode != FLYBY_INACTIVE)
 	{
-		const Vector3DF lCutie = mVehicle->GetPosition();
-		const Vector3DF lGoal = mCtf->GetPosition();
-		const double lTotalTime = 35.0;
-		const double lFrameTime = 1.0/FPS;
-		bool mForceCircle = mIsPaused;
-		if (mIsFlyingBy && mIsPaused)
-		{
-			mForceCircle = false;
-		}
-		else
-		{
-			mFlyByTime += lFrameTime;
-		}
-		if (mFlyByTime > lTotalTime && !mIsPaused)
-		{
-			mIsFlyingBy = false;
-			return true;
-		}
-
-		TransformationF t;
-		const double lSweepTime = lTotalTime * 0.25;
-		if (mFlyByTime < lSweepTime || mForceCircle)
-		{
-			// Sweep around the area in a circle.
-			const float a = 0.8f * 2*PIF * (float)(mFlyByTime/lSweepTime);
-			t.GetOrientation().RotateAroundOwnZ(a + PIF/2);
-			t.GetOrientation().RotateAroundOwnX(-PIF/8);
-			t.SetPosition(Vector3DF(::cos(a)*240, ::sin(a)*240, ::sin(a+PIF/8)*50 + 80));
-		}
-		else
-		{
-			// Look at cutie, goal and launcher in more detail.
-			const double lDetailTime = lTotalTime - lSweepTime;
-			// Orientation. Treat orientation and position in different time slices, because if
-			// both happen at the same time, perception of space is without a doubt lost.
-			if (mFlyByTime-lSweepTime < lDetailTime * 1/12)
-			{
-				// Stare right at Cutie.
-				t.GetOrientation().RotateAroundOwnZ(+PIF/2);
-				t.GetOrientation().RotateAroundOwnX(-PIF/8);
-			}
-			else if (mFlyByTime-lSweepTime < lDetailTime * 3/12)
-			{
-				// Stand beside Cutie.
-				t.GetOrientation().RotateAroundOwnZ(+PIF*11/12);
-				t.GetOrientation().RotateAroundOwnX(-PIF/8);
-			}
-			else if (mFlyByTime-lSweepTime < lDetailTime * 4/12)
-			{
-				// Look up at the goal.
-				t.GetOrientation().RotateAroundOwnZ(-PIF*2/5);
-				t.GetOrientation().RotateAroundOwnX(+PIF/12);
-			}
-			else if (mFlyByTime-lSweepTime < lDetailTime * 7/12)
-			{
-				// Look down at the goal.
-				t.GetOrientation().RotateAroundOwnZ(-PIF*2/5);
-				t.GetOrientation().RotateAroundOwnX(-PIF/8);
-			}
-			else if (mFlyByTime-lSweepTime < lDetailTime * 10/12)
-			{
-				// Look right at the launcher.
-				t.GetOrientation().RotateAroundOwnZ(+PIF*7/8);
-				t.GetOrientation().RotateAroundOwnX(-PIF/10);
-			}
-			else
-			{
-				// Stand beside the launcher.
-				t.GetOrientation().RotateAroundOwnZ(+PIF/2);
-				t.GetOrientation().RotateAroundOwnX(-PIF/4);
-			}
-			// Position.
-			if (mFlyByTime-lSweepTime < lDetailTime * 1/3)
-			{
-				t.SetPosition(lCutie + Vector3DF(+4, +20, +10));
-			}
-			else if (mFlyByTime-lSweepTime < lDetailTime * 2/3)
-			{
-				t.SetPosition(lGoal + Vector3DF(-40, -30, +30));
-			}
-			else if (mFlyByTime-lSweepTime < lDetailTime * 10/12)
-			{
-				t.SetPosition(lLauncherPosition + Vector3DF(+5, +15, +10));	// In front of launcher.
-			}
-			else
-			{
-				t.SetPosition(lLauncherPosition + Vector3DF(+14, 0, +14));	// Beside launcher.
-			}
-		}
-#ifdef LEPRA_IOS_LOOKANDFEEL
-		// If computer runs the launcher, the vehicle should be displayed in landscape mode.
-		if (GetComputerIndex() != 1)
-		{
-			t.GetOrientation().RotateAroundOwnY(-PIF*0.5f);
-		}
-#endif // iOS
-		if (GetComputerIndex() != 0)
-		{
-			mLeftCamera.Interpolate(mLeftCamera, t, 0.05f);
-			mUiManager->SetCameraPosition(mLeftCamera);
-			mUiManager->GetRenderer()->SetViewFrustum(60, 3, 1000);
-			mUiManager->Render(lLeftRect);
-		}
-		if (GetComputerIndex() != 1)
-		{
-#ifdef LEPRA_IOS_LOOKANDFEEL
-			// The launcher is always displayed in portrait, both for single and dual play.
-			t.GetOrientation().RotateAroundOwnY(PIF);
-#endif // iOS
-			mRightCamera.Interpolate(mRightCamera, t, 0.05f);
-			mUiManager->SetCameraPosition(mRightCamera);
-			mUiManager->GetRenderer()->SetViewFrustum(60, 3, 1000);
-			mUiManager->Render(lRightRect);
-		}
-		return true;
+		return FlybyRender();
 	}
 
 	if (GetComputerIndex() != 0)
@@ -646,7 +530,7 @@ bool Game::Render()
 		mLeftCamera.Interpolate(mLeftCamera, t, 0.1f);
 		mUiManager->SetCameraPosition(mLeftCamera);
 		mUiManager->GetRenderer()->SetViewFrustum(60, 3, 1000);
-		mUiManager->Render(lLeftRect);
+		mUiManager->Render(mLeftRect);
 	}
 
 	if (GetComputerIndex() != 1)
@@ -678,7 +562,123 @@ bool Game::Render()
 		mRightCamera.Interpolate(mRightCamera, t, 0.1f);
 		mUiManager->SetCameraPosition(mRightCamera);
 		mUiManager->GetRenderer()->SetViewFrustum(std::min(60.0f, 9000/lRange), 3, 1000);
-		mUiManager->Render(lRightRect);
+		mUiManager->Render(mRightRect);
+	}
+	return true;
+}
+
+
+
+bool Game::FlybyRender()
+{
+	const Vector3DF lCutie = mVehicle->GetPosition();
+	const Vector3DF lGoal = mCtf->GetPosition();
+	const double lTotalTime = 35.0;
+	const double lFrameTime = 1.0/FPS;
+	mFlyByTime += lFrameTime;
+	if (mFlybyMode == FLYBY_INTRODUCTION)
+	{
+		if (mFlyByTime > lTotalTime)
+		{
+			mFlybyMode = FLYBY_INACTIVE;
+			return true;
+		}
+	}
+
+	TransformationF t;
+	const double lSweepTime = lTotalTime * 0.25;
+	if (mFlyByTime < lSweepTime || mFlybyMode == FLYBY_USER_PAUSE || mFlybyMode == FLYBY_SYSTEM_PAUSE)
+	{
+		// Sweep around the area in a circle.
+		const float a = 0.8f * 2*PIF * (float)(mFlyByTime/lSweepTime);
+		t.GetOrientation().RotateAroundOwnZ(a + PIF/2);
+		t.GetOrientation().RotateAroundOwnX(-PIF/8);
+		t.SetPosition(Vector3DF(::cos(a)*240, ::sin(a)*240, ::sin(a+PIF/8)*50 + 80));
+	}
+	else
+	{
+		// Look at cutie, goal and launcher in more detail.
+		const double lDetailTime = lTotalTime - lSweepTime;
+		// Orientation. Treat orientation and position in different time slices, because if
+		// both happen at the same time, perception of space is without a doubt lost.
+		if (mFlyByTime-lSweepTime < lDetailTime * 1/12)
+		{
+			// Stare right at Cutie.
+			t.GetOrientation().RotateAroundOwnZ(+PIF/2);
+			t.GetOrientation().RotateAroundOwnX(-PIF/8);
+		}
+		else if (mFlyByTime-lSweepTime < lDetailTime * 3/12)
+		{
+			// Stand beside Cutie.
+			t.GetOrientation().RotateAroundOwnZ(+PIF*11/12);
+			t.GetOrientation().RotateAroundOwnX(-PIF/8);
+		}
+		else if (mFlyByTime-lSweepTime < lDetailTime * 4/12)
+		{
+			// Look up at the goal.
+			t.GetOrientation().RotateAroundOwnZ(-PIF*2/5);
+			t.GetOrientation().RotateAroundOwnX(+PIF/12);
+		}
+		else if (mFlyByTime-lSweepTime < lDetailTime * 7/12)
+		{
+			// Look down at the goal.
+			t.GetOrientation().RotateAroundOwnZ(-PIF*2/5);
+			t.GetOrientation().RotateAroundOwnX(-PIF/8);
+		}
+		else if (mFlyByTime-lSweepTime < lDetailTime * 10/12)
+		{
+			// Look right at the launcher.
+			t.GetOrientation().RotateAroundOwnZ(+PIF*7/8);
+			t.GetOrientation().RotateAroundOwnX(-PIF/10);
+		}
+		else
+		{
+			// Stand beside the launcher.
+			t.GetOrientation().RotateAroundOwnZ(+PIF/2);
+			t.GetOrientation().RotateAroundOwnX(-PIF/4);
+		}
+		// Position.
+		if (mFlyByTime-lSweepTime < lDetailTime * 1/3)
+		{
+			t.SetPosition(lCutie + Vector3DF(+4, +20, +10));
+		}
+		else if (mFlyByTime-lSweepTime < lDetailTime * 2/3)
+		{
+			t.SetPosition(lGoal + Vector3DF(-40, -30, +30));
+		}
+		else if (mFlyByTime-lSweepTime < lDetailTime * 10/12)
+		{
+			t.SetPosition(mLauncherPosition + Vector3DF(+5, +15, +10));	// In front of launcher.
+		}
+		else
+		{
+			t.SetPosition(mLauncherPosition + Vector3DF(+14, 0, +14));	// Beside launcher.
+		}
+	}
+#ifdef LEPRA_IOS_LOOKANDFEEL
+	// If computer runs the launcher, the vehicle should be displayed in landscape mode.
+	if (GetComputerIndex() != 1)
+	{
+		t.GetOrientation().RotateAroundOwnY(-PIF*0.5f);
+	}
+#endif // iOS
+	if (GetComputerIndex() != 0)
+	{
+		mLeftCamera.Interpolate(mLeftCamera, t, 0.05f);
+		mUiManager->SetCameraPosition(mLeftCamera);
+		mUiManager->GetRenderer()->SetViewFrustum(60, 3, 1000);
+		mUiManager->Render(mLeftRect);
+	}
+	if (GetComputerIndex() != 1)
+	{
+#ifdef LEPRA_IOS_LOOKANDFEEL
+		// The launcher is always displayed in portrait, both for single and dual play.
+		t.GetOrientation().RotateAroundOwnY(PIF);
+#endif // iOS
+		mRightCamera.Interpolate(mRightCamera, t, 0.05f);
+		mUiManager->SetCameraPosition(mRightCamera);
+		mUiManager->GetRenderer()->SetViewFrustum(60, 3, 1000);
+		mUiManager->Render(mRightRect);
 	}
 	return true;
 }
@@ -798,6 +798,8 @@ bool Game::Initialize()
 		mRightCamera.GetOrientation().RotateAroundOwnY(+PIF*0.5f);
 #endif // iOS
 
+		mLauncherPosition = Vector3DF(0, -215, 27);
+
 		lOk = InitializeTerrain();
 	}
 	if (lOk)
@@ -837,8 +839,7 @@ bool Game::Initialize()
 	}
 	if (lOk)
 	{
-		mIsFlyingBy = true;
-		mFlyByTime = 0;
+		SetFlybyMode(FLYBY_INTRODUCTION);
 	}
 	return lOk;
 }

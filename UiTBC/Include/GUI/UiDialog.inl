@@ -11,9 +11,9 @@
 
 
 template<class _Target>
-Dialog<_Target>::Dialog(Component* pParent, const str& pText, Action pTarget):
+Dialog<_Target>::Dialog(Component* pParent, Action pTarget):
 	Parent(WHITE, _T("Dialog"), new FloatingLayout),
-	mText(pText),
+	mLabel(0),
 	mTarget(pTarget),
 	mClickedButton(0),
 	mIsClosing(false),
@@ -51,6 +51,31 @@ Dialog<_Target>::~Dialog()
 }
 
 template<class _Target>
+Label* Dialog<_Target>::QueryLabel(const str& pText, UiTbc::FontManager::FontId pFontId)
+{
+	if (!mLabel)
+	{
+		mLabel = new UiTbc::Label;
+	}
+	UiTbc::Painter* lPainter = ((DesktopWindow*)GetTopParent())->GetPainter();
+	mLabel->SetFontId(pFontId);
+	mLabel->ActivateFont(lPainter);
+	mLabel->SetText(pText, mColor[1], Lepra::Color(0,0,0,0), lPainter);
+	const int w = lPainter->GetStringWidth(pText);
+	const int h = lPainter->GetFontHeight();
+	mLabel->SetPreferredSize(w+20, h);
+	AddChild(mLabel);
+	// Set position.
+	PixelCoord lCoord;
+	const PixelCoord lSize = GetSize();
+	lCoord.x = lSize.x/2 - w/2;
+	lCoord.y = lSize.y/3 - h;
+	mLabel->SetPos(lCoord);
+	mLabel->DeactivateFont(lPainter);
+	return mLabel;
+}
+
+template<class _Target>
 void Dialog<_Target>::AddButton(int pTag, const str& pText)
 {
 	Button* lButton = new Button(BorderComponent::ZIGZAG, 1, Color(mColor[0], mColor[1], 0.3f), _T("DialogButton"));
@@ -77,6 +102,35 @@ void Dialog<_Target>::AddButton(int pTag, Button* pButton)
 
 template<class _Target>
 void Dialog<_Target>::Repaint(Painter* pPainter)
+{
+	Animate();	// Slides dialog in on create and out on destroy.
+	Parent::Repaint(pPainter);
+}
+
+template<class _Target>
+void Dialog<_Target>::UpdateLayout()
+{
+	const int lCount = (int)mButtonList.size();
+	const PixelCoord& lSize = GetSize();
+
+	Button* lButton = mButtonList[0];
+	PixelCoord lButtonSize = lButton->GetPreferredSize();
+	const int lSpacePerEach = lButtonSize.x*3/2;
+	const int lHalfGap = (lSpacePerEach - lButtonSize.x)/2;
+	int x = lSize.x/2 + lHalfGap - lSpacePerEach*lCount/2;
+	const int y = mLabel? lSize.y/2 : lSize.y/2-lButtonSize.y/2;
+	for (int i = 0; i < lCount; ++i)
+	{
+		Button* lButton = mButtonList[i];
+		lButton->SetPos(x, y);
+		x +=  lSpacePerEach;
+	}
+
+	Parent::UpdateLayout();
+}
+
+template<class _Target>
+void Dialog<_Target>::Animate()
 {
 	if (mAnimationStep)
 	{
@@ -108,36 +162,6 @@ void Dialog<_Target>::Repaint(Painter* pPainter)
 			}
 		}
 	}
-	Parent::Repaint(pPainter);
-
-	pPainter->SetColor(mColor[1], 0);
-	PixelCoord lCoord = GetScreenPos();
-	const PixelCoord lSize = GetSize();
-	lCoord.x += lSize.x/2 - pPainter->GetStringWidth(mText)/2;
-	lCoord.y += lSize.y/3 - pPainter->GetFontHeight();
-	pPainter->PrintText(mText, lCoord.x, lCoord.y);
-}
-
-template<class _Target>
-void Dialog<_Target>::UpdateLayout()
-{
-	const int lCount = (int)mButtonList.size();
-	const PixelCoord& lSize = GetSize();
-
-	Button* lButton = mButtonList[0];
-	PixelCoord lButtonSize = lButton->GetPreferredSize();
-	const int lSpacePerEach = lButtonSize.x*3/2;
-	const int lHalfGap = (lSpacePerEach - lButtonSize.x)/2;
-	int x = lSize.x/2 + lHalfGap - lSpacePerEach*lCount/2;
-	const int y = mText.empty()? lSize.y/2-lButtonSize.y/2 : lSize.y/2;
-	for (int i = 0; i < lCount; ++i)
-	{
-		Button* lButton = mButtonList[i];
-		lButton->SetPos(x, y);
-		x +=  lSpacePerEach;
-	}
-
-	Parent::UpdateLayout();
 }
 
 template<class _Target>

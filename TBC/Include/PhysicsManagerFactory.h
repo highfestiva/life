@@ -34,6 +34,9 @@ public:
 		ENGINE_BULLET = 3,
 	};
 
+	// Radius says how large area around origin you want to use, levels is how many hierarchical levels
+	// you'll allow in the collision tree; sensitivity tells the engine what threshold to use to determine
+	// what objects are still (= auto disabled in ODE).
 	static PhysicsManager* Create(Engine pEngine, float pRadius, int pLevels, float pSensitivity);
 
 	LOG_CLASS_DECLARE();

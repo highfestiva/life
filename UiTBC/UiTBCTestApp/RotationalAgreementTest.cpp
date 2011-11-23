@@ -179,7 +179,7 @@ void RunRotationalAgreementTest()
 	Lepra::Canvas lScreen;
 	lDisp->GetScreenCanvas(lScreen);
 	UiTbc::OpenGLRenderer lRenderer(&lScreen);
-	TBC::PhysicsManager* lPhysics = TBC::PhysicsManagerFactory::Create(TBC::PhysicsManagerFactory::ENGINE_ODE, 500, 3);
+	TBC::PhysicsManager* lPhysics = TBC::PhysicsManagerFactory::Create(TBC::PhysicsManagerFactory::ENGINE_ODE, 500, 3, 3);
 
 	lRenderer.SetShadowMode(UiTbc::Renderer::CAST_SHADOWS, UiTbc::Renderer::SH_VOLUMES_AND_MAPS);
 	lPhysics->SetGravity(Lepra::Vector3DF(0, 0, -9.82f));

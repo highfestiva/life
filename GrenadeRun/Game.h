@@ -86,6 +86,14 @@ class Game: public Cure::GameTicker, public Cure::GameManager
 {
 	typedef GameManager Parent;
 public:
+	enum FlybyMode
+	{
+		FLYBY_INACTIVE = 1,
+		FLYBY_INTRODUCTION,
+		FLYBY_USER_PAUSE,
+		FLYBY_SYSTEM_PAUSE,
+	};
+
 	Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager);
 	virtual ~Game();
 	UiCure::GameUiManager* GetUiManager() const;
@@ -108,8 +116,8 @@ public:
 	float GetMuzzleVelocity() const;
 	bool IsLauncherLocked() const;
 	void UnlockLauncher();
-	bool IsFlyingBy() const;
-	void SetIsFlyingBy(bool pFlyingBy);
+	FlybyMode GetFlybyMode() const;
+	void SetFlybyMode(FlybyMode pFlybyMode);
 	void Detonate(const Vector3DF& pForce, const Vector3DF& pTorque, const Vector3DF& pPosition,
 		Cure::ContextObject* pExplosive, Cure::ContextObject* pTarget, TBC::PhysicsManager::BodyID pExplosiveBodyId, TBC::PhysicsManager::BodyID pTargetBodyId);
 	void OnCapture();	// CTF
@@ -118,13 +126,14 @@ public:
 	int GetComputerIndex() const;	// -1, 0, or 1.
 	void NextComputerIndex();
 	void SetComputerDifficulty(float pDifficulty);	// -1,[0,1], -1=inactive.
-	void SetPaused(bool pPaused);
 
 	bool Render();
 
 	//void MoveTo(const FingerMovement& pMove);
 
 private:
+	bool FlybyRender();
+
 	virtual void PollRoundTrip();	// Polls network for any incoming to yield lower latency.
 	virtual float GetTickTimeReduction() const;	// Returns how much quicker the tick loop should be; can be negative.
 	virtual float GetPowerSaveAmount() const;
@@ -150,10 +159,13 @@ private:
 	UiTbc::Renderer::LightID mLightId;
 	UiCure::CppContextObject* mLevel;
 	str mLevelName;
-	bool mIsFlyingBy;
+	FlybyMode mFlybyMode;
 	double mFlyByTime;
 	Cutie* mVehicle;
 	Vector3DF mVehicleCamPos;
+	Vector3DF mLauncherPosition;
+	PixelRect mLeftRect;
+	PixelRect mRightRect;
 	float mVehicleCamHeight;
 	bool mIsLaunching;
 	float mLauncherYaw;
@@ -169,7 +181,6 @@ private:
 	LauncherAi* mLauncherAi;
 	int mComputerIndex;
 	float mComputerDifficulty;
-	bool mIsPaused;
 };
 
 

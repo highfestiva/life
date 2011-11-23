@@ -160,7 +160,8 @@ void Label::Repaint(Painter* pPainter)
 {
 	SetNeedsRepaint(false);
 
-	const int lTextWidth  = pPainter->GetStringWidth(_T(" ")+mText);
+	ActivateFont(pPainter);
+	const int lTextWidth  = pPainter->GetStringWidth(mText);
 	const int lTextHeight = pPainter->GetLineHeight() * (std::count(mText.begin(), mText.end(), _T('\n')) + 1);
 	if (mTextWidth != lTextWidth || mTextHeight != lTextHeight)
 	{
@@ -204,7 +205,7 @@ void Label::Repaint(Painter* pPainter)
 		pPainter->SetColor(mTextBackgColor, 1);
 	}
 
-	pPainter->PrintText(_T(" ")+mText, lTextX, lTextY);
+	pPainter->PrintText(mText, lTextX, lTextY);
 
 	// Finally, draw the dotted rectangle.
 	if (HasKeyboardFocus() == true  && 
@@ -247,6 +248,7 @@ void Label::Repaint(Painter* pPainter)
 	}
 
 	pPainter->PopAttrib();
+	DeactivateFont(pPainter);
 }
 
 PixelCoord Label::GetPreferredSize(bool pForceAdaptive)
@@ -283,13 +285,9 @@ PixelCoord Label::GetPreferredSize(bool pForceAdaptive)
 void Label::SetText(const str& pText,
 			const Color& pTextColor,
 			const Color& pBackgColor,
-			Painter*)
+			Painter* pPainter)
 {
-	SetFontColor(pTextColor);
-	mText                   = pText;
-	mTextBackgColor         = pBackgColor;
-	mSelectedTextColor      = pTextColor;
-	mSelectedTextBackgColor = pBackgColor;
+	SetText(pText, pTextColor, pBackgColor, pTextColor, pBackgColor, pPainter);
 }
 
 void Label::SetText(const str& pText,

@@ -350,7 +350,7 @@ bool CreateWorld(AgentData& pAgentData)
 {
 	bool lTestOk = true;
 	pAgentData.mTickTimeModulo = 0;
-	pAgentData.mPhysics = TBC::PhysicsManagerFactory::Create(TBC::PhysicsManagerFactory::ENGINE_ODE, 1000, 6);
+	pAgentData.mPhysics = TBC::PhysicsManagerFactory::Create(TBC::PhysicsManagerFactory::ENGINE_ODE, 1000, 6, 6);
 	pAgentData.mPhysics->SetGravity(Lepra::Vector3DF(0, 0, -10));
 	// Create floor on server.
 	const float lFloorSize = 100;

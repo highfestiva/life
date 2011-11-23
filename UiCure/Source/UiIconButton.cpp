@@ -47,6 +47,7 @@ void IconButton::PainterImageLoadCallback(UserPainterKeepImageResource* pResourc
 		bool lHasTransparent = false;
 		const unsigned w = lCanvas.GetWidth();
 		const unsigned h = lCanvas.GetHeight();
+		const Color lBlendColor(0, 0, 128, 128);
 		for (unsigned y = 0; y < h; ++y)
 		{
 			for (unsigned x = 0; x < w; ++x)
@@ -54,7 +55,7 @@ void IconButton::PainterImageLoadCallback(UserPainterKeepImageResource* pResourc
 				Color c = lCanvas.GetPixelColor(x, y);
 				if (c.mAlpha)
 				{
-					c = Color(c, BLUE, 0.3f);
+					c = Color(c, lBlendColor, 0.5f);
 					lCanvas.SetPixelColor(x, y, c);
 				}
 				else

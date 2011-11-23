@@ -32,6 +32,7 @@
 #pragma once
 
 #include "../../../ThirdParty/FastDelegate/FastDelegate.h"
+#include "UiTextComponent.h"
 #include "UiWindow.h"
 
 
@@ -63,7 +64,7 @@ public:
 	SetOnDragDelegate(UiTbc::ButtonType<UiTbc::Button>::DelegateXY(this, &_class::_func))
 
 
-class Button: public Window
+class Button: public Window, public TextComponent
 {
 	typedef Window Parent;
 public:
@@ -143,6 +144,7 @@ public:
 	void SetState(State pState);
 
 protected:
+	virtual void ForceRepaint();
 	virtual void OnTextChanged();
 	virtual StateComponentList GetStateList(ComponentState pState);
 
@@ -165,7 +167,6 @@ private:
 	IconAlignment mIconAlignment;
 
 	str mText;
-	Color mTextColor;
 	Color mTextBackgColor;
 
 	Color mHooverColor;

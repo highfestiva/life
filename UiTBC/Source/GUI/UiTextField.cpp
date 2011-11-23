@@ -600,8 +600,7 @@ void TextField::Repaint(Painter* pPainter)
 	int lTextX = lRect.mLeft + mTextX;
 	int lTextY = lRect.mTop + (lRect.GetHeight() - lTextHeight) / 2;
 
-	pPainter->SetColor(GetTextColor());
-	pPainter->PrintText(GetVisibleText(), lTextX, lTextY);
+	PrintTextDeactivate(pPainter, GetVisibleText(), lTextX, lTextY);
 
 	if (mMarkerVisible == true)
 	{

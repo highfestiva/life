@@ -419,7 +419,6 @@ int App::Run()
 		mGame = new Game(mUiManager, mVariableScope, mResourceManager);
 		mGame->SetComputerDifficulty(-1);
 		mGame->SetComputerIndex(0);
-		mGame->SetPaused(true);
 		lOk = mGame->SetLevel(_T("level_2"));
 	}
 	if (lOk)
@@ -498,7 +497,8 @@ bool App::Poll()
 		mUiManager->InputTick();
 		PollTaps();
 	}
-	if (lOk && !mIsPaused)
+	const bool lTRICKY_IsLoopPaused = mIsPaused;
+	if (lOk && !lTRICKY_IsLoopPaused)
 	{
 		mGame->BeginTick();
 	}
@@ -520,11 +520,11 @@ bool App::Poll()
 		mInfoTextColor = Color(127, 127, 127)*(1+::sin(mAngleTime*27)*0.9f);
 		DrawHud();
 	}
-	if (lOk && !mIsPaused)
+	if (lOk && !lTRICKY_IsLoopPaused)
 	{
 		lOk = mGame->EndTick();
 	}
-	if (lOk && !mIsPaused)
+	if (lOk && !lTRICKY_IsLoopPaused)
 	{
 		lOk = mGame->Tick();
 	}
@@ -572,7 +572,7 @@ void App::PollTaps()
 
 void App::DrawHud() const
 {
-	if (mGame->IsFlyingBy())
+	if (mGame->GetFlybyMode() != Game::FLYBY_INACTIVE)
 	{
 		return;
 	}
@@ -1335,10 +1335,9 @@ int App::PollTap(FingerMovement& pMovement)
 
 void App::MainMenu()
 {
-	mIsPaused = true;
-	mGame->SetIsFlyingBy(false);
+	mGame->SetFlybyMode(Game::FLYBY_SYSTEM_PAUSE);
 	mPauseButton->SetVisible(false);
-	UiTbc::Dialog<App>* d = new UiTbc::Dialog<App>(mUiManager->GetDesktopWindow(), _T(""), UiTbc::Dialog<App>::Action(this, &App::OnMainMenuAction));
+	UiTbc::Dialog<App>* d = new UiTbc::Dialog<App>(mUiManager->GetDesktopWindow(), UiTbc::Dialog<App>::Action(this, &App::OnMainMenuAction));
 	d->SetColor(COLOR_DIALOG);
 	d->AddButton(1, ICONBTN("btn_1p.png", "Single player"));
 	d->AddButton(2, ICONBTN("btn_2p.png", "Two players"));
@@ -1372,8 +1371,9 @@ void App::OnMainMenuAction(UiTbc::Button* pButton)
 		// 2P
 		mGame->SetComputerIndex(-1);
 	}
-	UiTbc::Dialog<App>* d = new UiTbc::Dialog<App>(mUiManager->GetDesktopWindow(), _T("Select level"), UiTbc::Dialog<App>::Action(this, &App::OnLevelAction));
+	UiTbc::Dialog<App>* d = new UiTbc::Dialog<App>(mUiManager->GetDesktopWindow(), UiTbc::Dialog<App>::Action(this, &App::OnLevelAction));
 	d->SetColor(COLOR_DIALOG);
+	d->QueryLabel(_T("Select level"), mBigFontId);
 	d->AddButton(1, ICONBTN("btn_lvl2.png", "Pendulum"));
 	d->AddButton(2, ICONBTN("btn_lvl3.png", "Elevate"));
 	d->AddButton(3, ICONBTN("btn_lvl4.png", "RoboCastle"));
@@ -1392,8 +1392,9 @@ void App::OnLevelAction(UiTbc::Button* pButton)
 	{
 		mGame->SetLevel(lLevel);
 	}
-	UiTbc::Dialog<App>* d = new UiTbc::Dialog<App>(mUiManager->GetDesktopWindow(), _T("Select vehicle"), UiTbc::Dialog<App>::Action(this, &App::OnVehicleAction));
+	UiTbc::Dialog<App>* d = new UiTbc::Dialog<App>(mUiManager->GetDesktopWindow(), UiTbc::Dialog<App>::Action(this, &App::OnVehicleAction));
 	d->SetColor(COLOR_DIALOG);
+	d->QueryLabel(_T("Select vehicle"), mBigFontId);
 	d->AddButton(1, _T("Cutie"));
 	d->AddButton(2, _T("Hardie"));
 	d->AddButton(3, _T("Speedie"));
@@ -1411,16 +1412,15 @@ void App::OnVehicleAction(UiTbc::Button* pButton)
 		case 4:	lVehicle = _T("sleepie");	break;
 	}
 	mGame->SetVehicle(lVehicle);
-	mGame->SetPaused(false);
-	mGame->SetIsFlyingBy(true);
+	mGame->SetFlybyMode(Game::FLYBY_INACTIVE);
+	mPauseButton->SetVisible(true);
 }
 
 void App::OnPauseClick(UiTbc::Button*)
 {
 	mIsPaused = true;
-	mGame->SetPaused(true);
 	mPauseButton->SetVisible(false);
-	UiTbc::Dialog<App>* d = new UiTbc::Dialog<App>(mUiManager->GetDesktopWindow(), _T(""), UiTbc::Dialog<App>::Action(this, &App::OnPauseAction));
+	UiTbc::Dialog<App>* d = new UiTbc::Dialog<App>(mUiManager->GetDesktopWindow(), UiTbc::Dialog<App>::Action(this, &App::OnPauseAction));
 	d->SetColor(COLOR_DIALOG);
 	d->AddButton(1, _T("Resume"));
 	d->AddButton(2, _T("Restart"));
@@ -1430,9 +1430,8 @@ void App::OnPauseClick(UiTbc::Button*)
 void App::OnPauseAction(UiTbc::Button* pButton)
 {
 	mIsPaused = false;
-	mGame->SetPaused(false);
 	mPauseButton->SetVisible(true);
-	if (pButton->GetTag() == 2 || pButton->GetTag() == 3)
+	if (pButton->GetTag() == 2)
 	{
 		const str lLevel = mGame->GetLevel();
 		delete mGame;
@@ -1442,10 +1441,10 @@ void App::OnPauseAction(UiTbc::Button* pButton)
 		mGame->Cure::GameTicker::GetTimeManager()->Clear(1);
 		mIsLoaded = false;
 		mDoLayout = true;
-		if (pButton->GetTag() == 3)
-		{
-			MainMenu();
-		}
+	}
+	else if (pButton->GetTag() == 3)
+	{
+		MainMenu();
 	}
 }
 
@@ -1460,8 +1459,7 @@ UiTbc::Button* App::CreateButton(const str& pText, const Color& pColor, UiTbc::C
 {
 	UiTbc::Button* lButton = new UiTbc::Button(UiTbc::BorderComponent::LINEAR, 6, pColor, _T(""));
 	lButton->SetText(pText);
-	const int h = std::max(pParent->GetSize().y/9, 44);
-	lButton->SetPreferredSize(pParent->GetSize().x/5, h);
+	lButton->SetPreferredSize(44, 44);
 	pParent->AddChild(lButton);
 	lButton->SetVisible(false);
 	lButton->UpdateLayout();

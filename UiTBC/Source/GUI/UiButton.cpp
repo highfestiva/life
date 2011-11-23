@@ -24,7 +24,6 @@ Button::Button(const str& pName) :
 	mHighlightedIconId(Painter::INVALID_IMAGEID),
 	mIconAlignment(ICON_CENTER),
 	mText(_T("")),
-	mTextColor(OFF_BLACK),
 	mTextBackgColor(255, 255, 255),
 	mPressed(false),
 	mImageButton(false),
@@ -44,7 +43,6 @@ Button::Button(const Color& pColor, const str& pName):
 	mHighlightedIconId(Painter::INVALID_IMAGEID),
 	mIconAlignment(ICON_CENTER),
 	mText(_T("")),
-	mTextColor(OFF_BLACK),
 	mTextBackgColor(255, 255, 255),
 	mPressed(false),
 	mImageButton(false),
@@ -65,7 +63,6 @@ Button::Button(BorderComponent::BorderShadeFunc pShadeFunc, int pBorderWidth, co
 	mHighlightedIconId(Painter::INVALID_IMAGEID),
 	mIconAlignment(ICON_CENTER),
 	mText(_T("")),
-	mTextColor(OFF_BLACK),
 	mTextBackgColor(255, 255, 255),
 	mPressed(false),
 	mImageButton(false),
@@ -94,7 +91,6 @@ Button::Button(Painter::ImageID pReleasedImageID, Painter::ImageID pPressedImage
 	mHighlightedIconId(Painter::INVALID_IMAGEID),
 	mIconAlignment(ICON_CENTER),
 	mText(_T("")),
-	mTextColor(OFF_BLACK),
 	mTextBackgColor(255, 255, 255),
 	mPressed(false),
 	mImageButton(true),
@@ -222,6 +218,7 @@ void Button::Repaint(Painter* pPainter)
 {
 	Parent::Repaint(pPainter);
 
+	ActivateFont(pPainter);
 	GUIImageManager* lIMan = GetImageManager();
 
 	pPainter->PushAttrib(Painter::ATTR_ALL);
@@ -290,9 +287,8 @@ void Button::Repaint(Painter* pPainter)
 
 void Button::PrintText(Painter* pPainter, int x, int y)
 {
-	pPainter->SetColor(mTextColor, 0);
 	pPainter->SetColor(mTextBackgColor, 1);
-	pPainter->PrintText(mText.c_str(), x, y);
+	PrintTextDeactivate(pPainter, mText, x, y);
 }
 
 void Button::SetExtraData(void* pData)
@@ -464,9 +460,9 @@ void Button::SetText(const str& pText,
 		     const Color& pTextColor,
 		     const Color& pBackgColor)
 {
-	assert(mTextColor != BLACK);
+	assert(pTextColor != BLACK);
 	mText           = pText;
-	mTextColor      = pTextColor;
+	SetFontColor(pTextColor);
 	mTextBackgColor = pBackgColor;
 
 	OnTextChanged();
@@ -480,6 +476,11 @@ const str& Button::GetText()
 Button::Type Button::GetType() const
 {
 	return BUTTON;
+}
+
+void Button::ForceRepaint()
+{
+	SetNeedsRepaint(true);
 }
 
 void Button::OnTextChanged()

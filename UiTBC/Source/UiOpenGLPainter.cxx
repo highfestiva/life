@@ -370,7 +370,7 @@ void OpenGLPainter::DoFillTriangle(float pX1, float pY1, float pU1, float pV1,
 	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
@@ -1068,7 +1068,7 @@ void OpenGLPainter::DoDrawAlphaImage(ImageID pImageID, int x, int y)
 	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
@@ -1105,14 +1105,6 @@ void OpenGLPainter::DoDrawImage(ImageID pImageID, const PixelRect& pRect)
 		return;
 	}
 
-	GLfloat lLeft   = (GLfloat)pRect.mLeft;
-	GLfloat lRight  = (GLfloat)pRect.mRight;
-	GLfloat lTop    = (GLfloat)pRect.mTop;
-	GLfloat lBottom = (GLfloat)pRect.mBottom;
-
-	ToScreenCoords(lLeft, lTop);
-	ToScreenCoords(lRight, lBottom);
-
 	::glEnable(GL_TEXTURE_2D);
 
 	glBindTexture (GL_TEXTURE_2D, pImageID);
@@ -1125,7 +1117,7 @@ void OpenGLPainter::DoDrawImage(ImageID pImageID, const PixelRect& pRect)
 	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
@@ -1138,11 +1130,11 @@ void OpenGLPainter::DoDrawImage(ImageID pImageID, const PixelRect& pRect)
 		glColor4ub(255, 255, 255, GetAlphaValue());
 	}
 
-	GLfloat u[] = {0,0, 1,0, 1,1, 0,1};
-	GLfloat v[] = {lLeft,lTop, lRight,lTop, lRight,lBottom, lLeft,lBottom};
+	GLint u[] = {0, 0, 1, 0, 1, 1, 0, 1};
+	GLint v[] = {pRect.mLeft, pRect.mTop, pRect.mRight, pRect.mTop, pRect.mRight, pRect.mBottom, pRect.mLeft, pRect.mBottom};
 	::glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	::glTexCoordPointer(2, GL_FLOAT, 0, u);
-	::glVertexPointer(2, GL_FLOAT, 0, v);
+	::glTexCoordPointer(2, GL_INT, 0, u);
+	::glVertexPointer(2, GL_INT, 0, v);
 	::glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	::glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	::glDisable(GL_TEXTURE_2D);
@@ -1192,7 +1184,7 @@ void OpenGLPainter::DoDrawImage(ImageID pImageID, const PixelRect& pRect, const 
 	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
@@ -1575,7 +1567,7 @@ void OpenGLPainter::DoRenderDisplayList(std::vector<DisplayEntity*>* pDisplayLis
 			glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 			glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 			glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-			glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
 			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
@@ -1660,7 +1652,7 @@ FontTexture* OpenGLPainter::SelectGlyphs(uint32 pFontHash, int pFontHeight, cons
 			GL_UNSIGNED_BYTE,
 			lFontTexture->GetBuffer());
 		OGL_ASSERT();
-		::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	}
 
