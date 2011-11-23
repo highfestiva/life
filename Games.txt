@@ -6,7 +6,9 @@ Bombulum - use the pendulum to push bombs off their respective "poles" befor the
 
 Car Jumpin'
 
-Helicopter Gravity Force 3D - steer using accelerometer, add a "calibrate" button somewhere.
+Helicopter Gravity Force 3D - steer using accelerometer, add a "calibrate" button somewhere. Cam behind or behind on one side.
+
+Robo Arm - optimize a movement scheme to make the robot pick something up and move it to a designated area. Definition of done = object colliding with trigger and object velocity <= threshold.
 
 Space ship flight. Fly though predefined map, steer using swipe left/right/up/down? Or accelerometer? Fly close to ground, to give impression of moving VERY fast.
 
