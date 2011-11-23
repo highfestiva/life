@@ -10,6 +10,8 @@ Helicopter Gravity Force 3D - steer using accelerometer, add a "calibrate" butto
 
 Robo Arm - optimize a movement scheme to make the robot pick something up and move it to a designated area. Definition of done = object colliding with trigger and object velocity <= threshold.
 
+Ping pong racket. Try to bounce the ball on the racket without dropping it on the floor.
+
 Space ship flight. Fly though predefined map, steer using swipe left/right/up/down? Or accelerometer? Fly close to ground, to give impression of moving VERY fast.
 
 Spider Tank. Two thumbs steering.
