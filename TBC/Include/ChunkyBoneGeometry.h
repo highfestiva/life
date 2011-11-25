@@ -28,7 +28,7 @@ public:
 	{
 		BONE_BODY = 1,
 		BONE_TRIGGER,
-		BONE_SPAWNER,
+		BONE_POSITION,
 	};
 
 	enum GeometryType

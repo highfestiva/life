@@ -89,7 +89,7 @@ bool ChunkyBoneGeometry::CreateJoint(ChunkyPhysics* pStructure, PhysicsManager* 
 	bool lOk = false;
 	if (mBodyData.mParent)
 	{
-		if (GetBoneType() == BONE_SPAWNER)
+		if (GetBoneType() == BONE_POSITION)
 		{
 			// Need not do jack. It's not a physical object.
 			lOk = true;
@@ -253,7 +253,7 @@ ChunkyBoneGeometry::JointType ChunkyBoneGeometry::GetJointType() const
 
 ChunkyBoneGeometry::BoneType ChunkyBoneGeometry::GetBoneType() const
 {
-	assert(mBodyData.mBoneType >= BONE_BODY && mBodyData.mBoneType <= BONE_SPAWNER);
+	assert(mBodyData.mBoneType >= BONE_BODY && mBodyData.mBoneType <= BONE_POSITION);
 	return (mBodyData.mBoneType);
 }
 
