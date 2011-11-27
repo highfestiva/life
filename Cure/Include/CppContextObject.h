@@ -18,6 +18,7 @@ namespace Cure
 
 class CppContextObject: public ContextObject
 {
+	typedef ContextObject Parent;
 public:
 	CppContextObject(ResourceManager* pResourceManager, const str& pClassId);
 	virtual ~CppContextObject();
@@ -30,11 +31,13 @@ public:
 	TBC::ChunkyPhysics* GetPhysics() const;
 	virtual const TBC::ChunkyClass* GetClass() const;
 	const TBC::ChunkyClass::Tag* FindTag(const str& pTagType, int pFloatValueCount, int pStringValueCount, const std::vector<int>& pTriggerIndexArray) const;
+	virtual void SetTagIndex(int pIndex);
 
 protected:
 	virtual void StartLoading();
 	void StartLoadingPhysics(const str& pPhysicsName);
 	virtual bool TryComplete();
+	virtual void SetupChildHandlers();
 
 	void OnMicroTick(float pFrameTime);
 	void OnAlarm(int pAlarmId, void* pExtraData);

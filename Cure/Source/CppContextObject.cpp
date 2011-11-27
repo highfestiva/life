@@ -147,6 +147,11 @@ const TBC::ChunkyClass::Tag* CppContextObject::FindTag(const str& pTagType, int 
 	return 0;
 }
 
+void CppContextObject::SetTagIndex(int pIndex)
+{
+	(void)pIndex;
+}
+
 
 
 void CppContextObject::StartLoading()
@@ -203,6 +208,28 @@ bool CppContextObject::TryComplete()
 		return (true);
 	}
 	return (false);
+}
+
+void CppContextObject::SetupChildHandlers()
+{
+	Parent::SetupChildHandlers();
+
+	if (!GetClass())
+	{
+		return;
+	}
+	const int lTagCount = GetClass()->GetTagCount();
+	for (int x = 0; x < lTagCount; ++x)
+	{
+		const TBC::ChunkyClass::Tag& lTag = GetClass()->GetTag(x);
+		CppContextObject* lHandlerChild = (CppContextObject*)GetManager()->GetGameManager()->CreateLogicHandler(lTag.mTagName);
+		if (!lHandlerChild)
+		{
+			continue;
+		}
+		AddChild(lHandlerChild);
+		lHandlerChild->SetTagIndex(x);
+	}
 }
 
 

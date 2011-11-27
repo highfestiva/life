@@ -119,7 +119,7 @@ TimeType CubicDeCasteljauSpline<T, TimeType, TBase>::FindNearestTime(TimeType pS
 	T lNearestDistance = GetValue()-pWhere;
 	typename T::BaseType lDistance2 = lNearestDistance.GetLengthSquared();
 	T lNewNearestDistance;
-	for (int y = 0; y < 20; ++y)
+	for (int y = 0; y < 3; ++y)
 	{
 		const int zc = 8;
 		int z;

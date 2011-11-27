@@ -19,13 +19,16 @@ Adjust for single rendering view (and no splitter).
 Move HUD for landscape mode.
 Adjust HUD for keyboard controls.
 Adjust HUD for single/dual play.
+Main menu: single player/two players/about, enter P1+P2 names (remember last), select map, select car.
+Admin: add button in center, for alert:restart/continue.
 
 Computer demo
 -------------
-Main menu: single player/two players/about, enter P1+P2 names (remember last), select map, select car.
-Admin: add button in center, for alert:restart/continue.
 Polish on level_2 roads (in texture).
+Path finding for Cutie AI.
 AI for Cutie.
+Record voice for tutorial.
+Playback voice for tutorial.
 Game over view.
 Show keyboard controls when starting.
 Elevator from ravine to left mountain.

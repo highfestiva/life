@@ -51,8 +51,8 @@ public:
 		TYPE_BSPLINE	= 2,
 	};
 
-	CubicDeCasteljauSpline(T* pKeyFrames, 
-			      TimeType* pTimeTags, // pCount + 1 elements.
+	CubicDeCasteljauSpline(T* pKeyFrames,		// pCount + 1 elements.
+			      TimeType* pTimeTags,	// pCount + 1 elements.
 			      int pCount,
 			      SplineType pSplineType = TYPE_BSPLINE,
 			      DataPolicy pPolicy = FULL_COPY);

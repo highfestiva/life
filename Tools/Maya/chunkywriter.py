@@ -146,7 +146,7 @@ class ChunkyWriter:
 			return c
 		bodies.sort(key=childlevel)
 		meshes.sort(key=childlevel)
-		return bodies, meshes, engines, phys_triggers, phys_positions
+		return bodies, meshes, engines, phys_triggers
 
 
 	def _addfeat(self, k, v):

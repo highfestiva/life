@@ -138,7 +138,7 @@ protected:
 
 	void RemoveChild(ContextObject* pChild);
 	void SetParent(ContextObject* pParent);
-	void SetupChildHandlers();
+	virtual void SetupChildHandlers();
 
 	virtual bool IsSameInstance(TBC::PhysicsManager::ForceFeedbackListener* pOther);
 

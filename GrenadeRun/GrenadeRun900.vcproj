@@ -561,6 +561,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Level.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Spawner.cpp"
 				>
 			</File>
@@ -592,6 +596,10 @@
 			</File>
 			<File
 				RelativePath=".\LauncherAi.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Level.h"
 				>
 			</File>
 			<File

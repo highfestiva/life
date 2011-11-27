@@ -6,6 +6,7 @@
 
 #include "Game.h"
 #include "../Cure/Include/ContextManager.h"
+#include "../Cure/Include/ContextPath.h"
 #include "../Cure/Include/FloatAttribute.h"
 #include "../Cure/Include/RuntimeVariable.h"
 #include "../Cure/Include/TimeManager.h"
@@ -21,6 +22,7 @@
 #include "Grenade.h"
 #include "Launcher.h"
 #include "LauncherAi.h"
+#include "Level.h"
 #include "Spawner.h"
 
 
@@ -567,6 +569,22 @@ bool Game::Render()
 	return true;
 }
 
+bool Game::Paint()
+{
+	if (!mVehicle || !mVehicle->IsLoaded())
+	{
+		return true;
+	}
+	Cure::ContextPath* lPath = (Cure::ContextPath*)mLevel->QueryPath();
+	Cure::ContextPath::Spline* lPathData = lPath->mPathArray[0];
+	float lNearestDistance = 0;
+	Vector3DF lClosestPoint;
+	lPathData->FindNearestTime(0.025f, mVehicle->GetPosition(), lNearestDistance, lClosestPoint);
+	mUiManager->GetPainter()->SetColor(WHITE);
+	mUiManager->GetPainter()->PrintText(strutil::Format(_T("Distance to path %f m"), lNearestDistance/3), 0, 0);
+	return true;
+}
+
 
 
 bool Game::FlybyRender()
@@ -849,7 +867,7 @@ bool Game::InitializeTerrain()
 	bool lOk = true;
 	if (lOk)
 	{
-		mLevel = new UiCure::Machine(GetResourceManager(), mLevelName, mUiManager);
+		mLevel = new Level(GetResourceManager(), mLevelName, mUiManager);
 		AddContextObject(mLevel, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 		lOk = (mLevel != 0);
 		assert(lOk);
@@ -875,7 +893,10 @@ Cure::ContextObject* Game::CreateLogicHandler(const str& pType) const
 		mCtf = new Ctf(GetContext());
 		return mCtf;
 	}
-	assert(false);
+	else if (pType == _T("context_path"))
+	{
+		return mLevel->QueryPath();
+	}
 	return (0);
 }
 

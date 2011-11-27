@@ -519,6 +519,8 @@ bool App::Poll()
 		mTouchShootColor = Color(170, 38, 45)*(1.1f+::sin(mAngleTime*37)*0.2f);
 		mInfoTextColor = Color(127, 127, 127)*(1+::sin(mAngleTime*27)*0.9f);
 		DrawHud();
+
+		mGame->Paint();
 	}
 	if (lOk && !lTRICKY_IsLoopPaused)
 	{

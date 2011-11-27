@@ -45,6 +45,7 @@ class Ctf;
 class Cutie;
 class Launcher;
 class LauncherAi;
+class Level;
 
 
 
@@ -128,6 +129,7 @@ public:
 	void SetComputerDifficulty(float pDifficulty);	// -1,[0,1], -1=inactive.
 
 	bool Render();
+	bool Paint();
 
 	//void MoveTo(const FingerMovement& pMove);
 
@@ -157,7 +159,7 @@ private:
 	UiCure::GameUiManager* mUiManager;
 	UiCure::CollisionSoundManager* mCollisionSoundManager;
 	UiTbc::Renderer::LightID mLightId;
-	UiCure::CppContextObject* mLevel;
+	Level* mLevel;
 	str mLevelName;
 	FlybyMode mFlybyMode;
 	double mFlyByTime;
