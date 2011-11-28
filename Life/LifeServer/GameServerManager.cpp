@@ -1165,7 +1165,6 @@ Cure::ContextObject* GameServerManager::CreateLogicHandler(const str& pType) con
 	{
 		return new RaceTimer(GetContext());
 	}
-	assert(false);
 	return (0);
 }
 

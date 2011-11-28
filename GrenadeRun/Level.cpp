@@ -29,7 +29,7 @@ Level::~Level()
 
 
 
-Cure::ContextObject* Level::QueryPath()
+Cure::ContextPath* Level::QueryPath()
 {
 	if (!mPath)
 	{

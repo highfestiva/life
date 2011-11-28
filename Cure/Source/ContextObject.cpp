@@ -381,7 +381,11 @@ const TBC::PhysicsSpawner* ContextObject::GetSpawner() const
 void ContextObject::AddChild(ContextObject* pChild)
 {
 	assert(pChild->GetInstanceId() != 0);
-	assert(std::find(mChildList.begin(), mChildList.end(), pChild) == mChildList.end());
+	if (std::find(mChildList.begin(), mChildList.end(), pChild) != mChildList.end())
+	{
+		// Already added.
+		return;
+	}
 	mChildList.push_back(pChild);
 	pChild->SetParent(this);
 }

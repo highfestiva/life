@@ -17,14 +17,29 @@ namespace Cure
 class ContextPath: public CppContextObject
 {
 public:
+	typedef CubicDeCasteljauSpline<Vector3DF, float> SplineShape;
+	class SplinePath: public SplineShape
+	{
+		typedef SplineShape Parent;
+	public:
+		SplinePath(Vector3DF* pKeyFrames,	// pCount + 1 elements.
+			float* pTimeTags,		// pCount + 1 elements.
+			int pCount,
+			float pDistanceNormal);
+		float GetDistanceNormal() const;
+	private:
+		float mDistanceNormal;
+	};
+
 	ContextPath(ResourceManager* pResourceManager, const str& pClassId);
 	virtual ~ContextPath();
 
 	virtual void SetTagIndex(int pIndex);
+	int GetPathCount() const;
+	SplinePath* GetPath(int pIndex) const;
 
-//private:
-	typedef CubicDeCasteljauSpline<Vector3DF, float> Spline;
-	typedef std::vector<Spline*> PathArray;
+private:
+	typedef std::vector<SplinePath*> PathArray;
 
 	PathArray mPathArray;
 };

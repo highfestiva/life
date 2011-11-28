@@ -969,7 +969,7 @@ class GroupReader(DefaultMAReader):
 						ok &= (len(connected_to) > 0)
 						for cn in connected_to:
 							ok &= (cn.nodetype.startswith(cntype))
-							if not ok:
+							if not (cn.nodetype.startswith(cntype)):
 								print("Error: node %s not of %s type, but %s." % (cn.getName(), cntype, cn.nodetype))
 					return ok
 				def check_connected_transform(l):

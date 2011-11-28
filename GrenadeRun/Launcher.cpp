@@ -53,11 +53,7 @@ void Launcher::GetBallisticData(const Vector3DF& pPosition1, const Vector3DF& pP
 {
 	const Vector3DF lDelta = pPosition1 - pPosition2;
 	const Vector2DF lYawVector(lDelta.x, lDelta.y);
-	pGuideYaw = lYawVector.GetAngle(Vector2DF(0, 1));
-	if (lDelta.x > 0)
-	{
-		pGuideYaw = -pGuideYaw;
-	}
+	pGuideYaw = Vector2DF(0, 1).GetAngle(lYawVector);
 
 	const float h = lDelta.z;
 	const float v = mGame->GetMuzzleVelocity();

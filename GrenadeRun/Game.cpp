@@ -24,6 +24,7 @@
 #include "LauncherAi.h"
 #include "Level.h"
 #include "Spawner.h"
+#include "VehicleAi.h"
 
 
 
@@ -50,6 +51,7 @@ Game::Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVaria
 	mWinnerIndex(-1),
 	mPreviousFrameWinnerIndex(-1),
 	mCtf(0),
+	mVehicleAi(0),
 	mLauncher(0),
 	mLauncherAi(0),
 	mComputerIndex(-1),
@@ -73,6 +75,7 @@ Game::~Game()
 	SetVariableScope(0);	// Not owned by us.
 
 	mCtf = 0;
+	mVehicleAi = 0;
 	mLauncher = 0;
 	mLauncherAi = 0;
 }
@@ -82,12 +85,12 @@ UiCure::GameUiManager* Game::GetUiManager() const
 	return mUiManager;
 }
 
-const str& Game::GetLevel() const
+const str& Game::GetLevelName() const
 {
 	return mLevelName;
 }
 
-bool Game::SetLevel(const str& pLevel)
+bool Game::SetLevelName(const str& pLevel)
 {
 	mLevelName = pLevel;
 	return Initialize();
@@ -199,6 +202,11 @@ UiCure::CppContextObject* Game::GetP1() const
 UiCure::CppContextObject* Game::GetP2() const
 {
 	return mLauncher;
+}
+
+Level* Game::GetLevel() const
+{
+	return mLevel;
 }
 
 Cutie* Game::GetCutie() const
@@ -571,17 +579,6 @@ bool Game::Render()
 
 bool Game::Paint()
 {
-	if (!mVehicle || !mVehicle->IsLoaded())
-	{
-		return true;
-	}
-	Cure::ContextPath* lPath = (Cure::ContextPath*)mLevel->QueryPath();
-	Cure::ContextPath::Spline* lPathData = lPath->mPathArray[0];
-	float lNearestDistance = 0;
-	Vector3DF lClosestPoint;
-	lPathData->FindNearestTime(0.025f, mVehicle->GetPosition(), lNearestDistance, lClosestPoint);
-	mUiManager->GetPainter()->SetColor(WHITE);
-	mUiManager->GetPainter()->PrintText(strutil::Format(_T("Distance to path %f m"), lNearestDistance/3), 0, 0);
 	return true;
 }
 
@@ -847,6 +844,9 @@ bool Game::Initialize()
 	{
 		if (mComputerIndex == 0)
 		{
+			mVehicleAi = new VehicleAi(this);
+			AddContextObject(mVehicleAi, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+			mVehicleAi->Init();
 		}
 		else if (mComputerIndex == 1)
 		{

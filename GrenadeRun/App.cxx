@@ -417,9 +417,9 @@ int App::Run()
 	if (lOk)
 	{
 		mGame = new Game(mUiManager, mVariableScope, mResourceManager);
-		mGame->SetComputerDifficulty(-1);
+		mGame->SetComputerDifficulty(0.5f);
 		mGame->SetComputerIndex(0);
-		lOk = mGame->SetLevel(_T("level_2"));
+		lOk = mGame->SetLevelName(_T("level_2"));
 	}
 	if (lOk)
 	{
@@ -1390,9 +1390,9 @@ void App::OnLevelAction(UiTbc::Button* pButton)
 		case 2:	lLevel = _T("level_3");	break;
 		case 3:	lLevel = _T("level_4");	break;
 	}
-	if (mGame->GetLevel() != lLevel)
+	if (mGame->GetLevelName() != lLevel)
 	{
-		mGame->SetLevel(lLevel);
+		mGame->SetLevelName(lLevel);
 	}
 	UiTbc::Dialog<App>* d = new UiTbc::Dialog<App>(mUiManager->GetDesktopWindow(), UiTbc::Dialog<App>::Action(this, &App::OnVehicleAction));
 	d->SetColor(COLOR_DIALOG);
@@ -1435,10 +1435,11 @@ void App::OnPauseAction(UiTbc::Button* pButton)
 	mPauseButton->SetVisible(true);
 	if (pButton->GetTag() == 2)
 	{
-		const str lLevel = mGame->GetLevel();
+		const str lLevel = mGame->GetLevelName();
 		delete mGame;
 		mGame = new Game(mUiManager, mVariableScope, mResourceManager);
-		mGame->SetLevel(lLevel);
+		mGame->SetComputerIndex(0);
+		mGame->SetLevelName(lLevel);
 		mGame->Cure::GameTicker::GetTimeManager()->Tick();
 		mGame->Cure::GameTicker::GetTimeManager()->Clear(1);
 		mIsLoaded = false;

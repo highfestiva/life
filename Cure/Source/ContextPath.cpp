@@ -14,6 +14,22 @@ namespace Cure
 
 
 
+ContextPath::SplinePath::SplinePath(Vector3DF* pKeyFrames,
+	float* pTimeTags,
+	int pCount,
+	float pDistanceNormal):
+	Parent(pKeyFrames, pTimeTags, pCount, SplineShape::TYPE_CATMULLROM, TAKE_OWNERSHIP),
+	mDistanceNormal(pDistanceNormal)
+{
+}
+
+float ContextPath::SplinePath::GetDistanceNormal() const
+{
+	return mDistanceNormal;
+}
+
+
+
 ContextPath::ContextPath(ResourceManager* pResourceManager, const str& pClassId):
 	CppContextObject(pResourceManager, pClassId)
 {
@@ -77,9 +93,24 @@ void ContextPath::SetTagIndex(int pIndex)
 	}
 	lPathPositions[1+lBodyCount] = lPathPositions[1+lBodyCount-1];
 	lPathPositions[1+lBodyCount+1] = lPathPositions[1+lBodyCount-1];
-	Spline* lSpline = new Spline(lPathPositions, lTimes, lBodyCount+2, Spline::TYPE_CATMULLROM, TAKE_OWNERSHIP);
-	lSpline->StartInterpolation(0);
-	mPathArray.push_back(lSpline);
+	SplinePath* lSplinePath = new SplinePath(lPathPositions, lTimes, lBodyCount+2, lScale);
+	lSplinePath->StartInterpolation(0);
+	mPathArray.push_back(lSplinePath);
+}
+
+int ContextPath::GetPathCount() const
+{
+	return (int)mPathArray.size();
+}
+
+ContextPath::SplinePath* ContextPath::GetPath(int pIndex) const
+{
+	assert(pIndex >= 0 && pIndex < GetPathCount());
+	if (!(pIndex >= 0 && pIndex < GetPathCount()))
+	{
+		return 0;
+	}
+	return mPathArray[pIndex];
 }
 
 

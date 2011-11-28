@@ -295,7 +295,6 @@ void GameManager::AddContextObject(ContextObject* pObject, NetworkObjectType pNe
 
 ContextObject* GameManager::CreateLogicHandler(const str&) const
 {
-	assert(false);
 	return 0;
 }
 

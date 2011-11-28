@@ -62,7 +62,7 @@ public:
 	void GotoAbsoluteTime(TimeType pTime);
 	void StepInterpolation(TimeType pTimeStep);
 	TimeType GetCurrentInterpolationTime() const;
-	TimeType FindNearestTime(TimeType pStepLength, const T& pWhere, TBase& pNearestDistance, T& pNearestPoint);
+	TimeType FindNearestTime(TimeType pStepLength, const T& pWhere, TBase& pNearestDistance, T& pNearestPoint, int pSteps);
 
 	// Choose one...
 	T GetValue() const;

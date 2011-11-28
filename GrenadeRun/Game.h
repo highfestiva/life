@@ -46,6 +46,7 @@ class Cutie;
 class Launcher;
 class LauncherAi;
 class Level;
+class VehicleAi;
 
 
 
@@ -98,8 +99,8 @@ public:
 	Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager);
 	virtual ~Game();
 	UiCure::GameUiManager* GetUiManager() const;
-	const str& GetLevel() const;
-	bool SetLevel(const str& pLevel);
+	const str& GetLevelName() const;
+	bool SetLevelName(const str& pLevel);
 	bool RestartLevel();
 	TransformationF GetCutieStart() const;
 	virtual bool Tick();
@@ -107,6 +108,7 @@ public:
 	void SetVehicle(const str& pVehicle);
 	UiCure::CppContextObject* GetP1() const;
 	UiCure::CppContextObject* GetP2() const;
+	Level* GetLevel() const;
 	Cutie* GetCutie() const;
 	Launcher* GetLauncher() const;
 	Ctf* GetCtf() const;
@@ -179,6 +181,7 @@ private:
 	TransformationF mRightCamera;
 
 	mutable Ctf* mCtf;
+	VehicleAi* mVehicleAi;
 	Launcher* mLauncher;
 	LauncherAi* mLauncherAi;
 	int mComputerIndex;

@@ -7,15 +7,19 @@
 #pragma once
 
 #include "../UiCure/Include/UiMachine.h"
+#include "Game.h"
+
+
+
+namespace Cure
+{
+class ContextPath;
+}
 
 
 
 namespace GrenadeRun
 {
-
-
-
-using namespace Lepra;
 
 
 
@@ -27,10 +31,10 @@ public:
 	Level(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager);
 	virtual ~Level();
 
-	Cure::ContextObject* QueryPath();
+	Cure::ContextPath* QueryPath();
 
 private:
-	Cure::ContextObject* mPath;
+	Cure::ContextPath* mPath;
 
 	LOG_CLASS_DECLARE();
 };

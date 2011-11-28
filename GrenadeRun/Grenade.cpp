@@ -86,16 +86,16 @@ void Grenade::OnTick()
 			TBC::PhysicsManager::BodyID lBodyId = mPhysics->GetBoneGeometry(0)->GetBodyId();
 			const float l = lVelocity.GetLength();
 			const float lPitch = -lVelocity.GetAngle(Vector3DF(0,0,l));
-			Vector3DF lXY = Vector3DF(lVelocity.x, lVelocity.y, 0);
+			Vector2DF lXY = Vector2DF(lVelocity.x, lVelocity.y);
 			const float l2 = lXY.GetLength();
 			if (l2)
 			{
-				const float lYaw = lXY.GetAngle(Vector3DF(0,l2,0));
+				const float lYaw = lXY.GetAngle(Vector2DF(0,l2));
 				QuaternionF q;
 				//q.SetEulerAngles(lYaw, lPitch, 0);
 				q.RotateAroundWorldZ(lPosition.z/100);
 				q.RotateAroundWorldX(lPitch);
-				q.RotateAroundWorldZ((lVelocity.x > 0)? -lYaw : lYaw);
+				q.RotateAroundWorldZ(-lYaw);
 				TransformationF t;
 				t.GetOrientation() = q * mPhysics->GetOriginalBoneTransformation(0).GetOrientation();
 				t.SetPosition(lPosition);

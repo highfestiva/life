@@ -110,7 +110,8 @@ TimeType CubicDeCasteljauSpline<T, TimeType, TBase>::GetCurrentInterpolationTime
 }
 
 template<class T, class TimeType, class TBase>
-TimeType CubicDeCasteljauSpline<T, TimeType, TBase>::FindNearestTime(TimeType pStepLength, const T& pWhere, TBase& pNearestDistance, T& pNearestPoint)
+TimeType CubicDeCasteljauSpline<T, TimeType, TBase>::FindNearestTime(TimeType pStepLength, const T& pWhere,
+	TBase& pNearestDistance, T& pNearestPoint, int pSteps)
 {
 	// Ugly search algorithm. Looks in the step direction until the distance becomes greater than
 	// the starting distance. Then turns around and looks in the other direction at half the velocity.
@@ -119,7 +120,7 @@ TimeType CubicDeCasteljauSpline<T, TimeType, TBase>::FindNearestTime(TimeType pS
 	T lNearestDistance = GetValue()-pWhere;
 	typename T::BaseType lDistance2 = lNearestDistance.GetLengthSquared();
 	T lNewNearestDistance;
-	for (int y = 0; y < 3; ++y)
+	for (int y = 0; y < pSteps; ++y)
 	{
 		const int zc = 8;
 		int z;

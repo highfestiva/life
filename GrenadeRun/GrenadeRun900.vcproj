@@ -568,6 +568,10 @@
 				RelativePath=".\Spawner.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\VehicleAi.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -604,6 +608,10 @@
 			</File>
 			<File
 				RelativePath=".\Spawner.h"
+				>
+			</File>
+			<File
+				RelativePath=".\VehicleAi.h"
 				>
 			</File>
 		</Filter>

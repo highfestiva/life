@@ -9,6 +9,7 @@
 #include "../Include/GammaLookup.h"
 #include "../Include/HiResTimer.h"
 #include "../Include/MetaFile.h"
+#include "../Include/Random.h"
 #include "../Include/SystemManager.h"
 
 
@@ -30,6 +31,8 @@ void Init()
 	Canvas::InitSamplingGrid();
 
 	MetaFile::AddZipExtension(_T(".zip"));
+
+	Random::SetSeed((uint32)HiResTimer::GetSystemCounter());
 }
 
 void Shutdown()

@@ -192,7 +192,16 @@ V2D_TEMPLATE _TVarType V2D_QUAL::GetAngle() const
 
 V2D_TEMPLATE _TVarType V2D_QUAL::GetAngle(const Vector2D<_TVarType>& pV) const
 {
-	return Math::Acos(Dot(pV) / GetLength() / pV.GetLength());
+	BaseType a = pV.GetAngle() - GetAngle();
+	if (a  < -(BaseType)PI)
+	{
+		a += 2*(BaseType)PI;
+	}
+	else if (a  > +(BaseType)PI)
+	{
+		a -= 2*(BaseType)PI;
+	}
+	return a;
 }
 
 V2D_TEMPLATE void V2D_QUAL::Cross(const Vector2D<_TVarType>& pV)

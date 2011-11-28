@@ -503,7 +503,7 @@ void PhysicsEngine::ForwardStabilize(PhysicsManager* pPhysicsManager, const Chun
 	Vector2DF lForward2d(lForward3d.x, lForward3d.y);
 	if (lForward2d.GetLengthSquared() > 0.1f && lVelocity2d.GetLengthSquared() > 0.3f)
 	{
-		float lAngle = lVelocity2d.GetAngle() - lForward2d.GetAngle();
+		float lAngle = lForward2d.GetAngle(lVelocity2d);
 		if (lAngle > PIF)
 		{
 			lAngle -= 2*PIF;
