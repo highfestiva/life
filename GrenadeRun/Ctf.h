@@ -25,6 +25,7 @@ public:
 	virtual ~Ctf();
 
 	Vector3DF GetPosition() const;
+	float GetCaptureLevel() const;
 
 private:
 	virtual void FinalizeTrigger(const TBC::PhysicsTrigger* pTrigger);

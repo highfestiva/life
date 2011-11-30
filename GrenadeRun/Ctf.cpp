@@ -40,6 +40,11 @@ Vector3DF Ctf::GetPosition() const
 	return GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyPosition(lCutieGoal->GetTriggerId());
 }
 
+float Ctf::GetCaptureLevel() const
+{
+	return 1 - (mFlagTop - mFlagMesh->GetOffsetTransformation().GetPosition()).GetLength() / mFlagOffset.GetLength();
+}
+
 
 
 void Ctf::FinalizeTrigger(const TBC::PhysicsTrigger* pTrigger)
@@ -92,14 +97,14 @@ void Ctf::OnTick()
 			((Game*)GetManager()->GetGameManager())->OnCapture();
 		}
 	}
-	else
+	/*else
 	{
 		// Move down if not at bottom.
 		if ((mFlagOffset - (mFlagMesh->GetOffsetTransformation().GetPosition() - mFlagTop)).Dot(mFlagOffset) > 0)
 		{
 			mFlagMesh->AddOffset(mCatchingFlagVelocity / -60);
 		}
-	}
+	}*/
 
 	mLastFrameTriggered = false;
 	mTriggerTimer.UpdateTimer();

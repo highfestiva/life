@@ -1182,7 +1182,6 @@ bool App::Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor)
 			}
 		}
 		break;
-
 		case UIKEY(PLUS):
 		{
 			if (!pFactor)
@@ -1193,6 +1192,21 @@ bool App::Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor)
 				{
 					Cure::ObjectPositionalData* lNewPlacement = (Cure::ObjectPositionalData*)lPosition->Clone();
 					lNewPlacement->mPosition.mTransformation.GetPosition().x -= 10;
+					lAvatar1->SetFullPosition(*lNewPlacement);
+				}
+			}
+		}
+		break;
+		case UIKEY(9):
+		{
+			if (!pFactor)
+			{
+				const Cure::ObjectPositionalData* lPosition = 0;
+				lAvatar1->UpdateFullPosition(lPosition);
+				if (lPosition)
+				{
+					Cure::ObjectPositionalData* lNewPlacement = (Cure::ObjectPositionalData*)lPosition->Clone();
+					lNewPlacement->mPosition.mTransformation.GetOrientation().RotateAroundOwnY(PIF*0.4f);
 					lAvatar1->SetFullPosition(*lNewPlacement);
 				}
 			}

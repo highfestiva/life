@@ -12,6 +12,7 @@
 #include "Ctf.h"
 #include "Cutie.h"
 #include "Game.h"
+#include "Grenade.h"
 #include "Launcher.h"
 #include "Level.h"
 
@@ -24,10 +25,15 @@
 #define END_PATH_TIME			0.9999f	// Time is considered at end of path.
 #define	OFF_END_PATH_TIME		0.9995f	// Close to end, but not quite.
 #define DOUBLE_OFF_END_PATH_TIME	0.9990f	// Close to end, but not quite. Double that.
+#define REACT_TO_GRENADE_HEIGHT		50.0f	// How low a grenade needs to be for AI to take notice.
 
 
 namespace GrenadeRun
 {
+
+
+
+typedef Cure::ContextPath::SplinePath Spline;
 
 
 
@@ -43,6 +49,7 @@ VehicleAi::~VehicleAi()
 
 void VehicleAi::Init()
 {
+	mStoppedFrame = -1;
 	mActivePath = -1;
 	SetMode(MODE_FIND_BEST_PATH);
 	GetManager()->EnableTickCallback(this);
@@ -58,11 +65,12 @@ void VehicleAi::OnTick()
 		return;
 	}
 
-	const int lModeRunDeltaFrameCount = GetManager()->GetGameManager()->GetTimeManager()->GetCurrentPhysicsFrameDelta(mModeStartFrame);
-	const float lModeRunTime = GetManager()->GetGameManager()->GetTimeManager()->ConvertPhysicsFramesToSeconds(lModeRunDeltaFrameCount);
+	const Cure::TimeManager* lTime = GetManager()->GetGameManager()->GetTimeManager();
+	const int lModeRunDeltaFrameCount = lTime->GetCurrentPhysicsFrameDelta(mModeStartFrame);
+	const float lModeRunTime = lTime->ConvertPhysicsFramesToSeconds(lModeRunDeltaFrameCount);
 
-	typedef Cure::ContextPath::SplinePath Spline;
 	const Vector3DF lPosition = mGame->GetCutie()->GetPosition();
+	const Vector3DF lVelocity = mGame->GetCutie()->GetVelocity();
 	switch (mMode)
 	{
 		case MODE_FIND_BEST_PATH:
@@ -132,8 +140,49 @@ void VehicleAi::OnTick()
 
 			Spline* lPath = mGame->GetLevel()->QueryPath()->GetPath(mActivePath);
 			Vector3DF lTarget = lPath->GetValue();
+
+			// Check if vehicle stopped. That would mean either crashed against something or too steep hill.
+			if (lModeRunDeltaFrameCount%7 == 4 && mGame->GetCutie()->GetHealth() > 0)
 			{
-				// Step aim ahead.
+				const float lSlowSpeed = 0.2f * SCALE_FACTOR;
+				if (lVelocity.GetLengthSquared() < lSlowSpeed*lSlowSpeed)
+				{
+					if (mStoppedFrame == -1)
+					{
+						mStoppedFrame = lTime->GetCurrentPhysicsFrame();
+					}
+					const int lStoppedDeltaFrameCount = lTime->GetCurrentPhysicsFrameDelta(mStoppedFrame);
+					const float lStoppedTime = lTime->ConvertPhysicsFramesToSeconds(lStoppedDeltaFrameCount);
+					if (lStoppedTime >= 1.0f)
+					{
+						const Vector3DF lDirection = mGame->GetCutie()->GetOrientation() * Vector3DF(0,1,0);
+						const Vector3DF lWantedDirection = lTarget-lPosition;
+						const float lForwardAngle = Vector2DF(lWantedDirection.x, lWantedDirection.y).GetAngle(Vector2DF(lDirection.x, lDirection.y));
+						// Amplify angle to be either full left or full right.
+						const float lAngle = (lForwardAngle < 0)? -1.0f : 1.0f;
+						mGame->GetCutie()->SetEnginePower(1, -lAngle, 0);
+						mStoppedFrame = -1;
+						SetMode(MODE_BACKING_UP);
+						return;
+					}
+				}
+				else
+				{
+					mStoppedFrame = -1;
+				}
+			}
+
+			// Check if incoming.
+			if (lModeRunDeltaFrameCount%5 == 1)
+			{
+				if (AvoidGrenade(lPosition, lVelocity))
+				{
+					return;
+				}
+			}
+
+			// Step target (aim) ahead.
+			{
 				const float lActualDistance2 = lTarget.GetDistanceSquared(lPosition);
 				const float lWantedDistance = SCALE_FACTOR * NORMAL_AIM_AHEAD;
 				if (lActualDistance2 < lWantedDistance*lWantedDistance)
@@ -141,38 +190,58 @@ void VehicleAi::OnTick()
 					const float lMoveAhead = lWantedDistance*1.1f - ::sqrt(lActualDistance2);
 					const float lPreStepTime = lPath->GetCurrentInterpolationTime();
 					lPath->StepInterpolation(lMoveAhead * lPath->GetDistanceNormal());
+					// Did wrap around? That means target is close to the end of our path, so we
+					// should try to stop.
 					if (lPreStepTime > 0.9f && lPath->GetCurrentInterpolationTime() < 0.1f)
 					{
 						lPath->GotoAbsoluteTime(END_PATH_TIME);
-						SetMode(MODE_AT_GOAL);
-						return;
+						if (mGame->GetCutie()->GetForwardSpeed() > 2.0f*SCALE_FACTOR ||
+							IsCloseToTarget(lPosition))
+						{
+							SetMode(MODE_AT_GOAL);
+							return;
+						}
 					}
 					lTarget = lPath->GetValue();
 				}
 			}
+
+			// Move forward.
+			mGame->GetCutie()->SetEnginePower(0, +1.0f, 0);
+			mGame->GetCutie()->SetEnginePower(2, 0, 0);
+
+			// Steer.
 			const Vector3DF lDirection = mGame->GetCutie()->GetOrientation() * Vector3DF(0,1,0);
 			const Vector3DF lWantedDirection = lTarget-lPosition;
-			if (lPath->GetCurrentInterpolationTime() < OFF_END_PATH_TIME)
+			const float lAngle = Vector2DF(lWantedDirection.x, lWantedDirection.y).GetAngle(Vector2DF(lDirection.x, lDirection.y));
+			mGame->GetCutie()->SetEnginePower(1, +lAngle, 0);
+		}
+		break;
+		case MODE_BACKING_UP:
+		{
+			// Brake or move backward.
+			const bool lIsMovingForward = (mGame->GetCutie()->GetForwardSpeed() > 0.1f*SCALE_FACTOR);
+			mGame->GetCutie()->SetEnginePower(0, lIsMovingForward? 0.0f : -1.0f, 0);
+			mGame->GetCutie()->SetEnginePower(2, lIsMovingForward? 1.0f :  0.0f, 0);
+
+			if (!lIsMovingForward && lModeRunTime > 1.7f)
 			{
-				// Move forward.
-				mGame->GetCutie()->SetEnginePower(0, +1.0f, 0);
-				mGame->GetCutie()->SetEnginePower(2, 0, 0);
+				SetMode(MODE_HEADING_BACK_ON_TRACK);
+				return;
 			}
-			const float lAngle = Vector2DF(lDirection.x, lDirection.y).GetAngle(Vector2DF(lWantedDirection.x, lWantedDirection.y));
-			if (mMode == MODE_NORMAL && lModeRunDeltaFrameCount%20 == 10)
-			{
-				mLog.Infof(_T("Angle: %f"), lAngle);
-			}
-			mGame->GetCutie()->SetEnginePower(1, -lAngle, 0);
 		}
 		break;
 		case MODE_AT_GOAL:
 		{
+			if (lModeRunDeltaFrameCount%5 == 3 && mGame->GetCtf()->GetCaptureLevel() < 0.85f)
+			{
+				if (AvoidGrenade(lPosition, lVelocity))
+				{
+					return;
+				}
+			}
 			Spline* lPath = mGame->GetLevel()->QueryPath()->GetPath(mActivePath);
-			const Vector3DF lTarget = lPath->GetValue();
-			const float lTargetDistance2 = lTarget.GetDistanceSquared(lPosition);
-			const float lGoalDistance = GOAL_DISTANCE*SCALE_FACTOR;
-			if (lTargetDistance2 > lGoalDistance*lGoalDistance)
+			if (!IsCloseToTarget(lPosition))
 			{
 				lPath->GotoAbsoluteTime(DOUBLE_OFF_END_PATH_TIME);	// Close to end, but not at end.
 				SetMode(MODE_HEADING_BACK_ON_TRACK);
@@ -186,6 +255,84 @@ void VehicleAi::OnTick()
 	}
 }
 
+bool VehicleAi::AvoidGrenade(const Vector3DF& pPosition, const Vector3DF& pVelocity)
+{
+	// Walk all objects, pick out grenades.
+	const Cure::ContextManager::ContextObjectTable& lObjectTable = GetManager()->GetObjectTable();
+	Cure::ContextManager::ContextObjectTable::const_iterator x = lObjectTable.begin();
+	for (; x != lObjectTable.end(); ++x)
+	{
+		Grenade* lGrenade = dynamic_cast<Grenade*>(x->second);
+		if (!lGrenade)
+		{
+			continue;
+		}
+		// Ignore those too high up, too far down or still heading upwards.
+		const Vector3DF lGrenadePosition = lGrenade->GetPosition();
+		const float h = lGrenadePosition.z - pPosition.z;
+		const Vector3DF lGrenadeVelocity = lGrenade->GetVelocity();
+		if (h > REACT_TO_GRENADE_HEIGHT * SCALE_FACTOR ||
+			h < 4.0f * SCALE_FACTOR ||
+			lGrenadeVelocity.z >= 0)
+		{
+			continue;
+		}
+		float t;
+		{
+			const float vup = lGrenadeVelocity.z;
+			// g*t^2/2 - vup*t + h = 0
+			//
+			// Quaderatic formula:
+			// ax^2 + bx + c = 0
+			// =>
+			//     -b +- sqrt(b^2 - 4ac)
+			// x = ---------------------
+			//             2a
+			const float a = 9.82f/2;
+			const float b = -vup;
+			const float c = -h;
+			const float b2 = b*b;
+			const float _4ac = 4*a*c;
+			if (b2 < _4ac)	// Will never rise high enough.
+			{
+				mLog.AHeadline("Ignoring grenade, ballistic says it can not hit.");
+				continue;
+			}
+			t = (-b + sqrt(b2 - _4ac)) / (2*a);
+			assert(t > 0);
+		}
+		const Vector2DF lGrenadeTarget(lGrenadePosition.x + lGrenadeVelocity.x * t,
+			lGrenadePosition.y + lGrenadeVelocity.y * t);
+		// Compare against some point in front of my vehicle, so that I won't break
+		// if it's better to speed up.
+		const float lDamageRange = 8.0f * SCALE_FACTOR;
+		const Vector2DF lMyTarget(pPosition.x + pVelocity.x * t,
+			pPosition.y + pVelocity.y * t);
+		Vector2DF lMyExtraStep(pVelocity.x, pVelocity.y);
+		if (lMyExtraStep.GetLengthSquared() < SCALE_FACTOR*SCALE_FACTOR)
+		{
+			lMyExtraStep.Set(0, 0);
+		}
+		else
+		{
+			// Overlap the sweet spot some with my probable position.
+			lMyExtraStep.Normalize(lDamageRange*0.6f);
+		}
+		if (lGrenadeTarget.GetDistanceSquared(lMyTarget+lMyExtraStep) < lDamageRange*lDamageRange)
+		{
+			mLog.Headlinef(_T("Grenade would hit: %f m (%f s)."), lGrenadeTarget.GetDistance(lMyTarget)/3, t);
+			mGame->GetCutie()->SetEnginePower(1, 0, 0);	// Backup straight.
+			SetMode(MODE_BACKING_UP);
+			return true;
+		}
+		else
+		{
+			mLog.Headlinef(_T("Doging the grenade: %f m (%f s)."), lGrenadeTarget.GetDistance(lMyTarget)/3, t);
+		}
+	}
+	return false;
+}
+
 void VehicleAi::SetMode(Mode pMode)
 {
 	mMode = pMode;
@@ -193,21 +340,26 @@ void VehicleAi::SetMode(Mode pMode)
 	const tchar* lModeName = _T("???");
 	switch (mMode)
 	{
-		case MODE_FIND_BEST_PATH:		lModeName = _T("FIND PATH");		break;
-		case MODE_NORMAL:			lModeName = _T("NORMAL");		break;
-		case MODE_HEADING_BACK_ON_TRACK:	lModeName = _T("GO BACK ON TRACK");	break;
-		case MODE_BACKING_UP_DUE_TO_CRASH:	lModeName = _T("BACKING UP");		break;
-		case MODE_CIRCUMVENTING_AFTER_BACKING:	lModeName = _T("CIRCUMVENTING");	break;
-		case MODE_BACKING_ON_TRACK:		lModeName = _T("BACKING TO TRACK");	break;
-		case MODE_REVERSING_DUE_TO_GRENADE:	lModeName = _T("AVOID GRENADE");	break;
-		case MODE_AT_GOAL:			lModeName = _T("AT GOAL");		break;
+		case MODE_FIND_BEST_PATH:		lModeName = _T("FIND PATH");			break;
+		case MODE_NORMAL:			lModeName = _T("NORMAL");			break;
+		case MODE_HEADING_BACK_ON_TRACK:	lModeName = _T("HEADING BACK ON TRACK");	break;
+		case MODE_BACKING_UP:			lModeName = _T("BACKING UP");			break;
+		case MODE_AT_GOAL:			lModeName = _T("AT GOAL");			break;
 	}
 	mLog.Headlinef(_T("Switching mode to %s."), lModeName);
 }
 
+bool VehicleAi::IsCloseToTarget(const Vector3DF& pPosition) const
+{
+	Spline* lPath = mGame->GetLevel()->QueryPath()->GetPath(mActivePath);
+	const Vector3DF lTarget = lPath->GetValue();
+	const float lTargetDistance2 = lTarget.GetDistanceSquared(pPosition);
+	const float lGoalDistance = GOAL_DISTANCE*SCALE_FACTOR;
+	return (lTargetDistance2 <= lGoalDistance*lGoalDistance);
+}
+
 float VehicleAi::GetClosestPathDistance(const Vector3DF& pPosition, int pPath) const
 {
-	typedef Cure::ContextPath::SplinePath Spline;
 	Spline* lPath = mGame->GetLevel()->QueryPath()->GetPath((pPath >= 0)? pPath : mActivePath);
 	const float lCurrentTime = lPath->GetCurrentInterpolationTime();
 

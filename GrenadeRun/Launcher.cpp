@@ -66,9 +66,9 @@ void Launcher::GetBallisticData(const Vector3DF& pPosition1, const Vector3DF& pP
 	//     -b +- sqrt(b^2 - 4ac)
 	// x = ---------------------
 	//             2a
-	const float a = 9.82f/2;
+	const float a = +9.82f/2;
 	const float b = -vup;
-	const float c = h;
+	const float c = +h;
 	const float b2 = b*b;
 	const float _4ac = 4*a*c;
 	if (b2 < _4ac)	// Does not compute.
@@ -78,6 +78,7 @@ void Launcher::GetBallisticData(const Vector3DF& pPosition1, const Vector3DF& pP
 	else
 	{
 		const float t = (-b + sqrt(b2 - _4ac)) / (2*a);
+		assert(t > 0);
 		pTime = t;
 		const float vfwd = lYawVector.GetLength() / t;
 		pGuidePitch = -::atan(vfwd/vup);
