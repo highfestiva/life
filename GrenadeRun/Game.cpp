@@ -145,14 +145,11 @@ bool Game::Tick()
 
 	if (mLauncher && mLauncher->IsLoaded())
 	{
-		QuaternionF lQuaternion;
 		mLauncherYaw -= mLauncher->ContextObject::GetPhysics()->GetEngine(1)->GetLerpThrottle(0.2f, 0.2f) * 0.01f;
 		mLauncherPitch -= mLauncher->ContextObject::GetPhysics()->GetEngine(0)->GetLerpThrottle(0.2f, 0.2f) * 0.01f;
 		mLauncherYaw = Math::Clamp(mLauncherYaw, -PIF/2, PIF/2);
 		mLauncherPitch = Math::Clamp(mLauncherPitch, -PIF/2*0.6f, -PIF/90);
-		lQuaternion.RotateAroundWorldZ(mLauncherYaw);
-		lQuaternion.RotateAroundOwnX(mLauncherPitch);
-		mLauncher->SetRootOrientation(lQuaternion);
+		mLauncher->SetBarrelAngle(mLauncherYaw, mLauncherPitch);
 	}
 
 	if (mPreviousFrameWinnerIndex == -1 && mWinnerIndex != -1)
@@ -485,7 +482,7 @@ bool Game::Render()
 		case 1:	mLeftRect = lFullRect;	break;	// Single player, to left.
 	}
 
-	const Vector3DF lLauncherPosition(0, -215, 27);
+	const Vector3DF lLauncherPosition(0, -215, 29);
 	mLauncher->SetRootPosition(lLauncherPosition);
 
 	if (mFlybyMode != FLYBY_INACTIVE)

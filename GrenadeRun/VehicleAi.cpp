@@ -175,7 +175,7 @@ void VehicleAi::OnTick()
 			// Check if incoming.
 			if (lModeRunDeltaFrameCount%5 == 1)
 			{
-				if (AvoidGrenade(lPosition, lVelocity))
+				if (AvoidGrenade(lPosition, lVelocity, 0.5f))
 				{
 					return;
 				}
@@ -235,7 +235,7 @@ void VehicleAi::OnTick()
 		{
 			if (lModeRunDeltaFrameCount%5 == 3 && mGame->GetCtf()->GetCaptureLevel() < 0.85f)
 			{
-				if (AvoidGrenade(lPosition, lVelocity))
+				if (AvoidGrenade(lPosition, lVelocity, 1))
 				{
 					return;
 				}
@@ -255,7 +255,7 @@ void VehicleAi::OnTick()
 	}
 }
 
-bool VehicleAi::AvoidGrenade(const Vector3DF& pPosition, const Vector3DF& pVelocity)
+bool VehicleAi::AvoidGrenade(const Vector3DF& pPosition, const Vector3DF& pVelocity, float pCaution)
 {
 	// Walk all objects, pick out grenades.
 	const Cure::ContextManager::ContextObjectTable& lObjectTable = GetManager()->GetObjectTable();
@@ -305,7 +305,7 @@ bool VehicleAi::AvoidGrenade(const Vector3DF& pPosition, const Vector3DF& pVeloc
 			lGrenadePosition.y + lGrenadeVelocity.y * t);
 		// Compare against some point in front of my vehicle, so that I won't break
 		// if it's better to speed up.
-		const float lDamageRange = 8.0f * SCALE_FACTOR;
+		const float lDamageRange = 8.0f * SCALE_FACTOR * pCaution;
 		const Vector2DF lMyTarget(pPosition.x + pVelocity.x * t,
 			pPosition.y + pVelocity.y * t);
 		Vector2DF lMyExtraStep(pVelocity.x, pVelocity.y);

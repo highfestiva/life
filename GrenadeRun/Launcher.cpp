@@ -5,6 +5,7 @@
 
 
 #include "Launcher.h"
+#include "../UiCure/Include/UiGameUiManager.h"
 
 
 
@@ -22,6 +23,32 @@ Launcher::Launcher(Game* pGame):
 Launcher::~Launcher()
 {
 }
+
+
+
+void Launcher::SetBarrelAngle(float pYaw, float pPitch)
+{
+	QuaternionF lQuaternion;
+	lQuaternion.RotateAroundWorldZ(pYaw);
+	lQuaternion.RotateAroundOwnX(pPitch);
+	SetRootOrientation(lQuaternion);
+
+	// Keep supportive thingie on ground.
+	TBC::GeometryReference* lMesh = (TBC::GeometryReference*)GetMesh(1);
+	static bool lHasStoredTransformation = false;
+	static QuaternionF lOriginalOrientation;
+	if (!lHasStoredTransformation)
+	{
+		lOriginalOrientation = lMesh->GetOffsetTransformation().GetOrientation();
+		lHasStoredTransformation = true;
+	}
+	lQuaternion = lOriginalOrientation;
+	lQuaternion.RotateAroundOwnX(-pPitch);
+	TransformationF lTransform = lMesh->GetOffsetTransformation();
+	lTransform.SetOrientation(lQuaternion);
+	lMesh->SetOffsetTransformation(lTransform);
+}
+
 
 
 void Launcher::GetAngles(const Cure::ContextObject* pTarget, float& pPitch, float& pGuidePitch,
@@ -87,6 +114,14 @@ void Launcher::GetBallisticData(const Vector3DF& pPosition1, const Vector3DF& pP
 			pGuidePitch += (pGuidePitch-pPitch);	// Tss! Homebrew... seems to be working somewhat! :)
 		}
 	}
+}
+
+
+
+void Launcher::DispatchOnLoadMesh(UiCure::UserGeometryReferenceResource* pMeshResource)
+{
+	mUiManager->GetRenderer()->SetShadows(pMeshResource->GetData(), UiTbc::Renderer::FORCE_NO_SHADOWS);
+	Parent::DispatchOnLoadMesh(pMeshResource);
 }
 
 

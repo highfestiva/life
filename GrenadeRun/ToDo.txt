@@ -21,17 +21,19 @@ Adjust HUD for keyboard controls.
 Adjust HUD for single/dual play.
 Main menu: single player/two players/about, enter P1+P2 names (remember last), select map, select car.
 Admin: add button in center, for alert:restart/continue.
+Path finding for Cutie AI.
+AI for Cutie.
 
 Computer demo
 -------------
-Polish on level_2 roads (in texture).
-Path finding for Cutie AI.
-AI for Cutie.
 Record voice for tutorial.
 Playback voice for tutorial.
+Single player difficulty levels.
+Polish on level_2 roads (in texture).
+Tutorial.
+Smooth Cutie's roof and windows (and thus normals).
 Game over view.
 Show keyboard controls when starting.
-Elevator from ravine to left mountain.
 Cutify Cutie.
 Delete all resources when switching level (and make sure!).
 Turn the table when completing a level.
@@ -41,10 +43,10 @@ Optimize.
 Memory leak check.
 Icon x god-knows-how-many resolutions (iOS x 4, PC, Mac).
 
-iOS release
------------
+iOS and computer full version
+-----------------------------
+Tutorial for controls as well.
 Default image (=splash) for iPhone, Retina, iPad. Pixel Doctrine logo.
 Screen shots + marketing texts.
-Extra vehicle: cute monster truck.
+Extra vehicles: cute monster truck.
 2 extra levels: castle and machine.
-Hiscore release.
