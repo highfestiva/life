@@ -319,7 +319,7 @@ void PixelRect::Offset(int x, int y)
 }
 
 
-#define CLEAR_COLOR	Color(0, 0, 0, 0);
+#define CLEAR_COLOR	Color(0, 0, 0, 0)
 #define BLACK		Color(0, 0, 0)
 #define OFF_BLACK	Color(1, 1, 1)
 #define WHITE		Color(255, 255, 255)

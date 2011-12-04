@@ -201,6 +201,7 @@ public:
 		const PixelCoord& pPoint3, float pU3, float pV3, ImageID pImageID);
 
 	virtual void DrawFan(const std::vector<Vector2DF> pCoords, bool pFill) = 0;
+	virtual void DrawImageFan(ImageID pImageID, const std::vector<Vector2DF> pCoords, const std::vector<Vector2DF> pTexCoords) = 0;
 
 	// Returns an ID to the added bitmap. Returns 0 if error. 
 	// Alpha buffer or bitmap may be NULL.

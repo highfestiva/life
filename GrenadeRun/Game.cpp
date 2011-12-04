@@ -55,7 +55,8 @@ Game::Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVaria
 	mLauncher(0),
 	mLauncherAi(0),
 	mComputerIndex(-1),
-	mComputerDifficulty(0.5f)
+	mComputerDifficulty(0.5f),
+	mScoreBalance(0)
 {
 	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
 	mCollisionSoundManager->AddSound(_T("explosion"), UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f));
@@ -166,6 +167,7 @@ bool Game::Tick()
 		{
 			AddContextObject(new UiCure::Sound(GetResourceManager(), _T("kia.wav"), mUiManager), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 		}
+		mScoreBalance += (mWinnerIndex == 0)? -1 : +1;
 	}
 	mPreviousFrameWinnerIndex = mWinnerIndex;
 
@@ -445,6 +447,11 @@ void Game::SetComputerDifficulty(float pDifficulty)
 {
 	assert(pDifficulty >= -1 && pDifficulty <= 1);
 	mComputerDifficulty = pDifficulty;
+}
+
+int Game::GetScoreBalance()
+{
+	return mScoreBalance;
 }
 
 bool Game::Render()

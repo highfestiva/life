@@ -129,6 +129,7 @@ public:
 	int GetComputerIndex() const;	// -1, 0, or 1.
 	void NextComputerIndex();
 	void SetComputerDifficulty(float pDifficulty);	// -1,[0,1], -1=inactive.
+	int GetScoreBalance();	// 0 = score is 2 love, -1 = P1 leads with 1 point, +2 P2 leads with 2 points...
 
 	bool Render();
 	bool Paint();
@@ -186,6 +187,7 @@ private:
 	LauncherAi* mLauncherAi;
 	int mComputerIndex;
 	float mComputerDifficulty;
+	int mScoreBalance;
 };
 
 

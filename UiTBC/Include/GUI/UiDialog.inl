@@ -21,15 +21,16 @@ Dialog<_Target>::Dialog(Component* pParent, Action pTarget):
 {
 	SetCornerRadius(20);
 	mColor[1] = DARK_GRAY;
-	const PixelCoord& lSize = pParent->GetSize();
-	const int w = std::max(lSize.x/2, 200);
-	const int h = std::max(lSize.y/2, 100);
-	SetPreferredSize(w, h);
 	pParent->AddChild(this);
-	SetPos(lSize.x+MARGIN, lSize.y/2 - h/2);
+
+	const PixelCoord& lParentSize = pParent->GetSize();
+	PixelCoord lSize = lParentSize / 2;
+	SetPos(lParentSize.x+MARGIN, lParentSize.y/2 - lSize.y/2);
+	SetSize(lSize);
+	SetPreferredSize(lSize);
 
 	// Calculate what animation speed is required to get right end speed using the acceleration.
-	const int lTargetX = GetParent()->GetSize().x/2 - w/2;
+	const int lTargetX = lParentSize.x/2 - lSize.x/2;
 	const int lStartX = GetPos().x;
 	int x = lTargetX;
 	for (int i = 0; i < 1000; ++i)
@@ -48,6 +49,14 @@ template<class _Target>
 Dialog<_Target>::~Dialog()
 {
 	mTarget.clear();
+}
+
+template<class _Target>
+void Dialog<_Target>::Center()
+{
+	const PixelCoord& lParentSize = GetParent()->GetSize();
+	const PixelCoord& lSize = GetSize();
+	SetPos(lParentSize.x/2 - lSize.x/2, lParentSize.y/2 - lSize.y/2);
 }
 
 template<class _Target>
@@ -134,28 +143,28 @@ void Dialog<_Target>::Animate()
 {
 	if (mAnimationStep)
 	{
+		const PixelCoord& lParentSize = GetParent()->GetSize();
+		const PixelCoord& lSize = GetSize();
 		PixelCoord lPos = GetPos();
 		lPos.x += mAnimationStep;
+		lPos.y = lParentSize.y/2 - lSize.y/2;
 		SetPos(lPos);
-		const PixelCoord& lSize = GetSize();
-		const PixelCoord& lParentSize = GetParent()->GetSize();
 		if (!mIsClosing)
 		{
 			// Move in from right.
 			mAnimationStep += ACCELERATION;
 			const int x = lParentSize.x/2-lSize.x/2;
-			if (lPos.x <= x)
+			if (lPos.x <= x || mAnimationStep >= 0)
 			{
-				lPos.x = x;
-				SetPos(lPos);
 				mAnimationStep = 0;
+				Center();
 			}
 		}
 		else
 		{
 			// Move out to left.
 			mAnimationStep -= ACCELERATION;
-			if (lPos.x+GetSize().x < -MARGIN)
+			if (lPos.x+GetSize().x < -MARGIN || mAnimationStep >= 0)
 			{
 				mTarget(mClickedButton);
 				((DesktopWindow*)GetTopParent())->PostDeleteComponent(this, 0);

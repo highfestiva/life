@@ -8,6 +8,7 @@
 #include "../Cure/Include/RuntimeVariable.h"
 #include "../Cure/Include/TimeManager.h"
 #include "../Lepra/Include/Application.h"
+#include "../Lepra/Include/CyclicArray.h"
 #include "../Lepra/Include/LogListener.h"
 #include "../Lepra/Include/Path.h"
 #include "../Lepra/Include/SystemManager.h"
@@ -37,8 +38,10 @@
 #define UIKEY(name)	UiLepra::InputManager::IN_KBD_##name
 #define BUTTON_WIDTH	40
 #define BUTTON_MARGIN	2
-#define COLOR_DIALOG	Color(255, 255, 255, 192)
+#define BGCOLOR_DIALOG	Color(5, 20, 30, 192)
+#define FGCOLOR_DIALOG	Color(170, 170, 170, 255)
 #define ICONBTN(i,n)	new UiCure::IconButton(mUiManager, mResourceManager, _T(i), _T(n))
+#define SCORE_POINTS	4
 
 
 
@@ -69,6 +72,7 @@ private:
 	bool Poll();
 	void PollTaps();
 	void DrawHud() const;
+	void DrawImage(UiTbc::Painter::ImageID pImageId, float x, float y, float w, float h, float pAngle) const;
 	void DrawRoundedPolygon(float x, float y, float pRadius, float pAngle, int pCorners) const;
 	void DrawRoundedPolygon(float x, float y, float pRadius, float pAngle, int pCorners, const Color& pColor) const;
 	void DrawCircle(float x, float y, float pRadius) const;
@@ -99,13 +103,17 @@ private:
 	void OnMinimize();
 	void OnMaximize(int pWidth, int pHeight);
 
+	void OnAction(UiTbc::Button* pButton);
 	void OnMainMenuAction(UiTbc::Button* pButton);
 	void OnLevelAction(UiTbc::Button* pButton);
 	void OnVehicleAction(UiTbc::Button* pButton);
 	void OnPauseClick(UiTbc::Button*);
 	void OnPauseAction(UiTbc::Button* pButton);
 	void OnGetiPhoneClick(UiTbc::Button*);
+	void PainterImageLoadCallback(UiCure::UserPainterKeepImageResource* pResource);
 
+	typedef void (App::*ButtonAction)(UiTbc::Button*);
+	UiTbc::Dialog<App>* CreateTbcDialog(ButtonAction pAction);
 	static UiTbc::Button* CreateButton(const str& pText, const Color& pColor, UiTbc::Component* pParent);
 
 	StdioConsoleLogListener mConsoleLogger;
@@ -145,6 +153,8 @@ private:
 	UiTbc::Button* mRetryButton;
 	UiTbc::Button* mPauseButton;
 	UiTbc::Button* mGetiPhoneButton;
+	UiCure::UserPainterKeepImageResource* mScoreHeart;
+	mutable Vector3DF mScoreHeartPos[SCORE_POINTS];
 	UiTbc::RectComponent* mPlayerSplitter;
 	float mAngleTime;
 	Color mTouchCenterColor;
@@ -161,6 +171,8 @@ private:
 	mutable HiResTimer mPlayer2TouchDelay;
 	UiTbc::FontManager::FontId mBigFontId;
 	float mReverseAndBrake;
+	UiTbc::Dialog<App>::Action mButtonDelegate;
+	UiTbc::Dialog<App>* mDialog;
 
 	LOG_CLASS_DECLARE();
 };
@@ -201,7 +213,8 @@ App::App(const strutil::strvec& pArgumentList):
 	mGetiPhoneButton(0),
 	mAngleTime(0),
 	mBigFontId(UiTbc::FontManager::INVALID_FONTID),
-	mReverseAndBrake(0)
+	mReverseAndBrake(0),
+	mDialog(0)
 {
 	mApp = this;
 }
@@ -230,8 +243,13 @@ bool App::Open()
 	const int lDisplayWidth = lSize.height;
 	const int lDisplayHeight = lSize.width;
 #else // !iOS
+#ifdef LEPRA_IOS_LOOKANDFEEL
+	const int lDisplayWidth = 480;
+	const int lDisplayHeight = 320;
+#else // !iOS L&F
 	const int lDisplayWidth = 760;
 	const int lDisplayHeight = 524;
+#endif // iOS / Computer L&F
 #endif // iOS/!iOS
 	int lDisplayBpp = 0;
 	int lDisplayFrequency = 0;
@@ -317,6 +335,12 @@ bool App::Open()
 		mGetiPhoneButton->SetVisible(true);
 		mGetiPhoneButton->SetOnClick(App, OnGetiPhoneClick);
 #endif // iOS L&F
+	}
+	if (lOk)
+	{
+		mScoreHeart = new UiCure::UserPainterKeepImageResource(mUiManager, UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
+		mScoreHeart->Load(mResourceManager, _T("heart.png"),
+			UiCure::UserPainterKeepImageResource::TypeLoadCallback(this, &App::PainterImageLoadCallback));
 	}
 	if (lOk)
 	{
@@ -418,7 +442,7 @@ int App::Run()
 	{
 		mGame = new Game(mUiManager, mVariableScope, mResourceManager);
 		mGame->SetComputerDifficulty(0.5f);
-		mGame->SetComputerIndex(0);
+		mGame->SetComputerIndex(1);
 		lOk = mGame->SetLevelName(_T("level_2"));
 	}
 	if (lOk)
@@ -513,7 +537,14 @@ bool App::Poll()
 	}
 	if (lOk && lRender)
 	{
-		mUiManager->Paint(false);
+		if (mDialog)
+		{
+			mUiManager->PreparePaint(false);
+		}
+		else
+		{
+			mUiManager->Paint(false);
+		}
 		mTouchCenterColor = Color(102, 120, 190)*(1.1f+::sin(mAngleTime*40)*0.2f);
 		mTouchSteerColor = Color(102, 120, 190)*(1.0f+::sin(mAngleTime*41)*0.3f);
 		mTouchShootColor = Color(170, 38, 45)*(1.1f+::sin(mAngleTime*37)*0.2f);
@@ -521,6 +552,11 @@ bool App::Poll()
 		DrawHud();
 
 		mGame->Paint();
+
+		if (mDialog)
+		{
+			mUiManager->Paint(false);
+		}
 	}
 	if (lOk && !lTRICKY_IsLoopPaused)
 	{
@@ -614,10 +650,15 @@ void App::DrawHud() const
 		}
 		else
 		{
+#ifdef LEPRA_IOS_LOOKANDFEEL
+				const float a = (mGame->GetComputerIndex() == 0)? -lAngle : 0;
+#else // Computer L&F
+				const float a = 0;
+#endif // iOS / Computer L&F
 			if (lWinner != mGame->GetComputerIndex())
 			{
 				mUiManager->GetPainter()->SetColor(GREEN, 0);
-				PrintText(_T("WON!"), 0, (int)(w/2), (int)(h/2));
+				PrintText(_T("WON!"), a, (int)(w/2), (int)(h/2));
 			}
 			else
 			{
@@ -795,6 +836,79 @@ void App::DrawHud() const
 		DrawBarrelIndicator(x, y, lPitch+lDrawAngle, 1, 1, false);
 		InfoText(2, _T("Up/down compass"), PIF, -20-lButtonRadius, -lButtonRadius/2);
 	}
+
+	if (mScoreHeart->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
+	{
+		mUiManager->GetPainter()->SetRenderMode(UiTbc::Painter::RM_ALPHABLEND);
+		mUiManager->GetPainter()->SetAlphaValue(255);
+		const float lMargin = 8;
+		float x = lMargin;
+		float y = BUTTON_WIDTH + 8*2 + 3;
+		float lAngle = 0;
+		const int lBalance = -mGame->GetScoreBalance();
+		static float lHeartBeatTime = 0;
+		lHeartBeatTime += 0.5f;
+		if (lHeartBeatTime > 4*PIF)
+		{
+			lHeartBeatTime -= 4*PIF;
+		}
+		const float lHeartBeatFactor = (lHeartBeatTime < 2*PIF) ? 1 : 1+0.15f*sin(lHeartBeatTime);
+		const float iw = (float)mScoreHeart->GetRamData()->GetWidth();
+		const float ih = (float)mScoreHeart->GetRamData()->GetHeight();
+		const float hw = iw * lHeartBeatFactor;
+		const float hh = ih * lHeartBeatFactor;
+#ifdef LEPRA_IOS_LOOKANDFEEL
+		if (mGame->GetComputerIndex() == -1)
+		{
+			x = w/2 - BUTTON_WIDTH/2 - 8 - 3 - ih;
+			lAngle = -PIF/2;
+		}
+#endif	// iOS L&F
+		if (mGame->GetComputerIndex() == -1)
+		{
+			y = lMargin;
+		}
+		int lHeartIndex = 0;
+		for (int i = -SCORE_POINTS/2; i < lBalance; ++i, ++lHeartIndex)
+		{
+			if (mGame->GetComputerIndex() != 0)
+			{
+				mScoreHeartPos[lHeartIndex] = Math::Lerp(mScoreHeartPos[lHeartIndex], Vector3DF(x+iw/2, y+iw/2, lAngle), 0.07f);
+				DrawImage(mScoreHeart->GetData(), mScoreHeartPos[lHeartIndex].x, mScoreHeartPos[lHeartIndex].y, hw, hh, mScoreHeartPos[lHeartIndex].z);
+				y += iw+8;
+			}
+		}
+		x = w - lMargin - iw;
+		y = BUTTON_WIDTH + 8*2 + 3;
+#ifdef LEPRA_IOS_LOOKANDFEEL
+		if (mGame->GetComputerIndex() == -1)
+		{
+			x = w/2 + BUTTON_WIDTH/2 + lMargin;
+		}
+		else
+		{
+			x = BUTTON_WIDTH + lMargin*2;
+		}
+		y = lMargin;
+		lAngle = PIF/2;
+#endif	// iOS L&F
+		if (mGame->GetComputerIndex() == -1)
+		{
+			y = lMargin;
+		}
+		y += (iw+8) * (SCORE_POINTS/2 - lBalance - 1);
+		for (int i = lBalance; i < SCORE_POINTS/2; ++i, ++lHeartIndex)
+		{
+			if (mGame->GetComputerIndex() != 1)
+			{
+				mScoreHeartPos[lHeartIndex] = Math::Lerp(mScoreHeartPos[lHeartIndex], Vector3DF(x+iw/2, y+iw/2, lAngle), 0.07f);
+				DrawImage(mScoreHeart->GetData(), mScoreHeartPos[lHeartIndex].x, mScoreHeartPos[lHeartIndex].y, hw, hh, mScoreHeartPos[lHeartIndex].z);
+				y -= iw+8;
+			}
+		}
+		//mUiManager->GetPainter()->SetRenderMode(UiTbc::Painter::RM_NORMAL);
+	}
+
 	if (mGame->GetComputerIndex() != 1)	// Computer not running launcher.
 	{
 		float x;
@@ -817,6 +931,20 @@ void App::DrawHud() const
 	}
 
 	DrawInfoTexts();
+}
+
+void App::DrawImage(UiTbc::Painter::ImageID pImageId, float cx, float cy, float w, float h, float pAngle) const
+{
+	const float ca = ::cos(pAngle);
+	const float sa = ::sin(pAngle);
+	const float w2 = w*0.5f;
+	const float h2 = h*0.5f;
+	const float x = cx - w2*ca - h2*sa;
+	const float y = cy - h2*ca + w2*sa;
+	const Vector2DF c[] = { Vector2DF(x, y), Vector2DF(x+w*ca, y-w*sa), Vector2DF(x+w*ca+h*sa, y+h*ca-w*sa), Vector2DF(x+h*sa, y+h*ca) };
+	const Vector2DF t[] = { Vector2DF(0, 0), Vector2DF(1, 0), Vector2DF(1, 1), Vector2DF(0, 1) };
+#define V(z) std::vector<Vector2DF>(z, z+LEPRA_ARRAY_COUNT(z))
+	mUiManager->GetPainter()->DrawImageFan(pImageId, V(c), V(t));
 }
 
 void App::DrawRoundedPolygon(float x, float y, float pRadius, float pAngle, int pCorners) const
@@ -1097,6 +1225,11 @@ void App::Layout()
 		mGetiPhoneButton->SetPos(tx, ty);
 	}
 	mPauseButton->SetPos(tx2, ty2);
+
+	if (mDialog)
+	{
+		mDialog->Center();
+	}
 }
 
 
@@ -1353,8 +1486,7 @@ void App::MainMenu()
 {
 	mGame->SetFlybyMode(Game::FLYBY_SYSTEM_PAUSE);
 	mPauseButton->SetVisible(false);
-	UiTbc::Dialog<App>* d = new UiTbc::Dialog<App>(mUiManager->GetDesktopWindow(), UiTbc::Dialog<App>::Action(this, &App::OnMainMenuAction));
-	d->SetColor(COLOR_DIALOG);
+	UiTbc::Dialog<App>* d = CreateTbcDialog(&App::OnMainMenuAction);
 	d->AddButton(1, ICONBTN("btn_1p.png", "Single player"));
 	d->AddButton(2, ICONBTN("btn_2p.png", "Two players"));
 }
@@ -1375,6 +1507,17 @@ void App::OnMaximize(int pWidth, int pHeight)
 	OnResize(pWidth, pHeight);
 }
 
+void App::OnAction(UiTbc::Button* pButton)
+{
+	UiTbc::Dialog<App>* d = mDialog;
+	mButtonDelegate(pButton);
+	if (mDialog == d)	// No news? Just drop it.
+	{
+		mButtonDelegate.clear();
+		mDialog = 0;
+	}
+}
+
 void App::OnMainMenuAction(UiTbc::Button* pButton)
 {
 	if (pButton->GetTag() == 1)
@@ -1387,8 +1530,7 @@ void App::OnMainMenuAction(UiTbc::Button* pButton)
 		// 2P
 		mGame->SetComputerIndex(-1);
 	}
-	UiTbc::Dialog<App>* d = new UiTbc::Dialog<App>(mUiManager->GetDesktopWindow(), UiTbc::Dialog<App>::Action(this, &App::OnLevelAction));
-	d->SetColor(COLOR_DIALOG);
+	UiTbc::Dialog<App>* d = CreateTbcDialog(&App::OnLevelAction);
 	d->QueryLabel(_T("Select level"), mBigFontId);
 	d->AddButton(1, ICONBTN("btn_lvl2.png", "Pendulum"));
 	d->AddButton(2, ICONBTN("btn_lvl3.png", "Elevate"));
@@ -1408,8 +1550,7 @@ void App::OnLevelAction(UiTbc::Button* pButton)
 	{
 		mGame->SetLevelName(lLevel);
 	}
-	UiTbc::Dialog<App>* d = new UiTbc::Dialog<App>(mUiManager->GetDesktopWindow(), UiTbc::Dialog<App>::Action(this, &App::OnVehicleAction));
-	d->SetColor(COLOR_DIALOG);
+	UiTbc::Dialog<App>* d = CreateTbcDialog(&App::OnVehicleAction);
 	d->QueryLabel(_T("Select vehicle"), mBigFontId);
 	d->AddButton(1, _T("Cutie"));
 	d->AddButton(2, _T("Hardie"));
@@ -1436,8 +1577,7 @@ void App::OnPauseClick(UiTbc::Button*)
 {
 	mIsPaused = true;
 	mPauseButton->SetVisible(false);
-	UiTbc::Dialog<App>* d = new UiTbc::Dialog<App>(mUiManager->GetDesktopWindow(), UiTbc::Dialog<App>::Action(this, &App::OnPauseAction));
-	d->SetColor(COLOR_DIALOG);
+	UiTbc::Dialog<App>* d = CreateTbcDialog(&App::OnPauseAction);
 	d->AddButton(1, _T("Resume"));
 	d->AddButton(2, _T("Restart"));
 	d->AddButton(3, _T("Main menu"));
@@ -1470,6 +1610,22 @@ void App::OnGetiPhoneClick(UiTbc::Button*)
 	SystemManager::WebBrowseTo(_T("http://itunes.apple.com/us/app/slimeball/id447966821?mt=8&ls=1"));
 	delete mGetiPhoneButton;
 	mGetiPhoneButton = 0;
+}
+
+void App::PainterImageLoadCallback(UiCure::UserPainterKeepImageResource* pResource)
+{
+	(void)pResource;
+}
+
+UiTbc::Dialog<App>* App::CreateTbcDialog(ButtonAction pAction)
+{
+	mButtonDelegate = UiTbc::Dialog<App>::Action(this, pAction);
+	UiTbc::Dialog<App>* d = new UiTbc::Dialog<App>(mUiManager->GetDesktopWindow(), UiTbc::Dialog<App>::Action(this, &App::OnAction));
+	d->SetSize(440, 280);
+	d->SetPreferredSize(440, 280);
+	d->SetColor(BGCOLOR_DIALOG, FGCOLOR_DIALOG, BLACK, BLACK);
+	mDialog = d;
+	return d;
 }
 
 UiTbc::Button* App::CreateButton(const str& pText, const Color& pColor, UiTbc::Component* pParent)

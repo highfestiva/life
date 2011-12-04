@@ -236,19 +236,19 @@ void Button::Repaint(Painter* pPainter)
 		int y = 0;
 		switch(mIconAlignment)
 		{
-		case ICON_LEFT:
-			x = lRect.mLeft + lOffset;
-			y = lRect.mTop + (lRect.GetHeight() - lImageSize.y) / 2 + lOffset;
-			lTextX = lRect.mLeft + lImageSize.x;
+			case ICON_LEFT:
+				x = lRect.mLeft + lOffset;
+				y = lRect.mTop + (lRect.GetHeight() - lImageSize.y) / 2 + lOffset;
+				lTextX = lRect.mLeft + lImageSize.x;
 			break;
-		case ICON_CENTER:
-			x = lRect.mLeft + (lRect.GetWidth()  - lImageSize.x) / 2 + lOffset;
-			y = lRect.mTop;
-			lTextX = lRect.GetCenterX() - pPainter->GetStringWidth(mText)/2;
+			case ICON_CENTER:
+				x = lRect.mLeft + (lRect.GetWidth()  - lImageSize.x) / 2 + lOffset;
+				y = lRect.mTop;
+				lTextX = lRect.GetCenterX() - pPainter->GetStringWidth(mText)/2;
 			break;
-		case ICON_RIGHT:
-			x = lRect.mRight - lImageSize.x + lOffset;
-			y = lRect.mTop + (lRect.GetHeight() - lImageSize.y) / 2 + lOffset;
+			case ICON_RIGHT:
+				x = lRect.mRight - lImageSize.x + lOffset;
+				y = lRect.mTop + (lRect.GetHeight() - lImageSize.y) / 2 + lOffset;
 			break;
 		}
 		if (mHighlightedIconId != Painter::INVALID_IMAGEID &&

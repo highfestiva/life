@@ -36,11 +36,15 @@ void CustomButton::SetIsOverDelegate(const DelegateXY& pIsOver)
 	mIsOver = new DelegateXY(pIsOver);
 }
 
-void CustomButton::Repaint(Painter*)
+void CustomButton::Repaint(Painter* pPainter)
 {
 	if (mOnRender)
 	{
 		(*mOnRender)(this);
+	}
+	else
+	{
+		Parent::Repaint(pPainter);
 	}
 }
 
@@ -50,7 +54,7 @@ bool CustomButton::IsOver(int pScreenX, int pScreenY)
 	{
 		return (*mIsOver)(this, pScreenX, pScreenY);
 	}
-	return (false);
+	return Parent::IsOver(pScreenX, pScreenY);
 }
 
 

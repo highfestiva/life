@@ -8,7 +8,7 @@
 
 
 #pragma once
-#include "../../UiTBC/Include/GUI/UiButton.h"
+#include "../../UiTBC/Include/GUI/UiCustomButton.h"
 #include "UiResourceManager.h"
 
 
@@ -29,9 +29,9 @@ class GameUiManager;
 
 
 
-class IconButton: public UiTbc::Button
+class IconButton: public UiTbc::CustomButton
 {
-	typedef UiTbc::Button Parent;
+	typedef UiTbc::CustomButton Parent;
 public:
 	IconButton(GameUiManager* pUiManager, Cure::ResourceManager* pResourceManager, const str& pIconImageName, const str& pText);
 	virtual ~IconButton();

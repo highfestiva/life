@@ -23,6 +23,8 @@ Main menu: single player/two players/about, enter P1+P2 names (remember last), s
 Admin: add button in center, for alert:restart/continue.
 Path finding for Cutie AI.
 AI for Cutie.
+Smooth Cutie's roof and windows (and thus normals).
+Cutify Cutie.
 
 Computer demo
 -------------
@@ -31,10 +33,8 @@ Playback voice for tutorial.
 Single player difficulty levels.
 Polish on level_2 roads (in texture).
 Tutorial.
-Smooth Cutie's roof and windows (and thus normals).
 Game over view.
 Show keyboard controls when starting.
-Cutify Cutie.
 Delete all resources when switching level (and make sure!).
 Turn the table when completing a level.
 Autostart next/same level.

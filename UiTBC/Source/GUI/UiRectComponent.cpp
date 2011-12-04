@@ -197,6 +197,10 @@ void RectComponent::SetColor(const Color& pColor)
 	mShaded = false;
 	SetNeedsRepaint(mColor[0] != pColor);
 	mColor[0] = pColor;
+	if (mColor[0].mAlpha == 0)
+	{
+		mHollow = true;
+	}
 }
 
 void RectComponent::SetColor(const Color& pTopLeftColor,
@@ -211,6 +215,10 @@ void RectComponent::SetColor(const Color& pTopLeftColor,
 	mColor[1] = pTopRightColor;
 	mColor[2] = pBottomRightColor;
 	mColor[3] = pBottomLeftColor;
+	if (mColor[0].mAlpha == 0)
+	{
+		mHollow = true;
+	}
 }
 
 Painter::ImageID RectComponent::GetImage()

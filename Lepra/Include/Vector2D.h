@@ -122,6 +122,7 @@ template<class _TVarType> inline _TVarType LineSegmentDistance(const Vector2D<_T
 
 typedef Vector2D<float> Vector2DF;
 typedef Vector2D<double> Vector2DD;
+typedef Vector2D<int> Vector2DI;
 
 
 

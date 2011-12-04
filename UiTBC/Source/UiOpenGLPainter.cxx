@@ -665,6 +665,53 @@ void OpenGLPainter::DrawFan(const std::vector<Vector2DF> pCoords, bool pFill)
 	OGL_ASSERT();
 }
 
+void OpenGLPainter::DrawImageFan(ImageID pImageID, const std::vector<Vector2DF> pCoords, const std::vector<Vector2DF> pTexCoords)
+{
+	OGL_ASSERT();
+	assert(pCoords.size() == pTexCoords.size());
+
+	TextureTable::Iterator lIter = mTextureTable.Find(pImageID);
+
+	if (lIter == mTextureTable.End())
+	{
+		return;
+	}
+
+	::glEnable(GL_TEXTURE_2D);
+
+	glBindTexture (GL_TEXTURE_2D, pImageID);
+	glPixelStorei (GL_UNPACK_ALIGNMENT, 1);
+#ifndef LEPRA_GL_ES
+	glPixelStorei (GL_UNPACK_ROW_LENGTH, 0);
+	glPixelStorei (GL_UNPACK_SKIP_ROWS, 0);
+	glPixelStorei (GL_UNPACK_SKIP_PIXELS, 0);
+#endif // !GLES
+	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+	if (GetRenderMode() == RM_ALPHATEST)
+	{
+		glColor4ub(255, 255, 255, 255);
+	}
+	else
+	{
+		glColor4ub(255, 255, 255, GetAlphaValue());
+	}
+
+	::glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	::glTexCoordPointer(2, GL_FLOAT, 0, &pTexCoords[0]);
+	::glVertexPointer(2, GL_FLOAT, 0, &pCoords[0]);
+	::glDrawArrays(GL_TRIANGLE_FAN, 0, pCoords.size());
+	::glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	::glDisable(GL_TEXTURE_2D);
+
+	OGL_ASSERT();
+}
+
 Painter::ImageID OpenGLPainter::AddImage(const Canvas* pImage, const Canvas* pAlphaBuffer)
 {
 	OGL_ASSERT();

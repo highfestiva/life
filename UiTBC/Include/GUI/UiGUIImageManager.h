@@ -67,6 +67,7 @@ public:
 	void AddLoadedImage(const Canvas& pImage, Painter::ImageID pImageId, ImageStyle pStyle, BlendFunc pBlendFunc, uint8 pAlphaValue);
 	bool RemoveImage(Painter::ImageID pImageId);
 	bool DropImage(Painter::ImageID pImageId);
+	bool HasImage(Painter::ImageID pImageId) const;
 
 	void SetImageOffset(Painter::ImageID pImageID, int pXOffset, int pYOffset);
 

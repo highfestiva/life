@@ -29,7 +29,10 @@ IconButton::~IconButton()
 {
 	if (mIconResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
-		GetImageManager()->DropImage(mIconResource->GetData());
+		if (GetImageManager()->HasImage(mIconResource->GetData()))
+		{
+			GetImageManager()->DropImage(mIconResource->GetData());
+		}
 		GetImageManager()->RemoveImage(mHighlightedIconId);
 	}
 	delete mIconResource;
@@ -65,9 +68,12 @@ void IconButton::PainterImageLoadCallback(UserPainterKeepImageResource* pResourc
 			}
 		}
 		const UiTbc::GUIImageManager::BlendFunc lBlendFunc = lHasTransparent? UiTbc::GUIImageManager::ALPHABLEND : UiTbc::GUIImageManager::NO_BLEND;
-		GetImageManager()->AddLoadedImage(lCanvas, pResource->GetData(), UiTbc::GUIImageManager::CENTERED, lBlendFunc, 255);
+		if (!GetImageManager()->HasImage(pResource->GetData()))
+		{
+			GetImageManager()->AddLoadedImage(lCanvas, pResource->GetData(), UiTbc::GUIImageManager::CENTERED, lBlendFunc, 255);
+		}
 		mHighlightedIconId = GetImageManager()->AddImage(lCanvas, UiTbc::GUIImageManager::CENTERED, lBlendFunc, 255);
-		lCanvas.SetBuffer(0);	// Free buffer.
+		//lCanvas.SetBuffer(0);	// Free buffer.
 		SetIcon(pResource->GetData(), ICON_CENTER);
 		SetHighlightedIcon(mHighlightedIconId);
 	}

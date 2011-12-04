@@ -24,6 +24,7 @@ public:
 
 	Dialog(Component* pParent, Action pTarget);
 	virtual ~Dialog();
+	virtual void Center();
 	Label* QueryLabel(const str& pText, UiTbc::FontManager::FontId pFontId);
 	void AddButton(int pTag, const str& pText);
 	void AddButton(int pTag, Button* pButton);

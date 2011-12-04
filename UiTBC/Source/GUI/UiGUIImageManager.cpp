@@ -67,6 +67,7 @@ Painter::ImageID GUIImageManager::AddImage(const Canvas& pImage, ImageStyle pSty
 
 void GUIImageManager::AddLoadedImage(const Canvas& pImage, Painter::ImageID pImageId, ImageStyle pStyle, BlendFunc pBlendFunc, uint8 pAlphaValue)
 {
+	assert(!HasImage(pImageId));
 	mImageTable.Insert(pImageId, new Image(pImageId, pImage, pStyle, pBlendFunc, pAlphaValue));
 }
 
@@ -92,6 +93,11 @@ bool GUIImageManager::DropImage(Painter::ImageID pImageId)
 	}
 	assert(false);
 	return false;
+}
+
+bool GUIImageManager::HasImage(Painter::ImageID pImageId) const
+{
+	return (mImageTable.Find(pImageId) != mImageTable.End());
 }
 
 void GUIImageManager::SetImageOffset(Painter::ImageID pImageID, int pXOffset, int pYOffset)
