@@ -255,26 +255,42 @@ class StopWatch: public HiResTimer
 	typedef HiResTimer Parent;
 public:
 	inline StopWatch();
+	inline bool TryStart();
 	inline void Start();
 	inline void Stop();
 	inline bool IsStarted() const;
+	inline int GetStartCount() const;
 
 private:
 	bool mIsStarted;
+	int mStartCount;
 };
 
 
 
 StopWatch::StopWatch():
 	Parent(0),
-	mIsStarted(false)
+	mIsStarted(false),
+	mStartCount(0)
 {
+}
+
+bool StopWatch::TryStart()
+{
+	if (mIsStarted)
+	{
+		return false;
+	}
+	PopTimeDiff();
+	mIsStarted = true;
+	return true;
 }
 
 void StopWatch::Start()
 {
 	PopTimeDiff();
 	mIsStarted = true;
+	++mStartCount;
 }
 
 void StopWatch::Stop()
@@ -285,6 +301,11 @@ void StopWatch::Stop()
 bool StopWatch::IsStarted() const
 {
 	return mIsStarted;
+}
+
+int StopWatch::GetStartCount() const
+{
+	return mStartCount;
 }
 
 

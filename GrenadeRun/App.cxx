@@ -71,7 +71,7 @@ private:
 	virtual int Run();
 	bool Poll();
 	void PollTaps();
-	void DrawHud() const;
+	void DrawHud();
 	void DrawImage(UiTbc::Painter::ImageID pImageId, float x, float y, float w, float h, float pAngle) const;
 	void DrawRoundedPolygon(float x, float y, float pRadius, float pAngle, int pCorners) const;
 	void DrawRoundedPolygon(float x, float y, float pRadius, float pAngle, int pCorners, const Color& pColor) const;
@@ -86,6 +86,7 @@ private:
 	void PrintText(const str& pText, float pAngle, int pCenterX, int pCenterY) const;
 	void Layout();
 	void MainMenu();
+	void SuperReset();
 
 	virtual void Suspend();
 	virtual void Resume();
@@ -154,6 +155,10 @@ private:
 	UiTbc::Button* mPauseButton;
 	UiTbc::Button* mGetiPhoneButton;
 	UiCure::UserPainterKeepImageResource* mScoreHeart;
+	UiCure::UserPainterKeepImageResource* mScoreGreyHeart;
+#ifndef LEPRA_IOS_LOOKANDFEEL
+	UiCure::UserPainterKeepImageResource* mKeyboardButton;
+#endif // Computer
 	mutable Vector3DF mScoreHeartPos[SCORE_POINTS];
 	UiTbc::RectComponent* mPlayerSplitter;
 	float mAngleTime;
@@ -173,6 +178,8 @@ private:
 	float mReverseAndBrake;
 	UiTbc::Dialog<App>::Action mButtonDelegate;
 	UiTbc::Dialog<App>* mDialog;
+	mutable StopWatch mStartTimer;
+	mutable StopWatch mGameOverTimer;
 
 	LOG_CLASS_DECLARE();
 };
@@ -203,6 +210,7 @@ namespace GrenadeRun
 
 App::App(const strutil::strvec& pArgumentList):
 	Application(pArgumentList),
+	mGame(0),
 	mLayoutFrameCounter(-10),
 	mVariableScope(0),
 	mAverageLoopTime(1.0/FPS),
@@ -341,6 +349,14 @@ bool App::Open()
 		mScoreHeart = new UiCure::UserPainterKeepImageResource(mUiManager, UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
 		mScoreHeart->Load(mResourceManager, _T("heart.png"),
 			UiCure::UserPainterKeepImageResource::TypeLoadCallback(this, &App::PainterImageLoadCallback));
+		mScoreGreyHeart = new UiCure::UserPainterKeepImageResource(mUiManager, UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
+		mScoreGreyHeart->Load(mResourceManager, _T("grey_heart.png"),
+			UiCure::UserPainterKeepImageResource::TypeLoadCallback(this, &App::PainterImageLoadCallback));
+#ifndef LEPRA_IOS_LOOKANDFEEL
+		mKeyboardButton = new UiCure::UserPainterKeepImageResource(mUiManager, UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
+		mKeyboardButton->Load(mResourceManager, _T("btn_key.png"),
+			UiCure::UserPainterKeepImageResource::TypeLoadCallback(this, &App::PainterImageLoadCallback));
+#endif // Computer
 	}
 	if (lOk)
 	{
@@ -577,6 +593,12 @@ bool App::Poll()
 			mMusicStreamer->Playback();
 		}
 	}
+
+	if (mGameOverTimer.IsStarted() && mGameOverTimer.QueryTimeDiff() > 10.0)
+	{
+		SuperReset();
+	}
+
 	return lOk;
 }
 
@@ -608,7 +630,7 @@ void App::PollTaps()
 #endif // iOS L&F
 }
 
-void App::DrawHud() const
+void App::DrawHud()
 {
 	if (mGame->GetFlybyMode() != Game::FLYBY_INACTIVE)
 	{
@@ -633,23 +655,33 @@ void App::DrawHud() const
 		mUiManager->GetFontManager()->SetActiveFont(mBigFontId);
 		if (mGame->GetComputerIndex() < 0)
 		{
+			str lText1;
+			str lText2;
 			if (lWinner == 0)
 			{
-				mUiManager->GetPainter()->SetColor(GREEN, 0);
-				PrintText(_T("WON!"),  +lAngle, (int)(w*1/4), (int)(h/2));
-				mUiManager->GetPainter()->SetColor(RED, 0);
-				PrintText(_T("LOST!"), -lAngle, (int)(w*3/4), (int)(h/2));
+				lText1 = _T("WON!");
+				lText2 = _T("LOST!");
 			}
 			else if (lWinner == 1)
 			{
-				mUiManager->GetPainter()->SetColor(RED, 0);
-				PrintText(_T("LOST!"), +lAngle, (int)(w*1/4), (int)(h/2));
-				mUiManager->GetPainter()->SetColor(GREEN, 0);
-				PrintText(_T("WON!"),  -lAngle, (int)(w*3/4), (int)(h/2));
+				lText1 = _T("LOST!");
+				lText2 = _T("WON!");
 			}
+			const int x1 = (int)(w*1/4);
+			const int x2 = (int)(w*3/4);
+			const int y  = (int)(h/2);
+			DrawRoundedPolygon((float)x1, (float)y, 45, PIF/4, 4, BGCOLOR_DIALOG);
+			DrawRoundedPolygon((float)x2, (float)y, 45, PIF/4, 4, BGCOLOR_DIALOG);
+			mUiManager->GetPainter()->SetColor(GREEN, 0);
+			PrintText(lText1,  +lAngle, x1, y);
+			mUiManager->GetPainter()->SetColor(RED, 0);
+			PrintText(lText2, -lAngle, x2, y);
 		}
 		else
 		{
+			const int x = (int)(w/2);
+			const int y  = (int)(h/2);
+			DrawRoundedPolygon((float)x, (float)y, 45, PIF/4, 4, BGCOLOR_DIALOG);
 #ifdef LEPRA_IOS_LOOKANDFEEL
 				const float a = (mGame->GetComputerIndex() == 0)? -lAngle : 0;
 #else // Computer L&F
@@ -658,15 +690,17 @@ void App::DrawHud() const
 			if (lWinner != mGame->GetComputerIndex())
 			{
 				mUiManager->GetPainter()->SetColor(GREEN, 0);
-				PrintText(_T("WON!"), a, (int)(w/2), (int)(h/2));
+				PrintText(_T("WON!"), a, x, y);
 			}
 			else
 			{
 				mUiManager->GetPainter()->SetColor(RED, 0);
-				PrintText(_T("LOST!"), 0, (int)(w/2), (int)(h/2));
+				PrintText(_T("LOST!"), a, x, y);
 			}
 		}
 		mUiManager->GetFontManager()->SetActiveFont(lFontId);
+
+		mGameOverTimer.TryStart();
 	}
 
 #ifdef LEPRA_IOS_LOOKANDFEEL
@@ -837,7 +871,29 @@ void App::DrawHud() const
 		InfoText(2, _T("Up/down compass"), PIF, -20-lButtonRadius, -lButtonRadius/2);
 	}
 
-	if (mScoreHeart->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
+	if (mGame->GetComputerIndex() != 1)	// Computer not running launcher.
+	{
+		float x;
+		float y;
+#ifdef LEPRA_IOS_LOOKANDFEEL
+		x = w-m*2-lButtonWidth-8;
+		y = m*1.5f+lButtonWidth;
+#else // !iOS
+		lDrawAngle = -PIF/2;
+		x = w-m-lButtonWidth;
+		y = h-m*2;
+#endif // iOS/!iOS
+		mUiManager->GetPainter()->SetColor(Color(150, 20, 20), 0);
+		DrawBarrelIndicator(x, y, lGuideYaw+lDrawAngle, 1.1f, 3.0f, true);
+		mUiManager->GetPainter()->SetColor(Color(220, 210, 200), 0);
+		DrawBarrelIndicator(x, y, lGuideYaw+lDrawAngle, 0.9f, 1.4f, true);
+		mUiManager->GetPainter()->SetColor(Color(140, 140, 140), 0);
+		DrawBarrelIndicator(x, y, lYaw+lDrawAngle, 1, 1, false);
+		InfoText(2, _T("Left/right compass"), PIF/2, -lButtonRadius, 30);
+	}
+
+	if (mScoreHeart->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE &&
+		mScoreGreyHeart->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
 		mUiManager->GetPainter()->SetRenderMode(UiTbc::Painter::RM_ALPHABLEND);
 		mUiManager->GetPainter()->SetAlphaValue(255);
@@ -869,12 +925,21 @@ void App::DrawHud() const
 			y = lMargin;
 		}
 		int lHeartIndex = 0;
-		for (int i = -SCORE_POINTS/2; i < lBalance; ++i, ++lHeartIndex)
+		for (int i = -SCORE_POINTS/2; i < +SCORE_POINTS/2; ++i)
 		{
 			if (mGame->GetComputerIndex() != 0)
 			{
-				mScoreHeartPos[lHeartIndex] = Math::Lerp(mScoreHeartPos[lHeartIndex], Vector3DF(x+iw/2, y+iw/2, lAngle), 0.07f);
-				DrawImage(mScoreHeart->GetData(), mScoreHeartPos[lHeartIndex].x, mScoreHeartPos[lHeartIndex].y, hw, hh, mScoreHeartPos[lHeartIndex].z);
+				Vector3DF v(x+iw/2, y+iw/2, lAngle);
+				if (i < lBalance)
+				{
+					v = mScoreHeartPos[lHeartIndex] = Math::Lerp(mScoreHeartPos[lHeartIndex], v, 0.07f);
+					++lHeartIndex;
+					DrawImage(mScoreHeart->GetData(), v.x, v.y, hw, hh, v.z);
+				}
+				else
+				{
+					DrawImage(mScoreGreyHeart->GetData(), v.x, v.y, iw, ih, v.z);
+				}
 				y += iw+8;
 			}
 		}
@@ -896,39 +961,41 @@ void App::DrawHud() const
 		{
 			y = lMargin;
 		}
-		y += (iw+8) * (SCORE_POINTS/2 - lBalance - 1);
-		for (int i = lBalance; i < SCORE_POINTS/2; ++i, ++lHeartIndex)
+		y += (iw+8) * (SCORE_POINTS - 1);
+		for (int i = -SCORE_POINTS/2; i < +SCORE_POINTS/2; ++i)
 		{
 			if (mGame->GetComputerIndex() != 1)
 			{
-				mScoreHeartPos[lHeartIndex] = Math::Lerp(mScoreHeartPos[lHeartIndex], Vector3DF(x+iw/2, y+iw/2, lAngle), 0.07f);
-				DrawImage(mScoreHeart->GetData(), mScoreHeartPos[lHeartIndex].x, mScoreHeartPos[lHeartIndex].y, hw, hh, mScoreHeartPos[lHeartIndex].z);
+				Vector3DF v(x+iw/2, y+iw/2, lAngle);
+				if (i >= lBalance)
+				{
+					v = mScoreHeartPos[lHeartIndex] = Math::Lerp(mScoreHeartPos[lHeartIndex], v, 0.07f);
+					++lHeartIndex;
+					DrawImage(mScoreHeart->GetData(), v.x, v.y, hw, hh, v.z);
+				}
+				else
+				{
+					DrawImage(mScoreGreyHeart->GetData(), v.x, v.y, iw, ih, v.z);
+				}
 				y -= iw+8;
 			}
 		}
 		//mUiManager->GetPainter()->SetRenderMode(UiTbc::Painter::RM_NORMAL);
 	}
 
-	if (mGame->GetComputerIndex() != 1)	// Computer not running launcher.
+#ifndef LEPRA_IOS_LOOKANDFEEL
+	if (mGame->GetFlybyMode() == Game::FLYBY_INACTIVE && !mStartTimer.IsStarted())
 	{
-		float x;
-		float y;
-#ifdef LEPRA_IOS_LOOKANDFEEL
-		x = w-m*2-lButtonWidth-8;
-		y = m*1.5f+lButtonWidth;
-#else // !iOS
-		lDrawAngle = -PIF/2;
-		x = w-m-lButtonWidth;
-		y = h-m*2;
-#endif // iOS/!iOS
-		mUiManager->GetPainter()->SetColor(Color(150, 20, 20), 0);
-		DrawBarrelIndicator(x, y, lGuideYaw+lDrawAngle, 1.1f, 3.0f, true);
-		mUiManager->GetPainter()->SetColor(Color(220, 210, 200), 0);
-		DrawBarrelIndicator(x, y, lGuideYaw+lDrawAngle, 0.9f, 1.4f, true);
-		mUiManager->GetPainter()->SetColor(Color(140, 140, 140), 0);
-		DrawBarrelIndicator(x, y, lYaw+lDrawAngle, 1, 1, false);
-		InfoText(2, _T("Left/right compass"), PIF/2, -lButtonRadius, 30);
+		mStartTimer.Start();
 	}
+	if (mStartTimer.IsStarted() && mStartTimer.QueryTimeDiff() < 5.0)
+	{
+		if (mKeyboardButton->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
+		{
+			mUiManager->GetPainter()->DrawImage(mKeyboardButton->GetData(), 100, 100);
+		}
+	}
+#endif // Computer
 
 	DrawInfoTexts();
 }
@@ -1491,6 +1558,19 @@ void App::MainMenu()
 	d->AddButton(2, ICONBTN("btn_2p.png", "Two players"));
 }
 
+void App::SuperReset()
+{
+	const str lLevel = mGame->GetLevelName();
+	delete mGame;
+	mResourceManager->ForceFreeCache();
+	mGame = new Game(mUiManager, mVariableScope, mResourceManager);
+	mGame->SetComputerIndex(0);
+	mGame->SetLevelName(lLevel);
+	mGame->Cure::GameTicker::GetTimeManager()->Tick();
+	mGame->Cure::GameTicker::GetTimeManager()->Clear(1);
+	mIsLoaded = false;
+	mDoLayout = true;
+}
 
 
 void App::OnResize(int /*pWidth*/, int /*pHeight*/)
@@ -1509,6 +1589,7 @@ void App::OnMaximize(int pWidth, int pHeight)
 
 void App::OnAction(UiTbc::Button* pButton)
 {
+	mDoLayout = true;
 	UiTbc::Dialog<App>* d = mDialog;
 	mButtonDelegate(pButton);
 	if (mDialog == d)	// No news? Just drop it.
@@ -1589,15 +1670,7 @@ void App::OnPauseAction(UiTbc::Button* pButton)
 	mPauseButton->SetVisible(true);
 	if (pButton->GetTag() == 2)
 	{
-		const str lLevel = mGame->GetLevelName();
-		delete mGame;
-		mGame = new Game(mUiManager, mVariableScope, mResourceManager);
-		mGame->SetComputerIndex(0);
-		mGame->SetLevelName(lLevel);
-		mGame->Cure::GameTicker::GetTimeManager()->Tick();
-		mGame->Cure::GameTicker::GetTimeManager()->Clear(1);
-		mIsLoaded = false;
-		mDoLayout = true;
+		SuperReset();
 	}
 	else if (pButton->GetTag() == 3)
 	{
